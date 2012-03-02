@@ -20,13 +20,10 @@ Rectangle {
     }
 
 
-    Timer{
-        id:singleshot
-        repeat: false
-        interval: 250
-        triggeredOnStart: false
-        onTriggered: filedetailsimage.source = "image://listprovider/filedetailsprovider/"+securityvideo.timestamp
-        running: true
+
+    Connections{
+        target:filedetailsclass
+        onObjectChanged:filedetailsimage.source = "image://listprovider/filedetailsprovider/"+securityvideo.timestamp
     }
 
     Rectangle{
@@ -68,7 +65,7 @@ Rectangle {
             id: filedetailsimage
             width: filedetailsclass.aspect=="wide"? scaleX(42.5) : scaleX(23)
             height:filedetailsclass.aspect=="wide"?scaleY(42.5) : scaleY(55)
-            source: "image://listprovider/filedetails/"+securityvideo.timestamp
+            source: "../img/icons/mediatime.png"
             smooth: true
         }
 

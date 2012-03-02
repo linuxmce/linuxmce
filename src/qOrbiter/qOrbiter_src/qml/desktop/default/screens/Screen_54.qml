@@ -5,18 +5,11 @@ import "../js/ComponentLoader.js" as MyJs
 Rectangle {
     id: storedaudioremote
 
-    Timer{
-        id:singleshot
-        repeat: false
-        interval: 2000
-        triggeredOnStart: false
-        running: true
 
-        onTriggered: nowplayingimage.source = "image://listprovider/updateobject/"+securityvideo.timestamp
-    }
     Connections{
         target:dcenowplaying
         onPlayListPositionChanged: nowplayingimage.source = "image://listprovider/updateobject/"+securityvideo.timestamp
+        onImageChanged:nowplayingimage.source = "image://listprovider/updateobject/"+securityvideo.timestamp
     }
 
 
@@ -36,7 +29,7 @@ Rectangle {
 
     }
 
-    Component.onCompleted:setNowPlayingData()
+    Component.onCompleted:dcerouter.requestMediaPlaylist()
 
     //main 'now playing rect containing all the other items
 

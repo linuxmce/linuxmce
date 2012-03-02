@@ -91,7 +91,7 @@ Rectangle {
 
             MouseArea{
                 anchors.fill: parent
-                onClicked: changedPlaylistPosition(name)
+                onClicked: dcerouter.JumpToPlaylistPosition(name)
             }
         }
     }

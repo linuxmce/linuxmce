@@ -18,7 +18,6 @@ public:
     
 signals:
     void imageChanged();
-
     void screenSaverReady();
     void statusChanged();
     

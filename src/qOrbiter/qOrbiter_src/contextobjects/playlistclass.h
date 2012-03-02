@@ -28,12 +28,16 @@
 
 class PlaylistClass: public QAbstractListModel
 {
+    Q_OBJECT
+
 public:
+
   explicit PlaylistClass(PlaylistItemClass* prototype, QObject* parent = 0);
   ~PlaylistClass();
+
   int rowCount(const QModelIndex &parent = QModelIndex()) const;
   QVariant data(const QModelIndex &index, int role = Qt::DisplayRole) const;
-  void appendRow(PlaylistItemClass* item);
+
   void appendRows(const QList<PlaylistItemClass*> &items);
   void insertRow(int row, PlaylistItemClass* item);
   bool removeRow(int row, const QModelIndex &parent = QModelIndex());
@@ -42,13 +46,17 @@ public:
   PlaylistItemClass* find(const QString &id) const;
   QModelIndex indexFromItem( const PlaylistItemClass* item) const;
   PlaylistItemClass* currentRow();
-  bool checkDupe(QString name, QString position);
-  void setItemStatus(int b);
-  void clear();
 
 signals:
   void ItemAdded();
   void dataChanged(const QModelIndex &topLeft, const QModelIndex &bottomRight, const int &sRow);
+
+
+public slots:
+  bool checkDupe(QString name, QString position);
+  void setItemStatus(int b);
+  void clear();
+  void appendRow(PlaylistItemClass* item);
 
 private slots:
   void handleItemChange();

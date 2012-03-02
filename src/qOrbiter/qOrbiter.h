@@ -79,6 +79,8 @@ public:
     int i_current_mediaType;
     QImage returnImage;
     QByteArray TconfigData;
+    QTcpSocket timeCodeSocket;
+    QThread *timeCodeThread;
 
     string *s_user;
     QString currentScreen;
@@ -161,8 +163,10 @@ public:
     Q_INVOKABLE void JogStream(QString jump);
     Q_INVOKABLE void processScreenShot(char picData, int picDataSize, string fileFormat);
     Q_INVOKABLE void showAdvancedButtons();
+    //playlist manipulation
     Q_INVOKABLE void movePlaylistEntry(bool pos, int num);
     Q_INVOKABLE void addToPlaylist(bool now, string playlist);
+    //-------------------------------------------------------
     Q_INVOKABLE void grabScreenshot();
     // Default colored settop box and VDR buttons.
     Q_INVOKABLE void redButton();
@@ -1116,6 +1120,9 @@ signals:
     void routerInvalid();
     void statusMessage(QString s);
     void configReady(QByteArray config);
+    void setMyIp(QString ip);
+    void newTCport(int port);
+
 
     //connections
     void disconnected(QString msg);
@@ -1169,6 +1176,45 @@ signals:
     void np_track(QString track);
     void np_releaseDate(QString release_date);
 
+    //storemediaplaylist
+    void playlistItemAdded(PlaylistItemClass*);
+    void playlistItemRemoved(int index);
+    void playlistItemMoved(int index);
+
+    void mediaPositionChanged(QString pos);
+    void mediaLengthChanged(QString length);
+    void tcUpdated(QString tc);
+    void updateMediaSpeed(int speed);
+
+    void resetNowPlaying();
+    void setPlaylistPosition(int);
+
+    //filedetails popup
+    void clearFileDetails();
+    void fd_fileChanged(QString f);
+    void fd_show(bool s);
+    void fd_objectTitleChanged(QString t);
+    void fd_synopChanged(QString s);
+    void fd_imageUrlChanged(QUrl loc);
+    void fd_pathChanged(QString path);
+    void fd_titleChanged(QString t);
+    void fd_programChanged(QString p);
+    void fd_mediaTitleChanged(QString s);
+    void fd_genreChanged(QString g);
+    void fd_studioChanged(QString s);
+    void fd_channelChanged(QString chan);
+    void fd_chanIdChanged(QString chanid);
+    void fd_episodeChanged(QString ep);
+    void fd_directorChanged(QString dir);
+    void fd_albumChanged(QString al);
+    void fd_trackChanged(QString track);
+    void fd_performersChanged(QString t);
+    void fd_composersChanged(QString c);
+    void fd_aspectH(int h);
+    void fd_aspectW(int w);
+    void fd_titleImageChanged(QImage t);
+
+
 
 
 public slots:
@@ -1181,6 +1227,7 @@ public slots:
     void registerDevice(int user, QString ea, int room);
     void qmlSetup(QString device, QString address);
     void setCurrentScreen(QString s);
+     void setupTimeCode();
 
     //connections
     void connectionError();
@@ -1218,6 +1265,8 @@ public slots:
     void FfMedia();
     void PauseMedia();
     void requestMediaPlaylist();
+    void checkTimeCode();
+    void showTimeCode();
 
     void ShowFloorPlan(int floorplantype);
     void GetScreenSaverImages();

@@ -18,19 +18,17 @@
 class FileDetailsClass : public QDeclarativeItem
 {
     Q_OBJECT
-public:
-    explicit FileDetailsClass(QDeclarativeItem *parent = 0);
-    void clear();
+
     Q_PROPERTY (bool showDetails READ isVisible WRITE setVisible NOTIFY VisibleChanged)
     Q_PROPERTY(QString file READ getFile WRITE setFile NOTIFY FileChanged)
-    Q_PROPERTY(QString objecttitle READ getTitle WRITE setTitle NOTIFY object_changed)
+    Q_PROPERTY(QString objecttitle READ getTitle WRITE setTitle NOTIFY objectChanged)
     Q_PROPERTY(QString synop READ getSynop WRITE setSynop NOTIFY synopChanged)
     Q_PROPERTY(QUrl screenshot READ getScreenShot WRITE setScreenshot NOTIFY imageChanged)
-    Q_PROPERTY(QString filename READ getFilename WRITE setFilename NOTIFY object_changed)
-    Q_PROPERTY(QString path READ getPath WRITE setPath NOTIFY object_changed)
+    Q_PROPERTY(QString filename READ getFilename WRITE setFilename NOTIFY objectChanged)
+    Q_PROPERTY(QString path READ getPath WRITE setPath NOTIFY objectChanged)
 
-    Q_PROPERTY(QImage title READ getTitleImage WRITE setTitleImage NOTIFY titleImageChanged)
-    Q_PROPERTY(QImage program READ getProgramImage WRITE setProgramImage NOTIFY object_changed)
+    Q_PROPERTY(QImage titleImage READ getTitleImage WRITE setTitleImage NOTIFY titleImageChanged)
+    Q_PROPERTY(QImage program READ getProgramImage WRITE setProgramImage NOTIFY objectChanged)
 
     //media title variable that can be independant of what is passed initially by now playing
     Q_PROPERTY (QString mediatitle READ getMediaTitle WRITE setMediaTitle NOTIFY mediaTitleChanged)
@@ -53,6 +51,10 @@ public:
     Q_PROPERTY (int i_aspectH READ getAspectH WRITE setAspectH NOTIFY aspectHChanged())
     Q_PROPERTY (int i_aspectW READ getAspectW WRITE setAspectW NOTIFY aspectWChanged())
 
+public:
+    explicit FileDetailsClass(QDeclarativeItem *parent = 0);
+    void clear();
+
     QString objecttitle;
 
     /*
@@ -63,10 +65,7 @@ public:
     int i_aspectH; //height then width
     int i_aspectW; //height then width
     QString aspect;
-
-
-
-    QImage title;
+    QImage titleImage;
     QString file;
     QImage programImage;
     QUrl Season;
@@ -106,7 +105,7 @@ public:
     QString path;
 
 signals:
-    void object_changed();
+    void objectChanged();
     void synopChanged();
     void FileChanged(QString f);
     void VisibleChanged(bool vis);
@@ -246,11 +245,11 @@ public slots:
     inline void setFile(QString incFile) { file = incFile; emit FileChanged(file);}
 
 
-    inline void setTitleImage (QImage inc_t) {title = inc_t; emit object_changed();}
-    inline QImage getTitleImage () {return title;}
+    inline void setTitleImage (QImage inc_t) {titleImage = inc_t; emit objectChanged();}
+    inline QImage getTitleImage () {return titleImage;}
 
 
-    inline void setProgramImage (QImage inc_p) {programImage = inc_p; emit object_changed();}
+    inline void setProgramImage (QImage inc_p) {programImage = inc_p; emit objectChanged();}
     inline QImage getProgramImage () {return programImage;}
 
 
@@ -265,10 +264,10 @@ public slots:
     inline QUrl getScreenShot() {return screenshot;}
 
     inline QString getFilename() {return filename;}
-    inline void setFilename (QString f) {filename = f; emit object_changed();}
+    inline void setFilename (QString f) {filename = f; emit objectChanged();}
 
     inline QString getPath() {return path;}
-    inline void setPath (QString f) {path = f; emit object_changed();}
+    inline void setPath (QString f) {path = f; emit objectChanged();}
 
 
     inline void setScreenshotimage(QImage img) {qi_screenshot= img; emit imageChanged();}

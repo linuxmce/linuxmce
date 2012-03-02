@@ -36,7 +36,7 @@ void FileDetailsClass::clear(){
 
 
     emit synopChanged();
-    emit object_changed();
+    emit objectChanged();
     emit synopChanged();
     emit titleImageChanged();
     emit mediaTitleChanged();

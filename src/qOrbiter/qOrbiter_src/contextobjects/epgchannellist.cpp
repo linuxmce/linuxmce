@@ -2,8 +2,8 @@
 
 
 
-EPGChannelList::EPGChannelList(EPGItemClass* prototype,qorbiterManager *reference) :
-    m_prototype(prototype), ref(reference)
+EPGChannelList::EPGChannelList(EPGItemClass* prototype) :
+    m_prototype(prototype)
 {
     setRoleNames(m_prototype->roleNames());
     qRegisterMetaType<QModelIndex>("QModelIndex");
@@ -205,5 +205,6 @@ QModelIndex EPGChannelList::getChannelIndex(const QString &name) const
 
 void EPGChannelList::populate()
 {
+    clear();
     //ref->pqOrbiter->requestLiveTvPlaylist();
 }

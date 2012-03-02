@@ -86,6 +86,8 @@ qorbiterManager::qorbiterManager(QDeclarativeView *view, QObject *parent) :
     QObject::connect(qorbiterUIwin, SIGNAL(sceneResized(QSize)),  SLOT(checkOrientation(QSize)) );
     QObject::connect(this, SIGNAL(orbiterConfigReady(bool)), this, SLOT(showUI(bool)));
 
+    ScreenSaver = new ScreenSaverClass();
+
 
 #ifdef for_desktop
     buildType = "/qml/desktop";
@@ -153,7 +155,6 @@ qorbiterManager::qorbiterManager(QDeclarativeView *view, QObject *parent) :
 
     //avcode grid button list
 
-
     //file details object and imageprovider setup
     filedetailsclass = new FileDetailsClass();
     qorbiterUIwin->rootContext()->setContextProperty("filedetailsclass" ,filedetailsclass);
@@ -164,17 +165,10 @@ qorbiterManager::qorbiterManager(QDeclarativeView *view, QObject *parent) :
     //screen parameters class that could be extended as needed to fetch other data
     ScreenParameters = new ScreenParamsClass;
     qorbiterUIwin->rootContext()->setContextProperty("screenparams", ScreenParameters);
-
-    //stored video playlist for managing any media that isnt live broacast essentially
-    QThread *storedVideoPlaylistThread = new QThread();
-    storedVideoPlaylist = new PlaylistClass (new PlaylistItemClass);
-    storedVideoPlaylist->moveToThread(storedVideoPlaylistThread);
-    storedVideoPlaylistThread->start();
-
-    qorbiterUIwin->rootContext()->setContextProperty("mediaplaylist", storedVideoPlaylist);
-
-    //initializing threading for timecode to prevent blocking
+    timecodeThread = new QThread();
     timeCodeSocket = new QTcpSocket();
+    timeCodeSocket->moveToThread(timecodeThread);
+    timecodeThread->start();
     QApplication::processEvents(QEventLoop::AllEvents);
 }
 
@@ -201,7 +195,7 @@ void qorbiterManager::gotoQScreen(QString s)
     setDceResponse("Starting screen switch");
 
     QVariant screenname= s;
-currentScreen = s;
+    currentScreen = s;
     QObject *item = qorbiterUIwin->rootObject();
     setDceResponse("About to call screenchange()");
     if (QMetaObject::invokeMethod(item, "screenchange", Qt::QueuedConnection, Q_ARG(QVariant, screenname))) {
@@ -329,7 +323,7 @@ void qorbiterManager::processConfig(QByteArray config)
 
     }
 
-    setDceResponse("Attempting to write config");    
+    setDceResponse("Attempting to write config");
     if (!writeConfig())
     {
         setDceResponse("Couldnt save config!");
@@ -590,20 +584,8 @@ void qorbiterManager::processConfig(QByteArray config)
     qorbiterUIwin->rootContext()->setContextProperty("roomList", m_lRooms);                           //custom room list  provided
     qorbiterUIwin->rootContext()->setContextProperty("gmediaType", q_mediaType);
     qorbiterUIwin->rootContext()->setContextProperty("screenshotAttributes", QVariant::fromValue(screenshotVars));
-   // QObject::connect(this->nowPlayingButton, SIGNAL(mediaStatusChanged()), this, SLOT(updateTimecode()), Qt::QueuedConnection);
+    // QObject::connect(this->nowPlayingButton, SIGNAL(mediaStatusChanged()), this, SLOT(updateTimecode()), Qt::QueuedConnection);
     setDceResponse("Properties Done");
-
-    //epg listmodel, no imageprovider as of yet
-    simpleEPGmodel = new EPGChannelList(new EPGItemClass, this );
-    qorbiterUIwin->rootContext()->setContextProperty("simpleepg", simpleEPGmodel);
-    processingThread = new QThread();
-    simpleEPGmodel->moveToThread(processingThread);
-    processingThread->start();    QApplication::processEvents(QEventLoop::AllEvents);
-
-    setDceResponse("EPG Threading Initialized");
-    QObject::connect(this,SIGNAL(liveTVrequest()), simpleEPGmodel,SLOT(populate()), Qt::QueuedConnection);
-    QApplication::processEvents(QEventLoop::AllEvents);
-
 
     setDceResponse("Setting location");
     QApplication::processEvents(QEventLoop::AllEvents);
@@ -744,7 +726,7 @@ void qorbiterManager::closeOrbiter()
 #ifndef ANDROID
     LoggerWrapper::GetInstance()->Write(LV_CRITICAL, "Orbiter Exiting, Unregistering 1st");
 #endif
-   emit unregisterOrbiter((userList->find(sPK_User)->data(4).toInt()), QString(iFK_Room), iea_area );
+    emit unregisterOrbiter((userList->find(sPK_User)->data(4).toInt()), QString(iFK_Room), iea_area );
     this->~qorbiterManager();
     exit(0);
 }
@@ -811,7 +793,7 @@ void qorbiterManager:: setLocation(const int &room, const int &ea)
     iea_area = ea;
 
     //emit locationChanged(room, ea);
-   // pqOrbiter->setLocation(room, ea);
+    // pqOrbiter->setLocation(room, ea);
     QApplication::processEvents(QEventLoop::AllEvents);
 }
 
@@ -927,14 +909,14 @@ bool qorbiterManager::loadSkins(QUrl base)
     tskinModel->addSkin("aeon");
     tskinModel->addSkin("crystalshades");
 #endif
-emit skinIndexReady(true);
+    emit skinIndexReady(true);
     return true;
 }
 
 void qorbiterManager::quickReload()
 {
 
-   // pqOrbiter->QuickReload();
+    // pqOrbiter->QuickReload();
     //bool connected = pqOrbiter->m_bRouterReloading;
 }
 
@@ -942,7 +924,7 @@ void qorbiterManager::showUI(bool b)
 {
     if(b == true)
     {
-swapSkins(currentSkin);
+        swapSkins(currentSkin);
     }
     else
     {
@@ -953,6 +935,11 @@ swapSkins(currentSkin);
 void qorbiterManager::displayModelPages(QList<QObject *> pages)
 {
     qorbiterUIwin->rootContext()->setContextProperty("pageList", QVariant::fromValue(pages));
+}
+
+void qorbiterManager::setIpAddress(QString s)
+{
+    m_ipAddress = s;
 }
 
 
@@ -1110,7 +1097,7 @@ bool qorbiterManager::writeConfig()
 void qorbiterManager::setStringParam(int paramType, QString param)
 {
 
-emit setDceGridParam(paramType, param);
+    emit setDceGridParam(paramType, param);
 
 }
 
@@ -1199,23 +1186,23 @@ void qorbiterManager::goBackGrid()
 void qorbiterManager::showFileInfo(QString fk_file)
 {
 
-   // pqOrbiter->GetMediaAttributeGrid(fk_file);
+    // pqOrbiter->GetMediaAttributeGrid(fk_file);
 }
 
 void qorbiterManager::requestSecurityPic(int i_pk_camera_device, int h, int w)
 {
-  //  pqOrbiter->GetSingleSecurityCam( i_pk_camera_device,  h,  w);
+    //  pqOrbiter->GetSingleSecurityCam( i_pk_camera_device,  h,  w);
 }
 
 void qorbiterManager::playMedia(QString FK_Media)
 {
-  //  pqOrbiter->playMedia(FK_Media);
+    //  pqOrbiter->playMedia(FK_Media);
     emit startPlayback(FK_Media);
 }
 
 void qorbiterManager::stopMedia()
 {
-  //  pqOrbiter->StopMedia();
+    //  pqOrbiter->StopMedia();
 }
 
 void qorbiterManager::rw_media(int speed)
@@ -1232,12 +1219,12 @@ void qorbiterManager::ff_media(int speed)
 
 void qorbiterManager::pauseMedia()
 {
-  //  pqOrbiter->PauseMedia();
+    //  pqOrbiter->PauseMedia();
 }
 
 void qorbiterManager::showfloorplan(int fptype)
 {
-  //  pqOrbiter->ShowFloorPlan(fptype);
+    //  pqOrbiter->ShowFloorPlan(fptype);
 }
 
 
@@ -1247,21 +1234,21 @@ void qorbiterManager::changedPlaylistPosition(QString position)
 
     if(!position.contains(QRegExp("TITLE:")))
     {
-  //      pqOrbiter->JumpToPlaylistPosition(position.toInt());
+        //      pqOrbiter->JumpToPlaylistPosition(position.toInt());
     }
     else
     {
-  //      pqOrbiter->setPosition(position);
+        //      pqOrbiter->setPosition(position);
     }
 
 }
 
 void qorbiterManager::setNowPlayingData()
 {
-  //  pqOrbiter->BindMediaRemote(true);
+    //  pqOrbiter->BindMediaRemote(true);
     setDceResponse("bound remote" );
-   // pqOrbiter->requestMediaPlaylist();
-   // updateTimecode();
+    // pqOrbiter->requestMediaPlaylist();
+    // updateTimecode();
 }
 
 void qorbiterManager::updateImageChanged(QImage img)
@@ -1272,36 +1259,36 @@ void qorbiterManager::updateImageChanged(QImage img)
 
 void qorbiterManager::setNowPlayingTv()
 {
-  //  pqOrbiter->BindMediaRemote(true);
-   // pqOrbiter->requestMediaPlaylist();
+    //  pqOrbiter->BindMediaRemote(true);
+    // pqOrbiter->requestMediaPlaylist();
 }
 
 void qorbiterManager::changeChannels(QString chan)
 {
-  //  pqOrbiter->TuneToChannel(chan.toInt(), chan );
+    //  pqOrbiter->TuneToChannel(chan.toInt(), chan );
 }
 
 void qorbiterManager::getLiveTVPlaylist()
 {   
-  //  emit liveTVrequest();
+    //  emit liveTVrequest();
 }
 
 void qorbiterManager::gridChangeChannel(QString chan, QString chanid)
 {
-////    pqOrbiter->TuneToChannel(chan.toInt(), chanid);
+    ////    pqOrbiter->TuneToChannel(chan.toInt(), chanid);
 }
 
 
 void qorbiterManager::setHouseMode(int mode, int pass)
 {
-   // pqOrbiter->SetSecurityMode(pass, mode);
+    // pqOrbiter->SetSecurityMode(pass, mode);
 }
 
 void qorbiterManager::setCurrentUser(QString inc_user)
 {
     sPK_User = userList->find(sPK_User)->data(1).toString();
     int user = inc_user.toInt();
-   // pqOrbiter->setUser(user);
+    // pqOrbiter->setUser(user);
     emit userChanged();
 }
 
@@ -1321,81 +1308,40 @@ void qorbiterManager::sleepingMenu(bool toggle, int grp)
 
     if(toggle == true)
     {   sleeping_alarms.clear();
-      //  pqOrbiter->GetAlarms(toggle, grp);
+        //  pqOrbiter->GetAlarms(toggle, grp);
     }
     else
     {
         sleeping_alarms.clear();
-       // pqOrbiter->GetAlarms(false, 0);
+        // pqOrbiter->GetAlarms(false, 0);
     }
 }
 
 
 
-void qorbiterManager::updateTimecode()
+void qorbiterManager::updateTimecode(int port)
 {
-    /*
-    string sIPAddress;
-    if(nowPlayingButton->b_mediaPlaying == true && !timeCodeSocket->isValid())
-    {
-        //qDebug("media playing with no timecode!");
-        if(!timeCodeSocket->isOpen())
 
+    if(!timeCodeSocket->isOpen())
+    {   qDebug() <<"opening connection to " << port;
+
+        timeCodeSocket->connectToHost(qs_routerip, port, QFile::ReadOnly );
+        if ( timeCodeSocket->isValid() )
         {
-            //qDebug("socket is closed, opening!");
-            DeviceData_Base *pDevice = pqOrbiter->m_dwPK_Device_NowPlaying ? pqOrbiter->m_pData->m_AllDevices.m_mapDeviceData_Base_Find(pqOrbiter->m_dwPK_Device_NowPlaying) : NULL;
-            if( NULL != pDevice &&
-                    (
-                        pDevice->m_dwPK_DeviceTemplate==DEVICETEMPLATE_Xine_Player_CONST ||
-                        pDevice->m_dwPK_DeviceTemplate==DEVICETEMPLATE_MPlayer_Player_CONST
-                        )
-                    )
-            {
-                sIPAddress = pDevice->m_sIPAddress;
-                //qDebug() << sIPAddress.c_str();
-                if( sIPAddress.empty() )
-                {
-                    //qDebug() << "ip empty...";
-                    if( pDevice->m_pDevice_MD && !pDevice->m_pDevice_MD->m_sIPAddress.empty() )
-                        sIPAddress = pDevice->m_pDevice_MD->m_sIPAddress;
-                    else if( pDevice->m_pDevice_Core && !pDevice->m_pDevice_Core->m_sIPAddress.empty() )
-                        sIPAddress = pDevice->m_pDevice_Core->m_sIPAddress;
-                    else
-                    {
-#ifndef ANDROID
-                        LoggerWrapper::GetInstance()->Write(LV_WARNING,"Orbiter::CMD_Set_Now_Playing  Xine has no IP address");
-#endif
-                        return;
-                    }
-                }
-            }
-            QString port = QString::fromStdString(pqOrbiter->GetCurrentDeviceData(pqOrbiter->m_dwPK_Device_NowPlaying, 171));
-            if (sIPAddress.length() == 0 && i_current_mediaType == 11)
-            {
-                //qDebug() << "IpAddress empty, error!: " <<  sIPAddress.c_str();
-                return;
-            }
-            else
-            {
-                timeCodeSocket->connectToHost(QString::fromStdString(sIPAddress), port.toInt(), QFile::ReadOnly );
-                if ( timeCodeSocket->isValid() )
-                {
-                    setDceResponse("Time Code Socket connected! " + QString::fromStdString(sIPAddress.c_str()));
-                    QObject::connect(timeCodeSocket,SIGNAL(readyRead()), this, SLOT(showTimeCode()));
-                }
-            }
+            setDceResponse("Time Code Socket connected! " + QString::fromStdString(m_ipAddress.toStdString()));
+            QObject::connect(timeCodeSocket,SIGNAL(readyRead()), this, SLOT(showTimeCode()));
+        }
+        else
+        {   qDebug("couldnt start timecode");
+            qDebug() << timeCodeSocket->errorString();
         }
     }
-    else if (nowPlayingButton->b_mediaPlaying == false)
-    {
-        timeCodeSocket->disconnectFromHost();
-        timeCodeSocket->close();
-    }
-    */
+
 }
 
 void qorbiterManager::showTimeCode()
 {
+    qDebug("Something");
     QByteArray socketData = timeCodeSocket->readLine();
     QString tcData = QString::fromAscii(socketData.data(), socketData.size());
 
@@ -1415,6 +1361,7 @@ void qorbiterManager::showTimeCode()
         nowPlayingButton->setDuration(duration);
 
     }
+
 }
 
 void qorbiterManager::checkConnection(QString s)
@@ -1433,7 +1380,7 @@ void qorbiterManager::checkConnection(QString s)
 
 void qorbiterManager::jogPosition(QString jog)
 {
-   // pqOrbiter->JogStream(jog);
+    // pqOrbiter->JogStream(jog);
 }
 
 void qorbiterManager::regenError(QProcess::ProcessError)
@@ -1531,7 +1478,7 @@ void qorbiterManager::setDceResponse(QString response)
     dceResponse = response;
     emit loadingMessage(dceResponse);
     emit dceResponseChanged();
-   //qDebug() << dceResponse;
+    //qDebug() << dceResponse;
 
 }
 
@@ -1548,10 +1495,8 @@ int qorbiterManager::loadSplash()
 
 void qorbiterManager::activateScreenSaver()
 {
-    setDceResponse("Starting Screensaver");
-   // QObject::connect(pqOrbiter, SIGNAL(screenSaverImages(QStringList)), &ScreenSaver,SLOT(setImageList(QStringList)));
-   // pqOrbiter->GetScreenSaverImages();
-    qorbiterUIwin->engine()->rootContext()->setContextProperty("screensaver", &ScreenSaver);
+
+    qorbiterUIwin->engine()->rootContext()->setContextProperty("screensaver", ScreenSaver);
 }
 
 void qorbiterManager::killScreenSaver()
@@ -1635,7 +1580,7 @@ void qorbiterManager::getGrid(int i)
 
 void qorbiterManager::adjustVolume(int vol)
 {
-  //  pqOrbiter->adjustVolume( vol);
+    //  pqOrbiter->adjustVolume( vol);
 }
 
 QString qorbiterManager::getCurrentScreen()

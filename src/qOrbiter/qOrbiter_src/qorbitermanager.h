@@ -179,7 +179,7 @@ public:
     SkinDataItem* skin;
     QDeclarativeView  *qorbiterUIwin;               //Qml declarativeview
     QObject *item;
-    ScreenSaverClass ScreenSaver;
+    ScreenSaverClass *ScreenSaver;
 
     //media
     bool mediaPlaying;
@@ -303,6 +303,7 @@ Param 10 - pk_attribute
     bool needRegen;                 //regen flag
 
     string s_RouterIP;               // string of the router ip
+    QString m_ipAddress;
     QString qs_routerip;
     bool dceBool;                   //
     bool bLocalMode;                //local running flag, for running without router.
@@ -389,6 +390,7 @@ public slots: //note: Q_INVOKABLE means it can be called directly from qml
     void quickReload();
     void showUI(bool b);
     void displayModelPages(QList<QObject*> pages);
+    void setIpAddress(QString s);
 
     void qmlSetupLmce(QString incdeviceid, QString incrouterip);
     void setRequestMore(bool state);
@@ -431,7 +433,7 @@ public slots: //note: Q_INVOKABLE means it can be called directly from qml
 
     void jogPosition(QString jog);
     void updateImageChanged(QImage img);
-    void updateTimecode();
+    void updateTimecode(int port);
     void showTimeCode();
     Q_INVOKABLE void cleanupScreenie();
 

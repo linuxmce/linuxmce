@@ -203,6 +203,7 @@ public slots:
         if( t.loadFromData(data, iData_size))
         {
             setImage(t);
+            emit statusMessage("Set Cover Art");
         }
         else
         {

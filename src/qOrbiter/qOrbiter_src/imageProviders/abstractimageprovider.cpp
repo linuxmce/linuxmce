@@ -80,7 +80,7 @@ QImage AbstractImageProvider::updateObjectProvider()
 
 QImage AbstractImageProvider::fileDetails()
 {
-    key= managerreference->filedetailsclass->getScreenshotimage();
+    key= managerreference->filedetailsclass->getTitleImage();
 
     if (key.isNull())
     {
@@ -113,7 +113,7 @@ QImage AbstractImageProvider::ScreenSaver()
 
      if (key.isNull())
      {
-          key.load(":/icons/playlist.png");
+          key.load(":/icons/icon.png");
      }
 
      return key;

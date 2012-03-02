@@ -8,9 +8,9 @@
 #include <QVariant>
 #include <datamodels/gridItem.h>
 #include <qorbitermanager.h>
-#include <QMutex>
 
-class qorbiterManager;
+
+
 
 class ListModel : public QAbstractListModel
 {
@@ -37,7 +37,7 @@ public:
     Q_INVOKABLE QVariant get(int index, const QString &name) const;
     QModelIndex indexFromItem( const gridItem* item) const;
     gridItem* currentRow();
-    QMutex mutextest;
+
     int totalcells;
     bool loadingStatus;
     int gridType;
@@ -85,8 +85,6 @@ public slots:
 private slots:
     void handleItemChange();
     void reset();
-
-
     virtual void beginResetModel();
     virtual void endResetModel();
 private:

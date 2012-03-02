@@ -69,7 +69,10 @@ qOrbiter::qOrbiter( int DeviceID, string ServerAddress,bool bConnectEventHandler
     media_currentPage=0;
     media_pos=0;
     media_pageSeperator = 25;
-    initializeGrid();
+    initializeGrid();    
+
+
+
 
 }
 
@@ -1017,7 +1020,7 @@ void qOrbiter::CMD_Continuous_Refresh(string sTime,string &sCMD_Result,Message *
 void qOrbiter::CMD_Set_Now_Playing(string sPK_DesignObj,string sValue_To_Assign,string sText,int iPK_MediaType,int iStreamID,int iValue,string sName,string sList_PK_Device,bool bRetransmit,string &sCMD_Result,Message *pMessage)
 //<-dceag-c242-e->
 {
-
+/*
     cout << "Need to implement command #242 - Set Now Playing" << endl;
     cout << "Parm #3 - PK_DesignObj=" << sPK_DesignObj << endl;
     cout << "Parm #5 - Value_To_Assign=" << sValue_To_Assign << endl;
@@ -1028,21 +1031,23 @@ void qOrbiter::CMD_Set_Now_Playing(string sPK_DesignObj,string sValue_To_Assign,
     cout << "Parm #50 - Name=" << sName << endl;
     cout << "Parm #103 - List_PK_Device=" << sList_PK_Device << endl;
     cout << "Parm #120 - Retransmit=" << bRetransmit << endl;
-
-
-
+*/
     string::size_type pos=0;
     m_dwPK_Device_NowPlaying = atoi(StringUtils::Tokenize(sList_PK_Device,",",pos).c_str());
     m_dwPK_Device_NowPlaying_Video = atoi(StringUtils::Tokenize(sList_PK_Device,",",pos).c_str());
     m_dwPK_Device_NowPlaying_Audio = atoi(StringUtils::Tokenize(sList_PK_Device,",",pos).c_str());
     m_dwPK_Device_CaptureCard = atoi(StringUtils::Tokenize(sList_PK_Device,",",pos).c_str());
 
-    //nowPlayingButton->resetData();
+    QString port = QString::fromStdString(GetCurrentDeviceData(m_dwPK_Device_NowPlaying, 171));
+    emit newTCport(port.toInt());
+
+    emit resetNowPlaying();
     if (iPK_MediaType != 0)
     {
         emit setNowPlaying(true);
         // nowPlayingButton->setStatus(true);
         //requestMediaPlaylist();
+        emit setPlaylistPosition(iValue);
         // nowPlayingButton->setPlaylistPostion(iValue);
         //  BindMediaRemote(true);
 
@@ -1096,8 +1101,9 @@ void qOrbiter::CMD_Set_Now_Playing(string sPK_DesignObj,string sValue_To_Assign,
     emit streamIdChanged(iStreamID);
     emit mediaTypeChanged(iPK_MediaType);
     GetNowPlayingAttributes();
+    checkTimeCode();
 
-    // SetNowPlayingDetails();
+
 }
 
 //<-dceag-c254-b->
@@ -1866,11 +1872,14 @@ void qOrbiter::registerDevice(int user, QString ea, int room)
 
         emit statusMessage("DCERouter Responded to Register with " + QString::fromStdString(pResponse));
         setLocation(room, ea.toInt());
+
+        GetScreenSaverImages();
     }
     else
     {
 
     }
+
 
 
 
@@ -2284,19 +2293,18 @@ QImage DCE::qOrbiter::getfileForDG(string filePath)
 
     //SendCommand(reqFile, p_sResponse);
 
-    if(SendCommand(reqFile, &p_sResponse) && p_sResponse =="OK")
+    if(SendCommand(reqFile, &p_sResponse) && p_sResponse=="OK")
     {
+        QByteArray tempData;
+        tempData.setRawData(picData, picData_Size);
 
-       TconfigData.setRawData(picData, picData_Size) ;              //config file put into qbytearray for processing
-
-
-
-        if (!returnImage.loadFromData(TconfigData))
+        if (!returnImage.loadFromData(tempData))
         {
             emit statusMessage("Couldnt Load From Data, setting default icon image");
             returnImage.load(":/icons/icon.png");
             return returnImage;
         }
+        return returnImage;
 
     }
     else
@@ -2372,13 +2380,13 @@ void DCE::qOrbiter::GetMediaAttributeGrid(QString  qs_fk_fileno)
     placeholder = details.indexOf("TITLE");
     if(placeholder != -1)
     {
-        //filedetailsclass->setTitle(details.at(placeholder+1));
+        emit fd_titleChanged(details.at(placeholder+1));
     }
 
     placeholder = details.indexOf("SYNOPSIS");
     if(placeholder != -1)
     {
-        // filedetailsclass->setSynop(details.at(placeholder+1));
+        emit fd_synopChanged(details.at(placeholder+1));
     }
 
     placeholder = details.indexOf("PICTURE");
@@ -2386,7 +2394,8 @@ void DCE::qOrbiter::GetMediaAttributeGrid(QString  qs_fk_fileno)
     {
         // filedetailsclass->setScreenshot(details.at(placeholder+1));
         // filedetailsclass->setScreenshotimage(getfileForDG(details.at(placeholder+1).toStdString()));
-        // filedetailsclass->title =  getfileForDG(details.at(placeholder+1).toStdString());
+        QImage temp =  getfileForDG(details.at(placeholder+1).toStdString());
+        emit fd_titleImageChanged(temp);
     }
 
     placeholder = details.indexOf("PATH");
@@ -2555,7 +2564,7 @@ void DCE::qOrbiter::RwMedia()
 void DCE::qOrbiter::FfMedia()
 {
 
-    //CMD_Change_Playback_Speed forward_media(m_dwPK_Device, iMediaPluginID, internal_streamID, nowPlayingButton->i_playbackSpeed, true);
+   // CMD_Change_Playback_Speed forward_media(m_dwPK_Device, iMediaPluginID, internal_streamID, nowPlayingButton->i_playbackSpeed, true);
     //SendCommand(forward_media);
 }
 
@@ -2568,9 +2577,11 @@ void DCE::qOrbiter::PauseMedia()
 
 void DCE::qOrbiter::requestMediaPlaylist()
 {
+    BindMediaRemote(1);
+
     //storedVideoPlaylist->clear();
-    int gHeight = 10;
-    int gWidth = 10;
+    int gHeight = 1;
+    int gWidth = 1;
     int pkVar = 0;
     string valassign ="";
     bool isSuccessfull;// = "false";
@@ -2654,10 +2665,39 @@ void DCE::qOrbiter::requestMediaPlaylist()
 
                     cellImg.load(":/icons/icon.png");
                 }
+                emit playlistItemAdded(new PlaylistItemClass(cellTitle, cellAttribute, fk_file ,index));
 
-                //storedVideoPlaylist->appendRow(new PlaylistItemClass(cellTitle, cellAttribute, fk_file ,index, storedVideoPlaylist));
             }
         }
+    }
+}
+
+void qOrbiter::checkTimeCode()
+{
+emit setMyIp(QString::fromStdString(m_sMyIPAddress));
+
+}
+
+void qOrbiter::showTimeCode()
+{
+    QByteArray socketData = timeCodeSocket.readLine();
+    QString tcData = QString::fromAscii(socketData.data(), socketData.size());
+
+    if (tcData.length() > 0)
+    {
+        QStringList tcVars = tcData.split(",");
+        QString tcClean = tcVars.at(1);
+        tcClean.remove(QRegExp(".\\d\\d\\d|00:0|0:0|00:"));
+        emit tcUpdated(tcClean);
+
+        QString playbackSpeed = tcVars.at(0);
+        playbackSpeed.remove(QRegExp("000"));
+       emit updateMediaSpeed(playbackSpeed.toInt());
+
+        QString duration = tcVars.at(2);
+        duration.remove(QRegExp(".\\d\\d\\d|00:0|0:0|00:"));
+        emit mediaLengthChanged(duration);
+
     }
 }
 
@@ -2675,9 +2715,6 @@ void DCE::qOrbiter::ShowFloorPlan(int floorplantype)
     // SendCommand(getLayout);
     //qDebug() << "SVAL::" << sval.c_str();
     //gotoQScreen(Screen);
-
-
-
 }
 
 void DCE::qOrbiter::GetScreenSaverImages() // unused at this time
@@ -2708,9 +2745,9 @@ void DCE::qOrbiter::BindMediaRemote(bool onoff)
 
 void DCE::qOrbiter::JumpToPlaylistPosition(int pos)
 {
-    //
-    // CMD_Jump_Position_In_Playlist jump_playlist(m_dwPK_Device, iMediaPluginID, QString::number(pos).toStdString(), nowPlayingButton->i_streamID);
-    //  SendCommand(jump_playlist);
+
+    CMD_Jump_Position_In_Playlist jump_playlist(m_dwPK_Device, iMediaPluginID, QString::number(pos).toStdString(), internal_streamID);
+     SendCommand(jump_playlist);
 
 
 }
@@ -2753,6 +2790,7 @@ void DCE::qOrbiter::GetNowPlayingAttributes()
       to expand our ui capabilities. it is essentially a clone of the many datagrid requests
       that the orbiter makes in addition to parsing of other information passed for a given object.
       */
+
 
     int p = 0;
     string s_val;
@@ -4136,6 +4174,7 @@ void DCE::qOrbiter::prepareFileList(int iPK_MediaType)
                             cellImg.load(":/icons/icon.png");
                         }
                         emit addItem(new gridItem(fk_file, cellTitle, filePath, index, cellImg));
+                        QApplication::processEvents(QEventLoop::AllEvents);
                     }
                     delete pDataGridTable;
                 }
@@ -4207,6 +4246,13 @@ bool qOrbiter::checkLoadingStatus()
         return false;
 
     }
+}
+
+void qOrbiter::setupTimeCode()
+{
+
+    //initializing threading for timecode to prevent blocking
+
 }
 
 

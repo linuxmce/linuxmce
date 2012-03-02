@@ -140,7 +140,7 @@ Rectangle {
                         anchors.centerIn: parent;
                         fillMode: Image.PreserveAspectCrop
                         opacity: 1
-                        asynchronous: true
+
                         smooth: true
                     }
                     Rectangle{

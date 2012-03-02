@@ -26,7 +26,7 @@ Rectangle {
         onImageChanged:{ nowplayingimage.source = "image://listprovider/updateobject/"+securityvideo.timestamp;}
     }
 
-    Component.onCompleted:setNowPlayingData()
+    Component.onCompleted:dcerouter.requestMediaPlaylist()
 
     Row{
         id:mainrow
