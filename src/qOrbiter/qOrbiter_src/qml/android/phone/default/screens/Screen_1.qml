@@ -28,10 +28,10 @@ Rectangle {
         anchors.top: spaceholder.bottom
         anchors.horizontalCenter: parent.horizontalCenter
         height: childrenRect.height
-        width: childrenRect.width
+        width: scaleX(90)
         spacing: scaleY(1)
-        NowPlayingButton{ width: home_selector.width}
-        DroidHomeSelector{id:home_selector}
+        NowPlayingButton{ width: parent.width}
+        DroidHomeSelector{id:home_selector; width: parent.width}
 
     }
 

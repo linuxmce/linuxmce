@@ -260,8 +260,6 @@ int main(int argc, char* argv[])
         orbiterWin.mainView.rootContext()->setContextProperty("simpleepg", simpleEPGmodel);
         simpleEPGmodel->moveToThread(epgThread);
 
-
-
         QThread * mediaThread = new QThread();
         ListModel *mediaModel = new ListModel(new gridItem);
         mediaModel->moveToThread(mediaThread);
@@ -302,6 +300,7 @@ int main(int argc, char* argv[])
         QObject::connect(w,SIGNAL(showSetup()), &orbiterWin, SLOT( showSetup()) );
         QObject::connect(pqOrbiter, SIGNAL(screenSaverImages(QStringList)), w->ScreenSaver, SLOT(setImageList(QStringList)));
         QObject::connect(pqOrbiter, SIGNAL(setMyIp(QString)), w, SLOT(setIpAddress(QString)));
+
         //messaging
         QObject::connect(mediaModel, SIGNAL(statusMessage(QString)), w, SLOT(setDceResponse(QString)),Qt::DirectConnection);
         QObject::connect(pqOrbiter, SIGNAL(statusMessage(QString)), w , SLOT(setDceResponse(QString)), Qt::DirectConnection);

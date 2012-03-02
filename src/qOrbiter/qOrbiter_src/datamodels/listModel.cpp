@@ -306,8 +306,21 @@ void ListModel::clearAndRequest(int type)
 void ListModel::clearForPaging()
 {
 #ifndef for_desktop
+    /*
     if(removeRows(0, m_list.count(), QModelIndex()))
         emit pagingCleared();
+        */
+    clearing = true;
+    emit modelAboutToBeReset();
+    beginResetModel();
+    resetInternalData();
+    //qDeleteAll(m_list);
+    endResetModel();
+    emit modelReset();
+    clearing = false;
+   // qDebug("Page Cleared, requesting");
+    emit pagingCleared();
+
 #else
     //qDebug("Clearing for next page");
     clearing = true;

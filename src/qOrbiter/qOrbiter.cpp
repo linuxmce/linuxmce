@@ -2222,7 +2222,7 @@ void qOrbiter::requestPage(int page)
     media_pos = page * media_pageSeperator;
     media_currentPage = page;
     setGridStatus(true);
-
+        emit gridModelSizeChange(0);
     //qDebug () << "Navigating to page " << media_currentPage;
     //qDebug() << "Cell Range::" << media_pos << "to" << media_pos + media_pageSeperator;
 #ifndef for_desktop
@@ -3102,7 +3102,6 @@ void DCE::qOrbiter::changedTrack(QString direction)
 void DCE::qOrbiter::populateAdditionalMedia() //additional media grid that populates after the initial request to break out the threading and allow for a checkpoint across threads
 {
 
-
     if(checkLoadingStatus() == true)
     {
         emit statusMessage("requesting additional media");
@@ -3141,8 +3140,8 @@ void DCE::qOrbiter::populateAdditionalMedia() //additional media grid that popul
         if(SendCommand(req_data_grid_pics, &pResponse) && pResponse == "OK")
         {
             DataGridTable *pDataGridTable = new DataGridTable(iData_Size,pData,false);
-            // cellsToRender= pDataGridTable->GetRows();
 
+             emit gridModelSizeChange(pDataGridTable->GetRows());
             // LoggerWrapper::GetInstance()->Write(LV_CRITICAL, "Pic Datagrid Dimensions: Height %i, Width %i", gHeight, gWidth);
 
             for(MemoryDataTable::iterator it=pDataGridTable->m_MemoryDataTable.begin();it!=pDataGridTable->m_MemoryDataTable.end();++it)
@@ -3176,8 +3175,6 @@ void DCE::qOrbiter::populateAdditionalMedia() //additional media grid that popul
                 //qDebug() << index ;
                 emit addItem(new gridItem(fk_file, cellTitle, filePath, index, cellImg));
             }
-            delete pDataGridTable;
-
         }
     }
     else
