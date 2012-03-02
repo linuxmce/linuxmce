@@ -2455,61 +2455,52 @@ void DCE::qOrbiter::GetMediaAttributeGrid(QString  qs_fk_fileno)
                 QString attribute  = pCell->m_mapAttributes_Find("Name").c_str();
                 cellfk = pCell->GetValue();
 
-                /*   if(attributeType == "Program")
+                   if(attributeType == "Program")
                 {
-                   // emit setProgram(attributeType);
+                    emit fd_programChanged(attributeType);
                 }
                 else if(attributeType == "Title")
                 {
-                    if (filedetailsclass->mediatitle ==attribute )
-                    {
-
-                        filedetailsclass->setEpisode(attribute);
-                    }
-                    else
-                    {
-
-                        filedetailsclass->setMediaTitle(attribute);
-                    }
+                        fd_mediaTitleChanged(attribute);
 
 
                 }
                 else if(attributeType == "Channel")
                 {
-                    filedetailsclass->setChannelID(attribute);
+                    fd_chanIdChanged(attribute);
                 }
                 else if(attributeType == "Episode")
                 {
-                    filedetailsclass->setEpisode(attribute);
+                    fd_episodeChanged(attribute);
 
                 }
                 else if(attributeType == "Performer")
                 {
-                    filedetailsclass->setPerformers(attribute);
+                    fd_performersChanged(attribute);
                 }
                 else if(attributeType == "Composer/Writer")
                 {
-                    filedetailsclass->setComposers(attribute);
+                   fd_composersChanged(attribute);
                 }
                 else if(attributeType == "Director")
                 {
-                    filedetailsclass->setDirector(attribute);
+                    fd_directorChanged(attribute);
                 }
                 else if(attributeType == "Genre")
                 {
-                    filedetailsclass->setGenre(attribute);
+                    fd_genreChanged(attribute);
                 }
                 else if(attributeType == "Album")
                 {
-                    filedetailsclass->setAlbum(attribute);
+                    fd_albumChanged(attribute);
                 }
                 else if(attributeType == "Studio")
                 {
-                    filedetailsclass->setStudio(attribute);
+                   fd_studioChanged(attribute);
                 }
                 else if(attributeType == "Track")
                 {
-                    filedetailsclass->setTrack(attribute);
+                   fd_trackChanged(attribute);
                 }
                 else if(attributeType == "Rating")
                 {
@@ -2519,7 +2510,6 @@ void DCE::qOrbiter::GetMediaAttributeGrid(QString  qs_fk_fileno)
                 {
 
                 }
-*/
             }
 
         }
@@ -2680,25 +2670,7 @@ emit setMyIp(QString::fromStdString(m_sMyIPAddress));
 
 void qOrbiter::showTimeCode()
 {
-    QByteArray socketData = timeCodeSocket.readLine();
-    QString tcData = QString::fromAscii(socketData.data(), socketData.size());
 
-    if (tcData.length() > 0)
-    {
-        QStringList tcVars = tcData.split(",");
-        QString tcClean = tcVars.at(1);
-        tcClean.remove(QRegExp(".\\d\\d\\d|00:0|0:0|00:"));
-        emit tcUpdated(tcClean);
-
-        QString playbackSpeed = tcVars.at(0);
-        playbackSpeed.remove(QRegExp("000"));
-       emit updateMediaSpeed(playbackSpeed.toInt());
-
-        QString duration = tcVars.at(2);
-        duration.remove(QRegExp(".\\d\\d\\d|00:0|0:0|00:"));
-        emit mediaLengthChanged(duration);
-
-    }
 }
 
 void DCE::qOrbiter::ShowFloorPlan(int floorplantype)

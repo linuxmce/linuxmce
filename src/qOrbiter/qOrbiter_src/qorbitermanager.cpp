@@ -1341,7 +1341,7 @@ void qorbiterManager::updateTimecode(int port)
 
 void qorbiterManager::showTimeCode()
 {
-    qDebug("Something");
+
     QByteArray socketData = timeCodeSocket->readLine();
     QString tcData = QString::fromAscii(socketData.data(), socketData.size());
 
