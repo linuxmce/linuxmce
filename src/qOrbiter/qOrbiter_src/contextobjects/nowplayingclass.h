@@ -228,7 +228,7 @@ public slots:
     void setSubTitle (QString inc_subTitle) {qs_subTitle = inc_subTitle; emit titleChanged();}
     QString getSubTitle () {return qs_subTitle;}
 
-    void setStatus (bool status) {b_mediaPlaying = status; qDebug() << "Now Playing is: " + status;  emit mediaStatusChanged(); }
+    void setStatus (bool status) {b_mediaPlaying = status;  emit mediaStatusChanged(); }
     bool getStatus () {return b_mediaPlaying;}
 
     void setMediaType (int inc_mediaType) {i_mediaType = inc_mediaType; emit mediaTypeChanged();}

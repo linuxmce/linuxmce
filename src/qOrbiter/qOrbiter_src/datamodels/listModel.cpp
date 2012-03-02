@@ -166,9 +166,9 @@ void ListModel::clear()
     clearing = false;
     while(m_list.count() > 1)
     {
-        qDebug("Clearing");
+     //   qDebug("Clearing");
     }
-    qDebug ()<< "Model Clear" ;
+ //   qDebug ()<< "Model Clear" ;
 }
 
 bool ListModel::removeRow(int row, const QModelIndex &parent)

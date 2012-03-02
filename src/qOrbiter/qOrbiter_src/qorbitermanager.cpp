@@ -165,10 +165,10 @@ qorbiterManager::qorbiterManager(QDeclarativeView *view, QObject *parent) :
     //screen parameters class that could be extended as needed to fetch other data
     ScreenParameters = new ScreenParamsClass;
     qorbiterUIwin->rootContext()->setContextProperty("screenparams", ScreenParameters);
-    timecodeThread = new QThread();
+   // timecodeThread = new QThread();
     timeCodeSocket = new QTcpSocket();
-    timeCodeSocket->moveToThread(timecodeThread);
-    timecodeThread->start();
+   // timeCodeSocket->moveToThread(timecodeThread);
+   // timecodeThread->start();
     QApplication::processEvents(QEventLoop::AllEvents);
 }
 
@@ -268,7 +268,7 @@ bool qorbiterManager::initializeManager(string sRouterIP, int device_id)
         return false;
     }
 #elif for_android
-    qDebug() << "Loading skins";
+    //qDebug() << "Loading skins";
     if( !loadSkins(QUrl(localDir)))
     {   emit skinIndexReady(false);
         return false;
@@ -1323,7 +1323,8 @@ void qorbiterManager::updateTimecode(int port)
 {
 
     if(!timeCodeSocket->isOpen())
-    {   qDebug() <<"opening connection to " << port;
+    {
+        //qDebug() <<"opening connection to " << port;
 
         timeCodeSocket->connectToHost(qs_routerip, port, QFile::ReadOnly );
         if ( timeCodeSocket->isValid() )
@@ -1332,8 +1333,8 @@ void qorbiterManager::updateTimecode(int port)
             QObject::connect(timeCodeSocket,SIGNAL(readyRead()), this, SLOT(showTimeCode()));
         }
         else
-        {   qDebug("couldnt start timecode");
-            qDebug() << timeCodeSocket->errorString();
+        {   //qDebug("couldnt start timecode");
+           // qDebug() << timeCodeSocket->errorString();
         }
     }
 

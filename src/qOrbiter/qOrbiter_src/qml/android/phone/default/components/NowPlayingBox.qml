@@ -22,6 +22,7 @@ Rectangle {
         height:  appH
         width: appW
         anchors.centerIn: np_box
+        asynchronous: true
 
     }
     Image {
