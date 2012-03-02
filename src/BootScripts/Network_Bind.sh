@@ -14,10 +14,11 @@ if [[ "$CoreID" == "" ]] ;then
 	# No database entries yet, probably still installing
 	exit 0
 fi
+
 # Read the new core internal ip address
-R=$(RunSQL "SELECT IK_DeviceData FROM Device_DeviceData where FK_Device=$CoreID AND FK_DeviceData=$DD_NetworkInterfaces")
-Internal_IP=$(Field 1 "$R")
-Internal_IP=$(echo $Internal_IP | cut -d',' -f3)
+. /usr/pluto/bin/Network_Parameters.sh
+Internal_IP=$IntIP
+echo "Internal: $Internal_IP"
 Address_1=$(echo "$Internal_IP" | cut -d'.' -f1)
 Address_2=$(echo "$Internal_IP" | cut -d'.' -f2)
 Address_3=$(echo "$Internal_IP" | cut -d'.' -f3)
@@ -25,11 +26,9 @@ Address_4=$(echo "$Internal_IP" | cut -d'.' -f4)
 Short_IP="$Address_1.$Address_2.$Address_3"
 Reverse_IP="$Address_3.$Address_2.$Address_1"
 
-
-
 # Add dynamic zone files for bind
 # Bind doesnt like it when its zone files are altered while it is running
-invoke-rc.d bind9 stop
+service bind9 stop
 
 if [[ -e /var/cache/bind/db.linuxmce.local ]] ;then
 	# Determine old ip address
@@ -89,21 +88,36 @@ $Reverse_IP.in-addr.arpa IN SOA  linuxmce.local. postmaster.linuxmce.local. (
 1                       PTR     dcerouter.linuxmce.local." > /var/cache/bind/db.linuxmce.rev
 fi
 
-# Check for and update named.conf files
+### Check for and update named.conf files
+# Listen only on localhost and internal ip addresses
+sed -i "/listen-on /d" /etc/bind/named.conf.options
+sed -i "/auth-nxdomain/ a\
+listen-on { 127.0.0.1;$IntIP;};" /etc/bind/named.conf.options
+
+# Only try IPv6 connecions if IPv6 is enabled on core
+sed -i "/OPTIONS/d" /etc/default/bind9
+if [[ "$IPv6Active" == "on" || "$Extv6IP" != "disabled" ]]; then
+	echo 'OPTIONS="-u bind"' >> /etc/default/bind9
+else
+	echo 'OPTIONS="-4 -u bind"' >> /etc/default/bind9
+fi
+
 if [[ $( grep named.conf.linuxmce /etc/bind/named.conf ) == "" ]] ;then
 	echo 'include "/etc/bind/named.conf.linuxmce";' >> /etc/bind/named.conf
 fi
 cp /usr/pluto/templates/named.conf.linuxmce.tmpl /etc/bind/named.conf.linuxmce
 sed -i "s,%DYNAMIC_REVERSE_RANGE%,$Reverse_IP,g" /etc/bind/named.conf.linuxmce
 
-chown bind: /var/cache/bind/db.*
+# Setting right permissions after our changes
+#chown bind: /var/cache/bind/db.*
+chown -R bind: /var/cache/bind
 chown bind:dhcpd /etc/bind/rndc.key
 chmod 664 /etc/bind/rndc.key
 
 # Apparmor prevents dhcpd from reading bind conf files
 if [[ -e /etc/apparmor.d/usr.sbin.dhcpd3 && $( grep '/etc/bind' /etc/apparmor.d/usr.sbin.dhcpd3 ) == "" ]] ;then
 	sed -i "s,\},\n  # Let dhcpd read bind's config files\n  /etc/bind/\*\* r\,\n\},g" /etc/apparmor.d/usr.sbin.dhcpd3
-	invoke-rc.d apparmor restart
-	invoke-rc.d dhcp3-server restart
+	service apparmor restart
+	service dhcp3-server restart
 fi
-invoke-rc.d bind9 start 
+service bind9 start 

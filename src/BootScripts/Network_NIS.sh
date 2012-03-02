@@ -34,6 +34,6 @@ if ! BlacklistConfFiles '/etc/ypserv.securenets' ;then
 fi
 sed -i 's/master|slave|\[Yy\]/slave|[Yy]/g' /etc/init.d/nis
 
-service nis stop
+# Rebuilding NIS database and reloading config
 echo | /usr/lib/yp/ypinit -m
-service nis start
+service nis reload

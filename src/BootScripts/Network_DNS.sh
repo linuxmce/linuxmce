@@ -29,6 +29,6 @@ case "$1" in
 	;;
 
 	*)
-		/etc/init.d/bind9 restart
+		service bind9 restart
 	;;
 esac

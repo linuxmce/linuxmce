@@ -5,6 +5,9 @@
 
 AllowMark=0x01
 
+#####
+# Function to open a port on the core
+#####
 OpenPort()
 {
 	local Protocol Port FilterIP
@@ -69,6 +72,9 @@ OpenPort()
 	fi
 }
 
+#####
+# Function to forward a specific port to internal lan
+#####
 ForwardPort()
 {
 	local Protocol ExtIP SrcPort DestIP DestPort FilterIP
@@ -109,6 +115,9 @@ ForwardPort()
   	esac
 }
 
+#####
+# Function to clear all existing firewall rules
+#####
 ClearFirewall()
 {
 	local table
@@ -132,19 +141,39 @@ ClearFirewall()
 	done
 
 }
-
+#####
+# Main working spaghetti
+#####
 trap 'Unlock "Firewall" "Firewall"' EXIT
 WaitLock "Firewall" "Firewall"
 
+# If we use xDSL PPPoE then use that interface as external interface for firewall
+OldExtIf=$ExtIf
+if [[ "$PPPoEEnabled" == "on" ]]; then
+	echo "xDSL PPPoE enabled, using dsl-provider interface as external interface"
+	ExtIf="ppp0"
+fi
+
+# sanitize old installations
+Q="UPDATE Firewall SET Protocol='tcp-ipv4' WHERE Protocol='tcp'"
+R=$(RunSQL "$Q")
+Q="UPDATE Firewall SET Protocol='udp-ipv4' WHERE Protocol='udp'"
+R=$(RunSQL "$Q")
+
+
+# Clear all firewall rules
 ClearFirewall
 
+# Enabling forwarding on all network interfaces
 echo "Enabling packet forwarding"
 echo 1 >/proc/sys/net/ipv4/ip_forward
 echo 1 >/proc/sys/net/ipv6/conf/all/forwarding
 
+# Per default entirely close the firewall
 DefaultPolicy=DROP
 DefaultIPv6Policy=DROP
 
+# If user choosed to disabled one or both firewalls, then accept everything
 if [[ "$DisableFirewall" == 1 ]]; then
 	DefaultPolicy=ACCEPT
 fi
@@ -152,6 +181,8 @@ fi
 if [[ "$DisableIPv6Firewall" == 1 ]]; then
 	DefaultIPv6Policy=ACCEPT
 fi
+
+# Set some default firewall parameters before opening ports
 echo "Setting up firewall"
 iptables -P INPUT "$DefaultPolicy"
 iptables -F INPUT
@@ -167,6 +198,7 @@ ip6tables -A INPUT -i lo -j ACCEPT
 ip6tables -A INPUT -m state --state ESTABLISHED,RELATED -j ACCEPT
 ip6tables -A INPUT -m mark --mark "$AllowMark" -j ACCEPT
 
+# If on multiple NIC's, accept incoming on LAN and NAT or masquerade on external
 if [[ -n "$IntIP" ]]; then
 	#TODO: use 4 byte netmask in these calculations
 	IntNet="$(echo "$IntIP" | cut -d. -f-3).0"
@@ -179,14 +211,21 @@ if [[ -n "$IntIP" ]]; then
 	iptables -t mangle -A POSTROUTING -o $ExtIf -j TTL --ttl-set 255
 	ip6tables -t mangle -A POSTROUTING -o $ExtIf -j HL --hl-set 255
 	
+	# If on static external interface do source nating. If on DHCP do masquerading
 	if [[ "$ExtIP" != "dhcp" ]]; then
-		iptables -t nat -A POSTROUTING -s "$IntNet/$IntBitmask" -d \! "$IntNet/$IntBitmask" -o $ExtIf -j SNAT --to-source $ExtIP
+		iptables -t nat -A POSTROUTING -s "$IntNet/$IntBitmask" \! -d "$IntNet/$IntBitmask" -o $OldExtIf -j SNAT --to-source $ExtIP
 	else
-		iptables -t nat -A POSTROUTING -s "$IntNet/$IntBitmask" -d \! "$IntNet/$IntBitmask" -o $ExtIf -j MASQUERADE
+		iptables -t nat -A POSTROUTING -s "$IntNet/$IntBitmask" \! -d "$IntNet/$IntBitmask" -o $OldExtIf -j MASQUERADE
 	fi
+	
+	# If PPPoE is used masquerade to that interface too
+	if [[ "$ExtIf" == "ppp0" ]]; then
+		iptables -t nat -A POSTROUTING -s "$IntNet/$IntBitmask" \! -d "$IntNet/$IntBitmask" -o $ExtIf -j MASQUERADE
+	fi
+	
 
 fi
-
+# Configuring all port forwards
 echo "Setting up forwarded ports"
 Q="SELECT Protocol,SourcePort,SourcePortEnd,DestinationPort,DestinationIP,SourceIP FROM Firewall WHERE RuleType='port_forward' ORDER BY PK_Firewall"
 R=$(RunSQL "$Q")
@@ -223,6 +262,7 @@ for Port in $R; do
   fi
 done
 
+# Configuring open ports on core
 echo "Opening specified ports to exterior"
 Q="SELECT Protocol,SourcePort,SourcePortEnd,SourceIP FROM Firewall WHERE RuleType='core_input' ORDER BY PK_Firewall"
 R=$(RunSQL "$Q")
@@ -245,5 +285,10 @@ for Port in $R; do
 	OpenPort "$Protocol" "$IPversion" "$Port1:$Port2" "$SrcIP"
 done
 
-iptables --append FORWARD -o ppp+ --protocol tcp --tcp-flags SYN,RST SYN --jump TCPMSS --clamp-mss-to-pmtu
-ip6tables --append FORWARD -o ppp+ --protocol tcp --tcp-flags SYN,RST SYN --jump TCPMSS --clamp-mss-to-pmtu
+# Set discovered MSS to make PMTU work on PPPoE interfaces
+if [[ "$PPPoEEnabled" == "on" ]]; then
+	iptables --append FORWARD -o ppp+ --protocol tcp --tcp-flags SYN,RST SYN --jump TCPMSS --clamp-mss-to-pmtu
+	ip6tables --append FORWARD -o ppp+ --protocol tcp --tcp-flags SYN,RST SYN --jump TCPMSS --clamp-mss-to-pmtu
+fi
+
+ExtIf=$OldExtIf
