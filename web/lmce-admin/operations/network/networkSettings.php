@@ -10,8 +10,19 @@ function getIP($int) {
 	return $pieces[0];
 }
 
+function getIPv6IP($int) {
+	$ip = exec("ip -f inet6 addr show $int| awk '/scope global/ {print $2}'");
+	$pieces = explode("/", $ip);
+	return $pieces[0];
+}
+
 function getGW() {
 	$gw = exec("ip -f inet route show|awk '/default/ {print($3)}'");
+	return $gw;
+}
+
+function getIPv6GW() {
+	$gw = exec("ip -f inet6 route show|awk '/default/ {print($3)}'");
 	return $gw;
 }
 
@@ -23,15 +34,30 @@ function getMASK($int) {
 	return join('.', $netmask);
 }
 
+function getIPv6MASK($int) {
+ 	$ip = exec("ip -f inet6 addr show $int| awk '/scope global/ {print $2}'");	
+    $pieces = explode("/", $ip);
+	return $pieces[1];
+}
+
 function getOutSideIP() {
 	$ch = curl_init();
     curl_setopt($ch, CURLOPT_URL, 'http://automation.whatismyip.com/n09230945.asp');
     curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
     $internetip = curl_exec($ch);
+	if(!filter_var($internetip, FILTER_VALIDATE_IP)) {
+		$internetip='';
+	}
 	return $internetip;
 }
 
 function getDNS() {
+    $dns = shell_exec("cat /etc/resolv.conf|awk '/nameserver/ {print $2}'");
+    $dns = implode(", ",explode("\n", trim($dns)));
+    return $dns;
+}
+
+function getIPv6DNS() {
     $dns = shell_exec("cat /etc/resolv.conf|awk '/nameserver/ {print $2}'");
     $dns = implode(", ",explode("\n", trim($dns)));
     return $dns;
@@ -100,35 +126,130 @@ function networkSettings($output,$dbADO) {
 	$VPNRange=explode('.',str_replace('-','.',$VPN_data[1]));
 	$VPNPSK = $VPN_data[2];
 	
+	// extract PPPoE settings from core
+	$resPPPoE=$dbADO->Execute('SELECT IK_DeviceData FROM Device_DeviceData WHERE FK_Device=1 AND FK_DeviceData='.$GLOBALS['PPPoeData']);
+	$rowPPPoE=$resPPPoE->FetchRow();
+	$PPPoEData=explode(",", $rowPPPoE['IK_DeviceData']);
+	$PPPoEEnabled = ($PPPoEData[0]=='on')?1:0;
+	$PPPoEUser=$PPPoEData[1];
+	$PPPoEPass=$PPPoEData[2];
+	$PPPoEIPv6Enabled = ($PPPoEData[3]=='on')?1:0;
+
+	// extract NIC IPv4 settings from core
 	$queryNC='SELECT * FROM Device_DeviceData WHERE FK_Device=? AND FK_DeviceData=?';
 	$resNC=$dbADO->Execute($queryNC,array($coreID,$GLOBALS['NetworkInterfaces']));
+	
 	if($resNC->RecordCount()>0){
 		$rowNC=$resNC->FetchRow();
 		$interfacesArray=explode('|',$rowNC['IK_DeviceData']);
+		
+		// get external NIC IPv4 settings
 		$externalInterfaceArray=explode(',',$interfacesArray[0]);
 		$externalMAC=getMAC($externalInterfaceArray[0]);
-		if($externalInterfaceArray[1]!='dhcp'){
-			$coreIPArray=explode('.',$externalInterfaceArray[1]);
-			$coreNetMaskArray=explode('.',$externalInterfaceArray[2]);
-			$coreGWArray=explode('.',$externalInterfaceArray[3]);
-			$coreDNS1Array=explode('.',$externalInterfaceArray[4]);
-			$coreDNS2Array=explode('.',@$externalInterfaceArray[5]);
-			$ipFromDHCP=0;
-		}else{
-			$ipFromDHCP=1;
-            $externalIP=getIP($externalInterfaceArray[0]);
-            $externalMASK=getMASK($externalInterfaceArray[0]);
-			$defaultGW=getGW();
-			$DNS=getDNS();
+		$coreIPv4Status=$externalInterfaceArray[1];
+
+		switch ($coreIPv4Status) {
+		    case 'disabled':
+		    	$coreIPv4='disabled';
+		        break;
+
+		    case 'dhcp':
+				$ipFromDHCP=1;
+	            $coreIPv4=getIP($externalInterfaceArray[0]);
+	            $coreIPv4NetMask=getMASK($externalInterfaceArray[0]);
+				$coreIPv4GW=getGW();
+				$DNS=explode(',',getDNS());
+				$coreIPv4DNS1=trim($DNS[0]);
+				$coreIPv4DNS2=trim($DNS[1]);
+				$coreIPv4DNS3=trim($DNS[2]);
+				break;
+				
+		    case 'static';
+		    default:
+		    	$coreIPv4Status='static';
+				$ipFromDHCP=0;
+				$coreIPv4=$externalInterfaceArray[1];
+				$coreIPv4NetMask=$externalInterfaceArray[2];
+				$coreIPv4GW=$externalInterfaceArray[3];
+				$coreIPv4DNS1=$externalInterfaceArray[4];
+				$coreIPv4DNS2=$externalInterfaceArray[5];
+				break;			
 		}
+			   
+		// get internal NIC IPv4 settings
 		$internalInterfaceArray=explode(',',$interfacesArray[1]);
 		$internalMAC=getMAC($internalInterfaceArray[0]);
-		// old internal core ip
 		$oldInternalCoreIP=$internalInterfaceArray[1];
+		
+		switch ($internalCoreIPv4Status) {
+		    case 'disabled':
+		    	$internalCoreIPv4IP='disabled';
+		        break;
 
-		$internalCoreIPArray=explode('.',$internalInterfaceArray[1]);
-		$internalCoreNetMaskArray=explode('.',$internalInterfaceArray[2]);
+			case 'static';
+		    default:
+		    	$internalCoreIPv4Status='static';
+				$internalCoreIPv4IP=$internalInterfaceArray[1];
+				$internalCoreIPv4NM=$internalInterfaceArray[2];
+			break;
+		}
 		$outsideIP = getOutsideIP();
+		
+		$externalInterface=$externalInterfaceArray[0];
+		$internalInterface=$internalInterfaceArray[0];
+		
+		// extract NIC IPv6 settings from core
+		$queryNC='SELECT * FROM Device_DeviceData WHERE FK_Device=? AND FK_DeviceData=?';
+		$resNC=$dbADO->Execute($queryNC,array($coreID,$GLOBALS['IPv6NetworkInterfaces']));
+		$rowNC=$resNC->FetchRow();
+		
+		$IPv6interfacesArray=explode('|',$rowNC['IK_DeviceData']);
+
+		// get external NIC IPv6 settings
+		$externalIPv6InterfaceArray=explode(',',$IPv6interfacesArray[0]);
+		$coreIPv6Status=$externalIPv6InterfaceArray[1];
+		switch ($coreIPv6Status) {
+			case 'disabled':
+				break;
+			case 'ra':
+				$coreIPv6=getIPv6IP($externalIPv6InterfaceArray[0]);
+				$coreIPv6GW=getIPv6GW();
+				$coreIPv6NetMask=getIPv6MASK($externalIPv6InterfaceArray[0]);
+				break;
+			case 'dhcp':
+				$coreIPv6=getIPv6IP($externalIPv6InterfaceArray[0]);
+				$coreIPv6GW=getIPv6GW();
+				$coreIPv6NetMask=getIPv6MASK($externalIPv6InterfaceArray[0]);
+				break;
+			case 'static':
+			default:
+				$coreIPv6Status='static';
+				$coreIPv6=$externalIPv6InterfaceArray[1];
+				$coreIPv6NetMask=$externalIPv6InterfaceArray[2];
+				$coreIPv6GW=$externalIPv6InterfaceArray[3];
+				$coreIPv6DNS1=$externalIPv6InterfaceArray[4];
+				$coreIPv6DNS2=$externalIPv6InterfaceArray[5];
+				break;
+		}
+		
+		// get internal NIC IPv6 settings
+		$internalIPv6InterfaceArray=explode(',',$IPv6interfacesArray[1]);
+		$internalCoreIPv6Status=$internalIPv6InterfaceArray[1];
+		switch ($internalCoreIPv6Status) {
+			case 'disabled':
+				break;
+			case 'ra':
+				$internalCoreIPv6=getIPv6IP($internalIPv6InterfaceArray[0]);
+				$internalCoreIPv6NetMask=getIPv6MASK($internalIPv6InterfaceArray[0]);
+				break;
+			case 'static':
+			default:
+				$internalCoreIPv6Status='static';
+				$internalCoreIPv6=$internalIPv6InterfaceArray[1];
+				$internalCoreIPv6NetMask=$internalIPv6InterfaceArray[2];
+				break;
+		}
+
 	}else{
 		$fatalError='No record in Device_DeviceData for Network Interfaces.';
 	}	
@@ -137,7 +258,7 @@ function networkSettings($output,$dbADO) {
   if (!empty($externalInterfaceArray[0]) && !empty($internalInterfaceArray[0]))
 
 	{
-		$swaphtml = '<br><input type="submit" class="button" name="swap" value="'.translate('TEXT_SWAP_INTERFACES_CONST').'"><br>';
+		$swaphtml = '<input type="submit" class="button" name="swap" value="'.translate('TEXT_SWAP_INTERFACES_CONST').'"';
 	}
 	if ($action == 'form') {
 		if(!isset($fatalError)){
@@ -146,7 +267,7 @@ function networkSettings($output,$dbADO) {
 	function ipFromDHCP()
 	{
 		newVal=(!document.networkSettings.ipForAnonymousDevices.checked)?true:false;
-		newColor=(document.networkSettings.ipForAnonymousDevices.checked)?"#4E6CA6":"#CCCCCC";
+		newColor=(document.networkSettings.ipForAnonymousDevices.checked)?"#4E6CA6":"#999999";
 
 		for(i=1;i<9;i++){
 			eval("document.networkSettings.nonPlutoIP_"+i+".disabled="+newVal+";");
@@ -170,24 +291,26 @@ function networkSettings($output,$dbADO) {
 			
 	function validateForm()
 	{
-		if(document.networkSettings.ipFrom[1].checked ){
-			validIP=validateElement(new Array("coreIP_1","coreIP_2","coreIP_3","coreIP_4"),"Please enter Core\'s IP address.");
+		/*if(document.networkSettings.extv4[2].checked ){
+			validIP=validateElement(array("coreIPv4IP"),"Please enter Core\'s IP address.");
 			if(validIP)
-				validNetMask=validateElement(new Array("coreNetMask_1","coreNetMask_2","coreNetMask_3","coreNetMask_4"),"Please enter Subnet Mask address.");
+				validNetMask=validateElement(array("coreIPv4NM"),"Please enter Subnet Mask address.");
 			if(validNetMask)
-				validGW=validateElement(new Array("coreGW_1","coreGW_2","coreGW_3","coreGW_4"),"Please enter Gateway address.");
+				validGW=validateElement(array("coreIPv4GW"),"Please enter Gateway address.");
 			if(validGW)
-				validDNS1=validateElement(new Array("coreDNS1_1","coreDNS1_2","coreDNS1_3","coreDNS1_4"),"Please enter first DNS address.");
+				validDNS1=validateElement(array("coreIPv4DNS1"),"Please enter first DNS address.");
 			if(validDNS1)
 				document.networkSettings.submit();
-		}else
+		}else*/
+
+			alert("'.translate('TEXT_UPDATING_SETTINGS_CONST').'");
 			document.networkSettings.submit();
 	}
 		
 	function setIPRange()
 	{
 		newVal=(!document.networkSettings.enableDHCP.checked)?true:false;
-		newColor=(document.networkSettings.enableDHCP.checked)?"#4E6CA6":"#CCCCCC";
+		newColor=(document.networkSettings.enableDHCP.checked)?"#4E6CA6":"#999999";
 
 		for(i=1;i<9;i++){
 			eval("document.networkSettings.coreDHCP_"+i+".disabled="+newVal+";");
@@ -203,7 +326,7 @@ function networkSettings($output,$dbADO) {
 	function setVPNRange()
 	{
 		newVal=(!document.networkSettings.enableVPN.checked)?true:false;
-		newColor=(document.networkSettings.enableVPN.checked)?"#4E6CA6":"#CCCCCC";
+		newColor=(document.networkSettings.enableVPN.checked)?"#4E6CA6":"#999999";
 
 		for(i=1;i<9;i++) eval("document.networkSettings.VPNRange_"+i+".disabled="+newVal+";");
 
@@ -215,7 +338,7 @@ function networkSettings($output,$dbADO) {
 	function setIPv6Range()
 	{
 		newVal=(!document.networkSettings.enableRA.checked)?true:false;
-		newColor=(document.networkSettings.enableRA.checked)?"#4E6CA6":"#CCCCCC";
+		newColor=(document.networkSettings.enableRA.checked)?"#4E6CA6":"#999999";
 
 		for(i=1;i<9;i++){
 			eval("document.networkSettings.IPv6Prefix_"+i+".disabled="+newVal+";");
@@ -224,22 +347,62 @@ function networkSettings($output,$dbADO) {
 		document.getElementById("IPv6Prefix").style.color=newColor;
 	}
 		
-	function setStaticIP(newVal)
+	function setPPPoE()
 	{
-		for(i=1;i<5;i++){
-			eval("document.networkSettings.coreIP_"+i+".disabled="+newVal+";");
-			eval("document.networkSettings.coreNetMask_"+i+".disabled="+newVal+";");
-			eval("document.networkSettings.coreGW_"+i+".disabled="+newVal+";");
-			eval("document.networkSettings.coreDNS1_"+i+".disabled="+newVal+";");
-			eval("document.networkSettings.coreDNS2_"+i+".disabled="+newVal+";");
-		}
-		newColor=(newVal==false)?"#4E6CA6":"#CCCCCC";
-		document.getElementById("coreIPtext").style.color=newColor;
-		document.getElementById("coreNMtext").style.color=newColor;
-		document.getElementById("coreGWtext").style.color=newColor;
-		document.getElementById("coreDNS1text").style.color=newColor;
-		document.getElementById("coreDNS2text").style.color=newColor;
+		checked=document.getElementById("PPPoEEnabled").checked;
+		newColor=(checked)?"#000000":"#999999";
+		
+		document.getElementById("PPPoEUserText").style.color=newColor;
+		document.getElementById("PPPoEUser").style.color=newColor;
+		document.getElementById("PPPoEPassText").style.color=newColor;
+		document.getElementById("PPPoEPass").style.color=newColor;
+		document.getElementById("PPPoEIPv6EnabledText").style.color=newColor;
+		
+		document.getElementById("PPPoEUser").disabled=!checked;
+		document.getElementById("PPPoEPass").disabled=!checked;
+		document.getElementById("PPPoEIPv6Enabled").disabled=!checked;
 	}
+	
+	function setStaticIP(newVal,ipVersion)
+	{
+		newVal=!newVal;
+		newColor=(newVal==false)?"#000000":"#999999";
+
+		eval("document.getElementById(\"coreIPv"+ipVersion+"IPtext\").style.color=\""+newColor+"\";");
+		eval("document.getElementById(\"coreIPv"+ipVersion+"IP\").style.color=\""+newColor+"\";");
+		eval("document.getElementById(\"coreIPv"+ipVersion+"IP\").disabled="+newVal+";");
+
+		eval("document.getElementById(\"coreIPv"+ipVersion+"NMtext\").style.color=\""+newColor+"\";");
+		eval("document.getElementById(\"coreIPv"+ipVersion+"NM\").style.color=\""+newColor+"\";");
+		eval("document.getElementById(\"coreIPv"+ipVersion+"NM\").disabled="+newVal+";");
+
+		eval("document.getElementById(\"coreIPv"+ipVersion+"GWtext\").style.color=\""+newColor+"\";");
+		eval("document.getElementById(\"coreIPv"+ipVersion+"GW\").style.color=\""+newColor+"\";");
+		eval("document.getElementById(\"coreIPv"+ipVersion+"GW\").disabled="+newVal+";");
+
+		eval("document.getElementById(\"coreIPv"+ipVersion+"DNS1text\").style.color=\""+newColor+"\";");
+		eval("document.getElementById(\"coreIPv"+ipVersion+"DNS1\").style.color=\""+newColor+"\";");
+		eval("document.getElementById(\"coreIPv"+ipVersion+"DNS1\").disabled="+newVal+";");
+
+		eval("document.getElementById(\"coreIPv"+ipVersion+"DNS2text\").style.color=\""+newColor+"\";");
+		eval("document.getElementById(\"coreIPv"+ipVersion+"DNS2\").style.color=\""+newColor+"\";");
+		eval("document.getElementById(\"coreIPv"+ipVersion+"DNS2\").disabled="+newVal+";");
+	}
+	
+	function setStaticIntIP(newVal,ipVersion)
+	{
+		newVal=!newVal;
+		newColor=(newVal==false)?"#000000":"#999999";
+
+		eval("document.getElementById(\"internalCoreIPv"+ipVersion+"IPtext\").style.color=\""+newColor+"\";");
+		eval("document.getElementById(\"internalCoreIPv"+ipVersion+"IP\").style.color=\""+newColor+"\";");
+		eval("document.getElementById(\"internalCoreIPv"+ipVersion+"IP\").disabled="+newVal+";");
+
+		eval("document.getElementById(\"internalCoreIPv"+ipVersion+"NMtext\").style.color=\""+newColor+"\";");
+		eval("document.getElementById(\"internalCoreIPv"+ipVersion+"NM\").style.color=\""+newColor+"\";");
+		eval("document.getElementById(\"internalCoreIPv"+ipVersion+"NM\").disabled="+newVal+";");
+	}
+	
 	</script>
 	<div class="err">'.(isset($_GET['error'])?strip_tags($_GET['error']):'').'</div>
 	<form action="index.php" method="POST" name="networkSettings">
@@ -248,130 +411,187 @@ function networkSettings($output,$dbADO) {
 	<div align="center" class="confirm"><B>'.(isset($_GET['msg'])?strip_tags($_GET['msg']):'').'</B></div>
 	<table border="0">
 		<tr>
-			<td colspan="3" class="tablehead"><B>'.translate('TEXT_CORE_IDENTIFICATION_CONST').':</B></td>
+			<td colspan="6" class="tablehead"><B>'.translate('TEXT_CORE_IDENTIFICATION_CONST').':</B></td>
 		</tr>
 		<tr>
-			<td colspan="4"><B>'.translate('TEXT_COMPUTER_NAME_CONST').'</B> &nbsp; <input type="text" name="cname" value="'.$cname.'"> &nbsp; <B>'.translate('TEXT_DOMAIN_CONST').'</B> &nbsp; <input type="text" name="domain" value="'.$domain.'"></td>
+			<td colspan="6"><B>'.translate('TEXT_COMPUTER_NAME_CONST').'</B> &nbsp; <input type="text" name="cname" value="'.$cname.'"> &nbsp; <B>'.translate('TEXT_DOMAIN_CONST').'</B> &nbsp; <input type="text" name="domain" value="'.$domain.'"></td>
 		</tr>
-		<tr><td>&nbsp;</td></tr>
-        	<tr>
-                        <td colspan="3" class="tablehead"><B>'.translate('TEXT_CORE_SEEN_FROM_INTERNET_CONST').':</B></td>
-                </tr>
-		<tr><td colspan="3"><b>'.translate('TEXT_OUTSIDE_IP_CONST').'</b>&nbsp;<input type="text" name="outsideip" disabled value="'.$outsideIP.'">&nbsp;&nbsp;<b>'.translate('TEXT_OUTSIDE_HOSTNAME_CONST').'</b>&nbsp;<input type="text" name="outsideip" disabled size=50 value="'.gethostbyaddr($outsideIP).'"></td></tr>
-		<tr><td>&nbsp;</td></tr>
+		<tr><td colspan="6">&nbsp;</td></tr>
+       	<tr><td colspan="6" class="tablehead"><B>'.translate('TEXT_CORE_SEEN_FROM_INTERNET_CONST').':</B></td></tr>
+		<tr><td colspan="6"><b>'.translate('TEXT_OUTSIDE_IP_CONST').'</b>&nbsp;<input type="text" name="outsideip" disabled value="'.$outsideIP.'">&nbsp;&nbsp;<b>'.translate('TEXT_OUTSIDE_HOSTNAME_CONST').'</b>&nbsp;<input type="text" name="outsideip" disabled size=50 value="'.gethostbyaddr($outsideIP).'"></td></tr>
+		<tr><td colspan="6">&nbsp;</td></tr>
 		<tr>
-			<td colspan="3" class="tablehead"><B>'.translate('TEXT_DHCP_SERVERS_CONST').':</B></td>
+			<td colspan="6" class="tablehead"><B>'.translate('TEXT_DHCP_SERVERS_CONST').':</B></td>
 		</tr>
 		<tr>
-			<td colspan="3"><input type="checkbox" name="enableDHCP" value="1" '
+			<td colspan="6"><input type="checkbox" name="enableDHCP" value="1" '
 				.(($enableDHCP==1)?'checked':'').' onclick="setIPRange();"> '.translate('TEXT_IPV4_DHCP_ENABLED_CONST').'</td>
 		</tr>
 		<tr>
 			<td>&nbsp;</td>
-			<td colspan="2"><span id="range" style="color:'.(($enableDHCP!=1)?'#CCCCCC':'').'">'.translate('TEXT_IPV4_DHCP_LMCE_RANGE_CONST').': <input type="text" maxlength="3" name="coreDHCP_1" size="3" value="'.@$coreDHCPArray[0].'" '.(($enableDHCP!=1)?'disabled':'').'>.<input type="text" maxlength="3" name="coreDHCP_2" size="3" value="'.@$coreDHCPArray[1].'" '.(($enableDHCP!=1)?'disabled':'').'>.<input type="text" maxlength="3" name="coreDHCP_3" size="3" value="'.@$coreDHCPArray[2].'" '.(($enableDHCP!=1)?'disabled':'').'>.<input type="text" maxlength="3" name="coreDHCP_4" size="3" value="'.@$coreDHCPArray[3].'" '.(($enableDHCP!=1)?'disabled':'').'> - <input type="text" maxlength="3" name="coreDHCP_5" size="3" value="'.@$coreDHCPArray[4].'" '.(($enableDHCP!=1)?'disabled':'').'>.<input type="text" maxlength="3" name="coreDHCP_6" size="3" value="'.@$coreDHCPArray[5].'" '.(($enableDHCP!=1)?'disabled':'').'>.<input type="text" maxlength="3" name="coreDHCP_7" size="3" value="'.@$coreDHCPArray[6].'" '.(($enableDHCP!=1)?'disabled':'').'>.<input type="text" maxlength="3" name="coreDHCP_8" size="3" value="'.@$coreDHCPArray[7].'" '.(($enableDHCP!=1)?'disabled':'').'></td>
+			<td colspan="5"><span id="range" style="color:'.(($enableDHCP!=1)?'#999999':'').'">'.translate('TEXT_IPV4_DHCP_LMCE_RANGE_CONST').': <input type="text" maxlength="3" name="coreDHCP_1" size="3" value="'.@$coreDHCPArray[0].'" '.(($enableDHCP!=1)?'disabled':'').'>.<input type="text" maxlength="3" name="coreDHCP_2" size="3" value="'.@$coreDHCPArray[1].'" '.(($enableDHCP!=1)?'disabled':'').'>.<input type="text" maxlength="3" name="coreDHCP_3" size="3" value="'.@$coreDHCPArray[2].'" '.(($enableDHCP!=1)?'disabled':'').'>.<input type="text" maxlength="3" name="coreDHCP_4" size="3" value="'.@$coreDHCPArray[3].'" '.(($enableDHCP!=1)?'disabled':'').'> - <input type="text" maxlength="3" name="coreDHCP_5" size="3" value="'.@$coreDHCPArray[4].'" '.(($enableDHCP!=1)?'disabled':'').'>.<input type="text" maxlength="3" name="coreDHCP_6" size="3" value="'.@$coreDHCPArray[5].'" '.(($enableDHCP!=1)?'disabled':'').'>.<input type="text" maxlength="3" name="coreDHCP_7" size="3" value="'.@$coreDHCPArray[6].'" '.(($enableDHCP!=1)?'disabled':'').'>.<input type="text" maxlength="3" name="coreDHCP_8" size="3" value="'.@$coreDHCPArray[7].'" '.(($enableDHCP!=1)?'disabled':'').'></td>
 		</tr>
 		<tr>
 			<td>&nbsp;</td>
-			<td colspan="2"><input type="checkbox" name="ipForAnonymousDevices" value="1" '.((@$nonPlutoIP==1)?'checked':'').' onClick="ipFromDHCP()" '.(($enableDHCP==1)?'':'disabled').'><span id="provide" style="color:'.(($enableDHCP!=1)?'#CCCCCC':'').'"> '.translate('TEXT_IPV4_DHCP_NONLMCE_ENABLED_CONST').'</span></td>
+			<td colspan="5"><input type="checkbox" name="ipForAnonymousDevices" value="1" '.((@$nonPlutoIP==1)?'checked':'').' onClick="ipFromDHCP()" '.(($enableDHCP==1)?'':'disabled').'><span id="provide" style="color:'.(($enableDHCP!=1)?'#999999':'').'"> '.translate('TEXT_IPV4_DHCP_NONLMCE_ENABLED_CONST').'</span></td>
 		</tr>
-		<tr><td>&nbsp;</td><td colspan="2">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span id="nonPluto" style="color:'
-			.(($enableDHCP!=1)?'#CCCCCC':'').'">'.translate('TEXT_IPV4_DHCP_NONLMCE_RANGE_CONST').': </span>
+		<tr><td>&nbsp;</td><td colspan="5">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span id="nonPluto" style="color:'
+			.(($enableDHCP!=1)?'#999999':'').'">'.translate('TEXT_IPV4_DHCP_NONLMCE_RANGE_CONST').': </span>
 			<input type="text" maxlength="3" name="nonPlutoIP_1" size="3" value="'.@$nonPlutoIPArray[0].'" '.(($enableDHCP==1)?'':'disabled').'>			.<input type="text" maxlength="3" name="nonPlutoIP_2" size="3" value="'.@$nonPlutoIPArray[1].'" '.(($enableDHCP==1)?'':'disabled').'>.<input type="text" maxlength="3" name="nonPlutoIP_3" size="3" value="'.@$nonPlutoIPArray[2].'" '.(($enableDHCP==1)?'':'disabled').'>.<input type="text" maxlength="3" name="nonPlutoIP_4" size="3" value="'.@$nonPlutoIPArray[3].'" '.(($enableDHCP==1)?'':'disabled').'> - <input type="text" maxlength="3" name="nonPlutoIP_5" size="3" value="'.@$nonPlutoIPArray[4].'" '.(($enableDHCP==1)?'':'disabled').'>.<input type="text" maxlength="3" name="nonPlutoIP_6" size="3" value="'.@$nonPlutoIPArray[5].'" '.(($enableDHCP==1)?'':'disabled').'>.<input type="text" maxlength="3" name="nonPlutoIP_7" size="3" value="'.@$nonPlutoIPArray[6].'" '.(($enableDHCP==1)?'':'disabled').'>.<input type="text" maxlength="3" name="nonPlutoIP_8" size="3" value="'.@$nonPlutoIPArray[7].'" '.(($enableDHCP==1)?'':'disabled').'>
 		</td></tr>
 		<tr>
-		<td colspan="3"><input type="checkbox" name="enableRA" '
+		<td colspan="6"><input type="checkbox" name="enableRA" '
 			.(($enableRA==1)?'checked':'').' onclick="setIPv6Range();"> '.translate('TEXT_IPV6_RA_ENABLED_CONST').'</td>
 		</tr>
-		<tr><td>&nbsp;</td><td colspan="2">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span id="IPv6Prefix" style="color:'
-			.(($enableRA!=1)?'#CCCCCC':'').'">'.translate('TEXT_IPV6_PUBLIC_PREFIX_CONST').': </span>
-			<input type="text" maxlength="3" name="IPv6Prefix_1" size="3" value="'.@$IPv6PrefixArray[0].'" '.(($enableRA==1)?'':'disabled').'>:<input type="text" maxlength="3" name="IPv6Prefix_2" size="3" value="'.@$IPv6PrefixArray[1].'" '.(($enableRA==1)?'':'disabled').'>:<input type="text" maxlength="3" name="IPv6Prefix_3" size="3" value="'.@$IPv6PrefixArray[2].'" '.(($enableRA==1)?'':'disabled').'>:<input type="text" maxlength="3" name="IPv6Prefix_4" size="3" value="'.@$IPv6PrefixArray[3].'" '.(($enableRA==1)?'':'disabled').'>:<input type="text" maxlength="3" name="IPv6Prefix_5" size="3" value="'.@$IPv6PrefixArray[4].'" '.(($enableRA==1)?'':'disabled').'>:<input type="text" maxlength="3" name="IPv6Prefix_6" size="3" value="'.@$IPv6PrefixArray[5].'" '.(($enableRA==1)?'':'disabled').'>:<input type="text" maxlength="3" name="IPv6Prefix_7" size="3" value="'.@$IPv6PrefixArray[6].'" '.(($enableRA==1)?'':'disabled').'>:<input type="text" maxlength="3" name="IPv6Prefix_8" size="3" value="'.@$IPv6PrefixArray[7].'" '.(($enableRA==1)?'':'disabled').'> / <input type="text" maxlength="3" name="IPv6Netmask" size="3" value="'.@$IPv6Netmask.'" '.(($enableRA==1)?'':'disabled').'>
+		<tr><td>&nbsp;</td><td colspan="5">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span id="IPv6Prefix" style="color:'
+			.(($enableRA!=1)?'#999999':'').'">'.translate('TEXT_IPV6_PUBLIC_PREFIX_CONST').': </span>
+			<input type="text" maxlength="4" name="IPv6Prefix_1" size="4" value="'.@$IPv6PrefixArray[0].'" '.(($enableRA==1)?'':'disabled').'>:<input type="text" maxlength="4" name="IPv6Prefix_2" size="4" value="'.@$IPv6PrefixArray[1].'" '.(($enableRA==1)?'':'disabled').'>:<input type="text" maxlength="4" name="IPv6Prefix_3" size="4" value="'.@$IPv6PrefixArray[2].'" '.(($enableRA==1)?'':'disabled').'>:<input type="text" maxlength="4" name="IPv6Prefix_4" size="4" value="'.@$IPv6PrefixArray[3].'" '.(($enableRA==1)?'':'disabled').'>:<input type="text" maxlength="4" name="IPv6Prefix_5" size="4" value="'.@$IPv6PrefixArray[4].'" '.(($enableRA==1)?'':'disabled').'>:<input type="text" maxlength="4" name="IPv6Prefix_6" size="4" value="'.@$IPv6PrefixArray[5].'" '.(($enableRA==1)?'':'disabled').'>:<input type="text" maxlength="4" name="IPv6Prefix_7" size="4" value="'.@$IPv6PrefixArray[6].'" '.(($enableRA==1)?'':'disabled').'>:<input type="text" maxlength="4" name="IPv6Prefix_8" size="4" value="'.@$IPv6PrefixArray[7].'" '.(($enableRA==1)?'':'disabled').'> / <input type="text" maxlength="2" name="IPv6Netmask" size="2" value="'.@$IPv6Netmask.'" '.(($enableRA==1)?'':'disabled').'>
 		</td></tr>
 		
 		<tr>
-			<td colspan="3"><input type="checkbox" name="enableVPN" '.(($enableVPN==1)?'checked':'').' onclick="setVPNRange();">'.translate('TEXT_VPN_ENABLED_CONST').'</td>
+			<td colspan="6"><input type="checkbox" name="enableVPN" '.(($enableVPN==1)?'checked':'').' onclick="setVPNRange();">'.translate('TEXT_VPN_ENABLED_CONST').'</td>
 		</tr>
 		<tr>
 			<td>&nbsp;</td>
-			<td colspan="2"><span id="VPNPSKlabel" style="color:'.(($enableVPN!=1)?'#CCCCCC':'').'">'.translate('TEXT_VPN_PSK_CONST').': <input type="text" maxlength="15" name="VPNPSK" size="20" value="'.@$VPNPSK.'" '.(($enableVPN!=1)?'disabled':'').'></td>		
+			<td colspan="5"><span id="VPNPSKlabel" style="color:'.(($enableVPN!=1)?'#999999':'').'">'.translate('TEXT_VPN_PSK_CONST').': <input type="text" maxlength="15" name="VPNPSK" size="20" value="'.@$VPNPSK.'" '.(($enableVPN!=1)?'disabled':'').'></td>		
 		</tr>
 		<tr>
 			<td>&nbsp;</td>
-			<td colspan="2"><span id="VPNrange" style="color:'.(($enableVPN!=1)?'#CCCCCC':'').'">'.translate('TEXT_VPN_CLIENT_RANGE_CONST').': <input type="text" maxlength="3" name="VPNRange_1" size="3" value="'.@$VPNRange[0].'" '.(($enableVPN!=1)?'disabled':'').'>.<input type="text" maxlength="3" name="VPNRange_2" size="3" value="'.@$VPNRange[1].'" '.(($enableVPN!=1)?'disabled':'').'>.<input type="text" maxlength="3" name="VPNRange_3" size="3" value="'.@$VPNRange[2].'" '.(($enableVPN!=1)?'disabled':'').'>.<input type="text" maxlength="3" name="VPNRange_4" size="3" value="'.@$VPNRange[3].'" '.(($enableVPN!=1)?'disabled':'').'> - <input type="text" maxlength="3" name="VPNRange_5" size="3" value="'.@$VPNRange[4].'" '.(($enableVPN!=1)?'disabled':'').'>.<input type="text" maxlength="3" name="VPNRange_6" size="3" value="'.@$VPNRange[5].'" '.(($enableVPN!=1)?'disabled':'').'>.<input type="text" maxlength="3" name="VPNRange_7" size="3" value="'.@$VPNRange[6].'" '.(($enableVPN!=1)?'disabled':'').'>.<input type="text" maxlength="3" name="VPNRange_8" size="3" value="'.@$VPNRange[7].'" '.(($enableVPN!=1)?'disabled':'').'></td>
+			<td colspan="5"><span id="VPNrange" style="color:'.(($enableVPN!=1)?'#999999':'').'">'.translate('TEXT_VPN_CLIENT_RANGE_CONST').': <input type="text" maxlength="3" name="VPNRange_1" size="3" value="'.@$VPNRange[0].'" '.(($enableVPN!=1)?'disabled':'').'>.<input type="text" maxlength="3" name="VPNRange_2" size="3" value="'.@$VPNRange[1].'" '.(($enableVPN!=1)?'disabled':'').'>.<input type="text" maxlength="3" name="VPNRange_3" size="3" value="'.@$VPNRange[2].'" '.(($enableVPN!=1)?'disabled':'').'>.<input type="text" maxlength="3" name="VPNRange_4" size="3" value="'.@$VPNRange[3].'" '.(($enableVPN!=1)?'disabled':'').'> - <input type="text" maxlength="3" name="VPNRange_5" size="3" value="'.@$VPNRange[4].'" '.(($enableVPN!=1)?'disabled':'').'>.<input type="text" maxlength="3" name="VPNRange_6" size="3" value="'.@$VPNRange[5].'" '.(($enableVPN!=1)?'disabled':'').'>.<input type="text" maxlength="3" name="VPNRange_7" size="3" value="'.@$VPNRange[6].'" '.(($enableVPN!=1)?'disabled':'').'>.<input type="text" maxlength="3" name="VPNRange_8" size="3" value="'.@$VPNRange[7].'" '.(($enableVPN!=1)?'disabled':'').'></td>
 		</tr>
 		
-		<tr><td>&nbsp;</td></tr>
+		<tr><td colspan="6">&nbsp;</td></tr>
 		<tr>
-			<td colspan="3" class="tablehead"><B>'.translate('TEXT_NUMBER_OF_NIC_CONST').': '.$number_of_cards.'</B></td>
+			<td colspan="6" class="tablehead"><B>'.translate('TEXT_NUMBER_OF_NIC_CONST').': '.$number_of_cards.'</B></td>
 		</tr>
 		<tr>
-			<td colspan="3"><B>1. '.translate('TEXT_EXTERNAL_NIC_CONST').' '.@$externalInterfaceArray[0].'</B> (MAC: '
+			<td colspan="6"><B>1. '.translate('TEXT_EXTERNAL_NIC_CONST').' '.@$externalInterfaceArray[0].'</B> (MAC: '
 			.@$externalMAC.')</td>
 		</tr>
-		<tr>
-			<td colspan="3"><input type="radio" name="ipFrom" value="DHCP" onclick="setStaticIP(true);"'.(($ipFromDHCP==1)?'checked':'')
-				.'> '.translate('TEXT_GET_IP_FROM_DHCP_CONST').''
-				.'<br><input type="radio" name="ipFrom" value="static" onclick="setStaticIP(false);" '
-				.(($ipFromDHCP==0)?'checked':'').'> '.translate('TEXT_USE_STATIC_IP_CONST').'</td>
+		<tr style="background-color: #CCFFCC;" >
+		<!-- PPPoE xDSL configuration -->
+			<td colspan="2"><input type="checkbox" onclick="setPPPoE();" name="PPPoEEnabled" id="PPPoEEnabled" value="1" '.(($PPPoEEnabled)?'checked':'').'> '.translate('TEXT_PPPOE_ENABLED_CONST').':</td>
+			<td colspan="4">
+				<B><span id="PPPoEUserText" style="color:'.(!$PPPoEEnabled?'#999999':'').'">'.translate('TEXT_PPPOE_USER_CONST').'</span></B> &nbsp; <input type="text" id="PPPoEUser" name="PPPoEUser" style="color:'.(!$PPPoEEnabled?'#999999':'').'" value="'.$PPPoEUser.'" '.(!$PPPoEEnabled?'disabled':'').'> &nbsp; 
+				<B><span id="PPPoEPassText" style="color:'.(!$PPPoEEnabled?'#999999':'').'">'.translate('TEXT_PPPOE_PASS_CONST').'</span></B> &nbsp; <input type="password" id="PPPoEPass" name="PPPoEPass" style="color:'.(!$PPPoEEnabled?'#999999':'').'" value="'.$PPPoEPass.'" '.(!$PPPoEEnabled?'disabled':'').'>
+				<input type="checkbox" name="PPPoEIPv6Enabled" id="PPPoEIPv6Enabled" value="1" '.(($PPPoEIPv6Enabled==1)?'checked':'').' '.((!$PPPoEEnabled)?'disabled':'').'> <span id="PPPoEIPv6EnabledText" style="color:'.(!$PPPoEEnabled?'#999999':'').'">'.translate('TEXT_PPPOE_IPV6_CONST').'</span>
+			</td>		
 		</tr>
 		<tr>
+			<!-- IPv4 NIC mode) -->
+			<td colspan="3"><B>IPv4:</B>&nbsp;
+				<input type="radio" name="extv4" disabled value="disabled" onclick="setStaticIP(false,4);"'.(($coreIPv4Status=='disabled')?'checked':'').'> '.translate('TEXT_INTERFACE_DISABLED').''.'
+				&nbsp;&nbsp;<input type="radio" name="extv4" value="dhcp" onclick="setStaticIP(false,4);"'.(($coreIPv4Status=='dhcp')?'checked':'').'> '.translate('TEXT_INTERFACE_DHCP').''.'
+				&nbsp;&nbsp;<input type="radio" name="extv4" value="static" onclick="setStaticIP(true,4);"'.(($coreIPv4Status=='static')?'checked':'').'> '.translate('TEXT_INTERFACE_STATIC').'
+			</td>
+			<!-- IPv6 NIC mode) -->
+			<td colspan="3"><B>IPv6:</B>&nbsp;
+				<input type="radio" name="extv6" value="disabled" onclick="setStaticIP(false,6);"'.(($coreIPv6Status=='disabled')?'checked':'').'> '.translate('TEXT_INTERFACE_DISABLED').''.'
+				&nbsp;&nbsp;<input type="radio" name="extv6" value="ra" onclick="setStaticIP(false,6);"'.(($coreIPv6Status=='ra')?'checked':'').'> '.translate('TEXT_INTERFACE_RA').''.'
+				&nbsp;&nbsp;<input type="radio" name="extv6" value="dhcp" onclick="setStaticIP(false,6);"'.(($coreIPv6Status=='dhcp')?'checked':'').'> '.translate('TEXT_INTERFACE_DHCP').''.'
+				&nbsp;&nbsp;<input type="radio" name="extv6" value="static" onclick="setStaticIP(true,6);"'.(($coreIPv6Status=='static')?'checked':'').'> '.translate('TEXT_INTERFACE_STATIC').'
+			</td>
+		</tr>
+		<tr>
+			<!-- IPv4 address -->
 			<td>&nbsp;</td>
-			<td width="150"><span id="coreIPtext" style="color:'.(($ipFromDHCP==1)?'#CCCCCC':'').'">'.translate('TEXT_IP_ADDRESS_CONST').':</span></td>
-			<td><input type="text" maxlength="3" name="coreIP_1" size="3" value="'.@$coreIPArray[0].'" '.(($ipFromDHCP==1)?'disabled':'').'>.<input type="text" maxlength="3" name="coreIP_2" size="3" value="'.@$coreIPArray[1].'" '.(($ipFromDHCP==1)?'disabled':'').'>.<input type="text" maxlength="3" name="coreIP_3" size="3" value="'.@$coreIPArray[2].'" '.(($ipFromDHCP==1)?'disabled':'').'>.<input type="text" maxlength="3" name="coreIP_4" size="3" value="'.@$coreIPArray[3].'" '.(($ipFromDHCP==1)?'disabled':'').'>'
-		.(($ipFromDHCP==1)?'&nbsp;&nbsp;DHCP IP  : '.@$externalIP:'')
-		.'</td>	
+			<td width="150"><span id="coreIPv4IPtext" style="color:'.(($coreIPv4Status!='static')?'#999999':'').'">'.translate('TEXT_IP_ADDRESS_CONST').':</span></td>
+			<td><input type="text" maxlength="15" id="coreIPv4IP" name="coreIPv4IP" size="25" style="color:'.(($coreIPv4Status!='static')?'#999999':'').'" value="'.@$coreIPv4.'" '.(($coreIPv4Status!='static')?'disabled':'').'></td>			
+			<!-- IPv6 address -->
+			<td>&nbsp;</td>
+			<td width="150"><span id="coreIPv6IPtext" style="color:'.(($coreIPv6Status!='static')?'#999999':'').'">'.translate('TEXT_IP_ADDRESS_CONST').':</span></td>
+			<td><input type="text" maxlength="39" id="coreIPv6IP" name="coreIPv6IP" size="50" style="color:'.(($coreIPv6Status!='static')?'#999999':'').'" value="'.@$coreIPv6.'" '.(($coreIPv6Status!='static')?'disabled':'').'></td>	
 		</tr>						
 		<tr>
+			<!-- IPv4 netmask -->
 			<td>&nbsp;</td>
-			<td><span id="coreNMtext" style="color:'.(($ipFromDHCP==1)?'#CCCCCC':'').'">'.translate('TEXT_NETMASK_CONST').':</span></td>
-			<td><input type="text" maxlength="3" name="coreNetMask_1" size="3" value="'.@$coreNetMaskArray[0].'" '.(($ipFromDHCP==1)?'disabled':'').'>.<input type="text" maxlength="3" name="coreNetMask_2" size="3" value="'.@$coreNetMaskArray[1].'" '.(($ipFromDHCP==1)?'disabled':'').'>.<input type="text" maxlength="3" name="coreNetMask_3" size="3" value="'.@$coreNetMaskArray[2].'" '.(($ipFromDHCP==1)?'disabled':'').'>.<input type="text" maxlength="3" name="coreNetMask_4" size="3" value="'.@$coreNetMaskArray[3].'" '.(($ipFromDHCP==1)?'disabled':'').'>'
-		.(($ipFromDHCP==1)?'&nbsp;&nbsp;DHCP MASK: '.@$externalMASK:'')
-		.'</td>
+			<td><span id="coreIPv4NMtext" style="color:'.(($coreIPv4Status!='static')?'#999999':'').'">'.translate('TEXT_NETMASK_CONST').':</span></td>
+			<td><input type="text" maxlength="15" id="coreIPv4NM" name="coreIPv4NM" size="25" style="color:'.(($coreIPv4Status!='static')?'#999999':'').'" value="'.@$coreIPv4NetMask.'" '.(($coreIPv4Status!='static')?'disabled':'').'></td>
+			<!-- IPv6 netmask -->
+			<td>&nbsp;</td>
+			<td><span id="coreIPv6NMtext" style="color:'.(($coreIPv6Status!='static')?'#999999':'').'">'.translate('TEXT_NETMASK_CONST').':</span></td>
+			<td><input type="text" maxlength="2" id="coreIPv6NM" name="coreIPv6NM" size="5" style="color:'.(($coreIPv6Status!='static')?'#999999':'').'" value="'.@$coreIPv6NetMask.'" '.(($coreIPv6Status!='static')?'disabled':'').'></td>
 		</tr>
 		<tr>
+			<!-- IPv4 gateway -->
 			<td>&nbsp;</td>
-			<td><span id="coreGWtext" style="color:'.(($ipFromDHCP==1)?'#CCCCCC':'').'">'.translate('TEXT_GATEWAY_CONST').':</span></td>
-			<td><input type="text" maxlength="3" name="coreGW_1" size="3" value="'.@$coreGWArray[0].'" '.(($ipFromDHCP==1)?'disabled':'').'>.<input type="text" maxlength="3" name="coreGW_2" size="3" value="'.@$coreGWArray[1].'" '.(($ipFromDHCP==1)?'disabled':'').'>.<input type="text" maxlength="3" name="coreGW_3" size="3" value="'.@$coreGWArray[2].'" '.(($ipFromDHCP==1)?'disabled':'').'>.<input type="text" maxlength="3" name="coreGW_4" size="3" value="'.@$coreGWArray[3].'" '.(($ipFromDHCP==1)?'disabled':'').'>'
-		 .(($ipFromDHCP==1)?'&nbsp;&nbsp;DHCP GW  : '.@$defaultGW:'')
-		.'</td>
+			<td><span id="coreIPv4GWtext" style="color:'.(($coreIPv4Status!='static')?'#999999':'').'">'.translate('TEXT_GATEWAY_CONST').':</span></td>
+			<td><input type="text" maxlength="15" id="coreIPv4GW" name="coreIPv4GW" size="25" style="color:'.(($coreIPv4Status!='static')?'#999999':'').'" value="'.@$coreIPv4GW.'" '.(($coreIPv4Status!='static')?'disabled':'').'></td>		
+			<!-- IPv6 gateway -->
+			<td>&nbsp;</td>
+			<td><span id="coreIPv6GWtext" style="color:'.(($coreIPv6Status!='static')?'#999999':'').'">'.translate('TEXT_GATEWAY_CONST').':</span></td>
+			<td><input type="text" maxlength="39" id="coreIPv6GW" name="coreIPv6GW" size="50" style="color:'.(($coreIPv6Status!='static')?'#999999':'').'" value="'.@$coreIPv6GW.'" '.(($coreIPv6Status!='static')?'disabled':'').'></td>
 		</tr>		
 		<tr>
+			<!-- IPv4 DNS1 -->
 			<td>&nbsp;</td>
-			<td><span id="coreDNS1text" style="color:'.(($ipFromDHCP==1)?'#CCCCCC':'').'">'.translate('TEXT_NAMESERVER_CONST').' (DNS) #1:</span></td>
-			<td><input type="text" maxlength="3" name="coreDNS1_1" size="3" value="'.@$coreDNS1Array[0].'" '.(($ipFromDHCP==1)?'disabled':'').'>.<input type="text" maxlength="3" name="coreDNS1_2" size="3" value="'.@$coreDNS1Array[1].'" '.(($ipFromDHCP==1)?'disabled':'').'>.<input type="text" maxlength="3" name="coreDNS1_3" size="3" value="'.@$coreDNS1Array[2].'" '.(($ipFromDHCP==1)?'disabled':'').'>.<input type="text" maxlength="3" name="coreDNS1_4" size="3" value="'.@$coreDNS1Array[3].'" '.(($ipFromDHCP==1)?'disabled':'').'>'
-			.(($ipFromDHCP==1)?'&nbsp;&nbsp;DHCP DNS : '.@$DNS:'')
-			.'</td>
+			<td><span id="coreIPv4DNS1text" style="color:'.(($coreIPv4Status!='static')?'#999999':'').'">'.translate('TEXT_NAMESERVER_CONST').' #1:</span></td>
+			<td><input type="text" maxlength="15" id="coreIPv4DNS1" name="coreIPv4DNS1" size="25" style="color:'.(($coreIPv4Status!='static')?'#999999':'').'" value="'.@$coreIPv4DNS1.'" '.(($coreIPv4Status!='static')?'disabled':'').'></td>
+			<!-- IPv6 DNS1 -->
+			<td>&nbsp;</td>
+			<td><span id="coreIPv6DNS1text" style="color:'.(($coreIPv6Status!='static')?'#999999':'').'">'.translate('TEXT_NAMESERVER_CONST').' #1:</span></td>
+			<td><input type="text" maxlength="39" id="coreIPv6DNS1" name="coreIPv6DNS1" size="50" style="color:'.(($coreIPv6Status!='static')?'#999999':'').'" value="'.@$coreIPv6DNS1.'" '.(($coreIPv6Status!='static')?'disabled':'').'></td>
 		</tr>		
 		<tr>
+			<!-- IPv4 DNS2 -->
 			<td>&nbsp;</td>
-			<td><span id="coreDNS2text" style="color:'.(($ipFromDHCP==1)?'#CCCCCC':'').'">'.translate('TEXT_NAMESERVER_CONST').' (DNS) #2:</span></td>
-			<td><input type="text" maxlength="3" name="coreDNS2_1" size="3" value="'.@$coreDNS2Array[0].'" '.(($ipFromDHCP==1)?'disabled':'').'>.<input type="text" maxlength="3" name="coreDNS2_2" size="3" value="'.@$coreDNS2Array[1].'" '.(($ipFromDHCP==1)?'disabled':'').'>.<input type="text" maxlength="3" name="coreDNS2_3" size="3" value="'.@$coreDNS2Array[2].'" '.(($ipFromDHCP==1)?'disabled':'').'>.<input type="text" maxlength="3" name="coreDNS2_4" size="3" value="'.@$coreDNS2Array[3].'" '.(($ipFromDHCP==1)?'disabled':'').'></td>
+			<td><span id="coreIPv4DNS2text" style="color:'.(($coreIPv4Status!='static')?'#999999':'').'">'.translate('TEXT_NAMESERVER_CONST').' #2:</span></td>
+			<td><input type="text" maxlength="15" id="coreIPv4DNS2" name="coreIPv4DNS2" size="25" style="color:'.(($coreIPv4Status!='static')?'#999999':'').'" value="'.@$coreIPv4DNS2.'" '.(($coreIPv4Status!='static')?'disabled':'').'></td>	
+			<!-- IPv6 DNS2 -->
+			<td>&nbsp;</td>
+			<td><span id="coreIPv6DNS2text" style="color:'.(($coreIPv6Status!='static')?'#999999':'').'">'.translate('TEXT_NAMESERVER_CONST').' #2:</span></td>
+			<td><input type="text" maxlength="39" id="coreIPv6DNS2" name="coreIPv6DNS2" size="50" style="color:'.(($coreIPv6Status!='static')?'#999999':'').'" value="'.@$coreIPv6DNS2.'" '.(($coreIPv6Status!='static')?'disabled':'').'></td>
 		</tr>		
-		<tr><td colspan="3"><hr></td></tr>
+		<tr><td colspan="6"><hr></td></tr>
 		<tr>
-			<td colspan="3"><B>2. '.translate('TEXT_INTERNAL_NIC_CONST').' '.@$internalInterfaceArray[0].'</B> (MAC: '.@$internalMAC.')</td>
+			<td colspan="6"><B>2. '.translate('TEXT_INTERNAL_NIC_CONST').' '.@$internalInterfaceArray[0].'</B> (MAC: '.@$internalMAC.')</td>
 		<tr>
+			<!-- Internal IPv4 NIC mode) -->
+			<td colspan="3"><B>IPv4:</B>&nbsp;
+				<input type="radio" name="intv4" disabled value="disabled" onclick="setStaticIntIP(false,4);"'.(($internalCoreIPv4Status=='disabled')?'checked':'').'> '.translate('TEXT_INTERFACE_DISABLED').''.'
+				&nbsp;&nbsp;<input type="radio" name="intv4" value="static" onclick="setStaticIntIP(true,4);"'.(($internalCoreIPv4Status=='static')?'checked':'').'> '.translate('TEXT_INTERFACE_STATIC').'
+			</td>
+			<!-- Internal IPv6 NIC mode) -->
+			<td colspan="3"><B>IPv6:</B>&nbsp;
+				<input type="radio" name="intv6" value="disabled" onclick="setStaticIntIP(false,6);"'.(($internalCoreIPv6Status=='disabled')?'checked':'').'> '.translate('TEXT_INTERFACE_DISABLED').''.'
+				&nbsp;&nbsp;<input type="radio" name="intv6" value="ra" onclick="setStaticIntIP(false,6);"'.(($internalCoreIPv6Status=='ra')?'checked':'').'> '.translate('TEXT_INTERFACE_RA').''.'
+				&nbsp;&nbsp;<input type="radio" name="intv6" value="static" onclick="setStaticIntIP(true,6);"'.(($internalCoreIPv6Status=='static')?'checked':'').'> '.translate('TEXT_INTERFACE_STATIC').'
+			</td>
+		</tr>
+
 		<tr>
+			<!-- Internal IPv4 address -->
 			<td>&nbsp;</td>
-			<td width="150">'.translate('TEXT_IP_ADDRESS_CONST').':</td>
-			<td><input type="text" maxlength="3" name="internalCoreIP_1" size="3" value="'.@$internalCoreIPArray[0].'">.<input type="text" maxlength="3" name="internalCoreIP_2" size="3" value="'.@$internalCoreIPArray[1].'">.<input type="text" maxlength="3" name="internalCoreIP_3" size="3" value="'.@$internalCoreIPArray[2].'">.<input type="text" maxlength="3" name="internalCoreIP_4" size="3" value="'.@$internalCoreIPArray[3].'"></td>
+			<td width="150"><span id="internalCoreIPv4IPtext" style="color:'.(($internalCoreIPv4Status!='static')?'#999999':'').'">'.translate('TEXT_IP_ADDRESS_CONST').':</span></td>
+			<td><input type="text" maxlength="15" name="internalCoreIPv4IP" size="25" value="'.@$internalCoreIPv4IP.'"></td>
+			<!-- Internal IPv6 address -->
+			<td>&nbsp;</td>
+			<td width="150"><span id="internalCoreIPv6IPtext" style="color:'.(($internalCoreIPv6Status!='static')?'#999999':'').'">'.translate('TEXT_IP_ADDRESS_CONST').':</span></td>
+			<td><input type="text" maxlength="39" id="internalCoreIPv6IP" name="internalCoreIPv6IP" size="50" style="color:'.(($internalCoreIPv6Status!='static')?'#999999':'').'" value="'.@$internalCoreIPv6.'" '.(($internalCoreIPv6Status!='static')?'disabled':'').'></td>	
+
 		</tr>						
 		<tr>
+			<!-- Internal IPv4 netmask -->
 			<td>&nbsp;</td>
-			<td>'.translate('TEXT_NETMASK_CONST').':</td>
-			<td><input type="text" maxlength="3" name="internalCoreNetMask_1" size="3" value="'.@$internalCoreNetMaskArray[0].'">.<input type="text" maxlength="3" name="internalCoreNetMask_2" size="3" value="'.@$internalCoreNetMaskArray[1].'">.<input type="text" maxlength="3" name="internalCoreNetMask_3" size="3" value="'.@$internalCoreNetMaskArray[2].'">.<input type="text" maxlength="3" name="internalCoreNetMask_4" size="3" value="'.@$internalCoreNetMaskArray[3].'"></td>
+			<td><span id="internalCoreIPv4NMtext" style="color:'.(($internalCoreIPv4Status!='static')?'#999999':'').'">'.translate('TEXT_NETMASK_CONST').':</span></td>
+			<td><input type="text" maxlength="15" name="internalCoreIPv4NM" size="25" value="'.@$internalCoreIPv4NM.'"></td>
+			<!-- Internal IPv6 netmask -->
+			<td>&nbsp;</td>
+			<td><span id="internalCoreIPv6NMtext" style="color:'.(($internalCoreIPv6Status!='static')?'#999999':'').'">'.translate('TEXT_NETMASK_CONST').':</span></td>
+			<td><input type="text" maxlength="2" id="internalCoreIPv6NM" name="internalCoreIPv6NM" size="5" style="color:'.(($internalCoreIPv6Status!='static')?'#999999':'').'" value="'.@$internalCoreIPv6NetMask.'" '.(($internalCoreIPv6Status!='static')?'disabled':'').'></td>
 		</tr>
-		<tr><td colspan="3"><hr></td></tr>
+		
+		<tr><td colspan="6"><hr></td></tr>
 		<tr>
-			<td colspan=3>'.$swaphtml.'</td>
-		</tr>
-		<tr>
-			<td><input type="checkbox" name="OfflineMode" value="1" '.(($OfflineMode=='true')?'checked':'').'></td>
-			<td colspan="2"><B>'.translate('TEXT_OFFLINEMODE_CONST').'</B></td>
+			<td colspan="3">
+				<input type="checkbox" name="OfflineMode" value="1" '.(($OfflineMode=='true')?'checked':'').'>
+				<B>'.translate('TEXT_OFFLINEMODE_CONST').'&nbsp;'.$swaphtml.'</B>	
+			</td>
+			<td colspan="3" bgcolor="#EEEEEE">
+				<input type="button" class="button" name="update" value="'.translate('TEXT_UPDATE_CONST').'" onClick="validateForm()"> <input type="reset" class="button" name="reset" value="'.translate('TEXT_RESET_CONST').'">
+			</td>
 		</tr>			
-		<tr>
-			<td colspan="3" align="center" bgcolor="#EEEEEE"><input type="button" class="button" name="update" value="'.translate('TEXT_UPDATE_CONST').'" onClick="validateForm()"> <input type="reset" class="button" name="reset" value="'.translate('TEXT_RESET_CONST').'"></td>
-		</tr>		
-	<tr><td colspan="3">'.translate('TEXT_OPEN_FIREWALL_CONST').'</td></tr>	'
+	<tr><td colspan="6">'.translate('TEXT_OPEN_FIREWALL_CONST').'</td></tr>	'
 	.'</table>
 	</form>
 		<script>
@@ -402,9 +622,7 @@ function networkSettings($output,$dbADO) {
 		$coreDHCP=getIpFromParts('coreDHCP_',1).'-'.getIpFromParts('coreDHCP_',5);
 
 		// new internal core ip
-		$internalCoreIP=getIpFromParts('internalCoreIP_');
-
-
+		$internalCoreIP=$_POST['internalCoreIPv4IP'];
 		$isChanged=0;
 		$ipForAnonymousDevices=isset($_POST['ipForAnonymousDevices'])?1:0;
 		if($ipForAnonymousDevices==1){
@@ -424,32 +642,90 @@ function networkSettings($output,$dbADO) {
 		$needReboot=0;
 		$willReboot=0;
 
-		$externalInterface=$externalInterfaceArray[0];
-		$internalInterface=$internalInterfaceArray[0];
 		if(isset($_POST['swap'])){
-      $externalInterface=$internalInterfaceArray[0];
-      $internalInterface=$externalInterfaceArray[0];
-
+			$externalInterface=$internalInterfaceArray[0];
+			$internalInterface=$externalInterfaceArray[0];
 			$needReboot=1;
 		}
+				
 		if($resNC->RecordCount()>0){
+			// Configure IPv4 external interface
 			$networkInterfaces=$externalInterface;
-			if($_POST['ipFrom']=='DHCP'){
-				$networkInterfaces.=',dhcp|';
-			}else{
-				$dns1 = getIpFromParts('coreDNS1_');
-				$dns2 = getIpFromParts('coreDNS2_');
-				$dns_string = $dns1 . ($dns2 === "" ? "" : ",$dns2");
-				$networkInterfaces.=','.getIpFromParts('coreIP_').','.getIpFromParts('coreNetMask_').','.getIpFromParts('coreGW_').','.$dns_string.'|';
+			if($_POST['extv4']=='disabled'){
+				$networkInterfaces.=',disabled|';
 			}
+			else if($_POST['extv4']=='dhcp'){
+				$networkInterfaces.=',dhcp|';
+			}
+			else{
+				$dns1 = $_POST['coreIPv4DNS1'];
+				$dns2 = $_POST['coreIPv4DNS2'];
+				$dns_string = $dns1 . ($dns2 === "" ? "" : ",$dns2");
+				$networkInterfaces.=','.$_POST['coreIPv4IP'].','.$_POST['coreIPv4NM'].','.$_POST['coreIPv4GW'].','.$dns_string.'|';
+			}
+			// Configure IPv4 internal interface
 			if ($internalInterface !== ""){
-				$networkInterfaces.=$internalInterface.','.$internalCoreIP.','.getIpFromParts('internalCoreNetMask_');
+				$networkInterfaces.=$internalInterface.','.$internalCoreIP.','.$_POST['internalCoreIPv4NM'];
 			}
 			if($networkInterfaces!=$rowNC['IK_DeviceData']){
 				$SQL="REPLACE INTO Device_DeviceData(FK_Device,FK_DeviceData,IK_DeviceData) VALUES(?,?,?)";
 				$dbADO->Execute($SQL,array($coreID,$GLOBALS['NetworkInterfaces'],$networkInterfaces));
 			}
+
+			// Configure IPv6 external interface
+			$networkInterfaces=$externalInterface;
+			switch ($_POST['extv6']) {
+				case 'static';
+					$dns1 = $_POST['coreIPv6DNS1'];
+					$dns2 = $_POST['coreIPv6DNS2'];
+					$dns_string = $dns1 . ($dns2 === "" ? "" : ",$dns2");
+					$networkInterfaces.=','.$_POST['coreIPv6IP'].','.$_POST['coreIPv6NM'].','.$_POST['coreIPv6GW'].','.$dns_string.'|';
+				break;
+				
+				case 'dhcp':
+				case 'ra':
+					$networkInterfaces.=','.$_POST['extv6'].'|';
+				break;
+
+				default:
+				case 'disabled':
+					$networkInterfaces.=',disabled|';
+				break;
+			}
+
+			// Configure IPv6 internal interface
+			if ($internalInterface !== ""){
+				switch ($_POST['intv6']) {
+					case 'static';
+						$networkInterfaces.=$internalInterface.','.$_POST['internalCoreIPv6IP'].','.$_POST['internalCoreIPv6NM'];
+					break;
+					
+					case 'ra';
+						$networkInterfaces.=$internalInterface.',ra';
+					break;
+					
+					default:
+					case 'disabled':
+						$networkInterfaces.=$internalInterface.',disabled';
+					break;
+				}
+			}
+			if($networkInterfaces!=$rowNC['IK_DeviceData']){
+				$SQL="REPLACE INTO Device_DeviceData(FK_Device,FK_DeviceData,IK_DeviceData) VALUES(?,?,?)";
+				$dbADO->Execute($SQL,array($coreID,$GLOBALS['IPv6NetworkInterfaces'],$networkInterfaces));
+			}
 		}
+
+		// tokenize xDSL PPPoE values to put in CORE device data
+		$resPPPoE=$dbADO->Execute('SELECT IK_DeviceData FROM Device_DeviceData WHERE FK_Device=1 AND FK_DeviceData='.$GLOBALS['PPPoeData']);
+		$rowPPPoE=$resRA->FetchRow();
+		$PPPoEData[0]=($_POST['PPPoEEnabled']?'on':'off');
+		$PPPoEData[1]= $_POST['PPPoEUser'];
+		$PPPoEData[2]= $_POST['PPPoEPass'];
+		$PPPoEData[3]=($_POST['PPPoEIPv6Enabled']?'on':'off');
+		$token = join(',',$PPPoEData);
+	 	$dbADO->Execute("UPDATE Device_DeviceData SET IK_DeviceData='".$token."' WHERE FK_Device=1 AND FK_DeviceData=".$GLOBALS['PPPoeData']) 
+	 		or die('ERROR: Invalid query: '.mysql_error());
 
 		// tokenize IPv6 values to put in CORE device data
 		$resRA=$dbADO->Execute('SELECT IK_DeviceData FROM Device_DeviceData WHERE FK_Device=1 AND FK_DeviceData=292');
