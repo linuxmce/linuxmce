@@ -1048,6 +1048,7 @@ void qOrbiter::CMD_Set_Now_Playing(string sPK_DesignObj,string sValue_To_Assign,
     if (iPK_MediaType != 0)
     {
         emit setNowPlaying(true);
+        emit playlistPositionChanged(iValue);
 
 
     }
@@ -2662,6 +2663,19 @@ void qOrbiter::showTimeCode()
 
 }
 
+void qOrbiter::changedPlaylistPosition(QString pos)
+{
+
+    if(!pos.contains(QRegExp("TITLE:")))
+    {
+             jumpToPlaylistPosition(pos.toInt());
+    }
+    else
+    {
+        //      pqOrbiter->setPosition(pos);
+    }
+}
+
 void DCE::qOrbiter::ShowFloorPlan(int floorplantype)
 {
 
@@ -2704,13 +2718,11 @@ void DCE::qOrbiter::BindMediaRemote(bool onoff)
     SendCommand(bind_remote);
 }
 
-void DCE::qOrbiter::JumpToPlaylistPosition(int pos)
+void DCE::qOrbiter::jumpToPlaylistPosition(int pos)
 {
-
-    CMD_Jump_Position_In_Playlist jump_playlist(m_dwPK_Device, iMediaPluginID, QString::number(pos).toStdString(), internal_streamID);
+    qDebug("jumping to playlist item");
+    CMD_Jump_Position_In_Playlist jump_playlist(m_dwPK_Device, iMediaPluginID, StringUtils::itos(pos), internal_streamID);
     SendCommand(jump_playlist);
-
-
 }
 
 void DCE::qOrbiter::setNowPlayingDetails()

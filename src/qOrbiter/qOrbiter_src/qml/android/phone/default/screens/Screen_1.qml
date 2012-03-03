@@ -31,7 +31,7 @@ Rectangle {
         width: scaleX(90)
         spacing: scaleY(1)
         NowPlayingButton{ width: parent.width}
-        DroidHomeSelector{id:home_selector; width: parent.width}
+        DroidHomeSelector{id:home_selector; }
 
     }
 

@@ -15,7 +15,16 @@ Rectangle {
         onImageChanged: nowplayingimage.source = "image://listprovider/updateobject/"+securityvideo.timestamp
     }
 
-    Image{
+   Image {
+      id: nowplayingimage
+     anchors.fill: np_box
+      fillMode: Image.PreserveAspectFit
+      anchors.centerIn: np_box
+     source: "image://listprovider/updateobject/"+dcenowplaying.m_iplaylistPosition
+  }
+
+   /*
+   Image{
         id:np_image
         fillMode: Image.PreserveAspectCrop
         source:"../img/transparencymask.png"
@@ -23,24 +32,20 @@ Rectangle {
         width: appW
         anchors.centerIn: np_box
         asynchronous: true
+        opacity: .25
 
     }
+    */
+
     Image {
         id: np_box
         source: "../img/nowplayingbox.png"
        height: now_playing.height
        width: now_playing.width
-        opacity: .65
+        opacity: .35
     }
-     Image {
-        id: nowplayingimage
-        height: style.orbiterh
-        fillMode: Image.PreserveAspectFit
-        width: style.orbiterw
-        anchors.fill: np_box
-       source: "image://listprovider/updateobject/"+dcenowplaying.m_iplaylistPosition
 
-    }
+
 
     Text {
         id: np_label

@@ -1157,6 +1157,7 @@ signals:
     void np_album(QString album);
     void np_track(QString track);
     void np_releaseDate(QString release_date);
+    void np_playlistIndexChanged(int index);
 
     //storemediaplaylist
     void playlistItemAdded(PlaylistItemClass*);
@@ -1247,11 +1248,11 @@ public slots:
     void requestMediaPlaylist();
     void checkTimeCode();
     void showTimeCode();
-
+    void changedPlaylistPosition(QString pos);
     void ShowFloorPlan(int floorplantype);
     void GetScreenSaverImages();
     void BindMediaRemote(bool onoff);
-    void JumpToPlaylistPosition(int pos);
+    void jumpToPlaylistPosition(int pos);
     void setNowPlayingDetails();
     void SetSecurityStatus(string pin, string mode, int user, string special);
     void GetSingleSecurityCam(int cam_device, int iHeight, int iWidth);

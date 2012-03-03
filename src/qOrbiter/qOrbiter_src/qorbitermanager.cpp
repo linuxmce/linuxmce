@@ -1219,14 +1219,6 @@ void qorbiterManager::showfloorplan(int fptype)
 void qorbiterManager::changedPlaylistPosition(QString position)
 {
 
-    if(!position.contains(QRegExp("TITLE:")))
-    {
-        //      pqOrbiter->JumpToPlaylistPosition(position.toInt());
-    }
-    else
-    {
-        //      pqOrbiter->setPosition(position);
-    }
 
 }
 

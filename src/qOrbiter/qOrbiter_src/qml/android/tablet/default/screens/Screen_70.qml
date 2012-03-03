@@ -18,21 +18,14 @@ Rectangle {
         Remote_Audio_controls{ id: remote1; }
     }
 
-    Timer{
-        id:singleshot
-        repeat: false
-        interval: 2000
-        triggeredOnStart: false
-        running: true
-        onTriggered: nowplayingimage.source = "image://listprovider/updateobject/"+securityvideo.timestamp
-    }
 
     Connections{
         target:dcenowplaying
         onPlayListPositionChanged: { nowplayingimage.source = "image://listprovider/updateobject/"+securityvideo.timestamp;}
+        onImageChanged: nowplayingimage.source = "image://listprovider/updateobject/"+securityvideo.timestamp;
     }
 
-    Component.onCompleted:setNowPlayingData()
+    Component.onCompleted:dcerouter.setNowPlayingData()
 
     Row{
         id:mainrow

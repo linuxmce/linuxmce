@@ -11,7 +11,6 @@ Rectangle {
 
 
     Component.onCompleted:{
-
         nonepgplaylistview.positionViewAtIndex(dcenowplaying.m_iplaylistPosition, ListView.Beginning)
     }
 
@@ -94,7 +93,7 @@ Rectangle {
 
             MouseArea{
                 anchors.fill: parent
-                onClicked: dcerouter.JumpToPlaylistPosition(name)
+                onClicked: dcerouter.changedPlaylistPosition(name)
             }
         }
     }

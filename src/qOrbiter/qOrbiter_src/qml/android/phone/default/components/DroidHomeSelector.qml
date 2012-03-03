@@ -2,10 +2,12 @@
 import QtQuick 1.1
 import "../js/ComponentLoader.js" as MyJs
 
+
 Rectangle{
     id:selector
     height: childrenRect.height
     width: childrenRect.width
+property int imagebuttonsize: scaleY(15)
 
     Row{
         id:toprow
@@ -18,8 +20,9 @@ Rectangle{
             Image {
                 id: lighting
                 source: "../img/lights.png"
-                height: style.iconH
-                width: style.iconW
+                height: imagebuttonsize
+                width: imagebuttonsize
+                smooth:true
 
             }
             MouseArea{
@@ -35,8 +38,9 @@ Rectangle{
             Image {
                 id: media
                 source: "../img/media.png"
-                height: style.iconH
-                width: style.iconW
+                height:imagebuttonsize
+                width: imagebuttonsize
+                smooth:true
             }
 
             MouseArea{
@@ -53,8 +57,9 @@ Rectangle{
             Image {
                 id: climate
                 source: "../img/climate.png"
-                height: style.iconH
-                width: style.iconW
+                height: imagebuttonsize
+                width: imagebuttonsize
+                smooth:true
             }
 
             MouseArea{
@@ -78,8 +83,9 @@ Rectangle{
             Image {
                 id: security
                 source: "../img/security.png"
-                height: style.iconH
-                width: style.iconW
+                height: imagebuttonsize
+                width: imagebuttonsize
+                smooth:true
             }
             MouseArea{
                 anchors.fill: parent
@@ -94,8 +100,9 @@ Rectangle{
             Image {
                 id: telecom
                 source: "../img/telecom.png"
-                height: style.iconH
-                width: style.iconW
+                height: imagebuttonsize
+                width: imagebuttonsize
+                smooth:true
             }
 
             MouseArea{
@@ -112,8 +119,9 @@ Rectangle{
             Image {
                 id: adv
                 source: "../img/advanced.png"
-                height: style.iconH
-                width: style.iconW
+                height: imagebuttonsize
+                width:imagebuttonsize
+                smooth:true
             }
 
             MouseArea{

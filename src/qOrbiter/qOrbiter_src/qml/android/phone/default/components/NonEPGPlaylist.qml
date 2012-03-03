@@ -10,7 +10,7 @@ Rectangle {
     clip:false    
     function setupMedia()
     {
-        dcerouter.setNowPlayingDetails();
+
         nonepgplaylistview.positionViewAtIndex(dcenowplaying.m_iplaylistPosition, ListView.Beginning)
     }
 
@@ -102,7 +102,7 @@ Rectangle {
 
             MouseArea{
                 anchors.fill: parent
-                onClicked: changedPlaylistPosition(name)
+                onClicked: dcerouter.changedPlaylistPosition(name)
                 onPressed: border.color = "orange"
                 onReleased: border.color="silver"
             }

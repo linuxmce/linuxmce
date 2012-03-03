@@ -9,10 +9,10 @@ Rectangle {
     radius: 0
     opacity: 1
     color: "transparent"
-    Component.onCompleted: dcerouter.SetNowPlayingDetails()
+    Component.onCompleted: dcerouter.setNowPlayingDetails()
     Connections{
         target:dcenowplaying
-        onPlayListPositionChanged: nowplayingimage.source = "image://listprovider/updateobject/"+securityvideo.timestamp
+        onImageChanged: nowplayingimage.source = "image://listprovider/updateobject/"+securityvideo.timestamp
     }
 
     Text {

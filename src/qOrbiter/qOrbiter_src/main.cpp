@@ -138,11 +138,13 @@ extern "C" {
 */
 int main(int argc, char* argv[])
 {
-#ifndef for_harmattan
-    QApplication::setGraphicsSystem("raster");
-#endif
-
-#ifdef for_desktop || ANDROID
+#ifdef for_harmattan
+    QApplication::setGraphicsSystem("meego");
+#elif for_desktop
+    QApplication::setGraphicsSystem("opengl");
+#elif ANDROID
+ QApplication::setGraphicsSystem("opengl");
+#else
     QApplication::setGraphicsSystem("opengl");
 #endif
 
@@ -378,6 +380,7 @@ int main(int argc, char* argv[])
         QObject::connect(pqOrbiter, SIGNAL(np_title2Changed(QString)), w->nowPlayingButton, SLOT(setTitle2(QString)));
         QObject::connect(pqOrbiter, SIGNAL(subtitleChanged(QString)), w->nowPlayingButton, SLOT(setSubTitle(QString)));
         QObject::connect(pqOrbiter, SIGNAL(np_synopsisChanged(QString)), w->nowPlayingButton, SLOT(setSynop(QString)));
+        QObject::connect(pqOrbiter,SIGNAL(playlistPositionChanged(int)), w->nowPlayingButton, SLOT(setPlaylistPostion(int)));
 
         dceThread->start();
         mediaThread->start();
