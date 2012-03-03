@@ -4,27 +4,16 @@ import "../js/ComponentLoader.js" as MyJs
 
 Rectangle {
     id: storedaudioremote
-
-    Timer{
-        id:singleshot
-        repeat: false
-        interval: 2000
-        triggeredOnStart: false
-        running: true
-
-        onTriggered: nowplayingimage.source = "image://listprovider/updateobject/"+securityvideo.timestamp
-    }
-    Connections{
-        target:dcenowplaying
-        onPlayListPositionChanged: nowplayingimage.source = "image://listprovider/updateobject/"+securityvideo.timestamp
-    }
-
-
     height: style.orbiterH
     width: style.orbiterW
     radius: 0
     opacity: 1
     color: "transparent"
+    Component.onCompleted: dcerouter.SetNowPlayingDetails()
+    Connections{
+        target:dcenowplaying
+        onPlayListPositionChanged: nowplayingimage.source = "image://listprovider/updateobject/"+securityvideo.timestamp
+    }
 
     Text {
         id: bignowplaying
@@ -33,14 +22,9 @@ Rectangle {
         font.pixelSize: scaleY(5)
         opacity: .5
         style: Text.Sunken
-
     }
 
-    Component.onCompleted:setNowPlayingData()
-
     //main 'now playing rect containing all the other items
-
-
 
     Column{
         anchors.right: storedaudioremote.right
@@ -117,8 +101,6 @@ Rectangle {
                     opacity: .5
 
                 }
-
-
             }
 
             Rectangle{

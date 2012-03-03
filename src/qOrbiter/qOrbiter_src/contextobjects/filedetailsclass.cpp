@@ -1,10 +1,10 @@
 
 #include "filedetailsclass.h"
 
-FileDetailsClass::FileDetailsClass(QDeclarativeItem *parent) :
-    QDeclarativeItem(parent)
+FileDetailsClass::FileDetailsClass(QObject *parent) :
+    QObject(parent)
 {
-     aspect = "TEST";
+
 }
 
 void FileDetailsClass::setFileMediaType()

@@ -69,7 +69,7 @@ qOrbiter::qOrbiter( int DeviceID, string ServerAddress,bool bConnectEventHandler
     media_currentPage=0;
     media_pos=0;
     media_pageSeperator = 25;
-    initializeGrid();    
+    initializeGrid();
 
 
 
@@ -1020,7 +1020,7 @@ void qOrbiter::CMD_Continuous_Refresh(string sTime,string &sCMD_Result,Message *
 void qOrbiter::CMD_Set_Now_Playing(string sPK_DesignObj,string sValue_To_Assign,string sText,int iPK_MediaType,int iStreamID,int iValue,string sName,string sList_PK_Device,bool bRetransmit,string &sCMD_Result,Message *pMessage)
 //<-dceag-c242-e->
 {
-/*
+    /*
     cout << "Need to implement command #242 - Set Now Playing" << endl;
     cout << "Parm #3 - PK_DesignObj=" << sPK_DesignObj << endl;
     cout << "Parm #5 - Value_To_Assign=" << sValue_To_Assign << endl;
@@ -1032,6 +1032,7 @@ void qOrbiter::CMD_Set_Now_Playing(string sPK_DesignObj,string sValue_To_Assign,
     cout << "Parm #103 - List_PK_Device=" << sList_PK_Device << endl;
     cout << "Parm #120 - Retransmit=" << bRetransmit << endl;
 */
+    i_current_mediaType = iPK_MediaType;
     string::size_type pos=0;
     m_dwPK_Device_NowPlaying = atoi(StringUtils::Tokenize(sList_PK_Device,",",pos).c_str());
     m_dwPK_Device_NowPlaying_Video = atoi(StringUtils::Tokenize(sList_PK_Device,",",pos).c_str());
@@ -1042,23 +1043,20 @@ void qOrbiter::CMD_Set_Now_Playing(string sPK_DesignObj,string sValue_To_Assign,
     emit newTCport(port.toInt());
 
     emit resetNowPlaying();
+    emit clearPlaylist();
+
     if (iPK_MediaType != 0)
     {
         emit setNowPlaying(true);
-        // nowPlayingButton->setStatus(true);
-        //requestMediaPlaylist();
-        emit setPlaylistPosition(iValue);
-        // nowPlayingButton->setPlaylistPostion(iValue);
-        //  BindMediaRemote(true);
+
 
     }
     else if (iPK_MediaType == 0)
     {
         emit setNowPlaying(false);
-        //qDebug () << "Closing Now Playing";
-        // nowPlayingButton->setStatus(false);
-        // gotoQScreen("Screen_1.qml");
-        //BindMediaRemote(false);
+        emit gotoQml("Screen_1.qml");
+        BindMediaRemote(0);
+
     }
 
     QString scrn = sPK_DesignObj.c_str();
@@ -1091,19 +1089,18 @@ void qOrbiter::CMD_Set_Now_Playing(string sPK_DesignObj,string sValue_To_Assign,
         }
     }
 
+
     emit currentScreenChanged("Screen_"+scrn+".qml");
     currentScreen = "Screen_"+scrn+".qml";
-
     emit subtitleChanged((QString::fromStdString(sText)));
     emit streamIdChanged(iStreamID);
     emit subtitleChanged(QString::fromStdString(sText));
     internal_streamID = iStreamID;
     emit streamIdChanged(iStreamID);
     emit mediaTypeChanged(iPK_MediaType);
+
     GetNowPlayingAttributes();
     checkTimeCode();
-
-
 }
 
 //<-dceag-c254-b->
@@ -2093,13 +2090,14 @@ void qOrbiter::setStringParam(int paramType, QString param)
             {
                 emit showFileInfo(true);
                 emit setFocusFile(param);
-
+                GetFileInfoForQml(param);
                 break;
             }
             else if (param.contains("!P"))
             {
                 emit showFileInfo(true);
                 emit setFocusFile(param);
+                GetFileInfoForQml(param);
                 break;
             }
             else
@@ -2107,7 +2105,6 @@ void qOrbiter::setStringParam(int paramType, QString param)
                 q_pk_attribute = param.remove("!A");
                 longassstring << q_mediaType+ "|" + q_subType + "|" + q_fileFormat + "|" + q_attribute_genres + "|" + q_mediaSources << "|" + q_usersPrivate +"|" + q_attributetype_sort +"|" + q_pk_users + "|" + q_last_viewed +"|" + q_pk_attribute;
                 datagridVariableString = longassstring.join("|");
-
                 emit clearAndContinue(q_mediaType.toInt());;
             }
         }
@@ -2222,7 +2219,7 @@ void qOrbiter::requestPage(int page)
     media_pos = page * media_pageSeperator;
     media_currentPage = page;
     setGridStatus(true);
-        emit gridModelSizeChange(0);
+    emit gridModelSizeChange(0);
     //qDebug () << "Navigating to page " << media_currentPage;
     //qDebug() << "Cell Range::" << media_pos << "to" << media_pos + media_pageSeperator;
 #ifndef for_desktop
@@ -2335,8 +2332,9 @@ void DCE::qOrbiter::GetFileInfoForQml(QString qs_file_reference)
 
 void DCE::qOrbiter::GetMediaAttributeGrid(QString  qs_fk_fileno)
 {
-    int gHeight = 10;
-    int gWidth = 10;
+    qDebug("Getting file info");
+    int gHeight = 1;
+    int gWidth = 1;
     int pkVar = 0;
     string valassign ="";
     bool isSuccessfull;// = "false";
@@ -2360,7 +2358,7 @@ void DCE::qOrbiter::GetMediaAttributeGrid(QString  qs_fk_fileno)
     int iData_Size=0;
     int GridCurRow = 0;
     int GridCurCol= 0;
-
+    string pResponse="";
     char *pData;
     pData = "NULL";
     int iRow;
@@ -2372,21 +2370,22 @@ void DCE::qOrbiter::GetMediaAttributeGrid(QString  qs_fk_fileno)
     CMD_Get_Attributes_For_Media attribute_detail_get(m_dwPK_Device, iMediaPluginID,  qs_fk_fileno.toStdString(), " ",&s_val );
     SendCommand(attribute_detail_get);
     QString breaker = s_val.c_str();
-    //filedetailsclass->clear();
+
 
     QStringList details = breaker.split(QRegExp("\\t"));
     int placeholder;
 
     placeholder = details.indexOf("TITLE");
     if(placeholder != -1)
-    {
-        emit fd_titleChanged(details.at(placeholder+1));
+    {   temp = details.at(placeholder+1);
+        emit fd_titleChanged(temp);
     }
 
     placeholder = details.indexOf("SYNOPSIS");
     if(placeholder != -1)
     {
-        emit fd_synopChanged(details.at(placeholder+1));
+        temp = details.at(placeholder+1);
+        emit fd_synopChanged(temp);
     }
 
     placeholder = details.indexOf("PICTURE");
@@ -2401,18 +2400,18 @@ void DCE::qOrbiter::GetMediaAttributeGrid(QString  qs_fk_fileno)
     placeholder = details.indexOf("PATH");
     if(placeholder != -1)
     {
-        // filedetailsclass->setPath(details.at(placeholder+1));
+        emit fd_pathChanged(details.at(placeholder+1));
     }
 
     placeholder = details.indexOf("FILENAME");
     if(placeholder != -1)
     {
-        // filedetailsclass->setFilename(details.at(placeholder+1));
+        emit fd_fileChanged(qs_fk_fileno);
     }
 
     CMD_Populate_Datagrid cmd_populate_attribute_grid(m_dwPK_Device, iPK_Device_DatagridPlugIn, StringUtils::itos( m_dwIDataGridRequestCounter ), string(m_sGridID), 83, qs_fk_fileno.toStdString(), DEVICETEMPLATE_Datagrid_Plugin_CONST, &pkVar, &valassign,  &isSuccessfull, &gHeight, &gWidth );
 
-    if (SendCommand(cmd_populate_attribute_grid))
+    if (SendCommand(cmd_populate_attribute_grid, &pResponse))
     {
         /*
           initial request to populate the text only grid as denoted by the lack of a leading "_" as in _MediaFile_43
@@ -2443,11 +2442,7 @@ void DCE::qOrbiter::GetMediaAttributeGrid(QString  qs_fk_fileno)
             DataGridCell *pCell;
             for(MemoryDataTable::iterator it=pDataGridTable->m_MemoryDataTable.begin();it!=pDataGridTable->m_MemoryDataTable.end();++it)
             {
-
                 pCell = it->second;
-
-                string emptyEA;
-
                 // fk.remove("!F");
                 const char *pPath = pCell->GetImagePath();
                 index = pDataGridTable->CovertColRowType(it->first).first;
@@ -2455,52 +2450,50 @@ void DCE::qOrbiter::GetMediaAttributeGrid(QString  qs_fk_fileno)
                 QString attribute  = pCell->m_mapAttributes_Find("Name").c_str();
                 cellfk = pCell->GetValue();
 
-                   if(attributeType == "Program")
+                if(attributeType == "Program")
                 {
-                    emit fd_programChanged(attributeType);
+                    emit fd_programChanged(attribute);
+                    ;
                 }
                 else if(attributeType == "Title")
                 {
-                        fd_mediaTitleChanged(attribute);
-
-
+                    emit fd_mediaTitleChanged(attribute);
                 }
                 else if(attributeType == "Channel")
                 {
-                    fd_chanIdChanged(attribute);
+                    emit fd_chanIdChanged(attribute);
                 }
                 else if(attributeType == "Episode")
                 {
-                    fd_episodeChanged(attribute);
-
+                    emit fd_episodeChanged(attribute);
                 }
                 else if(attributeType == "Performer")
                 {
-                    fd_performersChanged(attribute);
+                    emit fd_performersChanged(attribute);
                 }
                 else if(attributeType == "Composer/Writer")
                 {
-                   fd_composersChanged(attribute);
+                    emit fd_composersChanged(attribute);
                 }
                 else if(attributeType == "Director")
                 {
-                    fd_directorChanged(attribute);
+                    emit fd_directorChanged(attribute);
                 }
                 else if(attributeType == "Genre")
                 {
-                    fd_genreChanged(attribute);
+                    emit fd_genreChanged(attribute);
                 }
                 else if(attributeType == "Album")
                 {
-                    fd_albumChanged(attribute);
+                    emit fd_albumChanged(attribute);
                 }
                 else if(attributeType == "Studio")
                 {
-                   fd_studioChanged(attribute);
+                    emit fd_studioChanged(attribute);
                 }
                 else if(attributeType == "Track")
                 {
-                   fd_trackChanged(attribute);
+                    emit fd_trackChanged(attribute);
                 }
                 else if(attributeType == "Rating")
                 {
@@ -2554,7 +2547,7 @@ void DCE::qOrbiter::RwMedia()
 void DCE::qOrbiter::FfMedia()
 {
 
-   // CMD_Change_Playback_Speed forward_media(m_dwPK_Device, iMediaPluginID, internal_streamID, nowPlayingButton->i_playbackSpeed, true);
+    // CMD_Change_Playback_Speed forward_media(m_dwPK_Device, iMediaPluginID, internal_streamID, nowPlayingButton->i_playbackSpeed, true);
     //SendCommand(forward_media);
 }
 
@@ -2566,9 +2559,7 @@ void DCE::qOrbiter::PauseMedia()
 }
 
 void DCE::qOrbiter::requestMediaPlaylist()
-{
-    BindMediaRemote(1);
-
+{BindMediaRemote(true);
     //storedVideoPlaylist->clear();
     int gHeight = 1;
     int gWidth = 1;
@@ -2607,10 +2598,8 @@ void DCE::qOrbiter::requestMediaPlaylist()
 
     if (SendCommand(cmd_populate_nowplaying_grid))
     {
-
-
         //CMD_Request_Datagrid_Contents(long DeviceIDFrom, long DeviceIDTo,                   string sID,                                              string sDataGrid_ID,int iRow_count,int iColumn_count,bool bKeep_Row_Header,bool bKeep_Column_Header,bool bAdd_UpDown_Arrows,string sSeek,int iOffset,    char **pData,int *iData_Size,int *iRow,int *iColumn
-        DCE::CMD_Request_Datagrid_Contents req_data_grid( long(m_dwPK_Device), long(iPK_Device_DatagridPlugIn), StringUtils::itos( m_dwIDataGridRequestCounter ), string(m_sGridID),    int(gWidth), int(gHeight),           false, false,        true,   string(m_sSeek),    int(iOffset),  &pData,         &iData_Size, &GridCurRow, &GridCurCol );
+        DCE::CMD_Request_Datagrid_Contents req_data_grid( long(m_dwPK_Device), long(iPK_Device_DatagridPlugIn), StringUtils::itos( m_dwIDataGridRequestCounter ), string(m_sGridID),    int(gWidth), int(gHeight),           false, false,        false,   string(m_sSeek),    int(iOffset),  &pData,         &iData_Size, &GridCurRow, &GridCurCol );
         if(SendCommand(req_data_grid))
         {
             bool barrows = false; //not sure what its for
@@ -2652,11 +2641,9 @@ void DCE::qOrbiter::requestMediaPlaylist()
                 }
                 else //making sure we dont provide a null image
                 {
-
                     cellImg.load(":/icons/icon.png");
                 }
                 emit playlistItemAdded(new PlaylistItemClass(cellTitle, cellAttribute, fk_file ,index));
-
             }
         }
     }
@@ -2664,7 +2651,7 @@ void DCE::qOrbiter::requestMediaPlaylist()
 
 void qOrbiter::checkTimeCode()
 {
-emit setMyIp(QString::fromStdString(m_sMyIPAddress));
+    emit setMyIp(QString::fromStdString(m_sMyIPAddress));
 
 }
 
@@ -2719,13 +2706,25 @@ void DCE::qOrbiter::JumpToPlaylistPosition(int pos)
 {
 
     CMD_Jump_Position_In_Playlist jump_playlist(m_dwPK_Device, iMediaPluginID, QString::number(pos).toStdString(), internal_streamID);
-     SendCommand(jump_playlist);
+    SendCommand(jump_playlist);
 
 
 }
 
-void DCE::qOrbiter::SetNowPlayingDetails(QString file)
+void DCE::qOrbiter::SetNowPlayingDetails()
 {
+
+
+    if(i_current_mediaType != 11)
+    {
+
+        qDebug("Requesting playlist");
+         requestMediaPlaylist();
+    }
+    else{
+
+
+    }
 
 }
 
@@ -3141,7 +3140,7 @@ void DCE::qOrbiter::populateAdditionalMedia() //additional media grid that popul
         {
             DataGridTable *pDataGridTable = new DataGridTable(iData_Size,pData,false);
 
-             emit gridModelSizeChange(pDataGridTable->GetRows());
+            emit gridModelSizeChange(pDataGridTable->GetRows());
             // LoggerWrapper::GetInstance()->Write(LV_CRITICAL, "Pic Datagrid Dimensions: Height %i, Width %i", gHeight, gWidth);
 
             for(MemoryDataTable::iterator it=pDataGridTable->m_MemoryDataTable.begin();it!=pDataGridTable->m_MemoryDataTable.end();++it)
@@ -3193,6 +3192,9 @@ void DCE::qOrbiter::SetSecurityMode(int pin, int mode)
 
 void DCE::qOrbiter::setLocation(int location, int ea) // sets the ea and room
 {
+    i_room = location;
+    i_ea = ea;
+
     CMD_Set_Entertainment_Area_DL set_entertain_area(m_dwPK_Device, StringUtils::itos(iOrbiterPluginID), StringUtils::itos(ea));
     SendCommand(set_entertain_area);
 

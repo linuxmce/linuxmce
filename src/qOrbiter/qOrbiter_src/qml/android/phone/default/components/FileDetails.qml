@@ -42,7 +42,7 @@ Rectangle {
         anchors.verticalCenter: parent.verticalCenter
 
         anchors.left: parent.left
-        anchors.leftMargin: filedetailsclass.aspect=="wide"? scaleX(2.6) : scaleX(15)
+        anchors.leftMargin: scaleX(2.9)
         BorderImage {
             id: borderimg
             horizontalTileMode: BorderImage.Repeat

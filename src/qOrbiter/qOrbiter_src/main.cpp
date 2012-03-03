@@ -141,6 +141,11 @@ int main(int argc, char* argv[])
 #ifndef for_harmattan
     QApplication::setGraphicsSystem("raster");
 #endif
+
+#ifdef for_desktop || ANDROID
+    QApplication::setGraphicsSystem("opengl");
+#endif
+
     QApplication  a(argc, argv);
 
     g_sBinary = FileUtils::FilenameWithoutPath(argv[0]);
@@ -275,6 +280,21 @@ int main(int argc, char* argv[])
         //tv epg signals
         QObject::connect(w,SIGNAL(liveTVrequest()), simpleEPGmodel,SLOT(populate()), Qt::QueuedConnection);
 
+        //filedetails
+        QObject::connect(pqOrbiter,SIGNAL(fd_titleImageChanged(QImage)), w->filedetailsclass, SLOT(setTitleImage(QImage)));
+        QObject::connect(pqOrbiter, SIGNAL(fd_mediaTitleChanged(QString)), w->filedetailsclass, SLOT(setMediaTitle(QString)));
+        QObject::connect(pqOrbiter, SIGNAL(fd_directorChanged(QString)), w->filedetailsclass, SLOT(setDirector(QString)));
+        QObject::connect(pqOrbiter, SIGNAL(fd_programChanged(QString)), w->filedetailsclass, SLOT(setProgram(QString)));
+        QObject::connect(pqOrbiter, SIGNAL(fd_synopChanged(QString)), w->filedetailsclass, SLOT(setSynop(QString)));
+        QObject::connect(pqOrbiter, SIGNAL(fd_albumChanged(QString)), w->filedetailsclass, SLOT(setAlbum(QString)));
+        QObject::connect(pqOrbiter, SIGNAL(fd_performersChanged(QString)), w->filedetailsclass, SLOT(setPerformers(QString)));
+        QObject::connect(pqOrbiter, SIGNAL(fd_genreChanged(QString)), w->filedetailsclass, SLOT(setGenre(QString)));
+        QObject::connect(pqOrbiter, SIGNAL(fd_channelChanged(QString)), w->filedetailsclass, SLOT(setChannel(QString)));
+        QObject::connect(pqOrbiter, SIGNAL(fd_pathChanged(QString)), w->filedetailsclass, SLOT(setPath(QString)));
+        QObject::connect(pqOrbiter, SIGNAL(fd_fileChanged(QString)), w->filedetailsclass, SLOT(setFile(QString)));
+        QObject::connect(pqOrbiter, SIGNAL(fd_episodeChanged(QString)), w->filedetailsclass, SLOT(setEpisode(QString)));
+        QObject::connect(pqOrbiter, SIGNAL(fd_trackChanged(QString)), w->nowPlayingButton, SLOT(setTrack(QString)));
+
         //stored media signal
         QObject::connect(pqOrbiter,SIGNAL(playlistItemAdded(PlaylistItemClass*)), storedVideoPlaylist,SLOT(appendRow(PlaylistItemClass*)));
         QObject::connect(pqOrbiter,SIGNAL(resetNowPlaying()), w->nowPlayingButton, SLOT(resetData()));
@@ -282,6 +302,7 @@ int main(int argc, char* argv[])
         QObject::connect(pqOrbiter,SIGNAL(updateMediaSpeed(int)), w->nowPlayingButton, SLOT(setMediaSpeed(int)));
         QObject::connect(pqOrbiter,SIGNAL(mediaLengthChanged(QString)), w->nowPlayingButton, SLOT(setDuration(QString)));
         QObject::connect(pqOrbiter,SIGNAL(tcUpdated(QString)), w->nowPlayingButton, SLOT(setTimeCode(QString)));
+        //QObject::connect(pqOrbiter, SIGNAL(clearPlaylist()), simpleEPGmodel, SLOT(clearData()));
 
         //setup
         QObject::connect(w, SIGNAL(registerOrbiter(int,QString,int)), pqOrbiter,SLOT(registerDevice(int,QString,int)));
@@ -309,6 +330,8 @@ int main(int argc, char* argv[])
         //operations
         QObject::connect(pqOrbiter, SIGNAL(newTCport(int)), w, SLOT(updateTimecode(int)));
         QObject::connect(pqOrbiter, SIGNAL(addScreenParam(QString,int)), w->ScreenParameters, SLOT(addParam(QString, int)));
+        QObject::connect(w, SIGNAL(locationChanged(int,int)), pqOrbiter, SLOT(setLocation(int,int)));
+        QObject::connect(w, SIGNAL(userChanged(int)), pqOrbiter, SLOT(setUser(int)));
 
         QObject::connect(w, SIGNAL(startPlayback(QString)), pqOrbiter, SLOT(playMedia(QString)));
 
@@ -338,6 +361,7 @@ int main(int argc, char* argv[])
         QObject::connect(pqOrbiter,SIGNAL(streamIdChanged(int)), w->nowPlayingButton, SLOT(setStreamID(int)));
         QObject::connect(pqOrbiter, SIGNAL(currentScreenChanged(QString)), w->nowPlayingButton, SLOT(setScreen(QString)));
         QObject::connect(pqOrbiter,SIGNAL(objectUpdate(const uchar*,int)), w->nowPlayingButton, SLOT(setImageData(const uchar*,int)),Qt::DirectConnection);
+
         //attributes
         QObject::connect(pqOrbiter, SIGNAL(np_mediaTitleChanged(QString)), w->nowPlayingButton, SLOT(setMediaTitle(QString)));
         QObject::connect(pqOrbiter, SIGNAL(np_album(QString)), w->nowPlayingButton, SLOT(setAlbum(QString)));
@@ -354,10 +378,6 @@ int main(int argc, char* argv[])
         QObject::connect(pqOrbiter, SIGNAL(np_title2Changed(QString)), w->nowPlayingButton, SLOT(setTitle2(QString)));
         QObject::connect(pqOrbiter, SIGNAL(subtitleChanged(QString)), w->nowPlayingButton, SLOT(setSubTitle(QString)));
         QObject::connect(pqOrbiter, SIGNAL(np_synopsisChanged(QString)), w->nowPlayingButton, SLOT(setSynop(QString)));
-
-        //filedetails
-        QObject::connect(pqOrbiter,SIGNAL(fd_titleImageChanged(QImage)), w->filedetailsclass, SLOT(setTitleImage(QImage)));
-
 
         dceThread->start();
         mediaThread->start();

@@ -342,7 +342,7 @@ signals:
     void mediaRequest(int);
     void objectUpdated();
     void liveTVrequest();
-    void userChanged();
+    void userChanged(int user);
     void requestMoreGridData();
     void dceResponseChanged();
     void imageAspectChanged();

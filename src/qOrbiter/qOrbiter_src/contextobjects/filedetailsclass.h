@@ -13,9 +13,13 @@
   */
 
 
-#include <QDeclarativeItem>
+#include <QObject>
+#include <QStringList>
+#include <QImage>
+#include <QUrl>
+#include <QDebug>
 
-class FileDetailsClass : public QDeclarativeItem
+class FileDetailsClass : public QObject
 {
     Q_OBJECT
 
@@ -28,7 +32,7 @@ class FileDetailsClass : public QDeclarativeItem
     Q_PROPERTY(QString path READ getPath WRITE setPath NOTIFY objectChanged)
 
     Q_PROPERTY(QImage titleImage READ getTitleImage WRITE setTitleImage NOTIFY titleImageChanged)
-    Q_PROPERTY(QImage program READ getProgramImage WRITE setProgramImage NOTIFY objectChanged)
+   // Q_PROPERTY(QImage program READ getProgramImage WRITE setProgramImage NOTIFY objectChanged)
 
     //media title variable that can be independant of what is passed initially by now playing
     Q_PROPERTY (QString mediatitle READ getMediaTitle WRITE setMediaTitle NOTIFY mediaTitleChanged)
@@ -48,20 +52,13 @@ class FileDetailsClass : public QDeclarativeItem
     Q_PROPERTY (QString composerlist READ getComposers WRITE setComposers NOTIFY composersChanged)
     Q_PROPERTY (QStringList composers READ getComposerList)
     Q_PROPERTY (QString aspect READ getImageAspect WRITE setImageAspect NOTIFY imageAspectChanged )
-    Q_PROPERTY (int i_aspectH READ getAspectH WRITE setAspectH NOTIFY aspectHChanged())
-    Q_PROPERTY (int i_aspectW READ getAspectW WRITE setAspectW NOTIFY aspectWChanged())
+    Q_PROPERTY (int i_aspectH READ getAspectH WRITE setAspectH NOTIFY aspectHChanged)
+    Q_PROPERTY (int i_aspectW READ getAspectW WRITE setAspectW NOTIFY aspectWChanged)
 
 public:
-    explicit FileDetailsClass(QDeclarativeItem *parent = 0);
-    void clear();
+    explicit FileDetailsClass(QObject *parent = 0);
 
     QString objecttitle;
-
-    /*
-      Function declared inline for readability as they are short simple functions. anything besides getters and setters will
-      be located in the .cpp
-      */
-
     int i_aspectH; //height then width
     int i_aspectW; //height then width
     QString aspect;
@@ -152,18 +149,10 @@ signals:
     void episodeChanged();
 
 public slots:
+    void clear();
 
-    void setProgram(QString newProgram) {program = newProgram; emit programChanged();}
+    void setProgram(QString newProgram) {program = newProgram; qDebug("recieved program"); emit programChanged();}
     QString getProgram () {return program;}
-
-    //void setImage(QUrl incImage) {nowPlayingImage = incImage; emit imageChanged();}
-    //QUrl getImage () { return nowPlayingImage;}
-
-    //void setScreen(QString inc_screen) {qs_screen = inc_screen; emit screenTypeChanged();}
-    //QString getScreen () {return qs_screen;}
-
-    //void setUrl (QString inc_url) {qs_imagePath = inc_url; emit imageChanged();}
-    // QString getUrl () {return qs_imagePath;}
 
     void setTitle (QString inc_title) {qs_mainTitle = inc_title; emit titleChanged();}
     QString getTitle () {return qs_mainTitle;}
@@ -174,14 +163,6 @@ public slots:
     void setSubTitle (QString inc_subTitle) {qs_subTitle = inc_subTitle; emit titleChanged();}
     QString getSubTitle () {return qs_subTitle;}
 
-    //void setStatus (bool status) {b_mediaPlaying = status; emit mediaStatusChanged(); }
-    // bool getStatus () {return b_mediaPlaying;}
-
-    //  void setMediaType (int inc_mediaType) {i_mediaType = inc_mediaType; emit mediaTypeChanged();}
-    // int  getMediaType () {return i_mediaType;}
-
-    //void setFilePath (QString inc_fp) {filepath = inc_fp; qDebug() <<"FilePath:" << filepath; emit filePathChanged();}
-    // QString getFilePath () {return filepath;}
 
     //general media getters and setters ----//
 
@@ -191,13 +172,6 @@ public slots:
     void setStudio (QString inc_studio) {channel = inc_studio;  emit studioChanged();}
     QString getStudio () {return studio;}
 
-    //void setPlaylistPostion(int i_pls) {m_iplaylistPosition = i_pls; qDebug() << "Playlist set to: "<< m_iplaylistPosition;  emit playListPositionChanged();}
-    //  int getPlaylistPosition() {return m_iplaylistPosition;}
-
-    //  void setMediaSpeed(int speed);
-    //void setStringSpeed(QString s) {qs_playbackSpeed = s; qDebug() << qs_playbackSpeed; emit mediaSpeedChanged();}
-    // QString getMediaSpeed() {return qs_playbackSpeed;}
-
     //--tv getters and setters-------------//
 
     void setChannel (QString inc_channel) {channel = inc_channel;  emit channelChanged();}
@@ -206,7 +180,7 @@ public slots:
     void setChannelID (QString inc_channelID) {channelID = inc_channelID;  emit channelChanged();}
     QString getChannelID () {return channelID;}
 
-    void setEpisode (QString inc_episode) {episode = inc_episode;  emit episodeChanged();}
+    void setEpisode (QString inc_episode) {episode = inc_episode; qDebug("recieved episode");  emit episodeChanged();}
     QString getEpisode () {return episode;}
 
     //-----audio getters and setter--------//
@@ -216,7 +190,7 @@ public slots:
     void setTrack (QString inc_track) {track = inc_track;  emit trackChanged();}
     QString getTrack() {return track;}
 
-    void setPerformers (QString inc_performer) {performers << inc_performer;  emit performersChanged();}
+    void setPerformers (QString inc_performer) {performers << inc_performer; emit performersChanged();}
     QString getPerformers() {performerlist = performers.join(" | "); return performerlist;}
     QStringList getPerformerList() {return performers;}
 
@@ -264,7 +238,7 @@ public slots:
     inline QUrl getScreenShot() {return screenshot;}
 
     inline QString getFilename() {return filename;}
-    inline void setFilename (QString f) {filename = f; emit objectChanged();}
+    inline void setFilename (QString f) {filename = f; emit FileChanged(filename);}
 
     inline QString getPath() {return path;}
     inline void setPath (QString f) {path = f; emit objectChanged();}
@@ -283,12 +257,6 @@ public slots:
 
     // Q_INVOKABLE void setSelectionStatus(QString format);
     // Q_INVOKABLE bool getSelectionStatus();
-
-
-
-
-
-
 
 };
 

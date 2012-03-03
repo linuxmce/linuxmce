@@ -37,7 +37,6 @@ class NowPlayingClass : public QDeclarativeItem
 {
     Q_OBJECT
 
-
     Q_PROPERTY (bool b_mediaPlaying READ getStatus WRITE setStatus NOTIFY mediaStatusChanged) //property to know if media is playing
 
     Q_PROPERTY (QImage fileImage READ getImage WRITE setImage NOTIFY imageChanged)

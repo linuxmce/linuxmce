@@ -10,7 +10,10 @@ Rectangle {
     clip:false
 
 
-    Component.onCompleted: nonepgplaylistview.positionViewAtIndex(dcenowplaying.m_iplaylistPosition, ListView.Beginning)
+    Component.onCompleted:{
+
+        nonepgplaylistview.positionViewAtIndex(dcenowplaying.m_iplaylistPosition, ListView.Beginning)
+    }
 
     Connections{
         target: dcenowplaying
@@ -45,7 +48,7 @@ Rectangle {
 
         delegate:
             Rectangle {
-            border.color: "black"
+            border.color: "slategrey"
             border.width: 1
             width:scaleX(25)
             height: scaleY(12)
@@ -91,7 +94,7 @@ Rectangle {
 
             MouseArea{
                 anchors.fill: parent
-                onClicked: dcerouter.changedPlaylistPosition(name)
+                onClicked: dcerouter.JumpToPlaylistPosition(name)
             }
         }
     }

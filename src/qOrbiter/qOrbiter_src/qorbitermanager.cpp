@@ -158,6 +158,7 @@ qorbiterManager::qorbiterManager(QDeclarativeView *view, QObject *parent) :
     //file details object and imageprovider setup
     filedetailsclass = new FileDetailsClass();
     qorbiterUIwin->rootContext()->setContextProperty("filedetailsclass" ,filedetailsclass);
+    filedetailsclass->clear();
 
     nowPlayingButton = new NowPlayingClass();
     qorbiterUIwin->rootContext()->setContextProperty("dcenowplaying" , nowPlayingButton);
@@ -746,7 +747,7 @@ bool qorbiterManager::requestDataGrid()
 
 void qorbiterManager::setActiveRoom(int room,int ea)
 {
-
+     emit setLocation(room, ea);
     roomLights = roomLightingScenarios.value(room);
     roomMedia = roomMediaScenarios.value(room);
     roomClimate = roomClimateScenarios.value(room);
@@ -792,7 +793,7 @@ void qorbiterManager:: setLocation(const int &room, const int &ea)
     iFK_Room = room;
     iea_area = ea;
 
-    //emit locationChanged(room, ea);
+    emit locationChanged(room, ea);
     // pqOrbiter->setLocation(room, ea);
     QApplication::processEvents(QEventLoop::AllEvents);
 }
@@ -1127,22 +1128,8 @@ void qorbiterManager::initializeSortString()
 
 void qorbiterManager::initializeGridModel()
 {
-
-    //datagrid model setup with image provider for grid
-    /*  gridThread = new QThread();
-    model = new ListModel(new gridItem);
-    model->moveToThread(gridThread);
-    gridThread->start();
-*/
-    // QObject::connect(pqOrbiter, SIGNAL(addItem(gridItem*)), this, SLOT(addMediaItem(gridItem*)), Qt::QueuedConnection);
-    //    model->moveToThread(processingThread);
     basicProvider = new basicImageProvider();
-    qorbiterUIwin->rootContext()->setContextProperty("currentDateTime", QDateTime::currentDateTime());
-    //QObject::connect(this,SIGNAL(requestMoreGridData()), model,SLOT(checkForMore()));
-
-    //adding important data and objects to qml now that they have been setup
-    // qorbiterUIwin->rootContext()->setContextProperty("dataModel", model);
-
+    qorbiterUIwin->rootContext()->setContextProperty("currentDateTime", QDateTime::currentDateTime());  
     setDceResponse("Grid Initialized");
 }
 
@@ -1245,10 +1232,9 @@ void qorbiterManager::changedPlaylistPosition(QString position)
 
 void qorbiterManager::setNowPlayingData()
 {
-    //  pqOrbiter->BindMediaRemote(true);
-    setDceResponse("bound remote" );
-    // pqOrbiter->requestMediaPlaylist();
-    // updateTimecode();
+
+
+
 }
 
 void qorbiterManager::updateImageChanged(QImage img)
@@ -1289,7 +1275,7 @@ void qorbiterManager::setCurrentUser(QString inc_user)
     sPK_User = userList->find(sPK_User)->data(1).toString();
     int user = inc_user.toInt();
     // pqOrbiter->setUser(user);
-    emit userChanged();
+    emit userChanged(user);
 }
 
 void qorbiterManager::setRequestMore(bool state)
@@ -1429,7 +1415,6 @@ void qorbiterManager::processError(QString msg)
 void qorbiterManager::setActiveSkin(QString name)
 {
     //qDebug("Setting Skin");
-
     swapSkins(name);
 }
 

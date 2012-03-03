@@ -139,24 +139,6 @@ public:
     virtual int DeviceIdInvalid();
 
 
-
-    Q_INVOKABLE void SetSecurityMode(int pin, int mode);
-    Q_INVOKABLE void setLocation(int location, int ea);
-    Q_INVOKABLE void setUser(int user);
-    Q_INVOKABLE void QuickReload();
-    Q_INVOKABLE void powerOn(QString devicetype);
-    Q_INVOKABLE void powerOff(QString deviceType);
-    Q_INVOKABLE void getMediaTimeCode();
-    Q_INVOKABLE  void GetAdvancedMediaOptions();
-    Q_INVOKABLE void GetAlarms(bool toggle, int grp);
-    Q_INVOKABLE void setZoom(QString zoomLevel);
-    Q_INVOKABLE void setAspect(QString ratio);
-    Q_INVOKABLE void GetText(int textno);
-    Q_INVOKABLE void setPosition(QString position);
-    Q_INVOKABLE void showMenu();
-    Q_INVOKABLE void CopyDisc();
-    Q_INVOKABLE void ShowBookMarks();
-
     void getImage();
 
     Q_INVOKABLE void moveDirection(QString direction);
@@ -1188,6 +1170,7 @@ signals:
 
     void resetNowPlaying();
     void setPlaylistPosition(int);
+    void clearPlaylist();
 
     //filedetails popup
     void clearFileDetails();
@@ -1213,9 +1196,6 @@ signals:
     void fd_aspectH(int h);
     void fd_aspectW(int w);
     void fd_titleImageChanged(QImage t);
-
-
-
 
 public slots:
     //setup
@@ -1272,7 +1252,7 @@ public slots:
     void GetScreenSaverImages();
     void BindMediaRemote(bool onoff);
     void JumpToPlaylistPosition(int pos);
-    void SetNowPlayingDetails(QString file);
+    void SetNowPlayingDetails();
     void SetSecurityStatus(string pin, string mode, int user, string special);
     void GetSingleSecurityCam(int cam_device, int iHeight, int iWidth);
     void GetMultipleSecurityCams(QStringList cams);
@@ -1282,6 +1262,22 @@ public slots:
     void adjustVolume( int vol);
     void mute();
     void changedTrack(QString direction);
+     void SetSecurityMode(int pin, int mode);
+     void setLocation(int location, int ea);
+     void setUser(int user);
+     void QuickReload();
+     void powerOn(QString devicetype);
+     void powerOff(QString deviceType);
+     void getMediaTimeCode();
+      void GetAdvancedMediaOptions();
+     void GetAlarms(bool toggle, int grp);
+     void setZoom(QString zoomLevel);
+     void setAspect(QString ratio);
+     void GetText(int textno);
+     void setPosition(QString position);
+     void showMenu();
+     void CopyDisc();
+     void ShowBookMarks();
 
 
     //floorplans
