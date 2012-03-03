@@ -1252,7 +1252,7 @@ public slots:
     void GetScreenSaverImages();
     void BindMediaRemote(bool onoff);
     void JumpToPlaylistPosition(int pos);
-    void SetNowPlayingDetails();
+    void setNowPlayingDetails();
     void SetSecurityStatus(string pin, string mode, int user, string special);
     void GetSingleSecurityCam(int cam_device, int iHeight, int iWidth);
     void GetMultipleSecurityCams(QStringList cams);

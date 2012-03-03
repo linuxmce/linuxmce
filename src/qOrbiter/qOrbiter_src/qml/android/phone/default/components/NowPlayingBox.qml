@@ -38,7 +38,7 @@ Rectangle {
         fillMode: Image.PreserveAspectCrop
         width: style.orbiterw
         anchors.fill: np_box
-     /  source: "image://listprovider/updateobject/"+dcenowplaying.m_iplaylistPosition
+       source: "image://listprovider/updateobject/"+dcenowplaying.m_iplaylistPosition
 
     }
 

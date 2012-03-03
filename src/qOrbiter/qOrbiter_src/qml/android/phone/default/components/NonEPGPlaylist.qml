@@ -10,7 +10,7 @@ Rectangle {
     clip:false    
     function setupMedia()
     {
-        dcerouter.SetNowPlayingDetails();
+        dcerouter.setNowPlayingDetails();
         nonepgplaylistview.positionViewAtIndex(dcenowplaying.m_iplaylistPosition, ListView.Beginning)
     }
 

@@ -2559,8 +2559,9 @@ void DCE::qOrbiter::PauseMedia()
 }
 
 void DCE::qOrbiter::requestMediaPlaylist()
-{BindMediaRemote(true);
-    //storedVideoPlaylist->clear();
+{
+    BindMediaRemote(true);
+    emit clearPlaylist();
     int gHeight = 1;
     int gWidth = 1;
     int pkVar = 0;
@@ -2711,7 +2712,7 @@ void DCE::qOrbiter::JumpToPlaylistPosition(int pos)
 
 }
 
-void DCE::qOrbiter::SetNowPlayingDetails()
+void DCE::qOrbiter::setNowPlayingDetails()
 {
 
 
