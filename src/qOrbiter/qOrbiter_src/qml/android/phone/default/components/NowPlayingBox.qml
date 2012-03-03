@@ -12,7 +12,7 @@ Rectangle {
    Connections
     {
         target: dcenowplaying
-        onImageChanged: np_image.source = "image://listprovider/updateobject/"+securityvideo.timestamp
+        onImageChanged: nowplayingimage.source = "image://listprovider/updateobject/"+securityvideo.timestamp
     }
 
     Image{
@@ -35,7 +35,7 @@ Rectangle {
      Image {
         id: nowplayingimage
         height: style.orbiterh
-        fillMode: Image.PreserveAspectCrop
+        fillMode: Image.PreserveAspectFit
         width: style.orbiterw
         anchors.fill: np_box
        source: "image://listprovider/updateobject/"+dcenowplaying.m_iplaylistPosition
@@ -67,7 +67,7 @@ Rectangle {
     Text {
         id: np
         text:dcenowplaying.timecode
-        font.pixelSize: 12
+        font.pixelSize: scaleY(2.5)
         anchors.bottom: np_label.bottom
         wrapMode: Text.WrapAtWordBoundaryOrAnywhere
         anchors.horizontalCenter: np_box.horizontalCenter

@@ -1055,7 +1055,7 @@ void qOrbiter::CMD_Set_Now_Playing(string sPK_DesignObj,string sValue_To_Assign,
     {
         emit setNowPlaying(false);
         emit gotoQml("Screen_1.qml");
-        BindMediaRemote(0);
+        BindMediaRemote(false);
 
     }
 
@@ -2561,6 +2561,7 @@ void DCE::qOrbiter::PauseMedia()
 void DCE::qOrbiter::requestMediaPlaylist()
 {
     BindMediaRemote(true);
+
     emit clearPlaylist();
     int gHeight = 1;
     int gWidth = 1;
