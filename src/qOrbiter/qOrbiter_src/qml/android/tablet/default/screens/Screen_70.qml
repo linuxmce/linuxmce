@@ -21,11 +21,11 @@ Rectangle {
 
     Connections{
         target:dcenowplaying
-        onPlayListPositionChanged: { nowplayingimage.source = "image://listprovider/updateobject/"+securityvideo.timestamp;}
+
         onImageChanged: nowplayingimage.source = "image://listprovider/updateobject/"+securityvideo.timestamp;
     }
 
-    Component.onCompleted:dcerouter.setNowPlayingData()
+    Component.onCompleted:dcerouter.setNowPlayingDetails()
 
     Row{
         id:mainrow
