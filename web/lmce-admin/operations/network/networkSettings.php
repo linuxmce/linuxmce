@@ -104,17 +104,26 @@ function networkSettings($output,$dbADO) {
 	if(ereg(',',$oldCoreDHCP)){
 		$nonPlutoIP=1;
 		$ipArray=explode(',',$oldCoreDHCP);
-		$coreDHCPArray=explode('.',str_replace('-','.',$ipArray[0]));
-		$nonPlutoIPArray=explode('.',str_replace('-','.',$ipArray[1]));
+		$coreDHCPArray=explode('-',$ipArray[0]);
+		$coreDHCPStart=$coreDHCPArray[0];
+		$coreDHCPEnd=explode('.',$coreDHCPArray[1]);
+		$coreDHCPEnd=$coreDHCPEnd[3];
+		$nonPlutoIPArray=explode('-',$ipArray[1]);
+		$nonPlutoIPStart=$nonPlutoIPArray[0];
+		$nonPlutoIPEnd=explode('.',$nonPlutoIPArray[1]);
+		$nonPlutoIPEnd=$nonPlutoIPEnd[3];		
 	}else{
-		$coreDHCPArray=explode('.',str_replace('-','.',$oldCoreDHCP));
+		$coreDHCPArray=explode('-',$oldCoreDHCP);
+		$coreDHCPStart=$coreDHCPArray[0];
+		$coreDHCPEnd=explode('.',$coreDHCPArray[1]);
+		$coreDHCPEnd=$coreDHCPEnd[3];
 	}
 
 	// extract radvd and public prefix from IPv6 tunnel settings for now
 	$resRA=$dbADO->Execute('SELECT IK_DeviceData FROM Device_DeviceData WHERE FK_Device=1 AND FK_DeviceData=292');
 	$rowRA=$resRA->FetchRow();
 	$ipv6_data=explode(",", $rowRA['IK_DeviceData']);
-	$IPv6PrefixArray=explode(':',$ipv6_data[5]);
+	$IPv6Prefix=$ipv6_data[5];
 	$IPv6Netmask = $ipv6_data[6];
 	$enableRA = ($ipv6_data[11]=='on')?1:0;
 	
@@ -267,12 +276,14 @@ function networkSettings($output,$dbADO) {
 	function ipFromDHCP()
 	{
 		newVal=(!document.networkSettings.ipForAnonymousDevices.checked)?true:false;
-		newColor=(document.networkSettings.ipForAnonymousDevices.checked)?"#4E6CA6":"#999999";
+		newColor=(document.networkSettings.ipForAnonymousDevices.checked)?"#000000":"#999999";
 
-		for(i=1;i<9;i++){
-			eval("document.networkSettings.nonPlutoIP_"+i+".disabled="+newVal+";");
-		}
-		document.getElementById("nonPluto").style.color=newColor;
+		eval("document.networkSettings.nonPlutoIPStart.disabled="+newVal+";");
+		eval("document.networkSettings.nonPlutoIPEnd.disabled="+newVal+";");
+		
+		document.getElementById("nonPlutoIPText").style.color=newColor;
+		document.getElementById("nonPlutoIPStart").style.color=newColor;
+		document.getElementById("nonPlutoIPEnd").style.color=newColor;
 		
 	}
 
@@ -310,23 +321,26 @@ function networkSettings($output,$dbADO) {
 	function setIPRange()
 	{
 		newVal=(!document.networkSettings.enableDHCP.checked)?true:false;
-		newColor=(document.networkSettings.enableDHCP.checked)?"#4E6CA6":"#999999";
+		newColor=(document.networkSettings.enableDHCP.checked)?"#000000":"#999999";
 
-		for(i=1;i<9;i++){
-			eval("document.networkSettings.coreDHCP_"+i+".disabled="+newVal+";");
-		}
+		eval("document.networkSettings.coreDHCPStart.disabled="+newVal+";");
+		eval("document.networkSettings.coreDHCPEnd.disabled="+newVal+";");
+		
 		document.networkSettings.ipForAnonymousDevices.disabled=newVal;
 		if(!document.networkSettings.enableDHCP.checked)
 			document.networkSettings.ipForAnonymousDevices.checked=false;
-		document.getElementById("range").style.color=newColor;
-		document.getElementById("provide").style.color=newColor;
+		
+		document.getElementById("coreDHCPText").style.color=newColor;
+		document.getElementById("coreDHCPStart").style.color=newColor;
+		document.getElementById("coreDHCPEnd").style.color=newColor;
+		
 		ipFromDHCP();
 	}
 	
 	function setVPNRange()
 	{
 		newVal=(!document.networkSettings.enableVPN.checked)?true:false;
-		newColor=(document.networkSettings.enableVPN.checked)?"#4E6CA6":"#999999";
+		newColor=(document.networkSettings.enableVPN.checked)?"#000000":"#999999";
 
 		for(i=1;i<9;i++) eval("document.networkSettings.VPNRange_"+i+".disabled="+newVal+";");
 
@@ -338,13 +352,14 @@ function networkSettings($output,$dbADO) {
 	function setIPv6Range()
 	{
 		newVal=(!document.networkSettings.enableRA.checked)?true:false;
-		newColor=(document.networkSettings.enableRA.checked)?"#4E6CA6":"#999999";
+		newColor=(document.networkSettings.enableRA.checked)?"#000000":"#999999";
 
-		for(i=1;i<9;i++){
-			eval("document.networkSettings.IPv6Prefix_"+i+".disabled="+newVal+";");
-		}
+		eval("document.networkSettings.IPv6Prefix.disabled="+newVal+";");
 		eval("document.networkSettings.IPv6Netmask.disabled="+newVal+";");
+
+		document.getElementById("IPv6PrefixText").style.color=newColor;
 		document.getElementById("IPv6Prefix").style.color=newColor;
+		document.getElementById("IPv6Netmask").style.color=newColor;
 	}
 		
 	function setPPPoE()
@@ -424,30 +439,42 @@ function networkSettings($output,$dbADO) {
 			<td colspan="6" class="tablehead"><B>'.translate('TEXT_DHCP_SERVERS_CONST').':</B></td>
 		</tr>
 		<tr>
-			<td colspan="6"><input type="checkbox" name="enableDHCP" value="1" '
-				.(($enableDHCP==1)?'checked':'').' onclick="setIPRange();"> '.translate('TEXT_IPV4_DHCP_ENABLED_CONST').'</td>
+			<!-- IPv4 DHCP range for LinuxMCE devices) -->
+			<td colspan="3">
+				<input type="checkbox" name="enableDHCP" value="1" '.(($enableDHCP==1)?'checked':'').' onclick="setIPRange();">
+				<span id="coreDHCPText" style="color:'.(($enableDHCP!=1)?'#999999':'').'">'.translate('TEXT_IPV4_DHCP_ENABLED_CONST').'</span>
+			</td>
+			<td colspan="3">
+				<input type="text" maxlength="15" id="coreDHCPStart" name="coreDHCPStart" size="16" style="text-align: right" value="'.@$coreDHCPStart.'" '.(($enableDHCP!=1)?'disabled':'').'> - 
+			  	<input type="text" maxlength="3" id="coreDHCPEnd" name="coreDHCPEnd" size="4" value="'.@$coreDHCPEnd.'" '.(($enableDHCP!=1)?'disabled':'').'>
+			</td>
 		</tr>
 		<tr>
+			<!-- IPv4 DHCP range for non-LinuxMCE devices) -->		
 			<td>&nbsp;</td>
-			<td colspan="5"><span id="range" style="color:'.(($enableDHCP!=1)?'#999999':'').'">'.translate('TEXT_IPV4_DHCP_LMCE_RANGE_CONST').': <input type="text" maxlength="3" name="coreDHCP_1" size="3" value="'.@$coreDHCPArray[0].'" '.(($enableDHCP!=1)?'disabled':'').'>.<input type="text" maxlength="3" name="coreDHCP_2" size="3" value="'.@$coreDHCPArray[1].'" '.(($enableDHCP!=1)?'disabled':'').'>.<input type="text" maxlength="3" name="coreDHCP_3" size="3" value="'.@$coreDHCPArray[2].'" '.(($enableDHCP!=1)?'disabled':'').'>.<input type="text" maxlength="3" name="coreDHCP_4" size="3" value="'.@$coreDHCPArray[3].'" '.(($enableDHCP!=1)?'disabled':'').'> - <input type="text" maxlength="3" name="coreDHCP_5" size="3" value="'.@$coreDHCPArray[4].'" '.(($enableDHCP!=1)?'disabled':'').'>.<input type="text" maxlength="3" name="coreDHCP_6" size="3" value="'.@$coreDHCPArray[5].'" '.(($enableDHCP!=1)?'disabled':'').'>.<input type="text" maxlength="3" name="coreDHCP_7" size="3" value="'.@$coreDHCPArray[6].'" '.(($enableDHCP!=1)?'disabled':'').'>.<input type="text" maxlength="3" name="coreDHCP_8" size="3" value="'.@$coreDHCPArray[7].'" '.(($enableDHCP!=1)?'disabled':'').'></td>
+			<td colspan="2">
+				<input type="checkbox" name="ipForAnonymousDevices" value="1" '.((@$nonPlutoIP==1)?'checked':'').' onClick="ipFromDHCP()" '.(($enableDHCP==1)?'':'disabled').'>
+				<span id="nonPlutoIPText" style="color:'.(($nonPlutoIP!=1)?'#999999':'').'"> '.translate('TEXT_IPV4_DHCP_NONLMCE_ENABLED_CONST').'</span>
+			</td>
+			<td colspan="3">
+				<input type="text" maxlength="15" id="nonPlutoIPStart" name="nonPlutoIPStart" size="16" style="text-align: right" value="'.@$nonPlutoIPStart.'" '.(($enableDHCP==1)?'':'disabled').'> -
+				<input type="text" maxlength="3" id="nonPlutoIPEnd" name="nonPlutoIPEnd" size="4" value="'.@$nonPlutoIPEnd.'" '.(($enableDHCP==1)?'':'disabled').'>
+			</td>
 		</tr>
-		<tr>
-			<td>&nbsp;</td>
-			<td colspan="5"><input type="checkbox" name="ipForAnonymousDevices" value="1" '.((@$nonPlutoIP==1)?'checked':'').' onClick="ipFromDHCP()" '.(($enableDHCP==1)?'':'disabled').'><span id="provide" style="color:'.(($enableDHCP!=1)?'#999999':'').'"> '.translate('TEXT_IPV4_DHCP_NONLMCE_ENABLED_CONST').'</span></td>
-		</tr>
-		<tr><td>&nbsp;</td><td colspan="5">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span id="nonPluto" style="color:'
-			.(($enableDHCP!=1)?'#999999':'').'">'.translate('TEXT_IPV4_DHCP_NONLMCE_RANGE_CONST').': </span>
-			<input type="text" maxlength="3" name="nonPlutoIP_1" size="3" value="'.@$nonPlutoIPArray[0].'" '.(($enableDHCP==1)?'':'disabled').'>			.<input type="text" maxlength="3" name="nonPlutoIP_2" size="3" value="'.@$nonPlutoIPArray[1].'" '.(($enableDHCP==1)?'':'disabled').'>.<input type="text" maxlength="3" name="nonPlutoIP_3" size="3" value="'.@$nonPlutoIPArray[2].'" '.(($enableDHCP==1)?'':'disabled').'>.<input type="text" maxlength="3" name="nonPlutoIP_4" size="3" value="'.@$nonPlutoIPArray[3].'" '.(($enableDHCP==1)?'':'disabled').'> - <input type="text" maxlength="3" name="nonPlutoIP_5" size="3" value="'.@$nonPlutoIPArray[4].'" '.(($enableDHCP==1)?'':'disabled').'>.<input type="text" maxlength="3" name="nonPlutoIP_6" size="3" value="'.@$nonPlutoIPArray[5].'" '.(($enableDHCP==1)?'':'disabled').'>.<input type="text" maxlength="3" name="nonPlutoIP_7" size="3" value="'.@$nonPlutoIPArray[6].'" '.(($enableDHCP==1)?'':'disabled').'>.<input type="text" maxlength="3" name="nonPlutoIP_8" size="3" value="'.@$nonPlutoIPArray[7].'" '.(($enableDHCP==1)?'':'disabled').'>
-		</td></tr>
-		<tr>
-		<td colspan="6"><input type="checkbox" name="enableRA" '
-			.(($enableRA==1)?'checked':'').' onclick="setIPv6Range();"> '.translate('TEXT_IPV6_RA_ENABLED_CONST').'</td>
-		</tr>
-		<tr><td>&nbsp;</td><td colspan="5">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span id="IPv6Prefix" style="color:'
-			.(($enableRA!=1)?'#999999':'').'">'.translate('TEXT_IPV6_PUBLIC_PREFIX_CONST').': </span>
-			<input type="text" maxlength="4" name="IPv6Prefix_1" size="4" value="'.@$IPv6PrefixArray[0].'" '.(($enableRA==1)?'':'disabled').'>:<input type="text" maxlength="4" name="IPv6Prefix_2" size="4" value="'.@$IPv6PrefixArray[1].'" '.(($enableRA==1)?'':'disabled').'>:<input type="text" maxlength="4" name="IPv6Prefix_3" size="4" value="'.@$IPv6PrefixArray[2].'" '.(($enableRA==1)?'':'disabled').'>:<input type="text" maxlength="4" name="IPv6Prefix_4" size="4" value="'.@$IPv6PrefixArray[3].'" '.(($enableRA==1)?'':'disabled').'>:<input type="text" maxlength="4" name="IPv6Prefix_5" size="4" value="'.@$IPv6PrefixArray[4].'" '.(($enableRA==1)?'':'disabled').'>:<input type="text" maxlength="4" name="IPv6Prefix_6" size="4" value="'.@$IPv6PrefixArray[5].'" '.(($enableRA==1)?'':'disabled').'>:<input type="text" maxlength="4" name="IPv6Prefix_7" size="4" value="'.@$IPv6PrefixArray[6].'" '.(($enableRA==1)?'':'disabled').'>:<input type="text" maxlength="4" name="IPv6Prefix_8" size="4" value="'.@$IPv6PrefixArray[7].'" '.(($enableRA==1)?'':'disabled').'> / <input type="text" maxlength="2" name="IPv6Netmask" size="2" value="'.@$IPv6Netmask.'" '.(($enableRA==1)?'':'disabled').'>
-		</td></tr>
+		<tr><td colspan="6"><hr></td></tr>
 		
+		<tr>
+			<!-- IPv6 RA daemon settings -->
+			<td colspan="3">
+				<input type="checkbox" name="enableRA" '.(($enableRA==1)?'checked':'').' onclick="setIPv6Range();">
+				<span id="IPv6PrefixText" style="color:'.(($enableRA==0)?'#999999':'').'">'.translate('TEXT_IPV6_RA_ENABLED_CONST').':</span>
+			</td>
+			<td colspan="3">
+				<input type="text" maxlength="38" id="IPv6Prefix" name="IPv6Prefix" size="39" value="'.@$IPv6Prefix.'" '.(($enableRA==1)?'':'disabled').'> / 
+				<input type="text" maxlength="2" id="IPv6Netmask" name="IPv6Netmask" size="2" value="'.@$IPv6Netmask.'" '.(($enableRA==1)?'':'disabled').'>
+			</td>
+		</tr>
+		<tr><td colspan="6"><hr></td></tr>
 		<tr>
 			<td colspan="6"><input type="checkbox" name="enableVPN" '.(($enableVPN==1)?'checked':'').' onclick="setVPNRange();">'.translate('TEXT_VPN_ENABLED_CONST').'</td>
 		</tr>
@@ -496,7 +523,7 @@ function networkSettings($output,$dbADO) {
 			<!-- IPv4 address -->
 			<td>&nbsp;</td>
 			<td width="150"><span id="coreIPv4IPtext" style="color:'.(($coreIPv4Status!='static')?'#999999':'').'">'.translate('TEXT_IP_ADDRESS_CONST').':</span></td>
-			<td><input type="text" maxlength="15" id="coreIPv4IP" name="coreIPv4IP" size="25" style="color:'.(($coreIPv4Status!='static')?'#999999':'').'" value="'.@$coreIPv4.'" '.(($coreIPv4Status!='static')?'disabled':'').'></td>			
+			<td><input type="text" maxlength="15" id="coreIPv4IP" name="coreIPv4IP" size="20" style="color:'.(($coreIPv4Status!='static')?'#999999':'').'" value="'.@$coreIPv4.'" '.(($coreIPv4Status!='static')?'disabled':'').'></td>			
 			<!-- IPv6 address -->
 			<td>&nbsp;</td>
 			<td width="150"><span id="coreIPv6IPtext" style="color:'.(($coreIPv6Status!='static')?'#999999':'').'">'.translate('TEXT_IP_ADDRESS_CONST').':</span></td>
@@ -506,17 +533,17 @@ function networkSettings($output,$dbADO) {
 			<!-- IPv4 netmask -->
 			<td>&nbsp;</td>
 			<td><span id="coreIPv4NMtext" style="color:'.(($coreIPv4Status!='static')?'#999999':'').'">'.translate('TEXT_NETMASK_CONST').':</span></td>
-			<td><input type="text" maxlength="15" id="coreIPv4NM" name="coreIPv4NM" size="25" style="color:'.(($coreIPv4Status!='static')?'#999999':'').'" value="'.@$coreIPv4NetMask.'" '.(($coreIPv4Status!='static')?'disabled':'').'></td>
-			<!-- IPv6 netmask -->
+			<td><input type="text" maxlength="15" id="coreIPv4NM" name="coreIPv4NM" size="20" style="color:'.(($coreIPv4Status!='static')?'#999999':'').'" value="'.@$coreIPv4NetMask.'" '.(($coreIPv4Status!='static')?'disabled':'').'></td>
+			<!-- IPv6 prefix length -->
 			<td>&nbsp;</td>
-			<td><span id="coreIPv6NMtext" style="color:'.(($coreIPv6Status!='static')?'#999999':'').'">'.translate('TEXT_NETMASK_CONST').':</span></td>
+			<td><span id="coreIPv6NMtext" style="color:'.(($coreIPv6Status!='static')?'#999999':'').'">'.translate('TEXT_PREFIX_LENGTH_CONST').':</span></td>
 			<td><input type="text" maxlength="2" id="coreIPv6NM" name="coreIPv6NM" size="5" style="color:'.(($coreIPv6Status!='static')?'#999999':'').'" value="'.@$coreIPv6NetMask.'" '.(($coreIPv6Status!='static')?'disabled':'').'></td>
 		</tr>
 		<tr>
 			<!-- IPv4 gateway -->
 			<td>&nbsp;</td>
 			<td><span id="coreIPv4GWtext" style="color:'.(($coreIPv4Status!='static')?'#999999':'').'">'.translate('TEXT_GATEWAY_CONST').':</span></td>
-			<td><input type="text" maxlength="15" id="coreIPv4GW" name="coreIPv4GW" size="25" style="color:'.(($coreIPv4Status!='static')?'#999999':'').'" value="'.@$coreIPv4GW.'" '.(($coreIPv4Status!='static')?'disabled':'').'></td>		
+			<td><input type="text" maxlength="15" id="coreIPv4GW" name="coreIPv4GW" size="20" style="color:'.(($coreIPv4Status!='static')?'#999999':'').'" value="'.@$coreIPv4GW.'" '.(($coreIPv4Status!='static')?'disabled':'').'></td>		
 			<!-- IPv6 gateway -->
 			<td>&nbsp;</td>
 			<td><span id="coreIPv6GWtext" style="color:'.(($coreIPv6Status!='static')?'#999999':'').'">'.translate('TEXT_GATEWAY_CONST').':</span></td>
@@ -526,7 +553,7 @@ function networkSettings($output,$dbADO) {
 			<!-- IPv4 DNS1 -->
 			<td>&nbsp;</td>
 			<td><span id="coreIPv4DNS1text" style="color:'.(($coreIPv4Status!='static')?'#999999':'').'">'.translate('TEXT_NAMESERVER_CONST').' #1:</span></td>
-			<td><input type="text" maxlength="15" id="coreIPv4DNS1" name="coreIPv4DNS1" size="25" style="color:'.(($coreIPv4Status!='static')?'#999999':'').'" value="'.@$coreIPv4DNS1.'" '.(($coreIPv4Status!='static')?'disabled':'').'></td>
+			<td><input type="text" maxlength="15" id="coreIPv4DNS1" name="coreIPv4DNS1" size="20" style="color:'.(($coreIPv4Status!='static')?'#999999':'').'" value="'.@$coreIPv4DNS1.'" '.(($coreIPv4Status!='static')?'disabled':'').'></td>
 			<!-- IPv6 DNS1 -->
 			<td>&nbsp;</td>
 			<td><span id="coreIPv6DNS1text" style="color:'.(($coreIPv6Status!='static')?'#999999':'').'">'.translate('TEXT_NAMESERVER_CONST').' #1:</span></td>
@@ -536,7 +563,7 @@ function networkSettings($output,$dbADO) {
 			<!-- IPv4 DNS2 -->
 			<td>&nbsp;</td>
 			<td><span id="coreIPv4DNS2text" style="color:'.(($coreIPv4Status!='static')?'#999999':'').'">'.translate('TEXT_NAMESERVER_CONST').' #2:</span></td>
-			<td><input type="text" maxlength="15" id="coreIPv4DNS2" name="coreIPv4DNS2" size="25" style="color:'.(($coreIPv4Status!='static')?'#999999':'').'" value="'.@$coreIPv4DNS2.'" '.(($coreIPv4Status!='static')?'disabled':'').'></td>	
+			<td><input type="text" maxlength="15" id="coreIPv4DNS2" name="coreIPv4DNS2" size="20" style="color:'.(($coreIPv4Status!='static')?'#999999':'').'" value="'.@$coreIPv4DNS2.'" '.(($coreIPv4Status!='static')?'disabled':'').'></td>	
 			<!-- IPv6 DNS2 -->
 			<td>&nbsp;</td>
 			<td><span id="coreIPv6DNS2text" style="color:'.(($coreIPv6Status!='static')?'#999999':'').'">'.translate('TEXT_NAMESERVER_CONST').' #2:</span></td>
@@ -563,7 +590,7 @@ function networkSettings($output,$dbADO) {
 			<!-- Internal IPv4 address -->
 			<td>&nbsp;</td>
 			<td width="150"><span id="internalCoreIPv4IPtext" style="color:'.(($internalCoreIPv4Status!='static')?'#999999':'').'">'.translate('TEXT_IP_ADDRESS_CONST').':</span></td>
-			<td><input type="text" maxlength="15" name="internalCoreIPv4IP" size="25" value="'.@$internalCoreIPv4IP.'"></td>
+			<td><input type="text" maxlength="15" name="internalCoreIPv4IP" size="20" value="'.@$internalCoreIPv4IP.'"></td>
 			<!-- Internal IPv6 address -->
 			<td>&nbsp;</td>
 			<td width="150"><span id="internalCoreIPv6IPtext" style="color:'.(($internalCoreIPv6Status!='static')?'#999999':'').'">'.translate('TEXT_IP_ADDRESS_CONST').':</span></td>
@@ -574,7 +601,7 @@ function networkSettings($output,$dbADO) {
 			<!-- Internal IPv4 netmask -->
 			<td>&nbsp;</td>
 			<td><span id="internalCoreIPv4NMtext" style="color:'.(($internalCoreIPv4Status!='static')?'#999999':'').'">'.translate('TEXT_NETMASK_CONST').':</span></td>
-			<td><input type="text" maxlength="15" name="internalCoreIPv4NM" size="25" value="'.@$internalCoreIPv4NM.'"></td>
+			<td><input type="text" maxlength="15" name="internalCoreIPv4NM" size="20" value="'.@$internalCoreIPv4NM.'"></td>
 			<!-- Internal IPv6 netmask -->
 			<td>&nbsp;</td>
 			<td><span id="internalCoreIPv6NMtext" style="color:'.(($internalCoreIPv6Status!='static')?'#999999':'').'">'.translate('TEXT_NETMASK_CONST').':</span></td>
@@ -619,14 +646,22 @@ function networkSettings($output,$dbADO) {
 		$newEnableDHCP=(isset($_POST['enableDHCP']))?1:0;
 		
 		// new ip range
-		$coreDHCP=getIpFromParts('coreDHCP_',1).'-'.getIpFromParts('coreDHCP_',5);
-
+		$coreDHCPStart=$_POST['coreDHCPStart'];
+		$coreDHCPEnd=explode('.',$_POST['coreDHCPStart']);
+		$coreDHCPEnd[3]=$_POST['coreDHCPEnd'];
+		$coreDHCPEnd=join('.',$coreDHCPEnd);
+		$coreDHCP=$coreDHCPStart.'-'.$coreDHCPEnd;
 		// new internal core ip
 		$internalCoreIP=$_POST['internalCoreIPv4IP'];
 		$isChanged=0;
 		$ipForAnonymousDevices=isset($_POST['ipForAnonymousDevices'])?1:0;
 		if($ipForAnonymousDevices==1){
-			$coreDHCP.=','.getIpFromParts('nonPlutoIP_').'-'.getIpFromParts('nonPlutoIP_',5);
+			$nonPlutoIPStart=$_POST['nonPlutoIPStart'];
+			$nonPlutoIPEnd=explode('.',$_POST['nonPlutoIPStart']);
+			$nonPlutoIPEnd[3]=$_POST['nonPlutoIPEnd'];
+			$nonPlutoIPEnd=join('.',$nonPlutoIPEnd);
+			$nonPlutoIP=$nonPlutoIPStart.'-'.$nonPlutoIPEnd;			
+			$coreDHCP.=','.$nonPlutoIP;
 		}
 
 		if($newEnableDHCP==1){
@@ -731,7 +766,7 @@ function networkSettings($output,$dbADO) {
 		$resRA=$dbADO->Execute('SELECT IK_DeviceData FROM Device_DeviceData WHERE FK_Device=1 AND FK_DeviceData=292');
 		$rowRA=$resRA->FetchRow();
 		$ipv6_data=explode(",", $rowRA['IK_DeviceData']);
-		$ipv6_data[5]= getIPv6FromParts('IPv6Prefix_'); 
+		$ipv6_data[5]= $_POST['IPv6Prefix']; 
 		$ipv6_data[6]= $_POST['IPv6Netmask'];
 		$ipv6_data[11]= $_POST['enableRA'];
 		$token = join(',',$ipv6_data);
