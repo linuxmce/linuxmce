@@ -436,11 +436,22 @@ function networkSettings($output,$dbADO) {
 			<td colspan="6" class="tablehead"><B>'.translate('TEXT_CORE_IDENTIFICATION_CONST').':</B></td>
 		</tr>
 		<tr>
-			<td colspan="6"><B>'.translate('TEXT_COMPUTER_NAME_CONST').'</B> &nbsp; <input type="text" name="cname" value="'.$cname.'"> &nbsp; <B>'.translate('TEXT_DOMAIN_CONST').'</B> &nbsp; <input type="text" name="domain" value="'.$domain.'"></td>
+			<!-- CORE name -->
+			<td colspan="2"><B>'.translate('TEXT_COMPUTER_NAME_CONST').'</B></td>
+			<td><input type="text" name="cname" value="'.$cname.'"></td>
+			<td colspan="2"><B>'.translate('TEXT_DOMAIN_CONST').'</B></td>
+			<td><input type="text" name="domain" value="'.$domain.'"></td>
 		</tr>
 		<tr><td colspan="6">&nbsp;</td></tr>
-       	<tr><td colspan="6" class="tablehead"><B>'.translate('TEXT_CORE_SEEN_FROM_INTERNET_CONST').':</B></td></tr>
-		<tr><td colspan="6"><b>'.translate('TEXT_OUTSIDE_IP_CONST').'</b>&nbsp;<input type="text" name="outsideip" disabled value="'.$outsideIP.'">&nbsp;&nbsp;<b>'.translate('TEXT_OUTSIDE_HOSTNAME_CONST').'</b>&nbsp;<input type="text" name="outsideip" disabled size=50 value="'.gethostbyaddr($outsideIP).'"></td></tr>
+       	<tr>
+       		<td colspan="6" class="tablehead"><B>'.translate('TEXT_CORE_SEEN_FROM_INTERNET_CONST').':</B></td>
+       	</tr>
+		<tr>
+			<td colspan="2"><b>'.translate('TEXT_OUTSIDE_IP_CONST').'</b></td>
+			<td><input type="text" name="outsideip" disabled value="'.$outsideIP.'"></td>
+			<td colspan="2"><b>'.translate('TEXT_OUTSIDE_HOSTNAME_CONST').'</b></td>
+			<td><input type="text" name="outsideip" disabled size=50 value="'.gethostbyaddr($outsideIP).'"></td>
+		</tr>
 		<tr><td colspan="6">&nbsp;</td></tr>
 		<tr>
 			<td colspan="6" class="tablehead"><B>'.translate('TEXT_DHCP_SERVERS_CONST').':</B></td>
