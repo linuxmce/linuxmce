@@ -143,7 +143,7 @@ int main(int argc, char* argv[])
 #elif for_desktop
     QApplication::setGraphicsSystem("opengl");
 #elif for_android
- QApplication::setGraphicsSystem("opengl");
+    QApplication::setGraphicsSystem("opengl");
 #else
     QApplication::setGraphicsSystem("raster");
 #endif
@@ -255,16 +255,14 @@ int main(int argc, char* argv[])
         qOrbiter *pqOrbiter = new qOrbiter(PK_Device, sRouter_IP,true,bLocalMode);
         pqOrbiter->moveToThread(dceThread);
 
-        QThread *epgThread = new QThread; //for playlists and epg of all types. only one will be active a given time inthe app
-
+        QThread * playlistThread = new QThread();
         //stored video playlist for managing any media that isnt live broacast essentially
         PlaylistClass *storedVideoPlaylist = new PlaylistClass (new PlaylistItemClass);
-        storedVideoPlaylist->moveToThread(epgThread);
-        orbiterWin.mainView.rootContext()->setContextProperty("mediaplaylist", storedVideoPlaylist);
+        storedVideoPlaylist->moveToThread(playlistThread);
 
+        QThread *epgThread = new QThread; //for playlists and epg of all types. only one will be active a given time inthe app
         //epg listmodel, no imageprovider as of yet
         EPGChannelList *simpleEPGmodel = new EPGChannelList(new EPGItemClass);
-        orbiterWin.mainView.rootContext()->setContextProperty("simpleepg", simpleEPGmodel);
         simpleEPGmodel->moveToThread(epgThread);
 
         QThread * mediaThread = new QThread();
@@ -278,9 +276,11 @@ int main(int argc, char* argv[])
 
         orbiterWin.mainView.rootContext()->setContextProperty("dcerouter", pqOrbiter); //dcecontext object
         orbiterWin.mainView.rootContext()->setContextProperty("dataModel", mediaModel);
+        orbiterWin.mainView.rootContext()->setContextProperty("mediaplaylist", storedVideoPlaylist);
+        orbiterWin.mainView.rootContext()->setContextProperty("simpleepg", simpleEPGmodel);
 
         //tv epg signals
-        QObject::connect(w,SIGNAL(liveTVrequest()), simpleEPGmodel,SLOT(populate()), Qt::QueuedConnection);
+        QObject::connect(pqOrbiter, SIGNAL(addChannel(EPGItemClass*)), simpleEPGmodel, SLOT(appendRow(EPGItemClass*)), Qt::QueuedConnection );
 
         //filedetails
         QObject::connect(pqOrbiter,SIGNAL(fd_titleImageChanged(QImage)), w->filedetailsclass, SLOT(setTitleImage(QImage)));
@@ -304,7 +304,7 @@ int main(int argc, char* argv[])
         QObject::connect(pqOrbiter,SIGNAL(updateMediaSpeed(int)), w->nowPlayingButton, SLOT(setMediaSpeed(int)));
         QObject::connect(pqOrbiter,SIGNAL(mediaLengthChanged(QString)), w->nowPlayingButton, SLOT(setDuration(QString)));
         QObject::connect(pqOrbiter,SIGNAL(tcUpdated(QString)), w->nowPlayingButton, SLOT(setTimeCode(QString)));
-        //QObject::connect(pqOrbiter, SIGNAL(clearPlaylist()), simpleEPGmodel, SLOT(clearData()));
+        QObject::connect(pqOrbiter, SIGNAL(clearPlaylist()), storedVideoPlaylist,  SLOT(clear()), Qt::DirectConnection);
 
         //setup
         QObject::connect(w, SIGNAL(registerOrbiter(int,QString,int)), pqOrbiter,SLOT(registerDevice(int,QString,int)));
@@ -334,6 +334,10 @@ int main(int argc, char* argv[])
         QObject::connect(pqOrbiter, SIGNAL(addScreenParam(QString,int)), w->ScreenParameters, SLOT(addParam(QString, int)));
         QObject::connect(w, SIGNAL(locationChanged(int,int)), pqOrbiter, SLOT(setLocation(int,int)));
         QObject::connect(w, SIGNAL(userChanged(int)), pqOrbiter, SLOT(setUser(int)));
+        QObject::connect(w, SIGNAL(bindMediaRemote(bool)), pqOrbiter, SLOT(BindMediaRemote(bool)));
+        QObject::connect(w, SIGNAL(setMediaDetails()), pqOrbiter, SLOT(setNowPlayingDetails()));
+        QObject::connect(w,SIGNAL(playlistRequest()), pqOrbiter, SLOT(requestMediaPlaylist()));
+
 
         QObject::connect(w, SIGNAL(startPlayback(QString)), pqOrbiter, SLOT(playMedia(QString)));
 
@@ -381,10 +385,12 @@ int main(int argc, char* argv[])
         QObject::connect(pqOrbiter, SIGNAL(subtitleChanged(QString)), w->nowPlayingButton, SLOT(setSubTitle(QString)));
         QObject::connect(pqOrbiter, SIGNAL(np_synopsisChanged(QString)), w->nowPlayingButton, SLOT(setSynop(QString)));
         QObject::connect(pqOrbiter,SIGNAL(playlistPositionChanged(int)), w->nowPlayingButton, SLOT(setPlaylistPostion(int)));
+        QObject::connect(pqOrbiter, SIGNAL(np_channelID(QString)), w->nowPlayingButton, SLOT(setChannelID(QString)));
 
         dceThread->start();
         mediaThread->start();
         epgThread->start();
+        playlistThread->start();
 
         pqOrbiter->m_dwPK_Device = w->iPK_Device;
         pqOrbiter->m_sHostName = w->qs_routerip.toStdString();

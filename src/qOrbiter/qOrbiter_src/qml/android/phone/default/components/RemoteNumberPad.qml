@@ -61,8 +61,8 @@ Rectangle {
                     //number one
                     Rectangle{
                         id:number1
-                        height: 55
-                        width: 55
+                        height: scaleX(15)
+                        width: scaleX(15)
                         color:"silver"
 
                         Image {
@@ -102,8 +102,8 @@ Rectangle {
                     //number two
                     Rectangle{
                         id:number2
-                        height: 55
-                        width: 55
+                        height: scaleX(15)
+                        width: scaleX(15)
                         color:"silver"
 
                         Image {
@@ -143,10 +143,10 @@ Rectangle {
                     //number 3
                     Rectangle{
                         id:number3
-                        height: 55
-                        width: 55
+                        height: scaleX(15)
+                        width: scaleX(15)
                         color:"silver"
-                        radius: 100
+
                         Image {
 
                             source: "../img/buttonbg.png"
@@ -193,10 +193,10 @@ Rectangle {
                     //number 4
                     Rectangle{
                         id:number4
-                        height: 55
-                        width: 55
+                        height: scaleX(15)
+                        width: scaleX(15)
                         color:"silver"
-                        radius: 100
+
                         Image {
 
                             source: "../img/buttonbg.png"
@@ -234,10 +234,10 @@ Rectangle {
                     //number 5
                     Rectangle{
                         id:number5
-                        height: 55
-                        width: 55
+                        height: scaleX(15)
+                        width: scaleX(15)
                         color:"silver"
-                        radius: 100
+
                         Image {
 
                             source: "../img/buttonbg.png"
@@ -275,10 +275,10 @@ Rectangle {
                     //number 6
                     Rectangle{
                         id:number6
-                        height: 55
-                        width: 55
+                        height: scaleX(15)
+                        width: scaleX(15)
                         color:"silver"
-                        radius: 100
+
                         Image {
 
                             source: "../img/buttonbg.png"
@@ -325,10 +325,10 @@ Rectangle {
                     //number 7
                     Rectangle{
                         id:number7
-                        height: 55
-                        width: 55
+                        height: scaleX(15)
+                        width: scaleX(15)
                         color:"silver"
-                        radius: 100
+
                         Image {
 
                             source: "../img/buttonbg.png"
@@ -366,10 +366,10 @@ Rectangle {
                     //number 8
                     Rectangle{
                         id:number8
-                        height: 55
-                        width: 55
+                        height: scaleX(15)
+                        width: scaleX(15)
                         color:"silver"
-                        radius: 100
+
                         Image {
 
                             source: "../img/buttonbg.png"
@@ -407,10 +407,10 @@ Rectangle {
                     //number 9
                     Rectangle{
                         id:number9
-                        height: 55
-                        width: 55
+                        height: scaleX(15)
+                        width: scaleX(15)
                         color:"silver"
-                        radius: 100
+
                         Image {
 
                             source: "../img/buttonbg.png"
@@ -453,8 +453,8 @@ Rectangle {
                     spacing: 8
                     ButtonSq{
                         id:backbutton
-                        height: 55
-                        width: 55
+                        height: scaleX(15)
+                        width: scaleX(15)
 
                         buttontext: "Back"
 
@@ -472,10 +472,10 @@ Rectangle {
                     //number 9
                     Rectangle{
                         id:number0
-                        height: 55
-                        width: 55
+                        height: scaleX(15)
+                        width: scaleX(15)
                         color:"silver"
-                        radius: 100
+
                         Image {
 
                             source: "../img/buttonbg.png"
@@ -503,26 +503,23 @@ Rectangle {
                             {
                               parent.color = "silver"
                             }
+                            onClicked: text_input1.text = text_input1.text + "0"
 
                         }
                     }
 
-
-
-
                     ButtonSq{
                         id:go
-                        height: 55
-                        width: 55
-
+                        height: scaleX(15)
+                        width: scaleX(15)
                         buttontext: "Go"
-
                         buttontextfontsize: 10
                         buttonsqradius: 10
 
                         MouseArea{
                             anchors.fill: parent
-                            onClicked: {changeChannels(text_input1.text)
+                            onClicked: {
+                                dcerouter.TuneToChannel(text_input1.text, text_input1.text)
                                 text_input1.text = ""
                             }
                         }

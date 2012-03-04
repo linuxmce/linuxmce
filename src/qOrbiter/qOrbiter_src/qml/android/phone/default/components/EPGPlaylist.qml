@@ -2,10 +2,9 @@ import QtQuick 1.0
 
 Rectangle {
     id:droidepg_small
-    width: 225
-    height: 400
-    color: "transparent"
-    Component.onCompleted: getLiveTVPlaylist()
+    width: scaleX(72.5)
+    height: scaleY(85)
+    color: "transparent"    
     clip:true
 
     Connections{
@@ -28,9 +27,8 @@ Rectangle {
 
         ListView{
             id:epgplaylistview
-            height:400
-            width: 225
-            anchors.centerIn: parent
+            height:scaleY(85)
+            width: scaleX(72.5)
             clip:true
             interactive: true
             flickableDirection: "VerticalFlick"
@@ -39,10 +37,10 @@ Rectangle {
             delegate:
                 Rectangle {
                 id:delrect
-                border.color: "aliceblue"
+                border.color: "orange"
                 border.width: 1
-                width:225
-                height: 50
+                width: scaleX(72.5)
+                height: scaleY(15)
                 color: "transparent"
 
                 Rectangle{
@@ -61,7 +59,7 @@ Rectangle {
                         width: parent.width
 
                         wrapMode: "WrapAnywhere"
-                        font.pixelSize: 8
+                        font.pixelSize:scaleY(2.5)
                         anchors.top: parent.top
                         color: "whitesmoke"
                         anchors.horizontalCenter: parent.horizontalCenter
@@ -74,7 +72,7 @@ Rectangle {
                         font.bold: true
                         font.family: "DroidSans"
                         anchors.centerIn: parent
-                        font.pixelSize: 12
+                        font.pixelSize: scaleY(4)
                     }
                 }
                 Text {
@@ -86,17 +84,16 @@ Rectangle {
                     width: parent.width *.75
 
                     wrapMode: "WrapAtWordBoundaryOrAnywhere"
-                    font.pixelSize: 12
+                    font.pixelSize:scaleY(2.5)
                     color: "aliceblue"
                 }
 
                 MouseArea{
                     anchors.fill: parent
                     onClicked:{
-                        gridChangeChannel(channelnumber, channelid)
+                        dcerouter.TuneToChannel(channelnumber, channelid)
                         epgplaylistview.positionViewAtIndex(index, ListView.Beginning)
-                        dcenowplaying.setProgram(program)
-                        droidepg_small.destroy()
+                        dcenowplaying.setProgram(program)                        
                     }
 
                 }

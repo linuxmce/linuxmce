@@ -19,7 +19,7 @@ Rectangle {
       id: nowplayingimage
      anchors.fill: np_box
       fillMode: Image.PreserveAspectFit
-      anchors.centerIn: np_box
+
      source: "image://listprovider/updateobject/"+dcenowplaying.m_iplaylistPosition
   }
 
@@ -36,17 +36,6 @@ Rectangle {
 
     }
     */
-
-    Image {
-        id: np_box
-        source: "../img/nowplayingbox.png"
-       height: now_playing.height
-       width: now_playing.width
-        opacity: .35
-    }
-
-
-
     Text {
         id: np_label
         text: qsTr("NowPlaying")

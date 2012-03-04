@@ -8,7 +8,15 @@ Rectangle {
     height: appH
     width: appW
     color: "transparent"
-    Component.onCompleted:setNowPlayingData()
+    Component.onCompleted:
+    {   manager.setNowPlayingData()
+        manager.getStoredPlaylist();
+
+    }
+    MouseArea{
+        id:swipe_area
+
+    }
 
     NowPlayingBox
     {
@@ -129,6 +137,32 @@ Rectangle {
         }
     }
 
+    ButtonSq {
+        id: playlist_button
+        anchors.bottom: controls.top
+        anchors.left: storedAudioRemote.left
+        height: style.stdbuttonh
+        width: style.stdbuttonw
+        buttontext: qsTr("Playlist")
+        visible: true
+        MouseArea{
+            anchors.fill: parent
+            onClicked: storedVideoRemote.state = "GRID"
+        }
+    }
+    ButtonSq {
+        id: default_button
+        anchors.bottom: controls.top
+        anchors.left: storedAudioRemote.left
+        height: style.stdbuttonh
+        width: style.stdbuttonw
+        buttontext: qsTr("MetaData")
+        visible: false
+        MouseArea{
+            anchors.fill: parent
+            onClicked: storedVideoRemote.state = ""
+        }
+    }
 
     AudioRemote{id:controls;anchors.bottom: parent.bottom; anchors.horizontalCenter: parent.horizontalCenter}
 
@@ -137,7 +171,50 @@ Rectangle {
     // Remote_Audio_controls{ id: remote1; x: 200; y: 351; anchors.rightMargin: 71; z: 45; anchors.right: remote_lighting_controls1.left}
     HaControls{ id:hacontrolbox; anchors.left: parent.left; anchors.top: home.bottom; anchors.topMargin: scaleY(1)}
     HomeButton{ id:home; anchors.left: storedVideoRemote.left; anchors.top:storedVideoRemote.top; anchors.topMargin: scaleY(1)}
+    NonEPGPlaylist{id:playlist; anchors.top: home.top; anchors.left: hacontrolbox.right; visible: false }
+
+    states: [
+        State{
+            name:"GRID"
+            PropertyChanges
+            {
+                target: playlist
+                visible:true
+                anchors.top: storedVideoRemote.top
+                anchors.topMargin: 75
+            }
+
+            PropertyChanges
+            {
+                target: playlist_button
+                visible:false
+
+            }
+            PropertyChanges
+            {
+                target: default_button
+                visible:true
+            }
 
 
+
+            PropertyChanges {
+                target: np_box
+                visible: false
+
+            }
+
+            PropertyChanges{
+                target:homebutton
+                visible:true
+
+            }
+
+            PropertyChanges {
+                target: textcol
+                visible: false
+            }
+        }
+    ]
 }
 

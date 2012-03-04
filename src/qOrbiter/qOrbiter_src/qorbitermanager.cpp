@@ -188,6 +188,7 @@ void qorbiterManager::gotoQScreen(QString s)
         emit keepLoading(t);
         emit clearModel();
         emit resetFilter();
+        emit bindMediaRemote(false);
     }
 
     //send the qmlview a request to go to a screen, needs error handling
@@ -1028,11 +1029,7 @@ bool qorbiterManager::readLocalConfig()
             {
                 qs_ext_routerip = "fill.me.in.com";
             }
-
-
-
         }
-
         return true;
     }
 }
@@ -1224,8 +1221,7 @@ void qorbiterManager::changedPlaylistPosition(QString position)
 
 void qorbiterManager::setNowPlayingData()
 {
-
-
+emit bindMediaRemote(true);
 
 }
 
@@ -1237,8 +1233,7 @@ void qorbiterManager::updateImageChanged(QImage img)
 
 void qorbiterManager::setNowPlayingTv()
 {
-    //  pqOrbiter->BindMediaRemote(true);
-    // pqOrbiter->requestMediaPlaylist();
+
 }
 
 void qorbiterManager::changeChannels(QString chan)
@@ -1249,6 +1244,11 @@ void qorbiterManager::changeChannels(QString chan)
 void qorbiterManager::getLiveTVPlaylist()
 {   
     //  emit liveTVrequest();
+}
+
+void qorbiterManager::getStoredPlaylist()
+{
+    emit playlistRequest();
 }
 
 void qorbiterManager::gridChangeChannel(QString chan, QString chanid)

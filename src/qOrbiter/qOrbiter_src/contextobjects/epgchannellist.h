@@ -24,9 +24,10 @@ public:
 
     void clear();
     bool isActive;
-
+ //nowPlayingButton->setProgram(simpleEPGmodel->data(simpleEPGmodel->getChannelIndex(chanid), 5).toString());
     bool checkDupe(QString name, QString position);
     void setItemStatus(int i);
+    int activeIndex;
 
 public slots:
     int rowCount(const QModelIndex &parent = QModelIndex()) const;
@@ -49,6 +50,7 @@ signals:
     void ItemAdded();
     void dataChanged(const QModelIndex &topLeft, const QModelIndex &bottomRight, const int &sRow);
     void requestEpg();
+    void activeIndexChanged();
 
 private slots:
     void handleItemChange();

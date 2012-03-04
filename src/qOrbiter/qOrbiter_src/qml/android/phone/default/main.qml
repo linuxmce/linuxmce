@@ -50,7 +50,7 @@ import "js/ScreenChange.js" as ScreenLogic
 
           console.log("QML Command to change to:" +screen);
           component = Qt.createComponent("screens/"+screen);
-          if (component.status == Component.Ready)
+          if (component.status === Component.Ready)
           {
               console.log("loaded!");
               finishCreation(component);
@@ -66,15 +66,15 @@ import "js/ScreenChange.js" as ScreenLogic
 
       function finishCreation(component) {
         var sprite;
-          if (component.status == Component.Ready) {
+          if (component.status === Component.Ready) {
               console.log("Finishing creation")
               sprite = component.createObject(this, {"x": 0, "y": 0});
               pageLoader.sourceComponent = component
-              if (sprite == null) {
+              if (sprite === null) {
                   // Error Handling
                   console.log("Not finished!");
               }
-          } else if (component.status == Component.Error) {
+          } else if (component.status === Component.Error) {
               // Error Handling
               console.log("Error loading component:", component.errorString());
           }

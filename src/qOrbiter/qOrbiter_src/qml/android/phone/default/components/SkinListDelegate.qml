@@ -4,24 +4,23 @@ Component{
         Item {
     id: skindelegate
 
-    height: 100
-    width: 350
+    height: scaleY(25)
+    width: scaleX(85)
     Row{
 
-        height: 75
+        height: scaleY(25)
         width: skindelegate.width
 
         Rectangle{
             id:rectDelegate
-            height: 75
+            height: scaleY(25)
             width: skindelegate.width
 
             MouseArea{
                 anchors.fill: parent
                 onClicked:{
                     console.log("the path:" +path)
-                    swapSkins(path)
-
+                    manager.setActiveSkin(path)
 
                 }
             }
@@ -34,7 +33,7 @@ Component{
 
             text: "Name:" + name + ". Version:" + version
             wrapMode: "WrapAtWordBoundaryOrAnywhere"
-            font.pointSize: 14
+            font.pixelSize:  scaleY(3)
 
             }
         Text {
@@ -42,6 +41,7 @@ Component{
             id: skinDescription
             text: description
             wrapMode: "WrapAtWordBoundaryOrAnywhere"
+            font.pixelSize:  scaleY(2)
             }
 
 
@@ -50,12 +50,14 @@ Component{
                 id: skincreator
                 text: "Created By:" + creator
                 wrapMode: "WrapAnywhere"
+                font.pixelSize:  scaleY(2)
             }
             Text {
                 anchors.top: skincreator.bottom
                 id: skinvariant
                 text: "Variation for: " + variation
                 wrapMode: "WrapAnywhere"
+                font.pixelSize:  scaleY(2)
             }
 
         }

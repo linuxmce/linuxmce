@@ -3,18 +3,15 @@ import QtQuick 1.0
 Rectangle {
     id:nonepgplaylist
     width: scaleX(80)
-    height: scaleY(75)
+    height: scaleY(85)
     color: "silver"
     border.color: "orange"
-    border.width: 2
+    border.width: 1
     clip:false    
     function setupMedia()
     {
-
         nonepgplaylistview.positionViewAtIndex(dcenowplaying.m_iplaylistPosition, ListView.Beginning)
     }
-
-    Component.onCompleted: setupMedia()
 
     Connections{
         target: dcenowplaying
@@ -39,7 +36,7 @@ Rectangle {
         id:nonepgplaylistview
         width: scaleX(80)
         height: scaleY(75)
-        anchors.centerIn: parent
+
         highlightFollowsCurrentItem: true
         highlight: Rectangle { color: "lightsteelblue"; radius: 5 }
         clip: true
@@ -47,14 +44,13 @@ Rectangle {
         flickableDirection: "VerticalFlick"
         model: mediaplaylist
 
-
         delegate:
             Rectangle {
             border.color: "silver"
             border.width: 1
             width:scaleX(80)
             height: scaleY(20)
-            anchors.horizontalCenter: parent.horizontalCenter
+
 
             Image {
                 id: bg

@@ -4,8 +4,8 @@ import QtQuick 1.0
 Item {
     id: skinchooser
     anchors.centerIn: parent
-    height: 350
-    width: 350
+    height: scaleY(65)
+    width: scaleX(85)
 
 Rectangle {
     width: skinchooser.width-5

@@ -7,6 +7,7 @@ Rectangle{
     id:selector
     height: childrenRect.height
     width: childrenRect.width
+    anchors.horizontalCenter: parent.horizontalCenter
 property int imagebuttonsize: scaleY(15)
 
     Row{
@@ -126,7 +127,7 @@ property int imagebuttonsize: scaleY(15)
 
             MouseArea{
                 anchors.fill: parent
-                onClicked:  MyJs.createListComponent("AdvancedSelector.qml", selector)
+                onClicked:  manager.gotoQScreen("Screen_44.qml")
             }
 
         }

@@ -8,7 +8,11 @@ Rectangle {
     height: appH
     width: appW
     color: "transparent"
-    Component.onCompleted: dcerouter.setNowPlayingDetails()
+    Component.onCompleted:
+    {   manager.setNowPlayingData()
+        manager.getStoredPlaylist();
+
+    }
 
     NowPlayingBox
     {

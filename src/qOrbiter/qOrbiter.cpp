@@ -1020,7 +1020,7 @@ void qOrbiter::CMD_Continuous_Refresh(string sTime,string &sCMD_Result,Message *
 void qOrbiter::CMD_Set_Now_Playing(string sPK_DesignObj,string sValue_To_Assign,string sText,int iPK_MediaType,int iStreamID,int iValue,string sName,string sList_PK_Device,bool bRetransmit,string &sCMD_Result,Message *pMessage)
 //<-dceag-c242-e->
 {
-    /*
+
     cout << "Need to implement command #242 - Set Now Playing" << endl;
     cout << "Parm #3 - PK_DesignObj=" << sPK_DesignObj << endl;
     cout << "Parm #5 - Value_To_Assign=" << sValue_To_Assign << endl;
@@ -1031,7 +1031,7 @@ void qOrbiter::CMD_Set_Now_Playing(string sPK_DesignObj,string sValue_To_Assign,
     cout << "Parm #50 - Name=" << sName << endl;
     cout << "Parm #103 - List_PK_Device=" << sList_PK_Device << endl;
     cout << "Parm #120 - Retransmit=" << bRetransmit << endl;
-*/
+
     i_current_mediaType = iPK_MediaType;
     string::size_type pos=0;
     m_dwPK_Device_NowPlaying = atoi(StringUtils::Tokenize(sList_PK_Device,",",pos).c_str());
@@ -1042,18 +1042,14 @@ void qOrbiter::CMD_Set_Now_Playing(string sPK_DesignObj,string sValue_To_Assign,
     QString port = QString::fromStdString(GetCurrentDeviceData(m_dwPK_Device_NowPlaying, 171));
     emit newTCport(port.toInt());
 
-    emit resetNowPlaying();
-    emit clearPlaylist();
-
     if (iPK_MediaType != 0)
     {
         emit setNowPlaying(true);
-        emit playlistPositionChanged(iValue);
-
-
+       emit playlistPositionChanged(iValue);
     }
     else if (iPK_MediaType == 0)
     {
+        emit resetNowPlaying();
         emit setNowPlaying(false);
         emit gotoQml("Screen_1.qml");
         BindMediaRemote(false);
@@ -2561,7 +2557,6 @@ void DCE::qOrbiter::PauseMedia()
 
 void DCE::qOrbiter::requestMediaPlaylist()
 {
-    BindMediaRemote(true);
 
     emit clearPlaylist();
     int gHeight = 1;
@@ -2668,7 +2663,7 @@ void qOrbiter::changedPlaylistPosition(QString pos)
 
     if(!pos.contains(QRegExp("TITLE:")))
     {
-             jumpToPlaylistPosition(pos.toInt());
+        jumpToPlaylistPosition(pos.toInt());
     }
     else
     {
@@ -2727,16 +2722,14 @@ void DCE::qOrbiter::jumpToPlaylistPosition(int pos)
 
 void DCE::qOrbiter::setNowPlayingDetails()
 {
-
-
     if(i_current_mediaType != 11)
     {
 
         qDebug("Requesting playlist");
-         requestMediaPlaylist();
+        requestMediaPlaylist();
     }
     else{
-
+        requestLiveTvPlaylist();
 
     }
 
@@ -2978,10 +2971,10 @@ void DCE::qOrbiter::requestLiveTvPlaylist()
       to expand our ui capabilities. it is essentially a clone of the many datagrid requests
       that the orbiter makes.
       */
-
-    // simpleEPGmodel->clear();
-    int gHeight = 10;
-    int gWidth = 10;
+    emit statusMessage("Getting current Epg");
+    emit clearPlaylist();
+    int gHeight = 1;
+    int gWidth = 1;
     int pkVar = 0;
     string valassign ="";
     bool isSuccessfull;// = "false";
@@ -3068,8 +3061,8 @@ void DCE::qOrbiter::requestLiveTvPlaylist()
 
                 channelimage.load(":/icons/icon.png");
 
-                //simpleEPGmodel->appendRow(new EPGItemClass(channelName, channelNumber, channelIndex, program, index, channelimage, channelimage, simpleEPGmodel));
-                QApplication::processEvents(QEventLoop::AllEvents);
+                EPGItemClass *t = new EPGItemClass(channelName, channelNumber, channelIndex, program, index, channelimage, channelimage);
+                emit addChannel(t);
                 index++;
             }
         }
@@ -3077,15 +3070,16 @@ void DCE::qOrbiter::requestLiveTvPlaylist()
 }
 
 
-void DCE::qOrbiter::TuneToChannel( QString chanid) //tunes to channel based on input, need some reworking for myth
+void DCE::qOrbiter::TuneToChannel(QString channel, QString chanid) //tunes to channel based on input, need some reworking for myth
 {
+
     if(i_current_mediaType = 11)
     {
         CMD_Tune_to_channel changeChannel(m_dwPK_Device, iMediaPluginID, chanid.toStdString(), chanid.toStdString());
         SendCommand(changeChannel);
-        //emit np_channel(QString::number(chanid));
+        emit np_channel(chanid);
         emit np_channelID(chanid);
-        // nowPlayingButton->setProgram(simpleEPGmodel->data(simpleEPGmodel->getChannelIndex(chanid), 5).toString());
+        //nowPlayingButton->setProgram(simpleEPGmodel->data(simpleEPGmodel->getChannelIndex(chanid), 5).toString());
     }
     else
     {

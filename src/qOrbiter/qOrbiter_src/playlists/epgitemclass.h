@@ -11,7 +11,6 @@ class EPGItemClass : public QObject
 {
     Q_OBJECT
 
-
 public:
     enum Roles {
         NameRole = Qt::DisplayRole+1,

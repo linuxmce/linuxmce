@@ -1,11 +1,12 @@
 import QtQuick 1.0
 import "../components"
+import "../js/ComponentLoader.js" as MyJs
 
 
 Rectangle {
-    height: style.orbiterH
-    width: style.orbiterW
-    color: style.advanced_bg
+    height: appH
+    width: appW
+    color: "transparent"
     id: advancedscreen
 
     HomeButton{}
@@ -13,8 +14,8 @@ Rectangle {
     Flow {
         id: flow1
         anchors.centerIn: parent
-        height: 400
-        width: 400
+        height: scaleY(85)
+        width: scaleX(85)
         spacing: 10
 
         ButtonSq{
@@ -72,7 +73,7 @@ Rectangle {
             MouseArea{
                 anchors.fill: parent
                 z:10
-                onClicked: quickReload()
+                onClicked: dcerouter.QuickReload()
             }
         }
 

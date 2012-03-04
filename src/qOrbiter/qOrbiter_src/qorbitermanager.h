@@ -341,9 +341,14 @@ signals:
     void gridTypeChanged(int i);
     void mediaRequest(int);
     void objectUpdated();
+    void setMediaDetails();
+
     void liveTVrequest();
+    void playlistRequest();
+    void bindMediaRemote(bool b);
     void userChanged(int user);
     void requestMoreGridData();
+
     void dceResponseChanged();
     void imageAspectChanged();
     void connectedStateChanged();
@@ -420,10 +425,11 @@ public slots: //note: Q_INVOKABLE means it can be called directly from qml
     Q_INVOKABLE void gridChangeChannel(QString chan, QString chanid);
 
     //media related
-
+    void getLiveTVPlaylist();
+    void getStoredPlaylist();
     Q_INVOKABLE void setNowPlayingData();
     Q_INVOKABLE void setNowPlayingTv();
-    Q_INVOKABLE void getLiveTVPlaylist();
+
     Q_INVOKABLE void playMedia(QString FK_Media);
     Q_INVOKABLE void stopMedia();
     Q_INVOKABLE void ff_media(int speed);

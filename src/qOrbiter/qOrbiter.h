@@ -1139,6 +1139,7 @@ signals:
     void subtitleChanged(QString subtitle);
     void streamIdChanged(int stream_id);
     void mediaTypeChanged(int mediaType);
+    void addChannel(EPGItemClass* chan);
 
     //attributes. granular instead of grouped because i can. i figure the strongly interwoven orbiter got us in trouble the 1st time right? Right?!
     void np_title1Changed(QString t1);
@@ -1258,7 +1259,7 @@ public slots:
     void GetSingleSecurityCam(int cam_device, int iHeight, int iWidth);
     void GetMultipleSecurityCams(QStringList cams);
     void GetNowPlayingAttributes();
-    void TuneToChannel(QString chanid);
+    void TuneToChannel(QString channel, QString chanid);
     void adjustLighting(int level);
     void adjustVolume( int vol);
     void mute();

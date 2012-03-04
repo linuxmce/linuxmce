@@ -20,9 +20,8 @@ Rectangle{
 
         height: style.stdbuttonh
         width: style.stdbuttonw
-        border.width: 1
-        border.color: "aliceblue"
-        radius: 5
+        color:"transparent"
+        radius: 2.5
         smooth:true
         Image {
 
@@ -32,7 +31,6 @@ Rectangle{
         }
         Text {
             id: buttonLabel
-
             text:"null ipsum delorium"
             font.pixelSize: scaleY(2)
             verticalAlignment: Text.AlignVCenter
@@ -48,11 +46,8 @@ Rectangle{
 
         }
         MouseArea{
-            anchors.fill: buttonLabel           
-
-
+            anchors.fill: buttonLabel
             onExited: {
-
                 buttonLabel.font.capitalization = Font.Normal
                 buttonLabel.color = "black"
             }

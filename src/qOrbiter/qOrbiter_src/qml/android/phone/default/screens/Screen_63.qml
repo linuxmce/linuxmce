@@ -9,6 +9,7 @@ Rectangle {
     width: appW
     state: ""
     color: "transparent"
+    Component.onCompleted: manager.setNowPlayingData()
     NowPlayingBox{id:np_box
         anchors.top: satcableboxremote.top
         anchors.horizontalCenter: parent.horizontalCenter
@@ -23,6 +24,68 @@ Rectangle {
     }
     HomeButton{id:home; anchors.leftMargin: 5; anchors.topMargin: 5;anchors.left: satcableboxremote.left; anchors.top:satcableboxremote.top}
 
+    Rectangle {
+        id: metadatavideo
+        width: scaleX(45)
+        height: childrenRect.height
+        anchors.top: np_box.bottom
+        anchors.left: automation_controls.right
+        color: "transparent"
+        visible:true
+
+        Image {
+            id: npgloss
+            source: "../img/widegreyshape.png"
+            height:parent.height
+            width:parent.width
+            smooth:true
+            opacity: .35
+        }
+
+        Column
+        {
+            width: scaleX(45)
+            spacing: 5
+            height: childrenRect.height
+
+            Text {
+                id: artist
+                width: parent.width
+                text: qsTr("Device: ")  + dcenowplaying.qs_mainTitle
+                font.family: "Droid Sans"
+                wrapMode: "NoWrap"
+                font.bold: true
+                smooth: true
+                font.pixelSize: scaleY(3)
+                color: "orange"
+            }
+
+
+            Text {
+                id: album
+                wrapMode: "NoWrap"
+                text: qsTr("Channel: ") + dcenowplaying.channelID
+                font.family: "Droid Sans"
+                font.bold: true
+                smooth: true
+                horizontalAlignment: Text.AlignHCenter
+                font.pixelSize: scaleY(2)
+                color: "white"
+            }
+
+            Text {
+                id: title
+                wrapMode: "NoWrap"
+                text: qsTr("Program:") + dcenowplaying.tvProgram
+                font.family: "Droid Sans"
+                font.bold: true
+                smooth: true
+                horizontalAlignment: Text.AlignHCenter
+                font.pixelSize: scaleY(2)
+                color: "white"
+            }
+        }
+    }
     RemoteNumberPad {
         id: remotenumberpad1
         x: 0
@@ -32,11 +95,11 @@ Rectangle {
 
     ButtonSq {
         id: keypad
-        width: 45
-        height: 45
+        width: style.stdbuttonw
+        height: style.stdbuttonh
         anchors.right: satcableboxremote.right
         anchors.top: np_box.top
-        buttontextfontsize: 28
+        buttontextfontsize: scaleY(2)
         buttontext: "#"
         MouseArea{
             smooth: true
@@ -90,6 +153,7 @@ Rectangle {
                 x: 70
                 y: 0
                 visible: true
+                anchors.horizontalCenter: satcableboxremote.horizontalCenter
             }
 
             PropertyChanges {
@@ -103,7 +167,8 @@ Rectangle {
                 buttontextbold: true
                 buttontext: "Display"
                 visible:true
-
+                anchors.top: satcableboxremote.top
+                anchors.left: satcableboxremote.left
             }
 
             PropertyChanges{
@@ -111,6 +176,11 @@ Rectangle {
                 anchors.top: homebutton.bottom
                 anchors.right: satcableboxremote.right
                 visible:true
+            }
+            PropertyChanges {
+                target: metadatavideo
+                visible:false
+
             }
         },
         State{
@@ -123,6 +193,11 @@ Rectangle {
                 anchors.topMargin: 75
             }
 
+            PropertyChanges {
+                target: metadatavideo
+                visible:false
+
+            }
             PropertyChanges{
                 target: showepg
                 visible:false
