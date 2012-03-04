@@ -180,13 +180,13 @@ Rectangle {
                     text: label
                     font.pixelSize: scaleY(3.5)
                     anchors.centerIn: parent
-                    color: "white"
+                    color: "slategrey"
                     font.bold: true
                 }
 
                 MouseArea{
                     anchors.fill: parent
-                    onReleased: {  page_label.font.italic = true ; dcerouter.requestPage(index) }
+                    onReleased: {  page_label.font.italic = true ; dcerouter.requestPage(index);  }
                     onPressed: page_label.font.italic = false
                 }
 
@@ -249,7 +249,7 @@ Rectangle {
                 MouseArea
                 {
                     anchors.fill:parent
-                    onClicked: goBackGrid()
+                    onClicked: dcerouter.goBackGrid()
                 }
             }
             AttributeSelector {}
