@@ -70,7 +70,7 @@ function networkSettings($output,$dbADO) {
 	
 	/* @var $dbADO ADOConnection */
 	/* @var $rs ADORecordSet */
-//	$dbADO->debug=true;
+	//	$dbADO->debug=true;
 	// # TODO - We should take wlan adapters into account as well, especially for the external network
 	$number_of_cards = exec('/sbin/ifconfig -s | awk \'$1 != "Iface" && $1 != "lo" { print $1 }\' | wc -l');
 	$out='';
@@ -132,7 +132,10 @@ function networkSettings($output,$dbADO) {
 	$rowVPN=$resVPN->FetchRow();
 	$VPN_data=explode(",", $rowVPN['IK_DeviceData']);
 	$enableVPN = ($VPN_data[0]=='on')?1:0;
-	$VPNRange=explode('.',str_replace('-','.',$VPN_data[1]));
+	$VPNRange=explode('-',$VPN_data[1]);
+	$VPNRangeStart=$VPNRange[0];
+	$VPNRangeEnd=explode('.',$VPNRange[1]);
+	$VPNRangeEnd=$VPNRangeEnd[3];
 	$VPNPSK = $VPN_data[2];
 	
 	// extract PPPoE settings from core
@@ -342,11 +345,15 @@ function networkSettings($output,$dbADO) {
 		newVal=(!document.networkSettings.enableVPN.checked)?true:false;
 		newColor=(document.networkSettings.enableVPN.checked)?"#000000":"#999999";
 
-		for(i=1;i<9;i++) eval("document.networkSettings.VPNRange_"+i+".disabled="+newVal+";");
-
+		eval("document.networkSettings.VPNRangeStart.disabled="+newVal+";");
+		eval("document.networkSettings.VPNRangeEnd.disabled="+newVal+";");
 		eval("document.networkSettings.VPNPSK.disabled="+newVal+";");
-		document.getElementById("VPNrange").style.color=newColor;
-		document.getElementById("VPNPSKlabel").style.color=newColor;
+		
+		document.getElementById("VPNEnabledText").style.color=newColor;
+		document.getElementById("VPNRangeText").style.color=newColor;
+		document.getElementById("VPNRangeStart").style.color=newColor;
+		document.getElementById("VPNRangeEnd").style.color=newColor;
+		document.getElementById("VPNPSK").style.color=newColor;
 	}	
 	
 	function setIPv6Range()
@@ -476,15 +483,22 @@ function networkSettings($output,$dbADO) {
 		</tr>
 		<tr><td colspan="6"><hr></td></tr>
 		<tr>
-			<td colspan="6"><input type="checkbox" name="enableVPN" '.(($enableVPN==1)?'checked':'').' onclick="setVPNRange();">'.translate('TEXT_VPN_ENABLED_CONST').'</td>
+			<!-- VPN SETTINGS -->
+			<td colspan="3">
+				<input type="checkbox" name="enableVPN" '.(($enableVPN==1)?'checked':'').' onclick="setVPNRange();">
+				<span id="VPNEnabledText" style="color:'.(($enableRA==0)?'#999999':'').'">'.translate('TEXT_VPN_ENABLED_CONST').':</span>
+			</td>
+			<td colspan="3"><input type="text" maxlength="25" id="VPNPSK" name="VPNPSK" size="26" value="'.@$VPNPSK.'" '.(($enableVPN!=1)?'disabled':'').'></td>		
 		</tr>
 		<tr>
 			<td>&nbsp;</td>
-			<td colspan="5"><span id="VPNPSKlabel" style="color:'.(($enableVPN!=1)?'#999999':'').'">'.translate('TEXT_VPN_PSK_CONST').': <input type="text" maxlength="15" name="VPNPSK" size="20" value="'.@$VPNPSK.'" '.(($enableVPN!=1)?'disabled':'').'></td>		
-		</tr>
-		<tr>
-			<td>&nbsp;</td>
-			<td colspan="5"><span id="VPNrange" style="color:'.(($enableVPN!=1)?'#999999':'').'">'.translate('TEXT_VPN_CLIENT_RANGE_CONST').': <input type="text" maxlength="3" name="VPNRange_1" size="3" value="'.@$VPNRange[0].'" '.(($enableVPN!=1)?'disabled':'').'>.<input type="text" maxlength="3" name="VPNRange_2" size="3" value="'.@$VPNRange[1].'" '.(($enableVPN!=1)?'disabled':'').'>.<input type="text" maxlength="3" name="VPNRange_3" size="3" value="'.@$VPNRange[2].'" '.(($enableVPN!=1)?'disabled':'').'>.<input type="text" maxlength="3" name="VPNRange_4" size="3" value="'.@$VPNRange[3].'" '.(($enableVPN!=1)?'disabled':'').'> - <input type="text" maxlength="3" name="VPNRange_5" size="3" value="'.@$VPNRange[4].'" '.(($enableVPN!=1)?'disabled':'').'>.<input type="text" maxlength="3" name="VPNRange_6" size="3" value="'.@$VPNRange[5].'" '.(($enableVPN!=1)?'disabled':'').'>.<input type="text" maxlength="3" name="VPNRange_7" size="3" value="'.@$VPNRange[6].'" '.(($enableVPN!=1)?'disabled':'').'>.<input type="text" maxlength="3" name="VPNRange_8" size="3" value="'.@$VPNRange[7].'" '.(($enableVPN!=1)?'disabled':'').'></td>
+			<td colspan="2">
+				<span id="VPNRangeText" style="color:'.(($enableVPN!=1)?'#999999':'').'">'.translate('TEXT_VPN_CLIENT_RANGE_CONST').':</span>
+			</td>
+			<td colspan="3">
+				<input type="text" maxlength="15" id="VPNRangeStart" name="VPNRangeStart" size="16" value="'.@$VPNRangeStart.'" '.(($enableVPN!=1)?'disabled':'').'> - 
+				<input type="text" maxlength="3" id="VPNRangeEnd" name="VPNRangeEnd" size="4" value="'.@$VPNRangeEnd.'" '.(($enableVPN!=1)?'disabled':'').'>
+			</td>
 		</tr>
 		
 		<tr><td colspan="6">&nbsp;</td></tr>
@@ -778,7 +792,12 @@ function networkSettings($output,$dbADO) {
 		$rowVPN=$resVPN->FetchRow();
 		$VPN_data=explode(",", $rowVPN['IK_DeviceData']);
 		$VPN_data[0]= $_POST['enableVPN'];
-		$VPN_data[1]= $coreDHCP=getIpFromParts('VPNRange_',1).'-'.getIpFromParts('VPNRange_',5);
+		$VPNRangeStart=$_POST['VPNRangeStart'];
+		$VPNRangeEnd=explode('.',$_POST['VPNRangeStart']);
+		$VPNRangeEnd[3]=$_POST['VPNRangeEnd'];
+		$VPNRangeEnd=join('.',$VPNRangeEnd);
+		$VPNRange=$VPNRangeStart.'-'.$VPNRangeEnd;		
+		$VPN_data[1]= $VPNRange;
 		$VPN_data[2]= $_POST['VPNPSK'];
 		$token = join(',',$VPN_data);
 	 	$dbADO->Execute("UPDATE Device_DeviceData SET IK_DeviceData='".$token."' WHERE FK_Device=1 AND FK_DeviceData=295") 
