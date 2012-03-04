@@ -10,45 +10,39 @@ Rectangle {
     border.width: 1
     clip: true
 
+
     Component{
         id:attributedelegate
         Item {
             id: fileformatitem
-            height: 50
-            width: 150
+            height: scaleY(12.5)
+            width: scaleX(30)
 
             Rectangle{
                 id: formatrect
-                height: 50
-                width: 130
-                border.color: "black"
+                height: scaleY(12.5)
+                width: scaleX(30)
+                border.color: "white"
                 border.width: 1
-                color: status ? "transparent": "silver"
-
-
+                color: status ? "grey": "steelblue"
 
                 Text {
-                    width: 75
-                    height: parent.height
                     id: fileformatcell
                     text: name
                     font.pointSize: scaleY(3)
                     wrapMode: "WrapAtWordBoundaryOrAnywhere"
+                    anchors.centerIn: parent
                     onFocusChanged: {rect.destroy()}
-
                 }
 
                 MouseArea{
+                    id:generic_filter_mouseArea
                     anchors.fill: parent
-                    onPressed: {
-                        formatrect.opacity = 0
+                    onReleased: {
                         attribfilter.setSelectionStatus(name)
-                        formatrect.color = status ? "green" : "red"
-                        formatrect.opacity = 1
-                        parent.color = "orange"
+                        formatrect.color = status ? "grey": "steelblue"
                     }
-                    onReleased: parent.color = "silver"
-
+                    onPressed: status ? "grey": "steelblue"
                 }
             }
         }
@@ -56,13 +50,34 @@ Rectangle {
 
     ListView{
         id:genrelist
-        height: 400
-        width: 450
+        height: scaleY(55)
+        width: scaleX(30)
         model: attribfilter
-
         delegate: attributedelegate
-
+        anchors.top: exit_button.bottom
+        clip:true
     }
+    Rectangle{
+        id:exit_button
+        height: scaleY(12.5)
+        width: scaleX(30)
+        color: "darkgrey"
+        opacity: .45
+        anchors.top: rect.top
+        clip: true
+        MouseArea{
+            id: exit_mousearea
+            anchors.fill: parent
+            onPressed: rect.destroy()
+        }
+    }
+    Text {
+        id: exit_label
+        text: qsTr("Exit")
+        anchors.centerIn: exit_button
+        font.pixelSize: scaleY(3.5)
+    }
+
 
 }
 

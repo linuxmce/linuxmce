@@ -2,8 +2,8 @@ import QtQuick 1.0
 
 Rectangle {
     id:rect
-    width: childrenRect.width
-    height: childrenRect.height
+    width: scaleX(90)
+    height: scaleY(85)
     color: "transparent"
     anchors.centerIn: parent
     border.color: style.button_system_color
@@ -24,11 +24,16 @@ Rectangle {
                 width: scaleX(15)
                 border.color: "black"
                 border.width: 1
-                color: status ? style.stageBG : "green"
-
+                color: status ? style.stageBG : "slategrey"
+                clip:true
+                Image {
+                    id: overlay
+                    source: "../img/icons/rowbg.png"
+                    anchors.fill:parent
+                    opacity: .75
+                }
                 MouseArea{
-                    anchors.fill: parent
-                    z:0
+                    anchors.fill: parent                  
                     onClicked:
                     {
                         rect.destroy()
@@ -46,19 +51,18 @@ Rectangle {
                         height: parent.height
                         id: fileformatcell
                         text: status ? name +" Is selected": name
-                        font.pointSize: 12
+                        font.pointSize: scaleY(2.5)
                         wrapMode: "WrapAtWordBoundaryOrAnywhere"
-                        onFocusChanged: {rect.destroy()}
+
                     }
 
                     Rectangle{
-                        height: 25
-                        width: 25
+                        height: scaleY(8)
+                        width: scaleX(5)
                         border.color: "black"
                         border.width: 1
-                        color: status ? "red" : style.stageBG
-                        anchors.right: parent.right
-                        z:10
+                        color: status ? "green" : "red"
+                        anchors.right: parent.right                       
                         MouseArea{
                             anchors.fill: parent
                             onClicked:{
@@ -72,13 +76,38 @@ Rectangle {
         }
     }
 
+    Rectangle{
+        id:exit_button
+        height: scaleY(12.5)
+        width: scaleX(90)
+        color: "darkgrey"
+        opacity: .65
+        anchors.top: rect.top
+        clip: true
+        MouseArea{
+            id: exit_mousearea
+            anchors.fill: parent
+            onPressed: rect.destroy()
+        }
+    }
+    Text {
+        id: exit_label
+        text: qsTr("Exit")
+        anchors.centerIn: exit_button
+        font.pixelSize: scaleY(3.5)
+    }
 
-    ListView{
+
+    GridView{
         id:genrelist
-        height: scaleY(80)
-        width: scaleX(15)
-        model: genrefilter        
+        height: scaleY(85)
+        width: scaleX(95)
+        model: genrefilter
+        cellHeight: scaleY(8.5)
+        cellWidth: scaleX(15.5)
         delegate: genredelegate
+        anchors.top: exit_button.bottom
+        clip:true
     }
 }
 

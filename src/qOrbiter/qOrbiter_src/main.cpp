@@ -142,10 +142,10 @@ int main(int argc, char* argv[])
     QApplication::setGraphicsSystem("meego");
 #elif for_desktop
     QApplication::setGraphicsSystem("opengl");
-#elif ANDROID
+#elif for_android
  QApplication::setGraphicsSystem("opengl");
 #else
-    QApplication::setGraphicsSystem("opengl");
+    QApplication::setGraphicsSystem("raster");
 #endif
 
     QApplication  a(argc, argv);
