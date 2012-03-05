@@ -318,6 +318,21 @@ function networkSettings($output,$dbADO) {
 		}else*/
 
 			alert("'.translate('TEXT_UPDATING_SETTINGS_CONST').'");
+			
+			// Enable fields to make variables flow into POST request
+			// disabled elements are not transmitted
+			document.networkSettings.PPPoEUser.disabled=false;
+			document.networkSettings.PPPoEPass.disabled=false;
+			document.networkSettings.coreDHCPStart.disabled=false;
+			document.networkSettings.coreDHCPEnd.disabled=false;
+			document.networkSettings.nonPlutoIPStart.disabled=false;
+			document.networkSettings.nonPlutoIPEnd.disabled=false;
+			document.networkSettings.VPNRangeStart.disabled=false;
+			document.networkSettings.VPNRangeEnd.disabled=false;
+			document.networkSettings.VPNPSK.disabled=false;
+			document.networkSettings.IPv6Prefix.disabled=false;
+			document.networkSettings.IPv6Netmask.disabled=false;
+		
 			document.networkSettings.submit();
 	}
 		
@@ -326,16 +341,16 @@ function networkSettings($output,$dbADO) {
 		newVal=(!document.networkSettings.enableDHCP.checked)?true:false;
 		newColor=(document.networkSettings.enableDHCP.checked)?"#000000":"#999999";
 
-		eval("document.networkSettings.coreDHCPStart.disabled="+newVal+";");
-		eval("document.networkSettings.coreDHCPEnd.disabled="+newVal+";");
+		document.networkSettings.coreDHCPStart.disabled=newVal;
+		document.networkSettings.coreDHCPEnd.disabled=newVal;
 		
 		document.networkSettings.ipForAnonymousDevices.disabled=newVal;
 		if(!document.networkSettings.enableDHCP.checked)
 			document.networkSettings.ipForAnonymousDevices.checked=false;
 		
 		document.getElementById("coreDHCPText").style.color=newColor;
-		document.getElementById("coreDHCPStart").style.color=newColor;
-		document.getElementById("coreDHCPEnd").style.color=newColor;
+		document.networkSettings.coreDHCPStart.style.color=newColor;
+		document.networkSettings.coreDHCPEnd.style.color=newColor;
 		
 		ipFromDHCP();
 	}
@@ -345,15 +360,16 @@ function networkSettings($output,$dbADO) {
 		newVal=(!document.networkSettings.enableVPN.checked)?true:false;
 		newColor=(document.networkSettings.enableVPN.checked)?"#000000":"#999999";
 
-		eval("document.networkSettings.VPNRangeStart.disabled="+newVal+";");
-		eval("document.networkSettings.VPNRangeEnd.disabled="+newVal+";");
-		eval("document.networkSettings.VPNPSK.disabled="+newVal+";");
+		document.networkSettings.VPNRangeStart.disabled=newVal;
+		document.networkSettings.VPNRangeEnd.disabled=newVal;
+		document.networkSettings.VPNPSK.disabled=newVal;
 		
 		document.getElementById("VPNEnabledText").style.color=newColor;
 		document.getElementById("VPNRangeText").style.color=newColor;
-		document.getElementById("VPNRangeStart").style.color=newColor;
-		document.getElementById("VPNRangeEnd").style.color=newColor;
-		document.getElementById("VPNPSK").style.color=newColor;
+		
+		document.networkSettings.VPNRangeStart.style.color=newColor;
+		document.networkSettings.VPNRangeEnd.style.color=newColor;
+		document.networkSettings.VPNPSK.style.color=newColor;
 	}	
 	
 	function setIPv6Range()
@@ -361,12 +377,12 @@ function networkSettings($output,$dbADO) {
 		newVal=(!document.networkSettings.enableRA.checked)?true:false;
 		newColor=(document.networkSettings.enableRA.checked)?"#000000":"#999999";
 
-		eval("document.networkSettings.IPv6Prefix.disabled="+newVal+";");
-		eval("document.networkSettings.IPv6Netmask.disabled="+newVal+";");
+		document.networkSettings.IPv6Prefix.disabled=newVal;
+		document.networkSettings.IPv6Netmask.disabled=newVal;
 
 		document.getElementById("IPv6PrefixText").style.color=newColor;
-		document.getElementById("IPv6Prefix").style.color=newColor;
-		document.getElementById("IPv6Netmask").style.color=newColor;
+		document.networkSettings.IPv6Prefix.style.color=newColor;
+		document.networkSettings.IPv6Netmask.style.color=newColor;
 	}
 		
 	function setPPPoE()
@@ -375,14 +391,14 @@ function networkSettings($output,$dbADO) {
 		newColor=(checked)?"#000000":"#999999";
 		
 		document.getElementById("PPPoEUserText").style.color=newColor;
-		document.getElementById("PPPoEUser").style.color=newColor;
 		document.getElementById("PPPoEPassText").style.color=newColor;
-		document.getElementById("PPPoEPass").style.color=newColor;
 		document.getElementById("PPPoEIPv6EnabledText").style.color=newColor;
+		document.networkSettings.PPPoEUser.style.color=newColor;
+		document.networkSettings.PPPoEPass.style.color=newColor;
 		
-		document.getElementById("PPPoEUser").disabled=!checked;
-		document.getElementById("PPPoEPass").disabled=!checked;
-		document.getElementById("PPPoEIPv6Enabled").disabled=!checked;
+		document.networkSettings.PPPoEUser.disabled=!checked;
+		document.networkSettings.PPPoEPass.disabled=!checked;
+		document.networkSettings.PPPoEIPv6Enabled.disabled=!checked;
 	}
 	
 	function setStaticIP(newVal,ipVersion)
@@ -475,8 +491,8 @@ function networkSettings($output,$dbADO) {
 				<span id="nonPlutoIPText" style="color:'.(($nonPlutoIP!=1)?'#999999':'').'"> '.translate('TEXT_IPV4_DHCP_NONLMCE_ENABLED_CONST').'</span>
 			</td>
 			<td colspan="3">
-				<input type="text" maxlength="15" id="nonPlutoIPStart" name="nonPlutoIPStart" size="16" style="text-align: right" value="'.@$nonPlutoIPStart.'" '.(($enableDHCP==1)?'':'disabled').'> -
-				<input type="text" maxlength="3" id="nonPlutoIPEnd" name="nonPlutoIPEnd" size="4" value="'.@$nonPlutoIPEnd.'" '.(($enableDHCP==1)?'':'disabled').'>
+				<input type="text" maxlength="15" name="nonPlutoIPStart" size="16" style="text-align: right" value="'.@$nonPlutoIPStart.'" '.(($enableDHCP==1)?'':'disabled').'> -
+				<input type="text" maxlength="3" name="nonPlutoIPEnd" size="4" value="'.@$nonPlutoIPEnd.'" '.(($enableDHCP==1)?'':'disabled').'>
 			</td>
 		</tr>
 		<tr><td colspan="6"><hr></td></tr>
@@ -488,27 +504,27 @@ function networkSettings($output,$dbADO) {
 				<span id="IPv6PrefixText" style="color:'.(($enableRA==0)?'#999999':'').'">'.translate('TEXT_IPV6_RA_ENABLED_CONST').':</span>
 			</td>
 			<td colspan="3">
-				<input type="text" maxlength="38" id="IPv6Prefix" name="IPv6Prefix" size="39" value="'.@$IPv6Prefix.'" '.(($enableRA==1)?'':'disabled').'> / 
-				<input type="text" maxlength="2" id="IPv6Netmask" name="IPv6Netmask" size="2" value="'.@$IPv6Netmask.'" '.(($enableRA==1)?'':'disabled').'>
+				<input type="text" maxlength="38" style="color:'.(($enableRA==0)?'#999999':'').'" name="IPv6Prefix" size="39" value="'.@$IPv6Prefix.'" '.(($enableRA==1)?'':'disabled').'> / 
+				<input type="text" maxlength="2" style="color:'.(($enableRA==0)?'#999999':'').'" name="IPv6Netmask" size="2" value="'.@$IPv6Netmask.'" '.(($enableRA==1)?'':'disabled').'>
 			</td>
 		</tr>
 		<tr><td colspan="6"><hr></td></tr>
 		<tr>
 			<!-- VPN SETTINGS -->
 			<td colspan="3">
-				<input type="checkbox" name="enableVPN" '.(($enableVPN==1)?'checked':'').' onclick="setVPNRange();">
-				<span id="VPNEnabledText" style="color:'.(($enableRA==0)?'#999999':'').'">'.translate('TEXT_VPN_ENABLED_CONST').':</span>
+				<input type="checkbox" name="enableVPN" '.($enableVPN?'checked':'#000000').' onclick="setVPNRange();">
+				<span id="VPNEnabledText" style="color:'.(!$enableVPN?'#999999':'#000000').'">'.translate('TEXT_VPN_ENABLED_CONST').':</span>
 			</td>
-			<td colspan="3"><input type="text" maxlength="25" id="VPNPSK" name="VPNPSK" size="26" value="'.@$VPNPSK.'" '.(($enableVPN!=1)?'disabled':'').'></td>		
+			<td colspan="3"><input type="password" maxlength="25" style="color:'.(!$enableVPN?'#999999':'#000000').'" name="VPNPSK" size="26" value="'.@$VPNPSK.'" '.(($enableVPN!=1)?'disabled':'').'></td>		
 		</tr>
 		<tr>
 			<td>&nbsp;</td>
 			<td colspan="2">
-				<span id="VPNRangeText" style="color:'.(($enableVPN!=1)?'#999999':'').'">'.translate('TEXT_VPN_CLIENT_RANGE_CONST').':</span>
+				<span id="VPNRangeText" style="color:'.(!$enableVPN?'#999999':'#000000').'">'.translate('TEXT_VPN_CLIENT_RANGE_CONST').':</span>
 			</td>
 			<td colspan="3">
-				<input type="text" maxlength="15" id="VPNRangeStart" name="VPNRangeStart" size="16" value="'.@$VPNRangeStart.'" '.(($enableVPN!=1)?'disabled':'').'> - 
-				<input type="text" maxlength="3" id="VPNRangeEnd" name="VPNRangeEnd" size="4" value="'.@$VPNRangeEnd.'" '.(($enableVPN!=1)?'disabled':'').'>
+				<input type="text" maxlength="15" style="text-align: right; color:'.(!$enableVPN?'#999999':'#000000').'" name="VPNRangeStart" size="16" value="'.@$VPNRangeStart.'" '.(($enableVPN!=1)?'disabled':'').'> - 
+				<input type="text" maxlength="3" style="color:'.(!$enableVPN?'#999999':'#000000').'" name="VPNRangeEnd" size="4" value="'.@$VPNRangeEnd.'" '.(($enableVPN!=1)?'disabled':'').'>
 			</td>
 		</tr>
 		
