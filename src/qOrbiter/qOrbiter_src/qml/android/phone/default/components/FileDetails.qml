@@ -3,7 +3,7 @@ import QtQuick 1.0
 
 Rectangle {
     id: filedetailrect
-    width: scaleX(85)
+    width: scaleX(90)
     height: scaleY(85)
     anchors.centerIn: parent
     color: "silver"
@@ -18,20 +18,17 @@ Rectangle {
         onPressed: filedetailrect.destroy()
 
     }
+    Connections{
+        target: filedetailsclass
+        onImageChanged: filedetailsimage.source = "image://listprovider/filedetails/"+securityvideo.timestamp
+    }
 
     Image {
         id: fdbg
         source: "../img/bkg.png"
         anchors.fill: filedetailrect
     }
-    Timer{
-        id:singleshot
-        repeat: false
-        interval: 250
-        triggeredOnStart: false
-        onTriggered: filedetailsimage.source = "image://listprovider/filedetailsprovider/"+securityvideo.timestamp
-        running: true
-    }
+
 
 
     Rectangle{
@@ -40,9 +37,8 @@ Rectangle {
         width:childrenRect.width
         color: "transparent"
         anchors.verticalCenter: parent.verticalCenter
-
         anchors.left: parent.left
-        anchors.leftMargin: scaleX(2.9)
+        anchors.leftMargin: scaleX(1)
         BorderImage {
             id: borderimg
             horizontalTileMode: BorderImage.Repeat
@@ -73,8 +69,8 @@ Rectangle {
     Rectangle {
         id: rectangle1
         anchors.verticalCenter: imageholder.verticalCenter
-        width:  filedetailsclass.aspect=="wide"? parent.width *.40 : parent.width *.45
-        height: scaleY(35)
+        width:  filedetailsclass.aspect=="wide"? scaleX(60): scaleX(45)
+        height: scaleY(65)
         radius: 2.5
         clip:  true
         color: "black"

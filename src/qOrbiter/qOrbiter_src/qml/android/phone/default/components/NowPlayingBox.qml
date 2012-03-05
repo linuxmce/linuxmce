@@ -19,8 +19,7 @@ Rectangle {
       id: nowplayingimage
      anchors.fill: np_box
       fillMode: Image.PreserveAspectFit
-
-     source: "image://listprovider/updateobject/"+dcenowplaying.m_iplaylistPosition
+     source: "image://listprovider/updateobject/"+securityvideo.timestamp
   }
 
    /*

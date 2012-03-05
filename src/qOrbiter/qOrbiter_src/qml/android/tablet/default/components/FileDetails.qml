@@ -19,15 +19,10 @@ Rectangle {
         anchors.fill: filedetailrect
     }
 
-
-    Timer{
-        id:singleshot
-        repeat: false
-        interval: 250
-        triggeredOnStart: false
-        onTriggered: filedetailsimage.source = "image://listprovider/filedetailsprovider/"+securityvideo.timestamp
-        running: true
-    }
+  Connections{
+      target: filedetailsclass
+      onImageChanged: filedetailsimage.source = "image://listprovider/filedetails/"+securityvideo.timestamp
+  }
 
     Rectangle{
         id:titlerect
@@ -70,6 +65,7 @@ Rectangle {
             height:filedetailsclass.aspect=="wide"?scaleY(42.5) : scaleY(55)
             source: "image://listprovider/filedetails/"+securityvideo.timestamp
             smooth: true
+            asynchronous: true
         }
 
         Image {

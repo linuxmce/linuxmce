@@ -7,7 +7,7 @@ Rectangle {
     height: scaleY(35)
     color: "transparent"
     border.color: "silver"
-    radius: 10
+    radius: 2.5
     visible: dcenowplaying.b_mediaPlaying ? true : false
     clip:true
 

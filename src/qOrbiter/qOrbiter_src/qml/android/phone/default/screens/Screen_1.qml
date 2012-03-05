@@ -10,6 +10,21 @@ Rectangle {
     height: appH
     width: appW
     color: "transparent"
+    Connections{
+        target: dcenowplaying
+        onImageChanged:np_bg.source = "image://listprovider/filedetails/"+securityvideo.timestamp
+
+    }
+
+    Image {
+        id: np_bg
+fillMode: Image.PreserveAspectFit
+source: ""
+        anchors.fill: parent
+
+        visible:dcenowplaying.b_mediaPlaying ? true : false
+    }
+
 
     Text{
         id:spaceholder
