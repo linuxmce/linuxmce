@@ -1221,14 +1221,13 @@ void qorbiterManager::changedPlaylistPosition(QString position)
 
 void qorbiterManager::setNowPlayingData()
 {
-emit bindMediaRemote(true);
+//emit bindMediaRemote(true);
 
 }
 
 void qorbiterManager::updateImageChanged(QImage img)
 {
-    updatedObjectImage = img;
-    emit objectUpdated();
+
 }
 
 void qorbiterManager::setNowPlayingTv()
@@ -1248,7 +1247,7 @@ void qorbiterManager::getLiveTVPlaylist()
 
 void qorbiterManager::getStoredPlaylist()
 {
-    emit playlistRequest();
+   // emit playlistRequest();
 }
 
 void qorbiterManager::gridChangeChannel(QString chan, QString chanid)

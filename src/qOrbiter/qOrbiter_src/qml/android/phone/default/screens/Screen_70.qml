@@ -9,7 +9,8 @@ Rectangle {
     width: appW
     color: "transparent"
     Component.onCompleted:
-    {   manager.setNowPlayingData()
+    {
+        manager.setNowPlayingData()
         manager.getStoredPlaylist();
 
     }
