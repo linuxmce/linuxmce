@@ -290,35 +290,57 @@ function networkSettings($output,$dbADO) {
 		
 	}
 
-	function validateElement(elementNameArray,errorMsg)
+	function validateElement(elementName,errorMsg)
 	{
-		for(i=0;i<elementNameArray.length;i++){
-			tmp=eval(\'document.networkSettings.\'+elementNameArray[i]+\'.value==""\');
-			if(tmp){
-				eval(\'document.networkSettings.\'+elementNameArray[i]+\'.focus()\');
+		// check for valid ip address
+	
+		ipaddr = eval(\'document.networkSettings.\'+elementName+\'.value\');
+		ipaddr = ipaddr.replace( /\s/g, "") //remove spaces for checking
+		var re = /^\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}$/; //regex. check for digits and in all 4 quadrants of the IP
+		
+		if (re.test(ipaddr)) {
+			//split into units with dots "."
+			var parts = ipaddr.split(".");
+			//if the first unit/quadrant of the IP is zero
+			if (parseInt(parseFloat(parts[0])) == 0) {
 				alert(errorMsg);
 				return false;
 			}
+			//if any part is greater than 255
+			for (var i=0; i<parts.length; i++) {
+				if (parseInt(parseFloat(parts[i])) > 255){
+					alert(errorMsg);
+					return false;
+				}
+			}
+			return true;
+		} else {
+			alert(errorMsg);
+			return false;
 		}
-		return true;
 	}
 			
 	function validateForm()
 	{
-		/*if(document.networkSettings.extv4[2].checked ){
-			validIP=validateElement(array("coreIPv4IP"),"Please enter Core\'s IP address.");
+		var shouldSubmit=false;
+		
+		if(document.networkSettings.extv4[2].checked ){
+			validIP=validateElement("coreIPv4IP","Please enter Core\'s IP address.");
 			if(validIP)
-				validNetMask=validateElement(array("coreIPv4NM"),"Please enter Subnet Mask address.");
+				validNetMask=validateElement("coreIPv4NM","Please enter Subnet Mask address.");
 			if(validNetMask)
-				validGW=validateElement(array("coreIPv4GW"),"Please enter Gateway address.");
+				validGW=validateElement("coreIPv4GW","Please enter Gateway address.");
 			if(validGW)
-				validDNS1=validateElement(array("coreIPv4DNS1"),"Please enter first DNS address.");
+				validDNS1=validateElement("coreIPv4DNS1","Please enter first DNS address.");
 			if(validDNS1)
-				document.networkSettings.submit();
-		}else*/
-
+				shouldSubmit=true;
+		}else {
+			shouldSubmit=true;
+		}
+		
+		if(shouldSubmit==true) {
 			alert("'.translate('TEXT_UPDATING_SETTINGS_CONST').'");
-			
+
 			// Enable fields to make variables flow into POST request
 			// disabled elements are not transmitted
 			document.networkSettings.PPPoEUser.disabled=false;
@@ -334,6 +356,7 @@ function networkSettings($output,$dbADO) {
 			document.networkSettings.IPv6Netmask.disabled=false;
 		
 			document.networkSettings.submit();
+		}
 	}
 		
 	function setIPRange()
