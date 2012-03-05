@@ -20,7 +20,7 @@ Rectangle {
     }
     Connections{
         target: filedetailsclass
-        onImageChanged: filedetailsimage.source = "image://listprovider/filedetails/"+securityvideo.timestamp
+        onImageChanged: filedetailsimage.source = "image://listprovider/filedetailsprovider/"+securityvideo.timestamp
     }
 
     Image {
@@ -52,8 +52,8 @@ Rectangle {
             id: filedetailsimage
             width: scaleX(25)
             height:scaleY(25)
-            source: "image://listprovider/filedetails/"+securityvideo.timestamp
-            smooth: true
+            source: "../img/kmix.png"
+
         }
 
         Image {

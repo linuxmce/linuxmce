@@ -125,7 +125,7 @@ Rectangle {
         font.pixelSize: scaleY(4)
         width:childrenRect.width
         anchors.bottom: np_box.bottom
-        anchors.horizontalCenter: np_label.horizontalCenter
+        anchors.horizontalCenter: np_box.horizontalCenter
         wrapMode: Text.WrapAtWordBoundaryOrAnywhere
         color: "white"
     }
@@ -133,7 +133,7 @@ Rectangle {
     MouseArea{
         id: mousearea1
         anchors.fill: parent
-        onClicked:manager.gotoQScreen(dcenowplaying.qs_screen)
+        onClicked:manager.setCurrentScreen(dcenowplaying.qs_screen)
     }
 }
 

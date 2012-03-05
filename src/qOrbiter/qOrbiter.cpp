@@ -2425,16 +2425,12 @@ void DCE::qOrbiter::GetMediaAttributeGrid(QString  qs_fk_fileno)
             bool barrows = false; //not sure what its for
             //creating a dg table to check for cells. If 0, then we error out and provide a single "error cell"
             DataGridTable *pDataGridTable = new DataGridTable(iData_Size,pData,false);
-            int cellsToRender= pDataGridTable->GetRows();
+           // int cellsToRender= pDataGridTable->GetRows();
 #ifndef ANDROID
             LoggerWrapper::GetInstance()->Write(LV_CRITICAL, "Attribute Datagrid Dimensions: Height %i, Width %i", gHeight, gWidth);
 #endif
-            QString cellTitle;
-            QString cellAttribute;
-            QString fk_file;
-            QString filePath;
+
             int index;
-            QImage cellImg;
             QString cellfk;
             DataGridCell *pCell;
             for(MemoryDataTable::iterator it=pDataGridTable->m_MemoryDataTable.begin();it!=pDataGridTable->m_MemoryDataTable.end();++it)

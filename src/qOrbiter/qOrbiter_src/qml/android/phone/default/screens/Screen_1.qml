@@ -12,17 +12,16 @@ Rectangle {
     color: "transparent"
     Connections{
         target: dcenowplaying
-        onImageChanged:np_bg.source = "image://listprovider/filedetails/"+securityvideo.timestamp
-
+        onImageChanged:np_bg.source = "image://listprovider/updateobject/"+securityvideo.timestamp
     }
 
     Image {
         id: np_bg
-fillMode: Image.PreserveAspectFit
-source: ""
+        fillMode: Image.PreserveAspectFit
+        source: "image://listprovider/updateobject/"+securityvideo.timestamp
         anchors.fill: parent
-
-        visible:dcenowplaying.b_mediaPlaying ? true : false
+       visible: dcenowplaying.b_mediaPlaying ? true : false
+       opacity: .25
     }
 
 

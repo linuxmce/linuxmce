@@ -183,12 +183,12 @@ void qorbiterManager::gotoQScreen(QString s)
     }
     else
 
-    {   qDebug() << "Setting load to false";
+    {  // qDebug() << "Setting load to false";
         bool t = false;
         emit keepLoading(t);
         emit clearModel();
         emit resetFilter();
-        emit bindMediaRemote(false);
+        //emit bindMediaRemote(false);
     }
 
     //send the qmlview a request to go to a screen, needs error handling

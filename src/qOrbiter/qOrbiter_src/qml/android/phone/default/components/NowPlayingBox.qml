@@ -19,7 +19,7 @@ Rectangle {
       id: nowplayingimage
      anchors.fill: np_box
       fillMode: Image.PreserveAspectFit
-     source: "image://listprovider/updateobject/"+securityvideo.timestamp
+      source: ""
   }
 
    /*

@@ -13,12 +13,7 @@ Rectangle {
         manager.getStoredPlaylist();
 
     }
-    MouseArea{
-        id:swipe_area
-
-    }
-
-    NowPlayingBox
+      NowPlayingBox
     {
         id:np_box
         anchors.top: parent.top
@@ -140,7 +135,7 @@ Rectangle {
     ButtonSq {
         id: playlist_button
         anchors.bottom: controls.top
-        anchors.left: storedAudioRemote.left
+        anchors.left: storedVideoRemote.left
         height: style.stdbuttonh
         width: style.stdbuttonw
         buttontext: qsTr("Playlist")
@@ -153,7 +148,7 @@ Rectangle {
     ButtonSq {
         id: default_button
         anchors.bottom: controls.top
-        anchors.left: storedAudioRemote.left
+        anchors.left: storedVideoRemote.left
         height: style.stdbuttonh
         width: style.stdbuttonw
         buttontext: qsTr("MetaData")

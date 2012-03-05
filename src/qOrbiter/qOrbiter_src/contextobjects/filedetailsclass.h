@@ -219,7 +219,7 @@ public slots:
     inline void setFile(QString incFile) { file = incFile; emit FileChanged(file);}
 
 
-    inline void setTitleImage (QImage inc_t) {titleImage = inc_t; emit objectChanged();}
+    inline void setTitleImage (QImage inc_t) {titleImage = inc_t; emit imageChanged();}
     inline QImage getTitleImage () {return titleImage;}
 
 

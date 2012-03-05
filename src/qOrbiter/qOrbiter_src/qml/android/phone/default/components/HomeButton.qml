@@ -20,7 +20,7 @@ Item {
         }
         MouseArea{
             anchors.fill: parent
-            onReleased:gotoQScreen("Screen_1.qml")
+            onReleased:manager.setCurrentScreen("Screen_1.qml")
         }
     }
 }
