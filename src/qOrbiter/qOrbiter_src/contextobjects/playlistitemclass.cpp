@@ -1,6 +1,6 @@
 #include "playlistitemclass.h"
-PlaylistItemClass::PlaylistItemClass( QString &ident, QString &name,  QString &path,  int &index,  QObject *parent) :
-    m_fk_file(ident), m_name(name), m_path(path), m_index(index)
+PlaylistItemClass::PlaylistItemClass( QString &ident, QString &path,  int &index) :
+    m_fk_file(path), m_path(path), m_index(index), m_name(ident)
 {
 isActive = false;
 }
@@ -11,9 +11,8 @@ QHash<int, QByteArray> PlaylistItemClass::roleNames() const
   QHash<int, QByteArray> names;
   names[NameRole] = "name";
   names[IndexRole] = "dceindex";
-  names[PathRole] = "path";
-  names[AttributeRole] = "attributes";
-  names[FKRole]= "id";
+  names[PathRole] = "path"; 
+  names[FKRole]= "file";
   names[StateRole] = "state";
   return names;
 }
@@ -28,7 +27,7 @@ QVariant PlaylistItemClass::data(int role) const
   case PathRole:
     return path();
   case FKRole:
-    return id();
+    return path();
   default:
     return QVariant();
   }

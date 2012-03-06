@@ -31,7 +31,9 @@ EPGChannelList::~EPGChannelList() {
 
 void EPGChannelList::appendRow(EPGItemClass *item)
 {
+
     appendRows(QList<EPGItemClass*>() << item);
+
 }
 
 void EPGChannelList::appendRows(const QList<EPGItemClass *> &items)
@@ -42,12 +44,11 @@ void EPGChannelList::appendRows(const QList<EPGItemClass *> &items)
         connect(item, SIGNAL(dataChanged()), this , SLOT(handleItemChange()));
         m_list.append(item);
     }
-
     endInsertRows();
     QModelIndex index = indexFromItem(m_list.last());
     QModelIndex index2 = indexFromItem(m_list.first());
     int currentRows= m_list.count() - 1;
-    emit dataChanged(index2, index, currentRows);
+   // emit dataChanged(index2, index, currentRows);
     isActive = true;
 }
 
@@ -67,8 +68,13 @@ void EPGChannelList::handleItemChange()
     //qDebug() << "Handling item change for:" << index;
     if(index.isValid())
     {
-        emit dataChanged(index, index, 0);
+      //  emit dataChanged(index, index, 0);
     }
+}
+
+void EPGChannelList::resetInternalData()
+{
+    m_list.clear();
 }
 
 EPGItemClass * EPGChannelList::find(const QString &id) const
@@ -149,28 +155,28 @@ void EPGChannelList::setItemStatus(int pos)
 
 bool EPGChannelList::checkDupe(QString name, QString position)
 {
-    //qDebug() << "Checking dupe for:" << name << " at " <<position;
+    qDebug() << "Checking dupe for:" << name << " at " <<position;
 
     if (EPGItemClass *item = find(name))
-    {   //qDebug() << "Found " << name;
+    {   qDebug() << "Found " << name;
 
-        if (item->name().compare(position))
+        if (QString::number(item->index()-1).compare(position))
         {
-            //qDebug() << "Dupe position " << position.toInt() ;
-            return true;
+            qDebug() << "Dupe position " << position.toInt() ;
+            return false;
         }
         else
         {
-            //qDebug() << item->index();
-            //qDebug() << "Did not find item at postion " << position;
-            return false;
+            qDebug() << item->index();
+            qDebug() << "Did not find item at postion " << position;
+            return  true;
         }
 
     }
     else
     {
-        //qDebug() << name << " at " << position << " Not in playlist";
-        return false;
+        qDebug() << name << " at " << position << " Not in playlist";
+        return true;
     }
 
 }
@@ -179,22 +185,18 @@ QModelIndex EPGChannelList::getChannelIndex(const QString &name) const
 {
     if (m_list.size() > 0)
     {
-        int l=0;
-      //  qDebug() << "Checkin list";
-      //  qDebug() << m_list.size() << " Channels";
-        while (m_list.size() > l)
+
+        for (int l=0; m_list.size() > l; l++)
         {
+
             if (m_list.at(l)->data(3).toInt() == name.toInt())
             {
-                //qDebug() << m_list.at(l)->data(4) << "::" << name ;
+                qDebug() << m_list.at(l)->data(4) << "::" << name ;
                 QModelIndex index = indexFromItem(m_list.at(l));
-                //qDebug() << index;
+                qDebug() << index;
                 return index;
             }
-            else
-            {
-                l++;
-            }
+
         }
     }
     else
@@ -205,6 +207,46 @@ QModelIndex EPGChannelList::getChannelIndex(const QString &name) const
 
 void EPGChannelList::populate()
 {
-    clear();
-    //ref->pqOrbiter->requestLiveTvPlaylist();
+    emit modelAboutToBeReset();
+    beginResetModel();
+    resetInternalData();
+    //qDeleteAll(m_list);
+    endResetModel();
+    emit modelReset();
+    emit requestEpg();
+}
+
+void EPGChannelList::setProgram(QString qml_text_channel)
+{
+
+    QModelIndex epgLocation = getChannelIndex(qml_text_channel);
+    if (epgLocation.isValid())
+    {
+
+        emit networkChanged(data(epgLocation,1).toString());
+        emit channelNumberChanged(data(epgLocation, 3).toString());
+        emit programChanged(data(epgLocation,5).toString());
+        setCurrentIndex(epgLocation);
+        setCurrentRow(epgLocation.row());
+    }
+
+}
+
+void EPGChannelList::setCurrentIndex(QModelIndex index)
+{
+    activeIndex = index;
+    emit activeIndexChanged();
+}
+
+QModelIndex EPGChannelList::getCurrentIndex()
+{
+    return activeIndex;
+}
+
+void EPGChannelList::beginResetModel()
+{
+}
+
+void EPGChannelList::endResetModel()
+{
 }

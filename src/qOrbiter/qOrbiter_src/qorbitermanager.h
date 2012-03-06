@@ -129,11 +129,6 @@ class qorbiterManager : public QObject
 public:
     qorbiterManager(QDeclarativeView * view, QObject *parent=0);  //constructor
 
-    //thread objects
-    QThread *processingThread; //threaded class
-    QThread *timecodeThread; //for timecode
-    QThread *gridThread;
-    QTcpSocket *timeCodeSocket;
 
     //settings
     QString sPK_User;
@@ -143,9 +138,7 @@ public:
     QString qs_ext_routerip;
 
     //------------------------------------------------------playlist classes
-    PlaylistClass *storedVideoPlaylist;
-    EPGChannelList *simpleEPGmodel;
-    ListModel *playlistModel;
+
 
     //------CUSTOM QML TYPES------------------------------------------------------------------------------------
     ScreenParamsClass *ScreenParameters;
@@ -160,6 +153,7 @@ public:
     NowPlayingClass *nowPlayingButton;
     QString aspect; //-- true poster || false landscape
     QString *gridReqType;
+    QTcpSocket * timeCodeSocket;
 
     //skins
     SkinDataModel* tskinModel;
@@ -206,9 +200,6 @@ public:
     //image providers
     basicImageProvider *basicProvider;
     GridIndexProvider *advancedProvider;
-    AbstractImageProvider *modelimageprovider;
-
-
 
     //floorplans
     FloorPlanModel *floorplans;

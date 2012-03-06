@@ -30,40 +30,54 @@ class PlaylistClass: public QAbstractListModel
 {
     Q_OBJECT
 
+    Q_PROPERTY(int currentIndex READ getCurrentIndex WRITE setCurrentIndex NOTIFY activeItemChanged)
+
 public:
 
-  explicit PlaylistClass(PlaylistItemClass* prototype, QObject* parent = 0);
-  ~PlaylistClass();
+    explicit PlaylistClass(PlaylistItemClass* prototype, QObject* parent = 0);
+    ~PlaylistClass();
 
-  int rowCount(const QModelIndex &parent = QModelIndex()) const;
-  QVariant data(const QModelIndex &index, int role = Qt::DisplayRole) const;
+    int rowCount(const QModelIndex &parent = QModelIndex()) const;
+    QVariant data(const QModelIndex &index, int role = Qt::DisplayRole) const;
+    void clear();
+    void appendRows(const QList<PlaylistItemClass*> &items);
+    void insertRow(int row, PlaylistItemClass* item);
+    bool removeRow(int row, const QModelIndex &parent = QModelIndex());
+    bool removeRows(int row, int count, const QModelIndex &parent = QModelIndex());
+    PlaylistItemClass* takeRow(int row);
+    PlaylistItemClass* find(const QString &id) const;
+    QModelIndex indexFromItem( const PlaylistItemClass* item) const;
+    PlaylistItemClass* currentRow();
+    virtual void beginResetModel();
+    virtual void endResetModel();
+    virtual void resetInternalData();
+    int currentIndex;
 
-  void appendRows(const QList<PlaylistItemClass*> &items);
-  void insertRow(int row, PlaylistItemClass* item);
-  bool removeRow(int row, const QModelIndex &parent = QModelIndex());
-  bool removeRows(int row, int count, const QModelIndex &parent = QModelIndex());
-  PlaylistItemClass* takeRow(int row);
-  PlaylistItemClass* find(const QString &id) const;
-  QModelIndex indexFromItem( const PlaylistItemClass* item) const;
-  PlaylistItemClass* currentRow();
 
 signals:
-  void ItemAdded();
-  void dataChanged(const QModelIndex &topLeft, const QModelIndex &bottomRight, const int &sRow);
+    void ItemAdded();
+    void dataChanged(const QModelIndex &topLeft, const QModelIndex &bottomRight, const int &sRow);
+    void modelAboutToBeReset();
+    void modelReset();
+    void playlistReady();
+    void activeItemChanged();
 
 
 public slots:
-  bool checkDupe(QString name, QString position);
-  void setItemStatus(int b);
-  void clear();
-  void appendRow(PlaylistItemClass* item);
+    bool checkDupe(QString name, int position);
+    void setItemStatus(int b);
 
+    void setCurrentIndex(int i);
+    int getCurrentIndex();
+
+    void appendRow(PlaylistItemClass* item);
+    void populate();
 private slots:
-  void handleItemChange();
+    void handleItemChange();
 
 private:
-  PlaylistItemClass* m_prototype;
-  QList<PlaylistItemClass*> m_list;
+    PlaylistItemClass* m_prototype;
+    QList<PlaylistItemClass*> m_list;
 };
 
 #endif // PLAYLISTCLASS_H

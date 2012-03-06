@@ -17,6 +17,8 @@ class qorbiterManager;
 class EPGChannelList : public QAbstractListModel
 {
     Q_OBJECT
+    Q_PROPERTY(QModelIndex activeIndex READ getCurrentIndex WRITE setCurrentIndex NOTIFY activeIndexChanged)
+    Q_PROPERTY(int currentIndex READ getCurrentRow WRITE setCurrentRow NOTIFY activeRowChanged)
 
 public:
     explicit EPGChannelList(EPGItemClass* prototype);
@@ -27,7 +29,8 @@ public:
  //nowPlayingButton->setProgram(simpleEPGmodel->data(simpleEPGmodel->getChannelIndex(chanid), 5).toString());
     bool checkDupe(QString name, QString position);
     void setItemStatus(int i);
-    int activeIndex;
+    QModelIndex activeIndex;
+    int currentIndex;
 
 public slots:
     int rowCount(const QModelIndex &parent = QModelIndex()) const;
@@ -43,6 +46,15 @@ public slots:
     QModelIndex indexFromItem( const EPGItemClass* item) const;
     EPGItemClass* currentRow();
     void populate();
+    void setProgram(QString qml_text_channel);
+    void setCurrentIndex(QModelIndex index);
+    QModelIndex getCurrentIndex();
+
+    virtual void beginResetModel();
+    virtual void endResetModel();
+
+    void setCurrentRow(int row) {currentIndex = row; emit activeRowChanged(); }
+    int getCurrentRow() {return currentIndex;}
 
     QModelIndex getChannelIndex(const QString &name) const;
 
@@ -51,6 +63,12 @@ signals:
     void dataChanged(const QModelIndex &topLeft, const QModelIndex &bottomRight, const int &sRow);
     void requestEpg();
     void activeIndexChanged();
+    void activeRowChanged();
+    void channelNumberChanged(QString chan);
+    void programChanged(QString prog);
+    void networkChanged(QString net);
+    void modelAboutToBeReset();
+    void modelReset();
 
 private slots:
     void handleItemChange();
@@ -58,6 +76,7 @@ private slots:
 private:
     EPGItemClass* m_prototype;
     QList<EPGItemClass*> m_list;
+    void resetInternalData();
 
 };
 

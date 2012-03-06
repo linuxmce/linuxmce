@@ -253,7 +253,7 @@ public slots:
 
 
     inline bool isVisible () { return showDetails; }
-    inline void setVisible (bool state) { showDetails = state; emit VisibleChanged( showDetails);}
+    inline void setVisible (bool state) { clear(); showDetails = state; emit VisibleChanged( showDetails);}
 
     // Q_INVOKABLE void setSelectionStatus(QString format);
     // Q_INVOKABLE bool getSelectionStatus();

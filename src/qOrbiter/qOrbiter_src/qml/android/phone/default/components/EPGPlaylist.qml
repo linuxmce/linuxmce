@@ -6,10 +6,11 @@ Rectangle {
     height: scaleY(85)
     color: "transparent"    
     clip:true
-
+    Component.onCompleted: manager.getLiveTVPlaylist()
     Connections{
-        target: dcenowplaying
-        onPlayListPositionChanged:epgplaylistview.positionViewAtIndex(dcenowplaying.m_iplaylistPosition, ListView.Beginning)
+        target: simpleepg
+        onActiveIndexChanged:epgplaylistview.positionViewAtIndex(simpleepg.currentIndex, ListView.Beginning)
+
     }
 
     Image {
@@ -91,7 +92,7 @@ Rectangle {
                 MouseArea{
                     anchors.fill: parent
                     onClicked:{
-                        dcerouter.TuneToChannel(channelnumber, channelid)
+                        dcerouter.TuneToChannel(channelnumber, channelnumber)
                         epgplaylistview.positionViewAtIndex(index, ListView.Beginning)
                         dcenowplaying.setProgram(program)                        
                     }

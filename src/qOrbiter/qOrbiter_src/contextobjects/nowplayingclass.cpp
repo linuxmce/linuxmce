@@ -12,46 +12,7 @@ NowPlayingClass::NowPlayingClass(QDeclarativeItem *parent) :
 
 void NowPlayingClass::setMediaSpeed(int speed)
 {
-    if(speed == 0)
-    {
-        i_playbackSpeed = 0;
-    }
-
-    if (i_playbackSpeed  = 1)
-    {
-        i_playbackSpeed = speed * 1;
-      // setStringSpeed(QString::number(i_playbackSpeed)+"x");
-    }
-    else if (i_playbackSpeed = 2||-2)
-    {
-        i_playbackSpeed = speed * i_playbackSpeed;
-       //  setStringSpeed(QString::number(i_playbackSpeed)+"x");
-    }
-    else if (i_playbackSpeed = 4||-4)
-    {
-        i_playbackSpeed = speed * i_playbackSpeed;
-        // setStringSpeed(QString::number(i_playbackSpeed)+"x");
-    }
-    else if (i_playbackSpeed = 8 ||-8)
-    {
-        i_playbackSpeed = speed * i_playbackSpeed;
-      //   setStringSpeed(QString::number(i_playbackSpeed)+"x");
-    }
-    else if (i_playbackSpeed = 16||-16)
-    {
-        i_playbackSpeed = speed * i_playbackSpeed;
-       //  setStringSpeed(QString::number(i_playbackSpeed)+"x");
-    }
-    else if (i_playbackSpeed = 32||-32)
-    {
-        i_playbackSpeed = speed * i_playbackSpeed;
-       //  setStringSpeed(QString::number(i_playbackSpeed)+"x");
-    }
-    else if (i_playbackSpeed < 64 )
-    {
-        i_playbackSpeed = 1 ;
-       //  setStringSpeed(QString::number(i_playbackSpeed)+"x");
-    }
+   emit newMediaSpeed(speed);
 
 }
 

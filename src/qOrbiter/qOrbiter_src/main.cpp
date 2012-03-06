@@ -255,12 +255,12 @@ int main(int argc, char* argv[])
         qOrbiter *pqOrbiter = new qOrbiter(PK_Device, sRouter_IP,true,bLocalMode);
         pqOrbiter->moveToThread(dceThread);
 
-        QThread * playlistThread = new QThread();
+        QThread *epgThread = new QThread; //for playlists and epg of all types. only one will be active a given time inthe app
         //stored video playlist for managing any media that isnt live broacast essentially
         PlaylistClass *storedVideoPlaylist = new PlaylistClass (new PlaylistItemClass);
-        storedVideoPlaylist->moveToThread(playlistThread);
+        storedVideoPlaylist->moveToThread(epgThread);
 
-        QThread *epgThread = new QThread; //for playlists and epg of all types. only one will be active a given time inthe app
+
         //epg listmodel, no imageprovider as of yet
         EPGChannelList *simpleEPGmodel = new EPGChannelList(new EPGItemClass);
         simpleEPGmodel->moveToThread(epgThread);
@@ -269,8 +269,6 @@ int main(int argc, char* argv[])
         ListModel *mediaModel = new ListModel(new gridItem);
         mediaModel->moveToThread(mediaThread);
         GridIndexProvider * advancedProvider = new GridIndexProvider(mediaModel , 6, 4);
-        //QObject::connect(mediaModel,SIGNAL(dataChanged(QModelIndex,QModelIndex, int )), advancedProvider,SLOT(dataUpdated(QModelIndex,QModelIndex, int)), Qt::DirectConnection);
-        //QObject::connect(mediaModel, SIGNAL(modelAboutToBeReset()), advancedProvider, SLOT(dataReset()), Qt::DirectConnection);
         orbiterWin.mainView.engine()->addImageProvider("datagridimg", advancedProvider);
         advancedProvider->moveToThread(mediaThread);
 
@@ -304,7 +302,8 @@ int main(int argc, char* argv[])
         QObject::connect(pqOrbiter,SIGNAL(updateMediaSpeed(int)), w->nowPlayingButton, SLOT(setMediaSpeed(int)));
         QObject::connect(pqOrbiter,SIGNAL(mediaLengthChanged(QString)), w->nowPlayingButton, SLOT(setDuration(QString)));
         QObject::connect(pqOrbiter,SIGNAL(tcUpdated(QString)), w->nowPlayingButton, SLOT(setTimeCode(QString)));
-        QObject::connect(pqOrbiter, SIGNAL(clearPlaylist()), storedVideoPlaylist,  SLOT(clear()), Qt::DirectConnection);
+        QObject::connect(w->nowPlayingButton, SIGNAL(playListPositionChanged(int)), storedVideoPlaylist, SLOT(setCurrentIndex(int)) );
+
 
         //setup
         QObject::connect(w, SIGNAL(registerOrbiter(int,QString,int)), pqOrbiter,SLOT(registerDevice(int,QString,int)));
@@ -335,11 +334,19 @@ int main(int argc, char* argv[])
         QObject::connect(w, SIGNAL(locationChanged(int,int)), pqOrbiter, SLOT(setLocation(int,int)));
         QObject::connect(w, SIGNAL(userChanged(int)), pqOrbiter, SLOT(setUser(int)));
         QObject::connect(w, SIGNAL(bindMediaRemote(bool)), pqOrbiter, SLOT(BindMediaRemote(bool)));
-        QObject::connect(w, SIGNAL(setMediaDetails()), pqOrbiter, SLOT(setNowPlayingDetails()));
-        QObject::connect(w,SIGNAL(playlistRequest()), pqOrbiter, SLOT(requestMediaPlaylist()));
-
-
         QObject::connect(w, SIGNAL(startPlayback(QString)), pqOrbiter, SLOT(playMedia(QString)));
+
+        //QObject::connect(w, SIGNAL(liveTVrequest()), pqOrbiter, SLOT(requestLiveTvPlaylist()), Qt::QueuedConnection);
+        QObject::connect(w->nowPlayingButton, SIGNAL(newMediaSpeed(int)), pqOrbiter,SLOT(setMediaSpeed(int)));
+
+        //epg specific
+        QObject::connect(simpleEPGmodel, SIGNAL(requestEpg()), pqOrbiter, SLOT(requestLiveTvPlaylist()));
+        QObject::connect(pqOrbiter, SIGNAL(clearTVplaylist()), simpleEPGmodel, SLOT(populate()));
+
+        //storemediaplaylist specific
+        QObject::connect(storedVideoPlaylist,SIGNAL(playlistReady()), pqOrbiter,SLOT(requestMediaPlaylist()));
+        QObject::connect(pqOrbiter, SIGNAL(clearPlaylist()), storedVideoPlaylist,  SLOT(populate()));
+        QObject::connect(pqOrbiter, SIGNAL(playlistDone()), storedVideoPlaylist, SIGNAL(activeItemChanged()));
 
         //navigation
         QObject::connect(pqOrbiter,SIGNAL(gotoQml(QString)), w, SLOT(gotoQScreen(QString)));
@@ -367,6 +374,9 @@ int main(int argc, char* argv[])
         QObject::connect(pqOrbiter,SIGNAL(streamIdChanged(int)), w->nowPlayingButton, SLOT(setStreamID(int)));
         QObject::connect(pqOrbiter, SIGNAL(currentScreenChanged(QString)), w->nowPlayingButton, SLOT(setScreen(QString)));
         QObject::connect(pqOrbiter,SIGNAL(objectUpdate(const uchar*,int)), w->nowPlayingButton, SLOT(setImageData(const uchar*,int)),Qt::DirectConnection);
+        QObject::connect(simpleEPGmodel, SIGNAL(channelNumberChanged(QString)), w->nowPlayingButton, SLOT(setChannel(QString)));
+        QObject::connect(simpleEPGmodel, SIGNAL(programChanged(QString)), w->nowPlayingButton, SLOT(setProgram(QString)));
+        QObject::connect(simpleEPGmodel, SIGNAL(networkChanged(QString)), w->nowPlayingButton, SLOT(setChannelID(QString)));
 
         //attributes
         QObject::connect(pqOrbiter, SIGNAL(np_mediaTitleChanged(QString)), w->nowPlayingButton, SLOT(setMediaTitle(QString)));
@@ -385,12 +395,12 @@ int main(int argc, char* argv[])
         QObject::connect(pqOrbiter, SIGNAL(subtitleChanged(QString)), w->nowPlayingButton, SLOT(setSubTitle(QString)));
         QObject::connect(pqOrbiter, SIGNAL(np_synopsisChanged(QString)), w->nowPlayingButton, SLOT(setSynop(QString)));
         QObject::connect(pqOrbiter,SIGNAL(playlistPositionChanged(int)), w->nowPlayingButton, SLOT(setPlaylistPostion(int)));
-        QObject::connect(pqOrbiter, SIGNAL(np_channelID(QString)), w->nowPlayingButton, SLOT(setChannelID(QString)));
+        QObject::connect(pqOrbiter, SIGNAL(np_channel(QString)), simpleEPGmodel, SLOT(setProgram(QString)));
 
         dceThread->start();
         mediaThread->start();
         epgThread->start();
-        playlistThread->start();
+
 
         pqOrbiter->m_dwPK_Device = w->iPK_Device;
         pqOrbiter->m_sHostName = w->qs_routerip.toStdString();

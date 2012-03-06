@@ -31,22 +31,32 @@ void PlaylistClass::appendRow(PlaylistItemClass *item)
 {
     appendRows(QList<PlaylistItemClass*>() << item);
 }
+//the purpose of this function is to first clear the existing playlist data out, and add the new data in due to the way the dce router send the updated playlist to us
+void PlaylistClass::populate()
+{
+    emit modelAboutToBeReset();
+    beginResetModel();
+    resetInternalData();
+    //qDeleteAll(m_list);
+    endResetModel();
+    emit modelReset();
+    emit playlistReady();
+}
 
 void PlaylistClass::appendRows(const QList<PlaylistItemClass *> &items)
 {
     beginInsertRows(QModelIndex(), rowCount(), rowCount()+items.size()-1);
     foreach(PlaylistItemClass *item, items) {
 
-        //QObject::connect(item, SIGNAL(dataChanged()), this, SLOT(handleItemChange()));
-        m_list.append(item);
+       QObject::connect(item, SIGNAL(dataChanged()), this, SLOT(handleItemChange()));
+            m_list.append(item);
     }
 
     endInsertRows();
     QModelIndex index = indexFromItem(m_list.last());
     QModelIndex index2 = indexFromItem(m_list.first());
-    int currentRows= m_list.count() - 1;
-    // emit dataChanged(index2, index, currentRows);
-
+    int currentRows= m_list.count();
+    emit dataChanged(index2, index, currentRows);
 }
 
 void PlaylistClass::insertRow(int row, PlaylistItemClass *item)
@@ -65,7 +75,7 @@ void PlaylistClass::handleItemChange()
   //  qDebug() << "Handling item change for:" << index;
     if(index.isValid())
     {
-        //emit dataChanged(index, index);
+        emit dataChanged(index, index, index.row());
     }
 }
 
@@ -74,7 +84,6 @@ PlaylistItemClass * PlaylistClass::find(const QString &id) const
     foreach(PlaylistItemClass* item, m_list) {
         if(item->id().compare(id))
         {
-
             return item;
         }
     }
@@ -97,9 +106,13 @@ QModelIndex PlaylistClass::indexFromItem(const PlaylistItemClass *item) const
 void PlaylistClass::clear()
 {
 
-    qDeleteAll(m_list);
-    m_list.clear();
-    this->reset();
+    emit modelAboutToBeReset();
+    beginResetModel();
+    resetInternalData();
+    //qDeleteAll(m_list);
+    endResetModel();
+    emit modelReset();
+
 
 }
 
@@ -145,30 +158,31 @@ void PlaylistClass::setItemStatus(int pos)
     item->setActive(true);
 }
 
-bool PlaylistClass::checkDupe(QString name, QString position)
+void PlaylistClass::setCurrentIndex(int i)
 {
-    //qDebug() << "Checking dupe for:" << name << " at " <<position;
+    currentIndex = i; emit activeItemChanged();
+}
 
-    if (PlaylistItemClass *item = find(name))
-    {   //qDebug() << "Found " << name;
+int PlaylistClass::getCurrentIndex()
+{
+     return currentIndex;
+}
 
-        if (item->name().compare(position))
-        {
-            //qDebug() << "Dupe position " << position.toInt() ;
-            return true;
-        }
-        else
-        {
-            //qDebug() << item->index();
-            //qDebug() << "Did not find item at postion " << position;
-            return false;
-        }
+bool PlaylistClass::checkDupe(QString name, int position)
+{
 
-    }
-    else
-    {
-        //qDebug() << name << " at " << position << " Not in playlist";
-        return false;
-    }
 
+}
+
+void PlaylistClass::beginResetModel()
+{
+}
+
+void PlaylistClass::endResetModel()
+{
+}
+
+void PlaylistClass::resetInternalData()
+{
+      m_list.clear();
 }

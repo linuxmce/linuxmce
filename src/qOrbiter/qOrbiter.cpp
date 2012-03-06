@@ -1044,7 +1044,7 @@ void qOrbiter::CMD_Set_Now_Playing(string sPK_DesignObj,string sValue_To_Assign,
 
     if (iPK_MediaType != 0)
     {
-        emit setNowPlaying(true);
+       emit setNowPlaying(true);
        emit playlistPositionChanged(iValue);
     }
     else if (iPK_MediaType == 0)
@@ -1052,8 +1052,16 @@ void qOrbiter::CMD_Set_Now_Playing(string sPK_DesignObj,string sValue_To_Assign,
         emit resetNowPlaying();
         emit setNowPlaying(false);
         emit gotoQml("Screen_1.qml");
-        BindMediaRemote(false);
+      // BindMediaRemote(false);
 
+    }
+
+    if(iPK_MediaType == 11)
+    {
+        emit clearTVplaylist();
+    }
+    else{
+        emit clearPlaylist();
     }
 
     QString scrn = sPK_DesignObj.c_str();
@@ -1086,9 +1094,8 @@ void qOrbiter::CMD_Set_Now_Playing(string sPK_DesignObj,string sValue_To_Assign,
         }
     }
 
-
     emit currentScreenChanged("Screen_"+scrn+".qml");
-    currentScreen = "Screen_"+scrn+".qml";
+   currentScreen = "Screen_"+scrn+".qml";
     emit subtitleChanged((QString::fromStdString(sText)));
     emit streamIdChanged(iStreamID);
     emit subtitleChanged(QString::fromStdString(sText));
@@ -1097,7 +1104,6 @@ void qOrbiter::CMD_Set_Now_Playing(string sPK_DesignObj,string sValue_To_Assign,
     emit mediaTypeChanged(iPK_MediaType);
 
     GetNowPlayingAttributes();
-    checkTimeCode();
 }
 
 //<-dceag-c254-b->
@@ -1833,8 +1839,11 @@ bool DCE::qOrbiter::deinitialize()
     int iSize;
     pData = "NULL";
     iSize = 0;
-    DCE::CMD_Orbiter_Registered CMD_Orbiter_Registered(m_dwPK_Device, iOrbiterPluginID, "0" ,i_user, StringUtils::itos(i_ea), i_room, &pData, &iSize);
+    BindMediaRemote(false);
+    DCE::CMD_Orbiter_Registered CMD_Orbiter_Registered(m_dwPK_Device, iOrbiterPluginID, StringUtils::itos(m_dwPK_Device) ,i_user, StringUtils::itos(i_ea), i_room, &pData, &iSize);
     SendCommand(CMD_Orbiter_Registered);
+    this->~qOrbiter();
+
 }
 
 
@@ -1847,7 +1856,7 @@ bool qOrbiter::getConfiguration()
 
 void qOrbiter::registerDevice(int user, QString ea, int room)
 {
-    emit statusMessage("registering");
+  //  emit statusMessage("registering");
 
     char *pData;
     int iSize;
@@ -1865,8 +1874,8 @@ void qOrbiter::registerDevice(int user, QString ea, int room)
     {
 
         emit statusMessage("DCERouter Responded to Register with " + QString::fromStdString(pResponse));
-        setLocation(room, ea.toInt());
-
+       // setLocation(room, ea.toInt());
+        BindMediaRemote(true);
         GetScreenSaverImages();
     }
     else
@@ -2266,6 +2275,11 @@ void qOrbiter::displayToggle(int i)
 
 }
 
+void qOrbiter::setMediaSpeed(int s)
+{
+    internal_playback_speed = s;
+}
+
 void qOrbiter::getGridView(bool direction)
 {
 
@@ -2528,20 +2542,20 @@ void DCE::qOrbiter::StopMedia()
 
     CMD_MH_Stop_Media endMedia(m_dwPK_Device, iMediaPluginID,0,i_current_mediaType ,0,StringUtils::itos(i_ea),false);
     SendCommand(endMedia);
-    //storedVideoPlaylist->clear();
+
 }
 
 void DCE::qOrbiter::RwMedia()
 {
-    //CMD_Change_Playback_Speed rewind_media(m_dwPK_Device, iMediaPluginID, internal_streamID , nowPlayingButton->i_playbackSpeed, false);
-    // SendCommand(rewind_media);
+    CMD_Change_Playback_Speed rewind_media(m_dwPK_Device, iMediaPluginID, internal_streamID , -2, true);
+     SendCommand(rewind_media);
 }
 
 void DCE::qOrbiter::FfMedia()
 {
 
-    // CMD_Change_Playback_Speed forward_media(m_dwPK_Device, iMediaPluginID, internal_streamID, nowPlayingButton->i_playbackSpeed, true);
-    //SendCommand(forward_media);
+    CMD_Change_Playback_Speed forward_media(m_dwPK_Device, iMediaPluginID, internal_streamID, +2, true);
+    SendCommand(forward_media);
 }
 
 void DCE::qOrbiter::PauseMedia()
@@ -2554,59 +2568,37 @@ void DCE::qOrbiter::PauseMedia()
 void DCE::qOrbiter::requestMediaPlaylist()
 {
 
-    emit clearPlaylist();
-    int gHeight = 1;
-    int gWidth = 1;
+    int gHeight = 0;
+    int gWidth = 0;
     int pkVar = 0;
     string valassign ="";
     bool isSuccessfull;// = "false";
-
     string m_sGridID ="plist_"+StringUtils::itos(m_dwPK_Device);
-
-    int iRow_count=5;
-    int iColumn_count = 5;
-    bool m_bKeep_Row_Header = false;
-    bool m_bKeepColHeader = false;
-    bool m_bAdd_UpDown_Arrows = true;
-
-    string m_sSeek;
-    string m_sDataGrid_ID = "1";
-    int iOffset;
-
-    int iColumn = 1;
-    int iRowCount= 5;
-    int iRowColums = 5;
-    int m_iSeekColumn = 0;
+    string m_sSeek;   
+    int iOffset;  
     int iData_Size=0;
     int GridCurRow = 0;
     int GridCurCol= 0;
-
     char *pData;
-    pData = "NULL";
-    int iRow;
-
-    QString temp;
+    pData = "NULL";   
     m_dwIDataGridRequestCounter++;
 
+    string sPopulateResp ="";
     CMD_Populate_Datagrid cmd_populate_nowplaying_grid(m_dwPK_Device, iPK_Device_DatagridPlugIn, StringUtils::itos( m_dwIDataGridRequestCounter ), string(m_sGridID), 18, "38", DEVICETEMPLATE_Datagrid_Plugin_CONST, &pkVar, &valassign,  &isSuccessfull, &gHeight, &gWidth );
 
-    if (SendCommand(cmd_populate_nowplaying_grid))
+    if (SendCommand(cmd_populate_nowplaying_grid, &sPopulateResp ) && sPopulateResp == "OK")
     {
         //CMD_Request_Datagrid_Contents(long DeviceIDFrom, long DeviceIDTo,                   string sID,                                              string sDataGrid_ID,int iRow_count,int iColumn_count,bool bKeep_Row_Header,bool bKeep_Column_Header,bool bAdd_UpDown_Arrows,string sSeek,int iOffset,    char **pData,int *iData_Size,int *iRow,int *iColumn
+        sPopulateResp = "";
         DCE::CMD_Request_Datagrid_Contents req_data_grid( long(m_dwPK_Device), long(iPK_Device_DatagridPlugIn), StringUtils::itos( m_dwIDataGridRequestCounter ), string(m_sGridID),    int(gWidth), int(gHeight),           false, false,        false,   string(m_sSeek),    int(iOffset),  &pData,         &iData_Size, &GridCurRow, &GridCurCol );
-        if(SendCommand(req_data_grid))
+        if(SendCommand(req_data_grid, &sPopulateResp ) && sPopulateResp == "OK")
         {
-            bool barrows = false; //not sure what its for
-            //creating a dg table to check for cells. If 0, then we error out and provide a single "error cell"
-
             DataGridTable *pDataGridTable = new DataGridTable(iData_Size,pData,false);
-            int cellsToRender= pDataGridTable->GetRows();
-
 #ifndef ANDROID
             LoggerWrapper::GetInstance()->Write(LV_CRITICAL, "Attribute Datagrid Dimensions: Height %i, Width %i", gHeight, gWidth);
 #endif
             QString cellTitle;
-            QString cellAttribute;
+            QString qs_plsIndex;
             QString fk_file;
             QString filePath;
             int index;
@@ -2616,37 +2608,26 @@ void DCE::qOrbiter::requestMediaPlaylist()
 
             for(MemoryDataTable::iterator it=pDataGridTable->m_MemoryDataTable.begin();it!=pDataGridTable->m_MemoryDataTable.end();++it)
             {
-
-                pCell = it->second;
-
-                const char *pPath = pCell->GetImagePath();
-                index = pDataGridTable->CovertColRowType(it->first).first;
+                pCell = it->second;             
                 cellTitle = pCell->GetText();
-                cellAttribute = pCell->GetValue();
-                fk_file = pCell->GetValue();
-
-
-                if (pPath )
-                {
-                    cellImg = getfileForDG(pCell->GetImagePath());
-                    size_t s=0;
-                    pCell->m_GraphicLength = (unsigned long) s;
-                    pCell->m_GraphicFormat = GR_JPG;
-                }
-                else //making sure we dont provide a null image
-                {
-                    cellImg.load(":/icons/icon.png");
-                }
-                emit playlistItemAdded(new PlaylistItemClass(cellTitle, cellAttribute, fk_file ,index));
+                qs_plsIndex = pCell->GetValue();
+                index = qs_plsIndex.toInt();
+                fk_file = pCell->GetValue();                
+                emit playlistItemAdded(new PlaylistItemClass(cellTitle,  fk_file,index));
+                QApplication::processEvents(QEventLoop::AllEvents);
             }
+            emit playlistDone();
         }
+    }
+    else
+    {
+        emit statusMessage("Could not populate playlist!");
     }
 }
 
 void qOrbiter::checkTimeCode()
 {
-    emit setMyIp(QString::fromStdString(m_sMyIPAddress));
-
+    emit setMyIp(QString::fromStdString(m_sIPAddress));
 }
 
 void qOrbiter::showTimeCode()
@@ -2659,6 +2640,7 @@ void qOrbiter::changedPlaylistPosition(QString pos)
 
     if(!pos.contains(QRegExp("TITLE:")))
     {
+        qDebug() << pos;
         jumpToPlaylistPosition(pos.toInt());
     }
     else
@@ -2705,7 +2687,7 @@ void DCE::qOrbiter::BindMediaRemote(bool onoff)
         status = "0";
     }
     string designobj = "2355";
-    CMD_Bind_to_Media_Remote bind_remote(m_dwPK_Device, iMediaPluginID, 0,string("4962") ,status, string(""), StringUtils::itos(i_ea), 0, 0);
+    CMD_Bind_to_Media_Remote bind_remote(m_dwPK_Device, iMediaPluginID, m_dwPK_Device,string("4962") ,status, string(""), StringUtils::itos(i_ea), 0, 0);
     SendCommand(bind_remote);
 }
 
@@ -2722,10 +2704,10 @@ void DCE::qOrbiter::setNowPlayingDetails()
     {
 
         qDebug("Requesting playlist");
-        requestMediaPlaylist();
+
     }
     else{
-        requestLiveTvPlaylist();
+
 
     }
 
@@ -2967,10 +2949,11 @@ void DCE::qOrbiter::requestLiveTvPlaylist()
       to expand our ui capabilities. it is essentially a clone of the many datagrid requests
       that the orbiter makes.
       */
+    qDebug("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!");
     emit statusMessage("Getting current Epg");
-    emit clearPlaylist();
-    int gHeight = 1;
-    int gWidth = 1;
+
+    int gHeight = 0;
+    int gWidth = 0;
     int pkVar = 0;
     string valassign ="";
     bool isSuccessfull;// = "false";
@@ -2988,22 +2971,13 @@ void DCE::qOrbiter::requestLiveTvPlaylist()
     string m_EA = QString::number(i_ea).toStdString();
     string m_UserID = QString::number(i_user).toStdString();
     int iOffset;
-
-    int iColumn = 1;
-    int iRowCount= 5;
-    int iRowColums = 5;
-    int m_iSeekColumn = 0;
     int iData_Size=0;
     int GridCurRow = 0;
     int GridCurCol= 0;
-
     char *pData;
-    pData = "NULL";
-    int iRow;
-
-    QString temp;
+    pData = "NULL";   
     m_dwIDataGridRequestCounter++;
-
+    string sPopulateResp="";
     CMD_Populate_Datagrid cmd_populate_livetv_grid(m_dwPK_Device, iPK_Device_DatagridPlugIn, StringUtils::itos( m_dwIDataGridRequestCounter ), string(m_sGridID), 11, m_UserID + "," + m_EA, 0, &pkVar, &valassign,  &isSuccessfull, &gHeight, &gWidth );
 
     if (SendCommand(cmd_populate_livetv_grid))
@@ -3056,12 +3030,16 @@ void DCE::qOrbiter::requestLiveTvPlaylist()
                 string *response;
 
                 channelimage.load(":/icons/icon.png");
-
                 EPGItemClass *t = new EPGItemClass(channelName, channelNumber, channelIndex, program, index, channelimage, channelimage);
                 emit addChannel(t);
+                QApplication::processEvents(QEventLoop::AllEvents);
                 index++;
             }
         }
+    }
+    else
+    {
+        emit statusMessage("Could Not Populate");
     }
 }
 

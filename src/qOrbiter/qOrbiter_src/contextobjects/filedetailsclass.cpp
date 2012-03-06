@@ -40,7 +40,7 @@ void FileDetailsClass::clear(){
     emit synopChanged();
     emit titleImageChanged();
     emit mediaTitleChanged();
-    emit imageChanged();
+
     emit screenTypeChanged();
     emit titleChanged();
     emit titleChanged2();

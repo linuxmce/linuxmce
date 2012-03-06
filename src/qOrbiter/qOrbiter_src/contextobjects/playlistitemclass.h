@@ -35,25 +35,24 @@ class PlaylistItemClass: public QObject
 
 public:
     enum Roles {
-        NameRole = Qt::UserRole+1,
-        IndexRole =Qt::UserRole+2,
+        NameRole = Qt::DisplayRole+1,
+        IndexRole =Qt::DisplayRole+2,
         PathRole= Qt::DisplayRole+3,
-        AttributeRole = Qt::UserRole+5,
-        FKRole = Qt::DisplayRole+6,
-        StateRole = Qt::DisplayRole+7
+        FKRole = Qt::DisplayRole+4,
+        StateRole = Qt::DisplayRole+5
 
     };
 
 public:
     PlaylistItemClass(QObject *parent = 0) {}
-    explicit PlaylistItemClass( QString &ident, QString &name,  QString &path,  int &index,   QObject *parent = 0);
+    explicit PlaylistItemClass( QString &ident,  QString &path,  int &index);
     QVariant data(int role) const;
     QHash<int, QByteArray> roleNames() const;
 
-    inline QString id() const {  return m_fk_file.toUtf8(); }
-    inline QString name() const { return m_name.toLatin1(); }
+    inline QString id() const {  return QString::number(m_index); }
+    inline QString name() const { return m_name; }
     inline int index() const { return m_index; }
-    inline QString path() const { return m_path; }
+    inline QString path() const { return m_fk_file; }
 
     inline QMap <QString*, int> attributes() const {return m_mapAttrib;}
 

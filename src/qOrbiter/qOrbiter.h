@@ -87,6 +87,8 @@ public:
 
 
     int internal_streamID;
+    int internal_playback_speed;
+
     //media grid
     QStringList goBack;
 
@@ -108,7 +110,7 @@ public:
     QString audioDefaultSort;
     QString photoDefaultSort;
     QString gamesDefaultSort;
-    DataGridTable pDataGridTable ;
+
 
     bool backwards;
     bool requestMore;
@@ -1173,6 +1175,10 @@ signals:
     void resetNowPlaying();
     void setPlaylistPosition(int);
     void clearPlaylist();
+    void clearTVplaylist();
+    void playlistDone();
+    void epgDone();
+    void mediaGridDone();
 
     //filedetails popup
     void clearFileDetails();
@@ -1237,6 +1243,7 @@ public slots:
 
     //media
     void displayToggle(int);
+    void setMediaSpeed(int s);
     QImage getfileForDG(string filename);
     void GetFileInfoForQml(QString qs_file_reference);
     void GetMediaAttributeGrid(QString qs_fk_fileno);

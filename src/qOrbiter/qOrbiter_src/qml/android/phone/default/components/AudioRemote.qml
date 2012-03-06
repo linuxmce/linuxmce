@@ -45,7 +45,7 @@ Rectangle {
             anchors.verticalCenter: parent.verticalCenter
             MouseArea{
                 anchors.fill: parent                
-                onClicked: rw_media(-2)
+                onClicked: dcerouter.RwMedia(-2)
             }
         }
 
@@ -70,7 +70,7 @@ Rectangle {
             anchors.verticalCenter: parent.verticalCenter
             MouseArea{
                 anchors.fill: parent                 
-                onClicked: dcerouter.Ffmedia(2)
+                onClicked: dcerouter.FfMedia(+2)
             }
 
         }

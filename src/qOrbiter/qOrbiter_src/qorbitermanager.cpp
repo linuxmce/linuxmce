@@ -748,7 +748,7 @@ bool qorbiterManager::requestDataGrid()
 
 void qorbiterManager::setActiveRoom(int room,int ea)
 {
-     emit setLocation(room, ea);
+    //emit setLocation(room, ea);
     roomLights = roomLightingScenarios.value(room);
     roomMedia = roomMediaScenarios.value(room);
     roomClimate = roomClimateScenarios.value(room);
@@ -1221,7 +1221,7 @@ void qorbiterManager::changedPlaylistPosition(QString position)
 
 void qorbiterManager::setNowPlayingData()
 {
-//emit bindMediaRemote(true);
+emit bindMediaRemote(true);
 
 }
 
@@ -1242,12 +1242,12 @@ void qorbiterManager::changeChannels(QString chan)
 
 void qorbiterManager::getLiveTVPlaylist()
 {   
-    //  emit liveTVrequest();
+      emit liveTVrequest();
 }
 
 void qorbiterManager::getStoredPlaylist()
 {
-   // emit playlistRequest();
+    emit playlistRequest();
 }
 
 void qorbiterManager::gridChangeChannel(QString chan, QString chanid)
@@ -1333,6 +1333,7 @@ void qorbiterManager::showTimeCode()
         QString playbackSpeed = tcVars.at(0);
         playbackSpeed.remove(QRegExp("000"));
         nowPlayingButton->setStringSpeed(playbackSpeed+"x");
+        nowPlayingButton->setMediaSpeed(playbackSpeed.toInt());
 
         QString duration = tcVars.at(2);
         duration.remove(QRegExp(".\\d\\d\\d|00:0|0:0|00:"));

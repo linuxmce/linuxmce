@@ -8,13 +8,7 @@ Rectangle {
     height: appH
     width: appW
     color: "transparent"
-    Component.onCompleted:
-    {   manager.setNowPlayingData()
-        manager.getStoredPlaylist();
-
-    }
-
-    NowPlayingBox
+      NowPlayingBox
     {
         id:np_box
         anchors.top: parent.top

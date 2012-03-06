@@ -72,7 +72,7 @@ class NowPlayingClass : public QDeclarativeItem
     //television related variables
     Q_PROPERTY (QString tvProgram READ getProgram WRITE setProgram NOTIFY programChanged)
     Q_PROPERTY (QString channel READ getChannel WRITE setChannel NOTIFY channelChanged)
-    Q_PROPERTY (QString channelID READ getChannelID WRITE setChannelID NOTIFY channelChanged)
+    Q_PROPERTY (QString channelID READ getChannelID WRITE setChannelID NOTIFY networkChanged)
     Q_PROPERTY (QString episode READ getEpisode WRITE setEpisode NOTIFY episodeChanged)
     //movies
 
@@ -148,14 +148,15 @@ signals:
     void mediaStatusChanged();
     void filePathChanged();
     void mediaSpeedChanged();
-    void playListPositionChanged();
+    void playListPositionChanged(int p);
     void genreChanged();
     void rlsChanged();
     void synopChanged();
     void tcChanged();
     void durationChanged();
     void statusMessage(QString msg);
-
+    void newMediaSpeed(int speed);
+    void networkChanged();
 
     //audio signals
     void albumChanged();
@@ -227,7 +228,7 @@ public slots:
     void setSubTitle (QString inc_subTitle) {qs_subTitle = inc_subTitle; emit titleChanged();}
     QString getSubTitle () {return qs_subTitle;}
 
-    void setStatus (bool status) {b_mediaPlaying = status;  emit mediaStatusChanged(); }
+    void setStatus (bool status) {resetData(); b_mediaPlaying = status;  emit mediaStatusChanged(); }
     bool getStatus () {return b_mediaPlaying;}
 
     void setMediaType (int inc_mediaType) {i_mediaType = inc_mediaType; emit mediaTypeChanged();}
@@ -241,7 +242,7 @@ public slots:
     void setMediaTitle (QString inc_mediaTitle) {mediatitle = inc_mediaTitle;  emit mediaTitleChanged();}
     QString getMediaTitle () {return mediatitle;}
 
-    void setPlaylistPostion(int i_pls) {m_iplaylistPosition = i_pls;  emit playListPositionChanged();}
+    void setPlaylistPostion(int i_pls) { m_iplaylistPosition = i_pls;  emit playListPositionChanged( m_iplaylistPosition);}
     int getPlaylistPosition() {return m_iplaylistPosition;}
 
     void setMediaSpeed(int speed);
@@ -253,7 +254,7 @@ public slots:
     void setChannel (QString inc_channel) {channel = inc_channel;  emit channelChanged();}
     QString getChannel () {return channel;}
 
-    void setChannelID (QString inc_channelID) {channelID = inc_channelID;  emit channelChanged();}
+    void setChannelID (QString inc_channelID) {channelID = inc_channelID;  emit networkChanged();}
     QString getChannelID () {return channelID;}
 
     void setEpisode (QString inc_episode) {episode = inc_episode;  emit episodeChanged();}

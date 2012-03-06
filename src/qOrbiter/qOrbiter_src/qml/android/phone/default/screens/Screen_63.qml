@@ -9,7 +9,8 @@ Rectangle {
     width: appW
     state: ""
     color: "transparent"
-    Component.onCompleted: manager.setNowPlayingData()
+
+
     NowPlayingBox{id:np_box
         anchors.top: satcableboxremote.top
         anchors.horizontalCenter: parent.horizontalCenter
@@ -60,11 +61,23 @@ Rectangle {
                 color: "orange"
             }
 
+            Text {
+                id: network_id
+                wrapMode: "NoWrap"
+                text: qsTr("Network: ") + dcenowplaying.channelID
+                font.family: "Droid Sans"
+                font.bold: true
+                smooth: true
+                horizontalAlignment: Text.AlignHCenter
+                font.pixelSize: scaleY(2)
+                color: "white"
+            }
+
 
             Text {
-                id: album
+                id: channel_id
                 wrapMode: "NoWrap"
-                text: qsTr("Channel: ") + dcenowplaying.channelID
+                text: qsTr("Channel: ") + dcenowplaying.channel
                 font.family: "Droid Sans"
                 font.bold: true
                 smooth: true
@@ -74,7 +87,7 @@ Rectangle {
             }
 
             Text {
-                id: title
+                id: program_title
                 wrapMode: "NoWrap"
                 text: qsTr("Program:") + dcenowplaying.tvProgram
                 font.family: "Droid Sans"
@@ -86,53 +99,65 @@ Rectangle {
             }
         }
     }
+
+    Row
+    {
+        id:extra_buttons
+        height: childrenRect.height
+        width: childrenRect.width
+        anchors.bottom: audioremote1.top
+
+        ButtonSq {
+            id: keypad
+            width: style.stdbuttonw
+            height: style.stdbuttonh
+
+            buttontextfontsize: scaleY(2)
+            buttontext: "#"
+            MouseArea{
+                smooth: true
+                anchors.fill: parent
+                onClicked: satcableboxremote.state="NUMBERS"
+            }
+        }
+
+        ButtonSq {
+            id: homebutton
+
+            visible: false
+            buttontext: "home"
+            MouseArea{
+                anchors.fill:parent
+                onClicked: satcableboxremote.state=""
+            }
+        }
+
+        ButtonSq {
+            id: showepg
+            visible: true
+
+            buttontext: "EPG"
+            MouseArea{
+                anchors.fill:parent
+                onClicked: satcableboxremote.state="GRID"
+            }
+        }
+    }
+
     RemoteNumberPad {
         id: remotenumberpad1
-        x: 0
-        y: 0
+        anchors.right: satcableboxremote.right
+        anchors.top: satcableboxremote.top
         visible: false
     }
 
-    ButtonSq {
-        id: keypad
-        width: style.stdbuttonw
-        height: style.stdbuttonh
-        anchors.right: satcableboxremote.right
-        anchors.top: np_box.top
-        buttontextfontsize: scaleY(2)
-        buttontext: "#"
-        MouseArea{
-            smooth: true
-            anchors.fill: parent
-            onClicked: satcableboxremote.state="NUMBERS"
-        }
-    }
-
-    ButtonSq {
-        id: homebutton
-       anchors.top: parent.top
-       anchors.left: parent.left
+    EPGPlaylist{
+        id:playlist;
+        anchors.top: satcableboxremote.top;
+        anchors.right:satcableboxremote.right
         visible: false
-        buttontext: "home"
-        MouseArea{
-            anchors.fill:parent
-            onClicked: satcableboxremote.state=""
-        }
     }
 
-    ButtonSq {
-        id: showepg       
-        visible: true
-        anchors.right: satcableboxremote.right
-        anchors.top: keypad.bottom
-        buttontext: "EPG"
-        MouseArea{
-            anchors.fill:parent
-            onClicked: satcableboxremote.state="GRID"
-        }
-    }
-
-    EPGPlaylist{id:playlist; anchors.top: satcableboxremote.top; anchors.horizontalCenter: satcableboxremote.horizontalCenter; visible: false }
 
     states: [
         State {
@@ -167,8 +192,7 @@ Rectangle {
                 buttontextbold: true
                 buttontext: "Display"
                 visible:true
-                anchors.top: satcableboxremote.top
-                anchors.left: satcableboxremote.left
+
             }
 
             PropertyChanges{
@@ -189,8 +213,7 @@ Rectangle {
             {
                 target: playlist
                 visible:true
-                anchors.top: satcableboxremote.top
-                anchors.topMargin: 75
+
             }
 
             PropertyChanges {
@@ -211,15 +234,13 @@ Rectangle {
             PropertyChanges{
                 target:homebutton
                 visible:true
-                anchors.right: satcableboxremote.right
-                anchors.top: satcableboxremote.top
+
             }
 
             PropertyChanges {
                 target: keypad
                 visible: true
-                anchors.right: satcableboxremote.right
-                anchors.top: homebutton.bottom
+
 
             }
             PropertyChanges {

@@ -8,12 +8,8 @@ Rectangle {
     height: appH
     width: appW
     color: "transparent"
-    Component.onCompleted:
-    {
-        manager.setNowPlayingData()
-        manager.getStoredPlaylist();
+    Component.onCompleted: manager.getStoredPlaylist()
 
-    }
       NowPlayingBox
     {
         id:np_box

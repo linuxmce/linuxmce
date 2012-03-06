@@ -8,15 +8,13 @@ Rectangle {
     border.color: "orange"
     border.width: 1
     clip:false    
-    function setupMedia()
-    {
-        nonepgplaylistview.positionViewAtIndex(dcenowplaying.m_iplaylistPosition, ListView.Beginning)
-    }
+
 
     Connections{
-        target: dcenowplaying
-        onPlayListPositionChanged:{
-            nonepgplaylistview.positionViewAtIndex(dcenowplaying.m_iplaylistPosition, ListView.Beginning)
+        target: mediaplaylist
+        onActiveItemChanged:{
+            nonepgplaylistview.positionViewAtIndex(mediaplaylist.currentIndex  , ListView.Beginning)
+            console.log("New position!")
         }
     }
 
@@ -69,18 +67,17 @@ Rectangle {
             }
             Text {
                 id: position
-                text: qsTr("#") + name
+                text: qsTr("#") + dceindex
                 font.family: "DroidSans"
                 color: "silver"
                 font.pixelSize: scaleY(4)
                 font.bold: true
-
                 anchors.bottom: parent.bottom
                 opacity: .75
             }
 
             Text {
-                text:  index === dcenowplaying.m_iplaylistPosition ? "Now Playing - " + id : id
+                text:  index === dcenowplaying.m_iplaylistPosition ? "Now Playing - " + name : name
                 font.family: "DroidSans"
                 color: "silver"
                 width: parent.width
@@ -98,7 +95,7 @@ Rectangle {
 
             MouseArea{
                 anchors.fill: parent
-                onClicked: dcerouter.changedPlaylistPosition(name)
+                onClicked: dcerouter.changedPlaylistPosition(path)
                 onPressed: border.color = "orange"
                 onReleased: border.color="silver"
             }

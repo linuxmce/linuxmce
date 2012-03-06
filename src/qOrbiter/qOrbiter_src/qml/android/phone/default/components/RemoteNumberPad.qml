@@ -12,20 +12,20 @@ Rectangle {
     Column{
         id:padcolumn
         spacing:5
-        width:numberrect.width
+        width:scaleX(45)
         height: childrenRect.height + scaleY(1)
         anchors.top: remotenumberpad.top
         anchors.horizontalCenter: remotenumberpad.horizontalCenter
 
         Rectangle {
             id: numberdisplay
-            width: remotenumberpad.width *.80
-            height: 25
+            width: numberrect.width
+            height: scaleY(5)
             color: style.highlight2
             radius: 2
             anchors.horizontalCenter: parent.horizontalCenter
             border.color: style.accentcolor
-            border.width: 2
+            border.width: 1
 
             TextInput {
                 id: text_input1
@@ -519,8 +519,8 @@ Rectangle {
                         MouseArea{
                             anchors.fill: parent
                             onClicked: {
-                                dcerouter.TuneToChannel(text_input1.text, text_input1.text)
-                                text_input1.text = ""
+                                dcerouter.TuneToChannel(text_input1.text, text_input1.text)                               
+                               text_input1.text = ""
                             }
                         }
                     }
