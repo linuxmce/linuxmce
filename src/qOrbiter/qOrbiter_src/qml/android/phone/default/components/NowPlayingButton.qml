@@ -108,6 +108,7 @@ Rectangle {
             horizontalAlignment: Text.AlignHCenter
             font.pixelSize: scaleY(2)
             color: "white"
+            visible:  dcenowplaying.channelID ==="" ? false: true
         }
 
 
@@ -133,8 +134,9 @@ Rectangle {
             smooth: true
             horizontalAlignment: Text.AlignHCenter
             font.pixelSize: scaleY(2)
-            visible:  dcenowplaying.program ==="" ? false: true
+            visible:  dcenowplaying.tvProgram ==="" ? false: true
             color: "white"
+
         }
 
         Text {
@@ -169,18 +171,6 @@ Rectangle {
         }
         */
 
-
-        Text {
-            id: np_timecode
-            text:dcenowplaying.timecode
-            font.pixelSize: scaleY(4)
-            width:childrenRect.width
-            anchors.bottom: np_box.bottom
-            anchors.horizontalCenter: np_box.horizontalCenter
-            wrapMode: Text.WrapAtWordBoundaryOrAnywhere
-            color: "white"
-            visible:  dcenowplaying.timecode ==="0" ? false: true
-        }
     }
 
     MouseArea{

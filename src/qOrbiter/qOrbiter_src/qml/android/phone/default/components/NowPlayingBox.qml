@@ -55,44 +55,7 @@ Rectangle {
         width: np_box.width - 40
         anchors.horizontalCenter: np_box.horizontalCenter
     }
-    Text {
-        id: network_id
-        wrapMode: "NoWrap"
-        text: qsTr("Network: ") + dcenowplaying.channelID
-        font.family: "Droid Sans"
-        font.bold: true
-        smooth: true
-        horizontalAlignment: Text.AlignHCenter
-        font.pixelSize: scaleY(2)
-        color: "white"
-    }
 
-
-    Text {
-        id: channel_id
-        wrapMode: "NoWrap"
-        text: qsTr("Channel: ") + dcenowplaying.channel
-        font.family: "Droid Sans"
-        font.bold: true
-        smooth: true
-        horizontalAlignment: Text.AlignHCenter
-        font.pixelSize: scaleY(2)
-        color: "white"
-      visible:  dcenowplaying.channel ==="" ? false: true
-    }
-
-    Text {
-        id: program_title
-        wrapMode: "NoWrap"
-        text: qsTr("Program:") + dcenowplaying.tvProgram
-        font.family: "Droid Sans"
-        font.bold: true
-        smooth: true
-        horizontalAlignment: Text.AlignHCenter
-        font.pixelSize: scaleY(2)
-        visible:  dcenowplaying.program ==="" ? false: true
-        color: "white"
-    }
 
     Text {
         id: np
@@ -102,7 +65,6 @@ Rectangle {
         wrapMode: Text.WrapAtWordBoundaryOrAnywhere
         anchors.horizontalCenter: np_box.horizontalCenter
         color: "white"
-        visible:  dcenowplaying.timecode ==="0" ? false: true
     }
 
     states: [
