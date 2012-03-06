@@ -336,6 +336,7 @@ int main(int argc, char* argv[])
         QObject::connect(w, SIGNAL(startPlayback(QString)), pqOrbiter, SLOT(playMedia(QString)));
 
         QObject::connect(w, SIGNAL(liveTVrequest()), simpleEPGmodel, SLOT(populate()), Qt::QueuedConnection);
+        QObject::connect(w, SIGNAL(playlistRequest()), storedVideoPlaylist, SLOT(populate()), Qt::QueuedConnection);
         QObject::connect(w->nowPlayingButton, SIGNAL(newMediaSpeed(int)), pqOrbiter,SLOT(setMediaSpeed(int)));
 
         //epg specific

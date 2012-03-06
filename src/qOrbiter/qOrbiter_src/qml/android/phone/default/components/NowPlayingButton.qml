@@ -27,7 +27,7 @@ Rectangle {
             font.bold: true
             smooth: true
             font.pixelSize: scaleY(3)
-            visible:  dcenowplaying.qs_mainTitle =="" ? false: true
+            visible:  dcenowplaying.qs_mainTitle ==="" ? false: true
             color: "orange"
         }
 
@@ -39,8 +39,8 @@ Rectangle {
             wrapMode: "WrapAtWordBoundaryOrAnywhere"
             //  font.bold: true
             smooth: true
-            font.pixelSize: scaleY(3)
-            visible:  dcenowplaying.tvProgram =="" ? false: true
+            font.pixelSize: scaleY(2)
+            visible:  dcenowplaying.tvProgram ==="" ? false: true
             color:"silver"
 
         }
@@ -53,8 +53,8 @@ Rectangle {
             font.family: "Droid Sans"
             //  font.bold: true
             smooth: true
-            font.pixelSize: scaleY(3)
-            visible:  dcenowplaying.episode =="" ? false: true
+            font.pixelSize: scaleY(2)
+            visible:  dcenowplaying.episode ==="" ? false: true
             color:"silver"
         }
 
@@ -66,8 +66,8 @@ Rectangle {
             font.family: "Droid Sans"
             // font.bold: true
             smooth: true
-            font.pixelSize: scaleY(3)
-            visible:  dcenowplaying.genre =="" ? false: true
+            font.pixelSize: scaleY(2)
+            visible:  dcenowplaying.genre ==="" ? false: true
             color:"silver"
             MouseArea{
                 anchors.fill: genre
@@ -88,7 +88,7 @@ Rectangle {
             smooth: true
             font.pixelSize: scaleY(3)
             elide: "ElideRight"
-            visible:  dcenowplaying.performerlist =="" ? false: true
+            visible:  dcenowplaying.performerlist ==="" ? false: true
             color:"silver"
             MouseArea{
                 anchors.fill: starring
@@ -99,6 +99,56 @@ Rectangle {
         }
 
         Text {
+            id: network_id
+            wrapMode: "NoWrap"
+            text: qsTr("Network: ") + dcenowplaying.channelID
+            font.family: "Droid Sans"
+            font.bold: true
+            smooth: true
+            horizontalAlignment: Text.AlignHCenter
+            font.pixelSize: scaleY(2)
+            color: "white"
+        }
+
+
+        Text {
+            id: channel_id
+            wrapMode: "NoWrap"
+            text: qsTr("Channel: ") + dcenowplaying.channel
+            font.family: "Droid Sans"
+            font.bold: true
+            smooth: true
+            horizontalAlignment: Text.AlignHCenter
+            font.pixelSize: scaleY(2)
+            color: "white"
+            visible:  dcenowplaying.channel ==="" ? false: true
+        }
+
+        Text {
+            id: program_title
+            wrapMode: "NoWrap"
+            text: qsTr("Program:") + dcenowplaying.tvProgram
+            font.family: "Droid Sans"
+            font.bold: true
+            smooth: true
+            horizontalAlignment: Text.AlignHCenter
+            font.pixelSize: scaleY(2)
+            visible:  dcenowplaying.program ==="" ? false: true
+            color: "white"
+        }
+
+        Text {
+            id: np
+            text:dcenowplaying.timecode
+            font.pixelSize: scaleY(2.5)
+            anchors.bottom: np_label.bottom
+            wrapMode: Text.WrapAtWordBoundaryOrAnywhere
+            anchors.horizontalCenter: np_box.horizontalCenter
+            color: "white"
+            visible:  dcenowplaying.timecode ==="0" ? false: true
+        }
+
+        /*  Text {
             id: synopsis
             width: parent.width
             wrapMode: "WrapAtWordBoundaryOrAnywhere"
@@ -117,17 +167,20 @@ Rectangle {
                 onExited: {synopsis.elide = "ElideRight"; }
             }
         }
-    }
+        */
 
-    Text {
-        id: np
-        text:dcenowplaying.timecode
-        font.pixelSize: scaleY(4)
-        width:childrenRect.width
-        anchors.bottom: np_box.bottom
-        anchors.horizontalCenter: np_box.horizontalCenter
-        wrapMode: Text.WrapAtWordBoundaryOrAnywhere
-        color: "white"
+
+        Text {
+            id: np_timecode
+            text:dcenowplaying.timecode
+            font.pixelSize: scaleY(4)
+            width:childrenRect.width
+            anchors.bottom: np_box.bottom
+            anchors.horizontalCenter: np_box.horizontalCenter
+            wrapMode: Text.WrapAtWordBoundaryOrAnywhere
+            color: "white"
+            visible:  dcenowplaying.timecode ==="0" ? false: true
+        }
     }
 
     MouseArea{
