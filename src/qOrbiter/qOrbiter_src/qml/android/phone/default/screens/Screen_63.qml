@@ -9,7 +9,7 @@ Rectangle {
     width: appW
     state: ""
     color: "transparent"
-
+    Component.onCompleted: manager.getLiveTVPlaylist()
 
     NowPlayingBox{id:np_box
         anchors.top: satcableboxremote.top
@@ -196,15 +196,12 @@ Rectangle {
             }
 
             PropertyChanges{
-                target: showepg
-                anchors.top: homebutton.bottom
-                anchors.right: satcableboxremote.right
+                target: showepg           
                 visible:true
             }
             PropertyChanges {
                 target: metadatavideo
                 visible:false
-
             }
         },
         State{
@@ -213,7 +210,6 @@ Rectangle {
             {
                 target: playlist
                 visible:true
-
             }
 
             PropertyChanges {

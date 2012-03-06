@@ -1058,10 +1058,10 @@ void qOrbiter::CMD_Set_Now_Playing(string sPK_DesignObj,string sValue_To_Assign,
 
     if(iPK_MediaType == 11)
     {
-        emit clearTVplaylist();
+
     }
     else{
-        emit clearPlaylist();
+
     }
 
     QString scrn = sPK_DesignObj.c_str();
@@ -2614,10 +2614,11 @@ void DCE::qOrbiter::requestMediaPlaylist()
                 index = qs_plsIndex.toInt();
                 fk_file = pCell->GetValue();                
                 emit playlistItemAdded(new PlaylistItemClass(cellTitle,  fk_file,index));
-                QApplication::processEvents(QEventLoop::AllEvents);
+
             }
-            emit playlistDone();
+
         }
+        emit playlistDone();
     }
     else
     {
@@ -2949,7 +2950,7 @@ void DCE::qOrbiter::requestLiveTvPlaylist()
       to expand our ui capabilities. it is essentially a clone of the many datagrid requests
       that the orbiter makes.
       */
-    qDebug("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!");
+
     emit statusMessage("Getting current Epg");
 
     int gHeight = 0;
@@ -2999,7 +3000,6 @@ void DCE::qOrbiter::requestLiveTvPlaylist()
             DataGridTable *pDataGridTable = new DataGridTable(iData_Size,pData,false);
             int cellsToRender= pDataGridTable->GetRows();
 
-
             //LoggerWrapper::GetInstance()->Write(LV_CRITICAL, "Attribute Datagrid Dimensions: Height %i, Width %i", gHeight, gWidth);
             QString channelName;
             QString channelIndex;
@@ -3029,10 +3029,10 @@ void DCE::qOrbiter::requestLiveTvPlaylist()
                 int chanIData_size = 0;
                 string *response;
 
-                channelimage.load(":/icons/icon.png");
+
                 EPGItemClass *t = new EPGItemClass(channelName, channelNumber, channelIndex, program, index, channelimage, channelimage);
                 emit addChannel(t);
-                QApplication::processEvents(QEventLoop::AllEvents);
+
                 index++;
             }
         }

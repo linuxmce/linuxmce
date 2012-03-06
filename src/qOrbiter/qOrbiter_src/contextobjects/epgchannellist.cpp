@@ -31,9 +31,7 @@ EPGChannelList::~EPGChannelList() {
 
 void EPGChannelList::appendRow(EPGItemClass *item)
 {
-
     appendRows(QList<EPGItemClass*>() << item);
-
 }
 
 void EPGChannelList::appendRows(const QList<EPGItemClass *> &items)
@@ -55,7 +53,7 @@ void EPGChannelList::appendRows(const QList<EPGItemClass *> &items)
 void EPGChannelList::insertRow(int row, EPGItemClass *item)
 {
     beginInsertRows(QModelIndex(), row, row);
-    connect(item, SIGNAL(dataChanged()), this, SLOT(handleItemChange()));
+    //connect(item, SIGNAL(dataChanged()), this, SLOT(handleItemChange()));
     //qDebug() << "Inserting at:" << row;
     m_list.insert(row, item);
     endInsertRows();
