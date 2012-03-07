@@ -1030,7 +1030,7 @@ void qOrbiter::CMD_Continuous_Refresh(string sTime,string &sCMD_Result,Message *
 void qOrbiter::CMD_Set_Now_Playing(string sPK_DesignObj,string sValue_To_Assign,string sText,int iPK_MediaType,int iStreamID,int iValue,string sName,string sList_PK_Device,bool bRetransmit,string &sCMD_Result,Message *pMessage)
 //<-dceag-c242-e->
 {
-
+/*
     cout << "Need to implement command #242 - Set Now Playing" << endl;
     cout << "Parm #3 - PK_DesignObj=" << sPK_DesignObj << endl;
     cout << "Parm #5 - Value_To_Assign=" << sValue_To_Assign << endl;
@@ -1041,13 +1041,18 @@ void qOrbiter::CMD_Set_Now_Playing(string sPK_DesignObj,string sValue_To_Assign,
     cout << "Parm #50 - Name=" << sName << endl;
     cout << "Parm #103 - List_PK_Device=" << sList_PK_Device << endl;
     cout << "Parm #120 - Retransmit=" << bRetransmit << endl;
-
+*/
     i_current_mediaType = iPK_MediaType;
     string::size_type pos=0;
     m_dwPK_Device_NowPlaying = atoi(StringUtils::Tokenize(sList_PK_Device,",",pos).c_str());
     m_dwPK_Device_NowPlaying_Video = atoi(StringUtils::Tokenize(sList_PK_Device,",",pos).c_str());
     m_dwPK_Device_NowPlaying_Audio = atoi(StringUtils::Tokenize(sList_PK_Device,",",pos).c_str());
     m_dwPK_Device_CaptureCard = atoi(StringUtils::Tokenize(sList_PK_Device,",",pos).c_str());
+
+    QString scrn = sPK_DesignObj.c_str();
+    int pos1 = scrn.indexOf(",");
+    scrn.remove(pos1, scrn.length());
+    // qDebug() << sValue_To_Assign.c_str();
 
     QString port = QString::fromStdString(GetCurrentDeviceData(m_dwPK_Device_NowPlaying, 171));
     emit newTCport(port.toInt());
@@ -1067,46 +1072,53 @@ void qOrbiter::CMD_Set_Now_Playing(string sPK_DesignObj,string sValue_To_Assign,
     }
     else
     {
-        b_mediaPlaying = true;
+
         emit setNowPlaying(true);
+        emit currentScreenChanged("Screen_"+scrn+".qml");
+        currentScreen = "Screen_"+scrn+".qml";
+        emit subtitleChanged((QString::fromStdString(sText)));
+        emit streamIdChanged(iStreamID);
+        emit subtitleChanged(QString::fromStdString(sText));
+        internal_streamID = iStreamID;
+
+        emit mediaTypeChanged(iPK_MediaType);
 
         if(iPK_MediaType ==1)
         {
             //channel ID will be sent to the playlist parser to find our position of the current data
             emit np_channelID(QString::number(iValue));
-
-            emit np_network(QString::fromStdString(sValue_To_Assign));
+           emit np_network(QString::fromStdString(sValue_To_Assign));
             //the remaining two signals are sent to the now playing class immediatly
             emit np_program(QString::fromStdString(sText));
             emit mythTvUpdate("i"+QString::number(iValue));
-            if(bRetransmit == 0 && b_mediaPlaying == true)
+            b_mediaPlaying = true;
+            if(bRetransmit == 0 )
             {
 
             }
             else
             {
                 emit epgDone();
+
             }
         }
         else if(iPK_MediaType== 11)
         {
-            emit clearTVplaylist();
+            emit np_channelID(QString::number(iValue));
+           emit np_network(QString::fromStdString(sValue_To_Assign));
+            emit epgDone();
+            b_mediaPlaying = true;
         }
         else
         {
-
-            emit setNowPlaying(true);
             GetNowPlayingAttributes();
             emit playlistPositionChanged(iValue);
             emit clearPlaylist();
-
+            b_mediaPlaying = true;
         }
     }
 
-        QString scrn = sPK_DesignObj.c_str();
-        int pos1 = scrn.indexOf(",");
-        scrn.remove(pos1, scrn.length());
-        // qDebug() << sValue_To_Assign.c_str();
+
 
         if(iPK_MediaType == 5)
         {
@@ -1134,14 +1146,7 @@ void qOrbiter::CMD_Set_Now_Playing(string sPK_DesignObj,string sValue_To_Assign,
         }
 
 
-        emit currentScreenChanged("Screen_"+scrn+".qml");
-        currentScreen = "Screen_"+scrn+".qml";
-        emit subtitleChanged((QString::fromStdString(sText)));
-        emit streamIdChanged(iStreamID);
-        emit subtitleChanged(QString::fromStdString(sText));
-        internal_streamID = iStreamID;
-        emit streamIdChanged(iStreamID);
-        emit mediaTypeChanged(iPK_MediaType);
+
 
 
 }
@@ -2965,10 +2970,10 @@ void DCE::qOrbiter::requestLiveTvPlaylist()
       that the orbiter makes.
       */
 
-    emit statusMessage("Getting current Epg");
+    qDebug("Getting current Epg");
 
-    int gHeight = 5;
-    int gWidth = 5;
+    int gHeight = 1;
+    int gWidth = 1;
     int pkVar = 0;
     string valassign ="";
     bool isSuccessfull;// = "false";
@@ -3037,9 +3042,14 @@ void DCE::qOrbiter::requestLiveTvPlaylist()
     {
         emit statusMessage("Could Not Populate");
     }
-    if(i_current_mediaType == 1)
+
+    if(i_current_mediaType == 11)
     {
         emit epgDone();
+    }
+    else
+    {
+
     }
 }
 

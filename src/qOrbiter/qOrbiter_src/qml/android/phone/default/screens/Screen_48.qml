@@ -2,101 +2,250 @@ import QtQuick 1.0
 import "../components"
 
 Rectangle {
-    property alias videoTitle: video_title.text
-   // property alias synText:
-    id: pvrRemote
 
+    // property alias synText:
+    id: satcableboxremote
+    height: appH
+    width: appW
+    state: ""
+    color: "transparent"
+    Component.onCompleted: manager.getLiveTVPlaylist()
 
-    width: 800
-    height: 600
-    radius: 0
-    opacity: 1
-    color: style.advanced_bg
+    NowPlayingBox{id:np_box
+        anchors.top: satcableboxremote.top
+        anchors.horizontalCenter: parent.horizontalCenter
+        visible: true
+    }
 
-    //main 'now playing rect containing all the other items
-    Rectangle{
-        id:video_now_playing
-        x: 200
-        y: 2
-        height: 179
-        width: 224
-        anchors.left: pvrRemote.right
-        anchors.leftMargin: -600
+    HaControls{id:automation_controls; anchors.top: home.bottom; anchors.left:home.left}
 
-        color: style.button_system_color
-        Text {
-            id: video_title
-            text: "text"
+    AudioRemote {
+        id: audioremote1
+        anchors.bottom: satcableboxremote.bottom
+    }
+    HomeButton{id:home; anchors.leftMargin: 5; anchors.topMargin: 5;anchors.left: satcableboxremote.left; anchors.top:satcableboxremote.top}
+
+    Rectangle {
+        id: metadatavideo
+        width: scaleX(45)
+        height: childrenRect.height
+        anchors.top: np_box.bottom
+        anchors.left: automation_controls.right
+        color: "transparent"
+        visible:true
+
+        Image {
+            id: npgloss
+            source: "../img/widegreyshape.png"
+            height:parent.height
+            width:parent.width
+            smooth:true
+            opacity: .35
         }
-        Rectangle{
-            id: title_box
-            width: video_now_playing.width
-            height: 15
-            color: style.rowbgColor
-            opacity: 5
-            anchors.top: parent.top
+
+        Column
+        {
+            width: scaleX(45)
+            spacing: 5
+            height: childrenRect.height
+
             Text {
-                id: now_playing_label
-                x: 0
+                id: artist
+                width: parent.width
+                text: qsTr("Device: ")  + dcenowplaying.qs_mainTitle
+                font.family: "Droid Sans"
+                wrapMode: "NoWrap"
+                font.bold: true
+                smooth: true
+                font.pixelSize: scaleY(3)
+                color: "orange"
+            }
+
+            Text {
+                id: network_id
+                wrapMode: "NoWrap"
+                text: qsTr("Network: ") + dcenowplaying.channelID
+                font.family: "Droid Sans"
+                font.bold: true
+                smooth: true
+                horizontalAlignment: Text.AlignHCenter
+                font.pixelSize: scaleY(2)
+                color: "white"
+            }
+
+
+            Text {
+                id: channel_id
+                wrapMode: "NoWrap"
+                text: qsTr("Channel: ") + dcenowplaying.channel
+                font.family: "Droid Sans"
+                font.bold: true
+                smooth: true
+                horizontalAlignment: Text.AlignHCenter
+                font.pixelSize: scaleY(2)
+                color: "white"
+            }
+
+            Text {
+                id: program_title
+                wrapMode: "NoWrap"
+                text: qsTr("Program:") + dcenowplaying.tvProgram
+                font.family: "Droid Sans"
+                font.bold: true
+                smooth: true
+                horizontalAlignment: Text.AlignHCenter
+                font.pixelSize: scaleY(2)
+                color: "white"
+            }
+        }
+    }
+
+    Row
+    {
+        id:extra_buttons
+        height: childrenRect.height
+        width: childrenRect.width
+        anchors.bottom: audioremote1.top
+
+        ButtonSq {
+            id: keypad
+            width: style.stdbuttonw
+            height: style.stdbuttonh
+
+            buttontextfontsize: scaleY(2)
+            buttontext: "#"
+            MouseArea{
+                smooth: true
+                anchors.fill: parent
+                onClicked: satcableboxremote.state="NUMBERS"
+            }
+        }
+
+        ButtonSq {
+            id: homebutton
+
+            visible: false
+            buttontext: "home"
+            MouseArea{
+                anchors.fill:parent
+                onClicked: satcableboxremote.state=""
+            }
+        }
+
+        ButtonSq {
+            id: showepg
+            visible: true
+
+            buttontext: "EPG"
+            MouseArea{
+                anchors.fill:parent
+                onClicked: satcableboxremote.state="GRID"
+            }
+        }
+    }
+
+    RemoteNumberPad {
+        id: remotenumberpad1
+        anchors.right: satcableboxremote.right
+        anchors.top: satcableboxremote.top
+        visible: false
+    }
+
+    EPGPlaylist{
+        id:playlist;
+        anchors.top: satcableboxremote.top;
+        anchors.right:satcableboxremote.right
+        visible: false
+    }
+
+
+    states: [
+        State {
+            name: "NUMBERS"
+
+            PropertyChanges {
+                target: textcol
+                visible: false
+            }
+            PropertyChanges {
+                target: np_box
+                visible: false
+
+            }
+
+            PropertyChanges {
+                target: remotenumberpad1
+                x: 70
                 y: 0
-                text: "Now Playing"
-                anchors.topMargin: 0
-                wrapMode: Text.WordWrap
-                anchors.top: parent.top
+                visible: true
+                anchors.horizontalCenter: satcableboxremote.horizontalCenter
             }
 
-            Text {
-                id: text2
-                x: 139
-                y: 139
-                text: "whats playing"
-                clip: true
-                horizontalAlignment: Text.AlignLeft
-                wrapMode: Text.WordWrap
-                font.pixelSize: 12
+            PropertyChanges {
+                target: keypad
+                visible: false
+
+            }
+
+            PropertyChanges {
+                target: homebutton
+                buttontextbold: true
+                buttontext: "Display"
+                visible:true
+
+            }
+
+            PropertyChanges{
+                target: showepg
+                visible:true
+            }
+            PropertyChanges {
+                target: metadatavideo
+                visible:false
+            }
+        },
+        State{
+            name:"GRID"
+            PropertyChanges
+            {
+                target: playlist
+                visible:true
+            }
+
+            PropertyChanges {
+                target: metadatavideo
+                visible:false
+
+            }
+            PropertyChanges{
+                target: showepg
+                visible:false
+            }
+            PropertyChanges {
+                target: np_box
+                visible: false
+
+            }
+
+            PropertyChanges{
+                target:homebutton
+                visible:true
+
+            }
+
+            PropertyChanges {
+                target: keypad
+                visible: true
+
+
+            }
+            PropertyChanges {
+                target: remotenumberpad1
+                visible: false
             }
         }
-    }
-    Remote_lighting_controls{ id: remote_lighting_controls1; x: 331; y: 181; width: 65; height: 219; anchors.topMargin: 179;anchors.top: video_now_playing.baseline}
-    Remote_Audio_controls{ id: remote1; x: 277; y: 181; width: 60; height: 219; anchors.rightMargin: -6; z: 45; anchors.right: remote_lighting_controls1.left}
 
-    HomeButton{anchors.right: parent.right}
+    ]
 
 
-    VideoControls {
-        id: videocontrols1
-        x: 537
-        y: 231
-        width: 263
-        height: 249
-        color: "#e1e9f1"
-    }
-
-    Column {
-        id: channelgrid
-
-        width: 200
-        height: 500
-        clip: true
-
-        Flickable{
-            height: parent.height
-            width: parent.width
-            contentHeight: childrenRect.height
-            contentWidth: childrenRect.width
-            clip: true
-
-            Repeater { model: 50               
-
-                Rectangle {
-                    width:200
-                    height: 50
-                    color: "whitesmoke"
-                    Text {
-                        text: "I am DG item ,Sroll me!"
-                    }
-                }
-            }
-}
-    }
 }

@@ -72,6 +72,8 @@ void EPGChannelList::handleItemChange()
 
 void EPGChannelList::resetInternalData()
 {
+    qDebug("Clearing internal epg");
+    if(m_list.isEmpty())
     m_list.clear();
 }
 
