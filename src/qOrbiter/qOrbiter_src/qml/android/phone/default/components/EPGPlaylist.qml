@@ -9,8 +9,7 @@ Rectangle {
 
     Connections{
         target: simpleepg
-        onActiveIndexChanged:epgplaylistview.positionViewAtIndex(simpleepg.currentIndex, ListView.Beginning)
-
+        onProgramChanged:epgplaylistview.positionViewAtIndex(simpleepg.currentIndex, ListView.Beginning)
     }
 
     Image {
@@ -54,7 +53,7 @@ Rectangle {
                     border.width: 1
 
                     Text {
-                        id:channelID
+                        id:channel_ID
                         text: name
                         font.capitalization: Font.SmallCaps
                         width: parent.width
@@ -92,9 +91,9 @@ Rectangle {
                 MouseArea{
                     anchors.fill: parent
                     onClicked:{
-                        dcerouter.TuneToChannel(channelnumber, channelnumber)
+                        dcerouter.TuneToChannel(channelnumber, channelid)
                         epgplaylistview.positionViewAtIndex(index, ListView.Beginning)
-                        dcenowplaying.setProgram(program)                        
+
                     }
 
                 }
