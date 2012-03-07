@@ -335,7 +335,7 @@ signals:
     void setMediaDetails();
 
     void liveTVrequest();
-    void playlistRequest();
+    void managerPlaylistRequest();
     void bindMediaRemote(bool b);
     void userChanged(int user);
     void requestMoreGridData();

@@ -48,20 +48,17 @@ public:
     PlaylistItemClass* find(const QString &id) const;
     QModelIndex indexFromItem( const PlaylistItemClass* item) const;
     PlaylistItemClass* currentRow();
-    virtual void beginResetModel();
-    virtual void endResetModel();
-    virtual void resetInternalData();
     int currentIndex;
 
 
 signals:
     void ItemAdded();
     void dataChanged(const QModelIndex &topLeft, const QModelIndex &bottomRight, const int &sRow);
-    void modelAboutToBeReset();
-    void modelReset();
+
     void playlistReady();
     void activeItemChanged();
-
+    virtual void modelAboutToBeReset();
+    virtual void modelReset();
 
 public slots:
     bool checkDupe(QString name, int position);
@@ -74,10 +71,12 @@ public slots:
     void populate();
 private slots:
     void handleItemChange();
-
+    virtual void beginResetModel();
+    virtual void endResetModel();
 private:
     PlaylistItemClass* m_prototype;
     QList<PlaylistItemClass*> m_list;
+    virtual void resetInternalData();
 };
 
 #endif // PLAYLISTCLASS_H

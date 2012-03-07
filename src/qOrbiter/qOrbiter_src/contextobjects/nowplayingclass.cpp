@@ -38,6 +38,7 @@ void NowPlayingClass::resetData()
     setMediaType(NULL);
     setSynop(""); emit synopChanged();
     setStreamID(0);
+    setProgram("");
 
 }
 

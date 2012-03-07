@@ -7,16 +7,6 @@ Rectangle {
     id: genericdvdremote
     anchors.centerIn: parent
 
-    Timer{
-        id:singleshot
-        repeat: false
-        interval: 2000
-        triggeredOnStart: false
-        running: true
-
-        onTriggered: image1.source = "image://updateobject/"+securityvideo.timestamp
-    }
-
     Connections{
         target:dcenowplaying
         onPlayListPositionChanged: image1.source = "image://updateobject/"+securityvideo.timestamp
@@ -41,7 +31,7 @@ Rectangle {
 
     }
 
-   NonEPGPlaylist{ x: 64;y: 70}
+   //NonEPGPlaylist{ x: 64;y: 70}
 
 
 

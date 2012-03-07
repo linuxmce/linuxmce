@@ -31,6 +31,7 @@ public:
     void setItemStatus(int i);
     QModelIndex activeIndex;
     int currentIndex;
+    QString id;
 
 public slots:
     int rowCount(const QModelIndex &parent = QModelIndex()) const;
@@ -48,7 +49,11 @@ public slots:
     void populate();
     void setProgram(QString qml_text_channel);
     void setCurrentIndex(QModelIndex index);
+    void setMythProgram(QString channel);
+    void updatePosition();
     QModelIndex getCurrentIndex();
+    QModelIndex getMythChannelIndex(QString m);
+
 
     virtual void beginResetModel();
     virtual void endResetModel();

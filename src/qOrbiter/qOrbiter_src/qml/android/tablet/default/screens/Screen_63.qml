@@ -8,24 +8,13 @@ Rectangle {
     height: style.orbiterH
     width: style.orbiterW
     color:"transparent"
-    Timer{
-        id:singleshot
-        repeat: false
-        interval: 2000
-        triggeredOnStart: false
-        running: true
 
-        onTriggered: nowplayingimage.source = "image://listprovider/updateobject/"+securityvideo.timestamp
-    }
 
     Connections{
         target:dcenowplaying
         onPlayListPositionChanged: nowplayingimage.source = "image://listprovider/updateobject/"+securityvideo.timestamp
     }
 
-
-
-    Component.onCompleted:setNowPlayingTv()
 
         //main 'now playing rect containing all the other items
 
@@ -333,10 +322,15 @@ Rectangle {
                         buttontext: qsTr("Power")
                         MouseArea{
                             anchors.fill: parent
-                            onClicked: dcerouter.stopMedia()
+                            onClicked: dcerouter.StopMedia()
                         }
                     }
                     HomeButton{}
+                }
+                Text {
+                    id: media_messages
+                    text: dcerouter.mediaResponse
+                    font.pixelSize: scaleY(5)
                 }
             }
         }

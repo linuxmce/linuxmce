@@ -39,8 +39,8 @@ orbiterWindow::orbiterWindow(long deviceid, std::string routerip, QObject *paren
     mainView.rootContext()->setContextProperty("appH", mainView.window()->height());
 #elif for_android
 
-    mainView.rootContext()->setContextProperty("appW", 320);
-    mainView.rootContext()->setContextProperty("appH", 480);
+    mainView.rootContext()->setContextProperty("appW", 1280);
+    mainView.rootContext()->setContextProperty("appH", 720);
 #else
     mainView.rootContext()->setContextProperty("appW", 1280);
     mainView.rootContext()->setContextProperty("appH", 720);
@@ -135,7 +135,7 @@ bool orbiterWindow::getOrbiterState()
 
 void orbiterWindow::showSplash()
 {
-    mainView.setSource(QUrl("../Splash.qml"));
+  mainView.setSource(QUrl(qrcPath));
 }
 
 void orbiterWindow::setSkinDataState(bool b)

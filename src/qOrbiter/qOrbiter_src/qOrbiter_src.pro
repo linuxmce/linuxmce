@@ -341,8 +341,7 @@ HEADERS += \
     threadedClasses/threadedsplash.h \
     orbiterwindow.h \
     contextobjects/screensaverclass.h \
-    datamodels/skinloader.h \
-    datamodels/skinloader.h \
+    datamodels/skinloader.h  \
     datamodels/genericsetupmodel.h \
     datamodels/genericsetupitem.h \
     dgmanager.h \

@@ -41,6 +41,8 @@ namespace DCE
 class qOrbiter : public qOrbiter_Command
 {
     Q_OBJECT
+    Q_PROPERTY (QString mediaResponse READ getMediaResponse WRITE setMediaResponse NOTIFY mediaResponseChanged)
+
 
     //<-dceag-decl-e->
     // Private member variables
@@ -54,6 +56,8 @@ public:
     int m_dwPK_Device_NowPlaying,m_dwPK_Device_NowPlaying_Video,m_dwPK_Device_NowPlaying_Audio,m_dwPK_Device_CaptureCard;  /** < set by the media engine, this is whatever media device is currently playing.  Capture Card is non null if we're displaying media via this card */
     bool retrieving;
     bool finished;
+    bool b_mediaPlaying;
+    QString mediaResponse;
 
     int i_mediaModelRows;
     int i_currentMediaModelRow;
@@ -1102,14 +1106,16 @@ signals:
     void startManager(QString, QString);
     void deviceInvalid(QList<QObject*>);
     void routerInvalid();
+     void routerReloading(QString msg);
     void statusMessage(QString s);
     void configReady(QByteArray config);
     void setMyIp(QString ip);
     void newTCport(int port);
-
+    void mediaResponseChanged();
 
     //connections
-    void disconnected(QString msg);
+
+
 
     //media
     void screenShotReady();
@@ -1119,6 +1125,8 @@ signals:
     void mediaMessage(QString msg);
     void gridModelSizeChange(int size);
     void checkGridStatus();
+    void liveTvUpdate(QString id);
+    void mythTvUpdate(QString id);
 
     //media datagrid
     void initializeSorting();
@@ -1161,6 +1169,7 @@ signals:
     void np_track(QString track);
     void np_releaseDate(QString release_date);
     void np_playlistIndexChanged(int index);
+    void np_network(QString s);
 
     //storemediaplaylist
     void playlistItemAdded(PlaylistItemClass*);
@@ -1217,6 +1226,10 @@ public slots:
     void setCurrentScreen(QString s);
      void setupTimeCode();
 
+//operations
+     void setMediaResponse(QString r) {mediaResponse = r; emit mediaResponseChanged();}
+     QString getMediaResponse() {return mediaResponse;}
+
     //connections
     void connectionError();
 
@@ -1240,6 +1253,7 @@ public slots:
     void jumpMobileGrid(int page);
     void getGridView(bool direction);
     //now playing
+
 
     //media
     void displayToggle(int);

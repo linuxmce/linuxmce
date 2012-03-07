@@ -57,6 +57,7 @@ qOrbiter::qOrbiter( int DeviceID, string ServerAddress,bool bConnectEventHandler
     m_pOrbiterCat = 5;
 
     internal_streamID = 0;
+
     videoDefaultSort = "13";
     audioDefaultSort = "2";
     photoDefaultSort = "13";
@@ -69,6 +70,13 @@ qOrbiter::qOrbiter( int DeviceID, string ServerAddress,bool bConnectEventHandler
     media_currentPage=0;
     media_pos=0;
     media_pageSeperator = 25;
+
+    b_mediaPlaying = false;
+    m_dwPK_Device_NowPlaying = 0;
+    m_dwPK_Device_NowPlaying_Video = 0;
+    m_dwPK_Device_NowPlaying_Audio = 0;
+    m_dwPK_Device_CaptureCard = 0;
+
     initializeGrid();
 
 
@@ -658,10 +666,11 @@ void qOrbiter::CMD_Set_Size_Rel_To_Parent(string sPK_DesignObj,int iPosition_X,i
 void qOrbiter::CMD_Set_Text(string sPK_DesignObj,string sText,int iPK_Text,string &sCMD_Result,Message *pMessage)
 //<-dceag-c25-e->
 {
-    cout << "Need to implement command #25 - Set Text" << endl;
-    cout << "Parm #3 - PK_DesignObj=" << sPK_DesignObj << endl;
-    cout << "Parm #9 - Text=" << sText << endl;
-    cout << "Parm #25 - PK_Text=" << iPK_Text << endl;
+    //   cout << "Need to implement command #25 - Set Text" << endl;
+    //   cout << "Parm #3 - PK_DesignObj=" << sPK_DesignObj << endl;
+    //  cout << "Parm #9 - Text=" << sText << endl;
+    //  cout << "Parm #25 - PK_Text=" << iPK_Text << endl;
+    emit statusMessage(QString::fromStdString(sText));
 }
 
 //<-dceag-c26-b->
@@ -702,6 +711,7 @@ void qOrbiter::CMD_Set_Variable(int iPK_Variable,string sValue_To_Assign,string 
     cout << "Need to implement command #27 - Set Variable" << endl;
     cout << "Parm #4 - PK_Variable=" << iPK_Variable << endl;
     cout << "Parm #5 - Value_To_Assign=" << sValue_To_Assign << endl;
+    //emit statusMessage(QString::fromStdString(sValue_To_Assign));
 }
 
 //<-dceag-c28-b->
@@ -1042,68 +1052,98 @@ void qOrbiter::CMD_Set_Now_Playing(string sPK_DesignObj,string sValue_To_Assign,
     QString port = QString::fromStdString(GetCurrentDeviceData(m_dwPK_Device_NowPlaying, 171));
     emit newTCport(port.toInt());
 
-    if (iPK_MediaType != 0)
-    {
-       emit setNowPlaying(true);
-       emit playlistPositionChanged(iValue);
-    }
-    else if (iPK_MediaType == 0)
+    if (iPK_MediaType == 0)
     {
         emit resetNowPlaying();
         emit setNowPlaying(false);
         emit gotoQml("Screen_1.qml");
-      // BindMediaRemote(false);
-
-    }
-
-    if(iPK_MediaType == 11)
-    {
-
-    }
-    else{
-
-    }
-
-    QString scrn = sPK_DesignObj.c_str();
-    int pos1 = scrn.indexOf(",");
-    scrn.remove(pos1, scrn.length());
-    // qDebug() << sValue_To_Assign.c_str();
-
-    if(iPK_MediaType == 5)
-    {
-        emit np_title1Changed(QString::fromStdString(sValue_To_Assign ));
-        emit np_title2Changed(QString::fromStdString(sText));
+        b_mediaPlaying = false;
+        // BindMediaRemote(false);
+        emit currentScreenChanged("Screen_1.qml");
+        currentScreen = "Screen_1.qml";
+        internal_streamID = iStreamID;
+        emit streamIdChanged(iStreamID);
+        emit mediaTypeChanged(iPK_MediaType);
     }
     else
     {
-        QString md1 = QString::fromStdString(sValue_To_Assign);
-        QStringList mdlist;
-        mdlist= md1.split(QRegExp("\\n"), QString::SkipEmptyParts);
+        b_mediaPlaying = true;
+        emit setNowPlaying(true);
 
-        if (mdlist.count() == 2)
+        if(iPK_MediaType ==1)
         {
-            emit np_title1Changed(mdlist.at(0));
-            emit np_title2Changed(mdlist.at(1));
-            //nowPlayingButton->setTitle(mdlist.at(0));
-            // nowPlayingButton->setTitle2(mdlist.at(1));
+            //channel ID will be sent to the playlist parser to find our position of the current data
+            emit np_channelID(QString::number(iValue));
+
+            emit np_network(QString::fromStdString(sValue_To_Assign));
+            //the remaining two signals are sent to the now playing class immediatly
+            emit np_program(QString::fromStdString(sText));
+            emit mythTvUpdate("i"+QString::number(iValue));
+            if(bRetransmit == 0 && b_mediaPlaying == true)
+            {
+
+            }
+            else
+            {
+                emit epgDone();
+            }
+        }
+        else if(iPK_MediaType== 11)
+        {
+            emit clearTVplaylist();
         }
         else
         {
-            emit np_title1Changed(QString::fromStdString(sValue_To_Assign));
-            emit np_title2Changed("");
+
+            emit setNowPlaying(true);
+            GetNowPlayingAttributes();
+            emit playlistPositionChanged(iValue);
+            emit clearPlaylist();
+
         }
     }
 
-    emit currentScreenChanged("Screen_"+scrn+".qml");
-   currentScreen = "Screen_"+scrn+".qml";
-    emit subtitleChanged((QString::fromStdString(sText)));
-    emit streamIdChanged(iStreamID);
-    emit subtitleChanged(QString::fromStdString(sText));
-    internal_streamID = iStreamID;
-    emit streamIdChanged(iStreamID);
-    emit mediaTypeChanged(iPK_MediaType);
+        QString scrn = sPK_DesignObj.c_str();
+        int pos1 = scrn.indexOf(",");
+        scrn.remove(pos1, scrn.length());
+        // qDebug() << sValue_To_Assign.c_str();
 
-    GetNowPlayingAttributes();
+        if(iPK_MediaType == 5)
+        {
+            emit np_title1Changed(QString::fromStdString(sValue_To_Assign ));
+            emit np_title2Changed(QString::fromStdString(sText));
+        }
+        else
+        {
+            QString md1 = QString::fromStdString(sValue_To_Assign);
+            QStringList mdlist;
+            mdlist= md1.split(QRegExp("\\n"), QString::SkipEmptyParts);
+
+            if (mdlist.count() == 2)
+            {
+                emit np_title1Changed(mdlist.at(0));
+                emit np_title2Changed(mdlist.at(1));
+                //nowPlayingButton->setTitle(mdlist.at(0));
+                // nowPlayingButton->setTitle2(mdlist.at(1));
+            }
+            else
+            {
+                emit np_title1Changed(QString::fromStdString(sValue_To_Assign));
+                emit np_title2Changed("");
+            }
+        }
+
+
+        emit currentScreenChanged("Screen_"+scrn+".qml");
+        currentScreen = "Screen_"+scrn+".qml";
+        emit subtitleChanged((QString::fromStdString(sText)));
+        emit streamIdChanged(iStreamID);
+        emit subtitleChanged(QString::fromStdString(sText));
+        internal_streamID = iStreamID;
+        emit streamIdChanged(iStreamID);
+        emit mediaTypeChanged(iPK_MediaType);
+
+
 }
 
 //<-dceag-c254-b->
@@ -1856,7 +1896,7 @@ bool qOrbiter::getConfiguration()
 
 void qOrbiter::registerDevice(int user, QString ea, int room)
 {
-  //  emit statusMessage("registering");
+    //  emit statusMessage("registering");
 
     char *pData;
     int iSize;
@@ -1874,7 +1914,7 @@ void qOrbiter::registerDevice(int user, QString ea, int room)
     {
 
         emit statusMessage("DCERouter Responded to Register with " + QString::fromStdString(pResponse));
-       // setLocation(room, ea.toInt());
+        setLocation(room, ea.toInt());
         BindMediaRemote(true);
         GetScreenSaverImages();
     }
@@ -1963,7 +2003,7 @@ void qOrbiter::getFloorplanDeviceCommand(int device)
             QString fk_file;
             QString filePath;
             int index;
-            QImage cellImg;
+
             for(MemoryDataTable::iterator it=pDataGridTable->m_MemoryDataTable.begin();it!=pDataGridTable->m_MemoryDataTable.end();++it)
             {
                 DataGridCell *pCell = it->second;
@@ -2253,9 +2293,8 @@ void DCE::qOrbiter::executeCommandGroup(int cmdGrp)
 
 void qOrbiter::displayToggle(int i)
 {
-
     string state;
-    string res;
+
     if (i == 0)
     {
         state = "off";
@@ -2439,7 +2478,7 @@ void DCE::qOrbiter::GetMediaAttributeGrid(QString  qs_fk_fileno)
             bool barrows = false; //not sure what its for
             //creating a dg table to check for cells. If 0, then we error out and provide a single "error cell"
             DataGridTable *pDataGridTable = new DataGridTable(iData_Size,pData,false);
-           // int cellsToRender= pDataGridTable->GetRows();
+            // int cellsToRender= pDataGridTable->GetRows();
 #ifndef ANDROID
             LoggerWrapper::GetInstance()->Write(LV_CRITICAL, "Attribute Datagrid Dimensions: Height %i, Width %i", gHeight, gWidth);
 #endif
@@ -2548,7 +2587,7 @@ void DCE::qOrbiter::StopMedia()
 void DCE::qOrbiter::RwMedia()
 {
     CMD_Change_Playback_Speed rewind_media(m_dwPK_Device, iMediaPluginID, internal_streamID , -2, true);
-     SendCommand(rewind_media);
+    SendCommand(rewind_media);
 }
 
 void DCE::qOrbiter::FfMedia()
@@ -2574,24 +2613,24 @@ void DCE::qOrbiter::requestMediaPlaylist()
     string valassign ="";
     bool isSuccessfull;// = "false";
     string m_sGridID ="plist_"+StringUtils::itos(m_dwPK_Device);
-    string m_sSeek;   
-    int iOffset;  
+    string m_sSeek;
+    int iOffset;
     int iData_Size=0;
     int GridCurRow = 0;
     int GridCurCol= 0;
     char *pData;
-    pData = "NULL";   
+    pData = "NULL";
     m_dwIDataGridRequestCounter++;
 
     string sPopulateResp ="";
     CMD_Populate_Datagrid cmd_populate_nowplaying_grid(m_dwPK_Device, iPK_Device_DatagridPlugIn, StringUtils::itos( m_dwIDataGridRequestCounter ), string(m_sGridID), 18, "38", DEVICETEMPLATE_Datagrid_Plugin_CONST, &pkVar, &valassign,  &isSuccessfull, &gHeight, &gWidth );
 
-    if (SendCommand(cmd_populate_nowplaying_grid, &sPopulateResp ) && sPopulateResp == "OK")
+    if (SendCommand(cmd_populate_nowplaying_grid))
     {
         //CMD_Request_Datagrid_Contents(long DeviceIDFrom, long DeviceIDTo,                   string sID,                                              string sDataGrid_ID,int iRow_count,int iColumn_count,bool bKeep_Row_Header,bool bKeep_Column_Header,bool bAdd_UpDown_Arrows,string sSeek,int iOffset,    char **pData,int *iData_Size,int *iRow,int *iColumn
         sPopulateResp = "";
         DCE::CMD_Request_Datagrid_Contents req_data_grid( long(m_dwPK_Device), long(iPK_Device_DatagridPlugIn), StringUtils::itos( m_dwIDataGridRequestCounter ), string(m_sGridID),    int(gWidth), int(gHeight),           false, false,        false,   string(m_sSeek),    int(iOffset),  &pData,         &iData_Size, &GridCurRow, &GridCurCol );
-        if(SendCommand(req_data_grid, &sPopulateResp ) && sPopulateResp == "OK")
+        if(SendCommand(req_data_grid))
         {
             DataGridTable *pDataGridTable = new DataGridTable(iData_Size,pData,false);
 #ifndef ANDROID
@@ -2600,21 +2639,19 @@ void DCE::qOrbiter::requestMediaPlaylist()
             QString cellTitle;
             QString qs_plsIndex;
             QString fk_file;
-            QString filePath;
             int index;
-            QImage cellImg;
-            QString cellfk;
-            DataGridCell *pCell;
 
             for(MemoryDataTable::iterator it=pDataGridTable->m_MemoryDataTable.begin();it!=pDataGridTable->m_MemoryDataTable.end();++it)
             {
-                pCell = it->second;             
+                DataGridCell *pCell;
+                pCell = it->second;
                 cellTitle = pCell->GetText();
                 qs_plsIndex = pCell->GetValue();
                 index = qs_plsIndex.toInt();
-                fk_file = pCell->GetValue();                
+                fk_file = pCell->GetValue();
                 emit playlistItemAdded(new PlaylistItemClass(cellTitle,  fk_file,index));
 
+                QApplication::processEvents(QEventLoop::AllEvents);
             }
 
         }
@@ -2748,7 +2785,6 @@ void DCE::qOrbiter::GetNowPlayingAttributes()
       that the orbiter makes in addition to parsing of other information passed for a given object.
       */
 
-
     int p = 0;
     string s_val;
     string pResponse="";
@@ -2800,30 +2836,14 @@ void DCE::qOrbiter::GetNowPlayingAttributes()
         bool isSuccessfull;// = "false";
 
         string m_sGridID ="mac_"+StringUtils::itos(m_dwPK_Device); // the string identifier on the type of grid
-
-        int iRow_count=0;
-        int iColumn_count = 0;
-        bool m_bKeep_Row_Header = false;
-        bool m_bKeepColHeader = false;
-        bool m_bAdd_UpDown_Arrows = true;
-
         string m_sSeek;
-        string m_sDataGrid_ID = "1";
-        int iOffset;
-
-        int iColumn = 1;
-        int iRowCount= 5;
-        int iRowColums = 5;
-        int m_iSeekColumn = 0;
         int iData_Size=0;
         int GridCurRow = 0;
         int GridCurCol= 0;
 
         char *pData;
         pData = "NULL";
-        int iRow;
 
-        QString temp;
         m_dwIDataGridRequestCounter++;
 
         CMD_Populate_Datagrid cmd_populate_attribute_grid(m_dwPK_Device, iPK_Device_DatagridPlugIn, StringUtils::itos( m_dwIDataGridRequestCounter ), string(m_sGridID), 31, StringUtils::itos(i_ea), 0, &pkVar, &valassign,  &isSuccessfull, &gHeight, &gWidth );
@@ -2835,36 +2855,30 @@ void DCE::qOrbiter::GetNowPlayingAttributes()
                   this way, we can safely check empty grids and error gracefully in the case of no matching media
                   */
 
-            string imgDG = m_sGridID; //standard text grid with no images. this will not crash the router if requested and its empty, picture grids will
+            //standard text grid with no images. this will not crash the router if requested and its empty, picture grids will
 
             //CMD_Request_Datagrid_Contents(long DeviceIDFrom, long DeviceIDTo,                   string sID,                                              string sDataGrid_ID,int iRow_count,int iColumn_count,bool bKeep_Row_Header,bool bKeep_Column_Header,bool bAdd_UpDown_Arrows,string sSeek,int iOffset,    char **pData,int *iData_Size,int *iRow,int *iColumn
             DCE::CMD_Request_Datagrid_Contents req_data_grid( long(m_dwPK_Device), long(iPK_Device_DatagridPlugIn), StringUtils::itos( m_dwIDataGridRequestCounter ), string(m_sGridID),    int(gWidth), int(gHeight),           false, false,        true,   string(m_sSeek),    0,  &pData,         &iData_Size, &GridCurRow, &GridCurCol );
             if(SendCommand(req_data_grid))
             {
 
-                bool barrows = false; //not sure what its for
+
                 //creating a dg table to check for cells. If 0, then we error out and provide a single "error cell"
                 DataGridTable *pDataGridTable = new DataGridTable(iData_Size,pData,false);
-                int cellsToRender= pDataGridTable->GetRows();
+                //int cellsToRender= pDataGridTable->GetRows();
 #ifndef ANDROID
                 LoggerWrapper::GetInstance()->Write(LV_CRITICAL, "Attribute Datagrid Dimensions: Height %i, Width %i", gHeight, gWidth);
 #endif
                 QString cellTitle;
                 QString cellAttribute;
-                QString fk_file;
-                QString filePath;
                 int index;
-                QImage cellImg;
                 QString cellfk;
                 DataGridCell *pCell;
                 for(MemoryDataTable::iterator it=pDataGridTable->m_MemoryDataTable.begin();it!=pDataGridTable->m_MemoryDataTable.end();++it)
                 {
 
                     pCell = it->second;
-                    string emptyEA;
-                    const char *pPath = pCell->GetImagePath();
                     index = pDataGridTable->CovertColRowType(it->first).first;
-
                     cellTitle = pCell->GetText();
                     cellAttribute = pCell->GetValue();
                     cellfk = pCell->GetValue();
@@ -2953,22 +2967,13 @@ void DCE::qOrbiter::requestLiveTvPlaylist()
 
     emit statusMessage("Getting current Epg");
 
-    int gHeight = 0;
-    int gWidth = 0;
+    int gHeight = 5;
+    int gWidth = 5;
     int pkVar = 0;
     string valassign ="";
     bool isSuccessfull;// = "false";
-
     string m_sGridID ="tvchan_"+StringUtils::itos(m_dwPK_Device); // the string identifier on the type of grid
-
-    int iRow_count=5;
-    int iColumn_count = 5;
-    bool m_bKeep_Row_Header = false;
-    bool m_bKeepColHeader = false;
-    bool m_bAdd_UpDown_Arrows = true;
-
     string m_sSeek;
-    string m_sDataGrid_ID = "1";
     string m_EA = QString::number(i_ea).toStdString();
     string m_UserID = QString::number(i_user).toStdString();
     int iOffset;
@@ -2976,11 +2981,15 @@ void DCE::qOrbiter::requestLiveTvPlaylist()
     int GridCurRow = 0;
     int GridCurCol= 0;
     char *pData;
-    pData = "NULL";   
+    pData = "NULL";
     m_dwIDataGridRequestCounter++;
-    string sPopulateResp="";
+#ifdef ANDROID
+    CMD_Populate_Datagrid cmd_populate_livetv_grid(m_dwPK_Device, iPK_Device_DatagridPlugIn, StringUtils::itos( m_dwIDataGridRequestCounter ), string(m_sGridID), 16, m_UserID + "," + m_EA, 0, &pkVar, &valassign,  &isSuccessfull, &gHeight, &gWidth );
+#elif for_android
+    CMD_Populate_Datagrid cmd_populate_livetv_grid(m_dwPK_Device, iPK_Device_DatagridPlugIn, StringUtils::itos( m_dwIDataGridRequestCounter ), string(m_sGridID),11, m_UserID + "," + m_EA, 0, &pkVar, &valassign,  &isSuccessfull, &gHeight, &gWidth );
+#else
     CMD_Populate_Datagrid cmd_populate_livetv_grid(m_dwPK_Device, iPK_Device_DatagridPlugIn, StringUtils::itos( m_dwIDataGridRequestCounter ), string(m_sGridID), 11, m_UserID + "," + m_EA, 0, &pkVar, &valassign,  &isSuccessfull, &gHeight, &gWidth );
-
+#endif
     if (SendCommand(cmd_populate_livetv_grid))
     {
         /*
@@ -2988,23 +2997,19 @@ void DCE::qOrbiter::requestLiveTvPlaylist()
               this way, we can safely check empty grids and error gracefully in the case of no matching media
               */
 
-        string imgDG = m_sGridID; //standard text grid with no images. this will not crash the router if requested and its empty, picture grids will
+        //standard text grid with no images. this will not crash the router if requested and its empty, picture grids will
 
         //CMD_Request_Datagrid_Contents(long DeviceIDFrom, long DeviceIDTo,                   string sID,                                              string sDataGrid_ID,int iRow_count,int iColumn_count,bool bKeep_Row_Header,bool bKeep_Column_Header,bool bAdd_UpDown_Arrows,string sSeek,int iOffset,    char **pData,int *iData_Size,int *iRow,int *iColumn
         DCE::CMD_Request_Datagrid_Contents req_data_grid( long(m_dwPK_Device), long(iPK_Device_DatagridPlugIn), StringUtils::itos( m_dwIDataGridRequestCounter ), string(m_sGridID),    int(gWidth), int(gHeight),           false, false,        true,   string(m_sSeek),    int(iOffset),  &pData,         &iData_Size, &GridCurRow, &GridCurCol );
         if(SendCommand(req_data_grid))
         {
-
-            bool barrows = false; //not sure what its for
             //creating a dg table to check for cells. If 0, then we error out and provide a single "error cell"
             DataGridTable *pDataGridTable = new DataGridTable(iData_Size,pData,false);
-            int cellsToRender= pDataGridTable->GetRows();
 
             //LoggerWrapper::GetInstance()->Write(LV_CRITICAL, "Attribute Datagrid Dimensions: Height %i, Width %i", gHeight, gWidth);
             QString channelName;
             QString channelIndex;
             QString program;
-            int dceIndex;
             int index = 0;
             int channelNumber;
             QImage channelimage;
@@ -3012,34 +3017,29 @@ void DCE::qOrbiter::requestLiveTvPlaylist()
 
             for(MemoryDataTable::iterator it=pDataGridTable->m_MemoryDataTable.begin();it!=pDataGridTable->m_MemoryDataTable.end();++it)
             {
+                QApplication::processEvents(QEventLoop::AllEvents);
                 pCell = it->second;
-                const char *pPath = pCell->GetImagePath();
-                // index = pDataGridTable->CovertColRowType(pCell->m_Value);
                 QStringList breaker = QString::fromStdString(pCell->m_mapAttributes_Find("Name").c_str()).split(" ");
-
                 channelName = breaker.at(1);
                 channelNumber = breaker.at(0).toInt();
                 channelIndex = pCell->GetValue();
-
                 program = QString::fromStdString(pCell->GetText());
                 program.remove(channelName);
                 program.remove(breaker.at(0));
-
-                char * chanPData;
-                int chanIData_size = 0;
-                string *response;
-
-
                 EPGItemClass *t = new EPGItemClass(channelName, channelNumber, channelIndex, program, index, channelimage, channelimage);
                 emit addChannel(t);
-
                 index++;
+                QApplication::processEvents(QEventLoop::AllEvents);
             }
         }
     }
     else
     {
         emit statusMessage("Could Not Populate");
+    }
+    if(i_current_mediaType == 1)
+    {
+        emit epgDone();
     }
 }
 
@@ -3049,14 +3049,19 @@ void DCE::qOrbiter::TuneToChannel(QString channel, QString chanid) //tunes to ch
 
     if(i_current_mediaType = 11)
     {
+        setMediaResponse("Setting Channel! " + channel);
         CMD_Tune_to_channel changeChannel(m_dwPK_Device, iMediaPluginID, chanid.toStdString(), chanid.toStdString());
         SendCommand(changeChannel);
         emit np_channel(chanid);
-        emit np_channelID(chanid);
+        emit liveTvUpdate(chanid);
         //nowPlayingButton->setProgram(simpleEPGmodel->data(simpleEPGmodel->getChannelIndex(chanid), 5).toString());
+
+
     }
     else
     {
+        CMD_Tune_to_channel mythChannel(m_dwPK_Device, iMediaPluginID, chanid.toStdString(), chanid.toStdString());
+        SendCommand(mythChannel);
 
     }
 
@@ -3142,12 +3147,11 @@ void DCE::qOrbiter::populateAdditionalMedia() //additional media grid that popul
                 index = pDataGridTable->CovertColRowType(it->first).first;
                 if (pPath )
                 {
-                    QString fullsize = pPath;
-                    fullsize.replace(".tnj", "");
-                    cellImg = getfileForDG(fullsize.toStdString());
-                    size_t s=0;
-                    pCell->m_GraphicLength = (unsigned long) s;
-                    pCell->m_GraphicFormat = GR_JPG;
+#ifndef ANDROID
+                    cellImg = getfileForDG(pPath);
+#else
+                    cellImg = getfileForDG(pPath);
+#endif
                 }
                 else
                 {
@@ -3244,7 +3248,6 @@ void DCE::qOrbiter::GetAdvancedMediaOptions() // prepping for advanced media opt
         QString fk_file;
         QString filePath;
         int index;
-        QImage cellImg;
         for(MemoryDataTable::iterator it=pDataGridTable->m_MemoryDataTable.begin();it!=pDataGridTable->m_MemoryDataTable.end();++it)
         {
             DataGridCell *pCell = it->second;
@@ -3529,7 +3532,6 @@ void DCE::qOrbiter::showAdvancedButtons()
             QString fk_file;
             QString filePath;
             int index;
-            QImage cellImg;
             for(MemoryDataTable::iterator it=pDataGridTable->m_MemoryDataTable.begin();it!=pDataGridTable->m_MemoryDataTable.end();++it)
             {
 
@@ -3574,10 +3576,10 @@ void DCE::qOrbiter::grabScreenshot()
     char *screenieData;         //screenshot data using the char** data structure for passing of data
     int screenieDataSize=0;       //var for size of data
     string s_format ="jpg";   //the format we want returned
-    int imageH;                 //image height of desired screenshot
-    int imageW;                 //width of desired screenshot
+    int imageH = 800;                 //image height of desired screenshot
+    int imageW = 800;                 //width of desired screenshot
     string sDisableAspectLock = "0";
-    string sResponse;
+
     CMD_Get_Video_Frame grabMediaScreenshot(long(m_dwPK_Device), long(m_dwPK_Device_NowPlaying), sDisableAspectLock,internal_streamID, 800,800, &screenieData, &screenieDataSize, &s_format);
 
     SendCommand(grabMediaScreenshot);
@@ -3599,27 +3601,13 @@ void DCE::qOrbiter::grabScreenshot()
     string valassign ="";
     bool isSuccessfull;// = "false";
     string m_sGridID ="thumbs_"+StringUtils::itos(m_dwPK_Device); // the string identifier on the type of grid
-    int iRow_count=0;
-    int iColumn_count = 0;
-    bool m_bKeep_Row_Header = false;
-    bool m_bKeepColHeader = false;
-    bool m_bAdd_UpDown_Arrows = true;
     string m_sSeek;
-    string m_sDataGrid_ID = "1";
-    int iOffset;
-    int iColumn = 1;
-    int iRowCount= 5;
-    int iRowColums = 5;
-    int m_iSeekColumn = 0;
     int iData_Size=0;
     int GridCurRow = 0;
     int GridCurCol= 0;
 
     char *pData;
     pData = "NULL";
-    int iRow;
-
-    QString temp;
     m_dwIDataGridRequestCounter++;
 
     CMD_Populate_Datagrid cmd_populate_attribute_grid(m_dwPK_Device, iPK_Device_DatagridPlugIn, StringUtils::itos( m_dwIDataGridRequestCounter ), string(m_sGridID), 31, QString::number(i_ea).toStdString(), 0, &pkVar, &valassign,  &isSuccessfull, &gHeight, &gWidth );
@@ -3638,10 +3626,10 @@ void DCE::qOrbiter::grabScreenshot()
         if(SendCommand(req_data_grid))
         {
 
-            bool barrows = false; //not sure what its for
+            //not sure what its for
             //creating a dg table to check for cells. If 0, then we error out and provide a single "error cell"
             DataGridTable *pDataGridTable = new DataGridTable(iData_Size,pData,false);
-            int cellsToRender= pDataGridTable->GetRows();
+
 
 #ifndef ANDROID
             LoggerWrapper::GetInstance()->Write(LV_CRITICAL, "Attribute Datagrid Dimensions: Height %i, Width %i", gHeight, gWidth);
@@ -3649,18 +3637,14 @@ void DCE::qOrbiter::grabScreenshot()
 
             QString cellTitle;
             QString cellAttribute;
-            QString fk_file;
-            QString filePath;
             int index;
-            QImage cellImg;
             QString cellfk;
             DataGridCell *pCell;
             for(MemoryDataTable::iterator it=pDataGridTable->m_MemoryDataTable.begin();it!=pDataGridTable->m_MemoryDataTable.end();++it)
             {
 
                 pCell = it->second;
-                string emptyEA;
-                const char *pPath = pCell->GetImagePath();
+
                 index = pDataGridTable->CovertColRowType(it->first).first;
                 cellTitle = pCell->GetText();
                 cellAttribute = pCell->GetValue();
@@ -3749,13 +3733,13 @@ void DCE::qOrbiter::adjustVolume(int vol)
 
 void DCE::qOrbiter::OnDisconnect()
 {
-    emit disconnected("Lost Connection");
+    emit routerDisconnect();
 }
 
 void DCE::qOrbiter::OnReload()
 {
 
-    emit disconnected("Router Reload");
+    emit routerReloading("Router Reload");
 
 
 }
@@ -4044,14 +4028,14 @@ void DCE::qOrbiter::prepareFileList(int iPK_MediaType)
               this way, we can safely check empty grids and error gracefully in the case of no matching media
               */
 
-        string imgDG = m_sGridID; //standard text grid with no images. this will not crash the router if requested and its empty, picture grids will
+        //standard text grid with no images. this will not crash the router if requested and its empty, picture grids will
 
         //CMD_Request_Datagrid_Contents(long DeviceIDFrom, long DeviceIDTo,                   string sID,                                              string sDataGrid_ID,int iRow_count,int iColumn_count,bool bKeep_Row_Header,bool bKeep_Column_Header,bool bAdd_UpDown_Arrows,string sSeek,int iOffset,    char **pData,int *iData_Size,int *iRow,int *iColumn
 
-        DCE::CMD_Request_Datagrid_Contents req_data_grid( long(m_dwPK_Device), long(iPK_Device_DatagridPlugIn), StringUtils::itos( m_dwIDataGridRequestCounter ), string(imgDG),    gHeight, gWidth,           false, false,        true,   string(m_sSeek),    iOffset,  &pData,         &iData_Size, &GridCurRow, &GridCurCol );
+        DCE::CMD_Request_Datagrid_Contents req_data_grid( long(m_dwPK_Device), long(iPK_Device_DatagridPlugIn), StringUtils::itos( m_dwIDataGridRequestCounter ), string(m_sGridID),    gHeight, gWidth,           false, false,        true,   string(m_sSeek),    iOffset,  &pData,         &iData_Size, &GridCurRow, &GridCurCol );
         if(SendCommand(req_data_grid))
         {
-            bool barrows = false; //not sure what its for
+            //not sure what its for
             //creating a dg table to check for cells. If 0, then we error out and provide a single "error cell"
             DataGridTable *pDataGridTable = new DataGridTable(iData_Size,pData,false);
             int cellsToRender= pDataGridTable->GetRows();
@@ -4101,7 +4085,7 @@ void DCE::qOrbiter::prepareFileList(int iPK_MediaType)
                     QString filePath;
                     int index;
                     QImage cellImg;
-                    int i=0;
+
 
                     for(MemoryDataTable::iterator it=pDataGridTable->m_MemoryDataTable.begin();it!=pDataGridTable->m_MemoryDataTable.end();++it)
                     {
@@ -4115,19 +4099,19 @@ void DCE::qOrbiter::prepareFileList(int iPK_MediaType)
                         index = pDataGridTable->CovertColRowType(it->first).first;
                         if (pPath )
                         {
-                            QString fullsize = pPath;
-                            fullsize.replace(".tnj", "");
-                            cellImg = getfileForDG(fullsize.toStdString());
-                            size_t s=0;
-                            pCell->m_GraphicLength = (unsigned long) s;
-                            pCell->m_GraphicFormat = GR_JPG;
+#ifndef ANDROID
+                            cellImg = getfileForDG(pPath);
+#else
+                            cellImg = getfileForDG(pPath);
+#endif
+
                         }
                         else
                         {
                             cellImg.load(":/icons/icon.png");
                         }
                         emit addItem(new gridItem(fk_file, cellTitle, filePath, index, cellImg));
-                        QApplication::processEvents(QEventLoop::AllEvents);
+
                     }
                     delete pDataGridTable;
                 }

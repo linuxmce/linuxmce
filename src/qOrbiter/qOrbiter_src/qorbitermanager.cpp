@@ -593,6 +593,7 @@ void qorbiterManager::processConfig(QByteArray config)
     QApplication::processEvents(QEventLoop::AllEvents);
     //------------not sure if neccesary since it knows where we are.
     setActiveRoom(iFK_Room, iea_area);
+    setCurrentUser(QString::number(iPK_User));
     emit registerOrbiter((userList->find(sPK_User)->data(4).toInt()), QString::number(iea_area), iFK_Room );
 
     //pqOrbiter->CMD_Set_Current_Room(m_lRooms->idefault_Ea);
@@ -748,7 +749,7 @@ bool qorbiterManager::requestDataGrid()
 
 void qorbiterManager::setActiveRoom(int room,int ea)
 {
-    //emit setLocation(room, ea);
+    emit setLocation(room, ea);
     roomLights = roomLightingScenarios.value(room);
     roomMedia = roomMediaScenarios.value(room);
     roomClimate = roomClimateScenarios.value(room);
@@ -1242,12 +1243,13 @@ void qorbiterManager::changeChannels(QString chan)
 
 void qorbiterManager::getLiveTVPlaylist()
 {   
-      emit liveTVrequest();
+     // emit liveTVrequest();
 }
 
 void qorbiterManager::getStoredPlaylist()
 {
-    emit playlistRequest();
+
+   // emit managerPlaylistRequest();
 }
 
 void qorbiterManager::gridChangeChannel(QString chan, QString chanid)

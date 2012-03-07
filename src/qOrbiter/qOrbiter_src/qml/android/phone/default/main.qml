@@ -46,7 +46,7 @@ import "js/ScreenChange.js" as ScreenLogic
 
       function screenchange(screen) {
           var component;
-          pageLoader.source = "screens/"+screen
+         // pageLoader.source = "screens/"+screen
 
           console.log("QML Command to change to:" +screen);
           component = Qt.createComponent("screens/"+screen);

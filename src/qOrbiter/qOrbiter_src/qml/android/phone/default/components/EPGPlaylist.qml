@@ -6,7 +6,7 @@ Rectangle {
     height: scaleY(85)
     color: "transparent"    
     clip:true
-    Component.onCompleted: manager.getLiveTVPlaylist()
+
     Connections{
         target: simpleepg
         onActiveIndexChanged:epgplaylistview.positionViewAtIndex(simpleepg.currentIndex, ListView.Beginning)

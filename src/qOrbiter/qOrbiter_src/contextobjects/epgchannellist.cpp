@@ -153,27 +153,27 @@ void EPGChannelList::setItemStatus(int pos)
 
 bool EPGChannelList::checkDupe(QString name, QString position)
 {
-    qDebug() << "Checking dupe for:" << name << " at " <<position;
+    //qDebug() << "Checking dupe for:" << name << " at " <<position;
 
     if (EPGItemClass *item = find(name))
-    {   qDebug() << "Found " << name;
+    {   //qDebug() << "Found " << name;
 
         if (QString::number(item->index()-1).compare(position))
         {
-            qDebug() << "Dupe position " << position.toInt() ;
+           // qDebug() << "Dupe position " << position.toInt() ;
             return false;
         }
         else
         {
-            qDebug() << item->index();
-            qDebug() << "Did not find item at postion " << position;
+           // qDebug() << item->index();
+           // qDebug() << "Did not find item at postion " << position;
             return  true;
         }
 
     }
     else
     {
-        qDebug() << name << " at " << position << " Not in playlist";
+        //qDebug() << name << " at " << position << " Not in playlist";
         return true;
     }
 
@@ -181,6 +181,7 @@ bool EPGChannelList::checkDupe(QString name, QString position)
 
 QModelIndex EPGChannelList::getChannelIndex(const QString &name) const
 {
+    qDebug() << "Finding tv program index for " << name ;
     if (m_list.size() > 0)
     {
 
@@ -189,9 +190,9 @@ QModelIndex EPGChannelList::getChannelIndex(const QString &name) const
 
             if (m_list.at(l)->data(3).toInt() == name.toInt())
             {
-                qDebug() << m_list.at(l)->data(4) << "::" << name ;
+                qDebug() << m_list.at(l)->name() << "::" << name ;
                 QModelIndex index = indexFromItem(m_list.at(l));
-                qDebug() << index;
+             //   qDebug() << index;
                 return index;
             }
 
@@ -216,8 +217,8 @@ void EPGChannelList::populate()
 
 void EPGChannelList::setProgram(QString qml_text_channel)
 {
-
-    QModelIndex epgLocation = getChannelIndex(qml_text_channel);
+ id = qml_text_channel;
+    QModelIndex epgLocation = getChannelIndex(id);
     if (epgLocation.isValid())
     {
 
@@ -226,6 +227,10 @@ void EPGChannelList::setProgram(QString qml_text_channel)
         emit programChanged(data(epgLocation,5).toString());
         setCurrentIndex(epgLocation);
         setCurrentRow(epgLocation.row());
+    }
+    else
+    {
+       // qDebug("Cant find station");
     }
 
 }
@@ -236,9 +241,57 @@ void EPGChannelList::setCurrentIndex(QModelIndex index)
     emit activeIndexChanged();
 }
 
+void EPGChannelList::setMythProgram(QString channel)
+{
+    id = channel;
+}
+
+void EPGChannelList::updatePosition()
+{
+    QModelIndex epgLocation = getMythChannelIndex(id);
+    if (epgLocation.isValid())
+    {
+
+        emit networkChanged(data(epgLocation,1).toString());
+        emit channelNumberChanged(data(epgLocation, 3).toString());
+        emit programChanged(data(epgLocation,5).toString());
+        setCurrentIndex(epgLocation);
+        setCurrentRow(epgLocation.row());
+    }
+    else
+    {
+       // qDebug("Cant find station");
+    }
+}
+
 QModelIndex EPGChannelList::getCurrentIndex()
 {
     return activeIndex;
+}
+
+QModelIndex EPGChannelList::getMythChannelIndex(QString m)
+{
+   // qDebug() << "Finding mythTV program index for " << m ;
+    if (m_list.size() > 0)
+    {
+
+        for (int l=0; m_list.size() > l; l++)
+        {
+
+            if (m_list.at(l)->mythid() == m)
+            {
+              //  qDebug() << m_list.at(l)->name() << "::" << m ;
+                QModelIndex index = indexFromItem(m_list.at(l));
+               // qDebug() << index;
+                return index;
+            }
+
+        }
+    }
+    else
+    {
+        return QModelIndex();
+    }
 }
 
 void EPGChannelList::beginResetModel()
@@ -247,4 +300,5 @@ void EPGChannelList::beginResetModel()
 
 void EPGChannelList::endResetModel()
 {
+
 }

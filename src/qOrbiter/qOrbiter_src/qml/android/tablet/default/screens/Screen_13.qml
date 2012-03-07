@@ -80,8 +80,8 @@ Stage{
                     }
 
                     onClicked: {
-                        setHouseMode(mode, securitynumbers.pass)
-                        console.log(securitynumbers)
+                       dcerouter.SetSecurityMode(mode, securitynumbers.pass)
+
                     }
                 }
             }
@@ -109,7 +109,7 @@ Stage{
         Text {
             id: securitypanellabel
             anchors.bottom: container.top
-            text: "Security Panel"
+            text: "Security Panel" + manager.dceResponse
             font.family: "Droid Sans"
             font.bold: false
             font.pointSize: 15

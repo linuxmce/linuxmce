@@ -25,7 +25,10 @@ Rectangle {
         onImageChanged:{ nowplayingimage.source = "image://listprovider/updateobject/"+securityvideo.timestamp;}
     }
 
-    Component.onCompleted:dcerouter.setNowPlayingDetails()
+    Component.onCompleted: {
+        console.log("fucking loaded");
+        manager.getStoredPlaylist()
+    }
 
     Row{
         id:mainrow
@@ -41,7 +44,6 @@ Rectangle {
             anchors.left: parent.left
             anchors.leftMargin: scaleX(1)
         }
-
 
             Column
             {

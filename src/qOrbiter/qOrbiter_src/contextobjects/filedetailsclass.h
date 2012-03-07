@@ -151,7 +151,7 @@ signals:
 public slots:
     void clear();
 
-    void setProgram(QString newProgram) {program = newProgram; qDebug("recieved program"); emit programChanged();}
+    void setProgram(QString newProgram) {program = newProgram;  emit programChanged();}
     QString getProgram () {return program;}
 
     void setTitle (QString inc_title) {qs_mainTitle = inc_title; emit titleChanged();}
@@ -180,7 +180,7 @@ public slots:
     void setChannelID (QString inc_channelID) {channelID = inc_channelID;  emit channelChanged();}
     QString getChannelID () {return channelID;}
 
-    void setEpisode (QString inc_episode) {episode = inc_episode; qDebug("recieved episode");  emit episodeChanged();}
+    void setEpisode (QString inc_episode) {episode = inc_episode;  emit episodeChanged();}
     QString getEpisode () {return episode;}
 
     //-----audio getters and setter--------//

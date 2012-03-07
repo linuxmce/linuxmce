@@ -72,7 +72,8 @@ class NowPlayingClass : public QDeclarativeItem
     //television related variables
     Q_PROPERTY (QString tvProgram READ getProgram WRITE setProgram NOTIFY programChanged)
     Q_PROPERTY (QString channel READ getChannel WRITE setChannel NOTIFY channelChanged)
-    Q_PROPERTY (QString channelID READ getChannelID WRITE setChannelID NOTIFY networkChanged)
+    Q_PROPERTY (QString channelID READ getChannelID WRITE setChannelID NOTIFY chanIDchanged)
+    Q_PROPERTY (QString network WRITE setNetwork READ getNetwork NOTIFY networkChanged)
     Q_PROPERTY (QString episode READ getEpisode WRITE setEpisode NOTIFY episodeChanged)
     //movies
 
@@ -118,6 +119,7 @@ public:
     QString tvProgram;
     QString channel;
     QString channelID;
+    QString network;
     QString episode;
     QString director;
     QStringList directors;
@@ -156,7 +158,8 @@ signals:
     void durationChanged();
     void statusMessage(QString msg);
     void newMediaSpeed(int speed);
-    void networkChanged();
+
+
 
     //audio signals
     void albumChanged();
@@ -176,10 +179,15 @@ signals:
     void programChanged();
     void channelChanged();
     void episodeChanged();
+    void networkChanged();
+    void chanIDchanged();
     void imageAspectChanged();
 
 public slots:
     void resetData();
+
+    void setNetwork(QString bcast_network) {network = bcast_network; emit networkChanged();}
+    QString getNetwork() {return network;}
 
     void setImageAspect(QString i_aspect) { aspect = i_aspect; emit imageAspectChanged();}
     QString getImageAspect() { return aspect;}
@@ -254,7 +262,7 @@ public slots:
     void setChannel (QString inc_channel) {channel = inc_channel;  emit channelChanged();}
     QString getChannel () {return channel;}
 
-    void setChannelID (QString inc_channelID) {channelID = inc_channelID;  emit networkChanged();}
+    void setChannelID (QString inc_channelID) {channelID = inc_channelID;  emit chanIDchanged();}
     QString getChannelID () {return channelID;}
 
     void setEpisode (QString inc_episode) {episode = inc_episode;  emit episodeChanged();}

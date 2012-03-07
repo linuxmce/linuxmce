@@ -34,13 +34,19 @@ void PlaylistClass::appendRow(PlaylistItemClass *item)
 //the purpose of this function is to first clear the existing playlist data out, and add the new data in due to the way the dce router send the updated playlist to us
 void PlaylistClass::populate()
 {
-    emit modelAboutToBeReset();
+    /*
+ emit modelAboutToBeReset();
     beginResetModel();
     resetInternalData();
-    //qDeleteAll(m_list);
+
     endResetModel();
-    emit modelReset();
+emit modelReset();
+
+    */
+
+    m_list.clear();
     emit playlistReady();
+
 }
 
 void PlaylistClass::appendRows(const QList<PlaylistItemClass *> &items)
@@ -109,7 +115,6 @@ void PlaylistClass::clear()
     emit modelAboutToBeReset();
     beginResetModel();
     resetInternalData();
-    //qDeleteAll(m_list);
     endResetModel();
     emit modelReset();
 
@@ -160,7 +165,7 @@ void PlaylistClass::setItemStatus(int pos)
 
 void PlaylistClass::setCurrentIndex(int i)
 {
-    currentIndex = i; emit activeItemChanged();
+    currentIndex = i;
 }
 
 int PlaylistClass::getCurrentIndex()
