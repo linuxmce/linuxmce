@@ -218,14 +218,7 @@ fi
 echo "IPv4: External $ExtIf=$Setting, internal $IntIf=static"
 
 # IPv6 interfaces configuration
-if [[ "$Extv6IP" == "static" ||  "$Intv6IP" == "static" || "$IPv6TunnelActive" == "on" ]]
-then
-	echo "
-#####
-# IPv6 network interfaces
-#####" >>"$File"
-fi
-
+v6=""
 case $Extv6IP in
 	"disabled")
 		ExtSetting="disabled"
@@ -239,21 +232,24 @@ case $Extv6IP in
 		dhcpv6=("${dhcpv6[@]}" $Extv6If)
 	;;
 	*)
-		ExtSetting="static"
-		auto=("${auto[@]}" $Extv6If)
-		echo "
+		ExtSetting="error"
+		if [[ "$Extv6IP" != "" ]]; then	
+			ExtSetting="static"
+			auto=("${auto[@]}" $Extv6If)
+			v6="$v6
 # --- External NIC
 iface $Extv6If inet6 static
 	address $Extv6IP
 	netmask $Extv6Netmask
-	gateway $v6Gateway" >>"$File"
+	gateway $v6Gateway"
 		
 	DNSservers=$(echo "$v6DNS")
 	DNSservers=$(echo "$DNSservers" | tr ',' '\n' | sort -u | tr '\n' ' ')
-	if ! BlacklistConfFiles '/etc/resolv.conf' ;then
-		for i in $DNSservers; do
-			echo "nameserver $i" >>/etc/resolv.conf
-		done
+		if ! BlacklistConfFiles '/etc/resolv.conf' ;then
+			for i in $DNSservers; do
+				echo "nameserver $i" >>/etc/resolv.conf
+			done
+		fi
 	fi
 	;;
 esac
@@ -267,15 +263,28 @@ case $Intv6IP in
 	;;
 	
 	*)
-		IntSetting="static"
-		auto=("${auto[@]}" $Intv6If)
-		echo "
+		IntSetting="error"
+		if [[ "$Intv6IP" != "" ]]; then
+			IntSetting="static"
+			auto=("${auto[@]}" $Intv6If)
+			v6="$v6
 # --- Internal NIC
 iface $Intv6If inet6 static
 	address $Intv6IP
-	netmask $Intv6Netmask" >>"$File"
+	netmask $Intv6Netmask"
+		fi
 	;;
 esac
+
+if [[ "$ExtSetting" == "static" ||  "$IntSetting" == "static" || "$IPv6TunnelActive" == "on" ]]
+then
+	echo "
+#####
+# IPv6 network interfaces
+#####" >>"$File"
+	echo "$v6" >>"$File"
+fi
+
 
 echo "IPv6: External $Extv6If=$ExtSetting, internal $Intv6If=$IntSetting"
 
