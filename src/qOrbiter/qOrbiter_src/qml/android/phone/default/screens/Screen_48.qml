@@ -9,7 +9,7 @@ Rectangle {
     width: appW
     state: ""
     color: "transparent"
-    Component.onCompleted: dcerouter.requestLiveTvPlaylist()
+
 
     NowPlayingBox{id:np_box
         anchors.top: satcableboxremote.top
