@@ -1041,7 +1041,7 @@ void qOrbiter::CMD_Set_Now_Playing(string sPK_DesignObj,string sValue_To_Assign,
     cout << "Parm #50 - Name=" << sName << endl;
     cout << "Parm #103 - List_PK_Device=" << sList_PK_Device << endl;
     cout << "Parm #120 - Retransmit=" << bRetransmit << endl;
-*/
+    */
     i_current_mediaType = iPK_MediaType;
     string::size_type pos=0;
     m_dwPK_Device_NowPlaying = atoi(StringUtils::Tokenize(sList_PK_Device,",",pos).c_str());
@@ -1092,13 +1092,13 @@ void qOrbiter::CMD_Set_Now_Playing(string sPK_DesignObj,string sValue_To_Assign,
             emit np_program(QString::fromStdString(sText));
             emit mythTvUpdate("i"+QString::number(iValue));
             b_mediaPlaying = true;
-            if(bRetransmit == 0 )
+            if(bRetransmit == 1 )
             {
-
+                emit epgDone();
             }
             else
             {
-                emit epgDone();
+                requestLiveTvPlaylist();
 
             }
         }
@@ -1108,6 +1108,16 @@ void qOrbiter::CMD_Set_Now_Playing(string sPK_DesignObj,string sValue_To_Assign,
            emit np_network(QString::fromStdString(sValue_To_Assign));
             emit epgDone();
             b_mediaPlaying = true;
+            emit liveTvUpdate("1");
+            if(bRetransmit == 1 )
+            {
+                emit epgDone();
+            }
+            else
+            {
+                requestLiveTvPlaylist();
+
+            }
         }
         else
         {
@@ -2989,7 +2999,7 @@ void DCE::qOrbiter::requestLiveTvPlaylist()
     pData = "NULL";
     m_dwIDataGridRequestCounter++;
 #ifdef ANDROID
-    CMD_Populate_Datagrid cmd_populate_livetv_grid(m_dwPK_Device, iPK_Device_DatagridPlugIn, StringUtils::itos( m_dwIDataGridRequestCounter ), string(m_sGridID), 16, m_UserID + "," + m_EA, 0, &pkVar, &valassign,  &isSuccessfull, &gHeight, &gWidth );
+    CMD_Populate_Datagrid cmd_populate_livetv_grid(m_dwPK_Device, iPK_Device_DatagridPlugIn, StringUtils::itos( m_dwIDataGridRequestCounter ), string(m_sGridID), 11, m_UserID + "," + m_EA, 0, &pkVar, &valassign,  &isSuccessfull, &gHeight, &gWidth );
 #elif for_android
     CMD_Populate_Datagrid cmd_populate_livetv_grid(m_dwPK_Device, iPK_Device_DatagridPlugIn, StringUtils::itos( m_dwIDataGridRequestCounter ), string(m_sGridID),11, m_UserID + "," + m_EA, 0, &pkVar, &valassign,  &isSuccessfull, &gHeight, &gWidth );
 #else

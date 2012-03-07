@@ -1243,7 +1243,7 @@ void qorbiterManager::changeChannels(QString chan)
 
 void qorbiterManager::getLiveTVPlaylist()
 {   
-     // emit liveTVrequest();
+      //emit liveTVrequest();
 }
 
 void qorbiterManager::getStoredPlaylist()

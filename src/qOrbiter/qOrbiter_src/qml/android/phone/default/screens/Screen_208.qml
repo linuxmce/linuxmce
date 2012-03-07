@@ -14,18 +14,27 @@ Rectangle {
 
     HomeButton{
         id:home
+        anchors.left: parent.left
     }
 
     Text {
         id: temp_label
         text: qsTr("mythTV recordings")
+        font.pixelSize: scaleY(4)
+        anchors.bottom: recordings_control.top
+    }
+    NowPlayingBox{
+        id:myth_now_playing
+        anchors.top: parent.top
+        anchors.horizontalCenter: parent.horizontalCenter
     }
 
     Rectangle{
         id:buttons_row
         height: scaleY(25)
         width:scaleX(85)
-        anchors.centerIn: parent
+        anchors.top: myth_now_playing.bottom
+        anchors.horizontalCenter: parent.horizontalCenter
         color: "transparent"
 
         Flow{

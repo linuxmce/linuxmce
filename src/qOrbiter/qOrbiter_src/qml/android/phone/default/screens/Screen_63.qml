@@ -9,7 +9,7 @@ Rectangle {
     width: appW
     state: ""
     color: "transparent"
-    Component.onCompleted: manager.getLiveTVPlaylist()
+
 
     NowPlayingBox{id:np_box
         anchors.top: satcableboxremote.top
