@@ -437,16 +437,21 @@ GetVideoDriver()
 	VideoDriver=$(lspci | grep ' VGA ' | cut -d' ' -f5)
 	case "$VideoDriver" in
 		nVidia) 
-			if PackageIsInstalled nvidia-glx 2>/dev/null || PackageIsInstalled nvidia-glx-new 2>/dev/null || PackageIsInstalled nvidia-glx-71 2>/dev/null || PackageIsInstalled nvidia-glx-96 2>/dev/null || PackageIsInstalled nvidia-glx-173 2>/dev/null || PackageIsInstalled nvidia-glx-180 2>/dev/null || PackageIsInstalled nvidia-glx-190 2>/dev/null || PackageIsInstalled nvidia-glx-195 2>/dev/null || PackageIsInstalled nvidia-glx-260 2>/dev/null || PackageIsInstalled nvidia-glx-185 2>/dev/null ;then
+			if PackageIsInstalled nvidia-glx 2>/dev/null || PackageIsInstalled nvidia-glx-new 2>/dev/null || PackageIsInstalled nvidia-glx-71 2>/dev/null || PackageIsInstalled nvidia-glx-96 2>/dev/null || PackageIsInstalled nvidia-glx-173 2>/dev/null || PackageIsInstalled nvidia-glx-180 2>/dev/null || PackageIsInstalled nvidia-glx-190 2>/dev/null || PackageIsInstalled nvidia-glx-195 2>/dev/null || PackageIsInstalled nvidia-glx-260 2>/dev/null || PackageIsInstalled nvidia-glx-185 || PackageIsInstalled nvidia-current 2>/dev/null 2>/dev/null ;then
 			       	VideoDriver="nvidia" 
 			fi
 		;;
-		Radeon|ATI) PackageIsInstalled xorg-driver-fglrx && VideoDriver="fglrx" ;;
-		Intel) VideoDriver="intel" ;;
-		"") VideoDriver="vesa" ;; # just-in-case default
+                Radeon|ATI)  
+                 	if PackageIsInstalled xorg-driver-fglrx 2>/dev/null; then VideoDriver="fglrx" 
+                 	elif PackageIsInstalled xserver-xorg-video-radeon 2>/dev/null; then VideoDriver="radeon" 
+                 	elif PackageIsInstalled xserver-xorg-video-radeonhd 2>/dev/null; then VideoDriver="radeonhd" 
+                 	fi 
+                 ;; 
+	Intel) VideoDriver="intel" ;;
 	esac
 #<-mkr_B_via_e->
-	echo "$VideoDriver"
+   	[[ "$VideoDriver" == @(nvidia|fglrx|radeonhd|radeon|intel) ]] || VideoDriver="vesa" 
+   	echo "$VideoDriver"
 }
 
 ReloadDevicesOnThisMachine()
