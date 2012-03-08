@@ -22,7 +22,7 @@ public:
   };
 
 public:
-  GenreItem(QObject *parent = 0) {}
+  GenreItem() {}
   explicit GenreItem( QString name,  QString pk_fileformat,  QImage img, bool selstat, QObject *parent = 0);
   QVariant data(int role) const;
   QHash<int, QByteArray> roleNames() const;

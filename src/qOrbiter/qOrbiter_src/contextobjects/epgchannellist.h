@@ -50,9 +50,11 @@ public slots:
     void setProgram(QString qml_text_channel);
     void setCurrentIndex(QModelIndex index);
     void setMythProgram(QString channel);
+    void updateLivePosition();
     void updatePosition();
     QModelIndex getCurrentIndex();
     QModelIndex getMythChannelIndex(QString m);
+    void empty();
 
 
     virtual void beginResetModel();

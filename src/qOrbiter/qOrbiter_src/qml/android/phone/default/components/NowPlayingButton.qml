@@ -143,7 +143,7 @@ Rectangle {
             id: np
             text:dcenowplaying.timecode
             font.pixelSize: scaleY(2.5)
-            anchors.bottom: np_label.bottom
+            anchors.bottom: np_box.bottom
             wrapMode: Text.WrapAtWordBoundaryOrAnywhere
             anchors.horizontalCenter: np_box.horizontalCenter
             color: "white"

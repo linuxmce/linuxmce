@@ -19,7 +19,7 @@ Rectangle {
 
     Text {
         id: temp_label
-        text: qsTr("mythTV recordings")
+        text: qsTr("Catch All Screen")
         font.pixelSize: scaleY(4)
         anchors.bottom: recordings_control.top
     }

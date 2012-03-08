@@ -21,7 +21,7 @@ class ClimateScenarioItem: public QObject{
 
         public:
 
-          ClimateScenarioItem(QObject *parent = 0) {}
+          ClimateScenarioItem() {}
           explicit ClimateScenarioItem( const QString &name,  const QString &title, const  QString &parameter, const QString &scommand, const  QString &gotoScreen , QImage img, QObject *parent=0);
 
           QVariant data(int role) const;

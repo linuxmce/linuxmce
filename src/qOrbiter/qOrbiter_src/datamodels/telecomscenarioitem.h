@@ -22,7 +22,7 @@ class TelecomScenarioItem: public QObject
 
         public:
 
-          TelecomScenarioItem(QObject *parent = 0) {}
+          TelecomScenarioItem() {}
           explicit TelecomScenarioItem( const QString &name,  const QString &title, const  QString &parameter, const QString &scommand, const  QString &gotoScreen , QImage img, QObject *parent=0);
 
           QVariant data(int role) const;

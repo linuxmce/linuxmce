@@ -349,18 +349,18 @@ int main(int argc, char* argv[])
         QObject::connect(pqOrbiter,SIGNAL(gotoQml(QString)), w, SLOT(gotoQScreen(QString)));
 
         //mediagrid
-        QObject::connect(mediaModel, SIGNAL(pagingCleared()), pqOrbiter,SLOT(populateAdditionalMedia()), Qt::DirectConnection);
+        QObject::connect(mediaModel, SIGNAL(pagingCleared()), pqOrbiter,SLOT(populateAdditionalMedia()), Qt::QueuedConnection);
         QObject::connect(pqOrbiter, SIGNAL(clearPageGrid()), mediaModel, SLOT(clearForPaging()), Qt::DirectConnection);
         QObject::connect(mediaModel, SIGNAL(itemAdded(int)), pqOrbiter, SLOT(setCurrentRow(int)));
-        QObject::connect(w, SIGNAL(clearModel()), mediaModel,SLOT(clear()), Qt::DirectConnection);
-        QObject::connect(pqOrbiter, SIGNAL(clearAndContinue(int)), mediaModel, SLOT(clearAndRequest(int)), Qt::DirectConnection);
+        QObject::connect(w, SIGNAL(clearModel()), mediaModel,SLOT(clear()),Qt::DirectConnection);
+        QObject::connect(pqOrbiter, SIGNAL(clearAndContinue(int)), mediaModel, SLOT(clearAndRequest(int)), Qt::QueuedConnection);
         QObject::connect(pqOrbiter,SIGNAL(addItem(gridItem*)), mediaModel, SLOT(appendRow(gridItem*)));
-        QObject::connect(pqOrbiter,SIGNAL(gridModelSizeChange(int)), mediaModel, SLOT(setTotalCells(int)), Qt::DirectConnection);
+        QObject::connect(pqOrbiter,SIGNAL(gridModelSizeChange(int)), mediaModel, SLOT(setTotalCells(int)), Qt::QueuedConnection);
 
 
         QObject::connect(mediaModel,SIGNAL(ready(int)), pqOrbiter, SLOT(prepareFileList(int)), Qt::DirectConnection);
         QObject::connect(w, SIGNAL(gridTypeChanged(int)), mediaModel, SLOT(setGridType(int)), Qt::QueuedConnection);
-        QObject::connect(w, SIGNAL(setDceGridParam(int,QString)), pqOrbiter, SLOT(setStringParam(int,QString)));
+        QObject::connect(w, SIGNAL(setDceGridParam(int,QString)), pqOrbiter, SLOT(setStringParam(int,QString)), Qt::QueuedConnection);
         QObject::connect(w, SIGNAL(keepLoading(bool)), pqOrbiter,SLOT(setGridStatus(bool)));
         QObject::connect(pqOrbiter, SIGNAL(showFileInfo(bool)), w->filedetailsclass, SLOT(setVisible(bool)));
         QObject::connect(pqOrbiter, SIGNAL(setFocusFile(QString)), w->filedetailsclass, SLOT(setFile(QString)));
@@ -378,7 +378,7 @@ int main(int argc, char* argv[])
         //attributes
         QObject::connect(pqOrbiter, SIGNAL(np_mediaTitleChanged(QString)), w->nowPlayingButton, SLOT(setMediaTitle(QString)));
         QObject::connect(pqOrbiter, SIGNAL(np_album(QString)), w->nowPlayingButton, SLOT(setAlbum(QString)));
-
+        QObject::connect(pqOrbiter, SIGNAL(np_track(QString)), w->nowPlayingButton, SLOT(setTrack(QString)));
         QObject::connect(pqOrbiter,SIGNAL(np_channel(QString)), w->nowPlayingButton, SLOT(setChannel(QString)));
          QObject::connect(pqOrbiter, SIGNAL(np_network(QString)), w->nowPlayingButton, SLOT(setNetwork(QString)) );
          QObject::connect(pqOrbiter, SIGNAL(np_channelID(QString)), w->nowPlayingButton, SLOT(setChannelID(QString)));
@@ -401,12 +401,15 @@ int main(int argc, char* argv[])
         // myth  now playing requires special handling
         QObject::connect(pqOrbiter, SIGNAL(mythTvUpdate(QString)), simpleEPGmodel, SLOT(setMythProgram(QString)),Qt::QueuedConnection);
         QObject::connect(pqOrbiter, SIGNAL(epgDone()), simpleEPGmodel, SLOT(updatePosition()),Qt::QueuedConnection);
+        QObject::connect(pqOrbiter, SIGNAL(livetvDone()), simpleEPGmodel, SLOT(updateLivePosition()), Qt::QueuedConnection);
 
         QObject::connect(simpleEPGmodel, SIGNAL(requestEpg()), pqOrbiter, SLOT(requestLiveTvPlaylist()), Qt::QueuedConnection);
         QObject::connect(pqOrbiter, SIGNAL(clearTVplaylist()), simpleEPGmodel, SLOT(populate()), Qt::QueuedConnection);
+        QObject::connect(w, SIGNAL(liveTVrequest()), simpleEPGmodel, SLOT(populate()),Qt::DirectConnection);
 
         //so does live tv
-        QObject::connect(pqOrbiter, SIGNAL(liveTvUpdate(QString)), simpleEPGmodel, SLOT(setProgram(QString)),Qt::QueuedConnection);
+        QObject::connect(w, SIGNAL(clearModel()), simpleEPGmodel, SLOT(empty()));
+        QObject::connect(pqOrbiter, SIGNAL(liveTvUpdate(QString)), simpleEPGmodel, SLOT(setProgram(QString)), Qt::QueuedConnection);
         //epg specific
 
 
@@ -416,6 +419,8 @@ int main(int argc, char* argv[])
         QObject::connect(pqOrbiter, SIGNAL(playlistDone()), storedVideoPlaylist, SIGNAL(activeItemChanged()));
 
         QObject::connect(pqOrbiter,SIGNAL(routerReloading(QString)), w, SLOT(reloadHandler()) );
+        QObject::connect(pqOrbiter, SIGNAL(routerDisconnect()), w, SLOT(reloadHandler()));
+        QObject::connect(pqOrbiter, SIGNAL(closeOrbiter()), w, SLOT(closeOrbiter()));
 
         dceThread->start();
         mediaThread->start();

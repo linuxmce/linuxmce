@@ -26,7 +26,7 @@ class FloorPlanItem : public QObject
     };
 
 public:
-     FloorPlanItem(QObject *parent = 0) {}
+     FloorPlanItem() {}
     explicit FloorPlanItem( QString &installation, QString &description,  int &page,  QString &icon, QImage fpImage,  QImage &icoimg, QObject *parent = 0);
     QVariant data(int role) const;
     QHash<int, QByteArray> roleNames() const;

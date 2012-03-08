@@ -1030,7 +1030,7 @@ void qOrbiter::CMD_Continuous_Refresh(string sTime,string &sCMD_Result,Message *
 void qOrbiter::CMD_Set_Now_Playing(string sPK_DesignObj,string sValue_To_Assign,string sText,int iPK_MediaType,int iStreamID,int iValue,string sName,string sList_PK_Device,bool bRetransmit,string &sCMD_Result,Message *pMessage)
 //<-dceag-c242-e->
 {
-/*
+
     cout << "Need to implement command #242 - Set Now Playing" << endl;
     cout << "Parm #3 - PK_DesignObj=" << sPK_DesignObj << endl;
     cout << "Parm #5 - Value_To_Assign=" << sValue_To_Assign << endl;
@@ -1041,7 +1041,7 @@ void qOrbiter::CMD_Set_Now_Playing(string sPK_DesignObj,string sValue_To_Assign,
     cout << "Parm #50 - Name=" << sName << endl;
     cout << "Parm #103 - List_PK_Device=" << sList_PK_Device << endl;
     cout << "Parm #120 - Retransmit=" << bRetransmit << endl;
-    */
+
     i_current_mediaType = iPK_MediaType;
     string::size_type pos=0;
     m_dwPK_Device_NowPlaying = atoi(StringUtils::Tokenize(sList_PK_Device,",",pos).c_str());
@@ -1087,37 +1087,29 @@ void qOrbiter::CMD_Set_Now_Playing(string sPK_DesignObj,string sValue_To_Assign,
         {
             //channel ID will be sent to the playlist parser to find our position of the current data
             emit np_channelID(QString::number(iValue));
-           emit np_network(QString::fromStdString(sValue_To_Assign));
+            emit np_network(QString::fromStdString(sValue_To_Assign));
             //the remaining two signals are sent to the now playing class immediatly
             emit np_program(QString::fromStdString(sText));
             emit mythTvUpdate("i"+QString::number(iValue));
             b_mediaPlaying = true;
-            if(bRetransmit == 1 )
+            if(bRetransmit == 0 )
             {
                 emit epgDone();
             }
-            else
-            {
-                requestLiveTvPlaylist();
 
-            }
         }
         else if(iPK_MediaType== 11)
         {
             emit np_channelID(QString::number(iValue));
-           emit np_network(QString::fromStdString(sValue_To_Assign));
-            emit epgDone();
-            b_mediaPlaying = true;
-            emit liveTvUpdate("1");
-            if(bRetransmit == 1 )
-            {
-                emit epgDone();
-            }
-            else
-            {
-                requestLiveTvPlaylist();
+            emit np_network(QString::fromStdString(sValue_To_Assign));
 
+            b_mediaPlaying = true;
+
+            if(bRetransmit == 0 )
+            {
+                livetvDone();
             }
+
         }
         else
         {
@@ -1130,30 +1122,30 @@ void qOrbiter::CMD_Set_Now_Playing(string sPK_DesignObj,string sValue_To_Assign,
 
 
 
-        if(iPK_MediaType == 5)
+    if(iPK_MediaType == 5)
+    {
+        emit np_title1Changed(QString::fromStdString(sValue_To_Assign ));
+        emit np_title2Changed(QString::fromStdString(sText));
+    }
+    else
+    {
+        QString md1 = QString::fromStdString(sValue_To_Assign);
+        QStringList mdlist;
+        mdlist= md1.split(QRegExp("\\n"), QString::SkipEmptyParts);
+
+        if (mdlist.count() == 2)
         {
-            emit np_title1Changed(QString::fromStdString(sValue_To_Assign ));
-            emit np_title2Changed(QString::fromStdString(sText));
+            emit np_title1Changed(mdlist.at(0));
+            emit np_title2Changed(mdlist.at(1));
+            //nowPlayingButton->setTitle(mdlist.at(0));
+            // nowPlayingButton->setTitle2(mdlist.at(1));
         }
         else
         {
-            QString md1 = QString::fromStdString(sValue_To_Assign);
-            QStringList mdlist;
-            mdlist= md1.split(QRegExp("\\n"), QString::SkipEmptyParts);
-
-            if (mdlist.count() == 2)
-            {
-                emit np_title1Changed(mdlist.at(0));
-                emit np_title2Changed(mdlist.at(1));
-                //nowPlayingButton->setTitle(mdlist.at(0));
-                // nowPlayingButton->setTitle2(mdlist.at(1));
-            }
-            else
-            {
-                emit np_title1Changed(QString::fromStdString(sValue_To_Assign));
-                emit np_title2Changed("");
-            }
+            emit np_title1Changed(QString::fromStdString(sValue_To_Assign));
+            emit np_title2Changed("");
         }
+    }
 
 
 
@@ -2280,7 +2272,7 @@ void qOrbiter::requestPage(int page)
     media_pos = page * media_pageSeperator;
     media_currentPage = page;
     setGridStatus(true);
-    emit gridModelSizeChange(0);
+
     //qDebug () << "Navigating to page " << media_currentPage;
     //qDebug() << "Cell Range::" << media_pos << "to" << media_pos + media_pageSeperator;
 #ifndef for_desktop
@@ -2914,7 +2906,7 @@ void DCE::qOrbiter::GetNowPlayingAttributes()
                     else if(attributeType == "Title")
                     {
 
-                        emit np_title1Changed(attribute);
+                        emit np_mediaTitleChanged(attribute);
 
                     }
                     else if(attributeType == "Channel")
@@ -3053,13 +3045,13 @@ void DCE::qOrbiter::requestLiveTvPlaylist()
         emit statusMessage("Could Not Populate");
     }
 
-    if(i_current_mediaType == 11)
+    if(i_current_mediaType == 1)
     {
         emit epgDone();
     }
     else
     {
-
+        emit livetvDone();
     }
 }
 
@@ -3074,14 +3066,22 @@ void DCE::qOrbiter::TuneToChannel(QString channel, QString chanid) //tunes to ch
         SendCommand(changeChannel);
         emit np_channel(chanid);
         emit liveTvUpdate(chanid);
-        //nowPlayingButton->setProgram(simpleEPGmodel->data(simpleEPGmodel->getChannelIndex(chanid), 5).toString());
-
-
+        emit livetvDone();
     }
     else
     {
-        CMD_Tune_to_channel mythChannel(m_dwPK_Device, iMediaPluginID, chanid.toStdString(), chanid.toStdString());
-        SendCommand(mythChannel);
+
+        if(channel.contains("i"))
+        {
+            CMD_Tune_to_channel mythChannel(m_dwPK_Device, iMediaPluginID, channel.toStdString(), channel.toStdString());
+            SendCommand(mythChannel);
+        }
+        else
+        {
+
+        }
+
+
 
     }
 
@@ -3097,11 +3097,36 @@ void DCE::qOrbiter::mute()
 
 void DCE::qOrbiter::changedTrack(QString direction)
 {
-    CMD_Jump_Position_In_Playlist jump_playlist(m_dwPK_Device, iMediaPluginID, direction.toStdString(), internal_streamID );
-    string sResponse = "";
-    if(SendCommand(jump_playlist, &sResponse) && sResponse=="OK")
+    string pResponse="";
+    if (i_current_mediaType == 1)
     {
+        if(direction == "+1")
+        {
+            CMD_Channel_up tvChanUp(m_dwPK_Device, iMediaPluginID );
+            if(SendCommand(tvChanUp, &pResponse) && pResponse =="OK")
+            {
+                emit mediaMessage("Channel Up sent");
+            }
+        }
+        else
+        {
+            CMD_Channel_up tvChanDwn(m_dwPK_Device, iMediaPluginID );
+            if(SendCommand(tvChanDwn, &pResponse) && pResponse =="OK")
+            {
+                emit mediaMessage("Channel down sent");
+            }
+        }
 
+
+    }
+    else
+    {
+        CMD_Jump_Position_In_Playlist jump_playlist(m_dwPK_Device, iMediaPluginID, direction.toStdString(), internal_streamID );
+        string sResponse = "";
+        if(SendCommand(jump_playlist, &sResponse) && sResponse=="OK")
+        {
+            emit mediaMessage("Jumped to" + direction);
+        }
     }
 }
 
@@ -3129,6 +3154,7 @@ void DCE::qOrbiter::populateAdditionalMedia() //additional media grid that popul
         int iOffset=0;
         //qDebug() << "our target is row:" << GridCurCol;
         string m_sSeek = "" ;
+
 #endif
 
         string imgDG ="_MediaFile_"+QString::number(m_dwPK_Device).toStdString();
@@ -3146,19 +3172,19 @@ void DCE::qOrbiter::populateAdditionalMedia() //additional media grid that popul
         if(SendCommand(req_data_grid_pics, &pResponse) && pResponse == "OK")
         {
             DataGridTable *pDataGridTable = new DataGridTable(iData_Size,pData,false);
+            setMediaResponse("grid request ok");
 
-            emit gridModelSizeChange(pDataGridTable->GetRows());
             // LoggerWrapper::GetInstance()->Write(LV_CRITICAL, "Pic Datagrid Dimensions: Height %i, Width %i", gHeight, gWidth);
+            DataGridCell *pCell;
+            QString cellTitle;
+            QString fk_file;
+            QString filePath;
+            int index;
+            QImage cellImg;
 
             for(MemoryDataTable::iterator it=pDataGridTable->m_MemoryDataTable.begin();it!=pDataGridTable->m_MemoryDataTable.end();++it)
             {
-                QString cellTitle;
-                QString fk_file;
-                QString filePath;
-                int index;
-                QImage cellImg;
-
-                DataGridCell *pCell = it->second;
+                pCell= it->second;
                 const char *pPath = pCell->GetImagePath();
                 filePath = QString::fromUtf8(pPath);
                 fk_file = pCell->GetValue();
@@ -3177,9 +3203,11 @@ void DCE::qOrbiter::populateAdditionalMedia() //additional media grid that popul
                 {
                     cellImg.load(":/icons/icon.png");
                 }
-                //qDebug() << index ;
+
                 emit addItem(new gridItem(fk_file, cellTitle, filePath, index, cellImg));
             }
+
+            delete pDataGridTable;
         }
     }
     else
@@ -3760,8 +3788,16 @@ void DCE::qOrbiter::OnReload()
 {
 
     emit routerReloading("Router Reload");
+    DisconnectAndWait();
 
 
+}
+
+void qOrbiter::OnReplaceHandler()
+{
+    emit replaceDevice();
+    this->deinitialize();
+    emit closeOrbiter();
 }
 
 void DCE::qOrbiter::extraButtons(QString button)
@@ -3928,7 +3964,7 @@ void DCE::qOrbiter::prepareFileList(int iPK_MediaType)
     requestMore = true;
     i_currentMediaModelRow = 0;
 
-    emit statusMessage("Initial media request");
+    setMediaResponse("Initial media request");
     //emit cleanupGrid();
 #ifdef for_desktop
     int gHeight = 1;            //how many rows we want
@@ -4070,7 +4106,7 @@ void DCE::qOrbiter::prepareFileList(int iPK_MediaType)
             }
             else
             {
-                emit gridModelSizeChange(cellsToRender);
+                emit gridModelSizeChange(pDataGridTable->GetRows());
                 i_mediaModelRows = cellsToRender;
                 QList <QObject*> modelPages;
                 int iPages = cellsToRender / media_pageSeperator; //15 being the items per page.
@@ -4105,12 +4141,12 @@ void DCE::qOrbiter::prepareFileList(int iPK_MediaType)
                     QString filePath;
                     int index;
                     QImage cellImg;
-
+                    DataGridCell *pCell;
 
                     for(MemoryDataTable::iterator it=pDataGridTable->m_MemoryDataTable.begin();it!=pDataGridTable->m_MemoryDataTable.end();++it)
                     {
 
-                        DataGridCell *pCell = it->second;
+                        pCell = it->second;
                         const char *pPath = pCell->GetImagePath();
                         filePath = QString::fromUtf8(pPath);
                         fk_file = pCell->GetValue();
@@ -4133,9 +4169,11 @@ void DCE::qOrbiter::prepareFileList(int iPK_MediaType)
                         emit addItem(new gridItem(fk_file, cellTitle, filePath, index, cellImg));
 
                     }
-                    delete pDataGridTable;
+
+
                 }
             }
+            delete pDataGridTable;
         }
     }
 

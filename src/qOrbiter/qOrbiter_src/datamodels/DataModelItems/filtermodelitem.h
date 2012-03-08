@@ -23,7 +23,7 @@ public:
   };
 
 public:
-  FilterModelItem(QObject *parent = 0) {}
+  FilterModelItem() {}
   explicit FilterModelItem( QString name,  QString pk_fileformat,  QImage img, bool selstat, QObject *parent = 0);
   QVariant data(int role) const;
   QHash<int, QByteArray> roleNames() const;

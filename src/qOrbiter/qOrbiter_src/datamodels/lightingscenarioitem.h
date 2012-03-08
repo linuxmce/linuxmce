@@ -21,7 +21,7 @@ class LightingScenarioItem: public QObject
 
         public:
 
-          LightingScenarioItem(QObject *parent = 0) {}
+          LightingScenarioItem() {}
           explicit LightingScenarioItem( const QString &name,  const QString &title, const  QString &parameter, const QString &scommand, const  QString &gotoScreen , QImage img, QObject *parent=0);
 
           QVariant data(int role) const;

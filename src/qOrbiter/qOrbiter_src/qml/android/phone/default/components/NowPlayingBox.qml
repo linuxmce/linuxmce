@@ -2,7 +2,7 @@ import QtQuick 1.0
 
 Rectangle {
 
-    id: now_playing
+    id: np_box
     height: scaleY(40)
     width: scaleX(75)
     visible: dcenowplaying.b_mediaPlaying ? true : false

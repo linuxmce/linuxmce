@@ -29,7 +29,7 @@ public:
   };
 
 public:
-  UserItem(QObject *parent = 0) {}
+  UserItem() {}
   explicit UserItem( QString &userName ,  QString &firstName,  QString &lastName,  QString &nickName,   int &iPK_User,  int &sUserMode,  int &pinRequired,  int &phoneExtension ,  QImage &img,  int &defaultUser, QObject *parent);
 
   QVariant data(int role) const;

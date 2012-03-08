@@ -57,7 +57,7 @@ signals:
 
     void playlistReady();
     void activeItemChanged();
-    virtual void modelAboutToBeReset();
+    void modelAboutToBeReset();
     virtual void modelReset();
 
 public slots:

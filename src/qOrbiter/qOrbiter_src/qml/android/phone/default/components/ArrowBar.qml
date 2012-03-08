@@ -24,7 +24,7 @@ Rectangle {
         anchors.horizontalCenter: overlay.horizontalCenter
 
         MediaButton {
-            id:back
+            id:up
             color: "transparent"
             media_but_txt: "back"
             height: style.stdbuttonh
@@ -36,7 +36,8 @@ Rectangle {
             }
         }
 
-        MediaButton {id:rw ;
+        MediaButton {
+            id:dwn ;
             color: "transparent"
             media_but_txt: "RW"
             height: style.stdbuttonh

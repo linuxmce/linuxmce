@@ -322,7 +322,7 @@ Param 10 - pk_attribute
     long iMediaPluginID;
     int m_pDevice_ScreenSaver;
     int m_dwIDataGridRequestCounter;
-
+    QString applicationPath;
 
 signals:
     void filterChanged();
@@ -364,6 +364,7 @@ signals:
     void engineReady();
     void error(QString msg);
     void orientationChanged();
+    void appPath(QString ap);
 
     void loadingMessage(QString msg);
     void splashReady();
@@ -387,6 +388,8 @@ public slots: //note: Q_INVOKABLE means it can be called directly from qml
     void showUI(bool b);
     void displayModelPages(QList<QObject*> pages);
     void setIpAddress(QString s);
+
+    //void setAppPath(QString p) {appPath;}
 
     void qmlSetupLmce(QString incdeviceid, QString incrouterip);
     void setRequestMore(bool state);

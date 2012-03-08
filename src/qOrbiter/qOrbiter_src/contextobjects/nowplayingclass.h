@@ -31,6 +31,10 @@
 #include <QDeclarativeItem>
 #include <QTime>
 #include <QDebug>
+#ifdef ANDROID
+#include <QFile>
+#include <QImageReader>
+#endif
 
 
 class NowPlayingClass : public QDeclarativeItem
@@ -206,6 +210,7 @@ public slots:
 
     void setImageData( const uchar *data, int iData_size) {
 
+#ifndef ANDROID
         QImage t;
 
         if( t.loadFromData(data, iData_size))
@@ -217,6 +222,32 @@ public slots:
         {
             emit statusMessage("Update Object Image Conversion Failed:");
         }
+#else
+        qDebug() << QImageReader::supportedImageFormats ();
+        QFile temp_hack_file;
+        temp_hack_file.setFileName("/mnt/sdcard/linuxmce/np.jpg");
+        qDebug("Set Filename");
+        if(temp_hack_file.open(QFile::ReadWrite))
+        {
+            qDebug("Opened temp file");
+            if( temp_hack_file.write(QByteArray::fromRawData((char*)data, iData_size)) )
+            {
+                qDebug("tempfile data write successfull");
+
+                temp_hack_file.close();
+                qDebug() << temp_hack_file.size();
+
+                QImage t;
+                if(t.load("/mnt/sdcard/Linuxmce/np.jpg")){
+                    qDebug("Loaded local image");
+                 }
+               setImage(t);
+            }
+            temp_hack_file.remove();
+        }
+
+#endif
+
     }
     void setImage(QImage img) {fileImage = img; emit imageChanged();}
     QImage getImage() {return fileImage;}
@@ -282,16 +313,16 @@ public slots:
     QString getDirector() {director = directors.join(" | "); return director;}
 
     void setGenre (QString inc_genre) { if(!genre.contains(inc_genre)) {genre.append(inc_genre+" | "); emit genreChanged();} }
-                QString getGenre() { return genre;}
+    QString getGenre() { return genre;}
 
-                void setRelease (QString inc_rls) {releasedate = inc_rls;  emit rlsChanged();}
-                QString getRelease() {return releasedate;}
+    void setRelease (QString inc_rls) {releasedate = inc_rls;  emit rlsChanged();}
+    QString getRelease() {return releasedate;}
 
-                inline QString getSynop() {return synop;}
-                inline void setSynop(QString s) { synop = s;  emit synopChanged(); }
+    inline QString getSynop() {return synop;}
+    inline void setSynop(QString s) { synop = s;  emit synopChanged(); }
 
-                void setStreamID(int stream) {i_streamID = stream;}
-                int getStreamID() {return i_streamID;}
-    };
+    void setStreamID(int stream) {i_streamID = stream;}
+    int getStreamID() {return i_streamID;}
+};
 
-        #endif // NOWPLAYINGCLASS_H
+#endif // NOWPLAYINGCLASS_H

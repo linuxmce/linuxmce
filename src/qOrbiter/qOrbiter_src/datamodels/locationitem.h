@@ -23,7 +23,7 @@ Q_OBJECT
     };
 
   public:
-    LocationItem(QObject *parent = 0) {}
+    LocationItem() {}
     explicit LocationItem(const QString &name, const int &iRoom, const QString &sTitle, const int &ea, const int &roomType, const QUrl &rmimage, QObject *parent = 0);
 
     QVariant data(int role) const;

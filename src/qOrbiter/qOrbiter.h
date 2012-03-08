@@ -58,6 +58,7 @@ public:
     bool finished;
     bool b_mediaPlaying;
     QString mediaResponse;
+    DataGridTable *pDataGridTable;
 
     int i_mediaModelRows;
     int i_currentMediaModelRow;
@@ -142,6 +143,8 @@ public:
     virtual void ReceivedUnknownCommand(string &sCMD_Result,Message *pMessage);
     virtual void OnDisconnect();
     virtual void OnReload();
+    virtual void OnReplaceHandler();
+
     virtual int DeviceIdInvalid();
 
 
@@ -1107,6 +1110,8 @@ signals:
     void deviceInvalid(QList<QObject*>);
     void routerInvalid();
      void routerReloading(QString msg);
+     void replaceDevice();
+     void closeOrbiter();
     void statusMessage(QString s);
     void configReady(QByteArray config);
     void setMyIp(QString ip);
@@ -1187,6 +1192,7 @@ signals:
     void clearTVplaylist();
     void playlistDone();
     void epgDone();
+    void livetvDone();
     void mediaGridDone();
 
     //filedetails popup

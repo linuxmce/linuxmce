@@ -176,19 +176,20 @@ qorbiterManager::qorbiterManager(QDeclarativeView *view, QObject *parent) :
 
 void qorbiterManager::gotoQScreen(QString s)
 {
-
-    if(s =="Screen_47.qml")
+    QRegExp tx(QRegExp("(_48)|(_63)|(_208)"));
+    if(s.contains(tx))
     {
-
+     QMetaObject::invokeMethod(this, "setNowPlayingTv", Qt::QueuedConnection);
     }
-    else
 
-    {  // qDebug() << "Setting load to false";
+    if(s == "Screen_1.qml")
+    {
+      // qDebug() << "Setting load to false";
         bool t = false;
         emit keepLoading(t);
         emit clearModel();
         emit resetFilter();
-        //emit bindMediaRemote(false);
+        emit bindMediaRemote(false);
     }
 
     //send the qmlview a request to go to a screen, needs error handling
@@ -217,7 +218,7 @@ bool qorbiterManager::initializeManager(string sRouterIP, int device_id)
 
     //QObject::connect(pqOrbiter, SIGNAL(gotoQml(QString)), this, SLOT(gotoQScreen(QString)));
 
-    QObject::connect(this,SIGNAL(screenChange(QString)), this, SLOT(gotoQScreen(QString)), Qt::QueuedConnection);
+    QObject::connect(this,SIGNAL(screenChange(QString)), this, SLOT(gotoQScreen(QString)));
     //QObject::connect(this,SIGNAL(executeCMD(int)), pqOrbiter, SLOT(executeCommandGroup(int)), Qt::QueuedConnection);
 
 
@@ -313,7 +314,7 @@ void qorbiterManager::processConfig(QByteArray config)
     s_onOFF = "1";
 
     QDomDocument configData;
-    const QByteArray tConf =  config;
+    QByteArray tConf =  config;
     configData.setContent(tConf,false);
     if(configData.isDocument() == false)
     {
@@ -321,8 +322,6 @@ void qorbiterManager::processConfig(QByteArray config)
         setDceResponse("Please run http://dcerouter/lmce-admin/qOrbiterGenerator.php?d="+QString::number(iPK_Device)) ;
         setDceResponse("Invalid Config");
         emit orbiterConfigReady(false);
-
-
     }
 
     setDceResponse("Attempting to write config");
@@ -673,6 +672,8 @@ void qorbiterManager::processConfig(QByteArray config)
 
     setDceResponse(" Remote Config Complete");
 
+    configData.clear();
+    tConf.clear();
 #ifdef for_desktop
     activateScreenSaver();
 #endif
@@ -1222,7 +1223,7 @@ void qorbiterManager::changedPlaylistPosition(QString position)
 
 void qorbiterManager::setNowPlayingData()
 {
-emit bindMediaRemote(true);
+
 
 }
 
@@ -1233,7 +1234,8 @@ void qorbiterManager::updateImageChanged(QImage img)
 
 void qorbiterManager::setNowPlayingTv()
 {
-
+emit bindMediaRemote(true);
+emit liveTVrequest();
 }
 
 void qorbiterManager::changeChannels(QString chan)
@@ -1243,7 +1245,7 @@ void qorbiterManager::changeChannels(QString chan)
 
 void qorbiterManager::getLiveTVPlaylist()
 {   
-      //emit liveTVrequest();
+
 }
 
 void qorbiterManager::getStoredPlaylist()
@@ -1374,6 +1376,7 @@ bool qorbiterManager::cleanupData()
 {
     roomLights= NULL;                 //current room scenarios model
     roomMedia=NULL;                   //current room media model
+    return true;
 }
 
 void qorbiterManager::setSeekLetter(QString letter)
@@ -1383,6 +1386,7 @@ void qorbiterManager::setSeekLetter(QString letter)
 
 void qorbiterManager::showMessage(QString message, int duration, bool critical)
 {
+
 }
 
 void qorbiterManager::startOrbiter()
@@ -1432,7 +1436,7 @@ void qorbiterManager::initializeConnections()
 
 void qorbiterManager::reloadHandler()
 {
-    emit raiseSplash();
+    gotoQScreen("ReloadHandler.qml");
     /*
     setDceResponse("Reloading Router");
     QApplication::processEvents(QEventLoop::AllEvents);
@@ -1470,7 +1474,7 @@ QString qorbiterManager::getDceResponse()
 
 int qorbiterManager::loadSplash()
 {
-
+    return 1;
 }
 
 void qorbiterManager::activateScreenSaver()
@@ -1525,6 +1529,7 @@ bool qorbiterManager::createAndroidConfig()
             return false;
         }
     }
+    return false;
 
 }
 

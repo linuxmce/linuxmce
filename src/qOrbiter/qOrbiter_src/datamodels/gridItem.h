@@ -24,7 +24,7 @@ public:
   };
 
 public:
-  gridItem(QObject *parent = 0) {}
+  gridItem() {}
   explicit gridItem( QString &ident, QString &name,  QString &path,  int &index,  QImage &img);
   QVariant data(int role) const;
   QHash<int, QByteArray> roleNames() const;

@@ -21,7 +21,7 @@ class MediaScenarioItem: public QObject
 
         public:
 
-          MediaScenarioItem(QObject *parent = 0) {}
+          MediaScenarioItem() {}
           explicit MediaScenarioItem( const QString &name,  const QString &title, const  QString &parameter, const QString &scommand, const  QString &gotoScreen , QImage img, QObject *parent=0);
 
           QVariant data(int role) const;

@@ -21,17 +21,17 @@ public:
   };
 
 public:
-  MediaSubTypeItem(QObject *parent = 0) {}
+  MediaSubTypeItem() {}
   explicit MediaSubTypeItem( QString name,  QString pk_fileformat,  QImage img, bool selstat, QObject *parent = 0);
   QVariant data(int role) const;
   QHash<int, QByteArray> roleNames() const;
 
-  inline QString id() const {  return m_description; }
-   inline QString name() const {  return m_description; }
-  inline QString mediatype() const { return m_qs_mediatype; }
-  inline QImage cellImage() const {  return m_image; }
-  inline bool selectedStatus() const { return m_isSelected; }
-  inline bool setStatus(bool b) { m_isSelected = b; }
+   QString id() const {  return m_description; }
+    QString name() const {  return m_description; }
+   QString mediatype() const { return m_qs_mediatype; }
+   QImage cellImage() const {  return m_image; }
+   bool selectedStatus() const { return m_isSelected; }
+   bool setStatus(bool b) { m_isSelected = b; return m_isSelected; }
    void updateSelection (bool newBool) ;
 
 private:

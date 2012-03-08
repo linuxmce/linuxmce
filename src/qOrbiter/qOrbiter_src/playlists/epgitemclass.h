@@ -24,7 +24,7 @@ public:
     };
 
 public:
-    EPGItemClass(QObject *parent = 0) {}
+    EPGItemClass() {}
     explicit EPGItemClass( QString &chanName, int &chanIndex,  QString &channel, QString &program, int &dceIndex, QImage &chanImage, QImage &progImag);
     QVariant data(int role) const;
     QHash<int, QByteArray> roleNames() const;

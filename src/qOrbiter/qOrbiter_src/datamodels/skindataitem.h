@@ -28,7 +28,7 @@ public:
 
 public:
 
-    SkinDataItem(QObject *parent = 0) {}
+    SkinDataItem() {}
     explicit SkinDataItem( const QUrl &url, const QString &name,  const QString &creator, const  QString &description, const QString &version, const  QString &variant , const QImage img, const QString &path, const QString &mainc, const QString &accentc, QObject *parent=0);
 
     QVariant data(int role) const;

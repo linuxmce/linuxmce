@@ -109,10 +109,8 @@ void ListModel::endResetModel()
 
 void ListModel::resetInternalData()
 {
-    setTotalCells(0);
-    setProgress(0.0);
-    m_list.clear();
-
+    qDeleteAll(m_list.begin(), m_list.end());
+     m_list.clear();
 }
 
 gridItem * ListModel::find(const QString &id) const
@@ -161,14 +159,12 @@ void ListModel::clear()
     emit modelAboutToBeReset();
     beginResetModel();
     resetInternalData();
+    setTotalCells(0);
+    setProgress(0);
     endResetModel();
     emit modelReset();
     clearing = false;
-    while(m_list.count() > 1)
-    {
-     //   qDebug("Clearing");
-    }
- //   qDebug ()<< "Model Clear" ;
+
 }
 
 bool ListModel::removeRow(int row, const QModelIndex &parent)
@@ -288,18 +284,16 @@ void ListModel::attributeSort()
 
 void ListModel::clearAndRequest(int type)
 {
-    gridType = type;
-    clearing = true;
+    gridType = type;      
+    QApplication::processEvents(QEventLoop::AllEvents);
     emit modelAboutToBeReset();
     beginResetModel();
     resetInternalData();
-    setTotalCells(0);
+    setProgress(0.0);
     //qDeleteAll(m_list);
     endResetModel();
     emit modelReset();
-    clearing = false;
     emit ready(gridType);
-
 
 }
 
@@ -310,22 +304,22 @@ void ListModel::clearForPaging()
     if(removeRows(0, m_list.count(), QModelIndex()))
         emit pagingCleared();
         */
-    clearing = true;
+QApplication::processEvents(QEventLoop::AllEvents);
     emit modelAboutToBeReset();
     beginResetModel();
-    resetInternalData();
-    //qDeleteAll(m_list);
+   resetInternalData();
+    setProgress(0.0);
+     QApplication::processEvents(QEventLoop::AllEvents);
     endResetModel();
     emit modelReset();
-    clearing = false;
-   // qDebug("Page Cleared, requesting");
     emit pagingCleared();
-
+QApplication::processEvents(QEventLoop::AllEvents);
 #else
     //qDebug("Clearing for next page");
     clearing = true;
     emit modelAboutToBeReset();
     beginResetModel();
+    setProgress(0.0);
     resetInternalData();
     //qDeleteAll(m_list);
     endResetModel();

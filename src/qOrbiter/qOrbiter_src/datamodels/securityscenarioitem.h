@@ -21,7 +21,7 @@ class SecurityScenarioItem: public QObject
 
         public:
 
-          SecurityScenarioItem(QObject *parent = 0) {}
+          SecurityScenarioItem() {}
           explicit SecurityScenarioItem( const QString &name,  const QString &title, const  QString &parameter, const QString &scommand, const  QString &gotoScreen , QImage img, QObject *parent=0);
 
           QVariant data(int role) const;
