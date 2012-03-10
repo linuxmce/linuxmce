@@ -437,7 +437,7 @@ GetVideoDriver()
 	VideoDriver=$(lspci | grep ' VGA ' | cut -d' ' -f5)
 	case "$VideoDriver" in
 		nVidia) 
-			if PackageIsInstalled nvidia-glx 2>/dev/null || PackageIsInstalled nvidia-glx-new 2>/dev/null || PackageIsInstalled nvidia-glx-71 2>/dev/null || PackageIsInstalled nvidia-glx-96 2>/dev/null || PackageIsInstalled nvidia-glx-173 2>/dev/null || PackageIsInstalled nvidia-glx-180 2>/dev/null || PackageIsInstalled nvidia-glx-190 2>/dev/null || PackageIsInstalled nvidia-glx-195 2>/dev/null || PackageIsInstalled nvidia-glx-260 2>/dev/null || PackageIsInstalled nvidia-glx-185 || PackageIsInstalled nvidia-current 2>/dev/null 2>/dev/null ;then
+			if PackageIsInstalled nvidia-glx 2>/dev/null || PackageIsInstalled nvidia-glx-new 2>/dev/null || PackageIsInstalled nvidia-glx-71 2>/dev/null || PackageIsInstalled nvidia-glx-96 2>/dev/null || PackageIsInstalled nvidia-glx-173 2>/dev/null || PackageIsInstalled nvidia-glx-180 2>/dev/null || PackageIsInstalled nvidia-glx-190 2>/dev/null || PackageIsInstalled nvidia-glx-195 2>/dev/null || PackageIsInstalled nvidia-glx-260 2>/dev/null || PackageIsInstalled nvidia-glx-185 2>/dev/null || PackageIsInstalled nvidia-current 2>/dev/null; then
 			       	VideoDriver="nvidia" 
 			fi
 		;;
@@ -446,11 +446,21 @@ GetVideoDriver()
                  	elif PackageIsInstalled xserver-xorg-video-radeon 2>/dev/null; then VideoDriver="radeon" 
                  	elif PackageIsInstalled xserver-xorg-video-radeonhd 2>/dev/null; then VideoDriver="radeonhd" 
                  	fi 
-                 ;; 
-	Intel) VideoDriver="intel" ;;
+                ;; 
+		Intel)
+                        if PackageIsInstalled xserver-xorg-video-i128 2>/dev/null; then VideoDriver="i128" 
+                        elif PackageIsInstalled xserver-xorg-video-i740 2>/dev/null; then VideoDriver="i740" 
+                        elif PackageIsInstalled xserver-xorg-video-intel 2>/dev/null; then VideoDriver="intel" 
+                        fi 
+		;;       
+                VIA) 
+                	if PackageIsInstalled xserver-xorg-video-openchrome; then VideoDriver="openchrome" 
+                        elif PackageIsInstalled xserver-xorg-video-savage; then VideoDriver="savage" 
+                        fi 
+		;; 
 	esac
 #<-mkr_B_via_e->
-   	[[ "$VideoDriver" == @(nvidia|fglrx|radeonhd|radeon|intel) ]] || VideoDriver="vesa" 
+   	[[ "$VideoDriver" == @(nvidia|fglrx|radeonhd|radeon|i128|i740|intel|savage|openchrome) ]] || VideoDriver="vesa" 
    	echo "$VideoDriver"
 }
 
