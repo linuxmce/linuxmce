@@ -431,11 +431,12 @@ GetVideoDriver()
 		return 0
 	fi
 	
-	local VideoDriver
+	local VideoDriver,PCIVGAOutput
 #
+	VideoDriver="vesa"
 #<-mkr_B_via_b->
-	VideoDriver=$(lspci | grep ' VGA ' | cut -d' ' -f5)
-	case "$VideoDriver" in
+	PCIVGAOutput=$(lspci | grep ' VGA ' | cut -d' ' -f5)
+	case "$PCIVGAOUTPut" in
 		nVidia) 
 			if PackageIsInstalled nvidia-glx 2>/dev/null || PackageIsInstalled nvidia-glx-new 2>/dev/null || PackageIsInstalled nvidia-glx-71 2>/dev/null || PackageIsInstalled nvidia-glx-96 2>/dev/null || PackageIsInstalled nvidia-glx-173 2>/dev/null || PackageIsInstalled nvidia-glx-180 2>/dev/null || PackageIsInstalled nvidia-glx-190 2>/dev/null || PackageIsInstalled nvidia-glx-195 2>/dev/null || PackageIsInstalled nvidia-glx-260 2>/dev/null || PackageIsInstalled nvidia-glx-185 2>/dev/null || PackageIsInstalled nvidia-current 2>/dev/null; then
 			       	VideoDriver="nvidia" 
@@ -460,7 +461,7 @@ GetVideoDriver()
 		;; 
 	esac
 #<-mkr_B_via_e->
-   	[[ "$VideoDriver" == @(nvidia|fglrx|radeonhd|radeon|i128|i740|intel|savage|openchrome) ]] || VideoDriver="vesa" 
+#   	[[ "$VideoDriver" == @(nvidia|fglrx|radeonhd|radeon|i128|i740|intel|savage|openchrome) ]] || VideoDriver="vesa" 
    	echo "$VideoDriver"
 }
 
