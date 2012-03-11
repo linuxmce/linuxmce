@@ -241,7 +241,7 @@ public slots:
                 if(t.load("/mnt/sdcard/Linuxmce/np.jpg")){
                     qDebug("Loaded local image");
                  }
-               setImage(t);
+               setImage(t.convertToFormat());
             }
             temp_hack_file.remove();
         }

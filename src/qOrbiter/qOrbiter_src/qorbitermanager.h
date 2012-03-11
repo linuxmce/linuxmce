@@ -333,6 +333,8 @@ signals:
     void mediaRequest(int);
     void objectUpdated();
     void setMediaDetails();
+    void mediaScreenShotReady();
+    void saveMediaScreenShot(QString attribute, QByteArray pic);
 
     void liveTVrequest();
     void managerPlaylistRequest();
@@ -423,6 +425,9 @@ public slots: //note: Q_INVOKABLE means it can be called directly from qml
     void getStoredPlaylist();
     Q_INVOKABLE void setNowPlayingData();
     Q_INVOKABLE void setNowPlayingTv();
+    void setScreenShotVariables(QList <QObject*> l);
+    void setMediaScreenShot(QByteArray data);
+    void saveScreenShot(QString attribute);
 
     Q_INVOKABLE void playMedia(QString FK_Media);
     Q_INVOKABLE void stopMedia();

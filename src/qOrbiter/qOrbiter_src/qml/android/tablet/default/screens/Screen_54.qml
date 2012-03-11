@@ -61,7 +61,10 @@ Rectangle {
         anchors.topMargin: scaleY(2)
         anchors.horizontalCenter: parent.horizontalCenter
 
-        NonEPGPlaylist{ id:playlist; visible: true}
+        NonEPGPlaylist{
+            id:playlist;
+            visible: true
+        }
 
         Row {
             id:metarow

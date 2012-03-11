@@ -8,14 +8,10 @@ Rectangle {
     border.color: style.highlight1
     border.width: 2
     clip:false
-
-
-    Component.onCompleted: nonepgplaylistview.positionViewAtIndex(dcenowplaying.m_iplaylistPosition, ListView.Beginning)
-
     Connections{
-        target: dcenowplaying
-        onPlayListPositionChanged:{
-            nonepgplaylistview.positionViewAtIndex(dcenowplaying.m_iplaylistPosition, ListView.Beginning)
+        target: mediaplaylist
+        onActiveItemChanged:{
+            nonepgplaylistview.positionViewAtIndex(mediaplaylist.currentIndex, ListView.Beginning)
         }
     }
 
@@ -61,7 +57,7 @@ Rectangle {
             }
             Text {
                 id: position
-                text: qsTr("Item #") + name
+                text: qsTr("Item #") + index
                 font.family: "DroidSans"
                 color: "aliceblue"
                 font.pixelSize: scaleY(2.25)
@@ -71,7 +67,7 @@ Rectangle {
             }
 
             Text {
-                text:  index === dcenowplaying.m_iplaylistPosition ? "Now Playing - " + id : id
+                text:  index === dcenowplaying.m_iplaylistPosition ? "Now Playing - " + name : name
                 font.family: "DroidSans"
                 color: "aliceblue"
                 width: parent.width
@@ -91,7 +87,7 @@ Rectangle {
 
             MouseArea{
                 anchors.fill: parent
-                onClicked: dcerouter.jumpToPlaylistPosition(name)
+                onClicked: dcerouter.jumpToPlaylistPosition(index)
             }
         }
     }

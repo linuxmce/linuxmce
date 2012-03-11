@@ -166,30 +166,25 @@ qorbiterManager::qorbiterManager(QDeclarativeView *view, QObject *parent) :
     //screen parameters class that could be extended as needed to fetch other data
     ScreenParameters = new ScreenParamsClass;
     qorbiterUIwin->rootContext()->setContextProperty("screenparams", ScreenParameters);
-   // timecodeThread = new QThread();
+    // timecodeThread = new QThread();
     timeCodeSocket = new QTcpSocket();
-   // timeCodeSocket->moveToThread(timecodeThread);
-   // timecodeThread->start();
+    // timeCodeSocket->moveToThread(timecodeThread);
+    // timecodeThread->start();
     QApplication::processEvents(QEventLoop::AllEvents);
 }
 
 
 void qorbiterManager::gotoQScreen(QString s)
 {
-    QRegExp tx(QRegExp("(_48)|(_63)|(_208)"));
-    if(s.contains(tx))
-    {
-     QMetaObject::invokeMethod(this, "setNowPlayingTv", Qt::QueuedConnection);
-    }
 
     if(s == "Screen_1.qml")
     {
-      // qDebug() << "Setting load to false";
+        // qDebug() << "Setting load to false";
         bool t = false;
         emit keepLoading(t);
         emit clearModel();
         emit resetFilter();
-        emit bindMediaRemote(false);
+       // emit bindMediaRemote(false);
     }
 
     //send the qmlview a request to go to a screen, needs error handling
@@ -585,7 +580,7 @@ void qorbiterManager::processConfig(QByteArray config)
     qorbiterUIwin->rootContext()->setContextProperty("roomList", m_lRooms);                           //custom room list  provided
     qorbiterUIwin->rootContext()->setContextProperty("gmediaType", q_mediaType);
     qorbiterUIwin->rootContext()->setContextProperty("screenshotAttributes", QVariant::fromValue(screenshotVars));
-    // QObject::connect(this->nowPlayingButton, SIGNAL(mediaStatusChanged()), this, SLOT(updateTimecode()), Qt::QueuedConnection);
+    QObject::connect(this->nowPlayingButton, SIGNAL(mediaStatusChanged()), this, SLOT(updateTimecode()), Qt::QueuedConnection);
     setDceResponse("Properties Done");
 
     setDceResponse("Setting location");
@@ -1128,7 +1123,7 @@ void qorbiterManager::initializeSortString()
 void qorbiterManager::initializeGridModel()
 {
     basicProvider = new basicImageProvider();
-    qorbiterUIwin->rootContext()->setContextProperty("currentDateTime", QDateTime::currentDateTime());  
+    qorbiterUIwin->rootContext()->setContextProperty("currentDateTime", QDateTime::currentDateTime());
     setDceResponse("Grid Initialized");
 }
 
@@ -1234,8 +1229,38 @@ void qorbiterManager::updateImageChanged(QImage img)
 
 void qorbiterManager::setNowPlayingTv()
 {
-emit bindMediaRemote(true);
-emit liveTVrequest();
+    emit bindMediaRemote(true);
+    emit liveTVrequest();
+}
+
+void qorbiterManager::setScreenShotVariables(QList<QObject *> l)
+{
+    setDceResponse("Setting thumbnail attributes to screen");
+    screenshotVars = l;
+    qorbiterUIwin->rootContext()->setContextProperty("screenshotAttributes", QVariant::fromValue(screenshotVars));
+}
+
+void qorbiterManager::setMediaScreenShot(QByteArray data)
+{
+    if(mediaScreenShot.loadFromData(data))
+    {
+        emit mediaScreenShotReady();
+        qDebug("Screen Shot loaded");
+    }
+}
+
+void qorbiterManager::saveScreenShot(QString attribute)
+{
+
+    QByteArray bytes;
+
+    QBuffer ba(&bytes);
+    ba.open(QIODevice::WriteOnly);
+    mediaScreenShot.save(&ba, "JPG");
+    ba.close();
+    qDebug()<<  bytes.size();
+    emit saveMediaScreenShot(attribute, bytes);
+     cleanupScreenie();
 }
 
 void qorbiterManager::changeChannels(QString chan)
@@ -1250,8 +1275,9 @@ void qorbiterManager::getLiveTVPlaylist()
 
 void qorbiterManager::getStoredPlaylist()
 {
+ emit bindMediaRemote(true);
+emit managerPlaylistRequest();
 
-   // emit managerPlaylistRequest();
 }
 
 void qorbiterManager::gridChangeChannel(QString chan, QString chanid)
@@ -1305,7 +1331,7 @@ void qorbiterManager::updateTimecode(int port)
 
     if(!timeCodeSocket->isOpen())
     {
-        //qDebug() <<"opening connection to " << port;
+       qDebug() <<"opening connection to " << port;
 
         timeCodeSocket->connectToHost(qs_routerip, port, QFile::ReadOnly );
         if ( timeCodeSocket->isValid() )
@@ -1314,8 +1340,8 @@ void qorbiterManager::updateTimecode(int port)
             QObject::connect(timeCodeSocket,SIGNAL(readyRead()), this, SLOT(showTimeCode()));
         }
         else
-        {   //qDebug("couldnt start timecode");
-           // qDebug() << timeCodeSocket->errorString();
+        {   qDebug("couldnt start timecode");
+             qDebug() << timeCodeSocket->errorString();
         }
     }
 
@@ -1416,6 +1442,8 @@ void qorbiterManager::setActiveSkin(QString name)
     swapSkins(name);
 }
 
+
+
 void qorbiterManager::cleanupScreenie()
 {
     mediaScreenShot = QImage();
@@ -1462,7 +1490,7 @@ void qorbiterManager::setDceResponse(QString response)
     dceResponse = response;
     emit loadingMessage(dceResponse);
     emit dceResponseChanged();
-    //qDebug() << dceResponse;
+    qDebug() << dceResponse;
 
 }
 

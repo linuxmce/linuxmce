@@ -18,17 +18,14 @@ Rectangle {
         Remote_Audio_controls{ id: remote1; }
     }
 
+    Component.onCompleted: manager.getStoredPlaylist()
 
     Connections{
         target:dcenowplaying
-        onPlayListPositionChanged: { nowplayingimage.source = "image://listprovider/updateobject/"+securityvideo.timestamp;}
-        onImageChanged:{ nowplayingimage.source = "image://listprovider/updateobject/"+securityvideo.timestamp;}
+        onImageChanged: { nowplayingimage.source = "image://listprovider/updateobject/"+securityvideo.timestamp;}
+
     }
 
-    Component.onCompleted: {
-        console.log("fucking loaded");
-        manager.getStoredPlaylist()
-    }
 
     Row{
         id:mainrow
@@ -299,7 +296,7 @@ Rectangle {
                             MouseArea{
                                 anchors.fill: parent
                                 onClicked:  {
-                                    dcerouter.grabScreenshot()
+                                    dcerouter.grabScreenshot(dcenowplaying.filepath)
                                     MyJs.createThumbComponent("../components/AssignScreenShot.qml", storedvideoremote)
 
                                 }

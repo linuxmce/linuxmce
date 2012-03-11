@@ -76,6 +76,7 @@ qOrbiter::qOrbiter( int DeviceID, string ServerAddress,bool bConnectEventHandler
     m_dwPK_Device_NowPlaying_Video = 0;
     m_dwPK_Device_NowPlaying_Audio = 0;
     m_dwPK_Device_CaptureCard = 0;
+    m_dwMaxRetries = 3;
 
     initializeGrid();
 
@@ -1054,8 +1055,7 @@ void qOrbiter::CMD_Set_Now_Playing(string sPK_DesignObj,string sValue_To_Assign,
     scrn.remove(pos1, scrn.length());
     // qDebug() << sValue_To_Assign.c_str();
 
-    QString port = QString::fromStdString(GetCurrentDeviceData(m_dwPK_Device_NowPlaying, 171));
-    emit newTCport(port.toInt());
+
 
     if (iPK_MediaType == 0)
     {
@@ -1063,7 +1063,7 @@ void qOrbiter::CMD_Set_Now_Playing(string sPK_DesignObj,string sValue_To_Assign,
         emit setNowPlaying(false);
         emit gotoQml("Screen_1.qml");
         b_mediaPlaying = false;
-        // BindMediaRemote(false);
+         BindMediaRemote(false);
         emit currentScreenChanged("Screen_1.qml");
         currentScreen = "Screen_1.qml";
         internal_streamID = iStreamID;
@@ -1080,58 +1080,13 @@ void qOrbiter::CMD_Set_Now_Playing(string sPK_DesignObj,string sValue_To_Assign,
         emit streamIdChanged(iStreamID);
         emit subtitleChanged(QString::fromStdString(sText));
         internal_streamID = iStreamID;
-
         emit mediaTypeChanged(iPK_MediaType);
-
-        if(iPK_MediaType ==1)
-        {
-            //channel ID will be sent to the playlist parser to find our position of the current data
-            emit np_channelID(QString::number(iValue));
-            emit np_network(QString::fromStdString(sValue_To_Assign));
-            //the remaining two signals are sent to the now playing class immediatly
-            emit np_program(QString::fromStdString(sText));
-            emit mythTvUpdate("i"+QString::number(iValue));
-            b_mediaPlaying = true;
-            if(bRetransmit == 0 )
-            {
-                emit epgDone();
-            }
-
-        }
-        else if(iPK_MediaType== 11)
-        {
-            emit np_channelID(QString::number(iValue));
-            emit np_network(QString::fromStdString(sValue_To_Assign));
-
-            b_mediaPlaying = true;
-
-            if(bRetransmit == 0 )
-            {
-                livetvDone();
-            }
-
-        }
-        else
-        {
-            GetNowPlayingAttributes();
-            emit playlistPositionChanged(iValue);
-            emit clearPlaylist();
-            b_mediaPlaying = true;
-        }
-    }
-
-
-
-    if(iPK_MediaType == 5)
-    {
-        emit np_title1Changed(QString::fromStdString(sValue_To_Assign ));
-        emit np_title2Changed(QString::fromStdString(sText));
-    }
-    else
-    {
+        emit np_playlistIndexChanged(iValue);
         QString md1 = QString::fromStdString(sValue_To_Assign);
         QStringList mdlist;
         mdlist= md1.split(QRegExp("\\n"), QString::SkipEmptyParts);
+        QString port = QString::fromStdString(GetCurrentDeviceData(m_dwPK_Device_NowPlaying, 171));
+        emit newTCport(port.toInt());
 
         if (mdlist.count() == 2)
         {
@@ -1145,11 +1100,56 @@ void qOrbiter::CMD_Set_Now_Playing(string sPK_DesignObj,string sValue_To_Assign,
             emit np_title1Changed(QString::fromStdString(sValue_To_Assign));
             emit np_title2Changed("");
         }
+
     }
 
+    if(iPK_MediaType ==1)
+    {
+        //channel ID will be sent to the playlist parser to find our position of the current data
+        emit np_channelID(QString::number(iValue));
+        emit np_network(QString::fromStdString(sValue_To_Assign));
+        //the remaining two signals are sent to the now playing class immediatly
+        emit np_program(QString::fromStdString(sText));
+        emit mythTvUpdate("i"+QString::number(iValue));
 
+        if(bRetransmit == 0 )
+        {
+            emit epgDone();
+        }
+        b_mediaPlaying = true;
+    }
+    else if(iPK_MediaType== 11)
+    {
+        emit np_channelID(QString::number(iValue));
+        emit np_network(QString::fromStdString(sValue_To_Assign));
+        if(bRetransmit == 0 )
+        {
+            livetvDone();
+        }
+        b_mediaPlaying = true;
 
+    }
+    else if(iPK_MediaType == 5)
+    {
+        if(bRetransmit == 1)
+        {
+            emit clearPlaylist();
+        }
+        emit np_title1Changed(QString::fromStdString(sValue_To_Assign ));
+        emit np_title2Changed(QString::fromStdString(sText));
+         b_mediaPlaying = true;
+           emit playlistPositionChanged(iValue);
+    }
+    else
+    {
+        GetNowPlayingAttributes();
+        emit playlistPositionChanged(iValue);
+        if(bRetransmit == 1)
+        {
+            emit clearPlaylist();
+        }
 
+    }
 
 }
 
@@ -1922,7 +1922,7 @@ void qOrbiter::registerDevice(int user, QString ea, int room)
 
         emit statusMessage("DCERouter Responded to Register with " + QString::fromStdString(pResponse));
         setLocation(room, ea.toInt());
-        BindMediaRemote(true);
+
         GetScreenSaverImages();
     }
     else
@@ -2834,7 +2834,7 @@ void DCE::qOrbiter::GetNowPlayingAttributes()
             filepath.append(details.at(placeholder+1));
         }
 
-        //nowPlayingButton->setFilePath(filepath);
+        emit np_filename(filepath);
 
         int gHeight = 0;
         int gWidth = 0;
@@ -3618,30 +3618,17 @@ void DCE::qOrbiter::addToPlaylist(bool now, std::string playlist)
       */
 }
 
-void DCE::qOrbiter::grabScreenshot()
+void DCE::qOrbiter::grabScreenshot(QString fileWithPath)
 {
 
     char *screenieData;         //screenshot data using the char** data structure for passing of data
     int screenieDataSize=0;       //var for size of data
     string s_format ="jpg";   //the format we want returned
-    int imageH = 800;                 //image height of desired screenshot
-    int imageW = 800;                 //width of desired screenshot
+    int imageH;                 //image height of desired screenshot
+    int imageW;                 //width of desired screenshot
     string sDisableAspectLock = "0";
 
-    CMD_Get_Video_Frame grabMediaScreenshot(long(m_dwPK_Device), long(m_dwPK_Device_NowPlaying), sDisableAspectLock,internal_streamID, 800,800, &screenieData, &screenieDataSize, &s_format);
 
-    SendCommand(grabMediaScreenshot);
-    QByteArray configData;              //config file put into qbytearray for processing
-    configData.setRawData(screenieData, screenieDataSize);    ;
-    QImage returnImage;
-
-    if (!returnImage.loadFromData(configData))
-    {
-        returnImage.load(":/icons/videos.png");
-    }
-
-    // mediaScreenShot = returnImage;
-    // emit screenShotReady();
 
     int gHeight = 0;
     int gWidth = 0;
@@ -3698,24 +3685,35 @@ void DCE::qOrbiter::grabScreenshot()
                 cellAttribute = pCell->GetValue();
                 cellfk = pCell->GetValue();
                 QStringList parser = cellTitle.split(QRegExp("(\\n|:\\s)"), QString::KeepEmptyParts);
-                //  screenshotVars.append(new screenshotAttributes( cellfk, cellTitle, cellAttribute.prepend("!A") ));
+                screenshotVars.append(new screenshotAttributes( cellfk, cellTitle, cellAttribute.prepend("!A") ));
             }
 
         }
 
         int iEK_File;
-        //CMD_Get_ID_from_Filename getFileID(m_dwPK_Device, iMediaPluginID, nowPlayingButton->filepath.toStdString(), &iEK_File);
-        //SendCommand(getFileID);
-        // QString fk;
-        //fk.append("!F"+ QString::fromStdString(StringUtils::itos(iEK_File)));
-        //emit statusMessage(fk);
-        // string *fk = StringUtils::itos(&iEK_File);
-
-        //  screenshotVars.append(new screenshotAttributes(fk, QString("Filename"),fk ));
-
+        CMD_Get_ID_from_Filename getFileID(m_dwPK_Device, iMediaPluginID, fileWithPath.toStdString(), &iEK_File);
+        string fResp = "";
+        if(SendCommand(getFileID, &fResp) && fResp == "OK")
+        {
+            QString fk;
+            fk.append("!F"+ QString::fromStdString(StringUtils::itos(iEK_File)));
+            emit statusMessage(fk);
+            // string *fk = StringUtils::itos(&iEK_File);
+            screenshotVars.prepend(new screenshotAttributes(fk, QString("Filename"),fk ));
+        }
     }
+    emit screenshotVariablesReady(screenshotVars);
+    screenshotVars.clear();
 
-    // qorbiterUIwin->rootContext()->setContextProperty("screenshotAttributes", QVariant::fromValue(screenshotVars));
+    CMD_Get_Video_Frame grabMediaScreenshot(long(m_dwPK_Device), long(m_dwPK_Device_NowPlaying), sDisableAspectLock,internal_streamID, imageH , imageW, &screenieData, &screenieDataSize, &s_format);
+    string mpResp= "";
+
+    if(SendCommand(grabMediaScreenshot, &mpResp) && mpResp =="OK")
+    {
+        QByteArray screenShotData;              //config file put into qbytearray for processing
+        screenShotData.setRawData(screenieData, screenieDataSize);
+        emit screenShotReady(screenShotData);
+    }
 }
 
 /*
@@ -3874,21 +3872,24 @@ void DCE::qOrbiter::extraButtons(QString button)
 
 }
 
-void DCE::qOrbiter::saveScreenAttribute(QString attribute)
+void DCE::qOrbiter::saveScreenAttribute(QString attribute, QByteArray data)
 {
-    /*
+
+    if(attribute.contains("!F"))
+    {
+        attribute.remove("!F");
+    }
+
     string sAttribute = attribute.toStdString();
-    QByteArray bytes;
-    QBuffer ba(&bytes);
-    ba.open(QIODevice::WriteOnly);
-    mediaScreenShot.save(&ba, "JPG");
-    ba.close();
-    char *pData = (char*) bytes.constData();
-    int pDataSize = ba.size();
+    char *pData = (char*) data.constData();
+    int pDataSize = data.size();
+
     CMD_Make_Thumbnail thumb(m_dwPK_Device, iMediaPluginID, sAttribute, pData, pDataSize );
-    SendCommand(thumb);
-    cleanupScreenie();
-    */
+    string cResp = "";
+    if(SendCommand(thumb, &cResp) && cResp=="OK")
+    {
+        emit statusMessage("Created Thumbnail");
+    }
 }
 
 void DCE::qOrbiter::newOrbiter()

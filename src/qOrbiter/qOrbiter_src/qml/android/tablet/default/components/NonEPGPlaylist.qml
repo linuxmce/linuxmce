@@ -1,4 +1,5 @@
 import QtQuick 1.0
+import "../components"
 
 Rectangle {
     id:nonepgplaylist
@@ -6,13 +7,12 @@ Rectangle {
     height: scaleY(55)
     color: style.highlight2
     border.color: style.highlight1
-    border.width: 2
+    border.width: 1
     clip:false
     Connections{
         target: mediaplaylist
         onActiveItemChanged:{
             nonepgplaylistview.positionViewAtIndex(mediaplaylist.currentIndex  , ListView.Beginning)
-
         }
 
         BorderImage {
@@ -26,19 +26,16 @@ Rectangle {
             smooth: true
         }
 
-        ListView{
+
+        ListView {
             id:nonepgplaylistview
             width: scaleX(25)
             height: scaleY(55)
             anchors.centerIn: parent
-            highlightFollowsCurrentItem: true
-            highlight: Rectangle { color: "lightsteelblue"; radius: 5 }
-            clip: true
+           clip: true
             interactive: true
             flickableDirection: "VerticalFlick"
             model: mediaplaylist
-
-
             delegate:
                 Rectangle {
                 border.color: "slategrey"
@@ -46,7 +43,7 @@ Rectangle {
                 width:scaleX(25)
                 height: scaleY(12)
                 anchors.horizontalCenter: parent.horizontalCenter
-                color: style.darkhighlight
+                color: "transparent"
                 clip: true
                 Image {
                     id: playlistimage

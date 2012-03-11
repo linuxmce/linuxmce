@@ -87,6 +87,8 @@ public:
     QTcpSocket timeCodeSocket;
     QThread *timeCodeThread;
 
+    QList<QObject*> screenshotVars;
+
     string *s_user;
     QString currentScreen;
 
@@ -158,7 +160,7 @@ public:
     Q_INVOKABLE void movePlaylistEntry(bool pos, int num);
     Q_INVOKABLE void addToPlaylist(bool now, string playlist);
     //-------------------------------------------------------
-    Q_INVOKABLE void grabScreenshot();
+    Q_INVOKABLE void grabScreenshot(QString fileWithPath);
     // Default colored settop box and VDR buttons.
     Q_INVOKABLE void redButton();
     Q_INVOKABLE void greenButton();
@@ -166,7 +168,7 @@ public:
     Q_INVOKABLE void blueButton();
     //buttons from the more screen
     Q_INVOKABLE void extraButtons(QString button);
-    Q_INVOKABLE void saveScreenAttribute(QString attribute);
+
     Q_INVOKABLE void newOrbiter();
 
     virtual int PromptUser(string sPrompt,int iTimeoutSeconds=10,map<int,string> *p_mapPrompts = NULL);
@@ -1123,8 +1125,9 @@ signals:
 
 
     //media
-    void screenShotReady();
+    void screenShotReady(QByteArray data);
     void waitForScreenShot(char picData, int picDataSize, string fileFormat);
+
     void screenSaverImages(QStringList images);
     void objectUpdate(const uchar* ,int);
     void mediaMessage(QString msg);
@@ -1132,7 +1135,7 @@ signals:
     void checkGridStatus();
     void liveTvUpdate(QString id);
     void mythTvUpdate(QString id);
-
+    void screenshotVariablesReady(QList<QObject*> vars);
     //media datagrid
     void initializeSorting();
 
@@ -1308,7 +1311,7 @@ public slots:
      void CopyDisc();
      void ShowBookMarks();
 
-
+ void saveScreenAttribute(QString attribute, QByteArray data);
     //floorplans
     void getFloorplanDeviceCommand(int device);
 

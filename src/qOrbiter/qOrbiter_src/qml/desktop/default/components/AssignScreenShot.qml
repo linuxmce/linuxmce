@@ -7,6 +7,10 @@ Rectangle {
     height: scaleY(75)
     radius: 5
     color: "slategrey"
+    Connections{
+        target: manager
+        onMediaScreenShotReady: screenshotImage.source="image://listprovider/screenshot/"+securityvideo.timestamp
+    }
 
     Text {
         id: labelscreenshot
@@ -34,7 +38,7 @@ Rectangle {
                 onEntered: attributedelegate.color = "aliceblue"
                 onExited: attributedelegate.color = style.accentcolor
                 onClicked: {
-                    dcerouter.saveScreenAttribute(attributeNo);
+                    manager.saveScreenShot(attributeNo);
                      assignscreenshot.destroy()
                 }
             }
@@ -78,6 +82,7 @@ Rectangle {
         height: parent.height *.65
         fillMode: Image.PreserveAspectFit
         width: parent.width*.50
+
     }
 
     ButtonSq
@@ -93,7 +98,7 @@ Rectangle {
         MouseArea{
             anchors.fill: parent
             onPressed: {assignscreenshot.destroy() }
-            onClicked: { cleanupScreenie()
+            onClicked: { manager.cleanupScreenie()
             }
         }
     }
