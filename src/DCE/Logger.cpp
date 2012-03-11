@@ -36,7 +36,7 @@
     #ifdef UNDER_CE
         char *LoggerFileName="\\Storage Card\\PlutoServer.Logger.txt";
     #else
-        char *LoggerFileName="\\pluto\\PlutoServer.Logger.txt";
+        const char *LoggerFileName="\\pluto\\PlutoServer.Logger.txt";
     #endif
 #endif
 
