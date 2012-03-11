@@ -271,6 +271,7 @@ bool qorbiterManager::initializeManager(string sRouterIP, int device_id)
     {   emit skinIndexReady(false);
         return false;
     }
+
 #else
     if( !loadSkins(QUrl(localDir)))
     {   emit skinIndexReady(false);
@@ -679,6 +680,7 @@ void qorbiterManager::processConfig(QByteArray config)
 
 bool qorbiterManager::OrbiterGen()
 {
+    return true;
 }
 
 void qorbiterManager::swapSkins(QString incSkin)
@@ -961,6 +963,8 @@ bool qorbiterManager::readLocalConfig()
     QString xmlPath = QString::fromStdString(QApplication::applicationDirPath().remove("MacOS").append("Resources").append("/config.xml").toStdString());
 #elif ANDROID
     QString xmlPath = "/mnt/sdcard/LinuxMCE/config.xml";
+#elseif WIN32
+     QString xmlPath = QString::fromStdString(QApplication::applicationDirPath().toStdString())+"\\config.xml";
 #else
     QString xmlPath = QString::fromStdString(QApplication::applicationDirPath().toStdString())+"/config.xml";
 #endif
@@ -1503,7 +1507,7 @@ QString qorbiterManager::getDceResponse()
 
 int qorbiterManager::loadSplash()
 {
-    return 1;
+    return 0;
 }
 
 void qorbiterManager::activateScreenSaver()

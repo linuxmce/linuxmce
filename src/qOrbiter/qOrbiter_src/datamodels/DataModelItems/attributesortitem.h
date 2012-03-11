@@ -32,7 +32,7 @@ public:
    QString fileformat() const { return m_fk_fileformat; }
    QImage cellImage() const {  return m_image; }
    bool selectedStatus() const { return m_isSelected; }
-   bool setStatus(bool b) { m_isSelected = b; }
+   bool setStatus(bool b) { m_isSelected = b; return m_isSelected;}
    bool updateSelection (bool newBool) ;
 
 private:

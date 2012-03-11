@@ -1846,6 +1846,7 @@ bool DCE::qOrbiter::initialize()
             emit statusMessage("No Connection to Router");
             emit routerInvalid();
             QApplication::processEvents(QEventLoop::AllEvents);
+            return false;
 
         }
         else if( m_pEvent->m_pClientSocket->m_eLastError==ClientSocket::cs_err_BadDevice )
@@ -1855,7 +1856,7 @@ bool DCE::qOrbiter::initialize()
             emit statusMessage("Bad Device");
             DeviceIdInvalid();
             QApplication::processEvents(QEventLoop::AllEvents);
-
+            return false;
         }
 
         else if(  m_pEvent->m_pClientSocket->m_eLastError==ClientSocket::cs_err_NeedReload )
@@ -1864,7 +1865,7 @@ bool DCE::qOrbiter::initialize()
             LoggerWrapper::GetInstance()->Write(LV_CRITICAL, "Router Needs Reload");
             emit statusMessage("Needs Reload");
             QApplication::processEvents(QEventLoop::AllEvents);
-
+            return false;
         }
         else
         {
@@ -1872,6 +1873,7 @@ bool DCE::qOrbiter::initialize()
             LoggerWrapper::GetInstance()->Write(LV_CRITICAL, "Connect() Failed");
             emit statusMessage("QOrbiter Connect() Failed :(");
             QApplication::processEvents(QEventLoop::AllEvents);
+            return false;
         }
 
         Disconnect();
@@ -1900,7 +1902,7 @@ bool DCE::qOrbiter::deinitialize()
 
 bool qOrbiter::getConfiguration()
 {
-
+return true;
 }
 
 void qOrbiter::registerDevice(int user, QString ea, int room)
@@ -3912,12 +3914,12 @@ void DCE::qOrbiter::newOrbiter()
   */
 int DCE::qOrbiter::PromptFor(std::string sToken)
 {
-
+return 0;
 }
 
 int DCE::qOrbiter::PromptUser(std::string sPrompt, int iTimeoutSeconds, map<int, std::string> *p_mapPrompts)
 {
-
+return 0;
 }
 
 void DCE::qOrbiter::adjustLighting(int level)

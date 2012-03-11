@@ -46,7 +46,7 @@ void EPGChannelList::appendRows(const QList<EPGItemClass *> &items)
     QModelIndex index = indexFromItem(m_list.last());
     QModelIndex index2 = indexFromItem(m_list.first());
     int currentRows= m_list.count() - 1;
-   // emit dataChanged(index2, index, currentRows);
+    // emit dataChanged(index2, index, currentRows);
     isActive = true;
 }
 
@@ -66,7 +66,7 @@ void EPGChannelList::handleItemChange()
     //qDebug() << "Handling item change for:" << index;
     if(index.isValid())
     {
-      //  emit dataChanged(index, index, 0);
+        //  emit dataChanged(index, index, 0);
     }
 }
 
@@ -163,13 +163,13 @@ bool EPGChannelList::checkDupe(QString name, QString position)
 
         if (QString::number(item->index()-1).compare(position))
         {
-           // qDebug() << "Dupe position " << position.toInt() ;
+            // qDebug() << "Dupe position " << position.toInt() ;
             return false;
         }
         else
         {
-           // qDebug() << item->index();
-           // qDebug() << "Did not find item at postion " << position;
+            // qDebug() << item->index();
+            // qDebug() << "Did not find item at postion " << position;
             return  true;
         }
 
@@ -184,21 +184,20 @@ bool EPGChannelList::checkDupe(QString name, QString position)
 
 QModelIndex EPGChannelList::getChannelIndex(const QString &name) const
 {
-   // qDebug() << "Finding tv program index for " << name ;
+    // qDebug() << "Finding tv program index for " << name ;
     if (m_list.size() > 0)
     {
 
         for (int l=0; m_list.size() > l; l++)
         {
-//qDebug() << m_list.at(l)->mythid() << "::" << name ;
+            //qDebug() << m_list.at(l)->mythid() << "::" << name ;
             if (m_list.at(l)->data(3).toInt() == name.toInt()||m_list.at(l)->mythid() == name)
             {
 
                 QModelIndex index = indexFromItem(m_list.at(l));
-             //   qDebug() << index;
+                //   qDebug() << index;
                 return index;
             }
-
         }
     }
     else
@@ -220,8 +219,8 @@ void EPGChannelList::populate()
 
 void EPGChannelList::setProgram(QString qml_text_channel)
 {
- id = qml_text_channel;
- qDebug("Set liveTv channel");
+    id = qml_text_channel;
+    qDebug("Set liveTv channel");
 
 }
 
@@ -250,7 +249,7 @@ void EPGChannelList::updatePosition()
     }
     else
     {
-      // qDebug("Cant find myth station");
+        // qDebug("Cant find myth station");
     }
 }
 
@@ -261,7 +260,7 @@ QModelIndex EPGChannelList::getCurrentIndex()
 
 QModelIndex EPGChannelList::getMythChannelIndex(QString m)
 {
-   // qDebug() << "Finding mythTV program index for " << m ;
+    // qDebug() << "Finding mythTV program index for " << m ;
     if (m_list.size() > 0)
     {
 
@@ -270,9 +269,9 @@ QModelIndex EPGChannelList::getMythChannelIndex(QString m)
 
             if (m_list.at(l)->mythid() == m)
             {
-              //  qDebug() << m_list.at(l)->name() << "::" << m ;
+                //  qDebug() << m_list.at(l)->name() << "::" << m ;
                 QModelIndex index = indexFromItem(m_list.at(l));
-               // qDebug() << index;
+                // qDebug() << index;
                 return index;
             }
 
@@ -312,6 +311,6 @@ void EPGChannelList::updateLivePosition()
     }
     else
     {
-       qDebug() << "Cant find live tv station" << id;
+        qDebug() << "Cant find live tv station" << id;
     }
 }

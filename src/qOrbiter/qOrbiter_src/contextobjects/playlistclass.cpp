@@ -176,7 +176,7 @@ int PlaylistClass::getCurrentIndex()
 bool PlaylistClass::checkDupe(QString name, int position)
 {
 
-
+return false;
 }
 
 void PlaylistClass::beginResetModel()
