@@ -110,6 +110,7 @@ qOrbiter::~qOrbiter()
 bool qOrbiter::GetConfig()
 {
     if( !qOrbiter_Command::GetConfig() )
+
         return false;
     //<-dceag-getconfig-e->
 
@@ -1792,9 +1793,10 @@ void qOrbiter::CMD_Assisted_Make_Call(int iPK_Users,string sPhoneExtension,strin
 bool DCE::qOrbiter::initialize()
 {
 
-    if ( GetConfig() && Connect(PK_DeviceTemplate_get()) )
+    if ( GetConfig() ==true && Connect(PK_DeviceTemplate_get()) == true )
     {
-        //   qDebug("Starting Manager");
+
+           qDebug("Starting Manager");
         emit startManager(QString::number(m_dwPK_Device), QString::fromStdString(m_sHostName) );
 #ifdef ANDROID
         DCE::LoggerWrapper::GetInstance()->Write(LV_CRITICAL, "Orbiter Connected, requesting configuration for device %d", m_dwPK_Device);
@@ -1894,7 +1896,7 @@ bool DCE::qOrbiter::deinitialize()
     DCE::CMD_Orbiter_Registered CMD_Orbiter_Registered(m_dwPK_Device, iOrbiterPluginID, StringUtils::itos(m_dwPK_Device) ,i_user, StringUtils::itos(i_ea), i_room, &pData, &iSize);
     SendCommand(CMD_Orbiter_Registered);
     this->~qOrbiter();
-
+return true;
 }
 
 

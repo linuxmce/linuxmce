@@ -51,8 +51,6 @@ folder_01.target = $$DESTDIR/qml
 
 folder_03.source = config.xml
 folder_03.target = $$DESTDIR
-
-
 DEFINES += for_desktop
 }
 
@@ -63,6 +61,7 @@ folder_01.target = qml
 folder_02.source = img
 folder_02.target =
 DEFINES += for_windows
+DEFINES +=for_desktop
 }
 
 for_android{
@@ -142,7 +141,12 @@ INSTALLS +=deployment
 QML_IMPORT_PATH =
 symbian:TARGET.UID3 = 0xE0D07D4D
 QMAKE_CXXFLAGS += -DUSE_LZO_DATAGRID
+
 INCLUDEPATH += ../../ ../../DCE/
+
+win32{
+
+}
 
 macx{
     QT += xml
@@ -154,8 +158,10 @@ macx{
 }
 
 win32{
+INCLUDEPATH += ../qorbiter-pthreads/Prebuilt/include/
+LIBS+= -L../qorbiter-pthreads/Prebuilt/lib/ -lpthreadVC2
 LIBS +=  -lWS2_32 -luser32
-LIBS +=  -lpthreadVC2
+#LIBS +=  -lpthreadVC2
 DEFINES += USE_MYSQL_WRAPPER
 QT += network
 }

@@ -171,6 +171,7 @@ qorbiterManager::qorbiterManager(QDeclarativeView *view, QObject *parent) :
     // timeCodeSocket->moveToThread(timecodeThread);
     // timecodeThread->start();
     QApplication::processEvents(QEventLoop::AllEvents);
+
 }
 
 

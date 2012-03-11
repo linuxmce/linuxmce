@@ -146,7 +146,7 @@ int main(int argc, char* argv[])
 #elif for_android
     QApplication::setGraphicsSystem("raster");
 #else
-    QApplication::setGraphicsSystem("raster");
+QApplication::setGraphicsSystem("opengl");
 #endif
 
     QApplication  a(argc, argv);
@@ -431,10 +431,11 @@ int main(int argc, char* argv[])
         epgThread->start();
 
 
-        pqOrbiter->m_dwPK_Device = w->iPK_Device;
-        pqOrbiter->m_sHostName = w->qs_routerip.toStdString();
+     //   pqOrbiter->m_dwPK_Device = w->iPK_Device;
+      //  pqOrbiter->m_sHostName = w->qs_routerip.toStdString();
 
-        if ( pqOrbiter->initialize() )
+        qDebug("break");
+        if ( pqOrbiter->initialize() == true )
         {
 
             LoggerWrapper::GetInstance()->Write(LV_STATUS, "Connect OK");

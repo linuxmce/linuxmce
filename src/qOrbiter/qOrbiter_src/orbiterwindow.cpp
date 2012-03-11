@@ -41,6 +41,9 @@ orbiterWindow::orbiterWindow(long deviceid, std::string routerip, QObject *paren
 
     mainView.rootContext()->setContextProperty("appW", 1280);
     mainView.rootContext()->setContextProperty("appH", 720);
+#elif for_desktop
+    mainView.rootContext()->setContextProperty("appW", 1280);
+    mainView.rootContext()->setContextProperty("appH", 720);
 #else
     mainView.rootContext()->setContextProperty("appW", 1280);
     mainView.rootContext()->setContextProperty("appH", 720);
@@ -67,12 +70,8 @@ orbiterWindow::orbiterWindow(long deviceid, std::string routerip, QObject *paren
     buildType="/qml/desktop";
     qrcPath = "qrc:osx/Splash.qml";
 #elif defined ANDROID
-
     qrcPath = "qrc:android/Splash.qml";
-
     mainView.window()->setAttribute(Qt::WA_LockPortraitOrientation);
-
-
 #elif defined for_android
     buildType = "/qml/android";
     qrcPath = "qrc:android/Splash.qml";

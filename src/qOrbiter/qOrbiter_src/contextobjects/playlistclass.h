@@ -58,7 +58,7 @@ signals:
     void playlistReady();
     void activeItemChanged();
     void modelAboutToBeReset();
-    virtual void modelReset();
+    void modelReset();
 
 public slots:
     bool checkDupe(QString name, int position);
