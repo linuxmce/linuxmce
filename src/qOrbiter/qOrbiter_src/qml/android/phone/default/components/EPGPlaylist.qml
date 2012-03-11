@@ -93,7 +93,6 @@ Rectangle {
                     onClicked:{
                         dcerouter.TuneToChannel(channelnumber, channelid)
                         epgplaylistview.positionViewAtIndex(index, ListView.Beginning)
-
                     }
 
                 }

@@ -8,24 +8,14 @@ Rectangle {
     height: appH
     width: appW
     color:"transparent"
-    Timer{
-        id:singleshot
-        repeat: false
-        interval: 2000
-        triggeredOnStart: false
-        running: true
 
-        onTriggered: nowplayingimage.source = "image://listprovider/updateobject/"+securityvideo.timestamp
-    }
 
     Connections{
         target:dcenowplaying
         onPlayListPositionChanged: nowplayingimage.source = "image://listprovider/updateobject/"+securityvideo.timestamp
     }
 
-
-
-    //Component.onCompleted:setNowPlayingTv()
+    Component.onCompleted:setNowPlayingTv()
 
         //main 'now playing rect containing all the other items
 
@@ -97,7 +87,7 @@ Rectangle {
                         height: childrenRect.height
 
                         Text {
-                            id: artist
+                            id: np_device
                             width: parent.width
                             text: qsTr("Device: ")  + dcenowplaying.qs_mainTitle
                             font.family: "Droid Sans"
@@ -110,27 +100,40 @@ Rectangle {
 
 
                         Text {
-                            id: album
+                            id: network_id
+                            wrapMode: "NoWrap"
+                            text: qsTr("Network: ") + dcenowplaying.channelID
+                            font.family: "Droid Sans"
+                            font.bold: true
+                            smooth: true
+                            horizontalAlignment: Text.AlignHCenter
+                            font.pixelSize: scaleY(2)
+                            color: "white"
+                        }
+
+
+                        Text {
+                            id: channel_id
                             wrapMode: "NoWrap"
                             text: qsTr("Channel: ") + dcenowplaying.channel
                             font.family: "Droid Sans"
                             font.bold: true
                             smooth: true
                             horizontalAlignment: Text.AlignHCenter
-                            font.pixelSize: 1 * scaleY(2)
-                            color: "aliceblue"
+                            font.pixelSize: scaleY(2)
+                            color: "white"
                         }
 
                         Text {
-                            id: title
+                            id: program_title
                             wrapMode: "NoWrap"
                             text: qsTr("Program:") + dcenowplaying.tvProgram
                             font.family: "Droid Sans"
                             font.bold: true
                             smooth: true
                             horizontalAlignment: Text.AlignHCenter
-                            font.pixelSize: 1 * scaleY(2)
-                            color: "aliceblue"
+                            font.pixelSize: scaleY(2)
+                            color: "white"
                         }
                     }
                 }

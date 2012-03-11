@@ -1118,13 +1118,14 @@ void qOrbiter::CMD_Set_Now_Playing(string sPK_DesignObj,string sValue_To_Assign,
         }
         b_mediaPlaying = true;
     }
+    //todo - fix livetv playlist to adjust position from clicking on the grid.
     else if(iPK_MediaType== 11)
     {
         emit np_channelID(QString::number(iValue));
         emit np_network(QString::fromStdString(sValue_To_Assign));
         if(bRetransmit == 0 )
         {
-            livetvDone();
+
         }
         b_mediaPlaying = true;
 

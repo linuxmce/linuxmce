@@ -184,16 +184,16 @@ bool EPGChannelList::checkDupe(QString name, QString position)
 
 QModelIndex EPGChannelList::getChannelIndex(const QString &name) const
 {
-    //qDebug() << "Finding tv program index for " << name ;
+   // qDebug() << "Finding tv program index for " << name ;
     if (m_list.size() > 0)
     {
 
         for (int l=0; m_list.size() > l; l++)
         {
-
-            if (m_list.at(l)->data(3).toInt() == name.toInt())
+//qDebug() << m_list.at(l)->mythid() << "::" << name ;
+            if (m_list.at(l)->data(3).toInt() == name.toInt()||m_list.at(l)->mythid() == name)
             {
-               // qDebug() << m_list.at(l)->name() << "::" << name ;
+
                 QModelIndex index = indexFromItem(m_list.at(l));
              //   qDebug() << index;
                 return index;
@@ -221,7 +221,7 @@ void EPGChannelList::populate()
 void EPGChannelList::setProgram(QString qml_text_channel)
 {
  id = qml_text_channel;
-// qDebug("Set liveTv channel");
+ qDebug("Set liveTv channel");
 
 }
 
@@ -312,6 +312,6 @@ void EPGChannelList::updateLivePosition()
     }
     else
     {
-      //  qDebug() << "Cant find live tv station" << id;
+       qDebug() << "Cant find live tv station" << id;
     }
 }
