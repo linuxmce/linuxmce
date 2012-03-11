@@ -436,7 +436,7 @@ GetVideoDriver()
 	VideoDriver="vesa"
 #<-mkr_B_via_b->
 	PCIVGAOutput=$(lspci | grep ' VGA ' | cut -d' ' -f5)
-	case "$PCIVGAOUTPut" in
+	case "$PCIVGAOutput" in
 		nVidia) 
 			if PackageIsInstalled nvidia-glx 2>/dev/null || PackageIsInstalled nvidia-glx-new 2>/dev/null || PackageIsInstalled nvidia-glx-71 2>/dev/null || PackageIsInstalled nvidia-glx-96 2>/dev/null || PackageIsInstalled nvidia-glx-173 2>/dev/null || PackageIsInstalled nvidia-glx-180 2>/dev/null || PackageIsInstalled nvidia-glx-190 2>/dev/null || PackageIsInstalled nvidia-glx-195 2>/dev/null || PackageIsInstalled nvidia-glx-260 2>/dev/null || PackageIsInstalled nvidia-glx-185 2>/dev/null || PackageIsInstalled nvidia-current 2>/dev/null; then
 			       	VideoDriver="nvidia" 
