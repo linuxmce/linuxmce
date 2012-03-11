@@ -1063,7 +1063,7 @@ void qOrbiter::CMD_Set_Now_Playing(string sPK_DesignObj,string sValue_To_Assign,
         emit setNowPlaying(false);
         emit gotoQml("Screen_1.qml");
         b_mediaPlaying = false;
-         BindMediaRemote(false);
+        BindMediaRemote(false);
         emit currentScreenChanged("Screen_1.qml");
         currentScreen = "Screen_1.qml";
         internal_streamID = iStreamID;
@@ -1137,8 +1137,9 @@ void qOrbiter::CMD_Set_Now_Playing(string sPK_DesignObj,string sValue_To_Assign,
         }
         emit np_title1Changed(QString::fromStdString(sValue_To_Assign ));
         emit np_title2Changed(QString::fromStdString(sText));
-         b_mediaPlaying = true;
-           emit playlistPositionChanged(iValue);
+        b_mediaPlaying = true;
+        emit playlistPositionChanged(iValue);
+        GetNowPlayingAttributes();
     }
     else
     {
@@ -2770,6 +2771,7 @@ void DCE::qOrbiter::GetSingleSecurityCam(int cam_device, int iHeight, int iWidth
     int sData_size= 0;
     string imgtype;
 
+
     CMD_Get_Video_Frame singleVideoFrame(m_dwPK_Device,long(cam_device), string("1"), 0, iWidth, iHeight, &sData, &sData_size, &imgtype);
     SendCommand(singleVideoFrame);
 
@@ -2835,6 +2837,7 @@ void DCE::qOrbiter::GetNowPlayingAttributes()
         }
 
         emit np_filename(filepath);
+        qDebug() <<filepath;
 
         int gHeight = 0;
         int gWidth = 0;
@@ -3629,7 +3632,7 @@ void DCE::qOrbiter::grabScreenshot(QString fileWithPath)
     string sDisableAspectLock = "0";
 
 
-
+    qDebug() << fileWithPath;
     int gHeight = 0;
     int gWidth = 0;
     int pkVar = 0;
@@ -3690,7 +3693,9 @@ void DCE::qOrbiter::grabScreenshot(QString fileWithPath)
 
         }
 
-        int iEK_File;
+
+
+         int iEK_File;
         CMD_Get_ID_from_Filename getFileID(m_dwPK_Device, iMediaPluginID, fileWithPath.toStdString(), &iEK_File);
         string fResp = "";
         if(SendCommand(getFileID, &fResp) && fResp == "OK")
@@ -3699,13 +3704,15 @@ void DCE::qOrbiter::grabScreenshot(QString fileWithPath)
             fk.append("!F"+ QString::fromStdString(StringUtils::itos(iEK_File)));
             emit statusMessage(fk);
             // string *fk = StringUtils::itos(&iEK_File);
-            screenshotVars.prepend(new screenshotAttributes(fk, QString("Filename"),fk ));
+   screenshotVars.prepend(new screenshotAttributes(fk, QString("Filename"),fk ));
         }
+
+
     }
     emit screenshotVariablesReady(screenshotVars);
     screenshotVars.clear();
 
-    CMD_Get_Video_Frame grabMediaScreenshot(long(m_dwPK_Device), long(m_dwPK_Device_NowPlaying), sDisableAspectLock,internal_streamID, imageH , imageW, &screenieData, &screenieDataSize, &s_format);
+    CMD_Get_Video_Frame grabMediaScreenshot(long(m_dwPK_Device), long(m_dwPK_Device_NowPlaying), sDisableAspectLock,internal_streamID, 800 , 800, &screenieData, &screenieDataSize, &s_format);
     string mpResp= "";
 
     if(SendCommand(grabMediaScreenshot, &mpResp) && mpResp =="OK")
@@ -3875,20 +3882,18 @@ void DCE::qOrbiter::extraButtons(QString button)
 void DCE::qOrbiter::saveScreenAttribute(QString attribute, QByteArray data)
 {
 
-    if(attribute.contains("!F"))
-    {
-        attribute.remove("!F");
-    }
-
     string sAttribute = attribute.toStdString();
     char *pData = (char*) data.constData();
     int pDataSize = data.size();
-
     CMD_Make_Thumbnail thumb(m_dwPK_Device, iMediaPluginID, sAttribute, pData, pDataSize );
     string cResp = "";
-    if(SendCommand(thumb, &cResp) && cResp=="OK")
+    if(SendCommand(thumb))
     {
         emit statusMessage("Created Thumbnail");
+    }
+    else
+    {
+
     }
 }
 

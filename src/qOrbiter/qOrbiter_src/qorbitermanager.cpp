@@ -1252,6 +1252,7 @@ void qorbiterManager::setMediaScreenShot(QByteArray data)
 void qorbiterManager::saveScreenShot(QString attribute)
 {
 
+    qDebug() << attribute;
     QByteArray bytes;
 
     QBuffer ba(&bytes);

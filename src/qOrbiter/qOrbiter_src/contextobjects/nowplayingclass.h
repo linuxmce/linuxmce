@@ -273,7 +273,7 @@ public slots:
     void setMediaType (int inc_mediaType) {i_mediaType = inc_mediaType; emit mediaTypeChanged();}
     int  getMediaType () {return i_mediaType;}
 
-    void setFilePath (QString inc_fp) {filepath = inc_fp; emit filePathChanged();}
+    void setFilePath (QString inc_fp) {filepath = inc_fp; qDebug () << filepath; emit filePathChanged();}
     QString getFilePath () {return filepath;}
 
     //general media getters and setters ----//
