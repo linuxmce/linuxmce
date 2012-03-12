@@ -43,7 +43,7 @@ void PlaylistClass::populate()
 emit modelReset();
 
     */
-
+    qDeleteAll(m_list.begin(), m_list.end());
     m_list.clear();
     emit playlistReady();
 

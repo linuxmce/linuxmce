@@ -85,8 +85,8 @@ public slots:
 private slots:
     void handleItemChange();
     void reset();
-    virtual void beginResetModel();
-    virtual void endResetModel();
+     void beginResetModel();
+     void endResetModel();
 private:
     void resetInternalData();
     gridItem* m_prototype;

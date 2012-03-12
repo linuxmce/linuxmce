@@ -144,11 +144,11 @@ int main(int argc, char* argv[])
 #elif for_desktop
     QApplication::setGraphicsSystem("opengl");
 #elif WIN32
-    QApplication::setGraphicsSystem("raster");
+
 #elif for_android
-            QApplication::setGraphicsSystem("raster");
+    QApplication::setGraphicsSystem("raster");
 #else
-QApplication::setGraphicsSystem("opengl");
+    QApplication::setGraphicsSystem("raster");
 #endif
 
     QApplication  a(argc, argv);
@@ -252,13 +252,12 @@ QApplication::setGraphicsSystem("opengl");
         orbiterWin.setMessage("Setting up Lmce");
         qorbiterManager  *w= new qorbiterManager(&orbiterWin.mainView);
 
-
         AbstractImageProvider *modelimageprovider = new AbstractImageProvider(w);
         orbiterWin.mainView.engine()->addImageProvider("listprovider", modelimageprovider);
 
         QThread *dceThread = new QThread;
         qOrbiter *pqOrbiter = new qOrbiter(PK_Device, sRouter_IP,true,bLocalMode);
-      pqOrbiter->moveToThread(dceThread);
+        pqOrbiter->moveToThread(dceThread);
 
         QThread *epgThread = new QThread; //for playlists and epg of all types. only one will be active a given time inthe app
         //stored video playlist for managing any media that isnt live broacast essentially
@@ -280,6 +279,12 @@ QApplication::setGraphicsSystem("opengl");
         orbiterWin.mainView.rootContext()->setContextProperty("dataModel", mediaModel);
         orbiterWin.mainView.rootContext()->setContextProperty("mediaplaylist", storedVideoPlaylist);
         orbiterWin.mainView.rootContext()->setContextProperty("simpleepg", simpleEPGmodel);
+        //shutdown signals
+
+        QObject::connect(w, SIGNAL(orbiterClosing()), dceThread, SLOT(quit()));
+        QObject::connect(w, SIGNAL(orbiterClosing()), mediaThread, SLOT(quit()));
+        QObject::connect(w, SIGNAL(orbiterClosing()), epgThread, SLOT(quit()));
+        QObject::connect(dceThread, SIGNAL(finished()), &a, SLOT(quit()));
 
         //tv epg signals
         QObject::connect(pqOrbiter, SIGNAL(addChannel(EPGItemClass*)), simpleEPGmodel, SLOT(appendRow(EPGItemClass*)), Qt::QueuedConnection );
@@ -341,7 +346,7 @@ QApplication::setGraphicsSystem("opengl");
         QObject::connect(w, SIGNAL(bindMediaRemote(bool)), pqOrbiter, SLOT(BindMediaRemote(bool)), Qt::DirectConnection);
         QObject::connect(w, SIGNAL(startPlayback(QString)), pqOrbiter, SLOT(playMedia(QString)));
 
-       // QObject::connect(w, SIGNAL(liveTVrequest()), simpleEPGmodel, SLOT(populate()));
+        // QObject::connect(w, SIGNAL(liveTVrequest()), simpleEPGmodel, SLOT(populate()));
 
         QObject::connect(w->nowPlayingButton, SIGNAL(newMediaSpeed(int)), pqOrbiter,SLOT(setMediaSpeed(int)));
 
@@ -352,15 +357,15 @@ QApplication::setGraphicsSystem("opengl");
         QObject::connect(mediaModel, SIGNAL(pagingCleared()), pqOrbiter,SLOT(populateAdditionalMedia()), Qt::QueuedConnection);
         QObject::connect(pqOrbiter, SIGNAL(clearPageGrid()), mediaModel, SLOT(clearForPaging()), Qt::DirectConnection);
         QObject::connect(mediaModel, SIGNAL(itemAdded(int)), pqOrbiter, SLOT(setCurrentRow(int)));
-        QObject::connect(w, SIGNAL(clearModel()), mediaModel,SLOT(clear()),Qt::DirectConnection);
+        QObject::connect(w, SIGNAL(clearModel()), mediaModel,SLOT(clear()));
         QObject::connect(pqOrbiter, SIGNAL(clearAndContinue(int)), mediaModel, SLOT(clearAndRequest(int)), Qt::QueuedConnection);
         QObject::connect(pqOrbiter,SIGNAL(addItem(gridItem*)), mediaModel, SLOT(appendRow(gridItem*)));
         QObject::connect(pqOrbiter,SIGNAL(gridModelSizeChange(int)), mediaModel, SLOT(setTotalCells(int)), Qt::QueuedConnection);
 
 
-        QObject::connect(mediaModel,SIGNAL(ready(int)), pqOrbiter, SLOT(prepareFileList(int)), Qt::DirectConnection);
+        QObject::connect(mediaModel,SIGNAL(ready(int)), pqOrbiter, SLOT(prepareFileList(int)), Qt::QueuedConnection);
         QObject::connect(w, SIGNAL(gridTypeChanged(int)), mediaModel, SLOT(setGridType(int)), Qt::QueuedConnection);
-        QObject::connect(w, SIGNAL(setDceGridParam(int,QString)), pqOrbiter, SLOT(setStringParam(int,QString)), Qt::QueuedConnection);
+        QObject::connect(w, SIGNAL(setDceGridParam(int,QString)), pqOrbiter, SLOT(setStringParam(int,QString)), Qt::DirectConnection);
         QObject::connect(w, SIGNAL(keepLoading(bool)), pqOrbiter,SLOT(setGridStatus(bool)));
         QObject::connect(pqOrbiter, SIGNAL(showFileInfo(bool)), w->filedetailsclass, SLOT(setVisible(bool)));
         QObject::connect(pqOrbiter, SIGNAL(setFocusFile(QString)), w->filedetailsclass, SLOT(setFile(QString)));
@@ -382,9 +387,9 @@ QApplication::setGraphicsSystem("opengl");
         QObject::connect(pqOrbiter, SIGNAL(np_album(QString)), w->nowPlayingButton, SLOT(setAlbum(QString)));
         QObject::connect(pqOrbiter, SIGNAL(np_track(QString)), w->nowPlayingButton, SLOT(setTrack(QString)));
         QObject::connect(pqOrbiter,SIGNAL(np_channel(QString)), w->nowPlayingButton, SLOT(setChannel(QString)));
-         QObject::connect(pqOrbiter, SIGNAL(np_network(QString)), w->nowPlayingButton, SLOT(setNetwork(QString)) );
-         QObject::connect(pqOrbiter, SIGNAL(np_channelID(QString)), w->nowPlayingButton, SLOT(setChannelID(QString)));
-         QObject::connect(pqOrbiter, SIGNAL(np_program(QString)), w->nowPlayingButton, SLOT(setProgram(QString)));
+        QObject::connect(pqOrbiter, SIGNAL(np_network(QString)), w->nowPlayingButton, SLOT(setNetwork(QString)) );
+        QObject::connect(pqOrbiter, SIGNAL(np_channelID(QString)), w->nowPlayingButton, SLOT(setChannelID(QString)));
+        QObject::connect(pqOrbiter, SIGNAL(np_program(QString)), w->nowPlayingButton, SLOT(setProgram(QString)));
 
         QObject::connect(pqOrbiter, SIGNAL(np_director(QString)), w->nowPlayingButton, SLOT(setDirector(QString)));
         QObject::connect(pqOrbiter,SIGNAL(np_episode(QString)), w->nowPlayingButton, SLOT(setEpisode(QString)));
@@ -415,9 +420,9 @@ QApplication::setGraphicsSystem("opengl");
 
         //so does live tv
         QObject::connect(w, SIGNAL(clearModel()), simpleEPGmodel, SLOT(empty()));
+
         QObject::connect(pqOrbiter, SIGNAL(liveTvUpdate(QString)), simpleEPGmodel, SLOT(setProgram(QString)), Qt::QueuedConnection);
         //epg specific
-
 
         //storemediaplaylist specific
         QObject::connect(storedVideoPlaylist,SIGNAL(playlistReady()), pqOrbiter,SLOT(requestMediaPlaylist()));
@@ -432,17 +437,12 @@ QApplication::setGraphicsSystem("opengl");
         mediaThread->start();
         epgThread->start();
 
-
         pqOrbiter->m_dwPK_Device = w->iPK_Device;
-       pqOrbiter->m_sHostName = w->qs_routerip.toStdString();
+        pqOrbiter->m_sHostName = w->qs_routerip.toStdString();
 
-        qDebug("break");
         if ( pqOrbiter->initialize() == true )
         {
-
             LoggerWrapper::GetInstance()->Write(LV_STATUS, "Connect OK");
-
-
             pqOrbiter->CreateChildren();
             if( bLocalMode )
                 pqOrbiter->RunLocalMode();
@@ -453,19 +453,15 @@ QApplication::setGraphicsSystem("opengl");
                     pthread_join(pqOrbiter->m_RequestHandlerThread, NULL);  // This function will return when the device is shutting down
                 */
             }
-
         }
         else
         {
 
-
         }
+        a.exec();
 
         if( pqOrbiter->m_bReload )
             bReload=true;
-        a.exec();
-
-
     }
 
     catch(string s)

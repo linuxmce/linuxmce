@@ -726,10 +726,7 @@ void qorbiterManager::skinLoaded(QDeclarativeView::Status status) {
         m_bStartingUp = false;
         emit skinDataLoaded(true);
         QApplication::processEvents(QEventLoop::AllEvents);
-
         startOrbiter();
-
-
     }
 }
 
@@ -743,8 +740,7 @@ void qorbiterManager::closeOrbiter()
     LoggerWrapper::GetInstance()->Write(LV_CRITICAL, "Orbiter Exiting, Unregistering 1st");
 #endif
     emit unregisterOrbiter((userList->find(sPK_User)->data(4).toInt()), QString(iFK_Room), iea_area );
-    this->~qorbiterManager();
-    exit(0);
+    emit orbiterClosing();
 }
 
 /*
@@ -768,7 +764,6 @@ void qorbiterManager::setActiveRoom(int room,int ea)
     roomClimate = roomClimateScenarios.value(room);
     roomTelecom = roomTelecomScenarios.value(room);
     roomSecurity = roomSecurityScenarios.value(room);
-
     qorbiterUIwin->rootContext()->setContextProperty("currentRoomLights", roomLights);
     qorbiterUIwin->rootContext()->setContextProperty("currentRoomMedia", roomMedia);
     qorbiterUIwin->rootContext()->setContextProperty("currentRoomClimate", roomClimate);
@@ -779,7 +774,6 @@ void qorbiterManager::setActiveRoom(int room,int ea)
 
 void qorbiterManager::execGrp(int grp)
 {
-
     i_current_command_grp = grp;
     qorbiterUIwin->rootContext()->setContextProperty("currentcommandgrp", i_current_command_grp);
     QApplication::processEvents(QEventLoop::AllEvents);
@@ -807,7 +801,6 @@ void qorbiterManager:: setLocation(const int &room, const int &ea)
 {
     iFK_Room = room;
     iea_area = ea;
-
     emit locationChanged(room, ea);
     // pqOrbiter->setLocation(room, ea);
     QApplication::processEvents(QEventLoop::AllEvents);
@@ -823,7 +816,6 @@ void qorbiterManager::regenOrbiter(int deviceNo)
 
     if(qs_routerip =="127.0.0.1")
     {
-
         //splashView->showFullScreen();
         qorbiterUIwin->close();
         QApplication::processEvents(QEventLoop::AllEvents);
@@ -833,7 +825,6 @@ void qorbiterManager::regenOrbiter(int deviceNo)
         //qDebug() <<"status code:" << regen->errorString();
         QObject::connect(regen,SIGNAL(finished(int)), this, SLOT(regenComplete(int)));
         QObject::connect(regen,SIGNAL(error(QProcess::ProcessError)), this, SLOT(regenError(QProcess::ProcessError)));
-
     }
     else
     {
@@ -962,7 +953,6 @@ void qorbiterManager::setIpAddress(QString s)
 void qorbiterManager::qmlSetupLmce(QString incdeviceid, QString incrouterip)
 {
     setDceResponse("Triggering connection to LMCE Device ID [" + incdeviceid + "] port Router Address [" + incrouterip + "]") ;
-
     qs_routerip = incrouterip;
     iPK_Device = long(incdeviceid.toInt());
     setDceResponse("Connecting to LinuxMCE Core");
@@ -1010,7 +1000,6 @@ bool qorbiterManager::readLocalConfig()
     {
         setDceResponse("config not found!");
         return false;
-
     }
     else
     {
@@ -1023,7 +1012,6 @@ bool qorbiterManager::readLocalConfig()
         }
         else
         {
-
             QDomElement configVariables = localConfig.documentElement().toElement();
 
             if(!configVariables.namedItem("routerip").attributes().namedItem("id").nodeValue().isEmpty())
@@ -1075,7 +1063,6 @@ return true;
     }
     else
     {
-
         if (!localConfig.setContent( &localConfigFile))
         {
             setDceResponse("Cannot set document type!");
@@ -1085,17 +1072,13 @@ return true;
         {
             localConfigFile.close();
             localConfigFile.remove();
-
             QDomElement configVariables = localConfig.documentElement().toElement();
             configVariables.namedItem("routerip").attributes().namedItem("id").setNodeValue(qs_routerip);
             configVariables.namedItem("skin").attributes().namedItem("id").setNodeValue(currentSkin);
             configVariables.namedItem("device").attributes().namedItem("id").setNodeValue(QString::number(iPK_Device));
             configVariables.namedItem("externalip").attributes().namedItem("id").setNodeValue(qs_ext_routerip);
             configVariables.namedItem("firstrun").attributes().namedItem("id").setNodeValue(QString("false"));
-
-
             QByteArray output = localConfig.toByteArray();
-
             localConfigFile.open(QFile::ReadWrite);
             if (!localConfigFile.write(output))
             {
@@ -1272,15 +1255,11 @@ void qorbiterManager::setMediaScreenShot(QByteArray data)
 
 void qorbiterManager::saveScreenShot(QString attribute)
 {
-
-    qDebug() << attribute;
     QByteArray bytes;
-
     QBuffer ba(&bytes);
     ba.open(QIODevice::WriteOnly);
     mediaScreenShot.save(&ba, "JPG");
-    ba.close();
-    qDebug()<<  bytes.size();
+    ba.close();  
     emit saveMediaScreenShot(attribute, bytes);
      cleanupScreenie();
 }
@@ -1390,9 +1369,7 @@ void qorbiterManager::showTimeCode()
         QString duration = tcVars.at(2);
         duration.remove(QRegExp(".\\d\\d\\d|00:0|0:0|00:"));
         nowPlayingButton->setDuration(duration);
-
     }
-
 }
 
 void qorbiterManager::checkConnection(QString s)
@@ -1464,8 +1441,6 @@ void qorbiterManager::setActiveSkin(QString name)
     swapSkins(name);
 }
 
-
-
 void qorbiterManager::cleanupScreenie()
 {
     mediaScreenShot = QImage();
@@ -1476,9 +1451,7 @@ void qorbiterManager::cleanupScreenie()
 
 void qorbiterManager::initializeConnections()
 {
-
     //QObject::connect(pqOrbiter, SIGNAL(disconnected(QString)), this, SLOT(checkConnection(QString)));
-
     QObject::connect(this, SIGNAL(continueSetup()), this, SLOT(startSetup()));
     setDceResponse("Connections Complete");
     emit continueSetup();
@@ -1504,7 +1477,6 @@ QApplication::processEvents(QEventLoop::AllEvents);
 
     }
     */
-
 }
 
 void qorbiterManager::setDceResponse(QString response)
@@ -1529,7 +1501,6 @@ int qorbiterManager::loadSplash()
 
 void qorbiterManager::activateScreenSaver()
 {
-
     qorbiterUIwin->engine()->rootContext()->setContextProperty("screensaver", ScreenSaver);
 }
 
@@ -1570,7 +1541,6 @@ bool qorbiterManager::createAndroidConfig()
                 setDceResponse("config size: "+ QString::number(droidConfig.size()));
                 return true;
             }
-
         }
         else
         {
@@ -1580,7 +1550,6 @@ bool qorbiterManager::createAndroidConfig()
         }
     }
     return false;
-
 }
 
 void qorbiterManager::checkOrientation(QSize)
@@ -1588,21 +1557,17 @@ void qorbiterManager::checkOrientation(QSize)
 
     if(qorbiterUIwin->height() < qorbiterUIwin->width())
     {
-
         //setDceResponse("wide");
         appHeight = qorbiterUIwin->height() ;
         appWidth = qorbiterUIwin->width() ;
         setOrientation(false);
-
     }
     else
     {
-
         appHeight = qorbiterUIwin->height() ;
         appWidth = qorbiterUIwin->width() ;
         setOrientation( true);
     }
-
     setDceResponse("orientation change");
 }
 

@@ -373,6 +373,7 @@ signals:
     void raiseSplash();
     void showSetup();
 
+
     void stillLoading(bool b);
     void executeCMD(int);
 

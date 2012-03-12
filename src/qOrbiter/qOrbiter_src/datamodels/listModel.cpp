@@ -154,7 +154,7 @@ QModelIndex ListModel::indexFromItem(const gridItem *item) const
 
 void ListModel::clear()
 {
-
+    qDebug() << "clearing media model";
     clearing = true;
     emit modelAboutToBeReset();
     beginResetModel();
@@ -289,8 +289,7 @@ void ListModel::clearAndRequest(int type)
     emit modelAboutToBeReset();
     beginResetModel();
     resetInternalData();
-    setProgress(0.0);
-    //qDeleteAll(m_list);
+    setProgress(0.0);   
     endResetModel();
     emit modelReset();
     emit ready(gridType);

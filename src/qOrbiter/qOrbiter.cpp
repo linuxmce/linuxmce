@@ -55,34 +55,24 @@ qOrbiter::qOrbiter( int DeviceID, string ServerAddress,bool bConnectEventHandler
     iMediaPluginID = 10;
     iPK_Device_eventPlugin = 12;
     m_pOrbiterCat = 5;
-
     internal_streamID = 0;
-
     videoDefaultSort = "13";
     audioDefaultSort = "2";
     photoDefaultSort = "13";
     gamesDefaultSort = "49";
-
     backwards = false;
     i_current_mediaType = 0;
-
     media_totalPages=0;
     media_currentPage=0;
     media_pos=0;
     media_pageSeperator = 25;
-
     b_mediaPlaying = false;
     m_dwPK_Device_NowPlaying = 0;
     m_dwPK_Device_NowPlaying_Video = 0;
     m_dwPK_Device_NowPlaying_Audio = 0;
     m_dwPK_Device_CaptureCard = 0;
     m_dwMaxRetries = 3;
-
     initializeGrid();
-
-
-
-
 }
 
 //<-dceag-const2-b->
@@ -123,7 +113,6 @@ bool qOrbiter::GetConfig()
         RouterNeedsReload();
         return false;
     }
-
     return true;
 }
 
@@ -802,12 +791,8 @@ void qOrbiter::CMD_Update_Object_Image(string sPK_DesignObj,string sType,char *p
     cout << "Parm #19 - Data  (data value)" << endl;
     cout << "Parm #23 - Disable_Aspect_Lock=" << sDisable_Aspect_Lock << endl;
 */
-
-    // emit statusMessage("Incoming" + QString::fromStdString(sType));
-    // emit statusMessage("Update Image detected. Size:" + QString::number(iData_Size));
     const uchar *data = (uchar*)pData;
     emit objectUpdate(data, iData_Size);
-
 }
 
 //<-dceag-c58-b->
@@ -1033,7 +1018,6 @@ void qOrbiter::CMD_Continuous_Refresh(string sTime,string &sCMD_Result,Message *
 void qOrbiter::CMD_Set_Now_Playing(string sPK_DesignObj,string sValue_To_Assign,string sText,int iPK_MediaType,int iStreamID,int iValue,string sName,string sList_PK_Device,bool bRetransmit,string &sCMD_Result,Message *pMessage)
 //<-dceag-c242-e->
 {
-
     cout << "Need to implement command #242 - Set Now Playing" << endl;
     cout << "Parm #3 - PK_DesignObj=" << sPK_DesignObj << endl;
     cout << "Parm #5 - Value_To_Assign=" << sValue_To_Assign << endl;
@@ -1074,7 +1058,6 @@ void qOrbiter::CMD_Set_Now_Playing(string sPK_DesignObj,string sValue_To_Assign,
     }
     else
     {
-
         emit setNowPlaying(true);
         emit currentScreenChanged("Screen_"+scrn+".qml");
         currentScreen = "Screen_"+scrn+".qml";
@@ -1152,9 +1135,7 @@ void qOrbiter::CMD_Set_Now_Playing(string sPK_DesignObj,string sValue_To_Assign,
         {
             emit clearPlaylist();
         }
-
     }
-
 }
 
 //<-dceag-c254-b->
@@ -1386,16 +1367,11 @@ void qOrbiter::CMD_Show_File_List(int iPK_MediaType,string &sCMD_Result,Message 
 
     }
     q_mediaType = QString::number(iPK_MediaType);
-
-
     emit gotoQml("Screen_47.qml");
     currentScreen= "Screen_47.qml";
     emit statusMessage("Show File List Complete, Calling request Media Grid");
-
     setGridStatus(true);
     prepareFileList(iPK_MediaType);
-
-
 }
 
 //<-dceag-c402-b->
@@ -1605,8 +1581,6 @@ void qOrbiter::CMD_Goto_Screen(string sID,int iPK_Screen,int iInterruption,bool 
         // ScreenParameters->addParam( QString::fromStdString(dparam2), dparam );
         emit addScreenParam(QString::fromStdString(dparam2), dparam );
     }
-
-
     map<long, char* >::const_iterator end2 = pMessage->m_mapData_Parameters.end();
     for (map<long, char* >::const_iterator it2 = pMessage->m_mapData_Parameters.begin(); it2 != end2; ++it2)
     {
@@ -1678,8 +1652,6 @@ void qOrbiter::CMD_Display_Alert(string sText,string sTokens,string sTimeout,int
     cout << "Parm #70 - Tokens=" << sTokens << endl;
     cout << "Parm #182 - Timeout=" << sTimeout << endl;
     cout << "Parm #251 - Interruption=" << iInterruption << endl;
-
-
 }
 
 //<-dceag-c810-b->
@@ -1896,7 +1868,6 @@ bool DCE::qOrbiter::deinitialize()
     BindMediaRemote(false);
     DCE::CMD_Orbiter_Registered CMD_Orbiter_Registered(m_dwPK_Device, iOrbiterPluginID, StringUtils::itos(m_dwPK_Device) ,i_user, StringUtils::itos(i_ea), i_room, &pData, &iSize);
     SendCommand(CMD_Orbiter_Registered);
-    this->~qOrbiter();
 return true;
 }
 
@@ -1917,8 +1888,6 @@ void qOrbiter::registerDevice(int user, QString ea, int room)
     i_user = user;
     i_ea = ea.toInt();
     i_room = room;
-
-
     pData = "NULL";
     iSize = 0;
     string pResponse ="";
@@ -1926,20 +1895,14 @@ void qOrbiter::registerDevice(int user, QString ea, int room)
     DCE::CMD_Orbiter_Registered CMD_Orbiter_Registered(m_dwPK_Device, iOrbiterPluginID,  "1" ,      i_user,         StringUtils::itos(i_ea),          i_room,           &pData, &iSize);
     if (SendCommand(CMD_Orbiter_Registered, &pResponse) && pResponse=="OK")
     {
-
         emit statusMessage("DCERouter Responded to Register with " + QString::fromStdString(pResponse));
         setLocation(room, ea.toInt());
-
         GetScreenSaverImages();
     }
     else
     {
 
     }
-
-
-
-
 }
 
 void qOrbiter::qmlSetup(QString device, QString address)
@@ -1948,9 +1911,6 @@ void qOrbiter::qmlSetup(QString device, QString address)
     m_sHostName = address.toStdString();
     if(initialize())
     {
-
-
-
     }
     else
     {
@@ -2051,6 +2011,7 @@ void qOrbiter::setGridStatus(bool b)
 {
 
     requestMore = b;
+
     //qDebug() << "Request set to " << requestMore;
     //checkLoadingStatus();
 }
@@ -2100,6 +2061,7 @@ void qOrbiter::initializeGrid()
 
 void qOrbiter::setStringParam(int paramType, QString param)
 {
+    requestMore = false;
     /*
     QString q_mediaType;           //1 passed in inital dg request
     QString q_subType;             //2
@@ -2119,6 +2081,7 @@ void qOrbiter::setStringParam(int paramType, QString param)
     QString datagridVariableString;
 
     backwards = false;
+
     setGridStatus(false);
     switch (paramType)
     {
@@ -3174,7 +3137,7 @@ void DCE::qOrbiter::populateAdditionalMedia() //additional media grid that popul
         char *pData;
         pData = "NULL";
         //CMD_Request_Datagrid_Contents(                              long DeviceIDFrom,                long DeviceIDTo,                   string sID,                                string sDataGrid_ID, int iRow_count,int iColumn_count,        bool bKeep_Row_Header,bool bKeep_Column_Header,bool bAdd_UpDown_Arrows,string sSeek,       int iOffset,    char **pData,int *iData_Size,int *iRow,int *iColumn
-#ifdef for_desktop
+#ifndef ANDROID || for_android
         DCE::CMD_Request_Datagrid_Contents req_data_grid_pics( long(m_dwPK_Device), long(iPK_Device_DatagridPlugIn), StringUtils::itos( m_dwIDataGridRequestCounter ), string(imgDG),    1, 1,                     false,                 false,                                 true, string(m_sSeek),   iOffset,  &pData,         &iData_Size, &GridCurRow, &GridCurCol );
 #else
         DCE::CMD_Request_Datagrid_Contents req_data_grid_pics( long(m_dwPK_Device), long(iPK_Device_DatagridPlugIn), StringUtils::itos( m_dwIDataGridRequestCounter ), string(imgDG),    1, media_pageSeperator,                     false,                 false,                                 true, string(m_sSeek),   iOffset,  &pData,         &iData_Size, &GridCurRow, &GridCurCol );
@@ -4137,7 +4100,7 @@ void DCE::qOrbiter::prepareFileList(int iPK_MediaType)
                 string imgDG = "_"+m_sGridID; //correcting the grid id string for images
 
                 //CMD_Request_Datagrid_Contents(                              long DeviceIDFrom,                long DeviceIDTo,                   string sID,                                string sDataGrid_ID, int iRow_count,int iColumn_count,        bool bKeep_Row_Header,bool bKeep_Column_Header,bool bAdd_UpDown_Arrows,string sSeek,       int iOffset,    char **pData,int *iData_Size,int *iRow,int *iColumn
-#ifdef for_desktop
+#ifndef ANDROID || for_android
                 DCE::CMD_Request_Datagrid_Contents req_data_grid_pics( long(m_dwPK_Device), long(iPK_Device_DatagridPlugIn), StringUtils::itos( m_dwIDataGridRequestCounter ), string(imgDG),    1, 1,                     false,                 false,                                 true, string(m_sSeek),   iOffset,  &pData,         &iData_Size, &GridCurRow, &GridCurCol );
 #else
                 DCE::CMD_Request_Datagrid_Contents req_data_grid_pics( long(m_dwPK_Device), long(iPK_Device_DatagridPlugIn), StringUtils::itos( m_dwIDataGridRequestCounter ), string(imgDG),    1, media_pageSeperator,                     false,                 false,                                 true, string(m_sSeek),   iOffset,  &pData,         &iData_Size, &GridCurRow, &GridCurCol );

@@ -285,6 +285,7 @@ QModelIndex EPGChannelList::getMythChannelIndex(QString m)
 
 void EPGChannelList::empty()
 {
+    qDeleteAll(m_list.begin(), m_list.end());
     m_list.clear();
 }
 
