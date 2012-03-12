@@ -92,6 +92,9 @@ qorbiterManager::qorbiterManager(QDeclarativeView *view, QObject *parent) :
 #ifdef for_desktop
     buildType = "/qml/desktop";
     qrcPath = "qrc:desktop/Splash.qml";
+#elif defined (WIN32)
+    buildType="/qml/desktop";
+    qrcPath = "qrc:desktop/Splash.qml";
 #elif defined (for_freemantle)
     buildType = "/qml/freemantle";
     qrcPath = "qrc:freemantle/Splash.qml";
@@ -238,6 +241,8 @@ bool qorbiterManager::initializeManager(string sRouterIP, int device_id)
     remoteDirectoryPath = "http://"+QString::fromStdString(sRouterIP)+"/lmce-admin/skins/macosx";
 #elif for_desktop
     remoteDirectoryPath = "http://"+QString::fromStdString(sRouterIP)+"/lmce-admin/skins/desktop";
+#elif WIN32
+    remoteDirectoryPath = "http://"+QString::fromStdString(sRouterIP)+"/lmce-admin/skins/desktop";
 #elif for_harmattan
     remoteDirectoryPath = "http://"+QString::fromStdString(sRouterIP)+"/lmce-admin/skins/harmattan";
 #elif for_android
@@ -254,7 +259,7 @@ bool qorbiterManager::initializeManager(string sRouterIP, int device_id)
         setDceResponse("Guessing Android Phone, Loading Phone Skins");
     }
 #else
-    remoteDirectoryPath = "http://"+QString::fromStdString(sRouterIP)+"/lmce-admin/skins";
+    remoteDirectoryPath = "http://"+QString::fromStdString(sRouterIP)+"/lmce-admin/skins"+qmlPath;
 #endif
 
     QString qmlPath = adjustPath(QApplication::applicationDirPath().remove("/bin"));
@@ -272,9 +277,14 @@ bool qorbiterManager::initializeManager(string sRouterIP, int device_id)
     {   emit skinIndexReady(false);
         return false;
     }
-
+#elif WIN32
+    //qDebug() << "Loading skins";
+    if( !loadSkins(QUrl::fromLocalFile(localDir)))
+    {   emit skinIndexReady(false);
+        return false;
+    }
 #else
-    if( !loadSkins(QUrl(localDir)))
+    if( !loadSkins(QUrl(remoteDirectoryPath)))
     {   emit skinIndexReady(false);
         return false;
 
@@ -582,7 +592,7 @@ void qorbiterManager::processConfig(QByteArray config)
     qorbiterUIwin->rootContext()->setContextProperty("roomList", m_lRooms);                           //custom room list  provided
     qorbiterUIwin->rootContext()->setContextProperty("gmediaType", q_mediaType);
     qorbiterUIwin->rootContext()->setContextProperty("screenshotAttributes", QVariant::fromValue(screenshotVars));
-    QObject::connect(this->nowPlayingButton, SIGNAL(mediaStatusChanged()), this, SLOT(updateTimecode()), Qt::QueuedConnection);
+    //QObject::connect(this->nowPlayingButton, SIGNAL(mediaStatusChanged()), this, SLOT(updateTimecode()), Qt::QueuedConnection);
     setDceResponse("Properties Done");
 
     setDceResponse("Setting location");
@@ -686,6 +696,10 @@ bool qorbiterManager::OrbiterGen()
 
 void qorbiterManager::swapSkins(QString incSkin)
 {    
+#ifdef WIN32
+    incSkin = "default";
+        #endif
+
     setDceResponse("Setting Skin to:" + incSkin);
     skin = tskinModel->find(incSkin);
     setDceResponse("Got it from the model : " + skin->baseUrl().toString());
@@ -845,7 +859,7 @@ QString qorbiterManager::adjustPath(const QString &path)
 {
 
 #ifdef ANDROID
-    return path+"droid";
+    return path+"android";
 #endif
 
 #ifdef Q_OS_UNIX
@@ -958,6 +972,7 @@ void qorbiterManager::qmlSetupLmce(QString incdeviceid, QString incrouterip)
 
 bool qorbiterManager::readLocalConfig()
 {
+    return true;
     QApplication::processEvents(QEventLoop::AllEvents);
     QDomDocument localConfig;
 #ifdef Q_OS_MAC
@@ -1040,6 +1055,7 @@ bool qorbiterManager::readLocalConfig()
 
 bool qorbiterManager::writeConfig()
 {
+return true;
     QDomDocument localConfig;
 #ifdef Q_OS_MAC
     QString xmlPath = QString::fromStdString(QApplication::applicationDirPath().remove("MacOS").append("Resources").append("/config.xml").toStdString());

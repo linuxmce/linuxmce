@@ -55,21 +55,17 @@ DEFINES += for_desktop
 }
 
 win32{
+folder_01.source = qml/desktop
+folder_01.target = $$DESTDIR
 
-folder_01.source = qml\desktop
-folder_01.target = qml
-folder_02.source = img
-folder_02.target =
 DEFINES += for_windows
-DEFINES +=for_desktop
 }
 
 for_android{
 folder_01.source = qml/android/
 folder_01.target = $$DESTDIR/qml
 folder_03.source = config.xml
-folder_03.target =
-
+folder_03.target = $$DESTDIR
 DEFINES+=for_android
 }
 
@@ -116,22 +112,14 @@ DEFINES+=ANDROID
 
 }
 
-!macx{
-    folder_03.source = config.xml
-    folder_03.target = $$DESTDIR
-}
-
 #uncomment this line to work on skins locally
-!win32{
-DEPLOYMENTFOLDERS = folder_01 folder_02 folder_03
-}
+
+!win32{DEPLOYMENTFOLDERS = folder_01 folder_02 folder_03}
 
 win32{
-DEPLOYMENTFOLDERS = folder_01 folder_02
-DEPLOYMENT = file_01
-file_01.source = config.xml
-file_01.path =
+DEPLOYMENTFOLDERS = folder_01
 }
+
 
 ANDROID{
 INSTALLS +=deployment
@@ -145,9 +133,8 @@ QMAKE_CXXFLAGS += -DUSE_LZO_DATAGRID
 INCLUDEPATH += ../../ ../../DCE/
 
 win32{
-
+QT+= opengl
 }
-
 macx{
     QT += xml
     QT += network

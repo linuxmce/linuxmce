@@ -609,7 +609,9 @@ void Command_Impl::GetDevicesByTemplate(int PK_DeviceTemplate,map<int,string> *p
 				+ " " + sName + " (" + sRoom + ")";
 		}
 	}
-	delete pEvent;
+#ifndef for_windows
+    delete pEvent;
+#endif
 }
 
 void Command_Impl::GetDevicesByCategory(int PK_DeviceCategory,map<int,string> *p_mapDevices)

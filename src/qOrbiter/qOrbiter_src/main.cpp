@@ -143,8 +143,10 @@ int main(int argc, char* argv[])
     QApplication::setGraphicsSystem("meego");
 #elif for_desktop
     QApplication::setGraphicsSystem("opengl");
-#elif for_android
+#elif WIN32
     QApplication::setGraphicsSystem("raster");
+#elif for_android
+            QApplication::setGraphicsSystem("raster");
 #else
 QApplication::setGraphicsSystem("opengl");
 #endif
@@ -431,8 +433,8 @@ QApplication::setGraphicsSystem("opengl");
         epgThread->start();
 
 
-     //   pqOrbiter->m_dwPK_Device = w->iPK_Device;
-      //  pqOrbiter->m_sHostName = w->qs_routerip.toStdString();
+        pqOrbiter->m_dwPK_Device = w->iPK_Device;
+       pqOrbiter->m_sHostName = w->qs_routerip.toStdString();
 
         qDebug("break");
         if ( pqOrbiter->initialize() == true )
@@ -462,7 +464,7 @@ QApplication::setGraphicsSystem("opengl");
         if( pqOrbiter->m_bReload )
             bReload=true;
         a.exec();
-        delete pqOrbiter;
+
 
     }
 

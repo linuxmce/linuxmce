@@ -112,6 +112,7 @@ bool qOrbiter::GetConfig()
     if( !qOrbiter_Command::GetConfig() )
 
         return false;
+
     //<-dceag-getconfig-e->
 
     // Put your code here to initialize the data in this class
@@ -2064,6 +2065,8 @@ void qOrbiter::setCurrentRow(int row)
     i_currentMediaModelRow = row;
 #ifdef for_desktop
     populateAdditionalMedia();
+#elif WIN32
+    populateAdditionalMedia();
 #endif
 }
 
@@ -3145,7 +3148,7 @@ void DCE::qOrbiter::populateAdditionalMedia() //additional media grid that popul
     {
         emit statusMessage("requesting additional media");
 
-#ifdef for_desktop
+#ifndef ANDROID
         int gHeight = 1;
         int gWidth = 1;
         int offset = 0;
@@ -3977,7 +3980,7 @@ void DCE::qOrbiter::prepareFileList(int iPK_MediaType)
 
     setMediaResponse("Initial media request");
     //emit cleanupGrid();
-#ifdef for_desktop
+#ifndef ANDROID
     int gHeight = 1;            //how many rows we want
     int gWidth = 0;             //how many columns we want. in this case, just the one
     int pkVar = 0;              // ??

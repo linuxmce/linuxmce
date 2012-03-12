@@ -81,7 +81,7 @@ SkinDataItem * SkinDataModel::find(const QString &id) const
 
     }
          ui_reference->setDceResponse("SKIN ERROR");
-        return m_list.at(0);
+         return 0;
 }
 
 QModelIndex SkinDataModel::indexFromItem(const SkinDataItem *item) const
@@ -131,6 +131,7 @@ SkinDataItem * SkinDataModel::takeRow(int row)
 
 void SkinDataModel::addSkin(QString name) {
 
+
     /*QImage skinPic(":/icons/Skin-Data.png");
 
     // Init the skin loader at this URL and then load the SkinDataItems from that SkinLoader
@@ -145,7 +146,7 @@ void SkinDataModel::addSkin(QString name) {
    if (!style.isValid()) {
        qDebug() << "Invalid URL!";
    }*/
-   // qDebug() << "Loading skin : " << name;
+    qDebug() << "Loading skin : " << name;
     m_skin_loader->loadSkin(name);
 
 }

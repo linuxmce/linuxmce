@@ -59,6 +59,9 @@ orbiterWindow::orbiterWindow(long deviceid, std::string routerip, QObject *paren
 #elif defined (for_freemantle)
     buildType = "/qml/freemantle";
     qrcPath = "qrc:freemantle/Splash.qml";
+#elif defined (WIN32)
+    buildType="/qml/desktop";
+    qrcPath = "qrc:desktop/Splash.qml";
 #elif defined (for_harmattan)
     buildType="/qml/harmattan";
     qrcPath = "qrc:harmattan/Splash.qml";
