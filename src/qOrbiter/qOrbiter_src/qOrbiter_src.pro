@@ -56,7 +56,10 @@ DEFINES += for_desktop
 
 win32{
 folder_01.source = qml/desktop
-folder_01.target = $$DESTDIR
+folder_01.target = $$DESTDIR/qml
+
+files_01.source = "../qOrbiter_src/config.xml/"
+files_01.path =$$DESTDIR/
 
 DEFINES += for_windows
 }
@@ -117,7 +120,8 @@ DEFINES+=ANDROID
 !win32{DEPLOYMENTFOLDERS = folder_01 folder_02 folder_03}
 
 win32{
-DEPLOYMENTFOLDERS = folder_01
+DEPLOYMENTFOLDERS = folder_01 files_01
+
 }
 
 
@@ -172,6 +176,7 @@ symbian:TARGET.CAPABILITY += NetworkServices
 message(Qt version: $$[QT_VERSION])
 message(Qt is installed in $$[QT_INSTALL_PREFIX])
 message (Build Type: $$DEFINES)
+
 
 # The .cpp file which was generated for your project. Feel free to hack it.
 SOURCES += main.cpp \

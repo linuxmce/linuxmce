@@ -12,6 +12,8 @@
 
      See the GNU General Public License for more details.
 
+     This main.cpp has be heavily modified from the DCE Generated main.cpp for Qt integration.
+
 */
 //<-dceag-incl-b->
 #ifdef IOS
