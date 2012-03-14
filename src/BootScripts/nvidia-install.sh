@@ -14,7 +14,6 @@
 
 # These will need redone for each LMCE release, depending on the drivers available to the base kubuntu installation
 #######################################################################################################################
-. /usr/pluto/bin/Config_Ops.sh
 . /usr/pluto/bin/Utils.sh
 LogFile="/var/log/pluto/nvidia-install.log";
 
@@ -188,8 +187,8 @@ installCorrectNvidiaDriver() {
 
         Log "$LogFile" "== End NVidia driver installation ($(date)) =="
 
-        # Reboot only if requested and a new driver was installed
-        if [[ "$param" == "reboot" && "$INSTALLED" == "1" ]];then
+        # Reboot only if a new driver was installed
+        if [[ "$INSTALLED" == "1" ]];then
                 # Give the user a warning message and beep, then reboot
                 echo ""
                 echo -e "\e[1;31mNvidia driver installation requires a reboot.\e[0m"
@@ -197,7 +196,7 @@ installCorrectNvidiaDriver() {
                 echo ""
 				#need to force AVWizard to run, and remove the xorg.conf file created by the nvidia installer so it starts clean
 				rm /etc/X11/xorg.conf*
-				ConfSet AVWizardOverride 1
+				ConfSet "AVWizardOverride" "1"
                 beep -l 100 -f 500 -d 50 -r 3
                 sleep 2
                 reboot

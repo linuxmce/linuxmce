@@ -424,45 +424,214 @@ ValidIP()
 	return 0
 }
 
-GetVideoDriver()
-{
-	if [[ -n "$ForceVESA" ]]; then
-		echo vesa
-		return 0
+# Colors and bolds messages
+# '\E begin escape sequence
+# [XX; is the text color
+# XXm' is the background color
+# \033 is the an escape
+# [1m bold     [0m unbold
+# "" around text   '' around color
+# COLOR         FOREGROUND      BACKGROUND
+# black         30              40
+# red           31              41
+# green         32              42
+# yellow        33              43
+# blue          34              44
+# magenta       35              45
+# cyan          36              46
+# white         37              47
+
+StatusMessage () { 
+	echo -e '\E[33;40m'"\033[1m  $* \033[0m" 
+}
+ErrorMessage () { 
+	echo -e '\E[33;41m'"\033[1m  $* \033[0m" 
+}
+NotifyMessage () {
+	echo -e '\E[32;40m'"\033[1m  $* \033[0m" 
+}
+
+# Looks for a ping reply. Without one restarts networking. Occasionally helpful
+pinger () {
+	while ! ping -c 1 google.com > /dev/null 2>&1; do /etc/init.d/networking restart; sleep 3; done
+}
+
+# This does an update, while adding gpg keys for any that are missing. This is primarily for medibuntu
+# but will work for any source.
+gpgUpdate () {
+	sed -i 's/#deb/deb/g' /etc/apt/sources.list
+	gpgs=$(apt-get update |& grep -s NO_PUBKEY | awk '{ print $NF }' | cut -c 9-16); 
+	if [ -n $gpgs ]; then for gpg in $gpgs 
+		do gpg --keyserver pgp.mit.edu --recv-keys $gpg
+		gpg --export --armor $gpg | apt-key add -
+		done 
+		apt-get update
 	fi
-	
-	local VideoDriver,PCIVGAOutput
-#
-	VideoDriver="vesa"
-#<-mkr_B_via_b->
-	PCIVGAOutput=$(lspci | grep ' VGA ' | cut -d' ' -f5)
-	case "$PCIVGAOutput" in
-		nVidia) 
-			if PackageIsInstalled nvidia-glx 2>/dev/null || PackageIsInstalled nvidia-glx-new 2>/dev/null || PackageIsInstalled nvidia-glx-71 2>/dev/null || PackageIsInstalled nvidia-glx-96 2>/dev/null || PackageIsInstalled nvidia-glx-173 2>/dev/null || PackageIsInstalled nvidia-glx-180 2>/dev/null || PackageIsInstalled nvidia-glx-190 2>/dev/null || PackageIsInstalled nvidia-glx-195 2>/dev/null || PackageIsInstalled nvidia-glx-260 2>/dev/null || PackageIsInstalled nvidia-glx-185 2>/dev/null || PackageIsInstalled nvidia-current 2>/dev/null; then
-			       	VideoDriver="nvidia" 
+}
+
+confirmRoot () {
+	testroot="`whoami`"
+	if [ "$testroot" != "root" ]; then
+		ErrorMessage "Need to be root to run. Exiting"
+		exit 1
+	fi
+}
+
+StartService() {
+ServiceDescription="$1"
+ServiceCmd="$2"
+ServiceBkg="$3"
+	if [[ -x $(echo $ServiceCmd | cut -d ' ' -f1) ]] ;then
+		if [ -x /bin/plymouth ]; then
+			/bin/plymouth update --status="$ServiceDescription ... "
+		fi
+		echo -n "$ServiceDescription ... "
+			if [[ "$ServiceBkg" == "&" ]] ;then
+				$ServiceCmd 1>/dev/null 2>/dev/null &
+			else
+				$ServiceCmd 1>/dev/null 2>/dev/null
 			fi
-		;;
-                Radeon|ATI)  
-                 	if PackageIsInstalled xorg-driver-fglrx 2>/dev/null; then VideoDriver="fglrx" 
-                 	elif PackageIsInstalled xserver-xorg-video-radeon 2>/dev/null; then VideoDriver="radeon" 
-                 	elif PackageIsInstalled xserver-xorg-video-radeonhd 2>/dev/null; then VideoDriver="radeonhd" 
-                 	fi 
-                ;; 
-		Intel)
-                        if PackageIsInstalled xserver-xorg-video-i128 2>/dev/null; then VideoDriver="i128" 
-                        elif PackageIsInstalled xserver-xorg-video-i740 2>/dev/null; then VideoDriver="i740" 
-                        elif PackageIsInstalled xserver-xorg-video-intel 2>/dev/null; then VideoDriver="intel" 
-                        fi 
-		;;       
-                VIA) 
-                	if PackageIsInstalled xserver-xorg-video-openchrome; then VideoDriver="openchrome" 
-                        elif PackageIsInstalled xserver-xorg-video-savage; then VideoDriver="savage" 
-                        fi 
-		;; 
-	esac
-#<-mkr_B_via_e->
-#   	[[ "$VideoDriver" == @(nvidia|fglrx|radeonhd|radeon|i128|i740|intel|savage|openchrome) ]] || VideoDriver="vesa" 
-   	echo "$VideoDriver"
+			err=$?
+			if [[ "$err" == "0" ]] ;then
+				echo "ok"
+			else
+				echo "fail"
+			fi
+	fi
+		return $err
+}
+
+Purge_Fglrx () {
+        apt-get -y remove --purge xorg-driver-fglrx fglrx* --force-yes
+        apt-get -y install --reinstall libgl1-mesa-glx libgl1-mesa-dri fglrx-modaliases --force-yes
+        dpkg-reconfigure xserver-xorg
+        apt-get -y install --reinstall xserver-xorg-core --force-yes
+        reboot
+}
+
+GetVideoDriver () {
+        vga_pci=$(lspci -v | grep -i 'VGA')
+        prop_driver="vesa"
+        chip_man=$(echo "$vga_pci" | grep -Eo '(ATI|VIA|nVidia|Intel)')
+        case $chip_man in
+                nVidia)
+                        prop_driver="nvidia"  ;;
+
+                ATI)
+                        prop_driver="fglrx"
+                        if echo $vga_pci | grep -Ei '(r5|r6|r7)'; then
+                                prop_driver="radeonhd"; fi
+                        if echo "$vga_pci" | grep -E '((9|X|ES)(1|2?)([0-9])(5|0)0|Xpress)'; then
+                                prop_driver="radeon"; fi ;;
+
+                Intel)
+                        prop_driver="intel"
+                        if echo $vga_pci | grep "i740"; then
+                                prop_driver="i740"; fi
+                        if echo $vga_pci | grep "i128"; then
+                                prop_driver="i128"; fi ;;
+
+                VIA)
+                        prop_driver="openchrome" ;
+                        if echo $vga_pci | grep -i "Savage"; then
+                                prop_driver="savage"; fi
+#                       if echo $vga_pci | grep -i "s3"; then
+#                               prop_driver="via"; fi 
+                        if echo $vga_pci | grep -i "virge"; then
+                                prop_driver="virge"; fi ;;
+        esac
+}
+
+CheckVideoDriver () {
+GetVideoDriver
+if [[ -f /etc/X11/xorg.conf ]]; then
+         xorg_drivers=$(grep "Driver" /etc/X11/xorg.conf)
+                cur_driver=$(echo "$xorg_drivers" | grep -Eo '(nvidia|radeon|radeonhd|fglrx|savage|openchrome|via|virge|intel|i740|i128)')
+                card_detail=$(lspci | grep 'VGA' | cut -d':' -f3)
+                driver_match=$(echo "$prop_driver" | grep -x "$cur_driver")
+                if [[ -n $driver_match ]]; then
+                        StatusMessage "Correct $prop_driver driver already loaded"
+                else
+                        ErrorMessage "Video chipset change detected !!!"
+                        fglrx_in_use=$(cat /var/log/Xorg.0.log | grep -o fglrx |sort -u)
+                        if [[ -n "$fglrx_in_use" ]] && [[ "$prop_driver" != "fglrx" ]]; then
+                                echo ""
+                                echo ""
+                                echo ""
+                                ErrorMessage "Purging fglrx driver due to multiple conflicts"
+                                PurgeFglrx
+                        fi
+                        StatusMessage "Installing $prop_driver video driver for $card_detail"
+                        InstallVideoDriver
+                        rm /etc/X11/xorg.conf
+#                       /usr/pluto/bin/Xconfigure.sh
+                        ConfSet "AVWizardDone" "0"
+                        reboot
+                fi
+        else InstallVideoDriver
+        fi
+}
+
+InstallVideoDriver () {
+GetVideoDriver
+                case "$prop_driver" in
+                        nvidia)         if PackageIsInstalled nvidia-glx || PackageIsInstalled nvidia-glx-new || PackageIsInstalled nvidia-glx-71 || PackageIsInstalled nvidia-glx-96 || PackageIsInstalled nvidia-glx-173 || PackageIsInstalled nvidia-glx-180 || PackageIsInstalled nvidia-glx-190 || PackageIsInstalled nvidia-glx-195 || PackageIsInstalled nvidia-glx-260 || PackageIsInstalled nvidia-glx-185 || PackageIsInstalled nvidia-current ; then VideoDriver="$prop_driver"
+                                                else apt-get -yf install pluto-nvidia-video-drivers
+                                                VerifyExitCode "Install Pluto nVidia Driver"
+                                                StartService "Installing nVidia driver - this may take a few minutes" ". /usr/pluto/bin/nvidia-install.sh"
+                                                installCorrectNvidiaDriver
+                                        fi ;;
+                        radeon)         if PackageIsInstalled xserver-xorg-video-radeon; then VideoDriver="$prop_driver"
+                                        else apt-get -yf install xserver-xorg-video-radeon
+                                                VerifyExitCode "Install radeon Driver"
+                                                VideoDriver="$prop_driver" 
+                                        fi ;;
+                        fglrx)          if PackageIsInstalled fglrx; then VideoDriver="$prop_driver"
+                                        else apt-get -yf install fglrx
+                                                VerifyExitCode "Install fglrx Driver"
+                                                VideoDriver="$prop_driver"
+                                        fi ;;
+                        radeonhd)       if PackageIsInstalled xserver-xorg-video-radeonhd; then VideoDriver="$prop_driver"
+                                        else apt-get -yf install xserver-xorg-video-radeonhd
+                                                VerifyExitCode "Install radeonhd Driver"
+                                                VideoDriver="$prop_driver"
+                                        fi ;; 
+                        intel)          if PackageIsInstalled xserver-xorg-video-intel; then VideoDriver="$prop_driver" 
+                                        else apt-get -yf install xserver-xorg-video-intel
+                                                VerifyExitCode "Install Intel Driver"
+                                                VideoDriver="$prop_driver"
+                                        fi ;;
+                        i128)           if PackageIsInstalled xserver-xorg-video-i128; then VideoDriver="$prop_driver"
+                                        else apt-get -yf install xserver-xorg-video-i128
+                                                VerifyExitCode "Install i128 Driver"
+                                                VideoDriver="$prop_driver"
+                                        fi ;;
+                        i740)           if PackageIsInstalled xserver-xorg-video-i740; then VideoDriver="$prop_driver"
+                                                else apt-get -yf install xserver-xorg-video-i740
+                                                VerifyExitCode "Install i740 Driver"
+                                                VideoDriver="$prop_driver"
+                                        fi ;; 
+                        openchrome)     if PackageIsInstalled xserver-xorg-video-openchrome; then VideoDriver="$prop_driver"
+                                        else apt-get -yf install xserver-xorg-video-openchrome
+                                                VerifyExitCode "Install opencrhome Driver"
+                                                VideoDriver="$prop_driver"
+                                        fi ;; 
+                        savage)         if PackageIsInstalled xserver-xorg-video-savage; then VideoDriver="$prop_driver"
+                                        else apt-get -yf install xserver-xorg-video-savage
+                                                VerifyExitCode "Install VIA Savage Driver"
+                                                VideoDriver="$prop_driver"
+                                        fi ;;
+                        via)            if PackageIsInstalled xserver-xorg-video-s3; then VideoDriver="$prop_driver"
+                                        else apt-get -yf install xserver-xorg-video-s3
+                                                VerifyExitCode "Install VIA S3 Driver"
+                                                VideoDriver="$prop_driver"
+                                        fi ;;
+                        virge)          if PackageIsInstalled xserver-xorg-video-s3virge; then VideoDriver="$prop_driver"
+                                        else apt-get -yf install xserver-xorg-video-s3
+                                                VerifyExitCode "Install VIA S3 Virge Driver"
+                                                VideoDriver="$prop_driver"
+                                        fi ;;
+                esac
 }
 
 ReloadDevicesOnThisMachine()
