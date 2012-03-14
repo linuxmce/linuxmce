@@ -13,166 +13,17 @@
 
 if [ "$1" == "status" ] ; then
 	if [ pidof AVWizard_Run.sh &> /dev/null ] ; then
-        	echo "* AVWizard is running"
+		echo "* AVWizard is running"
 	else
 		echo "* AVWizard is not running"
 	fi
 	exit 0
 fi
-                                                                
-StartService() {
-        ServiceDescription=$1
-        ServiceCmd=$2
-        ServiceBkg=$3
-
-        if [[ -x $(echo $ServiceCmd | cut -d ' ' -f1) ]] ;then
-                if [ -x /bin/plymouth ]; then
-                        /bin/plymouth update --status="$ServiceDescription ... "
-                fi
-                echo -n "$ServiceDescription ... "
-                if [[ "$ServiceBkg" == "&" ]] ;then
-                        $ServiceCmd 1>/dev/null 2>/dev/null &
-                else
-                        $ServiceCmd 1>/dev/null 2>/dev/null
-                fi
-                err=$?
-
-                if [[ "$err" == "0" ]] ;then
-                        echo "ok"
-                else
-                        echo "fail"
-                fi
-        fi
-
-        return $err
-}
-VerifyExitCode () {
-        local EXITCODE=$?
-        if [ "$EXITCODE" != "0" ] ; then
-        	echo "An error (Exit code $EXITCODE) occured during the last action"
-        	echo "$1"
-                exit 1
-        fi
-}
-
-PurgeFglrx () {
-	#Purge fglrx driver if card changes. TODO Definitely required for fglrx, consider doing the same for nVidia.
-	apt-get -y remove --purge xorg-driver-fglrx fglrx* --force-yes
-	apt-get -y install --reinstall libgl1-mesa-glx libgl1-mesa-dri fglrx-modaliases --force-yes
-	dpkg-reconfigure xserver-xorg
-	apt-get -y install --reinstall xserver-xorg-core --force-yes
-	cp /var/log/Xorg.0.log /var/log/Xorg.0.old.log
-	echo > /var/log/Xorg.0.log
-}
-
-VideoDriver () {
-	local prop_driver=$1
-	## Install driver based on the proper driver as determined in CheckVideoDriver
-	case $prop_driver in
-		nvidia)
-			apt-get -yf install pluto-nvidia-video-drivers
-			VerifyExitCode "Install Pluto nVidia Driver"
-			StartService "Installing nVidia driver - this may take a few minutes" ". /usr/pluto/bin/nvidia-install.sh"
-			installCorrectNvidiaDriver ;;
-		fglrx)
-			apt-get -yf install fglrx
-			VerifyExitCode "Install fglrx Driver" ;;
-		radeonhd)
-			apt-get -yf install xserver-xorg-video-radeonhd
-			VerifyExitCode "Install RadeonHD Driver" ;;
-		radeon)
-			apt-get -yf install xserver-xorg-video-radeon
-			VerifyExitCode "Install Radeon Driver" ;;
-		savage)
-			apt-get -yf install xserver-xorg-video-savage
-			VerifyExitCode "Install VIA Savage Driver" ;;
-		openchrome)
-			apt-get -yf install xserver-xorg-video-openchrome
-			VerifyExitCode "Install VIA Chrome Driver" ;;
-		i128)
-			apt-get -yf install xserver-xorg-video-i128
-			VerifyExitCode "Install Intel i128 Driver" ;;
-		i740)
-			apt-get -yf install xserver-xorg-video-i740
-			VerifyExitCode "Install Intel i740 Driver" ;;
-		intel)
-			apt-get -yf install xserver-xorg-video-intel
-			VerifyExitCode "Install Intel Driver"
-			if echo "$vga_pci" | grep -qi 'G45'; then
-				apt-get -yf install libva-driver-i965
-				VerifyExitCode "Install Intel Acceleration"
-			fi ;;
-	esac
-# Place correct driver in DB and xorg.conf.pluto.avwizard
-GetVideoDriver
-}
-
-CheckVideoDriver () {
-	vga_pci=$(lspci -v | grep -i 'VGA')
-	prop_driver="vesa"
-	chip_man=$(echo "$vga_pci" | grep -Eo '(ATI|VIA|nVidia|Intel)')
-	radeon_driver=$(echo "$vga_pci" | grep -Eo '((9|X|ES)(1|2?)([0-9])(5|0)0|Xpress)')
-	card_detail=$(lspci | grep 'VGA' | cut -d':' -f3)
-   
-	case $chip_man in
-		nVidia)
-			NotifyMessage "nVidia card Detected"
-			prop_driver="nvidia"  ;;
-
-		ATI)
-			NotifyMessage "ATI card Detected"
-			case $vga_pci in
-				*)
-					prop_driver="fglrx" ;;
-				r5|R5|r6|R6|r7|R7)
-					prop_driver="radeonhd" ;;
-			esac
-			if [[ -n radeon_driver ]]; then prop_driver="radeon"; fi ;;
-
-		Intel)
-			case $vga_pci in
-				*)
-					prop_driver="intel" ;;
-				i740|i128)
-					prop_driver="$cur_chipset" ;;
-			esac ;;
-
-		VIA)
-			case $vga_pci in
-				*)
-					prop_driver="openchrome" ;;
-				s3|S3|savage|Savage|SAVAGE)
-					prop_driver="savage" ;;
-			esac ;;
-	esac
-   
-	if [[ -f /etc/X11/xorg.conf ]]; then
-		xorg_drivers=$(grep "Driver" /etc/X11/xorg.conf)
-		cur_driver=$(echo "$xorg_drivers" | grep -Eo '(nvidia|radeon|radeonhd|fglrx|savage|openchrome|intel|i740|i128)')
-		driver_match=$(echo "$prop_driver" | grep -i "$cur_driver")
-		if [[ -n $driver_match ]]; then
-			#SuccessMessage "Correct driver $prop_driver already loaded"
-			GetVideoDriver
-	 	else
-			#ErrorMessage "Card change detected !!!"
-			fglrx_in_use=$(cat /var/log/Xorg.0.log | grep -o fglrx |sort -u)
-			if [[ -n "$fglrx_in_use" ]] && [[ "$prop_driver" != "fglrx" ]]; then
-				echo ""
-				echo ""
-				echo ""
-				#ErrorMessage "Purging fglrx driver due to multiple conflicts"
-				PurgeFglrx
-			fi
-			#StatusMessage "Installing $prop_driver video driver for $card_detail"
-			VideoDriver $prop_driver		
-		fi
-	else VideoDriver $prop_driver
-	fi
-}
 CheckVideoDriver
+## Install driver based on the type of video card used
 if [[ "$AVWizardOverride" == "1" || "$AVWizardDone" != "1" ]] ;then
-	ConfSet "AVWizardOverride" "0"
 	/usr/pluto/bin/AVWizard_Run.sh 1>/dev/null 2>/dev/null </dev/null
+	ConfSet "AVWizardOverride" "0"
 else
 	beep -l 50 -f 1000 -n -l 50 -f 1200 -n -l 50 -f 1400 -n -l 50 -f 1600 -n -l 50 -f 1800 -n -l 50 -f 2000 -n -l 50 -f 2200 &
 fi
