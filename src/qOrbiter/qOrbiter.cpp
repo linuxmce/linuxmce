@@ -27,6 +27,7 @@
 #include <datamodels/avdevice.h>
 #include <contextobjects/existingorbiter.h>
 #include <contextobjects/modelpage.h>
+#include <avitem.h>
 
 #include "QBuffer"
 #include "QApplication"
@@ -1120,6 +1121,10 @@ void qOrbiter::CMD_Set_Now_Playing(string sPK_DesignObj,string sValue_To_Assign,
         if(bRetransmit == 1)
         {
             emit clearPlaylist();
+        }
+        else
+        {
+
         }
         emit np_title1Changed(QString::fromStdString(sValue_To_Assign ));
         emit np_title2Changed(QString::fromStdString(sText));
@@ -3240,46 +3245,64 @@ void DCE::qOrbiter::getMediaTimeCode()
 
 }
 
-void DCE::qOrbiter::GetAdvancedMediaOptions() // prepping for advanced media options
+void DCE::qOrbiter::GetAdvancedMediaOptions(int device) // prepping for advanced media options
 {
     int cellsToRender= 0;
 
+    bool isSuccessfull;
+    string valassign="";
     int gHeight = 1;
-    int gWidth = 8;
-    string imgDG ="resetav_"+StringUtils::itos(m_dwPK_Device);
+    int gWidth = 0;
+    string dgIdent ="cmds_"+StringUtils::itos(m_dwPK_Device);
     int iData_Size=0;
     int GridCurRow = 0;
     int GridCurCol= 0;
     char *pData;
     pData = "NULL";
     string m_sSeek = "";
+    string options = StringUtils::itos(device) + ",134, 670";
     m_dwIDataGridRequestCounter++;
     int offset = 0;
-    //CMD_Request_Datagrid_Contents(                              long DeviceIDFrom,                long DeviceIDTo,                   string sID,                                string sDataGrid_ID, int iRow_count,int iColumn_count,        bool bKeep_Row_Header,bool bKeep_Column_Header,bool bAdd_UpDown_Arrows,string sSeek,       int iOffset,    char **pData,int *iData_Size,int *iRow,int *iColumn
-    DCE::CMD_Request_Datagrid_Contents advanced_av_grid( long(m_dwPK_Device), long(iPK_Device_DatagridPlugIn), StringUtils::itos( m_dwIDataGridRequestCounter ), string(imgDG),    100,    int(gHeight),                      false,                 false,                                 true, string(m_sSeek), 0   ,  &pData,         &iData_Size, &GridCurRow, &GridCurCol );
-
-    if(SendCommand(advanced_av_grid))
+    int pkVar=0;
+    CMD_Populate_Datagrid codeGrid(m_dwPK_Device, iPK_Device_DatagridPlugIn, StringUtils::itos( m_dwIDataGridRequestCounter ), string(dgIdent), 24, options, DEVICETEMPLATE_Datagrid_Plugin_CONST, &pkVar, &valassign,  &isSuccessfull, &gHeight, &gWidth );
+    string gResp="";
+    if(SendCommand(codeGrid, &gResp) && gResp == "OK")
     {
-        DataGridTable *pDataGridTable = new DataGridTable(iData_Size,pData,false);
-        cellsToRender= pDataGridTable->GetRows();
+        //CMD_Request_Datagrid_Contents(                              long DeviceIDFrom,                long DeviceIDTo,                   string sID,                                string sDataGrid_ID, int iRow_count,int iColumn_count,        bool bKeep_Row_Header,bool bKeep_Column_Header,bool bAdd_UpDown_Arrows,string sSeek,       int iOffset,    char **pData,int *iData_Size,int *iRow,int *iColumn
+        DCE::CMD_Request_Datagrid_Contents advanced_av_grid( long(m_dwPK_Device), long(iPK_Device_DatagridPlugIn), StringUtils::itos( m_dwIDataGridRequestCounter ), string(dgIdent),    int(gWidth),    int(gHeight),                      false,                 false,                                 true, string(m_sSeek), 0   ,  &pData,         &iData_Size, &GridCurRow, &GridCurCol );
 
-#ifndef ANDROID
-        LoggerWrapper::GetInstance()->Write(LV_CRITICAL, "Advanced AV  Grid Dimensions: Height %i, Width %i", gHeight, gWidth);
-#endif
-        QString cellTitle;
-        QString fk_file;
-        QString filePath;
-        int index;
-        for(MemoryDataTable::iterator it=pDataGridTable->m_MemoryDataTable.begin();it!=pDataGridTable->m_MemoryDataTable.end();++it)
+        if(SendCommand(advanced_av_grid))
         {
-            DataGridCell *pCell = it->second;
-            const char *pPath = pCell->GetImagePath();
-            filePath = QString::fromUtf8(pPath);
-            fk_file = pCell->GetValue();
-            cellTitle = QString::fromUtf8(pCell->m_Text);
-            index = pDataGridTable->CovertColRowType(it->first).first;
+            DataGridTable *pDataGridTable = new DataGridTable(iData_Size,pData,false);
+            cellsToRender= pDataGridTable->GetRows();
+
+    #ifndef ANDROID
+            LoggerWrapper::GetInstance()->Write(LV_CRITICAL, "Advanced AV  Grid Dimensions: Height %i, Width %i", gHeight, gWidth);
+    #endif
+            QString cellTitle;
+            QString fk_file;
+            QString filePath;
+            int index;
+
+            for(MemoryDataTable::iterator it=pDataGridTable->m_MemoryDataTable.begin();it!=pDataGridTable->m_MemoryDataTable.end();++it)
+            {
+                DataGridCell *pCell = it->second;
+                const char *pPath = pCell->GetImagePath();
+                filePath = QString::fromUtf8(pPath);
+                fk_file = pCell->GetValue();
+                cellTitle = QString::fromUtf8(pCell->m_Text);
+                index = pDataGridTable->CovertColRowType(it->first).first;
+
+                emit statusMessage(cellTitle);
+              //  QStringList splitList;
+               // splitList =
+
+               // resendAvButtons.append(new AvItem());
+            }
+
         }
     }
+
 
 }
 
@@ -3563,9 +3586,15 @@ void DCE::qOrbiter::showAdvancedButtons()
                 fk_file = pCell->GetValue();
                 cellTitle = QString::fromUtf8(pCell->m_Text);
                 index = pDataGridTable->CovertColRowType(it->first).first;
-                emit statusMessage(cellTitle + "::" + fk_file);
-                //buttonList.append(new AvDevice(fk_file.toInt(), cellTitle, "core"));
+                //cell title is device and heriarchy
+                // fk_file seems to be device name and heirachy
+                //
+                QStringList splitter;
+                splitter = cellTitle.split("/");
+
+                resendAvButtons.append(new AvDevice(fk_file.toInt(), splitter.at(0), "core"));
             }
+            emit resendAvButtonList(resendAvButtons);
             //  qorbiterUIwin->rootContext()->setContextProperty("buttonList" ,QVariant::fromValue(buttonList));
         }
     }

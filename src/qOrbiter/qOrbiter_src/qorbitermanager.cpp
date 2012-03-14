@@ -284,7 +284,7 @@ bool qorbiterManager::initializeManager(string sRouterIP, int device_id)
         return false;
     }
 #else
-    if( !loadSkins(QUrl(remoteDirectoryPath)))
+    if( !loadSkins(QUrl(localDir)))
     {   emit skinIndexReady(false);
         return false;
 
@@ -541,8 +541,6 @@ void qorbiterManager::processConfig(QByteArray config)
             QString imgName = tScenarioRoom.at(innerIndex).attributes().namedItem("Description").nodeValue();
 
             QImage m_image = QImage("Qrc:/icons/"+imgName);
-
-
             telecomModelHolder->appendRow(new TelecomScenarioItem(m_name,m_label, m_param, m_command, m_goto, m_image, telecomModelHolder));
         }
         roomTelecomScenarios.insert(troomMapNo, telecomModelHolder);
@@ -592,6 +590,7 @@ void qorbiterManager::processConfig(QByteArray config)
     qorbiterUIwin->rootContext()->setContextProperty("roomList", m_lRooms);                           //custom room list  provided
     qorbiterUIwin->rootContext()->setContextProperty("gmediaType", q_mediaType);
     qorbiterUIwin->rootContext()->setContextProperty("screenshotAttributes", QVariant::fromValue(screenshotVars));
+    qorbiterUIwin->rootContext()->setContextProperty("avcodes", QVariant::fromValue(buttonList));
     //QObject::connect(this->nowPlayingButton, SIGNAL(mediaStatusChanged()), this, SLOT(updateTimecode()), Qt::QueuedConnection);
     setDceResponse("Properties Done");
 
@@ -702,7 +701,7 @@ void qorbiterManager::swapSkins(QString incSkin)
 
     setDceResponse("Setting Skin to:" + incSkin);
     skin = tskinModel->find(incSkin);
-    setDceResponse("Got it from the model : " + skin->baseUrl().toString());
+   setDceResponse("Got it from the model : " + skin->baseUrl().toString());
     //load the actual skin entry point
     currentSkin = incSkin;
     qorbiterUIwin->engine()->rootContext()->setContextProperty("style", skin->styleView());
@@ -962,7 +961,8 @@ void qorbiterManager::qmlSetupLmce(QString incdeviceid, QString incrouterip)
 
 bool qorbiterManager::readLocalConfig()
 {
-    return true;
+
+
     QApplication::processEvents(QEventLoop::AllEvents);
     QDomDocument localConfig;
 #ifdef Q_OS_MAC
@@ -1043,12 +1043,14 @@ bool qorbiterManager::readLocalConfig()
 
 bool qorbiterManager::writeConfig()
 {
-return true;
+
     QDomDocument localConfig;
 #ifdef Q_OS_MAC
     QString xmlPath = QString::fromStdString(QApplication::applicationDirPath().remove("MacOS").append("Resources").append("/config.xml").toStdString());
 #elif ANDROID
     QString xmlPath = "/mnt/sdcard/LinuxMCE/config.xml";
+#elif WIN32
+    QString xmlPath = QString::fromStdString(QApplication::applicationDirPath().toStdString())+"/config.xml";
 #else
     QString xmlPath = QString::fromStdString(QApplication::applicationDirPath().toStdString())+"/config.xml";
 #endif
@@ -1261,7 +1263,13 @@ void qorbiterManager::saveScreenShot(QString attribute)
     mediaScreenShot.save(&ba, "JPG");
     ba.close();  
     emit saveMediaScreenShot(attribute, bytes);
-     cleanupScreenie();
+    cleanupScreenie();
+}
+
+void qorbiterManager::showDeviceCodes(QList<QObject *> t)
+{
+    buttonList = t;
+    qorbiterUIwin->rootContext()->setContextProperty("avcodes", QVariant::fromValue(buttonList));
 }
 
 void qorbiterManager::changeChannels(QString chan)

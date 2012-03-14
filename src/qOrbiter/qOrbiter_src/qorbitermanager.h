@@ -429,6 +429,7 @@ public slots: //note: Q_INVOKABLE means it can be called directly from qml
     void setScreenShotVariables(QList <QObject*> l);
     void setMediaScreenShot(QByteArray data);
     void saveScreenShot(QString attribute);
+    void showDeviceCodes(QList<QObject*> t);
 
     Q_INVOKABLE void playMedia(QString FK_Media);
     Q_INVOKABLE void stopMedia();

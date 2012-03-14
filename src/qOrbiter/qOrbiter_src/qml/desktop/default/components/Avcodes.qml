@@ -1,7 +1,7 @@
 import QtQuick 1.0
 
 Rectangle {
-    id:avcodes
+    id:avcodes_rect
     width: scaleX(75)
     height: scaleY(65)
     radius: 10
@@ -11,13 +11,13 @@ Rectangle {
     anchors.centerIn: parent
     Component.onCompleted: dcerouter.showAdvancedButtons()
     MouseArea{
-        anchors.fill:avcodes
+        anchors.fill:avcodes_rect
 
     }
 
 Column{
     height: childrenRect.height
-    width: avcodes.width* .85
+    width: avcodes_rect.width* .85
     anchors.horizontalCenter: parent.horizontalCenter
 
     spacing: scaleY(1)
@@ -34,7 +34,7 @@ Column{
     {
         id:codelistrect
         height: scaleY(55)
-        width: avcodes.width *.85
+        width: avcodes_rect.width *.85
         color: "#628BC7"
         anchors.horizontalCenter: parent.horizontalCenter
         border.color: "aliceblue"
@@ -51,21 +51,32 @@ Column{
             height: parent.height
             width: scaleX(15)
             anchors.top:blah.bottom
-            model: buttonList
+            model: avcodes
             delegate: Rectangle{
                 id:av_code_top
-                height: scaleY(5)
-                width: parent.width *(.25)
+                height: scaleY(8)
+                width: scaleX(20)
                 color: "grey"
-                Text{
-                    id:av_label
-                    text:qs_device
+                Column{
+                    spacing: scaleY(1)
+                    Text{
+                        id:av_label
+                        text:qs_device
+                        font.pixelSize: scaleY(2)
+                    }
+
+                    Text {
+                        id: device_number
+                        text: qsTr("Device Number:") + i_deviceNo
+                        font.pixelSize: scaleY(2)
+                    }
                 }
                 MouseArea{
                     anchors.fill: av_code_top
                     hoverEnabled: true
                     onEntered: av_code_top.color = "white"
                     onExited: av_code_top.color = style.lighthighlight
+                    onClicked: dcerouter.GetAdvancedMediaOptions(i_deviceNo)
 
                 }
             }
@@ -85,7 +96,7 @@ Column{
         anchors.rightMargin: scaleX(1)
         MouseArea{
             anchors.fill: parent
-            onClicked: avcodes.destroy()
+            onClicked: avcodes_rect.destroy()
         }
     }
 }

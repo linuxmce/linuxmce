@@ -420,6 +420,9 @@ int main(int argc, char* argv[])
         QObject::connect(w, SIGNAL(liveTVrequest()), simpleEPGmodel, SLOT(populate()),Qt::DirectConnection);
         QObject::connect(w, SIGNAL(managerPlaylistRequest()), storedVideoPlaylist,SLOT(populate()) );
 
+        //controls
+        QObject::connect(pqOrbiter, SIGNAL(resendAvButtonList(QList<QObject*>)), w, SLOT(showDeviceCodes(QList<QObject*>)), Qt::QueuedConnection);
+
         //so does live tv
         QObject::connect(w, SIGNAL(clearModel()), simpleEPGmodel, SLOT(empty()));
 

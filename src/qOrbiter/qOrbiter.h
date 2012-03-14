@@ -88,6 +88,7 @@ public:
     QThread *timeCodeThread;
 
     QList<QObject*> screenshotVars;
+    QList<QObject*> resendAvButtons;
 
     string *s_user;
     QString currentScreen;
@@ -1149,6 +1150,7 @@ signals:
     void setFocusFile(QString);
     void modelPageCount(QList<QObject*> count);
 
+
     //now playing signals
     void setNowPlaying(bool status);
     void addScreenParam(QString, int);
@@ -1222,6 +1224,9 @@ signals:
     void fd_aspectH(int h);
     void fd_aspectW(int w);
     void fd_titleImageChanged(QImage t);
+
+    //controls
+    void resendAvButtonList(QList<QObject*> t);
 
 public slots:
     //setup
@@ -1301,7 +1306,7 @@ public slots:
      void powerOn(QString devicetype);
      void powerOff(QString deviceType);
      void getMediaTimeCode();
-      void GetAdvancedMediaOptions();
+      void GetAdvancedMediaOptions(int device);
      void GetAlarms(bool toggle, int grp);
      void setZoom(QString zoomLevel);
      void setAspect(QString ratio);
