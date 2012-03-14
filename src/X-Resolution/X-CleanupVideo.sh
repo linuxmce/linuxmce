@@ -80,7 +80,7 @@ CleanupVideo()
 	# Add proprietary video card Device and drivers if needed
 	# TODO: allow user to express his/her will in using the open source driver if he/she so desires
 	echo "$(date -R) --> Auto-create video card device"
-	VideoDriver=$(GetVideoDriver)
+	InstallVideoDriver
 	case "$VideoDriver" in
 		nv|nvidia)
 			if [[ -z "$nV_dev" ]]; then

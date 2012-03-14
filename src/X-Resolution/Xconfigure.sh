@@ -320,7 +320,7 @@ if [[ -z "$SkipLock" ]]; then
 fi
 EnsureResolutionVariables
 
-DisplayDriver=$(GetVideoDriver)
+InstallVideoDriver
 if [[ -n "$ForceVESA" ]]; then
 	DisplayDriver=vesa
 fi
