@@ -89,6 +89,7 @@ public:
 
     QList<QObject*> screenshotVars;
     QList<QObject*> resendAvButtons;
+    QList<QObject*> deviceCommands;
 
     string *s_user;
     QString currentScreen;
@@ -1227,7 +1228,7 @@ signals:
 
     //controls
     void resendAvButtonList(QList<QObject*> t);
-
+     void deviceCommandList(QList<QObject*> f);
 public slots:
     //setup
     void executeCommandGroup(int cmdGrp);

@@ -591,6 +591,7 @@ void qorbiterManager::processConfig(QByteArray config)
     qorbiterUIwin->rootContext()->setContextProperty("gmediaType", q_mediaType);
     qorbiterUIwin->rootContext()->setContextProperty("screenshotAttributes", QVariant::fromValue(screenshotVars));
     qorbiterUIwin->rootContext()->setContextProperty("avcodes", QVariant::fromValue(buttonList));
+    qorbiterUIwin->rootContext()->setContextProperty("device_commands", QVariant::fromValue(commandList));
     //QObject::connect(this->nowPlayingButton, SIGNAL(mediaStatusChanged()), this, SLOT(updateTimecode()), Qt::QueuedConnection);
     setDceResponse("Properties Done");
 
@@ -1270,6 +1271,12 @@ void qorbiterManager::showDeviceCodes(QList<QObject *> t)
 {
     buttonList = t;
     qorbiterUIwin->rootContext()->setContextProperty("avcodes", QVariant::fromValue(buttonList));
+}
+
+void qorbiterManager::setCommandList(QList<QObject *> l)
+{
+    commandList = l;
+    qorbiterUIwin->rootContext()->setContextProperty("device_commands", QVariant::fromValue(commandList));
 }
 
 void qorbiterManager::changeChannels(QString chan)

@@ -251,6 +251,7 @@ Param 10 - pk_attribute
     UserModel *userList;
     SkinDataModel *skinModel;
     QList<QObject*> buttonList;
+    QList<QObject*>commandList;
     MediaSubTypeModel *mediaTypeFilter;
     FilterModel *uiFileFilter;
     AttributeSortModel *attribFilter;
@@ -430,6 +431,7 @@ public slots: //note: Q_INVOKABLE means it can be called directly from qml
     void setMediaScreenShot(QByteArray data);
     void saveScreenShot(QString attribute);
     void showDeviceCodes(QList<QObject*> t);
+    void setCommandList(QList<QObject*> l);
 
     Q_INVOKABLE void playMedia(QString FK_Media);
     Q_INVOKABLE void stopMedia();

@@ -15,74 +15,108 @@ Rectangle {
 
     }
 
-Column{
-    height: childrenRect.height
-    width: avcodes_rect.width* .85
-    anchors.horizontalCenter: parent.horizontalCenter
-
-    spacing: scaleY(1)
-    Text {
-        id: avcodeslabel
-        text: qsTr("These are the devices in use. Touch a device name to send it a command, or touch the other cells to resend inputs or jump to advanced")
-        width: parent.width * .75
-        wrapMode: "WrapAtWordBoundaryOrAnywhere"
-        font.pixelSize: scaleY(2)
+    Column{
+        height: childrenRect.height
+        width: avcodes_rect.width
         anchors.horizontalCenter: parent.horizontalCenter
-    }
 
-    Rectangle
-    {
-        id:codelistrect
-        height: scaleY(55)
-        width: avcodes_rect.width *.85
-        color: "#628BC7"
-        anchors.horizontalCenter: parent.horizontalCenter
-        border.color: "aliceblue"
-        border.width: 2
-        radius: 20
-
+        spacing: scaleY(1)
         Text {
-            id: blah
-            text: qsTr("List model grid goes here")
+            id: avcodeslabel
+            text: qsTr("These are the devices in use. Touch a device name to send it a command, or touch the other cells to resend inputs or jump to advanced")
+            width: parent.width * .75
+            wrapMode: "WrapAtWordBoundaryOrAnywhere"
+            font.pixelSize: scaleY(2)
+            anchors.horizontalCenter: parent.horizontalCenter
         }
-        ListView
-        {
-            id:codelist
-            height: parent.height
-            width: scaleX(15)
-            anchors.top:blah.bottom
-            model: avcodes
-            delegate: Rectangle{
-                id:av_code_top
-                height: scaleY(8)
-                width: scaleX(20)
-                color: "grey"
-                Column{
-                    spacing: scaleY(1)
-                    Text{
-                        id:av_label
-                        text:qs_device
-                        font.pixelSize: scaleY(2)
-                    }
 
-                    Text {
-                        id: device_number
-                        text: qsTr("Device Number:") + i_deviceNo
-                        font.pixelSize: scaleY(2)
+        Rectangle
+        {
+            id:codelistrect
+            height: scaleY(55)
+            width: avcodes_rect.width *.85
+            color: "#628BC7"
+            anchors.horizontalCenter: parent.horizontalCenter
+            border.color: "aliceblue"
+            border.width: 2
+            radius: 20
+
+            Text {
+                id: blah
+                text: qsTr("List model grid goes here")
+            }
+            ListView
+            {
+                id:codelist
+                height: parent.height
+                width: scaleX(15)
+                anchors.top:blah.bottom
+                model: avcodes
+                delegate: Rectangle{
+                    id:av_code_top
+                    height: scaleY(8)
+                    width: scaleX(20)
+                    color: "grey"
+                    Column{
+                        spacing: scaleY(1)
+                        Text{
+                            id:av_label
+                            text:qs_device
+                            font.pixelSize: scaleY(2)
+                        }
+
+                        Text {
+                            id: device_number
+                            text: qsTr("Device Number:") + i_deviceNo
+                            font.pixelSize: scaleY(2)
+                        }
+                    }
+                    MouseArea{
+                        anchors.fill: av_code_top
+                        hoverEnabled: true
+                        onEntered: av_code_top.color = "white"
+                        onExited: av_code_top.color = style.lighthighlight
+                        onClicked: dcerouter.GetAdvancedMediaOptions(i_deviceNo)
+
                     }
                 }
-                MouseArea{
-                    anchors.fill: av_code_top
-                    hoverEnabled: true
-                    onEntered: av_code_top.color = "white"
-                    onExited: av_code_top.color = style.lighthighlight
-                    onClicked: dcerouter.GetAdvancedMediaOptions(i_deviceNo)
+            }
 
+            ListView
+            {
+                id:device_command_list
+                height: parent.height
+                width: scaleX(10)
+                anchors.top: parent.top
+                anchors.left: codelist.right
+                anchors.leftMargin: scaleY(5)
+                clip: true
+                model: device_commands
+                delegate: Rectangle{
+                    id:device_commandlist
+                    height: scaleY(8)
+                    width: scaleX(20)
+                    color: "grey"
+                    Column{
+                        spacing: scaleY(1)
+                        Text{
+                            id:command_label
+                            text:qs_command
+                            font.pixelSize: scaleY(2)
+                        }
+
+                    }
+                    MouseArea{
+                        anchors.fill: device_command_list
+                        hoverEnabled: true
+                        onEntered: device_command_list.color = "white"
+                        onExited: device_command_list.color = style.lighthighlight
+
+                    }
                 }
             }
         }
     }
-}
 
     ButtonSq
     {

@@ -28,6 +28,7 @@
 #include <contextobjects/existingorbiter.h>
 #include <contextobjects/modelpage.h>
 #include <avitem.h>
+#include <contextobjects/avcommand.h>
 
 #include "QBuffer"
 #include "QApplication"
@@ -3292,13 +3293,14 @@ void DCE::qOrbiter::GetAdvancedMediaOptions(int device) // prepping for advanced
                 fk_file = pCell->GetValue();
                 cellTitle = QString::fromUtf8(pCell->m_Text);
                 index = pDataGridTable->CovertColRowType(it->first).first;
+                if(!cellTitle.contains("learn"))
+                {
 
-                emit statusMessage(cellTitle);
-              //  QStringList splitList;
-               // splitList =
-
-               // resendAvButtons.append(new AvItem());
+                }
+                deviceCommands.append(new AvCommand(fk_file.toInt(), cellTitle, false));
             }
+            emit deviceCommandList(deviceCommands);
+            deviceCommands.clear();
 
         }
     }
