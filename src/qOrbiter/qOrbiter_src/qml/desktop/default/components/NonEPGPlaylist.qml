@@ -4,9 +4,7 @@ Rectangle {
     id:nonepgplaylist
     width: scaleX(25)
     height: scaleY(55)
-    color: style.highlight2
-    border.color: style.highlight1
-    border.width: 2
+    color: "transparent"
     clip:false
     Connections{
         target: mediaplaylist
@@ -14,7 +12,7 @@ Rectangle {
             nonepgplaylistview.positionViewAtIndex(mediaplaylist.currentIndex, ListView.Beginning)
         }
     }
-
+/*
     BorderImage {
         id: borderimg
         verticalTileMode: BorderImage.Round
@@ -25,19 +23,16 @@ Rectangle {
         border { left: 10; top: 10; right: 10; bottom: 10 }
         smooth: true
     }
-
+*/
     ListView{
         id:nonepgplaylistview
         width: scaleX(25)
         height: scaleY(55)
-        anchors.centerIn: parent
-        highlightFollowsCurrentItem: true
-        highlight: Rectangle { color: "lightsteelblue"; radius: 5 }
+        anchors.centerIn: parent       
         clip: true
         interactive: true
         flickableDirection: "VerticalFlick"
         model: mediaplaylist
-
 
         delegate:
             Rectangle {
@@ -46,7 +41,7 @@ Rectangle {
             width:scaleX(25)
             height: scaleY(12)
             anchors.horizontalCenter: parent.horizontalCenter
-            color: style.darkhighlight
+            color: "transparent"
             clip: true
             Image {
                 id: playlistimage
@@ -82,12 +77,24 @@ Rectangle {
                 fillMode: Image.PreserveAspectCrop
                 source: "../img/icons/header.png"
                 anchors.fill: parent
-                opacity: .30
+                opacity:index === dcenowplaying.m_iplaylistPosition ? .25 :  .15
             }
 
             MouseArea{
                 anchors.fill: parent
                 onClicked: dcerouter.jumpToPlaylistPosition(index)
+            }
+            Rectangle{
+                id:remove_box
+                height: parent.height *.25
+                width: parent.height *.25
+                color:"red"
+                opacity: .5
+                anchors.right: parent.right
+                MouseArea{
+                    anchors.fill: remove_box
+                    onClicked: dcerouter.removePlaylistItem(index)
+                }
             }
         }
     }

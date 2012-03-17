@@ -1,6 +1,3 @@
-#ifndef SCREENPARAMSCLASS_H
-#define SCREENPARAMSCLASS_H
-
 /*
     This file is part of QOrbiter for use with the LinuxMCE project found at http://www.linuxmce.org
    Langston Ball  golgoj4@gmail.com
@@ -24,8 +21,13 @@ back to the router in the case of special buttons like the 'yes and no' prompts 
 It needs to be expanded to create device numberlists for now playing and other situations where the contextual data may be relevant
  */
 
+#ifndef SCREENPARAMSCLASS_H
+#define SCREENPARAMSCLASS_H
+
 #include <QObject>
 #include <QMap>
+#include <QDebug>
+
 
 class ScreenParamsClass : public QObject
 {
@@ -68,7 +70,7 @@ signals:
 
 public slots:
     void setSender(long sender) { sender = deviceFrom; emit senderChanged();}
-    void addParam(QString val, int key) {paramDevices.insert(key, val);}
+    void addParam(QString val, int key) {paramDevices.insert(key, val); qDebug() << key << "==" << val;}
     void clear();
 
 };

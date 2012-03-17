@@ -39,6 +39,6 @@ void NowPlayingClass::resetData()
     setSynop(""); emit synopChanged();
     setStreamID(0);
     setProgram("");
-
+   // setImage(QImage());
 }
 

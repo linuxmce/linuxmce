@@ -205,7 +205,7 @@ void qorbiterManager::gotoQScreen(QString s)
     } else {
         setDceResponse("screenchange() FAILED");
     }
-
+qDebug() << ScreenParameters->getParam(224);
 
 }
 
@@ -970,8 +970,8 @@ bool qorbiterManager::readLocalConfig()
     QString xmlPath = QString::fromStdString(QApplication::applicationDirPath().remove("MacOS").append("Resources").append("/config.xml").toStdString());
 #elif ANDROID
     QString xmlPath = "/mnt/sdcard/LinuxMCE/config.xml";
-#elseif WIN32
-     QString xmlPath = QString::fromStdString(QApplication::applicationDirPath().toStdString())+"\\config.xml";
+#elif WIN32
+     QString xmlPath = QString::fromStdString(QApplication::applicationDirPath().toStdString())+"/config.xml";
 #else
     QString xmlPath = QString::fromStdString(QApplication::applicationDirPath().toStdString())+"/config.xml";
 #endif
@@ -1279,6 +1279,11 @@ void qorbiterManager::setCommandList(QList<QObject *> l)
     qorbiterUIwin->rootContext()->setContextProperty("device_commands", QVariant::fromValue(commandList));
 }
 
+void qorbiterManager::setBoundStatus(bool b)
+{
+    emit bindMediaRemote(b);
+}
+
 void qorbiterManager::changeChannels(QString chan)
 {
     //  pqOrbiter->TuneToChannel(chan.toInt(), chan );
@@ -1292,7 +1297,7 @@ void qorbiterManager::getLiveTVPlaylist()
 void qorbiterManager::getStoredPlaylist()
 {
  emit bindMediaRemote(true);
-emit managerPlaylistRequest();
+
 
 }
 
@@ -1347,17 +1352,17 @@ void qorbiterManager::updateTimecode(int port)
 
     if(!timeCodeSocket->isOpen())
     {
-       qDebug() <<"opening connection to " << port;
+      // qDebug() <<"opening connection to " << port;
 
         timeCodeSocket->connectToHost(qs_routerip, port, QFile::ReadOnly );
         if ( timeCodeSocket->isValid() )
         {
-            setDceResponse("Time Code Socket connected! " + QString::fromStdString(m_ipAddress.toStdString()));
+            setDceResponse("Time Code Socket connected! " + QString::fromStdString(qs_routerip.toStdString()));
             QObject::connect(timeCodeSocket,SIGNAL(readyRead()), this, SLOT(showTimeCode()));
         }
         else
-        {   qDebug("couldnt start timecode");
-             qDebug() << timeCodeSocket->errorString();
+        {   setDceResponse("couldnt start timecode");
+           //  qDebug() << timeCodeSocket->errorString();
         }
     }
 
@@ -1499,7 +1504,7 @@ void qorbiterManager::setDceResponse(QString response)
     dceResponse = response;
     emit loadingMessage(dceResponse);
     emit dceResponseChanged();
-    qDebug() << dceResponse;
+   // qDebug() << dceResponse;
 
 }
 

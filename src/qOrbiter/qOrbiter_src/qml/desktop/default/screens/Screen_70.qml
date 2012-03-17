@@ -10,22 +10,18 @@ Rectangle {
     radius: 0
     opacity: 1
     color: "transparent"
-
+   // Component.onCompleted: manager.setBoundStatus(true)
     Column{
         anchors.right: storedvideoremote.right
         anchors.rightMargin: scaleX(1)
         Remote_lighting_controls{ id: remote_lighting_controls1; }
         Remote_Audio_controls{ id: remote1; }
     }
-
-    Component.onCompleted: manager.getStoredPlaylist()
-
     Connections{
         target:dcenowplaying
         onImageChanged: { nowplayingimage.source = "image://listprovider/updateobject/"+securityvideo.timestamp;}
-
     }
-
+    Component.onCompleted: dcerouter.BindMediaRemote(true)
 
     Row{
         id:mainrow

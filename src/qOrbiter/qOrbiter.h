@@ -1268,7 +1268,8 @@ public slots:
     void jumpMobileGrid(int page);
     void getGridView(bool direction);
     //now playing
-
+    void removePlaylistItem(int index);
+    void saveCurrentPlaylist(int user, QString ea, QString name, bool SaveAsNew);
 
     //media
     void displayToggle(int);
@@ -1318,6 +1319,7 @@ public slots:
      void ShowBookMarks();
 
  void saveScreenAttribute(QString attribute, QByteArray data);
+ void sendAvCommand(int deviceto, int command);
     //floorplans
     void getFloorplanDeviceCommand(int device);
 

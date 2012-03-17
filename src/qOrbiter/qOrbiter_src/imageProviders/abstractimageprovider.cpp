@@ -59,6 +59,7 @@ QImage AbstractImageProvider::updateObjectProvider()
     if (key.isNull())
     {
         key.load(":/icons/icon.png");
+        qDebug("Error getting image!");
 
     }
     //aspect checking

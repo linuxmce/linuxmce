@@ -59,6 +59,7 @@ class NowPlayingClass : public QDeclarativeItem
     Q_PROPERTY (bool b_mediaPlaying READ getStatus WRITE setStatus NOTIFY mediaStatusChanged) //property to know if media is playing
 
     Q_PROPERTY (QImage fileImage READ getImage WRITE setImage NOTIFY imageChanged)
+
     //timecode
 
     Q_PROPERTY (QString timecode READ getTimeCode WRITE setTimeCode NOTIFY tcChanged)
@@ -256,7 +257,7 @@ public slots:
                 if(t.load("/mnt/sdcard/Linuxmce/np.jpg")){
                     qDebug("Loaded local image");
                  }
-               setImage(t.convertToFormat());
+               setImage(t);
             }
             temp_hack_file.remove();
         }

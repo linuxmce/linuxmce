@@ -4,7 +4,7 @@ import "../js/ComponentLoader.js" as MyJs
 Rectangle {
 
     // property alias synText:
-    id: dvdremote
+    id: dvd_remote
     height: style.orbiterH
     width: style.orbiterW
     radius: 0
@@ -16,17 +16,11 @@ Rectangle {
         source: "../img/icons/orbiterbg.png"
     }
 
-    Timer{
-        id:singleshot
-        repeat: false
-        interval: 2000
-        triggeredOnStart: false
-        running: true
-        onTriggered: nowplayingimage.source = "image://listprovider/updateobject/"+securityvideo.timestamp
-    }
+
 
     Connections{
         target:dcenowplaying
+        onImageChanged:nowplayingimage.source = "image://listprovider/updateobject/"+securityvideo.timestamp;
         onPlayListPositionChanged: { nowplayingimage.source = "image://listprovider/updateobject/"+securityvideo.timestamp;}
     }
 
@@ -314,7 +308,7 @@ Rectangle {
                         buttontext: qsTr("Menu")
                         MouseArea{
                             anchors.fill: parent
-                            onClicked: showMenu()
+                            onClicked: dcerouter.showMenu()
                         }
                     }
                     AvOptionButton{

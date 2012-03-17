@@ -17,7 +17,7 @@ Rectangle {
 
     Column{
         height: childrenRect.height
-        width: avcodes_rect.width
+        width: childrenRect.width
         anchors.horizontalCenter: parent.horizontalCenter
 
         spacing: scaleY(1)
@@ -29,6 +29,7 @@ Rectangle {
             font.pixelSize: scaleY(2)
             anchors.horizontalCenter: parent.horizontalCenter
         }
+
 
         Rectangle
         {
@@ -43,7 +44,7 @@ Rectangle {
 
             Text {
                 id: blah
-                text: qsTr("List model grid goes here")
+                text: qsTr("Router Reply") + dcerouter.mediaResponse
             }
             ListView
             {
@@ -52,6 +53,7 @@ Rectangle {
                 width: scaleX(15)
                 anchors.top:blah.bottom
                 model: avcodes
+                clip:true
                 delegate: Rectangle{
                     id:av_code_top
                     height: scaleY(8)
@@ -93,10 +95,10 @@ Rectangle {
                 clip: true
                 model: device_commands
                 delegate: Rectangle{
-                    id:device_commandlist
+                    id:device_box
                     height: scaleY(8)
                     width: scaleX(20)
-                    color: "grey"
+                    color: "slateblue"
                     Column{
                         spacing: scaleY(1)
                         Text{
@@ -107,11 +109,11 @@ Rectangle {
 
                     }
                     MouseArea{
-                        anchors.fill: device_command_list
+                        anchors.fill: parent
                         hoverEnabled: true
-                        onEntered: device_command_list.color = "white"
-                        onExited: device_command_list.color = style.lighthighlight
-
+                        onEntered: device_box.color = "white"
+                        onExited: device_box.color = "slateblue"
+                        onClicked: dcerouter.sendAvCommand(i_parentDevice, i_commandnum)
                     }
                 }
             }

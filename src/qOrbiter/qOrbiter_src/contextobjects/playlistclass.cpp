@@ -34,18 +34,18 @@ void PlaylistClass::appendRow(PlaylistItemClass *item)
 //the purpose of this function is to first clear the existing playlist data out, and add the new data in due to the way the dce router send the updated playlist to us
 void PlaylistClass::populate()
 {
-    /*
- emit modelAboutToBeReset();
+
+    emit modelAboutToBeReset();
     beginResetModel();
     resetInternalData();
-
-    endResetModel();
-emit modelReset();
-
-    */
     qDeleteAll(m_list.begin(), m_list.end());
     m_list.clear();
+
+    endResetModel();
+    emit modelReset();
     emit playlistReady();
+
+
 
 }
 
@@ -54,8 +54,8 @@ void PlaylistClass::appendRows(const QList<PlaylistItemClass *> &items)
     beginInsertRows(QModelIndex(), rowCount(), rowCount()+items.size()-1);
     foreach(PlaylistItemClass *item, items) {
 
-       QObject::connect(item, SIGNAL(dataChanged()), this, SLOT(handleItemChange()));
-            m_list.append(item);
+        QObject::connect(item, SIGNAL(dataChanged()), this, SLOT(handleItemChange()));
+        m_list.append(item);
     }
 
     endInsertRows();
@@ -78,7 +78,7 @@ void PlaylistClass::handleItemChange()
 {
     PlaylistItemClass* item = static_cast<PlaylistItemClass*>(sender());
     QModelIndex index = indexFromItem(item);
-  //  qDebug() << "Handling item change for:" << index;
+    //  qDebug() << "Handling item change for:" << index;
     if(index.isValid())
     {
         emit dataChanged(index, index, index.row());
@@ -170,13 +170,13 @@ void PlaylistClass::setCurrentIndex(int i)
 
 int PlaylistClass::getCurrentIndex()
 {
-     return currentIndex;
+    return currentIndex;
 }
 
 bool PlaylistClass::checkDupe(QString name, int position)
 {
 
-return false;
+    return false;
 }
 
 void PlaylistClass::beginResetModel()
@@ -189,5 +189,5 @@ void PlaylistClass::endResetModel()
 
 void PlaylistClass::resetInternalData()
 {
-      m_list.clear();
+    m_list.clear();
 }

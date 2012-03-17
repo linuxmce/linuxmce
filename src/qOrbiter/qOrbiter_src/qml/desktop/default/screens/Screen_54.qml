@@ -4,11 +4,15 @@ import "../js/ComponentLoader.js" as MyJs
 
 Rectangle {
     id: storedaudioremote
-
+    Text {
+        id: messages
+        text: dcerouter.mediaResponse
+        font.pixelSize: scaleY(4)
+        anchors.bottom: parent.bottom
+    }
 
     Connections{
-        target:dcenowplaying
-        onPlayListPositionChanged: nowplayingimage.source = "image://listprovider/updateobject/"+securityvideo.timestamp
+        target:dcenowplaying        
         onImageChanged:nowplayingimage.source = "image://listprovider/updateobject/"+securityvideo.timestamp
     }
 
@@ -28,8 +32,6 @@ Rectangle {
         style: Text.Sunken
 
     }
-
-    Component.onCompleted:dcerouter.requestMediaPlaylist()
 
     //main 'now playing rect containing all the other items
 

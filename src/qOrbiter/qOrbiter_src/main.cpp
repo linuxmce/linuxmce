@@ -342,7 +342,7 @@ int main(int argc, char* argv[])
 
         //operations
         QObject::connect(pqOrbiter, SIGNAL(newTCport(int)), w, SLOT(updateTimecode(int)));
-        QObject::connect(pqOrbiter, SIGNAL(addScreenParam(QString,int)), w->ScreenParameters, SLOT(addParam(QString, int)));
+        QObject::connect(pqOrbiter, SIGNAL(addScreenParam(QString,int)), w->ScreenParameters, SLOT(addParam(QString, int)), Qt::QueuedConnection);
         QObject::connect(w, SIGNAL(locationChanged(int,int)), pqOrbiter, SLOT(setLocation(int,int)));
         QObject::connect(w, SIGNAL(userChanged(int)), pqOrbiter, SLOT(setUser(int)));
         QObject::connect(w, SIGNAL(bindMediaRemote(bool)), pqOrbiter, SLOT(BindMediaRemote(bool)), Qt::DirectConnection);
@@ -359,8 +359,8 @@ int main(int argc, char* argv[])
         QObject::connect(mediaModel, SIGNAL(pagingCleared()), pqOrbiter,SLOT(populateAdditionalMedia()), Qt::QueuedConnection);
         QObject::connect(pqOrbiter, SIGNAL(clearPageGrid()), mediaModel, SLOT(clearForPaging()), Qt::DirectConnection);
         QObject::connect(mediaModel, SIGNAL(itemAdded(int)), pqOrbiter, SLOT(setCurrentRow(int)));
-        QObject::connect(w, SIGNAL(clearModel()), mediaModel,SLOT(clear()));
-        QObject::connect(pqOrbiter, SIGNAL(clearAndContinue(int)), mediaModel, SLOT(clearAndRequest(int)), Qt::QueuedConnection);
+        QObject::connect(w, SIGNAL(clearModel()), mediaModel,SLOT(clear()), Qt::QueuedConnection);
+        QObject::connect(pqOrbiter, SIGNAL(clearAndContinue(int)), mediaModel, SLOT(clearAndRequest(int)));
         QObject::connect(pqOrbiter,SIGNAL(addItem(gridItem*)), mediaModel, SLOT(appendRow(gridItem*)));
         QObject::connect(pqOrbiter,SIGNAL(gridModelSizeChange(int)), mediaModel, SLOT(setTotalCells(int)), Qt::QueuedConnection);
 
