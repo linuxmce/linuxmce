@@ -15,7 +15,6 @@ XorgConfLogging "Starting $0 $*"
 Modeline_640x480_60='"640x480" 25.18 640 656 752 800 480 490 492 525'
 
 . /usr/pluto/bin/pluto.func
-. /usr/pluto/bin/Config_Ops.sh
 . /usr/pluto/bin/Utils.sh
 . /usr/pluto/bin/LockUtils.sh
 . /usr/pluto/bin/X-Common.sh
@@ -319,8 +318,8 @@ if [[ -z "$SkipLock" ]]; then
 	WaitLock "Xconfigure" "Xconfigure" nolog # don't run two copies of Xconfigure simultaneously
 fi
 EnsureResolutionVariables
-
 InstallVideoDriver
+DisplayDriver=$VideoDriver
 if [[ -n "$ForceVESA" ]]; then
 	DisplayDriver=vesa
 fi

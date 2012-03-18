@@ -1,7 +1,6 @@
 #!/bin/bash
 
 . /usr/pluto/bin/Utils.sh
-. /usr/pluto/bin/Config_Ops.sh
 
 DEVICECATEGORY_Video_Cards=125
 DEVICECATEGORY_Media_Director=8
@@ -80,7 +79,7 @@ CleanupVideo()
 	# Add proprietary video card Device and drivers if needed
 	# TODO: allow user to express his/her will in using the open source driver if he/she so desires
 	echo "$(date -R) --> Auto-create video card device"
-	InstallVideoDriver
+        InstallVideoDriver
 	case "$VideoDriver" in
 		nv|nvidia)
 			if [[ -z "$nV_dev" ]]; then
