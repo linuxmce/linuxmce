@@ -36,7 +36,7 @@ Rectangle {
                 MouseArea{
                     anchors.fill:parent
                     z:5
-                    onClicked: regenOrbiter(35)
+                    onClicked: manager.regenOrbiter(35)
                 }
             }
 
@@ -65,7 +65,7 @@ Rectangle {
                 MouseArea{
                     anchors.fill: parent
                     z:10
-                    onClicked: quickReload()
+                    onClicked: manager.quickReload()
                 }
             }
 

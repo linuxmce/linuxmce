@@ -1,16 +1,18 @@
 /*
-     Copyright (C) 2004 Pluto, Inc., a Florida Corporation
+    This file is part of QOrbiter for use with the LinuxMCE project found at http://www.linuxmce.org
+   Langston Ball  golgoj4@gmail.com
+    QOrbiter is free software: you can redistribute it and/or modify
+   it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
 
-     www.plutohome.com
+    QOrbiter is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
 
-     Phone: +1 (877) 758-8648
-
-
-     This program is free software; you can redistribute it and/or modify it under the terms of the GNU General Public License.
-     This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty
-     of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
-
-     See the GNU General Public License for more details.
+    You should have received a copy of the GNU General Public License
+    along with QOrbiter.  If not, see <http://www.gnu.org/licenses/>.
 
      This main.cpp has be heavily modified from the DCE Generated main.cpp for Qt integration.
 
@@ -435,6 +437,7 @@ int main(int argc, char* argv[])
         QObject::connect(pqOrbiter, SIGNAL(playlistDone()), storedVideoPlaylist, SIGNAL(activeItemChanged()));
 
         QObject::connect(pqOrbiter,SIGNAL(routerReloading(QString)), w, SLOT(reloadHandler()) );
+        QObject::connect(w, SIGNAL(reloadRouter()), pqOrbiter, SLOT(quickReload()), Qt::QueuedConnection);
         QObject::connect(pqOrbiter, SIGNAL(routerDisconnect()), w, SLOT(reloadHandler()));
         QObject::connect(pqOrbiter, SIGNAL(closeOrbiter()), w, SLOT(closeOrbiter()));
 
@@ -453,10 +456,9 @@ int main(int argc, char* argv[])
                 pqOrbiter->RunLocalMode();
             else
             {
-                /*
-                if(pqOrbiter->m_RequestHandlerThread)
-                    pthread_join(pqOrbiter->m_RequestHandlerThread, NULL);  // This function will return when the device is shutting down
-                */
+
+
+
             }
         }
         else
@@ -465,6 +467,10 @@ int main(int argc, char* argv[])
         }
         a.exec();
 
+       /*
+ if(pqOrbiter->m_RequestHandlerThread)
+            pthread_join(pqOrbiter->m_RequestHandlerThread, NULL);  // This function will return when the device is shutting down
+    */
         if( pqOrbiter->m_bReload )
             bReload=true;
     }

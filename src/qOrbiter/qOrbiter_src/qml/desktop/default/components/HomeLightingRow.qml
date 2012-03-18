@@ -35,7 +35,8 @@ import QtQuick 1.0
 
                 MouseArea{
                     id: mousearea1
-                    onClicked: showfloorplan(2)
+                    anchors.fill: parent
+                    onClicked: dcerouter.ShowFloorPlan(2)
                 }
 
             }

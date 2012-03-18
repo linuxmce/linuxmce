@@ -374,7 +374,7 @@ signals:
     void splashReady();
     void raiseSplash();
     void showSetup();
-
+    void reloadRouter();
 
     void stillLoading(bool b);
     void executeCMD(int);

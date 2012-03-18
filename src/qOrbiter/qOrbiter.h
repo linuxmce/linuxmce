@@ -93,16 +93,12 @@ public:
 
     string *s_user;
     QString currentScreen;
-
-
     int internal_streamID;
     int internal_playback_speed;
 
     //media grid
     QStringList goBack;
-
     QString qs_seek;
-
     QString q_mediaType;           //1
     QString q_subType;             //2
     QString q_fileFormat;          //3
@@ -119,7 +115,6 @@ public:
     QString audioDefaultSort;
     QString photoDefaultSort;
     QString gamesDefaultSort;
-
 
     bool backwards;
     bool requestMore;
@@ -148,9 +143,7 @@ public:
     virtual void OnDisconnect();
     virtual void OnReload();
     virtual void OnReplaceHandler();
-
     virtual int DeviceIdInvalid();
-
 
     void getImage();
 
@@ -1304,7 +1297,7 @@ public slots:
      void SetSecurityMode(int pin, int mode);
      void setLocation(int location, int ea);
      void setUser(int user);
-     void QuickReload();
+     void quickReload();
      void powerOn(QString devicetype);
      void powerOff(QString deviceType);
      void getMediaTimeCode();

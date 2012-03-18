@@ -1781,11 +1781,10 @@ bool DCE::qOrbiter::initialize()
     if ( GetConfig() ==true && Connect(PK_DeviceTemplate_get()) == true )
     {
 
-        qDebug("Starting Manager");
+        emit statusMessage("Starting Manager");
         emit startManager(QString::number(m_dwPK_Device), QString::fromStdString(m_sHostName) );
-#ifdef ANDROID
+
         DCE::LoggerWrapper::GetInstance()->Write(LV_CRITICAL, "Orbiter Connected, requesting configuration for device %d", m_dwPK_Device);
-#endif
 
         char *oData;
         oData = NULL;
@@ -1796,15 +1795,13 @@ bool DCE::qOrbiter::initialize()
         string filePath = "/var/tmp/"+QString::number(m_dwPK_Device).toStdString()+"conf.xml";
         CMD_Request_File configFileRequest((long)m_dwPK_Device, (long)4 , (string)filePath, &oData, &iData_Size);
 
-        if (SendCommand(configFileRequest) == false)
+        if (SendCommand(configFileRequest))
         {
-            // setConnectedState(false);
-            // processError("Cant request config!");
-            return false;
+            emit statusMessage("Requesting remote configuration..");
         }
         else
         {
-            emit statusMessage("Requesting remote configuration..");
+            return false;
         }
 
         //setDceResponse("Idata recieved: " +QString::number(iData_Size)) ; // size of xml file
@@ -1814,7 +1811,6 @@ bool DCE::qOrbiter::initialize()
         {
             emit statusMessage("Invalid config for device: " + QString::number(m_dwPK_Device));
             emit statusMessage("Please run http://dcerouter/lmce-admin/qOrbiterGenerator.php?d=" + QString::number(m_dwPK_Device)) ;
-
             return false;
         }
         emit configReady(configData);
@@ -1841,7 +1837,7 @@ bool DCE::qOrbiter::initialize()
 
             LoggerWrapper::GetInstance()->Write(LV_CRITICAL, "Bad Device");
             emit statusMessage("Bad Device");
-            DeviceIdInvalid();
+            int errorType = DeviceIdInvalid();
             QApplication::processEvents(QEventLoop::AllEvents);
             return false;
         }
@@ -1858,6 +1854,7 @@ bool DCE::qOrbiter::initialize()
         {
 
             LoggerWrapper::GetInstance()->Write(LV_CRITICAL, "Connect() Failed");
+            Disconnect();
             emit statusMessage("QOrbiter Connect() Failed :(");
             QApplication::processEvents(QEventLoop::AllEvents);
             return false;
@@ -2700,18 +2697,20 @@ void qOrbiter::changedPlaylistPosition(QString pos)
 
 void DCE::qOrbiter::ShowFloorPlan(int floorplantype)
 {
-
+QString Screen = QString("Screen_").append(StringUtils::itos(floorplantype).c_str()).append(".qml");
     string sval = "";
     string id = "1";
 
     CMD_Get_Current_Floorplan getFloorPlan(m_dwPK_Device, iOrbiterPluginID, id, floorplantype , &sval);
     SendCommand(getFloorPlan);
-    QString Screen = QString("Screen_").append(StringUtils::itos(floorplantype).c_str()).append(".qml");
-    //qDebug() << "SVAL::" << sval.c_str();
-    //   CMD_Get_Floorplan_Layout getLayout(m_dwPK_Device, iMediaPluginID, &sval);
-    // SendCommand(getLayout);
-    //qDebug() << "SVAL::" << sval.c_str();
-    //gotoQScreen(Screen);
+
+    qDebug() << "SVAL::" << sval.c_str();
+/*
+       CMD_Get_Floorplan_Layout getLayout(m_dwPK_Device, iMediaPluginID, &sval);
+     SendCommand(getLayout);
+    qDebug() << "SVAL::" << sval.c_str();
+     */
+    emit gotoQml(Screen);
 }
 
 void DCE::qOrbiter::GetScreenSaverImages() // unused at this time
@@ -2965,7 +2964,6 @@ void DCE::qOrbiter::GetNowPlayingAttributes()
         }
     }
 
-
 }
 
 void DCE::qOrbiter::requestLiveTvPlaylist()
@@ -3086,11 +3084,7 @@ void DCE::qOrbiter::TuneToChannel(QString channel, QString chanid) //tunes to ch
         {
 
         }
-
-
-
     }
-
 }
 
 
@@ -3249,10 +3243,11 @@ void DCE::qOrbiter::setUser(int user)
     SendCommand(set_user);
 }
 
-void DCE::qOrbiter::QuickReload() //experimental function. checkConnection is going to be our watchdog at some point, now its just um. there to restart things.
+void DCE::qOrbiter::quickReload() //experimental function. checkConnection is going to be our watchdog at some point, now its just um. there to restart things.
 {
     Event_Impl event_Impl(DEVICEID_MESSAGESEND, 0, m_sHostName);
     event_Impl.m_pClientSocket->SendString( "RELOAD" );
+
 }
 
 void DCE::qOrbiter::powerOn(QString devicetype)
@@ -3816,18 +3811,12 @@ void DCE::qOrbiter::OnDisconnect()
 
 void DCE::qOrbiter::OnReload()
 {
-
     emit routerReloading("Router Reload");
-    DisconnectAndWait();
-
-
 }
 
 void qOrbiter::OnReplaceHandler()
 {
-    emit replaceDevice();
-    this->deinitialize();
-    emit closeOrbiter();
+
 }
 
 void DCE::qOrbiter::extraButtons(QString button)
@@ -3985,8 +3974,6 @@ int DCE::qOrbiter::DeviceIdInvalid()
     }
     emit deviceInvalid(temp_orbiter_list);
     return 0;
-
-
 }
 
 void DCE::qOrbiter::prepareFileList(int iPK_MediaType)
@@ -4132,7 +4119,7 @@ void DCE::qOrbiter::prepareFileList(int iPK_MediaType)
             if (cellsToRender == 0)
             {
                 //performing checks
-                delete pDataGridTable;
+
                 // exit ; //exit the loop because there is no grid? - eventually provide "no media" feedback
             }
             else
@@ -4198,10 +4185,7 @@ void DCE::qOrbiter::prepareFileList(int iPK_MediaType)
                             cellImg.load(":/icons/icon.png");
                         }
                         emit addItem(new gridItem(fk_file, cellTitle, filePath, index, cellImg));
-
                     }
-
-
                 }
             }
             delete pDataGridTable;
@@ -4253,24 +4237,19 @@ void DCE::qOrbiter::cleanupGrid()
 {
     emit statusMessage("Clearing Grid");
     //emit clearPageGrid();
-
 }
 
 bool qOrbiter::checkLoadingStatus()
 {
     if(i_currentMediaModelRow < i_mediaModelRows && requestMore == true )
     {
-
         //emit statusMessage("Count" + QString::number(i_currentMediaModelRow)+ "/" + QString::number(i_mediaModelRows));
         return true;
     }
     else
     {
         //emit statusMessage("Loading Ended");
-
-
         return false;
-
     }
 }
 
@@ -4282,27 +4261,13 @@ void qOrbiter::setupTimeCode()
 }
 
 void DCE::qOrbiter::sendAvCommand(int deviceto, int command)
-{   //0 64 1 190 41 ""
-    /*
-    //CMD_Send_Command_To_Child av(m_dwPK_Device, deviceto, "", command, "");
-
-    //SendCommand(av);
-    QString cmd_text = m_dwPK_Device+","+QString::fromStdString(m_sIPAddress)+"," +QString::number(command)+",""";
-            string msg = cmd_text.toStdString();
-
-
-    string m_Response = "";
-    if(SendCommand(m, &m_Response))
-    {
-        emit mediaMessage(QString::fromStdString(m_Response));
-    }
-    else
-    {
-        emit mediaMessage("Couldnt send command!");
-    }
-    */
-    QString commandString = "1, " + QString::number(command);
-
+{
+    string cmd_resp="";
+    string cmd_string;
+    QString commandString =  QString::number(m_dwPK_Device) + " " + QString::number(deviceto) + " " + "1" + " " + QString::number(command);
+    cmd_string = commandString.toStdString();
+    DCE::Message avMessage(cmd_string);
+    m_pEvent->SendMessage(&avMessage);  
 }
 
 

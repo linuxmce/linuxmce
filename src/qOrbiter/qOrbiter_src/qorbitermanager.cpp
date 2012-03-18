@@ -922,7 +922,7 @@ bool qorbiterManager::loadSkins(QUrl base)
 
 void qorbiterManager::quickReload()
 {
-
+    emit reloadRouter();
     // pqOrbiter->QuickReload();
     //bool connected = pqOrbiter->m_bRouterReloading;
 }
@@ -1212,7 +1212,7 @@ void qorbiterManager::pauseMedia()
 
 void qorbiterManager::showfloorplan(int fptype)
 {
-    //  pqOrbiter->ShowFloorPlan(fptype);
+     //pqOrbiter->ShowFloorPlan(fptype);
 }
 
 
