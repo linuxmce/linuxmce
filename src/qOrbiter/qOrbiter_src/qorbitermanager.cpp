@@ -55,7 +55,6 @@ qorbiterManager::qorbiterManager(QDeclarativeView *view, QObject *parent) :
 
     if (readLocalConfig())
     {
-
         emit localConfigReady( true);
         QApplication::processEvents(QEventLoop::AllEvents);
     }
@@ -70,16 +69,15 @@ qorbiterManager::qorbiterManager(QDeclarativeView *view, QObject *parent) :
     qorbiterUIwin->rootContext()->setContextProperty("deviceid", QString::number((iPK_Device)) );
     qorbiterUIwin->rootContext()->setContextProperty("extip", qs_ext_routerip );
     qorbiterUIwin->rootContext()->setContextProperty("manager", this); //providing a direct object for qml to call c++ functions of this class
-    qorbiterUIwin->rootContext()->setContextProperty("dcemessage", dceResponse); //file grids current media type
-
+    qorbiterUIwin->rootContext()->setContextProperty("dcemessage", dceResponse);
 
     appHeight = qorbiterUIwin->height() ;
     appWidth = qorbiterUIwin->width() ;
 
     qorbiterUIwin->setResizeMode(QDeclarativeView::SizeRootObjectToView);
 
-    qorbiterUIwin->rootContext()->setContextProperty("appH", appHeight); //file grids current media type
-    qorbiterUIwin->rootContext()->setContextProperty("appW", appWidth); //file grids current media type
+    qorbiterUIwin->rootContext()->setContextProperty("appH", appHeight);
+    qorbiterUIwin->rootContext()->setContextProperty("appW", appWidth);
 
     item = qorbiterUIwin->rootObject();
 
@@ -87,7 +85,6 @@ qorbiterManager::qorbiterManager(QDeclarativeView *view, QObject *parent) :
     QObject::connect(this, SIGNAL(orbiterConfigReady(bool)), this, SLOT(showUI(bool)));
 
     ScreenSaver = new ScreenSaverClass();
-
 
 #ifdef for_desktop
     buildType = "/qml/desktop";
@@ -108,12 +105,10 @@ qorbiterManager::qorbiterManager(QDeclarativeView *view, QObject *parent) :
     if (qorbiterUIwin->width() > 480 && qorbiterUIwin-> height() > 854 || qorbiterUIwin->height() > 480 && qorbiterUIwin-> width() > 854 )
     {
         buildType = "/qml/android/tablet";
-
     }
     else
     {
         buildType = "/qml/android/phone";
-
     }
 
     qrcPath = ":android/Splash.qml";
@@ -122,12 +117,10 @@ qorbiterManager::qorbiterManager(QDeclarativeView *view, QObject *parent) :
     if (qorbiterUIwin->width() > 480 && qorbiterUIwin-> height() > 854 || qorbiterUIwin->height() > 480 && qorbiterUIwin-> width() > 854 )
     {
         buildType = "/qml/android/tablet";
-
     }
     else
     {
         buildType = "/qml/android/phone";
-
     }
 
     qrcPath = ":android/Splash.qml";
@@ -153,10 +146,7 @@ qorbiterManager::qorbiterManager(QDeclarativeView *view, QObject *parent) :
     photoDefaultSort = "13";
     gamesDefaultSort = "49";
 
-    //goBack << ("|||1,2|0|13|0|2|");
     backwards = false;
-
-    //avcode grid button list
 
     //file details object and imageprovider setup
     filedetailsclass = new FileDetailsClass();
@@ -169,26 +159,32 @@ qorbiterManager::qorbiterManager(QDeclarativeView *view, QObject *parent) :
     //screen parameters class that could be extended as needed to fetch other data
     ScreenParameters = new ScreenParamsClass;
     qorbiterUIwin->rootContext()->setContextProperty("screenparams", ScreenParameters);
-    // timecodeThread = new QThread();
-    timeCodeSocket = new QTcpSocket();
-    // timeCodeSocket->moveToThread(timecodeThread);
-    // timecodeThread->start();
-    QApplication::processEvents(QEventLoop::AllEvents);
 
+    //floorplan model initialization for slots in main.cpp
+    floorplans = new FloorPlanModel( new FloorPlanItem , this);
+
+    /*needs to go to main.cpp---------------------|
+    QThread *timecodeThread = new QThread();
+
+    timeCodeSocket->moveToThread(timecodeThread);
+    timecodeThread->start();
+    -------------------------------------------|
+    */
+    timeCodeSocket = new QTcpSocket();
+    QApplication::processEvents(QEventLoop::AllEvents);
 }
 
 
 void qorbiterManager::gotoQScreen(QString s)
 {
-
     if(s == "Screen_1.qml")
     {
-        // qDebug() << "Setting load to false";
+
         bool t = false;
         emit keepLoading(t);
         emit clearModel();
         emit resetFilter();
-       // emit bindMediaRemote(false);
+        // emit bindMediaRemote(false);
     }
 
     //send the qmlview a request to go to a screen, needs error handling
@@ -205,33 +201,23 @@ void qorbiterManager::gotoQScreen(QString s)
     } else {
         setDceResponse("screenchange() FAILED");
     }
-qDebug() << ScreenParameters->getParam(224);
-
 }
 
-//this block sets up the connection to linuxmce
+//this function begins the initialization of the 'manager' object
 bool qorbiterManager::initializeManager(string sRouterIP, int device_id)
 {
-
     setDceResponse("Starting Manager");
-
-    //QObject::connect(pqOrbiter, SIGNAL(gotoQml(QString)), this, SLOT(gotoQScreen(QString)));
-
     QObject::connect(this,SIGNAL(screenChange(QString)), this, SLOT(gotoQScreen(QString)));
-    //QObject::connect(this,SIGNAL(executeCMD(int)), pqOrbiter, SLOT(executeCommandGroup(int)), Qt::QueuedConnection);
-
 
 #ifdef ANDROID
     if (qorbiterUIwin->width() > 480 && qorbiterUIwin-> height() > 854 || qorbiterUIwin->height() > 480 && qorbiterUIwin-> width() > 854 )
     {
-
         remoteDirectoryPath = "http://"+QString::fromStdString(sRouterIP)+"/lmce-admin/skins/android/tablet";
         setDceResponse("Guessing Android Tablet, Loading Tablet Skins");
         QApplication::processEvents(QEventLoop::AllEvents);
     }
     else
     {
-
         remoteDirectoryPath = "http://"+QString::fromStdString(sRouterIP)+"/lmce-admin/skins/android/phone";
         setDceResponse("Guessing Android Phone, Loading Phone Skins");
         QApplication::processEvents(QEventLoop::AllEvents);
@@ -261,11 +247,8 @@ bool qorbiterManager::initializeManager(string sRouterIP, int device_id)
 #else
     remoteDirectoryPath = "http://"+QString::fromStdString(sRouterIP)+"/lmce-admin/skins"+qmlPath;
 #endif
-
     QString qmlPath = adjustPath(QApplication::applicationDirPath().remove("/bin"));
     QString localDir = qmlPath.append(buildType);
-
-    //loadSkins(QUrl(localDir));
 #ifdef ANDROID
     if( !loadSkins(QUrl(remoteDirectoryPath)))
     {   emit skinIndexReady(true);
@@ -287,26 +270,22 @@ bool qorbiterManager::initializeManager(string sRouterIP, int device_id)
     if( !loadSkins(QUrl(localDir)))
     {   emit skinIndexReady(false);
         return false;
-
     }
 #endif
-
-
 }
 
+//this functions purpose is to change the UI to the new skin pointed to. It will evolve to encompass orbiter regen to some extent
 void qorbiterManager::refreshUI(QUrl url)
 {
     qorbiterUIwin->rootContext()->setBaseUrl(skin->entryUrl());
     qorbiterUIwin->setSource(skin->entryUrl());
     qorbiterUIwin->setResizeMode(QDeclarativeView::SizeRootObjectToView);
-
 }
 
 
 // get conf method that reads config file
 void qorbiterManager::processConfig(QByteArray config)
 {
-
     iPK_Device_DatagridPlugIn =  long(6);
     iPK_Device_OrbiterPlugin = long(9);
     iPK_Device_GeneralInfoPlugin = long(4);
@@ -335,7 +314,6 @@ void qorbiterManager::processConfig(QByteArray config)
     if (!writeConfig())
     {
         setDceResponse("Couldnt save config!");
-
     }
 
     QDomElement root = configData.documentElement();        //represent configuration in memeory
@@ -346,36 +324,32 @@ void qorbiterManager::processConfig(QByteArray config)
     iFK_Room = defaults.attribute("DefaultRoom").toInt();
     iea_area = defaults.attribute("DefaultEA").toInt();
     iPK_User = defaults.attribute("PK_User").toInt();
-
     setDceResponse("Defaults Set");
 
     //-floorplans-----------------------------------------------------------------------------------------------------
     QDomElement floorplanXml = root.firstChildElement("Floorplans");
-    floorplans = new FloorPlanModel( new FloorPlanItem , this);
+
     QDomNodeList floorplanList = floorplanXml.childNodes();
     for(int index = 0; index < floorplanList.count(); index++)
     {
         QString m_installation= floorplanList.at(index).attributes().namedItem("Installation").nodeValue();
-        QString m_iconpath= floorplanList.at(index).attributes().namedItem("Icon").nodeValue();
+        //QString m_iconpath= floorplanList.at(index).attributes().namedItem("Icon").nodeValue();
+
         QString m_description= floorplanList.at(index).attributes().namedItem("Description").nodeValue();
         int m_page= floorplanList.at(index).attributes().namedItem("Page").nodeValue().toInt();
-
-
+        QString m_imgPath = "/usr/pluto/orbiter/floorplans/inst"+m_installation+"/"+QString::number(m_page)+".png";
         QImage m_image;// pqOrbiter->getfileForDG("/usr/pluto/orbiter/floorplans/inst"+m_installation.toStdString()+"/"+StringUtils::itos(m_page)+".png");
         m_image.load(":/icons/icon.png");
         QImage icon = m_image.scaledToHeight(100);
-        floorplans->appendRow(new FloorPlanItem(m_installation,m_description, m_page, m_iconpath, m_image, icon,  userList));
+        floorplans->appendRow(new FloorPlanItem(m_installation,m_description, m_page, m_imgPath, userList));
 
         if (m_page == 1)
         {
             QString safe = m_installation;
             floorplans->setCurrentPage(safe.append("-").append(QString::number(m_page)));
         }
-
     }
-
-
-    emit loadingMessage("floorplans");
+    emit loadingMessage("floorplans complete");
     QApplication::processEvents(QEventLoop::AllEvents);
 
     //-USERS-----------------------------------------------------------------------------------------------------
@@ -400,12 +374,10 @@ void qorbiterManager::processConfig(QByteArray config)
     //-----ROOMS-AND-ENTERTAIN-AREAS-------------------------------------------------------------------
     QDomElement roomXml = root.firstChildElement("Rooms");  //rooms
     m_lRooms = new LocationModel(new LocationItem, this);   //roomlistmodel
-
     QMap <QString, int> RroomMapping;                       //map for later reference
     QDomNodeList roomListXml = roomXml.childNodes();
     for(int index = 0; index < roomListXml.count(); index++)
     {
-
         QString m_name = roomListXml.at(index).attributes().namedItem("Description").nodeValue();
         int m_val = roomListXml.at(index).attributes().namedItem("PK_Room").nodeValue().toInt();
         int m_iEA = roomListXml.at(index).attributes().namedItem("PK_EntertainArea").nodeValue().toInt();
@@ -430,9 +402,7 @@ void qorbiterManager::processConfig(QByteArray config)
             imagePath = QUrl("../img/lmcesplash.png");
             break;
         }
-
         RroomMapping.insert(m_name, m_val);
-
         m_lRooms->appendRow(new LocationItem(m_name, m_val, m_title, m_iEA, m_iType, imagePath, m_lRooms));
     }
     m_lRooms->sdefault_Ea = defaults.attribute("DefaultLocation");
@@ -539,7 +509,6 @@ void qorbiterManager::processConfig(QByteArray config)
             QString m_command = tScenarioRoom.at(innerIndex).attributes().namedItem("eaDescription").nodeValue();
             QString m_goto = tScenarioRoom.at(innerIndex).attributes().namedItem("FK_CommandGroup").nodeValue();
             QString imgName = tScenarioRoom.at(innerIndex).attributes().namedItem("Description").nodeValue();
-
             QImage m_image = QImage("Qrc:/icons/"+imgName);
             telecomModelHolder->appendRow(new TelecomScenarioItem(m_name,m_label, m_param, m_command, m_goto, m_image, telecomModelHolder));
         }
@@ -698,11 +667,11 @@ void qorbiterManager::swapSkins(QString incSkin)
 {    
 #ifdef WIN32
     incSkin = "default";
-        #endif
+#endif
 
     setDceResponse("Setting Skin to:" + incSkin);
     skin = tskinModel->find(incSkin);
-   setDceResponse("Got it from the model : " + skin->baseUrl().toString());
+    setDceResponse("Got it from the model : " + skin->baseUrl().toString());
     //load the actual skin entry point
     currentSkin = incSkin;
     qorbiterUIwin->engine()->rootContext()->setContextProperty("style", skin->styleView());
@@ -971,7 +940,7 @@ bool qorbiterManager::readLocalConfig()
 #elif ANDROID
     QString xmlPath = "/mnt/sdcard/LinuxMCE/config.xml";
 #elif WIN32
-     QString xmlPath = QString::fromStdString(QApplication::applicationDirPath().toStdString())+"/config.xml";
+    QString xmlPath = QString::fromStdString(QApplication::applicationDirPath().toStdString())+"/config.xml";
 #else
     QString xmlPath = QString::fromStdString(QApplication::applicationDirPath().toStdString())+"/config.xml";
 #endif
@@ -1212,7 +1181,7 @@ void qorbiterManager::pauseMedia()
 
 void qorbiterManager::showfloorplan(int fptype)
 {
-     //pqOrbiter->ShowFloorPlan(fptype);
+    //pqOrbiter->ShowFloorPlan(fptype);
 }
 
 
@@ -1262,7 +1231,7 @@ void qorbiterManager::saveScreenShot(QString attribute)
     QBuffer ba(&bytes);
     ba.open(QIODevice::WriteOnly);
     mediaScreenShot.save(&ba, "JPG");
-    ba.close();  
+    ba.close();
     emit saveMediaScreenShot(attribute, bytes);
     cleanupScreenie();
 }
@@ -1296,7 +1265,7 @@ void qorbiterManager::getLiveTVPlaylist()
 
 void qorbiterManager::getStoredPlaylist()
 {
- emit bindMediaRemote(true);
+    emit bindMediaRemote(true);
 
 
 }
@@ -1352,7 +1321,7 @@ void qorbiterManager::updateTimecode(int port)
 
     if(!timeCodeSocket->isOpen())
     {
-      // qDebug() <<"opening connection to " << port;
+        // qDebug() <<"opening connection to " << port;
 
         timeCodeSocket->connectToHost(qs_routerip, port, QFile::ReadOnly );
         if ( timeCodeSocket->isValid() )
@@ -1362,7 +1331,7 @@ void qorbiterManager::updateTimecode(int port)
         }
         else
         {   setDceResponse("couldnt start timecode");
-           //  qDebug() << timeCodeSocket->errorString();
+            //  qDebug() << timeCodeSocket->errorString();
         }
     }
 
@@ -1504,7 +1473,7 @@ void qorbiterManager::setDceResponse(QString response)
     dceResponse = response;
     emit loadingMessage(dceResponse);
     emit dceResponseChanged();
-   // qDebug() << dceResponse;
+    // qDebug() << dceResponse;
 
 }
 

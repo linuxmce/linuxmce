@@ -1117,7 +1117,8 @@ signals:
 
     //connections
 
-
+    //floorplans
+    void floorPlanImageData(const uchar* ,int);
 
     //media
     void screenShotReady(QByteArray data);
@@ -1237,6 +1238,9 @@ public slots:
 //operations
      void setMediaResponse(QString r) {mediaResponse = r; emit mediaResponseChanged();}
      QString getMediaResponse() {return mediaResponse;}
+
+     //floorplans
+     void getFloorPlanImage(QString fp_path);
 
     //connections
     void connectionError();

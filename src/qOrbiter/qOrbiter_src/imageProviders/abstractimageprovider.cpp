@@ -12,29 +12,22 @@ AbstractImageProvider::AbstractImageProvider(qorbiterManager *manager):QDeclarat
 QImage AbstractImageProvider::floorplanProvider()
 {
 
-    key= managerreference->floorplans->getPageImage(managerreference->floorplans->currentPage);
-
+    key= managerreference->floorplans->getFloorPlanImage();
 
     if (key.isNull())
     {
         key.load(":/icons/playlist.png");
-
     }
 
     //aspect checking
     if(key.height() > key.width())
     {
-
         managerreference->nowPlayingButton->setImageAspect("poster");
-
     }
     else
     {
-
         managerreference->nowPlayingButton->setImageAspect("wide");
-
     }
-
     return key;
 }
 

@@ -2697,7 +2697,7 @@ void qOrbiter::changedPlaylistPosition(QString pos)
 
 void DCE::qOrbiter::ShowFloorPlan(int floorplantype)
 {
-QString Screen = QString("Screen_").append(StringUtils::itos(floorplantype).c_str()).append(".qml");
+    QString Screen = QString("Screen_").append(StringUtils::itos(floorplantype).c_str()).append(".qml");
     string sval = "";
     string id = "1";
 
@@ -2705,7 +2705,7 @@ QString Screen = QString("Screen_").append(StringUtils::itos(floorplantype).c_st
     SendCommand(getFloorPlan);
 
     qDebug() << "SVAL::" << sval.c_str();
-/*
+    /*
        CMD_Get_Floorplan_Layout getLayout(m_dwPK_Device, iMediaPluginID, &sval);
      SendCommand(getLayout);
     qDebug() << "SVAL::" << sval.c_str();
@@ -4260,6 +4260,21 @@ void qOrbiter::setupTimeCode()
 
 }
 
+void qOrbiter::getFloorPlanImage(QString fp_path)
+{
+    char *picData = NULL;
+    int picData_Size;
+    picData_Size = 0;
+
+    CMD_Request_File reqFile((long)m_dwPK_Device, (long)4 , fp_path.toStdString(), &picData, &picData_Size);
+    string p_sResponse="";
+    if(SendCommand(reqFile, &p_sResponse) && p_sResponse=="OK")
+    {
+         const uchar *data = (uchar*)picData;
+        emit floorPlanImageData(data, picData_Size);
+    }
+}
+
 void DCE::qOrbiter::sendAvCommand(int deviceto, int command)
 {
     string cmd_resp="";
@@ -4267,7 +4282,7 @@ void DCE::qOrbiter::sendAvCommand(int deviceto, int command)
     QString commandString =  QString::number(m_dwPK_Device) + " " + QString::number(deviceto) + " " + "1" + " " + QString::number(command);
     cmd_string = commandString.toStdString();
     DCE::Message avMessage(cmd_string);
-    m_pEvent->SendMessage(&avMessage);  
+    m_pEvent->SendMessage(&avMessage);
 }
 
 

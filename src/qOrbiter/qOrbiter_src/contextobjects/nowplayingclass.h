@@ -226,9 +226,7 @@ public slots:
 
     void setImageData( const uchar *data, int iData_size) {
 
-#ifndef ANDROID
         QImage t;
-
         if( t.loadFromData(data, iData_size))
         {
             setImage(t);
@@ -238,32 +236,6 @@ public slots:
         {
             emit statusMessage("Update Object Image Conversion Failed:");
         }
-#else
-        qDebug() << QImageReader::supportedImageFormats ();
-        QFile temp_hack_file;
-        temp_hack_file.setFileName("/mnt/sdcard/linuxmce/np.jpg");
-        qDebug("Set Filename");
-        if(temp_hack_file.open(QFile::ReadWrite))
-        {
-            qDebug("Opened temp file");
-            if( temp_hack_file.write(QByteArray::fromRawData((char*)data, iData_size)) )
-            {
-                qDebug("tempfile data write successfull");
-
-                temp_hack_file.close();
-                qDebug() << temp_hack_file.size();
-
-                QImage t;
-                if(t.load("/mnt/sdcard/Linuxmce/np.jpg")){
-                    qDebug("Loaded local image");
-                 }
-               setImage(t);
-            }
-            temp_hack_file.remove();
-        }
-
-#endif
-
     }
     void setImage(QImage img) {fileImage = img; emit imageChanged();}
     QImage getImage() {return fileImage;}

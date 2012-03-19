@@ -284,6 +284,7 @@ void ListModel::attributeSort()
 
 void ListModel::clearAndRequest(int type)
 {
+    clearing = true;
     gridType = type;      
     QApplication::processEvents(QEventLoop::AllEvents);
     emit modelAboutToBeReset();
@@ -292,6 +293,7 @@ void ListModel::clearAndRequest(int type)
     setProgress(0.0);   
     endResetModel();
     emit modelReset();
+    clearing = false;
     emit ready(gridType);
 
 }

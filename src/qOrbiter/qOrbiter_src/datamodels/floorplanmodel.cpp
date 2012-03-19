@@ -5,6 +5,7 @@ FloorPlanModel::FloorPlanModel(FloorPlanItem* prototype, QObject *parent) :
 {
     setRoleNames(m_prototype->roleNames());
      qRegisterMetaType<QModelIndex>("QModelIndex");
+
 }
 
 int FloorPlanModel::rowCount(const QModelIndex &parent) const
@@ -157,16 +158,42 @@ QImage FloorPlanModel::getPageImage(QString &id)
     }
 
      QImage fpImage= myItem->floorplanImage();    
-    return fpImage;
+     return fpImage;
+}
+
+QString FloorPlanModel::getCurrentImagePath()
+{
+    FloorPlanItem *myItem = find(getCurrentPage());
+    QString returnVal="";
+    if (!myItem)
+    {
+       return returnVal;
+    }
+     return myItem->imgPath();
 }
 
 
 
 void FloorPlanModel::setCurrentPage(QString currentPageId)
 {
- currentPage = currentPageId;
- emit pageChanged();
 
+ currentPage = currentPageId;
+ QString s = getCurrentImagePath();
+ emit pageChanged(s);
+}
+
+void FloorPlanModel::setImageData(const uchar *data, int iData_size)
+{
+        QImage t;
+        if( t.loadFromData(data, iData_size))
+        {
+            setImage(t);
+            emit floorPlanStatus("Converted Image");
+        }
+        else
+        {
+            emit floorPlanStatus("Update Object Image Conversion Failed:");
+        }
 }
 
 /*

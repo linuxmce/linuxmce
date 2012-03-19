@@ -146,7 +146,7 @@ int main(int argc, char* argv[])
 #ifdef for_harmattan
     QApplication::setGraphicsSystem("meego");
 #elif for_desktop
-    QApplication::setGraphicsSystem("opengl");
+    QApplication::setGraphicsSystem("raster");
 #elif WIN32
 
 #elif for_android
@@ -357,12 +357,16 @@ int main(int argc, char* argv[])
         //navigation
         QObject::connect(pqOrbiter,SIGNAL(gotoQml(QString)), w, SLOT(gotoQScreen(QString)));
 
+        //floorplans
+        QObject::connect(pqOrbiter, SIGNAL(floorPlanImageData(const uchar*,int)), w->floorplans, SLOT(setImageData(const uchar*,int)), Qt::QueuedConnection);
+        QObject::connect(w->floorplans, SIGNAL(pageChanged(QString)), pqOrbiter, SLOT(getFloorPlanImage(QString)), Qt::QueuedConnection);
+
         //mediagrid
         QObject::connect(mediaModel, SIGNAL(pagingCleared()), pqOrbiter,SLOT(populateAdditionalMedia()), Qt::QueuedConnection);
-        QObject::connect(pqOrbiter, SIGNAL(clearPageGrid()), mediaModel, SLOT(clearForPaging()), Qt::DirectConnection);
+        QObject::connect(pqOrbiter, SIGNAL(clearPageGrid()), mediaModel, SLOT(clearForPaging()), Qt::QueuedConnection);
         QObject::connect(mediaModel, SIGNAL(itemAdded(int)), pqOrbiter, SLOT(setCurrentRow(int)));
         QObject::connect(w, SIGNAL(clearModel()), mediaModel,SLOT(clear()), Qt::QueuedConnection);
-        QObject::connect(pqOrbiter, SIGNAL(clearAndContinue(int)), mediaModel, SLOT(clearAndRequest(int)));
+        QObject::connect(pqOrbiter, SIGNAL(clearAndContinue(int)), mediaModel, SLOT(clearAndRequest(int)), Qt::QueuedConnection);
         QObject::connect(pqOrbiter,SIGNAL(addItem(gridItem*)), mediaModel, SLOT(appendRow(gridItem*)));
         QObject::connect(pqOrbiter,SIGNAL(gridModelSizeChange(int)), mediaModel, SLOT(setTotalCells(int)), Qt::QueuedConnection);
 
