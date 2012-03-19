@@ -64,6 +64,7 @@ qOrbiter::qOrbiter( int DeviceID, string ServerAddress,bool bConnectEventHandler
     gamesDefaultSort = "49";
     backwards = false;
     i_current_mediaType = 0;
+    i_current_floorplanType = 0;
     media_totalPages=0;
     media_currentPage=0;
     media_pos=0;
@@ -2697,20 +2698,19 @@ void qOrbiter::changedPlaylistPosition(QString pos)
 
 void DCE::qOrbiter::ShowFloorPlan(int floorplantype)
 {
-    QString Screen = QString("Screen_").append(StringUtils::itos(floorplantype).c_str()).append(".qml");
-    string sval = "";
-    string id = "1";
+    i_current_floorplanType = floorplantype;
+    QString Screen = QString("Screen_").append(StringUtils::itos(i_current_floorplanType).c_str()).append(".qml");
+    emit gotoQml(Screen);
+}
 
-    CMD_Get_Current_Floorplan getFloorPlan(m_dwPK_Device, iOrbiterPluginID, id, floorplantype , &sval);
+void qOrbiter::updateFloorPlan(QString p)
+{
+    string sval = "";
+    p.remove(0, p.length() - 1);
+    CMD_Get_Current_Floorplan getFloorPlan(m_dwPK_Device, iOrbiterPluginID, p.toStdString(), i_current_floorplanType , &sval);
     SendCommand(getFloorPlan);
 
-    qDebug() << "SVAL::" << sval.c_str();
-    /*
-       CMD_Get_Floorplan_Layout getLayout(m_dwPK_Device, iMediaPluginID, &sval);
-     SendCommand(getLayout);
-    qDebug() << "SVAL::" << sval.c_str();
-     */
-    emit gotoQml(Screen);
+    qDebug() << "This Page Floorplan Data for Page " <<  p << ", Floorplan device type " << i_current_floorplanType << "::" <<sval.c_str();
 }
 
 void DCE::qOrbiter::GetScreenSaverImages() // unused at this time
@@ -4270,7 +4270,7 @@ void qOrbiter::getFloorPlanImage(QString fp_path)
     string p_sResponse="";
     if(SendCommand(reqFile, &p_sResponse) && p_sResponse=="OK")
     {
-         const uchar *data = (uchar*)picData;
+        const uchar *data = (uchar*)picData;
         emit floorPlanImageData(data, picData_Size);
     }
 }

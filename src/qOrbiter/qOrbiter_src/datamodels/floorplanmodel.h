@@ -47,6 +47,7 @@ public:
     FloorPlanItem* currentRow();
     QString currentPage;
     QImage currentImage;
+    int currentFloorPlanType;
 
     // QModelIndex index(int row, int column, const QModelIndex &parent) const ;
     //  QModelIndex parent(const QModelIndex &child) const;
@@ -56,7 +57,7 @@ signals:
     void pageChanged(QString s);
     void floorPlanImageChanged();
     void floorPlanStatus(QString s);
-
+    void requestNewFloorPlanData(QString p);
 public slots:
     void clear();
     void handleItemChange();
@@ -71,7 +72,7 @@ public slots:
     QString getCurrentPage() {return currentPage;}
 
     void setImageData(const uchar *data, int iData_size);
-    void setImage(QImage fp) { currentImage = fp; emit floorPlanImageChanged();}
+    void setImage(QImage fp) { currentImage = fp; emit floorPlanImageChanged(); emit requestNewFloorPlanData(currentPage);}
 
     QImage getFloorPlanImage () {return currentImage;}
 

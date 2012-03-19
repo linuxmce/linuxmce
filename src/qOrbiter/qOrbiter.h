@@ -82,6 +82,7 @@ public:
     int i_room;
     int i_user;
     int i_current_mediaType;
+    int i_current_floorplanType;
     QImage returnImage;
     QByteArray TconfigData;
     QTcpSocket timeCodeSocket;
@@ -1285,6 +1286,7 @@ public slots:
     void showTimeCode();
     void changedPlaylistPosition(QString pos);
     void ShowFloorPlan(int floorplantype);
+    void updateFloorPlan(QString p);
     void GetScreenSaverImages();
     void BindMediaRemote(bool onoff);
     void jumpToPlaylistPosition(int pos);

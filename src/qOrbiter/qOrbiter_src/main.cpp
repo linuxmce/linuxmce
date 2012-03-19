@@ -360,7 +360,7 @@ int main(int argc, char* argv[])
         //floorplans
         QObject::connect(pqOrbiter, SIGNAL(floorPlanImageData(const uchar*,int)), w->floorplans, SLOT(setImageData(const uchar*,int)), Qt::QueuedConnection);
         QObject::connect(w->floorplans, SIGNAL(pageChanged(QString)), pqOrbiter, SLOT(getFloorPlanImage(QString)), Qt::QueuedConnection);
-
+        QObject::connect(w->floorplans, SIGNAL(requestNewFloorPlanData(QString)), pqOrbiter, SLOT(updateFloorPlan(QString)), Qt::QueuedConnection);
         //mediagrid
         QObject::connect(mediaModel, SIGNAL(pagingCleared()), pqOrbiter,SLOT(populateAdditionalMedia()), Qt::QueuedConnection);
         QObject::connect(pqOrbiter, SIGNAL(clearPageGrid()), mediaModel, SLOT(clearForPaging()), Qt::QueuedConnection);
