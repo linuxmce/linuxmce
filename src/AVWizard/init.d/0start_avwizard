@@ -12,7 +12,7 @@
 . /usr/pluto/bin/Utils.sh
 
 if [ "$1" == "status" ] ; then
-	if [ pidof AVWizard_Run.sh &> /dev/null ] ; then
+	if [ `pidof AVWizard_Run.sh` ] ; then
 		echo "* AVWizard is running"
 	else
 		echo "* AVWizard is not running"
