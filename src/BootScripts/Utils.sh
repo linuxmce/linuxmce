@@ -501,16 +501,6 @@ ServiceBkg="$3"
 		return $err
 }
 
-Purge_Fglrx () {
-        apt-get -y remove --purge xorg-driver-fglrx fglrx* --force-yes
-        apt-get -y install --reinstall libgl1-mesa-glx libgl1-mesa-dri fglrx-modaliases --force-yes
-        dpkg-reconfigure xserver-xorg
-        apt-get -y install --reinstall xserver-xorg-core --force-yes
-	mv /var/log/Xorg.0.log /var/log/Xorg.0.log.fglrx-purge
-	rm /etc/X11/xorg.conf
-        reboot
-}
-
 GetVideoDriver () {
         vga_pci=$(lspci -v | grep -i 'VGA')
         prop_driver="vesa"
@@ -545,13 +535,18 @@ GetVideoDriver () {
 }
 
 InstallVideoDriver () {
-GetVideoDriver
+	GetVideoDriver
 	case "$prop_driver" in
         	nvidia)		if ! PackageIsInstalled nvidia-glx && ! PackageIsInstalled nvidia-glx-new && ! PackageIsInstalled nvidia-glx-71 && ! PackageIsInstalled nvidia-glx-96 && ! PackageIsInstalled nvidia-glx-173 && ! PackageIsInstalled nvidia-glx-180 && ! PackageIsInstalled nvidia-glx-190 && ! PackageIsInstalled nvidia-glx-195 && ! PackageIsInstalled nvidia-glx-260 && ! PackageIsInstalled nvidia-glx-185 && ! PackageIsInstalled nvidia-current ; then 
 					apt-get -yf install pluto-nvidia-video-drivers
 					VerifyExitCode "Install Pluto nVidia Driver"
-					StartService "Installing nVidia driver - this may take a few minutes" ". /usr/pluto/bin/nvidia-install.sh"
-					installCorrectNvidiaDriver
+					nv_pid=$(pidof nvidia-install.sh)
+						if [[ -n $nv_pid ]] ; then
+							StatusMessage "Installing nVidia driver this may take a few minutes"
+							installCorrectNvidiaDriver
+						else StartService "Installing nVidia driver this may take a few minutes" ". /usr/pluto/bin/nvidia-install.sh"
+							installCorrectNvidiaDriver
+						fi
 				fi ;;
 		radeon)         if ! PackageIsInstalled xserver-xorg-video-radeon; then 
 					apt-get -yf install xserver-xorg-video-radeon
@@ -604,33 +599,55 @@ VideoDriver="$prop_driver"
 }
 
 CheckVideoDriver () {
-GetVideoDriver
+	GetVideoDriver
 	if [[ -f /etc/X11/xorg.conf ]]; then
+		# TODO figure out a better way to isolate the video driver in the xorg.conf list of "Driver" options
         	xorg_drivers=$(grep "Driver" /etc/X11/xorg.conf)
                 cur_driver=$(echo "$xorg_drivers" | grep -Eo '(nvidia|radeon|radeonhd|fglrx|savage|openchrome|via|virge|intel|i740|i128|vesa)')
                 card_detail=$(lspci | grep 'VGA' | cut -d':' -f3)
-                driver_match=$(echo "$prop_driver" | grep -x "$cur_driver")
-                if [[ -n $driver_match ]]; then
-                        StatusMessage "Correct driver '$prop_driver' already loaded"
-                else
-                        ErrorMessage "Video chipset change detected !!!"
-			if [[ -f /var/log/Xorg.0.log ]]; then
-	                        fglrx_in_use=$(cat /var/log/Xorg.0.log | grep -o fglrx |sort -u)
-        	                if [[ -n "$fglrx_in_use" ]] && [[ "$prop_driver" != "fglrx" ]]; then
-        	                        echo ""
-        	                        echo ""
-        	                        echo ""
-        	                        ErrorMessage "Purging fglrx driver due to multiple conflicts"
-        	                        PurgeFglrx
-					exit 0
-        	                fi
+		driver_match=""
+		# Check to see that the appropriate driver is installed by type
+                if [[ "$prop_driver" != "$cur_driver" ]]; then
+			driver_match="no"
+		else
+			driver_match="yes"
+		fi
+		# If current driver is nvidia, check that it is the correct one
+		if [[ "$driver_match" == "yes" ]] && [[ "$cur_driver" == "nvidia" ]]; then
+			StartService "Checking nVidia driver" ". /usr/pluto/bin/nvidia-install.sh"
+			if [[ "$current_driver" != "$preferred_driver" ]]; then
+				driver_match="no"
 			fi
-                        StatusMessage "Installing $prop_driver video driver for $card_detail"
+		fi
+		# remove fglrx or nVidia drivers if they are installed, but do not match current requirements
+                if [[ "$driver_match" == "no" ]]; then
+                        ErrorMessage "Video chipset change detected !!!"
+			if [[ "$cur_driver" == "fglrx" ]]; then
+				echo ""
+				echo ""
+				echo ""
+				ErrorMessage "Purging fglrx driver due to multiple conflicts"
+				apt-get -y remove --purge xorg-driver-fglrx fglrx* --force-yes
+				apt-get -y install --reinstall libgl1-mesa-glx libgl1-mesa-dri fglrx-modaliases --force-yes
+				dpkg-reconfigure xserver-xorg
+				apt-get -y install --reinstall xserver-xorg-core --force-yes
+				rm /etc/X11/xorg.conf
+				reboot
+				exit 0
+			elif [[ $cur_driver == "nvidia" ]]; then
+				StatusMessage "Removing old nVidia driver"
+				apt-get -yf remove $current_driver --force-yes
+			fi
+			# If there is an xorg, but the driver does not match best selection, install driver and run AVWizard
+                        StatusMessage "Installing video driver '$prop_driver' for $card_detail"
 			InstallVideoDriver
                         ConfSet "AVWizardOverride" "1"
+                else
+			StatusMessage "Correct driver '$prop_driver' already loaded"
                 fi
         else
-		StatusMessage "Installing $prop_driver video driver for $card_detail"
+		# If there is no xorg.conf, install driver and run AVWizard 
+		StatusMessage "Installing video driver '$prop_driver' for $card_detail"
 		InstallVideoDriver
 		ConfSet "AVWizardOverride" "1"
         fi
