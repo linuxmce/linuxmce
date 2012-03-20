@@ -91,6 +91,10 @@ echo "Growing Raid to use extra disk(s)..."
 mdadm --grow $RaidDevice --raid-disks=$TotalNewRaidDrives
 sleep 10
 
+# Save RAID configuration
+mdadm --detail --scan >> /etc/mdadm/mdadm.conf
+echo "PROGRAM /usr/pluto/bin/monitoring_RAID.sh" >> /etc/mdadm/mdadm.conf
+
 #loop around reporting the status until finished reshaping/rebuilding
 #cat /proc/mdstat shows a % finished while this is happening
 while res=$(cat /proc/mdstat | grep '%');do
