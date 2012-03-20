@@ -1,6 +1,6 @@
 #include "floorplanmodel.h"
 
-FloorPlanModel::FloorPlanModel(FloorPlanItem* prototype, QObject *parent) :
+FloorPlanModel::FloorPlanModel(FloorplanDevice* prototype, QObject *parent) :
     QAbstractListModel(parent), m_prototype(prototype)
 {
     setRoleNames(m_prototype->roleNames());
@@ -29,15 +29,15 @@ DataGridItemModelClass::~DataGridItemModelClass() {
 }
 */
 
-void FloorPlanModel::appendRow(FloorPlanItem *item)
+void FloorPlanModel::appendRow(FloorplanDevice *item)
 {
-  appendRows(QList<FloorPlanItem*>() << item);
+  appendRows(QList<FloorplanDevice*>() << item);
 }
 
-void FloorPlanModel::appendRows(const QList<FloorPlanItem *> &items)
+void FloorPlanModel::appendRows(const QList<FloorplanDevice *> &items)
 {
   beginInsertRows(QModelIndex(), rowCount(), rowCount()+items.size()-1);
-  foreach(FloorPlanItem *item, items) {
+  foreach(FloorplanDevice *item, items) {
 
    QObject::connect(item, SIGNAL(dataChanged()), this, SLOT(handleItemChange()));
     m_list.append(item);
@@ -51,7 +51,7 @@ void FloorPlanModel::appendRows(const QList<FloorPlanItem *> &items)
 
 }
 
-void FloorPlanModel::insertRow(int row, FloorPlanItem *item)
+void FloorPlanModel::insertRow(int row, FloorplanDevice *item)
 {
   beginInsertRows(QModelIndex(), row, row);
   connect(item, SIGNAL(dataChanged()), this, SLOT(handleItemChange()));
@@ -62,7 +62,7 @@ void FloorPlanModel::insertRow(int row, FloorPlanItem *item)
 
 void FloorPlanModel::handleItemChange()
 {
-  FloorPlanItem* item = static_cast<FloorPlanItem*>(sender());
+  FloorplanDevice* item = static_cast<FloorplanDevice*>(sender());
   QModelIndex index = indexFromItem(item);
   //qDebug() << "Handling item change for:" << index;
   if(index.isValid())
@@ -71,9 +71,9 @@ void FloorPlanModel::handleItemChange()
   }
 }
 
-FloorPlanItem * FloorPlanModel::find(const QString &id) const
+FloorplanDevice * FloorPlanModel::find(const QString &id) const
 {
-  foreach(FloorPlanItem* item, m_list) {
+  foreach(FloorplanDevice* item, m_list) {
 
       if(item->id().contains(id))
       {
@@ -88,7 +88,7 @@ FloorPlanItem * FloorPlanModel::find(const QString &id) const
   return 0;
 }
 
-QModelIndex FloorPlanModel::indexFromItem(const FloorPlanItem *item) const
+QModelIndex FloorPlanModel::indexFromItem(const FloorplanDevice *item) const
 {
   Q_ASSERT(item);
   for(int row=0; row<m_list.size(); ++row) {
@@ -134,42 +134,28 @@ bool FloorPlanModel::removeRows(int row, int count, const QModelIndex &parent)
   return true;
 }
 
-FloorPlanItem * FloorPlanModel::takeRow(int row)
+FloorplanDevice * FloorPlanModel::takeRow(int row)
 {
   beginRemoveRows(QModelIndex(), row, row);
-  FloorPlanItem* item = m_list.takeAt(row);
+  FloorplanDevice* item = m_list.takeAt(row);
   endRemoveRows();
   return item;
 }
 
-FloorPlanItem * FloorPlanModel::currentRow()
+FloorplanDevice * FloorPlanModel::currentRow()
 {
-    FloorPlanItem* item = m_list.at(0);
+    FloorplanDevice* item = m_list.at(0);
     return item;
 }
 
 QImage FloorPlanModel::getPageImage(QString &id)
 {
-
-    FloorPlanItem *myItem = find(id);
-    if (!myItem)
-    { QImage fail;
-        return fail;
-    }
-
-     QImage fpImage= myItem->floorplanImage();    
-     return fpImage;
+   return currentImage;
 }
 
 QString FloorPlanModel::getCurrentImagePath()
 {
-    FloorPlanItem *myItem = find(getCurrentPage());
-    QString returnVal="";
-    if (!myItem)
-    {
-       return returnVal;
-    }
-     return myItem->imgPath();
+    return imageBasePath+currentPage+".png";
 }
 
 

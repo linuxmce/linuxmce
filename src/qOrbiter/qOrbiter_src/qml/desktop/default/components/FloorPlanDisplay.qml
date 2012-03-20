@@ -6,9 +6,9 @@ Rectangle {
     color: style.darkhighlight
 
     Connections{
-        target: floorplan
+        target: floorplan_devices
         onFloorPlanImageChanged: {
-            floorplanimage.source = "image://listprovider/floorplan/"+floorplan.currentPage
+            floorplanimage.source = "image://listprovider/floorplan/"+floorplan_devices.currentPage
         }
     }
 
@@ -49,7 +49,7 @@ Rectangle {
                 id:floorplanlist
                 height: scaleY(10)
                 width: scaleX(18)
-                model:floorplan
+                model:floorplan_pages
                 clip:true
                 anchors.top: fplabel.bottom
                 anchors.horizontalCenter: parent.horizontalCenter
@@ -60,13 +60,13 @@ Rectangle {
                     border.color: style.darkhighlight
                     Text {
                         id: desc
-                        text: description
+                        text: m_description
                     }
 
                     MouseArea{
                         anchors.fill: parent
                         onPressed:{
-                            floorplan.setCurrentPage(ident)
+                            floorplan_devices.setCurrentPage(m_page)
                         }
                     }
                 }

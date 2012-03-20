@@ -2701,6 +2701,7 @@ void DCE::qOrbiter::ShowFloorPlan(int floorplantype)
     i_current_floorplanType = floorplantype;
     QString Screen = QString("Screen_").append(StringUtils::itos(i_current_floorplanType).c_str()).append(".qml");
     emit gotoQml(Screen);
+
 }
 
 void qOrbiter::updateFloorPlan(QString p)
@@ -2709,7 +2710,6 @@ void qOrbiter::updateFloorPlan(QString p)
     p.remove(0, p.length() - 1);
     CMD_Get_Current_Floorplan getFloorPlan(m_dwPK_Device, iOrbiterPluginID, p.toStdString(), i_current_floorplanType , &sval);
     SendCommand(getFloorPlan);
-
     qDebug() << "This Page Floorplan Data for Page " <<  p << ", Floorplan device type " << i_current_floorplanType << "::" <<sval.c_str();
 }
 
@@ -2720,7 +2720,6 @@ void DCE::qOrbiter::GetScreenSaverImages() // unused at this time
     SendCommand(screen_saver_files);
     QStringList tempList = QString::fromStdString(sFilename).split("\n");
     emit screenSaverImages(tempList);
-
 }
 
 void DCE::qOrbiter::BindMediaRemote(bool onoff)
@@ -2772,15 +2771,11 @@ void DCE::qOrbiter::GetSingleSecurityCam(int cam_device, int iHeight, int iWidth
     char *sData;
     int sData_size= 0;
     string imgtype;
-
-
     CMD_Get_Video_Frame singleVideoFrame(m_dwPK_Device,long(cam_device), string("1"), 0, iWidth, iHeight, &sData, &sData_size, &imgtype);
     SendCommand(singleVideoFrame);
-
     QImage returnedFrame;
     returnedFrame.loadFromData(QByteArray(sData, sData_size));
     // SecurityVideo->currentFrame = returnedFrame;
-
 }
 
 void DCE::qOrbiter::GetMultipleSecurityCams(QStringList cams) // not implemented yet

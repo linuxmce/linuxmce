@@ -72,13 +72,11 @@ SkinDataItem * SkinDataModel::find(const QString &id) const
     foreach(SkinDataItem* item, m_list)
     {
         qDebug() << "Skin Item" << item->id();
-       // qDebug()<< "Found:" << item->id() << "of" << m_list.size();
-
         if(item->id().toLower() == id.toLower())
         {
+             qDebug()<< "Found:" << item->id() << "of" << m_list.size();
             return item;
         }       
-
     }
          ui_reference->setDceResponse("SKIN ERROR");
          return 0;
@@ -95,7 +93,7 @@ QModelIndex SkinDataModel::indexFromItem(const SkinDataItem *item) const
 
 void SkinDataModel::clear()
 {
-    qDeleteAll(m_list);
+    qDeleteAll(m_list.begin(), m_list.end());
     m_list.clear();
 }
 

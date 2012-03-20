@@ -14,7 +14,8 @@
 class FloorPlanItem : public QObject
 {
     Q_OBJECT
-
+    Q_PROPERTY(int m_page READ page NOTIFY pageChanged)
+    Q_PROPERTY(QString m_description READ description NOTIFY descChanged)
     enum Roles {
         InstallationRole = Qt::UserRole+1,
         DescriptionRole =Qt::UserRole+2,
@@ -26,7 +27,7 @@ class FloorPlanItem : public QObject
     };
 
 public:
-     FloorPlanItem() {}
+    FloorPlanItem() {}
     explicit FloorPlanItem( QString &installation, QString &description,  int &page, QString imgPath,  QObject *parent);
     QVariant data(int role) const;
     QHash<int, QByteArray> roleNames() const;
@@ -49,11 +50,14 @@ private:
     QString m_iconPath;
     QImage m_iconImage;
     QString m_imgPath;
+
     QMap <int , QObject> devicelist ;
 
 signals:
     void imageChanged();
     void dataChanged();
+    void pageChanged();
+    void descChanged();
 
 };
 

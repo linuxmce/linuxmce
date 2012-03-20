@@ -251,7 +251,8 @@ Param 10 - pk_attribute
     UserModel *userList;
     SkinDataModel *skinModel;
     QList<QObject*> buttonList;
-    QList<QObject*>commandList;
+    QList<QObject*> commandList;
+    QList<QObject*>pages;
 
     MediaSubTypeModel *mediaTypeFilter;
     FilterModel *uiFileFilter;

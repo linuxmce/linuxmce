@@ -41,6 +41,7 @@ class FloorplanDevice : public QObject
 
 public:
     explicit FloorplanDevice(QString &name, int &deviceNo, int &floorplan_device_type, QString &position, QImage &icon, QObject *parent = 0);
+    FloorplanDevice(QObject * parent=0) {}
     QVariant data(int role) const;
     QHash<int, QByteArray> roleNames() const;
 

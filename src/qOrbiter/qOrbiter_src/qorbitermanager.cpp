@@ -161,7 +161,7 @@ qorbiterManager::qorbiterManager(QDeclarativeView *view, QObject *parent) :
     qorbiterUIwin->rootContext()->setContextProperty("screenparams", ScreenParameters);
 
     //floorplan model initialization for slots in main.cpp
-    floorplans = new FloorPlanModel( new FloorPlanItem , this);
+    floorplans = new FloorPlanModel( new FloorplanDevice , this);
 
     /*needs to go to main.cpp---------------------|
     QThread *timecodeThread = new QThread();
@@ -332,22 +332,14 @@ void qorbiterManager::processConfig(QByteArray config)
     QDomNodeList floorplanList = floorplanXml.childNodes();
     for(int index = 0; index < floorplanList.count(); index++)
     {
+        floorplans->totalPages = index;
         QString m_installation= floorplanList.at(index).attributes().namedItem("Installation").nodeValue();
-        //QString m_iconpath= floorplanList.at(index).attributes().namedItem("Icon").nodeValue();
-
+        floorplans->m_installation = m_installation;
         QString m_description= floorplanList.at(index).attributes().namedItem("Description").nodeValue();
         int m_page= floorplanList.at(index).attributes().namedItem("Page").nodeValue().toInt();
-        QString m_imgPath = "/usr/pluto/orbiter/floorplans/inst"+m_installation+"/"+QString::number(m_page)+".png";
-        QImage m_image;// pqOrbiter->getfileForDG("/usr/pluto/orbiter/floorplans/inst"+m_installation.toStdString()+"/"+StringUtils::itos(m_page)+".png");
-        m_image.load(":/icons/icon.png");
-        QImage icon = m_image.scaledToHeight(100);
-        floorplans->appendRow(new FloorPlanItem(m_installation,m_description, m_page, m_imgPath, userList));
-
-        if (m_page == 1)
-        {
-            QString safe = m_installation;
-            floorplans->setCurrentPage(safe.append("-").append(QString::number(m_page)));
-        }
+        floorplans->imageBasePath = "/usr/pluto/orbiter/floorplans/inst"+m_installation+"/";
+       QString m_imgPath = "/usr/pluto/orbiter/floorplans/inst"+m_installation+"/"+QString::number(m_page)+".png";
+       pages.append(new FloorPlanItem(m_installation,m_description, m_page, m_imgPath, floorplans));
     }
     emit loadingMessage("floorplans complete");
     QApplication::processEvents(QEventLoop::AllEvents);
@@ -551,7 +543,8 @@ void qorbiterManager::processConfig(QByteArray config)
     qorbiterUIwin->rootContext()->setContextProperty("currentRoomClimate", roomClimate);               //curent room climate model
     qorbiterUIwin->rootContext()->setContextProperty("currentRoomTelecom", roomTelecom);               //curret room telecom model
     qorbiterUIwin->rootContext()->setContextProperty("currentRoomSecurity", roomSecurity);             //current room security model
-    qorbiterUIwin->rootContext()->setContextProperty("floorplan", floorplans);
+    qorbiterUIwin->rootContext()->setContextProperty("floorplan_devices", floorplans);                  //floorplan devices
+    qorbiterUIwin->rootContext()->setContextProperty("floorplan_pages", QVariant::fromValue(pages));    //pages for floorplans
     qorbiterUIwin->rootContext()->setContextProperty("currentuser", sPK_User);
     qorbiterUIwin->rootContext()->setContextProperty("iPK_Device", QVariant::fromValue(iPK_Device));  //orbiter device number
     qorbiterUIwin->rootContext()->setContextProperty("currentroom", m_lRooms->sdefault_Ea);           //custom room list item provided
@@ -680,7 +673,6 @@ void qorbiterManager::swapSkins(QString incSkin)
                      this, SLOT(skinLoaded(QDeclarativeView::Status)));
 
     QMetaObject::invokeMethod(this, "refreshUI", Qt::QueuedConnection, Q_ARG(QUrl, skin->entryUrl()));
-
 }
 
 void qorbiterManager::skinLoaded(QDeclarativeView::Status status) {
@@ -988,8 +980,10 @@ bool qorbiterManager::readLocalConfig()
             {
                 qs_routerip = configVariables.namedItem("routerip").attributes().namedItem("id").nodeValue();
             }
-            currentSkin = configVariables.namedItem("skin").attributes().namedItem("id").nodeValue();
 
+            currentSkin = configVariables.namedItem("skin").attributes().namedItem("id").nodeValue();
+            if (currentSkin.isEmpty())
+                currentSkin = "default";
 
             if(configVariables.namedItem("device").attributes().namedItem("id").nodeValue().toLong() !=0)
             {
@@ -1473,7 +1467,7 @@ void qorbiterManager::setDceResponse(QString response)
     dceResponse = response;
     emit loadingMessage(dceResponse);
     emit dceResponseChanged();
-    // qDebug() << dceResponse;
+     qDebug() << dceResponse;
 
 }
 
@@ -1579,7 +1573,7 @@ QString qorbiterManager::getCurrentScreen()
 
 void qorbiterManager::setCurrentScreen(QString s)
 {
-    currentSkin = s;
+    currentScreen = s;
     emit screenChange(s);
 }
 

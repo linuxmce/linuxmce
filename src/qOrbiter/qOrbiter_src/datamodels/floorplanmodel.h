@@ -25,6 +25,7 @@
   */
 #include <QAbstractListModel>
 #include <datamodels/floorplanimageitem.h>
+#include <contextobjects/floorplandevice.h>
 #include <QModelIndex>
 
 class FloorPlanModel : public QAbstractListModel
@@ -33,21 +34,31 @@ class FloorPlanModel : public QAbstractListModel
     Q_PROPERTY (QImage currentImage READ getCurrentImage WRITE setImage NOTIFY floorPlanImageChanged)
     Q_OBJECT
 public:
-    explicit FloorPlanModel(FloorPlanItem *m_prototype, QObject *parent = 0);
+    explicit FloorPlanModel(FloorplanDevice *m_prototype, QObject *parent = 0);
+
     int rowCount(const QModelIndex &parent = QModelIndex()) const;
     QVariant data(const QModelIndex &index, int role = Qt::DisplayRole) const;
-    void appendRow(FloorPlanItem* item);
-    void appendRows(const QList<FloorPlanItem*> &items);
-    void insertRow(int row, FloorPlanItem* item);
+    void appendRow(FloorplanDevice* item);
+    void appendRows(const QList<FloorplanDevice*> &items);
+    void insertRow(int row, FloorplanDevice* item);
     bool removeRow(int row, const QModelIndex &parent = QModelIndex());
     bool removeRows(int row, int count, const QModelIndex &parent = QModelIndex());
-    FloorPlanItem* takeRow(int row);
-    FloorPlanItem* find(const QString &id) const;
-    QModelIndex indexFromItem( const FloorPlanItem* item) const;
-    FloorPlanItem* currentRow();
+    FloorplanDevice* takeRow(int row);
+    FloorplanDevice* find(const QString &id) const;
+    QModelIndex indexFromItem( const FloorplanDevice* item) const;
+    FloorplanDevice* currentRow();
+
+    QString m_installation;
     QString currentPage;
+
     QImage currentImage;
+
     int currentFloorPlanType;
+    int totalPages;
+
+    QString imageBasePath;
+
+    QMap<int, QString*> floorplanPages;
 
     // QModelIndex index(int row, int column, const QModelIndex &parent) const ;
     //  QModelIndex parent(const QModelIndex &child) const;
@@ -62,23 +73,20 @@ public slots:
     void clear();
     void handleItemChange();
 
-    QImage getPageImage(QString &id);
-    QString getCurrentImagePath();
-
+    QImage getFloorPlanImage () {return currentImage;}
     QImage getCurrentImage() {return currentImage;}
+    QImage getPageImage(QString &id);
+    void setImageData(const uchar *data, int iData_size);
+    void setImage(QImage fp) { currentImage = fp; emit floorPlanImageChanged(); emit requestNewFloorPlanData(currentPage);}
 
+    QString getCurrentImagePath();
 
     Q_INVOKABLE void setCurrentPage(QString currentPageId);
     QString getCurrentPage() {return currentPage;}
 
-    void setImageData(const uchar *data, int iData_size);
-    void setImage(QImage fp) { currentImage = fp; emit floorPlanImageChanged(); emit requestNewFloorPlanData(currentPage);}
-
-    QImage getFloorPlanImage () {return currentImage;}
-
 private:
-    FloorPlanItem* m_prototype;
-    QList<FloorPlanItem*> m_list;
+    FloorplanDevice* m_prototype;
+    QList<FloorplanDevice*> m_list;
 };
 
 #endif // FLOORPLANMODEL_H
