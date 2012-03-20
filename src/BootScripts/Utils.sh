@@ -615,7 +615,9 @@ CheckVideoDriver () {
 		# If current driver is nvidia, check that it is the correct one
 		if [[ "$driver_match" == "yes" ]] && [[ "$cur_driver" == "nvidia" ]]; then
 			StartService "Checking nVidia driver" ". /usr/pluto/bin/nvidia-install.sh"
-			if [[ "$current_driver" != "$preferred_driver" ]]; then
+			current_nvidia=$(getInstalledNvidiaDriver)
+			preferred_nvidia=$(getPreferredNvidiaDriver)
+			if [[ "$current_nvidia" != "$preferred_nvidia" ]]; then
 				driver_match="no"
 			fi
 		fi
