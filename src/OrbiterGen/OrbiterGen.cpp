@@ -333,12 +333,6 @@ int OrbiterGenerator::DoIt()
 		exit(1);
 	}
 
-	if ( m_pRow_Device->FK_DeviceTemplate_get()==DEVICETEMPLATE_qOrbiter_CONST )
-	{
-		LoggerWrapper::GetInstance()->Write(LV_STATUS,"Device %d is a qOrbiter, no regen required.",m_iPK_Orbiter);
-		exit(1);
-	}
-
 	m_bIsMobilePhone = m_pRow_Device->FK_DeviceTemplate_getrow()->FK_DeviceCategory_get()==DEVICECATEGORY_Mobile_Orbiter_CONST;
 
 	m_bNewOrbiter=false; // Will set to true if this is the first time this Orbiter was generated
@@ -355,6 +349,19 @@ int OrbiterGenerator::DoIt()
 	}
 	else
 		m_pRow_Orbiter->Reload();
+
+	if ( m_pRow_Device->FK_DeviceTemplate_get()==DEVICETEMPLATE_qOrbiter_CONST )
+	{
+		LoggerWrapper::GetInstance()->Write(LV_STATUS,"Device %d is a qOrbiter, no regen required.",m_iPK_Orbiter);
+		DatabaseUtils::UnLockTables(m_spDatabase_pluto_main.get());
+		if( !m_bNewOrbiter )
+		{
+			// Don't reset the psc_mod so this doesn't result in a 'new devices' messages
+			string sql = "UPDATE Device SET NeedConfigure=0,psc_mod=psc_mod WHERE PK_Device=" + StringUtils::itos(m_pRow_Device->PK_Device_get());
+			m_spDatabase_pluto_main->threaded_db_wrapper_query(sql);
+		}
+		return 0;
+	}
 
 	if( m_pRow_Orbiter->RegenInProgress_get() )
 	{
