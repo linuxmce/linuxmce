@@ -333,6 +333,12 @@ int OrbiterGenerator::DoIt()
 		exit(1);
 	}
 
+	if ( m_pRow_Device->FK_DeviceTemplate_get()==DEVICETEMPLATE_qOrbiter_CONST )
+	{
+		LoggerWrapper::GetInstance()->Write(LV_STATUS,"Device %d is a qOrbiter, no regen required.",m_iPK_Orbiter);
+		exit(1);
+	}
+
 	m_bIsMobilePhone = m_pRow_Device->FK_DeviceTemplate_getrow()->FK_DeviceCategory_get()==DEVICECATEGORY_Mobile_Orbiter_CONST;
 
 	m_bNewOrbiter=false; // Will set to true if this is the first time this Orbiter was generated
