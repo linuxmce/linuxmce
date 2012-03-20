@@ -135,7 +135,7 @@ symbian:TARGET.UID3 = 0xE0D07D4D
 QMAKE_CXXFLAGS += -DUSE_LZO_DATAGRID
 
 INCLUDEPATH += ../../ ../../DCE/
-
+QT += webkit
 win32{
 QT+= opengl
 }

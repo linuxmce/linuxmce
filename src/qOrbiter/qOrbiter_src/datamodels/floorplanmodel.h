@@ -13,16 +13,18 @@
 
     You should have received a copy of the GNU General Public License
     along with QOrbiter.  If not, see <http://www.gnu.org/licenses/>.
-*/
 
-#ifndef FLOORPLANMODEL_H
-#define FLOORPLANMODEL_H
-/*
   This class is intended to be an intelligent container class for the floorplans. Initially it will hold the images for the floorplans
   and the floorplan devices and their types. I hope expand it to internalize the data needed for placing on the floorplan the items at their
   appropriate places. None of the operations here can be heavy however, as this class needs to remain lightweight and fast as its connected
-  to the gui thread.
+  to the gui thread. It is also responsible for sending signals to the DCE thread that events have occured, like page changes, and to send the
+  new floorplan and fetch relevant data.
   */
+
+
+#ifndef FLOORPLANMODEL_H
+#define FLOORPLANMODEL_H
+
 #include <QAbstractListModel>
 #include <datamodels/floorplanimageitem.h>
 #include <contextobjects/floorplandevice.h>
