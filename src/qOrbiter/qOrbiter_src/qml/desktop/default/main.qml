@@ -58,15 +58,15 @@ Item {
 
     function componentLoad(component_path)
     {
-        pageLoader.source = "components/"+component_path
-        if (pageLoader.status == 1)
+        componentLoader.source = "components/"+component_path
+        if (componentLoader.status == 1)
         {
           // manager.setDceResponse("Command to change to:" + screenname+ " was successfull")
         }
         else
         {
             console.log("Could not load" + component_path)
-            pageLoader.source = "screens/Screen_x.qml"
+            componentLoader.source = "screens/Screen_x.qml"
         }
     }
 

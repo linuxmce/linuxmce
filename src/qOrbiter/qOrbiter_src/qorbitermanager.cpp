@@ -911,8 +911,7 @@ bool qorbiterManager::loadSkins(QUrl base)
    // tskinModel->addSkin("aeon");
    // tskinModel->addSkin("crystalshades");
 #endif
-    emit skinIndexReady(true);
-    qDebug() << tskinModel->rowCount();
+    emit skinIndexReady(true);    
     return true;
 }
 
