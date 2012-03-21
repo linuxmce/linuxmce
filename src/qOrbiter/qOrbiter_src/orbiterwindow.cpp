@@ -42,7 +42,6 @@ orbiterWindow::orbiterWindow(long deviceid, std::string routerip, QObject *paren
     this->b_skinIndexReady = false;
     this->b_devicePresent = false;
 
-
     //qDebug() << mainView.size();
     router = routerip;
     deviceno = deviceid;
@@ -51,6 +50,7 @@ orbiterWindow::orbiterWindow(long deviceid, std::string routerip, QObject *paren
     mainView.rootContext()->setContextProperty("window", this);
     mainView.setWindowTitle("LinuxMCE Orbiter ");
     mainView.rootContext()->setContextProperty("orbiterList" , "");
+    mainView.setViewport(glWidget);
 
     //QObject::connect(&mainView, SIGNAL(sceneResized(QSize)), this, SIGNAL(orientationChanged(QSize)));
 

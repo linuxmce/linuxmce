@@ -146,7 +146,7 @@ int main(int argc, char* argv[])
 #ifdef for_harmattan
     QApplication::setGraphicsSystem("meego");
 #elif for_desktop
-    QApplication::setGraphicsSystem("raster");
+    QApplication::setGraphicsSystem("opengl");
 #elif WIN32
 
 #elif for_android

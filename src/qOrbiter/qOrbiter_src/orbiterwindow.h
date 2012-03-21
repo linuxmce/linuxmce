@@ -5,6 +5,7 @@
 #include <QDeclarativeView>
 #include <QDeclarativeContext>
 #include <QVariant>
+#include <QtOpenGL/QGLWidget>
 
 class orbiterWindow : public QObject
 {
@@ -30,6 +31,8 @@ public:
     QString qrcPath;
     std::string router;
     QList<QObject*> orbiterList;
+    QGLWidget *glWidget;
+
 
     long deviceno;
     bool newOrbiter;

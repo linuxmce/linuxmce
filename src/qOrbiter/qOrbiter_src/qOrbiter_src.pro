@@ -32,8 +32,6 @@ symbian:TARGET.UID3 = 0xE15A481D
 # Allow network access on Symbian
 symbian:TARGET.CAPABILITY += NetworkServices
 
-
-
 # When we do stuff for Symbian, why not define the target in here...
 symbian {
     DEFINES += for_symbian
@@ -45,7 +43,6 @@ symbian {
 
 # Add more folders to ship with the application, here
 for_desktop{
-
 folder_01.source = qml/desktop
 folder_01.target = $$DESTDIR/qml
 
@@ -135,10 +132,8 @@ symbian:TARGET.UID3 = 0xE0D07D4D
 QMAKE_CXXFLAGS += -DUSE_LZO_DATAGRID
 
 INCLUDEPATH += ../../ ../../DCE/
-QT += webkit
-win32{
-QT+= opengl
-}
+QT += webkit opengl
+
 macx{
     QT += xml
     QT += network
