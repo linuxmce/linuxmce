@@ -149,8 +149,8 @@ int main(int argc, char* argv[])
     QApplication::setGraphicsSystem("opengl");
 #elif WIN32
 
-#elif for_android
-    QApplication::setGraphicsSystem("raster");
+#elif for_android|| ANDROID
+    QApplication::setGraphicsSystem("opengl");
 #else
     QApplication::setGraphicsSystem("raster");
 #endif
