@@ -22,7 +22,7 @@ void SkinLoader::loadSkin(QString name) {
     if (current_component->isLoading()) {
         qDebug() << "Hooking up slot";
 
-        if (QObject::connect(current_component, SIGNAL(statusChanged(QDeclarativeComponent::Status)),this, SLOT(continueLoading())))
+        if (QObject::connect(current_component, SIGNAL(statusChanged(QDeclarativeComponent::Status)),this, SLOT(checkLoadingStatus())))
         {
             qDebug() << "Hooked!";
         } else {
@@ -44,7 +44,7 @@ void SkinLoader::continueLoading() {
     QImage skinPic(":/icons/playlist.png");
 
 
-    if (current_component->isError()) {
+    if (current_component->isError() || current_component->isLoading()) {
         qWarning() << current_component->errors();
         exit (1);
     } else {
@@ -65,4 +65,12 @@ void SkinLoader::continueLoading() {
         qDebug() << "Location" << skinBase;
         m_parent->appendRow(new SkinDataItem(skinBase, s_title, s_creator, s_description, s_version, s_target, skinPic, s_path, s_mainc, s_accentc, styleObject));
     }
+}
+
+void SkinLoader::checkLoadingStatus()
+{
+    qDebug() << "Loading progress" << current_component->progress();
+    qDebug() << current_component->status();
+    if(current_component->status() == QDeclarativeComponent::Ready)
+        continueLoading();
 }

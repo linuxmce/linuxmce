@@ -183,6 +183,9 @@ public:
     bool b_orientation;
     int appHeight;
     int appWidth;
+    bool b_localLoading;
+    bool b_skinsReady;
+    bool b_orbiterReady;
     Q_INVOKABLE void refreshUI(QUrl url);
     void swapSkins(QString incSkin);
 

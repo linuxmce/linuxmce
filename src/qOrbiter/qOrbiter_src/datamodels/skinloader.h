@@ -22,6 +22,7 @@ public:
 
   private slots:
     void continueLoading();
+    void checkLoadingStatus();
 
   private:
     QDeclarativeComponent *current_component;

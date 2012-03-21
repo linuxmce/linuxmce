@@ -49,7 +49,16 @@ qorbiterManager::qorbiterManager(QDeclarativeView *view, QObject *parent) :
 {
 
     m_bStartingUp= true;
+    b_skinsReady = false;
+    b_orbiterReady = false;
     bAppError = false;
+
+    //this governs local vs remote loading. condensed to one line, and will be configurable from the ui soon.
+#ifndef ANDROID
+    b_localLoading = false;
+#else
+    b_localLoading = false;
+#endif
     //pqOrbiter->qmlUI = this;
     setDceResponse("Initializing...");
 
@@ -179,28 +188,31 @@ void qorbiterManager::gotoQScreen(QString s)
 {
     if(s == "Screen_1.qml")
     {
-
         bool t = false;
         emit keepLoading(t);
         emit clearModel();
         emit resetFilter();
-        // emit bindMediaRemote(false);
+
     }
 
     //send the qmlview a request to go to a screen, needs error handling
     //This allows it to execute some transition or other if it wants to
 
-    setDceResponse("Starting screen switch");
-
-    QVariant screenname= s;
-    currentScreen = s;
-    QObject *item = qorbiterUIwin->rootObject();
-    setDceResponse("About to call screenchange()");
-    if (QMetaObject::invokeMethod(item, "screenchange", Qt::QueuedConnection, Q_ARG(QVariant, screenname))) {
-        setDceResponse("Done call to screenchange()");
-    } else {
-        setDceResponse("screenchange() FAILED");
+    if(b_skinsReady)
+    {
+        setDceResponse("Starting screen switch");
+        QVariant screenname= s;
+        currentScreen = s;
+        QObject *item = qorbiterUIwin->rootObject();
+        setDceResponse("About to call screenchange()");
+        if (QMetaObject::invokeMethod(item, "screenchange", Qt::QueuedConnection, Q_ARG(QVariant, screenname))) {
+            setDceResponse("Done call to screenchange()");
+        } else {
+            setDceResponse("screenchange() FAILED");
+        }
     }
+
+
 }
 
 //this function begins the initialization of the 'manager' object
@@ -249,9 +261,12 @@ bool qorbiterManager::initializeManager(string sRouterIP, int device_id)
 #endif
     QString qmlPath = adjustPath(QApplication::applicationDirPath().remove("/bin"));
     QString localDir = qmlPath.append(buildType);
+
+
 #ifdef ANDROID
     if( !loadSkins(QUrl(remoteDirectoryPath)))
-    {   emit skinIndexReady(true);
+    {   emit skinIndexReady(false);
+        b_skinsReady = true;
         return false;
     }
 #elif for_android
@@ -266,9 +281,28 @@ bool qorbiterManager::initializeManager(string sRouterIP, int device_id)
     {   emit skinIndexReady(false);
         return false;
     }
+#elif for_desktop
+    if(b_localLoading == true)
+    {
+        if( !loadSkins(QUrl(localDir)))
+        {
+            emit skinIndexReady(false);
+            return false;
+        }
+    }
+    else
+    {
+        if( !loadSkins(QUrl(remoteDirectoryPath)))
+        {
+            emit skinIndexReady(false);
+            return false;
+        }
+    }
+
 #else
     if( !loadSkins(QUrl(localDir)))
-    {   emit skinIndexReady(false);
+    {
+        emit skinIndexReady(false);
         return false;
     }
 #endif
@@ -646,9 +680,8 @@ void qorbiterManager::processConfig(QByteArray config)
 #ifdef for_desktop
     activateScreenSaver();
 #endif
-
     emit orbiterConfigReady(true);
-
+    b_orbiterReady = true;
 }
 
 bool qorbiterManager::OrbiterGen()
@@ -687,6 +720,7 @@ void qorbiterManager::skinLoaded(QDeclarativeView::Status status) {
         m_bStartingUp = false;
         emit skinDataLoaded(true);
         QApplication::processEvents(QEventLoop::AllEvents);
+        b_skinsReady = true;
         startOrbiter();
     }
 }
@@ -874,10 +908,11 @@ bool qorbiterManager::loadSkins(QUrl base)
     tskinModel->addSkin("default");
 #else
     tskinModel->addSkin("default");
-    tskinModel->addSkin("aeon");
-    tskinModel->addSkin("crystalshades");
+   // tskinModel->addSkin("aeon");
+   // tskinModel->addSkin("crystalshades");
 #endif
     emit skinIndexReady(true);
+    qDebug() << tskinModel->rowCount();
     return true;
 }
 
@@ -1399,16 +1434,24 @@ void qorbiterManager::showMessage(QString message, int duration, bool critical)
 
 void qorbiterManager::startOrbiter()
 {
-    setDceResponse("Showing main orbiter window");
-    QApplication::processEvents(QEventLoop::AllEvents);
+    if (b_skinsReady && b_orbiterReady)
+    {
+        setDceResponse("Showing main orbiter window");
+        QApplication::processEvents(QEventLoop::AllEvents);
 
-    m_bStartingUp = false;
-    qorbiterUIwin->setWindowTitle("LinuxMCE Orbiter " + QString::number(iPK_Device));
+        m_bStartingUp = false;
+        qorbiterUIwin->setWindowTitle("LinuxMCE Orbiter " + QString::number(iPK_Device));
 
-    qorbiterUIwin->setResizeMode(QDeclarativeView::SizeRootObjectToView);
-    QApplication::processEvents(QEventLoop::AllEvents);
-    emit screenChange("Screen_1.qml");
-    QApplication::processEvents(QEventLoop::AllEvents);
+        qorbiterUIwin->setResizeMode(QDeclarativeView::SizeRootObjectToView);
+        QApplication::processEvents(QEventLoop::AllEvents);
+        emit screenChange("Screen_1.qml");
+        QApplication::processEvents(QEventLoop::AllEvents);
+    }
+    else
+    {
+        setDceResponse("This orbiter is not ready yet, please be patient");
+    }
+
 
 }
 
