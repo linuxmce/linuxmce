@@ -44,7 +44,7 @@ Item {
     function screenchange(screenname )
     {
         pageLoader.source = "screens/"+screenname
-        if (pageLoader.status == 1)
+        if (pageLoader.status == Component.Ready )
         {
             //manager.setDceResponse("Command to change to:" + screenname+ " was successfull")
         }
@@ -53,20 +53,6 @@ Item {
             console.log("Command to change to:" + screenname + " failed!")
             screenfile = screenname
             pageLoader.source = "screens/Screen_x.qml"
-        }
-    }
-
-    function componentLoad(component_path)
-    {
-        componentLoader.source = "components/"+component_path
-        if (componentLoader.status == 1)
-        {
-          // manager.setDceResponse("Command to change to:" + screenname+ " was successfull")
-        }
-        else
-        {
-            console.log("Could not load" + component_path)
-            componentLoader.source = "screens/Screen_x.qml"
         }
     }
 
@@ -81,14 +67,6 @@ Item {
         }
     }
 
-    Loader
-    {
-        id:componentLoader
-        objectName: "componentbot"
-        onLoaded: {
-            console.log("component loaded!")
-        }
-    }
 
     SequentialAnimation{
         id:loadin
