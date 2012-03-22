@@ -44,9 +44,14 @@ Item {
     function screenchange(screenname )
     {
         pageLoader.source = "screens/"+screenname
-        if (pageLoader.status == 1)
+        if (pageLoader.status == Component.Ready)
         {
-            //manager.setDceResponse("Command to change to:" + screenname+ " was successfull")
+            manager.setDceResponse("Command to change to:" + screenname+ " was successfull")
+        }
+        else if (pageLoader.status == Component.Loading)
+        {
+            console.log("loading page from network")
+            finishLoading(screenname)
         }
         else
         {
@@ -56,7 +61,20 @@ Item {
         }
     }
 
+    function finishLoading (screenname)
+    {
+        if(pageLoader.status != Component.Loading)
+        {
+            console.log("finishing load")
+            pageLoader.source = "screens/"+screenname
+            console.log("screen" + screenname + " loaded.")
+        }
+        else
+        {
+            finishLoading(screenname)
+        }
 
+    }
 
     Loader {
         id:pageLoader

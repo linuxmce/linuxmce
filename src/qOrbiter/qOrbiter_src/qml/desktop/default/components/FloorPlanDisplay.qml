@@ -71,7 +71,41 @@ Rectangle {
                     }
                 }
             }
-
+        }
+    }
+    ListView
+    {
+        id:floorplanDevices
+        height: scaleY(20)
+        width: scaleX(80)
+        model:floorplan_devices
+        clip:true
+        orientation: ListView.Horizontal
+        anchors.top: mainRect.bottom
+        anchors.horizontalCenter: parent.horizontalCenter
+        delegate: Rectangle{
+            id:fp_device_rect
+            height: scaleY(20)
+            width: scaleY(20)
+            color: "lightgrey"
+            Column{
+                Text {
+                    id: fpDevice_name
+                    text: "I am " + name
+                }
+                Text {
+                    id: fpDevice_type
+                    text: "I am type" + type
+                }
+                Text {
+                    id: fpDevice_no
+                    text: "I am Dev#" + deviceno
+                }
+                Text {
+                    id: fpDevice_pos
+                    text: "Position" + position
+                }
+            }
         }
     }
 }

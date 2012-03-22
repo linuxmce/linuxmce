@@ -318,7 +318,6 @@ int main(int argc, char* argv[])
         QObject::connect(pqOrbiter,SIGNAL(tcUpdated(QString)), w->nowPlayingButton, SLOT(setTimeCode(QString)));
         QObject::connect(w->nowPlayingButton, SIGNAL(playListPositionChanged(int)), storedVideoPlaylist, SLOT(setCurrentIndex(int)) );
 
-
         //setup
         QObject::connect(w, SIGNAL(registerOrbiter(int,QString,int)), pqOrbiter,SLOT(registerDevice(int,QString,int)));
         QObject::connect(pqOrbiter,SIGNAL(startManager(QString,QString)), w, SLOT(qmlSetupLmce(QString,QString)));
@@ -369,7 +368,6 @@ int main(int argc, char* argv[])
         QObject::connect(pqOrbiter, SIGNAL(clearAndContinue(int)), mediaModel, SLOT(clearAndRequest(int)), Qt::QueuedConnection);
         QObject::connect(pqOrbiter,SIGNAL(addItem(gridItem*)), mediaModel, SLOT(appendRow(gridItem*)));
         QObject::connect(pqOrbiter,SIGNAL(gridModelSizeChange(int)), mediaModel, SLOT(setTotalCells(int)), Qt::QueuedConnection);
-
 
         QObject::connect(mediaModel,SIGNAL(ready(int)), pqOrbiter, SLOT(prepareFileList(int)), Qt::QueuedConnection);
         QObject::connect(w, SIGNAL(gridTypeChanged(int)), mediaModel, SLOT(setGridType(int)), Qt::QueuedConnection);
@@ -445,13 +443,15 @@ int main(int argc, char* argv[])
         QObject::connect(pqOrbiter, SIGNAL(routerDisconnect()), w, SLOT(reloadHandler()));
         QObject::connect(pqOrbiter, SIGNAL(closeOrbiter()), w, SLOT(closeOrbiter()));
 
+        qDebug("Connected Signals and Slots, Starting threads.");
+
         dceThread->start();
         mediaThread->start();
         epgThread->start();
 
         pqOrbiter->m_dwPK_Device = w->iPK_Device;
         pqOrbiter->m_sHostName = w->qs_routerip.toStdString();
-
+        qDebug("Trying connection");
         if ( pqOrbiter->initialize() == true )
         {
             LoggerWrapper::GetInstance()->Write(LV_STATUS, "Connect OK");
@@ -460,8 +460,6 @@ int main(int argc, char* argv[])
                 pqOrbiter->RunLocalMode();
             else
             {
-
-
 
             }
         }

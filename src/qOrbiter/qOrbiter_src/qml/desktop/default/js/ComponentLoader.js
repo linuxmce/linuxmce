@@ -19,14 +19,29 @@ var component
 function createFilterObjects(toBeCreated) {
     console.log(toBeCreated)
     component = Qt.createComponent(toBeCreated);
-       sprite = component.createObject(fileviewscreen , {"x": 0, "y": 0});
-   setRequestMore(false)
-
+    if (component.status === Component.Ready)
+    {
+    sprite = component.createObject(fileviewscreen , {"x": 0, "y": 0});
+    setRequestMore(false)
     console.log("showing!")
-       if (sprite == null) {
-           // Error Handling
-           console.log("Error creating object")
+    }
+    else if (component.status === Component.Error)
+    {
+     console.log("Error creating object")
+    }
+    else if (component.status === Component.Loading)
+    {
+        component.statusChanged.connect(finishFilterObjects)
+    }
+
+
 }
+
+function finishFilterObjects() {
+
+    sprite = component.createObject(fileviewscreen , {"x": 0, "y": 0});
+    setRequestMore(false)
+    console.log("showing!")
 }
 
 var toBeDeleted

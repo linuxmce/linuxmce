@@ -13,7 +13,7 @@ QHash<int, QByteArray> FloorplanDevice::roleNames() const
   names[NameRole] = "name";
   names[DeviceNoRole] = "deviceno";
   names[DeviceTypeRole] = "type";
-  names[PositionRole] = "postion";
+  names[PositionRole] = "position";
   names[IconImageRole]= "iconimage";
   return names;
 }

@@ -92,6 +92,7 @@ qorbiterManager::qorbiterManager(QDeclarativeView *view, QObject *parent) :
 
     QObject::connect(qorbiterUIwin, SIGNAL(sceneResized(QSize)),  SLOT(checkOrientation(QSize)) );
     QObject::connect(this, SIGNAL(orbiterConfigReady(bool)), this, SLOT(showUI(bool)));
+    QObject::connect(this, SIGNAL(skinIndexReady(bool)), this, SLOT(showUI(bool)));
 
     ScreenSaver = new ScreenSaverClass();
 
@@ -192,27 +193,21 @@ void qorbiterManager::gotoQScreen(QString s)
         emit keepLoading(t);
         emit clearModel();
         emit resetFilter();
-
     }
 
     //send the qmlview a request to go to a screen, needs error handling
     //This allows it to execute some transition or other if it wants to
 
-    if(b_skinsReady)
-    {
-        setDceResponse("Starting screen switch");
-        QVariant screenname= s;
-        currentScreen = s;
-        QObject *item = qorbiterUIwin->rootObject();
-        setDceResponse("About to call screenchange()");
-        if (QMetaObject::invokeMethod(item, "screenchange", Qt::QueuedConnection, Q_ARG(QVariant, screenname))) {
-            setDceResponse("Done call to screenchange()");
-        } else {
-            setDceResponse("screenchange() FAILED");
-        }
+    setDceResponse("Starting screen switch");
+    QVariant screenname= s;
+    currentScreen = s;
+    QObject *item = qorbiterUIwin->rootObject();
+    setDceResponse("About to call screenchange()");
+    if (QMetaObject::invokeMethod(item, "screenchange", Qt::QueuedConnection, Q_ARG(QVariant, screenname))) {
+        setDceResponse("Done call to screenchange()");
+    } else {
+        setDceResponse("screenchange() FAILED");
     }
-
-
 }
 
 //this function begins the initialization of the 'manager' object
@@ -266,7 +261,7 @@ bool qorbiterManager::initializeManager(string sRouterIP, int device_id)
 #ifdef ANDROID
     if( !loadSkins(QUrl(remoteDirectoryPath)))
     {   emit skinIndexReady(false);
-        b_skinsReady = true;
+        b_skinsReady = false;
         return false;
     }
 #elif for_android
@@ -372,11 +367,27 @@ void qorbiterManager::processConfig(QByteArray config)
         QString m_description= floorplanList.at(index).attributes().namedItem("Description").nodeValue();
         int m_page= floorplanList.at(index).attributes().namedItem("Page").nodeValue().toInt();
         floorplans->imageBasePath = "/usr/pluto/orbiter/floorplans/inst"+m_installation+"/";
-       QString m_imgPath = "/usr/pluto/orbiter/floorplans/inst"+m_installation+"/"+QString::number(m_page)+".png";
-       pages.append(new FloorPlanItem(m_installation,m_description, m_page, m_imgPath, floorplans));
+        QString m_imgPath = "/usr/pluto/orbiter/floorplans/inst"+m_installation+"/"+QString::number(m_page)+".png";
+        pages.append(new FloorPlanItem(m_installation,m_description, m_page, m_imgPath, floorplans));
     }
     emit loadingMessage("floorplans complete");
     QApplication::processEvents(QEventLoop::AllEvents);
+
+    //floorplan devices
+    QDomElement floorplan_devices = root.firstChildElement("FloorplanDevices");
+    QDomNodeList floorplan_device_list = floorplan_devices.childNodes();
+    for(int index = 0; index < floorplan_device_list.count(); index++)
+    {
+        QString name = floorplan_device_list.at(index).attributes().namedItem("Name").nodeValue();
+        int fp_deviceno = floorplan_device_list.at(index).attributes().namedItem("Device").nodeValue().toInt();
+        QString position = floorplan_device_list.at(index).attributes().namedItem("Position").nodeValue();
+        int fp_deviceType = floorplan_device_list.at(index).attributes().namedItem("Type").nodeValue().toInt();
+        QImage icon;
+        floorplans->appendRow(new FloorplanDevice( name, fp_deviceno, fp_deviceType, position, icon, floorplans));
+    }
+    emit loadingMessage("Floorplan Devices complete");
+    QApplication::processEvents(QEventLoop::AllEvents);
+
 
     //-USERS-----------------------------------------------------------------------------------------------------
     QDomElement userXml = root.firstChildElement("Users");
@@ -680,8 +691,9 @@ void qorbiterManager::processConfig(QByteArray config)
 #ifdef for_desktop
     activateScreenSaver();
 #endif
-    emit orbiterConfigReady(true);
     b_orbiterReady = true;
+    emit orbiterConfigReady(true);
+
 }
 
 bool qorbiterManager::OrbiterGen()
@@ -911,7 +923,8 @@ bool qorbiterManager::loadSkins(QUrl base)
    // tskinModel->addSkin("aeon");
    // tskinModel->addSkin("crystalshades");
 #endif
-    emit skinIndexReady(true);    
+    b_skinsReady = true;
+    emit skinIndexReady(true);
     return true;
 }
 
@@ -924,13 +937,16 @@ void qorbiterManager::quickReload()
 
 void qorbiterManager::showUI(bool b)
 {
-    if(b == true)
+    if(b_skinsReady == true && b_orbiterReady == true)
     {
-        swapSkins(currentSkin);
-    }
-    else
-    {
-        emit raiseSplash();
+        if(b == true)
+        {
+            swapSkins(currentSkin);
+        }
+        else
+        {
+            emit raiseSplash();
+        }
     }
 }
 
@@ -957,8 +973,6 @@ void qorbiterManager::qmlSetupLmce(QString incdeviceid, QString incrouterip)
 
 bool qorbiterManager::readLocalConfig()
 {
-
-
     QApplication::processEvents(QEventLoop::AllEvents);
     QDomDocument localConfig;
 #ifdef Q_OS_MAC
@@ -1509,7 +1523,7 @@ void qorbiterManager::setDceResponse(QString response)
     dceResponse = response;
     emit loadingMessage(dceResponse);
     emit dceResponseChanged();
-     qDebug() << dceResponse;
+    qDebug() << dceResponse;
 
 }
 

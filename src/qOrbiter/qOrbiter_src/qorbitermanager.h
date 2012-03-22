@@ -185,6 +185,7 @@ public:
     int appWidth;
     bool b_localLoading;
     bool b_skinsReady;
+    bool b_skinDataReady;
     bool b_orbiterReady;
     Q_INVOKABLE void refreshUI(QUrl url);
     void swapSkins(QString incSkin);
@@ -256,6 +257,7 @@ Param 10 - pk_attribute
     QList<QObject*> buttonList;
     QList<QObject*> commandList;
     QList<QObject*>pages;
+    QStringList *skinNames;
 
     MediaSubTypeModel *mediaTypeFilter;
     FilterModel *uiFileFilter;
