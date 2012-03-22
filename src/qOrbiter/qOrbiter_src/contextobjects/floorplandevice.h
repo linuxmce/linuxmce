@@ -54,6 +54,7 @@ public:
 
 signals:
     void statusChanged();
+    void dataChanged();
 
 public slots:
 

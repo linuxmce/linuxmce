@@ -103,24 +103,6 @@ qOrbiter::~qOrbiter()
 }
 
 //<-dceag-getconfig-b->
-bool qOrbiter::GetConfig()
-{
-    if( !qOrbiter_Command::GetConfig() )
-
-        return false;
-
-    //<-dceag-getconfig-e->
-
-    // Put your code here to initialize the data in this class
-    // The configuration parameters DATA_ are now populated
-
-    if( !coreDevices.GetConfig(m_pData) )
-    {
-        RouterNeedsReload();
-        return false;
-    }
-    return true;
-}
 
 
 //<-dceag-reg-b->
@@ -3132,7 +3114,7 @@ void DCE::qOrbiter::populateAdditionalMedia() //additional media grid that popul
 
     if(checkLoadingStatus() == true)
     {
-        emit statusMessage("requesting additional media");
+        //emit statusMessage("requesting additional media");
 
 #ifndef ANDROID
         int gHeight = 1;

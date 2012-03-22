@@ -49,13 +49,13 @@ qorbiterManager::qorbiterManager(QDeclarativeView *view, QObject *parent) :
 {
 
     m_bStartingUp= true;
-    b_skinsReady = false;
-    b_orbiterReady = false;
+   // b_skinsReady = false;
+   // b_orbiterReady = false;
     bAppError = false;
 
     //this governs local vs remote loading. condensed to one line, and will be configurable from the ui soon.
 #ifndef ANDROID
-    b_localLoading = false;
+    b_localLoading = true;
 #else
     b_localLoading = false;
 #endif
@@ -91,8 +91,8 @@ qorbiterManager::qorbiterManager(QDeclarativeView *view, QObject *parent) :
     item = qorbiterUIwin->rootObject();
 
     QObject::connect(qorbiterUIwin, SIGNAL(sceneResized(QSize)),  SLOT(checkOrientation(QSize)) );
-    QObject::connect(this, SIGNAL(orbiterConfigReady(bool)), this, SLOT(showUI(bool)));
-    QObject::connect(this, SIGNAL(skinIndexReady(bool)), this, SLOT(showUI(bool)));
+   QObject::connect(this, SIGNAL(orbiterConfigReady(bool)), this, SLOT(showUI(bool)));
+   QObject::connect(this, SIGNAL(skinIndexReady(bool)), this, SLOT(showUI(bool)));
 
     ScreenSaver = new ScreenSaverClass();
 
@@ -260,7 +260,7 @@ bool qorbiterManager::initializeManager(string sRouterIP, int device_id)
 
 #ifdef ANDROID
     if( !loadSkins(QUrl(remoteDirectoryPath)))
-    {   emit skinIndexReady(false);
+    {   emit skinIndexReady(true);
         b_skinsReady = false;
         return false;
     }
@@ -920,8 +920,11 @@ bool qorbiterManager::loadSkins(QUrl base)
     tskinModel->addSkin("default");
 #else
     tskinModel->addSkin("default");
-   // tskinModel->addSkin("aeon");
-   // tskinModel->addSkin("crystalshades");
+    if(b_localLoading) //temporary hack until i deal with whats causing issues with these skins. from the outside, it appears to be a race condition. data being returned out of order.
+    {
+    tskinModel->addSkin("aeon");
+    tskinModel->addSkin("crystalshades");
+    }
 #endif
     b_skinsReady = true;
     emit skinIndexReady(true);

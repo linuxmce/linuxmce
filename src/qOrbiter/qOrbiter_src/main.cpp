@@ -149,7 +149,7 @@ int main(int argc, char* argv[])
     QApplication::setGraphicsSystem("opengl");
 #elif WIN32
 
-#elif for_android|| ANDROID
+#elif ANDROID
     QApplication::setGraphicsSystem("opengl");
 #else
     QApplication::setGraphicsSystem("raster");
@@ -475,6 +475,8 @@ int main(int argc, char* argv[])
     */
         if( pqOrbiter->m_bReload )
             bReload=true;
+
+        a.quit();
     }
 
     catch(string s)

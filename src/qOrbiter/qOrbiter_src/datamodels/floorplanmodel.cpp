@@ -38,19 +38,19 @@ void FloorPlanModel::appendRows(const QList<FloorplanDevice *> &items)
 {
   beginInsertRows(QModelIndex(), rowCount(), rowCount()+items.size()-1);
   foreach(FloorplanDevice *item, items) {
-/*
+
    QObject::connect(item, SIGNAL(dataChanged()), this, SLOT(handleItemChange()));
     m_list.append(item);
-    */
+
   }
 
   endInsertRows();
-  /*
+
   QModelIndex index = indexFromItem(m_list.last());
   QModelIndex index2 = indexFromItem(m_list.first());
   int currentRows= m_list.count() - 1;
   emit dataChanged(index2, index);
-*/
+
 }
 
 void FloorPlanModel::insertRow(int row, FloorplanDevice *item)

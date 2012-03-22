@@ -71,6 +71,8 @@ signals:
     void floorPlanImageChanged();
     void floorPlanStatus(QString s);
     void requestNewFloorPlanData(QString p);
+    void dataChanged(const QModelIndex &topLeft, const QModelIndex &bottomRight);
+
 public slots:
     void clear();
     void handleItemChange();

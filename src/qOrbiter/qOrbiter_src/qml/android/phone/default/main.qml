@@ -44,40 +44,39 @@ import "js/ScreenChange.js" as ScreenLogic
       }
 
 
-      function screenchange(screen) {
-          var component;
-         // pageLoader.source = "screens/"+screen
-
-          console.log("QML Command to change to:" +screen);
-          component = Qt.createComponent("screens/"+screen);
-          if (component.status === Component.Ready)
+      function screenchange(screenname )
+      {
+          pageLoader.source = "screens/"+screenname
+          if (pageLoader.status == Component.Ready)
           {
-              console.log("loaded!");
-              finishCreation(component);
+              manager.setDceResponse("Command to change to:" + screenname+ " was successfull")
+          }
+          else if (pageLoader.status == Component.Loading)
+          {
+              console.log("loading page from network")
+              finishLoading(screenname)
           }
           else
           {
-              console.log("delayed load, waiting..")
-
-              component.statusChanged.connect(finishCreation(component));              
-              component.progressChanged.connect(checkStatus(component))
+              console.log("Command to change to:" + screenname + " failed!")
+              screenfile = screenname
+              pageLoader.source = "screens/Screen_x.qml"
           }
       }
 
-      function finishCreation(component) {
-        var sprite;
-          if (component.status === Component.Ready) {
-              console.log("Finishing creation")
-              sprite = component.createObject(this, {"x": 0, "y": 0});
-              pageLoader.sourceComponent = component
-              if (sprite === null) {
-                  // Error Handling
-                  console.log("Not finished!");
-              }
-          } else if (component.status === Component.Error) {
-              // Error Handling
-              console.log("Error loading component:", component.errorString());
+      function finishLoading (screenname)
+      {
+          if(pageLoader.status != Component.Ready)
+          {
+              console.log("finishing load")
+              pageLoader.source = "screens/"+screenname
+              console.log("screen" + screenname + " loaded.")
           }
+          else
+          {
+              finishLoading(screenname)
+          }
+
       }
 
       function checkStatus(component)

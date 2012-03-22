@@ -80,6 +80,7 @@ SkinDataItem * SkinDataModel::find(const QString &id) const
         }       
     }
          ui_reference->setDceResponse("SKIN ERROR");
+         find(id);
          return 0;
 }
 
