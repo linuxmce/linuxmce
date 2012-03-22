@@ -44,7 +44,7 @@ Item {
     function screenchange(screenname )
     {
         pageLoader.source = "screens/"+screenname
-        if (pageLoader.status == Component.Ready )
+        if (pageLoader.status == 1)
         {
             //manager.setDceResponse("Command to change to:" + screenname+ " was successfull")
         }
@@ -57,16 +57,18 @@ Item {
     }
 
 
+
     Loader {
         id:pageLoader
         objectName: "loadbot"
 
         onSourceChanged:  loadin
         onLoaded: {
+
             console.log("Screen Changed:" + pageLoader.source)
+
         }
     }
-
 
     SequentialAnimation{
         id:loadin
