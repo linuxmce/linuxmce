@@ -30,7 +30,6 @@ Rectangle {
         anchors.centerIn: parent
         smooth: true
 
-
         ParallelAnimation {
 
             id:raise
@@ -45,7 +44,7 @@ Rectangle {
 
             id:lower
             running:false
-            loops: Animation.complete
+            loops: Animation.alwaysRunToEnd
             PropertyAnimation{ target:ssimg; property: "opacity"; to: "0"; duration: 2000}
             ScriptAction {script: changePic()}
         }
@@ -55,7 +54,5 @@ Rectangle {
             onImageChanged:changeStuff()
 
         }
-
-
     }
 }

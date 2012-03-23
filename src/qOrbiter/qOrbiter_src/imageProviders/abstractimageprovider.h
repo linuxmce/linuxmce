@@ -70,7 +70,6 @@ QImage key;
             }
             else
             {
-
                 managerreference->filedetailsclass->setImageAspect("wide");
             }
         }
