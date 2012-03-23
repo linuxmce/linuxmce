@@ -87,7 +87,7 @@ Rectangle {
         MouseArea{
             id: exit_mousearea
             anchors.fill: parent
-            onPressed: rect.destroy()
+            onPressed:loadComponent("NullComponent.qml")
         }
     }
     Text {
