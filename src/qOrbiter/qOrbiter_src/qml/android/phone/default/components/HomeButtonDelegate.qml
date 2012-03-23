@@ -27,7 +27,7 @@ Component{
                 anchors.fill: parent
                 onClicked: {
                     dcerouter.executeCommandGroup(params);
-                    generic_list.destroy()
+                    loadComponent("NullComponent.qml")
                 }
                 onPressed:  delegatemenu.color = "orange"
                 onReleased: delegatemenu.color = "transparent"

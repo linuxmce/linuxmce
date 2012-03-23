@@ -34,7 +34,7 @@ Rectangle {
         }
         MouseArea{
             anchors.fill: parent
-            onClicked: generic_list.destroy()
+            onClicked: loadComponent("NullComponent.qml")
         }
     }
     HomeButtonDelegate{id:generic_delegate}
