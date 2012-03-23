@@ -92,7 +92,7 @@ Rectangle {
         anchors.rightMargin: scaleX(1)
         MouseArea{
             anchors.fill: parent
-            onPressed: {assignscreenshot.destroy() }
+            onPressed: {loadComponent("NullComponent.qml") }
             onClicked: { cleanupScreenie()
             }
         }
