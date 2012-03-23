@@ -266,7 +266,7 @@ bool qorbiterManager::initializeManager(string sRouterIP, int device_id)
     }
 #elif for_android
     //qDebug() << "Loading skins";
-    if( !loadSkins(QUrl(remoteDirectoryPath)))
+    if( !loadSkins(QUrl(localDir)))
     {   emit skinIndexReady(false);
         return false;
     }

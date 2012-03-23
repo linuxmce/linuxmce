@@ -407,7 +407,12 @@ OTHER_FILES += Readme.txt \
     android/res/values-id/strings.xml \
     android/res/drawable-ldpi/icon.png \
     android/AndroidManifest.xml \
-    android/version.xml
+    android/version.xml \
+    qml/effects/EffectVignette.qml \
+    qml/shaders/vignette.fsh \
+    qml/shaders/gaussianblur_v.fsh \
+    qml/shaders/gaussianblur_h.fsh \
+    qml/effects/EffectGaussianBlur.qml
 
 ANDROID{
 OTHER_FILES=\

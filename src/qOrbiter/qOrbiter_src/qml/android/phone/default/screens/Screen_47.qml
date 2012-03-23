@@ -66,7 +66,7 @@ Rectangle {
         target: filedetailsclass
         onShowDetailsChanged:
         {
-            MyJs.createFileDetails()
+            loadComponent("FileDetails.qml")
 
         }
     }

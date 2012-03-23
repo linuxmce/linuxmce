@@ -70,7 +70,7 @@ qOrbiter::qOrbiter( int DeviceID, string ServerAddress,bool bConnectEventHandler
     media_totalPages=0;
     media_currentPage=0;
     media_pos=0;
-    media_pageSeperator = 25;
+    media_pageSeperator = 50;
     b_mediaPlaying = false;
     m_dwPK_Device_NowPlaying = 0;
     m_dwPK_Device_NowPlaying_Video = 0;
@@ -3120,14 +3120,14 @@ void DCE::qOrbiter::populateAdditionalMedia() //additional media grid that popul
         int gWidth = 0;
         int pkVar = 0;
         int iOffset = 0;
-        int GridCurRow = 0;
+        int GridCurRow = media_currentPage;
         int GridCurCol= 0;
 #elif for_android
         int gHeight = media_pageSeperator;
         int gWidth = 0;
         int pkVar = 0;
         int iOffset = 0;
-        int GridCurRow = 0;
+        int GridCurRow = media_currentPage;
         int GridCurCol= 0;
 #else
         int gHeight = 1;            //how many rows we want

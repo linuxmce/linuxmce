@@ -72,7 +72,7 @@ Rectangle {
             buttontext: currentuser
             MouseArea{
                 anchors.fill: parent
-                onClicked:  MyJs.createStageComponent("UserSelector.qml", stage)
+                onClicked:  loadComponent("UserSelector.qml")
             }
         }
 
@@ -88,7 +88,7 @@ Rectangle {
             }
             MouseArea{
                 anchors.fill: parent
-                onClicked:  MyJs.createStageComponent("RoomSelector.qml", stage)
+                onClicked:  loadComponent("RoomSelector.qml")
             }
         }
 

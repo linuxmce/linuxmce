@@ -1,118 +1,162 @@
-  import QtQuick 1.1
+import QtQuick 1.1
 
-  import "components"
-  import "js/ComponentLoader.js" as MyJs
-import "js/ScreenChange.js" as ScreenLogic
-
-  Item {
-      id: item
-    width:appW
-      height:appH
-
-      signal close()
-      signal changeScreen(string s)
-      signal setupStart(int x, string y)
+import "components"
+import "js/ComponentLoader.js" as MyJs
 
 
-      property string locationinfo: "standby"
-      property string screenfile
-  property string dynamic_height 
-  property string dynamic_width 
+Item {
+    id: item
+  width:appW
+    height:appH
 
-  function checkLayout()
-  {
-  console.log("c++ slot orientation changed")
-  }
-  
-  Connections{
-	  target: manager
-      onOrientationChanged: checkLayout()
-
-      }
-
-      Image {
-	  id: bg
-	  source: "img/bkg.png"
-	  anchors.fill:parent
-      }
-
-      function scaleX(x){
-	  return x/100*appW
-      }
-      function scaleY(y){
-	  return y/100*appH
-      }
+    signal close()
+    signal changeScreen(string s)
+    signal setupStart(int x, string y)
 
 
-      function screenchange(screenname )
-      {
-          pageLoader.source = "screens/"+screenname
-          if (pageLoader.status == Component.Ready)
-          {
-              manager.setDceResponse("Command to change to:" + screenname+ " was successfull")
-          }
-          else if (pageLoader.status == Component.Loading)
-          {
-              console.log("loading page from network")
-              finishLoading(screenname)
-          }
-          else
-          {
-              console.log("Command to change to:" + screenname + " failed!")
-              screenfile = screenname
-              pageLoader.source = "screens/Screen_x.qml"
-          }
-      }
+    property string locationinfo: "standby"
+    property string screenfile
+property string dynamic_height
+property string dynamic_width
 
-      function finishLoading (screenname)
-      {
-          if(pageLoader.status != Component.Ready)
-          {
-              console.log("finishing load")
-              pageLoader.source = "screens/"+screenname
-              console.log("screen" + screenname + " loaded.")
-          }
-          else
-          {
-              finishLoading(screenname)
-          }
+function checkLayout()
+{
+console.log("c++ slot orientation changed")
+}
 
-      }
+Connections{
+    target: manager
+    onOrientationChanged: checkLayout()
 
-      function checkStatus(component)
-      {
-         console.log(component.progress)
-      }
+    }
+
+    Image {
+    id: bg
+    source: "img/bkg.png"
+    anchors.fill:parent
+    }
+
+    function scaleX(x){
+    return x/100*appW
+    }
+    function scaleY(y){
+    return y/100*appH
+    }
 
 
-      Loader {
-	  id:pageLoader
-	  objectName: "loadbot"
+    function screenchange(screenname )
+    {
+        pageLoader.source = "screens/"+screenname
+        if (pageLoader.status == Component.Ready)
+        {
+            manager.setDceResponse("Command to change to:" + screenname+ " was successfull")
+        }
+        else if (pageLoader.status == Component.Loading)
+        {
+            console.log("loading page from network")
+            finishLoading(screenname)
+        }
+        else
+        {
+            console.log("Command to change to:" + screenname + " failed!")
+            screenfile = screenname
+            pageLoader.source = "screens/Screen_x.qml"
+        }
+    }
 
-	  onSourceChanged:  loadin
-	  onLoaded: {
+    function finishLoading (screenname)
+    {
+        if(pageLoader.status != Component.Ready)
+        {
+            console.log("finishing load")
+            pageLoader.source = "screens/"+screenname
+            console.log("screen" + screenname + " loaded.")
+        }
+        else
+        {
+            finishLoading(screenname)
+        }
 
-	      console.log("Screen Changed:" + pageLoader.source)
+    }
 
-	      }
-	  }
-
-      SequentialAnimation{
-	  id:loadin
-
-	  PropertyAnimation{
-	      id:fadeout
-	      target:pageLoader
-	      properties: "opacity"; to: "0"; duration: 5000
-
-	  }
-	  PropertyAnimation{
-	      id: fadein
-	      target:pageLoader
-	      properties: "opacity"; to: "1"; duration: 5000
-	  }
-
-      }
+    function checkStatus(component)
+    {
+       console.log(component.progress)
+    }
 
 
-  }
+    Loader {
+    id:pageLoader
+    objectName: "loadbot"
+
+    onSourceChanged:  loadin
+    onLoaded: {
+
+        console.log("Screen Changed:" + pageLoader.source)
+
+        }
+    }
+  //=================Components==================================================//
+    function loadComponent(componentName )
+    {
+        componentLoader.source = "components/"+componentName
+        if (componentLoader.status == Component.Ready)
+        {
+            manager.setDceResponse("Command to change to:" + componentName+ " was successfull")
+        }
+        else if (componentLoader.status == Component.Loading)
+        {
+            console.log("loading page from network")
+            finishLoadingComponent(componentName)
+        }
+        else
+        {
+            console.log("Command to add: " + componentName + " failed!")
+            componentFile = componentName
+
+        }
+    }
+
+    function finishLoadingComponent (componentName)
+    {
+        if(componentLoader.status != Component.Ready)
+        {
+            console.log("finishing network load")
+            componentLoader.source = "components/"+componentName
+            console.log("screen" + componentName + " loaded.")
+        }
+        else
+        {
+            finishLoadingComponent(componentName)
+        }
+
+    }
+
+
+    Loader{
+        id:componentLoader
+        height: parent.height
+        width: parent.width
+        objectName: "componentbot"
+        onLoaded: {console.log("Component is loaded")}
+    }
+
+    SequentialAnimation{
+    id:loadin
+
+    PropertyAnimation{
+        id:fadeout
+        target:pageLoader
+        properties: "opacity"; to: "0"; duration: 5000
+
+    }
+    PropertyAnimation{
+        id: fadein
+        target:pageLoader
+        properties: "opacity"; to: "1"; duration: 5000
+    }
+
+    }
+
+
+}

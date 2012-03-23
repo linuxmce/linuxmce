@@ -28,7 +28,7 @@ property int imagebuttonsize: scaleY(15)
             }
             MouseArea{
                 anchors.fill: parent
-               onClicked:  MyJs.createListComponent("LightingSelector.qml", selector)
+               onClicked:  loadComponent("LightingSelector.qml")
             }
         }
 
@@ -46,7 +46,7 @@ property int imagebuttonsize: scaleY(15)
 
             MouseArea{
                 anchors.fill: parent
-                onClicked:  MyJs.createListComponent("MediaSelector.qml", selector)
+                onClicked:  loadComponent("MediaSelector.qml")
             }
         }
 
@@ -65,7 +65,7 @@ property int imagebuttonsize: scaleY(15)
 
             MouseArea{
                 anchors.fill: parent
-                onClicked:  MyJs.createListComponent("ClimateSelector.qml", selector)
+                onClicked:  loadComponent("ClimateSelector.qml")
             }
 
         }
@@ -90,7 +90,7 @@ property int imagebuttonsize: scaleY(15)
             }
             MouseArea{
                 anchors.fill: parent
-                onClicked:  MyJs.createListComponent("SecuritySelector.qml", selector)
+                onClicked:  loadComponent("SecuritySelector.qml")
             }
         }
 
@@ -108,7 +108,7 @@ property int imagebuttonsize: scaleY(15)
 
             MouseArea{
                 anchors.fill: parent
-                onClicked:  MyJs.createListComponent("TelecomSelector.qml", selector)
+                onClicked:  loadComponent("TelecomSelector.qml")
             }
         }
 

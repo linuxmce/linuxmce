@@ -1,6 +1,9 @@
 import QtQuick 1.0
+import Qt.labs.shaders 1.0
+import "../effects"
 import "../components"
 import "../js/ComponentLoader.js" as MyJs
+
 
 
 Rectangle {
@@ -10,10 +13,15 @@ Rectangle {
     color: "transparent"
     clip: true
 
+
     Image {
         id: gb
         source: "../img/icons/mediatime.png"
-    }
+      }
+
+
+
+
     Connections
     {
         target: filedetailsclass
@@ -162,7 +170,11 @@ Rectangle {
             }
         }
 
-
+        EffectVignette {
+               id: curtain
+               anchors.fill: gb
+                ShaderEffectSource { sourceItem: gb; hideSource: true }
+        }
         MultiStateFileDisplay{id:grid_view1}
 
         ListView{
