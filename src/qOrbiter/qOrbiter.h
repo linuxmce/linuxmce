@@ -1224,6 +1224,9 @@ signals:
     //controls
     void resendAvButtonList(QList<QObject*> t);
      void deviceCommandList(QList<QObject*> f);
+
+     //screensaver
+     void currentScreenSaverImage(const uchar* ,int);
 public slots:
     //setup
     void executeCommandGroup(int cmdGrp);
@@ -1242,6 +1245,9 @@ public slots:
 
      //floorplans
      void getFloorPlanImage(QString fp_path);
+
+     //screensave
+     void getScreenSaverImage(QString inc_requested_img_path);
 
     //connections
     void connectionError();

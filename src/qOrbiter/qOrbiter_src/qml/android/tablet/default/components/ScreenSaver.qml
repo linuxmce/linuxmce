@@ -3,8 +3,8 @@ import QtQuick 1.0
 Rectangle {
     width: appW
     height: appH
-    color: "slategrey"
-
+    color: "darkslateblue"
+    anchors.centerIn: parent
     function changeStuff()
     {
         lower.running =true
@@ -24,8 +24,9 @@ Rectangle {
 
     Image {
         id: ssimg
-        height: style.height
-        width: style.width
+        height: appH
+         width: appW
+
         source: "image://listprovider/screensaver"+screensaver.timestamp
         anchors.centerIn: parent
         smooth: true

@@ -4268,6 +4268,21 @@ void qOrbiter::getFloorPlanImage(QString fp_path)
     }
 }
 
+void qOrbiter::getScreenSaverImage(QString inc_requested_img_path)
+{
+    char *picData = NULL;
+    int picData_Size;
+    picData_Size = 0;
+
+    CMD_Request_File reqFile((long)m_dwPK_Device, (long)4 , inc_requested_img_path.toStdString(), &picData, &picData_Size);
+    string p_sResponse="";
+    if(SendCommand(reqFile, &p_sResponse) && p_sResponse=="OK")
+    {
+        const uchar *data = (uchar*)picData;
+        emit currentScreenSaverImage(data, picData_Size);
+    }
+}
+
 void DCE::qOrbiter::sendAvCommand(int deviceto, int command)
 {
     string cmd_resp="";

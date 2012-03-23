@@ -3,6 +3,7 @@
 
 #include <QObject>
 #include <QStringList>
+#include <QImage>
 
 class ScreenSaverClass : public QObject
 {
@@ -14,16 +15,20 @@ public:
     explicit ScreenSaverClass(QObject *parent = 0);
     QStringList images;
     QString currentImage;
+    QImage qi_currentImage;
+
     bool isReady;
     
 signals:
     void imageChanged();
     void screenSaverReady();
     void statusChanged();
+    void requestNewImage(QString url);
     
 public slots:
     void setImageList(QStringList imgList);
     void clearImageList();
+    void setImageData(const uchar* data,int iData_size);
 
     QString getImage();
     void setImage(QString imgUrl);

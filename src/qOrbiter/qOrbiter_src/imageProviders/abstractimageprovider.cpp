@@ -103,7 +103,7 @@ QImage AbstractImageProvider::screenShot()
 
 QImage AbstractImageProvider::ScreenSaver()
 {
-    key = managerreference->updatedObjectImage;
+    key = managerreference->ScreenSaver->qi_currentImage;
 
      if (key.isNull())
      {

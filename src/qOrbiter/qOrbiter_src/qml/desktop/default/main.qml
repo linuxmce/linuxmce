@@ -19,19 +19,18 @@ Item {
         target:manager
         onOrientationChanged: updateScreen()
     }
-
+ScreenSaver{
+height: appH
+width: appW
+anchors.centerIn: parent
+}
     function updateScreen()
     {
 
 
         console.log("updated screen")
     }
-    Image {
-        id: bg
-        fillMode: Image.PreserveAspectFit
-        source: "img/icons/backgrounds/livingroom.png"
-        anchors.fill: parent
-    }
+
 
 
     function scaleX(x){

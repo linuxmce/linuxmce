@@ -28,6 +28,12 @@ void ScreenSaverClass::clearImageList()
     images.clear();
 }
 
+void ScreenSaverClass::setImageData(const uchar *data, int iData_size)
+{
+    qi_currentImage.loadFromData(data, iData_size);
+    emit imageChanged();
+}
+
 bool ScreenSaverClass::getStatus()
 {
     return isReady;
@@ -75,6 +81,6 @@ QString ScreenSaverClass::getImage()
 void ScreenSaverClass::setImage(QString url)
 {
     currentImage =  url;
+    emit requestNewImage(currentImage);
 
-               emit imageChanged();
 }

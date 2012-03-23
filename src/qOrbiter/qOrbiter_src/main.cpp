@@ -350,6 +350,9 @@ int main(int argc, char* argv[])
         QObject::connect(w, SIGNAL(bindMediaRemote(bool)), pqOrbiter, SLOT(BindMediaRemote(bool)), Qt::DirectConnection);
         QObject::connect(w, SIGNAL(startPlayback(QString)), pqOrbiter, SLOT(playMedia(QString)));
 
+        QObject::connect(w->ScreenSaver, SIGNAL(requestNewImage(QString)), pqOrbiter, SLOT(getScreenSaverImage(QString)), Qt::QueuedConnection);
+        QObject::connect(pqOrbiter, SIGNAL(currentScreenSaverImage(const uchar*,int)), w->ScreenSaver, SLOT(setImageData(const uchar*,int)),Qt::QueuedConnection);
+
         // QObject::connect(w, SIGNAL(liveTVrequest()), simpleEPGmodel, SLOT(populate()));
 
         QObject::connect(w->nowPlayingButton, SIGNAL(newMediaSpeed(int)), pqOrbiter,SLOT(setMediaSpeed(int)));
