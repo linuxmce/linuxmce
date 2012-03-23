@@ -1520,7 +1520,8 @@ QApplication::processEvents(QEventLoop::AllEvents);
 
     }
     */
-}
+    raiseSplash();
+    }
 
 void qorbiterManager::setDceResponse(QString response)
 {

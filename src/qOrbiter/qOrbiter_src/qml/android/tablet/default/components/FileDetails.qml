@@ -19,6 +19,15 @@ Rectangle {
         anchors.fill: filedetailrect
     }
 
+    Rectangle{
+        id:mask
+        height: appH
+        width: appW
+        color: "lightgrey"
+        opacity: .5
+        z: -1
+    }
+
   Connections{
       target:filedetailsclass
       onObjectChanged:filedetailsimage.source = "image://listprovider/filedetailsprovider/"+securityvideo.timestamp

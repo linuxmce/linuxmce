@@ -35,7 +35,7 @@ Rectangle {
 
             id:raise
             running: false
-            loops: Animation.complete
+            loops: 1
             PropertyAnimation{ target:ssimg; property: "opacity"; to: "1"; duration: 2000}
             PropertyAnimation{ target:ssimg; property: "scale"; to:1.25; duration: 5000}
 
@@ -45,7 +45,7 @@ Rectangle {
 
             id:lower
             running:false
-            loops: Animation.alwaysRunToEnd
+            loops: 1
             PropertyAnimation{ target:ssimg; property: "opacity"; to: "0"; duration: 2000}
             ScriptAction {script: changePic()}
         }
