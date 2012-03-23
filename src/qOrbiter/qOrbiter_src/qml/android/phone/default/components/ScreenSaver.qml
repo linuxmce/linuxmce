@@ -1,10 +1,10 @@
 import QtQuick 1.0
 
 Rectangle {
-    width: style.orbiterH
-    height: style.orbiterW
-    color: "black"
-
+    width: appW
+    height: appH
+    color: "darkslateblue"
+    anchors.centerIn: parent
     function changeStuff()
     {
         lower.running =true
@@ -24,12 +24,12 @@ Rectangle {
 
     Image {
         id: ssimg
-        height: style.height
-        width: style.width
+        height: appH
+         width: appW
+
         source: "image://listprovider/screensaver"+screensaver.timestamp
         anchors.centerIn: parent
         smooth: true
-
 
         ParallelAnimation {
 
@@ -45,7 +45,7 @@ Rectangle {
 
             id:lower
             running:false
-            loops: Animation.complete
+            loops: Animation.alwaysRunToEnd
             PropertyAnimation{ target:ssimg; property: "opacity"; to: "0"; duration: 2000}
             ScriptAction {script: changePic()}
         }
@@ -55,7 +55,5 @@ Rectangle {
             onImageChanged:changeStuff()
 
         }
-
-
     }
 }

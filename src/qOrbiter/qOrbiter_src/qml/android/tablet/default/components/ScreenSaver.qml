@@ -3,7 +3,7 @@ import QtQuick 1.0
 Rectangle {
     width: appW
     height: appH
-    color: "darkslateblue"
+    color: "darkgrey"
     anchors.centerIn: parent
     function changeStuff()
     {

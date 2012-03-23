@@ -30,12 +30,19 @@ Connections{
 
     }
 
+/*
     Image {
     id: bg
     source: "img/bkg.png"
     anchors.fill:parent
     }
-
+*/
+ScreenSaver
+{
+    height: appH
+    width: appW
+    anchors.centerIn: parent
+}
     function scaleX(x){
     return x/100*appW
     }

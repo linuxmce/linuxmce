@@ -28,14 +28,19 @@ Connections{
     target: manager
     onOrientationChanged: checkLayout()
     }
-
+/*
     Image {
     id: bg
     source: "img/icons/backgrounds/livingroom.png"
     anchors.fill:parent
     }
-
-ScreenSaver{}
+*/
+    ScreenSaver
+    {
+        height: appH
+        width: appW
+        anchors.centerIn: parent
+    }
     function scaleX(x){
     return x/100*appW
     }
