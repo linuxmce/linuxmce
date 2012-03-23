@@ -27,15 +27,15 @@ console.log("c++ slot orientation changed")
 Connections{
     target: manager
     onOrientationChanged: checkLayout()
-
     }
-
+/*
     Image {
     id: bg
-    source: "img/bkg.png"
+    source: "img/icons/backgrounds/livingroom.png"
     anchors.fill:parent
     }
-
+*/
+ScreenSaver{}
     function scaleX(x){
     return x/100*appW
     }

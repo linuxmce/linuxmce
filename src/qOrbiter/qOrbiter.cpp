@@ -2240,9 +2240,11 @@ void qOrbiter::requestPage(int page)
     media_currentPage = page;
     setGridStatus(true);
 
-    qDebug() << "Navigating to page " << media_currentPage;
-    qDebug() << "Cell Range::" << media_pos << "to" << media_pos + media_pageSeperator;
-#ifdef for_android || ANDROID
+    //qDebug() << "Navigating to page " << media_currentPage;
+    //qDebug() << "Cell Range::" << media_pos << "to" << media_pos + media_pageSeperator;
+#ifdef ANDROID
+    emit clearPageGrid();
+#elif for_android
     emit clearPageGrid();
 #endif
 
@@ -2374,7 +2376,7 @@ void DCE::qOrbiter::GetFileInfoForQml(QString qs_file_reference)
 
 void DCE::qOrbiter::GetMediaAttributeGrid(QString  qs_fk_fileno)
 {
-    qDebug("Getting file info");
+    //qDebug("Getting file info");
     int gHeight = 1;
     int gWidth = 1;
     int pkVar = 0;
@@ -2694,7 +2696,7 @@ void qOrbiter::updateFloorPlan(QString p)
     p.remove(0, p.length() - 1);
     CMD_Get_Current_Floorplan getFloorPlan(m_dwPK_Device, iOrbiterPluginID, p.toStdString(), i_current_floorplanType , &sval);
     SendCommand(getFloorPlan);
-    qDebug() << "This Page Floorplan Data for Page " <<  p << ", Floorplan device type " << i_current_floorplanType << "::" <<sval.c_str();
+    //qDebug() << "This Page Floorplan Data for Page " <<  p << ", Floorplan device type " << i_current_floorplanType << "::" <<sval.c_str();
 }
 
 void DCE::qOrbiter::GetScreenSaverImages() // unused at this time
@@ -2724,7 +2726,7 @@ void DCE::qOrbiter::BindMediaRemote(bool onoff)
 
 void DCE::qOrbiter::jumpToPlaylistPosition(int pos)
 {
-    qDebug("jumping to playlist item");
+    //qDebug("jumping to playlist item");
     CMD_Jump_Position_In_Playlist jump_playlist(m_dwPK_Device, iMediaPluginID, StringUtils::itos(pos), internal_streamID);
     SendCommand(jump_playlist);
 }
@@ -2734,7 +2736,7 @@ void DCE::qOrbiter::setNowPlayingDetails()
     if(i_current_mediaType != 11)
     {
 
-        qDebug("Requesting playlist");
+        //qDebug("Requesting playlist");
 
     }
     else{
@@ -2955,7 +2957,7 @@ void DCE::qOrbiter::requestLiveTvPlaylist()
       that the orbiter makes.
       */
 
-    qDebug("Getting current Epg");
+    //qDebug("Getting current Epg");
 
     int gHeight = 1;
     int gWidth = 1;

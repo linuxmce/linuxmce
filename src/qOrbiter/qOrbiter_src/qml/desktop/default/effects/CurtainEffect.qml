@@ -45,13 +45,13 @@ import Qt.labs.shaders 1.0
 ShaderEffectItem {
     anchors.fill: parent
     property variant source
-    meshResolution: Qt.size(25, 25)
+    meshResolution: Qt.size(15, 15)
 
     property real topWidth: width
     property real bottomWidth: width
     property real originalWidth: width
     property real originalHeight: height
-    property real amplitude: 0.1
+    property real amplitude: 0.10
 
     vertexShader: "
         attribute highp vec4 qt_Vertex;

@@ -96,6 +96,7 @@ qorbiterManager::qorbiterManager(QDeclarativeView *view, QObject *parent) :
 
     ScreenSaver = new ScreenSaverClass();
 
+
 #ifdef for_desktop
     buildType = "/qml/desktop";
     qrcPath = "qrc:desktop/Splash.qml";
@@ -688,9 +689,9 @@ void qorbiterManager::processConfig(QByteArray config)
 
     configData.clear();
     tConf.clear();
-#ifdef for_desktop
+
     activateScreenSaver();
-#endif
+
     b_orbiterReady = true;
     emit orbiterConfigReady(true);
 
@@ -1266,7 +1267,7 @@ void qorbiterManager::setMediaScreenShot(QByteArray data)
     if(mediaScreenShot.loadFromData(data))
     {
         emit mediaScreenShotReady();
-        qDebug("Screen Shot loaded");
+       // qDebug("Screen Shot loaded");
     }
 }
 
@@ -1526,7 +1527,7 @@ void qorbiterManager::setDceResponse(QString response)
     dceResponse = response;
     emit loadingMessage(dceResponse);
     emit dceResponseChanged();
-    qDebug() << dceResponse;
+    //qDebug() << dceResponse;
 
 }
 

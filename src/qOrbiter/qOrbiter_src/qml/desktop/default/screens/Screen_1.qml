@@ -33,13 +33,11 @@ Item
 
                SequentialAnimation on topWidth {
                    id: topWidthAnim
-                   loops: Animation.Infinite
+
 
                    PauseAnimation { duration: 3000 }
                    NumberAnimation { to: 0; duration: 2000 }
-                   PauseAnimation { duration: 2000 }
-                   NumberAnimation { to: 1280; duration: 2000 }
-                   PauseAnimation { duration: 2000 }
+
                }
            }
 

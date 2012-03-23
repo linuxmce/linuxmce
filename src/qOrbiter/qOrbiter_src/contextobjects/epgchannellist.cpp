@@ -220,7 +220,7 @@ void EPGChannelList::populate()
 void EPGChannelList::setProgram(QString qml_text_channel)
 {
     id = qml_text_channel;
-    qDebug("Set liveTv channel");
+    //qDebug("Set liveTv channel");
 
 }
 
@@ -312,6 +312,6 @@ void EPGChannelList::updateLivePosition()
     }
     else
     {
-        qDebug() << "Cant find live tv station" << id;
+        //qDebug() << "Cant find live tv station" << id;
     }
 }

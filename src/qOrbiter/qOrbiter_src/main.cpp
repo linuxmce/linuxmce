@@ -445,15 +445,13 @@ int main(int argc, char* argv[])
         QObject::connect(pqOrbiter, SIGNAL(routerDisconnect()), w, SLOT(reloadHandler()));
         QObject::connect(pqOrbiter, SIGNAL(closeOrbiter()), w, SLOT(closeOrbiter()));
 
-        qDebug("Connected Signals and Slots, Starting threads.");
-
         dceThread->start();
         mediaThread->start();
         epgThread->start();
 
         pqOrbiter->m_dwPK_Device = w->iPK_Device;
         pqOrbiter->m_sHostName = w->qs_routerip.toStdString();
-        qDebug("Trying connection");
+
         if ( pqOrbiter->initialize() == true )
         {
             LoggerWrapper::GetInstance()->Write(LV_STATUS, "Connect OK");

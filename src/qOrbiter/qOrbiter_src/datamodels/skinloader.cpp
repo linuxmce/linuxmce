@@ -20,17 +20,17 @@ void SkinLoader::loadSkin(QString name) {
     ui_reference->setDceResponse("Skin loader is loading Style.qml: " + name);
     current_component = new QDeclarativeComponent(ui_reference->qorbiterUIwin->engine(), style);
     if (current_component->isLoading()) {
-        qDebug() << "Hooking up slot";
+        //qDebug() << "Hooking up slot";
 
         if (QObject::connect(current_component, SIGNAL(statusChanged(QDeclarativeComponent::Status)),this, SLOT(checkLoadingStatus())))
         {
-            qDebug() << "Hooked!";
+            //qDebug() << "Hooked!";
         } else {
-            qDebug() << "Fooked! :-(";
+            //qDebug() << "Fooked! :-(";
         }
     }
     else {
-        qDebug() << "Loaded already?  Attempting to ->create()";
+        //qDebug() << "Loaded already?  Attempting to ->create()";
         continueLoading();
     }
 

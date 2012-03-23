@@ -1,5 +1,4 @@
 import QtQuick 1.0
-import Qt.labs.shaders 1.0
 
 import "../components"
 import "../js/ComponentLoader.js" as MyJs
@@ -18,7 +17,6 @@ Rectangle {
         id: gb
         source: "../img/icons/mediatime.png"
       }
-
 
 
 

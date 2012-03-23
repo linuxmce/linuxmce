@@ -164,13 +164,13 @@ QModelIndex ListModel::indexFromItem(const gridItem *item) const
 
 void ListModel::clear()
 {
-    qDebug() << "clearing media model";
+    //qDebug() << "clearing media model";
     clearing = true;
     emit modelAboutToBeReset();
     beginResetModel();
     resetInternalData();
     setTotalCells(0);
-    setProgress(0);
+    setProgress(0.0);
     endResetModel();
     emit modelReset();
     clearing = false;

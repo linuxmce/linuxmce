@@ -9,7 +9,29 @@ Rectangle {
     border.color: "silver"
     border.width: 1
     clip: true
+    Rectangle{
+        id:exit_button
+        height: scaleY(8)
+        width: parent.width
+        anchors.top: rect.top
+        color: "transparent"
+        Image {
+            id: headerbg
+            source: "../img/widegreyshape.png"
+            anchors.fill: exit_button
+        }
 
+        Text {
+            id: exit
+            text: qsTr("Exit")
+            font.pixelSize: scaleY(3)
+            anchors.centerIn: parent
+        }
+        MouseArea{
+            anchors.fill: parent
+            onClicked: loadComponent("NullComponent.qml")
+        }
+    }
     Component{
         id:attributedelegate
         Item {

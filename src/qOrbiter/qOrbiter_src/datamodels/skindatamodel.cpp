@@ -68,14 +68,14 @@ void SkinDataModel::handleItemChange()
 
 SkinDataItem * SkinDataModel::find(const QString &id) const
 {
-    qDebug()<< "Looking for skin..." << id;
-    qDebug() << m_list.size();
+    //qDebug()<< "Looking for skin..." << id;
+    //qDebug() << m_list.size();
     foreach(SkinDataItem* item, m_list)
     {
-        qDebug() << "Skin Item" << item->id();
+        //qDebug() << "Skin Item" << item->id();
         if(item->id().toLower() == id.toLower())
         {
-             qDebug()<< "Found:" << item->id() << "of" << m_list.size();
+             //qDebug()<< "Found:" << item->id() << "of" << m_list.size();
             return item;
         }       
     }
@@ -146,7 +146,7 @@ void SkinDataModel::addSkin(QString name) {
    if (!style.isValid()) {
        qDebug() << "Invalid URL!";
    }*/
-    qDebug() << "Loading skin : " << name;
+    //qDebug() << "Loading skin : " << name;
     m_skin_loader->loadSkin(name);
 
 }

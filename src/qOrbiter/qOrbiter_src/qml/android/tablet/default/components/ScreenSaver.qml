@@ -1,9 +1,9 @@
 import QtQuick 1.0
 
 Rectangle {
-    width: style.orbiterH
-    height: style.orbiterW
-    color: "black"
+    width: appW
+    height: appH
+    color: "slategrey"
 
     function changeStuff()
     {

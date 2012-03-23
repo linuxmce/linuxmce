@@ -70,7 +70,7 @@ signals:
 
 public slots:
     void setSender(long sender) { sender = deviceFrom; emit senderChanged();}
-    void addParam(QString val, int key) {paramDevices.insert(key, val); qDebug() << key << "==" << val;}
+    void addParam(QString val, int key) {paramDevices.insert(key, val); }
     void clear();
 
 };
