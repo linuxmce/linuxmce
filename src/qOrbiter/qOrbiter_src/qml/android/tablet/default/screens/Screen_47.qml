@@ -5,8 +5,8 @@ import "../js/ComponentLoader.js" as MyJs
 
 Rectangle {
     id:fileviewscreen
-    width: style.orbiterW
-    height: style.orbiterH
+    width: appW
+    height: appH
     color: "transparent"
     clip: true
 
@@ -19,7 +19,7 @@ Rectangle {
         target: filedetailsclass
         onShowDetailsChanged:
         {
-            MyJs.createFileDetails(gmediaType)
+            loadComponent("FileDetails.qml")
         }
     }
 

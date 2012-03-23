@@ -154,7 +154,7 @@ Rectangle {
                         MouseArea{
                             anchors.fill: parent
                             onClicked:  {
-                                MyJs.createAvComponent("../components/ZoomAspect.qml",satcableboxremote )
+                                loadComponent("ZoomAspect.qml")
                             }
                         }
                     }

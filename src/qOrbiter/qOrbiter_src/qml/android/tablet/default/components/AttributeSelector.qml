@@ -22,7 +22,7 @@ Rectangle {
                     width:  scaleX(style.buttonW)
                     MouseArea{
                         anchors.fill:parent
-                        onClicked: MyJs.createFilterObjects("../components/AttributeTypes.qml")
+                        onClicked: loadComponent("AttributeTypes.qml")
                         }
                 }
 
@@ -34,7 +34,7 @@ Rectangle {
                     width:  scaleX(style.buttonW)
                     MouseArea{
                         anchors.fill:parent
-                        onClicked: MyJs.createFilterObjects("../components/GenreSelector.qml")
+                        onClicked: loadComponent("GenreSelector.qml")
                     }
                 }
 
@@ -47,7 +47,7 @@ Rectangle {
 
                     MouseArea{
                         anchors.fill:parent
-                        onClicked: MyJs.createFilterObjects("../components/MediaSources.qml")
+                        onClicked: loadComponent("MediaSources.qml")
                     }
                 }
 
@@ -61,7 +61,7 @@ Rectangle {
                 width:  scaleX(style.buttonW)
                 MouseArea{
                     anchors.fill:parent
-                    onClicked: MyJs.createFilterObjects("../components/FileFormat.qml")
+                    onClicked: loadComponent("FileFormat.qml")
                 }
             }
 
@@ -73,7 +73,7 @@ Rectangle {
                 width:  scaleX(style.buttonW)
                 MouseArea{
                     anchors.fill:parent
-                    onClicked: MyJs.createFilterObjects("../components/MediaTypes.qml")
+                    onClicked: loadComponent("MediaTypes.qml")
                 }
          }
 
