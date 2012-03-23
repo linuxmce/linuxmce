@@ -36,7 +36,7 @@ Rectangle {
                                    z:0
                                    onClicked:
                                    {
-                                       rect.destroy()
+                                      loadComponent("NullComponent.qml")
                                    }
                               }
 
@@ -53,7 +53,7 @@ Rectangle {
                                  id: fileformatcell
                                  text: name
                                  font.pointSize: 14
-                                 onFocusChanged: {rect.destroy()}
+                                 onFocusChanged: {loadComponent("NullComponent.qml")}
                                  font.pixelSize: scaleY(2)
 
                                   }
@@ -75,10 +75,7 @@ Rectangle {
                                                 }
                                           }
                                       }
-
                                }
-
-
                          }
                      }
                  }

@@ -31,7 +31,7 @@ Rectangle {
                                    z:0
                                    onClicked:
                                    {
-                                       rect.destroy()
+                                       loadComponent("NullComponent.qml")
                                    }
                               }
 

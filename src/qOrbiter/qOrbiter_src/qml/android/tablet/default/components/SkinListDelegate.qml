@@ -21,8 +21,6 @@ Component{
                 onClicked:{
                     console.log("the path:" +path)
                     swapSkins(path)
-
-
                 }
             }
 

@@ -32,7 +32,7 @@ Rectangle {
                     font.pointSize: scaleY(3)
                     wrapMode: "WrapAtWordBoundaryOrAnywhere"
                     anchors.centerIn: parent
-                    onFocusChanged: {rect.destroy()}
+                    onFocusChanged: {loadComponent("NullComponent.qml")}
                 }
 
                 MouseArea{
@@ -69,7 +69,7 @@ Rectangle {
         MouseArea{
             id: exit_mousearea
             anchors.fill: parent
-            onPressed: rect.destroy()
+            onPressed: loadComponent("NullComponent.qml")
         }
     }
     Text {

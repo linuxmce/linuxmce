@@ -36,7 +36,7 @@ Rectangle {
                     anchors.fill: parent                  
                     onClicked:
                     {
-                        rect.destroy()
+                        loadComponent("NullComponent.qml")
                     }
                 }
 

@@ -60,7 +60,7 @@ Rectangle {
                 onClicked: {
                     setActiveRoom(intRoom, entertain_area)
                     currentroom = title
-                    roomselectorrect.visible = false
+                    loadComponent("NullComponent.qml")
                     roombutton.buttontext = title
                 }
             }
