@@ -5,8 +5,8 @@ Rectangle {
 
     // property alias synText:
     id: satcableboxremote
-    height: style.orbiterH
-    width: style.orbiterW
+    height: appH
+    width: appW
     color:"transparent"
 
 
@@ -15,6 +15,7 @@ Rectangle {
         onPlayListPositionChanged: nowplayingimage.source = "image://listprovider/updateobject/"+securityvideo.timestamp
     }
 
+    Component.onCompleted:setNowPlayingTv()
 
         //main 'now playing rect containing all the other items
 
@@ -86,7 +87,7 @@ Rectangle {
                         height: childrenRect.height
 
                         Text {
-                            id: artist
+                            id: np_device
                             width: parent.width
                             text: qsTr("Device: ")  + dcenowplaying.qs_mainTitle
                             font.family: "Droid Sans"
@@ -99,27 +100,40 @@ Rectangle {
 
 
                         Text {
-                            id: album
+                            id: network_id
+                            wrapMode: "NoWrap"
+                            text: qsTr("Network: ") + dcenowplaying.channelID
+                            font.family: "Droid Sans"
+                            font.bold: true
+                            smooth: true
+                            horizontalAlignment: Text.AlignHCenter
+                            font.pixelSize: scaleY(2)
+                            color: "white"
+                        }
+
+
+                        Text {
+                            id: channel_id
                             wrapMode: "NoWrap"
                             text: qsTr("Channel: ") + dcenowplaying.channel
                             font.family: "Droid Sans"
                             font.bold: true
                             smooth: true
                             horizontalAlignment: Text.AlignHCenter
-                            font.pixelSize: 1 * scaleY(2)
-                            color: "aliceblue"
+                            font.pixelSize: scaleY(2)
+                            color: "white"
                         }
 
                         Text {
-                            id: title
+                            id: program_title
                             wrapMode: "NoWrap"
                             text: qsTr("Program:") + dcenowplaying.tvProgram
                             font.family: "Droid Sans"
                             font.bold: true
                             smooth: true
                             horizontalAlignment: Text.AlignHCenter
-                            font.pixelSize: 1 * scaleY(2)
-                            color: "aliceblue"
+                            font.pixelSize: scaleY(2)
+                            color: "white"
                         }
                     }
                 }
@@ -157,7 +171,7 @@ Rectangle {
                         MouseArea{
                             anchors.fill: parent
                             onClicked:  {
-                                MyJs.createAvComponent("../components/ZoomAspect.qml",satcableboxremote )
+                                loadComponent("ZoomAspect.qml")
                             }
                         }
                     }
@@ -173,7 +187,7 @@ Rectangle {
                         MouseArea{
                             anchors.fill: parent
                             onClicked:  {
-                                MyJs.createAvComponent("../components/Avcodes.qml",satcableboxremote )
+                                loadComponent("Avcodes.qml")
                             }
                         }
                     }
@@ -322,15 +336,10 @@ Rectangle {
                         buttontext: qsTr("Power")
                         MouseArea{
                             anchors.fill: parent
-                            onClicked: dcerouter.StopMedia()
+                            onClicked: dcerouter.stopMedia()
                         }
                     }
                     HomeButton{}
-                }
-                Text {
-                    id: media_messages
-                    text: dcerouter.mediaResponse
-                    font.pixelSize: scaleY(5)
                 }
             }
         }

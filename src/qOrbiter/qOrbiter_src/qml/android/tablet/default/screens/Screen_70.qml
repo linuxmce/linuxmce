@@ -5,27 +5,23 @@ Rectangle {
 
     // property alias synText:
     id: storedvideoremote
-    height: style.orbiterH
-    width: style.orbiterW
+    height: appH
+    width: appW
     radius: 0
     opacity: 1
     color: "transparent"
-
+   // Component.onCompleted: manager.setBoundStatus(true)
     Column{
         anchors.right: storedvideoremote.right
         anchors.rightMargin: scaleX(1)
         Remote_lighting_controls{ id: remote_lighting_controls1; }
         Remote_Audio_controls{ id: remote1; }
     }
-
-
     Connections{
         target:dcenowplaying
-
-        onImageChanged: nowplayingimage.source = "image://listprovider/updateobject/"+securityvideo.timestamp;
+        onImageChanged: { nowplayingimage.source = "image://listprovider/updateobject/"+securityvideo.timestamp;}
     }
-
-    Component.onCompleted:dcerouter.setNowPlayingDetails()
+    Component.onCompleted: dcerouter.BindMediaRemote(true)
 
     Row{
         id:mainrow
@@ -41,7 +37,6 @@ Rectangle {
             anchors.left: parent.left
             anchors.leftMargin: scaleX(1)
         }
-
 
             Column
             {
@@ -126,7 +121,7 @@ Rectangle {
             BorderImage {
                 id: metaborder
                 horizontalTileMode: BorderImage.Repeat
-                source: "../img/icons/drpshadow.png"
+                source: "../../../img/icons/drpshadow.png"
                 anchors.fill: textrect
                 anchors { leftMargin: -6; topMargin: -6; rightMargin: -8; bottomMargin: -8 }
                 border { left: 10; top: 10; right: 10; bottom: 10 }
@@ -265,7 +260,7 @@ Rectangle {
                             MouseArea{
                                 anchors.fill: parent
                                 onClicked:  {
-                                    MyJs.createAvComponent("../components/ZoomAspect.qml", storedvideoremote)
+                                    loadComponent("ZoomAspect.qml")
                                 }
                             }
                         }
@@ -275,7 +270,7 @@ Rectangle {
                                 anchors.fill: parent
                                 onClicked:  {
 
-                                    MyJs.createThumbComponent("../components/Bookmarks.qml", storedvideoremote)
+                                    loadComponent("Bookmarks.qml")
 
                                 }
                             }
@@ -285,7 +280,7 @@ Rectangle {
                             MouseArea{
                                 anchors.fill: parent
                                 onClicked:  {
-                                    MyJs.createAvComponent("../components/Avcodes.qml", storedvideoremote)
+                                   loadComponent("Avcodes.qml")
                                 }
                             }
                         }
@@ -297,8 +292,8 @@ Rectangle {
                             MouseArea{
                                 anchors.fill: parent
                                 onClicked:  {
-                                    dcerouter.grabScreenshot()
-                                    MyJs.createThumbComponent("../components/AssignScreenShot.qml", storedvideoremote)
+                                    dcerouter.grabScreenshot(dcenowplaying.filepath)
+                                   loadComponent("AssignScreenShot.qml")
 
                                 }
                             }
@@ -308,7 +303,7 @@ Rectangle {
                             MouseArea{
                                 anchors.fill: parent
                                 onClicked:  {
-                                    MyJs.createAvComponent("../components/JogPanel.qml", storedvideoremote)
+                                    loadComponent("JogPanel.qml")
                                 }
                             }
                         }

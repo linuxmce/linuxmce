@@ -33,7 +33,6 @@
 orbiterWindow::orbiterWindow(long deviceid, std::string routerip, QObject *parent) :
     QObject(parent)
 {
-
     newOrbiter = false;
     this->b_connectionPresent = false;
     this->b_localConfigReady = false;
@@ -50,18 +49,15 @@ orbiterWindow::orbiterWindow(long deviceid, std::string routerip, QObject *paren
     mainView.rootContext()->setContextProperty("window", this);
     mainView.setWindowTitle("LinuxMCE Orbiter ");
     mainView.rootContext()->setContextProperty("orbiterList" , "");
-  mainView.setViewport(glWidget);
-   mainView.setViewportUpdateMode(QGraphicsView::FullViewportUpdate);
+    mainView.setViewport(glWidget);
+    mainView.setViewportUpdateMode(QGraphicsView::FullViewportUpdate);
 
-
-    QObject::connect(&mainView, SIGNAL(sceneResized(QSize)), this, SIGNAL(orientationChanged(QSize)));
-
+    // QObject::connect(&mainView, SIGNAL(sceneResized(QSize)), this, SIGNAL(orientationChanged(QSize)));
 
 #ifdef ANDROID
     mainView.rootContext()->setContextProperty("appW", (mainView.window()->width()/ 2));//this is done because android reports the desktop width as 2x what it is.at least on my phone
     mainView.rootContext()->setContextProperty("appH", mainView.window()->height());
 #elif for_android
-
     mainView.rootContext()->setContextProperty("appW", 1280);
     mainView.rootContext()->setContextProperty("appH", 720);
 #elif for_desktop
@@ -74,7 +70,6 @@ orbiterWindow::orbiterWindow(long deviceid, std::string routerip, QObject *paren
 
     mainView.rootContext()->setContextProperty("deviceid", int(deviceno));
     mainView.rootContext()->setContextProperty("srouterip", QString::fromStdString(router));
-
 
 #ifdef for_desktop
     buildType = "/qml/desktop";
@@ -160,27 +155,27 @@ bool orbiterWindow::getOrbiterState()
 
 void orbiterWindow::showSplash()
 {
-  mainView.setSource(QUrl(qrcPath));
+    mainView.setSource(QUrl(qrcPath));
 }
 
 void orbiterWindow::setSkinDataState(bool b)
 {
-     b_skinDataReady = b; emit connectionChanged();
+    b_skinDataReady = b; emit connectionChanged();
 }
 
 void orbiterWindow::setSkinIndexState(bool b)
 {
-     b_skinIndexReady = b; emit skinIndexStatus();
+    b_skinIndexReady = b; emit skinIndexStatus();
 }
 
 void orbiterWindow::setOrbiterConfigState(bool b)
 {
-     b_orbiterConfigReady = b; emit orbiterConfigStatus();
+    b_orbiterConfigReady = b; emit orbiterConfigStatus();
 }
 
 void orbiterWindow::setLocalConfigState(bool b)
 {
-     b_localConfigReady = b; emit configStatus();
+    b_localConfigReady = b; emit configStatus();
 }
 
 void orbiterWindow::setOrbiterState(bool state)

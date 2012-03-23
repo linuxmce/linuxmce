@@ -44,7 +44,7 @@ Rectangle {
                         anchors.fill: parent
                         onClicked: {
                             dcerouter.displayToggle(1)
-                            powerrect.destroy()
+                            powerrect.visible = false
                         }
                     }
                 }

@@ -8,8 +8,8 @@ Item
         id:stage
 
         signal swapStyle()
-        height: style.orbiterH
-        width: style.orbiterW
+        height: appH
+        width: appW
         color: "transparent"
 
         Image {

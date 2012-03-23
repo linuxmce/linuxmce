@@ -50,7 +50,7 @@ Rectangle {
             radius: 5
             MouseArea{
                 anchors.fill: parent
-                onClicked:MyJs.createPowerButton()
+                onClicked:loadComponent("Power.qml")
             }
         }
 
@@ -80,7 +80,7 @@ Rectangle {
             buttontext: currentroom
             MouseArea{
                 anchors.fill: parent
-                onClicked:MyJs.createRoomSelector()
+                onClicked:loadComponent("RoomSelector.qml")
             }
         }
 

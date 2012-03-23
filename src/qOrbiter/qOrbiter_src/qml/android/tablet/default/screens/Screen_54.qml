@@ -4,16 +4,24 @@ import "../js/ComponentLoader.js" as MyJs
 
 Rectangle {
     id: storedaudioremote
+    Text {
+        id: messages
+        text: dcerouter.mediaResponse
+        font.pixelSize: scaleY(4)
+        anchors.bottom: parent.bottom
+    }
+
+    Connections{
+        target:dcenowplaying
+        onImageChanged:nowplayingimage.source = "image://listprovider/updateobject/"+securityvideo.timestamp
+    }
+
+
     height: style.orbiterH
     width: style.orbiterW
     radius: 0
     opacity: 1
     color: "transparent"
-    Component.onCompleted: dcerouter.setNowPlayingDetails()
-    Connections{
-        target:dcenowplaying
-        onImageChanged: nowplayingimage.source = "image://listprovider/updateobject/"+securityvideo.timestamp
-    }
 
     Text {
         id: bignowplaying
@@ -22,9 +30,12 @@ Rectangle {
         font.pixelSize: scaleY(5)
         opacity: .5
         style: Text.Sunken
+
     }
 
     //main 'now playing rect containing all the other items
+
+
 
     Column{
         anchors.right: storedaudioremote.right
@@ -61,10 +72,7 @@ Rectangle {
         anchors.topMargin: scaleY(2)
         anchors.horizontalCenter: parent.horizontalCenter
 
-        NonEPGPlaylist{
-            id:playlist;
-            visible: true
-        }
+        NonEPGPlaylist{ id:playlist; visible: true}
 
         Row {
             id:metarow
@@ -104,6 +112,8 @@ Rectangle {
                     opacity: .5
 
                 }
+
+
             }
 
             Rectangle{
@@ -245,7 +255,7 @@ Rectangle {
                     MouseArea{
                         anchors.fill: parent
                         onClicked:  {
-                            MyJs.createAvComponent("../components/Avcodes.qml", storedaudioremote)
+                            loadComponent("Avcodes.qml")
                         }
                     }
                 }
@@ -258,17 +268,10 @@ Rectangle {
                 }
                 AvOptionButton{
                     buttontext: qsTr("Power")
-                    MouseArea{
-                        anchors.fill: parent
-                        onClicked: dcerouter.StopMedia()
-                    }
                 }
                 HomeButton{}
             }
         }
     }
-
-
-
 }
 

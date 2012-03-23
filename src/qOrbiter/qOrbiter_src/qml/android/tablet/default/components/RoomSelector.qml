@@ -60,8 +60,8 @@ Rectangle {
                 onClicked: {
                     setActiveRoom(intRoom, entertain_area)
                     currentroom = title
+                    roomselectorrect.visible = false
                     roombutton.buttontext = title
-                    roomselectorrect.destroy()
                 }
             }
 

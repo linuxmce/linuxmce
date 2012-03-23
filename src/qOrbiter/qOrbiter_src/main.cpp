@@ -151,8 +151,10 @@ int main(int argc, char* argv[])
 
 #elif ANDROID
     QApplication::setGraphicsSystem("opengl");
+#elif for_android
+    QApplication::setGraphicsSystem("opengl");
 #else
-    QApplication::setGraphicsSystem("raster");
+      QApplication::setGraphicsSystem("opengl");
 #endif
 
     QApplication  a(argc, argv);
@@ -161,7 +163,7 @@ int main(int argc, char* argv[])
     g_sBinaryPath = FileUtils::BasePath(argv[0]);
 
     cout << "qOrbiter, v." << VERSION << endl
-         << "Visit www.plutohome.com for source code and license information" << endl << endl;
+         << "Visit www.linuxmce.org for source code and license information" << endl << endl;
 
     string sRouter_IP="DCEROUTER";
     int PK_Device;
