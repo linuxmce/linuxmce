@@ -32,7 +32,7 @@ Rectangle {
                     font.pixelSize: scaleY(2.5)
                     anchors.centerIn: formatrect
                     wrapMode: "WrapAtWordBoundaryOrAnywhere"
-                    onFocusChanged: {rect.destroy()}
+                    onFocusChanged: {loadComponent("NullComponent.qml")}
 
                 }
 
@@ -44,7 +44,7 @@ Rectangle {
                         formatrect.color = status ? "green" : "red"
                         formatrect.opacity = 1
                         parent.color = "orange"
-                        rect.destroy()
+                       loadComponent("NullComponent.qml")
                     }
                     onReleased: parent.color = "silver"
 

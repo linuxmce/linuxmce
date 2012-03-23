@@ -15,7 +15,7 @@ Rectangle {
         id:bg_catch
         height: appH
         width: appW
-        onPressed: filedetailrect.destroy()
+        onPressed: loadComponent("NullComponent.qml")
 
     }
     Connections{
@@ -263,7 +263,7 @@ Rectangle {
             x: ((parent.width/3)*2)
             MouseArea{
                 anchors.fill:  parent
-                onClicked: { filedetailrect.destroy()}
+                onClicked: { loadComponent("NullComponent.qml")}
             }
         }
     }

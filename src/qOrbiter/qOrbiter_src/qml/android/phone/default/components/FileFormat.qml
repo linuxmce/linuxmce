@@ -10,7 +10,29 @@ Rectangle {
            border.width: 1
            clip: true
            property string cindex
+           Rectangle{
+               id:exit_button
+               height: scaleY(8)
+               width: parent.width
+               anchors.top: rect.top
+               color: "transparent"
+               Image {
+                   id: headerbg
+                   source: "../img/widegreyshape.png"
+                   anchors.fill: exit_button
+               }
 
+               Text {
+                   id: exit
+                   text: qsTr("Exit")
+                   font.pixelSize: scaleY(3)
+                   anchors.centerIn: parent
+               }
+               MouseArea{
+                   anchors.fill: parent
+                   onClicked: loadComponent("NullComponent.qml")
+               }
+           }
            Component{
                  id:fileformatdelegate
                  Item {
@@ -31,7 +53,7 @@ Rectangle {
                                    z:0
                                    onClicked:
                                    {
-                                       rect.destroy()
+                                       loadComponent("NullComponent.qml")
                                    }
                               }
 
@@ -48,7 +70,7 @@ Rectangle {
                                  id: fileformatcell
                                  text: name
                                  font.pointSize: 14
-                                 onFocusChanged: {rect.destroy()}
+                                 onFocusChanged: {loadComponent("NullComponent.qml")}
 
                                   }
 
@@ -66,7 +88,7 @@ Rectangle {
                                           fileformatmodel.setSelectionStatus(name)
                                           fileformatcell.color = status ? "green" : "red"
                                           console.log(status)
-                                          rect.destroy()
+                                          loadComponent("NullComponent.qml")
                                           }
 
                                           }
