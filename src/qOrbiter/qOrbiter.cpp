@@ -2240,9 +2240,9 @@ void qOrbiter::requestPage(int page)
     media_currentPage = page;
     setGridStatus(true);
 
-    //qDebug () << "Navigating to page " << media_currentPage;
-    //qDebug() << "Cell Range::" << media_pos << "to" << media_pos + media_pageSeperator;
-#ifndef for_desktop
+    qDebug() << "Navigating to page " << media_currentPage;
+    qDebug() << "Cell Range::" << media_pos << "to" << media_pos + media_pageSeperator;
+#ifdef for_android || ANDROID
     emit clearPageGrid();
 #endif
 
@@ -3115,37 +3115,41 @@ void DCE::qOrbiter::populateAdditionalMedia() //additional media grid that popul
     if(checkLoadingStatus() == true)
     {
         //emit statusMessage("requesting additional media");
-
-#ifndef ANDROID
-        int gHeight = 1;
-        int gWidth = 1;
-        int offset = 0;
-        int GridCurRow =i_currentMediaModelRow;
+#ifdef ANDROID
+        int gHeight = media_pageSeperator;
+        int gWidth = 0;
+        int pkVar = 0;
+        int iOffset = 0;
+        int GridCurRow = 0;
         int GridCurCol= 0;
-        string m_sSeek = "" ;
-        int iOffset=0;
+#elif for_android
+        int gHeight = media_pageSeperator;
+        int gWidth = 0;
+        int pkVar = 0;
+        int iOffset = 0;
+        int GridCurRow = 0;
+        int GridCurCol= 0;
 #else
-        int gHeight = 1;
-        int gWidth = media_pageSeperator;
-        int offset = 0;
-        int GridCurRow =media_currentPage ;
-        int GridCurCol= 0 ;
-        int iOffset=0;
-        //qDebug() << "our target is row:" << GridCurCol;
-        string m_sSeek = "" ;
-
+        int gHeight = 1;            //how many rows we want
+        int gWidth = 0;             //how many columns we want. in this case, just the one
+        int pkVar = 0;              // ??
+        int iOffset = 0;            // ??
+        int GridCurRow = 0;         //the row to start from
+        int GridCurCol= 0;           //column to start from
 #endif
-
+        string m_sSeek="";
         string imgDG ="_MediaFile_"+QString::number(m_dwPK_Device).toStdString();
 
         int iData_Size=0;
         char *pData;
         pData = "NULL";
         //CMD_Request_Datagrid_Contents(                              long DeviceIDFrom,                long DeviceIDTo,                   string sID,                                string sDataGrid_ID, int iRow_count,int iColumn_count,        bool bKeep_Row_Header,bool bKeep_Column_Header,bool bAdd_UpDown_Arrows,string sSeek,       int iOffset,    char **pData,int *iData_Size,int *iRow,int *iColumn
-#ifndef ANDROID || for_android
-        DCE::CMD_Request_Datagrid_Contents req_data_grid_pics( long(m_dwPK_Device), long(iPK_Device_DatagridPlugIn), StringUtils::itos( m_dwIDataGridRequestCounter ), string(imgDG),    1, 1,                     false,                 false,                                 true, string(m_sSeek),   iOffset,  &pData,         &iData_Size, &GridCurRow, &GridCurCol );
-#else
+#ifdef ANDROID for_android
         DCE::CMD_Request_Datagrid_Contents req_data_grid_pics( long(m_dwPK_Device), long(iPK_Device_DatagridPlugIn), StringUtils::itos( m_dwIDataGridRequestCounter ), string(imgDG),    1, media_pageSeperator,                     false,                 false,                                 true, string(m_sSeek),   iOffset,  &pData,         &iData_Size, &GridCurRow, &GridCurCol );
+#elif for_android
+        DCE::CMD_Request_Datagrid_Contents req_data_grid_pics( long(m_dwPK_Device), long(iPK_Device_DatagridPlugIn), StringUtils::itos( m_dwIDataGridRequestCounter ), string(imgDG),    1, media_pageSeperator,                     false,                 false,                                 true, string(m_sSeek),   iOffset,  &pData,         &iData_Size, &GridCurRow, &GridCurCol );
+#else
+        DCE::CMD_Request_Datagrid_Contents req_data_grid_pics( long(m_dwPK_Device), long(iPK_Device_DatagridPlugIn), StringUtils::itos( m_dwIDataGridRequestCounter ), string(imgDG),    1, 1,                     false,                 false,                                 true, string(m_sSeek),   iOffset,  &pData,         &iData_Size, &GridCurRow, &GridCurCol );
 #endif
         std::string pResponse ="";
         if(SendCommand(req_data_grid_pics, &pResponse) && pResponse == "OK")
@@ -3185,7 +3189,6 @@ void DCE::qOrbiter::populateAdditionalMedia() //additional media grid that popul
 
                 emit addItem(new gridItem(fk_file, cellTitle, filePath, index, cellImg));
             }
-
             delete pDataGridTable;
         }
     }
@@ -3963,20 +3966,27 @@ void DCE::qOrbiter::prepareFileList(int iPK_MediaType)
 
     setMediaResponse("Initial media request");
     //emit cleanupGrid();
-#ifndef ANDROID
-    int gHeight = 1;            //how many rows we want
-    int gWidth = 0;             //how many columns we want. in this case, just the one
-    int pkVar = 0;              // ??
-    int iOffset = 0;            // ??
-    int GridCurRow = 0;         //the row to start from
-    int GridCurCol= 0;           //column to start from
-#else
+#ifdef ANDROID
     int gHeight = media_pageSeperator;
     int gWidth = 0;
     int pkVar = 0;
     int iOffset = 0;
     int GridCurRow = 0;
     int GridCurCol= 0;
+#elif for_android
+    int gHeight = media_pageSeperator;
+    int gWidth = 0;
+    int pkVar = 0;
+    int iOffset = 0;
+    int GridCurRow = 0;
+    int GridCurCol= 0;
+#else
+    int gHeight = 1;            //how many rows we want
+    int gWidth = 0;             //how many columns we want. in this case, just the one
+    int pkVar = 0;              // ??
+    int iOffset = 0;            // ??
+    int GridCurRow = 0;         //the row to start from
+    int GridCurCol= 0;           //column to start from
 #endif
 
     string valassign ="";              // ??
@@ -4120,10 +4130,12 @@ void DCE::qOrbiter::prepareFileList(int iPK_MediaType)
                 string imgDG = "_"+m_sGridID; //correcting the grid id string for images
 
                 //CMD_Request_Datagrid_Contents(                              long DeviceIDFrom,                long DeviceIDTo,                   string sID,                                string sDataGrid_ID, int iRow_count,int iColumn_count,        bool bKeep_Row_Header,bool bKeep_Column_Header,bool bAdd_UpDown_Arrows,string sSeek,       int iOffset,    char **pData,int *iData_Size,int *iRow,int *iColumn
-#ifndef ANDROID || for_android
-                DCE::CMD_Request_Datagrid_Contents req_data_grid_pics( long(m_dwPK_Device), long(iPK_Device_DatagridPlugIn), StringUtils::itos( m_dwIDataGridRequestCounter ), string(imgDG),    1, 1,                     false,                 false,                                 true, string(m_sSeek),   iOffset,  &pData,         &iData_Size, &GridCurRow, &GridCurCol );
-#else
+#ifdef ANDROID
                 DCE::CMD_Request_Datagrid_Contents req_data_grid_pics( long(m_dwPK_Device), long(iPK_Device_DatagridPlugIn), StringUtils::itos( m_dwIDataGridRequestCounter ), string(imgDG),    1, media_pageSeperator,                     false,                 false,                                 true, string(m_sSeek),   iOffset,  &pData,         &iData_Size, &GridCurRow, &GridCurCol );
+#elif for_android
+                DCE::CMD_Request_Datagrid_Contents req_data_grid_pics( long(m_dwPK_Device), long(iPK_Device_DatagridPlugIn), StringUtils::itos( m_dwIDataGridRequestCounter ), string(imgDG),    1, media_pageSeperator,                     false,                 false,                                 true, string(m_sSeek),   iOffset,  &pData,         &iData_Size, &GridCurRow, &GridCurCol );
+#else
+                DCE::CMD_Request_Datagrid_Contents req_data_grid_pics( long(m_dwPK_Device), long(iPK_Device_DatagridPlugIn), StringUtils::itos( m_dwIDataGridRequestCounter ), string(imgDG),    1, 1,                     false,                 false,                                 true, string(m_sSeek),   iOffset,  &pData,         &iData_Size, &GridCurRow, &GridCurCol );
 #endif
                 if(SendCommand(req_data_grid_pics))
                 {

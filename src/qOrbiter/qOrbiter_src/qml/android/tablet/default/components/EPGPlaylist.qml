@@ -9,13 +9,12 @@ Rectangle {
 
     Connections{
         target: simpleepg
-        onActiveIndexChanged:epgplaylistview.positionViewAtIndex(simpleepg.currentIndex, ListView.Beginning)
-
+        onProgramChanged:epgplaylistview.positionViewAtIndex(simpleepg.currentIndex, ListView.Beginning)
     }
 
     Rectangle{
-        height:scaleY(60)
-        width: scaleX(25)
+        height: childrenRect.height
+        width: childrenRect.width
         anchors.centerIn: parent
         color: "aliceblue"
         clip:true
@@ -90,9 +89,9 @@ Rectangle {
                 MouseArea{
                     anchors.fill: parent
                     onClicked:{
-                        dcerouter.TuneToChannel(channelnumber, channelnumber)
-                        epgplaylistview.positionViewAtIndex(index, ListView.Beginning)
-                        dcenowplaying.setProgram(program)
+                        dcerouter.TuneToChannel(channelnumber, channelid)
+                          epgplaylistview.positionViewAtIndex(index, ListView.Beginning)
+
                     }
                     hoverEnabled: true
                     onEntered:{ delrect.color = style.accentcolor ; proglabel.color = "black"}

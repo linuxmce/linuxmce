@@ -20,8 +20,8 @@ Rectangle {
     }
 
   Connections{
-      target: filedetailsclass
-      onImageChanged: filedetailsimage.source = "image://listprovider/filedetails/"+securityvideo.timestamp
+      target:filedetailsclass
+      onObjectChanged:filedetailsimage.source = "image://listprovider/filedetailsprovider/"+securityvideo.timestamp
   }
 
     Rectangle{
@@ -274,7 +274,10 @@ Rectangle {
             x: ((parent.width/3)*2)
             MouseArea{
                 anchors.fill:  parent
-                onClicked: { dataModel.checkForMore();filedetailrect.destroy()}
+                onClicked: {
+                    dataModel.checkForMore()
+                    loadComponent("NullComponent.qml")
+                }
             }
         }
     }

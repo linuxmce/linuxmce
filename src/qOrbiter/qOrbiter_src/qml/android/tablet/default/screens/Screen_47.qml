@@ -229,9 +229,6 @@ Rectangle {
             }
         }
 
-
-
-
         Row
         {
             height: childrenRect.height

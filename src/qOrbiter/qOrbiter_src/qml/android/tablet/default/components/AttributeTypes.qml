@@ -41,7 +41,7 @@ Rectangle {
                     onReleased: {
                         attribfilter.setSelectionStatus(name)
                         formatrect.color = status ? "grey": "steelblue"
-                        rect.destroy()
+                        loadComponent("NullComponent.qml")
                     }
                     onPressed: status ? "grey": "steelblue"
                 }

@@ -35,7 +35,7 @@ Rectangle {
                 onExited: attributedelegate.color = style.accentcolor
                 onClicked: {
                     dcerouter.saveScreenAttribute(attributeNo);
-                     assignscreenshot.destroy()
+                    loadComponent("NullComponent.qml")
                 }
             }
 
