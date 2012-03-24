@@ -49,8 +49,8 @@ qorbiterManager::qorbiterManager(QDeclarativeView *view, QObject *parent) :
 {
 
     m_bStartingUp= true;
-   // b_skinsReady = false;
-   // b_orbiterReady = false;
+    // b_skinsReady = false;
+    // b_orbiterReady = false;
     bAppError = false;
 
     //this governs local vs remote loading. condensed to one line, and will be configurable from the ui soon.
@@ -91,8 +91,8 @@ qorbiterManager::qorbiterManager(QDeclarativeView *view, QObject *parent) :
     item = qorbiterUIwin->rootObject();
 
     QObject::connect(qorbiterUIwin, SIGNAL(sceneResized(QSize)),  SLOT(checkOrientation(QSize)) );
-   QObject::connect(this, SIGNAL(orbiterConfigReady(bool)), this, SLOT(showUI(bool)));
-   QObject::connect(this, SIGNAL(skinIndexReady(bool)), this, SLOT(showUI(bool)));
+    QObject::connect(this, SIGNAL(orbiterConfigReady(bool)), this, SLOT(showUI(bool)));
+    QObject::connect(this, SIGNAL(skinIndexReady(bool)), this, SLOT(showUI(bool)));
 
     ScreenSaver = new ScreenSaverClass();
 
@@ -923,8 +923,8 @@ bool qorbiterManager::loadSkins(QUrl base)
     tskinModel->addSkin("default");
     if(b_localLoading) //temporary hack until i deal with whats causing issues with these skins. from the outside, it appears to be a race condition. data being returned out of order.
     {
-    tskinModel->addSkin("aeon");
-    tskinModel->addSkin("crystalshades");
+        tskinModel->addSkin("aeon");
+        tskinModel->addSkin("crystalshades");
     }
 #endif
     b_skinsReady = true;
@@ -1267,7 +1267,7 @@ void qorbiterManager::setMediaScreenShot(QByteArray data)
     if(mediaScreenShot.loadFromData(data))
     {
         emit mediaScreenShotReady();
-       // qDebug("Screen Shot loaded");
+        // qDebug("Screen Shot loaded");
     }
 }
 
@@ -1503,25 +1503,8 @@ void qorbiterManager::initializeConnections()
 void qorbiterManager::reloadHandler()
 {
     gotoQScreen("ReloadHandler.qml");
-    /*
-    setDceResponse("Reloading Router");
-    QApplication::processEvents(QEventLoop::AllEvents);
-     sleep(15);
-    if ( pqOrbiter->GetConfig() && pqOrbiter->Connect(pqOrbiter->PK_DeviceTemplate_get()))
-    {
-
-        setDceResponse("Reload Complete");
-        swapSkins(currentSkin);
-         QApplication::processEvents(QEventLoop::AllEvents);
-    }
-    else
-    {
-QApplication::processEvents(QEventLoop::AllEvents);
-
-    }
-    */
-    raiseSplash();
-    }
+    emit reInitialize();
+}
 
 void qorbiterManager::setDceResponse(QString response)
 {

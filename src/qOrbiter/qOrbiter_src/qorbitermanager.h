@@ -379,6 +379,7 @@ signals:
     void loadingMessage(QString msg);
     void splashReady();
     void raiseSplash();
+    void reInitialize();
     void showSetup();
     void reloadRouter();
 

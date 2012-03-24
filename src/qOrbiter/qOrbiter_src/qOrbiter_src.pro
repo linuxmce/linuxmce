@@ -126,6 +126,7 @@ DEPLOYMENTFOLDERS = folder_01 files_01
 
 ANDROID{
 INSTALLS +=deployment
+
 }
 
 # Additional import path used to resolve QML modules in Creator's code model
