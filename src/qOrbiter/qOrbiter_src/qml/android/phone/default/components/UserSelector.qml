@@ -4,12 +4,18 @@ import QtQuick 1.1
 Rectangle {
     id:genericlist
     height: childrenRect.height
-    width: childrenRect.width
+    width: genericview.width
     border.color: "orange"
     border.width: 1
-    clip: false
+    clip: true
     color:"transparent"
+    anchors.centerIn: parent
 
+    Image {
+        id: bg
+        source: "../img/bkg.png"
+        anchors.fill: genericview
+    }
     Rectangle{
         id:exit_button
         height: scaleY(8)
@@ -37,26 +43,27 @@ Rectangle {
     Component{
         id:delegatemenu
 
+
         Item{
             id:generic_item
             //important!! these need to be set on an imported component otherwise its appears all wrong!
-            height:  delegatemenu.height
-            width: delegatemenu.width
+            height:  container.height
+            width: container.width
 
             Rectangle{
-
+                id:container
                 width: scaleX(61)
                 height: scaleY(15)
-                border.color: "white"
+                border.color: "silver"
                 border.width: 1
                 color:"transparent"
-
                 Text {
                     id: generic_label
                     text:  username
                     color: "white"
                     font.pixelSize: scaleY(3)
-                    anchors.centerIn: parent
+                    anchors.centerIn: container
+                    font.family: "Droid Sans"
                 }
 
                 MouseArea{
@@ -69,20 +76,19 @@ Rectangle {
             }
         }
     }
-    Image {
-        id: bg
-        source: "../img/bkg.png"
-        anchors.fill: genericview
-    }
+
     ListView{
         id: genericview
         width: scaleX(61)
-        height: genericview.childrenRect.height +25
+        height: scaleY(50)
         anchors.top: exit_button.bottom
         model: userList
+        spacing:1
         orientation:ListView.Vertical
         delegate:  delegatemenu
         interactive: true
         clip:true
+        // contentHeight: (roomList.count +1) * scaleY(5)
+
     }
 }
