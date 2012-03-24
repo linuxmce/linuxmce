@@ -3,49 +3,72 @@ import QtQuick 1.1
 
 Rectangle {
     id:genericlist
-    height: 200
-    width: 200
+    height: childrenRect.height
+    width: childrenRect.width
     border.color: "orange"
     border.width: 1
     clip: false
     color:"transparent"
 
-Component{
-  id:delegatemenu
-  
-  Item{
-        id:generic_item
-        //important!! these need to be set on an imported component otherwise its appears all wrong!
-        height:  delegatemenu.height
-        width: delegatemenu.width
+    Rectangle{
+        id:exit_button
+        height: scaleY(8)
+        width: scaleX(61)
+        anchors.top: generic_list.top
+        color: "transparent"
+        Image {
+            id: headerbg
+            source: "../img/widegreyshape.png"
+            anchors.fill: exit_button
+        }
 
-        Rectangle{
-           
-            width: 200
-            height: 55
-            border.color: "white"
-            border.width: 1
-            color:"transparent"
+        Text {
+            id: exit
+            text: qsTr("Exit")
+            font.pixelSize: scaleY(3)
+            anchors.centerIn: parent
+        }
+        MouseArea{
+            anchors.fill: parent
+            onClicked:loadComponent("NullComponent.qml")
+        }
+    }
 
-            Text {
-                id: generic_label
-                text:  username
-                color: "white"
-                font.pixelSize: 11
-                anchors.centerIn: parent
-            }
+    Component{
+        id:delegatemenu
 
-            MouseArea{
-                anchors.fill: parent
-                onClicked: {
-                   setCurrentUser(index+1)
-                   currentuser
-                    genericlist.destroy()
+        Item{
+            id:generic_item
+            //important!! these need to be set on an imported component otherwise its appears all wrong!
+            height:  delegatemenu.height
+            width: delegatemenu.width
+
+            Rectangle{
+
+                width: scaleX(45)
+                height: scaleY(10)
+                border.color: "white"
+                border.width: 1
+                color:"transparent"
+
+                Text {
+                    id: generic_label
+                    text:  username
+                    color: "white"
+                    font.pixelSize: scaleY(3)
+                    anchors.centerIn: parent
+                }
+
+                MouseArea{
+                    anchors.fill: parent
+                    onClicked: {
+                        setCurrentUser(index+1)
+                        loadComponent("NullComponent.qml")
+                    }
                 }
             }
         }
     }
-}
     Image {
         id: bg
         source: "../img/bkg.png"
@@ -53,11 +76,9 @@ Component{
     }
     ListView{
         id: genericview
-        width: 200
+        width: scaleX(45)
         height: genericview.childrenRect.height +25
-        
         model: userList
-        spacing:56
         orientation:ListView.Vertical
         delegate:  delegatemenu
         interactive: true

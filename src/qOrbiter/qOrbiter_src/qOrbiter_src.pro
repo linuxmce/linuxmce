@@ -126,7 +126,22 @@ DEPLOYMENTFOLDERS = folder_01 files_01
 
 ANDROID{
 INSTALLS +=deployment
-
+android {
+    qmlcomponents.source = ../android-extra-libs
+    qmlcomponents.target = /
+    DEPLOYMENTFOLDERS += qmlcomponents
+    qmlplugins.files = \
+        ../android-extra-libs/libqmlshadersplugin.so\
+../android-extra-libs/qmldir
+        x86 {
+            qmlplugins.path = /libs/x86
+        } else: armeabi-v7a {
+            qmlplugins.path = /libs/armeabi-v7a
+        } else {
+            qmlplugins.path = /data/data/org.linuxmce.qorbiter/lib/
+        }
+    INSTALLS += qmlplugins
+}
 }
 
 # Additional import path used to resolve QML modules in Creator's code model

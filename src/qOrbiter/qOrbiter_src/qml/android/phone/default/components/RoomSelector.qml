@@ -16,6 +16,29 @@ Rectangle {
         source: "../img/bkg.png"
         anchors.fill: genericview
     }
+    Rectangle{
+        id:exit_button
+        height: scaleY(8)
+        width: scaleX(61)
+        anchors.top: generic_list.top
+        color: "transparent"
+        Image {
+            id: headerbg
+            source: "../img/widegreyshape.png"
+            anchors.fill: exit_button
+        }
+
+        Text {
+            id: exit
+            text: qsTr("Exit")
+            font.pixelSize: scaleY(3)
+            anchors.centerIn: parent
+        }
+        MouseArea{
+            anchors.fill: parent
+            onClicked:loadComponent("NullComponent.qml")
+        }
+    }
 
 Component{
   id:delegatemenu
@@ -47,9 +70,9 @@ Component{
                 anchors.fill: parent
                 onClicked: {
                     currentroom = title
-                    roombutton.buttontext = title
+
                    setActiveRoom(intRoom, entertain_area)
-                    genericlist.destroy()
+                    loadComponent("NullComponent.qml")
                 }
             }
         }
@@ -58,7 +81,7 @@ Component{
 
     ListView{
         id: genericview
-        width: scaleX(35)
+        width: scaleX(45)
         height: scaleY(50)
         model: roomList
         spacing:1

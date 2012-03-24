@@ -25,6 +25,8 @@
 #include <qdeclarative.h>
 #include <contextobjects/existingorbiter.h>
 #include <QApplication>
+#include <QDeclarativeEngine>
+#include <QDir>
 
 #ifdef IOS
 #include "../iOS/qOrbiter/ioshelpers.h"
@@ -33,6 +35,9 @@
 orbiterWindow::orbiterWindow(long deviceid, std::string routerip, QObject *parent) :
     QObject(parent)
 {
+
+
+
     newOrbiter = false;
     this->b_connectionPresent = false;
     this->b_localConfigReady = false;
@@ -49,7 +54,7 @@ orbiterWindow::orbiterWindow(long deviceid, std::string routerip, QObject *paren
     mainView.rootContext()->setContextProperty("window", this);
     mainView.setWindowTitle("LinuxMCE Orbiter ");
     mainView.rootContext()->setContextProperty("orbiterList" , "");
-   #ifdef for_desktop
+#ifdef for_desktop
 
 #elif for_android
 

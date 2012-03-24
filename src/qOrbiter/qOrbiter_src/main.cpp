@@ -158,6 +158,7 @@ int main(int argc, char* argv[])
 
     QApplication  a(argc, argv);
 
+
     g_sBinary = FileUtils::FilenameWithoutPath(argv[0]);
     g_sBinaryPath = FileUtils::BasePath(argv[0]);
 
@@ -254,6 +255,7 @@ int main(int argc, char* argv[])
         //        NSAutoreleasePool * pool = [[NSAutoreleasePool alloc] init];
 #endif
         orbiterWindow orbiterWin(PK_Device, sRouter_IP);
+
         orbiterWin.setMessage("Setting up Lmce");
         qorbiterManager  *w= new qorbiterManager(&orbiterWin.mainView);
 
