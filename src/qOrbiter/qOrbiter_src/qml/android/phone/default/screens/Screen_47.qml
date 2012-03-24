@@ -2,8 +2,6 @@ import QtQuick 1.1
 import "../components"
 import "../js/ComponentLoader.js" as MyJs
 
-
-
 Rectangle {
     id:fileviewscreen
     width: appW
@@ -58,15 +56,6 @@ Rectangle {
             }
 
         }
-
-        Text {
-            id: current_cells
-            text: dataModel.currentCells
-            color: "grey"
-            font.pixelSize: scaleY(3)
-            anchors.right: progress_bar.left
-        }
-
     }
 
     Connections
