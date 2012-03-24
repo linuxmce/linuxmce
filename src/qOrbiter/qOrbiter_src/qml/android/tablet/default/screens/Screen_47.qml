@@ -39,7 +39,8 @@ Rectangle {
                 width: scaleX(20);
                 height: scaleY(20)
                 color: "transparent"
-
+                opacity: 0
+Component.onCompleted: PropertyAnimation { target: mainItem; property: "opacity"; to: 1; duration: 1000}
                 MouseArea{
                     anchors.fill: mainItem
                     hoverEnabled: true
@@ -55,6 +56,43 @@ Rectangle {
                         mainItem.z = 1
                     }
                 }
+                Rectangle
+                {
+                    id:progress_bar
+                    height: scaleY(65)
+                    width: scaleX(2)
+                    color: "transparent"
+                    border.color: "white"
+                    border.width: 1
+                    anchors.verticalCenter: parent.verticalCenter
+
+                    Rectangle{
+                        id:progress_bar_fill
+                        height: 0
+                        width: parent.width
+                        color: dataModel.loadingStatus ? "green" : "red"
+                        anchors.bottom: parent.bottom
+                        opacity: .5
+                    }
+
+                    Text {
+                        id: total_cells
+                        text: dataModel.totalcells
+                        color: "grey"
+                        font.bold: false
+                        font.pixelSize: scaleY(4)
+                        anchors.top: progress_bar.top
+                    }
+                    Text {
+                        id: current_cells
+                        text: dataModel.currentCells
+                        color: "grey"
+                        font.bold: false
+                        font.pixelSize: scaleY(4)
+                        anchors.top: progress_bar_fill.top
+                    }
+                }
+
 
                 Rectangle
                 {

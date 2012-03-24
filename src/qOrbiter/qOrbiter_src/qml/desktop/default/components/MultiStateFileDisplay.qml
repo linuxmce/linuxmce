@@ -30,9 +30,5 @@ Rectangle {
         //contentItem.clip: true
         cellWidth: scaleX(20)
         cellHeight: scaleY(20)
-
-
     }
-
-
 }

@@ -5,23 +5,15 @@ Rectangle {
     id: filedetailrect
     width: scaleX(90)
     height: scaleY(85)
-    anchors.centerIn: parent
-    color: "silver"
-    clip: true
+  anchors.centerIn: parent
+    color: "darkgrey"
+    clip: false
     radius: 5
-    border.color:"orange"
-    border.width: 1
-    MouseArea{
-        id:bg_catch
-        height: appH
-        width: appW
-        onPressed: loadComponent("NullComponent.qml")
-
-    }
-    Connections{
-        target: filedetailsclass
-        onImageChanged: filedetailsimage.source = "image://listprovider/filedetailsprovider/"+securityvideo.timestamp
-    }
+    border.color: "orange"
+    border.width: 3
+    //opacity: 0
+    scale:0
+    Component.onCompleted: PropertyAnimation { target: filedetailrect; property: "scale"; to:1; duration: 1000}
 
     Image {
         id: fdbg
@@ -29,7 +21,53 @@ Rectangle {
         anchors.fill: filedetailrect
     }
 
+    Rectangle{
+        id:masking_rect
+        height: appH
+        width: appW
+        color: "darkgrey"
+        opacity: .75
+        z:-1
 
+        anchors.centerIn: parent
+        MouseArea{
+            anchors.fill: parent
+            onClicked: loadComponent("NullComponent")
+        }
+    }
+
+
+    Connections{
+        target:filedetailsclass
+        onObjectChanged:filedetailsimage.source = "image://listprovider/filedetailsprovider/"+securityvideo.timestamp
+    }
+
+    Rectangle{
+        id:titlerect
+        height: childrenRect.height + 5
+        width: parent.width
+        color:"black"
+        radius:2.5
+        Text {
+            id: text2
+            anchors.horizontalCenter: parent.horizontalCenter
+               text: "Location: " + filedetailsclass.path
+               font.pixelSize: scaleY(2)
+            font.bold: true
+            wrapMode: Text.WrapAtWordBoundaryOrAnywhere
+        }
+
+    }
+    Text {
+        id: filename_block
+        anchors.horizontalCenter: parent.horizontalCenter
+           text: "Filename: " + filedetailsclass.file
+           font.pixelSize: scaleY(3)
+        font.bold: true
+        wrapMode: Text.WrapAtWordBoundaryOrAnywhere
+        anchors.bottom: parent.bottom
+
+    }
 
     Rectangle{
         id:imageholder
@@ -37,12 +75,13 @@ Rectangle {
         width:childrenRect.width
         color: "transparent"
         anchors.verticalCenter: parent.verticalCenter
+
         anchors.left: parent.left
-        anchors.leftMargin: scaleX(1)
+        anchors.leftMargin: filedetailsclass.aspect=="wide"? scaleX(2.6) : scaleX(7)
         BorderImage {
             id: borderimg
             horizontalTileMode: BorderImage.Repeat
-            source: "../img/drpshadow.png"
+            source: "../img/icons/drpshadow.png"
             anchors.fill: filedetailsimage
             anchors { leftMargin: -6; topMargin: -6; rightMargin: -8; bottomMargin: -8 }
             border { left: 10; top: 10; right: 10; bottom: 10 }
@@ -50,18 +89,17 @@ Rectangle {
         }
         Image {
             id: filedetailsimage
-            width: scaleX(25)
-            height:scaleY(25)
-            source: "../img/kmix.png"
-
+            width: filedetailsclass.aspect=="wide"? scaleX(42.5) : scaleX(30)
+            height:filedetailsclass.aspect=="wide"?scaleY(42.5) : scaleY(55)
+            source: "../img/icons/mediatime.png"
+            smooth: true
         }
 
         Image {
             id: npmask
-            source: "../img/nowplayingbox.png"
+            source: "../img/icons/transparencymask.png"
             anchors.fill: filedetailsimage
             opacity: .5
-
         }
     }
 
@@ -69,12 +107,12 @@ Rectangle {
     Rectangle {
         id: rectangle1
         anchors.verticalCenter: imageholder.verticalCenter
-        width:  filedetailsclass.aspect=="wide"? scaleX(60): scaleX(45)
-        height: scaleY(65)
+        width:  filedetailsclass.aspect=="wide"? parent.width *.40 : parent.width *.45
+        height: scaleY(45)
         radius: 2.5
         clip:  true
-        color: "black"
-        border.color: "orange"
+        color: style.darkhighlight
+        border.color: style.highlight1
         anchors.left: imageholder.right
         anchors.leftMargin: scaleX(.5)
 
@@ -109,28 +147,92 @@ Rectangle {
                     wrapMode: "WrapAtWordBoundaryOrAnywhere"
                      width: rectangle1.width *.95
                 }
+
                 Text {
-                    id:  episode
-                    text:filedetailsclass.episode
+                    id:  program_block
+                    text:qsTr("Program") + filedetailsclass.program
                     font.pixelSize: scaleY(2)
                     font.bold: true
                     color:"aliceblue"
                     wrapMode: "WrapAtWordBoundaryOrAnywhere"
                      width: rectangle1.width *.95
+                     visible:  filedetailsclass.program =="" ? false: true
                 }
 
                 Text {
+                    id:  episode
+                    text:qsTr("Episode") + filedetailsclass.episode
+                    font.pixelSize: scaleY(2)
+                    font.bold: true
+                    color:"aliceblue"
+                    wrapMode: "WrapAtWordBoundaryOrAnywhere"
+                     width: rectangle1.width *.95
+                     visible:  filedetailsclass.episode =="" ? false: true
+                }
+                Text {
+                    id: album_block
+                    width: scaleX(35)
+                    text: qsTr("Album: ") + filedetailsclass.album
+                    font.family: "Droid Sans"
+                    wrapMode: "WrapAtWordBoundaryOrAnywhere"
+                    smooth: true
+                    font.pixelSize: scaleY(2)
+                    visible:  filedetailsclass.album =="" ? false: true
+                }
+
+              /*  Text {
                     id: rating
                    width: rectangle1.width *.95
                     wrapMode: "WrapAtWordBoundaryOrAnywhere"
-                    text: qsTr("Rating")
+                    text: qsTr("Rating") + filedetailsclass
                     font.family: "Droid Sans"
                     //  font.bold: true
                     smooth: true
                     font.pixelSize: scaleY(2)
                      color:"aliceblue"
                     elide: "ElideRight"
-                    visible:  filedetailsclass.rating ==="" ? false: true
+                    visible:  filedetailsclass.rating =="" ? false: true
+                }
+                */
+                Text {
+                    id: genre_block
+                   width: rectangle1.width *.95
+                    wrapMode: "WrapAtWordBoundaryOrAnywhere"
+                    text: filedetailsclass.genre
+                    font.family: "Droid Sans"
+                    //  font.bold: true
+                    smooth: true
+                    font.pixelSize: scaleY(2)
+                     color:"aliceblue"
+                    elide: "ElideRight"
+                    visible:  filedetailsclass.genre =="" ? false: true
+
+                    MouseArea{
+                        anchors.fill: parent
+                        hoverEnabled: true
+                        onEntered: { starring.elide = "ElideNone" ; }
+                        onExited: {starring.elide = "ElideRight"; }
+                    }
+                }
+                Text {
+                    id: director_block
+                   width: rectangle1.width *.95
+                    wrapMode: "WrapAtWordBoundaryOrAnywhere"
+                    text: qsTr("Directed By: ") + filedetailsclass.director
+                    font.family: "Droid Sans"
+                    //  font.bold: true
+                    smooth: true
+                    font.pixelSize: scaleY(2)
+                     color:"aliceblue"
+                    elide: "ElideRight"
+                    visible:  filedetailsclass.director =="" ? false: true
+
+                    MouseArea{
+                        anchors.fill: parent
+                        hoverEnabled: true
+                        onEntered: { starring.elide = "ElideNone" ; }
+                        onExited: {starring.elide = "ElideRight"; }
+                    }
                 }
 
                 Text {
@@ -153,7 +255,6 @@ Rectangle {
                         onExited: {starring.elide = "ElideRight"; }
                     }
                 }
-
 
                 Text {
                     id: synopsistext
@@ -241,8 +342,7 @@ Rectangle {
             MouseArea
             {
                 anchors.fill: parent
-                onClicked:{ dcerouter.playMedia(filedetailsclass.file) ; filedetailrect.destroy()}
-
+                onClicked:{ dcerouter.playMedia(filedetailsclass.file); loadComponent("NullComponent") }  //dce function
             }
         }
 
@@ -256,18 +356,18 @@ Rectangle {
 
         AvOptionButton {
             id: buttonsq3
-            height: style.stdbuttonh
             width: style.stdbuttonw
+            height: style.stdbuttonh
             radius: 10
             buttontext: "Close"
             x: ((parent.width/3)*2)
             MouseArea{
                 anchors.fill:  parent
-                onClicked: { loadComponent("NullComponent.qml")}
+                onClicked: { dataModel.setLoadingStatus(true);filedetailsclass.clear(); dcerouter.setGridStatus(true); loadComponent("NullComponent.qml")}
             }
         }
     }
-    Component.onCompleted: contentFlick.contentHeight=synopsistext.height+104
+
 
 }
 

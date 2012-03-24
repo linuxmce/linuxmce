@@ -1,44 +1,53 @@
-import QtQuick 1.0
+import QtQuick 1.1
+
 import "components"
 import "js/ComponentLoader.js" as MyJs
 
+
 Item {
     id: item
+  width:appW
+    height:appH
+
     signal close()
     signal changeScreen(string s)
     signal setupStart(int x, string y)
 
+
     property string locationinfo: "standby"
     property string screenfile
+property string dynamic_height
+property string dynamic_width
 
-    // Style {id:style}
-    width: 1280
-    height: 720;
-
-    Connections{
-        target:manager
-        onOrientationChanged: updateScreen()
-    }
-ScreenSaver{
-height: appH
-width: appW
-anchors.centerIn: parent
+function checkLayout()
+{
+console.log("c++ slot orientation changed")
 }
-    function updateScreen()
-    {
 
-
-        console.log("updated screen")
+Connections{
+    target: manager
+    onOrientationChanged: checkLayout()
     }
-
-
-
+/*
+    Image {
+    id: bg
+    source: "img/icons/backgrounds/livingroom.png"
+    anchors.fill:parent
+    }
+*/
+    ScreenSaver
+    {
+        height: appH
+        width: appW
+        anchors.centerIn: parent
+    }
     function scaleX(x){
-        return x/100*style.orbiterW
+    return x/100*appW
     }
     function scaleY(y){
-        return y/100*style.orbiterH
+    return y/100*appH
     }
+
 
     function screenchange(screenname )
     {
@@ -62,7 +71,7 @@ anchors.centerIn: parent
 
     function finishLoading (screenname)
     {
-        if(pageLoader.status != Component.Loading)
+        if(pageLoader.status != Component.Ready)
         {
             console.log("finishing load")
             pageLoader.source = "screens/"+screenname
@@ -75,32 +84,81 @@ anchors.centerIn: parent
 
     }
 
+    function checkStatus(component)
+    {
+       console.log(component.progress)
+    }
+
+
     Loader {
-        id:pageLoader
-        objectName: "loadbot"
+    id:pageLoader
+    objectName: "loadbot"
 
-        onSourceChanged:  loadin
-        onLoaded: {
+    onSourceChanged:  loadin
+    onLoaded: {
 
-            console.log("Screen Changed:" + pageLoader.source)
+        console.log("Screen Changed:" + pageLoader.source)
+
+        }
+    }
+  //=================Components==================================================//
+    function loadComponent(componentName )
+    {
+        componentLoader.source = "components/"+componentName
+        if (componentLoader.status == Component.Ready)
+        {
+            manager.setDceResponse("Command to change to:" + componentName+ " was successfull")
+        }
+        else if (componentLoader.status == Component.Loading)
+        {
+            console.log("loading page from network")
+            finishLoadingComponent(componentName)
+        }
+        else
+        {
+            console.log("Command to add: " + componentName + " failed!")           
 
         }
     }
 
+    function finishLoadingComponent (componentName)
+    {
+        if(componentLoader.status != Component.Ready)
+        {
+            console.log("finishing network load")
+            componentLoader.source = "components/"+componentName
+            console.log("screen" + componentName + " loaded.")
+        }
+        else
+        {
+            finishLoadingComponent(componentName)
+        }
+
+    }
+
+
+    Loader{
+        id:componentLoader
+        height: parent.height
+        width: parent.width
+        objectName: "componentbot"
+        onLoaded: {console.log("Component is loaded")}
+    }
+
     SequentialAnimation{
-        id:loadin
+    id:loadin
 
-        PropertyAnimation{
-            id:fadeout
-            target:pageLoader
-            properties: "opacity"; to: "0"; duration: 5000
+    PropertyAnimation{
+        id:fadeout
+        target:pageLoader
+        properties: "opacity"; to: "0"; duration: 5000
 
-        }
-        PropertyAnimation{
-            id: fadein
-            target:pageLoader
-            properties: "opacity"; to: "1"; duration: 5000
-        }
+    }
+    PropertyAnimation{
+        id: fadein
+        target:pageLoader
+        properties: "opacity"; to: "1"; duration: 5000
+    }
 
     }
 

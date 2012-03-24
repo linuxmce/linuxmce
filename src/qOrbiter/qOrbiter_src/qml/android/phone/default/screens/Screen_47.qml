@@ -35,6 +35,14 @@ Rectangle {
             anchors.left: progress_bar.right
         }
 
+        Text {
+            id: current_cells
+            text: dataModel.currentCells
+            color: "grey"
+            font.pixelSize: scaleY(3)
+            anchors.left: progress_bar_fill.right
+        }
+
         Rectangle{
             id:progress_bar_fill
             height: parent.height
@@ -87,9 +95,11 @@ Rectangle {
                 id: background
                 color: mouseclick.pressed ? "orange":"transparent"
                 anchors.centerIn: parent
-                border.color: "silver"               
+                border.color: "silver"
                 height: scaleY(15)
                 width: scaleX(75)
+               opacity: 0
+    Component.onCompleted: PropertyAnimation { target: background; property: "opacity"; to: 1; duration: 1000}
                 Row{
                     Image
                     {
@@ -109,13 +119,13 @@ Rectangle {
                         //anchors.fill: parent
                         width: scaleX(55)
                         height: scaleY(20)
-                        font.family: "Droid Sans"                        
+                        font.family: "Droid Sans"
                     }
                 }
 
                 MouseArea {
                     id:mouseclick
-                    anchors.fill: parent                   
+                    anchors.fill: parent
                     onReleased: setStringParam(4, id)
                 }
             }

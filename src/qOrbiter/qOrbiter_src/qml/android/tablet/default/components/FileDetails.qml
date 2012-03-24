@@ -5,14 +5,16 @@ Rectangle {
     id: filedetailrect
     width: scaleX(80)
     height: scaleY(85)
-    anchors.top: parent.top
-    anchors.topMargin: scaleY(5)
-    anchors.horizontalCenter: parent.horizontalCenter
+  anchors.centerIn: parent
     color: style.highlight2
-    clip: true
+    clip: false
     radius: 5
     border.color: style.highlight1
     border.width: 3
+    //opacity: 0
+    scale:0
+    Component.onCompleted: PropertyAnimation { target: filedetailrect; property: "scale"; to:1; duration: 1000}
+
     Image {
         id: fdbg
         source: "../img/icons/nowplaying.png"
@@ -20,18 +22,25 @@ Rectangle {
     }
 
     Rectangle{
-        id:mask
+        id:masking_rect
         height: appH
         width: appW
-        color: "lightgrey"
-        opacity: .5
-        z: -1
+        color: "darkgrey"
+        opacity: .75
+        z:-1
+
+        anchors.centerIn: parent
+        MouseArea{
+            anchors.fill: parent
+            onClicked: loadComponent("NullComponent")
+        }
     }
 
-  Connections{
-      target:filedetailsclass
-      onObjectChanged:filedetailsimage.source = "image://listprovider/filedetailsprovider/"+securityvideo.timestamp
-  }
+
+    Connections{
+        target:filedetailsclass
+        onObjectChanged:filedetailsimage.source = "image://listprovider/filedetailsprovider/"+securityvideo.timestamp
+    }
 
     Rectangle{
         id:titlerect
@@ -42,11 +51,21 @@ Rectangle {
         Text {
             id: text2
             anchors.horizontalCenter: parent.horizontalCenter
-               text: "Filename: " + filedetailsclass.filename
-            font.pixelSize: 14
+               text: "Location: " + filedetailsclass.path
+               font.pixelSize: scaleY(2)
             font.bold: true
             wrapMode: Text.WrapAtWordBoundaryOrAnywhere
         }
+
+    }
+    Text {
+        id: filename_block
+        anchors.horizontalCenter: parent.horizontalCenter
+           text: "Filename: " + filedetailsclass.file
+           font.pixelSize: scaleY(3)
+        font.bold: true
+        wrapMode: Text.WrapAtWordBoundaryOrAnywhere
+        anchors.bottom: parent.bottom
 
     }
 
@@ -58,7 +77,7 @@ Rectangle {
         anchors.verticalCenter: parent.verticalCenter
 
         anchors.left: parent.left
-        anchors.leftMargin: filedetailsclass.aspect=="wide"? scaleX(2.6) : scaleX(15)
+        anchors.leftMargin: filedetailsclass.aspect=="wide"? scaleX(2.6) : scaleX(7)
         BorderImage {
             id: borderimg
             horizontalTileMode: BorderImage.Repeat
@@ -72,9 +91,8 @@ Rectangle {
             id: filedetailsimage
             width: filedetailsclass.aspect=="wide"? scaleX(42.5) : scaleX(23)
             height:filedetailsclass.aspect=="wide"?scaleY(42.5) : scaleY(55)
-            source: "image://listprovider/filedetails/"+securityvideo.timestamp
+            source: "../img/icons/mediatime.png"
             smooth: true
-            asynchronous: true
         }
 
         Image {
@@ -82,7 +100,6 @@ Rectangle {
             source: "../img/icons/transparencymask.png"
             anchors.fill: filedetailsimage
             opacity: .5
-
         }
     }
 
@@ -130,28 +147,92 @@ Rectangle {
                     wrapMode: "WrapAtWordBoundaryOrAnywhere"
                      width: rectangle1.width *.95
                 }
+
                 Text {
-                    id:  episode
-                    text:filedetailsclass.episode
+                    id:  program_block
+                    text:qsTr("Program") + filedetailsclass.program
                     font.pixelSize: scaleY(2)
                     font.bold: true
                     color:"aliceblue"
                     wrapMode: "WrapAtWordBoundaryOrAnywhere"
                      width: rectangle1.width *.95
+                     visible:  filedetailsclass.program =="" ? false: true
                 }
 
                 Text {
+                    id:  episode
+                    text:qsTr("Episode") + filedetailsclass.episode
+                    font.pixelSize: scaleY(2)
+                    font.bold: true
+                    color:"aliceblue"
+                    wrapMode: "WrapAtWordBoundaryOrAnywhere"
+                     width: rectangle1.width *.95
+                     visible:  filedetailsclass.episode =="" ? false: true
+                }
+                Text {
+                    id: album_block
+                    width: scaleX(35)
+                    text: qsTr("Album: ") + filedetailsclass.album
+                    font.family: "Droid Sans"
+                    wrapMode: "WrapAtWordBoundaryOrAnywhere"
+                    smooth: true
+                    font.pixelSize: scaleY(2)
+                    visible:  filedetailsclass.album =="" ? false: true
+                }
+
+              /*  Text {
                     id: rating
                    width: rectangle1.width *.95
                     wrapMode: "WrapAtWordBoundaryOrAnywhere"
-                    text: qsTr("Rating")
+                    text: qsTr("Rating") + filedetailsclass
                     font.family: "Droid Sans"
                     //  font.bold: true
                     smooth: true
                     font.pixelSize: scaleY(2)
                      color:"aliceblue"
                     elide: "ElideRight"
-                    visible:  filedetailsclass.rating ==="" ? false: true
+                    visible:  filedetailsclass.rating =="" ? false: true
+                }
+                */
+                Text {
+                    id: genre_block
+                   width: rectangle1.width *.95
+                    wrapMode: "WrapAtWordBoundaryOrAnywhere"
+                    text: filedetailsclass.genre
+                    font.family: "Droid Sans"
+                    //  font.bold: true
+                    smooth: true
+                    font.pixelSize: scaleY(2)
+                     color:"aliceblue"
+                    elide: "ElideRight"
+                    visible:  filedetailsclass.genre =="" ? false: true
+
+                    MouseArea{
+                        anchors.fill: parent
+                        hoverEnabled: true
+                        onEntered: { starring.elide = "ElideNone" ; }
+                        onExited: {starring.elide = "ElideRight"; }
+                    }
+                }
+                Text {
+                    id: director_block
+                   width: rectangle1.width *.95
+                    wrapMode: "WrapAtWordBoundaryOrAnywhere"
+                    text: qsTr("Directed By: ") + filedetailsclass.director
+                    font.family: "Droid Sans"
+                    //  font.bold: true
+                    smooth: true
+                    font.pixelSize: scaleY(2)
+                     color:"aliceblue"
+                    elide: "ElideRight"
+                    visible:  filedetailsclass.director =="" ? false: true
+
+                    MouseArea{
+                        anchors.fill: parent
+                        hoverEnabled: true
+                        onEntered: { starring.elide = "ElideNone" ; }
+                        onExited: {starring.elide = "ElideRight"; }
+                    }
                 }
 
                 Text {
@@ -174,7 +255,6 @@ Rectangle {
                         onExited: {starring.elide = "ElideRight"; }
                     }
                 }
-
 
                 Text {
                     id: synopsistext
@@ -262,7 +342,7 @@ Rectangle {
             MouseArea
             {
                 anchors.fill: parent
-                onClicked: playMedia(filedetailsclass.file)  //dce function
+                onClicked:{ dcerouter.playMedia(filedetailsclass.file); loadComponent("NullComponent") }  //dce function
             }
         }
 
@@ -283,14 +363,11 @@ Rectangle {
             x: ((parent.width/3)*2)
             MouseArea{
                 anchors.fill:  parent
-                onClicked: {
-                    dataModel.checkForMore()
-                    loadComponent("NullComponent.qml")
-                }
+                onClicked: { dataModel.setLoadingStatus(true);filedetailsclass.clear(); dcerouter.setGridStatus(true); loadComponent("NullComponent.qml")}
             }
         }
     }
-    Component.onCompleted: contentFlick.contentHeight=synopsistext.height+104
+
 
 }
 

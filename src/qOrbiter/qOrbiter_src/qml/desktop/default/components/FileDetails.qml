@@ -5,20 +5,36 @@ Rectangle {
     id: filedetailrect
     width: scaleX(80)
     height: scaleY(85)
-    anchors.top: parent.top
-    anchors.topMargin: scaleY(5)
-    anchors.horizontalCenter: parent.horizontalCenter
+  anchors.centerIn: parent
     color: style.highlight2
-    clip: true
+    clip: false
     radius: 5
     border.color: style.highlight1
     border.width: 3
+    //opacity: 0
+    scale:0
+    Component.onCompleted: PropertyAnimation { target: filedetailrect; property: "scale"; to:1; duration: 1000}
+
     Image {
         id: fdbg
         source: "../img/icons/nowplaying.png"
         anchors.fill: filedetailrect
     }
 
+    Rectangle{
+        id:masking_rect
+        height: appH
+        width: appW
+        color: "darkgrey"
+        opacity: .75
+        z:-1
+
+        anchors.centerIn: parent
+        MouseArea{
+            anchors.fill: parent
+            onClicked: loadComponent("NullComponent")
+        }
+    }
 
 
     Connections{
@@ -192,7 +208,7 @@ Rectangle {
                     visible:  filedetailsclass.genre =="" ? false: true
 
                     MouseArea{
-                        anchors.fill: starring
+                        anchors.fill: parent
                         hoverEnabled: true
                         onEntered: { starring.elide = "ElideNone" ; }
                         onExited: {starring.elide = "ElideRight"; }
@@ -212,7 +228,7 @@ Rectangle {
                     visible:  filedetailsclass.director =="" ? false: true
 
                     MouseArea{
-                        anchors.fill: starring
+                        anchors.fill: parent
                         hoverEnabled: true
                         onEntered: { starring.elide = "ElideNone" ; }
                         onExited: {starring.elide = "ElideRight"; }
@@ -326,7 +342,7 @@ Rectangle {
             MouseArea
             {
                 anchors.fill: parent
-                onClicked: dcerouter.playMedia(filedetailsclass.file)  //dce function
+                onClicked:{ dcerouter.playMedia(filedetailsclass.file); loadComponent("NullComponent") }  //dce function
             }
         }
 
@@ -347,11 +363,11 @@ Rectangle {
             x: ((parent.width/3)*2)
             MouseArea{
                 anchors.fill:  parent
-                onClicked: { dataModel.setLoadingStatus(true);filedetailsclass.clear(); filedetailrect.destroy()}
+                onClicked: { dataModel.setLoadingStatus(true);filedetailsclass.clear(); dcerouter.setGridStatus(true); dcerouter.populateAdditionalMedia();loadComponent("NullComponent.qml")}
             }
         }
     }
-    Component.onCompleted: contentFlick.contentHeight=synopsistext.height+104
+
 
 }
 
