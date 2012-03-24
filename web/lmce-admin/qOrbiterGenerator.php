@@ -699,10 +699,17 @@ function getFloorPlanDevices($conn, $doc, $orbiterData)
 	
 	//looks for devices with floorplan data
 	//selects all the devices with floorplan info thanks possy
-	$sql = "select PK_Device, Device.Description,ddd1.IK_DeviceData as  
-	FloorplanInfo,ddd2.IK_DeviceData as FloorplanObjectType From Device Join Device_DeviceData as 
-	ddd1 on Device.PK_Device = ddd1.FK_Device Join Device_DeviceData as 
-	ddd2 on Device.PK_Device = ddd2.FK_Device Where ddd1.FK_DeviceData = 10 and ddd2.FK_DeviceData = 11  ";
+        $sql = "select PK_Device, Device.Description,
+        ddd1.IK_DeviceData as FloorplanInfo,
+        ddd2.IK_DeviceData as FloorplanObjectType,
+        fopt.FK_FloorplanType as FloorplanType
+        From Device
+
+        Join Device_DeviceData as ddd1 on Device.PK_Device = ddd1.FK_Device
+        Join Device_DeviceData as ddd2 on Device.PK_Device = ddd2.FK_Device
+        Join FloorplanObjectType as fopt on ddd2.IK_DeviceData = fopt.PK_FloorplanObjectType
+
+        Where ddd1.FK_DeviceData = 10 and ddd2.FK_DeviceData = 11;  ";
 	
 	$result = mysql_query($sql);
 		$i=0;
@@ -713,7 +720,8 @@ function getFloorPlanDevices($conn, $doc, $orbiterData)
 		$att1= $fp->setAttribute("Name", $row['Description']);
 		$att2= $fp->setAttribute("Device", $row['PK_Device']);	
 		$att3= $fp->setAttribute("Position", $row['FloorplanInfo']);
-		$att4= $fp->setAttribute("Type", $row['FloorplanObjectType']);							
+                $att4= $fp->setAttribute("Type", $row['FloorplanObjectType']);
+                $att5=$fp->setAttribute("fpType", $row['FloorplanType']);
 		$floorplanDeviceElement->appendChild($fp);		
 	 		
 		$i++;
