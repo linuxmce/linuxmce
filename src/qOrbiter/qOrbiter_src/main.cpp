@@ -158,6 +158,12 @@ int main(int argc, char* argv[])
 
     QApplication  a(argc, argv);
 
+#ifdef ANDROID // workaround for 'text as boxes' issue.
+ QFont f = a.font();
+ f.setFamily("Droid Sans");
+ f.setBold("true");
+ a.setFont(f);
+#endif
 
     g_sBinary = FileUtils::FilenameWithoutPath(argv[0]);
     g_sBinaryPath = FileUtils::BasePath(argv[0]);

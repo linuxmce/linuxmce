@@ -32,7 +32,7 @@ Rectangle {
         font.family: "Droid Sans"
         anchors.top: stage.top
         anchors.topMargin: scaleY(1)
-        width: scaleX(75)
+        width: scaleX(99)
         wrapMode: Text.WrapAtWordBoundaryOrAnywhere
         color: "silver"
 
