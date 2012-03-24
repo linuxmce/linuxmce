@@ -3,7 +3,7 @@ import QtQuick 1.1
 
 Rectangle {
     id:genericlist
-    height: scaleY(50)
+    height: childrenRect.height
     width: genericview.width
     border.color: "orange"
     border.width: 1
@@ -52,8 +52,8 @@ Component{
 
         Rectangle{
            id:container
-            width: scaleX(35)
-            height: scaleY(8)
+            width: scaleX(61)
+            height: scaleY(15)
             border.color: "silver"
             border.width: 1
             color:"transparent"
@@ -70,7 +70,6 @@ Component{
                 anchors.fill: parent
                 onClicked: {
                     currentroom = title
-
                    setActiveRoom(intRoom, entertain_area)
                     loadComponent("NullComponent.qml")
                 }
@@ -81,8 +80,9 @@ Component{
 
     ListView{
         id: genericview
-        width: scaleX(45)
+        width: scaleX(61)
         height: scaleY(50)
+        anchors.top: exit_button.bottom
         model: roomList
         spacing:1
         orientation:ListView.Vertical

@@ -45,8 +45,8 @@ Rectangle {
 
             Rectangle{
 
-                width: scaleX(45)
-                height: scaleY(10)
+                width: scaleX(61)
+                height: scaleY(15)
                 border.color: "white"
                 border.width: 1
                 color:"transparent"
@@ -76,13 +76,13 @@ Rectangle {
     }
     ListView{
         id: genericview
-        width: scaleX(45)
+        width: scaleX(61)
         height: genericview.childrenRect.height +25
+        anchors.top: exit_button.bottom
         model: userList
         orientation:ListView.Vertical
         delegate:  delegatemenu
         interactive: true
         clip:true
-
     }
 }
