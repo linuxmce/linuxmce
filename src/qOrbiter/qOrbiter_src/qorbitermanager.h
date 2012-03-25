@@ -395,6 +395,8 @@ signals:
     void skinIndexReady(bool b);
     void skinDataLoaded(bool b);
 
+    void floorplanTypeChanged();
+
 public slots: //note: Q_INVOKABLE means it can be called directly from qml
     void processConfig(QByteArray config);
     bool OrbiterGen();              //prelim orbter generation

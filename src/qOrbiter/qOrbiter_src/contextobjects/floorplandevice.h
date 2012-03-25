@@ -37,8 +37,10 @@ class FloorplanDevice : public QObject
         DeviceTypeRole= Qt::UserRole+3,
         PositionRole = Qt::UserRole+4,
         IconImageRole = Qt::UserRole+5,
-        FloorPlanTypeRole = Qt::DisplayRole+6
+        FloorPlanTypeRole = Qt::UserRole+6
     };
+
+
 
 public:
     explicit FloorplanDevice(QString &name, int &deviceNo, int &floorplan_device_type, int i_flooplanType, QString &position, QImage &icon, QObject *parent = 0);

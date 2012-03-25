@@ -90,7 +90,7 @@ Rectangle {
             height: scaleY(20)
             width: scaleY(20)
             color: "lightgrey"
-            Component.onCompleted: console.log("Fptype:" + floorplantype + " -- Floorplantype::" + currentFloorplanType)
+           // Component.onCompleted: console.log("Item Fptype:" + floorplantype + " -- Floorplantype::" + currentFloorplanType)
             visible: currentFloorplanType === floorplantype  ? true : false
             Column{
                 Text {

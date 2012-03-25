@@ -593,6 +593,7 @@ void qorbiterManager::processConfig(QByteArray config)
     qorbiterUIwin->rootContext()->setContextProperty("current_floorplan_devices", QVariant::fromValue(current_floorplan_devices));
     qorbiterUIwin->rootContext()->setContextProperty("floorplan_devices", floorplans);                  //floorplan devices
     qorbiterUIwin->rootContext()->setContextProperty("floorplan_pages", QVariant::fromValue(pages));    //pages for floorplans
+    qorbiterUIwin->rootContext()->setContextProperty("currentFloorplanType", QVariant::fromValue(i_currentFloorplanType));
     qorbiterUIwin->rootContext()->setContextProperty("currentuser", sPK_User);
     qorbiterUIwin->rootContext()->setContextProperty("iPK_Device", QVariant::fromValue(iPK_Device));  //orbiter device number
     qorbiterUIwin->rootContext()->setContextProperty("currentroom", m_lRooms->sdefault_Ea);           //custom room list item provided
@@ -985,7 +986,7 @@ void qorbiterManager::getFloorplanDevices(int floorplantype)
 void qorbiterManager::setFloorplanType(int t)
 {
     i_currentFloorplanType = t;
-    qorbiterUIwin->rootContext()->setContextProperty("currentFloorplanType", QVariant::fromValue(i_currentFloorplanType));
+    emit floorplanTypeChanged();
 }
 
 

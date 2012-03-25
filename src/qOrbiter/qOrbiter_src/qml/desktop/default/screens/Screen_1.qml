@@ -21,25 +21,6 @@ Item
             fillMode: Image.Tile
         }
 
-        CurtainEffect {
-               id: curtain
-               anchors.fill: fabric
-               bottomWidth: topWidth
-               source: ShaderEffectSource { sourceItem: fabric; hideSource: true }
-
-               Behavior on bottomWidth {
-                   SpringAnimation { easing.type: Easing.OutElastic; velocity: 250; mass: 1.5; spring: 0.5; damping: 0.05}
-               }
-
-               SequentialAnimation on topWidth {
-                   id: topWidthAnim
-
-
-                   PauseAnimation { duration: 3000 }
-                   NumberAnimation { to: 0; duration: 2000 }
-
-               }
-           }
 
         Image {
             id: headerbg
