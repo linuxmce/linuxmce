@@ -1927,7 +1927,11 @@ void qOrbiter::connectionError()
 
 void qOrbiter::getFloorplanDeviceCommand(int device)
 {
+
     long current_device = (long)device;
+    qDebug() << device;
+    string cmds="";
+    string cmd_resp="";
 
     int cellsToRender= 0;
 
@@ -1949,14 +1953,13 @@ void qOrbiter::getFloorplanDeviceCommand(int device)
     string valassign = "0";
     bool isSuccessfull;
 
+
+
     CMD_Populate_Datagrid cmd_populate_device_grid(m_dwPK_Device, iPK_Device_DatagridPlugIn, StringUtils::itos( m_dwIDataGridRequestCounter ), string(dgName), 94, option, 0, &pkVar, &valassign,  &isSuccessfull, &gHeight, &gWidth );
 
     if (SendCommand(cmd_populate_device_grid))
     {
-        /*
-              initial request to populate the text only grid as denoted by the lack of a leading "_" as in _MediaFile_43
-              this way, we can safely check empty grids and error gracefully in the case of no matching media
-              */
+
 
 
         //CMD_Request_Datagrid_Contents(long DeviceIDFrom, long DeviceIDTo,                   string sID,                                              string sDataGrid_ID,int iRow_count,int iColumn_count,bool bKeep_Row_Header,bool bKeep_Column_Header,bool bAdd_UpDown_Arrows,string sSeek,int iOffset,    char **pData,int *iData_Size,int *iRow,int *iColumn
@@ -1981,9 +1984,8 @@ void qOrbiter::getFloorplanDeviceCommand(int device)
                 fk_file = pCell->GetValue();
                 cellTitle = QString::fromUtf8(pCell->m_Text);
                 index = pDataGridTable->CovertColRowType(it->first).first;
-                /*
-             //   model->appendRow(new gridItem(fk_file, cellTitle, filePath, index, cellImg,  model));
-    */
+                qDebug() << cellTitle;
+
             }
         }
     }
@@ -2299,6 +2301,95 @@ void qOrbiter::setMediaSpeed(int s)
 void qOrbiter::getGridView(bool direction)
 {
 
+}
+
+void qOrbiter::seekToGridPosition(QString s)
+{
+    if(checkLoadingStatus() == true)
+    {
+        //emit statusMessage("requesting additional media");
+#ifdef ANDROID
+        int gHeight = media_pageSeperator;
+        int gWidth = 0;
+        int pkVar = 0;
+        int iOffset = 0;
+        int GridCurRow = media_currentPage;
+        int GridCurCol= 0;
+#elif for_android
+        int gHeight = media_pageSeperator;
+        int gWidth = 0;
+        int pkVar = 0;
+        int iOffset = 0;
+        int GridCurRow = media_currentPage;
+        int GridCurCol= 0;
+#else
+        int gHeight = 1;            //how many rows we want
+        int gWidth = 0;             //how many columns we want. in this case, just the one
+        int pkVar = 0;              // ??
+        int iOffset = 0;            // ??
+        int GridCurRow = i_currentMediaModelRow;         //the row to start from
+        int GridCurCol= 0;           //column to start from
+#endif
+        string m_sSeek=s.toStdString();
+        qDebug("Seeking");
+        string imgDG ="_MediaFile_"+QString::number(m_dwPK_Device).toStdString();
+
+        int iData_Size=0;
+        char *pData;
+        pData = "NULL";
+        //CMD_Request_Datagrid_Contents(                              long DeviceIDFrom,                long DeviceIDTo,                   string sID,                                string sDataGrid_ID, int iRow_count,int iColumn_count,        bool bKeep_Row_Header,bool bKeep_Column_Header,bool bAdd_UpDown_Arrows,string sSeek,       int iOffset,    char **pData,int *iData_Size,int *iRow,int *iColumn
+#ifdef ANDROID
+        DCE::CMD_Request_Datagrid_Contents req_data_grid_pics( long(m_dwPK_Device), long(iPK_Device_DatagridPlugIn), StringUtils::itos( m_dwIDataGridRequestCounter ), string(imgDG),    1, media_pageSeperator,                     false,                 false,                                 true, string(m_sSeek),   iOffset,  &pData,         &iData_Size, &GridCurRow, &GridCurCol );
+#elif for_android
+        DCE::CMD_Request_Datagrid_Contents req_data_grid_pics( long(m_dwPK_Device), long(iPK_Device_DatagridPlugIn), StringUtils::itos( m_dwIDataGridRequestCounter ), string(imgDG),    1, media_pageSeperator,                     false,                 false,                                 true, string(m_sSeek),   iOffset,  &pData,         &iData_Size, &GridCurRow, &GridCurCol );
+#else
+        DCE::CMD_Request_Datagrid_Contents req_data_grid_pics( long(m_dwPK_Device), long(iPK_Device_DatagridPlugIn), StringUtils::itos( m_dwIDataGridRequestCounter ), string(imgDG),    1, 1,                     false,                 false,                                 true, string(m_sSeek),   iOffset,  &pData,         &iData_Size, &GridCurRow, &GridCurCol );
+#endif
+        std::string pResponse ="";
+        if(SendCommand(req_data_grid_pics, &pResponse) && pResponse == "OK")
+        {
+            DataGridTable *pDataGridTable = new DataGridTable(iData_Size,pData,false);
+            setMediaResponse("grid request ok");
+
+            // LoggerWrapper::GetInstance()->Write(LV_CRITICAL, "Pic Datagrid Dimensions: Height %i, Width %i", gHeight, gWidth);
+            DataGridCell *pCell;
+            QString cellTitle;
+            QString fk_file;
+            QString filePath;
+            int index;
+            QImage cellImg;
+
+            for(MemoryDataTable::iterator it=pDataGridTable->m_MemoryDataTable.begin();it!=pDataGridTable->m_MemoryDataTable.end();++it)
+            {
+                pCell= it->second;
+                const char *pPath = pCell->GetImagePath();
+                filePath = QString::fromUtf8(pPath);
+                fk_file = pCell->GetValue();
+                cellTitle = QString::fromUtf8(pCell->m_Text);
+
+                index = pDataGridTable->CovertColRowType(it->first).first;
+                if (pPath )
+                {
+#ifndef ANDROID
+                    cellImg = getfileForDG(pPath);
+#else
+                    cellImg = getfileForDG(pPath);
+#endif
+                }
+                else
+                {
+                    cellImg.load(":/icons/icon.png");
+                }
+
+                emit addItem(new gridItem(fk_file, cellTitle, filePath, index, cellImg));
+            }
+            delete pDataGridTable;
+        }
+    }
+    else
+    {
+        //qDebug("Grid set to stop, will not load more.");
+    }
 }
 
 void qOrbiter::removePlaylistItem(int index)

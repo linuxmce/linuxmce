@@ -1271,6 +1271,7 @@ public slots:
 
     void jumpMobileGrid(int page);
     void getGridView(bool direction);
+    void seekToGridPosition(QString s);
     //now playing
     void removePlaylistItem(int index);
     void saveCurrentPlaylist(int user, QString ea, QString name, bool SaveAsNew);

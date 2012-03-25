@@ -89,9 +89,10 @@ Rectangle {
         }
         Image {
             id: filedetailsimage
-            width: filedetailsclass.aspect=="wide"? scaleX(42.5) : scaleX(30)
+            width: filedetailsclass.aspect=="wide"? scaleX(42.5) : scaleX(45)
             height:filedetailsclass.aspect=="wide"?scaleY(42.5) : scaleY(55)
             source: "../img/icons/mediatime.png"
+transform: Rotation { origin.x: 30; origin.y: 30; axis { x: 0; y: 1; z: 0 } angle: 35 }
             smooth: true
         }
 
@@ -99,9 +100,11 @@ Rectangle {
             id: npmask
             source: "../img/icons/transparencymask.png"
             anchors.fill: filedetailsimage
+transform: Rotation { origin.x: 30; origin.y: 30; axis { x: 0; y: 1; z: 0 } angle: 35 }
             opacity: .5
         }
     }
+
 
 
     Rectangle {
@@ -111,10 +114,13 @@ Rectangle {
         height: scaleY(45)
         radius: 2.5
         clip:  true
-        color: style.darkhighlight
-        border.color: style.highlight1
+        color: "black"
+        border.color: "orange"
         anchors.left: imageholder.right
-        anchors.leftMargin: scaleX(.5)
+        anchors.leftMargin: scaleX(-10)
+smooth:true
+transform: Rotation { origin.x: 30; origin.y: 30; axis { x: 0; y: 1; z: 0 } angle: -25 }
+
 
         Flickable {
             anchors.fill: parent
@@ -125,10 +131,20 @@ Rectangle {
             Column
             {
                 id:textcol
-                spacing:5
+                spacing:scaleY(2)
                 anchors.margins: scaleY(1)
                 width: parent.width
                 height: childrenRect.height
+Text {
+                    id:  titletext
+                    text:filedetailsclass.mediatitle
+                    font.pixelSize: scaleY(3)
+                    font.bold: true
+                    color:"aliceblue"
+                    wrapMode: "WrapAtWordBoundaryOrAnywhere"
+                     width: parent.width
+
+                }
                 Text {
                     id: fnametext
 
@@ -138,15 +154,7 @@ Rectangle {
                      width: rectangle1.width *.95
                 }
 
-                Text {
-                    id:  titletext
-                    text:filedetailsclass.mediatitle
-                    font.pixelSize: scaleY(3)
-                    font.bold: true
-                    color:"aliceblue"
-                    wrapMode: "WrapAtWordBoundaryOrAnywhere"
-                     width: rectangle1.width *.95
-                }
+
 
                 Text {
                     id:  program_block
@@ -186,7 +194,7 @@ Rectangle {
                     wrapMode: "WrapAtWordBoundaryOrAnywhere"
                     text: qsTr("Rating") + filedetailsclass
                     font.family: "Droid Sans"
-                    //  font.bold: true
+                    font.bold: false
                     smooth: true
                     font.pixelSize: scaleY(2)
                      color:"aliceblue"
@@ -200,7 +208,7 @@ Rectangle {
                     wrapMode: "WrapAtWordBoundaryOrAnywhere"
                     text: filedetailsclass.genre
                     font.family: "Droid Sans"
-                    //  font.bold: true
+                     font.bold: false
                     smooth: true
                     font.pixelSize: scaleY(2)
                      color:"aliceblue"
@@ -220,7 +228,7 @@ Rectangle {
                     wrapMode: "WrapAtWordBoundaryOrAnywhere"
                     text: qsTr("Directed By: ") + filedetailsclass.director
                     font.family: "Droid Sans"
-                    //  font.bold: true
+                     font.bold: false
                     smooth: true
                     font.pixelSize: scaleY(2)
                      color:"aliceblue"

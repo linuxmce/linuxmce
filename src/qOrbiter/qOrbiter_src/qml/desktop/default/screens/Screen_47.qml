@@ -1,5 +1,6 @@
 import QtQuick 1.0
 import "../components"
+import "../animation"
 import "../js/ComponentLoader.js" as MyJs
 
 
@@ -11,6 +12,9 @@ Rectangle {
     clip: true
     property int mouselocY: 0
     property int mouselocX: 0
+
+
+
     Connections
     {
         target: filedetailsclass
@@ -100,6 +104,9 @@ Rectangle {
             height: scaleY(20)
             color: "transparent"
             opacity: 0
+            scale:0
+            rotation: 360
+
             MouseArea{
                 anchors.fill: mainItem
                 hoverEnabled: true
@@ -115,7 +122,15 @@ Rectangle {
                     mainItem.z = 1
                 }
             }
-            Component.onCompleted: PropertyAnimation { target: mainItem; property: "opacity"; to: 1; duration: 1000}
+            ParallelAnimation {
+                id:fade_and_scale
+                running: false
+                PropertyAnimation { target: mainItem; property: "opacity"; to: 1; duration: 1000}
+                PropertyAnimation { target: mainItem; property: "scale"; to: 1; duration: 500}
+                PropertyAnimation { target: mainItem; property: "rotation"; to: 0; duration: 500}
+            }
+
+            Component.onCompleted: fade_and_scale.running = true
             Rectangle
             {
                 id:frame
@@ -140,7 +155,7 @@ Rectangle {
                     anchors.fill: imagerect
                     anchors { leftMargin: -6; topMargin: -6; rightMargin: -8; bottomMargin: -8 }
                     border { left: 10; top: 10; right: 10; bottom: 10 }
-                    //smooth: true
+                    smooth: true
                 }
 
                 Image
@@ -150,9 +165,7 @@ Rectangle {
                     height: scaleY(18);
                     width: scaleX(18);
                     anchors.centerIn: parent;
-                    fillMode: Image.PreserveAspectCrop
-                    opacity: 1
-
+                    fillMode: Image.PreserveAspectCrop                   
                     smooth: true
                 }
                 Rectangle{
@@ -185,6 +198,7 @@ Rectangle {
         Item {
             width: list_view1.width;
             height: 120
+
             Rectangle {
                 id: background
                 x: 2; y: 2; width: parent.width - x*2; height: parent.height - y*2

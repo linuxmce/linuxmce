@@ -34,6 +34,7 @@ class FloorPlanModel : public QAbstractListModel
 {
     Q_PROPERTY (QString currentPage READ getCurrentPage WRITE setCurrentPage NOTIFY pageChanged)
     Q_PROPERTY (QImage currentImage READ getCurrentImage WRITE setImage NOTIFY floorPlanImageChanged)
+    Q_PROPERTY (int iCurrentPage READ getCurrentIntPage WRITE setCurrentIntPage NOTIFY pageChanged)
     Q_OBJECT
 public:
     explicit FloorPlanModel(FloorplanDevice *m_prototype, QObject *parent = 0);
@@ -57,6 +58,7 @@ public:
 
     int currentFloorPlanType;
     int totalPages;
+    int iCurrentPage;
 
     QString imageBasePath;
 
@@ -76,6 +78,9 @@ signals:
 public slots:
     void clear();
     void handleItemChange();
+
+    int getCurrentIntPage() {return iCurrentPage;}
+    void setCurrentIntPage(int i) {iCurrentPage = i;}
 
     QImage getFloorPlanImage () {return currentImage;}
     QImage getCurrentImage() {return currentImage;}

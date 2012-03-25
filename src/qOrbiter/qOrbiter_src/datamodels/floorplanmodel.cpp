@@ -166,6 +166,7 @@ void FloorPlanModel::setCurrentPage(QString currentPageId)
 {
 
  currentPage = currentPageId;
+ setCurrentIntPage( currentPage.toInt());
  QString s = getCurrentImagePath();
  emit pageChanged(s);
 }

@@ -156,7 +156,7 @@ qorbiterManager::qorbiterManager(QDeclarativeView *view, QObject *parent) :
     audioDefaultSort = "2";
     photoDefaultSort = "13";
     gamesDefaultSort = "49";
-
+    i_currentFloorplanType = 0;
     backwards = false;
 
     //file details object and imageprovider setup
@@ -383,8 +383,9 @@ void qorbiterManager::processConfig(QByteArray config)
         int fp_deviceno = floorplan_device_list.at(index).attributes().namedItem("Device").nodeValue().toInt();
         QString position = floorplan_device_list.at(index).attributes().namedItem("Position").nodeValue();
         int fp_deviceType = floorplan_device_list.at(index).attributes().namedItem("Type").nodeValue().toInt();
+        int fpType = floorplan_device_list.at(index).attributes().namedItem("fpType").nodeValue().toInt();
         QImage icon;
-        floorplans->appendRow(new FloorplanDevice( name, fp_deviceno, fp_deviceType, position, icon, floorplans));
+        floorplans->appendRow(new FloorplanDevice( name, fp_deviceno, fp_deviceType, fpType, position, icon, floorplans));
     }
     emit loadingMessage("Floorplan Devices complete");
     QApplication::processEvents(QEventLoop::AllEvents);
@@ -589,6 +590,7 @@ void qorbiterManager::processConfig(QByteArray config)
     qorbiterUIwin->rootContext()->setContextProperty("currentRoomClimate", roomClimate);               //curent room climate model
     qorbiterUIwin->rootContext()->setContextProperty("currentRoomTelecom", roomTelecom);               //curret room telecom model
     qorbiterUIwin->rootContext()->setContextProperty("currentRoomSecurity", roomSecurity);             //current room security model
+    qorbiterUIwin->rootContext()->setContextProperty("current_floorplan_devices", QVariant::fromValue(current_floorplan_devices));
     qorbiterUIwin->rootContext()->setContextProperty("floorplan_devices", floorplans);                  //floorplan devices
     qorbiterUIwin->rootContext()->setContextProperty("floorplan_pages", QVariant::fromValue(pages));    //pages for floorplans
     qorbiterUIwin->rootContext()->setContextProperty("currentuser", sPK_User);
@@ -962,6 +964,28 @@ void qorbiterManager::displayModelPages(QList<QObject *> pages)
 void qorbiterManager::setIpAddress(QString s)
 {
     m_ipAddress = s;
+}
+
+void qorbiterManager::getFloorplanDevices(int floorplantype)
+{
+    for (int i=0; i < floorplans->rowCount(); i++)
+    {
+        qDebug() << floorplans->index(i, 0, QModelIndex()).data(1);
+
+        if(floorplans->index(i).data(6).toInt() == floorplantype)
+        {
+
+            QString markerID = floorplans->index(i).data(1).toString();
+            current_floorplan_devices.append(floorplans->find(markerID));
+        }
+    }
+    //  qorbiterUIwin->rootContext()->setContextProperty("current_floorplan_devices", QVariant::fromValue(current_floorplan_devices));
+}
+
+void qorbiterManager::setFloorplanType(int t)
+{
+    i_currentFloorplanType = t;
+    qorbiterUIwin->rootContext()->setContextProperty("currentFloorplanType", QVariant::fromValue(i_currentFloorplanType));
 }
 
 

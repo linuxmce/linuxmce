@@ -36,11 +36,12 @@ class FloorplanDevice : public QObject
         DeviceNoRole =Qt::UserRole+2,
         DeviceTypeRole= Qt::UserRole+3,
         PositionRole = Qt::UserRole+4,
-        IconImageRole = Qt::UserRole+5
+        IconImageRole = Qt::UserRole+5,
+        FloorPlanTypeRole = Qt::DisplayRole+6
     };
 
 public:
-    explicit FloorplanDevice(QString &name, int &deviceNo, int &floorplan_device_type, QString &position, QImage &icon, QObject *parent = 0);
+    explicit FloorplanDevice(QString &name, int &deviceNo, int &floorplan_device_type, int i_flooplanType, QString &position, QImage &icon, QObject *parent = 0);
     FloorplanDevice(QObject * parent=0) {}
     QVariant data(int role) const;
     QHash<int, QByteArray> roleNames() const;
@@ -48,9 +49,20 @@ public:
     inline QString id() const {  return mQS_name; }                         //returns name
     inline int deviceNum() const { return mI_deviceNo; }                    //returns device no
     inline int deviceType() const { return mI_floorplan_device_type; }      // returns device type
+    inline int floorplanType() const { return mI_floorplanType; }
     inline QString pagePosition() const { return mQS_position; }            // returns page position raw, will be converted to return current page position
     inline QString iconPath() const { return mQS_iconpath; }
     inline QImage deviceImage() const {  return mIM_icon; }
+
+    QString mQS_name;                       //device name
+    int mI_deviceNo;                        //device number
+    int mI_floorplan_device_type;           //floorplan device type
+    int mI_floorplanType;                   //type of floorplan its associated with
+    QString mQS_position;                   //postion, raw in string form
+    QImage mIM_icon;                        //raw image data
+    QMap <int, int> mm_currentPosition;     //map of positions on pages
+    QMap <QString, QString> mm_commands;    //command map with command and corresponding ??
+    QString mQS_iconpath;                   //icon path to be used in the future with skins
 
 signals:
     void statusChanged();
@@ -60,14 +72,7 @@ public slots:
 
 
 private:
-    QString mQS_name;                       //device name
-    int mI_deviceNo;                        //device number
-    int mI_floorplan_device_type;           //floorplan device type
-    QString mQS_position;                   //postion, raw in string form
-    QImage mIM_icon;                        //raw image data
-    QMap <int, int> mm_currentPosition;     //map of positions on pages
-    QMap <QString, QString> mm_commands;    //command map with command and corresponding ??
-    QString mQS_iconpath;                   //icon path to be used in the future with skins
+
 };
 
 #endif // FLOORPLANDEVICE_H

@@ -34,7 +34,10 @@ color:"transparent"
 
                 MouseArea{
                     id: mousearea1
-                    onClicked:showfloorplan(5)
+                    onClicked:{
+                        manager.setFloorplanType(5)
+                        dcerouter.ShowFloorPlan(5)
+                    }
                 }
             }
 

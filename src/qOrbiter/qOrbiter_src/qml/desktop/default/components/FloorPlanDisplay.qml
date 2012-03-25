@@ -8,9 +8,10 @@ Rectangle {
     Connections{
         target: floorplan_devices
         onFloorPlanImageChanged: {
-            floorplanimage.source = "image://listprovider/floorplan/"+floorplan_devices.currentPage
+            floorplanimage.source = "image://listprovider/floorplan/"+floorplan_devices.currentPage           
         }
     }
+    Component.onCompleted: floorplan_devices.setCurrentPage(1)
 
     Rectangle{
         id:mainRect
@@ -83,11 +84,14 @@ Rectangle {
         orientation: ListView.Horizontal
         anchors.top: mainRect.bottom
         anchors.horizontalCenter: parent.horizontalCenter
-        delegate: Rectangle{
+        delegate:
+            Rectangle{
             id:fp_device_rect
             height: scaleY(20)
             width: scaleY(20)
             color: "lightgrey"
+            Component.onCompleted: console.log("Fptype:" + floorplantype + " -- Floorplantype::" + currentFloorplanType)
+            visible: currentFloorplanType === floorplantype  ? true : false
             Column{
                 Text {
                     id: fpDevice_name
@@ -98,6 +102,10 @@ Rectangle {
                     text: "I am type" + type
                 }
                 Text {
+                    id: fp_type
+                    text: "Floorplan type" + floorplantype
+                }
+                Text {
                     id: fpDevice_no
                     text: "I am Dev#" + deviceno
                 }
@@ -105,6 +113,11 @@ Rectangle {
                     id: fpDevice_pos
                     text: "Position" + position
                 }
+            }
+
+            MouseArea{
+                anchors.fill: parent
+                onClicked: dcerouter.getFloorplanDeviceCommand(type)
             }
         }
     }

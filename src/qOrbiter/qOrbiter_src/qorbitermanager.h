@@ -258,6 +258,7 @@ Param 10 - pk_attribute
     QList<QObject*> commandList;
     QList<QObject*>pages;
     QStringList *skinNames;
+    QList<QObject*> current_floorplan_devices;
 
     MediaSubTypeModel *mediaTypeFilter;
     FilterModel *uiFileFilter;
@@ -330,6 +331,7 @@ Param 10 - pk_attribute
     long iMediaPluginID;
     int m_pDevice_ScreenSaver;
     int m_dwIDataGridRequestCounter;
+    int i_currentFloorplanType;
     QString applicationPath;
 
 signals:
@@ -400,6 +402,8 @@ public slots: //note: Q_INVOKABLE means it can be called directly from qml
     void showUI(bool b);
     void displayModelPages(QList<QObject*> pages);
     void setIpAddress(QString s);
+    void getFloorplanDevices(int floorplantype);
+    void setFloorplanType(int t);
 
     //void setAppPath(QString p) {appPath;}
 

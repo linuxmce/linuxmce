@@ -9,8 +9,6 @@ Rectangle {
     anchors.horizontalCenter: parent.horizontalCenter
     color: "transparent"
 
-
-
     Image {
         id: name
         source: ""
@@ -30,5 +28,7 @@ Rectangle {
         //contentItem.clip: true
         cellWidth: scaleX(20)
         cellHeight: scaleY(20)
+
     }
+
 }
