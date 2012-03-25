@@ -210,13 +210,12 @@ function processSubmit($telecomADO){
 				$user=$_REQUEST['voicemail_'.$mode];
 				$routingValue='voicemail,'.$user;
 			break;			
-			case 'prompt':
-				$routingValue='prompt';
-			break;			
 			case 'transfer':
 				$routingValue='transfer,'.$_REQUEST['transfer_phone'];
 			break;			
+			case 'prompt':
 			default:
+				$routingValue='prompt';
 			break;
 		}
 
