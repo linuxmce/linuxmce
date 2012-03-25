@@ -226,6 +226,7 @@ public slots:
 
     void setImageData( const uchar *data, int iData_size) {
 
+
         QImage t;
         if( t.loadFromData(data, iData_size))
         {
@@ -236,6 +237,8 @@ public slots:
         {
             emit statusMessage("Update Object Image Conversion Failed:");
         }
+
+
     }
     void setImage(QImage img) {fileImage = img; emit imageChanged();}
     QImage getImage() {return fileImage;}

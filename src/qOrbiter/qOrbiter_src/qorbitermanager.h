@@ -48,6 +48,10 @@
 #include <QtNetwork/QTcpSocket>
 #include <QProcess>
 #include <QtXml/QDomDocument>
+#ifdef for_desktop
+#include <shaders/filereader.h>
+#include<shaders/trace.h>
+#endif
 
 /*-------Custom Classes -----------------*/
 
@@ -129,7 +133,7 @@ class qorbiterManager : public QObject
 public:
     qorbiterManager(QDeclarativeView * view, QObject *parent=0);  //constructor
 
-
+    FileReader * fileReader;
     //settings
     QString sPK_User;
     QString buildType;

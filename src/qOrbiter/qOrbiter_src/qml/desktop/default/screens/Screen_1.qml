@@ -14,12 +14,7 @@ Item
         width: style.orbiterW
         color: "transparent"
 
-        Image {
-            id: fabric
-            anchors.fill: stage
-            source: "../img/lmcesplash.jpg"
-            fillMode: Image.Tile
-        }
+
 
 
         Image {

@@ -28,6 +28,8 @@
 #include <datamodels/skindatamodel.h>
 #include <QTimer>
 
+
+
 //#include "OrbiterData.h"
 
 
@@ -79,7 +81,10 @@ qorbiterManager::qorbiterManager(QDeclarativeView *view, QObject *parent) :
     qorbiterUIwin->rootContext()->setContextProperty("extip", qs_ext_routerip );
     qorbiterUIwin->rootContext()->setContextProperty("manager", this); //providing a direct object for qml to call c++ functions of this class
     qorbiterUIwin->rootContext()->setContextProperty("dcemessage", dceResponse);
-
+#ifdef for_desktop
+    fileReader = new FileReader;
+    qorbiterUIwin->rootContext()->setContextProperty("fileReader", fileReader);
+#endif
     appHeight = qorbiterUIwin->height() ;
     appWidth = qorbiterUIwin->width() ;
 

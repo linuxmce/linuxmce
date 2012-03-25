@@ -284,7 +284,8 @@ SOURCES += main.cpp \
     datamodels/avdevice.cpp \
     contextobjects/existingorbiter.cpp \
     contextobjects/modelpage.cpp \
-    contextobjects/avcommand.cpp
+    contextobjects/avcommand.cpp \
+    shaders/filereader.cpp
 
 # Please do not modify the following two lines. Required for deployment.
 include(qmlapplicationviewer/qmlapplicationviewer.pri)
@@ -383,7 +384,9 @@ HEADERS += \
     datamodels/avdevice.h \
     contextobjects/existingorbiter.h \
     contextobjects/modelpage.h \
-    contextobjects/avcommand.h
+    contextobjects/avcommand.h \
+    shaders/filereader.h \
+    shaders/trace.h
 
 OTHER_FILES += Readme.txt \
     qml/Splash.qml \

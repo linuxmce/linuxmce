@@ -46,6 +46,8 @@ Q_IMPORT_PLUGIN(UIKit)
 #include <contextobjects/epgchannellist.h>
 #include <contextobjects/playlistclass.h>
 
+
+
 // In source files stored in archives and packages, these 2 lines will have the release version (build)
 // and the svn revision as a global variable that can be inspected within a core dump
 #define  VERSION "<=version=>"

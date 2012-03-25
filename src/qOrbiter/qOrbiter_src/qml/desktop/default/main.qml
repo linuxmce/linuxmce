@@ -1,5 +1,6 @@
 import QtQuick 1.1
-
+import Qt.labs.shaders 1.0
+import "effects"
 import "components"
 import "js/ComponentLoader.js" as MyJs
 
@@ -36,7 +37,7 @@ Connections{
     }
 */
     ScreenSaver
-    {
+    {   id:ss
         height: appH
         width: appW
         anchors.centerIn: parent
@@ -145,6 +146,8 @@ Connections{
         onLoaded: {console.log("Component is loaded")}
     }
 
+
+
     SequentialAnimation{
     id:loadin
 
@@ -161,6 +164,8 @@ Connections{
     }
 
     }
+
+    //-----------------------------shader related---------------------------//
 
 
 }
