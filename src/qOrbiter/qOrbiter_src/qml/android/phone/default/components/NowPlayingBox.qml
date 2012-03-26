@@ -22,6 +22,8 @@ Rectangle {
      anchors.fill: np_box
       fillMode: Image.PreserveAspectFit
       source: ""
+      opacity: 0
+      onSourceChanged: PropertyAnimation { target: nowplayingimage; property: "opacity"; to: 1}
   }
 
    /*
@@ -39,7 +41,7 @@ Rectangle {
     */
     Text {
         id: np_label
-        text: qsTr("NowPlaying")
+        text: qsTr("Now Playing ")
         font.pixelSize: scaleY(3)
         anchors.top: np_box.top
         font.bold: true
@@ -52,11 +54,12 @@ Rectangle {
     Text{
         text: dcenowplaying.qs_mainTitle
         font.pixelSize: scaleY(3)
-        anchors.top: np_label.bottom
+        anchors.top: np_label.top
+
         wrapMode: Text.WrapAtWordBoundaryOrAnywhere
         color: "silver"
         width: np_box.width - 40
-        anchors.horizontalCenter: np_box.horizontalCenter
+        anchors.left: np_label.right
         font.bold: true
     }
 
@@ -65,7 +68,7 @@ Rectangle {
         id: np
         text:dcenowplaying.timecode
         font.pixelSize: scaleY(2)
-        anchors.bottom: np_label.bottom
+        anchors.top: np_label.bottom
         wrapMode: Text.WrapAtWordBoundaryOrAnywhere
         anchors.horizontalCenter: np_box.horizontalCenter
         color: "white"
