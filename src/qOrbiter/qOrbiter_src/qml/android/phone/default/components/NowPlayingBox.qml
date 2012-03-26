@@ -23,7 +23,7 @@ Rectangle {
       fillMode: Image.PreserveAspectFit
       source: ""
       opacity: 0
-      onSourceChanged: PropertyAnimation { target: nowplayingimage; property: "opacity"; to: 1}
+      onSourceChanged: PropertyAnimation { target: nowplayingimage; property: "opacity"; to: 1; duration: 1500}
   }
 
    /*
@@ -38,7 +38,7 @@ Rectangle {
         opacity: .25
 
     }
-    */
+
     Text {
         id: np_label
         text: qsTr("Now Playing ")
@@ -62,18 +62,9 @@ Rectangle {
         anchors.left: np_label.right
         font.bold: true
     }
+*/
 
 
-    Text {
-        id: np
-        text:dcenowplaying.timecode
-        font.pixelSize: scaleY(2)
-        anchors.top: np_label.bottom
-        wrapMode: Text.WrapAtWordBoundaryOrAnywhere
-        anchors.horizontalCenter: np_box.horizontalCenter
-        color: "white"
-        font.bold: true
-    }
 
     states: [
         State {

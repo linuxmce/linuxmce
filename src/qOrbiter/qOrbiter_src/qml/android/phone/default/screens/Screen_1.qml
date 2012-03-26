@@ -64,10 +64,10 @@ Rectangle {
         height: childrenRect.height
         width: childrenRect.width
         anchors.centerIn: bottomBg
-        spacing: scaleX(4)
+        spacing: scaleX(15)
 
         ButtonSq{
-            height: scaleY(5)
+            height: scaleY(10)
             width: scaleX(10)
             buttontext: currentuser
             MouseArea{

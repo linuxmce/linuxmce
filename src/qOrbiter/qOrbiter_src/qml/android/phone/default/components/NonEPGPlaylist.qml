@@ -3,8 +3,8 @@ import QtQuick 1.0
 Rectangle {
     id:nonepgplaylist
     width: scaleX(80)
-    height: scaleY(85)
-    color: "silver"
+    height: scaleY(75)
+    color: "transparent"
     border.color: "orange"
     border.width: 1
     clip:false    
@@ -47,15 +47,8 @@ Rectangle {
             border.width: 1
             width:scaleX(80)
             height: scaleY(20)
+            color:"transparent"
 
-
-            Image {
-                id: bg
-                source: "../img/lowerbkg.png"
-                width:scaleX(80)
-                height: scaleY(20)
-                fillMode: Image.PreserveAspectCrop
-            }
             clip: true
             Image {
                 id: playlistimage
@@ -73,6 +66,7 @@ Rectangle {
                 font.bold: true
                 anchors.bottom: parent.bottom
                 opacity: .75
+                anchors.right: parent.right
             }
 
             Text {
@@ -81,7 +75,8 @@ Rectangle {
                 color: "silver"
                 width: parent.width
                 wrapMode: "WrapAtWordBoundaryOrAnywhere"
-                font.pixelSize: scaleY(4)
+                font.pixelSize: scaleY(2)
+                font.bold: true
             }
 
            Image {
@@ -89,7 +84,7 @@ Rectangle {
                 fillMode: Image.PreserveAspectCrop
                 source: "../img/transparencymask.png"
                 anchors.fill: parent
-                opacity: .30
+                opacity: .50
             }
 
             MouseArea{

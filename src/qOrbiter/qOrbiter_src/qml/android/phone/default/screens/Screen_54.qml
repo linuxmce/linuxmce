@@ -8,37 +8,45 @@ Rectangle {
     height: appH
     width: appW
     color: "transparent"
-    Component.onCompleted: manager.getStoredPlaylist()
-      NowPlayingBox
-    {
-        id:np_box
-        anchors.top: parent.top
-        anchors.left: home.right
-        anchors.leftMargin: scaleX(5)
-    }
-    Text {
-        id: track
 
-        wrapMode: "WrapAtWordBoundaryOrAnywhere"
-        anchors.bottom:controls.top
-        anchors.left: ha.right
-        text: qsTr("Track: ") + dcenowplaying.track
-        font.family: "Droid Sans"
-        font.bold: true
-        //font.italic: true
-        smooth: true
-        font.pixelSize: scaleY(12)
-        visible:  dcenowplaying.track =="" ? false: true
-        color: "orange"
-        opacity: .25
-    }
+    Connections
+     {
+         target: dcenowplaying
+         onImageChanged: nowplayingimage.source = "image://listprovider/updateobject/"+securityvideo.timestamp
+     }
+
+    Component.onCompleted: dcerouter.BindMediaRemote(true)
+
+    Image {
+       id: nowplayingimage
+       height: scaleX(55)
+       width: scaleX(55)
+       fillMode: Image.PreserveAspectFit
+       source: ""
+       opacity: 0
+       onSourceChanged: PropertyAnimation { target: nowplayingimage; property: "opacity"; to: 1; duration: 1500}
+       anchors.top: parent.top
+       anchors.horizontalCenter: parent.horizontalCenter
+   }
+
+      Text {
+          id: np
+          text:dcenowplaying.timecode
+          font.pixelSize: scaleY(5)
+          wrapMode: Text.WrapAtWordBoundaryOrAnywhere
+          anchors.horizontalCenter: parent.horizontalCenter
+          color: "white"
+          font.bold: true
+          anchors.bottom: controls.top
+      }
+
 
     Column{
         id:textcol
         spacing: scaleY(1.5)
         width: scaleX(80)
         height: childrenRect.height
-        anchors.top: np_box.bottom
+        anchors.top: nowplayingimage.bottom
         anchors.left: ha.right
         anchors.leftMargin: scaleX(2)
 
@@ -62,6 +70,7 @@ Rectangle {
             font.family: "Droid Sans"
             wrapMode: "WrapAtWordBoundaryOrAnywhere"
             smooth: true
+            font.bold: true
             font.pixelSize: scaleY(4)
             visible:  dcenowplaying.mediatitle =="" ? false: true
             color: "silver"
@@ -97,6 +106,23 @@ Rectangle {
                 onEntered: { genre.elide = "ElideNone" ; }
                 onExited: {genre.elide = "ElideRight"; }
             }
+        }
+
+        Text {
+            id: track
+
+            wrapMode: "WrapAtWordBoundaryOrAnywhere"
+            anchors.bottom:controls.top
+            anchors.left: ha.right
+            text: qsTr("Track: ") + dcenowplaying.track
+            font.family: "Droid Sans"
+            font.bold: true
+            //font.italic: true
+            smooth: true
+            font.pixelSize: scaleY(3)
+            visible:  dcenowplaying.track =="" ? false: true
+            color: "orange"
+            opacity: .25
         }
     }
 
@@ -147,22 +173,20 @@ states: [
 State {
     name: "State1"
 
-
-
-    PropertyChanges {
-        target: textrect
-        visible: false
-    }
-
-    PropertyChanges {
-        target: np_box
-        visible: false
-    }
-
     PropertyChanges {
         target: nonepgplaylist3
         visible: true
         opacity: 1
+    }
+
+    PropertyChanges {
+        target: textcol
+        visible: false
+    }
+
+    PropertyChanges {
+        target: nowplayingimage
+        visible: false
     }
 
     PropertyChanges {
