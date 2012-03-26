@@ -9,16 +9,14 @@ Rectangle {
     anchors.horizontalCenter: parent.horizontalCenter
     color: "transparent"
 
-    Image {
-        id: name
-        source: ""
-    }
+
 
     GridView {
         id: gridView
         //z: 2
         width: scaleX(82)
         height: scaleY(82)
+
         anchors.centerIn: gridholder
         model:dataModel
         delegate: contactDelegate

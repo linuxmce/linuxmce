@@ -1145,6 +1145,7 @@ signals:
     void showFileInfo(bool state);
     void setFocusFile(QString);
     void modelPageCount(QList<QObject*> count);
+    void clearModel();
 
 
     //now playing signals

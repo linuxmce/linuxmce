@@ -65,7 +65,7 @@ void ListModel::appendRows(const QList<gridItem *> &items)
     endInsertRows();
     QModelIndex index = indexFromItem(m_list.last());
     QModelIndex index2 = indexFromItem(m_list.first());
-    int currentRows= m_list.size();
+    int currentRows= m_list.count();
     emit itemAdded(currentRows);
     setCurrentCells(currentRows);
     double p = (((double)m_list.size() / (double)totalcells) * 100) ;
@@ -102,9 +102,11 @@ void ListModel::reset()
     clearing = true;
     emit modelAboutToBeReset();
     beginResetModel();
+    setProgress(0.0);
     resetInternalData();
+    //qDeleteAll(m_list);
     endResetModel();
-   emit modelReset();
+    emit modelReset();
     clearing = false;
 
 }
@@ -119,6 +121,7 @@ void ListModel::endResetModel()
 
 void ListModel::resetInternalData()
 {
+
     qDeleteAll(m_list.begin(), m_list.end());
      m_list.clear();
 }
@@ -168,9 +171,9 @@ void ListModel::clear()
     clearing = true;
     emit modelAboutToBeReset();
     beginResetModel();
-    resetInternalData();
-    setTotalCells(0);
     setProgress(0.0);
+    resetInternalData();
+    //qDeleteAll(m_list);
     endResetModel();
     emit modelReset();
     clearing = false;
@@ -296,13 +299,14 @@ void ListModel::clearAndRequest(int type)
 {
     clearing = true;
     gridType = type;      
-    QApplication::processEvents(QEventLoop::AllEvents);
     emit modelAboutToBeReset();
     beginResetModel();
+    setProgress(0.0);
     resetInternalData();
-    setProgress(0.0);   
+    //qDeleteAll(m_list);
     endResetModel();
     emit modelReset();
+
     clearing = false;
     emit ready(gridType);
 

@@ -1,27 +1,32 @@
 import QtQuick 1.0
+import Qt.labs.shaders 1.0
+import "../effects"
 import "../components"
 import "../animation"
+
 import "../js/ComponentLoader.js" as MyJs
 
 
 Rectangle {
     id:fileviewscreen
-    width: style.orbiterW
-    height: style.orbiterH
+    width: appW
+    height: appH
     color: "transparent"
     clip: true
     property int mouselocY: 0
     property int mouselocX: 0
 
-
+    function runEffects()
+    {
+        loadComponent("FileDetails.qml")
+    }
 
     Connections
     {
         target: filedetailsclass
         onShowDetailsChanged:
         {
-            loadComponent("FileDetails.qml")
-
+            runEffects()
         }
     }
     Rectangle{
@@ -128,6 +133,7 @@ Rectangle {
                 PropertyAnimation { target: mainItem; property: "opacity"; to: 1; duration: 1000}
                 PropertyAnimation { target: mainItem; property: "scale"; to: 1; duration: 500}
                 PropertyAnimation { target: mainItem; property: "rotation"; to: 0; duration: 500}
+
             }
 
             Component.onCompleted: fade_and_scale.running = true
@@ -165,7 +171,7 @@ Rectangle {
                     height: scaleY(18);
                     width: scaleX(18);
                     anchors.centerIn: parent;
-                    fillMode: Image.PreserveAspectCrop                   
+                    fillMode: Image.PreserveAspectCrop
                     smooth: true
                 }
                 Rectangle{
@@ -182,7 +188,6 @@ Rectangle {
                     font.pointSize: 12;
                     color: "white" ;
                     wrapMode: "WrapAtWordBoundaryOrAnywhere"
-
                     width: imagerect.width
                     font.bold: true
                     anchors.top: imagerect.top

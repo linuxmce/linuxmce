@@ -2025,6 +2025,8 @@ void qOrbiter::setCurrentRow(int row)
     populateAdditionalMedia();
 #elif WIN32
     populateAdditionalMedia();
+#elif Q_OS_MACX
+     populateAdditionalMedia();
 #endif
 }
 
@@ -4327,8 +4329,16 @@ bool qOrbiter::checkLoadingStatus()
 {
     if(i_currentMediaModelRow < i_mediaModelRows && requestMore == true )
     {
+        if(currentScreen=="Screen_47.qml")
+        {
         //emit statusMessage("Count" + QString::number(i_currentMediaModelRow)+ "/" + QString::number(i_mediaModelRows));
         return true;
+        }
+        else
+        {
+            return false;
+            emit clearModel();
+        }
     }
     else
     {

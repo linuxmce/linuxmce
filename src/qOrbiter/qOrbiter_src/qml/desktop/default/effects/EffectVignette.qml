@@ -42,5 +42,5 @@
 import QtQuick 1.0
 
 Effect {
-    fragmentShaderFilename: "shaders/vignette.fsh"
+    fragmentShaderFilename: "vignette.fsh"
 }
