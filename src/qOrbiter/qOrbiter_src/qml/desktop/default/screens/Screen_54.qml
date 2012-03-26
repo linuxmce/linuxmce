@@ -12,13 +12,13 @@ Rectangle {
     }
 
     Connections{
-        target:dcenowplaying        
+        target:dcenowplaying
         onImageChanged:nowplayingimage.source = "image://listprovider/updateobject/"+securityvideo.timestamp
     }
 
 
-    height: style.orbiterH
-    width: style.orbiterW
+    height: appH
+    width: appW
     radius: 0
     opacity: 1
     color: "transparent"
@@ -29,7 +29,7 @@ Rectangle {
         anchors.centerIn: parent
         font.pixelSize: scaleY(5)
         opacity: .5
-        style: Text.Sunken
+       font.bold: true
 
     }
 
@@ -110,10 +110,7 @@ Rectangle {
                     source: "../img/icons/transparencymask.png"
                     anchors.fill: nowplayingimage
                     opacity: .5
-
                 }
-
-
             }
 
             Rectangle{

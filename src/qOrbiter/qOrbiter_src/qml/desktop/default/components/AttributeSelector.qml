@@ -15,6 +15,17 @@ Rectangle {
                 HomeButton{id:home}
 
                 ButtonSq{
+                    buttontext: "Play All"
+                    buttonsqradius: 7
+                    height: scaleY(style.buttonH)
+                    width:  scaleX(style.buttonW)
+                    MouseArea{
+                        anchors.fill:parent
+                        onClicked: dcerouter.playMedia("!G"+iPK_Device)
+                    }
+                }
+
+                ButtonSq{
 
                     buttontext: "Attribute Sort"
                     buttonsqradius: 7

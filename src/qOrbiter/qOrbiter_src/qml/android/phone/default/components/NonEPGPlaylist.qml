@@ -14,7 +14,6 @@ Rectangle {
         target: mediaplaylist
         onActiveItemChanged:{
             nonepgplaylistview.positionViewAtIndex(mediaplaylist.currentIndex  , ListView.Beginning)
-
         }
     }
 

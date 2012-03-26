@@ -285,7 +285,8 @@ SOURCES += main.cpp \
     contextobjects/existingorbiter.cpp \
     contextobjects/modelpage.cpp \
     contextobjects/avcommand.cpp \
-    shaders/filereader.cpp
+    shaders/filereader.cpp \
+    contextobjects/timecodemanager.cpp
 
 # Please do not modify the following two lines. Required for deployment.
 include(qmlapplicationviewer/qmlapplicationviewer.pri)
@@ -386,7 +387,8 @@ HEADERS += \
     contextobjects/modelpage.h \
     contextobjects/avcommand.h \
     shaders/filereader.h \
-    shaders/trace.h
+    shaders/trace.h \
+    contextobjects/timecodemanager.h
 
 OTHER_FILES += Readme.txt \
     qml/Splash.qml \

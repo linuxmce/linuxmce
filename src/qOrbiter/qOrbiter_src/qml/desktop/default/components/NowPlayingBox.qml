@@ -41,7 +41,8 @@ Rectangle {
             x: 255
             y: 12
             text: dcenowplaying.qs_playbackSpeed
-            font.pixelSize: 12
+            font.pixelSize: scaleY(1)
+            font.bold: true
         }
     }
 
@@ -72,7 +73,7 @@ Rectangle {
             font.bold: true
             smooth: true
             horizontalAlignment: Text.AlignHCenter
-            font.pixelSize: 12
+            font.pixelSize: scaleY(2)
         }
 
 

@@ -67,8 +67,8 @@ Rectangle {
         spacing: scaleX(4)
 
         ButtonSq{
-            height: style.stdbuttonh
-            width: style.stdbuttonw
+            height: scaleY(5)
+            width: scaleX(10)
             buttontext: currentuser
             MouseArea{
                 anchors.fill: parent
@@ -78,14 +78,9 @@ Rectangle {
 
         ButtonSq{
             id:roombutton
-            height: style.stdbuttonh
-            width: style.stdbuttonw
-            buttontext: currentroom
-            Image {
-                id: centerbottom
-                source: "../img/grid.png"
-                anchors.fill: roombutton
-            }
+            height: scaleY(5)
+            width: scaleX(10)
+            buttontext: currentroom         
             MouseArea{
                 anchors.fill: parent
                 onClicked:  loadComponent("RoomSelector.qml")

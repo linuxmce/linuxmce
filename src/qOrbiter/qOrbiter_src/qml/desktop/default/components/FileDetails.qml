@@ -136,6 +136,7 @@ Rectangle {
                     color:"aliceblue"
                     wrapMode: "WrapAtWordBoundaryOrAnywhere"
                      width: rectangle1.width *.95
+                     font.bold: true
                 }
 
                 Text {

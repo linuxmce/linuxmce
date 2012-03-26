@@ -70,8 +70,7 @@ Rectangle {
         Text {
             id: album
             width: parent.width
-            text:  dcenowplaying.album + "|" + dcenowplaying.releasedate
-            font.family: "Droid Sans"
+            text:  dcenowplaying.album + "|" + dcenowplaying.releasedate            
             wrapMode: "WrapAtWordBoundaryOrAnywhere"
             font.bold: true
             smooth: true
@@ -143,9 +142,6 @@ Rectangle {
         visible: false
         opacity: 0
     }
-
-
-
 
 states: [
 State {

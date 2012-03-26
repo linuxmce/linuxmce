@@ -15,11 +15,13 @@ Rectangle {
         onImageChanged: nowplayingimage.source = "image://listprovider/updateobject/"+securityvideo.timestamp
     }
 
+   Component.onCompleted: dcerouter.BindMediaRemote(true)
+
    Image {
       id: nowplayingimage
      anchors.fill: np_box
       fillMode: Image.PreserveAspectFit
-      source: "image://listprovider/updateobject/"+securityvideo.timestamp
+      source: ""
   }
 
    /*
@@ -40,6 +42,7 @@ Rectangle {
         text: qsTr("NowPlaying")
         font.pixelSize: scaleY(3)
         anchors.top: np_box.top
+        font.bold: true
         anchors.topMargin: 15
         anchors.left: np_box.left
         anchors.leftMargin: 20
@@ -54,17 +57,19 @@ Rectangle {
         color: "silver"
         width: np_box.width - 40
         anchors.horizontalCenter: np_box.horizontalCenter
+        font.bold: true
     }
 
 
     Text {
         id: np
         text:dcenowplaying.timecode
-        font.pixelSize: scaleY(2.5)
+        font.pixelSize: scaleY(2)
         anchors.bottom: np_label.bottom
         wrapMode: Text.WrapAtWordBoundaryOrAnywhere
         anchors.horizontalCenter: np_box.horizontalCenter
         color: "white"
+        font.bold: true
     }
 
     states: [

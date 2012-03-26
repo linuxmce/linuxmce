@@ -45,6 +45,7 @@ Q_IMPORT_PLUGIN(UIKit)
 #include <imageProviders/abstractimageprovider.h>
 #include <contextobjects/epgchannellist.h>
 #include <contextobjects/playlistclass.h>
+#include <contextobjects/timecodemanager.h>
 
 
 
@@ -283,6 +284,8 @@ int main(int argc, char* argv[])
         EPGChannelList *simpleEPGmodel = new EPGChannelList(new EPGItemClass);
         simpleEPGmodel->moveToThread(epgThread);
 
+        TimeCodeManager *timecode = new TimeCodeManager();
+
         QThread * mediaThread = new QThread();
         ListModel *mediaModel = new ListModel(new gridItem);
         mediaModel->moveToThread(mediaThread);
@@ -294,6 +297,7 @@ int main(int argc, char* argv[])
         orbiterWin.mainView.rootContext()->setContextProperty("dataModel", mediaModel);
         orbiterWin.mainView.rootContext()->setContextProperty("mediaplaylist", storedVideoPlaylist);
         orbiterWin.mainView.rootContext()->setContextProperty("simpleepg", simpleEPGmodel);
+        orbiterWin.mainView.rootContext()->setContextProperty("timecode", timecode);
         //shutdown signals
 
         QObject::connect(w, SIGNAL(orbiterClosing()), dceThread, SLOT(quit()),Qt::QueuedConnection);
@@ -329,6 +333,8 @@ int main(int argc, char* argv[])
         QObject::connect(pqOrbiter,SIGNAL(tcUpdated(QString)), w->nowPlayingButton, SLOT(setTimeCode(QString)),Qt::QueuedConnection);
         QObject::connect(w->nowPlayingButton, SIGNAL(playListPositionChanged(int)), storedVideoPlaylist, SLOT(setCurrentIndex(int)) ,Qt::QueuedConnection);
 
+        //timecodemanager signals / slots
+        QObject::connect(pqOrbiter, SIGNAL(updateTimeCode(QString,int)), timecode, SLOT(start(QString,int)));
         //setup
         QObject::connect(w, SIGNAL(registerOrbiter(int,QString,int)), pqOrbiter,SLOT(registerDevice(int,QString,int)),Qt::QueuedConnection);
         QObject::connect(pqOrbiter,SIGNAL(startManager(QString,QString)), w, SLOT(qmlSetupLmce(QString,QString)),Qt::QueuedConnection);

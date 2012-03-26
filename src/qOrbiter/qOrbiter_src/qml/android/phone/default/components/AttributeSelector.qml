@@ -12,6 +12,17 @@ Rectangle {
         width: childrenRect.width
         spacing: 5
 
+        ButtonSq{
+            buttontext: "Play All"
+            height: style.stdbuttonh
+            width: style.stdbuttonw
+            buttontextbold: true
+            MouseArea{
+                anchors.fill:parent
+                onClicked: dcerouter.playMedia("!G"+iPK_Device)
+            }
+        }
+
         ButtonSq
         {
             height: style.stdbuttonh

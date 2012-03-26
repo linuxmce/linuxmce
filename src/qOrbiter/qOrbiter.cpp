@@ -1029,7 +1029,7 @@ void qOrbiter::CMD_Set_Now_Playing(string sPK_DesignObj,string sValue_To_Assign,
     scrn.remove(pos1, scrn.length());
     // qDebug() << sValue_To_Assign.c_str();
 
-
+    emit updateTimeCode(QString::fromStdString(m_sIPAddress), 12000);
 
     if (iPK_MediaType == 0)
     {
@@ -1133,6 +1133,7 @@ void qOrbiter::CMD_Set_Now_Playing(string sPK_DesignObj,string sValue_To_Assign,
             //  emit clearPlaylist();
         }
     }
+
 }
 
 //<-dceag-c254-b->
@@ -2651,6 +2652,11 @@ void DCE::qOrbiter::GetSecurityCam(int i_inc_pkdevice)
 
 void DCE::qOrbiter::playMedia(QString inc_FKFile)
 {
+    if(inc_FKFile == "!G")
+    {
+        qDebug()<<"Appending onto !G"<< "::" <<m_dwPK_Device;
+        inc_FKFile.append(QString::number(m_dwPK_Device));
+    }
 
     //changed to remove media type as that is decided on by the media plugin and passed back
 

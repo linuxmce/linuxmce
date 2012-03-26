@@ -12,8 +12,8 @@ Rectangle {
 
       NowPlayingBox
     {
-        id:np_box
-        anchors.top: parent.top
+       id:np_box
+       anchors.top: parent.top
        anchors.left: home.right
        anchors.leftMargin: scaleX(5)
     }
@@ -47,7 +47,7 @@ Rectangle {
             text: qsTr("Program :") + dcenowplaying.tvProgram
             font.family: "Droid Sans"
             wrapMode: "WrapAtWordBoundaryOrAnywhere"
-            //  font.bold: true
+            font.bold: true
             smooth: true
             font.pixelSize: scaleY(3)
             visible:  dcenowplaying.tvProgram =="" ? false: true
@@ -61,7 +61,7 @@ Rectangle {
             wrapMode: "WrapAtWordBoundaryOrAnywhere"
             text: qsTr("Episode: ") + dcenowplaying.episode
             font.family: "Droid Sans"
-            //  font.bold: true
+            font.bold: true
             smooth: true
             font.pixelSize: scaleY(3)
             visible:  dcenowplaying.episode =="" ? false: true
