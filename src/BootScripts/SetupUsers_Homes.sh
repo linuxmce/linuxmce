@@ -110,7 +110,7 @@ for Users in $R; do
 		path = /home/user_$PlutoUserID
 		public = no
 		"
-		echo "/home/user_$PlutoUserID	\"$UserName\"	options:upriv,usedots rolist:nobody rwlist:\"pluto_$UserName\"">>/etc/netatalk/AppleVolumes.default
+		echo "/home/user_$PlutoUserID	\"$UserName\"	cnidscheme:dbd options:upriv,usedots rolist:nobody rwlist:\"pluto_$UserName\"">>/etc/netatalk/AppleVolumes.default
 
 		# TODO: replace 00000001 with a real number of seconds (never set to 00000000)
 		SambaEntry="pluto_$UserName:$LinuxUserID:$SambaPassword:[U          ]:LCT-00000001:,,,"
