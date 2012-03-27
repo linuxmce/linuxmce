@@ -18,7 +18,7 @@ function slimServer($output,$dbADO) {
 			$out='<span class="err">'.translate('TEXT_PRINTING_SYSTEM_NOT_FOUND_CONST').'</span>';
 		}else{
 			$ip=$_SERVER['REMOTE_ADDR'];	
-			$out.='<iframe src="http://'.$_SERVER['HTTP_HOST'].':631/" style="width:98%;height:600px;"></iframe>';
+			$out.='<iframe src="https://'.$_SERVER['HTTP_HOST'].':631/" style="width:98%;height:600px;"></iframe>';
 		}	
 	}else{
 	// process area
