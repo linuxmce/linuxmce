@@ -78,6 +78,8 @@ SambaUserShares=
 /usr/pluto/bin/BootMessage.sh "Setting up users..."
 if [[ "$MakeUsers" == yes ]]; then
 	echo "# LinuxMCE AppleTalk shares" >/etc/netatalk/AppleVolumes.default
+	echo "/home/public/data \"public\" cnidscheme:dbd options:upriv,usedots dperm:0777 fperm:0777" >>/etc/netatalk/AppleVolumes.default
+	echo "/home   "home"  cnidscheme:dbd options:upriv,usedots,ro,noadouble" >>/etc/netatalk/AppleVolumes.default
 fi
 
 for Users in $R; do
