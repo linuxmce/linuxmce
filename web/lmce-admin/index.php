@@ -1778,6 +1778,12 @@ switch ($section) {
 	    include_once('operations/others/slimServer.php');
 	    slimServer($output,$dbADO);	    
 	break;		
+        case 'printingSystem':
+                $output = new Template($dbADO);
+                $output->setTemplateFileType('large');
+            include_once('operations/others/printingSystem.php');
+            slimServer($output,$dbADO);
+        break;
 	case 'searchMedia':
 		$output = new Template($dbADO);
 		$output->setTemplateFileType('large');
