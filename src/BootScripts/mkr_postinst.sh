@@ -65,7 +65,9 @@ fi
 if ! BlacklistConfFiles '/etc/avahi/afpd.service.tmpl' ;then
         cp /usr/pluto/templates/afpd.service.tmpl /etc/avahi/afpd.service
 fi
+## Enable Metadata DB to emulate OSX attributes since we are not on HFS+ filesystem
 sed "s/CNID_METAD_RUN=no/CNID_METAD_RUN=yes/" -i /etc/default/netatalk
+## Restart to enable modifications
 service netatalk restart
 service avahi-daemon restart
 

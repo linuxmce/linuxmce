@@ -612,4 +612,13 @@ if [ -n "$IntIf" ] && [ -z "$( echo $IntIf | grep : )"  ] && [ -e /etc/default/l
 	sed -i "s/^EXTIFACE=\"*\(.*\)\"*/EXTIFACE=${ExtIf}/" /etc/default/linux-igd
 fi
 
+## Bind afpd to local interface only
+if ! BlacklistConfFiles '/etc/avahi/ssh.service' ;then
+        if !(grep -q "^-ipaddr" "/etc/netatalk/afpd.conf") ;then
+                echo "-ipaddr $IntIP" >> /etc/netatalk/afpd.conf
+        fi
+fi
+service netatalk restart
+
+
 /usr/pluto/bin/Network_NIS.sh
