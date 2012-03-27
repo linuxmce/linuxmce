@@ -58,6 +58,17 @@ if ! BlacklistConfFiles '/etc/asound.conf' ;then
 	cp /usr/pluto/templates/asound.conf /etc/asound.conf
 fi
 
+## Setup AppleTalk services for SSH and file sharing
+if ! BlacklistConfFiles '/etc/avahi/ssh.service' ;then
+        cp /usr/pluto/templates/ssh.service.tmpl /etc/avahi/ssh.service
+fi
+if ! BlacklistConfFiles '/etc/avahi/afpd.service.tmpl' ;then
+        cp /usr/pluto/templates/afpd.service.tmpl /etc/avahi/afpd.service
+fi
+sed "s/CNID_METAD_RUN=no/CNID_METAD_RUN=yes/" -i /etc/default/netatalk
+service netatalk restart
+service avahi-daemon restart
+
 ## Prevent updatedb from running from cron
 if ! BlacklistConfFiles '/etc/updatedb.conf' ;then
 	if ! grep -qF 'exit 0 # Pluto' /etc/updatedb.conf; then
