@@ -1,0 +1,4 @@
+Add FileNotFound.bmp to the root of your skins directory.
+
+For example, if your Basic skin is located in /usr/pluto/orbiter/skins/Basic
+then FileNotFound.bmp must be copied to /usr/pluto/orbiter/skins.
