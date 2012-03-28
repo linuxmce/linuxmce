@@ -1,5 +1,6 @@
 import QtQuick 1.0
-
+import Qt.labs.shaders 1.0
+import "../effects"
 Rectangle {
     id: recScreen
     height: style.orbiterH
@@ -13,7 +14,17 @@ Rectangle {
             anchors.fill: parent
         }
     }
-
+    EffectGaussianBlur{
+        id: blur
+        anchors.fill: recScreen
+        divider: false
+        dividerValue: 1.0
+        opacity: 1
+        radius: 0.4
+        targetHeight: recScreen.height
+        targetWidth: recScreen.width
+        source: ShaderEffectSource { sourceItem: bgrect; hideSource: false; smooth: true }
+    }
     Rectangle {
         id: recRooms
         x: mnuBottomRight.x+txtRoom.x
@@ -105,6 +116,7 @@ Rectangle {
                 PropertyChanges { target: recRooms; x: recScreen.width/2-recRooms.width/2}
                 PropertyChanges { target: recRooms; y: recScreen.height/2-recRooms.height/2}
                 PropertyChanges { target: recRooms; opacity: 1}
+                PropertyChanges { target: blur; radius: 0.4}
             }
         ]
         transitions: [ Transition {
@@ -112,6 +124,7 @@ Rectangle {
                 NumberAnimation { duration: 300; target: recRooms; properties: "x,y"; easing.type: Easing.InOutQuad }
                 NumberAnimation { duration: 300; target: recRooms; easing.amplitude: 0.5; properties: "height,width"; easing.type: Easing.InOutQuart }
                 NumberAnimation { duration: 300; target: recRooms; properties: "opacity" }
+                //NumberAnimation { duration: 0.25; target: blur}
                 reversible: true
             }
         ]

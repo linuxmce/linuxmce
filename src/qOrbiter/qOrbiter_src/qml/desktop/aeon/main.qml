@@ -162,23 +162,24 @@ Item {
                 }
                 PropertyAnimation { id: zoomimgBg2; target: imgBg2; property: "scale"; from: 1.0; to: 1.25; duration: 18000 }
             }
+            Loader {
+                id:pageLoader
+                objectName: "loadbot"
+                source: "Splash.qml"
+                onSourceChanged:  loadin
+                focus: true
+                onLoaded: {
+
+                    console.log("Screen Changed:" + pageLoader.source)
+
+                }
+            }
 
         }
     }
 
 
-    Loader {
-        id:pageLoader
-        objectName: "loadbot"
-        source: "Splash.qml"
-        onSourceChanged:  loadin
-        focus: true
-        onLoaded: {
 
-            console.log("Screen Changed:" + pageLoader.source)
-
-        }
-    }
 
     SequentialAnimation{
         id:loadin
