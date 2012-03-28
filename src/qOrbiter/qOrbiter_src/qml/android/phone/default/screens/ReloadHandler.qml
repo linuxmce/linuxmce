@@ -6,15 +6,17 @@ Rectangle {
     width: appW
     height: appH
     color:"transparent"
+
     HomeButton{id:home_but; anchors.left: parent.left; anchors.top: parent.top
+
         Text {
             id: reload_label
             text: qsTr("Router Disconnect, in the meantime, we will attempt to refresh scenarios")
             width: scaleX(85)
-            wrapMode: Text.WrapAtWordBoundaryOrAnywhere
-            font.pixelSize: scaleY(4)
-            color:"orange"
             anchors.centerIn: parent
+            wrapMode: Text.WrapAtWordBoundaryOrAnywhere
+            font.pixelSize: scaleY(3)
+            color:"orange"
         }
 
         WebView {
@@ -23,7 +25,6 @@ Rectangle {
             height: parent.height - 200
             width: parent.width - 100
             url: "http://"+srouterip+"/lmce-admin/qOrbiterGenerator.php?d="+iPK_Device
-
         }
     }
 }

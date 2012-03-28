@@ -35,8 +35,10 @@ Rectangle {
         width: scaleX(99)
         wrapMode: Text.WrapAtWordBoundaryOrAnywhere
         color: "silver"
+        visible: false
 
     }
+
     Column{
         id:maindisplay
         anchors.top: spaceholder.bottom
@@ -67,6 +69,17 @@ Rectangle {
         spacing: scaleX(15)
 
         ButtonSq{
+            height: style.stdbuttonh
+            width: style.stdbuttonw
+            buttontext: qsTr("Power")
+            MouseArea{
+                anchors.fill: parent
+                onClicked: loadComponent("Power.qml")
+            }
+
+        }
+
+        ButtonSq{
             height: scaleY(10)
             width: scaleX(10)
             buttontext: currentuser
@@ -95,8 +108,8 @@ Rectangle {
                 anchors.fill: parent
                 onClicked: closeOrbiter()
             }
-
         }
+
     }
 
 }

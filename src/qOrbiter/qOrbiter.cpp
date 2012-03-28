@@ -1029,7 +1029,6 @@ void qOrbiter::CMD_Set_Now_Playing(string sPK_DesignObj,string sValue_To_Assign,
     scrn.remove(pos1, scrn.length());
     // qDebug() << sValue_To_Assign.c_str();
 
-    emit updateTimeCode(QString::fromStdString(m_sIPAddress), 12000);
 
     if (iPK_MediaType == 0)
     {
@@ -1046,6 +1045,7 @@ void qOrbiter::CMD_Set_Now_Playing(string sPK_DesignObj,string sValue_To_Assign,
     }
     else
     {
+        emit updateTimeCode(QString::fromStdString(m_sIPAddress), 12000);
         emit setNowPlaying(true);
         emit currentScreenChanged("Screen_"+scrn+".qml");
         currentScreen = "Screen_"+scrn+".qml";
@@ -1364,7 +1364,7 @@ void qOrbiter::CMD_Show_Shortcuts(string &sCMD_Result,Message *pMessage)
 void qOrbiter::CMD_Show_File_List(int iPK_MediaType,string &sCMD_Result,Message *pMessage)
 //<-dceag-c401-e->
 {
-
+    setMediaType(iPK_MediaType);
     if (iPK_MediaType != q_mediaType.toInt())
     {
         initializeGrid();

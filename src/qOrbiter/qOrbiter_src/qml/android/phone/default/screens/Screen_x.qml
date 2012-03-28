@@ -1,20 +1,21 @@
 import QtQuick 1.0
 import "../components"
 Item{
-    id:security
+    id:no_screen
 
     Rectangle{
-        width: style.orbiterW
-        height: style.orbiterH
-        color: style.bgcolor
-        Text {
-            id: unknownscreen
-            x: 0
-            y: 131
+        width: appW
+        height: appH
+        color: "transparent"
+        Text {            
+            id: screen_not_found
+            anchors.centerIn: parent
+            width: scaleX(75)
             text: "Error: Screen file not found: " + screenfile
+            wrapMode: "WrapAtWordBoundaryOrAnywhere"
             font.family: "Droid Sans"
             font.bold: false
-            font.pointSize: 15
+            font.pixelSize: scaleY(3)
         }
         HomeButton{ x: 5; y: 5; width: 75; height: 75; smooth: true}
     }

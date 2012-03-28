@@ -126,7 +126,7 @@ DEPLOYMENTFOLDERS = folder_01 files_01
 
 ANDROID{
 INSTALLS +=deployment
-android {
+android-debug {
     qmlcomponents.source = ../android-extra-libs
     qmlcomponents.target = /
     DEPLOYMENTFOLDERS += qmlcomponents

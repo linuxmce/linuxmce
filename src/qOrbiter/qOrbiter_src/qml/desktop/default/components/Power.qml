@@ -32,7 +32,7 @@ Rectangle {
             height: childrenRect.height
             spacing: scaleX(5)
             Column {
-                id: on
+                id: display_on
                 width: childrenRect.width
                 height: childrenRect.height
                 spacing: 10
@@ -49,22 +49,10 @@ Rectangle {
                     }
                 }
 
-                ButtonSq {
-                    id: mdonlabel
-                    buttontext:  qsTr("Media Director On")
-                    buttonsqradius: 20
-                    MouseArea{
-                        anchors.fill: parent
-                        onClicked: {
-
-                            loadComponent("NullComponent.qml")
-                        }
-                    }
-                }
             }
 
             Column {
-                id: off
+                id: display_off
                 width: childrenRect.width
                 height: childrenRect.height
                 spacing: 10
@@ -81,18 +69,7 @@ Rectangle {
                     }
                 }
 
-                ButtonSq{
-                    id: mdofflabel
-                    buttontext : qsTr("Media Director Off")
-                    buttonsqradius: 20
-                    MouseArea{
-                        anchors.fill: parent
-                        onClicked: {
 
-                           loadComponent("NullComponent.qml")
-                        }
-                    }
-                }
             }
         }
     }

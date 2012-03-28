@@ -1486,7 +1486,7 @@ void qorbiterManager::setDceResponse(QString response)
     dceResponse = response;
     emit loadingMessage(dceResponse);
     emit dceResponseChanged();
-    //qDebug() << dceResponse;
+    qDebug() << dceResponse;
 
 }
 

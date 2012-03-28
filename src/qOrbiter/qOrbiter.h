@@ -42,6 +42,7 @@ class qOrbiter : public qOrbiter_Command
 {
     Q_OBJECT
     Q_PROPERTY (QString mediaResponse READ getMediaResponse WRITE setMediaResponse NOTIFY mediaResponseChanged)
+    Q_PROPERTY (int i_current_mediaType READ getMediaType WRITE setMediaType NOTIFY mediaTypeChanged)
 
 
     //<-dceag-decl-e->
@@ -1106,9 +1107,9 @@ signals:
     void startManager(QString, QString);
     void deviceInvalid(QList<QObject*>);
     void routerInvalid();
-     void routerReloading(QString msg);
-     void replaceDevice();
-     void closeOrbiter();
+    void routerReloading(QString msg);
+    void replaceDevice();
+    void closeOrbiter();
     void statusMessage(QString s);
     void configReady(QByteArray config);
     void setMyIp(QString ip);
@@ -1224,10 +1225,10 @@ signals:
 
     //controls
     void resendAvButtonList(QList<QObject*> t);
-     void deviceCommandList(QList<QObject*> f);
+    void deviceCommandList(QList<QObject*> f);
 
-     //screensaver
-     void currentScreenSaverImage(const uchar* ,int);
+    //screensaver
+    void currentScreenSaverImage(const uchar* ,int);
 public slots:
     //setup
     void executeCommandGroup(int cmdGrp);
@@ -1240,15 +1241,15 @@ public slots:
     void setCurrentScreen(QString s);
 
 
-//operations
-     void setMediaResponse(QString r) {mediaResponse = r; emit mediaResponseChanged();}
-     QString getMediaResponse() {return mediaResponse;}
+    //operations
+    void setMediaResponse(QString r) {mediaResponse = r; emit mediaResponseChanged();}
+    QString getMediaResponse() {return mediaResponse;}
 
-     //floorplans
-     void getFloorPlanImage(QString fp_path);
+    //floorplans
+    void getFloorPlanImage(QString fp_path);
 
-     //screensave
-     void getScreenSaverImage(QString inc_requested_img_path);
+    //screensave
+    void getScreenSaverImage(QString inc_requested_img_path);
 
     //connections
     void connectionError();
@@ -1269,6 +1270,8 @@ public slots:
     void setStringParam(int paramType, QString param);
     void goBackGrid();
     void requestPage(int page);
+    void setMediaType(int t) { i_current_mediaType = t; emit mediaTypeChanged( i_current_mediaType);}
+    int getMediaType () {return i_current_mediaType;}
 
     void jumpMobileGrid(int page);
     void getGridView(bool direction);
@@ -1308,25 +1311,25 @@ public slots:
     void adjustVolume( int vol);
     void mute();
     void changedTrack(QString direction);
-     void SetSecurityMode(int pin, int mode);
-     void setLocation(int location, int ea);
-     void setUser(int user);
-     void quickReload();
-     void powerOn(QString devicetype);
-     void powerOff(QString deviceType);
+    void SetSecurityMode(int pin, int mode);
+    void setLocation(int location, int ea);
+    void setUser(int user);
+    void quickReload();
+    void powerOn(QString devicetype);
+    void powerOff(QString deviceType);
 
-      void GetAdvancedMediaOptions(int device);
-     void GetAlarms(bool toggle, int grp);
-     void setZoom(QString zoomLevel);
-     void setAspect(QString ratio);
-     void GetText(int textno);
-     void setPosition(QString position);
-     void showMenu();
-     void CopyDisc();
-     void ShowBookMarks();
+    void GetAdvancedMediaOptions(int device);
+    void GetAlarms(bool toggle, int grp);
+    void setZoom(QString zoomLevel);
+    void setAspect(QString ratio);
+    void GetText(int textno);
+    void setPosition(QString position);
+    void showMenu();
+    void CopyDisc();
+    void ShowBookMarks();
 
- void saveScreenAttribute(QString attribute, QByteArray data);
- void sendAvCommand(int deviceto, int command);
+    void saveScreenAttribute(QString attribute, QByteArray data);
+    void sendAvCommand(int deviceto, int command);
     //floorplans
     void getFloorplanDeviceCommand(int device);
 

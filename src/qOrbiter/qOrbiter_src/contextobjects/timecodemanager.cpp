@@ -3,16 +3,19 @@
 
 TimeCodeManager::TimeCodeManager()
 {
+
     dceMediaSocket = new QTcpSocket();
     playbackSpeed = 0;
     tcCurrentTime = 0;
     tcTotalTime = 0;
     socketData = NULL;
     mediaPlayerIp = "";
+    qDebug("Setup Timecode Manager");
 }
 
 void TimeCodeManager::start(QString server, int iport)
 {
+    qDebug("Starting timecode...");
     port = iport;
     mediaPlayerIp = server;
 
@@ -59,7 +62,7 @@ void TimeCodeManager::updateTimeCode()
 {
     socketData = dceMediaSocket->readLine();
     std::string sLine = QString::fromAscii(socketData.data(), socketData.size()).toStdString();
-    // qDebug() << tcData;
+   //qDebug() << QString::fromStdString(sLine);
     if (sLine.length() > 0)
     {
         std::string::size_type pos=0;

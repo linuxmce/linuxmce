@@ -44,7 +44,7 @@ Rectangle {
             spacing: scaleX(1)
             Text {
                 id: grid_position_label
-                text: qsTr("You are browsing by:") + manager.q_mediaType
+                text: qsTr("You are browsing by:") + dcerouter.i_current_mediaType
             }
             Text {
                 id: grid_attritbute_label

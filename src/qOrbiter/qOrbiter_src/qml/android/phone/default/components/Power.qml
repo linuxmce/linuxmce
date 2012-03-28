@@ -2,13 +2,24 @@ import QtQuick 1.0
 
 Rectangle {
     id:powerrect
-    width: scaleX(40)
+    width: scaleX(50)
     height: scaleY(40)
     clip: true
     color: style.darkhighlight
     anchors.centerIn: parent
     border.color: style.lighthighlight
     border.width: 2
+    opacity: 1
+
+    function openAimation()
+    {
+
+    }
+
+    function closeAnimation()
+    {
+
+    }
 
     Image {
         id: bg
@@ -25,9 +36,25 @@ Rectangle {
         clip:true
         anchors.centerIn: parent
 
+        Rectangle{
+            id:exit
+            width: parent.width
+            height: scaleX(15)
+            Text {
+                id: exit_label
+                text: qsTr("Exit")
+                font.bold: true
+                font.pixelSize: scaleY(3)
+            }
+            MouseArea{
+                anchors.fill: parent
+                onClicked: loadComponent("NullComponent.qml")
+            }
+        }
 
         Row{
-            anchors.centerIn: parent
+            anchors.top: exit.bottom
+            anchors.horizontalCenter: parent.horizontalCenter
             width: childrenRect.width
             height: childrenRect.height
             spacing: scaleX(5)
@@ -43,8 +70,8 @@ Rectangle {
                     MouseArea{
                         anchors.fill: parent
                         onClicked: {
-
-                            powerrect.destroy()
+                            dcerouter.displayToggle(1)
+                            loadComponent("NullComponent.qml")
                         }
                     }
                 }
@@ -57,7 +84,7 @@ Rectangle {
                         anchors.fill: parent
                         onClicked: {
 
-                            powerrect.destroy()
+                            loadComponent("NullComponent.qml")
                         }
                     }
                 }
@@ -75,8 +102,8 @@ Rectangle {
                     MouseArea{
                         anchors.fill: parent
                         onClicked: {
-
-                            powerrect.destroy()
+                            dcerouter.displayToggle(0)
+                           loadComponent("NullComponent.qml")
                         }
                     }
                 }
@@ -88,8 +115,7 @@ Rectangle {
                     MouseArea{
                         anchors.fill: parent
                         onClicked: {
-
-                            powerrect.destroy()
+                           loadComponent("NullComponent.qml")
                         }
                     }
                 }
