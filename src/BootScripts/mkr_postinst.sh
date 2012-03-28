@@ -59,6 +59,7 @@ if ! BlacklistConfFiles '/etc/asound.conf' ;then
 fi
 
 ## Setup AppleTalk services for SSH and file sharing
+test -d "/etc/avahi" || mkdir -p "/etc/avahi"
 if ! BlacklistConfFiles '/etc/avahi/ssh.service' ;then
         cp /usr/pluto/templates/ssh.service.tmpl /etc/avahi/ssh.service
 fi
