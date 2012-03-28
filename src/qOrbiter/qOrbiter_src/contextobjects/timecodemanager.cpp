@@ -1,8 +1,7 @@
 #include "timecodemanager.h"
+#include "PlutoUtils/StringUtils.h"
 
-
-TimeCodeManager::TimeCodeManager(QObject *parent) :
-    QObject(parent)
+TimeCodeManager::TimeCodeManager()
 {
     dceMediaSocket = new QTcpSocket();
     playbackSpeed = 0;
@@ -40,6 +39,11 @@ void TimeCodeManager::start(QString server, int iport)
 
 void TimeCodeManager::stop()
 {
+    setTotalTime(0);
+    setStringTotalTime("0");
+    setTime(0);
+    setStringTime("0");
+    setSpeed(0);
     dceMediaSocket->close();
 }
 
@@ -54,29 +58,75 @@ void TimeCodeManager::restart()
 void TimeCodeManager::updateTimeCode()
 {
     socketData = dceMediaSocket->readLine();
-    QString tcData = QString::fromAscii(socketData.data(), socketData.size());
-   // qDebug() << tcData;
-    if (tcData.length() > 0)
+    std::string sLine = QString::fromAscii(socketData.data(), socketData.size()).toStdString();
+    // qDebug() << tcData;
+    if (sLine.length() > 0)
     {
+        std::string::size_type pos=0;
+        int iSpeed = atoi(StringUtils::Tokenize( sLine,",",pos ).c_str());
+        std::string m_sTime = StringUtils::Tokenize( sLine,",",pos );
+        std::string m_sTotalTime = StringUtils::Tokenize( sLine,",",pos );
+        int iStreamID = atoi(StringUtils::Tokenize( sLine,",",pos ).c_str());
+        std::string sTitle = StringUtils::Tokenize( sLine,",",pos );
+        std::string sChapter = StringUtils::Tokenize( sLine,",",pos );
 
-        QStringList tcVars = tcData.split(",");
-        QString tcClean = tcVars.at(1);
-        tcClean.remove(QRegExp(".\\d\\d\\d|00:0|0:0|00:"));
-        //  nowPlayingButton->setTimeCode(tcClean);
+        //in case of a dvd or other media supporting chapters and such - still need Q_Property accessors
+        qsChapter = QString::fromStdString(sChapter);
+        qsTitle = QString::fromStdString(sTitle);
+        //-----------------------------------------------------------/
 
+        // Strip fractions of a second
+        if( (pos=m_sTime.find('.'))!=string::npos )
+            m_sTime = m_sTime.substr(0,pos);
 
-        QString playbackSpeed = tcVars.at(0);
-        playbackSpeed.remove(QRegExp("000"));
-        // nowPlayingButton->setStringSpeed(playbackSpeed+"x");
-        //  nowPlayingButton->setMediaSpeed(playbackSpeed.toInt());
+        if( (pos=m_sTotalTime.find('.'))!=string::npos )
+            m_sTotalTime = m_sTotalTime.substr(0,pos);
 
-        QString duration = tcVars.at(2);
-        duration.remove(QRegExp(".\\d\\d\\d|00:0|0:0|00:"));
-        //nowPlayingButton->setDuration(duration);
-        QTime total = QTime::fromString(tcVars.at(2), "hh:mm:ss:sss" );
-        //qDebug() << total.toString();
-       // setSpeed(tcVars.at(0).remove(",000").toInt());
+        if (qsTotalTime != QString::fromStdString(m_sTotalTime))
+        {
+            setStringTotalTime(QString::fromStdString(m_sTotalTime));
+            convertToSeconds();
+        }
 
+        setStringTime(QString::fromStdString(m_sTime));
 
+        std::string sSpeed;
+        if( iSpeed!=1000 ) // normal playback
+        {
+            if( iSpeed>=1000 || iSpeed<=-1000 )
+                sSpeed = StringUtils::itos( iSpeed / 1000 ) + "x";  // A normal speed
+            else if( iSpeed==250 )
+                sSpeed = "1/4x";
+            else if( iSpeed==-250 )
+                sSpeed = "-1/4x";
+            else if( iSpeed==500 )
+                sSpeed = "1/2x";
+            else if( iSpeed==-500 )
+                sSpeed = "-1/2x";
+            else
+                sSpeed = "." + StringUtils::itos(iSpeed) + "x";
+        }
+        setSpeed(iSpeed);
     }
+}
+
+void TimeCodeManager::convertToSeconds()
+{
+
+    QStringList times = qsTotalTime.split(":");
+    int hoursToSec = times.at(0).toInt() * 3600 ;
+    int minuteToSec = (times.at(1).toInt() * 60);
+    int seconds = times.at(2).toInt();
+    int totalSeconds = hoursToSec + minuteToSec + seconds;
+    setTotalTime(totalSeconds);
+}
+
+void TimeCodeManager::setPosition()
+{
+    QStringList current = qsCurrentTime.split(":");
+    int hoursToSec = current.at(0).toInt() * 3600 ;
+    int minuteToSec = (current.at(1).toInt() * 60);
+    int seconds = current.at(2).toInt();
+    int currentPosition = hoursToSec + minuteToSec + seconds;
+    setTime(currentPosition);
 }

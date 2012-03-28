@@ -50,7 +50,7 @@ Rectangle {
             radius: 5
             MouseArea{
                 anchors.fill: parent
-                onClicked:componentLoad("Power.qml")
+                onClicked:loadComponent("Power.qml")
             }
         }
 

@@ -60,10 +60,6 @@ class NowPlayingClass : public QDeclarativeItem
 
     Q_PROPERTY (QImage fileImage READ getImage WRITE setImage NOTIFY imageChanged)
 
-    //timecode
-
-    Q_PROPERTY (QString timecode READ getTimeCode WRITE setTimeCode NOTIFY tcChanged)
-    Q_PROPERTY (QString duration READ getDuration WRITE setDuration NOTIFY durationChanged)
     //set now playing - text to assign
     Q_PROPERTY (QString qs_mainTitle READ getTitle WRITE setTitle NOTIFY titleChanged) //the text set sent by now playing command
     Q_PROPERTY (QString qs_mainTitle2 READ getTitle2 WRITE setTitle2 NOTIFY titleChanged2) // in the case of audio, multiple metada value are sent  thus title 2
@@ -76,9 +72,6 @@ class NowPlayingClass : public QDeclarativeItem
 
     //file path of the file in question
     Q_PROPERTY (QString filepath READ getFilePath WRITE setFilePath NOTIFY filePathChanged)
-
-    //current playback speed
-    Q_PROPERTY (QString qs_playbackSpeed READ getMediaSpeed WRITE setStringSpeed NOTIFY mediaSpeedChanged)
 
     //metadata related image url
     Q_PROPERTY (QUrl nowPlayingImageUrl READ getImageUrl WRITE setImageUrl NOTIFY imageUrlChanged)
@@ -129,12 +122,7 @@ public:
 
     //media  related--------------------------
     QString mediatitle; //special if the media itself for some reason has a title different than the now playing
-    QString timecode;
     QString synop;
-    int i_playbackSpeed;
-    QString qs_playbackSpeed;
-    QString duration;
-
     //television related
     QString tvProgram;
     QString channel;
@@ -174,20 +162,12 @@ signals:
     void genreChanged();
     void rlsChanged();
     void synopChanged();
-    void tcChanged();
-    void durationChanged();
     void statusMessage(QString msg);
-    void newMediaSpeed(int speed);
-
-
-
     //audio signals
     void albumChanged();
     void trackChanged();
     void performersChanged();
     void composerChanged();
-
-
     //video signals
     void directorChanged();
 
@@ -212,12 +192,6 @@ public slots:
     void setImageAspect(QString i_aspect) { aspect = i_aspect; emit imageAspectChanged();}
     QString getImageAspect() { return aspect;}
 
-    void setDuration(QString nDuration) {duration = nDuration; emit durationChanged();}
-    QString getDuration () {return duration;}
-
-    void setTimeCode(QString uTc) {timecode = uTc; emit tcChanged();}
-    QString getTimeCode () {return timecode;}
-
     void setProgram(QString newProgram) {tvProgram = newProgram; emit programChanged();}
     QString getProgram () {return tvProgram;}
 
@@ -226,19 +200,9 @@ public slots:
 
     void setImageData( const uchar *data, int iData_size) {
 
-
         QImage t;
         if( t.loadFromData(data, iData_size))
-        {
             setImage(t);
-            emit statusMessage("Set Cover Art");
-        }
-        else
-        {
-            emit statusMessage("Update Object Image Conversion Failed:");
-        }
-
-
     }
     void setImage(QImage img) {fileImage = img; emit imageChanged();}
     QImage getImage() {return fileImage;}
@@ -274,10 +238,6 @@ public slots:
 
     void setPlaylistPostion(int i_pls) { m_iplaylistPosition = i_pls;  emit playListPositionChanged( m_iplaylistPosition);}
     int getPlaylistPosition() {return m_iplaylistPosition;}
-
-    void setMediaSpeed(int speed);
-    void setStringSpeed(QString s) {qs_playbackSpeed = s; emit mediaSpeedChanged();}
-    QString getMediaSpeed() {return qs_playbackSpeed;}
 
     //--tv getters and setters-------------//
 

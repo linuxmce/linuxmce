@@ -124,6 +124,7 @@ class qorbiterManager : public QObject
 
     Q_PROPERTY (QString q_mediaType READ getSorting NOTIFY gridTypeChanged)
     Q_PROPERTY (QString sPK_User READ getCurrentUser WRITE setCurrentUser NOTIFY userChanged)
+    Q_PROPERTY (QString currentRoom READ getCurrentRoom WRITE setCurrentRoom NOTIFY roomChanged)
     Q_PROPERTY (QString dceResponse READ getDceResponse WRITE setDceResponse NOTIFY dceResponseChanged)
     Q_PROPERTY (bool connectedState READ getConnectedState WRITE setConnectedState NOTIFY connectedStateChanged)
     Q_PROPERTY (bool b_orientation READ getOrientation WRITE setOrientation NOTIFY orientationChanged)
@@ -157,7 +158,7 @@ public:
     NowPlayingClass *nowPlayingButton;
     QString aspect; //-- true poster || false landscape
     QString *gridReqType;
-    QTcpSocket * timeCodeSocket;
+
 
     //skins
     SkinDataModel* tskinModel;
@@ -283,9 +284,10 @@ Param 10 - pk_attribute
 
     //ui functions
     Q_INVOKABLE QDateTime getCurrentDateTime() const { return QDateTime::currentDateTimeUtc();}
-    Q_INVOKABLE void setActiveRoom(int room,int ea);
-    Q_INVOKABLE void setCurrentUser(QString inc_user );
-    Q_INVOKABLE  QString getCurrentUser() {return sPK_User;}
+    QString currentRoom;
+
+    void setActiveRoom(int room,int ea);
+
 
     //class objects
 
@@ -398,10 +400,15 @@ signals:
     void connectionValid(bool b);
     void skinIndexReady(bool b);
     void skinDataLoaded(bool b);
+    void roomChanged();
 
     void floorplanTypeChanged();
 
 public slots: //note: Q_INVOKABLE means it can be called directly from qml
+    QString getCurrentUser() {return sPK_User;}
+    void setCurrentUser(QString inc_user );
+    void setCurrentRoom(QString room) {currentRoom = room; emit roomChanged();}
+    QString getCurrentRoom () {return currentRoom;}
     void processConfig(QByteArray config);
     bool OrbiterGen();              //prelim orbter generation
     void quickReload();
@@ -461,8 +468,7 @@ public slots: //note: Q_INVOKABLE means it can be called directly from qml
 
     void jogPosition(QString jog);
     void updateImageChanged(QImage img);
-    void updateTimecode(int port);
-    void showTimeCode();
+
     Q_INVOKABLE void cleanupScreenie();
 
     Q_INVOKABLE void setActiveSkin(QString name);

@@ -1108,21 +1108,29 @@ void qOrbiter::CMD_Set_Now_Playing(string sPK_DesignObj,string sValue_To_Assign,
 
 
         b_mediaPlaying = true;
-        emit clearPlaylist();
+
         //  emit np_title1Changed(QString::fromStdString(sValue_To_Assign ));
         //  emit np_title2Changed(QString::fromStdString(sText));
 
         emit playlistPositionChanged(iValue);
+
         GetNowPlayingAttributes();
+        {
+            emit clearPlaylist();
+        }
     }
     else if(iPK_MediaType == 4)
     {
         b_mediaPlaying = true;
-        emit clearPlaylist();
+       // emit clearPlaylist();
         //  emit np_title1Changed(QString::fromStdString(sValue_To_Assign ));
         //  emit np_title2Changed(QString::fromStdString(sText));
         emit playlistPositionChanged(iValue);
         GetNowPlayingAttributes();
+        if(bRetransmit == 1)
+        {
+            emit clearPlaylist();
+        }
     }
     else
     {
@@ -2274,26 +2282,9 @@ void DCE::qOrbiter::executeCommandGroup(int cmdGrp)
 
 void qOrbiter::displayToggle(int i)
 {
-    string state;
-
-    if (i == 0)
-    {
-        state = "off";
-        DCE::CMD_Off display(m_dwPK_Device, iOrbiterPluginID,0);
+        DCE::CMD_Display_OnOff display(m_dwPK_Device, m_pData->FindFirstRelatedDeviceOfTemplate(DEVICETEMPLATE_OnScreen_Orbiter_CONST)->m_dwPK_Device , StringUtils::itos(i), false );
         SendCommand(display);
-
-        emit statusMessage("Attempting to toggle the MD display Off");
-    }
-    else
-    {
-        state ="on";
-        DCE::CMD_On display(m_dwPK_Device, iOrbiterPluginID, 1, "");
-        SendCommand(display);
-        emit statusMessage("Attempting to toggle the MD display on");
-
-    }
-
-
+        emit statusMessage("Attempting to toggle the display" );
 }
 
 void qOrbiter::setMediaSpeed(int s)
@@ -2693,16 +2684,19 @@ void DCE::qOrbiter::FfMedia()
 void DCE::qOrbiter::PauseMedia()
 {
     CMD_Pause_Media pause_media(m_dwPK_Device, iMediaPluginID,internal_streamID);
-    SendCommand(pause_media);
+    if(SendCommand(pause_media))
+    {
+
+    }
     //  nowPlayingButton->setMediaSpeed(0);
 }
 
 void DCE::qOrbiter::requestMediaPlaylist()
 {
 
-    emit mediaMessage("Fetching Playlist");
+    qDebug("Fetching Playlist");
     int gHeight = 0;
-    int gWidth = 0;
+    int gWidth = 1;
     int pkVar = 0;
     string valassign ="";
     bool isSuccessfull;// = "false";
@@ -2733,18 +2727,19 @@ void DCE::qOrbiter::requestMediaPlaylist()
             QString cellTitle;
             QString qs_plsIndex;
             QString fk_file;
-            int index;
+            int index = 0;
 
             for(MemoryDataTable::iterator it=pDataGridTable->m_MemoryDataTable.begin();it!=pDataGridTable->m_MemoryDataTable.end();++it)
             {
+
                 DataGridCell *pCell;
                 pCell = it->second;
                 cellTitle = pCell->GetText();
                 qs_plsIndex = pCell->GetValue();
                 index = qs_plsIndex.toInt();
                 fk_file = pCell->GetValue();
-                emit playlistItemAdded(new PlaylistItemClass(cellTitle,  fk_file,index));
-
+                emit playlistItemAdded(new PlaylistItemClass(cellTitle, fk_file, index));
+                index++;
                 QApplication::processEvents(QEventLoop::AllEvents);
             }
 
@@ -2762,10 +2757,7 @@ void qOrbiter::checkTimeCode()
     emit setMyIp(QString::fromStdString(m_sIPAddress));
 }
 
-void qOrbiter::showTimeCode()
-{
 
-}
 
 void qOrbiter::changedPlaylistPosition(QString pos)
 {
@@ -3343,10 +3335,6 @@ void DCE::qOrbiter::powerOn(QString devicetype)
 
 }
 
-void DCE::qOrbiter::getMediaTimeCode()
-{
-
-}
 
 void DCE::qOrbiter::GetAdvancedMediaOptions(int device) // prepping for advanced media options
 {
@@ -4353,12 +4341,6 @@ bool qOrbiter::checkLoadingStatus()
     }
 }
 
-void qOrbiter::setupTimeCode()
-{
-
-    //initializing threading for timecode to prevent blocking
-
-}
 
 void qOrbiter::getFloorPlanImage(QString fp_path)
 {

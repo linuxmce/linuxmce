@@ -179,14 +179,6 @@ qorbiterManager::qorbiterManager(QDeclarativeView *view, QObject *parent) :
     //floorplan model initialization for slots in main.cpp
     floorplans = new FloorPlanModel( new FloorplanDevice , this);
 
-    /*needs to go to main.cpp---------------------|
-    QThread *timecodeThread = new QThread();
-
-    timeCodeSocket->moveToThread(timecodeThread);
-    timecodeThread->start();
-    -------------------------------------------|
-    */
-    timeCodeSocket = new QTcpSocket();
     QApplication::processEvents(QEventLoop::AllEvents);
 }
 
@@ -608,7 +600,7 @@ void qorbiterManager::processConfig(QByteArray config)
     qorbiterUIwin->rootContext()->setContextProperty("screenshotAttributes", QVariant::fromValue(screenshotVars));
     qorbiterUIwin->rootContext()->setContextProperty("avcodes", QVariant::fromValue(buttonList));
     qorbiterUIwin->rootContext()->setContextProperty("device_commands", QVariant::fromValue(commandList));
-    //QObject::connect(this->nowPlayingButton, SIGNAL(mediaStatusChanged()), this, SLOT(updateTimecode()), Qt::QueuedConnection);
+
     setDceResponse("Properties Done");
 
     setDceResponse("Setting location");
@@ -677,11 +669,7 @@ void qorbiterManager::processConfig(QByteArray config)
     this->qorbiterUIwin->rootContext()->setContextProperty("attribfilter", attribFilter); //custom mediatype selection model
     connect(attribFilter, SIGNAL(SetTypeSort(int,QString)), this, SLOT(setStringParam(int,QString)));
     QObject::connect(this, SIGNAL(resetFilter()), attribFilter, SLOT(resetStates()) );
-
-    //connect(nowPlayingButton, SIGNAL(mediaStatusChanged()), this , SLOT(updateTimecode()));
-    binaryConfig.clear();
-
-    //tConf.clear();
+      binaryConfig.clear();
 
     //----------------Security Video setup
     SecurityVideo = new SecurityVideoClass();
@@ -775,11 +763,14 @@ bool qorbiterManager::requestDataGrid()
 void qorbiterManager::setActiveRoom(int room,int ea)
 {
     emit setLocation(room, ea);
+    setCurrentRoom(QString::number(room));
+
     roomLights = roomLightingScenarios.value(room);
     roomMedia = roomMediaScenarios.value(room);
     roomClimate = roomClimateScenarios.value(room);
     roomTelecom = roomTelecomScenarios.value(room);
     roomSecurity = roomSecurityScenarios.value(room);
+
     qorbiterUIwin->rootContext()->setContextProperty("currentRoomLights", roomLights);
     qorbiterUIwin->rootContext()->setContextProperty("currentRoomMedia", roomMedia);
     qorbiterUIwin->rootContext()->setContextProperty("currentRoomClimate", roomClimate);
@@ -1390,52 +1381,6 @@ void qorbiterManager::sleepingMenu(bool toggle, int grp)
     }
 }
 
-
-
-void qorbiterManager::updateTimecode(int port)
-{
-
-    if(!timeCodeSocket->isOpen())
-    {
-        // qDebug() <<"opening connection to " << port;
-
-        timeCodeSocket->connectToHost(qs_routerip, port, QFile::ReadOnly );
-        if ( timeCodeSocket->isValid() )
-        {
-            setDceResponse("Time Code Socket connected! " + QString::fromStdString(qs_routerip.toStdString()));
-            QObject::connect(timeCodeSocket,SIGNAL(readyRead()), this, SLOT(showTimeCode()));
-        }
-        else
-        {   setDceResponse("couldnt start timecode");
-            //  qDebug() << timeCodeSocket->errorString();
-        }
-    }
-
-}
-
-void qorbiterManager::showTimeCode()
-{
-
-    QByteArray socketData = timeCodeSocket->readLine();
-    QString tcData = QString::fromAscii(socketData.data(), socketData.size());
-
-    if (tcData.length() > 0)
-    {
-        QStringList tcVars = tcData.split(",");
-        QString tcClean = tcVars.at(1);
-        tcClean.remove(QRegExp(".\\d\\d\\d|00:0|0:0|00:"));
-        nowPlayingButton->setTimeCode(tcClean);
-
-        QString playbackSpeed = tcVars.at(0);
-        playbackSpeed.remove(QRegExp("000"));
-        nowPlayingButton->setStringSpeed(playbackSpeed+"x");
-        nowPlayingButton->setMediaSpeed(playbackSpeed.toInt());
-
-        QString duration = tcVars.at(2);
-        duration.remove(QRegExp(".\\d\\d\\d|00:0|0:0|00:"));
-        nowPlayingButton->setDuration(duration);
-    }
-}
 
 void qorbiterManager::checkConnection(QString s)
 {

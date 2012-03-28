@@ -40,12 +40,9 @@ void PlaylistClass::populate()
     resetInternalData();
     qDeleteAll(m_list.begin(), m_list.end());
     m_list.clear();
-
     endResetModel();
     emit modelReset();
     emit playlistReady();
-
-
 
 }
 
@@ -54,8 +51,12 @@ void PlaylistClass::appendRows(const QList<PlaylistItemClass *> &items)
     beginInsertRows(QModelIndex(), rowCount(), rowCount()+items.size()-1);
     foreach(PlaylistItemClass *item, items) {
 
-        QObject::connect(item, SIGNAL(dataChanged()), this, SLOT(handleItemChange()));
-        m_list.append(item);
+        if (checkDupe(item->id(), item->index()) == false)
+        {
+            QObject::connect(item, SIGNAL(dataChanged()), this, SLOT(handleItemChange()));
+            m_list.append(item);
+        }
+
     }
 
     endInsertRows();
@@ -171,12 +172,36 @@ void PlaylistClass::setCurrentIndex(int i)
 int PlaylistClass::getCurrentIndex()
 {
     return currentIndex;
+    emit activeItemChanged();
 }
 
 bool PlaylistClass::checkDupe(QString name, int position)
 {
+    qDebug() << "Checking dupe for:" << name << " at " << position ;
 
-    return false;
+    if (PlaylistItemClass *item = find(name))
+    {   qDebug() << "Found " << name;
+
+        if (item->index() == position )
+        {
+             qDebug() << "Dupe position " << position ;
+            return true;
+        }
+        else
+        {
+           qDebug() << item->index();
+            qDebug() << "Did not find item at postion " << position;
+            return  false;
+        }
+
+    }
+    else
+    {
+        qDebug() << name << " at " << position-1 << " Not in playlist";
+        return false;
+    }
+
+    return true;
 }
 
 void PlaylistClass::beginResetModel()

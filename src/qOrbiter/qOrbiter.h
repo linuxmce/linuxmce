@@ -85,8 +85,7 @@ public:
     int i_current_floorplanType;
     QImage returnImage;
     QByteArray TconfigData;
-    QTcpSocket timeCodeSocket;
-    QThread *timeCodeThread;
+
 
     QList<QObject*> screenshotVars;
     QList<QObject*> resendAvButtons;
@@ -1239,7 +1238,7 @@ public slots:
     void registerDevice(int user, QString ea, int room);
     void qmlSetup(QString device, QString address);
     void setCurrentScreen(QString s);
-     void setupTimeCode();
+
 
 //operations
      void setMediaResponse(QString r) {mediaResponse = r; emit mediaResponseChanged();}
@@ -1292,7 +1291,7 @@ public slots:
     void PauseMedia();
     void requestMediaPlaylist();
     void checkTimeCode();
-    void showTimeCode();
+
     void changedPlaylistPosition(QString pos);
     void ShowFloorPlan(int floorplantype);
     void updateFloorPlan(QString p);
@@ -1315,7 +1314,7 @@ public slots:
      void quickReload();
      void powerOn(QString devicetype);
      void powerOff(QString deviceType);
-     void getMediaTimeCode();
+
       void GetAdvancedMediaOptions(int device);
      void GetAlarms(bool toggle, int grp);
      void setZoom(QString zoomLevel);

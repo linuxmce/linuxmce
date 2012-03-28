@@ -10,7 +10,7 @@ Rectangle {
     radius: 0
     opacity: 1
     color: "transparent"
-   // Component.onCompleted: manager.setBoundStatus(true)
+    Component.onCompleted: manager.setBoundStatus(true)
     Column{
         anchors.right: storedvideoremote.right
         anchors.rightMargin: scaleX(1)
@@ -21,7 +21,7 @@ Rectangle {
         target:dcenowplaying
         onImageChanged: { nowplayingimage.source = "image://listprovider/updateobject/"+securityvideo.timestamp;}
     }
-    Component.onCompleted: dcerouter.BindMediaRemote(true)
+
 
     Row{
         id:mainrow
@@ -62,7 +62,7 @@ Rectangle {
                     Text {
                         id: headertext
                         height:scaleY(2)
-                        text:qsTr("Speed: ") + dcenowplaying.qs_playbackSpeed
+                        text:qsTr("Speed: ") + dceTimecode.playbackSpeed
                         font.family: "Droid Sans"
                         font.pixelSize: scaleY(2)
                         color: "aliceblue"
@@ -71,7 +71,7 @@ Rectangle {
                     Text {
                         id: timecode
                         height:scaleY(2)
-                        text: dcenowplaying.timecode + qsTr(" of ") + dcenowplaying.duration
+                        text: dceTimecode.qsCurrentTime + qsTr(" of ") + dceTimecode.qsTotalTime
                         font.family: "Droid Sans"
                         font.pixelSize: scaleY(1) *2.15
                         anchors.bottom:parent.bottom

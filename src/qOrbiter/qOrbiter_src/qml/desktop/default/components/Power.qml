@@ -44,7 +44,7 @@ Rectangle {
                         anchors.fill: parent
                         onClicked: {
                             dcerouter.displayToggle(1)
-                            powerrect.destroy()
+                            loadComponent("NullComponent.qml")
                         }
                     }
                 }
@@ -57,7 +57,7 @@ Rectangle {
                         anchors.fill: parent
                         onClicked: {
 
-                            powerrect.destroy()
+                            loadComponent("NullComponent.qml")
                         }
                     }
                 }
@@ -76,7 +76,7 @@ Rectangle {
                         anchors.fill: parent
                         onClicked: {
                             dcerouter.displayToggle(0)
-                            powerrect.destroy()
+                            loadComponent("NullComponent.qml")
                         }
                     }
                 }
@@ -89,7 +89,7 @@ Rectangle {
                         anchors.fill: parent
                         onClicked: {
 
-                            powerrect.destroy()
+                           loadComponent("NullComponent.qml")
                         }
                     }
                 }

@@ -3,17 +3,7 @@
 NowPlayingClass::NowPlayingClass(QDeclarativeItem *parent) :
     QDeclarativeItem(parent)
 {
-
-    b_mediaPlaying = false;
-    qs_playbackSpeed = "1x";
-    i_playbackSpeed = 1;
-   // m_iplaylistPosition = 0;
-}
-
-void NowPlayingClass::setMediaSpeed(int speed)
-{
-   emit newMediaSpeed(speed);
-
+    b_mediaPlaying = false;   
 }
 
 void NowPlayingClass::resetData()
@@ -32,13 +22,11 @@ void NowPlayingClass::resetData()
     directors.clear(); emit directorChanged();
     setDirector("");
     setTrack(""); emit trackChanged();
-    setMediaTitle("");
-    setDuration("");
-    setTimeCode("");
+    setMediaTitle(""); 
     setMediaType(NULL);
     setSynop(""); emit synopChanged();
     setStreamID(0);
     setProgram("");
-   // setImage(QImage());
+   //setImage(QImage());
 }
 
