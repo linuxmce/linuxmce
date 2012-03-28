@@ -103,7 +103,7 @@ Rectangle {
                         Text {
                             id: timecode
                             height:scaleY(2)
-                            text: dcenowplaying.timecode + qsTr(" of ") + dcenowplaying.duration
+                            text: dceTimecode.qsCurrentTime + qsTr(" of ") + dcenowplaying.duration
                             font.family: "Droid Sans"
                             font.pixelSize: scaleY(1) *2.15
                             anchors.bottom:parent.bottom

@@ -46,7 +46,7 @@ import QtQuick 1.0
                 width: scaleX(8)
 
                 radius: style.but_smooth
-                buttontext: dcenowplaying.qs_mainTitle +" \n " + dcenowplaying.timecode
+                buttontext: dcenowplaying.qs_mainTitle +" \n " + dceTimecode.qsCurrentTime
 
                 MouseArea{
                     anchors.fill: parent

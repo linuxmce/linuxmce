@@ -31,7 +31,7 @@ Rectangle {
 
       Text {
           id: np
-          text:dcenowplaying.timecode
+          text:dceTimecode.qsCurrentTimeime
           font.pixelSize: scaleY(5)
           wrapMode: Text.WrapAtWordBoundaryOrAnywhere
           anchors.horizontalCenter: parent.horizontalCenter

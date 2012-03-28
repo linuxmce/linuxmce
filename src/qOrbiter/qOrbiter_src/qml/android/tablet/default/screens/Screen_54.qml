@@ -54,7 +54,7 @@ Rectangle {
         Text {
             id: timecode
             height:scaleY(2.15)
-            text: qsTr("Speed: ") + dcenowplaying.qs_playbackSpeed +" || " +dcenowplaying.timecode + qsTr(" of ") + dcenowplaying.duration
+            text: qsTr("Speed: ") + dcenowplaying.qs_playbackSpeed +" || " +dceTimecode.qsCurrentTime + qsTr(" of ") + dcenowplaying.duration
             font.family: "Droid Sans"
             font.pixelSize: scaleY(2.15)
             anchors.verticalCenter: parent.verticalCenter

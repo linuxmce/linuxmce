@@ -5,9 +5,7 @@ Rectangle {
     id:np_box
     width: scaleX(90)
     height: scaleY(35)
-    color: "transparent"
-    border.color: "silver"
-    radius: 2.5
+    color: "transparent"   
     visible: dcenowplaying.b_mediaPlaying ? true : false
     clip:true
 
@@ -141,13 +139,13 @@ Rectangle {
 
         Text {
             id: np
-            text:dcenowplaying.timecode
+            text:.timecode
             font.pixelSize: scaleY(2.5)
             anchors.bottom: np_box.bottom
             wrapMode: Text.WrapAtWordBoundaryOrAnywhere
             anchors.horizontalCenter: np_box.horizontalCenter
             color: "white"
-            visible:  dcenowplaying.timecode ==="0" ? false: true
+            visible:  dceTimecode.qsCurrentTime ==="0" ? false: true
         }
 
         /*  Text {

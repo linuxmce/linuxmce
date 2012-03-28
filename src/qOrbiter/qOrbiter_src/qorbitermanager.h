@@ -48,7 +48,7 @@
 #include <QtNetwork/QTcpSocket>
 #include <QProcess>
 #include <QtXml/QDomDocument>
-#ifdef for_desktop
+#ifndef ANDROID
 #include <shaders/filereader.h>
 #include<shaders/trace.h>
 #endif
@@ -134,7 +134,9 @@ class qorbiterManager : public QObject
 public:
     qorbiterManager(QDeclarativeView * view, QObject *parent=0);  //constructor
 
+#ifndef ANDROID
     FileReader * fileReader;
+#endif
     //settings
     QString sPK_User;
     QString buildType;
