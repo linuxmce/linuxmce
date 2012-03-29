@@ -45,6 +45,8 @@
 #include <QtCore/QFile>
 #include <QtCore/QFileInfo>
 #include <QtCore/QTextStream>
+#include <QDir>
+
 
 QString adjustPath(const QString &path)
 {
