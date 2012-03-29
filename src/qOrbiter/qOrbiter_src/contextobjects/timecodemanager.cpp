@@ -131,5 +131,26 @@ void TimeCodeManager::setPosition()
     int minuteToSec = (current.at(1).toInt() * 60);
     int seconds = current.at(2).toInt();
     int currentPosition = hoursToSec + minuteToSec + seconds;
+
     setTime(currentPosition);
+    setProgressBar((currentPosition));
+}
+
+void TimeCodeManager::showDragTime(int seconds)
+{
+    int displayHours = seconds / (3600);
+    int remainder = seconds % 3600;
+    int minutes = remainder / 60;
+    int forseconds = remainder % 60;
+    i_dragTime = seconds;
+    if (i_dragTime < tcCurrentTime)
+    {
+        reverse = true;
+    }
+    else
+    {
+        reverse = false;
+    }
+    setDragTime(QString::number(displayHours)+":"+QString::number(minutes)+":"+QString::number(forseconds) );
+
 }

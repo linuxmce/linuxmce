@@ -5,10 +5,14 @@ Rectangle {
     id:router_reloading
     width: appW
     height: appH
+    color: "transparent"
+
 
     Text {
         id: reload_text
         text: qsTr("Router is Reloading")
         font.pixelSize: scaleY(4)
+        color: "black"
+        font.bold: true
     }
 }

@@ -1106,31 +1106,22 @@ void qOrbiter::CMD_Set_Now_Playing(string sPK_DesignObj,string sValue_To_Assign,
     else if(iPK_MediaType == 5)
     {
 
-
         b_mediaPlaying = true;
-
         //  emit np_title1Changed(QString::fromStdString(sValue_To_Assign ));
         //  emit np_title2Changed(QString::fromStdString(sText));
-
         emit playlistPositionChanged(iValue);
-
         GetNowPlayingAttributes();
-        {
-            emit clearPlaylist();
-        }
+
+        emit clearPlaylist();
+
     }
     else if(iPK_MediaType == 4)
     {
         b_mediaPlaying = true;
-       // emit clearPlaylist();
-        //  emit np_title1Changed(QString::fromStdString(sValue_To_Assign ));
-        //  emit np_title2Changed(QString::fromStdString(sText));
         emit playlistPositionChanged(iValue);
         GetNowPlayingAttributes();
-        if(bRetransmit == 1)
-        {
-            emit clearPlaylist();
-        }
+        emit clearPlaylist();
+
     }
     else
     {
@@ -1898,7 +1889,6 @@ void qOrbiter::registerDevice(int user, QString ea, int room)
     DCE::CMD_Orbiter_Registered CMD_Orbiter_Registered(m_dwPK_Device, iOrbiterPluginID,  "1" ,      i_user,         StringUtils::itos(i_ea),          i_room,           &pData, &iSize);
     if (SendCommand(CMD_Orbiter_Registered, &pResponse) && pResponse=="OK")
     {
-        BindMediaRemote(true);
         emit statusMessage("DCERouter Responded to Register with " + QString::fromStdString(pResponse));
         setLocation(room, ea.toInt());
         GetScreenSaverImages();
@@ -2035,7 +2025,7 @@ void qOrbiter::setCurrentRow(int row)
 #elif WIN32
     populateAdditionalMedia();
 #elif Q_OS_MACX
-     populateAdditionalMedia();
+    populateAdditionalMedia();
 #endif
 }
 
@@ -2282,9 +2272,9 @@ void DCE::qOrbiter::executeCommandGroup(int cmdGrp)
 
 void qOrbiter::displayToggle(int i)
 {
-        DCE::CMD_Display_OnOff display(m_dwPK_Device, m_pData->FindFirstRelatedDeviceOfTemplate(DEVICETEMPLATE_OnScreen_Orbiter_CONST)->m_dwPK_Device , StringUtils::itos(i), false );
-        SendCommand(display);
-        emit statusMessage("Attempting to toggle the display" );
+    DCE::CMD_Display_OnOff display(m_dwPK_Device, m_pData->FindFirstRelatedDeviceOfTemplate(DEVICETEMPLATE_OnScreen_Orbiter_CONST)->m_dwPK_Device , StringUtils::itos(i), false );
+    SendCommand(display);
+    emit statusMessage("Attempting to toggle the display" );
 }
 
 void qOrbiter::setMediaSpeed(int s)
@@ -2368,6 +2358,7 @@ void qOrbiter::seekToGridPosition(QString s)
                     cellImg = getfileForDG(pPath);
 #else
                     cellImg = getfileForDG(pPath);
+
 #endif
                 }
                 else
@@ -3536,7 +3527,7 @@ void DCE::qOrbiter::GetText(int textno)
 //used for resume to pass complex things like chapters and positions in playlists.
 void DCE::qOrbiter::setPosition(QString position)
 {
-    /*
+//CHAPTER:0 POS:2040 TITLE:0 SUBTITLE:-1 AUDIO:-1 TOTAL:1239600 QUEUE_POS:0
     if(currentScreen.contains( "Screen_49.qml"))
 
     {
@@ -3549,14 +3540,28 @@ void DCE::qOrbiter::setPosition(QString position)
     }
     else
     {
-        CMD_Set_Media_Position setPosition(m_dwPK_Device, ScreenParameters->getParam(186).toInt(), ScreenParameters->getParam(187).toInt(), position.toStdString());
+
+        QString jumpstring = "CHAPTER:0 POS:"+position+" TITLE:0 SUBTITLE:-1 AUDIO:-1 TOTAL:1239600 QUEUE_POS:0";
+        emit statusMessage(jumpstring);
+        CMD_Set_Media_Position setPosition(m_dwPK_Device, m_dwPK_Device_NowPlaying, internal_streamID, jumpstring.toStdString());
 
         if(!SendCommand(setPosition))
         {
 
         }
     }
-*/
+
+}
+
+void qOrbiter::setPosition(int position)
+{
+    emit statusMessage("Jumping position in stream to "+ QString::number(position)) ;
+    CMD_Set_Media_Position setPosition(m_dwPK_Device, this->m_dwPK_Device_NowPlaying, internal_streamID, StringUtils::itos(position));
+            string cResp = "";
+    if(SendCommand(setPosition, &cResp) && cResp == "OK")
+    {
+        emit mediaMessage("Jumping to Position");
+    }
 }
 
 void DCE::qOrbiter::showMenu() //show the dvd menu
@@ -4325,8 +4330,8 @@ bool qOrbiter::checkLoadingStatus()
     {
         if(currentScreen=="Screen_47.qml")
         {
-        //emit statusMessage("Count" + QString::number(i_currentMediaModelRow)+ "/" + QString::number(i_mediaModelRows));
-        return true;
+            //emit statusMessage("Count" + QString::number(i_currentMediaModelRow)+ "/" + QString::number(i_mediaModelRows));
+            return true;
         }
         else
         {

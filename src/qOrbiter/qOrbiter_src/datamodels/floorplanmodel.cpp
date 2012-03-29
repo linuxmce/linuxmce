@@ -1,4 +1,5 @@
 #include "floorplanmodel.h"
+#include <QDebug>
 
 FloorPlanModel::FloorPlanModel(FloorplanDevice* prototype, QObject *parent) :
     QAbstractListModel(parent), m_prototype(prototype)
@@ -40,6 +41,7 @@ void FloorPlanModel::appendRows(const QList<FloorplanDevice *> &items)
   foreach(FloorplanDevice *item, items) {
 
    QObject::connect(item, SIGNAL(dataChanged()), this, SLOT(handleItemChange()));
+   QObject::connect(this, SIGNAL(changePage(int)), item, SLOT(setCurrentPage(int)));
     m_list.append(item);
 
   }
@@ -66,7 +68,7 @@ void FloorPlanModel::handleItemChange()
 {
   FloorplanDevice* item = static_cast<FloorplanDevice*>(sender());
   QModelIndex index = indexFromItem(item);
-  //qDebug() << "Handling item change for:" << index;
+ // qDebug() << "Handling item change for:" << index;
   if(index.isValid())
   {
     emit dataChanged(index, index);
@@ -94,10 +96,14 @@ QModelIndex FloorPlanModel::indexFromItem(const FloorplanDevice *item) const
 {
   Q_ASSERT(item);
   for(int row=0; row<m_list.size(); ++row) {
- //qDebug() << "Row:" << row << "::" << m_list.at(row)->id();
-      if(m_list.at(row) == item) {
+    //  qDebug() << "item:" << item->id() << "::" << m_list.at(row)->id();
+      if(m_list.at(row)->id() == item->id()) {
 
-          return index(row,row,QModelIndex());
+          return index(row,0);
+      }
+      else
+      {
+        //  qDebug("item not Found");
       }
 
   }
@@ -183,6 +189,40 @@ void FloorPlanModel::setImageData(const uchar *data, int iData_size)
         {
             emit floorPlanStatus("Update Object Image Conversion Failed:");
         }
+}
+
+int FloorPlanModel::getDeviceX(int device)
+{
+    foreach(FloorplanDevice* item, m_list) {
+
+        if(item->deviceNum() == device)
+        {
+            //qDebug() << "Found Match of: " << item->id() << "to " << id;
+            return item->getCurrentX();
+        }
+        else
+        {
+          //  qDebug() << item->id();
+        }
+    }
+    return 0;
+}
+
+int FloorPlanModel::getDeviceY(int device)
+{
+    foreach(FloorplanDevice* item, m_list) {
+
+        if(item->deviceNum() == device)
+        {
+            //qDebug() << "Found Match of: " << item->id() << "to " << id;
+            return item->getCurrentY();
+        }
+        else
+        {
+          //  qDebug() << item->id();
+        }
+    }
+    return 0;
 }
 
 /*

@@ -233,6 +233,7 @@ Rectangle {
                 }
             }
         }
+    MediaScrollBar{id:media_transit; anchors.bottom: controlrow.top; anchors.horizontalCenter: controlrow.horizontalCenter}
 
             Row{
                 id:controlrow

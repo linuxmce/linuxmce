@@ -4,6 +4,7 @@ import "../js/ComponentLoader.js" as MyJs
 
 Rectangle {
     id: storedaudioremote
+
     Text {
         id: messages
         text: dcerouter.mediaResponse
@@ -15,7 +16,7 @@ Rectangle {
         target:dcenowplaying
         onImageChanged:nowplayingimage.source = "image://listprovider/updateobject/"+securityvideo.timestamp
     }
-
+ Component.onCompleted: manager.setBoundStatus(true)
 
     height: appH
     width: appW
@@ -217,6 +218,9 @@ Rectangle {
             }
         }
     }
+
+
+    MediaScrollBar{id:media_transit; anchors.bottom: controlrow.top; anchors.horizontalCenter: controlrow.horizontalCenter; anchors.bottomMargin: scaleY(2)}
     Row{
         id:controlrow
         anchors.top: mainrow.bottom

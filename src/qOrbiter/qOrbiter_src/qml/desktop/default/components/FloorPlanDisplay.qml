@@ -84,14 +84,16 @@ Rectangle {
         orientation: ListView.Horizontal
         anchors.top: mainRect.bottom
         anchors.horizontalCenter: parent.horizontalCenter
+
         delegate:
             Rectangle{
             id:fp_device_rect
             height: scaleY(20)
             width: scaleY(20)
+
             color: "lightgrey"
-           // Component.onCompleted: console.log("Item Fptype:" + floorplantype + " -- Floorplantype::" + currentFloorplanType)
-            visible: currentFloorplanType === floorplantype  ? true : false
+
+
             Column{
                 Text {
                     id: fpDevice_name
@@ -111,7 +113,7 @@ Rectangle {
                 }
                 Text {
                     id: fpDevice_pos
-                    text: "Position" + position
+                    text: "Position" + floorplan_devices.getDeviceX(deviceno) + "," + floorplan_devices.getDeviceY(deviceno)
                 }
             }
 

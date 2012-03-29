@@ -199,12 +199,12 @@ public slots:
     QUrl getImageUrl () { return nowPlayingImageUrl;}
 
     void setImageData( const uchar *data, int iData_size) {
-
+        qDebug("Revieved Image data");
         QImage t;
         if( t.loadFromData(data, iData_size))
             setImage(t);
     }
-    void setImage(QImage img) {fileImage = img; emit imageChanged();}
+    void setImage(QImage img) {fileImage = img; qDebug("Emitting new image"); emit imageChanged();}
     QImage getImage() {return fileImage;}
 
     void setScreen(QString inc_screen) {qs_screen = inc_screen; emit screenTypeChanged();}

@@ -13,6 +13,8 @@ class TimeCodeManager : public QObject
     Q_OBJECT
     Q_PROPERTY (int tcTotalTime READ getTotalTime WRITE setTotalTime NOTIFY totalTimeChanged)
     Q_PROPERTY (int tcCurrentTime READ getTime WRITE setTime NOTIFY timeChanged)
+    Q_PROPERTY (double runningTimer READ getProgressBar WRITE setProgressBar NOTIFY positionChanged)
+    Q_PROPERTY (QString dragTime READ getDragTime WRITE setDragTime NOTIFY dragtimeChanged)
 
     Q_PROPERTY (QString qsTotalTime READ getStringTotalTime WRITE setStringTotalTime NOTIFY totalStringTimeChanged)
     Q_PROPERTY (QString qsCurrentTime READ getStringTime WRITE setStringTime NOTIFY stringTimeChanged)
@@ -27,6 +29,7 @@ public:
     //it needs to report the positon of the marker, and provide the time readout converted back to the proper HH::MM:SS format
     int tcTotalTime;
     int tcCurrentTime;
+    double runningTimer;
 
     QString qsTotalTime;
     QString qsCurrentTime;
@@ -44,7 +47,10 @@ public:
     QString qsTitle;
     QString qsChapter;
 
-    
+    QString dragTime;
+    int i_dragTime;
+
+    bool reverse;
 signals:
     void totalStringTimeChanged();
     void stringTimeChanged();
@@ -54,6 +60,9 @@ signals:
     void playbackSpeedChanged();
     void sPlaybackSpeedChanged();
     void tcMessage();
+    void seekToTime(QString time);
+    void dragtimeChanged();
+
     
 public slots:
     void start(QString server, int iport);
@@ -63,10 +72,16 @@ public slots:
     void convertToSeconds();
     void setPosition();
 
+    void showDragTime(int seconds);
+
+
+    void setDragTime(QString dtime) {dragTime = dtime; emit dragtimeChanged();}
+    QString getDragTime () {return dragTime;}
+
     void setStringTotalTime(QString qstTime) {qsTotalTime = qstTime; emit totalStringTimeChanged(); }
      QString getStringTotalTime(){return qsTotalTime;}
 
-     void setStringTime(QString qstime) { qsCurrentTime = qstime; emit stringTimeChanged(); }
+     void setStringTime(QString qstime) { qsCurrentTime = qstime; setPosition(); emit stringTimeChanged(); }
      QString getStringTime () {return qsCurrentTime;}
 
     void setTotalTime(int tTime) {tcTotalTime = tTime; emit totalTimeChanged();}
@@ -80,6 +95,18 @@ public slots:
 
     void setStringPlaybackSpeed(QString pbs ) {stringPlaybackSpeed = pbs; emit sPlaybackSpeedChanged();}
     QString getStringPlaybackSpeed() {return stringPlaybackSpeed ; }
+
+    void setProgressBar(int progress) {runningTimer = progress; emit positionChanged();}
+    int getProgressBar() {return runningTimer;}
+
+    void finishDragging() {
+
+      //  QString t = dragTime;
+      //  t.replace(QRegExp("0:(?!/d)"), "00:");
+      //  t.replace(QRegExp("0:(?![/d/d[1-9][1-9]:)"), "0:0");
+                emit seekToTime(QString::number(i_dragTime));
+
+    }
     
 };
 

@@ -148,24 +148,7 @@ public:
 
     void getImage();
 
-    Q_INVOKABLE void moveDirection(QString direction);
-    Q_INVOKABLE void JogStream(QString jump);
-    Q_INVOKABLE void processScreenShot(char picData, int picDataSize, string fileFormat);
-    Q_INVOKABLE void showAdvancedButtons();
-    //playlist manipulation
-    Q_INVOKABLE void movePlaylistEntry(bool pos, int num);
-    Q_INVOKABLE void addToPlaylist(bool now, string playlist);
-    //-------------------------------------------------------
-    Q_INVOKABLE void grabScreenshot(QString fileWithPath);
-    // Default colored settop box and VDR buttons.
-    Q_INVOKABLE void redButton();
-    Q_INVOKABLE void greenButton();
-    Q_INVOKABLE void yellowButton();
-    Q_INVOKABLE void blueButton();
-    //buttons from the more screen
-    Q_INVOKABLE void extraButtons(QString button);
 
-    Q_INVOKABLE void newOrbiter();
 
     virtual int PromptUser(string sPrompt,int iTimeoutSeconds=10,map<int,string> *p_mapPrompts = NULL);
     virtual int PromptFor(string sToken);
@@ -1229,6 +1212,7 @@ signals:
 
     //screensaver
     void currentScreenSaverImage(const uchar* ,int);
+
 public slots:
     //setup
     void executeCommandGroup(int cmdGrp);
@@ -1240,6 +1224,24 @@ public slots:
     void qmlSetup(QString device, QString address);
     void setCurrentScreen(QString s);
 
+     void moveDirection(QString direction);
+     void JogStream(QString jump);
+     void processScreenShot(char picData, int picDataSize, string fileFormat);
+     void showAdvancedButtons();
+    //playlist manipulation
+     void movePlaylistEntry(bool pos, int num);
+     void addToPlaylist(bool now, string playlist);
+    //-------------------------------------------------------
+     void grabScreenshot(QString fileWithPath);
+    // Default colored settop box and VDR buttons.
+     void redButton();
+     void greenButton();
+     void yellowButton();
+     void blueButton();
+    //buttons from the more screen
+     void extraButtons(QString button);
+
+     void newOrbiter();
 
     //operations
     void setMediaResponse(QString r) {mediaResponse = r; emit mediaResponseChanged();}
@@ -1301,6 +1303,7 @@ public slots:
     void GetScreenSaverImages();
     void BindMediaRemote(bool onoff);
     void jumpToPlaylistPosition(int pos);
+
     void setNowPlayingDetails();
     void SetSecurityStatus(string pin, string mode, int user, string special);
     void GetSingleSecurityCam(int cam_device, int iHeight, int iWidth);
@@ -1324,6 +1327,7 @@ public slots:
     void setAspect(QString ratio);
     void GetText(int textno);
     void setPosition(QString position);
+    void setPosition(int position);
     void showMenu();
     void CopyDisc();
     void ShowBookMarks();

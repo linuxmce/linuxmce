@@ -46,6 +46,7 @@ Q_IMPORT_PLUGIN(UIKit)
 #include <contextobjects/epgchannellist.h>
 #include <contextobjects/playlistclass.h>
 #include <contextobjects/timecodemanager.h>
+#include <modeltest/modeltest.h>
 
 
 
@@ -156,16 +157,16 @@ int main(int argc, char* argv[])
 #elif for_android
     QApplication::setGraphicsSystem("opengl");
 #else
-      QApplication::setGraphicsSystem("opengl");
+    QApplication::setGraphicsSystem("opengl");
 #endif
 
     QApplication  a(argc, argv);
 
 #ifdef ANDROID // workaround for 'text as boxes' issue.
- QFont f = a.font();
- f.setFamily("Droid Sans");
- f.setBold("true");
- a.setFont(f);
+    QFont f = a.font();
+    f.setFamily("Droid Sans");
+    f.setBold("true");
+    a.setFont(f);
 #endif
 
     g_sBinary = FileUtils::FilenameWithoutPath(argv[0]);
@@ -278,13 +279,14 @@ int main(int argc, char* argv[])
         QThread *epgThread = new QThread; //for playlists and epg of all types. only one will be active a given time inthe app
         //stored video playlist for managing any media that isnt live broacast essentially
         PlaylistClass *storedVideoPlaylist = new PlaylistClass (new PlaylistItemClass);
-        storedVideoPlaylist->moveToThread(epgThread);
+        //ModelTest *modelTester = new ModelTest(storedVideoPlaylist);
+        storedVideoPlaylist->moveToThread(dceThread);
 
         //epg listmodel, no imageprovider as of yet
         EPGChannelList *simpleEPGmodel = new EPGChannelList(new EPGItemClass);
-        simpleEPGmodel->moveToThread(epgThread);
+        simpleEPGmodel->moveToThread(dceThread);
 
-       // QThread *tcThread = new QThread();
+        // QThread *tcThread = new QThread();
         TimeCodeManager *timecode = new TimeCodeManager;
         //timecode->moveToThread(tcThread);
 
@@ -389,7 +391,7 @@ int main(int argc, char* argv[])
         QObject::connect(pqOrbiter, SIGNAL(clearAndContinue(int)), mediaModel, SLOT(clearAndRequest(int)), Qt::QueuedConnection);
         QObject::connect(pqOrbiter,SIGNAL(addItem(gridItem*)), mediaModel, SLOT(appendRow(gridItem*)),Qt::QueuedConnection);
         QObject::connect(pqOrbiter,SIGNAL(gridModelSizeChange(int)), mediaModel, SLOT(setTotalCells(int)), Qt::QueuedConnection);
-          QObject::connect(pqOrbiter, SIGNAL(clearModel()), mediaModel, SLOT(reset()), Qt::DirectConnection);
+        QObject::connect(pqOrbiter, SIGNAL(clearModel()), mediaModel, SLOT(reset()), Qt::DirectConnection);
         QObject::connect(mediaModel,SIGNAL(ready(int)), pqOrbiter, SLOT(prepareFileList(int)), Qt::QueuedConnection);
         QObject::connect(w, SIGNAL(gridTypeChanged(int)), mediaModel, SLOT(setGridType(int)), Qt::QueuedConnection);
         QObject::connect(w, SIGNAL(setDceGridParam(int,QString)), pqOrbiter, SLOT(setStringParam(int,QString)),Qt::QueuedConnection);
@@ -402,11 +404,11 @@ int main(int argc, char* argv[])
         QObject::connect(pqOrbiter, SIGNAL(setNowPlaying(bool)), w->nowPlayingButton,SLOT(setStatus(bool)),Qt::QueuedConnection);
         QObject::connect(pqOrbiter,SIGNAL(streamIdChanged(int)), w->nowPlayingButton, SLOT(setStreamID(int)),Qt::QueuedConnection);
         QObject::connect(pqOrbiter, SIGNAL(currentScreenChanged(QString)), w->nowPlayingButton, SLOT(setScreen(QString)),Qt::QueuedConnection);
-        QObject::connect(pqOrbiter,SIGNAL(objectUpdate(const uchar*,int)), w->nowPlayingButton, SLOT(setImageData(const uchar*,int)));
+        QObject::connect(pqOrbiter,SIGNAL(objectUpdate(const uchar*,int)), w->nowPlayingButton, SLOT(setImageData(const uchar*,int)), Qt::QueuedConnection);
         QObject::connect(simpleEPGmodel, SIGNAL(channelNumberChanged(QString)), w->nowPlayingButton, SLOT(setChannel(QString)), Qt::QueuedConnection);
         QObject::connect(simpleEPGmodel, SIGNAL(programChanged(QString)), w->nowPlayingButton, SLOT(setProgram(QString)), Qt::QueuedConnection);
         QObject::connect(simpleEPGmodel, SIGNAL(networkChanged(QString)), w->nowPlayingButton, SLOT(setChannelID(QString)), Qt::QueuedConnection);
-
+        QObject::connect(timecode, SIGNAL(seekToTime(QString)), pqOrbiter, SLOT(JogStream(QString)), Qt::QueuedConnection );
         //attributes
         QObject::connect(pqOrbiter, SIGNAL(np_filename(QString)), w->nowPlayingButton, SLOT(setFilePath(QString)),Qt::QueuedConnection);
 
@@ -467,7 +469,7 @@ int main(int argc, char* argv[])
         QObject::connect(w, SIGNAL(reInitialize()), pqOrbiter, SLOT(initialize()), Qt::QueuedConnection);
 
         dceThread->start();
-       // tcThread->start();
+        // tcThread->start();
         mediaThread->start();
         epgThread->start();
 
@@ -491,7 +493,7 @@ int main(int argc, char* argv[])
         }
         a.exec();
 
-       /*
+        /*
  if(pqOrbiter->m_RequestHandlerThread)
             pthread_join(pqOrbiter->m_RequestHandlerThread, NULL);  // This function will return when the device is shutting down
     */

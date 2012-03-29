@@ -1,4 +1,5 @@
 #include "playlistitemclass.h"
+#include <QDebug>
 PlaylistItemClass::PlaylistItemClass( QString &ident, QString &path,  int &index) :
     m_fk_file(path), m_path(path), m_index(index), m_name(ident)
 {
@@ -15,6 +16,11 @@ QHash<int, QByteArray> PlaylistItemClass::roleNames() const
   names[FKRole]= "file";
   names[StateRole] = "state";
   return names;
+}
+
+void PlaylistItemClass::addedToModel()
+{
+    emit dataChanged();
 }
 
 QVariant PlaylistItemClass::data(int role) const

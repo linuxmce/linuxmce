@@ -74,13 +74,15 @@ signals:
     void floorPlanStatus(QString s);
     void requestNewFloorPlanData(QString p);
     void dataChanged(const QModelIndex &topLeft, const QModelIndex &bottomRight);
+    void changePage(int p);
 
 public slots:
     void clear();
     void handleItemChange();
 
+
     int getCurrentIntPage() {return iCurrentPage;}
-    void setCurrentIntPage(int i) {iCurrentPage = i;}
+    void setCurrentIntPage(int i) {iCurrentPage = i; emit changePage( iCurrentPage);}
 
     QImage getFloorPlanImage () {return currentImage;}
     QImage getCurrentImage() {return currentImage;}
@@ -88,6 +90,8 @@ public slots:
     void setImageData(const uchar *data, int iData_size);
     void setImage(QImage fp) { currentImage = fp; emit floorPlanImageChanged(); emit requestNewFloorPlanData(currentPage);}
 
+    int getDeviceX(int device);
+    int getDeviceY(int device);
     QString getCurrentImagePath();
 
     Q_INVOKABLE void setCurrentPage(QString currentPageId);

@@ -48,7 +48,6 @@ class PlaylistItemClass: public QObject
 {
     Q_OBJECT
 
-
 public:
     enum Roles {
         NameRole = Qt::DisplayRole+1,
@@ -75,6 +74,9 @@ public:
     inline void setActive(bool b) { isActive = b;}
     Q_INVOKABLE inline bool getActive () {return isActive;}
     bool isActive;
+
+public slots:
+    void addedToModel();
 
 private:
     QString m_name;

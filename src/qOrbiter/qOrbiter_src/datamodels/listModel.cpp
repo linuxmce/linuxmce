@@ -90,7 +90,7 @@ void ListModel::handleItemChange()
 {
     gridItem* item = static_cast<gridItem*>(sender());
     QModelIndex index = indexFromItem(item);
-    // qDebug() << "Handling item change for:" << index;
+     qDebug() << "Handling item change for:" << index;
     if(index.isValid())
     {
         emit dataChanged(index, index, 0);
