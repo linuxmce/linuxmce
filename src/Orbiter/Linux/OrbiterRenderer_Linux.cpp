@@ -75,8 +75,9 @@
 #endif
 #endif
 
-
 using namespace DCE;
+
+#include "ProgressBarConfig.h"
 
 OrbiterRenderer_Linux::OrbiterRenderer_Linux(Orbiter *pOrbiter) : BASE_CLASS(pOrbiter), 
 #ifndef DIRECTFB
@@ -374,44 +375,8 @@ bool OrbiterRenderer_Linux::DisplayProgress(string sMessage, const map<string, b
         if(!it->second)
             sMessage += StringUtils::Replace(it->first, "|", "# ") + ", ";
     std::cout << "== DisplayProgress( " << sMessage << ", ChildDevices, " << nProgress << " );" << std::endl;
-    if (pOrbiterLinux->m_pProgressWnd && pOrbiterLinux->m_pProgressWnd->IsCancelled())
-    {
-        delete pOrbiterLinux->m_pProgressWnd;
-        pOrbiterLinux->m_pProgressWnd = NULL;
-        return true;
-    }
-    if (nProgress != -1 && !pOrbiterLinux->m_pProgressWnd)
-    {
-        // Create the progress window ...
-#ifdef USE_GTK
-	pOrbiterLinux->m_pProgressWnd = new GTKProgressWnd();
-#else
-        pOrbiterLinux->m_pProgressWnd = new XProgressWnd();
-#endif
-        pOrbiterLinux->m_pProgressWnd->UpdateProgress(sMessage, nProgress);
-        pOrbiterLinux->m_pProgressWnd->Run();
-        pOrbiterLinux->m_pWinListManager->PositionWindow(pOrbiterLinux->m_pProgressWnd->m_wndName, 0, 0, pOrbiterLinux->m_iImageWidth, pOrbiterLinux->m_iImageHeight);
-		pOrbiterLinux->m_pWinListManager->SetSdlWindowVisibility(false);
-		pOrbiterLinux->m_pWinListManager->ApplyContext();
-        return false;
-    }
-    /*else*/ if (nProgress != -1)
-    {
-        // Update progress info
-        pOrbiterLinux->m_pProgressWnd->UpdateProgress(sMessage, nProgress);
-        pOrbiterLinux->m_pProgressWnd->DrawWindow();
-        return false;
-    }
-    /*else*/ if(pOrbiterLinux->m_pProgressWnd)
-    {
-        // We are done here ...
-		pOrbiterLinux->m_pWinListManager->SetSdlWindowVisibility(true);
-        pOrbiterLinux->m_pProgressWnd->Terminate();
-        pOrbiterLinux->m_pProgressWnd = NULL;
-        pOrbiterLinux->reinitGraphics();
-		pOrbiterLinux->m_pWinListManager->ApplyContext();
-        return false;
-    }
+
+    DisplayProgress(sMessage, nProgress);
 
     return false;
 #else
@@ -428,44 +393,35 @@ bool OrbiterRenderer_Linux::DisplayProgress(string sMessage, int nProgress)
 	if(NULL ==	pOrbiterLinux)
 		return false;
 
-    if (pOrbiterLinux->m_pProgressWnd && pOrbiterLinux->m_pProgressWnd->IsCancelled())
-    {
-        delete pOrbiterLinux->m_pProgressWnd;
-        pOrbiterLinux->m_pProgressWnd = NULL;
-        return true;
-    }
-	if (nProgress != -1 && !pOrbiterLinux->m_pProgressWnd)
-    {
-        // Create the progress window ...
-#ifdef USE_GTK
-	pOrbiterLinux->m_pProgressWnd = new GTKProgressWnd();
-#else
-        pOrbiterLinux->m_pProgressWnd = new XProgressWnd();
+#ifdef ORBITER_OPENGL
+	TextureManager::Instance()->SafeToReleaseTextures(true);
+
+	Popups->Reset();
+	Engine->NewScreen("Progress");
+	TextureManager::Instance()->EmptyCache();
+
+	TextureManager::Instance()->SafeToReleaseTextures(false);
+
+	m_pLastHighlightedObject = NULL;
+	Engine->BeginModifyGeometry();
+#endif /* ORBITER_OPENGL */
+	RenderProgressBar(nProgress);
+
+	BatchedTextRendering(false);
+
+	DesignObjText text;
+	text.m_rPosition = PlutoRectangle(TEXT_TOP_X, TEXT_TOP_Y, OrbiterLogic()->m_iImageWidth - TEXT_TOP_X, OrbiterLogic()->m_iImageHeight - PROGRESS_BOTTOM_DISTANCE);
+
+#ifndef ARMV4I	
+	RenderText(sMessage, &text, m_spTextStyle.get());
 #endif
-        pOrbiterLinux->m_pProgressWnd->UpdateProgress(sMessage, nProgress);
-        pOrbiterLinux->m_pProgressWnd->Run();
-		pOrbiterLinux->m_pWinListManager->PositionWindow(pOrbiterLinux->m_pProgressWnd->m_wndName, 0, 0, pOrbiterLinux->m_iImageWidth, pOrbiterLinux->m_iImageHeight);
-		pOrbiterLinux->m_pWinListManager->SetSdlWindowVisibility(false);
-		pOrbiterLinux->m_pWinListManager->ApplyContext();
-        return false;
-    }
-    /*else*/ if (nProgress != -1)
-    {
-        // Update progress info
-        pOrbiterLinux->m_pProgressWnd->UpdateProgress(sMessage, nProgress);
-        pOrbiterLinux->m_pProgressWnd->DrawWindow();
-        return false;
-    }
-    /*else*/ if(pOrbiterLinux->m_pProgressWnd)
-    {
-        // We are done here ...
-		pOrbiterLinux->m_pWinListManager->SetSdlWindowVisibility(true);
-        pOrbiterLinux->m_pProgressWnd->Terminate();
-        pOrbiterLinux->m_pProgressWnd = NULL;
-        pOrbiterLinux->reinitGraphics();
-		pOrbiterLinux->m_pWinListManager->ApplyContext();
-        return false;
-    }
+
+	BatchedTextRendering(true);
+
+#ifdef ORBITER_OPENGL
+	Engine->EndModifyGeometry();
+#endif /* ORBITER_OPENGL */
+	UpdateScreen();
 
     return false;
 #else
@@ -487,6 +443,7 @@ int OrbiterRenderer_Linux::PromptUser(string sPrompt, int iTimeoutSeconds, map<i
 	if(NULL ==	pOrbiterLinux)
 		return false;
 
+	// TODO: replace these with SDL code
 	pOrbiterLinux->m_pWinListManager->SetSdlWindowVisibility(false);
 #ifdef USE_GTK
     GTKPromptUser promptDlg(sPrompt, iTimeoutSeconds, p_mapPrompts);

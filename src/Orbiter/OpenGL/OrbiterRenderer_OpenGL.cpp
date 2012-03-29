@@ -160,7 +160,7 @@ void *OrbiterRenderer_OpenGLThread(void *p)
 	pOrbiterRenderer->Engine = NULL;
 
 	return NULL; 
-}	
+}
 //-----------------------------------------------------------------------------------------------------
 OrbiterRenderer_OpenGL::OrbiterRenderer_OpenGL(Orbiter *pOrbiter) : 
 	OrbiterRenderer(pOrbiter), NeedToUpdateScreen_(false), m_bWindowCreated(false), Popups(NULL), 
@@ -732,7 +732,22 @@ void OrbiterRenderer_OpenGL::OnIdle()
 //-----------------------------------------------------------------------------------------------------
 /*virtual*/ void OrbiterRenderer_OpenGL::ShowProgress(int nPercent) 
 {
-	//OrbiterRenderer::ShowProgress(nPercent);
+	TextureManager::Instance()->SafeToReleaseTextures(true);
+
+	Popups->Reset();
+	Engine->NewScreen("Progress");
+	TextureManager::Instance()->EmptyCache();
+
+	TextureManager::Instance()->SafeToReleaseTextures(false);
+
+	m_pLastHighlightedObject = NULL;
+	Engine->BeginModifyGeometry();
+
+	OrbiterRenderer::ShowProgress(nPercent);
+
+	Engine->EndModifyGeometry();
+
+	UpdateScreen();
 }
 //-----------------------------------------------------------------------------------------------------
 /*virtual*/ bool OrbiterRenderer_OpenGL::NeedToUpdateScreen()

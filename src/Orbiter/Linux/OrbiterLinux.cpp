@@ -95,7 +95,6 @@ OrbiterLinux::OrbiterLinux(int DeviceID, int PK_DeviceTemplate,
         , m_nProgressWidth(0)
         , m_nProgressHeight(0)
 #ifndef DIRECTFB
-	, m_pProgressWnd(NULL)
         , m_pWaitGrid(NULL)
         , m_bButtonPressed_WaitGrid(false)
         , m_pWaitList(NULL)
@@ -142,14 +141,6 @@ OrbiterLinux::~OrbiterLinux()
     pthread_t hackthread;
     pthread_create(&hackthread, NULL, HackThread, (void*)this);
     pthread_detach(hackthread);
-
-#ifndef DIRECTFB
-    if (m_pProgressWnd)
-    {
-        m_pProgressWnd->Terminate();
-        delete m_pProgressWnd;
-    }
-#endif
 
     KillMaintThread();
 

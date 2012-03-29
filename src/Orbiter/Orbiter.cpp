@@ -2286,6 +2286,11 @@ void Orbiter::Initialize( GraphicType Type, int iPK_Room, int iPK_EntertainArea 
 				it!=m_pOrbiterFileBrowser_Collection->m_mapRemoteControls.end();++it)
 					m_pOrbiterFileBrowser_Collection->m_mapRemoteID_Device[ it->second.second ] = it->second.first;
 
+#if !defined(PROXY_ORBITER) && !defined(BLUETOOTH_DONGLE) && !defined(MOXI_ORBITER) && !defined(WIN32)
+			CreateChildren();
+			WaitForRelativesIfOSD();
+#endif
+
 			// Debug various issues with startup sequence irregularities
 			LoggerWrapper::GetInstance()->Write(LV_STATUS,"Orbiter::Initialize finished startup phase");
 		} // Originally this context ended before the startup actions.  This meant onload actions,
@@ -3772,7 +3777,7 @@ DesignObj_Orbiter *Orbiter::FindObject( string PK_DesignObj, class DesignObj_Orb
 		// AB 1 Jul 05 - check for version & page first, otherwise popups use the wrong version
 		if( pDesignObj_Orbiter )
 			PK_DesignObj += "." + StringUtils::itos(pDesignObj_Orbiter->m_iVersion) + "." + StringUtils::itos(pDesignObj_Orbiter->m_iPage);
-		else
+		else if (m_pLocationInfo)
 			PK_DesignObj += "." + StringUtils::itos(m_pLocationInfo->iLocation) + ".0";
 
 		if( (oi=m_mapObj_All.find(PK_DesignObj))!=m_mapObj_All.end(  ) )
@@ -9167,7 +9172,7 @@ bool Orbiter::WaitForRelativesIfOSD()
 			}
 
 			string sMessage = m_mapTextString[TEXT_Not_all_devices_started_CONST];
-			m_pOrbiterRenderer->PromptUser(sMessage);
+			CMD_Display_Alert(sMessage, "relatives_failed", "10", interuptAlways);
 			LoggerWrapper::GetInstance()->Write(LV_WARNING,"Continuing anyway with %d devices not registered: %s",iUnregisteredRelatives,sDevices.c_str());
 			break;
 		}

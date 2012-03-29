@@ -76,9 +76,9 @@ namespace DCE
 		void InitializeAfterSetVideoMode();
 		void InitializeAfterRelatives();
 
-		bool DisplayProgress(string sMessage, int nProgress);
-		bool DisplayProgress(string sMessage, const map<string, bool> &mapChildDevices, int nProgress);
-		int PromptUser(string sPrompt,int iTimeoutSeconds=10,map<int,string> *p_mapPrompts=NULL);
+		virtual bool DisplayProgress(string sMessage, int nProgress);
+		virtual bool DisplayProgress(string sMessage, const map<string, bool> &mapChildDevices, int nProgress);
+		virtual int PromptUser(string sPrompt,int iTimeoutSeconds=10,map<int,string> *p_mapPrompts=NULL);
 
 		void LockDisplay();
 		void UnlockDisplay();

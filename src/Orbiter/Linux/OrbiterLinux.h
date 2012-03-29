@@ -53,14 +53,6 @@
 #include "GTKPromptUser.h"
 #endif
 
-#ifndef USE_GTK
-#include "XProgressWnd.h"
-#endif
-
-#ifdef USE_GTK
-#include "GTKProgressWnd.h"
-#endif
-
 class wxDialog_WaitGrid;
 class wxDialog_WaitList;
 class wxDialog_WaitUser;
@@ -107,11 +99,6 @@ private:
     int m_nProgressHeight;
 #ifndef DIRECTFB
 
-#ifdef USE_GTK
-    GTKProgressWnd *m_pProgressWnd;
-#else
-    XProgressWnd *m_pProgressWnd;
-#endif
     wxDialog_WaitGrid *m_pWaitGrid;
     bool m_bButtonPressed_WaitGrid;
     wxDialog_WaitList *m_pWaitList;

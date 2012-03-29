@@ -42,12 +42,7 @@
 using namespace std;
 using namespace DCE;
 //-----------------------------------------------------------------------------------------------------
-//progress bar custom settings
-#define PROGRESS_MAX 100
-#define PROGRESS_OPTIMAL_SIZE 300
-#define PROGRESS_UPDATE_STEP 10
-#define PROGRESS_BOTTOM_DISTANCE 50
-#define PROGRESS_HEIGHT 20
+#include "ProgressBarConfig.h"
 //-----------------------------------------------------------------------------------------------------
 namespace ProgressBar
 {
@@ -328,21 +323,31 @@ void OrbiterRenderer::ShowProgress(int nPercent)
 	if(++nCount % PROGRESS_UPDATE_STEP)
 		return;
 
+	RenderProgressBar(nPercent);
+	UpdateScreen();
+}
+//-----------------------------------------------------------------------------------------------------
+void OrbiterRenderer::RenderProgressBar(int nPercent)
+{
 	int nProgressWidth = OrbiterLogic()->m_iImageWidth < PROGRESS_OPTIMAL_SIZE ? OrbiterLogic()->m_iImageWidth - PROGRESS_MAX : PROGRESS_OPTIMAL_SIZE;
 	PlutoRectangle rect(
-		(OrbiterLogic()->m_iImageWidth - nProgressWidth) / 2, OrbiterLogic()->m_iImageHeight - PROGRESS_BOTTOM_DISTANCE, 
-		nProgressWidth, PROGRESS_HEIGHT
-		);
+			(OrbiterLogic()->m_iImageWidth - nProgressWidth) / 2, OrbiterLogic()->m_iImageHeight - PROGRESS_BOTTOM_DISTANCE,
+			nProgressWidth, PROGRESS_HEIGHT
+			);
 
+#ifndef ORBITER_OPENGL
+	// this rectangle hides the progress bar in OpenGL for some reason
+	SolidRectangle(0, 0, OrbiterLogic()->m_iImageWidth, OrbiterLogic()->m_iImageHeight, PlutoColor::Black());
+#endif
 	SolidRectangle(rect.Left(), rect.Top(), rect.Width, rect.Height, BorderColor);
 	SolidRectangle(rect.Left() + 1, rect.Top() + 1, rect.Width - 3, rect.Height - 3, FillBackgroundColor);
-	SolidRectangle(rect.Left() + 1, rect.Top() + 1, rect.Width * nPercent / PROGRESS_MAX - 3, rect.Height - 3, 
-		PlutoColor(
-		ProgressStartColor.R() + nPercent * (ProgressEndColor.R() - ProgressStartColor.R()) / PROGRESS_MAX, 
-		ProgressStartColor.G() + nPercent * (ProgressEndColor.G() - ProgressStartColor.G()) / PROGRESS_MAX, 
-		ProgressStartColor.B() + nPercent * (ProgressEndColor.B() - ProgressStartColor.B()) / PROGRESS_MAX
-		)
-		);
+	SolidRectangle(rect.Left() + 1, rect.Top() + 1, rect.Width * nPercent / PROGRESS_MAX - 3, rect.Height - 3,
+			PlutoColor(
+				ProgressStartColor.R() + nPercent * (ProgressEndColor.R() - ProgressStartColor.R()) / PROGRESS_MAX,
+				ProgressStartColor.G() + nPercent * (ProgressEndColor.G() - ProgressStartColor.G()) / PROGRESS_MAX,
+				ProgressStartColor.B() + nPercent * (ProgressEndColor.B() - ProgressStartColor.B()) / PROGRESS_MAX
+				)
+		      );
 
 	DesignObjText text;
 	string sText = StringUtils::ltos(nPercent) + "%";
@@ -352,20 +357,18 @@ void OrbiterRenderer::ShowProgress(int nPercent)
 	m_spTextStyle->m_ForeColor = TextShadowColor;
 	text.m_rPosition = PlutoRectangle(rect.Left() + 1, rect.Top() + 1, rect.Width, rect.Height);
 
-#ifndef ARMV4I	
+#ifndef ARMV4I
 	RenderText(sText, &text, m_spTextStyle.get());
 #endif
 
 	m_spTextStyle->m_ForeColor = TextColor;
 	text.m_rPosition = rect;
 
-#ifndef ARMV4I	
+#ifndef ARMV4I
 	RenderText(sText, &text, m_spTextStyle.get());
 #endif
 
 	BatchedTextRendering(true);
-
-	UpdateScreen();
 }
 //-----------------------------------------------------------------------------------------------------
 void OrbiterRenderer::UpdateScreen()
