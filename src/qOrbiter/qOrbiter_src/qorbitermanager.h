@@ -288,7 +288,7 @@ Param 10 - pk_attribute
     Q_INVOKABLE QDateTime getCurrentDateTime() const { return QDateTime::currentDateTimeUtc();}
     QString currentRoom;
 
-    void setActiveRoom(int room,int ea);
+
 
 
     //class objects
@@ -419,6 +419,8 @@ public slots: //note: Q_INVOKABLE means it can be called directly from qml
     void setIpAddress(QString s);
     void getFloorplanDevices(int floorplantype);
     void setFloorplanType(int t);
+    void setActiveRoom(int room,int ea);
+
 
     //void setAppPath(QString p) {appPath;}
 
