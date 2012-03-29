@@ -35,18 +35,19 @@ void PlaylistClass::appendRow(PlaylistItemClass *item)
 void PlaylistClass::populate()
 {
 
+    emit modelAboutToBeReset();
+    beginResetModel();
+    resetInternalData();
+
     if(removeRows(0, m_list.count()-1))
     {
-      //  qDebug() << "List Cleared";
+        //  qDebug() << "List Cleared";
         m_list.clear();
-        emit playlistReady();
-    }
-    else
-    {
-      //  qDebug()<< "Playlist not clear " << m_list.count();
-        emit playlistReady();
-    }
 
+    }
+    endResetModel();
+    emit modelReset();
+    emit playlistReady();
 
 }
 
@@ -188,20 +189,20 @@ bool PlaylistClass::checkDupe(QString name, int position)
 
         if (item->index() == position )
         {
-           //  qDebug() << "Dupe position " << position ;
+            //  qDebug() << "Dupe position " << position ;
             return true;
         }
         else
         {
-          // qDebug() << item->index();
-           // qDebug() << "Did not find item at postion " << position;
+            // qDebug() << item->index();
+            // qDebug() << "Did not find item at postion " << position;
             return  false;
         }
 
     }
     else
     {
-       // qDebug() << name << " at " << position-1 << " Not in playlist";
+        // qDebug() << name << " at " << position-1 << " Not in playlist";
         return false;
     }
 

@@ -5,6 +5,14 @@ Rectangle {
     height: style.orbiterH
     color: style.darkhighlight
 
+    function placeSprites(x,y, name)
+    {
+        var i;
+        var pX = x; //x point
+        var pY = y; //y point
+        console.log("Want to create " + name + " at " + x+","+y)
+    }
+
     Connections{
         target: floorplan_devices
         onFloorPlanImageChanged: {
@@ -114,7 +122,12 @@ Rectangle {
                 Text {
                     id: fpDevice_pos
                     text: "Position" + floorplan_devices.getDeviceX(deviceno) + "," + floorplan_devices.getDeviceY(deviceno)
+
                 }
+            }
+            Connections{
+                target: floorplan_devices
+                onDataChanged:placeSprites(floorplan_devices.getDeviceX(deviceno),floorplan_devices.getDeviceY(deviceno),name)
             }
 
             MouseArea{
