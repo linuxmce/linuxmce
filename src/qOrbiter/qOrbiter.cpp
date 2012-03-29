@@ -3524,7 +3524,7 @@ void DCE::qOrbiter::GetText(int textno)
 
 }
 
-//used for resume to pass complex things like chapters and positions in playlists.
+//used for resume to pass complex things like chapters and resume positions in playlists.
 void DCE::qOrbiter::setPosition(QString position)
 {
 //CHAPTER:0 POS:2040 TITLE:0 SUBTITLE:-1 AUDIO:-1 TOTAL:1239600 QUEUE_POS:0
@@ -3541,9 +3541,7 @@ void DCE::qOrbiter::setPosition(QString position)
     else
     {
 
-        QString jumpstring = "CHAPTER:0 POS:"+position+" TITLE:0 SUBTITLE:-1 AUDIO:-1 TOTAL:1239600 QUEUE_POS:0";
-        emit statusMessage(jumpstring);
-        CMD_Set_Media_Position setPosition(m_dwPK_Device, m_dwPK_Device_NowPlaying, internal_streamID, jumpstring.toStdString());
+        CMD_Set_Media_Position setPosition(m_dwPK_Device, m_dwPK_Device_NowPlaying, internal_streamID, position.toStdString());
 
         if(!SendCommand(setPosition))
         {
