@@ -2024,7 +2024,7 @@ void qOrbiter::setCurrentRow(int row)
     populateAdditionalMedia();
 #elif WIN32
     populateAdditionalMedia();
-#elif Q_OS_MACX
+#elif defined (Q_OS_MACX)
     populateAdditionalMedia();
 #endif
 }
