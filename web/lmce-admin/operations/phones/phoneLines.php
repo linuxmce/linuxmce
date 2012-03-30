@@ -6,7 +6,7 @@
 function phoneLines($output,$astADO,$dbADO) {
 	global $wikiHost, $editedID, $editdata;
 	
-	// check if database pluto_vdr exist
+	// check if database asterisk exists
 	$databases=$dbADO->MetaDatabases();
 	if(!in_array('asterisk',$databases)){
 		error_redirect(translate('TEXT_ASTERISK_DB_NOT_FOUND_CONST'),'index.php?section=phoneLines');
@@ -21,14 +21,13 @@ function phoneLines($output,$astADO,$dbADO) {
 	if(isset($_REQUEST['id'])) $id=$_REQUEST['id'];
 
 	if($action=='form'){
-		$ProtocolList=array('SIP','IAX', 'GTALK');
+		$ProtocolList=array('SIP','IAX','SPA','GTALK');
 		
 		$out.='
 		<div align="center" class="err">'.stripslashes(@$_REQUEST['error']).'</div>
 		<div align="center" class="confirm"><B>'.stripslashes(@$_REQUEST['msg']).'</B></div>
 		
 		'
-		//.phoneLinesLocalSettings($dbADO)
 		.emergencySettings($dbADO,$astADO)
 		.'
 		
@@ -105,9 +104,15 @@ function phoneLines($output,$astADO,$dbADO) {
 		
 		// delete existing phoneline 
 		if(isset($action) && $action == 'del') {
+			$SQL="DELETE FROM Line_HouseMode WHERE ID=".$id;
+			$dbADO->Execute($SQL);
 			$SQL="DELETE FROM phonelines WHERE id='".$id."'";
-			$res=$astADO->Execute($SQL);
+			$astADO->Execute($SQL);
+			$SQL="ALTER TABLE phonelines AUTO_INCREMENT=1";
+			$astADO->Execute($SQL);
 			$cmd='sudo -u root /usr/pluto/bin/db_phone_config.sh lines';
+			exec_batch_command($cmd,1);
+			$cmd='sudo -u root /usr/pluto/bin/db_create_dialplan.sh';
 			exec_batch_command($cmd,1);
 			$suffix='&msg='.translate('TEXT_PHONE_LINE_DELETED_CONST');
 			header('Location: index.php?section=phoneLines'.@$suffix);
@@ -121,6 +126,8 @@ function phoneLines($output,$astADO,$dbADO) {
 			$res=$astADO->Execute('SELECT LAST_INSERT_ID();');
 			$row=$res->FetchRow();
 			$id=$row[0];
+			$cmd='sudo -u root /usr/pluto/bin/db_create_dialplan.sh';
+			exec_batch_command($cmd,1);
 			$suffix='&msg='.translate('TEXT_ADD_PHONE_LINE_CMD_SENT_CONST');
 			header('Location: index.php?section=phoneLines&action=form&eid='.$id.@$suffix);
 			exit();
@@ -309,6 +316,10 @@ function getLineState($protocol, $username){
 	if($protocol == 'SIP') {
 		$cmd='sudo -u root /usr/sbin/asterisk -rx "sip show registry" |  awk \'$3 == "'.$username.'" { print $5}\'';
 		$response=exec_batch_command($cmd,1);
+	}
+
+	else if($protocol == 'SPA') {
+		$response='N/A';
 	}
 
 	else if($protocol == 'IAX') {
