@@ -307,15 +307,21 @@ AddTrunk()
   			context="from-trunk"
    			LINESSQL="$LINESSQL INSERT INTO $DB_IAX_Device_Table (name,username,secret,host,port,context,type,callerid,disallow,allow)
 			VALUES ('$username','$username','$password','$host','4569','$context','peer','$phonenumber','all','alaw;ulaw');"
-   ;;
-        "SIP")
-        	# provider registry
-			LINESSQL="$LINESSQL INSERT INTO $DB_astconfig_Table (var_metric,filename,category,var_name,var_val) VALUES
-				('$(( 100+$id ))', 'sip.conf', 'general', 'register', '$username:$password@$host/$phonenumber');"
+		;;
+        "SIP"|"SPA")
 			# create SIP peer
 			context="from-trunk"
+			if [[ "$protocol" == "SPA" ]]; then
+				type='friend'
+				host='dynamic'
+			else
+				# provider registry if not SPA
+				LINESSQL="$LINESSQL INSERT INTO $DB_astconfig_Table (var_metric,filename,category,var_name,var_val) VALUES
+				('$(( 100+$id ))', 'sip.conf', 'general', 'register', '$username:$password@$host/$phonenumber');"
+				type='peer'
+			fi
 			LINESSQL="$LINESSQL INSERT INTO $DB_SIP_Device_Table (name,defaultuser,secret,host,port,context,qualify,nat,type,fromuser,fromdomain,callerid,allow,insecure,directmedia) VALUES \
-			('$phonenumber','$username','$password','$host','5060','$context','yes','yes','peer','$username','$host','$phonenumber','alaw;ulaw','port,invite','no');"
+			('$phonenumber','$username','$password','$host','5060','$context','yes','yes','$type','$username','$host','$phonenumber','alaw;ulaw','port,invite','no');"
         ;;
         "GTALK")
         	# provider registry
@@ -331,8 +337,12 @@ AddTrunk()
 				('1', '8', 'jabber.conf', 'asterisk', 'statusmessage', 'LinuxMCE asterisk server'),
 				('1', '9', 'jabber.conf', 'asterisk', 'timeout', '100');"
         ;;
-   esac
-	
+	esac
+   
+	# Everything SPA specific has been done, for the rest fallback to SIP
+	if [[ "$protocol" == "SPA" ]]; then
+		protocol="SIP"
+	fi
 	# add outbound context in realtime extensions
 	context="outbound-allroutes"
 	LINESSQL="$LINESSQL INSERT INTO $DB_Extensions_Table (context,exten,priority,app,appdata) VALUES \
