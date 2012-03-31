@@ -1763,7 +1763,7 @@ void qOrbiter::CMD_Assisted_Make_Call(int iPK_Users,string sPhoneExtension,strin
 
 bool DCE::qOrbiter::initialize()
 {
-
+    Disconnect();
     if ( GetConfig() ==true && Connect(PK_DeviceTemplate_get()) == true )
     {
 
@@ -3888,11 +3888,12 @@ void DCE::qOrbiter::OnDisconnect()
 void DCE::qOrbiter::OnReload()
 {
     emit routerReloading("Router Reload");
+
 }
 
 void qOrbiter::OnReplaceHandler()
 {
-
+emit closeOrbiter();
 }
 
 void DCE::qOrbiter::extraButtons(QString button)
