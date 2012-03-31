@@ -198,10 +198,10 @@ public slots:
     void setImageUrl(QUrl incImage) {nowPlayingImageUrl = incImage;}
     QUrl getImageUrl () { return nowPlayingImageUrl;}
 
-    void setImageData( const uchar *data, int iData_size) {
+    void setImageData( QByteArray data) {
         qDebug("Revieved Image data");
         QImage t;
-        if( t.loadFromData(data, iData_size))
+        if( t.loadFromData(data))
             setImage(t);
     }
     void setImage(QImage img) {fileImage = img; qDebug("Emitting new image"); emit imageChanged();}

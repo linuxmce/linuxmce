@@ -779,8 +779,9 @@ void qOrbiter::CMD_Update_Object_Image(string sPK_DesignObj,string sType,char *p
     cout << "Parm #19 - Data  (data value)" << endl;
     cout << "Parm #23 - Disable_Aspect_Lock=" << sDisable_Aspect_Lock << endl;
 
-    const uchar *data = (uchar*)pData;
-    emit objectUpdate(data, iData_Size);
+    QByteArray imgData;
+    imgData.setRawData(pData,iData_Size);
+    emit objectUpdate(imgData);
 }
 
 //<-dceag-c58-b->
@@ -2767,6 +2768,7 @@ void qOrbiter::changedPlaylistPosition(QString pos)
 void DCE::qOrbiter::ShowFloorPlan(int floorplantype)
 {
     i_current_floorplanType = floorplantype;
+    emit floorplanTypeChanged(floorplantype);
     QString Screen = QString("Screen_").append(StringUtils::itos(i_current_floorplanType).c_str()).append(".qml");
     emit gotoQml(Screen);
 

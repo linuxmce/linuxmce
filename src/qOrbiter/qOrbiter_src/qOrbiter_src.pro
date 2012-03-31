@@ -22,6 +22,8 @@ TARGET = qorbiter
 
 symbian:TARGET.UID3 = 0xE15A481D
 
+CONFIG += qt thread
+
 # Smart Installer package's UID
 # This UID is from the protected range and therefore the package will
 # fail to install if self-signed. By default qmake uses the unprotected
@@ -113,7 +115,7 @@ folder_01.source = qml/android/
 DEFINES+=ANDROID
 
 }
-
+LIBS+= -lQtNetwork
 #uncomment this line to work on skins locally
 
 !win32{DEPLOYMENTFOLDERS = folder_01 folder_02 folder_03}

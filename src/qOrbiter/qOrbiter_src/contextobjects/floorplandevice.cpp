@@ -6,9 +6,11 @@ FloorplanDevice::FloorplanDevice(QString &name, int &deviceNo, int &floorplan_de
     mQS_name(name), mI_deviceNo(deviceNo), mI_floorplan_device_type(floorplan_device_type), mI_floorplanType(i_flooplanType), mQS_position(position), mIM_icon(icon)
 
 {
-    setupFloorplanPositions();
     setCurrentX(0);
     setCurrentY(0);
+    status = false;
+    setupFloorplanPositions();
+
 }
 
 QHash<int, QByteArray> FloorplanDevice::roleNames() const

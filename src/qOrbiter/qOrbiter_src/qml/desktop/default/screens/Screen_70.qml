@@ -11,6 +11,7 @@ Rectangle {
     opacity: 1
     color: "transparent"
     Component.onCompleted: manager.setBoundStatus(true)
+
     Column{
         anchors.right: storedvideoremote.right
         anchors.rightMargin: scaleX(1)
@@ -19,7 +20,10 @@ Rectangle {
     }
     Connections{
         target:dcenowplaying
-        onImageChanged: { nowplayingimage.source = "image://listprovider/updateobject/"+securityvideo.timestamp;}
+        onImageChanged: {
+            nowplayingimage.source = "image://listprovider/updateobject/"+securityvideo.timestamp;
+            console.log("now playing changed")
+        }
     }
 
 

@@ -1,28 +1,62 @@
 import QtQuick 1.1
 
 Rectangle {
+    objectName: "floorplan_display"
     width: style.orbiterW
     height: style.orbiterH
     color: style.darkhighlight
+    property int scaleFactor:floorplanimage.scale
 
-    function placeSprites(x,y, name)
+    function placeSprites(x,y, num, state)
     {
         var i;
         var pX = x; //x point
         var pY = y; //y point
-        console.log("Want to create " + name + " at " + x+","+y)
+        var c;
+        console.log("Creating Sprite")
+        c = Qt.createComponent("FpSprite.qml");
+        if(c.status === Component.Loading)
+        {   console.log("Component Loading")
+           finishPlacingSprites(c,pX,pY, num, state)
+        }
+        else if (c.status === Component.Error)
+        {
+            console.log("Component Error")
+        }
+        else if (c.status === Component.Ready)
+        {
+            console.log("Component Ready!")
+            var sprite = c.createObject(floorplanimage, {"x": pX, "y": pY, "deviceNum": num});
+        }
     }
+
+    function finishPlacingSprites(c,x,y,num, state)
+    {
+        console.log("Finishing Creation")
+        if(c.status === Component.Ready )
+        {
+            var sprite = c.createObject(floorplanimage, {"x": x, "y": y, "deviceNum": num});
+        }
+        else
+        {
+            finishPlacingSprites(c,x,y,num, state)
+        }
+
+    }
+
 
     Connections{
         target: floorplan_devices
         onFloorPlanImageChanged: {
-            floorplanimage.source = "image://listprovider/floorplan/"+floorplan_devices.currentPage           
+            floorplanimage.source = "image://listprovider/floorplan/"+floorplan_devices.currentPage
+
         }
     }
     Component.onCompleted: floorplan_devices.setCurrentPage(1)
 
     Rectangle{
         id:mainRect
+        objectName: "main_rect"
         height: scaleY(80)
         width:scaleX(80)
         border.color: style.highlight1
@@ -32,20 +66,18 @@ Rectangle {
         color:style.lighthighlight
 
         Image {
+            objectName: "floorplan_image"
             id: floorplanimage
             source: ""
-            anchors.fill: parent
-            height:scaleY(45)
-            width: scaleX(45)
-            fillMode: Image.PreserveAspectFit
-            anchors.left: parent.left
-            anchors.leftMargin: scaleY(2)
+            anchors.centerIn: parent
+            scale: floorplanimage.height > floorplanimage.width ? .5 : .75
+
         }
 
         Rectangle
         {
             height: childrenRect.height + 5
-            width: childrenRect.width + 5
+            width: scaleX(18)
             color: style.lighthighlight
             anchors.right: parent.right
             Text{
@@ -62,6 +94,7 @@ Rectangle {
                 clip:true
                 anchors.top: fplabel.bottom
                 anchors.horizontalCenter: parent.horizontalCenter
+
                 delegate:Rectangle{
                     height: scaleY(9)
                     width: scaleX(16)
@@ -122,12 +155,8 @@ Rectangle {
                 Text {
                     id: fpDevice_pos
                     text: "Position" + floorplan_devices.getDeviceX(deviceno) + "," + floorplan_devices.getDeviceY(deviceno)
-
+                    // onTextChanged: placeSprites(floorplan_devices.getDeviceX(deviceno),floorplan_devices.getDeviceY(deviceno),deviceno)
                 }
-            }
-            Connections{
-                target: floorplan_devices
-                onDataChanged:placeSprites(floorplan_devices.getDeviceX(deviceno),floorplan_devices.getDeviceY(deviceno),name)
             }
 
             MouseArea{

@@ -32,6 +32,7 @@ class FloorplanDevice : public QObject
 {
     Q_PROPERTY (int currentFloorplanX READ getCurrentX WRITE setCurrentX NOTIFY floorplanXChanged)
     Q_PROPERTY (int currentFloorplanY READ getCurrentY WRITE setCurrentY NOTIFY floorplanYChanged)
+
     Q_OBJECT
 
     enum Roles {
@@ -42,10 +43,9 @@ class FloorplanDevice : public QObject
         IconImageRole = Qt::UserRole+5,
         FloorPlanTypeRole = Qt::UserRole+6,
         XRole = Qt::UserRole+7,
-        YRole = Qt::UserRole+8
+        YRole = Qt::UserRole+8,
+        StatusRole = Qt::UserRole+9
     };
-
-
 
 public:
     explicit FloorplanDevice(QString &name, int &deviceNo, int &floorplan_device_type, int i_flooplanType, QString &position, QImage &icon, QObject *parent = 0);
@@ -62,6 +62,7 @@ public:
     inline QImage deviceImage() const {  return mIM_icon; }
     inline int getCurrentX () const {return currentFloorplanX; }
     inline int getCurrentY () const {return currentFloorplanY;}
+    inline bool getStatus() const {return status;}
 
     QString mQS_name;                       //device name
     int mI_deviceNo;                        //device number
@@ -74,6 +75,7 @@ public:
     QString mQS_iconpath;                   //icon path to be used in the future with skins
     int currentFloorplanX;
     int currentFloorplanY;
+    bool status;
 
 
 signals:
@@ -88,6 +90,8 @@ public slots:
 
     void setCurrentX(int x) {currentFloorplanX = x; emit floorplanXChanged(); }
     void setCurrentY( int y) {currentFloorplanY = y; emit floorplanYChanged();}
+    void setStatus( bool state) {status = state; }
+
 
 private:
     void setupFloorplanPositions();

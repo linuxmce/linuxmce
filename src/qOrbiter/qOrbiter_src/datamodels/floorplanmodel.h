@@ -29,6 +29,8 @@
 #include <datamodels/floorplanimageitem.h>
 #include <contextobjects/floorplandevice.h>
 #include <QModelIndex>
+#include <qorbitermanager.h>
+class qorbiterManager;
 
 class FloorPlanModel : public QAbstractListModel
 {
@@ -37,7 +39,7 @@ class FloorPlanModel : public QAbstractListModel
     Q_PROPERTY (int iCurrentPage READ getCurrentIntPage WRITE setCurrentIntPage NOTIFY pageChanged)
     Q_OBJECT
 public:
-    explicit FloorPlanModel(FloorplanDevice *m_prototype, QObject *parent = 0);
+    explicit FloorPlanModel(FloorplanDevice *m_prototype, qorbiterManager *r, QObject *parent = 0);
 
     int rowCount(const QModelIndex &parent = QModelIndex()) const;
     QVariant data(const QModelIndex &index, int role = Qt::DisplayRole) const;
@@ -64,9 +66,12 @@ public:
 
     QMap<int, QString*> floorplanPages;
 
-    // QModelIndex index(int row, int column, const QModelIndex &parent) const ;
-    //  QModelIndex parent(const QModelIndex &child) const;
-    //  int columnCount(const QModelIndex &parent) const;
+    QDeclarativeComponent *fpProxy;
+    QDeclarativeEngine *proxyEngine;
+
+   //QModelIndex index(int row, int column, const QModelIndex &parent) const ;
+   //QModelIndex parent(const QModelIndex &child) const;
+   //int columnCount(const QModelIndex &parent) const;
 
 signals:
     void pageChanged(QString s);
@@ -75,6 +80,8 @@ signals:
     void requestNewFloorPlanData(QString p);
     void dataChanged(const QModelIndex &topLeft, const QModelIndex &bottomRight);
     void changePage(int p);
+    void addFloorplanSprite(int x, int y, int device, bool status);
+    void floorplanTypeChanged();
 
 public slots:
     void clear();
@@ -87,19 +94,30 @@ public slots:
     QImage getFloorPlanImage () {return currentImage;}
     QImage getCurrentImage() {return currentImage;}
     QImage getPageImage(QString &id);
+
     void setImageData(const uchar *data, int iData_size);
-    void setImage(QImage fp) { currentImage = fp; emit floorPlanImageChanged(); emit requestNewFloorPlanData(currentPage);}
+    void setImage(QImage fp) { currentImage = fp; emit floorPlanImageChanged(); emit requestNewFloorPlanData(currentPage); populateSprites();}
 
     int getDeviceX(int device);
     int getDeviceY(int device);
     QString getCurrentImagePath();
+    void populateSprites();
+    void finishSprite();
 
     Q_INVOKABLE void setCurrentPage(QString currentPageId);
     QString getCurrentPage() {return currentPage;}
 
+    void setCurrentFloorPlanType(int t) { currentFloorPlanType = t; emit floorplanTypeChanged(); }
+    int getCurrentFloorPlanType() {return currentFloorPlanType; }
+
+
+
 private:
     FloorplanDevice* m_prototype;
     QList<FloorplanDevice*> m_list;
+    qorbiterManager *uiRef;
+
+
 };
 
 #endif // FLOORPLANMODEL_H

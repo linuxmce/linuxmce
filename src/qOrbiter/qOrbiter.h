@@ -1103,13 +1103,13 @@ signals:
 
     //floorplans
     void floorPlanImageData(const uchar* ,int);
-
+    void floorplanTypeChanged(int f);
     //media
     void screenShotReady(QByteArray data);
     void waitForScreenShot(char picData, int picDataSize, string fileFormat);
 
     void screenSaverImages(QStringList images);
-    void objectUpdate(const uchar* ,int);
+    void objectUpdate(QByteArray bytes);
     void mediaMessage(QString msg);
     void gridModelSizeChange(int size);
     void checkGridStatus();

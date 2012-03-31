@@ -93,7 +93,7 @@ qorbiterManager::qorbiterManager(QDeclarativeView *view, QObject *parent) :
     qorbiterUIwin->rootContext()->setContextProperty("appH", appHeight);
     qorbiterUIwin->rootContext()->setContextProperty("appW", appWidth);
 
-    item = qorbiterUIwin->rootObject();
+
 
     QObject::connect(qorbiterUIwin, SIGNAL(sceneResized(QSize)),  SLOT(checkOrientation(QSize)) );
     QObject::connect(this, SIGNAL(orbiterConfigReady(bool)), this, SLOT(showUI(bool)));
@@ -379,6 +379,11 @@ void qorbiterManager::processConfig(QByteArray config)
         QString name = floorplan_device_list.at(index).attributes().namedItem("Name").nodeValue();
         int fp_deviceno = floorplan_device_list.at(index).attributes().namedItem("Device").nodeValue().toInt();
         QString position = floorplan_device_list.at(index).attributes().namedItem("Position").nodeValue();
+        if(position.isNull())
+        {
+            position = "-1,-1" ;
+        }
+
         int fp_deviceType = floorplan_device_list.at(index).attributes().namedItem("Type").nodeValue().toInt();
         int fpType = floorplan_device_list.at(index).attributes().namedItem("fpType").nodeValue().toInt();
         QImage icon;
@@ -886,10 +891,6 @@ void qorbiterManager::setSorting(int i)
 
 void qorbiterManager::setNowPlayingIcon(bool b)
 {
-    QColor color;
-    color.fromRgb(255, 255, 215);
-    qorbiterUIwin->rootContext()->setContextProperty("nowPlayingColor", color);
-    item->setProperty("nowplayingtext", "null");
 }
 
 void qorbiterManager::nowPlayingChanged(bool b)

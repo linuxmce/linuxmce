@@ -22,7 +22,7 @@ source: "../img/icons/drpshadow.png"
 
         Rectangle{
             id:regenrequestcontainer
-            height: childrenRect.height
+            height: scaleY(85)
             width:scaleX(50)
             anchors.centerIn: parent
             color: style.darkhighlight

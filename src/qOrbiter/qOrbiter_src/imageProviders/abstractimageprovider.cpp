@@ -47,12 +47,12 @@ QImage AbstractImageProvider::securityProvider()
 
 QImage AbstractImageProvider::updateObjectProvider()
 {
-   key = managerreference->nowPlayingButton->fileImage;
+   key = managerreference->nowPlayingButton->getImage();
    //qDebug()<< "!!!!!!!!!!" <<key.size();
     if (key.isNull())
     {
         key.load(":/icons/icon.png");
-        //qDebug("Error getting image!");
+        qDebug("Error getting image!");
 
     }
     //aspect checking

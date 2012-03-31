@@ -383,6 +383,7 @@ int main(int argc, char* argv[])
         QObject::connect(pqOrbiter, SIGNAL(floorPlanImageData(const uchar*,int)), w->floorplans, SLOT(setImageData(const uchar*,int)), Qt::QueuedConnection);
         QObject::connect(w->floorplans, SIGNAL(pageChanged(QString)), pqOrbiter, SLOT(getFloorPlanImage(QString)), Qt::QueuedConnection);
         QObject::connect(w->floorplans, SIGNAL(requestNewFloorPlanData(QString)), pqOrbiter, SLOT(updateFloorPlan(QString)), Qt::QueuedConnection);
+        QObject::connect(pqOrbiter,SIGNAL(floorplanTypeChanged(int)), w->floorplans, SLOT(setCurrentFloorPlanType(int)),Qt::QueuedConnection);
         //mediagrid
         QObject::connect(mediaModel, SIGNAL(pagingCleared()), pqOrbiter,SLOT(populateAdditionalMedia()), Qt::QueuedConnection);
         QObject::connect(pqOrbiter, SIGNAL(clearPageGrid()), mediaModel, SLOT(clearForPaging()), Qt::QueuedConnection);
@@ -404,7 +405,7 @@ int main(int argc, char* argv[])
         QObject::connect(pqOrbiter, SIGNAL(setNowPlaying(bool)), w->nowPlayingButton,SLOT(setStatus(bool)),Qt::QueuedConnection);
         QObject::connect(pqOrbiter,SIGNAL(streamIdChanged(int)), w->nowPlayingButton, SLOT(setStreamID(int)),Qt::QueuedConnection);
         QObject::connect(pqOrbiter, SIGNAL(currentScreenChanged(QString)), w->nowPlayingButton, SLOT(setScreen(QString)),Qt::QueuedConnection);
-        QObject::connect(pqOrbiter,SIGNAL(objectUpdate(const uchar*,int)), w->nowPlayingButton, SLOT(setImageData(const uchar*,int)), Qt::QueuedConnection);
+        QObject::connect(pqOrbiter,SIGNAL(objectUpdate(QByteArray)), w->nowPlayingButton, SLOT(setImageData(QByteArray)), Qt::QueuedConnection);
         QObject::connect(simpleEPGmodel, SIGNAL(channelNumberChanged(QString)), w->nowPlayingButton, SLOT(setChannel(QString)), Qt::QueuedConnection);
         QObject::connect(simpleEPGmodel, SIGNAL(programChanged(QString)), w->nowPlayingButton, SLOT(setProgram(QString)), Qt::QueuedConnection);
         QObject::connect(simpleEPGmodel, SIGNAL(networkChanged(QString)), w->nowPlayingButton, SLOT(setChannelID(QString)), Qt::QueuedConnection);

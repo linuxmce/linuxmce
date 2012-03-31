@@ -110,7 +110,7 @@ class TelecomScenarioModel;
 class SecurityScenarioModel;
 class AbstractImageProvider;
 class SkinDataModel;
-
+class FloorPlanModel;
 
 
 namespace DCE
@@ -179,7 +179,7 @@ public:
     QString remoteDirectoryPath;
     SkinDataItem* skin;
     QDeclarativeView  *qorbiterUIwin;               //Qml declarativeview
-    QObject *item;
+
     ScreenSaverClass *ScreenSaver;
 
     //media
