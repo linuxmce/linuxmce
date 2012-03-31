@@ -25,6 +25,16 @@ Rectangle {
       opacity: 0
       onSourceChanged: PropertyAnimation { target: nowplayingimage; property: "opacity"; to: 1; duration: 1500}
   }
+   Text {
+       id: np
+       text:dceTimecode.qsCurrentTime
+       font.pixelSize: scaleY(2.5)
+       anchors.bottom: np_box.bottom
+       wrapMode: Text.WrapAtWordBoundaryOrAnywhere
+       anchors.horizontalCenter: np_box.horizontalCenter
+       color: "white"
+       visible:  dceTimecode.qsCurrentTime ==="0" ? false: true
+   }
 
    /*
    Image{

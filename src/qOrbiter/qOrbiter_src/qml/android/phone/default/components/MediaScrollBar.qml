@@ -3,13 +3,10 @@ import QtQuick 1.1
 
 Rectangle {
     id:scroller
-    width: scaleX(44)
+    width: scaleX(55)
     height: scaleY(3)
     color: "transparent"
-
     property int slidertimer: (scroll_tab.x / scroller_transit.width) * dceTimecode.tcTotalTime
-
-
 
     Rectangle{
         id:drag_indicator
@@ -27,7 +24,7 @@ Rectangle {
 
     Image {
         id: scroller_transit
-        source: "../img/icons/blue.png"
+        source: "../img/blue.png"
         height: parent.height
         width: parent.width
         anchors.centerIn: parent
@@ -35,7 +32,7 @@ Rectangle {
     }
     Image {
         id: scroll_tab
-        source: "../img/icons/scroller.png"
+        source: "../img/scroller.png"
         height: scaleY(5)
         width: scaleX(2)
         anchors.verticalCenter: scroller_transit.verticalCenter

@@ -139,13 +139,13 @@ Rectangle {
 
         Text {
             id: np
-            text:dcetimecode.qsCurrentTime
+            text:dceTimecode.qsCurrentTime
             font.pixelSize: scaleY(2.5)
             anchors.bottom: np_box.bottom
             wrapMode: Text.WrapAtWordBoundaryOrAnywhere
             anchors.horizontalCenter: np_box.horizontalCenter
             color: "white"
-            visible:  dceTimecode.qsCurrentTime ==="0" ? false: true
+            visible:  dceTimecode.qsCurrentTime ==="0" && dcerouter.i_current_mediaType ==4 ? false: true
         }
 
         /*  Text {

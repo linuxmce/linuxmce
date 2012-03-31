@@ -70,3 +70,4 @@ ControlRow ControlRow.qml
 DroidHomeSelector DroidHomeSelector.qml
 NowPlayingButton NowPlayingButton.qml
 MediaScrollBar MediaScrollBar.qml
+NullComponent NullComponent.qml

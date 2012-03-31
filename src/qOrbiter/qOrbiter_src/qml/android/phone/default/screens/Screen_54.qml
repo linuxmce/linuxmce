@@ -29,18 +29,6 @@ Rectangle {
        anchors.horizontalCenter: parent.horizontalCenter
    }
 
-      Text {
-          id: np
-          text:dceTimecode.qsCurrentTimeime
-          font.pixelSize: scaleY(5)
-          wrapMode: Text.WrapAtWordBoundaryOrAnywhere
-          anchors.horizontalCenter: parent.horizontalCenter
-          color: "white"
-          font.bold: true
-          anchors.bottom: controls.top
-      }
-
-
     Column{
         id:textcol
         spacing: scaleY(1.5)
@@ -154,7 +142,7 @@ Rectangle {
             onClicked: storedAudioRemote.state = ""
         }
     }
-
+    MediaScrollBar{id:media_scroller; anchors.bottom: controls.top; anchors.horizontalCenter: parent.horizontalCenter; anchors.bottomMargin: scaleY(2)}
     HaControls{id:ha; anchors.left: parent.left ; anchors.top: buttonsq1.bottom }
     AudioRemote{ id:controls; anchors.bottom: parent.bottom; anchors.horizontalCenter: parent.horizontalCenter}
 
