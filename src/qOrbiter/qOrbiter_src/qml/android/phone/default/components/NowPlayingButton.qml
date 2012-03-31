@@ -139,7 +139,7 @@ Rectangle {
 
         Text {
             id: np
-            text:dceTimecode.qsCurrentTime
+            text:dcetimecode.qsCurrentTime
             font.pixelSize: scaleY(2.5)
             anchors.bottom: np_box.bottom
             wrapMode: Text.WrapAtWordBoundaryOrAnywhere

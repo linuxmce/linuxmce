@@ -4,6 +4,7 @@ import "../js/ComponentLoader.js" as MyJs
 
 Rectangle {
     id: storedaudioremote
+
     Text {
         id: messages
         text: dcerouter.mediaResponse
@@ -15,10 +16,10 @@ Rectangle {
         target:dcenowplaying
         onImageChanged:nowplayingimage.source = "image://listprovider/updateobject/"+securityvideo.timestamp
     }
+ Component.onCompleted: manager.setBoundStatus(true)
 
-
-    height: style.orbiterH
-    width: style.orbiterW
+    height: appH
+    width: appW
     radius: 0
     opacity: 1
     color: "transparent"
@@ -29,7 +30,7 @@ Rectangle {
         anchors.centerIn: parent
         font.pixelSize: scaleY(5)
         opacity: .5
-        style: Text.Sunken
+       font.bold: true
 
     }
 
@@ -54,7 +55,7 @@ Rectangle {
         Text {
             id: timecode
             height:scaleY(2.15)
-            text: qsTr("Speed: ") + dcenowplaying.qs_playbackSpeed +" || " +dceTimecode.qsCurrentTime + qsTr(" of ") + dcenowplaying.duration
+            text: qsTr("Speed: ") + dceTimecode.playbackSpeed +" || " +dceTimecode.qsCurrentTime + qsTr(" of ") + dceTimecode.qsTotalTime
             font.family: "Droid Sans"
             font.pixelSize: scaleY(2.15)
             anchors.verticalCenter: parent.verticalCenter
@@ -110,10 +111,7 @@ Rectangle {
                     source: "../img/icons/transparencymask.png"
                     anchors.fill: nowplayingimage
                     opacity: .5
-
                 }
-
-
             }
 
             Rectangle{
@@ -220,6 +218,9 @@ Rectangle {
             }
         }
     }
+
+
+    MediaScrollBar{id:media_transit; anchors.bottom: controlrow.top; anchors.horizontalCenter: controlrow.horizontalCenter; anchors.bottomMargin: scaleY(2)}
     Row{
         id:controlrow
         anchors.top: mainrow.bottom
@@ -255,7 +256,7 @@ Rectangle {
                     MouseArea{
                         anchors.fill: parent
                         onClicked:  {
-                            loadComponent("Avcodes.qml")
+                            MyJs.createAvComponent("../components/Avcodes.qml", storedaudioremote)
                         }
                     }
                 }
@@ -273,5 +274,8 @@ Rectangle {
             }
         }
     }
+
+
+
 }
 

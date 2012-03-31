@@ -11,7 +11,7 @@ Rectangle {
         triggeredOnStart: false
         interval: 1500
         running: true
-        onTriggered: manager.refreshUI()
+        onTriggered: manager.reloadHandler()
     }
 
    HomeButton{anchors.top: parent.top; anchors.left: parent.left}

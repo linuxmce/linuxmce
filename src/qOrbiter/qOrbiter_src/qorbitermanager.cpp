@@ -386,6 +386,12 @@ void qorbiterManager::processConfig(QByteArray config)
 
         int fp_deviceType = floorplan_device_list.at(index).attributes().namedItem("Type").nodeValue().toInt();
         int fpType = floorplan_device_list.at(index).attributes().namedItem("fpType").nodeValue().toInt();
+        if (fpType == 7)
+        {fpType = 6;}
+        else if (fpType == 1)
+        {
+            fpType = 5;
+        }
         QImage icon;
         floorplans->appendRow(new FloorplanDevice( name, fp_deviceno, fp_deviceType, fpType, position, icon, floorplans));
     }
@@ -1479,6 +1485,7 @@ void qorbiterManager::initializeConnections()
 void qorbiterManager::reloadHandler()
 {
     gotoQScreen("ReloadHandler.qml");
+
     emit reInitialize();
 }
 
