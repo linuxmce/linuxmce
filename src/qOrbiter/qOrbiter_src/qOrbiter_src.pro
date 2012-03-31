@@ -115,7 +115,7 @@ folder_01.source = qml/android/
 DEFINES+=ANDROID
 
 }
-LIBS+= -lQtNetwork
+
 #uncomment this line to work on skins locally
 
 !win32{DEPLOYMENTFOLDERS = folder_01 folder_02 folder_03}
