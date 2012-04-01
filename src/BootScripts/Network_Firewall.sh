@@ -206,6 +206,7 @@ if [[ -n "$IntIP" ]]; then
 	iptables -A INPUT -p udp --dport 67 -j ACCEPT # BOOTP/DHCP
 	ip6tables -A INPUT -p udp --dport 67 -j ACCEPT # BOOTP/DHCP
 	iptables -A INPUT -s "$IntNet/$IntBitmask" -j ACCEPT
+	ip6tables -A INPUT -i $IntIf -j ACCEPT
 
 	## Workaround for some ISPs that don't allow routers and drop packets based on TTL.
 	iptables -t mangle -A POSTROUTING -o $ExtIf -j TTL --ttl-set 255
@@ -225,6 +226,8 @@ if [[ -n "$IntIP" ]]; then
 	
 
 fi
+
+
 # Configuring all port forwards
 echo "Setting up forwarded ports"
 Q="SELECT Protocol,SourcePort,SourcePortEnd,DestinationPort,DestinationIP,SourceIP FROM Firewall WHERE RuleType='port_forward' ORDER BY PK_Firewall"
