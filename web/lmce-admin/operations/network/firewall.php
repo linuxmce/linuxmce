@@ -1,12 +1,12 @@
 <?
 function firewall($output,$dbADO) {
 	// include language files
-	include(APPROOT.'/languages/'.$GLOBALS['lang'].'/common.lang.php');
-	include(APPROOT.'/languages/'.$GLOBALS['lang'].'/firewall.lang.php');
+ 	includeLangFile('common.lang.php');
+ 	includeLangFile('firewall.lang.php');
+	
 	
 	/* @var $dbADO ADOConnection */
 	/* @var $res ADORecordSet */
-//	$dbADO->debug=true;
 	$out='';
 	$action = isset($_REQUEST['action'])?cleanString($_REQUEST['action']):'form';
 	$installationID = (int)@$_SESSION['installationID'];
@@ -40,7 +40,7 @@ function firewall($output,$dbADO) {
 	{
 		if((document.firewall.change_ipv4_firewall_status.checked && ver=="ipv4")
 			|| (document.firewall.change_ipv6_firewall_status.checked && ver=="ipv6")){
-			if(confirm("("+ver+") '.$TEXT_DISABLE_FIREWALL_CONFIRMATION_CONST.'")){
+			if(confirm("("+ver+") '.translate('TEXT_DISABLE_FIREWALL_CONFIRMATION_CONST').'")){
 				document.firewall.submit();
 			}else{
 				if(ver=="ipv4") document.firewall.change_ipv4_firewall_status.checked=false;
@@ -59,23 +59,23 @@ function firewall($output,$dbADO) {
 		
 	<table border="0" align="center">
 		<tr>
-			<td colspan="7" align="center"><h3 class="err">'.((@$DisableFirewall!=1)?'':'- '.$TEXT_FIREWALL_DISABLED_WARNING_CONST.' - ')
-					.((@$DisableIPv6Firewall!=1)?'':' - '.$TEXT_IPV6_FIREWALL_DISABLED_WARNING_CONST.' -').'</h3></td>
+			<td colspan="7" align="center"><h3 class="err">'.((@$DisableFirewall!=1)?'':'- '.translate('TEXT_FIREWALL_DISABLED_WARNING_CONST').' - ')
+					.((@$DisableIPv6Firewall!=1)?'':' - '.translate('TEXT_IPV6_FIREWALL_DISABLED_WARNING_CONST').' -').'</h3></td>
 		</tr>
 		<tr>
-			<td colspan="7" align="center"><input type="checkbox" name="change_ipv4_firewall_status" value="1" '.((@$DisableFirewall!=1)?'':'checked').' onClick="confirmDisableFirewall(\'ipv4\');"> IPv4 '.$TEXT_FIREWALL_DISABLED_CONST.'    <input type="checkbox" name="change_ipv6_firewall_status" value="1" '.((@$DisableIPv6Firewall!=1)?'':'checked').' onClick="confirmDisableFirewall(\'ipv6\');"> IPv6 '.$TEXT_FIREWALL_DISABLED_CONST.'</td>
+			<td colspan="7" align="center"><input type="checkbox" name="change_ipv4_firewall_status" value="1" '.((@$DisableFirewall!=1)?'':'checked').' onClick="confirmDisableFirewall(\'ipv4\');"> IPv4 '.translate('TEXT_FIREWALL_DISABLED_CONST').'    <input type="checkbox" name="change_ipv6_firewall_status" value="1" '.((@$DisableIPv6Firewall!=1)?'':'checked').' onClick="confirmDisableFirewall(\'ipv6\');"> IPv6 '.translate('TEXT_FIREWALL_DISABLED_CONST').'</td>
 		</tr>
 		<tr class="tablehead">
-			<td align="center"><B>'.$TEXT_PROTOCOL_CONST.'</B></td>
-			<td align="center"><B>'.$TEXT_IPVERSION_CONST.'</B></td>
-			<td align="center"><B>'.$TEXT_SOURCE_PORT_CONST.'</B></td>
-			<td align="center"><B>'.$TEXT_DESTINATION_PORT_CONST.'</B></td>
-			<td align="center"><B>'.$TEXT_DESTINATION_IP_CONST.'</B></td>
-			<td align="center"><B>'.$TEXT_RULE_TYPE_CONST.'</B></td>
-			<td align="center"><B>'.$TEXT_LIMIT_TO_IP_CONST.'</B></td>
+			<td align="center"><B>'.translate('TEXT_PROTOCOL_CONST').'</B></td>
+			<td align="center"><B>'.translate('TEXT_IPVERSION_CONST').'</B></td>
+			<td align="center"><B>'.translate('TEXT_SOURCE_PORT_CONST').'</B></td>
+			<td align="center"><B>'.translate('TEXT_DESTINATION_PORT_CONST').'</B></td>
+			<td align="center"><B>'.translate('TEXT_DESTINATION_IP_CONST').'</B></td>
+			<td align="center"><B>'.translate('TEXT_RULE_TYPE_CONST').'</B></td>
+			<td align="center"><B>'.translate('TEXT_LIMIT_TO_IP_CONST').'</B></td>
 			<td>&nbsp;</td>
 		</tr>';
-		$res=$dbADO->Execute('SELECT * FROM Firewall');
+		$res=$dbADO->Execute('SELECT * FROM Firewall ORDER BY SourcePort, Protocol');
 		$pos=0;
 		while($row=$res->FetchRow()){
 			++$pos;
@@ -90,7 +90,7 @@ function firewall($output,$dbADO) {
 					<td align="center">'.($row['DestinationIP'] > 0 ? $row['DestinationIP']:'').'</td>
 					<td align="center">'.$row['RuleType'].'</td>
 					<td align="center">'.$row['SourceIP'].'</td>
-					<td align="center"><a href="index.php?section=firewall&action=del&delid='.$row['PK_Firewall'].'">'.$TEXT_DELETE_CONST.'</a></td>
+					<td align="center"><a href="index.php?section=firewall&action=del&delid='.$row['PK_Firewall'].'">'.translate('TEXT_DELETE_CONST').'</a></td>
 				</tr>';
 		}
 		$out.='
@@ -98,16 +98,16 @@ function firewall($output,$dbADO) {
 			<td colspan="7" align="center">&nbsp;</td>
 		</tr>		
 		<tr>
-			<td colspan="7" align="center" bgcolor="#EEEEEE"><B>'.$TEXT_ADD_NEW_FIREWALL_RULE_CONST.'</B></td>
+			<td colspan="7" align="center" bgcolor="#EEEEEE"><B>'.translate('TEXT_ADD_NEW_FIREWALL_RULE_CONST').'</B></td>
 		</tr>
 		<tr class="tablehead">
-			<td align="center"><B>'.$TEXT_PROTOCOL_CONST.'</B></td>
-			<td align="center"><B>IP version</B></td>
-			<td align="center"><B>'.$TEXT_SOURCE_PORT_CONST.'</B></td>
-			<td align="center"><B>'.$TEXT_DESTINATION_PORT_CONST.'</B></td>
-			<td align="center"><B>'.$TEXT_DESTINATION_IP_CONST.'</B></td>
-			<td align="center"><B>'.$TEXT_RULE_TYPE_CONST.'</B></td>
-			<td align="center"><B>'.$TEXT_LIMIT_TO_IP_CONST.'*</B></td>
+			<td align="center"><B>'.translate('TEXT_PROTOCOL_CONST').'</B></td>
+			<td align="center"><B>'.translate('TEXT_IPVERSION_CONST').'</B></td>
+			<td align="center"><B>'.translate('TEXT_SOURCE_PORT_CONST').'</B></td>
+			<td align="center"><B>'.translate('TEXT_DESTINATION_PORT_CONST').'</B></td>
+			<td align="center"><B>'.translate('TEXT_DESTINATION_IP_CONST').'</B></td>
+			<td align="center"><B>'.translate('TEXT_RULE_TYPE_CONST').'</B></td>
+			<td align="center"><B>'.translate('TEXT_LIMIT_TO_IP_CONST').'*</B></td>
 			<td>&nbsp;</td>
 		</tr>				
 		<tr>
@@ -132,23 +132,23 @@ function firewall($output,$dbADO) {
 			<td align="center">&nbsp;</td>
 		</tr>		
 		<tr>
-			<td colspan="7" align="center" bgcolor="#EEEEEE"><input type="submit" class="button" name="add" value="'.$TEXT_ADD_CONST.'"> <input type="reset" class="button" name="cancelBtn" value="'.$TEXT_CANCEL_CONST.'"></td>
+			<td colspan="7" align="center" bgcolor="#EEEEEE"><input type="submit" class="button" name="add" value="'.translate('TEXT_ADD_CONST').'"> <input type="reset" class="button" name="cancelBtn" value="'.translate('TEXT_CANCEL_CONST').'"></td>
 		</tr>		
 		<tr>
-			<td colspan="7" align="left">* '.$TEXT_OPTIONAL_FIELD_CONST.'</td>
+			<td colspan="7" align="left">* '.translate('TEXT_OPTIONAL_FIELD_CONST').'</td>
 		</tr>		
 	</table>	
 	</form>
 		<script>
 		 	var frmvalidator = new formValidator("firewall");
-// 			frmvalidator.addValidation("internalCoreIP_1","req","'.$TEXT_IP_REQUIRED_CONST.'");
+// 			frmvalidator.addValidation("internalCoreIP_1","req","'.translate('TEXT_IP_REQUIRED_CONST').'");
 		</script>
 	';
 	} else {
 		// check if the user has the right to modify installation
 		$canModifyInstallation = getUserCanModifyInstallation($_SESSION['userID'],$_SESSION['installationID'],$dbADO);
 		if (!$canModifyInstallation){
-			header("Location: index.php?section=firewall&error=$TEXT_NOT_AUTHORISED_TO_MODIFY_INSTALLATION_CONST");
+			header("Location: index.php?section=firewall&error=".translate('TEXT_NOT_AUTHORISED_TO_MODIFY_INSTALLATION_CONST'));
 			exit(0);
 		}
 		if(isset($_POST['add'])){
@@ -182,15 +182,15 @@ function firewall($output,$dbADO) {
 				
 		exec_batch_command('sudo -u root /usr/pluto/bin/Network_Firewall.sh');
 		
-		header("Location: index.php?section=firewall&msg=$TEXT_FIREWALL_RULES_UPDATED_CONST");
+		header("Location: index.php?section=firewall&msg=".translate('TEXT_FIREWALL_RULES_UPDATED_CONST'));
 	}
 
-	$output->setMenuTitle($TEXT_ADVANCED_CONST.' |');
-	$output->setPageTitle($TEXT_FIREWALL_RULES_CONST);
+	$output->setMenuTitle(translate('TEXT_ADVANCED_CONST').' |');
+	$output->setPageTitle(translate('TEXT_FIREWALL_RULES_CONST'));
 	$output->setScriptCalendar('null');
-	$output->setNavigationMenu(array($TEXT_FIREWALL_RULES_CONST=>'index.php?section=firewall'));	
+	$output->setNavigationMenu(array(translate('TEXT_FIREWALL_RULES_CONST')=>'index.php?section=firewall'));	
 	$output->setBody($out);
-	$output->setTitle(APPLICATION_NAME.' :: '.$TEXT_FIREWALL_RULES_CONST);
+	$output->setTitle(APPLICATION_NAME.' :: '.translate('TEXT_FIREWALL_RULES_CONST'));
 	$output->output();
 }
 
@@ -200,12 +200,12 @@ function writeConf($accessFile, $variable,$oldValue,$newValue)
 		//exit();
 
 	// include language files
-	include(APPROOT.'/languages/'.$GLOBALS['lang'].'/common.lang.php');
-	include(APPROOT.'/languages/'.$GLOBALS['lang'].'/firewall.lang.php');
+ 	includeLangFile('common.lang.php');
+ 	includeLangFile('firewall.lang.php');
 	
 	$oldFileArray=@file($accessFile);	
 	if(!$oldFileArray){
-		header("Location: index.php?section=firewall&error=$TEXT_ERROR_CANNOT_OPEN_FILE_FOR_READING_CONST $accessFile");
+		header("Location: index.php?section=firewall&error=".translate('TEXT_ERROR_CANNOT_OPEN_FILE_FOR_READING_CONST')." ".$accessFile);
 		exit();
 	}
 	$oldFile=implode('',$oldFileArray);
@@ -216,13 +216,13 @@ function writeConf($accessFile, $variable,$oldValue,$newValue)
 	else
 		$newFile=$oldFile.$variable.'='.$newValue."\n";
 	if(!is_writable($accessFile)){
-		header("Location: index.php?section=firewall&error=$TEXT_ERROR_CANNOT_WRITE_TO_FILE_CONST ".$accessFile);
+		header("Location: index.php?section=firewall&error=".translate('TEXT_ERROR_CANNOT_WRITE_TO_FILE_CONST')." ".$accessFile);
 		exit();
 	}
 	$handle = fopen($accessFile, 'w');
 
 	if (!fwrite($handle, $newFile)) {
-		header("Location: index.php?section=firewall&error=$TEXT_ERROR_CANNOT_WRITE_TO_FILE_CONST ".$accessFile);
+		header("Location: index.php?section=firewall&error=".translate('TEXT_ERROR_CANNOT_WRITE_TO_FILE_CONST')." ".$accessFile);
 		exit();
 	}
 	fclose($handle);
