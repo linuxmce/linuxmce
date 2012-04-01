@@ -121,5 +121,5 @@ if [[ -e /etc/apparmor.d/usr.sbin.dhcpd3 && $( grep '/etc/bind' /etc/apparmor.d/
 	service apparmor restart
 	service dhcp3-server restart
 fi
-rm /var/cache/bind/*.jnl
+rm -f /var/cache/bind/*.jnl
 service bind9 start 
