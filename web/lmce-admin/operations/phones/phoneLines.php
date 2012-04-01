@@ -46,6 +46,8 @@ function phoneLines($output,$astADO,$dbADO) {
 			<table align="center" cellpadding="3" cellspacing="0">
 				<tr class="tablehead"><td><B>'.translate('TEXT_NAME_CONST').'</B> </td><td><input type="text" name="name" value="'.$editdata['name'].'"></td></tr>
 				<tr><td><B>'.translate('TEXT_ENABLED_CONST').'</B> </td><td><input type="checkbox" name="enabled" value="1" '.((@$editdata['enabled']=='yes')?'checked':'').'></td></tr>
+				<tr><td><B>'.translate('TEXT_FAX_CONST').'</B> </td><td><input type="checkbox" name="isfax" value="1" '.((@$editdata['isfax']=='yes')?'checked':'').'>
+				&nbsp;&nbsp;'.translate('TEXT_FAX_EMAIL_CONST').'&nbsp;<input type="text" size="20" name="faxmail" value="'.$editdata['faxmail'].'"></td></tr>
 				<tr><td><B>'.translate('TEXT_PREFIX_CONST').'</B> </td><td><input type="text" name="prefix" maxlength="2" size="3" value="'.$editdata['prefix'].'"></td></tr>
 				<tr><td><B>'.translate('TEXT_USERNAME_CONST').' *</B> </td> <td><input type="text" name="username" value="'.$editdata['username'].'"></td></tr>
 				<tr><td colspan="2">'.translate('TEXT_PHONE_LINE_USERNAME_NOTE_CONST').'</td></tr>
@@ -80,12 +82,15 @@ function phoneLines($output,$astADO,$dbADO) {
 			$editedID=$_REQUEST['editedID'];
 			$username=cleanString($_POST['username']);
 			$password=cleanString($_POST['pass']);
+			$faxmail=cleanString($_POST['faxmail']);
 			if(isset($editedID)) {
 				$SQL="UPDATE phonelines SET name='".$_POST['name']
 					."',enabled='".(($_POST['enabled'])?'yes':'no')
+					."',isfax='".(($_POST['isfax'])?'yes':'no')
 					."',prefix='".$_POST['prefix']
 					."',username='".$username
 					."',password='".$password
+					."',faxmail='".$faxmail
 					."',phonenumber='".$_POST['phone']
 					."',host='".$_POST['host']
 					."',protocol='".$_POST['proto']
@@ -215,6 +220,9 @@ function phoneLinesTable($astADO){
 			<td align="center">'.(($row['enabled']=='yes')
 				?'<img src="/'.APPDIRECTORY.'/img/enabled.png" height="15" alt="[x]">'
 				:'<img src="/'.APPDIRECTORY.'/img/disabled.png" height="15" alt="[&nbsp&nbsp]">')
+			.(($row['isfax']=='yes')
+				?'<img src="/'.APPDIRECTORY.'/img/fax.png" height="15" alt="FAX">'
+				:'')
 			.'</td>
 			<td align="center">'.$row['prefix'].'</td>
 			<td>'.$row['name'].'</td>

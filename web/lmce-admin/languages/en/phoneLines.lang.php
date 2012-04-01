@@ -1,5 +1,7 @@
 <?
 $TEXT_PHONE_LINES_CONST='Phone Lines';
+$TEXT_FAX_CONST='Incoming FAX line';
+$TEXT_FAX_EMAIL_CONST='forward to email';
 $TEXT_PREFIX_CONST='Prefix';
 $TEXT_CHANNELS_CONST='Chan.';
 $TEXT_PROTOCOL_CONST='Protocol';
