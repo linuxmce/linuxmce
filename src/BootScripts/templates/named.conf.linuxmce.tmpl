@@ -4,7 +4,7 @@ controls {
 	inet 127.0.0.1 port 953
 	allow {127.0.0.1;} keys { "rndc-key"; };
 };
-zone "linuxmce.local" {
+zone "%DOMAINNAME%" {
         type master;
         file "/var/cache/bind/db.linuxmce.local";
         allow-update { key rndc-key; };

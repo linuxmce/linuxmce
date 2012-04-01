@@ -223,10 +223,7 @@ if [[ -n "$IntIP" ]]; then
 	if [[ "$ExtIf" == "ppp0" ]]; then
 		iptables -t nat -A POSTROUTING -s "$IntNet/$IntBitmask" \! -d "$IntNet/$IntBitmask" -o $ExtIf -j MASQUERADE
 	fi
-	
-
 fi
-
 
 # Configuring all port forwards
 echo "Setting up forwarded ports"

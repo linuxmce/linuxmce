@@ -277,12 +277,10 @@ Q="SELECT IK_DeviceData
 FROM Device_DeviceData
 WHERE FK_DeviceData=$DEVICEDATA_Hostname"
 Hostname=$(RunSQL "$Q")
-echo "HOST: $Hostname"
 Q="SELECT IK_DeviceData
 FROM Device_DeviceData
 WHERE FK_DeviceData=$DEVICEDATA_Domainname"
 Domainname=$(RunSQL "$Q")
-echo "HOST: $Domainname"
 
 # PPPoe config
 Q="SELECT IK_DeviceData

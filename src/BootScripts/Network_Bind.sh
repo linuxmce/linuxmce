@@ -60,32 +60,32 @@ Serial=$( date +%Y%m%d00 )
   echo "\
 \$ORIGIN .
 \$TTL 259200     ; 3 days
-linuxmce.local          IN SOA  dcerouter.linuxmce.local. postmaster.linuxmce.local. (
+$Domainname          IN SOA  $Hostname.$Domainname. postmaster.$Domainname. (
                                 $Serial  ; serial
                                 28800         ; refresh (8 hours)
                                 7200          ; retry (2 hours)
                                 2419200       ; expire (4 weeks)
                                 86400         ; minimum (1 day)
                                 )
-                        NS      dcerouter.linuxmce.local.
-\$ORIGIN linuxmce.local.
-dcerouter               A       $Internal_IP" > /var/cache/bind/db.linuxmce.local
+                        NS      $Hostname.$Domainname.
+\$ORIGIN $Domainname.
+$Hostname               A       $Internal_IP" > /var/cache/bind/db.linuxmce.local
 
 # Reverse
 echo "\
 \$ORIGIN .
 \$TTL 259200     ; 3 days
-$Reverse_IP.in-addr.arpa IN SOA  linuxmce.local. postmaster.linuxmce.local. (
+$Reverse_IP.in-addr.arpa IN SOA  $Domainname. postmaster.$Domainname. (
                                 $Serial  ; serial
                                 28800         ; refresh (8 hours)
                                 7200          ; retry (2 hours)
                                 2419200       ; expire (4 weeks)
                                 86400         ; minimum (1 day)
                                 )
-                        NS      dcerouter.linuxmce.local.
-                        PTR     linuxmce.local.
+                        NS      $Hostname.$Domainname.
+                        PTR     $Domainname.
 \$ORIGIN $Reverse_IP.in-addr.arpa.
-1                       PTR     dcerouter.linuxmce.local." > /var/cache/bind/db.linuxmce.rev
+1                       PTR     $Hostname.$Domainname." > /var/cache/bind/db.linuxmce.rev
 fi
 
 ### Check for and update named.conf files
@@ -107,6 +107,7 @@ if [[ $( grep named.conf.linuxmce /etc/bind/named.conf ) == "" ]] ;then
 fi
 cp /usr/pluto/templates/named.conf.linuxmce.tmpl /etc/bind/named.conf.linuxmce
 sed -i "s,%DYNAMIC_REVERSE_RANGE%,$Reverse_IP,g" /etc/bind/named.conf.linuxmce
+sed -i "s,%DOMAINNAME%,$Domainname,g" /etc/bind/named.conf.linuxmce
 
 # Setting right permissions after our changes
 #chown bind: /var/cache/bind/db.*
@@ -120,4 +121,5 @@ if [[ -e /etc/apparmor.d/usr.sbin.dhcpd3 && $( grep '/etc/bind' /etc/apparmor.d/
 	service apparmor restart
 	service dhcp3-server restart
 fi
+rm /var/cache/bind/*.jnl
 service bind9 start 
