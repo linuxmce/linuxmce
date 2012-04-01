@@ -3,6 +3,8 @@
 . /usr/pluto/bin/SQL_Ops.sh
 . /usr/pluto/bin/Utils.sh
 
+DEVICEDATA_Hostname=188
+DEVICEDATA_Domainname=187
 DEVICEDATA_Network_Interfaces=32
 DEVICEDATA_Network_Interfaces_IPv6=302
 DEVICEDATA_Network_Interfaces_IPv6_tunnel=292
@@ -223,6 +225,9 @@ fi
 	fi
 }
 
+Hostname=DCERouter
+Domainname=linuxmce.local
+
 PPPoEEnabled=off
 PPPoEUser=
 PPPoEPass=
@@ -266,6 +271,18 @@ VPNrange=
 VPNPSK=
 
 NCards=$(ip addr | grep "^[0-9]*:" | grep -v "^[0-9]*: lo" | grep -v "^[0-9]*: pan" | grep -c ".")
+
+# Hast- and domainname
+Q="SELECT IK_DeviceData
+FROM Device_DeviceData
+WHERE FK_DeviceData=$DEVICEDATA_Hostname"
+Hostname=$(RunSQL "$Q")
+echo "HOST: $Hostname"
+Q="SELECT IK_DeviceData
+FROM Device_DeviceData
+WHERE FK_DeviceData=$DEVICEDATA_Domainname"
+Domainname=$(RunSQL "$Q")
+echo "HOST: $Domainname"
 
 # PPPoe config
 Q="SELECT IK_DeviceData
