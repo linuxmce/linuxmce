@@ -56,7 +56,7 @@ qorbiterManager::qorbiterManager(QDeclarativeView *view, QObject *parent) :
     bAppError = false;
 
     //this governs local vs remote loading. condensed to one line, and will be configurable from the ui soon.
-#ifndef ANDROID
+#ifndef __ANDROID__
     b_localLoading = true;
 #else
     b_localLoading = false;
@@ -73,6 +73,7 @@ qorbiterManager::qorbiterManager(QDeclarativeView *view, QObject *parent) :
     {
         emit localConfigReady(false);
     }
+    timecode = new TimeCodeManager();
 
     QApplication::processEvents(QEventLoop::AllEvents);
 
@@ -81,7 +82,8 @@ qorbiterManager::qorbiterManager(QDeclarativeView *view, QObject *parent) :
     qorbiterUIwin->rootContext()->setContextProperty("extip", qs_ext_routerip );
     qorbiterUIwin->rootContext()->setContextProperty("manager", this); //providing a direct object for qml to call c++ functions of this class
     qorbiterUIwin->rootContext()->setContextProperty("dcemessage", dceResponse);
-#ifndef ANDROID
+    qorbiterUIwin->rootContext()->setContextProperty("dceTimecode", timecode);
+#ifndef __ANDROID__
     fileReader = new FileReader;
     qorbiterUIwin->rootContext()->setContextProperty("fileReader", fileReader);
 #endif
@@ -93,15 +95,9 @@ qorbiterManager::qorbiterManager(QDeclarativeView *view, QObject *parent) :
     qorbiterUIwin->rootContext()->setContextProperty("appH", appHeight);
     qorbiterUIwin->rootContext()->setContextProperty("appW", appWidth);
 
-
-
     QObject::connect(qorbiterUIwin, SIGNAL(sceneResized(QSize)),  SLOT(checkOrientation(QSize)) );
-    QObject::connect(this, SIGNAL(orbiterConfigReady(bool)), this, SLOT(showUI(bool)));
-    QObject::connect(this, SIGNAL(skinIndexReady(bool)), this, SLOT(showUI(bool)));
 
     ScreenSaver = new ScreenSaverClass();
-
-
 #ifdef for_desktop
     buildType = "/qml/desktop";
     qrcPath = "qrc:desktop/Splash.qml";
@@ -117,7 +113,7 @@ qorbiterManager::qorbiterManager(QDeclarativeView *view, QObject *parent) :
 #elif defined (Q_OS_MACX)
     buildType="/qml/desktop";
     qrcPath = "qrc:osx/Splash.qml";
-#elif defined (ANDROID)
+#elif defined (__ANDROID__)
     if (qorbiterUIwin->width() > 480 && qorbiterUIwin-> height() > 854 || qorbiterUIwin->height() > 480 && qorbiterUIwin-> width() > 854 )
     {
         buildType = "/qml/android/tablet";
@@ -214,7 +210,7 @@ bool qorbiterManager::initializeManager(string sRouterIP, int device_id)
     setDceResponse("Starting Manager");
     QObject::connect(this,SIGNAL(screenChange(QString)), this, SLOT(gotoQScreen(QString)));
 
-#ifdef ANDROID
+#ifdef __ANDROID__
     if (qorbiterUIwin->width() > 480 && qorbiterUIwin-> height() > 854 || qorbiterUIwin->height() > 480 && qorbiterUIwin-> width() > 854 )
     {
         remoteDirectoryPath = "http://"+QString::fromStdString(sRouterIP)+"/lmce-admin/skins/android/tablet";
@@ -256,10 +252,10 @@ bool qorbiterManager::initializeManager(string sRouterIP, int device_id)
     QString localDir = qmlPath.append(buildType);
 
 
-#ifdef ANDROID
+#ifdef __ANDROID__
     if( !loadSkins(QUrl(remoteDirectoryPath)))
-    {   emit skinIndexReady(true);
-        b_skinsReady = false;
+    {   emit skinIndexReady(false);
+        b_skinReady = false;
         return false;
     }
 #elif for_android
@@ -714,7 +710,10 @@ void qorbiterManager::swapSkins(QString incSkin)
 #ifdef WIN32
     incSkin = "default";
 #endif
+    qDebug() << tskinModel->rowCount();
 
+    if (tskinModel->rowCount() > 0)
+    {
     setDceResponse("Setting Skin to:" + incSkin);
     skin = tskinModel->find(incSkin);
     setDceResponse("Got it from the model : " + skin->baseUrl().toString());
@@ -726,6 +725,11 @@ void qorbiterManager::swapSkins(QString incSkin)
                      this, SLOT(skinLoaded(QDeclarativeView::Status)));
 
     QMetaObject::invokeMethod(this, "refreshUI", Qt::QueuedConnection, Q_ARG(QUrl, skin->entryUrl()));
+    }
+    else
+    {
+       swapSkins(incSkin);
+    }
 }
 
 void qorbiterManager::skinLoaded(QDeclarativeView::Status status) {
@@ -740,7 +744,7 @@ void qorbiterManager::skinLoaded(QDeclarativeView::Status status) {
         m_bStartingUp = false;
         emit skinDataLoaded(true);
         QApplication::processEvents(QEventLoop::AllEvents);
-        b_skinsReady = true;
+        b_skinReady = true;
         startOrbiter();
     }
 }
@@ -751,7 +755,7 @@ void qorbiterManager::closeOrbiter()
 {
     setDceResponse("Shutting Down");
     QApplication::processEvents(QEventLoop::AllEvents);
-#ifndef ANDROID
+#ifndef __ANDROID__
     LoggerWrapper::GetInstance()->Write(LV_CRITICAL, "Orbiter Exiting, Unregistering 1st");
 #endif
     emit unregisterOrbiter((userList->find(sPK_User)->data(4).toInt()), QString(iFK_Room), iea_area );
@@ -867,7 +871,7 @@ void qorbiterManager::regenComplete(int i)
 QString qorbiterManager::adjustPath(const QString &path)
 {
 
-#ifdef ANDROID
+#ifdef __ANDROID__
     return path+"android";
 #endif
 
@@ -909,6 +913,7 @@ bool qorbiterManager::loadSkins(QUrl base)
 
     tskinModel = new SkinDataModel(base, new SkinDataItem, this);
     qorbiterUIwin->rootContext()->setContextProperty("skinsList", tskinModel);
+    QObject::connect(tskinModel, SIGNAL(skinsFinished(bool)), this, SLOT(showUI(bool)));
 
     /*
       TODO ASAP:
@@ -920,7 +925,7 @@ bool qorbiterManager::loadSkins(QUrl base)
 #ifdef for_harmattan
     tskinModel->addSkin("default");
 
-#elif ANDROID
+#elif __ANDROID__
     tskinModel->addSkin("default");
 
 #elif for_android
@@ -933,8 +938,6 @@ bool qorbiterManager::loadSkins(QUrl base)
         tskinModel->addSkin("crystalshades");
     }
 #endif
-    b_skinsReady = true;
-    emit skinIndexReady(true);
     return true;
 }
 
@@ -947,8 +950,7 @@ void qorbiterManager::quickReload()
 
 void qorbiterManager::showUI(bool b)
 {
-    if(b_skinsReady == true && b_orbiterReady == true)
-    {
+
         if(b == true)
         {
             swapSkins(currentSkin);
@@ -956,8 +958,9 @@ void qorbiterManager::showUI(bool b)
         else
         {
             emit raiseSplash();
+            setDceResponse("Skin Loading Error!");
         }
-    }
+
 }
 
 void qorbiterManager::displayModelPages(QList<QObject *> pages)
@@ -995,10 +998,10 @@ void qorbiterManager::setFloorplanType(int t)
 
 void qorbiterManager::qmlSetupLmce(QString incdeviceid, QString incrouterip)
 {
-    setDceResponse("Triggering connection to LMCE Device ID [" + incdeviceid + "] port Router Address [" + incrouterip + "]") ;
+    //setDceResponse("Triggering connection to LMCE Device ID [" + incdeviceid + "] port Router Address [" + incrouterip + "]") ;
     qs_routerip = incrouterip;
     iPK_Device = long(incdeviceid.toInt());
-    setDceResponse("Connecting to LinuxMCE Core");
+    setDceResponse("Initializing Local Manager");
     initializeManager( qs_routerip.toStdString(), iPK_Device);
 }
 
@@ -1009,7 +1012,7 @@ bool qorbiterManager::readLocalConfig()
     QDomDocument localConfig;
 #ifdef Q_OS_MAC
     QString xmlPath = QString::fromStdString(QApplication::applicationDirPath().remove("MacOS").append("Resources").append("/config.xml").toStdString());
-#elif ANDROID
+#elif __ANDROID__
     QString xmlPath = "/mnt/sdcard/LinuxMCE/config.xml";
 #elif WIN32
     QString xmlPath = QString::fromStdString(QApplication::applicationDirPath().toStdString())+"/config.xml";
@@ -1021,7 +1024,7 @@ bool qorbiterManager::readLocalConfig()
 
     localConfigFile.setFileName(xmlPath);
 
-#ifdef ANDROID
+#ifdef __ANDROID__
     if (createAndroidConfig())
     {
 
@@ -1091,7 +1094,7 @@ bool qorbiterManager::writeConfig()
     QDomDocument localConfig;
 #ifdef Q_OS_MAC
     QString xmlPath = QString::fromStdString(QApplication::applicationDirPath().remove("MacOS").append("Resources").append("/config.xml").toStdString());
-#elif ANDROID
+#elif __ANDROID__
     QString xmlPath = "/mnt/sdcard/LinuxMCE/config.xml";
 #elif WIN32
     QString xmlPath = QString::fromStdString(QApplication::applicationDirPath().toStdString())+"/config.xml";
@@ -1433,7 +1436,7 @@ void qorbiterManager::showMessage(QString message, int duration, bool critical)
 
 void qorbiterManager::startOrbiter()
 {
-    if (b_skinsReady && b_orbiterReady)
+    if (b_skinReady && b_orbiterReady)
     {
         setDceResponse("Showing main orbiter window");
         QApplication::processEvents(QEventLoop::AllEvents);

@@ -22,7 +22,7 @@ ThreadedSplash::ThreadedSplash(QObject *parent)
          #elif defined (Q_OS_MACX)
 
              qrcPath = "qrc:osx/Splash.qml";
-         #elif defined (ANDROID)
+         #elif defined (__ANDROID__)
 
              qrcPath = "qrc:android-phone/Splash.qml";
          #elif defined (for_droid)

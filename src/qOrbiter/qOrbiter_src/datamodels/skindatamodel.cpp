@@ -14,6 +14,8 @@ SkinDataModel::SkinDataModel(QUrl &baseUrl, SkinDataItem* prototype, qorbiterMan
     ui_reference = uiRef;
     SkinLoader* load = new SkinLoader(m_baseUrl, ui_reference, this);
     m_skin_loader = load;
+
+    QObject::connect(m_skin_loader, SIGNAL(finishedList()), this, SLOT(checkStatus()));
 }
 
 
@@ -80,7 +82,7 @@ SkinDataItem * SkinDataModel::find(const QString &id) const
         }       
     }
          ui_reference->setDceResponse("SKIN ERROR");
-         find(id);
+
          return 0;
 }
 
@@ -147,7 +149,7 @@ void SkinDataModel::addSkin(QString name) {
        qDebug() << "Invalid URL!";
    }*/
     //qDebug() << "Loading skin : " << name;
-    m_skin_loader->loadSkin(name);
+    m_skin_loader->prepSkinsToLoad(name);
 
 }
 
@@ -182,4 +184,10 @@ void SkinDataModel::setActiveSkin(QString name)
         }
 
     }
+}
+
+void SkinDataModel::checkStatus()
+{
+
+        emit skinsFinished(true);
 }

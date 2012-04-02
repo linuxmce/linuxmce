@@ -4,6 +4,7 @@ NowPlayingClass::NowPlayingClass(QDeclarativeItem *parent) :
     QDeclarativeItem(parent)
 {
     b_mediaPlaying = false;   
+    fileImage.load("qrc:/icons/icon.png");
 }
 
 void NowPlayingClass::resetData()
@@ -27,6 +28,7 @@ void NowPlayingClass::resetData()
     setSynop(""); emit synopChanged();
     setStreamID(0);
     setProgram("");
-   //setImage(QImage());
+ fileImage.load("qrc:/icons/icon.png");
+ emit imageChanged();
 }
 

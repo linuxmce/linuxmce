@@ -58,17 +58,12 @@ QImage AbstractImageProvider::updateObjectProvider()
     //aspect checking
     if(key.height() > key.width())
     {
-
         managerreference->nowPlayingButton->setImageAspect("poster");
-
     }
     else
     {
-
         managerreference->nowPlayingButton->setImageAspect("wide");
-
     }
-
     return key;
 }
 

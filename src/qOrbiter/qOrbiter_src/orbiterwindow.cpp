@@ -65,7 +65,7 @@ orbiterWindow::orbiterWindow(long deviceid, std::string routerip, QObject *paren
 
     // QObject::connect(&mainView, SIGNAL(sceneResized(QSize)), this, SIGNAL(orientationChanged(QSize)));
 
-#ifdef ANDROID
+#ifdef __ANDROID__
     mainView.rootContext()->setContextProperty("appW", (mainView.window()->width()/ 2));//this is done because android reports the desktop width as 2x what it is.at least on my phone
     mainView.rootContext()->setContextProperty("appH", mainView.window()->height());
 #elif for_android
@@ -101,7 +101,7 @@ orbiterWindow::orbiterWindow(long deviceid, std::string routerip, QObject *paren
 #elif defined(Q_OS_MACX)
     buildType="/qml/desktop";
     qrcPath = "qrc:osx/Splash.qml";
-#elif defined ANDROID
+#elif defined __ANDROID__
     qrcPath = "qrc:android/Splash.qml";
     mainView.window()->setAttribute(Qt::WA_LockPortraitOrientation);
 #elif defined for_android
@@ -122,7 +122,7 @@ orbiterWindow::orbiterWindow(long deviceid, std::string routerip, QObject *paren
     mainView.showFullScreen();
 #elif defined(for_desktop)
     mainView.showNormal();
-#elif defined(ANDROID)
+#elif defined(__ANDROID__)
     mainView.showFullScreen();
 #elif defined(for_android)
     mainView.show();

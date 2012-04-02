@@ -39,16 +39,21 @@ public:
 
 public slots:
     void setActiveSkin(QString name);
-
-  private slots:
+    void checkStatus();
+private slots:
     void handleItemChange();
 
-  private:
+
+signals:
+    void skinsFinished(bool b);
+
+private:
     SkinLoader *m_skin_loader;
     QUrl m_baseUrl;
     qorbiterManager  *ui_reference;
     SkinDataItem* m_prototype;
     QList<SkinDataItem*> m_list;
+
 };
 
 #endif // SKINDATAMODEL_H

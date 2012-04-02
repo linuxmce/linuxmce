@@ -19,10 +19,15 @@ public:
     ~SkinLoader();
 
     void loadSkin(QString name);
+    void prepSkinsToLoad(QString skinlist);
 
   private slots:
     void continueLoading();
     void checkLoadingStatus();
+
+signals:
+    void finishedList();
+    void skinItemComplete();
 
   private:
     QDeclarativeComponent *current_component;
@@ -31,6 +36,9 @@ public:
     QUrl m_base_url;
     qorbiterManager  *ui_reference;
     QObject *styleObject;
+    QStringList skinsToLoad;
+    int totalSkinsToLoad;
+    int loadercounter;
 };
 
 #endif // SKINLOADER_H

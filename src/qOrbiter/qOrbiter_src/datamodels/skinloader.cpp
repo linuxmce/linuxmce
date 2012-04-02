@@ -4,14 +4,16 @@
 
 SkinLoader::SkinLoader(QUrl baseUrl, qorbiterManager *uiRef, SkinDataModel *parent): ui_reference(uiRef), m_base_url(baseUrl), m_parent(parent)
 {
-
+    totalSkinsToLoad = 0;
+    loadercounter= 0;
 }
 
 
 SkinLoader::~SkinLoader() {}
 
 void SkinLoader::loadSkin(QString name) {
-    // qDebug() << "skinloader adding::" << name;
+    qDebug() << "skinloader adding::" << name;
+
     //skinBase.setPath(m_baseUrl.toString());
     QUrl style;
     style.setUrl(m_base_url.toString() + "/" + name + "/Style.qml");
@@ -22,7 +24,7 @@ void SkinLoader::loadSkin(QString name) {
     if (current_component->isLoading()) {
         //qDebug() << "Hooking up slot";
 
-        if (QObject::connect(current_component, SIGNAL(statusChanged(QDeclarativeComponent::Status)),this, SLOT(checkLoadingStatus())))
+        if (QObject::connect(current_component, SIGNAL(statusChanged(QDeclarativeComponent::Status)),this, SLOT(continueLoading())))
         {
             //qDebug() << "Hooked!";
         } else {
@@ -48,6 +50,7 @@ void SkinLoader::continueLoading() {
         qWarning() << current_component->errors();
         exit (1);
     } else {
+
         //qDebug() << "Making style object";
         styleObject = current_component->create(ui_reference->qorbiterUIwin->rootContext());
         QString s_title = styleObject->property("skinname").toString();
@@ -60,8 +63,17 @@ void SkinLoader::continueLoading() {
         QString s_accentc = styleObject->property("accentcolor").toString();
         QUrl skinBase(m_base_url.toString()+"/"+s_path);
         ui_reference->setDceResponse("Adding skin to list" + s_title);
-
         m_parent->appendRow(new SkinDataItem(skinBase, s_title, s_creator, s_description, s_version, s_target, skinPic, s_path, s_mainc, s_accentc, styleObject));
+        loadercounter++;
+        if (loadercounter == totalSkinsToLoad)
+        {
+            emit finishedList();
+        }
+        else
+        {
+            qDebug() << "Loading counter: " << loadercounter;
+            qDebug() << "Total Skin Count:" << totalSkinsToLoad;
+        }
     }
 }
 
@@ -70,4 +82,14 @@ void SkinLoader::checkLoadingStatus()
 
     if(current_component->status() == QDeclarativeComponent::Ready)
         continueLoading();
+}
+
+void SkinLoader::prepSkinsToLoad(QString skinlist)
+{
+    loadercounter = 0;
+    skinsToLoad = skinlist.split(",");
+    totalSkinsToLoad = skinsToLoad.size();
+    qDebug() << totalSkinsToLoad;
+    qDebug() << skinsToLoad.join("||");
+    loadSkin(skinsToLoad.first());
 }

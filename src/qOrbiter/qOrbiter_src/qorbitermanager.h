@@ -45,10 +45,10 @@
 #include <QFile>
 #include <QDir>
 #include <QDataStream>
-#include <QtNetwork/QTcpSocket>
+
 #include <QProcess>
 #include <QtXml/QDomDocument>
-#ifndef ANDROID
+#ifndef __ANDROID__
 #include <shaders/filereader.h>
 #include<shaders/trace.h>
 #endif
@@ -80,6 +80,7 @@
 #include <datamodels/skindatamodel.h>
 #include <contextobjects/floorplandevice.h>
 #include <contextobjects/screenshotattributes.h>
+#include <contextobjects/timecodemanager.h>
 
 //own version of OrbiterData.h
 #include <datamodels/listModel.h>                            //custom item model
@@ -134,7 +135,7 @@ class qorbiterManager : public QObject
 public:
     qorbiterManager(QDeclarativeView * view, QObject *parent=0);  //constructor
 
-#ifndef ANDROID
+#ifndef __ANDROID__
     FileReader * fileReader;
 #endif
     //settings
@@ -151,7 +152,7 @@ public:
     ScreenParamsClass *ScreenParameters;
     SecurityVideoClass *SecurityVideo;
     QList<QObject*> screenshotVars;
-
+    TimeCodeManager *timecode;
     //-------------sleeping menu----------------------
     QList<QObject*> sleeping_alarms;
 
@@ -191,7 +192,7 @@ public:
     int appHeight;
     int appWidth;
     bool b_localLoading;
-    bool b_skinsReady;
+    bool b_skinReady;
     bool b_skinDataReady;
     bool b_orbiterReady;
     Q_INVOKABLE void refreshUI(QUrl url);

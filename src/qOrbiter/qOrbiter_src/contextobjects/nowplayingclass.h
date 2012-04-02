@@ -46,7 +46,7 @@
 #include <QDeclarativeItem>
 #include <QTime>
 #include <QDebug>
-#ifdef ANDROID
+#ifdef __ANDROID__
 #include <QFile>
 #include <QImageReader>
 #endif
@@ -196,15 +196,33 @@ public slots:
     QString getProgram () {return tvProgram;}
 
     void setImageUrl(QUrl incImage) {nowPlayingImageUrl = incImage;}
+
     QUrl getImageUrl () { return nowPlayingImageUrl;}
 
-    void setImageData( QByteArray data) {
-        qDebug("Revieved Image data");
-        QImage t;
-        if( t.loadFromData(data))
-            setImage(t);
+    void setImageData(QImage t) {
+        qDebug("Recieved Image data");
+
+        setImage(t);
     }
-    void setImage(QImage img) {fileImage = img; qDebug("Emitting new image"); emit imageChanged();}
+    void setImageData( char data, int iData_size) {
+        qDebug("Android ARM Now Playing Process Called");
+        QImage t;
+        const uchar *localDat =(uchar*)&data;
+        int dataSize = iData_size;
+        if( t.loadFromData(localDat, dataSize, "4"))
+        {
+
+            setImage(t);
+            emit statusMessage("Set Cover Art");
+        }
+        else
+        {
+            emit statusMessage("Update Object Image Conversion Failed:");
+        }
+    }
+
+
+    void setImage(QImage img) {fileImage = img; emit imageChanged();}
     QImage getImage() {return fileImage;}
 
     void setScreen(QString inc_screen) {qs_screen = inc_screen; emit screenTypeChanged();}

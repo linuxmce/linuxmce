@@ -1,7 +1,8 @@
 #include "timecodemanager.h"
 #include "PlutoUtils/StringUtils.h"
 
-TimeCodeManager::TimeCodeManager()
+TimeCodeManager::TimeCodeManager(QDeclarativeItem *parent) :
+    QDeclarativeItem(parent)
 {
 
     dceMediaSocket = new QTcpSocket();
@@ -21,7 +22,7 @@ void TimeCodeManager::start(QString server, int iport)
 
     if(!dceMediaSocket->isOpen())
     {
-        // qDebug() <<"opening connection to " << port;
+         qDebug() <<"opening connection to " << port;
 
         dceMediaSocket->connectToHost(mediaPlayerIp, port, QFile::ReadOnly );
         if ( dceMediaSocket->isValid() )
@@ -31,12 +32,12 @@ void TimeCodeManager::start(QString server, int iport)
         }
         else
         {   //setDceResponse("couldnt start timecode");
-            //  qDebug() << timeCodeSocket->errorString();
+             qDebug() << dceMediaSocket->errorString();
         }
     }
     else
     {
-
+        qDebug("Time code running, moving on.");
     }
 }
 

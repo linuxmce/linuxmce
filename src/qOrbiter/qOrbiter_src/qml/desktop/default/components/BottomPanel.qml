@@ -50,7 +50,7 @@ Rectangle {
             radius: 5
             MouseArea{
                 anchors.fill: parent
-                onClicked:loadComponent("Power.qml")
+                onClicked:MyJs.createDynamicComponent("Power.qml" , stage)
             }
         }
 
@@ -93,7 +93,7 @@ Rectangle {
             buttontext: "Exit Orbiter"
             MouseArea{
                 anchors.fill: exit
-                onClicked: closeOrbiter()
+                onClicked: manager.closeOrbiter()
             }
         }
 

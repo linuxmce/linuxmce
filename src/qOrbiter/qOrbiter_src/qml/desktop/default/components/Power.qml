@@ -34,20 +34,20 @@ Rectangle{
         ParallelAnimation{
             id: show
             running:false
-            PropertyAnimation { target: powerrect; property: "opacity"; to: 1; duration: 1500}
-            PropertyAnimation { target: powerrect; property: "scale"; to: 1; duration: 1500}
-            PropertyAnimation { target: powerrect; property: "x"; easing.type: Easing.InElastic; to: appW/2; duration: 1500}
-            PropertyAnimation { target: powerrect; property: "y"; easing.type: Easing.InElastic; to: appH/2; duration: 1500}
+            PropertyAnimation { target: powerrect; property: "opacity"; to: 1; duration: 750}
+            PropertyAnimation { target: powerrect; property: "scale"; to: 1; duration: 750}
+            PropertyAnimation { target: powerrect; property: "x"; easing.type: Easing.InElastic; to: appW/2; duration: 750}
+            PropertyAnimation { target: powerrect; property: "y"; easing.type: Easing.InElastic; to: appH/2; duration: 750}
         }
 
         ParallelAnimation{
             id: hide
             running:false
-            PropertyAnimation { target: powerrect; property: "opacity"; to: 0; duration: 1000}
-            PropertyAnimation { target: powerrect; property: "scale"; to: 0; duration: 1000}
-            PropertyAnimation { target: powerrect; property: "x"; to: appW; duration: 1000}
-            PropertyAnimation { target: powerrect; property: "y"; to: appH; duration: 1000}
-            ScriptAction {script:loadComponent("NullComponent.qml")}
+            PropertyAnimation { target: powerrect; property: "opacity"; to: 0; duration: 750}
+            PropertyAnimation { target: powerrect; property: "scale"; to: 0; duration: 750}
+            PropertyAnimation { target: powerrect; property: "x"; to: appW; duration: 750}
+            PropertyAnimation { target: powerrect; property: "y"; to: appH; duration: 750}
+            ScriptAction {script:power_rect_container.destroy()}
         }
 
         Rectangle{
@@ -96,7 +96,7 @@ Rectangle{
                             anchors.fill: parent
                             onClicked: {
                                 dcerouter.displayToggle(1)
-                                loadComponent("NullComponent.qml")
+                                power_rect_container.destroy()
                             }
                         }
                     }
@@ -116,7 +116,7 @@ Rectangle{
                             anchors.fill: parent
                             onClicked: {
                                 dcerouter.displayToggle(0)
-                                loadComponent("NullComponent.qml")
+                                 power_rect_container.destroy()
                             }
                         }
                     }
