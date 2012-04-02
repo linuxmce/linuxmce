@@ -57,19 +57,22 @@ void FloorplanDevice::setupFloorplanPositions()
 {
     QStringList positions = mQS_position.split(",");
     QStringList::const_iterator constIterator;
-    for (int i = 0; i < positions.count(); ++i)
+    // positions should have minimum 2 entries, one device with X+Y co-ords
+    if (positions.count() >= 2)
     {
+        for (int i = 0; i < positions.count(); ++i)
+        {
 
        // qDebug() << mQS_name << " Floorplan #" << positions.at(i);
        // qDebug() << "Coordinates" << positions.at(i+1) << "," << positions.at(i+2);
-        mm_currentPosition.append(positions.at(i+1)+","+ positions.at(i+2));
+            mm_currentPosition.append(positions.at(i+1)+","+ positions.at(i+2));
 
-
-        if(positions.count() <= i+2)
-        { break; }
-        else
-        {
-            i=i+2;
+            if(positions.count() <= i+2)
+            { break; }
+            else
+            {
+                i=i+2;
+            }
         }
     }
 }
