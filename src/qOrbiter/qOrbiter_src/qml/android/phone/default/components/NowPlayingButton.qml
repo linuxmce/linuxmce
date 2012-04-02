@@ -17,16 +17,56 @@ Rectangle {
         anchors.top: np_box.top
 
         Text {
-            id: generaltitle
+            id: genera_title
             width: parent.width
             text:  dcenowplaying.qs_mainTitle
             font.family: "Droid Sans"
             wrapMode: "WrapAtWordBoundaryOrAnywhere"
+            smooth: true
+            font.bold: true
+            font.pixelSize: scaleY(3)
+            visible:  dcenowplaying.mediatitle =="" ? true: false
+            color: "silver"
+        }
+
+        Text {
+            id: tracktitle
+            width: parent.width
+            text:  dcenowplaying.mediatitle
+            font.family: "Droid Sans"
+            wrapMode: "WrapAtWordBoundaryOrAnywhere"
+            smooth: true
+            font.bold: true
+            font.pixelSize: scaleY(3)
+            visible:  dcenowplaying.mediatitle =="" ? false: true
+            color: "silver"
+        }
+        Text {
+            id: album
+            width: parent.width
+            text:  dcenowplaying.album + "|" + dcenowplaying.releasedate
+            wrapMode: "WrapAtWordBoundaryOrAnywhere"
             font.bold: true
             smooth: true
+            font.pixelSize: scaleY(2)
+            visible:  dcenowplaying.album =="" ? false: true
+            color: "silver"
+        }
+        Text {
+            id: track
+
+            wrapMode: "WrapAtWordBoundaryOrAnywhere"
+
+
+            text: qsTr("Track: ") + dcenowplaying.track
+            font.family: "Droid Sans"
+            font.bold: true
+            //font.italic: true
+            smooth: true
             font.pixelSize: scaleY(3)
-            visible:  dcenowplaying.qs_mainTitle ==="" ? false: true
+            visible:  dcenowplaying.track =="" ? false: true
             color: "orange"
+            opacity: .50
         }
 
         Text {
@@ -123,29 +163,15 @@ Rectangle {
             visible:  dcenowplaying.channel ==="" ? false: true
         }
 
-        Text {
-            id: program_title
-            wrapMode: "NoWrap"
-            text: qsTr("Program:") + dcenowplaying.tvProgram
-            font.family: "Droid Sans"
-            font.bold: true
-            smooth: true
-            horizontalAlignment: Text.AlignHCenter
-            font.pixelSize: scaleY(2)
-            visible:  dcenowplaying.tvProgram ==="" ? false: true
-            color: "white"
-
-        }
 
         Text {
             id: np
             text:dceTimecode.qsCurrentTime
-            font.pixelSize: scaleY(2.5)
-            anchors.bottom: np_box.bottom
+            font.pixelSize: scaleY(2.5)            
             wrapMode: Text.WrapAtWordBoundaryOrAnywhere
-            anchors.horizontalCenter: np_box.horizontalCenter
+
             color: "white"
-            visible:  dceTimecode.qsCurrentTime ==="0" && dcerouter.i_current_mediaType ==4 ? false: true
+            visible:  dceTimecode.qsCurrentTime ==="00:00:00" && dcerouter.i_current_mediaType ==4 ? false: true
         }
 
         /*  Text {

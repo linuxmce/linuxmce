@@ -42,7 +42,7 @@ Rectangle {
         Text {
             id: generaltitle
             width: parent.width
-            text:  dcenowplaying.qs_mainTitle + "|"
+            text:  dcenowplaying.qs_mainTitle
             font.family: "Droid Sans"
             wrapMode: "WrapAtWordBoundaryOrAnywhere"
             font.bold: true
@@ -59,7 +59,7 @@ Rectangle {
             wrapMode: "WrapAtWordBoundaryOrAnywhere"
             smooth: true
             font.bold: true
-            font.pixelSize: scaleY(4)
+            font.pixelSize: scaleY(3)
             visible:  dcenowplaying.mediatitle =="" ? false: true
             color: "silver"
         }
@@ -71,7 +71,7 @@ Rectangle {
             wrapMode: "WrapAtWordBoundaryOrAnywhere"
             font.bold: true
             smooth: true
-            font.pixelSize: scaleY(3)
+            font.pixelSize: scaleY(2)
             visible:  dcenowplaying.album =="" ? false: true
             color: "silver"
         }
@@ -83,9 +83,9 @@ Rectangle {
             wrapMode: "WrapAtWordBoundaryOrAnywhere"
             text: qsTr("Genre(s): ") + dcenowplaying.genre
             font.family: "Droid Sans"
-            // font.bold: true
+            font.bold: true
             smooth: true
-            font.pixelSize: scaleY(3)
+            font.pixelSize: scaleY(2)
             visible:  dcenowplaying.genre =="" ? false: true
             color:"silver"
             MouseArea{
@@ -110,7 +110,7 @@ Rectangle {
             font.pixelSize: scaleY(3)
             visible:  dcenowplaying.track =="" ? false: true
             color: "orange"
-            opacity: .25
+            opacity: .50
         }
     }
 
@@ -141,6 +141,16 @@ Rectangle {
             anchors.fill: parent
             onClicked: storedAudioRemote.state = ""
         }
+    }
+    Text {
+        id: np
+        text:dceTimecode.qsCurrentTime
+        font.pixelSize: scaleY(2.5)
+        anchors.bottom: media_scroller.top
+        wrapMode: Text.WrapAtWordBoundaryOrAnywhere
+        anchors.horizontalCenter: media_scroller.horizontalCenter
+        color: "white"
+        visible:  dceTimecode.qsCurrentTime ==="0" ? false: true
     }
     MediaScrollBar{id:media_scroller; anchors.bottom: controls.top; anchors.horizontalCenter: parent.horizontalCenter; anchors.bottomMargin: scaleY(2)}
     HaControls{id:ha; anchors.left: parent.left ; anchors.top: buttonsq1.bottom }

@@ -4,7 +4,7 @@ import QtQuick 1.1
 Rectangle {
     id:scroller
     width: scaleX(55)
-    height: scaleY(3)
+    height: scaleY(4)
     color: "transparent"
     property int slidertimer: (scroll_tab.x / scroller_transit.width) * dceTimecode.tcTotalTime
 
@@ -17,6 +17,7 @@ Rectangle {
             id: drag_label
             text: dceTimecode.dragTime
             anchors.centerIn: parent
+            font.pixelSize: scaleY(2)
         }
         anchors.bottom: scroll_tab.top
         anchors.topMargin: scaleY(1)
@@ -33,15 +34,12 @@ Rectangle {
     Image {
         id: scroll_tab
         source: "../img/scroller.png"
-        height: scaleY(5)
-        width: scaleX(2)
+        height: scaleY(6)
+        width: scaleX(3)
         anchors.verticalCenter: scroller_transit.verticalCenter
         x: ( dceTimecode.runningTimer / dceTimecode.tcTotalTime) * scroller.width
-
-
         MouseArea{
             anchors.fill: parent
-
             drag.target: scroll_tab
             drag.axis: Drag.XAxis
             drag.minimumX: 0
