@@ -39,7 +39,6 @@ Rectangle {
 
             id:raise
             running: false
-            loops: Animation.complete
             PropertyAnimation{ target:ssimg; property: "opacity"; to: "1"; duration: 1500}
             PropertyAnimation{ target:ssimg; property: "scale"; to:1.15; duration: 6000}
 

@@ -96,6 +96,8 @@ qorbiterManager::qorbiterManager(QDeclarativeView *view, QObject *parent) :
     qorbiterUIwin->rootContext()->setContextProperty("appW", appWidth);
 
     QObject::connect(qorbiterUIwin, SIGNAL(sceneResized(QSize)),  SLOT(checkOrientation(QSize)) );
+    QObject::connect(this, SIGNAL(orbiterReady(bool)), this, SLOT(showUI(bool)));
+    QObject::connect(this, SIGNAL(skinDataLoaded(bool)), SLOT(showUI(bool)));
 
     ScreenSaver = new ScreenSaverClass();
 #ifdef for_desktop
@@ -694,10 +696,7 @@ void qorbiterManager::processConfig(QByteArray config)
     tConf.clear();
 
     activateScreenSaver();
-
-    b_orbiterReady = true;
-    emit orbiterConfigReady(true);
-
+   setOrbiterStatus(true);
 }
 
 bool qorbiterManager::OrbiterGen()
@@ -741,10 +740,8 @@ void qorbiterManager::skinLoaded(QDeclarativeView::Status status) {
         emit skinDataLoaded(false);
     } else {
 
-        m_bStartingUp = false;
-        emit skinDataLoaded(true);
+        m_bStartingUp = false;        
         QApplication::processEvents(QEventLoop::AllEvents);
-        b_skinReady = true;
         startOrbiter();
     }
 }
@@ -913,7 +910,7 @@ bool qorbiterManager::loadSkins(QUrl base)
 
     tskinModel = new SkinDataModel(base, new SkinDataItem, this);
     qorbiterUIwin->rootContext()->setContextProperty("skinsList", tskinModel);
-    QObject::connect(tskinModel, SIGNAL(skinsFinished(bool)), this, SLOT(showUI(bool)));
+    QObject::connect(tskinModel, SIGNAL(skinsFinished(bool)), this, SLOT(setSkinStatus(bool)));
 
     /*
       TODO ASAP:
@@ -947,14 +944,15 @@ void qorbiterManager::quickReload()
 void qorbiterManager::showUI(bool b)
 {
 
-        if(b == true)
+        if( b_orbiterReady && b_skinReady )
         {
             swapSkins(currentSkin);
         }
         else
         {
-            emit raiseSplash();
-            setDceResponse("Skin Loading Error!");
+            setDceResponse("Orbiter Cant Show UI");
+            qDebug() << "Orbiter Status:" << b_orbiterReady;
+            qDebug() << "Skin Status:" << b_skinReady;
         }
 
 }

@@ -421,7 +421,8 @@ public slots: //note: Q_INVOKABLE means it can be called directly from qml
     void getFloorplanDevices(int floorplantype);
     void setFloorplanType(int t);
     void setActiveRoom(int room,int ea);
-
+    void setSkinStatus(bool status) { b_skinReady = status ; emit skinDataLoaded(b_skinReady); }
+    void setOrbiterStatus(bool status) {b_orbiterReady = status ; emit orbiterReady(b_orbiterReady);}
 
     //void setAppPath(QString p) {appPath;}
 
