@@ -10,7 +10,8 @@ Rectangle {
     radius: 0
     opacity: 1
     color: "transparent"
-   // Component.onCompleted: manager.setBoundStatus(true)
+    Component.onCompleted: manager.setBoundStatus(true)
+
     Column{
         anchors.right: storedvideoremote.right
         anchors.rightMargin: scaleX(1)
@@ -19,9 +20,12 @@ Rectangle {
     }
     Connections{
         target:dcenowplaying
-        onImageChanged: { nowplayingimage.source = "image://listprovider/updateobject/"+securityvideo.timestamp;}
+        onImageChanged: {
+            nowplayingimage.source = "image://listprovider/updateobject/"+securityvideo.timestamp;
+            console.log("now playing changed")
+        }
     }
-    Component.onCompleted: dcerouter.BindMediaRemote(true)
+
 
     Row{
         id:mainrow
@@ -62,7 +66,7 @@ Rectangle {
                     Text {
                         id: headertext
                         height:scaleY(2)
-                        text:qsTr("Speed: ") + dcenowplaying.qs_playbackSpeed
+                        text:qsTr("Speed: ") + dceTimecode.playbackSpeed
                         font.family: "Droid Sans"
                         font.pixelSize: scaleY(2)
                         color: "aliceblue"
@@ -71,7 +75,7 @@ Rectangle {
                     Text {
                         id: timecode
                         height:scaleY(2)
-                        text: dceTimecode.qsCurrentTime + qsTr(" of ") + dcenowplaying.duration
+                        text: dceTimecode.qsCurrentTime + qsTr(" of ") + dceTimecode.qsTotalTime
                         font.family: "Droid Sans"
                         font.pixelSize: scaleY(1) *2.15
                         anchors.bottom:parent.bottom
@@ -233,6 +237,7 @@ Rectangle {
                 }
             }
         }
+    MediaScrollBar{id:media_transit; anchors.bottom: controlrow.top; anchors.horizontalCenter: controlrow.horizontalCenter}
 
             Row{
                 id:controlrow
@@ -260,7 +265,7 @@ Rectangle {
                             MouseArea{
                                 anchors.fill: parent
                                 onClicked:  {
-                                    loadComponent("ZoomAspect.qml")
+                                    MyJs.createStageComponent("ZoomAspect.qml", storedvideoremote)
                                 }
                             }
                         }
@@ -270,7 +275,7 @@ Rectangle {
                                 anchors.fill: parent
                                 onClicked:  {
 
-                                    loadComponent("Bookmarks.qml")
+                                    MyJs.createStageComponent("Bookmarks.qml", storedvideoremote)
 
                                 }
                             }
@@ -280,7 +285,7 @@ Rectangle {
                             MouseArea{
                                 anchors.fill: parent
                                 onClicked:  {
-                                   loadComponent("Avcodes.qml")
+                                     MyJs.createStageComponent("Avcodes.qml", storedvideoremote)
                                 }
                             }
                         }
@@ -293,7 +298,7 @@ Rectangle {
                                 anchors.fill: parent
                                 onClicked:  {
                                     dcerouter.grabScreenshot(dcenowplaying.filepath)
-                                   loadComponent("AssignScreenShot.qml")
+                                     MyJs.createStageComponent("AssignScreenShot.qml", storedvideoremote)
 
                                 }
                             }
@@ -303,7 +308,7 @@ Rectangle {
                             MouseArea{
                                 anchors.fill: parent
                                 onClicked:  {
-                                    loadComponent("JogPanel.qml")
+                                     MyJs.createStageComponent("JogPanel.qml", storedvideoremote)
                                 }
                             }
                         }

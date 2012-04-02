@@ -32,7 +32,7 @@ Rectangle {
         MouseArea{
             anchors.fill: parent
             onClicked: {
-                loadComponent("NullComponent.qml")
+                bookmarks.destroy()
             }
         }
     }

@@ -277,7 +277,7 @@ Rectangle {
                 anchors.right: parent.right
                 MouseArea{
                     anchors.fill: parent
-                    onClicked: zoomaspectratio.visible = false;
+                    onClicked:zoomaspectratio.destroy()
                 }
             }
         }

@@ -1287,13 +1287,11 @@ void qorbiterManager::setScreenShotVariables(QList<QObject *> l)
     qorbiterUIwin->rootContext()->setContextProperty("screenshotAttributes", QVariant::fromValue(screenshotVars));
 }
 
-void qorbiterManager::setMediaScreenShot(QByteArray data)
+void qorbiterManager::setMediaScreenShot(QImage screen_shot)
 {
-    if(mediaScreenShot.loadFromData(data))
-    {
+    mediaScreenShot = screen_shot;
         emit mediaScreenShotReady();
-        // qDebug("Screen Shot loaded");
-    }
+
 }
 
 void qorbiterManager::saveScreenShot(QString attribute)
@@ -1483,7 +1481,6 @@ void qorbiterManager::reloadHandler()
 {
     gotoQScreen("ReloadHandler.qml");
 
-    emit reInitialize();
 }
 
 void qorbiterManager::setDceResponse(QString response)

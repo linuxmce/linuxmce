@@ -132,7 +132,7 @@ Rectangle {
         anchors.rightMargin: scaleX(1)
         MouseArea{
             anchors.fill: parent
-            onClicked: avcodes_rect.visible = false
+            onClicked: avcodes_rect.destroy()
         }
     }
 }

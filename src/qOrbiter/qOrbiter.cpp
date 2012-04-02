@@ -3816,8 +3816,10 @@ void DCE::qOrbiter::grabScreenshot(QString fileWithPath)
     if(SendCommand(grabMediaScreenshot, &mpResp) && mpResp =="OK")
     {
         QByteArray screenShotData;              //config file put into qbytearray for processing
+        QImage t;
         screenShotData.setRawData(screenieData, screenieDataSize);
-        emit screenShotReady(screenShotData);
+        t.loadFromData(screenShotData);
+        emit screenShotReady(t);
     }
 }
 
@@ -3890,7 +3892,6 @@ void DCE::qOrbiter::OnDisconnect()
 void DCE::qOrbiter::OnReload()
 {
     emit routerReloading("Router Reload");
-
 }
 
 void qOrbiter::OnReplaceHandler()

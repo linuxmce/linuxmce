@@ -32,7 +32,7 @@ Rectangle {
         anchors.centerIn: parent
         MouseArea{
             anchors.fill: parent
-            onClicked: loadComponent("NullComponent")
+            onClicked: filedetailrect.destroy()
         }
     }
 
@@ -342,7 +342,7 @@ Rectangle {
             MouseArea
             {
                 anchors.fill: parent
-                onClicked:{ dcerouter.playMedia(filedetailsclass.file); loadComponent("NullComponent") }  //dce function
+                onClicked:{ dcerouter.playMedia(filedetailsclass.file); filedetailrect.destroy() }  //dce function
             }
         }
 
@@ -352,6 +352,10 @@ Rectangle {
             height: style.stdbuttonh
             radius: 10
             buttontext: "Move"
+            MouseArea{
+                anchors.fill:  parent
+                onClicked: { dataModel.setLoadingStatus(true);filedetailsclass.clear(); dcerouter.setGridStatus(true); filedetailrect.destroy()}
+            }
         }
 
         AvOptionButton {
@@ -363,7 +367,7 @@ Rectangle {
             x: ((parent.width/3)*2)
             MouseArea{
                 anchors.fill:  parent
-                onClicked: { dataModel.setLoadingStatus(true);filedetailsclass.clear(); dcerouter.setGridStatus(true); loadComponent("NullComponent.qml")}
+                onClicked: { dataModel.setLoadingStatus(true);filedetailsclass.clear(); dcerouter.setGridStatus(true); filedetailrect.destroy()}
             }
         }
     }

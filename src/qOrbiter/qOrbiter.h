@@ -1105,7 +1105,7 @@ signals:
     void floorPlanImageData(const uchar* ,int);
     void floorplanTypeChanged(int f);
     //media
-    void screenShotReady(QByteArray data);
+    void screenShotReady(QImage data);
     void waitForScreenShot(char picData, int picDataSize, string fileFormat);
 
     void screenSaverImages(QStringList images);

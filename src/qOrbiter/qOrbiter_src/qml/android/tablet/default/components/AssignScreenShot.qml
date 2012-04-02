@@ -7,12 +7,17 @@ Rectangle {
     height: scaleY(75)
     radius: 5
     color: "slategrey"
-
+    anchors.centerIn: parent
     Text {
         id: labelscreenshot
         text: qsTr("Choose Attribute for screenshot")
         anchors.horizontalCenter: parent.horizontalCenter
         anchors.top: parent.top
+    }
+
+    Connections{
+        target: manager
+        onMediaScreenShotReady: screenshotImage.source = "image://listprovider/screenshot/"+securityvideo.timestamp
     }
 
     Component
@@ -35,7 +40,7 @@ Rectangle {
                 onExited: attributedelegate.color = style.accentcolor
                 onClicked: {
                     dcerouter.saveScreenAttribute(attributeNo);
-                    loadComponent("NullComponent.qml")
+                    assignscreenshot.destroy()
                 }
             }
 
@@ -74,7 +79,7 @@ Rectangle {
         id: screenshotImage
         anchors.left: attributes.right
         anchors.leftMargin: 10
-        source: "image://listprovider/screenshot/"+securityvideo.timestamp
+        source: ""
         height: parent.height *.65
         fillMode: Image.PreserveAspectFit
         width: parent.width*.50
@@ -92,8 +97,9 @@ Rectangle {
         anchors.rightMargin: scaleX(1)
         MouseArea{
             anchors.fill: parent
-            onPressed: {loadComponent("NullComponent.qml") }
+
             onClicked: { cleanupScreenie()
+                assignscreenshot.destroy()
             }
         }
     }

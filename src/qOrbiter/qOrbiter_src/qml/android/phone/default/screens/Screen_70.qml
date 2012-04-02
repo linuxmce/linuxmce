@@ -155,7 +155,7 @@ Rectangle {
             onClicked: storedVideoRemote.state = ""
         }
     }
-    MediaScrollBar{id:media_scroller; anchors.bottom: controls.top; anchors.horizontalCenter: parent.horizontalCenter; anchors.bottomMargin: scaleY(2)}
+
     AudioRemote{id:controls;anchors.bottom: parent.bottom; anchors.horizontalCenter: parent.horizontalCenter}
 
     //main 'now playing rect containing all the other items
