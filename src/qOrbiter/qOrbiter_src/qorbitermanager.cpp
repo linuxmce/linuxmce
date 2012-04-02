@@ -931,12 +931,8 @@ bool qorbiterManager::loadSkins(QUrl base)
 #elif for_android
     tskinModel->addSkin("default");
 #else
-    tskinModel->addSkin("default");
-    if(b_localLoading) //temporary hack until i deal with whats causing issues with these skins. from the outside, it appears to be a race condition. data being returned out of order.
-    {
-        tskinModel->addSkin("aeon");
-        tskinModel->addSkin("crystalshades");
-    }
+    tskinModel->addSkin("default,aeon,crystalshades");
+
 #endif
     return true;
 }

@@ -1109,7 +1109,8 @@ signals:
     void waitForScreenShot(char picData, int picDataSize, string fileFormat);
 
     void screenSaverImages(QStringList images);
-    void objectUpdate(QByteArray bytes);
+    void objectUpdate(QImage bytes);
+    void objectDataUpdate( char,int);
     void mediaMessage(QString msg);
     void gridModelSizeChange(int size);
     void checkGridStatus();
@@ -1224,24 +1225,24 @@ public slots:
     void qmlSetup(QString device, QString address);
     void setCurrentScreen(QString s);
 
-     void moveDirection(QString direction);
-     void JogStream(QString jump);
-     void processScreenShot(char picData, int picDataSize, string fileFormat);
-     void showAdvancedButtons();
+    void moveDirection(QString direction);
+    void JogStream(QString jump);
+    void processScreenShot(char picData, int picDataSize, string fileFormat);
+    void showAdvancedButtons();
     //playlist manipulation
-     void movePlaylistEntry(bool pos, int num);
-     void addToPlaylist(bool now, string playlist);
+    void movePlaylistEntry(bool pos, int num);
+    void addToPlaylist(bool now, string playlist);
     //-------------------------------------------------------
-     void grabScreenshot(QString fileWithPath);
+    void grabScreenshot(QString fileWithPath);
     // Default colored settop box and VDR buttons.
-     void redButton();
-     void greenButton();
-     void yellowButton();
-     void blueButton();
+    void redButton();
+    void greenButton();
+    void yellowButton();
+    void blueButton();
     //buttons from the more screen
-     void extraButtons(QString button);
+    void extraButtons(QString button);
 
-     void newOrbiter();
+    void newOrbiter();
 
     //operations
     void setMediaResponse(QString r) {mediaResponse = r; emit mediaResponseChanged();}

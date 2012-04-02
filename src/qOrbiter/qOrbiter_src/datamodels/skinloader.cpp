@@ -65,14 +65,15 @@ void SkinLoader::continueLoading() {
         ui_reference->setDceResponse("Adding skin to list" + s_title);
         m_parent->appendRow(new SkinDataItem(skinBase, s_title, s_creator, s_description, s_version, s_target, skinPic, s_path, s_mainc, s_accentc, styleObject));
         loadercounter++;
+        qDebug() << "Loading counter: " << loadercounter;
         if (loadercounter == totalSkinsToLoad)
+
         {
             emit finishedList();
         }
         else
         {
-            qDebug() << "Loading counter: " << loadercounter;
-            qDebug() << "Total Skin Count:" << totalSkinsToLoad;
+            loadSkin(skinsToLoad.at(loadercounter));
         }
     }
 }

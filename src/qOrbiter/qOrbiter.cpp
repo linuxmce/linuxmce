@@ -781,7 +781,9 @@ void qOrbiter::CMD_Update_Object_Image(string sPK_DesignObj,string sType,char *p
 
     QByteArray imgData;
     imgData.setRawData(pData,iData_Size);
-    emit objectUpdate(imgData);
+    QImage t;
+    t.loadFromData(imgData);
+    emit objectUpdate(t);
 }
 
 //<-dceag-c58-b->
