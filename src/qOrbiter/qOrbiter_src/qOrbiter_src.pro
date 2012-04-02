@@ -18,12 +18,19 @@
 
 # define deployment destination and target executable name
 
+
+opengl{
+TARGET = qorbiter-gl
+DEFINES+=GLENABLED
+glmsg= yes
+}else{
 TARGET = qorbiter
+glmsg = no
+}
 
 symbian:TARGET.UID3 = 0xE15A481D
 
 CONFIG += qt thread
-
 # Smart Installer package's UID
 # This UID is from the protected range and therefore the package will
 # fail to install if self-signed. By default qmake uses the unprotected
@@ -48,6 +55,9 @@ for_desktop{
 folder_01.source = qml/desktop
 folder_01.target = $$DESTDIR/qml
 
+folder_05.source = qml/template
+folder_05.target = $$DESTDIR/qml
+
 folder_03.source = config.xml
 folder_03.target = $$DESTDIR
 DEFINES += for_desktop
@@ -56,6 +66,9 @@ DEFINES += for_desktop
 win32{
 folder_01.source = qml/desktop
 folder_01.target = $$DESTDIR/qml
+
+folder_05.source = qml/template
+folder_05.target = $$DESTDIR/qml
 
 files_01.source = "../qOrbiter_src/config.xml/"
 files_01.path =$$DESTDIR/
@@ -67,6 +80,9 @@ for_android{
 folder_01.source = qml/android/
 folder_01.target = $$DESTDIR/qml
 
+folder_05.source = qml/template
+folder_05.target = $$DESTDIR/qml
+
 folder_03.source = config.xml
 folder_03.target = $$DESTDIR
 
@@ -76,6 +92,9 @@ DEFINES+=for_android
 for_freemantle{
 folder_01.source = qml/freemantle
 folder_01.target = $$DESTDIR/qml
+
+folder_05.source = qml/template
+folder_05.target = $$DESTDIR/qml
 
 folder_02.source= img
 folder_02.target=     #left blank so it will appear in the root
@@ -88,6 +107,9 @@ DEFINES += for_freemantle
 for_harmattan{
 folder_01.source = qml/harmattan
 folder_01.target =
+
+folder_05.source = qml/template
+folder_05.target = $$DESTDIR/qml
 
 folder_02.source= img
 folder_02.target=     #left blank so it will appear in the root
@@ -104,6 +126,9 @@ macx{
     folder_02.source= img
     folder_02.target= $$APP_RESOURCES_PATH   #left blank so it will appear in the root
 
+folder_05.source = qml/template
+folder_05.target = $$DESTDIR/qml
+
     folder_03.source = config.xml
     folder_03.target = $$APP_RESOURCES_PATH
 
@@ -112,16 +137,19 @@ macx{
 
 ANDROID{
 folder_01.source = qml/android/
+
+folder_05.source = qml/template
+folder_05.target = $$DESTDIR/qml
 DEFINES+=ANDROID
 
 }
 
 #uncomment this line to work on skins locally
 
-!win32{DEPLOYMENTFOLDERS = folder_01 folder_02 folder_03}
+!win32{DEPLOYMENTFOLDERS = folder_01 folder_02 folder_03 folder_05}
 
 win32{
-DEPLOYMENTFOLDERS = folder_01 files_01
+DEPLOYMENTFOLDERS = folder_01 files_01 folder_05
 
 }
 
@@ -152,7 +180,10 @@ symbian:TARGET.UID3 = 0xE0D07D4D
 QMAKE_CXXFLAGS += -DUSE_LZO_DATAGRID
 
 INCLUDEPATH += ../../ ../../DCE/
-QT += webkit opengl
+opengl{
+QT+= opengl
+}
+QT += webkit
 
 macx{
     QT += xml
@@ -191,6 +222,7 @@ symbian:TARGET.CAPABILITY += NetworkServices
 message(Qt version: $$[QT_VERSION])
 message(Qt is installed in $$[QT_INSTALL_PREFIX])
 message (Build Type: $$DEFINES)
+message( Opengl Status: $$glmsg )
 
 
 # The .cpp file which was generated for your project. Feel free to hack it.

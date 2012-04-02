@@ -49,8 +49,12 @@
 #include <QProcess>
 #include <QtXml/QDomDocument>
 #ifndef __ANDROID__
+
+#if GLENABLED
 #include <shaders/filereader.h>
 #include<shaders/trace.h>
+#endif
+
 #endif
 
 /*-------Custom Classes -----------------*/
@@ -136,8 +140,11 @@ public:
     qorbiterManager(QDeclarativeView * view, QObject *parent=0);  //constructor
 
 #ifndef __ANDROID__
+#if GLENABLED
     FileReader * fileReader;
 #endif
+#endif
+    bool b_glEnabled;
     //settings
     QString sPK_User;
     QString buildType;

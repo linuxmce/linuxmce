@@ -84,8 +84,10 @@ qorbiterManager::qorbiterManager(QDeclarativeView *view, QObject *parent) :
     qorbiterUIwin->rootContext()->setContextProperty("dcemessage", dceResponse);
     qorbiterUIwin->rootContext()->setContextProperty("dceTimecode", timecode);
 #ifndef __ANDROID__
+#ifdef GLENABLED
     fileReader = new FileReader;
     qorbiterUIwin->rootContext()->setContextProperty("fileReader", fileReader);
+#endif
 #endif
     appHeight = qorbiterUIwin->height() ;
     appWidth = qorbiterUIwin->width() ;
@@ -678,7 +680,7 @@ void qorbiterManager::processConfig(QByteArray config)
     this->qorbiterUIwin->rootContext()->setContextProperty("attribfilter", attribFilter); //custom mediatype selection model
     connect(attribFilter, SIGNAL(SetTypeSort(int,QString)), this, SLOT(setStringParam(int,QString)));
     QObject::connect(this, SIGNAL(resetFilter()), attribFilter, SLOT(resetStates()) );
-      binaryConfig.clear();
+    binaryConfig.clear();
 
     //----------------Security Video setup
     SecurityVideo = new SecurityVideoClass();
@@ -696,7 +698,7 @@ void qorbiterManager::processConfig(QByteArray config)
     tConf.clear();
 
     activateScreenSaver();
-   setOrbiterStatus(true);
+    setOrbiterStatus(true);
 }
 
 bool qorbiterManager::OrbiterGen()
@@ -713,21 +715,21 @@ void qorbiterManager::swapSkins(QString incSkin)
 
     if (tskinModel->rowCount() > 0)
     {
-    setDceResponse("Setting Skin to:" + incSkin);
-    skin = tskinModel->find(incSkin);
-    setDceResponse("Got it from the model : " + skin->baseUrl().toString());
-    //load the actual skin entry point
-    currentSkin = incSkin;
-    qorbiterUIwin->engine()->rootContext()->setContextProperty("style", skin->styleView());
+        setDceResponse("Setting Skin to:" + incSkin);
+        skin = tskinModel->find(incSkin);
+        setDceResponse("Got it from the model : " + skin->baseUrl().toString());
+        //load the actual skin entry point
+        currentSkin = incSkin;
+        qorbiterUIwin->engine()->rootContext()->setContextProperty("style", skin->styleView());
 
-    QObject::connect(qorbiterUIwin, SIGNAL(statusChanged(QDeclarativeView::Status)),
-                     this, SLOT(skinLoaded(QDeclarativeView::Status)));
+        QObject::connect(qorbiterUIwin, SIGNAL(statusChanged(QDeclarativeView::Status)),
+                         this, SLOT(skinLoaded(QDeclarativeView::Status)));
 
-    QMetaObject::invokeMethod(this, "refreshUI", Qt::QueuedConnection, Q_ARG(QUrl, skin->entryUrl()));
+        QMetaObject::invokeMethod(this, "refreshUI", Qt::QueuedConnection, Q_ARG(QUrl, skin->entryUrl()));
     }
     else
     {
-       swapSkins(incSkin);
+        swapSkins(incSkin);
     }
 }
 
@@ -740,7 +742,7 @@ void qorbiterManager::skinLoaded(QDeclarativeView::Status status) {
         emit skinDataLoaded(false);
     } else {
 
-        m_bStartingUp = false;        
+        m_bStartingUp = false;
         QApplication::processEvents(QEventLoop::AllEvents);
         startOrbiter();
     }
@@ -944,16 +946,16 @@ void qorbiterManager::quickReload()
 void qorbiterManager::showUI(bool b)
 {
 
-        if( b_orbiterReady && b_skinReady )
-        {
-            swapSkins(currentSkin);
-        }
-        else
-        {
-            setDceResponse("Orbiter Cant Show UI");
-            qDebug() << "Orbiter Status:" << b_orbiterReady;
-            qDebug() << "Skin Status:" << b_skinReady;
-        }
+    if( b_orbiterReady && b_skinReady )
+    {
+        swapSkins(currentSkin);
+    }
+    else
+    {
+        setDceResponse("Orbiter Cant Show UI");
+        qDebug() << "Orbiter Status:" << b_orbiterReady;
+        qDebug() << "Skin Status:" << b_skinReady;
+    }
 
 }
 
@@ -1290,7 +1292,7 @@ void qorbiterManager::setScreenShotVariables(QList<QObject *> l)
 void qorbiterManager::setMediaScreenShot(QImage screen_shot)
 {
     mediaScreenShot = screen_shot;
-        emit mediaScreenShotReady();
+    emit mediaScreenShotReady();
 
 }
 

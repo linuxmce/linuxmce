@@ -148,16 +148,10 @@ int main(int argc, char* argv[])
 {
 #ifdef for_harmattan
     QApplication::setGraphicsSystem("meego");
-#elif for_desktop
+#elif GLENABLED
     QApplication::setGraphicsSystem("opengl");
 #elif WIN32
-
-#elif __ANDROID__
-    QApplication::setGraphicsSystem("opengl");
-#elif for_android
-    QApplication::setGraphicsSystem("opengl");
-#else
-    QApplication::setGraphicsSystem("opengl");
+    QApplication::setGraphicsSystem("raster");
 #endif
 
     QApplication  a(argc, argv);
@@ -264,6 +258,11 @@ int main(int argc, char* argv[])
 #ifdef IOS
         //        NSAutoreleasePool * pool = [[NSAutoreleasePool alloc] init];
 #endif
+#if GLENABLED
+        bool glpresent= true;
+#else
+        bool glpresent = false;
+#endif
         orbiterWindow orbiterWin(PK_Device, sRouter_IP);
 
         orbiterWin.setMessage("Setting up Lmce");
@@ -280,7 +279,7 @@ int main(int argc, char* argv[])
         //stored video playlist for managing any media that isnt live broacast essentially
         PlaylistClass *storedVideoPlaylist = new PlaylistClass (new PlaylistItemClass);
 
-      storedVideoPlaylist->moveToThread(dceThread);
+        storedVideoPlaylist->moveToThread(dceThread);
 
         //epg listmodel, no imageprovider as of yet
         EPGChannelList *simpleEPGmodel = new EPGChannelList(new EPGItemClass);
@@ -299,7 +298,7 @@ int main(int argc, char* argv[])
         orbiterWin.mainView.rootContext()->setContextProperty("dataModel", mediaModel);
         orbiterWin.mainView.rootContext()->setContextProperty("mediaplaylist", storedVideoPlaylist);
         orbiterWin.mainView.rootContext()->setContextProperty("simpleepg", simpleEPGmodel);
-
+        orbiterWin.mainView.rootContext()->setContextProperty("opengl", glpresent);
 
         //shutdown signals
 
