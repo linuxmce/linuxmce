@@ -752,7 +752,7 @@ StatsMessage "Starting video driver setup"
 touch /etc/X11/xorg.conf
 
 ## Install driver based on the type of video card used
-if lshwd | grep -qi 'VGA .* (nv)'; then
+if lspci | grep -qi 'VGA .* nvidia'; then
 		. /usr/pluto/bin/nvidia-install.sh
 		installCorrectNvidiaDriver
 fi
@@ -842,10 +842,6 @@ rm -f /etc/network/interfaces
 
 ## Reconfigure networking
 /usr/pluto/bin/Network_Setup.sh
-/etc/init.d/networking restart
-/usr/pluto/bin/DHCP_config.sh
-/etc/init.d/networking restart
-/usr/pluto/bin/Network_Firewall.sh
 /usr/pluto/bin/ConfirmInstallation.sh
 /usr/pluto/bin/Timezone_Detect.sh
 
@@ -913,19 +909,33 @@ local diskless_log=/var/log/pluto/Diskless_Create-\`date +"%F"\`.log
 nohup /usr/pluto/bin/Diskless_CreateTBZ.sh >> \${diskless_log} 2>&1 &
 }
 
+
 VideoDriver () {
-## Install driver based on the type of video card used
-if lshwd | grep -qi 'VGA .* (nv)'; then
-        apt-get -y -f install pluto-nvidia-video-drivers
-                VerifyExitCode "Install Pluto nVidia Driver"
-elif lshwd | grep -qi 'VGA .* (radeon)'; then
-        # Check to see if old Radeon card, if so, do not install new driver
-        if ! lshwd | grep -Pqi 'VGA .*Radeon ((9|X|ES)(1|2?)([0-9])(5|0)0|Xpress) (.*) \(radeon\)'; then
-               apt-get -y -f install xorg-driver-fglrx
-                           VerifyExitCode "Install Radeon Driver"
-        fi
-fi
+. /usr/pluto/bin/Utils.sh
+	GetVideoDriver
+	online=\$(ping -c 2 google.com)
+	card_detail=\$(lspci | grep 'VGA' | cut -d':' -f3)
+	# If there is no xorg.conf, install driver and run AVWizard
+	if [[ -z \$online ]]; then
+		case "\$prop_driver" in
+			nvidia)
+				prop_driver="nouveau" ;;
+			fglrx)
+				prop_driver="radeon" ;;
+			savage)
+				prop_driver="openchrome" ;;
+			via)
+				prop_driver="openchrome" ;;
+			virge)
+				prop_driver="openchrome" ;;
+		esac
+	fi
+	StatusMessage "Installing video driver '\$prop_driver' for \$card_detail"
+	InstallVideoDriver
+	sleep 2
+	ConfSet "AVWizardOverride" "1"
 }
+
 
 ###########################################################
 ### Main execution area
@@ -955,7 +965,7 @@ StatsMessage "Preparing initial reboot"
 rm -rf /etc/rc3.d/*
 cp -a /etc/rc2.d/* /etc/rc3.d/
 ln -sf /etc/init.d/linuxmce /etc/rc5.d/S99linuxmce
-rm -f /etc/rc3.d/S99kdm /etc/rc3.d/S990start_avwizard
+rm -f /etc/rc3.d/S99kdm /etc/rc3.d/S99a0start_avwizard
 
 #Setup Runlevel 4
 rm -rf /etc/rc4.d/*
@@ -1017,9 +1027,6 @@ addAdditionalTTYStart
 TempEMIFix
 CreateFirstBoot
 InitialBootPrep
-
-
-
 StatsMessage "MCE Install Script completed without a detected error"
 StatsMessage "The log file for the install process is located at ${log_file}"
 StatsMessage "Reboot the system to start the final process"
