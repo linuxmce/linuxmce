@@ -489,17 +489,10 @@ GetVideoDriver () {
         chip_man=$(echo "$vga_pci" | grep -Eo '(ATI|VIA|nVidia|Intel)')
         case $chip_man in
                 nVidia)
-			if ping -c 1 google.com; then
-				prop_driver="nvidia"  
-			else 
-				prop_driver="nouveau"
-			fi ;;
-
+				prop_driver="nvidia" ;;
                 ATI)
-                        prop_driver="fglrx"
-                        if echo $vga_pci | grep -Ei '(r5|r6|r7)'; then
-                                prop_driver="radeonhd"; fi
-                        if echo "$vga_pci" | grep -E '((9|X|ES)(1|2?)([0-9])(5|0)0|Xpress)'; then
+                        	prop_driver="fglrx"
+                        if echo "$vga_pci" | grep -Ei '((r5|r6|r7)|(9|X|ES)(1|2?)([0-9])(5|0)0|Xpress)'; then
                                 prop_driver="radeon"; fi ;;
 
                 Intel)
@@ -511,12 +504,12 @@ GetVideoDriver () {
 
                 VIA)
                         prop_driver="openchrome" ;
-                        if echo $vga_pci | grep -i "Savage"; then
-                                prop_driver="savage"; fi
-#                       if echo $vga_pci | grep -i "s3"; then
-#                               prop_driver="via"; fi 
-                        if echo $vga_pci | grep -i "virge"; then
-                                prop_driver="virge"; fi ;;
+			if echo $vga_pci | grep -i "Savage"; then
+				prop_driver="savage"; fi
+			#if echo $vga_pci | grep -i "s3"; then
+				#prop_driver="via"; fi 
+			if echo $vga_pci | grep -i "virge"; then
+                               	prop_driver="virge"; fi ;;
 		*)
 			prop_driver="vesa"
         esac
@@ -524,10 +517,9 @@ GetVideoDriver () {
 }
 
 InstallVideoDriver () {
-	GetVideoDriver
 	case "$prop_driver" in
         	nvidia)
-			if ! PackageIsInstalled nvidia-glx && ! PackageIsInstalled nvidia-glx-new && ! PackageIsInstalled nvidia-glx-71 && ! PackageIsInstalled nvidia-glx-96 && ! PackageIsInstalled nvidia-glx-173 && ! PackageIsInstalled nvidia-glx-180 && ! PackageIsInstalled nvidia-glx-190 && ! PackageIsInstalled nvidia-glx-195 && ! PackageIsInstalled nvidia-glx-260 && ! PackageIsInstalled nvidia-glx-185 && ! PackageIsInstalled nvidia-current && ping -c 1 google.com; then 
+			if ! PackageIsInstalled nvidia-glx && ! PackageIsInstalled nvidia-glx-new && ! PackageIsInstalled nvidia-glx-71 && ! PackageIsInstalled nvidia-glx-96 && ! PackageIsInstalled nvidia-glx-173 && ! PackageIsInstalled nvidia-glx-180 && ! PackageIsInstalled nvidia-glx-190 && ! PackageIsInstalled nvidia-glx-195 && ! PackageIsInstalled nvidia-glx-260 && ! PackageIsInstalled nvidia-glx-185 && ! PackageIsInstalled nvidia-current; then 
 				apt-get -yf install pluto-nvidia-video-drivers
 				VerifyExitCode "Install Pluto nVidia Driver"
 				nv_pid=$(pidof nvidia-install.sh)
@@ -536,11 +528,12 @@ InstallVideoDriver () {
 						installCorrectNvidiaDriver
 					else StartService "Installing nVidia driver this may take a few minutes" ". /usr/pluto/bin/nvidia-install.sh"
 						installCorrectNvidiaDriver
-					fi
-			else
+					fi 
+			fi ;;
+		nouveau)
+			if ! PackageIsInstalled xserver-xorg-video-nouveau; then
 				apt-get -yf install xserver-xorg-video-nouveau
 				VerifyExitCode "Install nouveau Driver"
-				prop_driver="nouveau"
 			fi ;;
 		radeon)
 			if ! PackageIsInstalled xserver-xorg-video-radeon; then 
@@ -548,19 +541,10 @@ InstallVideoDriver () {
 				VerifyExitCode "Install radeon Driver"
 			fi ;;
 		fglrx)
-			if ! PackageIsInstalled fglrx && ping -c 1 google.com; then 
+			if ! PackageIsInstalled fglrx; then 
 				apt-get -yf install fglrx
 				VerifyExitCode "Install fglrx Driver"
-			else
-				apt-get -yf install xserver-xorg-video-radeon
-				VerifyExitCode "Install radeon Driver"
-				prop_driver="radeon"
 			fi ;;
-		radeonhd)
-			if ! PackageIsInstalled xserver-xorg-video-radeonhd; then 
-				apt-get -yf install xserver-xorg-video-radeonhd
-				VerifyExitCode "Install radeonhd Driver"
-			fi ;; 
 		intel)
 			if ! PackageIsInstalled xserver-xorg-video-intel; then 
 				apt-get -yf install xserver-xorg-video-intel
@@ -582,10 +566,9 @@ InstallVideoDriver () {
 				VerifyExitCode "Install opencrhome Driver"
 			fi ;; 
 		savage)
-			if ! PackageIsInstalled xserver-xorg-video-savage && ping -c 1 google.com; then 
+			if ! PackageIsInstalled xserver-xorg-video-savage; then 
 				apt-get -yf install xserver-xorg-video-savage
 				VerifyExitCode "Install VIA Savage Driver"
-			else prop_driver="openchrome"
 			fi ;;
 		via)
 			if ! PackageIsInstalled xserver-xorg-video-s3; then 
@@ -593,14 +576,13 @@ InstallVideoDriver () {
 				VerifyExitCode "Install VIA S3 Driver"
 			fi ;;
 		virge)
-			if ! PackageIsInstalled xserver-xorg-video-s3virge && ping -c 1 google.com; then 
+			if ! PackageIsInstalled xserver-xorg-video-s3virge; then 
 				apt-get -yf install xserver-xorg-video-s3virge
 				VerifyExitCode "Install VIA S3 Virge Driver"
-			else prop_driver="openchrome"
 			fi ;;
                 esac
-	if [[ "$chip_man" == "Intel" ]] && ping -c 1 google.com; then
-		if ! PackageIsInstalled "libva-driver-i965" && ping -c 1 google.com; then 
+	if [[ "$chip_man" == "Intel" ]] && [[ -z $online ]]; then
+		if ! PackageIsInstalled "libva-driver-i965"; then 
 			apt-get -yf install libva-driver-i965
 			VerifyExitCode "Install Intel Graphics Accelerator"
 		fi
@@ -610,27 +592,31 @@ VideoDriver="$prop_driver"
 
 CheckVideoDriver () {
 	GetVideoDriver
+	online=$(ping -c 2 google.com)
+	card_detail=$(lspci | grep 'VGA' | cut -d':' -f3)
+	offline_mismatch=""
 	if [[ -f /etc/X11/xorg.conf ]]; then
 		# TODO figure out a better way to isolate the video driver in the xorg.conf list of "Driver" options
-        	cur_driver=$(grep "Driver" /etc/X11/xorg.conf | grep -Eo '(nvidia|radeon|radeonhd|fglrx|savage|openchrome|via|virge|intel|i740|i128|vesa)')
-                card_detail=$(lspci | grep 'VGA' | cut -d':' -f3)
-		# Check to see that the appropriate driver is installed by type
-                if [[ "$prop_driver" != "$cur_driver" ]]; then
-			driver_match="no"
-		else
-			driver_match="yes"
+        	cur_driver=$(grep "Driver" /etc/X11/xorg.conf | grep -Eo '(nvidia|nouveau|radeon|fglrx|savage|openchrome|via|virge|intel|i740|i128|vesa)')
+		if [[ "$prop_driver" != "$cur_driver" ]] &&  [[ -z $online ]]; then
+			offline_mismatch="true"
+		elif [[ "$prop_driver" != "$cur_driver" ]] && [[ -n $online ]]; then
+			offline_mismatch="false"
 		fi
+		# Check to see that the appropriate driver is installed by type
 		# If current driver is nvidia, check that it is the correct one
-		if [[ "$driver_match" == "yes" ]] && [[ "$cur_driver" == "nvidia" ]]; then
+
+		if [[ "$offline_mismatch" == "false" ]] && [[ "$cur_driver" == "nvidia" ]]; then
 			StartService "Checking nVidia driver" ". /usr/pluto/bin/nvidia-install.sh"
 			current_nvidia=$(getInstalledNvidiaDriver)
 			preferred_nvidia=$(getPreferredNvidiaDriver)
-			if [[ "$current_nvidia" != "$preferred_nvidia" ]]; then
-				driver_match="no"
-			fi
 		fi
-		# remove fglrx or nVidia drivers if they are installed, but do not match current requirements
-                if [[ "$driver_match" == "no" ]]; then
+
+		if [[ "$cur_driver" == "$prop_driver" ]]; then
+			StatusMessage "Correct driver '$prop_driver' already loaded"
+			exit 0
+		# Remove fglrx or nVidia drivers if they are installed, but do not match current requirements
+                elif ([[ "$offline_mismatch" == "false" ]]) || ([[ "$offine_mismatch" == "true" ]] && echo "$prop_driver" | grep -Eq '(nouveau|radeon|openchrome)'); then
                         ErrorMessage "Video chipset change detected !!!"
 			if [[ "$cur_driver" == "fglrx" ]]; then
 				echo ""
@@ -648,18 +634,55 @@ CheckVideoDriver () {
 				StatusMessage "Removing old nVidia driver"
 				apt-get -yf remove $current_driver --force-yes
 			fi
+		
 			# If there is an xorg, but the driver does not match best selection, install driver and run AVWizard
-                        StatusMessage "Installing video driver '$prop_driver' for $card_detail"
+			StatusMessage "Installing video driver '$prop_driver' for $card_detail"
 			InstallVideoDriver
+			sleep 3
                         ConfSet "AVWizardOverride" "1"
-                else
-			StatusMessage "Correct driver '$prop_driver' already loaded"
+			exit 0
+		elif [[ "$offine_mismatch" == "true" ]]; then 
+			case "$prop_driver" in
+				nvidia)
+					prop_driver="nouveau" ;;
+				fglrx)
+					prop_driver="radeon" ;;
+				savage)
+					prop_driver="openchrome" ;;
+				via)
+					prop_driver="openchrome" ;;
+				virge)
+					prop_driver="openchrome" ;;
+			esac
+			if [[ "$prop_driver" != "$cur_driver" ]]; then
+				StatusMessage "Installing video driver '$prop_driver' for $card_detail"
+				InstallVideoDriver
+				sleep 2
+				ConfSet "AVWizardOverride" "1"
+				exit 0
+			fi
                 fi
         else
-		# If there is no xorg.conf, install driver and run AVWizard 
-		StatusMessage "Installing video driver '$prop_driver' for $card_detail"
+		# If there is no xorg.conf, install driver and run AVWizard
+		if [[ -z $online ]]; then
+			case "$prop_driver" in
+				nvidia)
+					prop_driver="nouveau" ;;
+				fglrx)
+					prop_driver="radeon" ;;
+				savage)
+					prop_driver="openchrome" ;;
+				via)
+					prop_driver="openchrome" ;;
+				virge)
+					prop_driver="openchrome" ;;
+			esac
+		fi
+		StatusMessage "/etc/X11/xorg.conf is missing. Installing video driver '$prop_driver' for $card_detail"
 		InstallVideoDriver
+		sleep 2
 		ConfSet "AVWizardOverride" "1"
+		exit 0
         fi
 }
 
