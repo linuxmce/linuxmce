@@ -50,7 +50,7 @@ Rectangle {
             radius: 5
             MouseArea{
                 anchors.fill: parent
-                onClicked:MyJs.createDynamicComponent("Power.qml" , stage)
+                onClicked:MyJs.createStageComponent("Power.qml" , stage)
             }
         }
 

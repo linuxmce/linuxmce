@@ -102,6 +102,7 @@ Rectangle {
     {
         id: contactDelegate
 
+
         Rectangle
         {
             id:mainItem

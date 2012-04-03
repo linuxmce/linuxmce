@@ -2777,13 +2777,21 @@ void DCE::qOrbiter::ShowFloorPlan(int floorplantype)
 
 }
 
+/*
+  This function updates the floorplan data. Its ordered by device number, lowest to highest
+  Fields:
+  Color - sent as an unsigned int
+  String - device status
+  String - device status with level
+  design obj number (legacy)
+  */
 void qOrbiter::updateFloorPlan(QString p)
 {
     string sval = "";
     p.remove(0, p.length() - 1);
     CMD_Get_Current_Floorplan getFloorPlan(m_dwPK_Device, iOrbiterPluginID, p.toStdString(), i_current_floorplanType , &sval);
     SendCommand(getFloorPlan);
-    //qDebug() << "This Page Floorplan Data for Page " <<  p << ", Floorplan device type " << i_current_floorplanType << "::" <<sval.c_str();
+    qDebug() << "This Page Floorplan Data for Page " <<  p << ", Floorplan device type " << i_current_floorplanType << "::" <<sval.c_str();
 }
 
 void DCE::qOrbiter::GetScreenSaverImages() // unused at this time
@@ -3893,6 +3901,7 @@ void DCE::qOrbiter::OnDisconnect()
 void DCE::qOrbiter::OnReload()
 {
     emit routerReloading("Router Reload");
+    DisconnectAndWait();
 }
 
 void qOrbiter::OnReplaceHandler()

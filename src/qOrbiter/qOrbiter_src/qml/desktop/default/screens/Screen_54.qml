@@ -256,7 +256,7 @@ Rectangle {
                     MouseArea{
                         anchors.fill: parent
                         onClicked:  {
-                            MyJs.createAvComponent("../components/Avcodes.qml", storedaudioremote)
+                            MyJs.createStageComponent("../components/Avcodes.qml", storedaudioremote)
                         }
                     }
                 }

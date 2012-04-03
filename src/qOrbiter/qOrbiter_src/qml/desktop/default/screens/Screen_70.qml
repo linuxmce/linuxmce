@@ -265,7 +265,7 @@ Rectangle {
                             MouseArea{
                                 anchors.fill: parent
                                 onClicked:  {
-                                    MyJs.createAvComponent("../components/ZoomAspect.qml", storedvideoremote)
+                                    MyJs.createStageComponent("../components/ZoomAspect.qml", storedvideoremote)
                                 }
                             }
                         }
@@ -275,7 +275,7 @@ Rectangle {
                                 anchors.fill: parent
                                 onClicked:  {
 
-                                    MyJs.createThumbComponent("../components/Bookmarks.qml", storedvideoremote)
+                                    MyJs.createStageComponent("../components/Bookmarks.qml", storedvideoremote)
 
                                 }
                             }
@@ -285,7 +285,7 @@ Rectangle {
                             MouseArea{
                                 anchors.fill: parent
                                 onClicked:  {
-                                    MyJs.createAvComponent("../components/Avcodes.qml", storedvideoremote)
+                                    MyJs.createStageComponent("../components/Avcodes.qml", storedvideoremote)
                                 }
                             }
                         }
@@ -298,7 +298,7 @@ Rectangle {
                                 anchors.fill: parent
                                 onClicked:  {
                                     dcerouter.grabScreenshot(dcenowplaying.filepath)
-                                    MyJs.createThumbComponent("../components/AssignScreenShot.qml", storedvideoremote)
+                                    MyJs.createStageComponent("../components/AssignScreenShot.qml", storedvideoremote)
 
                                 }
                             }
@@ -308,7 +308,7 @@ Rectangle {
                             MouseArea{
                                 anchors.fill: parent
                                 onClicked:  {
-                                    MyJs.createAvComponent("../components/JogPanel.qml", storedvideoremote)
+                                    MyJs.createStageComponent("../components/JogPanel.qml", storedvideoremote)
                                 }
                             }
                         }

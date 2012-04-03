@@ -156,7 +156,10 @@ int main(int argc, char* argv[])
     QApplication::setGraphicsSystem("raster");
 #endif
 
+#ifdef Q_OS_LINUX
+Qt::AA_X11InitThreads;
     QApplication  a(argc, argv);
+#endif
 
 #ifdef __ANDROID__ // workaround for 'text as boxes' issue.
     QFont f = a.font();

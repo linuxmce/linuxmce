@@ -171,7 +171,7 @@ Rectangle {
                         MouseArea{
                             anchors.fill: parent
                             onClicked:  {
-                                MyJs.createAvComponent("../components/ZoomAspect.qml",satcableboxremote )
+                                MyJs.createStageComponent("../components/ZoomAspect.qml",satcableboxremote )
                             }
                         }
                     }
@@ -187,7 +187,7 @@ Rectangle {
                         MouseArea{
                             anchors.fill: parent
                             onClicked:  {
-                                MyJs.createAvComponent("../components/Avcodes.qml",satcableboxremote )
+                                MyJs.createStageComponent("../components/Avcodes.qml",satcableboxremote )
                             }
                         }
                     }
