@@ -179,6 +179,7 @@
 	$GLOBALS['PPPoeData']=303;					// PPPoE configuration
 	$GLOBALS['NetworkInterfaces']=32;			// IPv4 Network Interfaces
 	$GLOBALS['IPv6NetworkInterfaces']=302;		// IPv6 Network Interfaces
+	$GLOBALS['EmailSettings']=304;			// core's email settings
 	$GLOBALS['securityAlert']=33;				// Alert 
 	$GLOBALS['MobileOrbiterNotification']=34;	// Mobile Orbiter Notification
 	$GLOBALS['OtherPhoneNotifications']=35;		// Other Phone Notifications 
