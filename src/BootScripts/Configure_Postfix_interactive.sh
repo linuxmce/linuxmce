@@ -18,45 +18,44 @@ apt-get -y remove postfix
 	 
 apt-get -y install postfix 
 apt-get -y install expect 
-apt-get -y install mailx 
+apt-get -y install mailutils 
 apt-get -y install ca-certificates 
 	 
-if [ -e main.cf.orig ] 
-then 
-cp main.cf.orig main.cf 
+if [ -e main.cf.orig ]; then 
+	cp main.cf.orig main.cf 
 else 
-cp main.cf main.cf.orig 
+	cp main.cf main.cf.orig 
 fi 
 	 
-if [ $tls = "yes" ] 
-then 
-rm -rf demoCA 
-rm *.pem 
-rm *.pm 
-/usr/pluto/bin/Configure_Postfix_TLS.sh "$email" "$password" "$name" "$country" "$state" "$org" "/CN=dcerouter/C=$country/ST=$state/O=$org/CN=$name/emailAddress=$email"
-echo "## TLS Settings" >> main.cf 
-echo "smtp_tls_loglevel = 1" >> main.cf 
-echo "smtp_enforce_tls = yes" >> main.cf 
-echo "smtp_tls_CAfile = /etc/postfix/cacert.pem" >> main.cf 
-echo "smtp_tls_cert_file = /etc/postfix/cert.pem" >> main.cf 
-echo "smtp_tls_key_file = /etc/postfix/key.pem" >> main.cf 
-echo "smtp_tls_session_cache_database = btree:/var/run/smtp_tls_session_cache" >> main.cf 
-echo "smtp_use_tls = yes" >> main.cf 
-echo "smtpd_tls_CAfile = /etc/postfix/cacert.pem" >> main.cf 
-echo "smtpd_tls_cert_file = /etc/postfix/cert.pem" >> main.cf 
-echo "smtpd_tls_key_file = /etc/postfix/key.pem" >> main.cf 
-echo "smtpd_tls_received_header = yes" >> main.cf 
-echo "smtpd_tls_session_cache_database = btree:/var/run/smtpd_tls_session_cache" >> main.cf 
-echo "smtpd_use_tls = yes" >> main.cf 
-echo "tls_random_source = dev:/dev/urandom" >> main.cf 
+if [ $tls = "yes" ]; then 
+	rm -rf demoCA 
+	rm -f *.pem 
+	rm -f *.pm 
+	/usr/pluto/bin/Configure_Postfix_TLS.sh "$email" "$password" "$name" "$country" "$state" "$org" "/CN=dcerouter/C=$country/ST=$state/O=$org/CN=$name/emailAddress=$email"
+	echo "## TLS Settings" >> main.cf 
+	echo "smtp_tls_loglevel = 1" >> main.cf 
+	echo "smtp_enforce_tls = yes" >> main.cf 
+	echo "smtp_tls_CAfile = /etc/postfix/cacert.pem" >> main.cf 
+	echo "smtp_tls_cert_file = /etc/postfix/cert.pem" >> main.cf 
+	echo "smtp_tls_key_file = /etc/postfix/key.pem" >> main.cf 
+	echo "smtp_tls_session_cache_database = btree:/var/run/smtp_tls_session_cache" >> main.cf 
+	echo "smtp_use_tls = yes" >> main.cf 
+	echo "smtpd_tls_CAfile = /etc/postfix/cacert.pem" >> main.cf 
+	echo "smtpd_tls_cert_file = /etc/postfix/cert.pem" >> main.cf 
+	echo "smtpd_tls_key_file = /etc/postfix/key.pem" >> main.cf 
+	echo "smtpd_tls_received_header = yes" >> main.cf 
+	echo "smtpd_tls_session_cache_database = btree:/var/run/smtpd_tls_session_cache" >> main.cf 
+	echo "smtpd_use_tls = yes" >> main.cf 
+	echo "tls_random_source = dev:/dev/urandom" >> main.cf 
 fi
 	 
 echo "dcerouter       relay:[dcerouter]" >transport 
 echo "*               smtp:[$mta]:$port" >>transport 
 postmap transport 
 	 
-echo "[$mta]:$port             $email:$password" >sasl_passwd 
-postmap sasl_passwd 
+echo '[$mta]:$port             $email:$password' >sasl_passwd 
+chown root:root /etc/postfix/sasl_passwd && chmod 600 /etc/postfix/sasl_passwd
+postmap hash:/etc/postfix/sasl_passwd
 	 
 rm -f generic ; touch generic 
 postmap generic 
@@ -78,25 +77,23 @@ echo "relayhost = [$mta]:$port" >> main.cf
 echo "disable_dns_lookups = yes" >> main.cf 
 echo "smtp_generic_maps = hash:/etc/postfix/generic" >> main.cf 
 echo "transport_maps = hash:/etc/postfix/transport" >> main.cf 
-	 
-cp demoCA/cacert.pem . 
-chmod 644 cert.pem  
-chmod 644 cacert.pem 
-chmod 400 key.pem
+
+#cp demoCA/cacert.pem . 
+#chmod 644 cert.pem  
+#chmod 644 cacert.pem 
+#chmod 400 key.pem
  
-/etc/init.d/postfix restart 
-	 
-sleep 10
-	
 if [ $emailservice = "gmail" ]
 then
 cat /etc/ssl/certs/Equifax_Secure_CA.pem >> /etc/postfix/cacert.pem
 fi
 
+service postfix reload 
+	 
 sleep 5
- 
+
 echo "sending test email..." 
-mailx -s "testing from linuxmcenew" $email < /etc/hosts 
+mailx -a "From:LinuxMCE test<$email>" -s "Email test from LinuxMCE" $email < /etc/hosts 
 	 
 sleep 10 
 	 
