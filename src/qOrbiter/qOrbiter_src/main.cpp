@@ -152,6 +152,8 @@ int main(int argc, char* argv[])
     QApplication::setGraphicsSystem("opengl");
 #elif WIN32
     QApplication::setGraphicsSystem("raster");
+#else
+    QApplication::setGraphicsSystem("raster");
 #endif
 
     QApplication  a(argc, argv);
@@ -279,7 +281,7 @@ int main(int argc, char* argv[])
         //stored video playlist for managing any media that isnt live broacast essentially
         PlaylistClass *storedVideoPlaylist = new PlaylistClass (new PlaylistItemClass);
 
-        storedVideoPlaylist->moveToThread(dceThread);
+        //storedVideoPlaylist->moveToThread(dceThread);
 
         //epg listmodel, no imageprovider as of yet
         EPGChannelList *simpleEPGmodel = new EPGChannelList(new EPGItemClass);
@@ -324,6 +326,8 @@ int main(int argc, char* argv[])
         QObject::connect(pqOrbiter, SIGNAL(fd_fileChanged(QString)), w->filedetailsclass, SLOT(setFile(QString)),Qt::QueuedConnection);
         QObject::connect(pqOrbiter, SIGNAL(fd_episodeChanged(QString)), w->filedetailsclass, SLOT(setEpisode(QString)),Qt::QueuedConnection);
         QObject::connect(pqOrbiter, SIGNAL(fd_trackChanged(QString)), w->nowPlayingButton, SLOT(setTrack(QString)),Qt::QueuedConnection);
+
+        QObject::connect(w, SIGNAL(mediaSeperatorChanged(int)), pqOrbiter, SLOT(setGridSeperator(int)), Qt::QueuedConnection);
 
         //stored media signal
         QObject::connect(pqOrbiter,SIGNAL(playlistItemAdded(PlaylistItemClass*)), storedVideoPlaylist,SLOT(appendRow(PlaylistItemClass*)), Qt::QueuedConnection);

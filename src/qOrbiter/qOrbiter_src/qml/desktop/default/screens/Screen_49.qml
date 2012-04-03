@@ -288,7 +288,7 @@ Rectangle {
                         MouseArea{
                             anchors.fill: parent
                             onClicked:  {
-                                MyJs.createAvComponent("../components/ZoomAspect.qml", dvdremote)
+                                MyJs.createStageComponent("../components/ZoomAspect.qml", dvd_remote)
                             }
                         }
                     }
@@ -300,7 +300,7 @@ Rectangle {
                         MouseArea{
                             anchors.fill: parent
                             onClicked:  {
-                                MyJs.createAvComponent("../components/Avcodes.qml", dvdremote)
+                                MyJs.createStageComponent("../components/Avcodes.qml", dvd_remote)
                             }
                         }
                     }
@@ -316,7 +316,7 @@ Rectangle {
                         MouseArea{
                             anchors.fill: parent
                             onClicked:  {
-                                MyJs.createAvComponent("../components/JogPanel.qml", storedvideoremote)
+                                MyJs.createStageComponent("../components/JogPanel.qml", dvd_remote)
                             }
                         }
                     }

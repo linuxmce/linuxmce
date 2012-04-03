@@ -19,9 +19,9 @@ GridIndexProvider::GridIndexProvider(ListModel *model  , int pathRole, int pixma
         mPixmapIndex[path] = index;
     }
 
-    QObject::connect(&mModel, SIGNAL(dataChanged(QModelIndex,QModelIndex, int)), this, SLOT(dataUpdated(QModelIndex,QModelIndex, int)),Qt::QueuedConnection);
+    QObject::connect(&mModel, SIGNAL(dataChanged(QModelIndex,QModelIndex, int)), this, SLOT(dataUpdated(QModelIndex,QModelIndex, int)),Qt::DirectConnection);
     QObject::connect(&mModel, SIGNAL(rowsRemoved(QModelIndex,int,int)), this, SLOT(dataDeleted(QModelIndex,int,int)) );
-   QObject::connect(&mModel, SIGNAL(modelAboutToBeReset()), this, SLOT(dataReset()), Qt::QueuedConnection);
+   QObject::connect(&mModel, SIGNAL(modelAboutToBeReset()), this, SLOT(dataReset()), Qt::DirectConnection);
 
 }
 

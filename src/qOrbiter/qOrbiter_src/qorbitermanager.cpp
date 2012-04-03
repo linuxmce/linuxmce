@@ -129,6 +129,15 @@ qorbiterManager::qorbiterManager(QDeclarativeView *view, QObject *parent) :
 
     qrcPath = ":android/Splash.qml";
     droidPath = "/";
+
+    if(qorbiterUIwin->width() > 480 && qorbiterUIwin-> height() > 854 || qorbiterUIwin->height() > 480 && qorbiterUIwin-> width() > 854)
+    {
+        emit mediaSeperatorChanged(50);
+    }
+    else
+    {
+        emit mediaSeperatorChanged(20);
+    }
 #elif defined (for_android)
     if (qorbiterUIwin->width() > 480 && qorbiterUIwin-> height() > 854 || qorbiterUIwin->height() > 480 && qorbiterUIwin-> width() > 854 )
     {
@@ -711,7 +720,7 @@ void qorbiterManager::swapSkins(QString incSkin)
 #ifdef WIN32
     incSkin = "default";
 #endif
-    qDebug() << tskinModel->rowCount();
+    //qDebug() << tskinModel->rowCount();
 
     if (tskinModel->rowCount() > 0)
     {
@@ -953,8 +962,8 @@ void qorbiterManager::showUI(bool b)
     else
     {
         setDceResponse("Orbiter Cant Show UI");
-        qDebug() << "Orbiter Status:" << b_orbiterReady;
-        qDebug() << "Skin Status:" << b_skinReady;
+        //qDebug() << "Orbiter Status:" << b_orbiterReady;
+       // qDebug() << "Skin Status:" << b_skinReady;
     }
 
 }
@@ -973,7 +982,7 @@ void qorbiterManager::getFloorplanDevices(int floorplantype)
 {
     for (int i=0; i < floorplans->rowCount(); i++)
     {
-        qDebug() << floorplans->index(i, 0, QModelIndex()).data(1);
+        //qDebug() << floorplans->index(i, 0, QModelIndex()).data(1);
 
         if(floorplans->index(i).data(6).toInt() == floorplantype)
         {
@@ -1490,7 +1499,7 @@ void qorbiterManager::setDceResponse(QString response)
     dceResponse = response;
     emit loadingMessage(dceResponse);
     emit dceResponseChanged();
-    qDebug() << dceResponse;
+   // qDebug() << dceResponse;
 
 }
 

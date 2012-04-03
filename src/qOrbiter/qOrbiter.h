@@ -42,6 +42,7 @@ class qOrbiter : public qOrbiter_Command
 {
     Q_OBJECT
     Q_PROPERTY (QString mediaResponse READ getMediaResponse WRITE setMediaResponse NOTIFY mediaResponseChanged)
+    Q_PROPERTY (int media_pageSeperator READ getGridSeperator WRITE setGridSeperator NOTIFY newPageSeperator )
     Q_PROPERTY (int i_current_mediaType READ getMediaType WRITE setMediaType NOTIFY mediaTypeChanged)
 
 
@@ -1117,9 +1118,10 @@ signals:
     void liveTvUpdate(QString id);
     void mythTvUpdate(QString id);
     void screenshotVariablesReady(QList<QObject*> vars);
+
     //media datagrid
     void initializeSorting();
-
+    void newPageSeperator();
     void recievingStatusChanged();
     void gridStatusChanged();
     void addItem(gridItem*);
@@ -1258,6 +1260,8 @@ public slots:
     void connectionError();
 
     //media grid
+    void setGridSeperator(int sep);
+    int getGridSeperator() { return media_pageSeperator;}
     bool checkLoadingStatus();
     void requestLiveTvPlaylist();
     void prepareFileList( int iPK_MediaType);

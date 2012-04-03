@@ -18,7 +18,7 @@ Rectangle {
 
     function runEffects()
     {
-        loadComponent("FileDetails.qml")
+        MyJs.createStageComponent("FileDetails.qml", fileviewscreen)
     }
 
     Connections
@@ -173,6 +173,7 @@ Rectangle {
                     anchors.centerIn: parent;
                     fillMode: Image.PreserveAspectCrop
                     smooth: true
+                    asynchronous: true
                 }
                 Rectangle{
                     id:textmask

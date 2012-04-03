@@ -28,6 +28,10 @@ TARGET = qorbiter
 glmsg = no
 }
 
+ANDROID{
+TARGET=qorbiter
+}
+
 symbian:TARGET.UID3 = 0xE15A481D
 
 CONFIG += qt thread

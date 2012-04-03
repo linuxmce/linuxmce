@@ -16,7 +16,7 @@ Rectangle {
         target: filedetailsclass
         onShowDetailsChanged:
         {
-            MyJs.createFileDetails(gmediaType)
+            MyJs.createFileDetails("FileDetails"+dcerouter.i_current_mediaType+".qml", fileviewscreen  )
         }
     }
     Rectangle{

@@ -121,7 +121,7 @@ Rectangle {
                 radius: 5
                 MouseArea{
                     anchors.fill: parent
-                    onClicked: MyJs.createComponentObjects("SkinSelector.qml")
+                    onClicked: MyJs.createStageComponent("SkinSelector.qml", advancedscreen)
                 }
             }
 

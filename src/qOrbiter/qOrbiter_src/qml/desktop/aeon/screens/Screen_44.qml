@@ -2,6 +2,7 @@ import QtQuick 1.0
 import "../components"
 import "../js/ComponentLoader.js" as MyJs
 Item {
+    id:screen_44
     height: style.orbiterH
     width: style.orbiterW
     Rectangle {
@@ -212,7 +213,7 @@ Rectangle {
 
             MouseArea{
                 anchors.fill: parent
-                onClicked: MyJs.createComponentObjects("SkinSelector.qml")
+                onClicked: MyJs.createStageComponent("SkinSelector.qml", screen_44 )
             }
         }
 

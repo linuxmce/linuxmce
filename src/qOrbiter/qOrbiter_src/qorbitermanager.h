@@ -310,7 +310,7 @@ Param 10 - pk_attribute
 
     //DCE variables
     bool m_bStartingUp;
-    string m_sLocalDirectory;
+    std::string m_sLocalDirectory;
     int m_pOrbiterCat;
     char *pData;                   //config size, pointer to pointer
     int iSize;                     //size of pData aka the config
@@ -318,7 +318,7 @@ Param 10 - pk_attribute
     bool bReload;                   //reload flag
     bool needRegen;                 //regen flag
 
-    string s_RouterIP;               // string of the router ip
+    std::string s_RouterIP;               // string of the router ip
     QString m_ipAddress;
     QString qs_routerip;
     bool dceBool;                   //
@@ -361,6 +361,7 @@ signals:
     void setMediaDetails();
     void mediaScreenShotReady();
     void saveMediaScreenShot(QString attribute, QByteArray pic);
+    void mediaSeperatorChanged(int sep);
 
     void liveTVrequest();
     void managerPlaylistRequest();

@@ -70,6 +70,7 @@ qOrbiter::qOrbiter( int DeviceID, string ServerAddress,bool bConnectEventHandler
     media_totalPages=0;
     media_currentPage=0;
     media_pos=0;
+
     media_pageSeperator = 50;
     b_mediaPlaying = false;
     m_dwPK_Device_NowPlaying = 0;
@@ -4389,6 +4390,11 @@ void DCE::qOrbiter::sendAvCommand(int deviceto, int command)
     cmd_string = commandString.toStdString();
     DCE::Message avMessage(cmd_string);
     m_pEvent->SendMessage(&avMessage);
+}
+
+void DCE::qOrbiter::setGridSeperator(int sep)
+{
+    media_pageSeperator = sep;
 }
 
 
