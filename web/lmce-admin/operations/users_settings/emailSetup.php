@@ -78,7 +78,7 @@ function emailSetup($output,$dbADO) {
 						document.emailSetup.emailAuthEnabled.checked = true;
 						break;
 					case "yahoo":
-						document.emailSetup.emailServer.value = "smtp.mobile.mail.yahoo.com";
+						document.emailSetup.emailServer.value = "smtp.mail.yahoo.com";
 						document.emailSetup.emailPort.value = "25";
 						document.emailSetup.emailTLSEnabled.checked = false;
 						document.emailSetup.emailAuthEnabled.checked = true;
@@ -189,22 +189,23 @@ function emailSetup($output,$dbADO) {
 				
 				<tr><td colspan="4"><hr></td></tr>
 				<tr>
-					<td>&nbsp</td>
-					<td><B>'.translate('TEXT_MAIL_SMTP_TEST_CONST').'</B></td>
-					<form action="index.php" method="POST" name="emailSetup">
+					<td>&nbsp;</td>
+					<td><input type="button" onClick="submit_form()" value="'.translate('TEXT_UPDATE_CONST').'" class="button"/></td>
+					</form>
+					<form action="index.php" method="POST" name="emailTest">
 						<input type="hidden" name="section" value="emailSetup">
 						<input type="hidden" name="action" value="test">
 						<input type="hidden" name="emailFromName" value="'.$emailFromName.'">
 						<input type="hidden" name="emailFromMail" value="'.$emailFromMail.'">
+						<td align="right"><B>'.translate('TEXT_MAIL_SMTP_TEST_CONST').'</B></td>
 						<td>
 							<input type="text" size="50" name="emailTestAddress" value="'.$emailFromMail.'">
-							<input type="submit"  value="'.translate('TEXT_TEST_CONST').'" class="button"/>
+							&nbsp;<input type="submit"  value="'.translate('TEXT_TEST_CONST').'" class="button"/>
 						</td>
 					</form>		
-					<td align="right"><input type="button" onClick="submit_form()" value="'.translate('TEXT_UPDATE_CONST').'" class="button"/></td>
+					
 				</tr>
-			</table>
-			</form>';
+			</table>';
 		}else{
 			$out.='<h2 style="color:red;">'.$fatalError.'</h2>';
 		}
@@ -272,6 +273,7 @@ function emailSetup($output,$dbADO) {
 		
 		// Call our script to setup postfix using our settings
 		$cmd="sudo -u root /usr/pluto/bin/Configure_Postfix_interactive.sh '$emailFromName' '$emailFromMail' '$emailAuthUsername' '$emailAuthPassword' '$emailServer' '$emailPort' '".($emailTLSEnabled?'yes':'no')."' '$org' '$state' '$selectedCountry' '$emailProvider'";
+		$response=exec_batch_command($cmd,0);
 		$msg=urlencode("Email settings updated.");	
 		header("Location: index.php?section=emailSetup&msg=".$msg);
 
