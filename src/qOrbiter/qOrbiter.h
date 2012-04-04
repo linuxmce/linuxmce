@@ -1147,6 +1147,7 @@ signals:
     void mediaTypeChanged(int mediaType);
     void addChannel(EPGItemClass* chan);
     void updateTimeCode(QString server, int port);
+    void stopTimeCode();
 
     //attributes. granular instead of grouped because i can. i figure the strongly interwoven orbiter got us in trouble the 1st time right? Right?!
     void np_title1Changed(QString t1);

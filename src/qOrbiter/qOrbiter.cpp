@@ -1047,6 +1047,7 @@ void qOrbiter::CMD_Set_Now_Playing(string sPK_DesignObj,string sValue_To_Assign,
         internal_streamID = iStreamID;
         emit streamIdChanged(iStreamID);
         emit mediaTypeChanged(iPK_MediaType);
+        emit stopTimeCode();
     }
     else
     {

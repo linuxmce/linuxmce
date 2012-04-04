@@ -345,6 +345,7 @@ QApplication  a(argc, argv);
 
         //timecodemanager signals / slots
         QObject::connect(pqOrbiter, SIGNAL(updateTimeCode(QString,int)), w->timecode, SLOT(start(QString,int)));
+        QObject::connect(pqOrbiter, SIGNAL(stopTimeCode()), w->timecode, SLOT(restart()), Qt::QueuedConnection);
         //setup
         QObject::connect(w, SIGNAL(registerOrbiter(int,QString,int)), pqOrbiter,SLOT(registerDevice(int,QString,int)),Qt::QueuedConnection);
         QObject::connect(pqOrbiter,SIGNAL(startManager(QString,QString)), w, SLOT(qmlSetupLmce(QString,QString)),Qt::QueuedConnection);
@@ -483,6 +484,7 @@ QObject::connect(pqOrbiter, SIGNAL(closeOrbiter()), w, SLOT(closeOrbiter()),Qt::
          QObject::connect(pqOrbiter, SIGNAL(routerDisconnect()), w, SLOT(reloadHandler()),Qt::QueuedConnection);
         QObject::connect(pqOrbiter, SIGNAL(checkReload()), w, SLOT(connectionWatchdog()), Qt::QueuedConnection);
         QObject::connect(w, SIGNAL(reInitialize()), pqOrbiter, SLOT(initialize()), Qt::QueuedConnection);
+
 
         dceThread->start();
         // tcThread->start();
