@@ -7,7 +7,7 @@ Rectangle {
     color: style.darkhighlight
     property int scaleFactor:floorplanimage.scale
 
-    function placeSprites(x,y, num, state)
+    function placeSprites(x,y, num, state, devtype)
     {
         var i;
         var pX = x; //x point
@@ -17,7 +17,7 @@ Rectangle {
         c = Qt.createComponent("FpSprite.qml");
         if(c.status === Component.Loading)
         {   console.log("Component Loading")
-           finishPlacingSprites(c,pX,pY, num, state)
+           finishPlacingSprites(c,pX,pY, num, state, devtype)
         }
         else if (c.status === Component.Error)
         {
@@ -26,20 +26,20 @@ Rectangle {
         else if (c.status === Component.Ready)
         {
             console.log("Component Ready!")
-            var sprite = c.createObject(floorplanimage, {"x": pX, "y": pY, "deviceNum": num});
+            var sprite = c.createObject(floorplanimage, {"x": pX, "y": pY, "deviceNum": num, "deviceType": devtype});
         }
     }
 
-    function finishPlacingSprites(c,x,y,num, state)
+    function finishPlacingSprites(c,x,y,num, state, devtype)
     {
         console.log("Finishing Creation")
         if(c.status === Component.Ready )
         {
-            var sprite = c.createObject(floorplanimage, {"x": x, "y": y, "deviceNum": num});
+            var sprite = c.createObject(floorplanimage, {"x": x, "y": y, "deviceNum": num, "deviceType": devtype});
         }
         else
         {
-            finishPlacingSprites(c,x,y,num, state)
+            finishPlacingSprites(c,x,y,num, state, devtype)
         }
 
     }

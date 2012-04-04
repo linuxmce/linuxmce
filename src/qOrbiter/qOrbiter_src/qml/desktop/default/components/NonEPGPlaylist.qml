@@ -11,6 +11,8 @@ Rectangle {
         onActiveItemChanged:{
             nonepgplaylistview.positionViewAtIndex(mediaplaylist.currentIndex, ListView.Beginning)
         }
+
+
     }
 /*
     BorderImage {
@@ -49,6 +51,7 @@ Rectangle {
                 source:  index === dcenowplaying.m_iplaylistPosition ? playlistimage.source = "image://listprovider/updateobject/"+securityvideo.timestamp: ""
                 anchors.fill: parent
                 opacity: .5
+
             }
             Text {
                 id: position

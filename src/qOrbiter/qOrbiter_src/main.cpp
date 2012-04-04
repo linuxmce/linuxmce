@@ -46,7 +46,7 @@ Q_IMPORT_PLUGIN(UIKit)
 #include <contextobjects/epgchannellist.h>
 #include <contextobjects/playlistclass.h>
 #include <contextobjects/timecodemanager.h>
-#include <modeltest/modeltest.h>
+
 
 
 
@@ -157,9 +157,12 @@ int main(int argc, char* argv[])
 #endif
 
 #ifdef Q_OS_LINUX
-Qt::AA_X11InitThreads;
-    QApplication  a(argc, argv);
+Qt::AA_X11InitThreads;    
 #endif
+
+
+QApplication  a(argc, argv);
+
 
 #ifdef __ANDROID__ // workaround for 'text as boxes' issue.
     QFont f = a.font();
@@ -360,6 +363,7 @@ Qt::AA_X11InitThreads;
         QObject::connect(pqOrbiter, SIGNAL(screenSaverImages(QStringList)), w->ScreenSaver, SLOT(setImageList(QStringList)),Qt::QueuedConnection);
         QObject::connect(pqOrbiter, SIGNAL(setMyIp(QString)), w, SLOT(setIpAddress(QString)),Qt::QueuedConnection);
 
+
         //messaging
         QObject::connect(mediaModel, SIGNAL(statusMessage(QString)), w, SLOT(setDceResponse(QString)),Qt::QueuedConnection);
 
@@ -469,12 +473,15 @@ Qt::AA_X11InitThreads;
         QObject::connect(storedVideoPlaylist,SIGNAL(playlistReady()), pqOrbiter,SLOT(requestMediaPlaylist()),Qt::QueuedConnection);
         QObject::connect(pqOrbiter, SIGNAL(clearPlaylist()), storedVideoPlaylist,  SLOT(populate()),Qt::QueuedConnection);
         QObject::connect(pqOrbiter, SIGNAL(playlistDone()), storedVideoPlaylist, SIGNAL(activeItemChanged()),Qt::QueuedConnection);
+QObject::connect(pqOrbiter, SIGNAL(closeOrbiter()), w, SLOT(closeOrbiter()),Qt::QueuedConnection);
 
-        QObject::connect(pqOrbiter,SIGNAL(routerReloading(QString)), w, SLOT(reloadHandler()) );
-        QObject::connect(w, SIGNAL(reloadRouter()), pqOrbiter, SLOT(quickReload()), Qt::QueuedConnection);
-        QObject::connect(pqOrbiter, SIGNAL(routerDisconnect()), w, SLOT(reloadHandler()),Qt::QueuedConnection);
-        QObject::connect(pqOrbiter, SIGNAL(closeOrbiter()), w, SLOT(closeOrbiter()),Qt::QueuedConnection);
+
+
+         QObject::connect(pqOrbiter,SIGNAL(routerReloading(QString)), w, SLOT(reloadHandler()) );
         QObject::connect(&orbiterWin, SLOT(close()), w, SLOT(closeOrbiter()), Qt::DirectConnection);
+        QObject::connect(w, SIGNAL(reloadRouter()), pqOrbiter, SLOT(quickReload()), Qt::QueuedConnection);
+         QObject::connect(pqOrbiter, SIGNAL(routerDisconnect()), w, SLOT(reloadHandler()),Qt::QueuedConnection);
+        QObject::connect(pqOrbiter, SIGNAL(checkReload()), w, SLOT(connectionWatchdog()), Qt::QueuedConnection);
         QObject::connect(w, SIGNAL(reInitialize()), pqOrbiter, SLOT(initialize()), Qt::QueuedConnection);
 
         dceThread->start();

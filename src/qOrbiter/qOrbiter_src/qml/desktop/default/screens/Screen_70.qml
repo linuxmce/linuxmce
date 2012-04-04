@@ -10,7 +10,7 @@ Rectangle {
     radius: 0
     opacity: 1
     color: "transparent"
-    Component.onCompleted: manager.setBoundStatus(true)
+
 
     Column{
         anchors.right: storedvideoremote.right
@@ -106,7 +106,8 @@ Rectangle {
                         id: nowplayingimage
                         width: dcenowplaying.aspect=="wide"? scaleX(30) : scaleX(20)
                         height:dcenowplaying.aspect=="wide"? scaleY(30) : scaleY(50)
-                        source: "image://listprovider/updateobject/"+dcenowplaying.m_iplaylistPosition
+                        source: ""
+                        Component.onCompleted: manager.setBoundStatus(true)
                     }
                 }
 

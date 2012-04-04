@@ -90,7 +90,6 @@ QImage AbstractImageProvider::screenShot()
      if (key.isNull())
      {
           key.load(":/icons/playlist.png");
-
      }
 
      return key;

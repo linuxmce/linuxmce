@@ -5,6 +5,7 @@ Item {
     id:sprite_root
     width: itemW
     height: itemH
+    objectName:deviceNum
 
     property color activeColor: "grey"
     property color inactivecolor: "green"
@@ -26,17 +27,14 @@ Item {
         sprite.border.width = selected ? 1 : 0
     }
 
-    Rectangle{
-        id:sprite
-        height: parent.height - 1
-        width: parent.width - 1
-        color: selected ? inactivecolor: activeColor
-        opacity: 0
-        border.color: "white"
-        border.width:sprite.border.width = selected ? 1 : 0
-        Component.onCompleted: PropertyAnimation {target:sprite ; property:"opacity"; to: 1; duration:1500 }
-        scale: iconScale
+    Image {
+        id: fpDevice_image
+        source: "../img/floorplanitems/"+deviceType+".png"
+        sourceSize:Qt.size(scaleY(5), scaleY(5))
+        anchors.centerIn: parent
+        cache: false
     }
+
     Text {
         id: device_number
         text: deviceNum
@@ -44,9 +42,16 @@ Item {
         font.pixelSize: scaleY(2)
     }
 
-    Image {
-        id: fpDevice_image
-        source: ""
+    Rectangle{
+        id:sprite
+        height: parent.height - 1
+        width: parent.width - 1
+        color: "transparent"
+        opacity: 0
+        border.color: "white"
+        border.width:sprite.border.width = selected ? 1 : 0
+        Component.onCompleted: PropertyAnimation {target:sprite ; property:"opacity"; to: 1; duration:1500 }
+        scale: iconScale
     }
 
     Connections{

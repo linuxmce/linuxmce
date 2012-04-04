@@ -6,21 +6,33 @@ Rectangle {
     id:router_reloading
     width: appW
     height: appH
-    color: "transparent"
+    color: "slategrey"
 
 
     Text {
         id: reload_text
-        text: qsTr("Router is Reloading")
-        font.pixelSize: scaleY(4)
+        text: qsTr("Router is Reloading, Please be patient")
+        font.pixelSize: scaleY(8)
         color: "black"
         font.bold: true
+        anchors.horizontalCenter: parent.horizontalCenter
     }
     WebView {
-        anchors.top: reload_label.bottom
+        id:web_regen
+        anchors.top: reload_text.bottom
         anchors.horizontalCenter: parent.horizontalCenter
         height: parent.height - 200
         width: parent.width - 100
         url: "http://"+srouterip+"/lmce-admin/qOrbiterGenerator.php?d="+iPK_Device
     }
+    Text {
+        id: reload_status
+        text: dcemessage
+        font.pixelSize: scaleY(5)
+        color: "black"
+        font.bold: true
+        anchors.top: web_regen.bottom
+        anchors.horizontalCenter: parent.horizontalCenter
+    }
+
 }

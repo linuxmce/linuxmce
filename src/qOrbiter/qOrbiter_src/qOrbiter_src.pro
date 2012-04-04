@@ -324,7 +324,8 @@ SOURCES += main.cpp \
     contextobjects/modelpage.cpp \
     contextobjects/avcommand.cpp \
     shaders/filereader.cpp \
-    contextobjects/timecodemanager.cpp
+    contextobjects/timecodemanager.cpp \
+    imageProviders/floorplandeviceprovider.cpp
 
 # Please do not modify the following two lines. Required for deployment.
 include(qmlapplicationviewer/qmlapplicationviewer.pri)
@@ -426,7 +427,8 @@ HEADERS += \
     contextobjects/avcommand.h \
     shaders/filereader.h \
     shaders/trace.h \
-    contextobjects/timecodemanager.h
+    contextobjects/timecodemanager.h \
+    imageProviders/floorplandeviceprovider.h
 
 OTHER_FILES += Readme.txt \
     qml/Splash.qml \

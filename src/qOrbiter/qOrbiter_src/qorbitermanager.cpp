@@ -200,6 +200,7 @@ void qorbiterManager::gotoQScreen(QString s)
         emit keepLoading(t);
         emit clearModel();
         emit resetFilter();
+
     }
 
     //send the qmlview a request to go to a screen, needs error handling
@@ -628,7 +629,7 @@ void qorbiterManager::processConfig(QByteArray config)
     //------------not sure if neccesary since it knows where we are.
     setActiveRoom(iFK_Room, iea_area);
     setCurrentUser(QString::number(iPK_User));
-    emit registerOrbiter((userList->find(sPK_User)->data(4).toInt()), QString::number(iea_area), iFK_Room );
+
 
     //pqOrbiter->CMD_Set_Current_Room(m_lRooms->idefault_Ea);
     //pqOrbiter->CMD_Set_Entertainment_Area(m_lRooms->sdefault_Ea.toStdString());
@@ -707,6 +708,7 @@ void qorbiterManager::processConfig(QByteArray config)
     tConf.clear();
 
     activateScreenSaver();
+    emit registerOrbiter((userList->find(sPK_User)->data(4).toInt()), QString::number(iea_area), iFK_Room );
     setOrbiterStatus(true);
 }
 
@@ -1293,7 +1295,7 @@ void qorbiterManager::setNowPlayingTv()
 
 void qorbiterManager::setScreenShotVariables(QList<QObject *> l)
 {
-    setDceResponse("Setting thumbnail attributes to screen");
+    qDebug("Setting thumbnail attributes to screen");
     screenshotVars = l;
     qorbiterUIwin->rootContext()->setContextProperty("screenshotAttributes", QVariant::fromValue(screenshotVars));
 }
@@ -1301,8 +1303,8 @@ void qorbiterManager::setScreenShotVariables(QList<QObject *> l)
 void qorbiterManager::setMediaScreenShot(QImage screen_shot)
 {
     mediaScreenShot = screen_shot;
+    qDebug() << mediaScreenShot.size();
     emit mediaScreenShotReady();
-
 }
 
 void qorbiterManager::saveScreenShot(QString attribute)
@@ -1491,7 +1493,6 @@ void qorbiterManager::initializeConnections()
 void qorbiterManager::reloadHandler()
 {
     gotoQScreen("ReloadHandler.qml");
-
 }
 
 void qorbiterManager::setDceResponse(QString response)
@@ -1607,6 +1608,12 @@ void qorbiterManager::setCurrentScreen(QString s)
 {
     currentScreen = s;
     emit screenChange(s);
+}
+
+void qorbiterManager::connectionWatchdog()
+{
+    QTimer::singleShot(15000, this, SIGNAL(reInitialize()));
+    qDebug("Starting Watchdog");
 }
 
 

@@ -69,6 +69,18 @@ void FloorPlanModel::handleItemChange()
     }
 }
 
+void FloorPlanModel::updateDevice(int device)
+{
+    qDebug("Updating Sprites");
+    QObject * view = uiRef->qorbiterUIwin->rootObject();
+    QList<QObject*>  currentFloorplanDevices = view->findChildren<QObject*>("floorplan_sprite");
+
+    foreach(QObject* item, currentFloorplanDevices) {
+
+
+    }
+}
+
 FloorplanDevice * FloorPlanModel::find(const QString &id) const
 {
     foreach(FloorplanDevice* item, m_list) {
@@ -179,7 +191,7 @@ void FloorPlanModel::populateSprites()
             if(item->getCurrentX() != -1)
             {
                 qDebug() << "Need to draw" << item->id();
-                QMetaObject::invokeMethod(page, "placeSprites", Q_ARG(QVariant,item->getCurrentX()), Q_ARG(QVariant,item->getCurrentY()), Q_ARG(QVariant,item->deviceNum()), Q_ARG(QVariant,false ));
+                QMetaObject::invokeMethod(page, "placeSprites", Q_ARG(QVariant,item->getCurrentX()), Q_ARG(QVariant,item->getCurrentY()), Q_ARG(QVariant,item->deviceNum()), Q_ARG(QVariant,false ), Q_ARG(QVariant, item->deviceType()));
             }
         }
         else

@@ -31,6 +31,7 @@
 #include <contextobjects/modelpage.h>
 #include <avitem.h>
 #include <contextobjects/avcommand.h>
+#include <qtimer.h>
 
 #include "QBuffer"
 #include "QApplication"
@@ -1766,10 +1767,13 @@ void qOrbiter::CMD_Assisted_Make_Call(int iPK_Users,string sPhoneExtension,strin
 
 bool DCE::qOrbiter::initialize()
 {
-    Disconnect();
+
+    qDebug("Starting dce initialization");
     if ( GetConfig() ==true && Connect(PK_DeviceTemplate_get()) == true )
     {
 
+        m_bRouterReloading = false;
+        m_bReload = false;
         emit statusMessage("Starting Manager");
         emit startManager(QString::number(m_dwPK_Device), QString::fromStdString(m_sHostName) );
 
@@ -1928,16 +1932,15 @@ void qOrbiter::connectionError()
 
 }
 
+
+
 void qOrbiter::getFloorplanDeviceCommand(int device)
 {
 
     long current_device = (long)device;
-    qDebug() << device;
     string cmds="";
     string cmd_resp="";
-
     int cellsToRender= 0;
-
     int gHeight = 1;
     int gWidth = 6;
     string dgName ="fpdev_"+StringUtils::itos(m_dwPK_Device);
@@ -1953,32 +1956,33 @@ void qOrbiter::getFloorplanDeviceCommand(int device)
     int offset = 0;
     int pkVar  = 0;
     int iOffset= 0;
-    string valassign = "0";
+    string valassign = "";
     bool isSuccessfull;
 
 
-
-    CMD_Populate_Datagrid cmd_populate_device_grid(m_dwPK_Device, iPK_Device_DatagridPlugIn, StringUtils::itos( m_dwIDataGridRequestCounter ), string(dgName), 94, option, 0, &pkVar, &valassign,  &isSuccessfull, &gHeight, &gWidth );
-
-    if (SendCommand(cmd_populate_device_grid))
+    CMD_Populate_Datagrid cmd_populate_device_grid(m_dwPK_Device, iPK_Device_DatagridPlugIn, StringUtils::itos( m_dwIDataGridRequestCounter ), string(dgName), 24, StringUtils::itos(device), 0, &pkVar, &valassign,  &isSuccessfull, &gHeight, &gWidth );
+    string cmdresponse="";
+    if (SendCommand(cmd_populate_device_grid, &cmdresponse) && cmdresponse=="OK")
     {
+        qDebug() << "Requesting floorplan Device commands";
 
-
+        cmdresponse="";
 
         //CMD_Request_Datagrid_Contents(long DeviceIDFrom, long DeviceIDTo,                   string sID,                                              string sDataGrid_ID,int iRow_count,int iColumn_count,bool bKeep_Row_Header,bool bKeep_Column_Header,bool bAdd_UpDown_Arrows,string sSeek,int iOffset,    char **pData,int *iData_Size,int *iRow,int *iColumn
-        DCE::CMD_Request_Datagrid_Contents req_device_grid( long(device), long(iPK_Device_DatagridPlugIn), StringUtils::itos( m_dwIDataGridRequestCounter ), string(dgName),    int(gWidth), int(gHeight),           false, false,        true,   string(m_sSeek),    int(iOffset),  &pData,         &iData_Size, &GridCurRow, &GridCurCol );
-        if(SendCommand(req_device_grid))
+        DCE::CMD_Request_Datagrid_Contents req_device_grid( long(m_dwPK_Device), long(iPK_Device_DatagridPlugIn), StringUtils::itos( m_dwIDataGridRequestCounter ), string(dgName),    int(gWidth), int(gHeight),           false, false,        true,   string(m_sSeek),    int(iOffset),  &pData,         &iData_Size, &GridCurRow, &GridCurCol );
+        if(SendCommand(req_device_grid, &cmdresponse) && cmdresponse=="OK")
         {
+            qDebug() << cmdresponse.c_str();
             DataGridTable *pDataGridTable = new DataGridTable(iData_Size,pData,false);
             cellsToRender= pDataGridTable->GetRows();
-#ifdef ANDROID
+#ifndef ANDROID
             LoggerWrapper::GetInstance()->Write(LV_CRITICAL, "Floorplan Device Grid Dimensions: Height %i, Width %i", gHeight, gWidth);
 #endif
             QString cellTitle;
             QString fk_file;
             QString filePath;
             int index;
-
+            qDebug() << pDataGridTable->getTotalRowCount();
             for(MemoryDataTable::iterator it=pDataGridTable->m_MemoryDataTable.begin();it!=pDataGridTable->m_MemoryDataTable.end();++it)
             {
                 DataGridCell *pCell = it->second;
@@ -1991,6 +1995,14 @@ void qOrbiter::getFloorplanDeviceCommand(int device)
 
             }
         }
+        else
+        {
+            qDebug() << cmdresponse.c_str();
+        }
+    }
+    else
+    {
+        qDebug() << cmdresponse.c_str();
     }
 
 }
@@ -2276,7 +2288,7 @@ void DCE::qOrbiter::executeCommandGroup(int cmdGrp)
 
 void qOrbiter::displayToggle(int i)
 {
-    DCE::CMD_Display_OnOff display(m_dwPK_Device, m_pData->FindFirstRelatedDeviceOfTemplate(DEVICETEMPLATE_OnScreen_Orbiter_CONST)->m_dwPK_Device , StringUtils::itos(i), false );
+  DCE::CMD_Display_OnOff display(m_dwPK_Device, m_pData->FindFirstRelatedDeviceOfTemplate(DEVICETEMPLATE_OnScreen_Orbiter_CONST)->m_dwPK_Device , StringUtils::itos(i), false );
     SendCommand(display);
     emit statusMessage("Attempting to toggle the display" );
 }
@@ -3540,7 +3552,7 @@ void DCE::qOrbiter::GetText(int textno)
 //used for resume to pass complex things like chapters and resume positions in playlists.
 void DCE::qOrbiter::setPosition(QString position)
 {
-//CHAPTER:0 POS:2040 TITLE:0 SUBTITLE:-1 AUDIO:-1 TOTAL:1239600 QUEUE_POS:0
+    //CHAPTER:0 POS:2040 TITLE:0 SUBTITLE:-1 AUDIO:-1 TOTAL:1239600 QUEUE_POS:0
     if(currentScreen.contains( "Screen_49.qml"))
 
     {
@@ -3568,7 +3580,7 @@ void qOrbiter::setPosition(int position)
 {
     emit statusMessage("Jumping position in stream to "+ QString::number(position)) ;
     CMD_Set_Media_Position setPosition(m_dwPK_Device, this->m_dwPK_Device_NowPlaying, internal_streamID, StringUtils::itos(position));
-            string cResp = "";
+    string cResp = "";
     if(SendCommand(setPosition, &cResp) && cResp == "OK")
     {
         emit mediaMessage("Jumping to Position");
@@ -3739,7 +3751,7 @@ void DCE::qOrbiter::grabScreenshot(QString fileWithPath)
     string sDisableAspectLock = "0";
 
 
-    //  qDebug() << fileWithPath;
+    qDebug() << fileWithPath;
     int gHeight = 0;
     int gWidth = 0;
     int pkVar = 0;
@@ -3758,7 +3770,7 @@ void DCE::qOrbiter::grabScreenshot(QString fileWithPath)
     CMD_Populate_Datagrid cmd_populate_attribute_grid(m_dwPK_Device, iPK_Device_DatagridPlugIn, StringUtils::itos( m_dwIDataGridRequestCounter ), string(m_sGridID), 31, QString::number(i_ea).toStdString(), 0, &pkVar, &valassign,  &isSuccessfull, &gHeight, &gWidth );
 
     if (SendCommand(cmd_populate_attribute_grid))
-    {
+    {   m_dwIDataGridRequestCounter++;
         /*
               initial request to populate the text only grid as denoted by the lack of a leading "_" as in _MediaFile_43
               this way, we can safely check empty grids and error gracefully in the case of no matching media
@@ -3785,22 +3797,20 @@ void DCE::qOrbiter::grabScreenshot(QString fileWithPath)
             int index;
             QString cellfk;
             DataGridCell *pCell;
-            for(MemoryDataTable::iterator it=pDataGridTable->m_MemoryDataTable.begin();it!=pDataGridTable->m_MemoryDataTable.end();++it)
+            for(MemoryDataTable::iterator it=pDataGridTable->m_MemoryDataTable.begin();it!=pDataGridTable->m_MemoryDataTable.end(); it++)
             {
 
-                pCell = it->second;
-
-                index = pDataGridTable->CovertColRowType(it->first).first;
+                pCell= it->second;
                 cellTitle = pCell->GetText();
                 cellAttribute = pCell->GetValue();
                 cellfk = pCell->GetValue();
                 QStringList parser = cellTitle.split(QRegExp("(\\n|:\\s)"), QString::KeepEmptyParts);
+                qDebug() << parser;
                 screenshotVars.append(new screenshotAttributes( cellfk, cellTitle, cellAttribute.prepend("!A") ));
+
             }
 
         }
-
-
 
         int iEK_File;
         CMD_Get_ID_from_Filename getFileID(m_dwPK_Device, iMediaPluginID, fileWithPath.toStdString(), &iEK_File);
@@ -3817,6 +3827,7 @@ void DCE::qOrbiter::grabScreenshot(QString fileWithPath)
 
     }
     emit screenshotVariablesReady(screenshotVars);
+    qDebug("sending screenshot variables");
     screenshotVars.clear();
 
     CMD_Get_Video_Frame grabMediaScreenshot(long(m_dwPK_Device), long(m_dwPK_Device_NowPlaying), sDisableAspectLock,internal_streamID, 800 , 800, &screenieData, &screenieDataSize, &s_format);
@@ -3829,6 +3840,10 @@ void DCE::qOrbiter::grabScreenshot(QString fileWithPath)
         screenShotData.setRawData(screenieData, screenieDataSize);
         t.loadFromData(screenShotData);
         emit screenShotReady(t);
+    }
+    else
+    {
+        emit mediaMessage("Couldnt Create Screenshot!");
     }
 }
 
@@ -3896,17 +3911,28 @@ void DCE::qOrbiter::adjustVolume(int vol)
 void DCE::qOrbiter::OnDisconnect()
 {
     emit routerDisconnect();
+
 }
 
 void DCE::qOrbiter::OnReload()
 {
-    emit routerReloading("Router Reload");
-    DisconnectAndWait();
+    LoggerWrapper::GetInstance()->Write(LV_STATUS,"Command_Impl::OnReload %d", m_dwPK_Device);
+
+    pthread_cond_broadcast( &m_listMessageQueueCond );
+
+
+#ifdef LINK_TO_ROUTER
+    if(NULL != m_pRouter && m_pRouter->IsPlugin(m_pcRequestSocket->m_dwPK_Device))
+        m_pRouter->Reload();
+#endif
+    emit routerDisconnect();
+    emit checkReload();
+    Disconnect();
 }
 
 void qOrbiter::OnReplaceHandler()
 {
-emit closeOrbiter();
+    emit closeOrbiter();
 }
 
 void DCE::qOrbiter::extraButtons(QString button)
@@ -3993,11 +4019,11 @@ void DCE::qOrbiter::saveScreenAttribute(QString attribute, QByteArray data)
     string cResp = "";
     if(SendCommand(thumb))
     {
-        emit statusMessage("Created Thumbnail");
+        emit mediaMessage("Created Thumbnail");
     }
     else
     {
-
+        emit mediaMessage("Couldnt Save");
     }
 }
 

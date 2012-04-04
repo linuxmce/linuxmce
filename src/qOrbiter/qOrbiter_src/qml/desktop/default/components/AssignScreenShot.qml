@@ -7,9 +7,11 @@ Rectangle {
     height: scaleY(75)
     radius: 5
     color: "slategrey"
+    anchors.centerIn: parent
     Connections{
         target: manager
         onMediaScreenShotReady: screenshotImage.source="image://listprovider/screenshot/"+securityvideo.timestamp
+
     }
 
     Text {
@@ -38,7 +40,8 @@ Rectangle {
                 onEntered: attributedelegate.color = "aliceblue"
                 onExited: attributedelegate.color = style.accentcolor
                 onClicked: {
-                    manager.saveScreenShot(attributeNo);
+                     manager.saveScreenShot(attributeNo)
+                    manager.cleanupScreenie()
                      assignscreenshot.destroy()
                 }
             }
@@ -78,11 +81,11 @@ Rectangle {
         id: screenshotImage
         anchors.left: attributes.right
         anchors.leftMargin: 10
-        source: "image://listprovider/screenshot/"+securityvideo.timestamp
+        source: ""
         height: parent.height *.65
         fillMode: Image.PreserveAspectFit
         width: parent.width*.50
-
+        onSourceChanged: console.log("image updated")
     }
 
     ButtonSq
@@ -96,9 +99,10 @@ Rectangle {
         anchors.right: parent.right
         anchors.rightMargin: scaleX(1)
         MouseArea{
-            anchors.fill: parent
-            onPressed: {assignscreenshot.destroy() }
-            onClicked: { manager.cleanupScreenie()
+            anchors.fill: parent           
+            onClicked: {
+                manager.cleanupScreenie()
+                assignscreenshot.destroy()
             }
         }
     }

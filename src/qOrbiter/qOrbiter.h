@@ -151,6 +151,7 @@ public:
 
 
 
+
     virtual int PromptUser(string sPrompt,int iTimeoutSeconds=10,map<int,string> *p_mapPrompts = NULL);
     virtual int PromptFor(string sToken);
 
@@ -1086,6 +1087,7 @@ signals:
     //navigation
     void gotoQml(QString qml);
     void gotoScreen(QString screen);
+    void bookmarksReady(QList<QObject*>);
 
     //setup
     void startManager(QString, QString);
@@ -1101,6 +1103,7 @@ signals:
     void mediaResponseChanged();
 
     //connections
+    void checkReload();
 
     //floorplans
     void floorPlanImageData(const uchar* ,int);
@@ -1258,6 +1261,7 @@ public slots:
 
     //connections
     void connectionError();
+
 
     //media grid
     void setGridSeperator(int sep);

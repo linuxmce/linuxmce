@@ -363,6 +363,7 @@ signals:
     void saveMediaScreenShot(QString attribute, QByteArray pic);
     void mediaSeperatorChanged(int sep);
 
+
     void liveTVrequest();
     void managerPlaylistRequest();
     void bindMediaRemote(bool b);
@@ -416,6 +417,7 @@ signals:
     void floorplanTypeChanged();
 
 public slots: //note: Q_INVOKABLE means it can be called directly from qml
+    void connectionWatchdog();
     QString getCurrentUser() {return sPK_User;}
     void setCurrentUser(QString inc_user );
     void setCurrentRoom(QString room) {currentRoom = room; emit roomChanged();}

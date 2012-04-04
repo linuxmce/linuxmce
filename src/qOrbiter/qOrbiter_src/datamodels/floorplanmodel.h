@@ -32,6 +32,7 @@
 #include <qorbitermanager.h>
 class qorbiterManager;
 
+
 class FloorPlanModel : public QAbstractListModel
 {
     Q_PROPERTY (QString currentPage READ getCurrentPage WRITE setCurrentPage NOTIFY pageChanged)
@@ -86,6 +87,7 @@ signals:
 public slots:
     void clear();
     void handleItemChange();
+    void updateDevice(int device);
 
 
     int getCurrentIntPage() {return iCurrentPage;}
