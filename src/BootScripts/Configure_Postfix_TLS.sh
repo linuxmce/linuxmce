@@ -40,7 +40,6 @@ expect "Data Base Updated"
 spawn openssl x509 -in demoCA/cacert.pem -days 3650 -out cacert.pem -signkey demoCA/private/cakey.pem 
 expect -re "Enter pass phrase" 
 send "$password\r" 
-	 
 spawn cp cacert.pem demoCA 
 	 
 spawn openssl req -new -nodes -subj "$dn" -keyout key.pem -out req.pem -days 3650 
@@ -54,5 +53,5 @@ send "y\r"
 expect -re "1 out of 1 certificate requests certified, commit" 
 send "y\r" 
 expect "Data Base Updated" 
- 
+
 exit 0 

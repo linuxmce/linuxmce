@@ -14,7 +14,9 @@ country=$8
 emailservice=$9
 
 cd /etc/postfix 
-	 
+
+# reinstall packages, to be honest: I don't know why. It was like this before i touched.
+# Will investigate if be can drop this.
 apt-get -y remove postfix 
 	 
 apt-get -y install postfix 
@@ -27,7 +29,11 @@ if [ -e main.cf.orig ]; then
 else 
 	cp main.cf main.cf.orig 
 fi 
-	 
+
+# Turn off history mode to allow ! in passwords
+set +H
+
+# If TLS is used generate certificates and configure postfix to use them
 if [ "$tls" == "yes" ]; then 
 	rm -rf demoCA 
 	rm -f *.pem 
@@ -49,7 +55,8 @@ if [ "$tls" == "yes" ]; then
 	echo "smtpd_use_tls = yes" >> main.cf 
 	echo "tls_random_source = dev:/dev/urandom" >> main.cf 
 fi
-	 
+
+# Generate new postfix config files
 echo "dcerouter       relay:[dcerouter]" >transport 
 echo "*               smtp:[$mta]:$port" >>transport 
 postmap transport 
@@ -89,14 +96,6 @@ then
 cat /etc/ssl/certs/Equifax_Secure_CA.pem >> /etc/postfix/cacert.pem
 fi
 
+# reload new config
 service postfix reload 
-	 
-echo "sending test email..." 
-mailx -a "From:LinuxMCE test<$email>" -s "Email test from LinuxMCE" $email < /etc/hosts 
-sleep 7 
-	 
-status=$(tail -3 /var/log/mail.info | grep status | sed -n 's/^.*status=\(.*\).*$/\1/p')
-
-echo "Status: $status"
-
-exit 1
+exit 0
