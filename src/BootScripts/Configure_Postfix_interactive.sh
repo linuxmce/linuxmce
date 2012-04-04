@@ -2,14 +2,15 @@
 	 
 name=$1 
 email=$2 
-password=$3 
-mta=$4 
-port=$5 
-tls=$6 
-org=$7 
-state=$8 
-country=$9 
-shift 1
+username=$3
+password=$4 
+mta=$5
+port=$6 
+tls=$7
+org=$8 
+state=$9 
+shift 2
+country=$8
 emailservice=$9
 
 cd /etc/postfix 
@@ -27,7 +28,7 @@ else
 	cp main.cf main.cf.orig 
 fi 
 	 
-if [ $tls = "yes" ]; then 
+if [ "$tls" == "yes" ]; then 
 	rm -rf demoCA 
 	rm -f *.pem 
 	rm -f *.pm 
@@ -53,7 +54,7 @@ echo "dcerouter       relay:[dcerouter]" >transport
 echo "*               smtp:[$mta]:$port" >>transport 
 postmap transport 
 	 
-echo '[$mta]:$port             $email:$password' >sasl_passwd 
+echo "[$mta]:$port             $username:$password" >sasl_passwd 
 chown root:root /etc/postfix/sasl_passwd && chmod 600 /etc/postfix/sasl_passwd
 postmap hash:/etc/postfix/sasl_passwd
 	 
@@ -90,11 +91,12 @@ fi
 
 service postfix reload 
 	 
-sleep 5
-
 echo "sending test email..." 
 mailx -a "From:LinuxMCE test<$email>" -s "Email test from LinuxMCE" $email < /etc/hosts 
+sleep 7 
 	 
-sleep 10 
-	 
-tail /var/log/mail.info | grep status= 
+status=$(tail -3 /var/log/mail.info | grep status | sed -n 's/^.*status=\(.*\).*$/\1/p')
+
+echo "Status: $status"
+
+exit 1
