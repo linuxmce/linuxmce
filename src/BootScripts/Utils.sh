@@ -587,7 +587,6 @@ InstallVideoDriver () {
 			VerifyExitCode "Install Intel Graphics Accelerator"
 		fi
 	fi
-VideoDriver="$prop_driver"
 }
 
 CheckVideoDriver () {
@@ -629,7 +628,6 @@ CheckVideoDriver () {
 				apt-get -y install --reinstall xserver-xorg-core --force-yes
 				rm /etc/X11/xorg.conf
 				reboot
-				exit 0
 			elif [[ $cur_driver == "nvidia" ]]; then
 				StatusMessage "Removing old nVidia driver"
 				apt-get -yf remove $current_driver --force-yes
@@ -638,9 +636,8 @@ CheckVideoDriver () {
 			# If there is an xorg, but the driver does not match best selection, install driver and run AVWizard
 			StatusMessage "Installing video driver '$prop_driver' for $card_detail"
 			InstallVideoDriver
-			sleep 3
+			sleep 2
                         ConfSet "AVWizardOverride" "1"
-			exit 0
 		elif [[ "$offine_mismatch" == "true" ]]; then 
 			case "$prop_driver" in
 				nvidia)
@@ -659,7 +656,6 @@ CheckVideoDriver () {
 				InstallVideoDriver
 				sleep 2
 				ConfSet "AVWizardOverride" "1"
-				exit 0
 			fi
                 fi
         else
@@ -682,8 +678,8 @@ CheckVideoDriver () {
 		InstallVideoDriver
 		sleep 2
 		ConfSet "AVWizardOverride" "1"
-		exit 0
         fi
+VideoDriver="$prop_driver"
 }
 
 ReloadDevicesOnThisMachine()

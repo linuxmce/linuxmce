@@ -318,7 +318,7 @@ if [[ -z "$SkipLock" ]]; then
 	WaitLock "Xconfigure" "Xconfigure" nolog # don't run two copies of Xconfigure simultaneously
 fi
 EnsureResolutionVariables
-InstallVideoDriver
+CheckVideoDriver
 DisplayDriver=$VideoDriver
 if [[ -n "$ForceVESA" ]]; then
 	DisplayDriver=vesa
