@@ -331,6 +331,38 @@ left: 100%;
   color: #000;                 /* makes the active menu item text black */ 
 }
 
+#loading { 
+	display:none;
+	position:absolute;
+	width:300px;
+	height:150px;
+	left:50%;
+	top:50%;
+	margin-left: -150px;
+	margin-top: -75px;
+	-moz-box-shadow: 3px 3px 5px gray;
+	-webkit-box-shadow: 3px 3px 5px gray;
+	-moz-border-radius: 10px;
+	-webkit-border-radius: 15px;
+	z-index:10;
+    background-image:url("/lmce-admin/img/transparentbg.png"); 
+}
+
+#loading_picture {
+	position: relative;
+	top: 20px;
+	margin-left:auto;
+	margin-right:auto;
+	width: 50px;
+}
+
+#loading_text {
+	position: relative;
+	color: #FFFFFF;
+	text-align: center;
+	font-size: 24px;
+	top: 50px;
+}
 
 div#menu ul ul,
 div#menu ul li:hover ul ul,

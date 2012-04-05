@@ -187,4 +187,5 @@ $DEFAULT_SORT ='Fixer tri par défaut';
 $TEXT_DEFAULT_SORT_CONST ='Fixer tri par défaut';
 $TEXT_AUDIO_CONST='Audio';
 $TEXT_VIDEO_CONST='Vidéo';
+$TEXT_PLEASE_WAIT_CONST='Veuillez patienter';
 ?>

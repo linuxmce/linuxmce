@@ -105,9 +105,18 @@ function emailSetup($output,$dbADO) {
 				document.emailSetup.emailTLSEnabled.disabled = false;
 				document.emailSetup.emailAuthEnabled.disabled = false;
 
+				document.getElementById("loading").style.display = "block";
 				document.emailSetup.submit();
 			}
 			</script>
+			<div id="loading">
+  				<div id="loading_picture">
+					<img src="img/loader.gif" /> 
+				</div>
+				<div id="loading_text">
+					'.translate('TEXT_PLEASE_WAIT_CONST').'
+				</div>
+			</div>
 			<div class="err">'.(isset($_GET['error'])?strip_tags($_GET['error']):'').'</div>
 			<form action="index.php" method="POST" name="emailSetup">
 			<input type="hidden" name="section" value="emailSetup">

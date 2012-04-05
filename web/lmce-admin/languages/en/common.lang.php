@@ -187,4 +187,5 @@ $TEXT_DEFAULT_SORT_CONST ='Set Default Sort';
 $TEXT_AUDIO_CONST='Audio';
 $TEXT_VIDEO_CONST='Video';
 $TEXT_UPLOAD_CONST='Upload';
+$TEXT_PLEASE_WAIT_CONST='Please wait';
 ?>
