@@ -2,8 +2,7 @@
 	// include language files
 	includeLangFile('common.lang.php');
 	includeLangFile('phoneLines.lang.php');
-error_reporting(E_ALL);
-ini_set('display_errors', '1');
+
 function phoneLines($output,$astADO,$dbADO) {
 	global $wikiHost, $editedID, $editdata;
 	
