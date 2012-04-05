@@ -2,7 +2,8 @@
 	// include language files
 	includeLangFile('common.lang.php');
 	includeLangFile('phoneLines.lang.php');
-
+error_reporting(E_ALL);
+ini_set('display_errors', '1');
 function phoneLines($output,$astADO,$dbADO) {
 	global $wikiHost, $editedID, $editdata;
 	
@@ -40,14 +41,20 @@ function phoneLines($output,$astADO,$dbADO) {
 		
 		// edit phoneline block
 		if(isset($GLOBALS['count']) && $GLOBALS['count']==0 || isset($_REQUEST['eid'])){
+			$res=$dbADO->Execute("SELECT PK_Users, CONCAT(FirstName,' ',LastName) AS Name FROM Users WHERE ForwardEmail <> '' ORDER BY LastName,FirstName");
+			while($row=$res->FetchRow()) $UsersList[$row['PK_Users']]=$row['Name'];	
 			$out.='
 			<br /><hr /><br />
 			<input type="hidden" name="editedID" value="'.@$editedID.'">
 			<table align="center" cellpadding="3" cellspacing="0">
 				<tr class="tablehead"><td><B>'.translate('TEXT_NAME_CONST').'</B> </td><td><input type="text" name="name" value="'.$editdata['name'].'"></td></tr>
 				<tr><td><B>'.translate('TEXT_ENABLED_CONST').'</B> </td><td><input type="checkbox" name="enabled" value="1" '.((@$editdata['enabled']=='yes')?'checked':'').'></td></tr>
-				<tr><td><B>'.translate('TEXT_FAX_CONST').'</B> </td><td><input type="checkbox" name="isfax" value="1" '.((@$editdata['isfax']=='yes')?'checked':'').'>
-				&nbsp;&nbsp;'.translate('TEXT_FAX_EMAIL_CONST').'&nbsp;<input type="text" size="20" name="faxmail" value="'.$editdata['faxmail'].'"></td></tr>
+				<tr><td><B>'.translate('TEXT_FAX_CONST').'</B> </td><td><input type="checkbox" name="isfax" value="1" '.((@$editdata['isfax']=='yes')?'checked':'').'>&nbsp;&nbsp;
+				'.translate('TEXT_FAX_EMAIL_CONST').'&nbsp;<select name="faxmail"  style="width: auto">';
+				foreach ($UsersList as $id => $name) $out.='<option value="'.$id.'" '.(($editdata['faxmail'] == $id)?'selected="selected"':'').'>'.$name.'</option>';
+				$out .='</select>
+				<!-- <input type="text" size="20" name="faxmail" value="'.$editdata['faxmail'].'"></td> -->
+				</tr>
 				<tr><td><B>'.translate('TEXT_PREFIX_CONST').'</B> </td><td><input type="text" name="prefix" maxlength="2" size="3" value="'.$editdata['prefix'].'"></td></tr>
 				<tr><td><B>'.translate('TEXT_USERNAME_CONST').' *</B> </td> <td><input type="text" name="username" value="'.$editdata['username'].'"></td></tr>
 				<tr><td colspan="2">'.translate('TEXT_PHONE_LINE_USERNAME_NOTE_CONST').'</td></tr>

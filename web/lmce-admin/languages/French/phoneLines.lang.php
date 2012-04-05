@@ -1,7 +1,7 @@
 <?
 $TEXT_PHONE_LINES_CONST='Lignes téléphoniques';
-$TEXT_FAX_CONST='Line Fax entrant';
-$TEXT_FAX_EMAIL_CONST='transférer à l\'adresse mail';
+$TEXT_FAX_CONST='Ligne Fax entrant';
+$TEXT_FAX_EMAIL_CONST='transférer en PDF par mail à l\'utilisateur suivant';
 $TEXT_PREFIX_CONST='Prefixe';
 $TEXT_CHANNELS_CONST='Canal';
 $TEXT_PROTOCOL_CONST='Protocole';
