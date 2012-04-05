@@ -209,7 +209,7 @@ function emailSetup($output,$dbADO) {
 						<td align="right"><B>'.translate('TEXT_MAIL_SMTP_TEST_CONST').'</B></td>
 						<td>
 							<input type="text" size="50" name="emailTestAddress" value="'.$emailFromMail.'">
-							&nbsp;<input type="submit"  value="'.translate('TEXT_TEST_CONST').'" class="button"/>
+							&nbsp;<input type="button" onClick="document.getElementById(\'loading\').style.display = \'block\';submit();"; value="'.translate('TEXT_TEST_CONST').'" class="button"/>
 						</td>
 					</form>		
 					
@@ -227,7 +227,6 @@ function emailSetup($output,$dbADO) {
 		$response=exec_batch_command($cmd,0);
 
 		$msg=urlencode('Response:'.$response);
-		//$msg=urlencode("Email settings updated.");	
 		header("Location: index.php?section=emailSetup&msg=".$msg);
 	} else {
 		$emailFromName = $_POST["emailFromName"];
