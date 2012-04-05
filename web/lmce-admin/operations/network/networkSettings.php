@@ -339,8 +339,8 @@ function networkSettings($output,$dbADO) {
 		}
 		
 		if(shouldSubmit==true) {
-			alert("'.translate('TEXT_UPDATING_SETTINGS_CONST').'");
-
+			document.getElementById("loading").style.display = "block";
+			
 			// Enable fields to make variables flow into POST request
 			// disabled elements are not transmitted
 			document.networkSettings.PPPoEUser.disabled=false;
@@ -465,6 +465,15 @@ function networkSettings($output,$dbADO) {
 	}
 	
 	</script>
+	<div id="loading">
+		<div id="loading_picture">
+			<img src="img/loader.gif" /> 
+		</div>
+		<div id="loading_text">
+			'.translate('TEXT_PLEASE_WAIT_CONST').'
+		</div>
+	</div>
+
 	<div class="err">'.(isset($_GET['error'])?strip_tags($_GET['error']):'').'</div>
 	<form action="index.php" method="POST" name="networkSettings">
 	<input type="hidden" name="section" value="networkSettings">
