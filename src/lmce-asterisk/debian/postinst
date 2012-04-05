@@ -35,7 +35,7 @@ if [[ "$1" == configure ]]; then
 		#create asterisk account if it does not yet exist
 		id -u asterisk >/dev/null 2>/dev/null
 		if [[ $? -ne 0 ]]; then
-			adduser www-data asterisk
+			adduser --ingroup www-data asterisk
 		fi
 		
 		mkdir -p /var/lib/asterisk/mohmp3
@@ -51,6 +51,19 @@ if [[ "$1" == configure ]]; then
 
 		service apache2 restart
 		service asterisk restart
-	fi	
+	fi
+	
+	# add asterisk user to sudoers to execute dialplan bash scripts
+	sudo="asterisk	ALL=(root) NOPASSWD:PLUTO_WEBCMD"
+	awk '!/asterisk.*ALL=\(root\)/' /etc/sudoers >>/etc/sudoers.$$	
+	if ! BlacklistConfFiles '/etc/sudoers' ;then
+	        if [ ! -e '/etc/sudoers.pbackup' ] ;then
+	                cp /etc/sudoers /etc/sudoers.pbackup || :
+	        fi
+	
+	        echo "$sudo" >>/etc/sudoers.$$
+	        mv -f /etc/sudoers.$$ /etc/sudoers
+	        chmod 440 /etc/sudoers
+	fi
 
 fi

@@ -128,7 +128,9 @@ chown asterisk:asterisk /home/fax
 ARCHIVEFILE="$DTFAX $(basename $DESTFILE)"
 ARCHIVEFILE="/home/fax/$(echo $ARCHIVEFILE | sed 's/ /_/g' | sed 's/\//-/g')"
 mv -f $DESTFILE $ARCHIVEFILE
-echo "$DATETIME	Moving $DESTFILE to $ARCHIVEFILE">>$LOGFILE
+chown asterisk:asterisk $ARCHIVEFILE
+chmod 666 $ARCHIVEFILE
+echo "$DATETIME	Moved $DESTFILE to $ARCHIVEFILE">>$LOGFILE
 
 echo "----------">>$LOGFILE
 exit $RETVAL
