@@ -368,8 +368,7 @@ switch => Realtime
 	('$context','$phonenumber','1','Set','__FROM_DID=\${EXTEN}'), \
 	('$context','$phonenumber','2','Set','CALLERID(num)=\${CALLERID(name)}'), \
 	('$context','$phonenumber','3','Noop','Incoming call from \${CALLERID(num)}'), \
-	('$context','$phonenumber','4','Set','FAX_RX='), \
-	('$context','$phonenumber','5','Goto','custom-linuxmce,$line,1');"
+	('$context','$phonenumber','4','Goto','custom-linuxmce,$line,1');"
 }
 
 WorkTheLines()

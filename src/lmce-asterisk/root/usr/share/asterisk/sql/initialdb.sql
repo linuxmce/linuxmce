@@ -54,11 +54,23 @@ INSERT INTO ast_config (cat_metric, var_metric, commented, filename, category, v
 (0, 5, 0, 'iax.conf', 'general', 'allow', 'gsm'),
 (0, 6, 0, 'iax.conf', 'general', 'context', 'from-sip-external'),
 (0, 7, 0, 'iax.conf', 'general', 'mailboxdetail', 'yes'),
-(0, 8, 0, 'iax.conf', 'general', 'dtmfmode', 'auto'),
-(0, 9, 0, 'iax.conf', 'general', 'rtcachefriends', 'yes'),
-(0, 10, 0, 'iax.conf', 'general', 'rtupdate', 'yes'),
-(0, 11, 0, 'iax.conf', 'general', 'tos', '0x18'),
-(0, 12, 0, 'iax.conf', 'general', 'jitterbuffer', 'yes');
+(0, 8, 0, 'iax.conf', 'general', 'iaxcompat', 'yes'),
+(0, 9, 0, 'iax.conf', 'general', 'nochecksums', 'no'),
+(0, 10, 0, 'iax.conf', 'general', 'delayreject', 'yes'),
+(0, 11, 0, 'iax.conf', 'general', 'bandwidth', 'high'),
+(0, 12, 0, 'iax.conf', 'general', 'dtmfmode', 'auto'),
+(0, 13, 0, 'iax.conf', 'general', 'rtcachefriends', 'yes'),
+(0, 14, 0, 'iax.conf', 'general', 'rtupdate', 'yes'),
+(0, 15, 0, 'iax.conf', 'general', 'tos', '0x18'),
+(0, 16, 0, 'iax.conf', 'general', 'maxjitterbuffer', '1000'),
+(0, 17, 0, 'iax.conf', 'general', 'maxjitterinterps', '10'),
+(0, 18, 0, 'iax.conf', 'general', 'jitterbuffer', 'yes'),
+(0, 19, 0, 'iax.conf', 'general', 'resyncthreshold', '1000'),
+(0, 20, 0, 'iax.conf', 'general', 'trunktimestamps', 'yes'),
+(0, 21, 0, 'iax.conf', 'general', 'minregexpire', '120'),
+(0, 22, 0, 'iax.conf', 'general', 'maxregexpire', '300'),
+(0, 23, 0, 'iax.conf', 'general', 'iaxthreadcount', '256'),
+(0, 24, 0, 'iax.conf', 'general', 'iaxmaxthreadcount', '256');
 
 --
 -- Insert static rtp.conf in  DB
@@ -121,7 +133,7 @@ INSERT INTO ast_config (cat_metric, var_metric, commented, filename, category, v
 DELETE FROM extensions WHERE exten='*43';
 DELETE FROM extensions WHERE exten='*60';
 DELETE FROM extensions WHERE exten='*65';
-DELETE FROM extensions WHERE exten='*70';
+DELETE FROM extensions WHERE context='fax';
 DELETE FROM extensions WHERE exten='*96';
 
 ALTER TABLE extensions AUTO_INCREMENT=1;
@@ -171,16 +183,17 @@ INSERT INTO extensions (context, exten, priority, app, appdata) VALUES
 ('applications', '*65',10, 'Hangup', '');
 
 -- *70: Incoming Fax
+DELETE FROM extensions WHERE context='fax';
 INSERT INTO extensions (context, exten, priority, app, appdata) VALUES
-('applications', '*70', 1, 'Answer', ''),
-('applications', '*70', 2, 'Wait', '6'),
-('applications', '*70', 3, 'Set', 'FAXFILE=/var/spool/asterisk/fax/${CALLERID(num)}.tif'),
-('applications', '*70', 4, 'Set', 'FAXFILENOEXT=/var/spool/asterisk/fax/${CALLERID(num)}'),
-('applications', '*70', 5, 'Receivefax', '${FAXFILE}'),
-('applications', '*70', 6, 'Hangup', '');
-
--- exten => fax,n,System('/usr/bin/fax2mail ${CALLERIDNUM} "${CALLERIDNAME}" FaxNum RecipName email@address.com ${FAXFILENOEXT} p')
-
+('fax', '*70', 1, 'Answer', ''),
+('fax', '*70', 2, 'Noop', 'Receiving fax for DID ${CALLERID(DNID)}'),
+('fax', '*70', 3, 'Wait', '3'),
+('fax', '*70', 4, 'Set', 'FAXFILE=/var/spool/asterisk/fax/${CALLERID(num)}.tif'),
+('fax', '*70', 5, 'Set', 'FAXFILENOEXT=/var/spool/asterisk/fax/${CALLERID(num)}'),
+('fax', '*70', 6, 'Receivefax', '${FAXFILE}'),
+('fax', '*70', 7, 'Hangup', ''),
+('fax', 'h', 1, 'System', '/usr/pluto/bin/Fax_Process.sh ${FAXFILENOEXT} ${CALLERID(DNID)} ${CALLERID(num)} "${CALLERID(name)}"'),
+('fax', 'h', 2, 'Hangup', '');
 
 -- *95: test Music On Hold (MOH)
 INSERT INTO extensions (context, exten, priority, app, appdata) VALUES

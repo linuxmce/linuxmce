@@ -347,7 +347,7 @@ CREATE TABLE IF NOT EXISTS `phonelines` (
   `phonenumber` varchar(50) NOT NULL,
   `username` varchar(50) NOT NULL DEFAULT '',
   `password` varchar(50) NOT NULL DEFAULT '',
-  `faxmail` varchar(50) DEFAULT NULL,
+  `faxmail` varchar(5) DEFAULT NULL,
   `channels` int(11) NOT NULL DEFAULT 5,
   PRIMARY KEY (`id`)
 );

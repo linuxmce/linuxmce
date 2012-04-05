@@ -114,7 +114,7 @@ CreateDialplanLines()
 		
 		if [[ $Routing == fax ]]; then
 			App="Goto"
-			AppParam="applications,*70,1"
+			AppParam="fax,*70,1"
 			SQL="$SQL INSERT INTO $DB_Extensions_Table (context,exten,priority,app,appdata) VALUES
 				('$Context_From_Lmce','$Line-hm$HouseMode','1','$App','$AppParam'),
 				('$Context_From_Lmce','$Line-hm$HouseMode','2','Goto','$Context_From_Lmce,$Line-hm$HouseMode-\${DIALSTATUS},1'),
