@@ -21,7 +21,7 @@ apt-get -y remove postfix
 	 
 apt-get -y install postfix 
 apt-get -y install expect 
-apt-get -y install mailutils 
+apt-get -y install heirloom-mailx nail 
 apt-get -y install ca-certificates 
 	 
 if [ -e main.cf.orig ]; then 

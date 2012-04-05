@@ -6,7 +6,7 @@ mailTo=$3
 
 # test actual postfix config.
 echo "Sending test email..." 
-mailx -a "From:$mailFromName<$mailFromAddress>" -s "Email test from LinuxMCE" $mailTo < /etc/hosts 
+mailx -r "$mailFromName <$mailFromAddress>" -s "Email test from LinuxMCE" $mailTo < /etc/hosts 
 sleep 7 
 	 
 status=$(tail -3 /var/log/mail.info | grep status | sed -n 's/^.*status=\(.*\).*$/\1/p')
