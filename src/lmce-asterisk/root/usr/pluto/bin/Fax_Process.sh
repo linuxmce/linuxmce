@@ -120,12 +120,15 @@ fi
 # Delete the temporary message file
 rm -f $FILE.part1
 rm -f $INFOFILE
-#rm -f $SOURCEFILE
+rm -f $SOURCEFILE
 
 # Archive faxes for now
 mkdir -p /home/fax
+chown asterisk:asterisk /home/fax
 ARCHIVEFILE="$DTFAX $(basename $DESTFILE)"
-mv -f $DESTFILE /home/fax/`echo $ARCHIVEFILE | sed 's/ /_/g' | sed 's/\//-/g'`
+ARCHIVEFILE="/home/fax/$(echo $ARCHIVEFILE | sed 's/ /_/g' | sed 's/\//-/g')"
+mv -f $DESTFILE $ARCHIVEFILE
+echo "$DATETIME	Moving $DESTFILE to $ARCHIVEFILE">>$LOGFILE
 
 echo "----------">>$LOGFILE
 exit $RETVAL

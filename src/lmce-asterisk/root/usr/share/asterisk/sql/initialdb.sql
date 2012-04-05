@@ -192,7 +192,7 @@ INSERT INTO extensions (context, exten, priority, app, appdata) VALUES
 ('fax', '*70', 5, 'Set', 'FAXFILENOEXT=/var/spool/asterisk/fax/${CALLERID(num)}'),
 ('fax', '*70', 6, 'Receivefax', '${FAXFILE}'),
 ('fax', '*70', 7, 'Hangup', ''),
-('fax', 'h', 1, 'System', '/usr/pluto/bin/Fax_Process.sh ${FAXFILENOEXT} ${CALLERID(DNID)} ${CALLERID(num)} "${CALLERID(name)}"'),
+('fax', 'h', 1, 'System', 'sudo -u root /usr/pluto/bin/Fax_Process.sh ${FAXFILENOEXT} ${CALLERID(DNID)} ${CALLERID(num)} "${CALLERID(name)}"'),
 ('fax', 'h', 2, 'Hangup', '');
 
 -- *95: test Music On Hold (MOH)
