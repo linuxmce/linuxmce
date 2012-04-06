@@ -167,7 +167,6 @@ QModelIndex ListModel::indexFromItem(const gridItem *item) const
 
 void ListModel::clear()
 {
-    //qDebug() << "clearing media model";
     clearing = true;
     emit modelAboutToBeReset();
     beginResetModel();
@@ -306,7 +305,6 @@ void ListModel::clearAndRequest(int type)
     //qDeleteAll(m_list);
     endResetModel();
     emit modelReset();
-
     clearing = false;
     emit ready(gridType);
 
@@ -330,9 +328,8 @@ QApplication::processEvents(QEventLoop::AllEvents);
     emit pagingCleared();
 QApplication::processEvents(QEventLoop::AllEvents);
 #else
-    //qDebug("Clearing for next page");
     clearing = true;
-    emit modelAboutToBeReset();
+     emit modelAboutToBeReset();
     beginResetModel();
     setProgress(0.0);
     resetInternalData();
@@ -340,7 +337,7 @@ QApplication::processEvents(QEventLoop::AllEvents);
     endResetModel();
     emit modelReset();
     clearing = false;
-   // qDebug("Page Cleared, requesting");
+
     emit pagingCleared();
 #endif
 

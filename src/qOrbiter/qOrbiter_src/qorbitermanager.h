@@ -84,7 +84,7 @@
 #include <datamodels/skindatamodel.h>
 #include <contextobjects/floorplandevice.h>
 #include <contextobjects/screenshotattributes.h>
-#include <contextobjects/timecodemanager.h>
+
 
 //own version of OrbiterData.h
 #include <datamodels/listModel.h>                            //custom item model
@@ -159,7 +159,7 @@ public:
     ScreenParamsClass *ScreenParameters;
     SecurityVideoClass *SecurityVideo;
     QList<QObject*> screenshotVars;
-    TimeCodeManager *timecode;
+
     //-------------sleeping menu----------------------
     QList<QObject*> sleeping_alarms;
 

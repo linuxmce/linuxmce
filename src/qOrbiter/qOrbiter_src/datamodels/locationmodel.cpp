@@ -78,6 +78,19 @@ void LocationModel::clear()
   m_list.clear();
 }
 
+void LocationModel::setLocation(int ea, int room)
+{
+
+    foreach(LocationItem* item, m_list) {
+      if(item->roomVal()== room && item->entertain_area() == ea)
+      {
+          setCurrentEA(item->entertain_area());
+          setCurrentRoom(item->roomVal());
+      }
+    }
+
+}
+
 bool LocationModel::removeRow(int row, const QModelIndex &parent)
 {
   Q_UNUSED(parent);

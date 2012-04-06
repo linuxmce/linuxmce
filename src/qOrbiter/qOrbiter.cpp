@@ -1022,9 +1022,16 @@ void qOrbiter::CMD_Set_Now_Playing(string sPK_DesignObj,string sValue_To_Assign,
     cout << "Parm #103 - List_PK_Device=" << sList_PK_Device << endl;
     cout << "Parm #120 - Retransmit=" << bRetransmit << endl;
 
+    //**TODO - create a function that keeps a running track of the current room. like, the location info class or something.
+    // it should unify the current location and media data in to one easily accesible item that update automatically on changes.
+    map <int, string> mds;
+    GetDevicesByTemplate(DEVICETEMPLATE_OnScreen_Orbiter_CONST, &mds);
+
+
     i_current_mediaType = iPK_MediaType;
     string::size_type pos=0;
     m_dwPK_Device_NowPlaying = atoi(StringUtils::Tokenize(sList_PK_Device,",",pos).c_str());
+
     m_dwPK_Device_NowPlaying_Video = atoi(StringUtils::Tokenize(sList_PK_Device,",",pos).c_str());
     m_dwPK_Device_NowPlaying_Audio = atoi(StringUtils::Tokenize(sList_PK_Device,",",pos).c_str());
     m_dwPK_Device_CaptureCard = atoi(StringUtils::Tokenize(sList_PK_Device,",",pos).c_str());
@@ -1769,7 +1776,7 @@ void qOrbiter::CMD_Assisted_Make_Call(int iPK_Users,string sPhoneExtension,strin
 bool DCE::qOrbiter::initialize()
 {
 
-    qDebug("Starting dce initialization");
+ emit statusMessage("Starting dce initialization");
     if ( GetConfig() ==true && Connect(PK_DeviceTemplate_get()) == true )
     {
 
@@ -1965,7 +1972,7 @@ void qOrbiter::getFloorplanDeviceCommand(int device)
     string cmdresponse="";
     if (SendCommand(cmd_populate_device_grid, &cmdresponse) && cmdresponse=="OK")
     {
-        qDebug() << "Requesting floorplan Device commands";
+      //  qDebug() << "Requesting floorplan Device commands";
 
         cmdresponse="";
 
@@ -1973,7 +1980,7 @@ void qOrbiter::getFloorplanDeviceCommand(int device)
         DCE::CMD_Request_Datagrid_Contents req_device_grid( long(m_dwPK_Device), long(iPK_Device_DatagridPlugIn), StringUtils::itos( m_dwIDataGridRequestCounter ), string(dgName),    int(gWidth), int(gHeight),           false, false,        true,   string(m_sSeek),    int(iOffset),  &pData,         &iData_Size, &GridCurRow, &GridCurCol );
         if(SendCommand(req_device_grid, &cmdresponse) && cmdresponse=="OK")
         {
-            qDebug() << cmdresponse.c_str();
+//            qDebug() << cmdresponse.c_str();
             DataGridTable *pDataGridTable = new DataGridTable(iData_Size,pData,false);
             cellsToRender= pDataGridTable->GetRows();
 #ifndef ANDROID
@@ -1983,7 +1990,7 @@ void qOrbiter::getFloorplanDeviceCommand(int device)
             QString fk_file;
             QString filePath;
             int index;
-            qDebug() << pDataGridTable->getTotalRowCount();
+           // qDebug() << pDataGridTable->getTotalRowCount();
             for(MemoryDataTable::iterator it=pDataGridTable->m_MemoryDataTable.begin();it!=pDataGridTable->m_MemoryDataTable.end();++it)
             {
                 DataGridCell *pCell = it->second;
@@ -1992,18 +1999,18 @@ void qOrbiter::getFloorplanDeviceCommand(int device)
                 fk_file = pCell->GetValue();
                 cellTitle = QString::fromUtf8(pCell->m_Text);
                 index = pDataGridTable->CovertColRowType(it->first).first;
-                qDebug() << cellTitle;
+              //  qDebug() << cellTitle;
 
             }
         }
         else
         {
-            qDebug() << cmdresponse.c_str();
+         //   qDebug() << cmdresponse.c_str();
         }
     }
     else
     {
-        qDebug() << cmdresponse.c_str();
+     //   qDebug() << cmdresponse.c_str();
     }
 
 }
@@ -2289,7 +2296,10 @@ void DCE::qOrbiter::executeCommandGroup(int cmdGrp)
 
 void qOrbiter::displayToggle(int i)
 {
-  DCE::CMD_Display_OnOff display(m_dwPK_Device, m_pData->FindFirstRelatedDeviceOfTemplate(DEVICETEMPLATE_OnScreen_Orbiter_CONST)->m_dwPK_Device , StringUtils::itos(i), false );
+
+
+   // qDebug() << m_pData->FindFirstRelatedDeviceOfTemplate(DEVICETEMPLATE_OnScreen_Orbiter_CONST)->m_dwPK_Device;
+  DCE::CMD_Display_OnOff display(m_dwPK_Device, m_pData->FindFirstRelatedDeviceOfTemplate(DEVICETEMPLATE_OnScreen_Orbiter_CONST)->m_dwPK_Device, StringUtils::itos(i), false );
     SendCommand(display);
     emit statusMessage("Attempting to toggle the display" );
 }
@@ -2332,7 +2342,7 @@ void qOrbiter::seekToGridPosition(QString s)
         int GridCurCol= 0;           //column to start from
 #endif
         string m_sSeek=s.toStdString();
-        qDebug("Seeking");
+      //  qDebug("Seeking");
         string imgDG ="_MediaFile_"+QString::number(m_dwPK_Device).toStdString();
 
         int iData_Size=0;
@@ -2406,8 +2416,17 @@ void qOrbiter::removePlaylistItem(int index)
 
 void qOrbiter::saveCurrentPlaylist(int user, QString ea, QString name, bool SaveAsNew)
 {
-
+    emit mediaMessage("Saving playlist-"+name);
     CMD_Save_playlist savePlaylist(m_dwPK_Device, iMediaPluginID, user, ea.toStdString(), name.toStdString(), SaveAsNew);
+    string saveResp = "";
+    if(SendCommand(savePlaylist, & saveResp) && saveResp == "OK")
+    {
+        emit mediaMessage("Playlist Saved");
+    }
+    else
+    {
+        emit mediaMessage("Playlist not saved::"+QString::fromStdString(saveResp.c_str()));
+    }
 
 }
 
@@ -2653,7 +2672,7 @@ void DCE::qOrbiter::playMedia(QString inc_FKFile)
 {
     if(inc_FKFile == "!G")
     {
-        qDebug()<<"Appending onto !G"<< "::" <<m_dwPK_Device;
+      //  qDebug()<<"Appending onto !G"<< "::" <<m_dwPK_Device;
         inc_FKFile.append(QString::number(m_dwPK_Device));
     }
 
@@ -2702,7 +2721,7 @@ void DCE::qOrbiter::PauseMedia()
 void DCE::qOrbiter::requestMediaPlaylist()
 {
 
-    qDebug("Fetching Playlist");
+  //  qDebug("Fetching Playlist");
     int gHeight = 0;
     int gWidth = 1;
     int pkVar = 0;
@@ -2804,7 +2823,7 @@ void qOrbiter::updateFloorPlan(QString p)
     p.remove(0, p.length() - 1);
     CMD_Get_Current_Floorplan getFloorPlan(m_dwPK_Device, iOrbiterPluginID, p.toStdString(), i_current_floorplanType , &sval);
     SendCommand(getFloorPlan);
-    qDebug() << "This Page Floorplan Data for Page " <<  p << ", Floorplan device type " << i_current_floorplanType << "::" <<sval.c_str();
+   // qDebug() << "This Page Floorplan Data for Page " <<  p << ", Floorplan device type " << i_current_floorplanType << "::" <<sval.c_str();
 }
 
 void DCE::qOrbiter::GetScreenSaverImages() // unused at this time
@@ -3752,7 +3771,7 @@ void DCE::qOrbiter::grabScreenshot(QString fileWithPath)
     string sDisableAspectLock = "0";
 
 
-    qDebug() << fileWithPath;
+  //  qDebug() << fileWithPath;
     int gHeight = 0;
     int gWidth = 0;
     int pkVar = 0;
@@ -3806,7 +3825,7 @@ void DCE::qOrbiter::grabScreenshot(QString fileWithPath)
                 cellAttribute = pCell->GetValue();
                 cellfk = pCell->GetValue();
                 QStringList parser = cellTitle.split(QRegExp("(\\n|:\\s)"), QString::KeepEmptyParts);
-                qDebug() << parser;
+                //qDebug() << parser;
                 screenshotVars.append(new screenshotAttributes( cellfk, cellTitle, cellAttribute.prepend("!A") ));
 
             }
@@ -3828,7 +3847,7 @@ void DCE::qOrbiter::grabScreenshot(QString fileWithPath)
 
     }
     emit screenshotVariablesReady(screenshotVars);
-    qDebug("sending screenshot variables");
+ //   qDebug("sending screenshot variables");
     screenshotVars.clear();
 
     CMD_Get_Video_Frame grabMediaScreenshot(long(m_dwPK_Device), long(m_dwPK_Device_NowPlaying), sDisableAspectLock,internal_streamID, 800 , 800, &screenieData, &screenieDataSize, &s_format);

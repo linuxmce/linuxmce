@@ -103,8 +103,7 @@ orbiterWindow::orbiterWindow(long deviceid, std::string routerip, QObject *paren
     buildType="/qml/desktop";
     qrcPath = "qrc:osx/Splash.qml";
 #elif defined __ANDROID__
-    qrcPath = "qrc:android/Splash.qml";
-    mainView.window()->setAttribute(Qt::WA_LockPortraitOrientation);
+    qrcPath = "qrc:android/Splash.qml";    
 #elif defined for_android
     buildType = "/qml/android";
     qrcPath = "qrc:android/Splash.qml";

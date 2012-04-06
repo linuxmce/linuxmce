@@ -54,6 +54,12 @@ In an effor to keep the history of changes broken up
 #1261 - ui blocking issues
 #1372 - harmattan skin development
 
+##Android building information
+versioning codes
+08 - api target
+1234 - screen sizes, 1-4 for all
+10 - version
+
 
 If something you are working on is not described here, please open a ticket for it so we can track that specific issue.
 

@@ -200,12 +200,12 @@ public slots:
     QUrl getImageUrl () { return nowPlayingImageUrl;}
 
     void setImageData(QImage t) {
-        qDebug("Recieved Image data");
+        emit statusMessage("Now Playing Class::Recieved Image data");
 
         setImage(t);
     }
     void setImageData( char data, int iData_size) {
-        qDebug("Android ARM Now Playing Process Called");
+       emit statusMessage("Now Playing Class::Android ARM Now Playing Process Called");
         QImage t;
         const uchar *localDat =(uchar*)&data;
         int dataSize = iData_size;
@@ -213,11 +213,11 @@ public slots:
         {
 
             setImage(t);
-            emit statusMessage("Set Cover Art");
+           emit statusMessage("Now Playing Class::Set Cover Art");
         }
         else
         {
-            emit statusMessage("Update Object Image Conversion Failed:");
+           emit statusMessage("Now Playing Class::Update Object Image Conversion Failed:");
         }
     }
 

@@ -73,7 +73,6 @@ qorbiterManager::qorbiterManager(QDeclarativeView *view, QObject *parent) :
     {
         emit localConfigReady(false);
     }
-    timecode = new TimeCodeManager();
 
     QApplication::processEvents(QEventLoop::AllEvents);
 
@@ -82,7 +81,7 @@ qorbiterManager::qorbiterManager(QDeclarativeView *view, QObject *parent) :
     qorbiterUIwin->rootContext()->setContextProperty("extip", qs_ext_routerip );
     qorbiterUIwin->rootContext()->setContextProperty("manager", this); //providing a direct object for qml to call c++ functions of this class
     qorbiterUIwin->rootContext()->setContextProperty("dcemessage", dceResponse);
-    qorbiterUIwin->rootContext()->setContextProperty("dceTimecode", timecode);
+
 #ifndef __ANDROID__
 #ifdef GLENABLED
     fileReader = new FileReader;
@@ -464,6 +463,7 @@ void qorbiterManager::processConfig(QByteArray config)
     }
     m_lRooms->sdefault_Ea = defaults.attribute("DefaultLocation");
     m_lRooms->idefault_Ea = RroomMapping.value(m_lRooms->sdefault_Ea);
+
     setDceResponse("Room Done");
 
     //--LIGHTING SCENARIOS----------------------------------------------------------------------------------
@@ -602,7 +602,7 @@ void qorbiterManager::processConfig(QByteArray config)
     QApplication::processEvents(QEventLoop::AllEvents);
     //------------------------------------------context objects----------------------------------------------------
     qorbiterUIwin->rootContext()->setContextObject(this);
-    // setActiveRoom(RroomMapping.value(QString::fromStdString(pqOrbiter->DATA_Get_FK_EntertainArea())), 0);
+
     qorbiterUIwin->rootContext()->setContextProperty("currentRoomLights", roomLights);                 //current room scenarios model
     qorbiterUIwin->rootContext()->setContextProperty("currentRoomMedia", roomMedia);                   //current room media model
     qorbiterUIwin->rootContext()->setContextProperty("currentRoomClimate", roomClimate);               //curent room climate model
@@ -788,7 +788,9 @@ bool qorbiterManager::requestDataGrid()
 void qorbiterManager::setActiveRoom(int room,int ea)
 {
     emit setLocation(room, ea);
+    qDebug() << "LocatioModel::" << m_lRooms->find(QString::number(room)) ;
     setCurrentRoom(QString::number(room));
+    m_lRooms->setLocation(ea, room);
 
     roomLights = roomLightingScenarios.value(room);
     roomMedia = roomMediaScenarios.value(room);
