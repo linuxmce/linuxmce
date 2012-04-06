@@ -6,6 +6,7 @@ Rectangle {
     height: scaleY(55)
     color: "transparent"
     clip:false
+    property bool optionVisible: false
     Connections{
         target: mediaplaylist
         onActiveItemChanged:{
@@ -14,7 +15,7 @@ Rectangle {
 
 
     }
-/*
+    /*
     BorderImage {
         id: borderimg
         verticalTileMode: BorderImage.Round
@@ -30,7 +31,7 @@ Rectangle {
         id:nonepgplaylistview
         width: scaleX(25)
         height: scaleY(55)
-        anchors.centerIn: parent       
+        anchors.centerIn: parent
         clip: true
         interactive: true
         flickableDirection: "VerticalFlick"
@@ -87,17 +88,77 @@ Rectangle {
                 anchors.fill: parent
                 onClicked: dcerouter.jumpToPlaylistPosition(index)
             }
-            Rectangle{
-                id:remove_box
-                height: parent.height *.25
-                width: parent.height *.25
-                color:"red"
-                opacity: .5
+
+            Column{
+                id:options
+                visible: optionVisible
+                height: scaleY(12)
                 anchors.right: parent.right
-                MouseArea{
-                    anchors.fill: remove_box
-                    onClicked: dcerouter.removePlaylistItem(index)
+                spacing: scaleY(2)
+
+                Rectangle{
+                    id:move_up
+                    height: scaleX(1)
+                    width: scaleX(1)
+                    color:"green"
+                    Text {
+                        id: up
+                        text: qsTr("Up")
+                    }
+                    MouseArea{
+                        anchors.fill: parent
+                        onClicked: dcerouter.movePlaylistEntry("", index)
+                    }
                 }
+
+                Rectangle{
+                    id:remove_box
+                    height: scaleX(1)
+                    width:scaleX(1)
+                    color:"yellow"
+                    MouseArea{
+                        anchors.fill: remove_box
+                        onClicked: dcerouter.removePlaylistItem(index)
+                    }
+                }
+
+                Rectangle{
+                    id:move_dwn
+                    height: scaleX(1)
+                    width: scaleX(1)
+                    color:"blue"
+                    Text {
+                        id: down
+                        text: qsTr("down")
+                    }
+                    MouseArea{
+                        anchors.fill: parent
+                        onClicked: dcerouter.movePlaylistEntry("+", index)
+                    }
+                }
+            }
+        }
+    }
+
+    Rectangle{
+        id:option_box
+        height: scaleY(10)
+        width: parent.width
+        visible: optionVisible
+        anchors.top: nonepgplaylistview.bottom
+        Row{
+            height: parent.height
+            width: parent.width
+            spacing: scaleX(3)
+            Text {
+                id: save_playlist
+                text: qsTr("text")
+                font.pixelSize: scaleY(3)
+            }
+            Text {
+                id: user
+                text: currentuser
+                font.pixelSize: scaleY(3)
             }
         }
     }

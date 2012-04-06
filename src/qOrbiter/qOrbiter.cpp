@@ -3739,16 +3739,17 @@ void DCE::qOrbiter::showAdvancedButtons()
     }
 }
 
-void DCE::qOrbiter::movePlaylistEntry(bool pos, int num)
+void DCE::qOrbiter::movePlaylistEntry(QString pos, int index)
 {
-    if (pos==true)
+
+    if (pos == "+")
     {
-        CMD_Move_Playlist_entry_Up move_entry_up(m_dwPK_Device, iOrbiterPluginID, num);
+        CMD_Move_Playlist_entry_Up move_entry_up(m_dwPK_Device, iMediaPluginID, index);
         SendCommand(move_entry_up);
     }
     else
     {
-        CMD_Move_Playlist_entry_Down move_entry_down(m_dwPK_Device, iOrbiterPluginID, num);
+        CMD_Move_Playlist_entry_Down move_entry_down(m_dwPK_Device, iMediaPluginID, index);
         SendCommand(move_entry_down);
     }
 }
