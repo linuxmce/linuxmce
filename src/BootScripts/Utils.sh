@@ -580,11 +580,19 @@ InstallVideoDriver () {
 				apt-get -yf install xserver-xorg-video-s3virge
 				VerifyExitCode "Install VIA S3 Virge Driver"
 			fi ;;
-                esac
+	esac
+
 	if [[ "$chip_man" == "Intel" ]] && [[ -z $online ]]; then
-		if ! PackageIsInstalled "libva-driver-i965"; then 
-			apt-get -yf install libva-driver-i965
-			VerifyExitCode "Install Intel Graphics Accelerator"
+		if [[ "$DISTRO" = "precise" ]]; then
+			if ! PackageIsInstalled "i965-va-driver"; then
+				apt-get -yf install i965-va-driver
+				VerifyExitCode "Install Intel Graphics Accelerator"
+			fi
+		else	
+			if ! PackageIsInstalled "libva-driver-i965"; then 
+				apt-get -yf install libva-driver-i965
+				VerifyExitCode "Install Intel Graphics Accelerator"
+			fi
 		fi
 	fi
 }
