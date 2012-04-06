@@ -1239,7 +1239,7 @@ public slots:
 
     //playlist manipulation   
     void removePlaylistItem(int index);
-    void saveCurrentPlaylist(int user, QString ea, QString name, bool SaveAsNew);
+    void saveCurrentPlaylist( QString name, bool SaveAsNew);
     void movePlaylistEntry(QString pos, int index);
     void addToPlaylist(bool now, string playlist);
     //-------------------------------------------------------

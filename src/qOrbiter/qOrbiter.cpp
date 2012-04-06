@@ -2414,18 +2414,20 @@ void qOrbiter::removePlaylistItem(int index)
     }
 }
 
-void qOrbiter::saveCurrentPlaylist(int user, QString ea, QString name, bool SaveAsNew)
+void qOrbiter::saveCurrentPlaylist( QString name, bool SaveAsNew)
 {
     emit mediaMessage("Saving playlist-"+name);
-    CMD_Save_playlist savePlaylist(m_dwPK_Device, iMediaPluginID, user, ea.toStdString(), name.toStdString(), SaveAsNew);
+    CMD_Save_playlist savePlaylist(m_dwPK_Device, iMediaPluginID, i_user, StringUtils::itos(this->i_ea), name.toStdString(), SaveAsNew);
     string saveResp = "";
     if(SendCommand(savePlaylist, & saveResp) && saveResp == "OK")
     {
         emit mediaMessage("Playlist Saved");
+        qDebug() << mediaResponse;
     }
     else
     {
         emit mediaMessage("Playlist not saved::"+QString::fromStdString(saveResp.c_str()));
+        qDebug() << mediaResponse;
     }
 
 }

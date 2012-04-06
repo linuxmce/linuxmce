@@ -150,15 +150,47 @@ Rectangle {
             height: parent.height
             width: parent.width
             spacing: scaleX(3)
-            Text {
-                id: save_playlist
-                text: qsTr("text")
-                font.pixelSize: scaleY(3)
+            Rectangle{
+                id:save_playlist
+                height: style.avoptionbuttonh
+                width: style.avoptionbuttonw
+                color: style.darkhighlight
+                TextInput {
+                    id: save_as
+                    text: qsTr("Edit name")
+                    anchors.centerIn: parent
+                    fillColor: "white"
+                    onFocusChanged: save_as.text=""
+                }
+
             }
-            Text {
-                id: user
-                text: currentuser
-                font.pixelSize: scaleY(3)
+
+            Rectangle{
+                id:public_option
+                height: style.avoptionbuttonh
+                width: style.avoptionbuttonw
+                color: style.darkhighlight
+                Text {
+                    id: public_text
+                    text: qsTr("Public")
+                    anchors.centerIn: parent
+                }
+                MouseArea{
+                    anchors.fill: parent
+                    onClicked: dcerouter.saveCurrentPlaylist(save_as.text, true)
+                }
+
+            }
+            Rectangle{
+                id:private_option
+                height: style.avoptionbuttonh
+                width: style.avoptionbuttonw
+                color: style.darkhighlight
+                Text {
+                    id: private_text
+                    text: qsTr("Private")
+                    anchors.centerIn: parent
+                }
             }
         }
     }

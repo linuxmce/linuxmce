@@ -248,7 +248,7 @@ Rectangle {
                     buttontext: qsTr("Manage Playlist")
                     MouseArea{
                         anchors.fill: parent
-                        onClicked: playlist.visible = !playlist.visible
+                        onClicked: playlist.optionVisible ? playlist.optionVisible =false: playlist.optionVisible=true
                     }
                 }
                 AvOptionButton{
