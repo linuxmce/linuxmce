@@ -65,5 +65,5 @@ if [[ "$1" == configure ]]; then
 	        mv -f /etc/sudoers.$$ /etc/sudoers
 	        chmod 440 /etc/sudoers
 	fi
-
+	mkdir -p /home/fax
 fi
