@@ -76,11 +76,6 @@ UserList=
 SambaUserShares=
 
 /usr/pluto/bin/BootMessage.sh "Setting up users..."
-if [[ "$MakeUsers" == yes ]]; then
-	echo "# LinuxMCE AppleTalk shares" >/etc/netatalk/AppleVolumes.default
-	echo "/home/public/data \"public\" cnidscheme:dbd options:upriv,usedots dperm:0777 fperm:0777" >>/etc/netatalk/AppleVolumes.default
-	echo "/home   "home"  cnidscheme:dbd options:upriv,usedots,ro,noadouble" >>/etc/netatalk/AppleVolumes.default
-fi
 
 for Users in $R; do
 	PlutoUserID=$(Field 1 "$Users")
@@ -112,12 +107,11 @@ for Users in $R; do
 		path = /home/user_$PlutoUserID
 		public = no
 		"
-		echo "/home/user_$PlutoUserID	\"$UserName\"	cnidscheme:dbd options:upriv,usedots rolist:nobody rwlist:\"pluto_$UserName\"">>/etc/netatalk/AppleVolumes.default
 
 		# TODO: replace 00000001 with a real number of seconds (never set to 00000000)
 		SambaEntry="pluto_$UserName:$LinuxUserID:$SambaPassword:[U          ]:LCT-00000001:,,,"
 		ShadowEntry="pluto_$UserName:$LinuxPassword:12221:0:99999:7:::"
-		PasswdEntry="pluto_$UserName:x:$LinuxUserID:$LinuxUserID:$RealName,,,:/home/user_$PlutoUserID:/bin/false"
+		PasswdEntry="pluto_$UserName:x:$LinuxUserID:$LinuxUserID:,,,:/home/user_$PlutoUserID:/bin/false"
 		GroupEntry="pluto_$UserName:x:$LinuxUserID:www-data"
 		SambaUnixMap="pluto_$UserName = $UserName"
 		echo "$SambaEntry" >>/etc/samba/smbpasswd.$$

@@ -58,13 +58,13 @@ if ! BlacklistConfFiles '/etc/asound.conf' ;then
 	cp /usr/pluto/templates/asound.conf /etc/asound.conf
 fi
 
-## Setup AppleTalk services for SSH and file sharing
+## Advertise SSH and file sharing via AVAHI
 test -d "/etc/avahi" || mkdir -p "/etc/avahi"
 if ! BlacklistConfFiles '/etc/avahi/ssh.service' ;then
         cp /usr/pluto/templates/ssh.service.tmpl /etc/avahi/ssh.service
 fi
-if ! BlacklistConfFiles '/etc/avahi/afpd.service.tmpl' ;then
-        cp /usr/pluto/templates/afpd.service.tmpl /etc/avahi/afpd.service
+if ! BlacklistConfFiles '/etc/avahi/samba.service.tmpl' ;then
+        cp /usr/pluto/templates/samba.service.tmpl /etc/avahi/samba.service
 fi
 ## Enable Metadata DB to emulate OSX attributes since we are not on HFS+ filesystem
 sed "s/CNID_METAD_RUN=no/CNID_METAD_RUN=yes/" -i /etc/default/netatalk
