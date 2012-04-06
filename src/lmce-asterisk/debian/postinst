@@ -25,6 +25,7 @@ if [[ "$1" == configure ]]; then
 
 	# if asterisk is already installed, and db creation succeded make sure file rights are correct
 	if [[ -e /usr/sbin/asterisk ]] && [[ "$res" == "asterisk" ]]; then
+		. /usr/pluto/bin/Section_Ops.sh
 
 		#create asterisk group if it does not yet exist 
 		egrep -i "^asterisk" /etc/group >/dev/null 
@@ -51,6 +52,20 @@ if [[ "$1" == configure ]]; then
 
 		service apache2 restart
 		service asterisk restart
+
+		Fax="[fax]
+        comment = archive of received faxes
+        mangled names = no
+        browsable = yes
+        writable = yes
+        path = /home/fax
+        public = no
+        guest ok = no
+        force user = asterisk
+        force group = asterisk
+        create mask = 0660"
+
+		PopulateSection "/etc/samba/smb.conf" "FAX" "$Fax"
 	fi
 	
 	# add asterisk user to sudoers to execute dialplan bash scripts
