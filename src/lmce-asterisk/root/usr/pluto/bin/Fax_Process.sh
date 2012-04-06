@@ -126,7 +126,7 @@ rm -f $SOURCEFILE
 mkdir -p /home/fax
 chown asterisk:asterisk /home/fax
 ARCHIVEFILE="$DTFAX $(basename $DESTFILE)"
-ARCHIVEFILE="/home/fax/$(echo $ARCHIVEFILE | sed 's/ /_/g' | sed 's/\//-/g')"
+ARCHIVEFILE="/home/fax/$(echo $ARCHIVEFILE | sed 's/ /_/g' | sed 's/:/./g' | sed 's/\//-/g')"
 mv -f $DESTFILE $ARCHIVEFILE
 chown asterisk:asterisk $ARCHIVEFILE
 chmod 666 $ARCHIVEFILE
