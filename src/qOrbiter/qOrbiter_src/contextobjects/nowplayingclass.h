@@ -59,6 +59,8 @@ class NowPlayingClass : public QDeclarativeItem
     Q_PROPERTY (bool b_mediaPlaying READ getStatus WRITE setStatus NOTIFY mediaStatusChanged) //property to know if media is playing
 
     Q_PROPERTY (QImage fileImage READ getImage WRITE setImage NOTIFY imageChanged)
+    Q_PROPERTY (QImage streamImage READ getStreamImage WRITE setStreamImage NOTIFY streamImageChanged)
+
 
     //set now playing - text to assign
     Q_PROPERTY (QString qs_mainTitle READ getTitle WRITE setTitle NOTIFY titleChanged) //the text set sent by now playing command
@@ -119,6 +121,7 @@ public:
     QUrl nowPlayingImageUrl;
     int m_iplaylistPosition;
     QImage fileImage;
+    QImage streamImage;
 
     //media  related--------------------------
     QString mediatitle; //special if the media itself for some reason has a title different than the now playing
@@ -151,6 +154,7 @@ signals:
     void mediaStarted();
     void imageUrlChanged();
     void imageChanged();
+    void streamImageChanged();
     void screenTypeChanged();
     void titleChanged();
     void titleChanged2();
@@ -224,6 +228,13 @@ public slots:
 
     void setImage(QImage img) {fileImage = img; emit imageChanged();}
     QImage getImage() {return fileImage;}
+
+    void setStreamImage(QImage t){
+        qDebug("Setting stream image");
+        streamImage = t;
+        emit streamImageChanged();
+    }
+    QImage getStreamImage() { return streamImage;}
 
     void setScreen(QString inc_screen) {qs_screen = inc_screen; emit screenTypeChanged();}
     QString getScreen () {return qs_screen;}

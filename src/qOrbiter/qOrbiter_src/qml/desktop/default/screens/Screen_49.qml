@@ -88,7 +88,7 @@ Rectangle {
                         Text {
                             id: headertext
                             height:scaleY(2)
-                            text:qsTr("Speed: ") + dcenowplaying.qs_playbackSpeed
+                            text:qsTr("Speed: ") + dceTimecode.playbackSpeed
                             font.family: "Droid Sans"
                             font.pixelSize: scaleY(2)
                             color: "aliceblue"
@@ -97,7 +97,7 @@ Rectangle {
                         Text {
                             id: timecode
                             height:scaleY(2)
-                            text: dcenowplaying.timecode + qsTr(" of ") + dcenowplaying.duration
+                            text: dceTimecode.qsCurrentTime + qsTr(" of ") + dceTimecode.qsTotalTime
                             font.family: "Droid Sans"
                             font.pixelSize: scaleY(1) *2.15
                             anchors.bottom:parent.bottom

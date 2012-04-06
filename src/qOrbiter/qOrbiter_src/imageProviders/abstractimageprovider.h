@@ -77,6 +77,10 @@ QImage key;
         {
             temp = ScreenSaver();
         }
+        else if(id.contains("stream"))
+        {
+            temp = Stream();
+        }
 
         //aspect checking
 
@@ -104,6 +108,7 @@ private:
     QImage fileDetails();
     QImage screenShot();
     QImage ScreenSaver();
+    QImage Stream();
 
 };
 

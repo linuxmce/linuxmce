@@ -16,7 +16,7 @@ QImage AbstractImageProvider::floorplanProvider()
 
     if (key.isNull())
     {
-        key.load(":/icons/playlist.png");
+        key.load(":/icons/icon.png");
     }
 
     //aspect checking
@@ -73,7 +73,7 @@ QImage AbstractImageProvider::fileDetails()
 
     if (key.isNull())
     {
-         key.load(":/icons/playlist.png");
+         key.load(":/icons/icon.png");
 
     }
     managerreference->filedetailsclass->setAspectH(key.height()/ 100);
@@ -89,7 +89,7 @@ QImage AbstractImageProvider::screenShot()
 
      if (key.isNull())
      {
-          key.load(":/icons/playlist.png");
+          key.load(":/icons/video.png");
      }
 
      return key;
@@ -102,6 +102,18 @@ QImage AbstractImageProvider::ScreenSaver()
      if (key.isNull())
      {
           key.load(":/icons/icon.png");
+     }
+
+     return key;
+}
+
+QImage AbstractImageProvider::Stream()
+{
+    key = managerreference->nowPlayingButton->streamImage;
+
+     if (key.isNull())
+     {
+          key.load(":/icons/video.png");
      }
 
      return key;

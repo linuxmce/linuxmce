@@ -1112,6 +1112,7 @@ signals:
     //media
     void screenShotReady(QImage data);
     void waitForScreenShot(char picData, int picDataSize, string fileFormat);
+    void videoGrabReady(QImage grab);
 
     void screenSaverImages(QStringList images);
     void objectUpdate(QImage bytes);
@@ -1308,6 +1309,7 @@ public slots:
     void PauseMedia();
     void requestMediaPlaylist();
     void checkTimeCode();
+    void getStreamingVideo();
 
     void changedPlaylistPosition(QString pos);
     void ShowFloorPlan(int floorplantype);

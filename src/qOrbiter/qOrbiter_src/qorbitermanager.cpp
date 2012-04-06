@@ -1337,6 +1337,12 @@ void qorbiterManager::setBoundStatus(bool b)
     emit bindMediaRemote(b);
 }
 
+void qorbiterManager::grabStreamImage()
+{
+    emit requestStreamImage();
+
+}
+
 void qorbiterManager::changeChannels(QString chan)
 {
     //  pqOrbiter->TuneToChannel(chan.toInt(), chan );

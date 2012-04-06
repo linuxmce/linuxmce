@@ -2786,6 +2786,34 @@ void qOrbiter::checkTimeCode()
     emit setMyIp(QString::fromStdString(m_sIPAddress));
 }
 
+void qOrbiter::getStreamingVideo()
+{
+
+    char *grabData;
+    int grabData_size=0;
+    string sFormat ="png";
+    string grabResponse="";
+
+    QApplication::processEvents(QEventLoop::AllEvents);
+
+    CMD_Get_Video_Frame grabVideoFrame( m_dwPK_Device, m_dwPK_Device_NowPlaying, "0", this->internal_streamID, 800, 800, &grabData, &grabData_size, &sFormat );
+
+    if(SendCommand(grabVideoFrame, &grabResponse) && grabResponse =="OK")
+    {
+       QImage tgrab;
+       QByteArray buf;
+       buf.setRawData(grabData, grabData_size);
+       tgrab.loadFromData(buf);
+       emit  videoGrabReady(tgrab);
+    }
+    else
+    {
+        qDebug("Couldnt get the stream image!");
+    }
+
+
+}
+
 
 
 void qOrbiter::changedPlaylistPosition(QString pos)
@@ -3611,7 +3639,7 @@ void qOrbiter::setPosition(int position)
 
 void DCE::qOrbiter::showMenu() //show the dvd menu
 {
-    CMD_Goto_Media_Menu showDVDmenu(m_dwPK_Device, iMediaPluginID, internal_streamID, 0 );
+    CMD_Goto_Media_Menu showDVDmenu(m_dwPK_Device, iMediaPluginID, internal_streamID, i_current_mediaType );
     if(!SendCommand(showDVDmenu))
     {
 
