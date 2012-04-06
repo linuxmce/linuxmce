@@ -517,6 +517,7 @@ GetVideoDriver () {
 }
 
 InstallVideoDriver () {
+        distro="$(lsb_release -c -s)" 
 	case "$prop_driver" in
         	nvidia)
 			if ! PackageIsInstalled nvidia-glx && ! PackageIsInstalled nvidia-glx-new && ! PackageIsInstalled nvidia-glx-71 && ! PackageIsInstalled nvidia-glx-96 && ! PackageIsInstalled nvidia-glx-173 && ! PackageIsInstalled nvidia-glx-180 && ! PackageIsInstalled nvidia-glx-190 && ! PackageIsInstalled nvidia-glx-195 && ! PackageIsInstalled nvidia-glx-260 && ! PackageIsInstalled nvidia-glx-185 && ! PackageIsInstalled nvidia-current; then 
@@ -583,7 +584,7 @@ InstallVideoDriver () {
 	esac
 
 	if [[ "$chip_man" == "Intel" ]] && [[ -z $online ]]; then
-		if [[ "$DISTRO" = "precise" ]]; then
+		if [[ "$distro" = "precise" ]]; then
 			if ! PackageIsInstalled "i965-va-driver"; then
 				apt-get -yf install i965-va-driver
 				VerifyExitCode "Install Intel Graphics Accelerator"
