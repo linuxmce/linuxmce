@@ -20,8 +20,8 @@
 # CREATED BY: Diederik de Groot <ddegroot@sourceforge.net>
 # LICENSE: This program is free software and may be modified and distributed under the terms of the GNU Public License version 3.
 #          See the LICENSE file at the top of the source tree.
-# DATE:     $Date: 2011-10-11 17:30:35 +0000 (Tue, 11 Oct 2011) $
-# REVISION: $Revision: 2997 $
+# DATE:     $Date: 2011-11-06 18:16:44 +0100 (So, 06. Nov 2011) $
+# REVISION: $Revision: 3118 $
 # NOTE: Process this file with automake to produce a makefile.in script.
 
 
@@ -44,6 +44,20 @@ POST_UNINSTALL = :
 build_triplet = x86_64-unknown-linux-gnu
 host_triplet = x86_64-unknown-linux-gnu
 target_triplet = x86_64-unknown-linux-gnu
+am__append_1 = pbx_impl/ast/ast.h pbx_impl/ast/ast.c \
+	pbx_impl/ast/ast102.h pbx_impl/ast/ast102.c \
+	pbx_impl/ast/ast1020x.h \
+	pbx_impl/ast/ast1020x.c pbx_impl/ast/ast104.h \
+	pbx_impl/ast/ast104.c pbx_impl/ast/ast1040x.h \
+	pbx_impl/ast/ast1040x.c pbx_impl/ast/ast106.h \
+	pbx_impl/ast/ast106.c pbx_impl/ast/ast1060x.h \
+	pbx_impl/ast/ast1060x.c pbx_impl/ast/ast108.h \
+	pbx_impl/ast/ast108.c pbx_impl/ast/ast1080x.h \
+	pbx_impl/ast/ast1080x.c pbx_impl/ast/ast110.h \
+	pbx_impl/ast/ast110.c pbx_impl/ast/ast1100x.h \
+	pbx_impl/ast/ast1100x.c \
+	pbx_impl/ast/astTrunk.h \
+	pbx_impl/ast/astTrunk.c
 subdir = src
 DIST_COMMON = $(srcdir)/Makefile.am $(srcdir)/Makefile.in \
 	$(srcdir)/config.h.in
@@ -95,13 +109,13 @@ am_chan_sccp_la_OBJECTS = chan_sccp_la-chan_sccp.lo \
 	chan_sccp_la-sccp_featureButton.lo chan_sccp_la-sccp_line.lo \
 	chan_sccp_la-sccp_utils.lo chan_sccp_la-sccp_actions.lo \
 	chan_sccp_la-sccp_cli.lo chan_sccp_la-sccp_features.lo \
-	chan_sccp_la-sccp_socket.lo chan_sccp_la-sccp_config.lo \
-	chan_sccp_la-sccp_hint.lo chan_sccp_la-sccp_lock.lo \
-	chan_sccp_la-sccp_event.lo chan_sccp_la-sccp_adv_features.lo \
+	chan_sccp_la-sccp_config.lo chan_sccp_la-sccp_hint.lo \
+	chan_sccp_la-sccp_lock.lo chan_sccp_la-sccp_event.lo \
+	chan_sccp_la-sccp_adv_features.lo \
 	chan_sccp_la-sccp_management.lo chan_sccp_la-sccp_mwi.lo \
 	chan_sccp_la-sccp_conference.lo chan_sccp_la-sccp_rtp.lo \
 	chan_sccp_la-sccp_appfunctions.lo \
-	chan_sccp_la-sccp_protocol.lo
+	chan_sccp_la-sccp_protocol.lo chan_sccp_la-sccp_socket.lo
 am__EXTRA_chan_sccp_la_SOURCES_DIST = pbx_impl/ast/ast.h \
 	pbx_impl/ast/ast.c pbx_impl/ast/ast102.h pbx_impl/ast/ast102.c \
 	pbx_impl/ast/ast1020x.h pbx_impl/ast/ast1020x.c \
@@ -153,30 +167,30 @@ DIST_SOURCES = $(chan_sccp_la_SOURCES) \
 ETAGS = etags
 CTAGS = ctags
 DISTFILES = $(DIST_COMMON) $(DIST_SOURCES) $(TEXINFOS) $(EXTRA_DIST)
-ACLOCAL = ${SHELL} /var/lmce-build/svn/branches/LinuxMCE-1004/ubuntu/asterisk/Chan_SCCP_trunk/autoconf/missing --run aclocal-1.11
+ACLOCAL = ${SHELL} /var/lmce-build/svn/branches/LinuxMCE-1004/ubuntu/asterisk/trunk/autoconf/missing --run aclocal-1.11
 ALLOCA = 
-AMTAR = ${SHELL} /var/lmce-build/svn/branches/LinuxMCE-1004/ubuntu/asterisk/Chan_SCCP_trunk/autoconf/missing --run tar
+AMTAR = ${SHELL} /var/lmce-build/svn/branches/LinuxMCE-1004/ubuntu/asterisk/trunk/autoconf/missing --run tar
 AM_DEFAULT_VERBOSITY = 0
 AR = ar
 ARGZ_H = 
 ASTERISK_REPOS_LOCATION = TGZ
-ASTERISK_VERSION_NUMBER = 10807
+ASTERISK_VERSION_NUMBER = 10811
 ASTERISK_VER_GROUP = 108
-AUTOCONF = ${SHELL} /var/lmce-build/svn/branches/LinuxMCE-1004/ubuntu/asterisk/Chan_SCCP_trunk/autoconf/missing --run autoconf
-AUTOHEADER = ${SHELL} /var/lmce-build/svn/branches/LinuxMCE-1004/ubuntu/asterisk/Chan_SCCP_trunk/autoconf/missing --run autoheader
-AUTOMAKE = ${SHELL} /var/lmce-build/svn/branches/LinuxMCE-1004/ubuntu/asterisk/Chan_SCCP_trunk/autoconf/missing --run automake-1.11
+AUTOCONF = ${SHELL} /var/lmce-build/svn/branches/LinuxMCE-1004/ubuntu/asterisk/trunk/autoconf/missing --run autoconf
+AUTOHEADER = ${SHELL} /var/lmce-build/svn/branches/LinuxMCE-1004/ubuntu/asterisk/trunk/autoconf/missing --run autoheader
+AUTOMAKE = ${SHELL} /var/lmce-build/svn/branches/LinuxMCE-1004/ubuntu/asterisk/trunk/autoconf/missing --run automake-1.11
 AWK = gawk
-BUILD_DATE = 2011-10-25 13:29:59 UTC
+BUILD_DATE = 2012-04-07 08:51:18 UTC
 BUILD_HOSTNAME = fluffybitch.org
-BUILD_KERNEL = 2.6.32-30-server
+BUILD_KERNEL = 2.6.32-35-server
 BUILD_MACHINE = x86_64
 BUILD_OS = Linux
-BUILD_USER = finger not found so no builduser info will be available -lp root
+BUILD_USER = root
 CAT = /bin/cat
 CC = gcc
 CCACHE = 
 CCDEPMODE = depmode=gcc3
-CFLAGS = -g -O2 -D_LARGEFILE_SOURCE -D_FILE_OFFSET_BITS=64 -std=gnu89 -Wno-unused-function -Wno-long-long
+CFLAGS = -g -O2 -D_LARGEFILE_SOURCE -D_FILE_OFFSET_BITS=64 -std=gnu89 -O3  -Wno-long-long -Wno-unused-parameter -Wno-ignored-qualifiers
 CHANGELOG_OLDEST = 1021
 CPP = gcc -E
 CPPFLAGS = 
@@ -221,9 +235,12 @@ ECHO_C =
 ECHO_N = -n
 ECHO_T = 
 EGREP = /bin/grep -E
+EVENT_CFLAGS = 
+EVENT_LIBS = 
+EVENT_TYPE = 
 EXEEXT = 
 FGREP = /bin/grep -F
-FINGER = echo finger not found so no builduser info will be available
+FINGER = No
 GCFLAGS = 
 GCLIBS = 
 GDB_FLAGS = 
@@ -259,7 +276,7 @@ LT_CONFIG_H = src/config.h
 LT_DLLOADERS =  libltdl/dlopen.la
 LT_DLPREOPEN = -dlpreopen libltdl/dlopen.la 
 M4 = /usr/bin/m4
-MAKEINFO = ${SHELL} /var/lmce-build/svn/branches/LinuxMCE-1004/ubuntu/asterisk/Chan_SCCP_trunk/autoconf/missing --run makeinfo
+MAKEINFO = ${SHELL} /var/lmce-build/svn/branches/LinuxMCE-1004/ubuntu/asterisk/trunk/autoconf/missing --run makeinfo
 MKDIR_P = /bin/mkdir -p
 NM = /usr/bin/nm -B
 NMEDIT = 
@@ -291,7 +308,7 @@ PTHREAD_LIBS =
 RANLIB = ranlib
 RPMBUILD = echo rpmbuild not found so you cannot build rpm packages (no problem)
 SCCP_BRANCH = DEV
-SCCP_REVISION = 
+SCCP_REVISION = 3352
 SCCP_VERSION = 4.0.0
 SED = /bin/sed
 SET_MAKE = 
@@ -305,10 +322,10 @@ UNAME = /bin/uname
 VERSION = 4.0.0_DEV
 WHOAMI = /usr/bin/whoami
 __Darwin__ = 
-abs_builddir = /var/lmce-build/svn/branches/LinuxMCE-1004/ubuntu/asterisk/Chan_SCCP_trunk/src
-abs_srcdir = /var/lmce-build/svn/branches/LinuxMCE-1004/ubuntu/asterisk/Chan_SCCP_trunk/src
-abs_top_builddir = /var/lmce-build/svn/branches/LinuxMCE-1004/ubuntu/asterisk/Chan_SCCP_trunk
-abs_top_srcdir = /var/lmce-build/svn/branches/LinuxMCE-1004/ubuntu/asterisk/Chan_SCCP_trunk
+abs_builddir = /var/lmce-build/svn/branches/LinuxMCE-1004/ubuntu/asterisk/trunk/src
+abs_srcdir = /var/lmce-build/svn/branches/LinuxMCE-1004/ubuntu/asterisk/trunk/src
+abs_top_builddir = /var/lmce-build/svn/branches/LinuxMCE-1004/ubuntu/asterisk/trunk
+abs_top_srcdir = /var/lmce-build/svn/branches/LinuxMCE-1004/ubuntu/asterisk/trunk
 ac_ct_CC = gcc
 ac_ct_CXX = g++
 ac_ct_DUMPBIN = 
@@ -339,7 +356,7 @@ host_vendor = unknown
 htmldir = ${docdir}
 includedir = ${prefix}/include
 infodir = ${datarootdir}/info
-install_sh = ${SHELL} /var/lmce-build/svn/branches/LinuxMCE-1004/ubuntu/asterisk/Chan_SCCP_trunk/autoconf/install-sh
+install_sh = ${SHELL} /var/lmce-build/svn/branches/LinuxMCE-1004/ubuntu/asterisk/trunk/autoconf/install-sh
 libdir = ${exec_prefix}/lib
 libexecdir = ${exec_prefix}/libexec
 localedir = ${datarootdir}/locale
@@ -371,8 +388,6 @@ top_build_prefix = ../
 top_builddir = ..
 top_srcdir = ..
 AUTOMAKE_OPTS = gnu silent-rules
-#SUBDIRS			= gen_sccpconf
-# Chan_SCCP.so
 csmod_LTLIBRARIES = chan_sccp.la
 chan_sccp_la_SOURCES = chan_sccp.h sccp_cli.h sccp_event.h \
 	sccp_labels.h sccp_utils.h sccp_adv_features.h sccp_channel.h \
@@ -380,35 +395,23 @@ chan_sccp_la_SOURCES = chan_sccp.h sccp_cli.h sccp_event.h \
 	sccp_line.h sccp_actions.h sccp_config.h sccp_features.h \
 	sccp_pbx.h pbx_impl/pbx_impl.h sccp_device.h sccp_hint.h \
 	sccp_lock.h sccp_protocol.h sccp_dllists.h sccp_indicate.h \
-	sccp_management.h sccp_socket.h sccp_mwi.h common.h sccp_rtp.h \
-	sccp_appfunctions.h chan_sccp.c sccp_channel.c sccp_device.c \
-	sccp_indicate.c sccp_pbx.c pbx_impl/pbx_impl.c sccp_softkeys.c \
-	sccp_featureButton.c sccp_line.c sccp_utils.c sccp_actions.c \
-	sccp_cli.c sccp_features.c sccp_socket.c sccp_config.c \
+	sccp_management.h sccp_mwi.h common.h sccp_rtp.h \
+	sccp_appfunctions.h sccp_socket.h chan_sccp.c sccp_channel.c \
+	sccp_device.c sccp_indicate.c sccp_pbx.c pbx_impl/pbx_impl.c \
+	sccp_softkeys.c sccp_featureButton.c sccp_line.c sccp_utils.c \
+	sccp_actions.c sccp_cli.c sccp_features.c sccp_config.c \
 	sccp_hint.c sccp_lock.c sccp_event.c sccp_adv_features.c \
 	sccp_management.c sccp_mwi.c sccp_conference.c sccp_rtp.c \
-	sccp_appfunctions.c sccp_protocol.c
-EXTRA_chan_sccp_la_SOURCES = pbx_impl/ast/ast.h \
-	pbx_impl/ast/ast.c pbx_impl/ast/ast102.h \
-	pbx_impl/ast/ast102.c pbx_impl/ast/ast1020x.h \
-	pbx_impl/ast/ast1020x.c pbx_impl/ast/ast104.h \
-	pbx_impl/ast/ast104.c pbx_impl/ast/ast1040x.h \
-	pbx_impl/ast/ast1040x.c pbx_impl/ast/ast106.h \
-	pbx_impl/ast/ast106.c pbx_impl/ast/ast1060x.h \
-	pbx_impl/ast/ast1060x.c pbx_impl/ast/ast108.h \
-	pbx_impl/ast/ast108.c pbx_impl/ast/ast1080x.h \
-	pbx_impl/ast/ast1080x.c pbx_impl/ast/ast110.h \
-	pbx_impl/ast/ast110.c pbx_impl/ast/ast1100x.h \
-	pbx_impl/ast/ast1100x.c \
-	pbx_impl/ast/astTrunk.h \
-	pbx_impl/ast/astTrunk.c
+	sccp_appfunctions.c sccp_protocol.c sccp_socket.c
+EXTRA_chan_sccp_la_SOURCES = $(am__append_1)
 chan_sccp_la_CPPFLAGS = $(PBX_CPPFLAGS)
 chan_sccp_la_LIBADD = $(PTHREAD_CFLAGS) $(GCLIBS) $(PBX_GENERAL) $(PBX_MAJOR) $(PBX_MINOR)
 chan_sccp_la_DEPENDENCIES = $(PBX_GENERAL) $(PBX_MAJOR) $(PBX_MINOR)
 chan_sccp_la_CFLAGS = $(AM_CFLAGS) $(PBX_CFLAGS) $(GDB_FLAGS) \
-	$(PTHREAD_CFLAGS) $(GCLIBS) -D_REENTRANT -D_GNU_SOURCE \
-	-DCRYPTO -fPIC -pipe -Wall $(GCFLAGS)
-chan_sccp_la_LDFLAGS = -avoid-version -module  $(PBX_LDFLAGS) $(PTHREAD_LIBS) $(GCLIBS)
+	$(PTHREAD_CFLAGS) $(GCLIBS) $(EVENT_LIBS) -D_REENTRANT \
+	-D_GNU_SOURCE -DCRYPTO -fPIC -pipe -Wall $(GCFLAGS) \
+	$(EVENT_CFLAGS)
+chan_sccp_la_LDFLAGS = -avoid-version -module  $(PBX_LDFLAGS) $(PTHREAD_LIBS) $(GCLIBS) $(EVENT_LIBS)
 all: config.h
 	$(MAKE) $(AM_MAKEFLAGS) all-am
 
@@ -654,14 +657,6 @@ chan_sccp_la-sccp_features.lo: sccp_features.c
 #	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) \
 #	$(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(chan_sccp_la_CPPFLAGS) $(CPPFLAGS) $(chan_sccp_la_CFLAGS) $(CFLAGS) -c -o chan_sccp_la-sccp_features.lo `test -f 'sccp_features.c' || echo '$(srcdir)/'`sccp_features.c
 
-chan_sccp_la-sccp_socket.lo: sccp_socket.c
-	$(AM_V_CC)$(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(chan_sccp_la_CPPFLAGS) $(CPPFLAGS) $(chan_sccp_la_CFLAGS) $(CFLAGS) -MT chan_sccp_la-sccp_socket.lo -MD -MP -MF $(DEPDIR)/chan_sccp_la-sccp_socket.Tpo -c -o chan_sccp_la-sccp_socket.lo `test -f 'sccp_socket.c' || echo '$(srcdir)/'`sccp_socket.c
-	$(AM_V_at)$(am__mv) $(DEPDIR)/chan_sccp_la-sccp_socket.Tpo $(DEPDIR)/chan_sccp_la-sccp_socket.Plo
-#	$(AM_V_CC) \
-#	source='sccp_socket.c' object='chan_sccp_la-sccp_socket.lo' libtool=yes \
-#	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) \
-#	$(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(chan_sccp_la_CPPFLAGS) $(CPPFLAGS) $(chan_sccp_la_CFLAGS) $(CFLAGS) -c -o chan_sccp_la-sccp_socket.lo `test -f 'sccp_socket.c' || echo '$(srcdir)/'`sccp_socket.c
-
 chan_sccp_la-sccp_config.lo: sccp_config.c
 	$(AM_V_CC)$(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(chan_sccp_la_CPPFLAGS) $(CPPFLAGS) $(chan_sccp_la_CFLAGS) $(CFLAGS) -MT chan_sccp_la-sccp_config.lo -MD -MP -MF $(DEPDIR)/chan_sccp_la-sccp_config.Tpo -c -o chan_sccp_la-sccp_config.lo `test -f 'sccp_config.c' || echo '$(srcdir)/'`sccp_config.c
 	$(AM_V_at)$(am__mv) $(DEPDIR)/chan_sccp_la-sccp_config.Tpo $(DEPDIR)/chan_sccp_la-sccp_config.Plo
@@ -749,6 +744,14 @@ chan_sccp_la-sccp_protocol.lo: sccp_protocol.c
 #	source='sccp_protocol.c' object='chan_sccp_la-sccp_protocol.lo' libtool=yes \
 #	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) \
 #	$(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(chan_sccp_la_CPPFLAGS) $(CPPFLAGS) $(chan_sccp_la_CFLAGS) $(CFLAGS) -c -o chan_sccp_la-sccp_protocol.lo `test -f 'sccp_protocol.c' || echo '$(srcdir)/'`sccp_protocol.c
+
+chan_sccp_la-sccp_socket.lo: sccp_socket.c
+	$(AM_V_CC)$(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(chan_sccp_la_CPPFLAGS) $(CPPFLAGS) $(chan_sccp_la_CFLAGS) $(CFLAGS) -MT chan_sccp_la-sccp_socket.lo -MD -MP -MF $(DEPDIR)/chan_sccp_la-sccp_socket.Tpo -c -o chan_sccp_la-sccp_socket.lo `test -f 'sccp_socket.c' || echo '$(srcdir)/'`sccp_socket.c
+	$(AM_V_at)$(am__mv) $(DEPDIR)/chan_sccp_la-sccp_socket.Tpo $(DEPDIR)/chan_sccp_la-sccp_socket.Plo
+#	$(AM_V_CC) \
+#	source='sccp_socket.c' object='chan_sccp_la-sccp_socket.lo' libtool=yes \
+#	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) \
+#	$(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(chan_sccp_la_CPPFLAGS) $(CPPFLAGS) $(chan_sccp_la_CFLAGS) $(CFLAGS) -c -o chan_sccp_la-sccp_socket.lo `test -f 'sccp_socket.c' || echo '$(srcdir)/'`sccp_socket.c
 
 chan_sccp_la-ast.lo: pbx_impl/ast/ast.c
 	$(AM_V_CC)$(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(chan_sccp_la_CPPFLAGS) $(CPPFLAGS) $(chan_sccp_la_CFLAGS) $(CFLAGS) -MT chan_sccp_la-ast.lo -MD -MP -MF $(DEPDIR)/chan_sccp_la-ast.Tpo -c -o chan_sccp_la-ast.lo `test -f 'pbx_impl/ast/ast.c' || echo '$(srcdir)/'`pbx_impl/ast/ast.c
@@ -1054,14 +1057,6 @@ uninstall-am: uninstall-csmodLTLIBRARIES
 	mostlyclean-libtool pdf pdf-am ps ps-am tags uninstall \
 	uninstall-am uninstall-csmodLTLIBRARIES
 
-
-#bin_PROGRAMS = gen_sccpconf
-#gen_sccpconf_SOURCES = gen_sccpconf/gen_sccpconf.c gen_sccpconf/gen_sccpconf.h sccp_config_entries.h
-#gen_sccpconf_CPPFLAGS	= $(PBX_CPPFLAGS)
-#gen_sccpconf_DEPENDENCIES = $(PBX_GENERAL) $(PBX_MAJOR) $(PBX_MINOR)
-#gen_sccpconf_CFLAGS	= $(AM_CFLAGS) $(PBX_CFLAGS) $(GDB_FLAGS) $(PTHREAD_CFLAGS) $(GCLIBS)
-#gen_sccpconf_CFLAGS	+= -D_REENTRANT -D_GNU_SOURCE -DCRYPTO -fPIC -pipe -Wall $(GCFLAGS)
-#gen_sccpconf_LDFLAGS	= -avoid-version -module  $(PBX_LDFLAGS) $(PTHREAD_LIBS) $(GCLIBS)
 
 install-csmodLTLIBRARIES:
 	@$(NORMAL_INSTALL)

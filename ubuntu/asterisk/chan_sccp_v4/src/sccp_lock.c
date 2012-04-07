@@ -7,8 +7,8 @@
  * \note		This program is free software and may be modified and distributed under the terms of the GNU Public License.
  *		See the LICENSE file at the top of the source tree.
  * 
- * $Date: 2011-10-11 16:34:34 +0000 (Tue, 11 Oct 2011) $
- * $Revision: 2976 $  
+ * $Date: 2012-03-02 17:53:21 +0000 (Fri, 02 Mar 2012) $
+ * $Revision: 3295 $  
  */
 
 /*!
@@ -86,7 +86,7 @@
 #include "config.h"
 #include "common.h"
 
-SCCP_FILE_VERSION(__FILE__, "$Revision: 2976 $")
+SCCP_FILE_VERSION(__FILE__, "$Revision: 3295 $")
 
 #ifdef CS_AST_DEBUG_CHANNEL_LOCKS
 #    define CS_LOCKS_DEBUG_ALL
@@ -177,12 +177,6 @@ int __sccp_mutex_lock(ast_mutex_t * p_mutex, const char *itemnametolock, const c
 #    ifdef CS_LOCKS_DEBUG_ALL
 	if (strncasecmp(filename, "sccp_socket.c", 13))
 		sccp_log((DEBUGCAT_LOCK)) (VERBOSE_PREFIX_3 "::::==== %s line %d (%s) SCCP_MUTEX: Locking %s\n", filename, lineno, func, itemnametolock);
-
-#        if ASTERISK_VERSION_NUMBER >= 10601
-	if ((sccp_globals->debug & DEBUGCAT_THREADLOCK) != 0) {
-		log_show_lock(p_mutex);
-	}
-#        endif
 #    endif
 #    ifdef CS_AST_DEBUG_THREADS
 	res = __pbx_pthread_mutex_lock(filename, lineno, func, itemnametolock, p_mutex);
@@ -243,12 +237,6 @@ int __sccp_mutex_trylock(ast_mutex_t * p_mutex, const char *itemnametolock, cons
 #    ifdef CS_LOCKS_DEBUG_ALL
 	if (strncasecmp(filename, "sccp_socket.c", 13))
 		sccp_log((DEBUGCAT_LOCK)) (VERBOSE_PREFIX_3 "::::==== %s line %d (%s) SCCP_MUTEX: Trying to lock %s\n", filename, lineno, func, itemnametolock);
-
-#        if ASTERISK_VERSION_NUMBER >= 10601
-	if ((sccp_globals->debug & DEBUGCAT_THREADLOCK) != 0) {
-		log_show_lock(p_mutex);
-	}
-#        endif
 #    endif
 #    ifdef CS_AST_DEBUG_THREADS
 	res = __pbx_pthread_mutex_trylock(filename, lineno, func, itemnametolock, p_mutex);
@@ -295,5 +283,74 @@ int __sccp_mutex_trylock(ast_mutex_t * p_mutex, const char *itemnametolock, cons
 
 	return res;
 }
+#endif
 
+#if CS_EXPERIMENTAL_REFCOUNT
+void * RefCountedObjectAlloc(size_t size, void *destructor)
+{
+	RefCountedObject * o;
+	char * ptr;
+	o = (RefCountedObject *)calloc( sizeof( RefCountedObject ) + size, 1 );
+	ptr = (char *)o;
+	ptr += sizeof(RefCountedObject);
+	o->refcount = 1;
+	o->data = ptr;
+	o->destructor = destructor;
+	pbx_log(LOG_NOTICE, "Refcount initialized for object %p to %d\n",o, o->refcount);
+	sccp_log((DEBUGCAT_LOCK)) (VERBOSE_PREFIX_3 "Refcount initialized for object %p to %d\n",o, o->refcount);
+	return ( void * )ptr;
+} 
+
+inline void *sccp_retain(void * ptr, const char *objecttype, const char *objectid, const char *filename, int lineno, const char *func)
+{
+	RefCountedObject * o;
+	char * cptr;
+	int refcountval;
+
+	cptr = (char *)ptr;
+	cptr -= sizeof(RefCountedObject);
+	o = (RefCountedObject *)cptr;
+
+	refcountval = pbx_atomic_fetchadd_int(&o->refcount, 1) + 1;
+	if (refcountval < 1) {
+		pbx_log(LOG_ERROR, "%s: refcount already reached 0 -> obj is fading!\n", objectid);
+		return NULL;		// refcount = 0 -> object is being cleaned up
+	} else {
+#if DEBUG
+		sccp_log((DEBUGCAT_LOCK)) ("%-15.15s:%-4.4d (%-25.25s) %*.*s> refcount for %s: %s increased to: %d\n", filename, lineno, func, refcountval-1, refcountval-1, "------", objecttype, objectid, refcountval);
+#else		
+		sccp_log((DEBUGCAT_LOCK)) ("SCCP: %*.*s> refcount for %s: %s increased to: %d\n", refcountval-1, refcountval-1, "------", objecttype, objectid, refcountval);
+#endif
+	}
+	return ptr;
+}
+
+inline void *sccp_release(void * ptr, const char *objecttype, const char *objectid, const char *filename, int lineno, const char *func)
+{
+	RefCountedObject * o;
+	char * cptr;
+	int refcountval;
+
+	cptr = (char *)ptr;
+	cptr -= sizeof(RefCountedObject);
+	o = (RefCountedObject *)cptr;
+
+	refcountval=pbx_atomic_fetchadd_int(&o->refcount, -1) -1;
+
+	if( refcountval < 0 ) {
+		pbx_log(LOG_ERROR, "%s: refcount would go below 0 -> it is already being cleaned!\n", objectid);
+	} else if( refcountval == 0 ) {
+		pbx_log(LOG_NOTICE, "%s: refcount has reached 0 -> cleaning up!\n", objectid);
+		o->destructor(ptr);
+		sccp_free(o);
+		o = NULL;
+	} else {
+#if DEBUG
+		sccp_log((DEBUGCAT_LOCK)) ("%-15.15s:%-4.4d (%-25.25s) <%*.*s refcount for %s: %s decreased to: %d\n", filename, lineno, func, refcountval, refcountval, "------", objecttype, objectid, refcountval);
+#else
+		sccp_log((DEBUGCAT_LOCK)) ("SCCP: <%*.*s refcount for %s: %s decreased to: %d\n", filename, lineno, func, refcountval, refcountval, "------", objecttype, objectid, refcountval);
+#endif		
+	}
+	return NULL;
+}
 #endif

@@ -20,11 +20,18 @@ typedef enum { FALSE = 0, TRUE = 1 } boolean_t;
 #define offsetof(T, F) 0
 #define offsize(T, F) 0
 
-#define G_OBJ_REF(x) 0, 0
-#define D_OBJ_REF(x) 0, 0
-#define L_OBJ_REF(x) 0, 0
-#define S_OBJ_REF(x) 0, 0
-#define H_OBJ_REF(x) 0, 0
+/*
+#define G_OBJ_REF(x) #x,offsize(struct sccp_global_vars,x)
+#define D_OBJ_REF(x) #x,offsize(struct sccp_device,x)
+#define L_OBJ_REF(x) #x,offsize(struct sccp_line,x)
+#define S_OBJ_REF(x) #x,offsize(struct softKeySetConfiguration,x)
+#define H_OBJ_REF(x) #x,offsize(struct sccp_hotline,x)
+*/
+#define G_OBJ_REF(x) 0,0
+#define D_OBJ_REF(x) 0,0
+#define L_OBJ_REF(x) 0,0
+#define S_OBJ_REF(x) 0,0
+#define H_OBJ_REF(x) 0,0
 
 /* dyn config */
 typedef enum {
@@ -59,9 +66,12 @@ enum SCCPConfigOptionType {
 	SCCP_CONFIG_DATATYPE_INT			= 1 << 1,
 	SCCP_CONFIG_DATATYPE_UINT			= 1 << 2,
 	SCCP_CONFIG_DATATYPE_STRING			= 1 << 3,
-	SCCP_CONFIG_DATATYPE_GENERIC			= 1 << 4,
+	SCCP_CONFIG_DATATYPE_PARSER			= 1 << 4,
 	SCCP_CONFIG_DATATYPE_STRINGPTR			= 1 << 5,	/* pointer */
 	SCCP_CONFIG_DATATYPE_CHAR			= 1 << 6,
+	SCCP_CONFIG_DATATYPE_ENUM2INT			= 1 << 7,
+	SCCP_CONFIG_DATATYPE_ENUM2STR			= 1 << 8,
+	SCCP_CONFIG_DATATYPE_CSV2STR			= 1 << 9,
 /* *INDENT-ON* */
 };
 
@@ -78,6 +88,7 @@ enum SCCPConfigOptionFlag {
 	SCCP_CONFIG_FLAG_REQUIRED			= 1 << 5,		/*< parameter is required */
 	SCCP_CONFIG_FLAG_GET_DEVICE_DEFAULT		= 1 << 6,		/*< retrieve default value from device */
 	SCCP_CONFIG_FLAG_GET_GLOBAL_DEFAULT		= 1 << 7,		/*< retrieve default value from global */
+	SCCP_CONFIG_FLAG_MULTI_ENTRY			= 1 << 8,		/*< multi entries allowed */
 /* *INDENT-ON* */
 };
 
@@ -89,48 +100,51 @@ typedef struct SCCPConfigOption {
 
 /* *INDENT-ON* */
 	const char *name;							/*!< Configuration Parameter Name */
-	const int offset;							/*!< The offset relative to the context structure where the option value is stored. */
-	const int size;								/*!< Structure size */
+	const int offset;
+	const size_t size;
 	enum SCCPConfigOptionType type;						/*!< Data type */
+	const char *generic_parser;
+	const char *str2enum;							/*!< convert used for parsing OptionType: SCCP_CONFIG_DATATYPE_ENUM */
 	enum SCCPConfigOptionFlag flags;					/*!< Data type */
 	sccp_configurationchange_t change;					/*!< Does a change of this value needs a device restart */
 	const char *defaultValue;						/*!< Default value */
-//	sccp_value_changed_t(*converter_f) (void *dest, const size_t size, const char *value, const sccp_config_segment_t segment);	/*!< Conversion function */
-	const char *cb;
 	const char *description;						/*!< Configuration description (config file) or warning message for deprecated or obsolete values */
 /* *INDENT-OFF* */
 } SCCPConfigOption;
 
 //converter function prototypes 
-#define sccp_config_parse_codec_preferences "sccp_config_parse_codec_preferences"
-#define sccp_config_parse_allow_codec "sccp_config_parse_allow_codec"
-#define sccp_config_parse_disallow_codec "sccp_config_parse_disallow_codec"
-#define sccp_config_parse_mailbox "sccp_config_parse_mailbox"
-#define sccp_config_parse_tos "sccp_config_parse_tos"
-#define sccp_config_parse_cos "sccp_config_parse_cos"
-#define sccp_config_parse_amaflags "sccp_config_parse_amaflags"
-#define sccp_config_parse_secondaryDialtoneDigits "sccp_config_parse_secondaryDialtoneDigits"
-#define sccp_config_parse_variables "sccp_config_parse_variables"
-#define sccp_config_parse_group "sccp_config_parse_group"
-#define sccp_config_parse_permit "sccp_config_parse_permit"
-#define sccp_config_parse_deny "sccp_config_parse_deny"
-#define sccp_config_parse_button "sccp_config_parse_button"
-#define sccp_config_parse_permithosts "sccp_config_parse_permithosts"
-#define sccp_config_parse_addons "sccp_config_parse_addons"
-#define sccp_config_parse_privacyFeature "sccp_config_parse_privacyFeature"
-#define sccp_config_parse_earlyrtp "sccp_config_parse_earlyrtp"
-#define sccp_config_parse_dtmfmode "sccp_config_parse_dtmfmode"
-#define sccp_config_parse_mwilamp "sccp_config_parse_mwilamp"
-#define sccp_config_parse_debug "sccp_config_parse_debug"
-#define sccp_config_parse_ipaddress "sccp_config_parse_ipaddress"
-#define sccp_config_parse_port "sccp_config_parse_port"
-#define sccp_config_parse_blindtransferindication "sccp_config_parse_blindtransferindication"
-#define sccp_config_parse_callanswerorder "sccp_config_parse_callanswerorder"
-#define sccp_config_parse_regcontext "sccp_config_parse_regcontext"
-#define sccp_config_parse_context "sccp_config_parse_context"
-#define sccp_config_parse_hotline_context "sccp_config_parse_hotline_context"
-#define sccp_config_parse_hotline_exten "sccp_config_parse_hotline_exten"
-#define sccp_config_parse_dnd "sccp_config_parse_dnd"
+//#define sccp_config_parse_codec_preferences "codec_preferences"
+#define sccp_config_parse_allow_codec "(codec)=all|(alaw,ulaw,gsm,ilbc,g722,g723,g729,g726,slin,slin16)"
+#define sccp_config_parse_disallow_codec "(codec)=all|(alaw,ulaw,gsm,ilbc,g722,g723,g729,g726,slin,slin16)"
+#define sccp_config_parse_mailbox "(mailbox)=mailbox@context"
+#define sccp_config_parse_tos "(tos)=[[value]]|lowdelay|throughput|reliability|mincost|none"
+#define sccp_config_parse_cos "(cos)=[[value]]"
+#define sccp_config_parse_amaflags "(amaflags)=[[string]]"
+#define sccp_config_parse_secondaryDialtoneDigits "(secondaryDialtoneDigits)=[[value]]"
+#define sccp_config_parse_variables "(variables)=[[string]]"
+#define sccp_config_parse_group "(group)=[[fromto]],[[value]]"
+#define sccp_config_parse_permit "(permit)=[[ipaddress]],internal"
+#define sccp_config_parse_deny "(deny)=[[ipaddress]],internal"
+#define sccp_config_parse_button "(button)=[[button]]"
+#define sccp_config_parse_permithosts "(permithosts)=[[hostname]]"
+#define sccp_config_parse_addons "(addons)=7914,7915,7916,SPA500S"
+#define sccp_config_parse_privacyFeature "(privacyFeature)=full|on|off"
+#define sccp_config_parse_earlyrtp "(earlyrtp)=none|offhook|dial|ringout|progress"
+#define sccp_config_parse_dtmfmode "(dtmfmode)=outofband|inband"
+#define sccp_config_parse_mwilamp "(mwilamp)=on|off|wink|flash|blink"
+#define sccp_config_parse_debug "(debug)=all,none,core,sccp,hint,rtp,device,line,action,channel,cli,config,feature,feature_button,softkey,indicate,pbx,socket,mwi,event,adv_feature,conference,buttontemplate,speeddial,codec,realtime,lock,threadlock,message,newcode,high,myi,fixme,fyi"
+#define sccp_config_parse_ipaddress "(ipaddress)=[[ipaddress]]"
+#define sccp_config_parse_port "(port)=[[port]]"
+#define sccp_config_parse_blindtransferindication "(blindtransferindication)=moh|ring"
+#define sccp_config_parse_callanswerorder "(callanswerorder)=oldestfirst|lastfirst"
+#define sccp_config_parse_regcontext "(regcontext)=[[string]]"
+#define sccp_config_parse_context "(context)=[[context]]"
+#define sccp_config_parse_hotline_context "(hotline_context)=[[context]]"
+#define sccp_config_parse_hotline_exten "(hotline_exten)=[[value]]"
+#define sccp_config_parse_dnd "(dnd)=reject|silent|user|on|off"
+#define sccp_config_parse_jbflags_enable "(jbflags_enable)=on|off"
+#define sccp_config_parse_jbflags_force "(jbflags_force)=on|off"
+#define sccp_config_parse_jbflags_log "(jbflags_log)=on|off"
 
 #include "../../src/sccp_config_entries.h"
 
@@ -148,7 +162,7 @@ typedef struct SCCPConfigSegment {
  * \brief SCCP Config Option Struct Initialization
  */
 static const SCCPConfigSegment sccpConfigSegments[] = {
-	{"global", SCCP_CONFIG_GLOBAL_SEGMENT, sccpGlobalConfigOptions, ARRAY_LEN(sccpGlobalConfigOptions)},
+	{"general", SCCP_CONFIG_GLOBAL_SEGMENT, sccpGlobalConfigOptions, ARRAY_LEN(sccpGlobalConfigOptions)},
 	{"device", SCCP_CONFIG_DEVICE_SEGMENT, sccpDeviceConfigOptions, ARRAY_LEN(sccpDeviceConfigOptions)},
 	{"line", SCCP_CONFIG_LINE_SEGMENT, sccpLineConfigOptions, ARRAY_LEN(sccpLineConfigOptions)},
 	{"softkey", SCCP_CONFIG_SOFTKEY_SEGMENT, sccpSoftKeyConfigOptions, ARRAY_LEN(sccpSoftKeyConfigOptions)},

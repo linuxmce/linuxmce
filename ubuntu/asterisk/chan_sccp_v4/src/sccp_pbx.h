@@ -9,11 +9,11 @@
  * \note        This program is free software and may be modified and distributed under the terms of the GNU Public License.
  *              See the LICENSE file at the top of the source tree.
  *
- * $Date: 2011-10-20 17:26:12 +0000 (Thu, 20 Oct 2011) $
- * $Revision: 3072 $  
+ * $Date: 2012-01-02 13:56:08 +0000 (Mon, 02 Jan 2012) $
+ * $Revision: 3147 $  
  */
-#ifndef __SCCP_PBX_H
-#    define __SCCP_PBX_H
+#    ifndef __SCCP_PBX_H
+#define __SCCP_PBX_H
 
 uint8_t sccp_pbx_channel_allocate_locked(sccp_channel_t * c);
 int sccp_pbx_sched_dial(const void *data);
@@ -29,7 +29,7 @@ sccp_channel_t *sccp_pbx_getPeer(sccp_channel_t * channel);
 int sccp_pbx_getCodecCapabilities(sccp_channel_t * channel, void **capabilities);
 int sccp_pbx_getPeerCodecCapabilities(sccp_channel_t * channel, void **capabilities);
 int sccp_pbx_hangup_locked(sccp_channel_t * c);
-int sccp_pbx_call(PBX_CHANNEL_TYPE *ast, char *dest, int timeout);
+int sccp_pbx_call(PBX_CHANNEL_TYPE * ast, char *dest, int timeout);
 int sccp_pbx_answer(sccp_channel_t * c);
 
 //! \todo do we need this?
@@ -38,4 +38,4 @@ int sccp_pbx_answer(sccp_channel_t * c);
 //! \todo move this to pbx impl
 int sccp_pbx_queue_control(sccp_channel_t * c, uint8_t control);
 
-#endif
+#    endif

@@ -1,3 +1,13 @@
+/*!
+ * \file 	define.h
+ * \brief 	SCCP PBX Redefinition Asterisk Header
+ * \author 	Diederik de Groot <ddegroot [at] users.sourceforge.net>
+ * \note        This program is free software and may be modified and distributed under the terms of the GNU Public License.
+ *		See the LICENSE file at the top of the source tree.
+ *
+ * $Date: 2010-10-23 20:04:30 +0200 (Sat, 23 Oct 2010) $
+ * $Revision: 2044 $  
+ */
 #ifndef SCCP_AST_DEFINE_H_
 #    define SCCP_AST_DEFINE_H_
 // type redefinitions
@@ -109,6 +119,7 @@
 #    define pbx_cli_unregister ast_cli_unregister
 #    define pbx_cli_unregister_multiple ast_cli_unregister_multiple
 #    define pbx_codec_pref_string ast_codec_pref_string
+#    define pbx_cond_t ast_cond_t
 #    define pbx_cond_broadcast ast_cond_broadcast
 #    define pbx_cond_destroy ast_cond_destroy
 #    define pbx_cond_init ast_cond_init
@@ -133,6 +144,7 @@
 #    define pbx_exists_extension ast_exists_extension
 #    define pbx_extension_state_add ast_extension_state_add
 #    define pbx_extension_state_del ast_extension_state_del
+#    define pbx_extension_state ast_extension_state
 #    define pbx_get_group ast_get_group
 #    define pbx_get_hint ast_get_hint
 #    define pbx_gethostbyname ast_gethostbyname
@@ -147,6 +159,7 @@
 #    define pbx_manager_unregister ast_manager_unregister
 #    define pbx_matchmore_extension ast_matchmore_extension
 #    define pbx_moh_stop ast_moh_stop
+#    define pbx_mutex_t ast_mutex_t
 #    define pbx_mutex_destroy ast_mutex_destroy
 #    define pbx_mutex_init ast_mutex_init
 #    define pbx_mutex_lock ast_mutex_lock
@@ -166,8 +179,8 @@
 #    define pbx_pthread_mutex_lock ast_pthread_mutex_lock
 #    define pbx_pthread_mutex_trylock ast_pthread_mutex_trylock
 #    define pbx_pthread_mutex_unlock ast_pthread_mutex_unlock
-#    define pbx_queue_control ast_queue_control
-#    define pbx_queue_frame ast_queue_frame
+//#    define pbx_queue_control ast_queue_control
+//#    define pbx_queue_frame ast_queue_frame
 #    define pbx_queue_hangup ast_queue_hangup
 #    define pbx_random ast_random
 #    define pbx_realloc ast_realloc
@@ -229,6 +242,8 @@
 #    define pbx_string_field_set ast_string_field_set
 #    define pbx_strip ast_strip
 #    define pbx_test_flag ast_test_flag
+#    define pbx_set_flag ast_set_flag
+#    define pbx_set2_flag ast_set2_flag
 #    define pbx_trim_blanks ast_trim_blanks
 #    define pbx_true ast_true
 #    define pbx_tvnow ast_tvnow
@@ -240,4 +255,9 @@
 #    define pbx_strlen_zero ast_strlen_zero
 #    define pbx_event_sub ast_event_sub
 #    define pbx_context_find ast_context_find
+#    define pbx_bridge_impart ast_bridge_impart
+#    define pbx_bridge_depart ast_bridge_depart
+#    define pbx_hangup ast_hangup
+
+#    define pbx_atomic_fetchadd_int ast_atomic_fetchadd_int
 #endif

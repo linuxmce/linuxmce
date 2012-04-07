@@ -3,8 +3,8 @@ dnl COPYRIGHT: chan-sccp-b.sourceforge.net group 2009
 dnl CREATED BY: Created by Diederik de Groot
 dnl LICENSE: This program is free software and may be modified and distributed under the terms of the GNU Public License.
 dnl          See the LICENSE file at the top of the source tree.
-dnl DATE: $Date: 2011-10-18 00:54:49 +0000 (Tue, 18 Oct 2011) $
-dnl REVISION: $Revision: 3054 $
+dnl DATE: $Date: 2011-11-04 13:58:39 +0000 (Fri, 04 Nov 2011) $
+dnl REVISION: $Revision: 3114 $
 dnl NOTE: Process this file with autoconf to produce a configure script.
 AC_PREREQ(2.53)
 AC_INIT([Chan_SCCP],
@@ -49,7 +49,7 @@ AM_DISABLE_STATIC([])
 
 AC_CONFIG_SRCDIR([src/chan_sccp.c]) 
 AC_COPYRIGHT("Chan_SCCP")
-AC_REVISION($Revision: 3054 $) 
+AC_REVISION($Revision: 3114 $) 
 
 CONFIGURE_PART([Checking build environment:])
 CS_SETUP_BUILD
@@ -76,9 +76,13 @@ CS_WITH_CHANGELOG_OLDEST
 
 CONFIGURE_PART([Checking Configure Options:])
 CS_WITH_PBX
+
 CS_SETUP_DOXYGEN
+CONFIGURE_PART([Checking Enable/Disable:])
+CS_PARSE_WITH_LIBEV
 CS_PARSE_WITH_AND_ENABLE
 CS_PARSE_WITH_LIBGC
+AX_COUNT_CPUS
 
 dnl Return CFLAGS / CPPFLAGS
 CFLAGS=${CFLAGS_saved}

@@ -3,9 +3,13 @@ Needs testing
 Fix Check sccp reload:
   - sccp.conf reloading / reset necessary devices
 
+Fix RegContext SubscriptionId (segfault during module load after unload)
+
 Remote capabilities check: test remote channel is sccp channel -> use preferred codecs (mostly done, test transfer hold needed -MC)
 
 MaxCallBR to "automaticly" choose audio and video codec
+
+Automatically Detect nated devices
 
 
 
@@ -23,8 +27,6 @@ Fix when phone looses connection and tries to re-connect within keepalive time, 
 
 Fix Conference + ConfList
 
-Fix RegContext SubscriptionId (segfault during module load after unload)
-
 Fix Pressing a shared line button, while another phone is on a call using the same shared line.
 
 Handle control_frame receipt of AST_CONTROL_HANGUP when previous channel->state AST_CONTROL_REDIRECTING -> finish tranfer/blindtransfer
@@ -36,14 +38,14 @@ Pickup: eigentlicher pickup code sollte in ein seperate function liegen, damit d
 
 CLI_Macro's saubern: Da sollte ich noch mal durch gehen und die per asterisk version spalten.
 
+Crossover device registration: It happens after module unload chan_sccp.so, module load chan_sccp.so and a 7985 phone is connected during it. 
+
 
 Objectives 1.8
 ============================================================================
 
 Finish Configuration
 - use global codecs for device
-
-Automatically Detect nated devices
 
 Automatic enabling of directrtp when possible / desired
 

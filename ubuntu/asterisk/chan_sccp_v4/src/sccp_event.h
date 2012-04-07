@@ -7,14 +7,15 @@
  *		See the LICENSE file at the top of the source tree.
  * \since	2009-09-02
  *
- * $Date: 2011-10-11 16:34:34 +0000 (Tue, 11 Oct 2011) $
- * $Revision: 2976 $  
+ * $Date: 2012-02-05 06:03:05 +0000 (Sun, 05 Feb 2012) $
+ * $Revision: 3249 $  
  */
 
-#ifndef SCCP_EVENT_H_
-#    define SCCP_EVENT_H_
+#    ifndef SCCP_EVENT_H_
+#define SCCP_EVENT_H_
 
-#    include "chan_sccp.h"
+//#include "config.h"
+#include "common.h"
 
 /* structures */
 
@@ -101,4 +102,4 @@ void sccp_event_subscribe(sccp_event_type_t eventType, sccp_event_callback_t cb)
 
 void sccp_event_fire(const sccp_event_t ** event);
 
-#endif										/* SCCP_EVENT_H_ */
+#    endif										/* SCCP_EVENT_H_ */

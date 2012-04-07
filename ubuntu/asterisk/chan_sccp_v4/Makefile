@@ -20,7 +20,7 @@
 # CREATED BY: Diederik de Groot <ddegroot@sourceforge.net>
 # LICENSE: This program is free software and may be modified and distributed under the terms of the GNU Public License.
 #          See the LICENSE file at the top of the source tree.
-# DATE:     $Date: 2011-10-11 17:30:35 +0000 (Tue, 11 Oct 2011) $
+# DATE:     $Date: 2011-10-11 19:30:35 +0200 (Di, 11. Okt 2011) $
 # REVISION: $Revision: 2997 $
 # NOTE: Process this file with automake to produce a makefile.in script.
 
@@ -157,30 +157,30 @@ DIST_ARCHIVES = $(distdir).tar.gz $(distdir).tar.bz2 $(distdir).tar.Z
 GZIP_ENV = --best
 distuninstallcheck_listfiles = find . -type f -print
 distcleancheck_listfiles = find . -type f -print
-ACLOCAL = ${SHELL} /var/lmce-build/svn/branches/LinuxMCE-1004/ubuntu/asterisk/Chan_SCCP_trunk/autoconf/missing --run aclocal-1.11
+ACLOCAL = ${SHELL} /var/lmce-build/svn/branches/LinuxMCE-1004/ubuntu/asterisk/trunk/autoconf/missing --run aclocal-1.11
 ALLOCA = 
-AMTAR = ${SHELL} /var/lmce-build/svn/branches/LinuxMCE-1004/ubuntu/asterisk/Chan_SCCP_trunk/autoconf/missing --run tar
+AMTAR = ${SHELL} /var/lmce-build/svn/branches/LinuxMCE-1004/ubuntu/asterisk/trunk/autoconf/missing --run tar
 AM_DEFAULT_VERBOSITY = 0
 AR = ar
 ARGZ_H = 
 ASTERISK_REPOS_LOCATION = TGZ
-ASTERISK_VERSION_NUMBER = 10807
+ASTERISK_VERSION_NUMBER = 10811
 ASTERISK_VER_GROUP = 108
-AUTOCONF = ${SHELL} /var/lmce-build/svn/branches/LinuxMCE-1004/ubuntu/asterisk/Chan_SCCP_trunk/autoconf/missing --run autoconf
-AUTOHEADER = ${SHELL} /var/lmce-build/svn/branches/LinuxMCE-1004/ubuntu/asterisk/Chan_SCCP_trunk/autoconf/missing --run autoheader
-AUTOMAKE = ${SHELL} /var/lmce-build/svn/branches/LinuxMCE-1004/ubuntu/asterisk/Chan_SCCP_trunk/autoconf/missing --run automake-1.11
+AUTOCONF = ${SHELL} /var/lmce-build/svn/branches/LinuxMCE-1004/ubuntu/asterisk/trunk/autoconf/missing --run autoconf
+AUTOHEADER = ${SHELL} /var/lmce-build/svn/branches/LinuxMCE-1004/ubuntu/asterisk/trunk/autoconf/missing --run autoheader
+AUTOMAKE = ${SHELL} /var/lmce-build/svn/branches/LinuxMCE-1004/ubuntu/asterisk/trunk/autoconf/missing --run automake-1.11
 AWK = gawk
-BUILD_DATE = 2011-10-25 13:29:59 UTC
+BUILD_DATE = 2012-04-07 08:51:18 UTC
 BUILD_HOSTNAME = fluffybitch.org
-BUILD_KERNEL = 2.6.32-30-server
+BUILD_KERNEL = 2.6.32-35-server
 BUILD_MACHINE = x86_64
 BUILD_OS = Linux
-BUILD_USER = finger not found so no builduser info will be available -lp root
+BUILD_USER = root
 CAT = /bin/cat
 CC = gcc
 CCACHE = 
 CCDEPMODE = depmode=gcc3
-CFLAGS = -g -O2 -D_LARGEFILE_SOURCE -D_FILE_OFFSET_BITS=64 -std=gnu89 -Wno-unused-function -Wno-long-long
+CFLAGS = -g -O2 -D_LARGEFILE_SOURCE -D_FILE_OFFSET_BITS=64 -std=gnu89 -O3  -Wno-long-long -Wno-unused-parameter -Wno-ignored-qualifiers
 CHANGELOG_OLDEST = 1021
 CPP = gcc -E
 CPPFLAGS = 
@@ -225,9 +225,12 @@ ECHO_C =
 ECHO_N = -n
 ECHO_T = 
 EGREP = /bin/grep -E
+EVENT_CFLAGS = 
+EVENT_LIBS = 
+EVENT_TYPE = 
 EXEEXT = 
 FGREP = /bin/grep -F
-FINGER = echo finger not found so no builduser info will be available
+FINGER = No
 GCFLAGS = 
 GCLIBS = 
 GDB_FLAGS = 
@@ -263,7 +266,7 @@ LT_CONFIG_H = src/config.h
 LT_DLLOADERS =  libltdl/dlopen.la
 LT_DLPREOPEN = -dlpreopen libltdl/dlopen.la 
 M4 = /usr/bin/m4
-MAKEINFO = ${SHELL} /var/lmce-build/svn/branches/LinuxMCE-1004/ubuntu/asterisk/Chan_SCCP_trunk/autoconf/missing --run makeinfo
+MAKEINFO = ${SHELL} /var/lmce-build/svn/branches/LinuxMCE-1004/ubuntu/asterisk/trunk/autoconf/missing --run makeinfo
 MKDIR_P = /bin/mkdir -p
 NM = /usr/bin/nm -B
 NMEDIT = 
@@ -295,7 +298,7 @@ PTHREAD_LIBS =
 RANLIB = ranlib
 RPMBUILD = echo rpmbuild not found so you cannot build rpm packages (no problem)
 SCCP_BRANCH = DEV
-SCCP_REVISION = 
+SCCP_REVISION = 3352
 SCCP_VERSION = 4.0.0
 SED = /bin/sed
 SET_MAKE = 
@@ -309,10 +312,10 @@ UNAME = /bin/uname
 VERSION = 4.0.0_DEV
 WHOAMI = /usr/bin/whoami
 __Darwin__ = 
-abs_builddir = /var/lmce-build/svn/branches/LinuxMCE-1004/ubuntu/asterisk/Chan_SCCP_trunk
-abs_srcdir = /var/lmce-build/svn/branches/LinuxMCE-1004/ubuntu/asterisk/Chan_SCCP_trunk
-abs_top_builddir = /var/lmce-build/svn/branches/LinuxMCE-1004/ubuntu/asterisk/Chan_SCCP_trunk
-abs_top_srcdir = /var/lmce-build/svn/branches/LinuxMCE-1004/ubuntu/asterisk/Chan_SCCP_trunk
+abs_builddir = /var/lmce-build/svn/branches/LinuxMCE-1004/ubuntu/asterisk/trunk
+abs_srcdir = /var/lmce-build/svn/branches/LinuxMCE-1004/ubuntu/asterisk/trunk
+abs_top_builddir = /var/lmce-build/svn/branches/LinuxMCE-1004/ubuntu/asterisk/trunk
+abs_top_srcdir = /var/lmce-build/svn/branches/LinuxMCE-1004/ubuntu/asterisk/trunk
 ac_ct_CC = gcc
 ac_ct_CXX = g++
 ac_ct_DUMPBIN = 
@@ -343,7 +346,7 @@ host_vendor = unknown
 htmldir = ${docdir}
 includedir = ${prefix}/include
 infodir = ${datarootdir}/info
-install_sh = ${SHELL} /var/lmce-build/svn/branches/LinuxMCE-1004/ubuntu/asterisk/Chan_SCCP_trunk/autoconf/install-sh
+install_sh = ${SHELL} /var/lmce-build/svn/branches/LinuxMCE-1004/ubuntu/asterisk/trunk/autoconf/install-sh
 libdir = ${exec_prefix}/lib
 libexecdir = ${exec_prefix}/libexec
 localedir = ${datarootdir}/locale

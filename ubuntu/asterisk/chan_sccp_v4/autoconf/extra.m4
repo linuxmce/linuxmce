@@ -10,13 +10,13 @@ AC_DEFUN([CS_SETUP_DEFAULTS], [
 
 AC_DEFUN([CS_SETUP_BUILD],[
 	AC_PATH_TOOL([UNAME], [uname], No)
-	AC_PATH_PROGS(DATE,date,[echo date not found so no daten info will be available])
-	AC_PATH_PROGS(UNAME,uname,[echo uname not found so no version info will be available])
-	AC_PATH_PROGS(WHOAMI,whoami,[echo whoami not found so no builduser info will be available])
-	AC_PATH_PROGS(FINGER,finger,[echo finger not found so no builduser info will be available])
-	AC_PATH_PROGS(HEAD,head,[echo finger not found so no builduser info will be available])
-	AC_PATH_PROGS(CUT,cut,[echo finger not found so no builduser info will be available])
-	AC_PATH_PROGS(AWK,awk,[echo awk not found so no builduser info will be available])
+	AC_PATH_PROGS(DATE,date,No)
+	AC_PATH_PROGS(UNAME,uname,No)
+	AC_PATH_PROGS(WHOAMI,whoami,No)
+	AC_PATH_PROGS(FINGER,finger,No)
+	AC_PATH_PROGS(HEAD,head,No)
+	AC_PATH_PROGS(CUT,cut,No)
+	AC_PATH_PROGS(AWK,awk,No)
 
 	if test ! x"${UNAME}" = xNo; then
 	    if test -n $BUILD_OS ; then
@@ -25,7 +25,7 @@ AC_DEFUN([CS_SETUP_BUILD],[
 		BUILD_MACHINE="`${UNAME} -m`"
 		BUILD_HOSTNAME="`${UNAME} -n`"
 		BUILD_KERNEL="`${UNAME} -r`"
-		if test ! x"${AWK}" = xNo; then
+		if test "_${AWK}" != "_No" && test "_${FINGER}" != "_No"; then
 			BUILD_USER="`${FINGER} -lp $(echo "$USER") | ${HEAD} -n 1 | ${AWK} -F:\  '{print $3}'`"
 		else
 			BUILD_USER="`${WHOAMI}`"
@@ -50,54 +50,69 @@ AC_DEFUN([CS_SETUP_HOST_PLATFORM],[
 	astlibdir=''
 	case "${host}" in
 	  *-*-darwin*)
-		AC_DEFINE([__Darwin__],,[Define if Darwin])
+		AC_DEFINE([__Darwin__],1,[Using Darwin / Apple OSX])
+		AC_DEFINE([DARWIN],1,[Using Darwin / Apple OSX])
 		AC_SUBST(__Darwin__)
+		use_poll_compat=yes
 		no_libcap=yes
 		ostype=bsd
 		;;
 	  *-*-freebsd*)
+	    	AC_DEFINE([BSD], 1, [using BSD])
+		use_poll_compat=yes
 		no_libcap=yes
 		ostype=bsd
 		;;
 	  *-*-netbsd*)
+	    	AC_DEFINE([BSD], 1, [using BSD])
+		use_poll_compat=yes
 		no_libcap=yes
 		ostype=bsd
 		;;
 	  *-*-openbsd*)
+	    	AC_DEFINE([BSD], 1, [using BSD])
+		use_poll_compat=yes
 		no_libcap=yes
 		ostype=bsd
 		;;
 	  *-*-dragonfly*)
+	    	AC_DEFINE([BSD], 1, [using BSD])
+		use_poll_compat=yes
 		no_libcap=yes
 		ostype=bsd
 		;;
 	  *-aix*)
-	    AC_DEFINE(AIX,,[Define if AIX])
-	     broken_types=yes
+	    	AC_DEFINE([AIX], 1, [using IAX])
+		use_poll_compat=yes
+		broken_types=yes
 		no_libcap=yes
 		ostype=aix
 	    ;;
 	  *-osf4*)
-	    AC_DEFINE(OSF1,,[Define if OSF1])
-	    tru64_types=yes
+		AC_DEFINE([OSF1], 1, [using my beloved Digital OS])
+		use_poll_compat=yes
+		tru64_types=yes
 		no_libcap=yes
 		ostype=osf
 	    ;;
 	  *-osf5.1*)
-	    AC_DEFINE(OSF1)
+		AC_DEFINE([OSF1], 1, [using my beloved Digital OS])
+		use_poll_compat=yes
 		no_libcap=yes
 		ostype=osf
 	    ;;
 	  *-tru64*)
-	    AC_DEFINE(OSF1)
+		AC_DEFINE([OSF1], 1, [using my beloved Digital OS])
+		use_poll_compat=yes
 		tru64_types=yes
 		no_libcap=yes
 		ostype=osf
 	    ;;
 	  *-*-linux*)
-		ostype=linux
+		AC_DEFINE([LINUX],[1],[using LINUX])
 		LARGEFILE_FLAGS="-D_LARGEFILE_SOURCE -D_FILE_OFFSET_BITS=64"
 		CFLAGS="$CFLAGS $LARGEFILE_FLAGS"
+		ostype=linux
 		;;
 	  *cygwin*)
 		AC_DEFINE([_WIN32_WINNT],[0x0500],[Heya, it's windows])
@@ -107,17 +122,22 @@ AC_DEFUN([CS_SETUP_HOST_PLATFORM],[
 		ostype=cygwin
 		;;
 	  *-*-solaris2*)
-		AC_DEFINE([SOLARIS],[1],[needed for optional declarations to be visible])
+		AC_DEFINE([SOLARIS],[1],[using SOLARIS])
+		use_poll_compat=yes
 		no_libcap=yes
-	ostype=solaris
+		ostype=solaris
 		force_generic_timers=yes
 		;;
 	  *)
-		AC_MSG_RESULT(Unsupported operating system: ${host})
+		AC_MSG_RESULT(Unsupported/Unknown operating system: ${host})
+		use_poll_compat=yes
 		no_libcap=yes
 		ostype=unknown
 		;;
-	esac  
+	esac
+	if test "x$use_poll_compat" = "xyes"; then
+		AC_DEFINE([CS_USE_POLL_COMPAT], 1, [Define to 1 if internal poll should be used.])
+	fi
 	AC_SUBST(ostype)
 ])
 
@@ -184,7 +204,7 @@ AC_DEFUN([CS_FIND_LIBRARIES], [
 	AC_CHECK_FUNCS([gethostbyname inet_ntoa memset mkdir select socket strsep strcasecmp strchr strdup strerror strncasecmp strerror strchr malloc calloc realloc free]) 
 	AC_HEADER_STDC    
 	AC_HEADER_STDBOOL 
-	AC_CHECK_HEADERS([netinet/in.h fcntl.h])
+	AC_CHECK_HEADERS([netinet/in.h fcntl.h sys/signal.h stdio.h errno.h ctype.h assert.h])
 	AC_STRUCT_TM
 	AC_STRUCT_TIMEZONE
 ])
@@ -207,7 +227,7 @@ AC_DEFUN([CS_WITH_CCACHE],[
 	dnl Compile With CCACHE
 	AC_ARG_WITH(ccache,
 	  AC_HELP_STRING([--with-ccache[=PATH]], [use ccache during compile]), [ac_cv_use_ccache="${withval}"], [ac_cv_use_ccache="no"])
-	AS_IF([test "${ac_cv_use_ccache}" != "no"], [
+	AS_IF([test "_${ac_cv_use_ccache}" != "_no"], [
 		if test "${ac_cv_use_ccache}" = "yes"; then
 			AC_PATH_PROGS(CCACHE,ccache,[echo ccache not found])
 			if test -n "${CCACHE}"; then
@@ -268,8 +288,8 @@ AC_DEFUN([CS_CHECK_TYPES], [
 	AC_TYPE_UINT32_T
 	AC_TYPE_UINT64_T
 	AC_FUNC_FSEEKO
-	AC_FUNC_MALLOC
-	AC_FUNC_REALLOC
+dnl	AC_FUNC_MALLOC
+dnl	AC_FUNC_REALLOC
 
 	dnl check declarations
 	AC_CHECK_DECLS(INET_ADDRSTRLEN,[],[],[#if HAVE_NETINET_IN_H
@@ -437,8 +457,8 @@ AC_DEFUN([CS_SETUP_DOXYGEN], [
 	AC_ARG_ENABLE(devdoc, 
 	  AC_HELP_STRING([--enable-devdoc], [enable developer documentation]), 
 	  ac_cv_use_devdoc=$enableval, ac_cv_use_devdoc=no)
-	AS_IF([test "${ac_cv_use_devdoc}" == "yes"], 
-	  [DX_ENV_APPEND([INPUT],[. doc src])],
+	AS_IF([test "_${ac_cv_use_devdoc}" == "_yes"], 
+	  [DX_ENV_APPEND([INPUT],[. doc src src/pbx_impl src/pbx_impl/ast])],
 	  [DX_ENV_APPEND([INPUT],[. doc])]
 	)
 	AC_MSG_NOTICE([--enable-devdoc: ${ac_cv_use_devdoc}])
@@ -474,9 +494,16 @@ AC_DEFUN([CS_ENABLE_OPTIMIZATION], [
 		enable_do_crash="yes"
 		enable_debug_mutex="yes"
 		strip_binaries="no"
-		CFLAGS_saved="$CFLAGS_saved -O0 -Os -Wall -Wextra -Wno-unused-parameter -Wstrict-prototypes -Wmissing-prototypes -Wmissing-declarations -Wnested-externs"
-		dnl " -Wlong-long"
-		CFLAGS="$CFLAGS_saved"
+		CFLAGS="$CFLAGS_saved -O0 -Os -Wall"
+		if test "x$GCC" = "xyes"; then
+                        AX_CFLAGS_GCC_OPTION_NEW(-Wstrict-prototypes)
+                        AX_CFLAGS_GCC_OPTION_NEW(-Wmissing-prototypes)
+                        AX_CFLAGS_GCC_OPTION_NEW(-Wmissing-declarations)
+                        AX_CFLAGS_GCC_OPTION_NEW(-Wnested-externs)
+                        AX_CFLAGS_GCC_OPTION_NEW(-Wno-long-long)
+dnl			AX_CFLAGS_GCC_OPTION_NEW(-Wno-unused-but-set-variable)
+dnl			AX_CFLAGS_GCC_OPTION_NEW(-Wno-unused-parameter)
+    		fi 
 		GDB_FLAGS="-g"
 	else
 		AC_DEFINE([DEBUG],[0],[Extra debugging.])
@@ -484,9 +511,15 @@ AC_DEFUN([CS_ENABLE_OPTIMIZATION], [
 		enable_debug_mutex="no"
 		strip_binaries="yes"
 		GDB_FLAGS="$GDB_FLAGS"
-		CFLAGS_saved="$CFLAGS_saved -Wno-unused-function -Wno-long-long"
-		CFLAGS="$CFLAGS_saved"
+		CFLAGS="$CFLAGS_saved -O3 "
+		if test "x$GCC" = "xyes"; then
+                        AX_CFLAGS_GCC_OPTION_NEW(-Wno-long-long)
+                        AX_CFLAGS_GCC_OPTION_NEW(-Wno-unused-parameter)
+dnl                        AX_CFLAGS_GCC_OPTION_NEW(-Wno-unused-but-set-variable)	// has negative side effect on certain platforms (http://xen.1045712.n5.nabble.com/xen-4-0-testing-test-7147-regressions-FAIL-td4415622.html)
+                        AX_CFLAGS_GCC_OPTION_NEW(-Wno-ignored-qualifiers)
+		fi		
 	fi
+	CFLAGS_saved="$CFLAGS"
 ])
 
 AC_DEFUN([CS_ENABLE_DEBUG], [
@@ -500,7 +533,7 @@ AC_DEFUN([CS_DISABLE_PICKUP], [
 	AC_ARG_ENABLE(pickup, 
 	  AC_HELP_STRING([--disable-pickup], [disable pickup function]), 
 	  ac_cv_use_pickup=$enableval, ac_cv_use_pickup=yes)
-	AS_IF([test "${ac_cv_use_pickup}" == "yes"], [AC_DEFINE(CS_SCCP_PICKUP, 1, [pickup function enabled])])
+	AS_IF([test "_${ac_cv_use_pickup}" == "_yes"], [AC_DEFINE(CS_SCCP_PICKUP, 1, [pickup function enabled])])
 	AC_MSG_NOTICE([--enable-pickup: ${ac_cv_use_pickup}])
 ])
 
@@ -508,7 +541,7 @@ AC_DEFUN([CS_DISABLE_PARK], [
 	AC_ARG_ENABLE(park, 
 	  AC_HELP_STRING([--disable-park], [disable park functionality]), 
 	  ac_cv_use_park=$enableval, ac_cv_use_park=yes)
-	AS_IF([test "${ac_cv_use_park}" == "yes"], [AC_DEFINE(CS_SCCP_PARK, 1, [park functionality enabled])])
+	AS_IF([test "_${ac_cv_use_park}" == "_yes"], [AC_DEFINE(CS_SCCP_PARK, 1, [park functionality enabled])])
 	AC_MSG_NOTICE([--enable-park: ${ac_cv_use_park}])
 ])
 
@@ -516,7 +549,7 @@ AC_DEFUN([CS_DISABLE_DIRTRFR], [
 	AC_ARG_ENABLE(dirtrfr, 
 	  AC_HELP_STRING([--disable-dirtrfr], [disable direct transfer]), 
 	  ac_cv_use_dirtrfr=$enableval, ac_cv_use_dirtrfr=yes)
-	AS_IF([test "${ac_cv_use_dirtrfr}" == "yes"], [AC_DEFINE(CS_SCCP_DIRTRFR, 1, [direct transfer enabled])])
+	AS_IF([test "_${ac_cv_use_dirtrfr}" == "_yes"], [AC_DEFINE(CS_SCCP_DIRTRFR, 1, [direct transfer enabled])])
 	AC_MSG_NOTICE([--enable-dirtrfr: ${ac_cv_use_dirtrfr}])
 ])
 
@@ -524,7 +557,7 @@ AC_DEFUN([CS_DISABLE_MONITOR], [
 	AC_ARG_ENABLE(monitor, 
 	  AC_HELP_STRING([--disable-monitor], [disable feature monitor)]), 
 	  ac_cv_use_monitor=$enableval, ac_cv_use_monitor=yes)
-	AS_IF([test "${ac_cv_use_monitor}" == "yes"], [AC_DEFINE(CS_SCCP_FEATURE_MONITOR, 1, [feature monitor enabled])])
+	AS_IF([test "_${ac_cv_use_monitor}" == "_yes"], [AC_DEFINE(CS_SCCP_FEATURE_MONITOR, 1, [feature monitor enabled])])
 	AC_MSG_NOTICE([--enable-monitor: ${ac_cv_use_monitor}])
 ])
 
@@ -532,7 +565,7 @@ AC_DEFUN([CS_ENABLE_CONFERENCE], [
 	AC_ARG_ENABLE(conference, 
 	  AC_HELP_STRING([--enable-conference], [enable conference (>ast 1.6.2)(experimental)]), 
 	  ac_cv_use_conference=$enableval, ac_cv_use_conference=no)
-	AS_IF([test "${ac_cv_use_conference}" == "yes"], [AC_DEFINE(CS_SCCP_CONFERENCE, 1, [conference enabled])])
+	AS_IF([test "_${ac_cv_use_conference}" == "_yes"], [AC_DEFINE(CS_SCCP_CONFERENCE, 1, [conference enabled])])
 	AC_MSG_NOTICE([--enable-conference: ${ac_cv_use_conference}])
 ])
 
@@ -540,7 +573,7 @@ AC_DEFUN([CS_DISABLE_MANAGER], [
 	AC_ARG_ENABLE(manager, 
 	  AC_HELP_STRING([--disable-manager], [disabled ast manager events]), 
 	  ac_cv_use_manager=$enableval, ac_cv_use_manager=yes)
-	AS_IF([test "${ac_cv_use_manager}" == "yes"], [
+	AS_IF([test "_${ac_cv_use_manager}" == "_yes"], [
 		AC_DEFINE(CS_MANAGER_EVENTS, 1, [manager events enabled])
 		AC_DEFINE(CS_SCCP_MANAGER, 1, [manager console control enabled])
 	])
@@ -551,7 +584,7 @@ AC_DEFUN([CS_DISABLE_FUNCTIONS], [
 	AC_ARG_ENABLE(functions, 
 	  AC_HELP_STRING([--disable-functions], [disabled Dialplan functions]), 
 	  ac_cv_use_functions=$enableval, ac_cv_use_functions=yes)
-	AS_IF([test "${ac_cv_use_functions}" == "yes"], [AC_DEFINE(CS_SCCP_FUNCTIONS, 1, [dialplan function enabled])])
+	AS_IF([test "_${ac_cv_use_functions}" == "_yes"], [AC_DEFINE(CS_SCCP_FUNCTIONS, 1, [dialplan function enabled])])
 	AC_MSG_NOTICE([--enable-functions: ${ac_cv_use_functions}])
 ])
 
@@ -559,7 +592,7 @@ AC_DEFUN([CS_ENABLE_INDICATIONS], [
 	AC_ARG_ENABLE(indications, 
 	  AC_HELP_STRING([--enable-indications], [enable debug indications]), 
 	  ac_cv_debug_indications=$enableval, ac_cv_debug_indications=no)
-	AS_IF([test "${ac_cv_debug_indications}" == "yes"], [AC_DEFINE(CS_DEBUG_INDICATIONS, 1, [debug indications enabled])])
+	AS_IF([test "_${ac_cv_debug_indications}" == "_yes"], [AC_DEFINE(CS_DEBUG_INDICATIONS, 1, [debug indications enabled])])
 	AC_MSG_NOTICE([--enable-indications: ${ac_cv_debug_indications}])
 ])
 
@@ -567,7 +600,7 @@ AC_DEFUN([CS_DISABLE_REALTIME], [
 	AC_ARG_ENABLE(realtime, 
 	  AC_HELP_STRING([--disable-realtime], [disable realtime support]), 
 	  ac_cv_realtime=$enableval, ac_cv_realtime=yes)
-	AS_IF([test "${ac_cv_realtime}" == "yes"], [AC_DEFINE(CS_SCCP_REALTIME, 1, [realtime enabled])])
+	AS_IF([test "_${ac_cv_realtime}" == "_yes"], [AC_DEFINE(CS_SCCP_REALTIME, 1, [realtime enabled])])
 	AC_MSG_NOTICE([--enable-realtime: ${ac_cv_realtime}])
 ])
 
@@ -575,7 +608,7 @@ AC_DEFUN([CS_DISABLE_FEATURE_MONITOR], [
 	AC_ARG_ENABLE(feature_monitor, 
 	  AC_HELP_STRING([--disable-feature-monitor], [disable feature monitor]), 
 	  ac_cv_feature_monitor=$enableval, ac_cv_feature_monitor=yes)
-	AS_IF([test "${ac_cv_feature_monitor}" == "yes"], [AC_DEFINE(CS_SCCP_FEATURE_MONITOR, 1, [feature monitor enabled])])
+	AS_IF([test "_${ac_cv_feature_monitor}" == "_yes"], [AC_DEFINE(CS_SCCP_FEATURE_MONITOR, 1, [feature monitor enabled])])
 	AC_MSG_NOTICE([--enable-feature-monitor: ${ac_cv_feature_monitor}])
 ])
 
@@ -583,7 +616,7 @@ AC_DEFUN([CS_ENABLE_ADVANCED_FUNCTIONS], [
 	AC_ARG_ENABLE(advanced_functions, 
 	  AC_HELP_STRING([--enable-advanced-functions], [enable advanced functions (experimental)]), 
 	    ac_cv_advanced_functions=$enableval, ac_cv_advanced_functions=no)
-	AS_IF([test "${ac_cv_advanced_functions}" == "yes"], [AC_DEFINE(CS_ADV_FEATURES, 1, [advanced functions enabled])])
+	AS_IF([test "_${ac_cv_advanced_functions}" == "_yes"], [AC_DEFINE(CS_ADV_FEATURES, 1, [advanced functions enabled])])
 	AC_MSG_NOTICE([--enable-advanced-functions: ${ac_cv_advanced_functions}])
 ])
 
@@ -591,8 +624,40 @@ AC_DEFUN([CS_ENABLE_EXPERIMENTAL_MODE], [
 	AC_ARG_ENABLE(experimental_mode, 
 	  AC_HELP_STRING([--enable-experimental-mode], [enable experimental mode (only for developers)]), 
 	    ac_cv_experimental_mode=$enableval, ac_cv_experimental_mode=no)
-	AS_IF([test "${ac_cv_experimental_mode}" == "yes"], [AC_DEFINE(CS_EXPERIMENTAL, 1, [experimental mode enabled])])
+	AS_IF([test "_${ac_cv_experimental_mode}" == "_yes"], [AC_DEFINE(CS_EXPERIMENTAL, 1, [experimental mode enabled])])
 	AC_MSG_NOTICE([--enable-experimental-mode: ${ac_cv_experimental_mode} (only for developers)])
+])
+
+AC_DEFUN([CS_ENABLE_EXPERIMENTAL_CODEC], [
+	AC_ARG_ENABLE(experimental_codec, 
+	  AC_HELP_STRING([--enable-experimental-codec], [enable experimental codec (only for developers)]), 
+	    ac_cv_experimental_codec=$enableval, ac_cv_experimental_codec=no)
+	AS_IF([test "_${ac_cv_experimental_codec}" == "_yes"], [AC_DEFINE(CS_EXPERIMENTAL_CODEC, 1, [experimental codec enabled])])
+	AC_MSG_NOTICE([--enable-experimental-codec: ${ac_cv_experimental_codec} (only for developers)])
+])
+
+AC_DEFUN([CS_ENABLE_EXPERIMENTAL_RTP], [
+	AC_ARG_ENABLE(experimental_rtp, 
+	  AC_HELP_STRING([--enable-experimental-rtp], [enable experimental rtp (only for developers)]), 
+	    ac_cv_experimental_rtp=$enableval, ac_cv_experimental_rtp=no)
+	AS_IF([test "_${ac_cv_experimental_rtp}" == "_yes"], [AC_DEFINE(CS_EXPERIMENTAL_RTP, 1, [experimental rtp enabled])])
+	AC_MSG_NOTICE([--enable-experimental-rtp: ${ac_cv_experimental_rtp} (only for developers)])
+])
+
+AC_DEFUN([CS_ENABLE_EXPERIMENTAL_NEWIP], [
+	AC_ARG_ENABLE(experimental_newip, 
+	  AC_HELP_STRING([--enable-experimental-newip], [enable experimental newip (only for developers)]), 
+	    ac_cv_experimental_newip=$enableval, ac_cv_experimental_newip=no)
+	AS_IF([test "_${ac_cv_experimental_newip}" == "_yes"], [AC_DEFINE(CS_EXPERIMENTAL_NEWIP, 1, [experimental newip enabled])])
+	AC_MSG_NOTICE([--enable-experimental-newip: ${ac_cv_experimental_newip} (only for developers)])
+])
+
+AC_DEFUN([CS_ENABLE_EXPERIMENTAL_REFCOUNT], [
+	AC_ARG_ENABLE(experimental_refcount, 
+	  AC_HELP_STRING([--enable-experimental-rtp], [enable experimental refcount (only for developers)]), 
+	    ac_cv_experimental_refcount=$enableval, ac_cv_experimental_refcount=no)
+	AS_IF([test "_${ac_cv_experimental_refcount}" == "_yes"], [AC_DEFINE(CS_EXPERIMENTAL_REFCOUNT, 1, [experimental refcount enabled])])
+	AC_MSG_NOTICE([--enable-experimental-refcount: ${ac_cv_experimental_refcount} (only for developers)])
 ])
 
 AC_DEFUN([CS_DISABLE_DEVSTATE_FEATURE], [
@@ -600,8 +665,8 @@ AC_DEFUN([CS_DISABLE_DEVSTATE_FEATURE], [
 	  AC_HELP_STRING([--disable-devstate-feature], [disable device state feature button]), 
 	    ac_cv_devstate_feature=$enableval, ac_cv_devstate_feature=yes)
 	AS_IF([test ${ASTERISK_VERSION_NUMBER} -lt 10601], [ac_cv_devstate_feature=no])
-	AS_IF([test "${DEVICESTATE_H}" != "yes"], [ac_cv_devstate_feature=no])
-	AS_IF([test "${ac_cv_devstate_feature}" == "yes"], [AC_DEFINE(CS_DEVSTATE_FEATURE, 1, [devstate feature enabled])])
+	AS_IF([test "_${DEVICESTATE_H}" != "_yes"], [ac_cv_devstate_feature=no])
+	AS_IF([test "_${ac_cv_devstate_feature}" == "_yes"], [AC_DEFINE(CS_DEVSTATE_FEATURE, 1, [devstate feature enabled])])
 	AC_MSG_NOTICE([--enable-devstate-feature: ${ac_cv_devstate_feature}])
 ])
 
@@ -609,7 +674,7 @@ AC_DEFUN([CS_DISABLE_DYNAMIC_SPEEDDIAL], [
 	AC_ARG_ENABLE(dynamic_speeddial, 
 	  AC_HELP_STRING([--disable-dynamic-speeddial], [disable dynamic speeddials]), 
 	    ac_cv_dynamic_speeddial=$enableval, ac_cv_dynamic_speeddial=yes)
-	AS_IF([test "${ac_cv_dynamic_speeddial}" == "yes"], [AC_DEFINE(CS_DYNAMIC_SPEEDDIAL, 1, [dynamic speeddials enabled])])
+	AS_IF([test "_${ac_cv_dynamic_speeddial}" == "_yes"], [AC_DEFINE(CS_DYNAMIC_SPEEDDIAL, 1, [dynamic speeddials enabled])])
 	AC_MSG_NOTICE([--enable-dynamic-speeddial: ${ac_cv_dynamic_speeddial}])
 ])
 
@@ -629,7 +694,7 @@ AC_DEFUN([CS_ENABLE_VIDEO], [
 	AC_ARG_ENABLE(video, 
 	  AC_HELP_STRING([--enable-video], [enable streaming video (experimental)]), 
 	  ac_cv_streaming_video=$enableval, ac_cv_streaming_video=no)
-	AS_IF([test "${ac_cv_streaming_video}" == "yes"], [AC_DEFINE(CS_SCCP_VIDEO, 1, [Using streaming video])])
+	AS_IF([test "_${ac_cv_streaming_video}" == "_yes"], [AC_DEFINE(CS_SCCP_VIDEO, 1, [Using streaming video])])
 	AC_MSG_NOTICE([--enable-video: ${ac_cv_streaming_video}])
 ])
 
@@ -653,7 +718,7 @@ AC_DEFUN([CS_DISABLE_DYNAMIC_CONFIG], [
 	AC_ARG_ENABLE(dynamic_config, 
 	  AC_HELP_STRING([--disable-dynamic-config], [disable sccp reload]), 
 	  ac_cv_dynamic_config=$enableval, ac_cv_dynamic_config=yes)
-	AS_IF([test "${ac_cv_dynamic_config}" == "yes"], [AC_DEFINE(CS_DYNAMIC_CONFIG, 1, [sccp reload enabled])])
+	AS_IF([test "_${ac_cv_dynamic_config}" == "_yes"], [AC_DEFINE(CS_DYNAMIC_CONFIG, 1, [sccp reload enabled])])
 	AC_MSG_NOTICE([--enable-dynamic-config: ${ac_cv_dynamic_config}])
 ])
 
@@ -672,6 +737,10 @@ AC_DEFUN([CS_PARSE_WITH_AND_ENABLE], [
 	CS_DISABLE_FEATURE_MONITOR
 	CS_ENABLE_ADVANCED_FUNCTIONS
 	CS_ENABLE_EXPERIMENTAL_MODE
+	CS_ENABLE_EXPERIMENTAL_CODEC
+	CS_ENABLE_EXPERIMENTAL_RTP
+	CS_ENABLE_EXPERIMENTAL_NEWIP
+	CS_ENABLE_EXPERIMENTAL_REFCOUNT
 	CS_DISABLE_DEVSTATE_FEATURE
 	CS_DISABLE_DYNAMIC_SPEEDDIAL
 	CS_DISABLE_DYNAMIC_SPEEDDIAL_CID
@@ -730,4 +799,98 @@ AC_DEFUN([CS_SETUP_MODULE_DIR], [
           		;;
 	esac
 	AC_SUBST([csmoddir])
+])
+
+AC_DEFUN([CS_PARSE_WITH_LIBEV], [
+	EVENT_LIBS=""
+	EVENT_CFLAGS=""
+	EVENT_TYPE=""
+	AC_ARG_WITH(libevent,
+	  [AC_HELP_STRING([--with-libevent=yes|no],[use garbage collector (libgc) as allocator (experimental)])],
+	    uselibevent="$withval")
+	if test "x$uselibevent" = "xyes"; then
+		if test -z "$EVENT_HOME" ; then
+			AC_CHECK_LIB([ev], [event_init], [HAVE_EVENT="yes"], [])
+			if test "$HAVE_EVENT" = "yes" ; then
+				EVENT_LIBS="-lev"
+				EVENT_TYPE="ev"
+			else 
+				AC_CHECK_LIB([event], [event_init], [HAVE_EVENT="yes"], [])
+				if test "$HAVE_EVENT" = "yes" ; then
+					EVENT_LIBS="-levent"
+					EVENT_TYPE="event"
+				fi
+			fi	
+		else
+			EVENT_OLD_LDFLAGS="$LDFLAGS" ; LDFLAGS="$LDFLAGS -L$EVENT_HOME/lib"
+			EVENT_OLD_CFLAGS="$CFLAGS" ; CFLAGS="$CFLAGS -I$EVENT_HOME/include"
+			AC_CHECK_LIB([ev], [event_init], [HAVE_EVENT="yes"], [])
+			if test "$HAVE_EVENT" = "yes"; then
+				CFLAGS="$EVENT_OLD_CFLAGS"
+				LDFLAGS="$EVENT_OLD_LDFLAGS"
+				if test "$HAVE_EVENT" = "yes" ; then
+					EVENT_LIBS="-L$EVENT_HOME/lib -lev"
+					test -d "$EVENT_HOME/include" && EVENT_CFLAGS="-I$EVENT_HOME/include"
+					EVENT_TYPE="ev"
+				fi
+			else
+				AC_CHECK_LIB([event], [event_init], [HAVE_EVENT="yes"], [])
+				CFLAGS="$EVENT_OLD_CFLAGS"
+				LDFLAGS="$EVENT_OLD_LDFLAGS"
+				if test "$HAVE_EVENT" = "yes" ; then
+					EVENT_LIBS="-L$EVENT_HOME/lib -levent"
+					test -d "$EVENT_HOME/include" && EVENT_CFLAGS="-I$EVENT_HOME/include"
+					EVENT_TYPE="event"
+				fi
+			fi
+		fi
+		AC_MSG_CHECKING([for libev/libevent...])
+		if test "$HAVE_EVENT" = "yes" ; then
+			if test "$EVENT_TYPE" = "ev"; then
+				AC_MSG_RESULT([libev])
+				AC_DEFINE(HAVE_LIBEV, 1, [Define to 1 if libev is available])
+				AC_DEFINE(HAVE_LIBEVENT_COMPAT, 1, [Define to 1 if libev-libevent is available])
+			else
+				AC_MSG_RESULT([libevent])
+				AC_DEFINE(HAVE_LIBEVENT, 1, [Define to 1 if libevent is available])
+			fi
+		else
+			AC_MSG_RESULT([no])
+	dnl		AC_MSG_ERROR([
+	dnl			*** ERROR: cannot find libev or libevent!
+	dnl			***
+	dnl			*** Either install libev + libev-libevent-dev (preferred) or the older libevent
+	dnl			*** Sources can be found here: http://software.schmorp.de/pkg/libev.html or http://www.monkey.org/~provos/libevent/
+	dnl			*** If it's already installed, specify its path using --with-libevent=PATH
+	dnl		])
+		fi
+	fi
+	AM_CONDITIONAL([BUILD_WITH_LIBEVENT], test "$EVENT_TYPE" != "")
+	AC_SUBST([EVENT_LIBS])
+	AC_SUBST([EVENT_CFLAGS])
+	AC_SUBST([EVENT_TYPE])
+])
+
+AC_DEFUN([AX_COUNT_CPUS], [
+    AC_REQUIRE([AC_PROG_EGREP])
+    AC_MSG_CHECKING(the number of available CPUs)
+    CPU_COUNT="0"
+
+    #On MacOS
+    if test -x /usr/sbin/sysctl -a `/sbin/sysctl -a 2>/dev/null| grep -c hw.cpu`; then
+        CPU_COUNT=`/usr/sbin/sysctl -n hw.ncpu`
+    fi
+
+    #On Linux
+    if test "x$CPU_COUNT" = "x0" -a -e /proc/cpuinfo; then
+        CPU_COUNT=`$EGREP -c '^processor' /proc/cpuinfo`
+    fi
+
+    if test "x$CPU_COUNT" = "x0"; then
+        CPU_COUNT="1"
+        AC_MSG_RESULT( [unable to detect (assuming 1)] )
+    else
+        AC_MSG_RESULT( $CPU_COUNT )
+    fi
+    AC_DEFINE_UNQUOTED([CS_CPU_COUNT],`echo ${CPU_COUNT}`,[CS_CPU Count])
 ])

@@ -9,17 +9,18 @@
  * \note		This program is free software and may be modified and distributed under the terms of the GNU Public License.
  *		See the LICENSE file at the top of the source tree.
  *
- * $Date: 2011-10-14 19:39:51 +0000 (Fri, 14 Oct 2011) $
- * $Revision: 3036 $
+ * $Date: 2012-02-02 20:28:31 +0000 (Thu, 02 Feb 2012) $
+ * $Revision: 3248 $
  */
 
 #include "config.h"
 #include "common.h"
 
-SCCP_FILE_VERSION(__FILE__, "$Revision: 3036 $")
+SCCP_FILE_VERSION(__FILE__, "$Revision: 3248 $")
 
 #ifdef CS_DYNAMIC_CONFIG
 static void regcontext_exten(sccp_line_t * l, struct subscriptionId *subscriptionId, int onoff);
+int __sccp_line_destroy(const void *ptr);
 
 /*!
  * \brief run before reload is start on lines
@@ -115,20 +116,35 @@ void sccp_line_post_reload(void)
  */
 sccp_line_t *sccp_line_create(void)
 {
+#if CS_EXPERIMENTAL_REFCOUNT
+	sccp_line_t *l = (sccp_line_t *)RefCountedObjectAlloc(sizeof(sccp_line_t), __sccp_line_destroy);
+#else	
 	sccp_line_t *l = sccp_malloc(sizeof(sccp_line_t));
+#endif
 
 	if (!l) {
-		sccp_log(0) (VERBOSE_PREFIX_3 "Unable to allocate memory for a line\n");
+		sccp_log((DEBUGCAT_CORE)) (VERBOSE_PREFIX_3 "Unable to allocate memory for a line\n");
 		return NULL;
 	}
 	memset(l, 0, sizeof(sccp_line_t));
 	pbx_mutex_init(&l->lock);
+	sccp_line_lock(l);
 	SCCP_LIST_HEAD_INIT(&l->channels);
 	SCCP_LIST_HEAD_INIT(&l->devices);
 	SCCP_LIST_HEAD_INIT(&l->mailboxes);
+	sccp_line_unlock(l);
 
 	return l;
 }
+
+#if CS_EXPERIMENTAL_REFCOUNT
+inline sccp_line_t *__sccp_line_retain(sccp_line_t *l, const char *filename, int lineno, const char *func) {
+	return (sccp_line_t *)sccp_retain(l, "line", (l && l->name) ? l->name : "UNDEF", filename, lineno, func);
+}
+inline sccp_line_t *__sccp_line_release(sccp_line_t *l, const char *filename, int lineno, const char *func) {
+	return (sccp_line_t *)sccp_release(l, "line", (l && l->name) ? l->name : "UNDEF", filename, lineno, func);
+}
+#endif
 
 /*!
  * Add a line to global line list.
@@ -166,7 +182,7 @@ sccp_line_t *sccp_line_addToGlobals(sccp_line_t * line)
 	/* line was not created */
 	SCCP_RWLIST_INSERT_HEAD(&GLOB(lines), line, list);
 	SCCP_RWLIST_UNLOCK(&GLOB(lines));
-	sccp_log(1) (VERBOSE_PREFIX_3 "Added line '%s'\n", line->name);
+	sccp_log((DEBUGCAT_CORE)) (VERBOSE_PREFIX_3 "Added line '%s'\n", line->name);
 
 	sccp_event_t *event = sccp_malloc(sizeof(sccp_event_t));
 
@@ -264,13 +280,17 @@ void sccp_line_clean(sccp_line_t * l, boolean_t remove_from_global)
  * 	- line
  * 	  - see sccp_mwi_unsubscribeMailbox()
  */
-int sccp_line_destroy(const void *ptr)
+int __sccp_line_destroy(const void *ptr)
 {
 	sccp_line_t *l = (sccp_line_t *) ptr;
 
 	sccp_log((DEBUGCAT_NEWCODE | DEBUGCAT_CONFIG)) (VERBOSE_PREFIX_1 "%s: Line FREE\n", l->name);
 
+#if CS_EXPERIMENTAL_REFCOUNT
+	sccp_mutex_lock(&l->lock);
+#else	
 	sccp_line_lock(l);
+#endif	
 	if (l->trnsfvm)
 		sccp_free(l->trnsfvm);
 
@@ -287,10 +307,39 @@ int sccp_line_destroy(const void *ptr)
 			sccp_free(mailbox->context);
 		sccp_free(mailbox);
 	}
+#if CS_EXPERIMENTAL_REFCOUNT
+	sccp_mutex_unlock(&l->lock);
+#else	
 	sccp_line_unlock(l);
+#endif	
 	pbx_mutex_destroy(&l->lock);
-	sccp_free(l);
+#if !CS_EXPERIMENTAL_REFCOUNT
+	sccp_free(l);	// moved to sccp_release
+#endif
 	return 0;
+}
+
+/*!
+ * \brief Free a Line as scheduled command
+ * \param ptr SCCP Line Pointer
+ * \return success as int
+ *
+ * \callgraph
+ * \callergraph
+ * 
+ * \lock
+ * 	- line
+ * 	  - see sccp_mwi_unsubscribeMailbox()
+ */
+int sccp_line_destroy(const void *ptr)
+{
+#if CS_EXPERIMENTAL_REFCOUNT
+	sccp_line_t *l = (sccp_line_t *) ptr;
+	sccp_line_release(l);
+	return 0;
+#else
+	return __sccp_line_destroy(ptr);
+#endif
 }
 
 /*!
@@ -342,12 +391,12 @@ void sccp_line_cfwd(sccp_line_t * l, sccp_device_t * device, uint8_t type, char 
 	if (type == SCCP_CFWD_NONE) {
 		linedevice->cfwdAll.enabled = 0;
 		linedevice->cfwdBusy.enabled = 0;
-		sccp_log(1) (VERBOSE_PREFIX_3 "%s: Call Forward disabled on line %s\n", DEV_ID_LOG(device), l->name);
+		sccp_log((DEBUGCAT_CORE)) (VERBOSE_PREFIX_3 "%s: Call Forward disabled on line %s\n", DEV_ID_LOG(device), l->name);
 	} else {
 		if (!number || sccp_strlen_zero(number)) {
 			linedevice->cfwdAll.enabled = 0;
 			linedevice->cfwdBusy.enabled = 0;
-			sccp_log(1) (VERBOSE_PREFIX_3 "%s: Call Forward to an empty number. Invalid\n", DEV_ID_LOG(device));
+			sccp_log((DEBUGCAT_CORE)) (VERBOSE_PREFIX_3 "%s: Call Forward to an empty number. Invalid\n", DEV_ID_LOG(device));
 		} else {
 			switch (type) {
 				case SCCP_CFWD_ALL:
@@ -415,11 +464,17 @@ void sccp_line_addDevice(sccp_line_t * l, sccp_device_t * device, uint8_t lineIn
 		sccp_log(DEBUGCAT_LINE) (VERBOSE_PREFIX_3 "%s: add device to line %s\n", DEV_ID_LOG(device), l->name);
 		linedevice = sccp_malloc(sizeof(sccp_linedevices_t));
 		memset(linedevice, 0, sizeof(sccp_linedevices_t));
+		
 	}
 
+#if CS_EXPERIMENTAL_REFCOUNT			
+	linedevice->device = sccp_device_retain(device);
+	linedevice->line = sccp_line_retain(l);
+#else			
 	linedevice->device = device;
-	linedevice->lineInstance = lineInstance;
 	linedevice->line = l;
+#endif
+	linedevice->lineInstance = lineInstance;
 
 	if (NULL != subscriptionId) {
 		sccp_copy_string(linedevice->subscriptionId.name, subscriptionId->name, sizeof(linedevice->subscriptionId.name));
@@ -517,7 +572,10 @@ void sccp_line_removeDevice(sccp_line_t * l, sccp_device_t * device)
 			event->type = SCCP_EVENT_DEVICE_DETACHED;
 			event->event.deviceAttached.linedevice = linedevice;
 			sccp_event_fire((const sccp_event_t **)&event);
-			
+#if CS_EXPERIMENTAL_REFCOUNT			
+			sccp_device_release(device);
+			sccp_line_release(l);
+#endif			
 			sccp_free(linedevice);
 		}
 	}
@@ -575,7 +633,7 @@ void sccp_line_removeChannel(sccp_line_t * l, sccp_channel_t * channel)
 
 	sccp_line_lock(l);
 	SCCP_LIST_LOCK(&l->channels);
-	SCCP_LIST_REMOVE(&l->channels, channel, list);
+	channel = SCCP_LIST_REMOVE(&l->channels, channel, list);
 	SCCP_LIST_UNLOCK(&l->channels);
 
 	sccp_line_unlock(l);

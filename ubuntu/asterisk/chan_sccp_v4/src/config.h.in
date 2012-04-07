@@ -17,7 +17,7 @@
 /* Define if building universal (internal helper macro) */
 #undef AC_APPLE_UNIVERSAL_BUILD
 
-/* Define if AIX */
+/* using IAX */
 #undef AIX
 
 /* NOT Defined ASTERISK_CONF !! */
@@ -49,6 +49,9 @@
 
 /* 'AST_MAX_CONTEXT' replacement */
 #undef AST_MAX_CONTEXT
+
+/* using BSD */
+#undef BSD
 
 /* The date of this build */
 #undef BUILD_DATE
@@ -131,6 +134,9 @@
 /* 'AST_DEVICE_TOTAL' available */
 #undef CS_AST_DEVICE_TOTAL
 
+/* Found 'ast_do_pickup' in asterisk/features.h */
+#undef CS_AST_DO_PICKUP
+
 /* SIREN7 frmt available */
 #undef CS_AST_FORMAT_SIREN7
 
@@ -203,6 +209,9 @@
 /* Found 'AST_FORMAT_SIREN7' in asterisk/frame.h */
 #undef CS_CODEC_G722_1_24K
 
+/* CS_CPU Count */
+#undef CS_CPU_COUNT
+
 /* debug indications enabled */
 #undef CS_DEBUG_INDICATIONS
 
@@ -220,6 +229,18 @@
 
 /* experimental mode enabled */
 #undef CS_EXPERIMENTAL
+
+/* experimental codec enabled */
+#undef CS_EXPERIMENTAL_CODEC
+
+/* experimental newip enabled */
+#undef CS_EXPERIMENTAL_NEWIP
+
+/* experimental refcount enabled */
+#undef CS_EXPERIMENTAL_REFCOUNT
+
+/* experimental rtp enabled */
+#undef CS_EXPERIMENTAL_RTP
 
 /* Enable IPv6 support */
 #undef CS_IPV6
@@ -266,8 +287,14 @@
 /* Using video layer */
 #undef CS_SCCP_VIDEOLAYER
 
+/* Define to 1 if internal poll should be used. */
+#undef CS_USE_POLL_COMPAT
+
 /* Define to 1 if using `alloca.c'. */
 #undef C_ALLOCA
+
+/* Using Darwin / Apple OSX */
+#undef DARWIN
 
 /* Extra debugging. */
 #undef DEBUG
@@ -309,6 +336,9 @@
 /* Define to 1 if you have the <arpa/nameser.h> header file. */
 #undef HAVE_ARPA_NAMESER_H
 
+/* Define to 1 if you have the <assert.h> header file. */
+#undef HAVE_ASSERT_H
+
 /* Uses Asterisk as PBX */
 #undef HAVE_ASTERISK
 
@@ -332,6 +362,9 @@
 
 /* Define to 1 if you have the `closedir' function. */
 #undef HAVE_CLOSEDIR
+
+/* Define to 1 if you have the <ctype.h> header file. */
+#undef HAVE_CTYPE_H
 
 /* Define to 1 if you have the declaration of `cygwin_conv_path', and to 0 if
    you don't. */
@@ -374,6 +407,9 @@
 /* Define if you have the _dyld_func_lookup function. */
 #undef HAVE_DYLD
 
+/* Define to 1 if you have the <errno.h> header file. */
+#undef HAVE_ERRNO_H
+
 /* Define to 1 if the system has the type `error_t'. */
 #undef HAVE_ERROR_T
 
@@ -404,6 +440,15 @@
 /* Define if libdlloader will be built on this platform */
 #undef HAVE_LIBDLLOADER
 
+/* Define to 1 if libev is available */
+#undef HAVE_LIBEV
+
+/* Define to 1 if libevent is available */
+#undef HAVE_LIBEVENT
+
+/* Define to 1 if libev-libevent is available */
+#undef HAVE_LIBEVENT_COMPAT
+
 /* Define to 1 if libgc is available */
 #undef HAVE_LIBGC
 
@@ -422,8 +467,7 @@
 /* Define to 1 if you have the <mach-o/dyld.h> header file. */
 #undef HAVE_MACH_O_DYLD_H
 
-/* Define to 1 if your system has a GNU libc compatible `malloc' function, and
-   to 0 otherwise. */
+/* Define to 1 if you have the `malloc' function. */
 #undef HAVE_MALLOC
 
 /* Define to 1 if you have the <memory.h> header file. */
@@ -564,8 +608,7 @@
 /* Define to 1 if you have the `readdir' function. */
 #undef HAVE_READDIR
 
-/* Define to 1 if your system has a GNU libc compatible `realloc' function,
-   and to 0 otherwise. */
+/* Define to 1 if you have the `realloc' function. */
 #undef HAVE_REALLOC
 
 /* Define to 1 if you have the <resolv.h> header file. */
@@ -585,6 +628,9 @@
 
 /* Define to 1 if you have the <stdint.h> header file. */
 #undef HAVE_STDINT_H
+
+/* Define to 1 if you have the <stdio.h> header file. */
+#undef HAVE_STDIO_H
 
 /* Define to 1 if you have the <stdlib.h> header file. */
 #undef HAVE_STDLIB_H
@@ -637,6 +683,9 @@
 /* Define to 1 if you have the <sys/ioctl.h> header file. */
 #undef HAVE_SYS_IOCTL_H
 
+/* Define to 1 if you have the <sys/signal.h> header file. */
+#undef HAVE_SYS_SIGNAL_H
+
 /* Define to 1 if you have the <sys/socket.h> header file. */
 #undef HAVE_SYS_SOCKET_H
 
@@ -673,6 +722,9 @@
 /* cygwin detection does not work for that, anybody has an idea ? */
 #undef INET_ADDRSTRLEN
 
+/* using LINUX */
+#undef LINUX
+
 /* Define if the OS needs help to load dependent libraries for dlopen(). */
 #undef LTDL_DLOPEN_DEPLIBS
 
@@ -681,6 +733,9 @@
 
 /* The archive extension */
 #undef LT_LIBEXT
+
+/* The archive prefix */
+#undef LT_LIBPREFIX
 
 /* Define to the extension used for runtime loadable modules, say, ".so". */
 #undef LT_MODULE_EXT
@@ -702,7 +757,7 @@
 /* Define to 1 if your C compiler doesn't accept -c and -o together. */
 #undef NO_MINUS_C_MINUS_O
 
-/* Define if OSF1 */
+/* using my beloved Digital OS */
 #undef OSF1
 
 /* Define to the address where bug reports for this package should be sent. */
@@ -772,7 +827,7 @@
 /* The size of `long long', as computed by sizeof. */
 #undef SIZEOF_LONG_LONG
 
-/* needed for optional declarations to be visible */
+/* using SOLARIS */
 #undef SOLARIS
 
 /* If using the C implementation of alloca, define if you know the
@@ -875,7 +930,7 @@
 /* make sure __CYGWIN__ is defined ... */
 #undef __CYGWIN__
 
-/* Define if Darwin */
+/* Using Darwin / Apple OSX */
 #undef __Darwin__
 
 /* for the places where it is not defined */
@@ -917,12 +972,6 @@
 /* Define to the type of a signed integer type of width exactly 8 bits if such
    a type exists and the standard includes do not define it. */
 #undef int8_t
-
-/* Define to rpl_malloc if the replacement function should be used. */
-#undef malloc
-
-/* Define to rpl_realloc if the replacement function should be used. */
-#undef realloc
 
 /* Found 'ast_app_separate_args' in asterisk/app.h */
 #undef sccp_app_separate_args

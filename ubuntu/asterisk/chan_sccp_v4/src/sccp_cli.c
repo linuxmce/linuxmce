@@ -1,3 +1,4 @@
+
 /*!
  * \file 	sccp_cli.c
  * \brief 	SCCP CLI Class
@@ -8,8 +9,8 @@
  * \note		This program is free software and may be modified and distributed under the terms of the GNU Public License.
  *		See the LICENSE file at the top of the source tree.
  *
- * $Date: 2011-10-24 20:54:17 +0000 (Mon, 24 Oct 2011) $
- * $Revision: 3085 $
+ * $Date: 2012-03-30 13:56:18 +0000 (Fri, 30 Mar 2012) $
+ * $Revision: 3348 $
  */
 
 /*!
@@ -21,13 +22,12 @@
 #include "config.h"
 #include "common.h"
 
-SCCP_FILE_VERSION(__FILE__, "$Revision: 3085 $")
-
+SCCP_FILE_VERSION(__FILE__, "$Revision: 3348 $")
 #include <asterisk/cli.h>
 #ifdef CS_IPV6
-#  define CLI_AMI_LIST_WIDTH 46
+#    define CLI_AMI_LIST_WIDTH 46
 #else
-#  define CLI_AMI_LIST_WIDTH 21
+#    define CLI_AMI_LIST_WIDTH 21
 #endif
 
 /* --- CLI Tab Completion ---------------------------------------------------------------------------------------------- */
@@ -49,12 +49,12 @@ static char *sccp_complete_device(OLDCONST char *line, OLDCONST char *word, int 
 {
 	sccp_device_t *d;
 	int wordlen = strlen(word), which = 0;
-	char *ret=NULL;
+	char *ret = NULL;
 
 	SCCP_RWLIST_RDLOCK(&GLOB(devices));
 	SCCP_RWLIST_TRAVERSE(&GLOB(devices), d, list) {
 		if (!strncasecmp(word, d->id, wordlen) && ++which > state) {
-			ret=strdup(d->id);	
+			ret = strdup(d->id);
 			break;
 		}
 	}
@@ -80,12 +80,12 @@ static char *sccp_complete_line(OLDCONST char *line, OLDCONST char *word, int po
 {
 	sccp_line_t *l;
 	int wordlen = strlen(word), which = 0;
-	char *ret=NULL;
+	char *ret = NULL;
 
 	SCCP_RWLIST_RDLOCK(&GLOB(lines));
 	SCCP_RWLIST_TRAVERSE(&GLOB(lines), l, list) {
 		if (!strncasecmp(word, l->name, wordlen) && ++which > state) {
-			ret=strdup(l->name);	
+			ret = strdup(l->name);
 			break;
 		}
 	}
@@ -112,7 +112,7 @@ static char *sccp_complete_channel(OLDCONST char *line, OLDCONST char *word, int
 	sccp_line_t *l;
 	sccp_channel_t *c;
 	int wordlen = strlen(word), which = 0;
-	char *ret=NULL;
+	char *ret = NULL;
 	char tmpname[20];
 
 	SCCP_RWLIST_RDLOCK(&GLOB(lines));
@@ -121,10 +121,10 @@ static char *sccp_complete_channel(OLDCONST char *line, OLDCONST char *word, int
 		SCCP_LIST_TRAVERSE(&l->channels, c, list) {
 			snprintf(tmpname, sizeof(tmpname), "SCCP/%s-%08x", l->name, c->callid);
 			if (!strncasecmp(word, tmpname, wordlen) && ++which > state) {
-				ret=strdup(tmpname);
+				ret = strdup(tmpname);
 				break;
 			}
-		}		
+		}
 		SCCP_LIST_UNLOCK(&l->channels);
 	}
 	SCCP_RWLIST_UNLOCK(&GLOB(lines));
@@ -145,7 +145,7 @@ static char *sccp_complete_channel(OLDCONST char *line, OLDCONST char *word, int
 static char *sccp_complete_debug(OLDCONST char *line, OLDCONST char *word, int pos, int state)
 {
 	uint8_t i;
-	int wordlen=strlen(word), which = 0;
+	int wordlen = strlen(word), which = 0;
 	char *ret = NULL;
 	boolean_t debugno = 0;
 	char *extra_cmds[3] = { "no", "none", "all" };
@@ -177,40 +177,40 @@ static char *sccp_complete_debug(OLDCONST char *line, OLDCONST char *word, int p
 				continue;
 		}
 		// find a match with partial category
-		if (!strncasecmp(word, sccp_debug_categories[i].short_name, wordlen)) {
+		if (!strncasecmp(word, sccp_debug_categories[i].key, wordlen)) {
 			if (++which > state)
-				return strdup(sccp_debug_categories[i].short_name);
+				return strdup(sccp_debug_categories[i].key);
 		}
 	}
 	return ret;
 }
 
-static char *sccp_exec_completer(sccp_cli_completer_t completer, OLDCONST char *line, OLDCONST char *word, int pos, int state) {
+static char *sccp_exec_completer(sccp_cli_completer_t completer, OLDCONST char *line, OLDCONST char *word, int pos, int state)
+{
 	switch (completer) {
-		case SCCP_CLI_NULL_COMPLETER:
-			return NULL;
-			break;
-		case SCCP_CLI_DEVICE_COMPLETER:
-			return sccp_complete_device(line, word, pos, state);
-			break;
-		case SCCP_CLI_LINE_COMPLETER:
-			return sccp_complete_line(line, word, pos, state);
-			break;
-		case SCCP_CLI_CHANNEL_COMPLETER:
-			return sccp_complete_channel(line, word, pos, state);
-			break;
-		case SCCP_CLI_DEBUG_COMPLETER:
-			return sccp_complete_debug(line, word, pos, state);
-			break;
+	case SCCP_CLI_NULL_COMPLETER:
+		return NULL;
+		break;
+	case SCCP_CLI_DEVICE_COMPLETER:
+		return sccp_complete_device(line, word, pos, state);
+		break;
+	case SCCP_CLI_LINE_COMPLETER:
+		return sccp_complete_line(line, word, pos, state);
+		break;
+	case SCCP_CLI_CHANNEL_COMPLETER:
+		return sccp_complete_channel(line, word, pos, state);
+		break;
+	case SCCP_CLI_DEBUG_COMPLETER:
+		return sccp_complete_debug(line, word, pos, state);
+		break;
 	}
 	return NULL;
 }
 
-
 /* --- Support Functions ---------------------------------------------------------------------------------------------- */
 
-
 /* -------------------------------------------------------------------------------------------------------SHOW GLOBALS- */
+
 /*!
  * \brief Show Globals
  * \param fd Fd as int
@@ -232,13 +232,15 @@ static int sccp_show_globals(int fd, int *total, struct mansession *s, const str
 	char pref_buf[256];
 	struct ast_str *callgroup_buf = pbx_str_alloca(512);
 	struct ast_str *pickupgroup_buf = pbx_str_alloca(512);
+	struct ast_str *ha_buf = pbx_str_alloca(512);
 	char *debugcategories;
-	int local_total=0;
+	int local_total = 0;
 
 	sccp_globals_lock(lock);
 
 	sccp_multiple_codecs2str(pref_buf, sizeof(pref_buf) - 1, GLOB(global_preferences), ARRAY_LEN(GLOB(global_preferences)));
 	debugcategories = sccp_get_debugcategories(GLOB(debug));
+	sccp_print_ha(ha_buf, sizeof(ha_buf), GLOB(ha));
 
 	if (!s) {
 		CLI_AMI_OUTPUT(fd, s, "\n--- SCCP channel driver global settings ----------------------------------------------------------------------------------\n");
@@ -246,89 +248,91 @@ static int sccp_show_globals(int fd, int *total, struct mansession *s, const str
 		astman_send_listack(s, m, argv[0], "start");
 		CLI_AMI_OUTPUT_PARAM("Event", CLI_AMI_LIST_WIDTH, "%s", argv[0]);
 	}
-	CLI_AMI_OUTPUT_PARAM("Config File", 		CLI_AMI_LIST_WIDTH,	"%s",		GLOB(config_file_name));
+	CLI_AMI_OUTPUT_PARAM("Config File", CLI_AMI_LIST_WIDTH, "%s", GLOB(config_file_name));
 #if SCCP_PLATFORM_BYTE_ORDER == SCCP_LITTLE_ENDIAN
-	CLI_AMI_OUTPUT_PARAM("Platform byte order", 	CLI_AMI_LIST_WIDTH,	"%s",		"LITTLE ENDIAN");
+	CLI_AMI_OUTPUT_PARAM("Platform byte order", CLI_AMI_LIST_WIDTH, "%s", "LITTLE ENDIAN");
 #else
-	CLI_AMI_OUTPUT_PARAM("Platform byte order", 	CLI_AMI_LIST_WIDTH,	"%s",		"BIG ENDIAN");
+	CLI_AMI_OUTPUT_PARAM("Platform byte order", CLI_AMI_LIST_WIDTH, "%s", "BIG ENDIAN");
 #endif
-//	CLI_AMI_OUTPUT_PARAM("Protocol Version", 	CLI_AMI_LIST_WIDTH,	"%d",		GLOB(protocolversion));
-	CLI_AMI_OUTPUT_PARAM("Server Name", 		CLI_AMI_LIST_WIDTH,	"%s",		GLOB(servername));
-	CLI_AMI_OUTPUT_PARAM("Bind Address", 		CLI_AMI_LIST_WIDTH,	"%s:%d",	pbx_inet_ntoa(GLOB(bindaddr.sin_addr)), ntohs(GLOB(bindaddr.sin_port)));
-	CLI_AMI_OUTPUT_BOOL ("Nat", 			CLI_AMI_LIST_WIDTH,			GLOB(nat));
-	CLI_AMI_OUTPUT_PARAM("Extern Hostname", 	CLI_AMI_LIST_WIDTH,	"%s",		GLOB(externhost));
-	CLI_AMI_OUTPUT_PARAM("Extern Host Refresh", 	CLI_AMI_LIST_WIDTH,	"%d",		GLOB(externrefresh));
-	CLI_AMI_OUTPUT_PARAM("Extern IP", 		CLI_AMI_LIST_WIDTH,	"%s:%d",	pbx_inet_ntoa(GLOB(externip.sin_addr)), ntohs(GLOB(externip.sin_port)));
-	CLI_AMI_OUTPUT_BOOL ("Direct RTP", 		CLI_AMI_LIST_WIDTH,			GLOB(directrtp));
-	CLI_AMI_OUTPUT_PARAM("Keepalive", 		CLI_AMI_LIST_WIDTH,	"%d",		GLOB(keepalive));
-	CLI_AMI_OUTPUT_PARAM("Debug", 			CLI_AMI_LIST_WIDTH,	"(%d) %s",	GLOB(debug), debugcategories);
-	CLI_AMI_OUTPUT_PARAM("Date format", 		CLI_AMI_LIST_WIDTH,	"%s",		GLOB(dateformat));
-	CLI_AMI_OUTPUT_PARAM("First digit timeout", 	CLI_AMI_LIST_WIDTH,	"%d",		GLOB(firstdigittimeout));
-	CLI_AMI_OUTPUT_PARAM("Digit timeout", 		CLI_AMI_LIST_WIDTH,	"%d",		GLOB(digittimeout));
-	CLI_AMI_OUTPUT_PARAM("Digit timeout char", 	CLI_AMI_LIST_WIDTH,	"%c",		GLOB(digittimeoutchar));
-	CLI_AMI_OUTPUT_PARAM("SCCP tos (signaling)", 	CLI_AMI_LIST_WIDTH,	"%d",		GLOB(sccp_tos));
-	CLI_AMI_OUTPUT_PARAM("SCCP cos (signaling)", 	CLI_AMI_LIST_WIDTH,	"%d",		GLOB(sccp_cos));
-	CLI_AMI_OUTPUT_PARAM("AUDIO tos (rtp)", 	CLI_AMI_LIST_WIDTH,	"%d",		GLOB(audio_tos));
-	CLI_AMI_OUTPUT_PARAM("AUDIO cos (rtp)", 	CLI_AMI_LIST_WIDTH,	"%d",		GLOB(audio_cos));
-	CLI_AMI_OUTPUT_PARAM("VIDEO tos (vrtp)", 	CLI_AMI_LIST_WIDTH,	"%d",		GLOB(video_tos));
-	CLI_AMI_OUTPUT_PARAM("VIDEO cos (vrtp)", 	CLI_AMI_LIST_WIDTH,	"%d",		GLOB(video_cos));
-	CLI_AMI_OUTPUT_PARAM("Context", 		CLI_AMI_LIST_WIDTH,	"%s (%s)",	GLOB(context), pbx_context_find(GLOB(context)) ? "exists" : "does not exist !!");
-	CLI_AMI_OUTPUT_PARAM("Language", 		CLI_AMI_LIST_WIDTH,	"%s",		GLOB(language));
-	CLI_AMI_OUTPUT_PARAM("Accountcode", 		CLI_AMI_LIST_WIDTH,	"%s",		GLOB(accountcode));
-	CLI_AMI_OUTPUT_PARAM("Musicclass", 		CLI_AMI_LIST_WIDTH,	"%s",		GLOB(musicclass));
-	CLI_AMI_OUTPUT_PARAM("AMA flags", 		CLI_AMI_LIST_WIDTH,	"%d (%s)",	GLOB(amaflags), pbx_cdr_flags2str(GLOB(amaflags)));
+//      CLI_AMI_OUTPUT_PARAM("Protocol Version",        CLI_AMI_LIST_WIDTH,     "%d",           GLOB(protocolversion));
+	CLI_AMI_OUTPUT_PARAM("Server Name", CLI_AMI_LIST_WIDTH, "%s", GLOB(servername));
+	CLI_AMI_OUTPUT_PARAM("Bind Address", CLI_AMI_LIST_WIDTH, "%s:%d", pbx_inet_ntoa(GLOB(bindaddr.sin_addr)), ntohs(GLOB(bindaddr.sin_port)));
+	CLI_AMI_OUTPUT_BOOL("Nat", CLI_AMI_LIST_WIDTH, GLOB(nat));
+	CLI_AMI_OUTPUT_PARAM("Extern Hostname", CLI_AMI_LIST_WIDTH, "%s", GLOB(externhost));
+	CLI_AMI_OUTPUT_PARAM("Extern Host Refresh", CLI_AMI_LIST_WIDTH, "%d", GLOB(externrefresh));
+	CLI_AMI_OUTPUT_PARAM("Extern IP", CLI_AMI_LIST_WIDTH, "%s:%d", pbx_inet_ntoa(GLOB(externip.sin_addr)), ntohs(GLOB(externip.sin_port)));
+	CLI_AMI_OUTPUT_PARAM("Deny/Permit", CLI_AMI_LIST_WIDTH, "%s", pbx_str_buffer(ha_buf));
+	CLI_AMI_OUTPUT_BOOL("Direct RTP", CLI_AMI_LIST_WIDTH, GLOB(directrtp));
+	CLI_AMI_OUTPUT_PARAM("Keepalive", CLI_AMI_LIST_WIDTH, "%d", GLOB(keepalive));
+	CLI_AMI_OUTPUT_PARAM("Debug", CLI_AMI_LIST_WIDTH, "(%d) %s", GLOB(debug), debugcategories);
+	CLI_AMI_OUTPUT_PARAM("Date format", CLI_AMI_LIST_WIDTH, "%s", GLOB(dateformat));
+	CLI_AMI_OUTPUT_PARAM("First digit timeout", CLI_AMI_LIST_WIDTH, "%d", GLOB(firstdigittimeout));
+	CLI_AMI_OUTPUT_PARAM("Digit timeout", CLI_AMI_LIST_WIDTH, "%d", GLOB(digittimeout));
+	CLI_AMI_OUTPUT_PARAM("Digit timeout char", CLI_AMI_LIST_WIDTH, "%c", GLOB(digittimeoutchar));
+	CLI_AMI_OUTPUT_PARAM("SCCP tos (signaling)", CLI_AMI_LIST_WIDTH, "%d", GLOB(sccp_tos));
+	CLI_AMI_OUTPUT_PARAM("SCCP cos (signaling)", CLI_AMI_LIST_WIDTH, "%d", GLOB(sccp_cos));
+	CLI_AMI_OUTPUT_PARAM("AUDIO tos (rtp)", CLI_AMI_LIST_WIDTH, "%d", GLOB(audio_tos));
+	CLI_AMI_OUTPUT_PARAM("AUDIO cos (rtp)", CLI_AMI_LIST_WIDTH, "%d", GLOB(audio_cos));
+	CLI_AMI_OUTPUT_PARAM("VIDEO tos (vrtp)", CLI_AMI_LIST_WIDTH, "%d", GLOB(video_tos));
+	CLI_AMI_OUTPUT_PARAM("VIDEO cos (vrtp)", CLI_AMI_LIST_WIDTH, "%d", GLOB(video_cos));
+	CLI_AMI_OUTPUT_PARAM("Context", CLI_AMI_LIST_WIDTH, "%s (%s)", GLOB(context), pbx_context_find(GLOB(context)) ? "exists" : "does not exist !!");
+	CLI_AMI_OUTPUT_PARAM("Language", CLI_AMI_LIST_WIDTH, "%s", GLOB(language));
+	CLI_AMI_OUTPUT_PARAM("Accountcode", CLI_AMI_LIST_WIDTH, "%s", GLOB(accountcode));
+	CLI_AMI_OUTPUT_PARAM("Musicclass", CLI_AMI_LIST_WIDTH, "%s", GLOB(musicclass));
+	CLI_AMI_OUTPUT_PARAM("AMA flags", CLI_AMI_LIST_WIDTH, "%d (%s)", GLOB(amaflags), pbx_cdr_flags2str(GLOB(amaflags)));
 	sccp_print_group(callgroup_buf, sizeof(callgroup_buf), GLOB(callgroup));
-	CLI_AMI_OUTPUT_PARAM("Callgroup", 		CLI_AMI_LIST_WIDTH,	"%s",		callgroup_buf ? pbx_str_buffer(callgroup_buf) : "");
+	CLI_AMI_OUTPUT_PARAM("Callgroup", CLI_AMI_LIST_WIDTH, "%s", callgroup_buf ? pbx_str_buffer(callgroup_buf) : "");
 #ifdef CS_SCCP_PICKUP
 	sccp_print_group(pickupgroup_buf, sizeof(pickupgroup_buf), GLOB(pickupgroup));
-	CLI_AMI_OUTPUT_PARAM("Pickupgroup", 		CLI_AMI_LIST_WIDTH,	"%s",		pickupgroup_buf ? pbx_str_buffer(pickupgroup_buf) : "");
-	CLI_AMI_OUTPUT_BOOL ("Pickup Mode Answer ", 	CLI_AMI_LIST_WIDTH,			GLOB(pickupmodeanswer));
+	CLI_AMI_OUTPUT_PARAM("Pickupgroup", CLI_AMI_LIST_WIDTH, "%s", pickupgroup_buf ? pbx_str_buffer(pickupgroup_buf) : "");
+	CLI_AMI_OUTPUT_BOOL("Pickup Mode Answer ", CLI_AMI_LIST_WIDTH, GLOB(pickupmodeanswer));
 #endif
-	CLI_AMI_OUTPUT_PARAM("Codecs preference", 	CLI_AMI_LIST_WIDTH,	"%s",		pref_buf);
-	CLI_AMI_OUTPUT_BOOL ("CFWDALL    ", 		CLI_AMI_LIST_WIDTH,			GLOB(cfwdall));
-	CLI_AMI_OUTPUT_BOOL ("CFWBUSY    ", 		CLI_AMI_LIST_WIDTH,			GLOB(cfwdbusy));
-	CLI_AMI_OUTPUT_BOOL ("CFWNOANSWER   ", 		CLI_AMI_LIST_WIDTH,			GLOB(cfwdnoanswer));
+	CLI_AMI_OUTPUT_PARAM("Codecs preference", CLI_AMI_LIST_WIDTH, "%s", pref_buf);
+	CLI_AMI_OUTPUT_BOOL("CFWDALL    ", CLI_AMI_LIST_WIDTH, GLOB(cfwdall));
+	CLI_AMI_OUTPUT_BOOL("CFWBUSY    ", CLI_AMI_LIST_WIDTH, GLOB(cfwdbusy));
+	CLI_AMI_OUTPUT_BOOL("CFWNOANSWER   ", CLI_AMI_LIST_WIDTH, GLOB(cfwdnoanswer));
 #ifdef CS_MANAGER_EVENTS
-	CLI_AMI_OUTPUT_BOOL ("Call Events", 		CLI_AMI_LIST_WIDTH,			GLOB(callevents));
+	CLI_AMI_OUTPUT_BOOL("Call Events", CLI_AMI_LIST_WIDTH, GLOB(callevents));
 #else
-	CLI_AMI_OUTPUT_BOOL ("Call Events", 		CLI_AMI_LIST_WIDTH,			FALSE);
+	CLI_AMI_OUTPUT_BOOL("Call Events", CLI_AMI_LIST_WIDTH, FALSE);
 #endif
-	CLI_AMI_OUTPUT_PARAM("DND", 			CLI_AMI_LIST_WIDTH,	"%s",		GLOB(dndmode) ? dndmode2str(GLOB(dndmode)) : "Disabled");
+	CLI_AMI_OUTPUT_PARAM("DND", CLI_AMI_LIST_WIDTH, "%s", GLOB(dndmode) ? dndmode2str(GLOB(dndmode)) : "Disabled");
 #ifdef CS_SCCP_PARK
-	CLI_AMI_OUTPUT_BOOL ("Park", 			CLI_AMI_LIST_WIDTH,			FALSE);
+	CLI_AMI_OUTPUT_BOOL("Park", CLI_AMI_LIST_WIDTH, FALSE);
 #else
-	CLI_AMI_OUTPUT_BOOL ("Park", 			CLI_AMI_LIST_WIDTH,			FALSE);
+	CLI_AMI_OUTPUT_BOOL("Park", CLI_AMI_LIST_WIDTH, FALSE);
 #endif
-	CLI_AMI_OUTPUT_BOOL ("Private softkey", 	CLI_AMI_LIST_WIDTH,			GLOB(privacy));
-	CLI_AMI_OUTPUT_BOOL ("Echo cancel", 		CLI_AMI_LIST_WIDTH,			GLOB(echocancel));
-	CLI_AMI_OUTPUT_BOOL ("Silence suppression", 	CLI_AMI_LIST_WIDTH,			GLOB(silencesuppression));
-	CLI_AMI_OUTPUT_BOOL ("Trust phone ip", 		CLI_AMI_LIST_WIDTH,			GLOB(trustphoneip));
-	CLI_AMI_OUTPUT_PARAM("Early RTP", 		CLI_AMI_LIST_WIDTH,	"%s (%s)",		GLOB(earlyrtp) ? "Yes" : "No", GLOB(earlyrtp) ? sccp_indicate2str(GLOB(earlyrtp)) : "none");
-	CLI_AMI_OUTPUT_PARAM("AutoAnswer ringtime", 	CLI_AMI_LIST_WIDTH,	"%d",		GLOB(autoanswer_ring_time));
-	CLI_AMI_OUTPUT_PARAM("AutoAnswer tone", 	CLI_AMI_LIST_WIDTH,	"%d",		GLOB(autoanswer_tone));
-	CLI_AMI_OUTPUT_PARAM("RemoteHangup tone", 	CLI_AMI_LIST_WIDTH,	"%d",		GLOB(remotehangup_tone));
-	CLI_AMI_OUTPUT_PARAM("Transfer tone", 		CLI_AMI_LIST_WIDTH,	"%d",		GLOB(transfer_tone));
-	CLI_AMI_OUTPUT_PARAM("CallWaiting tone", 	CLI_AMI_LIST_WIDTH,	"%d",		GLOB(callwaiting_tone));
-	CLI_AMI_OUTPUT_PARAM("Registration Context", 	CLI_AMI_LIST_WIDTH,	"%s",		GLOB(regcontext) ? GLOB(regcontext) : "Unset");
-	CLI_AMI_OUTPUT_BOOL ("Jitterbuffer enabled ", 	CLI_AMI_LIST_WIDTH,			pbx_test_flag(&GLOB(global_jbconf), AST_JB_ENABLED));
-	CLI_AMI_OUTPUT_BOOL ("Jitterbuffer forced ", 	CLI_AMI_LIST_WIDTH,			pbx_test_flag(&GLOB(global_jbconf), AST_JB_FORCED));
-	CLI_AMI_OUTPUT_PARAM("Jitterbuffer max size", 	CLI_AMI_LIST_WIDTH,	"%ld",		GLOB(global_jbconf).max_size);
-	CLI_AMI_OUTPUT_PARAM("Jitterbuffer resync", 	CLI_AMI_LIST_WIDTH,	"%ld",		GLOB(global_jbconf).resync_threshold);
-	CLI_AMI_OUTPUT_PARAM("Jitterbuffer impl", 	CLI_AMI_LIST_WIDTH,	"%s",		GLOB(global_jbconf).impl);
-	CLI_AMI_OUTPUT_BOOL ("Jitterbuffer log  ", 	CLI_AMI_LIST_WIDTH,			pbx_test_flag(&GLOB(global_jbconf), AST_JB_LOG));
+	CLI_AMI_OUTPUT_BOOL("Private softkey", CLI_AMI_LIST_WIDTH, GLOB(privacy));
+	CLI_AMI_OUTPUT_BOOL("Echo cancel", CLI_AMI_LIST_WIDTH, GLOB(echocancel));
+	CLI_AMI_OUTPUT_BOOL("Silence suppression", CLI_AMI_LIST_WIDTH, GLOB(silencesuppression));
+	CLI_AMI_OUTPUT_BOOL("Trust phone ip", CLI_AMI_LIST_WIDTH, GLOB(trustphoneip));
+	CLI_AMI_OUTPUT_PARAM("Early RTP", CLI_AMI_LIST_WIDTH, "%s (%s)", GLOB(earlyrtp) ? "Yes" : "No", GLOB(earlyrtp) ? sccp_indicate2str(GLOB(earlyrtp)) : "none");
+	CLI_AMI_OUTPUT_PARAM("AutoAnswer ringtime", CLI_AMI_LIST_WIDTH, "%d", GLOB(autoanswer_ring_time));
+	CLI_AMI_OUTPUT_PARAM("AutoAnswer tone", CLI_AMI_LIST_WIDTH, "%d", GLOB(autoanswer_tone));
+	CLI_AMI_OUTPUT_PARAM("RemoteHangup tone", CLI_AMI_LIST_WIDTH, "%d", GLOB(remotehangup_tone));
+	CLI_AMI_OUTPUT_PARAM("Transfer tone", CLI_AMI_LIST_WIDTH, "%d", GLOB(transfer_tone));
+	CLI_AMI_OUTPUT_PARAM("CallWaiting tone", CLI_AMI_LIST_WIDTH, "%d", GLOB(callwaiting_tone));
+	CLI_AMI_OUTPUT_PARAM("Registration Context", CLI_AMI_LIST_WIDTH, "%s", GLOB(regcontext) ? GLOB(regcontext) : "Unset");
+	CLI_AMI_OUTPUT_BOOL("Jitterbuffer enabled ", CLI_AMI_LIST_WIDTH, pbx_test_flag(&GLOB(global_jbconf), AST_JB_ENABLED));
+	CLI_AMI_OUTPUT_BOOL("Jitterbuffer forced ", CLI_AMI_LIST_WIDTH, pbx_test_flag(&GLOB(global_jbconf), AST_JB_FORCED));
+	CLI_AMI_OUTPUT_PARAM("Jitterbuffer max size", CLI_AMI_LIST_WIDTH, "%ld", GLOB(global_jbconf).max_size);
+	CLI_AMI_OUTPUT_PARAM("Jitterbuffer resync", CLI_AMI_LIST_WIDTH, "%ld", GLOB(global_jbconf).resync_threshold);
+	CLI_AMI_OUTPUT_PARAM("Jitterbuffer impl", CLI_AMI_LIST_WIDTH, "%s", GLOB(global_jbconf).impl);
+	CLI_AMI_OUTPUT_BOOL("Jitterbuffer log  ", CLI_AMI_LIST_WIDTH, pbx_test_flag(&GLOB(global_jbconf), AST_JB_LOG));
 #ifdef CS_AST_JB_TARGET_EXTRA
-	CLI_AMI_OUTPUT_PARAM("Jitterbuf target extra", 	CLI_AMI_LIST_WIDTH,	"%ld",		GLOB(global_jbconf).target_extra);
+	CLI_AMI_OUTPUT_PARAM("Jitterbuf target extra", CLI_AMI_LIST_WIDTH, "%ld", GLOB(global_jbconf).target_extra);
 #endif
-	CLI_AMI_OUTPUT_PARAM("Token FallBack", 		CLI_AMI_LIST_WIDTH,	"%s",		GLOB(token_fallback));
-	CLI_AMI_OUTPUT_PARAM("Token Backoff-Time", 	CLI_AMI_LIST_WIDTH,	"%d",		GLOB(token_backoff_time));
-	CLI_AMI_OUTPUT_BOOL ("Hotline_Enabled", 	CLI_AMI_LIST_WIDTH,			GLOB(allowAnonymous));
-	CLI_AMI_OUTPUT_PARAM("Hotline_Exten", 		CLI_AMI_LIST_WIDTH,	"%s",		GLOB(hotline->line->context));
-	CLI_AMI_OUTPUT_PARAM("Hotline_Context", 	CLI_AMI_LIST_WIDTH,	"%s",		GLOB(hotline->exten));
+	CLI_AMI_OUTPUT_PARAM("Token FallBack", CLI_AMI_LIST_WIDTH, "%s", GLOB(token_fallback));
+	CLI_AMI_OUTPUT_PARAM("Token Backoff-Time", CLI_AMI_LIST_WIDTH, "%d", GLOB(token_backoff_time));
+	CLI_AMI_OUTPUT_BOOL("Hotline_Enabled", CLI_AMI_LIST_WIDTH, GLOB(allowAnonymous));
+	CLI_AMI_OUTPUT_PARAM("Hotline_Context", CLI_AMI_LIST_WIDTH, "%s", GLOB(hotline->line->context));
+	CLI_AMI_OUTPUT_PARAM("Hotline_Exten", CLI_AMI_LIST_WIDTH, "%s", GLOB(hotline->exten));
 
 	sccp_free(debugcategories);
 	sccp_globals_unlock(lock);
 
-	if (s) *total=local_total;
+	if (s)
+		*total = local_total;
 
 	return RESULT_SUCCESS;
 }
@@ -363,40 +367,41 @@ CLI_AMI_ENTRY(show_globals, sccp_show_globals, "List defined SCCP global setting
  * \lock
  * 	- devices
  */
-
 //static int sccp_show_devices(int fd, int argc, char *argv[])
 static int sccp_show_devices(int fd, int *total, struct mansession *s, const struct message *m, int argc, char *argv[])
 {
 	struct tm *timeinfo;
 	char regtime[25];
-	int local_total=0;
-	
-	// table definition
-	#define CLI_AMI_TABLE_NAME Devices
-	#define CLI_AMI_TABLE_PER_ENTRY_NAME Device
-	
-	#define CLI_AMI_TABLE_LIST_ITER_TYPE sccp_device_t 
-	#define CLI_AMI_TABLE_LIST_ITER_HEAD &GLOB(devices)
-	#define CLI_AMI_TABLE_LIST_ITER_VAR d
-	#define CLI_AMI_TABLE_LIST_LOCK SCCP_RWLIST_RDLOCK
-	#define CLI_AMI_TABLE_LIST_ITERATOR SCCP_RWLIST_TRAVERSE
-	#define CLI_AMI_TABLE_BEFORE_ITERATION timeinfo = localtime(&d->registrationTime); strftime(regtime, sizeof(regtime), "%c ", timeinfo);
-	#define CLI_AMI_TABLE_LIST_UNLOCK SCCP_RWLIST_UNLOCK
+	int local_total = 0;
 
-	#define CLI_AMI_TABLE_FIELDS 													\
+	// table definition
+#define CLI_AMI_TABLE_NAME Devices
+#define CLI_AMI_TABLE_PER_ENTRY_NAME Device
+
+#define CLI_AMI_TABLE_LIST_ITER_TYPE sccp_device_t
+#define CLI_AMI_TABLE_LIST_ITER_HEAD &GLOB(devices)
+#define CLI_AMI_TABLE_LIST_ITER_VAR d
+#define CLI_AMI_TABLE_LIST_LOCK SCCP_RWLIST_RDLOCK
+#define CLI_AMI_TABLE_LIST_ITERATOR SCCP_RWLIST_TRAVERSE
+#define CLI_AMI_TABLE_BEFORE_ITERATION timeinfo = localtime(&d->registrationTime); strftime(regtime, sizeof(regtime), "%c ", timeinfo);
+#define CLI_AMI_TABLE_LIST_UNLOCK SCCP_RWLIST_UNLOCK
+
+#define CLI_AMI_TABLE_FIELDS 													\
 		CLI_AMI_TABLE_FIELD(Name,		s,	40,	d->description)							\
 		CLI_AMI_TABLE_FIELD(Address,		s,	20,	(d->session) ? pbx_inet_ntoa(d->session->sin.sin_addr) : "--")	\
 		CLI_AMI_TABLE_FIELD(Mac,		s,	16,	d->id)								\
 		CLI_AMI_TABLE_FIELD(RegState,		s,	10, 	deviceregistrationstatus2str(d->registrationState))		\
 		CLI_AMI_TABLE_FIELD(RegTime,		s, 	25, 	regtime)							\
 		CLI_AMI_TABLE_FIELD(Act,		s,  	3, 	(d->active_channel) ? "Yes" : "No")				\
-		CLI_AMI_TABLE_FIELD(Lines, 		d,  	5, 	d->configurationStatistic.numberOfLines)			
-	#include "sccp_cli_table.h"
+		CLI_AMI_TABLE_FIELD(Lines, 		d,  	5, 	d->configurationStatistic.numberOfLines)
+#include "sccp_cli_table.h"
 	// end of table definition
-	if (s) *total=local_total;
+	if (s)
+		*total = local_total;
 
 	return RESULT_SUCCESS;
 }
+
 static char cli_devices_usage[] = "Usage: sccp show devices\n" "       Lists defined SCCP devices.\n";
 static char ami_devices_usage[] = "Usage: SCCPShowDevices\n" "Lists defined SCCP devices.\n\n" "PARAMS: None\n";
 
@@ -437,17 +442,19 @@ static int sccp_show_device(int fd, int *total, struct mansession *s, const stru
 	sccp_line_t *l;
 	char pref_buf[256];
 	char cap_buf[512];
+	struct ast_str *ha_buf = pbx_str_alloca(512);
 	PBX_VARIABLE_TYPE *v = NULL;
 	sccp_linedevices_t *linedevice;
-	int local_total=0;
-	
+	int local_total = 0;
+
 	const char *dev;
+
 	if (s) {
-		dev = strdupa(astman_get_header(m, "DeviceName"));
+		dev = sccp_strdupa(astman_get_header(m, "DeviceName"));
 	} else {
 		if (argc < 4)
 			return RESULT_SHOWUSAGE;
-		dev = strdupa(argv[3]);
+		dev = sccp_strdupa(argv[3]);
 	}
 	d = sccp_device_find_byid(dev, TRUE);
 
@@ -459,6 +466,7 @@ static int sccp_show_device(int fd, int *total, struct mansession *s, const stru
 
 	sccp_multiple_codecs2str(pref_buf, sizeof(pref_buf) - 1, d->preferences.audio, ARRAY_LEN(d->preferences.audio));
 	sccp_multiple_codecs2str(cap_buf, sizeof(cap_buf) - 1, d->capabilities.audio, ARRAY_LEN(d->capabilities.audio));
+	sccp_print_ha(ha_buf, sizeof(ha_buf), GLOB(ha));
 
 	if (!s) {
 		CLI_AMI_OUTPUT(fd, s, "\n--- SCCP channel driver device settings ----------------------------------------------------------------------------------\n");
@@ -466,179 +474,182 @@ static int sccp_show_device(int fd, int *total, struct mansession *s, const stru
 		astman_send_listack(s, m, argv[0], "start");
 		CLI_AMI_OUTPUT_PARAM("Event", CLI_AMI_LIST_WIDTH, "%s", argv[0]);
 	}
-	CLI_AMI_OUTPUT_PARAM("Arguments", 		CLI_AMI_LIST_WIDTH,	"%s/%s/%s/%s (%d)",argv[0],argv[1],argv[2],argv[3],argc);
-	CLI_AMI_OUTPUT_PARAM("MAC-Address", 		CLI_AMI_LIST_WIDTH,	"%s", 		d->id);
-	CLI_AMI_OUTPUT_PARAM("Protocol Version", 	CLI_AMI_LIST_WIDTH,	"Supported '%d', In Use '%d'", 	d->protocolversion, d->inuseprotocolversion);
-	CLI_AMI_OUTPUT_PARAM("Protocol In Use", 	CLI_AMI_LIST_WIDTH,	"%s Version %d",d->protocol ? d->protocol->name : "NONE", d->protocol ? d->protocol->version: 0);
-	CLI_AMI_OUTPUT_PARAM("Tokenstate", 		CLI_AMI_LIST_WIDTH,	"%s",	 	d->status.token ? ( (d->status.token == SCCP_TOKEN_STATE_ACK) ? "Token acknowledged" : "Token rejected" ) : "no toke requested");
-	CLI_AMI_OUTPUT_PARAM("Keepalive", 		CLI_AMI_LIST_WIDTH,	"%d",	 	d->keepalive);
-	CLI_AMI_OUTPUT_PARAM("Registration state", 	CLI_AMI_LIST_WIDTH,	"%s(%d)",	deviceregistrationstatus2str(d->registrationState), d->registrationState);
-	CLI_AMI_OUTPUT_PARAM("State", 			CLI_AMI_LIST_WIDTH,	"%s(%d)",	devicestatus2str(d->state), d->state);
-	CLI_AMI_OUTPUT_BOOL ("MWI handset light", 	CLI_AMI_LIST_WIDTH, 			d->mwilight);
-	CLI_AMI_OUTPUT_PARAM("Description", 		CLI_AMI_LIST_WIDTH,	"%s",	 	d->description);
-	CLI_AMI_OUTPUT_PARAM("Config Phone Type", 	CLI_AMI_LIST_WIDTH,	"%s",	 	d->config_type);
-	CLI_AMI_OUTPUT_PARAM("Skinny Phone Type", 	CLI_AMI_LIST_WIDTH,	"%s(%d)",	devicetype2str(d->skinny_type), d->skinny_type);
-	CLI_AMI_OUTPUT_YES_NO ("Softkey support", 	CLI_AMI_LIST_WIDTH, 			d->softkeysupport);
-	CLI_AMI_OUTPUT_YES_NO ("BTemplate support", 	CLI_AMI_LIST_WIDTH, 			d->buttonTemplate);
-	CLI_AMI_OUTPUT_YES_NO ("linesRegistered", 	CLI_AMI_LIST_WIDTH, 			d->linesRegistered);
-	CLI_AMI_OUTPUT_PARAM("Image Version", 		CLI_AMI_LIST_WIDTH,	"%s",	 	d->imageversion);
-	CLI_AMI_OUTPUT_PARAM("Timezone Offset", 	CLI_AMI_LIST_WIDTH,	"%d",	 	d->tz_offset);
-	CLI_AMI_OUTPUT_PARAM("Capabilities", 		CLI_AMI_LIST_WIDTH,	"%s",	 	cap_buf);
-	CLI_AMI_OUTPUT_PARAM("Codecs preference", 	CLI_AMI_LIST_WIDTH,	"%s",	 	pref_buf);
-	CLI_AMI_OUTPUT_PARAM("Audio TOS", 		CLI_AMI_LIST_WIDTH,	"%d",	 	d->audio_tos);
-	CLI_AMI_OUTPUT_PARAM("Audio COS", 		CLI_AMI_LIST_WIDTH,	"%d",	 	d->audio_cos);
-	CLI_AMI_OUTPUT_PARAM("Video TOS", 		CLI_AMI_LIST_WIDTH,	"%d",	 	d->video_tos);
-	CLI_AMI_OUTPUT_PARAM("Video COS", 		CLI_AMI_LIST_WIDTH,	"%d",	 	d->video_cos);
-	CLI_AMI_OUTPUT_BOOL ("DND Feature enabled", 	CLI_AMI_LIST_WIDTH, 			d->dndFeature.enabled);
-	CLI_AMI_OUTPUT_PARAM("DND Status", 		CLI_AMI_LIST_WIDTH,	"%s",	 	(d->dndFeature.status) ? dndmode2str(d->dndFeature.status) : "Disabled");
-	CLI_AMI_OUTPUT_BOOL ("Can Transfer", 		CLI_AMI_LIST_WIDTH, 			d->transfer);
-	CLI_AMI_OUTPUT_BOOL ("Can Park", 		CLI_AMI_LIST_WIDTH, 			d->park);
-	CLI_AMI_OUTPUT_BOOL ("Private softkey", 	CLI_AMI_LIST_WIDTH, 			d->privacyFeature.enabled);
-	CLI_AMI_OUTPUT_BOOL ("Can CFWDALL", 		CLI_AMI_LIST_WIDTH, 			d->cfwdall);
-	CLI_AMI_OUTPUT_BOOL ("Can CFWBUSY", 		CLI_AMI_LIST_WIDTH, 			d->cfwdbusy);
-	CLI_AMI_OUTPUT_BOOL ("Can CFWNOANSWER", 	CLI_AMI_LIST_WIDTH, 			d->cfwdnoanswer);
-	CLI_AMI_OUTPUT_PARAM("Dtmf mode", 		CLI_AMI_LIST_WIDTH,	"%s",	 	(d->dtmfmode) ? "Out-of-Band" : "In-Band");
-	CLI_AMI_OUTPUT_PARAM("digit timeout", 		CLI_AMI_LIST_WIDTH,	"%d",	 	d->digittimeout);
-	CLI_AMI_OUTPUT_BOOL ("Nat", 			CLI_AMI_LIST_WIDTH, 			d->nat);
-	CLI_AMI_OUTPUT_BOOL ("Videosupport?", 		CLI_AMI_LIST_WIDTH, 			sccp_device_isVideoSupported(d));
-	CLI_AMI_OUTPUT_BOOL ("Direct RTP", 		CLI_AMI_LIST_WIDTH, 			d->directrtp);
-	CLI_AMI_OUTPUT_BOOL ("Trust phone ip", 		CLI_AMI_LIST_WIDTH, 			d->trustphoneip);
-	CLI_AMI_OUTPUT_PARAM("Bind Address", 		CLI_AMI_LIST_WIDTH,	"%s:%d",	(d->session) ? pbx_inet_ntoa(d->session->sin.sin_addr) : "???.???.???.???", (d->session) ? ntohs(d->session->sin.sin_port) : 0);
-	CLI_AMI_OUTPUT_PARAM("Our Address", 		CLI_AMI_LIST_WIDTH,	"%s",	 	(d->session) ? ast_inet_ntoa(d->session->ourip) : "???.???.???.???");
-	CLI_AMI_OUTPUT_PARAM("Early RTP", 		CLI_AMI_LIST_WIDTH,	"%s (%s)",	d->earlyrtp ? "Yes" : "No", d->earlyrtp ? sccp_indicate2str(d->earlyrtp) : "none");
-	CLI_AMI_OUTPUT_PARAM("Device State (Acc.)", 	CLI_AMI_LIST_WIDTH,	"%s",	 	accessorystatus2str(d->accessorystatus));
-	CLI_AMI_OUTPUT_PARAM("Last Used Accessory", 	CLI_AMI_LIST_WIDTH,	"%s",	 	accessory2str(d->accessoryused));
-	CLI_AMI_OUTPUT_PARAM("Last dialed number", 	CLI_AMI_LIST_WIDTH,	"%s",	 	d->lastNumber);
+	CLI_AMI_OUTPUT_PARAM("Arguments", CLI_AMI_LIST_WIDTH, "%s/%s/%s/%s (%d)", argv[0], argv[1], argv[2], argv[3], argc);
+	CLI_AMI_OUTPUT_PARAM("MAC-Address", CLI_AMI_LIST_WIDTH, "%s", d->id);
+	CLI_AMI_OUTPUT_PARAM("Protocol Version", CLI_AMI_LIST_WIDTH, "Supported '%d', In Use '%d'", d->protocolversion, d->inuseprotocolversion);
+	CLI_AMI_OUTPUT_PARAM("Protocol In Use", CLI_AMI_LIST_WIDTH, "%s Version %d", d->protocol ? d->protocol->name : "NONE", d->protocol ? d->protocol->version : 0);
+	CLI_AMI_OUTPUT_PARAM("Tokenstate", CLI_AMI_LIST_WIDTH, "%s", d->status.token ? ((d->status.token == SCCP_TOKEN_STATE_ACK) ? "Token acknowledged" : "Token rejected") : "no token requested");
+	CLI_AMI_OUTPUT_PARAM("Keepalive", CLI_AMI_LIST_WIDTH, "%d", d->keepalive);
+	CLI_AMI_OUTPUT_PARAM("Registration state", CLI_AMI_LIST_WIDTH, "%s(%d)", deviceregistrationstatus2str(d->registrationState), d->registrationState);
+	CLI_AMI_OUTPUT_PARAM("State", CLI_AMI_LIST_WIDTH, "%s(%d)", devicestatus2str(d->state), d->state);
+	CLI_AMI_OUTPUT_BOOL("MWI handset light", CLI_AMI_LIST_WIDTH, d->mwilight);
+	CLI_AMI_OUTPUT_PARAM("Description", CLI_AMI_LIST_WIDTH, "%s", d->description);
+	CLI_AMI_OUTPUT_PARAM("Config Phone Type", CLI_AMI_LIST_WIDTH, "%s", d->config_type);
+	CLI_AMI_OUTPUT_PARAM("Skinny Phone Type", CLI_AMI_LIST_WIDTH, "%s(%d)", devicetype2str(d->skinny_type), d->skinny_type);
+	CLI_AMI_OUTPUT_YES_NO("Softkey support", CLI_AMI_LIST_WIDTH, d->softkeysupport);
+	CLI_AMI_OUTPUT_YES_NO("BTemplate support", CLI_AMI_LIST_WIDTH, d->buttonTemplate);
+	CLI_AMI_OUTPUT_YES_NO("linesRegistered", CLI_AMI_LIST_WIDTH, d->linesRegistered);
+	CLI_AMI_OUTPUT_PARAM("Image Version", CLI_AMI_LIST_WIDTH, "%s", d->imageversion);
+	CLI_AMI_OUTPUT_PARAM("Timezone Offset", CLI_AMI_LIST_WIDTH, "%d", d->tz_offset);
+	CLI_AMI_OUTPUT_PARAM("Capabilities", CLI_AMI_LIST_WIDTH, "%s", cap_buf);
+	CLI_AMI_OUTPUT_PARAM("Codecs preference", CLI_AMI_LIST_WIDTH, "%s", pref_buf);
+	CLI_AMI_OUTPUT_PARAM("Audio TOS", CLI_AMI_LIST_WIDTH, "%d", d->audio_tos);
+	CLI_AMI_OUTPUT_PARAM("Audio COS", CLI_AMI_LIST_WIDTH, "%d", d->audio_cos);
+	CLI_AMI_OUTPUT_PARAM("Video TOS", CLI_AMI_LIST_WIDTH, "%d", d->video_tos);
+	CLI_AMI_OUTPUT_PARAM("Video COS", CLI_AMI_LIST_WIDTH, "%d", d->video_cos);
+	CLI_AMI_OUTPUT_BOOL("DND Feature enabled", CLI_AMI_LIST_WIDTH, d->dndFeature.enabled);
+	CLI_AMI_OUTPUT_PARAM("DND Status", CLI_AMI_LIST_WIDTH, "%s", (d->dndFeature.status) ? dndmode2str(d->dndFeature.status) : "Disabled");
+	CLI_AMI_OUTPUT_BOOL("Can Transfer", CLI_AMI_LIST_WIDTH, d->transfer);
+	CLI_AMI_OUTPUT_BOOL("Can Park", CLI_AMI_LIST_WIDTH, d->park);
+	CLI_AMI_OUTPUT_BOOL("Private softkey", CLI_AMI_LIST_WIDTH, d->privacyFeature.enabled);
+	CLI_AMI_OUTPUT_BOOL("Can CFWDALL", CLI_AMI_LIST_WIDTH, d->cfwdall);
+	CLI_AMI_OUTPUT_BOOL("Can CFWBUSY", CLI_AMI_LIST_WIDTH, d->cfwdbusy);
+	CLI_AMI_OUTPUT_BOOL("Can CFWNOANSWER", CLI_AMI_LIST_WIDTH, d->cfwdnoanswer);
+	CLI_AMI_OUTPUT_PARAM("Dtmf mode", CLI_AMI_LIST_WIDTH, "%s", (d->dtmfmode) ? "Out-of-Band" : "In-Band");
+	CLI_AMI_OUTPUT_PARAM("digit timeout", CLI_AMI_LIST_WIDTH, "%d", d->digittimeout);
+	CLI_AMI_OUTPUT_BOOL("Nat", CLI_AMI_LIST_WIDTH, d->nat);
+	CLI_AMI_OUTPUT_BOOL("Videosupport?", CLI_AMI_LIST_WIDTH, sccp_device_isVideoSupported(d));
+	CLI_AMI_OUTPUT_BOOL("Direct RTP", CLI_AMI_LIST_WIDTH, d->directrtp);
+	CLI_AMI_OUTPUT_BOOL("Trust phone ip", CLI_AMI_LIST_WIDTH, d->trustphoneip);
+	CLI_AMI_OUTPUT_PARAM("Bind Address", CLI_AMI_LIST_WIDTH, "%s:%d", (d->session) ? pbx_inet_ntoa(d->session->sin.sin_addr) : "???.???.???.???", (d->session) ? ntohs(d->session->sin.sin_port) : 0);
+	CLI_AMI_OUTPUT_PARAM("Our Address", CLI_AMI_LIST_WIDTH, "%s", (d->session) ? ast_inet_ntoa(d->session->ourip) : "???.???.???.???");
+	CLI_AMI_OUTPUT_PARAM("Deny/Permit", CLI_AMI_LIST_WIDTH, "%s", pbx_str_buffer(ha_buf));
+	CLI_AMI_OUTPUT_PARAM("Early RTP", CLI_AMI_LIST_WIDTH, "%s (%s)", d->earlyrtp ? "Yes" : "No", d->earlyrtp ? sccp_indicate2str(d->earlyrtp) : "none");
+	CLI_AMI_OUTPUT_PARAM("Device State (Acc.)", CLI_AMI_LIST_WIDTH, "%s", accessorystatus2str(d->accessorystatus));
+	CLI_AMI_OUTPUT_PARAM("Last Used Accessory", CLI_AMI_LIST_WIDTH, "%s", accessory2str(d->accessoryused));
+	CLI_AMI_OUTPUT_PARAM("Last dialed number", CLI_AMI_LIST_WIDTH, "%s", d->lastNumber);
 #ifdef CS_ADV_FEATURES
-	CLI_AMI_OUTPUT_BOOL ("Use Placed Calls", 	CLI_AMI_LIST_WIDTH, 			d->useRedialMenu);
+	CLI_AMI_OUTPUT_BOOL("Use Placed Calls", CLI_AMI_LIST_WIDTH, d->useRedialMenu);
 #endif
 #ifdef CS_DYNAMIC_CONFIG
-	CLI_AMI_OUTPUT_BOOL ("PendingUpdate", 		CLI_AMI_LIST_WIDTH, 			d->pendingUpdate);
-	CLI_AMI_OUTPUT_BOOL ("PendingDelete", 		CLI_AMI_LIST_WIDTH, 			d->pendingDelete);
+	CLI_AMI_OUTPUT_BOOL("PendingUpdate", CLI_AMI_LIST_WIDTH, d->pendingUpdate);
+	CLI_AMI_OUTPUT_BOOL("PendingDelete", CLI_AMI_LIST_WIDTH, d->pendingDelete);
 #endif
 #ifdef CS_SCCP_PICKUP
-	CLI_AMI_OUTPUT_PARAM("Pickup Extension", 	CLI_AMI_LIST_WIDTH,	"%d",	 	d->pickupexten);
-	CLI_AMI_OUTPUT_PARAM("Pickup Context", 		CLI_AMI_LIST_WIDTH,	"%s (%s)",	d->pickupcontext, pbx_context_find(d->pickupcontext) ? "exists" : "does not exist !!");
-	CLI_AMI_OUTPUT_BOOL ("Pickup Mode Answer", 	CLI_AMI_LIST_WIDTH, 			d->pickupmodeanswer);
+	CLI_AMI_OUTPUT_PARAM("Pickup Extension", CLI_AMI_LIST_WIDTH, "%d", d->pickupexten);
+	CLI_AMI_OUTPUT_PARAM("Pickup Context", CLI_AMI_LIST_WIDTH, "%s (%s)", d->pickupcontext, pbx_context_find(d->pickupcontext) ? "exists" : "does not exist !!");
+	CLI_AMI_OUTPUT_BOOL("Pickup Mode Answer", CLI_AMI_LIST_WIDTH, d->pickupmodeanswer);
 #endif
 	if (SCCP_LIST_FIRST(&d->buttonconfig)) {
 		// BUTTONS
-		#define CLI_AMI_TABLE_NAME Buttons
-		#define CLI_AMI_TABLE_PER_ENTRY_NAME Button		
-		#define CLI_AMI_TABLE_LIST_ITER_TYPE sccp_buttonconfig_t 
-		#define CLI_AMI_TABLE_LIST_ITER_HEAD &d->buttonconfig
-		#define CLI_AMI_TABLE_LIST_ITER_VAR buttonconfig
-		#define CLI_AMI_TABLE_LIST_LOCK SCCP_LIST_LOCK
-		#define CLI_AMI_TABLE_LIST_ITERATOR SCCP_LIST_TRAVERSE
-		#define CLI_AMI_TABLE_LIST_UNLOCK SCCP_LIST_UNLOCK
-		#define CLI_AMI_TABLE_FIELDS 												\
+#define CLI_AMI_TABLE_NAME Buttons
+#define CLI_AMI_TABLE_PER_ENTRY_NAME Button
+#define CLI_AMI_TABLE_LIST_ITER_TYPE sccp_buttonconfig_t
+#define CLI_AMI_TABLE_LIST_ITER_HEAD &d->buttonconfig
+#define CLI_AMI_TABLE_LIST_ITER_VAR buttonconfig
+#define CLI_AMI_TABLE_LIST_LOCK SCCP_LIST_LOCK
+#define CLI_AMI_TABLE_LIST_ITERATOR SCCP_LIST_TRAVERSE
+#define CLI_AMI_TABLE_LIST_UNLOCK SCCP_LIST_UNLOCK
+#define CLI_AMI_TABLE_FIELDS 												\
 			CLI_AMI_TABLE_FIELD(Id,			d,	4,	buttonconfig->instance)					\
 			CLI_AMI_TABLE_FIELD(TypeStr,		s,	29,	sccp_buttontype2str(buttonconfig->type))		\
 			CLI_AMI_TABLE_FIELD(Type,		d,	20,	buttonconfig->type)					\
 			CLI_AMI_TABLE_FIELD(pendUpdt,		s,	13, 	buttonconfig->pendingUpdate ? "Yes" : "No")		\
-			CLI_AMI_TABLE_FIELD(pendDel,		s, 	13, 	buttonconfig->pendingUpdate ? "Yes" : "No")		
-		#include "sccp_cli_table.h"
+			CLI_AMI_TABLE_FIELD(pendDel,		s, 	13, 	buttonconfig->pendingUpdate ? "Yes" : "No")
+#include "sccp_cli_table.h"
 
 		// LINES
-		#define CLI_AMI_TABLE_NAME Lines
-		#define CLI_AMI_TABLE_PER_ENTRY_NAME Line		
-		#define CLI_AMI_TABLE_LIST_ITER_HEAD &d->buttonconfig
-		#define CLI_AMI_TABLE_LIST_ITER_VAR buttonconfig
-		#define CLI_AMI_TABLE_LIST_LOCK SCCP_LIST_LOCK
-		#define CLI_AMI_TABLE_LIST_ITERATOR SCCP_LIST_TRAVERSE
-		#define CLI_AMI_TABLE_BEFORE_ITERATION 											\
+#define CLI_AMI_TABLE_NAME Lines
+#define CLI_AMI_TABLE_PER_ENTRY_NAME Line
+#define CLI_AMI_TABLE_LIST_ITER_HEAD &d->buttonconfig
+#define CLI_AMI_TABLE_LIST_ITER_VAR buttonconfig
+#define CLI_AMI_TABLE_LIST_LOCK SCCP_LIST_LOCK
+#define CLI_AMI_TABLE_LIST_ITERATOR SCCP_LIST_TRAVERSE
+#define CLI_AMI_TABLE_BEFORE_ITERATION 											\
 			l = sccp_line_find_byname_wo(buttonconfig->button.line.name, FALSE);						\
 			if (l) {													\
-				linedevice = sccp_util_getDeviceConfiguration(d, l);							
-		#define CLI_AMI_TABLE_AFTER_ITERATION 											\
+				linedevice = sccp_util_getDeviceConfiguration(d, l);
+#define CLI_AMI_TABLE_AFTER_ITERATION 											\
 			}
-		#define CLI_AMI_TABLE_LIST_UNLOCK SCCP_LIST_UNLOCK
-		
-		#define CLI_AMI_TABLE_FIELDS 												\
+#define CLI_AMI_TABLE_LIST_UNLOCK SCCP_LIST_UNLOCK
+
+#define CLI_AMI_TABLE_FIELDS 												\
 			CLI_AMI_TABLE_FIELD(Id,			d,	4,	buttonconfig->instance)					\
 			CLI_AMI_TABLE_FIELD(Name,		s,	23,	l->name)						\
 			CLI_AMI_TABLE_FIELD(Suffix,		s,	6,	buttonconfig->button.line.subscriptionId.number)	\
 			CLI_AMI_TABLE_FIELD(Label,		s,	19, 	l->label)						\
 			CLI_AMI_TABLE_FIELD(CfwdType,		s, 	10, 	(linedevice && linedevice->cfwdAll.enabled ? "All" : (linedevice && linedevice->cfwdBusy.enabled ? "Busy" : "None")))	\
 			CLI_AMI_TABLE_FIELD(CfwdNumber,		s, 	16, 	(linedevice && linedevice->cfwdAll.enabled ? linedevice->cfwdAll.number : (linedevice && linedevice->cfwdBusy.enabled ? linedevice->cfwdBusy.number : "")))
-		#include "sccp_cli_table.h"
+#include "sccp_cli_table.h"
 
 		// SPEEDDIALS
-		#define CLI_AMI_TABLE_NAME Speeddials
-		#define CLI_AMI_TABLE_PER_ENTRY_NAME Speeddial
-		#define CLI_AMI_TABLE_LIST_ITER_HEAD &d->buttonconfig
-		#define CLI_AMI_TABLE_LIST_ITER_VAR buttonconfig
-		#define CLI_AMI_TABLE_LIST_LOCK SCCP_LIST_LOCK
-		#define CLI_AMI_TABLE_LIST_ITERATOR SCCP_LIST_TRAVERSE
-		#define CLI_AMI_TABLE_BEFORE_ITERATION 											\
-			if (buttonconfig->type == SPEEDDIAL) {										
-		#define CLI_AMI_TABLE_AFTER_ITERATION 											\
+#define CLI_AMI_TABLE_NAME Speeddials
+#define CLI_AMI_TABLE_PER_ENTRY_NAME Speeddial
+#define CLI_AMI_TABLE_LIST_ITER_HEAD &d->buttonconfig
+#define CLI_AMI_TABLE_LIST_ITER_VAR buttonconfig
+#define CLI_AMI_TABLE_LIST_LOCK SCCP_LIST_LOCK
+#define CLI_AMI_TABLE_LIST_ITERATOR SCCP_LIST_TRAVERSE
+#define CLI_AMI_TABLE_BEFORE_ITERATION 											\
+			if (buttonconfig->type == SPEEDDIAL) {
+#define CLI_AMI_TABLE_AFTER_ITERATION 											\
 			}
-		#define CLI_AMI_TABLE_LIST_UNLOCK SCCP_LIST_UNLOCK
-		
-		#define CLI_AMI_TABLE_FIELDS 												\
+#define CLI_AMI_TABLE_LIST_UNLOCK SCCP_LIST_UNLOCK
+
+#define CLI_AMI_TABLE_FIELDS 												\
 			CLI_AMI_TABLE_FIELD(Id,			d,	4,	buttonconfig->instance)					\
 			CLI_AMI_TABLE_FIELD(Name,		s,	23,	buttonconfig->label)					\
 			CLI_AMI_TABLE_FIELD(Number,		s,	26,	buttonconfig->button.speeddial.ext)			\
-			CLI_AMI_TABLE_FIELD(Hint,		s,	27, 	buttonconfig->button.speeddial.hint)			
-//			CLI_AMI_TABLE_FIELD(HintStatus,		s,	20, 	ast_extension_state2str(ast_extension_state()))
-		#include "sccp_cli_table.h"
+			CLI_AMI_TABLE_FIELD(Hint,		s,	27, 	buttonconfig->button.speeddial.hint)
+//                      CLI_AMI_TABLE_FIELD(HintStatus,         s,      20,     ast_extension_state2str(ast_extension_state()))
+#include "sccp_cli_table.h"
 
 		// FEATURES
-		#define CLI_AMI_TABLE_NAME Features
-		#define CLI_AMI_TABLE_PER_ENTRY_NAME Feature
-		#define CLI_AMI_TABLE_LIST_ITER_HEAD &d->buttonconfig
-		#define CLI_AMI_TABLE_LIST_ITER_VAR buttonconfig
-		#define CLI_AMI_TABLE_LIST_LOCK SCCP_LIST_LOCK
-		#define CLI_AMI_TABLE_LIST_ITERATOR SCCP_LIST_TRAVERSE
-		#define CLI_AMI_TABLE_BEFORE_ITERATION 											\
-			if (buttonconfig->type == FEATURE) {										
-		#define CLI_AMI_TABLE_AFTER_ITERATION 											\
+#define CLI_AMI_TABLE_NAME Features
+#define CLI_AMI_TABLE_PER_ENTRY_NAME Feature
+#define CLI_AMI_TABLE_LIST_ITER_HEAD &d->buttonconfig
+#define CLI_AMI_TABLE_LIST_ITER_VAR buttonconfig
+#define CLI_AMI_TABLE_LIST_LOCK SCCP_LIST_LOCK
+#define CLI_AMI_TABLE_LIST_ITERATOR SCCP_LIST_TRAVERSE
+#define CLI_AMI_TABLE_BEFORE_ITERATION 											\
+			if (buttonconfig->type == FEATURE) {
+#define CLI_AMI_TABLE_AFTER_ITERATION 											\
 			}
-		#define CLI_AMI_TABLE_LIST_UNLOCK SCCP_LIST_UNLOCK
-		
-		#define CLI_AMI_TABLE_FIELDS 												\
+#define CLI_AMI_TABLE_LIST_UNLOCK SCCP_LIST_UNLOCK
+
+#define CLI_AMI_TABLE_FIELDS 												\
 			CLI_AMI_TABLE_FIELD(Id,			d,	4,	buttonconfig->instance)					\
 			CLI_AMI_TABLE_FIELD(Name,		s,	23,	buttonconfig->label)					\
 			CLI_AMI_TABLE_FIELD(Options,		s,	26,	buttonconfig->button.feature.options)			\
-			CLI_AMI_TABLE_FIELD(Status,		d,	27, 	buttonconfig->button.feature.status)			
-		#include "sccp_cli_table.h"
+			CLI_AMI_TABLE_FIELD(Status,		d,	27, 	buttonconfig->button.feature.status)
+#include "sccp_cli_table.h"
 
 		// SERVICEURL
-		#define CLI_AMI_TABLE_NAME ServiceURLs
-		#define CLI_AMI_TABLE_PER_ENTRY_NAME ServiceURL
-		#define CLI_AMI_TABLE_LIST_ITER_HEAD &d->buttonconfig
-		#define CLI_AMI_TABLE_LIST_ITER_VAR buttonconfig
-		#define CLI_AMI_TABLE_LIST_LOCK SCCP_LIST_LOCK
-		#define CLI_AMI_TABLE_LIST_ITERATOR SCCP_LIST_TRAVERSE
-		#define CLI_AMI_TABLE_BEFORE_ITERATION 											\
-			if (buttonconfig->type == SERVICE) {										
-		#define CLI_AMI_TABLE_AFTER_ITERATION 											\
+#define CLI_AMI_TABLE_NAME ServiceURLs
+#define CLI_AMI_TABLE_PER_ENTRY_NAME ServiceURL
+#define CLI_AMI_TABLE_LIST_ITER_HEAD &d->buttonconfig
+#define CLI_AMI_TABLE_LIST_ITER_VAR buttonconfig
+#define CLI_AMI_TABLE_LIST_LOCK SCCP_LIST_LOCK
+#define CLI_AMI_TABLE_LIST_ITERATOR SCCP_LIST_TRAVERSE
+#define CLI_AMI_TABLE_BEFORE_ITERATION 											\
+			if (buttonconfig->type == SERVICE) {
+#define CLI_AMI_TABLE_AFTER_ITERATION 											\
 			}
-		#define CLI_AMI_TABLE_LIST_UNLOCK SCCP_LIST_UNLOCK
-		
-		#define CLI_AMI_TABLE_FIELDS 												\
+#define CLI_AMI_TABLE_LIST_UNLOCK SCCP_LIST_UNLOCK
+
+#define CLI_AMI_TABLE_FIELDS 												\
 			CLI_AMI_TABLE_FIELD(Id,			d,	4,	buttonconfig->instance)					\
 			CLI_AMI_TABLE_FIELD(Name,		s,	23,	buttonconfig->label)					\
-			CLI_AMI_TABLE_FIELD(URL,		s,	54,	buttonconfig->button.service.url)			
-		#include "sccp_cli_table.h"
+			CLI_AMI_TABLE_FIELD(URL,		s,	54,	buttonconfig->button.service.url)
+#include "sccp_cli_table.h"
 	}
 
 	if (d->variables) {
 		// SERVICEURL
-		#define CLI_AMI_TABLE_NAME Variables
-		#define CLI_AMI_TABLE_PER_ENTRY_NAME Variable
-		#define CLI_AMI_TABLE_ITERATOR for(v = d->variables;v;v = v->next)
-		#define CLI_AMI_TABLE_FIELDS 												\
+#define CLI_AMI_TABLE_NAME Variables
+#define CLI_AMI_TABLE_PER_ENTRY_NAME Variable
+#define CLI_AMI_TABLE_ITERATOR for(v = d->variables;v;v = v->next)
+#define CLI_AMI_TABLE_FIELDS 												\
 			CLI_AMI_TABLE_FIELD(Name,		s,	10,	v->name)						\
-			CLI_AMI_TABLE_FIELD(Value,		s,	17,	v->value)						
-		#include "sccp_cli_table.h"
-	}	
+			CLI_AMI_TABLE_FIELD(Value,		s,	17,	v->value)
+#include "sccp_cli_table.h"
+	}
 	sccp_device_unlock(d);
-	if (s) *total=local_total;
+	if (s)
+		*total = local_total;
 
 	return RESULT_SUCCESS;
 }
+
 static char cli_device_usage[] = "Usage: sccp show device <deviceId>\n" "       Lists device settings for the SCCP subsystem.\n";
 static char ami_device_usage[] = "Usage: SCCPShowDevice\n" "Lists device settings for the SCCP subsystem.\n\n" "PARAMS: DeviceName\n";
 
@@ -651,7 +662,6 @@ CLI_AMI_ENTRY(show_device, sccp_show_device, "Lists device settings", cli_device
 #undef CLI_COMPLETE
 #undef AMI_COMMAND
 #undef CLI_COMMAND
-
 
 /* ---------------------------------------------------------------------------------------------------------SHOW LINES- */
 
@@ -680,17 +690,19 @@ static int sccp_show_lines(int fd, int *total, struct mansession *s, const struc
 	boolean_t found_linedevice;
 	char cap_buf[512];
 	PBX_VARIABLE_TYPE *v = NULL;
-	int local_total=0;
-	const char *actionid="";
+	int local_total = 0;
+	const char *actionid = "";
 
 	if (!s) {
 		pbx_cli(fd, "\n+--- Lines ----------------------------------------------------------------------------------------------+\n");
 		pbx_cli(fd, "| %-16s %-8s %-16s %-4s %-4s %-49s |\n", "Ext", "Suffix", "Device", "MWI", "Chs", "Active Channel");
 		pbx_cli(fd, "+ ================ ======== ================ ==== ==== ================================================= +\n");
 	} else {
-		astman_append(s, "Event: TableStart\r\n");local_total++;
-		astman_append(s, "TableName: Lines\r\n");local_total++;
-		actionid=astman_get_header(m, "ActionID");
+		astman_append(s, "Event: TableStart\r\n");
+		local_total++;
+		astman_append(s, "TableName: Lines\r\n");
+		local_total++;
+		actionid = astman_get_header(m, "ActionID");
 		if (!pbx_strlen_zero(actionid)) {
 			astman_append(s, "ActionID: %s\r\n\r\n", actionid);
 		}
@@ -717,34 +729,27 @@ static int sccp_show_lines(int fd, int *total, struct mansession *s, const struc
 		}
 
 		sccp_linedevices_t *linedevice;
+
 		found_linedevice = 0;
 		SCCP_LIST_LOCK(&l->devices);
 		SCCP_LIST_TRAVERSE(&l->devices, linedevice, list) {
 			if ((d = linedevice->device)) {
 				if (!s) {
-				pbx_cli(fd, "| %-16s %-8s %-16s %-4s %-4d %-10s %-10s %-16s %-10s |\n", 
-					!found_linedevice ? l->name : " +--", 
-					linedevice->subscriptionId.number, 
-					(d) ? d->id : "--", 
-					(l->voicemailStatistic.newmsgs) ? "ON" : "OFF",
-					SCCP_RWLIST_GETSIZE(l->channels), 
-					(channel) ? sccp_indicate2str(channel->state) : "--", 
-					(channel) ? calltype2str(channel->calltype) : "", 
-					(channel) ? ((channel->calltype == SKINNY_CALLTYPE_OUTBOUND) ? channel->callInfo.calledPartyName : channel->callInfo.callingPartyName) : "", 
-					cap_buf);
+					pbx_cli(fd, "| %-16s %-8s %-16s %-4s %-4d %-10s %-10s %-16s %-10s |\n",
+						!found_linedevice ? l->name : " +--", linedevice->subscriptionId.number, (d) ? d->id : "--", (l->voicemailStatistic.newmsgs) ? "ON" : "OFF", SCCP_RWLIST_GETSIZE(l->channels), (channel) ? sccp_indicate2str(channel->state) : "--", (channel) ? calltype2str(channel->calltype) : "", (channel) ? ((channel->calltype == SKINNY_CALLTYPE_OUTBOUND) ? channel->callInfo.calledPartyName : channel->callInfo.callingPartyName) : "", cap_buf);
 				} else {
-					astman_append(s, "Event: LineEntry\r\n");	
-					astman_append(s, "ChannelType: SCCP\r\n");	
-					astman_append(s, "ChannelObjectType: Line\r\n");	
-					astman_append(s, "Exten: %s\r\n", l->name);	
-					astman_append(s, "SubscriptionNumber: %s\r\n", linedevice->subscriptionId.number);	
-					astman_append(s, "Device: %s\r\n", (d) ? d->id : "--");	
-					astman_append(s, "MWI: %s\r\n", (l->voicemailStatistic.newmsgs) ? "ON" : "OFF");	
-					astman_append(s, "ActiveChannels: %d\r\n", SCCP_RWLIST_GETSIZE(l->channels));	
-					astman_append(s, "ChannelState: %s\r\n", (channel) ? sccp_indicate2str(channel->state) : "--");	
-					astman_append(s, "CallType: %s\r\n", (channel) ? calltype2str(channel->calltype) : "");	
-					astman_append(s, "PartyName: %s\r\n", (channel) ? ((channel->calltype == SKINNY_CALLTYPE_OUTBOUND) ? channel->callInfo.calledPartyName : channel->callInfo.callingPartyName) : "");	
-					astman_append(s, "Capabilities: %s\r\n", cap_buf);	
+					astman_append(s, "Event: LineEntry\r\n");
+					astman_append(s, "ChannelType: SCCP\r\n");
+					astman_append(s, "ChannelObjectType: Line\r\n");
+					astman_append(s, "Exten: %s\r\n", l->name);
+					astman_append(s, "SubscriptionNumber: %s\r\n", linedevice->subscriptionId.number);
+					astman_append(s, "Device: %s\r\n", (d) ? d->id : "--");
+					astman_append(s, "MWI: %s\r\n", (l->voicemailStatistic.newmsgs) ? "ON" : "OFF");
+					astman_append(s, "ActiveChannels: %d\r\n", SCCP_RWLIST_GETSIZE(l->channels));
+					astman_append(s, "ChannelState: %s\r\n", (channel) ? sccp_indicate2str(channel->state) : "--");
+					astman_append(s, "CallType: %s\r\n", (channel) ? calltype2str(channel->calltype) : "");
+					astman_append(s, "PartyName: %s\r\n", (channel) ? ((channel->calltype == SKINNY_CALLTYPE_OUTBOUND) ? channel->callInfo.calledPartyName : channel->callInfo.callingPartyName) : "");
+					astman_append(s, "Capabilities: %s\r\n", cap_buf);
 					astman_append(s, "\r\n");
 				}
 				found_linedevice = 1;
@@ -754,22 +759,13 @@ static int sccp_show_lines(int fd, int *total, struct mansession *s, const struc
 
 		if (found_linedevice == 0) {
 			if (!s) {
-			pbx_cli(fd, "| %-16s %-8s %-16s %-4s %-4d %-10s %-10s %-16s %-10s |\n", 
-				l->name, 
-				"", 
-				"--", 
-				(l->voicemailStatistic.newmsgs) ? "ON" : "OFF", 
-				SCCP_RWLIST_GETSIZE(l->channels), 
-				(channel) ? sccp_indicate2str(channel->state) : "--", 
-				(channel) ? calltype2str(channel->calltype) : "", 
-				(channel) ? ((channel->calltype == SKINNY_CALLTYPE_OUTBOUND) ? channel->callInfo.calledPartyName : channel->callInfo.callingPartyName) : "", 
-				cap_buf);
+				pbx_cli(fd, "| %-16s %-8s %-16s %-4s %-4d %-10s %-10s %-16s %-10s |\n", l->name, "", "--", (l->voicemailStatistic.newmsgs) ? "ON" : "OFF", SCCP_RWLIST_GETSIZE(l->channels), (channel) ? sccp_indicate2str(channel->state) : "--", (channel) ? calltype2str(channel->calltype) : "", (channel) ? ((channel->calltype == SKINNY_CALLTYPE_OUTBOUND) ? channel->callInfo.calledPartyName : channel->callInfo.callingPartyName) : "", cap_buf);
 			} else {
 				astman_append(s, "Event: LineEntry\r\n");
 				astman_append(s, "ChannelType: SCCP\r\n");
 				astman_append(s, "ChannelObjectType: Line\r\n");
-				astman_append(s, "Exten: %s\r\n", l->name);	
-				astman_append(s, "Device: %s\r\n", "(null)");	
+				astman_append(s, "Exten: %s\r\n", l->name);
+				astman_append(s, "Device: %s\r\n", "(null)");
 				astman_append(s, "MWI: %s\r\n", (l->voicemailStatistic.newmsgs) ? "ON" : "OFF");
 				astman_append(s, "\r\n");
 			}
@@ -779,22 +775,27 @@ static int sccp_show_lines(int fd, int *total, struct mansession *s, const struc
 				pbx_cli(fd, "| %-16s %-8s %-16s %-59.59s |\n", "", "Variable", v->name, v->value);
 
 			if (strcmp(l->defaultSubscriptionId.number, "") || strcmp(l->defaultSubscriptionId.name, ""))
-				pbx_cli(fd, "| %-16s %-8s %-16s %-59.59s |\n", "","SubscrId", l->defaultSubscriptionId.number, l->defaultSubscriptionId.name);
+				pbx_cli(fd, "| %-16s %-8s %-16s %-59.59s |\n", "", "SubscrId", l->defaultSubscriptionId.number, l->defaultSubscriptionId.name);
 		}
 	}
 	if (!s) {
 		pbx_cli(fd, "+--------------------------------------------------------------------------------------------------------+\n");
 	} else {
-		astman_append(s, "Event: TableEnd\r\n");local_total++;
-		astman_append(s, "TableName: Lines\r\n");local_total++;
+		astman_append(s, "Event: TableEnd\r\n");
+		local_total++;
+		astman_append(s, "TableName: Lines\r\n");
+		local_total++;
 		if (!pbx_strlen_zero(actionid)) {
-			astman_append(s, "ActionID: %s\r\n", actionid);local_total++;
+			astman_append(s, "ActionID: %s\r\n", actionid);
+			local_total++;
 		}
-		astman_append(s, "\r\n");local_total++;
+		astman_append(s, "\r\n");
+		local_total++;
 
 	}
 	SCCP_RWLIST_UNLOCK(&GLOB(lines));
-	if (s) *total=local_total;
+	if (s)
+		*total = local_total;
 
 	return RESULT_SUCCESS;
 }
@@ -838,15 +839,16 @@ static int sccp_show_line(int fd, int *total, struct mansession *s, const struct
 	PBX_VARIABLE_TYPE *v = NULL;
 	struct ast_str *callgroup_buf = pbx_str_alloca(512);
 	struct ast_str *pickupgroup_buf = pbx_str_alloca(512);
-	int local_total=0;
+	int local_total = 0;
 
 	const char *line;
+
 	if (s) {
-		line = strdupa(astman_get_header(m, "LineName"));
+		line = sccp_strdupa(astman_get_header(m, "LineName"));
 	} else {
 		if (argc < 4)
 			return RESULT_SHOWUSAGE;
-		line = strdupa(argv[3]);
+		line = sccp_strdupa(argv[3]);
 	}
 	l = sccp_line_find_byname(line);
 
@@ -863,80 +865,81 @@ static int sccp_show_line(int fd, int *total, struct mansession *s, const struct
 		astman_send_listack(s, m, argv[0], "start");
 		CLI_AMI_OUTPUT_PARAM("Event", CLI_AMI_LIST_WIDTH, "%s", argv[0]);
 	}
-	CLI_AMI_OUTPUT_PARAM("Name", 			CLI_AMI_LIST_WIDTH,	"%s",	 	l->name ? l->name : "<not set>");
-	CLI_AMI_OUTPUT_PARAM("Description", 		CLI_AMI_LIST_WIDTH,	"%s",	 	l->description ? l->description : "<not set>");
-	CLI_AMI_OUTPUT_PARAM("Label", 			CLI_AMI_LIST_WIDTH,	"%s",	 	l->label ? l->label : "<not set>");
-	CLI_AMI_OUTPUT_PARAM("ID", 			CLI_AMI_LIST_WIDTH,	"%s",	 	l->id ? l->id : "<not set>");
-	CLI_AMI_OUTPUT_PARAM("Pin", 			CLI_AMI_LIST_WIDTH,	"%s",	 	l->pin ? l->pin : "<not set>");
-	CLI_AMI_OUTPUT_PARAM("VoiceMail number", 	CLI_AMI_LIST_WIDTH,	"%s",	 	l->vmnum ? l->vmnum : "<not set>");
-	CLI_AMI_OUTPUT_PARAM("Transfer to Voicemail", 	CLI_AMI_LIST_WIDTH, 	"%s",		l->trnsfvm ? l->trnsfvm : "No");
-	CLI_AMI_OUTPUT_BOOL ("MeetMe enabled", 		CLI_AMI_LIST_WIDTH, 			l->meetme);
-	CLI_AMI_OUTPUT_BOOL ("MeetMe number", 		CLI_AMI_LIST_WIDTH, 			l->meetmenum);
-	CLI_AMI_OUTPUT_PARAM("MeetMe Options", 		CLI_AMI_LIST_WIDTH,	"%s",	 	l->meetmeopts);
-	CLI_AMI_OUTPUT_PARAM("Context", 		CLI_AMI_LIST_WIDTH,	"%s (%s)",	l->context ? l->context : "<not set>", pbx_context_find(l->context) ? "exists" : "does not exist !!");
-	CLI_AMI_OUTPUT_PARAM("Language", 		CLI_AMI_LIST_WIDTH,	"%s",	 	l->language ? l->language : "<not set>");
-	CLI_AMI_OUTPUT_PARAM("Account Code", 		CLI_AMI_LIST_WIDTH,	"%s",	 	l->accountcode ? l->accountcode : "<not set>");
-	CLI_AMI_OUTPUT_PARAM("Musicclass", 		CLI_AMI_LIST_WIDTH,	"%s",	 	l->musicclass ? l->musicclass : "<not set>");
-	CLI_AMI_OUTPUT_PARAM("AmaFlags", 		CLI_AMI_LIST_WIDTH,	"%d",	 	l->amaflags);
+	CLI_AMI_OUTPUT_PARAM("Name", CLI_AMI_LIST_WIDTH, "%s", l->name ? l->name : "<not set>");
+	CLI_AMI_OUTPUT_PARAM("Description", CLI_AMI_LIST_WIDTH, "%s", l->description ? l->description : "<not set>");
+	CLI_AMI_OUTPUT_PARAM("Label", CLI_AMI_LIST_WIDTH, "%s", l->label ? l->label : "<not set>");
+	CLI_AMI_OUTPUT_PARAM("ID", CLI_AMI_LIST_WIDTH, "%s", l->id ? l->id : "<not set>");
+	CLI_AMI_OUTPUT_PARAM("Pin", CLI_AMI_LIST_WIDTH, "%s", l->pin ? l->pin : "<not set>");
+	CLI_AMI_OUTPUT_PARAM("VoiceMail number", CLI_AMI_LIST_WIDTH, "%s", l->vmnum ? l->vmnum : "<not set>");
+	CLI_AMI_OUTPUT_PARAM("Transfer to Voicemail", CLI_AMI_LIST_WIDTH, "%s", l->trnsfvm ? l->trnsfvm : "No");
+	CLI_AMI_OUTPUT_BOOL("MeetMe enabled", CLI_AMI_LIST_WIDTH, l->meetme);
+	CLI_AMI_OUTPUT_BOOL("MeetMe number", CLI_AMI_LIST_WIDTH, l->meetmenum);
+	CLI_AMI_OUTPUT_PARAM("MeetMe Options", CLI_AMI_LIST_WIDTH, "%s", l->meetmeopts);
+	CLI_AMI_OUTPUT_PARAM("Context", CLI_AMI_LIST_WIDTH, "%s (%s)", l->context ? l->context : "<not set>", pbx_context_find(l->context) ? "exists" : "does not exist !!");
+	CLI_AMI_OUTPUT_PARAM("Language", CLI_AMI_LIST_WIDTH, "%s", l->language ? l->language : "<not set>");
+	CLI_AMI_OUTPUT_PARAM("Account Code", CLI_AMI_LIST_WIDTH, "%s", l->accountcode ? l->accountcode : "<not set>");
+	CLI_AMI_OUTPUT_PARAM("Musicclass", CLI_AMI_LIST_WIDTH, "%s", l->musicclass ? l->musicclass : "<not set>");
+	CLI_AMI_OUTPUT_PARAM("AmaFlags", CLI_AMI_LIST_WIDTH, "%d", l->amaflags);
 	sccp_print_group(callgroup_buf, sizeof(callgroup_buf), GLOB(callgroup));
-	CLI_AMI_OUTPUT_PARAM("Call Group", 		CLI_AMI_LIST_WIDTH,	"%s",	 	callgroup_buf ? pbx_str_buffer(callgroup_buf) : "");
+	CLI_AMI_OUTPUT_PARAM("Call Group", CLI_AMI_LIST_WIDTH, "%s", callgroup_buf ? pbx_str_buffer(callgroup_buf) : "");
 #ifdef CS_SCCP_PICKUP
 	sccp_print_group(pickupgroup_buf, sizeof(pickupgroup_buf), GLOB(pickupgroup));
-	CLI_AMI_OUTPUT_PARAM("Pickup Group", 		CLI_AMI_LIST_WIDTH,	"%s",	 	pickupgroup_buf ? pbx_str_buffer(pickupgroup_buf) : "");
+	CLI_AMI_OUTPUT_PARAM("Pickup Group", CLI_AMI_LIST_WIDTH, "%s", pickupgroup_buf ? pbx_str_buffer(pickupgroup_buf) : "");
 #endif
-	CLI_AMI_OUTPUT_PARAM("Caller ID name", 		CLI_AMI_LIST_WIDTH,	"%s",	 	l->cid_name ? l->cid_name : "<not set>");
-	CLI_AMI_OUTPUT_PARAM("Caller ID number", 	CLI_AMI_LIST_WIDTH,	"%s",	 	l->cid_num ? l->cid_num : "<not set>");
-	CLI_AMI_OUTPUT_PARAM("Incoming Calls limit", 	CLI_AMI_LIST_WIDTH,	"%d",	 	l->incominglimit);
-	CLI_AMI_OUTPUT_PARAM("Active Channel Count", 	CLI_AMI_LIST_WIDTH,	"%d",	 	SCCP_RWLIST_GETSIZE(l->channels));
-	CLI_AMI_OUTPUT_PARAM("Sec. Dialtone Digits", 	CLI_AMI_LIST_WIDTH,	"%s",	 	l->secondary_dialtone_digits ? l->secondary_dialtone_digits : "<not set>");
-	CLI_AMI_OUTPUT_PARAM("Sec. Dialtone", 		CLI_AMI_LIST_WIDTH,	"0x%02x",	l->secondary_dialtone_tone);
-	CLI_AMI_OUTPUT_BOOL ("Echo Cancellation", 	CLI_AMI_LIST_WIDTH, 			l->echocancel);
-	CLI_AMI_OUTPUT_BOOL ("Silence Suppression", 	CLI_AMI_LIST_WIDTH, 			l->silencesuppression);
-	CLI_AMI_OUTPUT_BOOL ("Can Transfer", 		CLI_AMI_LIST_WIDTH, 			l->transfer);
-	CLI_AMI_OUTPUT_PARAM("Can DND", 		CLI_AMI_LIST_WIDTH,	"%s",	 	(l->dndmode) ? dndmode2str(l->dndmode) : "Disabled");
+	CLI_AMI_OUTPUT_PARAM("Caller ID name", CLI_AMI_LIST_WIDTH, "%s", l->cid_name ? l->cid_name : "<not set>");
+	CLI_AMI_OUTPUT_PARAM("Caller ID number", CLI_AMI_LIST_WIDTH, "%s", l->cid_num ? l->cid_num : "<not set>");
+	CLI_AMI_OUTPUT_PARAM("Incoming Calls limit", CLI_AMI_LIST_WIDTH, "%d", l->incominglimit);
+	CLI_AMI_OUTPUT_PARAM("Active Channel Count", CLI_AMI_LIST_WIDTH, "%d", SCCP_RWLIST_GETSIZE(l->channels));
+	CLI_AMI_OUTPUT_PARAM("Sec. Dialtone Digits", CLI_AMI_LIST_WIDTH, "%s", l->secondary_dialtone_digits ? l->secondary_dialtone_digits : "<not set>");
+	CLI_AMI_OUTPUT_PARAM("Sec. Dialtone", CLI_AMI_LIST_WIDTH, "0x%02x", l->secondary_dialtone_tone);
+	CLI_AMI_OUTPUT_BOOL("Echo Cancellation", CLI_AMI_LIST_WIDTH, l->echocancel);
+	CLI_AMI_OUTPUT_BOOL("Silence Suppression", CLI_AMI_LIST_WIDTH, l->silencesuppression);
+	CLI_AMI_OUTPUT_BOOL("Can Transfer", CLI_AMI_LIST_WIDTH, l->transfer);
+	CLI_AMI_OUTPUT_PARAM("Can DND", CLI_AMI_LIST_WIDTH, "%s", (l->dndmode) ? dndmode2str(l->dndmode) : "Disabled");
 #ifdef CS_SCCP_REALTIME
-	CLI_AMI_OUTPUT_BOOL ("Is Realtime Line", 	CLI_AMI_LIST_WIDTH, 			l->realtime);
+	CLI_AMI_OUTPUT_BOOL("Is Realtime Line", CLI_AMI_LIST_WIDTH, l->realtime);
 #endif
 #ifdef CS_DYNAMIC_CONFIG
-	CLI_AMI_OUTPUT_BOOL ("Pending Delete", 		CLI_AMI_LIST_WIDTH, 			l->pendingUpdate);
-	CLI_AMI_OUTPUT_BOOL ("Pending Update", 		CLI_AMI_LIST_WIDTH, 			l->pendingDelete);
+	CLI_AMI_OUTPUT_BOOL("Pending Delete", CLI_AMI_LIST_WIDTH, l->pendingUpdate);
+	CLI_AMI_OUTPUT_BOOL("Pending Update", CLI_AMI_LIST_WIDTH, l->pendingDelete);
 #endif
 
-	CLI_AMI_OUTPUT_PARAM("Registration Extension", 	CLI_AMI_LIST_WIDTH,	"%s",	 	l->regexten ? l->regexten : "Unset");
-	CLI_AMI_OUTPUT_PARAM("Registration Context", 	CLI_AMI_LIST_WIDTH,	"%s",	 	l->regcontext ? l->regcontext : "Unset");
+	CLI_AMI_OUTPUT_PARAM("Registration Extension", CLI_AMI_LIST_WIDTH, "%s", l->regexten ? l->regexten : "Unset");
+	CLI_AMI_OUTPUT_PARAM("Registration Context", CLI_AMI_LIST_WIDTH, "%s", l->regcontext ? l->regcontext : "Unset");
 
-	CLI_AMI_OUTPUT_BOOL ("Adhoc Number Assigned", 	CLI_AMI_LIST_WIDTH, 			l->adhocNumber ? l->adhocNumber : "No");
-	CLI_AMI_OUTPUT_PARAM("Message Waiting New.", 	CLI_AMI_LIST_WIDTH,	"%i",	 	l->voicemailStatistic.newmsgs);
-	CLI_AMI_OUTPUT_PARAM("Message Waiting Old.", 	CLI_AMI_LIST_WIDTH,	"%i",	 	l->voicemailStatistic.oldmsgs);
+	CLI_AMI_OUTPUT_BOOL("Adhoc Number Assigned", CLI_AMI_LIST_WIDTH, l->adhocNumber ? l->adhocNumber : "No");
+	CLI_AMI_OUTPUT_PARAM("Message Waiting New.", CLI_AMI_LIST_WIDTH, "%i", l->voicemailStatistic.newmsgs);
+	CLI_AMI_OUTPUT_PARAM("Message Waiting Old.", CLI_AMI_LIST_WIDTH, "%i", l->voicemailStatistic.oldmsgs);
 
 	// Line attached to these devices
-	#define CLI_AMI_TABLE_NAME AttachedDevices
-	#define CLI_AMI_TABLE_PER_ENTRY_NAME Device
-	#define CLI_AMI_TABLE_LIST_ITER_HEAD &l->devices
-	#define CLI_AMI_TABLE_LIST_ITER_VAR linedevice
-	#define CLI_AMI_TABLE_LIST_LOCK SCCP_LIST_LOCK
-	#define CLI_AMI_TABLE_LIST_ITERATOR SCCP_LIST_TRAVERSE
-	#define CLI_AMI_TABLE_LIST_UNLOCK SCCP_LIST_UNLOCK
-	
-	#define CLI_AMI_TABLE_FIELDS 												\
+#define CLI_AMI_TABLE_NAME AttachedDevices
+#define CLI_AMI_TABLE_PER_ENTRY_NAME Device
+#define CLI_AMI_TABLE_LIST_ITER_HEAD &l->devices
+#define CLI_AMI_TABLE_LIST_ITER_VAR linedevice
+#define CLI_AMI_TABLE_LIST_LOCK SCCP_LIST_LOCK
+#define CLI_AMI_TABLE_LIST_ITERATOR SCCP_LIST_TRAVERSE
+#define CLI_AMI_TABLE_LIST_UNLOCK SCCP_LIST_UNLOCK
+
+#define CLI_AMI_TABLE_FIELDS 												\
 		CLI_AMI_TABLE_FIELD(Device,		s,	15,	linedevice->device->id)					\
 		CLI_AMI_TABLE_FIELD(CfwdType,		s,	8,	linedevice->cfwdAll.enabled ? "All" : (linedevice->cfwdBusy.enabled ? "Busy" : ""))					\
 		CLI_AMI_TABLE_FIELD(CfwdNumber,		s,	20,	linedevice->cfwdAll.enabled ? linedevice->cfwdAll.number : (linedevice->cfwdBusy.enabled ? linedevice->cfwdBusy.number : ""))
-	#include "sccp_cli_table.h"
+#include "sccp_cli_table.h"
 
 	if (l->variables) {
 		// SERVICEURL
-		#define CLI_AMI_TABLE_NAME Variables
-		#define CLI_AMI_TABLE_PER_ENTRY_NAME Variable
-		#define CLI_AMI_TABLE_ITERATOR for(v = l->variables;v;v = v->next)
-		#define CLI_AMI_TABLE_FIELDS 										\
+#define CLI_AMI_TABLE_NAME Variables
+#define CLI_AMI_TABLE_PER_ENTRY_NAME Variable
+#define CLI_AMI_TABLE_ITERATOR for(v = l->variables;v;v = v->next)
+#define CLI_AMI_TABLE_FIELDS 										\
 			CLI_AMI_TABLE_FIELD(Name,		s,	10,	v->name)				\
-			CLI_AMI_TABLE_FIELD(Value,		s,	17,	v->value)				
-		#include "sccp_cli_table.h"
-	}	
+			CLI_AMI_TABLE_FIELD(Value,		s,	17,	v->value)
+#include "sccp_cli_table.h"
+	}
 	sccp_line_unlock(l);
-	if (s) *total=local_total;
-	
+	if (s)
+		*total = local_total;
+
 	return RESULT_SUCCESS;
 }
 
@@ -977,30 +980,29 @@ static int sccp_show_channels(int fd, int *total, struct mansession *s, const st
 {
 	sccp_channel_t *channel;
 	sccp_line_t *l;
-	int local_total=0;
+	int local_total = 0;
 	char tmpname[20];
 
 	// Channels
-	#define CLI_AMI_TABLE_NAME Channels
-	#define CLI_AMI_TABLE_PER_ENTRY_NAME Channel
-	#define CLI_AMI_TABLE_LIST_ITER_HEAD &GLOB(lines)
-	#define CLI_AMI_TABLE_LIST_ITER_VAR l
-	#define CLI_AMI_TABLE_LIST_LOCK SCCP_RWLIST_RDLOCK
-	#define CLI_AMI_TABLE_LIST_ITERATOR SCCP_RWLIST_TRAVERSE
-	#define CLI_AMI_TABLE_LIST_UNLOCK SCCP_RWLIST_UNLOCK
-	#define CLI_AMI_TABLE_BEFORE_ITERATION 											\
+#define CLI_AMI_TABLE_NAME Channels
+#define CLI_AMI_TABLE_PER_ENTRY_NAME Channel
+#define CLI_AMI_TABLE_LIST_ITER_HEAD &GLOB(lines)
+#define CLI_AMI_TABLE_LIST_ITER_VAR l
+#define CLI_AMI_TABLE_LIST_LOCK SCCP_RWLIST_RDLOCK
+#define CLI_AMI_TABLE_LIST_ITERATOR SCCP_RWLIST_TRAVERSE
+#define CLI_AMI_TABLE_LIST_UNLOCK SCCP_RWLIST_UNLOCK
+#define CLI_AMI_TABLE_BEFORE_ITERATION 											\
 		sccp_line_lock(l);												\
 		SCCP_LIST_LOCK(&l->channels);											\
 		SCCP_LIST_TRAVERSE(&l->channels, channel, list) {								\
 			snprintf(tmpname, sizeof(tmpname), "SCCP/%s-%08x", l->name, channel->callid);
-				
-	
-	#define CLI_AMI_TABLE_AFTER_ITERATION 											\
+
+#define CLI_AMI_TABLE_AFTER_ITERATION 											\
 		}														\
 		SCCP_LIST_UNLOCK(&l->channels);											\
 		sccp_line_unlock(l);
-	
-	#define CLI_AMI_TABLE_FIELDS 												\
+
+#define CLI_AMI_TABLE_FIELDS 												\
 		CLI_AMI_TABLE_FIELD(ID,			d,	5,	channel->callid)					\
 		CLI_AMI_TABLE_FIELD(PBX,		s,	20,	strdupa(tmpname))						\
 		CLI_AMI_TABLE_FIELD(Line,		s,	10,	channel->line->name)					\
@@ -1011,9 +1013,10 @@ static int sccp_show_channels(int fd, int *total, struct mansession *s, const st
 		CLI_AMI_TABLE_FIELD(SCCP State,		s,	10,	sccp_indicate2str(channel->state))			\
 		CLI_AMI_TABLE_FIELD(ReadCodec,		s,	10,	codec2name(channel->rtp.audio.readFormat))		\
 		CLI_AMI_TABLE_FIELD(WriteCodec,		s,	10,	codec2name(channel->rtp.audio.writeFormat))
-	#include "sccp_cli_table.h"
+#include "sccp_cli_table.h"
 
-	if (s) *total=local_total;
+	if (s)
+		*total = local_total;
 	return RESULT_SUCCESS;
 }
 
@@ -1053,41 +1056,42 @@ CLI_AMI_ENTRY(show_channels, sccp_show_channels, "Lists active SCCP channels", c
 //static int sccp_show_sessions(int fd, int argc, char *argv[])
 static int sccp_show_sessions(int fd, int *total, struct mansession *s, const struct message *m, int argc, char *argv[])
 {
-//	sccp_session_t *session=NULL;
+//      sccp_session_t *session=NULL;
 	sccp_device_t *d = NULL;
-	int local_total=0;
+	int local_total = 0;
 
 	// Channels
-	#define CLI_AMI_TABLE_NAME Sessions
-	#define CLI_AMI_TABLE_PER_ENTRY_NAME Session
-	#define CLI_AMI_TABLE_LIST_ITER_HEAD &GLOB(sessions)
-	#define CLI_AMI_TABLE_LIST_ITER_TYPE sccp_session_t
-	#define CLI_AMI_TABLE_LIST_ITER_VAR session
-	#define CLI_AMI_TABLE_LIST_LOCK SCCP_RWLIST_RDLOCK
-	#define CLI_AMI_TABLE_LIST_ITERATOR SCCP_RWLIST_TRAVERSE
-	#define CLI_AMI_TABLE_LIST_UNLOCK SCCP_RWLIST_UNLOCK
-	#define CLI_AMI_TABLE_BEFORE_ITERATION 											\
+#define CLI_AMI_TABLE_NAME Sessions
+#define CLI_AMI_TABLE_PER_ENTRY_NAME Session
+#define CLI_AMI_TABLE_LIST_ITER_HEAD &GLOB(sessions)
+#define CLI_AMI_TABLE_LIST_ITER_TYPE sccp_session_t
+#define CLI_AMI_TABLE_LIST_ITER_VAR session
+#define CLI_AMI_TABLE_LIST_LOCK SCCP_RWLIST_RDLOCK
+#define CLI_AMI_TABLE_LIST_ITERATOR SCCP_RWLIST_TRAVERSE
+#define CLI_AMI_TABLE_LIST_UNLOCK SCCP_RWLIST_UNLOCK
+#define CLI_AMI_TABLE_BEFORE_ITERATION 											\
 		sccp_session_lock(session);											\
 		d = session->device;												\
 		if (d) {													\
 			sccp_device_lock(d);
-	
-	#define CLI_AMI_TABLE_AFTER_ITERATION 											\
+
+#define CLI_AMI_TABLE_AFTER_ITERATION 											\
 			sccp_device_unlock(d);											\
 		}														\
 		sccp_session_unlock(session);
-	
-	#define CLI_AMI_TABLE_FIELDS 												\
+
+#define CLI_AMI_TABLE_FIELDS 												\
 		CLI_AMI_TABLE_FIELD(Socket,			d,	10,	session->fds[0].fd)				\
 		CLI_AMI_TABLE_FIELD(IP,				s,	CLI_AMI_LIST_WIDTH,	pbx_inet_ntoa(session->sin.sin_addr))		\
 		CLI_AMI_TABLE_FIELD(Port,			d,	5,	session->sin.sin_port)				\
 		CLI_AMI_TABLE_FIELD(KA,				d,	4,	(uint32_t) (time(0) - session->lastKeepAlive))	\
 		CLI_AMI_TABLE_FIELD(Device,			s,	15,	(d) ? d->id : "--")				\
 		CLI_AMI_TABLE_FIELD(State,			s,	14,	(d) ? devicestatus2str(d->state) : "--")	\
-		CLI_AMI_TABLE_FIELD(Type,			s,	15,	(d) ? devicetype2str(d->skinny_type) : "--")	
-	#include "sccp_cli_table.h"
-	
-	if (s) *total=local_total;
+		CLI_AMI_TABLE_FIELD(Type,			s,	15,	(d) ? devicetype2str(d->skinny_type) : "--")
+#include "sccp_cli_table.h"
+
+	if (s)
+		*total = local_total;
 
 	return RESULT_SUCCESS;
 }
@@ -1123,6 +1127,7 @@ CLI_AMI_ENTRY(show_sessions, sccp_show_sessions, "Show all SCCP sessions", cli_s
  */
 static int sccp_show_mwi_subscriptions(int fd, int *total, struct mansession *s, const struct message *m, int argc, char *argv[])
 {
+
 /*
  	sccp_line_t *line=NULL;
  	sccp_mailboxLine_t *mailboxLine = NULL;
@@ -1158,7 +1163,7 @@ static int sccp_show_mwi_subscriptions(int fd, int *total, struct mansession *s,
  	if (s) *total=local_total;
 
 	return RESULT_SUCCESS;
-*/ 	
+*/
 
 	pbx_cli(fd, "Command has not been fully implemented yet!\n");
 	return RESULT_FAILURE;
@@ -1235,7 +1240,6 @@ CLI_ENTRY(cli_show_softkeysets, sccp_show_softkeysets, "Show configured SoftKeyS
 #undef CLI_COMPLETE
 #undef CLI_COMMAND
 
-
 /* -----------------------------------------------------------------------------------------------------MESSAGE DEVICES- */
 
 /*!
@@ -1278,7 +1282,7 @@ static int sccp_message_devices(int fd, int argc, char *argv[])
 
 	SCCP_RWLIST_RDLOCK(&GLOB(devices));
 	SCCP_RWLIST_TRAVERSE(&GLOB(devices), d, list) {
-		sccp_dev_set_message(d, argv[3], timeout, FALSE, beep);	
+		sccp_dev_set_message(d, argv[3], timeout, FALSE, beep);
 	}
 	SCCP_RWLIST_UNLOCK(&GLOB(devices));
 	return RESULT_SUCCESS;
@@ -1307,45 +1311,36 @@ CLI_ENTRY(cli_message_devices, sccp_message_devices, "Send a message to all SCCP
  */
 static int sccp_message_device(int fd, int argc, char *argv[])
 {
- 	sccp_device_t *d;
+	sccp_device_t *d;
 
 	int timeout = 10;
 
 	boolean_t beep = FALSE;
 
 	if (argc < 4)
-	        return RESULT_SHOWUSAGE;
-	if (sccp_strlen_zero(argv[3]))  
-	        return RESULT_SHOWUSAGE;
+		return RESULT_SHOWUSAGE;
+	if (sccp_strlen_zero(argv[3]))
+		return RESULT_SHOWUSAGE;
 	if (argc > 5) {
-	        if (!strcmp(argv[5], "beep")) {
-	                beep = TRUE;
-	                if (sscanf(argv[6], "%d", &timeout) != 1) {
-	                        timeout = 10;
-	                }
-	        }
-	        if (sscanf(argv[5], "%d", &timeout) != 1) {
-	                timeout = 10;
-	        }
+		if (!strcmp(argv[5], "beep")) {
+			beep = TRUE;
+			if (sscanf(argv[6], "%d", &timeout) != 1) {
+				timeout = 10;
+			}
+		}
+		if (sscanf(argv[5], "%d", &timeout) != 1) {
+			timeout = 10;
+		}
 	}
 	if ((d = sccp_device_find_byid(argv[3], FALSE))) {
-		sccp_dev_set_message(d, argv[4], timeout, FALSE, beep);	
+		sccp_dev_set_message(d, argv[4], timeout, FALSE, beep);
 
-#if CS_ADV_FEATURES
-		sccp_moo_t *r1;
-		REQ(r1, LineStatMessage);
-		r1->msg.LineStatMessage.lel_lineNumber = htolel(1);
-		sccp_copy_string(r1->msg.LineStatMessage.lineDirNumber, "lDN", sizeof(r1->msg.LineStatMessage.lineDirNumber));
-		sccp_copy_string(r1->msg.LineStatMessage.lineFullyQualifiedDisplayName, "lFQDN", sizeof(r1->msg.LineStatMessage.lineFullyQualifiedDisplayName));
-		sccp_copy_string(r1->msg.LineStatMessage.lineDisplayName, "lDisplayName", sizeof(r1->msg.LineStatMessage.lineDisplayName));
-		sccp_dev_send(d, r1);
-#endif
-	        return RESULT_SUCCESS;
+		return RESULT_SUCCESS;
 	} else {
-	        ast_cli(fd, "Device not found!\n");
-	        return RESULT_FAILURE;
+		ast_cli(fd, "Device not found!\n");
+		return RESULT_FAILURE;
 	}
-	
+
 }
 
 static char message_device_usage[] = "Usage: sccp message device <deviceId> <message text> [beep] [timeout]\n" "       Send a message to an SCCP Device + phone beep + timeout.\n";
@@ -1374,28 +1369,28 @@ static int sccp_system_message(int fd, int argc, char *argv[])
 	int timeout = 0;
 	boolean_t beep = FALSE;
 
-	if (argc==3) {
+	if (argc == 3) {
 		SCCP_RWLIST_RDLOCK(&GLOB(devices));
 		SCCP_RWLIST_TRAVERSE(&GLOB(devices), d, list) {
-			sccp_dev_clear_message(d, TRUE);	
+			sccp_dev_clear_message(d, TRUE);
 		}
 		SCCP_RWLIST_UNLOCK(&GLOB(devices));
-                ast_cli(fd, "Message Cleared\n");
+		ast_cli(fd, "Message Cleared\n");
 		return RESULT_SUCCESS;
 	}
 
-	if (argc < 4 || argc >6)
+	if (argc < 4 || argc > 6)
 		return RESULT_SHOWUSAGE;
 
-        if (sccp_strlen_zero(argv[3]))  
-                return RESULT_SHOWUSAGE;
+	if (sccp_strlen_zero(argv[3]))
+		return RESULT_SHOWUSAGE;
 
-	res = PBX(feature_addToDatabase)("SCCP/message", "text", argv[3]);
-        if (!res) {
-                ast_cli(fd, "Failed to store the SCCP system message text\n");
-        } else {
-                sccp_log(DEBUGCAT_CLI)(VERBOSE_PREFIX_3 "SCCP system message text stored successfully\n");
-        }
+	res = PBX(feature_addToDatabase) ("SCCP/message", "text", argv[3]);
+	if (!res) {
+		ast_cli(fd, "Failed to store the SCCP system message text\n");
+	} else {
+		sccp_log(DEBUGCAT_CLI) (VERBOSE_PREFIX_3 "SCCP system message text stored successfully\n");
+	}
 
 	if (argc > 4) {
 		if (!strcmp(argv[4], "beep")) {
@@ -1403,20 +1398,20 @@ static int sccp_system_message(int fd, int argc, char *argv[])
 			if (sscanf(argv[5], "%d", &timeout) != 1)
 				timeout = 10;
 		}
-		if (sscanf(argv[4], "%d", &timeout) != 1) 
+		if (sscanf(argv[4], "%d", &timeout) != 1)
 			timeout = 10;
 	} else {
 		timeout = 0;
 	}
-        if (!res) {
-       		ast_cli(fd, "Failed to store the SCCP system message timeout\n");
-        } else {
-        	sccp_log(DEBUGCAT_CLI)(VERBOSE_PREFIX_3 "SCCP system message timeout stored successfully\n");
-        }
+	if (!res) {
+		ast_cli(fd, "Failed to store the SCCP system message timeout\n");
+	} else {
+		sccp_log(DEBUGCAT_CLI) (VERBOSE_PREFIX_3 "SCCP system message timeout stored successfully\n");
+	}
 
 	SCCP_RWLIST_RDLOCK(&GLOB(devices));
 	SCCP_RWLIST_TRAVERSE(&GLOB(devices), d, list) {
-		sccp_dev_set_message(d, argv[3], timeout, TRUE, beep);	
+		sccp_dev_set_message(d, argv[3], timeout, TRUE, beep);
 	}
 	SCCP_RWLIST_UNLOCK(&GLOB(devices));
 	return RESULT_SUCCESS;
@@ -1590,6 +1585,7 @@ static char do_debug_usage[] = "Usage: SCCP debug [no] <level or categories>\n" 
 CLI_ENTRY(cli_do_debug, sccp_do_debug, "Set SCCP Debugging Types", do_debug_usage, TRUE)
 #undef CLI_COMMAND
 #undef CLI_COMPLETE
+
 /* ------------------------------------------------------------------------------------------------------------NO DEBUG- */
 
 /*!
@@ -1639,7 +1635,7 @@ static int sccp_cli_reload(int fd, int argc, char *argv[])
 {
 #ifdef CS_DYNAMIC_CONFIG
 	sccp_readingtype_t readingtype;
-	int returnval=RESULT_SUCCESS;
+	int returnval = RESULT_SUCCESS;
 
 	if (argc < 2 || argc > 3)
 		return RESULT_SHOWUSAGE;
@@ -1653,11 +1649,12 @@ static int sccp_cli_reload(int fd, int argc, char *argv[])
 
 	if (argc > 2) {
 		pbx_cli(fd, "Using config file '%s'\n", argv[2]);
-		GLOB(config_file_name) = strdupa(argv[2]);
+		GLOB(config_file_name) = sccp_strdupa(argv[2]);
 	}
 
 	struct ast_config *cfg = sccp_config_getConfig();
-	if (cfg) {				// no errors
+
+	if (cfg) {								// no errors
 		pbx_cli(fd, "SCCP reloading configuration.\n");
 		readingtype = SCCP_CONFIG_READRELOAD;
 		GLOB(reload_in_progress) = TRUE;
@@ -1676,13 +1673,13 @@ static int sccp_cli_reload(int fd, int argc, char *argv[])
 		pbx_cli(fd, "Error reloading from '%s'\n", GLOB(config_file_name));
 		if (CONFIG_STATUS_FILEMISSING == cfg) {
 			pbx_cli(fd, "Config file '%s' not found, aborting reload.\n", GLOB(config_file_name));
-		} else if (CONFIG_STATUS_FILEUNCHANGED == cfg) {	
+		} else if (CONFIG_STATUS_FILEUNCHANGED == cfg) {
 			pbx_cli(fd, "Config file '%s' has not changed, aborting reload.\n", GLOB(config_file_name));
-		} else if (CONFIG_STATUS_FILEINVALID == cfg) {	
+		} else if (CONFIG_STATUS_FILEINVALID == cfg) {
 			pbx_cli(fd, "Config file '%s' specified is not a valid config file, aborting reload.\n", GLOB(config_file_name));
-		} else if (CONFIG_STATUS_FILEOLD == cfg ) {
+		} else if (CONFIG_STATUS_FILEOLD == cfg) {
 			pbx_cli(fd, "\n\n --> You are using an old configuration format, please update '%s'!!\n --> Loading of module chan_sccp with current sccp.conf has terminated\n --> Check http://chan-sccp-b.sourceforge.net/doc_setup.shtml for more information.\n\n", GLOB(config_file_name));
-		} else if (CONFIG_STATUS_FILE_NOT_SCCP == cfg ) {
+		} else if (CONFIG_STATUS_FILE_NOT_SCCP == cfg) {
 			pbx_cli(fd, "\n\n --> You are using an configuration file is not following the sccp format, please check '%s'!!\n --> Loading of module chan_sccp with current sccp.conf has terminated\n --> Check http://chan-sccp-b.sourceforge.net/doc_setup.shtml for more information.\n\n", GLOB(config_file_name));
 		}
 		returnval = RESULT_FAILURE;
@@ -1723,8 +1720,8 @@ CLI_ENTRY(cli_config_reload, sccp_cli_reload, "Reload the SCCP configuration", r
 static int sccp_cli_config_generate(int fd, int argc, char *argv[])
 {
 #ifdef CS_EXPERIMENTAL
-	int returnval=RESULT_SUCCESS;
-	char *config_file="sccp.conf.test";
+	int returnval = RESULT_SUCCESS;
+	char *config_file = "sccp.conf.test";
 
 	if (argc < 2 || argc > 3)
 		return RESULT_SHOWUSAGE;
@@ -1733,7 +1730,7 @@ static int sccp_cli_config_generate(int fd, int argc, char *argv[])
 
 	if (argc > 3) {
 		pbx_cli(fd, "Using config file '%s'\n", argv[3]);
-		config_file=strdupa(argv[3]);
+		config_file = sccp_strdupa(argv[3]);
 	}
 	if (sccp_config_generate(config_file, 0)) {
 		pbx_cli(fd, "SCCP generated. saving '%s'...\n", config_file);
@@ -1744,7 +1741,7 @@ static int sccp_cli_config_generate(int fd, int argc, char *argv[])
 
 	return returnval;
 #else
-	pbx_cli(fd, "SCCP config generate not implemented yet! use unload and load.\n");
+	pbx_cli(fd, "online SCCP config generate not implemented yet! use gen_sccpconf from contrib for now.\n");
 	return RESULT_FAILURE;
 #endif
 }
@@ -1924,6 +1921,7 @@ CLI_ENTRY(cli_unregister, sccp_unregister, "Unregister an SCCP device", unregist
 #undef CLI_COMPLETE
 
 /* --------------------------------------------------------------------------------------------------------------START CALL- */
+
 /*!
  * \brief Start Call
  * \param fd Fd as int
@@ -1952,11 +1950,11 @@ static int sccp_start_call(int fd, int argc, char *argv[])
 		pbx_cli(fd, "Can't find settings for device %s\n", argv[2]);
 		return RESULT_FAILURE;
 	}
-	if (d && d->defaultLineInstance > 0){
- 		line = sccp_line_find_byid(d,d->defaultLineInstance);
- 	} else {
- 		line = sccp_dev_get_activeline(d);
- 	}
+	if (d && d->defaultLineInstance > 0) {
+		line = sccp_line_find_byid(d, d->defaultLineInstance);
+	} else {
+		line = sccp_dev_get_activeline(d);
+	}
 	if (!line) {
 		pbx_cli(fd, "Can't find line for device %s\n", argv[2]);
 		return RESULT_FAILURE;
@@ -1975,6 +1973,7 @@ CLI_ENTRY(cli_start_call, sccp_start_call, "Call Number via Device", start_call_
 #undef CLI_COMPLETE
 
 /* --------------------------------------------------------------------------------------------------------------SET HOLD- */
+
 /*!
  * \brief Set Channel on Hold
  * \param fd Fd as int
@@ -1995,9 +1994,10 @@ static int sccp_set_hold(int fd, int argc, char *argv[])
 		return RESULT_SHOWUSAGE;
 	if (pbx_strlen_zero(argv[3]) || pbx_strlen_zero(argv[4]))
 		return RESULT_SHOWUSAGE;
-		
+
 	if (!strncasecmp("SCCP/", argv[3], 5)) {
 		int line, channel;
+
 		sscanf(argv[3], "SCCP/%d-%d", &line, &channel);
 		c = sccp_channel_find_byid_locked(channel);
 	} else {
@@ -2021,7 +2021,6 @@ static int sccp_set_hold(int fd, int argc, char *argv[])
 	return RESULT_SUCCESS;
 }
 
-
 static char set_hold_usage[] = "Usage: sccp set hold <channelId> <on/off>\n" "Set a channel to hold/unhold\n";
 
 #define CLI_COMMAND "sccp", "set", "hold"
@@ -2029,7 +2028,9 @@ static char set_hold_usage[] = "Usage: sccp set hold <channelId> <on/off>\n" "Se
 CLI_ENTRY(cli_set_hold, sccp_set_hold, "Set channel to hold/unhold", set_hold_usage, FALSE)
 #undef CLI_COMMAND
 #undef CLI_COMPLETE
+
 /* --------------------------------------------------------------------------------------------------------------REMOTE ANSWER- */
+
 /*!
  * \brief Answer a Remote Channel
  * \param fd Fd as int
@@ -2050,9 +2051,10 @@ static int sccp_remote_answer(int fd, int argc, char *argv[])
 		return RESULT_SHOWUSAGE;
 	if (pbx_strlen_zero(argv[2]))
 		return RESULT_SHOWUSAGE;
-		
+
 	if (!strncasecmp("SCCP/", argv[2], 5)) {
 		int line, channel;
+
 		sscanf(argv[2], "SCCP/%d-%d", &line, &channel);
 		c = sccp_channel_find_byid_locked(channel);
 	} else {
@@ -2066,7 +2068,7 @@ static int sccp_remote_answer(int fd, int argc, char *argv[])
 	sccp_channel_answer_locked(sccp_channel_getDevice(c), c);
 	sccp_channel_unlock(c);
 	if (c->owner) {
-		pbx_queue_control(c->owner, AST_CONTROL_ANSWER);
+		PBX(queue_control)(c->owner, AST_CONTROL_ANSWER);
 	}
 	return RESULT_SUCCESS;
 }
@@ -2080,6 +2082,7 @@ CLI_ENTRY(cli_remote_answer, sccp_remote_answer, "Answer a ringing/incoming chan
 #undef CLI_COMPLETE
 
 /* --------------------------------------------------------------------------------------------------------------END CALL- */
+
 /*!
  * \brief End a Call (on a Channel)
  * \param fd Fd as int
@@ -2100,9 +2103,10 @@ static int sccp_end_call(int fd, int argc, char *argv[])
 		return RESULT_SHOWUSAGE;
 	if (pbx_strlen_zero(argv[2]))
 		return RESULT_SHOWUSAGE;
-		
+
 	if (!strncasecmp("SCCP/", argv[2], 5)) {
 		int line, channel;
+
 		sscanf(argv[2], "SCCP/%d-%d", &line, &channel);
 		c = sccp_channel_find_byid_locked(channel);
 	} else {
@@ -2126,6 +2130,64 @@ CLI_ENTRY(cli_end_call, sccp_end_call, "Hangup a channel", end_call_usage, FALSE
 #undef CLI_COMMAND
 #undef CLI_COMPLETE
 
+/* ---------------------------------------------------------------------------------------------------------------------- TOKEN - */
+
+/*!
+ * \brief Send Token Ack to device(s)
+ * \param fd Fd as int
+ * \param argc Argc as int
+ * \param argv[] Argv[] as char
+ * \return Result as int
+ * 
+ * \called_from_asterisk
+ *
+ * \lock
+ * 	- channel
+ */
+static int sccp_tokenack(int fd, int *total, struct mansession *s, const struct message *m, int argc, char *argv[])
+{
+	sccp_device_t *d;
+	int local_total = 0;
+	const char *dev;
+
+	if (s) {
+		dev = sccp_strdupa(astman_get_header(m, "DeviceName"));
+	} else {
+		if (argc < 3)
+			return RESULT_SHOWUSAGE;
+		dev = sccp_strdupa(argv[2]);
+	}
+	d = sccp_device_find_byid(dev, TRUE);
+	if (!d) {
+		pbx_log(LOG_WARNING, "Failed to get device %s\n", dev);
+		CLI_AMI_ERROR(fd, s, m, "Can't find settings for device %s\n", dev);
+	}
+
+	if (d->status.token != SCCP_TOKEN_STATE_REJ && d->session) {
+		pbx_log(LOG_WARNING, "%s: We need to have received a token request before we can acknowledge it\n", dev);
+		CLI_AMI_ERROR(fd, s, m, "%s: We need to have received a token request before we can acknowledge it\n", dev);
+	} else {
+		sccp_log((DEBUGCAT_CORE)) (VERBOSE_PREFIX_3 "%s: Sending phone a token acknowledgement\n", dev);
+		sccp_session_tokenAck(d->session);
+	}
+	
+	if (s)
+		*total = local_total;
+	return RESULT_SUCCESS;
+}
+
+static char cli_tokenack_usage[] = "Usage: sccp tokenack <deviceId>\n" "Send Token Acknowlegde. Makes a phone switch servers on demand (used in clustering)\n";
+static char ami_tokenack_usage[] = "Usage: SCCPTokenAck\n" "Send Token Acknowledge to device. Makes a phone switch servers on demand (used in clustering)\n\n" "PARAMS: DeviceName\n";
+
+#define CLI_COMMAND "sccp", "tokenack"
+#define CLI_COMPLETE SCCP_CLI_DEVICE_COMPLETER
+#define AMI_COMMAND "SCCPTokenAck"
+#define CLI_AMI_PARAMS "DeviceName"
+CLI_AMI_ENTRY(tokenack, sccp_tokenack, "Send TokenAck", cli_tokenack_usage, FALSE)
+#undef CLI_AMI_PARAMS
+#undef CLI_COMPLETE
+#undef AMI_COMMAND
+#undef CLI_COMMAND
 
 /* --- Register Cli Entries-------------------------------------------------------------------------------------------- */
 #if ASTERISK_VERSION_NUMBER >= 10600
@@ -2159,14 +2221,15 @@ static struct pbx_cli_entry cli_entries[] = {
 	AST_CLI_DEFINE(cli_do_debug, "Enable SCCP debugging."),
 	AST_CLI_DEFINE(cli_no_debug, "Disable SCCP debugging."),
 	AST_CLI_DEFINE(cli_config_generate, "SCCP generate config file."),
-//	AST_CLI_DEFINE(cli_config_reload, "SCCP module reload."),
+//      AST_CLI_DEFINE(cli_config_reload, "SCCP module reload."),
 	AST_CLI_DEFINE(cli_reload, "SCCP module reload."),
 	AST_CLI_DEFINE(cli_restart, "Restart an SCCP device"),
 	AST_CLI_DEFINE(cli_reset, "Reset an SCCP Device"),
 	AST_CLI_DEFINE(cli_start_call, "Start a Call."),
 	AST_CLI_DEFINE(cli_end_call, "End a Call."),
 	AST_CLI_DEFINE(cli_set_hold, "Place call on hold."),
-	AST_CLI_DEFINE(cli_remote_answer, "Remotely answer a call.")
+	AST_CLI_DEFINE(cli_remote_answer, "Remotely answer a call."),
+	AST_CLI_DEFINE(cli_tokenack, "Send Token Acknowledgement.")
 };
 #endif
 
@@ -2189,7 +2252,7 @@ void sccp_register_cli(void)
 	pbx_cli_register(&cli_show_version);
 	pbx_cli_register(&cli_show_softkeysets);
 	pbx_cli_register(&cli_config_generate);
-//	pbx_cli_register(&cli_config_reload);
+//      pbx_cli_register(&cli_config_reload);
 	pbx_cli_register(&cli_reload);
 	pbx_cli_register(&cli_restart);
 	pbx_cli_register(&cli_reset);
@@ -2208,14 +2271,15 @@ void sccp_register_cli(void)
 	pbx_cli_register(&cli_remote_answer);
 	pbx_cli_register(&cli_start_call);
 	pbx_cli_register(&cli_end_call);
+	pbx_cli_register(&cli_tokenack);
 #endif
-#    if ASTERISK_VERSION_NUMBER < 10600
-#        define _MAN_COM_FLAGS	EVENT_FLAG_SYSTEM | EVENT_FLAG_COMMAND
-#        define _MAN_REP_FLAGS	EVENT_FLAG_SYSTEM | EVENT_FLAG_CONFIG
-#    else
-#        define _MAN_COM_FLAGS	EVENT_FLAG_SYSTEM | EVENT_FLAG_COMMAND
-#        define _MAN_REP_FLAGS	EVENT_FLAG_SYSTEM | EVENT_FLAG_CONFIG | EVENT_FLAG_REPORTING
-#    endif
+#if ASTERISK_VERSION_NUMBER < 10600
+#    define _MAN_COM_FLAGS	EVENT_FLAG_SYSTEM | EVENT_FLAG_COMMAND
+#    define _MAN_REP_FLAGS	EVENT_FLAG_SYSTEM | EVENT_FLAG_CONFIG
+#else
+#    define _MAN_COM_FLAGS	EVENT_FLAG_SYSTEM | EVENT_FLAG_COMMAND
+#    define _MAN_REP_FLAGS	EVENT_FLAG_SYSTEM | EVENT_FLAG_CONFIG | EVENT_FLAG_REPORTING
+#endif
 	pbx_manager_register2("SCCPShowGlobals", _MAN_REP_FLAGS, manager_show_globals, "show globals setting", ami_globals_usage);
 	pbx_manager_register2("SCCPShowDevices", _MAN_REP_FLAGS, manager_show_devices, "show devices", ami_devices_usage);
 	pbx_manager_register2("SCCPShowDevice", _MAN_REP_FLAGS, manager_show_device, "show device settings", ami_device_usage);
@@ -2224,6 +2288,7 @@ void sccp_register_cli(void)
 	pbx_manager_register2("SCCPShowChannels", _MAN_REP_FLAGS, manager_show_channels, "show channels", ami_channels_usage);
 	pbx_manager_register2("SCCPShowSessions", _MAN_REP_FLAGS, manager_show_sessions, "show sessions", ami_sessions_usage);
 	pbx_manager_register2("SCCPShowMWISubscriptions", _MAN_REP_FLAGS, manager_show_mwi_subscriptions, "show sessions", ami_mwi_subscriptions_usage);
+	pbx_manager_register2("SCCPTokenAck", _MAN_REP_FLAGS, manager_tokenack, "send tokenack", ami_tokenack_usage);
 }
 
 /*!
@@ -2245,7 +2310,7 @@ void sccp_unregister_cli(void)
 	pbx_cli_unregister(&cli_show_version);
 	pbx_cli_unregister(&cli_show_softkeysets);
 	pbx_cli_unregister(&cli_config_generate);
-//	pbx_cli_unregister(&cli_config_reload);
+//      pbx_cli_unregister(&cli_config_reload);
 	pbx_cli_unregister(&cli_reload);
 	pbx_cli_unregister(&cli_restart);
 	pbx_cli_unregister(&cli_reset);
@@ -2264,6 +2329,7 @@ void sccp_unregister_cli(void)
 	pbx_cli_unregister(&cli_remote_answer);
 	pbx_cli_unregister(&cli_start_call);
 	pbx_cli_unregister(&cli_end_call);
+	pbx_cli_unregister(&cli_tokenack);
 #endif
 	pbx_manager_unregister("SCCPShowGlobals");
 	pbx_manager_unregister("SCCPShowDevice");
@@ -2273,4 +2339,5 @@ void sccp_unregister_cli(void)
 	pbx_manager_unregister("SCCPShowChannels");
 	pbx_manager_unregister("SCCPShowSessions");
 	pbx_manager_unregister("SCCPShowMWISubscriptions");
+	pbx_manager_unregister("SCCPTokenAck");
 }

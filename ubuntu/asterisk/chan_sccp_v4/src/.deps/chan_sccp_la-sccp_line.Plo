@@ -37,22 +37,22 @@ chan_sccp_la-sccp_line.lo: sccp_line.c config.h \
  /usr/include/unistd.h /usr/include/bits/posix_opt.h \
  /usr/include/bits/environments.h /usr/include/bits/confname.h \
  /usr/include/getopt.h /usr/include/bits/unistd.h /usr/include/assert.h \
- /usr/include/poll.h /usr/include/sys/poll.h /usr/include/bits/poll.h \
- sccp_lock.h sccp_dllists.h sccp_event.h chan_sccp.h sccp_protocol.h \
- sccp_labels.h sccp_softkeys.h pbx_impl/ast/ast.h \
- pbx_impl/ast/../../common.h /usr/include/asterisk.h \
+ /usr/include/inttypes.h /usr/include/byteswap.h sccp_lock.h \
+ sccp_dllists.h chan_sccp.h sccp_protocol.h sccp_labels.h sccp_softkeys.h \
+ pbx_impl/ast/ast.h pbx_impl/ast/../../common.h /usr/include/asterisk.h \
  /usr/include/asterisk/autoconfig.h /usr/include/asterisk/compat.h \
- /usr/include/asterisk/compiler.h /usr/include/inttypes.h \
+ /usr/include/asterisk/compiler.h \
  /usr/lib/gcc/i486-linux-gnu/4.4.3/include-fixed/limits.h \
  /usr/lib/gcc/i486-linux-gnu/4.4.3/include-fixed/syslimits.h \
  /usr/include/limits.h /usr/include/bits/posix1_lim.h \
  /usr/include/bits/local_lim.h /usr/include/linux/limits.h \
  /usr/include/bits/posix2_lim.h /usr/include/bits/xopen_lim.h \
- /usr/include/glob.h /usr/include/asterisk/abstract_jb.h \
- /usr/include/sys/time.h /usr/include/asterisk/frame_defs.h \
- /usr/include/asterisk/utils.h /usr/include/asterisk/network.h \
- /usr/include/arpa/inet.h /usr/include/netdb.h /usr/include/rpc/netdb.h \
- /usr/include/bits/netdb.h /usr/include/net/if.h /usr/include/sys/ioctl.h \
+ /usr/include/sys/poll.h /usr/include/bits/poll.h /usr/include/glob.h \
+ /usr/include/asterisk/abstract_jb.h /usr/include/sys/time.h \
+ /usr/include/asterisk/frame_defs.h /usr/include/asterisk/utils.h \
+ /usr/include/asterisk/network.h /usr/include/arpa/inet.h \
+ /usr/include/netdb.h /usr/include/rpc/netdb.h /usr/include/bits/netdb.h \
+ /usr/include/net/if.h /usr/include/sys/ioctl.h \
  /usr/include/bits/ioctls.h /usr/include/asm/ioctls.h \
  /usr/include/asm-generic/ioctls.h /usr/include/linux/ioctl.h \
  /usr/include/asm/ioctl.h /usr/include/asm-generic/ioctl.h \
@@ -87,13 +87,14 @@ chan_sccp_la-sccp_line.lo: sccp_line.c config.h \
  /usr/include/asterisk/plc.h /usr/include/asterisk/rtp_engine.h \
  /usr/include/asterisk/res_srtp.h /usr/include/asterisk/event_defs.h \
  /usr/include/asterisk/indications.h pbx_impl/ast/define.h \
- pbx_impl/ast/ast108.h pbx_impl/ast/../../config.h pbx_impl/pbx_impl.h \
- pbx_impl/../config.h pbx_impl/../common.h pbx_impl/ast/ast.h sccp_pbx.h \
- sccp_socket.h sccp_device.h sccp_line.h sccp_channel.h sccp_features.h \
- sccp_utils.h sccp_indicate.h sccp_hint.h sccp_actions.h \
- sccp_featureButton.h sccp_mwi.h /usr/include/asterisk/event.h \
- sccp_config.h sccp_conference.h sccp_adv_features.h sccp_cli.h \
- sccp_appfunctions.h sccp_management.h sccp_rtp.h
+ pbx_impl/ast/ast108.h pbx_impl/ast/../../config.h sccp_event.h \
+ pbx_impl/pbx_impl.h pbx_impl/../config.h pbx_impl/../common.h \
+ pbx_impl/ast/ast.h sccp_pbx.h sccp_socket.h sccp_device.h sccp_line.h \
+ sccp_channel.h sccp_features.h sccp_utils.h sccp_indicate.h sccp_hint.h \
+ sccp_actions.h sccp_featureButton.h sccp_mwi.h \
+ /usr/include/asterisk/event.h sccp_config.h sccp_conference.h \
+ sccp_adv_features.h sccp_cli.h sccp_appfunctions.h sccp_management.h \
+ sccp_rtp.h
 
 config.h:
 
@@ -261,17 +262,13 @@ common.h:
 
 /usr/include/assert.h:
 
-/usr/include/poll.h:
+/usr/include/inttypes.h:
 
-/usr/include/sys/poll.h:
-
-/usr/include/bits/poll.h:
+/usr/include/byteswap.h:
 
 sccp_lock.h:
 
 sccp_dllists.h:
-
-sccp_event.h:
 
 chan_sccp.h:
 
@@ -293,8 +290,6 @@ pbx_impl/ast/../../common.h:
 
 /usr/include/asterisk/compiler.h:
 
-/usr/include/inttypes.h:
-
 /usr/lib/gcc/i486-linux-gnu/4.4.3/include-fixed/limits.h:
 
 /usr/lib/gcc/i486-linux-gnu/4.4.3/include-fixed/syslimits.h:
@@ -310,6 +305,10 @@ pbx_impl/ast/../../common.h:
 /usr/include/bits/posix2_lim.h:
 
 /usr/include/bits/xopen_lim.h:
+
+/usr/include/sys/poll.h:
+
+/usr/include/bits/poll.h:
 
 /usr/include/glob.h:
 
@@ -476,6 +475,8 @@ pbx_impl/ast/define.h:
 pbx_impl/ast/ast108.h:
 
 pbx_impl/ast/../../config.h:
+
+sccp_event.h:
 
 pbx_impl/pbx_impl.h:
 

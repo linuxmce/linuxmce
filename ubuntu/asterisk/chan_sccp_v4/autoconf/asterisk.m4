@@ -32,18 +32,16 @@ AC_DEFUN([AST_GET_VERSION], [
 			else
 				ASTERISK_REPOS_LOCATION=TGZ
 			fi
-			echo "ASTERISK_REPOS_LOCATION: ${ASTERISK_REPOS_LOCATION}"
 
 			# remove from pbx_ver
-#	    		echo "NEW PBX_VER: [${pbx_ver}]"
 	    		pbx_ver=${pbx_ver%%-*}							# remove tail
 			pbx_ver=${pbx_ver//\"/}							# remove '"'
-#	    		echo "NEW PBX_VER: [${pbx_ver}]"
 
 			# process version number
 			version_found=0
 			for x in "1.2" "1.4" "1.6" "1.8" "1.10" "10"; do
-				if [ ! test -z `expr match "${pbx_ver}" "^\($x\).*"` ]; then
+				if test `echo $pbx_ver | sed "s/^\(${x}\).*$/\1/g"` == "$x";then  
+dnl				if [ ! test -z `expr match "${pbx_ver}" "^\($x\).*"` ]; then
 					if test ${#x} -gt 3; then		# 1.10
 						ASTERISK_VER_GROUP="`echo $x|sed 's/\.//g'`"
 					elif test ${#x} -lt 3; then		# 1.10
@@ -65,11 +63,7 @@ AC_DEFUN([AST_GET_VERSION], [
 					else
 						ASTERISK_VERSION_NUMBER="${ASTERISK_VER_GROUP}0${ASTERISK_MINOR_VER1}"		# add only third version part
 					fi
-
 					ASTERISK_STR_VER="${x}.${ASTERISK_MINOR_VER1}"
-					echo "ASTERISK_MINOR_VER: $ASTERISK_MINOR_VER1"
-					echo "ASTERISK_VER_GROUP: $ASTERISK_VER_GROUP"
-					echo "ASTERISK_VERSION_NUMBER: $ASTERISK_VERSION_NUMBER"
 					
 					version_found=1
 					AC_MSG_RESULT([Found 'Asterisk Version ${ASTERISK_VERSION_NUMBER} ($x)'])
@@ -504,6 +498,15 @@ AC_DEFUN([AST_CHECK_HEADERS],[
     AC_CHECK_HEADER([asterisk/features.h],
     		[
     			AC_DEFINE(HAVE_PBX_FEATURES_H,1,[Found 'asterisk/features.h'])
+
+			AC_MSG_CHECKING([ - availability 'ast_do_pickup'...])
+			AC_EGREP_HEADER([ast_do_pickup], [asterisk/features.h],
+			[
+				AC_DEFINE(CS_AST_DO_PICKUP,1,[Found 'ast_do_pickup' in asterisk/features.h])
+				AC_MSG_RESULT(yes)
+			],[
+				AC_MSG_RESULT(no)
+			])
 		],,[ 
 		#if ASTERISK_VERSION_NUMBER >= 10400
 		#include <asterisk.h>

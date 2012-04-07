@@ -9,12 +9,12 @@
  * \note        This program is free software and may be modified and distributed under the terms of the GNU Public License.
  *		See the LICENSE file at the top of the source tree.
  * 
- * $Date: 2011-10-12 18:22:58 +0000 (Wed, 12 Oct 2011) $
- * $Revision: 3010 $
+ * $Date: 2012-01-02 13:56:08 +0000 (Mon, 02 Jan 2012) $
+ * $Revision: 3147 $
  */
 
-#ifndef __SCCP_ACTIONS_H
-#    define __SCCP_ACTIONS_H
+#    ifndef __SCCP_ACTIONS_H
+#define __SCCP_ACTIONS_H
 void sccp_init_device(sccp_device_t * d);
 void sccp_handle_unknown_message(sccp_session_t * s, sccp_device_t * d, sccp_moo_t * r);
 void sccp_handle_dialedphonebook_message(sccp_session_t * s, sccp_device_t * d, sccp_moo_t * r);
@@ -61,4 +61,4 @@ void sccp_handle_XMLAlarmMessage(sccp_session_t * s, sccp_device_t * d, sccp_moo
 void sccp_handle_startmultimediatransmission_ack(sccp_session_t * s, sccp_device_t * d, sccp_moo_t * r);
 void sccp_handle_mediatransmissionfailure(sccp_session_t * s, sccp_device_t * d, sccp_moo_t * r);
 void sccp_handle_miscellaneousCommandMessage(sccp_session_t * s, sccp_device_t * d, sccp_moo_t * r);
-#endif
+#    endif

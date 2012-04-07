@@ -13,14 +13,15 @@
  *   		Relationships: 	SCCP Device -> SCCP DeviceLine -> SCCP Line
  *   			 	SCCP Line -> SCCP ButtonConfig -> SCCP Device
  *
- * \date        $Date: 2011-10-24 20:54:17 +0000 (Mon, 24 Oct 2011) $
- * \version     $Revision: 3085 $
+ * \date        $Date: 2012-03-30 09:22:22 +0000 (Fri, 30 Mar 2012) $
+ * \version     $Revision: 3336 $
  */
 
 #include "config.h"
 #include "common.h"
 
-SCCP_FILE_VERSION(__FILE__, "$Revision: 3085 $")
+SCCP_FILE_VERSION(__FILE__, "$Revision: 3336 $")
+int __sccp_device_destroy(const void *ptr);
 
 static void sccp_device_old_indicate_remoteHold(const sccp_device_t *device, uint8_t lineInstance, uint8_t callid, uint8_t callPriority, uint8_t callPrivacy);
 
@@ -70,14 +71,17 @@ static boolean_t sccp_device_checkACL(sccp_device_t *device){
 	
 	/* no permit deny information */
 	if(!device->ha){
-		sccp_log(DEBUGCAT_DEVICE) (VERBOSE_PREFIX_3 "%s: no deny/permit information for this device, allow all connections", device->id);
+		pbx_log(LOG_NOTICE, "%s: no deny/permit information for this device, allow all connections\n", device->id);
 		return TRUE;
 	}
   
 	if (sccp_apply_ha(device->ha, &sin) != AST_SENSE_ALLOW) {
 	  
 		// checking permithosts	
-		sccp_log(DEBUGCAT_DEVICE) (VERBOSE_PREFIX_3 "%s: not allowed by deny/permit list. Checking permithost list...", device->id);
+		struct ast_str *ha_buf = pbx_str_alloca(512);
+		sccp_print_ha(ha_buf, sizeof(ha_buf), GLOB(ha));
+		
+		sccp_log(DEBUGCAT_DEVICE) (VERBOSE_PREFIX_3 "%s: not allowed by deny/permit list (%s). Checking permithost list...\n", device->id, pbx_str_buffer(ha_buf));
 
 		struct ast_hostent ahp;
 		struct hostent *hp;
@@ -102,6 +106,7 @@ static boolean_t sccp_device_checkACL(sccp_device_t *device){
 		matchesACL = TRUE;
 	}
   
+	sccp_log(DEBUGCAT_DEVICE) (VERBOSE_PREFIX_3 "%s: checkACL returning %s\n", device->id, matchesACL ? "TRUE" : "FALSE");
 	return matchesACL;
 }
 
@@ -170,7 +175,7 @@ boolean_t sccp_device_check_update(sccp_device_t * d)
 		return FALSE;
 	}
 
-	sccp_log(1) (VERBOSE_PREFIX_1 "Device %s needs to be reset because of a change in sccp.conf\n", d->id);
+	sccp_log((DEBUGCAT_CORE)) (VERBOSE_PREFIX_1 "Device %s needs to be reset because of a change in sccp.conf (%d, %d)\n", d->id, d->pendingUpdate, d->pendingDelete);
 	sccp_device_sendReset(d, SKINNY_DEVICE_RESTART);
 	if (d->session)
 		pthread_cancel(d->session->session_thread);
@@ -244,14 +249,19 @@ void sccp_device_post_reload(void)
 sccp_device_t *sccp_device_create(void)
 {
 	sccp_log(DEBUGCAT_CORE) (VERBOSE_PREFIX_3 "DEVICE CREATE\n");
+#if CS_EXPERIMENTAL_REFCOUNT
+	sccp_device_t *d = RefCountedObjectAlloc(sizeof(sccp_device_t), __sccp_device_destroy);
+#else
 	sccp_device_t *d = sccp_calloc(1, sizeof(sccp_device_t));
+#endif
 	if (!d) {
 		sccp_log(0) (VERBOSE_PREFIX_3 "Unable to allocate memory for a device\n");
 		return NULL;
 	}
 	
-	memset(d, 0, sizeof(d));
+	memset(d, 0, sizeof(sccp_device_t));
 	pbx_mutex_init(&d->lock);
+	sccp_device_lock(d);
 
 	SCCP_LIST_HEAD_INIT(&d->buttonconfig);
 	SCCP_LIST_HEAD_INIT(&d->selectedChannels);
@@ -283,9 +293,18 @@ sccp_device_t *sccp_device_create(void)
 	d->pushTextMessage = sccp_device_pushTextMessageNotSupported;
 	d->checkACL = sccp_device_checkACL;
 	d->hasDisplayPrompt = sccp_device_trueResult;
-	
+	sccp_device_unlock(d);
 	return d;
 }
+
+#if CS_EXPERIMENTAL_REFCOUNT
+inline sccp_device_t *__sccp_device_retain(sccp_device_t *d, const char *filename, int lineno, const char *func) {
+	return (sccp_device_t *)sccp_retain(d, "device", DEV_ID_LOG(d), filename, lineno, func);
+}
+inline sccp_device_t *__sccp_device_release(sccp_device_t *d, const char *filename, int lineno, const char *func) {
+	return (sccp_device_t *)sccp_release(d, "device", DEV_ID_LOG(d), filename, lineno, func);
+}
+#endif
 
 sccp_device_t *sccp_device_createAnonymous(const char *name){
 	sccp_device_t *d = sccp_device_create();
@@ -648,6 +667,8 @@ void sccp_dev_set_registered(sccp_device_t * d, uint8_t opt)
 {
 	char servername[StationMaxDisplayNotifySize];
 	sccp_moo_t *r;
+
+	sccp_log((DEBUGCAT_DEVICE)) (VERBOSE_PREFIX_3 "%s: (sccp_dev_set_registered) Setting Registered Status for Device from %s to %s\n", DEV_ID_LOG(d), deviceregistrationstatus2str(d->registrationState), deviceregistrationstatus2str(opt));
 
 	if (d->registrationState == opt)
 		return;
@@ -1247,7 +1268,7 @@ void sccp_dev_check_displayprompt(sccp_device_t * d)
 	for(i = SCCP_MAX_MESSAGESTACK-1; i>=0; i--) {
 		if(d->messageStack[i] != NULL){
 			sccp_dev_displayprompt(d, 0, 0, d->messageStack[i], 0);
-			goto OUT;
+			goto DONE;
 		}
 	}
 	
@@ -1257,7 +1278,7 @@ void sccp_dev_check_displayprompt(sccp_device_t * d)
 	}
 	sccp_dev_set_keyset(d, 0, 0, KEYMODE_ONHOOK);				/* this is for redial softkey */
 
-OUT:
+DONE:
 	sccp_log((DEBUGCAT_HIGH)) (VERBOSE_PREFIX_3 "%s: Finish DisplayPrompt\n", d->id);
 }
 
@@ -1494,7 +1515,6 @@ void sccp_dev_clean(sccp_device_t * d, boolean_t remove_from_global, uint8_t cle
 	sccp_selectedchannel_t *selectedChannel = NULL;
 	sccp_line_t *line = NULL;
 	sccp_channel_t *channel = NULL;
-	int i;
 
 #ifdef CS_DEVSTATE_FEATURE
 	sccp_devstate_specifier_t *devstateSpecifier;
@@ -1508,7 +1528,7 @@ void sccp_dev_clean(sccp_device_t * d, boolean_t remove_from_global, uint8_t cle
 
 	if (remove_from_global) {
 		SCCP_RWLIST_WRLOCK(&GLOB(devices));
-		SCCP_RWLIST_REMOVE(&GLOB(devices), d, list);
+		d = SCCP_RWLIST_REMOVE(&GLOB(devices), d, list);
 		SCCP_RWLIST_UNLOCK(&GLOB(devices));
 	}
 
@@ -1576,14 +1596,6 @@ void sccp_dev_clean(sccp_device_t * d, boolean_t remove_from_global, uint8_t cle
 		sccp_addons_clear(d);
 	}
 	
-	/* cleanup message stack */
-//	for(i = ARRAY_LEN(d->messageStack); i>=0; i--){
-	for(i=0;i< SCCP_MAX_MESSAGESTACK;i++) { 
-		if(d->messageStack[i] != NULL){
-			sccp_free(d->messageStack[i]);
-		}
-	}
-
 	/* removing selected channels */
 	SCCP_LIST_LOCK(&d->selectedChannels);
 	while ((selectedChannel = SCCP_LIST_REMOVE_HEAD(&d->selectedChannels, list))) {
@@ -1617,6 +1629,11 @@ void sccp_dev_clean(sccp_device_t * d, boolean_t remove_from_global, uint8_t cle
 	sccp_device_unlock(d);
 
 	if (remove_from_global) {
+#if CS_EXPERIMENTAL_REFCOUNT
+		// don't need scheduled destroy when using refcount
+		sccp_device_destroy(d);
+		d = NULL;
+#else
 		if (cleanupTime > 0) {
 			sccp_log((DEBUGCAT_DEVICE | DEBUGCAT_CONFIG)) (VERBOSE_PREFIX_2 "%s: Device planned to be free'd in %d secs.\n", d->id, cleanupTime);
 			if ((d->scheduleTasks.free = sccp_sched_add(cleanupTime * 1000, sccp_device_destroy, d)) < 0) {
@@ -1628,6 +1645,7 @@ void sccp_dev_clean(sccp_device_t * d, boolean_t remove_from_global, uint8_t cle
 			sccp_device_destroy(d);
 			d = NULL;
 		}
+#endif
 		return;
 	}
 }
@@ -1648,15 +1666,18 @@ void sccp_dev_clean(sccp_device_t * d, boolean_t remove_from_global, uint8_t cle
  * 	  - device->permithosts
  * 	  - device->devstateSpecifiers
  */
-int sccp_device_destroy(const void *ptr)
+int __sccp_device_destroy(const void *ptr)
 {
 	sccp_device_t *d = (sccp_device_t *) ptr;
 	sccp_buttonconfig_t *config = NULL;
 	sccp_hostname_t *permithost = NULL;
 
 	sccp_log((DEBUGCAT_DEVICE | DEBUGCAT_CONFIG)) (VERBOSE_PREFIX_1 "%s: Destroy Device\n", d->id);
+#if CS_EXPERIMENTAL_REFCOUNT
+	sccp_mutex_lock(&d->lock);		// using real device lock while using refcount
+#else
 	sccp_device_lock(d);
-
+#endif
 	/* remove button config */
 	/* only generated on read config, so do not remove on reset/restart */
 	SCCP_LIST_LOCK(&d->buttonconfig);
@@ -1670,7 +1691,8 @@ int sccp_device_destroy(const void *ptr)
 	/* removing permithosts */
 	SCCP_LIST_LOCK(&d->permithosts);
 	while ((permithost = SCCP_LIST_REMOVE_HEAD(&d->permithosts, list))) {
-		sccp_free(permithost);
+		if (permithost)
+			sccp_free(permithost);
 	}
 	SCCP_LIST_UNLOCK(&d->permithosts);
 	SCCP_LIST_HEAD_DESTROY(&d->permithosts);
@@ -1678,30 +1700,70 @@ int sccp_device_destroy(const void *ptr)
 #ifdef CS_DEVSTATE_FEATURE
 	/* removing devstate_specifier */
 	sccp_devstate_specifier_t *devstateSpecifier;
-
 	SCCP_LIST_LOCK(&d->devstateSpecifiers);
 	while ((devstateSpecifier = SCCP_LIST_REMOVE_HEAD(&d->devstateSpecifiers, list))) {
-		sccp_free(devstateSpecifier);
+		if (devstateSpecifier)
+			sccp_free(devstateSpecifier);
 	}
 	SCCP_LIST_UNLOCK(&d->devstateSpecifiers);
-       	SCCP_LIST_HEAD_DESTROY(&d->devstateSpecifiers);	
+	SCCP_LIST_HEAD_DESTROY(&d->devstateSpecifiers);	
 #endif
 
 	/* destroy selected channels list */
 	SCCP_LIST_HEAD_DESTROY(&d->selectedChannels);
+
 	if (d->ha) {
 		sccp_free_ha(d->ha);
+		d->ha = NULL;
 	}
 
-	d->ha = NULL;
+	/* cleanup message stack */
+	int i;
+	for(i=0;i< SCCP_MAX_MESSAGESTACK;i++) { 
+		if(d && d->messageStack && d->messageStack[i] != NULL){
+			sccp_free(d->messageStack[i]);
+		}
+	}
 
 	sccp_log(DEBUGCAT_DEVICE) (VERBOSE_PREFIX_3 "%s: Device Destroyed\n", d->id);
-
+#if CS_EXPERIMENTAL_REFCOUNT
+	sccp_mutex_unlock(&d->lock);		// using real device lock while using refcount
+#else
 	sccp_device_unlock(d);
+#endif
 	pbx_mutex_destroy(&d->lock);
-	sccp_free(d);
 
+#if !CS_EXPERIMENTAL_REFCOUNT
+	sccp_free(d);	// moved to sccp_release
+#endif
 	return 0;
+}
+
+/*!
+ * \brief Free a Device as scheduled command
+ * \param ptr SCCP Device Pointer
+ * \return success as int
+ *
+ * \callgraph
+ * \callergraph
+ * 
+ * \called_from_asterisk
+ * 
+ * \lock
+ * 	- device
+ * 	  - device->buttonconfig
+ * 	  - device->permithosts
+ * 	  - device->devstateSpecifiers
+ */
+int sccp_device_destroy(const void *ptr)
+{
+#if CS_EXPERIMENTAL_REFCOUNT
+	sccp_device_t *d = (sccp_device_t *) ptr;
+	sccp_device_release(d);
+	return 0;
+#else
+	return __sccp_device_destroy(ptr);
+#endif	
 }
 
 /*!
@@ -1954,7 +2016,7 @@ void sccp_device_clearMessageFromStack(sccp_device_t *device, const uint8_t prio
 	if(ARRAY_LEN(device->messageStack) <= priority)
 		return;
 	
-	pbx_log(LOG_NOTICE, "%s: clear message stack %d\n", DEV_ID_LOG(device), priority);
+	sccp_log(DEBUGCAT_DEVICE)(VERBOSE_PREFIX_4 "%s: clear message stack %d\n", DEV_ID_LOG(device), priority);
 	if(device->messageStack[priority]){
 		sccp_free(device->messageStack[priority]);
 		device->messageStack[priority] = NULL;
@@ -1994,7 +2056,7 @@ void sccp_device_featureChangedDisplay(const sccp_event_t ** event)
 	if (!(*event) || !device)
 		return;
 
-	sccp_log(1) (VERBOSE_PREFIX_3 "%s: received Feature Change Event %d\n", DEV_ID_LOG(device), (*event)->event.featureChanged.featureType);
+	sccp_log((DEBUGCAT_CORE)) (VERBOSE_PREFIX_3 "%s: Received Feature Change Event: %s(%d)\n", DEV_ID_LOG(device), featureType2str((*event)->event.featureChanged.featureType), (*event)->event.featureChanged.featureType);
 
 	switch ((*event)->event.featureChanged.featureType) {
 	case SCCP_FEATURE_CFWDNONE:

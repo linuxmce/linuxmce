@@ -10,7 +10,6 @@ Package: chan-sccp-b
 Section: libs
 Architecture: any
 Depends: ${shlibs:Depends}, ${misc:Depends}
-Conflicts: asterisk (<< 1.8.0)
 Description: chan-sccp-b is a branch from the original chan-sccp
  implementation of Skinny Client Control Protocol (SCCP) for the Asterisk
  soft-PBX. It is mainly focused on extending the functionality provided by

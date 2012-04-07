@@ -6,14 +6,14 @@
  * \note		This program is free software and may be modified and distributed under the terms of the GNU Public License.
  *		See the LICENSE file at the top of the source tree.
  *
- * $Date: 2011-10-11 14:16:34 +0000 (Tue, 11 Oct 2011) $
- * $Revision: 2963 $
+ * $Date: 2012-01-10 17:18:49 +0000 (Tue, 10 Jan 2012) $
+ * $Revision: 3189 $
  */
 
 #include "config.h"
 #include "common.h"
 
-SCCP_FILE_VERSION(__FILE__, "$Revision: 2963 $")
+SCCP_FILE_VERSION(__FILE__, "$Revision: 3189 $")
 #ifndef CS_AST_HAS_EVENT
 #    define SCCP_MWI_CHECK_INTERVAL 30
 #endif
@@ -445,8 +445,11 @@ void sccp_mwi_setMWILineStatus(sccp_device_t * d, sccp_line_t * l)
 	if (!d)
 		return;
 
-	int retry = 0;
 
+#if CS_EXPERIMENTAL_REFCOUNT
+	sccp_device_lock(d);
+#else
+	int retry = 0;
 	while (sccp_device_trylock(d)) {
 		retry++;
 		sccp_log((DEBUGCAT_MWI + DEBUGCAT_HIGH)) (VERBOSE_PREFIX_1 "[SCCP LOOP] in file %s, line %d (%s), retry: %d\n", __FILE__, __LINE__, __PRETTY_FUNCTION__, retry);
@@ -456,6 +459,7 @@ void sccp_mwi_setMWILineStatus(sccp_device_t * d, sccp_line_t * l)
 			return;
 		}
 	}
+#endif	
 
 	/* when l is defined we are switching on/off the button icon */
 	if (l) {

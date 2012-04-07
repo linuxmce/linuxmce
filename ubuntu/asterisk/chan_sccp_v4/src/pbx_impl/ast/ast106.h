@@ -1,6 +1,6 @@
 
 /*!
- * \file 	sccp_ast108.h
+ * \file 	ast106.h
  * \brief 	SCCP PBX Asterisk Header
  * \author 	Marcello Ceshia
  * \author 	Diederik de Groot <ddegroot [at] users.sourceforge.net>
@@ -22,18 +22,17 @@
 #    define NEWCONST const							// old functions used without const
 #    define OLDCONST								// new function used with const
 
-
 enum AST_CONNECTED_LINE_UPDATE_SOURCE {
-        /*! Update for unknown reason (May be interpreted to mean from answer) */
-        AST_CONNECTED_LINE_UPDATE_SOURCE_UNKNOWN,
-        /*! Update from normal call answering */
-        AST_CONNECTED_LINE_UPDATE_SOURCE_ANSWER,
-        /*! Update from call diversion (Deprecated, use REDIRECTING updates instead.) */
-        AST_CONNECTED_LINE_UPDATE_SOURCE_DIVERSION,
-        /*! Update from call transfer(active) (Party has already answered) */
-        AST_CONNECTED_LINE_UPDATE_SOURCE_TRANSFER,
-        /*! Update from call transfer(alerting) (Party has not answered yet) */
-        AST_CONNECTED_LINE_UPDATE_SOURCE_TRANSFER_ALERTING
+	/*! Update for unknown reason (May be interpreted to mean from answer) */
+	AST_CONNECTED_LINE_UPDATE_SOURCE_UNKNOWN,
+	/*! Update from normal call answering */
+	AST_CONNECTED_LINE_UPDATE_SOURCE_ANSWER,
+	/*! Update from call diversion (Deprecated, use REDIRECTING updates instead.) */
+	AST_CONNECTED_LINE_UPDATE_SOURCE_DIVERSION,
+	/*! Update from call transfer(active) (Party has already answered) */
+	AST_CONNECTED_LINE_UPDATE_SOURCE_TRANSFER,
+	/*! Update from call transfer(alerting) (Party has not answered yet) */
+	AST_CONNECTED_LINE_UPDATE_SOURCE_TRANSFER_ALERTING
 };
 
 #    include "ast.h"
@@ -42,9 +41,6 @@ typedef int64_t format_t;
 int sccp_wrapper_asterisk_set_rtp_peer(PBX_CHANNEL_TYPE * ast, PBX_RTP_TYPE * rtp, PBX_RTP_TYPE * vrtp, PBX_RTP_TYPE * trtp, int codecs, int nat_active);
 void *sccp_do_monitor(void *data);
 int sccp_restart_monitor(void);
-int sccp_wrapper_asterisk16_hangup(PBX_CHANNEL_TYPE * ast_channel);
-boolean_t sccp_wrapper_asterisk16_allocPBXChannel(const sccp_channel_t * channel, PBX_CHANNEL_TYPE ** pbx_channel);
-int sccp_wrapper_asterisk16_requestHangup(PBX_CHANNEL_TYPE * channel);
 char *pbx_getformatname(format_t format);
 char *pbx_getformatname_multiple(char *buf, size_t size, format_t format);
 
@@ -100,9 +96,9 @@ char *pbx_getformatname_multiple(char *buf, size_t size, format_t format);
 	static int manager_ ## _FUNCTION_NAME(struct mansession *s, const struct message *m)			\
 	{													\
 		const char *id = astman_get_header(m, "ActionID");						\
-		static char *cli_ami_command[] = { CLI_COMMAND, NULL};						\
-		static char *ami_command = AMI_COMMAND;								\
-		cli_ami_command[0] = ami_command;								\
+/*		static char *cli_ami_command[] = { CLI_COMMAND, NULL};					*/	\
+/*		static char *ami_command = AMI_COMMAND;							*/	\
+/*		cli_ami_command[0] = ami_command;							*/	\
 		static char *cli_ami_params[] = { CLI_AMI_PARAMS, NULL };					\
 		static char *arguments[ARRAY_LEN(cli_ami_params)];						\
 		uint8_t x=0;											\

@@ -7,8 +7,8 @@
  *		See the LICENSE file at the top of the source tree.
  * \since 	2009-06-15
  *
- * $Date: 2011-10-14 16:46:40 +0000 (Fri, 14 Oct 2011) $
- * $Revision: 3032 $
+ * $Date: 2012-01-02 13:56:08 +0000 (Mon, 02 Jan 2012) $
+ * $Revision: 3147 $
  */
 
 /*!
@@ -23,7 +23,7 @@
 #include "config.h"
 #include "common.h"
 
-SCCP_FILE_VERSION(__FILE__, "$Revision: 3032 $")
+SCCP_FILE_VERSION(__FILE__, "$Revision: 3147 $")
 
 /*!
  * \brief Feature Button Changed
@@ -295,7 +295,7 @@ void sccp_devstateFeatureState_cb(const struct ast_event *ast_event, void *data)
 	/* If it is the custom family, isolate the specifier. */
 	sccp_device_t *device;
 	size_t len = strlen("Custom:");
-	char *sspecifier = 0;
+//	char *sspecifier = 0;
 	const char *dev;
 
 	if (!data || !ast_event)
@@ -321,7 +321,7 @@ void sccp_devstateFeatureState_cb(const struct ast_event *ast_event, void *data)
 	   In the future we might need a more elegant hint-registry for this type of notification,
 	   which should be global to chan-sccp-b, not for each device. For now, this suffices. */
 	if (!strncasecmp(dev, "Custom:", len)) {
-		sspecifier = (char *)(dev + len);
+//		sspecifier = (char *)(dev + len);
 		sccp_featButton_changed(device, SCCP_FEATURE_DEVSTATE);
 	}
 }

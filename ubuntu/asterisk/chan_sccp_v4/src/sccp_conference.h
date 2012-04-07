@@ -6,21 +6,21 @@
  * \note        This program is free software and may be modified and distributed under the terms of the GNU Public License.
  *		See the LICENSE file at the top of the source tree.
  * 
- * $Date: 2011-08-30 17:53:17 +0000 (Tue, 30 Aug 2011) $
- * $Revision: 2718 $  
+ * $Date: 2012-01-10 20:56:03 +0000 (Tue, 10 Jan 2012) $
+ * $Revision: 3194 $  
  */
 
-#ifndef SCCP_CONFERENCE_H_
-#    define SCCP_CONFERENCE_H_
+#    ifndef SCCP_CONFERENCE_H_
+#define SCCP_CONFERENCE_H_
 
-#    ifdef CS_SCCP_CONFERENCE
+#ifdef CS_SCCP_CONFERENCE
 
-#        if defined(__cplusplus) || defined(c_plusplus)
+#    if defined(__cplusplus) || defined(c_plusplus)
 extern "C" {
-#        endif
+#    endif
 
-#        include "asterisk/bridging.h"
-#        include "asterisk/bridging_features.h"
+#    include "asterisk/bridging.h"
+#    include "asterisk/bridging_features.h"
 
 	typedef struct sccp_conference sccp_conference_t;			/*!< SCCP Conference Structure */
 	typedef struct sccp_conference_participant sccp_conference_participant_t;	/*!< SCCP Conference Participant Structure */
@@ -45,7 +45,8 @@ extern "C" {
 
 		uint32_t id;							/*!< Numeric participant id. */
 		sccp_channel_t *channel;					/*!< sccp channel, non-null if the participant resides on an SCCP device */
-		PBX_CHANNEL_TYPE *conferenceBridgePeer;			/*!< the asterisk channel which joins the conference bridge */
+		PBX_CHANNEL_TYPE *origChannel;					/*!< the original asterisk channel to which we have to return after the conference */
+		PBX_CHANNEL_TYPE *conferenceBridgePeer;				/*!< the asterisk channel which joins the conference bridge */
 		struct ast_bridge_features features;				/*!< Enabled features information */
 		pthread_t joinThread;						/*!< Running in this Thread */
 		sccp_conference_t *conference;					/*!< Conference this participant belongs to */
@@ -66,10 +67,10 @@ extern "C" {
 	void sccp_conference_retractParticipatingChannel(sccp_conference_t * conference, sccp_channel_t * channel);
 	void sccp_conference_module_start(void);
 	void sccp_conference_end(sccp_conference_t * conference);
-	int sccp_conference_addAstChannelToConferenceBridge(sccp_conference_participant_t * participant, PBX_CHANNEL_TYPE *currentParticipantPeer);
+	int sccp_conference_addAstChannelToConferenceBridge(sccp_conference_participant_t * participant, PBX_CHANNEL_TYPE * currentParticipantPeer);
 
-	void sccp_conference_readFrame(PBX_FRAME_TYPE *frame, sccp_channel_t * channel);
-	void sccp_conference_writeFrame(PBX_FRAME_TYPE *frame, sccp_channel_t * channel);
+	void sccp_conference_readFrame(PBX_FRAME_TYPE * frame, sccp_channel_t * channel);
+	void sccp_conference_writeFrame(PBX_FRAME_TYPE * frame, sccp_channel_t * channel);
 
 	/* conf list related */
 	void sccp_conference_show_list(sccp_conference_t * conference, sccp_channel_t * channel);
@@ -80,9 +81,8 @@ extern "C" {
 	void sccp_conference_demode_participant(sccp_conference_t * conference, sccp_channel_t * channel);
 	void sccp_conference_invite_participant(sccp_conference_t * conference, sccp_channel_t * channel);
 
-
-#        if defined(__cplusplus) || defined(c_plusplus)
+#    if defined(__cplusplus) || defined(c_plusplus)
 }
-#        endif
-#    endif									/* CS_SCCP_CONFERENCE */
-#endif										/* SCCP_CONFERENCE_H_ */
+#    endif
+#endif										/* CS_SCCP_CONFERENCE */
+#    endif										/* SCCP_CONFERENCE_H_ */

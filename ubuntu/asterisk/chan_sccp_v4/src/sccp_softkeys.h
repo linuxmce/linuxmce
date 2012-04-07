@@ -9,16 +9,16 @@
  * \note        This program is free software and may be modified and distributed under the terms of the GNU Public License.
  *		See the LICENSE file at the top of the source tree.
  *
- * $Date: 2011-10-11 16:34:34 +0000 (Tue, 11 Oct 2011) $
- * $Revision: 2976 $  
+ * $Date: 2012-01-02 13:56:08 +0000 (Mon, 02 Jan 2012) $
+ * $Revision: 3147 $  
  */
-#ifndef __SCCP_SOFTKEYS_H
-#    define __SCCP_SOFTKEYS_H
+#    ifndef __SCCP_SOFTKEYS_H
+#define __SCCP_SOFTKEYS_H
 
-#    ifdef CS_DYNAMIC_CONFIG
+#ifdef CS_DYNAMIC_CONFIG
 void sccp_softkey_pre_reload(void);
 void sccp_softkey_post_reload(void);
-#    endif
+#endif
 
 /*!
  * \brief SCCP SoftKeyMap Callback
@@ -33,7 +33,7 @@ struct sccp_softkeyMap_cb {
 typedef struct sccp_softkeyMap_cb sccp_softkeyMap_cb_t;
 
 const sccp_softkeyMap_cb_t *sccp_getSoftkeyMap_by_SoftkeyEvent(uint32_t event);
-void sccp_softkey_setSoftkeyState(sccp_device_t *device, uint8_t softKeySet, uint8_t softKey, boolean_t enable);
+void sccp_softkey_setSoftkeyState(sccp_device_t * device, uint8_t softKeySet, uint8_t softKey, boolean_t enable);
 
 void sccp_sk_dial(sccp_device_t * d, sccp_line_t * l, const uint32_t lineInstance, sccp_channel_t * c);
 void sccp_sk_redial(sccp_device_t * d, sccp_line_t * l, const uint32_t lineInstance, sccp_channel_t * c);
@@ -69,4 +69,4 @@ void sccp_sk_pickup(sccp_device_t * d, sccp_line_t * l, const uint32_t lineInsta
 void sccp_sk_gpickup(sccp_device_t * d, sccp_line_t * l, const uint32_t lineInstance, sccp_channel_t * c);
 void sccp_sk_set_keystate(sccp_device_t * d, sccp_line_t * l, const uint32_t lineInstance, sccp_channel_t * c, unsigned int keymode, unsigned int softkeyindex, unsigned int status);
 
-#endif
+#    endif

@@ -1,6 +1,6 @@
 
 /*!
- * \file 	sccp_ast108.h
+ * \file 	ast106.h
  * \brief 	SCCP PBX Asterisk Header
  * \author 	Marcello Ceshia
  * \author 	Diederik de Groot <ddegroot [at] users.sourceforge.net>
@@ -23,9 +23,6 @@ typedef int64_t ast_format_t;
 int sccp_wrapper_asterisk_set_rtp_peer(PBX_CHANNEL_TYPE * ast, PBX_RTP_TYPE * rtp, PBX_RTP_TYPE * vrtp, PBX_RTP_TYPE * trtp, int codecs, int nat_active);
 void *sccp_do_monitor(void *data);
 int sccp_restart_monitor(void);
-int sccp_wrapper_asterisk18_hangup(PBX_CHANNEL_TYPE * ast_channel);
-boolean_t sccp_wrapper_asterisk18_allocPBXChannel(const sccp_channel_t * channel, PBX_CHANNEL_TYPE ** pbx_channel);
-int sccp_wrapper_asterisk18_requestHangup(PBX_CHANNEL_TYPE * channel);
 char *pbx_getformatname(format_t format);
 char *pbx_getformatname_multiple(char *buf, size_t size, format_t format);
 
@@ -80,21 +77,21 @@ char *pbx_getformatname_multiple(char *buf, size_t size, format_t format);
 //   param3=cli string to be types as array of strings
 //   param4=registration description
 //   param5=usage string
-#    define CLI_AMI_ENTRY(_FUNCTION_NAME,_CALLED_FUNCTION,_DESCR,_USAGE, _COMPLETER_REPEAT)		\
+#    define CLI_AMI_ENTRY(_FUNCTION_NAME,_CALLED_FUNCTION,_DESCR,_USAGE, _COMPLETER_REPEAT)			\
 	static int manager_ ## _FUNCTION_NAME(struct mansession *s, const struct message *m)			\
 	{													\
 		const char *id = astman_get_header(m, "ActionID");						\
-		static char *cli_ami_command[] = { CLI_COMMAND, NULL};						\
-		static char *ami_command = AMI_COMMAND;								\
-		cli_ami_command[0] = ami_command;								\
-		static char *cli_ami_params[] = { CLI_AMI_PARAMS };					\
+/*		static char *cli_ami_command[] = { CLI_COMMAND, NULL};					*/	\
+/*		static char *ami_command = AMI_COMMAND;							*/	\
+/*		cli_ami_command[0] = ami_command;							*/	\
+		static char *cli_ami_params[] = { CLI_AMI_PARAMS };						\
 		static char *arguments[ARRAY_LEN(cli_ami_params)];						\
-		uint8_t x=0; \
-		uint8_t i=0; \
-		for (x=0, i=0;x<ARRAY_LEN(cli_ami_params);x++) {	\
-			if(NULL != cli_ami_params[x] && strlen(cli_ami_params[x]) > 0){ \
-				arguments[i++]=strdupa(astman_get_header(m, cli_ami_params[x])); \
-			} \
+		uint8_t x=0; 											\
+		uint8_t i=0; 											\
+		for (x=0, i=0;x<ARRAY_LEN(cli_ami_params);x++) {						\
+			if(NULL != cli_ami_params[x] && strlen(cli_ami_params[x]) > 0){				\
+				arguments[i++]=sccp_strdupa(astman_get_header(m, cli_ami_params[x]));		\
+			} 											\
 		}												\
 		char idtext[256] = "";										\
 		int total = 0;											\

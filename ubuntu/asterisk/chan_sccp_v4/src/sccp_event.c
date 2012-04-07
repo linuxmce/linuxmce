@@ -7,8 +7,8 @@
  *		See the LICENSE file at the top of the source tree.
  * \since	2009-09-02
  * 
- * $Date: 2011-08-30 17:53:17 +0000 (Tue, 30 Aug 2011) $
- * $Revision: 2718 $  
+ * $Date: 2012-03-30 10:11:50 +0000 (Fri, 30 Mar 2012) $
+ * $Revision: 3340 $  
  */
 
 /*!
@@ -20,7 +20,7 @@
 #include "config.h"
 #include "common.h"
 
-SCCP_FILE_VERSION(__FILE__, "$Revision: 2718 $")
+SCCP_FILE_VERSION(__FILE__, "$Revision: 3340 $")
 
 /*!
  * \brief SCCP Event Listeners Structure
@@ -70,9 +70,9 @@ void sccp_event_fire(const sccp_event_t * *event)
 	sccp_event_type_t type = (*event)->type;
 	sccp_event_subscriber_t *subscriber;
 
-	sccp_log((DEBUGCAT_EVENT)) (VERBOSE_PREFIX_1 "[SCCP] Fire event %d\n", type);
+	sccp_log((DEBUGCAT_EVENT)) (VERBOSE_PREFIX_2 "[SCCP] Fire event %d\n", type);
 	SCCP_LIST_TRAVERSE(&sccp_event_listeners->subscriber, subscriber, list) {
-		sccp_log((DEBUGCAT_EVENT)) (VERBOSE_PREFIX_1 "eventtype: %d listenerType: %d, -> result: %d %s\n", type, subscriber->eventType, (subscriber->eventType & type), (subscriber->eventType & type) ? "true" : "false");
+		sccp_log((DEBUGCAT_EVENT)) (VERBOSE_PREFIX_3 "eventtype: %d listenerType: %d, -> result: %d %s\n", type, subscriber->eventType, (subscriber->eventType & type), (subscriber->eventType & type) ? "true" : "false");
 		if (subscriber->eventType & type) {
 			subscriber->callback_function(event);
 		}

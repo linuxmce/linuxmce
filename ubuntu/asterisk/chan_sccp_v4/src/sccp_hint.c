@@ -129,10 +129,12 @@ void sccp_hint_module_stop()
 static boolean_t sccp_hint_isCIDavailabe(const sccp_device_t * device, const uint8_t positionOnDevice)
 {
 
+#ifdef CS_DYNAMIC_SPEEDDIAL_CID
 	if ((device->skinny_type == SKINNY_DEVICETYPE_CISCO7970 || device->skinny_type == SKINNY_DEVICETYPE_CISCO7971 || device->skinny_type == SKINNY_DEVICETYPE_CISCO7975 || device->skinny_type == SKINNY_DEVICETYPE_CISCO7985)
 	    && positionOnDevice <= 8)
 
 		return TRUE;
+#endif
 
 	return FALSE;
 }
@@ -626,7 +628,7 @@ void sccp_hint_notifyAsterisk(sccp_line_t * line, sccp_channelState_t state)
 #ifdef CS_NEW_DEVICESTATE
 
 #    ifndef AST_EVENT_IE_CIDNAME
-	sccp_log(1) (VERBOSE_PREFIX_4 "notify asterisk to set state to sccp channelstate %s (%d) => asterisk: %s (%d) on channel SCCP/%s\n", channelstate2str(state), state, pbxdevicestate2str(sccp_channelState2AstDeviceState(state)), sccp_channelState2AstDeviceState(state), line->name);
+	sccp_log((DEBUGCAT_CORE)) (VERBOSE_PREFIX_4 "notify asterisk to set state to sccp channelstate %s (%d) => asterisk: %s (%d) on channel SCCP/%s\n", channelstate2str(state), state, pbxdevicestate2str(sccp_channelState2AstDeviceState(state)), sccp_channelState2AstDeviceState(state), line->name);
 	pbx_devstate_changed(sccp_channelState2AstDeviceState(state), "SCCP/%s", line->name);
 #    else
 	struct ast_event *event;
@@ -636,7 +638,7 @@ void sccp_hint_notifyAsterisk(sccp_line_t * line, sccp_channelState_t state)
 
 	if (!(event = pbx_event_new(AST_EVENT_DEVICE_STATE_CHANGE, AST_EVENT_IE_DEVICE, AST_EVENT_IE_PLTYPE_STR, channelName, AST_EVENT_IE_STATE, AST_EVENT_IE_PLTYPE_UINT, sccp_channelState2AstDeviceState(state), AST_EVENT_IE_CIDNAME, AST_EVENT_IE_PLTYPE_STR, strdup(l->cid_name), AST_EVENT_IE_CIDNUM, AST_EVENT_IE_PLTYPE_STR, strdup(l->cid_num), AST_EVENT_IE_END))) {
 
-		sccp_log(1) (VERBOSE_PREFIX_4 "notify asterisk to set state to sccp channelstate %s (%d) => asterisk: %s (%d) on channel SCCP/%s\n", channelstate2str(state), state, pbxdevicestate2str(sccp_channelState2AstDeviceState(state)), sccp_channelState2AstDeviceState(state), line->name);
+		sccp_log((DEBUGCAT_CORE)) (VERBOSE_PREFIX_4 "notify asterisk to set state to sccp channelstate %s (%d) => asterisk: %s (%d) on channel SCCP/%s\n", channelstate2str(state), state, pbxdevicestate2str(sccp_channelState2AstDeviceState(state)), sccp_channelState2AstDeviceState(state), line->name);
 		pbx_devstate_changed(sccp_channelState2AstDeviceState(state), "%s", channelName);
 		return;
 	}
@@ -987,8 +989,8 @@ void sccp_hint_subscribeHint(const sccp_device_t * device, const char *hintStr, 
 	SCCP_LIST_TRAVERSE(&sccp_hint_subscriptions, hint, list) {
 		if (sccp_strlen(hint_exten) == sccp_strlen(hint->exten)
 		    && sccp_strlen(hint_context) == sccp_strlen(hint->context)
-		    && !sccp_strcmp(hint_exten, hint->exten)
-		    && !sccp_strcmp(hint_context, hint->context)) {
+		    && sccp_strequals(hint_exten, hint->exten)
+		    && sccp_strequals(hint_context, hint->context)) {
 			sccp_log(DEBUGCAT_HINT) (VERBOSE_PREFIX_4 "Hint found\n");
 			break;
 		}
@@ -1268,9 +1270,9 @@ void sccp_hint_handleFeatureChangeEvent(const sccp_event_t ** event)
 				if (line) {
 					sccp_log((DEBUGCAT_SOFTKEY)) (VERBOSE_PREFIX_3 "%s: Notify the dnd status (%s) to asterisk for line %s\n", d->id, d->dndFeature.status ? "on" : "off", line->name);
 					if (d->dndFeature.status == SCCP_DNDMODE_REJECT) {
-						sccp_hint_lineStatusChanged(line, d, NULL, SCCP_DEVICESTATE_ONHOOK, SCCP_CHANNELSTATE_DND);
+						sccp_hint_lineStatusChanged(line, d, NULL, SCCP_CHANNELSTATE_ONHOOK, SCCP_CHANNELSTATE_DND);
 					} else {
-						sccp_hint_lineStatusChanged(line, d, NULL, SCCP_DEVICESTATE_DND, SCCP_DEVICESTATE_ONHOOK);
+						sccp_hint_lineStatusChanged(line, d, NULL, SCCP_CHANNELSTATE_DND, SCCP_CHANNELSTATE_ONHOOK);
 					}
 				}
 			}

@@ -10,11 +10,11 @@
  * \note        This program is free software and may be modified and distributed under the terms of the GNU Public License. 
  *		See the LICENSE file at the top of the source tree.
  * 
- * $Date: 2011-10-11 16:34:34 +0000 (Tue, 11 Oct 2011) $
- * $Revision: 2976 $
+ * $Date: 2012-01-02 13:56:08 +0000 (Mon, 02 Jan 2012) $
+ * $Revision: 3147 $
  */
 
-#define DUMMY 1
+#    define DUMMY 1
 
 void dummyproc1(void);
 void dummyproc2(void);

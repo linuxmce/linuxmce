@@ -10,12 +10,12 @@
  * \note        This program is free software and may be modified and distributed under the terms of the GNU Public License.
  *		See the LICENSE file at the top of the source tree.
  *
- * $Date: 2011-10-11 16:34:34 +0000 (Tue, 11 Oct 2011) $
- * $Revision: 2976 $  
+ * $Date: 2012-03-30 16:21:52 +0000 (Fri, 30 Mar 2012) $
+ * $Revision: 3349 $  
  */
 
-#ifndef __SCCP_CHANNEL_H
-#    define __SCCP_CHANNEL_H
+#    ifndef __SCCP_CHANNEL_H
+#define __SCCP_CHANNEL_H
 
 sccp_channel_t *sccp_channel_allocate_locked(sccp_line_t * l, sccp_device_t * device);
 sccp_channel_t *sccp_channel_get_active_locked(sccp_device_t * d);
@@ -25,6 +25,7 @@ void sccp_channel_set_active(sccp_device_t * d, sccp_channel_t * c);
 void sccp_channel_send_callinfo(sccp_device_t * device, sccp_channel_t * c);
 void sccp_channel_send_dialednumber(sccp_channel_t * c);
 void sccp_channel_setSkinnyCallstate(sccp_channel_t * c, skinny_callstate_t state);
+void sccp_channel_display_callInfo(sccp_channel_t * channel);
 void sccp_channel_set_callingparty(sccp_channel_t * c, char *name, char *number);
 void sccp_channel_set_calledparty(sccp_channel_t * c, char *name, char *number);
 boolean_t sccp_channel_set_originalCallingparty(sccp_channel_t * channel, char *name, char *number);
@@ -55,13 +56,14 @@ void sccp_channel_transfer_locked(sccp_channel_t * c);
 void sccp_channel_transfer_complete(sccp_channel_t * c);
 void sccp_channel_forward(sccp_channel_t * parent, sccp_linedevices_t * lineDevice, char *fwdNumber);
 
-sccp_device_t *sccp_channel_getDevice(const sccp_channel_t *channel);
-void sccp_channel_setDevice(sccp_channel_t *channel, const sccp_device_t *device);
+sccp_device_t *sccp_channel_getDevice(const sccp_channel_t * channel);
+void sccp_channel_setDevice(sccp_channel_t * channel, const sccp_device_t * device);
 
-#    ifdef CS_SCCP_PARK
+#ifdef CS_SCCP_PARK
 void sccp_channel_park(sccp_channel_t * c);
-#    endif
-
-boolean_t sccp_channel_setPreferredCodec(sccp_channel_t *c, const void *data);
-
 #endif
+
+boolean_t sccp_channel_setPreferredCodec(sccp_channel_t * c, const void *data);
+int sccp_channel_callwaiting_tone_interval(sccp_channel_t *c);
+
+#    endif

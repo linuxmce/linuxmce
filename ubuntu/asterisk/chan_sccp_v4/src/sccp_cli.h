@@ -9,13 +9,13 @@
  * \note	This program is free software and may be modified and distributed under the terms of the GNU Public License.
  *		See the LICENSE file at the top of the source tree.
  *
- * $Date: 2011-09-26 17:15:53 +0000 (Mon, 26 Sep 2011) $
- * $Revision: 2867 $
+ * $Date: 2012-01-02 13:56:08 +0000 (Mon, 02 Jan 2012) $
+ * $Revision: 3147 $
  */
-#ifndef __SCCP_CLI_H
-#    define __SCCP_CLI_H
+#    ifndef __SCCP_CLI_H
+#define __SCCP_CLI_H
 
-typedef enum sccp_cli_completer{
+typedef enum sccp_cli_completer {
 	SCCP_CLI_NULL_COMPLETER,
 	SCCP_CLI_DEVICE_COMPLETER,
 	SCCP_CLI_LINE_COMPLETER,
@@ -26,4 +26,4 @@ typedef enum sccp_cli_completer{
 void sccp_register_cli(void);
 void sccp_unregister_cli(void);
 
-#endif										// __SCCP_CLI_H
+#    endif										// __SCCP_CLI_H

@@ -9,14 +9,14 @@
  * \note		This program is free software and may be modified and distributed under the terms of the GNU Public License.
  *		See the LICENSE file at the top of the source tree.
  *
- * $Date: 2011-10-14 19:39:51 +0000 (Fri, 14 Oct 2011) $
- * $Revision: 3036 $
+ * $Date: 2012-02-21 14:37:26 +0000 (Tue, 21 Feb 2012) $
+ * $Revision: 3262 $
  */
 
 #include "config.h"
 #include "common.h"
 
-SCCP_FILE_VERSION(__FILE__, "$Revision: 3036 $")
+SCCP_FILE_VERSION(__FILE__, "$Revision: 3262 $")
 
 
 /* private prototypes */
@@ -163,9 +163,9 @@ void sccp_sk_dial(sccp_device_t * d, sccp_line_t * l, const uint32_t lineInstanc
 	sccp_log((DEBUGCAT_SOFTKEY)) (VERBOSE_PREFIX_3 "%s: SoftKey Dial Pressed\n", DEV_ID_LOG(d));
 	if (c) { // Handle termination of dialling if in appropriate state.
 		/* Only handle this in DIALING state. AFAIK GETDIGITS is used only for call forward and related input functions. (-DD) */
-		if ( (c->state == SCCP_CHANNELSTATE_DIALING) ) {
+		if ( SCCP_CHANNELSTATE_DIALING == c->state ) {
 			sccp_channel_lock(c);
-			SCCP_SCHED_DEL(c->scheduler.digittimeout);
+			c->scheduler.digittimeout = SCCP_SCHED_DEL(c->scheduler.digittimeout);
 			sccp_pbx_softswitch_locked(c);
 			sccp_channel_unlock(c);
 		}
@@ -257,7 +257,7 @@ void sccp_sk_redial(sccp_device_t * d, sccp_line_t * l, const uint32_t lineInsta
 			sccp_copy_string(c->dialedNumber, d->lastNumber, sizeof(c->dialedNumber));
 			sccp_log((DEBUGCAT_SOFTKEY)) (VERBOSE_PREFIX_3 "%s: Get ready to redial number %s\n", d->id, d->lastNumber);
 			// c->digittimeout = time(0)+1;
-			SCCP_SCHED_DEL(c->scheduler.digittimeout);
+			c->scheduler.digittimeout = SCCP_SCHED_DEL(c->scheduler.digittimeout);
 			sccp_pbx_softswitch_locked(c);
 			sccp_channel_unlock(c);
 		}
@@ -494,18 +494,18 @@ void sccp_sk_backspace(sccp_device_t * d, sccp_line_t * l, const uint32_t lineIn
 	if (len > 1) {
 		c->dialedNumber[len - 1] = '\0';
 		/* removing scheduled dial */
-		SCCP_SCHED_DEL(c->scheduler.digittimeout);
+		c->scheduler.digittimeout = SCCP_SCHED_DEL(c->scheduler.digittimeout);
 		/* rescheduling dial timeout (one digit) */
 		if ((c->scheduler.digittimeout = sccp_sched_add(GLOB(digittimeout) * 1000, sccp_pbx_sched_dial, c)) < 0) {
-			sccp_log(1) (VERBOSE_PREFIX_1 "SCCP: (sccp_sk_backspace) Unable to reschedule dialing in '%d' s\n", GLOB(digittimeout));
+			sccp_log((DEBUGCAT_CORE)) (VERBOSE_PREFIX_1 "SCCP: (sccp_sk_backspace) Unable to reschedule dialing in '%d' s\n", GLOB(digittimeout));
 		}
 	} else if (len == 1) {
 		c->dialedNumber[len - 1] = '\0';
 		/* removing scheduled dial */
-		SCCP_SCHED_DEL(c->scheduler.digittimeout);
+		c->scheduler.digittimeout = SCCP_SCHED_DEL(c->scheduler.digittimeout);
 		/* rescheduling dial timeout (no digits) */
 		if ((c->scheduler.digittimeout = sccp_sched_add(GLOB(firstdigittimeout) * 1000, sccp_pbx_sched_dial, c)) < 0) {
-			sccp_log(1) (VERBOSE_PREFIX_1 "SCCP: (sccp_sk_backspace) Unable to reschedule dialing in '%d' s\n", GLOB(firstdigittimeout));
+			sccp_log((DEBUGCAT_CORE)) (VERBOSE_PREFIX_1 "SCCP: (sccp_sk_backspace) Unable to reschedule dialing in '%d' s\n", GLOB(firstdigittimeout));
 		}
 	}
 	// sccp_log((DEBUGCAT_SOFTKEY))(VERBOSE_PREFIX_3 "%s: backspacing dial number %s\n", c->device->id, c->dialedNumber);
@@ -645,7 +645,7 @@ void sccp_sk_select(sccp_device_t * d, sccp_line_t * l, const uint32_t lineInsta
 
 	if ((x = sccp_device_find_selectedchannel(d, c))) {
 		SCCP_LIST_LOCK(&d->selectedChannels);
-		SCCP_LIST_REMOVE(&d->selectedChannels, x, list);
+		x = SCCP_LIST_REMOVE(&d->selectedChannels, x, list);
 		SCCP_LIST_UNLOCK(&d->selectedChannels);
 		sccp_free(x);
 	} else {
@@ -695,7 +695,7 @@ void sccp_sk_cfwdall(sccp_device_t * d, sccp_line_t * l, const uint32_t lineInst
 	if (l)
 		sccp_feat_handle_callforward(l, d, SCCP_CFWD_ALL);
 	else
-		sccp_log(1) (VERBOSE_PREFIX_3 "%s: No line (%d) found\n", DEV_ID_LOG(d), 1);
+		sccp_log((DEBUGCAT_CORE)) (VERBOSE_PREFIX_3 "%s: No line (%d) found\n", DEV_ID_LOG(d), 1);
 }
 
 /*!
@@ -716,7 +716,7 @@ void sccp_sk_cfwdbusy(sccp_device_t * d, sccp_line_t * l, const uint32_t lineIns
 	if (l)
 		sccp_feat_handle_callforward(l, d, SCCP_CFWD_BUSY);
 	else
-		sccp_log(1) (VERBOSE_PREFIX_3 "%s: No line (%d) found\n", d->id, 1);
+		sccp_log((DEBUGCAT_CORE)) (VERBOSE_PREFIX_3 "%s: No line (%d) found\n", d->id, 1);
 }
 
 /*!
@@ -736,7 +736,7 @@ void sccp_sk_cfwdnoanswer(sccp_device_t * d, sccp_line_t * l, const uint32_t lin
 	if (l)
 		sccp_feat_handle_callforward(l, d, SCCP_CFWD_NOANSWER);
 	else
-		sccp_log(1) (VERBOSE_PREFIX_3 "%s: No line (%d) found\n", d->id, 1);
+		sccp_log((DEBUGCAT_CORE)) (VERBOSE_PREFIX_3 "%s: No line (%d) found\n", d->id, 1);
 
 	/*
 	   sccp_log((DEBUGCAT_SOFTKEY))(VERBOSE_PREFIX_3 "### CFwdNoAnswer Softkey pressed - NOT SUPPORTED\n");
@@ -792,7 +792,7 @@ void sccp_sk_private(sccp_device_t * d, sccp_line_t * l, const uint32_t lineInst
 	sccp_log((DEBUGCAT_SOFTKEY)) (VERBOSE_PREFIX_3 "%s: SoftKey Private Pressed\n", DEV_ID_LOG(d));
 
 	if (!d->privacyFeature.enabled) {
-		sccp_log(1) (VERBOSE_PREFIX_3 "%s: private function is not active on this device\n", d->id);
+		sccp_log((DEBUGCAT_CORE)) (VERBOSE_PREFIX_3 "%s: private function is not active on this device\n", d->id);
 		sccp_dev_displayprompt(d, lineInstance, 0, "PRIVATE function is not active", 5);
 		return;
 	}
@@ -804,16 +804,15 @@ void sccp_sk_private(sccp_device_t * d, sccp_line_t * l, const uint32_t lineInst
 
 	sccp_channel_lock(c);
 	c->privacy = (c->privacy) ? FALSE : TRUE;
-	d->privacyFeature.status = c->privacy;
-	sccp_feat_changed(d, SCCP_FEATURE_PRIVACY);
-/*	
+//	d->privacyFeature.status = c->privacy;		// should not be activeted on softkey
+//	sccp_feat_changed(d, SCCP_FEATURE_PRIVACY);
+
 	if (c->privacy) {
 		sccp_dev_displayprompt(d, lineInstance, c->callid, SKINNY_DISP_PRIVATE, 0);
 	} else {
 		sccp_dev_displayprompt(d, lineInstance, c->callid, SKINNY_DISP_ENTER_NUMBER, 1);
 	}
-*/
-	sccp_log(1) (VERBOSE_PREFIX_3 "%s: Private %s on call %d\n", d->id, c->privacy ? "enabled" : "disabled", c->callid);
+	sccp_log((DEBUGCAT_CORE)) (VERBOSE_PREFIX_3 "%s: Private %s on call %d\n", d->id, c->privacy ? "enabled" : "disabled", c->callid);
 	sccp_channel_unlock(c);
 }
 
@@ -880,7 +879,7 @@ void sccp_sk_barge(sccp_device_t * d, sccp_line_t * l, const uint32_t lineInstan
 	if (l)
 		sccp_feat_handle_barge(l, lineInstance, d);
 	else
-		sccp_log(1) (VERBOSE_PREFIX_3 "%s: No line (%d) found\n", d->id, 1);
+		sccp_log((DEBUGCAT_CORE)) (VERBOSE_PREFIX_3 "%s: No line (%d) found\n", d->id, 1);
 }
 
 /*!
@@ -900,7 +899,7 @@ void sccp_sk_cbarge(sccp_device_t * d, sccp_line_t * l, const uint32_t lineInsta
 	if (l)
 		sccp_feat_handle_cbarge(l, lineInstance, d);
 	else
-		sccp_log(1) (VERBOSE_PREFIX_3 "%s: No line (%d) found\n", d->id, 1);
+		sccp_log((DEBUGCAT_CORE)) (VERBOSE_PREFIX_3 "%s: No line (%d) found\n", d->id, 1);
 }
 
 /*!
@@ -922,7 +921,7 @@ void sccp_sk_meetme(sccp_device_t * d, sccp_line_t * l, const uint32_t lineInsta
 	if (l)
 		sccp_feat_handle_meetme(l, lineInstance, d);
 	else
-		sccp_log(1) (VERBOSE_PREFIX_3 "%s: No line (%d) found\n", d->id, 1);
+		sccp_log((DEBUGCAT_CORE)) (VERBOSE_PREFIX_3 "%s: No line (%d) found\n", d->id, 1);
 }
 
 /*!
@@ -945,7 +944,7 @@ void sccp_sk_pickup(sccp_device_t * d, sccp_line_t * l, const uint32_t lineInsta
 	if (l)
 		sccp_feat_handle_directpickup(l, lineInstance, d);
 	else
-		sccp_log(1) (VERBOSE_PREFIX_3 "%s: No line (%d) found\n", d->id, 1);
+		sccp_log((DEBUGCAT_CORE)) (VERBOSE_PREFIX_3 "%s: No line (%d) found\n", d->id, 1);
 #endif
 }
 
@@ -969,7 +968,7 @@ void sccp_sk_gpickup(sccp_device_t * d, sccp_line_t * l, const uint32_t lineInst
 	if (l)
 		sccp_feat_grouppickup(l, d);
 	else
-		sccp_log(1) (VERBOSE_PREFIX_3 "%s: No line (%d) found\n", d->id, 1);
+		sccp_log((DEBUGCAT_CORE)) (VERBOSE_PREFIX_3 "%s: No line (%d) found\n", d->id, 1);
 
 #endif
 }

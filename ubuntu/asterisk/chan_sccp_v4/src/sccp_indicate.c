@@ -8,14 +8,14 @@
  *        	Modified by Jan Czmok and Julien Goodwin
  * \note 	This program is free software and may be modified and distributed under the terms of the GNU Public License.
  *
- * $Date: 2011-10-15 08:55:11 +0000 (Sat, 15 Oct 2011) $
- * $Revision: 3043 $
+ * $Date: 2012-03-30 16:21:52 +0000 (Fri, 30 Mar 2012) $
+ * $Revision: 3349 $
  */
 
 #include "config.h"
 #include "common.h"
 
-SCCP_FILE_VERSION(__FILE__, "$Revision: 3043 $")
+SCCP_FILE_VERSION(__FILE__, "$Revision: 3349 $")
 
 static void __sccp_indicate_remote_device(sccp_device_t * device, sccp_channel_t * c, uint8_t state, uint8_t debug, char *file, int line, const char *pretty_function);
 
@@ -67,7 +67,9 @@ void __sccp_indicate_locked(sccp_device_t * device, sccp_channel_t * c, uint8_t 
 	l = c->line;
 
 	/* replaced with a trylock loop, because lock is taken out of order */
-//	sccp_device_lock(d);
+#if CS_EXPERIMENTAL_REFCOUNT
+	sccp_device_lock(d);
+#else	
 	int deadlockAvoidanceCounter=0;
         while (sccp_device_trylock(d)) {
                 if (deadlockAvoidanceCounter++ > 100) {
@@ -78,7 +80,8 @@ void __sccp_indicate_locked(sccp_device_t * device, sccp_channel_t * c, uint8_t 
 		sccp_channel_unlock(c);
 		usleep(10);
 		sccp_channel_lock(c);
-	}		
+	}
+#endif
 	instance = sccp_device_find_index_for_line(d, l->name);
 
 	/* all the check are ok. We can safely run all the dev functions with no more checks */
@@ -92,19 +95,21 @@ void __sccp_indicate_locked(sccp_device_t * device, sccp_channel_t * c, uint8_t 
 //              PBX(set_callstate)(c, AST_STATE_DOWN);
 		break;
 	case SCCP_CHANNELSTATE_OFFHOOK:
-		//sccp_dev_set_mwi(d, l, 0);
-		//if (!d->mwioncall)
-		//      sccp_dev_set_mwi(d, NULL, 0);
-
-		sccp_dev_set_speaker(d, SKINNY_STATIONSPEAKER_ON);
-		PBX(set_callstate) (c, AST_STATE_OFFHOOK);
-		sccp_device_sendcallstate(d, instance, c->callid, SKINNY_CALLSTATE_OFFHOOK, SKINNY_CALLPRIORITY_LOW, SKINNY_CALLINFO_VISIBILITY_DEFAULT);
-		sccp_dev_set_cplane(l, instance, d, 1);
-		sccp_dev_displayprompt(d, instance, c->callid, SKINNY_DISP_ENTER_NUMBER, 0);
-		sccp_dev_set_keyset(d, instance, c->callid, KEYMODE_OFFHOOK);
-
-		sccp_dev_starttone(d, SKINNY_TONE_INSIDEDIALTONE, instance, c->callid, 0);
-
+		if (SCCP_CHANNELSTATE_DOWN==c->previousChannelState) {		// new call
+			sccp_dev_set_speaker(d, SKINNY_STATIONSPEAKER_ON);
+			PBX(set_callstate) (c, AST_STATE_OFFHOOK);
+			sccp_device_sendcallstate(d, instance, c->callid, SKINNY_CALLSTATE_OFFHOOK, SKINNY_CALLPRIORITY_LOW, SKINNY_CALLINFO_VISIBILITY_DEFAULT);
+			sccp_dev_set_cplane(l, instance, d, 1);
+			sccp_dev_displayprompt(d, instance, c->callid, SKINNY_DISP_ENTER_NUMBER, 0);
+			sccp_dev_set_keyset(d, instance, c->callid, KEYMODE_OFFHOOK);
+			sccp_dev_starttone(d, SKINNY_TONE_INSIDEDIALTONE, instance, c->callid, 0);
+		} else {							// call pickup
+			sccp_dev_set_speaker(d, SKINNY_STATIONSPEAKER_ON);
+			PBX(set_callstate) (c, AST_STATE_OFFHOOK);
+			sccp_device_sendcallstate(d, instance, c->callid, SKINNY_CALLSTATE_OFFHOOK, SKINNY_CALLPRIORITY_LOW, SKINNY_CALLINFO_VISIBILITY_DEFAULT);
+			sccp_dev_set_cplane(l, instance, d, 1);
+			sccp_dev_set_keyset(d, instance, c->callid, KEYMODE_OFFHOOK);
+		}
 		/* for earlyrtp take a look at sccp_channel_newcall because we have no c->owner here */
 		break;
 	case SCCP_CHANNELSTATE_GETDIGITS:
@@ -316,8 +321,11 @@ void __sccp_indicate_locked(sccp_device_t * device, sccp_channel_t * c, uint8_t 
 		sccp_dev_displayprompt(d, instance, c->callid, SKINNY_DISP_TEMP_FAIL, 0);
 		break;
 	case SCCP_CHANNELSTATE_CALLWAITING:
-		if (GLOB(callwaiting_tone))
-			sccp_dev_starttone(d, GLOB(callwaiting_tone), instance, c->callid, 0);
+//		if (GLOB(callwaiting_tone)) {
+//			sccp_dev_starttone(d, GLOB(callwaiting_tone), instance, c->callid, 0);
+//		}
+		sccp_log(DEBUGCAT_INDICATE) (VERBOSE_PREFIX_3 "%s: SCCP_CHANNELSTATE_CALLWAITING (%s)\n", DEV_ID_LOG(d), sccp_indicate2str(c->previousChannelState));
+		sccp_channel_callwaiting_tone_interval(c);
 		sccp_device_sendcallstate(d, instance, c->callid, SKINNY_CALLSTATE_RINGIN, SKINNY_CALLPRIORITY_LOW, SKINNY_CALLINFO_VISIBILITY_DEFAULT);	/* send connected, so it is not listed as missed call */
 		sccp_channel_send_callinfo(d, c);
 		sccp_dev_displayprompt(d, instance, c->callid, SKINNY_DISP_CALL_WAITING, 0);
@@ -402,7 +410,6 @@ void __sccp_indicate_locked(sccp_device_t * device, sccp_channel_t * c, uint8_t 
 		PBX(set_callstate) (c, AST_STATE_DIALING);
 		break;
 	case SCCP_CHANNELSTATE_DIGITSFOLL:
-		//sccp_dev_stoptone(d, l->instance, c->callid);
 		sccp_channel_send_dialednumber(c);
 		sccp_dev_set_keyset(d, instance, c->callid, KEYMODE_DIGITSFOLL);
 		PBX(set_callstate) (c, AST_STATE_DIALING);
@@ -458,7 +465,7 @@ static void __sccp_indicate_remote_device(sccp_device_t *device, sccp_channel_t 
 	sccp_device_t *remoteDevice;
 	sccp_channel_t *activeChannel;
 	int instance;
-	uint32_t privacyStatus=0;
+//	uint32_t privacyStatus=0;
 	uint8_t stateVisibility;
 
 	if (!c || !c->line)
@@ -467,8 +474,8 @@ static void __sccp_indicate_remote_device(sccp_device_t *device, sccp_channel_t 
     
 
 	/** \todo move this to channel->privacy */
-	if (sccp_channel_getDevice(c))
-		privacyStatus = sccp_channel_getDevice(c)->privacyFeature.status & SCCP_PRIVACYFEATURE_HINT;
+//	if (sccp_channel_getDevice(c))
+//		privacyStatus = sccp_channel_getDevice(c)->privacyFeature.status & SCCP_PRIVACYFEATURE_HINT;
 
 // 	/* do not display private lines */
 // 	if (state !=SCCP_CHANNELSTATE_CONNECTED && (c->privacy || privacyStatus > 0) ){

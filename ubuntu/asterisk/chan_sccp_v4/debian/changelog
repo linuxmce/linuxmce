@@ -1,3 +1,9 @@
+chan-sccp-b (4.0.0-3) unstable; urgency=low
+
+  * updates from 3.0.0-3
+
+ -- Peer Oliver Schmidt <developer@linuxmce.org>  Sat, 07 Apr 2012 10:50:40 +0200
+
 chan-sccp-b (4.0.0-0) unstable; urgency=low
 
   * Trunk which is going to be v4
