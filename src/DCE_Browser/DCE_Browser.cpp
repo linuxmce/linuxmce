@@ -283,3 +283,173 @@ void DCE_Browser::CMD_Reduce_DPI(string &sCMD_Result,Message *pMessage)
 }
 
 
+//<-dceag-c81-b->
+
+	/** @brief COMMAND: #81 - Navigate Next */
+	/** Navigate to the next page if there is one. */
+		/** @param #41 StreamID */
+			/** The stream on which to do the navigation. */
+
+void DCE_Browser::CMD_Navigate_Next(int iStreamID,string &sCMD_Result,Message *pMessage)
+//<-dceag-c81-e->
+//<-dceag-c82-b->
+
+	/** @brief COMMAND: #82 - Navigate Prev */
+	/** Navigate to the previous web page if there is one */
+		/** @param #41 StreamID */
+			/** The stream on which to do the navigation. */
+
+void DCE_Browser::CMD_Navigate_Prev(int iStreamID,string &sCMD_Result,Message *pMessage)
+//<-dceag-c82-e->
+//<-dceag-c190-b->
+
+	/** @brief COMMAND: #190 - Enter/Go */
+	/** Enter was hit */
+		/** @param #41 StreamID */
+			/** ID of stream to apply */
+
+void DCE_Browser::CMD_EnterGo(int iStreamID,string &sCMD_Result,Message *pMessage)
+//<-dceag-c190-e->
+//<-dceag-c200-b->
+
+	/** @brief COMMAND: #200 - Move Up */
+	/** Up */
+		/** @param #41 StreamID */
+			/** ID of stream to apply */
+
+void DCE_Browser::CMD_Move_Up(int iStreamID,string &sCMD_Result,Message *pMessage)
+//<-dceag-c200-e->
+//<-dceag-c201-b->
+
+	/** @brief COMMAND: #201 - Move Down */
+	/** Down */
+		/** @param #41 StreamID */
+			/** ID of stream to apply */
+
+void DCE_Browser::CMD_Move_Down(int iStreamID,string &sCMD_Result,Message *pMessage)
+//<-dceag-c201-e->
+//<-dceag-c202-b->
+
+	/** @brief COMMAND: #202 - Move Left */
+	/** Left */
+		/** @param #41 StreamID */
+			/** ID of stream to apply */
+
+void DCE_Browser::CMD_Move_Left(int iStreamID,string &sCMD_Result,Message *pMessage)
+//<-dceag-c202-e->
+//<-dceag-c203-b->
+
+	/** @brief COMMAND: #203 - Move Right */
+	/** Right */
+		/** @param #41 StreamID */
+			/** ID of stream to apply */
+
+void DCE_Browser::CMD_Move_Right(int iStreamID,string &sCMD_Result,Message *pMessage)
+//<-dceag-c203-e->
+//<-dceag-c204-b->
+
+	/** @brief COMMAND: #204 - 0 */
+	/** 0 */
+
+void DCE_Browser::CMD_0(string &sCMD_Result,Message *pMessage)
+//<-dceag-c204-e->
+//<-dceag-c205-b->
+
+	/** @brief COMMAND: #205 - 1 */
+	/** 1 */
+
+void DCE_Browser::CMD_1(string &sCMD_Result,Message *pMessage)
+//<-dceag-c205-e->
+//<-dceag-c206-b->
+
+	/** @brief COMMAND: #206 - 2 */
+	/** 2 */
+
+void DCE_Browser::CMD_2(string &sCMD_Result,Message *pMessage)
+//<-dceag-c206-e->
+//<-dceag-c207-b->
+
+	/** @brief COMMAND: #207 - 3 */
+	/** 3 */
+
+void DCE_Browser::CMD_3(string &sCMD_Result,Message *pMessage)
+//<-dceag-c207-e->
+//<-dceag-c208-b->
+
+	/** @brief COMMAND: #208 - 4 */
+	/** 4 */
+
+void DCE_Browser::CMD_4(string &sCMD_Result,Message *pMessage)
+//<-dceag-c208-e->
+//<-dceag-c209-b->
+
+	/** @brief COMMAND: #209 - 5 */
+	/** 5 */
+
+void DCE_Browser::CMD_5(string &sCMD_Result,Message *pMessage)
+//<-dceag-c209-e->
+//<-dceag-c210-b->
+
+	/** @brief COMMAND: #210 - 6 */
+	/** 6 */
+
+void DCE_Browser::CMD_6(string &sCMD_Result,Message *pMessage)
+//<-dceag-c210-e->
+//<-dceag-c211-b->
+
+	/** @brief COMMAND: #211 - 7 */
+	/** 7 */
+
+void DCE_Browser::CMD_7(string &sCMD_Result,Message *pMessage)
+//<-dceag-c211-e->
+//<-dceag-c212-b->
+
+	/** @brief COMMAND: #212 - 8 */
+	/** 8 */
+
+void DCE_Browser::CMD_8(string &sCMD_Result,Message *pMessage)
+//<-dceag-c212-e->
+//<-dceag-c213-b->
+
+	/** @brief COMMAND: #213 - 9 */
+	/** 9 */
+
+void DCE_Browser::CMD_9(string &sCMD_Result,Message *pMessage)
+//<-dceag-c213-e->
+//<-dceag-c240-b->
+
+	/** @brief COMMAND: #240 - Back / Prior Menu */
+	/** Navigate back .. ( Escape ) */
+		/** @param #41 StreamID */
+			/** ID of stream to apply */
+
+void DCE_Browser::CMD_Back_Prior_Menu(int iStreamID,string &sCMD_Result,Message *pMessage)
+//<-dceag-c240-e->
+//<-dceag-c409-b->
+
+	/** @brief COMMAND: #409 - Save Bookmark */
+	/** Bookmark the current page. */
+		/** @param #17 PK_Users */
+			/** The user to save this under, or 0 for public */
+		/** @param #19 Data */
+			/** The picture to save as the thumbnail, in jpg format.  If not specified the plugin will try to grab a frame from the media player */
+		/** @param #29 PK_MediaType */
+			/** The media type, if not specified it will get it from the stream */
+		/** @param #45 PK_EntertainArea */
+			/** The entertainment area with the media */
+		/** @param #163 Description */
+			/** The description for this bookmark. */
+		/** @param #188 Position */
+			/** The position to save as.  For TV, CHAN: or PROG: or SERIES:.  Leave blank and the plugin will grab the current value */
+		/** @param #225 Always */
+			/** If true, then this is the start position */
+
+void DCE_Browser::CMD_Save_Bookmark(int iPK_Users,char *pData,int iData_Size,int iPK_MediaType,string sPK_EntertainArea,string sDescription,string sPosition,bool bAlways,string &sCMD_Result,Message *pMessage)
+//<-dceag-c409-e->
+//<-dceag-c1099-b->
+
+	/** @brief COMMAND: #1099 - Load Url */
+	/** the url you want loaded.  */
+
+void DCE_Browser::CMD_Load_Url(string &sCMD_Result,Message *pMessage)
+//<-dceag-c1099-e->
