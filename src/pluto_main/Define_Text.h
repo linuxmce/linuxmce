@@ -1221,6 +1221,13 @@
 #define TEXT_Lights_Wakeup_CONST 2164
 #define TEXT_Lights_House_Sleep_CONST 2165
 #define TEXT_MediaType_StreamedAudio_CONST 2166
+#define TEXT_To_call_everybody_in_the_house_dial_0_CONST 2167
+#define TEXT_If_you_know_the_extension_of_the_person_CONST 2168
+#define TEXT_To_leave_a_message_please_press_the_pou_CONST 2169
+#define TEXT_To_call_CONST 2170
+#define TEXT_dial_CONST 2171
+#define TEXT_Your_selection_is_not_valid_please_try_CONST 2172
+#define TEXT_Thank_you_for_calling_CONST 2173
 
 #define TEXT_TABLE "Text"
 #define TEXT_PK_TEXT_FIELD "PK_Text"

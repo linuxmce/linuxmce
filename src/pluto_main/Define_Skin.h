@@ -16,6 +16,7 @@
 #define SKIN_Jarvis_CONST 22
 #define SKIN_Brushed_Aluminum_CONST 23
 #define SKIN_UIta_CONST 24
+#define SKIN_Blue_Crystal_CONST 25
 
 #define SKIN_TABLE "Skin"
 #define SKIN_PK_SKIN_FIELD "PK_Skin"

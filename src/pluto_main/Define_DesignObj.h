@@ -2304,7 +2304,6 @@
 #define DESIGNOBJ_Monitor_Mode_CONST 5623
 #define DESIGNOBJ_grpMediaNavigation_MAME_CONST 5624
 #define DESIGNOBJ_mnuGamesRemote_CONST 5625
-#define DESIGNOBJ_popGameOptions_CONST 5626
 #define DESIGNOBJ_mnuRip_CONST 5627
 #define DESIGNOBJ_cellTracks_CONST 5628
 #define DESIGNOBJ_cellUseDrive_CONST 5629
@@ -2822,6 +2821,7 @@
 #define DESIGNOBJ_butDeleteRecording_CONST 6216
 #define DESIGNOBJ_butInfoRecording_CONST 6217
 #define DESIGNOBJ_butOK_CONST 6218
+#define DESIGNOBJ_popGameOptions_Arcade_CONST 6219
 
 #define DESIGNOBJ_TABLE "DesignObj"
 #define DESIGNOBJ_PK_DESIGNOBJ_FIELD "PK_DesignObj"

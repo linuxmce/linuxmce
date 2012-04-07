@@ -23,7 +23,7 @@
 #define DEVICEDATA_DHCP_CONST 28
 #define DEVICEDATA_PhoneType_CONST 29
 #define DEVICEDATA_PhoneNumber_CONST 31
-#define DEVICEDATA_Network_Interfaces_CONST 32
+#define DEVICEDATA_IPv4_Network_Interfaces_CONST 32
 #define DEVICEDATA_Alert_CONST 33
 #define DEVICEDATA_Mobile_Orbiter_Notification_CONST 34
 #define DEVICEDATA_Other_Phone_Notifications_CONST 35
@@ -249,6 +249,12 @@
 #define DEVICEDATA_Emergency_numbers_CONST 296
 #define DEVICEDATA_Emergency_phoneline_CONST 297
 #define DEVICEDATA_RequireCallToken_CONST 298
+#define DEVICEDATA_Mode_CONST 299
+#define DEVICEDATA_HeatPoint_CONST 300
+#define DEVICEDATA_CoolPoint_CONST 301
+#define DEVICEDATA_IPv6_Network_Interfaces_CONST 302
+#define DEVICEDATA_PPPoE_Settings_CONST 303
+#define DEVICEDATA_EmailSettings_CONST 304
 
 #define DEVICEDATA_TABLE "DeviceData"
 #define DEVICEDATA_PK_DEVICEDATA_FIELD "PK_DeviceData"
