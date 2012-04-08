@@ -51,9 +51,9 @@ if [[ "$1" == configure ]]; then
 		
 
 		service apache2 restart
-		service asterisk restart
+		which asterisk > /dev/null && service asterisk restart
 
-		Fax="[fax]
+		Fax="[fax-incoming]
         comment = archive of received faxes
         mangled names = no
         browsable = yes
