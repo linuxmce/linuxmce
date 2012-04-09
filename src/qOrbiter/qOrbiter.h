@@ -23,6 +23,19 @@
 //	DCE Implemenation for #2186 qOrbiter
 
 #include "Gen_Devices/qOrbiterBase.h"
+#include "DataGrid.h"
+#include "Virtual_Device_Translator.h"
+#include <QObject>
+#include <QImage>
+#include <QStringList>
+#include <contextobjects/epgchannellist.h>
+#include <contextobjects/playlistclass.h>
+#include <avitem.h>
+#include <contextobjects/avcommand.h>
+#include <datamodels/avdevice.h>
+#include <contextobjects/modelpage.h>
+#include <contextobjects/existingorbiter.h>
+
 //<-dceag-d-e->
 
 class basicImageProvider;
@@ -32,9 +45,15 @@ class basicImageProvider;
 //<-dceag-decl-b->
 namespace DCE
 {
-	class qOrbiter : public qOrbiter_Command
-	{
-//<-dceag-decl-e->
+class qOrbiter :  public qOrbiter_Command
+{
+    Q_OBJECT
+    Q_PROPERTY (QString mediaResponse READ getMediaResponse WRITE setMediaResponse NOTIFY mediaResponseChanged)
+    Q_PROPERTY (int media_pageSeperator READ getGridSeperator WRITE setGridSeperator NOTIFY newPageSeperator )
+    Q_PROPERTY (int i_current_mediaType READ getMediaType WRITE setMediaType NOTIFY mediaTypeChanged)
+
+
+    //<-dceag-decl-e->
     // Private member variables
 
     // Private methods
@@ -125,12 +144,19 @@ public:
     //<-dceag-const-b->
 public:
 		// Constructors/Destructor
-		qOrbiter(int DeviceID, string ServerAddress,bool bConnectEventHandler=true,bool bLocalMode=false,class Router *pRouter=NULL);
+        qOrbiter(int DeviceID, string ServerAddress,bool bConnectEventHandler=true,bool bLocalMode=false,class Router *pRouter=NULL, QObject *parent =0);
 		virtual ~qOrbiter();
-		virtual bool GetConfig();
-		virtual bool Register();
+
+        virtual bool Register();
 		virtual void ReceivedCommandForChild(DeviceData_Impl *pDeviceData_Impl,string &sCMD_Result,Message *pMessage);
 		virtual void ReceivedUnknownCommand(string &sCMD_Result,Message *pMessage);
+        virtual void OnReload();
+        virtual void OnDisconnect();
+        virtual void OnReplaceHandler();
+        virtual int PromptFor(std::string t);
+        virtual int PromptUser(std::string sPrompt, int iTimeoutSeconds, map<int, std::string> *p_mapPrompts);
+        virtual int DeviceIdInvalid();
+
 //<-dceag-const-e->
 
     //<-dceag-const2-b->
@@ -1177,6 +1203,7 @@ signals:
 
     //connections
     void checkReload();
+    void routerDisconnect();
 
     //floorplans
     void floorPlanImageData(const uchar* ,int);

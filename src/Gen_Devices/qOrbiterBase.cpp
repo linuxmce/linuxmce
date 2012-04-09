@@ -1,4 +1,4 @@
-#include "qOrbiterBase.h"
+
 #include "DeviceData_Impl.h"
 #include "Logger.h"
 
@@ -7,6 +7,7 @@ using namespace DCE;
 extern qOrbiter_Command *Create_qOrbiter(Command_Impl *pPrimaryDeviceCommand, DeviceData_Impl *pData, Event_Impl *pEvent, Router *pRouter);
 #include "qMediaPlayerBase.h"
 extern qMediaPlayer_Command *Create_qMediaPlayer(Command_Impl *pPrimaryDeviceCommand, DeviceData_Impl *pData, Event_Impl *pEvent, Router *pRouter);
+
 DeviceData_Impl *qOrbiter_Data::CreateData(DeviceData_Impl *Parent,char *pDataBlock,unsigned long AllocatedSize,char *CurrentPosition)
 {
 	// Peek ahead in the stream.  We're going to pass in the above pointers anyway so it won't affect the position

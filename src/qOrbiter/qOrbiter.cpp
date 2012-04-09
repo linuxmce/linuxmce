@@ -24,6 +24,7 @@
 #include "PlutoUtils/StringUtils.h"
 #include "PlutoUtils/Other.h"
 
+
 #include <iostream>
 using namespace std;
 using namespace DCE;
@@ -33,7 +34,7 @@ using namespace DCE;
 
 //<-dceag-const-b->
 // The primary constructor when the class is created as a stand-alone device
-qOrbiter::qOrbiter(int DeviceID, string ServerAddress,bool bConnectEventHandler,bool bLocalMode,class Router *pRouter)
+qOrbiter::qOrbiter(int DeviceID, string ServerAddress,bool bConnectEventHandler,bool bLocalMode,class Router *pRouter, QObject*parent)
 	: qOrbiter_Command(DeviceID, ServerAddress,bConnectEventHandler,bLocalMode,pRouter)
 //<-dceag-const-e->
 {
@@ -1808,7 +1809,8 @@ bool DCE::qOrbiter::initialize()
     {
 
 
-        //  qDebug("Checking Connection Error Type:");
+          qDebug("Checking Connection Error Type:");
+
         QApplication::processEvents(QEventLoop::AllEvents);
         if(  m_pEvent->m_pClientSocket->m_eLastError==ClientSocket::cs_err_CannotConnect )
         {
@@ -1825,7 +1827,7 @@ bool DCE::qOrbiter::initialize()
 
             LoggerWrapper::GetInstance()->Write(LV_CRITICAL, "Bad Device");
             emit statusMessage("Bad Device");
-            int errorType = DeviceIdInvalid();
+            int errorType =  this->DeviceIdInvalid();
             QApplication::processEvents(QEventLoop::AllEvents);
             return false;
         }
@@ -1843,8 +1845,9 @@ bool DCE::qOrbiter::initialize()
 
             LoggerWrapper::GetInstance()->Write(LV_CRITICAL, "Connect() Failed");
             Disconnect();
-            emit statusMessage("QOrbiter Connect() Failed :(");
+            emit statusMessage("QOrbiter Connect() Failed for"+QString::number(this->m_dwPK_Device) );
             QApplication::processEvents(QEventLoop::AllEvents);
+
             return false;
         }
 
@@ -3638,7 +3641,7 @@ void DCE::qOrbiter::moveDirection(QString direction) //connects ui buttons to dc
 {
     if(direction.contains("up"))
     {
-        CMD_Move_Up moveUp(m_dwPK_Device, iMediaPluginID, internal_streamID);
+        DCE::CMD_Move_Up moveUp(m_dwPK_Device, iMediaPluginID, internal_streamID);
         if(!SendCommand(moveUp))
         {
 
@@ -3646,7 +3649,7 @@ void DCE::qOrbiter::moveDirection(QString direction) //connects ui buttons to dc
     }
     else if(direction.contains("down"))
     {
-        CMD_Move_Down moveDown(m_dwPK_Device, iMediaPluginID, internal_streamID);
+        DCE::CMD_Move_Down moveDown(m_dwPK_Device, iMediaPluginID, internal_streamID);
         if(!SendCommand(moveDown))
         {
 
@@ -3654,7 +3657,7 @@ void DCE::qOrbiter::moveDirection(QString direction) //connects ui buttons to dc
     }
     else if(direction.contains("right"))
     {
-        CMD_Move_Right move(m_dwPK_Device, iMediaPluginID, internal_streamID);
+        DCE::CMD_Move_Right move(m_dwPK_Device, iMediaPluginID, internal_streamID);
         if(!SendCommand(move))
         {
 
@@ -3662,7 +3665,7 @@ void DCE::qOrbiter::moveDirection(QString direction) //connects ui buttons to dc
     }
     else  if(direction.contains("left"))
     {
-        CMD_Move_Left move(m_dwPK_Device, iMediaPluginID, internal_streamID);
+        DCE::CMD_Move_Left move(m_dwPK_Device, iMediaPluginID, internal_streamID);
         if(!SendCommand(move))
         {
 
@@ -3670,7 +3673,7 @@ void DCE::qOrbiter::moveDirection(QString direction) //connects ui buttons to dc
     }
     else if(direction.contains("enter"))
     {
-        CMD_EnterGo enter(m_dwPK_Device, iMediaPluginID, internal_streamID);
+        DCE::CMD_EnterGo enter(m_dwPK_Device, iMediaPluginID, internal_streamID);
         if(!SendCommand(enter))
         {
 
@@ -3924,9 +3927,6 @@ void DCE::qOrbiter::ShowBookMarks()
 {
 }
 
-void qOrbiter::getImage()
-{
-}
 
 void DCE::qOrbiter::processScreenShot(char picData, int picDataSize, std::string fileFormat)
 {
@@ -4000,7 +4000,7 @@ void DCE::qOrbiter::extraButtons(QString button)
 
     if(button.toLower() == "guide")
     {
-        CMD_Guide showGuide(m_dwPK_Device, m_dwPK_Device_NowPlaying );
+        DCE::CMD_Guide showGuide(m_dwPK_Device, m_dwPK_Device_NowPlaying );
         SendCommand(showGuide);
     }
 
@@ -4087,25 +4087,8 @@ int DCE::qOrbiter::PromptUser(std::string sPrompt, int iTimeoutSeconds, map<int,
     return 0;
 }
 
-void DCE::qOrbiter::adjustLighting(int level)
+int qOrbiter::DeviceIdInvalid()
 {
-    if (level == 10)
-    {
-        CMD_Set_Level up(m_dwPK_Device, iPK_Device_LightingPlugin, StringUtils::itos(level));
-        SendCommand(up);
-    }
-    else
-    {
-        CMD_Set_Level dn(m_dwPK_Device, iPK_Device_LightingPlugin, StringUtils::itos(level));
-        SendCommand(dn);
-
-    }
-}
-
-int DCE::qOrbiter::DeviceIdInvalid()
-{
-
-
     emit statusMessage("Device ID is invalid. Finding Existing Orbiters of this type");
     QApplication::processEvents(QEventLoop::AllEvents);
     QList<QObject*>  temp_orbiter_list ;
@@ -4129,6 +4112,23 @@ int DCE::qOrbiter::DeviceIdInvalid()
     emit deviceInvalid(temp_orbiter_list);
     return 0;
 }
+
+
+void DCE::qOrbiter::adjustLighting(int level)
+{
+    if (level == 10)
+    {
+        CMD_Set_Level up(m_dwPK_Device, iPK_Device_LightingPlugin, StringUtils::itos(level));
+        SendCommand(up);
+    }
+    else
+    {
+        CMD_Set_Level dn(m_dwPK_Device, iPK_Device_LightingPlugin, StringUtils::itos(level));
+        SendCommand(dn);
+
+    }
+}
+
 
 void DCE::qOrbiter::prepareFileList(int iPK_MediaType)
 {
@@ -4471,18 +4471,12 @@ void DCE::qOrbiter::setGridSeperator(int sep)
 }
 
 
-//<-dceag-getconfig-b->
-bool qOrbiter::GetConfig()
-{
-	if( !qOrbiter_Command::GetConfig() )
-		return false;
-//<-dceag-getconfig-e->
-//<-dceag-c126-b->
 
 	/** @brief COMMAND: #126 - Guide */
 	/** Go to the media guide if applicable, otherwise forward to media plugin. */
 
 void qOrbiter::CMD_Guide(string &sCMD_Result,Message *pMessage)
+{}
 //<-dceag-c126-e->
 //<-dceag-c190-b->
 
@@ -4492,6 +4486,7 @@ void qOrbiter::CMD_Guide(string &sCMD_Result,Message *pMessage)
 			/** ID of stream to apply */
 
 void qOrbiter::CMD_EnterGo(int iStreamID,string &sCMD_Result,Message *pMessage)
+{}
 //<-dceag-c190-e->
 //<-dceag-c194-b->
 
@@ -4501,6 +4496,7 @@ void qOrbiter::CMD_EnterGo(int iStreamID,string &sCMD_Result,Message *pMessage)
 			/** Depending on each device On/Off can be interpreted differently, but in genereal On/Off has a value of 1 for on and 0 for Off */
 
 void qOrbiter::CMD_Toggle_Power(string sOnOff,string &sCMD_Result,Message *pMessage)
+{}
 //<-dceag-c194-e->
 //<-dceag-c200-b->
 
@@ -4510,6 +4506,7 @@ void qOrbiter::CMD_Toggle_Power(string sOnOff,string &sCMD_Result,Message *pMess
 			/** ID of stream to apply */
 
 void qOrbiter::CMD_Move_Up(int iStreamID,string &sCMD_Result,Message *pMessage)
+{}
 //<-dceag-c200-e->
 //<-dceag-c201-b->
 
@@ -4518,7 +4515,7 @@ void qOrbiter::CMD_Move_Up(int iStreamID,string &sCMD_Result,Message *pMessage)
 		/** @param #41 StreamID */
 			/** ID of stream to apply */
 
-void qOrbiter::CMD_Move_Down(int iStreamID,string &sCMD_Result,Message *pMessage)
+void qOrbiter::CMD_Move_Down(int iStreamID,string &sCMD_Result,Message *pMessage){}
 //<-dceag-c201-e->
 //<-dceag-c202-b->
 
@@ -4528,6 +4525,7 @@ void qOrbiter::CMD_Move_Down(int iStreamID,string &sCMD_Result,Message *pMessage
 			/** ID of stream to apply */
 
 void qOrbiter::CMD_Move_Left(int iStreamID,string &sCMD_Result,Message *pMessage)
+{}
 //<-dceag-c202-e->
 //<-dceag-c203-b->
 
@@ -4537,6 +4535,7 @@ void qOrbiter::CMD_Move_Left(int iStreamID,string &sCMD_Result,Message *pMessage
 			/** ID of stream to apply */
 
 void qOrbiter::CMD_Move_Right(int iStreamID,string &sCMD_Result,Message *pMessage)
+{}
 //<-dceag-c203-e->
 //<-dceag-c240-b->
 
@@ -4546,6 +4545,7 @@ void qOrbiter::CMD_Move_Right(int iStreamID,string &sCMD_Result,Message *pMessag
 			/** ID of stream to apply */
 
 void qOrbiter::CMD_Back_Prior_Menu(int iStreamID,string &sCMD_Result,Message *pMessage)
+{}
 //<-dceag-c240-e->
 //<-dceag-c363-b->
 
@@ -4553,6 +4553,7 @@ void qOrbiter::CMD_Back_Prior_Menu(int iStreamID,string &sCMD_Result,Message *pM
 	/** If at a remote control, forward to media plugin.  Otherwise clear typing */
 
 void qOrbiter::CMD_Back_Clear_Entry(string &sCMD_Result,Message *pMessage)
+{}
 //<-dceag-c363-e->
 //<-dceag-c548-b->
 
@@ -4564,4 +4565,5 @@ void qOrbiter::CMD_Back_Clear_Entry(string &sCMD_Result,Message *pMessage)
 			/** ID of stream to apply */
 
 void qOrbiter::CMD_Menu(string sText,int iStreamID,string &sCMD_Result,Message *pMessage)
+{}
 //<-dceag-c548-e->

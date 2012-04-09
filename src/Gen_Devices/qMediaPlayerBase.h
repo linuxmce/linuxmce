@@ -31,8 +31,7 @@ public:
 	/**
 	* @brief Constructors
 	*/
-	qMediaPlayer_Event(int DeviceID, string ServerAddress, bool bConnectEventHandler=true) :
-		Event_Impl(DeviceID, DEVICETEMPLATE_qMediaPlayer_CONST, ServerAddress, bConnectEventHandler, SOCKET_TIMEOUT) {};
+    qMediaPlayer_Event(int DeviceID, string ServerAddress, bool bConnectEventHandler=true) :Event_Impl(DeviceID, DEVICETEMPLATE_qMediaPlayer_CONST, ServerAddress, bConnectEventHandler, SOCKET_TIMEOUT) {};
 	qMediaPlayer_Event(class ClientSocket *pOCClientSocket, int DeviceID) : Event_Impl(pOCClientSocket, DeviceID) {};
 
 	/**

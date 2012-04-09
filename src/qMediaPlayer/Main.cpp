@@ -30,7 +30,7 @@ const char *g_szCompile_Date="<=compile_date=>";
 
 
 using namespace DCE;
-
+/*
 // You can override this block if you don't want the app to reload in the event of a problem
 extern void (*g_pDeadlockHandler)(PlutoLock *pPlutoLock);
 extern void (*g_pSocketCrashHandler)(Socket *pSocket);
@@ -84,7 +84,7 @@ extern "C" {
 			return 0;
 	}
 }
-
+*/
 
 //<-dceag-plug-b->
 extern "C" {
@@ -108,6 +108,7 @@ extern "C" {
 		return pqMediaPlayer;
 	}
 }
+
 //<-dceag-plug-e->
 
 //<-dceag-main-b->

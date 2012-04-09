@@ -10,6 +10,8 @@
 #include "../pluto_main/Define_Event.h"
 #include "../pluto_main/Define_EventParameter.h"
 #include "../pluto_main/Define_DeviceData.h"
+#include "qMediaPlayerBase.h"
+#include <QObject>
 
 
 /**
@@ -334,10 +336,10 @@ public:
 
 //   OUR COMMAND CLASS 
 
-class qOrbiter_Command : public Command_Impl
+class qOrbiter_Command : public QObject, public Command_Impl
 {
 public:
-	qOrbiter_Command(int DeviceID, string ServerAddress,bool bConnectEventHandler=true,bool bLocalMode=false,class Router *pRouter=NULL)
+    qOrbiter_Command(int DeviceID, string ServerAddress,bool bConnectEventHandler=true,bool bLocalMode=false,class Router *pRouter=NULL, QObject *parent=0)
 	: Command_Impl(DeviceID, ServerAddress, bLocalMode, pRouter)
 	{
 	}
@@ -421,7 +423,7 @@ public:
 		PostConfigCleanup();
 		return true;
 	};
-	qOrbiter_Command(Command_Impl *pPrimaryDeviceCommand, DeviceData_Impl *pData, Event_Impl *pEvent, Router *pRouter) : Command_Impl(pPrimaryDeviceCommand, pData, pEvent, pRouter) {};
+    qOrbiter_Command(Command_Impl *pPrimaryDeviceCommand, DeviceData_Impl *pData, Event_Impl *pEvent, Router *pRouter, QObject *parent=0) : Command_Impl(pPrimaryDeviceCommand, pData, pEvent, pRouter) {};
 	virtual ~qOrbiter_Command() {};
 	qOrbiter_Event *GetEvents() { return (qOrbiter_Event *) m_pEvent; };
 	qOrbiter_Data *GetData() { return (qOrbiter_Data *) m_pData; };

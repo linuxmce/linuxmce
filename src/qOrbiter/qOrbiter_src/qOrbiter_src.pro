@@ -325,7 +325,10 @@ SOURCES += main.cpp \
     contextobjects/avcommand.cpp \
     shaders/filereader.cpp \
     contextobjects/timecodemanager.cpp \
-    imageProviders/floorplandeviceprovider.cpp
+    imageProviders/floorplandeviceprovider.cpp \
+    ../qMediaPlayer.cpp \
+    ../../Gen_Devices/qMediaPlayerBase.cpp
+
 
 # Please do not modify the following two lines. Required for deployment.
 include(qmlapplicationviewer/qmlapplicationviewer.pri)
@@ -428,7 +431,10 @@ HEADERS += \
     shaders/filereader.h \
     shaders/trace.h \
     contextobjects/timecodemanager.h \
-    imageProviders/floorplandeviceprovider.h
+    imageProviders/floorplandeviceprovider.h \
+    ../qMediaPlayer.h \
+    ../../Gen_Devices/qMediaPlayerBase.h
+
 
 OTHER_FILES += Readme.txt \
     qml/Splash.qml \
