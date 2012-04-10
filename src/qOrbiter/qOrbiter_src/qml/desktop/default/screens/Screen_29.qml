@@ -8,7 +8,7 @@ Item{
         width: style.orbiterW
         color: style.darkhighlight
         HomeButton{ x: 5; y: 5; width: 75; height: 75; smooth: true}
-        Component.onCompleted: sleepingMenu(false, 0)
+        Component.onCompleted: dcerouter.GetAlarms(false, 0)
         Rectangle{
             id:mainsleepingrect
             height:scaleY(65)
@@ -101,7 +101,7 @@ Item{
                                             MouseArea{
                                                 anchors.fill: parent
                                                 onClicked: {
-                                                    sleepingMenu(true, eventHandler)
+                                                    dcerouter.GetAlarms(true, eventHandler)
                                                     indicator.color = state ? "red" : "green"
                                                 }
                                             }

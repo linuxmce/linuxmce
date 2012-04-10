@@ -389,7 +389,8 @@ int main(int argc, char* argv[])
 
         // QObject::connect(w, SIGNAL(liveTVrequest()), simpleEPGmodel, SLOT(populate()));
 
-
+        //sleeping alarms
+        QObject::connect(pqOrbiter, SIGNAL(sleepingAlarmsReady(QList<QObject*>)), w, SLOT(showSleepingAlarms(QList<QObject*>)), Qt::QueuedConnection);
 
         //navigation
         QObject::connect(pqOrbiter,SIGNAL(gotoQml(QString)), w, SLOT(gotoQScreen(QString)),Qt::QueuedConnection);

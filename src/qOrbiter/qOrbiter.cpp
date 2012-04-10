@@ -3523,9 +3523,9 @@ void DCE::qOrbiter::GetAlarms(bool toggle, int grp)
     string valassign = "0";
     bool isSuccessfull;
 
-    CMD_Populate_Datagrid sleepingAlarms(m_dwPK_Device, iPK_Device_DatagridPlugIn, StringUtils::itos( m_dwIDataGridRequestCounter ), string(dgName), 29, option, 0, &pkVar, &valassign,  &isSuccessfull, &gHeight, &gWidth );
+    CMD_Populate_Datagrid sleepingAlarmsGrid(m_dwPK_Device, iPK_Device_DatagridPlugIn, StringUtils::itos( m_dwIDataGridRequestCounter ), string(dgName), 29, option, 0, &pkVar, &valassign,  &isSuccessfull, &gHeight, &gWidth );
 
-    if (SendCommand(sleepingAlarms))
+    if (SendCommand(sleepingAlarmsGrid))
     {
         /*
               initial request to populate the text only grid as denoted by the lack of a leading "_" as in _MediaFile_43
@@ -3579,13 +3579,16 @@ void DCE::qOrbiter::GetAlarms(bool toggle, int grp)
                     days.remove("Day of Week");
                     timeleft=breakerbreaker.at(1);
                     alarmtime=".";
-                    // sleeping_alarms.append(new SleepingAlarm( eventgrp, name, alarmtime, state, timeleft, days));
+                    sleepingAlarms.append(new SleepingAlarm( eventgrp, name, alarmtime, state, timeleft, days));
                     row = -1;
                     col++;
                     row++;
                 }
             }
+
+            emit sleepingAlarmsReady(sleepingAlarms);
         }
+        sleepingAlarms.clear();
     }
 
 }
@@ -3964,9 +3967,9 @@ void DCE::qOrbiter::ShowBookMarks()
     int cellsToRender= 0;
     bool isSuccessfull;
     string valassign="";
-    int gHeight = 3;
-    int gWidth = 0;
-    string dgIdent ="_bmark_"+StringUtils::itos(m_dwPK_Device);
+    int gHeight = 5;
+    int gWidth = 1;
+    string dgIdent ="bmark_"+StringUtils::itos(m_dwPK_Device);
     int iData_Size=0;
     int GridCurRow = 0;
     int GridCurCol= 0;
@@ -4008,12 +4011,12 @@ void DCE::qOrbiter::ShowBookMarks()
                 fk_file = pCell->GetValue();
                 cellTitle = QString::fromUtf8(pCell->m_Text);
 
-                qDebug() << cellTitle;
-                qDebug() << pCell->GetImagePath();
-                qDebug() << outer_index;
-                qDebug() << pCell->GetValue();
-                qDebug() << filePath;
-                qDebug() << pCell->m_mapAttributes.size();
+                qDebug() <<"title "<< cellTitle;
+                qDebug() << "image path " << pCell->GetImagePath();
+                qDebug() << "Column index "<< outer_index;
+                qDebug() << "Value " << pCell->GetValue();
+                qDebug() << "path " << filePath;
+                qDebug() << "Attributes " <<  pCell->m_mapAttributes.size();
 
                 titleImg.load(":/icons/icon.png");
                 bookmarkImg.load(":/icons/icon.png");
@@ -4031,6 +4034,7 @@ void DCE::qOrbiter::ShowBookMarks()
             emit bookmarkList(bookmarks);
         }
         bookmarks.clear();
+
     }
 }
 
@@ -4300,7 +4304,7 @@ void DCE::qOrbiter::prepareFileList(int iPK_MediaType)
             }
             else if(q_attributetype_sort == "12" && q_pk_attribute !="") //catches program
             {
-                q_attributetype_sort= "52";
+                q_attributetype_sort= "52,1";
             }
             else if(q_attributetype_sort == "1" && q_pk_attribute !="") //catches director
             {

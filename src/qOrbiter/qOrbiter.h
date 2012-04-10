@@ -111,6 +111,7 @@ public:
     QList<QObject*> resendAvButtons;
     QList<QObject*> deviceCommands;
     QList<QObject*> bookmarks;
+    QList<QObject*> sleepingAlarms;
 
     string *s_user;
     QString currentScreen;
@@ -1334,8 +1335,12 @@ signals:
     void deviceCommandList(QList<QObject*> f);
     void bookmarkList(QList<QObject*> b);
 
+
     //screensaver
     void currentScreenSaverImage(const uchar* ,int);
+
+    //sleeping alarms
+    void sleepingAlarmsReady(QList<QObject*> s);
 
     void discreteAudioChanged();
     void liveAvPath();

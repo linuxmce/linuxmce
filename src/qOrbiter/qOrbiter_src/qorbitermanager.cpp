@@ -1413,6 +1413,12 @@ void qorbiterManager::sleepingMenu(bool toggle, int grp)
     }
 }
 
+void qorbiterManager::showSleepingAlarms(QList<QObject *> s)
+{
+    sleeping_alarms = s;
+    qorbiterUIwin->rootContext()->setContextProperty("alarms", QVariant::fromValue(sleeping_alarms) );
+}
+
 
 void qorbiterManager::checkConnection(QString s)
 {

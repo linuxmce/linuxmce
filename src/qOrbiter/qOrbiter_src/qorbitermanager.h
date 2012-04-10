@@ -538,7 +538,7 @@ public slots: //note: Q_INVOKABLE means it can be called directly from qml
 
     //sleeping menu
     void sleepingMenu(bool toggle, int grp);
-
+    void showSleepingAlarms(QList<QObject*> s);
     //security
     void setHouseMode(int mode, int pass);
     void activateScreenSaver();
