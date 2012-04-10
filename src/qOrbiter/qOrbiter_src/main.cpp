@@ -349,17 +349,19 @@ int main(int argc, char* argv[])
         //timecodemanager signals / slots
         QObject::connect(pqOrbiter, SIGNAL(updateTimeCode(QString,int)), timecode, SLOT(start(QString,int)), Qt::QueuedConnection);
         QObject::connect(pqOrbiter, SIGNAL(stopTimeCode()), timecode, SLOT(restart()), Qt::QueuedConnection);
+
         //setup
         QObject::connect(w, SIGNAL(registerOrbiter(int,QString,int)), pqOrbiter,SLOT(registerDevice(int,QString,int)),Qt::QueuedConnection);
         QObject::connect(pqOrbiter,SIGNAL(startManager(QString,QString)), w, SLOT(qmlSetupLmce(QString,QString)),Qt::QueuedConnection);
         QObject::connect(pqOrbiter, SIGNAL(deviceInvalid(QList<QObject*>)), &orbiterWin,SLOT(prepareExistingOrbiters(QList<QObject *>)),Qt::QueuedConnection);
         QObject::connect(pqOrbiter,SIGNAL(routerInvalid()), &orbiterWin, SIGNAL(showExternal()),Qt::QueuedConnection);
+        QObject::connect(pqOrbiter, SIGNAL(connectionValid(bool)), &orbiterWin, SLOT(setConnectionState(bool)), Qt::QueuedConnection);
         QObject::connect(&orbiterWin,SIGNAL(setupLmce(QString,QString)), pqOrbiter, SLOT(qmlSetup(QString,QString)),Qt::DirectConnection);
         QObject::connect(w,SIGNAL(connectionValid(bool)), &orbiterWin, SLOT(setConnectionState(bool)));
-        QObject::connect(w,SIGNAL(deviceValid(bool)), &orbiterWin, SLOT(setDeviceState(bool)));
-        QObject::connect(w,SIGNAL(localConfigReady(bool)), &orbiterWin, SLOT(setLocalConfigState(bool)));
+        QObject::connect(pqOrbiter,SIGNAL(deviceValid(bool)), &orbiterWin, SLOT(setDeviceState(bool)));
+        QObject::connect(w,SIGNAL(localConfigReady(bool)), &orbiterWin, SLOT(setLocalConfigState(bool)),Qt::QueuedConnection);
         QObject::connect(w, SIGNAL(skinDataLoaded(bool)), &orbiterWin, SLOT(setSkinDataState(bool)));
-        QObject::connect(w,SIGNAL(skinIndexReady(bool)), &orbiterWin,SLOT(setSkinIndexState(bool)));
+        QObject::connect(w,SIGNAL(skinIndexReady(bool)), &orbiterWin,SLOT(setSkinIndexState(bool)),Qt::QueuedConnection);
         QObject::connect(w,SIGNAL(orbiterConfigReady(bool)), &orbiterWin, SLOT(setOrbiterConfigState(bool)));
         QObject::connect(pqOrbiter, SIGNAL(configReady(QByteArray)), w, SLOT(processConfig(QByteArray)),Qt::QueuedConnection);
         QObject::connect(w, SIGNAL(raiseSplash()), &orbiterWin, SLOT(showSplash()) );
@@ -480,7 +482,7 @@ int main(int argc, char* argv[])
         QObject::connect(pqOrbiter, SIGNAL(clearPlaylist()), storedVideoPlaylist,  SLOT(populate()),Qt::QueuedConnection);
         QObject::connect(pqOrbiter, SIGNAL(playlistDone()), storedVideoPlaylist, SIGNAL(activeItemChanged()),Qt::QueuedConnection);
         QObject::connect(pqOrbiter, SIGNAL(closeOrbiter()), w, SLOT(closeOrbiter()),Qt::QueuedConnection);
-
+        QObject::connect(w, SIGNAL(resendDeviceCode(int,int)), pqOrbiter, SLOT(sendAvCommand(int,int)), Qt::QueuedConnection);
 
 
         QObject::connect(pqOrbiter,SIGNAL(routerReloading(QString)), w, SLOT(reloadHandler()) );
@@ -512,7 +514,7 @@ int main(int argc, char* argv[])
         }
         else
         {
-
+            pqOrbiter->Disconnect();
         }
         a.exec();
 

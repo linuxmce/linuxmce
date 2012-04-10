@@ -171,7 +171,7 @@ void orbiterWindow::showSplash()
 
 void orbiterWindow::setSkinDataState(bool b)
 {
-    b_skinDataReady = b; emit connectionChanged();
+    b_skinDataReady = b; emit skinDataLoaded();
 }
 
 void orbiterWindow::setSkinIndexState(bool b)

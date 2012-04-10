@@ -12,7 +12,7 @@ SkinLoader::SkinLoader(QUrl baseUrl, qorbiterManager *uiRef, SkinDataModel *pare
 SkinLoader::~SkinLoader() {}
 
 void SkinLoader::loadSkin(QString name) {
-    qDebug() << "skinloader adding::" << name;
+   // qDebug() << "skinloader adding::" << name;
 
     //skinBase.setPath(m_baseUrl.toString());
     QUrl style;
@@ -65,7 +65,7 @@ void SkinLoader::continueLoading() {
         ui_reference->setDceResponse("Adding skin to list" + s_title);
         m_parent->appendRow(new SkinDataItem(skinBase, s_title, s_creator, s_description, s_version, s_target, skinPic, s_path, s_mainc, s_accentc, styleObject));
         loadercounter++;
-        qDebug() << "Loading counter: " << loadercounter;
+       // qDebug() << "Loading counter: " << loadercounter;
         if (loadercounter == totalSkinsToLoad)
 
         {
@@ -90,7 +90,7 @@ void SkinLoader::prepSkinsToLoad(QString skinlist)
     loadercounter = 0;
     skinsToLoad = skinlist.split(",");
     totalSkinsToLoad = skinsToLoad.size();
-    qDebug() << totalSkinsToLoad;
-    qDebug() << skinsToLoad.join("||");
+   // qDebug() << totalSkinsToLoad;
+   // qDebug() << skinsToLoad.join("||");
     loadSkin(skinsToLoad.first());
 }

@@ -11,6 +11,8 @@ Rectangle {
     width:1280
     onWidthChanged: console.log("detected size change")
 
+
+
     function scaleX(x){
         return x/100*appH
     }
@@ -44,39 +46,96 @@ Rectangle {
         width: scaleX(40)
         spacing: 2
 
-        Text {
-            id: connection_present
-            text: qsTr("Connection")
-            color: window.b_connectionPresent ? "transparent" : "red"
-            font.pointSize: window.b_connectionPresent ? 14 : 12
+        Rectangle{
+
+            id:connection_indicator
+            height: scaleX(5)
+            width: scaleX(5)
+
+            Image {
+                id: connection_icon
+                source: ""
+            }
+
+            Text {
+                id: connection_label
+                text: qsTr("Connection")
+                color: window.b_connectionPresent ? "green" : "red"
+                font.pointSize: window.b_connectionPresent ? 14 : 12
+            }
         }
 
-        Text {
-            id: device
-            text: qsTr("Device")
-            color: window.b_devicePresent ? "transparent" : "red"
-            font.pointSize: window.b_devicePresent ? 14 : 12
+        Rectangle{
+            id:device_indicator
+            height: scaleX(5)
+            width: scaleX(5)
+
+            Image {
+                id: device_icon
+                source: ""
+            }
+
+            Text {
+                id: device_Label
+                text: qsTr("Device")
+                color: window.b_devicePresent ? "green" : "red"
+                font.pointSize: window.b_devicePresent ? 14 : 12
+            }
         }
 
-        Text {
-            id: configuration_file
-            text: qsTr("Config")
-            color: window.b_localConfigReady ? "red" : "green"
-            font.pointSize: window.b_localConfigReady ? 14 : 12
+        Rectangle{
+            id:config_indicator
+            height: scaleX(5)
+            width: scaleX(5)
+
+            Image {
+                id: config_icon
+                source: ""
+            }
+
+            Text {
+                id: config_label
+                text: qsTr("Config")
+                color: window.b_localConfigReady ? "green" : "red"
+                font.pointSize: window.b_localConfigReady ? 14 : 12
+            }
         }
 
-        Text {
-            id: skin_index
-            text: qsTr("Skins")
-            opacity: 0
+        Rectangle{
+            id:skin_indicator
+            height: scaleX(5)
+            width: scaleX(5)
+
+            Image {
+                id: skin_icon
+                source: ""
+            }
+
+            Text {
+                id: skin_label
+                text: qsTr("Skins")
+                color: window.b_skinIndexReady ? "green" : "red"
+                font.pointSize: window.b_skinIndexReady ? 14 : 12
+            }
         }
 
-        Text {
-            id: orbiter_config
-            text: qsTr("Orbiter Config")
-            opacity: 0
-        }
+        Rectangle{
+            id:skindata_indicator
+            height: scaleX(5)
+            width: scaleX(5)
 
+            Image {
+                id: skinData_icon
+                source: ""
+            }
+
+            Text {
+                id: skin_data_label
+                text: qsTr("Orbiter Ready")
+                color: window.b_orbiterConfigReady ? "green" : "red"
+                font.pointSize: window.b_orbiterConfigReady ? 14 : 12
+            }
+        }
 
 
     }
@@ -259,11 +318,11 @@ Rectangle {
         id: loadingStatus
 
         text: "Status " + window.message
-        anchors.topMargin: -17
+        anchors.topMargin: scaleY(15)
         font.pixelSize: 14
         font.family: "Droid Sans"
         color: "white"
-        anchors.bottom: rectangle2.bottom
+        anchors.top: rectangle2.bottom
         anchors.horizontalCenter: rectangle2.horizontalCenter
     }
 

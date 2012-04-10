@@ -188,6 +188,6 @@ void SkinDataModel::setActiveSkin(QString name)
 
 void SkinDataModel::checkStatus()
 {
-
+    qDebug("Finished loading skins") ;
         emit skinsFinished(true);
 }

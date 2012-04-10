@@ -51,7 +51,11 @@ class qOrbiter :  public qOrbiter_Command
     Q_PROPERTY (QString mediaResponse READ getMediaResponse WRITE setMediaResponse NOTIFY mediaResponseChanged)
     Q_PROPERTY (int media_pageSeperator READ getGridSeperator WRITE setGridSeperator NOTIFY newPageSeperator )
     Q_PROPERTY (int i_current_mediaType READ getMediaType WRITE setMediaType NOTIFY mediaTypeChanged)
-
+    Q_PROPERTY (bool discreteAudio READ getDiscreteAudio WRITE setDiscreteAudio NOTIFY discreteAudioChanged )
+    Q_PROPERTY (bool m_bContainsVideo READ getContainsVideo WRITE setContainsVideo NOTIFY containsVideo())
+    Q_PROPERTY (bool usingLiveAv READ getLiveAvPath WRITE setLiveAvPath NOTIFY liveAvPath)
+    Q_PROPERTY (bool m_bIsOSD READ getOsd WRITE setOsd NOTIFY isOsd)
+    Q_PROPERTY (bool monitorAvailible READ getMonitorStatus WRITE setMonitorStatus NOTIFY monitorStatusChanged)
 
     //<-dceag-decl-e->
     // Private member variables
@@ -64,6 +68,11 @@ public:
     //DataGridTable pDataGridTable;
     int m_dwPK_Device_NowPlaying,m_dwPK_Device_NowPlaying_Video,m_dwPK_Device_NowPlaying_Audio,m_dwPK_Device_CaptureCard;  /** < set by the media engine, this is whatever media device is currently playing.  Capture Card is non null if we're displaying media via this card */
     bool m_bPK_Device_NowPlaying_Audio_DiscreteVolume,m_bContainsVideo,m_bUsingLiveAVPath;
+
+    bool discreteAudio;
+    bool usingLiveAv;
+    bool monitorAvailible;
+
     bool retrieving;
     bool finished;
     bool b_mediaPlaying;
@@ -1192,6 +1201,7 @@ signals:
     void startManager(QString, QString);
     void deviceInvalid(QList<QObject*>);
     void routerInvalid();
+    void connectionValid(bool v);
     void routerReloading(QString msg);
     void replaceDevice();
     void closeOrbiter();
@@ -1200,6 +1210,7 @@ signals:
     void setMyIp(QString ip);
     void newTCport(int port);
     void mediaResponseChanged();
+    void  deviceValid(bool s);
 
     //connections
     void checkReload();
@@ -1321,7 +1332,30 @@ signals:
     //screensaver
     void currentScreenSaverImage(const uchar* ,int);
 
+    void discreteAudioChanged();
+    void liveAvPath();
+    void containsVideo();
+    void isOsd();
+    void monitorStatusChanged();
+
 public slots:
+
+    void setDiscreteAudio(bool audio) { discreteAudio = audio;  emit discreteAudioChanged(); }
+    bool getDiscreteAudio() {return discreteAudio; }
+
+    void setLiveAvPath(bool path) { usingLiveAv = path; qDebug() ; emit liveAvPath();}
+    bool getLiveAvPath() { return usingLiveAv;}
+
+    void setContainsVideo(bool video) {m_bContainsVideo = video; emit containsVideo();}
+    bool getContainsVideo() {return m_bContainsVideo;}
+
+    void setOsd(bool osd) { m_bIsOSD = osd; emit isOsd();}
+    bool getOsd() { return m_bIsOSD;}
+
+    void setMonitorStatus(bool state) { monitorAvailible = state; emit monitorStatusChanged();}
+    bool getMonitorStatus() {return monitorAvailible;}
+
+
     //setup
     void executeCommandGroup(int cmdGrp);
     void shutdownMD();
@@ -1448,8 +1482,7 @@ public slots:
     void saveScreenAttribute(QString attribute, QByteArray data);
     void sendAvCommand(int deviceto, int command);
     //floorplans
-    void getFloorplanDeviceCommand(int device);
-
+    void getFloorplanDeviceCommand(int device);    
 
 };
 

@@ -1017,13 +1017,47 @@ void qOrbiter::CMD_Set_Now_Playing(string sPK_DesignObj,string sValue_To_Assign,
 
 
     i_current_mediaType = iPK_MediaType;
+    /* string::size_type pos=0;
+    m_dwPK_Device_NowPlaying = atoi(StringUtils::Tokenize(sList_PK_Device,",",pos).c_str());
+    m_dwPK_Device_NowPlaying_Video = atoi(StringUtils::Tokenize(sList_PK_Device,",",pos).c_str());
+    m_dwPK_Device_NowPlaying_Audio = atoi(StringUtils::Tokenize(sList_PK_Device,",",pos).c_str());
+    m_dwPK_Device_CaptureCard = atoi(StringUtils::Tokenize(sList_PK_Device,",",pos).c_str());
+   m_iStreamID=iStreamID;
+    m_iPK_MediaType=iPK_MediaType;
+    m_sNowPlaying_Window = sName;
+    m_sNowPlaying = SubstituteVariables(sValue_To_Assign, NULL, 0, 0);
+    m_sNowPlaying_Section = SubstituteVariables(sText, NULL, 0, 0);
+    */
     string::size_type pos=0;
     m_dwPK_Device_NowPlaying = atoi(StringUtils::Tokenize(sList_PK_Device,",",pos).c_str());
-
     m_dwPK_Device_NowPlaying_Video = atoi(StringUtils::Tokenize(sList_PK_Device,",",pos).c_str());
     m_dwPK_Device_NowPlaying_Audio = atoi(StringUtils::Tokenize(sList_PK_Device,",",pos).c_str());
     m_dwPK_Device_CaptureCard = atoi(StringUtils::Tokenize(sList_PK_Device,",",pos).c_str());
 
+    if(m_dwPK_Device_CaptureCard != 0)
+    {
+        setMonitorStatus(true);
+    }
+
+    m_bPK_Device_NowPlaying_Audio_DiscreteVolume = atoi(StringUtils::Tokenize(sList_PK_Device,",",pos).c_str())==1;
+    setDiscreteAudio(m_bPK_Device_NowPlaying_Audio_DiscreteVolume);
+
+    m_bContainsVideo = atoi(StringUtils::Tokenize(sList_PK_Device,",",pos).c_str())==1;
+    setContainsVideo(m_bContainsVideo);
+
+
+    m_bUsingLiveAVPath = atoi(StringUtils::Tokenize(sList_PK_Device,",",pos).c_str())==1;
+    setLiveAvPath(m_bUsingLiveAVPath);
+     qDebug() << m_bUsingLiveAVPath;
+    pos=0;
+    /*
+    m_iPK_Screen_Remote=atoi(StringUtils::Tokenize(sPK_DesignObj,",",pos).c_str());
+    m_iPK_DesignObj_Remote_Popup=atoi(StringUtils::Tokenize(sPK_DesignObj,",",pos).c_str());  // ON UI2 the leftmost popup menu on the main menu
+    m_iPK_Screen_FileList=atoi(StringUtils::Tokenize(sPK_DesignObj,",",pos).c_str());
+    m_iPK_Screen_RemoteOSD=atoi(StringUtils::Tokenize(sPK_DesignObj,",",pos).c_str());
+    m_iPK_Screen_OSD_Speed=atoi(StringUtils::Tokenize(sPK_DesignObj,",",pos).c_str());
+    m_iPK_Screen_OSD_Track=atoi(StringUtils::Tokenize(sPK_DesignObj,",",pos).c_str());
+    */
     QString scrn = sPK_DesignObj.c_str();
     int pos1 = scrn.indexOf(",");
     scrn.remove(pos1, scrn.length());
@@ -1770,6 +1804,7 @@ bool DCE::qOrbiter::initialize()
 
         m_bRouterReloading = false;
         m_bReload = false;
+        emit deviceValid(true);
         emit statusMessage("Starting Manager");
         emit startManager(QString::number(m_dwPK_Device), QString::fromStdString(m_sHostName) );
 
@@ -1828,6 +1863,7 @@ bool DCE::qOrbiter::initialize()
             LoggerWrapper::GetInstance()->Write(LV_CRITICAL, "Bad Device");
             emit statusMessage("Bad Device");
             int errorType =  this->DeviceIdInvalid();
+            emit connectionValid(true);
             QApplication::processEvents(QEventLoop::AllEvents);
             return false;
         }
@@ -4459,10 +4495,12 @@ void DCE::qOrbiter::sendAvCommand(int deviceto, int command)
 {
     string cmd_resp="";
     string cmd_string;
-    QString commandString =  QString::number(m_dwPK_Device) + " " + QString::number(deviceto) + " " + "1" + " " + QString::number(command);
+    QString commandString =  QString::number(m_dwPK_Device_NowPlaying) + " " + QString::number(deviceto) + " " + "1" + " " + QString::number(command);
     cmd_string = commandString.toStdString();
     DCE::Message avMessage(cmd_string);
-    m_pEvent->SendMessage(&avMessage);
+  //  Event_Impl *msg_event(m_pEvent->m_pClientSocket, -1003);
+  //  msg_event->SendMessage(&avMessage);
+    m_pEvent->SendMessage(&avMessage, cmd_resp);
 }
 
 void DCE::qOrbiter::setGridSeperator(int sep)

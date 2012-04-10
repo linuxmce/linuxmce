@@ -135,6 +135,18 @@ Rectangle {
                             font.pixelSize: scaleY(2)
                             color: "white"
                         }
+
+                        Text {
+                            id: live_av
+                            wrapMode: "NoWrap"
+                            text: qsTr("ScreenShot Availible:") + dcerouter.monitorAvailible
+                            font.family: "Droid Sans"
+                            font.bold: true
+                            smooth: true
+                            horizontalAlignment: Text.AlignHCenter
+                            font.pixelSize: scaleY(2)
+                            color: "white"
+                        }
                     }
                 }
             }

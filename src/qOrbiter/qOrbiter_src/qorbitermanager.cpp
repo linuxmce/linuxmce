@@ -66,7 +66,7 @@ qorbiterManager::qorbiterManager(QDeclarativeView *view, QObject *parent) :
 
     if (readLocalConfig())
     {
-        emit localConfigReady( true);
+        emit localConfigReady(true);
         QApplication::processEvents(QEventLoop::AllEvents);
     }
     else

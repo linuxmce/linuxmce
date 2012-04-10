@@ -369,6 +369,7 @@ signals:
     void bindMediaRemote(bool b);
     void userChanged(int user);
     void requestMoreGridData();
+    void resendDeviceCode(int from, int to);
 
     void dceResponseChanged();
     void imageAspectChanged();
@@ -475,6 +476,7 @@ public slots: //note: Q_INVOKABLE means it can be called directly from qml
     void setCommandList(QList<QObject*> l);
     void setBoundStatus(bool b);
     void grabStreamImage();
+    void resendCode(int from, int to) { emit resendDeviceCode( from,  to);}
 
     Q_INVOKABLE void playMedia(QString FK_Media);
     Q_INVOKABLE void stopMedia();
