@@ -134,6 +134,7 @@ DELETE FROM extensions WHERE exten='*43';
 DELETE FROM extensions WHERE exten='*60';
 DELETE FROM extensions WHERE exten='*65';
 DELETE FROM extensions WHERE context='fax';
+DELETE FROM extensions WHERE context='fax-transmit';
 DELETE FROM extensions WHERE exten='*96';
 
 ALTER TABLE extensions AUTO_INCREMENT=1;
@@ -183,7 +184,6 @@ INSERT INTO extensions (context, exten, priority, app, appdata) VALUES
 ('applications', '*65',10, 'Hangup', '');
 
 -- *70: Incoming Fax
-DELETE FROM extensions WHERE context='fax';
 INSERT INTO extensions (context, exten, priority, app, appdata) VALUES
 ('fax', '*70', 1, 'Answer', ''),
 ('fax', '*70', 2, 'Noop', 'Receiving fax for DID ${CALLERID(DNID)}'),
@@ -194,6 +194,19 @@ INSERT INTO extensions (context, exten, priority, app, appdata) VALUES
 ('fax', '*70', 7, 'Hangup', ''),
 ('fax', 'h', 1, 'System', 'sudo -u root /usr/pluto/bin/Fax_Process.sh ${FAXFILENOEXT} ${CALLERID(DNID)} ${CALLERID(num)} "${CALLERID(name)}"'),
 ('fax', 'h', 2, 'Hangup', '');
+
+-- *72: Outgoing Fax
+ INTO extensions (context, exten, priority, app, appdata) VALUES
+('fax-transmit', '*71', 1, 'NoOp', '*** LINUXMCE SENDING FAX ***'),
+('fax-transmit', '*71', 2, 'Set', 'FAXOPT(ecm)=yes'),
+('fax-transmit', '*71', 3, 'Set', 'FAXOPT(headerinfo)=${HEADER}'),
+('fax-transmit', '*71', 4, 'Set', 'FAXOPT(localstationid)=${STATIONID}'),
+('fax-transmit', '*71', 5, 'NoOp', '*** SENDING FILE : ${FAXFILE} ***'),
+('fax-transmit', '*71', 6, 'SendFAX', '${FAXFILE},d'),
+('fax-transmit', '*71', 7, 'Hangup', ''),
+('fax-transmit', 'h', 1, 'NoOp', 'FAXOPT(statusstr) : ${FAXOPT(statusstr)}'),
+('fax-transmit', 'h', 2, 'NoOp', 'FAXOPT(remotestationid) : ${FAXOPT(remotestationid)}'),
+('fax-transmit', 'h', 3, 'Hangup', '');
 
 -- *95: test Music On Hold (MOH)
 INSERT INTO extensions (context, exten, priority, app, appdata) VALUES

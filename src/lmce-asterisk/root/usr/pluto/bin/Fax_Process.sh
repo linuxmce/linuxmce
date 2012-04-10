@@ -123,10 +123,10 @@ rm -f $INFOFILE
 rm -f $SOURCEFILE
 
 # Archive faxes for now
-mkdir -p /home/fax
-chown asterisk:asterisk /home/fax
+mkdir -p /home/fax/incoming
+chown -R asterisk:asterisk /home/fax
 ARCHIVEFILE="$DTFAX $(basename $DESTFILE)"
-ARCHIVEFILE="/home/fax/$(echo $ARCHIVEFILE | sed 's/ /_/g' | sed 's/:/./g' | sed 's/\//-/g')"
+ARCHIVEFILE="/home/fax/incoming/$(echo $ARCHIVEFILE | sed 's/ /_/g' | sed 's/:/./g' | sed 's/\//-/g')"
 mv -f $DESTFILE $ARCHIVEFILE
 chown asterisk:asterisk $ARCHIVEFILE
 chmod 666 $ARCHIVEFILE

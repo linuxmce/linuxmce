@@ -36,7 +36,9 @@ if [[ "$1" == configure ]]; then
 		#create asterisk account if it does not yet exist
 		id -u asterisk >/dev/null 2>/dev/null
 		if [[ $? -ne 0 ]]; then
-			adduser www-data asterisk
+			adduser asterisk
+			usermod -a -G www-data asterisk
+			usermod -a -G asterisk www-data
 		fi
 		
 		mkdir -p /var/lib/asterisk/mohmp3
@@ -53,8 +55,8 @@ if [[ "$1" == configure ]]; then
 		service apache2 restart
 		which asterisk > /dev/null && service asterisk restart
 
-		Fax="[fax-incoming]
-        comment = archive of received faxes
+		Fax="[fax]
+        comment = Archive of incoming and outgoing faxes
         mangled names = no
         browsable = yes
         writable = yes
@@ -80,5 +82,8 @@ if [[ "$1" == configure ]]; then
 	        mv -f /etc/sudoers.$$ /etc/sudoers
 	        chmod 440 /etc/sudoers
 	fi
-	mkdir -p /home/fax
+	mkdir -p /home/fax/incoming
+	mkdir -p /home/fax/outgoing
+	chown -R asterisk:asterisk /home/fax
+	chmod -R 770 /home/fax
 fi
