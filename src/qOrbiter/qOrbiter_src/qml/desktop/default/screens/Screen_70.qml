@@ -276,6 +276,7 @@ Rectangle {
                                 anchors.fill: parent
                                 onClicked:  {
 
+                                    dcerouter.ShowBookMarks()
                                     MyJs.createStageComponent("../components/Bookmarks.qml", storedvideoremote)
 
                                 }

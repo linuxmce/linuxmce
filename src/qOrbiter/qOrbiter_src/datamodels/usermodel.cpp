@@ -60,7 +60,11 @@ void UserModel::handleItemChange()
 UserItem * UserModel::find(const QString &id) const
 {
   foreach(UserItem* item, m_list) {
-    if(item->id() == id) return item;
+
+    if(item->pk_user_get() == id.toInt())
+    {
+        return item;
+    }
   }
   return 0;
 }

@@ -22,7 +22,7 @@ Rectangle {
     }
     Text {
         id: nameLabel
-        text: currentuser
+        text: manager.sPK_User
         font.bold: true
 
 

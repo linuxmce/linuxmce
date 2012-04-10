@@ -1373,9 +1373,9 @@ void qorbiterManager::setHouseMode(int mode, int pass)
 
 void qorbiterManager::setCurrentUser(QString inc_user)
 {
-    sPK_User = userList->find(sPK_User)->data(1).toString();
+    qDebug() << "Incoming user::" << inc_user;
+    sPK_User = userList->find(inc_user)->id();
     int user = inc_user.toInt();
-    // pqOrbiter->setUser(user);
     emit userChanged(user);
 }
 

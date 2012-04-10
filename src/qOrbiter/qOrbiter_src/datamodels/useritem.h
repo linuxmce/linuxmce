@@ -16,11 +16,11 @@ class UserItem: public QObject
 public:
   enum Roles {
     NameRole = Qt::UserRole+1, // username
-    FirstNameRole,
-    LastNamRole,
-    NickNameRole,
-    PKUserRole= Qt::UserRole+4,
-    UserModeRole,
+    FirstNameRole=Qt::UserRole+2,
+    LastNamRole=Qt::UserRole+3,
+    NickNameRol=Qt::UserRole+4,
+    PKUserRole = Qt::UserRole+5,
+    UserModeRole= Qt::UserRole+6,
     RequirePinRole,
     PhoneExtensionRole,
     ImageRole,

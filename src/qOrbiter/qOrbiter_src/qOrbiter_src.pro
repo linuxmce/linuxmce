@@ -327,7 +327,8 @@ SOURCES += main.cpp \
     contextobjects/timecodemanager.cpp \
     imageProviders/floorplandeviceprovider.cpp \
     ../qMediaPlayer.cpp \
-    ../../Gen_Devices/qMediaPlayerBase.cpp
+    ../../Gen_Devices/qMediaPlayerBase.cpp \
+    contextobjects/bookmarkitem.cpp
 
 
 # Please do not modify the following two lines. Required for deployment.
@@ -433,7 +434,8 @@ HEADERS += \
     contextobjects/timecodemanager.h \
     imageProviders/floorplandeviceprovider.h \
     ../qMediaPlayer.h \
-    ../../Gen_Devices/qMediaPlayerBase.h
+    ../../Gen_Devices/qMediaPlayerBase.h \
+    contextobjects/bookmarkitem.h
 
 
 OTHER_FILES += Readme.txt \
