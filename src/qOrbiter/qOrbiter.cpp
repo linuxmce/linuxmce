@@ -3960,12 +3960,13 @@ void DCE::qOrbiter::CopyDisc()
 void DCE::qOrbiter::ShowBookMarks()
 {
    // bmark_134
+    qDebug("Getting Bookmarks");
     int cellsToRender= 0;
     bool isSuccessfull;
     string valassign="";
     int gHeight = 3;
     int gWidth = 0;
-    string dgIdent ="bmark_"+StringUtils::itos(m_dwPK_Device);
+    string dgIdent ="_bmark_"+StringUtils::itos(m_dwPK_Device);
     int iData_Size=0;
     int GridCurRow = 0;
     int GridCurCol= 0;
@@ -3994,21 +3995,45 @@ void DCE::qOrbiter::ShowBookMarks()
             QString cellTitle;
             QString fk_file;
             QString filePath;
-            int index;
-
+            QImage titleImg;
+            QImage bookmarkImg;
+            int outer_index;
+            outer_index = 0;
             for(MemoryDataTable::iterator it=pDataGridTable->m_MemoryDataTable.begin();it!=pDataGridTable->m_MemoryDataTable.end();++it)
             {
+
                 DataGridCell *pCell = it->second;
                 const char *pPath = pCell->GetImagePath();
                 filePath = QString::fromUtf8(pPath);
                 fk_file = pCell->GetValue();
                 cellTitle = QString::fromUtf8(pCell->m_Text);
-                index = pDataGridTable->CovertColRowType(it->first).first;
+
                 qDebug() << cellTitle;
+                qDebug() << pCell->GetImagePath();
+                qDebug() << outer_index;
+                qDebug() << pCell->GetValue();
+                qDebug() << filePath;
+                qDebug() << pCell->m_mapAttributes.size();
+
+                titleImg.load(":/icons/icon.png");
+                bookmarkImg.load(":/icons/icon.png");
+
+                if(outer_index==2)
+                {
+                  bookmarks.append(new BookmarkItem(cellTitle, titleImg, bookmarkImg));
+                  outer_index = 0;
+                }
+                else
+                {
+                    outer_index++;
+                }
             }
+            emit bookmarkList(bookmarks);
         }
+        bookmarks.clear();
     }
 }
+
 
 
 void DCE::qOrbiter::processScreenShot(char picData, int picDataSize, std::string fileFormat)

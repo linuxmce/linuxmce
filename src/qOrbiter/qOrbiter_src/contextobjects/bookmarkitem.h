@@ -23,16 +23,27 @@
   */
 
 #include <QDeclarativeItem>
-
-class BookmarkItem : public QDeclarativeItem
+#include <QImage>
+class BookmarkItem : public QObject
 {
+    Q_PROPERTY(QString title READ getTitle WRITE setTitle NOTIFY titleChanged)
     Q_OBJECT
 public:
-    explicit BookmarkItem(QDeclarativeItem *parent = 0);
-    
+    explicit BookmarkItem(QString incTitle, QImage incMediaImage, QImage incBookmarkImage, QObject *parent = 0);
+    QString title;
+    QImage mediaImage;
+    QImage bookmarkImage;
 signals:
-    
+    void titleChanged();
+    void mediaImageChanged();
+    void bookmarkImageChanged();
 public slots:
+    void setTitle(QString inc_title) {title = inc_title; emit titleChanged();}
+    QString getTitle() {return title;}
+
+    void setMediaImage (QImage inc_mediaImage) {mediaImage = inc_mediaImage;}
+
+    void setBookmarkImage (QImage inc_bookmark) {bookmarkImage = inc_bookmark;}
     
 };
 

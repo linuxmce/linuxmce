@@ -274,6 +274,7 @@ Param 10 - pk_attribute
     QList<QObject*>pages;
     QStringList *skinNames;
     QList<QObject*> current_floorplan_devices;
+    QList<QObject*> current_bookmarks;
 
     MediaSubTypeModel *mediaTypeFilter;
     FilterModel *uiFileFilter;
@@ -450,7 +451,7 @@ public slots: //note: Q_INVOKABLE means it can be called directly from qml
     QString getCurrentScreen();
     void setCurrentScreen(QString s);
 
-    Q_INVOKABLE bool writeConfig();
+    bool writeConfig();
     bool readLocalConfig();
     void setConnectedState(bool state) { connectedState = state;  if(state == false) {checkConnection("Connection Changed");} emit connectedStateChanged(); }
     bool getConnectedState () {return connectedState;}
@@ -458,17 +459,17 @@ public slots: //note: Q_INVOKABLE means it can be called directly from qml
     QString getDceResponse () ;
 
     //security related
-    Q_INVOKABLE void requestSecurityPic(int i_pk_camera_device, int h, int w);
+    void requestSecurityPic(int i_pk_camera_device, int h, int w);
 
     //livetv related
-    Q_INVOKABLE void changeChannels(QString chan);
-    Q_INVOKABLE void gridChangeChannel(QString chan, QString chanid);
+    void changeChannels(QString chan);
+    void gridChangeChannel(QString chan, QString chanid);
 
     //media related
     void getLiveTVPlaylist();
     void getStoredPlaylist();
-    Q_INVOKABLE void setNowPlayingData();
-    Q_INVOKABLE void setNowPlayingTv();
+    void setNowPlayingData();
+    void setNowPlayingTv();
     void setScreenShotVariables(QList <QObject*> l);
     void setMediaScreenShot(QImage screen_shot);
     void saveScreenShot(QString attribute);
@@ -477,21 +478,22 @@ public slots: //note: Q_INVOKABLE means it can be called directly from qml
     void setBoundStatus(bool b);
     void grabStreamImage();
     void resendCode(int from, int to) { emit resendDeviceCode( from,  to);}
+    void showBookmarks(QList<QObject*> t);
 
-    Q_INVOKABLE void playMedia(QString FK_Media);
-    Q_INVOKABLE void stopMedia();
-    Q_INVOKABLE void ff_media(int speed);
-    Q_INVOKABLE void rw_media(int speed);
-    Q_INVOKABLE void pauseMedia();
+    void playMedia(QString FK_Media);
+    void stopMedia();
+    void ff_media(int speed);
+    void rw_media(int speed);
+    void pauseMedia();
     void adjustVolume(int vol);
 
     void jogPosition(QString jog);
     void updateImageChanged(QImage img);
 
-    Q_INVOKABLE void cleanupScreenie();
+    void cleanupScreenie();
 
-    Q_INVOKABLE void setActiveSkin(QString name);
-    Q_INVOKABLE  bool loadSkins(QUrl url);
+    void setActiveSkin(QString name);
+    bool loadSkins(QUrl url);
 
     void changedPlaylistPosition(QString position);
 
@@ -503,8 +505,8 @@ public slots: //note: Q_INVOKABLE means it can be called directly from qml
     void getGrid(int i);
     void addMediaItem(gridItem* g);
     void updateModel();
-    Q_INVOKABLE void setStringParam(int paramType, QString param);
-    Q_INVOKABLE void goBackGrid();
+    void setStringParam(int paramType, QString param);
+    void goBackGrid();
 
     void showFileInfo(QString fk_file);
 
@@ -525,17 +527,17 @@ public slots: //note: Q_INVOKABLE means it can be called directly from qml
     void checkConnection(QString s);
     void processError(QString msg);
     //dce related slots
-    Q_INVOKABLE void execGrp(int grp);        //for command groups
-    Q_INVOKABLE void closeOrbiter();
+    void execGrp(int grp);        //for command groups
+    void closeOrbiter();
     void reloadHandler();
 
     //floorplans
-    Q_INVOKABLE void showfloorplan(int fptype);
+    void showfloorplan(int fptype);
     //random c++ related slots
     bool requestDataGrid();
 
     //sleeping menu
-    Q_INVOKABLE void sleepingMenu(bool toggle, int grp);
+    void sleepingMenu(bool toggle, int grp);
 
     //security
     void setHouseMode(int mode, int pass);

@@ -471,6 +471,7 @@ int main(int argc, char* argv[])
         //controls
         QObject::connect(pqOrbiter, SIGNAL(resendAvButtonList(QList<QObject*>)), w, SLOT(showDeviceCodes(QList<QObject*>)), Qt::QueuedConnection);
         QObject::connect(pqOrbiter, SIGNAL(deviceCommandList(QList<QObject*>)), w, SLOT(setCommandList(QList<QObject*>)), Qt::QueuedConnection);
+        QObject::connect(pqOrbiter, SIGNAL(bookmarkList(QList<QObject*>)), w, SLOT(showBookmarks(QList<QObject*>)), Qt::QueuedConnection);
         //so does live tv
         QObject::connect(w, SIGNAL(clearModel()), simpleEPGmodel, SLOT(empty()),Qt::QueuedConnection);
 

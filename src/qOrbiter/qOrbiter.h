@@ -35,6 +35,7 @@
 #include <datamodels/avdevice.h>
 #include <contextobjects/modelpage.h>
 #include <contextobjects/existingorbiter.h>
+#include <contextobjects/bookmarkitem.h>
 
 //<-dceag-d-e->
 
@@ -109,6 +110,7 @@ public:
     QList<QObject*> screenshotVars;
     QList<QObject*> resendAvButtons;
     QList<QObject*> deviceCommands;
+    QList<QObject*> bookmarks;
 
     string *s_user;
     QString currentScreen;
@@ -165,6 +167,7 @@ public:
         virtual int PromptFor(std::string t);
         virtual int PromptUser(std::string sPrompt, int iTimeoutSeconds, map<int, std::string> *p_mapPrompts);
         virtual int DeviceIdInvalid();
+
 
 //<-dceag-const-e->
 
@@ -1191,6 +1194,7 @@ light, climate, media, security, telecom */
 
 //<-dceag-h-e->
 
+
 signals:
     //navigation
     void gotoQml(QString qml);
@@ -1328,6 +1332,7 @@ signals:
     //controls
     void resendAvButtonList(QList<QObject*> t);
     void deviceCommandList(QList<QObject*> f);
+    void bookmarkList(QList<QObject*> b);
 
     //screensaver
     void currentScreenSaverImage(const uchar* ,int);

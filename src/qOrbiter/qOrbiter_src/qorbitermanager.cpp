@@ -621,6 +621,7 @@ void qorbiterManager::processConfig(QByteArray config)
     qorbiterUIwin->rootContext()->setContextProperty("screenshotAttributes", QVariant::fromValue(screenshotVars));
     qorbiterUIwin->rootContext()->setContextProperty("avcodes", QVariant::fromValue(buttonList));
     qorbiterUIwin->rootContext()->setContextProperty("device_commands", QVariant::fromValue(commandList));
+     qorbiterUIwin->rootContext()->setContextProperty("currentBookmarks", QVariant::fromValue(current_bookmarks));
 
     setDceResponse("Properties Done");
 
@@ -1341,6 +1342,14 @@ void qorbiterManager::grabStreamImage()
 {
     emit requestStreamImage();
 
+}
+
+void qorbiterManager::showBookmarks(QList<QObject *> t)
+{
+
+    current_bookmarks = t;
+    qDebug() << current_bookmarks.size();
+    qorbiterUIwin->rootContext()->setContextProperty("currentBookmarks", QVariant::fromValue(current_bookmarks));
 }
 
 void qorbiterManager::changeChannels(QString chan)
