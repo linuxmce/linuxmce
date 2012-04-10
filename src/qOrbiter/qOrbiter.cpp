@@ -4542,12 +4542,13 @@ void DCE::qOrbiter::sendAvCommand(int deviceto, int command)
 {
     string cmd_resp="";
     string cmd_string;
-    QString commandString =  QString::number(m_dwPK_Device_NowPlaying) + " " + QString::number(deviceto) + " " + "1" + " " + QString::number(command);
+    QString commandString =  QString::number(m_dwPK_Device) + " " + QString::number(deviceto) + " " + "1" + " " + QString::number(command);
     cmd_string = commandString.toStdString();
-    DCE::Message avMessage(cmd_string);
+    DCE::Message *avMessage = new Message(cmd_string);
   //  Event_Impl *msg_event(m_pEvent->m_pClientSocket, -1003);
   //  msg_event->SendMessage(&avMessage);
-    m_pEvent->SendMessage(&avMessage, cmd_resp);
+   SendMessageToRouter(avMessage);
+
 }
 
 void DCE::qOrbiter::setGridSeperator(int sep)
