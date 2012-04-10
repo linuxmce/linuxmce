@@ -252,7 +252,34 @@ Rectangle {
 
 
     MultiStateFileDisplay{id:grid_view1; anchors.top: pos_label.bottom}
+    ListView{
+        id:model_pages
+        height: appH
+        width: scaleX(10)
+        model: pageList
+        anchors.left: parent.left
+        delegate: Rectangle{
+            height: scaleY(10)
+            width: scaleX(10)
+            color: "transparent"
+            Text {
+                id:page_label
+                text: label
+                font.pixelSize: scaleY(3.5)
+                anchors.centerIn: parent
+                color: "slategrey"
+                font.bold: true
+            }
 
+            MouseArea{
+                anchors.fill: parent
+                onReleased: {  page_label.font.italic = true ; dcerouter.requestPage(index);  }
+                onPressed: page_label.font.italic = false
+            }
+
+        }
+
+    }
     ListView{
         id:alphalist
         height: grid_view1.height

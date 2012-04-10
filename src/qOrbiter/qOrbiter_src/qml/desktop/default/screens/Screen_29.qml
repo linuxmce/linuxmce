@@ -102,7 +102,7 @@ Item{
                                                 anchors.fill: parent
                                                 onClicked: {
                                                     dcerouter.GetAlarms(true, eventHandler)
-
+                                                    alarms.clear()
                                                 }
                                             }
                                         }
