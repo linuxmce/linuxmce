@@ -688,7 +688,7 @@ CheckVideoDriver () {
 		sleep 2
 		ConfSet "AVWizardOverride" "1"
         fi
-VideoDriver="$prop_driver"
+export Best_Video_Driver="$prop_driver"
 }
 
 ReloadDevicesOnThisMachine()
