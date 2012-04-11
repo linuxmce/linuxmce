@@ -1082,6 +1082,14 @@ switch ($section) {
 	    $output->setHelpSrc('/wiki/index.php/Phone_Lines');
 	    phoneLines($output,$asteriskADO,$dbADO);
 	break;
+	case 'fax';
+		$output = new Template($dbADO);
+		$output->setTemplateFileType('large');
+		@include($GLOBALS['globalConfigPath'].'asteriskDB.inc.php');
+	    include_once('operations/phones/fax.php');
+	    $output->setHelpSrc('/wiki/index.php/fax');
+	    fax($output,$asteriskADO,$dbADO,$telecomADO);
+	break;
 	case 'phoneExtensions';
 		$output = new Template($dbADO);
 		$output->setTemplateFileType('large');
