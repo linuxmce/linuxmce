@@ -123,7 +123,7 @@ if [ -e $SOURCEFILE ]; then
 	
 	# Insert sent fax into lmce's fax table
 	UseDB asterisk;
-	Q="INSERT INTO fax_list (Incoming,FileName,Result) VALUES ('1','$(basename $ARCHIVEFILE)','$5');"
+	Q="INSERT INTO fax_list (Incoming,remoteCID,FileName,Result) VALUES ('1','$4','$(basename $ARCHIVEFILE)','$5');"
 	R=$(RunSQL "$Q")
 	
 	mv -f $DESTFILE $ARCHIVEFILE

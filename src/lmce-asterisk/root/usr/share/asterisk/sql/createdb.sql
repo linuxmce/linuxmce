@@ -353,6 +353,19 @@ CREATE TABLE IF NOT EXISTS `phonelines` (
 );
 
 --
+-- Table for fax_list
+--
+CREATE TABLE IF NOT EXISTS `fax_list` (
+  `PK_Fax` smallint(6) unsigned NOT NULL AUTO_INCREMENT,
+  `DateTime` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `Incoming` tinyint(1) NOT NULL,
+  `remoteCID` varchar(30) DEFAULT NULL,
+  `FileName` varchar(255) NOT NULL,
+  `Result` varchar(255) DEFAULT 'N/A',
+  PRIMARY KEY (`PK_Fax`)
+);
+
+--
 -- Create view for LMCE phones in asterisk DB
 --
 CREATE OR REPLACE ALGORITHM = MERGE
