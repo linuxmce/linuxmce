@@ -130,6 +130,9 @@ NameVirtualHost *
 		Order allow,deny
 		Allow from all
 	</Directory>
+	
+	Alias /fax-incoming/ /home/fax/incoming/
+    Alias /fax-outgoing/ /home/fax/outgoing/
 
 	ErrorLog /var/log/apache2/error.log
 

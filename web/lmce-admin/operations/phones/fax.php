@@ -172,6 +172,7 @@ function faxTable($astADO){
 			<td><B>&nbsp;</B></td>
 			<td><B>'.translate('TEXT_FAX_DATETIME_CONST').'</B></td>
 			<td><B>'.translate('TEXT_FAX_RESULT_CONST').'</B></td>
+			<td><B>'.translate('TEXT_FAX_REMOTECID_CONST').'</B></td>
 			<td><B>'.translate('TEXT_FAX_FILENAME_CONST').'</B></td>
 		</tr>	';
 
@@ -197,7 +198,14 @@ function faxTable($astADO){
 				break;
 		}
 		$out .='</td>
-		<td>'.$row['FileName'].'</td>
+		<td>'.$row['remoteCID'].'</td>
+		<td>';
+		if($row['Incoming']==1) {
+			$out.='<a href="/fax-incoming/'.$row['FileName'].'">'.$row['FileName'].'</a>';
+		} else {
+			$out.='<a href="/fax-outgoing/'.$row['FileName'].'">'.$row['FileName'].'</a>';
+		}
+		$out.='</td>
 		</tr>';
 	}
 	$out.='</table></form>';

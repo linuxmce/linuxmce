@@ -6,6 +6,7 @@ $TEXT_SEND_CONST="Envoyer";
 $TEXT_USE_PHONELINE_CONST="Utiliser ligne";
 $TEXT_FAX_DATETIME_CONST="Date / Heure";
 $TEXT_FAX_RESULT_CONST="Résultat";
+$TEXT_FAX_REMOTECID_CONST="CID distant";
 $TEXT_FAX_FILENAME_CONST="Nom du fichier";
 $TEXT_FAX_FILE_CONST="Faxer fichier";
 $TEXT_FAX_DESTINATION_CONST="au destinataire";
