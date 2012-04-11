@@ -192,11 +192,11 @@ INSERT INTO extensions (context, exten, priority, app, appdata) VALUES
 ('fax', '*70', 5, 'Set', 'FAXFILENOEXT=/var/spool/asterisk/fax/${CALLERID(num)}'),
 ('fax', '*70', 6, 'Receivefax', '${FAXFILE}'),
 ('fax', '*70', 7, 'Hangup', ''),
-('fax', 'h', 1, 'System', 'sudo -u root /usr/pluto/bin/Fax_Process.sh ${FAXFILENOEXT} ${CALLERID(DNID)} ${CALLERID(num)} "${CALLERID(name)}"'),
+('fax', 'h', 1, 'System', 'sudo -u root /usr/pluto/bin/Fax_Process.sh ${FAXFILENOEXT} ${CALLERID(DNID)} ${CALLERID(num)} "${CALLERID(name)}" "${FAXOPT(statusstr)}"'),
 ('fax', 'h', 2, 'Hangup', '');
 
--- *72: Outgoing Fax
- INTO extensions (context, exten, priority, app, appdata) VALUES
+-- *71: Outgoing Fax
+INSERT INTO extensions (context, exten, priority, app, appdata) VALUES
 ('fax-transmit', '*71', 1, 'NoOp', '*** LINUXMCE SENDING FAX ***'),
 ('fax-transmit', '*71', 2, 'Set', 'FAXOPT(ecm)=yes'),
 ('fax-transmit', '*71', 3, 'Set', 'FAXOPT(headerinfo)=${HEADER}'),
@@ -206,7 +206,8 @@ INSERT INTO extensions (context, exten, priority, app, appdata) VALUES
 ('fax-transmit', '*71', 7, 'Hangup', ''),
 ('fax-transmit', 'h', 1, 'NoOp', 'FAXOPT(statusstr) : ${FAXOPT(statusstr)}'),
 ('fax-transmit', 'h', 2, 'NoOp', 'FAXOPT(remotestationid) : ${FAXOPT(remotestationid)}'),
-('fax-transmit', 'h', 3, 'Hangup', '');
+('fax-transmit', 'h', 3, 'System', 'sudo -u root rm \'${FAXFILE}\''),
+('fax-transmit', 'h', 4, 'System', 'sudo -u root /usr/pluto/bin/Fax_Update_Status.sh ${PK_FAX} "${FAXOPT(statusstr)}"');
 
 -- *95: test Music On Hold (MOH)
 INSERT INTO extensions (context, exten, priority, app, appdata) VALUES

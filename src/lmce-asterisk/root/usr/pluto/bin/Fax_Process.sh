@@ -11,9 +11,10 @@
 #=========================================================================|
 
 # $1 = Filename without .tif
-# $2 = Destination Email
+# $2 = Destination extension
 # $3 = CID_NUMBER
 # $4 = CID_NAME
+# $5 = STATUS
 
 . /usr/pluto/bin/SQL_Ops.sh
 
@@ -25,12 +26,9 @@ DATETIME=$(date +"%d-%m-%Y %H:%M:%S")
 FORMAT="pdf"
 
 FILE=$1
-DEST_NUMBER=$2
+DEST_EXTEN=$2
 CID_NUMBER=$3
 CID_NAME=$4
-
-# TODO: Replace by some real stuff
-DEST_EXTEN="20408720"
 USER_ID=1
 
 SOURCEFILE=$FILE.tif
@@ -76,15 +74,15 @@ if [ "$CID_NUMBER" = "" ] ; then
   CID_NUMBER="unknown"
 fi
 
-echo "$DATETIME	Called with arguments: $*" >>$LOGFILE
+echo "$DATETIME	$0 called with arguments: $*" >>$LOGFILE
 echo "$DATETIME	Processing fax file (without .tif extension) = $FILE">>$LOGFILE
 
 RETVAL=1
 
 if [ -e $SOURCEFILE ]; then
 	# Read data from TIFF file
-	PAGES=$(tiffinfo $SOURCEFILE | grep "Page" | cut -d "-" -f 2)
-	DT=$(tiffinfo $SOURCEFILE | grep "Date")
+	PAGES=$(tiffinfo $SOURCEFILE | grep "Page" | tail -1 | cut -d "-" -f 2)
+	DT=$(tiffinfo $SOURCEFILE | grep "Date" | tail -1)
 	DTFAX=${DT#*: }
 	COUNT=${PAGES#*-}
 	if [ -z $COUNT ]; then
@@ -94,7 +92,7 @@ if [ -e $SOURCEFILE ]; then
 			COUNT="<unknown>"
 		fi
 	fi
-    tiff2pdf -f -p letter $SOURCEFILE > $DESTFILE
+    tiff2pdf -f -p A4 -o $DESTFILE $SOURCEFILE
 
 	echo "" >$INFOFILE
 	echo "Dear $DEST_NICK," >>$INFOFILE
@@ -112,25 +110,30 @@ if [ -e $SOURCEFILE ]; then
 	echo "$DATETIME	$COUNT page(s) fax received from $CID_NUMBER @ $DTFAX">>$LOGFILE
 	echo "$DATETIME	Sent pdf converted fax as attachment from $FROM_NAME <$FROM_EMAIL> to $DEST_EMAIL">>$LOGFILE
 
+	# Delete the temporary message file
+	rm -f $FILE.part1
+	rm -f $INFOFILE
+	rm -f $SOURCEFILE
+	
+	# Archive faxes for now
+	mkdir -p /home/fax/incoming
+	chown -R asterisk:asterisk /home/fax
+	ARCHIVEFILE="$DTFAX $(basename $DESTFILE)"
+	ARCHIVEFILE="/home/fax/incoming/$(echo $ARCHIVEFILE | sed 's/ /_/g' | sed 's/:/./g' | sed 's/\//-/g')"
+	
+	# Insert sent fax into lmce's fax table
+	UseDB asterisk;
+	Q="INSERT INTO fax_list (Incoming,FileName,Result) VALUES ('1','$(basename $ARCHIVEFILE)','$5');"
+	R=$(RunSQL "$Q")
+	
+	mv -f $DESTFILE $ARCHIVEFILE
+	chown asterisk:asterisk $ARCHIVEFILE
+	chmod 666 $ARCHIVEFILE
+	echo "$DATETIME	Moved $DESTFILE to $ARCHIVEFILE">>$LOGFILE
+	
 	# Exit with OK status code
 	RETVAL=0
 fi
-
-
-# Delete the temporary message file
-rm -f $FILE.part1
-rm -f $INFOFILE
-rm -f $SOURCEFILE
-
-# Archive faxes for now
-mkdir -p /home/fax/incoming
-chown -R asterisk:asterisk /home/fax
-ARCHIVEFILE="$DTFAX $(basename $DESTFILE)"
-ARCHIVEFILE="/home/fax/incoming/$(echo $ARCHIVEFILE | sed 's/ /_/g' | sed 's/:/./g' | sed 's/\//-/g')"
-mv -f $DESTFILE $ARCHIVEFILE
-chown asterisk:asterisk $ARCHIVEFILE
-chmod 666 $ARCHIVEFILE
-echo "$DATETIME	Moved $DESTFILE to $ARCHIVEFILE">>$LOGFILE
 
 echo "----------">>$LOGFILE
 exit $RETVAL

@@ -273,7 +273,7 @@ CREATE TABLE IF NOT EXISTS `extensions` (
 `exten` varchar(50) NOT NULL default '',
 `priority` tinyint(4) NOT NULL default '0',
 `app` varchar(20) NOT NULL default '',
-`appdata` varchar(128) NOT NULL default '',
+`appdata` varchar(150) NOT NULL default '',
 PRIMARY KEY (`context`,`exten`,`priority`),
 KEY `id` (`id`)
 );

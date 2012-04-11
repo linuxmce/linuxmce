@@ -15,6 +15,7 @@ if [[ "$1" == configure ]]; then
 	if [[ "$res" == "asterisk" ]]; then
 		mysql -f -h "$MySqlHost" -u "$MySqlUser" $PassParm -e "use asterisk; ALTER TABLE phonelines ADD isfax ENUM('yes','no') NOT NULL DEFAULT 'no' AFTER enabled;" 2>>/dev/null
 		mysql -f -h "$MySqlHost" -u "$MySqlUser" $PassParm -e "use asterisk; ALTER TABLE phonelines ADD faxmail VARCHAR(5) AFTER password;" 2>>/dev/null
+		mysql -f -h "$MySqlHost" -u "$MySqlUser" $PassParm -e "use asterisk; ALTER TABLE extensions MODIFY appdata VARCHAR(150);" 2>>/dev/null
 	fi
 	
 	# recreate asterisk database (except tables which contains user data)
