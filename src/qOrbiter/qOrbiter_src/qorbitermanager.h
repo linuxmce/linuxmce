@@ -417,6 +417,7 @@ signals:
     void roomChanged();
 
     void floorplanTypeChanged();
+    void setAlarm(bool s, int g);
 
 public slots: //note: Q_INVOKABLE means it can be called directly from qml
     void connectionWatchdog();

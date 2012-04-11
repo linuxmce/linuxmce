@@ -300,6 +300,7 @@ Rectangle {
                 text: name
                 font.pixelSize: 18
                 anchors.centerIn: parent
+                color:"aliceblue"
             }
             MouseArea{
                 anchors.fill: parent

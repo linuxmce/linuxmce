@@ -88,10 +88,10 @@ Item{
                                             id:indicator
                                             height: scaleY(10)
                                             width: parent.width *.25
-                                            color: state ?  "green" : style.lighthighlight
+                                            color: b_state ?"green":  "red"
                                             border.color: "black"
                                             border.width: 2
-
+                                            Component.onCompleted: console.log(b_state)
                                             Text {
                                                 id: handler
                                                 text: status
@@ -101,8 +101,7 @@ Item{
                                             MouseArea{
                                                 anchors.fill: parent
                                                 onClicked: {
-                                                    dcerouter.GetAlarms(true, eventHandler)
-                                                    alarms.clear()
+                                                    manager.sleepingMenu(true, eventHandler)
                                                 }
                                             }
                                         }

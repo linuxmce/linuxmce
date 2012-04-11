@@ -391,6 +391,7 @@ int main(int argc, char* argv[])
 
         //sleeping alarms
         QObject::connect(pqOrbiter, SIGNAL(sleepingAlarmsReady(QList<QObject*>)), w, SLOT(showSleepingAlarms(QList<QObject*>)), Qt::QueuedConnection);
+        QObject::connect(w, SIGNAL(setAlarm(bool,int)), pqOrbiter, SLOT(GetAlarms(bool,int)), Qt::QueuedConnection);
 
         //navigation
         QObject::connect(pqOrbiter,SIGNAL(gotoQml(QString)), w, SLOT(gotoQScreen(QString)),Qt::QueuedConnection);

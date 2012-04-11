@@ -81,11 +81,12 @@ public:
     DataGridTable *pDataGridTable;
 
     int i_mediaModelRows;
-    int i_currentMediaModelRow;
+    int media_currentRow;
     int media_totalPages;
     int media_currentPage;
     int media_pos;
     int media_pageSeperator;
+    string media_seek;
 
     bool pause;
     int iPK_Device_DatagridPlugIn;

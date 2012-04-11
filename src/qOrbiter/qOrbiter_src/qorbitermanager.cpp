@@ -621,7 +621,7 @@ void qorbiterManager::processConfig(QByteArray config)
     qorbiterUIwin->rootContext()->setContextProperty("screenshotAttributes", QVariant::fromValue(screenshotVars));
     qorbiterUIwin->rootContext()->setContextProperty("avcodes", QVariant::fromValue(buttonList));
     qorbiterUIwin->rootContext()->setContextProperty("device_commands", QVariant::fromValue(commandList));
-     qorbiterUIwin->rootContext()->setContextProperty("currentBookmarks", QVariant::fromValue(current_bookmarks));
+    qorbiterUIwin->rootContext()->setContextProperty("currentBookmarks", QVariant::fromValue(current_bookmarks));
 
     setDceResponse("Properties Done");
 
@@ -968,7 +968,7 @@ void qorbiterManager::showUI(bool b)
     {
         setDceResponse("Orbiter Cant Show UI");
         //qDebug() << "Orbiter Status:" << b_orbiterReady;
-       // qDebug() << "Skin Status:" << b_skinReady;
+        // qDebug() << "Skin Status:" << b_skinReady;
     }
 
 }
@@ -1401,20 +1401,14 @@ bool qorbiterManager::getRequestMore()
 
 void qorbiterManager::sleepingMenu(bool toggle, int grp)
 {
-
-    if(toggle == true)
-    {   sleeping_alarms.clear();
-        //  pqOrbiter->GetAlarms(toggle, grp);
-    }
-    else
-    {
-        sleeping_alarms.clear();
-        // pqOrbiter->GetAlarms(false, 0);
-    }
+    emit setAlarm(toggle, grp);
+    sleeping_alarms.clear();
+    qorbiterUIwin->rootContext()->setContextProperty("alarms", QVariant::fromValue(sleeping_alarms) );
 }
 
 void qorbiterManager::showSleepingAlarms(QList<QObject *> s)
 {
+
     sleeping_alarms = s;
     qorbiterUIwin->rootContext()->setContextProperty("alarms", QVariant::fromValue(sleeping_alarms) );
 }
@@ -1523,7 +1517,7 @@ void qorbiterManager::setDceResponse(QString response)
     dceResponse = response;
     emit loadingMessage(dceResponse);
     emit dceResponseChanged();
-   // qDebug() << dceResponse;
+    // qDebug() << dceResponse;
 
 }
 
