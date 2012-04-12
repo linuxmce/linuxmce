@@ -349,6 +349,7 @@ CREATE TABLE IF NOT EXISTS `phonelines` (
   `password` varchar(50) NOT NULL DEFAULT '',
   `faxmail` varchar(5) DEFAULT NULL,
   `channels` int(11) NOT NULL DEFAULT 5,
+  `faxheader` varchar(30) DEFAULT 'LinuxMCE fax',
   PRIMARY KEY (`id`)
 );
 
