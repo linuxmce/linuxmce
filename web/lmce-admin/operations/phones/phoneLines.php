@@ -24,6 +24,17 @@ function phoneLines($output,$astADO,$dbADO) {
 		$ProtocolList=array('SIP','IAX','SPA','GTALK');
 		
 		$out.='
+		<script type="text/javascript">
+			function toggleFax() 	{
+				if(document.phoneLines.isfax.checked) {
+					document.getElementById("idFaxMail").style.display = "";
+					document.getElementById("idFaxHeader").style.display = "";
+				} else {
+					document.getElementById("idFaxMail").style.display = "none";
+					document.getElementById("idFaxHeader").style.display = "none";					
+				}
+			}
+		</script>
 		<div align="center" class="err">'.stripslashes(@$_REQUEST['error']).'</div>
 		<div align="center" class="confirm"><B>'.stripslashes(@$_REQUEST['msg']).'</B></div>
 		
@@ -46,28 +57,66 @@ function phoneLines($output,$astADO,$dbADO) {
 			<br /><hr /><br />
 			<input type="hidden" name="editedID" value="'.@$editedID.'">
 			<table align="center" cellpadding="3" cellspacing="0">
-				<tr class="tablehead"><td><B>'.translate('TEXT_NAME_CONST').'</B> </td><td><input type="text" name="name" value="'.$editdata['name'].'"></td></tr>
-				<tr><td><B>'.translate('TEXT_ENABLED_CONST').'</B> </td><td><input type="checkbox" name="enabled" value="1" '.((@$editdata['enabled']=='yes')?'checked':'').'></td></tr>
-				<tr><td><B>'.translate('TEXT_FAX_CONST').'</B> </td><td><input type="checkbox" name="isfax" value="1" '.((@$editdata['isfax']=='yes')?'checked':'').'>&nbsp;&nbsp;
-				'.translate('TEXT_FAX_EMAIL_CONST').'&nbsp;<select name="faxmail"  style="width: auto">';
-				foreach ($UsersList as $id => $name) $out.='<option value="'.$id.'" '.(($editdata['faxmail'] == $id)?'selected="selected"':'').'>'.$name.'</option>';
-				$out .='</select>
-				<!-- <input type="text" size="20" name="faxmail" value="'.$editdata['faxmail'].'"></td> -->
+				<tr class="tablehead">
+					<td><B>'.translate('TEXT_NAME_CONST').'</B></td>
+					<td><input type="text" name="name" value="'.$editdata['name'].'"></td>
+					<td>&nbsp;</td>
 				</tr>
-				<tr><td><B>'.translate('TEXT_PREFIX_CONST').'</B> </td><td><input type="text" name="prefix" maxlength="2" size="3" value="'.$editdata['prefix'].'"></td></tr>
-				<tr><td><B>'.translate('TEXT_USERNAME_CONST').' *</B> </td> <td><input type="text" name="username" value="'.$editdata['username'].'"></td></tr>
-				<tr><td colspan="2">'.translate('TEXT_PHONE_LINE_USERNAME_NOTE_CONST').'</td></tr>
-				<tr><td><B>'.translate('TEXT_PASSWORD_CONST').' *</B> </td><td><input type="password" name="pass" value="'.$editdata['password'].'"></td></tr>
-				<tr><td colspan="2">'.translate('TEXT_PHONE_LINE_PASSWORD_NOTE_CONST').'</td></tr>
-				<tr><td><B>'.translate('TEXT_PHONE_NUMBER_CONST').' *</B> </td><td><input type="text" name="phone" value="'.$editdata['phonenumber'].'"></td></tr>
-				<tr><td colspan="2">'.translate('TEXT_PHONE_LINE_NUMBER_NOTE_CONST').'</td></tr>
-				<tr><td><B>'.translate('TEXT_HOST_CONST').' *</B> </td><td><input type="text" name="host" value="'.$editdata['host'].'"> </td></tr>		
-				<tr><td><B>'.translate('TEXT_PROTOCOL_CONST').' *</B> </td><td><select name="proto">';
-				foreach ($ProtocolList as $p) $out.='<option value="'.$p.'" '.(($editdata['protocol'] == $p)?'selected="selected"':'').'>'.$p.'</option>';
-				$out .='</select></td></tr>		
-				<tr><td colspan="2">'.translate('TEXT_PHONE_LINE_HOST_NOTE_CONST').'</td></tr>		
-				<tr><td colspan="2" align="center"><input type="submit" class="button" name="submit" value="'.translate('TEXT_SAVE_CONST').'"> <input type="reset" class="button" name="cancelBtn1" value="'.translate('TEXT_CANCEL_CONST').'"></td></tr>
-				<tr><td colspan="2"><em>* '.translate('TEXT_REQUIRED_FIELDS_CONST').'</em></td></tr>
+				<tr>
+					<td><B>'.translate('TEXT_ENABLED_CONST').'</B></td>
+					<td><input type="checkbox" name="enabled" value="1" '.((@$editdata['enabled']=='yes')?'checked':'').'></td>
+				</tr>
+				<tr>
+					<td><B>'.translate('TEXT_FAX_CONST').'</B></td>
+					<td><input type="checkbox" name="isfax" value="1" '.((@$editdata['isfax']=='yes')?'checked':'').' onchange="toggleFax();"></td>
+					
+				</tr>
+				<tr id="idFaxMail" '.((@$editdata['isfax']!='yes')?'style="display: none;"':'').'>
+					<td>&nbsp;&nbsp;'.translate('TEXT_FAX_EMAIL_CONST').'
+					<td>
+						<select name="faxmail"  style="width: auto">';
+						foreach ($UsersList as $id => $name) $out.='<option value="'.$id.'" '.(($editdata['faxmail'] == $id)?'selected="selected"':'').'>'.$name.'</option>';
+						$out .='</select>
+					</td>
+				</tr>
+				<tr id="idFaxHeader" '.((@$editdata['isfax']!='yes')?'style="display: none;"':'').'>
+					<td>&nbsp;&nbsp;'.translate('TEXT_FAX_HEADER_CONST').'
+					<td colspan="2"><input type="text" name="faxheader" maxlength="30" size="40" value="'.$editdata['faxheader'].'"></td>
+				</tr>
+				<tr>
+					<td><B>'.translate('TEXT_PREFIX_CONST').'</B></td>
+					<td><input type="text" name="prefix" maxlength="2" size="3" value="'.$editdata['prefix'].'"></td>
+				</tr>
+				<tr>
+					<td><B>'.translate('TEXT_USERNAME_CONST').' *</B></td>
+					<td><input type="text" name="username" value="'.$editdata['username'].'"></td>
+					<td>'.translate('TEXT_PHONE_LINE_USERNAME_NOTE_CONST').'</td>
+				</tr>
+				<tr>
+					<td><B>'.translate('TEXT_PASSWORD_CONST').' *</B></td>
+					<td><input type="password" name="pass" value="'.$editdata['password'].'"></td>
+					<td>'.translate('TEXT_PHONE_LINE_PASSWORD_NOTE_CONST').'</td>
+				</tr>
+				<tr>
+					<td><B>'.translate('TEXT_PHONE_NUMBER_CONST').' *</B></td>
+					<td><input type="text" name="phone" value="'.$editdata['phonenumber'].'"></td>
+					<td>'.translate('TEXT_PHONE_LINE_NUMBER_NOTE_CONST').'</td></tr>
+				<tr>
+					<td><B>'.translate('TEXT_HOST_CONST').' *</B></td>
+					<td><input type="text" name="host" value="'.$editdata['host'].'"></td>
+					<td>'.translate('TEXT_PHONE_LINE_HOST_NOTE_CONST').'</td>
+				</tr>		
+				<tr>
+					<td><B>'.translate('TEXT_PROTOCOL_CONST').' *</B></td>
+					<td><select name="proto">';
+					foreach ($ProtocolList as $p) $out.='<option value="'.$p.'" '.(($editdata['protocol'] == $p)?'selected="selected"':'').'>'.$p.'</option>';
+					$out .='</select></td>
+				</tr>		
+				<tr>
+					<td><em>* '.translate('TEXT_REQUIRED_FIELDS_CONST').'</em></td>
+					<td>&nbsp;</td>
+					<td><input type="submit" class="button" name="submit" value="'.translate('TEXT_SAVE_CONST').'"> <input type="reset" class="button" name="cancelBtn1" value="'.translate('TEXT_CANCEL_CONST').'"></td>
+				</tr>
 			</table>
 			<script>
 				var frmvalidator = new formValidator("phoneLines");
