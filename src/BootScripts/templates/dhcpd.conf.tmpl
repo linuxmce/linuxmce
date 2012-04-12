@@ -5,8 +5,6 @@
 #
 
 # option definitions common to all supported networks...
-#option domain-name "fugue.com";
-#option domain-name-servers toccata.fugue.com;
 option domain-name-servers %CORE_INTERNAL_ADDRESS%;
 authoritative;
 
@@ -15,7 +13,7 @@ ddns-update-style interim;
 include "/etc/bind/rndc.key";
 
 # Use what key in what zone
-zone linuxmce.local. {
+zone %INTERNAL_DOMAIN_NAME%. {
 	primary 127.0.0.1;
 	key "rndc-key";
 }
@@ -51,7 +49,7 @@ subnet %INTERNAL_SUBNET% netmask %INTERNAL_SUBNET_MASK% {
 		primary localhost;
 		key	"rndc-key";
 	}
-	zone    linuxmce.local. {
+	zone    %INTERNAL_DOMAIN_NAME%. {
 		primary localhost;
 		key	"rndc-key";
 	}
