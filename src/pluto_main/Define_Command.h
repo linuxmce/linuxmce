@@ -1002,6 +1002,9 @@
 #define COMMAND_Get_Links_CONST 1100
 #define COMMAND_Reload_Page_CONST 1101
 #define COMMAND_Show_History_CONST 1102
+#define COMMAND_Goto_Url_CONST 1103
+#define COMMAND_Back_CONST 1104
+#define COMMAND_Forward_CONST 1105
 
 #define COMMAND_TABLE "Command"
 #define COMMAND_PK_COMMAND_FIELD "PK_Command"
