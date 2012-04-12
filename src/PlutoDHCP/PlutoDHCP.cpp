@@ -52,7 +52,7 @@
 
 #include "BD/PhoneDevice.h"
 
-#define  VERSION "<=version=>"
+#define  VERSION "2.0.0.45.12041125871"
 
 using namespace std;
 using namespace DCE;
@@ -357,7 +357,7 @@ void PlutoDHCP::GetNetParams(string &sCoreInternalAddress, string &sInternalSubn
 	Row_Device * pRow_Device = DetermineCore();
 	if (!pRow_Device)
 		return;
-	Row_Device_DeviceData * pRow_Device_DeviceData = m_pDatabase_pluto_main->Device_DeviceData_get()->GetRow(pRow_Device->PK_Device_get(), DEVICEDATA_Network_Interfaces_CONST);
+	Row_Device_DeviceData * pRow_Device_DeviceData = m_pDatabase_pluto_main->Device_DeviceData_get()->GetRow(pRow_Device->PK_Device_get(), DEVICEDATA_IPv4_Network_Interfaces_CONST);
 	if (!pRow_Device_DeviceData)
 	{
 		cerr << "ERROR: Cannot find network data" << endl;

@@ -41,7 +41,7 @@
 
 #endif
 
-#define  VERSION "<=version=>"
+#define  VERSION "2.0.0.45.12041125871"
 
 using namespace std;
 using namespace DCE;

@@ -98,9 +98,9 @@ public:
 	string Get_Network_Interfaces()
 	{
 		if( m_bRunningWithoutDeviceData )
-			return m_pEvent_Impl->GetDeviceDataFromDatabase(m_dwPK_Device,DEVICEDATA_Network_Interfaces_CONST);
+			return m_pEvent_Impl->GetDeviceDataFromDatabase(m_dwPK_Device,DEVICEDATA_IPv4_Network_Interfaces_CONST);
 		else
-			return m_mapParameters[DEVICEDATA_Network_Interfaces_CONST];
+			return m_mapParameters[IPv4_DEVICEDATA_Network_Interfaces_CONST];
 	}
 
 };
