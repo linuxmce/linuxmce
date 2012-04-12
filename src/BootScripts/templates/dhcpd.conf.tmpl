@@ -20,7 +20,7 @@ zone linuxmce.local. {
 	key "rndc-key";
 }
 
-option domain-name "linuxmce.local";
+option domain-name "%INTERNAL_DOMAIN_NAME%";
 
 
 option routers %CORE_INTERNAL_ADDRESS%;
