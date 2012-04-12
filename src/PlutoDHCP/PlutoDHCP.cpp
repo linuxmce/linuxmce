@@ -229,10 +229,10 @@ string PlutoDHCP::AssignIP(int PK_Device)
 
 string PlutoDHCP::GetDHCPConfig()
 {
-	string sCoreInternalAddress, sInternalSubnet, sInternalSubnetMask, sReverseInternalSubnet;
+	string sCoreInternalAddress, sInternalSubnet, sInternalSubnetMask, sReverseInternalSubnet, sInternalDomainName;
 	IPAddress ipAddressDhcpStart, ipAddressDhcpStop, ipAddressPlutoStart, ipAddressPlutoStop;
 
-	GetNetParams(sCoreInternalAddress, sInternalSubnet, sInternalSubnetMask);
+	GetNetParams(sCoreInternalAddress, sInternalSubnet, sInternalSubnetMask, sInternalDomainName);
 	DetermineIPRange(ipAddressDhcpStart, ipAddressDhcpStop, ipAddressPlutoStart, ipAddressPlutoStop);
 
 	if (sCoreInternalAddress.size() == 0 || sInternalSubnetMask.size() == 0)
@@ -328,6 +328,7 @@ string PlutoDHCP::GetDHCPConfig()
 	sConfigData=StringUtils::Replace(sConfigData,"%CORE_INTERNAL_ADDRESS%",sCoreInternalAddress);
 	sConfigData=StringUtils::Replace(sConfigData,"%INTERNAL_SUBNET_MASK%",sInternalSubnetMask);
 	sConfigData=StringUtils::Replace(sConfigData,"%INTERNAL_SUBNET%",sInternalSubnet);
+	sConfigData=StringUtils::Replace(sConfigData,"%INTERNAL_DOMAIN_NAME%",sInternalDomainName);
 	sConfigData=StringUtils::Replace(sConfigData,"%DYNAMIC_IP_RANGE%",sDynamicPool);
 	sConfigData=StringUtils::Replace(sConfigData,"%MOON_ENTRIES%",sMoonEntries);
 	sConfigData=StringUtils::Replace(sConfigData,"%NOBOOT_ENTRIES%",sNoBootEntries);
@@ -352,7 +353,7 @@ bool PlutoDHCP::bIsMediaDirector(Row_Device *pRow_Device)
 	return pRow_Device_DeviceData && pRow_Device_DeviceData->IK_DeviceData_get()=="1";
 }
 
-void PlutoDHCP::GetNetParams(string &sCoreInternalAddress, string &sInternalSubnet, string &sInternalSubnetMask)
+void PlutoDHCP::GetNetParams(string &sCoreInternalAddress, string &sInternalSubnet, string &sInternalSubnetMask, string &sInternalDomainName)
 {
 	Row_Device * pRow_Device = DetermineCore();
 	if (!pRow_Device)
@@ -400,4 +401,14 @@ void PlutoDHCP::GetNetParams(string &sCoreInternalAddress, string &sInternalSubn
 	IPAddress ipInternalSubnetMask(sInternalSubnetMask);
 	IPAddress ipInternalSubnet(ipCoreInternalAddress.AsInt() & ipInternalSubnetMask.AsInt());
 	sInternalSubnet = ipInternalSubnet.AsText();
+	
+	pRow_Device_DeviceData = m_pDatabase_pluto_main->Device_DeviceData_get()->GetRow(pRow_Device->PK_Device_get(), DEVICEDATA_Domain_CONST);
+	if (!pRow_Device_DeviceData)
+	{
+		cerr << "ERROR: Cannot find domain name" << endl;
+		LoggerWrapper::GetInstance()->Write(LV_CRITICAL, "Cannot find network data");
+		return;
+	}
+
+	sInternalDomainName=pRow_Device_DeviceData->IK_DeviceData_get();
 }
