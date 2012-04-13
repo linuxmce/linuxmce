@@ -10,8 +10,6 @@
 #include "../pluto_main/Define_Event.h"
 #include "../pluto_main/Define_EventParameter.h"
 #include "../pluto_main/Define_DeviceData.h"
-#include "qMediaPlayerBase.h"
-#include <QObject>
 
 
 /**
@@ -270,6 +268,18 @@ public:
 			return atoi(m_mapParameters[DEVICEDATA_PK_Screen_CONST].c_str());
 	}
 
+	bool Get_Use_OpenGL_effects()
+	{
+		if( m_bRunningWithoutDeviceData )
+			return (m_pEvent_Impl->GetDeviceDataFromDatabase(m_dwPK_Device,DEVICEDATA_Use_OpenGL_effects_CONST)=="1" ? true : false);
+		else
+			return (m_mapParameters[DEVICEDATA_Use_OpenGL_effects_CONST]=="1" ? true : false);
+	}
+
+	void Set_Use_OpenGL_effects(bool Value)
+	{
+		SetParm(DEVICEDATA_Use_OpenGL_effects_CONST,(Value ? "1" : "0"));
+	}
 	bool Get_Get_Time_Code_for_Media()
 	{
 		if( m_bRunningWithoutDeviceData )
@@ -298,6 +308,14 @@ public:
 	{
 		SetParm(DEVICEDATA_Enable_Memory_Management_CONST,(Value ? "1" : "0"));
 	}
+	string Get_Model()
+	{
+		if( m_bRunningWithoutDeviceData )
+			return m_pEvent_Impl->GetDeviceDataFromDatabase(m_dwPK_Device,DEVICEDATA_Model_CONST);
+		else
+			return m_mapParameters[DEVICEDATA_Model_CONST];
+	}
+
 	bool Get_Ignore_First_Event()
 	{
 		if( m_bRunningWithoutDeviceData )
@@ -336,10 +354,10 @@ public:
 
 //   OUR COMMAND CLASS 
 
-class qOrbiter_Command : public QObject, public Command_Impl
+class qOrbiter_Command : public Command_Impl
 {
 public:
-    qOrbiter_Command(int DeviceID, string ServerAddress,bool bConnectEventHandler=true,bool bLocalMode=false,class Router *pRouter=NULL, QObject *parent=0)
+	qOrbiter_Command(int DeviceID, string ServerAddress,bool bConnectEventHandler=true,bool bLocalMode=false,class Router *pRouter=NULL)
 	: Command_Impl(DeviceID, ServerAddress, bLocalMode, pRouter)
 	{
 	}
@@ -423,7 +441,7 @@ public:
 		PostConfigCleanup();
 		return true;
 	};
-    qOrbiter_Command(Command_Impl *pPrimaryDeviceCommand, DeviceData_Impl *pData, Event_Impl *pEvent, Router *pRouter, QObject *parent=0) : Command_Impl(pPrimaryDeviceCommand, pData, pEvent, pRouter) {};
+	qOrbiter_Command(Command_Impl *pPrimaryDeviceCommand, DeviceData_Impl *pData, Event_Impl *pEvent, Router *pRouter) : Command_Impl(pPrimaryDeviceCommand, pData, pEvent, pRouter) {};
 	virtual ~qOrbiter_Command() {};
 	qOrbiter_Event *GetEvents() { return (qOrbiter_Event *) m_pEvent; };
 	qOrbiter_Data *GetData() { return (qOrbiter_Data *) m_pData; };
@@ -460,10 +478,13 @@ public:
 	int DATA_Get_ScreenHeight() { return GetData()->Get_ScreenHeight(); }
 	int DATA_Get_Rotation() { return GetData()->Get_Rotation(); }
 	int DATA_Get_PK_Screen() { return GetData()->Get_PK_Screen(); }
+	bool DATA_Get_Use_OpenGL_effects() { return GetData()->Get_Use_OpenGL_effects(); }
+	void DATA_Set_Use_OpenGL_effects(bool Value,bool bUpdateDatabase=false) { GetData()->Set_Use_OpenGL_effects(Value); if( bUpdateDatabase ) SetDeviceDataInDB(m_dwPK_Device,172,Value); }
 	bool DATA_Get_Get_Time_Code_for_Media() { return GetData()->Get_Get_Time_Code_for_Media(); }
 	string DATA_Get_AV_Adjustment_Rules() { return GetData()->Get_AV_Adjustment_Rules(); }
 	bool DATA_Get_Enable_Memory_Management() { return GetData()->Get_Enable_Memory_Management(); }
 	void DATA_Set_Enable_Memory_Management(bool Value,bool bUpdateDatabase=false) { GetData()->Set_Enable_Memory_Management(Value); if( bUpdateDatabase ) SetDeviceDataInDB(m_dwPK_Device,222,Value); }
+	string DATA_Get_Model() { return GetData()->Get_Model(); }
 	bool DATA_Get_Ignore_First_Event() { return GetData()->Get_Ignore_First_Event(); }
 	void DATA_Set_Ignore_First_Event(bool Value,bool bUpdateDatabase=false) { GetData()->Set_Ignore_First_Event(Value); if( bUpdateDatabase ) SetDeviceDataInDB(m_dwPK_Device,274,Value); }
 	bool DATA_Get_Automatically_Go_to_Remote() { return GetData()->Get_Automatically_Go_to_Remote(); }

@@ -197,3 +197,82 @@ void qMediaPlayer_Plugin::SomeFunction()
 */
 
 
+//<-dceag-c36-b->
+
+	/** @brief COMMAND: #36 - Create Media */
+	/** Create a media stream descriptor. */
+		/** @param #13 Filename */
+			/** The filename of the media stream. */
+		/** @param #41 StreamID */
+			/** The media descriptor which will be associated with the current media. */
+
+void qMediaPlayer_Plugin::CMD_Create_Media(string sFilename,int iStreamID,string &sCMD_Result,Message *pMessage)
+//<-dceag-c36-e->
+//<-dceag-c37-b->
+
+	/** @brief COMMAND: #37 - Play Media */
+	/** Play a media stream descriptor. */
+		/** @param #29 PK_MediaType */
+			/** The type of media */
+		/** @param #41 StreamID */
+			/** The media that we need to play. */
+		/** @param #42 MediaPosition */
+			/** The position at which we need to start playing. */
+		/** @param #59 MediaURL */
+			/** The file to play, or other media id.  The format is specific on the media type and the media player. */
+
+void qMediaPlayer_Plugin::CMD_Play_Media(int iPK_MediaType,int iStreamID,string sMediaPosition,string sMediaURL,string &sCMD_Result,Message *pMessage)
+//<-dceag-c37-e->
+//<-dceag-c38-b->
+
+	/** @brief COMMAND: #38 - Stop Media */
+	/** Stop playing a media stream descriptor. */
+		/** @param #41 StreamID */
+			/** The media needing to be stopped. */
+		/** @param #42 MediaPosition */
+			/** The position at which this stream was last played. */
+
+void qMediaPlayer_Plugin::CMD_Stop_Media(int iStreamID,string *sMediaPosition,string &sCMD_Result,Message *pMessage)
+//<-dceag-c38-e->
+//<-dceag-c39-b->
+
+	/** @brief COMMAND: #39 - Pause Media */
+	/** Pause a media playback. */
+		/** @param #41 StreamID */
+			/** The media stream for which we need to pause playback. */
+
+void qMediaPlayer_Plugin::CMD_Pause_Media(int iStreamID,string &sCMD_Result,Message *pMessage)
+//<-dceag-c39-e->
+//<-dceag-c40-b->
+
+	/** @brief COMMAND: #40 - Restart Media */
+	/** Restart a media playback. */
+		/** @param #41 StreamID */
+			/** The media stream that we need to restart playback for. */
+
+void qMediaPlayer_Plugin::CMD_Restart_Media(int iStreamID,string &sCMD_Result,Message *pMessage)
+//<-dceag-c40-e->
+//<-dceag-c41-b->
+
+	/** @brief COMMAND: #41 - Change Playback Speed */
+	/** Change the playback speed of a media stream. */
+		/** @param #41 StreamID */
+			/** The media needing the playback speed change. */
+		/** @param #43 MediaPlaybackSpeed */
+			/** The requested media playback speed * 1000.  -1000 = rev, 4000 = 4x fwd, -500 = rev 1/2.  Less than 10 = relative.  +2 = double, -1 = reverse.   See Media_Plugin::ReceivedMessage */
+		/** @param #220 Report */
+			/** If true, report this speed to the user on the OSD */
+
+void qMediaPlayer_Plugin::CMD_Change_Playback_Speed(int iStreamID,int iMediaPlaybackSpeed,bool bReport,string &sCMD_Result,Message *pMessage)
+//<-dceag-c41-e->
+//<-dceag-c65-b->
+
+	/** @brief COMMAND: #65 - Jump Position In Playlist */
+	/** Jumps to a position within some media, such as songs in a playlist, tracks on a cd, etc.  It will assume the sender is an orbiter, and find the entertainment area and stream associated with it.  The track can be an absolute or relative position. */
+		/** @param #5 Value To Assign */
+			/** The track to go to.  A number is considered an absolute.  "+2" means forward 2, "-1" means back 1. */
+		/** @param #41 StreamID */
+			/** ID of stream to apply */
+
+void qMediaPlayer_Plugin::CMD_Jump_Position_In_Playlist(string sValue_To_Assign,int iStreamID,string &sCMD_Result,Message *pMessage)
+//<-dceag-c65-e->

@@ -23,20 +23,6 @@
 //	DCE Implemenation for #2186 qOrbiter
 
 #include "Gen_Devices/qOrbiterBase.h"
-#include "DataGrid.h"
-#include "Virtual_Device_Translator.h"
-#include <QObject>
-#include <QImage>
-#include <QStringList>
-#include <contextobjects/epgchannellist.h>
-#include <contextobjects/playlistclass.h>
-#include <avitem.h>
-#include <contextobjects/avcommand.h>
-#include <datamodels/avdevice.h>
-#include <contextobjects/modelpage.h>
-#include <contextobjects/existingorbiter.h>
-#include <contextobjects/bookmarkitem.h>
-
 //<-dceag-d-e->
 
 class basicImageProvider;
@@ -46,19 +32,9 @@ class basicImageProvider;
 //<-dceag-decl-b->
 namespace DCE
 {
-class qOrbiter :  public qOrbiter_Command
-{
-    Q_OBJECT
-    Q_PROPERTY (QString mediaResponse READ getMediaResponse WRITE setMediaResponse NOTIFY mediaResponseChanged)
-    Q_PROPERTY (int media_pageSeperator READ getGridSeperator WRITE setGridSeperator NOTIFY newPageSeperator )
-    Q_PROPERTY (int i_current_mediaType READ getMediaType WRITE setMediaType NOTIFY mediaTypeChanged)
-    Q_PROPERTY (bool discreteAudio READ getDiscreteAudio WRITE setDiscreteAudio NOTIFY discreteAudioChanged )
-    Q_PROPERTY (bool m_bContainsVideo READ getContainsVideo WRITE setContainsVideo NOTIFY containsVideo())
-    Q_PROPERTY (bool usingLiveAv READ getLiveAvPath WRITE setLiveAvPath NOTIFY liveAvPath)
-    Q_PROPERTY (bool m_bIsOSD READ getOsd WRITE setOsd NOTIFY isOsd)
-    Q_PROPERTY (bool monitorAvailible READ getMonitorStatus WRITE setMonitorStatus NOTIFY monitorStatusChanged)
-
-    //<-dceag-decl-e->
+	class qOrbiter : public qOrbiter_Command
+	{
+//<-dceag-decl-e->
     // Private member variables
 
     // Private methods
@@ -157,20 +133,12 @@ public:
     //<-dceag-const-b->
 public:
 		// Constructors/Destructor
-        qOrbiter(int DeviceID, string ServerAddress,bool bConnectEventHandler=true,bool bLocalMode=false,class Router *pRouter=NULL, QObject *parent =0);
+		qOrbiter(int DeviceID, string ServerAddress,bool bConnectEventHandler=true,bool bLocalMode=false,class Router *pRouter=NULL);
 		virtual ~qOrbiter();
-
-        virtual bool Register();
+		virtual bool GetConfig();
+		virtual bool Register();
 		virtual void ReceivedCommandForChild(DeviceData_Impl *pDeviceData_Impl,string &sCMD_Result,Message *pMessage);
 		virtual void ReceivedUnknownCommand(string &sCMD_Result,Message *pMessage);
-        virtual void OnReload();
-        virtual void OnDisconnect();
-        virtual void OnReplaceHandler();
-        virtual int PromptFor(std::string t);
-        virtual int PromptUser(std::string sPrompt, int iTimeoutSeconds, map<int, std::string> *p_mapPrompts);
-        virtual int DeviceIdInvalid();
-
-
 //<-dceag-const-e->
 
     //<-dceag-const2-b->
@@ -213,10 +181,13 @@ public:
 	int DATA_Get_ScreenHeight();
 	int DATA_Get_Rotation();
 	int DATA_Get_PK_Screen();
+	bool DATA_Get_Use_OpenGL_effects();
+	void DATA_Set_Use_OpenGL_effects(bool Value,bool bUpdateDatabase=false);
 	bool DATA_Get_Get_Time_Code_for_Media();
 	string DATA_Get_AV_Adjustment_Rules();
 	bool DATA_Get_Enable_Memory_Management();
 	void DATA_Set_Enable_Memory_Management(bool Value,bool bUpdateDatabase=false);
+	string DATA_Get_Model();
 	bool DATA_Get_Ignore_First_Event();
 	void DATA_Set_Ignore_First_Event(bool Value,bool bUpdateDatabase=false);
 	bool DATA_Get_Automatically_Go_to_Remote();

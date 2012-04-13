@@ -13,7 +13,7 @@ BASELDLIBS = -lSerializeClass -lDCECommon -lPlutoUtils -lpthread
 
 MYNAME = qMediaPlayer
 VERSION = 2.0.0
-MYDEVTEMPLATEID = 2203mplateID
+MYDEVTEMPLATEID = 2205mplateID
 
 Gen_Dev_Files = $(GENDEV)/qMediaPlayerBase.cpp
 sources = Main.cpp qMediaPlayer.cpp $(Gen_Dev_Files)

@@ -14,7 +14,7 @@ DeviceData_Impl *qMediaPlayer_Plugin_Data::CreateData(DeviceData_Impl *Parent,ch
 	int iPK_Installation = b.Read_unsigned_long();
 	int iPK_DeviceTemplate = b.Read_unsigned_long();
 	switch(iPK_DeviceTemplate) {
-		case 2204:
+		case 2206:
 			return new qMediaPlayer_Plugin_Data();
 	};
 	LoggerWrapper::GetInstance()->Write(LV_STATUS, "Got CreateData for unknown type %d.", iPK_DeviceTemplate);
@@ -24,7 +24,7 @@ DeviceData_Impl *qMediaPlayer_Plugin_Data::CreateData(DeviceData_Impl *Parent,ch
 Event_Impl *qMediaPlayer_Plugin_Event::CreateEvent( unsigned long dwPK_DeviceTemplate, ClientSocket *pOCClientSocket, unsigned long dwDevice )
 {
 	switch(dwPK_DeviceTemplate) {
-		case 2204:
+		case 2206:
 			return (Event_Impl *) new qMediaPlayer_Plugin_Event(pOCClientSocket, dwDevice);
 	};
 	LoggerWrapper::GetInstance()->Write(LV_STATUS, "Got CreateEvent for unknown type %d.", dwPK_DeviceTemplate);

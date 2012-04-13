@@ -17,7 +17,7 @@
 #ifndef qMediaPlayer_h
 #define qMediaPlayer_h
 
-//	DCE Implemenation for #2203 qMediaPlayer
+//	DCE Implemenation for #2205 qMediaPlayer
 
 #include "Gen_Devices/qMediaPlayerBase.h"
 //<-dceag-d-e->
@@ -59,13 +59,7 @@ public:
 
 	/*
 			*****DATA***** accessors inherited from base class
-	string DATA_Get_Audio_settings();
-	string DATA_Get_Video_settings();
-	string DATA_Get_Subtitles();
-	string DATA_Get_AuthPassword();
-	string DATA_Get_Name();
 	int DATA_Get_Port();
-	int DATA_Get_Zoom_Level();
 
 			*****EVENT***** accessors inherited from base class
 	void EVENT_Playback_Info_Changed(string sMediaDescription,string sSectionDescription,string sSynposisDescription);
@@ -288,22 +282,6 @@ public:
 	virtual void CMD_Stop(int iStreamID,bool bEject,string &sCMD_Result,Message *pMessage);
 
 
-	/** @brief COMMAND: #97 - Mute */
-	/** VDR mute */
-
-	virtual void CMD_Mute() { string sCMD_Result; CMD_Mute(sCMD_Result,NULL);};
-	virtual void CMD_Mute(string &sCMD_Result,Message *pMessage);
-
-
-	/** @brief COMMAND: #123 - Info */
-	/** VDR info */
-		/** @param #9 Text */
-			/** nimic */
-
-	virtual void CMD_Info(string sText) { string sCMD_Result; CMD_Info(sText.c_str(),sCMD_Result,NULL);};
-	virtual void CMD_Info(string sText,string &sCMD_Result,Message *pMessage);
-
-
 	/** @brief COMMAND: #126 - Guide */
 	/** Show guide information.  For a dvd this may be the menu, just like the menu command */
 
@@ -468,32 +446,6 @@ public:
 	virtual void CMD_9(string &sCMD_Result,Message *pMessage);
 
 
-	/** @brief COMMAND: #214 - Save playlist */
-	/** This will instruct the device to save the currently playing list */
-		/** @param #17 PK_Users */
-			/** The user that will own the new playlist. Can be missing. It will pick the current user then. */
-		/** @param #45 PK_EntertainArea */
-			/** Which playlist to save. You can direct the command to save a specific entertainment area's playlist or you can leave it blank to pick the current entertainment area's playlist */
-		/** @param #50 Name */
-			/** It will use the this name when saving. If it is not specified it will either use the name of the loaded playlist in the database or it will generate a new one. */
-		/** @param #77 Save as new */
-			/** Save the playlist as a new playlist. This will override the default behaviour. (If this playlist was not loaded from the database it will be saved as new. If it was loaded it will be overridded). This will make it always save it as new. */
-
-	virtual void CMD_Save_playlist(int iPK_Users,string sPK_EntertainArea,string sName,bool bSave_as_new) { string sCMD_Result; CMD_Save_playlist(iPK_Users,sPK_EntertainArea.c_str(),sName.c_str(),bSave_as_new,sCMD_Result,NULL);};
-	virtual void CMD_Save_playlist(int iPK_Users,string sPK_EntertainArea,string sName,bool bSave_as_new,string &sCMD_Result,Message *pMessage);
-
-
-	/** @brief COMMAND: #231 - Load Playlist */
-	/** This will instruct the device to load the specific playlist. */
-		/** @param #45 PK_EntertainArea */
-			/** The entertainment area in which to load the  playlist. By defualt it will be the entertainment in which the current orbiter is running. */
-		/** @param #78 EK_Playlist */
-			/** The id of the playlist to load */
-
-	virtual void CMD_Load_Playlist(string sPK_EntertainArea,int iEK_Playlist) { string sCMD_Result; CMD_Load_Playlist(sPK_EntertainArea.c_str(),iEK_Playlist,sCMD_Result,NULL);};
-	virtual void CMD_Load_Playlist(string sPK_EntertainArea,int iEK_Playlist,string &sCMD_Result,Message *pMessage);
-
-
 	/** @brief COMMAND: #240 - Back / Prior Menu */
 	/** Navigate back .. ( Escape ) */
 		/** @param #41 StreamID */
@@ -533,33 +485,6 @@ public:
 	virtual void CMD_Report_Playback_Position(int iStreamID,string *sText,string *sMediaPosition,string &sCMD_Result,Message *pMessage);
 
 
-	/** @brief COMMAND: #269 - Move Playlist entry Up */
-	/** Moves a entry up in the current playlist. */
-		/** @param #48 Value */
-			/** The id of the entry that needs to be moved up. */
-
-	virtual void CMD_Move_Playlist_entry_Up(int iValue) { string sCMD_Result; CMD_Move_Playlist_entry_Up(iValue,sCMD_Result,NULL);};
-	virtual void CMD_Move_Playlist_entry_Up(int iValue,string &sCMD_Result,Message *pMessage);
-
-
-	/** @brief COMMAND: #270 - Move Playlist entry Down */
-	/** Moves a entry down in the current playlist. */
-		/** @param #48 Value */
-			/** The id of the entry that needs to be moved down in the playlist. */
-
-	virtual void CMD_Move_Playlist_entry_Down(int iValue) { string sCMD_Result; CMD_Move_Playlist_entry_Down(iValue,sCMD_Result,NULL);};
-	virtual void CMD_Move_Playlist_entry_Down(int iValue,string &sCMD_Result,Message *pMessage);
-
-
-	/** @brief COMMAND: #271 - Remove playlist entry. */
-	/** Removes an entry from the playlist. */
-		/** @param #48 Value */
-			/** The Id of the entry that needs to be removed from the playlist. */
-
-	virtual void CMD_Remove_playlist_entry(int iValue) { string sCMD_Result; CMD_Remove_playlist_entry(iValue,sCMD_Result,NULL);};
-	virtual void CMD_Remove_playlist_entry(int iValue,string &sCMD_Result,Message *pMessage);
-
-
 	/** @brief COMMAND: #412 - Set Media Position */
 	/** Jump to a certain media position */
 		/** @param #41 StreamID */
@@ -571,20 +496,6 @@ public:
 	virtual void CMD_Set_Media_Position(int iStreamID,string sMediaPosition,string &sCMD_Result,Message *pMessage);
 
 
-	/** @brief COMMAND: #455 - Blue */
-	/** VDR blue */
-
-	virtual void CMD_Blue() { string sCMD_Result; CMD_Blue(sCMD_Result,NULL);};
-	virtual void CMD_Blue(string &sCMD_Result,Message *pMessage);
-
-
-	/** @brief COMMAND: #518 - Green */
-	/** VDR Green */
-
-	virtual void CMD_Green() { string sCMD_Result; CMD_Green(sCMD_Result,NULL);};
-	virtual void CMD_Green(string &sCMD_Result,Message *pMessage);
-
-
 	/** @brief COMMAND: #548 - Menu */
 	/** Show a menu associated with this media */
 		/** @param #9 Text */
@@ -594,13 +505,6 @@ public:
 
 	virtual void CMD_Menu(string sText,int iStreamID) { string sCMD_Result; CMD_Menu(sText.c_str(),iStreamID,sCMD_Result,NULL);};
 	virtual void CMD_Menu(string sText,int iStreamID,string &sCMD_Result,Message *pMessage);
-
-
-	/** @brief COMMAND: #605 - Red */
-	/** VDR red */
-
-	virtual void CMD_Red() { string sCMD_Result; CMD_Red(sCMD_Result,NULL);};
-	virtual void CMD_Red(string &sCMD_Result,Message *pMessage);
 
 
 	/** @brief COMMAND: #651 - Thumbs Down */
@@ -619,33 +523,6 @@ public:
 
 	virtual void CMD_Thumbs_Up(int iStreamID) { string sCMD_Result; CMD_Thumbs_Up(iStreamID,sCMD_Result,NULL);};
 	virtual void CMD_Thumbs_Up(int iStreamID,string &sCMD_Result,Message *pMessage);
-
-
-	/** @brief COMMAND: #682 - Yellow */
-	/** VDR yellow */
-
-	virtual void CMD_Yellow() { string sCMD_Result; CMD_Yellow(sCMD_Result,NULL);};
-	virtual void CMD_Yellow(string &sCMD_Result,Message *pMessage);
-
-
-	/** @brief COMMAND: #780 - Remove playlist */
-	/** Removes a playlist from database */
-		/** @param #78 EK_Playlist */
-			/** The id of the playlist to be removed. */
-
-	virtual void CMD_Remove_playlist(int iEK_Playlist) { string sCMD_Result; CMD_Remove_playlist(iEK_Playlist,sCMD_Result,NULL);};
-	virtual void CMD_Remove_playlist(int iEK_Playlist,string &sCMD_Result,Message *pMessage);
-
-
-	/** @brief COMMAND: #812 - Application Exited */
-	/** Notify us that Myth Player exited */
-		/** @param #227 PID */
-			/** Process ID to be passed to the ApplicationExited function */
-		/** @param #228 Exit Code */
-			/** Exit Code to be passed to the ApplicationExited function */
-
-	virtual void CMD_Application_Exited(int iPID,int iExit_Code) { string sCMD_Result; CMD_Application_Exited(iPID,iExit_Code,sCMD_Result,NULL);};
-	virtual void CMD_Application_Exited(int iPID,int iExit_Code,string &sCMD_Result,Message *pMessage);
 
 
 	/** @brief COMMAND: #916 - Set Aspect Ratio */
