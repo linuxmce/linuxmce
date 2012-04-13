@@ -334,53 +334,53 @@ UpdateOrbiterDimensions () {
 ###########################################################
 
 Video_Driver_Detection () {
-# Check if any driver is installed. If not, check what hardware is in the box, and install the relevant driver using
-# the binary drivers
-DriverInstalled=0
-driverConfig=none
-grep "Driver" /etc/X11/xorg.conf |grep -v "keyboard"| grep -v "#" | grep -v "vesa"|grep -v "mouse"|grep -vq "kbd" && DriverInstalled=1
-
-# Check if we have nVidia or ATI cards in here, and specify proper config programs and commandline options.
-if [[ $DriverInstalled -eq 0 ]]; then
+	# Check if any driver is installed. If not, check what hardware is in the box, and install the relevant driver using
+	# the binary drivers
+	DriverInstalled=0
 	driverConfig=none
-	lspci|grep nVidia|grep "VGA compatible controller" -q && driverConfig=nvidia-xconfig
-	if [[ $driverConfig == nvidia-xconfig ]]; then
-		driverLine = ""
-	fi
-	if [[ $driverConfig == none ]]; then
-		lspci|grep ATI|grep -vi Non-VGA|grep VGA -q && driverConfig=aticonfig
-	fi
-	if [[ $driverConfig == aticonfig ]]; then
-		driverLine="--initial"
-	fi
-fi
+	grep "Driver" /etc/X11/xorg.conf |grep -v "keyboard"| grep -v "#" | grep -v "vesa"|grep -v "mouse"|grep -vq "kbd" && DriverInstalled=1
 
-if [[ "$driverConfig" != none ]]; then
-	# Is it installed, if so execute it with any line params
-	driverConfigLocation=`which $driverConfig`
-	if [[ -x $driverConfigLocation ]]; then
-		$driverConfigLocation $driverLine
-		VerifyExitCode "Running $driverConfigLocation $driverLine failed!"
+	# Check if we have nVidia or ATI cards in here, and specify proper config programs and commandline options.
+	if [[ $DriverInstalled -eq 0 ]]; then
+		driverConfig=none
+		lspci|grep nVidia|grep "VGA compatible controller" -q && driverConfig=nvidia-xconfig
+		if [[ $driverConfig == nvidia-xconfig ]]; then
+			driverLine = ""
+		fi
+		if [[ $driverConfig == none ]]; then
+			lspci|grep ATI|grep -vi Non-VGA|grep VGA -q && driverConfig=aticonfig
+		fi
+		if [[ $driverConfig == aticonfig ]]; then
+			driverLine="--initial"
+		fi
 	fi
-fi
+	
+	if [[ "$driverConfig" != none ]]; then
+		# Is it installed, if so execute it with any line params
+		driverConfigLocation=`which $driverConfig`
+		if [[ -x $driverConfigLocation ]]; then
+			$driverConfigLocation $driverLine
+			VerifyExitCode "Running $driverConfigLocation $driverLine failed!"
+		fi
+	fi
 }
-
+	
 SetupViaXine() {
 	local Q OrbiterDev XineDev
 }
 
 GamePad_Setup () {
 
-if [[ ! -x /usr/pluto/bin/AVWizard_Remote_Detect.sh ]]; then
-	chmod +x /usr/pluto/bin/AVWizard_Remote_Detect.sh 
-fi
+	if [[ ! -x /usr/pluto/bin/AVWizard_Remote_Detect.sh ]]; then
+		chmod +x /usr/pluto/bin/AVWizard_Remote_Detect.sh 
+	fi
+	
+	if [[ ! -x /usr/pluto/bin/AVWizard_Gamepad_Detect.sh ]]; then
+		chmod +x /usr/pluto/bin/AVWizard_Gamepad_Detect.sh
+	fi
 
-if [[ ! -x /usr/pluto/bin/AVWizard_Gamepad_Detect.sh ]]; then
-	chmod +x /usr/pluto/bin/AVWizard_Gamepad_Detect.sh
-fi
-
-RemoteCmd=$(/usr/pluto/bin/AVWizard_Remote_Detect.sh | tail -1)
-GamepadCmd=$(/usr/pluto/bin/AVWizard_Gamepad_Detect.sh | tail -1)
+	RemoteCmd=$(/usr/pluto/bin/AVWizard_Remote_Detect.sh | tail -1)
+	GamepadCmd=$(/usr/pluto/bin/AVWizard_Gamepad_Detect.sh | tail -1)
 
 }
 
@@ -397,47 +397,47 @@ Enable_Audio_Channels () {
 }
 
 Start_AVWizard () {
-#Modify /etc/pluto.conf for the AVWizardOverride value
-ConfSet AVWizardOverride 0
-rm -f /tmp/AVWizard_Started
+	#Modify /etc/pluto.conf for the AVWizardOverride value
+	ConfSet AVWizardOverride 0
+	rm -f /tmp/AVWizard_Started
 
-#Setup Main AVWizard loop
-Done=0
-while [[ "$Done" -eq 0 ]]; do
-	StatsMessage "AVWizard Main loop"
-	rm -f /tmp/*.xml
-	SetupX
-	"$BaseDir"/AVWizardWrapper.sh
-	Ret="$?"
-	mv "$WMTweaksFile"{.orig,}
-	StatsMessage "AVWizard Main loop ret code $Ret"
-	case "$Ret" in
-		0) Done=1 ;;
-		3)
-			rm -f "$XF86Config" "$XineConf"
-			exit 0 ;; # AV Wizard canceled; don't apply any changes
-		*) : ;; # All others re-loop (failures)
-	esac
-done
-
-StatsMessage "AVWizard Main loop done"
-
-# Finalize wizard: save settings
-ConfSet "AVWizardDone" "1"
-mv "$XF86Config" "$ConfFile"
-mv "$XineConf" /etc/pluto/xine.conf
-StatsMessage "AVWizard reset conf file"
-alsactl store
-StatsMessage "AVWizard Saving Audio Settings"
-UpdateAudioSettings
-StatsMessage "AVWizard Calling UpdateOrbiterDimensions"
-UpdateOrbiterDimensions
-StatsMessage "AVWizard Calling UpdateOrbiterUI"
-UpdateOrbiterUI
-StatsMessage "AVWizard Calling SetupAudioVideo"
-bash -x /usr/pluto/bin/SetupAudioVideo.sh | tee-pluto /var/log/pluto/avwizard_setup_av.log
-
-ConfSet AVWizardOverride 0
+	#Setup Main AVWizard loop
+	Done=0
+	while [[ "$Done" -eq 0 ]]; do
+		StatsMessage "AVWizard Main loop"
+		rm -f /tmp/*.xml
+		SetupX
+		"$BaseDir"/AVWizardWrapper.sh
+		Ret="$?"
+		mv "$WMTweaksFile"{.orig,}
+		StatsMessage "AVWizard Main loop ret code $Ret"
+		case "$Ret" in
+			0) Done=1 ;;
+			3)
+				rm -f "$XF86Config" "$XineConf"
+				exit 0 ;; # AV Wizard canceled; don't apply any changes
+			*) : ;; # All others re-loop (failures)
+		esac
+	done
+	
+	StatsMessage "AVWizard Main loop done"
+	
+	# Finalize wizard: save settings
+	ConfSet "AVWizardDone" "1"
+	mv "$XF86Config" "$ConfFile"
+	mv "$XineConf" /etc/pluto/xine.conf
+	StatsMessage "AVWizard reset conf file"
+	alsactl store
+	StatsMessage "AVWizard Saving Audio Settings"
+	UpdateAudioSettings
+	StatsMessage "AVWizard Calling UpdateOrbiterDimensions"
+	UpdateOrbiterDimensions
+	StatsMessage "AVWizard Calling UpdateOrbiterUI"
+	UpdateOrbiterUI
+	StatsMessage "AVWizard Calling SetupAudioVideo"
+	bash -x /usr/pluto/bin/SetupAudioVideo.sh | tee-pluto /var/log/pluto/avwizard_setup_av.log
+	
+	ConfSet AVWizardOverride 0
 }
 
 
