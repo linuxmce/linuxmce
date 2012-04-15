@@ -1,5 +1,4 @@
 #!/bin/bash
-
 if [[ -n "$HEADER_Utils" ]]; then
 	return 0
 fi
@@ -517,7 +516,7 @@ GetVideoDriver () {
 }
 
 InstallVideoDriver () {
-        distro="$(lsb_release -c -s)" 
+	distro="$(lsb_release -c -s)"
 	case "$prop_driver" in
         	nvidia)
 			if ! PackageIsInstalled nvidia-glx && ! PackageIsInstalled nvidia-glx-new && ! PackageIsInstalled nvidia-glx-71 && ! PackageIsInstalled nvidia-glx-96 && ! PackageIsInstalled nvidia-glx-173 && ! PackageIsInstalled nvidia-glx-180 && ! PackageIsInstalled nvidia-glx-190 && ! PackageIsInstalled nvidia-glx-195 && ! PackageIsInstalled nvidia-glx-260 && ! PackageIsInstalled nvidia-glx-185 && ! PackageIsInstalled nvidia-current; then 
@@ -581,9 +580,9 @@ InstallVideoDriver () {
 				apt-get -yf install xserver-xorg-video-s3virge
 				VerifyExitCode "Install VIA S3 Virge Driver"
 			fi ;;
-	esac
+                esac
 
-	if [[ "$chip_man" == "Intel" ]] && [[ -z $online ]]; then
+	if [[ "$chip_man" == "Intel" ]] && [[ -n $online ]]; then
 		if [[ "$distro" = "precise" ]]; then
 			if ! PackageIsInstalled "i965-va-driver"; then
 				apt-get -yf install i965-va-driver
@@ -614,10 +613,14 @@ CheckVideoDriver () {
 		# Check to see that the appropriate driver is installed by type
 		# If current driver is nvidia, check that it is the correct one
 
-		if [[ "$offline_mismatch" == "false" ]] && [[ "$cur_driver" == "nvidia" ]]; then
+		if [[ "$offline_mismatch" != "true" ]] && [[ "$cur_driver" == "nvidia" ]]; then
 			StartService "Checking nVidia driver" ". /usr/pluto/bin/nvidia-install.sh"
 			current_nvidia=$(getInstalledNvidiaDriver)
 			preferred_nvidia=$(getPreferredNvidiaDriver)
+				if [[ "$current_nvidia" != "$preferred_nvidia" ]]; then 
+					cur_driver="wrongnv"
+					offline_mismatch="false"
+				fi
 		fi
 
 		if [[ "$cur_driver" == "$prop_driver" ]]; then
@@ -637,9 +640,9 @@ CheckVideoDriver () {
 				apt-get -y install --reinstall xserver-xorg-core --force-yes
 				rm /etc/X11/xorg.conf
 				reboot
-			elif [[ $cur_driver == "nvidia" ]]; then
+			elif [[ $cur_driver == "wrongnv" ]]; then
 				StatusMessage "Removing old nVidia driver"
-				apt-get -yf remove $current_driver --force-yes
+				apt-get -yf remove nvidia* --force-yes
 			fi
 		
 			# If there is an xorg, but the driver does not match best selection, install driver and run AVWizard
@@ -675,11 +678,7 @@ CheckVideoDriver () {
 					prop_driver="nouveau" ;;
 				fglrx)
 					prop_driver="radeon" ;;
-				savage)
-					prop_driver="openchrome" ;;
-				via)
-					prop_driver="openchrome" ;;
-				virge)
+				savage|via|verge)
 					prop_driver="openchrome" ;;
 			esac
 		fi
