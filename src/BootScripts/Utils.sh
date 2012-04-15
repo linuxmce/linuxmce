@@ -465,7 +465,7 @@ ServiceCmd="$2"
 ServiceBkg="$3"
 	if [[ -x $(echo $ServiceCmd | cut -d ' ' -f1) ]] ;then
 		if [ -x /bin/plymouth ]; then
-			/bin/plymouth update --status="$ServiceDescription ... "
+			/bin/plymouth update --status="$ServiceDescription ... " || :
 		fi
 		echo -n "$ServiceDescription ... "
 			if [[ "$ServiceBkg" == "&" ]] ;then
