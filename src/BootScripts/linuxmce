@@ -30,7 +30,7 @@ StartService() {
 
 	if [[ -x $(echo $ServiceCmd | cut -d ' ' -f1) ]] ;then
                 if [ -x /bin/plymouth ]; then
-                        /bin/plymouth update --status="$ServiceDescription ... "
+                        /bin/plymouth update --status="$ServiceDescription ... " || :
                 fi
 		echo -n "$ServiceDescription ... "
 		if [[ "$ServiceBkg" == "&" ]] ;then
@@ -57,7 +57,7 @@ StartDaemon() {
 
 	if [[ -x $(echo $ServiceCmd | cut -d ' ' -f1) ]] ;then
                 if [ -x /bin/plymouth ]; then
-                        /bin/plymouth update --status="$ServiceDescription ... "
+                        /bin/plymouth update --status="$ServiceDescription ... " || :
                 fi
 		echo -n "$ServiceDescription ... "
 		screen -d -m -S "$ServiceScreen" $ServiceCmd 
@@ -107,7 +107,7 @@ function assureXorgSane()
 }
 
 if [ -x /bin/plymouth ]; then
-        /bin/plymouth message --text="Starting up LinuxMCE..."
+        /bin/plymouth message --text="Starting up LinuxMCE..." || :
 fi
 
 setterm -blank >/dev/console             # disable console blanking
@@ -304,7 +304,7 @@ if VDRInstalled ; then
 fi
 StartDaemon  "Starting LinuxMCE Launch Manager" "/usr/pluto/bin/LaunchManagerDaemon.sh" "LMCE_Launch_Manager"
 if [ -x /bin/plymouth ]; then 
-        /bin/plymouth --hide-splash
+        /bin/plymouth --hide-splash || :
 fi
 
 exit 0
