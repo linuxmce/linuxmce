@@ -111,6 +111,19 @@ INSERT INTO ast_config (cat_metric, var_metric, commented, filename, category, v
 (1, 4, 0, 'voicemail.conf', 'zonemessages', 'european', 'Europe/Copenhagen|''vm-received'' a d b ''digits/at'' HM');
 
 --
+-- Insert static cdr_mysql.conf in  DB
+--	
+DELETE FROM ast_config WHERE filename = 'cdr_mysql.conf';
+INSERT INTO ast_config (cat_metric, var_metric, commented, filename, category, var_name, var_val) VALUES
+(0, 0, 0, 'cdr_mysql.conf', 'general', 'hostname', 'localhost'),
+(0, 1, 0, 'cdr_mysql.conf', 'general', 'dbname', 'asterisk'),
+(0, 2, 0, 'cdr_mysql.conf', 'general', 'table', 'cdr'),
+(0, 3, 0, 'cdr_mysql.conf', 'general', 'password', 'lmce'),
+(0, 4, 0, 'cdr_mysql.conf', 'general', 'user', 'asteriskuser'),
+(0, 5, 0, 'cdr_mysql.conf', 'general', 'port', '3306'),
+(0, 6, 0, 'cdr_mysql.conf', 'general', 'sock', '/var/run/mysqld/mysqld.sock');
+
+--
 -- Insert static jabber.conf and gtalk.conf in  DB for google's voice service
 --	
 DELETE FROM ast_config WHERE filename = 'jabber.conf';

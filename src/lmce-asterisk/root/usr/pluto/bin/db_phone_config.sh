@@ -343,11 +343,18 @@ AddTrunk()
 	if [[ "$protocol" == "SPA" ]]; then
 		protocol="SIP"
 	fi
+	
 	# add outbound context in realtime extensions
 	context="outbound-allroutes"
-	LINESSQL="$LINESSQL INSERT INTO $DB_Extensions_Table (context,exten,priority,app,appdata) VALUES \
-	('$context','_$prefix.','1','Macro','dialout-trunk,$protocol/$phonenumber,\${EXTEN:1},,'),\
-	('$context','_$prefix.','2','Macro','outisbusy,');"
+	if [[ $protocol == "GTALK" ]]; then
+		LINESSQL="$LINESSQL INSERT INTO $DB_Extensions_Table (context,exten,priority,app,appdata) VALUES \
+		('$context','_$prefix.','1','Macro','dialout-trunk,$protocol/$phonenumber,\${EXTEN:1}@voice.google.com,,'),\
+		('$context','_$prefix.','2','Macro','outisbusy,');"		
+	else
+		LINESSQL="$LINESSQL INSERT INTO $DB_Extensions_Table (context,exten,priority,app,appdata) VALUES \
+		('$context','_$prefix.','1','Macro','dialout-trunk,$protocol/$phonenumber,\${EXTEN:1},,'),\
+		('$context','_$prefix.','2','Macro','outisbusy,');"
+	fi
 	
 	# create incoming context and redirect to realtime
 	echo "[from-trunk-$phonenumber]

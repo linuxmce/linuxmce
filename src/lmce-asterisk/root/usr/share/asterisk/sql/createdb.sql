@@ -2,6 +2,7 @@
  * Create LinuxMCE asterisk database
  * and realtime tables
  *
+ * v0.2 - 15/04/2012 - foxi352 - removed asteriskcdrdb and created cdr table in asterisk db
  * v0.1 - 22/09/2011 - foxi352 - initial version
  * 
 */
@@ -17,14 +18,17 @@ START TRANSACTION;
 -- Create LinuxMCE asterisk databases
 --
 CREATE DATABASE IF NOT EXISTS asterisk;
-CREATE DATABASE IF NOT EXISTS asteriskcdrdb;
+
+--
+-- Drop database we created in older installs. This drop can be removed on release
+--
+DROP DATABASE IF EXISTS asteriskcdrdb;
 
 --
 -- Set LinuxMCE user privileges to asterisk databases
 -- Create LinuxMCE user @same time if not exists 
 --
 GRANT ALL PRIVILEGES ON asterisk.* TO asteriskuser@localhost;
-GRANT ALL PRIVILEGES ON asteriskcdrdb.* TO asteriskuser@localhost;
 
 --
 -- Reset LinuxMCE db user password to default if maybe still set to freepbx default
@@ -364,6 +368,31 @@ CREATE TABLE IF NOT EXISTS `fax_list` (
   `FileName` varchar(255) NOT NULL,
   `Result` varchar(255) DEFAULT 'N/A',
   PRIMARY KEY (`PK_Fax`)
+);
+
+--
+-- Table for calls details records (cdr)
+--
+CREATE TABLE IF NOT EXISTS `cdr` (
+  `calldate` datetime NOT NULL DEFAULT '0000-00-00 00:00:00',
+  `clid` varchar(80) NOT NULL DEFAULT '',
+  `src` varchar(80) NOT NULL DEFAULT '',
+  `dst` varchar(80) NOT NULL DEFAULT '',
+  `dcontext` varchar(80) NOT NULL DEFAULT '',
+  `channel` varchar(80) NOT NULL DEFAULT '',
+  `dstchannel` varchar(80) NOT NULL DEFAULT '',
+  `lastapp` varchar(80) NOT NULL DEFAULT '',
+  `lastdata` varchar(80) NOT NULL DEFAULT '',
+  `duration` int(11) NOT NULL DEFAULT '0',
+  `billsec` int(11) NOT NULL DEFAULT '0',
+  `disposition` varchar(45) NOT NULL DEFAULT '',
+  `amaflags` int(11) NOT NULL DEFAULT '0',
+  `accountcode` varchar(20) NOT NULL DEFAULT '',
+  `userfield` varchar(255) NOT NULL DEFAULT '',
+  `uniqueid` varchar(32) NOT NULL DEFAULT '',
+  KEY `calldate` (`calldate`),
+  KEY `dst` (`dst`),
+  KEY `accountcode` (`accountcode`)
 );
 
 --
