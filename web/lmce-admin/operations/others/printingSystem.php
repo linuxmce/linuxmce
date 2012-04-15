@@ -1,5 +1,5 @@
 <?
-function slimServer($output,$dbADO) {
+function printingSystem($output,$dbADO) {
 	// include language files
 	includeLangFile('common.lang.php');
 	includeLangFile('printingSystem.lang.php');
