@@ -1090,6 +1090,13 @@ switch ($section) {
 	    $output->setHelpSrc('/wiki/index.php/fax');
 	    fax($output,$asteriskADO,$dbADO,$telecomADO);
 	break;
+	case 'cdrviewer';
+		$output = new Template($dbADO);
+		$output->setTemplateFileType('large');
+		include_once('operations/phones/cdrviewer.php');
+	    $output->setHelpSrc('/wiki/index.php/cdrviewer');
+	    cdrviewer($output);
+	break;
 	case 'phoneExtensions';
 		$output = new Template($dbADO);
 		$output->setTemplateFileType('large');
@@ -1787,10 +1794,10 @@ switch ($section) {
 	    slimServer($output,$dbADO);	    
 	break;		
         case 'printingSystem':
-                $output = new Template($dbADO);
-                $output->setTemplateFileType('large');
-            include_once('operations/others/printingSystem.php');
-            slimServer($output,$dbADO);
+        $output = new Template($dbADO);
+        $output->setTemplateFileType('large');
+        include_once('operations/others/printingSystem.php');
+		printingSystem($output,$dbADO);
         break;
 	case 'searchMedia':
 		$output = new Template($dbADO);
@@ -1805,7 +1812,6 @@ switch ($section) {
 	    filePicker($output,$mediadbADO,$dbADO);
 	break;
 
-	
 	case 'index';
 		@$_SESSION['lastLeftFrameSrc']='';
 		@$_SESSION['lastRightFrameSrc']='';
