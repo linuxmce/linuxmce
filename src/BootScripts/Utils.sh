@@ -483,10 +483,22 @@ ServiceBkg="$3"
 }
 
 GetVideoDriver () {
-        vga_pci=$(lspci -v | grep -i 'VGA')
+        vga_pci=$(lspci | grep "VGA")
         prop_driver="vesa"
-        chip_man=$(echo "$vga_pci" | grep -Eo '(ATI|VIA|nVidia|Intel)')
-        case $chip_man in
+	gpus=$(echo "$vga_pci" | wc -l) 
+		if [[ "$gpus" -gt "1" ]]; then 
+			integrated_id=$(echo "$vga_pci" | head -1 | cut -d' ' -f1) 
+			iid_state=(cat /sys/devices/pci0000:00/0000:"$integrated_id"/enable) 
+			if [[ "$iid_state" == "1" ]]; then 
+				echo "0" > /sys/devices/pci0000:00/0000:"$integrated_id"/enable 
+				reboot 
+				exit 0 
+			fi 
+			vga_pci=$(echo "$vga_pci" | head -2) 
+		fi 
+	chip_man=$(echo "$vga_pci" | grep -Eo '(ATI|VIA|nVidia|Intel)')
+
+	case "$chip_man" in 
                 nVidia)
 				prop_driver="nvidia" ;;
                 ATI)
@@ -601,25 +613,26 @@ CheckVideoDriver () {
 	GetVideoDriver
 	online=$(ping -c 2 google.com)
 	card_detail=$(lspci | grep 'VGA' | cut -d':' -f3)
-	offline_mismatch=""
+	offline_mismatch="false"
+	online_mismatch="false"
 	if [[ -f /etc/X11/xorg.conf ]]; then
 		# TODO figure out a better way to isolate the video driver in the xorg.conf list of "Driver" options
         	cur_driver=$(grep "Driver" /etc/X11/xorg.conf | grep -Eo '(nvidia|nouveau|radeon|fglrx|savage|openchrome|via|virge|intel|i740|i128|vesa)')
 		if [[ "$prop_driver" != "$cur_driver" ]] &&  [[ -z $online ]]; then
 			offline_mismatch="true"
 		elif [[ "$prop_driver" != "$cur_driver" ]] && [[ -n $online ]]; then
-			offline_mismatch="false"
+			online_mismatch="true"
 		fi
 		# Check to see that the appropriate driver is installed by type
 		# If current driver is nvidia, check that it is the correct one
 
-		if [[ "$offline_mismatch" != "true" ]] && [[ "$cur_driver" == "nvidia" ]]; then
+		if [[ "$prop_driver" == "$cur_driver" ]] && [[ "$cur_driver" == "nvidia" ]] && [[ -n "$online" ]]; then
 			StartService "Checking nVidia driver" ". /usr/pluto/bin/nvidia-install.sh"
 			current_nvidia=$(getInstalledNvidiaDriver)
 			preferred_nvidia=$(getPreferredNvidiaDriver)
 				if [[ "$current_nvidia" != "$preferred_nvidia" ]]; then 
 					cur_driver="wrongnv"
-					offline_mismatch="false"
+					online_mismatch="true"
 				fi
 		fi
 
@@ -627,7 +640,7 @@ CheckVideoDriver () {
 			StatusMessage "Correct driver '$prop_driver' already loaded"
 			exit 0
 		# Remove fglrx or nVidia drivers if they are installed, but do not match current requirements
-                elif ([[ "$offline_mismatch" == "false" ]]) || ([[ "$offine_mismatch" == "true" ]] && echo "$prop_driver" | grep -Eq '(nouveau|radeon|openchrome)'); then
+                elif ([[ "$online_mismatch" == "true" ]]) || ([[ "$offine_mismatch" == "true" ]] && echo "$prop_driver" | grep -Eq '(nouveau|radeon|openchrome)'); then
                         ErrorMessage "Video chipset change detected !!!"
 			if [[ "$cur_driver" == "fglrx" ]]; then
 				echo ""
@@ -642,7 +655,7 @@ CheckVideoDriver () {
 				reboot
 			elif [[ $cur_driver == "wrongnv" ]]; then
 				StatusMessage "Removing old nVidia driver"
-				apt-get -yf remove nvidia* --force-yes
+				apt-get -yf remove nvidia* nouveau --force-yes
 			fi
 		
 			# If there is an xorg, but the driver does not match best selection, install driver and run AVWizard
@@ -656,13 +669,10 @@ CheckVideoDriver () {
 					prop_driver="nouveau" ;;
 				fglrx)
 					prop_driver="radeon" ;;
-				savage)
-					prop_driver="openchrome" ;;
-				via)
-					prop_driver="openchrome" ;;
-				virge)
+				savage|via|virge)
 					prop_driver="openchrome" ;;
 			esac
+
 			if [[ "$prop_driver" != "$cur_driver" ]]; then
 				StatusMessage "Installing video driver '$prop_driver' for $card_detail"
 				InstallVideoDriver
