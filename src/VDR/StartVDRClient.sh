@@ -23,7 +23,8 @@ else
 	if  [ -x /usr/bin/nmap ] ; then
 		VDRRUNNING=0
 		while [[ "$VDRRUNNING" = "0" ]]; do
-			nmap 127.0.0.1 -p 22 --open | grep open -iq && VDRRUNNING=1
+			# Wait for VDR to accept commands via SVDRP.
+			nmap 127.0.0.1 -p 2001 --open | grep open -iq && VDRRUNNING=1
 			sleep 1
 		done
 	else
