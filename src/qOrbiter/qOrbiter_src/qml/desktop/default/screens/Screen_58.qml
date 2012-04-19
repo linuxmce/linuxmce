@@ -4,8 +4,8 @@ Item{
     id:dvdoptions
 
     Rectangle{
-        height: style.orbiterH
-        width: style.orbiterW
+        height: appH
+        width: appW
         color: "transparent"
         Text {
             id: dvdoptionslabel

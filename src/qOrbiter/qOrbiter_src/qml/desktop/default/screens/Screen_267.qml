@@ -4,8 +4,8 @@ Item{
     id:activecallsitem
 
     Rectangle{
-        height: 430
-        width: 800
+        height: appH
+        width: appW
         color: "transparent"
         Text {
             id: activecallstext

@@ -5,8 +5,8 @@ Rectangle {
 
     // property alias synText:
     id: dvd_remote
-    height: style.orbiterH
-    width: style.orbiterW
+    height: appH
+    width: appW
     radius: 0
     opacity: 1
     color: style.darkhighlight

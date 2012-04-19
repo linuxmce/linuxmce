@@ -3,8 +3,8 @@ import "../components"
 
     Rectangle{
         id:requestingregen
-        height: style.orbiterH
-        width: style.orbiterW
+        height: appH
+        width: appW
        // color: style.highlight2
         Image {
             id: bgimage

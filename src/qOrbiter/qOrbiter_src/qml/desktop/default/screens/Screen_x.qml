@@ -4,8 +4,8 @@ Item{
     id:security
 
     Rectangle{
-        width: style.orbiterW
-        height: style.orbiterH
+        height: appH
+        width: appW
         color: "transparent"
         Text {
             id: unknownscreen

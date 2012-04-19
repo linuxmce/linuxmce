@@ -4,8 +4,8 @@ Item{
     id:answerphones
 
     Rectangle{
-        height: style.orbiterH
-        width: style.orbiterW
+        height: appH
+        width: appW
         color: "transparent"
         Text {
             id: answerphoneslabel

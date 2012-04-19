@@ -3,8 +3,8 @@ import QtWebKit 1.0
 import "../components"
 
 Rectangle {
-    width: style.orbiterW
-    height: style.orbiterH
+    height: appH
+    width: appW
     color: "slategrey"
 
     Timer{

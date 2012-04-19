@@ -22,8 +22,8 @@ Rectangle {
         onPlayListPositionChanged: image1.source = "image://updateobject/"+securityvideo.timestamp
     }
 
-    height: style.orbiterH
-    width: style.orbiterW
+    height: appH
+    width: appW
     radius: 0
     opacity: 1
     color: "transparent"

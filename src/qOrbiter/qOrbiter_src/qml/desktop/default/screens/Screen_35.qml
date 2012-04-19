@@ -19,8 +19,8 @@ Stage{
 
     Rectangle{
         id:mainrect
-        height: scaleY(55)
-        width: scaleX(55)
+        height: appH
+        width: appW
         color: style.lighthighlight
         anchors.centerIn: securitystatus
         Column{
