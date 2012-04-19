@@ -24,22 +24,25 @@ DELETE FROM ast_config WHERE filename = 'sip.conf';
 INSERT INTO ast_config (cat_metric, var_metric, commented, filename, category, var_name, var_val) VALUES
 (0, 0, 0, 'sip.conf', 'general', 'bindport', '5060'),
 (0, 1, 0, 'sip.conf', 'general', 'bindaddr', '0.0.0.0'),
-(0, 2, 0, 'sip.conf', 'general', 'disallow', 'all'),
-(0, 3, 0, 'sip.conf', 'general', 'allow', 'ulaw'),
-(0, 4, 0, 'sip.conf', 'general', 'allow', 'ulaw'),
-(0, 5, 0, 'sip.conf', 'general', 'context', 'from-sip-external'),
-(0, 6, 0, 'sip.conf', 'general', 'callerid', 'Unknown'),
-(0, 7, 0, 'sip.conf', 'general', 'tos', '0x68'),
-(0, 8, 0, 'sip.conf', 'general', 'notifyringing', 'yes'),
-(0, 9, 0, 'sip.conf', 'general', 'notifyhold', 'yes'),
-(0, 10, 0, 'sip.conf', 'general', 'limitonpeers', 'yes'),
-(0, 11, 0, 'sip.conf', 'general', 'rtcachefriends', 'yes'),
-(0, 12, 0, 'sip.conf', 'general', 'rtupdate', 'yes'),
-(0, 13, 0, 'sip.conf', 'general', 'tcpenable', 'yes'),
-(0, 14, 0, 'sip.conf', 'general', 'tcpbindaddr', '0.0.0.0'),
-(0, 15, 0, 'sip.conf', 'general', 'registerattempts', '0'),
-(0, 16, 0, 'sip.conf', 'general', 'registertimeout', '15'),
-(0, 17, 0, 'sip.conf', 'general', 'language', 'en');
+(0, 2, 0, 'sip.conf', 'general', 'videosupport', 'yes'),
+(0, 3, 0, 'sip.conf', 'general', 'disallow', 'all'),
+(0, 4, 0, 'sip.conf', 'general', 'allow', 'alaw'),
+(0, 5, 0, 'sip.conf', 'general', 'allow', 'ulaw'),
+(0, 6, 0, 'sip.conf', 'general', 'allow', 'h263p'),
+(0, 7, 0, 'sip.conf', 'general', 'allow', 'h263'),
+(0, 8, 0, 'sip.conf', 'general', 'context', 'from-sip-external'),
+(0, 9, 0, 'sip.conf', 'general', 'callerid', 'Unknown'),
+(0, 10, 0, 'sip.conf', 'general', 'tos', '0x68'),
+(0, 11, 0, 'sip.conf', 'general', 'notifyringing', 'yes'),
+(0, 12, 0, 'sip.conf', 'general', 'notifyhold', 'yes'),
+(0, 13, 0, 'sip.conf', 'general', 'limitonpeers', 'yes'),
+(0, 14, 0, 'sip.conf', 'general', 'rtcachefriends', 'yes'),
+(0, 15, 0, 'sip.conf', 'general', 'rtupdate', 'yes'),
+(0, 16, 0, 'sip.conf', 'general', 'tcpenable', 'yes'),
+(0, 17, 0, 'sip.conf', 'general', 'tcpbindaddr', '0.0.0.0'),
+(0, 18, 0, 'sip.conf', 'general', 'registerattempts', '0'),
+(0, 19, 0, 'sip.conf', 'general', 'registertimeout', '15'),
+(0, 20, 0, 'sip.conf', 'general', 'language', 'en');
 
 --
 -- Insert static iax.conf in  DB
@@ -155,9 +158,10 @@ INSERT INTO extensions (context, exten, priority, app, appdata) VALUES
 ('applications', '*43', 1, 'Answer', ''),
 ('applications', '*43', 2, 'Wait', '1'),
 ('applications', '*43', 3, 'Playback', 'demo-echotest'),
-('applications', '*43', 4, 'Echo', ''),
-('applications', '*43', 5, 'Playback', 'demo-echodone'),
-('applications', '*43', 6, 'Hangup', '');
+('applications', '*43', 4, 'Playback', 'beep'),
+('applications', '*43', 5, 'Echo', ''),
+('applications', '*43', 6, 'Playback', 'demo-echodone'),
+('applications', '*43', 7, 'Hangup', '');
 
 -- *60: speaking clock
 INSERT INTO extensions (context, exten, priority, app, appdata) VALUES
