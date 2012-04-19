@@ -53,7 +53,7 @@ symbian {
     INCLUDEPATH += $$EPOCROOT/epoc32/include/libc
     DEFINES += Q_OS_SYMBIAN
 }
-
+TRANSLATIONS += app_de.ts
 # Add more folders to ship with the application, here
 for_desktop{
 folder_01.source = qml/desktop
@@ -67,7 +67,7 @@ folder_03.target = $$DESTDIR
 DEFINES += for_desktop
 }
 
-win32{
+WIN32{
 folder_01.source = qml/desktop
 folder_01.target = $$DESTDIR/qml
 

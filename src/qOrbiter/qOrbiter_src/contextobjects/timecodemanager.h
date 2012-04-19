@@ -51,6 +51,8 @@ public:
     int i_dragTime;
 
     bool reverse;
+
+    QString ObjectToString(const QObject * obj);
 signals:
     void totalStringTimeChanged();
     void stringTimeChanged();

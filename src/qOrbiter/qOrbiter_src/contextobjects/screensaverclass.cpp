@@ -34,6 +34,12 @@ void ScreenSaverClass::setImageData(const uchar *data, int iData_size)
     emit imageChanged();
 }
 
+void ScreenSaverClass::setActive(bool state)
+{
+   active = state;
+   emit stateChanged();
+}
+
 bool ScreenSaverClass::getStatus()
 {
     return isReady;

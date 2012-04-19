@@ -134,6 +134,7 @@ public:
     QString q_pk_users;             //8
     QString q_last_viewed;        //9
     QString q_pk_attribute;        //10
+    int cellsToRender;
 
     QString *datagridVariableString;
     QString videoDefaultSort;

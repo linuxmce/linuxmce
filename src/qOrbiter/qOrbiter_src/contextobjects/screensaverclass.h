@@ -16,6 +16,7 @@ public:
     QStringList images;
     QString currentImage;
     QImage qi_currentImage;
+    bool active;
 
     bool isReady;
     
@@ -24,11 +25,13 @@ signals:
     void screenSaverReady();
     void statusChanged();
     void requestNewImage(QString url);
+    void stateChanged();
     
 public slots:
     void setImageList(QStringList imgList);
     void clearImageList();
     void setImageData(const uchar* data,int iData_size);
+    void setActive(bool state);
 
     QString getImage();
     void setImage(QString imgUrl);

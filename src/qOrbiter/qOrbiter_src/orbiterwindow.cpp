@@ -76,8 +76,8 @@ orbiterWindow::orbiterWindow(long deviceid, std::string routerip, QObject *paren
     mainView.rootContext()->setContextProperty("appW", 1280);
     mainView.rootContext()->setContextProperty("appH", 720);
 #else
-    mainView.rootContext()->setContextProperty("appW", 1280);
-    mainView.rootContext()->setContextProperty("appH", 720);
+    mainView.rootContext()->setContextProperty("appW", 800);
+    mainView.rootContext()->setContextProperty("appH", 600);
 #endif
 
     mainView.rootContext()->setContextProperty("deviceid", int(deviceno));
@@ -121,7 +121,7 @@ orbiterWindow::orbiterWindow(long deviceid, std::string routerip, QObject *paren
 #elif defined(for_harmattan)
     mainView.showFullScreen();
 #elif defined(for_desktop)
-    mainView.showNormal();
+    mainView.show();
 #elif defined(__ANDROID__)
     mainView.showFullScreen();
 #elif defined(for_android)

@@ -1,6 +1,9 @@
 #include "timecodemanager.h"
 #include "PlutoUtils/StringUtils.h"
-
+#include <QStringList>
+#include <QMetaType>
+#include <QDebug>
+#include <QMetaProperty>
 TimeCodeManager::TimeCodeManager(QDeclarativeItem *parent) :
     QDeclarativeItem(parent)
 {
@@ -12,6 +15,27 @@ TimeCodeManager::TimeCodeManager(QDeclarativeItem *parent) :
     socketData = NULL;
     mediaPlayerIp = "";
     qDebug("Setup Timecode Manager");
+}
+
+QString TimeCodeManager::ObjectToString(const QObject *obj)
+{
+        //setup list rof results
+        QStringList result;
+       const QMetaObject * meta = obj->metaObject();
+       result += QString("class %1 : public %2 {")
+               .arg(meta->className())
+               .arg(meta->superClass()->className());
+       for (int i=0; i < meta->propertyCount(); ++i)
+       {
+           const QMetaProperty qmp = meta->property(i);
+           QVariant val = obj->property(qmp.name());
+           result += QString(" %1 %2 = %3")
+                   .arg(qmp.typeName())
+                   .arg(qmp.name())
+                   .arg(val.toString()) ;
+       }
+       result +="};";
+       return result.join("\n");
 }
 
 void TimeCodeManager::start(QString server, int iport)
@@ -62,6 +86,7 @@ void TimeCodeManager::restart()
 void TimeCodeManager::updateTimeCode()
 {
     socketData = dceMediaSocket->readLine();
+    qDebug() << socketData;
     std::string sLine = QString::fromAscii(socketData.data(), socketData.size()).toStdString();
    //qDebug() << QString::fromStdString(sLine);
     if (sLine.length() > 0)

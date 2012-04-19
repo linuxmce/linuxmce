@@ -150,7 +150,7 @@ int main(int argc, char* argv[])
 #ifdef for_harmattan
     QApplication::setGraphicsSystem("meego");
 #elif GLENABLED
-    QApplication::setGraphicsSystem("opengl");
+    QApplication::setGraphicsSystem("raster");
 #elif WIN32
     QApplication::setGraphicsSystem("raster");
 #else

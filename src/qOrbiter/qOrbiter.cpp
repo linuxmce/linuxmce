@@ -59,7 +59,7 @@ qOrbiter::qOrbiter(int DeviceID, string ServerAddress,bool bConnectEventHandler,
     media_currentPage=0;
     media_pos=0;
     media_seek="";
-
+cellsToRender = 0;
     media_pageSeperator = 16;
     b_mediaPlaying = false;
     m_dwPK_Device_NowPlaying = 0;
@@ -3964,6 +3964,8 @@ void DCE::qOrbiter::adjustVolume(int vol)
 void qOrbiter::OnDisconnect()
 {
     emit routerDisconnect();
+    emit statusMessage("Connection Lost");
+
 
 }
 
@@ -4152,7 +4154,7 @@ void DCE::qOrbiter::prepareFileList(int iPK_MediaType)
     q_mediaType = QString::number(iPK_MediaType);
     requestMore = true;
     media_currentRow = 0;
-
+    cellsToRender = 0;
     setMediaResponse("Initial media request");
     //emit cleanupGrid();
 
@@ -4275,7 +4277,7 @@ void DCE::qOrbiter::prepareFileList(int iPK_MediaType)
             //not sure what its for
             //creating a dg table to check for cells. If 0, then we error out and provide a single "error cell"
             DataGridTable *pDataGridTable = new DataGridTable(iData_Size,pData,false);
-            int cellsToRender= pDataGridTable->GetRows();
+             cellsToRender= pDataGridTable->GetRows();
 #ifndef ANDROID
             LoggerWrapper::GetInstance()->Write(LV_CRITICAL, "Datagrid Dimensions: Height %i, Width %i", gHeight, gWidth);
 #endif

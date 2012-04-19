@@ -31,8 +31,13 @@ ListModel::ListModel(gridItem* prototype, QObject* parent) :
 
 int ListModel::rowCount(const QModelIndex &parent) const
 {
-    Q_UNUSED(parent);
-    return m_list.size();
+    if(parent.isValid()){
+        return 0;
+    }
+    else{
+        return m_list.size();
+    }
+
 }
 
 QVariant ListModel::data(const QModelIndex &index, int role) const
