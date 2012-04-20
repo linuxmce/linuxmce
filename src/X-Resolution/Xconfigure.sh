@@ -21,6 +21,7 @@ Modeline_640x480_60='"640x480" 25.18 640 656 752 800 480 490 492 525'
 
 ConfigFile="/etc/X11/xorg.conf"
 Output="VGA"
+DisplayDriver="$Best_Video_Driver"
 
 DEVICECATEGORY_Video_Cards=125
 DEVICEDATA_Setup_Script=189
@@ -186,7 +187,9 @@ UpdateUISections()
 	local OpenGL="$1" AlphaBlending="$2"
 	
 	awk -v"OpenGL=$OpenGL" -v"AlphaBlending=$AlphaBlending" -f/usr/pluto/bin/X-UI_Sections.awk "$ConfigFile" >"$ConfigFile.$$"
-	mv "$ConfigFile"{.$$,}
+	if [[ -f /etc/X11/xorg.conf ]]; then
+		mv "$ConfigFile"{.$$,}
+	fi
 }
 
 ScriptCustomization()
@@ -319,13 +322,12 @@ if [[ -z "$SkipLock" ]]; then
 fi
 EnsureResolutionVariables
 
-DisplayDriver="$Best_Video_Driver"
 if [[ -n "$ForceVESA" ]]; then
 	DisplayDriver=vesa
 fi
-if [[ "$DisplayDriver" == viaprop ]]; then
-	DisplayDriver=via
-fi
+#if [[ "$DisplayDriver" == viaprop ]]; then
+#	DisplayDriver=via
+#fi
 if [[ "$DisplayDriver" == intel ]]; then
 	. /usr/pluto/bin/X-IntelSpecificFunctions.sh
 elif [[ "$DisplayDriver" == nvidia ]]; then
@@ -388,4 +390,3 @@ fi
 #fi
 # ^^ 1004 testing - bad assumption that VESA always works due to dri module load which loads dynamically for VESA modules, dri severly kills the X session for AVWizard 
 # on nvidia cards - these lines break due to install from pluto-nvidia-video-drivers
-
