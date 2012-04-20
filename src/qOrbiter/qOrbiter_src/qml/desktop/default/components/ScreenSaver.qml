@@ -10,24 +10,22 @@ Rectangle {
 
     function changeStuff()
     {
-        if(screensaver.getStatus() === true)
-        {
+
             lower.running =true
             animation_section2.running = false
-        }
+
 
 
     }
 
     function changePic()
     {
-        if(screensaver.getStatus() === true)
-        {
+
             ssimg.scale= 1
             ssimg.source = "image://listprovider/screensaver/"+securityvideo.timestamp
             raise.running = true
             animation_section2.running = true
-        }
+
     }
 
     function startZoom()

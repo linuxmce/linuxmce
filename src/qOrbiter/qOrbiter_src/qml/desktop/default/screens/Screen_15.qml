@@ -15,7 +15,7 @@ Item{
         running: true
         onTriggered:{
             securityimage.source = "image://listprovider/securityimage/"+securityvideo.timestamp
-            requestSecurityPic(screenparams.getParam(2), 640, 480)
+            manager.requestSecurityPic(screenparams.getParam(2), 640, 480)
 
         }
 

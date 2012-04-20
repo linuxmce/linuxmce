@@ -2847,7 +2847,7 @@ void DCE::qOrbiter::GetSingleSecurityCam(int cam_device, int iHeight, int iWidth
     SendCommand(singleVideoFrame);
     QImage returnedFrame;
     returnedFrame.loadFromData(QByteArray(sData, sData_size));
-    // SecurityVideo->currentFrame = returnedFrame;
+    emit securityImageReady(cam_device, returnedFrame);
 }
 
 void DCE::qOrbiter::GetMultipleSecurityCams(QStringList cams) // not implemented yet

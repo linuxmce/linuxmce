@@ -6,8 +6,8 @@
 #include <QTimer>
 #include <QImage>
 #include <QTime>
+#include <QImage>
 
-class SecurityVideoImage;
 
 class SecurityVideoClass : public QObject
 {
@@ -24,12 +24,14 @@ public:
 
     QString getTimeStamp () {return QTime::currentTime().toString(); }
     void setTimeStamp(QString t) {timestamp = QTime::currentTime().toString(); emit imageUpdated();}
-    void setCameraImage(int cam, QImage img) { cameras.find(cam).value()= img; }
+
 
 signals:
     void imageUpdated();
 
 public slots:
+     void setCameraImage(int cam, QImage img) { cameras.find(cam).value()= img;  }
+
 
 };
 

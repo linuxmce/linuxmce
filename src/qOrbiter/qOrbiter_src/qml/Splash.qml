@@ -7,8 +7,8 @@ import QtQuick 1.0
 
 Rectangle {
     id: rectangle1
-    height:720
-    width:1280
+    height:appH
+    width:appW
     onWidthChanged: console.log("detected size change")
 
 

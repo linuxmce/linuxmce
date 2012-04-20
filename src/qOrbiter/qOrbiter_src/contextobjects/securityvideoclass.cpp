@@ -11,3 +11,4 @@ SecurityVideoClass::SecurityVideoClass(QObject *parent) :
 
     }
 }
+

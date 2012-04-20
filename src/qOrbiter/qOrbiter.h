@@ -1341,6 +1341,9 @@ signals:
     void deviceCommandList(QList<QObject*> f);
     void bookmarkList(QList<QObject*> b);
 
+    //security cameras
+    void securityImageReady(int c, QImage s);
+
 
     //screensaver
     void currentScreenSaverImage(const uchar* ,int);

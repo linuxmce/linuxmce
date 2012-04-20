@@ -321,6 +321,11 @@ int main(int argc, char* argv[])
         //tv epg signals
         QObject::connect(pqOrbiter, SIGNAL(addChannel(EPGItemClass*)), simpleEPGmodel, SLOT(appendRow(EPGItemClass*)), Qt::QueuedConnection );
 
+
+        //security video frames
+        QObject::connect(w, SIGNAL(getSingleCam(int,int,int)), pqOrbiter, SLOT(GetSingleSecurityCam(int,int,int)));
+        QObject::connect(pqOrbiter, SIGNAL(securityImageReady(int, QImage)), w->SecurityVideo, SLOT(setCameraImage(int,QImage)),Qt::QueuedConnection);
+
         //filedetails
         QObject::connect(pqOrbiter,SIGNAL(fd_titleImageChanged(QImage)), w->filedetailsclass, SLOT(setTitleImage(QImage)),Qt::QueuedConnection);
         QObject::connect(pqOrbiter, SIGNAL(fd_mediaTitleChanged(QString)), w->filedetailsclass, SLOT(setMediaTitle(QString)),Qt::QueuedConnection);

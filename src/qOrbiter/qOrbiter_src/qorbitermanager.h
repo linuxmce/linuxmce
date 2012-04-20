@@ -419,6 +419,8 @@ signals:
     void floorplanTypeChanged();
     void setAlarm(bool s, int g);
 
+    void getSingleCam(int i_pk_camera_device, int h, int w);
+
 public slots: //note: Q_INVOKABLE means it can be called directly from qml
     void connectionWatchdog();
     QString getCurrentUser() {return sPK_User;}

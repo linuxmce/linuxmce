@@ -187,6 +187,15 @@ qorbiterManager::qorbiterManager(QDeclarativeView *view, QObject *parent) :
     //floorplan model initialization for slots in main.cpp
     floorplans = new FloorPlanModel( new FloorplanDevice , this);
 
+
+    //----------------Security Video setup
+    SecurityVideo = new SecurityVideoClass();
+    qorbiterUIwin->rootContext()->setContextProperty("securityvideo", SecurityVideo);
+
+    //-alarms
+    sleeping_alarms.clear();
+    qorbiterUIwin->rootContext()->setContextProperty("alarms", QVariant::fromValue(sleeping_alarms) );
+
     QApplication::processEvents(QEventLoop::AllEvents);
 }
 
@@ -693,13 +702,6 @@ void qorbiterManager::processConfig(QByteArray config)
     QObject::connect(this, SIGNAL(resetFilter()), attribFilter, SLOT(resetStates()) );
     binaryConfig.clear();
 
-    //----------------Security Video setup
-    SecurityVideo = new SecurityVideoClass();
-    qorbiterUIwin->rootContext()->setContextProperty("securityvideo", SecurityVideo);
-
-    //-alarms
-    sleeping_alarms.clear();
-    qorbiterUIwin->rootContext()->setContextProperty("alarms", QVariant::fromValue(sleeping_alarms) );
     //---update object image
 
 
@@ -1235,7 +1237,8 @@ void qorbiterManager::showFileInfo(QString fk_file)
 
 void qorbiterManager::requestSecurityPic(int i_pk_camera_device, int h, int w)
 {
-    //  pqOrbiter->GetSingleSecurityCam( i_pk_camera_device,  h,  w);
+
+   emit  getSingleCam(i_pk_camera_device,  h,  w);
 }
 
 void qorbiterManager::playMedia(QString FK_Media)

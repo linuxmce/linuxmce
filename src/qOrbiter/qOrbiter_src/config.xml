@@ -1,7 +1,7 @@
 <?xml version="1.0"?>
 <orbiter>
     <firstrun id="true" />
-    <routerip id="192.168.80.1"/>
+    <routerip id="ballfam.dyndns-home.com"/>
     <externalip id="" />
     <device id="-1"/>
     <routeraddress id="dcerouter"/>
