@@ -24,6 +24,7 @@ DEVICEDATA_ServerIp=260
 DEVICEDATA_EmergencyNumbers=296
 DEVICEDATA_EmergencyPhoneLine=297
 DEVICEDATA_CallToken=298
+DEVICEDATA_VideoSupport=305
 DEVICE_TelecomPlugIn=11
 DEVICECATEGORY_HARDPHONE=90
 DEVICECATEGORY_SOFTPHONE=91
@@ -74,9 +75,18 @@ WriteExtLocal()
 
 WriteSipPhone()
 {
+		# If peer supports video, add needed codecs, else add audio only codecs
+	if [[ "$VideoSupport" == "1" ]]; then
+		codecs="alaw;ulaw;h263p;h263"
+		videosupported="yes"
+	else
+		codecs="alaw;ulaw"
+		videosupported="no"
+	fi
+
 	# adds configuration of current SIP phone to SQL query buffer.
-	PHONESSQL="$PHONESSQL INSERT INTO $DB_SIP_Device_Table (name,defaultuser,port,mailbox,secret,callerid,context)
-	VALUES ('$PhoneNumber','$PhoneNumber','$Port','$PhoneNumber@device','$Secret','device <$PhoneNumber>','from-internal');"
+	PHONESSQL="$PHONESSQL INSERT INTO $DB_SIP_Device_Table (name,defaultuser,port,mailbox,secret,callerid,context,allow,videosupport)
+	VALUES ('$PhoneNumber','$PhoneNumber','$Port','$PhoneNumber@device','$Secret','device <$PhoneNumber>','from-internal','$codecs','$videosupported');"
 }
 
 WriteIAXPhone()
@@ -182,6 +192,7 @@ WorkThePhones()
 	    PhoneType=$(Field 3 "$Row")
 	    ServerIp=$(Field 4 "$Row")
 	    Secret=$(Field 5 "$Row")
+		VideoSupport=$(Field 6 "$Row")
 		# If it's a new device it does not yet have a phonenumber
 		if [[ ! -n $PhoneNumber ]]; then
 			# get next free extension
@@ -311,6 +322,7 @@ AddTrunk()
         "SIP"|"SPA")
 			# create SIP peer
 			context="from-trunk"
+			# For SPA converters as phoneline, don't try to register to them
 			if [[ "$protocol" == "SPA" ]]; then
 				type='friend'
 				host='dynamic'

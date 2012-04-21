@@ -2,8 +2,9 @@ lmce-asterisk (0+0.3.2-1ubuntu1) lucid; urgency=low
 
   * Adding primitive fax send support, this is work in progress
   * added tables for cdr support
+  * Added video support
 
- -- Serge Wagener <serge@linuxmce.org>  Sun, 15 Apr 2012 14:35:56 +0200
+ -- Serge Wagener <serge@linuxmce.org>  Sat, 21 Apr 2012 22:10:55 +0200
 
 lmce-asterisk (0+0.3.2-1) unstable; urgency=low
 

@@ -2,6 +2,8 @@
  * Fill in LinuxMCE asterisk database
  * with default values
  *
+ * v0.3 - 21/04/2012 - foxi352 - added video call properties
+ * v0.2 - 29/11/2011 - foxi352 - added fax support
  * v0.1 - 23/09/2011 - foxi352 - initial version
  * 
 */
@@ -52,8 +54,8 @@ INSERT INTO ast_config (cat_metric, var_metric, commented, filename, category, v
 (0, 0, 0, 'iax.conf', 'general', 'bindport', '4569'),
 (0, 1, 0, 'iax.conf', 'general', 'bindaddr', '0.0.0.0'),
 (0, 2, 0, 'iax.conf', 'general', 'disallow', 'all'),
-(0, 3, 0, 'iax.conf', 'general', 'allow', 'ulaw'),
-(0, 4, 0, 'iax.conf', 'general', 'allow', 'alaw'),
+(0, 3, 0, 'iax.conf', 'general', 'allow', 'alaw'),
+(0, 4, 0, 'iax.conf', 'general', 'allow', 'ulaw'),
 (0, 5, 0, 'iax.conf', 'general', 'allow', 'gsm'),
 (0, 6, 0, 'iax.conf', 'general', 'context', 'from-sip-external'),
 (0, 7, 0, 'iax.conf', 'general', 'mailboxdetail', 'yes'),
@@ -224,7 +226,7 @@ INSERT INTO extensions (context, exten, priority, app, appdata) VALUES
 ('fax-transmit', 'h', 3, 'System', 'sudo -u root rm \'${FAXFILE}\''),
 ('fax-transmit', 'h', 4, 'System', 'sudo -u root /usr/pluto/bin/Fax_Update_Status.sh ${PK_FAX} "${FAXOPT(statusstr)}"');
 
--- *95: test Music On Hold (MOH)
+-- *96: test Music On Hold (MOH)
 INSERT INTO extensions (context, exten, priority, app, appdata) VALUES
 ('applications', '*96', 1, 'Answer', ''),
 ('applications', '*96', 2, 'Wait', '1'),

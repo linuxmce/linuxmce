@@ -405,6 +405,7 @@ Select PK_Device
 ,(select IK_DeviceData from pluto_main.Device_DeviceData WHERE FK_Device=PK_Device AND FK_DeviceData=29) AS type
 ,(select IK_DeviceData from pluto_main.Device_DeviceData WHERE FK_Device=PK_Device AND FK_DeviceData=260) AS ip
 ,(select IK_DeviceData from pluto_main.Device_DeviceData WHERE FK_Device=PK_Device AND FK_DeviceData=128) AS secret
+,(select IK_DeviceData from pluto_main.Device_DeviceData WHERE FK_Device=PK_Device AND FK_DeviceData=305) AS videosupport
 FROM pluto_main.Device Join pluto_main.DeviceTemplate ON FK_DeviceTemplate = PK_DeviceTemplate
 WHERE FK_DeviceCategory IN (90,91)
 ORDER BY PK_Device;
