@@ -605,7 +605,7 @@ CheckVideoDriver () {
         vga_pci=$(lspci | grep "VGA")
 	GetVideoDriver
 	online=$(ping -c 2 google.com)
-	card_detail=$(echo "$vga_pci | grep 'VGA' | cut -d':' -f3)
+	card_detail=$(echo "$vga_pci" | grep 'VGA' | cut -d':' -f3)
 	offline_mismatch="false"
 	online_mismatch="false"
 	if [[ -f /etc/X11/xorg.conf ]]; then
