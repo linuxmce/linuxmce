@@ -1,6 +1,21 @@
 #!/bin/bash
 
+DEVICEDATA_Hostname=188
+DEVICEDATA_Domainname=187
+
+. /usr/pluto/bin/SQL_Ops.sh
+. /usr/pluto/bin/Section_Ops.sh
 . /usr/pluto/bin/Utils.sh
+
+# Host- and domainname
+H="SELECT IK_DeviceData FROM Device_DeviceData WHERE FK_DeviceData=$DEVICEDATA_Hostname"
+D="SELECT IK_DeviceData FROM Device_DeviceData WHERE FK_DeviceData=$DEVICEDATA_Domainname"
+HostName=$(RunSQL "$H")
+DomainName=$(RunSQL "$D")
+
+# Site files
+default=LinuxMCE
+defaultssl=LinuxMCE-ssl
 
 PHP_CONFIG_FILE=
 if [[ -e /etc/php5/apache2/php.ini ]] ;then
@@ -9,43 +24,47 @@ else
 	PHP_CONFIG_FILE=/etc/php4/apache2/php.ini
 fi
 
+# clean out old pluto-admin links
+rm -f /var/www/pluto-admin/floorplans
+rm -f /var/www/pluto-admin/users
+rm -f /var/www/pluto-admin/mediapics
+rm -f /var/www/pluto-admin/rooms
+rm -f /var/www/pluto-admin/scenarios
+rm -f /var/www/pluto-admin/orbiter_bg
+rm -rf /var/www/pluto-admin/security_images
+rm -rf /var/www/pluto-admin/cached
+
 mkdir -p /home/pluto/floorplans
 chmod -R 777 /home/pluto/floorplans
 chown -R www-data.www-data /home/pluto/floorplans
 rm -f /var/www/lmce-admin/floorplans 2>/dev/null
 [[ -e /usr/pluto/orbiter/floorplans ]] || ln -sn /home/pluto/floorplans /usr/pluto/orbiter/floorplans
 [[ -e /var/www/lmce-admin/floorplans ]] || ln -sn /usr/pluto/orbiter/floorplans/ /var/www/lmce-admin/
-rm -f /var/www/pluto-admin/floorplans # get rid of old pluto-admin link
 
 mkdir -p /usr/pluto/orbiter/users
 chmod -R 777 /usr/pluto/orbiter/users
 chown -R www-data.www-data /usr/pluto/orbiter/users
 rm -f /var/www/lmce-admin/users
-rm -f /var/www/pluto-admin/users #get rid of old pluto-admin link
 ln -s /usr/pluto/orbiter/users/ /var/www/lmce-admin/
 
 mkdir -p /home/mediapics
 chmod -R 777 /home/mediapics
 rm -f /var/www/lmce-admin/mediapics
-rm -f /var/www/pluto-admin/mediapics #get rid of old pluto-admin link
 ln -s /home/mediapics /var/www/lmce-admin/mediapics
 
 mkdir -p /usr/pluto/orbiter/rooms
 chmod -R 777 /usr/pluto/orbiter/rooms
 rm -f /var/www/lmce-admin/rooms
-rm -f /var/www/pluto-admin/rooms #get rid of old pluto-admin link
 ln -s /usr/pluto/orbiter/rooms /var/www/lmce-admin/rooms
 
 mkdir -p /usr/pluto/orbiter/scenarios
 chmod -R 777 /usr/pluto/orbiter/scenarios
 rm -f /var/www/lmce-admin/scenarios
-rm -f /var/www/pluto-admin/scenarios #get rid of old pluto-admin link
 ln -s /usr/pluto/orbiter/scenarios /var/www/lmce-admin/scenarios
 
 mkdir -p /usr/pluto/orbiter/orbiter_bg
 chmod -R 777 /usr/pluto/orbiter/orbiter_bg
 rm -f /var/www/lmce-admin/orbiter_bg
-rm -f /var/www/pluto-admin/orbiter_bg #get rid of of old pluto-admin link
 ln -s /usr/pluto/orbiter/orbiter_bg /var/www/lmce-admin/orbiter_bg
 
 # Adding contact images folder - tschak
@@ -56,12 +75,10 @@ ln -s /usr/pluto/orbiter/contacts /var/www/lmce-admin/contacts
 
 mkdir -p /var/www/lmce-admin/security_images
 chmod -R 777 /var/www/lmce-admin/security_images
-rm -rf /var/www/pluto-admin/security_images #get rid of old pluto-admin directory
 
 chmod 777 /var/www/lmce-admin/cached
 touch /etc/pluto-callerid.conf
 chmod 777 /etc/pluto-callerid.conf
-rm -rf /var/www/pluto-admin/cached # get rid of old pluto-admin directory
 
 mkdir -p /var/log/pluto
 touch /var/log/pluto/webExecLog.log
@@ -72,16 +89,20 @@ chown www-data.www-data /home/coverartscan
 ln -snf /home/coverartscan /var/www/lmce-admin/coverartscan || :
 rm -f /var/www/pluto-admin/coverartscan
 
-mv /var/www/lmce-admin/grabcoverart.sh /usr/pluto/bin || /bin/true
+mv /var/www/lmce-admin/grabcoverart.sh /usr/pluto/bin 2>/dev/null|| /bin/true
 
 # enable rewrite module
 a2enmod rewrite || /bin/true
 
+# disable old pluto site
+a2dissite pluto 2>/dev/null|| /bin/true
+
 # disable default site that ships with apache
-a2dissite default || /bin/true
+a2dissite default 2>/dev/null|| /bin/true
+a2dissite default-ssl 2>/dev/null|| /bin/true
 
 # make sure that mythweb hasn't taken over web admin
-a2dissite default-mythbuntu || /bin/true
+a2dissite default-mythbuntu 2>/dev/null|| /bin/true
 
 #Index=$(grep DirectoryIndex /etc/apache/httpd.conf | sed 's/DirectoryIndex//g; s/^ *//g; s/ *$//g' | grep -v '^#')
 #[ -n "$Index" ] || exit 0
@@ -96,10 +117,12 @@ a2dissite default-mythbuntu || /bin/true
 #[ -e /var/www/index.php ] || echo "$Redirect" >/var/www/index.php
 
 Site="
-NameVirtualHost *
-<VirtualHost *>
-	ServerAdmin webmaster@localhost
-	
+## @FileType: Pluto Sectioned Config File ##
+@SSL_START
+<VirtualHost _default_:@PORT>
+	ServerAdmin webmaster@$HostName.$DomainName
+	ServerName $HostName.$DomainName
+		
 	DocumentRoot /var/www/
 	<Directory />
 		Options FollowSymLinks
@@ -110,8 +133,6 @@ NameVirtualHost *
 		AllowOverride All
 		Order allow,deny
 		allow from all
-		# This directive allows us to have apache2's default start page
-                # in /apache2-default/, but still have / go to the right place
 		RedirectMatch ^/$ /lmce-admin/
 	</Directory>
 
@@ -123,6 +144,9 @@ NameVirtualHost *
 		Allow from all
 	</Directory>
 
+	Alias /fax-incoming/ /home/fax/incoming/
+    Alias /fax-outgoing/ /home/fax/outgoing/
+
 	Alias /voicemail/ /var/spool/asterisk/voicemail/
 	<Directory \"/var/spool/asterisk/voicemail\">
 		AllowOverride None
@@ -131,16 +155,10 @@ NameVirtualHost *
 		Allow from all
 	</Directory>
 	
-	Alias /fax-incoming/ /home/fax/incoming/
-    Alias /fax-outgoing/ /home/fax/outgoing/
-
 	ErrorLog /var/log/apache2/error.log
-
-	# Possible values include: debug, info, notice, warn, error, crit,
-	# alert, emerg.
 	LogLevel warn
 
-	CustomLog /var/log/apache2/access.log combined
+	CustomLog /var/log/apache2/@LOGFILE combined
 	ServerSignature On
 	
 	Alias /icons/ \"/usr/share/apache2/icons/\"
@@ -150,21 +168,44 @@ NameVirtualHost *
 	    Order allow,deny
 	    Allow from all
 	</Directory>
-
-    Alias /doc/ \"/usr/share/doc/\"
-    <Directory \"/usr/share/doc/\">
-        Options Indexes MultiViews FollowSymLinks
-        AllowOverride None
-        Order deny,allow
-        Deny from all
-        Allow from 127.0.0.0/255.0.0.0 ::1/128
-    </Directory>
-
+## BEGIN : SSL
+## END : SSL
 </VirtualHost>
+@SSL_END
+"
+ssl="
+	SSLEngine on
+	SSLCertificateFile    /etc/ssl/certs/server.crt
+	SSLCertificateKeyFile /etc/ssl/private/server.key
+    SSLOptions +FakeBasicAuth +ExportCertData +StrictRequire
+    <FilesMatch \"\\\.(cgi|shtml|phtml|php)$\">
+		SSLOptions +StdEnvVars
+    </FilesMatch>
+    <Directory /usr/lib/cgi-bin>
+		SSLOptions +StdEnvVars
+    </Directory>
+     BrowserMatch \"MSIE [2-6]\" nokeepalive ssl-unclean-shutdown downgrade-1.0 force-response-1.0
+     BrowserMatch \"MSIE [17-9]\" ssl-unclean-shutdown
+
 "
 
-echo "$Site" >/etc/apache2/sites-available/pluto
-a2ensite pluto
+# Create default website config file
+echo "$Site" >/etc/apache2/sites-available/$default
+sed -i "s/@SSL_START//" /etc/apache2/sites-available/$default
+sed -i "s/@SSL_END//" /etc/apache2/sites-available/$default
+sed -i "s/@PORT/80/" /etc/apache2/sites-available/$default
+sed -i "s/@LOGFILE/access.log/" /etc/apache2/sites-available/$default
+a2ensite $default
+
+# Create ssl website config file and enable ssl
+echo "$Site" >/etc/apache2/sites-available/$defaultssl
+sed -i "s/@SSL_START/<IfModule mod_ssl.c>/" /etc/apache2/sites-available/$defaultssl
+PopulateSection "/etc/apache2/sites-available/$defaultssl" "SSL" "$ssl"
+sed -i "s/@SSL_END/<\/IfModule>/" /etc/apache2/sites-available/$defaultssl
+sed -i "s/@PORT/443/" /etc/apache2/sites-available/$defaultssl
+sed -i "s/@LOGFILE/ssl_access.log/" /etc/apache2/sites-available/$defaultssl
+a2ensite $defaultssl
+a2enmod ssl
 
 if ! BlacklistConfFiles '/etc/apache2/ports.conf' ;then
 	if [ ! -e '/etc/apache2/ports.conf.pbackup' ] && [ -e '/etc/apache2/ports.conf' ] ;then
@@ -172,7 +213,8 @@ if ! BlacklistConfFiles '/etc/apache2/ports.conf' ;then
 	fi
 						
 echo "Listen 80
-Listen 8080" >/etc/apache2/ports.conf
+Listen 8080
+Listen 443" >/etc/apache2/ports.conf
 fi
 
 #cmd_alias="Cmnd_Alias	PLUTO_WEBCMD = /usr/pluto/bin/SetupRemoteAccess.sh, /usr/pluto/bin/Network_Firewall.sh, /usr/pluto/bin/SetupUsers.sh, /usr/pluto/bin/Diskless_Setup.sh, /usr/pluto/bin/LaunchRemoteCmd.sh, /usr/pluto/bin/SetTimeZone.sh, /usr/pluto/bin/Update_StartupScrips.sh, /usr/pluto/bin/UpdateMedia"
@@ -260,28 +302,4 @@ rm server.crt
 rm server.csr
 fi
 
-#update apache config files if necessary
-cd /etc/apache2/sites-available/
-if [[ ! $(grep "NameVirtualHost _default_:443" default-ssl) ]]; then
-sed -i -e "s,<\(VirtualHost\s*_default_:443>\),NameVirtualHost _default_:443\n<\1,g" default-ssl
-fi
-sed -i -e "s,\(SSLCertificateFile\s*\).*$,\1/etc/ssl/certs/server.crt,g" default-ssl
-sed -i -e "s,\(SSLCertificateKeyFile\s*\).*$,\1/etc/ssl/private/server.key,g" default-ssl
-sed -i -e "s,\DocumentRoot.*$,DocumentRoot /var/www/,g" default-ssl
-sed -i -e "s,#\(SSLOptions\),\1,g" default-ssl
-sed -i '/<Directory \/var\/www\/>/,/<\/Directory>/ {
-                /RedirectMatch/ d
-                /<\/Directory>/i\
-                RedirectMatch ^/$ /lmce-admin/
-}' default-ssl
-sed -i -e "s,\(VirtualHost\s*\*\),VirtualHost _default_:80,g" pluto
-
-#enable the default ssl site
-a2ensite default-ssl
-if [[ ! $(grep "Listen 443" /etc/apache2/ports.conf) ]]; then
-echo "Listen 443" >> /etc/apache2/ports.conf
-fi
-
-#enable ssl
-a2enmod ssl
-/etc/init.d/apache2 force-reload
+service apache2 force-reload
