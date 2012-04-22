@@ -339,7 +339,7 @@ Video_Driver_Detection () {
 	DriverInstalled=0
 	driverConfig=none
 	grep "Driver" /etc/X11/xorg.conf |grep -v "keyboard"| grep -v "#" | grep -v "vesa"|grep -v "mouse"|grep -vq "kbd" && DriverInstalled=1
-
+	/usr/pluto/bin/Xconfigure.sh
 	# Check if we have nVidia or ATI cards in here, and specify proper config programs and commandline options.
 	if [[ $DriverInstalled -eq 0 ]]; then
 		driverConfig=none
@@ -386,12 +386,11 @@ GamePad_Setup () {
 
 Enable_Audio_Channels () {
 	# Added this to correctly unmute channels for setup wizard
-	amixer sset "IEC958" unmute
-	amixer sset "IEC958 1" unmute
-	amixer sset 'IEC958',0 unmute
-	amixer sset 'IEC958',1 unmute
-	amixer sset 'IEC958 Default PCM' unmute
-	amixer sset 'Beep',0 unmute
+	amixdigital=$(amixer | grep Simple | cut -d' ' -f4,5,6 | sort | uniq)
+	for output in $amixdigital; do
+		amixer sset $output unmute
+		amixer sset output 80%
+	done 2>/dev/null 
 	alsactl store
 	VerifyExitCode "Storing audio channel settings failed"
 }

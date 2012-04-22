@@ -3,7 +3,6 @@ function XorgConfLogging() {
 	local message="$1"
 	local xorgLog="/var/log/pluto/xorg.conf.log"
 	local xorgLines=$(cat /etc/X11/xorg.conf | wc -l)
-	
 	local myPid=$$
 
 	echo "$myPid $(date -R) $message [$xorgLines]"	>> $xorgLog
@@ -21,7 +20,6 @@ Modeline_640x480_60='"640x480" 25.18 640 656 752 800 480 490 492 525'
 
 ConfigFile="/etc/X11/xorg.conf"
 Output="VGA"
-DisplayDriver="$Best_Video_Driver"
 
 DEVICECATEGORY_Video_Cards=125
 DEVICEDATA_Setup_Script=189
@@ -185,11 +183,8 @@ UpdateModules()
 UpdateUISections()
 {
 	local OpenGL="$1" AlphaBlending="$2"
-	
-	awk -v"OpenGL=$OpenGL" -v"AlphaBlending=$AlphaBlending" -f/usr/pluto/bin/X-UI_Sections.awk "$ConfigFile" >"$ConfigFile.$$"
-	if [[ -f /etc/X11/xorg.conf ]]; then
+		awk -v"OpenGL=$OpenGL" -v"AlphaBlending=$AlphaBlending" -f/usr/pluto/bin/X-UI_Sections.awk "$ConfigFile" >"$ConfigFile.$$"
 		mv "$ConfigFile"{.$$,}
-	fi
 }
 
 ScriptCustomization()
@@ -321,7 +316,7 @@ if [[ -z "$SkipLock" ]]; then
 	WaitLock "Xconfigure" "Xconfigure" nolog # don't run two copies of Xconfigure simultaneously
 fi
 EnsureResolutionVariables
-
+DisplayDriver="$Best_Video_Driver"
 if [[ -n "$ForceVESA" ]]; then
 	DisplayDriver=vesa
 fi

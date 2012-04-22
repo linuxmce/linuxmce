@@ -483,18 +483,10 @@ ServiceBkg="$3"
 }
 
 GetVideoDriver () {
-        vga_pci=$(lspci | grep "VGA")
         prop_driver="vesa"
 	gpus=$(echo "$vga_pci" | wc -l) 
 		if [[ "$gpus" -gt "1" ]]; then 
-			integrated_id=$(echo "$vga_pci" | head -1 | cut -d' ' -f1) 
-			iid_state=(cat /sys/devices/pci0000:00/0000:"$integrated_id"/enable) 
-			if [[ "$iid_state" == "1" ]]; then 
-				echo "0" > /sys/devices/pci0000:00/0000:"$integrated_id"/enable 
-				reboot 
-				exit 0 
-			fi 
-			vga_pci=$(echo "$vga_pci" | head -2) 
+			vga_pci=$(echo "$vga_pci" | awk 'NR==2') 
 		fi 
 	chip_man=$(echo "$vga_pci" | grep -Eo '(ATI|VIA|nVidia|Intel)')
 
@@ -610,9 +602,10 @@ InstallVideoDriver () {
 }
 
 CheckVideoDriver () {
+        vga_pci=$(lspci | grep "VGA")
 	GetVideoDriver
 	online=$(ping -c 2 google.com)
-	card_detail=$(lspci | grep 'VGA' | cut -d':' -f3)
+	card_detail=$(echo "$vga_pci | grep 'VGA' | cut -d':' -f3)
 	offline_mismatch="false"
 	online_mismatch="false"
 	if [[ -f /etc/X11/xorg.conf ]]; then
