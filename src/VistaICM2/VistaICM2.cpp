@@ -25,7 +25,6 @@ using namespace DCE;
 
 /* For the web command socket */
 #include <curl/curl.h>
-#include <curl/types.h>
 #include <curl/easy.h>
 
 #include <string>
