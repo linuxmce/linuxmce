@@ -631,7 +631,6 @@ CheckVideoDriver () {
 
 		if [[ "$cur_driver" == "$prop_driver" ]]; then
 			StatusMessage "Correct driver '$prop_driver' already loaded"
-			exit 0
 		# Remove fglrx or nVidia drivers if they are installed, but do not match current requirements
                 elif ([[ "$online_mismatch" == "true" ]]) || ([[ "$offine_mismatch" == "true" ]] && echo "$prop_driver" | grep -Eq '(nouveau|radeon|openchrome)'); then
                         ErrorMessage "Video chipset change detected !!!"
