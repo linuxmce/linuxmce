@@ -77,20 +77,44 @@ SetupX () {
 			else
 				"$BaseDir"/AVWizard-XineDefaultConfig.sh
 				SetDefaults
+				DualBus
 			fi
 		else
 			"$BaseDir"/AVWizard-XineDefaultConfig.sh
 			SetDefaults
+			DualBus
 		fi
 	else
 		"$BaseDir"/AVWizard-XineDefaultConfig.sh
 		SetDefaults_720p
+		DualBus
 	fi
 
 	sed -ri '/Option.*"Composite"/d' "$XF86Config"
 	WMTweaksFile="/root/.config/xfce4/xfconf/xfce-perchannel-xml/xfwm4.xml"
 	cp "$WMTweaksFile"{,.orig}
 	sed -i '/Xfwm\/UseCompositing/ s/value="."/value="1"/g' "$WMTweaksFile"
+}
+
+DualBus () {
+vga_pci=$(lspci | grep 'VGA')
+gpus=$(echo "$vga_pci" | sort -u | wc -l)
+	if [[ "$gpus" -gt "1" ]]; then
+		dec_bus=$(echo "$vga_pci" | awk 'NR==2' | cut -d' ' -f1)
+		iid_1=$(echo "$dec_bus" | cut -d':' -f1 | sed 's@\(\B[A-Z]\)@_\1@g')
+		iid_2=$(echo "$dec_bus" | cut -d':' -f2 | cut -d'.' -f1 | sed 's@\(\B[A-Z]\)@_\1@g')
+		iid_3=$(echo "$dec_bus" | cut -d':' -f2 | cut -d'.' -f2 | sed 's@\(\B[A-Z]\)@_\1@g')
+
+		iid_1_con=$(echo "ibase=16; ${iid_1^^}" | bc)
+		iid_2_con=$(echo "ibase=16; ${iid_2^^}" | bc)
+		iid_3_con=$(echo "ibase=16; ${iid_3^^}" | bc)
+
+		if grep "\#BusID" $XineConf; then
+			sed -ie "s/\#BusID.*/BusID\t\t\"PCI:${iid_1_con}:${iid_2_con}:${iid_3_con}\"/g" $XineConf
+		elif grep "BusID" $XineConf; then
+			sed -ie "s/BusID.*/BusID\t\t\"PCI:${iid_1_con}:${iid_2_con}:${iid_3_con}\"/g" $XineConf
+		fi
+	fi
 }
 
 SetDefaults () {
@@ -339,7 +363,6 @@ Video_Driver_Detection () {
 	DriverInstalled=0
 	driverConfig=none
 	grep "Driver" /etc/X11/xorg.conf |grep -v "keyboard"| grep -v "#" | grep -v "vesa"|grep -v "mouse"|grep -vq "kbd" && DriverInstalled=1
-	/usr/pluto/bin/Xconfigure.sh
 	# Check if we have nVidia or ATI cards in here, and specify proper config programs and commandline options.
 	if [[ $DriverInstalled -eq 0 ]]; then
 		driverConfig=none
