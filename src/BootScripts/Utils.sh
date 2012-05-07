@@ -482,7 +482,7 @@ ServiceBkg="$3"
 		return $err
 }
 
-GetVideoDriver () {
+FindVideoDriver () {
         prop_driver="vesa"
 	gpus=$(echo "$vga_pci" | wc -l) 
 		if [[ "$gpus" -gt "1" ]]; then 
@@ -495,7 +495,7 @@ GetVideoDriver () {
 				prop_driver="nvidia" ;;
                 ATI)
                         	prop_driver="fglrx"
-                        if echo "$vga_pci" | grep -Ei '((r5|r6|r7)|(9|X|ES)(1|2?)([0-9])(5|0)0|Xpress)'; then
+                        if echo "$vga_pci" | grep -Ei '((R|RS)(5|6|7)|(9|X|ES)(1|2?)([0-9])(5|0)0|Xpress)'; then
                                 prop_driver="radeon"; fi ;;
 
                 Intel)
@@ -603,7 +603,7 @@ InstallVideoDriver () {
 
 CheckVideoDriver () {
         vga_pci=$(lspci | grep "VGA")
-	GetVideoDriver
+	FindVideoDriver
 	online=$(ping -c 2 google.com)
 	card_detail=$(echo "$vga_pci" | grep 'VGA' | cut -d':' -f3)
 	offline_mismatch="false"
@@ -631,6 +631,7 @@ CheckVideoDriver () {
 
 		if [[ "$cur_driver" == "$prop_driver" ]]; then
 			StatusMessage "Correct driver '$prop_driver' already loaded"
+			return 0
 		# Remove fglrx or nVidia drivers if they are installed, but do not match current requirements
                 elif ([[ "$online_mismatch" == "true" ]]) || ([[ "$offine_mismatch" == "true" ]] && echo "$prop_driver" | grep -Eq '(nouveau|radeon|openchrome)'); then
                         ErrorMessage "Video chipset change detected !!!"
@@ -690,6 +691,19 @@ CheckVideoDriver () {
 		ConfSet "AVWizardOverride" "1"
         fi
 export Best_Video_Driver="$prop_driver"
+}
+
+GetVideoDriver() {
+	if [[ -n "$ForceVESA" ]]; then
+		echo vesa
+		return 0
+	fi
+	       
+	local VideoDriver
+	#<-mkr_B_via_b->
+	VideoDriver="$Best_Video_Driver"
+	#<-mkr_B_via_e->
+	echo "$VideoDriver"
 }
 
 ReloadDevicesOnThisMachine()
