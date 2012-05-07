@@ -79,8 +79,8 @@ CleanupVideo()
 	# Add proprietary video card Device and drivers if needed
 	# TODO: allow user to express his/her will in using the open source driver if he/she so desires
 	echo "$(date -R) --> Auto-create video card device"
-
-	case "$Best_Video_Driver" in
+	VideoDriver=$(GetVideoDriver)
+	case "$VideoDriver" in
 		nvidia)
 			if [[ -z "$nV_dev" ]]; then
 				NewDeviceTemplate=$DEVICETEMPLATE_GeForce_or_TNT2
