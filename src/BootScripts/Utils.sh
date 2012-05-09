@@ -656,7 +656,7 @@ CheckVideoDriver () {
 			fi
 		
 			# If there is an xorg, but the driver does not match best selection, install driver and run AVWizard
-			StatusMessage "Installing video driver '$prop_driver' for $card_detail"
+			StatusMessage "Using video driver '$prop_driver' for $card_detail"
 			InstallVideoDriver
 			sleep 2
                         ConfSet "AVWizardOverride" "1"
@@ -671,7 +671,7 @@ CheckVideoDriver () {
 			esac
 
 			if [[ "$prop_driver" != "$cur_driver" ]]; then
-				StatusMessage "Installing video driver '$prop_driver' for $card_detail"
+				StatusMessage "Using video driver '$prop_driver' for $card_detail"
 				InstallVideoDriver
 				sleep 2
 				ConfSet "AVWizardOverride" "1"
@@ -689,7 +689,7 @@ CheckVideoDriver () {
 					prop_driver="openchrome" ;;
 			esac
 		fi
-		StatusMessage "/etc/X11/xorg.conf is missing. Installing video driver '$prop_driver' for $card_detail"
+		StatusMessage "/etc/X11/xorg.conf is missing. Using video driver '$prop_driver' for $card_detail"
 		InstallVideoDriver
 		sleep 2
 		ConfSet "AVWizardOverride" "1"
