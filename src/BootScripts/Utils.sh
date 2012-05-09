@@ -483,7 +483,11 @@ ServiceBkg="$3"
 }
 
 FindVideoDriver () {
-        prop_driver="vesa"
+	#####################################################################
+	# Switching our default to fbdev for interoperability 
+	# with KVM & nVidia no-test in AVWizard_Run.sh
+	#####################################################################
+        prop_driver="fbdev"
 	gpus=$(echo "$vga_pci" | wc -l) 
 		if [[ "$gpus" -gt "1" ]]; then 
 			vga_pci=$(echo "$vga_pci" | awk 'NR==2') 
@@ -514,7 +518,7 @@ FindVideoDriver () {
 			if echo $vga_pci | grep -i "virge"; then
                                	prop_driver="virge"; fi ;;
 		*)
-			prop_driver="vesa"
+			prop_driver="fbdev"
         esac
 
 }
@@ -610,7 +614,7 @@ CheckVideoDriver () {
 	online_mismatch="false"
 	if [[ -f /etc/X11/xorg.conf ]]; then
 		# TODO figure out a better way to isolate the video driver in the xorg.conf list of "Driver" options
-        	cur_driver=$(grep "Driver" /etc/X11/xorg.conf | grep -Eo '(nvidia|nouveau|radeon|fglrx|savage|openchrome|via|virge|intel|i740|i128|vesa)')
+        	cur_driver=$(grep "Driver" /etc/X11/xorg.conf | grep -Eo '(nvidia|nouveau|radeon|fglrx|savage|openchrome|via|virge|intel|i740|i128|fbdev)')
 		if [[ "$prop_driver" != "$cur_driver" ]] &&  [[ -z $online ]]; then
 			offline_mismatch="true"
 		elif [[ "$prop_driver" != "$cur_driver" ]] && [[ -n $online ]]; then
@@ -695,7 +699,7 @@ export Best_Video_Driver="$prop_driver"
 
 GetVideoDriver() {
 	if [[ -n "$ForceVESA" ]]; then
-		echo vesa
+		echo fbdev
 		return 0
 	fi
 	       
