@@ -1,29 +1,31 @@
 #!/bin/bash
 # vim:set ft=sh:
 
-set -e 
+set -e
 . ./filesd-parms.sh $@
 . /usr/pluto/bin/Config_Ops.sh
 . /usr/pluto/bin/Network_Parameters.sh
 
 ## fstab for diskless mds
 File="/etc/rcS.d/S99firstrun"
-Content="#!/bin/bash
+
+cat <<EOL > /etc/rcS.d/S99firstrun
+#!/bin/bash
 trap 'rm -f $File' EXIT
-vga_pci=$(lspci | grep "VGA")
-gpus=$(echo "$vga_pci" | wc -l)
-	if [[ "$gpus" -gt "1" ]]; then 
-		vga_pci=$(echo "$vga_pci" | awk 'NR==2') 
+vga_pci=\$(lspci | grep 'VGA')
+gpus=\$(echo "\$vga_pci" | wc -l)
+	if [[ "\$gpus" -gt "1" ]]; then 
+		vga_pci=\$(echo "\$vga_pci" | awk 'NR==2') 
 	fi 
 
 apt-get update
 
-if echo $vga_pci | grep -qi 'nVidia'; then
+if echo \$vga_pci | grep -qi 'nVidia'; then
 	apt-get -y -f install pluto-nvidia-video-drivers
-elif echo $vga_pci | grep -i 'ATI' | grep -Evi '((R|RS)(5|6|7)|(9|X|ES)(1|2?)([0-9])(5|0)0|Xpress)'; then 
+elif echo \$vga_pci | grep -i 'ATI' | grep -Evi '((R|RS)(5|6|7)|(9|X|ES)(1|2?)([0-9])(5|0)0|Xpress)'; then 
 	apt-get -y -f install xorg-driver-fglrx
 fi
-"
+EOL
 
 mkdir -p "${Parm_RootLocation}/$(dirname $File)"
 echo "$Content" > "${Parm_RootLocation}/${File}"
