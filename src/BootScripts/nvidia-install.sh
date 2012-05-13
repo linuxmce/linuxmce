@@ -45,7 +45,11 @@ VDPAU_REV_D_SUPPORTED="1040 1042 1051 1055 1056"
 # getPCI_ID()
 # returns the last 4 digits of the PCI ID of the currently installed nVidia card.
 getPCI_ID() {
-        lspci -nn | grep -vi "non-vga" | grep -i vga | sed 's/.*://;s/\].*//'
+	vga_pci=$(lspci -nn | grep -vi "non-vga" | grep -i "VGA" | sed 's/.*://;s/\].*//')
+	gpus=$(echo "$vga_pci" | sort -u | wc -l)
+		if [[ "$gpus" -gt "1" ]]; then 
+			vga_pci=$(echo "$vga_pci" | awk 'NR==2') 
+		fi 
 }
 
 
@@ -74,7 +78,7 @@ getPreferredNvidiaDriver() {
         DISTRO="$(lsb_release -c -s)"
  
         case " $DRIVER_295_SUPPORTED " in *" $PCI_ID "*)
-                echo "nvidia-glx-260"
+                echo "nvidia-current"
                 return 1
         esac
 
@@ -122,7 +126,7 @@ getVDPAUSupport() {
                 return 1
         esac
         case " $VDPAU_REV_D_SUPPORTED " in *" $PCI_ID "*)
-                echo "C"
+                echo "D"
                 return
         esac
         # Could not map a PCI_ID to a supported vdpau revision
@@ -170,7 +174,22 @@ installCorrectNvidiaDriver() {
                 Log "$LogFile" "installing NEW driver $preferred_driver!"
                 INSTALLED="1"
                 tmpfile=$( /bin/mktemp -t )
-                apt-get install -y $preferred_driver 2> >(tee $tmpfile)
+		if [[ -n "$current_driver" ]]; then
+			apt-get -y remove "$currrent_driver" --force-yes
+		fi
+
+		if [[ "$preferred_Driver" == "nvidia-current" ]]; then
+			add-apt-repository ppa:team-iquik/alsa
+			add-apt-repository ppa:ubuntu-x-swat/x-updates
+			apt-get update
+			apt-get install -y alsa-base 2> >(tee $tmpfile)
+			apt-get install -y $preferred_driver 2> >>(tee $tmpfile)
+#			rm /etc/apt/sources.list.d/*
+#			apt-get update
+		else
+	                apt-get install -y $preferred_driver 2> >(tee $tmpfile)
+		fi
+
                 if [[ $? > 0 ]] ; then
                         ERROR=$( cat $tmpfile )
                         INSTALLED="0"

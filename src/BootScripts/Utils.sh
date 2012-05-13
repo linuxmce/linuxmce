@@ -533,9 +533,9 @@ InstallVideoDriver () {
 				nv_pid=$(pidof nvidia-install.sh)
 					if [[ -n $nv_pid ]] ; then
 						StatusMessage "Installing nVidia driver this may take a few minutes"
-						installCorrectNvidiaDriver
+						installCorrectNvidiaDriver && echo "reboot"
 					else StartService "Installing nVidia driver this may take a few minutes" ". /usr/pluto/bin/nvidia-install.sh"
-						installCorrectNvidiaDriver
+						installCorrectNvidiaDriver && echo "reboot"
 					fi 
 			fi ;;
 		nouveau)
