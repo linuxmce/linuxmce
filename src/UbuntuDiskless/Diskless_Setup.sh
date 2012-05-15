@@ -377,8 +377,10 @@ for dir in /usr/pluto/diskless/* ;do
 		sed -i 's/ApplyUpdates.sh/LMCEUpdate_Apply.sh/g' "$dir/debian/etc/init.d/fastboot/rcS" || :
 		rm -f "$dir/debian/etc/rc2.d/S98LMCEUpdate" || :
 	fi
-done
 
+done
+cat /usr/pluto/keys/id_dsa_pluto.pub /usr/pluto/diskless/${Moon_DeviceID}/root/.ssh/authorized_keys
+(cd /usr/pluto/diskless/${Moon_DeviceID}/usr/pluto/deb-cache; dpkg-scanpackages -m . dev/null | tee Packages | gzip -c > Packages.gz)
 echo "Finished setting up network boot for media directors."
 echo "If new media director(s) were added, do a quick reload router."
 
