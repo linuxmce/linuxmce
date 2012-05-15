@@ -533,10 +533,13 @@ InstallVideoDriver () {
 				nv_pid=$(pidof nvidia-install.sh)
 					if [[ -n $nv_pid ]] ; then
 						StatusMessage "Installing nVidia driver this may take a few minutes"
-						installCorrectNvidiaDriver && echo "reboot"
+						installCorrectNvidiaDriver
 					else StartService "Installing nVidia driver this may take a few minutes" ". /usr/pluto/bin/nvidia-install.sh"
-						installCorrectNvidiaDriver && echo "reboot"
+						installCorrectNvidiaDriver
 					fi 
+				if [[ "$FirstBoot" == "false" ]];
+					then reboot
+				fi
 			fi ;;
 		nouveau)
 			if ! PackageIsInstalled xserver-xorg-video-nouveau; then
@@ -552,6 +555,9 @@ InstallVideoDriver () {
 			if ! PackageIsInstalled fglrx; then 
 				apt-get -yf install fglrx
 				VerifyExitCode "Install fglrx Driver"
+				if [[ "$FirstBoot" == "false" ]];
+					then reboot
+				fi
 			fi ;;
 		intel)
 			if ! PackageIsInstalled xserver-xorg-video-intel; then 
@@ -577,16 +583,25 @@ InstallVideoDriver () {
 			if ! PackageIsInstalled xserver-xorg-video-savage; then 
 				apt-get -yf install xserver-xorg-video-savage
 				VerifyExitCode "Install VIA Savage Driver"
+				if [[ "$FirstBoot" == "false" ]];
+					then reboot
+				fi
 			fi ;;
 		via)
 			if ! PackageIsInstalled xserver-xorg-video-s3; then 
 				apt-get -yf install xserver-xorg-video-s3
 				VerifyExitCode "Install VIA S3 Driver"
+				if [[ "$FirstBoot" == "false" ]];
+					then reboot
+				fi
 			fi ;;
 		virge)
 			if ! PackageIsInstalled xserver-xorg-video-s3virge; then 
 				apt-get -yf install xserver-xorg-video-s3virge
 				VerifyExitCode "Install VIA S3 Virge Driver"
+				if [[ "$FirstBoot" == "false" ]];
+					then reboot
+				fi
 			fi ;;
                 esac
 
@@ -657,9 +672,8 @@ CheckVideoDriver () {
 		
 			# If there is an xorg, but the driver does not match best selection, install driver and run AVWizard
 			StatusMessage "Using video driver '$prop_driver' for $card_detail"
+			ConfSet "AVWizardOverride" "1"
 			InstallVideoDriver
-			sleep 2
-                        ConfSet "AVWizardOverride" "1"
 		elif [[ "$offine_mismatch" == "true" ]]; then 
 			case "$prop_driver" in
 				nvidia)
@@ -672,9 +686,8 @@ CheckVideoDriver () {
 
 			if [[ "$prop_driver" != "$cur_driver" ]]; then
 				StatusMessage "Using video driver '$prop_driver' for $card_detail"
-				InstallVideoDriver
-				sleep 2
 				ConfSet "AVWizardOverride" "1"
+				InstallVideoDriver
 			fi
                 fi
         else
@@ -690,9 +703,8 @@ CheckVideoDriver () {
 			esac
 		fi
 		StatusMessage "/etc/X11/xorg.conf is missing. Using video driver '$prop_driver' for $card_detail"
-		InstallVideoDriver
-		sleep 2
 		ConfSet "AVWizardOverride" "1"
+		InstallVideoDriver
         fi
 export Best_Video_Driver="$prop_driver"
 }

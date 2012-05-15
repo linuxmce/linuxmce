@@ -45,11 +45,12 @@ VDPAU_REV_D_SUPPORTED="1040 1042 1051 1055 1056"
 # getPCI_ID()
 # returns the last 4 digits of the PCI ID of the currently installed nVidia card.
 getPCI_ID() {
-	vga_pci=$(lspci -nn | grep -vi "non-vga" | grep -i "VGA" | sed 's/.*://;s/\].*//')
+	vga_pci=$(lspci -nn | grep -vi "non-vga" | grep "VGA" | sed 's/.*://;s/\].*//')
 	gpus=$(echo "$vga_pci" | sort -u | wc -l)
 		if [[ "$gpus" -gt "1" ]]; then 
 			vga_pci=$(echo "$vga_pci" | awk 'NR==2') 
-		fi 
+		fi
+	echo "$vga_pci"
 }
 
 
@@ -62,7 +63,6 @@ getNvidiaInstalled() {
                 return 0
         fi
 }
-
 
 # getInstalledNvidiaDriver()
 # echos the currently installed nVidia driver (if there is one)
@@ -138,13 +138,12 @@ getVDPAUSupport() {
 # if the first parameter is set to "reboot", it will also reboot the system after the driver is installed.
 installCorrectNvidiaDriver() {
         #see if the caller wanted to reboot after installing packages
-	#TODO This function not working, so changed. Seems unnecessary. Nvidia installs always need reboot.
-        param="$1"
-
+	#TODO This function not working, so changed.
+        #param="$1"
 
         # first, lets see if there is even an nvidia card installed in the system
         # If there is no nVidia card even installed, lets get out of here.
-        if ! getNvidiaInstalled;then
+        if ! getNvidiaInstalled; then
                 return
         fi
 
@@ -153,12 +152,12 @@ installCorrectNvidiaDriver() {
 	StatusMessage "Begin nVidia driver installation"
 	echo "*************************************************"
         Log "$LogFile" "== Begin NVidia driver installation ($(date)) =="
-        Log "$LogFile" "Card Detected: $(lspci -nn | grep -vi non-vga | grep -i vga)"
+        Log "$LogFile" "Card Detected: $(lspci -nn | grep -vi 'non-vga' | grep -i 'vga')"
         Log "$LogFile" "PCI_ID Detected: $(getPCI_ID)"
 
         # Now lets get the currently installed nvidia driver (if there is one)
         current_driver=$(getInstalledNvidiaDriver)
-        if [[ "$current_driver" != "" ]];then
+        if echo "$current_driver" | grep "nvidia"; then
                 echo "Detected installed driver $current_driver"
                 Log "$LogFile" "Detected installed driver $current_driver"
         fi
@@ -183,14 +182,14 @@ installCorrectNvidiaDriver() {
 			add-apt-repository ppa:ubuntu-x-swat/x-updates
 			apt-get update
 			apt-get install -y alsa-base 2> >(tee $tmpfile)
-			apt-get install -y $preferred_driver 2> >>(tee $tmpfile)
+			apt-get install -y $preferred_driver 2> >(tee $tmpfile)
 #			rm /etc/apt/sources.list.d/*
 #			apt-get update
 		else
 	                apt-get install -y $preferred_driver 2> >(tee $tmpfile)
 		fi
 
-                if [[ $? > 0 ]] ; then
+                if [[ "$?" > "0" ]] ; then
                         ERROR=$( cat $tmpfile )
                         INSTALLED="0"
                         echo ""
@@ -219,19 +218,20 @@ installCorrectNvidiaDriver() {
         Log "$LogFile" "== End NVidia driver installation ($(date)) =="
 
         # Reboot only if requested and a new driver was installed
-        if [[ "$param" == "reboot" && "$INSTALLED" == "1" ]];then
-#	if [[ "$INSTALLED" == "1" ]]; then
+	#if [[ "$param" == "reboot" && "$INSTALLED" == "1" ]];then
+	if [[ "$INSTALLED" == "1" ]]; then
                 # Give the user a warning message and beep, then reboot
                 echo ""
-                echo -e "\e[1;31mNvidia driver installation requires a reboot.\e[0m"
-                echo -e "\e[1;31mPlease stand by while your system is rebooted.\e[0m"
+                StatusMessage "Nvidia driver installation requires a reboot."
+                NotifyMessage "Please stand by while your system is rebooted."
                 echo ""
                                 #need to force AVWizard to run, and remove the xorg.conf file created by the nvidia installer so it starts clean
                                 rm /etc/X11/xorg.conf*
                                 ConfSet AVWizardOverride 1
                 beep -l 100 -f 500 -d 50 -r 3
                 sleep 2
-                reboot
+		# Reboot now happens in Utils.sh
+                #reboot
         fi
 }
 #######################################################################################################################
