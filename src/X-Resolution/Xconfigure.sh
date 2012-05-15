@@ -20,6 +20,9 @@ Modeline_640x480_60='"640x480" 25.18 640 656 752 800 480 490 492 525'
 
 ConfigFile="/etc/X11/xorg.conf"
 Output="VGA"
+vga_pci=$(lspci | grep "VGA")
+gpus=$(echo "$vga_pci" | sort -u | wc -l)
+bus_id=$(echo "$vga_pci" | awk 'NR==2' | while IFS=':. ' read -r tok1 tok2 tok3 rest; do printf '%2s %2s %s\n' "$((16#$tok1))":"$((16#$tok2))":"$((16#$tok3))" | sed -e 's/ //g'; done)
 
 DEVICECATEGORY_Video_Cards=125
 DEVICEDATA_Setup_Script=189
@@ -347,10 +350,16 @@ if [[ "$Defaults" == y ]]; then
 		exit 1
 	fi
 	cat /usr/pluto/templates/xorg.conf.in | awk -v"DisplayDriver=$DisplayDriver" -f/usr/pluto/bin/X-ChangeDisplayDriver.awk >"$ConfigFile"
+	if [[ "$gpus" -gt "1" ]]; then
+		sed -ie "s/#BusID.*/BusID\t\t\"PCI:${bus_id}\"/g" "$ConfigFile"
+	fi
 elif [[ -n "$UpdateVideoDriver" && "$DisplayDriver" != "$CurrentDisplayDriver" ]]; then
 	# change video driver, but only if needed
 	awk -v"DisplayDriver=$DisplayDriver" -f/usr/pluto/bin/X-ChangeDisplayDriver.awk "$ConfigFile" >"$ConfigFile.$$"
 	mv "$ConfigFile"{.$$,}
+	if [[ "$gpus" -gt "1" ]]; then
+		sed -ie "s/#BusID.*/BusID\t\t\"PCI:${bus_id}\"/g" "$ConfigFile.$$"
+	fi
 fi
 
 UpdateModules
