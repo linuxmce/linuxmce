@@ -97,22 +97,14 @@ SetupX () {
 }
 
 DualBus () {
-vga_pci=$(lspci | grep 'VGA')
+vga_pci=$(lspci | grep "VGA")
 gpus=$(echo "$vga_pci" | sort -u | wc -l)
 	if [[ "$gpus" -gt "1" ]]; then
-		dec_bus=$(echo "$vga_pci" | awk 'NR==2' | cut -d' ' -f1)
-		iid_1=$(echo "$dec_bus" | cut -d':' -f1 | sed 's@\(\B[A-Z]\)@_\1@g')
-		iid_2=$(echo "$dec_bus" | cut -d':' -f2 | cut -d'.' -f1 | sed 's@\(\B[A-Z]\)@_\1@g')
-		iid_3=$(echo "$dec_bus" | cut -d':' -f2 | cut -d'.' -f2 | sed 's@\(\B[A-Z]\)@_\1@g')
-
-		iid_1_con=$(echo "ibase=16; ${iid_1^^}" | bc)
-		iid_2_con=$(echo "ibase=16; ${iid_2^^}" | bc)
-		iid_3_con=$(echo "ibase=16; ${iid_3^^}" | bc)
-
+		bus_id=$(echo "$vga_pci" | awk 'NR==2' | while IFS=':. ' read -r tok1 tok2 tok3 rest; do printf '%2s %2s %s\n' "$((16#$tok1))":"$((16#$tok2))":"$((16#$tok3))" | sed -e 's/ //g'; done)		
 		if grep "\#BusID" $XineConf; then
-			sed -ie "s/\#BusID.*/BusID\t\t\"PCI:${iid_1_con}:${iid_2_con}:${iid_3_con}\"/g" $XineConf
+			sed -ie "s/\#BusID.*/BusID\t\t\"PCI:${bus_id}\"/g" $XineConf
 		elif grep "BusID" $XineConf; then
-			sed -ie "s/BusID.*/BusID\t\t\"PCI:${iid_1_con}:${iid_2_con}:${iid_3_con}\"/g" $XineConf
+			sed -ie "s/BusID.*/BusID\t\t\"PCI:${bus_id}\"/g" $XineConf
 		fi
 	fi
 }
