@@ -379,7 +379,10 @@ for dir in /usr/pluto/diskless/* ;do
 	fi
 
 done
-cat /usr/pluto/keys/id_dsa_pluto.pub /usr/pluto/diskless/${Moon_DeviceID}/root/.ssh/authorized_keys
+if [[ ! -d $Moon_RootLocation/root/.ssh ]]; then 
+	mkdir -p $Moon_RootLocation/root/.ssh
+fi
+cat /usr/pluto/keys/id_dsa_pluto.pub > $Moon_RootLocation/root/.ssh/authorized_keys
 (cd /usr/pluto/diskless/${Moon_DeviceID}/usr/pluto/deb-cache; dpkg-scanpackages -m . dev/null | tee Packages | gzip -c > Packages.gz)
 echo "Finished setting up network boot for media directors."
 echo "If new media director(s) were added, do a quick reload router."
