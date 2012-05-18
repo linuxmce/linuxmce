@@ -1086,6 +1086,7 @@ switch ($section) {
 		$output = new Template($dbADO);
 		$output->setTemplateFileType('large');
 		@include($GLOBALS['globalConfigPath'].'asteriskDB.inc.php');
+		@include($GLOBALS['globalConfigPath'].'telecom.inc.php');
 	    include_once('operations/phones/fax.php');
 	    $output->setHelpSrc('/wiki/index.php/fax');
 	    fax($output,$asteriskADO,$dbADO,$telecomADO);
