@@ -499,7 +499,7 @@ FindVideoDriver () {
 				prop_driver="nvidia" ;;
                 ATI)
                         	prop_driver="fglrx"
-                        if echo "$vga_pci" | grep -Ei '((R|RS)(5|6|7)|(9|X|ES)(1|2?)([0-9])(5|0)0|Xpress)'; then
+                        if echo "$vga_pci" | grep -Ei '((R)(5|6|7)|(9|X|ES)(1|2?)([0-9])(5|0)0|Xpress)'; then
                                 prop_driver="radeon"; fi ;;
 
                 Intel)

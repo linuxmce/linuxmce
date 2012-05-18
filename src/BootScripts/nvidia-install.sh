@@ -179,7 +179,7 @@ installCorrectNvidiaDriver() {
 
 		if [[ "$preferred_Driver" == "nvidia-current" ]]; then
 			add-apt-repository ppa:team-iquik/alsa
-			add-apt-repository ppa:ubuntu-x-swat/x-updates
+			add-apt-repository ppa:xorg-edgers/ppa
 			apt-get update
 			apt-get install -y alsa-base 2> >(tee $tmpfile)
 			apt-get install -y $preferred_driver 2> >(tee $tmpfile)
