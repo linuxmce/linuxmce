@@ -272,7 +272,7 @@ VPNPSK=
 
 NCards=$(ip addr | grep "^[0-9]*:" | grep -v "^[0-9]*: lo" | grep -v "^[0-9]*: pan" | grep -c ".")
 
-# Hast- and domainname
+# Host- and domainname
 Q="SELECT IK_DeviceData
 FROM Device_DeviceData
 WHERE FK_DeviceData=$DEVICEDATA_Hostname"

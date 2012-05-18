@@ -154,7 +154,7 @@ if [[ "$PPPoEEnabled" == "on" ]]; then
 	ExtIf="ppp0"
 fi
 
-# sanitize old installations
+# sanitize old installations, could be removed somewhen
 Q="UPDATE Firewall SET Protocol='tcp-ipv4' WHERE Protocol='tcp'"
 R=$(RunSQL "$Q")
 Q="UPDATE Firewall SET Protocol='udp-ipv4' WHERE Protocol='udp'"
@@ -195,8 +195,17 @@ iptables -A INPUT -m mark --mark "$AllowMark" -j ACCEPT
 ip6tables -P INPUT "$DefaultIPv6Policy"
 ip6tables -F INPUT
 ip6tables -A INPUT -i lo -j ACCEPT
+ip6tables -A INPUT -p ipv6-icmp -m icmp6 --icmpv6-type 133 -m hl --hl-eq 255 -j ACCEPT
+ip6tables -A INPUT -p ipv6-icmp -m icmp6 --icmpv6-type 134 -m hl --hl-eq 255 -j ACCEPT
+ip6tables -A INPUT -p ipv6-icmp -m icmp6 --icmpv6-type 135 -m hl --hl-eq 255 -j ACCEPT
+ip6tables -A INPUT -p ipv6-icmp -m icmp6 --icmpv6-type 136 -m hl --hl-eq 255 -j ACCEPT
+ip6tables -A INPUT -p ipv6-icmp -m icmp6 --icmpv6-type 137 -m hl --hl-eq 255 -j ACCEPT
 ip6tables -A INPUT -m state --state ESTABLISHED,RELATED -j ACCEPT
 ip6tables -A INPUT -m mark --mark "$AllowMark" -j ACCEPT
+
+# Log denied packets
+iptables -I INPUT 5 -m limit --limit 5/min -j LOG --log-prefix "IPv4 packet denied: " --log-level 7
+ip6tables -I INPUT 5 -m limit --limit 5/min -j LOG --log-prefix "IPv6 packet denied: " --log-level 7
 
 # If on multiple NIC's, accept incoming on LAN and NAT or masquerade on external
 if [[ -n "$IntIP" ]]; then
@@ -204,7 +213,8 @@ if [[ -n "$IntIP" ]]; then
 	IntNet="$(echo "$IntIP" | cut -d. -f-3).0"
 	IntBitmask=24
 	iptables -A INPUT -p udp --dport 67 -j ACCEPT # BOOTP/DHCP
-	ip6tables -A INPUT -p udp --dport 67 -j ACCEPT # BOOTP/DHCP
+	ip6tables -A INPUT -p udp --dport 546 -j ACCEPT # DHCP
+	
 	iptables -A INPUT -s "$IntNet/$IntBitmask" -j ACCEPT
 	ip6tables -A INPUT -i $IntIf -j ACCEPT
 
