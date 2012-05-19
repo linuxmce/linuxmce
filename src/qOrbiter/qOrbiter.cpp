@@ -1048,7 +1048,7 @@ void qOrbiter::CMD_Set_Now_Playing(string sPK_DesignObj,string sValue_To_Assign,
 
     m_bUsingLiveAVPath = atoi(StringUtils::Tokenize(sList_PK_Device,",",pos).c_str())==1;
     setLiveAvPath(m_bUsingLiveAVPath);
-    qDebug() << m_bUsingLiveAVPath;
+    //qDebug() << m_bUsingLiveAVPath;
     pos=0;
     /*
     m_iPK_Screen_Remote=atoi(StringUtils::Tokenize(sPK_DesignObj,",",pos).c_str());
@@ -1844,7 +1844,7 @@ bool DCE::qOrbiter::initialize()
     {
 
 
-        qDebug("Checking Connection Error Type:");
+       // qDebug("Checking Connection Error Type:");
 
         QApplication::processEvents(QEventLoop::AllEvents);
         if(  m_pEvent->m_pClientSocket->m_eLastError==ClientSocket::cs_err_CannotConnect )
@@ -2351,12 +2351,12 @@ void qOrbiter::saveCurrentPlaylist( QString name, bool SaveAsNew)
     if(SendCommand(savePlaylist, & saveResp) && saveResp == "OK")
     {
         emit mediaMessage("Playlist Saved");
-        qDebug() << mediaResponse;
+      //  qDebug() << mediaResponse;
     }
     else
     {
         emit mediaMessage("Playlist not saved::"+QString::fromStdString(saveResp.c_str()));
-        qDebug() << mediaResponse;
+      //  qDebug() << mediaResponse;
     }
 
 }
@@ -2737,7 +2737,7 @@ void qOrbiter::getStreamingVideo()
     }
     else
     {
-        qDebug("Couldnt get the stream image!");
+      //  qDebug("Couldnt get the stream image!");
     }
 
 
@@ -3221,7 +3221,7 @@ void DCE::qOrbiter::populateAdditionalMedia() //additional media grid that popul
         char *pData;
         pData = "NULL";
         //CMD_Request_Datagrid_Contents(                              long DeviceIDFrom,                long DeviceIDTo,                   string sID,                                string sDataGrid_ID, int iRow_count,int iColumn_count,        bool bKeep_Row_Header,bool bKeep_Column_Header,bool bAdd_UpDown_Arrows,string sSeek,       int iOffset,    char **pData,int *iData_Size,int *iRow,int *iColumn
-
+/*
         qDebug("---------------------");
         qDebug() << "Seek-" << m_sSeek.c_str();
         qDebug() << "Current Row-" << media_pos ;
@@ -3229,7 +3229,7 @@ void DCE::qOrbiter::populateAdditionalMedia() //additional media grid that popul
         {qDebug() << "Projected Row" << media_pos + media_pageSeperator;}
         qDebug() << "Current Requested page" << media_currentPage;
          qDebug("---------------------");
-
+*/
 
         DCE::CMD_Request_Datagrid_Contents req_data_grid_pics( long(m_dwPK_Device), long(iPK_Device_DatagridPlugIn), StringUtils::itos( m_dwIDataGridRequestCounter ), string(imgDG),    gHeight,    gWidth,                  false,                 false,                                 true, m_sSeek,   iOffset,  &pData,         &iData_Size, &GridCurRow, &GridCurCol );
         std::string pResponse ="";
@@ -3246,11 +3246,12 @@ void DCE::qOrbiter::populateAdditionalMedia() //additional media grid that popul
             int index;
             QImage cellImg;
             media_pos = GridCurRow;
+        /*
             qDebug("---------------------");
             qDebug() << "Complete Call Results-" << m_sSeek.c_str();
             qDebug() << "Current Row-" << GridCurRow ;
              qDebug("---------------------");
-
+        */
             for(MemoryDataTable::iterator it=pDataGridTable->m_MemoryDataTable.begin();it!=pDataGridTable->m_MemoryDataTable.end();++it)
             {
                 pCell= it->second;
@@ -3913,14 +3914,14 @@ void DCE::qOrbiter::ShowBookMarks()
                 filePath = QString::fromUtf8(pPath);
                 fk_file = pCell->GetValue();
                 cellTitle = QString::fromUtf8(pCell->m_Text);
-
+            /*
                 qDebug() <<"title "<< cellTitle;
                 qDebug() << "image path " << pCell->GetImagePath();
                 qDebug() << "Column index "<< outer_index;
                 qDebug() << "Value " << pCell->GetValue();
                 qDebug() << "path " << filePath;
                 qDebug() << "Attributes " <<  pCell->m_mapAttributes.size();
-
+            */
                 titleImg.load(":/icons/icon.png");
                 bookmarkImg.load(":/icons/icon.png");
 

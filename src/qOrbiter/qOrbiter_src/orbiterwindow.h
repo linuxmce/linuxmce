@@ -11,7 +11,6 @@
 class orbiterWindow : public QObject
 {
     Q_OBJECT
-
     Q_PROPERTY (QString message READ getMessage WRITE setMessage NOTIFY MessageChanged)
     Q_PROPERTY (bool newOrbiter READ getOrbiterState WRITE setOrbiterState NOTIFY StatusChanged)
     Q_PROPERTY (bool b_connectionPresent READ getConnectionState WRITE setConnectionState NOTIFY connectionChanged)
@@ -20,7 +19,6 @@ class orbiterWindow : public QObject
     Q_PROPERTY (bool b_orbiterConfigReady READ getOrbiterConfigState WRITE setOrbiterConfigState NOTIFY orbiterConfigStatus )
     Q_PROPERTY (bool b_skinIndexReady READ getSkinIndexState WRITE setSkinIndexState NOTIFY skinIndexStatus )
     Q_PROPERTY (bool b_skinDataReady READ getSkinDataState WRITE setSkinDataState NOTIFY skinDataLoaded  )
-
 
 public:
     explicit orbiterWindow(long deviceid, std::string routerip, QObject *parent = 0);

@@ -369,6 +369,8 @@ void qorbiterManager::processConfig(QByteArray config)
     iFK_Room = defaults.attribute("DefaultRoom").toInt();
     iea_area = defaults.attribute("DefaultEA").toInt();
     iPK_User = defaults.attribute("PK_User").toInt();
+    if(iPK_User == 0)
+        iPK_User =1;
     setDceResponse("Defaults Set");
 
     //-floorplans-----------------------------------------------------------------------------------------------------
@@ -946,7 +948,7 @@ bool qorbiterManager::loadSkins(QUrl base)
 #elif for_android
     tskinModel->addSkin("default");
 #else
-    tskinModel->addSkin("default,aeon,crystalshades");
+    tskinModel->addSkin("default,aeon,crystalshades,noir");
 
 #endif
     return true;
@@ -1385,7 +1387,7 @@ void qorbiterManager::setHouseMode(int mode, int pass)
 
 void qorbiterManager::setCurrentUser(QString inc_user)
 {
-    qDebug() << "Incoming user::" << inc_user;
+   // qDebug() << "Incoming user::" << inc_user;
     sPK_User = userList->find(inc_user)->id();
     int user = inc_user.toInt();
     emit userChanged(user);

@@ -86,7 +86,7 @@ void TimeCodeManager::restart()
 void TimeCodeManager::updateTimeCode()
 {
     socketData = dceMediaSocket->readLine();
-    qDebug() << socketData;
+    //qDebug() << socketData;
     std::string sLine = QString::fromAscii(socketData.data(), socketData.size()).toStdString();
    //qDebug() << QString::fromStdString(sLine);
     if (sLine.length() > 0)

@@ -13,7 +13,7 @@ Rectangle {
     Rectangle{
         height: scaleY(75)
         width: scaleX(75)
-        color: style.darkhighlight
+        color: "slategrey"
         radius: 5
         border.color: style.highlight1
         border.width: 2

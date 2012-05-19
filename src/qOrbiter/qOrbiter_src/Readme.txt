@@ -76,3 +76,19 @@ bg -black
 highlight1 - darkseagreen
 highlight2 - darkolivegreen
 highlight3 - oldlace
+
+experimental
+<<
+#D36115
+2
+<<
+#82BDE4
+3
+<<
+#8E1212
+4
+<<
+#F1EBE4
+5
+<<
+#46B1E6
