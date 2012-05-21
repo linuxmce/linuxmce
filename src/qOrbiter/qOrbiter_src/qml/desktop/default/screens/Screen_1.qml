@@ -3,9 +3,17 @@ import "../components"
 import "../effects"
 import Qt.labs.shaders 1.0
 
+
+
 Item
 {
     anchors.centerIn: parent
+    Component.onCompleted: {
+        GoogleWeather.getWeather("90043")
+               GoogleWeather.submit()
+
+                }
+
     Rectangle {
         id:stage
 
@@ -13,8 +21,6 @@ Item
         height: style.orbiterH
         width: style.orbiterW
         color: "transparent"
-
-
 
 
         Image {
@@ -27,13 +33,23 @@ Item
 
         Text{
             id:connectstatus
-            text: qsTr("Orbiter")+ iPK_Device + qsTr(" Is Connected")
+            text: qsTr("Orbiter")+ iPK_Device + qsTr(" Is Connected") + " and the current temp is:" + GoogleWeather.currentTemp
             color: "aliceblue"
             font.letterSpacing: 2
             anchors.left: parent.left
             anchors.leftMargin: scaleX(5)
             anchors.verticalCenter: headerbg.verticalCenter
         }
+        Image {
+            id: weatherImage
+            source: GoogleWeather.currentIcon
+            anchors.left: connectstatus.right
+            anchors.verticalCenter: connectstatus.verticalCenter
+            anchors.leftMargin: 20
+            opacity: .75
+            height:25
+fillMode: Image.PreserveAspectFit
+}
 
         Clock{
             id:screen1time

@@ -47,9 +47,11 @@ Q_IMPORT_PLUGIN(UIKit)
 #include <contextobjects/playlistclass.h>
 #include <contextobjects/timecodemanager.h>
 
+//these includes will be made into plugins
+#include "plugins/GoogleWeather/googleweather.h"
 
 
-
+//--end includes to be made plugins
 
 // In source files stored in archives and packages, these 2 lines will have the release version (build)
 // and the svn revision as a global variable that can be inspected within a core dump
@@ -272,7 +274,11 @@ int main(int argc, char* argv[])
 #else
         bool glpresent = false;
 #endif
+
         orbiterWindow orbiterWin(PK_Device, sRouter_IP);
+        gWeatherModel *theWeather= new gWeatherModel(new gWeatherItem);
+
+        //qmlRegisterType<gWeatherModel>("GoogleWeather", 0,1,"GoogleWeather");
 
         orbiterWin.setMessage("Setting up Lmce");
         qorbiterManager  *w= new qorbiterManager(&orbiterWin.mainView);
@@ -310,6 +316,7 @@ int main(int argc, char* argv[])
         orbiterWin.mainView.rootContext()->setContextProperty("mediaplaylist", storedVideoPlaylist);
         orbiterWin.mainView.rootContext()->setContextProperty("simpleepg", simpleEPGmodel);
         orbiterWin.mainView.rootContext()->setContextProperty("opengl", glpresent);
+        orbiterWin.mainView.rootContext()->setContextProperty("GoogleWeather", theWeather);
 
         //shutdown signals
 

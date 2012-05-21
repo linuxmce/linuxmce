@@ -62,7 +62,7 @@ folder_01.source = qml/desktop
 folder_01.target = $$DESTDIR/qml
 
 folder_05.source = qml/template
-folder_05.target = $$DESTDIR/qml
+folder_05.target = $$DESTDIR/template
 
 folder_03.source = config.xml
 folder_03.target = $$DESTDIR
@@ -73,8 +73,8 @@ WIN32{
 folder_01.source = qml/desktop
 folder_01.target = $$DESTDIR/qml
 
-folder_05.source = qml/template
-folder_05.target = $$DESTDIR/qml
+folder_05.source = plugins
+folder_05.target = $$DESTDIR/plugins
 
 files_01.source = "../qOrbiter_src/config.xml/"
 files_01.path =$$DESTDIR/
@@ -149,10 +149,11 @@ folder_05.target = $$DESTDIR/qml
 DEFINES+=ANDROID
 
 }
-
+#plugins_folder.source = plugins/
+#plugins_folder.target = $$DESTDIR
 #uncomment this line to work on skins locally
 
-!win32{DEPLOYMENTFOLDERS = folder_01 folder_02 folder_03 folder_05}
+!win32{DEPLOYMENTFOLDERS = folder_01 folder_02 folder_03 folder_05 }
 
 win32{
 DEPLOYMENTFOLDERS = folder_01 files_01 folder_05
@@ -161,7 +162,9 @@ DEPLOYMENTFOLDERS = folder_01 files_01 folder_05
 
 
 # Additional import path used to resolve QML modules in Creator's code model
-QML_IMPORT_PATH =
+#QML_IMPORT_PATH =
+#QML_IMPORT_TRACE = 1
+
 symbian:TARGET.UID3 = 0xE0D07D4D
 QMAKE_CXXFLAGS += -DUSE_LZO_DATAGRID
 
@@ -210,6 +213,9 @@ message( Opengl Status: $$glmsg )
 
 
 # The .cpp file which was generated for your project. Feel free to hack it.
+#CONFIG += ordered
+#SOURCES += plugins/googleWeatherPlugin/googleweatherplugin.pro
+
 SOURCES += main.cpp \
         ../../Gen_Devices/qOrbiterBase.cpp \
     ../qOrbiter.cpp \   
@@ -308,7 +314,11 @@ SOURCES += main.cpp \
     imageProviders/floorplandeviceprovider.cpp \
     ../qMediaPlayer.cpp \
     ../../Gen_Devices/qMediaPlayerBase.cpp \
-    contextobjects/bookmarkitem.cpp
+    contextobjects/bookmarkitem.cpp \
+    plugins/GoogleWeather/googleweather.cpp
+
+
+
 
 
 # Please do not modify the following two lines. Required for deployment.
@@ -415,7 +425,8 @@ HEADERS += \
     imageProviders/floorplandeviceprovider.h \
     ../qMediaPlayer.h \
     ../../Gen_Devices/qMediaPlayerBase.h \
-    contextobjects/bookmarkitem.h
+    contextobjects/bookmarkitem.h \
+    plugins/GoogleWeather/googleweather.h
 
 
 OTHER_FILES += Readme.txt \
@@ -428,7 +439,8 @@ OTHER_FILES += Readme.txt \
     qml/shaders/vignette.fsh \
     qml/shaders/gaussianblur_v.fsh \
     qml/shaders/gaussianblur_h.fsh \
-    qml/effects/EffectGaussianBlur.qml
+    qml/effects/EffectGaussianBlur.qml \
+    qmldir
 
 
 for_harmattan{
