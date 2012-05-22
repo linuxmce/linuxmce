@@ -315,7 +315,8 @@ SOURCES += main.cpp \
     ../qMediaPlayer.cpp \
     ../../Gen_Devices/qMediaPlayerBase.cpp \
     contextobjects/bookmarkitem.cpp \
-    plugins/GoogleWeather/googleweather.cpp
+    plugins/GoogleWeather/googleweather.cpp \
+    audiovisual.cpp
 
 
 
@@ -426,7 +427,8 @@ HEADERS += \
     ../qMediaPlayer.h \
     ../../Gen_Devices/qMediaPlayerBase.h \
     contextobjects/bookmarkitem.h \
-    plugins/GoogleWeather/googleweather.h
+    plugins/GoogleWeather/googleweather.h \
+    audiovisual.h
 
 
 OTHER_FILES += Readme.txt \

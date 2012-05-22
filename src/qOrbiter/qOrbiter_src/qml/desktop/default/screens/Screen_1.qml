@@ -10,9 +10,7 @@ Item
     anchors.centerIn: parent
     Component.onCompleted: {
         GoogleWeather.getWeather("90043")
-               GoogleWeather.submit()
-
-                }
+    }
 
     Rectangle {
         id:stage
@@ -48,8 +46,8 @@ Item
             anchors.leftMargin: 20
             opacity: .75
             height:25
-fillMode: Image.PreserveAspectFit
-}
+            fillMode: Image.PreserveAspectFit
+        }
 
         Clock{
             id:screen1time
