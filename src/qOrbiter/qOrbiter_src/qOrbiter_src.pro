@@ -66,7 +66,9 @@ folder_05.target = $$DESTDIR/template
 
 folder_03.source = config.xml
 folder_03.target = $$DESTDIR
+
 DEFINES += for_desktop
+QT+= phonon
 }
 
 WIN32{
@@ -315,11 +317,9 @@ SOURCES += main.cpp \
     ../qMediaPlayer.cpp \
     ../../Gen_Devices/qMediaPlayerBase.cpp \
     contextobjects/bookmarkitem.cpp \
-    plugins/GoogleWeather/googleweather.cpp \
-    audiovisual.cpp
-
-
-
+    plugins/GoogleWeather/googleweather.cpp \    
+    plugins/AudioVisual/audiovisual.cpp \
+    plugins/AudioVisual/videowidgetplayer.cpp
 
 
 # Please do not modify the following two lines. Required for deployment.
@@ -428,7 +428,8 @@ HEADERS += \
     ../../Gen_Devices/qMediaPlayerBase.h \
     contextobjects/bookmarkitem.h \
     plugins/GoogleWeather/googleweather.h \
-    audiovisual.h
+    plugins/AudioVisual/audiovisual.h \
+    plugins/AudioVisual/videowidgetplayer.h
 
 
 OTHER_FILES += Readme.txt \
