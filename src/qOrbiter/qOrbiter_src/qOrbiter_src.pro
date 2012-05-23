@@ -318,8 +318,9 @@ SOURCES += main.cpp \
     ../../Gen_Devices/qMediaPlayerBase.cpp \
     contextobjects/bookmarkitem.cpp \
     plugins/GoogleWeather/googleweather.cpp \    
-    plugins/AudioVisual/audiovisual.cpp \
-    plugins/AudioVisual/videowidgetplayer.cpp
+    ../../qMediaPlayer/AudioVisual/audiovisual.cpp \
+    ../../qMediaPlayer/AudioVisual/videowidgetplayer.cpp
+
 
 
 # Please do not modify the following two lines. Required for deployment.
@@ -428,9 +429,8 @@ HEADERS += \
     ../../Gen_Devices/qMediaPlayerBase.h \
     contextobjects/bookmarkitem.h \
     plugins/GoogleWeather/googleweather.h \
-    plugins/AudioVisual/audiovisual.h \
-    plugins/AudioVisual/videowidgetplayer.h
-
+    ../../qMediaPlayer/AudioVisual/audiovisual.h \
+    ../../qMediaPlayer/AudioVisual/videowidgetplayer.h
 
 OTHER_FILES += Readme.txt \
     qml/Splash.qml \
