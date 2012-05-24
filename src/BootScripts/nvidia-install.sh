@@ -177,7 +177,7 @@ installCorrectNvidiaDriver() {
 			apt-get -y remove "$currrent_driver" --force-yes
 		fi
 
-		if [[ "$preferred_Driver" == "nvidia-current" ]]; then
+		if [[ "$preferred_driver" == "nvidia-current" ]]; then
 			add-apt-repository ppa:team-iquik/alsa
 			add-apt-repository ppa:ubuntu-x-swat/x-updates
 			apt-get update
