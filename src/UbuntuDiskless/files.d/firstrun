@@ -20,7 +20,7 @@ apt-get update
 
 if echo $vga_pci | grep -qi 'nVidia'; then
 	apt-get -y -f install pluto-nvidia-video-drivers
-elif echo $vga_pci | grep -i 'ATI' | grep -Evi '((R)(5|6|7)|(9|X|ES)(1|2?)([0-9])(5|0)0|Xpress)'; then 
+elif echo $vga_pci | grep -i 'ATI' | grep -Evi '((R.)(3|4|5|6|7)|(9|X|ES)(1|2?)([0-9])(5|0)0|Xpress)'; then 
 	apt-get -y -f install xorg-driver-fglrx
 fi
 "
