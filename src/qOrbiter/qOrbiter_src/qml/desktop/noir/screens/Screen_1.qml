@@ -2,6 +2,7 @@ import QtQuick 1.0
 import "../components"
 
 FocusScope{
+    focus: true
     Item
     {
         anchors.centerIn: parent
@@ -25,6 +26,9 @@ FocusScope{
             height: appH
             width: appW
             color: "black"
+MediaHeader{
+
+}
             /*
         Image {
             id: headerbg
@@ -35,21 +39,8 @@ FocusScope{
         }
  */
 
-            Rectangle{
-                id: temp_nowplaying
-                width: scaleX(50)
-                height: scaleY(35)
-                color: "grey"
-                anchors.top: advanced.bottom
-                anchors.topMargin: scaleY(15)
-                radius: 10
-                anchors.horizontalCenter: parent.horizontalCenter
-                Text {
-                    id: label
-                    text: dcenowplaying.mediatitle
-                }
-            }
-            BottomPanel{id: advanced; anchors.top: stage.top}
+
+            //BottomPanel{id: advanced; anchors.top: stage.top}
             ScenarioRow{id:lmceScenarios; anchors.bottom: stage.bottom}
         }
         Keys.onPressed:keyCheck(event.key)

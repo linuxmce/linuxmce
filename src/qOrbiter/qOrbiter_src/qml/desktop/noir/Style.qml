@@ -12,9 +12,10 @@ import QtQuick 1.0
   */
 
 
-QtObject{
+Item{
     id:classicstyle
-    objectName: "NOIR stb"
+    objectName: "noir"
+    property alias style: classicstyle
     function scaleX(x){
     return x/100*appW
     }
@@ -75,7 +76,7 @@ QtObject{
     property color button_action_color: "maroon"
     property color button_action_color_hover: "lightblue"
 
-    property variant bgImg: "null"
+    property string bgImg: "null"
     property string b_title: "null"
     property int but_smooth: 10
 
@@ -83,16 +84,21 @@ QtObject{
     property color arrow_color_nav: "maroon"
     property color arrow_text_nav: "white"
 
-
     //row container styling
-    property int rowWidth: orbiterW - 5
-    property int rowH: buttonH + 10
+    property int rowWidth: orbiterW
+    property int rowH: buttonH
     property color rowbgColor: "darkgrey"
 
     //Notifications bar
-    property int width: orbiterW - 5
+    property int notificationWidth: appW-5
     property color not_color: "darkgrey"
     property string not_pos: "anchors: parent.top"
+    property Gradient generalGradient: Gradient {
+        id:bg
+        GradientStop {position: 0.0; color: "#636363"}
+        GradientStop {position: 0.39; color: "#323233"}
+        GradientStop {position: 1.0; color: "#333333"}
+    }
 
     //special
     property color alert_bg: "black"
