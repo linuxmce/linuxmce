@@ -11,6 +11,7 @@ File="/etc/rcS.d/S99firstrun"
 Content="#!/bin/bash
 . /usr/pluto/bin/Utils.sh
 trap 'rm -f $File' EXIT
+apt-get update
 CheckVideoDriver
 sleep 5
 if echo \$Best_Video_Driver | grep -Eq '(nvidia|fglrx|via|virge|savage)'; then
