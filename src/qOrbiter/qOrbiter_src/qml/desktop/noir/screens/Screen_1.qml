@@ -1,61 +1,48 @@
 import QtQuick 1.0
 import "../components"
 
-FocusScope{
-    focus: true
-    Item
+
+Rectangle {
+    id:stage
+    function toggleUI()
     {
-        anchors.centerIn: parent
-        function toggleUI()
-        {
-            advanced.visible = !advanced.visible
-            lmceScenarios.visible = !lmceScenarios.visible
-        }
-        function keyCheck(k){
-            if(k === Qt.Key_T)
-                toggleUI()
-            console.log("Key toggle")
+        mediaHeader.visible = !mediaHeader.visible
+        lmceScenarios.visible = !lmceScenarios.visible
+    }
+    function keyCheck(k){
+        if(k === Qt.Key_T)
+            toggleUI()
+        console.log("Key toggle")
 
-        }
-
-
-        id:testScope
-        Rectangle {
-            id:stage
-            signal swapStyle()
-            height: appH
-            width: appW
-            color: "black"
-MediaHeader{
-
-}
-            /*
-        Image {
-            id: headerbg
-            source: "../img/ui3/header.png"
-            anchors.top: stage.top
-            height: scaleY(7)
-            width: scaleX(99)
-        }
- */
-
-
-            //BottomPanel{id: advanced; anchors.top: stage.top}
-            ScenarioRow{id:lmceScenarios; anchors.bottom: stage.bottom}
-        }
-        Keys.onPressed:keyCheck(event.key)
+    }
+    signal swapStyle()
+    height: appH
+    width: appW
+    color: "black"
+    focus:true
+    Keys.onPressed:{
+        console.log(event.key)
+                keyCheck(event.key)
     }
 
+    MediaHeader{id:mediaHeader}
+    //BottomPanel{id: advanced; anchors.top: stage.top}
+    ScenarioRow{id:lmceScenarios; anchors.bottom: stage.bottom}
 
     MouseArea{
-        anchors.fill: testScope
+        anchors.fill: stage
         acceptedButtons: Qt.LeftButton | Qt.RightButton
+        hoverEnabled: true
         onClicked:  {
+            //  console.log("stage click")
             if(mouse.button === Qt.RightButton)
             {
-                toggleUI()
-                console.log("Mouse Toggle")
+                stage.toggleUI()
+                //  console.log("Mouse Toggle")
             }
         }
     }
 }
+
+
+

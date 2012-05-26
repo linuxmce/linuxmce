@@ -4,64 +4,74 @@ import QtQuick 1.1
 
 Rectangle {
     id:scenarios
-    width: appW *.85
-    height: modelRow.height+presenceRow.height
+    width: appW
+    height:appH *.20
    // color: "grey"
     radius: 5
     gradient: style.generalGradient
-
+    property double buttonWidth:150
+    property double buttonHeight:50
+    property double scenarioFontSize:appH * .03
     anchors.horizontalCenter: parent.horizontalCenter
-
 
     Row{
         id:modelRow
         height: scenarios.height
-        width: scenarios.width
+        width: buttonWidth*6
         spacing: 10
         anchors.horizontalCenter: parent.horizontalCenter
+
         Rectangle{
             id:lightsTect
-            height: 50
-            width: 85
+            height: buttonHeight
+            width: buttonWidth
             color: "transparent"
             Text {
                 id: lLabel
                 text: qsTr("Lights")
                 anchors.centerIn: parent
                 color: "white"
+                font.pixelSize: scenarioFontSize
+            }
+            MouseArea{
+                anchors.fill: lightsTect
+                hoverEnabled: true
+
             }
         }
 
         Rectangle{
             id:mediaRect
-            height: 50
-            width: 85
+            height: buttonHeight
+            width: buttonWidth
             color: "transparent"
             Text {
                 id: mLabel
                 text: qsTr("Media")
                 anchors.centerIn: parent
                 color: "white"
+                font.pixelSize: scenarioFontSize
             }
         }
 
         Rectangle{
             id:climateRect
-            height: 50
-            width: 85
+            height: buttonHeight
+            width: buttonWidth
             color: "transparent"
             Text {
                 id: cLabel
                 text: qsTr("Climate")
                 anchors.centerIn: parent
                 color: "white"
+                font.pixelSize: scenarioFontSize
             }
         }
 
         Rectangle{
             id:securityRect
-            height: 50
-            width: 85
+            height: buttonHeight
+            width: buttonWidth
             color: "transparent"
             Text {
                 id: sLabel
@@ -69,13 +79,14 @@ Rectangle {
                 anchors.centerIn: parent
                 color: "white"
                 font.family: "Nimbus Sans L"
+                font.pixelSize: scenarioFontSize
             }
         }
 
         Rectangle{
             id:telecomRect
-            height: 50
-            width: 85
+            height: buttonHeight
+            width: buttonWidth
             color: "transparent"
             Text {
                 id: tLabel
@@ -83,13 +94,14 @@ Rectangle {
                 anchors.centerIn: parent
                 color: "white"
                 font.family: "Nimbus Sans L"
+                font.pixelSize: scenarioFontSize
             }
         }
 
         Rectangle{
             id:advanced
-            height: 50
-            width: 85
+            height: buttonHeight
+            width: buttonWidth
             color: "transparent"
             Text {
                 id: aLabel
@@ -97,6 +109,7 @@ Rectangle {
                 anchors.centerIn: parent
                 color: "white"
                 font.family: "Nimbus Sans L"
+                font.pixelSize: scenarioFontSize
             }
         }
     }
@@ -104,10 +117,10 @@ Rectangle {
 
     Row{
         id:presenceRow
-        height: 50
-        width: scenarios.width
-        anchors.top: modelRow.bottom
-        anchors.left: modelRow.left
+        height: 100
+        width: modelRow.width
+        anchors.bottom: scenarios.bottom
+        anchors.horizontalCenter: parent.horizontalCenter
         spacing: 5
 
         Rectangle{
@@ -118,7 +131,7 @@ Rectangle {
             Text {
                 id: roomLabel
                 text: qsTr("room")
-                font.pixelSize: 12
+
                 anchors.left: parent.left
                 color: "white"
                 font.family: "Nimbus Sans L"

@@ -12,7 +12,7 @@ Rectangle {
 
     Text {
         id: nowPlayingText
-        text: dcenowplaying.mediatitle
+        text: dcenowplaying.mediatitle === "" ? dcenowplaying.qs_mainTitle : dcenowplaying.mediatitle
         color: "white"
         font.pixelSize: 16
         font.family: "Nimbus Sans L"

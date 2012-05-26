@@ -4,11 +4,13 @@ import Qt.labs.shaders 1.0
 import "components"
 import "js/ComponentLoader.js" as MyJs
 
+
+
 Item {
     id: item
     width:appW
     height:appH
-
+    focus:true
     signal close()
     signal changeScreen(string s)
     signal setupStart(int x, string y)
@@ -162,8 +164,5 @@ Item {
 
 
     //floorplans
-
-
-
-
 }
+
