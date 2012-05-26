@@ -482,6 +482,15 @@ ServiceBkg="$3"
 		return $err
 }
 
+VerifyExitCode () {
+        local EXITCODE=$?
+        if [ "$EXITCODE" != "0" ] ; then
+        	echo "An error (Exit code $EXITCODE) occured during the last action"
+        	echo "$1"
+                exit 1
+        fi
+}
+
 FindVideoDriver () {
 	#####################################################################
 	# Switching our default to fbdev for interoperability 
@@ -537,9 +546,6 @@ InstallVideoDriver () {
 					else StartService "Installing nVidia driver this may take a few minutes" ". /usr/pluto/bin/nvidia-install.sh"
 						installCorrectNvidiaDriver
 					fi 
-				if [[ "$FirstBoot" == "false" ]];
-					then reboot
-				fi
 			fi ;;
 		nouveau)
 			if ! PackageIsInstalled xserver-xorg-video-nouveau; then
@@ -555,9 +561,6 @@ InstallVideoDriver () {
 			if ! PackageIsInstalled fglrx; then 
 				apt-get -yf install fglrx
 				VerifyExitCode "Install fglrx Driver"
-				if [[ "$FirstBoot" == "false" ]];
-					then reboot
-				fi
 			fi ;;
 		intel)
 			if ! PackageIsInstalled xserver-xorg-video-intel; then 
@@ -583,25 +586,16 @@ InstallVideoDriver () {
 			if ! PackageIsInstalled xserver-xorg-video-savage; then 
 				apt-get -yf install xserver-xorg-video-savage
 				VerifyExitCode "Install VIA Savage Driver"
-				if [[ "$FirstBoot" == "false" ]];
-					then reboot
-				fi
 			fi ;;
 		via)
 			if ! PackageIsInstalled xserver-xorg-video-s3; then 
 				apt-get -yf install xserver-xorg-video-s3
 				VerifyExitCode "Install VIA S3 Driver"
-				if [[ "$FirstBoot" == "false" ]];
-					then reboot
-				fi
 			fi ;;
 		virge)
 			if ! PackageIsInstalled xserver-xorg-video-s3virge; then 
 				apt-get -yf install xserver-xorg-video-s3virge
 				VerifyExitCode "Install VIA S3 Virge Driver"
-				if [[ "$FirstBoot" == "false" ]];
-					then reboot
-				fi
 			fi ;;
                 esac
 
