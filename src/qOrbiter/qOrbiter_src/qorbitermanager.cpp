@@ -91,7 +91,7 @@ qorbiterManager::qorbiterManager(QDeclarativeView *view, QObject *parent) :
     appHeight = qorbiterUIwin->height() ;
     appWidth = qorbiterUIwin->width() ;
 
-    qorbiterUIwin->setResizeMode(QDeclarativeView::SizeRootObjectToView);
+   // qorbiterUIwin->setResizeMode(QDeclarativeView::SizeRootObjectToView);
 
     qorbiterUIwin->rootContext()->setContextProperty("appH", appHeight);
     qorbiterUIwin->rootContext()->setContextProperty("appW", appWidth);
@@ -1596,16 +1596,21 @@ void qorbiterManager::checkOrientation(QSize)
     if(qorbiterUIwin->height() < qorbiterUIwin->width())
     {
         //setDceResponse("wide");
-        appHeight = qorbiterUIwin->height() ;
-        appWidth = qorbiterUIwin->width() ;
+        appHeight = qorbiterUIwin->window()->rect().height();
+        appWidth = qorbiterUIwin->window()->rect().width() ;
+        qorbiterUIwin->rootContext()->setContextProperty("appH", appHeight);
+        qorbiterUIwin->rootContext()->setContextProperty("appW", appWidth);
         setOrientation(false);
     }
     else
     {
-        appHeight = qorbiterUIwin->height() ;
-        appWidth = qorbiterUIwin->width() ;
+        appHeight = qorbiterUIwin->window()->rect().height();
+        appWidth = qorbiterUIwin->window()->rect().width() ;
+        qorbiterUIwin->rootContext()->setContextProperty("appH", appHeight);
+        qorbiterUIwin->rootContext()->setContextProperty("appW", appWidth);
         setOrientation( true);
     }
+    qDebug() << qorbiterUIwin->window()->rect().size();
     setDceResponse("orientation change");
 }
 
