@@ -10,7 +10,7 @@ Item {
     id: item
     width:appW
     height:appH
-    focus:true
+    //focus:true
     signal close()
     signal changeScreen(string s)
     signal setupStart(int x, string y)

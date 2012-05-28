@@ -1,5 +1,6 @@
 // import QtQuick 1.0 // to target S60 5th Edition or Maemo 5
 import QtQuick 1.1
+import "../js/ComponentLoader.js" as MyJs
 
 
 Rectangle {
@@ -25,6 +26,7 @@ Rectangle {
             id:lightsTect
             height: buttonHeight
             width: buttonWidth
+            property bool popEnabled: false
             color: "transparent"
             Text {
                 id: lLabel
@@ -36,7 +38,15 @@ Rectangle {
             MouseArea{
                 anchors.fill: lightsTect
                 hoverEnabled: true
+                onEntered: { console.log("Testing 125")
+                    if(!parent.popEnabled)
+                    {
+                    var model = currentRoomLights
+                    MyJs.createScenarioBox(model, 100, 400, lightsTect )
+                    }
 
+                }
+                onClicked: console.log("testing again")
             }
         }
 

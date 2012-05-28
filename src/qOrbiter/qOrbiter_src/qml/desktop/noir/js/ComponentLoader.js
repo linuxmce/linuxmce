@@ -207,3 +207,46 @@ function finishDynamicObject()
 {
     dynamic_component_sprite = dynamic_component.createObject(parent_screen);
 }
+
+//dynamic scenarios
+var scenarioComponent
+var modelToSet
+var scenarioWidth
+var scenarioHeight
+var parentObject
+
+function createScenarioBox(model, width, height, parent){
+    console.log("creating dynamic scenarios model")
+    modelToSet = model
+    scenarioWidth = width
+    scenarioHeight = height
+    parentObject = parent
+    scenarioComponent = Qt.createComponent("../components/ScenarioPopup.qml");
+
+
+    if ( scenarioComponent.status === Component.Error) {
+        // Error Handling
+        console.log("Error in "+ "Scenario Popup" +" object")
+    }
+    else if ( scenarioComponent.status === Component.loading)
+    {
+        scenarioComponent.statusChanged.connect(finishScenarioBox())
+    }
+    else if ( scenarioComponent.status === Component.Ready)
+    {
+        var  scenarioSprite = scenarioComponent.createObject(parent, {"componentHeight":scenarioHeight, "componentWidth":scenarioWidth, "scenarioModel":modelToSet});
+        modelToSet = null
+        scenarioWidth = null
+        scenarioHeight = null
+        parentObject = null
+    }
+}
+
+function finishScenarioBox(){
+
+var  scenarioSprite = scenarioComponent.createObject(parent, {"componentHeight":scenarioHeight, "componentWidth":scenarioWidth, "scenarioModel":modelToSet});
+    modelToSet = null
+    scenarioWidth = null
+    scenarioHeight = null
+    parentObject = null
+}

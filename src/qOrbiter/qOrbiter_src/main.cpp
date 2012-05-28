@@ -47,6 +47,7 @@ Q_IMPORT_PLUGIN(UIKit)
 #include <contextobjects/playlistclass.h>
 #include <contextobjects/timecodemanager.h>
 
+
 //these includes will be made into plugins
 #include "plugins/GoogleWeather/googleweather.h"
 
