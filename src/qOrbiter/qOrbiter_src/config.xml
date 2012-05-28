@@ -5,7 +5,7 @@
     <externalip id="" />
     <device id="-1"/>
     <routeraddress id="dcerouter"/>
-    <skin id="noir"/>
+    <skin id="default"/>
     <enablescreensavermode id="false"/>
     <defaultview id="flat"/>
     <phone id="false"/>

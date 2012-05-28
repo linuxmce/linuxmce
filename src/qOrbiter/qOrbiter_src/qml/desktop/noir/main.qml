@@ -22,9 +22,7 @@ Item {
     function checkLayout()
     {
         console.log("c++ slot orientation changed")
-        item.width = appW
-        item.height = appH
-        console.log(appW)
+        console.log(appW+" x " + appH)
         }
 
 
