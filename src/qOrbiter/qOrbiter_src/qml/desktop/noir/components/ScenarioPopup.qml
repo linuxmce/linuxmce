@@ -15,7 +15,7 @@ Rectangle {
 
     Timer{
         id:closeTimer
-        interval: 2500
+        interval: 750
         triggeredOnStart: false
         running: true
         onTriggered: {

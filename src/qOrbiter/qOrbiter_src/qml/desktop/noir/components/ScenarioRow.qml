@@ -36,17 +36,15 @@ Rectangle {
                 font.pixelSize: scenarioFontSize
             }
             MouseArea{
-                anchors.fill: lightsTect
+                anchors.fill: parent
                 hoverEnabled: true
-                onEntered: { console.log("Testing 125")
+                onEntered: {
                     if(!parent.popEnabled)
                     {
-                    var model = currentRoomLights
-                    MyJs.createScenarioBox(model, 100, 400, lightsTect )
-                    }
 
+                    MyJs.createScenarioBox(currentRoomLights, 100, 400, parent )
+                    }
                 }
-                onClicked: console.log("testing again")
             }
         }
 
@@ -55,12 +53,24 @@ Rectangle {
             height: buttonHeight
             width: buttonWidth
             color: "transparent"
+            property bool popEnabled:false
             Text {
                 id: mLabel
                 text: qsTr("Media")
                 anchors.centerIn: parent
                 color: "white"
                 font.pixelSize: scenarioFontSize
+            }
+            MouseArea{
+                anchors.fill: parent
+                hoverEnabled: true
+                onEntered: {
+                    if(!parent.popEnabled)
+                    {
+
+                    MyJs.createScenarioBox(currentRoomMedia, 100, 400, parent )
+                    }
+                }
             }
         }
 
@@ -69,12 +79,24 @@ Rectangle {
             height: buttonHeight
             width: buttonWidth
             color: "transparent"
+            property bool popEnabled:false
             Text {
                 id: cLabel
                 text: qsTr("Climate")
                 anchors.centerIn: parent
                 color: "white"
                 font.pixelSize: scenarioFontSize
+            }
+            MouseArea{
+                anchors.fill: parent
+                hoverEnabled: true
+                onEntered: {
+                    if(!parent.popEnabled)
+                    {
+
+                    MyJs.createScenarioBox(currentRoomClimate, 100, 400, parent )
+                    }
+                }
             }
         }
 
@@ -83,6 +105,7 @@ Rectangle {
             height: buttonHeight
             width: buttonWidth
             color: "transparent"
+            property bool popEnabled:false
             Text {
                 id: sLabel
                 text: qsTr("Security")
@@ -91,6 +114,17 @@ Rectangle {
                 font.family: "Nimbus Sans L"
                 font.pixelSize: scenarioFontSize
             }
+            MouseArea{
+                anchors.fill: parent
+                hoverEnabled: true
+                onEntered: {
+                    if(!parent.popEnabled)
+                    {
+
+                    MyJs.createScenarioBox(currentRoomSecurity, 100, 400, parent )
+                    }
+                }
+            }
         }
 
         Rectangle{
@@ -98,6 +132,7 @@ Rectangle {
             height: buttonHeight
             width: buttonWidth
             color: "transparent"
+            property bool popEnabled:false
             Text {
                 id: tLabel
                 text: qsTr("Telecom")
@@ -105,6 +140,17 @@ Rectangle {
                 color: "white"
                 font.family: "Nimbus Sans L"
                 font.pixelSize: scenarioFontSize
+            }
+            MouseArea{
+                anchors.fill: parent
+                hoverEnabled: true
+                onEntered: {
+                    if(!parent.popEnabled)
+                    {
+
+                    MyJs.createScenarioBox(currentRoomTelecom, 100, 400, parent )
+                    }
+                }
             }
         }
 
