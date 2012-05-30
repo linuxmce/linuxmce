@@ -352,21 +352,22 @@ UpdateOrbiterDimensions () {
 Video_Driver_Detection () {
 	# Check if any driver is installed. If not, check what hardware is in the box, and install the relevant driver using
 	# the binary drivers
-	DriverInstalled=0
-	driverConfig=none
-	grep "Driver" /etc/X11/xorg.conf |grep -v "keyboard"| grep -v "#" | grep -v "vesa"|grep -v "mouse"|grep -vq "kbd" && DriverInstalled=1
+	DriverInstalled="0"
+	driverConfig="none"
+	grep "Driver" /etc/X11/xorg.conf |grep -v "keyboard"| grep -v "#" | grep -v "vesa"|grep -v "mouse"|grep -vq "kbd" && DriverInstalled="1"
 	# Check if we have nVidia or ATI cards in here, and specify proper config programs and commandline options.
-	if [[ $DriverInstalled -eq 0 ]]; then
-		driverConfig=none
-		lspci|grep nVidia|grep "VGA compatible controller" -q && driverConfig=nvidia-xconfig
-		if [[ $driverConfig == nvidia-xconfig ]]; then
-			driverLine = ""
+	if [[ "$DriverInstalled" -eq "0" ]]; then
+		if [[ "$Best_Video_Driver" == "nvidia" ]]; then 
+			driverConfig="nvidia-xconfig"
+			driverLine=""
 		fi
-		if [[ $driverConfig == none ]]; then
-			lspci|grep ATI|grep -vi Non-VGA|grep VGA -q && driverConfig=aticonfig
-		fi
-		if [[ $driverConfig == aticonfig ]]; then
+		if [[ "$Best_Video_Driver" == "fglrx" ]]; then 
+			driverConfig="aticonfig"
 			driverLine="--initial"
+		fi
+		if [[ "$driverConfig" == "none" ]]; then
+			driverConfig="Xorg"
+			driverLine="-configure"
 		fi
 	fi
 	
