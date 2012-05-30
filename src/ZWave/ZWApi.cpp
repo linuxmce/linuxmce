@@ -1787,6 +1787,42 @@ std::string ZWApi::ZWApi::getDeviceList() {
 	return deviceList;
 }
 
+bool ZWApi::ZWApi::zwMultilevelSet(int node_id, int level, int duration, int instance) {
+	char mybuf[1024];
+
+	ZWNodeMapIt = ZWNodeMap.find(node_id);
+	if (ZWNodeMapIt != ZWNodeMap.end()) {
+			if (instance == 0) {
+				mybuf[0] = FUNC_ID_ZW_SEND_DATA;
+				mybuf[1] = node_id;
+				mybuf[2] = 3;
+				mybuf[3] = COMMAND_CLASS_SWITCH_MULTILEVEL;
+				mybuf[4] = SWITCH_MULTILEVEL_SET;
+				mybuf[5] = level;
+				mybuf[6] = duration;
+				mybuf[7] = TRANSMIT_OPTION_ACK | TRANSMIT_OPTION_AUTO_ROUTE;
+				sendFunction( mybuf , 8, REQUEST, 1);
+			} else {
+				mybuf[0] = FUNC_ID_ZW_SEND_DATA;
+				mybuf[1] = node_id;
+				mybuf[2] = 6;
+				mybuf[3] = COMMAND_CLASS_MULTI_INSTANCE;
+				mybuf[4] = MULTI_INSTANCE_CMD_ENCAP;
+				mybuf[5] = instance;
+				mybuf[6] = COMMAND_CLASS_SWITCH_MULTILEVEL;
+				mybuf[7] = SWITCH_MULTILEVEL_SET;
+				mybuf[8] = level;
+				mybuf[9] = duration;
+				mybuf[10] = TRANSMIT_OPTION_ACK | TRANSMIT_OPTION_AUTO_ROUTE;
+				sendFunction( mybuf , 11, REQUEST, 1);
+
+			}
+
+	}
+
+	return true;
+}
+
 bool ZWApi::ZWApi::zwBasicSet(int node_id, int level, int instance) {
 	char mybuf[1024];
 

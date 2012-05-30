@@ -531,6 +531,9 @@ namespace ZWApi {
 	// used by the ZWave DCE device to call BASIC SET class command
 	bool zwBasicSet(int node_id, int level, int instance);
 
+	// multilevel command class v2
+	bool zwMultilevelSet(int node_id, int level, int duration, int instance);
+
 	// get the association list for a specific group from a device
 	bool zwAssociationGet(int node_id, int group);
 	bool zwAssociationSet(int node_id, int group, int target_node_id);

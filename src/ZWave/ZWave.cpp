@@ -122,7 +122,7 @@ void ZWave::ReceivedCommandForChild(DeviceData_Impl *pDeviceData_Impl,string &sC
 	// TODO: use instance id in commands below
 	if (node_id > 0 && node_id <= 233) {
 		sCMD_Result = "OK";
-		int level,temp,fan;
+		int level,duration,temp,fan;
 		string heat;
 		switch (pMessage->m_dwID) {
 			case COMMAND_Generic_On_CONST:
@@ -137,8 +137,16 @@ void ZWave::ReceivedCommandForChild(DeviceData_Impl *pDeviceData_Impl,string &sC
 				;;
 			case COMMAND_Set_Level_CONST:
 				level = atoi(pMessage->m_mapParameters[COMMANDPARAMETER_Level_CONST].c_str());
-				LoggerWrapper::GetInstance()->Write(LV_ZWAVE,"SET LEVEL RECEIVED FOR CHILD %d, level: %d",node_id,level);
-				myZWApi->zwBasicSet(node_id,level>99?99:level,instance_id);
+				duration = 0;
+				// duration = atoi(pMessage->m_mapParameters[COMMANDPARAMETER_Duration_CONST].c_str());
+				if (duration) {
+					LoggerWrapper::GetInstance()->Write(LV_ZWAVE,"SET LEVEL RECEIVED FOR CHILD %d, level: %d, duration: %d",node_id,level,duration);
+					myZWApi->zwMultilevelSet(node_id,level>99?99:level,duration,instance_id);
+	
+				} else {
+					LoggerWrapper::GetInstance()->Write(LV_ZWAVE,"SET LEVEL RECEIVED FOR CHILD %d, level: %d",node_id,level);
+					myZWApi->zwBasicSet(node_id,level>99?99:level,instance_id);
+				}
 				break;
 				;;
 			case COMMAND_Set_Temperature_CONST:
