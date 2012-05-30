@@ -18,7 +18,7 @@ function get_keyboard_codes_id($dbADO)
 }
 
 $keyboard_codes = get_keyboard_codes_id($dbADO);
-$js_case = '';
+$js_case = "\n";
 
 $keyboard_codes[38]=1;  // up
 $keyboard_codes[40]=2;  // down
@@ -30,7 +30,7 @@ $keyboard_codes[27]=11; // escape
 
 
 foreach ($keyboard_codes as $code => $command_key)
-	$js_case .= "case $code: command_to_send = $command_key; break;";
+	$js_case .= "\t\tcase $code: command_to_send = $command_key; break;\n";
 
 $sendKeyJs='
 function sendKey(event)
@@ -56,13 +56,16 @@ function sendKey(event)
 
 		
 	switch(key_code)
-	{
-		'.$js_case.'
+	{'.$js_case.'
 		default: command_to_send = 0; break;
 	}
 
 	if (command_to_send != 0)
+	{
 		DoCmd("PLUTO_KEY " + command_to_send);
+		return false;
+	}
+	return true;
 }
 ';
 

@@ -101,6 +101,8 @@ function PageLoaded(theDeviceNumber)
 
 	$("#screen").load(OnPageLoaded);
 	$("#screen").error(OnPageLoadError);
+
+	$(document).keydown(sendKey);
 }
 
 function OnPageLoaded()
