@@ -109,6 +109,7 @@
 #define GENERIC_TYPE_THERMOSTAT                         0x08
 #define GENERIC_TYPE_WINDOW_COVERING                    0x09
 #define GENERIC_TYPE_REPEATER_SLAVE                     0x0F
+
 #define GENERIC_TYPE_SWITCH_BINARY                      0x10
 
 #define GENERIC_TYPE_SWITCH_MULTILEVEL                  0x11
@@ -226,6 +227,7 @@
 #define ASSOCIATION_REMOVE				0x04
 
 #define COMMAND_CLASS_CONFIGURATION			0x70
+#define CONFIGURATION_GET				0x05
 #define CONFIGURATION_SET				0x04
 
 #define COMMAND_CLASS_MANUFACTURER_SPECIFIC		0x72
@@ -305,6 +307,11 @@
 #define SIMPLE_AV_CONTROL_SET_PROPERTIES1_RESERVED_SHIFT 0x03
 
 #define COMMAND_CLASS_SWITCH_BINARY			0x25
+#define SWITCH_BINARY_VERSION				0x1
+#define SWITCH_BINARY_GET				0x2
+#define SWITCH_BINARY_REPORT				0x3
+#define SWITCH_BINARY_SET				0x01
+
 #define COMMAND_CLASS_SWITCH_TOGGLE_BINARY		0x28
 #define COMMAND_CLASS_SWITCH_TOGGLE_MULTILEVEL		0x29
 #define COMMAND_CLASS_THERMOSTAT_FAN_MODE		0x44
@@ -555,6 +562,7 @@ namespace ZWApi {
 
 	// configuration_set
 	bool zwConfigurationSet(int node_id, int parameter, int value, int size);
+	bool zwConfigurationGet(int node_id, int parameter);
 
 	// wakeup set
 	bool zwWakeupSet(int node_id, int value, bool multi);

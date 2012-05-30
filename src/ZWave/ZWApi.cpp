@@ -1181,6 +1181,11 @@ void *ZWApi::ZWApi::decodeFrame(char *frame, size_t length) {
 
 							
 						}
+					case COMMAND_CLASS_SWITCH_BINARY:
+						if ((unsigned char)frame[6] == SWITCH_BINARY_SET) {
+							DCE::LoggerWrapper::GetInstance()->Write(LV_ZWAVE,"COMMAND_CLASS_SWITCH_BINARY:SWITCH_BINARY_SET received from node %d value %d",(unsigned char)frame[3],(unsigned char)frame[7]);
+						}
+						
 					case COMMAND_CLASS_CLOCK:
 						if ((unsigned char)frame[6] == CLOCK_GET) {
 							DCE::LoggerWrapper::GetInstance()->Write(LV_ZWAVE,"COMMAND_CLASS_CLOCK:CLOCK_GET received from node %d",(unsigned char)frame[3]);
@@ -1981,6 +1986,32 @@ bool ZWApi::ZWApi::zwRemoveFailedNodeId(int nodeid) {
 
 	return true;
 }
+bool ZWApi::ZWApi::zwConfigurationGet(int node_id,int parameter) {
+        char mybuf[1024];
+        int len = 0;
+
+        mybuf[0] = FUNC_ID_ZW_SEND_DATA;
+        mybuf[1] = node_id;
+        mybuf[2] = 3;
+        mybuf[3] = COMMAND_CLASS_CONFIGURATION;
+        mybuf[4] = CONFIGURATION_GET;
+        mybuf[5] = parameter; // parameter number
+        mybuf[6] = TRANSMIT_OPTION_ACK | TRANSMIT_OPTION_AUTO_ROUTE;
+
+        if (zwIsSleepingNode(node_id)) {
+
+                DCE::LoggerWrapper::GetInstance()->Write(LV_ZWAVE, "Postpone Configuration Get - device is not always listening");
+                sendFunctionSleeping(node_id, mybuf , 7, REQUEST, 1);
+
+        } else {
+                DCE::LoggerWrapper::GetInstance()->Write(LV_ZWAVE, "Running Configuration Get");
+                sendFunction( mybuf , 7, REQUEST, 1);
+
+        }
+
+        return true;
+}
+
 
 bool ZWApi::ZWApi::zwConfigurationSet(int node_id,int parameter,int value, int size) {
 	char mybuf[1024];

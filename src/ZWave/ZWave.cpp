@@ -396,7 +396,9 @@ void ZWave::CMD_Set_Config_Param(int iValue,int iSize,int iNodeID,int iParameter
 //<-dceag-c841-e->
 {
 	LoggerWrapper::GetInstance()->Write(LV_ZWAVE, "ZWave::CMD_Set_Config_Param: Nodeid: %d Parameter: %d Value: %d",iNodeID,iParameter_ID,iValue);
-	if (iSize) {
+	if (iSize==-1) {
+		myZWApi->zwConfigurationGet(iNodeID,iParameter_ID);
+	} else if(iSize > 0) {
 		myZWApi->zwConfigurationSet(iNodeID,iParameter_ID,iValue,iSize);
 	} else {	
 		myZWApi->zwConfigurationSet(iNodeID,iParameter_ID,iValue,0);
