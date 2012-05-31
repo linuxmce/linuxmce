@@ -505,29 +505,35 @@ FindVideoDriver () {
  
 	case "$chip_man" in 
 		NVIDIA)
-				prop_driver="nvidia" ;;
+			prop_driver="nvidia" ;;
 		ATI)
-                        	prop_driver="fglrx"
+			prop_driver="fglrx"
                         if echo "$vga_pci" | grep -Ei '((R.)(2|3|4|5|6|7)|(9|X|ES)(1|2?)([0-9])(5|0)0|Xpress)'; then
-                                prop_driver="radeon"; fi ;;
+                                prop_driver="radeon" 
+			fi ;;
 
 		INTEL)
                         prop_driver="intel"
                         if echo $vga_pci | grep "i740"; then
-                                prop_driver="i740"; fi
+                                prop_driver="i740"
+			fi
                         if echo $vga_pci | grep "i128"; then
-                                prop_driver="i128"; fi 
+                                prop_driver="i128"
+			fi 
 			if echo $vga_driver | grep "mach"; then
-				prop_driver="mach64"; fi ;;
+				prop_driver="mach64"
+			fi ;;
 
 		VIA)
                         prop_driver="openchrome" ;
 			if echo $vga_pci | grep -i "Savage"; then
-				prop_driver="savage"; fi
+				prop_driver="savage"
+			fi
 			#if echo $vga_pci | grep -i "s3"; then
 				#prop_driver="via"; fi 
 			if echo $vga_pci | grep -i "virge"; then
-                               	prop_driver="virge"; fi ;;
+                               	prop_driver="virge"
+			fi ;;
 		*)
 			prop_driver="fbdev" ;;
         esac
@@ -629,7 +635,7 @@ CheckVideoDriver () {
 	online_mismatch="false"
 	if [[ -f /etc/X11/xorg.conf ]]; then
 		# TODO figure out a better way to isolate the video driver in the xorg.conf list of "Driver" options
-        	cur_driver=$(grep "Driver" /etc/X11/xorg.conf | grep -Eo '(nvidia|nouveau|radeon|fglrx|savage|openchrome|via|virge|intel|i740|i128|fbdev)')
+        	cur_driver=$(grep "Driver" /etc/X11/xorg.conf | grep -Eo '(nvidia|nouveau|radeon|fglrx|savage|openchrome|via|virge|intel|i740|i128|mach64|fbdev)')
 		if [[ "$prop_driver" != "$cur_driver" ]] &&  [[ -z $online ]]; then
 			offline_mismatch="true"
 		elif [[ "$prop_driver" != "$cur_driver" ]] && [[ -n $online ]]; then
