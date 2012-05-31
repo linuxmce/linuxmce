@@ -501,17 +501,17 @@ FindVideoDriver () {
 		if [[ "$gpus" -gt "1" ]]; then 
 			vga_pci=$(echo "$vga_pci" | awk 'NR==2') 
 		fi 
-	chip_man=$(echo "$vga_pci" | grep -Eio '( ATI | VIA | nVidia | Intel )' | tr -s '[:lower:]' '[:upper:]' | sed -e 's/ //g')
+	chip_man=$(echo "$vga_pci" | grep -Eiwo '(ATI|VIA|nVidia|Intel)' | tr -s '[:lower:]' '[:upper:]')
  
 	case "$chip_man" in 
-                NVIDIA)
+		NVIDIA)
 				prop_driver="nvidia" ;;
-                ATI)
+		ATI)
                         	prop_driver="fglrx"
                         if echo "$vga_pci" | grep -Ei '((R.)(2|3|4|5|6|7)|(9|X|ES)(1|2?)([0-9])(5|0)0|Xpress)'; then
                                 prop_driver="radeon"; fi ;;
 
-                INTEL)
+		INTEL)
                         prop_driver="intel"
                         if echo $vga_pci | grep "i740"; then
                                 prop_driver="i740"; fi
@@ -520,7 +520,7 @@ FindVideoDriver () {
 			if echo $vga_driver | grep "mach"; then
 				prop_driver="mach64"; fi ;;
 
-                VIA)
+		VIA)
                         prop_driver="openchrome" ;
 			if echo $vga_pci | grep -i "Savage"; then
 				prop_driver="savage"; fi
