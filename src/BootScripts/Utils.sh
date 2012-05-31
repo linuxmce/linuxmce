@@ -600,8 +600,8 @@ InstallVideoDriver () {
 				VerifyExitCode "Install VIA Savage Driver"
 			fi ;;
 		via)
-			if ! PackageIsInstalled xserver-xorg-video-s3; then 
-				apt-get -yf install xserver-xorg-video-s3
+			if ! PackageIsInstalled xserver-xorg-video-via; then 
+				apt-get -yf install xserver-xorg-video-via
 				VerifyExitCode "Install VIA S3 Driver"
 			fi ;;
 		virge)
@@ -669,11 +669,23 @@ CheckVideoDriver () {
 				apt-get -y install --reinstall libgl1-mesa-glx libgl1-mesa-dri fglrx-modaliases --force-yes
 				dpkg-reconfigure xserver-xorg
 				apt-get -y install --reinstall xserver-xorg-core --force-yes
-				rm /etc/X11/xorg.conf
+				rm /etc/X11/xorg.con*
 				reboot
 			elif [[ $cur_driver == "wrongnv" ]]; then
 				StatusMessage "Removing old nVidia driver"
-				apt-get -yf remove nvidia* nouveau --force-yes
+				apt-get -yf remove --purge nvidia* nouveau --force-yes
+				rm /etc/X11/xorg.con*
+				reboot
+			elif [[ $cur_driver == "nvidia" ]]; then
+				StatusMessage "Removing old nVidia driver"
+				apt-get -yf remove --purge nvidia* --force-yes
+				rm /etc/X11/xorg.con*
+				reboot
+			elif [[ $cur_driver == "via" ]]; then
+				StatusMessage "Removing old VIA driver"
+				apt-get -yf remove --purge xserver-xorg-video-via --force-yes
+				rm /etc/X11/xorg.con*
+				reboot
 			fi
 		
 			# If there is an xorg, but the driver does not match best selection, install driver and run AVWizard
