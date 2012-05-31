@@ -20,8 +20,8 @@ Modeline_640x480_60='"640x480" 25.18 640 656 752 800 480 490 492 525'
 
 ConfigFile="/etc/X11/xorg.conf"
 Output="VGA"
-vga_pci=$(lspci | grep "VGA")
-gpus=$(echo "$vga_pci" | sort -u | wc -l)
+vga_pci=$(lspci | grep ' VGA ')
+gpus=$(echo "$vga_pci" | wc -l)
 bus_id=$(echo "$vga_pci" | awk 'NR==2' | while IFS=':. ' read -r tok1 tok2 tok3 rest; do printf '%2s %2s %s\n' "$((16#$tok1))":"$((16#$tok2))":"$((16#$tok3))" | sed -e 's/ //g'; done)
 
 DEVICECATEGORY_Video_Cards=125
@@ -321,14 +321,14 @@ fi
 EnsureResolutionVariables
 DisplayDriver=$(GetVideoDriver)
 if [[ -n "$ForceVESA" ]]; then
-	DisplayDriver=vesa
+	DisplayDriver="fbdev"
 fi
 #if [[ "$DisplayDriver" == viaprop ]]; then
 #	DisplayDriver=via
 #fi
-if [[ "$DisplayDriver" == intel ]]; then
+if [[ "$DisplayDriver" == "intel" ]]; then
 	. /usr/pluto/bin/X-IntelSpecificFunctions.sh
-elif [[ "$DisplayDriver" == nvidia ]]; then
+elif [[ "$DisplayDriver" == "nvidia" ]]; then
 	. /usr/pluto/bin/X-nVidiaSpecificFunctions.sh
 #elif [[ "$DisplayDriver" == fglrx ]]; then
 #	. /usr/pluto/bin/X-ATISpecificFunction.sh
@@ -386,11 +386,11 @@ fi
 # Test detected display driver
 # Don't test if driver is vesa (assumption: always works) or current driver (assumption: already tested and works)
 # Doing this test last, to test all the changes, since the video driver (e.g. nvidia) may not work without some extra options that are set together with the resolution
-#if [[ "$DisplayDriver" != "$CurrentDisplayDriver" && "$DisplayDriver" != vesa ]] && [[ -n "$Defaults" || -n "$UpdateVideoDriver" ]]; then
-#       if [[ -z "$NoTest" ]] && ! TestXConfig "$Display" "$ConfigFile" && [[ -z "$ForceVESA" ]]; then
-#               "$0" "${OrigParams[@]}" --force-vesa --skiplock
-#               exit $?
-#       fi
-#fi
+if [[ "$DisplayDriver" != "$CurrentDisplayDriver" && "$DisplayDriver" != "fbdev" ]] && [[ -n "$Defaults" || -n "$UpdateVideoDriver" ]]; then
+	if [[ -z "$NoTest" ]] && ! TestXConfig "$Display" "$ConfigFile" && [[ -z "$ForceVESA" ]]; then
+		"0" "${OrigParams[@]}" --force-vesa --skiplock
+		exit $?
+	fi
+fi
 # ^^ 1004 testing - bad assumption that VESA always works due to dri module load which loads dynamically for VESA modules, dri severly kills the X session for AVWizard 
 # on nvidia cards - these lines break due to install from pluto-nvidia-video-drivers
