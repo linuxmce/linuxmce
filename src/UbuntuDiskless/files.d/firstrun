@@ -10,22 +10,17 @@ set -e
 File="/etc/rcS.d/S99firstrun"
 Content="#!/bin/bash
 trap 'rm -f $File' EXIT
-vga_pci=\$(lspci | grep "VGA")
-gpus=$(echo "\$vga_pci" | wc -l)
-	if [[ "\$gpus" -gt "1" ]]; then 
-		vga_pci=\$(echo "\$vga_pci" | awk 'NR==2') 
-	fi 
-
 apt-get update
 update-pciids
-
-if echo \$vga_pci | grep -qi 'nVidia'; then
-	apt-get -y -f install pluto-nvidia-video-drivers
-elif echo \$vga_pci | grep -i 'ATI' | grep -Evi '((R.)(2|3|4|5|6|7|8)|(9|X|ES)(1|2?)([0-9])(5|0)0|Xpress)'; then 
-	apt-get -y -f install fglrx
+. /usr/pluto/bin/Utils.sh
+CheckVideoDriver 
+sleep 5 
+if echo \"\$Best_Video_Driver\" | grep -Eq '(nvidia|fglrx|via|virge|savage)'; then 
+	reboot 
 fi
 "
-
-mkdir -p "${Parm_RootLocation}/$(dirname $File)"
+if ! [[ -d "${Parm_RootLocation}/$(dirname $File)" ]]; then
+	mkdir -p "${Parm_RootLocation}/$(dirname $File)"
+fi
 echo "$Content" > "${Parm_RootLocation}/${File}"
 chmod +x "${Parm_RootLocation}/${File}"
