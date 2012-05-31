@@ -501,7 +501,7 @@ FindVideoDriver () {
 		if [[ "$gpus" -gt "1" ]]; then 
 			vga_pci=$(echo "$vga_pci" | awk 'NR==2') 
 		fi 
-	chip_man=$(echo "$vga_pci" | grep -Eio '( ATI | VIA | nVidia | Intel )' | tr -s '[:lower:]' '[:upper:]' | sed -e 's/ //')
+	chip_man=$(echo "$vga_pci" | grep -Eio '( ATI | VIA | nVidia | Intel )' | tr -s '[:lower:]' '[:upper:]' | sed -e 's/ //g')
  
 	case "$chip_man" in 
                 NVIDIA)
@@ -529,7 +529,7 @@ FindVideoDriver () {
 			if echo $vga_pci | grep -i "virge"; then
                                	prop_driver="virge"; fi ;;
 		*)
-			prop_driver="fbdev"
+			prop_driver="fbdev" ;;
         esac
 }
 
