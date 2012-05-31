@@ -671,17 +671,17 @@ CheckVideoDriver () {
 				apt-get -y install --reinstall xserver-xorg-core --force-yes
 				rm /etc/X11/xorg.con*
 				reboot
-			elif [[ $cur_driver == "wrongnv" ]]; then
+			elif [[ "$cur_driver" == "wrongnv" ]]; then
 				StatusMessage "Removing old nVidia driver"
 				apt-get -yf remove --purge nvidia* nouveau --force-yes
 				rm /etc/X11/xorg.con*
 				reboot
-			elif [[ $cur_driver == "nvidia" ]]; then
+			elif [[ "$cur_driver" == "nvidia" ]]; then
 				StatusMessage "Removing old nVidia driver"
 				apt-get -yf remove --purge nvidia* --force-yes
 				rm /etc/X11/xorg.con*
 				reboot
-			elif [[ $cur_driver == "via" ]]; then
+			elif [[ "$cur_driver" == "via" ]]; then
 				StatusMessage "Removing old VIA driver"
 				apt-get -yf remove --purge xserver-xorg-video-via --force-yes
 				rm /etc/X11/xorg.con*
