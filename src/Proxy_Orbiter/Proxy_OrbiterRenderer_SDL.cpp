@@ -130,7 +130,7 @@ void Proxy_OrbiterRenderer_SDL::RefreshScreen(void *data)
 {
 	Proxy_Orbiter *pProxy_Orbiter = dynamic_cast<Proxy_Orbiter *>(OrbiterLogic());
 	pProxy_Orbiter->m_dequeCellXMLItems.clear();
-	pProxy_Orbiter->m_bRerenderScreen = true; //force full redraw
+	//pProxy_Orbiter->m_bRerenderScreen = true; //force full redraw
 
 	OrbiterRenderer::RefreshScreen(data);
 }
