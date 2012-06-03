@@ -1,3 +1,9 @@
+lmce-asterisk (0+0.3.2-1ubuntu2) lucid; urgency=low
+
+  * Some bug fixes
+
+ -- Serge Wagener <serge@linuxmce.org>  Sun, 03 Jun 2012 20:47:32 +0200
+
 lmce-asterisk (0+0.3.2-1ubuntu1) lucid; urgency=low
 
   * Adding primitive fax send support, this is work in progress
