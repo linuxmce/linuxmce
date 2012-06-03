@@ -113,6 +113,7 @@ Setup_AsoundConf()
 
 	SoundCard=$(GetDeviceData "$PK_Device" "$DEVICEDATA_Sound_Card"|cut -f2 -d";")
 	SoundCard=$(TranslateSoundCard "$SoundCard")
+	
 	if [[ -z "$SoundCard" ]]; then
 		SoundCard=0
 	fi
