@@ -499,7 +499,13 @@ FindVideoDriver () {
         prop_driver="fbdev"
 	gpus=$(echo "$vga_pci" | wc -l) 
 		if [[ "$gpus" -gt "1" ]]; then 
-			vga_pci=$(echo "$vga_pci" | awk 'NR==2') 
+			pci_id1=$(echo "$vga_pci" | head -1 | grep -o '\[....:....\]' | sed 's/.*\[//;s/\].*//')
+			gpu_module=$(lspci -nnv -d "$pci_id1" | grep "modules" | awk '{print $NF}')
+			vga_pci=$(echo "$vga_pci" | awk 'NR==2')
+			if ! grep "$gpu_module" /etc/modprobe.d/blacklist.conf; then
+				echo "# Blacklist of first GPU for dual GPU system." >> /etc/modprobe.d/blacklist.conf
+				echo "blacklist $gpu_module" >> /etc/modprobe.d/blacklist.conf
+			fi
 		fi 
 	chip_man=$(echo "$vga_pci" | grep -Eiwo '(ATI|VIA|nVidia|Intel)' | tr -s '[:lower:]' '[:upper:]')
  
@@ -508,7 +514,7 @@ FindVideoDriver () {
 			prop_driver="nvidia" ;;
 		ATI)
 			prop_driver="fglrx"
-                        if echo "$vga_pci" | grep -Ei '((R.)(2|3|4|5|6|7)|(9|X|ES)(1|2?)([0-9])(5|0)0|Xpress)'; then
+                        if echo "$vga_pci" | grep -Ei '((R.)([2-7])|(9|X|ES)(1|2?)([0-9])(5|0)0|Xpress)'; then
                                 prop_driver="radeon" 
 			fi ;;
 
