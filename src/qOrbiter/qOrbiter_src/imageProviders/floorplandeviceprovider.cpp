@@ -1,5 +1,5 @@
 #include "floorplandeviceprovider.h"
-#include <qdeclarative.h>
+#include <QtDeclarative/qdeclarative.h>
 
 FloorplanDeviceProvider::FloorplanDeviceProvider(qorbiterManager *ui): QDeclarativeImageProvider(QDeclarativeImageProvider::Pixmap), ui_reference(ui)
 {

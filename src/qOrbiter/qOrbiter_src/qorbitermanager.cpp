@@ -16,11 +16,11 @@
 */
 
 #include "qorbitermanager.h"
-#include <QDeclarativeProperty>
+#include <QtDeclarative/QDeclarativeProperty>
 #include <QFile>
 #include <QtXml/QtXml>
 #include <QProcess>
-#include <QDeclarativeEngine>
+#include <QtDeclarative/QDeclarativeEngine>
 #include <QApplication>
 #include <imageProviders/filedetailsimageprovider.h>
 

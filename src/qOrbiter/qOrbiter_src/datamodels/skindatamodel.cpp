@@ -1,8 +1,8 @@
 #include "skindatamodel.h"
 #include "qorbitermanager.h"
 
-#include <QDeclarativeComponent>
-#include <QDeclarativeEngine>
+#include <QtDeclarative/QDeclarativeComponent>
+#include <QtDeclarative/QDeclarativeEngine>
 #include <QUrl>
 
 SkinDataModel::SkinDataModel(QUrl &baseUrl, SkinDataItem* prototype, qorbiterManager *uiRef, QObject* parent): QAbstractListModel(parent), m_prototype(prototype)

@@ -36,9 +36,9 @@
 
 /*---qt includes----*/
 #include <QtGui>
-#include <QDeclarativeView>
-#include <qdeclarativecontext.h>
-#include <QDeclarativeItem>
+#include <QtDeclarative/QDeclarativeView>
+#include <QtDeclarative/qdeclarativecontext.h>
+#include <QtDeclarative/QDeclarativeItem>
 #include <QStringList>
 #include <QMainWindow>
 #include <QThread>

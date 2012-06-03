@@ -43,7 +43,7 @@
   I will try to note what is what, but i cant guarantee 100% accuracy at this time
   */
 
-#include <QDeclarativeItem>
+#include <QtDeclarative/QDeclarativeItem>
 #include <QTime>
 #include <QDebug>
 #ifdef __ANDROID__

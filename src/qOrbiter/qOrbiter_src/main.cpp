@@ -41,7 +41,8 @@ Q_IMPORT_PLUGIN(UIKit)
 #include "PlutoUtils/FileUtils.h"
 #include "PlutoUtils/StringUtils.h"
 #include "PlutoUtils/Other.h"
-#include <QDeclarativeEngine>
+#include <QtDeclarative/qdeclarativeengine.h>
+#include <QtDeclarative/qdeclarativecontext.h>
 #include <imageProviders/abstractimageprovider.h>
 #include <contextobjects/epgchannellist.h>
 #include <contextobjects/playlistclass.h>

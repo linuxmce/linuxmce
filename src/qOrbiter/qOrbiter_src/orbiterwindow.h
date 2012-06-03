@@ -2,8 +2,8 @@
 #define ORBITERWINDOW_H
 
 #include <QObject>
-#include <QDeclarativeView>
-#include <QDeclarativeContext>
+#include <QtDeclarative/QDeclarativeView>
+#include <QtDeclarative/QDeclarativeContext>
 #include <QVariant>
 #if GLENABLED
 #include <QtOpenGL/QGLWidget>

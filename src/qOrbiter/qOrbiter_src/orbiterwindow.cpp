@@ -21,11 +21,11 @@
 
 #include "orbiterwindow.h"
 #include <QObject>
-#include <QDeclarativeView>
-#include <qdeclarative.h>
+#include <QtDeclarative/QDeclarativeView>
+#include <QtDeclarative/qdeclarative.h>
 #include <contextobjects/existingorbiter.h>
 #include <QApplication>
-#include <QDeclarativeEngine>
+#include <QtDeclarative/QDeclarativeEngine>
 #include <QDir>
 
 #ifdef IOS

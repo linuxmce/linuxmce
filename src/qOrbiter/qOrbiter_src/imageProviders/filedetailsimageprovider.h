@@ -1,7 +1,7 @@
 #ifndef FILEDETAILSIMAGEPROVIDER_H
 #define FILEDETAILSIMAGEPROVIDER_H
 
-#include <QDeclarativeImageProvider>
+#include <QtDeclarative/QDeclarativeImageProvider>
 #include <QDebug>
 #include <QVariant>
 #include <contextobjects/filedetailsclass.h>

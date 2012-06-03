@@ -1,6 +1,6 @@
 #include "threadedsplash.h"
-#include <QDeclarativeView>
-#include <QDeclarativeContext>
+#include <QtDeclarative/QDeclarativeView>
+#include <QtDeclarative/QDeclarativeContext>
 
 
 

@@ -172,7 +172,7 @@ QMAKE_CXXFLAGS += -DUSE_LZO_DATAGRID
 
 INCLUDEPATH += ../../ ../../DCE/
 
-QT += webkit
+QT += webkit declarative
 
 macx{
     QT += xml
@@ -324,8 +324,8 @@ SOURCES += main.cpp \
 
 
 # Please do not modify the following two lines. Required for deployment.
-#include(qmlapplicationviewer/qmlapplicationviewer.pri)
-#qtcAddDeployment()
+include(qmlapplicationviewer/qmlapplicationviewer.pri)
+qtcAddDeployment()
 
 #    ../../DCE/*.h \
 #    ../../PlutoUtils/*.h \

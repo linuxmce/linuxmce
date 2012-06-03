@@ -1,7 +1,7 @@
 #ifndef THREADEDSPLASH_H
 #define THREADEDSPLASH_H
 #include <QObject>
-#include <QDeclarativeView>
+#include <QtDeclarative/QDeclarativeView>
 
 /*
   This class is an experiment in subclassing threading based on this page that corrects the docs on threads

@@ -1,7 +1,7 @@
 #ifndef TIMECODEMANAGER_H
 #define TIMECODEMANAGER_H
 
-#include <QDeclarativeItem>
+#include <QtDeclarative/QDeclarativeItem>
 #include <QtNetwork/QTcpSocket>
 #include <QFile>
 #include <QStringList>

@@ -5,9 +5,9 @@
   of keeping a link between the two, enabling datagrid images to be correlated to the right cells.
   */
 #include <QObject>
-#include <qdeclarative.h>
+#include <QtDeclarative/qdeclarative.h>
 #include <QModelIndex>
-#include <QDeclarativeImageProvider>
+#include <QtDeclarative/QDeclarativeImageProvider>
 #include <datamodels/listModel.h>
 #include <QImage>
 

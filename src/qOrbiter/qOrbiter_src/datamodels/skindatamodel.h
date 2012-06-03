@@ -6,7 +6,7 @@
 #include <datamodels/skindataitem.h>
 #include <QList>
 #include <QVariant>
-#include <QDeclarativeView>
+#include <QtDeclarative/QDeclarativeView>
 #include <QUrl>
 #include <qorbitermanager.h>
 

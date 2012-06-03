@@ -4,7 +4,7 @@
 #include <QObject>
 #include <QUrl>
 #include <QList>
-#include <QDeclarativeComponent>
+#include <QtDeclarative/QDeclarativeComponent>
 #include "skindataitem.h"
 
 class SkinDataModel;

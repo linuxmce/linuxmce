@@ -1,7 +1,7 @@
 #ifndef FLOORPLANDEVICEPROVIDER_H
 #define FLOORPLANDEVICEPROVIDER_H
 
-#include <QDeclarativeImageProvider>
+#include <QtDeclarative/QDeclarativeImageProvider>
 #include <datamodels/floorplanmodel.h>
 #include <qorbitermanager.h>
 

@@ -6,7 +6,7 @@
 #include <QImage>
 #include <QUrl>
 #include <QDebug>
-#include <QDeclarativeView>
+#include <QtDeclarative/QDeclarativeView>
 
 class SkinDataItem: public QObject
 {

@@ -7,7 +7,7 @@
 #define BASICIMAGEPROVIDER_H
 
 #include <QObject>
-#include <QDeclarativeImageProvider>
+#include <QtDeclarative/QDeclarativeImageProvider>
 #include <QDebug>
 #include <QVariant>
 #include <qorbitermanager.h>

@@ -5,7 +5,7 @@
 #include <QUrl>
 #include <QtNetwork/QtNetwork>
 #include <QtXml/QDomDocument>
-#include <QDeclarativeItem>
+#include <QtDeclarative/QDeclarativeItem>
 
 class gWeatherItem: public QObject
 {
