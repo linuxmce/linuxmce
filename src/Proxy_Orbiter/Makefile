@@ -62,6 +62,8 @@ LDLIBS = $(XTRALDLIBS) $(BASELDLIBS)
 whattodo:
 	@echo "type 'make bin', 'make so' or 'make all'"
 
+binary: bin
+
 all: bin so
 
 bin: Proxy_Orbiter
@@ -78,6 +80,10 @@ Proxy_Orbiter: $(sources:.cpp=.o)
 	$(CXX) -o $(MYNAME) $(call cpath,$+) $(LDFLAGS) $(LDLIBS)
 	cp $@ ../bin
 	./post_make.sh $@
+
+install:
+	mkdir -p $(DESTDIR)/usr/pluto/bin
+	cp Proxy_Orbiter $(DESTDIR)/usr/pluto/bin
 
 clean: clean-recursive
 	rm -f $(call cpath,$(sources:.cpp=.o) $(sources:.cpp=.d)) Proxy_Orbiter.bin Proxy_Orbiter.so >/dev/null
