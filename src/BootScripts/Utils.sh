@@ -509,6 +509,10 @@ FindVideoDriver () {
 				fi
 				echo "$gpu_modules" >> /etc/modprobe.d/blacklist.conf
 			fi
+			if ! [[ -f /etc/X11/xorg.conf ]]; then
+				Xorg -configure
+				cat /root/xorg.conf.new > /etc/X11/xorg.conf
+			fi
 		fi 
 	chip_man=$(echo "$vga_pci" | grep -Eiwo '(ATI|VIA|nVidia|Intel)' | tr -s '[:lower:]' '[:upper:]')
  
