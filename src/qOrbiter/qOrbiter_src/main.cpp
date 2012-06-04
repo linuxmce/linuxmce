@@ -517,33 +517,41 @@ int main(int argc, char* argv[])
 
         pqOrbiter->m_dwPK_Device = w->iPK_Device;
         pqOrbiter->m_sHostName = w->qs_routerip.toStdString();
+        qDebug() << "Initializing connection";
 
-        if ( pqOrbiter->initialize() == true )
+        if (pqOrbiter->routerCheck() == true)
         {
-            LoggerWrapper::GetInstance()->Write(LV_STATUS, "Connect OK");
-            pqOrbiter->CreateChildren();
-            if( bLocalMode )
-                pqOrbiter->RunLocalMode();
-            else
-            {
 
+
+            if ( pqOrbiter->initialize() == true )
+            {
+                LoggerWrapper::GetInstance()->Write(LV_STATUS, "Connect OK");
+                pqOrbiter->CreateChildren();
+                if( bLocalMode )
+                    pqOrbiter->RunLocalMode();
+                else
+                {
+
+                }
             }
         }
-        else
-        {
-            pqOrbiter->Disconnect();
-        }
-        a.exec();
+            else
+            {
+                qDebug() << "Connect Failed!";
+                pqOrbiter->Disconnect();
+            }
+            a.exec();
 
-        /*
+            /*
  if(pqOrbiter->m_RequestHandlerThread)
             pthread_join(pqOrbiter->m_RequestHandlerThread, NULL);  // This function will return when the device is shutting down
     */
-        if( pqOrbiter->m_bReload )
-            bReload=true;
+            if( pqOrbiter->m_bReload )
+                bReload=true;
 
-        a.quit();
-    }
+            a.quit();
+        }
+
 
     catch(string s)
     {

@@ -1406,6 +1406,7 @@ public slots:
     void extraButtons(QString button);
 
     void newOrbiter();
+    bool routerCheck();
 
     //operations
     void setMediaResponse(QString r) {mediaResponse = r; emit mediaResponseChanged();}
