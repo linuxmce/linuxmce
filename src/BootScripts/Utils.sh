@@ -501,16 +501,16 @@ FindVideoDriver () {
 		if [[ "$gpus" -gt "1" ]]; then 
 			pci_id1=$(echo $vga_pci | head -1 | grep -o '\[....:....\]' | sed 's/.*\[//;s/\].*//')
 			gpu_modules=$(lspci -nnv -d "$pci_id1" | grep "modules" | cut -d':' -f2 | sed 's/,/\n/g')
+			pci_id1=$(echo "$vga_pci" | head -1 |  sed 's/.*\[\(....:....\)\].*/\1/')
 			vga_pci=$(echo "$vga_pci" | awk 'NR==2')
-			if ! grep 'first GPUs modules'/etc/modprobe.d/blacklist.conf; then
-				echo "" >> /etc/modprobe.d/blacklist.conf
-				echo "# Block first GPUs modules for dual GPU system." >> /etc/modprobe.d/blacklist.conf
-			fi
-			for each in "$gpu_modules"; do 
-				if ! grep "$each" /etc/modprobe.d/blacklist.conf; then
-					echo "blacklist${each}" >> /etc/modprobe.d/blacklist.conf
+			gpu_modules=$(lspci -nnv -d "$pci_id1" | grep "modules" | cut -d':' -f2 | sed 's/ //' | awk 'BEGIN { while(getline < "/etc/modprobe.d/blacklist.conf") if ($1 == "blacklist") a[$2]; RS = "[,[:space:]]+" } !($0 in a) { printf "blacklist %s\n", $0 }')
+			if [[ -n "$gpu_modules" ]]; then
+				if ! grep 'first GPUs modules'/etc/modprobe.d/blacklist.conf; then
+					echo "" >> /etc/modprobe.d/blacklist.conf
+					echo "# Block first GPUs modules for dual GPU system." >> /etc/modprobe.d/blacklist.conf
 				fi
-			done
+				echo "$gpu_modules" >> /etc/modprobe.d/blacklist.conf
+			fi
 		fi 
 	chip_man=$(echo "$vga_pci" | grep -Eiwo '(ATI|VIA|nVidia|Intel)' | tr -s '[:lower:]' '[:upper:]')
  
