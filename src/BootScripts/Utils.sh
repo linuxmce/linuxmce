@@ -499,8 +499,6 @@ FindVideoDriver () {
         prop_driver="fbdev"
 	gpus=$(echo "$vga_pci" | wc -l) 
 		if [[ "$gpus" -gt "1" ]]; then 
-			pci_id1=$(echo $vga_pci | head -1 | grep -o '\[....:....\]' | sed 's/.*\[//;s/\].*//')
-			gpu_modules=$(lspci -nnv -d "$pci_id1" | grep "modules" | cut -d':' -f2 | sed 's/,/\n/g')
 			pci_id1=$(echo "$vga_pci" | head -1 |  sed 's/.*\[\(....:....\)\].*/\1/')
 			vga_pci=$(echo "$vga_pci" | awk 'NR==2')
 			gpu_modules=$(lspci -nnv -d "$pci_id1" | grep "modules" | cut -d':' -f2 | sed 's/ //' | awk 'BEGIN { while(getline < "/etc/modprobe.d/blacklist.conf") if ($1 == "blacklist") a[$2]; RS = "[,[:space:]]+" } !($0 in a) { printf "blacklist %s\n", $0 }')
