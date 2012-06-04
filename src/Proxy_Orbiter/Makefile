@@ -84,7 +84,9 @@ Proxy_Orbiter: $(sources:.cpp=.o)
 install:
 	mkdir -p $(DESTDIR)/usr/pluto/bin
 	cp Proxy_Orbiter $(DESTDIR)/usr/pluto/bin
-
+	cp configure_proxyorbiter.pl $(DESTDIR)/usr/pluto/bin
+	cp LaunchProxy_Orbiter.sh $(DESTDIR)/usr/pluto/bin
+	
 clean: clean-recursive
 	rm -f $(call cpath,$(sources:.cpp=.o) $(sources:.cpp=.d)) Proxy_Orbiter.bin Proxy_Orbiter.so >/dev/null
 
