@@ -77,10 +77,10 @@ WriteSipPhone()
 {
 		# If peer supports video, add needed codecs, else add audio only codecs
 	if [[ "$VideoSupport" == "1" ]]; then
-		codecs="g722;alaw;ulaw;h263p;h263;h264"
+		codecs="alaw;ulaw;h263p;h263;h264"
 		videosupported="yes"
 	else
-		codecs="g722;alaw;ulaw"
+		codecs="alaw;ulaw"
 		videosupported="no"
 	fi
 
@@ -384,10 +384,19 @@ switch => Realtime
 	context="ext-did"
 	line=$((100+$id))
 	LINESSQL="$LINESSQL INSERT INTO $DB_Extensions_Table (context,exten,priority,app,appdata) VALUES \
-	('$context','$phonenumber','1','Set','__FROM_DID=\${EXTEN}'), \
-	('$context','$phonenumber','2','Set','CALLERID(num)=\${CALLERID(name)}'), \
-	('$context','$phonenumber','3','Noop','Incoming call from \${CALLERID(num)}'), \
-	('$context','$phonenumber','4','Goto','custom-linuxmce,$line,1');"
+        ('$context','$phonenumber','1','Set','__FROM_DID=\${EXTEN}'), \
+        ('$context','$phonenumber','2','Set','PAI=\${SIP_HEADER(P-Asserted-Identity)}'),\
+        ('$context','$phonenumber','3','gotoif','(\$[\${LEN(\${PAI})} >= 9]?7)'), \
+        ('$context','$phonenumber','4','Noop','Incoming call from \${CALLERID(number)}'), \
+        ('$context','$phonenumber','5','Set','FAX_RX='), \
+        ('$context','$phonenumber','6','Goto','custom-linuxmce,$line,1'),\
+        ('$context','$phonenumber','7','noop','config p asserted id ${PAI}'),\
+        ('$context','$phonenumber','8','set','tmpcid=\${CUT(PAI,:,2)}'), \
+        ('$context','$phonenumber','9','Set','tmpcid=\${CUT(tmpcid,@,1)}'), \
+        ('$context','$phonenumber','10','Set','CALLERID(number)=\${tmpcid}'),\
+        ('$context','$phonenumber','11','Noop','Incoming call from \${CALLERID(number)}'),\
+        ('$context','$phonenumber','12','Set','FAX_RX='), \
+        ('$context','$phonenumber','13','Goto','custom-linuxmce,$line,1');"
 }
 
 WorkTheLines()
