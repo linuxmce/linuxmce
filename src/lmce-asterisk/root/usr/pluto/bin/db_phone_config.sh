@@ -77,10 +77,10 @@ WriteSipPhone()
 {
 		# If peer supports video, add needed codecs, else add audio only codecs
 	if [[ "$VideoSupport" == "1" ]]; then
-		codecs="alaw;ulaw;h263p;h263"
+		codecs="g722;alaw;ulaw;h263p;h263;h264"
 		videosupported="yes"
 	else
-		codecs="alaw;ulaw"
+		codecs="g722;alaw;ulaw"
 		videosupported="no"
 	fi
 
