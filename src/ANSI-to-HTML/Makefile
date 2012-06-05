@@ -6,3 +6,7 @@ all: ansi2html
 
 clean:
 	rm -f ansi2html
+
+install: 
+	mkdir -p /usr/pluto/bin
+	cp ansi2html $(DESTPATH)/usr/pluto/bin

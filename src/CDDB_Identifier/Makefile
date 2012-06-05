@@ -62,3 +62,8 @@ ifeq (,$(findstring clean, $(MAKECMDGOALS)))
 endif
 #<-dceag-mf-e->
 
+
+install: 
+	mkdir -p /usr/pluto/bin
+	cp CDDB_Identifier $(DESTPATH)/usr/pluto/bin
+	cp cddb_id.sh $(DESTPATH)/usr/pluto/bin

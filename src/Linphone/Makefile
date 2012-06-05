@@ -64,3 +64,8 @@ ifeq (,$(findstring clean, $(MAKECMDGOALS)))
 endif
 #<-dceag-mf-e->
 
+
+install: 
+	mkdir -p /usr/pluto/bin
+	cp Linphone $(DESTPATH)/usr/pluto/bin
+	cp Linphone_Wrapper.sh $(DESTPATH)/usr/pluto/bin

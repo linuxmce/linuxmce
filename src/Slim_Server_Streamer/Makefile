@@ -63,3 +63,8 @@ ifeq (,$(findstring clean, $(MAKECMDGOALS)))
 endif
 #<-dceag-mf-e->
 
+
+install: 
+	mkdir -p /usr/pluto/bin
+	cp Slim_Server_Streamer $(DESTPATH)/usr/pluto/bin
+	cp LaunchSlimServer.sh $(DESTPATH)/usr/pluto/bin

@@ -43,3 +43,10 @@ GAMEROM: GAMEROM.o GAMEROMMain.o
 
 clean:
 	rm -f UpdateMedia $(sources:.cpp=.o) 
+
+install: 
+	mkdir -p /etc/init.d
+	cp * $(DESTPATH)/etc/init.d
+	mkdir -p /usr/pluto/bin
+	cp UpdateMedia $(DESTPATH)/usr/pluto/bin
+	cp GAMEROM $(DESTPATH)/usr/pluto/bin

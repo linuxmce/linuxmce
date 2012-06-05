@@ -20,3 +20,8 @@ all: Main.o UpdateEntArea.o UpdateEntArea_Climate.o UpdateEntArea_Lighting.o Upd
 
 clean:
 	rm -f UpdateEntArea *.o
+
+install: 
+	mkdir -p /usr/pluto/bin
+	cp UpdateEntArea $(DESTPATH)/usr/pluto/bin
+	cp PurgeEntAreas.sql $(DESTPATH)/usr/pluto/bin

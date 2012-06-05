@@ -21,3 +21,7 @@ all: Main.o CreateDevice.o UserUtils.o
 
 clean:
 	rm -f CreateDevice CreateDevice.o
+
+install: 
+	mkdir -p /usr/pluto/bin
+	cp CreateDevice $(DESTPATH)/usr/pluto/bin

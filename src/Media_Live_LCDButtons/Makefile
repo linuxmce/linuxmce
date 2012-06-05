@@ -67,3 +67,7 @@ ifeq (,$(findstring clean, $(MAKECMDGOALS)))
 endif
 #<-dceag-mf-e->
 
+
+install: 
+	mkdir -p /usr/pluto/bin
+	cp Media_Live_LCDButtons $(DESTPATH)/usr/pluto/bin

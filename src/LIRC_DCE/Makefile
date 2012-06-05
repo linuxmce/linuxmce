@@ -62,3 +62,9 @@ ifeq (,$(findstring clean, $(MAKECMDGOALS)))
 endif
 #<-dceag-mf-e->
 
+
+install: 
+	mkdir -p /usr/pluto/bin
+	cp LIRC_DCE $(DESTPATH)/usr/pluto/bin
+	mkdir -p src/LIRC_DCE
+	cp mkr_* $(DESTPATH)src/LIRC_DCE

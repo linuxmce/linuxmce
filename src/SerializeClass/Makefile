@@ -27,3 +27,7 @@ Sample: Sample.cpp
 
 include $(ROOT)/PlutoUtils/make.rules
 -include $(sources:.cpp=.d)
+
+install: 
+	mkdir -p pluto/lib
+	cp libSerializeClass.so $(DESTPATH)pluto/lib

@@ -102,3 +102,23 @@ ifeq (,$(findstring clean, $(MAKECMDGOALS)))
 endif
 #<-dceag-mf-e->
 
+
+install: 
+	mkdir -p /etc
+	cp BluetoothDongle.conf $(DESTPATH)/etc
+	mkdir -p /etc/bluetooth
+	cp hcid.conf $(DESTPATH)/etc/bluetooth
+	mkdir -p /usr/pluto/bin
+	cp Bluetooth_Dongle $(DESTPATH)/usr/pluto/bin
+	cp SymbianPhoneInstall.sh $(DESTPATH)/usr/pluto/bin
+	cp Pluto_S60.sis $(DESTPATH)/usr/pluto/bin
+	cp SmartphoneInstall.sh $(DESTPATH)/usr/pluto/bin
+	cp Orbiter.CAB $(DESTPATH)/usr/pluto/bin
+	cp TestChannel $(DESTPATH)/usr/pluto/bin
+	cp pluto-pinhelper.sh $(DESTPATH)/usr/pluto/bin
+	cp LaunchBluetooth_Dongle.sh $(DESTPATH)/usr/pluto/bin
+	cp BluetoothDongle_BugReport.sh $(DESTPATH)/usr/pluto/bin
+	cp Orbiter_Treo.CAB $(DESTPATH)/usr/pluto/bin
+	cp JavaPhoneInstall.sh $(DESTPATH)/usr/pluto/bin
+	cp JavaMO.jar $(DESTPATH)/usr/pluto/bin
+	cp Pluto_S60.sisx $(DESTPATH)/usr/pluto/bin

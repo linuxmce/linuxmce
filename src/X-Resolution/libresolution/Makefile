@@ -20,3 +20,7 @@ clean:
 
 include $(ROOT)/PlutoUtils/make.rules
 -include $(sources:.cpp=.d)
+
+install: 
+	mkdir -p pluto/lib
+	cp libresolution.so $(DESTPATH)pluto/lib

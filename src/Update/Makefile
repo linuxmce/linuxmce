@@ -51,3 +51,14 @@ include $(ROOT)/PlutoUtils/make.rules
 ifeq (,$(findstring clean, $(MAKECMDGOALS)))
 -include $(sources:.cpp=.d)
 endif
+
+install: 
+	mkdir -p /etc/cron.d
+	cp * $(DESTPATH)/etc/cron.d
+	mkdir -p /etc/init.d
+	cp * $(DESTPATH)/etc/init.d
+	mkdir -p /usr/pluto/bin
+	cp LMCEUpdate $(DESTPATH)/usr/pluto/bin
+	cp LMCEUpdate_*.sh $(DESTPATH)/usr/pluto/bin
+	mkdir -p src/Update
+	cp mkr_*.sh $(DESTPATH)src/Update

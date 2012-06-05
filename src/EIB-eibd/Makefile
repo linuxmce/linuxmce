@@ -62,3 +62,11 @@ ifeq (,$(findstring clean, $(MAKECMDGOALS)))
 endif
 #<-dceag-mf-e->
 
+
+install: 
+	mkdir -p /etc/init
+	cp eibd.conf $(DESTPATH)/etc/init
+	mkdir -p /usr/pluto/bin
+	cp EIB $(DESTPATH)/usr/pluto/bin
+	mkdir -p src/EIB-eibd
+	cp mkr_*.sh $(DESTPATH)src/EIB-eibd

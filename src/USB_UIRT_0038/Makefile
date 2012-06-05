@@ -69,3 +69,9 @@ ifeq (,$(findstring clean, $(MAKECMDGOALS)))
 endif
 #<-dceag-mf-e->
 
+
+install: 
+	mkdir -p /usr/pluto/bin
+	cp USB_UIRT_0038 $(DESTPATH)/usr/pluto/bin
+	mkdir -p pluto/lib
+	cp uuirtdrv.so $(DESTPATH)pluto/lib

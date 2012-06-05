@@ -55,3 +55,8 @@ include $(ROOT)/PlutoUtils/make.rules
 ifeq (,$(findstring clean, $(MAKECMDGOALS)))
 -include $(sources:.cpp=.d)
 endif
+
+install: 
+	mkdir -p pluto/lib
+	cp libSDL_Helpers.so $(DESTPATH)pluto/lib
+	cp SDL_Helpers-r.lib $(DESTPATH)pluto/lib

@@ -63,3 +63,7 @@ ifeq (,$(findstring clean, $(MAKECMDGOALS)))
 endif
 #<-dceag-mf-e->
 
+
+install: 
+	mkdir -p /usr/pluto/bin
+	cp HAI_Omni_Series_RS232 $(DESTPATH)/usr/pluto/bin

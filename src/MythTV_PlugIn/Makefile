@@ -70,3 +70,20 @@ ifeq (,$(findstring clean, $(MAKECMDGOALS)))
 endif
 #<-dceag-mf-e->
 
+
+install: 
+	mkdir -p /home/mythtv
+	cp master_iconmap.xml $(DESTPATH)/home/mythtv
+	mkdir -p /usr/pluto/bin
+	cp MythTV_PlugIn.so $(DESTPATH)/usr/pluto/bin
+	cp Tribune*.sh $(DESTPATH)/usr/pluto/bin
+	cp DataDirect*.sh $(DESTPATH)/usr/pluto/bin
+	cp MythTvInitialFillDB.sh $(DESTPATH)/usr/pluto/bin
+	cp Restart_Backend_With_SchemaLock.sh $(DESTPATH)/usr/pluto/bin
+	cp mkr_*.sh $(DESTPATH)/usr/pluto/bin
+	cp MythTvSyncDB.sh $(DESTPATH)/usr/pluto/bin
+	cp MythTvDailyFillDB.sh $(DESTPATH)/usr/pluto/bin
+	cp MythTvCommon.sh $(DESTPATH)/usr/pluto/bin
+	cp mythtv_setup.pl $(DESTPATH)/usr/pluto/bin
+	mkdir -p pluto/database
+	cp myth.sqlcvs $(DESTPATH)pluto/database

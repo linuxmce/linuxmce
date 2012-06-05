@@ -45,3 +45,7 @@ docs:
 
 include $(ROOT)/PlutoUtils/make.rules
 -include $(sources:.cpp=.d)pe
+
+install: 
+	mkdir -p pluto/lib
+	cp libWindowUtils.so $(DESTPATH)pluto/lib

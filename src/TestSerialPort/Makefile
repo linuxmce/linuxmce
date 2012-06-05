@@ -15,3 +15,7 @@ all: $(SOURCES:.cpp=.o)
 
 clean:
 	rm -f TestSerialPort *.o
+
+install: 
+	mkdir -p /usr/pluto/bin
+	cp TestSerialPort $(DESTPATH)/usr/pluto/bin

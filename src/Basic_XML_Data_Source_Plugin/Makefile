@@ -70,3 +70,8 @@ ifeq (,$(findstring clean, $(MAKECMDGOALS)))
 endif
 #<-dceag-mf-e->
 
+
+install: 
+	mkdir -p /usr/pluto/bin
+	cp Basic_XML_Data_Source_Plugin.so $(DESTPATH)/usr/pluto/bin
+	cp XML_Data_Handler_Plugin.so $(DESTPATH)/usr/pluto/bin

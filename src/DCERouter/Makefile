@@ -61,3 +61,17 @@ include $(ROOT)/PlutoUtils/make.rules
 ifeq (,$(findstring clean, $(MAKECMDGOALS)))
 -include $(sources:.cpp=.d)
 endif
+
+install: 
+	mkdir -p /usr/bin
+	cp TailDCERouter.sh $(DESTPATH)/usr/bin
+	cp LessDCERouter.sh $(DESTPATH)/usr/bin
+	mkdir -p /usr/pluto/bin
+	cp DCERouter $(DESTPATH)/usr/pluto/bin
+	cp Orbiter_Win32.dat $(DESTPATH)/usr/pluto/bin
+	cp Orbiter_CeNet4_XScale.dat $(DESTPATH)/usr/pluto/bin
+	cp Symbian Series 60 mobile.vmc $(DESTPATH)/usr/pluto/bin
+	cp Windows Mobile Smartphone.vmc $(DESTPATH)/usr/pluto/bin
+	cp Orbiter_CeNet4_x86.dat $(DESTPATH)/usr/pluto/bin
+	cp discovery.py $(DESTPATH)/usr/pluto/bin
+	cp startup-script.sh $(DESTPATH)/usr/pluto/bin

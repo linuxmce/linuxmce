@@ -47,3 +47,7 @@ docs:
 
 include $(ROOT)/PlutoUtils/make.rules
 -include $(sources:.cpp=.d)
+
+install: 
+	mkdir -p pluto/lib
+	cp libPlutoUtils.so $(DESTPATH)pluto/lib

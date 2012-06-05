@@ -13,3 +13,8 @@ all: Main.o PlutoDHCP.o
 
 clean:
 	rm -f PlutoDHCP PlutoDHCP.o
+
+install: 
+	mkdir -p /usr/pluto/bin
+	cp PlutoDHCP $(DESTPATH)/usr/pluto/bin
+	cp PlutoDHCP.sh $(DESTPATH)/usr/pluto/bin

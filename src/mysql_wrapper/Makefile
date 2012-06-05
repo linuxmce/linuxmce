@@ -20,3 +20,7 @@ clean:
 
 include $(ROOT)/PlutoUtils/make.rules
 
+
+install: 
+	mkdir -p /usr/pluto/bin
+	cp mysql_wrapper $(DESTPATH)/usr/pluto/bin

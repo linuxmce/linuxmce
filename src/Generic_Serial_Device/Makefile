@@ -92,3 +92,8 @@ ifeq (,$(findstring clean, $(MAKECMDGOALS)))
 endif
 #<-dceag-mf-e->
 
+
+install: 
+	mkdir -p /usr/pluto/bin
+	cp Generic_Serial_Device $(DESTPATH)/usr/pluto/bin
+	cp Ruby_Generic_Serial_Device.so $(DESTPATH)/usr/pluto/bin

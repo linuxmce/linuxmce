@@ -62,3 +62,9 @@ ifeq (,$(findstring clean, $(MAKECMDGOALS)))
 -include $(sources:.cpp=.d)
 endif
 #<-dceag-mf-e->
+
+install: 
+	mkdir -p /usr/pluto/bin
+	cp SimplePhone $(DESTPATH)/usr/pluto/bin
+	mkdir -p pluto/templates
+	cp simplephone.conf $(DESTPATH)pluto/templates

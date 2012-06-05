@@ -28,3 +28,9 @@ clean: clean-recursive
 
 include $(ROOT)/PlutoUtils/make.rules
 -include $(sources:.cpp=.d)
+
+install: 
+	mkdir -p /usr/pluto/bin
+	cp sqlCVS $(DESTPATH)/usr/pluto/bin
+	cp sqlcvs_db_fixer.php $(DESTPATH)/usr/pluto/bin
+	cp sqlcvs_db_fixer.sh $(DESTPATH)/usr/pluto/bin

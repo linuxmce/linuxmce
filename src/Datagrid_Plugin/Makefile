@@ -62,3 +62,24 @@ ifeq (,$(findstring clean, $(MAKECMDGOALS)))
 endif
 #<-dceag-mf-e->
 
+
+install: 
+	mkdir -p /home/public
+	cp bookmarks.html $(DESTPATH)/home/public
+	mkdir -p /usr/pluto/bin
+	cp Datagrid_Plugin.so $(DESTPATH)/usr/pluto/bin
+	cp File_Grids_Plugin.so $(DESTPATH)/usr/pluto/bin
+	cp Security_Plugin.so $(DESTPATH)/usr/pluto/bin
+	cp Climate_Plugin.so $(DESTPATH)/usr/pluto/bin
+	cp Orbiter_Plugin.so $(DESTPATH)/usr/pluto/bin
+	cp Media_Plugin.so $(DESTPATH)/usr/pluto/bin
+	cp Telecom_Plugin.so $(DESTPATH)/usr/pluto/bin
+	cp Lighting_Plugin.so $(DESTPATH)/usr/pluto/bin
+	cp General_Info_Plugin.so $(DESTPATH)/usr/pluto/bin
+	cp Event_Plugin.so $(DESTPATH)/usr/pluto/bin
+	cp Infrared_Plugin.so $(DESTPATH)/usr/pluto/bin
+	cp RestartSecurityPlugin.sh $(DESTPATH)/usr/pluto/bin
+	cp Plug_And_Play_Plugin.so $(DESTPATH)/usr/pluto/bin
+	cp flickr.pl $(DESTPATH)/usr/pluto/bin
+	cp *.php $(DESTPATH)/usr/pluto/bin
+	cp flickr_status.sh $(DESTPATH)/usr/pluto/bin

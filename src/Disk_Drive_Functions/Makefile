@@ -30,3 +30,7 @@ all: $(sources:.cpp=.o)
 
 clean:
 	rm -f $(sources:.cpp=.o) *.so
+
+install: 
+	mkdir -p pluto/lib
+	cp libDisk_Drive_Functions.so $(DESTPATH)pluto/lib

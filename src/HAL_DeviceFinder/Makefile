@@ -42,3 +42,7 @@ ifeq (,$(findstring clean, $(MAKECMDGOALS)))
 -include $(sources:.cpp=.d)
 endif
 
+
+install: 
+	mkdir -p /usr/pluto/bin
+	cp hal_device_finder $(DESTPATH)/usr/pluto/bin

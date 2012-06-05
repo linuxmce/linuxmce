@@ -51,3 +51,12 @@ include $(ROOT)/PlutoUtils/make.rules
 ifeq (,$(findstring clean, $(MAKECMDGOALS)))
 -include $(sources:.cpp=.d)
 endif
+
+install: 
+	mkdir -p /etc/cron.d
+	cp * $(DESTPATH)/etc/cron.d
+	mkdir -p /usr/pluto/bin
+	cp Tribunexml $(DESTPATH)/usr/pluto/bin
+	cp headendtobase $(DESTPATH)/usr/pluto/bin
+	cp rmprogs $(DESTPATH)/usr/pluto/bin
+	cp filterprogs $(DESTPATH)/usr/pluto/bin

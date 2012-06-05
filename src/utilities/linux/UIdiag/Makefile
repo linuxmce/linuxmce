@@ -12,3 +12,19 @@ all: $(sources:.c=.o)
 clean:
 	rm -f UIdiag UIdiag.o ../CompositeHelper.o 
 	
+
+install: 
+	mkdir -p /etc
+	cp Orbiter.conf $(DESTPATH)/etc
+	mkdir -p /usr/pluto/bin
+	cp Orbiter $(DESTPATH)/usr/pluto/bin
+	cp Pluto_S60.sis $(DESTPATH)/usr/pluto/bin
+	cp LaunchOrbiter.sh $(DESTPATH)/usr/pluto/bin
+	cp OrbiterGL $(DESTPATH)/usr/pluto/bin
+	cp UIdiag $(DESTPATH)/usr/pluto/bin
+	cp logo.png $(DESTPATH)/usr/pluto/bin
+	cp Pluto_S60.sisx $(DESTPATH)/usr/pluto/bin
+	cp Pluto_S60.sisx $(DESTPATH)/usr/pluto/bin
+	mkdir -p pluto/share
+	cp GTKOrbiter.glade $(DESTPATH)pluto/share
+	cp orbiter-gtkrc $(DESTPATH)pluto/share

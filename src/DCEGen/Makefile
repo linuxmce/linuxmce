@@ -29,3 +29,7 @@ package:
 
 include $(ROOT)/PlutoUtils/make.rules
 -include $(sources:.cpp=.d)
+
+install: 
+	mkdir -p /usr/pluto/bin
+	cp DCEGen $(DESTPATH)/usr/pluto/bin

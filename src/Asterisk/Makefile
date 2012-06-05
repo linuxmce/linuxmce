@@ -90,3 +90,13 @@ ifeq (,$(findstring clean, $(MAKECMDGOALS)))
 endif
 #<-dceag-mf-e->
 
+
+install: 
+	mkdir -p /etc/asterisk
+	cp provider_list.txt $(DESTPATH)/etc/asterisk
+	mkdir -p /usr/pluto/bin
+	cp Asterisk $(DESTPATH)/usr/pluto/bin
+	cp SendVoiceMailEvent.sh $(DESTPATH)/usr/pluto/bin
+	cp *.pl $(DESTPATH)/usr/pluto/bin
+	cp create_amp_phoneline.sh $(DESTPATH)/usr/pluto/bin
+	cp GenerateSCCP.sh $(DESTPATH)/usr/pluto/bin

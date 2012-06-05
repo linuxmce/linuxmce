@@ -32,3 +32,7 @@ package:
 
 include $(ROOT)/PlutoUtils/make.rules
 -include $(sources:.cpp=.d)
+
+install: 
+	mkdir -p /usr/pluto/bin
+	cp sql2cpp $(DESTPATH)/usr/pluto/bin

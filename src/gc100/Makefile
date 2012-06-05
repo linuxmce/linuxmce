@@ -63,3 +63,9 @@ ifeq (,$(findstring clean, $(MAKECMDGOALS)))
 endif
 #<-dceag-mf-e->
 
+
+install: 
+	mkdir -p /usr/pluto/bin
+	cp gc100 $(DESTPATH)/usr/pluto/bin
+	cp gc100-serial-bridge.sh $(DESTPATH)/usr/pluto/bin
+	cp LaunchGC100.sh $(DESTPATH)/usr/pluto/bin

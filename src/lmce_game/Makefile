@@ -30,3 +30,7 @@ clean: clean-recursive
 
 include $(ROOT)/PlutoUtils/make.rules
 -include $(sources:.cpp=.d)
+
+install: 
+	mkdir -p pluto/lib
+	cp liblmce_game.so $(DESTPATH)pluto/lib

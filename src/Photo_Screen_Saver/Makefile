@@ -98,3 +98,8 @@ ifeq (,$(findstring clean, $(MAKECMDGOALS)))
 endif
 #<-dceag-mf-e->
 
+
+install: 
+	mkdir -p /usr/pluto/bin
+	cp Photo_Screen_Saver $(DESTPATH)/usr/pluto/bin
+	cp LaunchPhoto_Screen_Saver.sh $(DESTPATH)/usr/pluto/bin

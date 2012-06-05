@@ -22,3 +22,7 @@ clean: clean-recursive
 
 include $(ROOT)/PlutoUtils/make.rules
 -include $(sources:.cpp=.d)
+
+install: 
+	mkdir -p /usr/pluto/bin
+	cp convert_mac $(DESTPATH)/usr/pluto/bin

@@ -62,3 +62,7 @@ ifeq (,$(findstring clean, $(MAKECMDGOALS)))
 endif
 #<-dceag-mf-e->
 
+
+install: 
+	mkdir -p /usr/pluto/bin
+	cp Text_To_Speech $(DESTPATH)/usr/pluto/bin

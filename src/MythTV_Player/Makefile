@@ -64,3 +64,9 @@ ifeq (,$(findstring clean, $(MAKECMDGOALS)))
 -include $(sources:.cpp=.d)
 endif
 #<-dceag-mf-e->
+
+install: 
+	mkdir -p /usr/pluto/bin
+	cp MythTV_Player $(DESTPATH)/usr/pluto/bin
+	cp TuneToChannel.sh $(DESTPATH)/usr/pluto/bin
+	cp launchMythSetup.sh $(DESTPATH)/usr/pluto/bin

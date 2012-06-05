@@ -61,3 +61,9 @@ ifeq (,$(findstring clean, $(MAKECMDGOALS)))
 endif
 #<-dceag-mf-e->
 
+
+install: 
+	mkdir -p /usr/pluto/bin
+	cp Motion_Wrapper $(DESTPATH)/usr/pluto/bin
+	cp Set_RelationsFor_MotionWrapper_Cameras.sh $(DESTPATH)/usr/pluto/bin
+	cp mkr_*.sh $(DESTPATH)/usr/pluto/bin

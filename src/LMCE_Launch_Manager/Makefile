@@ -63,3 +63,13 @@ ifeq (,$(findstring clean, $(MAKECMDGOALS)))
 endif
 #<-dceag-mf-e->
 
+
+install: 
+	mkdir -p /usr/share/applications/
+	cp lmce_launch_manager.desktop $(DESTPATH)/usr/share/applications/
+	mkdir -p /usr/pluto/bin
+	cp LMCE_Launch_Manager $(DESTPATH)/usr/pluto/bin
+	cp StartCoreServices.sh $(DESTPATH)/usr/pluto/bin
+	cp StopCoreServices.sh $(DESTPATH)/usr/pluto/bin
+	cp GetVideoDriver.py $(DESTPATH)/usr/pluto/bin
+	cp lmce_launch_manager.sh $(DESTPATH)/usr/pluto/bin

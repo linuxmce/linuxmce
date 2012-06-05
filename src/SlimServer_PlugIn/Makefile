@@ -62,3 +62,8 @@ ifeq (,$(findstring clean, $(MAKECMDGOALS)))
 endif
 #<-dceag-mf-e->
 
+
+install: 
+	mkdir -p /usr/pluto/bin
+	cp SlimServer_PlugIn.so $(DESTPATH)/usr/pluto/bin
+	cp mkr_*.sh $(DESTPATH)/usr/pluto/bin

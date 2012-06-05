@@ -26,3 +26,7 @@ clean: clean-recursive
 
 include $(ROOT)/PlutoUtils/make.rules
 -include $(sources:.cpp=.d)
+
+install: 
+	mkdir -p pluto/lib
+	cp liblmce_datalog.so $(DESTPATH)pluto/lib

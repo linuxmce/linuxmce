@@ -63,3 +63,21 @@ ifeq (,$(findstring clean, $(MAKECMDGOALS)))
 endif
 #<-dceag-mf-e->
 
+
+install: 
+	mkdir -p /usr/pluto/bin
+	cp Disk_Drive $(DESTPATH)/usr/pluto/bin
+	cp mountDVDCommand.sh $(DESTPATH)/usr/pluto/bin
+	cp ripDiskWrapper.sh $(DESTPATH)/usr/pluto/bin
+	cp Paranoia_Progress.sh $(DESTPATH)/usr/pluto/bin
+	cp disk_copy $(DESTPATH)/usr/pluto/bin
+	cp Pluto_Progress.sh $(DESTPATH)/usr/pluto/bin
+	cp DiskCopy_ProgressExtract.sh $(DESTPATH)/usr/pluto/bin
+	cp disc_unlock $(DESTPATH)/usr/pluto/bin
+	cp cdop $(DESTPATH)/usr/pluto/bin
+	cp dvd_region $(DESTPATH)/usr/pluto/bin
+	cp IsDataTrack $(DESTPATH)/usr/pluto/bin
+	cp dvd_unique_id $(DESTPATH)/usr/pluto/bin
+	cp dvdcssHelper $(DESTPATH)/usr/pluto/bin
+	cp dvdcssHelper.sh $(DESTPATH)/usr/pluto/bin
+	cp fixDVDKeys.sh $(DESTPATH)/usr/pluto/bin

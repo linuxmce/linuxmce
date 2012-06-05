@@ -63,3 +63,9 @@ ifeq (,$(findstring clean, $(MAKECMDGOALS)))
 endif
 #<-dceag-mf-e->
 
+
+install: 
+	mkdir -p /usr/pluto/bin
+	cp MPlayer_Player $(DESTPATH)/usr/pluto/bin
+	mkdir -p pluto/share
+	cp black.mpeg $(DESTPATH)pluto/share

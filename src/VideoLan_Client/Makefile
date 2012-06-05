@@ -63,3 +63,7 @@ ifeq (,$(findstring clean, $(MAKECMDGOALS)))
 -include $(sources:.cpp=.d)
 endif
 #<-dceag-mf-e->
+
+install: 
+	mkdir -p /usr/pluto/bin
+	cp VideoLan_Client $(DESTPATH)/usr/pluto/bin

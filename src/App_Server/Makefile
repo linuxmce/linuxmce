@@ -69,3 +69,9 @@ ifeq (,$(findstring clean, $(MAKECMDGOALS)))
 endif
 #<-dceag-mf-e->
 
+
+install: 
+	mkdir -p /usr/pluto/bin
+	cp App_Server $(DESTPATH)/usr/pluto/bin
+	mkdir -p pluto/share
+	cp wait-screen.gif $(DESTPATH)pluto/share
