@@ -5,8 +5,10 @@
 #include <QVariant>
 #include <QImage>
 #include <QUrl>
+#ifdef debug
 #include <QDebug>
-#include <QtDeclarative/QDeclarativeView>
+#endif
+#include <QDeclarativeView>
 
 class SkinDataItem: public QObject
 {

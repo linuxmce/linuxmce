@@ -2,8 +2,9 @@
 #define SLEEPINGALARM_H
 
 #include <QObject>
+#ifdef debug
 #include <QDebug>
-
+#endif
 class SleepingAlarm : public QObject
 {
 

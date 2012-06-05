@@ -5,7 +5,9 @@
 #include <QVariant>
 #include <QImage>
 #include <QMap>
+#ifdef debug
 #include <QDebug>
+#endif
 
 //for use with the fileformat table.
 class FilterModelItem: public QObject

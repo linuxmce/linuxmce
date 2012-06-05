@@ -8,7 +8,9 @@
 
 #include <QObject>
 #include <QtDeclarative/QDeclarativeImageProvider>
+#ifdef debug
 #include <QDebug>
+#endif
 #include <QVariant>
 #include <qorbitermanager.h>
 

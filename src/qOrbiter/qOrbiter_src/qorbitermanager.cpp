@@ -99,8 +99,9 @@ qorbiterManager::qorbiterManager(QDeclarativeView *view, QObject *parent) :
     QObject::connect(qorbiterUIwin, SIGNAL(sceneResized(QSize)),  SLOT(checkOrientation(QSize)) );
     QObject::connect(this, SIGNAL(orbiterReady(bool)), this, SLOT(showUI(bool)));
     QObject::connect(this, SIGNAL(skinDataLoaded(bool)), SLOT(showUI(bool)));
-
+#ifndef ANDROID
     ScreenSaver = new ScreenSaverClass();
+#endif
 #ifdef for_desktop
     buildType = "/qml/desktop";
     qrcPath = "qrc:desktop/Splash.qml";
@@ -275,19 +276,20 @@ bool qorbiterManager::initializeManager(string sRouterIP, int device_id)
 
 
 #ifdef __ANDROID__
+    setDceResponse("Loading Skins");
     if( !loadSkins(QUrl(remoteDirectoryPath)))
     {   emit skinIndexReady(false);
         b_skinReady = false;
         return false;
     }
 #elif for_android
-    //qDebug() << "Loading skins";
+    setDceResponse("Loading skins");
     if( !loadSkins(QUrl(localDir)))
     {   emit skinIndexReady(false);
         return false;
     }
 #elif WIN32
-    //qDebug() << "Loading skins";
+    setDceResponse("Loading skins");
     if( !loadSkins(QUrl::fromLocalFile(localDir)))
     {   emit skinIndexReady(false);
         return false;
@@ -362,7 +364,7 @@ void qorbiterManager::processConfig(QByteArray config)
     }
 
     QDomElement root = configData.documentElement();        //represent configuration in memeory
-    // qDebug () << root.tagName();
+
     //------------DEFAULTS-FOR-ORBITER------------------------------------------------------------
     QDomElement defaults = root.firstChildElement("Default");
     QString sPK_User = defaults.attribute("sPK_User");
@@ -711,8 +713,9 @@ void qorbiterManager::processConfig(QByteArray config)
 
     configData.clear();
     tConf.clear();
-
+#ifndef ANDROID
     activateScreenSaver();
+#endif
     emit registerOrbiter((userList->find(sPK_User)->data(4).toInt()), QString::number(iea_area), iFK_Room );
     setOrbiterStatus(true);
 }
@@ -727,7 +730,9 @@ void qorbiterManager::swapSkins(QString incSkin)
 #ifdef WIN32
     incSkin = "default";
 #endif
-    //qDebug() << tskinModel->rowCount();
+#ifdef debug
+    qDebug() << tskinModel->rowCount();
+#endif
 
     if (tskinModel->rowCount() > 0)
     {
@@ -793,7 +798,9 @@ bool qorbiterManager::requestDataGrid()
 void qorbiterManager::setActiveRoom(int room,int ea)
 {
     emit setLocation(room, ea);
+#ifdef debug
     qDebug() << "LocatioModel::" << m_lRooms->find(QString::number(room)) ;
+#endif
     setCurrentRoom(QString::number(room));
     m_lRooms->setLocation(ea, room);
 
@@ -858,10 +865,14 @@ void qorbiterManager::regenOrbiter(int deviceNo)
         //splashView->showFullScreen();
         qorbiterUIwin->close();
         QApplication::processEvents(QEventLoop::AllEvents);
-        //qDebug("Onscreen orbiter");
+#ifdef debug
+        qDebug("Onscreen orbiter");
+#endif
         QProcess *regen = new QProcess(this);
         regen->start("/usr/bin/php /var/www/lmce-admin/qOrbiterGenerator.php?d="+QString::number(iPK_Device), QIODevice::ReadOnly);
-        //qDebug() <<"status code:" << regen->errorString();
+#ifdef debug
+        qDebug() <<"status code:" << regen->errorString();
+#endif
         QObject::connect(regen,SIGNAL(finished(int)), this, SLOT(regenComplete(int)));
         QObject::connect(regen,SIGNAL(error(QProcess::ProcessError)), this, SLOT(regenError(QProcess::ProcessError)));
     }
@@ -971,8 +982,10 @@ void qorbiterManager::showUI(bool b)
     else
     {
         setDceResponse("Orbiter Cant Show UI");
-        //qDebug() << "Orbiter Status:" << b_orbiterReady;
-        // qDebug() << "Skin Status:" << b_skinReady;
+#ifdef debug
+        qDebug() << "Orbiter Status:" << b_orbiterReady;
+         qDebug() << "Skin Status:" << b_skinReady;
+#endif
     }
 
 }
@@ -991,7 +1004,9 @@ void qorbiterManager::getFloorplanDevices(int floorplantype)
 {
     for (int i=0; i < floorplans->rowCount(); i++)
     {
-        //qDebug() << floorplans->index(i, 0, QModelIndex()).data(1);
+#ifdef debug
+        qDebug() << floorplans->index(i, 0, QModelIndex()).data(1);
+#endif
 
         if(floorplans->index(i).data(6).toInt() == floorplantype)
         {
@@ -1208,8 +1223,10 @@ void qorbiterManager::goBackGrid()
     {
         goBack.removeLast();
         int back = goBack.count() - 1;
-        //qDebug() << back;
-        //qDebug() << "Going back to::" << goBack.at(back);
+#ifdef debug
+        qDebug() << back;
+        qDebug() << "Going back to::" << goBack.at(back);
+#endif
 
         QStringList reverseParams = goBack.at(back).split("|", QString::KeepEmptyParts);
         q_mediaType = reverseParams.first();
@@ -1303,7 +1320,9 @@ void qorbiterManager::setNowPlayingTv()
 
 void qorbiterManager::setScreenShotVariables(QList<QObject *> l)
 {
+#ifdef debug
     qDebug("Setting thumbnail attributes to screen");
+#endif
     screenshotVars = l;
     qorbiterUIwin->rootContext()->setContextProperty("screenshotAttributes", QVariant::fromValue(screenshotVars));
 }
@@ -1311,7 +1330,9 @@ void qorbiterManager::setScreenShotVariables(QList<QObject *> l)
 void qorbiterManager::setMediaScreenShot(QImage screen_shot)
 {
     mediaScreenShot = screen_shot;
+#ifdef debug
     qDebug() << mediaScreenShot.size();
+#endif
     emit mediaScreenShotReady();
 }
 
@@ -1353,7 +1374,9 @@ void qorbiterManager::showBookmarks(QList<QObject *> t)
 {
 
     current_bookmarks = t;
+#ifdef debug
     qDebug() << current_bookmarks.size();
+#endif
     qorbiterUIwin->rootContext()->setContextProperty("currentBookmarks", QVariant::fromValue(current_bookmarks));
 }
 
@@ -1387,7 +1410,9 @@ void qorbiterManager::setHouseMode(int mode, int pass)
 
 void qorbiterManager::setCurrentUser(QString inc_user)
 {
-   // qDebug() << "Incoming user::" << inc_user;
+#ifdef debug
+   qDebug() << "Incoming user::" << inc_user;
+#endif
     sPK_User = userList->find(inc_user)->id();
     int user = inc_user.toInt();
     emit userChanged(user);
@@ -1492,7 +1517,9 @@ void qorbiterManager::processError(QString msg)
 
 void qorbiterManager::setActiveSkin(QString name)
 {
-    //qDebug("Setting Skin");
+#ifdef debug
+    qDebug("Setting Skin");
+#endif
     swapSkins(name);
 }
 
@@ -1522,7 +1549,9 @@ void qorbiterManager::setDceResponse(QString response)
     dceResponse = response;
     emit loadingMessage(dceResponse);
     emit dceResponseChanged();
-    // qDebug() << dceResponse;
+#ifdef debug
+    qDebug() << dceResponse;
+#endif
 
 }
 
@@ -1610,7 +1639,9 @@ void qorbiterManager::checkOrientation(QSize)
         qorbiterUIwin->rootContext()->setContextProperty("appW", appWidth);
         setOrientation( true);
     }
+#ifdef debug
     qDebug() << qorbiterUIwin->window()->rect().size();
+#endif
     setDceResponse("orientation change");
 }
 
@@ -1640,7 +1671,9 @@ void qorbiterManager::setCurrentScreen(QString s)
 void qorbiterManager::connectionWatchdog()
 {
     QTimer::singleShot(15000, this, SIGNAL(reInitialize()));
+#ifdef debug
     qDebug("Starting Watchdog");
+#endif
 }
 
 

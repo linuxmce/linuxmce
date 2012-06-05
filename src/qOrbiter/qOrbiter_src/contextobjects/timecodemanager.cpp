@@ -2,7 +2,9 @@
 #include "PlutoUtils/StringUtils.h"
 #include <QStringList>
 #include <QMetaType>
+#ifdef debug
 #include <QDebug>
+#endif
 #include <QMetaProperty>
 TimeCodeManager::TimeCodeManager(QDeclarativeItem *parent) :
     QDeclarativeItem(parent)

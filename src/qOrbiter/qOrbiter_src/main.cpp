@@ -48,6 +48,9 @@ Q_IMPORT_PLUGIN(UIKit)
 #include <contextobjects/playlistclass.h>
 #include <contextobjects/timecodemanager.h>
 
+#ifdef debug
+#include <QDebug>
+#endif
 
 //these includes will be made into plugins
 #include "plugins/GoogleWeather/googleweather.h"
@@ -204,7 +207,9 @@ int main(int argc, char* argv[])
             break;
         case 'd':
             PK_Device = atoi(argv[++optnum]);
-            //qDebug() << "From the command line input:" << PK_Device;
+#ifdef debug
+            qDebug() << "From the command line input:" << PK_Device;
+#endif
             break;
         case 'L':
             bLocalMode = true;
@@ -480,6 +485,7 @@ int main(int argc, char* argv[])
         QObject::connect(pqOrbiter, SIGNAL(livetvDone()), simpleEPGmodel, SLOT(updateLivePosition()), Qt::QueuedConnection);
 
         QObject::connect(simpleEPGmodel, SIGNAL(requestEpg()), pqOrbiter, SLOT(requestLiveTvPlaylist()), Qt::QueuedConnection);
+
         QObject::connect(pqOrbiter, SIGNAL(clearTVplaylist()), simpleEPGmodel, SLOT(populate()), Qt::QueuedConnection);
         QObject::connect(w, SIGNAL(liveTVrequest()), simpleEPGmodel, SLOT(populate()),Qt::DirectConnection);
         QObject::connect(w, SIGNAL(managerPlaylistRequest()), storedVideoPlaylist,SLOT(populate()),Qt::QueuedConnection );

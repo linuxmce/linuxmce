@@ -26,6 +26,10 @@
 #include "QtNetwork/QTcpSocket"
 #include "QtNetwork/QHostAddress"
 
+#ifdef debug
+#include <QDebug>
+#endif
+
 #include <iostream>
 using namespace std;
 using namespace DCE;
@@ -1050,7 +1054,9 @@ void qOrbiter::CMD_Set_Now_Playing(string sPK_DesignObj,string sValue_To_Assign,
 
     m_bUsingLiveAVPath = atoi(StringUtils::Tokenize(sList_PK_Device,",",pos).c_str())==1;
     setLiveAvPath(m_bUsingLiveAVPath);
-    //qDebug() << m_bUsingLiveAVPath;
+#ifdef debug
+ qDebug() << m_bUsingLiveAVPath;
+#endif
     pos=0;
     /*
     m_iPK_Screen_Remote=atoi(StringUtils::Tokenize(sPK_DesignObj,",",pos).c_str());
@@ -3066,6 +3072,7 @@ void DCE::qOrbiter::requestLiveTvPlaylist()
     pData = "NULL";
     m_dwIDataGridRequestCounter++;
 #ifdef ANDROID
+
     CMD_Populate_Datagrid cmd_populate_livetv_grid(m_dwPK_Device, iPK_Device_DatagridPlugIn, StringUtils::itos( m_dwIDataGridRequestCounter ), string(m_sGridID), 11, m_UserID + "," + m_EA, 0, &pkVar, &valassign,  &isSuccessfull, &gHeight, &gWidth );
 #elif for_android
     CMD_Populate_Datagrid cmd_populate_livetv_grid(m_dwPK_Device, iPK_Device_DatagridPlugIn, StringUtils::itos( m_dwIDataGridRequestCounter ), string(m_sGridID),11, m_UserID + "," + m_EA, 0, &pkVar, &valassign,  &isSuccessfull, &gHeight, &gWidth );

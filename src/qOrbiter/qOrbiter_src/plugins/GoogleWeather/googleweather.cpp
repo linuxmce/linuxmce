@@ -1,5 +1,7 @@
 #include <plugins/GoogleWeather/googleweather.h>
+#ifdef debug
 #include "QDebug"
+#endif
 #include <QtXml/QDomDocument>
 
 gWeatherModel::gWeatherModel(gWeatherItem *prototype, QObject *parent) :
@@ -69,7 +71,10 @@ void gWeatherModel::processXML()
         processCurrent();
     }
     else
-    {   qDebug() << xmlData->firstChildElement("weather").nodeName();
+    {
+#ifdef debug
+        qDebug() << xmlData->firstChildElement("weather").nodeName();
+#endif
         setStatus("Invalid Weather. Did you a enter real location?");
     }
 }

@@ -16,7 +16,9 @@
 */
 
 #include "datamodels/listModel.h"
+#ifdef debug
 #include <QDebug>
+#endif
 
 ListModel::ListModel(gridItem* prototype, QObject* parent) :
     QAbstractListModel(parent),  m_prototype(prototype)

@@ -1,5 +1,7 @@
 #include "floorplanmodel.h"
+#ifdef debug
 #include <QDebug>
+#endif
 
 FloorPlanModel::FloorPlanModel(FloorplanDevice* prototype, qorbiterManager *r, QObject *parent) :
     QAbstractListModel(parent), m_prototype(prototype), uiRef(r)

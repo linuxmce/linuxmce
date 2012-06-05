@@ -32,7 +32,11 @@
 #include <QStringList>
 #include <QImage>
 #include <QUrl>
+
+#ifdef debug
 #include <QDebug>
+#endif
+
 
 class FileDetailsClass : public QObject
 {

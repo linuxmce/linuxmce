@@ -42,7 +42,9 @@ The purpose of this class is to keep a reference to all items in the current pla
 #include <QVariant>
 #include <QImage>
 #include <QMap>
+#ifdef debug
 #include <QDebug>
+#endif
 
 class PlaylistItemClass: public QObject
 {

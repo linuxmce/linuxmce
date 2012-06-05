@@ -26,7 +26,9 @@ It needs to be expanded to create device numberlists for now playing and other s
 
 #include <QObject>
 #include <QMap>
+#ifdef debug
 #include <QDebug>
+#endif
 
 
 class ScreenParamsClass : public QObject

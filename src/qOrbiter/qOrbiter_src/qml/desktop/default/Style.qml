@@ -65,9 +65,9 @@ QtObject{
 
     //textStyles
     property string stylebuttonimage: ""
-    property int title_size: 20* scaleX(orbiterW)
+    property int title_size:scaleX(.20)
     property color title_color: "whitesmoke"
-    property int  stdbuttontext: 18 * scaleX(orbiterW)
+    property int  stdbuttontext:scaleX(4)
     property color lighttext: "whitesmoke"
     property color darktext: "slategrey"
 

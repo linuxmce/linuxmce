@@ -45,7 +45,9 @@
 
 #include <QtDeclarative/QDeclarativeItem>
 #include <QTime>
+#ifdef debug
 #include <QDebug>
+#endif
 #ifdef __ANDROID__
 #include <QFile>
 #include <QImageReader>

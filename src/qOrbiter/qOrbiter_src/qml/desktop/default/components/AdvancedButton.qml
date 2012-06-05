@@ -36,7 +36,7 @@ Rectangle{
             width: -1
             height: 0
             text:"null ipsum delorium"
-            font.pixelSize: 14
+            font.pixelSize: scaleY(2)
             verticalAlignment: Text.AlignVCenter
             horizontalAlignment: Text.AlignHCenter
             anchors.fill: parent
@@ -53,13 +53,13 @@ Rectangle{
             anchors.fill: buttonLabel
             hoverEnabled: true
             onEntered: {
-               buttonbg.opacity = 1
+                buttonbg.opacity = 1
                 buttonLabel.color = style.lighttext
                 buttonLabel.font.capitalization = Font.AllUppercase
             }
 
             onExited: {
-             buttonbg.opacity = .85
+                buttonbg.opacity = .85
                 buttonLabel.font.capitalization = Font.Normal
                 buttonLabel.color = "black"
             }

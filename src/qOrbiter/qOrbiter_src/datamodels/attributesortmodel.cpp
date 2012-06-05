@@ -1,5 +1,7 @@
 #include "attributesortmodel.h"
+#ifdef debug
 #include <QDebug>
+#endif
 
 AttributeSortModel::AttributeSortModel(AttributeSortItem* prototype, QObject *parent) :
     QAbstractListModel(parent), m_prototype(prototype)

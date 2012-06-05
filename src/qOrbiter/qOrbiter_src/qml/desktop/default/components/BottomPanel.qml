@@ -4,7 +4,7 @@ import "../js/ComponentLoader.js" as MyJs
 
 Rectangle {
     id:advanced_panel
-    width: style.orbiterW
+    width: appW
     height: style.widebuttonh + scaleY(4)
     color:"transparent"
 
@@ -28,8 +28,6 @@ Rectangle {
             width: style.widebuttonw
             height: style.widebuttonh
             id: buttonsq1
-            buttontextfontsize: 9
-
             buttontext: "Advanced"
             radius: 5
 
@@ -45,7 +43,6 @@ Rectangle {
             y: 1
             width: style.widebuttonw
             height: style.widebuttonh
-
             buttontext: "Power"
             radius: 5
             MouseArea{
@@ -61,7 +58,6 @@ Rectangle {
             y: 1
             width: style.widebuttonw
             height: style.widebuttonh
-
             buttontext: "Sleeping Menu"
             radius: 5
 
@@ -73,7 +69,6 @@ Rectangle {
                 }
             }
         }
-
 
 
         AdvancedButton{
