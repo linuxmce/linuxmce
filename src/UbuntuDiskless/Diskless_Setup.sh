@@ -384,6 +384,10 @@ if [[ ! -d $Moon_RootLocation/root/.ssh ]]; then
 fi
 cat /usr/pluto/keys/id_dsa_pluto.pub > $Moon_RootLocation/root/.ssh/authorized_keys
 (cd /usr/pluto/diskless/${Moon_DeviceID}/usr/pluto/deb-cache; dpkg-scanpackages -m . dev/null | tee Packages | gzip -c > Packages.gz)
+. /usr/pluto/bin/Config_Ops.sh
+if [[ "$PK_Users" -lt "1" ]]; then
+	/usr/pluto/bin/MessageSend "dcerouter" 0 7 7 1 163 "First MD headless reload"
+fi
 echo "Finished setting up network boot for media directors."
 echo "If new media director(s) were added, do a quick reload router."
 
