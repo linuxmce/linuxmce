@@ -130,6 +130,8 @@ void MouseBehavior_Linux::ShowMouse(bool bShow, SetMouseBehaviorRemote setMouseB
 	// (HID remote also registers a mouse device so no special code needed for it)
 	if (!FileUtils::FileExists("/dev/input/mice"))
 		bShow = false;
+	if (FileUtils::FileExists("/etc/pluto/orbiter.disable.mouse"))
+		bShow = false;
     // at show, we want to show the standard mouse cursor
 #ifdef HID_REMOTE
 	if( m_pOrbiter->m_pHIDInterface )
