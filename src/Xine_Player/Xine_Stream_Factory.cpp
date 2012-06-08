@@ -131,11 +131,17 @@ bool Xine_Stream_Factory::StartupFactory()
 	xine_engine_set_param(m_pXineLibrary, XINE_ENGINE_PARAM_VERBOSITY, XINE_VERBOSITY_DEBUG);
 	xine_init( m_pXineLibrary );	
 
+	/*
+# path to the title key cache
+# string, default: /root/.dvdcss/
+input.css_cache_path:/home/.dvdcss/
+*/
+	xine_config_register_string(m_pXineLibrary, "input.css_cache_path", "/home/.dvdcss/", "path to the title key cache", "", 0, NULL, NULL);
 	// detecting output drivers
 	DetectOutputDrivers();
 	
 	// setting audio settings 
-	setAudioSettings();
+	//setAudioSettings();
 	
 	// setting output driver
 	setVideoDriver( m_pPlayer->DATA_Get_Hardware_acceleration() );
