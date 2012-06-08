@@ -59,7 +59,7 @@ Xine_Player: $(sources:.cpp=.o)
 	./post_make.sh $@
 
 clean: clean-recursive
-	rm -f $(call cpath,$(sources:.cpp=.o) $(sources:.cpp=.d)) Xine_Player.bin Xine_Player.so >/dev/null
+	rm -f $(call cpath,$(sources:.cpp=.o) $(sources:.cpp=.d)) Xine_Player Xine_Player.bin Xine_Player.so >/dev/null
 
 package:
 	chmod +x make_package.sh
