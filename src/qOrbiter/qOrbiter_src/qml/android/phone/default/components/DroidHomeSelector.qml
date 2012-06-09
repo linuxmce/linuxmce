@@ -8,66 +8,48 @@ Rectangle{
     height: childrenRect.height
     width: childrenRect.width
     anchors.horizontalCenter: parent.horizontalCenter
-property int imagebuttonsize: scaleY(15)
+    property int imagebuttonsize: scaleY(15)
+    color:"transparent"
 
     Row{
         id:toprow
         height: childrenRect.height
         width: childrenRect.width
 
-        Rectangle{
-            height: childrenRect.height
-            width: childrenRect.width
-            Image {
-                id: lighting
-                source: "../img/lights.png"
-                height: imagebuttonsize
-                width: imagebuttonsize
-                smooth:true
-
-            }
+        Image {
+            id: lighting
+            source: "../img/lights.png"
+            height: style.iconHeight
+            width: style.iconWidth
+            smooth:true
             MouseArea{
                 anchors.fill: parent
-               onClicked:  loadComponent("LightingSelector.qml")
+                onClicked:  loadComponent("LightingSelector.qml")
             }
         }
 
-
-        Rectangle{
-            height: childrenRect.height
-            width: childrenRect.width
-            Image {
-                id: media
-                source: "../img/media.png"
-                height:imagebuttonsize
-                width: imagebuttonsize
-                smooth:true
-            }
-
+        Image {
+            id: media
+            source: "../img/media.png"
+            height: style.iconHeight
+            width: style.iconWidth
+            smooth:true
             MouseArea{
                 anchors.fill: parent
                 onClicked:  loadComponent("MediaSelector.qml")
             }
         }
 
-
-
-        Rectangle{
-            height: childrenRect.height
-            width: childrenRect.width
-            Image {
-                id: climate
-                source: "../img/climate.png"
-                height: imagebuttonsize
-                width: imagebuttonsize
-                smooth:true
-            }
-
+        Image {
+            id: climate
+            source: "../img/climate.png"
+            height: style.iconHeight
+            width: style.iconWidth
+            smooth:true
             MouseArea{
                 anchors.fill: parent
                 onClicked:  loadComponent("ClimateSelector.qml")
             }
-
         }
     }
 
@@ -78,58 +60,40 @@ property int imagebuttonsize: scaleY(15)
         height: childrenRect.height
         width: childrenRect.width
 
-        Rectangle{
-            height: childrenRect.height
-            width: childrenRect.width
-            Image {
-                id: security
-                source: "../img/security.png"
-                height: imagebuttonsize
-                width: imagebuttonsize
-                smooth:true
-            }
+        Image {
+            id: security
+            source: "../img/security.png"
+            height: style.iconHeight
+            width: style.iconWidth
+            smooth:true
             MouseArea{
                 anchors.fill: parent
                 onClicked:  loadComponent("SecuritySelector.qml")
             }
         }
 
-
-        Rectangle{
-            height: childrenRect.height
-            width: childrenRect.width
-            Image {
-                id: telecom
-                source: "../img/telecom.png"
-                height: imagebuttonsize
-                width: imagebuttonsize
-                smooth:true
-            }
-
+        Image {
+            id: telecom
+            source: "../img/telecom.png"
+            height: style.iconHeight
+            width: style.iconWidth
+            smooth:true
             MouseArea{
                 anchors.fill: parent
                 onClicked:  loadComponent("TelecomSelector.qml")
             }
         }
 
-
-
-        Rectangle{
-            height: childrenRect.height
-            width: childrenRect.width
-            Image {
-                id: adv
-                source: "../img/advanced.png"
-                height: imagebuttonsize
-                width:imagebuttonsize
-                smooth:true
-            }
-
+        Image {
+            id: adv
+            source: "../img/advanced.png"
+            height: style.iconHeight
+            width: style.iconWidth
+            smooth:true
             MouseArea{
                 anchors.fill: parent
                 onClicked:  manager.gotoQScreen("Screen_44.qml")
             }
-
         }
     }
 }

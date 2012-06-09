@@ -95,6 +95,7 @@ folder_03.source = config.xml
 folder_03.target = $$DESTDIR
 
 DEFINES+=for_android
+QT+= phonon
 }
 
 for_freemantle{
@@ -432,7 +433,7 @@ HEADERS += \
     contextobjects/bookmarkitem.h \
     plugins/GoogleWeather/googleweather.h \
 
-!ANDROID{
+!ANDROID||!for_android{
  HEADERS+=   ../../qMediaPlayer/AudioVisual/audiovisual.h \
     ../../qMediaPlayer/AudioVisual/videowidgetplayer.h
 }

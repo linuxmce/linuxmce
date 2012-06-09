@@ -6,7 +6,7 @@ import "js/ComponentLoader.js" as MyJs
 
 Item {
     id: item
-  width:appW
+    width:appW
     height:appH
 
     signal close()
@@ -16,33 +16,21 @@ Item {
 
     property string locationinfo: "standby"
     property string screenfile
-property string dynamic_height
-property string dynamic_width
-
-function checkLayout()
-{
-console.log("c++ slot orientation changed")
-}
-
-Connections{
-    target: manager
-    onOrientationChanged: checkLayout()
-
-    }
-
+    property string dynamic_height
+    property string dynamic_width
 
     Image {
-    id: bg
-    source: "img/bkg.png"
-    anchors.fill:parent
+        id: bg
+        source: "img/bkg.png"
+        anchors.fill:parent
     }
 
 
     function scaleX(x){
-    return x/100*appW
+        return x/100*appW
     }
     function scaleY(y){
-    return y/100*appH
+        return y/100*appH
     }
 
 
@@ -83,22 +71,22 @@ Connections{
 
     function checkStatus(component)
     {
-       console.log(component.progress)
+        console.log(component.progress)
     }
 
 
     Loader {
-    id:pageLoader
-    objectName: "loadbot"
+        id:pageLoader
+        objectName: "loadbot"
 
-    onSourceChanged:  loadin
-    onLoaded: {
+        onSourceChanged:  loadin
+        onLoaded: {
 
-        console.log("Screen Changed:" + pageLoader.source)
+            console.log("Screen Changed:" + pageLoader.source)
 
         }
     }
-  //=================Components==================================================//
+    //=================Components==================================================//
     function loadComponent(componentName )
     {
         componentLoader.source = "components/"+componentName
@@ -144,19 +132,19 @@ Connections{
     }
 
     SequentialAnimation{
-    id:loadin
+        id:loadin
 
-    PropertyAnimation{
-        id:fadeout
-        target:pageLoader
-        properties: "opacity"; to: "0"; duration: 5000
+        PropertyAnimation{
+            id:fadeout
+            target:pageLoader
+            properties: "opacity"; to: "0"; duration: 5000
 
-    }
-    PropertyAnimation{
-        id: fadein
-        target:pageLoader
-        properties: "opacity"; to: "1"; duration: 5000
-    }
+        }
+        PropertyAnimation{
+            id: fadein
+            target:pageLoader
+            properties: "opacity"; to: "1"; duration: 5000
+        }
 
     }
 

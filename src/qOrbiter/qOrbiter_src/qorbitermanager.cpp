@@ -146,6 +146,7 @@ qorbiterManager::qorbiterManager(QDeclarativeView *view, QObject *parent) :
     else
     {
         buildType = "/qml/android/phone";
+
     }
 
     qrcPath = ":android/Splash.qml";
@@ -327,6 +328,7 @@ void qorbiterManager::refreshUI(QUrl url)
     qorbiterUIwin->rootContext()->setBaseUrl(skin->entryUrl());
     qorbiterUIwin->setSource(skin->entryUrl());
     qorbiterUIwin->setResizeMode(QDeclarativeView::SizeRootObjectToView);
+     checkOrientation(qorbiterUIwin->size());
 }
 
 

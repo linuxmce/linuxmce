@@ -20,8 +20,8 @@ Rectangle {
         fillMode: Image.PreserveAspectFit
         source: "image://listprovider/updateobject/"+securityvideo.timestamp
         anchors.fill: parent
-       visible: dcenowplaying.b_mediaPlaying ? true : false
-       opacity: .25
+        visible: dcenowplaying.b_mediaPlaying ? true : false
+        opacity: .25
     }
 
 
@@ -35,27 +35,29 @@ Rectangle {
         width: scaleX(99)
         wrapMode: Text.WrapAtWordBoundaryOrAnywhere
         color: "silver"
-        visible: false
-
     }
 
-    Column{
-        id:maindisplay
+    NowPlayingButton{
+        id:fs_npButton
+        width: parent.width
         anchors.top: spaceholder.bottom
         anchors.horizontalCenter: parent.horizontalCenter
-        height: childrenRect.height
-        width: scaleX(90)
-        spacing: scaleY(1)
-        NowPlayingButton{ width: parent.width}
-        DroidHomeSelector{id:home_selector; }
 
     }
+    DroidHomeSelector{
+        id:home_selector;
+        anchors.verticalCenter: stage.verticalCenter
+        anchors.left: stage.left
+        anchors.leftMargin: manager.b_orientation ? scaleX(15) : scaleX(50)
+    }
+
+
 
     Image {
         id: bottomBg
         source: "../img/lowerbkg.png"
-        height: advancedrow.height + scaleY(1)
-        width: advancedrow.width + scaleX(1)
+        height: advancedrow.height + scaleY(4)
+        width: advancedrow.width + scaleX(4)
         anchors.bottom: stage.bottom
         anchors.horizontalCenter: stage.horizontalCenter
 
@@ -66,7 +68,7 @@ Rectangle {
         height: childrenRect.height
         width: childrenRect.width
         anchors.centerIn: bottomBg
-        spacing: scaleX(15)
+        spacing: manager.b_orientation ? scaleX(10) : scaleX(12)
 
         ButtonSq{
             height: style.stdbuttonh
@@ -93,7 +95,7 @@ Rectangle {
             id:roombutton
             height: scaleY(5)
             width: scaleX(10)
-            buttontext: currentroom         
+            buttontext: currentroom
             MouseArea{
                 anchors.fill: parent
                 onClicked:  loadComponent("RoomSelector.qml")

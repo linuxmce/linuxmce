@@ -84,7 +84,7 @@ Rectangle {
             color: "grey"
             font.bold: false
             font.pixelSize: scaleY(4)
-            anchors.top: progress_bar.top
+            anchors.bottom: progress_bar.top
         }
         Text {
             id: current_cells

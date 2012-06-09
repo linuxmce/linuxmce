@@ -4103,7 +4103,7 @@ void DCE::qOrbiter::newOrbiter()
 bool qOrbiter::routerCheck()
 {
     Event_Impl event_Impl(DEVICEID_MESSAGESEND, 0, m_sIPAddress);
-    if(event_Impl.m_pClientSocket->SendString( "-o 0  4 1 247 1" ))
+    if(event_Impl.m_pClientSocket->SendString( "-o 0 4 1 247 2 1" ))
     {
         qDebug("connection found");
         return true;

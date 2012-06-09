@@ -70,8 +70,8 @@ orbiterWindow::orbiterWindow(long deviceid, std::string routerip, QObject *paren
     mainView.rootContext()->setContextProperty("appW", (mainView.window()->width()/ 2));//this is done because android reports the desktop width as 2x what it is.at least on my phone
     mainView.rootContext()->setContextProperty("appH", mainView.window()->height());
 #elif for_android
-    mainView.rootContext()->setContextProperty("appW", 1280);
-    mainView.rootContext()->setContextProperty("appH", 720);
+    mainView.rootContext()->setContextProperty("appW", 480);
+    mainView.rootContext()->setContextProperty("appH", 800);
 #elif for_desktop
     mainView.rootContext()->setContextProperty("appW", 1280);
     mainView.rootContext()->setContextProperty("appH", 720);

@@ -31,6 +31,7 @@ QtObject{
     function scaleY(y){
         return y/100*appW
     }
+
     //end scale function
     //-color definitions
 
@@ -62,10 +63,11 @@ QtObject{
 
 
     //icon sizes
-    property int iconHeight:scaleY(15)
-    property int iconWidth: scaleY(15)
-    property int  stdbuttonh: scaleY(15)
-    property int  stdbuttonw: scaleY(15)
+    property int iconHeight: manager.b_orientation ? scaleY(22) :scaleY(16)
+    property int iconWidth: manager.b_orientation ? scaleY(22) :scaleY(16)
+    property int  stdbuttonh: manager.b_orientation ? scaleY(15) :scaleY(12)
+    property int  stdbuttonw: manager.b_orientation ? scaleY(15) :scaleY(12)
+    property int buttonLabelText : manager.b_orientation ? scaleY(2) : scaleY(2)
 
     //textStyles
     property string stylebuttonimage: ""

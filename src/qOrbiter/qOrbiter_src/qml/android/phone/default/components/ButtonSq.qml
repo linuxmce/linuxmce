@@ -12,6 +12,7 @@ Rectangle{
     property alias buttontextitalic: buttonLabel.font.italic
     property alias buttontextzindex: buttonLabel.z
     property alias buttonsqradius:  buttonBase.radius
+    property int textSize: style.buttonLabelText
 
 
 
@@ -32,7 +33,7 @@ Rectangle{
         Text {
             id: buttonLabel
             text:"null ipsum delorium"
-            font.pixelSize: scaleY(2)
+            font.pixelSize: textSize
             verticalAlignment: Text.AlignVCenter
             horizontalAlignment: Text.AlignHCenter
             anchors.fill: parent
