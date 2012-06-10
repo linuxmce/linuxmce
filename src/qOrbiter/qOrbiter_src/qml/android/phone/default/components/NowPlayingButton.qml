@@ -3,15 +3,15 @@ import QtQuick 1.1
 
 Rectangle {
     id:np_box
-    width: scaleX(90)
-    height: scaleY(35)
-    color: "transparent"   
+    width: manager.b_orientation ? scaleX(90) : scaleX(40)
+    height: manager.b_orientation ? scaleY(35) : scaleY(55)
+    color: "transparent"
     visible: dcenowplaying.b_mediaPlaying ? true : false
     clip:true
-
+    property real textSize:style.buttonLabelText
     Column{
         id:textcol
-        spacing: scaleY(1.5)
+        spacing: scaleY(1)
         width: parent.width
         height: childrenRect.height
         anchors.top: np_box.top
@@ -24,9 +24,10 @@ Rectangle {
             wrapMode: "WrapAtWordBoundaryOrAnywhere"
             smooth: true
             font.bold: true
-            font.pixelSize: scaleY(3)
-            visible:  dcenowplaying.mediatitle =="" ? true: false
+            font.pixelSize: scaleY(4)
+            visible:  dcenowplaying.mediatitle ==="" ? true: false
             color: "silver"
+            elide: Text.ElideRight
         }
 
         Text {
@@ -38,8 +39,9 @@ Rectangle {
             smooth: true
             font.bold: true
             font.pixelSize: scaleY(3)
-            visible:  dcenowplaying.mediatitle =="" ? false: true
+            visible:  dcenowplaying.mediatitle =="" || dcenowplaying.tvProgram !== "" ? false: true
             color: "silver"
+            elide: Text.ElideRight
         }
         Text {
             id: album
@@ -48,22 +50,20 @@ Rectangle {
             wrapMode: "WrapAtWordBoundaryOrAnywhere"
             font.bold: true
             smooth: true
-            font.pixelSize: scaleY(2)
+            font.pixelSize: textSize
             visible:  dcenowplaying.album =="" ? false: true
             color: "silver"
+            elide: Text.ElideRight
         }
         Text {
             id: track
-
             wrapMode: "WrapAtWordBoundaryOrAnywhere"
-
-
             text: qsTr("Track: ") + dcenowplaying.track
             font.family: "Droid Sans"
             font.bold: true
             //font.italic: true
             smooth: true
-            font.pixelSize: scaleY(3)
+            font.pixelSize: textSize
             visible:  dcenowplaying.track =="" ? false: true
             color: "orange"
             opacity: .50
@@ -77,10 +77,9 @@ Rectangle {
             wrapMode: "WrapAtWordBoundaryOrAnywhere"
             //  font.bold: true
             smooth: true
-            font.pixelSize: scaleY(2)
+            font.pixelSize: textSize
             visible:  dcenowplaying.tvProgram ==="" ? false: true
-            color:"silver"
-
+            color:"orange"
         }
 
         Text {
@@ -91,7 +90,7 @@ Rectangle {
             font.family: "Droid Sans"
             //  font.bold: true
             smooth: true
-            font.pixelSize: scaleY(2)
+            font.pixelSize: textSize
             visible:  dcenowplaying.episode ==="" ? false: true
             color:"silver"
         }
@@ -104,7 +103,7 @@ Rectangle {
             font.family: "Droid Sans"
             // font.bold: true
             smooth: true
-            font.pixelSize: scaleY(2)
+            font.pixelSize: textSize
             visible:  dcenowplaying.genre ==="" ? false: true
             color:"silver"
             MouseArea{
@@ -118,13 +117,13 @@ Rectangle {
 
         Text {
             id: starring
-            width: parent.width
+            width: manager.b_orientation ? scaleX (65) : scaleX (25)
             wrapMode: "WrapAtWordBoundaryOrAnywhere"
             text: qsTr("Perfomers: ") + dcenowplaying.performerlist
             font.family: "Droid Sans"
             //  font.bold: true
             smooth: true
-            font.pixelSize: scaleY(3)
+            font.pixelSize: textSize
             elide: "ElideRight"
             visible:  dcenowplaying.performerlist ==="" ? false: true
             color:"silver"
@@ -144,7 +143,7 @@ Rectangle {
             font.bold: true
             smooth: true
             horizontalAlignment: Text.AlignHCenter
-            font.pixelSize: scaleY(2)
+            font.pixelSize: textSize
             color: "white"
             visible:  dcenowplaying.channelID ==="" ? false: true
         }
@@ -158,7 +157,7 @@ Rectangle {
             font.bold: true
             smooth: true
             horizontalAlignment: Text.AlignHCenter
-            font.pixelSize: scaleY(2)
+            font.pixelSize: textSize
             color: "white"
             visible:  dcenowplaying.channel ==="" ? false: true
         }
@@ -167,9 +166,8 @@ Rectangle {
         Text {
             id: np
             text:dceTimecode.qsCurrentTime
-            font.pixelSize: scaleY(2.5)            
+            font.pixelSize: scaleY(4)
             wrapMode: Text.WrapAtWordBoundaryOrAnywhere
-
             color: "white"
             visible:  dceTimecode.qsCurrentTime ==="00:00:00" && dcerouter.i_current_mediaType ==4 ? false: true
         }
