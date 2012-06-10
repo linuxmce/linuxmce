@@ -39,16 +39,16 @@ Rectangle {
 
     NowPlayingButton{
         id:fs_npButton
-        width: parent.width
         anchors.top: spaceholder.bottom
-        anchors.horizontalCenter: parent.horizontalCenter
-
+        anchors.left: manager.b_orientation ? parent.horizontalCenter : parent.left
+        anchors.leftMargin: manager.b_orientation ? (fs_npButton.width / 2) * -1 : scaleX(2)
     }
+
     DroidHomeSelector{
         id:home_selector;
-        anchors.verticalCenter: stage.verticalCenter
-        anchors.left: stage.left
-        anchors.leftMargin: manager.b_orientation ? scaleX(15) : scaleX(50)
+        anchors.top: manager.b_orientation ? fs_npButton.bottom : spaceholder.bottom
+        anchors.left: manager.b_orientation ? stage.left : fs_npButton.right
+        anchors.leftMargin: manager.b_orientation ? scaleX(15) : scaleX(1)
     }
 
 
