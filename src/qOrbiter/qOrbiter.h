@@ -41,7 +41,7 @@
 
 //	DCE Implemenation for #2186 qOrbiter
 
-#include "Gen_Devices/qOrbiterBase.h"
+#include "../Gen_Devices/qOrbiterBase.h"
 //<-dceag-d-e->
 
 class basicImageProvider;

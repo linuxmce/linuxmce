@@ -69,6 +69,7 @@ folder_03.target = $$DESTDIR
 
 DEFINES += for_desktop
 QT+= phonon
+
 }
 
 WIN32{
@@ -96,6 +97,7 @@ folder_03.target = $$DESTDIR
 
 DEFINES+=for_android
 QT+= phonon
+LIBS += -L/usr/lib/ao/plugins-4 -lpulse -lpulse-mainloop-glib
 }
 
 for_freemantle{
