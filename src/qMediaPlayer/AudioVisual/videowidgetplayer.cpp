@@ -1,5 +1,5 @@
 #include "videowidgetplayer.h"
-#include "Phonon"
+#include <phonon/Phonon>
 #include "QVBoxLayout"
 #include <QUrl>
 #include <phonon/VideoWidget>

@@ -333,7 +333,7 @@ DataGridTable::DataGridTable()
 	m_iDownRow=m_iUpRow=-1;
 	m_iPK_Datagrid = 0;
 	m_bRePopulateEachTimeRequested = false;
-	Message::Message();
+    Message();
 	ClearData();
 }
 

@@ -2,7 +2,7 @@
 #define VIDEOWIDGETPLAYER_H
 
 #include <QWidget>
-#include <Phonon>
+#include <phonon/Phonon>
 class videoWidgetPlayer : public QWidget
 {
     Q_OBJECT

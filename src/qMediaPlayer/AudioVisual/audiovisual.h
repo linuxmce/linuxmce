@@ -4,7 +4,7 @@
 //place it in a QDeclarativeItem
 
 #include <QDeclarativeItem>
-#include <Phonon>
+#include <phonon/Phonon>
 #include <QString>
 #include <QUrl>
 #include "videowidgetplayer.h"
