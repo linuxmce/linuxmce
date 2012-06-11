@@ -1,0 +1,13 @@
+Source: pluto-vdr-plugin
+Section: unknown
+Priority: extra
+Maintainer: root <root@fluffybitch.org>
+Build-Depends: debhelper (>= 7)
+Standards-Version: 3.8.3
+Homepage: <insert the upstream URL, if relevant>
+
+Package: pluto-vdr-plugin
+Architecture: any
+Depends: libmysqlclient14, mysql-server-4.1, libstdc++5, pluto-dcecommon, dcecommon, libmysqlclient15off, mysql-server, vdr-plugin-streamdev-server, vdr-plugin-streamdev-client, vdr-plugin-control, vdr-plugin-remotetimers, libmysqlclient16, libstdc++6, ${shlibs:Depends}, ${misc:Depends}
+Description: <insert up to 60 chars description>
+ <insert long description, indented with spaces>
