@@ -289,7 +289,7 @@ Rectangle {
                 onEntered: parent.color="green"
                 onExited: parent.color="red"
                 anchors.fill: parent
-                onClicked: window.qmlSetupLmce(devicenumber.text, routerip.text)
+                onClicked: ext_routerip.visible ? window.qmlSetupLmce(devicenumber.text, ext_routerip.text) : window.qmlSetupLmce(devicenumber.text, routerip.text)
                 anchors.verticalCenter: parent.verticalCenter
             }
         }
