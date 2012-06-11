@@ -372,4 +372,21 @@ Rectangle {
             }
         }
     }
+    Rectangle{
+        id:newOrbiterButton
+        height: scaleY(10)
+        width:scaleX(55)
+        color: "slategrey"
+        Text {
+            id: newOrbiterLabel
+            text: qsTr("Create New Orbiter?")
+            font.pixelSize: scaleY(3)
+            width: parent.width
+            anchors.centerIn: parent
+            wrapMode: Text.WrapAtWordBoundaryOrAnywhere
+        }
+        visible: existing_orbiters.visible ? true : false
+        anchors.bottom: existing_orbiters.top
+        anchors.horizontalCenter: existing_orbiters.horizontalCenter
+    }
 }

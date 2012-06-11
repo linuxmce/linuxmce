@@ -4141,6 +4141,122 @@ int qOrbiter::DeviceIdInvalid()
     return 0;
 }
 
+int qOrbiter::SetupNewOrbiter()
+{
+    LoggerWrapper::GetInstance()->Write(LV_STATUS,"start SetupNewOrbiter");
+    Event_Impl event_Impl(DEVICEID_MESSAGESEND, 0, m_sIPAddress);
+    while(true)
+    {
+        string sResponse;
+        if( !event_Impl.m_pClientSocket->SendString("READY") ||
+            !event_Impl.m_pClientSocket->ReceiveString(sResponse) ||
+            sResponse.size()==0 )
+            return 0;  // Something went wrong
+
+        if( sResponse=="YES" )
+            break;
+        Sleep(2000);
+    }
+
+    LoggerWrapper::GetInstance()->Write(LV_STATUS,"SetupNewOrbiter prompting for inputs");
+
+    int PK_Users = PromptFor("Users");
+    //if( PROMPT_CANCEL == PK_Users )
+    //	return 0;
+
+    int PK_Room = PromptFor("Room");
+    //if( PROMPT_CANCEL == PK_Room )
+    //	return 0;
+
+    int PK_Skin = PromptFor("Skin");
+    //if( PROMPT_CANCEL == PK_Skin )
+    //	return 0;
+
+    int PK_Language =PromptFor("Language");
+    //if( PROMPT_CANCEL == PK_Language )
+    //	return 0;
+
+    map<int,string> mapResponseYNC;
+    mapResponseYNC[0]="Yes";
+    mapResponseYNC[1]="No";
+    mapResponseYNC[2]="Cancel";
+
+    int Width=0,Height=0;
+    string sType;
+#ifdef WIN32
+#ifdef WINCE
+    sType="CE";
+#else
+    sType="Windows";
+#endif
+    RECT rc;
+    HWND hWndDesktop = ::GetDesktopWindow();
+    GetWindowRect(hWndDesktop, &rc);
+    Width=rc.right;
+    Height=rc.bottom;
+#else
+    sType="Linux";
+    // HOW to do this??  TODO
+#endif
+
+#ifdef PADORBITER
+    int PK_Size=1;
+    Width=800;
+    Height=600;
+#else
+    int PK_Size=0;
+    PK_Size=PromptFor("Size");
+    //if( PROMPT_CANCEL == PK_Size)
+      //  return 0;
+#endif
+
+#ifdef PADORBITER
+    int PK_Device=0;
+    DCE::CMD_New_Orbiter_DT CMD_New_Orbiter_DT(m_dwPK_Device, DEVICETEMPLATE_Orbiter_Plugin_CONST, BL_SameHouse, sType,
+        PK_Users,DEVICETEMPLATE_Orbiter_CONST,m_sMacAddress,PK_Room,Width,Height,PK_Skin,PK_Language,PK_Size,&PK_Device);
+#else
+    int PK_Device=0;
+    DCE::CMD_New_Orbiter_DT CMD_New_Orbiter_DT(m_dwPK_Device, DEVICETEMPLATE_Orbiter_Plugin_CONST, BL_SameHouse, sType,
+        PK_Users,DEVICETEMPLATE_qOrbiter_CONST ,m_sMacAddress,PK_Room,Width,Height,PK_Skin,PK_Language,PK_Size,&PK_Device);
+
+#endif
+
+    CMD_New_Orbiter_DT.m_pMessage->m_eExpectedResponse = ER_ReplyMessage;
+    Message *pResponse = event_Impl.SendReceiveMessage( CMD_New_Orbiter_DT.m_pMessage );
+    if( !pResponse || pResponse->m_dwID != 0 )
+    {
+        if(pResponse)
+            delete pResponse;
+
+        LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"SetupNewOrbiter unable to create orbiter");
+       // m_pOrbiterRenderer->PromptUser("Sorry.  There is a problem creating the new orbiter.  Please check the logs.");
+        return 0;
+    }
+    CMD_New_Orbiter_DT.ParseResponse( pResponse );
+    delete pResponse;
+
+    if( !PK_Device )
+    {
+        LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"SetupNewOrbiter unable to create orbiter #2");
+        //PromptUser("Sorry.  Orbiter Plugin could not create the device for some reason.  Please check the logs.");
+        return 0;
+    }
+
+
+
+    LoggerWrapper::GetInstance()->Write(LV_STATUS,"SetupNewOrbiter new orbiter %d",PK_Device);
+/*
+    if( MonitorRegen(PK_Device)==0 )  // User hit cancel
+    {
+        OnReload();
+        exit(1);
+        return 0; // Don't retry to load now
+    }
+
+*/
+    return PK_Device;  // Retry loading as the specified device
+}
+
 
 
 

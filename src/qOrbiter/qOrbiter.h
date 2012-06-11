@@ -177,6 +177,7 @@ public:
     virtual int PromptFor(std::string sToken);
     virtual int PromptUser(std::string sPrompt, int iTimeoutSeconds, map<int, std::string> *p_mapPrompts);
     virtual int DeviceIdInvalid();
+    virtual int SetupNewOrbiter();
 
     //<-dceag-const-e->
 
