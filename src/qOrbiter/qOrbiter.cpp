@@ -4594,7 +4594,11 @@ void qOrbiter::pingCore()
 #endif
     QNetworkAccessManager *pingManager = new QNetworkAccessManager();
     connect(pingManager, SIGNAL(finished(QNetworkReply*)), this, SLOT(checkPing(QNetworkReply*)));
-    pingManager->get(QNetworkRequest(QUrl(url)));
+   QNetworkReply *badReply = pingManager->get(QNetworkRequest(QUrl(url)));
+
+   // TODO: add a network timeout for this so it returns faster for located non-lmce machines. Currently it only returns fast if the ip or hostname is totally invalid, i.e. no route. For online machines,
+   //it takes a bit longer. solve by attatching A Qtimer checking process and force it to cancel requests that dont return in a reasonable(whatever that is) amount of time. 5 seconds? I mean, who is still on
+   //dialup?
 
 }
 
@@ -4602,10 +4606,8 @@ void qOrbiter::checkPing(QNetworkReply* reply)
 {
 
     qDebug ("Check router says response is"+reply->bytesAvailable());
-
-
     // TODO: add helpers to redirect in case of bad ip address
-    if(reply->size() != 0)
+    if(reply->size() != 0 )
     {
         emit statusMessage("Router found, connecting");
         if ( initialize() == true )
