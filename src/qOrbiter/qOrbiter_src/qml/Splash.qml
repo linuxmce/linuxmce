@@ -10,9 +10,6 @@ Rectangle {
     height:appH
     width:appW
     onWidthChanged: console.log("detected size change")
-
-
-
     function scaleX(x){
         return x/100*appH
     }
@@ -231,6 +228,7 @@ Rectangle {
             //  onTextChanged: setRouterIp(routerip.text)
             fillColor: "grey"
             anchors.verticalCenter: parent.verticalCenter
+
         }
 
         TextInput {

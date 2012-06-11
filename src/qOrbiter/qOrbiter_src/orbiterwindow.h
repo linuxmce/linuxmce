@@ -8,6 +8,7 @@
 #if GLENABLED
 #include <QtOpenGL/QGLWidget>
 #endif
+#include <QtNetwork/QNetworkReply>
 class orbiterWindow : public QObject
 {
     Q_OBJECT
@@ -52,8 +53,6 @@ public slots:
     QString getMessage();
 
     void showSetup();
-
-
     void setOrbiterState(bool state);
     bool getOrbiterState();
 
@@ -78,9 +77,6 @@ public slots:
     bool getdeviceState () {return b_devicePresent;}
 
     void prepareExistingOrbiters(QList<QObject*> ex_list);
-
-
-
 
 signals:
     void MessageChanged();

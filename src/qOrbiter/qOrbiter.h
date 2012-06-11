@@ -36,6 +36,9 @@
 #include <datamodels/avdevice.h>
 #include <contextobjects/existingorbiter.h>
 
+#include <QtNetwork/QNetworkAccessManager>
+#include <QtNetwork/QNetworkReply>
+
 //	DCE Implemenation for #2186 qOrbiter
 
 #include "Gen_Devices/qOrbiterBase.h"
@@ -1385,6 +1388,10 @@ public slots:
     void qmlSetup(QString device, QString address);
     void setCurrentScreen(QString s);
 
+    void pingCore();
+    void checkPing(QNetworkReply* reply);
+
+
     void moveDirection(QString direction);
     void JogStream(QString jump);
     void processScreenShot(char picData, int picDataSize, string fileFormat);
@@ -1406,7 +1413,7 @@ public slots:
     void extraButtons(QString button);
 
     void newOrbiter();
-    bool routerCheck();
+
 
     //operations
     void setMediaResponse(QString r) {mediaResponse = r; emit mediaResponseChanged();}

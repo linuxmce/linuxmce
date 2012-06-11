@@ -185,7 +185,7 @@ int main(int argc, char* argv[])
     cout << "qOrbiter, v." << VERSION << endl
          << "Visit www.linuxmce.org for source code and license information" << endl << endl;
 
-    string sRouter_IP="DCEROUTER";
+    string sRouter_IP="192.168.80.1";
     int PK_Device;
     string sLogger="stdout";
 
@@ -523,9 +523,11 @@ int main(int argc, char* argv[])
 
         pqOrbiter->m_dwPK_Device = w->iPK_Device;
         pqOrbiter->m_sHostName = w->qs_routerip.toStdString();
+        pqOrbiter->m_sIPAddress = w->qs_routerip.toStdString();
         qDebug() << "Initializing connection";
+        pqOrbiter->pingCore();
 
-        if (pqOrbiter->routerCheck() == true)
+     /*   if (pqOrbiter->routerCheck() == true)
         {
 
 
@@ -545,7 +547,7 @@ int main(int argc, char* argv[])
             {
                 qDebug() << "Connect Failed!";
                 pqOrbiter->Disconnect();
-            }
+            } */
             a.exec();
 
             /*

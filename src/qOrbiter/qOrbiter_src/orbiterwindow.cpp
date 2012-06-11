@@ -28,6 +28,10 @@
 #include <QtDeclarative/QDeclarativeEngine>
 #include <QDir>
 
+#ifdef QT_DEBUG
+#include <QDebug>
+#endif
+
 #ifdef IOS
 #include "../iOS/qOrbiter/ioshelpers.h"
 #endif
@@ -35,8 +39,6 @@
 orbiterWindow::orbiterWindow(long deviceid, std::string routerip, QObject *parent) :
     QObject(parent)
 {
-
-
 
     newOrbiter = false;
     this->b_connectionPresent = false;
@@ -49,6 +51,7 @@ orbiterWindow::orbiterWindow(long deviceid, std::string routerip, QObject *paren
     //qDebug() << mainView.size();
     router = routerip;
     deviceno = deviceid;
+
 
     mainView.setResizeMode(QDeclarativeView::SizeRootObjectToView);
     mainView.rootContext()->setContextProperty("window", this);
@@ -216,5 +219,6 @@ void orbiterWindow::prepareExistingOrbiters(QList<QObject *> ex_list)
     mainView.rootContext()->setContextProperty("orbiterList", QVariant::fromValue(orbiterList));
     emit showList();
 }
+
 
 

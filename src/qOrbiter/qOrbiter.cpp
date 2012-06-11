@@ -23,8 +23,10 @@
 #include "PlutoUtils/FileUtils.h"
 #include "PlutoUtils/StringUtils.h"
 #include "PlutoUtils/Other.h"
+
 #include "QtNetwork/QTcpSocket"
 #include "QtNetwork/QHostAddress"
+
 
 #ifdef debug
 #include <QDebug>
@@ -1055,7 +1057,7 @@ void qOrbiter::CMD_Set_Now_Playing(string sPK_DesignObj,string sValue_To_Assign,
     m_bUsingLiveAVPath = atoi(StringUtils::Tokenize(sList_PK_Device,",",pos).c_str())==1;
     setLiveAvPath(m_bUsingLiveAVPath);
 #ifdef debug
- qDebug() << m_bUsingLiveAVPath;
+    qDebug() << m_bUsingLiveAVPath;
 #endif
     pos=0;
     /*
@@ -1805,8 +1807,9 @@ void qOrbiter::CMD_Assisted_Make_Call(int iPK_Users,string sPhoneExtension,strin
 
 bool DCE::qOrbiter::initialize()
 {
+#ifdef QT_DEBUG
     qDebug()<< "Connecting to router";
-
+#endif
     emit statusMessage("Starting dce initialization");
     if ( GetConfig() ==true && Connect(PK_DeviceTemplate_get()) == true )
     {
@@ -1955,13 +1958,8 @@ void qOrbiter::qmlSetup(QString device, QString address)
 {
     m_dwPK_Device = device.toLong();
     m_sHostName = address.toStdString();
-    if(initialize())
-    {
-    }
-    else
-    {
-        connectionError();
-    }
+    m_sIPAddress = address.toStdString();
+    pingCore();
 
 }
 
@@ -4100,21 +4098,6 @@ void DCE::qOrbiter::newOrbiter()
     //SendCommand(newOrbiterDevice);
 }
 
-bool qOrbiter::routerCheck()
-{
-    Event_Impl event_Impl(DEVICEID_MESSAGESEND, 0, m_sIPAddress);
-    if(event_Impl.m_pClientSocket->SendString( "-o 0 4 1 247 2 1" ))
-    {
-        qDebug("connection found");
-        return true;
-    }
-    else
-    {
-        qDebug("connection not found");
-        return false;
-    }
-}
-
 /*
           re-implementing from original orbiter as part of the orbiter setup. i dont know how it all works, but i have an idea
           PromptFor looks for the specific item it needs a list of, like users or rooms and then PromptUser will display the information
@@ -4602,4 +4585,38 @@ void qOrbiter::CMD_Guide(string &sCMD_Result,Message *pMessage)
 {}
 //<-dceag-c126-e->
 
+void qOrbiter::pingCore()
+{
+    QString url = "http://"+QString::fromStdString(m_sIPAddress)+"/lmce-admin/index.php";
+#ifdef QT_DEBUG
+    qDebug() << url;
+#endif
+    QNetworkAccessManager *pingManager = new QNetworkAccessManager(this);
+    connect(pingManager, SIGNAL(finished(QNetworkReply*)), this, SLOT(checkPing(QNetworkReply*)), Qt::QueuedConnection);
+    pingManager->get(QNetworkRequest(QUrl(url)));
+}
+
+void qOrbiter::checkPing(QNetworkReply* reply)
+{
+#ifdef QT_DEBUG
+    qDebug ("Check router says response is"+reply->bytesAvailable());
+#endif
+    // TODO: add helpers to redirect in case of bad ip address
+    if(reply->size() != 0)
+    {
+        if ( initialize() == true )
+        {
+            LoggerWrapper::GetInstance()->Write(LV_STATUS, "Connect OK");
+            CreateChildren();
+            if( m_bLocalMode )
+                RunLocalMode();
+            else
+            {
+#ifdef QT_DEBUG
+                qDebug ("Bad Ip");
+#endif
+            }
+        }
+    }
+}
 

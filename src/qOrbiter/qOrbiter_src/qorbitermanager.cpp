@@ -328,7 +328,7 @@ void qorbiterManager::refreshUI(QUrl url)
     qorbiterUIwin->rootContext()->setBaseUrl(skin->entryUrl());
     qorbiterUIwin->setSource(skin->entryUrl());
     qorbiterUIwin->setResizeMode(QDeclarativeView::SizeRootObjectToView);
-     checkOrientation(qorbiterUIwin->size());
+
 }
 
 
@@ -735,7 +735,7 @@ void qorbiterManager::swapSkins(QString incSkin)
 #ifdef debug
     qDebug() << tskinModel->rowCount();
 #endif
-
+checkOrientation(qorbiterUIwin->size());
     if (tskinModel->rowCount() > 0)
     {
         setDceResponse("Setting Skin to:" + incSkin);

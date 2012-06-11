@@ -2,7 +2,7 @@ import QtQuick 1.0
 
 
 Rectangle {
-    width: appW
+    width: childrenRect.width
     height: childrenRect.height
     color: "transparent"
 
