@@ -75,6 +75,7 @@ qOrbiter::qOrbiter(int DeviceID, string ServerAddress,bool bConnectEventHandler,
     m_dwPK_Device_NowPlaying_Audio = 0;
     m_dwPK_Device_CaptureCard = 0;
     m_dwMaxRetries = 3;
+    m_sExternalIP = "";
     initializeGrid();
 }
 
@@ -4591,32 +4592,37 @@ void qOrbiter::pingCore()
 #ifdef QT_DEBUG
     qDebug() << url;
 #endif
-    QNetworkAccessManager *pingManager = new QNetworkAccessManager(this);
-    connect(pingManager, SIGNAL(finished(QNetworkReply*)), this, SLOT(checkPing(QNetworkReply*)), Qt::QueuedConnection);
+    QNetworkAccessManager *pingManager = new QNetworkAccessManager();
+    connect(pingManager, SIGNAL(finished(QNetworkReply*)), this, SLOT(checkPing(QNetworkReply*)));
     pingManager->get(QNetworkRequest(QUrl(url)));
+
 }
 
 void qOrbiter::checkPing(QNetworkReply* reply)
 {
-#ifdef QT_DEBUG
+
     qDebug ("Check router says response is"+reply->bytesAvailable());
-#endif
+
+
     // TODO: add helpers to redirect in case of bad ip address
     if(reply->size() != 0)
     {
+        emit statusMessage("Router found, connecting");
         if ( initialize() == true )
         {
             LoggerWrapper::GetInstance()->Write(LV_STATUS, "Connect OK");
             CreateChildren();
             if( m_bLocalMode )
                 RunLocalMode();
-            else
-            {
-#ifdef QT_DEBUG
-                qDebug ("Bad Ip");
-#endif
-            }
         }
+    }
+    else
+    {
+#ifdef QT_DEBUG
+
+#endif
+        qDebug("Bad Ip");
+        emit routerInvalid();
     }
 }
 

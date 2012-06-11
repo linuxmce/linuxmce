@@ -524,6 +524,7 @@ int main(int argc, char* argv[])
         pqOrbiter->m_dwPK_Device = w->iPK_Device;
         pqOrbiter->m_sHostName = w->qs_routerip.toStdString();
         pqOrbiter->m_sIPAddress = w->qs_routerip.toStdString();
+        pqOrbiter->m_sExternalIP = w->qs_ext_routerip.toStdString();
         qDebug() << "Initializing connection";
         pqOrbiter->pingCore();
 

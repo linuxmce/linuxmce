@@ -20,7 +20,11 @@ Rectangle {
     Connections{
         target: window
         onShowList:existing_orbiters.visible = true
-        onShowExternal: ext_routerip.visible = true
+        onShowExternal: {
+            console.log("showing external ip box")
+            ext_routerip.visible = true
+        }
+
     }
 
 

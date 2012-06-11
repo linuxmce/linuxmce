@@ -94,6 +94,8 @@ public:
     string media_seek;
 
     bool pause;
+
+    string m_sExternalIP;
     int iPK_Device_DatagridPlugIn;
     int iPK_Device_OrbiterPlugin;
     int iPK_Device_GeneralInfoPlugin;
