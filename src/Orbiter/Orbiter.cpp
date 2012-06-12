@@ -5400,6 +5400,7 @@ void Orbiter::CMD_Goto_DesignObj(int iPK_Device,string sPK_DesignObj,string sID,
 	{
 		pObj_New->m_bCantGoBack=true;
 		ScreenHistory::m_bAddToHistory = false;
+		StartScreenSaver(false);
 	}
 	else if( ScreenHistory::m_bAddToHistory && m_pScreenHistory_Current != pScreenHistory_New)
 	{
