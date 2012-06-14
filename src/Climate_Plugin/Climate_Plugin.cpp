@@ -451,60 +451,70 @@ void Climate_Plugin::GetStateVar(DeviceData_Router *pDevice,
 {
 	string sCurrentState = pDevice->m_sState_get();
 	
-	// temperature
-	string::size_type pos1 = sCurrentState.rfind('(');
-	string::size_type pos2 = sCurrentState.rfind(')');
-	if( pos1!=string::npos && pos2!=string::npos && pos1 < pos2 )
+	switch(pDevice->m_dwPK_DeviceTemplate)
 	{
-		sTemp = sCurrentState.substr(pos1+1,pos2-pos1-1);
-		sCurrentState = sCurrentState.substr(0, pos1);
-	}
-	else
-	{
-		sTemp = "25";
-	}
-	
-	// on/off
-	if( sCurrentState.substr(0,3) == "OFF" )
-	{
-		sOn = "OFF";
-	}
-	else
-	{
-		sOn = "ON";
-	}
-	
-	// mode and fan
-	sMode = "AUTO";
-	sFan = "AUTO";
-	pos1 = sCurrentState.find('/');
-	pos2 = sCurrentState.rfind('/');
-	if( pos1!=string::npos && pos2!=string::npos && pos1 < pos2 )
-	{
-		string::size_type pos3 = sCurrentState.find('/', pos1 + 1);
-		if( pos3!=string::npos && pos1 < pos3 && pos3 < pos2 )
+		case DEVICETEMPLATE_Temperature_sensor_CONST:
+			sTemp = sCurrentState;
+			break; 
+		default:
 		{
-			sMode = sCurrentState.substr(pos1+1, pos3-pos1-1);
-			sFan = sCurrentState.substr(pos3+1, pos2-pos3-1);
+			// temperature
+			string::size_type pos1 = sCurrentState.rfind('(');
+			string::size_type pos2 = sCurrentState.rfind(')');
+			if( pos1!=string::npos && pos2!=string::npos && pos1 < pos2 )
+			{
+				sTemp = sCurrentState.substr(pos1+1,pos2-pos1-1);
+				sCurrentState = sCurrentState.substr(0, pos1);
+			}
+			else
+			{
+				sTemp = "25";
+			}
+			
+			// on/off
+			if( sCurrentState.substr(0,3) == "OFF" )
+			{
+				sOn = "OFF";
+			}
+			else
+			{
+				sOn = "ON";
+			}
+			
+			// mode and fan
+			sMode = "AUTO";
+			sFan = "AUTO";
+			pos1 = sCurrentState.find('/');
+			pos2 = sCurrentState.rfind('/');
+			if( pos1!=string::npos && pos2!=string::npos && pos1 < pos2 )
+			{
+				string::size_type pos3 = sCurrentState.find('/', pos1 + 1);
+				if( pos3!=string::npos && pos1 < pos3 && pos3 < pos2 )
+				{
+					sMode = sCurrentState.substr(pos1+1, pos3-pos1-1);
+					sFan = sCurrentState.substr(pos3+1, pos2-pos3-1);
+				}
+			}
+			else if( pos1!=string::npos )
+			{
+				if( sCurrentState.c_str()[0] != 'O' )
+				{
+					sMode = sCurrentState.substr(0, pos1);
+				}
+			}
+			
+			// set point
+			sSetPoint = "25";
+			if( pos2!=string::npos && pos2+1<sCurrentState.size() )
+			{
+				int iSetPoint = atoi( sCurrentState.substr(pos2+1).c_str() );
+				if( 0 != iSetPoint )
+				{
+					sSetPoint = StringUtils::itos(iSetPoint);
+				}
+			}
 		}
-	}
-	else if( pos1!=string::npos )
-	{
-		if( sCurrentState.c_str()[0] != 'O' )
-		{
-			sMode = sCurrentState.substr(0, pos1);
-		}
-	}
-	
-	// set point
-	sSetPoint = "25";
-	if( pos2!=string::npos && pos2+1<sCurrentState.size() )
-	{
-		int iSetPoint = atoi( sCurrentState.substr(pos2+1).c_str() );
-		if( 0 != iSetPoint )
-		{
-			sSetPoint = StringUtils::itos(iSetPoint);
-		}
+		break;
 	}
 }
 
