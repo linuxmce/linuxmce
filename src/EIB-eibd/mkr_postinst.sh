@@ -21,6 +21,10 @@ adduser --system --home /var/run/eib eib || true
 Q="GRANT ALL PRIVILEGES ON eib.* to 'eib'@'localhost'; FLUSH PRIVILEGES"
 RunSQL "$Q"
 
-# start eibd daemon
-service eibd start
+# start eibd daemon if not running, else restart
+if pidof eibd > /dev/null; then
+	service eibd restart
+else
+	service eibd start
+fi
 
