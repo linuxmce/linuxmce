@@ -32,6 +32,8 @@
 #include "Message.h"
 #include "DCERouter.h"
 
+#include "Climate_Plugin/Climate_Plugin.h"
+
 #include "pluto_main/Define_CriteriaParmList.h"
 #include "pluto_main/Define_ParameterType.h"
 #include "pluto_main/Table_EventParameter.h"
@@ -142,6 +144,67 @@ bool Criteria::EvaluateExpression(class CriteriaParm *pCriteriaParm,class EventI
 				{
 				        iTmp = (unsigned long)atoi(sLValue->c_str());
 					iLValue = &iTmp;
+				}
+			}
+		}
+		break;
+	case CRITERIAPARMLIST_State_CONST:
+	        {
+			Router *pRouter = (Router *) pExtraInfo;
+			int PK_Device = 0, valueType = 0;
+			string::size_type pos = pCriteriaParm->m_sParm.find('.');
+			if (pos != string::npos)
+			{
+				PK_Device = atoi( pCriteriaParm->m_sParm.substr(0,pos).c_str() );
+				valueType = atoi( pCriteriaParm->m_sParm.substr(pos+1).c_str() );
+			} else {
+				PK_Device = atoi( pCriteriaParm->m_sParm.c_str() );
+			}
+			LoggerWrapper::GetInstance()->Write(LV_STATUS,"Criteria::EvaluateExpression Device State: PK_Device = %d, valueType = %d", PK_Device, valueType);
+			
+			if (PK_Device > 0) 
+			{
+				PK_ParameterType = PARAMETERTYPE_string_CONST;
+				DeviceData_Router* pDevice = pRouter->m_mapDeviceData_Router_Find(PK_Device);
+				if (pDevice)
+				{
+					if (pDevice->m_dwPK_DeviceCategory == DEVICECATEGORY_Climate_Device_CONST)
+					{
+						string sOn;	string sMode; string sFan; string sSetPoint; string sTemp;
+						Climate_Plugin::GetStateVar(pDevice, sOn, sMode, sFan, sSetPoint, sTemp);
+						LoggerWrapper::GetInstance()->Write(LV_STATUS,"Criteria::EvaluateExpression Climate device: sOn = %s, sMode = %s, sFan = %s, sSetPoint = %s, sTemp = %s", sOn.c_str(), sMode.c_str(), sFan.c_str(), sSetPoint.c_str(), sTemp.c_str());
+						switch (valueType)
+						{
+						case 1:
+							sTmp = sOn;
+							sLValue = &sTmp;
+							break;
+						case 2:
+							sTmp = sOn;
+							sLValue = &sTmp;
+							break;
+						case 3:
+							sTmp = sOn;
+							sLValue = &sFan;
+							break;
+						case 4:
+							PK_ParameterType = PARAMETERTYPE_int_CONST;
+							iTmp = atoi(sSetPoint.c_str());
+							iLValue = &iTmp;
+							break;
+						case 5:
+						default:
+							PK_ParameterType = PARAMETERTYPE_int_CONST;
+							iTmp = atoi(sTemp.c_str());
+							iLValue = &iTmp;
+							break;
+						}
+					} else {
+						// Here we can add special handling for more types of devices, just make sure to
+						// also make changes to the web admin (utils.inc.php::displayCriteria)
+						sTmp = pDevice->m_sState_get();
+						sLValue = &sTmp;
+					}
 				}
 			}
 		}
