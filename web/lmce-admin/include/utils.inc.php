@@ -1339,6 +1339,46 @@ function displayCriteria($FK_CriteriaParmNesting,$eventHandlerID,$installationID
 					}
 					$out.='</select>';
 				}
+				if ($rowCP['FK_CriteriaParmList']==$GLOBALS['CPL_State']) {
+					$queryTable="SELECT * FROM Device WHERE FK_Installation='".$installationID."' ORDER BY Description ASC";
+					$resTable2=$dbADO->Execute($queryTable);
+					$out.='Device: <select name="CriteriaParmParm_'.$rowCP['PK_CriteriaParm'].'" onChange="document.editCriteria.changedCP.value='.$rowCP['PK_CriteriaParm'].';document.editCriteria.submit();">
+										<option value=""></option>';
+					$parmDevice = $rowCP['Parm'];
+					$parmData = "";
+					if (strpos($rowCP['Parm'], ".") > 0) {
+					         $parmDevice = substr($rowCP['Parm'], 0, strpos($rowCP['Parm'],"."));
+					   	 $parmData =  substr($rowCP['Parm'], strpos($rowCP['Parm'],".")+1);
+					}
+					while($rowTable2=$resTable2->FetchRow()) {
+						if(isset($parmDevice)) {
+							$isSelectedParm=($rowTable2['PK_Device']==$parmDevice)?'selected':'';
+						}
+						$out.='<option value="'.$rowTable2['PK_Device'].'" '.$isSelectedParm.'>'.$rowTable2['Description'].'</option>';
+					}
+						
+					$out.='			
+					</select>';
+					if (isset($parmDevice)) {
+					   	$queryTable="SELECT d.PK_Device,dt.FK_DeviceCategory FROM Device d INNER JOIN DeviceTemplate dt ON d.FK_DeviceTemplate=dt.PK_DeviceTemplate WHERE d.FK_Installation='".$installationID."' AND d.PK_Device='".$parmDevice."'";
+						$resCat=$dbADO->Query($queryTable);
+						if($resCat->RecordCount()>0){
+							$row=$resCat->FetchRow();
+							$DeviceCategory=$row['FK_DeviceCategory'];
+						}
+						if ($DeviceCategory == $GLOBALS['rootClimate']) {
+					             // Display options for mode,fan,on-off,setpoint,temp
+						     $stateArray=array(1=>'On/Off',2=>'Mode',3=>'Fan',4=>'Set Point',5=>'Current Temp');
+						     $out.='<select name="CriteriaParmParm_'.$rowCP['PK_CriteriaParm'].'_2" onChange="document.editCriteria.changedCP.value='.$rowCP['PK_CriteriaParm'].';document.editCriteria.submit();">
+								<option value=""></option>';
+						     foreach($stateArray AS $key => $value){
+						  	  $out.='<option value="'.$key.'" '.(($parmData==$key)?'selected':'').'>'.$value.'</option>';
+						     }
+						     $out.='			
+						     </select>';
+						}
+					}
+				}
 				$out.=' <select name="CriteriaParmOperator_'.$rowCP['PK_CriteriaParm'].'">
 						<option value="1" '.(($rowCP['Operator']==1)?'selected':'').'>=</option>
 						<option value="2" '.(($rowCP['Operator']==2)?'selected':'').'>&lt;&gt;</option>
@@ -1370,15 +1410,6 @@ function displayCriteria($FK_CriteriaParmNesting,$eventHandlerID,$installationID
 							$out.='<option value="'.$rowTable[$rowCP['CPL_Description']].'" '.(($rowCP['Value']==$rowTable[$rowCP['CPL_Description']])?'selected':'').'>'.$rowTable['Description'].'</option>';
 						}
 						$out.='</select>';
-					}elseif($rowCP['CPL_Description']=='State'){
-						$stateArray=array(5=>translate('TEXT_AFTERNOON_CONST'),1=>translate('TEXT_DAYLIGHT_CONST'),6=>translate('TEXT_EVENING_CONST'),3=>translate('TEXT_MORNING_CONST'),7=>translate('TEXT_NIGHT_CONST'),2=>translate('TEXT_NOT_DAYLIGHT_CONST'),9=>translate('TEXT_WEEKDAY_CONST'),8=>translate('TEXT_WEEKEND_CONST'));
-						$out.='<select name="CriteriaParmValue_'.$rowCP['PK_CriteriaParm'].'">
-										<option value=""></option>';
-						foreach($stateArray AS $key => $value){
-							$out.='<option value="'.$key.'" '.(($rowCP['Value']==$key)?'selected':'').'>'.$value.'</option>';
-						}
-						$out.='
-									</select>';
 					}
 					else{
 						$out.='<input type="text" name="CriteriaParmValue_'.$rowCP['PK_CriteriaParm'].'" value="'.$rowCP['Value'].'">';
