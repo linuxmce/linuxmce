@@ -97,7 +97,10 @@ function editCriteria($output,$dbADO) {
 		$changedCP=(int)@$_POST['changedCP'];
 		if($changedCP>0){
 			$newCPL=((int)@$_POST['CriteriaParmID_'.$changedCP]>0)?(int)$_POST['CriteriaParmID_'.$changedCP]:NULL;
-			$newParm=($newCPL==$GLOBALS['PK_EventParameterParmList'])?(isset($_POST['CriteriaParmParm_'.$changedCP])?(int)$_POST['CriteriaParmParm_'.$changedCP]:NULL):NULL;
+			$newParm=($newCPL==$GLOBALS['PK_EventParameterParmList']||$newCPL==$GLOBALS['CPL_State'])?(isset($_POST['CriteriaParmParm_'.$changedCP])?(int)$_POST['CriteriaParmParm_'.$changedCP]:NULL):NULL;
+			if ($newCPL==$GLOBALS['CPL_State'] && isset($_POST['CriteriaParmParm_'.$changedCP.'_2'])) {
+			         $newParm.='.'.$_POST['CriteriaParmParm_'.$changedCP.'_2'];
+			}
 			$dbADO->Execute('UPDATE CriteriaParm SET FK_CriteriaParmList=?, Parm=?,Value=NULL, Operator=1 WHERE PK_CriteriaParm=?',array($newCPL,$newParm,$changedCP));
 		}
 
