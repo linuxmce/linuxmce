@@ -282,6 +282,7 @@
 	$GLOBALS['DayOfMonthParmList']=18;					// Day Of Month
 	$GLOBALS['SpecificDateParmList']=19;				// Specific Date or Absolute
 	$GLOBALS['PK_EventParameterParmList']=24;			// PK_EventParameter
+	$GLOBALS['CPL_State']=26;					// State
 
 	// PK_Variable from table Variable
 	
