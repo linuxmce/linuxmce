@@ -47,11 +47,17 @@ function Detect {
 
 	## Looks for standard device names mounted in mtab and learns path. Note some mounted drives show only UUID
 	mountedDevName=$(cat /etc/mtab | awk '/dev\/(sd|hd|md|xd)./ {print $1}')
-	if [ "$mountedDevName" != "" ]; then mountedDevPath=$(udevadm info --query=all --name="$mountedDevName" | grep 'S: disk/by-path/' | sed 's,disk/by-path/,,g' | awk '{ print $2 }'); fi
+	mountedDevPath=""
+	for Drive in $mountedDevName; do
+		mountedDevPath="$mountedDevPath $(udevadm info --query=all --name="$Drive" | grep 'S: disk/by-path/' | sed 's,disk/by-path/,,g' | awk '{ print $2 }')"
+	done
 	
 	## Grabs UUID of mounted devices in mtab and learns path. Note some mounted drives only show device names.
 	mountedUuid=$(cat /etc/mtab | awk '/uuid/ { print $1 }' | sed 's,/dev/disk/by-uuid/,,g' | sort -u)
-	mountedPath=$(udevadm info --query=all --name="/dev/disk/by-uuid/$mountedUuid" | grep 'S: disk/by-path/' | sed 's,disk/by-path/,,g' | awk '{ print $2 }') 
+	mountedPath=""
+	for Drive in $mountedUuid; do
+		mountedPath="$mountedPath $(udevadm info --query=all --name="/dev/disk/by-uuid/$Drive" | grep 'S: disk/by-path/' | sed 's,disk/by-path/,,g' | awk '{ print $2 }')"
+	done
 
 	## Remove the mounted paths
 	availPath=$(substractPaths "$availPath" "$mountedPath")
