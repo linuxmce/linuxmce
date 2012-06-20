@@ -191,7 +191,6 @@ iptables -t nat -F PREROUTING
 iptables -A INPUT -i lo -j ACCEPT
 iptables -A INPUT -m state --state ESTABLISHED,RELATED -j ACCEPT
 iptables -A INPUT -m mark --mark "$AllowMark" -j ACCEPT
-
 ip6tables -P INPUT "$DefaultIPv6Policy"
 ip6tables -F INPUT
 ip6tables -A INPUT -i lo -j ACCEPT
@@ -206,8 +205,8 @@ ip6tables -A INPUT -m state --state ESTABLISHED,RELATED -j ACCEPT
 ip6tables -A INPUT -m mark --mark "$AllowMark" -j ACCEPT
 
 # Log denied packets
-iptables -I INPUT 5 -m limit --limit 5/min -j LOG --log-prefix "IPv4 packet denied: " --log-level 7
-ip6tables -I INPUT 5 -m limit --limit 5/min -j LOG --log-prefix "IPv6 packet denied: " --log-level 7
+iptables -I INPUT -m limit --limit 5/min -j LOG --log-prefix "IPv4 packet denied: " --log-level 7
+ip6tables -I INPUT -m limit --limit 5/min -j LOG --log-prefix "IPv6 packet denied: " --log-level 7
 
 # If on multiple NIC's, accept incoming on LAN and NAT or masquerade on external
 if [[ -n "$IntIP" ]]; then
