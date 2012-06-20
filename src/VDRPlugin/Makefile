@@ -65,5 +65,5 @@ endif
 
 
 install: 
-	mkdir -p /usr/pluto/bin
+	mkdir -p $(DESTPATH)/usr/pluto/bin
 	cp VDRPlugin.so $(DESTPATH)/usr/pluto/bin
