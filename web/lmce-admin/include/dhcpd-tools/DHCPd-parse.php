@@ -106,7 +106,27 @@ class Leases{
 			}
 			if(preg_match("/^(})/", $line))
 			{
-				$this->leases[] = $this->parseLease($entry);
+				$newleases = array();
+				$lease = $this->parseLease($entry);
+				// We want to remove any duplicates, leaving only the newest lease
+				$insert = true;
+				foreach ($this->leases as $templease) {
+					if ($lease['ip_addr'] == $templease['ip_addr']) {
+						$insert = false;
+					}
+				}
+				if ($insert) {
+					$this->leases[] = $lease;
+				} else {
+					foreach ($this->leases as $templease) {
+						if ($lease['ip_addr'] == $templease['ip_addr'] && $lease['ends'] > $templease['ends']) {
+							$newleases[] = $lease;
+						} else {
+							$newleases[] = $templease;
+						}
+					}
+					$this->leases = $newleases;
+				}
 				unset($entry);
 				continue;
 			}
@@ -142,18 +162,20 @@ class Leases{
 				$lease["ip_addr"] = $matches[1];
 				continue;
 			}
+
+			if(preg_match("/^\s+hardware\s+ethernet\s*\"?(([a-f0-9]{2}:){5}[a-f0-9]{2})\"?\s?\;/x",
+				$line, $matches))
+			{
+				$lease["mac"] = $matches[1];
+				continue;
+			}
 			
 			// Split the keywords from the values
 			preg_match("/^\s+([a-z -]+[a-z-]+)\s*\"?(.+?)?\"?\;/x", $line, $matches);
 			$key = $matches[1];
 			$value = $matches[2];
 			
-			if($key === "hardware ethernet")
-			{
-				$key = "mac";
-				$value = strtoupper($value);
-			}
-			else if($key === "ends never")
+			if($key === "ends never")
 			{
 				$lease["ends"] = "never";
 				continue;
