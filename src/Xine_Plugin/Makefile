@@ -68,5 +68,5 @@ endif
 
 
 install: 
-	mkdir -p /usr/pluto/bin
+	mkdir -p $(DESTPATH)/usr/pluto/bin
 	cp Xine_Plugin.so $(DESTPATH)/usr/pluto/bin
