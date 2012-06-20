@@ -33,6 +33,7 @@ Advanced_IP_Camera::Advanced_IP_Camera(int DeviceID, string ServerAddress,bool b
 	: Advanced_IP_Camera_Command(DeviceID, ServerAddress,bConnectEventHandler,bLocalMode,pRouter)
 //<-dceag-const-e->
 {
+	m_eventThread = 0;
 }
 
 //<-dceag-const2-b->
@@ -48,11 +49,29 @@ Advanced_IP_Camera::~Advanced_IP_Camera()
 //<-dceag-dest-e->
 {
 
-	//TODO wait for other threads
+	// wait for other threads
+	m_bRunning = false;
+	if (m_eventThread != 0)
+		pthread_join (m_eventThread, NULL);
+
 	curl_easy_cleanup(m_pCurl);
 	curl_global_cleanup();
 
+        for( vector<MotionDetector*>::const_iterator it = m_vectMotionDetector.begin();
+                        it != m_vectMotionDetector.end(); ++it )
+	{
+		delete (*it);
+	}
 }
+
+void *
+eventThread (void *param)
+{
+	Advanced_IP_Camera* pCameraDevice = (Advanced_IP_Camera*)param;
+	pCameraDevice->EventThread();
+	pthread_exit (NULL);
+}
+
 
 //<-dceag-getconfig-b->
 bool Advanced_IP_Camera::GetConfig()
@@ -74,10 +93,42 @@ bool Advanced_IP_Camera::GetConfig()
 	m_sUser = DATA_Get_AuthUser();
 	m_sPasswd = DATA_Get_AuthPassword();
 
+	m_sEventPath = DATA_Get_File_Name_and_Path();
+
 	curl_global_init (CURL_GLOBAL_ALL);
 	m_pCurl = curl_easy_init ();
 	if (!m_pCurl)
 		return false;
+
+	// See what child devices we have - it will determine if we have for example motion detection
+	DeviceData_Impl* pChildDevice;
+	LoggerWrapper::GetInstance ()->Write (LV_CRITICAL, "getConfig() Children:");
+        for( VectDeviceData_Impl::const_iterator it = m_pData->m_vectDeviceData_Impl_Children.begin();
+                        it != m_pData->m_vectDeviceData_Impl_Children.end(); ++it )
+	{
+                pChildDevice = (*it);
+		LoggerWrapper::GetInstance ()->Write (LV_CRITICAL, "getConfig() PK_Device= %d", pChildDevice->m_dwPK_Device);
+		if (pChildDevice->m_dwPK_DeviceTemplate == DEVICETEMPLATE_Motion_Detector_CONST)
+		{
+			MotionDetector* pMotionDetector = new MotionDetector();
+			pMotionDetector->PK_Device = pChildDevice->m_dwPK_Device;
+			pMotionDetector->status = 0;
+			string value;
+			GetChildDeviceData(pChildDevice->m_dwPK_Device, DEVICEDATA_Capabilities_CONST, value);
+			LoggerWrapper::GetInstance ()->Write (LV_CRITICAL, "getConfig() Motion detector, capabilities = %s", value.c_str());
+			size_t pos = value.find("\n");
+			if (pos != string::npos)
+			{
+				pMotionDetector->triggerOn = value.substr(0, pos-1);
+				pMotionDetector->triggerOff = value.substr(pos+1);
+			}
+			LoggerWrapper::GetInstance ()->Write (LV_CRITICAL, "getConfig() Motion detector, triggerOn = %s, triggerOff = %s", pMotionDetector->triggerOn.c_str(), pMotionDetector->triggerOff.c_str());
+			m_vectMotionDetector.push_back(pMotionDetector);
+		}
+	}
+
+	m_bRunning = true;
+	pthread_create (&m_eventThread, NULL, eventThread, (void*)this);
 
 	return true;
 }
@@ -223,4 +274,109 @@ void Advanced_IP_Camera::CMD_Get_Video_Frame(string sDisable_Aspect_Lock,int iSt
 
 }
 
+size_t Advanced_IP_Camera::StaticEventWriteCallback(void *ptr, size_t size, size_t nmemb, void *ourpointer) 
+{
+	return ((Advanced_IP_Camera*)ourpointer)->EventWriteCallback(ptr, size, nmemb);
+}
 
+size_t Advanced_IP_Camera::EventWriteCallback(void *ptr, size_t size, size_t nmemb)  {
+	string separatorToken = "\n";
+
+	if (m_bRunning) {
+		m_sEventBuffer.append((char*)ptr, size*nmemb);
+//		LoggerWrapper::GetInstance ()->Write (LV_WARNING, "EventWriteCallback: size*nmemb = %d", size*nmemb);
+
+		// Check what we have got, are there any recognized events
+		// split string on line endings
+		size_t lastPos = 0;
+		string::size_type loc = m_sEventBuffer.find( separatorToken, lastPos );
+		while (loc < m_sEventBuffer.length()) {
+			if( loc != string::npos ) {
+				string s = m_sEventBuffer.substr(lastPos, loc);
+				LoggerWrapper::GetInstance ()->Write (LV_WARNING, "EventWriteCallback: s = %s", s.c_str());
+				for( vector<MotionDetector*>::const_iterator it = m_vectMotionDetector.begin();
+				     it != m_vectMotionDetector.end(); ++it )
+				{
+					if ((*it)->Matches(s))
+						MotionStatusChanged(*it, s);
+				}
+				lastPos = loc+1;
+			}
+			loc = m_sEventBuffer.find( separatorToken, lastPos );
+		}
+		// discard checked data
+		if (lastPos != string::npos)
+		{
+			m_sEventBuffer = m_sEventBuffer.substr(lastPos);
+			LoggerWrapper::GetInstance ()->Write (LV_WARNING, "EventWriteCallback: compacting m_sEventBuffer, new length = %d", m_sEventBuffer.length());
+		}
+		
+		return size*nmemb;
+	} else {
+		return -1;
+	}
+}
+
+void Advanced_IP_Camera::MotionStatusChanged(MotionDetector* motionDetector, string trigger)
+{
+	LoggerWrapper::GetInstance ()->Write (LV_WARNING, "MotionStatusChanged: trigger = %s", trigger.c_str());
+	int newStatus = motionDetector->GetNewStatus(trigger);
+
+	Message *pMessage = new Message(motionDetector->PK_Device, 0, PRIORITY_NORMAL, MESSAGETYPE_EVENT, EVENT_Sensor_Tripped_CONST,
+					1, EVENTPARAMETER_Tripped_CONST, StringUtils::itos(newStatus).c_str());
+	QueueMessageToRouter(pMessage);
+	motionDetector->status = newStatus;
+
+}
+void Advanced_IP_Camera::EventThread() {
+
+	// Set up connection
+	string data;
+	string sUrl = m_sBaseURL + "/" + m_sEventPath;
+
+	CURLM* eventCurl = curl_easy_init();
+
+	LoggerWrapper::GetInstance ()->Write (LV_STATUS, "EventThread(): sUrl: %s", sUrl.c_str ());
+	curl_easy_setopt(eventCurl, CURLOPT_URL, sUrl.c_str());
+
+	/* send all data to this function  */ 
+	curl_easy_setopt(eventCurl, CURLOPT_WRITEFUNCTION, StaticEventWriteCallback);
+	curl_easy_setopt(eventCurl, CURLOPT_WRITEDATA, (void *)this);
+	curl_easy_setopt(eventCurl, CURLOPT_USERAGENT, "libcurl-agent/1.0");
+	if (!m_sUser.empty())
+	{
+		curl_easy_setopt(eventCurl, CURLOPT_HTTPAUTH, CURLAUTH_BASIC);
+		curl_easy_setopt(eventCurl, CURLOPT_USERNAME, m_sUser.c_str());
+		if (!m_sPasswd.empty()) {
+			curl_easy_setopt(eventCurl, CURLOPT_PASSWORD, m_sPasswd.c_str());
+		}
+	}
+	CURLcode res = curl_easy_perform(eventCurl);
+	LoggerWrapper::GetInstance ()->Write (LV_STATUS, "EventThread(): curl_Easy_perform has returned");
+	if (res != 0)
+	{
+		LoggerWrapper::GetInstance ()->Write (LV_STATUS, "EventThread(): failed to get connection: curl error: %s", curl_easy_strerror(res));
+		
+	} else {
+		long code;
+		curl_easy_getinfo(eventCurl, CURLINFO_RESPONSE_CODE, &code);
+		if (code == 200)
+		{
+			// http OK
+//			LoggerWrapper::GetInstance ()->Write (LV_STATUS, "EventThread(): data size: %d", data.);
+//			*pData = data.buffer;
+//			*iData_Size = data.size;
+		} else {
+//			LoggerWrapper::GetInstance ()->Write (LV_STATUS, "EventThread(): http code: %d, response:",  code, data.buffer);
+
+		}
+	}
+
+	while (m_bRunning)
+	{
+
+	}
+
+
+
+}
