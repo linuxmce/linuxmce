@@ -195,11 +195,13 @@ iptables -A INPUT -m mark --mark "$AllowMark" -j ACCEPT
 ip6tables -P INPUT "$DefaultIPv6Policy"
 ip6tables -F INPUT
 ip6tables -A INPUT -i lo -j ACCEPT
-ip6tables -A INPUT -p ipv6-icmp -m icmp6 --icmpv6-type 133 -m hl --hl-eq 255 -j ACCEPT
-ip6tables -A INPUT -p ipv6-icmp -m icmp6 --icmpv6-type 134 -m hl --hl-eq 255 -j ACCEPT
-ip6tables -A INPUT -p ipv6-icmp -m icmp6 --icmpv6-type 135 -m hl --hl-eq 255 -j ACCEPT
-ip6tables -A INPUT -p ipv6-icmp -m icmp6 --icmpv6-type 136 -m hl --hl-eq 255 -j ACCEPT
-ip6tables -A INPUT -p ipv6-icmp -m icmp6 --icmpv6-type 137 -m hl --hl-eq 255 -j ACCEPT
+ip6tables -A INPUT -p ipv6-icmp --icmpv6-type 128 -j ACCEPT -m comment --comment "Allow PING requests"
+ip6tables -A INPUT -p ipv6-icmp --icmpv6-type 129 -j ACCEPT -m comment --comment "Allow PING replies"
+ip6tables -A INPUT -p ipv6-icmp -m icmp6 --icmpv6-type 133 -m hl --hl-eq 255 -j ACCEPT # -m comment --comment "Router solicitation"
+ip6tables -A INPUT -p ipv6-icmp -m icmp6 --icmpv6-type 134 -m hl --hl-eq 255 -j ACCEPT # -m comment --comment "Router solicitation"
+ip6tables -A INPUT -p ipv6-icmp -m icmp6 --icmpv6-type 135 -m hl --hl-eq 255 -j ACCEPT # -m comment --comment "Neighbor solicitation"
+ip6tables -A INPUT -p ipv6-icmp -m icmp6 --icmpv6-type 136 -m hl --hl-eq 255 -j ACCEPT # -m comment --comment "Neighbor advertisement"
+ip6tables -A INPUT -p ipv6-icmp -m icmp6 --icmpv6-type 137 -m hl --hl-eq 255 -j ACCEPT # -m comment --comment "Redirect message"
 ip6tables -A INPUT -m state --state ESTABLISHED,RELATED -j ACCEPT
 ip6tables -A INPUT -m mark --mark "$AllowMark" -j ACCEPT
 
