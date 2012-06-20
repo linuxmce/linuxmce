@@ -65,6 +65,6 @@ endif
 #<-dceag-mf-e->
 
 install: 
-	mkdir -p /usr/pluto/bin
+	mkdir -p $(DESTPATH)/usr/pluto/bin
 	cp VDR $(DESTPATH)/usr/pluto/bin
 	cp StartVDRClient.sh $(DESTPATH)/usr/pluto/bin
