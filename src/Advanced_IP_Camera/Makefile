@@ -22,7 +22,7 @@ sources = Main.cpp Advanced_IP_Camera.cpp $(Gen_Dev_Files)
 CXXFLAGS +=
 CPPFLAGS +=
 LDFLAGS +=
-XTRALDLIBS = -lmysqlclient_r
+XTRALDLIBS = -lcurl -lmysqlclient_r
 
 Gen_Dev_Files +=
 sources +=

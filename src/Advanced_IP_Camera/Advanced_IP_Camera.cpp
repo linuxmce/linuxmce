@@ -47,7 +47,11 @@ Advanced_IP_Camera::Advanced_IP_Camera(Command_Impl *pPrimaryDeviceCommand, Devi
 Advanced_IP_Camera::~Advanced_IP_Camera()
 //<-dceag-dest-e->
 {
-	
+
+	//TODO wait for other threads
+	curl_easy_cleanup(m_pCurl);
+	curl_global_cleanup();
+
 }
 
 //<-dceag-getconfig-b->
@@ -59,6 +63,22 @@ bool Advanced_IP_Camera::GetConfig()
 
 	// Put your code here to initialize the data in this class
 	// The configuration parameters DATA_ are now populated
+	m_sBaseURL = "http://"+GetIpAddress();
+	if (DATA_Get_TCP_Port())
+	{
+		m_sBaseURL += ":" + StringUtils::itos(DATA_Get_TCP_Port());
+	}
+	m_sBaseURL += "/";
+	m_sImgPath = DATA_Get_Path();
+
+	m_sUser = DATA_Get_AuthUser();
+	m_sPasswd = DATA_Get_AuthPassword();
+
+	curl_global_init (CURL_GLOBAL_ALL);
+	m_pCurl = curl_easy_init ();
+	if (!m_pCurl)
+		return false;
+
 	return true;
 }
 
@@ -107,87 +127,7 @@ void Advanced_IP_Camera::ReceivedUnknownCommand(string &sCMD_Result,Message *pMe
 	sCMD_Result = "UNKNOWN COMMAND";
 }
 
-//<-dceag-sample-b->
-/*		**** SAMPLE ILLUSTRATING HOW TO USE THE BASE CLASSES ****
-
-**** IF YOU DON'T WANT DCEGENERATOR TO KEEP PUTTING THIS AUTO-GENERATED SECTION ****
-**** ADD AN ! AFTER THE BEGINNING OF THE AUTO-GENERATE TAG, LIKE //<=dceag-sample-b->! ****
-Without the !, everything between <=dceag-sometag-b-> and <=dceag-sometag-e->
-will be replaced by DCEGenerator each time it is run with the normal merge selection.
-The above blocks are actually <- not <=.  We don't want a substitution here
-
-void Advanced_IP_Camera::SomeFunction()
-{
-	// If this is going to be loaded into the router as a plug-in, you can implement: 	virtual bool Register();
-	// to do all your registration, such as creating message interceptors
-
-	// If you use an IDE with auto-complete, after you type DCE:: it should give you a list of all
-	// commands and requests, including the parameters.  See "AllCommandsRequests.h"
-
-	// Examples:
-	
-	// Send a specific the "CMD_Simulate_Mouse_Click" command, which takes an X and Y parameter.  We'll use 55,77 for X and Y.
-	DCE::CMD_Simulate_Mouse_Click CMD_Simulate_Mouse_Click(m_dwPK_Device,OrbiterID,55,77);
-	SendCommand(CMD_Simulate_Mouse_Click);
-
-	// Send the message to orbiters 32898 and 27283 (ie a device list, hence the _DL)
-	// And we want a response, which will be "OK" if the command was successfull
-	string sResponse;
-	DCE::CMD_Simulate_Mouse_Click_DL CMD_Simulate_Mouse_Click_DL(m_dwPK_Device,"32898,27283",55,77)
-	SendCommand(CMD_Simulate_Mouse_Click_DL,&sResponse);
-
-	// Send the message to all orbiters within the house, which is all devices with the category DEVICECATEGORY_Orbiter_CONST (see pluto_main/Define_DeviceCategory.h)
-	// Note the _Cat for category
-	DCE::CMD_Simulate_Mouse_Click_Cat CMD_Simulate_Mouse_Click_Cat(m_dwPK_Device,DEVICECATEGORY_Orbiter_CONST,true,BL_SameHouse,55,77)
-    SendCommand(CMD_Simulate_Mouse_Click_Cat);
-
-	// Send the message to all "DeviceTemplate_Orbiter_CONST" devices within the room (see pluto_main/Define_DeviceTemplate.h)
-	// Note the _DT.
-	DCE::CMD_Simulate_Mouse_Click_DT CMD_Simulate_Mouse_Click_DT(m_dwPK_Device,DeviceTemplate_Orbiter_CONST,true,BL_SameRoom,55,77);
-	SendCommand(CMD_Simulate_Mouse_Click_DT);
-
-	// This command has a normal string parameter, but also an int as an out parameter
-	int iValue;
-	DCE::CMD_Get_Signal_Strength CMD_Get_Signal_Strength(m_dwDeviceID, DestDevice, sMac_address,&iValue);
-	// This send command will wait for the destination device to respond since there is
-	// an out parameter
-	SendCommand(CMD_Get_Signal_Strength);  
-
-	// This time we don't care about the out parameter.  We just want the command to 
-	// get through, and don't want to wait for the round trip.  The out parameter, iValue,
-	// will not get set
-	SendCommandNoResponse(CMD_Get_Signal_Strength);  
-
-	// This command has an out parameter of a data block.  Any parameter that is a binary
-	// data block is a pair of int and char *
-	// We'll also want to see the response, so we'll pass a string for that too
-
-	int iFileSize;
-	char *pFileContents
-	string sResponse;
-	DCE::CMD_Request_File CMD_Request_File(m_dwDeviceID, DestDevice, "filename",&pFileContents,&iFileSize,&sResponse);
-	SendCommand(CMD_Request_File);
-
-	// If the device processed the command (in this case retrieved the file),
-	// sResponse will be "OK", and iFileSize will be the size of the file
-	// and pFileContents will be the file contents.  **NOTE**  We are responsible
-	// free deleting pFileContents.
-
-
-	// To access our data and events below, you can type this-> if your IDE supports auto complete to see all the data and events you can access
-
-	// Get our IP address from our data
-	string sIP = DATA_Get_IP_Address();
-
-	// Set our data "Filename" to "myfile"
-	DATA_Set_Filename("myfile");
-
-	// Fire the "Finished with file" event, which takes no parameters
-	EVENT_Finished_with_file();
-	// Fire the "Touch or click" which takes an X and Y parameter
-	EVENT_Touch_or_click(10,150);
-}
-*/
+//<-dceag-sample-b->!
 //<-dceag-sample-e->
 
 /*
@@ -195,6 +135,27 @@ void Advanced_IP_Camera::SomeFunction()
 	COMMANDS TO IMPLEMENT
 
 */
+
+struct CallbackData {
+	char* buffer;
+	size_t size;
+};
+
+size_t Advanced_IP_Camera::WriteCallback(void *ptr, size_t size, size_t nmemb, void *ourpointer) 
+{
+	struct CallbackData* data = (CallbackData*)ourpointer;
+	size_t realsize = size * nmemb;
+	data->buffer = (char*)realloc(data->buffer, data->size + realsize + 1);
+	if (data->buffer == NULL)
+	{
+		LoggerWrapper::GetInstance ()->Write (LV_CRITICAL, "CMD_Get_Video_Frame: Unable to allocate memory for receive buffer!");
+		return 0;
+	}
+	memcpy(&(data->buffer[data->size]), ptr, realsize);
+	data->size += realsize;
+	data->buffer[data->size] = 0;
+	return realsize;
+}
 
 //<-dceag-c84-b->
 
@@ -216,13 +177,50 @@ void Advanced_IP_Camera::SomeFunction()
 void Advanced_IP_Camera::CMD_Get_Video_Frame(string sDisable_Aspect_Lock,int iStreamID,int iWidth,int iHeight,char **pData,int *iData_Size,string *sFormat,string &sCMD_Result,Message *pMessage)
 //<-dceag-c84-e->
 {
-	cout << "Need to implement command #84 - Get Video Frame" << endl;
-	cout << "Parm #19 - Data  (data value)" << endl;
-	cout << "Parm #20 - Format=" << sFormat << endl;
-	cout << "Parm #23 - Disable_Aspect_Lock=" << sDisable_Aspect_Lock << endl;
-	cout << "Parm #41 - StreamID=" << iStreamID << endl;
-	cout << "Parm #60 - Width=" << iWidth << endl;
-	cout << "Parm #61 - Height=" << iHeight << endl;
+
+	CallbackData data;
+	data.buffer = (char*)malloc(1);
+	data.size = 0;
+	string sUrl = m_sBaseURL + "/" + m_sImgPath;
+
+
+	LoggerWrapper::GetInstance ()->Write (LV_STATUS, "CMD_Get_Video_Frame: sUrl: %s", sUrl.c_str ());
+	curl_easy_setopt(m_pCurl, CURLOPT_URL, sUrl.c_str());
+
+        /* send all data to this function  */ 
+	curl_easy_setopt(m_pCurl, CURLOPT_WRITEFUNCTION, WriteCallback);
+ 	curl_easy_setopt(m_pCurl, CURLOPT_WRITEDATA, (void *)&data);
+	curl_easy_setopt(m_pCurl, CURLOPT_USERAGENT, "libcurl-agent/1.0");
+	if (!m_sUser.empty())
+	{
+		curl_easy_setopt(m_pCurl, CURLOPT_HTTPAUTH, CURLAUTH_BASIC);
+		curl_easy_setopt(m_pCurl, CURLOPT_USERNAME, m_sUser.c_str());
+		if (!m_sPasswd.empty()) {
+			curl_easy_setopt(m_pCurl, CURLOPT_PASSWORD, m_sPasswd.c_str());
+		}
+	}
+
+	CURLcode res = curl_easy_perform(m_pCurl);
+
+	if (res != 0)
+	{
+		LoggerWrapper::GetInstance ()->Write (LV_STATUS, "CMD_Get_Video_Frame: failed to get data: curl error: %s", curl_easy_strerror(res));
+		
+	} else {
+		long code;
+		curl_easy_getinfo(m_pCurl, CURLINFO_RESPONSE_CODE, &code);
+		if (code == 200)
+		{
+			// http OK
+			LoggerWrapper::GetInstance ()->Write (LV_STATUS, "CMD_Get_Video_Frame: data size: %d", data.size);
+			*pData = data.buffer;
+			*iData_Size = data.size;
+		} else {
+			LoggerWrapper::GetInstance ()->Write (LV_STATUS, "CMD_Get_Video_Frame: http code: %d, response:",  code, data.buffer);
+
+		}
+	}
+
 }
 
 

@@ -22,6 +22,10 @@
 #include "Gen_Devices/Advanced_IP_CameraBase.h"
 //<-dceag-d-e->
 
+#include <curl/curl.h>
+#include <curl/types.h>
+#include <curl/easy.h>
+
 //<-dceag-decl-b->
 namespace DCE
 {
@@ -29,8 +33,13 @@ namespace DCE
 	{
 //<-dceag-decl-e->
 		// Private member variables
+	  string m_sBaseURL;
+	  string m_sImgPath;
+	  string m_sUser;
+	  string m_sPasswd;
 
-		// Private methods
+	  CURLM* m_pCurl;
+	        // Private methods
 public:
 		// Public member variables
 
@@ -44,6 +53,7 @@ public:
 		virtual void ReceivedCommandForChild(DeviceData_Impl *pDeviceData_Impl,string &sCMD_Result,Message *pMessage);
 		virtual void ReceivedUnknownCommand(string &sCMD_Result,Message *pMessage);
 //<-dceag-const-e->
+		static size_t WriteCallback(void *ptr, size_t size, size_t nmemb, void *ourpointer);
 
 //<-dceag-const2-b->
 		// The following constructor is only used if this a class instance embedded within a DCE Device.  In that case, it won't create it's own connection to the router
