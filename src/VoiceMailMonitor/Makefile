@@ -18,6 +18,6 @@ clean:
 	rm -f VoiceMailMonitor $(sources:.cpp=.o) 
 
 install:
-        mkdir -p $(DESTPATH)/usr/pluto/bin
-        cp VoiceMailMonitor $(DESTPATH)/usr/pluto/bin
-        cp VoiceMailMonitor.sh $(DESTPATH)/usr/pluto/bin
+	mkdir -p $(DESTPATH)/usr/pluto/bin
+	cp VoiceMailMonitor $(DESTPATH)/usr/pluto/bin
+	cp VoiceMailMonitor.sh $(DESTPATH)/usr/pluto/bin
