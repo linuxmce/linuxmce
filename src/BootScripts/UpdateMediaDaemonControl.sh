@@ -22,7 +22,7 @@ function LogMsg ()
 if [[ "$1" == "-enable" ]];then
 # enable option
         if [[ ! -z "$(pidof -x UpdateMediaDaemon.sh)" ]]; then
-                LogMsg "UpdateMedia is allready running (PID $(pidof -x UpdateMediaDaemon.sh))"
+                LogMsg "UpdateMedia is already running (PID $(pidof -x UpdateMediaDaemon.sh))"
         else
 					
 		LogMsg ": Enabling UpdateMediaDaemon on the system(s)"
