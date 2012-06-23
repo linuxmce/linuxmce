@@ -111,6 +111,11 @@ Setup_AsoundConf()
 	local AudioSetting="$1"
 	local SoundCard
 
+	# Do not mess with asound.conf if Audio Setting is set to Manual. This will only happen after the asound.conf has been generated at least once.
+	if [[ "$AudioSetting" == "M" ]]
+		return
+	fi
+
 	SoundCard=$(GetDeviceData "$PK_Device" "$DEVICEDATA_Sound_Card"|cut -f2 -d";")
 	SoundCard=$(TranslateSoundCard "$SoundCard")
 	
