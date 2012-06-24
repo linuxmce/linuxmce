@@ -18,7 +18,7 @@ fi
 # Read the new core internal ip address
 . /usr/pluto/bin/Network_Parameters.sh
 Internal_IP=$IntIP
-echo "Internal: $Internal_IP"
+echo "Internal IPv4: $Internal_IP"
 Address_1=$(echo "$Internal_IP" | cut -d'.' -f1)
 Address_2=$(echo "$Internal_IP" | cut -d'.' -f2)
 Address_3=$(echo "$Internal_IP" | cut -d'.' -f3)
@@ -26,30 +26,72 @@ Address_4=$(echo "$Internal_IP" | cut -d'.' -f4)
 Short_IP="$Address_1.$Address_2.$Address_3"
 Reverse_IP="$Address_3.$Address_2.$Address_1"
 
+# If IPv6 is enabled, see if we have a global IPv6 address on internal NIC
+if [[ "$IPv6Active" == "on" || "$Extv6IP" != "disabled" ]]; then
+	Internal_IPv6=$(ip -f inet6 addr show $IntIf| awk '/scope global/ {print $2}' | cut -d'/' -f1)
+	echo "Internal IPv6: $Internal_IPv6"
+fi
+
 # Add dynamic zone files for bind
 # Bind doesnt like it when its zone files are altered while it is running
 service bind9 stop
 
 if [[ -e /var/cache/bind/db.linuxmce.local ]] ;then
-	# Determine old ip address
-	Old_IP=$(grep ^dcerouter /var/cache/bind/db.linuxmce.local | awk '{print $3}')
+	# Determine old IPv4 address
+	Old_IP=$(grep ^$Hostname /var/cache/bind/db.linuxmce.local | grep -w A | awk '{print $3}')	
 	if [[ "$Internal_IP" != "$Old_IP" ]] ;then
-	Address_1=$(echo "$Internal_IP" | cut -d'.' -f1)
-	Address_2=$(echo "$Internal_IP" | cut -d'.' -f2)
-	Address_3=$(echo "$Internal_IP" | cut -d'.' -f3)
-	Address_4=$(echo "$Internal_IP" | cut -d'.' -f4)
-	Old_Short_IP="$Address_1.$Address_2.$Address_3"
-	Old_Reverse_IP="$Address_3.$Address_2.$Address_1"
+		Address_1=$(echo "$Internal_IP" | cut -d'.' -f1)
+		Address_2=$(echo "$Internal_IP" | cut -d'.' -f2)
+		Address_3=$(echo "$Internal_IP" | cut -d'.' -f3)
+		Address_4=$(echo "$Internal_IP" | cut -d'.' -f4)
+		Old_Short_IP="$Address_1.$Address_2.$Address_3"
+		Old_Reverse_IP="$Address_3.$Address_2.$Address_1"
 	fi
+
+	# Determine old IPv6 address
+	Old_IPv6=$(grep ^$Hostname /var/cache/bind/db.linuxmce.local | grep -w AAAA | awk '{print $3}')
+	
+	# If IPv6 is enabled, update record if necessary
+	if [[ "$IPv6Active" == "on" || "$Extv6IP" != "disabled" ]]; then
+		# TODO: Nothing yet
+		:
+	else
+		# If IPv6 is disabled, remove eventual existing AAAA record
+		if [[ "$Old_IPv6" != "" ]]; then
+			sed -i "/$Old_IPv6/d" /var/cache/bind/db.linuxmce.local
+			Old_IPv6=""
+		fi
+	fi
+	
 fi
 
-if [[ $Old_IP != $Internal_IP &&  -e /var/cache/bind/db.linuxmce.local && -e /var/cache/bind/db.linuxmce.rev ]] ;then
-	# Zone files exist and IP has changed; update zone files
-
-	# Forward
-	sed -i "s,$Old_Short_IP,$Short_IP,g" /var/cache/bind/db.linuxmce.local
-	# Reverse
-	sed -i "s,$Old_Reverse_IP,$Reverse_IP,g" /var/cache/bind/db.linuxmce.rev
+# If Zone cache file exists, modify it if necessary
+if [[ -e /var/cache/bind/db.linuxmce.local && -e /var/cache/bind/db.linuxmce.rev ]] ;then
+	
+	# Zone files exist. If IP4 has changed; update zone files
+	if [[ $Old_IP != $Internal_IP ]]; then
+		# Forward
+		sed -i "s,$Old_Short_IP,$Short_IP,g" /var/cache/bind/db.linuxmce.local
+		# Reverse
+		sed -i "s,$Old_Reverse_IP,$Reverse_IP,g" /var/cache/bind/db.linuxmce.rev
+	fi
+	
+	# If IPv6 is activated, check if AAAA record is still correct
+	if [[ "$IPv6Active" == "on" || "$Extv6IP" != "disabled" ]]; then
+		# If IPv6 has changed or has been added, modify zone files
+		if [[ $Old_IPv6 != $Internal_IPv6 ]]; then
+			# forward
+			# if AAAA record already there, modify it
+			if [[ "$Old_IPv6" != "" ]]; then
+				sed -i "s,$Old_IPv6,$Internal_IPv6,g" /var/cache/bind/db.linuxmce.local
+			# else insert it
+			else
+				echo "Inserting after $Internal_IP"
+				sed -i "/\<$Internal_IP\>/a\\$Hostname               AAAA    $Internal_IPv6" /var/cache/bind/db.linuxmce.local
+			fi
+			# TODO: reverse
+		fi	
+	fi
 else
 	# Zone files do not exist; create new ones
 
@@ -71,6 +113,10 @@ $Domainname          IN SOA  $Hostname.$Domainname. postmaster.$Domainname. (
 \$ORIGIN $Domainname.
 $Hostname               A       $Internal_IP" > /var/cache/bind/db.linuxmce.local
 
+# If IPv6 is activated, insert AAAA record
+if [[ "$IPv6Active" == "on" || "$Extv6IP" != "disabled" ]]; then
+	echo "$Hostname               AAAA    $Internal_IPv6" >> /var/cache/bind/db.linuxmce.local
+fi
 # Reverse
 echo "\
 \$ORIGIN .
