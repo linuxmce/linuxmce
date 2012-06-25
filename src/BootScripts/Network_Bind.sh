@@ -86,7 +86,6 @@ if [[ -e /var/cache/bind/db.linuxmce.local && -e /var/cache/bind/db.linuxmce.rev
 				sed -i "s,$Old_IPv6,$Internal_IPv6,g" /var/cache/bind/db.linuxmce.local
 			# else insert it
 			else
-				echo "Inserting after $Internal_IP"
 				sed -i "/\<$Internal_IP\>/a\\$Hostname               AAAA    $Internal_IPv6" /var/cache/bind/db.linuxmce.local
 			fi
 			# TODO: reverse
