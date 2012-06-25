@@ -27,7 +27,7 @@ Short_IP="$Address_1.$Address_2.$Address_3"
 Reverse_IP="$Address_3.$Address_2.$Address_1"
 
 # If IPv6 is enabled, see if we have a global IPv6 address on internal NIC
-if [[ "$IPv6Active" == "on" || "$Extv6IP" != "disabled" ]]; then
+if [[ "$Intv6IP" != "disabled" ]]; then
 	Internal_IPv6=$(ip -f inet6 addr show $IntIf| awk '/scope global/ {print $2}' | cut -d'/' -f1)
 	echo "Internal IPv6: $Internal_IPv6"
 fi
@@ -52,10 +52,7 @@ if [[ -e /var/cache/bind/db.linuxmce.local ]] ;then
 	Old_IPv6=$(grep ^$Hostname /var/cache/bind/db.linuxmce.local | grep -w AAAA | awk '{print $3}')
 	
 	# If IPv6 is enabled, update record if necessary
-	if [[ "$IPv6Active" == "on" || "$Extv6IP" != "disabled" ]]; then
-		# TODO: Nothing yet
-		:
-	else
+	if [[ "$Intv6IP" == "disabled" || "$Internal_IPv6" == "" ]]; then
 		# If IPv6 is disabled, remove eventual existing AAAA record
 		if [[ "$Old_IPv6" != "" ]]; then
 			sed -i "/$Old_IPv6/d" /var/cache/bind/db.linuxmce.local
@@ -77,7 +74,7 @@ if [[ -e /var/cache/bind/db.linuxmce.local && -e /var/cache/bind/db.linuxmce.rev
 	fi
 	
 	# If IPv6 is activated, check if AAAA record is still correct
-	if [[ "$IPv6Active" == "on" || "$Extv6IP" != "disabled" ]]; then
+	if [[ "$Intv6IP" != "disabled" ]]; then
 		# If IPv6 has changed or has been added, modify zone files
 		if [[ $Old_IPv6 != $Internal_IPv6 ]]; then
 			# forward
