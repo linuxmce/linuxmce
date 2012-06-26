@@ -4,6 +4,13 @@
 . /usr/pluto/bin/Config_Ops.sh
 . /usr/pluto/bin/Utils.sh
 
+ForwardZoneFile='/var/cache/bind/db.linuxmce.local'
+
+# function to find old IPv6 address in bind cache if exists
+GetOldIpv6() {
+		Old_IPv6=$(sed -n "/^$Hostname/{n;p}" $ForwardZoneFile | grep -P "^\t|^$Hostname" | awk '{print $NF}')
+}
+
 # Update bind zone files
 DD_NetworkInterfaces=32
 ConfGet "PK_Installation"
@@ -49,7 +56,7 @@ if [[ -e /var/cache/bind/db.linuxmce.local ]] ;then
 	fi
 
 	# Determine old IPv6 address
-	Old_IPv6=$(grep ^$Hostname /var/cache/bind/db.linuxmce.local | grep -w AAAA | awk '{print $3}')
+	GetOldIpv6
 	
 	# If IPv6 is enabled, update record if necessary
 	if [[ "$Intv6IP" == "disabled" || "$Internal_IPv6" == "" ]]; then
@@ -83,7 +90,7 @@ if [[ -e /var/cache/bind/db.linuxmce.local && -e /var/cache/bind/db.linuxmce.rev
 				sed -i "s,$Old_IPv6,$Internal_IPv6,g" /var/cache/bind/db.linuxmce.local
 			# else insert it
 			else
-				sed -i "/\<$Internal_IP\>/a\\$Hostname               AAAA    $Internal_IPv6" /var/cache/bind/db.linuxmce.local
+				sed -i "/\<$Internal_IP\>/a\\			AAAA    $Internal_IPv6" /var/cache/bind/db.linuxmce.local
 			fi
 			# TODO: reverse
 		fi	
@@ -111,7 +118,7 @@ $Hostname               A       $Internal_IP" > /var/cache/bind/db.linuxmce.loca
 
 # If IPv6 is activated, insert AAAA record
 if [[ "$IPv6Active" == "on" || "$Extv6IP" != "disabled" ]]; then
-	echo "$Hostname               AAAA    $Internal_IPv6" >> /var/cache/bind/db.linuxmce.local
+	echo "						AAAA    $Internal_IPv6" >> /var/cache/bind/db.linuxmce.local
 fi
 # Reverse
 echo "\
