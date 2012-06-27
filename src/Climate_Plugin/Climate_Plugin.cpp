@@ -249,9 +249,15 @@ bool Climate_Plugin::ClimateCommand( class Socket *pSocket, class Message *pMess
 {
 	// This only runs as a plug-in so we can safely cast it
 	class DeviceData_Router *pDevice_RouterTo = (class DeviceData_Router *) pDeviceTo;
+	LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"XXXX calling PreprocessClimateMessage for pDevice_RouterTo");
+	if (pDevice_RouterTo)
+	  LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"XXXX pDeviceTo %d",pDeviceTo->m_dwPK_Device);
 	PreprocessClimateMessage(pDevice_RouterTo,pMessage);
 
 	class DeviceData_Router *pDevice_RouterFrom = (class DeviceData_Router *) pDeviceFrom;
+	LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"XXXX calling PreprocessClimateMessage for pDevice_RouterFrom");
+	if (pDevice_RouterFrom)
+	  LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"XXXX pDeviceFrom %d",pDeviceFrom->m_dwPK_Device);
 	PreprocessClimateMessage(pDevice_RouterFrom,pMessage);
 
 	if( pMessage->m_sPK_Device_List_To.length() ) 
@@ -272,6 +278,24 @@ bool Climate_Plugin::ClimateCommand( class Socket *pSocket, class Message *pMess
 
 void Climate_Plugin::PreprocessClimateMessage(DeviceData_Router *pDevice,Message *pMessage)
 {
+  if (!pDevice)
+    {
+      //LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"XXXX pDevice is NULL");
+    }
+  else
+    {
+      //LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"XXXX pDevice->m_dwPK_Device is %d",pDevice->m_dwPK_Device);
+    }
+
+  if (!pMessage)
+    {
+      //LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"XXXX pMessage is NULL");
+    }
+  else
+    {
+      //LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"XXXX pMessage dwID is %d",pMessage->m_dwID);
+    }
+
 	if( !pDevice || !pMessage || !pDevice->WithinCategory(DEVICECATEGORY_Climate_Device_CONST) )
 		return;
 
@@ -285,27 +309,37 @@ void Climate_Plugin::PreprocessClimateMessage(DeviceData_Router *pDevice,Message
 	// The State is in the format ON|OFF/HEAT|COOL|FAN_ONLY|AUTO/HIGH|AUTO/SET TEMP (CURRENT TEMP)
 	if( pMessage->m_dwMessage_Type==MESSAGETYPE_COMMAND )
 	{
-		if( pMessage->m_dwID==COMMAND_Set_Level_CONST )
+	  // LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"XXXX Command!!!!");
+		if( pMessage->m_dwID==COMMAND_Set_Temperature_CONST )
 		{
-			string sLevel = pMessage->m_mapParameters[COMMANDPARAMETER_Level_CONST];
+		  LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"XXXX COMMAND_Set_Temperature! ");
+			string sLevel = pMessage->m_mapParameters[COMMANDPARAMETER_Value_To_Assign_CONST];
 			if( sLevel.size()==0 )
 				pMessage->m_dwID=COMMAND_Generic_Off_CONST;
 			else
 			{
 				int iLevel = atoi(sLevel.c_str());
+
+				if (sLevel[0]=='+' || sLevel[0]=='-')
+				  {
+				    iLevel = atoi(sLevel.substr(1).c_str());
+				    LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"sLevel is %s, iLevel is %d",sLevel.substr(1).c_str(),iLevel);
+				  }
+
 				if( sLevel[0]=='+' )
 					iLevel = min(100, GetClimateLevel(pDevice,0)+iLevel);
 				else if( sLevel[0]=='-' )
-					iLevel = max(0, GetClimateLevel(pDevice,0)+iLevel);
+					iLevel = max(0, GetClimateLevel(pDevice,0)-iLevel);
 
 				if( iLevel==0 )
 					pMessage->m_dwID=COMMAND_Generic_Off_CONST;
 				else
 				{
 //					pDevice->m_sState_set("ON/" + StringUtils::itos(iLevel) + GetTemperature(pDevice)); /Replaced with clause below
+				  LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"XXXX setting new Level to %d",iLevel);
 					SetStateValue(pDevice, "ON", sMode, sFan, StringUtils::itos(iLevel), sTemp);
 
-					pMessage->m_mapParameters[COMMANDPARAMETER_Level_CONST] = StringUtils::itos(iLevel);
+					pMessage->m_mapParameters[COMMANDPARAMETER_Value_To_Assign_CONST] = StringUtils::itos(iLevel);
 				}
 			}
 		}
@@ -361,6 +395,7 @@ void Climate_Plugin::PreprocessClimateMessage(DeviceData_Router *pDevice,Message
 			LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"Climate_Plugin: EVENT_Thermostat_Set_Point_Chan_CONST !");
 			// Replace the current temp
 			string sLevel = pMessage->m_mapParameters[EVENTPARAMETER_Value_CONST];
+			LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"Climate_Plugin: Set Point Changed to %s",sLevel.c_str());
 			SetStateValue(pDevice, "ON", sMode, sFan, sLevel, sTemp);
 		}
 		else if( pMessage->m_dwID == EVENT_Fan_Mode_Changed_CONST )

@@ -84,12 +84,12 @@ public:
 
 	/*
 			*****DATA***** accessors inherited from base class
+	string DATA_Get_Temperature_Measurement_Units();
 
 			*****EVENT***** accessors inherited from base class
 
 			*****COMMANDS***** we need to implement
 	*/
-
 
 //<-dceag-h-e->
 };

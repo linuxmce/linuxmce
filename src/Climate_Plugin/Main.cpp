@@ -202,8 +202,8 @@ int main(int argc, char* argv[])
 
 	LoggerWrapper::GetInstance()->Write(LV_STATUS, "Device: %d starting.  Connecting to: %s",PK_Device,sRouter_IP.c_str());
 
-	bool bAppError = false;
-	bool bReload = false;
+	bool bAppError=false;
+	bool bReload=false;
 	try
 	{
 		Climate_Plugin *pClimate_Plugin = new Climate_Plugin(PK_Device, sRouter_IP,true,bLocalMode);
@@ -217,7 +217,10 @@ int main(int argc, char* argv[])
 			if( bLocalMode )
 				pClimate_Plugin->RunLocalMode();
 			else
-				pthread_join(pClimate_Plugin->m_RequestHandlerThread, NULL);  // This function will return when the device is shutting down
+			{
+				if(pClimate_Plugin->m_RequestHandlerThread)
+					pthread_join(pClimate_Plugin->m_RequestHandlerThread, NULL);  // This function will return when the device is shutting down
+			}
 			g_pDeadlockHandler=NULL;
 			g_pSocketCrashHandler=NULL;
 		} 
