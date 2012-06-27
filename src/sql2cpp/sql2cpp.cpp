@@ -50,7 +50,7 @@
 #include "CommonFunctions.h"
 #include "DCE/Logger.h"
 
-#define  VERSION "<=version=>"
+#define  VERSION "2.0.0.45.12062726126"
 
 using namespace std;
 
@@ -373,6 +373,9 @@ int main( int argc, char *argv[] )
 	makefile_out << "\tcp $@ ../lib" << endl << endl;
 	makefile_out << "clean: clean-recursive" << endl;
 	makefile_out << "\trm -f *.o *.d lib" << sDBName << ".so >/dev/null" << endl << endl;
+	makefile_out << "install:" << endl;
+	makefile_out << "\tmkdir -p $(DESTDIR)/usr/pluto/bin" << endl;
+	makefile_out << "\tcp $@ /usr/pluto/bin" << endl << endl;
 	makefile_out << "include $(ROOT)/PlutoUtils/make.rules" << endl;
 	makefile_out << "-include $(sources:.cpp=.d)" << endl;
 
