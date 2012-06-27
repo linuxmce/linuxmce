@@ -530,16 +530,45 @@ char StringUtils::HexByte2Num( char* pcPtr )
 void StringUtils::AddressAndPortFromString( string sInput, int iDefaultPort, string &sAddress, int &iPort )
 {
     string::size_type CurPos = 0;
+	int i = count(sInput.begin(), sInput.end(), ':'); 
 
-    sAddress = Tokenize( sInput, ":", CurPos); // the address should be before the ':' character
-    if ( CurPos >= sInput.length() )
-    {
-        iPort = iDefaultPort; // no port given
-    }
-    else
-    {
-        iPort = atoi( sInput.substr(CurPos).c_str() ); // port follows address
-    }
+    // If Address is IPv6 (more than 1 x ':' ) then don't check for port YET. That is TODO !
+	if ( i > 1)
+	{
+		// Check is IPv6 address is in [host ip]:port format, if yes parse it
+		if (sInput[0] == '[') 
+		{ 
+			std::string port;
+			std::string::iterator splitEnd = std::find(sInput.begin() + 1, sInput.end(), ']'); 
+			sAddress.assign(sInput.begin()+1, splitEnd); 
+			if (splitEnd != sInput.end()) splitEnd++; 
+			if (splitEnd != sInput.end() && *splitEnd == ':') 
+			{
+				port.assign(splitEnd+1, sInput.end()); 
+				iPort=atoi(port.c_str()); 
+			}
+		} 
+		// else it is an IPv6 address only, use it and assign default port
+		else 
+		{
+			sAddress = sInput;
+			iPort = iDefaultPort;
+		}
+	}
+	// If Adress is IPv4 then check for port after : if any
+	else
+	{
+		sAddress = Tokenize( sInput, ":", CurPos); // the address should be before the ':' character
+		if ( CurPos >= sInput.length() )
+		{
+			iPort = iDefaultPort; // no port given
+		}
+		else
+		{
+			iPort = atoi( sInput.substr(CurPos).c_str() ); // port follows address
+		}
+	}
+	
 }
 
 string StringUtils::URLEncode( string sInput )
