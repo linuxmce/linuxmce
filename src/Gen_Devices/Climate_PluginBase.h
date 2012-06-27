@@ -1,18 +1,3 @@
-/*
-     Copyright (C) 2004 Pluto, Inc., a Florida Corporation
-
-     www.plutohome.com
-
-     Phone: +1 (877) 758-8648
- 
-
-     This program is free software; you can redistribute it and/or modify it under the terms of the GNU General Public License.
-     This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty
-     of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
-
-     See the GNU General Public License for more details.
-
-*/
 #ifndef Climate_PluginBase_h
 #define Climate_PluginBase_h
 #include "DeviceData_Impl.h"
@@ -94,6 +79,14 @@ public:
 	/**
 	* @brief Device data access methods:
 	*/
+
+	string Get_Temperature_Measurement_Units()
+	{
+		if( m_bRunningWithoutDeviceData )
+			return m_pEvent_Impl->GetDeviceDataFromDatabase(m_dwPK_Device,DEVICEDATA_Temperature_Measurement_Units_CONST);
+		else
+			return m_mapParameters[DEVICEDATA_Temperature_Measurement_Units_CONST];
+	}
 
 };
 
@@ -199,6 +192,7 @@ public:
 	virtual void ReceivedUnknownCommand(string &sCMD_Result,Message *pMessage) { };
 	Command_Impl *CreateCommand(int PK_DeviceTemplate, Command_Impl *pPrimaryDeviceCommand, DeviceData_Impl *pData, Event_Impl *pEvent);
 	//Data accessors
+	string DATA_Get_Temperature_Measurement_Units() { return GetData()->Get_Temperature_Measurement_Units(); }
 	//Event accessors
 	//Commands - Override these to handle commands from the server
 
