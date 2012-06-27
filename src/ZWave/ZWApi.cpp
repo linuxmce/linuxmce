@@ -1178,6 +1178,16 @@ void *ZWApi::ZWApi::decodeFrame(char *frame, size_t length) {
 									DCE::LoggerWrapper::GetInstance()->Write(LV_ZWAVE,"auto changeover, %.1f%c",ftemp,scale.c_str());
 									break;
 							}
+							
+							// Send setpoint changed back to router.
+							if (scale == "F")
+							  {
+							    DCEcallback->SendSetpointChangedEvent(frame[3], -1, (ftemp - 32) *5 / 9);
+							  }
+							else if (scale == "degC")
+							  {
+							    DCEcallback->SendSetpointChangedEvent(frame[3], -1, ftemp);
+							  }
 
 							
 						}

@@ -27,6 +27,7 @@ int sequence=1;
 
 #include "ZWApi.h"
 #include <deque>
+#include <math.h>
 
 //<-dceag-const-b->
 // The primary constructor when the class is created as a stand-alone device
@@ -156,6 +157,7 @@ void ZWave::ReceivedCommandForChild(DeviceData_Impl *pDeviceData_Impl,string &sC
 				myZWApi->zwThermostatSetpointSet(node_id,1,temp); // heating
 				myZWApi->zwThermostatSetpointSet(node_id,2,temp); // cooling
 				myZWApi->zwThermostatSetpointSet(node_id,10,temp); // auto changeover
+				SendSetpointChangedEvent(node_id, instance_id, (float)temp);
 				break;
 				;;
 			case COMMAND_Set_Fan_CONST:
@@ -632,6 +634,26 @@ void ZWave::SendCO2LevelChangedEvent(unsigned short node_id, int instance_id, in
 		);
 	}
 
+}
+
+void ZWave::SendSetpointChangedEvent(unsigned short node_id, int instance_id, float value)
+{
+	char tempstr[512];
+	int iValue = round(value);
+	sprintf(tempstr, "%d", iValue);
+	char tmp_node_id[16];
+	sprintf(tmp_node_id,"%i",node_id);
+        DeviceData_Impl *pChildDevice = InternalIDToDevice(tmp_node_id, instance_id);
+	if (pChildDevice != NULL) {		
+		LoggerWrapper::GetInstance()->Write(LV_ZWAVE,"Sending setpoint changed event from node %s",tmp_node_id);
+		m_pEvent->SendMessage( new Message(pChildDevice->m_dwPK_Device,
+			DEVICEID_EVENTMANAGER,
+			PRIORITY_NORMAL,
+			MESSAGETYPE_EVENT,
+			EVENT_Thermostat_Set_Point_Chan_CONST, 1, 
+			EVENTPARAMETER_Value_CONST, tempstr)
+		);
+	}
 }
 
 void ZWave::SendTemperatureChangedEvent(unsigned short node_id, int instance_id, float value)

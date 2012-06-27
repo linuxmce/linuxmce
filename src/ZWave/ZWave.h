@@ -73,6 +73,7 @@ public:
 		virtual void SendLightChangedEvents(unsigned short node_id, int instance_id, int value);
 		virtual void SendPowerUsageChangedEvent(unsigned short node_id, int instance_id, int value);
 		virtual void SendTemperatureChangedEvent(unsigned short node_id, int instance_id, float value);
+		virtual void SendSetpointChangedEvent(unsigned short node_id, int instance_id, float value);
 		virtual void SendBrightnessChangedEvent(unsigned short node_id, int instance_id, int value);
 		virtual void SendHumidityChangedEvent(unsigned short node_id, int instance_id, float value);
 		virtual void SendOnOffEvent(unsigned short node_id, int instance_id, int value);
