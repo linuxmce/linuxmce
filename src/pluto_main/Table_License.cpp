@@ -137,10 +137,8 @@ void Row_License::SetDefaultValues()
 {
 	m_PK_License = 0;
 is_null[0] = false;
-m_Description = "";
-is_null[1] = false;
-m_Define = "";
-is_null[2] = false;
+is_null[1] = true;
+is_null[2] = true;
 is_null[3] = true;
 is_null[4] = true;
 m_RequiresPayment = 0;
@@ -240,6 +238,12 @@ void Row_License::psc_restrict_set(long int val){PLUTO_SAFETY_LOCK_ERRORSONLY(sl
 m_psc_restrict = val; is_modified=true; is_null[11]=false;}
 
 		
+bool Row_License::Description_isNull() {PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
+
+return is_null[1];}
+bool Row_License::Define_isNull() {PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
+
+return is_null[2];}
 bool Row_License::Summary_isNull() {PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
 
 return is_null[3];}
@@ -266,6 +270,14 @@ bool Row_License::psc_restrict_isNull() {PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->
 return is_null[11];}
 
 			
+void Row_License::Description_setNull(bool val){PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
+is_null[1]=val;
+is_modified=true;
+}
+void Row_License::Define_setNull(bool val){PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
+is_null[2]=val;
+is_modified=true;
+}
 void Row_License::Summary_setNull(bool val){PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
 is_null[3]=val;
 is_modified=true;

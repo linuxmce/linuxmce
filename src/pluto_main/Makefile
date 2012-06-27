@@ -258,7 +258,3 @@ clean: clean-recursive
 
 include $(ROOT)/PlutoUtils/make.rules
 -include $(sources:.cpp=.d)
-
-install: 
-	mkdir -p pluto/lib
-	cp libpluto_main.so $(DESTPATH)pluto/lib

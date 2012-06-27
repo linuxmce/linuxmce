@@ -177,6 +177,12 @@ void psc_restrict_set(long int val);
 
 		
 		bool When_isNull();
+bool Command_isNull();
+bool Description_isNull();
+bool Parameter_Syntax_isNull();
+bool Core_Parameter_isNull();
+bool MD_Parameter_isNull();
+bool Hybrid_Parameter_isNull();
 bool FK_DeviceTemplate_isNull();
 bool psc_id_isNull();
 bool psc_batch_isNull();
@@ -186,6 +192,12 @@ bool psc_restrict_isNull();
 
 			
 		void When_setNull(bool val);
+void Command_setNull(bool val);
+void Description_setNull(bool val);
+void Parameter_Syntax_setNull(bool val);
+void Core_Parameter_setNull(bool val);
+void MD_Parameter_setNull(bool val);
+void Hybrid_Parameter_setNull(bool val);
 void FK_DeviceTemplate_setNull(bool val);
 void psc_id_setNull(bool val);
 void psc_batch_setNull(bool val);

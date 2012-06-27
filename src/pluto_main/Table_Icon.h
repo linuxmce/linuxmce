@@ -143,7 +143,10 @@ void psc_mod_set(string val);
 void psc_restrict_set(long int val);
 
 		
-		bool TransparentColor_isNull();
+		bool Define_isNull();
+bool Description_isNull();
+bool TransparentColor_isNull();
+bool MainFileName_isNull();
 bool SelectedFileName_isNull();
 bool AltFileNames_isNull();
 bool BackgroundFileName_isNull();
@@ -154,7 +157,10 @@ bool psc_frozen_isNull();
 bool psc_restrict_isNull();
 
 			
-		void TransparentColor_setNull(bool val);
+		void Define_setNull(bool val);
+void Description_setNull(bool val);
+void TransparentColor_setNull(bool val);
+void MainFileName_setNull(bool val);
 void SelectedFileName_setNull(bool val);
 void AltFileNames_setNull(bool val);
 void BackgroundFileName_setNull(bool val);

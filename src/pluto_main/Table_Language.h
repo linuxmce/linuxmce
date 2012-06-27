@@ -128,7 +128,8 @@ void psc_mod_set(string val);
 void psc_restrict_set(long int val);
 
 		
-		bool FK_Language_TextPlacement_isNull();
+		bool Description_isNull();
+bool FK_Language_TextPlacement_isNull();
 bool psc_id_isNull();
 bool psc_batch_isNull();
 bool psc_user_isNull();
@@ -136,7 +137,8 @@ bool psc_frozen_isNull();
 bool psc_restrict_isNull();
 
 			
-		void FK_Language_TextPlacement_setNull(bool val);
+		void Description_setNull(bool val);
+void FK_Language_TextPlacement_setNull(bool val);
 void psc_id_setNull(bool val);
 void psc_batch_setNull(bool val);
 void psc_user_setNull(bool val);

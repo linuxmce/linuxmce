@@ -256,6 +256,7 @@
 #define DEVICEDATA_PPPoE_Settings_CONST 303
 #define DEVICEDATA_EmailSettings_CONST 304
 #define DEVICEDATA_Video_Support_CONST 305
+#define DEVICEDATA_Temperature_Measurement_Units_CONST 306
 
 #define DEVICEDATA_TABLE "DeviceData"
 #define DEVICEDATA_PK_DEVICEDATA_FIELD "PK_DeviceData"

@@ -145,12 +145,9 @@ void Row_Users::SetDefaultValues()
 {
 	m_PK_Users = 0;
 is_null[0] = false;
-m_UserName = "";
-is_null[1] = false;
-m_Password = "";
-is_null[2] = false;
-m_PINCode = "0";
-is_null[3] = false;
+is_null[1] = true;
+is_null[2] = true;
+is_null[3] = true;
 m_HasMailbox = 0;
 is_null[4] = false;
 m_AccessGeneralMailbox = 0;
@@ -372,6 +369,15 @@ void Row_Users::psc_restrict_set(long int val){PLUTO_SAFETY_LOCK_ERRORSONLY(sl,t
 m_psc_restrict = val; is_modified=true; is_null[27]=false;}
 
 		
+bool Row_Users::UserName_isNull() {PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
+
+return is_null[1];}
+bool Row_Users::Password_isNull() {PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
+
+return is_null[2];}
+bool Row_Users::PINCode_isNull() {PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
+
+return is_null[3];}
 bool Row_Users::Extension_isNull() {PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
 
 return is_null[6];}
@@ -425,6 +431,18 @@ bool Row_Users::psc_restrict_isNull() {PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->da
 return is_null[27];}
 
 			
+void Row_Users::UserName_setNull(bool val){PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
+is_null[1]=val;
+is_modified=true;
+}
+void Row_Users::Password_setNull(bool val){PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
+is_null[2]=val;
+is_modified=true;
+}
+void Row_Users::PINCode_setNull(bool val){PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
+is_null[3]=val;
+is_modified=true;
+}
 void Row_Users::Extension_setNull(bool val){PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
 is_null[6]=val;
 is_modified=true;

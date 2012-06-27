@@ -135,8 +135,7 @@ void Row_psc_ir_schema::SetDefaultValues()
 {
 	m_PK_psc_ir_schema = 0;
 is_null[0] = false;
-m_Value = "";
-is_null[1] = false;
+is_null[1] = true;
 
 
 	is_added=false;
@@ -160,8 +159,15 @@ void Row_psc_ir_schema::Value_set(string val){PLUTO_SAFETY_LOCK_ERRORSONLY(sl,ta
 m_Value = val; is_modified=true; is_null[1]=false;}
 
 		
+bool Row_psc_ir_schema::Value_isNull() {PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
+
+return is_null[1];}
 
 			
+void Row_psc_ir_schema::Value_setNull(bool val){PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
+is_null[1]=val;
+is_modified=true;
+}
 	
 
 string Row_psc_ir_schema::PK_psc_ir_schema_asSQL()

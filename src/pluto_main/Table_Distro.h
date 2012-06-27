@@ -158,7 +158,8 @@ void psc_mod_set(string val);
 void psc_restrict_set(long int val);
 
 		
-		bool Define_isNull();
+		bool Description_isNull();
+bool Define_isNull();
 bool Installer_isNull();
 bool KickStartCD_isNull();
 bool Binaries_isNull();
@@ -171,7 +172,8 @@ bool psc_frozen_isNull();
 bool psc_restrict_isNull();
 
 			
-		void Define_setNull(bool val);
+		void Description_setNull(bool val);
+void Define_setNull(bool val);
 void Installer_setNull(bool val);
 void KickStartCD_setNull(bool val);
 void Binaries_setNull(bool val);

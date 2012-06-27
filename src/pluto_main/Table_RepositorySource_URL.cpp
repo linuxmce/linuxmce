@@ -140,13 +140,11 @@ void Row_RepositorySource_URL::SetDefaultValues()
 is_null[0] = false;
 m_FK_RepositorySource = 0;
 is_null[1] = false;
-m_URL = "";
-is_null[2] = false;
+is_null[2] = true;
 is_null[3] = true;
 m_FK_Country = 0;
 is_null[4] = true;
-m_Password = "";
-is_null[5] = false;
+is_null[5] = true;
 is_null[6] = true;
 is_null[7] = true;
 m_psc_id = 0;
@@ -249,12 +247,18 @@ void Row_RepositorySource_URL::psc_restrict_set(long int val){PLUTO_SAFETY_LOCK_
 m_psc_restrict = val; is_modified=true; is_null[12]=false;}
 
 		
+bool Row_RepositorySource_URL::URL_isNull() {PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
+
+return is_null[2];}
 bool Row_RepositorySource_URL::FK_Country_isNull() {PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
 
 return is_null[3];}
 bool Row_RepositorySource_URL::Username_isNull() {PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
 
 return is_null[4];}
+bool Row_RepositorySource_URL::Password_isNull() {PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
+
+return is_null[5];}
 bool Row_RepositorySource_URL::Comments_isNull() {PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
 
 return is_null[6];}
@@ -275,12 +279,20 @@ bool Row_RepositorySource_URL::psc_restrict_isNull() {PLUTO_SAFETY_LOCK_ERRORSON
 return is_null[12];}
 
 			
+void Row_RepositorySource_URL::URL_setNull(bool val){PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
+is_null[2]=val;
+is_modified=true;
+}
 void Row_RepositorySource_URL::FK_Country_setNull(bool val){PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
 is_null[3]=val;
 is_modified=true;
 }
 void Row_RepositorySource_URL::Username_setNull(bool val){PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
 is_null[4]=val;
+is_modified=true;
+}
+void Row_RepositorySource_URL::Password_setNull(bool val){PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
+is_null[5]=val;
 is_modified=true;
 }
 void Row_RepositorySource_URL::Comments_setNull(bool val){PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);

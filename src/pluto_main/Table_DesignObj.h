@@ -173,7 +173,8 @@ void psc_mod_set(string val);
 void psc_restrict_set(long int val);
 
 		
-		bool Define_isNull();
+		bool Description_isNull();
+bool Define_isNull();
 bool FK_DesignObj_IncludeIfOtherIncluded_isNull();
 bool TimeoutSeconds_isNull();
 bool ScreenType_isNull();
@@ -186,7 +187,8 @@ bool psc_frozen_isNull();
 bool psc_restrict_isNull();
 
 			
-		void Define_setNull(bool val);
+		void Description_setNull(bool val);
+void Define_setNull(bool val);
 void FK_DesignObj_IncludeIfOtherIncluded_setNull(bool val);
 void TimeoutSeconds_setNull(bool val);
 void ScreenType_setNull(bool val);

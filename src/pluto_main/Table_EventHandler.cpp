@@ -145,8 +145,7 @@ is_null[1] = true;
 m_FK_Event = 0;
 is_null[2] = true;
 m_TimedEvent = 0;
-m_Description = "";
-is_null[3] = false;
+is_null[3] = true;
 is_null[4] = true;
 m_FK_Criteria = 0;
 is_null[5] = true;
@@ -316,6 +315,9 @@ return is_null[1];}
 bool Row_EventHandler::TimedEvent_isNull() {PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
 
 return is_null[2];}
+bool Row_EventHandler::Description_isNull() {PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
+
+return is_null[3];}
 bool Row_EventHandler::FK_Criteria_isNull() {PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
 
 return is_null[4];}
@@ -366,6 +368,10 @@ is_modified=true;
 }
 void Row_EventHandler::TimedEvent_setNull(bool val){PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
 is_null[2]=val;
+is_modified=true;
+}
+void Row_EventHandler::Description_setNull(bool val){PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
+is_null[3]=val;
 is_modified=true;
 }
 void Row_EventHandler::FK_Criteria_setNull(bool val){PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);

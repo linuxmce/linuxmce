@@ -144,8 +144,7 @@ m_Hidden = 0;
 is_null[2] = false;
 m_Order = 0;
 is_null[3] = false;
-m_Title = "";
-is_null[4] = false;
+is_null[4] = true;
 is_null[5] = true;
 is_null[6] = true;
 m_psc_id = 0;
@@ -245,6 +244,9 @@ m_psc_restrict = val; is_modified=true; is_null[11]=false;}
 bool Row_Document::FK_Document_Parent_isNull() {PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
 
 return is_null[1];}
+bool Row_Document::Title_isNull() {PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
+
+return is_null[4];}
 bool Row_Document::Contents_isNull() {PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
 
 return is_null[5];}
@@ -267,6 +269,10 @@ return is_null[11];}
 			
 void Row_Document::FK_Document_Parent_setNull(bool val){PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
 is_null[1]=val;
+is_modified=true;
+}
+void Row_Document::Title_setNull(bool val){PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
+is_null[4]=val;
 is_modified=true;
 }
 void Row_Document::Contents_setNull(bool val){PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);

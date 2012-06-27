@@ -175,6 +175,7 @@ void psc_restrict_set(long int val);
 		
 		bool FK_Array_isNull();
 bool FK_Installation_isNull();
+bool Description_isNull();
 bool Hint_isNull();
 bool FK_Criteria_Orbiter_isNull();
 bool FK_DesignObj_isNull();
@@ -194,6 +195,7 @@ bool psc_restrict_isNull();
 			
 		void FK_Array_setNull(bool val);
 void FK_Installation_setNull(bool val);
+void Description_setNull(bool val);
 void Hint_setNull(bool val);
 void FK_Criteria_Orbiter_setNull(bool val);
 void FK_DesignObj_setNull(bool val);

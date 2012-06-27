@@ -185,7 +185,10 @@ void psc_mod_set(string val);
 void psc_restrict_set(long int val);
 
 		
-		bool Extension_isNull();
+		bool UserName_isNull();
+bool Password_isNull();
+bool PINCode_isNull();
+bool Extension_isNull();
 bool FirstName_isNull();
 bool LastName_isNull();
 bool Nickname_isNull();
@@ -204,7 +207,10 @@ bool psc_frozen_isNull();
 bool psc_restrict_isNull();
 
 			
-		void Extension_setNull(bool val);
+		void UserName_setNull(bool val);
+void Password_setNull(bool val);
+void PINCode_setNull(bool val);
+void Extension_setNull(bool val);
 void FirstName_setNull(bool val);
 void LastName_setNull(bool val);
 void Nickname_setNull(bool val);

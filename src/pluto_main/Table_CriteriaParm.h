@@ -141,6 +141,7 @@ void psc_restrict_set(long int val);
 
 		
 		bool Parm_isNull();
+bool Value_isNull();
 bool FK_CannedEvents_CriteriaParmList_isNull();
 bool psc_id_isNull();
 bool psc_batch_isNull();
@@ -150,6 +151,7 @@ bool psc_restrict_isNull();
 
 			
 		void Parm_setNull(bool val);
+void Value_setNull(bool val);
 void FK_CannedEvents_CriteriaParmList_setNull(bool val);
 void psc_id_setNull(bool val);
 void psc_batch_setNull(bool val);

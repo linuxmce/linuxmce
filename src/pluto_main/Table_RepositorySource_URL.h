@@ -140,8 +140,10 @@ void psc_mod_set(string val);
 void psc_restrict_set(long int val);
 
 		
-		bool FK_Country_isNull();
+		bool URL_isNull();
+bool FK_Country_isNull();
 bool Username_isNull();
+bool Password_isNull();
 bool Comments_isNull();
 bool psc_id_isNull();
 bool psc_batch_isNull();
@@ -150,8 +152,10 @@ bool psc_frozen_isNull();
 bool psc_restrict_isNull();
 
 			
-		void FK_Country_setNull(bool val);
+		void URL_setNull(bool val);
+void FK_Country_setNull(bool val);
 void Username_setNull(bool val);
+void Password_setNull(bool val);
 void Comments_setNull(bool val);
 void psc_id_setNull(bool val);
 void psc_batch_setNull(bool val);

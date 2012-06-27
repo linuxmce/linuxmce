@@ -128,9 +128,11 @@ void FK_psc_dce_bathdr_auth_set(long int val);
 void FK_psc_dce_bathdr_unauth_set(long int val);
 
 		
-		
+		bool Tablename_isNull();
+
 			
-			
+		void Tablename_setNull(bool val);
+	
 	
 		void Delete();
 		void Reload();		

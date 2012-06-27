@@ -163,8 +163,7 @@ void Row_DesignObj::SetDefaultValues()
 {
 	m_PK_DesignObj = 0;
 is_null[0] = false;
-m_Description = "";
-is_null[1] = false;
+is_null[1] = true;
 is_null[2] = true;
 m_FK_DesignObjType = 0;
 is_null[3] = false;
@@ -362,6 +361,9 @@ void Row_DesignObj::psc_restrict_set(long int val){PLUTO_SAFETY_LOCK_ERRORSONLY(
 m_psc_restrict = val; is_modified=true; is_null[23]=false;}
 
 		
+bool Row_DesignObj::Description_isNull() {PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
+
+return is_null[1];}
 bool Row_DesignObj::Define_isNull() {PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
 
 return is_null[2];}
@@ -397,6 +399,10 @@ bool Row_DesignObj::psc_restrict_isNull() {PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table
 return is_null[23];}
 
 			
+void Row_DesignObj::Description_setNull(bool val){PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
+is_null[1]=val;
+is_modified=true;
+}
 void Row_DesignObj::Define_setNull(bool val){PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
 is_null[2]=val;
 is_modified=true;
