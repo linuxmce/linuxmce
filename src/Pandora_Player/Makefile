@@ -4,16 +4,6 @@ GENDEV=../Gen_Devices
 SNR_CPPFLAGS ?= -DKDE_LMCE -DDEBUG -DTHREAD_LOG -DLOG_ALL_QUERIES
 SNR_LDFLAGS ?= 
 
-# External libs that Pandora Player needs
-EZXML=ezxml
-EZXML_SOURCES=ezxml.c
-
-WAITRESS=waitress
-WAITRESS_SOURCES=waitress.c
-
-PIANO=piano
-PIANO_SOURCES=crypt.c xml.c piano.c
-
 ROOT = ..
 CXX = g++
 CXXFLAGS = -Wall -fPIC -ggdb3
@@ -45,21 +35,9 @@ whattodo:
 
 all: bin so
 
-bin: libezxml.a libwaitress.a libpiano.a Pandora_Player
+bin: Pandora_Player
 
 so: Pandora_Player.so
-
-libezxml.a: $(EZXML_SOURCES:.c=.o)
-	$(AR) rc $@ $(call cpath,$+)
-	cp $@ ../lib
-
-libwaitress.a: $(WAITRESS_SOURCES:.c=.o)
-	$(AR) rc $@ $(call cpath,$+)
-	cp $@ ../lib
-
-libpiano.a: $(PIANO_SOURCES:.c=.o)
-	$(AR) rc $@ $(call cpath,$+)
-	cp $@ ../lib
 
 Pandora_Player.so: $(sources:.cpp=.o)
 	$(CXX) -shared -o $(MYNAME).so $(call cpath,$+) $(LDFLAGS) $(LDLIBS)
@@ -73,7 +51,7 @@ Pandora_Player: $(sources:.cpp=.o)
 	./post_make.sh $@
 
 clean: clean-recursive
-	rm -f $(EZXML_SOURCES:.c=.o) $(WAITRESS_SOURCES:.c=.o) $(PIANO_SOURCES:.c=.o) libpiano.a libwaitress.a libezxml.a $(call cpath,$(sources:.cpp=.o) $(sources:.cpp=.d)) Pandora_Player Pandora_Player.so >/dev/null
+	rm -f $(call cpath,$(sources:.cpp=.o) $(sources:.cpp=.d)) Pandora_Player Pandora_Player.so >/dev/null
 
 package:
 	chmod +x make_package.sh
