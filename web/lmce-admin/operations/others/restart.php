@@ -1,9 +1,9 @@
 <?
 function restart($output,$dbADO) {
 	// include language files
-	include(APPROOT.'/languages/'.$GLOBALS['lang'].'/common.lang.php');
-	include(APPROOT.'/languages/'.$GLOBALS['lang'].'/restart.lang.php');
-	
+	includeLangFile('common.lang.php');
+	includeLangFile('restart.lang.php');
+
 	/* @var $dbADO ADOConnection */
 	/* @var $rs ADORecordSet */
 	$out='';
@@ -43,23 +43,23 @@ function restart($output,$dbADO) {
 		
 		<table cellpadding="3" align="center">
 			<tr>
-				<td colspan="6" align="center"><input type="submit" class="button" name="quick_reload" value="'.$TEXT_QUICK_RELOAD_ROUTER_CONST.'"></td>
+				<td colspan="6" align="center"><input type="submit" class="button" name="quick_reload" value="'.translate('TEXT_QUICK_RELOAD_ROUTER_CONST').'"></td>
 			</tr>
 			<tr>
 				<td colspan="6" align="center">&nbsp;</td>
 			</tr>		
 			<tr bgcolor="#EEEEEE">
-				<td colspan="3"><B>'.$TEXT_RESTART_CORE_CONST.'</B></td>
-				<td><input type="submit" class="button" name="halt_core" value="'.$TEXT_HALT_CONST.'"></td>
-				<td><input type="submit" class="button" name="suspend_core" value="'.$TEXT_SUSPEND_CONST.'"></td>
-				<td><input type="submit" class="button" name="reboot_core" value="'.$TEXT_REBOOT_CONST.'"></td>
+				<td colspan="3"><B>'.translate('TEXT_RESTART_CORE_CONST').'</B></td>
+				<td><input type="submit" class="button" name="halt_core" value="'.translate('TEXT_HALT_CONST').'"></td>
+				<td><input type="submit" class="button" name="suspend_core" value="'.translate('TEXT_SUSPEND_CONST').'"></td>
+				<td><input type="submit" class="button" name="reboot_core" value="'.translate('TEXT_REBOOT_CONST').'"></td>
 			</tr>
 			<tr bgcolor="#DDDDDD">
-				<td colspan="6" align="center"><B>'.$TEXT_MEDIA_DIRECTORS_CONST.'</B></td>
+				<td colspan="6" align="center"><B>'.translate('TEXT_MEDIA_DIRECTORS_CONST').'</B></td>
 			</tr>		
 			<tr bgcolor="#EEEEEE">
 				<td>&nbsp;</td>
-				<td colspan="2" align="center"><B>'.$TEXT_BOOT_FROM_CONST.'</B></td>
+				<td colspan="2" align="center"><B>'.translate('TEXT_BOOT_FROM_CONST').'</B></td>
 				<td colspan="3"></td>
 			</tr>		
 		
@@ -72,11 +72,11 @@ function restart($output,$dbADO) {
 					$out.='
 					<tr>
 						<td><B>'.$description.'</B></td>
-						<td><input type="radio" name="boot_'.$mdID.'" value="V" onClick="self.location=\'index.php?section=restart&action=V&device='.$mdID.'\'"> '.$TEXT_HDD_CONST.' </td>
-						<td><input type="radio" name="boot_'.$mdID.'" value="net" onClick="self.location=\'index.php?section=restart&action=N&device='.$mdID.'\'"> '.$TEXT_NET_CONST.'</td>
-						<td><input type="submit" class="button" name="halt_'.$mdID.'" value="'.$TEXT_HALT_CONST.'"></td>
-						<td><input type="submit" class="button" name="suspend_'.$mdID.'" value="'.$TEXT_SUSPEND_CONST.'"></td>
-						<td><input type="submit" class="button" name="reboot_'.$mdID.'" value="'.$TEXT_REBOOT_CONST.'"></td>
+						<td><input type="radio" name="boot_'.$mdID.'" value="V" onClick="self.location=\'index.php?section=restart&action=V&device='.$mdID.'\'"> '.translate('TEXT_HDD_CONST').' </td>
+						<td><input type="radio" name="boot_'.$mdID.'" value="net" onClick="self.location=\'index.php?section=restart&action=N&device='.$mdID.'\'"> '.translate('TEXT_NET_CONST').'</td>
+						<td><input type="submit" class="button" name="halt_'.$mdID.'" value="'.translate('TEXT_HALT_CONST').'"></td>
+						<td><input type="submit" class="button" name="suspend_'.$mdID.'" value="'.translate('TEXT_SUSPEND_CONST').'"></td>
+						<td><input type="submit" class="button" name="reboot_'.$mdID.'" value="'.translate('TEXT_REBOOT_CONST').'"></td>
 					</tr>			
 					';
 				}
@@ -91,19 +91,19 @@ function restart($output,$dbADO) {
 	// process area
 		$canModifyInstallation = getUserCanModifyInstallation($_SESSION['userID'],$_SESSION['installationID'],$dbADO);
 		if (!$canModifyInstallation) {	
-			header('Location: index.php?section=restart&error='.$TEXT_NOT_AUTHORISED_TO_MODIFY_INSTALLATION_CONST);
+			header('Location: index.php?section=restart&error='.translate('TEXT_NOT_AUTHORISED_TO_MODIFY_INSTALLATION_CONST'));
 			exit();
 		}
 		$coreID=(int)@$_POST['coreID'];
 		$MDArray=explode(',',@$_POST['MDArray']);
 
 		if(isset($_POST['halt_core'])){
-			$command='/usr/pluto/bin/MessageSend localhost -targetType template 0 27 1 323 21 H 2 '.$coreID;
+			$command='/usr/pluto/bin/MessageSend ip6-localhost -targetType template 0 27 1 323 21 H 2 '.$coreID;
 			exec_batch_command($command);
 		}
 
 		if(isset($_POST['suspend_core'])){
-			$command='/usr/pluto/bin/MessageSend localhost -targetType template 0 27 1 323 21 S 2 '.$coreID;
+			$command='/usr/pluto/bin/MessageSend ip6-localhost -targetType template 0 27 1 323 21 S 2 '.$coreID;
 			exec_batch_command($command);
 		}
 
@@ -114,12 +114,12 @@ function restart($output,$dbADO) {
 
 		foreach ($MDArray AS $mdID){
 			if(isset($_POST['halt_'.$mdID])){
-				$command='/usr/pluto/bin/MessageSend localhost -targetType template 0 27 1 323 21 H 2 '.$mdID;
+				$command='/usr/pluto/bin/MessageSend ip6-localhost -targetType template 0 27 1 323 21 H 2 '.$mdID;
 				exec_batch_command($command);
 			}
 	
 			if(isset($_POST['suspend_'.$mdID])){
-				$command='/usr/pluto/bin/MessageSend localhost -targetType template 0 27 1 323 21 S 2 '.$mdID;
+				$command='/usr/pluto/bin/MessageSend ip6-localhost -targetType template 0 27 1 323 21 S 2 '.$mdID;
 				exec_batch_command($command);
 			}
 	
@@ -133,24 +133,24 @@ function restart($output,$dbADO) {
 		
 		if(isset($_REQUEST['device']) && (int)$_REQUEST['device']!=0){
 			$device=(int)$_REQUEST['device'];
-			$command='/usr/pluto/bin/MessageSend localhost -targetType template 0 27 1 323 21 '.$action.' 2 '.$device;
+			$command='/usr/pluto/bin/MessageSend ip6-localhost -targetType template 0 27 1 323 21 '.$action.' 2 '.$device;
 			exec_batch_command($command);
 		}
 
 		if(isset($_POST['quick_reload'])){
-			$command='/usr/pluto/bin/MessageSend localhost 0 -1000 7 1';
+			$command='/usr/pluto/bin/MessageSend ip6-localhost 0 -1000 7 1';
 			exec_batch_command($command);
 		}
 
-		header('Location: index.php?section=restart&msg='.$TEXT_COMMAND_SENT_CONST.' '.$command);
+		header('Location: index.php?section=restart&msg='.translate('TEXT_COMMAND_SENT_CONST').' '.$command);
 	}
 
-	$output->setMenuTitle($TEXT_WIZARD_CONST.' |');
-	$output->setPageTitle($TEXT_RESTART_CONST);
-	$output->setNavigationMenu(array($TEXT_RESTART_CONST=>'index.php?section=restart'));	
+	$output->setMenuTitle(translate('TEXT_WIZARD_CONST').' |');
+	$output->setPageTitle(translate('TEXT_RESTART_CONST'));
+	$output->setNavigationMenu(array(translate('TEXT_RESTART_CONST')=>'index.php?section=restart'));	
 	$output->setScriptCalendar('null');
 	$output->setBody($out);
-	$output->setTitle(APPLICATION_NAME.' :: '.$TEXT_RESTART_CONST);
+	$output->setTitle(APPLICATION_NAME.' :: '.translate('TEXT_RESTART_CONST'));
 	$output->output();
 }
 
