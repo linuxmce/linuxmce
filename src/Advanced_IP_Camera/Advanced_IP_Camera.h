@@ -28,30 +28,33 @@
 
 #include <pthread.h>
 
+namespace DCE {
+  class MotionDetector {
+       public:
+               int PK_Device;
+               int status;
+               string triggerOn;
+               string triggerOff;
+
+               bool Matches(string s) {
+                       return s.compare(triggerOn) == 0 || s.compare(triggerOff) == 0;
+               }
+
+               int GetNewStatus(string s) {
+                       if (s.compare(triggerOn) == 0) {
+                               return 1;
+                       } else if (s.compare(triggerOff) == 0) {
+                               return 0;
+                       }
+                       return 0;
+               }
+       };
+
+}
+
 //<-dceag-decl-b->
 namespace DCE
 {
-	class MotionDetector {
-	public:
-		int PK_Device;
-		int status;
-		string triggerOn;
-		string triggerOff;
-		
-		bool Matches(string s) {
-			return s.compare(triggerOn) == 0 || s.compare(triggerOff) == 0;
-		}
-		
-		int GetNewStatus(string s) {
-			if (s.compare(triggerOn) == 0) {
-				return 1;
-			} else if (s.compare(triggerOff) == 0) {
-				return 0;
-			}
-			return 0;
-		}
-	};
-  
 	class Advanced_IP_Camera : public Advanced_IP_Camera_Command
 	{
 //<-dceag-decl-e->
@@ -106,16 +109,16 @@ public:
 	string DATA_Get_Path();
 	int DATA_Get_PK_FloorplanObjectType();
 	string DATA_Get_Alert();
-	string DATA_Get_File_Name_and_Path();
+	string DATA_Get_Configuration();
 	int DATA_Get_TCP_Port();
 	string DATA_Get_Audio_settings();
 	string DATA_Get_Video_settings();
 	string DATA_Get_AuthUser();
 	string DATA_Get_AuthPassword();
-	string DATA_Get_Sound_Card();
 	bool DATA_Get_Video_Support();
 
 			*****EVENT***** accessors inherited from base class
+	void EVENT_Sensor_Tripped(bool bTripped);
 
 			*****COMMANDS***** we need to implement
 	*/
@@ -138,6 +141,56 @@ public:
 
 	virtual void CMD_Get_Video_Frame(string sDisable_Aspect_Lock,int iStreamID,int iWidth,int iHeight,char **pData,int *iData_Size,string *sFormat) { string sCMD_Result; CMD_Get_Video_Frame(sDisable_Aspect_Lock.c_str(),iStreamID,iWidth,iHeight,pData,iData_Size,sFormat,sCMD_Result,NULL);};
 	virtual void CMD_Get_Video_Frame(string sDisable_Aspect_Lock,int iStreamID,int iWidth,int iHeight,char **pData,int *iData_Size,string *sFormat,string &sCMD_Result,Message *pMessage);
+
+
+	/** @brief COMMAND: #200 - Move Up */
+	/** Move camera up */
+		/** @param #41 StreamID */
+			/** ID of stream to apply */
+
+	virtual void CMD_Move_Up(int iStreamID) { string sCMD_Result; CMD_Move_Up(iStreamID,sCMD_Result,NULL);};
+	virtual void CMD_Move_Up(int iStreamID,string &sCMD_Result,Message *pMessage);
+
+
+	/** @brief COMMAND: #201 - Move Down */
+	/** Move camera down */
+		/** @param #41 StreamID */
+			/** ID of stream to apply */
+
+	virtual void CMD_Move_Down(int iStreamID) { string sCMD_Result; CMD_Move_Down(iStreamID,sCMD_Result,NULL);};
+	virtual void CMD_Move_Down(int iStreamID,string &sCMD_Result,Message *pMessage);
+
+
+	/** @brief COMMAND: #202 - Move Left */
+	/** Move camera to the left */
+		/** @param #41 StreamID */
+			/** ID of stream to apply */
+
+	virtual void CMD_Move_Left(int iStreamID) { string sCMD_Result; CMD_Move_Left(iStreamID,sCMD_Result,NULL);};
+	virtual void CMD_Move_Left(int iStreamID,string &sCMD_Result,Message *pMessage);
+
+
+	/** @brief COMMAND: #203 - Move Right */
+	/** Move camera to the right */
+		/** @param #41 StreamID */
+			/** ID of stream to apply */
+
+	virtual void CMD_Move_Right(int iStreamID) { string sCMD_Result; CMD_Move_Right(iStreamID,sCMD_Result,NULL);};
+	virtual void CMD_Move_Right(int iStreamID,string &sCMD_Result,Message *pMessage);
+
+
+	/** @brief COMMAND: #684 - Zoom In */
+	/** Zoom in */
+
+	virtual void CMD_Zoom_In() { string sCMD_Result; CMD_Zoom_In(sCMD_Result,NULL);};
+	virtual void CMD_Zoom_In(string &sCMD_Result,Message *pMessage);
+
+
+	/** @brief COMMAND: #685 - Zoom Out */
+	/** Zoom out */
+
+	virtual void CMD_Zoom_Out() { string sCMD_Result; CMD_Zoom_Out(sCMD_Result,NULL);};
+	virtual void CMD_Zoom_Out(string &sCMD_Result,Message *pMessage);
 
 //<-dceag-h-e->
 	};

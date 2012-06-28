@@ -93,7 +93,7 @@ bool Advanced_IP_Camera::GetConfig()
 	m_sUser = DATA_Get_AuthUser();
 	m_sPasswd = DATA_Get_AuthPassword();
 
-	m_sEventPath = DATA_Get_File_Name_and_Path();
+	m_sEventPath = DATA_Get_Configuration();
 
 	curl_global_init (CURL_GLOBAL_ALL);
 	m_pCurl = curl_easy_init ();
@@ -379,4 +379,66 @@ void Advanced_IP_Camera::EventThread() {
 
 
 
+}
+//<-dceag-c200-b->
+
+	/** @brief COMMAND: #200 - Move Up */
+	/** Move camera up */
+		/** @param #41 StreamID */
+			/** ID of stream to apply */
+
+void Advanced_IP_Camera::CMD_Move_Up(int iStreamID,string &sCMD_Result,Message *pMessage)
+//<-dceag-c200-e->
+{
+}
+//<-dceag-c201-b->
+
+	/** @brief COMMAND: #201 - Move Down */
+	/** Move camera down */
+		/** @param #41 StreamID */
+			/** ID of stream to apply */
+
+void Advanced_IP_Camera::CMD_Move_Down(int iStreamID,string &sCMD_Result,Message *pMessage)
+//<-dceag-c201-e->
+{
+}
+//<-dceag-c202-b->
+
+	/** @brief COMMAND: #202 - Move Left */
+	/** Move camera to the left */
+		/** @param #41 StreamID */
+			/** ID of stream to apply */
+
+void Advanced_IP_Camera::CMD_Move_Left(int iStreamID,string &sCMD_Result,Message *pMessage)
+//<-dceag-c202-e->
+{
+}
+//<-dceag-c203-b->
+
+	/** @brief COMMAND: #203 - Move Right */
+	/** Move camera to the right */
+		/** @param #41 StreamID */
+			/** ID of stream to apply */
+
+void Advanced_IP_Camera::CMD_Move_Right(int iStreamID,string &sCMD_Result,Message *pMessage)
+//<-dceag-c203-e->
+{
+}
+//<-dceag-c684-b->
+
+	/** @brief COMMAND: #684 - Zoom In */
+	/** Zoom in */
+
+void Advanced_IP_Camera::CMD_Zoom_In(string &sCMD_Result,Message *pMessage)
+//<-dceag-c684-e->
+{
+}
+//<-dceag-c685-b->
+
+	/** @brief COMMAND: #685 - Zoom Out */
+	/** Zoom out */
+
+void Advanced_IP_Camera::CMD_Zoom_Out(string &sCMD_Result,Message *pMessage)
+//<-dceag-c685-e->
+{
 }
