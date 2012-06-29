@@ -39,8 +39,11 @@
 **
 ****************************************************************************/
 
-
+#if (QT_VERSION >= QT_VERSION_CHECK(5,0,0))
+#include <QtWidgets/QtWidgets>
+#else
 #include <QtGui/QtGui>
+#endif
 
 #include "modeltest.h"
 
