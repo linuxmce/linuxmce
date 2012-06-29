@@ -329,18 +329,31 @@ echo "
 #####
 auto ${auto[@]}" >>"$File"
 
+#
+# Scripts on Ipv6 UP
+#
 # Set IPv6 default route to ppp0 interface when IPv6 interface comes up
 echo "#!/bin/bash
 ip -6 route add default dev ppp0" >"/etc/ppp/ipv6-up.d/routing"
 # Start IPv6 DHCP client when IPv6 interface comes up, or restart it when already running
 echo "#!/bin/bash
 service wide-dhcpv6-client restart" >"/etc/ppp/ipv6-up.d/dhcp-client"
+# Restart Apache2 to make it listen on IPv6
+echo "#!/bin/bash
+service apache2 restart" >"/etc/ppp/ipv6-up.d/apache2"
+#
+# Scripts on IPv6 DOWN
+#
 # Remove IPv6 default route to ppp0 interface when IPv6 interface goes down
 echo "#!/bin/bash
 ip -6 route del default dev ppp0" >"/etc/ppp/ipv6-down.d/routing"
 # Restart IPv6 DHCP client when IPv6 interface goes down
 echo "#!/bin/bash
 service wide-dhcpv6-client restart" >"/etc/ppp/ipv6-down.d/dhcp-client"
+# Restart Apache2 to reinitialize available IP's
+echo "#!/bin/bash
+service apache2 restart" >"/etc/ppp/ipv6-down.d/apache2"
+
 chmod 755 /etc/ppp/ipv6-up.d/*
 chmod 755 /etc/ppp/ipv6-down.d/*
 	
@@ -395,6 +408,9 @@ if [[ "$IPv6RAenabled" == "on" ]]; then
 	if [[ "$IPv6NetNetmask" == "" ]]; then
 		IPv6NetNetmask="64";
 	fi
+        if [[ "$IPv6Net" == "" ]]; then
+                IPv6Net="::";
+        fi
 	# Configure RA daemon
 	echo "IPv6 RA daemon enabled, creating config files"	
 	RAConf="interface $IntIf {
