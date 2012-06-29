@@ -1,7 +1,15 @@
-#include "threadedsplash.h"
+
+
+#include <QPalette>
+#if (QT_VERSION >= QT_VERSION_CHECK(5,0,0))
+#include <QQuickView>
+#include <QQmlContext>
+#else
 #include <QtDeclarative/QDeclarativeView>
 #include <QtDeclarative/QDeclarativeContext>
+#endif
 
+#include "threadedsplash.h"
 
 
 
@@ -33,8 +41,12 @@ ThreadedSplash::ThreadedSplash(QObject *parent)
      QPalette palette;
      palette.setColor(QPalette::Base, Qt::transparent);
 
+#if (QT_VERSION >= QT_VERSION_CHECK(5,0,0))
+     splashView = new QQuickView; //qdeclarativeview for splash.qml
+#else
      splashView = new QDeclarativeView; //qdeclarativeview for splash.qml
-   //  splashView->setAttribute(Qt::WA_TranslucentBackground, true);     //doing the same for qdeclarativeview
+     splashView->setAttribute(Qt::WA_TranslucentBackground, true);     //doing the same for qdeclarativeview
+#endif
 
      splashView->rootContext()->setContextProperty("dcemessage", qs_progress); //sets connection to messaging variable in splash window
 
