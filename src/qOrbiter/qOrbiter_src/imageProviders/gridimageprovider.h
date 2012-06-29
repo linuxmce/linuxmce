@@ -5,16 +5,31 @@
   of keeping a link between the two, enabling datagrid images to be correlated to the right cells.
   */
 #include <QObject>
+#include <QtGlobal>
+#if (QT_VERSION >= QT_VERSION_CHECK(5, 0, 0))
+#include <QtCore/QObject>
+#include <QtCore/QModelIndex>
+#include <QtQml/QQmlImageProvider>
+#include <QtGui/QImage>
+#else
+#include <QObject>
 #include <QtDeclarative/qdeclarative.h>
 #include <QModelIndex>
 #include <QtDeclarative/QDeclarativeImageProvider>
-#include <datamodels/listModel.h>
 #include <QImage>
+#endif
+
+#include <datamodels/listModel.h>
+
 
 class qorbiterManager;
 class ListModel;
 
+#if (QT_VERSION >= QT_VERSION_CHECK(5,0,0))
+class GridIndexProvider :public QObject , public QQmlImageProvider
+#else
 class GridIndexProvider :public QObject , public QDeclarativeImageProvider
+#endif
 {
     Q_OBJECT
 public:

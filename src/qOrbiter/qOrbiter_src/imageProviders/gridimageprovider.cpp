@@ -3,8 +3,11 @@
 
 
 GridIndexProvider::GridIndexProvider(ListModel *model  , int pathRole, int pixmapRole) :
-    QDeclarativeImageProvider(QDeclarativeImageProvider::Image), mModel(*model),  mPathRole(pathRole),
-    mPixmapRole(pixmapRole)
+#if (QT_VERSION >= QT_VERSION_CHECK(5,0,0))
+    QQmlImageProvider(QQmlImageProvider::Image), mModel(*model),  mPathRole(pathRole), mPixmapRole(pixmapRole)
+#else
+    QDeclarativeImageProvider(QDeclarativeImageProvider::Image), mModel(*model),  mPathRole(pathRole), mPixmapRole(pixmapRole)
+#endif
 {
     // For each pixmap already in the model, get a mapping between the name and the index
     qRegisterMetaType<QModelIndex>("QModelIndex");
