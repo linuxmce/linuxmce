@@ -5,7 +5,11 @@
 #include <QUrl>
 #include <QtNetwork/QtNetwork>
 #include <QtXml/QDomDocument>
+#if   (QT_VERSION >= QT_VERSION_CHECK(5,0,0))
+//FIXME: Another unnecessary hdr?
+#else
 #include <QtDeclarative/QDeclarativeItem>
+#endif
 
 class gWeatherItem: public QObject
 {
