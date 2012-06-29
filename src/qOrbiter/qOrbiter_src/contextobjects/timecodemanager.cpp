@@ -6,8 +6,14 @@
 #include <QDebug>
 #endif
 #include <QMetaProperty>
+
+#if (QT_VERSION >= QT_VERSION_CHECK(5,0,0))
+TimeCodeManager::TimeCodeManager(QQuickItem *parent) :
+    QQuickItem(parent)
+#else
 TimeCodeManager::TimeCodeManager(QDeclarativeItem *parent) :
     QDeclarativeItem(parent)
+#endif
 {
 
     dceMediaSocket = new QTcpSocket();

@@ -10,17 +10,17 @@ ScreenSaverClass::ScreenSaverClass(QObject *parent) :
 
 void ScreenSaverClass::setImageList(QStringList imgList)
 {
-   images = imgList;
-   if(!images.empty())
-   {
-   pickImage();
-   setImage(images.at(0));
-   emit screenSaverReady();
-   }
-   else
-   {
-       //("Screensaver image list error!");
-   }
+    images = imgList;
+    if(!images.empty())
+    {
+        pickImage();
+        setImage(images.at(0));
+        emit screenSaverReady();
+    }
+    else
+    {
+        //("Screensaver image list error!");
+    }
 }
 
 void ScreenSaverClass::clearImageList()

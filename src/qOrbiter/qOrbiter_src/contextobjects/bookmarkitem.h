@@ -22,7 +22,6 @@
   in both the display and use of floorplan devices.
   */
 
-#include <QtDeclarative/QDeclarativeItem>
 #include <QImage>
 class BookmarkItem : public QObject
 {
