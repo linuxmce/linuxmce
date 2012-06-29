@@ -1,4 +1,4 @@
-/*
+    /*
     This file is part of QOrbiter for use with the LinuxMCE project found at http://www.linuxmce.org
    Langston Ball  golgoj4@gmail.com
     QOrbiter is free software: you can redistribute it and/or modify
@@ -18,7 +18,9 @@
 */
 
 //<-dceag-d-b->
-#include "qOrbiter.h"
+#include <iostream>
+#include <QApplication>
+
 #include "DCE/Logger.h"
 #include "PlutoUtils/FileUtils.h"
 #include "PlutoUtils/StringUtils.h"
@@ -27,12 +29,12 @@
 #include "QtNetwork/QTcpSocket"
 #include "QtNetwork/QHostAddress"
 
-
 #ifdef debug
 #include <QDebug>
 #endif
 
-#include <iostream>
+#include "qOrbiter.h"
+
 using namespace std;
 using namespace DCE;
 
@@ -1812,9 +1814,9 @@ bool DCE::qOrbiter::initialize()
     qDebug()<< "Connecting to router";
 #endif
     emit statusMessage("Starting dce initialization");
-    if ( GetConfig() ==true && Connect(PK_DeviceTemplate_get()) == true )
-    {
 
+    if ((GetConfig() == true) && (Connect(PK_DeviceTemplate_get()) == true))
+    {
         m_dwMaxRetries = 1;
         m_bRouterReloading = false;
         m_bReload = false;

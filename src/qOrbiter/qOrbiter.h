@@ -19,6 +19,7 @@
 //<-dceag-d-b->
 #ifndef qOrbiter_h
 #define qOrbiter_h
+
 #include <QObject>
 #include <QImage>
 #include <DataGrid.h>
