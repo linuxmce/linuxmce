@@ -8,7 +8,7 @@
 #ifdef debug
 #include <QDebug>
 #endif
-#include <QDeclarativeView>
+
 
 class SkinDataItem: public QObject
 {

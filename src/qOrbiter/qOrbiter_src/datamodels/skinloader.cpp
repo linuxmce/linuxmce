@@ -20,7 +20,12 @@ void SkinLoader::loadSkin(QString name) {
     // qDebug() <<style;
 
     ui_reference->setDceResponse("Skin loader is loading Style.qml: " + name);
+#if (QT_VERSION >= QT_VERSION_CHECK(5,0,0))
+    current_component = new QQmlComponent(ui_reference->qorbiterUIwin->engine(), style);
+#else
     current_component = new QDeclarativeComponent(ui_reference->qorbiterUIwin->engine(), style);
+#endif
+
     if (current_component->isLoading()) {
         //qDebug() << "Hooking up slot";
 
@@ -80,8 +85,11 @@ void SkinLoader::continueLoading() {
 
 void SkinLoader::checkLoadingStatus()
 {
-
+#if (QT_VERSION >= QT_VERSION_CHECK(5,0,0))
+    if(current_component->status() == QQmlComponent::Ready)
+#else
     if(current_component->status() == QDeclarativeComponent::Ready)
+#endif
         continueLoading();
 }
 

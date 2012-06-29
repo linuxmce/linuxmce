@@ -15,10 +15,13 @@
     along with QOrbiter.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-#include "datamodels/listModel.h"
 #ifdef debug
 #include <QDebug>
 #endif
+#include <QApplication>
+
+#include "datamodels/listModel.h"
+
 
 ListModel::ListModel(gridItem* prototype, QObject* parent) :
     QAbstractListModel(parent),  m_prototype(prototype)

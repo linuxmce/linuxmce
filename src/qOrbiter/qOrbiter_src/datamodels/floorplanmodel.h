@@ -67,8 +67,13 @@ public:
 
     QMap<int, QString*> floorplanPages;
 
+#if (QT_VERSION >= QT_VERSION_CHECK(5,0,0))
+    QQmlComponent *fpProxy;
+    QQmlEngine *proxyEngine;
+#else
     QDeclarativeComponent *fpProxy;
     QDeclarativeEngine *proxyEngine;
+#endif
 
    //QModelIndex index(int row, int column, const QModelIndex &parent) const ;
    //QModelIndex parent(const QModelIndex &child) const;

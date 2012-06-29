@@ -1,9 +1,14 @@
 #include "skindatamodel.h"
 #include "qorbitermanager.h"
-
+#if (QT_VERSION >= QT_VERSION_CHECK(5,0,0))
+#include <QtQml/QQmlComponent>
+#include <QtQml/QQmlEngine>
+#else
 #include <QtDeclarative/QDeclarativeComponent>
 #include <QtDeclarative/QDeclarativeEngine>
-#include <QUrl>
+#endif
+
+#include <QtCore/QUrl>
 
 SkinDataModel::SkinDataModel(QUrl &baseUrl, SkinDataItem* prototype, qorbiterManager *uiRef, QObject* parent): QAbstractListModel(parent), m_prototype(prototype)
 {
@@ -159,7 +164,11 @@ void SkinDataModel::setActiveSkin(QString name)
 
     QString skinURL = find(name)->path();
    //dir -l qDebug() << skinURL;
+#if (QT_VERSION >= QT_VERSION_CHECK(5,0,0))
+    QQmlComponent skinData(ui_reference->qorbiterUIwin->engine(), skinURL);
+#else
     QDeclarativeComponent skinData(ui_reference->qorbiterUIwin->engine(), skinURL);
+#endif
     QObject *styleObject = skinData.create(ui_reference->qorbiterUIwin->rootContext());
     if (skinData.isError()) {
         // this dir does not contain a Style.qml; ignore it

@@ -3,8 +3,13 @@
 
 #include <QObject>
 #include <QUrl>
-#include <QList>
+#include <QStringList>
+#if (QT_VERSION >= QT_VERSION_CHECK(5,0,0))
+#include <QtQuick/QQuickItem>
+#include <QQmlComponent>
+#else
 #include <QtDeclarative/QDeclarativeComponent>
+#endif
 #include "skindataitem.h"
 
 class SkinDataModel;
@@ -30,7 +35,12 @@ signals:
     void skinItemComplete();
 
   private:
+#if (QT_VERSION >= QT_VERSION_CHECK(5,0,0))
+    QQmlComponent *current_component;
+#else
     QDeclarativeComponent *current_component;
+#endif
+
 
     SkinDataModel *m_parent;
     QUrl m_base_url;
