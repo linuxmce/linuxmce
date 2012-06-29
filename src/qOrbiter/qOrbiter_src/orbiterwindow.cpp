@@ -19,18 +19,23 @@
     removing the lag time from the user starting the application and the app appearing on screen.
 */
 
-#include "orbiterwindow.h"
-#include <QObject>
+
+#include <QtCore/QObject>
+#if (QT_VERSION >= QT_VERSION_CHECK(5,0,0))
+#include <QtQml/QtQml>
+#include <QtWidgets/QApplication>
+#else
 #include <QtDeclarative/QDeclarativeView>
 #include <QtDeclarative/qdeclarative.h>
+#include <QtDeclarative/QDeclarativeEngine>
+#endif
 #include <contextobjects/existingorbiter.h>
 #include <QApplication>
-#include <QtDeclarative/QDeclarativeEngine>
-#include <QDir>
-
+#include <QtCore/QDir>
 #ifdef QT_DEBUG
 #include <QDebug>
 #endif
+#include "orbiterwindow.h"
 
 #ifdef IOS
 #include "../iOS/qOrbiter/ioshelpers.h"
@@ -53,7 +58,11 @@ orbiterWindow::orbiterWindow(long deviceid, std::string routerip, QObject *paren
     deviceno = deviceid;
 
 
+#if (QT_VERSION >= QT_VERSION_CHECK(5,0,0))
+    mainView.setResizeMode(QQuickView::SizeRootObjectToView);
+#else
     mainView.setResizeMode(QDeclarativeView::SizeRootObjectToView);
+#endif
     mainView.rootContext()->setContextProperty("window", this);
     mainView.setWindowTitle("LinuxMCE Orbiter ");
     mainView.rootContext()->setContextProperty("orbiterList" , "");

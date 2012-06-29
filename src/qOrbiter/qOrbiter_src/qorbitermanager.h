@@ -35,10 +35,16 @@
 #define QORBITERMANAGER_H
 
 /*---qt includes----*/
-#include <QtGui>
+#include <QtGlobal>
+#if (QT_VERSION >= QT_VERSION_CHECK(5,0,0))
+#include <QtQuick/QtQuick>
+#include <QQuickView>
+#else
+#include <QtGui/QWidget>
 #include <QtDeclarative/QDeclarativeView>
 #include <QtDeclarative/qdeclarativecontext.h>
 #include <QtDeclarative/QDeclarativeItem>
+#endif
 #include <QStringList>
 #include <QMainWindow>
 #include <QThread>
@@ -52,9 +58,11 @@
 
 #if GLENABLED
 #include <shaders/filereader.h>
-#include<shaders/trace.h>
+#include <shaders/trace.h>
 #endif
-
+//for pi - for_pi now sets glenabled
+//#include <shaders/filereader.h>
+//#include <shaders/trace.h>
 #endif
 
 /*-------Custom Classes -----------------*/
@@ -137,12 +145,18 @@ class qorbiterManager : public QObject
 
 
 public:
+#if (QT_VERSION >= QT_VERSION_CHECK(5,0,0))
+    qorbiterManager(QQuickView * view, QObject *parent=0);  //constructor
+#else
     qorbiterManager(QDeclarativeView * view, QObject *parent=0);  //constructor
+#endif
 
 #ifndef __ANDROID__
 #if GLENABLED
     FileReader * fileReader;
 #endif
+    //for Pi - for_pi now sets GLENABLED
+    //FileReader * fileReader;
 #endif
     bool b_glEnabled;
     //settings
@@ -186,7 +200,19 @@ public:
     QString currentSkinURL;
     QString remoteDirectoryPath;
     SkinDataItem* skin;
-    QDeclarativeView  *qorbiterUIwin;               //Qml declarativeview
+
+#if (QT_VERSION >= QT_VERSION_CHECK(5,0,0))
+    QQuickView *qorbiterUIwin;
+#else
+    QDeclarativeView *qorbiterUIwin;    //Qml declarativeview
+#endif
+
+
+
+
+
+
+
 
     ScreenSaverClass *ScreenSaver;
 
@@ -546,8 +572,11 @@ public slots: //note: Q_INVOKABLE means it can be called directly from qml
     void setHouseMode(int mode, int pass);
     void activateScreenSaver();
     void killScreenSaver();
-
+#if (QT_VERSION >= QT_VERSION_CHECK(5,0,0))
+    void skinLoaded(QQuickView::Status status);
+#else
     void skinLoaded(QDeclarativeView::Status status);
+#endif
 private:
     void initializeConnections();
     void setupQMLview();

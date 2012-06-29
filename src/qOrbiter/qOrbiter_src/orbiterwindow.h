@@ -2,13 +2,21 @@
 #define ORBITERWINDOW_H
 
 #include <QObject>
+#if (QT_VERSION >= QT_VERSION_CHECK(5,0,0))
+#include <QtQml/QQmlContext>
+#include <QQuickView>
+#else
 #include <QtDeclarative/QDeclarativeView>
 #include <QtDeclarative/QDeclarativeContext>
+#endif
 #include <QVariant>
+
 #if GLENABLED
 #include <QtOpenGL/QGLWidget>
 #endif
 #include <QtNetwork/QNetworkReply>
+
+
 class orbiterWindow : public QObject
 {
     Q_OBJECT
@@ -26,7 +34,11 @@ public:
     //public members
 
     QString message;
+#if (QT_VERSION >= QT_VERSION_CHECK(5,0,0))
+    QQuickView  mainView;
+#else
     QDeclarativeView  mainView;
+#endif
     QString buildType;
     QString qrcPath;
     std::string router;

@@ -26,11 +26,18 @@
 #include <QtCore/QtPlugin>
 #include <QtDeclarative/QDeclarativeEngine>
 
-
 Q_IMPORT_PLUGIN(UIKit)
 #endif
 
+#include <QtGlobal>
+#if QT_VERSION >= QT_VERSION_CHECK(5,0,0)
+#include <QtWidgets/QApplication>
+#include <QtQml/QQmlEngine>
+#else
 #include <QApplication>
+#include <QtDeclarative/QDeclarativeEngine>
+#endif
+
 #include <datamodels/listModel.h>
 #include <datamodels/gridItem.h>
 #include <qOrbiter/qOrbiter.h>
@@ -41,8 +48,6 @@ Q_IMPORT_PLUGIN(UIKit)
 #include "PlutoUtils/FileUtils.h"
 #include "PlutoUtils/StringUtils.h"
 #include "PlutoUtils/Other.h"
-#include <QtDeclarative/qdeclarativeengine.h>
-#include <QtDeclarative/qdeclarativecontext.h>
 #include <imageProviders/abstractimageprovider.h>
 #include <contextobjects/epgchannellist.h>
 #include <contextobjects/playlistclass.h>
@@ -509,6 +514,7 @@ int main(int argc, char* argv[])
 
 
         QObject::connect(pqOrbiter,SIGNAL(routerReloading(QString)), w, SLOT(reloadHandler()) );
+        //FIXME: below emits error: QObject::connect: Attempt to bind non-signal orbiterWindow::close()
         QObject::connect(&orbiterWin, SLOT(close()), w, SLOT(closeOrbiter()), Qt::DirectConnection);
         QObject::connect(w, SIGNAL(reloadRouter()), pqOrbiter, SLOT(quickReload()), Qt::QueuedConnection);
         QObject::connect(pqOrbiter, SIGNAL(routerDisconnect()), w, SLOT(reloadHandler()),Qt::QueuedConnection);
