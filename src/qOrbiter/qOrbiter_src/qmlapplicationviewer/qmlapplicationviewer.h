@@ -11,9 +11,18 @@
 #ifndef QMLAPPLICATIONVIEWER_H
 #define QMLAPPLICATIONVIEWER_H
 
+#include <QtGlobal>
+#if (QT_VERSION >= QT_VERSION_CHECK(5,0,0))
+#include <QQuickView>
+#else
 #include <QtDeclarative/QDeclarativeView>
+#endif
 
+#if (QT_VERSION >= QT_VERSION_CHECK(5,0,0))
+class QmlApplicationViewer : public QQuickView
+#else
 class QmlApplicationViewer : public QDeclarativeView
+#endif
 {
     Q_OBJECT
 
@@ -24,7 +33,12 @@ public:
         ScreenOrientationAuto
     };
 
+
+#if (QT_VERSION >= QT_VERSION_CHECK(5,0,0))
+    explicit QmlApplicationViewer(QWindow *parent = 0);
+#else
     explicit QmlApplicationViewer(QWidget *parent = 0);
+#endif
     virtual ~QmlApplicationViewer();
 
     static QmlApplicationViewer *create();
