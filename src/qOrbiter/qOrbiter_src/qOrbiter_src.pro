@@ -17,9 +17,17 @@
 
 CONFIG += qt thread
 # define deployment destination and target executable name
+contains(QT_VERSION, 4.8.1){
+DEFINES =+ QT4
+} else {
+contains(QT_VERSION, 5.0.0)
+DEFINES+=QT5
+}
+
 
 
 opengl{
+
 TARGET = qorbiter-gl
 DEFINES+=GLENABLED
 glmsg= yes
@@ -68,7 +76,10 @@ folder_03.source = config.xml
 folder_03.target = $$DESTDIR
 
 DEFINES += for_desktop
+
+!QT5{
 QT+= phonon
+}
 
 }
 
@@ -174,8 +185,11 @@ symbian:TARGET.UID3 = 0xE0D07D4D
 QMAKE_CXXFLAGS += -DUSE_LZO_DATAGRID
 
 INCLUDEPATH += ../../ ../../DCE/
-
+!QT5{
 QT += webkit declarative
+}else{
+QT += webkit quick mobility
+}
 
 macx{
     QT += xml
@@ -322,7 +336,7 @@ SOURCES += main.cpp \
     contextobjects/bookmarkitem.cpp \
     plugins/GoogleWeather/googleweather.cpp \
 
-!ANDROID{
+!ANDROID|!QT5{
  SOURCES+= ../../qMediaPlayer/AudioVisual/audiovisual.cpp \
     ../../qMediaPlayer/AudioVisual/videowidgetplayer.cpp
 }
@@ -435,7 +449,7 @@ HEADERS += \
     contextobjects/bookmarkitem.h \
     plugins/GoogleWeather/googleweather.h \
 
-!ANDROID||!for_android{
+!ANDROID|!for_android|!QT5{
  HEADERS+=   ../../qMediaPlayer/AudioVisual/audiovisual.h \
     ../../qMediaPlayer/AudioVisual/videowidgetplayer.h
 }
