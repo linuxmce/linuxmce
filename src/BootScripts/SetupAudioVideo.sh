@@ -112,7 +112,7 @@ Setup_AsoundConf()
 	local SoundCard
 
 	# Do not mess with asound.conf if Audio Setting is set to Manual. This will only happen after the asound.conf has been generated at least once.
-	if [[ "$AudioSetting" == "M" ]]
+	if [[ "$AudioSetting" == "M" ]]; then
 		return
 	fi
 
