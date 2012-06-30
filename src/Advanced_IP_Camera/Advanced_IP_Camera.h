@@ -28,29 +28,7 @@
 
 #include <pthread.h>
 
-namespace DCE {
-  class MotionDetector {
-       public:
-               int PK_Device;
-               int status;
-               string triggerOn;
-               string triggerOff;
-
-               bool Matches(string s) {
-                       return s.compare(triggerOn) == 0 || s.compare(triggerOff) == 0;
-               }
-
-               int GetNewStatus(string s) {
-                       if (s.compare(triggerOn) == 0) {
-                               return 1;
-                       } else if (s.compare(triggerOff) == 0) {
-                               return 0;
-                       }
-                       return 0;
-               }
-       };
-
-}
+#include "EventMethod.h"
 
 //<-dceag-decl-b->
 namespace DCE
@@ -63,18 +41,17 @@ namespace DCE
 	  string m_sImgPath;
 	  string m_sUser;
 	  string m_sPasswd;
-	  string m_sEventPath;
+	  string m_sEventURL;
+	  string m_sControlURL;
 	  
-	  vector<MotionDetector*> m_vectMotionDetector;
+	  vector<EventMethod*> m_vectEventMethod;
 
 	  CURLM* m_pCurl;
 	  
-	  pthread_t m_eventThread;
-	  string m_sEventBuffer;
 	        // Private methods
+	  EventMethod* GetEventMethod(int i);
 public:
 		// Public member variables
-	  bool m_bRunning;
 
 //<-dceag-const-b->
 public:
@@ -86,12 +63,14 @@ public:
 		virtual void ReceivedCommandForChild(DeviceData_Impl *pDeviceData_Impl,string &sCMD_Result,Message *pMessage);
 		virtual void ReceivedUnknownCommand(string &sCMD_Result,Message *pMessage);
 //<-dceag-const-e->
+
 		static size_t WriteCallback(void *ptr, size_t size, size_t nmemb, void *ourpointer);
-		static size_t StaticEventWriteCallback(void *ptr, size_t size, size_t nmemb, void *ourpointer);
-		size_t EventWriteCallback(void *ptr, size_t size, size_t nmemb);
-		void EventThread();
-		void MotionStatusChanged(MotionDetector* motionDetector, string trigger);
-		
+		void InputStatusChanged(InputDevice* inputDevice, string trigger);
+		string GetBaseURL();
+		string GetUser();
+		string GetPassword();
+		void InputStatusChanged(InputDevice* pInputDevice, int newStatus);
+
 //<-dceag-const2-b->
 		// The following constructor is only used if this a class instance embedded within a DCE Device.  In that case, it won't create it's own connection to the router
 		// You can delete this whole section and put an ! after dceag-const2-b tag if you don't want this constructor.  Do the same in the implementation file

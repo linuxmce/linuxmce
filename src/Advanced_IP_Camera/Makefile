@@ -25,7 +25,7 @@ LDFLAGS +=
 XTRALDLIBS = -lcurl -lmysqlclient_r
 
 Gen_Dev_Files +=
-sources +=
+sources += EventMethod.cpp
 
 #<-dceag-mf-b->
 LDLIBS = $(XTRALDLIBS) $(BASELDLIBS)
