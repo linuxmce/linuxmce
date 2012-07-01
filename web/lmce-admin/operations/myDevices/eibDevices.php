@@ -18,16 +18,25 @@ function eibDevices($output,$dbADO,$eibADO) {
 		case 'lights':
 			$allowedTemplates=array($GLOBALS['LightSwitchOnOff']=>'Light Switch On/Off',$GLOBALS['LightSwitchDimmable']=>'Light Switch Dimmable');
 			$targetDeviceData=$GLOBALS['Channel'];
-			$labels=array('On/Off','Status','Dim');
+			$labels=array(translate('TEXT_KNX_ONOFF'),translate('TEXT_KNX_STATUS'),translate('TEXT_KNX_DIM'));
 		break;
-		case 'sensors':
-			$resDT=$dbADO->Execute('SELECT PK_DeviceTemplate,Description FROM DeviceTemplate WHERE FK_DeviceCategory=? ORDER BY Description ASC',$GLOBALS['rootSecurity']);
+		case 'security':
+			$resDT=$dbADO->Execute('SELECT DT.PK_DeviceTemplate,DT.Description FROM DeviceTemplate AS DT,DeviceTemplate_DeviceCategory_ControlledVia as CV WHERE DT.PK_DeviceTemplate= CV.FK_DeviceTemplate AND CV.FK_DeviceCategory=? AND DT.FK_DeviceCategory=? ORDER BY DT.Description ASC',array($GLOBALS['specialized'],$GLOBALS['rootSecurity']));
 			$allowedTemplates=array();
 			while($rowDT=$resDT->FetchRow()){
 				$allowedTemplates[$rowDT['PK_DeviceTemplate']]=$rowDT['Description'];
 			}
 			$targetDeviceData=$GLOBALS['Channel'];
-			$labels=array('On/Off');
+			$labels=array(translate('TEXT_KNX_ONOFF'));
+		break;
+		case 'climate':
+			$resDT=$dbADO->Execute('SELECT DT.PK_DeviceTemplate,DT.Description FROM DeviceTemplate AS DT,DeviceTemplate_DeviceCategory_ControlledVia as CV WHERE DT.PK_DeviceTemplate= CV.FK_DeviceTemplate AND CV.FK_DeviceCategory=? AND DT.FK_DeviceCategory=? ORDER BY DT.Description ASC',array($GLOBALS['specialized'],$GLOBALS['rootClimate']));
+			$allowedTemplates=array();
+			while($rowDT=$resDT->FetchRow()){
+				$allowedTemplates[$rowDT['PK_DeviceTemplate']]=$rowDT['Description'];
+			}
+			$targetDeviceData=$GLOBALS['Channel'];
+			$labels=array(translate('TEXT_KNX_ONOFF'));
 		break;
 		case 'drapes':
 			$allowedTemplates=array($GLOBALS['DrapesSwitch']=>'Drapes Switch');
@@ -173,7 +182,7 @@ function eibDevices($output,$dbADO,$eibADO) {
 					<tr>
 						<td>'.$labels[0].'</td>
 						<td><input type="text" name="onOffName_'.@$rowDevices['PK_Device'].'" size="50" value="'.@$channelArray[$channelParts[0]].' ('.@$channelParts[0].')'.'" disabled> <input type="hidden" name="onOff_'.$rowDevices['PK_Device'].'" value="'.@$channelParts[0].'"></td>
-						<td><input type="button" class="button" name="setGroup" value="Pick" onClick="pickGroupAddress(\'onOffName_'.$rowDevices['PK_Device'].'\',\'onOff_'.$rowDevices['PK_Device'].'\');"></td>
+						<td><input type="button" class="button" name="setGroup" value="'.translate('TEXT_EIB_PICK_CONST').'" onClick="pickGroupAddress(\'onOffName_'.$rowDevices['PK_Device'].'\',\'onOff_'.$rowDevices['PK_Device'].'\');"></td>
 					</tr>';
 		if(count($labels) >= 2){
 			$out.='	<tr>
@@ -217,14 +226,14 @@ function eibDevices($output,$dbADO,$eibADO) {
 						<tr>
 							<td>'.$labels[0].'</td>
 							<td><input type="text" name="newOnOffName" size="50" value="" disabled> <input type="hidden" name="newOnOff" value=""></td>
-							<td><input type="button" class="button" name="setGroup" value="Pick" onClick="pickGroupAddress(\'newOnOffName\',\'newOnOff\');"></td>
+							<td><input type="button" class="button" name="setGroup" value="'.translate('TEXT_EIB_PICK_CONST').'" onClick="pickGroupAddress(\'newOnOffName\',\'newOnOff\');"></td>
 						</tr>';
 	if(isset($labels[1])){
 		$out.='
 						<tr>
 							<td>'.@$labels[1].'</td>
 							<td><input type="text" name="newStatusName" size="50" value="" disabled></td>
-							<td><input type="hidden" name="newStatus" value=""><input type="button" class="button" name="setNewStatus" '.((in_array($firstTemplate,$multiGroupAddress))?'':'disabled').' value="Pick" onClick="pickGroupAddress(\'newStatusName\',\'newStatus\');"></td>
+							<td><input type="hidden" name="newStatus" value=""><input type="button" class="button" name="setNewStatus" '.((in_array($firstTemplate,$multiGroupAddress))?'':'disabled').' value="'.translate('TEXT_EIB_PICK_CONST').'" onClick="pickGroupAddress(\'newStatusName\',\'newStatus\');"></td>
 						</tr>';
 	}
 	if(isset($labels[2])){
@@ -232,7 +241,7 @@ function eibDevices($output,$dbADO,$eibADO) {
 						<tr>
 							<td>'.@$labels[2].'</td>
 							<td><input type="text" name="newDimName" size="50" value="" disabled></td>
-							<td><input type="hidden" name="newDim" value=""><input type="button" class="button" name="setNewDim" '.((in_array($firstTemplate,$multiGroupAddress))?'':'disabled').' value="Pick" onClick="pickGroupAddress(\'newDimName\',\'newDim\');"></td>
+							<td><input type="hidden" name="newDim" value=""><input type="button" class="button" name="setNewDim" '.((in_array($firstTemplate,$multiGroupAddress))?'':'disabled').' value="'.translate('TEXT_EIB_PICK_CONST').'" onClick="pickGroupAddress(\'newDimName\',\'newDim\');"></td>
 						</tr>';
 	}	$out.='
 					</table>
