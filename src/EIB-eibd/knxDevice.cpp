@@ -30,12 +30,11 @@ namespace knx
 	{
 		switch(pDevData->m_dwPK_DeviceTemplate)
 		{
-			case DEVICETEMPLATE_Standard_Thermostat_CONST:return new Standard_Thermostat(pDevData);break;
-			case DEVICETEMPLATE_Light_Switch_onoff_CONST:return new LightSwitchOnOff(pDevData);break;
-			case DEVICETEMPLATE_Wall_Outlet_CONST:return new LightSwitchOnOff(pDevData);break;
-			case DEVICETEMPLATE_Light_Switch_dimmable_CONST:return new LightSwitchdimmable(pDevData);break;
-			case DEVICETEMPLATE_Drapes_Switch_CONST:return new Drapes_Switch(pDevData);break;
-			case DEVICETEMPLATE_Blinds_Switch_CONST:return new Blinds_Switch(pDevData);break;
+			case DEVICETEMPLATE_Standard_Thermostat_CONST: return new Standard_Thermostat(pDevData);break;
+			case DEVICETEMPLATE_Light_Switch_onoff_CONST: return new LightSwitchOnOff(pDevData);break;
+			case DEVICETEMPLATE_Light_Switch_dimmable_CONST: return new LightSwitchdimmable(pDevData);break;
+			case DEVICETEMPLATE_Drapes_Switch_CONST: return new Drapes_Switch(pDevData);break;
+			case DEVICETEMPLATE_Blinds_Switch_CONST: return new Blinds_Switch(pDevData);break;
 			case DEVICETEMPLATE_Temperature_sensor_CONST: return new TemperatureSensor(pDevData);break;
 			case DEVICETEMPLATE_Generic_Input_Ouput_CONST:
 			case DEVICETEMPLATE_Air_Quality_Sensor_CONST:
@@ -123,14 +122,14 @@ namespace knx
 			{
 				case(EIBWRITE):
 				{
-					if(tl->getGroupAddress()==_v_addrlist.at(1))
+					if(tl->getGroupAddress()==_v_addrlist.at(1)) // ON / OFF STATUS
 					{
 						return createStateChangedEventMessage(tl->getShortUserData());
 					}
 				}break;
 				case(EIBRESPONSE):
 				{
-					if(tl->getGroupAddress()==_v_addrlist.at(0))
+					if(tl->getGroupAddress()==_v_addrlist.at(0)) // ON / OFF
 					{
 						return createStateChangedEventMessage(tl->getShortUserData());
 					}
@@ -150,22 +149,22 @@ namespace knx
 			{
 				case(EIBWRITE):
 				{
-					if(tl->getGroupAddress()==_v_addrlist.at(2))
+					if(tl->getGroupAddress()==_v_addrlist.at(2)) // ON/OFF STATUS
 					{
 						return createStateChangedEventMessage(tl->getShortUserData());
 					}
-					if(tl->getGroupAddress()==_v_addrlist.at(3))
+					if(tl->getGroupAddress()==_v_addrlist.at(3)) // DIM STATUS
 					{
 						return createLevelChangedEventMessage(tl->getIntData());
 					}
 				}break;
 				case(EIBRESPONSE):
 				{
-					if(tl->getGroupAddress()==_v_addrlist.at(0))
+					if(tl->getGroupAddress()==_v_addrlist.at(0)) // ON/OFF
 					{
 						return createStateChangedEventMessage(tl->getShortUserData());
 					}
-					if(tl->getGroupAddress()==_v_addrlist.at(1))
+					if(tl->getGroupAddress()==_v_addrlist.at(1)) // DIM VALUE
 					{
 						return createLevelChangedEventMessage(tl->getIntData());
 					}
