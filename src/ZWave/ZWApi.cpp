@@ -719,6 +719,9 @@ void *ZWApi::ZWApi::decodeFrame(char *frame, size_t length) {
 								DCE::LoggerWrapper::GetInstance()->Write(LV_ZWAVE,"Got basic report from node %i, instance %i, value: %i",(unsigned char)frame[3],(unsigned char)frame[7], (unsigned char) frame[10]);
 								DCEcallback->SendLightChangedEvents ((unsigned char)frame[3], (unsigned char)frame[7], (unsigned char) frame[10]);
 
+						        } else if ((frame[8] == COMMAND_CLASS_BASIC) && (frame[9] == BASIC_SET)) {
+								DCE::LoggerWrapper::GetInstance()->Write(LV_ZWAVE,"Got basic set from node %i, instance %i, value: %i",(unsigned char)frame[3],(unsigned char)frame[7], (unsigned char) frame[10]);
+								DCEcallback->SendOnOffEvent ((unsigned char)frame[3],(unsigned char)frame[7],(unsigned char) frame[10]);
 							}
 						}
 						break;
@@ -1906,6 +1909,32 @@ bool ZWApi::ZWApi::zwAssociationGet(int node_id, int group) {
 		sendFunctionSleeping(node_id, mybuf , 7, REQUEST, 1);
 	} else {
 		sendFunction( mybuf , 7, REQUEST, 1);
+
+	}
+	return true;
+
+}
+
+bool ZWApi::ZWApi::zwAssociationSetMulti(int node_id, int group, int target_node_id, int instance) {
+
+	char mybuf[1024];
+
+        mybuf[0] = FUNC_ID_ZW_SEND_DATA;
+	mybuf[1] = node_id;
+	mybuf[2] = 4;
+	mybuf[3] = COMMAND_CLASS_MULTI_INSTANCE_ASSOCIATION;
+	mybuf[4] = MULTI_INSTANCE_ASSOCIATION_SET;
+	mybuf[5] = group;
+	mybuf[6] = MULTI_INSTANCE_ASSOCIATION_SET_MARKER;
+	mybuf[7] = target_node_id;
+	mybuf[8] = instance;
+	mybuf[9] = TRANSMIT_OPTION_ACK | TRANSMIT_OPTION_AUTO_ROUTE;
+
+	if (zwIsSleepingNode(node_id)) {
+		DCE::LoggerWrapper::GetInstance()->Write(LV_ZWAVE, "Postpone Association Set - device is not always listening");
+		sendFunctionSleeping(node_id, mybuf , 10, REQUEST, 1);
+	} else {
+		sendFunction( mybuf , 10, REQUEST, 1);
 
 	}
 	return true;

@@ -278,6 +278,18 @@
 #define MULTI_INSTANCE_CMD_ENCAP			0x6
 #define MULTI_INSTANCE_REPORT				0x05
 
+#define MULTI_INSTANCE_ASSOCIATION_VERSION              0x01
+#define MULTI_INSTANCE_ASSOCIATION_GET                 0x2
+#define MULTI_INSTANCE_ASSOCIATION_GROUPINGS_GET        0x05
+#define MULTI_INSTANCE_ASSOCIATION_GROUPINGS_REPORT     0x06
+#define MULTI_INSTANCE_ASSOCIATION_REMOVE               0x04
+#define MULTI_INSTANCE_ASSOCIATION_REPORT               0x03
+#define MULTI_INSTANCE_ASSOCIATION_SET                  0x01
+#define MULTI_INSTANCE_ASSOCIATION_REMOVE_MARKER        0x00
+#define MULTI_INSTANCE_ASSOCIATION_REPORT_MARKER        0x00
+#define MULTI_INSTANCE_ASSOCIATION_SET_MARKER           0x00
+
+
 #define COMMAND_CLASS_NO_OPERATION			0x00
 #define COMMAND_CLASS_NODE_NAMING			0x77
 #define COMMAND_CLASS_NON_INTEROPERABLE			0xf0
@@ -537,6 +549,7 @@ namespace ZWApi {
 	// get the association list for a specific group from a device
 	bool zwAssociationGet(int node_id, int group);
 	bool zwAssociationSet(int node_id, int group, int target_node_id);
+	bool zwAssociationSetMulti(int node_id, int group, int target_node_id, int channel);
 	bool zwAssociationRemove(int node_id, int group, int target_node_id);
 
 	bool zwAssignReturnRoute(int src_node_id, int dst_node_id);

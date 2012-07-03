@@ -439,11 +439,29 @@ void ZWave::CMD_Set_Association(int iNodeID,int iGroup_ID,string sNodes_List,str
 		std::vector<std::string> target;
 		StringUtils::Tokenize(sNodes_List, std::string(","), target);
 		for(std::vector<string>::iterator it=target.begin(); it!=target.end(); ++it) {
-			if (atoi((*it).c_str()) > 0) {
-				myZWApi->zwAssociationSet(iNodeID,iGroup_ID,atoi((*it).c_str()));
+			std::vector<std::string> target2;
+			StringUtils::Tokenize((*it), std::string("/"), target2);
+			std::vector<string>::iterator it2=target2.begin();
+			int nodeid = atoi((*it2).c_str());
+			int instance = -1;
+			if (it2!=target2.end()) {
+				instance = atoi((*it2).c_str());
 			}
-			if (atoi((*it).c_str()) < 0) {
-				myZWApi->zwAssociationRemove(iNodeID,iGroup_ID,atoi((*it).c_str()) * -1);
+			if (instance == -1) {	
+				if (nodeid > 0) {
+					myZWApi->zwAssociationSet(iNodeID,iGroup_ID,nodeid);
+				}
+				if (nodeid < 0) {
+					myZWApi->zwAssociationRemove(iNodeID,iGroup_ID,nodeid * -1);
+				}
+			} else {
+				if (nodeid > 0) {
+					myZWApi->zwAssociationSetMulti(iNodeID,iGroup_ID,nodeid, instance);
+				}
+				// if (nodeid < 0) {
+				//	myZWApi->zwAssociationRemoveMulti(iNodeID,iGroup_ID,nodeid * -1, instance);
+				// }
+
 			}
 		}
 
