@@ -1,0 +1,1223 @@
+// !$*UTF8*$!
+{
+	archiveVersion = 1;
+	classes = {
+	};
+	objectVersion = 46;
+	objects = {
+
+/* Begin PBXBuildFile section */
+		95CBD28215A9EFEB00F17914 /* libpluto_main.cp in Sources */ = {isa = PBXBuildFile; fileRef = 95CBD28115A9EFEB00F17914 /* libpluto_main.cp */; };
+		95CBD37815A9F16B00F17914 /* Table_Array.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 95CBD28D15A9F16A00F17914 /* Table_Array.cpp */; };
+		95CBD37915A9F16B00F17914 /* Table_Broadcast.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 95CBD28E15A9F16A00F17914 /* Table_Broadcast.cpp */; };
+		95CBD37A15A9F16B00F17914 /* Table_Button.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 95CBD28F15A9F16A00F17914 /* Table_Button.cpp */; };
+		95CBD37B15A9F16B00F17914 /* Table_CachedScreens.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 95CBD29015A9F16A00F17914 /* Table_CachedScreens.cpp */; };
+		95CBD37C15A9F16B00F17914 /* Table_CannedEvents_CriteriaParmList.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 95CBD29115A9F16A00F17914 /* Table_CannedEvents_CriteriaParmList.cpp */; };
+		95CBD37D15A9F16B00F17914 /* Table_CannedEvents.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 95CBD29215A9F16A00F17914 /* Table_CannedEvents.cpp */; };
+		95CBD37E15A9F16B00F17914 /* Table_City.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 95CBD29315A9F16A00F17914 /* Table_City.cpp */; };
+		95CBD37F15A9F16B00F17914 /* Table_Command_CommandParameter.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 95CBD29415A9F16A00F17914 /* Table_Command_CommandParameter.cpp */; };
+		95CBD38015A9F16B00F17914 /* Table_Command_Pipe.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 95CBD29515A9F16A00F17914 /* Table_Command_Pipe.cpp */; };
+		95CBD38115A9F16B00F17914 /* Table_Command.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 95CBD29615A9F16A00F17914 /* Table_Command.cpp */; };
+		95CBD38215A9F16B00F17914 /* Table_CommandCategory.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 95CBD29715A9F16A00F17914 /* Table_CommandCategory.cpp */; };
+		95CBD38315A9F16B00F17914 /* Table_CommandGroup_Command_CommandParameter.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 95CBD29815A9F16A00F17914 /* Table_CommandGroup_Command_CommandParameter.cpp */; };
+		95CBD38415A9F16B00F17914 /* Table_CommandGroup_Command.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 95CBD29915A9F16A00F17914 /* Table_CommandGroup_Command.cpp */; };
+		95CBD38515A9F16B00F17914 /* Table_CommandGroup_D_Command_CommandParameter.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 95CBD29A15A9F16A00F17914 /* Table_CommandGroup_D_Command_CommandParameter.cpp */; };
+		95CBD38615A9F16B00F17914 /* Table_CommandGroup_D_Command.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 95CBD29B15A9F16A00F17914 /* Table_CommandGroup_D_Command.cpp */; };
+		95CBD38715A9F16B00F17914 /* Table_CommandGroup_D.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 95CBD29C15A9F16A00F17914 /* Table_CommandGroup_D.cpp */; };
+		95CBD38815A9F16B00F17914 /* Table_CommandGroup_EntertainArea.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 95CBD29D15A9F16A00F17914 /* Table_CommandGroup_EntertainArea.cpp */; };
+		95CBD38915A9F16B00F17914 /* Table_CommandGroup_Room.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 95CBD29E15A9F16A00F17914 /* Table_CommandGroup_Room.cpp */; };
+		95CBD38A15A9F16B00F17914 /* Table_CommandGroup.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 95CBD29F15A9F16A00F17914 /* Table_CommandGroup.cpp */; };
+		95CBD38B15A9F16B00F17914 /* Table_CommandParameter.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 95CBD2A015A9F16A00F17914 /* Table_CommandParameter.cpp */; };
+		95CBD38C15A9F16B00F17914 /* Table_CommMethod.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 95CBD2A115A9F16A00F17914 /* Table_CommMethod.cpp */; };
+		95CBD38D15A9F16B00F17914 /* Table_ConfigType_File.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 95CBD2A215A9F16A00F17914 /* Table_ConfigType_File.cpp */; };
+		95CBD38E15A9F16B00F17914 /* Table_ConfigType_Setting.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 95CBD2A315A9F16A00F17914 /* Table_ConfigType_Setting.cpp */; };
+		95CBD38F15A9F16B00F17914 /* Table_ConfigType_Token.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 95CBD2A415A9F16A00F17914 /* Table_ConfigType_Token.cpp */; };
+		95CBD39015A9F16B00F17914 /* Table_ConfigType.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 95CBD2A515A9F16A00F17914 /* Table_ConfigType.cpp */; };
+		95CBD39115A9F16B00F17914 /* Table_ConnectorType.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 95CBD2A615A9F16A00F17914 /* Table_ConnectorType.cpp */; };
+		95CBD39215A9F16B00F17914 /* Table_Country.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 95CBD2A715A9F16A00F17914 /* Table_Country.cpp */; };
+		95CBD39315A9F16B00F17914 /* Table_Criteria.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 95CBD2A815A9F16A00F17914 /* Table_Criteria.cpp */; };
+		95CBD39415A9F16B00F17914 /* Table_CriteriaList_CriteriaParmList.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 95CBD2A915A9F16A00F17914 /* Table_CriteriaList_CriteriaParmList.cpp */; };
+		95CBD39515A9F16B00F17914 /* Table_CriteriaList.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 95CBD2AA15A9F16A00F17914 /* Table_CriteriaList.cpp */; };
+		95CBD39615A9F16B00F17914 /* Table_CriteriaParm.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 95CBD2AB15A9F16A00F17914 /* Table_CriteriaParm.cpp */; };
+		95CBD39715A9F16B00F17914 /* Table_CriteriaParmList.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 95CBD2AC15A9F16A00F17914 /* Table_CriteriaParmList.cpp */; };
+		95CBD39815A9F16B00F17914 /* Table_CriteriaParmNesting.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 95CBD2AD15A9F16A00F17914 /* Table_CriteriaParmNesting.cpp */; };
+		95CBD39915A9F16B00F17914 /* Table_DataGrid.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 95CBD2AE15A9F16A00F17914 /* Table_DataGrid.cpp */; };
+		95CBD39A15A9F16B00F17914 /* Table_DesignObj.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 95CBD2AF15A9F16A00F17914 /* Table_DesignObj.cpp */; };
+		95CBD39B15A9F16B00F17914 /* Table_DesignObjCategory.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 95CBD2B015A9F16A00F17914 /* Table_DesignObjCategory.cpp */; };
+		95CBD39C15A9F16B00F17914 /* Table_DesignObjParameter.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 95CBD2B115A9F16A00F17914 /* Table_DesignObjParameter.cpp */; };
+		95CBD39D15A9F16B00F17914 /* Table_DesignObjType_DesignObjParameter.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 95CBD2B215A9F16A00F17914 /* Table_DesignObjType_DesignObjParameter.cpp */; };
+		95CBD39E15A9F16B00F17914 /* Table_DesignObjType.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 95CBD2B315A9F16A00F17914 /* Table_DesignObjType.cpp */; };
+		95CBD39F15A9F16B00F17914 /* Table_DesignObjVariation_DesignObj_Skin_Language.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 95CBD2B415A9F16A00F17914 /* Table_DesignObjVariation_DesignObj_Skin_Language.cpp */; };
+		95CBD3A015A9F16B00F17914 /* Table_DesignObjVariation_DesignObj.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 95CBD2B515A9F16A00F17914 /* Table_DesignObjVariation_DesignObj.cpp */; };
+		95CBD3A115A9F16B00F17914 /* Table_DesignObjVariation_DesignObjParameter.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 95CBD2B615A9F16A00F17914 /* Table_DesignObjVariation_DesignObjParameter.cpp */; };
+		95CBD3A215A9F16B00F17914 /* Table_DesignObjVariation_Text_Skin_Language.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 95CBD2B715A9F16A00F17914 /* Table_DesignObjVariation_Text_Skin_Language.cpp */; };
+		95CBD3A315A9F16B00F17914 /* Table_DesignObjVariation_Text.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 95CBD2B815A9F16A00F17914 /* Table_DesignObjVariation_Text.cpp */; };
+		95CBD3A415A9F16B00F17914 /* Table_DesignObjVariation_Zone.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 95CBD2B915A9F16A00F17914 /* Table_DesignObjVariation_Zone.cpp */; };
+		95CBD3A515A9F16B00F17914 /* Table_DesignObjVariation.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 95CBD2BA15A9F16A00F17914 /* Table_DesignObjVariation.cpp */; };
+		95CBD3A615A9F16B00F17914 /* Table_Device_Command.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 95CBD2BB15A9F16A00F17914 /* Table_Device_Command.cpp */; };
+		95CBD3A715A9F16B00F17914 /* Table_Device_CommandGroup.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 95CBD2BC15A9F16A00F17914 /* Table_Device_CommandGroup.cpp */; };
+		95CBD3A815A9F16B00F17914 /* Table_Device_Device_Pipe.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 95CBD2BD15A9F16A00F17914 /* Table_Device_Device_Pipe.cpp */; };
+		95CBD3A915A9F16B00F17914 /* Table_Device_Device_Related.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 95CBD2BE15A9F16A00F17914 /* Table_Device_Device_Related.cpp */; };
+		95CBD3AA15A9F16B00F17914 /* Table_Device_DeviceData.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 95CBD2BF15A9F16A00F17914 /* Table_Device_DeviceData.cpp */; };
+		95CBD3AB15A9F16B00F17914 /* Table_Device_DeviceGroup.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 95CBD2C015A9F16A00F17914 /* Table_Device_DeviceGroup.cpp */; };
+		95CBD3AC15A9F16B00F17914 /* Table_Device_EntertainArea.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 95CBD2C115A9F16A00F17914 /* Table_Device_EntertainArea.cpp */; };
+		95CBD3AD15A9F16B00F17914 /* Table_Device_HouseMode.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 95CBD2C215A9F16A00F17914 /* Table_Device_HouseMode.cpp */; };
+		95CBD3AE15A9F16B00F17914 /* Table_Device_MRU.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 95CBD2C315A9F16A00F17914 /* Table_Device_MRU.cpp */; };
+		95CBD3AF15A9F16B00F17914 /* Table_Device_Orbiter.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 95CBD2C415A9F16A00F17914 /* Table_Device_Orbiter.cpp */; };
+		95CBD3B015A9F16B00F17914 /* Table_Device_QuickStart.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 95CBD2C515A9F16A00F17914 /* Table_Device_QuickStart.cpp */; };
+		95CBD3B115A9F16B00F17914 /* Table_Device_StartupScript.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 95CBD2C615A9F16A00F17914 /* Table_Device_StartupScript.cpp */; };
+		95CBD3B215A9F16B00F17914 /* Table_Device_Users.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 95CBD2C715A9F16A00F17914 /* Table_Device_Users.cpp */; };
+		95CBD3B315A9F16B00F17914 /* Table_Device.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 95CBD2C815A9F16A00F17914 /* Table_Device.cpp */; };
+		95CBD3B415A9F16B00F17914 /* Table_DeviceCategory_DeviceData.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 95CBD2C915A9F16A00F17914 /* Table_DeviceCategory_DeviceData.cpp */; };
+		95CBD3B515A9F16B00F17914 /* Table_DeviceCategory_Event.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 95CBD2CA15A9F16A00F17914 /* Table_DeviceCategory_Event.cpp */; };
+		95CBD3B615A9F16B00F17914 /* Table_DeviceCategory.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 95CBD2CB15A9F16A00F17914 /* Table_DeviceCategory.cpp */; };
+		95CBD3B715A9F16B00F17914 /* Table_DeviceCommandGroup_Command.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 95CBD2CC15A9F16A00F17914 /* Table_DeviceCommandGroup_Command.cpp */; };
+		95CBD3B815A9F16B00F17914 /* Table_DeviceCommandGroup_DeviceCommandGroup_Parent.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 95CBD2CD15A9F16A00F17914 /* Table_DeviceCommandGroup_DeviceCommandGroup_Parent.cpp */; };
+		95CBD3B915A9F16B00F17914 /* Table_DeviceCommandGroup.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 95CBD2CE15A9F16A00F17914 /* Table_DeviceCommandGroup.cpp */; };
+		95CBD3BA15A9F16B00F17914 /* Table_DeviceData.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 95CBD2CF15A9F16A00F17914 /* Table_DeviceData.cpp */; };
+		95CBD3BB15A9F16B00F17914 /* Table_DeviceGroup.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 95CBD2D015A9F16A00F17914 /* Table_DeviceGroup.cpp */; };
+		95CBD3BC15A9F16B00F17914 /* Table_DeviceTemplate_AV.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 95CBD2D115A9F16A00F17914 /* Table_DeviceTemplate_AV.cpp */; };
+		95CBD3BD15A9F16B00F17914 /* Table_DeviceTemplate_DesignObj.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 95CBD2D215A9F16A00F17914 /* Table_DeviceTemplate_DesignObj.cpp */; };
+		95CBD3BE15A9F16B00F17914 /* Table_DeviceTemplate_DeviceCategory_ControlledVia_Pipe.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 95CBD2D315A9F16A00F17914 /* Table_DeviceTemplate_DeviceCategory_ControlledVia_Pipe.cpp */; };
+		95CBD3BF15A9F16B00F17914 /* Table_DeviceTemplate_DeviceCategory_ControlledVia.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 95CBD2D415A9F16A00F17914 /* Table_DeviceTemplate_DeviceCategory_ControlledVia.cpp */; };
+		95CBD3C015A9F16B00F17914 /* Table_DeviceTemplate_DeviceCommandGroup.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 95CBD2D515A9F16A00F17914 /* Table_DeviceTemplate_DeviceCommandGroup.cpp */; };
+		95CBD3C115A9F16B00F17914 /* Table_DeviceTemplate_DeviceData.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 95CBD2D615A9F16A00F17914 /* Table_DeviceTemplate_DeviceData.cpp */; };
+		95CBD3C215A9F16B00F17914 /* Table_DeviceTemplate_DeviceTemplate_ControlledVia_Pipe.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 95CBD2D715A9F16A00F17914 /* Table_DeviceTemplate_DeviceTemplate_ControlledVia_Pipe.cpp */; };
+		95CBD3C315A9F16B00F17914 /* Table_DeviceTemplate_DeviceTemplate_ControlledVia.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 95CBD2D815A9F16A00F17914 /* Table_DeviceTemplate_DeviceTemplate_ControlledVia.cpp */; };
+		95CBD3C415A9F16B00F17914 /* Table_DeviceTemplate_DeviceTemplate_Related.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 95CBD2D915A9F16A00F17914 /* Table_DeviceTemplate_DeviceTemplate_Related.cpp */; };
+		95CBD3C515A9F16B00F17914 /* Table_DeviceTemplate_DSPMode.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 95CBD2DA15A9F16A00F17914 /* Table_DeviceTemplate_DSPMode.cpp */; };
+		95CBD3C615A9F16B00F17914 /* Table_DeviceTemplate_Event.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 95CBD2DB15A9F16A00F17914 /* Table_DeviceTemplate_Event.cpp */; };
+		95CBD3C715A9F16B00F17914 /* Table_DeviceTemplate_InfraredGroup.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 95CBD2DC15A9F16A00F17914 /* Table_DeviceTemplate_InfraredGroup.cpp */; };
+		95CBD3C815A9F16B00F17914 /* Table_DeviceTemplate_Input.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 95CBD2DD15A9F16A00F17914 /* Table_DeviceTemplate_Input.cpp */; };
+		95CBD3C915A9F16B00F17914 /* Table_DeviceTemplate_MediaType_DesignObj.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 95CBD2DE15A9F16A00F17914 /* Table_DeviceTemplate_MediaType_DesignObj.cpp */; };
+		95CBD3CA15A9F16B00F17914 /* Table_DeviceTemplate_MediaType.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 95CBD2DF15A9F16A00F17914 /* Table_DeviceTemplate_MediaType.cpp */; };
+		95CBD3CB15A9F16B00F17914 /* Table_DeviceTemplate_Output.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 95CBD2E015A9F16A00F17914 /* Table_DeviceTemplate_Output.cpp */; };
+		95CBD3CC15A9F16B00F17914 /* Table_DeviceTemplate_PageSetup.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 95CBD2E115A9F16A00F17914 /* Table_DeviceTemplate_PageSetup.cpp */; };
+		95CBD3CD15A9F16B00F17914 /* Table_DeviceTemplate.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 95CBD2E215A9F16A00F17914 /* Table_DeviceTemplate.cpp */; };
+		95CBD3CE15A9F16B00F17914 /* Table_DHCPDevice_DeviceData.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 95CBD2E315A9F16A00F17914 /* Table_DHCPDevice_DeviceData.cpp */; };
+		95CBD3CF15A9F16B00F17914 /* Table_DHCPDevice.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 95CBD2E415A9F16A00F17914 /* Table_DHCPDevice.cpp */; };
+		95CBD3D015A9F16B00F17914 /* Table_Direction.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 95CBD2E515A9F16A00F17914 /* Table_Direction.cpp */; };
+		95CBD3D115A9F16B00F17914 /* Table_Directory.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 95CBD2E615A9F16A00F17914 /* Table_Directory.cpp */; };
+		95CBD3D215A9F16B00F17914 /* Table_Distro.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 95CBD2E715A9F16A00F17914 /* Table_Distro.cpp */; };
+		95CBD3D315A9F16B00F17914 /* Table_Document_Comment.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 95CBD2E815A9F16A00F17914 /* Table_Document_Comment.cpp */; };
+		95CBD3D415A9F16B00F17914 /* Table_Document.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 95CBD2E915A9F16A00F17914 /* Table_Document.cpp */; };
+		95CBD3D515A9F16B00F17914 /* Table_Effect.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 95CBD2EA15A9F16A00F17914 /* Table_Effect.cpp */; };
+		95CBD3D615A9F16B00F17914 /* Table_EffectType_Effect_Skin.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 95CBD2EB15A9F16A00F17914 /* Table_EffectType_Effect_Skin.cpp */; };
+		95CBD3D715A9F16B00F17914 /* Table_EffectType.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 95CBD2EC15A9F16A00F17914 /* Table_EffectType.cpp */; };
+		95CBD3D815A9F16B00F17914 /* Table_EntertainArea.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 95CBD2ED15A9F16A00F17914 /* Table_EntertainArea.cpp */; };
+		95CBD3D915A9F16B00F17914 /* Table_Event_EventParameter.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 95CBD2EE15A9F16A00F17914 /* Table_Event_EventParameter.cpp */; };
+		95CBD3DA15A9F16B00F17914 /* Table_Event.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 95CBD2EF15A9F16A00F17914 /* Table_Event.cpp */; };
+		95CBD3DB15A9F16B00F17914 /* Table_EventCategory.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 95CBD2F015A9F16A00F17914 /* Table_EventCategory.cpp */; };
+		95CBD3DC15A9F16B00F17914 /* Table_EventHandler.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 95CBD2F115A9F16A00F17914 /* Table_EventHandler.cpp */; };
+		95CBD3DD15A9F16B00F17914 /* Table_EventParameter.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 95CBD2F215A9F16A00F17914 /* Table_EventParameter.cpp */; };
+		95CBD3DE15A9F16B00F17914 /* Table_FAQ.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 95CBD2F315A9F16A00F17914 /* Table_FAQ.cpp */; };
+		95CBD3DF15A9F16B00F17914 /* Table_Firewall.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 95CBD2F415A9F16A00F17914 /* Table_Firewall.cpp */; };
+		95CBD3E015A9F16B00F17914 /* Table_Floorplan.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 95CBD2F515A9F16A00F17914 /* Table_Floorplan.cpp */; };
+		95CBD3E115A9F16B00F17914 /* Table_FloorplanObjectType_Color.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 95CBD2F615A9F16A00F17914 /* Table_FloorplanObjectType_Color.cpp */; };
+		95CBD3E215A9F16B00F17914 /* Table_FloorplanObjectType.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 95CBD2F715A9F16A00F17914 /* Table_FloorplanObjectType.cpp */; };
+		95CBD3E315A9F16B00F17914 /* Table_FloorplanType.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 95CBD2F815A9F16A00F17914 /* Table_FloorplanType.cpp */; };
+		95CBD3E415A9F16B00F17914 /* Table_HorizAlignment.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 95CBD2F915A9F16A00F17914 /* Table_HorizAlignment.cpp */; };
+		95CBD3E515A9F16B00F17914 /* Table_Household_Installation.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 95CBD2FA15A9F16A00F17914 /* Table_Household_Installation.cpp */; };
+		95CBD3E615A9F16B00F17914 /* Table_Household.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 95CBD2FB15A9F16A00F17914 /* Table_Household.cpp */; };
+		95CBD3E715A9F16B00F17914 /* Table_HouseMode.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 95CBD2FC15A9F16A00F17914 /* Table_HouseMode.cpp */; };
+		95CBD3E815A9F16B00F17914 /* Table_Icon.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 95CBD2FD15A9F16A00F17914 /* Table_Icon.cpp */; };
+		95CBD3E915A9F16B00F17914 /* Table_Image.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 95CBD2FE15A9F16A00F17914 /* Table_Image.cpp */; };
+		95CBD3EA15A9F16B00F17914 /* Table_InfraredGroup_Command_Preferred.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 95CBD2FF15A9F16A00F17914 /* Table_InfraredGroup_Command_Preferred.cpp */; };
+		95CBD3EB15A9F16B00F17914 /* Table_InfraredGroup_Command.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 95CBD30015A9F16A00F17914 /* Table_InfraredGroup_Command.cpp */; };
+		95CBD3EC15A9F16B00F17914 /* Table_InfraredGroup.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 95CBD30115A9F16A00F17914 /* Table_InfraredGroup.cpp */; };
+		95CBD3ED15A9F16B00F17914 /* Table_Installation_RepositorySource_URL.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 95CBD30215A9F16A00F17914 /* Table_Installation_RepositorySource_URL.cpp */; };
+		95CBD3EE15A9F16B00F17914 /* Table_Installation_Users.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 95CBD30315A9F16A00F17914 /* Table_Installation_Users.cpp */; };
+		95CBD3EF15A9F16B00F17914 /* Table_Installation.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 95CBD30415A9F16A00F17914 /* Table_Installation.cpp */; };
+		95CBD3F015A9F16B00F17914 /* Table_InstallWizard_Distro.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 95CBD30515A9F16A00F17914 /* Table_InstallWizard_Distro.cpp */; };
+		95CBD3F115A9F16B00F17914 /* Table_InstallWizard.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 95CBD30615A9F16A00F17914 /* Table_InstallWizard.cpp */; };
+		95CBD3F215A9F16B00F17914 /* Table_Language.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 95CBD30715A9F16A00F17914 /* Table_Language.cpp */; };
+		95CBD3F315A9F16B00F17914 /* Table_License.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 95CBD30815A9F16A00F17914 /* Table_License.cpp */; };
+		95CBD3F415A9F16B00F17914 /* Table_Licensing.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 95CBD30915A9F16A00F17914 /* Table_Licensing.cpp */; };
+		95CBD3F515A9F16B00F17914 /* Table_Manufacturer.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 95CBD30A15A9F16A00F17914 /* Table_Manufacturer.cpp */; };
+		95CBD3F615A9F16B00F17914 /* Table_MediaType_Broadcast.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 95CBD30B15A9F16A00F17914 /* Table_MediaType_Broadcast.cpp */; };
+		95CBD3F715A9F16B00F17914 /* Table_MediaType_DesignObj.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 95CBD30C15A9F16A00F17914 /* Table_MediaType_DesignObj.cpp */; };
+		95CBD3F815A9F16B00F17914 /* Table_MediaType.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 95CBD30D15A9F16A00F17914 /* Table_MediaType.cpp */; };
+		95CBD3F915A9F16B00F17914 /* Table_News.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 95CBD30E15A9F16A00F17914 /* Table_News.cpp */; };
+		95CBD3FA15A9F16B00F17914 /* Table_OperatingSystem.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 95CBD30F15A9F16A00F17914 /* Table_OperatingSystem.cpp */; };
+		95CBD3FB15A9F16B00F17914 /* Table_Orbiter_Users_PasswordReq.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 95CBD31015A9F16A00F17914 /* Table_Orbiter_Users_PasswordReq.cpp */; };
+		95CBD3FC15A9F16B00F17914 /* Table_Orbiter_Variable.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 95CBD31115A9F16A00F17914 /* Table_Orbiter_Variable.cpp */; };
+		95CBD3FD15A9F16B00F17914 /* Table_Orbiter.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 95CBD31215A9F16A00F17914 /* Table_Orbiter.cpp */; };
+		95CBD3FE15A9F16B00F17914 /* Table_Package_Compat.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 95CBD31315A9F16A00F17914 /* Table_Package_Compat.cpp */; };
+		95CBD3FF15A9F16B00F17914 /* Table_Package_Device.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 95CBD31415A9F16A00F17914 /* Table_Package_Device.cpp */; };
+		95CBD40015A9F16B00F17914 /* Table_Package_Directory_File.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 95CBD31515A9F16A00F17914 /* Table_Package_Directory_File.cpp */; };
+		95CBD40115A9F16B00F17914 /* Table_Package_Directory.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 95CBD31615A9F16A00F17914 /* Table_Package_Directory.cpp */; };
+		95CBD40215A9F16B00F17914 /* Table_Package_Package.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 95CBD31715A9F16A00F17914 /* Table_Package_Package.cpp */; };
+		95CBD40315A9F16B00F17914 /* Table_Package_Source_Compat.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 95CBD31815A9F16A00F17914 /* Table_Package_Source_Compat.cpp */; };
+		95CBD40415A9F16B00F17914 /* Table_Package_Source.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 95CBD31915A9F16A00F17914 /* Table_Package_Source.cpp */; };
+		95CBD40515A9F16B00F17914 /* Table_Package_Users.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 95CBD31A15A9F16A00F17914 /* Table_Package_Users.cpp */; };
+		95CBD40715A9F16B00F17914 /* Table_Package.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 95CBD31C15A9F16A00F17914 /* Table_Package.cpp */; };
+		95CBD40815A9F16B00F17914 /* Table_PackageType.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 95CBD31D15A9F16A00F17914 /* Table_PackageType.cpp */; };
+		95CBD40915A9F16B00F17914 /* Table_PageSetup.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 95CBD31E15A9F16A00F17914 /* Table_PageSetup.cpp */; };
+		95CBD40A15A9F16B00F17914 /* Table_PaidLicense.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 95CBD31F15A9F16A00F17914 /* Table_PaidLicense.cpp */; };
+		95CBD40B15A9F16B00F17914 /* Table_ParameterType.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 95CBD32015A9F16A00F17914 /* Table_ParameterType.cpp */; };
+		95CBD40C15A9F16B00F17914 /* Table_PhoneLineType.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 95CBD32115A9F16A00F17914 /* Table_PhoneLineType.cpp */; };
+		95CBD40D15A9F16B00F17914 /* Table_Pipe.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 95CBD32215A9F16A00F17914 /* Table_Pipe.cpp */; };
+		95CBD40E15A9F16B00F17914 /* Table_PnpLevel.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 95CBD32315A9F16A00F17914 /* Table_PnpLevel.cpp */; };
+		95CBD40F15A9F16B00F17914 /* Table_PnpProtocol.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 95CBD32415A9F16A00F17914 /* Table_PnpProtocol.cpp */; };
+		95CBD41015A9F16B00F17914 /* Table_PnpQueue.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 95CBD32515A9F16A00F17914 /* Table_PnpQueue.cpp */; };
+		95CBD41115A9F16B00F17914 /* Table_PostalCode.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 95CBD32615A9F16A00F17914 /* Table_PostalCode.cpp */; };
+		95CBD41215A9F16B00F17914 /* Table_psc_constants_batdet.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 95CBD32715A9F16A00F17914 /* Table_psc_constants_batdet.cpp */; };
+		95CBD41315A9F16B00F17914 /* Table_psc_constants_bathdr.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 95CBD32815A9F16A00F17914 /* Table_psc_constants_bathdr.cpp */; };
+		95CBD41415A9F16B00F17914 /* Table_psc_constants_batuser.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 95CBD32915A9F16A00F17914 /* Table_psc_constants_batuser.cpp */; };
+		95CBD41515A9F16B00F17914 /* Table_psc_constants_repset.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 95CBD32A15A9F16A00F17914 /* Table_psc_constants_repset.cpp */; };
+		95CBD41615A9F16B00F17914 /* Table_psc_constants_schema.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 95CBD32B15A9F16A00F17914 /* Table_psc_constants_schema.cpp */; };
+		95CBD41715A9F16B00F17914 /* Table_psc_constants_tables.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 95CBD32C15A9F16A00F17914 /* Table_psc_constants_tables.cpp */; };
+		95CBD41815A9F16B00F17914 /* Table_psc_dce_batdet.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 95CBD32D15A9F16A00F17914 /* Table_psc_dce_batdet.cpp */; };
+		95CBD41915A9F16B00F17914 /* Table_psc_dce_bathdr.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 95CBD32E15A9F16A00F17914 /* Table_psc_dce_bathdr.cpp */; };
+		95CBD41A15A9F16B00F17914 /* Table_psc_dce_batuser.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 95CBD32F15A9F16A00F17914 /* Table_psc_dce_batuser.cpp */; };
+		95CBD41B15A9F16B00F17914 /* Table_psc_dce_repset.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 95CBD33015A9F16A00F17914 /* Table_psc_dce_repset.cpp */; };
+		95CBD41C15A9F16B00F17914 /* Table_psc_dce_schema.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 95CBD33115A9F16A00F17914 /* Table_psc_dce_schema.cpp */; };
+		95CBD41D15A9F16B00F17914 /* Table_psc_dce_tables.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 95CBD33215A9F16A00F17914 /* Table_psc_dce_tables.cpp */; };
+		95CBD41E15A9F16B00F17914 /* Table_psc_designer_batdet.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 95CBD33315A9F16A00F17914 /* Table_psc_designer_batdet.cpp */; };
+		95CBD41F15A9F16B00F17914 /* Table_psc_designer_bathdr.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 95CBD33415A9F16A00F17914 /* Table_psc_designer_bathdr.cpp */; };
+		95CBD42015A9F16B00F17914 /* Table_psc_designer_batuser.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 95CBD33515A9F16A00F17914 /* Table_psc_designer_batuser.cpp */; };
+		95CBD42115A9F16B00F17914 /* Table_psc_designer_repset.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 95CBD33615A9F16A00F17914 /* Table_psc_designer_repset.cpp */; };
+		95CBD42215A9F16B00F17914 /* Table_psc_designer_schema.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 95CBD33715A9F16A00F17914 /* Table_psc_designer_schema.cpp */; };
+		95CBD42315A9F16B00F17914 /* Table_psc_designer_tables.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 95CBD33815A9F16A00F17914 /* Table_psc_designer_tables.cpp */; };
+		95CBD42415A9F16B00F17914 /* Table_psc_document_batdet.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 95CBD33915A9F16A00F17914 /* Table_psc_document_batdet.cpp */; };
+		95CBD42515A9F16B00F17914 /* Table_psc_document_bathdr.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 95CBD33A15A9F16A00F17914 /* Table_psc_document_bathdr.cpp */; };
+		95CBD42615A9F16B00F17914 /* Table_psc_document_batuser.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 95CBD33B15A9F16A00F17914 /* Table_psc_document_batuser.cpp */; };
+		95CBD42715A9F16B00F17914 /* Table_psc_document_repset.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 95CBD33C15A9F16A00F17914 /* Table_psc_document_repset.cpp */; };
+		95CBD42815A9F16B00F17914 /* Table_psc_document_schema.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 95CBD33D15A9F16A00F17914 /* Table_psc_document_schema.cpp */; };
+		95CBD42915A9F16B00F17914 /* Table_psc_document_tables.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 95CBD33E15A9F16A00F17914 /* Table_psc_document_tables.cpp */; };
+		95CBD42A15A9F16B00F17914 /* Table_psc_ir_batdet.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 95CBD33F15A9F16A00F17914 /* Table_psc_ir_batdet.cpp */; };
+		95CBD42B15A9F16B00F17914 /* Table_psc_ir_bathdr.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 95CBD34015A9F16A00F17914 /* Table_psc_ir_bathdr.cpp */; };
+		95CBD42C15A9F16B00F17914 /* Table_psc_ir_batuser.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 95CBD34115A9F16A00F17914 /* Table_psc_ir_batuser.cpp */; };
+		95CBD42D15A9F16B00F17914 /* Table_psc_ir_repset.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 95CBD34215A9F16A00F17914 /* Table_psc_ir_repset.cpp */; };
+		95CBD42E15A9F16B00F17914 /* Table_psc_ir_schema.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 95CBD34315A9F16A00F17914 /* Table_psc_ir_schema.cpp */; };
+		95CBD42F15A9F16B00F17914 /* Table_psc_ir_tables.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 95CBD34415A9F16A00F17914 /* Table_psc_ir_tables.cpp */; };
+		95CBD43015A9F16B00F17914 /* Table_psc_local_batdet.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 95CBD34515A9F16A00F17914 /* Table_psc_local_batdet.cpp */; };
+		95CBD43115A9F16B00F17914 /* Table_psc_local_bathdr.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 95CBD34615A9F16A00F17914 /* Table_psc_local_bathdr.cpp */; };
+		95CBD43215A9F16B00F17914 /* Table_psc_local_batuser.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 95CBD34715A9F16A00F17914 /* Table_psc_local_batuser.cpp */; };
+		95CBD43315A9F16B00F17914 /* Table_psc_local_repset.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 95CBD34815A9F16A00F17914 /* Table_psc_local_repset.cpp */; };
+		95CBD43415A9F16B00F17914 /* Table_psc_local_schema.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 95CBD34915A9F16A00F17914 /* Table_psc_local_schema.cpp */; };
+		95CBD43515A9F16B00F17914 /* Table_psc_local_tables.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 95CBD34A15A9F16A00F17914 /* Table_psc_local_tables.cpp */; };
+		95CBD43615A9F16B00F17914 /* Table_psc_website_batdet.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 95CBD34B15A9F16A00F17914 /* Table_psc_website_batdet.cpp */; };
+		95CBD43715A9F16B00F17914 /* Table_psc_website_bathdr.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 95CBD34C15A9F16A00F17914 /* Table_psc_website_bathdr.cpp */; };
+		95CBD43815A9F16B00F17914 /* Table_psc_website_batuser.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 95CBD34D15A9F16A00F17914 /* Table_psc_website_batuser.cpp */; };
+		95CBD43915A9F16B00F17914 /* Table_psc_website_repset.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 95CBD34E15A9F16A00F17914 /* Table_psc_website_repset.cpp */; };
+		95CBD43A15A9F16B00F17914 /* Table_psc_website_schema.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 95CBD34F15A9F16A00F17914 /* Table_psc_website_schema.cpp */; };
+		95CBD43B15A9F16B00F17914 /* Table_psc_website_tables.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 95CBD35015A9F16A00F17914 /* Table_psc_website_tables.cpp */; };
+		95CBD43C15A9F16B00F17914 /* Table_QuickStartCategory.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 95CBD35115A9F16A00F17914 /* Table_QuickStartCategory.cpp */; };
+		95CBD43D15A9F16B00F17914 /* Table_QuickStartTemplate.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 95CBD35215A9F16A00F17914 /* Table_QuickStartTemplate.cpp */; };
+		95CBD43E15A9F16B00F17914 /* Table_Region.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 95CBD35315A9F16A00F17914 /* Table_Region.cpp */; };
+		95CBD43F15A9F16B00F17914 /* Table_RemoteControl.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 95CBD35415A9F16A00F17914 /* Table_RemoteControl.cpp */; };
+		95CBD44015A9F16B00F17914 /* Table_RemoteMapping.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 95CBD35515A9F16A00F17914 /* Table_RemoteMapping.cpp */; };
+		95CBD44115A9F16B00F17914 /* Table_RepositorySource_URL.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 95CBD35615A9F16A00F17914 /* Table_RepositorySource_URL.cpp */; };
+		95CBD44215A9F16B00F17914 /* Table_RepositorySource.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 95CBD35715A9F16A00F17914 /* Table_RepositorySource.cpp */; };
+		95CBD44315A9F16B00F17914 /* Table_RepositoryType.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 95CBD35815A9F16A00F17914 /* Table_RepositoryType.cpp */; };
+		95CBD44415A9F16B00F17914 /* Table_Room_Users.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 95CBD35915A9F16A00F17914 /* Table_Room_Users.cpp */; };
+		95CBD44515A9F16B00F17914 /* Table_Room.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 95CBD35A15A9F16A00F17914 /* Table_Room.cpp */; };
+		95CBD44615A9F16B00F17914 /* Table_RoomType.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 95CBD35B15A9F16A00F17914 /* Table_RoomType.cpp */; };
+		95CBD44715A9F16B00F17914 /* Table_Schema.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 95CBD35C15A9F16A00F17914 /* Table_Schema.cpp */; };
+		95CBD44815A9F16B00F17914 /* Table_Screen_CommandParameter.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 95CBD35D15A9F16A00F17914 /* Table_Screen_CommandParameter.cpp */; };
+		95CBD44915A9F16B00F17914 /* Table_Screen_DesignObj.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 95CBD35E15A9F16A00F17914 /* Table_Screen_DesignObj.cpp */; };
+		95CBD44A15A9F16B00F17914 /* Table_Screen.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 95CBD35F15A9F16A00F17914 /* Table_Screen.cpp */; };
+		95CBD44B15A9F16B00F17914 /* Table_SetupStep.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 95CBD36015A9F16A00F17914 /* Table_SetupStep.cpp */; };
+		95CBD44C15A9F16B00F17914 /* Table_Size.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 95CBD36115A9F16A00F17914 /* Table_Size.cpp */; };
+		95CBD44D15A9F16B00F17914 /* Table_Skin.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 95CBD36215A9F16A00F17914 /* Table_Skin.cpp */; };
+		95CBD44E15A9F16B00F17914 /* Table_Software_Device.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 95CBD36315A9F16A00F17914 /* Table_Software_Device.cpp */; };
+		95CBD44F15A9F16B00F17914 /* Table_Software_Source.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 95CBD36415A9F16A00F17914 /* Table_Software_Source.cpp */; };
+		95CBD45015A9F16B00F17914 /* Table_Software.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 95CBD36515A9F16A00F17914 /* Table_Software.cpp */; };
+		95CBD45115A9F16B00F17914 /* Table_StabilityStatus.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 95CBD36615A9F16A00F17914 /* Table_StabilityStatus.cpp */; };
+		95CBD45215A9F16B00F17914 /* Table_StartupScript.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 95CBD36715A9F16A00F17914 /* Table_StartupScript.cpp */; };
+		95CBD45315A9F16B00F17914 /* Table_Style.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 95CBD36815A9F16A00F17914 /* Table_Style.cpp */; };
+		95CBD45415A9F16B00F17914 /* Table_StyleVariation.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 95CBD36915A9F16A00F17914 /* Table_StyleVariation.cpp */; };
+		95CBD45515A9F16B00F17914 /* Table_System.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 95CBD36A15A9F16A00F17914 /* Table_System.cpp */; };
+		95CBD45615A9F16B00F17914 /* Table_Template.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 95CBD36B15A9F16A00F17914 /* Table_Template.cpp */; };
+		95CBD45715A9F16B00F17914 /* Table_Text_LS_AltVersions.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 95CBD36C15A9F16A00F17914 /* Table_Text_LS_AltVersions.cpp */; };
+		95CBD45815A9F16B00F17914 /* Table_Text_LS.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 95CBD36D15A9F16A00F17914 /* Table_Text_LS.cpp */; };
+		95CBD45915A9F16B00F17914 /* Table_Text.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 95CBD36E15A9F16A00F17914 /* Table_Text.cpp */; };
+		95CBD45A15A9F16B00F17914 /* Table_TextCategory.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 95CBD36F15A9F16A00F17914 /* Table_TextCategory.cpp */; };
+		95CBD45B15A9F16B00F17914 /* Table_TimeZone.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 95CBD37015A9F16A00F17914 /* Table_TimeZone.cpp */; };
+		95CBD45C15A9F16B00F17914 /* Table_UI.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 95CBD37115A9F16A00F17914 /* Table_UI.cpp */; };
+		95CBD45D15A9F16B00F17914 /* Table_UnknownDevices.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 95CBD37215A9F16A00F17914 /* Table_UnknownDevices.cpp */; };
+		95CBD45E15A9F16B00F17914 /* Table_UserMode.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 95CBD37315A9F16A00F17914 /* Table_UserMode.cpp */; };
+		95CBD45F15A9F16B00F17914 /* Table_Users.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 95CBD37415A9F16A00F17914 /* Table_Users.cpp */; };
+		95CBD46015A9F16B00F17914 /* Table_Variable.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 95CBD37515A9F16A00F17914 /* Table_Variable.cpp */; };
+		95CBD46115A9F16B00F17914 /* Table_Version.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 95CBD37615A9F16A00F17914 /* Table_Version.cpp */; };
+		95CBD46215A9F16B00F17914 /* Table_VertAlignment.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 95CBD37715A9F16A00F17914 /* Table_VertAlignment.cpp */; };
+		95CBD46515A9F21C00F17914 /* mysql.h in Headers */ = {isa = PBXBuildFile; fileRef = 95CBD46415A9F21C00F17914 /* mysql.h */; };
+		95CBD46815A9FBB200F17914 /* libmysqlclient.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 95CBD46715A9FBB200F17914 /* libmysqlclient.dylib */; };
+		95CBD46B15A9FC8900F17914 /* TableRow.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 95CBD46A15A9FC8900F17914 /* TableRow.cpp */; };
+		95CBD46D15A9FC9E00F17914 /* Database_pluto_main.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 95CBD46C15A9FC9E00F17914 /* Database_pluto_main.cpp */; };
+		95CBD46F15A9FD9800F17914 /* libDCECommon.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 95CBD46E15A9FD9800F17914 /* libDCECommon.dylib */; };
+/* End PBXBuildFile section */
+
+/* Begin PBXFileReference section */
+		95CBD27815A9EFEB00F17914 /* libpluto_main.dylib */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.dylib"; includeInIndex = 0; path = libpluto_main.dylib; sourceTree = BUILT_PRODUCTS_DIR; };
+		95CBD27C15A9EFEB00F17914 /* libpluto_main-Prefix.pch */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "libpluto_main-Prefix.pch"; sourceTree = "<group>"; };
+		95CBD27D15A9EFEB00F17914 /* libpluto_mainProj.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; path = libpluto_mainProj.xcconfig; sourceTree = "<group>"; };
+		95CBD27E15A9EFEB00F17914 /* libpluto_mainTarget.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; path = libpluto_mainTarget.xcconfig; sourceTree = "<group>"; };
+		95CBD27F15A9EFEB00F17914 /* libpluto_main.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = libpluto_main.h; sourceTree = "<group>"; };
+		95CBD28015A9EFEB00F17914 /* libpluto_mainPriv.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = libpluto_mainPriv.h; sourceTree = "<group>"; };
+		95CBD28115A9EFEB00F17914 /* libpluto_main.cp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = libpluto_main.cp; sourceTree = "<group>"; };
+		95CBD28D15A9F16A00F17914 /* Table_Array.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = Table_Array.cpp; path = ../pluto_main/Table_Array.cpp; sourceTree = "<group>"; };
+		95CBD28E15A9F16A00F17914 /* Table_Broadcast.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = Table_Broadcast.cpp; path = ../pluto_main/Table_Broadcast.cpp; sourceTree = "<group>"; };
+		95CBD28F15A9F16A00F17914 /* Table_Button.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = Table_Button.cpp; path = ../pluto_main/Table_Button.cpp; sourceTree = "<group>"; };
+		95CBD29015A9F16A00F17914 /* Table_CachedScreens.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = Table_CachedScreens.cpp; path = ../pluto_main/Table_CachedScreens.cpp; sourceTree = "<group>"; };
+		95CBD29115A9F16A00F17914 /* Table_CannedEvents_CriteriaParmList.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = Table_CannedEvents_CriteriaParmList.cpp; path = ../pluto_main/Table_CannedEvents_CriteriaParmList.cpp; sourceTree = "<group>"; };
+		95CBD29215A9F16A00F17914 /* Table_CannedEvents.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = Table_CannedEvents.cpp; path = ../pluto_main/Table_CannedEvents.cpp; sourceTree = "<group>"; };
+		95CBD29315A9F16A00F17914 /* Table_City.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = Table_City.cpp; path = ../pluto_main/Table_City.cpp; sourceTree = "<group>"; };
+		95CBD29415A9F16A00F17914 /* Table_Command_CommandParameter.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = Table_Command_CommandParameter.cpp; path = ../pluto_main/Table_Command_CommandParameter.cpp; sourceTree = "<group>"; };
+		95CBD29515A9F16A00F17914 /* Table_Command_Pipe.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = Table_Command_Pipe.cpp; path = ../pluto_main/Table_Command_Pipe.cpp; sourceTree = "<group>"; };
+		95CBD29615A9F16A00F17914 /* Table_Command.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = Table_Command.cpp; path = ../pluto_main/Table_Command.cpp; sourceTree = "<group>"; };
+		95CBD29715A9F16A00F17914 /* Table_CommandCategory.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = Table_CommandCategory.cpp; path = ../pluto_main/Table_CommandCategory.cpp; sourceTree = "<group>"; };
+		95CBD29815A9F16A00F17914 /* Table_CommandGroup_Command_CommandParameter.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = Table_CommandGroup_Command_CommandParameter.cpp; path = ../pluto_main/Table_CommandGroup_Command_CommandParameter.cpp; sourceTree = "<group>"; };
+		95CBD29915A9F16A00F17914 /* Table_CommandGroup_Command.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = Table_CommandGroup_Command.cpp; path = ../pluto_main/Table_CommandGroup_Command.cpp; sourceTree = "<group>"; };
+		95CBD29A15A9F16A00F17914 /* Table_CommandGroup_D_Command_CommandParameter.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = Table_CommandGroup_D_Command_CommandParameter.cpp; path = ../pluto_main/Table_CommandGroup_D_Command_CommandParameter.cpp; sourceTree = "<group>"; };
+		95CBD29B15A9F16A00F17914 /* Table_CommandGroup_D_Command.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = Table_CommandGroup_D_Command.cpp; path = ../pluto_main/Table_CommandGroup_D_Command.cpp; sourceTree = "<group>"; };
+		95CBD29C15A9F16A00F17914 /* Table_CommandGroup_D.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = Table_CommandGroup_D.cpp; path = ../pluto_main/Table_CommandGroup_D.cpp; sourceTree = "<group>"; };
+		95CBD29D15A9F16A00F17914 /* Table_CommandGroup_EntertainArea.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = Table_CommandGroup_EntertainArea.cpp; path = ../pluto_main/Table_CommandGroup_EntertainArea.cpp; sourceTree = "<group>"; };
+		95CBD29E15A9F16A00F17914 /* Table_CommandGroup_Room.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = Table_CommandGroup_Room.cpp; path = ../pluto_main/Table_CommandGroup_Room.cpp; sourceTree = "<group>"; };
+		95CBD29F15A9F16A00F17914 /* Table_CommandGroup.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = Table_CommandGroup.cpp; path = ../pluto_main/Table_CommandGroup.cpp; sourceTree = "<group>"; };
+		95CBD2A015A9F16A00F17914 /* Table_CommandParameter.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = Table_CommandParameter.cpp; path = ../pluto_main/Table_CommandParameter.cpp; sourceTree = "<group>"; };
+		95CBD2A115A9F16A00F17914 /* Table_CommMethod.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = Table_CommMethod.cpp; path = ../pluto_main/Table_CommMethod.cpp; sourceTree = "<group>"; };
+		95CBD2A215A9F16A00F17914 /* Table_ConfigType_File.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = Table_ConfigType_File.cpp; path = ../pluto_main/Table_ConfigType_File.cpp; sourceTree = "<group>"; };
+		95CBD2A315A9F16A00F17914 /* Table_ConfigType_Setting.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = Table_ConfigType_Setting.cpp; path = ../pluto_main/Table_ConfigType_Setting.cpp; sourceTree = "<group>"; };
+		95CBD2A415A9F16A00F17914 /* Table_ConfigType_Token.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = Table_ConfigType_Token.cpp; path = ../pluto_main/Table_ConfigType_Token.cpp; sourceTree = "<group>"; };
+		95CBD2A515A9F16A00F17914 /* Table_ConfigType.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = Table_ConfigType.cpp; path = ../pluto_main/Table_ConfigType.cpp; sourceTree = "<group>"; };
+		95CBD2A615A9F16A00F17914 /* Table_ConnectorType.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = Table_ConnectorType.cpp; path = ../pluto_main/Table_ConnectorType.cpp; sourceTree = "<group>"; };
+		95CBD2A715A9F16A00F17914 /* Table_Country.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = Table_Country.cpp; path = ../pluto_main/Table_Country.cpp; sourceTree = "<group>"; };
+		95CBD2A815A9F16A00F17914 /* Table_Criteria.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = Table_Criteria.cpp; path = ../pluto_main/Table_Criteria.cpp; sourceTree = "<group>"; };
+		95CBD2A915A9F16A00F17914 /* Table_CriteriaList_CriteriaParmList.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = Table_CriteriaList_CriteriaParmList.cpp; path = ../pluto_main/Table_CriteriaList_CriteriaParmList.cpp; sourceTree = "<group>"; };
+		95CBD2AA15A9F16A00F17914 /* Table_CriteriaList.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = Table_CriteriaList.cpp; path = ../pluto_main/Table_CriteriaList.cpp; sourceTree = "<group>"; };
+		95CBD2AB15A9F16A00F17914 /* Table_CriteriaParm.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = Table_CriteriaParm.cpp; path = ../pluto_main/Table_CriteriaParm.cpp; sourceTree = "<group>"; };
+		95CBD2AC15A9F16A00F17914 /* Table_CriteriaParmList.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = Table_CriteriaParmList.cpp; path = ../pluto_main/Table_CriteriaParmList.cpp; sourceTree = "<group>"; };
+		95CBD2AD15A9F16A00F17914 /* Table_CriteriaParmNesting.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = Table_CriteriaParmNesting.cpp; path = ../pluto_main/Table_CriteriaParmNesting.cpp; sourceTree = "<group>"; };
+		95CBD2AE15A9F16A00F17914 /* Table_DataGrid.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = Table_DataGrid.cpp; path = ../pluto_main/Table_DataGrid.cpp; sourceTree = "<group>"; };
+		95CBD2AF15A9F16A00F17914 /* Table_DesignObj.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = Table_DesignObj.cpp; path = ../pluto_main/Table_DesignObj.cpp; sourceTree = "<group>"; };
+		95CBD2B015A9F16A00F17914 /* Table_DesignObjCategory.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = Table_DesignObjCategory.cpp; path = ../pluto_main/Table_DesignObjCategory.cpp; sourceTree = "<group>"; };
+		95CBD2B115A9F16A00F17914 /* Table_DesignObjParameter.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = Table_DesignObjParameter.cpp; path = ../pluto_main/Table_DesignObjParameter.cpp; sourceTree = "<group>"; };
+		95CBD2B215A9F16A00F17914 /* Table_DesignObjType_DesignObjParameter.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = Table_DesignObjType_DesignObjParameter.cpp; path = ../pluto_main/Table_DesignObjType_DesignObjParameter.cpp; sourceTree = "<group>"; };
+		95CBD2B315A9F16A00F17914 /* Table_DesignObjType.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = Table_DesignObjType.cpp; path = ../pluto_main/Table_DesignObjType.cpp; sourceTree = "<group>"; };
+		95CBD2B415A9F16A00F17914 /* Table_DesignObjVariation_DesignObj_Skin_Language.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = Table_DesignObjVariation_DesignObj_Skin_Language.cpp; path = ../pluto_main/Table_DesignObjVariation_DesignObj_Skin_Language.cpp; sourceTree = "<group>"; };
+		95CBD2B515A9F16A00F17914 /* Table_DesignObjVariation_DesignObj.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = Table_DesignObjVariation_DesignObj.cpp; path = ../pluto_main/Table_DesignObjVariation_DesignObj.cpp; sourceTree = "<group>"; };
+		95CBD2B615A9F16A00F17914 /* Table_DesignObjVariation_DesignObjParameter.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = Table_DesignObjVariation_DesignObjParameter.cpp; path = ../pluto_main/Table_DesignObjVariation_DesignObjParameter.cpp; sourceTree = "<group>"; };
+		95CBD2B715A9F16A00F17914 /* Table_DesignObjVariation_Text_Skin_Language.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = Table_DesignObjVariation_Text_Skin_Language.cpp; path = ../pluto_main/Table_DesignObjVariation_Text_Skin_Language.cpp; sourceTree = "<group>"; };
+		95CBD2B815A9F16A00F17914 /* Table_DesignObjVariation_Text.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = Table_DesignObjVariation_Text.cpp; path = ../pluto_main/Table_DesignObjVariation_Text.cpp; sourceTree = "<group>"; };
+		95CBD2B915A9F16A00F17914 /* Table_DesignObjVariation_Zone.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = Table_DesignObjVariation_Zone.cpp; path = ../pluto_main/Table_DesignObjVariation_Zone.cpp; sourceTree = "<group>"; };
+		95CBD2BA15A9F16A00F17914 /* Table_DesignObjVariation.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = Table_DesignObjVariation.cpp; path = ../pluto_main/Table_DesignObjVariation.cpp; sourceTree = "<group>"; };
+		95CBD2BB15A9F16A00F17914 /* Table_Device_Command.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = Table_Device_Command.cpp; path = ../pluto_main/Table_Device_Command.cpp; sourceTree = "<group>"; };
+		95CBD2BC15A9F16A00F17914 /* Table_Device_CommandGroup.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = Table_Device_CommandGroup.cpp; path = ../pluto_main/Table_Device_CommandGroup.cpp; sourceTree = "<group>"; };
+		95CBD2BD15A9F16A00F17914 /* Table_Device_Device_Pipe.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = Table_Device_Device_Pipe.cpp; path = ../pluto_main/Table_Device_Device_Pipe.cpp; sourceTree = "<group>"; };
+		95CBD2BE15A9F16A00F17914 /* Table_Device_Device_Related.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = Table_Device_Device_Related.cpp; path = ../pluto_main/Table_Device_Device_Related.cpp; sourceTree = "<group>"; };
+		95CBD2BF15A9F16A00F17914 /* Table_Device_DeviceData.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = Table_Device_DeviceData.cpp; path = ../pluto_main/Table_Device_DeviceData.cpp; sourceTree = "<group>"; };
+		95CBD2C015A9F16A00F17914 /* Table_Device_DeviceGroup.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = Table_Device_DeviceGroup.cpp; path = ../pluto_main/Table_Device_DeviceGroup.cpp; sourceTree = "<group>"; };
+		95CBD2C115A9F16A00F17914 /* Table_Device_EntertainArea.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = Table_Device_EntertainArea.cpp; path = ../pluto_main/Table_Device_EntertainArea.cpp; sourceTree = "<group>"; };
+		95CBD2C215A9F16A00F17914 /* Table_Device_HouseMode.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = Table_Device_HouseMode.cpp; path = ../pluto_main/Table_Device_HouseMode.cpp; sourceTree = "<group>"; };
+		95CBD2C315A9F16A00F17914 /* Table_Device_MRU.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = Table_Device_MRU.cpp; path = ../pluto_main/Table_Device_MRU.cpp; sourceTree = "<group>"; };
+		95CBD2C415A9F16A00F17914 /* Table_Device_Orbiter.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = Table_Device_Orbiter.cpp; path = ../pluto_main/Table_Device_Orbiter.cpp; sourceTree = "<group>"; };
+		95CBD2C515A9F16A00F17914 /* Table_Device_QuickStart.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = Table_Device_QuickStart.cpp; path = ../pluto_main/Table_Device_QuickStart.cpp; sourceTree = "<group>"; };
+		95CBD2C615A9F16A00F17914 /* Table_Device_StartupScript.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = Table_Device_StartupScript.cpp; path = ../pluto_main/Table_Device_StartupScript.cpp; sourceTree = "<group>"; };
+		95CBD2C715A9F16A00F17914 /* Table_Device_Users.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = Table_Device_Users.cpp; path = ../pluto_main/Table_Device_Users.cpp; sourceTree = "<group>"; };
+		95CBD2C815A9F16A00F17914 /* Table_Device.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = Table_Device.cpp; path = ../pluto_main/Table_Device.cpp; sourceTree = "<group>"; };
+		95CBD2C915A9F16A00F17914 /* Table_DeviceCategory_DeviceData.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = Table_DeviceCategory_DeviceData.cpp; path = ../pluto_main/Table_DeviceCategory_DeviceData.cpp; sourceTree = "<group>"; };
+		95CBD2CA15A9F16A00F17914 /* Table_DeviceCategory_Event.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = Table_DeviceCategory_Event.cpp; path = ../pluto_main/Table_DeviceCategory_Event.cpp; sourceTree = "<group>"; };
+		95CBD2CB15A9F16A00F17914 /* Table_DeviceCategory.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = Table_DeviceCategory.cpp; path = ../pluto_main/Table_DeviceCategory.cpp; sourceTree = "<group>"; };
+		95CBD2CC15A9F16A00F17914 /* Table_DeviceCommandGroup_Command.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = Table_DeviceCommandGroup_Command.cpp; path = ../pluto_main/Table_DeviceCommandGroup_Command.cpp; sourceTree = "<group>"; };
+		95CBD2CD15A9F16A00F17914 /* Table_DeviceCommandGroup_DeviceCommandGroup_Parent.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = Table_DeviceCommandGroup_DeviceCommandGroup_Parent.cpp; path = ../pluto_main/Table_DeviceCommandGroup_DeviceCommandGroup_Parent.cpp; sourceTree = "<group>"; };
+		95CBD2CE15A9F16A00F17914 /* Table_DeviceCommandGroup.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = Table_DeviceCommandGroup.cpp; path = ../pluto_main/Table_DeviceCommandGroup.cpp; sourceTree = "<group>"; };
+		95CBD2CF15A9F16A00F17914 /* Table_DeviceData.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = Table_DeviceData.cpp; path = ../pluto_main/Table_DeviceData.cpp; sourceTree = "<group>"; };
+		95CBD2D015A9F16A00F17914 /* Table_DeviceGroup.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = Table_DeviceGroup.cpp; path = ../pluto_main/Table_DeviceGroup.cpp; sourceTree = "<group>"; };
+		95CBD2D115A9F16A00F17914 /* Table_DeviceTemplate_AV.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = Table_DeviceTemplate_AV.cpp; path = ../pluto_main/Table_DeviceTemplate_AV.cpp; sourceTree = "<group>"; };
+		95CBD2D215A9F16A00F17914 /* Table_DeviceTemplate_DesignObj.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = Table_DeviceTemplate_DesignObj.cpp; path = ../pluto_main/Table_DeviceTemplate_DesignObj.cpp; sourceTree = "<group>"; };
+		95CBD2D315A9F16A00F17914 /* Table_DeviceTemplate_DeviceCategory_ControlledVia_Pipe.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = Table_DeviceTemplate_DeviceCategory_ControlledVia_Pipe.cpp; path = ../pluto_main/Table_DeviceTemplate_DeviceCategory_ControlledVia_Pipe.cpp; sourceTree = "<group>"; };
+		95CBD2D415A9F16A00F17914 /* Table_DeviceTemplate_DeviceCategory_ControlledVia.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = Table_DeviceTemplate_DeviceCategory_ControlledVia.cpp; path = ../pluto_main/Table_DeviceTemplate_DeviceCategory_ControlledVia.cpp; sourceTree = "<group>"; };
+		95CBD2D515A9F16A00F17914 /* Table_DeviceTemplate_DeviceCommandGroup.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = Table_DeviceTemplate_DeviceCommandGroup.cpp; path = ../pluto_main/Table_DeviceTemplate_DeviceCommandGroup.cpp; sourceTree = "<group>"; };
+		95CBD2D615A9F16A00F17914 /* Table_DeviceTemplate_DeviceData.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = Table_DeviceTemplate_DeviceData.cpp; path = ../pluto_main/Table_DeviceTemplate_DeviceData.cpp; sourceTree = "<group>"; };
+		95CBD2D715A9F16A00F17914 /* Table_DeviceTemplate_DeviceTemplate_ControlledVia_Pipe.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = Table_DeviceTemplate_DeviceTemplate_ControlledVia_Pipe.cpp; path = ../pluto_main/Table_DeviceTemplate_DeviceTemplate_ControlledVia_Pipe.cpp; sourceTree = "<group>"; };
+		95CBD2D815A9F16A00F17914 /* Table_DeviceTemplate_DeviceTemplate_ControlledVia.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = Table_DeviceTemplate_DeviceTemplate_ControlledVia.cpp; path = ../pluto_main/Table_DeviceTemplate_DeviceTemplate_ControlledVia.cpp; sourceTree = "<group>"; };
+		95CBD2D915A9F16A00F17914 /* Table_DeviceTemplate_DeviceTemplate_Related.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = Table_DeviceTemplate_DeviceTemplate_Related.cpp; path = ../pluto_main/Table_DeviceTemplate_DeviceTemplate_Related.cpp; sourceTree = "<group>"; };
+		95CBD2DA15A9F16A00F17914 /* Table_DeviceTemplate_DSPMode.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = Table_DeviceTemplate_DSPMode.cpp; path = ../pluto_main/Table_DeviceTemplate_DSPMode.cpp; sourceTree = "<group>"; };
+		95CBD2DB15A9F16A00F17914 /* Table_DeviceTemplate_Event.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = Table_DeviceTemplate_Event.cpp; path = ../pluto_main/Table_DeviceTemplate_Event.cpp; sourceTree = "<group>"; };
+		95CBD2DC15A9F16A00F17914 /* Table_DeviceTemplate_InfraredGroup.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = Table_DeviceTemplate_InfraredGroup.cpp; path = ../pluto_main/Table_DeviceTemplate_InfraredGroup.cpp; sourceTree = "<group>"; };
+		95CBD2DD15A9F16A00F17914 /* Table_DeviceTemplate_Input.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = Table_DeviceTemplate_Input.cpp; path = ../pluto_main/Table_DeviceTemplate_Input.cpp; sourceTree = "<group>"; };
+		95CBD2DE15A9F16A00F17914 /* Table_DeviceTemplate_MediaType_DesignObj.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = Table_DeviceTemplate_MediaType_DesignObj.cpp; path = ../pluto_main/Table_DeviceTemplate_MediaType_DesignObj.cpp; sourceTree = "<group>"; };
+		95CBD2DF15A9F16A00F17914 /* Table_DeviceTemplate_MediaType.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = Table_DeviceTemplate_MediaType.cpp; path = ../pluto_main/Table_DeviceTemplate_MediaType.cpp; sourceTree = "<group>"; };
+		95CBD2E015A9F16A00F17914 /* Table_DeviceTemplate_Output.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = Table_DeviceTemplate_Output.cpp; path = ../pluto_main/Table_DeviceTemplate_Output.cpp; sourceTree = "<group>"; };
+		95CBD2E115A9F16A00F17914 /* Table_DeviceTemplate_PageSetup.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = Table_DeviceTemplate_PageSetup.cpp; path = ../pluto_main/Table_DeviceTemplate_PageSetup.cpp; sourceTree = "<group>"; };
+		95CBD2E215A9F16A00F17914 /* Table_DeviceTemplate.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = Table_DeviceTemplate.cpp; path = ../pluto_main/Table_DeviceTemplate.cpp; sourceTree = "<group>"; };
+		95CBD2E315A9F16A00F17914 /* Table_DHCPDevice_DeviceData.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = Table_DHCPDevice_DeviceData.cpp; path = ../pluto_main/Table_DHCPDevice_DeviceData.cpp; sourceTree = "<group>"; };
+		95CBD2E415A9F16A00F17914 /* Table_DHCPDevice.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = Table_DHCPDevice.cpp; path = ../pluto_main/Table_DHCPDevice.cpp; sourceTree = "<group>"; };
+		95CBD2E515A9F16A00F17914 /* Table_Direction.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = Table_Direction.cpp; path = ../pluto_main/Table_Direction.cpp; sourceTree = "<group>"; };
+		95CBD2E615A9F16A00F17914 /* Table_Directory.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = Table_Directory.cpp; path = ../pluto_main/Table_Directory.cpp; sourceTree = "<group>"; };
+		95CBD2E715A9F16A00F17914 /* Table_Distro.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = Table_Distro.cpp; path = ../pluto_main/Table_Distro.cpp; sourceTree = "<group>"; };
+		95CBD2E815A9F16A00F17914 /* Table_Document_Comment.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = Table_Document_Comment.cpp; path = ../pluto_main/Table_Document_Comment.cpp; sourceTree = "<group>"; };
+		95CBD2E915A9F16A00F17914 /* Table_Document.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = Table_Document.cpp; path = ../pluto_main/Table_Document.cpp; sourceTree = "<group>"; };
+		95CBD2EA15A9F16A00F17914 /* Table_Effect.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = Table_Effect.cpp; path = ../pluto_main/Table_Effect.cpp; sourceTree = "<group>"; };
+		95CBD2EB15A9F16A00F17914 /* Table_EffectType_Effect_Skin.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = Table_EffectType_Effect_Skin.cpp; path = ../pluto_main/Table_EffectType_Effect_Skin.cpp; sourceTree = "<group>"; };
+		95CBD2EC15A9F16A00F17914 /* Table_EffectType.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = Table_EffectType.cpp; path = ../pluto_main/Table_EffectType.cpp; sourceTree = "<group>"; };
+		95CBD2ED15A9F16A00F17914 /* Table_EntertainArea.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = Table_EntertainArea.cpp; path = ../pluto_main/Table_EntertainArea.cpp; sourceTree = "<group>"; };
+		95CBD2EE15A9F16A00F17914 /* Table_Event_EventParameter.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = Table_Event_EventParameter.cpp; path = ../pluto_main/Table_Event_EventParameter.cpp; sourceTree = "<group>"; };
+		95CBD2EF15A9F16A00F17914 /* Table_Event.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = Table_Event.cpp; path = ../pluto_main/Table_Event.cpp; sourceTree = "<group>"; };
+		95CBD2F015A9F16A00F17914 /* Table_EventCategory.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = Table_EventCategory.cpp; path = ../pluto_main/Table_EventCategory.cpp; sourceTree = "<group>"; };
+		95CBD2F115A9F16A00F17914 /* Table_EventHandler.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = Table_EventHandler.cpp; path = ../pluto_main/Table_EventHandler.cpp; sourceTree = "<group>"; };
+		95CBD2F215A9F16A00F17914 /* Table_EventParameter.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = Table_EventParameter.cpp; path = ../pluto_main/Table_EventParameter.cpp; sourceTree = "<group>"; };
+		95CBD2F315A9F16A00F17914 /* Table_FAQ.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = Table_FAQ.cpp; path = ../pluto_main/Table_FAQ.cpp; sourceTree = "<group>"; };
+		95CBD2F415A9F16A00F17914 /* Table_Firewall.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = Table_Firewall.cpp; path = ../pluto_main/Table_Firewall.cpp; sourceTree = "<group>"; };
+		95CBD2F515A9F16A00F17914 /* Table_Floorplan.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = Table_Floorplan.cpp; path = ../pluto_main/Table_Floorplan.cpp; sourceTree = "<group>"; };
+		95CBD2F615A9F16A00F17914 /* Table_FloorplanObjectType_Color.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = Table_FloorplanObjectType_Color.cpp; path = ../pluto_main/Table_FloorplanObjectType_Color.cpp; sourceTree = "<group>"; };
+		95CBD2F715A9F16A00F17914 /* Table_FloorplanObjectType.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = Table_FloorplanObjectType.cpp; path = ../pluto_main/Table_FloorplanObjectType.cpp; sourceTree = "<group>"; };
+		95CBD2F815A9F16A00F17914 /* Table_FloorplanType.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = Table_FloorplanType.cpp; path = ../pluto_main/Table_FloorplanType.cpp; sourceTree = "<group>"; };
+		95CBD2F915A9F16A00F17914 /* Table_HorizAlignment.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = Table_HorizAlignment.cpp; path = ../pluto_main/Table_HorizAlignment.cpp; sourceTree = "<group>"; };
+		95CBD2FA15A9F16A00F17914 /* Table_Household_Installation.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = Table_Household_Installation.cpp; path = ../pluto_main/Table_Household_Installation.cpp; sourceTree = "<group>"; };
+		95CBD2FB15A9F16A00F17914 /* Table_Household.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = Table_Household.cpp; path = ../pluto_main/Table_Household.cpp; sourceTree = "<group>"; };
+		95CBD2FC15A9F16A00F17914 /* Table_HouseMode.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = Table_HouseMode.cpp; path = ../pluto_main/Table_HouseMode.cpp; sourceTree = "<group>"; };
+		95CBD2FD15A9F16A00F17914 /* Table_Icon.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = Table_Icon.cpp; path = ../pluto_main/Table_Icon.cpp; sourceTree = "<group>"; };
+		95CBD2FE15A9F16A00F17914 /* Table_Image.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = Table_Image.cpp; path = ../pluto_main/Table_Image.cpp; sourceTree = "<group>"; };
+		95CBD2FF15A9F16A00F17914 /* Table_InfraredGroup_Command_Preferred.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = Table_InfraredGroup_Command_Preferred.cpp; path = ../pluto_main/Table_InfraredGroup_Command_Preferred.cpp; sourceTree = "<group>"; };
+		95CBD30015A9F16A00F17914 /* Table_InfraredGroup_Command.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = Table_InfraredGroup_Command.cpp; path = ../pluto_main/Table_InfraredGroup_Command.cpp; sourceTree = "<group>"; };
+		95CBD30115A9F16A00F17914 /* Table_InfraredGroup.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = Table_InfraredGroup.cpp; path = ../pluto_main/Table_InfraredGroup.cpp; sourceTree = "<group>"; };
+		95CBD30215A9F16A00F17914 /* Table_Installation_RepositorySource_URL.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = Table_Installation_RepositorySource_URL.cpp; path = ../pluto_main/Table_Installation_RepositorySource_URL.cpp; sourceTree = "<group>"; };
+		95CBD30315A9F16A00F17914 /* Table_Installation_Users.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = Table_Installation_Users.cpp; path = ../pluto_main/Table_Installation_Users.cpp; sourceTree = "<group>"; };
+		95CBD30415A9F16A00F17914 /* Table_Installation.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = Table_Installation.cpp; path = ../pluto_main/Table_Installation.cpp; sourceTree = "<group>"; };
+		95CBD30515A9F16A00F17914 /* Table_InstallWizard_Distro.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = Table_InstallWizard_Distro.cpp; path = ../pluto_main/Table_InstallWizard_Distro.cpp; sourceTree = "<group>"; };
+		95CBD30615A9F16A00F17914 /* Table_InstallWizard.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = Table_InstallWizard.cpp; path = ../pluto_main/Table_InstallWizard.cpp; sourceTree = "<group>"; };
+		95CBD30715A9F16A00F17914 /* Table_Language.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = Table_Language.cpp; path = ../pluto_main/Table_Language.cpp; sourceTree = "<group>"; };
+		95CBD30815A9F16A00F17914 /* Table_License.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = Table_License.cpp; path = ../pluto_main/Table_License.cpp; sourceTree = "<group>"; };
+		95CBD30915A9F16A00F17914 /* Table_Licensing.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = Table_Licensing.cpp; path = ../pluto_main/Table_Licensing.cpp; sourceTree = "<group>"; };
+		95CBD30A15A9F16A00F17914 /* Table_Manufacturer.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = Table_Manufacturer.cpp; path = ../pluto_main/Table_Manufacturer.cpp; sourceTree = "<group>"; };
+		95CBD30B15A9F16A00F17914 /* Table_MediaType_Broadcast.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = Table_MediaType_Broadcast.cpp; path = ../pluto_main/Table_MediaType_Broadcast.cpp; sourceTree = "<group>"; };
+		95CBD30C15A9F16A00F17914 /* Table_MediaType_DesignObj.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = Table_MediaType_DesignObj.cpp; path = ../pluto_main/Table_MediaType_DesignObj.cpp; sourceTree = "<group>"; };
+		95CBD30D15A9F16A00F17914 /* Table_MediaType.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = Table_MediaType.cpp; path = ../pluto_main/Table_MediaType.cpp; sourceTree = "<group>"; };
+		95CBD30E15A9F16A00F17914 /* Table_News.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = Table_News.cpp; path = ../pluto_main/Table_News.cpp; sourceTree = "<group>"; };
+		95CBD30F15A9F16A00F17914 /* Table_OperatingSystem.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = Table_OperatingSystem.cpp; path = ../pluto_main/Table_OperatingSystem.cpp; sourceTree = "<group>"; };
+		95CBD31015A9F16A00F17914 /* Table_Orbiter_Users_PasswordReq.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = Table_Orbiter_Users_PasswordReq.cpp; path = ../pluto_main/Table_Orbiter_Users_PasswordReq.cpp; sourceTree = "<group>"; };
+		95CBD31115A9F16A00F17914 /* Table_Orbiter_Variable.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = Table_Orbiter_Variable.cpp; path = ../pluto_main/Table_Orbiter_Variable.cpp; sourceTree = "<group>"; };
+		95CBD31215A9F16A00F17914 /* Table_Orbiter.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = Table_Orbiter.cpp; path = ../pluto_main/Table_Orbiter.cpp; sourceTree = "<group>"; };
+		95CBD31315A9F16A00F17914 /* Table_Package_Compat.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = Table_Package_Compat.cpp; path = ../pluto_main/Table_Package_Compat.cpp; sourceTree = "<group>"; };
+		95CBD31415A9F16A00F17914 /* Table_Package_Device.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = Table_Package_Device.cpp; path = ../pluto_main/Table_Package_Device.cpp; sourceTree = "<group>"; };
+		95CBD31515A9F16A00F17914 /* Table_Package_Directory_File.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = Table_Package_Directory_File.cpp; path = ../pluto_main/Table_Package_Directory_File.cpp; sourceTree = "<group>"; };
+		95CBD31615A9F16A00F17914 /* Table_Package_Directory.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = Table_Package_Directory.cpp; path = ../pluto_main/Table_Package_Directory.cpp; sourceTree = "<group>"; };
+		95CBD31715A9F16A00F17914 /* Table_Package_Package.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = Table_Package_Package.cpp; path = ../pluto_main/Table_Package_Package.cpp; sourceTree = "<group>"; };
+		95CBD31815A9F16A00F17914 /* Table_Package_Source_Compat.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = Table_Package_Source_Compat.cpp; path = ../pluto_main/Table_Package_Source_Compat.cpp; sourceTree = "<group>"; };
+		95CBD31915A9F16A00F17914 /* Table_Package_Source.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = Table_Package_Source.cpp; path = ../pluto_main/Table_Package_Source.cpp; sourceTree = "<group>"; };
+		95CBD31A15A9F16A00F17914 /* Table_Package_Users.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = Table_Package_Users.cpp; path = ../pluto_main/Table_Package_Users.cpp; sourceTree = "<group>"; };
+		95CBD31C15A9F16A00F17914 /* Table_Package.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = Table_Package.cpp; path = ../pluto_main/Table_Package.cpp; sourceTree = "<group>"; };
+		95CBD31D15A9F16A00F17914 /* Table_PackageType.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = Table_PackageType.cpp; path = ../pluto_main/Table_PackageType.cpp; sourceTree = "<group>"; };
+		95CBD31E15A9F16A00F17914 /* Table_PageSetup.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = Table_PageSetup.cpp; path = ../pluto_main/Table_PageSetup.cpp; sourceTree = "<group>"; };
+		95CBD31F15A9F16A00F17914 /* Table_PaidLicense.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = Table_PaidLicense.cpp; path = ../pluto_main/Table_PaidLicense.cpp; sourceTree = "<group>"; };
+		95CBD32015A9F16A00F17914 /* Table_ParameterType.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = Table_ParameterType.cpp; path = ../pluto_main/Table_ParameterType.cpp; sourceTree = "<group>"; };
+		95CBD32115A9F16A00F17914 /* Table_PhoneLineType.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = Table_PhoneLineType.cpp; path = ../pluto_main/Table_PhoneLineType.cpp; sourceTree = "<group>"; };
+		95CBD32215A9F16A00F17914 /* Table_Pipe.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = Table_Pipe.cpp; path = ../pluto_main/Table_Pipe.cpp; sourceTree = "<group>"; };
+		95CBD32315A9F16A00F17914 /* Table_PnpLevel.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = Table_PnpLevel.cpp; path = ../pluto_main/Table_PnpLevel.cpp; sourceTree = "<group>"; };
+		95CBD32415A9F16A00F17914 /* Table_PnpProtocol.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = Table_PnpProtocol.cpp; path = ../pluto_main/Table_PnpProtocol.cpp; sourceTree = "<group>"; };
+		95CBD32515A9F16A00F17914 /* Table_PnpQueue.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = Table_PnpQueue.cpp; path = ../pluto_main/Table_PnpQueue.cpp; sourceTree = "<group>"; };
+		95CBD32615A9F16A00F17914 /* Table_PostalCode.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = Table_PostalCode.cpp; path = ../pluto_main/Table_PostalCode.cpp; sourceTree = "<group>"; };
+		95CBD32715A9F16A00F17914 /* Table_psc_constants_batdet.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = Table_psc_constants_batdet.cpp; path = ../pluto_main/Table_psc_constants_batdet.cpp; sourceTree = "<group>"; };
+		95CBD32815A9F16A00F17914 /* Table_psc_constants_bathdr.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = Table_psc_constants_bathdr.cpp; path = ../pluto_main/Table_psc_constants_bathdr.cpp; sourceTree = "<group>"; };
+		95CBD32915A9F16A00F17914 /* Table_psc_constants_batuser.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = Table_psc_constants_batuser.cpp; path = ../pluto_main/Table_psc_constants_batuser.cpp; sourceTree = "<group>"; };
+		95CBD32A15A9F16A00F17914 /* Table_psc_constants_repset.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = Table_psc_constants_repset.cpp; path = ../pluto_main/Table_psc_constants_repset.cpp; sourceTree = "<group>"; };
+		95CBD32B15A9F16A00F17914 /* Table_psc_constants_schema.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = Table_psc_constants_schema.cpp; path = ../pluto_main/Table_psc_constants_schema.cpp; sourceTree = "<group>"; };
+		95CBD32C15A9F16A00F17914 /* Table_psc_constants_tables.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = Table_psc_constants_tables.cpp; path = ../pluto_main/Table_psc_constants_tables.cpp; sourceTree = "<group>"; };
+		95CBD32D15A9F16A00F17914 /* Table_psc_dce_batdet.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = Table_psc_dce_batdet.cpp; path = ../pluto_main/Table_psc_dce_batdet.cpp; sourceTree = "<group>"; };
+		95CBD32E15A9F16A00F17914 /* Table_psc_dce_bathdr.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = Table_psc_dce_bathdr.cpp; path = ../pluto_main/Table_psc_dce_bathdr.cpp; sourceTree = "<group>"; };
+		95CBD32F15A9F16A00F17914 /* Table_psc_dce_batuser.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = Table_psc_dce_batuser.cpp; path = ../pluto_main/Table_psc_dce_batuser.cpp; sourceTree = "<group>"; };
+		95CBD33015A9F16A00F17914 /* Table_psc_dce_repset.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = Table_psc_dce_repset.cpp; path = ../pluto_main/Table_psc_dce_repset.cpp; sourceTree = "<group>"; };
+		95CBD33115A9F16A00F17914 /* Table_psc_dce_schema.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = Table_psc_dce_schema.cpp; path = ../pluto_main/Table_psc_dce_schema.cpp; sourceTree = "<group>"; };
+		95CBD33215A9F16A00F17914 /* Table_psc_dce_tables.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = Table_psc_dce_tables.cpp; path = ../pluto_main/Table_psc_dce_tables.cpp; sourceTree = "<group>"; };
+		95CBD33315A9F16A00F17914 /* Table_psc_designer_batdet.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = Table_psc_designer_batdet.cpp; path = ../pluto_main/Table_psc_designer_batdet.cpp; sourceTree = "<group>"; };
+		95CBD33415A9F16A00F17914 /* Table_psc_designer_bathdr.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = Table_psc_designer_bathdr.cpp; path = ../pluto_main/Table_psc_designer_bathdr.cpp; sourceTree = "<group>"; };
+		95CBD33515A9F16A00F17914 /* Table_psc_designer_batuser.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = Table_psc_designer_batuser.cpp; path = ../pluto_main/Table_psc_designer_batuser.cpp; sourceTree = "<group>"; };
+		95CBD33615A9F16A00F17914 /* Table_psc_designer_repset.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = Table_psc_designer_repset.cpp; path = ../pluto_main/Table_psc_designer_repset.cpp; sourceTree = "<group>"; };
+		95CBD33715A9F16A00F17914 /* Table_psc_designer_schema.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = Table_psc_designer_schema.cpp; path = ../pluto_main/Table_psc_designer_schema.cpp; sourceTree = "<group>"; };
+		95CBD33815A9F16A00F17914 /* Table_psc_designer_tables.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = Table_psc_designer_tables.cpp; path = ../pluto_main/Table_psc_designer_tables.cpp; sourceTree = "<group>"; };
+		95CBD33915A9F16A00F17914 /* Table_psc_document_batdet.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = Table_psc_document_batdet.cpp; path = ../pluto_main/Table_psc_document_batdet.cpp; sourceTree = "<group>"; };
+		95CBD33A15A9F16A00F17914 /* Table_psc_document_bathdr.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = Table_psc_document_bathdr.cpp; path = ../pluto_main/Table_psc_document_bathdr.cpp; sourceTree = "<group>"; };
+		95CBD33B15A9F16A00F17914 /* Table_psc_document_batuser.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = Table_psc_document_batuser.cpp; path = ../pluto_main/Table_psc_document_batuser.cpp; sourceTree = "<group>"; };
+		95CBD33C15A9F16A00F17914 /* Table_psc_document_repset.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = Table_psc_document_repset.cpp; path = ../pluto_main/Table_psc_document_repset.cpp; sourceTree = "<group>"; };
+		95CBD33D15A9F16A00F17914 /* Table_psc_document_schema.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = Table_psc_document_schema.cpp; path = ../pluto_main/Table_psc_document_schema.cpp; sourceTree = "<group>"; };
+		95CBD33E15A9F16A00F17914 /* Table_psc_document_tables.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = Table_psc_document_tables.cpp; path = ../pluto_main/Table_psc_document_tables.cpp; sourceTree = "<group>"; };
+		95CBD33F15A9F16A00F17914 /* Table_psc_ir_batdet.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = Table_psc_ir_batdet.cpp; path = ../pluto_main/Table_psc_ir_batdet.cpp; sourceTree = "<group>"; };
+		95CBD34015A9F16A00F17914 /* Table_psc_ir_bathdr.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = Table_psc_ir_bathdr.cpp; path = ../pluto_main/Table_psc_ir_bathdr.cpp; sourceTree = "<group>"; };
+		95CBD34115A9F16A00F17914 /* Table_psc_ir_batuser.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = Table_psc_ir_batuser.cpp; path = ../pluto_main/Table_psc_ir_batuser.cpp; sourceTree = "<group>"; };
+		95CBD34215A9F16A00F17914 /* Table_psc_ir_repset.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = Table_psc_ir_repset.cpp; path = ../pluto_main/Table_psc_ir_repset.cpp; sourceTree = "<group>"; };
+		95CBD34315A9F16A00F17914 /* Table_psc_ir_schema.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = Table_psc_ir_schema.cpp; path = ../pluto_main/Table_psc_ir_schema.cpp; sourceTree = "<group>"; };
+		95CBD34415A9F16A00F17914 /* Table_psc_ir_tables.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = Table_psc_ir_tables.cpp; path = ../pluto_main/Table_psc_ir_tables.cpp; sourceTree = "<group>"; };
+		95CBD34515A9F16A00F17914 /* Table_psc_local_batdet.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = Table_psc_local_batdet.cpp; path = ../pluto_main/Table_psc_local_batdet.cpp; sourceTree = "<group>"; };
+		95CBD34615A9F16A00F17914 /* Table_psc_local_bathdr.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = Table_psc_local_bathdr.cpp; path = ../pluto_main/Table_psc_local_bathdr.cpp; sourceTree = "<group>"; };
+		95CBD34715A9F16A00F17914 /* Table_psc_local_batuser.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = Table_psc_local_batuser.cpp; path = ../pluto_main/Table_psc_local_batuser.cpp; sourceTree = "<group>"; };
+		95CBD34815A9F16A00F17914 /* Table_psc_local_repset.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = Table_psc_local_repset.cpp; path = ../pluto_main/Table_psc_local_repset.cpp; sourceTree = "<group>"; };
+		95CBD34915A9F16A00F17914 /* Table_psc_local_schema.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = Table_psc_local_schema.cpp; path = ../pluto_main/Table_psc_local_schema.cpp; sourceTree = "<group>"; };
+		95CBD34A15A9F16A00F17914 /* Table_psc_local_tables.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = Table_psc_local_tables.cpp; path = ../pluto_main/Table_psc_local_tables.cpp; sourceTree = "<group>"; };
+		95CBD34B15A9F16A00F17914 /* Table_psc_website_batdet.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = Table_psc_website_batdet.cpp; path = ../pluto_main/Table_psc_website_batdet.cpp; sourceTree = "<group>"; };
+		95CBD34C15A9F16A00F17914 /* Table_psc_website_bathdr.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = Table_psc_website_bathdr.cpp; path = ../pluto_main/Table_psc_website_bathdr.cpp; sourceTree = "<group>"; };
+		95CBD34D15A9F16A00F17914 /* Table_psc_website_batuser.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = Table_psc_website_batuser.cpp; path = ../pluto_main/Table_psc_website_batuser.cpp; sourceTree = "<group>"; };
+		95CBD34E15A9F16A00F17914 /* Table_psc_website_repset.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = Table_psc_website_repset.cpp; path = ../pluto_main/Table_psc_website_repset.cpp; sourceTree = "<group>"; };
+		95CBD34F15A9F16A00F17914 /* Table_psc_website_schema.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = Table_psc_website_schema.cpp; path = ../pluto_main/Table_psc_website_schema.cpp; sourceTree = "<group>"; };
+		95CBD35015A9F16A00F17914 /* Table_psc_website_tables.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = Table_psc_website_tables.cpp; path = ../pluto_main/Table_psc_website_tables.cpp; sourceTree = "<group>"; };
+		95CBD35115A9F16A00F17914 /* Table_QuickStartCategory.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = Table_QuickStartCategory.cpp; path = ../pluto_main/Table_QuickStartCategory.cpp; sourceTree = "<group>"; };
+		95CBD35215A9F16A00F17914 /* Table_QuickStartTemplate.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = Table_QuickStartTemplate.cpp; path = ../pluto_main/Table_QuickStartTemplate.cpp; sourceTree = "<group>"; };
+		95CBD35315A9F16A00F17914 /* Table_Region.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = Table_Region.cpp; path = ../pluto_main/Table_Region.cpp; sourceTree = "<group>"; };
+		95CBD35415A9F16A00F17914 /* Table_RemoteControl.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = Table_RemoteControl.cpp; path = ../pluto_main/Table_RemoteControl.cpp; sourceTree = "<group>"; };
+		95CBD35515A9F16A00F17914 /* Table_RemoteMapping.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = Table_RemoteMapping.cpp; path = ../pluto_main/Table_RemoteMapping.cpp; sourceTree = "<group>"; };
+		95CBD35615A9F16A00F17914 /* Table_RepositorySource_URL.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = Table_RepositorySource_URL.cpp; path = ../pluto_main/Table_RepositorySource_URL.cpp; sourceTree = "<group>"; };
+		95CBD35715A9F16A00F17914 /* Table_RepositorySource.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = Table_RepositorySource.cpp; path = ../pluto_main/Table_RepositorySource.cpp; sourceTree = "<group>"; };
+		95CBD35815A9F16A00F17914 /* Table_RepositoryType.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = Table_RepositoryType.cpp; path = ../pluto_main/Table_RepositoryType.cpp; sourceTree = "<group>"; };
+		95CBD35915A9F16A00F17914 /* Table_Room_Users.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = Table_Room_Users.cpp; path = ../pluto_main/Table_Room_Users.cpp; sourceTree = "<group>"; };
+		95CBD35A15A9F16A00F17914 /* Table_Room.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = Table_Room.cpp; path = ../pluto_main/Table_Room.cpp; sourceTree = "<group>"; };
+		95CBD35B15A9F16A00F17914 /* Table_RoomType.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = Table_RoomType.cpp; path = ../pluto_main/Table_RoomType.cpp; sourceTree = "<group>"; };
+		95CBD35C15A9F16A00F17914 /* Table_Schema.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = Table_Schema.cpp; path = ../pluto_main/Table_Schema.cpp; sourceTree = "<group>"; };
+		95CBD35D15A9F16A00F17914 /* Table_Screen_CommandParameter.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = Table_Screen_CommandParameter.cpp; path = ../pluto_main/Table_Screen_CommandParameter.cpp; sourceTree = "<group>"; };
+		95CBD35E15A9F16A00F17914 /* Table_Screen_DesignObj.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = Table_Screen_DesignObj.cpp; path = ../pluto_main/Table_Screen_DesignObj.cpp; sourceTree = "<group>"; };
+		95CBD35F15A9F16A00F17914 /* Table_Screen.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = Table_Screen.cpp; path = ../pluto_main/Table_Screen.cpp; sourceTree = "<group>"; };
+		95CBD36015A9F16A00F17914 /* Table_SetupStep.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = Table_SetupStep.cpp; path = ../pluto_main/Table_SetupStep.cpp; sourceTree = "<group>"; };
+		95CBD36115A9F16A00F17914 /* Table_Size.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = Table_Size.cpp; path = ../pluto_main/Table_Size.cpp; sourceTree = "<group>"; };
+		95CBD36215A9F16A00F17914 /* Table_Skin.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = Table_Skin.cpp; path = ../pluto_main/Table_Skin.cpp; sourceTree = "<group>"; };
+		95CBD36315A9F16A00F17914 /* Table_Software_Device.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = Table_Software_Device.cpp; path = ../pluto_main/Table_Software_Device.cpp; sourceTree = "<group>"; };
+		95CBD36415A9F16A00F17914 /* Table_Software_Source.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = Table_Software_Source.cpp; path = ../pluto_main/Table_Software_Source.cpp; sourceTree = "<group>"; };
+		95CBD36515A9F16A00F17914 /* Table_Software.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = Table_Software.cpp; path = ../pluto_main/Table_Software.cpp; sourceTree = "<group>"; };
+		95CBD36615A9F16A00F17914 /* Table_StabilityStatus.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = Table_StabilityStatus.cpp; path = ../pluto_main/Table_StabilityStatus.cpp; sourceTree = "<group>"; };
+		95CBD36715A9F16A00F17914 /* Table_StartupScript.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = Table_StartupScript.cpp; path = ../pluto_main/Table_StartupScript.cpp; sourceTree = "<group>"; };
+		95CBD36815A9F16A00F17914 /* Table_Style.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = Table_Style.cpp; path = ../pluto_main/Table_Style.cpp; sourceTree = "<group>"; };
+		95CBD36915A9F16A00F17914 /* Table_StyleVariation.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = Table_StyleVariation.cpp; path = ../pluto_main/Table_StyleVariation.cpp; sourceTree = "<group>"; };
+		95CBD36A15A9F16A00F17914 /* Table_System.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = Table_System.cpp; path = ../pluto_main/Table_System.cpp; sourceTree = "<group>"; };
+		95CBD36B15A9F16A00F17914 /* Table_Template.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = Table_Template.cpp; path = ../pluto_main/Table_Template.cpp; sourceTree = "<group>"; };
+		95CBD36C15A9F16A00F17914 /* Table_Text_LS_AltVersions.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = Table_Text_LS_AltVersions.cpp; path = ../pluto_main/Table_Text_LS_AltVersions.cpp; sourceTree = "<group>"; };
+		95CBD36D15A9F16A00F17914 /* Table_Text_LS.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = Table_Text_LS.cpp; path = ../pluto_main/Table_Text_LS.cpp; sourceTree = "<group>"; };
+		95CBD36E15A9F16A00F17914 /* Table_Text.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = Table_Text.cpp; path = ../pluto_main/Table_Text.cpp; sourceTree = "<group>"; };
+		95CBD36F15A9F16A00F17914 /* Table_TextCategory.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = Table_TextCategory.cpp; path = ../pluto_main/Table_TextCategory.cpp; sourceTree = "<group>"; };
+		95CBD37015A9F16A00F17914 /* Table_TimeZone.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = Table_TimeZone.cpp; path = ../pluto_main/Table_TimeZone.cpp; sourceTree = "<group>"; };
+		95CBD37115A9F16A00F17914 /* Table_UI.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = Table_UI.cpp; path = ../pluto_main/Table_UI.cpp; sourceTree = "<group>"; };
+		95CBD37215A9F16A00F17914 /* Table_UnknownDevices.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = Table_UnknownDevices.cpp; path = ../pluto_main/Table_UnknownDevices.cpp; sourceTree = "<group>"; };
+		95CBD37315A9F16A00F17914 /* Table_UserMode.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = Table_UserMode.cpp; path = ../pluto_main/Table_UserMode.cpp; sourceTree = "<group>"; };
+		95CBD37415A9F16A00F17914 /* Table_Users.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = Table_Users.cpp; path = ../pluto_main/Table_Users.cpp; sourceTree = "<group>"; };
+		95CBD37515A9F16A00F17914 /* Table_Variable.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = Table_Variable.cpp; path = ../pluto_main/Table_Variable.cpp; sourceTree = "<group>"; };
+		95CBD37615A9F16A00F17914 /* Table_Version.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = Table_Version.cpp; path = ../pluto_main/Table_Version.cpp; sourceTree = "<group>"; };
+		95CBD37715A9F16A00F17914 /* Table_VertAlignment.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = Table_VertAlignment.cpp; path = ../pluto_main/Table_VertAlignment.cpp; sourceTree = "<group>"; };
+		95CBD46415A9F21C00F17914 /* mysql.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = mysql.h; path = mysql/include/mysql.h; sourceTree = "<group>"; };
+		95CBD46715A9FBB200F17914 /* libmysqlclient.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libmysqlclient.dylib; path = mysql/lib/libmysqlclient.dylib; sourceTree = "<group>"; };
+		95CBD46A15A9FC8900F17914 /* TableRow.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = TableRow.cpp; path = ../pluto_main/TableRow.cpp; sourceTree = "<group>"; };
+		95CBD46C15A9FC9E00F17914 /* Database_pluto_main.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = Database_pluto_main.cpp; path = ../pluto_main/Database_pluto_main.cpp; sourceTree = "<group>"; };
+		95CBD46E15A9FD9800F17914 /* libDCECommon.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libDCECommon.dylib; path = lib/libDCECommon.dylib; sourceTree = "<group>"; };
+/* End PBXFileReference section */
+
+/* Begin PBXFrameworksBuildPhase section */
+		95CBD27515A9EFEB00F17914 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				95CBD46815A9FBB200F17914 /* libmysqlclient.dylib in Frameworks */,
+				95CBD46F15A9FD9800F17914 /* libDCECommon.dylib in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXFrameworksBuildPhase section */
+
+/* Begin PBXGroup section */
+		95CBD26D15A9EFEB00F17914 = {
+			isa = PBXGroup;
+			children = (
+				95CBD46915A9FC1100F17914 /* Includes */,
+				95CBD46615A9FB8400F17914 /* libraries */,
+				95CBD27A15A9EFEB00F17914 /* libpluto_main */,
+				95CBD27915A9EFEB00F17914 /* Products */,
+			);
+			sourceTree = "<group>";
+		};
+		95CBD27915A9EFEB00F17914 /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				95CBD27815A9EFEB00F17914 /* libpluto_main.dylib */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+		95CBD27A15A9EFEB00F17914 /* libpluto_main */ = {
+			isa = PBXGroup;
+			children = (
+				95CBD27D15A9EFEB00F17914 /* libpluto_mainProj.xcconfig */,
+				95CBD27E15A9EFEB00F17914 /* libpluto_mainTarget.xcconfig */,
+				95CBD27F15A9EFEB00F17914 /* libpluto_main.h */,
+				95CBD28015A9EFEB00F17914 /* libpluto_mainPriv.h */,
+				95CBD28115A9EFEB00F17914 /* libpluto_main.cp */,
+				95CBD27B15A9EFEB00F17914 /* Supporting Files */,
+			);
+			path = libpluto_main;
+			sourceTree = "<group>";
+		};
+		95CBD27B15A9EFEB00F17914 /* Supporting Files */ = {
+			isa = PBXGroup;
+			children = (
+				95CBD27C15A9EFEB00F17914 /* libpluto_main-Prefix.pch */,
+			);
+			name = "Supporting Files";
+			sourceTree = "<group>";
+		};
+		95CBD28B15A9F0CF00F17914 /* Tables */ = {
+			isa = PBXGroup;
+			children = (
+				95CBD28D15A9F16A00F17914 /* Table_Array.cpp */,
+				95CBD28E15A9F16A00F17914 /* Table_Broadcast.cpp */,
+				95CBD28F15A9F16A00F17914 /* Table_Button.cpp */,
+				95CBD29015A9F16A00F17914 /* Table_CachedScreens.cpp */,
+				95CBD29115A9F16A00F17914 /* Table_CannedEvents_CriteriaParmList.cpp */,
+				95CBD29215A9F16A00F17914 /* Table_CannedEvents.cpp */,
+				95CBD29315A9F16A00F17914 /* Table_City.cpp */,
+				95CBD29415A9F16A00F17914 /* Table_Command_CommandParameter.cpp */,
+				95CBD29515A9F16A00F17914 /* Table_Command_Pipe.cpp */,
+				95CBD29615A9F16A00F17914 /* Table_Command.cpp */,
+				95CBD29715A9F16A00F17914 /* Table_CommandCategory.cpp */,
+				95CBD29815A9F16A00F17914 /* Table_CommandGroup_Command_CommandParameter.cpp */,
+				95CBD29915A9F16A00F17914 /* Table_CommandGroup_Command.cpp */,
+				95CBD29A15A9F16A00F17914 /* Table_CommandGroup_D_Command_CommandParameter.cpp */,
+				95CBD29B15A9F16A00F17914 /* Table_CommandGroup_D_Command.cpp */,
+				95CBD29C15A9F16A00F17914 /* Table_CommandGroup_D.cpp */,
+				95CBD29D15A9F16A00F17914 /* Table_CommandGroup_EntertainArea.cpp */,
+				95CBD29E15A9F16A00F17914 /* Table_CommandGroup_Room.cpp */,
+				95CBD29F15A9F16A00F17914 /* Table_CommandGroup.cpp */,
+				95CBD2A015A9F16A00F17914 /* Table_CommandParameter.cpp */,
+				95CBD2A115A9F16A00F17914 /* Table_CommMethod.cpp */,
+				95CBD2A215A9F16A00F17914 /* Table_ConfigType_File.cpp */,
+				95CBD2A315A9F16A00F17914 /* Table_ConfigType_Setting.cpp */,
+				95CBD2A415A9F16A00F17914 /* Table_ConfigType_Token.cpp */,
+				95CBD2A515A9F16A00F17914 /* Table_ConfigType.cpp */,
+				95CBD2A615A9F16A00F17914 /* Table_ConnectorType.cpp */,
+				95CBD2A715A9F16A00F17914 /* Table_Country.cpp */,
+				95CBD2A815A9F16A00F17914 /* Table_Criteria.cpp */,
+				95CBD2A915A9F16A00F17914 /* Table_CriteriaList_CriteriaParmList.cpp */,
+				95CBD2AA15A9F16A00F17914 /* Table_CriteriaList.cpp */,
+				95CBD2AB15A9F16A00F17914 /* Table_CriteriaParm.cpp */,
+				95CBD2AC15A9F16A00F17914 /* Table_CriteriaParmList.cpp */,
+				95CBD2AD15A9F16A00F17914 /* Table_CriteriaParmNesting.cpp */,
+				95CBD2AE15A9F16A00F17914 /* Table_DataGrid.cpp */,
+				95CBD2AF15A9F16A00F17914 /* Table_DesignObj.cpp */,
+				95CBD2B015A9F16A00F17914 /* Table_DesignObjCategory.cpp */,
+				95CBD2B115A9F16A00F17914 /* Table_DesignObjParameter.cpp */,
+				95CBD2B215A9F16A00F17914 /* Table_DesignObjType_DesignObjParameter.cpp */,
+				95CBD2B315A9F16A00F17914 /* Table_DesignObjType.cpp */,
+				95CBD2B415A9F16A00F17914 /* Table_DesignObjVariation_DesignObj_Skin_Language.cpp */,
+				95CBD2B515A9F16A00F17914 /* Table_DesignObjVariation_DesignObj.cpp */,
+				95CBD2B615A9F16A00F17914 /* Table_DesignObjVariation_DesignObjParameter.cpp */,
+				95CBD2B715A9F16A00F17914 /* Table_DesignObjVariation_Text_Skin_Language.cpp */,
+				95CBD2B815A9F16A00F17914 /* Table_DesignObjVariation_Text.cpp */,
+				95CBD2B915A9F16A00F17914 /* Table_DesignObjVariation_Zone.cpp */,
+				95CBD2BA15A9F16A00F17914 /* Table_DesignObjVariation.cpp */,
+				95CBD2BB15A9F16A00F17914 /* Table_Device_Command.cpp */,
+				95CBD2BC15A9F16A00F17914 /* Table_Device_CommandGroup.cpp */,
+				95CBD2BD15A9F16A00F17914 /* Table_Device_Device_Pipe.cpp */,
+				95CBD2BE15A9F16A00F17914 /* Table_Device_Device_Related.cpp */,
+				95CBD2BF15A9F16A00F17914 /* Table_Device_DeviceData.cpp */,
+				95CBD2C015A9F16A00F17914 /* Table_Device_DeviceGroup.cpp */,
+				95CBD2C115A9F16A00F17914 /* Table_Device_EntertainArea.cpp */,
+				95CBD2C215A9F16A00F17914 /* Table_Device_HouseMode.cpp */,
+				95CBD2C315A9F16A00F17914 /* Table_Device_MRU.cpp */,
+				95CBD2C415A9F16A00F17914 /* Table_Device_Orbiter.cpp */,
+				95CBD2C515A9F16A00F17914 /* Table_Device_QuickStart.cpp */,
+				95CBD2C615A9F16A00F17914 /* Table_Device_StartupScript.cpp */,
+				95CBD2C715A9F16A00F17914 /* Table_Device_Users.cpp */,
+				95CBD2C815A9F16A00F17914 /* Table_Device.cpp */,
+				95CBD2C915A9F16A00F17914 /* Table_DeviceCategory_DeviceData.cpp */,
+				95CBD2CA15A9F16A00F17914 /* Table_DeviceCategory_Event.cpp */,
+				95CBD2CB15A9F16A00F17914 /* Table_DeviceCategory.cpp */,
+				95CBD2CC15A9F16A00F17914 /* Table_DeviceCommandGroup_Command.cpp */,
+				95CBD2CD15A9F16A00F17914 /* Table_DeviceCommandGroup_DeviceCommandGroup_Parent.cpp */,
+				95CBD2CE15A9F16A00F17914 /* Table_DeviceCommandGroup.cpp */,
+				95CBD2CF15A9F16A00F17914 /* Table_DeviceData.cpp */,
+				95CBD2D015A9F16A00F17914 /* Table_DeviceGroup.cpp */,
+				95CBD2D115A9F16A00F17914 /* Table_DeviceTemplate_AV.cpp */,
+				95CBD2D215A9F16A00F17914 /* Table_DeviceTemplate_DesignObj.cpp */,
+				95CBD2D315A9F16A00F17914 /* Table_DeviceTemplate_DeviceCategory_ControlledVia_Pipe.cpp */,
+				95CBD2D415A9F16A00F17914 /* Table_DeviceTemplate_DeviceCategory_ControlledVia.cpp */,
+				95CBD2D515A9F16A00F17914 /* Table_DeviceTemplate_DeviceCommandGroup.cpp */,
+				95CBD2D615A9F16A00F17914 /* Table_DeviceTemplate_DeviceData.cpp */,
+				95CBD2D715A9F16A00F17914 /* Table_DeviceTemplate_DeviceTemplate_ControlledVia_Pipe.cpp */,
+				95CBD2D815A9F16A00F17914 /* Table_DeviceTemplate_DeviceTemplate_ControlledVia.cpp */,
+				95CBD2D915A9F16A00F17914 /* Table_DeviceTemplate_DeviceTemplate_Related.cpp */,
+				95CBD2DA15A9F16A00F17914 /* Table_DeviceTemplate_DSPMode.cpp */,
+				95CBD2DB15A9F16A00F17914 /* Table_DeviceTemplate_Event.cpp */,
+				95CBD2DC15A9F16A00F17914 /* Table_DeviceTemplate_InfraredGroup.cpp */,
+				95CBD2DD15A9F16A00F17914 /* Table_DeviceTemplate_Input.cpp */,
+				95CBD2DE15A9F16A00F17914 /* Table_DeviceTemplate_MediaType_DesignObj.cpp */,
+				95CBD2DF15A9F16A00F17914 /* Table_DeviceTemplate_MediaType.cpp */,
+				95CBD2E015A9F16A00F17914 /* Table_DeviceTemplate_Output.cpp */,
+				95CBD2E115A9F16A00F17914 /* Table_DeviceTemplate_PageSetup.cpp */,
+				95CBD2E215A9F16A00F17914 /* Table_DeviceTemplate.cpp */,
+				95CBD2E315A9F16A00F17914 /* Table_DHCPDevice_DeviceData.cpp */,
+				95CBD2E415A9F16A00F17914 /* Table_DHCPDevice.cpp */,
+				95CBD2E515A9F16A00F17914 /* Table_Direction.cpp */,
+				95CBD2E615A9F16A00F17914 /* Table_Directory.cpp */,
+				95CBD2E715A9F16A00F17914 /* Table_Distro.cpp */,
+				95CBD2E815A9F16A00F17914 /* Table_Document_Comment.cpp */,
+				95CBD2E915A9F16A00F17914 /* Table_Document.cpp */,
+				95CBD2EA15A9F16A00F17914 /* Table_Effect.cpp */,
+				95CBD2EB15A9F16A00F17914 /* Table_EffectType_Effect_Skin.cpp */,
+				95CBD2EC15A9F16A00F17914 /* Table_EffectType.cpp */,
+				95CBD2ED15A9F16A00F17914 /* Table_EntertainArea.cpp */,
+				95CBD2EE15A9F16A00F17914 /* Table_Event_EventParameter.cpp */,
+				95CBD2EF15A9F16A00F17914 /* Table_Event.cpp */,
+				95CBD2F015A9F16A00F17914 /* Table_EventCategory.cpp */,
+				95CBD2F115A9F16A00F17914 /* Table_EventHandler.cpp */,
+				95CBD2F215A9F16A00F17914 /* Table_EventParameter.cpp */,
+				95CBD2F315A9F16A00F17914 /* Table_FAQ.cpp */,
+				95CBD2F415A9F16A00F17914 /* Table_Firewall.cpp */,
+				95CBD2F515A9F16A00F17914 /* Table_Floorplan.cpp */,
+				95CBD2F615A9F16A00F17914 /* Table_FloorplanObjectType_Color.cpp */,
+				95CBD2F715A9F16A00F17914 /* Table_FloorplanObjectType.cpp */,
+				95CBD2F815A9F16A00F17914 /* Table_FloorplanType.cpp */,
+				95CBD2F915A9F16A00F17914 /* Table_HorizAlignment.cpp */,
+				95CBD2FA15A9F16A00F17914 /* Table_Household_Installation.cpp */,
+				95CBD2FB15A9F16A00F17914 /* Table_Household.cpp */,
+				95CBD2FC15A9F16A00F17914 /* Table_HouseMode.cpp */,
+				95CBD2FD15A9F16A00F17914 /* Table_Icon.cpp */,
+				95CBD2FE15A9F16A00F17914 /* Table_Image.cpp */,
+				95CBD2FF15A9F16A00F17914 /* Table_InfraredGroup_Command_Preferred.cpp */,
+				95CBD30015A9F16A00F17914 /* Table_InfraredGroup_Command.cpp */,
+				95CBD30115A9F16A00F17914 /* Table_InfraredGroup.cpp */,
+				95CBD30215A9F16A00F17914 /* Table_Installation_RepositorySource_URL.cpp */,
+				95CBD30315A9F16A00F17914 /* Table_Installation_Users.cpp */,
+				95CBD30415A9F16A00F17914 /* Table_Installation.cpp */,
+				95CBD30515A9F16A00F17914 /* Table_InstallWizard_Distro.cpp */,
+				95CBD30615A9F16A00F17914 /* Table_InstallWizard.cpp */,
+				95CBD30715A9F16A00F17914 /* Table_Language.cpp */,
+				95CBD30815A9F16A00F17914 /* Table_License.cpp */,
+				95CBD30915A9F16A00F17914 /* Table_Licensing.cpp */,
+				95CBD30A15A9F16A00F17914 /* Table_Manufacturer.cpp */,
+				95CBD30B15A9F16A00F17914 /* Table_MediaType_Broadcast.cpp */,
+				95CBD30C15A9F16A00F17914 /* Table_MediaType_DesignObj.cpp */,
+				95CBD30D15A9F16A00F17914 /* Table_MediaType.cpp */,
+				95CBD30E15A9F16A00F17914 /* Table_News.cpp */,
+				95CBD30F15A9F16A00F17914 /* Table_OperatingSystem.cpp */,
+				95CBD31015A9F16A00F17914 /* Table_Orbiter_Users_PasswordReq.cpp */,
+				95CBD31115A9F16A00F17914 /* Table_Orbiter_Variable.cpp */,
+				95CBD31215A9F16A00F17914 /* Table_Orbiter.cpp */,
+				95CBD31315A9F16A00F17914 /* Table_Package_Compat.cpp */,
+				95CBD31415A9F16A00F17914 /* Table_Package_Device.cpp */,
+				95CBD31515A9F16A00F17914 /* Table_Package_Directory_File.cpp */,
+				95CBD31615A9F16A00F17914 /* Table_Package_Directory.cpp */,
+				95CBD31715A9F16A00F17914 /* Table_Package_Package.cpp */,
+				95CBD31815A9F16A00F17914 /* Table_Package_Source_Compat.cpp */,
+				95CBD31915A9F16A00F17914 /* Table_Package_Source.cpp */,
+				95CBD31A15A9F16A00F17914 /* Table_Package_Users.cpp */,
+				95CBD31C15A9F16A00F17914 /* Table_Package.cpp */,
+				95CBD31D15A9F16A00F17914 /* Table_PackageType.cpp */,
+				95CBD31E15A9F16A00F17914 /* Table_PageSetup.cpp */,
+				95CBD31F15A9F16A00F17914 /* Table_PaidLicense.cpp */,
+				95CBD32015A9F16A00F17914 /* Table_ParameterType.cpp */,
+				95CBD32115A9F16A00F17914 /* Table_PhoneLineType.cpp */,
+				95CBD32215A9F16A00F17914 /* Table_Pipe.cpp */,
+				95CBD32315A9F16A00F17914 /* Table_PnpLevel.cpp */,
+				95CBD32415A9F16A00F17914 /* Table_PnpProtocol.cpp */,
+				95CBD32515A9F16A00F17914 /* Table_PnpQueue.cpp */,
+				95CBD32615A9F16A00F17914 /* Table_PostalCode.cpp */,
+				95CBD32715A9F16A00F17914 /* Table_psc_constants_batdet.cpp */,
+				95CBD32815A9F16A00F17914 /* Table_psc_constants_bathdr.cpp */,
+				95CBD32915A9F16A00F17914 /* Table_psc_constants_batuser.cpp */,
+				95CBD32A15A9F16A00F17914 /* Table_psc_constants_repset.cpp */,
+				95CBD32B15A9F16A00F17914 /* Table_psc_constants_schema.cpp */,
+				95CBD32C15A9F16A00F17914 /* Table_psc_constants_tables.cpp */,
+				95CBD32D15A9F16A00F17914 /* Table_psc_dce_batdet.cpp */,
+				95CBD32E15A9F16A00F17914 /* Table_psc_dce_bathdr.cpp */,
+				95CBD32F15A9F16A00F17914 /* Table_psc_dce_batuser.cpp */,
+				95CBD33015A9F16A00F17914 /* Table_psc_dce_repset.cpp */,
+				95CBD33115A9F16A00F17914 /* Table_psc_dce_schema.cpp */,
+				95CBD33215A9F16A00F17914 /* Table_psc_dce_tables.cpp */,
+				95CBD33315A9F16A00F17914 /* Table_psc_designer_batdet.cpp */,
+				95CBD33415A9F16A00F17914 /* Table_psc_designer_bathdr.cpp */,
+				95CBD33515A9F16A00F17914 /* Table_psc_designer_batuser.cpp */,
+				95CBD33615A9F16A00F17914 /* Table_psc_designer_repset.cpp */,
+				95CBD33715A9F16A00F17914 /* Table_psc_designer_schema.cpp */,
+				95CBD33815A9F16A00F17914 /* Table_psc_designer_tables.cpp */,
+				95CBD33915A9F16A00F17914 /* Table_psc_document_batdet.cpp */,
+				95CBD33A15A9F16A00F17914 /* Table_psc_document_bathdr.cpp */,
+				95CBD33B15A9F16A00F17914 /* Table_psc_document_batuser.cpp */,
+				95CBD33C15A9F16A00F17914 /* Table_psc_document_repset.cpp */,
+				95CBD33D15A9F16A00F17914 /* Table_psc_document_schema.cpp */,
+				95CBD33E15A9F16A00F17914 /* Table_psc_document_tables.cpp */,
+				95CBD33F15A9F16A00F17914 /* Table_psc_ir_batdet.cpp */,
+				95CBD34015A9F16A00F17914 /* Table_psc_ir_bathdr.cpp */,
+				95CBD34115A9F16A00F17914 /* Table_psc_ir_batuser.cpp */,
+				95CBD34215A9F16A00F17914 /* Table_psc_ir_repset.cpp */,
+				95CBD34315A9F16A00F17914 /* Table_psc_ir_schema.cpp */,
+				95CBD34415A9F16A00F17914 /* Table_psc_ir_tables.cpp */,
+				95CBD34515A9F16A00F17914 /* Table_psc_local_batdet.cpp */,
+				95CBD34615A9F16A00F17914 /* Table_psc_local_bathdr.cpp */,
+				95CBD34715A9F16A00F17914 /* Table_psc_local_batuser.cpp */,
+				95CBD34815A9F16A00F17914 /* Table_psc_local_repset.cpp */,
+				95CBD34915A9F16A00F17914 /* Table_psc_local_schema.cpp */,
+				95CBD34A15A9F16A00F17914 /* Table_psc_local_tables.cpp */,
+				95CBD34B15A9F16A00F17914 /* Table_psc_website_batdet.cpp */,
+				95CBD34C15A9F16A00F17914 /* Table_psc_website_bathdr.cpp */,
+				95CBD34D15A9F16A00F17914 /* Table_psc_website_batuser.cpp */,
+				95CBD34E15A9F16A00F17914 /* Table_psc_website_repset.cpp */,
+				95CBD34F15A9F16A00F17914 /* Table_psc_website_schema.cpp */,
+				95CBD35015A9F16A00F17914 /* Table_psc_website_tables.cpp */,
+				95CBD35115A9F16A00F17914 /* Table_QuickStartCategory.cpp */,
+				95CBD35215A9F16A00F17914 /* Table_QuickStartTemplate.cpp */,
+				95CBD35315A9F16A00F17914 /* Table_Region.cpp */,
+				95CBD35415A9F16A00F17914 /* Table_RemoteControl.cpp */,
+				95CBD35515A9F16A00F17914 /* Table_RemoteMapping.cpp */,
+				95CBD35615A9F16A00F17914 /* Table_RepositorySource_URL.cpp */,
+				95CBD35715A9F16A00F17914 /* Table_RepositorySource.cpp */,
+				95CBD35815A9F16A00F17914 /* Table_RepositoryType.cpp */,
+				95CBD35915A9F16A00F17914 /* Table_Room_Users.cpp */,
+				95CBD35A15A9F16A00F17914 /* Table_Room.cpp */,
+				95CBD35B15A9F16A00F17914 /* Table_RoomType.cpp */,
+				95CBD35C15A9F16A00F17914 /* Table_Schema.cpp */,
+				95CBD35D15A9F16A00F17914 /* Table_Screen_CommandParameter.cpp */,
+				95CBD35E15A9F16A00F17914 /* Table_Screen_DesignObj.cpp */,
+				95CBD35F15A9F16A00F17914 /* Table_Screen.cpp */,
+				95CBD36015A9F16A00F17914 /* Table_SetupStep.cpp */,
+				95CBD36115A9F16A00F17914 /* Table_Size.cpp */,
+				95CBD36215A9F16A00F17914 /* Table_Skin.cpp */,
+				95CBD36315A9F16A00F17914 /* Table_Software_Device.cpp */,
+				95CBD36415A9F16A00F17914 /* Table_Software_Source.cpp */,
+				95CBD36515A9F16A00F17914 /* Table_Software.cpp */,
+				95CBD36615A9F16A00F17914 /* Table_StabilityStatus.cpp */,
+				95CBD36715A9F16A00F17914 /* Table_StartupScript.cpp */,
+				95CBD36815A9F16A00F17914 /* Table_Style.cpp */,
+				95CBD36915A9F16A00F17914 /* Table_StyleVariation.cpp */,
+				95CBD36A15A9F16A00F17914 /* Table_System.cpp */,
+				95CBD36B15A9F16A00F17914 /* Table_Template.cpp */,
+				95CBD36C15A9F16A00F17914 /* Table_Text_LS_AltVersions.cpp */,
+				95CBD36D15A9F16A00F17914 /* Table_Text_LS.cpp */,
+				95CBD36E15A9F16A00F17914 /* Table_Text.cpp */,
+				95CBD36F15A9F16A00F17914 /* Table_TextCategory.cpp */,
+				95CBD37015A9F16A00F17914 /* Table_TimeZone.cpp */,
+				95CBD37115A9F16A00F17914 /* Table_UI.cpp */,
+				95CBD37215A9F16A00F17914 /* Table_UnknownDevices.cpp */,
+				95CBD37315A9F16A00F17914 /* Table_UserMode.cpp */,
+				95CBD37415A9F16A00F17914 /* Table_Users.cpp */,
+				95CBD37515A9F16A00F17914 /* Table_Variable.cpp */,
+				95CBD37615A9F16A00F17914 /* Table_Version.cpp */,
+				95CBD37715A9F16A00F17914 /* Table_VertAlignment.cpp */,
+			);
+			name = Tables;
+			sourceTree = "<group>";
+		};
+		95CBD46315A9F1E400F17914 /* mysql */ = {
+			isa = PBXGroup;
+			children = (
+				95CBD46415A9F21C00F17914 /* mysql.h */,
+			);
+			name = mysql;
+			sourceTree = "<group>";
+		};
+		95CBD46615A9FB8400F17914 /* libraries */ = {
+			isa = PBXGroup;
+			children = (
+				95CBD46E15A9FD9800F17914 /* libDCECommon.dylib */,
+				95CBD46715A9FBB200F17914 /* libmysqlclient.dylib */,
+			);
+			name = libraries;
+			sourceTree = "<group>";
+		};
+		95CBD46915A9FC1100F17914 /* Includes */ = {
+			isa = PBXGroup;
+			children = (
+				95CBD46C15A9FC9E00F17914 /* Database_pluto_main.cpp */,
+				95CBD46A15A9FC8900F17914 /* TableRow.cpp */,
+				95CBD28B15A9F0CF00F17914 /* Tables */,
+				95CBD46315A9F1E400F17914 /* mysql */,
+			);
+			name = Includes;
+			sourceTree = "<group>";
+		};
+/* End PBXGroup section */
+
+/* Begin PBXHeadersBuildPhase section */
+		95CBD27615A9EFEB00F17914 /* Headers */ = {
+			isa = PBXHeadersBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				95CBD46515A9F21C00F17914 /* mysql.h in Headers */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXHeadersBuildPhase section */
+
+/* Begin PBXNativeTarget section */
+		95CBD27715A9EFEB00F17914 /* libpluto_main */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 95CBD28515A9EFEB00F17914 /* Build configuration list for PBXNativeTarget "libpluto_main" */;
+			buildPhases = (
+				95CBD27415A9EFEB00F17914 /* Sources */,
+				95CBD27515A9EFEB00F17914 /* Frameworks */,
+				95CBD27615A9EFEB00F17914 /* Headers */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = libpluto_main;
+			productName = libpluto_main;
+			productReference = 95CBD27815A9EFEB00F17914 /* libpluto_main.dylib */;
+			productType = "com.apple.product-type.library.dynamic";
+		};
+/* End PBXNativeTarget section */
+
+/* Begin PBXProject section */
+		95CBD26F15A9EFEB00F17914 /* Project object */ = {
+			isa = PBXProject;
+			attributes = {
+				LastUpgradeCheck = 0420;
+			};
+			buildConfigurationList = 95CBD27215A9EFEB00F17914 /* Build configuration list for PBXProject "libpluto_main" */;
+			compatibilityVersion = "Xcode 3.2";
+			developmentRegion = English;
+			hasScannedForEncodings = 0;
+			knownRegions = (
+				en,
+			);
+			mainGroup = 95CBD26D15A9EFEB00F17914;
+			productRefGroup = 95CBD27915A9EFEB00F17914 /* Products */;
+			projectDirPath = "";
+			projectRoot = "";
+			targets = (
+				95CBD27715A9EFEB00F17914 /* libpluto_main */,
+			);
+		};
+/* End PBXProject section */
+
+/* Begin PBXSourcesBuildPhase section */
+		95CBD27415A9EFEB00F17914 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				95CBD28215A9EFEB00F17914 /* libpluto_main.cp in Sources */,
+				95CBD37815A9F16B00F17914 /* Table_Array.cpp in Sources */,
+				95CBD37915A9F16B00F17914 /* Table_Broadcast.cpp in Sources */,
+				95CBD37A15A9F16B00F17914 /* Table_Button.cpp in Sources */,
+				95CBD37B15A9F16B00F17914 /* Table_CachedScreens.cpp in Sources */,
+				95CBD37C15A9F16B00F17914 /* Table_CannedEvents_CriteriaParmList.cpp in Sources */,
+				95CBD37D15A9F16B00F17914 /* Table_CannedEvents.cpp in Sources */,
+				95CBD37E15A9F16B00F17914 /* Table_City.cpp in Sources */,
+				95CBD37F15A9F16B00F17914 /* Table_Command_CommandParameter.cpp in Sources */,
+				95CBD38015A9F16B00F17914 /* Table_Command_Pipe.cpp in Sources */,
+				95CBD38115A9F16B00F17914 /* Table_Command.cpp in Sources */,
+				95CBD38215A9F16B00F17914 /* Table_CommandCategory.cpp in Sources */,
+				95CBD38315A9F16B00F17914 /* Table_CommandGroup_Command_CommandParameter.cpp in Sources */,
+				95CBD38415A9F16B00F17914 /* Table_CommandGroup_Command.cpp in Sources */,
+				95CBD38515A9F16B00F17914 /* Table_CommandGroup_D_Command_CommandParameter.cpp in Sources */,
+				95CBD38615A9F16B00F17914 /* Table_CommandGroup_D_Command.cpp in Sources */,
+				95CBD38715A9F16B00F17914 /* Table_CommandGroup_D.cpp in Sources */,
+				95CBD38815A9F16B00F17914 /* Table_CommandGroup_EntertainArea.cpp in Sources */,
+				95CBD38915A9F16B00F17914 /* Table_CommandGroup_Room.cpp in Sources */,
+				95CBD38A15A9F16B00F17914 /* Table_CommandGroup.cpp in Sources */,
+				95CBD38B15A9F16B00F17914 /* Table_CommandParameter.cpp in Sources */,
+				95CBD38C15A9F16B00F17914 /* Table_CommMethod.cpp in Sources */,
+				95CBD38D15A9F16B00F17914 /* Table_ConfigType_File.cpp in Sources */,
+				95CBD38E15A9F16B00F17914 /* Table_ConfigType_Setting.cpp in Sources */,
+				95CBD38F15A9F16B00F17914 /* Table_ConfigType_Token.cpp in Sources */,
+				95CBD39015A9F16B00F17914 /* Table_ConfigType.cpp in Sources */,
+				95CBD39115A9F16B00F17914 /* Table_ConnectorType.cpp in Sources */,
+				95CBD39215A9F16B00F17914 /* Table_Country.cpp in Sources */,
+				95CBD39315A9F16B00F17914 /* Table_Criteria.cpp in Sources */,
+				95CBD39415A9F16B00F17914 /* Table_CriteriaList_CriteriaParmList.cpp in Sources */,
+				95CBD39515A9F16B00F17914 /* Table_CriteriaList.cpp in Sources */,
+				95CBD39615A9F16B00F17914 /* Table_CriteriaParm.cpp in Sources */,
+				95CBD39715A9F16B00F17914 /* Table_CriteriaParmList.cpp in Sources */,
+				95CBD39815A9F16B00F17914 /* Table_CriteriaParmNesting.cpp in Sources */,
+				95CBD39915A9F16B00F17914 /* Table_DataGrid.cpp in Sources */,
+				95CBD39A15A9F16B00F17914 /* Table_DesignObj.cpp in Sources */,
+				95CBD39B15A9F16B00F17914 /* Table_DesignObjCategory.cpp in Sources */,
+				95CBD39C15A9F16B00F17914 /* Table_DesignObjParameter.cpp in Sources */,
+				95CBD39D15A9F16B00F17914 /* Table_DesignObjType_DesignObjParameter.cpp in Sources */,
+				95CBD39E15A9F16B00F17914 /* Table_DesignObjType.cpp in Sources */,
+				95CBD39F15A9F16B00F17914 /* Table_DesignObjVariation_DesignObj_Skin_Language.cpp in Sources */,
+				95CBD3A015A9F16B00F17914 /* Table_DesignObjVariation_DesignObj.cpp in Sources */,
+				95CBD3A115A9F16B00F17914 /* Table_DesignObjVariation_DesignObjParameter.cpp in Sources */,
+				95CBD3A215A9F16B00F17914 /* Table_DesignObjVariation_Text_Skin_Language.cpp in Sources */,
+				95CBD3A315A9F16B00F17914 /* Table_DesignObjVariation_Text.cpp in Sources */,
+				95CBD3A415A9F16B00F17914 /* Table_DesignObjVariation_Zone.cpp in Sources */,
+				95CBD3A515A9F16B00F17914 /* Table_DesignObjVariation.cpp in Sources */,
+				95CBD3A615A9F16B00F17914 /* Table_Device_Command.cpp in Sources */,
+				95CBD3A715A9F16B00F17914 /* Table_Device_CommandGroup.cpp in Sources */,
+				95CBD3A815A9F16B00F17914 /* Table_Device_Device_Pipe.cpp in Sources */,
+				95CBD3A915A9F16B00F17914 /* Table_Device_Device_Related.cpp in Sources */,
+				95CBD3AA15A9F16B00F17914 /* Table_Device_DeviceData.cpp in Sources */,
+				95CBD3AB15A9F16B00F17914 /* Table_Device_DeviceGroup.cpp in Sources */,
+				95CBD3AC15A9F16B00F17914 /* Table_Device_EntertainArea.cpp in Sources */,
+				95CBD3AD15A9F16B00F17914 /* Table_Device_HouseMode.cpp in Sources */,
+				95CBD3AE15A9F16B00F17914 /* Table_Device_MRU.cpp in Sources */,
+				95CBD3AF15A9F16B00F17914 /* Table_Device_Orbiter.cpp in Sources */,
+				95CBD3B015A9F16B00F17914 /* Table_Device_QuickStart.cpp in Sources */,
+				95CBD3B115A9F16B00F17914 /* Table_Device_StartupScript.cpp in Sources */,
+				95CBD3B215A9F16B00F17914 /* Table_Device_Users.cpp in Sources */,
+				95CBD3B315A9F16B00F17914 /* Table_Device.cpp in Sources */,
+				95CBD3B415A9F16B00F17914 /* Table_DeviceCategory_DeviceData.cpp in Sources */,
+				95CBD3B515A9F16B00F17914 /* Table_DeviceCategory_Event.cpp in Sources */,
+				95CBD3B615A9F16B00F17914 /* Table_DeviceCategory.cpp in Sources */,
+				95CBD3B715A9F16B00F17914 /* Table_DeviceCommandGroup_Command.cpp in Sources */,
+				95CBD3B815A9F16B00F17914 /* Table_DeviceCommandGroup_DeviceCommandGroup_Parent.cpp in Sources */,
+				95CBD3B915A9F16B00F17914 /* Table_DeviceCommandGroup.cpp in Sources */,
+				95CBD3BA15A9F16B00F17914 /* Table_DeviceData.cpp in Sources */,
+				95CBD3BB15A9F16B00F17914 /* Table_DeviceGroup.cpp in Sources */,
+				95CBD3BC15A9F16B00F17914 /* Table_DeviceTemplate_AV.cpp in Sources */,
+				95CBD3BD15A9F16B00F17914 /* Table_DeviceTemplate_DesignObj.cpp in Sources */,
+				95CBD3BE15A9F16B00F17914 /* Table_DeviceTemplate_DeviceCategory_ControlledVia_Pipe.cpp in Sources */,
+				95CBD3BF15A9F16B00F17914 /* Table_DeviceTemplate_DeviceCategory_ControlledVia.cpp in Sources */,
+				95CBD3C015A9F16B00F17914 /* Table_DeviceTemplate_DeviceCommandGroup.cpp in Sources */,
+				95CBD3C115A9F16B00F17914 /* Table_DeviceTemplate_DeviceData.cpp in Sources */,
+				95CBD3C215A9F16B00F17914 /* Table_DeviceTemplate_DeviceTemplate_ControlledVia_Pipe.cpp in Sources */,
+				95CBD3C315A9F16B00F17914 /* Table_DeviceTemplate_DeviceTemplate_ControlledVia.cpp in Sources */,
+				95CBD3C415A9F16B00F17914 /* Table_DeviceTemplate_DeviceTemplate_Related.cpp in Sources */,
+				95CBD3C515A9F16B00F17914 /* Table_DeviceTemplate_DSPMode.cpp in Sources */,
+				95CBD3C615A9F16B00F17914 /* Table_DeviceTemplate_Event.cpp in Sources */,
+				95CBD3C715A9F16B00F17914 /* Table_DeviceTemplate_InfraredGroup.cpp in Sources */,
+				95CBD3C815A9F16B00F17914 /* Table_DeviceTemplate_Input.cpp in Sources */,
+				95CBD3C915A9F16B00F17914 /* Table_DeviceTemplate_MediaType_DesignObj.cpp in Sources */,
+				95CBD3CA15A9F16B00F17914 /* Table_DeviceTemplate_MediaType.cpp in Sources */,
+				95CBD3CB15A9F16B00F17914 /* Table_DeviceTemplate_Output.cpp in Sources */,
+				95CBD3CC15A9F16B00F17914 /* Table_DeviceTemplate_PageSetup.cpp in Sources */,
+				95CBD3CD15A9F16B00F17914 /* Table_DeviceTemplate.cpp in Sources */,
+				95CBD3CE15A9F16B00F17914 /* Table_DHCPDevice_DeviceData.cpp in Sources */,
+				95CBD3CF15A9F16B00F17914 /* Table_DHCPDevice.cpp in Sources */,
+				95CBD3D015A9F16B00F17914 /* Table_Direction.cpp in Sources */,
+				95CBD3D115A9F16B00F17914 /* Table_Directory.cpp in Sources */,
+				95CBD3D215A9F16B00F17914 /* Table_Distro.cpp in Sources */,
+				95CBD3D315A9F16B00F17914 /* Table_Document_Comment.cpp in Sources */,
+				95CBD3D415A9F16B00F17914 /* Table_Document.cpp in Sources */,
+				95CBD3D515A9F16B00F17914 /* Table_Effect.cpp in Sources */,
+				95CBD3D615A9F16B00F17914 /* Table_EffectType_Effect_Skin.cpp in Sources */,
+				95CBD3D715A9F16B00F17914 /* Table_EffectType.cpp in Sources */,
+				95CBD3D815A9F16B00F17914 /* Table_EntertainArea.cpp in Sources */,
+				95CBD3D915A9F16B00F17914 /* Table_Event_EventParameter.cpp in Sources */,
+				95CBD3DA15A9F16B00F17914 /* Table_Event.cpp in Sources */,
+				95CBD3DB15A9F16B00F17914 /* Table_EventCategory.cpp in Sources */,
+				95CBD3DC15A9F16B00F17914 /* Table_EventHandler.cpp in Sources */,
+				95CBD3DD15A9F16B00F17914 /* Table_EventParameter.cpp in Sources */,
+				95CBD3DE15A9F16B00F17914 /* Table_FAQ.cpp in Sources */,
+				95CBD3DF15A9F16B00F17914 /* Table_Firewall.cpp in Sources */,
+				95CBD3E015A9F16B00F17914 /* Table_Floorplan.cpp in Sources */,
+				95CBD3E115A9F16B00F17914 /* Table_FloorplanObjectType_Color.cpp in Sources */,
+				95CBD3E215A9F16B00F17914 /* Table_FloorplanObjectType.cpp in Sources */,
+				95CBD3E315A9F16B00F17914 /* Table_FloorplanType.cpp in Sources */,
+				95CBD3E415A9F16B00F17914 /* Table_HorizAlignment.cpp in Sources */,
+				95CBD3E515A9F16B00F17914 /* Table_Household_Installation.cpp in Sources */,
+				95CBD3E615A9F16B00F17914 /* Table_Household.cpp in Sources */,
+				95CBD3E715A9F16B00F17914 /* Table_HouseMode.cpp in Sources */,
+				95CBD3E815A9F16B00F17914 /* Table_Icon.cpp in Sources */,
+				95CBD3E915A9F16B00F17914 /* Table_Image.cpp in Sources */,
+				95CBD3EA15A9F16B00F17914 /* Table_InfraredGroup_Command_Preferred.cpp in Sources */,
+				95CBD3EB15A9F16B00F17914 /* Table_InfraredGroup_Command.cpp in Sources */,
+				95CBD3EC15A9F16B00F17914 /* Table_InfraredGroup.cpp in Sources */,
+				95CBD3ED15A9F16B00F17914 /* Table_Installation_RepositorySource_URL.cpp in Sources */,
+				95CBD3EE15A9F16B00F17914 /* Table_Installation_Users.cpp in Sources */,
+				95CBD3EF15A9F16B00F17914 /* Table_Installation.cpp in Sources */,
+				95CBD3F015A9F16B00F17914 /* Table_InstallWizard_Distro.cpp in Sources */,
+				95CBD3F115A9F16B00F17914 /* Table_InstallWizard.cpp in Sources */,
+				95CBD3F215A9F16B00F17914 /* Table_Language.cpp in Sources */,
+				95CBD3F315A9F16B00F17914 /* Table_License.cpp in Sources */,
+				95CBD3F415A9F16B00F17914 /* Table_Licensing.cpp in Sources */,
+				95CBD3F515A9F16B00F17914 /* Table_Manufacturer.cpp in Sources */,
+				95CBD3F615A9F16B00F17914 /* Table_MediaType_Broadcast.cpp in Sources */,
+				95CBD3F715A9F16B00F17914 /* Table_MediaType_DesignObj.cpp in Sources */,
+				95CBD3F815A9F16B00F17914 /* Table_MediaType.cpp in Sources */,
+				95CBD3F915A9F16B00F17914 /* Table_News.cpp in Sources */,
+				95CBD3FA15A9F16B00F17914 /* Table_OperatingSystem.cpp in Sources */,
+				95CBD3FB15A9F16B00F17914 /* Table_Orbiter_Users_PasswordReq.cpp in Sources */,
+				95CBD3FC15A9F16B00F17914 /* Table_Orbiter_Variable.cpp in Sources */,
+				95CBD3FD15A9F16B00F17914 /* Table_Orbiter.cpp in Sources */,
+				95CBD3FE15A9F16B00F17914 /* Table_Package_Compat.cpp in Sources */,
+				95CBD3FF15A9F16B00F17914 /* Table_Package_Device.cpp in Sources */,
+				95CBD40015A9F16B00F17914 /* Table_Package_Directory_File.cpp in Sources */,
+				95CBD40115A9F16B00F17914 /* Table_Package_Directory.cpp in Sources */,
+				95CBD40215A9F16B00F17914 /* Table_Package_Package.cpp in Sources */,
+				95CBD40315A9F16B00F17914 /* Table_Package_Source_Compat.cpp in Sources */,
+				95CBD40415A9F16B00F17914 /* Table_Package_Source.cpp in Sources */,
+				95CBD40515A9F16B00F17914 /* Table_Package_Users.cpp in Sources */,
+				95CBD40715A9F16B00F17914 /* Table_Package.cpp in Sources */,
+				95CBD40815A9F16B00F17914 /* Table_PackageType.cpp in Sources */,
+				95CBD40915A9F16B00F17914 /* Table_PageSetup.cpp in Sources */,
+				95CBD40A15A9F16B00F17914 /* Table_PaidLicense.cpp in Sources */,
+				95CBD40B15A9F16B00F17914 /* Table_ParameterType.cpp in Sources */,
+				95CBD40C15A9F16B00F17914 /* Table_PhoneLineType.cpp in Sources */,
+				95CBD40D15A9F16B00F17914 /* Table_Pipe.cpp in Sources */,
+				95CBD40E15A9F16B00F17914 /* Table_PnpLevel.cpp in Sources */,
+				95CBD40F15A9F16B00F17914 /* Table_PnpProtocol.cpp in Sources */,
+				95CBD41015A9F16B00F17914 /* Table_PnpQueue.cpp in Sources */,
+				95CBD41115A9F16B00F17914 /* Table_PostalCode.cpp in Sources */,
+				95CBD41215A9F16B00F17914 /* Table_psc_constants_batdet.cpp in Sources */,
+				95CBD41315A9F16B00F17914 /* Table_psc_constants_bathdr.cpp in Sources */,
+				95CBD41415A9F16B00F17914 /* Table_psc_constants_batuser.cpp in Sources */,
+				95CBD41515A9F16B00F17914 /* Table_psc_constants_repset.cpp in Sources */,
+				95CBD41615A9F16B00F17914 /* Table_psc_constants_schema.cpp in Sources */,
+				95CBD41715A9F16B00F17914 /* Table_psc_constants_tables.cpp in Sources */,
+				95CBD41815A9F16B00F17914 /* Table_psc_dce_batdet.cpp in Sources */,
+				95CBD41915A9F16B00F17914 /* Table_psc_dce_bathdr.cpp in Sources */,
+				95CBD41A15A9F16B00F17914 /* Table_psc_dce_batuser.cpp in Sources */,
+				95CBD41B15A9F16B00F17914 /* Table_psc_dce_repset.cpp in Sources */,
+				95CBD41C15A9F16B00F17914 /* Table_psc_dce_schema.cpp in Sources */,
+				95CBD41D15A9F16B00F17914 /* Table_psc_dce_tables.cpp in Sources */,
+				95CBD41E15A9F16B00F17914 /* Table_psc_designer_batdet.cpp in Sources */,
+				95CBD41F15A9F16B00F17914 /* Table_psc_designer_bathdr.cpp in Sources */,
+				95CBD42015A9F16B00F17914 /* Table_psc_designer_batuser.cpp in Sources */,
+				95CBD42115A9F16B00F17914 /* Table_psc_designer_repset.cpp in Sources */,
+				95CBD42215A9F16B00F17914 /* Table_psc_designer_schema.cpp in Sources */,
+				95CBD42315A9F16B00F17914 /* Table_psc_designer_tables.cpp in Sources */,
+				95CBD42415A9F16B00F17914 /* Table_psc_document_batdet.cpp in Sources */,
+				95CBD42515A9F16B00F17914 /* Table_psc_document_bathdr.cpp in Sources */,
+				95CBD42615A9F16B00F17914 /* Table_psc_document_batuser.cpp in Sources */,
+				95CBD42715A9F16B00F17914 /* Table_psc_document_repset.cpp in Sources */,
+				95CBD42815A9F16B00F17914 /* Table_psc_document_schema.cpp in Sources */,
+				95CBD42915A9F16B00F17914 /* Table_psc_document_tables.cpp in Sources */,
+				95CBD42A15A9F16B00F17914 /* Table_psc_ir_batdet.cpp in Sources */,
+				95CBD42B15A9F16B00F17914 /* Table_psc_ir_bathdr.cpp in Sources */,
+				95CBD42C15A9F16B00F17914 /* Table_psc_ir_batuser.cpp in Sources */,
+				95CBD42D15A9F16B00F17914 /* Table_psc_ir_repset.cpp in Sources */,
+				95CBD42E15A9F16B00F17914 /* Table_psc_ir_schema.cpp in Sources */,
+				95CBD42F15A9F16B00F17914 /* Table_psc_ir_tables.cpp in Sources */,
+				95CBD43015A9F16B00F17914 /* Table_psc_local_batdet.cpp in Sources */,
+				95CBD43115A9F16B00F17914 /* Table_psc_local_bathdr.cpp in Sources */,
+				95CBD43215A9F16B00F17914 /* Table_psc_local_batuser.cpp in Sources */,
+				95CBD43315A9F16B00F17914 /* Table_psc_local_repset.cpp in Sources */,
+				95CBD43415A9F16B00F17914 /* Table_psc_local_schema.cpp in Sources */,
+				95CBD43515A9F16B00F17914 /* Table_psc_local_tables.cpp in Sources */,
+				95CBD43615A9F16B00F17914 /* Table_psc_website_batdet.cpp in Sources */,
+				95CBD43715A9F16B00F17914 /* Table_psc_website_bathdr.cpp in Sources */,
+				95CBD43815A9F16B00F17914 /* Table_psc_website_batuser.cpp in Sources */,
+				95CBD43915A9F16B00F17914 /* Table_psc_website_repset.cpp in Sources */,
+				95CBD43A15A9F16B00F17914 /* Table_psc_website_schema.cpp in Sources */,
+				95CBD43B15A9F16B00F17914 /* Table_psc_website_tables.cpp in Sources */,
+				95CBD43C15A9F16B00F17914 /* Table_QuickStartCategory.cpp in Sources */,
+				95CBD43D15A9F16B00F17914 /* Table_QuickStartTemplate.cpp in Sources */,
+				95CBD43E15A9F16B00F17914 /* Table_Region.cpp in Sources */,
+				95CBD43F15A9F16B00F17914 /* Table_RemoteControl.cpp in Sources */,
+				95CBD44015A9F16B00F17914 /* Table_RemoteMapping.cpp in Sources */,
+				95CBD44115A9F16B00F17914 /* Table_RepositorySource_URL.cpp in Sources */,
+				95CBD44215A9F16B00F17914 /* Table_RepositorySource.cpp in Sources */,
+				95CBD44315A9F16B00F17914 /* Table_RepositoryType.cpp in Sources */,
+				95CBD44415A9F16B00F17914 /* Table_Room_Users.cpp in Sources */,
+				95CBD44515A9F16B00F17914 /* Table_Room.cpp in Sources */,
+				95CBD44615A9F16B00F17914 /* Table_RoomType.cpp in Sources */,
+				95CBD44715A9F16B00F17914 /* Table_Schema.cpp in Sources */,
+				95CBD44815A9F16B00F17914 /* Table_Screen_CommandParameter.cpp in Sources */,
+				95CBD44915A9F16B00F17914 /* Table_Screen_DesignObj.cpp in Sources */,
+				95CBD44A15A9F16B00F17914 /* Table_Screen.cpp in Sources */,
+				95CBD44B15A9F16B00F17914 /* Table_SetupStep.cpp in Sources */,
+				95CBD44C15A9F16B00F17914 /* Table_Size.cpp in Sources */,
+				95CBD44D15A9F16B00F17914 /* Table_Skin.cpp in Sources */,
+				95CBD44E15A9F16B00F17914 /* Table_Software_Device.cpp in Sources */,
+				95CBD44F15A9F16B00F17914 /* Table_Software_Source.cpp in Sources */,
+				95CBD45015A9F16B00F17914 /* Table_Software.cpp in Sources */,
+				95CBD45115A9F16B00F17914 /* Table_StabilityStatus.cpp in Sources */,
+				95CBD45215A9F16B00F17914 /* Table_StartupScript.cpp in Sources */,
+				95CBD45315A9F16B00F17914 /* Table_Style.cpp in Sources */,
+				95CBD45415A9F16B00F17914 /* Table_StyleVariation.cpp in Sources */,
+				95CBD45515A9F16B00F17914 /* Table_System.cpp in Sources */,
+				95CBD45615A9F16B00F17914 /* Table_Template.cpp in Sources */,
+				95CBD45715A9F16B00F17914 /* Table_Text_LS_AltVersions.cpp in Sources */,
+				95CBD45815A9F16B00F17914 /* Table_Text_LS.cpp in Sources */,
+				95CBD45915A9F16B00F17914 /* Table_Text.cpp in Sources */,
+				95CBD45A15A9F16B00F17914 /* Table_TextCategory.cpp in Sources */,
+				95CBD45B15A9F16B00F17914 /* Table_TimeZone.cpp in Sources */,
+				95CBD45C15A9F16B00F17914 /* Table_UI.cpp in Sources */,
+				95CBD45D15A9F16B00F17914 /* Table_UnknownDevices.cpp in Sources */,
+				95CBD45E15A9F16B00F17914 /* Table_UserMode.cpp in Sources */,
+				95CBD45F15A9F16B00F17914 /* Table_Users.cpp in Sources */,
+				95CBD46015A9F16B00F17914 /* Table_Variable.cpp in Sources */,
+				95CBD46115A9F16B00F17914 /* Table_Version.cpp in Sources */,
+				95CBD46215A9F16B00F17914 /* Table_VertAlignment.cpp in Sources */,
+				95CBD46B15A9FC8900F17914 /* TableRow.cpp in Sources */,
+				95CBD46D15A9FC9E00F17914 /* Database_pluto_main.cpp in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXSourcesBuildPhase section */
+
+/* Begin XCBuildConfiguration section */
+		95CBD28315A9EFEB00F17914 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				ARCHS = "$(ARCHS_STANDARD_64_BIT)";
+				CLANG_ENABLE_OBJC_ARC = YES;
+				COPY_PHASE_STRIP = NO;
+				GCC_C_LANGUAGE_STANDARD = gnu99;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_ENABLE_OBJC_EXCEPTIONS = YES;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"DEBUG=1",
+					"$(inherited)",
+				);
+				GCC_SYMBOLS_PRIVATE_EXTERN = NO;
+				GCC_VERSION = com.apple.compilers.llvm.clang.1_0;
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_MISSING_PROTOTYPES = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				HEADER_SEARCH_PATHS = ..;
+				MACOSX_DEPLOYMENT_TARGET = 10.7;
+				ONLY_ACTIVE_ARCH = YES;
+				SDKROOT = macosx;
+			};
+			name = Debug;
+		};
+		95CBD28415A9EFEB00F17914 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				ARCHS = "$(ARCHS_STANDARD_64_BIT)";
+				CLANG_ENABLE_OBJC_ARC = YES;
+				COPY_PHASE_STRIP = YES;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				GCC_C_LANGUAGE_STANDARD = gnu99;
+				GCC_ENABLE_OBJC_EXCEPTIONS = YES;
+				GCC_VERSION = com.apple.compilers.llvm.clang.1_0;
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_MISSING_PROTOTYPES = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				HEADER_SEARCH_PATHS = ..;
+				MACOSX_DEPLOYMENT_TARGET = 10.7;
+				SDKROOT = macosx;
+			};
+			name = Release;
+		};
+		95CBD28615A9EFEB00F17914 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				LIBRARY_SEARCH_PATHS = (
+					"$(inherited)",
+					"\"$(SRCROOT)/mysql/lib\"",
+					"\"$(SRCROOT)/lib\"",
+				);
+				PRODUCT_NAME = "$(TARGET_NAME)";
+			};
+			name = Debug;
+		};
+		95CBD28715A9EFEB00F17914 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				LIBRARY_SEARCH_PATHS = (
+					"$(inherited)",
+					"\"$(SRCROOT)/mysql/lib\"",
+					"\"$(SRCROOT)/lib\"",
+				);
+				PRODUCT_NAME = "$(TARGET_NAME)";
+			};
+			name = Release;
+		};
+/* End XCBuildConfiguration section */
+
+/* Begin XCConfigurationList section */
+		95CBD27215A9EFEB00F17914 /* Build configuration list for PBXProject "libpluto_main" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				95CBD28315A9EFEB00F17914 /* Debug */,
+				95CBD28415A9EFEB00F17914 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		95CBD28515A9EFEB00F17914 /* Build configuration list for PBXNativeTarget "libpluto_main" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				95CBD28615A9EFEB00F17914 /* Debug */,
+				95CBD28715A9EFEB00F17914 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+/* End XCConfigurationList section */
+	};
+	rootObject = 95CBD26F15A9EFEB00F17914 /* Project object */;
+}

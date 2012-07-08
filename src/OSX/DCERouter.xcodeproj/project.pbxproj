@@ -1,0 +1,300 @@
+// !$*UTF8*$!
+{
+	archiveVersion = 1;
+	classes = {
+	};
+	objectVersion = 46;
+	objects = {
+
+/* Begin PBXBuildFile section */
+		95CBD10015A8D43000F17914 /* DataGrid.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 95CBD0FF15A8D43000F17914 /* DataGrid.cpp */; };
+		95CBD10515A8D6CD00F17914 /* StringUtils.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 95CBD10415A8D6CD00F17914 /* StringUtils.cpp */; };
+		95CBD10715A8D6E000F17914 /* FileUtils.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 95CBD10615A8D6E000F17914 /* FileUtils.cpp */; };
+		95CBD10915A8D78400F17914 /* CommonIncludes.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 95CBD10815A8D78400F17914 /* CommonIncludes.cpp */; };
+		95CBD10B15A8D79D00F17914 /* Other.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 95CBD10A15A8D79D00F17914 /* Other.cpp */; };
+		95CBD10D15A8D7C100F17914 /* AlarmManager.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 95CBD10C15A8D7C100F17914 /* AlarmManager.cpp */; };
+		95CBD10F15A8D7D800F17914 /* DeviceData_Router.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 95CBD10E15A8D7D800F17914 /* DeviceData_Router.cpp */; };
+		95CBD11715A8DDA800F17914 /* Main.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 95CBD11615A8DDA800F17914 /* Main.cpp */; };
+		95CBD48015AA088E00F17914 /* libDCECommon.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 95CBD47F15AA088E00F17914 /* libDCECommon.dylib */; };
+		95CBD48215AA089400F17914 /* libpluto_main.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 95CBD48115AA089400F17914 /* libpluto_main.dylib */; };
+		95CBD48415AA090B00F17914 /* MessageXML.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 95CBD48315AA090B00F17914 /* MessageXML.cpp */; };
+		95F6F9A51465C3B500900B74 /* DCERouter.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 95F6F9A41465C3B500900B74 /* DCERouter.cpp */; };
+		95F6F9AB1465CAC500900B74 /* libxml2.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 95F6F9AA1465CAC500900B74 /* libxml2.dylib */; };
+		95F6F9B01465CB3300900B74 /* libmysqlclient.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 95F6F9AF1465CB3300900B74 /* libmysqlclient.dylib */; };
+/* End PBXBuildFile section */
+
+/* Begin PBXCopyFilesBuildPhase section */
+		959C0A7B1465C35A00BF51D9 /* CopyFiles */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 2147483647;
+			dstPath = /usr/share/man/man1/;
+			dstSubfolderSpec = 0;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 1;
+		};
+/* End PBXCopyFilesBuildPhase section */
+
+/* Begin PBXFileReference section */
+		959C0A7D1465C35A00BF51D9 /* DCERouter */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = DCERouter; sourceTree = BUILT_PRODUCTS_DIR; };
+		95CBD0FF15A8D43000F17914 /* DataGrid.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = DataGrid.cpp; path = ../DCE/DataGrid.cpp; sourceTree = "<group>"; };
+		95CBD10415A8D6CD00F17914 /* StringUtils.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = StringUtils.cpp; path = ../PlutoUtils/StringUtils.cpp; sourceTree = "<group>"; };
+		95CBD10615A8D6E000F17914 /* FileUtils.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = FileUtils.cpp; path = ../PlutoUtils/FileUtils.cpp; sourceTree = "<group>"; };
+		95CBD10815A8D78400F17914 /* CommonIncludes.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = CommonIncludes.cpp; path = ../PlutoUtils/CommonIncludes.cpp; sourceTree = "<group>"; };
+		95CBD10A15A8D79D00F17914 /* Other.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = Other.cpp; path = ../PlutoUtils/Other.cpp; sourceTree = "<group>"; };
+		95CBD10C15A8D7C100F17914 /* AlarmManager.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = AlarmManager.cpp; path = ../DCE/AlarmManager.cpp; sourceTree = "<group>"; };
+		95CBD10E15A8D7D800F17914 /* DeviceData_Router.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = DeviceData_Router.cpp; path = ../DCE/DeviceData_Router.cpp; sourceTree = "<group>"; };
+		95CBD11615A8DDA800F17914 /* Main.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = Main.cpp; path = DCERouter.xcodeproj/../../DCERouter/Main.cpp; sourceTree = "<group>"; };
+		95CBD47F15AA088E00F17914 /* libDCECommon.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libDCECommon.dylib; path = lib/libDCECommon.dylib; sourceTree = "<group>"; };
+		95CBD48115AA089400F17914 /* libpluto_main.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libpluto_main.dylib; path = lib/libpluto_main.dylib; sourceTree = "<group>"; };
+		95CBD48315AA090B00F17914 /* MessageXML.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = MessageXML.cpp; path = ../DCE/MessageXML.cpp; sourceTree = "<group>"; };
+		95F6F9A41465C3B500900B74 /* DCERouter.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = DCERouter.cpp; path = ../DCERouter/DCERouter.cpp; sourceTree = "<group>"; };
+		95F6F9AA1465CAC500900B74 /* libxml2.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libxml2.dylib; path = usr/lib/libxml2.dylib; sourceTree = SDKROOT; };
+		95F6F9AF1465CB3300900B74 /* libmysqlclient.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libmysqlclient.dylib; path = ../../mysql/lib/libmysqlclient.dylib; sourceTree = "<group>"; };
+/* End PBXFileReference section */
+
+/* Begin PBXFrameworksBuildPhase section */
+		959C0A7A1465C35A00BF51D9 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				95F6F9B01465CB3300900B74 /* libmysqlclient.dylib in Frameworks */,
+				95F6F9AB1465CAC500900B74 /* libxml2.dylib in Frameworks */,
+				95CBD48015AA088E00F17914 /* libDCECommon.dylib in Frameworks */,
+				95CBD48215AA089400F17914 /* libpluto_main.dylib in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXFrameworksBuildPhase section */
+
+/* Begin PBXGroup section */
+		959C0A721465C35900BF51D9 = {
+			isa = PBXGroup;
+			children = (
+				95CBD11615A8DDA800F17914 /* Main.cpp */,
+				95F6F9AE1465CAD700900B74 /* Libraries */,
+				95F6F9A31465C3A000900B74 /* Includes */,
+				959C0A7E1465C35A00BF51D9 /* Products */,
+			);
+			sourceTree = "<group>";
+		};
+		959C0A7E1465C35A00BF51D9 /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				959C0A7D1465C35A00BF51D9 /* DCERouter */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+		95F6F9A31465C3A000900B74 /* Includes */ = {
+			isa = PBXGroup;
+			children = (
+				95F6F9A41465C3B500900B74 /* DCERouter.cpp */,
+				95CBD10E15A8D7D800F17914 /* DeviceData_Router.cpp */,
+				95CBD10C15A8D7C100F17914 /* AlarmManager.cpp */,
+				95CBD10A15A8D79D00F17914 /* Other.cpp */,
+				95CBD10815A8D78400F17914 /* CommonIncludes.cpp */,
+				95CBD10615A8D6E000F17914 /* FileUtils.cpp */,
+				95CBD10415A8D6CD00F17914 /* StringUtils.cpp */,
+				95CBD0FF15A8D43000F17914 /* DataGrid.cpp */,
+				95CBD48315AA090B00F17914 /* MessageXML.cpp */,
+			);
+			name = Includes;
+			sourceTree = "<group>";
+		};
+		95F6F9AE1465CAD700900B74 /* Libraries */ = {
+			isa = PBXGroup;
+			children = (
+				95CBD47F15AA088E00F17914 /* libDCECommon.dylib */,
+				95CBD48115AA089400F17914 /* libpluto_main.dylib */,
+				95F6F9AF1465CB3300900B74 /* libmysqlclient.dylib */,
+				95F6F9AA1465CAC500900B74 /* libxml2.dylib */,
+			);
+			name = Libraries;
+			sourceTree = "<group>";
+		};
+/* End PBXGroup section */
+
+/* Begin PBXNativeTarget section */
+		959C0A7C1465C35A00BF51D9 /* DCERouter */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 959C0A871465C35A00BF51D9 /* Build configuration list for PBXNativeTarget "DCERouter" */;
+			buildPhases = (
+				959C0A791465C35A00BF51D9 /* Sources */,
+				959C0A7A1465C35A00BF51D9 /* Frameworks */,
+				959C0A7B1465C35A00BF51D9 /* CopyFiles */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = DCERouter;
+			productName = DCERouter;
+			productReference = 959C0A7D1465C35A00BF51D9 /* DCERouter */;
+			productType = "com.apple.product-type.tool";
+		};
+/* End PBXNativeTarget section */
+
+/* Begin PBXProject section */
+		959C0A741465C35900BF51D9 /* Project object */ = {
+			isa = PBXProject;
+			attributes = {
+				LastUpgradeCheck = 0420;
+			};
+			buildConfigurationList = 959C0A771465C35900BF51D9 /* Build configuration list for PBXProject "DCERouter" */;
+			compatibilityVersion = "Xcode 3.2";
+			developmentRegion = English;
+			hasScannedForEncodings = 0;
+			knownRegions = (
+				en,
+			);
+			mainGroup = 959C0A721465C35900BF51D9;
+			productRefGroup = 959C0A7E1465C35A00BF51D9 /* Products */;
+			projectDirPath = "";
+			projectRoot = "";
+			targets = (
+				959C0A7C1465C35A00BF51D9 /* DCERouter */,
+			);
+		};
+/* End PBXProject section */
+
+/* Begin PBXSourcesBuildPhase section */
+		959C0A791465C35A00BF51D9 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				95F6F9A51465C3B500900B74 /* DCERouter.cpp in Sources */,
+				95CBD10015A8D43000F17914 /* DataGrid.cpp in Sources */,
+				95CBD10515A8D6CD00F17914 /* StringUtils.cpp in Sources */,
+				95CBD10715A8D6E000F17914 /* FileUtils.cpp in Sources */,
+				95CBD10915A8D78400F17914 /* CommonIncludes.cpp in Sources */,
+				95CBD10B15A8D79D00F17914 /* Other.cpp in Sources */,
+				95CBD10D15A8D7C100F17914 /* AlarmManager.cpp in Sources */,
+				95CBD10F15A8D7D800F17914 /* DeviceData_Router.cpp in Sources */,
+				95CBD11715A8DDA800F17914 /* Main.cpp in Sources */,
+				95CBD48415AA090B00F17914 /* MessageXML.cpp in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXSourcesBuildPhase section */
+
+/* Begin XCBuildConfiguration section */
+		959C0A851465C35A00BF51D9 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				ARCHS = "$(ARCHS_STANDARD_64_BIT)";
+				CLANG_ENABLE_OBJC_ARC = YES;
+				COPY_PHASE_STRIP = NO;
+				GCC_C_LANGUAGE_STANDARD = gnu99;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_ENABLE_OBJC_EXCEPTIONS = YES;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"DEBUG=1",
+					"$(inherited)",
+				);
+				GCC_SYMBOLS_PRIVATE_EXTERN = NO;
+				GCC_VERSION = com.apple.compilers.llvm.clang.1_0;
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_MISSING_PROTOTYPES = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				HEADER_SEARCH_PATHS = (
+					..,
+					/usr/include/mysql,
+					/usr/include/libxml2,
+				);
+				LIBRARY_SEARCH_PATHS = lib;
+				MACOSX_DEPLOYMENT_TARGET = 10.7;
+				ONLY_ACTIVE_ARCH = YES;
+				OTHER_LDFLAGS = "";
+				SDKROOT = macosx;
+			};
+			name = Debug;
+		};
+		959C0A861465C35A00BF51D9 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				ARCHS = "$(ARCHS_STANDARD_64_BIT)";
+				CLANG_ENABLE_OBJC_ARC = YES;
+				COPY_PHASE_STRIP = YES;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				GCC_C_LANGUAGE_STANDARD = gnu99;
+				GCC_ENABLE_OBJC_EXCEPTIONS = YES;
+				GCC_VERSION = com.apple.compilers.llvm.clang.1_0;
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_MISSING_PROTOTYPES = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				HEADER_SEARCH_PATHS = (
+					..,
+					/usr/include/mysql,
+					/usr/include/libxml2,
+				);
+				LIBRARY_SEARCH_PATHS = lib;
+				MACOSX_DEPLOYMENT_TARGET = 10.7;
+				OTHER_LDFLAGS = "";
+				SDKROOT = macosx;
+			};
+			name = Release;
+		};
+		959C0A881465C35A00BF51D9 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CONFIGURATION_BUILD_DIR = bin;
+				INSTALL_PATH = "";
+				LIBRARY_SEARCH_PATHS = (
+					"$(inherited)",
+					"\"$(SRCROOT)/lib\"",
+					"\"$(SRCROOT)/../../mysql/lib\"",
+					"\"$(SRCROOT)/../lib\"",
+					"\"$(SRCROOT)/mysql/lib\"",
+				);
+				PRODUCT_NAME = "$(TARGET_NAME)";
+			};
+			name = Debug;
+		};
+		959C0A891465C35A00BF51D9 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CONFIGURATION_BUILD_DIR = bin;
+				INSTALL_PATH = "";
+				LIBRARY_SEARCH_PATHS = (
+					"$(inherited)",
+					"\"$(SRCROOT)/lib\"",
+					"\"$(SRCROOT)/../../mysql/lib\"",
+					"\"$(SRCROOT)/../lib\"",
+					"\"$(SRCROOT)/mysql/lib\"",
+				);
+				"PRELINK_LIBS[arch=*]" = "";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+			};
+			name = Release;
+		};
+/* End XCBuildConfiguration section */
+
+/* Begin XCConfigurationList section */
+		959C0A771465C35900BF51D9 /* Build configuration list for PBXProject "DCERouter" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				959C0A851465C35A00BF51D9 /* Debug */,
+				959C0A861465C35A00BF51D9 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		959C0A871465C35A00BF51D9 /* Build configuration list for PBXNativeTarget "DCERouter" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				959C0A881465C35A00BF51D9 /* Debug */,
+				959C0A891465C35A00BF51D9 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+/* End XCConfigurationList section */
+	};
+	rootObject = 959C0A741465C35900BF51D9 /* Project object */;
+}

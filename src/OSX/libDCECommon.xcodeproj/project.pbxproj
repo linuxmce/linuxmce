@@ -42,7 +42,21 @@
 		95B5B6CA15A4E576005AD5C8 /* MultiThreadIncludes.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 95B5B6C815A4E576005AD5C8 /* MultiThreadIncludes.cpp */; };
 		95B5B6CB15A4E576005AD5C8 /* uuencode.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 95B5B6C915A4E576005AD5C8 /* uuencode.cpp */; };
 		95B5B6CD15A4E63B005AD5C8 /* CommonIncludes.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 95B5B6CC15A4E63B005AD5C8 /* CommonIncludes.cpp */; };
+		95CBD11315A8DD1500F17914 /* libDCECommon.dylib in CopyFiles */ = {isa = PBXBuildFile; fileRef = 95B5B66D14671A64005AD5C8 /* libDCECommon.dylib */; };
 /* End PBXBuildFile section */
+
+/* Begin PBXCopyFilesBuildPhase section */
+		95CBD11215A8DCE500F17914 /* CopyFiles */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 2147483647;
+			dstPath = ../lib;
+			dstSubfolderSpec = 16;
+			files = (
+				95CBD11315A8DD1500F17914 /* libDCECommon.dylib in CopyFiles */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
 		95B5B66D14671A64005AD5C8 /* libDCECommon.dylib */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.dylib"; includeInIndex = 0; path = libDCECommon.dylib; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -232,6 +246,7 @@
 				95B5B66914671A64005AD5C8 /* Sources */,
 				95B5B66A14671A64005AD5C8 /* Frameworks */,
 				95B5B66B14671A64005AD5C8 /* Headers */,
+				95CBD11215A8DCE500F17914 /* CopyFiles */,
 			);
 			buildRules = (
 			);
@@ -363,6 +378,9 @@
 		95B5B67B14671A64005AD5C8 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				CONFIGURATION_BUILD_DIR = "$(BUILD_DIR)/$(CONFIGURATION)$(EFFECTIVE_PLATFORM_NAME)";
+				CONFIGURATION_TEMP_DIR = "$(PROJECT_TEMP_DIR)/$(CONFIGURATION)$(EFFECTIVE_PLATFORM_NAME)";
+				LD_DYLIB_INSTALL_NAME = "../lib/$(EXECUTABLE_PATH)";
 				LIBRARY_SEARCH_PATHS = (
 					"$(inherited)",
 					"\"$(SRCROOT)/mysql/lib\"",
@@ -374,6 +392,9 @@
 		95B5B67C14671A64005AD5C8 /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				CONFIGURATION_BUILD_DIR = "$(BUILD_DIR)/$(CONFIGURATION)$(EFFECTIVE_PLATFORM_NAME)";
+				CONFIGURATION_TEMP_DIR = "$(PROJECT_TEMP_DIR)/$(CONFIGURATION)$(EFFECTIVE_PLATFORM_NAME)";
+				LD_DYLIB_INSTALL_NAME = "../lib/$(EXECUTABLE_PATH)";
 				LIBRARY_SEARCH_PATHS = (
 					"$(inherited)",
 					"\"$(SRCROOT)/mysql/lib\"",
