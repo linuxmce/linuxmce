@@ -21,6 +21,7 @@
 #include "PlutoUtils/Other.h"
 
 #include <iostream>
+#include <sstream>
 using namespace std;
 using namespace DCE;
 
@@ -1447,23 +1448,26 @@ void MPlayer_Player::CMD_Navigate_Prev(int iStreamID,string &sCMD_Result,Message
 void MPlayer_Player::CMD_Get_Video_Frame(string sDisable_Aspect_Lock,int iStreamID,int iWidth,int iHeight,char **pData,int *iData_Size,string *sFormat,string &sCMD_Result,Message *pMessage)
 //<-dceag-c84-e->
 {
-	LoggerWrapper::GetInstance()->Write(LV_STATUS, "MPlayer_Player::CMD_Get_Video_Frame received");
+  LoggerWrapper::GetInstance()->Write(LV_STATUS, "MPlayer_Player::CMD_Get_Video_Frame received");
+  
+  stringstream out;
+  out << pMessage->m_dwPK_Device_From;
+  string sDeviceFrom = out.str();
 
-	if (!m_bPlayerEngineInitialized)
-	{
-		LoggerWrapper::GetInstance()->Write(LV_WARNING, "MPlayer_Player::CMD_Get_Video_Frame aborts because Player Engine is not initialized");
-		return;
-	}
-	
-	if (pData && iData_Size && sFormat)
-	{
-		m_pPlayerEngine->GetScreenshot(1024, 768, *pData, *iData_Size, *sFormat, sCMD_Result);
-		LoggerWrapper::GetInstance()->Write(LV_WARNING, "MPlayer_Player::CMD_Get_Video_Frame read %i bytes of data", *iData_Size);
-	}
-	else
-	{
-		LoggerWrapper::GetInstance()->Write(LV_WARNING, "MPlayer_Player::CMD_Get_Video_Frame - null parameters passed, aborting");
-	}
+  string sCmd = "scrot -u -t 1280x720 /tmp/mplayer_videoframe_"+sDeviceFrom+".jpg";
+  system(sCmd.c_str());
+  sCmd = "mv /tmp/mplayer_videoframe_"+sDeviceFrom+"-thumb.jpg /tmp/mplayer_videoframe_"+sDeviceFrom+".jpg";
+  system(sCmd.c_str());
+  *sFormat = "2";  // JPEG
+  
+  size_t size;
+  *pData = FileUtils::ReadFileIntoBuffer("/tmp/mplayer_videoframe_"+sDeviceFrom+".jpg",size);
+  *iData_Size = size;
+
+  FileUtils::DelFile("/tmp/mplayer_videoframe_"+sDeviceFrom+".jpg");
+
+  return;
+
 }
 
 //<-dceag-c87-b->
