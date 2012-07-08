@@ -180,15 +180,8 @@ QMAKE_CXXFLAGS += -DUSE_LZO_DATAGRID
 
 INCLUDEPATH += ../../ ../../DCE/
 
-QT4{
+
 QT+= webkit declarative
-}
-
-QT5{
-
-}
-QT+= webkit quick mobility multimedia
-
 
 macx{
     QT += xml
@@ -335,7 +328,7 @@ SOURCES += main.cpp \
     contextobjects/bookmarkitem.cpp \
     plugins/GoogleWeather/googleweather.cpp \
 
-!ANDROID|!QT5{
+!ANDROID{
  SOURCES+= ../../qMediaPlayer/AudioVisual/audiovisual.cpp \
     ../../qMediaPlayer/AudioVisual/videowidgetplayer.cpp
 }
@@ -448,7 +441,7 @@ HEADERS += \
     contextobjects/bookmarkitem.h \
     plugins/GoogleWeather/googleweather.h \
 
-!ANDROID|!for_android|!QT5{
+!ANDROID|!for_android{
  HEADERS+=   ../../qMediaPlayer/AudioVisual/audiovisual.h \
     ../../qMediaPlayer/AudioVisual/videowidgetplayer.h
 }

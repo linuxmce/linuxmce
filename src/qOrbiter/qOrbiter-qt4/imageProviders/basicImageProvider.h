@@ -7,36 +7,24 @@
 #define BASICIMAGEPROVIDER_H
 
 #include <QtGlobal>
-#if (QT_VERSION >= QT_VERSION_CHECK(5,0,0))
-#include <QtQml/QQmlImageProvider>
-#include <QtCore/QObject>
-#include <QtCore/QDebug>
-#include <QtCore/QVariant>
-#else
+
 #include <QObject>
 #include <QDeclarativeImageProvider>
 #include <QDebug>
 #include <QVariant>
-#endif
+
 #ifdef debug
 #include <QDebug>
 #endif
-
 #include <qorbitermanager.h>
 
-#if (QT_VERSION >= QT_VERSION_CHECK(5,0,0))
-class basicImageProvider : public QQmlImageProvider, public QObject
-#else
 class basicImageProvider : public QDeclarativeImageProvider, public QObject
-#endif
+
 {
 
 public:
-#if (QT_VERSION >= QT_VERSION_CHECK(5,0,0))
-    basicImageProvider():QQmlImageProvider(QQmlImageProvider::Image)
-  #else
+
     basicImageProvider():QDeclarativeImageProvider(QDeclarativeImageProvider::Image)
-#endif
     {
     }
 

@@ -56,11 +56,9 @@ using namespace DCE;
   then (hopefully) notify us of background progress. A splash bar or loading indicator needs to be added, but a textual
   messaging system will be the initial method of communication
 */
-#if (QT_VERSION >= QT_VERSION_CHECK(5,0,0))
-qorbiterManager::qorbiterManager(QQuickView *view, QObject *parent) :
-#else
+
+
 qorbiterManager::qorbiterManager(QDeclarativeView *view, QObject *parent) :
-#endif
     QObject(parent),qorbiterUIwin(view)
 {
 
@@ -109,20 +107,11 @@ qorbiterManager::qorbiterManager(QDeclarativeView *view, QObject *parent) :
     appWidth = qorbiterUIwin->width() ;
 
     //Resize to view as opposed to the root item
-#if QT_VERSION >= QT_VERSION_CHECK(5,0,0)
-    qorbiterUIwin->setResizeMode(QQuickView::SizeRootObjectToView);
-#else
     qorbiterUIwin->setResizeMode(QDeclarativeView::SizeRootObjectToView);
-#endif
-
     qorbiterUIwin->rootContext()->setContextProperty("appH", appHeight);
     qorbiterUIwin->rootContext()->setContextProperty("appW", appWidth);
 
     //Don't think we need this with Qt5 QQuickView as it resizes Object to View above
-#if QT_VERSION < QT_VERSION_CHECK(5,0,0)
-    QObject::connect(qorbiterUIwin, SIGNAL(sceneResized(QSize)),  SLOT(checkOrientation(QSize)) );
-#endif
-
     QObject::connect(this, SIGNAL(orbiterReady(bool)), this, SLOT(showUI(bool)));
     QObject::connect(this, SIGNAL(skinDataLoaded(bool)), SLOT(showUI(bool)));
 #ifndef ANDROID
@@ -353,11 +342,9 @@ void qorbiterManager::refreshUI(QUrl url)
 {
     qorbiterUIwin->rootContext()->setBaseUrl(skin->entryUrl());
     qorbiterUIwin->setSource(skin->entryUrl());
-#if (QT_VERSION >= QT_VERSION_CHECK(5,0,0))
-    qorbiterUIwin->setResizeMode(QQuickView::SizeRootObjectToView);
-#else
+
     qorbiterUIwin->setResizeMode(QDeclarativeView::SizeRootObjectToView);
-#endif
+
 }
 
 
@@ -773,13 +760,9 @@ checkOrientation(qorbiterUIwin->size());
         //load the actual skin entry point
         currentSkin = incSkin;
         qorbiterUIwin->engine()->rootContext()->setContextProperty("style", skin->styleView());
-#if (QT_VERSION >= QT_VERSION_CHECK(5,0,0))
-        QObject::connect(qorbiterUIwin, SIGNAL(statusChanged(QQuickView::Status)),
-                         this, SLOT(skinLoaded(QQuickView::Status)));
-#else
+
         QObject::connect(qorbiterUIwin, SIGNAL(statusChanged(QDeclarativeView::Status)),
                          this, SLOT(skinLoaded(QDeclarativeView::Status)));
-#endif
         QMetaObject::invokeMethod(this, "refreshUI", Qt::QueuedConnection, Q_ARG(QUrl, skin->entryUrl()));
     }
     else
@@ -788,18 +771,11 @@ checkOrientation(qorbiterUIwin->size());
     }
 }
 
-#if (QT_VERSION >= QT_VERSION_CHECK(5,0,0))
-void qorbiterManager::skinLoaded(QQuickView::Status status)
-#else
 void qorbiterManager::skinLoaded(QDeclarativeView::Status status)
-#endif
 {
     setDceResponse("Skin appears to have finished loading ..");
-#if (QT_VERSION >= QT_VERSION_CHECK(5,0,0))
-    if (status == QQuickView::Error) {
-#else
+
     if (status == QDeclarativeView::Error) {
-#endif
         qWarning() << "Skin loading has FAILED";
         qWarning() << qorbiterUIwin->errors();
         emit skinDataLoaded(false);
@@ -1537,11 +1513,7 @@ void qorbiterManager::startOrbiter()
 
         m_bStartingUp = false;
         qorbiterUIwin->setWindowTitle("LinuxMCE Orbiter " + QString::number(iPK_Device));
-#if (QT_VERSION >= QT_VERSION_CHECK(5,0,0))
-        qorbiterUIwin->setResizeMode(QQuickView::SizeRootObjectToView);
-#else
         qorbiterUIwin->setResizeMode(QDeclarativeView::SizeRootObjectToView);
-#endif
         QApplication::processEvents(QEventLoop::AllEvents);
         emit screenChange("Screen_1.qml");
         QApplication::processEvents(QEventLoop::AllEvents);

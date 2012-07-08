@@ -142,11 +142,8 @@ class qorbiterManager : public QObject
 
 
 public:
-#if (QT_VERSION >= QT_VERSION_CHECK(5,0,0))
-    qorbiterManager(QQuickView * view, QObject *parent=0);  //constructor
-#else
+
     qorbiterManager(QDeclarativeView * view, QObject *parent=0);  //constructor
-#endif
 
 #ifndef __ANDROID__
 #if GLENABLED
@@ -198,11 +195,8 @@ public:
     QString remoteDirectoryPath;
     SkinDataItem* skin;
 
-#if (QT_VERSION >= QT_VERSION_CHECK(5,0,0))
-    QQuickView *qorbiterUIwin;
-#else
     QDeclarativeView *qorbiterUIwin;    //Qml declarativeview
-#endif
+
 
     ScreenSaverClass *ScreenSaver;
 
@@ -561,12 +555,8 @@ public slots: //note: Q_INVOKABLE means it can be called directly from qml
     //security
     void setHouseMode(int mode, int pass);
     void activateScreenSaver();
-    void killScreenSaver();
-#if (QT_VERSION >= QT_VERSION_CHECK(5,0,0))
-    void skinLoaded(QQuickView::Status status);
-#else
     void skinLoaded(QDeclarativeView::Status status);
-#endif
+    void killScreenSaver();
 private:
     void initializeConnections();
     void setupQMLview();

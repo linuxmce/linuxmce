@@ -1,12 +1,8 @@
 #include "nowplayingclass.h"
 
-#if (QT_VERSION >= QT_VERSION_CHECK(5,0,0))
-NowPlayingClass::NowPlayingClass(QQuickItem *parent) :
-    QQuickItem(parent)
-#else
+
 NowPlayingClass::NowPlayingClass(QDeclarativeItem *parent) :
     QDeclarativeItem(parent)
-#endif
 {
     b_mediaPlaying = false;   
     fileImage.load("qrc:/icons/icon.png");

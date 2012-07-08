@@ -28,22 +28,16 @@
 
 #include <QObject>
 
-#if (QT_VERSION >= QT_VERSION_CHECK(5,0,0))
-#include <QQmlImageProvider>
-#else
 #include <QtDeclarative/QDeclarativeImageProvider>
-#endif
+
 #ifdef debug
 #include <QDebug>
 #endif
 #include <QVariant>
 #include <qorbitermanager.h>
 
-#if (QT_VERSION >= QT_VERSION_CHECK(5,0,0))
-class AbstractImageProvider: public QObject , public QQmlImageProvider
-#else
+
 class AbstractImageProvider: public QObject , public QDeclarativeImageProvider
-#endif
 {
 public:
     AbstractImageProvider(qorbiterManager * manager );

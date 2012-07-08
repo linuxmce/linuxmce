@@ -2,22 +2,14 @@
 #define TIMECODEMANAGER_H
 
 #include <QtGlobal>
-#if (QT_VERSION >= QT_VERSION_CHECK(5,0,0))
-#include <QtQuick/QQuickItem>
-#else
 #include <QtDeclarative/QDeclarativeItem>
-#endif
 #include <QtNetwork/QTcpSocket>
 #include <QFile>
 #include <QStringList>
 #include <QRegExp>
 #include <QTime>
 
-#if (QT_VERSION >= QT_VERSION_CHECK(5,0,0))
-class TimeCodeManager : public QQuickItem
-#else
 class TimeCodeManager : public QDeclarativeItem
-#endif
 {
     Q_OBJECT
     Q_PROPERTY (int tcTotalTime READ getTotalTime WRITE setTotalTime NOTIFY totalTimeChanged)
@@ -32,11 +24,7 @@ class TimeCodeManager : public QDeclarativeItem
     Q_PROPERTY (int playbackSpeed READ getSpeed WRITE setSpeed NOTIFY playbackSpeedChanged)
 
 public:
-#if (QT_VERSION >= QT_VERSION_CHECK(5,0,0))
-    explicit TimeCodeManager(QQuickItem *parent = 0);
-#else
     explicit TimeCodeManager(QDeclarativeItem *parent = 0);
-#endif
 
     //these ints are used to represent the beginning and end of media in a format for consumption by a scroller
     //it needs to report the positon of the marker, and provide the time readout converted back to the proper HH::MM:SS format

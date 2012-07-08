@@ -3,19 +3,11 @@
 
 
 #include <QtGlobal>
-#if (QT_VERSION >= QT_VERSION_CHECK(5,0,0))
-#include <QQmlImageProvider>
-#else
 #include <QtDeclarative/QDeclarativeImageProvider>
-#endif
 #include <datamodels/floorplanmodel.h>
 #include <qorbitermanager.h>
 
-#if (QT_VERSION >= QT_VERSION_CHECK(5,0,0))
-class FloorplanDeviceProvider : public QObject, public QQmlImageProvider
-#else
 class FloorplanDeviceProvider : public QObject, public QDeclarativeImageProvider
-#endif
 {
     Q_OBJECT
 public:
