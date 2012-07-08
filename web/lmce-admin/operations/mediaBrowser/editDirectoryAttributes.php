@@ -127,7 +127,7 @@ function confirmation()
 					</tr>	
 					<tr>	
 			<td>
-			<input type="checkbox" name="cleanFiles" onChange="confirmation()" >'.$TEXT_CLEAN_FILES_CONST.'<br>							
+			<input type="button" name="cleanFiles" value="'.$TEXT_CLEAN_FILES_CONST.'" onClick="confirmation()" ><br>							
 			</td>
 			</tr>				
 					<tr>
