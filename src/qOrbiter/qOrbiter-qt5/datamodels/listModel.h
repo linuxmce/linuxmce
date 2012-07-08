@@ -1,0 +1,97 @@
+
+
+#ifndef LISTMODEL_H
+#define LISTMODEL_H
+
+#include <QAbstractListModel>
+#include <QList>
+#include <QVariant>
+#include <datamodels/gridItem.h>
+#include <qorbitermanager.h>
+
+
+
+
+class ListModel : public QAbstractListModel
+{
+    Q_OBJECT
+
+    Q_PROPERTY (double progress READ getProgress WRITE setProgress NOTIFY progressChanged)
+    Q_PROPERTY (bool loadingStatus READ getLoadingStatus WRITE setLoadingStatus NOTIFY loadingStatusChanged)
+    Q_PROPERTY (int totalcells READ getTotalCells WRITE setTotalCells NOTIFY sizeChanged)
+    Q_PROPERTY (int currentCells READ getCurrentCells WRITE setCurrentCells NOTIFY cellsChanged)
+
+
+public:
+    explicit ListModel(gridItem* prototype, QObject* parent = 0);
+    ~ListModel();
+    int rowCount(const QModelIndex &parent = QModelIndex()) const;
+    QVariant data(const QModelIndex &index, int role = Qt::DisplayRole) const;
+
+    void appendRows(const QList<gridItem*> &items);
+    void insertRow(int row, gridItem* item);
+    bool removeRow(int row, const QModelIndex &parent = QModelIndex());
+    bool removeRows(int row, int count, const QModelIndex &parent = QModelIndex());
+    gridItem* takeRow(int row);
+    gridItem* find(const QString &id) const;
+    Q_INVOKABLE QVariant get(int index, const QString &name) const;
+    QModelIndex indexFromItem( const gridItem* item) const;
+    gridItem* currentRow();
+
+    int totalcells;
+    bool loadingStatus;
+    int gridType;
+    double progress;
+    int currentCells;
+    bool clearing;
+
+signals:
+    void itemAdded(int row);
+    void gimmieData(int type);
+    void loadingStatusChanged(bool state);
+    void sizeChanged(int size);
+    void gridTypeChanged(int type);
+    void dataChanged(const QModelIndex &topLeft, const QModelIndex &bottomRight, const int &sRow);
+    void progressChanged(double p);
+    void ready(int type);
+    void statusMessage(QString msg);
+
+    void modelAboutToBeReset();
+    void modelReset();
+    void cellsChanged();
+    void pagingCleared();
+
+
+public slots:
+    void checkForMore();
+    void appendRow(gridItem* item);
+    void populateGrid(int mediaType);
+    void setTotalCells(int cells);
+    int getTotalCells();
+    void setGridType( int type);
+    int getGridType();
+    void clear();
+    void setLoadingStatus(bool b);
+    bool getLoadingStatus();
+    void setProgress(double n_progress);
+    double getProgress();
+    void attributeSort();
+    void clearAndRequest( int );
+    void setCurrentCells (int i) {currentCells = i; emit cellsChanged();}
+    int getCurrentCells () {return currentCells;}
+    void clearForPaging();
+
+
+private slots:
+    void handleItemChange();
+    void reset();
+    virtual void beginResetModel();
+    virtual void endResetModel();
+private:
+    void resetInternalData();
+    gridItem* m_prototype;
+    QList<gridItem*> m_list;
+    // qorbiterManager *manager_ref;
+};
+
+#endif // LISTMODEL_H
