@@ -12,7 +12,7 @@ libresolution.so: libresolution.o
 	g++ -shared $(CPPFLAGS) $(CXXFLAGS) $< -o libresolution.so $(LDFLAGS) $(LDLIBS)
 	cp libresolution.so $(ROOT)/lib
 
-test: test.o
+test: test.o libresolution.so
 	g++ $(CPPFLAGS) $(CXXFLAGS) $< -o test -L. -lresolution
 
 clean:
