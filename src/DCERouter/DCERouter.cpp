@@ -25,7 +25,8 @@ using namespace std;
 #include <math.h>
 #ifdef WIN32
 #include <WinSock.h>
-#else
+#endif
+#if !defined(WIN32) && !defined(__APPLE_CC__)
 #include <sys/vfs.h>
 #include <dirent.h>
 #endif
@@ -33,12 +34,12 @@ using namespace std;
 #include "PlutoUtils/FileUtils.h"
 #include "PlutoUtils/StringUtils.h"
 #include "PlutoUtils/Other.h"
-#include "Message.h"
-#include "ServerSocket.h"
+#include "DCE/Message.h"
+#include "DCE/ServerSocket.h"
 #include <sys/stat.h>
-#include "DCERouter.h"
-#include "DeviceData_Router.h"
-#include "AlarmManager.h"
+#include "DCE/DCERouter.h"
+#include "DCE/DeviceData_Router.h"
+#include "DCE/AlarmManager.h"
 #include "DCE/DCEConfig.h"
 #include "pluto_main/Database_pluto_main.h"
 #include "pluto_main/Table_DeviceTemplate.h"
@@ -98,7 +99,7 @@ void* WatchDogRoutine(void* param)
 	if (g_WatchDogFlag)
 	{
 		LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"Terminating DCERouter: watchdog detected hard deadlock, seems soft reload failed\n");
-#ifndef WIN32
+#if !defined(WIN32) && !defined(__APPLE_CC__)
 		fflush(stdout);
 		kill(getpid(), SIGKILL);
 #endif
@@ -563,9 +564,13 @@ RAP_FType Router::PlugIn_Load(int PK_Device, int PK_DeviceTemplate, string sComm
 
     if (sCommandLine == "")
         return NULL;
-
+    
 #ifndef WIN32
+    #ifdef __APPLE_CC__
+    sCommandLine += ".dylib";
+    #else
     sCommandLine += ".so";
+    #endif
     if (sCommandLine.find("/") == string::npos)
         sCommandLine = "./" + sCommandLine;
     so_handle = dlopen(sCommandLine.c_str(), RTLD_LAZY | RTLD_GLOBAL);
