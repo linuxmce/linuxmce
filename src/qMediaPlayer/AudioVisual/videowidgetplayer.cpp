@@ -3,11 +3,13 @@
 #include "QVBoxLayout"
 #include <QUrl>
 #include <phonon/VideoWidget>
+
+#include "QVBoxLayout"
 #include <QDebug>
 videoWidgetPlayer::videoWidgetPlayer(QWidget *parent) :
     QWidget(parent)
 {
-/*
+
     Phonon::MediaObject *mediaObject = new Phonon::MediaObject(this);
 
          Phonon::VideoWidget *videoWidget = new Phonon::VideoWidget(this);
@@ -25,7 +27,8 @@ videoWidgetPlayer::videoWidgetPlayer(QWidget *parent) :
          qDebug() << mediaObject->totalTime();
          qDebug() << mediaObject->isSeekable();
          qDebug() << mediaObject->errorType();
-*/
+
+
    Phonon::VideoPlayer *player =
              new Phonon::VideoPlayer(Phonon::VideoCategory, parent);
 
@@ -33,8 +36,9 @@ videoWidgetPlayer::videoWidgetPlayer(QWidget *parent) :
       mainLayout->setMargin(0);
       mainLayout->addWidget( player);
       player->play(QUrl::fromLocalFile("file goes here"));
+      }
 
 
 
 
-}
+

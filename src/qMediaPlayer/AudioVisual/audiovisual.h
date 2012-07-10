@@ -1,10 +1,10 @@
 #ifndef AUDIOVISUAL_H
 #define AUDIOVISUAL_H
-//this class represents the 'top level' of the QDeclarativeItem. Here is where we take our subclassed video widget and
-//place it in a QDeclarativeItem
+
 
 #include <QDeclarativeItem>
 #include <phonon/Phonon>
+
 #include <QString>
 #include <QUrl>
 #include "videowidgetplayer.h"
@@ -24,5 +24,7 @@ signals:
 public slots:
     
 };
+
+
 
 #endif // AUDIOVISUAL_H

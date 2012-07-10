@@ -4,6 +4,7 @@
 #include <QPainter>
 #include <phonon/VideoPlayer>
 #include <QDeclarativeItem>
+
 #include <QGraphicsProxyWidget>
 #include <QDebug>
 
@@ -39,3 +40,4 @@ bool AudioVisual::playAudio(const QString &audio)
          music->play();
     return true;
 }
+

@@ -39,16 +39,12 @@ void FloorPlanModel::appendRows(const QList<FloorplanDevice *> &items)
         QObject::connect(item, SIGNAL(dataChanged()), this, SLOT(handleItemChange()));
         QObject::connect(this, SIGNAL(changePage(int)), item, SLOT(setCurrentPage(int)));
         m_list.append(item);
-
     }
-
     endInsertRows();
-
     QModelIndex index = indexFromItem(m_list.last());
     QModelIndex index2 = indexFromItem(m_list.first());
     int currentRows= m_list.count() - 1;
     emit dataChanged(index2, index);
-
 }
 
 void FloorPlanModel::insertRow(int row, FloorplanDevice *item)

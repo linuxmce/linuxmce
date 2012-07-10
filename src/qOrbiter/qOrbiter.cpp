@@ -2009,7 +2009,7 @@ void qOrbiter::getFloorplanDeviceCommand(int device)
     string cmdresponse="";
     if (SendCommand(cmd_populate_device_grid, &cmdresponse) && cmdresponse=="OK")
     {
-        //  qDebug() << "Requesting floorplan Device commands";
+          qDebug() << "Requesting floorplan Device commands";
 
         cmdresponse="";
 
@@ -2017,7 +2017,7 @@ void qOrbiter::getFloorplanDeviceCommand(int device)
         DCE::CMD_Request_Datagrid_Contents req_device_grid( long(m_dwPK_Device), long(iPK_Device_DatagridPlugIn), StringUtils::itos( m_dwIDataGridRequestCounter ), string(dgName),    int(gWidth), int(gHeight),           false, false,        true,   string(m_sSeek),    int(iOffset),  &pData,         &iData_Size, &GridCurRow, &GridCurCol );
         if(SendCommand(req_device_grid, &cmdresponse) && cmdresponse=="OK")
         {
-            //            qDebug() << cmdresponse.c_str();
+                       qDebug() << cmdresponse.c_str();
             DataGridTable *pDataGridTable = new DataGridTable(iData_Size,pData,false);
             cellsToRender= pDataGridTable->GetRows();
 #ifndef ANDROID
@@ -2027,7 +2027,7 @@ void qOrbiter::getFloorplanDeviceCommand(int device)
             QString fk_file;
             QString filePath;
             int index;
-            // qDebug() << pDataGridTable->getTotalRowCount();
+             qDebug() << pDataGridTable->getTotalRowCount();
             for(MemoryDataTable::iterator it=pDataGridTable->m_MemoryDataTable.begin();it!=pDataGridTable->m_MemoryDataTable.end();++it)
             {
                 DataGridCell *pCell = it->second;
@@ -2036,18 +2036,18 @@ void qOrbiter::getFloorplanDeviceCommand(int device)
                 fk_file = pCell->GetValue();
                 cellTitle = QString::fromUtf8(pCell->m_Text);
                 index = pDataGridTable->CovertColRowType(it->first).first;
-                //  qDebug() << cellTitle;
+                qDebug() << cellTitle;
 
             }
         }
         else
         {
-            //   qDebug() << cmdresponse.c_str();
+             qDebug() << cmdresponse.c_str();
         }
     }
     else
     {
-        //   qDebug() << cmdresponse.c_str();
+         qDebug() << cmdresponse.c_str();
     }
 
 }

@@ -6,6 +6,14 @@ Item {
     width: itemW
     height: itemH
     objectName:deviceNum
+    ListModel{
+        id:commandModel
+
+        ListElement{
+            dcecommand:"on"
+            dcecmdgrp:1
+        }
+    }
 
     property color activeColor: "grey"
     property color inactivecolor: "green"
@@ -19,6 +27,7 @@ Item {
     property int itemH:scaleY(3)
     property int itemW: scaleY(3)
     property double iconScale: 1.5
+    property ListModel commandModel
 
     scale: iconScale
     function updateFpItem()
@@ -57,6 +66,33 @@ Item {
     Connections{
         target:floorplan_devices
         onChangePage:sprite_root.destroy()
+    }
+
+    ListView{
+        id:commandPopup
+        height: selected === true ? 100 : 0
+        width: selected === true? 50 : 0
+        model: commandModel
+        anchors.bottom: sprite.top
+        anchors.horizontalCenter: parent.horizontalCenter
+        delegate: Rectangle{
+            visible: selected === true ? true : false
+            height: 50
+            width: 50
+            color: delegateHit.pressed ? "white" : "lightgrey"
+            Text {
+                id: cmdLabel
+                text: dcecommand
+            }
+
+            MouseArea{
+                id:delegateHit
+                anchors.fill: commandPopup
+                onClicked: console.log("I want to send command:"+dcecommand)
+
+            }
+
+        }
     }
 
     MouseArea{

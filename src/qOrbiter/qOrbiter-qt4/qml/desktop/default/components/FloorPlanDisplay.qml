@@ -7,6 +7,29 @@ Rectangle {
     color: style.darkhighlight
     property int scaleFactor:floorplanimage.scale
 
+    function prepareCommands(){
+
+    }
+
+
+    ListModel{
+        id:commandTypes
+
+        function getCommands(type){
+            for (var i=0; i < count; i++ )
+            {
+                if(type===get(i).cat)
+                    return get(i).commands            }
+        }
+
+        ListElement{
+            cat:2
+            dimming:true
+            binary:true
+            commands:"ack"
+        }
+    }
+
     function placeSprites(x,y, num, state, devtype)
     {
         var i;
@@ -132,7 +155,7 @@ Rectangle {
             height: scaleY(20)
             width: scaleY(20)
 
-            color: "lightgrey"
+            color: delegateMA.pressed ? "white": "lightgrey"
 
 
             Column{
@@ -160,7 +183,8 @@ Rectangle {
             }
 
             MouseArea{
-                anchors.fill: parent
+                id:delegateMA
+                anchors.fill: parent                
                 onClicked: dcerouter.getFloorplanDeviceCommand(type)
             }
         }

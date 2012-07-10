@@ -9,7 +9,6 @@ Rectangle {
     width: appW
     color:"transparent"
 
-
     Connections{
         target:dcenowplaying
         onPlayListPositionChanged: nowplayingimage.source = "image://listprovider/updateobject/"+securityvideo.timestamp

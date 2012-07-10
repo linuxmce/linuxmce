@@ -70,11 +70,7 @@ folder_03.source = config.xml
 folder_03.target = $$DESTDIR
 
 DEFINES += for_desktop
-
-
 QT+= phonon
-
-
 }
 
 WIN32{
@@ -159,21 +155,24 @@ folder_05.target = $$DESTDIR/qml
 DEFINES+=ANDROID
 
 }
-#plugins_folder.source = plugins/
-#plugins_folder.target = $$DESTDIR
+plugins_folder.source = imports/
+plugins_folder.target = $$DESTDIR
+
+shaders_folder.source = imports/Qt/labs/shaders
+shaders_folder.target = $$DESTDIR
 #uncomment this line to work on skins locally
 
-!win32{DEPLOYMENTFOLDERS = folder_01 folder_02 folder_03 folder_05 }
+DEPLOYMENTFOLDERS+=folder_01 plugins_folder folder_05 shaders_folder
+
+!win32{DEPLOYMENTFOLDERS+= folder_02 folder_03 }
 
 win32{
-DEPLOYMENTFOLDERS = folder_01 files_01 folder_05
-
-}
+DEPLOYMENTFOLDERS +=files_01}
 
 
 # Additional import path used to resolve QML modules in Creator's code model
-#QML_IMPORT_PATH =
-#QML_IMPORT_TRACE = 1
+QML_IMPORT_PATH = imports
+QML_IMPORT_TRACE = 1
 
 symbian:TARGET.UID3 = 0xE0D07D4D
 QMAKE_CXXFLAGS += -DUSE_LZO_DATAGRID

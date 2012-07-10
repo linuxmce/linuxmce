@@ -70,7 +70,7 @@ public:
     int mI_floorplanType;                   //type of floorplan its associated with
     QString mQS_position;                   //postion, raw in string form
     QImage mIM_icon;                        //raw image data
-    QStringList mm_currentPosition;     //map of positions on pages
+    QStringList mm_currentPosition;         //map of positions on pages
     QMap <QString, QString> mm_commands;    //command map with command and corresponding ??
     QString mQS_iconpath;                   //icon path to be used in the future with skins
     int currentFloorplanX;
