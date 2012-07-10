@@ -811,9 +811,9 @@
 		95CBD46915A9FC1100F17914 /* Includes */ = {
 			isa = PBXGroup;
 			children = (
+				95CBD28B15A9F0CF00F17914 /* Tables */,
 				95CBD46C15A9FC9E00F17914 /* Database_pluto_main.cpp */,
 				95CBD46A15A9FC8900F17914 /* TableRow.cpp */,
-				95CBD28B15A9F0CF00F17914 /* Tables */,
 				95CBD46315A9F1E400F17914 /* mysql */,
 			);
 			name = Includes;
@@ -1175,24 +1175,39 @@
 		95CBD28615A9EFEB00F17914 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				CONFIGURATION_BUILD_DIR = lib;
+				HEADER_SEARCH_PATHS = (
+					../DCE,
+					..,
+				);
+				LD_DYLIB_INSTALL_NAME = "$(DYLIB_INSTALL_NAME_BASE:standardizepath)/$(EXECUTABLE_PATH)";
 				LIBRARY_SEARCH_PATHS = (
 					"$(inherited)",
 					"\"$(SRCROOT)/mysql/lib\"",
 					"\"$(SRCROOT)/lib\"",
 				);
 				PRODUCT_NAME = "$(TARGET_NAME)";
+				SHARED_PRECOMPS_DIR = lib;
 			};
 			name = Debug;
 		};
 		95CBD28715A9EFEB00F17914 /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				CONFIGURATION_BUILD_DIR = lib;
+				HEADER_SEARCH_PATHS = (
+					../DCE,
+					..,
+				);
+				LD_DYLIB_INSTALL_NAME = "$(DYLIB_INSTALL_NAME_BASE:standardizepath)/$(EXECUTABLE_PATH)";
+				LD_MAP_FILE_PATH = "$(EXECUTABLE_PATH)";
 				LIBRARY_SEARCH_PATHS = (
 					"$(inherited)",
 					"\"$(SRCROOT)/mysql/lib\"",
 					"\"$(SRCROOT)/lib\"",
 				);
 				PRODUCT_NAME = "$(TARGET_NAME)";
+				SHARED_PRECOMPS_DIR = lib;
 			};
 			name = Release;
 		};

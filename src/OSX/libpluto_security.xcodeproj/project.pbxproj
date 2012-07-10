@@ -1,0 +1,331 @@
+// !$*UTF8*$!
+{
+	archiveVersion = 1;
+	classes = {
+	};
+	objectVersion = 46;
+	objects = {
+
+/* Begin PBXBuildFile section */
+		956B0A2515ACA8BA0006C6C0 /* libpluto_security.cp in Sources */ = {isa = PBXBuildFile; fileRef = 956B0A2415ACA8BA0006C6C0 /* libpluto_security.cp */; };
+		956B0A3215ACB1440006C6C0 /* Database_pluto_security.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 956B0A3115ACB1440006C6C0 /* Database_pluto_security.cpp */; };
+		956B0A3F15ACB1940006C6C0 /* Table_Alert_Device.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 956B0A3415ACB1940006C6C0 /* Table_Alert_Device.cpp */; };
+		956B0A4015ACB1940006C6C0 /* Table_Alert.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 956B0A3515ACB1940006C6C0 /* Table_Alert.cpp */; };
+		956B0A4115ACB1940006C6C0 /* Table_AlertType.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 956B0A3615ACB1940006C6C0 /* Table_AlertType.cpp */; };
+		956B0A4215ACB1940006C6C0 /* Table_ModeChange.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 956B0A3715ACB1940006C6C0 /* Table_ModeChange.cpp */; };
+		956B0A4315ACB1940006C6C0 /* Table_Notification.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 956B0A3815ACB1940006C6C0 /* Table_Notification.cpp */; };
+		956B0A4415ACB1940006C6C0 /* Table_psc_security_batdet.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 956B0A3915ACB1940006C6C0 /* Table_psc_security_batdet.cpp */; };
+		956B0A4515ACB1940006C6C0 /* Table_psc_security_bathdr.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 956B0A3A15ACB1940006C6C0 /* Table_psc_security_bathdr.cpp */; };
+		956B0A4615ACB1940006C6C0 /* Table_psc_security_batuser.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 956B0A3B15ACB1940006C6C0 /* Table_psc_security_batuser.cpp */; };
+		956B0A4715ACB1940006C6C0 /* Table_psc_security_repset.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 956B0A3C15ACB1940006C6C0 /* Table_psc_security_repset.cpp */; };
+		956B0A4815ACB1940006C6C0 /* Table_psc_security_schema.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 956B0A3D15ACB1940006C6C0 /* Table_psc_security_schema.cpp */; };
+		956B0A4915ACB1940006C6C0 /* Table_psc_security_tables.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 956B0A3E15ACB1940006C6C0 /* Table_psc_security_tables.cpp */; };
+		956B0A4B15ACBBBF0006C6C0 /* mysql.h in Headers */ = {isa = PBXBuildFile; fileRef = 956B0A4A15ACBBBF0006C6C0 /* mysql.h */; };
+		956B0A4D15ACC0380006C6C0 /* libDCECommon.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 956B0A4C15ACC0380006C6C0 /* libDCECommon.dylib */; };
+		956B0A4F15ACC04B0006C6C0 /* libmysqlclient.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 956B0A4E15ACC04B0006C6C0 /* libmysqlclient.dylib */; };
+		956B0A5115ACCA670006C6C0 /* TableRow.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 956B0A5015ACCA670006C6C0 /* TableRow.cpp */; };
+/* End PBXBuildFile section */
+
+/* Begin PBXFileReference section */
+		956B0A1B15ACA8BA0006C6C0 /* libpluto_security.dylib */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.dylib"; includeInIndex = 0; path = libpluto_security.dylib; sourceTree = BUILT_PRODUCTS_DIR; };
+		956B0A1F15ACA8BA0006C6C0 /* libpluto_security-Prefix.pch */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "libpluto_security-Prefix.pch"; sourceTree = "<group>"; };
+		956B0A2015ACA8BA0006C6C0 /* libpluto_securityProj.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; path = libpluto_securityProj.xcconfig; sourceTree = "<group>"; };
+		956B0A2115ACA8BA0006C6C0 /* libpluto_securityTarget.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; path = libpluto_securityTarget.xcconfig; sourceTree = "<group>"; };
+		956B0A2215ACA8BA0006C6C0 /* libpluto_security.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = libpluto_security.h; sourceTree = "<group>"; };
+		956B0A2315ACA8BA0006C6C0 /* libpluto_securityPriv.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = libpluto_securityPriv.h; sourceTree = "<group>"; };
+		956B0A2415ACA8BA0006C6C0 /* libpluto_security.cp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = libpluto_security.cp; sourceTree = "<group>"; };
+		956B0A3115ACB1440006C6C0 /* Database_pluto_security.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = Database_pluto_security.cpp; path = ../pluto_security/Database_pluto_security.cpp; sourceTree = "<group>"; };
+		956B0A3415ACB1940006C6C0 /* Table_Alert_Device.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = Table_Alert_Device.cpp; path = ../pluto_security/Table_Alert_Device.cpp; sourceTree = "<group>"; };
+		956B0A3515ACB1940006C6C0 /* Table_Alert.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = Table_Alert.cpp; path = ../pluto_security/Table_Alert.cpp; sourceTree = "<group>"; };
+		956B0A3615ACB1940006C6C0 /* Table_AlertType.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = Table_AlertType.cpp; path = ../pluto_security/Table_AlertType.cpp; sourceTree = "<group>"; };
+		956B0A3715ACB1940006C6C0 /* Table_ModeChange.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = Table_ModeChange.cpp; path = ../pluto_security/Table_ModeChange.cpp; sourceTree = "<group>"; };
+		956B0A3815ACB1940006C6C0 /* Table_Notification.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = Table_Notification.cpp; path = ../pluto_security/Table_Notification.cpp; sourceTree = "<group>"; };
+		956B0A3915ACB1940006C6C0 /* Table_psc_security_batdet.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = Table_psc_security_batdet.cpp; path = ../pluto_security/Table_psc_security_batdet.cpp; sourceTree = "<group>"; };
+		956B0A3A15ACB1940006C6C0 /* Table_psc_security_bathdr.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = Table_psc_security_bathdr.cpp; path = ../pluto_security/Table_psc_security_bathdr.cpp; sourceTree = "<group>"; };
+		956B0A3B15ACB1940006C6C0 /* Table_psc_security_batuser.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = Table_psc_security_batuser.cpp; path = ../pluto_security/Table_psc_security_batuser.cpp; sourceTree = "<group>"; };
+		956B0A3C15ACB1940006C6C0 /* Table_psc_security_repset.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = Table_psc_security_repset.cpp; path = ../pluto_security/Table_psc_security_repset.cpp; sourceTree = "<group>"; };
+		956B0A3D15ACB1940006C6C0 /* Table_psc_security_schema.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = Table_psc_security_schema.cpp; path = ../pluto_security/Table_psc_security_schema.cpp; sourceTree = "<group>"; };
+		956B0A3E15ACB1940006C6C0 /* Table_psc_security_tables.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = Table_psc_security_tables.cpp; path = ../pluto_security/Table_psc_security_tables.cpp; sourceTree = "<group>"; };
+		956B0A4A15ACBBBF0006C6C0 /* mysql.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = mysql.h; path = mysql/include/mysql.h; sourceTree = "<group>"; };
+		956B0A4C15ACC0380006C6C0 /* libDCECommon.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libDCECommon.dylib; path = lib/libDCECommon.dylib; sourceTree = "<group>"; };
+		956B0A4E15ACC04B0006C6C0 /* libmysqlclient.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libmysqlclient.dylib; path = mysql/lib/libmysqlclient.dylib; sourceTree = "<group>"; };
+		956B0A5015ACCA670006C6C0 /* TableRow.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = TableRow.cpp; path = ../pluto_security/TableRow.cpp; sourceTree = "<group>"; };
+/* End PBXFileReference section */
+
+/* Begin PBXFrameworksBuildPhase section */
+		956B0A1815ACA8BA0006C6C0 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				956B0A4D15ACC0380006C6C0 /* libDCECommon.dylib in Frameworks */,
+				956B0A4F15ACC04B0006C6C0 /* libmysqlclient.dylib in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXFrameworksBuildPhase section */
+
+/* Begin PBXGroup section */
+		956B0A1015ACA8B90006C6C0 = {
+			isa = PBXGroup;
+			children = (
+				956B0A3115ACB1440006C6C0 /* Database_pluto_security.cpp */,
+				956B0A5015ACCA670006C6C0 /* TableRow.cpp */,
+				956B0A3015ACB1050006C6C0 /* Libraries */,
+				956B0A2E15ACB0FB0006C6C0 /* Includes */,
+				956B0A1D15ACA8BA0006C6C0 /* libpluto_security */,
+				956B0A1C15ACA8BA0006C6C0 /* Products */,
+			);
+			sourceTree = "<group>";
+		};
+		956B0A1C15ACA8BA0006C6C0 /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				956B0A1B15ACA8BA0006C6C0 /* libpluto_security.dylib */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+		956B0A1D15ACA8BA0006C6C0 /* libpluto_security */ = {
+			isa = PBXGroup;
+			children = (
+				956B0A2015ACA8BA0006C6C0 /* libpluto_securityProj.xcconfig */,
+				956B0A2115ACA8BA0006C6C0 /* libpluto_securityTarget.xcconfig */,
+				956B0A2215ACA8BA0006C6C0 /* libpluto_security.h */,
+				956B0A2315ACA8BA0006C6C0 /* libpluto_securityPriv.h */,
+				956B0A2415ACA8BA0006C6C0 /* libpluto_security.cp */,
+				956B0A1E15ACA8BA0006C6C0 /* Supporting Files */,
+			);
+			path = libpluto_security;
+			sourceTree = "<group>";
+		};
+		956B0A1E15ACA8BA0006C6C0 /* Supporting Files */ = {
+			isa = PBXGroup;
+			children = (
+				956B0A1F15ACA8BA0006C6C0 /* libpluto_security-Prefix.pch */,
+			);
+			name = "Supporting Files";
+			sourceTree = "<group>";
+		};
+		956B0A2E15ACB0FB0006C6C0 /* Includes */ = {
+			isa = PBXGroup;
+			children = (
+				956B0A4A15ACBBBF0006C6C0 /* mysql.h */,
+				956B0A3315ACB1520006C6C0 /* Tables */,
+			);
+			name = Includes;
+			sourceTree = "<group>";
+		};
+		956B0A3015ACB1050006C6C0 /* Libraries */ = {
+			isa = PBXGroup;
+			children = (
+				956B0A4C15ACC0380006C6C0 /* libDCECommon.dylib */,
+				956B0A4E15ACC04B0006C6C0 /* libmysqlclient.dylib */,
+			);
+			name = Libraries;
+			sourceTree = "<group>";
+		};
+		956B0A3315ACB1520006C6C0 /* Tables */ = {
+			isa = PBXGroup;
+			children = (
+				956B0A3415ACB1940006C6C0 /* Table_Alert_Device.cpp */,
+				956B0A3515ACB1940006C6C0 /* Table_Alert.cpp */,
+				956B0A3615ACB1940006C6C0 /* Table_AlertType.cpp */,
+				956B0A3715ACB1940006C6C0 /* Table_ModeChange.cpp */,
+				956B0A3815ACB1940006C6C0 /* Table_Notification.cpp */,
+				956B0A3915ACB1940006C6C0 /* Table_psc_security_batdet.cpp */,
+				956B0A3A15ACB1940006C6C0 /* Table_psc_security_bathdr.cpp */,
+				956B0A3B15ACB1940006C6C0 /* Table_psc_security_batuser.cpp */,
+				956B0A3C15ACB1940006C6C0 /* Table_psc_security_repset.cpp */,
+				956B0A3D15ACB1940006C6C0 /* Table_psc_security_schema.cpp */,
+				956B0A3E15ACB1940006C6C0 /* Table_psc_security_tables.cpp */,
+			);
+			name = Tables;
+			sourceTree = "<group>";
+		};
+/* End PBXGroup section */
+
+/* Begin PBXHeadersBuildPhase section */
+		956B0A1915ACA8BA0006C6C0 /* Headers */ = {
+			isa = PBXHeadersBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				956B0A4B15ACBBBF0006C6C0 /* mysql.h in Headers */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXHeadersBuildPhase section */
+
+/* Begin PBXNativeTarget section */
+		956B0A1A15ACA8BA0006C6C0 /* libpluto_security */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 956B0A2815ACA8BA0006C6C0 /* Build configuration list for PBXNativeTarget "libpluto_security" */;
+			buildPhases = (
+				956B0A1715ACA8BA0006C6C0 /* Sources */,
+				956B0A1815ACA8BA0006C6C0 /* Frameworks */,
+				956B0A1915ACA8BA0006C6C0 /* Headers */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = libpluto_security;
+			productName = libpluto_security;
+			productReference = 956B0A1B15ACA8BA0006C6C0 /* libpluto_security.dylib */;
+			productType = "com.apple.product-type.library.dynamic";
+		};
+/* End PBXNativeTarget section */
+
+/* Begin PBXProject section */
+		956B0A1215ACA8B90006C6C0 /* Project object */ = {
+			isa = PBXProject;
+			attributes = {
+				LastUpgradeCheck = 0420;
+			};
+			buildConfigurationList = 956B0A1515ACA8B90006C6C0 /* Build configuration list for PBXProject "libpluto_security" */;
+			compatibilityVersion = "Xcode 3.2";
+			developmentRegion = English;
+			hasScannedForEncodings = 0;
+			knownRegions = (
+				en,
+			);
+			mainGroup = 956B0A1015ACA8B90006C6C0;
+			productRefGroup = 956B0A1C15ACA8BA0006C6C0 /* Products */;
+			projectDirPath = "";
+			projectRoot = "";
+			targets = (
+				956B0A1A15ACA8BA0006C6C0 /* libpluto_security */,
+			);
+		};
+/* End PBXProject section */
+
+/* Begin PBXSourcesBuildPhase section */
+		956B0A1715ACA8BA0006C6C0 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				956B0A2515ACA8BA0006C6C0 /* libpluto_security.cp in Sources */,
+				956B0A3215ACB1440006C6C0 /* Database_pluto_security.cpp in Sources */,
+				956B0A3F15ACB1940006C6C0 /* Table_Alert_Device.cpp in Sources */,
+				956B0A4015ACB1940006C6C0 /* Table_Alert.cpp in Sources */,
+				956B0A4115ACB1940006C6C0 /* Table_AlertType.cpp in Sources */,
+				956B0A4215ACB1940006C6C0 /* Table_ModeChange.cpp in Sources */,
+				956B0A4315ACB1940006C6C0 /* Table_Notification.cpp in Sources */,
+				956B0A4415ACB1940006C6C0 /* Table_psc_security_batdet.cpp in Sources */,
+				956B0A4515ACB1940006C6C0 /* Table_psc_security_bathdr.cpp in Sources */,
+				956B0A4615ACB1940006C6C0 /* Table_psc_security_batuser.cpp in Sources */,
+				956B0A4715ACB1940006C6C0 /* Table_psc_security_repset.cpp in Sources */,
+				956B0A4815ACB1940006C6C0 /* Table_psc_security_schema.cpp in Sources */,
+				956B0A4915ACB1940006C6C0 /* Table_psc_security_tables.cpp in Sources */,
+				956B0A5115ACCA670006C6C0 /* TableRow.cpp in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXSourcesBuildPhase section */
+
+/* Begin XCBuildConfiguration section */
+		956B0A2615ACA8BA0006C6C0 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				ARCHS = "$(ARCHS_STANDARD_64_BIT)";
+				CLANG_ENABLE_OBJC_ARC = YES;
+				COPY_PHASE_STRIP = NO;
+				GCC_C_LANGUAGE_STANDARD = gnu99;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_ENABLE_OBJC_EXCEPTIONS = YES;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"DEBUG=1",
+					"$(inherited)",
+				);
+				GCC_SYMBOLS_PRIVATE_EXTERN = NO;
+				GCC_VERSION = com.apple.compilers.llvm.clang.1_0;
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_MISSING_PROTOTYPES = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				MACOSX_DEPLOYMENT_TARGET = 10.7;
+				ONLY_ACTIVE_ARCH = YES;
+				SDKROOT = macosx;
+			};
+			name = Debug;
+		};
+		956B0A2715ACA8BA0006C6C0 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				ARCHS = "$(ARCHS_STANDARD_64_BIT)";
+				CLANG_ENABLE_OBJC_ARC = YES;
+				COPY_PHASE_STRIP = YES;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				GCC_C_LANGUAGE_STANDARD = gnu99;
+				GCC_ENABLE_OBJC_EXCEPTIONS = YES;
+				GCC_VERSION = com.apple.compilers.llvm.clang.1_0;
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_MISSING_PROTOTYPES = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				MACOSX_DEPLOYMENT_TARGET = 10.7;
+				SDKROOT = macosx;
+			};
+			name = Release;
+		};
+		956B0A2915ACA8BA0006C6C0 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CONFIGURATION_BUILD_DIR = lib;
+				HEADER_SEARCH_PATHS = (
+					../DCE,
+					..,
+				);
+				LIBRARY_SEARCH_PATHS = (
+					"$(inherited)",
+					"\"$(SRCROOT)/lib\"",
+					"\"$(SRCROOT)/mysql/lib\"",
+				);
+				PRODUCT_NAME = "$(TARGET_NAME)";
+			};
+			name = Debug;
+		};
+		956B0A2A15ACA8BA0006C6C0 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CONFIGURATION_BUILD_DIR = lib;
+				HEADER_SEARCH_PATHS = (
+					../DCE,
+					..,
+				);
+				LIBRARY_SEARCH_PATHS = (
+					"$(inherited)",
+					"\"$(SRCROOT)/lib\"",
+					"\"$(SRCROOT)/mysql/lib\"",
+				);
+				PRODUCT_NAME = "$(TARGET_NAME)";
+			};
+			name = Release;
+		};
+/* End XCBuildConfiguration section */
+
+/* Begin XCConfigurationList section */
+		956B0A1515ACA8B90006C6C0 /* Build configuration list for PBXProject "libpluto_security" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				956B0A2615ACA8BA0006C6C0 /* Debug */,
+				956B0A2715ACA8BA0006C6C0 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		956B0A2815ACA8BA0006C6C0 /* Build configuration list for PBXNativeTarget "libpluto_security" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				956B0A2915ACA8BA0006C6C0 /* Debug */,
+				956B0A2A15ACA8BA0006C6C0 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+/* End XCConfigurationList section */
+	};
+	rootObject = 956B0A1215ACA8B90006C6C0 /* Project object */;
+}
