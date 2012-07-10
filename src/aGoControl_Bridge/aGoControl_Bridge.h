@@ -22,6 +22,15 @@
 #include "Gen_Devices/aGoControl_BridgeBase.h"
 //<-dceag-d-e->
 
+#include <qpid/messaging/Connection.h>
+#include <qpid/messaging/Message.h>
+#include <qpid/messaging/Receiver.h>
+#include <qpid/messaging/Sender.h>
+#include <qpid/messaging/Session.h>
+#include <qpid/messaging/Address.h>
+
+#include <uuid/uuid.h>
+
 //<-dceag-decl-b->
 namespace DCE
 {
@@ -29,6 +38,10 @@ namespace DCE
 	{
 //<-dceag-decl-e->
 		// Private member variables
+		qpid::messaging::Connection agoConnection;
+		qpid::messaging::Session agoSession;
+		qpid::messaging::Receiver agoEventReceiver;
+		qpid::messaging::Sender agoCommandSender;
 
 		// Private methods
 public:
