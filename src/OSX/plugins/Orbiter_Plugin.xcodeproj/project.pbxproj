@@ -1,0 +1,343 @@
+// !$*UTF8*$!
+{
+	archiveVersion = 1;
+	classes = {
+	};
+	objectVersion = 46;
+	objects = {
+
+/* Begin PBXBuildFile section */
+		956B09EE15AC915F0006C6C0 /* Orbiter_Plugin.cp in Sources */ = {isa = PBXBuildFile; fileRef = 956B09ED15AC915F0006C6C0 /* Orbiter_Plugin.cp */; };
+		956B09F815AC925A0006C6C0 /* Main.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 956B09F715AC925A0006C6C0 /* Main.cpp */; };
+		956B09FB15AC92630006C6C0 /* Orbiter_Plugin.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 956B09FA15AC92630006C6C0 /* Orbiter_Plugin.cpp */; };
+		956B09FF15AC92BA0006C6C0 /* FollowMe_Device.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 956B09FE15AC92BA0006C6C0 /* FollowMe_Device.cpp */; };
+		956B0A0115AC92C70006C6C0 /* PopulateListsInVMC.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 956B0A0015AC92C70006C6C0 /* PopulateListsInVMC.cpp */; };
+		956B0A0315AC934B0006C6C0 /* Orbiter_PluginBase.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 956B0A0215AC934B0006C6C0 /* Orbiter_PluginBase.cpp */; };
+		956B0A0515AC93B50006C6C0 /* mysql.h in Headers */ = {isa = PBXBuildFile; fileRef = 956B0A0415AC93B50006C6C0 /* mysql.h */; };
+		956B0A0715AC97670006C6C0 /* libDCECommon.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 956B0A0615AC97670006C6C0 /* libDCECommon.dylib */; };
+		956B0A0915AC978D0006C6C0 /* libpluto_main.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 956B0A0815AC978D0006C6C0 /* libpluto_main.dylib */; };
+		956B0A0B15AC97AB0006C6C0 /* libmysqlclient.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 956B0A0A15AC97AB0006C6C0 /* libmysqlclient.dylib */; };
+		95ABFD2315ACD1A00079029F /* libpluto_security.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 95ABFD2215ACD1A00079029F /* libpluto_security.dylib */; };
+		95ABFDAF15ACD5740079029F /* libpluto_media.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 95ABFDAE15ACD5740079029F /* libpluto_media.dylib */; };
+		95ABFDB115ACD67C0079029F /* RegenMonitor.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 95ABFDB015ACD67C0079029F /* RegenMonitor.cpp */; };
+		95ABFDB315ACD7890079029F /* OH_Orbiter.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 95ABFDB215ACD7890079029F /* OH_Orbiter.cpp */; };
+		95ABFDB515ACD92B0079029F /* DatabaseUtils.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 95ABFDB415ACD92B0079029F /* DatabaseUtils.cpp */; };
+		95ABFDB715ACD95B0079029F /* ProcessUtils.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 95ABFDB615ACD95B0079029F /* ProcessUtils.cpp */; };
+		95ABFDBB15ACDA700079029F /* CreateDevice.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 95ABFDBA15ACDA700079029F /* CreateDevice.cpp */; };
+		95ABFDBD15ACDB370079029F /* VIPMenu.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 95ABFDBC15ACDB370079029F /* VIPMenu.cpp */; };
+		95ABFDC115ACDC040079029F /* Other.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 95ABFDC015ACDC040079029F /* Other.cpp */; };
+		95ABFDF715AE1F590079029F /* Datagrid_Plugin.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 95ABFDF615AE1F590079029F /* Datagrid_Plugin.dylib */; };
+		95ABFDF915AE21420079029F /* OrbiterFileBrowser.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 95ABFDF815AE21420079029F /* OrbiterFileBrowser.cpp */; };
+/* End PBXBuildFile section */
+
+/* Begin PBXFileReference section */
+		956B09E415AC915E0006C6C0 /* Orbiter_Plugin.dylib */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.dylib"; includeInIndex = 0; path = Orbiter_Plugin.dylib; sourceTree = BUILT_PRODUCTS_DIR; };
+		956B09E815AC915E0006C6C0 /* Orbiter_Plugin-Prefix.pch */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "Orbiter_Plugin-Prefix.pch"; sourceTree = "<group>"; };
+		956B09E915AC915F0006C6C0 /* Orbiter_PluginProj.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; path = Orbiter_PluginProj.xcconfig; sourceTree = "<group>"; };
+		956B09EA15AC915F0006C6C0 /* Orbiter_PluginTarget.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; path = Orbiter_PluginTarget.xcconfig; sourceTree = "<group>"; };
+		956B09EB15AC915F0006C6C0 /* Orbiter_Plugin.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = Orbiter_Plugin.h; sourceTree = "<group>"; };
+		956B09EC15AC915F0006C6C0 /* Orbiter_PluginPriv.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = Orbiter_PluginPriv.h; sourceTree = "<group>"; };
+		956B09ED15AC915F0006C6C0 /* Orbiter_Plugin.cp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = Orbiter_Plugin.cp; sourceTree = "<group>"; };
+		956B09F715AC925A0006C6C0 /* Main.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = Main.cpp; path = ../../Orbiter_Plugin/Main.cpp; sourceTree = "<group>"; };
+		956B09FA15AC92630006C6C0 /* Orbiter_Plugin.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = Orbiter_Plugin.cpp; path = ../../Orbiter_Plugin/Orbiter_Plugin.cpp; sourceTree = "<group>"; };
+		956B09FE15AC92BA0006C6C0 /* FollowMe_Device.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = FollowMe_Device.cpp; path = ../../Orbiter_Plugin/FollowMe_Device.cpp; sourceTree = "<group>"; };
+		956B0A0015AC92C70006C6C0 /* PopulateListsInVMC.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = PopulateListsInVMC.cpp; path = ../../Orbiter_Plugin/PopulateListsInVMC.cpp; sourceTree = "<group>"; };
+		956B0A0215AC934B0006C6C0 /* Orbiter_PluginBase.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = Orbiter_PluginBase.cpp; path = ../../Gen_Devices/Orbiter_PluginBase.cpp; sourceTree = "<group>"; };
+		956B0A0415AC93B50006C6C0 /* mysql.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = mysql.h; path = ../mysql/include/mysql.h; sourceTree = "<group>"; };
+		956B0A0615AC97670006C6C0 /* libDCECommon.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libDCECommon.dylib; path = ../lib/libDCECommon.dylib; sourceTree = "<group>"; };
+		956B0A0815AC978D0006C6C0 /* libpluto_main.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libpluto_main.dylib; path = ../lib/libpluto_main.dylib; sourceTree = "<group>"; };
+		956B0A0A15AC97AB0006C6C0 /* libmysqlclient.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libmysqlclient.dylib; path = ../mysql/lib/libmysqlclient.dylib; sourceTree = "<group>"; };
+		95ABFD2215ACD1A00079029F /* libpluto_security.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libpluto_security.dylib; path = ../lib/libpluto_security.dylib; sourceTree = "<group>"; };
+		95ABFDAE15ACD5740079029F /* libpluto_media.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libpluto_media.dylib; path = ../lib/libpluto_media.dylib; sourceTree = "<group>"; };
+		95ABFDB015ACD67C0079029F /* RegenMonitor.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = RegenMonitor.cpp; path = ../../OrbiterGen/RegenMonitor.cpp; sourceTree = "<group>"; };
+		95ABFDB215ACD7890079029F /* OH_Orbiter.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = OH_Orbiter.cpp; path = ../../Orbiter_Plugin/OH_Orbiter.cpp; sourceTree = "<group>"; };
+		95ABFDB415ACD92B0079029F /* DatabaseUtils.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = DatabaseUtils.cpp; path = ../../PlutoUtils/DatabaseUtils.cpp; sourceTree = "<group>"; };
+		95ABFDB615ACD95B0079029F /* ProcessUtils.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = ProcessUtils.cpp; path = ../../PlutoUtils/ProcessUtils.cpp; sourceTree = "<group>"; };
+		95ABFDBA15ACDA700079029F /* CreateDevice.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = CreateDevice.cpp; path = ../../CreateDevice/CreateDevice.cpp; sourceTree = "<group>"; };
+		95ABFDBC15ACDB370079029F /* VIPMenu.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = VIPMenu.cpp; path = ../../VIPShared/VIPMenu.cpp; sourceTree = "<group>"; };
+		95ABFDC015ACDC040079029F /* Other.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = Other.cpp; path = ../../PlutoUtils/Other.cpp; sourceTree = "<group>"; };
+		95ABFDF615AE1F590079029F /* Datagrid_Plugin.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = Datagrid_Plugin.dylib; path = ../bin/Datagrid_Plugin.dylib; sourceTree = "<group>"; };
+		95ABFDF815AE21420079029F /* OrbiterFileBrowser.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = OrbiterFileBrowser.cpp; path = ../../Orbiter/OrbiterFileBrowser.cpp; sourceTree = "<group>"; };
+/* End PBXFileReference section */
+
+/* Begin PBXFrameworksBuildPhase section */
+		956B09E115AC915E0006C6C0 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				956B0A0715AC97670006C6C0 /* libDCECommon.dylib in Frameworks */,
+				956B0A0915AC978D0006C6C0 /* libpluto_main.dylib in Frameworks */,
+				956B0A0B15AC97AB0006C6C0 /* libmysqlclient.dylib in Frameworks */,
+				95ABFD2315ACD1A00079029F /* libpluto_security.dylib in Frameworks */,
+				95ABFDAF15ACD5740079029F /* libpluto_media.dylib in Frameworks */,
+				95ABFDF715AE1F590079029F /* Datagrid_Plugin.dylib in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXFrameworksBuildPhase section */
+
+/* Begin PBXGroup section */
+		956B09D915AC915E0006C6C0 = {
+			isa = PBXGroup;
+			children = (
+				956B09FD15AC92890006C6C0 /* libraries */,
+				956B09FC15AC927D0006C6C0 /* Includes */,
+				956B09F715AC925A0006C6C0 /* Main.cpp */,
+				956B09FA15AC92630006C6C0 /* Orbiter_Plugin.cpp */,
+				956B09E615AC915E0006C6C0 /* Orbiter_Plugin */,
+				956B09E515AC915E0006C6C0 /* Products */,
+			);
+			sourceTree = "<group>";
+		};
+		956B09E515AC915E0006C6C0 /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				956B09E415AC915E0006C6C0 /* Orbiter_Plugin.dylib */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+		956B09E615AC915E0006C6C0 /* Orbiter_Plugin */ = {
+			isa = PBXGroup;
+			children = (
+				956B09E915AC915F0006C6C0 /* Orbiter_PluginProj.xcconfig */,
+				956B09EA15AC915F0006C6C0 /* Orbiter_PluginTarget.xcconfig */,
+				956B09EB15AC915F0006C6C0 /* Orbiter_Plugin.h */,
+				956B09EC15AC915F0006C6C0 /* Orbiter_PluginPriv.h */,
+				956B09ED15AC915F0006C6C0 /* Orbiter_Plugin.cp */,
+				956B09E715AC915E0006C6C0 /* Supporting Files */,
+			);
+			path = Orbiter_Plugin;
+			sourceTree = "<group>";
+		};
+		956B09E715AC915E0006C6C0 /* Supporting Files */ = {
+			isa = PBXGroup;
+			children = (
+				956B09E815AC915E0006C6C0 /* Orbiter_Plugin-Prefix.pch */,
+			);
+			name = "Supporting Files";
+			sourceTree = "<group>";
+		};
+		956B09FC15AC927D0006C6C0 /* Includes */ = {
+			isa = PBXGroup;
+			children = (
+				956B0A0415AC93B50006C6C0 /* mysql.h */,
+				95ABFDF815AE21420079029F /* OrbiterFileBrowser.cpp */,
+				956B09FE15AC92BA0006C6C0 /* FollowMe_Device.cpp */,
+				956B0A0015AC92C70006C6C0 /* PopulateListsInVMC.cpp */,
+				956B0A0215AC934B0006C6C0 /* Orbiter_PluginBase.cpp */,
+				95ABFDB015ACD67C0079029F /* RegenMonitor.cpp */,
+				95ABFDB215ACD7890079029F /* OH_Orbiter.cpp */,
+				95ABFDB415ACD92B0079029F /* DatabaseUtils.cpp */,
+				95ABFDB615ACD95B0079029F /* ProcessUtils.cpp */,
+				95ABFDBA15ACDA700079029F /* CreateDevice.cpp */,
+				95ABFDBC15ACDB370079029F /* VIPMenu.cpp */,
+				95ABFDC015ACDC040079029F /* Other.cpp */,
+			);
+			name = Includes;
+			sourceTree = "<group>";
+		};
+		956B09FD15AC92890006C6C0 /* libraries */ = {
+			isa = PBXGroup;
+			children = (
+				956B0A0615AC97670006C6C0 /* libDCECommon.dylib */,
+				956B0A0815AC978D0006C6C0 /* libpluto_main.dylib */,
+				95ABFD2215ACD1A00079029F /* libpluto_security.dylib */,
+				95ABFDAE15ACD5740079029F /* libpluto_media.dylib */,
+				956B0A0A15AC97AB0006C6C0 /* libmysqlclient.dylib */,
+				95ABFDF615AE1F590079029F /* Datagrid_Plugin.dylib */,
+			);
+			name = libraries;
+			sourceTree = "<group>";
+		};
+/* End PBXGroup section */
+
+/* Begin PBXHeadersBuildPhase section */
+		956B09E215AC915E0006C6C0 /* Headers */ = {
+			isa = PBXHeadersBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				956B0A0515AC93B50006C6C0 /* mysql.h in Headers */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXHeadersBuildPhase section */
+
+/* Begin PBXNativeTarget section */
+		956B09E315AC915E0006C6C0 /* Orbiter_Plugin */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 956B09F115AC915F0006C6C0 /* Build configuration list for PBXNativeTarget "Orbiter_Plugin" */;
+			buildPhases = (
+				956B09E015AC915E0006C6C0 /* Sources */,
+				956B09E115AC915E0006C6C0 /* Frameworks */,
+				956B09E215AC915E0006C6C0 /* Headers */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = Orbiter_Plugin;
+			productName = Orbiter_Plugin;
+			productReference = 956B09E415AC915E0006C6C0 /* Orbiter_Plugin.dylib */;
+			productType = "com.apple.product-type.library.dynamic";
+		};
+/* End PBXNativeTarget section */
+
+/* Begin PBXProject section */
+		956B09DB15AC915E0006C6C0 /* Project object */ = {
+			isa = PBXProject;
+			attributes = {
+				LastUpgradeCheck = 0420;
+			};
+			buildConfigurationList = 956B09DE15AC915E0006C6C0 /* Build configuration list for PBXProject "Orbiter_Plugin" */;
+			compatibilityVersion = "Xcode 3.2";
+			developmentRegion = English;
+			hasScannedForEncodings = 0;
+			knownRegions = (
+				en,
+			);
+			mainGroup = 956B09D915AC915E0006C6C0;
+			productRefGroup = 956B09E515AC915E0006C6C0 /* Products */;
+			projectDirPath = "";
+			projectRoot = "";
+			targets = (
+				956B09E315AC915E0006C6C0 /* Orbiter_Plugin */,
+			);
+		};
+/* End PBXProject section */
+
+/* Begin PBXSourcesBuildPhase section */
+		956B09E015AC915E0006C6C0 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				956B09EE15AC915F0006C6C0 /* Orbiter_Plugin.cp in Sources */,
+				956B09F815AC925A0006C6C0 /* Main.cpp in Sources */,
+				956B09FB15AC92630006C6C0 /* Orbiter_Plugin.cpp in Sources */,
+				956B09FF15AC92BA0006C6C0 /* FollowMe_Device.cpp in Sources */,
+				956B0A0115AC92C70006C6C0 /* PopulateListsInVMC.cpp in Sources */,
+				956B0A0315AC934B0006C6C0 /* Orbiter_PluginBase.cpp in Sources */,
+				95ABFDB115ACD67C0079029F /* RegenMonitor.cpp in Sources */,
+				95ABFDB315ACD7890079029F /* OH_Orbiter.cpp in Sources */,
+				95ABFDB515ACD92B0079029F /* DatabaseUtils.cpp in Sources */,
+				95ABFDB715ACD95B0079029F /* ProcessUtils.cpp in Sources */,
+				95ABFDBB15ACDA700079029F /* CreateDevice.cpp in Sources */,
+				95ABFDBD15ACDB370079029F /* VIPMenu.cpp in Sources */,
+				95ABFDC115ACDC040079029F /* Other.cpp in Sources */,
+				95ABFDF915AE21420079029F /* OrbiterFileBrowser.cpp in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXSourcesBuildPhase section */
+
+/* Begin XCBuildConfiguration section */
+		956B09EF15AC915F0006C6C0 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				ARCHS = "$(ARCHS_STANDARD_64_BIT)";
+				CLANG_ENABLE_OBJC_ARC = YES;
+				COPY_PHASE_STRIP = NO;
+				GCC_C_LANGUAGE_STANDARD = gnu99;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_ENABLE_OBJC_EXCEPTIONS = YES;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"DEBUG=1",
+					"$(inherited)",
+				);
+				GCC_SYMBOLS_PRIVATE_EXTERN = NO;
+				GCC_VERSION = com.apple.compilers.llvm.clang.1_0;
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_MISSING_PROTOTYPES = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				MACOSX_DEPLOYMENT_TARGET = 10.7;
+				ONLY_ACTIVE_ARCH = YES;
+				SDKROOT = macosx;
+			};
+			name = Debug;
+		};
+		956B09F015AC915F0006C6C0 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				ARCHS = "$(ARCHS_STANDARD_64_BIT)";
+				CLANG_ENABLE_OBJC_ARC = YES;
+				COPY_PHASE_STRIP = YES;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				GCC_C_LANGUAGE_STANDARD = gnu99;
+				GCC_ENABLE_OBJC_EXCEPTIONS = YES;
+				GCC_VERSION = com.apple.compilers.llvm.clang.1_0;
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_MISSING_PROTOTYPES = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				MACOSX_DEPLOYMENT_TARGET = 10.7;
+				SDKROOT = macosx;
+			};
+			name = Release;
+		};
+		956B09F215AC915F0006C6C0 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CONFIGURATION_BUILD_DIR = ../bin;
+				HEADER_SEARCH_PATHS = (
+					../../DCE,
+					../..,
+				);
+				INSTALL_PATH = /usr/pluto/bin;
+				LIBRARY_SEARCH_PATHS = (
+					"$(inherited)",
+					"\"$(SRCROOT)/../lib\"",
+					"\"$(SRCROOT)/../mysql/lib\"",
+					"\"$(SRCROOT)/../bin\"",
+				);
+				PRODUCT_NAME = "$(TARGET_NAME)";
+			};
+			name = Debug;
+		};
+		956B09F315AC915F0006C6C0 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CONFIGURATION_BUILD_DIR = ../bin;
+				HEADER_SEARCH_PATHS = (
+					../../DCE,
+					../..,
+				);
+				INSTALL_PATH = /usr/pluto/bin;
+				LIBRARY_SEARCH_PATHS = (
+					"$(inherited)",
+					"\"$(SRCROOT)/../lib\"",
+					"\"$(SRCROOT)/../mysql/lib\"",
+					"\"$(SRCROOT)/../bin\"",
+				);
+				PRODUCT_NAME = "$(TARGET_NAME)";
+			};
+			name = Release;
+		};
+/* End XCBuildConfiguration section */
+
+/* Begin XCConfigurationList section */
+		956B09DE15AC915E0006C6C0 /* Build configuration list for PBXProject "Orbiter_Plugin" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				956B09EF15AC915F0006C6C0 /* Debug */,
+				956B09F015AC915F0006C6C0 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		956B09F115AC915F0006C6C0 /* Build configuration list for PBXNativeTarget "Orbiter_Plugin" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				956B09F215AC915F0006C6C0 /* Debug */,
+				956B09F315AC915F0006C6C0 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+/* End XCConfigurationList section */
+	};
+	rootObject = 956B09DB15AC915E0006C6C0 /* Project object */;
+}

@@ -272,11 +272,12 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
-				CONFIGURATION_BUILD_DIR = ../lib;
+				CONFIGURATION_BUILD_DIR = ../bin;
 				HEADER_SEARCH_PATHS = (
 					../../DCE,
 					../..,
 				);
+				INSTALL_PATH = /usr/local/bin;
 				LIBRARY_SEARCH_PATHS = (
 					"$(inherited)",
 					"\"$(SRCROOT)/../lib\"",
@@ -291,11 +292,12 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
-				CONFIGURATION_BUILD_DIR = ../lib;
+				CONFIGURATION_BUILD_DIR = ../bin;
 				HEADER_SEARCH_PATHS = (
 					../../DCE,
 					../..,
 				);
+				INSTALL_PATH = /usr/local/bin;
 				LIBRARY_SEARCH_PATHS = (
 					"$(inherited)",
 					"\"$(SRCROOT)/../lib\"",

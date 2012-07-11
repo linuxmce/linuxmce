@@ -1,0 +1,279 @@
+// !$*UTF8*$!
+{
+	archiveVersion = 1;
+	classes = {
+	};
+	objectVersion = 46;
+	objects = {
+
+/* Begin PBXBuildFile section */
+		95ABFDD715AE1C7B0079029F /* Datagrid_Plugin.cp in Sources */ = {isa = PBXBuildFile; fileRef = 95ABFDD615AE1C7B0079029F /* Datagrid_Plugin.cp */; };
+		95ABFDE115AE1CF60079029F /* Datagrid_Plugin.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 95ABFDE015AE1CF60079029F /* Datagrid_Plugin.cpp */; };
+		95ABFDE415AE1D000079029F /* Main.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 95ABFDE315AE1D000079029F /* Main.cpp */; };
+		95ABFDE715AE1D6B0079029F /* mysql.h in Headers */ = {isa = PBXBuildFile; fileRef = 95ABFDE615AE1D6B0079029F /* mysql.h */; };
+		95ABFDEC15AE1DB70079029F /* libDCECommon.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 95ABFDEB15AE1DB70079029F /* libDCECommon.dylib */; };
+		95ABFDEE15AE1E120079029F /* Datagrid_PluginBase.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 95ABFDED15AE1E120079029F /* Datagrid_PluginBase.cpp */; };
+/* End PBXBuildFile section */
+
+/* Begin PBXFileReference section */
+		95ABFDCD15AE1C7B0079029F /* Datagrid_Plugin.dylib */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.dylib"; includeInIndex = 0; path = Datagrid_Plugin.dylib; sourceTree = BUILT_PRODUCTS_DIR; };
+		95ABFDD115AE1C7B0079029F /* Datagrid_Plugin-Prefix.pch */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "Datagrid_Plugin-Prefix.pch"; sourceTree = "<group>"; };
+		95ABFDD215AE1C7B0079029F /* Datagrid_PluginProj.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; path = Datagrid_PluginProj.xcconfig; sourceTree = "<group>"; };
+		95ABFDD315AE1C7B0079029F /* Datagrid_PluginTarget.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; path = Datagrid_PluginTarget.xcconfig; sourceTree = "<group>"; };
+		95ABFDD415AE1C7B0079029F /* Datagrid_Plugin.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = Datagrid_Plugin.h; sourceTree = "<group>"; };
+		95ABFDD515AE1C7B0079029F /* Datagrid_PluginPriv.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = Datagrid_PluginPriv.h; sourceTree = "<group>"; };
+		95ABFDD615AE1C7B0079029F /* Datagrid_Plugin.cp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = Datagrid_Plugin.cp; sourceTree = "<group>"; };
+		95ABFDE015AE1CF60079029F /* Datagrid_Plugin.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = Datagrid_Plugin.cpp; path = ../../Datagrid_Plugin/Datagrid_Plugin.cpp; sourceTree = "<group>"; };
+		95ABFDE315AE1D000079029F /* Main.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = Main.cpp; path = ../../Datagrid_Plugin/Main.cpp; sourceTree = "<group>"; };
+		95ABFDE615AE1D6B0079029F /* mysql.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = mysql.h; path = ../mysql/include/mysql.h; sourceTree = "<group>"; };
+		95ABFDEB15AE1DB70079029F /* libDCECommon.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libDCECommon.dylib; path = ../lib/libDCECommon.dylib; sourceTree = "<group>"; };
+		95ABFDED15AE1E120079029F /* Datagrid_PluginBase.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = Datagrid_PluginBase.cpp; path = ../../Gen_Devices/Datagrid_PluginBase.cpp; sourceTree = "<group>"; };
+/* End PBXFileReference section */
+
+/* Begin PBXFrameworksBuildPhase section */
+		95ABFDCA15AE1C7B0079029F /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				95ABFDEC15AE1DB70079029F /* libDCECommon.dylib in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXFrameworksBuildPhase section */
+
+/* Begin PBXGroup section */
+		95ABFDC215AE1C7B0079029F = {
+			isa = PBXGroup;
+			children = (
+				95ABFDE015AE1CF60079029F /* Datagrid_Plugin.cpp */,
+				95ABFDE315AE1D000079029F /* Main.cpp */,
+				95ABFDEA15AE1D9D0079029F /* libraries */,
+				95ABFDE515AE1D490079029F /* includes */,
+				95ABFDCF15AE1C7B0079029F /* Datagrid_Plugin */,
+				95ABFDCE15AE1C7B0079029F /* Products */,
+			);
+			sourceTree = "<group>";
+		};
+		95ABFDCE15AE1C7B0079029F /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				95ABFDCD15AE1C7B0079029F /* Datagrid_Plugin.dylib */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+		95ABFDCF15AE1C7B0079029F /* Datagrid_Plugin */ = {
+			isa = PBXGroup;
+			children = (
+				95ABFDD215AE1C7B0079029F /* Datagrid_PluginProj.xcconfig */,
+				95ABFDD315AE1C7B0079029F /* Datagrid_PluginTarget.xcconfig */,
+				95ABFDD415AE1C7B0079029F /* Datagrid_Plugin.h */,
+				95ABFDD515AE1C7B0079029F /* Datagrid_PluginPriv.h */,
+				95ABFDD615AE1C7B0079029F /* Datagrid_Plugin.cp */,
+				95ABFDD015AE1C7B0079029F /* Supporting Files */,
+			);
+			path = Datagrid_Plugin;
+			sourceTree = "<group>";
+		};
+		95ABFDD015AE1C7B0079029F /* Supporting Files */ = {
+			isa = PBXGroup;
+			children = (
+				95ABFDD115AE1C7B0079029F /* Datagrid_Plugin-Prefix.pch */,
+			);
+			name = "Supporting Files";
+			sourceTree = "<group>";
+		};
+		95ABFDE515AE1D490079029F /* includes */ = {
+			isa = PBXGroup;
+			children = (
+				95ABFDE615AE1D6B0079029F /* mysql.h */,
+				95ABFDED15AE1E120079029F /* Datagrid_PluginBase.cpp */,
+			);
+			name = includes;
+			sourceTree = "<group>";
+		};
+		95ABFDEA15AE1D9D0079029F /* libraries */ = {
+			isa = PBXGroup;
+			children = (
+				95ABFDEB15AE1DB70079029F /* libDCECommon.dylib */,
+			);
+			name = libraries;
+			sourceTree = "<group>";
+		};
+/* End PBXGroup section */
+
+/* Begin PBXHeadersBuildPhase section */
+		95ABFDCB15AE1C7B0079029F /* Headers */ = {
+			isa = PBXHeadersBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				95ABFDE715AE1D6B0079029F /* mysql.h in Headers */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXHeadersBuildPhase section */
+
+/* Begin PBXNativeTarget section */
+		95ABFDCC15AE1C7B0079029F /* Datagrid_Plugin */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 95ABFDDA15AE1C7B0079029F /* Build configuration list for PBXNativeTarget "Datagrid_Plugin" */;
+			buildPhases = (
+				95ABFDC915AE1C7B0079029F /* Sources */,
+				95ABFDCA15AE1C7B0079029F /* Frameworks */,
+				95ABFDCB15AE1C7B0079029F /* Headers */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = Datagrid_Plugin;
+			productName = Datagrid_Plugin;
+			productReference = 95ABFDCD15AE1C7B0079029F /* Datagrid_Plugin.dylib */;
+			productType = "com.apple.product-type.library.dynamic";
+		};
+/* End PBXNativeTarget section */
+
+/* Begin PBXProject section */
+		95ABFDC415AE1C7B0079029F /* Project object */ = {
+			isa = PBXProject;
+			attributes = {
+				LastUpgradeCheck = 0420;
+			};
+			buildConfigurationList = 95ABFDC715AE1C7B0079029F /* Build configuration list for PBXProject "Datagrid_Plugin" */;
+			compatibilityVersion = "Xcode 3.2";
+			developmentRegion = English;
+			hasScannedForEncodings = 0;
+			knownRegions = (
+				en,
+			);
+			mainGroup = 95ABFDC215AE1C7B0079029F;
+			productRefGroup = 95ABFDCE15AE1C7B0079029F /* Products */;
+			projectDirPath = "";
+			projectRoot = "";
+			targets = (
+				95ABFDCC15AE1C7B0079029F /* Datagrid_Plugin */,
+			);
+		};
+/* End PBXProject section */
+
+/* Begin PBXSourcesBuildPhase section */
+		95ABFDC915AE1C7B0079029F /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				95ABFDD715AE1C7B0079029F /* Datagrid_Plugin.cp in Sources */,
+				95ABFDE115AE1CF60079029F /* Datagrid_Plugin.cpp in Sources */,
+				95ABFDE415AE1D000079029F /* Main.cpp in Sources */,
+				95ABFDEE15AE1E120079029F /* Datagrid_PluginBase.cpp in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXSourcesBuildPhase section */
+
+/* Begin XCBuildConfiguration section */
+		95ABFDD815AE1C7B0079029F /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				ARCHS = "$(ARCHS_STANDARD_64_BIT)";
+				CLANG_ENABLE_OBJC_ARC = YES;
+				COPY_PHASE_STRIP = NO;
+				GCC_C_LANGUAGE_STANDARD = gnu99;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_ENABLE_OBJC_EXCEPTIONS = YES;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"DEBUG=1",
+					"$(inherited)",
+				);
+				GCC_SYMBOLS_PRIVATE_EXTERN = NO;
+				GCC_VERSION = com.apple.compilers.llvm.clang.1_0;
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_MISSING_PROTOTYPES = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				MACOSX_DEPLOYMENT_TARGET = 10.7;
+				ONLY_ACTIVE_ARCH = YES;
+				SDKROOT = macosx;
+			};
+			name = Debug;
+		};
+		95ABFDD915AE1C7B0079029F /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				ARCHS = "$(ARCHS_STANDARD_64_BIT)";
+				CLANG_ENABLE_OBJC_ARC = YES;
+				COPY_PHASE_STRIP = YES;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				GCC_C_LANGUAGE_STANDARD = gnu99;
+				GCC_ENABLE_OBJC_EXCEPTIONS = YES;
+				GCC_VERSION = com.apple.compilers.llvm.clang.1_0;
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_MISSING_PROTOTYPES = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				MACOSX_DEPLOYMENT_TARGET = 10.7;
+				SDKROOT = macosx;
+			};
+			name = Release;
+		};
+		95ABFDDB15AE1C7B0079029F /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CONFIGURATION_BUILD_DIR = ../bin;
+				HEADER_SEARCH_PATHS = (
+					../../DCE,
+					../..,
+				);
+				INSTALL_PATH = /usr/pluto/bin;
+				LIBRARY_SEARCH_PATHS = (
+					"$(inherited)",
+					"\"$(SRCROOT)/../lib\"",
+				);
+				PRODUCT_NAME = "$(TARGET_NAME)";
+			};
+			name = Debug;
+		};
+		95ABFDDC15AE1C7B0079029F /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CONFIGURATION_BUILD_DIR = ../bin;
+				HEADER_SEARCH_PATHS = (
+					../../DCE,
+					../..,
+				);
+				INSTALL_PATH = /usr/pluto/bin;
+				LIBRARY_SEARCH_PATHS = (
+					"$(inherited)",
+					"\"$(SRCROOT)/../lib\"",
+				);
+				PRODUCT_NAME = "$(TARGET_NAME)";
+			};
+			name = Release;
+		};
+/* End XCBuildConfiguration section */
+
+/* Begin XCConfigurationList section */
+		95ABFDC715AE1C7B0079029F /* Build configuration list for PBXProject "Datagrid_Plugin" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				95ABFDD815AE1C7B0079029F /* Debug */,
+				95ABFDD915AE1C7B0079029F /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		95ABFDDA15AE1C7B0079029F /* Build configuration list for PBXNativeTarget "Datagrid_Plugin" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				95ABFDDB15AE1C7B0079029F /* Debug */,
+				95ABFDDC15AE1C7B0079029F /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+/* End XCConfigurationList section */
+	};
+	rootObject = 95ABFDC415AE1C7B0079029F /* Project object */;
+}
