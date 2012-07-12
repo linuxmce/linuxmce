@@ -1,6 +1,6 @@
 #include "skindatamodel.h"
 #include "qorbitermanager.h"
-#if (QT_VERSION >= QT_VERSION_CHECK(5,0,0))
+#if (QT_VERSION >= 0x050000)
 #include <QtQml/QQmlComponent>
 #include <QtQml/QQmlEngine>
 #else
@@ -100,6 +100,10 @@ QModelIndex SkinDataModel::indexFromItem(const SkinDataItem *item) const
     return QModelIndex();
 }
 
+void SkinDataModel::sortModel(int column, Qt::SortOrder order)
+{
+}
+
 void SkinDataModel::clear()
 {
     qDeleteAll(m_list.begin(), m_list.end());
@@ -164,7 +168,7 @@ void SkinDataModel::setActiveSkin(QString name)
 
     QString skinURL = find(name)->path();
    //dir -l qDebug() << skinURL;
-#if (QT_VERSION >= QT_VERSION_CHECK(5,0,0))
+#if (QT_VERSION >= 0x050000)
     QQmlComponent skinData(ui_reference->qorbiterUIwin->engine(), skinURL);
 #else
     QDeclarativeComponent skinData(ui_reference->qorbiterUIwin->engine(), skinURL);

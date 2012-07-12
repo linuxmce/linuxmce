@@ -72,6 +72,10 @@ QModelIndex MediaScenarioModel::indexFromItem(const MediaScenarioItem *item) con
   return QModelIndex();
 }
 
+void MediaScenarioModel::sortModel(int column, Qt::SortOrder order)
+{
+}
+
 void MediaScenarioModel::clear()
 {
   qDeleteAll(m_list);

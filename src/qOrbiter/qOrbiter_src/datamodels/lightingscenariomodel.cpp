@@ -74,6 +74,10 @@ QModelIndex LightingScenarioModel::indexFromItem(const LightingScenarioItem *ite
   return QModelIndex();
 }
 
+void LightingScenarioModel::sortModel(int column, Qt::SortOrder order)
+{
+}
+
 void LightingScenarioModel::clear()
 {
   qDeleteAll(m_list);

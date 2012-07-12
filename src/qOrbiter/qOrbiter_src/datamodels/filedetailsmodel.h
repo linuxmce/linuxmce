@@ -54,6 +54,7 @@ public:
     FileDetailsItem* currentRow();
     void clear();
     void ReturnSelectedItems();
+    void sortModel(int column, Qt::SortOrder order);
 
     QModelIndex lastrow;
     QString ident;

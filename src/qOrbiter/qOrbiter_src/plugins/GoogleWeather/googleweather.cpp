@@ -112,7 +112,6 @@ void gWeatherModel::processModelItems()
 
        appendRow(new gWeatherItem(day,  low,  high,  iconUrl,  condition) );
     }
-
 }
 
 
@@ -122,5 +121,9 @@ bool gWeatherModel::appendRow(gWeatherItem *item)
     beginInsertRows(QModelIndex(), 0, m_list.count());
     m_list.append(item);
     endInsertRows();
+}
+
+void gWeatherModel::sortModel(int column, Qt::SortOrder order)
+{
 }
 

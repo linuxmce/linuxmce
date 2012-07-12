@@ -117,6 +117,10 @@ void AvCodeGrid::clear()
 
 }
 
+void AvCodeGrid::sortModel(int column, Qt::SortOrder order)
+{
+}
+
 bool AvCodeGrid::removeRow(int row, const QModelIndex &parent)
 {
   Q_UNUSED(parent);

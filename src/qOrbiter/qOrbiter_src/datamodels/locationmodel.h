@@ -26,6 +26,7 @@ public:
     bool removeRows(int row, int count, const QModelIndex &parent = QModelIndex());
     LocationItem* takeRow(int row);
     LocationItem* find(const QString &id) const;
+    void sortModel(int column, Qt::SortOrder order);
 
 
     QModelIndex indexFromItem( const LocationItem* item) const;

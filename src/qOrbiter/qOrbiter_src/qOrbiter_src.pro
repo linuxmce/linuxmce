@@ -18,10 +18,18 @@
 CONFIG += qt thread
 # define deployment destination and target executable name
 
+contains(QT_VERSION,4.8.*){
+message("QT4 Build")
+DEFINES+=QT4
+}
+
+contains(QT_VERSION,5.0.*){
+message("QT5 Build")
+DEFINES+=QT5
+}
 
 
 opengl{
-
 TARGET = qorbiter-gl
 DEFINES+=GLENABLED
 glmsg= yes
@@ -36,8 +44,6 @@ TARGET=qorbiter
 }
 
 symbian:TARGET.UID3 = 0xE15A481D
-
-
 
 # Smart Installer package's UID
 # This UID is from the protected range and therefore the package will
@@ -68,13 +74,8 @@ folder_05.target = $$DESTDIR/template
 
 folder_03.source = config.xml
 folder_03.target = $$DESTDIR
-
 DEFINES += for_desktop
-
-
 QT+= phonon
-
-
 }
 
 WIN32{
@@ -123,42 +124,33 @@ DEFINES += for_freemantle
 for_harmattan{
 folder_01.source = qml/harmattan
 folder_01.target =
-
 folder_05.source = qml/template
 folder_05.target = $$DESTDIR/qml
-
 folder_02.source= img
 folder_02.target=     #left blank so it will appear in the root
 DEFINES += for_harmattan
 }
 
 macx{
-
     APP_RESOURCES_PATH=../../../$$DESTDIR/$$TARGET".app"/Contents/resources
-
     folder_01.source = qml/desktop
     folder_01.target = $$APP_RESOURCES_PATH/qml
-
     folder_02.source= img
     folder_02.target= $$APP_RESOURCES_PATH   #left blank so it will appear in the root
-
-folder_05.source = qml/template
-folder_05.target = $$DESTDIR/qml
-
+    folder_05.source = qml/template
+    folder_05.target = $$DESTDIR/qml
     folder_03.source = config.xml
     folder_03.target = $$APP_RESOURCES_PATH
-
     ICON = osxicons.icns
 }
 
 ANDROID{
 folder_01.source = qml/android/
-
 folder_05.source = qml/template
 folder_05.target = $$DESTDIR/qml
 DEFINES+=ANDROID
-
 }
+
 #plugins_folder.source = plugins/
 #plugins_folder.target = $$DESTDIR
 #uncomment this line to work on skins locally
@@ -167,13 +159,18 @@ DEFINES+=ANDROID
 
 win32{
 DEPLOYMENTFOLDERS = folder_01 files_01 folder_05
-
 }
 
 
+!ANDROID{
+plugins_folder.source = imports/
+plugins_folder.target = $$DESTDIR
+DEPLOYMENTFOLDERS+= plugins_folder
+}
+
 # Additional import path used to resolve QML modules in Creator's code model
-#QML_IMPORT_PATH =
-#QML_IMPORT_TRACE = 1
+QML_IMPORT_PATH = imports
+QML_IMPORT_TRACE = 1
 
 symbian:TARGET.UID3 = 0xE0D07D4D
 QMAKE_CXXFLAGS += -DUSE_LZO_DATAGRID
@@ -185,10 +182,8 @@ QT+= webkit declarative
 }
 
 QT5{
-
-}
 QT+= webkit quick mobility multimedia
-
+}
 
 macx{
     QT += xml

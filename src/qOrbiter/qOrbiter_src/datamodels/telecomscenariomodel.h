@@ -26,6 +26,7 @@ public:
   TelecomScenarioItem* takeRow(int row);
   TelecomScenarioItem* find(const QString &id) const;
   QModelIndex indexFromItem( const TelecomScenarioItem* item) const;
+  void sortModel(int column, Qt::SortOrder order);
   void clear();
 
 

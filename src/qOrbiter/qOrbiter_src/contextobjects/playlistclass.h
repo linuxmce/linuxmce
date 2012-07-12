@@ -49,7 +49,7 @@ public:
     QModelIndex indexFromItem( const PlaylistItemClass* item) const;
     PlaylistItemClass* currentRow();
     int currentIndex;
-
+    void sortModel(int column, Qt::SortOrder order);
 
 signals:
     void ItemAdded();

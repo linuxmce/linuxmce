@@ -7,7 +7,7 @@
 #endif
 #include <QMetaProperty>
 
-#if (QT_VERSION >= QT_VERSION_CHECK(5,0,0))
+#if (QT_VERSION >= 0x050000)
 TimeCodeManager::TimeCodeManager(QQuickItem *parent) :
     QQuickItem(parent)
 #else

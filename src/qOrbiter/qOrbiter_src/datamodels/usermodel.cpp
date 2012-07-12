@@ -78,6 +78,10 @@ QModelIndex UserModel::indexFromItem(const UserItem *item) const
   return QModelIndex();
 }
 
+void UserModel::sortModel(int column, Qt::SortOrder order)
+{
+}
+
 void UserModel::clear()
 {
   qDeleteAll(m_list);

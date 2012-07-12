@@ -2,7 +2,7 @@
 #define THREADEDSPLASH_H
 
 #include <QObject>
-#if (QT_VERSION >= QT_VERSION_CHECK(5,0,0))
+#if (QT_VERSION >= 0x050000)
 #include <QtQuick/QQuickView>
 #else
 #include <QtDeclarative/QDeclarativeView>
@@ -25,7 +25,7 @@ public:
     explicit ThreadedSplash(QObject *parent = 0);
 
     QString qs_progress;
-#if (QT_VERSION >= QT_VERSION_CHECK(5,0,0))
+#if (QT_VERSION >= 0x050000)
     QQuickView *splashView;
 #else
     QDeclarativeView *splashView;

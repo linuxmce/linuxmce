@@ -2,7 +2,7 @@
 #define ORBITERWINDOW_H
 
 #include <QObject>
-#if (QT_VERSION >= QT_VERSION_CHECK(5,0,0))
+#if (QT_VERSION >= 0x050000)
 #include <QtQml/QQmlContext>
 #include <QtQuick/QQuickView>
 #else
@@ -34,7 +34,7 @@ public:
     //public members
 
     QString message;
-#if (QT_VERSION >= QT_VERSION_CHECK(5,0,0))
+#if (QT_VERSION >= 0x050000)
     QQuickView  mainView;
 #else
     QDeclarativeView  mainView;

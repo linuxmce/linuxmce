@@ -26,6 +26,7 @@ public:
     GenreItem* find(const QString &id) const;
     QModelIndex indexFromItem( const GenreItem* item) const;
     GenreItem* currentRow();
+    void sortModel(int column, Qt::SortOrder order);
     void clear();
     void ReturnSelectedItems();
     QModelIndex lastrow;

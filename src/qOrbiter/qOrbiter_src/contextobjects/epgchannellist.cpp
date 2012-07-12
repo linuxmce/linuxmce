@@ -289,6 +289,10 @@ void EPGChannelList::empty()
     m_list.clear();
 }
 
+void EPGChannelList::sortModel(int column, Qt::SortOrder order)
+{
+}
+
 void EPGChannelList::beginResetModel()
 {
 }

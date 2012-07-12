@@ -4,7 +4,7 @@
 #include <QAbstractItemModel>
 #include <QImage>
 
-class GenericSetupItem : public QAbstractItemModel
+class GenericSetupItem : public QObject
 {
     Q_OBJECT
 

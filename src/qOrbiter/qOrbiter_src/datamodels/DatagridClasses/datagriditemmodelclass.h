@@ -30,6 +30,7 @@ public:
     DataGridItem* currentRow();
     void handleItemChange();
     void clear();
+    void sortModel(int column, Qt::SortOrder order);
 
 
 signals:

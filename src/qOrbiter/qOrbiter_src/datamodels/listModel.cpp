@@ -225,6 +225,10 @@ gridItem * ListModel::currentRow()
     return item;
 }
 
+void ListModel::sortModel(int column, Qt::SortOrder order)
+{
+}
+
 void ListModel::checkForMore()
 {
 

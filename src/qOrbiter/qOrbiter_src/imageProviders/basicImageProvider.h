@@ -7,7 +7,7 @@
 #define BASICIMAGEPROVIDER_H
 
 #include <QtGlobal>
-#if (QT_VERSION >= QT_VERSION_CHECK(5,0,0))
+#if (QT_VERSION >= 0x050000)
 #include <QtQml/QQmlImageProvider>
 #include <QtCore/QObject>
 #include <QtCore/QDebug>
@@ -24,7 +24,7 @@
 
 #include <qorbitermanager.h>
 
-#if (QT_VERSION >= QT_VERSION_CHECK(5,0,0))
+#if (QT_VERSION >= 0x050000)
 class basicImageProvider : public QQmlImageProvider, public QObject
 #else
 class basicImageProvider : public QDeclarativeImageProvider, public QObject
@@ -32,7 +32,7 @@ class basicImageProvider : public QDeclarativeImageProvider, public QObject
 {
 
 public:
-#if (QT_VERSION >= QT_VERSION_CHECK(5,0,0))
+#if (QT_VERSION >= 0x050000)
     basicImageProvider():QQmlImageProvider(QQmlImageProvider::Image)
   #else
     basicImageProvider():QDeclarativeImageProvider(QDeclarativeImageProvider::Image)

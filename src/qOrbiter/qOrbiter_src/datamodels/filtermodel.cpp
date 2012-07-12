@@ -136,6 +136,10 @@ FilterModelItem * FilterModel::currentRow()
     return item;
 }
 
+void FilterModel::sortModel(int column, Qt::SortOrder order)
+{
+}
+
 bool FilterModel::setSelectionStatus(QString format)
 {
     FilterModelItem* item = find(format);

@@ -17,7 +17,7 @@
 
 #include <QtGlobal>
 #include <QtXml/QtXml>
-#if (QT_VERSION >= QT_VERSION_CHECK(5,0,0))
+#if (QT_VERSION >= 0x050000)
 #include <QtCore/QFile>
 #include <QtQml/QtQml>
 #include <QtCore/QTimer>
@@ -56,7 +56,7 @@ using namespace DCE;
   then (hopefully) notify us of background progress. A splash bar or loading indicator needs to be added, but a textual
   messaging system will be the initial method of communication
 */
-#if (QT_VERSION >= QT_VERSION_CHECK(5,0,0))
+#if (QT_VERSION >= 0x050000)
 qorbiterManager::qorbiterManager(QQuickView *view, QObject *parent) :
 #else
 qorbiterManager::qorbiterManager(QDeclarativeView *view, QObject *parent) :
@@ -353,7 +353,7 @@ void qorbiterManager::refreshUI(QUrl url)
 {
     qorbiterUIwin->rootContext()->setBaseUrl(skin->entryUrl());
     qorbiterUIwin->setSource(skin->entryUrl());
-#if (QT_VERSION >= QT_VERSION_CHECK(5,0,0))
+#if (QT_VERSION >= 0x050000)
     qorbiterUIwin->setResizeMode(QQuickView::SizeRootObjectToView);
 #else
     qorbiterUIwin->setResizeMode(QDeclarativeView::SizeRootObjectToView);
@@ -773,7 +773,7 @@ checkOrientation(qorbiterUIwin->size());
         //load the actual skin entry point
         currentSkin = incSkin;
         qorbiterUIwin->engine()->rootContext()->setContextProperty("style", skin->styleView());
-#if (QT_VERSION >= QT_VERSION_CHECK(5,0,0))
+#if (QT_VERSION >= 0x050000)
         QObject::connect(qorbiterUIwin, SIGNAL(statusChanged(QQuickView::Status)),
                          this, SLOT(skinLoaded(QQuickView::Status)));
 #else
@@ -788,14 +788,14 @@ checkOrientation(qorbiterUIwin->size());
     }
 }
 
-#if (QT_VERSION >= QT_VERSION_CHECK(5,0,0))
+#if (QT_VERSION >= 0x050000)
 void qorbiterManager::skinLoaded(QQuickView::Status status)
 #else
 void qorbiterManager::skinLoaded(QDeclarativeView::Status status)
 #endif
 {
     setDceResponse("Skin appears to have finished loading ..");
-#if (QT_VERSION >= QT_VERSION_CHECK(5,0,0))
+#if (QT_VERSION >= 0x050000)
     if (status == QQuickView::Error) {
 #else
     if (status == QDeclarativeView::Error) {
@@ -1537,7 +1537,7 @@ void qorbiterManager::startOrbiter()
 
         m_bStartingUp = false;
         qorbiterUIwin->setWindowTitle("LinuxMCE Orbiter " + QString::number(iPK_Device));
-#if (QT_VERSION >= QT_VERSION_CHECK(5,0,0))
+#if (QT_VERSION >= 0x050000)
         qorbiterUIwin->setResizeMode(QQuickView::SizeRootObjectToView);
 #else
         qorbiterUIwin->setResizeMode(QDeclarativeView::SizeRootObjectToView);

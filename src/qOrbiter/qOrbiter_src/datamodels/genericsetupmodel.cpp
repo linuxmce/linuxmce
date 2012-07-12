@@ -117,6 +117,10 @@ void GenericSetupModel::clear()
 
 }
 
+void GenericSetupModel::sortModel(int column, Qt::SortOrder order)
+{
+}
+
 bool GenericSetupModel::removeRow(int row, const QModelIndex &parent)
 {
   Q_UNUSED(parent);

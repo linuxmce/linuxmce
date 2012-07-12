@@ -71,6 +71,10 @@ QModelIndex SecurityScenarioModel::indexFromItem(const SecurityScenarioItem *ite
   return QModelIndex();
 }
 
+void SecurityScenarioModel::sortModel(int column, Qt::SortOrder order)
+{
+}
+
 void SecurityScenarioModel::clear()
 {
   qDeleteAll(m_list);

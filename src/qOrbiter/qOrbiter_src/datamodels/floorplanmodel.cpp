@@ -164,6 +164,10 @@ FloorplanDevice * FloorPlanModel::currentRow()
     return item;
 }
 
+void FloorPlanModel::sortModel(int column, Qt::SortOrder order)
+{
+}
+
 QImage FloorPlanModel::getPageImage(QString &id)
 {
     return currentImage;

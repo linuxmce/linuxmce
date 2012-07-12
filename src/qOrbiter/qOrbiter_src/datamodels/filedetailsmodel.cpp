@@ -164,6 +164,10 @@ void FileDetailsModel::ReturnSelectedItems()
     emit SetTypeSort(2, qs_sorting_string);
 }
 
+void FileDetailsModel::sortModel(int column, Qt::SortOrder order)
+{
+}
+
 
 
 

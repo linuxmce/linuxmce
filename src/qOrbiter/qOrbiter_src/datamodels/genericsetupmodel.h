@@ -29,6 +29,7 @@ public:
   GenericSetupItem* currentRow();
   void clear();
   int totalcells;
+  void sortModel(int column, Qt::SortOrder order);
 
 
 

@@ -29,6 +29,7 @@ public:
     LightingScenarioItem* takeRow(int row);
     LightingScenarioItem* find(const QString &id) const;
     QModelIndex indexFromItem( const LightingScenarioItem* item) const;
+    void sortModel(int column, Qt::SortOrder order);
     void clear();
 
     int *default_ea;

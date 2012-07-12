@@ -28,7 +28,7 @@
 
 #include <QObject>
 
-#if (QT_VERSION >= QT_VERSION_CHECK(5,0,0))
+#if (QT_VERSION >= 0x050000)
 #include <QQmlImageProvider>
 #else
 #include <QtDeclarative/QDeclarativeImageProvider>
@@ -39,7 +39,7 @@
 #include <QVariant>
 #include <qorbitermanager.h>
 
-#if (QT_VERSION >= QT_VERSION_CHECK(5,0,0))
+#if (QT_VERSION >= 0x050000)
 class AbstractImageProvider: public QObject , public QQmlImageProvider
 #else
 class AbstractImageProvider: public QObject , public QDeclarativeImageProvider

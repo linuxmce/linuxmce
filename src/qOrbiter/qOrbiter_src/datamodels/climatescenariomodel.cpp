@@ -72,6 +72,10 @@ QModelIndex ClimateScenarioModel::indexFromItem(const ClimateScenarioItem *item)
   return QModelIndex();
 }
 
+void ClimateScenarioModel::sortModel(int column, Qt::SortOrder order)
+{
+}
+
 void ClimateScenarioModel::clear()
 {
   qDeleteAll(m_list);

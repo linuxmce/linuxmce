@@ -140,6 +140,10 @@ MediaSubTypeItem * MediaSubTypeModel::currentRow()
     return item;
 }
 
+void MediaSubTypeModel::sortModel(int column, Qt::SortOrder order)
+{
+}
+
 void MediaSubTypeModel::setSelectionStatus(QString format)
 {
     MediaSubTypeItem* item = find(format);

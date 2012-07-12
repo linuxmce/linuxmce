@@ -27,6 +27,7 @@ public:
   MediaSubTypeItem* find(const QString &id) const;
   QModelIndex indexFromItem( const MediaSubTypeItem* item) const;
   MediaSubTypeItem* currentRow();
+  void sortModel(int column, Qt::SortOrder order);
 
 
   void clear();

@@ -74,6 +74,7 @@ public slots:
     QModelIndex getCurrentIndex();
     QModelIndex getMythChannelIndex(QString m);
     void empty();
+    void sortModel(int column, Qt::SortOrder order);
 
 
     virtual void beginResetModel();

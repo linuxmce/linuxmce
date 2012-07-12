@@ -81,7 +81,7 @@ QString QmlApplicationViewerPrivate::adjustPath(const QString &path)
     return path;
 }
 
-#if (QT_VERSION >= QT_VERSION_CHECK(5,0,0))
+#if (QT_VERSION >= 0x050000)
 QmlApplicationViewer::QmlApplicationViewer(QWindow *parent)
     : QQuickView(parent)
 #else
@@ -91,7 +91,7 @@ QmlApplicationViewer::QmlApplicationViewer(QWidget *parent)
     , d(new QmlApplicationViewerPrivate())
 {
     connect(engine(), SIGNAL(quit()), SLOT(close()));
-#if (QT_VERSION >= QT_VERSION_CHECK(5,0,0))
+#if (QT_VERSION >= 0x050000)
     setResizeMode(QQuickView::SizeRootObjectToView);
 #else
     setResizeMode(QDeclarativeView::SizeRootObjectToView);

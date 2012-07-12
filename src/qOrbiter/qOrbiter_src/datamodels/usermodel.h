@@ -28,6 +28,7 @@ public:
     UserItem* find(const QString &id) const;
     void  findDefault() ;
     QModelIndex indexFromItem( const UserItem* item) const;
+    void sortModel(int column, Qt::SortOrder order);
     void clear();
 
     int defaultUser;           //when properly set, it will contain the default user for this orbiter / location

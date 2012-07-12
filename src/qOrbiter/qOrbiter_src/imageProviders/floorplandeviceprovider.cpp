@@ -1,5 +1,5 @@
 #include <QtGlobal>
-#if (QT_VERSION >= QT_VERSION_CHECK(5,0,0))
+#if (QT_VERSION >= 0x050000)
 //NOTE: Doesn't seem to need anything - is hdr needed?
 #else
 #include <QtDeclarative/qdeclarative.h>
@@ -9,7 +9,7 @@
 
 
 
-#if (QT_VERSION >= QT_VERSION_CHECK(5,0,0))
+#if (QT_VERSION >= 0x050000)
 FloorplanDeviceProvider::FloorplanDeviceProvider(qorbiterManager *ui): QQmlImageProvider(QQmlImageProvider::Pixmap), ui_reference(ui)
 #else
 FloorplanDeviceProvider::FloorplanDeviceProvider(qorbiterManager *ui): QDeclarativeImageProvider(QDeclarativeImageProvider::Pixmap), ui_reference(ui)

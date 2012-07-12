@@ -28,6 +28,7 @@ public:
   MediaScenarioItem* takeRow(int row);
   MediaScenarioItem* find(const QString &id) const;
   QModelIndex indexFromItem( const MediaScenarioItem* item) const;
+  void sortModel(int column, Qt::SortOrder order);
   void clear();
 
 private slots:

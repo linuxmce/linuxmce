@@ -6,7 +6,7 @@
   */
 #include <QObject>
 #include <QtGlobal>
-#if (QT_VERSION >= QT_VERSION_CHECK(5, 0, 0))
+#if (QT_VERSION >= 0x050000)
 #include <QtCore/QObject>
 #include <QtCore/QModelIndex>
 #include <QtQml/QQmlImageProvider>
@@ -25,7 +25,7 @@
 class qorbiterManager;
 class ListModel;
 
-#if (QT_VERSION >= QT_VERSION_CHECK(5,0,0))
+#if (QT_VERSION >= 0x050000)
 class GridIndexProvider :public QObject , public QQmlImageProvider
 #else
 class GridIndexProvider :public QObject , public QDeclarativeImageProvider

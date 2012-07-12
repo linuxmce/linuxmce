@@ -5,7 +5,7 @@
 #include <QUrl>
 #include <QtNetwork/QtNetwork>
 #include <QtXml/QDomDocument>
-#if   (QT_VERSION >= QT_VERSION_CHECK(5,0,0))
+#if   (QT_VERSION >= 0x050000)
 //FIXME: Another unnecessary hdr?
 #else
 #include <QtDeclarative/QDeclarativeItem>
@@ -96,6 +96,7 @@ public:
     int rowCount(const QModelIndex &parent) const;
 
     bool appendRow(gWeatherItem * item);
+    void sortModel(int column, Qt::SortOrder order);
     //end subclass related
 
     QString unitsSetup;

@@ -54,6 +54,7 @@ public:
     QModelIndex indexFromItem( const FloorplanDevice* item) const;
     FloorplanDevice* currentRow();
 
+    void sortModel(int column, Qt::SortOrder order);
     QString m_installation;
     QString currentPage;
 
@@ -67,7 +68,7 @@ public:
 
     QMap<int, QString*> floorplanPages;
 
-#if (QT_VERSION >= QT_VERSION_CHECK(5,0,0))
+#if (QT_VERSION >= 0x050000)
     QQmlComponent *fpProxy;
     QQmlEngine *proxyEngine;
 #else

@@ -63,6 +63,10 @@ LocationItem * LocationModel::find(const QString &id) const
   return 0;
 }
 
+void LocationModel::sortModel(int column, Qt::SortOrder order)
+{
+}
+
 QModelIndex LocationModel::indexFromItem(const LocationItem *item) const
 {
   Q_ASSERT(item);

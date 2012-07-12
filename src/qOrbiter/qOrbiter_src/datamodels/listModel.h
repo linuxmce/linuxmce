@@ -1,5 +1,3 @@
-
-
 #ifndef LISTMODEL_H
 #define LISTMODEL_H
 
@@ -8,9 +6,6 @@
 #include <QVariant>
 #include <datamodels/gridItem.h>
 #include <qorbitermanager.h>
-
-
-
 
 class ListModel : public QAbstractListModel
 {
@@ -37,6 +32,7 @@ public:
     Q_INVOKABLE QVariant get(int index, const QString &name) const;
     QModelIndex indexFromItem( const gridItem* item) const;
     gridItem* currentRow();
+    void sortModel(int column, Qt::SortOrder order);
 
     int totalcells;
     bool loadingStatus;

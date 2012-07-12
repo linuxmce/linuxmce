@@ -139,6 +139,10 @@ GenreItem * GenreModel::currentRow()
     return item;
 }
 
+void GenreModel::sortModel(int column, Qt::SortOrder order)
+{
+}
+
 bool GenreModel::setSelectionStatus(QString format)
 {
     GenreItem* item = find(format);

@@ -8,7 +8,7 @@ class AttributeModel : public QAbstractItemModel
     Q_OBJECT
 public:
     explicit AttributeModel(QObject *parent = 0);
-
+        void sortModel(int column, Qt::SortOrder order);
 signals:
 
 public slots:

@@ -48,6 +48,7 @@ public:
   AttributeSortItem* find(const QString &id) const;
   QModelIndex indexFromItem( const AttributeSortItem* item) const;
   AttributeSortItem* currentRow();
+  void sortModel(int column, Qt::SortOrder order);
 
   void ReturnSelectedItems();
   void clear();

@@ -163,6 +163,10 @@ PlaylistItemClass * PlaylistClass::currentRow()
     return item;
 }
 
+void PlaylistClass::sortModel(int column, Qt::SortOrder order)
+{
+}
+
 void PlaylistClass::setItemStatus(int pos)
 {
     PlaylistItemClass * item = find(QString::number(pos));

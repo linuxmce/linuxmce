@@ -49,6 +49,7 @@ public:
   ClimateScenarioItem* takeRow(int row);
   ClimateScenarioItem* find(const QString &id) const;
   QModelIndex indexFromItem( const ClimateScenarioItem* item) const;
+  void sortModel(int column, Qt::SortOrder order);
   void clear();
 
 

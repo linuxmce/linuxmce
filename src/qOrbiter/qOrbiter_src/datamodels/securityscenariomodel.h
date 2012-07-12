@@ -26,6 +26,7 @@ public:
   SecurityScenarioItem* takeRow(int row);
   SecurityScenarioItem* find(const QString &id) const;
   QModelIndex indexFromItem( const SecurityScenarioItem* item) const;
+  void sortModel(int column, Qt::SortOrder order);
   void clear();
 
 

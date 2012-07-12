@@ -72,6 +72,10 @@ QModelIndex TelecomScenarioModel::indexFromItem(const TelecomScenarioItem *item)
   return QModelIndex();
 }
 
+void TelecomScenarioModel::sortModel(int column, Qt::SortOrder order)
+{
+}
+
 void TelecomScenarioModel::clear()
 {
   qDeleteAll(m_list);

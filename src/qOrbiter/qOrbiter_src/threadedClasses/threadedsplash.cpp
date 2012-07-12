@@ -1,7 +1,7 @@
 
 
 #include <QPalette>
-#if (QT_VERSION >= QT_VERSION_CHECK(5,0,0))
+#if (QT_VERSION >= 0x050000)
 #include <QtQuick/QQuickView>
 #include <QQmlContext>
 #else
@@ -41,7 +41,7 @@ ThreadedSplash::ThreadedSplash(QObject *parent)
      QPalette palette;
      palette.setColor(QPalette::Base, Qt::transparent);
 
-#if (QT_VERSION >= QT_VERSION_CHECK(5,0,0))
+#if (QT_VERSION >= 0x050000)
      splashView = new QQuickView; //qdeclarativeview for splash.qml
 #else
      splashView = new QDeclarativeView; //qdeclarativeview for splash.qml

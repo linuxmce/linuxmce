@@ -51,6 +51,7 @@ public:
   FilterModelItem* find(const QString &id) const;
   QModelIndex indexFromItem( const FilterModelItem* item) const;
   FilterModelItem* currentRow();
+  void sortModel(int column, Qt::SortOrder order);
   void clear();
   void ReturnSelectedItems();
   QModelIndex lastrow;

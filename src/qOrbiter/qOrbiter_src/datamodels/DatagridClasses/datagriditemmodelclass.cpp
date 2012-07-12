@@ -98,6 +98,10 @@ void DataGridItemModelClass::clear()
 
 }
 
+void DataGridItemModelClass::sortModel(int column, Qt::SortOrder order)
+{
+}
+
 bool DataGridItemModelClass::removeRow(int row, const QModelIndex &parent)
 {
   Q_UNUSED(parent);

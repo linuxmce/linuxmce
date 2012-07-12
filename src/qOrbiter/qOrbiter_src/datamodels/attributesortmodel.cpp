@@ -138,6 +138,10 @@ AttributeSortItem * AttributeSortModel::currentRow()
     return item;
 }
 
+void AttributeSortModel::sortModel(int column, Qt::SortOrder order)
+{
+}
+
 bool AttributeSortModel::setSelectionStatus(QString format)
 {
     AttributeSortItem* item = find(format);

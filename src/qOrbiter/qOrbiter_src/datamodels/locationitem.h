@@ -1,7 +1,6 @@
 #ifndef LOCATIONITEM_H
 #define LOCATIONITEM_H
 
-
 #include <QAbstractListModel>
 #include <QVariant>
 #include <QImage>

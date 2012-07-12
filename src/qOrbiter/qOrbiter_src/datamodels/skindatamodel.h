@@ -32,6 +32,7 @@ public:
     SkinDataItem* takeRow(int row);
     SkinDataItem* find(const QString &id) const;
     QModelIndex indexFromItem( const SkinDataItem* item) const;
+    void sortModel(int column, Qt::SortOrder order);
     void clear();
     void addSkin(QString url);
     int *default_ea;
