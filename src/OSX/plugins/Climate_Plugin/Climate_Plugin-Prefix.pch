@@ -1,0 +1,6 @@
+//
+// Prefix header for all source files of the 'Climate_Plugin' target in the 'Climate_Plugin' project
+//
+
+#include <iostream>
+

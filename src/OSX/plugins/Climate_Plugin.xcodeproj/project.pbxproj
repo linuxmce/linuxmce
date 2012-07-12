@@ -1,0 +1,293 @@
+// !$*UTF8*$!
+{
+	archiveVersion = 1;
+	classes = {
+	};
+	objectVersion = 46;
+	objects = {
+
+/* Begin PBXBuildFile section */
+		95ABFE5315AF63860079029F /* Climate_Plugin.cp in Sources */ = {isa = PBXBuildFile; fileRef = 95ABFE5215AF63860079029F /* Climate_Plugin.cp */; };
+		95ABFE5D15AF63FB0079029F /* Climate_Plugin.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 95ABFE5C15AF63FB0079029F /* Climate_Plugin.cpp */; };
+		95ABFE6015AF64030079029F /* Main.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 95ABFE5F15AF64030079029F /* Main.cpp */; };
+		95ABFE6315AF647C0079029F /* mysql.h in Headers */ = {isa = PBXBuildFile; fileRef = 95ABFE6215AF647C0079029F /* mysql.h */; };
+		95ABFE6615AF64DD0079029F /* libDCECommon.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 95ABFE6515AF64DD0079029F /* libDCECommon.dylib */; };
+		95ABFE6815AF65000079029F /* libmysqlclient.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 95ABFE6715AF65000079029F /* libmysqlclient.dylib */; };
+		95ABFE6A15AF65230079029F /* libpluto_main.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 95ABFE6915AF65230079029F /* libpluto_main.dylib */; };
+		95ABFE6C15AF65790079029F /* Climate_PluginBase.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 95ABFE6B15AF65790079029F /* Climate_PluginBase.cpp */; };
+		95ABFE7015AF65CD0079029F /* Datagrid_Plugin.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 95ABFE6F15AF65CD0079029F /* Datagrid_Plugin.dylib */; };
+/* End PBXBuildFile section */
+
+/* Begin PBXFileReference section */
+		95ABFE4915AF63860079029F /* Climate_Plugin.dylib */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.dylib"; includeInIndex = 0; path = Climate_Plugin.dylib; sourceTree = BUILT_PRODUCTS_DIR; };
+		95ABFE4D15AF63860079029F /* Climate_Plugin-Prefix.pch */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "Climate_Plugin-Prefix.pch"; sourceTree = "<group>"; };
+		95ABFE4E15AF63860079029F /* Climate_PluginProj.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; path = Climate_PluginProj.xcconfig; sourceTree = "<group>"; };
+		95ABFE4F15AF63860079029F /* Climate_PluginTarget.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; path = Climate_PluginTarget.xcconfig; sourceTree = "<group>"; };
+		95ABFE5015AF63860079029F /* Climate_Plugin.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = Climate_Plugin.h; sourceTree = "<group>"; };
+		95ABFE5115AF63860079029F /* Climate_PluginPriv.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = Climate_PluginPriv.h; sourceTree = "<group>"; };
+		95ABFE5215AF63860079029F /* Climate_Plugin.cp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = Climate_Plugin.cp; sourceTree = "<group>"; };
+		95ABFE5C15AF63FB0079029F /* Climate_Plugin.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = Climate_Plugin.cpp; path = ../../Climate_Plugin/Climate_Plugin.cpp; sourceTree = "<group>"; };
+		95ABFE5F15AF64030079029F /* Main.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = Main.cpp; path = ../../Climate_Plugin/Main.cpp; sourceTree = "<group>"; };
+		95ABFE6215AF647C0079029F /* mysql.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = mysql.h; path = ../mysql/include/mysql.h; sourceTree = "<group>"; };
+		95ABFE6515AF64DD0079029F /* libDCECommon.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libDCECommon.dylib; path = ../lib/libDCECommon.dylib; sourceTree = "<group>"; };
+		95ABFE6715AF65000079029F /* libmysqlclient.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libmysqlclient.dylib; path = ../mysql/lib/libmysqlclient.dylib; sourceTree = "<group>"; };
+		95ABFE6915AF65230079029F /* libpluto_main.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libpluto_main.dylib; path = ../lib/libpluto_main.dylib; sourceTree = "<group>"; };
+		95ABFE6B15AF65790079029F /* Climate_PluginBase.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = Climate_PluginBase.cpp; path = ../../Gen_Devices/Climate_PluginBase.cpp; sourceTree = "<group>"; };
+		95ABFE6F15AF65CD0079029F /* Datagrid_Plugin.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = Datagrid_Plugin.dylib; path = ../bin/Datagrid_Plugin.dylib; sourceTree = "<group>"; };
+/* End PBXFileReference section */
+
+/* Begin PBXFrameworksBuildPhase section */
+		95ABFE4615AF63860079029F /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				95ABFE6615AF64DD0079029F /* libDCECommon.dylib in Frameworks */,
+				95ABFE6815AF65000079029F /* libmysqlclient.dylib in Frameworks */,
+				95ABFE6A15AF65230079029F /* libpluto_main.dylib in Frameworks */,
+				95ABFE7015AF65CD0079029F /* Datagrid_Plugin.dylib in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXFrameworksBuildPhase section */
+
+/* Begin PBXGroup section */
+		95ABFE3E15AF63860079029F = {
+			isa = PBXGroup;
+			children = (
+				95ABFE5C15AF63FB0079029F /* Climate_Plugin.cpp */,
+				95ABFE5F15AF64030079029F /* Main.cpp */,
+				95ABFE6415AF64AB0079029F /* Libraries */,
+				95ABFE6115AF64680079029F /* Includes */,
+				95ABFE4B15AF63860079029F /* Climate_Plugin */,
+				95ABFE4A15AF63860079029F /* Products */,
+			);
+			sourceTree = "<group>";
+		};
+		95ABFE4A15AF63860079029F /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				95ABFE4915AF63860079029F /* Climate_Plugin.dylib */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+		95ABFE4B15AF63860079029F /* Climate_Plugin */ = {
+			isa = PBXGroup;
+			children = (
+				95ABFE4E15AF63860079029F /* Climate_PluginProj.xcconfig */,
+				95ABFE4F15AF63860079029F /* Climate_PluginTarget.xcconfig */,
+				95ABFE5015AF63860079029F /* Climate_Plugin.h */,
+				95ABFE5115AF63860079029F /* Climate_PluginPriv.h */,
+				95ABFE5215AF63860079029F /* Climate_Plugin.cp */,
+				95ABFE4C15AF63860079029F /* Supporting Files */,
+			);
+			path = Climate_Plugin;
+			sourceTree = "<group>";
+		};
+		95ABFE4C15AF63860079029F /* Supporting Files */ = {
+			isa = PBXGroup;
+			children = (
+				95ABFE4D15AF63860079029F /* Climate_Plugin-Prefix.pch */,
+			);
+			name = "Supporting Files";
+			sourceTree = "<group>";
+		};
+		95ABFE6115AF64680079029F /* Includes */ = {
+			isa = PBXGroup;
+			children = (
+				95ABFE6215AF647C0079029F /* mysql.h */,
+			);
+			name = Includes;
+			sourceTree = "<group>";
+		};
+		95ABFE6415AF64AB0079029F /* Libraries */ = {
+			isa = PBXGroup;
+			children = (
+				95ABFE6515AF64DD0079029F /* libDCECommon.dylib */,
+				95ABFE6715AF65000079029F /* libmysqlclient.dylib */,
+				95ABFE6915AF65230079029F /* libpluto_main.dylib */,
+				95ABFE6B15AF65790079029F /* Climate_PluginBase.cpp */,
+				95ABFE6F15AF65CD0079029F /* Datagrid_Plugin.dylib */,
+			);
+			name = Libraries;
+			sourceTree = "<group>";
+		};
+/* End PBXGroup section */
+
+/* Begin PBXHeadersBuildPhase section */
+		95ABFE4715AF63860079029F /* Headers */ = {
+			isa = PBXHeadersBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				95ABFE6315AF647C0079029F /* mysql.h in Headers */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXHeadersBuildPhase section */
+
+/* Begin PBXNativeTarget section */
+		95ABFE4815AF63860079029F /* Climate_Plugin */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 95ABFE5615AF63860079029F /* Build configuration list for PBXNativeTarget "Climate_Plugin" */;
+			buildPhases = (
+				95ABFE4515AF63860079029F /* Sources */,
+				95ABFE4615AF63860079029F /* Frameworks */,
+				95ABFE4715AF63860079029F /* Headers */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = Climate_Plugin;
+			productName = Climate_Plugin;
+			productReference = 95ABFE4915AF63860079029F /* Climate_Plugin.dylib */;
+			productType = "com.apple.product-type.library.dynamic";
+		};
+/* End PBXNativeTarget section */
+
+/* Begin PBXProject section */
+		95ABFE4015AF63860079029F /* Project object */ = {
+			isa = PBXProject;
+			attributes = {
+				LastUpgradeCheck = 0420;
+			};
+			buildConfigurationList = 95ABFE4315AF63860079029F /* Build configuration list for PBXProject "Climate_Plugin" */;
+			compatibilityVersion = "Xcode 3.2";
+			developmentRegion = English;
+			hasScannedForEncodings = 0;
+			knownRegions = (
+				en,
+			);
+			mainGroup = 95ABFE3E15AF63860079029F;
+			productRefGroup = 95ABFE4A15AF63860079029F /* Products */;
+			projectDirPath = "";
+			projectRoot = "";
+			targets = (
+				95ABFE4815AF63860079029F /* Climate_Plugin */,
+			);
+		};
+/* End PBXProject section */
+
+/* Begin PBXSourcesBuildPhase section */
+		95ABFE4515AF63860079029F /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				95ABFE5315AF63860079029F /* Climate_Plugin.cp in Sources */,
+				95ABFE5D15AF63FB0079029F /* Climate_Plugin.cpp in Sources */,
+				95ABFE6015AF64030079029F /* Main.cpp in Sources */,
+				95ABFE6C15AF65790079029F /* Climate_PluginBase.cpp in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXSourcesBuildPhase section */
+
+/* Begin XCBuildConfiguration section */
+		95ABFE5415AF63860079029F /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				ARCHS = "$(ARCHS_STANDARD_64_BIT)";
+				CLANG_ENABLE_OBJC_ARC = YES;
+				COPY_PHASE_STRIP = NO;
+				GCC_C_LANGUAGE_STANDARD = gnu99;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_ENABLE_OBJC_EXCEPTIONS = YES;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"DEBUG=1",
+					"$(inherited)",
+				);
+				GCC_SYMBOLS_PRIVATE_EXTERN = NO;
+				GCC_VERSION = com.apple.compilers.llvm.clang.1_0;
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_MISSING_PROTOTYPES = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				MACOSX_DEPLOYMENT_TARGET = 10.7;
+				ONLY_ACTIVE_ARCH = YES;
+				SDKROOT = macosx;
+			};
+			name = Debug;
+		};
+		95ABFE5515AF63860079029F /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				ARCHS = "$(ARCHS_STANDARD_64_BIT)";
+				CLANG_ENABLE_OBJC_ARC = YES;
+				COPY_PHASE_STRIP = YES;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				GCC_C_LANGUAGE_STANDARD = gnu99;
+				GCC_ENABLE_OBJC_EXCEPTIONS = YES;
+				GCC_VERSION = com.apple.compilers.llvm.clang.1_0;
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_MISSING_PROTOTYPES = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				MACOSX_DEPLOYMENT_TARGET = 10.7;
+				SDKROOT = macosx;
+			};
+			name = Release;
+		};
+		95ABFE5715AF63860079029F /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CONFIGURATION_BUILD_DIR = ../bin;
+				HEADER_SEARCH_PATHS = (
+					../../DCE,
+					../..,
+				);
+				LIBRARY_SEARCH_PATHS = (
+					"$(inherited)",
+					"\"$(SRCROOT)/../lib\"",
+					"\"$(SRCROOT)/../mysql/lib\"",
+					"\"$(SRCROOT)/../bin\"",
+				);
+				PRODUCT_NAME = "$(TARGET_NAME)";
+			};
+			name = Debug;
+		};
+		95ABFE5815AF63860079029F /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CONFIGURATION_BUILD_DIR = ../bin;
+				HEADER_SEARCH_PATHS = (
+					../../DCE,
+					../..,
+				);
+				LIBRARY_SEARCH_PATHS = (
+					"$(inherited)",
+					"\"$(SRCROOT)/../lib\"",
+					"\"$(SRCROOT)/../mysql/lib\"",
+					"\"$(SRCROOT)/../bin\"",
+				);
+				PRODUCT_NAME = "$(TARGET_NAME)";
+			};
+			name = Release;
+		};
+/* End XCBuildConfiguration section */
+
+/* Begin XCConfigurationList section */
+		95ABFE4315AF63860079029F /* Build configuration list for PBXProject "Climate_Plugin" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				95ABFE5415AF63860079029F /* Debug */,
+				95ABFE5515AF63860079029F /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		95ABFE5615AF63860079029F /* Build configuration list for PBXNativeTarget "Climate_Plugin" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				95ABFE5715AF63860079029F /* Debug */,
+				95ABFE5815AF63860079029F /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+/* End XCConfigurationList section */
+	};
+	rootObject = 95ABFE4015AF63860079029F /* Project object */;
+}
