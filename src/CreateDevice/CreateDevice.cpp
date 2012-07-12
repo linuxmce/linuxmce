@@ -53,7 +53,7 @@
 
 #define  VERSION "<=version=>"
 
-extern DCEConfig dceConfig;
+DCEConfig dceConfig;
 
 using namespace std;
 using namespace DCE;
