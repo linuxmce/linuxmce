@@ -162,9 +162,7 @@ int main(int argc, char* argv[])
 #ifdef for_harmattan
     QApplication::setGraphicsSystem("meego");
 #elif GLENABLED
-    QApplication::setGraphicsSystem("raster");
-#elif WIN32
-    QApplication::setGraphicsSystem("raster");
+    QApplication::setGraphicsSystem("opengl");
 #else
     QApplication::setGraphicsSystem("raster");
 #endif
@@ -175,8 +173,6 @@ int main(int argc, char* argv[])
 
 
     QApplication  a(argc, argv);
-
-
 #ifdef __ANDROID__ // workaround for 'text as boxes' issue.
     QFont f = a.font();
     f.setFamily("Droid Sans");

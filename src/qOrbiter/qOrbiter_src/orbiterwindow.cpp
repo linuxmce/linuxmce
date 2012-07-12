@@ -67,13 +67,16 @@ orbiterWindow::orbiterWindow(long deviceid, std::string routerip, QObject *paren
     mainView.setWindowTitle("LinuxMCE Orbiter ");
     mainView.rootContext()->setContextProperty("orbiterList" , "");
 #if GLENABLED
-#ifdef for_desktop
 
+#ifdef for_desktop
+    glWidget = new QGLWidget();
+mainView.setViewport(glWidget);
 #elif for_android
 
 #else
     mainView.setViewport(glWidget);
 #endif
+
     mainView.setViewportUpdateMode(QGraphicsView::FullViewportUpdate);
 #endif
     // QObject::connect(&mainView, SIGNAL(sceneResized(QSize)), this, SIGNAL(orientationChanged(QSize)));
