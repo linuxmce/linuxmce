@@ -168,6 +168,11 @@ streamdev-server.StartHTTPServer = 1
 streamdev-server.StartServer = 1
 streamdev-server.SuspendMode = 1
 " >> /var/lib/vdr/setup.conf
+	echo "
+192.168.80.0/24
+"
+>> /etc/vdr/plugins/streamdevhosts.conf
+
 else
 	echo "
 streamdev-client.RemoteIp = 192.168.80.1
