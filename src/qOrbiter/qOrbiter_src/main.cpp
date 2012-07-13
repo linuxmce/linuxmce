@@ -30,9 +30,10 @@ Q_IMPORT_PLUGIN(UIKit)
 #endif
 
 #include <QtGlobal>
-#if QT_VERSION >= QT_VERSION_CHECK(5,0,0)
+#ifdef QT5
 #include <QtWidgets/QApplication>
 #include <QtQml/QQmlEngine>
+#include <QQmlContext>
 #else
 #include <QApplication>
 #include <QtDeclarative/QDeclarativeEngine>

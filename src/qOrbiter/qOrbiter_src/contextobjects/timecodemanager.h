@@ -2,7 +2,7 @@
 #define TIMECODEMANAGER_H
 
 #include <QtGlobal>
-#if (QT_VERSION >= 0x050000)
+#ifdef QT5
 #include <QtQuick/QQuickItem>
 #else
 #include <QtDeclarative/QDeclarativeItem>
@@ -13,7 +13,7 @@
 #include <QRegExp>
 #include <QTime>
 
-#if (QT_VERSION >= 0x050000)
+#ifdef QT5
 class TimeCodeManager : public QQuickItem
 #else
 class TimeCodeManager : public QDeclarativeItem
@@ -32,7 +32,7 @@ class TimeCodeManager : public QDeclarativeItem
     Q_PROPERTY (int playbackSpeed READ getSpeed WRITE setSpeed NOTIFY playbackSpeedChanged)
 
 public:
-#if (QT_VERSION >= 0x050000)
+#ifdef QT5
     explicit TimeCodeManager(QQuickItem *parent = 0);
 #else
     explicit TimeCodeManager(QDeclarativeItem *parent = 0);

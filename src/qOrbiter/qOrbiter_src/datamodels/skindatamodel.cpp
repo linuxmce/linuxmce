@@ -3,6 +3,8 @@
 #if (QT_VERSION >= 0x050000)
 #include <QtQml/QQmlComponent>
 #include <QtQml/QQmlEngine>
+#include <QtQuick/QQuickView>
+
 #else
 #include <QtDeclarative/QDeclarativeComponent>
 #include <QtDeclarative/QDeclarativeEngine>

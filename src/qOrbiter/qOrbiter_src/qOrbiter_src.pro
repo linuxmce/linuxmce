@@ -182,7 +182,7 @@ QT+= webkit declarative
 }
 
 QT5{
-QT+= webkit quick mobility multimedia
+QT+= webkit quick mobility multimedia widgets qtcore
 }
 
 macx{

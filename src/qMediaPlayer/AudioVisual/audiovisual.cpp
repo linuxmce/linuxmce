@@ -2,21 +2,33 @@
 #include <QUrl>
 #include <QFile>
 #include <QPainter>
+
+#ifdef QT5
+#include <QtWidgets/QApplication>
+#include <QtQuick/QQuickItem>
+#include <QtWidgets/QGraphicsProxyWidget>
+//#include <QtMultimedia/QtMultimedia>
+#else
+#include <QApplication>
 #include <phonon/VideoPlayer>
 #include <QDeclarativeItem>
-
 #include <QGraphicsProxyWidget>
 #include <QDebug>
+#endif
 
 //there will be a lot of commented out code as i work this into a proper plugin. the commented out code
 //is essentially prototype methods and things i dont feel like looking up again
-
+#ifdef QT5
+AudioVisual::AudioVisual(QQuickItem *parent) :
+    QQuickItem(parent)
+  #else
 AudioVisual::AudioVisual(QDeclarativeItem *parent) :
     QDeclarativeItem(parent)
-{
 
+  #endif
+{
     videoWidgetPlayer *player = new videoWidgetPlayer;
-    QGraphicsProxyWidget *proxy = new QGraphicsProxyWidget(this);
+    QGraphicsProxyWidget *proxy = new QGraphicsProxyWidget();
     proxy->setWidget(player);
 
 }
@@ -34,10 +46,14 @@ bool AudioVisual::playVideo(const QString &video)
 
 bool AudioVisual::playAudio(const QString &audio)
 {
+#ifdef QT5
+
+#else
     Phonon::MediaObject *music =
-             Phonon::createPlayer(Phonon::MusicCategory,
-                                  Phonon::MediaSource(":/audio/epic.mp3"));
-         music->play();
+            Phonon::createPlayer(Phonon::MusicCategory,
+                                 Phonon::MediaSource(":/audio/epic.mp3"));
+    music->play();
+#endif
     return true;
 }
 

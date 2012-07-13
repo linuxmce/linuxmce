@@ -3,15 +3,16 @@
 
 
 #include <QtGlobal>
-#if (QT_VERSION >= 0x050000)
+#ifdef QT5
 #include <QQmlImageProvider>
+
 #else
 #include <QtDeclarative/QDeclarativeImageProvider>
 #endif
 #include <datamodels/floorplanmodel.h>
 #include <qorbitermanager.h>
 
-#if (QT_VERSION >= 0x050000)
+#ifdef QT5
 class FloorplanDeviceProvider : public QObject, public QQmlImageProvider
 #else
 class FloorplanDeviceProvider : public QObject, public QDeclarativeImageProvider

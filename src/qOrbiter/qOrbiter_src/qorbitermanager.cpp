@@ -23,6 +23,8 @@
 #include <QtCore/QTimer>
 #include <QtCore/QProcess>
 #include <QtWidgets/QApplication>
+#include <QQmlContext>
+#include <QtQuick/QQuickView>
 #else
 #include <QtDeclarative/QDeclarativeProperty>
 #include <QFile>

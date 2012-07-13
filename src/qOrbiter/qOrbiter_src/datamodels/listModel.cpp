@@ -18,7 +18,13 @@
 #ifdef debug
 #include <QDebug>
 #endif
+#ifdef QT5
+#include <QtWidgets/QApplication>
+
+#else
 #include <QApplication>
+#endif
+
 
 #include "datamodels/listModel.h"
 

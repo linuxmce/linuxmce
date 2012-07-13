@@ -21,20 +21,25 @@
 
 
 #include <QtCore/QObject>
+#include <contextobjects/existingorbiter.h>
+#include <QtCore/QDir>
+
 #if (QT_VERSION >= 0x050000)
 #include <QtQml/QtQml>
+#include <QQmlContext>
+#include <QQmlEngine>
 #include <QtWidgets/QApplication>
 #else
 #include <QtDeclarative/QDeclarativeView>
 #include <QtDeclarative/qdeclarative.h>
 #include <QtDeclarative/QDeclarativeEngine>
-#endif
-#include <contextobjects/existingorbiter.h>
 #include <QApplication>
-#include <QtCore/QDir>
+#endif
+
 #ifdef QT_DEBUG
 #include <QDebug>
 #endif
+
 #include "orbiterwindow.h"
 
 #ifdef IOS

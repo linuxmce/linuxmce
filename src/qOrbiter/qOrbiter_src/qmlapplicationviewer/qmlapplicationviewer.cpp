@@ -19,6 +19,7 @@
 #include <QtQml/QQmlEngine>
 #include <QtQml/QtQml>
 #include <QtWidgets/QtWidgets>
+#include <QQmlContext>
 #else
 #include <QtGui/QApplication>
 #include <QtDeclarative/QDeclarativeComponent>
@@ -81,7 +82,7 @@ QString QmlApplicationViewerPrivate::adjustPath(const QString &path)
     return path;
 }
 
-#if (QT_VERSION >= 0x050000)
+#ifdef QT5
 QmlApplicationViewer::QmlApplicationViewer(QWindow *parent)
     : QQuickView(parent)
 #else
@@ -91,7 +92,7 @@ QmlApplicationViewer::QmlApplicationViewer(QWidget *parent)
     , d(new QmlApplicationViewerPrivate())
 {
     connect(engine(), SIGNAL(quit()), SLOT(close()));
-#if (QT_VERSION >= 0x050000)
+#ifdef QT5
     setResizeMode(QQuickView::SizeRootObjectToView);
 #else
     setResizeMode(QDeclarativeView::SizeRootObjectToView);

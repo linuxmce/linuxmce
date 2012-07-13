@@ -12,13 +12,13 @@
 #define QMLAPPLICATIONVIEWER_H
 
 #include <QtGlobal>
-#if (QT_VERSION >= 0x050000)
+#ifdef QT5
 #include <QtQuick/QQuickView>
 #else
 #include <QtDeclarative/QDeclarativeView>
 #endif
 
-#if (QT_VERSION >= 0x050000)
+#ifdef QT5
 class QmlApplicationViewer : public QQuickView
 #else
 class QmlApplicationViewer : public QDeclarativeView
@@ -34,7 +34,7 @@ public:
     };
 
 
-#if (QT_VERSION >= 0x050000)
+#ifdef QT5
     explicit QmlApplicationViewer(QWindow *parent = 0);
 #else
     explicit QmlApplicationViewer(QWidget *parent = 0);

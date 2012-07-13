@@ -19,7 +19,11 @@
 
 //<-dceag-d-b->
 #include <iostream>
+#ifdef QT5
+#include <QtWidgets/QApplication>
+#else
 #include <QApplication>
+#endif
 
 #include "DCE/Logger.h"
 #include "PlutoUtils/FileUtils.h"

@@ -46,6 +46,7 @@
 #include <QtGlobal>
 #if (QT_VERSION >= 0x050000)
 #include <QtQuick/QQuickPaintedItem>
+#include <QtQuick/QQuickItem>
 #else
 #include <QtDeclarative/QtDeclarative>
 #endif

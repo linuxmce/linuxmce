@@ -1,6 +1,7 @@
 #include <QtGlobal>
-#if (QT_VERSION >= 0x050000)
+#ifdef QT5
 //NOTE: Doesn't seem to need anything - is hdr needed?
+#include <QtWidgets/QGraphicsPixmapItem>
 #else
 #include <QtDeclarative/qdeclarative.h>
 #endif
@@ -9,7 +10,7 @@
 
 
 
-#if (QT_VERSION >= 0x050000)
+#ifdef QT5
 FloorplanDeviceProvider::FloorplanDeviceProvider(qorbiterManager *ui): QQmlImageProvider(QQmlImageProvider::Pixmap), ui_reference(ui)
 #else
 FloorplanDeviceProvider::FloorplanDeviceProvider(qorbiterManager *ui): QDeclarativeImageProvider(QDeclarativeImageProvider::Pixmap), ui_reference(ui)
@@ -22,14 +23,6 @@ QPixmap FloorplanDeviceProvider::requestPixmap(const QString &id, QSize *size, c
 {
     QPixmap key;
     QPixmap result;
-
-    QObject * view = ui_reference->qorbiterUIwin->rootObject();
-//NOTE: What is this doing? doesn't work under Qt5.0
-#if (QT_VERSION < QT_VERSION_CHECK(5,0,0))
-    QDeclarativeItem * iconObj = view->findChild<QDeclarativeItem*>(id);
-    QGraphicsPixmapItem * t = (QGraphicsPixmapItem*)iconObj->toGraphicsObject();
-#endif
-
      if (requestedSize.isValid()) {
             result = key.scaled(requestedSize, Qt::KeepAspectRatio);
         } else {

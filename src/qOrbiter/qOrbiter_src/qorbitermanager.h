@@ -36,14 +36,23 @@
 
 /*---qt includes----*/
 #include <QtGlobal>
+#if (QT_VERSION >= 0x050000)
 
+#include <QtQuick/QQuickView>
+#include <QtQuick/QtQuick>
+#include <QtWidgets/QWidget>
+#include <QtWidgets/QMainWindow>
+#include <QtQuick/QQuickItem>
+
+#else
 #include <QtGui/QWidget>
 #include <QtDeclarative/QDeclarativeView>
 #include <QtDeclarative/qdeclarativecontext.h>
 #include <QtDeclarative/QDeclarativeItem>
+#include <QMainWindow>
+#endif
 
 #include <QStringList>
-#include <QMainWindow>
 #include <QThread>
 #include <QFile>
 #include <QDir>
