@@ -150,7 +150,7 @@ int LMCE_Game_Update::AddRomm(string sRomName)
   Row_Rom *pRow_Rom = m_pMyDatabase->Rom_get()->AddRow();
   string sRomFile = sRomName + ".zip";
   pRow_Rom->Romname_set(sRomFile);
-  pRow_Rom->FK_GameSystem_set(GAMESYSTEM_MAME_CONST);
+  pRow_Rom->FK_GameSystem_set(GAMESYSTEM_Arcade_CONST);
   pRow_Rom->Table_Rom_get()->Commit();
   return pRow_Rom->PK_Rom_get();
 }
