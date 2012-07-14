@@ -3,14 +3,7 @@ CXXFLAGS = -pipe -Wall -O2 -D_GNU_SOURCE -fPIC -g -ggdb3
 CPPFLAGS =  -I.. -I../.. -I../DCE -D_FILE_OFFSET_BITS=64 -D_LARGEFILE_SOURCE -DMULTI_THREADED -DNO_SQL_THREAD_LOG
 CXX = g++
 LDFLAGS = -L$(ROOT)/lib
-
-sources += Database_lmce_game.cpp TableRow.cpp \
-Table_GameSystem.cpp \
-Table_Rom.cpp \
-Table_RomAttribute.cpp \
-Table_RomAttributeType.cpp \
-Table_Rom_RomAttribute.cpp
-
+sources = Database_lmce_game.cpp TableRow.cpp
 #<-mkr_B_use_mysql_wrapper_b->
 CPPFLAGS += -I/usr/include/mysql
 LDFLAGS += -lmysqlclient_r
@@ -18,6 +11,18 @@ LDFLAGS += -lmysqlclient_r
 
 #
 
+sources +=  \
+Table_GameSystem.cpp \
+Table_Rom.cpp \
+Table_RomAttribute.cpp \
+Table_RomAttributeType.cpp \
+Table_Rom_RomAttribute.cpp \
+Table_psc_game_batdet.cpp \
+Table_psc_game_bathdr.cpp \
+Table_psc_game_batuser.cpp \
+Table_psc_game_repset.cpp \
+Table_psc_game_schema.cpp \
+Table_psc_game_tables.cpp
 
 all: liblmce_game.so all-recursive
 
@@ -30,7 +35,3 @@ clean: clean-recursive
 
 include $(ROOT)/PlutoUtils/make.rules
 -include $(sources:.cpp=.d)
-
-install: 
-	mkdir -p pluto/lib
-	cp liblmce_game.so $(DESTPATH)pluto/lib

@@ -97,30 +97,58 @@ class DECLSPECIFIER Row_RomAttributeType : public TableRow, public SerializeClas
 string m_Define;
 string m_Description;
 long int m_PicPriority;
+long int m_psc_id;
+long int m_psc_batch;
+long int m_psc_user;
+short int m_psc_frozen;
+string m_psc_mod;
+long int m_psc_restrict;
 
-		bool is_null[4];
+		bool is_null[10];
 	
 	public:
 		long int PK_RomAttributeType_get();
 string Define_get();
 string Description_get();
 long int PicPriority_get();
+long int psc_id_get();
+long int psc_batch_get();
+long int psc_user_get();
+short int psc_frozen_get();
+string psc_mod_get();
+long int psc_restrict_get();
 
 		
 		void PK_RomAttributeType_set(long int val);
 void Define_set(string val);
 void Description_set(string val);
 void PicPriority_set(long int val);
+void psc_id_set(long int val);
+void psc_batch_set(long int val);
+void psc_user_set(long int val);
+void psc_frozen_set(short int val);
+void psc_mod_set(string val);
+void psc_restrict_set(long int val);
 
 		
 		bool Define_isNull();
 bool Description_isNull();
 bool PicPriority_isNull();
+bool psc_id_isNull();
+bool psc_batch_isNull();
+bool psc_user_isNull();
+bool psc_frozen_isNull();
+bool psc_restrict_isNull();
 
 			
 		void Define_setNull(bool val);
 void Description_setNull(bool val);
 void PicPriority_setNull(bool val);
+void psc_id_setNull(bool val);
+void psc_batch_setNull(bool val);
+void psc_user_setNull(bool val);
+void psc_frozen_setNull(bool val);
+void psc_restrict_setNull(bool val);
 	
 	
 		void Delete();
@@ -141,7 +169,7 @@ void PicPriority_setNull(bool val);
 
 		// Setup binary serialization
 		void SetupSerialization(int iSC_Version) {
-			StartSerializeList() + m_PK_RomAttributeType+ m_Define+ m_Description+ m_PicPriority;
+			StartSerializeList() + m_PK_RomAttributeType+ m_Define+ m_Description+ m_PicPriority+ m_psc_id+ m_psc_batch+ m_psc_user+ m_psc_frozen+ m_psc_mod+ m_psc_restrict;
 		}
 	private:
 		void SetDefaultValues();
@@ -150,6 +178,12 @@ void PicPriority_setNull(bool val);
 string Define_asSQL();
 string Description_asSQL();
 string PicPriority_asSQL();
+string psc_id_asSQL();
+string psc_batch_asSQL();
+string psc_user_asSQL();
+string psc_frozen_asSQL();
+string psc_mod_asSQL();
+string psc_restrict_asSQL();
 
 	};
 

@@ -82,6 +82,7 @@ void Row_RomAttribute::Delete()
 	Row_RomAttribute *pRow = this; // Needed so we will have only 1 version of get_primary_fields_assign_from_row
 	
 	if (!is_deleted)
+	{
 		if (is_added)	
 		{	
 			vector<TableRow*>::iterator i;	
@@ -103,6 +104,7 @@ void Row_RomAttribute::Delete()
 			table->deleted_cachedRows[key] = this;
 			is_deleted = true;	
 		}	
+	}
 }
 
 void Row_RomAttribute::Reload()
@@ -141,6 +143,18 @@ is_null[1] = false;
 m_FK_GameSystem = 0;
 is_null[2] = false;
 is_null[3] = true;
+is_null[4] = true;
+m_psc_id = 0;
+is_null[5] = true;
+m_psc_batch = 0;
+is_null[6] = true;
+m_psc_user = 0;
+m_psc_frozen = 0;
+is_null[7] = false;
+m_psc_mod = "0000-00-00 00:00:00";
+is_null[8] = false;
+is_null[9] = true;
+m_psc_restrict = 0;
 
 
 	is_added=false;
@@ -160,6 +174,24 @@ return m_FK_GameSystem;}
 string Row_RomAttribute::Name_get(){PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
 
 return m_Name;}
+long int Row_RomAttribute::psc_id_get(){PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
+
+return m_psc_id;}
+long int Row_RomAttribute::psc_batch_get(){PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
+
+return m_psc_batch;}
+long int Row_RomAttribute::psc_user_get(){PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
+
+return m_psc_user;}
+short int Row_RomAttribute::psc_frozen_get(){PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
+
+return m_psc_frozen;}
+string Row_RomAttribute::psc_mod_get(){PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
+
+return m_psc_mod;}
+long int Row_RomAttribute::psc_restrict_get(){PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
+
+return m_psc_restrict;}
 
 		
 void Row_RomAttribute::PK_RomAttribute_set(long int val){PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
@@ -174,15 +206,68 @@ m_FK_GameSystem = val; is_modified=true; is_null[2]=false;}
 void Row_RomAttribute::Name_set(string val){PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
 
 m_Name = val; is_modified=true; is_null[3]=false;}
+void Row_RomAttribute::psc_id_set(long int val){PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
+
+m_psc_id = val; is_modified=true; is_null[4]=false;}
+void Row_RomAttribute::psc_batch_set(long int val){PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
+
+m_psc_batch = val; is_modified=true; is_null[5]=false;}
+void Row_RomAttribute::psc_user_set(long int val){PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
+
+m_psc_user = val; is_modified=true; is_null[6]=false;}
+void Row_RomAttribute::psc_frozen_set(short int val){PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
+
+m_psc_frozen = val; is_modified=true; is_null[7]=false;}
+void Row_RomAttribute::psc_mod_set(string val){PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
+
+m_psc_mod = val; is_modified=true; is_null[8]=false;}
+void Row_RomAttribute::psc_restrict_set(long int val){PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
+
+m_psc_restrict = val; is_modified=true; is_null[9]=false;}
 
 		
 bool Row_RomAttribute::Name_isNull() {PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
 
 return is_null[3];}
+bool Row_RomAttribute::psc_id_isNull() {PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
+
+return is_null[4];}
+bool Row_RomAttribute::psc_batch_isNull() {PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
+
+return is_null[5];}
+bool Row_RomAttribute::psc_user_isNull() {PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
+
+return is_null[6];}
+bool Row_RomAttribute::psc_frozen_isNull() {PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
+
+return is_null[7];}
+bool Row_RomAttribute::psc_restrict_isNull() {PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
+
+return is_null[9];}
 
 			
 void Row_RomAttribute::Name_setNull(bool val){PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
 is_null[3]=val;
+is_modified=true;
+}
+void Row_RomAttribute::psc_id_setNull(bool val){PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
+is_null[4]=val;
+is_modified=true;
+}
+void Row_RomAttribute::psc_batch_setNull(bool val){PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
+is_null[5]=val;
+is_modified=true;
+}
+void Row_RomAttribute::psc_user_setNull(bool val){PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
+is_null[6]=val;
+is_modified=true;
+}
+void Row_RomAttribute::psc_frozen_setNull(bool val){PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
+is_null[7]=val;
+is_modified=true;
+}
+void Row_RomAttribute::psc_restrict_setNull(bool val){PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
+is_null[9]=val;
 is_modified=true;
 }
 	
@@ -240,6 +325,85 @@ delete[] buf;
 return s;
 }
 
+string Row_RomAttribute::psc_id_asSQL()
+{
+PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
+
+if (is_null[4])
+return "NULL";
+
+char buf[32];
+sprintf(buf, "%li", m_psc_id);
+
+return buf;
+}
+
+string Row_RomAttribute::psc_batch_asSQL()
+{
+PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
+
+if (is_null[5])
+return "NULL";
+
+char buf[32];
+sprintf(buf, "%li", m_psc_batch);
+
+return buf;
+}
+
+string Row_RomAttribute::psc_user_asSQL()
+{
+PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
+
+if (is_null[6])
+return "NULL";
+
+char buf[32];
+sprintf(buf, "%li", m_psc_user);
+
+return buf;
+}
+
+string Row_RomAttribute::psc_frozen_asSQL()
+{
+PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
+
+if (is_null[7])
+return "NULL";
+
+char buf[32];
+sprintf(buf, "%hi", m_psc_frozen);
+
+return buf;
+}
+
+string Row_RomAttribute::psc_mod_asSQL()
+{
+PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
+
+if (is_null[8])
+return "NULL";
+
+char *buf = new char[39];
+db_wrapper_real_escape_string(table->database->m_pDB, buf, m_psc_mod.c_str(), (unsigned long) min((size_t)19,m_psc_mod.size()));
+string s=string()+"\""+buf+"\"";
+delete[] buf;
+return s;
+}
+
+string Row_RomAttribute::psc_restrict_asSQL()
+{
+PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
+
+if (is_null[9])
+return "NULL";
+
+char buf[32];
+sprintf(buf, "%li", m_psc_restrict);
+
+return buf;
+}
+
 
 
 
@@ -279,10 +443,10 @@ bool Table_RomAttribute::Commit(bool bDeleteFailedModifiedRow,bool bDeleteFailed
 	
 		
 string values_list_comma_separated;
-values_list_comma_separated = values_list_comma_separated + pRow->PK_RomAttribute_asSQL()+", "+pRow->FK_RomAttributeType_asSQL()+", "+pRow->FK_GameSystem_asSQL()+", "+pRow->Name_asSQL();
+values_list_comma_separated = values_list_comma_separated + pRow->PK_RomAttribute_asSQL()+", "+pRow->FK_RomAttributeType_asSQL()+", "+pRow->FK_GameSystem_asSQL()+", "+pRow->Name_asSQL()+", "+pRow->psc_id_asSQL()+", "+pRow->psc_batch_asSQL()+", "+pRow->psc_user_asSQL()+", "+pRow->psc_frozen_asSQL()+", "+pRow->psc_restrict_asSQL();
 
 	
-		string query = "insert into RomAttribute (`PK_RomAttribute`, `FK_RomAttributeType`, `FK_GameSystem`, `Name`) values ("+
+		string query = "insert into RomAttribute (`PK_RomAttribute`, `FK_RomAttributeType`, `FK_GameSystem`, `Name`, `psc_id`, `psc_batch`, `psc_user`, `psc_frozen`, `psc_restrict`) values ("+
 			values_list_comma_separated+")";
 			
 		if (db_wrapper_query(database->m_pDB, query.c_str()))
@@ -348,7 +512,7 @@ condition = condition + "`PK_RomAttribute`=" + tmp_PK_RomAttribute;
 			
 		
 string update_values_list;
-update_values_list = update_values_list + "`PK_RomAttribute`="+pRow->PK_RomAttribute_asSQL()+", `FK_RomAttributeType`="+pRow->FK_RomAttributeType_asSQL()+", `FK_GameSystem`="+pRow->FK_GameSystem_asSQL()+", `Name`="+pRow->Name_asSQL();
+update_values_list = update_values_list + "`PK_RomAttribute`="+pRow->PK_RomAttribute_asSQL()+", `FK_RomAttributeType`="+pRow->FK_RomAttributeType_asSQL()+", `FK_GameSystem`="+pRow->FK_GameSystem_asSQL()+", `Name`="+pRow->Name_asSQL()+", `psc_id`="+pRow->psc_id_asSQL()+", `psc_batch`="+pRow->psc_batch_asSQL()+", `psc_user`="+pRow->psc_user_asSQL()+", `psc_frozen`="+pRow->psc_frozen_asSQL()+", `psc_restrict`="+pRow->psc_restrict_asSQL();
 
 	
 		string query = "update RomAttribute set " + update_values_list + " where " + condition;
@@ -525,6 +689,72 @@ pRow->is_null[3]=false;
 pRow->m_Name = string(row[3],lengths[3]);
 }
 
+if (row[4] == NULL)
+{
+pRow->is_null[4]=true;
+pRow->m_psc_id = 0;
+}
+else
+{
+pRow->is_null[4]=false;
+sscanf(row[4], "%li", &(pRow->m_psc_id));
+}
+
+if (row[5] == NULL)
+{
+pRow->is_null[5]=true;
+pRow->m_psc_batch = 0;
+}
+else
+{
+pRow->is_null[5]=false;
+sscanf(row[5], "%li", &(pRow->m_psc_batch));
+}
+
+if (row[6] == NULL)
+{
+pRow->is_null[6]=true;
+pRow->m_psc_user = 0;
+}
+else
+{
+pRow->is_null[6]=false;
+sscanf(row[6], "%li", &(pRow->m_psc_user));
+}
+
+if (row[7] == NULL)
+{
+pRow->is_null[7]=true;
+pRow->m_psc_frozen = 0;
+}
+else
+{
+pRow->is_null[7]=false;
+sscanf(row[7], "%hi", &(pRow->m_psc_frozen));
+}
+
+if (row[8] == NULL)
+{
+pRow->is_null[8]=true;
+pRow->m_psc_mod = "";
+}
+else
+{
+pRow->is_null[8]=false;
+pRow->m_psc_mod = string(row[8],lengths[8]);
+}
+
+if (row[9] == NULL)
+{
+pRow->is_null[9]=true;
+pRow->m_psc_restrict = 0;
+}
+else
+{
+pRow->is_null[9]=false;
+sscanf(row[9], "%li", &(pRow->m_psc_restrict));
+}
+
 
 
 		//checking for duplicates
@@ -683,6 +913,72 @@ else
 {
 pRow->is_null[3]=false;
 pRow->m_Name = string(row[3],lengths[3]);
+}
+
+if (row[4] == NULL)
+{
+pRow->is_null[4]=true;
+pRow->m_psc_id = 0;
+}
+else
+{
+pRow->is_null[4]=false;
+sscanf(row[4], "%li", &(pRow->m_psc_id));
+}
+
+if (row[5] == NULL)
+{
+pRow->is_null[5]=true;
+pRow->m_psc_batch = 0;
+}
+else
+{
+pRow->is_null[5]=false;
+sscanf(row[5], "%li", &(pRow->m_psc_batch));
+}
+
+if (row[6] == NULL)
+{
+pRow->is_null[6]=true;
+pRow->m_psc_user = 0;
+}
+else
+{
+pRow->is_null[6]=false;
+sscanf(row[6], "%li", &(pRow->m_psc_user));
+}
+
+if (row[7] == NULL)
+{
+pRow->is_null[7]=true;
+pRow->m_psc_frozen = 0;
+}
+else
+{
+pRow->is_null[7]=false;
+sscanf(row[7], "%hi", &(pRow->m_psc_frozen));
+}
+
+if (row[8] == NULL)
+{
+pRow->is_null[8]=true;
+pRow->m_psc_mod = "";
+}
+else
+{
+pRow->is_null[8]=false;
+pRow->m_psc_mod = string(row[8],lengths[8]);
+}
+
+if (row[9] == NULL)
+{
+pRow->is_null[9]=true;
+pRow->m_psc_restrict = 0;
+}
+else
+{
+pRow->is_null[9]=false;
+sscanf(row[9], "%li", &(pRow->m_psc_restrict));
 }
 
 

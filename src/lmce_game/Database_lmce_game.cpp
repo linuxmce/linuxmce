@@ -25,6 +25,12 @@ tblRom=NULL;
 tblRomAttribute=NULL;
 tblRomAttributeType=NULL;
 tblRom_RomAttribute=NULL;
+tblpsc_game_batdet=NULL;
+tblpsc_game_bathdr=NULL;
+tblpsc_game_batuser=NULL;
+tblpsc_game_repset=NULL;
+tblpsc_game_schema=NULL;
+tblpsc_game_tables=NULL;
 }
 
 Database_lmce_game::~Database_lmce_game()
@@ -50,6 +56,24 @@ if( tblRomAttributeType!=NULL )
 if( tblRom_RomAttribute!=NULL )
 	if( !Commit_Rom_RomAttribute(bDeleteFailedModifiedRow,bDeleteFailedInsertRow) )
 		bResult=false;
+if( tblpsc_game_batdet!=NULL )
+	if( !Commit_psc_game_batdet(bDeleteFailedModifiedRow,bDeleteFailedInsertRow) )
+		bResult=false;
+if( tblpsc_game_bathdr!=NULL )
+	if( !Commit_psc_game_bathdr(bDeleteFailedModifiedRow,bDeleteFailedInsertRow) )
+		bResult=false;
+if( tblpsc_game_batuser!=NULL )
+	if( !Commit_psc_game_batuser(bDeleteFailedModifiedRow,bDeleteFailedInsertRow) )
+		bResult=false;
+if( tblpsc_game_repset!=NULL )
+	if( !Commit_psc_game_repset(bDeleteFailedModifiedRow,bDeleteFailedInsertRow) )
+		bResult=false;
+if( tblpsc_game_schema!=NULL )
+	if( !Commit_psc_game_schema(bDeleteFailedModifiedRow,bDeleteFailedInsertRow) )
+		bResult=false;
+if( tblpsc_game_tables!=NULL )
+	if( !Commit_psc_game_tables(bDeleteFailedModifiedRow,bDeleteFailedInsertRow) )
+		bResult=false;
 return bResult;
 
 }
@@ -61,6 +85,12 @@ DeleteTable_Rom();
 DeleteTable_RomAttribute();
 DeleteTable_RomAttributeType();
 DeleteTable_Rom_RomAttribute();
+DeleteTable_psc_game_batdet();
+DeleteTable_psc_game_bathdr();
+DeleteTable_psc_game_batuser();
+DeleteTable_psc_game_repset();
+DeleteTable_psc_game_schema();
+DeleteTable_psc_game_tables();
 }
 
 bool Database_lmce_game::Connect(string host, string user, string pass, string sDBName, int port)
