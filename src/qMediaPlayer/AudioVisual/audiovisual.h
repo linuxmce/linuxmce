@@ -1,6 +1,7 @@
 #ifndef AUDIOVISUAL_H
 #define AUDIOVISUAL_H
 
+#ifndef ANDROID
 
 #ifdef QT5
 #include <QtWidgets/QApplication>
@@ -41,7 +42,7 @@ signals:
 public slots:
     
 };
-
+#endif
 
 
 #endif // AUDIOVISUAL_H

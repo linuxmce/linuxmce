@@ -1,6 +1,6 @@
 #ifndef VIDEOWIDGETPLAYER_H
 #define VIDEOWIDGETPLAYER_H
-
+#ifndef ANDROID
 #ifdef QT5
 #include <QtWidgets/QWidget>
 #else
@@ -21,5 +21,5 @@ signals:
 public slots:
 
 };
-
+#endif
 #endif // VIDEOWIDGETPLAYER_H

@@ -1,4 +1,5 @@
 #include "audiovisual.h"
+#ifndef ANDROID
 #include <QUrl>
 #include <QFile>
 #include <QPainter>
@@ -11,8 +12,10 @@
 #else
 #include <QApplication>
 #include <phonon/VideoPlayer>
+#endif
 #include <QDeclarativeItem>
 #include <QGraphicsProxyWidget>
+#ifdef debug
 #include <QDebug>
 #endif
 
@@ -35,7 +38,9 @@ AudioVisual::AudioVisual(QDeclarativeItem *parent) :
 //public function to take the url and then decide which source to send it to?
 bool AudioVisual::playMedia(const QString &media)
 {
+#ifdef debug
     qDebug("Handed off to play function");
+#endif
     return true;
 }
 
@@ -56,4 +61,4 @@ bool AudioVisual::playAudio(const QString &audio)
 #endif
     return true;
 }
-
+#endif

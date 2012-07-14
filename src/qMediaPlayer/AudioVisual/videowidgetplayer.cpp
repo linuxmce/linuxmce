@@ -1,14 +1,16 @@
 #include "videowidgetplayer.h"
+#ifndef ANDROID
 #ifdef QT5
 //#include <QtMultimedia/QtMultimedia>
 #include <QtWidgets/qwidget.h>
 #else
 #include <phonon/Phonon>
-#include "QVBoxLayout"
+#include <phonon/VideoWidget>
+#endif
 
+#include "QVBoxLayout"
 #include <phonon/VideoWidget>
 #include "QVBoxLayout"
-#endif
 #include <QUrl>
 #include <QDebug>
 
@@ -47,8 +49,9 @@ videoWidgetPlayer::videoWidgetPlayer(QWidget *parent) :
     mainLayout->addWidget( player);
     player->play(QUrl::fromLocalFile("file goes here"));
 #endif
-}
 
+}
+#endif
 
 
 
