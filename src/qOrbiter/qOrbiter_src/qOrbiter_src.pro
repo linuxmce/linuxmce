@@ -18,29 +18,40 @@
 CONFIG += qt thread
 # define deployment destination and target executable name
 
-contains(QT_VERSION,4.*.*){
-message("QT4 Build")
-DEFINES+=QT4
+DESTDIR = ../QOrbiter-build-$$QT_VERSION
+
+
+contains(QT_VERSION,4.8.*){
+message("QT4.8.QT_PATCH_VERSION Core")
+DEFINES+=QT4_8
 }
 
+contains(QT_VERSION,4.7.*){
+message("QT4.7.$$QT_PATCH_VERSION Core")
+DEFINES+=QT4_7
+}
+
+
 contains(QT_VERSION,5.*.*){
-message("QT5 Build")
+message("QT5.0 Core")
 DEFINES+=QT5
 }
 
 
 opengl{
-TARGET = qorbiter-gl
+TARGET = qorbiter-$$QT_VERSION-core-gl
 DEFINES+=GLENABLED
 glmsg= yes
 QT+= opengl
+
 }else{
-TARGET = qorbiter
+
+TARGET =qorbiter-$$QT_VERSION
 glmsg = no
 }
 
 ANDROID{
-TARGET=qorbiter
+TARGET=qorbiter-$$QT_VERSION
 }
 
 symbian:TARGET.UID3 = 0xE15A481D
@@ -177,7 +188,7 @@ QMAKE_CXXFLAGS += -DUSE_LZO_DATAGRID
 
 INCLUDEPATH += ../../ ../../DCE/
 
-QT4{
+QT4_*{
 QT+= webkit declarative
 }
 

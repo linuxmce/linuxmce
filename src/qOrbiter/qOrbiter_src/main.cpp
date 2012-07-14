@@ -168,7 +168,7 @@ int main(int argc, char* argv[])
     QApplication::setGraphicsSystem("raster");
 #endif
 
-#ifdef Q_OS_LINUX
+#if(QT_VERSION >= 0x040800)
     Qt::AA_X11InitThreads;
 #endif
 
