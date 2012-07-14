@@ -180,6 +180,7 @@ public:
     virtual int DeviceIdInvalid();
     virtual int SetupNewOrbiter();
 
+
     //<-dceag-const-e->
 
     //<-dceag-const2-b->
@@ -1365,6 +1366,8 @@ signals:
     void monitorStatusChanged();
 
 public slots:
+
+     void populateSetupInformation();
 
     void setDiscreteAudio(bool audio) { discreteAudio = audio;  emit discreteAudioChanged(); }
     bool getDiscreteAudio() {return discreteAudio; }

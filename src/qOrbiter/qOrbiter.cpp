@@ -4113,7 +4113,45 @@ void DCE::qOrbiter::newOrbiter()
           */
 int qOrbiter::PromptFor(std::string sToken)
 {
-    return 0;
+    Event_Impl event_Impl(DEVICEID_MESSAGESEND, 0, m_sIPAddress);
+    qDebug() << "Messaging core ip" << m_sIPAddress.c_str();
+    string sResults;
+    DCE::CMD_Get_Orbiter_Options_DT CMD_Get_Orbiter_Options_DT(m_dwPK_Device, DEVICETEMPLATE_Orbiter_Plugin_CONST, BL_SameHouse,
+        sToken,&sResults);
+
+    CMD_Get_Orbiter_Options_DT.m_pMessage->m_eExpectedResponse = ER_ReplyMessage;
+    Message *pResponse = event_Impl.SendReceiveMessage( CMD_Get_Orbiter_Options_DT.m_pMessage );
+    if( !pResponse || pResponse->m_dwID != 0 )
+    {
+        if(pResponse)
+            delete pResponse;
+
+        qDebug() << "Sorry.  There is a problem getting the list of "<< sToken.c_str();
+        return 0;
+    }
+    CMD_Get_Orbiter_Options_DT.ParseResponse( pResponse );
+    delete pResponse;
+
+    map<int,string> mapResponse;
+    vector<string> Choices;
+    StringUtils::Tokenize(sResults,"\n",Choices);
+    if( sToken=="Size" )
+        mapResponse[0]="Default";
+
+    for(vector<string>::iterator it = Choices.begin(); it != Choices.end(); ++it)
+    {
+        string sChoise = *it;
+        string::size_type pos=0;
+        int Choice = atoi(StringUtils::Tokenize(sChoise,"\t",pos).c_str());
+        string sDescription = StringUtils::Tokenize(sChoise,"\t",pos);
+        qDebug() << (Choice-1) << "-" << sDescription.c_str();
+
+        if( Choice && sDescription.size() )
+            mapResponse[Choice]=sDescription;
+    }
+
+
+    return PromptUser("Please select the " + sToken,0,&mapResponse);
 }
 
 int qOrbiter::PromptUser(std::string sPrompt, int iTimeoutSeconds, map<int, std::string> *p_mapPrompts)
@@ -4261,6 +4299,12 @@ int qOrbiter::SetupNewOrbiter()
 
 */
     return PK_Device;  // Retry loading as the specified device
+}
+
+void qOrbiter::populateSetupInformation()
+{
+    PromptFor("Users");
+    PromptFor("Room");
 }
 
 
