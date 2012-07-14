@@ -6,10 +6,13 @@ import QtQuick 1.0
 
 
 Rectangle {
-    id: rectangle1
+    id: splashPage
     height:appH
     width:appW
+    property bool orbiterSetup:false
+    onOrbiterSetupChanged:{  console.log(orbiterSetup) ; existing_orbiters.visible = false; orbiter_options.visible = true}
     onWidthChanged: console.log("detected size change")
+
     function scaleX(x){
         return x/100*appH
     }
@@ -27,15 +30,13 @@ Rectangle {
 
     }
 
-
-
     color: "slategrey"
     signal setupStart(string x, string y)
     signal splashLoaded()
 
     Image {
         id: splash
-        anchors.centerIn: rectangle1
+        anchors.centerIn: splashPage
         fillMode: Image.PreserveAspectFit
         source: "qrc:/img/desktop_splash.png"
         anchors.fill: parent
@@ -188,7 +189,7 @@ Rectangle {
         height: scaleY(20)
         radius: 7
         anchors.horizontalCenterOffset: 1
-        anchors.centerIn: rectangle1
+        anchors.centerIn: splashPage
         border.width: 1
         border.color: "#000000"
         gradient: Gradient {
@@ -335,7 +336,7 @@ Rectangle {
         clip: true
         anchors.centerIn: rectangle2
         model:orbiterList
-        visible: false
+        visible: orbiterSetup ===true ? false:true
         delegate: Rectangle{
             id:existing_orbiter_delegate
             height: scaleY(10)
@@ -363,15 +364,13 @@ Rectangle {
                     wrapMode: Text.WrapAtWordBoundaryOrAnywhere
                 }
             }
-
-
-
             MouseArea {
                 anchors.fill: parent
                 onClicked: window.qmlSetupLmce(i_device_number, routerip.text)
             }
         }
     }
+
     Rectangle{
         id:newOrbiterButton
         height: scaleY(10)
@@ -388,5 +387,145 @@ Rectangle {
         visible: existing_orbiters.visible ? true : false
         anchors.bottom: existing_orbiters.top
         anchors.horizontalCenter: existing_orbiters.horizontalCenter
+        MouseArea{
+            anchors.fill: parent
+            onClicked: orbiterSetup=true
+        }
     }
+
+    Row{
+        id:orbiter_options
+        spacing:1
+        anchors.centerIn: parent
+        height: scaleY(35)
+        width: scaleX(70)
+        visible: false
+        z:5
+
+        Rectangle{
+            id:usersBlock
+            height: scaleY(20)
+            width: scaleX(15)
+            color: "slategrey"
+            Text {
+                id: usersLabel
+                text: qsTr("Select User")
+            }
+            clip:true
+
+            ListView{
+                id:users_options
+                height: scaleY(20)
+                width: scaleX(15)
+                model:dummyModel
+                anchors.top: usersLabel.bottom
+                delegate: Rectangle{
+                    height: scaleY(5)
+                    width: scaleX(15)
+                    color: "lightgrey"
+                    Text {
+                        text: optionTitle
+                        anchors.centerIn: parent
+                    }
+                }
+            }
+        }
+
+        Rectangle{
+            id:roomsBlock
+            height: scaleY(20)
+            width: scaleX(15)
+            color: "slategrey"
+            Text {
+                id: roomsLabel
+                text: qsTr("Select Room")
+            }
+            clip:true
+
+            ListView{
+                id:rooms_options
+                height: scaleY(20)
+                width: scaleX(15)
+                model:dummyModel
+                anchors.top: roomsLabel.bottom
+                delegate: Rectangle{
+                    height: scaleY(5)
+                    width: scaleX(15)
+                    color: "lightgrey"
+                    Text {
+                        text: optionTitle
+                        anchors.centerIn: parent
+                    }
+                }
+            }
+        }
+
+        Rectangle{
+            id:skinsBlock
+            height: scaleY(20)
+            width: scaleX(15)
+            color: "slategrey"
+            Text {
+                id: skinsLabel
+                text: qsTr("Select Skin")
+            }
+            clip:true
+
+            ListView{
+                id:skins_options
+                height: scaleY(20)
+                width: scaleX(15)
+                model:dummyModel
+                anchors.top: skinsLabel.bottom
+                delegate: Rectangle{
+                    height: scaleY(5)
+                    width: scaleX(15)
+                    color: "lightgrey"
+                    Text {
+                        text: optionTitle
+                        anchors.centerIn: parent
+                    }
+                }
+            }
+        }
+
+        Rectangle{
+            id:langBlock
+            height: scaleY(20)
+            width: scaleX(15)
+            color: "slategrey"
+            Text {
+                id: langLabel
+                text: qsTr("Select Lang")
+            }
+            clip:true
+
+            ListView{
+                id:lang_options
+                height: scaleY(20)
+                width: scaleX(15)
+                model:dummyModel
+                anchors.top: langLabel.bottom
+                delegate: Rectangle{
+                    height: scaleY(5)
+                    width: scaleX(15)
+                    color: "lightgrey"
+                    Text {
+                        text: optionTitle
+                        anchors.centerIn: parent
+                    }
+                }
+            }
+        }
+
+    }
+
+    ListModel{
+        id:dummyModel
+        ListElement{
+            optionTitle:"foo"
+            optionValue:1
+        }
+    }
+
 }

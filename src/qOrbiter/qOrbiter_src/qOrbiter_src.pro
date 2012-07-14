@@ -18,12 +18,12 @@
 CONFIG += qt thread
 # define deployment destination and target executable name
 
-contains(QT_VERSION,4.8.*){
+contains(QT_VERSION,4.*.*){
 message("QT4 Build")
 DEFINES+=QT4
 }
 
-contains(QT_VERSION,5.0.*){
+contains(QT_VERSION,5.*.*){
 message("QT5 Build")
 DEFINES+=QT5
 }
