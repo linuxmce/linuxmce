@@ -10,7 +10,7 @@ Rectangle {
     height:appH
     width:appW
     property bool orbiterSetup:false
-    onOrbiterSetupChanged:{  console.log(orbiterSetup) ; existing_orbiters.visible = false; orbiter_options.visible = true}
+    onOrbiterSetupChanged:{  console.log(orbiterSetup) ; existing_orbiters.visible = false; orbiter_options.visible = true, window.showSetup()}
     onWidthChanged: console.log("detected size change")
 
     function scaleX(x){

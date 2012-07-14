@@ -104,6 +104,8 @@ signals:
     void checkRes();
     void showList();
     void showExternal();
+    void setupNewOrbiter();
+
 
 };
 #endif

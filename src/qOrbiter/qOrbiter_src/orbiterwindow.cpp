@@ -217,7 +217,7 @@ void orbiterWindow::setOrbiterState(bool state)
 
 void orbiterWindow::showSetup()
 {
-    mainView.setSource(QUrl("qrc:main/SetupNewOrbiter.qml"));
+    emit setupNewOrbiter();
 }
 
 void orbiterWindow::setConnectionState(bool b)
