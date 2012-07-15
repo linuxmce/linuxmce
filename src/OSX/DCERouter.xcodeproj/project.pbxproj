@@ -244,6 +244,12 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				CONFIGURATION_BUILD_DIR = bin;
+				HEADER_SEARCH_PATHS = (
+					..,
+					../DCE,
+					/usr/include/mysql,
+					/usr/include/libxml2,
+				);
 				INSTALL_PATH = "";
 				LIBRARY_SEARCH_PATHS = (
 					"$(inherited)",
@@ -260,6 +266,12 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				CONFIGURATION_BUILD_DIR = bin;
+				HEADER_SEARCH_PATHS = (
+					..,
+					../DCE,
+					/usr/include/mysql,
+					/usr/include/libxml2,
+				);
 				INSTALL_PATH = "";
 				LIBRARY_SEARCH_PATHS = (
 					"$(inherited)",

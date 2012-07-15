@@ -1,0 +1,331 @@
+// !$*UTF8*$!
+{
+	archiveVersion = 1;
+	classes = {
+	};
+	objectVersion = 46;
+	objects = {
+
+/* Begin PBXBuildFile section */
+		95FF880015B3624700B0EC93 /* libPlutoUtils.cp in Sources */ = {isa = PBXBuildFile; fileRef = 95FF87FF15B3624700B0EC93 /* libPlutoUtils.cp */; };
+		95FF880E15B3647900B0EC93 /* CommonIncludes.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 95FF880D15B3647900B0EC93 /* CommonIncludes.cpp */; };
+		95FF881115B3648B00B0EC93 /* DatabaseUtils.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 95FF880F15B3648B00B0EC93 /* DatabaseUtils.cpp */; };
+		95FF881215B3648B00B0EC93 /* FileUtils.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 95FF881015B3648B00B0EC93 /* FileUtils.cpp */; };
+		95FF881715B364D800B0EC93 /* MultiThreadIncludes.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 95FF881315B364D800B0EC93 /* MultiThreadIncludes.cpp */; };
+		95FF881815B364D800B0EC93 /* Other.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 95FF881415B364D800B0EC93 /* Other.cpp */; };
+		95FF881915B364D800B0EC93 /* ProcessUtils.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 95FF881515B364D800B0EC93 /* ProcessUtils.cpp */; };
+		95FF881A15B364D800B0EC93 /* StringUtils.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 95FF881615B364D800B0EC93 /* StringUtils.cpp */; };
+		95FF881E15B364F700B0EC93 /* getch.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 95FF881B15B364F700B0EC93 /* getch.cpp */; };
+		95FF881F15B364F700B0EC93 /* md5c.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 95FF881C15B364F700B0EC93 /* md5c.cpp */; };
+		95FF882015B364F700B0EC93 /* minilzo.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 95FF881D15B364F700B0EC93 /* minilzo.cpp */; };
+		95FF882315B3651700B0EC93 /* ThreadedClass.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 95FF882115B3651700B0EC93 /* ThreadedClass.cpp */; };
+		95FF882415B3651700B0EC93 /* uuencode.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 95FF882215B3651700B0EC93 /* uuencode.cpp */; };
+		95FF882815B3653500B0EC93 /* ClientSocket.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 95FF882515B3653500B0EC93 /* ClientSocket.cpp */; };
+		95FF882915B3653500B0EC93 /* db_wrapper.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 95FF882615B3653500B0EC93 /* db_wrapper.cpp */; };
+		95FF882A15B3653500B0EC93 /* Socket.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 95FF882715B3653500B0EC93 /* Socket.cpp */; };
+		95FF882C15B3655500B0EC93 /* mysql.h in Headers */ = {isa = PBXBuildFile; fileRef = 95FF882B15B3655500B0EC93 /* mysql.h */; };
+		95FF882F15B3658F00B0EC93 /* libmysqlclient.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 95FF882E15B3658F00B0EC93 /* libmysqlclient.dylib */; };
+		95FF883115B3659900B0EC93 /* libDCECommon.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 95FF883015B3659900B0EC93 /* libDCECommon.dylib */; };
+/* End PBXBuildFile section */
+
+/* Begin PBXFileReference section */
+		95FF87F615B3624700B0EC93 /* libPlutoUtils.dylib */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.dylib"; includeInIndex = 0; path = libPlutoUtils.dylib; sourceTree = BUILT_PRODUCTS_DIR; };
+		95FF87FA15B3624700B0EC93 /* libPlutoUtils-Prefix.pch */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "libPlutoUtils-Prefix.pch"; sourceTree = "<group>"; };
+		95FF87FB15B3624700B0EC93 /* libPlutoUtilsProj.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; path = libPlutoUtilsProj.xcconfig; sourceTree = "<group>"; };
+		95FF87FC15B3624700B0EC93 /* libPlutoUtilsTarget.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; path = libPlutoUtilsTarget.xcconfig; sourceTree = "<group>"; };
+		95FF87FD15B3624700B0EC93 /* libPlutoUtils.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = libPlutoUtils.h; sourceTree = "<group>"; };
+		95FF87FE15B3624700B0EC93 /* libPlutoUtilsPriv.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = libPlutoUtilsPriv.h; sourceTree = "<group>"; };
+		95FF87FF15B3624700B0EC93 /* libPlutoUtils.cp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = libPlutoUtils.cp; sourceTree = "<group>"; };
+		95FF880D15B3647900B0EC93 /* CommonIncludes.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = CommonIncludes.cpp; path = ../PlutoUtils/CommonIncludes.cpp; sourceTree = "<group>"; };
+		95FF880F15B3648B00B0EC93 /* DatabaseUtils.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = DatabaseUtils.cpp; path = ../PlutoUtils/DatabaseUtils.cpp; sourceTree = "<group>"; };
+		95FF881015B3648B00B0EC93 /* FileUtils.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = FileUtils.cpp; path = ../PlutoUtils/FileUtils.cpp; sourceTree = "<group>"; };
+		95FF881315B364D800B0EC93 /* MultiThreadIncludes.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = MultiThreadIncludes.cpp; path = ../PlutoUtils/MultiThreadIncludes.cpp; sourceTree = "<group>"; };
+		95FF881415B364D800B0EC93 /* Other.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = Other.cpp; path = ../PlutoUtils/Other.cpp; sourceTree = "<group>"; };
+		95FF881515B364D800B0EC93 /* ProcessUtils.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = ProcessUtils.cpp; path = ../PlutoUtils/ProcessUtils.cpp; sourceTree = "<group>"; };
+		95FF881615B364D800B0EC93 /* StringUtils.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = StringUtils.cpp; path = ../PlutoUtils/StringUtils.cpp; sourceTree = "<group>"; };
+		95FF881B15B364F700B0EC93 /* getch.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = getch.cpp; path = ../PlutoUtils/getch.cpp; sourceTree = "<group>"; };
+		95FF881C15B364F700B0EC93 /* md5c.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = md5c.cpp; path = ../PlutoUtils/md5c.cpp; sourceTree = "<group>"; };
+		95FF881D15B364F700B0EC93 /* minilzo.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = minilzo.cpp; path = ../PlutoUtils/minilzo.cpp; sourceTree = "<group>"; };
+		95FF882115B3651700B0EC93 /* ThreadedClass.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = ThreadedClass.cpp; path = ../PlutoUtils/ThreadedClass.cpp; sourceTree = "<group>"; };
+		95FF882215B3651700B0EC93 /* uuencode.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = uuencode.cpp; path = ../PlutoUtils/uuencode.cpp; sourceTree = "<group>"; };
+		95FF882515B3653500B0EC93 /* ClientSocket.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = ClientSocket.cpp; path = ../db_wrapper/ClientSocket.cpp; sourceTree = "<group>"; };
+		95FF882615B3653500B0EC93 /* db_wrapper.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = db_wrapper.cpp; path = ../db_wrapper/db_wrapper.cpp; sourceTree = "<group>"; };
+		95FF882715B3653500B0EC93 /* Socket.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = Socket.cpp; path = ../db_wrapper/Socket.cpp; sourceTree = "<group>"; };
+		95FF882B15B3655500B0EC93 /* mysql.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = mysql.h; path = mysql/include/mysql.h; sourceTree = "<group>"; };
+		95FF882E15B3658F00B0EC93 /* libmysqlclient.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libmysqlclient.dylib; path = mysql/lib/libmysqlclient.dylib; sourceTree = "<group>"; };
+		95FF883015B3659900B0EC93 /* libDCECommon.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libDCECommon.dylib; path = lib/libDCECommon.dylib; sourceTree = "<group>"; };
+/* End PBXFileReference section */
+
+/* Begin PBXFrameworksBuildPhase section */
+		95FF87F315B3624700B0EC93 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				95FF882F15B3658F00B0EC93 /* libmysqlclient.dylib in Frameworks */,
+				95FF883115B3659900B0EC93 /* libDCECommon.dylib in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXFrameworksBuildPhase section */
+
+/* Begin PBXGroup section */
+		95FF87EB15B3624600B0EC93 = {
+			isa = PBXGroup;
+			children = (
+				95FF882D15B3657C00B0EC93 /* libraries */,
+				95FF880C15B3646300B0EC93 /* Includes */,
+				95FF87F815B3624700B0EC93 /* libPlutoUtils */,
+				95FF87F715B3624700B0EC93 /* Products */,
+			);
+			sourceTree = "<group>";
+		};
+		95FF87F715B3624700B0EC93 /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				95FF87F615B3624700B0EC93 /* libPlutoUtils.dylib */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+		95FF87F815B3624700B0EC93 /* libPlutoUtils */ = {
+			isa = PBXGroup;
+			children = (
+				95FF87FB15B3624700B0EC93 /* libPlutoUtilsProj.xcconfig */,
+				95FF87FC15B3624700B0EC93 /* libPlutoUtilsTarget.xcconfig */,
+				95FF87FD15B3624700B0EC93 /* libPlutoUtils.h */,
+				95FF87FE15B3624700B0EC93 /* libPlutoUtilsPriv.h */,
+				95FF87FF15B3624700B0EC93 /* libPlutoUtils.cp */,
+				95FF87F915B3624700B0EC93 /* Supporting Files */,
+			);
+			path = libPlutoUtils;
+			sourceTree = "<group>";
+		};
+		95FF87F915B3624700B0EC93 /* Supporting Files */ = {
+			isa = PBXGroup;
+			children = (
+				95FF87FA15B3624700B0EC93 /* libPlutoUtils-Prefix.pch */,
+			);
+			name = "Supporting Files";
+			sourceTree = "<group>";
+		};
+		95FF880C15B3646300B0EC93 /* Includes */ = {
+			isa = PBXGroup;
+			children = (
+				95FF882B15B3655500B0EC93 /* mysql.h */,
+				95FF880D15B3647900B0EC93 /* CommonIncludes.cpp */,
+				95FF880F15B3648B00B0EC93 /* DatabaseUtils.cpp */,
+				95FF881015B3648B00B0EC93 /* FileUtils.cpp */,
+				95FF881315B364D800B0EC93 /* MultiThreadIncludes.cpp */,
+				95FF881415B364D800B0EC93 /* Other.cpp */,
+				95FF881515B364D800B0EC93 /* ProcessUtils.cpp */,
+				95FF881615B364D800B0EC93 /* StringUtils.cpp */,
+				95FF881B15B364F700B0EC93 /* getch.cpp */,
+				95FF881C15B364F700B0EC93 /* md5c.cpp */,
+				95FF881D15B364F700B0EC93 /* minilzo.cpp */,
+				95FF882115B3651700B0EC93 /* ThreadedClass.cpp */,
+				95FF882215B3651700B0EC93 /* uuencode.cpp */,
+				95FF882515B3653500B0EC93 /* ClientSocket.cpp */,
+				95FF882615B3653500B0EC93 /* db_wrapper.cpp */,
+				95FF882715B3653500B0EC93 /* Socket.cpp */,
+			);
+			name = Includes;
+			sourceTree = "<group>";
+		};
+		95FF882D15B3657C00B0EC93 /* libraries */ = {
+			isa = PBXGroup;
+			children = (
+				95FF883015B3659900B0EC93 /* libDCECommon.dylib */,
+				95FF882E15B3658F00B0EC93 /* libmysqlclient.dylib */,
+			);
+			name = libraries;
+			sourceTree = "<group>";
+		};
+/* End PBXGroup section */
+
+/* Begin PBXHeadersBuildPhase section */
+		95FF87F415B3624700B0EC93 /* Headers */ = {
+			isa = PBXHeadersBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				95FF882C15B3655500B0EC93 /* mysql.h in Headers */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXHeadersBuildPhase section */
+
+/* Begin PBXNativeTarget section */
+		95FF87F515B3624700B0EC93 /* libPlutoUtils */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 95FF880315B3624700B0EC93 /* Build configuration list for PBXNativeTarget "libPlutoUtils" */;
+			buildPhases = (
+				95FF87F215B3624700B0EC93 /* Sources */,
+				95FF87F315B3624700B0EC93 /* Frameworks */,
+				95FF87F415B3624700B0EC93 /* Headers */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = libPlutoUtils;
+			productName = libPlutoUtils;
+			productReference = 95FF87F615B3624700B0EC93 /* libPlutoUtils.dylib */;
+			productType = "com.apple.product-type.library.dynamic";
+		};
+/* End PBXNativeTarget section */
+
+/* Begin PBXProject section */
+		95FF87ED15B3624600B0EC93 /* Project object */ = {
+			isa = PBXProject;
+			attributes = {
+				LastUpgradeCheck = 0420;
+			};
+			buildConfigurationList = 95FF87F015B3624600B0EC93 /* Build configuration list for PBXProject "libPlutoUtils" */;
+			compatibilityVersion = "Xcode 3.2";
+			developmentRegion = English;
+			hasScannedForEncodings = 0;
+			knownRegions = (
+				en,
+			);
+			mainGroup = 95FF87EB15B3624600B0EC93;
+			productRefGroup = 95FF87F715B3624700B0EC93 /* Products */;
+			projectDirPath = "";
+			projectRoot = "";
+			targets = (
+				95FF87F515B3624700B0EC93 /* libPlutoUtils */,
+			);
+		};
+/* End PBXProject section */
+
+/* Begin PBXSourcesBuildPhase section */
+		95FF87F215B3624700B0EC93 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				95FF880015B3624700B0EC93 /* libPlutoUtils.cp in Sources */,
+				95FF880E15B3647900B0EC93 /* CommonIncludes.cpp in Sources */,
+				95FF881115B3648B00B0EC93 /* DatabaseUtils.cpp in Sources */,
+				95FF881215B3648B00B0EC93 /* FileUtils.cpp in Sources */,
+				95FF881715B364D800B0EC93 /* MultiThreadIncludes.cpp in Sources */,
+				95FF881815B364D800B0EC93 /* Other.cpp in Sources */,
+				95FF881915B364D800B0EC93 /* ProcessUtils.cpp in Sources */,
+				95FF881A15B364D800B0EC93 /* StringUtils.cpp in Sources */,
+				95FF881E15B364F700B0EC93 /* getch.cpp in Sources */,
+				95FF881F15B364F700B0EC93 /* md5c.cpp in Sources */,
+				95FF882015B364F700B0EC93 /* minilzo.cpp in Sources */,
+				95FF882315B3651700B0EC93 /* ThreadedClass.cpp in Sources */,
+				95FF882415B3651700B0EC93 /* uuencode.cpp in Sources */,
+				95FF882815B3653500B0EC93 /* ClientSocket.cpp in Sources */,
+				95FF882915B3653500B0EC93 /* db_wrapper.cpp in Sources */,
+				95FF882A15B3653500B0EC93 /* Socket.cpp in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXSourcesBuildPhase section */
+
+/* Begin XCBuildConfiguration section */
+		95FF880115B3624700B0EC93 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				ARCHS = "$(ARCHS_STANDARD_64_BIT)";
+				CLANG_ENABLE_OBJC_ARC = YES;
+				COPY_PHASE_STRIP = NO;
+				GCC_C_LANGUAGE_STANDARD = gnu99;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_ENABLE_OBJC_EXCEPTIONS = YES;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"DEBUG=1",
+					"$(inherited)",
+				);
+				GCC_SYMBOLS_PRIVATE_EXTERN = NO;
+				GCC_VERSION = com.apple.compilers.llvm.clang.1_0;
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_MISSING_PROTOTYPES = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				MACOSX_DEPLOYMENT_TARGET = 10.7;
+				ONLY_ACTIVE_ARCH = YES;
+				SDKROOT = macosx;
+			};
+			name = Debug;
+		};
+		95FF880215B3624700B0EC93 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				ARCHS = "$(ARCHS_STANDARD_64_BIT)";
+				CLANG_ENABLE_OBJC_ARC = YES;
+				COPY_PHASE_STRIP = YES;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				GCC_C_LANGUAGE_STANDARD = gnu99;
+				GCC_ENABLE_OBJC_EXCEPTIONS = YES;
+				GCC_VERSION = com.apple.compilers.llvm.clang.1_0;
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_MISSING_PROTOTYPES = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				MACOSX_DEPLOYMENT_TARGET = 10.7;
+				SDKROOT = macosx;
+			};
+			name = Release;
+		};
+		95FF880415B3624700B0EC93 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CONFIGURATION_BUILD_DIR = lib;
+				HEADER_SEARCH_PATHS = (
+					..,
+					../DCE,
+				);
+				LIBRARY_SEARCH_PATHS = (
+					"$(inherited)",
+					"\"$(SRCROOT)/mysql/lib\"",
+					"\"$(SRCROOT)/lib\"",
+				);
+				PRODUCT_NAME = "$(TARGET_NAME)";
+			};
+			name = Debug;
+		};
+		95FF880515B3624700B0EC93 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CONFIGURATION_BUILD_DIR = lib;
+				HEADER_SEARCH_PATHS = (
+					..,
+					../DCE,
+				);
+				LIBRARY_SEARCH_PATHS = (
+					"$(inherited)",
+					"\"$(SRCROOT)/mysql/lib\"",
+					"\"$(SRCROOT)/lib\"",
+				);
+				PRODUCT_NAME = "$(TARGET_NAME)";
+			};
+			name = Release;
+		};
+/* End XCBuildConfiguration section */
+
+/* Begin XCConfigurationList section */
+		95FF87F015B3624600B0EC93 /* Build configuration list for PBXProject "libPlutoUtils" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				95FF880115B3624700B0EC93 /* Debug */,
+				95FF880215B3624700B0EC93 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		95FF880315B3624700B0EC93 /* Build configuration list for PBXNativeTarget "libPlutoUtils" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				95FF880415B3624700B0EC93 /* Debug */,
+				95FF880515B3624700B0EC93 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+/* End XCConfigurationList section */
+	};
+	rootObject = 95FF87ED15B3624600B0EC93 /* Project object */;
+}
