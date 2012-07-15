@@ -19,7 +19,7 @@
 #define GAMESYSTEM_Super_Famicom_CONST 16
 #define GAMESYSTEM_SuperGrafx_CONST 17
 #define GAMESYSTEM_PC_Engine_CONST 18
-#define GAMESYSTEM_Apple_][_CONST 19
+#define GAMESYSTEM_Apple_II_CONST 19
 #define GAMESYSTEM_Playstation_1_CONST 20
 #define GAMESYSTEM_Playstation_2_CONST 21
 #define GAMESYSTEM_Jaguar_CONST 22
