@@ -287,13 +287,19 @@
 					../..,
 				);
 				INSTALL_PATH = /usr/pluto/bin;
+				KEEP_PRIVATE_EXTERNS = NO;
 				LIBRARY_SEARCH_PATHS = (
 					"$(inherited)",
 					"\"$(SRCROOT)/../lib\"",
 					"\"$(SRCROOT)/../mysql/lib\"",
 					"\"$(SRCROOT)/../bin\"",
 				);
+				OTHER_LDFLAGS = (
+					"-undefined",
+					dynamic_lookup,
+				);
 				PRODUCT_NAME = "$(TARGET_NAME)";
+				SEPARATE_SYMBOL_EDIT = NO;
 			};
 			name = Debug;
 		};
@@ -306,13 +312,19 @@
 					../..,
 				);
 				INSTALL_PATH = /usr/pluto/bin;
+				KEEP_PRIVATE_EXTERNS = NO;
 				LIBRARY_SEARCH_PATHS = (
 					"$(inherited)",
 					"\"$(SRCROOT)/../lib\"",
 					"\"$(SRCROOT)/../mysql/lib\"",
 					"\"$(SRCROOT)/../bin\"",
 				);
+				OTHER_LDFLAGS = (
+					"-undefined",
+					dynamic_lookup,
+				);
 				PRODUCT_NAME = "$(TARGET_NAME)";
+				SEPARATE_SYMBOL_EDIT = NO;
 			};
 			name = Release;
 		};
