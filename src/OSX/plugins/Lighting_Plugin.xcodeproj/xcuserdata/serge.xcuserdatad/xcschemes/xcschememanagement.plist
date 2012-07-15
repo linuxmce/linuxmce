@@ -4,15 +4,15 @@
 <dict>
 	<key>SchemeUserState</key>
 	<dict>
-		<key>General_Info_Plugin.xcscheme</key>
+		<key>Lighting_Plugin.xcscheme</key>
 		<dict>
 			<key>orderHint</key>
-			<integer>5</integer>
+			<integer>13</integer>
 		</dict>
 	</dict>
 	<key>SuppressBuildableAutocreation</key>
 	<dict>
-		<key>95ABFE7B15AF666A0079029F</key>
+		<key>95ABFF0E15B35BEE0079029F</key>
 		<dict>
 			<key>primary</key>
 			<true/>

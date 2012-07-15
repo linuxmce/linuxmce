@@ -238,6 +238,7 @@
 					../../DCE,
 					../..,
 				);
+				INSTALL_PATH = /usr/pluto/bin;
 				LIBRARY_SEARCH_PATHS = (
 					"$(inherited)",
 					"\"$(SRCROOT)/../lib\"",
@@ -256,6 +257,7 @@
 					../../DCE,
 					../..,
 				);
+				INSTALL_PATH = /usr/pluto/bin;
 				LIBRARY_SEARCH_PATHS = (
 					"$(inherited)",
 					"\"$(SRCROOT)/../lib\"",

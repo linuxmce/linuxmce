@@ -1,0 +1,299 @@
+// !$*UTF8*$!
+{
+	archiveVersion = 1;
+	classes = {
+	};
+	objectVersion = 46;
+	objects = {
+
+/* Begin PBXBuildFile section */
+		95ABFF1915B35BEE0079029F /* Lighting_Plugin.cp in Sources */ = {isa = PBXBuildFile; fileRef = 95ABFF1815B35BEE0079029F /* Lighting_Plugin.cp */; };
+		95FF87DA15B3606C00B0EC93 /* Main.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 95FF87D915B3606C00B0EC93 /* Main.cpp */; };
+		95FF87DC15B3607300B0EC93 /* Lighting_Plugin.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 95FF87DB15B3607300B0EC93 /* Lighting_Plugin.cpp */; };
+		95FF87E015B360AB00B0EC93 /* mysql.h in Headers */ = {isa = PBXBuildFile; fileRef = 95FF87DF15B360AB00B0EC93 /* mysql.h */; };
+		95FF87E215B360D300B0EC93 /* libDCECommon.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 95FF87E115B360D300B0EC93 /* libDCECommon.dylib */; };
+		95FF87E415B360E200B0EC93 /* libmysqlclient.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 95FF87E315B360E200B0EC93 /* libmysqlclient.dylib */; };
+		95FF87E615B3610B00B0EC93 /* Lighting_PluginBase.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 95FF87E515B3610B00B0EC93 /* Lighting_PluginBase.cpp */; };
+		95FF87E815B3613100B0EC93 /* libpluto_main.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 95FF87E715B3613100B0EC93 /* libpluto_main.dylib */; };
+		95FF87EA15B3614C00B0EC93 /* Datagrid_Plugin.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 95FF87E915B3614C00B0EC93 /* Datagrid_Plugin.dylib */; };
+		95FF880B15B362FD00B0EC93 /* FollowMe_Device.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 95FF880A15B362FD00B0EC93 /* FollowMe_Device.cpp */; };
+/* End PBXBuildFile section */
+
+/* Begin PBXFileReference section */
+		95ABFF0F15B35BEE0079029F /* Lighting_Plugin.dylib */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.dylib"; includeInIndex = 0; path = Lighting_Plugin.dylib; sourceTree = BUILT_PRODUCTS_DIR; };
+		95ABFF1315B35BEE0079029F /* Lighting_Plugin-Prefix.pch */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "Lighting_Plugin-Prefix.pch"; sourceTree = "<group>"; };
+		95ABFF1415B35BEE0079029F /* Lighting_PluginProj.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; path = Lighting_PluginProj.xcconfig; sourceTree = "<group>"; };
+		95ABFF1515B35BEE0079029F /* Lighting_PluginTarget.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; path = Lighting_PluginTarget.xcconfig; sourceTree = "<group>"; };
+		95ABFF1615B35BEE0079029F /* Lighting_Plugin.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = Lighting_Plugin.h; sourceTree = "<group>"; };
+		95ABFF1715B35BEE0079029F /* Lighting_PluginPriv.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = Lighting_PluginPriv.h; sourceTree = "<group>"; };
+		95ABFF1815B35BEE0079029F /* Lighting_Plugin.cp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = Lighting_Plugin.cp; sourceTree = "<group>"; };
+		95FF87D915B3606C00B0EC93 /* Main.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = Main.cpp; path = ../../Lighting_Plugin/Main.cpp; sourceTree = "<group>"; };
+		95FF87DB15B3607300B0EC93 /* Lighting_Plugin.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = Lighting_Plugin.cpp; path = ../../Lighting_Plugin/Lighting_Plugin.cpp; sourceTree = "<group>"; };
+		95FF87DF15B360AB00B0EC93 /* mysql.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = mysql.h; path = ../mysql/include/mysql.h; sourceTree = "<group>"; };
+		95FF87E115B360D300B0EC93 /* libDCECommon.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libDCECommon.dylib; path = ../lib/libDCECommon.dylib; sourceTree = "<group>"; };
+		95FF87E315B360E200B0EC93 /* libmysqlclient.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libmysqlclient.dylib; path = ../mysql/lib/libmysqlclient.dylib; sourceTree = "<group>"; };
+		95FF87E515B3610B00B0EC93 /* Lighting_PluginBase.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = Lighting_PluginBase.cpp; path = ../../Gen_Devices/Lighting_PluginBase.cpp; sourceTree = "<group>"; };
+		95FF87E715B3613100B0EC93 /* libpluto_main.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libpluto_main.dylib; path = ../lib/libpluto_main.dylib; sourceTree = "<group>"; };
+		95FF87E915B3614C00B0EC93 /* Datagrid_Plugin.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = Datagrid_Plugin.dylib; path = ../bin/Datagrid_Plugin.dylib; sourceTree = "<group>"; };
+		95FF880A15B362FD00B0EC93 /* FollowMe_Device.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = FollowMe_Device.cpp; path = ../../Orbiter_Plugin/FollowMe_Device.cpp; sourceTree = "<group>"; };
+/* End PBXFileReference section */
+
+/* Begin PBXFrameworksBuildPhase section */
+		95ABFF0C15B35BEE0079029F /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				95FF87E215B360D300B0EC93 /* libDCECommon.dylib in Frameworks */,
+				95FF87E415B360E200B0EC93 /* libmysqlclient.dylib in Frameworks */,
+				95FF87E815B3613100B0EC93 /* libpluto_main.dylib in Frameworks */,
+				95FF87EA15B3614C00B0EC93 /* Datagrid_Plugin.dylib in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXFrameworksBuildPhase section */
+
+/* Begin PBXGroup section */
+		95ABFF0415B35BED0079029F = {
+			isa = PBXGroup;
+			children = (
+				95FF87D915B3606C00B0EC93 /* Main.cpp */,
+				95FF87DB15B3607300B0EC93 /* Lighting_Plugin.cpp */,
+				95FF87DE15B3609400B0EC93 /* libraries */,
+				95FF87DD15B3608A00B0EC93 /* includes */,
+				95ABFF1115B35BEE0079029F /* Lighting_Plugin */,
+				95ABFF1015B35BEE0079029F /* Products */,
+			);
+			sourceTree = "<group>";
+		};
+		95ABFF1015B35BEE0079029F /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				95ABFF0F15B35BEE0079029F /* Lighting_Plugin.dylib */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+		95ABFF1115B35BEE0079029F /* Lighting_Plugin */ = {
+			isa = PBXGroup;
+			children = (
+				95ABFF1415B35BEE0079029F /* Lighting_PluginProj.xcconfig */,
+				95ABFF1515B35BEE0079029F /* Lighting_PluginTarget.xcconfig */,
+				95ABFF1615B35BEE0079029F /* Lighting_Plugin.h */,
+				95ABFF1715B35BEE0079029F /* Lighting_PluginPriv.h */,
+				95ABFF1815B35BEE0079029F /* Lighting_Plugin.cp */,
+				95ABFF1215B35BEE0079029F /* Supporting Files */,
+			);
+			path = Lighting_Plugin;
+			sourceTree = "<group>";
+		};
+		95ABFF1215B35BEE0079029F /* Supporting Files */ = {
+			isa = PBXGroup;
+			children = (
+				95ABFF1315B35BEE0079029F /* Lighting_Plugin-Prefix.pch */,
+			);
+			name = "Supporting Files";
+			sourceTree = "<group>";
+		};
+		95FF87DD15B3608A00B0EC93 /* includes */ = {
+			isa = PBXGroup;
+			children = (
+				95FF87E515B3610B00B0EC93 /* Lighting_PluginBase.cpp */,
+				95FF880A15B362FD00B0EC93 /* FollowMe_Device.cpp */,
+				95FF87DF15B360AB00B0EC93 /* mysql.h */,
+			);
+			name = includes;
+			sourceTree = "<group>";
+		};
+		95FF87DE15B3609400B0EC93 /* libraries */ = {
+			isa = PBXGroup;
+			children = (
+				95FF87E115B360D300B0EC93 /* libDCECommon.dylib */,
+				95FF87E715B3613100B0EC93 /* libpluto_main.dylib */,
+				95FF87E915B3614C00B0EC93 /* Datagrid_Plugin.dylib */,
+				95FF87E315B360E200B0EC93 /* libmysqlclient.dylib */,
+			);
+			name = libraries;
+			sourceTree = "<group>";
+		};
+/* End PBXGroup section */
+
+/* Begin PBXHeadersBuildPhase section */
+		95ABFF0D15B35BEE0079029F /* Headers */ = {
+			isa = PBXHeadersBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				95FF87E015B360AB00B0EC93 /* mysql.h in Headers */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXHeadersBuildPhase section */
+
+/* Begin PBXNativeTarget section */
+		95ABFF0E15B35BEE0079029F /* Lighting_Plugin */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 95ABFF1C15B35BEE0079029F /* Build configuration list for PBXNativeTarget "Lighting_Plugin" */;
+			buildPhases = (
+				95ABFF0B15B35BEE0079029F /* Sources */,
+				95ABFF0C15B35BEE0079029F /* Frameworks */,
+				95ABFF0D15B35BEE0079029F /* Headers */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = Lighting_Plugin;
+			productName = Lighting_Plugin;
+			productReference = 95ABFF0F15B35BEE0079029F /* Lighting_Plugin.dylib */;
+			productType = "com.apple.product-type.library.dynamic";
+		};
+/* End PBXNativeTarget section */
+
+/* Begin PBXProject section */
+		95ABFF0615B35BED0079029F /* Project object */ = {
+			isa = PBXProject;
+			attributes = {
+				LastUpgradeCheck = 0420;
+			};
+			buildConfigurationList = 95ABFF0915B35BED0079029F /* Build configuration list for PBXProject "Lighting_Plugin" */;
+			compatibilityVersion = "Xcode 3.2";
+			developmentRegion = English;
+			hasScannedForEncodings = 0;
+			knownRegions = (
+				en,
+			);
+			mainGroup = 95ABFF0415B35BED0079029F;
+			productRefGroup = 95ABFF1015B35BEE0079029F /* Products */;
+			projectDirPath = "";
+			projectRoot = "";
+			targets = (
+				95ABFF0E15B35BEE0079029F /* Lighting_Plugin */,
+			);
+		};
+/* End PBXProject section */
+
+/* Begin PBXSourcesBuildPhase section */
+		95ABFF0B15B35BEE0079029F /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				95ABFF1915B35BEE0079029F /* Lighting_Plugin.cp in Sources */,
+				95FF87DA15B3606C00B0EC93 /* Main.cpp in Sources */,
+				95FF87DC15B3607300B0EC93 /* Lighting_Plugin.cpp in Sources */,
+				95FF87E615B3610B00B0EC93 /* Lighting_PluginBase.cpp in Sources */,
+				95FF880B15B362FD00B0EC93 /* FollowMe_Device.cpp in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXSourcesBuildPhase section */
+
+/* Begin XCBuildConfiguration section */
+		95ABFF1A15B35BEE0079029F /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				ARCHS = "$(ARCHS_STANDARD_64_BIT)";
+				CLANG_ENABLE_OBJC_ARC = YES;
+				COPY_PHASE_STRIP = NO;
+				GCC_C_LANGUAGE_STANDARD = gnu99;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_ENABLE_OBJC_EXCEPTIONS = YES;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"DEBUG=1",
+					"$(inherited)",
+				);
+				GCC_SYMBOLS_PRIVATE_EXTERN = NO;
+				GCC_VERSION = com.apple.compilers.llvm.clang.1_0;
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_MISSING_PROTOTYPES = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				MACOSX_DEPLOYMENT_TARGET = 10.7;
+				ONLY_ACTIVE_ARCH = YES;
+				SDKROOT = macosx;
+			};
+			name = Debug;
+		};
+		95ABFF1B15B35BEE0079029F /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				ARCHS = "$(ARCHS_STANDARD_64_BIT)";
+				CLANG_ENABLE_OBJC_ARC = YES;
+				COPY_PHASE_STRIP = YES;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				GCC_C_LANGUAGE_STANDARD = gnu99;
+				GCC_ENABLE_OBJC_EXCEPTIONS = YES;
+				GCC_VERSION = com.apple.compilers.llvm.clang.1_0;
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_MISSING_PROTOTYPES = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				MACOSX_DEPLOYMENT_TARGET = 10.7;
+				SDKROOT = macosx;
+			};
+			name = Release;
+		};
+		95ABFF1D15B35BEE0079029F /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CONFIGURATION_BUILD_DIR = ../bin;
+				HEADER_SEARCH_PATHS = (
+					../../DCE,
+					../..,
+				);
+				INSTALL_PATH = /usr/pluto/bin;
+				LIBRARY_SEARCH_PATHS = (
+					"$(inherited)",
+					"\"$(SRCROOT)/../lib\"",
+					"\"$(SRCROOT)/../mysql/lib\"",
+					"\"$(SRCROOT)/../bin\"",
+				);
+				PRODUCT_NAME = "$(TARGET_NAME)";
+			};
+			name = Debug;
+		};
+		95ABFF1E15B35BEE0079029F /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CONFIGURATION_BUILD_DIR = ../bin;
+				HEADER_SEARCH_PATHS = (
+					../../DCE,
+					../..,
+				);
+				INSTALL_PATH = /usr/pluto/bin;
+				LIBRARY_SEARCH_PATHS = (
+					"$(inherited)",
+					"\"$(SRCROOT)/../lib\"",
+					"\"$(SRCROOT)/../mysql/lib\"",
+					"\"$(SRCROOT)/../bin\"",
+				);
+				PRODUCT_NAME = "$(TARGET_NAME)";
+			};
+			name = Release;
+		};
+/* End XCBuildConfiguration section */
+
+/* Begin XCConfigurationList section */
+		95ABFF0915B35BED0079029F /* Build configuration list for PBXProject "Lighting_Plugin" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				95ABFF1A15B35BEE0079029F /* Debug */,
+				95ABFF1B15B35BEE0079029F /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		95ABFF1C15B35BEE0079029F /* Build configuration list for PBXNativeTarget "Lighting_Plugin" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				95ABFF1D15B35BEE0079029F /* Debug */,
+				95ABFF1E15B35BEE0079029F /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+/* End XCConfigurationList section */
+	};
+	rootObject = 95ABFF0615B35BED0079029F /* Project object */;
+}
