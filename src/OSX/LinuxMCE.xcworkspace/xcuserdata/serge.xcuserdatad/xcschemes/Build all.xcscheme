@@ -27,6 +27,20 @@
             buildForAnalyzing = "YES">
             <BuildableReference
                BuildableIdentifier = "primary"
+               BlueprintIdentifier = "95FF87F515B3624700B0EC93"
+               BuildableName = "libPlutoUtils.dylib"
+               BlueprintName = "libPlutoUtils"
+               ReferencedContainer = "container:libPlutoUtils.xcodeproj">
+            </BuildableReference>
+         </BuildActionEntry>
+         <BuildActionEntry
+            buildForTesting = "YES"
+            buildForRunning = "YES"
+            buildForProfiling = "YES"
+            buildForArchiving = "YES"
+            buildForAnalyzing = "YES">
+            <BuildableReference
+               BuildableIdentifier = "primary"
                BlueprintIdentifier = "95CBD27715A9EFEB00F17914"
                BuildableName = "libpluto_main.dylib"
                BlueprintName = "libpluto_main"
@@ -115,6 +129,20 @@
                BuildableName = "Event_Plugin.dylib"
                BlueprintName = "Event_Plugin"
                ReferencedContainer = "container:plugins/Event_Plugin.xcodeproj">
+            </BuildableReference>
+         </BuildActionEntry>
+         <BuildActionEntry
+            buildForTesting = "YES"
+            buildForRunning = "YES"
+            buildForProfiling = "YES"
+            buildForArchiving = "YES"
+            buildForAnalyzing = "YES">
+            <BuildableReference
+               BuildableIdentifier = "primary"
+               BlueprintIdentifier = "95ABFF0E15B35BEE0079029F"
+               BuildableName = "Lighting_Plugin.dylib"
+               BlueprintName = "Lighting_Plugin"
+               ReferencedContainer = "container:plugins/Lighting_Plugin.xcodeproj">
             </BuildableReference>
          </BuildActionEntry>
          <BuildActionEntry
