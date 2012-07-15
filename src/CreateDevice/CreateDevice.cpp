@@ -53,7 +53,8 @@
 
 #define  VERSION "<=version=>"
 
-DCEConfig dceConfig;
+// must be extern as the same is defined in Main.cpp 
+extern DCEConfig dceConfig;
 
 using namespace std;
 using namespace DCE;
