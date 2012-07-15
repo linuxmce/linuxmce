@@ -47,8 +47,10 @@ using namespace DCE;
 #include "FileListOps.h"
 
 #ifndef WIN32
-#include <dirent.h>
-#include <attr/attributes.h>
+    #include <dirent.h>
+    #ifndef __APPLE_CC__
+        #include <attr/attributes.h>
+    #endif
 #endif
 
 
