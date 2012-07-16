@@ -9,6 +9,8 @@
 #define ROM_FK_GAMESYSTEM_TABLE_FIELD "Rom.FK_GameSystem"
 #define ROM_ROMNAME_FIELD "Romname"
 #define ROM_ROMNAME_TABLE_FIELD "Rom.Romname"
+#define ROM_MD5_FIELD "md5"
+#define ROM_MD5_TABLE_FIELD "Rom.md5"
 #define ROM_PSC_ID_FIELD "psc_id"
 #define ROM_PSC_ID_TABLE_FIELD "Rom.psc_id"
 #define ROM_PSC_BATCH_FIELD "psc_batch"

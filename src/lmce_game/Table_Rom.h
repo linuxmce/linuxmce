@@ -96,6 +96,7 @@ class DECLSPECIFIER Row_Rom : public TableRow, public SerializeClass
 		long int m_PK_Rom;
 long int m_FK_GameSystem;
 string m_Romname;
+string m_md5;
 long int m_psc_id;
 long int m_psc_batch;
 long int m_psc_user;
@@ -103,12 +104,13 @@ short int m_psc_frozen;
 string m_psc_mod;
 long int m_psc_restrict;
 
-		bool is_null[9];
+		bool is_null[10];
 	
 	public:
 		long int PK_Rom_get();
 long int FK_GameSystem_get();
 string Romname_get();
+string md5_get();
 long int psc_id_get();
 long int psc_batch_get();
 long int psc_user_get();
@@ -120,6 +122,7 @@ long int psc_restrict_get();
 		void PK_Rom_set(long int val);
 void FK_GameSystem_set(long int val);
 void Romname_set(string val);
+void md5_set(string val);
 void psc_id_set(long int val);
 void psc_batch_set(long int val);
 void psc_user_set(long int val);
@@ -129,6 +132,7 @@ void psc_restrict_set(long int val);
 
 		
 		bool Romname_isNull();
+bool md5_isNull();
 bool psc_id_isNull();
 bool psc_batch_isNull();
 bool psc_user_isNull();
@@ -137,6 +141,7 @@ bool psc_restrict_isNull();
 
 			
 		void Romname_setNull(bool val);
+void md5_setNull(bool val);
 void psc_id_setNull(bool val);
 void psc_batch_setNull(bool val);
 void psc_user_setNull(bool val);
@@ -163,7 +168,7 @@ void psc_restrict_setNull(bool val);
 
 		// Setup binary serialization
 		void SetupSerialization(int iSC_Version) {
-			StartSerializeList() + m_PK_Rom+ m_FK_GameSystem+ m_Romname+ m_psc_id+ m_psc_batch+ m_psc_user+ m_psc_frozen+ m_psc_mod+ m_psc_restrict;
+			StartSerializeList() + m_PK_Rom+ m_FK_GameSystem+ m_Romname+ m_md5+ m_psc_id+ m_psc_batch+ m_psc_user+ m_psc_frozen+ m_psc_mod+ m_psc_restrict;
 		}
 	private:
 		void SetDefaultValues();
@@ -171,6 +176,7 @@ void psc_restrict_setNull(bool val);
 		string PK_Rom_asSQL();
 string FK_GameSystem_asSQL();
 string Romname_asSQL();
+string md5_asSQL();
 string psc_id_asSQL();
 string psc_batch_asSQL();
 string psc_user_asSQL();
