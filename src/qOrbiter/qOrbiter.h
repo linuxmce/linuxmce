@@ -36,6 +36,7 @@
 #include <QList>
 #include <datamodels/avdevice.h>
 #include <contextobjects/existingorbiter.h>
+#include <contextobjects/promptdata.h>
 
 #include <QtNetwork/QNetworkAccessManager>
 #include <QtNetwork/QNetworkReply>
@@ -46,8 +47,6 @@
 //<-dceag-d-e->
 
 class basicImageProvider;
-
-
 
 //<-dceag-decl-b->
 namespace DCE
@@ -63,6 +62,7 @@ class qOrbiter : public qOrbiter_Command
     Q_PROPERTY (bool usingLiveAv READ getLiveAvPath WRITE setLiveAvPath NOTIFY liveAvPath)
     Q_PROPERTY (bool m_bIsOSD READ getOsd WRITE setOsd NOTIFY isOsd)
     Q_PROPERTY (bool monitorAvailible READ getMonitorStatus WRITE setMonitorStatus NOTIFY monitorStatusChanged)
+    Q_PROPERTY (int m_dwPK_Device READ getDeviceId WRITE setDeviceId NOTIFY deviceIdChanged)
 
     //<-dceag-decl-e->
     // Private member variables
@@ -115,6 +115,13 @@ public:
     QImage returnImage;
     QByteArray TconfigData;
 
+    //orbiterSetup
+    int sPK_Room;
+    int sPK_Lang;
+    int sPK_Skin;
+    int sPK_Users;
+    int sHeight;
+    int sWidth;
 
     QList<QObject*> screenshotVars;
     QList<QObject*> resendAvButtons;
@@ -1219,6 +1226,7 @@ signals:
     //setup
     void startManager(QString, QString);
     void deviceInvalid(QList<QObject*>);
+    void promptResponse(int, QList<QObject*>);
     void routerInvalid();
     void connectionValid(bool v);
     void routerReloading(QString msg);
@@ -1230,6 +1238,7 @@ signals:
     void newTCport(int port);
     void mediaResponseChanged();
     void  deviceValid(bool s);
+    void deviceIdChanged();
 
     //connections
     void checkReload();
@@ -1367,6 +1376,9 @@ signals:
 
 public slots:
 
+    void setDeviceId(int d) {m_dwPK_Device = d; emit deviceIdChanged();}
+    int getDeviceId() {return m_dwPK_Device;}
+
      void populateSetupInformation();
 
     void setDiscreteAudio(bool audio) { discreteAudio = audio;  emit discreteAudioChanged(); }
@@ -1394,6 +1406,7 @@ public slots:
     void registerDevice(int user, QString ea, int room);
     void qmlSetup(QString device, QString address);
     void setCurrentScreen(QString s);
+    void setOrbiterSetupVars(int users, int room, int skin, int lang, int height, int width);
 
     void pingCore();
     void checkPing(QNetworkReply* reply);

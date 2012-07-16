@@ -30,6 +30,11 @@ Rectangle {
 
     }
 
+    Connections{
+        target:dcerouter
+        onDeviceIdChanged:console.log(dcerouter.m_dwPK_Device)
+    }
+
     color: "slategrey"
     signal setupStart(string x, string y)
     signal splashLoaded()
@@ -384,7 +389,7 @@ Rectangle {
             anchors.centerIn: parent
             wrapMode: Text.WrapAtWordBoundaryOrAnywhere
         }
-        visible: existing_orbiters.visible ? true : false
+        visible:true // window.newOrbiter ? true : false
         anchors.bottom: existing_orbiters.top
         anchors.horizontalCenter: existing_orbiters.horizontalCenter
         MouseArea{
@@ -401,12 +406,29 @@ Rectangle {
         width: scaleX(70)
         visible: false
         z:5
+        Rectangle{
+            id:goButton
+            height: scaleY(15)
+            width: scaleX(15)
+            Text {
+                id: goLabel
+                text: qsTr("Go")
+            }
+            MouseArea{
+                anchors.fill: goButton
+                onClicked: {console.log("Going");
+                    window.setupNewOrbiter(users_options.currentIndex+1, rooms_options.currentIndex+1,1,1,1,1);
+                    orbiter_options.visible = false
+
+                }
+            }
+        }
 
         Rectangle{
             id:usersBlock
             height: scaleY(20)
             width: scaleX(15)
-            color: "slategrey"
+            color: "lightgrey"
             Text {
                 id: usersLabel
                 text: qsTr("Select User")
@@ -417,15 +439,21 @@ Rectangle {
                 id:users_options
                 height: scaleY(20)
                 width: scaleX(15)
-                model:dummyModel
+                model:users
+                spacing:5
                 anchors.top: usersLabel.bottom
                 delegate: Rectangle{
                     height: scaleY(5)
                     width: scaleX(15)
-                    color: "lightgrey"
+                    color: users.currentIndex ? "green" : "slategrey"
                     Text {
-                        text: optionTitle
+                        text:dataTitle
                         anchors.centerIn: parent
+                        color: "black"
+                    }
+                    MouseArea{
+                        anchors.fill: parent
+                        onClicked:{console.log(dataTitle); users.currentIndex=index}
                     }
                 }
             }
@@ -435,7 +463,7 @@ Rectangle {
             id:roomsBlock
             height: scaleY(20)
             width: scaleX(15)
-            color: "slategrey"
+            color: "lightgrey"
             Text {
                 id: roomsLabel
                 text: qsTr("Select Room")
@@ -446,20 +474,27 @@ Rectangle {
                 id:rooms_options
                 height: scaleY(20)
                 width: scaleX(15)
-                model:dummyModel
+                model:rooms
+                spacing:5
                 anchors.top: roomsLabel.bottom
                 delegate: Rectangle{
                     height: scaleY(5)
                     width: scaleX(15)
-                    color: "lightgrey"
+                    color: rooms.currentIndex ? "green" : "slategrey"
                     Text {
-                        text: optionTitle
+                        text:dataTitle
                         anchors.centerIn: parent
+                    }
+                    MouseArea{
+                        anchors.fill: parent
+                        onClicked: {console.log(dataTitle);
+                            rooms.currentIndex = index
+                        }
                     }
                 }
             }
         }
-
+/*
         Rectangle{
             id:skinsBlock
             height: scaleY(20)
@@ -517,6 +552,7 @@ Rectangle {
                 }
             }
         }
+        */
 
     }
 

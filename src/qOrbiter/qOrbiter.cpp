@@ -1,4 +1,4 @@
-    /*
+/*
     This file is part of QOrbiter for use with the LinuxMCE project found at http://www.linuxmce.org
    Langston Ball  golgoj4@gmail.com
     QOrbiter is free software: you can redistribute it and/or modify
@@ -83,6 +83,7 @@ qOrbiter::qOrbiter(int DeviceID, string ServerAddress,bool bConnectEventHandler,
     m_dwMaxRetries = 3;
     m_sExternalIP = "";
     initializeGrid();
+    setOrbiterSetupVars(0,0,0,0,0,0);
 }
 
 //<-dceag-const2-b->
@@ -1975,6 +1976,35 @@ void qOrbiter::setCurrentScreen(QString s)
     //currentScreen = s;
 }
 
+void qOrbiter::setOrbiterSetupVars(int users, int room, int skin, int lang, int height, int width)
+{
+    qDebug()<< "Processing New orbiter Setup";
+    sPK_Room = room;
+    sPK_Users = users;
+    sPK_Skin = skin;
+    sPK_Lang = lang;
+    sHeight = height;
+    sWidth = width;
+    if (sHeight > 0){
+        qDebug() << "Setting up a new orbiter";
+
+        int t = SetupNewOrbiter();
+        qDebug() << "New Device ID:" << t;
+        if (t == 0){
+            statusMessage("Error Setting up orbiter!");
+        }
+        else
+        {
+        setDeviceId(t);
+        OnReload();
+        }
+    }
+    else
+    {
+        qDebug()<<sPK_Users << "-" << sPK_Room;
+    }
+}
+
 void qOrbiter::connectionError()
 {
 
@@ -2013,7 +2043,7 @@ void qOrbiter::getFloorplanDeviceCommand(int device)
     string cmdresponse="";
     if (SendCommand(cmd_populate_device_grid, &cmdresponse) && cmdresponse=="OK")
     {
-          qDebug() << "Requesting floorplan Device commands";
+        qDebug() << "Requesting floorplan Device commands";
 
         cmdresponse="";
 
@@ -2021,7 +2051,7 @@ void qOrbiter::getFloorplanDeviceCommand(int device)
         DCE::CMD_Request_Datagrid_Contents req_device_grid( long(m_dwPK_Device), long(iPK_Device_DatagridPlugIn), StringUtils::itos( m_dwIDataGridRequestCounter ), string(dgName),    int(gWidth), int(gHeight),           false, false,        true,   string(m_sSeek),    int(iOffset),  &pData,         &iData_Size, &GridCurRow, &GridCurCol );
         if(SendCommand(req_device_grid, &cmdresponse) && cmdresponse=="OK")
         {
-                       qDebug() << cmdresponse.c_str();
+            qDebug() << cmdresponse.c_str();
             DataGridTable *pDataGridTable = new DataGridTable(iData_Size,pData,false);
             cellsToRender= pDataGridTable->GetRows();
 #ifndef ANDROID
@@ -2031,7 +2061,7 @@ void qOrbiter::getFloorplanDeviceCommand(int device)
             QString fk_file;
             QString filePath;
             int index;
-             qDebug() << pDataGridTable->getTotalRowCount();
+            qDebug() << pDataGridTable->getTotalRowCount();
             for(MemoryDataTable::iterator it=pDataGridTable->m_MemoryDataTable.begin();it!=pDataGridTable->m_MemoryDataTable.end();++it)
             {
                 DataGridCell *pCell = it->second;
@@ -2046,12 +2076,12 @@ void qOrbiter::getFloorplanDeviceCommand(int device)
         }
         else
         {
-             qDebug() << cmdresponse.c_str();
+            qDebug() << cmdresponse.c_str();
         }
     }
     else
     {
-         qDebug() << cmdresponse.c_str();
+        qDebug() << cmdresponse.c_str();
     }
 
 }
@@ -4117,7 +4147,7 @@ int qOrbiter::PromptFor(std::string sToken)
     qDebug() << "Messaging core ip" << m_sIPAddress.c_str();
     string sResults;
     DCE::CMD_Get_Orbiter_Options_DT CMD_Get_Orbiter_Options_DT(m_dwPK_Device, DEVICETEMPLATE_Orbiter_Plugin_CONST, BL_SameHouse,
-        sToken,&sResults);
+                                                               sToken,&sResults);
 
     CMD_Get_Orbiter_Options_DT.m_pMessage->m_eExpectedResponse = ER_ReplyMessage;
     Message *pResponse = event_Impl.SendReceiveMessage( CMD_Get_Orbiter_Options_DT.m_pMessage );
@@ -4135,6 +4165,7 @@ int qOrbiter::PromptFor(std::string sToken)
     map<int,string> mapResponse;
     vector<string> Choices;
     StringUtils::Tokenize(sResults,"\n",Choices);
+    QList <QObject*> promptList;
     if( sToken=="Size" )
         mapResponse[0]="Default";
 
@@ -4144,12 +4175,19 @@ int qOrbiter::PromptFor(std::string sToken)
         string::size_type pos=0;
         int Choice = atoi(StringUtils::Tokenize(sChoise,"\t",pos).c_str());
         string sDescription = StringUtils::Tokenize(sChoise,"\t",pos);
-        qDebug() << (Choice-1) << "-" << sDescription.c_str();
+        QString t = QString::fromStdString(sDescription);
+        promptList.append(new PromptData(QString::fromStdString(sDescription), Choice));
 
         if( Choice && sDescription.size() )
             mapResponse[Choice]=sDescription;
     }
 
+    if (sToken=="Users"){
+        emit promptResponse(1, promptList);
+    }
+    else if(sToken=="Room"){
+        emit promptResponse(2, promptList);
+    }
 
     return PromptUser("Please select the " + sToken,0,&mapResponse);
 }
@@ -4172,17 +4210,20 @@ int qOrbiter::DeviceIdInvalid()
     {
         emit statusMessage("No orbiters of this type found. Would you like to setup a new one?");
         QApplication::processEvents(QEventLoop::AllEvents);
+        populateSetupInformation();
+        return 0;
+    }
+    else{
+        for(map<int,string>::iterator it=mapDevices.begin();it!=mapDevices.end();++it)
+        {
+
+            temp_orbiter_list.append(new ExistingOrbiter((int)it->first, QString::fromStdString(it->second)));
+            cout << it->first << " " << it->second << endl;
+        }
+        emit deviceInvalid(temp_orbiter_list);
         return 0;
     }
 
-    for(map<int,string>::iterator it=mapDevices.begin();it!=mapDevices.end();++it)
-    {
-
-        temp_orbiter_list.append(new ExistingOrbiter((int)it->first, QString::fromStdString(it->second)));
-        cout << it->first << " " << it->second << endl;
-    }
-    emit deviceInvalid(temp_orbiter_list);
-    return 0;
 }
 
 int qOrbiter::SetupNewOrbiter()
@@ -4193,77 +4234,25 @@ int qOrbiter::SetupNewOrbiter()
     {
         string sResponse;
         if( !event_Impl.m_pClientSocket->SendString("READY") ||
-            !event_Impl.m_pClientSocket->ReceiveString(sResponse) ||
-            sResponse.size()==0 )
+                !event_Impl.m_pClientSocket->ReceiveString(sResponse) ||
+                sResponse.size()==0 )
+            qDebug()<< "setup response error!";
             return 0;  // Something went wrong
 
         if( sResponse=="YES" )
             break;
         Sleep(2000);
     }
+    int PK_Users;
 
     LoggerWrapper::GetInstance()->Write(LV_STATUS,"SetupNewOrbiter prompting for inputs");
 
-    int PK_Users = PromptFor("Users");
-    //if( PROMPT_CANCEL == PK_Users )
-    //	return 0;
+    int PK_Device=0;
 
-    int PK_Room = PromptFor("Room");
-    //if( PROMPT_CANCEL == PK_Room )
-    //	return 0;
-
-    int PK_Skin = PromptFor("Skin");
-    //if( PROMPT_CANCEL == PK_Skin )
-    //	return 0;
-
-    int PK_Language =PromptFor("Language");
-    //if( PROMPT_CANCEL == PK_Language )
-    //	return 0;
-
-    map<int,string> mapResponseYNC;
-    mapResponseYNC[0]="Yes";
-    mapResponseYNC[1]="No";
-    mapResponseYNC[2]="Cancel";
-
-    int Width=0,Height=0;
     string sType;
-#ifdef WIN32
-#ifdef WINCE
-    sType="CE";
-#else
-    sType="Windows";
-#endif
-    RECT rc;
-    HWND hWndDesktop = ::GetDesktopWindow();
-    GetWindowRect(hWndDesktop, &rc);
-    Width=rc.right;
-    Height=rc.bottom;
-#else
-    sType="Linux";
-    // HOW to do this??  TODO
-#endif
-
-#ifdef PADORBITER
-    int PK_Size=1;
-    Width=800;
-    Height=600;
-#else
-    int PK_Size=0;
-    PK_Size=PromptFor("Size");
-    //if( PROMPT_CANCEL == PK_Size)
-      //  return 0;
-#endif
-
-#ifdef PADORBITER
-    int PK_Device=0;
+    statusMessage("Setting up orbiter with core");
     DCE::CMD_New_Orbiter_DT CMD_New_Orbiter_DT(m_dwPK_Device, DEVICETEMPLATE_Orbiter_Plugin_CONST, BL_SameHouse, sType,
-        PK_Users,DEVICETEMPLATE_Orbiter_CONST,m_sMacAddress,PK_Room,Width,Height,PK_Skin,PK_Language,PK_Size,&PK_Device);
-#else
-    int PK_Device=0;
-    DCE::CMD_New_Orbiter_DT CMD_New_Orbiter_DT(m_dwPK_Device, DEVICETEMPLATE_Orbiter_Plugin_CONST, BL_SameHouse, sType,
-        PK_Users,DEVICETEMPLATE_qOrbiter_CONST ,m_sMacAddress,PK_Room,Width,Height,PK_Skin,PK_Language,PK_Size,&PK_Device);
-
-#endif
+       sPK_Users,DEVICETEMPLATE_qOrbiter_CONST ,m_sMacAddress,sPK_Room,sHeight,sWidth,sPK_Skin,sPK_Lang,1,&PK_Device);
 
     CMD_New_Orbiter_DT.m_pMessage->m_eExpectedResponse = ER_ReplyMessage;
     Message *pResponse = event_Impl.SendReceiveMessage( CMD_New_Orbiter_DT.m_pMessage );
@@ -4273,7 +4262,7 @@ int qOrbiter::SetupNewOrbiter()
             delete pResponse;
 
         LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"SetupNewOrbiter unable to create orbiter");
-       // m_pOrbiterRenderer->PromptUser("Sorry.  There is a problem creating the new orbiter.  Please check the logs.");
+        qDebug("Sorry.  There is a problem creating the new orbiter.  Please check the logs.");
         return 0;
     }
     CMD_New_Orbiter_DT.ParseResponse( pResponse );
@@ -4282,14 +4271,15 @@ int qOrbiter::SetupNewOrbiter()
     if( !PK_Device )
     {
         LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"SetupNewOrbiter unable to create orbiter #2");
-        //PromptUser("Sorry.  Orbiter Plugin could not create the device for some reason.  Please check the logs.");
+        qDebug("Sorry.  Orbiter Plugin could not create the device for some reason.  Please check the logs.");
         return 0;
     }
 
+    statusMessage("success, the device ID is:"+ PK_Device);
 
 
     LoggerWrapper::GetInstance()->Write(LV_STATUS,"SetupNewOrbiter new orbiter %d",PK_Device);
-/*
+    /*
     if( MonitorRegen(PK_Device)==0 )  // User hit cancel
     {
         OnReload();
@@ -4760,11 +4750,11 @@ void qOrbiter::pingCore()
 #endif
     QNetworkAccessManager *pingManager = new QNetworkAccessManager();
     connect(pingManager, SIGNAL(finished(QNetworkReply*)), this, SLOT(checkPing(QNetworkReply*)));
-   QNetworkReply *badReply = pingManager->get(QNetworkRequest(QUrl(url)));
+    QNetworkReply *badReply = pingManager->get(QNetworkRequest(QUrl(url)));
 
-   // TODO: add a network timeout for this so it returns faster for located non-lmce machines. Currently it only returns fast if the ip or hostname is totally invalid, i.e. no route. For online machines,
-   //it takes a bit longer. solve by attatching A Qtimer checking process and force it to cancel requests that dont return in a reasonable(whatever that is) amount of time. 5 seconds? I mean, who is still on
-   //dialup?
+    // TODO: add a network timeout for this so it returns faster for located non-lmce machines. Currently it only returns fast if the ip or hostname is totally invalid, i.e. no route. For online machines,
+    //it takes a bit longer. solve by attatching A Qtimer checking process and force it to cancel requests that dont return in a reasonable(whatever that is) amount of time. 5 seconds? I mean, who is still on
+    //dialup?
 
 }
 

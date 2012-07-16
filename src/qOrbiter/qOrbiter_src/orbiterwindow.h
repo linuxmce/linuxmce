@@ -43,6 +43,8 @@ public:
     QString qrcPath;
     std::string router;
     QList<QObject*> orbiterList;
+    QList<QObject*> userList;
+    QList<QObject*> roomList;
 #if GLENABLED
     QGLWidget *glWidget;
 #endif
@@ -89,6 +91,10 @@ public slots:
     bool getdeviceState () {return b_devicePresent;}
 
     void prepareExistingOrbiters(QList<QObject*> ex_list);
+    void displayPromptResponse(int type, QList<QObject *> pList);
+
+    void setupNewOrbiter(int user, int room, int skin, int lang, int height, int w);
+
 
 signals:
     void MessageChanged();
@@ -105,7 +111,7 @@ signals:
     void showList();
     void showExternal();
     void setupNewOrbiter();
-
+    void newOrbiterData(int u, int r, int s, int l, int h, int w);
 
 };
 #endif

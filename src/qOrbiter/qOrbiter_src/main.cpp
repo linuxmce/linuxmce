@@ -390,6 +390,8 @@ int main(int argc, char* argv[])
         QObject::connect(pqOrbiter, SIGNAL(screenSaverImages(QStringList)), w->ScreenSaver, SLOT(setImageList(QStringList)),Qt::QueuedConnection);
         QObject::connect(pqOrbiter, SIGNAL(setMyIp(QString)), w, SLOT(setIpAddress(QString)),Qt::QueuedConnection);
         QObject::connect(&orbiterWin, SIGNAL(setupNewOrbiter()), pqOrbiter,SLOT(populateSetupInformation()));
+        QObject::connect(pqOrbiter,SIGNAL(promptResponse(int,QList<QObject*>)), &orbiterWin, SLOT(displayPromptResponse(int, QList<QObject*> )));
+        QObject::connect(&orbiterWin, SIGNAL(newOrbiterData(int , int , int , int , int , int )), pqOrbiter, SLOT(setOrbiterSetupVars(int,int,int,int,int,int)));
 
         //messaging
         QObject::connect(mediaModel, SIGNAL(statusMessage(QString)), w, SLOT(setDceResponse(QString)),Qt::QueuedConnection);
@@ -398,7 +400,6 @@ int main(int argc, char* argv[])
         QObject::connect(w, SIGNAL(loadingMessage(QString)), &orbiterWin,SLOT(setMessage(QString)), Qt::DirectConnection);
 
         //operations
-
         QObject::connect(pqOrbiter, SIGNAL(addScreenParam(QString,int)), w->ScreenParameters, SLOT(addParam(QString, int)), Qt::QueuedConnection);
         QObject::connect(w, SIGNAL(locationChanged(int,int)), pqOrbiter, SLOT(setLocation(int,int)),Qt::QueuedConnection);
         QObject::connect(w, SIGNAL(userChanged(int)), pqOrbiter, SLOT(setUser(int)),Qt::QueuedConnection);
@@ -422,6 +423,7 @@ int main(int argc, char* argv[])
         QObject::connect(w->floorplans, SIGNAL(pageChanged(QString)), pqOrbiter, SLOT(getFloorPlanImage(QString)), Qt::QueuedConnection);
         QObject::connect(w->floorplans, SIGNAL(requestNewFloorPlanData(QString)), pqOrbiter, SLOT(updateFloorPlan(QString)), Qt::QueuedConnection);
         QObject::connect(pqOrbiter,SIGNAL(floorplanTypeChanged(int)), w->floorplans, SLOT(setCurrentFloorPlanType(int)),Qt::QueuedConnection);
+
         //mediagrid
         QObject::connect(mediaModel, SIGNAL(pagingCleared()), pqOrbiter,SLOT(populateAdditionalMedia()), Qt::QueuedConnection);
         QObject::connect(pqOrbiter, SIGNAL(clearPageGrid()), mediaModel, SLOT(clearForPaging()), Qt::QueuedConnection);

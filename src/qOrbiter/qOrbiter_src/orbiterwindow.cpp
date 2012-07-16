@@ -176,6 +176,7 @@ void orbiterWindow::qmlSetupLmce(QString device, QString ip)
     deviceno = device.toLong();
     mainView.rootContext()->setContextProperty("deviceid", int(deviceno));
     mainView.rootContext()->setContextProperty("srouterip", QString::fromStdString(router));
+
     emit setupLmce(device, ip);
 }
 
@@ -235,6 +236,29 @@ void orbiterWindow::prepareExistingOrbiters(QList<QObject *> ex_list)
     orbiterList = ex_list;
     mainView.rootContext()->setContextProperty("orbiterList", QVariant::fromValue(orbiterList));
     emit showList();
+}
+
+void orbiterWindow::displayPromptResponse(int type, QList<QObject*> pList)
+{
+    qDebug() << "Prompt for response" << type;
+    if(type==1){
+       userList = pList;
+       mainView.rootContext()->setContextProperty("users", QVariant::fromValue(userList));
+
+    }
+    else
+    {
+        roomList = pList;
+                mainView.rootContext()->setContextProperty("rooms", QVariant::fromValue(roomList));
+    }
+
+
+}
+
+void orbiterWindow::setupNewOrbiter(int user, int room, int skin, int lang, int height, int w)
+{
+    qDebug() << "Setup message recieved";
+ emit newOrbiterData(user, room, skin, lang, height, w);
 }
 
 
