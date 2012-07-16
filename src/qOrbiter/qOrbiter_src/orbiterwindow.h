@@ -28,6 +28,7 @@ class orbiterWindow : public QObject
     Q_PROPERTY (bool b_orbiterConfigReady READ getOrbiterConfigState WRITE setOrbiterConfigState NOTIFY orbiterConfigStatus )
     Q_PROPERTY (bool b_skinIndexReady READ getSkinIndexState WRITE setSkinIndexState NOTIFY skinIndexStatus )
     Q_PROPERTY (bool b_skinDataReady READ getSkinDataState WRITE setSkinDataState NOTIFY skinDataLoaded  )
+    Q_PROPERTY(bool b_reloadStatus READ getReloadStatus WRITE setReloadStatus NOTIFY reloadStatusChanged)
 
 public:
     explicit orbiterWindow(long deviceid, std::string routerip, QObject *parent = 0);
@@ -57,6 +58,7 @@ public:
     bool b_orbiterConfigReady;
     bool b_skinIndexReady;
     bool b_skinDataReady;
+    bool b_reloadStatus;
 
 public slots:
     Q_INVOKABLE void forceResponse (QString forced);
@@ -95,6 +97,8 @@ public slots:
 
     void setupNewOrbiter(int user, int room, int skin, int lang, int height, int w);
 
+    bool getReloadStatus() {return b_reloadStatus;}
+    void setReloadStatus(bool b) {b_reloadStatus = b ; emit reloadStatusChanged();}
 
 signals:
     void MessageChanged();
@@ -111,6 +115,7 @@ signals:
     void showList();
     void showExternal();
     void setupNewOrbiter();
+    void reloadStatusChanged();
     void newOrbiterData(int u, int r, int s, int l, int h, int w);
 
 };

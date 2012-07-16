@@ -22,6 +22,7 @@
 
 #include <QtCore/QObject>
 #include <contextobjects/existingorbiter.h>
+#include <contextobjects/promptdata.h>
 #include <QtCore/QDir>
 
 #if (QT_VERSION >= 0x050000)
@@ -51,17 +52,29 @@ orbiterWindow::orbiterWindow(long deviceid, std::string routerip, QObject *paren
 {
 
     newOrbiter = false;
-    this->b_connectionPresent = false;
-    this->b_localConfigReady = false;
-    this->b_orbiterConfigReady = false;
-    this->b_skinDataReady = false;
-    this->b_skinIndexReady = false;
-    this->b_devicePresent = false;
+    setConnectionState(false);
+    setLocalConfigState(false);
+    setOrbiterConfigState(false);
+    setSkinDataState(false);
+    setSkinIndexState(false);
+    setDeviceState(false);
+    setReloadStatus(false);
+    //    this->b_connectionPresent = false;
+    //    this->b_localConfigReady = false;
+    //    this->b_orbiterConfigReady = false;
+    //    this->b_skinDataReady = false;
+    //    this->b_skinIndexReady = false;
+    //    this->b_devicePresent = false;
 
     //qDebug() << mainView.size();
     router = routerip;
     deviceno = deviceid;
 
+    userList.append(new PromptData("null",0));
+    roomList.append(new PromptData("null",0));
+
+    mainView.rootContext()->setContextProperty("users", QVariant::fromValue(userList));
+    mainView.rootContext()->setContextProperty("rooms", QVariant::fromValue(roomList));
 
 #if (QT_VERSION >= 0x050000)
     mainView.setResizeMode(QQuickView::SizeRootObjectToView);
@@ -75,7 +88,7 @@ orbiterWindow::orbiterWindow(long deviceid, std::string routerip, QObject *paren
 
 #ifdef for_desktop
     glWidget = new QGLWidget();
-mainView.setViewport(glWidget);
+    mainView.setViewport(glWidget);
 #elif for_android
 
 #else
@@ -123,7 +136,7 @@ mainView.setViewport(glWidget);
     buildType="/qml/desktop";
     qrcPath = "qrc:osx/Splash.qml";
 #elif defined __ANDROID__
-    qrcPath = "qrc:android/Splash.qml";    
+    qrcPath = "qrc:android/Splash.qml";
 #elif defined for_android
     buildType = "/qml/android";
     qrcPath = "qrc:android/Splash.qml";
@@ -242,14 +255,16 @@ void orbiterWindow::displayPromptResponse(int type, QList<QObject*> pList)
 {
     qDebug() << "Prompt for response" << type;
     if(type==1){
-       userList = pList;
-       mainView.rootContext()->setContextProperty("users", QVariant::fromValue(userList));
+        userList.clear();
+        userList = pList;
+        mainView.rootContext()->setContextProperty("users", QVariant::fromValue(userList));
 
     }
     else
     {
+        roomList.clear();
         roomList = pList;
-                mainView.rootContext()->setContextProperty("rooms", QVariant::fromValue(roomList));
+        mainView.rootContext()->setContextProperty("rooms", QVariant::fromValue(roomList));
     }
 
 
@@ -258,7 +273,7 @@ void orbiterWindow::displayPromptResponse(int type, QList<QObject*> pList)
 void orbiterWindow::setupNewOrbiter(int user, int room, int skin, int lang, int height, int w)
 {
     qDebug() << "Setup message recieved";
- emit newOrbiterData(user, room, skin, lang, height, w);
+    emit newOrbiterData(user, room, skin, lang, height, w);
 }
 
 

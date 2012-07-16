@@ -526,7 +526,7 @@ int main(int argc, char* argv[])
         mediaThread->start();
         epgThread->start();
 
-        pqOrbiter->m_dwPK_Device = w->iPK_Device;
+        pqOrbiter->setDeviceId(w->iPK_Device);
         pqOrbiter->m_sHostName = w->qs_routerip.toStdString();
         pqOrbiter->m_sIPAddress = w->qs_routerip.toStdString();
         pqOrbiter->m_sExternalIP = w->qs_ext_routerip.toStdString();

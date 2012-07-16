@@ -3,14 +3,13 @@
   */
 import QtQuick 1.0
 
-
-
 Rectangle {
     id: splashPage
     height:appH
     width:appW
     property bool orbiterSetup:false
-    onOrbiterSetupChanged:{  console.log(orbiterSetup) ; existing_orbiters.visible = false; orbiter_options.visible = true, window.showSetup()}
+
+    onOrbiterSetupChanged:{  console.log(orbiterSetup) ; existing_orbiters.visible = false; orbiter_options.visible = true; window.showSetup()}
     onWidthChanged: console.log("detected size change")
 
     function scaleX(x){
@@ -19,6 +18,7 @@ Rectangle {
     function scaleY(y){
         return y/100*appW
     }
+
 
     Connections{
         target: window
@@ -32,7 +32,7 @@ Rectangle {
 
     Connections{
         target:dcerouter
-        onDeviceIdChanged:console.log(dcerouter.m_dwPK_Device)
+        onDeviceIdChanged: console.log(dcerouter.m_dwPK_Device)
     }
 
     color: "slategrey"
@@ -47,21 +47,21 @@ Rectangle {
         anchors.fill: parent
     }
 
-    Column{
+    Row{
 
         height: childrenRect.height
-        width: scaleX(40)
-        spacing: 2
+        width: scaleX(85)
+        spacing: scaleX(10)
 
         Rectangle{
 
             id:connection_indicator
             height: scaleX(5)
             width: scaleX(5)
-
+            color: "transparent"
             Image {
                 id: connection_icon
-                source: ""
+                source: ":/icons/audio"
             }
 
             Text {
@@ -76,7 +76,7 @@ Rectangle {
             id:device_indicator
             height: scaleX(5)
             width: scaleX(5)
-
+            color: "transparent"
             Image {
                 id: device_icon
                 source: ""
@@ -94,7 +94,7 @@ Rectangle {
             id:config_indicator
             height: scaleX(5)
             width: scaleX(5)
-
+            color: "transparent"
             Image {
                 id: config_icon
                 source: ""
@@ -112,7 +112,7 @@ Rectangle {
             id:skin_indicator
             height: scaleX(5)
             width: scaleX(5)
-
+            color: "transparent"
             Image {
                 id: skin_icon
                 source: ""
@@ -130,7 +130,7 @@ Rectangle {
             id:skindata_indicator
             height: scaleX(5)
             width: scaleX(5)
-
+            color: "transparent"
             Image {
                 id: skinData_icon
                 source: ""
@@ -389,7 +389,7 @@ Rectangle {
             anchors.centerIn: parent
             wrapMode: Text.WrapAtWordBoundaryOrAnywhere
         }
-        visible:true // window.newOrbiter ? true : false
+        visible: existing_orbiters.visible ? true : false
         anchors.bottom: existing_orbiters.top
         anchors.horizontalCenter: existing_orbiters.horizontalCenter
         MouseArea{
@@ -404,7 +404,9 @@ Rectangle {
         anchors.centerIn: parent
         height: scaleY(35)
         width: scaleX(70)
-        visible: false
+        visible: existing_orbiters.visible ? false : true
+
+
         z:5
         Rectangle{
             id:goButton
@@ -494,7 +496,7 @@ Rectangle {
                 }
             }
         }
-/*
+        /*
         Rectangle{
             id:skinsBlock
             height: scaleY(20)
@@ -563,5 +565,7 @@ Rectangle {
             optionValue:1
         }
     }
+
+
 
 }
