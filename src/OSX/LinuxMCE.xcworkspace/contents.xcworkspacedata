@@ -13,6 +13,9 @@
       <FileRef
          location = "group:MessageSend.xcodeproj">
       </FileRef>
+      <FileRef
+         location = "group:CreateDevice.xcodeproj">
+      </FileRef>
    </Group>
    <Group
       location = "container:"

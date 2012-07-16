@@ -250,7 +250,7 @@
 					/usr/include/mysql,
 					/usr/include/libxml2,
 				);
-				INSTALL_PATH = "";
+				INSTALL_PATH = /usr/pluto/bin;
 				LIBRARY_SEARCH_PATHS = (
 					"$(inherited)",
 					"\"$(SRCROOT)/lib\"",
@@ -272,7 +272,7 @@
 					/usr/include/mysql,
 					/usr/include/libxml2,
 				);
-				INSTALL_PATH = "";
+				INSTALL_PATH = /usr/pluto/bin;
 				LIBRARY_SEARCH_PATHS = (
 					"$(inherited)",
 					"\"$(SRCROOT)/lib\"",

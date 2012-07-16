@@ -1,0 +1,259 @@
+// !$*UTF8*$!
+{
+	archiveVersion = 1;
+	classes = {
+	};
+	objectVersion = 46;
+	objects = {
+
+/* Begin PBXBuildFile section */
+		95F7891015B4B85500FB8F5B /* CreateDevice.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 95F7890F15B4B85500FB8F5B /* CreateDevice.cpp */; };
+		95F7891315B4B86F00FB8F5B /* Main.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 95F7891215B4B86F00FB8F5B /* Main.cpp */; };
+		95F7891615B4B88200FB8F5B /* UserUtils.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 95F7891515B4B88200FB8F5B /* UserUtils.cpp */; };
+		95F7891915B4B96D00FB8F5B /* libDCECommon.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 95F7891815B4B96D00FB8F5B /* libDCECommon.dylib */; };
+		95F7891B15B4B97700FB8F5B /* libPlutoUtils.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 95F7891A15B4B97700FB8F5B /* libPlutoUtils.dylib */; };
+		95F7891D15B4B99700FB8F5B /* libmysqlclient.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 95F7891C15B4B99700FB8F5B /* libmysqlclient.dylib */; };
+/* End PBXBuildFile section */
+
+/* Begin PBXCopyFilesBuildPhase section */
+		95F788FC15B4B81400FB8F5B /* CopyFiles */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 2147483647;
+			dstPath = /usr/share/man/man1/;
+			dstSubfolderSpec = 0;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 1;
+		};
+/* End PBXCopyFilesBuildPhase section */
+
+/* Begin PBXFileReference section */
+		95F788FE15B4B81400FB8F5B /* CreateDevice */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = CreateDevice; sourceTree = BUILT_PRODUCTS_DIR; };
+		95F7890F15B4B85500FB8F5B /* CreateDevice.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = CreateDevice.cpp; path = ../CreateDevice/CreateDevice.cpp; sourceTree = "<group>"; };
+		95F7891215B4B86F00FB8F5B /* Main.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = Main.cpp; path = ../CreateDevice/Main.cpp; sourceTree = "<group>"; };
+		95F7891515B4B88200FB8F5B /* UserUtils.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = UserUtils.cpp; path = ../CreateDevice/UserUtils.cpp; sourceTree = "<group>"; };
+		95F7891815B4B96D00FB8F5B /* libDCECommon.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libDCECommon.dylib; path = lib/libDCECommon.dylib; sourceTree = "<group>"; };
+		95F7891A15B4B97700FB8F5B /* libPlutoUtils.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libPlutoUtils.dylib; path = lib/libPlutoUtils.dylib; sourceTree = "<group>"; };
+		95F7891C15B4B99700FB8F5B /* libmysqlclient.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libmysqlclient.dylib; path = ../../mysql/lib/libmysqlclient.dylib; sourceTree = "<group>"; };
+/* End PBXFileReference section */
+
+/* Begin PBXFrameworksBuildPhase section */
+		95F788FB15B4B81400FB8F5B /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				95F7891915B4B96D00FB8F5B /* libDCECommon.dylib in Frameworks */,
+				95F7891B15B4B97700FB8F5B /* libPlutoUtils.dylib in Frameworks */,
+				95F7891D15B4B99700FB8F5B /* libmysqlclient.dylib in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXFrameworksBuildPhase section */
+
+/* Begin PBXGroup section */
+		95F788F315B4B81300FB8F5B = {
+			isa = PBXGroup;
+			children = (
+				95F7891215B4B86F00FB8F5B /* Main.cpp */,
+				95F7890F15B4B85500FB8F5B /* CreateDevice.cpp */,
+				95F7891715B4B95B00FB8F5B /* Libraries */,
+				95F7891415B4B87200FB8F5B /* Includes */,
+				95F788FF15B4B81400FB8F5B /* Products */,
+			);
+			sourceTree = "<group>";
+		};
+		95F788FF15B4B81400FB8F5B /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				95F788FE15B4B81400FB8F5B /* CreateDevice */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+		95F7891415B4B87200FB8F5B /* Includes */ = {
+			isa = PBXGroup;
+			children = (
+				95F7891515B4B88200FB8F5B /* UserUtils.cpp */,
+			);
+			name = Includes;
+			sourceTree = "<group>";
+		};
+		95F7891715B4B95B00FB8F5B /* Libraries */ = {
+			isa = PBXGroup;
+			children = (
+				95F7891815B4B96D00FB8F5B /* libDCECommon.dylib */,
+				95F7891A15B4B97700FB8F5B /* libPlutoUtils.dylib */,
+				95F7891C15B4B99700FB8F5B /* libmysqlclient.dylib */,
+			);
+			name = Libraries;
+			sourceTree = "<group>";
+		};
+/* End PBXGroup section */
+
+/* Begin PBXNativeTarget section */
+		95F788FD15B4B81400FB8F5B /* CreateDevice */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 95F7890815B4B81400FB8F5B /* Build configuration list for PBXNativeTarget "CreateDevice" */;
+			buildPhases = (
+				95F788FA15B4B81400FB8F5B /* Sources */,
+				95F788FB15B4B81400FB8F5B /* Frameworks */,
+				95F788FC15B4B81400FB8F5B /* CopyFiles */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = CreateDevice;
+			productName = CreateDevice;
+			productReference = 95F788FE15B4B81400FB8F5B /* CreateDevice */;
+			productType = "com.apple.product-type.tool";
+		};
+/* End PBXNativeTarget section */
+
+/* Begin PBXProject section */
+		95F788F515B4B81300FB8F5B /* Project object */ = {
+			isa = PBXProject;
+			attributes = {
+				LastUpgradeCheck = 0420;
+			};
+			buildConfigurationList = 95F788F815B4B81300FB8F5B /* Build configuration list for PBXProject "CreateDevice" */;
+			compatibilityVersion = "Xcode 3.2";
+			developmentRegion = English;
+			hasScannedForEncodings = 0;
+			knownRegions = (
+				en,
+			);
+			mainGroup = 95F788F315B4B81300FB8F5B;
+			productRefGroup = 95F788FF15B4B81400FB8F5B /* Products */;
+			projectDirPath = "";
+			projectRoot = "";
+			targets = (
+				95F788FD15B4B81400FB8F5B /* CreateDevice */,
+			);
+		};
+/* End PBXProject section */
+
+/* Begin PBXSourcesBuildPhase section */
+		95F788FA15B4B81400FB8F5B /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				95F7891015B4B85500FB8F5B /* CreateDevice.cpp in Sources */,
+				95F7891315B4B86F00FB8F5B /* Main.cpp in Sources */,
+				95F7891615B4B88200FB8F5B /* UserUtils.cpp in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXSourcesBuildPhase section */
+
+/* Begin XCBuildConfiguration section */
+		95F7890615B4B81400FB8F5B /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				ARCHS = "$(ARCHS_STANDARD_64_BIT)";
+				CLANG_ENABLE_OBJC_ARC = YES;
+				COPY_PHASE_STRIP = NO;
+				GCC_C_LANGUAGE_STANDARD = gnu99;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_ENABLE_OBJC_EXCEPTIONS = YES;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"DEBUG=1",
+					"$(inherited)",
+				);
+				GCC_SYMBOLS_PRIVATE_EXTERN = NO;
+				GCC_VERSION = com.apple.compilers.llvm.clang.1_0;
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_MISSING_PROTOTYPES = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				MACOSX_DEPLOYMENT_TARGET = 10.7;
+				ONLY_ACTIVE_ARCH = YES;
+				SDKROOT = macosx;
+			};
+			name = Debug;
+		};
+		95F7890715B4B81400FB8F5B /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				ARCHS = "$(ARCHS_STANDARD_64_BIT)";
+				CLANG_ENABLE_OBJC_ARC = YES;
+				COPY_PHASE_STRIP = YES;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				GCC_C_LANGUAGE_STANDARD = gnu99;
+				GCC_ENABLE_OBJC_EXCEPTIONS = YES;
+				GCC_VERSION = com.apple.compilers.llvm.clang.1_0;
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_MISSING_PROTOTYPES = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				MACOSX_DEPLOYMENT_TARGET = 10.7;
+				SDKROOT = macosx;
+			};
+			name = Release;
+		};
+		95F7890915B4B81400FB8F5B /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CONFIGURATION_BUILD_DIR = bin;
+				HEADER_SEARCH_PATHS = (
+					../DCE,
+					..,
+					/usr/include/mysql,
+				);
+				INSTALL_PATH = /usr/pluto/bin;
+				LIBRARY_SEARCH_PATHS = (
+					"$(inherited)",
+					"\"$(SRCROOT)/lib\"",
+					"\"$(SRCROOT)/../../mysql/lib\"",
+				);
+				PRODUCT_NAME = "$(TARGET_NAME)";
+			};
+			name = Debug;
+		};
+		95F7890A15B4B81400FB8F5B /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CONFIGURATION_BUILD_DIR = bin;
+				HEADER_SEARCH_PATHS = (
+					../DCE,
+					..,
+					/usr/include/mysql,
+				);
+				INSTALL_PATH = /usr/pluto/bin;
+				LIBRARY_SEARCH_PATHS = (
+					"$(inherited)",
+					"\"$(SRCROOT)/lib\"",
+					"\"$(SRCROOT)/../../mysql/lib\"",
+				);
+				PRODUCT_NAME = "$(TARGET_NAME)";
+			};
+			name = Release;
+		};
+/* End XCBuildConfiguration section */
+
+/* Begin XCConfigurationList section */
+		95F788F815B4B81300FB8F5B /* Build configuration list for PBXProject "CreateDevice" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				95F7890615B4B81400FB8F5B /* Debug */,
+				95F7890715B4B81400FB8F5B /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		95F7890815B4B81400FB8F5B /* Build configuration list for PBXNativeTarget "CreateDevice" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				95F7890915B4B81400FB8F5B /* Debug */,
+				95F7890A15B4B81400FB8F5B /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+/* End XCConfigurationList section */
+	};
+	rootObject = 95F788F515B4B81300FB8F5B /* Project object */;
+}
