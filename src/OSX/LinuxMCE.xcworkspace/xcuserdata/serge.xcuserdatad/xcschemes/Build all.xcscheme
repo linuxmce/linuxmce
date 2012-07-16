@@ -153,6 +153,20 @@
             buildForAnalyzing = "YES">
             <BuildableReference
                BuildableIdentifier = "primary"
+               BlueprintIdentifier = "95F7892815B4BAE500FB8F5B"
+               BuildableName = "Security_Plugin.dylib"
+               BlueprintName = "Security_Plugin"
+               ReferencedContainer = "container:plugins/Security_Plugin.xcodeproj">
+            </BuildableReference>
+         </BuildActionEntry>
+         <BuildActionEntry
+            buildForTesting = "YES"
+            buildForRunning = "YES"
+            buildForProfiling = "YES"
+            buildForArchiving = "YES"
+            buildForAnalyzing = "YES">
+            <BuildableReference
+               BuildableIdentifier = "primary"
                BlueprintIdentifier = "95ABFE7B15AF666A0079029F"
                BuildableName = "General_Info_Plugin.dylib"
                BlueprintName = "General_Info_Plugin"

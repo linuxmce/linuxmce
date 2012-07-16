@@ -44,6 +44,9 @@
       <FileRef
          location = "group:plugins/Media_Plugin.xcodeproj">
       </FileRef>
+      <FileRef
+         location = "group:plugins/Security_Plugin.xcodeproj">
+      </FileRef>
    </Group>
    <Group
       location = "container:"

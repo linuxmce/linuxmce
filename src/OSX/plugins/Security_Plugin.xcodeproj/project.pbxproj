@@ -1,0 +1,308 @@
+// !$*UTF8*$!
+{
+	archiveVersion = 1;
+	classes = {
+	};
+	objectVersion = 46;
+	objects = {
+
+/* Begin PBXBuildFile section */
+		95F7893315B4BAE500FB8F5B /* Security_Plugin.cp in Sources */ = {isa = PBXBuildFile; fileRef = 95F7893215B4BAE500FB8F5B /* Security_Plugin.cp */; };
+		95F7893E15B4BB8C00FB8F5B /* Main.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 95F7893D15B4BB8C00FB8F5B /* Main.cpp */; };
+		95F7894015B4BB9500FB8F5B /* Security_Plugin.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 95F7893F15B4BB9500FB8F5B /* Security_Plugin.cpp */; };
+		95F7894415B4BBD500FB8F5B /* Notification.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 95F7894315B4BBD500FB8F5B /* Notification.cpp */; };
+		95F7894615B4BBF500FB8F5B /* Security_PluginBase.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 95F7894515B4BBF500FB8F5B /* Security_PluginBase.cpp */; };
+		95F7894815B4BC3200FB8F5B /* libDCECommon.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 95F7894715B4BC3200FB8F5B /* libDCECommon.dylib */; };
+		95F7894A15B4BC3B00FB8F5B /* libpluto_main.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 95F7894915B4BC3B00FB8F5B /* libpluto_main.dylib */; };
+		95F7894C15B4BC4200FB8F5B /* libpluto_security.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 95F7894B15B4BC4200FB8F5B /* libpluto_security.dylib */; };
+		95F7894E15B4BC4A00FB8F5B /* libPlutoUtils.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 95F7894D15B4BC4A00FB8F5B /* libPlutoUtils.dylib */; };
+		95F7895015B4BC7200FB8F5B /* mysql.h in Headers */ = {isa = PBXBuildFile; fileRef = 95F7894F15B4BC7200FB8F5B /* mysql.h */; };
+		95F7895215B4BCBE00FB8F5B /* libmysqlclient.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 95F7895115B4BCBE00FB8F5B /* libmysqlclient.dylib */; };
+		95F7895415B4BCCB00FB8F5B /* Datagrid_Plugin.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 95F7895315B4BCCB00FB8F5B /* Datagrid_Plugin.dylib */; };
+/* End PBXBuildFile section */
+
+/* Begin PBXFileReference section */
+		95F7892915B4BAE500FB8F5B /* Security_Plugin.dylib */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.dylib"; includeInIndex = 0; path = Security_Plugin.dylib; sourceTree = BUILT_PRODUCTS_DIR; };
+		95F7892D15B4BAE500FB8F5B /* Security_Plugin-Prefix.pch */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "Security_Plugin-Prefix.pch"; sourceTree = "<group>"; };
+		95F7892E15B4BAE500FB8F5B /* Security_PluginProj.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; path = Security_PluginProj.xcconfig; sourceTree = "<group>"; };
+		95F7892F15B4BAE500FB8F5B /* Security_PluginTarget.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; path = Security_PluginTarget.xcconfig; sourceTree = "<group>"; };
+		95F7893015B4BAE500FB8F5B /* Security_Plugin.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = Security_Plugin.h; sourceTree = "<group>"; };
+		95F7893115B4BAE500FB8F5B /* Security_PluginPriv.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = Security_PluginPriv.h; sourceTree = "<group>"; };
+		95F7893215B4BAE500FB8F5B /* Security_Plugin.cp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = Security_Plugin.cp; sourceTree = "<group>"; };
+		95F7893D15B4BB8C00FB8F5B /* Main.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = Main.cpp; path = ../../Security_Plugin/Main.cpp; sourceTree = "<group>"; };
+		95F7893F15B4BB9500FB8F5B /* Security_Plugin.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = Security_Plugin.cpp; path = ../../Security_Plugin/Security_Plugin.cpp; sourceTree = "<group>"; };
+		95F7894315B4BBD500FB8F5B /* Notification.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = Notification.cpp; path = ../Security_Plugin/Notification.cpp; sourceTree = "<group>"; };
+		95F7894515B4BBF500FB8F5B /* Security_PluginBase.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = Security_PluginBase.cpp; path = ../Gen_Devices/Security_PluginBase.cpp; sourceTree = "<group>"; };
+		95F7894715B4BC3200FB8F5B /* libDCECommon.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libDCECommon.dylib; path = ../lib/libDCECommon.dylib; sourceTree = "<group>"; };
+		95F7894915B4BC3B00FB8F5B /* libpluto_main.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libpluto_main.dylib; path = ../lib/libpluto_main.dylib; sourceTree = "<group>"; };
+		95F7894B15B4BC4200FB8F5B /* libpluto_security.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libpluto_security.dylib; path = ../lib/libpluto_security.dylib; sourceTree = "<group>"; };
+		95F7894D15B4BC4A00FB8F5B /* libPlutoUtils.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libPlutoUtils.dylib; path = ../lib/libPlutoUtils.dylib; sourceTree = "<group>"; };
+		95F7894F15B4BC7200FB8F5B /* mysql.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = mysql.h; path = plugins/../mysql/include/mysql.h; sourceTree = "<group>"; };
+		95F7895115B4BCBE00FB8F5B /* libmysqlclient.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libmysqlclient.dylib; path = ../mysql/lib/libmysqlclient.dylib; sourceTree = "<group>"; };
+		95F7895315B4BCCB00FB8F5B /* Datagrid_Plugin.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = Datagrid_Plugin.dylib; path = ../bin/Datagrid_Plugin.dylib; sourceTree = "<group>"; };
+/* End PBXFileReference section */
+
+/* Begin PBXFrameworksBuildPhase section */
+		95F7892615B4BAE500FB8F5B /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				95F7894815B4BC3200FB8F5B /* libDCECommon.dylib in Frameworks */,
+				95F7894A15B4BC3B00FB8F5B /* libpluto_main.dylib in Frameworks */,
+				95F7894C15B4BC4200FB8F5B /* libpluto_security.dylib in Frameworks */,
+				95F7894E15B4BC4A00FB8F5B /* libPlutoUtils.dylib in Frameworks */,
+				95F7895215B4BCBE00FB8F5B /* libmysqlclient.dylib in Frameworks */,
+				95F7895415B4BCCB00FB8F5B /* Datagrid_Plugin.dylib in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXFrameworksBuildPhase section */
+
+/* Begin PBXGroup section */
+		95F7891E15B4BAE400FB8F5B = {
+			isa = PBXGroup;
+			children = (
+				95F7893D15B4BB8C00FB8F5B /* Main.cpp */,
+				95F7893F15B4BB9500FB8F5B /* Security_Plugin.cpp */,
+				95F7894115B4BBAF00FB8F5B /* Includes */,
+				95F7894215B4BBC100FB8F5B /* Libraries */,
+				95F7892B15B4BAE500FB8F5B /* Security_Plugin */,
+				95F7892A15B4BAE500FB8F5B /* Products */,
+			);
+			sourceTree = "<group>";
+		};
+		95F7892A15B4BAE500FB8F5B /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				95F7892915B4BAE500FB8F5B /* Security_Plugin.dylib */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+		95F7892B15B4BAE500FB8F5B /* Security_Plugin */ = {
+			isa = PBXGroup;
+			children = (
+				95F7892E15B4BAE500FB8F5B /* Security_PluginProj.xcconfig */,
+				95F7892F15B4BAE500FB8F5B /* Security_PluginTarget.xcconfig */,
+				95F7893015B4BAE500FB8F5B /* Security_Plugin.h */,
+				95F7893115B4BAE500FB8F5B /* Security_PluginPriv.h */,
+				95F7893215B4BAE500FB8F5B /* Security_Plugin.cp */,
+				95F7892C15B4BAE500FB8F5B /* Supporting Files */,
+			);
+			path = Security_Plugin;
+			sourceTree = "<group>";
+		};
+		95F7892C15B4BAE500FB8F5B /* Supporting Files */ = {
+			isa = PBXGroup;
+			children = (
+				95F7892D15B4BAE500FB8F5B /* Security_Plugin-Prefix.pch */,
+			);
+			name = "Supporting Files";
+			sourceTree = "<group>";
+		};
+		95F7894115B4BBAF00FB8F5B /* Includes */ = {
+			isa = PBXGroup;
+			children = (
+				95F7894F15B4BC7200FB8F5B /* mysql.h */,
+				95F7894515B4BBF500FB8F5B /* Security_PluginBase.cpp */,
+				95F7894315B4BBD500FB8F5B /* Notification.cpp */,
+			);
+			name = Includes;
+			path = ..;
+			sourceTree = "<group>";
+		};
+		95F7894215B4BBC100FB8F5B /* Libraries */ = {
+			isa = PBXGroup;
+			children = (
+				95F7895115B4BCBE00FB8F5B /* libmysqlclient.dylib */,
+				95F7894715B4BC3200FB8F5B /* libDCECommon.dylib */,
+				95F7894D15B4BC4A00FB8F5B /* libPlutoUtils.dylib */,
+				95F7894915B4BC3B00FB8F5B /* libpluto_main.dylib */,
+				95F7894B15B4BC4200FB8F5B /* libpluto_security.dylib */,
+				95F7895315B4BCCB00FB8F5B /* Datagrid_Plugin.dylib */,
+			);
+			name = Libraries;
+			sourceTree = "<group>";
+		};
+/* End PBXGroup section */
+
+/* Begin PBXHeadersBuildPhase section */
+		95F7892715B4BAE500FB8F5B /* Headers */ = {
+			isa = PBXHeadersBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				95F7895015B4BC7200FB8F5B /* mysql.h in Headers */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXHeadersBuildPhase section */
+
+/* Begin PBXNativeTarget section */
+		95F7892815B4BAE500FB8F5B /* Security_Plugin */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 95F7893615B4BAE500FB8F5B /* Build configuration list for PBXNativeTarget "Security_Plugin" */;
+			buildPhases = (
+				95F7892515B4BAE500FB8F5B /* Sources */,
+				95F7892615B4BAE500FB8F5B /* Frameworks */,
+				95F7892715B4BAE500FB8F5B /* Headers */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = Security_Plugin;
+			productName = Security_Plugin;
+			productReference = 95F7892915B4BAE500FB8F5B /* Security_Plugin.dylib */;
+			productType = "com.apple.product-type.library.dynamic";
+		};
+/* End PBXNativeTarget section */
+
+/* Begin PBXProject section */
+		95F7892015B4BAE400FB8F5B /* Project object */ = {
+			isa = PBXProject;
+			attributes = {
+				LastUpgradeCheck = 0420;
+			};
+			buildConfigurationList = 95F7892315B4BAE400FB8F5B /* Build configuration list for PBXProject "Security_Plugin" */;
+			compatibilityVersion = "Xcode 3.2";
+			developmentRegion = English;
+			hasScannedForEncodings = 0;
+			knownRegions = (
+				en,
+			);
+			mainGroup = 95F7891E15B4BAE400FB8F5B;
+			productRefGroup = 95F7892A15B4BAE500FB8F5B /* Products */;
+			projectDirPath = "";
+			projectRoot = "";
+			targets = (
+				95F7892815B4BAE500FB8F5B /* Security_Plugin */,
+			);
+		};
+/* End PBXProject section */
+
+/* Begin PBXSourcesBuildPhase section */
+		95F7892515B4BAE500FB8F5B /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				95F7893315B4BAE500FB8F5B /* Security_Plugin.cp in Sources */,
+				95F7893E15B4BB8C00FB8F5B /* Main.cpp in Sources */,
+				95F7894015B4BB9500FB8F5B /* Security_Plugin.cpp in Sources */,
+				95F7894415B4BBD500FB8F5B /* Notification.cpp in Sources */,
+				95F7894615B4BBF500FB8F5B /* Security_PluginBase.cpp in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXSourcesBuildPhase section */
+
+/* Begin XCBuildConfiguration section */
+		95F7893415B4BAE500FB8F5B /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				ARCHS = "$(ARCHS_STANDARD_64_BIT)";
+				CLANG_ENABLE_OBJC_ARC = YES;
+				COPY_PHASE_STRIP = NO;
+				GCC_C_LANGUAGE_STANDARD = gnu99;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_ENABLE_OBJC_EXCEPTIONS = YES;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"DEBUG=1",
+					"$(inherited)",
+				);
+				GCC_SYMBOLS_PRIVATE_EXTERN = NO;
+				GCC_VERSION = com.apple.compilers.llvm.clang.1_0;
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_MISSING_PROTOTYPES = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				MACOSX_DEPLOYMENT_TARGET = 10.7;
+				ONLY_ACTIVE_ARCH = YES;
+				SDKROOT = macosx;
+			};
+			name = Debug;
+		};
+		95F7893515B4BAE500FB8F5B /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				ARCHS = "$(ARCHS_STANDARD_64_BIT)";
+				CLANG_ENABLE_OBJC_ARC = YES;
+				COPY_PHASE_STRIP = YES;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				GCC_C_LANGUAGE_STANDARD = gnu99;
+				GCC_ENABLE_OBJC_EXCEPTIONS = YES;
+				GCC_VERSION = com.apple.compilers.llvm.clang.1_0;
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_MISSING_PROTOTYPES = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				MACOSX_DEPLOYMENT_TARGET = 10.7;
+				SDKROOT = macosx;
+			};
+			name = Release;
+		};
+		95F7893715B4BAE500FB8F5B /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CONFIGURATION_BUILD_DIR = ../bin;
+				HEADER_SEARCH_PATHS = (
+					../../DCE,
+					../..,
+				);
+				INSTALL_PATH = /usr/pluto/bin;
+				LIBRARY_SEARCH_PATHS = (
+					"$(inherited)",
+					"\"$(SRCROOT)/../lib\"",
+					"\"$(SRCROOT)/../mysql/lib\"",
+					"\"$(SRCROOT)/../bin\"",
+				);
+				PRODUCT_NAME = "$(TARGET_NAME)";
+			};
+			name = Debug;
+		};
+		95F7893815B4BAE500FB8F5B /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CONFIGURATION_BUILD_DIR = ../bin;
+				HEADER_SEARCH_PATHS = (
+					../../DCE,
+					../..,
+				);
+				INSTALL_PATH = /usr/pluto/bin;
+				LIBRARY_SEARCH_PATHS = (
+					"$(inherited)",
+					"\"$(SRCROOT)/../lib\"",
+					"\"$(SRCROOT)/../mysql/lib\"",
+					"\"$(SRCROOT)/../bin\"",
+				);
+				PRODUCT_NAME = "$(TARGET_NAME)";
+			};
+			name = Release;
+		};
+/* End XCBuildConfiguration section */
+
+/* Begin XCConfigurationList section */
+		95F7892315B4BAE400FB8F5B /* Build configuration list for PBXProject "Security_Plugin" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				95F7893415B4BAE500FB8F5B /* Debug */,
+				95F7893515B4BAE500FB8F5B /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		95F7893615B4BAE500FB8F5B /* Build configuration list for PBXNativeTarget "Security_Plugin" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				95F7893715B4BAE500FB8F5B /* Debug */,
+				95F7893815B4BAE500FB8F5B /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+/* End XCConfigurationList section */
+	};
+	rootObject = 95F7892015B4BAE400FB8F5B /* Project object */;
+}

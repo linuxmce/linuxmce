@@ -4,20 +4,15 @@
 <dict>
 	<key>SchemeUserState</key>
 	<dict>
-		<key>MessageSend.xcscheme</key>
+		<key>Security_Plugin.xcscheme</key>
 		<dict>
 			<key>orderHint</key>
-			<integer>15</integer>
+			<integer>7</integer>
 		</dict>
 	</dict>
 	<key>SuppressBuildableAutocreation</key>
 	<dict>
-		<key>95B12033146410F500405DCB</key>
-		<dict>
-			<key>primary</key>
-			<true/>
-		</dict>
-		<key>95E0AC8A1462D1BD00F1A39B</key>
+		<key>95F7892815B4BAE500FB8F5B</key>
 		<dict>
 			<key>primary</key>
 			<true/>
