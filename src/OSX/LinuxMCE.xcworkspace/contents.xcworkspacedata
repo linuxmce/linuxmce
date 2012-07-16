@@ -8,6 +8,9 @@
          location = "group:DCERouter.xcodeproj">
       </FileRef>
       <FileRef
+         location = "group:UpdateEntArea.xcodeproj">
+      </FileRef>
+      <FileRef
          location = "group:MessageSend.xcodeproj">
       </FileRef>
    </Group>
@@ -34,6 +37,9 @@
       </FileRef>
       <FileRef
          location = "group:plugins/Orbiter_Plugin.xcodeproj">
+      </FileRef>
+      <FileRef
+         location = "group:plugins/Media_Plugin.xcodeproj">
       </FileRef>
    </Group>
    <Group

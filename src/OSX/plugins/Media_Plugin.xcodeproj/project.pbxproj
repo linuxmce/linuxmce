@@ -1,0 +1,369 @@
+// !$*UTF8*$!
+{
+	archiveVersion = 1;
+	classes = {
+	};
+	objectVersion = 46;
+	objects = {
+
+/* Begin PBXBuildFile section */
+		95DBE30C15B4A49B007ECCD8 /* Media_Plugin.cp in Sources */ = {isa = PBXBuildFile; fileRef = 95DBE30B15B4A49B007ECCD8 /* Media_Plugin.cp */; };
+		95DBE32115B4A531007ECCD8 /* Main.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 95DBE32015B4A531007ECCD8 /* Main.cpp */; };
+		95DBE32315B4A53C007ECCD8 /* Media_Plugin.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 95DBE32215B4A53C007ECCD8 /* Media_Plugin.cpp */; };
+		95DBE32715B4A56F007ECCD8 /* Media_PluginBase.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 95DBE32615B4A56F007ECCD8 /* Media_PluginBase.cpp */; };
+		95DBE32915B4A59E007ECCD8 /* mysql.h in Headers */ = {isa = PBXBuildFile; fileRef = 95DBE32815B4A59E007ECCD8 /* mysql.h */; };
+		95DBE32D15B4A642007ECCD8 /* BoundRemote.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 95DBE32C15B4A642007ECCD8 /* BoundRemote.cpp */; };
+		95DBE33715B4A65B007ECCD8 /* Generic_NonPluto_Media.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 95DBE32E15B4A65B007ECCD8 /* Generic_NonPluto_Media.cpp */; };
+		95DBE33815B4A65B007ECCD8 /* Media_Plugin_Grids.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 95DBE32F15B4A65B007ECCD8 /* Media_Plugin_Grids.cpp */; };
+		95DBE33915B4A65B007ECCD8 /* MediaAttributes_LowLevel.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 95DBE33015B4A65B007ECCD8 /* MediaAttributes_LowLevel.cpp */; };
+		95DBE33A15B4A65B007ECCD8 /* MediaAttributes.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 95DBE33115B4A65B007ECCD8 /* MediaAttributes.cpp */; };
+		95DBE33B15B4A65B007ECCD8 /* MediaHandlerBase.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 95DBE33215B4A65B007ECCD8 /* MediaHandlerBase.cpp */; };
+		95DBE33C15B4A65B007ECCD8 /* MediaHandlerInfo.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 95DBE33315B4A65B007ECCD8 /* MediaHandlerInfo.cpp */; };
+		95DBE33D15B4A65B007ECCD8 /* MediaListGrid.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 95DBE33415B4A65B007ECCD8 /* MediaListGrid.cpp */; };
+		95DBE33E15B4A65B007ECCD8 /* MediaStream.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 95DBE33515B4A65B007ECCD8 /* MediaStream.cpp */; };
+		95DBE33F15B4A65B007ECCD8 /* PlaylistParser.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 95DBE33615B4A65B007ECCD8 /* PlaylistParser.cpp */; };
+		95DBE34115B4A8DC007ECCD8 /* HttpUtils.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 95DBE34015B4A8DC007ECCD8 /* HttpUtils.cpp */; };
+		95DBE34515B4A900007ECCD8 /* Job.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 95DBE34215B4A900007ECCD8 /* Job.cpp */; };
+		95DBE34615B4A900007ECCD8 /* JobHandler.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 95DBE34315B4A900007ECCD8 /* JobHandler.cpp */; };
+		95DBE34715B4A900007ECCD8 /* Task.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 95DBE34415B4A900007ECCD8 /* Task.cpp */; };
+		95DBE34915B4A92F007ECCD8 /* libpluto_media.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 95DBE34815B4A92F007ECCD8 /* libpluto_media.dylib */; };
+		95DBE34B15B4A93B007ECCD8 /* libpluto_main.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 95DBE34A15B4A93B007ECCD8 /* libpluto_main.dylib */; };
+		95DBE34D15B4A96F007ECCD8 /* libDCECommon.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 95DBE34C15B4A96F007ECCD8 /* libDCECommon.dylib */; };
+		95DBE34F15B4A990007ECCD8 /* libmysqlclient.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 95DBE34E15B4A990007ECCD8 /* libmysqlclient.dylib */; };
+		95DBE35115B4AA0B007ECCD8 /* libPlutoUtils.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 95DBE35015B4AA0B007ECCD8 /* libPlutoUtils.dylib */; };
+		95DBE35315B4AA75007ECCD8 /* Datagrid_Plugin.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 95DBE35215B4AA75007ECCD8 /* Datagrid_Plugin.dylib */; };
+		95DBE35515B4AAA6007ECCD8 /* File_Grids_Plugin.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 95DBE35415B4AAA6007ECCD8 /* File_Grids_Plugin.dylib */; };
+		95DBE35715B4ABB5007ECCD8 /* libcurl.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 95DBE35615B4ABB5007ECCD8 /* libcurl.dylib */; };
+		95DBE35915B4ADE5007ECCD8 /* FollowMe_Device.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 95DBE35815B4ADE5007ECCD8 /* FollowMe_Device.cpp */; };
+/* End PBXBuildFile section */
+
+/* Begin PBXFileReference section */
+		95DBE30215B4A49B007ECCD8 /* Media_Plugin.dylib */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.dylib"; includeInIndex = 0; path = Media_Plugin.dylib; sourceTree = BUILT_PRODUCTS_DIR; };
+		95DBE30615B4A49B007ECCD8 /* Media_Plugin-Prefix.pch */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "Media_Plugin-Prefix.pch"; sourceTree = "<group>"; };
+		95DBE30715B4A49B007ECCD8 /* Media_PluginProj.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; path = Media_PluginProj.xcconfig; sourceTree = "<group>"; };
+		95DBE30815B4A49B007ECCD8 /* Media_PluginTarget.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; path = Media_PluginTarget.xcconfig; sourceTree = "<group>"; };
+		95DBE30915B4A49B007ECCD8 /* Media_Plugin.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = Media_Plugin.h; sourceTree = "<group>"; };
+		95DBE30A15B4A49B007ECCD8 /* Media_PluginPriv.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = Media_PluginPriv.h; sourceTree = "<group>"; };
+		95DBE30B15B4A49B007ECCD8 /* Media_Plugin.cp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = Media_Plugin.cp; sourceTree = "<group>"; };
+		95DBE32015B4A531007ECCD8 /* Main.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = Main.cpp; path = ../../Media_Plugin/Main.cpp; sourceTree = "<group>"; };
+		95DBE32215B4A53C007ECCD8 /* Media_Plugin.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = Media_Plugin.cpp; path = ../../Media_Plugin/Media_Plugin.cpp; sourceTree = "<group>"; };
+		95DBE32615B4A56F007ECCD8 /* Media_PluginBase.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = Media_PluginBase.cpp; path = ../../Gen_Devices/Media_PluginBase.cpp; sourceTree = "<group>"; };
+		95DBE32815B4A59E007ECCD8 /* mysql.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = mysql.h; path = ../mysql/include/mysql.h; sourceTree = "<group>"; };
+		95DBE32C15B4A642007ECCD8 /* BoundRemote.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = BoundRemote.cpp; path = ../../Media_Plugin/BoundRemote.cpp; sourceTree = "<group>"; };
+		95DBE32E15B4A65B007ECCD8 /* Generic_NonPluto_Media.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = Generic_NonPluto_Media.cpp; path = ../../Media_Plugin/Generic_NonPluto_Media.cpp; sourceTree = "<group>"; };
+		95DBE32F15B4A65B007ECCD8 /* Media_Plugin_Grids.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = Media_Plugin_Grids.cpp; path = ../../Media_Plugin/Media_Plugin_Grids.cpp; sourceTree = "<group>"; };
+		95DBE33015B4A65B007ECCD8 /* MediaAttributes_LowLevel.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = MediaAttributes_LowLevel.cpp; path = ../../Media_Plugin/MediaAttributes_LowLevel.cpp; sourceTree = "<group>"; };
+		95DBE33115B4A65B007ECCD8 /* MediaAttributes.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = MediaAttributes.cpp; path = ../../Media_Plugin/MediaAttributes.cpp; sourceTree = "<group>"; };
+		95DBE33215B4A65B007ECCD8 /* MediaHandlerBase.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = MediaHandlerBase.cpp; path = ../../Media_Plugin/MediaHandlerBase.cpp; sourceTree = "<group>"; };
+		95DBE33315B4A65B007ECCD8 /* MediaHandlerInfo.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = MediaHandlerInfo.cpp; path = ../../Media_Plugin/MediaHandlerInfo.cpp; sourceTree = "<group>"; };
+		95DBE33415B4A65B007ECCD8 /* MediaListGrid.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = MediaListGrid.cpp; path = ../../Media_Plugin/MediaListGrid.cpp; sourceTree = "<group>"; };
+		95DBE33515B4A65B007ECCD8 /* MediaStream.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = MediaStream.cpp; path = ../../Media_Plugin/MediaStream.cpp; sourceTree = "<group>"; };
+		95DBE33615B4A65B007ECCD8 /* PlaylistParser.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = PlaylistParser.cpp; path = ../../Media_Plugin/PlaylistParser.cpp; sourceTree = "<group>"; };
+		95DBE34015B4A8DC007ECCD8 /* HttpUtils.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = HttpUtils.cpp; path = ../../PlutoUtils/HttpUtils.cpp; sourceTree = "<group>"; };
+		95DBE34215B4A900007ECCD8 /* Job.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = Job.cpp; path = ../../JobHandler/Job.cpp; sourceTree = "<group>"; };
+		95DBE34315B4A900007ECCD8 /* JobHandler.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = JobHandler.cpp; path = ../../JobHandler/JobHandler.cpp; sourceTree = "<group>"; };
+		95DBE34415B4A900007ECCD8 /* Task.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = Task.cpp; path = ../../JobHandler/Task.cpp; sourceTree = "<group>"; };
+		95DBE34815B4A92F007ECCD8 /* libpluto_media.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libpluto_media.dylib; path = ../lib/libpluto_media.dylib; sourceTree = "<group>"; };
+		95DBE34A15B4A93B007ECCD8 /* libpluto_main.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libpluto_main.dylib; path = ../lib/libpluto_main.dylib; sourceTree = "<group>"; };
+		95DBE34C15B4A96F007ECCD8 /* libDCECommon.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libDCECommon.dylib; path = ../lib/libDCECommon.dylib; sourceTree = "<group>"; };
+		95DBE34E15B4A990007ECCD8 /* libmysqlclient.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libmysqlclient.dylib; path = ../mysql/lib/libmysqlclient.dylib; sourceTree = "<group>"; };
+		95DBE35015B4AA0B007ECCD8 /* libPlutoUtils.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libPlutoUtils.dylib; path = ../lib/libPlutoUtils.dylib; sourceTree = "<group>"; };
+		95DBE35215B4AA75007ECCD8 /* Datagrid_Plugin.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = Datagrid_Plugin.dylib; path = ../bin/Datagrid_Plugin.dylib; sourceTree = "<group>"; };
+		95DBE35415B4AAA6007ECCD8 /* File_Grids_Plugin.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = File_Grids_Plugin.dylib; path = ../bin/File_Grids_Plugin.dylib; sourceTree = "<group>"; };
+		95DBE35615B4ABB5007ECCD8 /* libcurl.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libcurl.dylib; path = usr/lib/libcurl.dylib; sourceTree = SDKROOT; };
+		95DBE35815B4ADE5007ECCD8 /* FollowMe_Device.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = FollowMe_Device.cpp; path = ../../Orbiter_Plugin/FollowMe_Device.cpp; sourceTree = "<group>"; };
+/* End PBXFileReference section */
+
+/* Begin PBXFrameworksBuildPhase section */
+		95DBE2FF15B4A49B007ECCD8 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				95DBE35715B4ABB5007ECCD8 /* libcurl.dylib in Frameworks */,
+				95DBE34915B4A92F007ECCD8 /* libpluto_media.dylib in Frameworks */,
+				95DBE34B15B4A93B007ECCD8 /* libpluto_main.dylib in Frameworks */,
+				95DBE34D15B4A96F007ECCD8 /* libDCECommon.dylib in Frameworks */,
+				95DBE34F15B4A990007ECCD8 /* libmysqlclient.dylib in Frameworks */,
+				95DBE35115B4AA0B007ECCD8 /* libPlutoUtils.dylib in Frameworks */,
+				95DBE35315B4AA75007ECCD8 /* Datagrid_Plugin.dylib in Frameworks */,
+				95DBE35515B4AAA6007ECCD8 /* File_Grids_Plugin.dylib in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXFrameworksBuildPhase section */
+
+/* Begin PBXGroup section */
+		95DBE2F715B4A49A007ECCD8 = {
+			isa = PBXGroup;
+			children = (
+				95DBE32515B4A54A007ECCD8 /* Libraries */,
+				95DBE32415B4A540007ECCD8 /* Includes */,
+				95DBE32015B4A531007ECCD8 /* Main.cpp */,
+				95DBE32215B4A53C007ECCD8 /* Media_Plugin.cpp */,
+				95DBE30415B4A49B007ECCD8 /* Media_Plugin */,
+				95DBE30315B4A49B007ECCD8 /* Products */,
+			);
+			sourceTree = "<group>";
+		};
+		95DBE30315B4A49B007ECCD8 /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				95DBE30215B4A49B007ECCD8 /* Media_Plugin.dylib */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+		95DBE30415B4A49B007ECCD8 /* Media_Plugin */ = {
+			isa = PBXGroup;
+			children = (
+				95DBE30715B4A49B007ECCD8 /* Media_PluginProj.xcconfig */,
+				95DBE30815B4A49B007ECCD8 /* Media_PluginTarget.xcconfig */,
+				95DBE30915B4A49B007ECCD8 /* Media_Plugin.h */,
+				95DBE30A15B4A49B007ECCD8 /* Media_PluginPriv.h */,
+				95DBE30B15B4A49B007ECCD8 /* Media_Plugin.cp */,
+				95DBE30515B4A49B007ECCD8 /* Supporting Files */,
+			);
+			path = Media_Plugin;
+			sourceTree = "<group>";
+		};
+		95DBE30515B4A49B007ECCD8 /* Supporting Files */ = {
+			isa = PBXGroup;
+			children = (
+				95DBE30615B4A49B007ECCD8 /* Media_Plugin-Prefix.pch */,
+			);
+			name = "Supporting Files";
+			sourceTree = "<group>";
+		};
+		95DBE32415B4A540007ECCD8 /* Includes */ = {
+			isa = PBXGroup;
+			children = (
+				95DBE32E15B4A65B007ECCD8 /* Generic_NonPluto_Media.cpp */,
+				95DBE32F15B4A65B007ECCD8 /* Media_Plugin_Grids.cpp */,
+				95DBE33015B4A65B007ECCD8 /* MediaAttributes_LowLevel.cpp */,
+				95DBE33115B4A65B007ECCD8 /* MediaAttributes.cpp */,
+				95DBE33215B4A65B007ECCD8 /* MediaHandlerBase.cpp */,
+				95DBE33315B4A65B007ECCD8 /* MediaHandlerInfo.cpp */,
+				95DBE33415B4A65B007ECCD8 /* MediaListGrid.cpp */,
+				95DBE33515B4A65B007ECCD8 /* MediaStream.cpp */,
+				95DBE33615B4A65B007ECCD8 /* PlaylistParser.cpp */,
+				95DBE32C15B4A642007ECCD8 /* BoundRemote.cpp */,
+				95DBE32815B4A59E007ECCD8 /* mysql.h */,
+				95DBE32615B4A56F007ECCD8 /* Media_PluginBase.cpp */,
+				95DBE34015B4A8DC007ECCD8 /* HttpUtils.cpp */,
+				95DBE34215B4A900007ECCD8 /* Job.cpp */,
+				95DBE34315B4A900007ECCD8 /* JobHandler.cpp */,
+				95DBE34415B4A900007ECCD8 /* Task.cpp */,
+				95DBE35815B4ADE5007ECCD8 /* FollowMe_Device.cpp */,
+			);
+			name = Includes;
+			sourceTree = "<group>";
+		};
+		95DBE32515B4A54A007ECCD8 /* Libraries */ = {
+			isa = PBXGroup;
+			children = (
+				95DBE35615B4ABB5007ECCD8 /* libcurl.dylib */,
+				95DBE34C15B4A96F007ECCD8 /* libDCECommon.dylib */,
+				95DBE34A15B4A93B007ECCD8 /* libpluto_main.dylib */,
+				95DBE34815B4A92F007ECCD8 /* libpluto_media.dylib */,
+				95DBE34E15B4A990007ECCD8 /* libmysqlclient.dylib */,
+				95DBE35015B4AA0B007ECCD8 /* libPlutoUtils.dylib */,
+				95DBE35215B4AA75007ECCD8 /* Datagrid_Plugin.dylib */,
+				95DBE35415B4AAA6007ECCD8 /* File_Grids_Plugin.dylib */,
+			);
+			name = Libraries;
+			sourceTree = "<group>";
+		};
+/* End PBXGroup section */
+
+/* Begin PBXHeadersBuildPhase section */
+		95DBE30015B4A49B007ECCD8 /* Headers */ = {
+			isa = PBXHeadersBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				95DBE32915B4A59E007ECCD8 /* mysql.h in Headers */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXHeadersBuildPhase section */
+
+/* Begin PBXNativeTarget section */
+		95DBE30115B4A49B007ECCD8 /* Media_Plugin */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 95DBE30F15B4A49B007ECCD8 /* Build configuration list for PBXNativeTarget "Media_Plugin" */;
+			buildPhases = (
+				95DBE2FE15B4A49B007ECCD8 /* Sources */,
+				95DBE2FF15B4A49B007ECCD8 /* Frameworks */,
+				95DBE30015B4A49B007ECCD8 /* Headers */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = Media_Plugin;
+			productName = Media_Plugin;
+			productReference = 95DBE30215B4A49B007ECCD8 /* Media_Plugin.dylib */;
+			productType = "com.apple.product-type.library.dynamic";
+		};
+/* End PBXNativeTarget section */
+
+/* Begin PBXProject section */
+		95DBE2F915B4A49A007ECCD8 /* Project object */ = {
+			isa = PBXProject;
+			attributes = {
+				LastUpgradeCheck = 0420;
+			};
+			buildConfigurationList = 95DBE2FC15B4A49A007ECCD8 /* Build configuration list for PBXProject "Media_Plugin" */;
+			compatibilityVersion = "Xcode 3.2";
+			developmentRegion = English;
+			hasScannedForEncodings = 0;
+			knownRegions = (
+				en,
+			);
+			mainGroup = 95DBE2F715B4A49A007ECCD8;
+			productRefGroup = 95DBE30315B4A49B007ECCD8 /* Products */;
+			projectDirPath = "";
+			projectRoot = "";
+			targets = (
+				95DBE30115B4A49B007ECCD8 /* Media_Plugin */,
+			);
+		};
+/* End PBXProject section */
+
+/* Begin PBXSourcesBuildPhase section */
+		95DBE2FE15B4A49B007ECCD8 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				95DBE30C15B4A49B007ECCD8 /* Media_Plugin.cp in Sources */,
+				95DBE32115B4A531007ECCD8 /* Main.cpp in Sources */,
+				95DBE32315B4A53C007ECCD8 /* Media_Plugin.cpp in Sources */,
+				95DBE32715B4A56F007ECCD8 /* Media_PluginBase.cpp in Sources */,
+				95DBE32D15B4A642007ECCD8 /* BoundRemote.cpp in Sources */,
+				95DBE33715B4A65B007ECCD8 /* Generic_NonPluto_Media.cpp in Sources */,
+				95DBE33815B4A65B007ECCD8 /* Media_Plugin_Grids.cpp in Sources */,
+				95DBE33915B4A65B007ECCD8 /* MediaAttributes_LowLevel.cpp in Sources */,
+				95DBE33A15B4A65B007ECCD8 /* MediaAttributes.cpp in Sources */,
+				95DBE33B15B4A65B007ECCD8 /* MediaHandlerBase.cpp in Sources */,
+				95DBE33C15B4A65B007ECCD8 /* MediaHandlerInfo.cpp in Sources */,
+				95DBE33D15B4A65B007ECCD8 /* MediaListGrid.cpp in Sources */,
+				95DBE33E15B4A65B007ECCD8 /* MediaStream.cpp in Sources */,
+				95DBE33F15B4A65B007ECCD8 /* PlaylistParser.cpp in Sources */,
+				95DBE34115B4A8DC007ECCD8 /* HttpUtils.cpp in Sources */,
+				95DBE34515B4A900007ECCD8 /* Job.cpp in Sources */,
+				95DBE34615B4A900007ECCD8 /* JobHandler.cpp in Sources */,
+				95DBE34715B4A900007ECCD8 /* Task.cpp in Sources */,
+				95DBE35915B4ADE5007ECCD8 /* FollowMe_Device.cpp in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXSourcesBuildPhase section */
+
+/* Begin XCBuildConfiguration section */
+		95DBE30D15B4A49B007ECCD8 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				ARCHS = "$(ARCHS_STANDARD_64_BIT)";
+				CLANG_ENABLE_OBJC_ARC = YES;
+				COPY_PHASE_STRIP = NO;
+				GCC_C_LANGUAGE_STANDARD = gnu99;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_ENABLE_OBJC_EXCEPTIONS = YES;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"DEBUG=1",
+					"$(inherited)",
+				);
+				GCC_SYMBOLS_PRIVATE_EXTERN = NO;
+				GCC_VERSION = com.apple.compilers.llvm.clang.1_0;
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_MISSING_PROTOTYPES = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				MACOSX_DEPLOYMENT_TARGET = 10.7;
+				ONLY_ACTIVE_ARCH = YES;
+				SDKROOT = macosx;
+			};
+			name = Debug;
+		};
+		95DBE30E15B4A49B007ECCD8 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				ARCHS = "$(ARCHS_STANDARD_64_BIT)";
+				CLANG_ENABLE_OBJC_ARC = YES;
+				COPY_PHASE_STRIP = YES;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				GCC_C_LANGUAGE_STANDARD = gnu99;
+				GCC_ENABLE_OBJC_EXCEPTIONS = YES;
+				GCC_VERSION = com.apple.compilers.llvm.clang.1_0;
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_MISSING_PROTOTYPES = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				MACOSX_DEPLOYMENT_TARGET = 10.7;
+				SDKROOT = macosx;
+			};
+			name = Release;
+		};
+		95DBE31015B4A49B007ECCD8 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CONFIGURATION_BUILD_DIR = ../bin;
+				HEADER_SEARCH_PATHS = (
+					../../DCE,
+					../..,
+				);
+				LIBRARY_SEARCH_PATHS = (
+					"$(inherited)",
+					"\"$(SRCROOT)/../lib\"",
+					"\"$(SRCROOT)/../mysql/lib\"",
+					"\"$(SRCROOT)/../bin\"",
+				);
+				PRODUCT_NAME = "$(TARGET_NAME)";
+			};
+			name = Debug;
+		};
+		95DBE31115B4A49B007ECCD8 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CONFIGURATION_BUILD_DIR = ../bin;
+				HEADER_SEARCH_PATHS = (
+					../../DCE,
+					../..,
+				);
+				LIBRARY_SEARCH_PATHS = (
+					"$(inherited)",
+					"\"$(SRCROOT)/../lib\"",
+					"\"$(SRCROOT)/../mysql/lib\"",
+					"\"$(SRCROOT)/../bin\"",
+				);
+				PRODUCT_NAME = "$(TARGET_NAME)";
+			};
+			name = Release;
+		};
+/* End XCBuildConfiguration section */
+
+/* Begin XCConfigurationList section */
+		95DBE2FC15B4A49A007ECCD8 /* Build configuration list for PBXProject "Media_Plugin" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				95DBE30D15B4A49B007ECCD8 /* Debug */,
+				95DBE30E15B4A49B007ECCD8 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		95DBE30F15B4A49B007ECCD8 /* Build configuration list for PBXNativeTarget "Media_Plugin" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				95DBE31015B4A49B007ECCD8 /* Debug */,
+				95DBE31115B4A49B007ECCD8 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+/* End XCConfigurationList section */
+	};
+	rootObject = 95DBE2F915B4A49A007ECCD8 /* Project object */;
+}

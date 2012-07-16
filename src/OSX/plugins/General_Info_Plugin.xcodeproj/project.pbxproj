@@ -27,7 +27,9 @@
 		95ABFEBD15AF745E0079029F /* UpdateEntArea_Lighting.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 95ABFEB815AF745E0079029F /* UpdateEntArea_Lighting.cpp */; };
 		95ABFEBE15AF745E0079029F /* UpdateEntArea_Media.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 95ABFEB915AF745E0079029F /* UpdateEntArea_Media.cpp */; };
 		95ABFEBF15AF745E0079029F /* UpdateEntArea_Security.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 95ABFEBA15AF745E0079029F /* UpdateEntArea_Security.cpp */; };
-		95ABFEC115AF75640079029F /* Main.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 95ABFEC015AF75640079029F /* Main.cpp */; };
+		95FF883415B49B3800B0EC93 /* CommandGroupArray.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 95FF883315B49B3800B0EC93 /* CommandGroupArray.cpp */; };
+		95FF883615B49B6200B0EC93 /* Criteria.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 95FF883515B49B6200B0EC93 /* Criteria.cpp */; };
+		95FF885015B49C4500B0EC93 /* PostCreateOptions.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 95FF884F15B49C4500B0EC93 /* PostCreateOptions.cpp */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -57,7 +59,9 @@
 		95ABFEB815AF745E0079029F /* UpdateEntArea_Lighting.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = UpdateEntArea_Lighting.cpp; path = ../../UpdateEntArea/UpdateEntArea_Lighting.cpp; sourceTree = "<group>"; };
 		95ABFEB915AF745E0079029F /* UpdateEntArea_Media.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = UpdateEntArea_Media.cpp; path = ../../UpdateEntArea/UpdateEntArea_Media.cpp; sourceTree = "<group>"; };
 		95ABFEBA15AF745E0079029F /* UpdateEntArea_Security.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = UpdateEntArea_Security.cpp; path = ../../UpdateEntArea/UpdateEntArea_Security.cpp; sourceTree = "<group>"; };
-		95ABFEC015AF75640079029F /* Main.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = Main.cpp; path = ../../UpdateEntArea/Main.cpp; sourceTree = "<group>"; };
+		95FF883315B49B3800B0EC93 /* CommandGroupArray.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = CommandGroupArray.cpp; path = ../../UpdateEntArea/CommandGroupArray.cpp; sourceTree = "<group>"; };
+		95FF883515B49B6200B0EC93 /* Criteria.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = Criteria.cpp; path = ../../UpdateEntArea/Criteria.cpp; sourceTree = "<group>"; };
+		95FF884F15B49C4500B0EC93 /* PostCreateOptions.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = PostCreateOptions.cpp; path = ../../General_Info_Plugin/PostCreateOptions.cpp; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -123,8 +127,8 @@
 			children = (
 				95ABFE9A15AF68B80079029F /* mysql.h */,
 				95ABFEA415AF69BA0079029F /* General_Info_PluginBase.cpp */,
+				95FF884F15B49C4500B0EC93 /* PostCreateOptions.cpp */,
 				95ABFEAC15AF6F410079029F /* DatabaseUtils.cpp */,
-				95ABFEC015AF75640079029F /* Main.cpp */,
 				95ABFEB215AF74140079029F /* UpdateEntArea.cpp */,
 				95ABFEB015AF73E70079029F /* UpdateEntArea_Setup.cpp */,
 				95ABFEB415AF743C0079029F /* UpdateEntArea_Telecom.cpp */,
@@ -133,6 +137,8 @@
 				95ABFEB815AF745E0079029F /* UpdateEntArea_Lighting.cpp */,
 				95ABFEB915AF745E0079029F /* UpdateEntArea_Media.cpp */,
 				95ABFEBA15AF745E0079029F /* UpdateEntArea_Security.cpp */,
+				95FF883315B49B3800B0EC93 /* CommandGroupArray.cpp */,
+				95FF883515B49B6200B0EC93 /* Criteria.cpp */,
 			);
 			name = Includes;
 			sourceTree = "<group>";
@@ -224,7 +230,9 @@
 				95ABFEBD15AF745E0079029F /* UpdateEntArea_Lighting.cpp in Sources */,
 				95ABFEBE15AF745E0079029F /* UpdateEntArea_Media.cpp in Sources */,
 				95ABFEBF15AF745E0079029F /* UpdateEntArea_Security.cpp in Sources */,
-				95ABFEC115AF75640079029F /* Main.cpp in Sources */,
+				95FF883415B49B3800B0EC93 /* CommandGroupArray.cpp in Sources */,
+				95FF883615B49B6200B0EC93 /* Criteria.cpp in Sources */,
+				95FF885015B49C4500B0EC93 /* PostCreateOptions.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

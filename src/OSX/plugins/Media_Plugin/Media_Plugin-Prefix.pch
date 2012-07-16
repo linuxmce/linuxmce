@@ -1,0 +1,6 @@
+//
+// Prefix header for all source files of the 'Media_Plugin' target in the 'Media_Plugin' project
+//
+
+#include <iostream>
+

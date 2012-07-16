@@ -384,6 +384,7 @@
 					..,
 					../DCE,
 				);
+				INSTALL_PATH = /usr/pluto/lib;
 				LD_DYLIB_INSTALL_NAME = "../lib/$(EXECUTABLE_PATH)";
 				LIBRARY_SEARCH_PATHS = (
 					"$(inherited)",
@@ -403,6 +404,7 @@
 					..,
 					../DCE,
 				);
+				INSTALL_PATH = /usr/pluto/lib;
 				LD_DYLIB_INSTALL_NAME = "../lib/$(EXECUTABLE_PATH)";
 				LIBRARY_SEARCH_PATHS = (
 					"$(inherited)",

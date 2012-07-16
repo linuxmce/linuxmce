@@ -278,6 +278,7 @@
 					..,
 					../DCE,
 				);
+				INSTALL_PATH = /usr/pluto/lib;
 				LIBRARY_SEARCH_PATHS = (
 					"$(inherited)",
 					"\"$(SRCROOT)/mysql/lib\"",
@@ -295,6 +296,7 @@
 					..,
 					../DCE,
 				);
+				INSTALL_PATH = /usr/pluto/lib;
 				LIBRARY_SEARCH_PATHS = (
 					"$(inherited)",
 					"\"$(SRCROOT)/mysql/lib\"",
