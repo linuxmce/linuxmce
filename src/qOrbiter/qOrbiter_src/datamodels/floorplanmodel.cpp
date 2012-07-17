@@ -61,15 +61,66 @@ void FloorPlanModel::insertRow(int row, FloorplanDevice *item)
     endInsertRows();
 }
 
+void FloorPlanModel::setDeviceSelection(int devNo)
+{
+    qDebug() << "Handling status change for:" << devNo;
+    for (int i =0; i < m_list.count(); i++){
+        if (m_list.at(i)->deviceNum() == devNo){
+            if(m_list.at(i)->status == false){
+               selectedDevices.insert(devNo, m_list.at(i)->id());
+            }
+            else
+            {
+                handleStatusChange(devNo);
+            }
+
+            m_list.at(i)->setStatus(!m_list.at(i)->status);
+        }
+    }
+    if(selectedDevices.count() > 0){
+        setStatus(true);
+    }
+    else
+    {
+        setStatus(false);
+    }
+    qDebug()<< selectedDevices.count();
+
+}
+
+bool FloorPlanModel::getDeviceSelection(int devNo)
+{
+    qDebug() << "Handling status request for:" << devNo;
+    for (int i =0; i < m_list.count(); i++){
+        if (m_list.at(i)->deviceNum() == devNo){
+
+            return m_list.at(i)->status;
+
+        }
+    }
+}
+
 void FloorPlanModel::handleItemChange()
 {
     FloorplanDevice* item = static_cast<FloorplanDevice*>(sender());
     QModelIndex index = indexFromItem(item);
-    // qDebug() << "Handling item change for:" << index;
+    //qDebug() << "Handling item change for:" << index;
     if(index.isValid())
     {
         emit dataChanged(index, index);
     }
+}
+
+void FloorPlanModel::handleStatusChange(int device)
+{
+    myMap::iterator dev = selectedDevices.begin();
+    while (dev != selectedDevices.end()) {
+        if (dev.key() == device)
+            dev = selectedDevices.erase(dev);
+        else
+            ++dev;
+    }
+
 }
 
 void FloorPlanModel::updateDevice(int device)
@@ -103,8 +154,8 @@ FloorplanDevice * FloorPlanModel::find(const QString &id) const
 
 QModelIndex FloorPlanModel::indexFromItem(const FloorplanDevice *item) const
 {
-    Q_ASSERT(item);
-    for(int row=0; row<m_list.size(); ++row) {
+    //Q_ASSERT(item);
+    for(int row=0; row<m_list.count(); ++row) {
         //  qDebug() << "item:" << item->id() << "::" << m_list.at(row)->id();
         if(m_list.at(row)->id() == item->id()) {
 

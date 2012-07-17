@@ -4302,14 +4302,19 @@ void qOrbiter::populateSetupInformation()
 
 
 
-void DCE::qOrbiter::adjustLighting(int level, int device)
+void DCE::qOrbiter::adjustLighting(int level, myMap devices)
 {
 
-    qDebug()<< "Sending adjust level " << level << " to device to" << device;
-    string pResponse="";
-    CMD_Set_Level basic(m_dwPK_Device , device, StringUtils::itos(level));
-        if(SendCommand(basic,&pResponse))
-            statusMessage(QString::fromStdString(pResponse.c_str()));
+
+
+    myMap::iterator i;
+     for (i = devices.begin(); i != devices.end(); ++i){
+string pResponse="";
+         CMD_Set_Level basic(m_dwPK_Device , i.key(), StringUtils::itos(level));
+             if(SendCommand(basic,&pResponse))
+                 qDebug()<< QString::fromStdString(pResponse.c_str());
+     }
+
 
 }
 

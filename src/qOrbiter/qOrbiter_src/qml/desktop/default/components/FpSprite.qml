@@ -15,18 +15,21 @@ Item {
     property string deviceNum:""
     property string deviceType: ""
     property string imgUrl: ""
-    property bool selected: false   
+    property bool selected:floorplan_devices.getDeviceSelection(deviceNum)
     property int itemH:scaleY(3)
     property int itemW: scaleY(3)
     property double iconScale: 1.5
 
+    Connections{
+        target: floorplan_devices
+        onDataChanged: selected = floorplan_devices.getDeviceSelection(deviceNum)
+    }
+
     scale: iconScale
     function updateFpItem()
     {
-        selected = !selected
+        floorplan_devices.setDeviceSelection(deviceNum)
         sprite.border.width = selected ? 1 : 0
-        floorplan_devices.itemSelected = selected
-        floorplan_devices.selectedDevice = deviceNum
     }
 
     Image {

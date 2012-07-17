@@ -30,8 +30,8 @@
 #include <contextobjects/floorplandevice.h>
 #include <QModelIndex>
 #include <qorbitermanager.h>
-class qorbiterManager;
 
+class qorbiterManager;
 
 class FloorPlanModel : public QAbstractListModel
 {
@@ -43,12 +43,13 @@ class FloorPlanModel : public QAbstractListModel
     Q_OBJECT
 public:
     explicit FloorPlanModel(FloorplanDevice *m_prototype, qorbiterManager *r, QObject *parent = 0);
-
+typedef QMap <int, QString> myMap;
     int rowCount(const QModelIndex &parent = QModelIndex()) const;
     QVariant data(const QModelIndex &index, int role = Qt::DisplayRole) const;
     void appendRow(FloorplanDevice* item);
     void appendRows(const QList<FloorplanDevice*> &items);
     void insertRow(int row, FloorplanDevice* item);
+
     bool removeRow(int row, const QModelIndex &parent = QModelIndex());
     bool removeRows(int row, int count, const QModelIndex &parent = QModelIndex());
     FloorplanDevice* takeRow(int row);
@@ -70,6 +71,7 @@ public:
     QString imageBasePath;
 
     QMap<int, QString*> floorplanPages;
+    myMap selectedDevices;
 
 #if (QT_VERSION >= 0x050000)
     QQmlComponent *fpProxy;
@@ -94,13 +96,17 @@ signals:
     void floorplanTypeChanged();
     void selectedChanged();
     void selectedDeviceChanged();
-
+    void adjustLevel(int, myMap);
 
 
 public slots:
     void clear();
     void handleItemChange();
+    void handleStatusChange(int device);
     void updateDevice(int device);
+    void setDeviceSelection(int devNo);
+    bool getDeviceSelection(int devNo);
+    void set(int level) {emit adjustLevel(level, selectedDevices);}
 
     void setStatus(bool status) { itemSelected = status; emit selectedChanged();}
     bool getStatus() {return itemSelected;}
@@ -120,6 +126,7 @@ public slots:
 
     int getDeviceX(int device);
     int getDeviceY(int device);
+
     QString getCurrentImagePath();
     void populateSprites();
     void finishSprite();
@@ -130,13 +137,10 @@ public slots:
     void setCurrentFloorPlanType(int t) { currentFloorPlanType = t; emit floorplanTypeChanged(); }
     int getCurrentFloorPlanType() {return currentFloorPlanType; }
 
-
-
 private:
     FloorplanDevice* m_prototype;
     QList<FloorplanDevice*> m_list;
     qorbiterManager *uiRef;
-
 
 };
 

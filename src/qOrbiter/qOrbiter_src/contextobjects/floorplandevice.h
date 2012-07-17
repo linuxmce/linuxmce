@@ -90,7 +90,7 @@ public slots:
 
     void setCurrentX(int x) {currentFloorplanX = x; emit floorplanXChanged(); }
     void setCurrentY( int y) {currentFloorplanY = y; emit floorplanYChanged();}
-    void setStatus( bool state) {status = state; }
+    void setStatus( bool state) {status = state; emit statusChanged(); emit dataChanged(); }
 
 
 private:

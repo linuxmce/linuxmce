@@ -70,6 +70,7 @@ class qOrbiter : public qOrbiter_Command
     // Private methods
 public:
     // Public member variables
+typedef QMap <int, QString> myMap;
 
     Virtual_Device_Translator coreDevices;
     //DataGridTable pDataGridTable;
@@ -1504,7 +1505,7 @@ public slots:
     void GetMultipleSecurityCams(QStringList cams);
     void GetNowPlayingAttributes();
     void TuneToChannel(QString channel, QString chanid);
-    void adjustLighting(int level, int device);
+    void adjustLighting(int level, myMap devices);
     void adjustVolume( int vol);
     void mute();
     void changedTrack(QString direction);

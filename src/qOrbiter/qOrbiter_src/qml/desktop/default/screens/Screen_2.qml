@@ -100,7 +100,7 @@ Rectangle{
 
             MouseArea{
                 anchors.fill: parent
-                onClicked: dcerouter.adjustLighting(level, floorplan_devices.selectedDevice )
+                onClicked: floorplan_devices.set(level)
             }
         }
 

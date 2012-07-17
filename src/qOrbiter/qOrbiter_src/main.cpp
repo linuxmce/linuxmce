@@ -288,6 +288,8 @@ int main(int argc, char* argv[])
         gWeatherModel *theWeather= new gWeatherModel(new gWeatherItem);
 
         //qmlRegisterType<gWeatherModel>("GoogleWeather", 0,1,"GoogleWeather");
+        typedef QMap <int, QString> myMap;
+        int throwaway = qRegisterMetaType<myMap>("myMap");
 
         orbiterWin.setMessage("Setting up Lmce");
         qorbiterManager  *w= new qorbiterManager(&orbiterWin.mainView);
@@ -423,6 +425,7 @@ int main(int argc, char* argv[])
         QObject::connect(w->floorplans, SIGNAL(pageChanged(QString)), pqOrbiter, SLOT(getFloorPlanImage(QString)), Qt::QueuedConnection);
         QObject::connect(w->floorplans, SIGNAL(requestNewFloorPlanData(QString)), pqOrbiter, SLOT(updateFloorPlan(QString)), Qt::QueuedConnection);
         QObject::connect(pqOrbiter,SIGNAL(floorplanTypeChanged(int)), w->floorplans, SLOT(setCurrentFloorPlanType(int)),Qt::QueuedConnection);
+        QObject::connect(w->floorplans, SIGNAL(adjustLevel(int,myMap)), pqOrbiter, SLOT(adjustLighting(int,myMap)),Qt::QueuedConnection);
 
         //mediagrid
         QObject::connect(mediaModel, SIGNAL(pagingCleared()), pqOrbiter,SLOT(populateAdditionalMedia()), Qt::QueuedConnection);

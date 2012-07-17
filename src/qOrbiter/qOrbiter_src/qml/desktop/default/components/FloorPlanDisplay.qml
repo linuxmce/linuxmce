@@ -118,8 +118,8 @@ Rectangle {
                     MouseArea{
                         anchors.fill: parent
                         onPressed:{
-                            floorplanDevices.itemSelected = false
-                            floorplanDevices.selectedDevice= 0
+                            floorplan_devices.itemSelected = false
+                            floorplan_devices.selectedDevice= 0
                             floorplan_devices.setCurrentPage(m_page)
                         }
                     }

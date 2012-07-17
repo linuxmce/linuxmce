@@ -10,7 +10,7 @@ FloorplanDevice::FloorplanDevice(QString &name, int &deviceNo, int &floorplan_de
 {
     setCurrentX(0);
     setCurrentY(0);
-    status = false;
+   setStatus(false);
     setupFloorplanPositions();
 
 }
