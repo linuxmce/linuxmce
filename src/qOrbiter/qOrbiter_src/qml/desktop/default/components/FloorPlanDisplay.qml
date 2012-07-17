@@ -2,10 +2,17 @@ import QtQuick 1.1
 
 Rectangle {
     objectName: "floorplan_display"
-    width: style.orbiterW
-    height: style.orbiterH
-    color: style.darkhighlight
+    width: childrenRect.width
+    height: childrenRect.height
+    color: "transparent"
     property int scaleFactor:floorplanimage.scale
+
+
+    function setCommandType(){
+
+        if(floorplan_devices.getCurrentFloorPlanType()=== 2)
+            return lightingCommands
+    }
 
     function placeSprites(x,y, num, state, devtype)
     {
@@ -54,6 +61,8 @@ Rectangle {
     }
     Component.onCompleted: floorplan_devices.setCurrentPage(1)
 
+
+
     Rectangle{
         id:mainRect
         objectName: "main_rect"
@@ -92,6 +101,7 @@ Rectangle {
                 width: scaleX(18)
                 model:floorplan_pages
                 clip:true
+
                 anchors.top: fplabel.bottom
                 anchors.horizontalCenter: parent.horizontalCenter
 
@@ -108,6 +118,8 @@ Rectangle {
                     MouseArea{
                         anchors.fill: parent
                         onPressed:{
+                            floorplanDevices.itemSelected = false
+                            floorplanDevices.selectedDevice= 0
                             floorplan_devices.setCurrentPage(m_page)
                         }
                     }
@@ -125,7 +137,7 @@ Rectangle {
         orientation: ListView.Horizontal
         anchors.top: mainRect.bottom
         anchors.horizontalCenter: parent.horizontalCenter
-
+        visible:false
         delegate:
             Rectangle{
             id:fp_device_rect
@@ -165,5 +177,7 @@ Rectangle {
             }
         }
     }
+
+
 }
 

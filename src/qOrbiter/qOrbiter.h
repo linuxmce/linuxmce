@@ -1504,7 +1504,7 @@ public slots:
     void GetMultipleSecurityCams(QStringList cams);
     void GetNowPlayingAttributes();
     void TuneToChannel(QString channel, QString chanid);
-    void adjustLighting(int level);
+    void adjustLighting(int level, int device);
     void adjustVolume( int vol);
     void mute();
     void changedTrack(QString direction);

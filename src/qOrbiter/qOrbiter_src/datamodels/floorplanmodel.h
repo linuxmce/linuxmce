@@ -38,6 +38,8 @@ class FloorPlanModel : public QAbstractListModel
     Q_PROPERTY (QString currentPage READ getCurrentPage WRITE setCurrentPage NOTIFY pageChanged)
     Q_PROPERTY (QImage currentImage READ getCurrentImage WRITE setImage NOTIFY floorPlanImageChanged)
     Q_PROPERTY (int iCurrentPage READ getCurrentIntPage WRITE setCurrentIntPage NOTIFY pageChanged)
+    Q_PROPERTY (bool itemSelected READ getStatus WRITE setStatus NOTIFY selectedChanged )
+    Q_PROPERTY (int selectedDevice  READ getSelectedDevice WRITE setSelectedDevice NOTIFY selectedDeviceChanged )
     Q_OBJECT
 public:
     explicit FloorPlanModel(FloorplanDevice *m_prototype, qorbiterManager *r, QObject *parent = 0);
@@ -57,12 +59,13 @@ public:
     void sortModel(int column, Qt::SortOrder order);
     QString m_installation;
     QString currentPage;
-
     QImage currentImage;
-
     int currentFloorPlanType;
     int totalPages;
     int iCurrentPage;
+
+    bool itemSelected;
+    int selectedDevice;
 
     QString imageBasePath;
 
@@ -89,12 +92,21 @@ signals:
     void changePage(int p);
     void addFloorplanSprite(int x, int y, int device, bool status);
     void floorplanTypeChanged();
+    void selectedChanged();
+    void selectedDeviceChanged();
+
+
 
 public slots:
     void clear();
     void handleItemChange();
     void updateDevice(int device);
 
+    void setStatus(bool status) { itemSelected = status; emit selectedChanged();}
+    bool getStatus() {return itemSelected;}
+
+    void setSelectedDevice(int dev) {selectedDevice = dev; emit selectedDeviceChanged();}
+    int getSelectedDevice() {return selectedDevice;}
 
     int getCurrentIntPage() {return iCurrentPage;}
     void setCurrentIntPage(int i) {iCurrentPage = i; emit changePage( iCurrentPage);}

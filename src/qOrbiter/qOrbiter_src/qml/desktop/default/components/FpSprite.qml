@@ -15,7 +15,7 @@ Item {
     property string deviceNum:""
     property string deviceType: ""
     property string imgUrl: ""
-    property bool selected: false
+    property bool selected: false   
     property int itemH:scaleY(3)
     property int itemW: scaleY(3)
     property double iconScale: 1.5
@@ -25,6 +25,8 @@ Item {
     {
         selected = !selected
         sprite.border.width = selected ? 1 : 0
+        floorplan_devices.itemSelected = selected
+        floorplan_devices.selectedDevice = deviceNum
     }
 
     Image {
@@ -60,7 +62,7 @@ Item {
     }
 
     MouseArea{
-        anchors.fill: parent
+        anchors.fill: sprite_root
         onClicked: updateFpItem()
     }
 }

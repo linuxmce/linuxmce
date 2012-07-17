@@ -8,6 +8,7 @@ FloorPlanModel::FloorPlanModel(FloorplanDevice* prototype, qorbiterManager *r, Q
 {
     setRoleNames(m_prototype->roleNames());
     qRegisterMetaType<QModelIndex>("QModelIndex");
+    setStatus(false);
 
 }
 

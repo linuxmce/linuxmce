@@ -2016,6 +2016,7 @@ void qOrbiter::connectionError()
 void qOrbiter::getFloorplanDeviceCommand(int device)
 {
 
+   /*
     long current_device = (long)device;
     string cmds="";
     string cmd_resp="";
@@ -2083,6 +2084,7 @@ void qOrbiter::getFloorplanDeviceCommand(int device)
     {
         qDebug() << cmdresponse.c_str();
     }
+    */
 
 }
 
@@ -4300,19 +4302,15 @@ void qOrbiter::populateSetupInformation()
 
 
 
-void DCE::qOrbiter::adjustLighting(int level)
+void DCE::qOrbiter::adjustLighting(int level, int device)
 {
-    if (level == 10)
-    {
-        CMD_Set_Level up(m_dwPK_Device, iPK_Device_LightingPlugin, StringUtils::itos(level));
-        SendCommand(up);
-    }
-    else
-    {
-        CMD_Set_Level dn(m_dwPK_Device, iPK_Device_LightingPlugin, StringUtils::itos(level));
-        SendCommand(dn);
 
-    }
+    qDebug()<< "Sending adjust level " << level << " to device to" << device;
+    string pResponse="";
+    CMD_Set_Level basic(m_dwPK_Device , device, StringUtils::itos(level));
+        if(SendCommand(basic,&pResponse))
+            statusMessage(QString::fromStdString(pResponse.c_str()));
+
 }
 
 
