@@ -103,7 +103,7 @@ size_t EventMethod::EventWriteCallback(void *ptr, size_t size, size_t nmemb)  {
 
 void EventMethod::InputStatusChanged(InputDevice* pInputDevice, string trigger)
 {
-	LoggerWrapper::GetInstance ()->Write (LV_WARNING, "MotionStatusChanged: trigger = %s", trigger.c_str());
+	LoggerWrapper::GetInstance ()->Write (LV_WARNING, "InputStatusChanged: trigger = %s", trigger.c_str());
 	int newStatus = pInputDevice->GetNewStatus(trigger);
 
 	m_pCamera->InputStatusChanged(pInputDevice, newStatus);

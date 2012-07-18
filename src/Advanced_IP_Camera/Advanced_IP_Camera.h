@@ -1,10 +1,5 @@
 /*
-     Copyright (C) 2004 Pluto, Inc., a Florida Corporation
-
-     www.plutohome.com
-
-     Phone: +1 (877) 758-8648
- 
+     Copyright (C) 2012 LinuxMCE
 
      This program is free software; you can redistribute it and/or modify it under the terms of the GNU General Public License.
      This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty
@@ -29,6 +24,7 @@
 #include <pthread.h>
 
 #include "EventMethod.h"
+#include "OutputDevice.h"
 
 //<-dceag-decl-b->
 namespace DCE
@@ -45,7 +41,9 @@ namespace DCE
 	  string m_sControlURL;
 	  
 	  vector<EventMethod*> m_vectEventMethod;
+	  map<int, OutputDevice*> m_mapPK_Device_OutputDevice;
 
+	  pluto_pthread_mutex_t m_CurlMutex;
 	  CURLM* m_pCurl;
 	  
 	        // Private methods
@@ -64,12 +62,17 @@ public:
 		virtual void ReceivedUnknownCommand(string &sCMD_Result,Message *pMessage);
 //<-dceag-const-e->
 
+		void SetupCurl(string sUrl);
 		static size_t WriteCallback(void *ptr, size_t size, size_t nmemb, void *ourpointer);
-		void InputStatusChanged(InputDevice* inputDevice, string trigger);
 		string GetBaseURL();
 		string GetUser();
 		string GetPassword();
+
+		void InputStatusChanged(InputDevice* inputDevice, string trigger);
 		void InputStatusChanged(InputDevice* pInputDevice, int newStatus);
+
+		bool ChangeOutput(OutputDevice* pDevice, bool newState);
+
 
 //<-dceag-const2-b->
 		// The following constructor is only used if this a class instance embedded within a DCE Device.  In that case, it won't create it's own connection to the router

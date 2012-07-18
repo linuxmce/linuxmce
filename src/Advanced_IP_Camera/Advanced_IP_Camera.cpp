@@ -1,10 +1,6 @@
 /*
-     Copyright (C) 2004 Pluto, Inc., a Florida Corporation
-
-     www.plutohome.com
-
-     Phone: +1 (877) 758-8648
- 
+     Copyright (C) 2012 LinuxMCE
+     www.linuxmce.org
 
      This program is free software; you can redistribute it and/or modify it under the terms of the GNU General Public License.
      This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty
@@ -30,15 +26,19 @@ using namespace DCE;
 //<-dceag-const-b->
 // The primary constructor when the class is created as a stand-alone device
 Advanced_IP_Camera::Advanced_IP_Camera(int DeviceID, string ServerAddress,bool bConnectEventHandler,bool bLocalMode,class Router *pRouter)
-	: Advanced_IP_Camera_Command(DeviceID, ServerAddress,bConnectEventHandler,bLocalMode,pRouter)
+	: Advanced_IP_Camera_Command(DeviceID, ServerAddress,bConnectEventHandler,bLocalMode,pRouter),
+	  m_CurlMutex("curl_mutex")
 //<-dceag-const-e->
 {
+  m_CurlMutex.Init (NULL);
+
 }
 
 //<-dceag-const2-b->
 // The constructor when the class is created as an embedded instance within another stand-alone device
 Advanced_IP_Camera::Advanced_IP_Camera(Command_Impl *pPrimaryDeviceCommand, DeviceData_Impl *pData, Event_Impl *pEvent, Router *pRouter)
-	: Advanced_IP_Camera_Command(pPrimaryDeviceCommand, pData, pEvent, pRouter)
+	: Advanced_IP_Camera_Command(pPrimaryDeviceCommand, pData, pEvent, pRouter),
+	  m_CurlMutex("curl_mutex")
 //<-dceag-const2-e->
 {
 }
@@ -56,6 +56,11 @@ Advanced_IP_Camera::~Advanced_IP_Camera()
 	{
 		(*it)->Stop();
 		delete (*it);
+	}
+        for( map<int, OutputDevice*>::const_iterator it = m_mapPK_Device_OutputDevice.begin();
+                        it != m_mapPK_Device_OutputDevice.end(); ++it )
+	{
+		delete (*it).second;
 	}
 }
 
@@ -132,7 +137,8 @@ bool Advanced_IP_Camera::GetConfig()
 	{
                 pChildDevice = (*it);
 		LoggerWrapper::GetInstance ()->Write (LV_STATUS, "getConfig() PK_Device= %d", pChildDevice->m_dwPK_Device);
-		if (pChildDevice->m_dwPK_DeviceTemplate == DEVICETEMPLATE_Motion_Detector_CONST)
+		if (pChildDevice->m_dwPK_DeviceTemplate == DEVICETEMPLATE_Motion_Detector_CONST ||
+			pChildDevice->m_dwPK_DeviceTemplate == DEVICETEMPLATE_Generic_Sensor_CONST)
 		{
 			InputDevice* pInputDevice = new InputDevice(pChildDevice->m_dwPK_Device, pChildDevice->m_dwPK_DeviceTemplate);
 			pInputDevice->status = 0;
@@ -150,7 +156,8 @@ bool Advanced_IP_Camera::GetConfig()
 					key = StringUtils::TrimSpaces(key);
 					string value = parameters[i].substr(pos+1);
 					value = StringUtils::TrimSpaces(value);
-					LoggerWrapper::GetInstance ()->Write (LV_STATUS, "getConfig() key = %s, value = %s", key.c_str(), value.c_str());					if (StringUtils::StartsWith(key, "method")) {
+					LoggerWrapper::GetInstance ()->Write (LV_STATUS, "getConfig() key = %s, value = %s", key.c_str(), value.c_str());
+					if (StringUtils::StartsWith(key, "method")) {
 						int num = atoi(value.c_str());
 						pEventMethod = GetEventMethod(num);
 						if (pEventMethod != NULL) 
@@ -164,7 +171,34 @@ bool Advanced_IP_Camera::GetConfig()
 					}
 				}
 			}
-			LoggerWrapper::GetInstance ()->Write (LV_STATUS, "getConfig() Motion detector, triggerOn = %s, triggerOff = %s", pInputDevice->m_sPatternOn.c_str(), pInputDevice->m_sPatternOff.c_str());
+		} else if (pChildDevice->m_dwPK_DeviceTemplate == DEVICETEMPLATE_Generic_Input_Ouput_CONST)
+		{
+			OutputDevice* pOutputDevice = new OutputDevice(pChildDevice->m_dwPK_Device, pChildDevice->m_dwPK_DeviceTemplate);
+			pOutputDevice->status = 0;
+			string value;
+			GetChildDeviceData(pChildDevice->m_dwPK_Device, DEVICEDATA_Capabilities_CONST, value);
+			LoggerWrapper::GetInstance ()->Write (LV_STATUS, "getConfig() Generic Input Output, capabilities = %s", value.c_str());
+			parameters = StringUtils::Split(value, "\n");
+			for (int i = 0; i < parameters.size(); i++)
+			{
+				size_t pos = parameters[i].find_first_of("=");
+				if (pos != string::npos)
+				{
+					string key = parameters[i].substr(0, pos);
+					key = StringUtils::TrimSpaces(key);
+					string value = parameters[i].substr(pos+1);
+					value = StringUtils::TrimSpaces(value);
+					LoggerWrapper::GetInstance ()->Write (LV_STATUS, "getConfig() key = %s, value = %s", key.c_str(), value.c_str());
+					if (StringUtils::StartsWith(key, "controlMethod")) {
+						pOutputDevice->m_sControlMethod = value;
+					} else if (StringUtils::StartsWith(key, "on")) {
+						pOutputDevice->m_sOn = value;
+					} else if (StringUtils::StartsWith(key, "off")) {
+						pOutputDevice->m_sOff = value;
+					}
+				}
+			}
+			m_mapPK_Device_OutputDevice[pChildDevice->m_dwPK_Device] = pOutputDevice;
 		}
 	}
 	
@@ -176,6 +210,17 @@ bool Advanced_IP_Camera::GetConfig()
 		{
 			LoggerWrapper::GetInstance ()->Write (LV_WARNING, "GetConfig(): EventMethod %d, %s", i, pEventMethod->ToString().c_str());
 			pEventMethod->Start();
+		}
+
+	}
+	LoggerWrapper::GetInstance ()->Write (LV_WARNING, "m_mapPK_Device_OutputDevice.size() = %d. Configured OutputDevices:", m_mapPK_Device_OutputDevice.size());
+        for( map<int, OutputDevice*>::const_iterator it = m_mapPK_Device_OutputDevice.begin();
+                        it != m_mapPK_Device_OutputDevice.end(); ++it )
+	{
+		OutputDevice* pOutputDevice = (*it).second;
+		if (pOutputDevice != NULL)
+		{
+			LoggerWrapper::GetInstance ()->Write (LV_WARNING, "GetConfig(): OutputDevice %s", pOutputDevice->ToString().c_str());
 		}
 
 	}
@@ -263,7 +308,86 @@ Advanced_IP_Camera_Command *Create_Advanced_IP_Camera(Command_Impl *pPrimaryDevi
 void Advanced_IP_Camera::ReceivedCommandForChild(DeviceData_Impl *pDeviceData_Impl,string &sCMD_Result,Message *pMessage)
 //<-dceag-cmdch-e->
 {
+
 	sCMD_Result = "UNHANDLED CHILD";
+	
+	map<int, OutputDevice*>::iterator it = m_mapPK_Device_OutputDevice.find(pDeviceData_Impl->m_dwPK_Device);
+	if ( it != m_mapPK_Device_OutputDevice.end() ) 
+	{
+		OutputDevice* pDevice = (*it).second;
+
+		if (pMessage->m_dwID == COMMAND_Generic_On_CONST ||
+		    pMessage->m_dwID == COMMAND_Generic_Off_CONST)
+		{
+			if (ChangeOutput(pDevice, pMessage->m_dwID == COMMAND_Generic_On_CONST)) 
+			{
+				sCMD_Result = "OK";
+			}
+		}
+	}
+}
+
+
+bool Advanced_IP_Camera::ChangeOutput(OutputDevice* pDevice, bool newState)
+{
+	PLUTO_SAFETY_LOCK (cm, m_CurlMutex);
+	string sUrl = GetBaseURL() + "/";
+	if ( newState )
+	{
+		sUrl += pDevice->m_sOn;
+	} else {
+		sUrl += pDevice->m_sOff;
+	}
+	SetupCurl(sUrl);
+	CURLcode res = curl_easy_perform(m_pCurl);
+	
+	if (res != 0)
+	{
+		LoggerWrapper::GetInstance ()->Write (LV_STATUS, "ChangeOutput(): failed to get data: curl error: %s", curl_easy_strerror(res));
+	} else {
+		long code;
+		curl_easy_getinfo(m_pCurl, CURLINFO_RESPONSE_CODE, &code);
+		if (code == 200)
+		{
+			// http OK
+			return true;
+		} else {
+			LoggerWrapper::GetInstance ()->Write (LV_STATUS, "ChangeOutput(): http code: %d, response:",  code);
+		}
+	}
+	return false;
+}
+
+void Advanced_IP_Camera::SetupCurl(string sUrl)
+{
+	LoggerWrapper::GetInstance ()->Write (LV_STATUS, "SetupCurl() start: sUrl: %s", sUrl.c_str ());
+	curl_easy_setopt(m_pCurl, CURLOPT_URL, sUrl.c_str());
+		
+	curl_easy_setopt(m_pCurl, CURLOPT_USERAGENT, "libcurl-agent/1.0");
+	if (!m_sUser.empty())
+	{
+		curl_easy_setopt(m_pCurl, CURLOPT_HTTPAUTH, CURLAUTH_BASIC);
+		curl_easy_setopt(m_pCurl, CURLOPT_USERNAME, m_sUser.c_str());
+		if (!m_sPasswd.empty()) {
+			curl_easy_setopt(m_pCurl, CURLOPT_PASSWORD, m_sPasswd.c_str());
+		}
+	}
+}
+
+size_t Advanced_IP_Camera::WriteCallback(void *ptr, size_t size, size_t nmemb, void *ourpointer) 
+{
+	struct CallbackData* data = (CallbackData*)ourpointer;
+	size_t realsize = size * nmemb;
+	data->buffer = (char*)realloc(data->buffer, data->size + realsize + 1);
+	if (data->buffer == NULL)
+	{
+		LoggerWrapper::GetInstance ()->Write (LV_CRITICAL, "CMD_Get_Video_Frame: Unable to allocate memory for receive buffer!");
+		return 0;
+	}
+	memcpy(&(data->buffer[data->size]), ptr, realsize);
+	data->size += realsize;
+	data->buffer[data->size] = 0;
+	return realsize;
 }
 
 /*
@@ -286,23 +410,6 @@ void Advanced_IP_Camera::ReceivedUnknownCommand(string &sCMD_Result,Message *pMe
 	COMMANDS TO IMPLEMENT
 
 */
-
-size_t Advanced_IP_Camera::WriteCallback(void *ptr, size_t size, size_t nmemb, void *ourpointer) 
-{
-	struct CallbackData* data = (CallbackData*)ourpointer;
-	size_t realsize = size * nmemb;
-	data->buffer = (char*)realloc(data->buffer, data->size + realsize + 1);
-	if (data->buffer == NULL)
-	{
-		LoggerWrapper::GetInstance ()->Write (LV_CRITICAL, "CMD_Get_Video_Frame: Unable to allocate memory for receive buffer!");
-		return 0;
-	}
-	memcpy(&(data->buffer[data->size]), ptr, realsize);
-	data->size += realsize;
-	data->buffer[data->size] = 0;
-	return realsize;
-}
-
 //<-dceag-c84-b->
 
 	/** @brief COMMAND: #84 - Get Video Frame */
@@ -329,7 +436,7 @@ void Advanced_IP_Camera::CMD_Get_Video_Frame(string sDisable_Aspect_Lock,int iSt
 	data.size = 0;
 	string sUrl = m_sBaseURL + "/" + m_sImgPath;
 
-
+	PLUTO_SAFETY_LOCK (gm, m_CurlMutex);
 	LoggerWrapper::GetInstance ()->Write (LV_STATUS, "CMD_Get_Video_Frame: sUrl: %s", sUrl.c_str ());
 	curl_easy_setopt(m_pCurl, CURLOPT_URL, sUrl.c_str());
 
