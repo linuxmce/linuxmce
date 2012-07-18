@@ -32,6 +32,7 @@
 
 #include "QtNetwork/QTcpSocket"
 #include "QtNetwork/QHostAddress"
+#include <QtNetwork/QHostInfo>
 
 #ifdef debug
 #include <QDebug>
@@ -1904,7 +1905,6 @@ bool DCE::qOrbiter::initialize()
             Disconnect();
             emit statusMessage("QOrbiter Connect() Failed for"+QString::number(this->m_dwPK_Device) );
             QApplication::processEvents(QEventLoop::AllEvents);
-
             return false;
         }
 
@@ -1995,8 +1995,8 @@ void qOrbiter::setOrbiterSetupVars(int users, int room, int skin, int lang, int 
         }
         else
         {
-        setDeviceId(t);
-        OnReload();
+            setDeviceId(t);
+            OnReload();
         }
     }
     else
@@ -2016,7 +2016,7 @@ void qOrbiter::connectionError()
 void qOrbiter::getFloorplanDeviceCommand(int device)
 {
 
-   /*
+    /*
     long current_device = (long)device;
     string cmds="";
     string cmd_resp="";
@@ -4239,7 +4239,7 @@ int qOrbiter::SetupNewOrbiter()
                 !event_Impl.m_pClientSocket->ReceiveString(sResponse) ||
                 sResponse.size()==0 )
             qDebug()<< "setup response error!";
-            return 0;  // Something went wrong
+        return 0;  // Something went wrong
 
         if( sResponse=="YES" )
             break;
@@ -4254,7 +4254,7 @@ int qOrbiter::SetupNewOrbiter()
     string sType;
     statusMessage("Setting up orbiter with core");
     DCE::CMD_New_Orbiter_DT CMD_New_Orbiter_DT(m_dwPK_Device, DEVICETEMPLATE_Orbiter_Plugin_CONST, BL_SameHouse, sType,
-       sPK_Users,DEVICETEMPLATE_qOrbiter_CONST ,m_sMacAddress,sPK_Room,sHeight,sWidth,sPK_Skin,sPK_Lang,1,&PK_Device);
+                                               sPK_Users,DEVICETEMPLATE_qOrbiter_CONST ,m_sMacAddress,sPK_Room,sHeight,sWidth,sPK_Skin,sPK_Lang,1,&PK_Device);
 
     CMD_New_Orbiter_DT.m_pMessage->m_eExpectedResponse = ER_ReplyMessage;
     Message *pResponse = event_Impl.SendReceiveMessage( CMD_New_Orbiter_DT.m_pMessage );
@@ -4308,12 +4308,12 @@ void DCE::qOrbiter::adjustLighting(int level, myMap devices)
 
 
     myMap::iterator i;
-     for (i = devices.begin(); i != devices.end(); ++i){
-string pResponse="";
-         CMD_Set_Level basic(m_dwPK_Device , i.key(), StringUtils::itos(level));
-             if(SendCommand(basic,&pResponse))
-                 qDebug()<< QString::fromStdString(pResponse.c_str());
-     }
+    for (i = devices.begin(); i != devices.end(); ++i){
+        string pResponse="";
+        CMD_Set_Level basic(m_dwPK_Device , i.key(), StringUtils::itos(level));
+        if(SendCommand(basic,&pResponse))
+            qDebug()<< QString::fromStdString(pResponse.c_str());
+    }
 
 
 }
@@ -4747,28 +4747,40 @@ void qOrbiter::CMD_Guide(string &sCMD_Result,Message *pMessage)
 
 void qOrbiter::pingCore()
 {
-    QString url = "http://"+QString::fromStdString(m_sIPAddress)+"/lmce-admin/index.php";
+
+    QString url = QString::fromStdString(m_sIPAddress);
+    QHostInfo::lookupHost(url, this, SLOT(checkPing(QHostInfo)));
+
 #ifdef QT_DEBUG
     qDebug() << url;
 #endif
-    QNetworkAccessManager *pingManager = new QNetworkAccessManager();
+    /*
+      QNetworkAccessManager *pingManager = new QNetworkAccessManager();
     connect(pingManager, SIGNAL(finished(QNetworkReply*)), this, SLOT(checkPing(QNetworkReply*)));
     QNetworkReply *badReply = pingManager->get(QNetworkRequest(QUrl(url)));
-
+*/
     // TODO: add a network timeout for this so it returns faster for located non-lmce machines. Currently it only returns fast if the ip or hostname is totally invalid, i.e. no route. For online machines,
     //it takes a bit longer. solve by attatching A Qtimer checking process and force it to cancel requests that dont return in a reasonable(whatever that is) amount of time. 5 seconds? I mean, who is still on
     //dialup?
 
 }
 
-void qOrbiter::checkPing(QNetworkReply* reply)
+void qOrbiter::checkPing(QHostInfo info)
 {
 
-    qDebug ("Check router says response is"+reply->bytesAvailable());
-    // TODO: add helpers to redirect in case of bad ip address
-    if(reply->size() != 0 )
-    {
+    qDebug () << "Ping router says response is: " << info.lookupId();
+    if (info.error() != QHostInfo::NoError){
+        emit routerInvalid();
+    }
+    else{
+        qDebug() << "ip address: " << info.addresses().at(0).toString();
+        m_sHostName = info.addresses().at(0).toString().toStdString();
+        m_sIPAddress = info.addresses().at(0).toString().toStdString();
         emit statusMessage("Router found, connecting");
+     //   Event_Impl event_Impl(DEVICEID_MESSAGESEND, 0, m_sIPAddress);
+      //  qDebug() << "Messaging core ip" << m_sIPAddress.c_str();
+
+
         if ( initialize() == true )
         {
             LoggerWrapper::GetInstance()->Write(LV_STATUS, "Connect OK");
@@ -4777,13 +4789,6 @@ void qOrbiter::checkPing(QNetworkReply* reply)
                 RunLocalMode();
         }
     }
-    else
-    {
-#ifdef QT_DEBUG
 
-#endif
-        qDebug("Bad Ip");
-        emit routerInvalid();
-    }
 }
 

@@ -1410,7 +1410,7 @@ public slots:
     void setOrbiterSetupVars(int users, int room, int skin, int lang, int height, int width);
 
     void pingCore();
-    void checkPing(QNetworkReply* reply);
+    void checkPing(QHostInfo info);
 
 
     void moveDirection(QString direction);

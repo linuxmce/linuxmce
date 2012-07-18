@@ -341,7 +341,8 @@ Rectangle {
         clip: true
         anchors.centerIn: rectangle2
         model:orbiterList
-        visible: orbiterSetup ===true ? false:true
+        visible: false
+        opacity: existing_orbiters.visible
         delegate: Rectangle{
             id:existing_orbiter_delegate
             height: scaleY(10)
@@ -389,7 +390,7 @@ Rectangle {
             anchors.centerIn: parent
             wrapMode: Text.WrapAtWordBoundaryOrAnywhere
         }
-        visible: existing_orbiters.visible ? true : false
+        visible: existing_orbiters.visible
         anchors.bottom: existing_orbiters.top
         anchors.horizontalCenter: existing_orbiters.horizontalCenter
         MouseArea{
@@ -402,9 +403,11 @@ Rectangle {
         id:orbiter_options
         spacing:1
         anchors.centerIn: parent
+        anchors.verticalCenterOffset: scaleY(10)
         height: scaleY(35)
         width: scaleX(70)
-        visible: existing_orbiters.visible ? false : true
+        visible: false
+        opacity: orbiter_options.visible
 
 
         z:5
