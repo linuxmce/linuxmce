@@ -390,7 +390,7 @@ int main(int argc, char* argv[])
         QObject::connect(w, SIGNAL(raiseSplash()), &orbiterWin, SLOT(showSplash()) );
         QObject::connect(w,SIGNAL(showSetup()), &orbiterWin, SLOT( showSetup()) );
         QObject::connect(pqOrbiter, SIGNAL(screenSaverImages(QStringList)), w->ScreenSaver, SLOT(setImageList(QStringList)),Qt::QueuedConnection);
-        QObject::connect(pqOrbiter, SIGNAL(setMyIp(QString)), w, SLOT(setIpAddress(QString)),Qt::QueuedConnection);
+        QObject::connect(pqOrbiter, SIGNAL(setMyIp(QString)), w, SLOT(setInternalIp(QString)),Qt::QueuedConnection);
         QObject::connect(&orbiterWin, SIGNAL(setupNewOrbiter()), pqOrbiter,SLOT(populateSetupInformation()));
         QObject::connect(pqOrbiter,SIGNAL(promptResponse(int,QList<QObject*>)), &orbiterWin, SLOT(displayPromptResponse(int, QList<QObject*> )));
         QObject::connect(&orbiterWin, SIGNAL(newOrbiterData(int , int , int , int , int , int )), pqOrbiter, SLOT(setOrbiterSetupVars(int,int,int,int,int,int)));

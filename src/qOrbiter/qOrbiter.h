@@ -1436,6 +1436,9 @@ public slots:
     void pingCore();
     void checkPing(QHostInfo info);
 
+    void checkInstall();
+    void verifyInstall(QNetworkReply*r);
+
 
     void moveDirection(QString direction);
     void JogStream(QString jump);

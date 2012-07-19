@@ -60,9 +60,9 @@ using namespace DCE;
 */
 #if (QT_VERSION >= 0x050000)
 qorbiterManager::qorbiterManager(QQuickView *view, QObject *parent) :
-#else
+    #else
 qorbiterManager::qorbiterManager(QDeclarativeView *view, QObject *parent) :
-#endif
+    #endif
     QObject(parent),qorbiterUIwin(view)
 {
 
@@ -766,7 +766,7 @@ void qorbiterManager::swapSkins(QString incSkin)
 #ifdef debug
     qDebug() << tskinModel->rowCount();
 #endif
-checkOrientation(qorbiterUIwin->size());
+    checkOrientation(qorbiterUIwin->size());
     if (tskinModel->rowCount() > 0)
     {
         setDceResponse("Setting Skin to:" + incSkin);
@@ -1028,7 +1028,7 @@ void qorbiterManager::showUI(bool b)
         setDceResponse("Orbiter Cant Show UI");
 #ifdef debug
         qDebug() << "Orbiter Status:" << b_orbiterReady;
-         qDebug() << "Skin Status:" << b_skinReady;
+        qDebug() << "Skin Status:" << b_skinReady;
 #endif
     }
 
@@ -1039,10 +1039,6 @@ void qorbiterManager::displayModelPages(QList<QObject *> pages)
     qorbiterUIwin->rootContext()->setContextProperty("pageList", QVariant::fromValue(pages));
 }
 
-void qorbiterManager::setIpAddress(QString s)
-{
-    m_ipAddress = s;
-}
 
 void qorbiterManager::getFloorplanDevices(int floorplantype)
 {
@@ -1195,11 +1191,17 @@ bool qorbiterManager::writeConfig()
             localConfigFile.close();
             localConfigFile.remove();
             QDomElement configVariables = localConfig.documentElement().toElement();
-            configVariables.namedItem("routerip").attributes().namedItem("id").setNodeValue(qs_routerip);
-            configVariables.namedItem("skin").attributes().namedItem("id").setNodeValue(currentSkin);
+            configVariables.namedItem("routerip").attributes().namedItem("id").setNodeValue(qs_routerip);           //internal ip
+            configVariables.namedItem("routeraddress").attributes().namedItem("id").setNodeValue(internalHost);     //internal hostname
+            configVariables.namedItem("skin").attributes().namedItem("id").setNodeValue(currentSkin);               //curent skin
+
+
+            configVariables.namedItem("externalip").attributes().namedItem("id").setNodeValue(qs_ext_routerip);     //externalip
+            configVariables.namedItem("externalHost").attributes().namedItem("id").setNodeValue(externalHost);      //external host
+
             configVariables.namedItem("device").attributes().namedItem("id").setNodeValue(QString::number(iPK_Device));
-            configVariables.namedItem("externalip").attributes().namedItem("id").setNodeValue(qs_ext_routerip);
             configVariables.namedItem("firstrun").attributes().namedItem("id").setNodeValue(QString("false"));
+            configVariables.namedItem("debug").attributes().namedItem("id").setNodeValue(debugMode ==true? "true" : "false");
             QByteArray output = localConfig.toByteArray();
             localConfigFile.open(QFile::ReadWrite);
             if (!localConfigFile.write(output))
@@ -1301,7 +1303,7 @@ void qorbiterManager::showFileInfo(QString fk_file)
 void qorbiterManager::requestSecurityPic(int i_pk_camera_device, int h, int w)
 {
 
-   emit  getSingleCam(i_pk_camera_device,  h,  w);
+    emit  getSingleCam(i_pk_camera_device,  h,  w);
 }
 
 void qorbiterManager::playMedia(QString FK_Media)
@@ -1455,7 +1457,7 @@ void qorbiterManager::setHouseMode(int mode, int pass)
 void qorbiterManager::setCurrentUser(QString inc_user)
 {
 #ifdef debug
-   qDebug() << "Incoming user::" << inc_user;
+    qDebug() << "Incoming user::" << inc_user;
 #endif
     sPK_User = userList->find(inc_user)->id();
     int user = inc_user.toInt();
@@ -1668,7 +1670,7 @@ bool qorbiterManager::createAndroidConfig()
 
 void qorbiterManager::checkOrientation(QSize)
 {
-//NOTE: Is this not handled by the window manager and Orientation change signals?
+    //NOTE: Is this not handled by the window manager and Orientation change signals?
 #if (QT_VERSION < QT_VERSION_CHECK(5,0,0))
     if(qorbiterUIwin->height() < qorbiterUIwin->width())
     {

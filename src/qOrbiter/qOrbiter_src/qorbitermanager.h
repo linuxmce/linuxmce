@@ -148,14 +148,14 @@ class qorbiterManager : public QObject
     Q_PROPERTY (bool connectedState READ getConnectedState WRITE setConnectedState NOTIFY connectedStateChanged)
     Q_PROPERTY (bool b_orientation READ getOrientation WRITE setOrientation NOTIFY orientationChanged)
     Q_PROPERTY (QString currentScreen READ getCurrentScreen WRITE setCurrentScreen  NOTIFY screenChange)
+    Q_PROPERTY (QString m_ipAddress READ getInternalIp WRITE setInternalIp NOTIFY internalIpChanged)
+    Q_PROPERTY (QString internalHost READ getInternalHost WRITE setInternalHost NOTIFY internalHostChanged)
+    Q_PROPERTY (QString externalip READ getExternalIp WRITE setExternalIp NOTIFY externalIpChanged)
+    Q_PROPERTY (QString externalHost READ getExternalHost WRITE setExternalHost NOTIFY externalHostChanged )
 
     /*
      *Need to move runtime options here so that we can tie into a configuration panel
      *first run - self explanitory?
-     *routerip - this needs to be set to the ip of the dcerouter we are currently connected to on the internal net.
-     *externalip - this should be the external ip address use to access the dcerouter from an external net.
-     *externalhost - this is the external hostname used to access the dcerouter. it should resolve to the external ip
-     *routeraddress - this will be namechanged to routerhostname for the internal hostname of the dcerouter
      *skin - the current selected skin. defaults to 'default'
      *enablescreensavermode - currently unused, should be built anyways
      *default view - relates to how list views are configured.
@@ -362,6 +362,11 @@ Param 10 - pk_attribute
     std::string s_RouterIP;               // string of the router ip
     QString m_ipAddress;
     QString qs_routerip;
+    QString internalHost;
+    QString externalip;
+    QString externalHost;
+
+    bool debugMode;
     bool dceBool;                   //
     bool bLocalMode;                //local running flag, for running without router.
 
@@ -458,8 +463,14 @@ signals:
 
     void floorplanTypeChanged();
     void setAlarm(bool s, int g);
-
     void getSingleCam(int i_pk_camera_device, int h, int w);
+
+    //runtime
+    void internalIpChanged();
+    void externalIpChanged();
+    void internalHostChanged();
+    void externalHostChanged();
+
 
 public slots: //note: Q_INVOKABLE means it can be called directly from qml
     void connectionWatchdog();
@@ -472,7 +483,21 @@ public slots: //note: Q_INVOKABLE means it can be called directly from qml
     void quickReload();
     void showUI(bool b);
     void displayModelPages(QList<QObject*> pages);
-    void setIpAddress(QString s);
+
+    void setInternalIp(QString s) { m_ipAddress = s; emit internalIpChanged(); }
+    QString getInternalIp() {return m_ipAddress; }
+
+    void setInternalHost(QString h) { internalHost = h; emit internalHostChanged();}
+    QString getInternalHost() {return internalHost;}
+
+    void setExternalIp(QString ex) {externalip = ex; emit externalIpChanged();}
+    QString getExternalIp() {return externalip;}
+
+    void setExternalHost(QString h) { externalHost = h; emit externalHostChanged();}
+    QString getExternalHost() {return externalHost;}
+
+
+
     void getFloorplanDevices(int floorplantype);
     void setFloorplanType(int t);
     void setActiveRoom(int room,int ea);

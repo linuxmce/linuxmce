@@ -4762,11 +4762,7 @@ void qOrbiter::pingCore()
 #ifdef QT_DEBUG
     qDebug() << url;
 #endif
-    /*
-      QNetworkAccessManager *pingManager = new QNetworkAccessManager();
-    connect(pingManager, SIGNAL(finished(QNetworkReply*)), this, SLOT(checkPing(QNetworkReply*)));
-    QNetworkReply *badReply = pingManager->get(QNetworkRequest(QUrl(url)));
-*/
+
     // TODO: add a network timeout for this so it returns faster for located non-lmce machines. Currently it only returns fast if the ip or hostname is totally invalid, i.e. no route. For online machines,
     //it takes a bit longer. solve by attatching A Qtimer checking process and force it to cancel requests that dont return in a reasonable(whatever that is) amount of time. 5 seconds? I mean, who is still on
     //dialup?
@@ -4781,14 +4777,36 @@ void qOrbiter::checkPing(QHostInfo info)
         emit routerInvalid();
     }
     else{
+#ifdef QT_DEBUG
         qDebug() << "ip address: " << info.addresses().at(0).toString();
+#endif
         m_sHostName = info.addresses().at(0).toString().toStdString();
         m_sIPAddress = info.addresses().at(0).toString().toStdString();
-        emit statusMessage("Router found, connecting");
-     //   Event_Impl event_Impl(DEVICEID_MESSAGESEND, 0, m_sIPAddress);
-      //  qDebug() << "Messaging core ip" << m_sIPAddress.c_str();
+        emit statusMessage("Router found, checking for LinuxMCE installation");
 
+#ifdef QT_DEBUG
+        qDebug() << "Checking for linuxmce installation" << m_sIPAddress.c_str();
+#endif
+        checkInstall();
+    }
 
+}
+
+void qOrbiter::checkInstall()
+{
+    QString url = "http://"+QString::fromStdString(m_sIPAddress)+"/lmce-admin/index.php";
+    QNetworkAccessManager *pingManager = new QNetworkAccessManager();
+    connect(pingManager, SIGNAL(finished(QNetworkReply*)), this, SLOT(verifyInstall(QNetworkReply*)));
+    QNetworkReply *badReply = pingManager->get(QNetworkRequest(url));
+    QTimer::singleShot(5000, badReply,SIGNAL(finished()));
+}
+
+void qOrbiter::verifyInstall(QNetworkReply *r)
+{
+
+    if(r->bytesAvailable() !=0)
+    {
+        emit statusMessage("Found installation, statring");
         if ( initialize() == true )
         {
             LoggerWrapper::GetInstance()->Write(LV_STATUS, "Connect OK");
@@ -4796,7 +4814,11 @@ void qOrbiter::checkPing(QHostInfo info)
             if( m_bLocalMode )
                 RunLocalMode();
         }
-    }
 
+    }
+    else
+    {
+        emit routerInvalid();
+    }
 }
 
