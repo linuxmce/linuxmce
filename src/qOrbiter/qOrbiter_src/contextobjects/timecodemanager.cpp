@@ -10,52 +10,56 @@
 #ifdef QT5
 TimeCodeManager::TimeCodeManager(QQuickItem *parent) :
     QQuickItem(parent)
-#else
+  #else
 TimeCodeManager::TimeCodeManager(QDeclarativeItem *parent) :
     QDeclarativeItem(parent)
-#endif
+  #endif
 {
-
     dceMediaSocket = new QTcpSocket();
     playbackSpeed = 0;
     tcCurrentTime = 0;
     tcTotalTime = 0;
     socketData = NULL;
     mediaPlayerIp = "";
+#ifdef QT_DEBUG
     qDebug("Setup Timecode Manager");
+#endif
 }
 
 QString TimeCodeManager::ObjectToString(const QObject *obj)
 {
-        //setup list rof results
-        QStringList result;
-       const QMetaObject * meta = obj->metaObject();
-       result += QString("class %1 : public %2 {")
-               .arg(meta->className())
-               .arg(meta->superClass()->className());
-       for (int i=0; i < meta->propertyCount(); ++i)
-       {
-           const QMetaProperty qmp = meta->property(i);
-           QVariant val = obj->property(qmp.name());
-           result += QString(" %1 %2 = %3")
-                   .arg(qmp.typeName())
-                   .arg(qmp.name())
-                   .arg(val.toString()) ;
-       }
-       result +="};";
-       return result.join("\n");
+    //setup list rof results
+    QStringList result;
+    const QMetaObject * meta = obj->metaObject();
+    result += QString("class %1 : public %2 {")
+            .arg(meta->className())
+            .arg(meta->superClass()->className());
+    for (int i=0; i < meta->propertyCount(); ++i)
+    {
+        const QMetaProperty qmp = meta->property(i);
+        QVariant val = obj->property(qmp.name());
+        result += QString(" %1 %2 = %3")
+                .arg(qmp.typeName())
+                .arg(qmp.name())
+                .arg(val.toString()) ;
+    }
+    result +="};";
+    return result.join("\n");
 }
 
 void TimeCodeManager::start(QString server, int iport)
 {
+#ifdef QT_DEBUG
     qDebug("Starting timecode...");
+#endif
     port = iport;
     mediaPlayerIp = server;
 
     if(!dceMediaSocket->isOpen())
     {
-         qDebug() <<"opening connection to " << port;
-
+#ifdef QT_DEBUG
+        qDebug() <<"opening connection to " << port;
+ #endif
         dceMediaSocket->connectToHost(mediaPlayerIp, port, QFile::ReadOnly );
         if ( dceMediaSocket->isValid() )
         {
@@ -64,12 +68,16 @@ void TimeCodeManager::start(QString server, int iport)
         }
         else
         {   //setDceResponse("couldnt start timecode");
-             qDebug() << dceMediaSocket->errorString();
+#ifdef QT_DEBUG
+            qDebug() << dceMediaSocket->errorString();
+#endif
         }
     }
     else
     {
+#ifdef QT_DEBUG
         qDebug("Time code running, moving on.");
+#endif
     }
 }
 
@@ -94,9 +102,7 @@ void TimeCodeManager::restart()
 void TimeCodeManager::updateTimeCode()
 {
     socketData = dceMediaSocket->readLine();
-    //qDebug() << socketData;
     std::string sLine = QString::fromAscii(socketData.data(), socketData.size()).toStdString();
-   //qDebug() << QString::fromStdString(sLine);
     if (sLine.length() > 0)
     {
         std::string::size_type pos=0;
@@ -165,7 +171,6 @@ void TimeCodeManager::setPosition()
     int minuteToSec = (current.at(1).toInt() * 60);
     int seconds = current.at(2).toInt();
     int currentPosition = hoursToSec + minuteToSec + seconds;
-
     setTime(currentPosition);
     setProgressBar((currentPosition));
 }

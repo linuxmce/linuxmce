@@ -253,7 +253,9 @@ void orbiterWindow::prepareExistingOrbiters(QList<QObject *> ex_list)
 
 void orbiterWindow::displayPromptResponse(int type, QList<QObject*> pList)
 {
+#ifdef QT_DEBUG
     qDebug() << "Prompt for response" << type;
+#endif
     if(type==1){
         userList.clear();
         userList = pList;
@@ -272,7 +274,9 @@ void orbiterWindow::displayPromptResponse(int type, QList<QObject*> pList)
 
 void orbiterWindow::setupNewOrbiter(int user, int room, int skin, int lang, int height, int w)
 {
+#ifdef QT_DEBUG
     qDebug() << "Setup message recieved";
+#endif
     emit newOrbiterData(user, room, skin, lang, height, w);
 }
 

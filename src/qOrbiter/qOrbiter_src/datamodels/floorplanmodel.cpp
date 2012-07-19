@@ -90,7 +90,9 @@ void FloorPlanModel::setDeviceSelection(int devNo)
 
 bool FloorPlanModel::getDeviceSelection(int devNo)
 {
+#ifdef QT_DEBUG
     qDebug() << "Handling status request for:" << devNo;
+#endif
     for (int i =0; i < m_list.count(); i++){
         if (m_list.at(i)->deviceNum() == devNo){
 
@@ -104,7 +106,6 @@ void FloorPlanModel::handleItemChange()
 {
     FloorplanDevice* item = static_cast<FloorplanDevice*>(sender());
     QModelIndex index = indexFromItem(item);
-    //qDebug() << "Handling item change for:" << index;
     if(index.isValid())
     {
         emit dataChanged(index, index);
@@ -125,7 +126,9 @@ void FloorPlanModel::handleStatusChange(int device)
 
 void FloorPlanModel::updateDevice(int device)
 {
+#ifdef QT_DEBUG
     qDebug("Updating Sprites");
+#endif
     QObject * view = uiRef->qorbiterUIwin->rootObject();
     QList<QObject*>  currentFloorplanDevices = view->findChildren<QObject*>("floorplan_sprite");
 
@@ -141,7 +144,6 @@ FloorplanDevice * FloorPlanModel::find(const QString &id) const
 
         if(item->id().contains(id))
         {
-            //qDebug() << "Found Match of: " << item->id() << "to " << id;
             return item;
         }
         else
@@ -154,7 +156,7 @@ FloorplanDevice * FloorPlanModel::find(const QString &id) const
 
 QModelIndex FloorPlanModel::indexFromItem(const FloorplanDevice *item) const
 {
-    //Q_ASSERT(item);
+    Q_ASSERT(item);
     for(int row=0; row<m_list.count(); ++row) {
         //  qDebug() << "item:" << item->id() << "::" << m_list.at(row)->id();
         if(m_list.at(row)->id() == item->id()) {
@@ -173,11 +175,9 @@ QModelIndex FloorPlanModel::indexFromItem(const FloorplanDevice *item) const
 
 void FloorPlanModel::clear()
 {
-
     qDeleteAll(m_list);
     m_list.clear();
     this->reset();
-
 }
 
 bool FloorPlanModel::removeRow(int row, const QModelIndex &parent)
@@ -248,7 +248,9 @@ void FloorPlanModel::populateSprites()
         {
             if(item->getCurrentX() != -1)
             {
+#ifdef QT_DEBUG
                 qDebug() << "Need to draw" << item->id();
+#endif
                 QMetaObject::invokeMethod(page, "placeSprites", Q_ARG(QVariant,item->getCurrentX()), Q_ARG(QVariant,item->getCurrentY()), Q_ARG(QVariant,item->deviceNum()), Q_ARG(QVariant,false ), Q_ARG(QVariant, item->deviceType()));
             }
         }

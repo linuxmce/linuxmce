@@ -55,6 +55,11 @@ class qOrbiter : public qOrbiter_Command
 {
     Q_OBJECT
     Q_PROPERTY (QString mediaResponse READ getMediaResponse WRITE setMediaResponse NOTIFY mediaResponseChanged)
+
+    Q_PROPERTY (QString commandResponse READ getCommandResponse WRITE setCommandResponse NOTIFY commandResponseChanged)//for use in displaying command related dce replies.
+    Q_PROPERTY (QString eventResponse READ getEventResponse WRITE setEventResponse NOTIFY eventResponseChanged) // for use in displaying message associated with incoming events
+    Q_PROPERTY (QString deviceResponse READ getDeviceResponse WRITE setDeviceResponse NOTIFY deviceResponseChanged) // for use in display of messages associated with specific devices
+
     Q_PROPERTY (int media_pageSeperator READ getGridSeperator WRITE setGridSeperator NOTIFY newPageSeperator )
     Q_PROPERTY (int i_current_mediaType READ getMediaType WRITE setMediaType NOTIFY mediaTypeChanged)
     Q_PROPERTY (bool discreteAudio READ getDiscreteAudio WRITE setDiscreteAudio NOTIFY discreteAudioChanged )
@@ -84,8 +89,14 @@ typedef QMap <int, QString> myMap;
     bool retrieving;
     bool finished;
     bool b_mediaPlaying;
+
     QString mediaResponse;
     DataGridTable *pDataGridTable;
+
+    //special Q_Properties which are always availible through the 'dcerouter object' for display of various responses
+    QString commandResponse;
+    QString eventResponse;
+    QString deviceResponse;
 
     int i_mediaModelRows;
     int media_currentRow;
@@ -1233,7 +1244,7 @@ signals:
     void routerReloading(QString msg);
     void replaceDevice();
     void closeOrbiter();
-    void statusMessage(QString s);
+    void statusMessage(QString s);      // special signal for use when setting up at the splash screen.
     void configReady(QByteArray config);
     void setMyIp(QString ip);
     void newTCport(int port);
@@ -1375,6 +1386,11 @@ signals:
     void isOsd();
     void monitorStatusChanged();
 
+    //messaging
+    void commandResponseChanged();
+    void eventResponseChanged();
+    void deviceResponseChanged();
+
 public slots:
 
     void setDeviceId(int d) {m_dwPK_Device = d; emit deviceIdChanged();}
@@ -1397,6 +1413,14 @@ public slots:
     void setMonitorStatus(bool state) { monitorAvailible = state; emit monitorStatusChanged();}
     bool getMonitorStatus() {return monitorAvailible;}
 
+    void setCommandResponse(QString response) {commandResponse = response; emit commandResponseChanged();}
+    QString getCommandResponse() {return commandResponse;}
+
+    void setEventResponse(QString eResponse){eventResponse = eResponse; emit eventResponseChanged();}
+    QString getEventResponse() {return eventResponse;}
+
+    void setDeviceResponse(QString dResponse) {deviceResponse = deviceResponse; emit deviceResponseChanged();}
+    QString getDeviceResponse() {return deviceResponse;}
 
     //setup
     void executeCommandGroup(int cmdGrp);

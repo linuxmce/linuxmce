@@ -149,6 +149,21 @@ class qorbiterManager : public QObject
     Q_PROPERTY (bool b_orientation READ getOrientation WRITE setOrientation NOTIFY orientationChanged)
     Q_PROPERTY (QString currentScreen READ getCurrentScreen WRITE setCurrentScreen  NOTIFY screenChange)
 
+    /*
+     *Need to move runtime options here so that we can tie into a configuration panel
+     *first run - self explanitory?
+     *routerip - this needs to be set to the ip of the dcerouter we are currently connected to on the internal net.
+     *externalip - this should be the external ip address use to access the dcerouter from an external net.
+     *externalhost - this is the external hostname used to access the dcerouter. it should resolve to the external ip
+     *routeraddress - this will be namechanged to routerhostname for the internal hostname of the dcerouter
+     *skin - the current selected skin. defaults to 'default'
+     *enablescreensavermode - currently unused, should be built anyways
+     *default view - relates to how list views are configured.
+     *phone - if the device is a phone or not. currently unused
+     *networkload - currently is used for android devices
+     *debug - allows the popup of various status messages.
+     */
+
 
 public:
 #if (QT_VERSION >= 0x050000)

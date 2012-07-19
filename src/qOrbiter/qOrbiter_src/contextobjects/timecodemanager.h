@@ -115,12 +115,7 @@ public slots:
     int getProgressBar() {return runningTimer;}
 
     void finishDragging() {
-
-      //  QString t = dragTime;
-      //  t.replace(QRegExp("0:(?!/d)"), "00:");
-      //  t.replace(QRegExp("0:(?![/d/d[1-9][1-9]:)"), "0:0");
                 emit seekToTime(QString::number(i_dragTime));
-
     }
     
 };

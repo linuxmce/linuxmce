@@ -4,6 +4,7 @@ Rectangle{
     id:lights
     height: appH
     width: appW
+    color: "transparent"
 
 FloorPlanDisplay{id: lightingfloorplan; anchors.centerIn: parent}
 

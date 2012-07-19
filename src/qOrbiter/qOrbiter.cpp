@@ -4304,17 +4304,25 @@ void qOrbiter::populateSetupInformation()
 
 void DCE::qOrbiter::adjustLighting(int level, myMap devices)
 {
-
-
-
     myMap::iterator i;
+
+    for (i = devices.begin(); i != devices.end(); ++i){
+        string pResponse="";
+        CMD_Set_Level basic(m_dwPK_Device , i.key(), StringUtils::itos(level));
+        if(SendCommand(basic,&pResponse))
+#ifdef QT_DEBUG
+            qDebug()<< QString::fromStdString(pResponse.c_str());
+#endif
+        setCommandResponse(QString::fromStdString(pResponse.c_str()));
+        ;
+    }
+
     for (i = devices.begin(); i != devices.end(); ++i){
         string pResponse="";
         CMD_Set_Level basic(m_dwPK_Device , i.key(), StringUtils::itos(level));
         if(SendCommand(basic,&pResponse))
             qDebug()<< QString::fromStdString(pResponse.c_str());
     }
-
 
 }
 
