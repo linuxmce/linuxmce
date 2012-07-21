@@ -74,19 +74,7 @@ bool ClientSocket::Connect( int PK_DeviceTemplate,string sExtraInfo,int iConnect
 		Disconnect();
 	}
 
-	m_Socket = socket( AF_INET6, SOCK_STREAM, 0 );
-
-	int iOptIPv6only = 0;
-	if (setsockopt(m_Socket, IPPROTO_IPV6, IPV6_V6ONLY, (char *)&iOptIPv6only, sizeof(iOptIPv6only)) == -1)
-	{
-		LoggerWrapper::GetInstance()->Write( LV_CRITICAL, "SOCKET: Cannot set IPV6_V6ONLY socket option.\r" );
-		m_Socket = INVALID_SOCKET;
-		return false;
-	} 
-	else 
-	{
-		LoggerWrapper::GetInstance()->Write( LV_SOCKET, "SOCKET: IPV6_V6ONLY option set.\r" );
-	}
+	m_Socket = socket( AF_INET, SOCK_STREAM, 0 );
 
 	int iOptKeepAlive = 1;
 	if (setsockopt(m_Socket, SOL_SOCKET, SO_KEEPALIVE, (SOCKOPTTYPE)&iOptKeepAlive, sizeof(iOptKeepAlive))) // error
@@ -117,32 +105,23 @@ bool ClientSocket::Connect( int PK_DeviceTemplate,string sExtraInfo,int iConnect
 	if ( m_Socket != INVALID_SOCKET )
 	{
 		int iRetries = 0, iRet;
-		struct sockaddr_in6  addrT;
+		struct sockaddr_in  addrT;
 		struct hostent*   phe;
 
 		for ( bSuccess = false;  iRetries < iConnectRetries && !bSuccess;  iRetries++ ) // keep tring until success or MAX_RETRIES is reached
 		{
  			memset( &addrT, 0, sizeof( addrT ) );
-			addrT.sin6_family = AF_INET6;
+			addrT.sin_family = AF_INET;
 			string sAddress;
 			int iPort;
 			StringUtils::AddressAndPortFromString( m_sIPAddress, DCE_DEFAULT_PORT, sAddress, iPort );
-			addrT.sin6_port = htons( iPort );
+			addrT.sin_port = htons( iPort );
 
-			// test if address is an IPv4 address
-			struct sockaddr_in sa; 
-			if(inet_pton(AF_INET, sAddress.c_str(), &(sa.sin_addr)) == 1)
-			{
-				// if yes then convert it to mapped IPv6 address
-				sAddress.insert(0,"::ffff:");
-			}
+			unsigned long dwAddr = inet_addr( sAddress.c_str() );
 
-			// test if address is a valid IPv6 address
-			int res = inet_pton(AF_INET6,sAddress.c_str(),&addrT.sin6_addr); 
-			
-			if ( res < 1 )
+			if ( dwAddr == INADDR_NONE )
 			{ // server address is a name
-				phe = gethostbyname2( sAddress.c_str(), AF_INET6 );
+				phe = gethostbyname( sAddress.c_str() );
 				if ( !phe )
 				{
 #ifdef _WIN32
@@ -151,16 +130,15 @@ bool ClientSocket::Connect( int PK_DeviceTemplate,string sExtraInfo,int iConnect
 					int ec = h_errno;
 #endif
 
-						LoggerWrapper::GetInstance()->Write( LV_CRITICAL, "gethostbyname2 for '%s', failed, Last Error Code %d, Device: %d", sAddress.c_str(), ec, m_dwPK_Device );
+						LoggerWrapper::GetInstance()->Write( LV_CRITICAL, "gethostbyname for '%s', failed, Last Error Code %d, Device: %d", sAddress.c_str(), ec, m_dwPK_Device );
 					Disconnect();
 					break;
 				}
-				memcpy((char *)&addrT.sin6_addr, phe->h_addr, phe->h_length);
+				addrT.sin_addr.s_addr = *(long *)phe->h_addr;
 			}
 			else
-			{ // Convert numerical address to a usable one
-				//memcpy((char *)&addrT.sin6_addr, phe->h_addr, phe->h_length);
-				
+			{ // Convert nnn.nnn address to a usable one
+				addrT.sin_addr.s_addr = dwAddr;
 			}
 
 			iRet = connect( m_Socket, (sockaddr *)&addrT, sizeof(addrT) );
@@ -168,16 +146,16 @@ bool ClientSocket::Connect( int PK_DeviceTemplate,string sExtraInfo,int iConnect
 			{
 #ifdef _WIN32
                 // Determine the local IP address
-                socklen_t len = sizeof( addrT );
+                socklen_t len = sizeof( struct sockaddr );
                 getsockname ( m_Socket, (struct sockaddr*) &addrT, &len );
-                char *pAddress = inet_ntoa(addrT.sin6_addr);
+                char *pAddress = inet_ntoa(addrT.sin_addr);
                 m_sMyIPAddress = pAddress;
 #else
                 // Determine the local IP address
 				char pcAddress[512];
 				socklen_t len = sizeof( struct sockaddr );
 				getsockname ( m_Socket, (struct sockaddr*) &addrT, &len );
-                inet_ntop( AF_INET6, &( addrT.sin6_addr), pcAddress, 32 );
+                inet_ntop( AF_INET, &( addrT.sin_addr.s_addr), pcAddress, 32 );
 				m_sMyIPAddress = pcAddress;
 #endif
 				bSuccess = true;
