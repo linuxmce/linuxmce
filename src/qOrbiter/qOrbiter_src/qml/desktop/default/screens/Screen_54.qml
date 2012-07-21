@@ -1,6 +1,8 @@
 import QtQuick 1.0
+import Qt.labs.shaders 1.0
 import "../components"
 import "../js/ComponentLoader.js" as MyJs
+import "../effects"
 
 Rectangle {
     id: storedaudioremote
@@ -19,10 +21,29 @@ Rectangle {
  Component.onCompleted: manager.setBoundStatus(true)
 
     height: appH
-    width: appW
-    radius: 0
-    opacity: 1
+    width: appW 
     color: "transparent"
+
+
+
+    EffectVignette{
+        id:vignetteEffect
+      //  grid: 2
+        targetWidth: filler.width
+        targetHeight: filler.height
+        anchors.fill: filler
+        dividerValue:1
+        divider:false
+        source:ShaderEffectSource {sourceItem: filler; smooth: false; hideSource: true }
+    }
+
+    Rectangle{
+        id:filler
+        color: "lightgrey"
+        anchors.fill:parent
+        opacity: .15
+
+    }
 
     Text {
         id: bignowplaying

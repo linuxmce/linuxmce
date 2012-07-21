@@ -40,6 +40,7 @@
 ****************************************************************************/
 
 import QtQuick 1.0
+import Qt.labs.shaders 1.0
 
 Effect {
     parameters: ListModel {
@@ -53,6 +54,5 @@ Effect {
     property real grid: parameters.get(0).value * 10
     property real step_x: 0.0015625
     property real step_y: targetHeight ? (step_x * targetWidth / targetHeight) : 0.0
-
     fragmentShaderFilename: "billboard.fsh"
 }

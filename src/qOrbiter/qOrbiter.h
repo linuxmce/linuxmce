@@ -124,6 +124,7 @@ typedef QMap <int, QString> myMap;
     int i_user;
     int i_current_mediaType;
     int i_current_floorplanType;
+    bool m_bOrbiterConnected;
     QImage returnImage;
     QByteArray TconfigData;
 

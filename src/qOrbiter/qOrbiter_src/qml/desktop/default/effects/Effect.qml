@@ -45,12 +45,13 @@ import Qt.labs.shaders 1.0
 ShaderEffectItem {
     property variant source
     property ListModel parameters: ListModel { }
-    property bool divider: true
-    property real dividerValue: 0.5
-    property real targetWidth: 0
-    property real targetHeight: 0
+    property bool divider: false
+    property real dividerValue: 1
+    property real targetWidth: source.sourceItem.width
+    property real targetHeight: source.sourceItem.height
     property string fragmentShaderFilename
     property string vertexShaderFilename
+
 
     QtObject {
         id: d

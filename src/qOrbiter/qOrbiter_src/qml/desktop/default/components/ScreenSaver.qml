@@ -92,12 +92,12 @@ Rectangle {
         id: blur
         anchors.fill: ssimg
         divider: false
-        dividerValue: 1.0
+        dividerValue: 1
         opacity: 1
         radius: 0.75
-        targetHeight: ssimg.height
-        targetWidth: ssimg.width
-        source: ShaderEffectSource { sourceItem: ssholder; hideSource: false }
+       targetHeight: ssimg.height
+       targetWidth: ssimg.width
+        source: ShaderEffectSource { sourceItem: ssimg; hideSource: true }
 
     }
     SequentialAnimation{

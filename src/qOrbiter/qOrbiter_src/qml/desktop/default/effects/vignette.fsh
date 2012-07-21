@@ -48,6 +48,7 @@ varying vec2 qt_TexCoord0;
 
 void main()
 {
+
     vec2 uv = qt_TexCoord0.xy;
     vec4 orig = texture2D(source, uv);
     float cr = pow(0.1, 2.0);

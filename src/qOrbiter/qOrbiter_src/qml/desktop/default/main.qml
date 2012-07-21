@@ -25,6 +25,24 @@ function checkLayout()
 console.log("c++ slot orientation changed")
 }
 
+DebugPanel{
+    id:dcemessages
+    debugMessage: dcemessage
+    z:2
+}
+
+DebugPanel{
+    id:mediaMessages
+    debugMessage: dcerouter.mediaResponse
+    z:2
+}
+
+DebugPanel{
+    id:commandmessages
+    debugMessage: dcerouter.commandResponse
+    z:2
+}
+
 Connections{
     target: manager
     onOrientationChanged: checkLayout()

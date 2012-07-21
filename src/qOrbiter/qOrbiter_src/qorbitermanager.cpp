@@ -1725,4 +1725,5 @@ void qorbiterManager::connectionWatchdog()
 #ifdef debug
     qDebug("Starting Watchdog");
 #endif
+
 }
