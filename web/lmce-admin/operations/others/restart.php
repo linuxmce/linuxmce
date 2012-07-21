@@ -98,12 +98,12 @@ function restart($output,$dbADO) {
 		$MDArray=explode(',',@$_POST['MDArray']);
 
 		if(isset($_POST['halt_core'])){
-			$command='/usr/pluto/bin/MessageSend ip6-localhost -targetType template 0 27 1 323 21 H 2 '.$coreID;
+			$command='/usr/pluto/bin/MessageSend localhost -targetType template 0 27 1 323 21 H 2 '.$coreID;
 			exec_batch_command($command);
 		}
 
 		if(isset($_POST['suspend_core'])){
-			$command='/usr/pluto/bin/MessageSend ip6-localhost -targetType template 0 27 1 323 21 S 2 '.$coreID;
+			$command='/usr/pluto/bin/MessageSend localhost -targetType template 0 27 1 323 21 S 2 '.$coreID;
 			exec_batch_command($command);
 		}
 
@@ -114,12 +114,12 @@ function restart($output,$dbADO) {
 
 		foreach ($MDArray AS $mdID){
 			if(isset($_POST['halt_'.$mdID])){
-				$command='/usr/pluto/bin/MessageSend ip6-localhost -targetType template 0 27 1 323 21 H 2 '.$mdID;
+				$command='/usr/pluto/bin/MessageSend localhost -targetType template 0 27 1 323 21 H 2 '.$mdID;
 				exec_batch_command($command);
 			}
 	
 			if(isset($_POST['suspend_'.$mdID])){
-				$command='/usr/pluto/bin/MessageSend ip6-localhost -targetType template 0 27 1 323 21 S 2 '.$mdID;
+				$command='/usr/pluto/bin/MessageSend localhost -targetType template 0 27 1 323 21 S 2 '.$mdID;
 				exec_batch_command($command);
 			}
 	
@@ -133,12 +133,12 @@ function restart($output,$dbADO) {
 		
 		if(isset($_REQUEST['device']) && (int)$_REQUEST['device']!=0){
 			$device=(int)$_REQUEST['device'];
-			$command='/usr/pluto/bin/MessageSend ip6-localhost -targetType template 0 27 1 323 21 '.$action.' 2 '.$device;
+			$command='/usr/pluto/bin/MessageSend localhost -targetType template 0 27 1 323 21 '.$action.' 2 '.$device;
 			exec_batch_command($command);
 		}
 
 		if(isset($_POST['quick_reload'])){
-			$command='/usr/pluto/bin/MessageSend ip6-localhost 0 -1000 7 1';
+			$command='/usr/pluto/bin/MessageSend localhost 0 -1000 7 1';
 			exec_batch_command($command);
 		}
 
