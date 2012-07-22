@@ -1,6 +1,0 @@
-//
-// Prefix header for all source files of the 'Lighting_Plugin' target in the 'Lighting_Plugin' project
-//
-
-#include <iostream>
-

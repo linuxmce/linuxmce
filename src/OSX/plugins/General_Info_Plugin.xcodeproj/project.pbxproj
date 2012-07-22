@@ -7,7 +7,6 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		95ABFE8615AF666A0079029F /* General_Info_Plugin.cp in Sources */ = {isa = PBXBuildFile; fileRef = 95ABFE8515AF666A0079029F /* General_Info_Plugin.cp */; };
 		95ABFE9715AF68360079029F /* General_Info_Plugin.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 95ABFE9615AF68360079029F /* General_Info_Plugin.cpp */; };
 		95ABFE9915AF68420079029F /* Main.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 95ABFE9815AF68420079029F /* Main.cpp */; };
 		95ABFE9B15AF68B80079029F /* mysql.h in Headers */ = {isa = PBXBuildFile; fileRef = 95ABFE9A15AF68B80079029F /* mysql.h */; };
@@ -34,12 +33,6 @@
 
 /* Begin PBXFileReference section */
 		95ABFE7C15AF666A0079029F /* General_Info_Plugin.dylib */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.dylib"; includeInIndex = 0; path = General_Info_Plugin.dylib; sourceTree = BUILT_PRODUCTS_DIR; };
-		95ABFE8015AF666A0079029F /* General_Info_Plugin-Prefix.pch */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "General_Info_Plugin-Prefix.pch"; sourceTree = "<group>"; };
-		95ABFE8115AF666A0079029F /* General_Info_PluginProj.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; path = General_Info_PluginProj.xcconfig; sourceTree = "<group>"; };
-		95ABFE8215AF666A0079029F /* General_Info_PluginTarget.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; path = General_Info_PluginTarget.xcconfig; sourceTree = "<group>"; };
-		95ABFE8315AF666A0079029F /* General_Info_Plugin.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = General_Info_Plugin.h; sourceTree = "<group>"; };
-		95ABFE8415AF666A0079029F /* General_Info_PluginPriv.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = General_Info_PluginPriv.h; sourceTree = "<group>"; };
-		95ABFE8515AF666A0079029F /* General_Info_Plugin.cp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = General_Info_Plugin.cp; sourceTree = "<group>"; };
 		95ABFE9615AF68360079029F /* General_Info_Plugin.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = General_Info_Plugin.cpp; path = ../../General_Info_Plugin/General_Info_Plugin.cpp; sourceTree = "<group>"; };
 		95ABFE9815AF68420079029F /* Main.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = Main.cpp; path = ../../General_Info_Plugin/Main.cpp; sourceTree = "<group>"; };
 		95ABFE9A15AF68B80079029F /* mysql.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = mysql.h; path = ../mysql/include/mysql.h; sourceTree = "<group>"; };
@@ -88,7 +81,6 @@
 				95ABFE9815AF68420079029F /* Main.cpp */,
 				95ABFE9C15AF68BF0079029F /* Includes */,
 				95ABFE9D15AF69350079029F /* Libraries */,
-				95ABFE7E15AF666A0079029F /* General_Info_Plugin */,
 				95ABFE7D15AF666A0079029F /* Products */,
 			);
 			sourceTree = "<group>";
@@ -99,27 +91,6 @@
 				95ABFE7C15AF666A0079029F /* General_Info_Plugin.dylib */,
 			);
 			name = Products;
-			sourceTree = "<group>";
-		};
-		95ABFE7E15AF666A0079029F /* General_Info_Plugin */ = {
-			isa = PBXGroup;
-			children = (
-				95ABFE8115AF666A0079029F /* General_Info_PluginProj.xcconfig */,
-				95ABFE8215AF666A0079029F /* General_Info_PluginTarget.xcconfig */,
-				95ABFE8315AF666A0079029F /* General_Info_Plugin.h */,
-				95ABFE8415AF666A0079029F /* General_Info_PluginPriv.h */,
-				95ABFE8515AF666A0079029F /* General_Info_Plugin.cp */,
-				95ABFE7F15AF666A0079029F /* Supporting Files */,
-			);
-			path = General_Info_Plugin;
-			sourceTree = "<group>";
-		};
-		95ABFE7F15AF666A0079029F /* Supporting Files */ = {
-			isa = PBXGroup;
-			children = (
-				95ABFE8015AF666A0079029F /* General_Info_Plugin-Prefix.pch */,
-			);
-			name = "Supporting Files";
 			sourceTree = "<group>";
 		};
 		95ABFE9C15AF68BF0079029F /* Includes */ = {
@@ -217,7 +188,6 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				95ABFE8615AF666A0079029F /* General_Info_Plugin.cp in Sources */,
 				95ABFE9715AF68360079029F /* General_Info_Plugin.cpp in Sources */,
 				95ABFE9915AF68420079029F /* Main.cpp in Sources */,
 				95ABFEA515AF69BA0079029F /* General_Info_PluginBase.cpp in Sources */,

@@ -21,6 +21,9 @@
       location = "container:"
       name = "Plugins">
       <FileRef
+         location = "group:plugins/AirPlay_PlugIn.xcodeproj">
+      </FileRef>
+      <FileRef
          location = "group:plugins/Climate_Plugin.xcodeproj">
       </FileRef>
       <FileRef
@@ -39,13 +42,19 @@
          location = "group:plugins/Lighting_Plugin.xcodeproj">
       </FileRef>
       <FileRef
-         location = "group:plugins/Orbiter_Plugin.xcodeproj">
-      </FileRef>
-      <FileRef
          location = "group:plugins/Media_Plugin.xcodeproj">
       </FileRef>
       <FileRef
+         location = "group:plugins/Orbiter_Plugin.xcodeproj">
+      </FileRef>
+      <FileRef
+         location = "group:plugins/Plug_And_Play_Plugin.xcodeproj">
+      </FileRef>
+      <FileRef
          location = "group:plugins/Security_Plugin.xcodeproj">
+      </FileRef>
+      <FileRef
+         location = "group:plugins/Telecom_Plugin.xcodeproj">
       </FileRef>
    </Group>
    <Group
@@ -59,6 +68,9 @@
       </FileRef>
       <FileRef
          location = "group:libpluto_main.xcodeproj">
+      </FileRef>
+      <FileRef
+         location = "group:libpluto_telecom.xcodeproj">
       </FileRef>
       <FileRef
          location = "group:libpluto_security.xcodeproj">

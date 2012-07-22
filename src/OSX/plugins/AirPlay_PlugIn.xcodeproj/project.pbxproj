@@ -1,0 +1,259 @@
+// !$*UTF8*$!
+{
+	archiveVersion = 1;
+	classes = {
+	};
+	objectVersion = 46;
+	objects = {
+
+/* Begin PBXBuildFile section */
+		95F78A6615BBEFEC00FB8F5B /* AirPlay_PlugIn.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 95F78A6515BBEFEC00FB8F5B /* AirPlay_PlugIn.cpp */; };
+		95F78A6915BBEFF700FB8F5B /* Main.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 95F78A6815BBEFF700FB8F5B /* Main.cpp */; };
+		95F78A6C15BBF01500FB8F5B /* AirPlayMediaStream.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 95F78A6B15BBF01500FB8F5B /* AirPlayMediaStream.cpp */; };
+		95F78A6E15BBF09600FB8F5B /* mysql.h in Headers */ = {isa = PBXBuildFile; fileRef = 95F78A6D15BBF09600FB8F5B /* mysql.h */; };
+		95F78A7115BBF0E500FB8F5B /* libDCECommon.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 95F78A7015BBF0E500FB8F5B /* libDCECommon.dylib */; };
+		95F78A7315BBF11000FB8F5B /* AirPlay_PlugInBase.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 95F78A7215BBF11000FB8F5B /* AirPlay_PlugInBase.cpp */; };
+		95F78A7515BBF13F00FB8F5B /* Media_Plugin.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 95F78A7415BBF13F00FB8F5B /* Media_Plugin.dylib */; };
+/* End PBXBuildFile section */
+
+/* Begin PBXFileReference section */
+		95F78A5215BBEF6D00FB8F5B /* AirPlay_PlugIn.dylib */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.dylib"; includeInIndex = 0; path = AirPlay_PlugIn.dylib; sourceTree = BUILT_PRODUCTS_DIR; };
+		95F78A6515BBEFEC00FB8F5B /* AirPlay_PlugIn.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = AirPlay_PlugIn.cpp; path = ../../AirPlay_PlugIn/AirPlay_PlugIn.cpp; sourceTree = "<group>"; };
+		95F78A6815BBEFF700FB8F5B /* Main.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = Main.cpp; path = "/Users/serge/lmce-1004/src/OSX/../AirPlay_PlugIn/Main.cpp"; sourceTree = "<absolute>"; };
+		95F78A6B15BBF01500FB8F5B /* AirPlayMediaStream.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = AirPlayMediaStream.cpp; path = ../../AirPlay_PlugIn/AirPlayMediaStream.cpp; sourceTree = "<group>"; };
+		95F78A6D15BBF09600FB8F5B /* mysql.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = mysql.h; path = ../mysql/include/mysql.h; sourceTree = "<group>"; };
+		95F78A7015BBF0E500FB8F5B /* libDCECommon.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libDCECommon.dylib; path = ../lib/libDCECommon.dylib; sourceTree = "<group>"; };
+		95F78A7215BBF11000FB8F5B /* AirPlay_PlugInBase.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = AirPlay_PlugInBase.cpp; path = ../../Gen_Devices/AirPlay_PlugInBase.cpp; sourceTree = "<group>"; };
+		95F78A7415BBF13F00FB8F5B /* Media_Plugin.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = Media_Plugin.dylib; path = ../bin/Media_Plugin.dylib; sourceTree = "<group>"; };
+/* End PBXFileReference section */
+
+/* Begin PBXFrameworksBuildPhase section */
+		95F78A4F15BBEF6D00FB8F5B /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				95F78A7115BBF0E500FB8F5B /* libDCECommon.dylib in Frameworks */,
+				95F78A7515BBF13F00FB8F5B /* Media_Plugin.dylib in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXFrameworksBuildPhase section */
+
+/* Begin PBXGroup section */
+		95F78A4715BBEF6D00FB8F5B = {
+			isa = PBXGroup;
+			children = (
+				95F78A6815BBEFF700FB8F5B /* Main.cpp */,
+				95F78A6515BBEFEC00FB8F5B /* AirPlay_PlugIn.cpp */,
+				95F78A6A15BBF00300FB8F5B /* Includes */,
+				95F78A6F15BBF0D200FB8F5B /* Libraries */,
+				95F78A5315BBEF6D00FB8F5B /* Products */,
+			);
+			sourceTree = "<group>";
+		};
+		95F78A5315BBEF6D00FB8F5B /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				95F78A5215BBEF6D00FB8F5B /* AirPlay_PlugIn.dylib */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+		95F78A6A15BBF00300FB8F5B /* Includes */ = {
+			isa = PBXGroup;
+			children = (
+				95F78A7215BBF11000FB8F5B /* AirPlay_PlugInBase.cpp */,
+				95F78A6D15BBF09600FB8F5B /* mysql.h */,
+				95F78A6B15BBF01500FB8F5B /* AirPlayMediaStream.cpp */,
+			);
+			name = Includes;
+			sourceTree = "<group>";
+		};
+		95F78A6F15BBF0D200FB8F5B /* Libraries */ = {
+			isa = PBXGroup;
+			children = (
+				95F78A7415BBF13F00FB8F5B /* Media_Plugin.dylib */,
+				95F78A7015BBF0E500FB8F5B /* libDCECommon.dylib */,
+			);
+			name = Libraries;
+			sourceTree = "<group>";
+		};
+/* End PBXGroup section */
+
+/* Begin PBXHeadersBuildPhase section */
+		95F78A5015BBEF6D00FB8F5B /* Headers */ = {
+			isa = PBXHeadersBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				95F78A6E15BBF09600FB8F5B /* mysql.h in Headers */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXHeadersBuildPhase section */
+
+/* Begin PBXNativeTarget section */
+		95F78A5115BBEF6D00FB8F5B /* AirPlay_PlugIn */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 95F78A5F15BBEF6D00FB8F5B /* Build configuration list for PBXNativeTarget "AirPlay_PlugIn" */;
+			buildPhases = (
+				95F78A4E15BBEF6D00FB8F5B /* Sources */,
+				95F78A4F15BBEF6D00FB8F5B /* Frameworks */,
+				95F78A5015BBEF6D00FB8F5B /* Headers */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = AirPlay_PlugIn;
+			productName = AirPlay_PlugIn;
+			productReference = 95F78A5215BBEF6D00FB8F5B /* AirPlay_PlugIn.dylib */;
+			productType = "com.apple.product-type.library.dynamic";
+		};
+/* End PBXNativeTarget section */
+
+/* Begin PBXProject section */
+		95F78A4915BBEF6D00FB8F5B /* Project object */ = {
+			isa = PBXProject;
+			attributes = {
+				LastUpgradeCheck = 0420;
+			};
+			buildConfigurationList = 95F78A4C15BBEF6D00FB8F5B /* Build configuration list for PBXProject "AirPlay_PlugIn" */;
+			compatibilityVersion = "Xcode 3.2";
+			developmentRegion = English;
+			hasScannedForEncodings = 0;
+			knownRegions = (
+				en,
+			);
+			mainGroup = 95F78A4715BBEF6D00FB8F5B;
+			productRefGroup = 95F78A5315BBEF6D00FB8F5B /* Products */;
+			projectDirPath = "";
+			projectRoot = "";
+			targets = (
+				95F78A5115BBEF6D00FB8F5B /* AirPlay_PlugIn */,
+			);
+		};
+/* End PBXProject section */
+
+/* Begin PBXSourcesBuildPhase section */
+		95F78A4E15BBEF6D00FB8F5B /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				95F78A6615BBEFEC00FB8F5B /* AirPlay_PlugIn.cpp in Sources */,
+				95F78A6915BBEFF700FB8F5B /* Main.cpp in Sources */,
+				95F78A6C15BBF01500FB8F5B /* AirPlayMediaStream.cpp in Sources */,
+				95F78A7315BBF11000FB8F5B /* AirPlay_PlugInBase.cpp in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXSourcesBuildPhase section */
+
+/* Begin XCBuildConfiguration section */
+		95F78A5D15BBEF6D00FB8F5B /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				ARCHS = "$(ARCHS_STANDARD_64_BIT)";
+				CLANG_ENABLE_OBJC_ARC = YES;
+				COPY_PHASE_STRIP = NO;
+				GCC_C_LANGUAGE_STANDARD = gnu99;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_ENABLE_OBJC_EXCEPTIONS = YES;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"DEBUG=1",
+					"$(inherited)",
+				);
+				GCC_SYMBOLS_PRIVATE_EXTERN = NO;
+				GCC_VERSION = com.apple.compilers.llvm.clang.1_0;
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_MISSING_PROTOTYPES = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				MACOSX_DEPLOYMENT_TARGET = 10.7;
+				ONLY_ACTIVE_ARCH = YES;
+				SDKROOT = macosx;
+			};
+			name = Debug;
+		};
+		95F78A5E15BBEF6D00FB8F5B /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				ARCHS = "$(ARCHS_STANDARD_64_BIT)";
+				CLANG_ENABLE_OBJC_ARC = YES;
+				COPY_PHASE_STRIP = YES;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				GCC_C_LANGUAGE_STANDARD = gnu99;
+				GCC_ENABLE_OBJC_EXCEPTIONS = YES;
+				GCC_VERSION = com.apple.compilers.llvm.clang.1_0;
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_MISSING_PROTOTYPES = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				MACOSX_DEPLOYMENT_TARGET = 10.7;
+				SDKROOT = macosx;
+			};
+			name = Release;
+		};
+		95F78A6015BBEF6D00FB8F5B /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CONFIGURATION_BUILD_DIR = ../bin;
+				HEADER_SEARCH_PATHS = (
+					../../DCE,
+					../..,
+				);
+				INSTALL_PATH = /usr/pluto/bin;
+				LIBRARY_SEARCH_PATHS = (
+					"$(inherited)",
+					"\"$(SRCROOT)/../lib\"",
+					"\"$(SRCROOT)/../bin\"",
+				);
+				PRODUCT_NAME = "$(TARGET_NAME)";
+			};
+			name = Debug;
+		};
+		95F78A6115BBEF6D00FB8F5B /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CONFIGURATION_BUILD_DIR = ../bin;
+				HEADER_SEARCH_PATHS = (
+					../../DCE,
+					../..,
+				);
+				INSTALL_PATH = /usr/pluto/bin;
+				LIBRARY_SEARCH_PATHS = (
+					"$(inherited)",
+					"\"$(SRCROOT)/../lib\"",
+					"\"$(SRCROOT)/../bin\"",
+				);
+				PRODUCT_NAME = "$(TARGET_NAME)";
+			};
+			name = Release;
+		};
+/* End XCBuildConfiguration section */
+
+/* Begin XCConfigurationList section */
+		95F78A4C15BBEF6D00FB8F5B /* Build configuration list for PBXProject "AirPlay_PlugIn" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				95F78A5D15BBEF6D00FB8F5B /* Debug */,
+				95F78A5E15BBEF6D00FB8F5B /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		95F78A5F15BBEF6D00FB8F5B /* Build configuration list for PBXNativeTarget "AirPlay_PlugIn" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				95F78A6015BBEF6D00FB8F5B /* Debug */,
+				95F78A6115BBEF6D00FB8F5B /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+/* End XCConfigurationList section */
+	};
+	rootObject = 95F78A4915BBEF6D00FB8F5B /* Project object */;
+}

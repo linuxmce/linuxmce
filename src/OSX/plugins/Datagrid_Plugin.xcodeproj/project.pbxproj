@@ -7,7 +7,6 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		95ABFDD715AE1C7B0079029F /* Datagrid_Plugin.cp in Sources */ = {isa = PBXBuildFile; fileRef = 95ABFDD615AE1C7B0079029F /* Datagrid_Plugin.cp */; };
 		95ABFDE115AE1CF60079029F /* Datagrid_Plugin.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 95ABFDE015AE1CF60079029F /* Datagrid_Plugin.cpp */; };
 		95ABFDE415AE1D000079029F /* Main.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 95ABFDE315AE1D000079029F /* Main.cpp */; };
 		95ABFDE715AE1D6B0079029F /* mysql.h in Headers */ = {isa = PBXBuildFile; fileRef = 95ABFDE615AE1D6B0079029F /* mysql.h */; };
@@ -17,12 +16,6 @@
 
 /* Begin PBXFileReference section */
 		95ABFDCD15AE1C7B0079029F /* Datagrid_Plugin.dylib */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.dylib"; includeInIndex = 0; path = Datagrid_Plugin.dylib; sourceTree = BUILT_PRODUCTS_DIR; };
-		95ABFDD115AE1C7B0079029F /* Datagrid_Plugin-Prefix.pch */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "Datagrid_Plugin-Prefix.pch"; sourceTree = "<group>"; };
-		95ABFDD215AE1C7B0079029F /* Datagrid_PluginProj.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; path = Datagrid_PluginProj.xcconfig; sourceTree = "<group>"; };
-		95ABFDD315AE1C7B0079029F /* Datagrid_PluginTarget.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; path = Datagrid_PluginTarget.xcconfig; sourceTree = "<group>"; };
-		95ABFDD415AE1C7B0079029F /* Datagrid_Plugin.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = Datagrid_Plugin.h; sourceTree = "<group>"; };
-		95ABFDD515AE1C7B0079029F /* Datagrid_PluginPriv.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = Datagrid_PluginPriv.h; sourceTree = "<group>"; };
-		95ABFDD615AE1C7B0079029F /* Datagrid_Plugin.cp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = Datagrid_Plugin.cp; sourceTree = "<group>"; };
 		95ABFDE015AE1CF60079029F /* Datagrid_Plugin.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = Datagrid_Plugin.cpp; path = ../../Datagrid_Plugin/Datagrid_Plugin.cpp; sourceTree = "<group>"; };
 		95ABFDE315AE1D000079029F /* Main.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = Main.cpp; path = ../../Datagrid_Plugin/Main.cpp; sourceTree = "<group>"; };
 		95ABFDE615AE1D6B0079029F /* mysql.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = mysql.h; path = ../mysql/include/mysql.h; sourceTree = "<group>"; };
@@ -49,7 +42,6 @@
 				95ABFDE315AE1D000079029F /* Main.cpp */,
 				95ABFDEA15AE1D9D0079029F /* libraries */,
 				95ABFDE515AE1D490079029F /* includes */,
-				95ABFDCF15AE1C7B0079029F /* Datagrid_Plugin */,
 				95ABFDCE15AE1C7B0079029F /* Products */,
 			);
 			sourceTree = "<group>";
@@ -60,27 +52,6 @@
 				95ABFDCD15AE1C7B0079029F /* Datagrid_Plugin.dylib */,
 			);
 			name = Products;
-			sourceTree = "<group>";
-		};
-		95ABFDCF15AE1C7B0079029F /* Datagrid_Plugin */ = {
-			isa = PBXGroup;
-			children = (
-				95ABFDD215AE1C7B0079029F /* Datagrid_PluginProj.xcconfig */,
-				95ABFDD315AE1C7B0079029F /* Datagrid_PluginTarget.xcconfig */,
-				95ABFDD415AE1C7B0079029F /* Datagrid_Plugin.h */,
-				95ABFDD515AE1C7B0079029F /* Datagrid_PluginPriv.h */,
-				95ABFDD615AE1C7B0079029F /* Datagrid_Plugin.cp */,
-				95ABFDD015AE1C7B0079029F /* Supporting Files */,
-			);
-			path = Datagrid_Plugin;
-			sourceTree = "<group>";
-		};
-		95ABFDD015AE1C7B0079029F /* Supporting Files */ = {
-			isa = PBXGroup;
-			children = (
-				95ABFDD115AE1C7B0079029F /* Datagrid_Plugin-Prefix.pch */,
-			);
-			name = "Supporting Files";
 			sourceTree = "<group>";
 		};
 		95ABFDE515AE1D490079029F /* includes */ = {
@@ -161,7 +132,6 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				95ABFDD715AE1C7B0079029F /* Datagrid_Plugin.cp in Sources */,
 				95ABFDE115AE1CF60079029F /* Datagrid_Plugin.cpp in Sources */,
 				95ABFDE415AE1D000079029F /* Main.cpp in Sources */,
 				95ABFDEE15AE1E120079029F /* Datagrid_PluginBase.cpp in Sources */,

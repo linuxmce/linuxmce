@@ -7,7 +7,6 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		95ABFF1915B35BEE0079029F /* Lighting_Plugin.cp in Sources */ = {isa = PBXBuildFile; fileRef = 95ABFF1815B35BEE0079029F /* Lighting_Plugin.cp */; };
 		95FF87DA15B3606C00B0EC93 /* Main.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 95FF87D915B3606C00B0EC93 /* Main.cpp */; };
 		95FF87DC15B3607300B0EC93 /* Lighting_Plugin.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 95FF87DB15B3607300B0EC93 /* Lighting_Plugin.cpp */; };
 		95FF87E015B360AB00B0EC93 /* mysql.h in Headers */ = {isa = PBXBuildFile; fileRef = 95FF87DF15B360AB00B0EC93 /* mysql.h */; };
@@ -21,12 +20,6 @@
 
 /* Begin PBXFileReference section */
 		95ABFF0F15B35BEE0079029F /* Lighting_Plugin.dylib */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.dylib"; includeInIndex = 0; path = Lighting_Plugin.dylib; sourceTree = BUILT_PRODUCTS_DIR; };
-		95ABFF1315B35BEE0079029F /* Lighting_Plugin-Prefix.pch */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "Lighting_Plugin-Prefix.pch"; sourceTree = "<group>"; };
-		95ABFF1415B35BEE0079029F /* Lighting_PluginProj.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; path = Lighting_PluginProj.xcconfig; sourceTree = "<group>"; };
-		95ABFF1515B35BEE0079029F /* Lighting_PluginTarget.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; path = Lighting_PluginTarget.xcconfig; sourceTree = "<group>"; };
-		95ABFF1615B35BEE0079029F /* Lighting_Plugin.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = Lighting_Plugin.h; sourceTree = "<group>"; };
-		95ABFF1715B35BEE0079029F /* Lighting_PluginPriv.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = Lighting_PluginPriv.h; sourceTree = "<group>"; };
-		95ABFF1815B35BEE0079029F /* Lighting_Plugin.cp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = Lighting_Plugin.cp; sourceTree = "<group>"; };
 		95FF87D915B3606C00B0EC93 /* Main.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = Main.cpp; path = ../../Lighting_Plugin/Main.cpp; sourceTree = "<group>"; };
 		95FF87DB15B3607300B0EC93 /* Lighting_Plugin.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = Lighting_Plugin.cpp; path = ../../Lighting_Plugin/Lighting_Plugin.cpp; sourceTree = "<group>"; };
 		95FF87DF15B360AB00B0EC93 /* mysql.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = mysql.h; path = ../mysql/include/mysql.h; sourceTree = "<group>"; };
@@ -60,7 +53,6 @@
 				95FF87DB15B3607300B0EC93 /* Lighting_Plugin.cpp */,
 				95FF87DE15B3609400B0EC93 /* libraries */,
 				95FF87DD15B3608A00B0EC93 /* includes */,
-				95ABFF1115B35BEE0079029F /* Lighting_Plugin */,
 				95ABFF1015B35BEE0079029F /* Products */,
 			);
 			sourceTree = "<group>";
@@ -71,27 +63,6 @@
 				95ABFF0F15B35BEE0079029F /* Lighting_Plugin.dylib */,
 			);
 			name = Products;
-			sourceTree = "<group>";
-		};
-		95ABFF1115B35BEE0079029F /* Lighting_Plugin */ = {
-			isa = PBXGroup;
-			children = (
-				95ABFF1415B35BEE0079029F /* Lighting_PluginProj.xcconfig */,
-				95ABFF1515B35BEE0079029F /* Lighting_PluginTarget.xcconfig */,
-				95ABFF1615B35BEE0079029F /* Lighting_Plugin.h */,
-				95ABFF1715B35BEE0079029F /* Lighting_PluginPriv.h */,
-				95ABFF1815B35BEE0079029F /* Lighting_Plugin.cp */,
-				95ABFF1215B35BEE0079029F /* Supporting Files */,
-			);
-			path = Lighting_Plugin;
-			sourceTree = "<group>";
-		};
-		95ABFF1215B35BEE0079029F /* Supporting Files */ = {
-			isa = PBXGroup;
-			children = (
-				95ABFF1315B35BEE0079029F /* Lighting_Plugin-Prefix.pch */,
-			);
-			name = "Supporting Files";
 			sourceTree = "<group>";
 		};
 		95FF87DD15B3608A00B0EC93 /* includes */ = {
@@ -176,7 +147,6 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				95ABFF1915B35BEE0079029F /* Lighting_Plugin.cp in Sources */,
 				95FF87DA15B3606C00B0EC93 /* Main.cpp in Sources */,
 				95FF87DC15B3607300B0EC93 /* Lighting_Plugin.cpp in Sources */,
 				95FF87E615B3610B00B0EC93 /* Lighting_PluginBase.cpp in Sources */,

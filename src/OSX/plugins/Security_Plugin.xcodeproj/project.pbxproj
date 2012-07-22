@@ -7,7 +7,6 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		95F7893315B4BAE500FB8F5B /* Security_Plugin.cp in Sources */ = {isa = PBXBuildFile; fileRef = 95F7893215B4BAE500FB8F5B /* Security_Plugin.cp */; };
 		95F7893E15B4BB8C00FB8F5B /* Main.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 95F7893D15B4BB8C00FB8F5B /* Main.cpp */; };
 		95F7894015B4BB9500FB8F5B /* Security_Plugin.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 95F7893F15B4BB9500FB8F5B /* Security_Plugin.cpp */; };
 		95F7894415B4BBD500FB8F5B /* Notification.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 95F7894315B4BBD500FB8F5B /* Notification.cpp */; };
@@ -23,12 +22,6 @@
 
 /* Begin PBXFileReference section */
 		95F7892915B4BAE500FB8F5B /* Security_Plugin.dylib */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.dylib"; includeInIndex = 0; path = Security_Plugin.dylib; sourceTree = BUILT_PRODUCTS_DIR; };
-		95F7892D15B4BAE500FB8F5B /* Security_Plugin-Prefix.pch */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "Security_Plugin-Prefix.pch"; sourceTree = "<group>"; };
-		95F7892E15B4BAE500FB8F5B /* Security_PluginProj.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; path = Security_PluginProj.xcconfig; sourceTree = "<group>"; };
-		95F7892F15B4BAE500FB8F5B /* Security_PluginTarget.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; path = Security_PluginTarget.xcconfig; sourceTree = "<group>"; };
-		95F7893015B4BAE500FB8F5B /* Security_Plugin.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = Security_Plugin.h; sourceTree = "<group>"; };
-		95F7893115B4BAE500FB8F5B /* Security_PluginPriv.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = Security_PluginPriv.h; sourceTree = "<group>"; };
-		95F7893215B4BAE500FB8F5B /* Security_Plugin.cp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = Security_Plugin.cp; sourceTree = "<group>"; };
 		95F7893D15B4BB8C00FB8F5B /* Main.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = Main.cpp; path = ../../Security_Plugin/Main.cpp; sourceTree = "<group>"; };
 		95F7893F15B4BB9500FB8F5B /* Security_Plugin.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = Security_Plugin.cpp; path = ../../Security_Plugin/Security_Plugin.cpp; sourceTree = "<group>"; };
 		95F7894315B4BBD500FB8F5B /* Notification.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = Notification.cpp; path = ../Security_Plugin/Notification.cpp; sourceTree = "<group>"; };
@@ -66,7 +59,6 @@
 				95F7893F15B4BB9500FB8F5B /* Security_Plugin.cpp */,
 				95F7894115B4BBAF00FB8F5B /* Includes */,
 				95F7894215B4BBC100FB8F5B /* Libraries */,
-				95F7892B15B4BAE500FB8F5B /* Security_Plugin */,
 				95F7892A15B4BAE500FB8F5B /* Products */,
 			);
 			sourceTree = "<group>";
@@ -77,27 +69,6 @@
 				95F7892915B4BAE500FB8F5B /* Security_Plugin.dylib */,
 			);
 			name = Products;
-			sourceTree = "<group>";
-		};
-		95F7892B15B4BAE500FB8F5B /* Security_Plugin */ = {
-			isa = PBXGroup;
-			children = (
-				95F7892E15B4BAE500FB8F5B /* Security_PluginProj.xcconfig */,
-				95F7892F15B4BAE500FB8F5B /* Security_PluginTarget.xcconfig */,
-				95F7893015B4BAE500FB8F5B /* Security_Plugin.h */,
-				95F7893115B4BAE500FB8F5B /* Security_PluginPriv.h */,
-				95F7893215B4BAE500FB8F5B /* Security_Plugin.cp */,
-				95F7892C15B4BAE500FB8F5B /* Supporting Files */,
-			);
-			path = Security_Plugin;
-			sourceTree = "<group>";
-		};
-		95F7892C15B4BAE500FB8F5B /* Supporting Files */ = {
-			isa = PBXGroup;
-			children = (
-				95F7892D15B4BAE500FB8F5B /* Security_Plugin-Prefix.pch */,
-			);
-			name = "Supporting Files";
 			sourceTree = "<group>";
 		};
 		95F7894115B4BBAF00FB8F5B /* Includes */ = {
@@ -185,7 +156,6 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				95F7893315B4BAE500FB8F5B /* Security_Plugin.cp in Sources */,
 				95F7893E15B4BB8C00FB8F5B /* Main.cpp in Sources */,
 				95F7894015B4BB9500FB8F5B /* Security_Plugin.cpp in Sources */,
 				95F7894415B4BBD500FB8F5B /* Notification.cpp in Sources */,

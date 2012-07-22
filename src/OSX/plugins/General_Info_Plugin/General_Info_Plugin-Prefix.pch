@@ -1,6 +1,0 @@
-//
-// Prefix header for all source files of the 'General_Info_Plugin' target in the 'General_Info_Plugin' project
-//
-
-#include <iostream>
-

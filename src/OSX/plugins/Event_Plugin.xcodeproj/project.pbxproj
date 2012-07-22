@@ -7,7 +7,6 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		956B098C15AB76B80006C6C0 /* Event_Plugin.cp in Sources */ = {isa = PBXBuildFile; fileRef = 956B098B15AB76B80006C6C0 /* Event_Plugin.cp */; };
 		956B09A315AB80330006C6C0 /* Main.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 956B09A215AB80330006C6C0 /* Main.cpp */; };
 		956B09A515AB803B0006C6C0 /* Event_Plugin.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 956B09A415AB803B0006C6C0 /* Event_Plugin.cpp */; };
 		956B09AA15AB80AC0006C6C0 /* mysql.h in Headers */ = {isa = PBXBuildFile; fileRef = 956B09A915AB80AC0006C6C0 /* mysql.h */; };
@@ -29,12 +28,6 @@
 
 /* Begin PBXFileReference section */
 		956B098215AB76B70006C6C0 /* Event_Plugin.dylib */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.dylib"; includeInIndex = 0; path = Event_Plugin.dylib; sourceTree = BUILT_PRODUCTS_DIR; };
-		956B098615AB76B80006C6C0 /* Event_Plugin-Prefix.pch */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "Event_Plugin-Prefix.pch"; sourceTree = "<group>"; };
-		956B098715AB76B80006C6C0 /* Event_PluginProj.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; path = Event_PluginProj.xcconfig; sourceTree = "<group>"; };
-		956B098815AB76B80006C6C0 /* Event_PluginTarget.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; path = Event_PluginTarget.xcconfig; sourceTree = "<group>"; };
-		956B098915AB76B80006C6C0 /* Event_Plugin.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = Event_Plugin.h; sourceTree = "<group>"; };
-		956B098A15AB76B80006C6C0 /* Event_PluginPriv.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = Event_PluginPriv.h; sourceTree = "<group>"; };
-		956B098B15AB76B80006C6C0 /* Event_Plugin.cp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = Event_Plugin.cp; sourceTree = "<group>"; };
 		956B09A215AB80330006C6C0 /* Main.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = Main.cpp; path = ../../Event_Plugin/Main.cpp; sourceTree = "<group>"; };
 		956B09A415AB803B0006C6C0 /* Event_Plugin.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = Event_Plugin.cpp; path = ../../Event_Plugin/Event_Plugin.cpp; sourceTree = "<group>"; };
 		956B09A915AB80AC0006C6C0 /* mysql.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = mysql.h; path = ../mysql/include/mysql.h; sourceTree = "<group>"; };
@@ -76,7 +69,6 @@
 				956B09A415AB803B0006C6C0 /* Event_Plugin.cpp */,
 				956B099515AB7D3A0006C6C0 /* Includes */,
 				956B099415AB7D2F0006C6C0 /* libraries */,
-				956B098415AB76B70006C6C0 /* Event_Plugin */,
 				956B098315AB76B70006C6C0 /* Products */,
 			);
 			sourceTree = "<group>";
@@ -87,27 +79,6 @@
 				956B098215AB76B70006C6C0 /* Event_Plugin.dylib */,
 			);
 			name = Products;
-			sourceTree = "<group>";
-		};
-		956B098415AB76B70006C6C0 /* Event_Plugin */ = {
-			isa = PBXGroup;
-			children = (
-				956B098715AB76B80006C6C0 /* Event_PluginProj.xcconfig */,
-				956B098815AB76B80006C6C0 /* Event_PluginTarget.xcconfig */,
-				956B098915AB76B80006C6C0 /* Event_Plugin.h */,
-				956B098A15AB76B80006C6C0 /* Event_PluginPriv.h */,
-				956B098B15AB76B80006C6C0 /* Event_Plugin.cp */,
-				956B098515AB76B80006C6C0 /* Supporting Files */,
-			);
-			path = Event_Plugin;
-			sourceTree = "<group>";
-		};
-		956B098515AB76B80006C6C0 /* Supporting Files */ = {
-			isa = PBXGroup;
-			children = (
-				956B098615AB76B80006C6C0 /* Event_Plugin-Prefix.pch */,
-			);
-			name = "Supporting Files";
 			sourceTree = "<group>";
 		};
 		956B099415AB7D2F0006C6C0 /* libraries */ = {
@@ -199,7 +170,6 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				956B098C15AB76B80006C6C0 /* Event_Plugin.cp in Sources */,
 				956B09A315AB80330006C6C0 /* Main.cpp in Sources */,
 				956B09A515AB803B0006C6C0 /* Event_Plugin.cpp in Sources */,
 				956B09B015AB81830006C6C0 /* sunrise.cpp in Sources */,

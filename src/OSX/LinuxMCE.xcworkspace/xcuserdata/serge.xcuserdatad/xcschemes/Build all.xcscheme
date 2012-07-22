@@ -69,6 +69,20 @@
             buildForAnalyzing = "YES">
             <BuildableReference
                BuildableIdentifier = "primary"
+               BlueprintIdentifier = "95F7899615B4C0A600FB8F5B"
+               BuildableName = "libpluto_telecom.dylib"
+               BlueprintName = "libpluto_telecom"
+               ReferencedContainer = "container:libpluto_telecom.xcodeproj">
+            </BuildableReference>
+         </BuildActionEntry>
+         <BuildActionEntry
+            buildForTesting = "YES"
+            buildForRunning = "YES"
+            buildForProfiling = "YES"
+            buildForArchiving = "YES"
+            buildForAnalyzing = "YES">
+            <BuildableReference
+               BuildableIdentifier = "primary"
                BlueprintIdentifier = "956B0A1A15ACA8BA0006C6C0"
                BuildableName = "libpluto_security.dylib"
                BlueprintName = "libpluto_security"
@@ -153,6 +167,20 @@
             buildForAnalyzing = "YES">
             <BuildableReference
                BuildableIdentifier = "primary"
+               BlueprintIdentifier = "95F7895F15B4BEC100FB8F5B"
+               BuildableName = "Telecom_Plugin.dylib"
+               BlueprintName = "Telecom_Plugin"
+               ReferencedContainer = "container:plugins/Telecom_Plugin.xcodeproj">
+            </BuildableReference>
+         </BuildActionEntry>
+         <BuildActionEntry
+            buildForTesting = "YES"
+            buildForRunning = "YES"
+            buildForProfiling = "YES"
+            buildForArchiving = "YES"
+            buildForAnalyzing = "YES">
+            <BuildableReference
+               BuildableIdentifier = "primary"
                BlueprintIdentifier = "95F7892815B4BAE500FB8F5B"
                BuildableName = "Security_Plugin.dylib"
                BlueprintName = "Security_Plugin"
@@ -185,6 +213,20 @@
                BuildableName = "Media_Plugin.dylib"
                BlueprintName = "Media_Plugin"
                ReferencedContainer = "container:plugins/Media_Plugin.xcodeproj">
+            </BuildableReference>
+         </BuildActionEntry>
+         <BuildActionEntry
+            buildForTesting = "YES"
+            buildForRunning = "YES"
+            buildForProfiling = "YES"
+            buildForArchiving = "YES"
+            buildForAnalyzing = "YES">
+            <BuildableReference
+               BuildableIdentifier = "primary"
+               BlueprintIdentifier = "95F78A1215B7673500FB8F5B"
+               BuildableName = "Plug_And_Play_Plugin.dylib"
+               BlueprintName = "Plug_And_Play_Plugin"
+               ReferencedContainer = "container:plugins/Plug_And_Play_Plugin.xcodeproj">
             </BuildableReference>
          </BuildActionEntry>
          <BuildActionEntry

@@ -1,6 +1,0 @@
-//
-// Prefix header for all source files of the 'Orbiter_Plugin' target in the 'Orbiter_Plugin' project
-//
-
-#include <iostream>
-

@@ -7,7 +7,6 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		95ABFE5315AF63860079029F /* Climate_Plugin.cp in Sources */ = {isa = PBXBuildFile; fileRef = 95ABFE5215AF63860079029F /* Climate_Plugin.cp */; };
 		95ABFE5D15AF63FB0079029F /* Climate_Plugin.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 95ABFE5C15AF63FB0079029F /* Climate_Plugin.cpp */; };
 		95ABFE6015AF64030079029F /* Main.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 95ABFE5F15AF64030079029F /* Main.cpp */; };
 		95ABFE6315AF647C0079029F /* mysql.h in Headers */ = {isa = PBXBuildFile; fileRef = 95ABFE6215AF647C0079029F /* mysql.h */; };
@@ -20,12 +19,6 @@
 
 /* Begin PBXFileReference section */
 		95ABFE4915AF63860079029F /* Climate_Plugin.dylib */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.dylib"; includeInIndex = 0; path = Climate_Plugin.dylib; sourceTree = BUILT_PRODUCTS_DIR; };
-		95ABFE4D15AF63860079029F /* Climate_Plugin-Prefix.pch */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "Climate_Plugin-Prefix.pch"; sourceTree = "<group>"; };
-		95ABFE4E15AF63860079029F /* Climate_PluginProj.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; path = Climate_PluginProj.xcconfig; sourceTree = "<group>"; };
-		95ABFE4F15AF63860079029F /* Climate_PluginTarget.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; path = Climate_PluginTarget.xcconfig; sourceTree = "<group>"; };
-		95ABFE5015AF63860079029F /* Climate_Plugin.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = Climate_Plugin.h; sourceTree = "<group>"; };
-		95ABFE5115AF63860079029F /* Climate_PluginPriv.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = Climate_PluginPriv.h; sourceTree = "<group>"; };
-		95ABFE5215AF63860079029F /* Climate_Plugin.cp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = Climate_Plugin.cp; sourceTree = "<group>"; };
 		95ABFE5C15AF63FB0079029F /* Climate_Plugin.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = Climate_Plugin.cpp; path = ../../Climate_Plugin/Climate_Plugin.cpp; sourceTree = "<group>"; };
 		95ABFE5F15AF64030079029F /* Main.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = Main.cpp; path = ../../Climate_Plugin/Main.cpp; sourceTree = "<group>"; };
 		95ABFE6215AF647C0079029F /* mysql.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = mysql.h; path = ../mysql/include/mysql.h; sourceTree = "<group>"; };
@@ -58,7 +51,6 @@
 				95ABFE5F15AF64030079029F /* Main.cpp */,
 				95ABFE6415AF64AB0079029F /* Libraries */,
 				95ABFE6115AF64680079029F /* Includes */,
-				95ABFE4B15AF63860079029F /* Climate_Plugin */,
 				95ABFE4A15AF63860079029F /* Products */,
 			);
 			sourceTree = "<group>";
@@ -69,27 +61,6 @@
 				95ABFE4915AF63860079029F /* Climate_Plugin.dylib */,
 			);
 			name = Products;
-			sourceTree = "<group>";
-		};
-		95ABFE4B15AF63860079029F /* Climate_Plugin */ = {
-			isa = PBXGroup;
-			children = (
-				95ABFE4E15AF63860079029F /* Climate_PluginProj.xcconfig */,
-				95ABFE4F15AF63860079029F /* Climate_PluginTarget.xcconfig */,
-				95ABFE5015AF63860079029F /* Climate_Plugin.h */,
-				95ABFE5115AF63860079029F /* Climate_PluginPriv.h */,
-				95ABFE5215AF63860079029F /* Climate_Plugin.cp */,
-				95ABFE4C15AF63860079029F /* Supporting Files */,
-			);
-			path = Climate_Plugin;
-			sourceTree = "<group>";
-		};
-		95ABFE4C15AF63860079029F /* Supporting Files */ = {
-			isa = PBXGroup;
-			children = (
-				95ABFE4D15AF63860079029F /* Climate_Plugin-Prefix.pch */,
-			);
-			name = "Supporting Files";
 			sourceTree = "<group>";
 		};
 		95ABFE6115AF64680079029F /* Includes */ = {
@@ -173,7 +144,6 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				95ABFE5315AF63860079029F /* Climate_Plugin.cp in Sources */,
 				95ABFE5D15AF63FB0079029F /* Climate_Plugin.cpp in Sources */,
 				95ABFE6015AF64030079029F /* Main.cpp in Sources */,
 				95ABFE6C15AF65790079029F /* Climate_PluginBase.cpp in Sources */,

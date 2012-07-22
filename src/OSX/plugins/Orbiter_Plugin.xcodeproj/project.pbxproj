@@ -7,7 +7,6 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		956B09EE15AC915F0006C6C0 /* Orbiter_Plugin.cp in Sources */ = {isa = PBXBuildFile; fileRef = 956B09ED15AC915F0006C6C0 /* Orbiter_Plugin.cp */; };
 		956B09F815AC925A0006C6C0 /* Main.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 956B09F715AC925A0006C6C0 /* Main.cpp */; };
 		956B09FB15AC92630006C6C0 /* Orbiter_Plugin.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 956B09FA15AC92630006C6C0 /* Orbiter_Plugin.cpp */; };
 		956B09FF15AC92BA0006C6C0 /* FollowMe_Device.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 956B09FE15AC92BA0006C6C0 /* FollowMe_Device.cpp */; };
@@ -32,12 +31,6 @@
 
 /* Begin PBXFileReference section */
 		956B09E415AC915E0006C6C0 /* Orbiter_Plugin.dylib */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.dylib"; includeInIndex = 0; path = Orbiter_Plugin.dylib; sourceTree = BUILT_PRODUCTS_DIR; };
-		956B09E815AC915E0006C6C0 /* Orbiter_Plugin-Prefix.pch */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "Orbiter_Plugin-Prefix.pch"; sourceTree = "<group>"; };
-		956B09E915AC915F0006C6C0 /* Orbiter_PluginProj.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; path = Orbiter_PluginProj.xcconfig; sourceTree = "<group>"; };
-		956B09EA15AC915F0006C6C0 /* Orbiter_PluginTarget.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; path = Orbiter_PluginTarget.xcconfig; sourceTree = "<group>"; };
-		956B09EB15AC915F0006C6C0 /* Orbiter_Plugin.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = Orbiter_Plugin.h; sourceTree = "<group>"; };
-		956B09EC15AC915F0006C6C0 /* Orbiter_PluginPriv.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = Orbiter_PluginPriv.h; sourceTree = "<group>"; };
-		956B09ED15AC915F0006C6C0 /* Orbiter_Plugin.cp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = Orbiter_Plugin.cp; sourceTree = "<group>"; };
 		956B09F715AC925A0006C6C0 /* Main.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = Main.cpp; path = ../../Orbiter_Plugin/Main.cpp; sourceTree = "<group>"; };
 		956B09FA15AC92630006C6C0 /* Orbiter_Plugin.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = Orbiter_Plugin.cpp; path = ../../Orbiter_Plugin/Orbiter_Plugin.cpp; sourceTree = "<group>"; };
 		956B09FE15AC92BA0006C6C0 /* FollowMe_Device.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = FollowMe_Device.cpp; path = ../../Orbiter_Plugin/FollowMe_Device.cpp; sourceTree = "<group>"; };
@@ -84,7 +77,6 @@
 				956B09FC15AC927D0006C6C0 /* Includes */,
 				956B09F715AC925A0006C6C0 /* Main.cpp */,
 				956B09FA15AC92630006C6C0 /* Orbiter_Plugin.cpp */,
-				956B09E615AC915E0006C6C0 /* Orbiter_Plugin */,
 				956B09E515AC915E0006C6C0 /* Products */,
 			);
 			sourceTree = "<group>";
@@ -95,27 +87,6 @@
 				956B09E415AC915E0006C6C0 /* Orbiter_Plugin.dylib */,
 			);
 			name = Products;
-			sourceTree = "<group>";
-		};
-		956B09E615AC915E0006C6C0 /* Orbiter_Plugin */ = {
-			isa = PBXGroup;
-			children = (
-				956B09E915AC915F0006C6C0 /* Orbiter_PluginProj.xcconfig */,
-				956B09EA15AC915F0006C6C0 /* Orbiter_PluginTarget.xcconfig */,
-				956B09EB15AC915F0006C6C0 /* Orbiter_Plugin.h */,
-				956B09EC15AC915F0006C6C0 /* Orbiter_PluginPriv.h */,
-				956B09ED15AC915F0006C6C0 /* Orbiter_Plugin.cp */,
-				956B09E715AC915E0006C6C0 /* Supporting Files */,
-			);
-			path = Orbiter_Plugin;
-			sourceTree = "<group>";
-		};
-		956B09E715AC915E0006C6C0 /* Supporting Files */ = {
-			isa = PBXGroup;
-			children = (
-				956B09E815AC915E0006C6C0 /* Orbiter_Plugin-Prefix.pch */,
-			);
-			name = "Supporting Files";
 			sourceTree = "<group>";
 		};
 		956B09FC15AC927D0006C6C0 /* Includes */ = {
@@ -211,7 +182,6 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				956B09EE15AC915F0006C6C0 /* Orbiter_Plugin.cp in Sources */,
 				956B09F815AC925A0006C6C0 /* Main.cpp in Sources */,
 				956B09FB15AC92630006C6C0 /* Orbiter_Plugin.cpp in Sources */,
 				956B09FF15AC92BA0006C6C0 /* FollowMe_Device.cpp in Sources */,

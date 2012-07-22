@@ -7,7 +7,6 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		95DBE30C15B4A49B007ECCD8 /* Media_Plugin.cp in Sources */ = {isa = PBXBuildFile; fileRef = 95DBE30B15B4A49B007ECCD8 /* Media_Plugin.cp */; };
 		95DBE32115B4A531007ECCD8 /* Main.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 95DBE32015B4A531007ECCD8 /* Main.cpp */; };
 		95DBE32315B4A53C007ECCD8 /* Media_Plugin.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 95DBE32215B4A53C007ECCD8 /* Media_Plugin.cpp */; };
 		95DBE32715B4A56F007ECCD8 /* Media_PluginBase.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 95DBE32615B4A56F007ECCD8 /* Media_PluginBase.cpp */; };
@@ -39,12 +38,6 @@
 
 /* Begin PBXFileReference section */
 		95DBE30215B4A49B007ECCD8 /* Media_Plugin.dylib */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.dylib"; includeInIndex = 0; path = Media_Plugin.dylib; sourceTree = BUILT_PRODUCTS_DIR; };
-		95DBE30615B4A49B007ECCD8 /* Media_Plugin-Prefix.pch */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "Media_Plugin-Prefix.pch"; sourceTree = "<group>"; };
-		95DBE30715B4A49B007ECCD8 /* Media_PluginProj.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; path = Media_PluginProj.xcconfig; sourceTree = "<group>"; };
-		95DBE30815B4A49B007ECCD8 /* Media_PluginTarget.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; path = Media_PluginTarget.xcconfig; sourceTree = "<group>"; };
-		95DBE30915B4A49B007ECCD8 /* Media_Plugin.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = Media_Plugin.h; sourceTree = "<group>"; };
-		95DBE30A15B4A49B007ECCD8 /* Media_PluginPriv.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = Media_PluginPriv.h; sourceTree = "<group>"; };
-		95DBE30B15B4A49B007ECCD8 /* Media_Plugin.cp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = Media_Plugin.cp; sourceTree = "<group>"; };
 		95DBE32015B4A531007ECCD8 /* Main.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = Main.cpp; path = ../../Media_Plugin/Main.cpp; sourceTree = "<group>"; };
 		95DBE32215B4A53C007ECCD8 /* Media_Plugin.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = Media_Plugin.cpp; path = ../../Media_Plugin/Media_Plugin.cpp; sourceTree = "<group>"; };
 		95DBE32615B4A56F007ECCD8 /* Media_PluginBase.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = Media_PluginBase.cpp; path = ../../Gen_Devices/Media_PluginBase.cpp; sourceTree = "<group>"; };
@@ -96,11 +89,10 @@
 		95DBE2F715B4A49A007ECCD8 = {
 			isa = PBXGroup;
 			children = (
-				95DBE32515B4A54A007ECCD8 /* Libraries */,
-				95DBE32415B4A540007ECCD8 /* Includes */,
 				95DBE32015B4A531007ECCD8 /* Main.cpp */,
 				95DBE32215B4A53C007ECCD8 /* Media_Plugin.cpp */,
-				95DBE30415B4A49B007ECCD8 /* Media_Plugin */,
+				95DBE32415B4A540007ECCD8 /* Includes */,
+				95DBE32515B4A54A007ECCD8 /* Libraries */,
 				95DBE30315B4A49B007ECCD8 /* Products */,
 			);
 			sourceTree = "<group>";
@@ -111,27 +103,6 @@
 				95DBE30215B4A49B007ECCD8 /* Media_Plugin.dylib */,
 			);
 			name = Products;
-			sourceTree = "<group>";
-		};
-		95DBE30415B4A49B007ECCD8 /* Media_Plugin */ = {
-			isa = PBXGroup;
-			children = (
-				95DBE30715B4A49B007ECCD8 /* Media_PluginProj.xcconfig */,
-				95DBE30815B4A49B007ECCD8 /* Media_PluginTarget.xcconfig */,
-				95DBE30915B4A49B007ECCD8 /* Media_Plugin.h */,
-				95DBE30A15B4A49B007ECCD8 /* Media_PluginPriv.h */,
-				95DBE30B15B4A49B007ECCD8 /* Media_Plugin.cp */,
-				95DBE30515B4A49B007ECCD8 /* Supporting Files */,
-			);
-			path = Media_Plugin;
-			sourceTree = "<group>";
-		};
-		95DBE30515B4A49B007ECCD8 /* Supporting Files */ = {
-			isa = PBXGroup;
-			children = (
-				95DBE30615B4A49B007ECCD8 /* Media_Plugin-Prefix.pch */,
-			);
-			name = "Supporting Files";
 			sourceTree = "<group>";
 		};
 		95DBE32415B4A540007ECCD8 /* Includes */ = {
@@ -234,7 +205,6 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				95DBE30C15B4A49B007ECCD8 /* Media_Plugin.cp in Sources */,
 				95DBE32115B4A531007ECCD8 /* Main.cpp in Sources */,
 				95DBE32315B4A53C007ECCD8 /* Media_Plugin.cpp in Sources */,
 				95DBE32715B4A56F007ECCD8 /* Media_PluginBase.cpp in Sources */,
