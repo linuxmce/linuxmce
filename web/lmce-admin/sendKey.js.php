@@ -42,6 +42,8 @@ function sendKey(event)
 	else if (event.keyCode)
 		key_code = event.keyCode;
 
+	if (event.ctrlKey || event.altKey || event.metaKey)
+		return true;
 
 	// Num Block 1-9
 	if (key_code>=97 && key_code<=105)
@@ -63,6 +65,7 @@ function sendKey(event)
 	if (command_to_send != 0)
 	{
 		DoCmd("PLUTO_KEY " + command_to_send);
+		event.preventDefault();
 		return false;
 	}
 	return true;
