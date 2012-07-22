@@ -54,6 +54,7 @@ class FileDetailsClass : public QObject
    // Q_PROPERTY(QImage program READ getProgramImage WRITE setProgramImage NOTIFY objectChanged)
 
     //media title variable that can be independant of what is passed initially by now playing
+    Q_PROPERTY(QString qs_mainTitle READ getTitle WRITE setTitle NOTIFY titleChanged )
     Q_PROPERTY (QString mediatitle READ getMediaTitle WRITE setMediaTitle NOTIFY mediaTitleChanged)
     Q_PROPERTY (QString genre READ getGenre WRITE setGenre NOTIFY genreChanged)
     Q_PROPERTY (QString studio READ getStudio WRITE setStudio NOTIFY studioChanged)

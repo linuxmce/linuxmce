@@ -78,7 +78,7 @@ qorbiterManager::qorbiterManager(QDeclarativeView *view, QObject *parent) :
     b_localLoading = false;
 #endif
     //pqOrbiter->qmlUI = this;
-    setDceResponse("Initializing...");
+    setDceResponse("Starting...");
 
     if (readLocalConfig())
     {
@@ -238,7 +238,6 @@ void qorbiterManager::gotoQScreen(QString s)
         emit keepLoading(t);
         emit clearModel();
         emit resetFilter();
-
     }
 
     //send the qmlview a request to go to a screen, needs error handling

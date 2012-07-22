@@ -1,6 +1,9 @@
 import QtQuick 1.0
 import "../components"
 import "../js/ComponentLoader.js" as MyJs
+import "../effects"
+import Qt.labs.shaders 1.0
+
 Rectangle {
 
     // property alias synText:
@@ -27,7 +30,19 @@ Rectangle {
             anchors.top:parent.top
             anchors.topMargin: scaleY(2)
             anchors.horizontalCenter: parent.horizontalCenter
+
+            DropShadowEffect{
+                id:plistShadow
+                width: tvchannellist.width
+                height: tvchannellist.height
+                sourceItem:tvchannellist
+                property real distance: 5.0
+                color: "black"
+                blur: distance / 10
+                opacity: 1-distance /50.0
+
             EPGPlaylist{id:tvchannellist }
+            }
 
             Rectangle {
                 id:metarect

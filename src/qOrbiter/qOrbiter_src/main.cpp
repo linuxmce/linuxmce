@@ -345,6 +345,7 @@ int main(int argc, char* argv[])
         QObject::connect(pqOrbiter, SIGNAL(securityImageReady(int, QImage)), w->SecurityVideo, SLOT(setCameraImage(int,QImage)),Qt::QueuedConnection);
 
         //filedetails
+        QObject::connect(pqOrbiter, SIGNAL(fd_titleChanged(QString)), w->filedetailsclass, SLOT(setTitle(QString)), Qt::QueuedConnection);
         QObject::connect(pqOrbiter,SIGNAL(fd_titleImageChanged(QImage)), w->filedetailsclass, SLOT(setTitleImage(QImage)),Qt::QueuedConnection);
         QObject::connect(pqOrbiter, SIGNAL(fd_mediaTitleChanged(QString)), w->filedetailsclass, SLOT(setMediaTitle(QString)),Qt::QueuedConnection);
         QObject::connect(pqOrbiter, SIGNAL(fd_directorChanged(QString)), w->filedetailsclass, SLOT(setDirector(QString)),Qt::QueuedConnection);

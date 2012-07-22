@@ -32,7 +32,7 @@ Rectangle {
 
     Connections{
         target:dcerouter
-        onDeviceIdChanged: console.log(dcerouter.m_dwPK_Device)
+        onDeviceIdChanged: console.log("Device Id changed to: "+dcerouter.m_dwPK_Device)
     }
 
     color: "slategrey"

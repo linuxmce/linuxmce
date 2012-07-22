@@ -15,7 +15,7 @@ Rectangle {
                            }
 
     x:0-debugpanel.width
-    y: 1
+
 
     onActiveChanged: active ? hideTimer.start() : hideTimer.stop()
 

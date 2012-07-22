@@ -13,8 +13,6 @@ Item {
     signal close()
     signal changeScreen(string s)
     signal setupStart(int x, string y)
-
-
     property string locationinfo: "standby"
     property string screenfile
 property string dynamic_height
@@ -29,18 +27,26 @@ DebugPanel{
     id:dcemessages
     debugMessage: dcemessage
     z:2
+    anchors.top: parent.top
 }
 
 DebugPanel{
     id:mediaMessages
     debugMessage: dcerouter.mediaResponse
     z:2
+    anchors.top: dcemessages.bottom
 }
 
 DebugPanel{
     id:commandmessages
     debugMessage: dcerouter.commandResponse
     z:2
+    anchors.top: mediaMessages.bottom
+}
+
+DebugInfoPanel{
+id:orbiterInfo
+z:2
 }
 
 Connections{

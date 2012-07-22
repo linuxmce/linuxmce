@@ -1823,101 +1823,97 @@ bool DCE::qOrbiter::initialize()
     setCommandResponse("Starting dce initialization");
 
     if(m_bOrbiterConnected==false){
-    if ((GetConfig() == true) && (Connect(PK_DeviceTemplate_get()) == true))
-    {
-        m_dwMaxRetries = 1;
-        m_bRouterReloading = false;
-        m_bReload = false;
-        m_bOrbiterConnected = true;
-        emit deviceValid(true);
-        setCommandResponse("Starting Manager");
-        emit startManager(QString::number(m_dwPK_Device), QString::fromStdString(m_sHostName) );
-
-        DCE::LoggerWrapper::GetInstance()->Write(LV_CRITICAL, "Orbiter Connected, requesting configuration for device %d", m_dwPK_Device);
-
-        char *oData;
-        oData = NULL;
-        int iData_Size;
-        iData_Size = 0;
-        string *p_sResponse;
-        p_sResponse = NULL;
-        string filePath = "/var/tmp/"+QString::number(m_dwPK_Device).toStdString()+"conf.xml";
-        CMD_Request_File configFileRequest((long)m_dwPK_Device, (long)4 , (string)filePath, &oData, &iData_Size);
-
-        if (SendCommand(configFileRequest))
+        if ((GetConfig() == true) && (Connect(PK_DeviceTemplate_get()) == true))
         {
-            setCommandResponse("Requesting remote configuration..");
+            m_dwMaxRetries = 1;
+            m_bRouterReloading = false;
+            m_bReload = false;
+            m_bOrbiterConnected = true;
+            emit deviceValid(true);
+            setCommandResponse("Starting Manager");
+            emit startManager(QString::number(m_dwPK_Device), QString::fromStdString(m_sHostName) );
+
+            DCE::LoggerWrapper::GetInstance()->Write(LV_CRITICAL, "Orbiter Connected, requesting configuration for device %d", m_dwPK_Device);
+
+            char *oData;
+            oData = NULL;
+            int iData_Size;
+            iData_Size = 0;
+            string *p_sResponse;
+            p_sResponse = NULL;
+            string filePath = "/var/tmp/"+QString::number(m_dwPK_Device).toStdString()+"conf.xml";
+            CMD_Request_File configFileRequest((long)m_dwPK_Device, (long)4 , (string)filePath, &oData, &iData_Size);
+
+            if (SendCommand(configFileRequest))
+            {
+                setCommandResponse("Requesting remote configuration..");
+            }
+            else
+            {
+                return false;
+            }
+
+            //setDceResponse("Idata recieved: " +QString::number(iData_Size)) ; // size of xml file
+            QByteArray configData;              //config file put into qbytearray for processing
+            configData = oData;
+            if (configData.size() == 0)
+            {
+                setCommandResponse("Invalid config for device: " + QString::number(m_dwPK_Device));
+                setCommandResponse("Please run http://dcerouter/lmce-admin/qOrbiterGenerator.php?d=" + QString::number(m_dwPK_Device)) ;
+                return false;
+            }
+            emit configReady(configData);
+            return true;
         }
         else
         {
-            return false;
-        }
+            // qDebug("Checking Connection Error Type:");
 
-        //setDceResponse("Idata recieved: " +QString::number(iData_Size)) ; // size of xml file
-        QByteArray configData;              //config file put into qbytearray for processing
-        configData = oData;
-        if (configData.size() == 0)
-        {
-            setCommandResponse("Invalid config for device: " + QString::number(m_dwPK_Device));
-            setCommandResponse("Please run http://dcerouter/lmce-admin/qOrbiterGenerator.php?d=" + QString::number(m_dwPK_Device)) ;
-            return false;
-        }
-        emit configReady(configData);
-        return true;
-    }
-    else
-    {
-
-
-        // qDebug("Checking Connection Error Type:");
-
-        QApplication::processEvents(QEventLoop::AllEvents);
-        if(  m_pEvent->m_pClientSocket->m_eLastError==ClientSocket::cs_err_CannotConnect )
-        {
-
-            LoggerWrapper::GetInstance()->Write(LV_CRITICAL, "No Router");
-            setCommandResponse("No Connection to Router");
-            emit routerInvalid();
             QApplication::processEvents(QEventLoop::AllEvents);
-            return false;
+            if(  m_pEvent->m_pClientSocket->m_eLastError==ClientSocket::cs_err_CannotConnect )
+            {
 
-        }
-        else if( m_pEvent->m_pClientSocket->m_eLastError==ClientSocket::cs_err_BadDevice )
-        {
+                LoggerWrapper::GetInstance()->Write(LV_CRITICAL, "No Router");
+                setCommandResponse("No Connection to Router");
+                emit routerInvalid();
+                QApplication::processEvents(QEventLoop::AllEvents);
+                return false;
 
-            LoggerWrapper::GetInstance()->Write(LV_CRITICAL, "Bad Device");
-            setCommandResponse("Bad Device");
-            int errorType =  this->DeviceIdInvalid();
-            emit connectionValid(true);
-            QApplication::processEvents(QEventLoop::AllEvents);
-            return false;
-        }
+            }
+            else if( m_pEvent->m_pClientSocket->m_eLastError==ClientSocket::cs_err_BadDevice )
+            {
 
-        else if(  m_pEvent->m_pClientSocket->m_eLastError==ClientSocket::cs_err_NeedReload )
-        {
+                LoggerWrapper::GetInstance()->Write(LV_CRITICAL, "Bad Device");
+                setCommandResponse("Bad Device");
+                int errorType =  this->DeviceIdInvalid();
+                emit connectionValid(true);
+                QApplication::processEvents(QEventLoop::AllEvents);
+                return false;
+            }
 
-            LoggerWrapper::GetInstance()->Write(LV_CRITICAL, "Router Needs Reload");
-            setCommandResponse("Needs Reload");
-            QApplication::processEvents(QEventLoop::AllEvents);
-            return false;
-        }
-        else
-        {
+            else if(  m_pEvent->m_pClientSocket->m_eLastError==ClientSocket::cs_err_NeedReload )
+            {
 
-            LoggerWrapper::GetInstance()->Write(LV_CRITICAL, "Connect() Failed");
+                LoggerWrapper::GetInstance()->Write(LV_CRITICAL, "Router Needs Reload");
+                setCommandResponse("Needs Reload");
+                QApplication::processEvents(QEventLoop::AllEvents);
+                return false;
+            }
+            else
+            {
+
+                LoggerWrapper::GetInstance()->Write(LV_CRITICAL, "Connect() Failed");
+                Disconnect();
+                setCommandResponse("QOrbiter Connect() Failed for"+QString::number(this->m_dwPK_Device) );
+                QApplication::processEvents(QEventLoop::AllEvents);
+                return false;
+            }
+
             Disconnect();
-            setCommandResponse("QOrbiter Connect() Failed for"+QString::number(this->m_dwPK_Device) );
-            QApplication::processEvents(QEventLoop::AllEvents);
             return false;
+            QApplication::processEvents(QEventLoop::AllEvents);
         }
-
-        Disconnect();
-        return false;
-        QApplication::processEvents(QEventLoop::AllEvents);
     }
-    }
-
-
 }
 
 bool DCE::qOrbiter::deinitialize()
@@ -1972,7 +1968,7 @@ void qOrbiter::qmlSetup(QString device, QString address)
     m_sHostName = address.toStdString();
     m_sIPAddress = address.toStdString();
     if(!m_bOrbiterConnected )
-    pingCore();
+        pingCore();
 
 }
 
@@ -2457,21 +2453,24 @@ void DCE::qOrbiter::GetFileInfoForQml(QString qs_file_reference)
     string s_value_assignment;
 
     CMD_Get_Attributes_For_Media cmd_file_info(m_dwPK_Device, iMediaPluginID , qs_file_reference.toStdString(), "", &s_value_assignment);
+    string pResponse="";
 
-    if (!SendCommand(cmd_file_info))
+    if (SendCommand(cmd_file_info, &pResponse) && pResponse == "OK")
     {
-        cout << "No Router";
+       GetMediaAttributeGrid(qs_file_reference);
+       setCommandResponse("Requesting file information for "+ qs_file_reference );
     }
     else
     {
-        GetMediaAttributeGrid(qs_file_reference);
+        setCommandResponse("Unable to request file information");
+        checkReload();
     }
 
 }
 
 void DCE::qOrbiter::GetMediaAttributeGrid(QString  qs_fk_fileno)
 {
-    //qDebug("Getting file info");
+    setCommandResponse("Getting file info");
     int gHeight = 1;
     int gWidth = 1;
     int pkVar = 0;
@@ -2510,9 +2509,12 @@ void DCE::qOrbiter::GetMediaAttributeGrid(QString  qs_fk_fileno)
     SendCommand(attribute_detail_get);
     QString breaker = s_val.c_str();
 
-
     QStringList details = breaker.split(QRegExp("\\t"));
     int placeholder;
+
+ #ifdef QT_DEBUG
+    qDebug() << details.join("||");
+#endif
 
     placeholder = details.indexOf("TITLE");
     if(placeholder != -1)
@@ -2790,7 +2792,7 @@ void qOrbiter::getStreamingVideo()
     }
     else
     {
-       setCommandResponse("Couldnt get the stream image!");
+        setCommandResponse("Couldnt get the stream image!");
     }
 
 
@@ -4023,8 +4025,8 @@ void DCE::qOrbiter::adjustVolume(int vol)
 void qOrbiter::OnDisconnect()
 {
     emit routerDisconnect();
-      qDebug("Router disconnected!");
-      m_bOrbiterConnected = false;
+    qDebug("Router disconnected!");
+    m_bOrbiterConnected = false;
     setEventResponse("Connection Lost");
 }
 
@@ -4765,21 +4767,23 @@ void qOrbiter::pingCore()
 {
 #ifdef QT_DEBUG
     qDebug() << "initiating ping to core";
-            #endif
-
-
+#endif
     QString url = QString::fromStdString(m_sIPAddress);
-    if(!url.contains("/D/" )){
-    QHostInfo::lookupHost(url, this, SLOT(checkPing(QHostInfo)));          
+    if(!url.contains(QRegExp("(\\D)"))){
+#ifdef QT_DEBUG
+        qDebug("Host name provided, doing lookup");
+#endif
+        QHostInfo::lookupHost(url, this, SLOT(checkPing(QHostInfo)));
     }
     else{
-        if(!m_bOrbiterConnected)
-        checkInstall();
+
+        if(!m_bOrbiterConnected){
+            qDebug("No hostname, checking installation");
+            checkInstall();
+        }
     }
 
-#ifdef QT_DEBUG
-    qDebug() << "Core lookup::"<< url;
-#endif
+
 
     // TODO: add a network timeout for this so it returns faster for located non-lmce machines. Currently it only returns fast if the ip or hostname is totally invalid, i.e. no route. For online machines,
     //it takes a bit longer. solve by attatching A Qtimer checking process and force it to cancel requests that dont return in a reasonable(whatever that is) amount of time. 5 seconds? I mean, who is still on
@@ -4805,7 +4809,7 @@ void qOrbiter::checkPing(QHostInfo info)
 #endif
         if(!m_bRunning ){
 #ifdef QT_DEBUG
-        qDebug() << "Checking for linuxmce installation" << m_sIPAddress.c_str();
+            qDebug() << "Checking for linuxmce installation" << m_sIPAddress.c_str();
 #endif
             checkInstall();
         }
@@ -4816,17 +4820,16 @@ void qOrbiter::checkPing(QHostInfo info)
 void qOrbiter::checkInstall()
 {
     if(m_bOrbiterConnected == false){
-    QString url = "http://"+QString::fromStdString(m_sIPAddress)+"/lmce-admin/index.php";
-    QNetworkAccessManager *pingManager = new QNetworkAccessManager();
-    connect(pingManager, SIGNAL(finished(QNetworkReply*)), this, SLOT(verifyInstall(QNetworkReply*)));
-    QNetworkReply *badReply = pingManager->get(QNetworkRequest(url));
-    QTimer::singleShot(5000, badReply,SIGNAL(finished()));
+        QString url = "http://"+QString::fromStdString(m_sIPAddress)+"/lmce-admin/index.php";
+        QNetworkAccessManager *pingManager = new QNetworkAccessManager();
+        connect(pingManager, SIGNAL(finished(QNetworkReply*)), this, SLOT(verifyInstall(QNetworkReply*)));
+        QNetworkReply *badReply = pingManager->get(QNetworkRequest(url));
+        QTimer::singleShot(5000, badReply,SIGNAL(finished()));
     }
 }
 
 void qOrbiter::verifyInstall(QNetworkReply *r)
 {
-
     if(r->bytesAvailable() !=0)
     {
         qDebug("Found installation, starting");

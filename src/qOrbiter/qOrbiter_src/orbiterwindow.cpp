@@ -189,7 +189,6 @@ void orbiterWindow::qmlSetupLmce(QString device, QString ip)
     deviceno = device.toLong();
     mainView.rootContext()->setContextProperty("deviceid", int(deviceno));
     mainView.rootContext()->setContextProperty("srouterip", QString::fromStdString(router));
-
     emit setupLmce(device, ip);
 }
 
@@ -259,8 +258,7 @@ void orbiterWindow::displayPromptResponse(int type, QList<QObject*> pList)
     if(type==1){
         userList.clear();
         userList = pList;
-        mainView.rootContext()->setContextProperty("users", QVariant::fromValue(userList));
-
+       mainView.rootContext()->setContextProperty("users", QVariant::fromValue(userList));
     }
     else
     {
@@ -268,8 +266,6 @@ void orbiterWindow::displayPromptResponse(int type, QList<QObject*> pList)
         roomList = pList;
         mainView.rootContext()->setContextProperty("rooms", QVariant::fromValue(roomList));
     }
-
-
 }
 
 void orbiterWindow::setupNewOrbiter(int user, int room, int skin, int lang, int height, int w)
