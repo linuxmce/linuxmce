@@ -7,7 +7,6 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		95ABFD3A15ACD1F50079029F /* libpluto_media.cp in Sources */ = {isa = PBXBuildFile; fileRef = 95ABFD3915ACD1F50079029F /* libpluto_media.cp */; };
 		95ABFD7515ACD2F40079029F /* Table_Attribute_Settings.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 95ABFD4A15ACD2F40079029F /* Table_Attribute_Settings.cpp */; };
 		95ABFD7615ACD2F40079029F /* Table_Attribute.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 95ABFD4B15ACD2F40079029F /* Table_Attribute.cpp */; };
 		95ABFD7715ACD2F40079029F /* Table_AttributeType.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 95ABFD4C15ACD2F40079029F /* Table_AttributeType.cpp */; };
@@ -60,12 +59,6 @@
 
 /* Begin PBXFileReference section */
 		95ABFD3015ACD1F50079029F /* libpluto_media.dylib */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.dylib"; includeInIndex = 0; path = libpluto_media.dylib; sourceTree = BUILT_PRODUCTS_DIR; };
-		95ABFD3415ACD1F50079029F /* libpluto_media-Prefix.pch */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "libpluto_media-Prefix.pch"; sourceTree = "<group>"; };
-		95ABFD3515ACD1F50079029F /* libpluto_mediaProj.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; path = libpluto_mediaProj.xcconfig; sourceTree = "<group>"; };
-		95ABFD3615ACD1F50079029F /* libpluto_mediaTarget.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; path = libpluto_mediaTarget.xcconfig; sourceTree = "<group>"; };
-		95ABFD3715ACD1F50079029F /* libpluto_media.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = libpluto_media.h; sourceTree = "<group>"; };
-		95ABFD3815ACD1F50079029F /* libpluto_mediaPriv.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = libpluto_mediaPriv.h; sourceTree = "<group>"; };
-		95ABFD3915ACD1F50079029F /* libpluto_media.cp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = libpluto_media.cp; sourceTree = "<group>"; };
 		95ABFD4A15ACD2F40079029F /* Table_Attribute_Settings.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = Table_Attribute_Settings.cpp; path = ../pluto_media/Table_Attribute_Settings.cpp; sourceTree = "<group>"; };
 		95ABFD4B15ACD2F40079029F /* Table_Attribute.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = Table_Attribute.cpp; path = ../pluto_media/Table_Attribute.cpp; sourceTree = "<group>"; };
 		95ABFD4C15ACD2F40079029F /* Table_AttributeType.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = Table_AttributeType.cpp; path = ../pluto_media/Table_AttributeType.cpp; sourceTree = "<group>"; };
@@ -135,7 +128,6 @@
 				95ABFDA415ACD31C0079029F /* Database_pluto_media.cpp */,
 				95ABFD4515ACD2600079029F /* Libraries */,
 				95ABFD4315ACD25C0079029F /* Includes */,
-				95ABFD3215ACD1F50079029F /* libpluto_media */,
 				95ABFD3115ACD1F50079029F /* Products */,
 			);
 			sourceTree = "<group>";
@@ -146,27 +138,6 @@
 				95ABFD3015ACD1F50079029F /* libpluto_media.dylib */,
 			);
 			name = Products;
-			sourceTree = "<group>";
-		};
-		95ABFD3215ACD1F50079029F /* libpluto_media */ = {
-			isa = PBXGroup;
-			children = (
-				95ABFD3515ACD1F50079029F /* libpluto_mediaProj.xcconfig */,
-				95ABFD3615ACD1F50079029F /* libpluto_mediaTarget.xcconfig */,
-				95ABFD3715ACD1F50079029F /* libpluto_media.h */,
-				95ABFD3815ACD1F50079029F /* libpluto_mediaPriv.h */,
-				95ABFD3915ACD1F50079029F /* libpluto_media.cp */,
-				95ABFD3315ACD1F50079029F /* Supporting Files */,
-			);
-			path = libpluto_media;
-			sourceTree = "<group>";
-		};
-		95ABFD3315ACD1F50079029F /* Supporting Files */ = {
-			isa = PBXGroup;
-			children = (
-				95ABFD3415ACD1F50079029F /* libpluto_media-Prefix.pch */,
-			);
-			name = "Supporting Files";
 			sourceTree = "<group>";
 		};
 		95ABFD4315ACD25C0079029F /* Includes */ = {
@@ -299,7 +270,6 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				95ABFD3A15ACD1F50079029F /* libpluto_media.cp in Sources */,
 				95ABFD7515ACD2F40079029F /* Table_Attribute_Settings.cpp in Sources */,
 				95ABFD7615ACD2F40079029F /* Table_Attribute.cpp in Sources */,
 				95ABFD7715ACD2F40079029F /* Table_AttributeType.cpp in Sources */,

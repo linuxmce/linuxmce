@@ -1,6 +1,0 @@
-//
-// Prefix header for all source files of the 'libpluto_main' target in the 'libpluto_main' project
-//
-
-#include <iostream>
-

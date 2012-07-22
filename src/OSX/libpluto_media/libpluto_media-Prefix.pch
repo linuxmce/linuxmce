@@ -1,6 +1,0 @@
-//
-// Prefix header for all source files of the 'libpluto_media' target in the 'libpluto_media' project
-//
-
-#include <iostream>
-

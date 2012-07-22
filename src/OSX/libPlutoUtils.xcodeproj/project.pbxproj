@@ -7,7 +7,6 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		95FF880015B3624700B0EC93 /* libPlutoUtils.cp in Sources */ = {isa = PBXBuildFile; fileRef = 95FF87FF15B3624700B0EC93 /* libPlutoUtils.cp */; };
 		95FF880E15B3647900B0EC93 /* CommonIncludes.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 95FF880D15B3647900B0EC93 /* CommonIncludes.cpp */; };
 		95FF881115B3648B00B0EC93 /* DatabaseUtils.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 95FF880F15B3648B00B0EC93 /* DatabaseUtils.cpp */; };
 		95FF881215B3648B00B0EC93 /* FileUtils.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 95FF881015B3648B00B0EC93 /* FileUtils.cpp */; };
@@ -30,12 +29,6 @@
 
 /* Begin PBXFileReference section */
 		95FF87F615B3624700B0EC93 /* libPlutoUtils.dylib */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.dylib"; includeInIndex = 0; path = libPlutoUtils.dylib; sourceTree = BUILT_PRODUCTS_DIR; };
-		95FF87FA15B3624700B0EC93 /* libPlutoUtils-Prefix.pch */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "libPlutoUtils-Prefix.pch"; sourceTree = "<group>"; };
-		95FF87FB15B3624700B0EC93 /* libPlutoUtilsProj.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; path = libPlutoUtilsProj.xcconfig; sourceTree = "<group>"; };
-		95FF87FC15B3624700B0EC93 /* libPlutoUtilsTarget.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; path = libPlutoUtilsTarget.xcconfig; sourceTree = "<group>"; };
-		95FF87FD15B3624700B0EC93 /* libPlutoUtils.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = libPlutoUtils.h; sourceTree = "<group>"; };
-		95FF87FE15B3624700B0EC93 /* libPlutoUtilsPriv.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = libPlutoUtilsPriv.h; sourceTree = "<group>"; };
-		95FF87FF15B3624700B0EC93 /* libPlutoUtils.cp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = libPlutoUtils.cp; sourceTree = "<group>"; };
 		95FF880D15B3647900B0EC93 /* CommonIncludes.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = CommonIncludes.cpp; path = ../PlutoUtils/CommonIncludes.cpp; sourceTree = "<group>"; };
 		95FF880F15B3648B00B0EC93 /* DatabaseUtils.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = DatabaseUtils.cpp; path = ../PlutoUtils/DatabaseUtils.cpp; sourceTree = "<group>"; };
 		95FF881015B3648B00B0EC93 /* FileUtils.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = FileUtils.cpp; path = ../PlutoUtils/FileUtils.cpp; sourceTree = "<group>"; };
@@ -74,7 +67,6 @@
 			children = (
 				95FF882D15B3657C00B0EC93 /* libraries */,
 				95FF880C15B3646300B0EC93 /* Includes */,
-				95FF87F815B3624700B0EC93 /* libPlutoUtils */,
 				95FF87F715B3624700B0EC93 /* Products */,
 			);
 			sourceTree = "<group>";
@@ -85,27 +77,6 @@
 				95FF87F615B3624700B0EC93 /* libPlutoUtils.dylib */,
 			);
 			name = Products;
-			sourceTree = "<group>";
-		};
-		95FF87F815B3624700B0EC93 /* libPlutoUtils */ = {
-			isa = PBXGroup;
-			children = (
-				95FF87FB15B3624700B0EC93 /* libPlutoUtilsProj.xcconfig */,
-				95FF87FC15B3624700B0EC93 /* libPlutoUtilsTarget.xcconfig */,
-				95FF87FD15B3624700B0EC93 /* libPlutoUtils.h */,
-				95FF87FE15B3624700B0EC93 /* libPlutoUtilsPriv.h */,
-				95FF87FF15B3624700B0EC93 /* libPlutoUtils.cp */,
-				95FF87F915B3624700B0EC93 /* Supporting Files */,
-			);
-			path = libPlutoUtils;
-			sourceTree = "<group>";
-		};
-		95FF87F915B3624700B0EC93 /* Supporting Files */ = {
-			isa = PBXGroup;
-			children = (
-				95FF87FA15B3624700B0EC93 /* libPlutoUtils-Prefix.pch */,
-			);
-			name = "Supporting Files";
 			sourceTree = "<group>";
 		};
 		95FF880C15B3646300B0EC93 /* Includes */ = {
@@ -201,7 +172,6 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				95FF880015B3624700B0EC93 /* libPlutoUtils.cp in Sources */,
 				95FF880E15B3647900B0EC93 /* CommonIncludes.cpp in Sources */,
 				95FF881115B3648B00B0EC93 /* DatabaseUtils.cpp in Sources */,
 				95FF881215B3648B00B0EC93 /* FileUtils.cpp in Sources */,

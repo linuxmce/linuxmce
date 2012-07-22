@@ -7,7 +7,6 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		95B5B67714671A64005AD5C8 /* libDCECommon.cp in Sources */ = {isa = PBXBuildFile; fileRef = 95B5B67614671A64005AD5C8 /* libDCECommon.cp */; };
 		95B5B68514671AFA005AD5C8 /* DataGrid.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 95B5B68414671AFA005AD5C8 /* DataGrid.cpp */; };
 		95B5B68714671B42005AD5C8 /* ClientSocket.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 95B5B68614671B42005AD5C8 /* ClientSocket.cpp */; };
 		95B5B68914671B4B005AD5C8 /* PlainClientSocket.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 95B5B68814671B4B005AD5C8 /* PlainClientSocket.cpp */; };
@@ -58,12 +57,6 @@
 
 /* Begin PBXFileReference section */
 		95B5B66D14671A64005AD5C8 /* libDCECommon.dylib */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.dylib"; includeInIndex = 0; path = libDCECommon.dylib; sourceTree = BUILT_PRODUCTS_DIR; };
-		95B5B67114671A64005AD5C8 /* libDCECommon-Prefix.pch */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "libDCECommon-Prefix.pch"; sourceTree = "<group>"; };
-		95B5B67214671A64005AD5C8 /* libDCECommonProj.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; path = libDCECommonProj.xcconfig; sourceTree = "<group>"; };
-		95B5B67314671A64005AD5C8 /* libDCECommonTarget.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; path = libDCECommonTarget.xcconfig; sourceTree = "<group>"; };
-		95B5B67414671A64005AD5C8 /* libDCECommon.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = libDCECommon.h; sourceTree = "<group>"; };
-		95B5B67514671A64005AD5C8 /* libDCECommonPriv.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = libDCECommonPriv.h; sourceTree = "<group>"; };
-		95B5B67614671A64005AD5C8 /* libDCECommon.cp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = libDCECommon.cp; sourceTree = "<group>"; };
 		95B5B68414671AFA005AD5C8 /* DataGrid.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = DataGrid.cpp; path = ../DCE/DataGrid.cpp; sourceTree = "<group>"; };
 		95B5B68614671B42005AD5C8 /* ClientSocket.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = ClientSocket.cpp; path = ../DCE/ClientSocket.cpp; sourceTree = "<group>"; };
 		95B5B68814671B4B005AD5C8 /* PlainClientSocket.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = PlainClientSocket.cpp; path = ../DCE/PlainClientSocket.cpp; sourceTree = "<group>"; };
@@ -120,7 +113,6 @@
 				95B5B6B514671D70005AD5C8 /* mysql */,
 				95B5B6B014671C77005AD5C8 /* db_wrapper */,
 				95B5B67D14671A6F005AD5C8 /* Sources */,
-				95B5B66F14671A64005AD5C8 /* libDCECommon */,
 				95B5B66E14671A64005AD5C8 /* Products */,
 			);
 			sourceTree = "<group>";
@@ -131,27 +123,6 @@
 				95B5B66D14671A64005AD5C8 /* libDCECommon.dylib */,
 			);
 			name = Products;
-			sourceTree = "<group>";
-		};
-		95B5B66F14671A64005AD5C8 /* libDCECommon */ = {
-			isa = PBXGroup;
-			children = (
-				95B5B67214671A64005AD5C8 /* libDCECommonProj.xcconfig */,
-				95B5B67314671A64005AD5C8 /* libDCECommonTarget.xcconfig */,
-				95B5B67414671A64005AD5C8 /* libDCECommon.h */,
-				95B5B67514671A64005AD5C8 /* libDCECommonPriv.h */,
-				95B5B67614671A64005AD5C8 /* libDCECommon.cp */,
-				95B5B67014671A64005AD5C8 /* Supporting Files */,
-			);
-			path = libDCECommon;
-			sourceTree = "<group>";
-		};
-		95B5B67014671A64005AD5C8 /* Supporting Files */ = {
-			isa = PBXGroup;
-			children = (
-				95B5B67114671A64005AD5C8 /* libDCECommon-Prefix.pch */,
-			);
-			name = "Supporting Files";
 			sourceTree = "<group>";
 		};
 		95B5B67D14671A6F005AD5C8 /* Sources */ = {
@@ -285,7 +256,6 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				95B5B67714671A64005AD5C8 /* libDCECommon.cp in Sources */,
 				95B5B68514671AFA005AD5C8 /* DataGrid.cpp in Sources */,
 				95B5B68714671B42005AD5C8 /* ClientSocket.cpp in Sources */,
 				95B5B68914671B4B005AD5C8 /* PlainClientSocket.cpp in Sources */,

@@ -7,7 +7,6 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		95CBD28215A9EFEB00F17914 /* libpluto_main.cp in Sources */ = {isa = PBXBuildFile; fileRef = 95CBD28115A9EFEB00F17914 /* libpluto_main.cp */; };
 		95CBD37815A9F16B00F17914 /* Table_Array.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 95CBD28D15A9F16A00F17914 /* Table_Array.cpp */; };
 		95CBD37915A9F16B00F17914 /* Table_Broadcast.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 95CBD28E15A9F16A00F17914 /* Table_Broadcast.cpp */; };
 		95CBD37A15A9F16B00F17914 /* Table_Button.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 95CBD28F15A9F16A00F17914 /* Table_Button.cpp */; };
@@ -251,12 +250,6 @@
 
 /* Begin PBXFileReference section */
 		95CBD27815A9EFEB00F17914 /* libpluto_main.dylib */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.dylib"; includeInIndex = 0; path = libpluto_main.dylib; sourceTree = BUILT_PRODUCTS_DIR; };
-		95CBD27C15A9EFEB00F17914 /* libpluto_main-Prefix.pch */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "libpluto_main-Prefix.pch"; sourceTree = "<group>"; };
-		95CBD27D15A9EFEB00F17914 /* libpluto_mainProj.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; path = libpluto_mainProj.xcconfig; sourceTree = "<group>"; };
-		95CBD27E15A9EFEB00F17914 /* libpluto_mainTarget.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; path = libpluto_mainTarget.xcconfig; sourceTree = "<group>"; };
-		95CBD27F15A9EFEB00F17914 /* libpluto_main.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = libpluto_main.h; sourceTree = "<group>"; };
-		95CBD28015A9EFEB00F17914 /* libpluto_mainPriv.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = libpluto_mainPriv.h; sourceTree = "<group>"; };
-		95CBD28115A9EFEB00F17914 /* libpluto_main.cp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = libpluto_main.cp; sourceTree = "<group>"; };
 		95CBD28D15A9F16A00F17914 /* Table_Array.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = Table_Array.cpp; path = ../pluto_main/Table_Array.cpp; sourceTree = "<group>"; };
 		95CBD28E15A9F16A00F17914 /* Table_Broadcast.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = Table_Broadcast.cpp; path = ../pluto_main/Table_Broadcast.cpp; sourceTree = "<group>"; };
 		95CBD28F15A9F16A00F17914 /* Table_Button.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = Table_Button.cpp; path = ../pluto_main/Table_Button.cpp; sourceTree = "<group>"; };
@@ -516,7 +509,6 @@
 			children = (
 				95CBD46915A9FC1100F17914 /* Includes */,
 				95CBD46615A9FB8400F17914 /* libraries */,
-				95CBD27A15A9EFEB00F17914 /* libpluto_main */,
 				95CBD27915A9EFEB00F17914 /* Products */,
 			);
 			sourceTree = "<group>";
@@ -527,27 +519,6 @@
 				95CBD27815A9EFEB00F17914 /* libpluto_main.dylib */,
 			);
 			name = Products;
-			sourceTree = "<group>";
-		};
-		95CBD27A15A9EFEB00F17914 /* libpluto_main */ = {
-			isa = PBXGroup;
-			children = (
-				95CBD27D15A9EFEB00F17914 /* libpluto_mainProj.xcconfig */,
-				95CBD27E15A9EFEB00F17914 /* libpluto_mainTarget.xcconfig */,
-				95CBD27F15A9EFEB00F17914 /* libpluto_main.h */,
-				95CBD28015A9EFEB00F17914 /* libpluto_mainPriv.h */,
-				95CBD28115A9EFEB00F17914 /* libpluto_main.cp */,
-				95CBD27B15A9EFEB00F17914 /* Supporting Files */,
-			);
-			path = libpluto_main;
-			sourceTree = "<group>";
-		};
-		95CBD27B15A9EFEB00F17914 /* Supporting Files */ = {
-			isa = PBXGroup;
-			children = (
-				95CBD27C15A9EFEB00F17914 /* libpluto_main-Prefix.pch */,
-			);
-			name = "Supporting Files";
 			sourceTree = "<group>";
 		};
 		95CBD28B15A9F0CF00F17914 /* Tables */ = {
@@ -880,7 +851,6 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				95CBD28215A9EFEB00F17914 /* libpluto_main.cp in Sources */,
 				95CBD37815A9F16B00F17914 /* Table_Array.cpp in Sources */,
 				95CBD37915A9F16B00F17914 /* Table_Broadcast.cpp in Sources */,
 				95CBD37A15A9F16B00F17914 /* Table_Button.cpp in Sources */,

@@ -7,7 +7,6 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		95F789A115B4C0A700FB8F5B /* libpluto_telecom.cp in Sources */ = {isa = PBXBuildFile; fileRef = 95F789A015B4C0A700FB8F5B /* libpluto_telecom.cp */; };
 		95F789B115B4C16B00FB8F5B /* mysql.h in Headers */ = {isa = PBXBuildFile; fileRef = 95F789B015B4C16B00FB8F5B /* mysql.h */; };
 		95F789CC15B4C1CA00FB8F5B /* libDCECommon.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 95F789CA15B4C1CA00FB8F5B /* libDCECommon.dylib */; };
 		95F789CD15B4C1CA00FB8F5B /* libmysqlclient.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 95F789CB15B4C1CA00FB8F5B /* libmysqlclient.dylib */; };
@@ -36,12 +35,6 @@
 
 /* Begin PBXFileReference section */
 		95F7899715B4C0A600FB8F5B /* libpluto_telecom.dylib */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.dylib"; includeInIndex = 0; path = libpluto_telecom.dylib; sourceTree = BUILT_PRODUCTS_DIR; };
-		95F7899B15B4C0A700FB8F5B /* libpluto_telecom-Prefix.pch */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "libpluto_telecom-Prefix.pch"; sourceTree = "<group>"; };
-		95F7899C15B4C0A700FB8F5B /* libpluto_telecomProj.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; path = libpluto_telecomProj.xcconfig; sourceTree = "<group>"; };
-		95F7899D15B4C0A700FB8F5B /* libpluto_telecomTarget.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; path = libpluto_telecomTarget.xcconfig; sourceTree = "<group>"; };
-		95F7899E15B4C0A700FB8F5B /* libpluto_telecom.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = libpluto_telecom.h; sourceTree = "<group>"; };
-		95F7899F15B4C0A700FB8F5B /* libpluto_telecomPriv.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = libpluto_telecomPriv.h; sourceTree = "<group>"; };
-		95F789A015B4C0A700FB8F5B /* libpluto_telecom.cp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = libpluto_telecom.cp; sourceTree = "<group>"; };
 		95F789B015B4C16B00FB8F5B /* mysql.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = mysql.h; path = mysql/include/mysql.h; sourceTree = "<group>"; };
 		95F789CA15B4C1CA00FB8F5B /* libDCECommon.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libDCECommon.dylib; path = lib/libDCECommon.dylib; sourceTree = "<group>"; };
 		95F789CB15B4C1CA00FB8F5B /* libmysqlclient.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libmysqlclient.dylib; path = mysql/lib/libmysqlclient.dylib; sourceTree = "<group>"; };
@@ -88,7 +81,6 @@
 				95F789FA15B4C50B00FB8F5B /* TableRow.cpp */,
 				95F789C915B4C1B500FB8F5B /* Libraries */,
 				95F789AF15B4C15B00FB8F5B /* Includes */,
-				95F7899915B4C0A700FB8F5B /* libpluto_telecom */,
 				95F7899815B4C0A600FB8F5B /* Products */,
 			);
 			sourceTree = "<group>";
@@ -99,27 +91,6 @@
 				95F7899715B4C0A600FB8F5B /* libpluto_telecom.dylib */,
 			);
 			name = Products;
-			sourceTree = "<group>";
-		};
-		95F7899915B4C0A700FB8F5B /* libpluto_telecom */ = {
-			isa = PBXGroup;
-			children = (
-				95F7899C15B4C0A700FB8F5B /* libpluto_telecomProj.xcconfig */,
-				95F7899D15B4C0A700FB8F5B /* libpluto_telecomTarget.xcconfig */,
-				95F7899E15B4C0A700FB8F5B /* libpluto_telecom.h */,
-				95F7899F15B4C0A700FB8F5B /* libpluto_telecomPriv.h */,
-				95F789A015B4C0A700FB8F5B /* libpluto_telecom.cp */,
-				95F7899A15B4C0A700FB8F5B /* Supporting Files */,
-			);
-			path = libpluto_telecom;
-			sourceTree = "<group>";
-		};
-		95F7899A15B4C0A700FB8F5B /* Supporting Files */ = {
-			isa = PBXGroup;
-			children = (
-				95F7899B15B4C0A700FB8F5B /* libpluto_telecom-Prefix.pch */,
-			);
-			name = "Supporting Files";
 			sourceTree = "<group>";
 		};
 		95F789AF15B4C15B00FB8F5B /* Includes */ = {
@@ -227,7 +198,6 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				95F789A115B4C0A700FB8F5B /* libpluto_telecom.cp in Sources */,
 				95F789D815B4C43900FB8F5B /* Table_CallersForMe.cpp in Sources */,
 				95F789D915B4C43900FB8F5B /* Table_Contact_Users_Sync.cpp in Sources */,
 				95F789DA15B4C43900FB8F5B /* Table_Contact.cpp in Sources */,

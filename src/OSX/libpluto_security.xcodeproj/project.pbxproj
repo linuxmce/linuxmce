@@ -7,7 +7,6 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		956B0A2515ACA8BA0006C6C0 /* libpluto_security.cp in Sources */ = {isa = PBXBuildFile; fileRef = 956B0A2415ACA8BA0006C6C0 /* libpluto_security.cp */; };
 		956B0A3215ACB1440006C6C0 /* Database_pluto_security.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 956B0A3115ACB1440006C6C0 /* Database_pluto_security.cpp */; };
 		956B0A3F15ACB1940006C6C0 /* Table_Alert_Device.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 956B0A3415ACB1940006C6C0 /* Table_Alert_Device.cpp */; };
 		956B0A4015ACB1940006C6C0 /* Table_Alert.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 956B0A3515ACB1940006C6C0 /* Table_Alert.cpp */; };
@@ -28,12 +27,6 @@
 
 /* Begin PBXFileReference section */
 		956B0A1B15ACA8BA0006C6C0 /* libpluto_security.dylib */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.dylib"; includeInIndex = 0; path = libpluto_security.dylib; sourceTree = BUILT_PRODUCTS_DIR; };
-		956B0A1F15ACA8BA0006C6C0 /* libpluto_security-Prefix.pch */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "libpluto_security-Prefix.pch"; sourceTree = "<group>"; };
-		956B0A2015ACA8BA0006C6C0 /* libpluto_securityProj.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; path = libpluto_securityProj.xcconfig; sourceTree = "<group>"; };
-		956B0A2115ACA8BA0006C6C0 /* libpluto_securityTarget.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; path = libpluto_securityTarget.xcconfig; sourceTree = "<group>"; };
-		956B0A2215ACA8BA0006C6C0 /* libpluto_security.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = libpluto_security.h; sourceTree = "<group>"; };
-		956B0A2315ACA8BA0006C6C0 /* libpluto_securityPriv.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = libpluto_securityPriv.h; sourceTree = "<group>"; };
-		956B0A2415ACA8BA0006C6C0 /* libpluto_security.cp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = libpluto_security.cp; sourceTree = "<group>"; };
 		956B0A3115ACB1440006C6C0 /* Database_pluto_security.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = Database_pluto_security.cpp; path = ../pluto_security/Database_pluto_security.cpp; sourceTree = "<group>"; };
 		956B0A3415ACB1940006C6C0 /* Table_Alert_Device.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = Table_Alert_Device.cpp; path = ../pluto_security/Table_Alert_Device.cpp; sourceTree = "<group>"; };
 		956B0A3515ACB1940006C6C0 /* Table_Alert.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = Table_Alert.cpp; path = ../pluto_security/Table_Alert.cpp; sourceTree = "<group>"; };
@@ -72,7 +65,6 @@
 				956B0A5015ACCA670006C6C0 /* TableRow.cpp */,
 				956B0A3015ACB1050006C6C0 /* Libraries */,
 				956B0A2E15ACB0FB0006C6C0 /* Includes */,
-				956B0A1D15ACA8BA0006C6C0 /* libpluto_security */,
 				956B0A1C15ACA8BA0006C6C0 /* Products */,
 			);
 			sourceTree = "<group>";
@@ -83,27 +75,6 @@
 				956B0A1B15ACA8BA0006C6C0 /* libpluto_security.dylib */,
 			);
 			name = Products;
-			sourceTree = "<group>";
-		};
-		956B0A1D15ACA8BA0006C6C0 /* libpluto_security */ = {
-			isa = PBXGroup;
-			children = (
-				956B0A2015ACA8BA0006C6C0 /* libpluto_securityProj.xcconfig */,
-				956B0A2115ACA8BA0006C6C0 /* libpluto_securityTarget.xcconfig */,
-				956B0A2215ACA8BA0006C6C0 /* libpluto_security.h */,
-				956B0A2315ACA8BA0006C6C0 /* libpluto_securityPriv.h */,
-				956B0A2415ACA8BA0006C6C0 /* libpluto_security.cp */,
-				956B0A1E15ACA8BA0006C6C0 /* Supporting Files */,
-			);
-			path = libpluto_security;
-			sourceTree = "<group>";
-		};
-		956B0A1E15ACA8BA0006C6C0 /* Supporting Files */ = {
-			isa = PBXGroup;
-			children = (
-				956B0A1F15ACA8BA0006C6C0 /* libpluto_security-Prefix.pch */,
-			);
-			name = "Supporting Files";
 			sourceTree = "<group>";
 		};
 		956B0A2E15ACB0FB0006C6C0 /* Includes */ = {
@@ -203,7 +174,6 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				956B0A2515ACA8BA0006C6C0 /* libpluto_security.cp in Sources */,
 				956B0A3215ACB1440006C6C0 /* Database_pluto_security.cpp in Sources */,
 				956B0A3F15ACB1940006C6C0 /* Table_Alert_Device.cpp in Sources */,
 				956B0A4015ACB1940006C6C0 /* Table_Alert.cpp in Sources */,
