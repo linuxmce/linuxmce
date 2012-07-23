@@ -13,18 +13,10 @@ Item {
     signal changeScreen(string s)
     signal setupStart(int x, string y)
 
-
     property string locationinfo: "standby"
     property string screenfile
     property string dynamic_height
     property string dynamic_width
-
-    Image {
-        id: bg
-        source: "img/bkg.png"
-        anchors.fill:parent
-    }
-
 
     function scaleX(x){
         return x/100*appW
@@ -87,8 +79,10 @@ Item {
         }
     }
     //=================Components==================================================//
-    function loadComponent(componentName )
+    function loadComponent(componentName)
     {
+
+
         componentLoader.source = "components/"+componentName
         if (componentLoader.status == Component.Ready)
         {
@@ -107,12 +101,12 @@ Item {
         }
     }
 
-    function finishLoadingComponent (componentName)
+    function finishLoadingComponent ()
     {
         if(componentLoader.status != Component.Ready)
         {
             console.log("finishing network load")
-            componentLoader.source = "components/"+componentName
+            componentLoader.source = "components/"+componentName          
             console.log("screen" + componentName + " loaded.")
         }
         else
@@ -127,9 +121,10 @@ Item {
         id:componentLoader
         height: parent.height
         width: parent.width
-        objectName: "componentbot"
+        objectName: "componentbot"      
         onLoaded: {console.log("Component is loaded")}
     }
+
 
     SequentialAnimation{
         id:loadin

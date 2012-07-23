@@ -3,39 +3,34 @@ import "../components"
 
 Rectangle {
 
-    width: parent.width
-    height: parent.height
-    color: "lightsteelblue"
-    Text {
-        id: orbiter_status
-        text: "Orbiter Needs to regen - Click 'Later' because regen isnt implemented. Kthxbai"
-    }
+    width: appW
+    height: appH
+    color: "transparent"
+
 
     Rectangle{
-        height: 200
-        width: 200
-
+        height: scaleY(30)
+        width: scaleX(30)
         color: "navajowhite"
-        anchors.horizontalCenter: parent.horizontalCenter
-        anchors.verticalCenter: parent.verticalCenter
+        anchors.centerIn: parent
+        radius:5
 
         ButtonSq{
             radius: 2
             buttontext: "Regen Now"
             anchors.left: parent.left
             MouseArea{
-
+                anchors.fill:parent
+                onClicked: manager.quickReload()
             }
         }
 
         ButtonSq{
-            x: 41
-            y: 80
             radius: 2
             buttontext: "Later"
             anchors.right: parent.right
             MouseArea{
-                 anchors.fill: parent
+                anchors.fill: parent
                 onClicked:gotoQScreen("Screen_1.qml")
             }
         }

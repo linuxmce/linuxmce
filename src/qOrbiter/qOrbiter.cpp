@@ -2943,6 +2943,7 @@ void DCE::qOrbiter::GetNowPlayingAttributes()
         placeholder = details.indexOf("SYNOPSIS");
         if(placeholder != -1)
         {
+            emit np_synopsisChanged(details.at(placeholder+1));
             //nowPlayingButton->setSynop(details.at(placeholder+1));
         }
 

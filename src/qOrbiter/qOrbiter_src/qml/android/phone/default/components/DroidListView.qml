@@ -9,6 +9,8 @@ Rectangle {
     border.width: 1
     anchors.centerIn: parent
     clip:true
+    property variant scenarioModel
+
     Image {
         id: bg
         source: "../img/bkg.png"
@@ -29,12 +31,12 @@ Rectangle {
         }
         Image {
             id: radio
-            source: "../img/radio_btn_inactive.png"
+            source: componentExit.pressed ? "../img/radio_btn_active.png" : "../img/radio_btn_inactive.png"
         }
         MouseArea{
             id:componentExit
             anchors.fill: parent
-            onClicked: loadComponent("NullComponent.qml")
+            onClicked: scenarioLoader.source="NullComponent.qml"
         }
     }
     HomeButtonDelegate{id:generic_delegate}
@@ -44,7 +46,7 @@ Rectangle {
         anchors.top: exit_button.bottom
         width: scaleX(61)
         height:  scaleY(50)
-        model: currentRoomTelecom
+        model: scenarioModel
         spacing:1
         orientation:ListView.Vertical
         delegate:  generic_delegate

@@ -16,12 +16,19 @@ Rectangle {
     }
 
     Image {
+        id: bg
+        source: b_orientation ?  "../img/homescreenP.png" : "../img/homescreenW.png"
+        anchors.fill:parent
+    }
+
+    Image {
         id: np_bg
         fillMode: Image.PreserveAspectFit
         source: "image://listprovider/updateobject/"+securityvideo.timestamp
-        anchors.fill: parent
-        visible: dcenowplaying.b_mediaPlaying ? true : false
-        opacity: .25
+        height: scaleY(35)
+        anchors.right: parent.right
+        anchors.top: parent.top
+        visible: dcenowplaying.b_mediaPlaying ? true : false        
     }
 
 

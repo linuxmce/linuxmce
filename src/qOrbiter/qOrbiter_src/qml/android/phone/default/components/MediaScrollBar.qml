@@ -31,6 +31,15 @@ Rectangle {
         anchors.centerIn: parent
 
     }
+    Image{
+      id:scroller_fill
+      source: "../img/active.png"
+      height: scroller_transit.height
+      width: (scroller_transit.x + scroll_tab.x)+5
+      anchors.verticalCenter: scroller_transit.verticalCenter
+      anchors.left: scroller_transit.left
+    }
+
     Image {
         id: scroll_tab
         source: "../img/scroller.png"

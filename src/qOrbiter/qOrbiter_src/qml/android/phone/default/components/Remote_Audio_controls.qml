@@ -2,16 +2,67 @@ import QtQuick 1.0
 
 Column {
     id:audio_column
-    height: (style.stdbuttonH * 3) + (audio_column.spacing *3)
+    height: style.stdbuttonh// (style.stdbuttonH * 3) + (audio_column.spacing *3)
     width:style.stdbuttonw
     spacing: scaleY(1)
 
+    Timer{
+        id:closeTimer
+        interval: 5000
+        onTriggered: audio_column.state = "DEFAULT"
+        running:false
+    }
+
+    states: [
+        State{
+            name:"expanded"
+            PropertyChanges {
+                target: audio_column
+                height:  (style.stdbuttonh * 3) + (audio_column.spacing *3)
+            }
+            PropertyChanges {
+                target: volup
+                height: style.stdbuttonh
+                width:style.stdbuttonw
+                visible:true
+
+            }
+            PropertyChanges {
+                target: voldn
+                height: style.stdbuttonh
+                width:style.stdbuttonw
+                visible:true
+
+            }
+            PropertyChanges {
+                target: muteBtn
+                height: style.stdbuttonh
+                width:style.stdbuttonw
+                visible:true
+
+            }
+            PropertyChanges {
+                target: trigger
+                height: 0
+                width:0
+                visible:false
+            }
+            PropertyChanges {
+                target: closeTimer
+                running:true
+            }
+
+        }
+
+    ]
+
 
     Rectangle{
-        height: style.stdbuttonh
-        width:style.stdbuttonw
+        id:volup
+        height: 0
+        width:0
         color:"transparent"
-
+        visible: false
         Image {
             id: up_bg
             height: style.stdbuttonh
@@ -38,19 +89,43 @@ Column {
         MouseArea{
             anchors.fill: parent
             onClicked: dcerouter.adjustVolume(1)
-
             onPressed: hoverimg.visible = true
-            onReleased: hoverimg.visible = false
+            onReleased: { hoverimg.visible = false; closeTimer.restart()}
         }
     }
 
     ButtonSq{
-
+        id:trigger
         anchors.centerIn: parent
-        buttontext: "Mute"
+        buttontext: "Options"
         buttontextzindex: 20
         buttontextcolor: "red"        
         buttontextfontsize: scaleY(2)
+        visible:true
+        Image {
+            id: audioicn
+            height: style.stdbuttonh
+            width:style.stdbuttonw
+            anchors.fill: parent
+            source: "../img/kmix.png"
+            visible:parent.visible
+        }
+        MouseArea{
+            anchors.fill: parent
+            onClicked: audio_column.state = "expanded"
+        }
+    }
+
+    ButtonSq{
+        id:muteBtn
+        anchors.centerIn: parent
+        buttontext: "Mute"
+        buttontextzindex: 20
+        buttontextcolor: "red"
+        buttontextfontsize: scaleY(2)
+        color: "red"
+        visible: false
+
         Image {
             id: muteimg
             height: style.stdbuttonh
@@ -65,10 +140,11 @@ Column {
     }
 
     Rectangle{
-        height: style.stdbuttonh
-        width:style.stdbuttonw
+        id:voldn
+        height: 0
+        width:0
         color:"transparent"
-
+        visible:false
         Image {
             id: dn_bg
             height: style.stdbuttonh
@@ -94,18 +170,9 @@ Column {
         MouseArea{
             anchors.fill: parent
             onClicked: dcerouter.adjustVolume(-1)
-
             onPressed: hoverimg2.visible = true
-            onReleased: hoverimg2.visible = false
+            onReleased: {hoverimg2.visible = false; closeTimer.restart()}
         }
     }
-
-
-
-
-
-
-
-
 
 }

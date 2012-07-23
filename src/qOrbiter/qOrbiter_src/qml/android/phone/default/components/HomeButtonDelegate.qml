@@ -11,19 +11,29 @@ Component{
             id:delegatemenu
             width: scaleX(61)
             height: scaleY(12)
-            border.color: "white"
+            border.color: "orange"
             border.width: 1
-            color:"transparent"
+            color:"white"
+
 
             Text {
                 id: generic_label
                 text: title
-                color: "silver"
+                color: "black"
                 font.pixelSize: scaleY(3)
-                anchors.centerIn: parent
+                anchors.left: delegatemenu.left
+            }
+
+            Image {
+                id: selectionIndicator
+                source: delegateHit.pressed ? "../img/radio_btn_active.png" : "../img/radio_btn_inactive.png"
+                height: 45
+                width: 45
+                anchors.right: delegatemenu.right
             }
 
             MouseArea{
+                id:delegateHit
                 anchors.fill: parent
                 onClicked: {
                     dcerouter.executeCommandGroup(params);

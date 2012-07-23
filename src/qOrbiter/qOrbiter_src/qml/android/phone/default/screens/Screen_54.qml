@@ -15,6 +15,12 @@ Rectangle {
          onImageChanged: nowplayingimage.source = "image://listprovider/updateobject/"+securityvideo.timestamp
      }
 
+    Image {
+        id: bg
+        source: b_orientation ? "../img/audioProfile.png" : "../img/audioWide.png"
+        anchors.fill: storedVideoRemote
+    }
+
     Component.onCompleted: dcerouter.BindMediaRemote(true)
 
     Image {

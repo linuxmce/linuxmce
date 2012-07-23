@@ -10,23 +10,33 @@ Rectangle {
     color: "transparent"
     Component.onCompleted: manager.getStoredPlaylist()
 
+    Image {
+        id: bg
+        source: b_orientation ? "../img/storedMediaP.png" : "../img/storedMediaW.png"
+        anchors.fill: storedVideoRemote
+    }
+
       NowPlayingBox
     {
        id:np_box
        anchors.top: parent.top
-       anchors.left: home.right
-       anchors.leftMargin: scaleX(5)
+       anchors.topMargin: scaleY(11)
+       anchors.left: parent.left
+       anchors.leftMargin: scaleX(11)
     }
-
+Flickable{
+    height:scaleY(35)
+width: textcol.width
+anchors.top: np_box.bottom
+anchors.horizontalCenter: np_box.horizontalCenter
+contentHeight: textcol.height
+clip:true
+boundsBehavior: Flickable.DragOverBounds
     Column{
         id:textcol
         spacing: scaleY(1.5)
-        width: scaleX(80)
+        width: scaleX(90)
         height: childrenRect.height
-        anchors.top: np_box.bottom
-        anchors.left: hacontrolbox.right
-        anchors.leftMargin: scaleX(2)
-
 
         Text {
             id: generaltitle
@@ -39,6 +49,7 @@ Rectangle {
             font.pixelSize: scaleY(3)
             visible:  dcenowplaying.qs_mainTitle =="" ? false: true
             color: "orange"
+
         }
 
         Text {
@@ -66,6 +77,7 @@ Rectangle {
             font.pixelSize: scaleY(3)
             visible:  dcenowplaying.episode =="" ? false: true
             color:"silver"
+
         }
 
         Text {
@@ -82,9 +94,10 @@ Rectangle {
             MouseArea{
                 anchors.fill: genre
                 hoverEnabled: true
-                onEntered: { genre.elide = "ElideNone" ; }
-                onExited: {genre.elide = "ElideRight"; }
+           //     onEntered: { genre.elide = "ElideNone" ; }
+           //     onExited: {genre.elide = "ElideRight"; }
             }
+
         }
 
 
@@ -97,15 +110,16 @@ Rectangle {
             //  font.bold: true
             smooth: true
             font.pixelSize: scaleY(3)
-            elide: "ElideRight"
+           // elide: "ElideRight"
             visible:  dcenowplaying.performerlist =="" ? false: true
             color:"silver"
             MouseArea{
                 anchors.fill: starring
                 hoverEnabled: true
-                onEntered: { starring.elide = "ElideNone" ; }
-                onExited: {starring.elide = "ElideRight"; }
+                //onEntered: { starring.elide = "ElideNone" ; }
+               // onExited: {starring.elide = "ElideRight"; }
             }
+
         }
 
         Text {
@@ -117,18 +131,12 @@ Rectangle {
             font.bold: true
             smooth: true
             font.pixelSize: scaleY(3)
-            elide: "ElideRight"
+           // elide: "ElideRight"
             visible:  dcenowplaying.synop =="" ? false: true
-            color:"silver"
-            MouseArea{
-                anchors.fill: synopsis
-                hoverEnabled: true
-                onEntered: { synopsis.elide = "ElideNone" ; }
-                onExited: {synopsis.elide = "ElideRight"; }
-            }
+            color:"silver"           
         }
     }
-
+}
     ButtonSq {
         id: playlist_button
         anchors.bottom: controls.top
@@ -163,8 +171,8 @@ Rectangle {
     // Remote_Audio_controls{ id: remote1; x: 200; y: 351; anchors.rightMargin: 71; z: 45; anchors.right: remote_lighting_controls1.left}
     HaControls{ id:hacontrolbox; anchors.left: parent.left; anchors.top: home.bottom; anchors.topMargin: scaleY(1)}
     HomeButton{ id:home; anchors.left: storedVideoRemote.left; anchors.top:storedVideoRemote.top; anchors.topMargin: scaleY(1)}
-    NonEPGPlaylist{id:playlist; anchors.top: home.top; anchors.left: hacontrolbox.right; visible: false }
-
+    NonEPGPlaylist{id:playlist; anchors.top: home.top; anchors.horizontalCenter: parent.horizontalCenter; visible: false; height:0 }
+    MediaScrollBar{id:media_scroller; anchors.bottom: controls.top; anchors.horizontalCenter: parent.horizontalCenter; anchors.bottomMargin: scaleY(2)}
     states: [
         State{
             name:"GRID"
@@ -174,6 +182,7 @@ Rectangle {
                 visible:true
                 anchors.top: storedVideoRemote.top
                 anchors.topMargin: 75
+                height:scaleY(65)
             }
 
             PropertyChanges
@@ -187,7 +196,6 @@ Rectangle {
                 target: default_button
                 visible:true
             }
-
 
 
             PropertyChanges {

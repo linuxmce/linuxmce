@@ -10,6 +10,11 @@ Rectangle {
     state: ""
     color: "transparent"
 
+    Image {
+        id: bg
+        source: b_orientation ? "../img/storedMediaP.png" : "../img/storedMediaW.png"
+        anchors.fill: storedVideoRemote
+    }
 
     NowPlayingBox{id:np_box
         anchors.top: satcableboxremote.top

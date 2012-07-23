@@ -1,42 +1,39 @@
-// import QtQuick 1.0 // to target S60 5th Edition or Maemo 5
-// this is for android platform specifically
+/*
+  Splash.qml This is the general linuxmce splash screen and should be used for all devices on startup.
+  */
+import QtQuick 1.0
 
-import QtQuick 1.1
 
 Rectangle {
-    id: rectangle1
-    height: appH
-    width: appW
-    focus: true
-    onScaleChanged: console.log("scale changed")
+    id: splashPage
+    height:appH
+    width:appW
+    property bool orbiterSetup:false
 
-    Connections{
-        target: window
-        onOrientationChanged:updateRez()
+    onOrbiterSetupChanged:{  console.log(orbiterSetup) ; existing_orbiters.visible = false; orbiter_options.visible = true; window.showSetup()}
+    onWidthChanged: console.log("detected size change")
+
+    function scaleX(x){
+        return x/100*appH
+    }
+    function scaleY(y){
+        return y/100*appW
     }
 
-    Connections{
-        target:window
-        onDeviceChanged: pageLoader.source ? ":/main/SetupNewOrbiter.qml": "Splash.qml"
-    }
 
     Connections{
         target: window
         onShowList:existing_orbiters.visible = true
-        onShowExternal: ext_routerip.visible = true
+        onShowExternal: {
+            console.log("showing external ip box")
+            ext_routerip.visible = true
+        }
+
     }
 
-    function scaleX(x){
-        return x/100*appW
-    }
-    function scaleY(y){
-        return y/100*appH
-    }
-
-    function updateRez()
-    {
-        rectangle1.height = appH
-        rectangle2.width = appW
+    Connections{
+        target:dcerouter
+        onDeviceIdChanged: console.log("Device Id changed to: "+dcerouter.m_dwPK_Device)
     }
 
     color: "slategrey"
@@ -45,7 +42,7 @@ Rectangle {
 
     Image {
         id: splash
-        anchors.centerIn: rectangle1
+        anchors.centerIn: splashPage
         fillMode: Image.PreserveAspectFit
         source: "qrc:/img/desktop_splash.png"
         anchors.fill: parent
@@ -54,52 +51,99 @@ Rectangle {
     Row{
 
         height: childrenRect.height
-        width: childrenRect.width
-        spacing: scaleX(2)
+        width: scaleX(85)
+        spacing: scaleX(10)
 
-        Text {
-            id: connection_present
-            text: qsTr("Connection")
-            color: window.b_connectionPresent ? "green" : "red"
-            font.pixelSize: window.b_connectionPresent ?  scaleY(3) : scaleY(4)
+        Rectangle{
+
+            id:connection_indicator
+            height: scaleX(5)
+            width: scaleX(5)
+            color: "transparent"
+            Image {
+                id: connection_icon
+                source: ":/icons/audio"
+            }
+
+            Text {
+                id: connection_label
+                text: qsTr("Connection")
+                color: window.b_connectionPresent ? "green" : "red"
+                font.pointSize: window.b_connectionPresent ? 8 : 10
+            }
         }
 
-        Text {
-            id: device
-            text: qsTr("Device")
-            color: window.b_devicePresent ? "green" : "red"
-            font.pixelSize: window.b_devicePresent ?  scaleY(3) : scaleY(4)
+        Rectangle{
+            id:device_indicator
+            height: scaleX(5)
+            width: scaleX(5)
+            color: "transparent"
+            Image {
+                id: device_icon
+                source: ""
+            }
+
+            Text {
+                id: device_Label
+                text: qsTr("Device")
+                color: window.b_devicePresent ? "green" : "red"
+                font.pointSize: window.b_devicePresent ? 8 : 10
+            }
         }
 
-        Text {
-            id: configuration_file
-            text: qsTr(" Local Config")
-            color: window.b_localConfigReady ? "green" : "red"
-            font.pixelSize: window.b_localConfigReady ?  scaleY(3) : scaleY(4)
+        Rectangle{
+            id:config_indicator
+            height: scaleX(5)
+            width: scaleX(5)
+            color: "transparent"
+            Image {
+                id: config_icon
+                source: ""
+            }
+
+            Text {
+                id: config_label
+                text: qsTr("Config")
+                color: window.b_localConfigReady ? "green" : "red"
+                font.pointSize: window.b_localConfigReady ? 8 : 10
+            }
         }
 
-        Text {
-            id: skins
-            text: qsTr("Skins Location")
-            color: window.b_localConfigReady ? "green" : "red"
-            font.pixelSize: window.b_skinDataReady ?  scaleY(3) : scaleY(4)
+        Rectangle{
+            id:skin_indicator
+            height: scaleX(5)
+            width: scaleX(5)
+            color: "transparent"
+            Image {
+                id: skin_icon
+                source: ""
+            }
+
+            Text {
+                id: skin_label
+                text: qsTr("Skins")
+                color: window.b_skinIndexReady ? "green" : "red"
+                font.pointSize: window.b_skinIndexReady ? 8 : 10
+            }
         }
 
-        Text {
-            id: skin_index
-            text: qsTr("Skins Loaded")
-            color: window.b_localConfigReady ? "green" : "red"
-            font.pixelSize: window.b_skinIndexReady ?  scaleY(3) : scaleY(4)
+        Rectangle{
+            id:skindata_indicator
+            height: scaleX(5)
+            width: scaleX(5)
+            color: "transparent"
+            Image {
+                id: skinData_icon
+                source: ""
+            }
+
+            Text {
+                id: skin_data_label
+                text: qsTr("Orbiter Ready")
+                color: window.b_orbiterConfigReady ? "green" : "red"
+                font.pointSize: window.b_orbiterConfigReady ? 8 : 10
+            }
         }
-
-        Text {
-            id: orbiter_config
-            text: qsTr("Orbiter Config")
-            color: window.b_localConfigReady ? "green" : "red"
-            font.pixelSize: window.b_orbiterConfigReady ?  scaleY(3) : scaleY(4)
-
-        }
-
 
 
     }
@@ -134,36 +178,26 @@ Rectangle {
         //onStatusChanged: screenchange("SetupNewOrbiter.qml")
     }
 
-
-    Text {
-        id: welcome
-        text: qsTr("Welcome To LinuxMCE!")
-        font.pixelSize: scaleY(4)
-        font.italic: true
-        font.family: "Droid Sans"
-        anchors.bottom: rectangle2.top
-        anchors.bottomMargin: scaleY(5)
-        anchors.horizontalCenter: parent.horizontalCenter
+    Rectangle {
+        width: parent.width
+        height: scaleY(20)
+        opacity: 1
+        color: "transparent"
 
     }
-    MouseArea{
-        anchors.fill: parent
-        onPressed: parent.focus = true
-    }
-
     Rectangle {
         id: rectangle2
 
         anchors.verticalCenter: parent.verticalCenter
         anchors.horizontalCenter: parent.horizontalCenter
         anchors.verticalCenterOffset:10
-        width: scaleX(100)
-        height: scaleY(20)
+        width: scaleX(99)
+        height: scaleY(45)
         radius: 7
         anchors.horizontalCenterOffset: 1
-        anchors.centerIn: rectangle1
+        anchors.centerIn: splashPage
         border.width: 1
-        border.color: "green"
+        border.color: "#000000"
         gradient: Gradient {
             GradientStop {
                 position: 0
@@ -179,160 +213,363 @@ Rectangle {
     Text {
         id: connectionlabel
         text: qsTr("Set Connection Details")
-        font.pixelSize: scaleY(4)
+        font.pixelSize: 11
         font.bold: false
         anchors.top: rectangle2.top
         anchors.horizontalCenter: parent.horizontalCenter
-
     }
 
-
-
-    Text {
-        text: qsTr("Host")
-        font.pixelSize: scaleY(3)
-        font.family: "Droid Sans"
-        anchors.bottom: routerip.top
-        anchors.horizontalCenter: routerip.horizontalCenter
-    }
-
-    TextInput {
-        id: routerip
-        width: scaleX(25)
-        text: srouterip
-        font.pixelSize: scaleY(3)
-        font.family: "Droid Sans"
-        //  onTextChanged: setRouterIp(routerip.text)
-        fillColor: "grey"
-        anchors.verticalCenter: rectangle2.verticalCenter
-        anchors.verticalCenterOffset: scaleY(2)
-        anchors.left: rectangle2.left
-        anchors.leftMargin: scaleX(20)
-        onFocusChanged: routerip.focus ? routerip.opacity = 1 : routerip.opacity = .5
-
-
-    }
-
-    Text {
-        text: qsTr("Device:")
-        font.pixelSize: scaleY(3)
-        font.family: "Droid Sans"
-        anchors.bottom: devicenumber.top
-        anchors.horizontalCenter: devicenumber.horizontalCenter
-    }
-    TextInput {
-        id: devicenumber
-        width: scaleX(10)
-        text: deviceid
-        font.family: "Droid Sans"
-        font.pixelSize: scaleY(3)
-        //onTextChanged: setDeviceNo(devicenumber.text)
-        fillColor: "grey"
-        focus: false
-        anchors.verticalCenter: routerip.verticalCenter
-        anchors.left: routerip.right
-        anchors.leftMargin: scaleX(10)
-        onFocusChanged: devicenumber.focus ? devicenumber.opacity = 1 : devicenumber.opacity = .5
-    }
-
-    Rectangle {
-        id: connectbutton
-        height: scaleY(5)
-        width: scaleX(10)
-        color:"red"
-
-        anchors.left: devicenumber.right
-        anchors.leftMargin: scaleX(5)
-        anchors.verticalCenter: devicenumber.verticalCenter
+    Row{
+        anchors.centerIn: rectangle2
+        anchors.verticalCenter: parent.verticalCenter
+        spacing: 10
         Text {
-            id: name
-            anchors.centerIn: parent
-            anchors.fill: parent
-            text: qsTr("Go!")
-            font.pixelSize: scaleY(3)
-            verticalAlignment: Text.AlignTop
-            font.bold: true
+            text: qsTr("Host:")
+            font.pixelSize: 11
+            font.family: "Droid Sans"
+            anchors.verticalCenter: parent.verticalCenter
         }
 
-        radius:  5
-        MouseArea{
-            hoverEnabled: true
-            onEntered: parent.color="green"
-            onExited: parent.color="red"
-            anchors.fill: parent
-            onClicked: window.qmlSetupLmce(devicenumber.text, routerip.text)
-            anchors.verticalCenter: devicenumber.verticalCenter
-        }
-    }
+        TextInput {
+            id: routerip
+            width: 80
+            text: srouterip
+            font.pixelSize: 10
+            font.family: "Droid Sans"
+            //  onTextChanged: setRouterIp(routerip.text)
+            fillColor: "grey"
+            anchors.verticalCenter: parent.verticalCenter
 
-    Rectangle {
-        id: exitbutton
-        height: scaleY(5)
-        width: scaleX(10)
-        anchors.left: connectbutton.right
-        anchors.leftMargin: scaleX(5)
-        anchors.verticalCenter: devicenumber.verticalCenter
-        radius:  4
+        }
+
+        TextInput {
+            id: ext_routerip
+            width: 80
+            text: extip
+            font.pixelSize: 10
+            font.family: "Droid Sans"
+            //  onTextChanged: setRouterIp(routerip.text)
+            fillColor: "grey"
+            anchors.verticalCenter: parent.verticalCenter
+            visible: false
+        }
 
         Text {
-            id: exitlabel
-            anchors.centerIn: parent
-
-            text: qsTr("Exit")
-            font.pixelSize: scaleY(3)
+            text: qsTr("Device:")
+            font.pixelSize: 11
+            font.family: "Droid Sans"
+            anchors.verticalCenter: parent.verticalCenter
         }
-        MouseArea{
-            anchors.fill: parent
-            onClicked:console.log("exit")
+        TextInput {
+            id: devicenumber
+            width: scaleX(10)
+            text: deviceid
+            font.family: "Droid Sans"
+            font.pixelSize: 12
+            //onTextChanged: setDeviceNo(devicenumber.text)
+            fillColor: "grey"
+            anchors.verticalCenter: parent.verticalCenter
+
+        }
+
+        Rectangle {
+            id: connectbutton
+            height: scaleY(5)
+            width: scaleX(10)
+            color:"red"
+
+            anchors.left: devicenumber.right
+            anchors.leftMargin: scaleX(5)
+            Text {
+                id: name
+                anchors.centerIn: parent
+                anchors.fill: parent
+                text: qsTr("Go!")
+                font.pixelSize: 12
+                verticalAlignment: Text.AlignTop
+                font.bold: true
+            }
+
+            radius:  5
+            MouseArea{
+                hoverEnabled: true
+                onEntered: parent.color="green"
+                onExited: parent.color="red"
+                anchors.fill: parent
+                onClicked: ext_routerip.visible ? window.qmlSetupLmce(devicenumber.text, ext_routerip.text) : window.qmlSetupLmce(devicenumber.text, routerip.text)
+                anchors.verticalCenter: parent.verticalCenter
+            }
+        }
+
+        Rectangle {
+            id: exitbutton
+            height: scaleY(5)
+            width: scaleX(10)
+            anchors.left: connectbutton.right
+            anchors.leftMargin: scaleX(5)
+            Text {
+                id: exitlabel
+                anchors.centerIn: parent
+                anchors.fill: parent
+                text: qsTr("Exit")
+                font.pixelSize: 11
+            }
+
+            radius:  4
+            MouseArea{
+                onClicked: closeOrbiter()
+                anchors.verticalCenter: parent.verticalCenter
+            }
 
         }
     }
-
     Text {
         id: loadingStatus
 
         text: "Status " + window.message
-        anchors.topMargin: -17
-        font.pixelSize: scaleY(5)
+        anchors.topMargin: scaleY(15)
+        font.pixelSize: 14
         font.family: "Droid Sans"
         color: "white"
-        anchors.bottom: rectangle2.bottom
+        anchors.top: rectangle2.bottom
         anchors.horizontalCenter: rectangle2.horizontalCenter
     }
 
     ListView{
         id:existing_orbiters
         height: scaleY(65)
-        width: scaleX(75)
-        anchors.centerIn: parent
+        width: scaleX(55)
+        clip: true
+        anchors.centerIn: rectangle2
         model:orbiterList
         visible: false
+        opacity: existing_orbiters.visible
         delegate: Rectangle{
             id:existing_orbiter_delegate
-            height: scaleY(20)
-            width: scaleX(70)
+            height: scaleY(10)
+            width: existing_orbiters.width
             color: "slategrey"
             border.color: "white"
             border.width: 1
-            Text {
-                id: orbiter_label
-                text: label
-                font.pixelSize: scaleY(2)
-                width: parent.width
-                wrapMode: Text.WrapAtWordBoundaryOrAnywhere
-            }
-            Text {
-                id: dev_num
-                anchors.left: orbiter_label.right
-                text:qsTr("Device:")+ i_device_number
-                 font.pixelSize: scaleY(2)
-                 wrapMode: Text.WrapAtWordBoundaryOrAnywhere
-            }
+            Column
+            {
+                height: childrenRect.height
+                width: existing_orbiters.width
 
+                Text {
+                    id: orbiter_label
+                    text: qsTr("Orbiter:")+ label
+                    font.pixelSize: scaleY(2.75)
+                    width: existing_orbiters.width
+                    wrapMode: Text.WrapAtWordBoundaryOrAnywhere
+                }
+                Text {
+                    id: dev_num
+                    width: existing_orbiters.width
+                    text:qsTr("Device:")+ i_device_number
+                    font.pixelSize: scaleY(2)
+                    wrapMode: Text.WrapAtWordBoundaryOrAnywhere
+                }
+            }
             MouseArea {
                 anchors.fill: parent
                 onClicked: window.qmlSetupLmce(i_device_number, routerip.text)
             }
         }
     }
+
+    Rectangle{
+        id:newOrbiterButton
+        height: scaleY(10)
+        width:scaleX(55)
+        color: "slategrey"
+        Text {
+            id: newOrbiterLabel
+            text: qsTr("Create New Orbiter?")
+            font.pixelSize: scaleY(3)
+            width: parent.width
+            anchors.centerIn: parent
+            wrapMode: Text.WrapAtWordBoundaryOrAnywhere
+        }
+        visible: existing_orbiters.visible
+        anchors.bottom: existing_orbiters.top
+        anchors.horizontalCenter: existing_orbiters.horizontalCenter
+        MouseArea{
+            anchors.fill: parent
+            onClicked: orbiterSetup=true
+        }
+    }
+
+    Row{
+        id:orbiter_options
+        spacing:1
+        anchors.centerIn: parent
+        anchors.verticalCenterOffset: scaleY(10)
+        height: scaleY(35)
+        width: scaleX(70)
+        visible: false
+        opacity: orbiter_options.visible
+
+
+        z:5
+        Rectangle{
+            id:goButton
+            height: scaleY(15)
+            width: scaleX(15)
+            Text {
+                id: goLabel
+                text: qsTr("Go")
+            }
+            MouseArea{
+                anchors.fill: goButton
+                onClicked: {console.log("Going");
+                    window.setupNewOrbiter(users_options.currentIndex+1, rooms_options.currentIndex+1,1,1,1,1);
+                    orbiter_options.visible = false
+
+                }
+            }
+        }
+
+        Rectangle{
+            id:usersBlock
+            height: scaleY(20)
+            width: scaleX(15)
+            color: "lightgrey"
+            Text {
+                id: usersLabel
+                text: qsTr("Select User")
+            }
+            clip:true
+
+            ListView{
+                id:users_options
+                height: scaleY(20)
+                width: scaleX(15)
+                model:users
+                spacing:5
+                anchors.top: usersLabel.bottom
+                delegate: Rectangle{
+                    height: scaleY(5)
+                    width: scaleX(15)
+                    color: users.currentIndex ? "green" : "slategrey"
+                    Text {
+                        text:dataTitle
+                        anchors.centerIn: parent
+                        color: "black"
+                    }
+                    MouseArea{
+                        anchors.fill: parent
+                        onClicked:{console.log(dataTitle); users.currentIndex=index}
+                    }
+                }
+            }
+        }
+
+        Rectangle{
+            id:roomsBlock
+            height: scaleY(20)
+            width: scaleX(15)
+            color: "lightgrey"
+            Text {
+                id: roomsLabel
+                text: qsTr("Select Room")
+            }
+            clip:true
+
+            ListView{
+                id:rooms_options
+                height: scaleY(20)
+                width: scaleX(15)
+                model:rooms
+                spacing:5
+                anchors.top: roomsLabel.bottom
+                delegate: Rectangle{
+                    height: scaleY(5)
+                    width: scaleX(15)
+                    color: rooms.currentIndex ? "green" : "slategrey"
+                    Text {
+                        text:dataTitle
+                        anchors.centerIn: parent
+                    }
+                    MouseArea{
+                        anchors.fill: parent
+                        onClicked: {console.log(dataTitle);
+                            rooms.currentIndex = index
+                        }
+                    }
+                }
+            }
+        }
+        /*
+        Rectangle{
+            id:skinsBlock
+            height: scaleY(20)
+            width: scaleX(15)
+            color: "slategrey"
+            Text {
+                id: skinsLabel
+                text: qsTr("Select Skin")
+            }
+            clip:true
+
+            ListView{
+                id:skins_options
+                height: scaleY(20)
+                width: scaleX(15)
+                model:dummyModel
+                anchors.top: skinsLabel.bottom
+                delegate: Rectangle{
+                    height: scaleY(5)
+                    width: scaleX(15)
+                    color: "lightgrey"
+                    Text {
+                        text: optionTitle
+                        anchors.centerIn: parent
+                    }
+                }
+            }
+        }
+
+        Rectangle{
+            id:langBlock
+            height: scaleY(20)
+            width: scaleX(15)
+            color: "slategrey"
+            Text {
+                id: langLabel
+                text: qsTr("Select Lang")
+            }
+            clip:true
+
+            ListView{
+                id:lang_options
+                height: scaleY(20)
+                width: scaleX(15)
+                model:dummyModel
+                anchors.top: langLabel.bottom
+                delegate: Rectangle{
+                    height: scaleY(5)
+                    width: scaleX(15)
+                    color: "lightgrey"
+                    Text {
+                        text: optionTitle
+                        anchors.centerIn: parent
+                    }
+                }
+            }
+        }
+        */
+
+    }
+
+    ListModel{
+        id:dummyModel
+        ListElement{
+            optionTitle:"foo"
+            optionValue:1
+        }
+    }
+
+
+
 }
