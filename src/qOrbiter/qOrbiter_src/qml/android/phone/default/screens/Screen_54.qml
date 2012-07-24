@@ -17,7 +17,8 @@ Rectangle {
 
     Image {
         id: bg
-        source: b_orientation ? "../img/audioProfile.png" : "../img/audioWide.png"
+fillMode: Image.PreserveAspectFit
+source: b_orientation ? "../img/audioProfile.png" : "../img/audioWide.png"
         anchors.fill: storedVideoRemote
     }
 

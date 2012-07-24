@@ -13,7 +13,8 @@ Rectangle {
     Image {
         id: bg
         source: b_orientation ? "../img/storedMediaP.png" : "../img/storedMediaW.png"
-        anchors.fill: storedVideoRemote
+        height: appH
+        width: appW
     }
 
     NowPlayingBox{id:np_box
@@ -32,7 +33,7 @@ Rectangle {
 
     Rectangle {
         id: metadatavideo
-        width: scaleX(45)
+        width: b_orientation ? scaleX(45) : scaleX(65)
         height: childrenRect.height
         anchors.top: np_box.bottom
         anchors.left: automation_controls.right
@@ -50,6 +51,7 @@ Rectangle {
 
         Column
         {
+            id:textcol
             width: scaleX(45)
             spacing: 5
             height: childrenRect.height
@@ -153,20 +155,46 @@ Rectangle {
         id: remotenumberpad1
         anchors.right: satcableboxremote.right
         anchors.top: satcableboxremote.top
+        anchors.topMargin: scaleY(22)
         visible: false
+
+        Transition {
+            to: "NUMBERS"
+            AnchorAnimation{
+                duration: 1000
+                easing.type: Easing.InBounce
+            }
+        }
+
     }
 
     EPGPlaylist{
         id:playlist;
-        anchors.top: satcableboxremote.top;
-        anchors.right:satcableboxremote.right
+        anchors.bottom: satcableboxremote.top;
+        anchors.left:satcableboxremote.left
+        anchors.leftMargin: scaleX(22)
         visible: false
+       Transition {
+
+            to: "GRID"
+            AnchorAnimation{
+                duration: 2000
+                easing.type: Easing.InBounce
+            }
+        }
     }
 
 
     states: [
         State {
             name: "NUMBERS"
+
+            AnchorChanges{
+                target:remotenumberpad1
+                anchors.top: undefined
+                anchors.right: undefined
+                anchors.horizontalCenter: satcableboxremote.horizontalCenter
+            }
 
             PropertyChanges {
                 target: textcol
@@ -180,10 +208,7 @@ Rectangle {
 
             PropertyChanges {
                 target: remotenumberpad1
-                x: 70
-                y: 0
                 visible: true
-                anchors.horizontalCenter: satcableboxremote.horizontalCenter
             }
 
             PropertyChanges {
@@ -193,7 +218,7 @@ Rectangle {
             }
 
             PropertyChanges {
-                target: homebutton                
+                target: homebutton
                 buttontextbold: true
                 buttontext: "Display"
                 visible:true
@@ -201,7 +226,7 @@ Rectangle {
             }
 
             PropertyChanges{
-                target: showepg           
+                target: showepg
                 visible:true
             }
             PropertyChanges {
@@ -211,10 +236,25 @@ Rectangle {
         },
         State{
             name:"GRID"
+
+            AnchorChanges{
+                target: playlist
+                anchors.bottom: undefined
+                anchors.top: satcableboxremote.top
+            }
+
+            AnchorChanges{
+                target:remotenumberpad1
+                anchors.right: satcableboxremote.right
+                anchors.top: satcableboxremote.top
+                anchors.horizontalCenter: undefined
+            }
+
             PropertyChanges
             {
                 target: playlist
                 visible:true
+                anchors.topMargin: scaleY(15)
             }
 
             PropertyChanges {
@@ -248,6 +288,7 @@ Rectangle {
                 target: remotenumberpad1
                 visible: false
             }
+
         }
 
     ]

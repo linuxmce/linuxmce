@@ -2,33 +2,42 @@ import QtQuick 1.0
 
 Rectangle {
     id:droidepg_small
-    width: scaleX(72.5)
-    height: scaleY(85)
+    width: scaleX(66)
+    height: scaleY(65)
     color: "transparent"    
     clip:true
-
+    Component.onCompleted: manager.setNowPlayingTv()
     Connections{
         target: simpleepg
         onProgramChanged:epgplaylistview.positionViewAtIndex(simpleepg.currentIndex, ListView.Beginning)
     }
+    Rectangle{
+        id:hdr
+        height: scaleY(4)
+        width: droidepg_small.width
+        color: "#383737"
+        anchors.top: droidepg_small.top
+        anchors.left: droidepg_small.left
+        Text {
+            id: hdrtxt
+            text: qsTr("Tv Channels")
+            color:"orange"
+            font.pixelSize: scaleY(2)
+        }
 
-    Image {
-        id: bg
-        source: "../img/bkg.png"
-        anchors.fill: droidepg_small
     }
 
     Rectangle{
         height: childrenRect.height
         width: childrenRect.width
-        anchors.centerIn: droidepg_small
+        anchors.top: hdr.bottom
         color: "transparent"
         clip:true
 
         ListView{
             id:epgplaylistview
-            height:scaleY(85)
-            width: scaleX(72.5)
+            height:scaleY(61)
+            width: scaleX(65)
             clip:true
             interactive: true
             flickableDirection: "VerticalFlick"
@@ -39,7 +48,7 @@ Rectangle {
                 id:delrect
                 border.color: "orange"
                 border.width: 1
-                width: scaleX(72.5)
+                width: scaleX(65)
                 height: scaleY(15)
                 color: "transparent"
 
