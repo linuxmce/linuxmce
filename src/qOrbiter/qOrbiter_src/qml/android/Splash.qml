@@ -49,27 +49,19 @@ Rectangle {
     }
 
     Row{
-
         height: childrenRect.height
         width: scaleX(85)
         spacing: scaleX(10)
-
         Rectangle{
-
             id:connection_indicator
             height: scaleX(5)
             width: scaleX(5)
             color: "transparent"
-            Image {
-                id: connection_icon
-                source: ":/icons/audio"
-            }
-
             Text {
                 id: connection_label
                 text: qsTr("Connection")
                 color: window.b_connectionPresent ? "green" : "red"
-                font.pointSize: window.b_connectionPresent ? 8 : 10
+                font.pointSize: window.b_connectionPresent ? 4 : 5
             }
         }
 
@@ -87,7 +79,7 @@ Rectangle {
                 id: device_Label
                 text: qsTr("Device")
                 color: window.b_devicePresent ? "green" : "red"
-                font.pointSize: window.b_devicePresent ? 8 : 10
+                font.pointSize: window.b_devicePresent ? 4 : 5
             }
         }
 
@@ -105,7 +97,7 @@ Rectangle {
                 id: config_label
                 text: qsTr("Config")
                 color: window.b_localConfigReady ? "green" : "red"
-                font.pointSize: window.b_localConfigReady ? 8 : 10
+                font.pointSize: window.b_localConfigReady ? 4 : 5
             }
         }
 
@@ -123,7 +115,7 @@ Rectangle {
                 id: skin_label
                 text: qsTr("Skins")
                 color: window.b_skinIndexReady ? "green" : "red"
-                font.pointSize: window.b_skinIndexReady ? 8 : 10
+                font.pointSize: window.b_skinIndexReady ? 4 : 5
             }
         }
 
@@ -141,11 +133,9 @@ Rectangle {
                 id: skin_data_label
                 text: qsTr("Orbiter Ready")
                 color: window.b_orbiterConfigReady ? "green" : "red"
-                font.pointSize: window.b_orbiterConfigReady ? 8 : 10
+                font.pointSize: window.b_orbiterConfigReady ? 4 : 5
             }
         }
-
-
     }
 
     function screenchange(screenname )
@@ -213,7 +203,7 @@ Rectangle {
     Text {
         id: connectionlabel
         text: qsTr("Set Connection Details")
-        font.pixelSize: 11
+        font.pointSize: 7
         font.bold: false
         anchors.top: rectangle2.top
         anchors.horizontalCenter: parent.horizontalCenter
@@ -225,7 +215,7 @@ Rectangle {
         spacing: 10
         Text {
             text: qsTr("Host:")
-            font.pixelSize: 11
+            font.pointSize: 4
             font.family: "Droid Sans"
             anchors.verticalCenter: parent.verticalCenter
         }
@@ -234,7 +224,7 @@ Rectangle {
             id: routerip
             width: 80
             text: srouterip
-            font.pixelSize: 10
+            font.pointSize: 4
             font.family: "Droid Sans"
             //  onTextChanged: setRouterIp(routerip.text)
             fillColor: "grey"
@@ -246,7 +236,7 @@ Rectangle {
             id: ext_routerip
             width: 80
             text: extip
-            font.pixelSize: 10
+            font.pointSize: 4
             font.family: "Droid Sans"
             //  onTextChanged: setRouterIp(routerip.text)
             fillColor: "grey"
@@ -256,7 +246,7 @@ Rectangle {
 
         Text {
             text: qsTr("Device:")
-            font.pixelSize: 11
+            font.pointSize:4
             font.family: "Droid Sans"
             anchors.verticalCenter: parent.verticalCenter
         }
@@ -265,11 +255,9 @@ Rectangle {
             width: scaleX(10)
             text: deviceid
             font.family: "Droid Sans"
-            font.pixelSize: 12
-            //onTextChanged: setDeviceNo(devicenumber.text)
+            font.pointSize: 4
             fillColor: "grey"
             anchors.verticalCenter: parent.verticalCenter
-
         }
 
         Rectangle {
@@ -277,20 +265,18 @@ Rectangle {
             height: scaleY(5)
             width: scaleX(10)
             color:"red"
-
+            radius:  5
             anchors.left: devicenumber.right
             anchors.leftMargin: scaleX(5)
             Text {
                 id: name
                 anchors.centerIn: parent
-                anchors.fill: parent
                 text: qsTr("Go!")
-                font.pixelSize: 12
+                font.pointSize: 4
                 verticalAlignment: Text.AlignTop
                 font.bold: true
             }
 
-            radius:  5
             MouseArea{
                 hoverEnabled: true
                 onEntered: parent.color="green"
@@ -307,28 +293,27 @@ Rectangle {
             width: scaleX(10)
             anchors.left: connectbutton.right
             anchors.leftMargin: scaleX(5)
+            radius: 4
             Text {
                 id: exitlabel
                 anchors.centerIn: parent
                 anchors.fill: parent
                 text: qsTr("Exit")
-                font.pixelSize: 11
+                font.pointSize: 5
             }
 
-            radius:  4
             MouseArea{
                 onClicked: closeOrbiter()
                 anchors.verticalCenter: parent.verticalCenter
             }
-
         }
     }
+
     Text {
         id: loadingStatus
-
         text: "Status " + window.message
         anchors.topMargin: scaleY(15)
-        font.pixelSize: 14
+        font.pointSize: 5
         font.family: "Droid Sans"
         color: "white"
         anchors.top: rectangle2.bottom
@@ -337,7 +322,7 @@ Rectangle {
 
     ListView{
         id:existing_orbiters
-        height: scaleY(65)
+        height: scaleY(75)
         width: scaleX(55)
         clip: true
         anchors.centerIn: rectangle2
@@ -355,11 +340,10 @@ Rectangle {
             {
                 height: childrenRect.height
                 width: existing_orbiters.width
-
                 Text {
                     id: orbiter_label
                     text: qsTr("Orbiter:")+ label
-                    font.pixelSize: scaleY(2.75)
+                    font.pointSize: 6
                     width: existing_orbiters.width
                     wrapMode: Text.WrapAtWordBoundaryOrAnywhere
                 }
@@ -367,7 +351,7 @@ Rectangle {
                     id: dev_num
                     width: existing_orbiters.width
                     text:qsTr("Device:")+ i_device_number
-                    font.pixelSize: scaleY(2)
+                    font.pointSize: 6
                     wrapMode: Text.WrapAtWordBoundaryOrAnywhere
                 }
             }
@@ -382,18 +366,28 @@ Rectangle {
         id:newOrbiterButton
         height: scaleY(10)
         width:scaleX(55)
-        color: "slategrey"
-        Text {
-            id: newOrbiterLabel
-            text: qsTr("Create New Orbiter?")
-            font.pixelSize: scaleY(3)
-            width: parent.width
-            anchors.centerIn: parent
-            wrapMode: Text.WrapAtWordBoundaryOrAnywhere
+        gradient: Gradient {
+            GradientStop {
+                position: 0
+                color: "transparent"
+            }
+            GradientStop {
+                position: 1
+                color: "#000000"
+            }
         }
         visible: existing_orbiters.visible
         anchors.bottom: existing_orbiters.top
         anchors.horizontalCenter: existing_orbiters.horizontalCenter
+        Text {
+            id: newOrbiterLabel
+            text: qsTr("Create New Orbiter?")
+            font.pointSize: scaleY(3)
+            width: parent.width
+            anchors.centerIn: parent
+            wrapMode: Text.WrapAtWordBoundaryOrAnywhere
+        }
+
         MouseArea{
             anchors.fill: parent
             onClicked: orbiterSetup=true
@@ -409,23 +403,34 @@ Rectangle {
         width: scaleX(70)
         visible: false
         opacity: orbiter_options.visible
-
-
         z:5
         Rectangle{
             id:goButton
             height: scaleY(15)
             width: scaleX(15)
+            radius:5
+            border.color: "white"
+            border.width: 1
+            gradient: Gradient {
+                GradientStop {
+                    position: 0
+                    color: "transparent"
+                }
+                GradientStop {
+                    position: 1
+                    color: "#000000"
+                }
+            }
             Text {
                 id: goLabel
                 text: qsTr("Go")
+                anchors.centerIn: parent
             }
             MouseArea{
                 anchors.fill: goButton
                 onClicked: {console.log("Going");
                     window.setupNewOrbiter(users_options.currentIndex+1, rooms_options.currentIndex+1,1,1,1,1);
                     orbiter_options.visible = false
-
                 }
             }
         }
@@ -435,11 +440,12 @@ Rectangle {
             height: scaleY(20)
             width: scaleX(15)
             color: "lightgrey"
+            clip:true
+
             Text {
                 id: usersLabel
                 text: qsTr("Select User")
             }
-            clip:true
 
             ListView{
                 id:users_options
@@ -470,12 +476,11 @@ Rectangle {
             height: scaleY(20)
             width: scaleX(15)
             color: "lightgrey"
+            clip:true
             Text {
                 id: roomsLabel
                 text: qsTr("Select Room")
             }
-            clip:true
-
             ListView{
                 id:rooms_options
                 height: scaleY(20)
@@ -561,15 +566,4 @@ Rectangle {
         */
 
     }
-
-    ListModel{
-        id:dummyModel
-        ListElement{
-            optionTitle:"foo"
-            optionValue:1
-        }
-    }
-
-
-
 }

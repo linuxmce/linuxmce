@@ -66,7 +66,6 @@ Rectangle {
                         text: name
                         font.capitalization: Font.SmallCaps
                         width: parent.width
-
                         wrapMode: "WrapAnywhere"
                         font.pixelSize:scaleY(2.5)
                         anchors.top: parent.top
@@ -91,7 +90,6 @@ Rectangle {
                     anchors.topMargin: 5
                     font.capitalization: Font.MixedCase
                     width: parent.width *.75
-
                     wrapMode: "WrapAtWordBoundaryOrAnywhere"
                     font.pixelSize:scaleY(2.5)
                     color: "aliceblue"

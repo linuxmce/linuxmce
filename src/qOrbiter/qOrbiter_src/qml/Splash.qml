@@ -61,7 +61,7 @@ Rectangle {
             color: "transparent"
             Image {
                 id: connection_icon
-                source: ":/icons/audio"
+                source: ":/icons/audio.png"
             }
 
             Text {
@@ -336,7 +336,7 @@ Rectangle {
 
     ListView{
         id:existing_orbiters
-        height: scaleY(16)
+        height: scaleY(65)
         width: scaleX(55)
         clip: true
         anchors.centerIn: rectangle2
@@ -358,7 +358,7 @@ Rectangle {
                 Text {
                     id: orbiter_label
                     text: qsTr("Orbiter:")+ label
-                    font.pixelSize: scaleY(1.75)
+                    font.pixelSize: 4
                     width: existing_orbiters.width
                     wrapMode: Text.WrapAtWordBoundaryOrAnywhere
                 }
@@ -366,7 +366,7 @@ Rectangle {
                     id: dev_num
                     width: existing_orbiters.width
                     text:qsTr("Device:")+ i_device_number
-                    font.pixelSize: scaleY(2)
+                    font.pixelSize: 3
                     wrapMode: Text.WrapAtWordBoundaryOrAnywhere
                 }
             }
@@ -381,7 +381,17 @@ Rectangle {
         id:newOrbiterButton
         height: scaleY(10)
         width:scaleX(55)
-        color: "slategrey"
+        gradient: Gradient {
+            GradientStop {
+                position: 0
+                color: "transparent"
+            }
+            GradientStop {
+                position: 1
+                color: "#000000"
+            }
+        }
+
         Text {
             id: newOrbiterLabel
             text: qsTr("Create New Orbiter?")
@@ -409,15 +419,25 @@ Rectangle {
         visible: false
         opacity: orbiter_options.visible
 
-
         z:5
         Rectangle{
             id:goButton
             height: scaleY(15)
             width: scaleX(15)
+            gradient: Gradient {
+                GradientStop {
+                    position: 0
+                    color: "transparent"
+                }
+                GradientStop {
+                    position: 1
+                    color: "#000000"
+                }
+            }
             Text {
                 id: goLabel
                 text: qsTr("Go")
+                anchors.centerIn: parent
             }
             MouseArea{
                 anchors.fill: goButton
@@ -437,6 +457,7 @@ Rectangle {
             Text {
                 id: usersLabel
                 text: qsTr("Select User")
+                anchors.centerIn: parent
             }
             clip:true
 
