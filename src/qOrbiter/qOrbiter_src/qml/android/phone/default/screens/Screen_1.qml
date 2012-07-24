@@ -21,17 +21,8 @@ Rectangle {
         anchors.fill:parent
     }
 
-    Image {
-        id: np_bg
-        fillMode: Image.PreserveAspectFit
-        source: "image://listprovider/updateobject/"+securityvideo.timestamp
-        height: scaleY(35)
-        anchors.right: parent.right
-        anchors.top: parent.top
-        visible: dcenowplaying.b_mediaPlaying ? true : false        
-    }
 
-
+/*
     Text{
         id:spaceholder
         text:manager.dceResponse
@@ -43,13 +34,24 @@ Rectangle {
         wrapMode: Text.WrapAtWordBoundaryOrAnywhere
         color: "silver"
     }
-
+*/
     NowPlayingButton{
         id:fs_npButton
         anchors.top: spaceholder.bottom
         anchors.left: manager.b_orientation ? parent.horizontalCenter : parent.left
         anchors.leftMargin: manager.b_orientation ? (fs_npButton.width / 2) * -1 : scaleX(2)
     }
+  /*
+    Image {
+        id: np_bg
+        fillMode: Image.PreserveAspectFit
+        source: "image://listprovider/updateobject/"+securityvideo.timestamp
+        height: scaleY(35)
+        anchors.right: parent.right
+        anchors.top: parent.top
+        visible: dcenowplaying.b_mediaPlaying ? true : false
+    }
+    */
 
     DroidHomeSelector{
         id:home_selector;

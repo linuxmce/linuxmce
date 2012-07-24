@@ -42,9 +42,8 @@ source: b_orientation ? "../img/audioProfile.png" : "../img/audioWide.png"
         width: scaleX(80)
         height: childrenRect.height
         anchors.top: nowplayingimage.bottom
-        anchors.left: ha.right
-        anchors.leftMargin: scaleX(2)
-
+        anchors.topMargin: scaleY(4)
+        anchors.horizontalCenter: parent.horizontalCenter
 
         Text {
             id: generaltitle
@@ -168,8 +167,8 @@ source: b_orientation ? "../img/audioProfile.png" : "../img/audioWide.png"
     NonEPGPlaylist {
         id: nonepgplaylist3
         anchors.top: storedAudioRemote.top
-        anchors.left: ha.right
-        anchors.leftMargin: scaleX(2)
+        anchors.topMargin: scaleY(4)
+        anchors.right: parent.right
         visible: false
         opacity: 0
     }
