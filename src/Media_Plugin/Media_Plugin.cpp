@@ -3952,7 +3952,7 @@ void Media_Plugin::CMD_Load_Playlist(string sPK_EntertainArea,int iEK_Playlist,s
 	{
 		LoggerWrapper::GetInstance()->Write(LV_STATUS,"Calling Start Media from Load Playlist");
 		MediaStream *pMyStream = StartMedia(it->second,0,pMessage->m_dwPK_Device_From,vectEntertainArea,0,&dequeMediaFile,false,false,0,"",iEK_Playlist);  // We'll let the plug-in figure out the source, and we'll use the default remote
-		delete pMyStream;
+		// delete pMyStream; // looks like a leak, but apparently we don't own this pointer over here - all kinds of things start crashing if we remove this
 	}
 }
 
