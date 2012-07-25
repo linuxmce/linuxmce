@@ -2097,6 +2097,7 @@ dequeMediaFile->size() ? (*dequeMediaFile)[0]->m_sPath.c_str() : "NO",
 
 	if( StartMedia(pMediaStream,p_mapEntertainmentArea_OutputZone) )
 		return pMediaStream;
+	// delete pMediaStream; // can't do this here because I'm not sure we always still own the pointer at this point
 	return NULL;
 }
 
