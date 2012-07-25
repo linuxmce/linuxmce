@@ -22,7 +22,7 @@ public:
     QUrl current_image;
     QUrl transition_image;
 
-    QStringList imageList;
+    QStringList *imageList;
     QString testtext;
     QString getTest() {return testtext;}
 
@@ -46,7 +46,7 @@ signals:
     void transitionSpeedChanged();
 
 public slots:
-
+    void init();
     void nextImage();
     void nextTransition();
 
@@ -61,8 +61,7 @@ public slots:
     void startAlternate();
 
 
-private:
-    QUrl *m_imgUrl;
+
 
 };
 

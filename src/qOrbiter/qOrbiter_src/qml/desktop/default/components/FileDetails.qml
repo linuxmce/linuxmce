@@ -39,7 +39,7 @@ Rectangle {
 
     Connections{
         target:filedetailsclass
-        onObjectChanged:filedetailsimage.source = "image://listprovider/filedetailsprovider/"+securityvideo.timestamp
+        onImageChanged:filedetailsimage.source = "image://listprovider/filedetailsprovider/"+securityvideo.timestamp
     }
 
     Rectangle{

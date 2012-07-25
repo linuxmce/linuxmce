@@ -161,9 +161,6 @@ source: b_orientation ? "../img/audioProfile.png" : "../img/audioWide.png"
     MediaScrollBar{id:media_scroller; anchors.bottom: controls.top; anchors.horizontalCenter: parent.horizontalCenter; anchors.bottomMargin: scaleY(2)}
     HaControls{id:ha; anchors.left: parent.left ; anchors.top: buttonsq1.bottom }
     AudioRemote{ id:controls; anchors.bottom: parent.bottom; anchors.horizontalCenter: parent.horizontalCenter}
-
-
-
     NonEPGPlaylist {
         id: nonepgplaylist3
         anchors.top: storedAudioRemote.top

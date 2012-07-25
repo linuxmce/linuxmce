@@ -2534,6 +2534,7 @@ void DCE::qOrbiter::GetMediaAttributeGrid(QString  qs_fk_fileno)
     {
         // filedetailsclass->setScreenshot(details.at(placeholder+1));
         // filedetailsclass->setScreenshotimage(getfileForDG(details.at(placeholder+1).toStdString()));
+        setMediaResponse(details.at(placeholder+1));
         QImage temp =  getfileForDG(details.at(placeholder+1).toStdString());
         emit fd_titleImageChanged(temp);
     }

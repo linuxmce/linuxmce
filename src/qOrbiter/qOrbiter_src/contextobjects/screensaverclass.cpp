@@ -30,6 +30,8 @@ void ScreenSaverClass::clearImageList()
 
 void ScreenSaverClass::setImageData(const uchar *data, int iData_size)
 {
+    QImage img;
+    qi_currentImage = img;
     qi_currentImage.loadFromData(data, iData_size);
     emit imageChanged();
 }

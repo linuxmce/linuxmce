@@ -9,7 +9,7 @@ Rectangle {
     width:appW
     property bool orbiterSetup:false
 
-    onOrbiterSetupChanged:{  console.log(orbiterSetup) ; existing_orbiters.visible = false; orbiter_options.visible = true; window.showSetup()}
+    onOrbiterSetupChanged:{  console.log(orbiterSetup) ; existing_orbiters.visible = false; orbiter_options.visible = true; newOrbiterOptionContainer.visible=true; window.showSetup()}
     onWidthChanged: console.log("detected size change")
 
     function scaleX(x){
@@ -58,17 +58,13 @@ Rectangle {
             id:connection_indicator
             height: scaleX(5)
             width: scaleX(5)
-            color: "transparent"
-            Image {
-                id: connection_icon
-                source: ":/icons/audio.png"
-            }
+            color: "transparent"           
 
             Text {
                 id: connection_label
                 text: qsTr("Connection")
                 color: window.b_connectionPresent ? "green" : "red"
-                font.pointSize: window.b_connectionPresent ? 14 : 12
+                font.pixelSize: window.b_connectionPresent ? 14 : 12
             }
         }
 
@@ -86,10 +82,10 @@ Rectangle {
                 id: device_Label
                 text: qsTr("Device")
                 color: window.b_devicePresent ? "green" : "red"
-                font.pointSize: window.b_devicePresent ? 14 : 12
+                font.pixelSize: window.b_devicePresent ? 14 : 12
             }
         }
-
+/*
         Rectangle{
             id:config_indicator
             height: scaleX(5)
@@ -104,7 +100,7 @@ Rectangle {
                 id: config_label
                 text: qsTr("Config")
                 color: window.b_localConfigReady ? "green" : "red"
-                font.pointSize: window.b_localConfigReady ? 14 : 12
+                font.pixelSize: window.b_localConfigReady ? 14 : 12
             }
         }
 
@@ -122,7 +118,7 @@ Rectangle {
                 id: skin_label
                 text: qsTr("Skins")
                 color: window.b_skinIndexReady ? "green" : "red"
-                font.pointSize: window.b_skinIndexReady ? 14 : 12
+                font.pixelSize: window.b_skinIndexReady ? 14 : 12
             }
         }
 
@@ -140,10 +136,10 @@ Rectangle {
                 id: skin_data_label
                 text: qsTr("Orbiter Ready")
                 color: window.b_orbiterConfigReady ? "green" : "red"
-                font.pointSize: window.b_orbiterConfigReady ? 14 : 12
+                font.pixelSize: window.b_orbiterConfigReady ? 14 : 12
             }
         }
-
+*/
 
     }
 
@@ -303,7 +299,7 @@ Rectangle {
         Rectangle {
             id: exitbutton
             height: scaleY(5)
-            width: scaleX(10)
+            width: scaleX(6)
             anchors.left: connectbutton.right
             anchors.leftMargin: scaleX(5)
             Text {
@@ -324,7 +320,6 @@ Rectangle {
     }
     Text {
         id: loadingStatus
-
         text: "Status " + window.message
         anchors.topMargin: scaleY(15)
         font.pixelSize: 14
@@ -336,7 +331,7 @@ Rectangle {
 
     ListView{
         id:existing_orbiters
-        height: scaleY(65)
+        height: scaleY(35)
         width: scaleX(55)
         clip: true
         anchors.centerIn: rectangle2
@@ -345,7 +340,7 @@ Rectangle {
         opacity: existing_orbiters.visible
         delegate: Rectangle{
             id:existing_orbiter_delegate
-            height: scaleY(10)
+            height: scaleY(5)
             width: existing_orbiters.width
             color: "slategrey"
             border.color: "white"
@@ -353,20 +348,20 @@ Rectangle {
             Column
             {
                 height: childrenRect.height
-                width: existing_orbiters.width
+                width: childrenRect.width
+                anchors.centerIn: parent
 
                 Text {
                     id: orbiter_label
                     text: qsTr("Orbiter:")+ label
-                    font.pixelSize: 4
-                    width: existing_orbiters.width
-                    wrapMode: Text.WrapAtWordBoundaryOrAnywhere
+                    font.pixelSize: 12
+                    wrapMode: Text.WrapAtWordBoundaryOrAnywhere                    
                 }
                 Text {
-                    id: dev_num
-                    width: existing_orbiters.width
+                    id: dev_num                  
                     text:qsTr("Device:")+ i_device_number
-                    font.pixelSize: 3
+                    font.pixelSize: 12
+                    font.italic: true
                     wrapMode: Text.WrapAtWordBoundaryOrAnywhere
                 }
             }
@@ -395,7 +390,7 @@ Rectangle {
         Text {
             id: newOrbiterLabel
             text: qsTr("Create New Orbiter?")
-            font.pixelSize: scaleY(3)
+            font.pixelSize: 15
             width: parent.width
             anchors.centerIn: parent
             wrapMode: Text.WrapAtWordBoundaryOrAnywhere
@@ -408,188 +403,195 @@ Rectangle {
             onClicked: orbiterSetup=true
         }
     }
-
-    Row{
-        id:orbiter_options
-        spacing:1
+    Rectangle{
+        id:newOrbiterOptionContainer
+        width: scaleX(50)
+        height: scaleY(25)
+        color: "darkgrey"
+        radius: 5
+        border.color: "white"
+        border.width: 1
+        visible: orbiter_options.visible
         anchors.centerIn: parent
-        anchors.verticalCenterOffset: scaleY(10)
-        height: scaleY(35)
-        width: scaleX(70)
-        visible: false
-        opacity: orbiter_options.visible
 
-        z:5
-        Rectangle{
-            id:goButton
-            height: scaleY(15)
-            width: scaleX(15)
-            gradient: Gradient {
-                GradientStop {
-                    position: 0
-                    color: "transparent"
+        Row{
+            id:orbiter_options
+            spacing:scaleX(1)
+            anchors.centerIn: parent
+            height: scaleY(25)
+            width: scaleX(70)
+            visible: false
+            opacity: orbiter_options.visible
+            z:5
+
+            Rectangle{
+                id:goButton
+                height: scaleY(5)
+                width: scaleY(5)
+
+                gradient: Gradient {
+                    GradientStop {
+                        position: 0
+                        color: "transparent"
+                    }
+                    GradientStop {
+                        position: 1
+                        color: "#000000"
+                    }
                 }
-                GradientStop {
-                    position: 1
-                    color: "#000000"
+                Text {
+                    id: goLabel
+                    text: qsTr("Go")
+                    anchors.centerIn: parent
+                }
+                MouseArea{
+                    anchors.fill: goButton
+                    onClicked: {console.log("Going");
+                        window.setupNewOrbiter(users_options.currentIndex+1, rooms_options.currentIndex+1,1,1,1,1);
+                        orbiter_options.visible = false
+
+                    }
                 }
             }
-            Text {
-                id: goLabel
-                text: qsTr("Go")
-                anchors.centerIn: parent
-            }
-            MouseArea{
-                anchors.fill: goButton
-                onClicked: {console.log("Going");
-                    window.setupNewOrbiter(users_options.currentIndex+1, rooms_options.currentIndex+1,1,1,1,1);
-                    orbiter_options.visible = false
 
-                }
-            }
-        }
-
-        Rectangle{
-            id:usersBlock
-            height: scaleY(20)
-            width: scaleX(15)
-            color: "lightgrey"
-            Text {
-                id: usersLabel
-                text: qsTr("Select User")
-                anchors.centerIn: parent
-            }
-            clip:true
-
-            ListView{
-                id:users_options
+            Rectangle{
+                id:usersBlock
                 height: scaleY(20)
                 width: scaleX(15)
-                model:users
-                spacing:5
-                anchors.top: usersLabel.bottom
-                delegate: Rectangle{
-                    height: scaleY(5)
-                    width: scaleX(15)
-                    color: users.currentIndex ? "green" : "slategrey"
-                    Text {
-                        text:dataTitle
-                        anchors.centerIn: parent
-                        color: "black"
-                    }
-                    MouseArea{
-                        anchors.fill: parent
-                        onClicked:{console.log(dataTitle); users.currentIndex=index}
-                    }
+                color: "lightgrey"
+                clip:true
+
+                Text {
+                    id: usersLabel
+                    text: qsTr("Select User")
+                    anchors.top:parent.top
                 }
-            }
-        }
 
-        Rectangle{
-            id:roomsBlock
-            height: scaleY(20)
-            width: scaleX(15)
-            color: "lightgrey"
-            Text {
-                id: roomsLabel
-                text: qsTr("Select Room")
-            }
-            clip:true
 
-            ListView{
-                id:rooms_options
-                height: scaleY(20)
-                width: scaleX(15)
-                model:rooms
-                spacing:5
-                anchors.top: roomsLabel.bottom
-                delegate: Rectangle{
-                    height: scaleY(5)
+                ListView{
+                    id:users_options
+                    height: scaleY(19)
                     width: scaleX(15)
-                    color: rooms.currentIndex ? "green" : "slategrey"
-                    Text {
-                        text:dataTitle
-                        anchors.centerIn: parent
-                    }
-                    MouseArea{
-                        anchors.fill: parent
-                        onClicked: {console.log(dataTitle);
-                            rooms.currentIndex = index
+                    model:users
+                    spacing:5
+                    clip:true
+                    anchors.top: usersLabel.bottom
+                    delegate: Rectangle{
+                        height: scaleY(5)
+                        width: scaleX(15)
+                        color: users.currentIndex ? "green" : "slategrey"
+                        Text {
+                            text:dataTitle
+                            anchors.centerIn: parent
+                            color: "black"
+                        }
+                        MouseArea{
+                            anchors.fill: parent
+                            onClicked:{console.log(dataTitle); users.currentIndex=index}
                         }
                     }
                 }
             }
-        }
-        /*
-        Rectangle{
-            id:skinsBlock
-            height: scaleY(20)
-            width: scaleX(15)
-            color: "slategrey"
-            Text {
-                id: skinsLabel
-                text: qsTr("Select Skin")
-            }
-            clip:true
 
-            ListView{
-                id:skins_options
+            Rectangle{
+                id:roomsBlock
                 height: scaleY(20)
                 width: scaleX(15)
-                model:dummyModel
-                anchors.top: skinsLabel.bottom
-                delegate: Rectangle{
-                    height: scaleY(5)
+                color: "lightgrey"
+                clip:true
+
+                Text {
+                    id: roomsLabel
+                    text: qsTr("Select Room")
+                    anchors.top: roomsBlock.top
+                }
+
+                ListView{
+                    id:rooms_options
+                    height: scaleY(19)
                     width: scaleX(15)
-                    color: "lightgrey"
-                    Text {
-                        text: optionTitle
-                        anchors.centerIn: parent
+                    model:rooms
+                    spacing:5
+                    anchors.top: roomsLabel.bottom
+                    delegate: Rectangle{
+                        height: scaleY(5)
+                        width: scaleX(15)
+                        color: rooms.currentIndex ? "green" : "slategrey"
+                        Text {
+                            text:dataTitle
+                            anchors.centerIn: parent
+                        }
+                        MouseArea{
+                            anchors.fill: parent
+                            onClicked: {console.log(dataTitle);
+                                rooms.currentIndex = index
+                            }
+                        }
                     }
                 }
             }
-        }
-
-        Rectangle{
-            id:langBlock
-            height: scaleY(20)
-            width: scaleX(15)
-            color: "slategrey"
-            Text {
-                id: langLabel
-                text: qsTr("Select Lang")
-            }
-            clip:true
-
-            ListView{
-                id:lang_options
+            /*
+            Rectangle{
+                id:skinsBlock
                 height: scaleY(20)
                 width: scaleX(15)
-                model:dummyModel
-                anchors.top: langLabel.bottom
-                delegate: Rectangle{
-                    height: scaleY(5)
+                color: "slategrey"
+                Text {
+                    id: skinsLabel
+                    text: qsTr("Select Skin")
+                }
+                clip:true
+
+                ListView{
+                    id:skins_options
+                    height: scaleY(20)
                     width: scaleX(15)
-                    color: "lightgrey"
-                    Text {
-                        text: optionTitle
-                        anchors.centerIn: parent
+                    model:dummyModel
+                    anchors.top: skinsLabel.bottom
+                    delegate: Rectangle{
+                        height: scaleY(5)
+                        width: scaleX(15)
+                        color: "lightgrey"
+                        Text {
+                            text: optionTitle
+                            anchors.centerIn: parent
+                        }
                     }
                 }
             }
+
+            Rectangle{
+                id:langBlock
+                height: scaleY(20)
+                width: scaleX(15)
+                color: "slategrey"
+                Text {
+                    id: langLabel
+                    text: qsTr("Select Lang")
+                }
+                clip:true
+
+                ListView{
+                    id:lang_options
+                    height: scaleY(20)
+                    width: scaleX(15)
+                    model:dummyModel
+                    anchors.top: langLabel.bottom
+                    delegate: Rectangle{
+                        height: scaleY(5)
+                        width: scaleX(15)
+                        color: "lightgrey"
+                        Text {
+                            text: optionTitle
+                            anchors.centerIn: parent
+                        }
+                    }
+                }
+            }
+            */
+
         }
-        */
-
     }
-
-    ListModel{
-        id:dummyModel
-        ListElement{
-            optionTitle:"foo"
-            optionValue:1
-        }
-    }
-
 
 
 }

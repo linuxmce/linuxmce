@@ -88,20 +88,6 @@ Rectangle {
                 }
             }
 
-            DropShadowEffect{
-                id: photoDropshadow
-                property real distance: 1
-                width: nowplayingimage.width
-                height: nowplayingimage.height
-                sourceItem: nowplayingimage
-                color: "black"
-                blur:5
-                opacity: .25
-                x:4
-                y:9
-            }
-
-
             Image {
                 id: nowplayingimage
                 anchors.top:gradientheader.bottom

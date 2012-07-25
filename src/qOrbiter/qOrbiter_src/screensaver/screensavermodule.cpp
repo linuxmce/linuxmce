@@ -3,33 +3,37 @@
 ScreenSaverModule::ScreenSaverModule(QObject *parent) :
     QObject(parent)
 {
-    imageList.append("../img/lmcesplash.png");
-    imageList.append("../img/icons/bedroom.jpg");
-    imageList.append("../img/icons/mediatime.png");
+    imageList = new QStringList();
+    init();
+}
 
-    setImage(QUrl(imageList.at(0)));
+void ScreenSaverModule::init()
+{
+    if(imageList->count() !=0){
+    setImage(QUrl(imageList->at(0)));
     testtext = "ack!";
     timerInterval = 10000;
-    setTImage(QUrl(imageList.at(getNext())));
-
+    setTImage(QUrl(imageList->at(getNext())));
     picChanger.setInterval(timerInterval);
     connect(&picChanger, SIGNAL(timeout()), this, SLOT(nextImage()));
     picChanger.start();
-
     QTimer::singleShot(5000,this,SLOT(startAlternate()));
-
+    }
+    else
+    {
+        QTimer::singleShot(5000, this,SLOT(init()));
+    }
 }
 
 void ScreenSaverModule::nextImage()
 {
-    setImage(QUrl(imageList.at(getNext())));
-
+    setImage(QUrl(imageList->at(getNext())));
 }
 
 int ScreenSaverModule::getNext()
 {
-    int listcount = (imageList.count()) - (1);
-    int pos = imageList.indexOf(current_image.toString());
+    int listcount = (imageList->count()) - (1);
+    int pos = imageList->indexOf(current_image.toString());
 
     // qDebug() << pos;
 
@@ -45,7 +49,7 @@ int ScreenSaverModule::getNext()
 
 void ScreenSaverModule::nextTransition()
 {
-    setTImage(QUrl(imageList.at(getNext())));
+    setTImage(QUrl(imageList->at(getNext())));
 }
 
 void ScreenSaverModule::startAlternate()

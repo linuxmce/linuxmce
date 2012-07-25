@@ -72,7 +72,7 @@ QImage AbstractImageProvider::updateObjectProvider()
 
 QImage AbstractImageProvider::fileDetails()
 {
-    key= managerreference->filedetailsclass->getTitleImage();
+    key= managerreference->filedetailsclass->titleImage;
 
     if (key.isNull())
     {
@@ -100,7 +100,7 @@ QImage AbstractImageProvider::screenShot()
 
 QImage AbstractImageProvider::ScreenSaver()
 {
-    key = managerreference->ScreenSaver->qi_currentImage;
+    key = managerreference->ScreenSaver->getImageData();
 
      if (key.isNull())
      {

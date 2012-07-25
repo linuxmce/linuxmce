@@ -32,7 +32,7 @@ public slots:
     void clearImageList();
     void setImageData(const uchar* data,int iData_size);
     void setActive(bool state);
-
+    QImage getImageData() {return qi_currentImage;}
     QString getImage();
     void setImage(QString imgUrl);
 
