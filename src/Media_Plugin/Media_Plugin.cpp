@@ -3950,7 +3950,8 @@ void Media_Plugin::CMD_Load_Playlist(string sPK_EntertainArea,int iEK_Playlist,s
 	for(map<int,MediaHandlerInfo *>::iterator it=mapMediaHandlerInfo.begin();it!=mapMediaHandlerInfo.end();++it)
 	{
 		LoggerWrapper::GetInstance()->Write(LV_STATUS,"Calling Start Media from Load Playlist");
-		StartMedia(it->second,0,pMessage->m_dwPK_Device_From,vectEntertainArea,0,&dequeMediaFile,false,false,0,"",iEK_Playlist);  // We'll let the plug-in figure out the source, and we'll use the default remote
+		MediaStream *pMyStream = StartMedia(it->second,0,pMessage->m_dwPK_Device_From,vectEntertainArea,0,&dequeMediaFile,false,false,0,"",iEK_Playlist);  // We'll let the plug-in figure out the source, and we'll use the default remote
+		delete pMyStream;
 	}
 }
 
