@@ -55,6 +55,7 @@ using namespace DCE;
 #include "pluto_main/Define_Screen.h"
 #include "pluto_main/Define_Button.h"
 #include "pluto_main/Define_DataGrid.h"
+#include "pluto_main/Define_MediaType.h"
 
 #include "Floorplan.h"
 #include "pluto_main/Define_DesignObj.h"
@@ -7991,6 +7992,44 @@ void Orbiter::RemoveShortcuts( void *data )
 	m_bShowShortcuts = false;
 	CMD_Refresh("");
 }
+
+int Orbiter::PreprocessMediaType(int iPK_MediaType)
+{
+  switch (iPK_MediaType)
+    {
+    case MEDIATYPE_lmce_Game_a2600_CONST:
+    case MEDIATYPE_lmce_Game_a5200_CONST:
+    case MEDIATYPE_lmce_Game_a7800_CONST:
+    case MEDIATYPE_lmce_Game_coleco_CONST:
+    case MEDIATYPE_lmce_Game_intv_CONST:
+    case MEDIATYPE_lmce_Game_famicom_CONST:
+    case MEDIATYPE_lmce_Game_nes_CONST:
+    case MEDIATYPE_lmce_Game_sms_CONST:
+    case MEDIATYPE_lmce_Game_sg1000_CONST:
+    case MEDIATYPE_lmce_Game_vectrex_CONST:
+    case MEDIATYPE_lmce_Game_tg16_CONST:
+    case MEDIATYPE_lmce_Game_genesis_CONST:
+    case MEDIATYPE_lmce_Game_snes_CONST:
+    case MEDIATYPE_lmce_Game_megadriv_CONST:
+    case MEDIATYPE_lmce_Game_snespal_CONST:
+    case MEDIATYPE_lmce_Game_sgx_CONST:
+    case MEDIATYPE_lmce_Game_pce_CONST:
+    case MEDIATYPE_lmce_Game_apple2_CONST:
+    case MEDIATYPE_lmce_Game_ps1_CONST:
+    case MEDIATYPE_lmce_Game_ps2_CONST:
+    case MEDIATYPE_lmce_Game_jaguar_CONST:
+    case MEDIATYPE_lmce_Game_vic20_CONST:
+    case MEDIATYPE_lmce_Game_c64_CONST:
+    case MEDIATYPE_lmce_Game_Atari800_CONST:
+      iPK_MediaType = MEDIATYPE_lmce_Game_CONST;
+      break;
+    default:
+      iPK_MediaType = iPK_MediaType;
+    }
+  
+  return iPK_MediaType;
+}
+
 //<-dceag-c401-b->
 
 	/** @brief COMMAND: #401 - Show File List */
@@ -8006,6 +8045,8 @@ void Orbiter::CMD_Show_File_List(int iPK_MediaType,string &sCMD_Result,Message *
 
 	OrbiterFileBrowser_Entry *pOrbiterFileBrowser_Entry =
 		m_pOrbiterFileBrowser_Collection->m_mapOrbiterFileBrowser[iPK_MediaType];
+
+	iPK_MediaType = PreprocessMediaType(iPK_MediaType);
 
 	if( !pOrbiterFileBrowser_Entry )
 	{
@@ -9235,9 +9276,21 @@ void Orbiter::CMD_Goto_Screen(string sID,int iPK_Screen,int iInterruption,bool b
 		return;
 	}
 
-	if( (bTurn_On && !m_bDisplayOn) )
-		CMD_Display_OnOff( "1",false );
+	if( bTurn_On && !m_bDisplayOn )
+	{
+		// If this is an OSD, and it's displaying an external media source, and we're going to the remote we assume Media_Plugin turned the display on, in all other cases turn it on. 
+		if ( m_bIsOSD && m_bUsingLiveAVPath && iPK_Screen==m_iPK_Screen_RemoteOSD)
+		{
+			// HACK: ideally orbiter should know if Media_Plugin turned the display pipes on or not 
+			m_bDisplayOn=true;
+		}
+		else
+		{
+			CMD_Display_OnOff( "1",false );
+		}
 
+	}
+	
 	// If this is an OSD, and it's displaying an external media source, and the a/v equipment's inputs are switched to that source, switch back if we're going to a screen other than the remote
 	if( m_bIsOSD && m_iPK_Screen_RemoteOSD && m_iLocation_Initial==m_pLocationInfo->iLocation && m_bUsingLiveAVPath && iPK_Screen!=m_iPK_Screen_RemoteOSD )
 	{

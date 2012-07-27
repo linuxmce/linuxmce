@@ -963,6 +963,9 @@ namespace DCE
 		//Returns true if Orbiter's config file has preseeded install values.
 		bool IsSelfInstallable();
 
+		//Used to redirect game media types to MEDIATYPE_LMCE_Game_CONST
+		int PreprocessMediaType(int iPK_MediaType);
+
 		//<-dceag-h-b->
 	/*
 				AUTO-GENERATED SECTION
