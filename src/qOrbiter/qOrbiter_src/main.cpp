@@ -535,7 +535,7 @@ int main(int argc, char* argv[])
         pqOrbiter->m_sIPAddress = w->qs_routerip.toStdString();
         pqOrbiter->m_sExternalIP = w->qs_ext_routerip.toStdString();
         qDebug() << "Initializing connection";
-        pqOrbiter->pingCore();
+      pqOrbiter->pingCore();
 
      /*   if (pqOrbiter->routerCheck() == true)
         {

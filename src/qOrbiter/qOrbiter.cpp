@@ -1817,9 +1817,8 @@ void qOrbiter::CMD_Assisted_Make_Call(int iPK_Users,string sPhoneExtension,strin
 
 bool DCE::qOrbiter::initialize()
 {
-#ifdef QT_DEBUG
-    qDebug()<< "Connecting to router";
-#endif
+
+    setCommandResponse("Connecting to router");
     setCommandResponse("Starting dce initialization");
 
     if(m_bOrbiterConnected==false){
@@ -1885,7 +1884,7 @@ bool DCE::qOrbiter::initialize()
 
                 LoggerWrapper::GetInstance()->Write(LV_CRITICAL, "Bad Device");
                 setCommandResponse("Bad Device");
-                int errorType =  this->DeviceIdInvalid();
+               // int errorType =  this->DeviceIdInvalid();
                 emit connectionValid(true);
                 QApplication::processEvents(QEventLoop::AllEvents);
                 return false;
@@ -4237,6 +4236,7 @@ int qOrbiter::DeviceIdInvalid()
             temp_orbiter_list.append(new ExistingOrbiter((int)it->first, QString::fromStdString(it->second)));
             cout << it->first << " " << it->second << endl;
         }
+        setCommandResponse("Returning List of Orbiters");
         emit deviceInvalid(temp_orbiter_list);
         return 0;
     }
@@ -4772,20 +4772,20 @@ void qOrbiter::CMD_Guide(string &sCMD_Result,Message *pMessage)
 
 void qOrbiter::pingCore()
 {
-#ifdef QT_DEBUG
-    qDebug() << "initiating ping to core";
-#endif
+
+    setCommandResponse("initiating ping to core");
+
     QString url = QString::fromStdString(m_sIPAddress);
     if(!url.contains(QRegExp("(\\D)"))){
-#ifdef QT_DEBUG
-        qDebug("Host name provided, doing lookup");
-#endif
+
+      setCommandResponse("Host name provided, doing lookup");
+
         QHostInfo::lookupHost(url, this, SLOT(checkPing(QHostInfo)));
     }
     else{
 
         if(!m_bOrbiterConnected){
-            qDebug("No hostname, checking installation");
+            setCommandResponse("No hostname, checking installation");
             checkInstall();
         }
     }
@@ -4801,23 +4801,20 @@ void qOrbiter::pingCore()
 void qOrbiter::checkPing(QHostInfo info)
 {
 
-    qDebug () << "Ping router says response is: " << info.lookupId();
+    setCommandResponse("Ping router says response is: "+ info.lookupId());
     if (info.error() != QHostInfo::NoError){
         emit routerInvalid();
     }
     else{
-#ifdef QT_DEBUG
-        qDebug() << "ip address: " << info.addresses().at(0).toString();
-#endif
+
+       setCommandResponse("ip address: " + info.addresses().at(0).toString());
         m_sHostName = info.addresses().at(0).toString().toStdString();
         m_sIPAddress = info.addresses().at(0).toString().toStdString();
-#ifdef QT_DEBUG
-        qDebug("Router found, checking for LinuxMCE installation");
-#endif
+
+        setCommandResponse("Router found, checking for LinuxMCE installation");
+
         if(!m_bRunning ){
-#ifdef QT_DEBUG
-            qDebug() << "Checking for linuxmce installation" << m_sIPAddress.c_str();
-#endif
+           setCommandResponse("Checking for linuxmce installation" + QString::fromStdString(m_sIPAddress));
             checkInstall();
         }
     }
@@ -4826,20 +4823,20 @@ void qOrbiter::checkPing(QHostInfo info)
 
 void qOrbiter::checkInstall()
 {
+    setCommandResponse("Checking for LinuxMCE installtion in checkInstall()");
     if(m_bOrbiterConnected == false){
         QString url = "http://"+QString::fromStdString(m_sIPAddress)+"/lmce-admin/index.php";
         QNetworkAccessManager *pingManager = new QNetworkAccessManager();
         connect(pingManager, SIGNAL(finished(QNetworkReply*)), this, SLOT(verifyInstall(QNetworkReply*)));
         QNetworkReply *badReply = pingManager->get(QNetworkRequest(url));
-        QTimer::singleShot(5000, badReply,SIGNAL(finished()));
     }
 }
 
 void qOrbiter::verifyInstall(QNetworkReply *r)
 {
-    if(r->bytesAvailable() !=0)
+    if(r->bytesAvailable() !=0 && this->m_bOrbiterConnected == false)
     {
-        qDebug("Found installation, starting");
+        setCommandResponse("Found installation, connecting.");
         if ( initialize() == true )
         {
             LoggerWrapper::GetInstance()->Write(LV_STATUS, "Connect OK");
@@ -4849,9 +4846,6 @@ void qOrbiter::verifyInstall(QNetworkReply *r)
         }
 
     }
-    else
-    {
-        emit routerInvalid();
-    }
+
 }
 

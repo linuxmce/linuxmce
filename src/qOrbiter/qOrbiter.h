@@ -1414,7 +1414,7 @@ public slots:
     void setMonitorStatus(bool state) { monitorAvailible = state; emit monitorStatusChanged();}
     bool getMonitorStatus() {return monitorAvailible;}
 
-    void setCommandResponse(QString response) {commandResponse = response; emit commandResponseChanged();}
+    void setCommandResponse(QString response) {commandResponse =QTime::currentTime().toString()+"::"+response; qDebug() << commandResponse; emit commandResponseChanged();}
     QString getCommandResponse() {return commandResponse;}
 
     void setEventResponse(QString eResponse){eventResponse = eResponse; emit eventResponseChanged();}
