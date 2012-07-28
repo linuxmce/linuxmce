@@ -1,4 +1,4 @@
-This is a Nokia770/800 application to handle Dianemo Orbiter.
+This is a Nokia770/800 application to handle LinuxMCE Orbiter.
 
 You need:
 
@@ -37,7 +37,7 @@ dpkg-buildpackage -rfakeroot -b -us -uc
 You can also run a parallel build like so:
 MAKEFLAGS=-j6 dpkg-buildpackage -rfakeroot -b -us -uc
 
-Result: ../dianemo-orbiter_${version}_armel.deb
+Result: ../linuxmce-orbiter_${version}_armel.deb
 
 
 On tablet you need:
@@ -74,5 +74,5 @@ Packages:
 - libsdl-sge
 
 Shortcut:
-dpkg -i dianemo-orbiter-os2008_*.deb
+dpkg -i linuxmce-orbiter-os2008_*.deb
 apt-get -f install
