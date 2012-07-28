@@ -3,4 +3,4 @@
 # Distribution under GPL, all rights reserved.
 [D-BUS Service]
 Name=com.nokia.linuxmceorbiter
-Exec=/usr/bin/linuxmceorbiter
+Exec=/opt/linuxmce-orbiter/bin/orbiter-launcher
