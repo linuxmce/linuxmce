@@ -21,7 +21,7 @@ Rectangle {
     function changePic()
     {
 
-            ssimg.scale= 1
+
             ssimg.source = "image://listprovider/screensaver/"+securityvideo.timestamp
             raise.running = true
             animation_section2.running = true
@@ -46,7 +46,7 @@ Rectangle {
             id:raise
             running: false
             PropertyAnimation{ target:ssimg; property: "opacity"; to: "1"; duration: 1500}
-            PropertyAnimation{ target:ssimg; property: "scale"; to:1.15; duration: 6000}
+
 
         }
 

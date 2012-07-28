@@ -22,18 +22,18 @@ DESTDIR = ../QOrbiter-build-$$QT_VERSION
 
 
 contains(QT_VERSION,4.8.*){
-message("QT4.8.QT_PATCH_VERSION Core")
+message("$$QT_VERSION Core")
 DEFINES+=QT4_8
 }
 
 contains(QT_VERSION,4.7.*){
-message("QT4.7.$$QT_PATCH_VERSION Core")
+message("$$QT_VERSION Core")
 DEFINES+=QT4_7
 }
 
 
 contains(QT_VERSION,5.*.*){
-message("QT5.0 Core")
+message("$$QT_VERSION Core")
 DEFINES+=QT5
 }
 
@@ -456,7 +456,7 @@ HEADERS += \
     plugins/GoogleWeather/googleweather.h \
     contextobjects/promptdata.h
 
-!ANDROID|!for_android|!QT5{
+!ANDROID||!QT5{
  HEADERS+=   ../../qMediaPlayer/AudioVisual/audiovisual.h \
     ../../qMediaPlayer/AudioVisual/videowidgetplayer.h
 }

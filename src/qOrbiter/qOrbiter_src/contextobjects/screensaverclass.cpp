@@ -34,6 +34,7 @@ void ScreenSaverClass::setImageData(const uchar *data, int iData_size)
     qi_currentImage = img;
     qi_currentImage.loadFromData(data, iData_size);
     emit imageChanged();
+    delete data;
 }
 
 void ScreenSaverClass::setActive(bool state)

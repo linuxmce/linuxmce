@@ -128,7 +128,7 @@ qorbiterManager::qorbiterManager(QDeclarativeView *view, QObject *parent) :
     QObject::connect(this, SIGNAL(orbiterReady(bool)), this, SLOT(showUI(bool)));
     QObject::connect(this, SIGNAL(skinDataLoaded(bool)), SLOT(showUI(bool)));
 #ifndef ANDROID
-    ScreenSaver = new ScreenSaverClass();
+    ScreenSaver = new ScreenSaverClass(this);
 #endif
 #ifdef for_desktop
     buildType = "/qml/desktop";
