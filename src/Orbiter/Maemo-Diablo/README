@@ -1,27 +1,45 @@
-This is a Nokia770/800 application to handle LinuxMCE Orbiter.
+This is a Nokia N770/N800/N810/N900 application to handle LinuxMCE Orbiter.
 
-You need:
+Note: these instructions need updating for the Nokia N770.
+Note: these instructions assume you will be using Linux on your development computer.
 
-- Maemo scratchbox
-- Maemo Diablo SDK
+------------------------------------------------------------------------------
 
-Last seen here: http://maemo.org/development/sdks/maemo-4-1-diablo-sdk/
+On your development computer, you need:
+
+- Maemo scratchbox - the one for the Fremantle SDK can be used for Diablo too
+- Maemo Diablo SDK (for Nokia N800, N810); or
+- Maemo Fremantle SDK (for Nokia N900)
+
+Maemo Diablo SDK last seen here:
+    http://maemo.org/development/sdks/maemo-4-1-diablo-sdk/
+Maemo Fremantle SDK last seen here:
+    http://www.developer.nokia.com/Resources/Tools_and_downloads/Other/Maemo/
+Scratchbox seen together with the SDK.
 
 In scratchbox, you need:
 
 In sources.list:
 
+* For Diablo:
+
 deb http://repository.maemo.org/extras/ diablo free non-free
-deb-src http://repository.maemo.org/extras/ diablo free non-free
 deb http://repository.maemo.org/extras-devel/ diablo free non-free
-deb-src http://repository.maemo.org/extras-devel/ diablo free non-free
 
-libsdl-sge[-dev] available only for chinook, not diablo, for some reason
+* For Fremantle:
 
+deb http://repository.maemo.org/extras/ fremantle free non-free
+deb http://repository.maemo.org/extras-devel/ fremantle free non-free
+
+* For both Diablo and Fremantle:
+
+- libsdl-sge[-dev] available only for chinook, for some reason,
+thus you need these as well:
+
+deb http://repository.maemo.org/extras/ chinook free non-free
 deb http://repository.maemo.org/extras-devel/ chinook free non-free
-deb-src http://repository.maemo.org/extras-devel/ chinook free non-free
 
-Packages:
+Packages to install in both Diablo and Fremantle scratchboxes:
 
 - libmysqlclient15-dev
 - libsdl-ttf2.0-dev
@@ -39,16 +57,27 @@ MAKEFLAGS=-j6 dpkg-buildpackage -rfakeroot -b -us -uc
 
 Result: ../linuxmce-orbiter_${version}_armel.deb
 
+------------------------------------------------------------------------------
 
-On tablet you need:
+On the tablet, you need:
 
-Latest OS2008 Diablo. Last seen here: http://tablets-dev.nokia.com/
+For Nokia N800, N810:
+- Latest OS2008 Diablo. Last seen here: http://tablets-dev.nokia.com/
 - "Maemo extras" repository enabled.
 deb http://repository.maemo.org/extras/ diablo free non-free
 - "Maemo devel extras" repository enabled.
 deb http://repository.maemo.org/extras-devel/ diablo free non-free
 - "LinuxMCE" repository
 deb http://deb.linuxmce.org/maemo/ diablo free
+
+For Nokia N900:
+- Latest Maemo 5 Fremantle. Last seen here: http://tablets-dev.nokia.com/
+- "Maemo extras" repository enabled.
+deb http://repository.maemo.org/extras/ fremantle free non-free
+- "Maemo devel extras" repository enabled.
+deb http://repository.maemo.org/extras-devel/ fremantle free non-free
+- "LinuxMCE" repository
+deb http://deb.linuxmce.org/maemo/ fremantle free
 
 Preparation:
 
@@ -74,5 +103,6 @@ Packages:
 - libsdl-sge
 
 Shortcut:
-dpkg -i linuxmce-orbiter-os2008_*.deb
+
+dpkg -i linuxmce-orbiter_*.deb
 apt-get -f install
