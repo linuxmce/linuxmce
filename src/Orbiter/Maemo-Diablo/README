@@ -11,6 +11,10 @@ On your development computer, you need:
 - Maemo Diablo SDK (for Nokia N800, N810); or
 - Maemo Fremantle SDK (for Nokia N900)
 
+Note: if you installed the Diablo scratchbox, you can safely and easily upgrade
+to the Fremantle scratchbox:
+http://wiki.maemo.org/Documentation/Maemo5_Final_Installation#Upgrading_from_Maemo_4.x.2FDiablo_SDK
+
 Maemo Diablo SDK last seen here:
     http://maemo.org/development/sdks/maemo-4-1-diablo-sdk/
 Maemo Fremantle SDK last seen here:
