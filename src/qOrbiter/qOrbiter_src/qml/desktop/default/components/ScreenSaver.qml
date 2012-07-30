@@ -10,12 +10,8 @@ Rectangle {
 
     function changeStuff()
     {
-
-            lower.running =true
-            animation_section2.running = false
-
-
-
+        lower.running =true
+        animation_section2.running = false
     }
 
     function changePic()
@@ -42,16 +38,13 @@ Rectangle {
         smooth: true
 
         ParallelAnimation {
-
             id:raise
             running: false
             PropertyAnimation{ target:ssimg; property: "opacity"; to: "1"; duration: 1500}
 
-
         }
 
         SequentialAnimation on opacity {
-
             id:lower
             running:false
             PropertyAnimation{ target:ssimg; property: "opacity"; to: "0"; duration: 1000}
@@ -63,7 +56,7 @@ Rectangle {
             onImageChanged:changeStuff()
         }
     }
-/*
+    /*
     EffectBillboard{
         id: billboard
         anchors.fill: ssimg
@@ -95,8 +88,8 @@ Rectangle {
         dividerValue: 1
         opacity: 1
         radius: 0.75
-       targetHeight: ssimg.height
-       targetWidth: ssimg.width
+        targetHeight: ssimg.height
+        targetWidth: ssimg.width
         source: ShaderEffectSource { sourceItem: ssimg; hideSource: true }
 
     }
@@ -105,9 +98,9 @@ Rectangle {
 
         running: false
         PropertyAnimation { target: blur; property: "radius"; to: 0.75; duration: 250}
-       // PropertyAnimation {target: blur; property: "opacity"; to:0 ; duration: 1000 }
+        // PropertyAnimation {target: blur; property: "opacity"; to:0 ; duration: 1000 }
         PropertyAnimation { target: blur; property: "radius"; to: 0.0; duration: 2000}
-      //  PropertyAnimation {target: blur; property: "opacity"; to:1 ; duration: 1000 }
+        //  PropertyAnimation {target: blur; property: "opacity"; to:1 ; duration: 1000 }
         PauseAnimation { duration: 5500 }
         PropertyAnimation { target: blur; property: "radius"; to: 0.75; duration: 1000}
         // PropertyAnimation { target: blur; property: "radius"; to: .5; duration: 5000}

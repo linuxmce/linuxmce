@@ -31,18 +31,9 @@ Rectangle {
             anchors.topMargin: scaleY(2)
             anchors.horizontalCenter: parent.horizontalCenter
 
-            DropShadowEffect{
-                id:plistShadow
-                width: tvchannellist.width
-                height: tvchannellist.height
-                sourceItem:tvchannellist
-                property real distance: 5.0
-                color: "black"
-                blur: distance / 10
-                opacity: 1-distance /50.0
 
             EPGPlaylist{id:tvchannellist }
-            }
+
 
             Rectangle {
                 id:metarect
