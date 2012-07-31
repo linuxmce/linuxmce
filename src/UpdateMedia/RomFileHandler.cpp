@@ -32,7 +32,7 @@ namespace UpdateMediaVars
 //-----------------------------------------------------------------------------------------------------
 
 RomFileHandler::RomFileHandler(string sDirectory, string sFile, int iRomType) :
-	GenericFileHandler(sDirectory, sFile)
+	ID3FileHandler(sDirectory, sFile)
 {
 	m_iRomType = iRomType;
 }
@@ -48,7 +48,7 @@ RomFileHandler::~RomFileHandler(void)
 bool RomFileHandler::LoadAttributes(PlutoMediaAttributes *pPlutoMediaAttributes, 
 		list<pair<char *, size_t> >& listPicturesForTags)
 {
-
+  
 	string sFileWithAttributes = m_sFullFilename;
 	string sROMName = FileUtils::FilenameWithoutPath(sFileWithAttributes,false);
 
@@ -81,9 +81,77 @@ bool RomFileHandler::LoadAttributes(PlutoMediaAttributes *pPlutoMediaAttributes,
 		else
 			itm->second->m_sName = sValue;
 	}
-
-	return true;
+  
+  // Pass it back once we have figured out the ROM attributes here.
+  return ID3FileHandler::LoadAttributes(pPlutoMediaAttributes, listPicturesForTags);
 }
+
+//-----------------------------------------------------------------------------------------------------
+bool RomFileHandler::SaveAttributes(PlutoMediaAttributes *pPlutoMediaAttributes)
+{
+  // Call superclass.
+  return ID3FileHandler::SaveAttributes(pPlutoMediaAttributes);
+}
+
+//-----------------------------------------------------------------------------------------------------
+bool RomFileHandler::RemoveAttribute(int nTagType, string sValue, PlutoMediaAttributes *pPlutoMediaAttributes)
+{
+  // We do not remove attributes from files at the moment.
+  return ID3FileHandler::RemoveAttribute(nTagType, sValue, pPlutoMediaAttributes);
+}
+
+//-----------------------------------------------------------------------------------------------------
+string RomFileHandler::GetFileAttribute()
+{
+  return ID3FileHandler::GetFileAttribute();
+}
+//-----------------------------------------------------------------------------------------------------
+/*static*/ bool RomFileHandler::IsSupported()
+{
+	const string csSupportedExtensions("zip");
+	string sExtension = StringUtils::ToLower(FileUtils::FindExtension(m_sFullFilename));
+
+	if(sExtension.empty())
+		return false;
+
+    return csSupportedExtensions.find(sExtension) != string::npos;
+}
+//-----------------------------------------------------------------------------------------------------
+bool RomFileHandler::FileAttributeExists()
+{
+  return ID3FileHandler::FileAttributeExists();
+}
+//-----------------------------------------------------------------------------------------------------
+string RomFileHandler::GetFileSourceForDB()
+{
+	if(!UpdateMediaVars::sUPnPMountPoint.empty() && StringUtils::StartsWith(m_sDirectory, UpdateMediaVars::sUPnPMountPoint))
+		return "U";
+	else 
+		return "F";
+}
+
+//-----------------------------------------------------------------------------------------------------
+void RomFileHandler::SetTagInfo(string sFilename, const map<int,string>& mapAttributes, const list<pair<char *, size_t> >& listPictures)
+{
+  // We do not modify the game database, currently.
+  //ID3FileHandler::SetTagInfo(sFilename, mapAttributes, listPictures);
+}
+//-----------------------------------------------------------------------------------------------------
+void RomFileHandler::RemoveTag(string sFilename, int nTagType, string sValue) {
+  // We do not modify the game database, currently.
+  //ID3FileHandler::RemoveTag(sFilename, nTagType, sValue);
+}
+//-----------------------------------------------------------------------------------------------------
+string RomFileHandler::ExtractAttribute(const map<int,string>& mapAttributes, int key)
+{
+	map<int,string>::const_iterator it = mapAttributes.find(key);
+	if(it != mapAttributes.end())
+		return it->second;
+
+	return "";
+}
+//-----------------------------------------------------------------------------------------------------
+
 //-----------------------------------------------------------------------------------------------------
 void RomFileHandler::getMAMEData(string sRomName)
 {
@@ -395,65 +463,3 @@ void RomFileHandler::GetRomInfo(string sFilename, map<int,string>& mapAttributes
     listPictures.push_back(make_pair(pSnapData,nSnapSize));
 
 }
-
-//-----------------------------------------------------------------------------------------------------
-bool RomFileHandler::SaveAttributes(PlutoMediaAttributes *pPlutoMediaAttributes)
-{
-  // No save attributes at the moment.
-}
-
-//-----------------------------------------------------------------------------------------------------
-bool RomFileHandler::RemoveAttribute(int nTagType, string sValue, PlutoMediaAttributes *pPlutoMediaAttributes)
-{
-  // We do not remove attributes from files at the moment.
-}
-
-//-----------------------------------------------------------------------------------------------------
-string RomFileHandler::GetFileAttribute()
-{
-	return m_sFullFilename;
-}
-//-----------------------------------------------------------------------------------------------------
-/*static*/ bool RomFileHandler::IsSupported()
-{
-	const string csSupportedExtensions("zip");
-	string sExtension = StringUtils::ToLower(FileUtils::FindExtension(m_sFullFilename));
-
-	if(sExtension.empty())
-		return false;
-
-    return csSupportedExtensions.find(sExtension) != string::npos;
-}
-//-----------------------------------------------------------------------------------------------------
-bool RomFileHandler::FileAttributeExists()
-{
-	return true;
-}
-//-----------------------------------------------------------------------------------------------------
-string RomFileHandler::GetFileSourceForDB()
-{
-	if(!UpdateMediaVars::sUPnPMountPoint.empty() && StringUtils::StartsWith(m_sDirectory, UpdateMediaVars::sUPnPMountPoint))
-		return "U";
-	else 
-		return "F";
-}
-
-//-----------------------------------------------------------------------------------------------------
-void RomFileHandler::SetTagInfo(string sFilename, const map<int,string>& mapAttributes, const list<pair<char *, size_t> >& listPictures)
-{
-  // We do not modify the game database, currently.
-}
-//-----------------------------------------------------------------------------------------------------
-void RomFileHandler::RemoveTag(string sFilename, int nTagType, string sValue) {
-  // We do not modify the game database, currently.
-}
-//-----------------------------------------------------------------------------------------------------
-string RomFileHandler::ExtractAttribute(const map<int,string>& mapAttributes, int key)
-{
-	map<int,string>::const_iterator it = mapAttributes.find(key);
-	if(it != mapAttributes.end())
-		return it->second;
-
-	return "";
-}
-//-----------------------------------------------------------------------------------------------------

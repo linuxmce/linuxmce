@@ -2,7 +2,7 @@
 #define __ROM_FILE_HANDLER_H__
 
 //-----------------------------------------------------------------------------------------------------
-#include "GenericFileHandler.h"
+#include "ID3FileHandler.h"
 #include "GAMEROM.h"
 #include <map>
 #include <algorithm>
@@ -12,7 +12,7 @@ using namespace std;
 #define ROMTYPE_COWERING 1
 //-----------------------------------------------------------------------------------------------------
 
-class RomFileHandler : public GenericFileHandler
+class RomFileHandler : public ID3FileHandler
 {
 public:
 	RomFileHandler(string sDirectory, string sFile, int iRomType);
