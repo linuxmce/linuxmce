@@ -17,6 +17,12 @@ $DB_PL_HANDLE = DBI->connect(&read_pluto_cred()) or die "Could not connect to My
 # get PK_Device of KNX device
 $KNXDeviceID = getDeviceID();
 
+# if device does not exist then simply exit and do nothing
+if($KNXDeviceID == "") {
+	$DB_PL_HANDLE->disconnect();
+	exit;
+}
+
 # test if send of Date / Time is enabled
 $DTEnabled = get_device_devicedata($KNXDeviceID,307);
 
@@ -48,7 +54,7 @@ if($TimeGA != "") {
 
 # if date GA is not empty, then send actual date to KNX bus
 if($DateGA != "") {
-	@args = ("/usr/bin/groupwrite", "ip:127.0.0.1", "$DateGA", # change protocoll to your needs
+	@args = ("/usr/bin/groupwrite", "ip:127.0.0.1", "$DateGA",
 	sprintf("%02X", $dayOfMonth ), # Day
 	sprintf("%02X", ($month+1) ), # Month
 	sprintf("%02X", ($yearOffset-100)) # Year
