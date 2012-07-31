@@ -28,3 +28,5 @@ else
 	service eibd start
 fi
 
+# create cronjob to send date and time to KNX bus
+ln -fs /usr/pluto/bin/knxtime /etc/cron.hourly/knxtime
