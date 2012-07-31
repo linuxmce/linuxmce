@@ -1,0 +1,73 @@
+#!/usr/bin/perl
+use Math::BaseCnv;
+use DBI;
+
+# Some helper functions
+require "/usr/pluto/bin/lmce.pl";
+
+my $KNXDeviceID;
+my $DTEnabled;
+my $DateGA;
+my $TimeGA;
+my $DB_PL_HANDLE;
+
+#connect to databases
+$DB_PL_HANDLE = DBI->connect(&read_pluto_cred()) or die "Could not connect to MySQL";
+
+# get PK_Device of KNX device
+$KNXDeviceID = getDeviceID();
+
+# test if send of Date / Time is enabled
+$DTEnabled = get_device_devicedata($KNXDeviceID,307);
+
+# if not simply exit and do nothing
+if($DTEnabled == 0) {
+	$DB_PL_HANDLE->disconnect();
+	exit;
+}
+
+# get group addresses for Date and Time object
+$DateGA = get_device_devicedata($KNXDeviceID,308);
+$TimeGA = get_device_devicedata($KNXDeviceID,309);
+$DB_PL_HANDLE->disconnect();
+
+# if time GA is not empty, then send actual time to KNX bus
+if($TimeGA != "") {
+	($second, $minute, $hour, $dayOfMonth, $month, $yearOffset, $dayOfWeek, $dayOfYear, $daylightSavings) = localtime(time);
+	# Mon is KNX 001 and Sun is 111 in Linux is Sun 1 und Sat 7
+	@weekDays = qw(111 001 010 011 100 101 110);
+	# calc $hour in bin with exact 5 digits
+	$bin_hour = rstr("000000".cnv( $hour, 10, 2) ,5);
+	@args = ("/usr/bin/groupwrite", "ip:127.0.0.1", "$TimeGA",
+	sprintf("%02X", cnv( $weekDays[$dayOfWeek] . $bin_hour, 2, 10)), # calc weekday and hour in hex
+	sprintf("%02X", $minute), # same for minute and second
+	sprintf("%02X", $second));
+	# execute command
+	system(@args) == 0 or die "system @args failed: $?";
+}
+
+# if date GA is not empty, then send actual date to KNX bus
+if($DateGA != "") {
+	@args = ("/usr/bin/groupwrite", "ip:127.0.0.1", "$DateGA", # change protocoll to your needs
+	sprintf("%02X", $dayOfMonth ), # Day
+	sprintf("%02X", ($month+1) ), # Month
+	sprintf("%02X", ($yearOffset-100)) # Year
+	);
+	system(@args) == 0 or die "system @args failed: $?";
+}
+
+# helpers
+sub rstr{
+	my $s = shift;
+	my $len = shift;
+	return substr($s, length($s) - $len, $len);
+}
+
+sub getDeviceID {
+	my $sth = $DB_PL_HANDLE->prepare("SELECT PK_Device FROM Device WHERE FK_DeviceTemplate=2195");
+	$sth->execute || die "Sql Error";
+	my $row = $sth->fetchrow_hashref;
+	my $ID = $row->{PK_Device};
+	return $ID;
+}
+
