@@ -10,6 +10,7 @@ Rectangle {
 
     HomeButton{}
 
+
     Rectangle{
         height: scaleY(75)
         width: scaleX(75)
@@ -148,7 +149,23 @@ Rectangle {
                 buttontext: qsTr("IR Codes")
                 radius: 5
             }
+
+            AdvancedButton{
+                id:qorbiterConfig
+                height: scaleY(style.buttonH)
+                width: scaleX(style.buttonW)
+                buttontext: qsTr("Local Config")
+                radius: 5
+                MouseArea{
+                    id:showConfig
+                    anchors.fill: parent
+                    onClicked: localConfigPanel.state="showing"
+                }
+            }
         }
+    }
+    ConfigPanel{
+        id:localConfigPanel
     }
 }
 

@@ -145,6 +145,7 @@ class qorbiterManager : public QObject
     Q_PROPERTY (QString sPK_User READ getCurrentUser WRITE setCurrentUser NOTIFY userChanged)
     Q_PROPERTY (QString currentRoom READ getCurrentRoom WRITE setCurrentRoom NOTIFY roomChanged)
     Q_PROPERTY (QString dceResponse READ getDceResponse WRITE setDceResponse NOTIFY dceResponseChanged)
+    Q_PROPERTY (bool debugMode READ getDebugMode WRITE setDebugMode NOTIFY debugModeChanged )
     Q_PROPERTY (bool connectedState READ getConnectedState WRITE setConnectedState NOTIFY connectedStateChanged)
     Q_PROPERTY (bool b_orientation READ getOrientation WRITE setOrientation NOTIFY orientationChanged)
     Q_PROPERTY (QString currentScreen READ getCurrentScreen WRITE setCurrentScreen  NOTIFY screenChange)
@@ -409,6 +410,7 @@ signals:
     void saveMediaScreenShot(QString attribute, QByteArray pic);
     void mediaSeperatorChanged(int sep);
     void requestStreamImage();
+    void debugModeChanged();
 
     void liveTVrequest();
     void managerPlaylistRequest();
@@ -476,13 +478,17 @@ public slots: //note: Q_INVOKABLE means it can be called directly from qml
     void connectionWatchdog();
     QString getCurrentUser() {return sPK_User;}
     void setCurrentUser(QString inc_user );
-    void setCurrentRoom(QString room) {currentRoom = room; emit roomChanged();}
+    void setCurrentRoom(QString room) {currentRoom = room; writeConfig(); emit roomChanged();}
     QString getCurrentRoom () {return currentRoom;}
     void processConfig(QByteArray config);
     bool OrbiterGen();              //prelim orbter generation
     void quickReload();
     void showUI(bool b);
-    void displayModelPages(QList<QObject*> pages);
+
+    void setDebugMode(bool b) {debugMode = b; emit debugModeChanged();}
+    bool getDebugMode() {return debugMode;}
+
+    void displayModelPages(QList<QObject*> pages);    
 
     void setInternalIp(QString s) { m_ipAddress = s; emit internalIpChanged(); }
     QString getInternalIp() {return m_ipAddress; }

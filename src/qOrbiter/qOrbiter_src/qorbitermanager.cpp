@@ -1192,7 +1192,7 @@ bool qorbiterManager::writeConfig()
             QDomElement configVariables = localConfig.documentElement().toElement();
             configVariables.namedItem("routerip").attributes().namedItem("id").setNodeValue(qs_routerip);           //internal ip
             configVariables.namedItem("routeraddress").attributes().namedItem("id").setNodeValue(internalHost);     //internal hostname
-            configVariables.namedItem("skin").attributes().namedItem("id").setNodeValue(currentSkin);               //curent skin
+            configVariables.namedItem("skin").attributes().namedItem("id").setNodeValue(currentSkin);              //curent skin
 
 
             configVariables.namedItem("externalip").attributes().namedItem("id").setNodeValue(qs_ext_routerip);     //externalip

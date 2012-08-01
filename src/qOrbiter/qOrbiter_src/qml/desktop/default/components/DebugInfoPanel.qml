@@ -6,6 +6,7 @@ Rectangle {
     width: 300
     height: 200
     color: "lightgrey"
+    visible: manager.debugMode ? true : false
     property int titleColWidth:.25 * infoPanel.width
     property int valueColWidth:.65 *infoPanel.width
     property bool active:false

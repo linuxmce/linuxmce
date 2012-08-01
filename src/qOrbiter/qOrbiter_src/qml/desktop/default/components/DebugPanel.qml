@@ -8,7 +8,7 @@ Rectangle {
     property string debugMessage:""
     property int messageTimeOut:6
     property bool active:false
-
+    visible: manager.debugMode ? true : false
     onDebugMessageChanged: if(debugMessage.toString() !== ""){
                                active = true
                                x = 0+scaleX(1)
