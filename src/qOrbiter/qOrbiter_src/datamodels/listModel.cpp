@@ -35,6 +35,7 @@ ListModel::ListModel(gridItem* prototype, QObject* parent) :
     setRoleNames(m_prototype->roleNames());
     qRegisterMetaType<QModelIndex>("QModelIndex");
     totalcells = 0;
+    seperator = 16;
     loadingStatus = false;
     progress = 0;
     clearing = false;
@@ -65,6 +66,7 @@ ListModel::~ListModel() {
 
 void ListModel::appendRow(gridItem *item)
 {
+    setLoadingStatus(true);
     appendRows(QList<gridItem*>() << item);
 }
 
@@ -84,9 +86,10 @@ void ListModel::appendRows(const QList<gridItem *> &items)
     int currentRows= m_list.count();
     emit itemAdded(currentRows);
     setCurrentCells(currentRows);
-    double p = (((double)m_list.size() / (double)totalcells) * 100) ;
+    double p = (((double)m_list.size() / (double)seperator) * 100) ;
     setProgress(p);
     emit dataChanged(index2, index, currentRows);
+    setLoadingStatus(false);
     QApplication::processEvents(QEventLoop::AllEvents);
 
 }

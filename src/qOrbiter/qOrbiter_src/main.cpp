@@ -444,7 +444,7 @@ int main(int argc, char* argv[])
         QObject::connect(pqOrbiter, SIGNAL(showFileInfo(bool)), w->filedetailsclass, SLOT(setVisible(bool)),Qt::QueuedConnection);
         QObject::connect(pqOrbiter, SIGNAL(setFocusFile(QString)), w->filedetailsclass, SLOT(setFile(QString)),Qt::QueuedConnection);
         QObject::connect(pqOrbiter, SIGNAL(modelPageCount(QList<QObject*>)), w, SLOT(displayModelPages(QList<QObject*>)),Qt::QueuedConnection);
-
+        QObject::connect(pqOrbiter, SIGNAL(pageSeperatorChanged(int)) , mediaModel, SLOT(setSeperator(int)), Qt::QueuedConnection);
         //now playing signals
         QObject::connect(pqOrbiter, SIGNAL(setNowPlaying(bool)), w->nowPlayingButton,SLOT(setStatus(bool)),Qt::QueuedConnection);
         QObject::connect(pqOrbiter,SIGNAL(streamIdChanged(int)), w->nowPlayingButton, SLOT(setStreamID(int)),Qt::QueuedConnection);

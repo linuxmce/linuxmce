@@ -4,7 +4,6 @@
 #ifdef QT5
 #include <QtWidgets/QWidget>
 #else
-
 #include <QWidget>
 #include <phonon/Phonon>
 #endif

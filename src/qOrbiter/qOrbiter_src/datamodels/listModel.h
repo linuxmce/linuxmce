@@ -38,11 +38,13 @@ public:
     void sortModel(int column, Qt::SortOrder order);
 
     int totalcells;
+    int seperator;
     bool loadingStatus;
     int gridType;
     double progress;
     int currentCells;
     bool clearing;
+
 
 signals:
     void itemAdded(int row);
@@ -62,6 +64,7 @@ signals:
 
 
 public slots:
+    void setSeperator(int s) {seperator = s;}
     void checkForMore();
     void appendRow(gridItem* item);
     void populateGrid(int mediaType);

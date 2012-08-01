@@ -33,6 +33,7 @@ Rectangle {
         id: pos_label
         anchors.top: fileviewscreen.top
         anchors.horizontalCenter: fileviewscreen.horizontalCenter
+        radius:5
         color:style.darkhighlight
         width: scaleX(75)
         height: scaleY(5)
@@ -50,14 +51,24 @@ Rectangle {
                 id: grid_attritbute_label
                 text: qsTr("Attribute Type Sort") + manager.q_attributetype_sort
             }
+            Text {
+                id: page_label
+                text: qsTr("Current Page") + dcerouter.media_currentPage
+            }
+            TextInput{
+                id:seperationSetter
+                width: page_label.width
+                text: dcerouter.media_pageSeperator
+            }
         }
 
     }
     Connections
     {
         target: dataModel
-        onProgressChanged:progress_bar_fill.height = ((progress_bar.height) * (dataModel.progress )) /100
+        onProgressChanged:{progress_bar_fill.height = ((progress_bar.height) * (dataModel.progress / 100)); console.log(dataModel.progress)}
         onReady:progress_bar_fill.height = 0
+        onLoadingStatusChanged:progress_bar_fill.color = dataModel.loadingStatus ? "green" : "red"
     }
 
     Rectangle
@@ -73,27 +84,21 @@ Rectangle {
         Rectangle{
             id:progress_bar_fill
             height: 0
-            width: parent.width
-            color: dataModel.loadingStatus ? "green" : "red"
+            width: parent.width-1
+            color: height === progress_bar.height ? "green" : "red"
             anchors.bottom: parent.bottom
+            opacity: .25
         }
 
         Text {
             id: total_cells
-            text: dataModel.totalcells
+            text: dcerouter.media_pageSeperator
             color: "grey"
             font.bold: false
             font.pixelSize: scaleY(4)
             anchors.bottom: progress_bar.top
         }
-        Text {
-            id: current_cells
-            text: dataModel.currentCells
-            color: "grey"
-            font.bold: false
-            font.pixelSize: scaleY(4)
-            anchors.top: progress_bar_fill.top
-        }
+
     }
 
 
@@ -252,6 +257,8 @@ Rectangle {
 
 
     MultiStateFileDisplay{id:grid_view1; anchors.top: pos_label.bottom}
+
+
     ListView{
         id:model_pages
         height: appH
@@ -263,12 +270,13 @@ Rectangle {
             width: scaleX(10)
             color: "transparent"
             Text {
-                id:page_label
+                id:page_label2
                 text: label
                 font.pixelSize: scaleY(3.5)
                 anchors.centerIn: parent
-                color: "slategrey"
+                color: label == dcerouter.media_currentPage ? "green":"slategrey"
                 font.bold: true
+
             }
 
             MouseArea{
@@ -301,6 +309,7 @@ Rectangle {
                 font.pixelSize: 18
                 anchors.centerIn: parent
                 color:"aliceblue"
+
             }
             MouseArea{
                 anchors.fill: parent

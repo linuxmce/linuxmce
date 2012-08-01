@@ -61,6 +61,7 @@ class qOrbiter : public qOrbiter_Command
     Q_PROPERTY (QString deviceResponse READ getDeviceResponse WRITE setDeviceResponse NOTIFY deviceResponseChanged) // for use in display of messages associated with specific devices
 
     Q_PROPERTY (int media_pageSeperator READ getGridSeperator WRITE setGridSeperator NOTIFY newPageSeperator )
+    Q_PROPERTY (int media_currentPage READ getCurrentPage WRITE setCurrentPage NOTIFY mediaPageChanged)
     Q_PROPERTY (int i_current_mediaType READ getMediaType WRITE setMediaType NOTIFY mediaTypeChanged)
     Q_PROPERTY (bool discreteAudio READ getDiscreteAudio WRITE setDiscreteAudio NOTIFY discreteAudioChanged )
     Q_PROPERTY (bool m_bContainsVideo READ getContainsVideo WRITE setContainsVideo NOTIFY containsVideo())
@@ -1278,6 +1279,7 @@ signals:
     //media datagrid
     void initializeSorting();
     void newPageSeperator();
+    void mediaPageChanged();
     void recievingStatusChanged();
     void gridStatusChanged();
     void addItem(gridItem*);
@@ -1288,6 +1290,7 @@ signals:
     void setFocusFile(QString);
     void modelPageCount(QList<QObject*> count);
     void clearModel();
+    void pageSeperatorChanged(int s);
 
 
     //now playing signals
@@ -1480,7 +1483,11 @@ public slots:
 
     //media grid
     void setGridSeperator(int sep);
-    int getGridSeperator() { return media_pageSeperator;}
+    int getGridSeperator() { return media_pageSeperator; emit newPageSeperator();}
+
+    void setCurrentPage(int page) {media_currentPage = page; emit mediaPageChanged();  }
+    int getCurrentPage() {return media_currentPage;}
+
     bool checkLoadingStatus();
     void requestLiveTvPlaylist();
     void prepareFileList( int iPK_MediaType);

@@ -4,6 +4,7 @@
 //#include <QtMultimedia/QtMultimedia>
 #include <QtWidgets/qwidget.h>
 #else
+#include <QtMultimedia/QtMultimedia>
 #include <phonon/Phonon>
 #include <phonon/VideoWidget>
 #endif
@@ -13,8 +14,6 @@
 #include "QVBoxLayout"
 #include <QUrl>
 #include <QDebug>
-
-
 
 videoWidgetPlayer::videoWidgetPlayer(QWidget *parent) :
     QWidget(parent)

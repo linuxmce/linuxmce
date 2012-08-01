@@ -70,12 +70,13 @@ qOrbiter::qOrbiter(int DeviceID, string ServerAddress,bool bConnectEventHandler,
     backwards = false;
     i_current_mediaType = 0;
     i_current_floorplanType = 0;
-    media_totalPages=0;
+    setCurrentPage(0);
+
     media_currentPage=0;
     media_pos=0;
     media_seek="";
     cellsToRender = 0;
-    media_pageSeperator = 16;
+    setGridSeperator(16);
     b_mediaPlaying = false;
     m_dwPK_Device_NowPlaying = 0;
     m_dwPK_Device_NowPlaying_Video = 0;
@@ -2330,7 +2331,7 @@ void qOrbiter::requestPage(int page)
 {
 
     media_pos = page * media_pageSeperator;
-    media_currentPage = page;
+    setCurrentPage(page);
     setGridStatus(true);
     //qDebug() << "Navigating to page " << media_currentPage;
     //qDebug() << "Cell Range::" << media_pos << "to" << media_pos + media_pageSeperator;
@@ -3309,12 +3310,17 @@ void DCE::qOrbiter::populateAdditionalMedia() //additional media grid that popul
             int index;
             QImage cellImg;
             media_pos = GridCurRow;
+
             if (m_sSeek != "")
             {
                 media_seek = "";
                 populateAdditionalMedia();
+
                 return;
             }
+            setCurrentPage((GridCurRow / media_totalPages)+1) ;
+            setMediaResponse("Page: "+ QString::number(media_currentPage));
+
             /*
             qDebug("---------------------");
             qDebug() << "Complete Call Results-" << m_sSeek.c_str();
@@ -4490,10 +4496,11 @@ void DCE::qOrbiter::prepareFileList(int iPK_MediaType)
                 emit gridModelSizeChange(pDataGridTable->GetRows());
                 i_mediaModelRows = cellsToRender;
                 QList <QObject*> modelPages;
-                int iPages = cellsToRender / media_pageSeperator; //15 being the items per page.
-                for (int i=0; i < (iPages+1); i++)
+                media_totalPages = (i_mediaModelRows / media_pageSeperator)+1; //16 being the items per page.
+
+                for (int i=0; i < (media_totalPages); i++)
                 {
-                    modelPage * item = new modelPage(i, QString::number(i));
+                    modelPage * item = new modelPage(i, QString::number(i+1));
                     modelPages.append(item);
                 }
 
@@ -4673,6 +4680,7 @@ void DCE::qOrbiter::sendAvCommand(int deviceto, int command)
 void DCE::qOrbiter::setGridSeperator(int sep)
 {
     media_pageSeperator = sep;
+    emit pageSeperatorChanged(media_pageSeperator);
 }
 
 
