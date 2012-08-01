@@ -91,7 +91,8 @@ bool Advanced_IP_Camera::GetConfig()
 	}
 	string config = DATA_Get_Configuration();
 	LoggerWrapper::GetInstance ()->Write (LV_STATUS, "getConfig() Configuration = %s", config.c_str());
-	vector<string> parameters = StringUtils::Split(config, "\n");
+	vector<string> parameters;
+	SplitConfig(config, parameters);
 	for (int i = 0; i < parameters.size(); i++)
 	{
 		size_t pos = parameters[i].find_first_of("=");
@@ -120,6 +121,18 @@ bool Advanced_IP_Camera::GetConfig()
 				}
 			} else if (StringUtils::StartsWith(key, "controlURL")) {
 				m_sControlURL = value;
+			} else if (StringUtils::StartsWith(key, "panUpCmd")) {
+				m_sPanUpCmd = value;
+			} else if (StringUtils::StartsWith(key, "panDownCmd")) {
+				m_sPanDownCmd = value;
+			} else if (StringUtils::StartsWith(key, "panLeftCmd")) {
+				m_sPanLeftCmd = value;
+			} else if (StringUtils::StartsWith(key, "panRightCmd")) {
+				m_sPanRightCmd = value;
+			} else if (StringUtils::StartsWith(key, "zoomInCmd")) {
+				m_sZoomInCmd = value;
+			} else if (StringUtils::StartsWith(key, "zoomOutCmd")) {
+				m_sZoomOutCmd = value;
 			}
 		}
 	}
@@ -145,7 +158,7 @@ bool Advanced_IP_Camera::GetConfig()
 			string value;
 			GetChildDeviceData(pChildDevice->m_dwPK_Device, DEVICEDATA_Capabilities_CONST, value);
 			LoggerWrapper::GetInstance ()->Write (LV_STATUS, "getConfig() Motion detector, capabilities = %s", value.c_str());
-			parameters = StringUtils::Split(value, "\n");
+			SplitConfig(value, parameters);
 			EventMethod* pEventMethod = NULL;
 			for (int i = 0; i < parameters.size(); i++)
 			{
@@ -178,7 +191,7 @@ bool Advanced_IP_Camera::GetConfig()
 			string value;
 			GetChildDeviceData(pChildDevice->m_dwPK_Device, DEVICEDATA_Capabilities_CONST, value);
 			LoggerWrapper::GetInstance ()->Write (LV_STATUS, "getConfig() Generic Input Output, capabilities = %s", value.c_str());
-			parameters = StringUtils::Split(value, "\n");
+			SplitConfig(value, parameters);
 			for (int i = 0; i < parameters.size(); i++)
 			{
 				size_t pos = parameters[i].find_first_of("=");
@@ -225,6 +238,17 @@ bool Advanced_IP_Camera::GetConfig()
 
 	}
 	return true;
+}
+
+void Advanced_IP_Camera::SplitConfig(string config, vector<string> &parameters)
+{
+	parameters.clear();
+	if ( config.find(":") != string::npos )
+	{
+		parameters = StringUtils::Split(config, ":");
+	} else {
+		parameters = StringUtils::Split(config, "\n");
+	}
 }
 
 EventMethod* Advanced_IP_Camera::GetEventMethod(int i)
@@ -327,10 +351,8 @@ void Advanced_IP_Camera::ReceivedCommandForChild(DeviceData_Impl *pDeviceData_Im
 	}
 }
 
-
 bool Advanced_IP_Camera::ChangeOutput(OutputDevice* pDevice, bool newState)
 {
-	PLUTO_SAFETY_LOCK (cm, m_CurlMutex);
 	string sUrl = GetBaseURL() + "/";
 	if ( newState )
 	{
@@ -338,24 +360,7 @@ bool Advanced_IP_Camera::ChangeOutput(OutputDevice* pDevice, bool newState)
 	} else {
 		sUrl += pDevice->m_sOff;
 	}
-	SetupCurl(sUrl);
-	CURLcode res = curl_easy_perform(m_pCurl);
-	
-	if (res != 0)
-	{
-		LoggerWrapper::GetInstance ()->Write (LV_STATUS, "ChangeOutput(): failed to get data: curl error: %s", curl_easy_strerror(res));
-	} else {
-		long code;
-		curl_easy_getinfo(m_pCurl, CURLINFO_RESPONSE_CODE, &code);
-		if (code == 200)
-		{
-			// http OK
-			return true;
-		} else {
-			LoggerWrapper::GetInstance ()->Write (LV_STATUS, "ChangeOutput(): http code: %d, response:",  code);
-		}
-	}
-	return false;
+	return DoURLAccess(sUrl);
 }
 
 void Advanced_IP_Camera::SetupCurl(string sUrl)
@@ -372,6 +377,29 @@ void Advanced_IP_Camera::SetupCurl(string sUrl)
 			curl_easy_setopt(m_pCurl, CURLOPT_PASSWORD, m_sPasswd.c_str());
 		}
 	}
+}
+
+bool Advanced_IP_Camera::DoURLAccess(string sUrl)
+{
+	PLUTO_SAFETY_LOCK (cm, m_CurlMutex);
+	SetupCurl(sUrl);
+	CURLcode res = curl_easy_perform(m_pCurl);
+	
+	if (res != 0)
+	{
+		LoggerWrapper::GetInstance ()->Write (LV_STATUS, "DoURLAccess(): failed to get data: curl error: %s", curl_easy_strerror(res));
+	} else {
+		long code;
+		curl_easy_getinfo(m_pCurl, CURLINFO_RESPONSE_CODE, &code);
+		if (code == 200)
+		{
+			// http OK
+			return true;
+		} else {
+			LoggerWrapper::GetInstance ()->Write (LV_STATUS, "DoURLAccess(): http code: %d, response:",  code);
+		}
+	}
+	return false;
 }
 
 size_t Advanced_IP_Camera::WriteCallback(void *ptr, size_t size, size_t nmemb, void *ourpointer) 
@@ -486,6 +514,13 @@ void Advanced_IP_Camera::CMD_Get_Video_Frame(string sDisable_Aspect_Lock,int iSt
 void Advanced_IP_Camera::CMD_Move_Up(int iStreamID,string &sCMD_Result,Message *pMessage)
 //<-dceag-c200-e->
 {
+	sCMD_Result = "UNKNOWN COMMAND";
+	if (!m_sPanUpCmd.empty())
+	{
+		string sUrl = GetBaseURL() + "/" + m_sControlURL + "/" + m_sPanUpCmd;
+		if (DoURLAccess(sUrl))
+			sCMD_Result = "OK";
+	}
 }
 //<-dceag-c201-b->
 
@@ -497,6 +532,13 @@ void Advanced_IP_Camera::CMD_Move_Up(int iStreamID,string &sCMD_Result,Message *
 void Advanced_IP_Camera::CMD_Move_Down(int iStreamID,string &sCMD_Result,Message *pMessage)
 //<-dceag-c201-e->
 {
+	sCMD_Result = "UNKNOWN COMMAND";
+	if (!m_sPanDownCmd.empty())
+	{
+		string sUrl = GetBaseURL() + "/" + m_sControlURL + "/" + m_sPanDownCmd;
+		if (DoURLAccess(sUrl))
+			sCMD_Result = "OK";
+	}
 }
 //<-dceag-c202-b->
 
@@ -508,6 +550,13 @@ void Advanced_IP_Camera::CMD_Move_Down(int iStreamID,string &sCMD_Result,Message
 void Advanced_IP_Camera::CMD_Move_Left(int iStreamID,string &sCMD_Result,Message *pMessage)
 //<-dceag-c202-e->
 {
+	sCMD_Result = "UNKNOWN COMMAND";
+	if (!m_sPanLeftCmd.empty())
+	{
+		string sUrl = GetBaseURL() + "/" + m_sControlURL + "/" + m_sPanLeftCmd;
+		if (DoURLAccess(sUrl))
+			sCMD_Result = "OK";
+	}
 }
 //<-dceag-c203-b->
 
@@ -519,6 +568,13 @@ void Advanced_IP_Camera::CMD_Move_Left(int iStreamID,string &sCMD_Result,Message
 void Advanced_IP_Camera::CMD_Move_Right(int iStreamID,string &sCMD_Result,Message *pMessage)
 //<-dceag-c203-e->
 {
+	sCMD_Result = "UNKNOWN COMMAND";
+	if (!m_sPanRightCmd.empty())
+	{
+		string sUrl = GetBaseURL() + "/" + m_sControlURL + "/" + m_sPanRightCmd;
+		if (DoURLAccess(sUrl))
+			sCMD_Result = "OK";
+	}
 }
 //<-dceag-c684-b->
 
@@ -528,6 +584,13 @@ void Advanced_IP_Camera::CMD_Move_Right(int iStreamID,string &sCMD_Result,Messag
 void Advanced_IP_Camera::CMD_Zoom_In(string &sCMD_Result,Message *pMessage)
 //<-dceag-c684-e->
 {
+	sCMD_Result = "UNKNOWN COMMAND";
+	if (!m_sZoomInCmd.empty())
+	{
+		string sUrl = GetBaseURL() + "/" + m_sControlURL + "/" + m_sZoomInCmd;
+		if (DoURLAccess(sUrl))
+			sCMD_Result = "OK";
+	}
 }
 //<-dceag-c685-b->
 
@@ -537,4 +600,11 @@ void Advanced_IP_Camera::CMD_Zoom_In(string &sCMD_Result,Message *pMessage)
 void Advanced_IP_Camera::CMD_Zoom_Out(string &sCMD_Result,Message *pMessage)
 //<-dceag-c685-e->
 {
+	sCMD_Result = "UNKNOWN COMMAND";
+	if (!m_sZoomOutCmd.empty())
+	{
+		string sUrl = GetBaseURL() + "/" + m_sControlURL + "/" + m_sZoomOutCmd;
+		if (DoURLAccess(sUrl))
+			sCMD_Result = "OK";
+	}
 }

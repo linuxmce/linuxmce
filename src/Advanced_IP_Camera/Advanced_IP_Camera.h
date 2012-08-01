@@ -1,5 +1,6 @@
 /*
      Copyright (C) 2012 LinuxMCE
+     www.linuxmce.org
 
      This program is free software; you can redistribute it and/or modify it under the terms of the GNU General Public License.
      This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty
@@ -39,6 +40,7 @@ namespace DCE
 	  string m_sPasswd;
 	  string m_sEventURL;
 	  string m_sControlURL;
+	  string m_sPanUpCmd, m_sPanDownCmd, m_sPanLeftCmd, m_sPanRightCmd, m_sZoomInCmd, m_sZoomOutCmd;
 	  
 	  vector<EventMethod*> m_vectEventMethod;
 	  map<int, OutputDevice*> m_mapPK_Device_OutputDevice;
@@ -63,6 +65,7 @@ public:
 //<-dceag-const-e->
 
 		void SetupCurl(string sUrl);
+		bool DoURLAccess(string sUrl);
 		static size_t WriteCallback(void *ptr, size_t size, size_t nmemb, void *ourpointer);
 		string GetBaseURL();
 		string GetUser();
@@ -73,7 +76,7 @@ public:
 
 		bool ChangeOutput(OutputDevice* pDevice, bool newState);
 
-
+		void SplitConfig(string value, vector<string> &parameters);
 //<-dceag-const2-b->
 		// The following constructor is only used if this a class instance embedded within a DCE Device.  In that case, it won't create it's own connection to the router
 		// You can delete this whole section and put an ! after dceag-const2-b tag if you don't want this constructor.  Do the same in the implementation file
