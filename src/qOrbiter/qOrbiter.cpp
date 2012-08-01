@@ -1884,7 +1884,7 @@ bool DCE::qOrbiter::initialize()
 
                 LoggerWrapper::GetInstance()->Write(LV_CRITICAL, "Bad Device");
                 setCommandResponse("Bad Device");
-               // int errorType =  this->DeviceIdInvalid();
+                // int errorType =  this->DeviceIdInvalid();
                 emit connectionValid(true);
                 QApplication::processEvents(QEventLoop::AllEvents);
                 return false;
@@ -2456,8 +2456,8 @@ void DCE::qOrbiter::GetFileInfoForQml(QString qs_file_reference)
 
     if (SendCommand(cmd_file_info, &pResponse) && pResponse == "OK")
     {
-       GetMediaAttributeGrid(qs_file_reference);
-       setCommandResponse("Requesting file information for "+ qs_file_reference );
+        GetMediaAttributeGrid(qs_file_reference);
+        setCommandResponse("Requesting file information for "+ qs_file_reference );
     }
     else
     {
@@ -2511,7 +2511,7 @@ void DCE::qOrbiter::GetMediaAttributeGrid(QString  qs_fk_fileno)
     QStringList details = breaker.split(QRegExp("\\t"));
     int placeholder;
 
- #ifdef QT_DEBUG
+#ifdef QT_DEBUG
     qDebug() << details.join("||");
 #endif
 
@@ -3271,12 +3271,13 @@ void DCE::qOrbiter::populateAdditionalMedia() //additional media grid that popul
         int iOffset = 0;            // ??
         int GridCurRow = media_pos;        //the row to start from
         int GridCurCol= 0;           //column to start from
-
-        string m_sSeek=media_seek;
-        if(m_sSeek !="")
-            GridCurRow = 0;
-
         string imgDG ="_MediaFile_"+QString::number(m_dwPK_Device).toStdString();
+        string m_sSeek=media_seek;
+        if(m_sSeek !=""){
+            GridCurRow = 0;
+            GridCurCol =0;
+            imgDG = "MediaFile_"+QString::number(m_dwPK_Device).toStdString();
+        }
 
         int iData_Size=0;
         char *pData;
@@ -3296,6 +3297,7 @@ void DCE::qOrbiter::populateAdditionalMedia() //additional media grid that popul
         std::string pResponse ="";
         if(SendCommand(req_data_grid_pics, &pResponse) && pResponse == "OK")
         {
+
             DataGridTable *pDataGridTable = new DataGridTable(iData_Size,pData,false);
             setMediaResponse("grid request ok");
 
@@ -3307,6 +3309,12 @@ void DCE::qOrbiter::populateAdditionalMedia() //additional media grid that popul
             int index;
             QImage cellImg;
             media_pos = GridCurRow;
+            if (m_sSeek != "")
+            {
+                media_seek = "";
+                populateAdditionalMedia();
+                return;
+            }
             /*
             qDebug("---------------------");
             qDebug() << "Complete Call Results-" << m_sSeek.c_str();
@@ -4778,7 +4786,7 @@ void qOrbiter::pingCore()
     QString url = QString::fromStdString(m_sIPAddress);
     if(!url.contains(QRegExp("(\\D)"))){
 
-      setCommandResponse("Host name provided, doing lookup");
+        setCommandResponse("Host name provided, doing lookup");
 
         QHostInfo::lookupHost(url, this, SLOT(checkPing(QHostInfo)));
     }
@@ -4807,14 +4815,14 @@ void qOrbiter::checkPing(QHostInfo info)
     }
     else{
 
-       setCommandResponse("ip address: " + info.addresses().at(0).toString());
+        setCommandResponse("ip address: " + info.addresses().at(0).toString());
         m_sHostName = info.addresses().at(0).toString().toStdString();
         m_sIPAddress = info.addresses().at(0).toString().toStdString();
 
         setCommandResponse("Router found, checking for LinuxMCE installation");
 
         if(!m_bRunning ){
-           setCommandResponse("Checking for linuxmce installation" + QString::fromStdString(m_sIPAddress));
+            setCommandResponse("Checking for linuxmce installation" + QString::fromStdString(m_sIPAddress));
             checkInstall();
         }
     }

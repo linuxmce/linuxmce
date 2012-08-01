@@ -317,7 +317,7 @@ void ListModel::attributeSort()
 void ListModel::clearAndRequest(int type)
 {
     clearing = true;
-    gridType = type;      
+    gridType = type;
     emit modelAboutToBeReset();
     beginResetModel();
     setProgress(0.0);
