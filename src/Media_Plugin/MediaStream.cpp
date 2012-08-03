@@ -570,6 +570,32 @@ void MediaStream::UpdateDescriptions(bool bAllFiles,MediaFile *pMediaFile_In)
 		}
 
 	}
+	else if( m_iPK_MediaType==MEDIATYPE_lmce_StreamedAudio_CONST )
+	{
+		// Use channel name as description
+		MediaFile *pMediaFile=pMediaFile_In;
+		if( bAllFiles )
+		{
+			for(size_t s=0;s<m_dequeMediaFile.size();++s)
+				UpdateDescriptions(false,m_dequeMediaFile[s]);
+			return;
+		}
+		else if( !pMediaFile )
+			pMediaFile = GetCurrentMediaFile();
+
+		Row_Attribute *pRow_Attribute_Channel=NULL;
+		if ( pMediaFile )
+		{
+			list_int *listPK_Attribute = pMediaFile->m_mapPK_Attribute_Find(ATTRIBUTETYPE_Channel_CONST);
+			if( listPK_Attribute && listPK_Attribute->size() )
+				pRow_Attribute_Channel = pMedia_Plugin->m_pDatabase_pluto_media->Attribute_get()->GetRow(*(listPK_Attribute->begin()));
+			if( pRow_Attribute_Channel != NULL)
+			{
+				m_sMediaDescription = pRow_Attribute_Channel->Name_get();
+				pMediaFile->m_sDescription = pRow_Attribute_Channel->Name_get();
+			}
+		}
+	}
 
 	if( m_sMediaDescription.size()==0 )
 	{

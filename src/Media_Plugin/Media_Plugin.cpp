@@ -2052,6 +2052,7 @@ dequeMediaFile->size() ? (*dequeMediaFile)[0]->m_sPath.c_str() : "NO",
 		// Load stream attributes for new files
 		m_pMediaAttributes->LoadStreamAttributes(pMediaStream);
 		// Update playlist datagrid
+		pMediaStream->UpdateDescriptions(true);
 		MediaInfoChanged(pMediaStream,true);
 		return pMediaStream;
 	}
