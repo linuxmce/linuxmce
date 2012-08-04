@@ -624,7 +624,7 @@ InstallVideoDriver () {
 			fi ;;
                 esac
 
-	if [[ "$chip_man" == "Intel" ]] && [[ -n $online ]]; then
+	if [[ "$chip_man" == "INTEL" ]] && [[ -n $online ]]; then
 		if [[ "$distro" = "precise" ]]; then
 			if ! PackageIsInstalled "i965-va-driver"; then
 				apt-get -yf install i965-va-driver
