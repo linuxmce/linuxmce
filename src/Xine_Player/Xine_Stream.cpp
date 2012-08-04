@@ -262,8 +262,8 @@ bool Xine_Stream::StartupStream()
 	PLUTO_SAFETY_LOCK(streamLock, m_streamMutex);
 	
 	m_iPrebuffer = xine_get_param( m_pXineStream, XINE_PARAM_METRONOM_PREBUFFER );
-	
 	m_iSeekMuteStatus = xine_get_param(m_pXineStream, XINE_PARAM_AUDIO_MUTE);
+	xine_set_param(m_pXineStream, XINE_PARAM_AUDIO_VOLUME, 100);
 	
 	m_bInitialized = true;
 	
