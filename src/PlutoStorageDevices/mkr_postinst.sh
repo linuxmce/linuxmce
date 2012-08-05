@@ -14,14 +14,14 @@ mkdir -p /mnt/device
 cronEntry="*/10 * * * * root bash -c '/usr/pluto/bin/StorageDevices_Radar.sh &>/dev/null'"
 if [[ ! -e /etc/cron.d/StorageDevicesRadar ]] ;then
 	echo "$cronEntry" >>/etc/cron.d/StorageDevicesRadar
-	invoke-rc.d cron reload
+	invoke-rc.d cron reload || :
 fi
 
 ## Add a cron entry that scans existing file servers for new shares
 cronEntry="*/10 * * * * root bash -c '/usr/pluto/bin/StorageDevices_FileServerRadar.sh &>/dev/null'"
 if [[ ! -e /etc/cron.d/StorageDevicesFileServerRadar ]] ;then
         echo "$cronEntry" >>/etc/cron.d/StorageDevicesFileServerRadar
-        invoke-rc.d cron reload
+        invoke-rc.d cron reload || :
 fi
 
 
