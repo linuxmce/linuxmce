@@ -69,15 +69,15 @@ Row_Rom* LMCE_Game_Utils::RomExists()
   string sWhereQuery = "WHERE ";
   if (!m_sRomFilename.empty() && m_sRomMD5.empty())
     {
-      sWhereQuery += "Romname = '"+m_sRomFilename+"'";
+      sWhereQuery += "Romname = \""+m_sRomFilename+"\"";
     }
   else if (m_sRomFilename.empty() && !m_sRomMD5.empty())
     {
-      sWhereQuery += "md5 = '"+m_sRomMD5+"'";
+      sWhereQuery += "md5 = \""+m_sRomMD5+"\"";
     }
   else
     {
-      sWhereQuery += "Romname = '"+m_sRomFilename+"' OR md5 = '"+m_sRomMD5+"'";
+      sWhereQuery += "Romname = \""+m_sRomFilename+"\" OR md5 = \""+m_sRomMD5+"\"";
     }
   LoggerWrapper::GetInstance()->Write(LV_STATUS,"LMCE_Game_Utils::RomExists() - Query is %s",sWhereQuery.c_str());
   bool bExists = m_pDatabase->Rom_get()->GetRows(sWhereQuery,&v_Rom);
@@ -349,7 +349,7 @@ int LMCE_Game_Utils::GetPK_GameSystem(string sPK_GameSystem)
 {
   Row_GameSystem *pRow_GameSystem;
   vector<class Row_GameSystem *> v_GameSystem;
-  string sWhereQuery = "WHERE Description = '"+sPK_GameSystem+"'";
+  string sWhereQuery = "WHERE Description = \""+sPK_GameSystem+"\"";
   if (!m_pDatabase->GameSystem_get()->GetRows(sWhereQuery,&v_GameSystem))
     {
       LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"No database handle while trying to get a Gamesystem value.");
@@ -399,8 +399,8 @@ std::string LMCE_Game_Utils::GetRomSystem(Row_Rom *pRow_Rom)
 
   vector<class Row_GameSystem *> v_GameSystem;
   LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"GameSystem is %d", pRow_Rom->FK_GameSystem_get());
-  string sWhereQuery = "where PK_GameSystem = '" + 
-    StringUtils::itos(pRow_Rom->FK_GameSystem_get()) + "'";
+  string sWhereQuery = "where PK_GameSystem = \"" + 
+    StringUtils::itos(pRow_Rom->FK_GameSystem_get()) + "\"";
 
   if (m_pDatabase->GameSystem_get()->GetRows(sWhereQuery,&v_GameSystem))
     {
@@ -416,7 +416,8 @@ std::string LMCE_Game_Utils::GetRomSystem(Row_Rom *pRow_Rom)
 
 void LMCE_Game_Utils::parseCoweringTags()
 {
-  LoggerWrapper::GetInstance()->Write(LV_WARNING,"parseCoweringTags()");
+  // LoggerWrapper::GetInstance()->Write(LV_WARNING,"parseCoweringTags()");
+  m_sRomFilename = FileUtils::FilenameWithoutPath(m_sRomFilename);
   // Assume that the first parenthesis ends the title.
   unsigned int iTitleEnd = m_sRomFilename.find("(");
 
@@ -438,8 +439,10 @@ void LMCE_Game_Utils::parseCoweringTags()
     {
       string sItem = StringUtils::Tokenize(sTags,"()",pos);
       sItem = trim(sItem);
+      LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"%s",sItem.c_str());
       int iYearTest = atoi(sItem.c_str());
-      if (sItem.length() > 0 && iYearTest == 0 && StringUtils::ToUpper(sItem) != "19XX")
+      if (sItem.length() > 3 && iYearTest == 0 && StringUtils::ToUpper(sItem) != "19XX" && sItem.find("[") == string::npos
+	  )
 	{
 	  m_sRomManufacturer = sItem;
 	}
