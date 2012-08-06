@@ -54,8 +54,11 @@ Advanced_IP_Camera::~Advanced_IP_Camera()
         for( vector<EventMethod*>::const_iterator it = m_vectEventMethod.begin();
                         it != m_vectEventMethod.end(); ++it )
 	{
-		(*it)->Stop();
-		delete (*it);
+		if ( *it != NULL )
+		{
+			(*it)->Stop();
+			delete (*it);
+		}
 	}
         for( map<int, OutputDevice*>::const_iterator it = m_mapPK_Device_OutputDevice.begin();
                         it != m_mapPK_Device_OutputDevice.end(); ++it )
