@@ -51,6 +51,7 @@
 #define ATTRIBUTETYPE_Season_Number_CONST 50
 #define ATTRIBUTETYPE_Episode_Number_CONST 51
 #define ATTRIBUTETYPE_TV_Season_ID_CONST 52
+#define ATTRIBUTETYPE_System_Configuration_CONST 56
 
 #define ATTRIBUTETYPE_TABLE "AttributeType"
 #define ATTRIBUTETYPE_PK_ATTRIBUTETYPE_FIELD "PK_AttributeType"
