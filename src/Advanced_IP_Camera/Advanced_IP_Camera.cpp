@@ -81,7 +81,6 @@ bool Advanced_IP_Camera::GetConfig()
 	{
 		m_sBaseURL += ":" + StringUtils::itos(DATA_Get_TCP_Port());
 	}
-	m_sBaseURL += "/";
 	m_sImgPath = DATA_Get_Path();
 
 	m_sUser = DATA_Get_AuthUser();
@@ -356,7 +355,7 @@ void Advanced_IP_Camera::ReceivedCommandForChild(DeviceData_Impl *pDeviceData_Im
 
 bool Advanced_IP_Camera::ChangeOutput(OutputDevice* pDevice, bool newState)
 {
-	string sUrl = GetBaseURL() + "/";
+	string sUrl = GetBaseURL();
 	if ( newState )
 	{
 		sUrl += pDevice->m_sOn;
@@ -465,7 +464,7 @@ void Advanced_IP_Camera::CMD_Get_Video_Frame(string sDisable_Aspect_Lock,int iSt
 	CallbackData data;
 	data.buffer = (char*)malloc(1);
 	data.size = 0;
-	string sUrl = m_sBaseURL + "/" + m_sImgPath;
+	string sUrl = m_sBaseURL + m_sImgPath;
 
 	PLUTO_SAFETY_LOCK (gm, m_CurlMutex);
 	LoggerWrapper::GetInstance ()->Write (LV_STATUS, "CMD_Get_Video_Frame: sUrl: %s", sUrl.c_str ());
@@ -520,7 +519,7 @@ void Advanced_IP_Camera::CMD_Move_Up(int iStreamID,string &sCMD_Result,Message *
 	sCMD_Result = "UNKNOWN COMMAND";
 	if (!m_sPanUpCmd.empty())
 	{
-		string sUrl = GetBaseURL() + "/" + m_sControlURL + "/" + m_sPanUpCmd;
+		string sUrl = GetBaseURL() + m_sControlURL + m_sPanUpCmd;
 		if (DoURLAccess(sUrl))
 			sCMD_Result = "OK";
 	}
@@ -538,7 +537,7 @@ void Advanced_IP_Camera::CMD_Move_Down(int iStreamID,string &sCMD_Result,Message
 	sCMD_Result = "UNKNOWN COMMAND";
 	if (!m_sPanDownCmd.empty())
 	{
-		string sUrl = GetBaseURL() + "/" + m_sControlURL + "/" + m_sPanDownCmd;
+		string sUrl = GetBaseURL() + m_sControlURL + m_sPanDownCmd;
 		if (DoURLAccess(sUrl))
 			sCMD_Result = "OK";
 	}
@@ -556,7 +555,7 @@ void Advanced_IP_Camera::CMD_Move_Left(int iStreamID,string &sCMD_Result,Message
 	sCMD_Result = "UNKNOWN COMMAND";
 	if (!m_sPanLeftCmd.empty())
 	{
-		string sUrl = GetBaseURL() + "/" + m_sControlURL + "/" + m_sPanLeftCmd;
+		string sUrl = GetBaseURL() + m_sControlURL + m_sPanLeftCmd;
 		if (DoURLAccess(sUrl))
 			sCMD_Result = "OK";
 	}
@@ -574,7 +573,7 @@ void Advanced_IP_Camera::CMD_Move_Right(int iStreamID,string &sCMD_Result,Messag
 	sCMD_Result = "UNKNOWN COMMAND";
 	if (!m_sPanRightCmd.empty())
 	{
-		string sUrl = GetBaseURL() + "/" + m_sControlURL + "/" + m_sPanRightCmd;
+		string sUrl = GetBaseURL() + m_sControlURL + m_sPanRightCmd;
 		if (DoURLAccess(sUrl))
 			sCMD_Result = "OK";
 	}
@@ -590,7 +589,7 @@ void Advanced_IP_Camera::CMD_Zoom_In(string &sCMD_Result,Message *pMessage)
 	sCMD_Result = "UNKNOWN COMMAND";
 	if (!m_sZoomInCmd.empty())
 	{
-		string sUrl = GetBaseURL() + "/" + m_sControlURL + "/" + m_sZoomInCmd;
+		string sUrl = GetBaseURL() + m_sControlURL + m_sZoomInCmd;
 		if (DoURLAccess(sUrl))
 			sCMD_Result = "OK";
 	}
@@ -606,7 +605,7 @@ void Advanced_IP_Camera::CMD_Zoom_Out(string &sCMD_Result,Message *pMessage)
 	sCMD_Result = "UNKNOWN COMMAND";
 	if (!m_sZoomOutCmd.empty())
 	{
-		string sUrl = GetBaseURL() + "/" + m_sControlURL + "/" + m_sZoomOutCmd;
+		string sUrl = GetBaseURL() + m_sControlURL + m_sZoomOutCmd;
 		if (DoURLAccess(sUrl))
 			sCMD_Result = "OK";
 	}
