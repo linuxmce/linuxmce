@@ -112,54 +112,82 @@ void EventMethod::InputStatusChanged(InputDevice* pInputDevice, string trigger)
 }
 void EventMethod::EventThread() {
 
-	// Set up connection
-	string data;
-	string sUrl = m_pCamera->GetBaseURL() + "/" + m_sURL;
-
-	CURLM* eventCurl = curl_easy_init();
-
-	LoggerWrapper::GetInstance ()->Write (LV_STATUS, "EventThread(): sUrl: %s", sUrl.c_str ());
-	curl_easy_setopt(eventCurl, CURLOPT_URL, sUrl.c_str());
-
-	/* send all data to this function  */ 
-	curl_easy_setopt(eventCurl, CURLOPT_WRITEFUNCTION, StaticEventWriteCallback);
-	curl_easy_setopt(eventCurl, CURLOPT_WRITEDATA, (void *)this);
-	curl_easy_setopt(eventCurl, CURLOPT_USERAGENT, "libcurl-agent/1.0");
-	if (!m_pCamera->GetUser().empty())
-	{
-		curl_easy_setopt(eventCurl, CURLOPT_HTTPAUTH, CURLAUTH_BASIC);
-		curl_easy_setopt(eventCurl, CURLOPT_USERNAME, m_pCamera->GetUser().c_str());
-		if (!m_pCamera->GetPassword().empty()) {
-			curl_easy_setopt(eventCurl, CURLOPT_PASSWORD, m_pCamera->GetPassword().c_str());
-		}
+	if (StringUtils::CompareNoCase(m_sMethod, "url") == 0 || 
+	    StringUtils::CompareNoCase(m_sMethod, "urlPoll") == 0) {
+		MethodURL();
+	} else if (StringUtils::CompareNoCase(m_sMethod, "httpserver") == 0) {
+		MethodHttpServer();
 	}
-	CURLcode res = curl_easy_perform(eventCurl);
-	LoggerWrapper::GetInstance ()->Write (LV_STATUS, "EventThread(): curl_Easy_perform has returned");
-	if (res != 0)
-	{
-		LoggerWrapper::GetInstance ()->Write (LV_STATUS, "EventThread(): failed to get connection: curl error: %s", curl_easy_strerror(res));
-		
-	} else {
-		long code;
-		curl_easy_getinfo(eventCurl, CURLINFO_RESPONSE_CODE, &code);
-		if (code == 200)
-		{
-			// http OK
-			LoggerWrapper::GetInstance ()->Write (LV_STATUS, "EventThread(): http OK");
-//			*pData = data.buffer;
-//			*iData_Size = data.size;
-		} else {
-			LoggerWrapper::GetInstance ()->Write (LV_STATUS, "EventThread(): Error? http code: %d",  code);
-
-		}
-	}
-
-	while (m_bRunning)
-	{
-		// http url client does nothing here
-	}
-
-
-
 }
 
+void EventMethod::MethodURL()
+{
+	bool usePolling = StringUtils::CompareNoCase(m_sMethod, "urlPoll") == 0;
+	while (m_bRunning)
+	{
+		// Set up connection
+		string data;
+		string sUrl = m_pCamera->GetBaseURL() + "/" + m_sURL;
+
+		CURLM* eventCurl = curl_easy_init();
+
+		LoggerWrapper::GetInstance ()->Write (LV_CRITICAL, "EventMethod::MethodURL(): sUrl: %s", sUrl.c_str ());
+		curl_easy_setopt(eventCurl, CURLOPT_URL, sUrl.c_str());
+
+		/* send all data to this function  */ 
+		curl_easy_setopt(eventCurl, CURLOPT_WRITEFUNCTION, StaticEventWriteCallback);
+		curl_easy_setopt(eventCurl, CURLOPT_WRITEDATA, (void *)this);
+		curl_easy_setopt(eventCurl, CURLOPT_USERAGENT, "libcurl-agent/1.0");
+		if (!m_pCamera->GetUser().empty())
+		{
+			curl_easy_setopt(eventCurl, CURLOPT_HTTPAUTH, CURLAUTH_BASIC);
+			curl_easy_setopt(eventCurl, CURLOPT_USERNAME, m_pCamera->GetUser().c_str());
+			if (!m_pCamera->GetPassword().empty()) {
+				curl_easy_setopt(eventCurl, CURLOPT_PASSWORD, m_pCamera->GetPassword().c_str());
+			}
+		}
+		CURLcode res = curl_easy_perform(eventCurl);
+		LoggerWrapper::GetInstance ()->Write (LV_STATUS, "EventMethod::MethodURL(): curl_Easy_perform has returned");
+		if (res != 0)
+		{
+			LoggerWrapper::GetInstance ()->Write (LV_CRITICAL, "EventMethod::MethodURL(): failed to get connection: curl error: %s", curl_easy_strerror(res));
+			
+		} else {
+			long code;
+			curl_easy_getinfo(eventCurl, CURLINFO_RESPONSE_CODE, &code);
+			if (code == 200)
+			{
+				// http OK
+				LoggerWrapper::GetInstance ()->Write (LV_STATUS, "EventMethod::MethodURL(): http OK");
+//				*pData = data.buffer;
+//				*iData_Size = data.size;
+			} else {
+				LoggerWrapper::GetInstance ()->Write (LV_CRITICAL, "EventMethod::MethodURL(): Error? http code: %d",  code);
+
+			}
+		}
+		LoggerWrapper::GetInstance ()->Write (LV_CRITICAL, "EventMethod::MethodURL(): We are here");
+		
+		if (usePolling) {
+			// polling, close connection and restart it after a short timeout
+			curl_easy_cleanup(eventCurl);
+			struct timespec req;
+			struct timespec rem;
+			req.tv_sec = 30;
+			req.tv_nsec = 0;
+			nanosleep(&req, &rem);
+		} else {
+			// Keep-alive connection and camera sends new data on same connection
+			while (m_bRunning)
+			{
+				// http url client does nothing here
+			}
+		}
+
+	}
+}
+
+void EventMethod::MethodHttpServer()
+{
+	// TODO: implement it :)
+}

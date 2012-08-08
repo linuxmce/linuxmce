@@ -90,6 +90,8 @@ namespace DCE {
 	  static size_t StaticEventWriteCallback(void *ptr, size_t size, size_t nmemb, void *ourpointer);
 	  size_t EventWriteCallback(void *ptr, size_t size, size_t nmemb);
 	  void EventThread();
+	  void MethodURL();
+	  void MethodHttpServer();
 	  void InputStatusChanged(InputDevice* pInputDevice, string trigger);
 
 	  string ToString()
