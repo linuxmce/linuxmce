@@ -98,12 +98,13 @@ SaveSettings()
 
 EnableDigitalOutputs()
 {
+	local SoundCard="$1"
 	# Added this to correctly unmute channels for setup wizard, and to 
 	# inject necessary unmuting commands for later bootup.
-	amixdigital=$(amixer | grep Simple | cut -d' ' -f4,5,6 | sort | uniq)
+	amixdigital=$(amixer -c "$SoundCard" | grep Simple | cut -d' ' -f4,5,6 | sort | uniq)
 	for output in $amixdigital; do
-		amixer sset $output unmute
-		amixer sset output 80%
+		amixer -c "$SoundCard" sset $output unmute
+		amixer -c "$SoundCard" sset output 80%
 	done 2>/dev/null 
 	alsactl store
 }
@@ -148,12 +149,12 @@ Setup_AsoundConf()
 		*[CO]*)
 			# audio setting is Coaxial or Optical, i.e. S/PDIF
 			echo 'pcm.!default asym_spdif' >>/etc/asound.conf
-			EnableDigitalOutputs
+			EnableDigitalOutputs "$SoundCard"
 		;;
 		*H*)
 			# audio setting is HDMI
 			echo 'pcm.!default asym_hdmi' >>/etc/asound.conf
-			EnableDigitalOutputs
+			EnableDigitalOutputs "$SoundCard"
 		;;
 		*)
 			# audio setting is Stereo or something unknown
