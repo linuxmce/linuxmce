@@ -27,6 +27,8 @@ rm -f {/home/*,/root}/.kde/share/config/displayconfigrc
 Reboot=NoReboot
 ReloadX=NoReloadX
 AudioSetting_Override="$1"
+SoundCard_Override="$2"
+XineConf_Override="$3"
 
 ComputerDev=$(FindDevice_Category "$PK_Device" "$DEVICECATEGORY_Media_Director" '' 'include-parent')
 OrbiterDev=$(FindDevice_Template "$ComputerDev" "$DEVICETEMPLATE_OnScreen_Orbiter")
@@ -116,13 +118,31 @@ Setup_AsoundConf()
 		return
 	fi
 
-	SoundCard=$(GetDeviceData "$PK_Device" "$DEVICEDATA_Sound_Card"|cut -f2 -d";")
+	local Q R
+	local MD_Device="$PK_Device"
+
+	Q="SELECT FK_DeviceTemplate FROM Device WHERE PK_Device=$PK_Device"
+	R=$(RunSQL "$Q")
+
+	if [[ "$R" == 7 ]]; then
+		Q="SELECT PK_Device FROM Device WHERE FK_DeviceTemplate=28 AND FK_Device_ControlledVia=$PK_Device"
+		R=$(RunSQL "$Q")
+		MD_Device=$(Field 1 "$R")
+	fi
+
+	if [[ -n "$SoundCard_Override" ]]; then
+		SoundCard="$SoundCard_Override"
+	else
+		SoundCard=$(GetDeviceData "$MD_Device" "$DEVICEDATA_Sound_Card")
+	fi
 	SoundCard=$(TranslateSoundCard "$SoundCard")
-	
 	if [[ -z "$SoundCard" ]]; then
 		SoundCard=0
 	fi
-	sed -r "s,%MAIN_CARD%,$SoundCard,g" /usr/pluto/templates/asound.conf >/etc/asound.conf
+
+	local AnalogPlaybackCard="plug:dmix:$SoundCard"
+
+	sed -r "s,%MAIN_CARD%,$SoundCard,g; s,%ANALOG_PLAYBACK_CARD%,$AnalogPlaybackCard,g" /usr/pluto/templates/asound.conf >/etc/asound.conf
 
 	case "$AudioSetting" in
 		*[CO]*)
@@ -139,6 +159,52 @@ Setup_AsoundConf()
 			# audio setting is Stereo or something unknown
 			echo 'pcm.!default asym_analog' >>/etc/asound.conf
 		;;
+	esac
+
+	local GT220=$(lspci -d 10de:0a20)
+	local ION2=$(lspci -d 10de:0a64)
+
+	if [[ "$AudioSetting" == H ]] && [[ -n "$GT220" || -n "$ION2" ]]; then
+		sed -ri "s;hdmi:$SoundCard;hw:$SoundCard,7;g" /etc/asound.conf
+		aplay -Dplughw:$SoundCard,7 /usr/share/sounds/linphone/rings/orig.wav # this initializes the soundcard (you get total silence without this)
+	fi
+
+	Setup_XineConf "$AudioSetting" "$SoundCard" "$AnalogPlaybackCard"
+}
+
+Setup_XineConf()
+{
+	local AudioSetting="$1" SoundCard="$2" AnalogPlaybackCard="$3"
+	local XineConf=/etc/pluto/xine.conf
+
+	if [[ -n "$XineConf_Override" ]]; then
+		XineConf="$XineConf_Override"
+	fi
+
+	case "$AudioSetting" in
+		*[CO]*)
+			XineConfSet audio.device.alsa_front_device asym_spdif "$XineConf"
+			XineConfSet audio.device.alsa_default_device asym_spdif "$XineConf"
+			XineConfSet audio.device.alsa_passthrough_device "iec958:CARD=$SoundCard,AES0=0x6,AES1=0x82,AES2=0x0,AES3=0x2" "$XineConf"
+			;;
+		*H*)
+			XineConfSet audio.device.alsa_front_device asym_hdmi "$XineConf"
+			XineConfSet audio.device.alsa_default_device asym_hdmi "$XineConf"
+			XineConfSet audio.device.alsa_passthrough_device "hdmi:CARD=$SoundCard,AES0=0x6,AES1=0x82,AES2=0x0,AES3=0x2" "$XineConf"
+			;;
+		*)
+			XineConfSet audio.device.alsa_front_device "$AnalogPlaybackCard" "$XineConf"
+			XineConfSet audio.device.alsa_default_device "$AnalogPlaybackCard" "$XineConf"
+			;;
+	esac
+
+	case "$AudioSetting" in
+		*3*)
+			XineConfSet audio.output.speaker_arrangement 'Pass Through' "$XineConf"
+			;;
+		*)
+			XineConfSet audio.output.speaker_arrangement 'Stereo 2.0' "$XineConf"
+			;;
 	esac
 }
 
