@@ -9,9 +9,9 @@ LDFLAGS = $(SNR_LDFLAGS) -L$(ROOT)/lib
 
 MYNAME = AVWizard
 
-CXXFLAGS += -g -O0
+CXXFLAGS += -g -O0 -pipe
 CPPFLAGS += -I/usr/include/SDL -I/usr/include/libxml2 
-LDLIBS = -lSDL -lSDL_ttf -lSDL_image -lxml2 -lxine -lSDL_gfx -lGL -lGLU -lXrender -lresolution
+LDLIBS = -lSDL -lSDL_ttf -lSDL_image -lxml2 -lxine -lSDL_gfx -lGL -lresolution
 FLAGS = $(CXXFLAGS) $(CPPFLAGS)
 Gen_Dev_Files +=
 include sources.list.mk
