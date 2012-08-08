@@ -76,6 +76,7 @@ namespace DCE {
 
   public:
 	  string m_sMethod;
+	  int m_iInterval;
 	  string m_sURL;
 	  EventMethod(Advanced_IP_Camera* pCamera);
 	  ~EventMethod();
@@ -101,7 +102,7 @@ namespace DCE {
 		  {
 			  s += (*it)->ToString() + ", ";
 		  }
-		  return StringUtils::Format("m_bRunning = %d, m_sMethod = %s, m_sURL = %s, m_vectInputDevices = [ %s ]", m_bRunning, m_sMethod.c_str(), m_sURL.c_str(), s.c_str());
+		  return StringUtils::Format("m_bRunning = %d, m_sMethod = %s, m_sURL = %s, m_iInterval = %d, m_vectInputDevices = [ %s ]", m_bRunning, m_sMethod.c_str(), m_sURL.c_str(), m_iInterval, s.c_str());
 	  }
   };
 

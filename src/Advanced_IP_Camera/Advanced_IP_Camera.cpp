@@ -121,6 +121,14 @@ bool Advanced_IP_Camera::GetConfig()
 					if (pEventMethod != NULL)
 						pEventMethod->m_sURL = value;
 				}
+			} else if (StringUtils::StartsWith(key, "eventInterval")) {
+				int num = atoi(key.substr(8).c_str());
+				if (num > 0)
+				{
+					EventMethod* pEventMethod = GetEventMethod(num);
+					if (pEventMethod != NULL && atoi(value.c_str()) > 0)
+						pEventMethod->m_iInterval = atoi(value.c_str());
+				}
 			} else if (StringUtils::StartsWith(key, "controlURL")) {
 				m_sControlURL = value;
 			} else if (StringUtils::StartsWith(key, "panUpCmd")) {

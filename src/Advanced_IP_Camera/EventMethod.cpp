@@ -25,6 +25,7 @@ EventMethod::EventMethod(Advanced_IP_Camera* pCamera)
 {
         m_pCamera = pCamera;
 	m_eventThread = NULL;
+	m_iInterval = 10; //10 seconds as a sensible default
 }
 
 EventMethod::~EventMethod()
@@ -106,8 +107,12 @@ void EventMethod::InputStatusChanged(InputDevice* pInputDevice, string trigger)
 	LoggerWrapper::GetInstance ()->Write (LV_WARNING, "InputStatusChanged: trigger = %s", trigger.c_str());
 	int newStatus = pInputDevice->GetNewStatus(trigger);
 
-	m_pCamera->InputStatusChanged(pInputDevice, newStatus);
-	pInputDevice->status = newStatus;
+	LoggerWrapper::GetInstance ()->Write (LV_WARNING, "InputStatusChanged: old status = %d, new status = %d", pInputDevice->status, newStatus);
+	if ( pInputDevice->status != newStatus )
+	{
+		m_pCamera->InputStatusChanged(pInputDevice, newStatus);
+		pInputDevice->status = newStatus;
+	}
 
 }
 void EventMethod::EventThread() {
@@ -127,11 +132,11 @@ void EventMethod::MethodURL()
 	{
 		// Set up connection
 		string data;
-		string sUrl = m_pCamera->GetBaseURL() + "/" + m_sURL;
+		string sUrl = m_pCamera->GetBaseURL() + m_sURL;
 
 		CURLM* eventCurl = curl_easy_init();
 
-		LoggerWrapper::GetInstance ()->Write (LV_CRITICAL, "EventMethod::MethodURL(): sUrl: %s", sUrl.c_str ());
+		LoggerWrapper::GetInstance ()->Write (LV_STATUS, "EventMethod::MethodURL(): sUrl: %s", sUrl.c_str ());
 		curl_easy_setopt(eventCurl, CURLOPT_URL, sUrl.c_str());
 
 		/* send all data to this function  */ 
@@ -166,14 +171,13 @@ void EventMethod::MethodURL()
 
 			}
 		}
-		LoggerWrapper::GetInstance ()->Write (LV_CRITICAL, "EventMethod::MethodURL(): We are here");
 		
 		if (usePolling) {
 			// polling, close connection and restart it after a short timeout
 			curl_easy_cleanup(eventCurl);
 			struct timespec req;
 			struct timespec rem;
-			req.tv_sec = 30;
+			req.tv_sec = m_iInterval;
 			req.tv_nsec = 0;
 			nanosleep(&req, &rem);
 		} else {
@@ -190,4 +194,58 @@ void EventMethod::MethodURL()
 void EventMethod::MethodHttpServer()
 {
 	// TODO: implement it :)
+
+	string serverPort = "12344";
+
+	int serversockfd, newsockfd;
+	struct addrinfo ai_setup;
+	struct addrinfo *ai_server;
+	struct sockaddr_storage remoteAddr;
+	memset(&ai_setup, 0, sizeof(ai_setup));
+	ai_setup.ai_family = AF_UNSPEC;
+	ai_setup.ai_socktype = SOCK_STREAM;
+	ai_setup.ai_flags = AI_PASSIVE;
+	ai_setup.ai_flags = AI_PASSIVE;
+
+	int status = getaddrinfo(NULL, serverPort.c_str(), &ai_setup, &ai_server);
+	if ( status != 0 )
+	{
+		LoggerWrapper::GetInstance ()->Write (LV_CRITICAL, "EventMethod::MethodServer(): Error getaddrinfo");
+		return;
+	}
+
+	serversockfd = socket(ai_setup.ai_family, ai_setup.ai_socktype, 0);
+	if ( serversockfd < 0 )
+	{
+		LoggerWrapper::GetInstance ()->Write (LV_CRITICAL, "EventMethod::MethodServer(): Error opening socket");
+		return;
+	}
+
+	if ( bind(serversockfd, ai_server->ai_addr, ai_server->ai_addrlen) < 0 )
+	{
+		LoggerWrapper::GetInstance ()->Write (LV_CRITICAL, "EventMethod::MethodServer(): Error binding");
+		return;
+	}
+
+	if ( listen(serversockfd, 20) < 0 )
+	{
+		LoggerWrapper::GetInstance ()->Write (LV_CRITICAL, "EventMethod::MethodServer(): Error listening");
+		return;
+	}
+
+	while (m_bRunning)
+	{
+		socklen_t remoteAddrSize = sizeof remoteAddr;
+		newsockfd = accept(serversockfd, (struct sockaddr *)&remoteAddr, &remoteAddrSize);
+		if ( newsockfd == -1 )
+		{
+			LoggerWrapper::GetInstance ()->Write (LV_CRITICAL, "EventMethod::MethodServer(): Error accepting");
+		} else {
+			LoggerWrapper::GetInstance ()->Write (LV_CRITICAL, "EventMethod::MethodServer(): Got connection");
+
+
+		}
+	}
+	freeaddrinfo(ai_server);
+
 }
