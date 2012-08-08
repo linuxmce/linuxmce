@@ -95,7 +95,7 @@ WizardPageAudioSoundCard::~WizardPageAudioSoundCard(void)
 			// strip EOL
 			for (int i = strlen(line) - 1; i >= 0 && (line[i] == '\r' || line[i] == '\n'); i--)
 				line[i] = 0;
-			List->AddItem(line, line);
+			List->AddItem(line, line, "");
 		}
 		fclose(f);
 	}
