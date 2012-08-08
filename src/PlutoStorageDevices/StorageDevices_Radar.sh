@@ -14,7 +14,7 @@ function substractPaths {
 	local unavailPath=$2
 	local retPath=""
 
-	for aPath in $availPath;do
+	for aPath in $availPath; do
 		available=1
 
 		for uPath in $unavailPath; do
@@ -27,6 +27,7 @@ function substractPaths {
 			retPath="$retPath $aPath"
 		fi
 	done
+
 	echo $retPath
 }
 
@@ -77,7 +78,6 @@ function Detect {
 	## Remove unmountable path additions (swap/extended/boot sector)
 	auxPath=""
 	for Path in $availPath; do
-
 		## If is extended partition
 		if file -sL /dev/disk/by-path/$Path | grep -q "extended partition table" ; then
 			continue
@@ -137,13 +137,11 @@ function Detect {
 
 			## Mount the partition to get it's size
 			mountpoint_temp=$(mktemp -d)
-
 			mount -o ro "/dev/$partition" "$mountpoint_temp"
-
 			partition_size=$(df -h "/dev/$partition" | tail -n +2 | awk '{ print $2 }')
 			umount -lf "$mountpoint_temp";  rmdir "$mountpoint_temp"
 
-			## Sends data to MessageSend			
+			## Sends data to MessageSend
 			thisHost=$(hostname)
 			Sent="false"
 			Count=0
@@ -167,4 +165,3 @@ function Detect {
 }
 
 Detect
-
