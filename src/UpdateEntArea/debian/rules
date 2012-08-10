@@ -14,3 +14,5 @@
 build: 
 	make all
 
+override_dh_strip:
+
