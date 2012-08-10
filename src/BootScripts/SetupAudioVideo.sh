@@ -155,6 +155,10 @@ Setup_AsoundConf()
 			# audio setting is HDMI
 			echo 'pcm.!default asym_hdmi' >>/etc/asound.conf
 			EnableDigitalOutputs "$SoundCard"
+			alsa_backports=$(dpkg-query -l "linux-backports-modules-alsa*" | grep "^ii" | awk '{print $2}') 2>/dev/null
+			if [[ -n "$alsa_backports" ]]; then
+				aplay -D plughw:0,7 /usr/share/sounds/pop.wav
+			fi
 		;;
 		*)
 			# audio setting is Stereo or something unknown
