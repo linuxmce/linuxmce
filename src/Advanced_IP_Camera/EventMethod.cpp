@@ -121,7 +121,7 @@ void EventMethod::EventThread() {
 	    StringUtils::CompareNoCase(m_sMethod, "urlPoll") == 0) {
 		MethodURL();
 	} else if (StringUtils::CompareNoCase(m_sMethod, "httpserver") == 0) {
-		MethodHttpServer();
+		MethodServer();
 	}
 }
 
@@ -191,11 +191,15 @@ void EventMethod::MethodURL()
 	}
 }
 
-void EventMethod::MethodHttpServer()
+void EventMethod::MethodServer()
 {
-	// TODO: implement it :)
-
-	string serverPort = "12344";
+	string serverPort;
+	if (atoi(m_sURL.c_str()) > 0) {
+		serverPort = m_sURL;
+	} else {
+		LoggerWrapper::GetInstance ()->Write (LV_CRITICAL, "EventMethod::MethodServer(): unable to find server port, m_sURL = %s", m_sURL.c_str());
+		return;
+	}
 
 	int serversockfd, newsockfd;
 	struct addrinfo ai_setup;
@@ -205,8 +209,8 @@ void EventMethod::MethodHttpServer()
 	ai_setup.ai_family = AF_UNSPEC;
 	ai_setup.ai_socktype = SOCK_STREAM;
 	ai_setup.ai_flags = AI_PASSIVE;
-	ai_setup.ai_flags = AI_PASSIVE;
 
+	LoggerWrapper::GetInstance ()->Write (LV_STATUS, "EventMethod::MethodServer(): Setting up listening socket.");
 	int status = getaddrinfo(NULL, serverPort.c_str(), &ai_setup, &ai_server);
 	if ( status != 0 )
 	{
@@ -214,7 +218,7 @@ void EventMethod::MethodHttpServer()
 		return;
 	}
 
-	serversockfd = socket(ai_setup.ai_family, ai_setup.ai_socktype, 0);
+	serversockfd = socket(ai_server->ai_family, ai_server->ai_socktype, 0);
 	if ( serversockfd < 0 )
 	{
 		LoggerWrapper::GetInstance ()->Write (LV_CRITICAL, "EventMethod::MethodServer(): Error opening socket");
@@ -235,17 +239,68 @@ void EventMethod::MethodHttpServer()
 
 	while (m_bRunning)
 	{
+		LoggerWrapper::GetInstance ()->Write (LV_STATUS, "EventMethod::MethodServer(): waiting for incoming connection.");
 		socklen_t remoteAddrSize = sizeof remoteAddr;
 		newsockfd = accept(serversockfd, (struct sockaddr *)&remoteAddr, &remoteAddrSize);
 		if ( newsockfd == -1 )
 		{
-			LoggerWrapper::GetInstance ()->Write (LV_CRITICAL, "EventMethod::MethodServer(): Error accepting");
+			LoggerWrapper::GetInstance ()->Write (LV_CRITICAL, "EventMethod::MethodServer(): Error accepting incoming connection");
 		} else {
-			LoggerWrapper::GetInstance ()->Write (LV_CRITICAL, "EventMethod::MethodServer(): Got connection");
-
-
+			LoggerWrapper::GetInstance ()->Write (LV_STATUS, "EventMethod::MethodServer(): Got connection");
+			HandleHttpCom(newsockfd);
+		LoggerWrapper::GetInstance ()->Write (LV_STATUS, "EventMethod::MethodServer(): closing socket");
 		}
+		close(newsockfd);
 	}
 	freeaddrinfo(ai_server);
+	close(serversockfd);
+	LoggerWrapper::GetInstance ()->Write (LV_STATUS, "EventMethod::MethodServer(): end");
+}
 
+void EventMethod::HandleHttpCom(int socketfd)
+{
+	LoggerWrapper::GetInstance ()->Write (LV_STATUS, "EventMethod::HandleHttpCom(): start");
+	// Handle http communications
+
+	// receive data
+	string data;
+	char buffer[3000];
+	int bytes = recv(socketfd, buffer, 3000, 0);
+	data.append(buffer, bytes);
+	while (bytes == 3000) {
+		data.append(buffer, bytes);
+		bytes = recv(socketfd, buffer, 3000, 0);
+	}
+	if (bytes == 0) {
+		LoggerWrapper::GetInstance ()->Write (LV_CRITICAL, "EventMethod::HandleHttpCom(): Remote closed on us");
+		return;
+	}
+	LoggerWrapper::GetInstance ()->Write (LV_STATUS, "EventMethod::HandleHttpCom(): data = %s", data.c_str());
+
+
+	// Send response
+	string response = "HTTP/1.1 200\n";
+	response += "\n\r";
+	const char* rc = response.c_str();
+	int totalSent = 0;
+	size_t toSend = strlen(rc);
+	int sent = write(socketfd, rc, toSend);
+	while (sent >= 0 && sent + totalSent < response.size()) 
+	{
+		totalSent += sent;
+		sent = send(socketfd, response.substr(totalSent).c_str(), toSend - totalSent, 0);
+	}
+	if (sent < 0)
+	{
+		LoggerWrapper::GetInstance ()->Write (LV_CRITICAL, "EventMethod::HandleHttpCom(): error sending response");
+	}
+	
+	for( vector<InputDevice*>::const_iterator it = m_vectInputDevices.begin();
+	     it != m_vectInputDevices.end(); ++it )
+	{
+		if ((*it)->Matches(data))
+			InputStatusChanged(*it, data);
+	}
+
+	LoggerWrapper::GetInstance ()->Write (LV_STATUS, "EventMethod::HandleHttpCom(): end");
 }

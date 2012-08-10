@@ -95,6 +95,7 @@ bool Advanced_IP_Camera::GetConfig()
 	LoggerWrapper::GetInstance ()->Write (LV_STATUS, "getConfig() Configuration = %s", config.c_str());
 	vector<string> parameters;
 	SplitConfig(config, parameters);
+	LoggerWrapper::GetInstance ()->Write (LV_STATUS, "getConfig() parameters.size = %d", parameters.size());
 	for (int i = 0; i < parameters.size(); i++)
 	{
 		size_t pos = parameters[i].find_first_of("=");
@@ -231,7 +232,7 @@ bool Advanced_IP_Camera::GetConfig()
 		EventMethod* pEventMethod = m_vectEventMethod[i];
 		if (pEventMethod != NULL)
 		{
-			LoggerWrapper::GetInstance ()->Write (LV_WARNING, "GetConfig(): EventMethod %d, %s", i, pEventMethod->ToString().c_str());
+			LoggerWrapper::GetInstance ()->Write (LV_WARNING, "GetConfig(): EventMethod %d, %s", i+1, pEventMethod->ToString().c_str());
 			pEventMethod->Start();
 		}
 

@@ -43,13 +43,13 @@ namespace DCE {
                string m_sPatternOff;
 
                bool Matches(string s) {
-                       return s.compare(m_sPatternOn) == 0 || s.compare(m_sPatternOff) == 0;
+                       return s.find(m_sPatternOn) != string::npos || s.find(m_sPatternOff) != string::npos;
                }
 
                int GetNewStatus(string s) {
-                       if (s.compare(m_sPatternOn) == 0) {
+                       if (s.find(m_sPatternOn) != string::npos) {
                                return 1;
-                       } else if (s.compare(m_sPatternOff) == 0) {
+                       } else if (s.find(m_sPatternOff) != string::npos) {
                                return 0;
                        }
                        return 0;
@@ -92,7 +92,8 @@ namespace DCE {
 	  size_t EventWriteCallback(void *ptr, size_t size, size_t nmemb);
 	  void EventThread();
 	  void MethodURL();
-	  void MethodHttpServer();
+	  void MethodServer();
+	  void HandleHttpCom(int socketfd);
 	  void InputStatusChanged(InputDevice* pInputDevice, string trigger);
 
 	  string ToString()
