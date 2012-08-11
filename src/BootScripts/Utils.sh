@@ -104,14 +104,14 @@ TranslateSoundCard()
 		Cards=$(find -name 'controlC*')
 		for Card in $Cards; do
 			Card="${Card#./}"
-			Dev=$(readlink "$Card/device"|cut -f3 -d/)
+			Dev=$(readlink -f "$Card/device" | sed -r 's,/sound/.*$,,g')
 			if [[ -n "$USB" ]]; then
 				if [[ "$Dev" == *"$PCI"*usb*"$USB:"* ]]; then
 					AlsaCard="${Card#controlC}"
 					break
 				fi
 			else
-				if [[ "$PCI" == *"$Dev" ]]; then
+				if [[ "$Dev" == *"$PCI" ]]; then
 					AlsaCard="${Card#controlC}"
 					break
 				fi
