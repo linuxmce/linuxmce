@@ -7,9 +7,9 @@ if [[ -d /sys/class/sound ]]; then
 	for dev in controlC*/device; do
 		path=$(readlink -f "$dev")
 		if [[ "$path" == *usb* ]]; then
-			id=$(readlink -f "$dev" | sed -r 's,^.*(pci.*)/usb[0-9]+/[0-9./-]+/[0-9]+-([0-9.]+):[0-9.]+,\1+\2,g')
+			id=$(echo "$path" | sed -r 's,^.*(pci.*)/usb[0-9]+/[0-9./-]+/[0-9]+-([0-9.]+):[0-9.]+,\1+\2,g; s,/sound/.*$,,g')
 		else
-			id=$(readlink -f "$dev" | sed -r 's,^.*(pci.*),\1,g')
+			id=$(echo "$path" | sed -r 's,^.*(pci.*),\1,g; s,/sound/.*$,,g')
 		fi
 		manufacturer=$(cat $path/id)
 		Ports="$Ports $manufacturer;$id"
