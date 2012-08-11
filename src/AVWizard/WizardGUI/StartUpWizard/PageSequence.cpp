@@ -10,6 +10,7 @@ PageSequence::PageSequence(const std::string & StartPage)
 		"UISwitcher",
 		"UISwitcherTest",
 		"VideoAdjustSize",
+		"AudioSoundCard",
 		"AudioConnector",
 		"AudioVolume",
 		"DolbyTest",
