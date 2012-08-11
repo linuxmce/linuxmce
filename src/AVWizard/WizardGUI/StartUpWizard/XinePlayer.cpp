@@ -145,6 +145,7 @@ bool XinePlayer::StartPlayingFile()
 
 		return false;
 	}
+	xine_set_param(stream, XINE_PARAM_AUDIO_VOLUME, 100);
 
 	std::cout<<"XinePlayer: Playing: "<<FileName<<std::endl;
 
