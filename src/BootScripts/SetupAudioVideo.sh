@@ -155,10 +155,7 @@ Setup_AsoundConf()
 			# audio setting is HDMI
 			echo 'pcm.!default asym_hdmi' >>/etc/asound.conf
 			EnableDigitalOutputs "$SoundCard"
-			alsa_backports=$(dpkg-query -l "linux-backports-modules-alsa*" | grep "^ii" | awk '{print $2}') 2>/dev/null
-			if [[ -n "$alsa_backports" ]]; then
-				aplay -D plughw:0,7 /usr/share/sounds/pop.wav
-			fi
+
 		;;
 		*)
 			# audio setting is Stereo or something unknown
@@ -166,15 +163,11 @@ Setup_AsoundConf()
 		;;
 	esac
 
-	local GT220=$(lspci -d 10de:0a20)
-	local ION2=$(lspci -d 10de:0a64)
-
-	if [[ "$AudioSetting" == H ]] && [[ -n "$GT220" || -n "$ION2" ]]; then
-		sed -ri "s;hdmi:$SoundCard;hw:$SoundCard,7;g" /etc/asound.conf
-		aplay -Dplughw:$SoundCard,7 /usr/share/sounds/linphone/rings/orig.wav # this initializes the soundcard (you get total silence without this)
-	fi
-
 	Setup_XineConf "$AudioSetting" "$SoundCard" "$AnalogPlaybackCard"
+	alsa_backports=$(dpkg-query -l "linux-backports-modules-alsa*" | grep "^ii" | awk '{print $2}') 2>/dev/null
+	if [[ -n "$alsa_backports" ]]; then
+		aplay -D plughw:"$SoundCard",7 /usr/share/sounds/pop.wav
+	fi
 }
 
 Setup_XineConf()
