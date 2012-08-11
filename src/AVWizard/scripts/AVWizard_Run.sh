@@ -20,6 +20,7 @@ DEVICEDATA_Connector=68
 DEVICEDATA_Spacing=150
 DEVICEDATA_Offset=167
 DEVICEDATA_TV_Standard=229
+DEVICEDATA_Sound_Card=288
 COMMANDPARAMETER_PK_Device=2
 COMMANDPARAMETER_Force=21
 COMMANDPARAMETER_Reset=24
@@ -205,6 +206,7 @@ UpdateAudioSettings () {
 		MD="$PK_Device"
 	fi
 
+	WizSoundCard=$(WizGet 'SoundCard')
 	WizAudioConnector=$(WizGet 'AudioConnector')
 	WizAC3_Result=$(WizGet 'DolbyTest')
 	WizDTS_Result=$(WizGet 'DTSTest')
@@ -231,6 +233,12 @@ UpdateAudioSettings () {
 	if [[ "$WizAC3_Result" != 0 || "$WizDTS_Result" != 0 ]]; then
 		PassThrough="3"
 	fi
+
+	Q="
+		REPLACE INTO Device_DeviceData(FK_Device, FK_DeviceData, IK_DeviceData)
+		VALUES('$MD', '$DEVICEDATA_Sound_card', '$WizSoundCard')
+	"
+	RunSQL "$Q"
 
 	NewAudioSetting="$AudioOutput$PassThrough"
 
