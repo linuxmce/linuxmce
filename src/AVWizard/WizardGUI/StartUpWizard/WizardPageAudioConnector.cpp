@@ -62,7 +62,7 @@ WizardPageAudioConnector::~WizardPageAudioConnector(void)
 	{
 		std::string Command = SkinGenerator::Instance()->CommandSetAudioConnector;
 		
-		Command = Command + " '" + OutputValue + "'";
+		Command = Command + " '" + Dictionary->GetValue("AudioConnector") + "' '" + Dictionary->GetValue("SoundCard") + "'";
 		system(Command.c_str());
 		Dictionary->Set("NoAudioDevice", 0);
 	}
