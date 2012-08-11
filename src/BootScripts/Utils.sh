@@ -92,6 +92,10 @@ TranslateSoundCard()
 	local PCI USB
 	local Cards Card Dev
 
+	if [[ "$SoundCard" == *';'* ]]; then
+		SoundCard="${SoundCard#*;}"
+	fi
+
 	if [[ -d /sys/class/sound && "$SoundCard" == pci* ]]; then
 		if [[ "$SoundCard" == *+* ]]; then
 			PCI="${SoundCard%+*}"
