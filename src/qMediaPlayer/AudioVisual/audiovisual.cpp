@@ -27,38 +27,67 @@ AudioVisual::AudioVisual(QQuickItem *parent) :
   #else
 AudioVisual::AudioVisual(QDeclarativeItem *parent) :
     QDeclarativeItem(parent)
-
   #endif
 {
-    videoWidgetPlayer *player = new videoWidgetPlayer;
-    QGraphicsProxyWidget *proxy = new QGraphicsProxyWidget();
-    proxy->setWidget(player);
+
 
 }
-//public function to take the url and then decide which source to send it to?
-bool AudioVisual::playMedia(const QString &media)
-{
-#ifdef debug
-    qDebug("Handed off to play function");
+
 #endif
-    return true;
-}
 
-bool AudioVisual::playVideo(const QString &video)
+
+void AudioVisual::setupPlayer()
 {
-    return true;
+    if(mediaType == 5)
+    {
+        videoWidgetPlayer *videoPlayer = new videoWidgetPlayer();
+
+    }
+    else
+        if (mediaType ==4)
+        {
+            AudioWidget* audioPlayer = new AudioWidget();
+        }
+
 }
 
-bool AudioVisual::playAudio(const QString &audio)
+
+void AudioVisual::stopMedia()
 {
-#ifdef QT5
-
-#else
-    Phonon::MediaObject *music =
-            Phonon::createPlayer(Phonon::MusicCategory,
-                                 Phonon::MediaSource(":/audio/epic.mp3"));
-    music->play();
-#endif
-    return true;
 }
-#endif
+
+void AudioVisual::rwMedia(int spd)
+{
+}
+
+void AudioVisual::ffMedia(int spd)
+{
+}
+
+void AudioVisual::seekToPosition(int position)
+{
+}
+
+void AudioVisual::setSource(QString source)
+{
+    switch(mediaType){
+    case 5 :
+        videoPlayer->qPlayer->setCurrentSource(Phonon::MediaSource(source));
+        break;
+    case 4:
+        audioPlayer->audioObject->setCurrentSource(Phonon::MediaSource(source));
+        break;
+    }
+
+}
+
+QString AudioVisual::getSource()
+{
+    return mediaSource;
+}
+
+
+void AudioVisual::playItem(QString track)
+{
+}
+

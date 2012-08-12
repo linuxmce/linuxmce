@@ -16,9 +16,11 @@ videoWidgetPlayer::videoWidgetPlayer(QWidget *parent) :
 #ifdef QT5
 
 #else
+
+    ColorFilterProxyWidget *hack = new ColorFilterProxyWidget();
     Phonon::MediaObject *qPlayer = new Phonon::MediaObject(this);
     Phonon::VideoWidget *videoOutput = new Phonon::VideoWidget(this);
-
+    hack->setWidget(videoOutput);
     Phonon::createPath(qPlayer, videoOutput);
 #endif
 

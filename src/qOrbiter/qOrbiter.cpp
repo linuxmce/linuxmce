@@ -2530,21 +2530,28 @@ void DCE::qOrbiter::GetMediaAttributeGrid(QString  qs_fk_fileno)
     if(placeholder != -1)
     {
         emit fd_pathChanged(details.at(placeholder+1));
-
         //begin ugly bit to determine the storage device for later use. its not passed explicitly, so i use a regex to determine it for media files
         QRegExp deviceNo("(\\\[\\\d+\\\])");
         int l = deviceNo.indexIn(details.at(placeholder+1));
 
         if (l ==-1){
-            emit fd_storageDeviceChanged("videos");
-            setCommandResponse("Stored in /videos");
+            emit fd_storageDeviceChanged("mediatype");
+            setCommandResponse("Stored in /mediaType");
         }
         else
         {
-            QString f = deviceNo.cap(0);
-            f.remove("[");
-            f.remove("]");
-            emit fd_storageDeviceChanged(f);
+            if(!deviceNo.isEmpty()){
+                QString f = deviceNo.cap(0);
+                f.remove("[");
+                f.remove("]");
+                emit fd_storageDeviceChanged(f);
+                QString localPath = details.at(placeholder+1).split(deviceNo).at(1);
+                emit fd_pathChanged(localPath);
+            }
+            else
+            {
+                emit fd_storageDeviceChanged("local");
+            }
         }
         //end ugly bit of regex. pretty because it works unless a user decides to also have [\d\d\d] type directories. I try to counter that by choosing only
         //the first match as that will be the first indexed by the regex engine.
