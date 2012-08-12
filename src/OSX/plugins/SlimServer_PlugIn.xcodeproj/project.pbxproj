@@ -1,0 +1,259 @@
+// !$*UTF8*$!
+{
+	archiveVersion = 1;
+	classes = {
+	};
+	objectVersion = 46;
+	objects = {
+
+/* Begin PBXBuildFile section */
+		95BBDC1915D7F43400F527A1 /* Main.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 95BBDC1815D7F43400F527A1 /* Main.cpp */; };
+		95BBDC1B15D7F43C00F527A1 /* SlimServer_PlugIn.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 95BBDC1A15D7F43C00F527A1 /* SlimServer_PlugIn.cpp */; };
+		95BBDC1D15D7F44A00F527A1 /* SlimServerMediaStream.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 95BBDC1C15D7F44A00F527A1 /* SlimServerMediaStream.cpp */; };
+		95BBDC1F15D7F46300F527A1 /* SlimServer_PlugInBase.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 95BBDC1E15D7F46300F527A1 /* SlimServer_PlugInBase.cpp */; };
+		95BBDC2115D7F4B400F527A1 /* mysql.h in Headers */ = {isa = PBXBuildFile; fileRef = 95BBDC2015D7F4B400F527A1 /* mysql.h */; };
+		95BBDC2315D7F4E500F527A1 /* libDCECommon.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 95BBDC2215D7F4E500F527A1 /* libDCECommon.dylib */; };
+		95BBDC2515D7F51E00F527A1 /* Media_Plugin.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 95BBDC2415D7F51E00F527A1 /* Media_Plugin.dylib */; };
+/* End PBXBuildFile section */
+
+/* Begin PBXFileReference section */
+		95BBDC0215D7F3B800F527A1 /* SlimServer_PlugIn.dylib */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.dylib"; includeInIndex = 0; path = SlimServer_PlugIn.dylib; sourceTree = BUILT_PRODUCTS_DIR; };
+		95BBDC1815D7F43400F527A1 /* Main.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = Main.cpp; path = ../../SlimServer_PlugIn/Main.cpp; sourceTree = "<group>"; };
+		95BBDC1A15D7F43C00F527A1 /* SlimServer_PlugIn.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = SlimServer_PlugIn.cpp; path = ../../SlimServer_PlugIn/SlimServer_PlugIn.cpp; sourceTree = "<group>"; };
+		95BBDC1C15D7F44A00F527A1 /* SlimServerMediaStream.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = SlimServerMediaStream.cpp; path = ../../SlimServer_PlugIn/SlimServerMediaStream.cpp; sourceTree = "<group>"; };
+		95BBDC1E15D7F46300F527A1 /* SlimServer_PlugInBase.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = SlimServer_PlugInBase.cpp; path = ../../Gen_Devices/SlimServer_PlugInBase.cpp; sourceTree = "<group>"; };
+		95BBDC2015D7F4B400F527A1 /* mysql.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = mysql.h; path = ../mysql/include/mysql.h; sourceTree = "<group>"; };
+		95BBDC2215D7F4E500F527A1 /* libDCECommon.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libDCECommon.dylib; path = ../lib/libDCECommon.dylib; sourceTree = "<group>"; };
+		95BBDC2415D7F51E00F527A1 /* Media_Plugin.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = Media_Plugin.dylib; path = ../bin/Media_Plugin.dylib; sourceTree = "<group>"; };
+/* End PBXFileReference section */
+
+/* Begin PBXFrameworksBuildPhase section */
+		95BBDBFF15D7F3B800F527A1 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				95BBDC2315D7F4E500F527A1 /* libDCECommon.dylib in Frameworks */,
+				95BBDC2515D7F51E00F527A1 /* Media_Plugin.dylib in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXFrameworksBuildPhase section */
+
+/* Begin PBXGroup section */
+		95BBDBF715D7F3B800F527A1 = {
+			isa = PBXGroup;
+			children = (
+				95BBDC1815D7F43400F527A1 /* Main.cpp */,
+				95BBDC1A15D7F43C00F527A1 /* SlimServer_PlugIn.cpp */,
+				95BBDC1715D7F40500F527A1 /* Includes */,
+				95BBDC1515D7F40100F527A1 /* Libraries */,
+				95BBDC0315D7F3B800F527A1 /* Products */,
+			);
+			sourceTree = "<group>";
+		};
+		95BBDC0315D7F3B800F527A1 /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				95BBDC0215D7F3B800F527A1 /* SlimServer_PlugIn.dylib */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+		95BBDC1515D7F40100F527A1 /* Libraries */ = {
+			isa = PBXGroup;
+			children = (
+				95BBDC2215D7F4E500F527A1 /* libDCECommon.dylib */,
+				95BBDC2415D7F51E00F527A1 /* Media_Plugin.dylib */,
+			);
+			name = Libraries;
+			sourceTree = "<group>";
+		};
+		95BBDC1715D7F40500F527A1 /* Includes */ = {
+			isa = PBXGroup;
+			children = (
+				95BBDC2015D7F4B400F527A1 /* mysql.h */,
+				95BBDC1E15D7F46300F527A1 /* SlimServer_PlugInBase.cpp */,
+				95BBDC1C15D7F44A00F527A1 /* SlimServerMediaStream.cpp */,
+			);
+			name = Includes;
+			sourceTree = "<group>";
+		};
+/* End PBXGroup section */
+
+/* Begin PBXHeadersBuildPhase section */
+		95BBDC0015D7F3B800F527A1 /* Headers */ = {
+			isa = PBXHeadersBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				95BBDC2115D7F4B400F527A1 /* mysql.h in Headers */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXHeadersBuildPhase section */
+
+/* Begin PBXNativeTarget section */
+		95BBDC0115D7F3B800F527A1 /* SlimServer_PlugIn */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 95BBDC0F15D7F3B800F527A1 /* Build configuration list for PBXNativeTarget "SlimServer_PlugIn" */;
+			buildPhases = (
+				95BBDBFE15D7F3B800F527A1 /* Sources */,
+				95BBDBFF15D7F3B800F527A1 /* Frameworks */,
+				95BBDC0015D7F3B800F527A1 /* Headers */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = SlimServer_PlugIn;
+			productName = SlimServer_PlugIn;
+			productReference = 95BBDC0215D7F3B800F527A1 /* SlimServer_PlugIn.dylib */;
+			productType = "com.apple.product-type.library.dynamic";
+		};
+/* End PBXNativeTarget section */
+
+/* Begin PBXProject section */
+		95BBDBF915D7F3B800F527A1 /* Project object */ = {
+			isa = PBXProject;
+			attributes = {
+				LastUpgradeCheck = 0420;
+			};
+			buildConfigurationList = 95BBDBFC15D7F3B800F527A1 /* Build configuration list for PBXProject "SlimServer_PlugIn" */;
+			compatibilityVersion = "Xcode 3.2";
+			developmentRegion = English;
+			hasScannedForEncodings = 0;
+			knownRegions = (
+				en,
+			);
+			mainGroup = 95BBDBF715D7F3B800F527A1;
+			productRefGroup = 95BBDC0315D7F3B800F527A1 /* Products */;
+			projectDirPath = "";
+			projectRoot = "";
+			targets = (
+				95BBDC0115D7F3B800F527A1 /* SlimServer_PlugIn */,
+			);
+		};
+/* End PBXProject section */
+
+/* Begin PBXSourcesBuildPhase section */
+		95BBDBFE15D7F3B800F527A1 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				95BBDC1915D7F43400F527A1 /* Main.cpp in Sources */,
+				95BBDC1B15D7F43C00F527A1 /* SlimServer_PlugIn.cpp in Sources */,
+				95BBDC1D15D7F44A00F527A1 /* SlimServerMediaStream.cpp in Sources */,
+				95BBDC1F15D7F46300F527A1 /* SlimServer_PlugInBase.cpp in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXSourcesBuildPhase section */
+
+/* Begin XCBuildConfiguration section */
+		95BBDC0D15D7F3B800F527A1 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				ARCHS = "$(ARCHS_STANDARD_64_BIT)";
+				CLANG_ENABLE_OBJC_ARC = YES;
+				COPY_PHASE_STRIP = NO;
+				GCC_C_LANGUAGE_STANDARD = gnu99;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_ENABLE_OBJC_EXCEPTIONS = YES;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"DEBUG=1",
+					"$(inherited)",
+				);
+				GCC_SYMBOLS_PRIVATE_EXTERN = NO;
+				GCC_VERSION = com.apple.compilers.llvm.clang.1_0;
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_MISSING_PROTOTYPES = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				MACOSX_DEPLOYMENT_TARGET = 10.7;
+				ONLY_ACTIVE_ARCH = YES;
+				SDKROOT = macosx;
+			};
+			name = Debug;
+		};
+		95BBDC0E15D7F3B800F527A1 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				ARCHS = "$(ARCHS_STANDARD_64_BIT)";
+				CLANG_ENABLE_OBJC_ARC = YES;
+				COPY_PHASE_STRIP = YES;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				GCC_C_LANGUAGE_STANDARD = gnu99;
+				GCC_ENABLE_OBJC_EXCEPTIONS = YES;
+				GCC_VERSION = com.apple.compilers.llvm.clang.1_0;
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_MISSING_PROTOTYPES = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				MACOSX_DEPLOYMENT_TARGET = 10.7;
+				SDKROOT = macosx;
+			};
+			name = Release;
+		};
+		95BBDC1015D7F3B800F527A1 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CONFIGURATION_BUILD_DIR = ../bin;
+				HEADER_SEARCH_PATHS = (
+					../../DCE,
+					../..,
+				);
+				INSTALL_PATH = /usr/pluto/bin;
+				LIBRARY_SEARCH_PATHS = (
+					"$(inherited)",
+					"\"$(SRCROOT)/../lib\"",
+					"\"$(SRCROOT)/../bin\"",
+				);
+				PRODUCT_NAME = "$(TARGET_NAME)";
+			};
+			name = Debug;
+		};
+		95BBDC1115D7F3B800F527A1 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CONFIGURATION_BUILD_DIR = ../bin;
+				HEADER_SEARCH_PATHS = (
+					../../DCE,
+					../..,
+				);
+				INSTALL_PATH = /usr/pluto/bin;
+				LIBRARY_SEARCH_PATHS = (
+					"$(inherited)",
+					"\"$(SRCROOT)/../lib\"",
+					"\"$(SRCROOT)/../bin\"",
+				);
+				PRODUCT_NAME = "$(TARGET_NAME)";
+			};
+			name = Release;
+		};
+/* End XCBuildConfiguration section */
+
+/* Begin XCConfigurationList section */
+		95BBDBFC15D7F3B800F527A1 /* Build configuration list for PBXProject "SlimServer_PlugIn" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				95BBDC0D15D7F3B800F527A1 /* Debug */,
+				95BBDC0E15D7F3B800F527A1 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		95BBDC0F15D7F3B800F527A1 /* Build configuration list for PBXNativeTarget "SlimServer_PlugIn" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				95BBDC1015D7F3B800F527A1 /* Debug */,
+				95BBDC1115D7F3B800F527A1 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+/* End XCConfigurationList section */
+	};
+	rootObject = 95BBDBF915D7F3B800F527A1 /* Project object */;
+}

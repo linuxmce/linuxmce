@@ -1,0 +1,265 @@
+// !$*UTF8*$!
+{
+	archiveVersion = 1;
+	classes = {
+	};
+	objectVersion = 46;
+	objects = {
+
+/* Begin PBXBuildFile section */
+		95BBDC4815D7F64A00F527A1 /* Main.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 95BBDC4715D7F64A00F527A1 /* Main.cpp */; };
+		95BBDC4A15D7F65A00F527A1 /* Infrared_Plugin.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 95BBDC4915D7F65A00F527A1 /* Infrared_Plugin.cpp */; };
+		95BBDC4C15D7F67000F527A1 /* Infrared_PluginBase.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 95BBDC4B15D7F67000F527A1 /* Infrared_PluginBase.cpp */; };
+		95BBDC4E15D7F6CC00F527A1 /* mysql.h in Headers */ = {isa = PBXBuildFile; fileRef = 95BBDC4D15D7F6CC00F527A1 /* mysql.h */; };
+		95BBDC5015D7F6F900F527A1 /* libDCECommon.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 95BBDC4F15D7F6F900F527A1 /* libDCECommon.dylib */; };
+		95BBDC5215D7F72000F527A1 /* libpluto_main.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 95BBDC5115D7F72000F527A1 /* libpluto_main.dylib */; };
+		95BBDC5415D7F73900F527A1 /* libmysqlclient.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 95BBDC5315D7F73900F527A1 /* libmysqlclient.dylib */; };
+		95BBDC5615D7F75300F527A1 /* Datagrid_Plugin.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 95BBDC5515D7F75300F527A1 /* Datagrid_Plugin.dylib */; };
+/* End PBXBuildFile section */
+
+/* Begin PBXFileReference section */
+		95BBDC3115D7F5BB00F527A1 /* Infrared_Plugin.dylib */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.dylib"; includeInIndex = 0; path = Infrared_Plugin.dylib; sourceTree = BUILT_PRODUCTS_DIR; };
+		95BBDC4715D7F64A00F527A1 /* Main.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = Main.cpp; path = ../../Infrared_Plugin/Main.cpp; sourceTree = "<group>"; };
+		95BBDC4915D7F65A00F527A1 /* Infrared_Plugin.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = Infrared_Plugin.cpp; path = ../../Infrared_Plugin/Infrared_Plugin.cpp; sourceTree = "<group>"; };
+		95BBDC4B15D7F67000F527A1 /* Infrared_PluginBase.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = Infrared_PluginBase.cpp; path = ../../Gen_Devices/Infrared_PluginBase.cpp; sourceTree = "<group>"; };
+		95BBDC4D15D7F6CC00F527A1 /* mysql.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = mysql.h; path = ../mysql/include/mysql.h; sourceTree = "<group>"; };
+		95BBDC4F15D7F6F900F527A1 /* libDCECommon.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libDCECommon.dylib; path = ../lib/libDCECommon.dylib; sourceTree = "<group>"; };
+		95BBDC5115D7F72000F527A1 /* libpluto_main.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libpluto_main.dylib; path = ../lib/libpluto_main.dylib; sourceTree = "<group>"; };
+		95BBDC5315D7F73900F527A1 /* libmysqlclient.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libmysqlclient.dylib; path = ../mysql/lib/libmysqlclient.dylib; sourceTree = "<group>"; };
+		95BBDC5515D7F75300F527A1 /* Datagrid_Plugin.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = Datagrid_Plugin.dylib; path = ../bin/Datagrid_Plugin.dylib; sourceTree = "<group>"; };
+/* End PBXFileReference section */
+
+/* Begin PBXFrameworksBuildPhase section */
+		95BBDC2E15D7F5BB00F527A1 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				95BBDC5015D7F6F900F527A1 /* libDCECommon.dylib in Frameworks */,
+				95BBDC5215D7F72000F527A1 /* libpluto_main.dylib in Frameworks */,
+				95BBDC5415D7F73900F527A1 /* libmysqlclient.dylib in Frameworks */,
+				95BBDC5615D7F75300F527A1 /* Datagrid_Plugin.dylib in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXFrameworksBuildPhase section */
+
+/* Begin PBXGroup section */
+		95BBDC2615D7F5BB00F527A1 = {
+			isa = PBXGroup;
+			children = (
+				95BBDC4715D7F64A00F527A1 /* Main.cpp */,
+				95BBDC4915D7F65A00F527A1 /* Infrared_Plugin.cpp */,
+				95BBDC4615D7F61700F527A1 /* Includes */,
+				95BBDC4415D7F61300F527A1 /* Libraries */,
+				95BBDC3215D7F5BB00F527A1 /* Products */,
+			);
+			sourceTree = "<group>";
+		};
+		95BBDC3215D7F5BB00F527A1 /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				95BBDC3115D7F5BB00F527A1 /* Infrared_Plugin.dylib */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+		95BBDC4415D7F61300F527A1 /* Libraries */ = {
+			isa = PBXGroup;
+			children = (
+				95BBDC4F15D7F6F900F527A1 /* libDCECommon.dylib */,
+				95BBDC5515D7F75300F527A1 /* Datagrid_Plugin.dylib */,
+				95BBDC5315D7F73900F527A1 /* libmysqlclient.dylib */,
+				95BBDC5115D7F72000F527A1 /* libpluto_main.dylib */,
+			);
+			name = Libraries;
+			sourceTree = "<group>";
+		};
+		95BBDC4615D7F61700F527A1 /* Includes */ = {
+			isa = PBXGroup;
+			children = (
+				95BBDC4D15D7F6CC00F527A1 /* mysql.h */,
+				95BBDC4B15D7F67000F527A1 /* Infrared_PluginBase.cpp */,
+			);
+			name = Includes;
+			sourceTree = "<group>";
+		};
+/* End PBXGroup section */
+
+/* Begin PBXHeadersBuildPhase section */
+		95BBDC2F15D7F5BB00F527A1 /* Headers */ = {
+			isa = PBXHeadersBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				95BBDC4E15D7F6CC00F527A1 /* mysql.h in Headers */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXHeadersBuildPhase section */
+
+/* Begin PBXNativeTarget section */
+		95BBDC3015D7F5BB00F527A1 /* Infrared_Plugin */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 95BBDC3E15D7F5BB00F527A1 /* Build configuration list for PBXNativeTarget "Infrared_Plugin" */;
+			buildPhases = (
+				95BBDC2D15D7F5BB00F527A1 /* Sources */,
+				95BBDC2E15D7F5BB00F527A1 /* Frameworks */,
+				95BBDC2F15D7F5BB00F527A1 /* Headers */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = Infrared_Plugin;
+			productName = Infrared_Plugin;
+			productReference = 95BBDC3115D7F5BB00F527A1 /* Infrared_Plugin.dylib */;
+			productType = "com.apple.product-type.library.dynamic";
+		};
+/* End PBXNativeTarget section */
+
+/* Begin PBXProject section */
+		95BBDC2815D7F5BB00F527A1 /* Project object */ = {
+			isa = PBXProject;
+			attributes = {
+				LastUpgradeCheck = 0420;
+			};
+			buildConfigurationList = 95BBDC2B15D7F5BB00F527A1 /* Build configuration list for PBXProject "Infrared_Plugin" */;
+			compatibilityVersion = "Xcode 3.2";
+			developmentRegion = English;
+			hasScannedForEncodings = 0;
+			knownRegions = (
+				en,
+			);
+			mainGroup = 95BBDC2615D7F5BB00F527A1;
+			productRefGroup = 95BBDC3215D7F5BB00F527A1 /* Products */;
+			projectDirPath = "";
+			projectRoot = "";
+			targets = (
+				95BBDC3015D7F5BB00F527A1 /* Infrared_Plugin */,
+			);
+		};
+/* End PBXProject section */
+
+/* Begin PBXSourcesBuildPhase section */
+		95BBDC2D15D7F5BB00F527A1 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				95BBDC4815D7F64A00F527A1 /* Main.cpp in Sources */,
+				95BBDC4A15D7F65A00F527A1 /* Infrared_Plugin.cpp in Sources */,
+				95BBDC4C15D7F67000F527A1 /* Infrared_PluginBase.cpp in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXSourcesBuildPhase section */
+
+/* Begin XCBuildConfiguration section */
+		95BBDC3C15D7F5BB00F527A1 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				ARCHS = "$(ARCHS_STANDARD_64_BIT)";
+				CLANG_ENABLE_OBJC_ARC = YES;
+				COPY_PHASE_STRIP = NO;
+				GCC_C_LANGUAGE_STANDARD = gnu99;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_ENABLE_OBJC_EXCEPTIONS = YES;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"DEBUG=1",
+					"$(inherited)",
+				);
+				GCC_SYMBOLS_PRIVATE_EXTERN = NO;
+				GCC_VERSION = com.apple.compilers.llvm.clang.1_0;
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_MISSING_PROTOTYPES = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				MACOSX_DEPLOYMENT_TARGET = 10.7;
+				ONLY_ACTIVE_ARCH = YES;
+				SDKROOT = macosx;
+			};
+			name = Debug;
+		};
+		95BBDC3D15D7F5BB00F527A1 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				ARCHS = "$(ARCHS_STANDARD_64_BIT)";
+				CLANG_ENABLE_OBJC_ARC = YES;
+				COPY_PHASE_STRIP = YES;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				GCC_C_LANGUAGE_STANDARD = gnu99;
+				GCC_ENABLE_OBJC_EXCEPTIONS = YES;
+				GCC_VERSION = com.apple.compilers.llvm.clang.1_0;
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_MISSING_PROTOTYPES = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				MACOSX_DEPLOYMENT_TARGET = 10.7;
+				SDKROOT = macosx;
+			};
+			name = Release;
+		};
+		95BBDC3F15D7F5BB00F527A1 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CONFIGURATION_BUILD_DIR = ../bin;
+				HEADER_SEARCH_PATHS = (
+					../../DCE,
+					../..,
+				);
+				INSTALL_PATH = /usr/pluto/bin;
+				LIBRARY_SEARCH_PATHS = (
+					"$(inherited)",
+					"\"$(SRCROOT)/../lib\"",
+					"\"$(SRCROOT)/../mysql/lib\"",
+					"\"$(SRCROOT)/../bin\"",
+				);
+				PRODUCT_NAME = "$(TARGET_NAME)";
+			};
+			name = Debug;
+		};
+		95BBDC4015D7F5BB00F527A1 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CONFIGURATION_BUILD_DIR = ../bin;
+				HEADER_SEARCH_PATHS = (
+					../../DCE,
+					../..,
+				);
+				INSTALL_PATH = /usr/pluto/bin;
+				LIBRARY_SEARCH_PATHS = (
+					"$(inherited)",
+					"\"$(SRCROOT)/../lib\"",
+					"\"$(SRCROOT)/../mysql/lib\"",
+					"\"$(SRCROOT)/../bin\"",
+				);
+				PRODUCT_NAME = "$(TARGET_NAME)";
+			};
+			name = Release;
+		};
+/* End XCBuildConfiguration section */
+
+/* Begin XCConfigurationList section */
+		95BBDC2B15D7F5BB00F527A1 /* Build configuration list for PBXProject "Infrared_Plugin" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				95BBDC3C15D7F5BB00F527A1 /* Debug */,
+				95BBDC3D15D7F5BB00F527A1 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		95BBDC3E15D7F5BB00F527A1 /* Build configuration list for PBXNativeTarget "Infrared_Plugin" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				95BBDC3F15D7F5BB00F527A1 /* Debug */,
+				95BBDC4015D7F5BB00F527A1 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+/* End XCConfigurationList section */
+	};
+	rootObject = 95BBDC2815D7F5BB00F527A1 /* Project object */;
+}
