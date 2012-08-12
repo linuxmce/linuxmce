@@ -34,9 +34,10 @@ Rectangle {
         Text {
             id: text2
             anchors.horizontalCenter: parent.horizontalCenter
-            text: filedetailsclass.filename
+            text: qsTr("Filename")+filedetailsclass.path+ "/"+filedetailsclass.filename
             font.pixelSize: 14
             font.bold: true
+            color: "black"
             wrapMode: Text.WrapAtWordBoundaryOrAnywhere
         }
 
@@ -222,7 +223,7 @@ Rectangle {
             x: ((parent.width/3)*2)
             MouseArea{
                 anchors.fill:  parent
-                onClicked: { dataModel.checkForMore();filedetailrect.destroy()}
+                onClicked: { filedetailrect.destroy()}
             }
         }
     }

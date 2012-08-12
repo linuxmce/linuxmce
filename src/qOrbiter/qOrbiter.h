@@ -1347,6 +1347,7 @@ signals:
     //filedetails popup
     void clearFileDetails();
     void fd_fileChanged(QString f);
+    void fd_fileNameChanged(QString f);
     void fd_show(bool s);
     void fd_objectTitleChanged(QString t);
     void fd_synopChanged(QString s);

@@ -4,14 +4,9 @@
 //#include <QtMultimedia/QtMultimedia>
 #include <QtWidgets/qwidget.h>
 #else
-#include <QtMultimedia/QtMultimedia>
 #include <phonon/Phonon>
-#include <phonon/VideoWidget>
+#include "QVBoxLayout"
 #endif
-
-#include "QVBoxLayout"
-#include <phonon/VideoWidget>
-#include "QVBoxLayout"
 #include <QUrl>
 #include <QDebug>
 
@@ -21,32 +16,10 @@ videoWidgetPlayer::videoWidgetPlayer(QWidget *parent) :
 #ifdef QT5
 
 #else
+    Phonon::MediaObject *qPlayer = new Phonon::MediaObject(this);
+    Phonon::VideoWidget *videoOutput = new Phonon::VideoWidget(this);
 
-    Phonon::MediaObject *mediaObject = new Phonon::MediaObject(this);
-
-    Phonon::VideoWidget *videoWidget = new Phonon::VideoWidget(this);
-    Phonon::createPath(mediaObject, videoWidget);
-
-    Phonon::AudioOutput *audioOutput =
-            new Phonon::AudioOutput(Phonon::VideoCategory, this);
-    Phonon::createPath(mediaObject, audioOutput);
-    qDebug() << audioOutput->isValid();
-    qDebug() << videoWidget->isValid();
-    mediaObject->setCurrentSource(Phonon::MediaSource(QUrl::fromLocalFile(":/video/vid.3gp")));
-    mediaObject->play();
-
-    qDebug() << mediaObject->state();
-    qDebug() << mediaObject->totalTime();
-    qDebug() << mediaObject->isSeekable();
-    qDebug() << mediaObject->errorType();
-
-    Phonon::VideoPlayer *player =
-            new Phonon::VideoPlayer(Phonon::VideoCategory, parent);
-
-    QVBoxLayout* mainLayout = new QVBoxLayout(this);
-    mainLayout->setMargin(0);
-    mainLayout->addWidget( player);
-    player->play(QUrl::fromLocalFile("file goes here"));
+    Phonon::createPath(qPlayer, videoOutput);
 #endif
 
 }

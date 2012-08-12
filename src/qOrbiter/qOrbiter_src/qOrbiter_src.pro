@@ -340,7 +340,8 @@ SOURCES += main.cpp \
     ../../Gen_Devices/qMediaPlayerBase.cpp \
     contextobjects/bookmarkitem.cpp \
     plugins/GoogleWeather/googleweather.cpp \
-    contextobjects/promptdata.cpp
+    contextobjects/promptdata.cpp \
+    ../../qMediaPlayer/AudioVisual/audiowidget.cpp
 
 !ANDROID|!QT5{
  SOURCES+= ../../qMediaPlayer/AudioVisual/audiovisual.cpp \
@@ -454,7 +455,8 @@ HEADERS += \
     ../../Gen_Devices/qMediaPlayerBase.h \
     contextobjects/bookmarkitem.h \
     plugins/GoogleWeather/googleweather.h \
-    contextobjects/promptdata.h
+    contextobjects/promptdata.h \
+    ../../qMediaPlayer/AudioVisual/audiowidget.h
 
 !ANDROID||!QT5{
  HEADERS+=   ../../qMediaPlayer/AudioVisual/audiovisual.h \

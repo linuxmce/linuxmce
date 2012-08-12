@@ -11,8 +11,7 @@ Rectangle {
     visible: manager.debugMode ? true : false
     onDebugMessageChanged: if(debugMessage.toString() !== ""){
                                active = true
-                               x = 0+scaleX(1)
-                           }
+                               x = 0+scaleX(1)                           }
 
     x:0-debugpanel.width
 
@@ -41,7 +40,7 @@ Rectangle {
         height: parent.height
         width: parent.width
         wrapMode: Text.WrapAtWordBoundaryOrAnywhere
-        font.pixelSize: scaleY(4)
+        font.pixelSize: scaleY(3)
     }
 
 

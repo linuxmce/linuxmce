@@ -47,8 +47,8 @@ class FileDetailsClass : public QObject
     Q_PROPERTY(QString objecttitle READ getTitle WRITE setTitle NOTIFY objectChanged)
     Q_PROPERTY(QString synop READ getSynop WRITE setSynop NOTIFY synopChanged)
     Q_PROPERTY(QUrl screenshot READ getScreenShot WRITE setScreenshot NOTIFY imageChanged)
-    Q_PROPERTY(QString filename READ getFilename WRITE setFilename NOTIFY objectChanged)
-    Q_PROPERTY(QString path READ getPath WRITE setPath NOTIFY objectChanged)
+    Q_PROPERTY(QString filename READ getFilename WRITE setFilename NOTIFY fileNameChanged)
+    Q_PROPERTY(QString path READ getPath WRITE setPath NOTIFY pathChanged)
 
     Q_PROPERTY(QImage titleImage READ getTitleImage WRITE setTitleImage NOTIFY titleImageChanged)
    // Q_PROPERTY(QImage program READ getProgramImage WRITE setProgramImage NOTIFY objectChanged)
@@ -123,7 +123,9 @@ public:
 
 signals:
     void objectChanged();
+    void pathChanged();
     void synopChanged();
+    void fileNameChanged();
     void FileChanged(QString f);
     void VisibleChanged(bool vis);
     //void ImageChanged(QUrl);
@@ -170,6 +172,8 @@ signals:
 
 public slots:
     void clear();
+
+
 
     void setProgram(QString newProgram) {program = newProgram;  emit programChanged();}
     QString getProgram () {return program;}
@@ -236,7 +240,7 @@ public slots:
     QString getImageAspect() {return aspect;}
 
     inline QString getFile () {return file;}
-    inline void setFile(QString incFile) { file = incFile; emit FileChanged(file);}
+    inline void setFile(QString incFile) { file = incFile; emit FileChanged(file); }
 
 
     inline void setTitleImage (QImage inc_t) {titleImage = inc_t; emit imageChanged();}
@@ -258,10 +262,10 @@ public slots:
     inline QUrl getScreenShot() {return screenshot;}
 
     inline QString getFilename() {return filename;}
-    inline void setFilename (QString f) {filename = f; emit FileChanged(filename);}
+    inline void setFilename (QString f) {filename = f; emit fileNameChanged();}
 
     inline QString getPath() {return path;}
-    inline void setPath (QString f) {path = f; emit objectChanged();}
+    inline void setPath (QString f) {path = f; emit pathChanged();}
 
 
     inline void setScreenshotimage(QImage img) {qi_screenshot= img; emit imageChanged();}

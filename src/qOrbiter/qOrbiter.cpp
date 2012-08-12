@@ -2479,27 +2479,14 @@ void DCE::qOrbiter::GetMediaAttributeGrid(QString  qs_fk_fileno)
 
     string m_sGridID ="mattrfile_"+StringUtils::itos(m_dwPK_Device);
 
-    int iRow_count=5;
-    int iColumn_count = 5;
-    bool m_bKeep_Row_Header = false;
-    bool m_bKeepColHeader = false;
-    bool m_bAdd_UpDown_Arrows = true;
-
-    string m_sSeek;
-    string m_sDataGrid_ID = "1";
+    string m_sSeek;   
     int iOffset;
-
-    int iColumn = 1;
-    int iRowCount= 5;
-    int iRowColums = 5;
-    int m_iSeekColumn = 0;
     int iData_Size=0;
     int GridCurRow = 0;
     int GridCurCol= 0;
     string pResponse="";
     char *pData;
     pData = "NULL";
-    int iRow;
 
     QString temp;
     m_dwIDataGridRequestCounter++;
@@ -2548,8 +2535,10 @@ void DCE::qOrbiter::GetMediaAttributeGrid(QString  qs_fk_fileno)
     placeholder = details.indexOf("FILENAME");
     if(placeholder != -1)
     {
-        emit fd_fileChanged(qs_fk_fileno);
+        emit fd_fileNameChanged(details.at(placeholder+1));
     }
+
+
 
     CMD_Populate_Datagrid cmd_populate_attribute_grid(m_dwPK_Device, iPK_Device_DatagridPlugIn, StringUtils::itos( m_dwIDataGridRequestCounter ), string(m_sGridID), 83, qs_fk_fileno.toStdString(), DEVICETEMPLATE_Datagrid_Plugin_CONST, &pkVar, &valassign,  &isSuccessfull, &gHeight, &gWidth );
 

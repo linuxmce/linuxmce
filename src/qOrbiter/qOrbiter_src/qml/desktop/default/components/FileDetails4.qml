@@ -222,7 +222,7 @@ Rectangle {
             x: ((parent.width/3)*2)
             MouseArea{
                 anchors.fill:  parent
-                onClicked: { dataModel.checkForMore();filedetailrect.destroy()}
+                onClicked: { filedetailrect.destroy()}
             }
         }
     }

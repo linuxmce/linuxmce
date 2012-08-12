@@ -357,6 +357,7 @@ int main(int argc, char* argv[])
         QObject::connect(pqOrbiter, SIGNAL(fd_channelChanged(QString)), w->filedetailsclass, SLOT(setChannel(QString)),Qt::QueuedConnection);
         QObject::connect(pqOrbiter, SIGNAL(fd_pathChanged(QString)), w->filedetailsclass, SLOT(setPath(QString)),Qt::QueuedConnection);
         QObject::connect(pqOrbiter, SIGNAL(fd_fileChanged(QString)), w->filedetailsclass, SLOT(setFile(QString)),Qt::QueuedConnection);
+        QObject::connect(pqOrbiter, SIGNAL(fd_fileNameChanged(QString)), w->filedetailsclass, SLOT(setFilename(QString)),Qt::QueuedConnection);
         QObject::connect(pqOrbiter, SIGNAL(fd_episodeChanged(QString)), w->filedetailsclass, SLOT(setEpisode(QString)),Qt::QueuedConnection);
         QObject::connect(pqOrbiter, SIGNAL(fd_trackChanged(QString)), w->nowPlayingButton, SLOT(setTrack(QString)),Qt::QueuedConnection);
 

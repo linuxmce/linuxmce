@@ -13,7 +13,8 @@ class videoWidgetPlayer : public QWidget
     Q_OBJECT
 public:
     explicit videoWidgetPlayer(QWidget *parent = 0);
-
+    Phonon::MediaObject *qPlayer;
+    Phonon::VideoWidget *videoOutput;
 
 signals:
 
