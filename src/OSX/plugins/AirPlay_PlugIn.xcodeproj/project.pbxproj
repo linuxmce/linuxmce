@@ -43,8 +43,8 @@
 		95F78A4715BBEF6D00FB8F5B = {
 			isa = PBXGroup;
 			children = (
-				95F78A6515BBEFEC00FB8F5B /* AirPlay_PlugIn.cpp */,
 				95F78A6815BBEFF700FB8F5B /* Main.cpp */,
+				95F78A6515BBEFEC00FB8F5B /* AirPlay_PlugIn.cpp */,
 				95F78A6A15BBF00300FB8F5B /* Includes */,
 				95F78A6F15BBF0D200FB8F5B /* Libraries */,
 				95F78A5315BBEF6D00FB8F5B /* Products */,
