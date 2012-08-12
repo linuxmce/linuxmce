@@ -1,0 +1,253 @@
+// !$*UTF8*$!
+{
+	archiveVersion = 1;
+	classes = {
+	};
+	objectVersion = 46;
+	objects = {
+
+/* Begin PBXBuildFile section */
+		95BBDB8815D7A10400F527A1 /* Main.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 95BBDB8715D7A10400F527A1 /* Main.cpp */; };
+		95BBDB8A15D7A11800F527A1 /* DataLogger_Plugin.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 95BBDB8915D7A11800F527A1 /* DataLogger_Plugin.cpp */; };
+		95BBDB8C15D7A13A00F527A1 /* DataLogger_PluginBase.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 95BBDB8B15D7A13A00F527A1 /* DataLogger_PluginBase.cpp */; };
+		95BBDB8E15D7A20E00F527A1 /* mysql.h in Headers */ = {isa = PBXBuildFile; fileRef = 95BBDB8D15D7A20E00F527A1 /* mysql.h */; };
+		95BBDB9015D7A25400F527A1 /* libDCECommon.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 95BBDB8F15D7A25400F527A1 /* libDCECommon.dylib */; };
+		95BBDBC715D7A46900F527A1 /* liblmce_datalog.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 95BBDBC615D7A46900F527A1 /* liblmce_datalog.dylib */; };
+/* End PBXBuildFile section */
+
+/* Begin PBXFileReference section */
+		95BBDB7115D7A05400F527A1 /* DataLogger_Plugin.dylib */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.dylib"; includeInIndex = 0; path = DataLogger_Plugin.dylib; sourceTree = BUILT_PRODUCTS_DIR; };
+		95BBDB8715D7A10400F527A1 /* Main.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = Main.cpp; path = ../../DataLogger_Plugin/Main.cpp; sourceTree = "<group>"; };
+		95BBDB8915D7A11800F527A1 /* DataLogger_Plugin.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = DataLogger_Plugin.cpp; path = ../../DataLogger_Plugin/DataLogger_Plugin.cpp; sourceTree = "<group>"; };
+		95BBDB8B15D7A13A00F527A1 /* DataLogger_PluginBase.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = DataLogger_PluginBase.cpp; path = ../../Gen_Devices/DataLogger_PluginBase.cpp; sourceTree = "<group>"; };
+		95BBDB8D15D7A20E00F527A1 /* mysql.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = mysql.h; path = ../mysql/include/mysql.h; sourceTree = "<group>"; };
+		95BBDB8F15D7A25400F527A1 /* libDCECommon.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libDCECommon.dylib; path = ../lib/libDCECommon.dylib; sourceTree = "<group>"; };
+		95BBDBC615D7A46900F527A1 /* liblmce_datalog.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = liblmce_datalog.dylib; path = ../lib/liblmce_datalog.dylib; sourceTree = "<group>"; };
+/* End PBXFileReference section */
+
+/* Begin PBXFrameworksBuildPhase section */
+		95BBDB6E15D7A05400F527A1 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				95BBDB9015D7A25400F527A1 /* libDCECommon.dylib in Frameworks */,
+				95BBDBC715D7A46900F527A1 /* liblmce_datalog.dylib in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXFrameworksBuildPhase section */
+
+/* Begin PBXGroup section */
+		95BBDB6615D7A05400F527A1 = {
+			isa = PBXGroup;
+			children = (
+				95BBDB8715D7A10400F527A1 /* Main.cpp */,
+				95BBDB8915D7A11800F527A1 /* DataLogger_Plugin.cpp */,
+				95BBDB8615D7A0D300F527A1 /* Includes */,
+				95BBDB8515D7A0D000F527A1 /* Libraries */,
+				95BBDB7215D7A05400F527A1 /* Products */,
+			);
+			sourceTree = "<group>";
+		};
+		95BBDB7215D7A05400F527A1 /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				95BBDB7115D7A05400F527A1 /* DataLogger_Plugin.dylib */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+		95BBDB8515D7A0D000F527A1 /* Libraries */ = {
+			isa = PBXGroup;
+			children = (
+				95BBDB8F15D7A25400F527A1 /* libDCECommon.dylib */,
+				95BBDBC615D7A46900F527A1 /* liblmce_datalog.dylib */,
+			);
+			name = Libraries;
+			sourceTree = "<group>";
+		};
+		95BBDB8615D7A0D300F527A1 /* Includes */ = {
+			isa = PBXGroup;
+			children = (
+				95BBDB8B15D7A13A00F527A1 /* DataLogger_PluginBase.cpp */,
+				95BBDB8D15D7A20E00F527A1 /* mysql.h */,
+			);
+			name = Includes;
+			sourceTree = "<group>";
+		};
+/* End PBXGroup section */
+
+/* Begin PBXHeadersBuildPhase section */
+		95BBDB6F15D7A05400F527A1 /* Headers */ = {
+			isa = PBXHeadersBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				95BBDB8E15D7A20E00F527A1 /* mysql.h in Headers */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXHeadersBuildPhase section */
+
+/* Begin PBXNativeTarget section */
+		95BBDB7015D7A05400F527A1 /* DataLogger_Plugin */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 95BBDB7E15D7A05400F527A1 /* Build configuration list for PBXNativeTarget "DataLogger_Plugin" */;
+			buildPhases = (
+				95BBDB6D15D7A05400F527A1 /* Sources */,
+				95BBDB6E15D7A05400F527A1 /* Frameworks */,
+				95BBDB6F15D7A05400F527A1 /* Headers */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = DataLogger_Plugin;
+			productName = DataLogger_Plugin;
+			productReference = 95BBDB7115D7A05400F527A1 /* DataLogger_Plugin.dylib */;
+			productType = "com.apple.product-type.library.dynamic";
+		};
+/* End PBXNativeTarget section */
+
+/* Begin PBXProject section */
+		95BBDB6815D7A05400F527A1 /* Project object */ = {
+			isa = PBXProject;
+			attributes = {
+				LastUpgradeCheck = 0420;
+			};
+			buildConfigurationList = 95BBDB6B15D7A05400F527A1 /* Build configuration list for PBXProject "DataLogger_Plugin" */;
+			compatibilityVersion = "Xcode 3.2";
+			developmentRegion = English;
+			hasScannedForEncodings = 0;
+			knownRegions = (
+				en,
+			);
+			mainGroup = 95BBDB6615D7A05400F527A1;
+			productRefGroup = 95BBDB7215D7A05400F527A1 /* Products */;
+			projectDirPath = "";
+			projectRoot = "";
+			targets = (
+				95BBDB7015D7A05400F527A1 /* DataLogger_Plugin */,
+			);
+		};
+/* End PBXProject section */
+
+/* Begin PBXSourcesBuildPhase section */
+		95BBDB6D15D7A05400F527A1 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				95BBDB8815D7A10400F527A1 /* Main.cpp in Sources */,
+				95BBDB8A15D7A11800F527A1 /* DataLogger_Plugin.cpp in Sources */,
+				95BBDB8C15D7A13A00F527A1 /* DataLogger_PluginBase.cpp in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXSourcesBuildPhase section */
+
+/* Begin XCBuildConfiguration section */
+		95BBDB7C15D7A05400F527A1 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				ARCHS = "$(ARCHS_STANDARD_64_BIT)";
+				CLANG_ENABLE_OBJC_ARC = YES;
+				COPY_PHASE_STRIP = NO;
+				GCC_C_LANGUAGE_STANDARD = gnu99;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_ENABLE_OBJC_EXCEPTIONS = YES;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"DEBUG=1",
+					"$(inherited)",
+				);
+				GCC_SYMBOLS_PRIVATE_EXTERN = NO;
+				GCC_VERSION = com.apple.compilers.llvm.clang.1_0;
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_MISSING_PROTOTYPES = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				MACOSX_DEPLOYMENT_TARGET = 10.7;
+				ONLY_ACTIVE_ARCH = YES;
+				SDKROOT = macosx;
+			};
+			name = Debug;
+		};
+		95BBDB7D15D7A05400F527A1 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				ARCHS = "$(ARCHS_STANDARD_64_BIT)";
+				CLANG_ENABLE_OBJC_ARC = YES;
+				COPY_PHASE_STRIP = YES;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				GCC_C_LANGUAGE_STANDARD = gnu99;
+				GCC_ENABLE_OBJC_EXCEPTIONS = YES;
+				GCC_VERSION = com.apple.compilers.llvm.clang.1_0;
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_MISSING_PROTOTYPES = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				MACOSX_DEPLOYMENT_TARGET = 10.7;
+				SDKROOT = macosx;
+			};
+			name = Release;
+		};
+		95BBDB7F15D7A05400F527A1 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CONFIGURATION_BUILD_DIR = ../bin;
+				HEADER_SEARCH_PATHS = (
+					../../DCE,
+					../..,
+				);
+				INSTALL_PATH = /usr/pluto/bin;
+				LIBRARY_SEARCH_PATHS = (
+					"$(inherited)",
+					"\"$(SRCROOT)/../lib\"",
+				);
+				PRODUCT_NAME = "$(TARGET_NAME)";
+			};
+			name = Debug;
+		};
+		95BBDB8015D7A05400F527A1 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CONFIGURATION_BUILD_DIR = ../bin;
+				HEADER_SEARCH_PATHS = (
+					../../DCE,
+					../..,
+				);
+				INSTALL_PATH = /usr/pluto/bin;
+				LIBRARY_SEARCH_PATHS = (
+					"$(inherited)",
+					"\"$(SRCROOT)/../lib\"",
+				);
+				PRODUCT_NAME = "$(TARGET_NAME)";
+			};
+			name = Release;
+		};
+/* End XCBuildConfiguration section */
+
+/* Begin XCConfigurationList section */
+		95BBDB6B15D7A05400F527A1 /* Build configuration list for PBXProject "DataLogger_Plugin" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				95BBDB7C15D7A05400F527A1 /* Debug */,
+				95BBDB7D15D7A05400F527A1 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		95BBDB7E15D7A05400F527A1 /* Build configuration list for PBXNativeTarget "DataLogger_Plugin" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				95BBDB7F15D7A05400F527A1 /* Debug */,
+				95BBDB8015D7A05400F527A1 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+/* End XCConfigurationList section */
+	};
+	rootObject = 95BBDB6815D7A05400F527A1 /* Project object */;
+}

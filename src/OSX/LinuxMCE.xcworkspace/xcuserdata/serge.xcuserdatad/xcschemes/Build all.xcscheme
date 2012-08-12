@@ -97,6 +97,34 @@
             buildForAnalyzing = "YES">
             <BuildableReference
                BuildableIdentifier = "primary"
+               BlueprintIdentifier = "95BBDB2415BF3E4800F527A1"
+               BuildableName = "liblmce_game.dylib"
+               BlueprintName = "liblmce_game"
+               ReferencedContainer = "container:liblmce_game.xcodeproj">
+            </BuildableReference>
+         </BuildActionEntry>
+         <BuildActionEntry
+            buildForTesting = "YES"
+            buildForRunning = "YES"
+            buildForProfiling = "YES"
+            buildForArchiving = "YES"
+            buildForAnalyzing = "YES">
+            <BuildableReference
+               BuildableIdentifier = "primary"
+               BlueprintIdentifier = "95BBDB9B15D7A2EB00F527A1"
+               BuildableName = "liblmce_datalog.dylib"
+               BlueprintName = "liblmce_datalog"
+               ReferencedContainer = "container:libraries/liblmce_datalog.xcodeproj">
+            </BuildableReference>
+         </BuildActionEntry>
+         <BuildActionEntry
+            buildForTesting = "YES"
+            buildForRunning = "YES"
+            buildForProfiling = "YES"
+            buildForArchiving = "YES"
+            buildForAnalyzing = "YES">
+            <BuildableReference
+               BuildableIdentifier = "primary"
                BlueprintIdentifier = "95ABFE1F15AF5FFA0079029F"
                BuildableName = "File_Grids_Plugin.dylib"
                BlueprintName = "File_Grids_Plugin"
@@ -223,10 +251,66 @@
             buildForAnalyzing = "YES">
             <BuildableReference
                BuildableIdentifier = "primary"
+               BlueprintIdentifier = "95F78A8D15BF30A100FB8F5B"
+               BuildableName = "Xine_Plugin.dylib"
+               BlueprintName = "Xine_Plugin"
+               ReferencedContainer = "container:plugins/Xine_Plugin.xcodeproj">
+            </BuildableReference>
+         </BuildActionEntry>
+         <BuildActionEntry
+            buildForTesting = "YES"
+            buildForRunning = "YES"
+            buildForProfiling = "YES"
+            buildForArchiving = "YES"
+            buildForAnalyzing = "YES">
+            <BuildableReference
+               BuildableIdentifier = "primary"
+               BlueprintIdentifier = "95F78ABC15BF339800FB8F5B"
+               BuildableName = "VDRPlugin.dylib"
+               BlueprintName = "VDRPlugin"
+               ReferencedContainer = "container:plugins/VDRPlugin.xcodeproj">
+            </BuildableReference>
+         </BuildActionEntry>
+         <BuildActionEntry
+            buildForTesting = "YES"
+            buildForRunning = "YES"
+            buildForProfiling = "YES"
+            buildForArchiving = "YES"
+            buildForAnalyzing = "YES">
+            <BuildableReference
+               BuildableIdentifier = "primary"
+               BlueprintIdentifier = "95BBDBD215D7A62800F527A1"
+               BuildableName = "Picture_Plugin.dylib"
+               BlueprintName = "Picture_Plugin"
+               ReferencedContainer = "container:plugins/Picture_Plugin.xcodeproj">
+            </BuildableReference>
+         </BuildActionEntry>
+         <BuildActionEntry
+            buildForTesting = "YES"
+            buildForRunning = "YES"
+            buildForProfiling = "YES"
+            buildForArchiving = "YES"
+            buildForAnalyzing = "YES">
+            <BuildableReference
+               BuildableIdentifier = "primary"
                BlueprintIdentifier = "95F78A1215B7673500FB8F5B"
                BuildableName = "Plug_And_Play_Plugin.dylib"
                BlueprintName = "Plug_And_Play_Plugin"
                ReferencedContainer = "container:plugins/Plug_And_Play_Plugin.xcodeproj">
+            </BuildableReference>
+         </BuildActionEntry>
+         <BuildActionEntry
+            buildForTesting = "YES"
+            buildForRunning = "YES"
+            buildForProfiling = "YES"
+            buildForArchiving = "YES"
+            buildForAnalyzing = "YES">
+            <BuildableReference
+               BuildableIdentifier = "primary"
+               BlueprintIdentifier = "95BBDB7015D7A05400F527A1"
+               BuildableName = "DataLogger_Plugin.dylib"
+               BlueprintName = "DataLogger_Plugin"
+               ReferencedContainer = "container:plugins/DataLogger_Plugin.xcodeproj">
             </BuildableReference>
          </BuildActionEntry>
          <BuildActionEntry

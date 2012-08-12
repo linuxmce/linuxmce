@@ -1,0 +1,267 @@
+// !$*UTF8*$!
+{
+	archiveVersion = 1;
+	classes = {
+	};
+	objectVersion = 46;
+	objects = {
+
+/* Begin PBXBuildFile section */
+		95BBDB0115BF3B1100F527A1 /* Game_PlugInBase.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 95BBDB0015BF3B1100F527A1 /* Game_PlugInBase.cpp */; };
+		95BBDB0515BF3B9200F527A1 /* Main.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 95BBDB0415BF3B9200F527A1 /* Main.cpp */; };
+		95BBDB0715BF3B9E00F527A1 /* Game_PlugIn.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 95BBDB0615BF3B9E00F527A1 /* Game_PlugIn.cpp */; };
+		95BBDB0A15BF3BB300F527A1 /* GameMediaStream.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 95BBDB0815BF3BB300F527A1 /* GameMediaStream.cpp */; };
+		95BBDB0B15BF3BB300F527A1 /* GAMEROM.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 95BBDB0915BF3BB300F527A1 /* GAMEROM.cpp */; };
+		95BBDB0D15BF3BC500F527A1 /* mysql.h in Headers */ = {isa = PBXBuildFile; fileRef = 95BBDB0C15BF3BC500F527A1 /* mysql.h */; };
+		95BBDB0F15BF3BEF00F527A1 /* libDCECommon.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 95BBDB0E15BF3BEF00F527A1 /* libDCECommon.dylib */; };
+		95BBDB1115BF3C4600F527A1 /* Media_Plugin.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 95BBDB1015BF3C4600F527A1 /* Media_Plugin.dylib */; };
+		95BBDB6315BF3FB400F527A1 /* liblmce_game.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 95BBDB6215BF3FB400F527A1 /* liblmce_game.dylib */; };
+/* End PBXBuildFile section */
+
+/* Begin PBXFileReference section */
+		95BBDB0015BF3B1100F527A1 /* Game_PlugInBase.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = Game_PlugInBase.cpp; path = ../../Gen_Devices/Game_PlugInBase.cpp; sourceTree = "<group>"; };
+		95BBDB0415BF3B9200F527A1 /* Main.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = Main.cpp; path = ../../Game_PlugIn/Main.cpp; sourceTree = "<group>"; };
+		95BBDB0615BF3B9E00F527A1 /* Game_PlugIn.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = Game_PlugIn.cpp; path = ../../Game_PlugIn/Game_PlugIn.cpp; sourceTree = "<group>"; };
+		95BBDB0815BF3BB300F527A1 /* GameMediaStream.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = GameMediaStream.cpp; path = ../../Game_PlugIn/GameMediaStream.cpp; sourceTree = "<group>"; };
+		95BBDB0915BF3BB300F527A1 /* GAMEROM.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = GAMEROM.cpp; path = ../../Game_PlugIn/GAMEROM.cpp; sourceTree = "<group>"; };
+		95BBDB0C15BF3BC500F527A1 /* mysql.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = mysql.h; path = ../mysql/include/mysql.h; sourceTree = "<group>"; };
+		95BBDB0E15BF3BEF00F527A1 /* libDCECommon.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libDCECommon.dylib; path = ../lib/libDCECommon.dylib; sourceTree = "<group>"; };
+		95BBDB1015BF3C4600F527A1 /* Media_Plugin.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = Media_Plugin.dylib; path = ../bin/Media_Plugin.dylib; sourceTree = "<group>"; };
+		95BBDB6215BF3FB400F527A1 /* liblmce_game.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = liblmce_game.dylib; path = ../lib/liblmce_game.dylib; sourceTree = "<group>"; };
+		95F78AD815BF33B100FB8F5B /* Game_PlugIn.dylib */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.dylib"; includeInIndex = 0; path = Game_PlugIn.dylib; sourceTree = BUILT_PRODUCTS_DIR; };
+/* End PBXFileReference section */
+
+/* Begin PBXFrameworksBuildPhase section */
+		95F78AD515BF33B100FB8F5B /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				95BBDB0F15BF3BEF00F527A1 /* libDCECommon.dylib in Frameworks */,
+				95BBDB1115BF3C4600F527A1 /* Media_Plugin.dylib in Frameworks */,
+				95BBDB6315BF3FB400F527A1 /* liblmce_game.dylib in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXFrameworksBuildPhase section */
+
+/* Begin PBXGroup section */
+		95BBDAFC15BF3ADA00F527A1 /* Libraries */ = {
+			isa = PBXGroup;
+			children = (
+				95BBDB0E15BF3BEF00F527A1 /* libDCECommon.dylib */,
+				95BBDB1015BF3C4600F527A1 /* Media_Plugin.dylib */,
+				95BBDB6215BF3FB400F527A1 /* liblmce_game.dylib */,
+			);
+			name = Libraries;
+			sourceTree = "<group>";
+		};
+		95BBDAFD15BF3ADE00F527A1 /* Includes */ = {
+			isa = PBXGroup;
+			children = (
+				95BBDB0C15BF3BC500F527A1 /* mysql.h */,
+				95BBDB0015BF3B1100F527A1 /* Game_PlugInBase.cpp */,
+				95BBDB0815BF3BB300F527A1 /* GameMediaStream.cpp */,
+				95BBDB0915BF3BB300F527A1 /* GAMEROM.cpp */,
+			);
+			name = Includes;
+			sourceTree = "<group>";
+		};
+		95F78ACD15BF33B100FB8F5B = {
+			isa = PBXGroup;
+			children = (
+				95BBDB0415BF3B9200F527A1 /* Main.cpp */,
+				95BBDB0615BF3B9E00F527A1 /* Game_PlugIn.cpp */,
+				95BBDAFD15BF3ADE00F527A1 /* Includes */,
+				95BBDAFC15BF3ADA00F527A1 /* Libraries */,
+				95F78AD915BF33B100FB8F5B /* Products */,
+			);
+			sourceTree = "<group>";
+		};
+		95F78AD915BF33B100FB8F5B /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				95F78AD815BF33B100FB8F5B /* Game_PlugIn.dylib */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+/* End PBXGroup section */
+
+/* Begin PBXHeadersBuildPhase section */
+		95F78AD615BF33B100FB8F5B /* Headers */ = {
+			isa = PBXHeadersBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				95BBDB0D15BF3BC500F527A1 /* mysql.h in Headers */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXHeadersBuildPhase section */
+
+/* Begin PBXNativeTarget section */
+		95F78AD715BF33B100FB8F5B /* Game_PlugIn */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 95F78AE515BF33B100FB8F5B /* Build configuration list for PBXNativeTarget "Game_PlugIn" */;
+			buildPhases = (
+				95F78AD415BF33B100FB8F5B /* Sources */,
+				95F78AD515BF33B100FB8F5B /* Frameworks */,
+				95F78AD615BF33B100FB8F5B /* Headers */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = Game_PlugIn;
+			productName = Game_PlugIn;
+			productReference = 95F78AD815BF33B100FB8F5B /* Game_PlugIn.dylib */;
+			productType = "com.apple.product-type.library.dynamic";
+		};
+/* End PBXNativeTarget section */
+
+/* Begin PBXProject section */
+		95F78ACF15BF33B100FB8F5B /* Project object */ = {
+			isa = PBXProject;
+			attributes = {
+				LastUpgradeCheck = 0420;
+			};
+			buildConfigurationList = 95F78AD215BF33B100FB8F5B /* Build configuration list for PBXProject "Game_PlugIn" */;
+			compatibilityVersion = "Xcode 3.2";
+			developmentRegion = English;
+			hasScannedForEncodings = 0;
+			knownRegions = (
+				en,
+			);
+			mainGroup = 95F78ACD15BF33B100FB8F5B;
+			productRefGroup = 95F78AD915BF33B100FB8F5B /* Products */;
+			projectDirPath = "";
+			projectRoot = "";
+			targets = (
+				95F78AD715BF33B100FB8F5B /* Game_PlugIn */,
+			);
+		};
+/* End PBXProject section */
+
+/* Begin PBXSourcesBuildPhase section */
+		95F78AD415BF33B100FB8F5B /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				95BBDB0115BF3B1100F527A1 /* Game_PlugInBase.cpp in Sources */,
+				95BBDB0515BF3B9200F527A1 /* Main.cpp in Sources */,
+				95BBDB0715BF3B9E00F527A1 /* Game_PlugIn.cpp in Sources */,
+				95BBDB0A15BF3BB300F527A1 /* GameMediaStream.cpp in Sources */,
+				95BBDB0B15BF3BB300F527A1 /* GAMEROM.cpp in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXSourcesBuildPhase section */
+
+/* Begin XCBuildConfiguration section */
+		95F78AE315BF33B100FB8F5B /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				ARCHS = "$(ARCHS_STANDARD_64_BIT)";
+				CLANG_ENABLE_OBJC_ARC = YES;
+				COPY_PHASE_STRIP = NO;
+				GCC_C_LANGUAGE_STANDARD = gnu99;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_ENABLE_OBJC_EXCEPTIONS = YES;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"DEBUG=1",
+					"$(inherited)",
+				);
+				GCC_SYMBOLS_PRIVATE_EXTERN = NO;
+				GCC_VERSION = com.apple.compilers.llvm.clang.1_0;
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_MISSING_PROTOTYPES = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				MACOSX_DEPLOYMENT_TARGET = 10.7;
+				ONLY_ACTIVE_ARCH = YES;
+				SDKROOT = macosx;
+			};
+			name = Debug;
+		};
+		95F78AE415BF33B100FB8F5B /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				ARCHS = "$(ARCHS_STANDARD_64_BIT)";
+				CLANG_ENABLE_OBJC_ARC = YES;
+				COPY_PHASE_STRIP = YES;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				GCC_C_LANGUAGE_STANDARD = gnu99;
+				GCC_ENABLE_OBJC_EXCEPTIONS = YES;
+				GCC_VERSION = com.apple.compilers.llvm.clang.1_0;
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_MISSING_PROTOTYPES = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				MACOSX_DEPLOYMENT_TARGET = 10.7;
+				SDKROOT = macosx;
+			};
+			name = Release;
+		};
+		95F78AE615BF33B100FB8F5B /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CONFIGURATION_BUILD_DIR = ../bin;
+				HEADER_SEARCH_PATHS = (
+					../../DCE,
+					../..,
+				);
+				INSTALL_PATH = /usr/pluto/bin;
+				LIBRARY_SEARCH_PATHS = (
+					"$(inherited)",
+					"\"$(SRCROOT)/../lib\"",
+					"\"$(SRCROOT)/../bin\"",
+				);
+				PRODUCT_NAME = "$(TARGET_NAME)";
+			};
+			name = Debug;
+		};
+		95F78AE715BF33B100FB8F5B /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CONFIGURATION_BUILD_DIR = ../bin;
+				HEADER_SEARCH_PATHS = (
+					../../DCE,
+					../..,
+				);
+				INSTALL_PATH = /usr/pluto/bin;
+				LIBRARY_SEARCH_PATHS = (
+					"$(inherited)",
+					"\"$(SRCROOT)/../lib\"",
+					"\"$(SRCROOT)/../bin\"",
+				);
+				PRODUCT_NAME = "$(TARGET_NAME)";
+			};
+			name = Release;
+		};
+/* End XCBuildConfiguration section */
+
+/* Begin XCConfigurationList section */
+		95F78AD215BF33B100FB8F5B /* Build configuration list for PBXProject "Game_PlugIn" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				95F78AE315BF33B100FB8F5B /* Debug */,
+				95F78AE415BF33B100FB8F5B /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		95F78AE515BF33B100FB8F5B /* Build configuration list for PBXNativeTarget "Game_PlugIn" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				95F78AE615BF33B100FB8F5B /* Debug */,
+				95F78AE715BF33B100FB8F5B /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+/* End XCConfigurationList section */
+	};
+	rootObject = 95F78ACF15BF33B100FB8F5B /* Project object */;
+}

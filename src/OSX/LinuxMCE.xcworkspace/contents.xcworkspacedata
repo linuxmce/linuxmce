@@ -30,6 +30,9 @@
          location = "group:plugins/Datagrid_Plugin.xcodeproj">
       </FileRef>
       <FileRef
+         location = "group:plugins/DataLogger_Plugin.xcodeproj">
+      </FileRef>
+      <FileRef
          location = "group:plugins/Event_Plugin.xcodeproj">
       </FileRef>
       <FileRef
@@ -48,6 +51,9 @@
          location = "group:plugins/Orbiter_Plugin.xcodeproj">
       </FileRef>
       <FileRef
+         location = "group:plugins/Picture_Plugin.xcodeproj">
+      </FileRef>
+      <FileRef
          location = "group:plugins/Plug_And_Play_Plugin.xcodeproj">
       </FileRef>
       <FileRef
@@ -55,6 +61,15 @@
       </FileRef>
       <FileRef
          location = "group:plugins/Telecom_Plugin.xcodeproj">
+      </FileRef>
+      <FileRef
+         location = "group:plugins/Xine_Plugin.xcodeproj">
+      </FileRef>
+      <FileRef
+         location = "group:plugins/VDRPlugin.xcodeproj">
+      </FileRef>
+      <FileRef
+         location = "group:plugins/Game_PlugIn.xcodeproj">
       </FileRef>
    </Group>
    <Group
@@ -70,6 +85,9 @@
          location = "group:libpluto_main.xcodeproj">
       </FileRef>
       <FileRef
+         location = "group:libraries/liblmce_datalog.xcodeproj">
+      </FileRef>
+      <FileRef
          location = "group:libpluto_telecom.xcodeproj">
       </FileRef>
       <FileRef
@@ -77,6 +95,9 @@
       </FileRef>
       <FileRef
          location = "group:libpluto_media.xcodeproj">
+      </FileRef>
+      <FileRef
+         location = "group:liblmce_game.xcodeproj">
       </FileRef>
    </Group>
 </Workspace>

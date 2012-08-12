@@ -1,0 +1,295 @@
+// !$*UTF8*$!
+{
+	archiveVersion = 1;
+	classes = {
+	};
+	objectVersion = 46;
+	objects = {
+
+/* Begin PBXBuildFile section */
+		95BBDB4315BF3ED100F527A1 /* Database_lmce_game.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 95BBDB4215BF3ED100F527A1 /* Database_lmce_game.cpp */; };
+		95BBDB4515BF3F1A00F527A1 /* TableRow.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 95BBDB4415BF3F1A00F527A1 /* TableRow.cpp */; };
+		95BBDB4715BF3F2500F527A1 /* mysql.h in Headers */ = {isa = PBXBuildFile; fileRef = 95BBDB4615BF3F2500F527A1 /* mysql.h */; };
+		95BBDB4A15BF3F4500F527A1 /* libDCECommon.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 95BBDB4815BF3F4500F527A1 /* libDCECommon.dylib */; };
+		95BBDB4B15BF3F4500F527A1 /* libmysqlclient.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 95BBDB4915BF3F4500F527A1 /* libmysqlclient.dylib */; };
+		95BBDB5715BF3F6400F527A1 /* Table_GameSystem.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 95BBDB4C15BF3F6400F527A1 /* Table_GameSystem.cpp */; };
+		95BBDB5815BF3F6400F527A1 /* Table_psc_game_batdet.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 95BBDB4D15BF3F6400F527A1 /* Table_psc_game_batdet.cpp */; };
+		95BBDB5915BF3F6400F527A1 /* Table_psc_game_bathdr.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 95BBDB4E15BF3F6400F527A1 /* Table_psc_game_bathdr.cpp */; };
+		95BBDB5A15BF3F6400F527A1 /* Table_psc_game_batuser.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 95BBDB4F15BF3F6400F527A1 /* Table_psc_game_batuser.cpp */; };
+		95BBDB5B15BF3F6400F527A1 /* Table_psc_game_repset.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 95BBDB5015BF3F6400F527A1 /* Table_psc_game_repset.cpp */; };
+		95BBDB5C15BF3F6400F527A1 /* Table_psc_game_schema.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 95BBDB5115BF3F6400F527A1 /* Table_psc_game_schema.cpp */; };
+		95BBDB5D15BF3F6400F527A1 /* Table_psc_game_tables.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 95BBDB5215BF3F6400F527A1 /* Table_psc_game_tables.cpp */; };
+		95BBDB5E15BF3F6400F527A1 /* Table_Rom_RomAttribute.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 95BBDB5315BF3F6400F527A1 /* Table_Rom_RomAttribute.cpp */; };
+		95BBDB5F15BF3F6400F527A1 /* Table_Rom.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 95BBDB5415BF3F6400F527A1 /* Table_Rom.cpp */; };
+		95BBDB6015BF3F6400F527A1 /* Table_RomAttribute.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 95BBDB5515BF3F6400F527A1 /* Table_RomAttribute.cpp */; };
+		95BBDB6115BF3F6400F527A1 /* Table_RomAttributeType.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 95BBDB5615BF3F6400F527A1 /* Table_RomAttributeType.cpp */; };
+/* End PBXBuildFile section */
+
+/* Begin PBXFileReference section */
+		95BBDB2515BF3E4800F527A1 /* liblmce_game.dylib */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.dylib"; includeInIndex = 0; path = liblmce_game.dylib; sourceTree = BUILT_PRODUCTS_DIR; };
+		95BBDB4215BF3ED100F527A1 /* Database_lmce_game.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = Database_lmce_game.cpp; path = ../lmce_game/Database_lmce_game.cpp; sourceTree = "<group>"; };
+		95BBDB4415BF3F1A00F527A1 /* TableRow.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = TableRow.cpp; path = ../lmce_game/TableRow.cpp; sourceTree = "<group>"; };
+		95BBDB4615BF3F2500F527A1 /* mysql.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = mysql.h; path = mysql/include/mysql.h; sourceTree = "<group>"; };
+		95BBDB4815BF3F4500F527A1 /* libDCECommon.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libDCECommon.dylib; path = lib/libDCECommon.dylib; sourceTree = "<group>"; };
+		95BBDB4915BF3F4500F527A1 /* libmysqlclient.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libmysqlclient.dylib; path = mysql/lib/libmysqlclient.dylib; sourceTree = "<group>"; };
+		95BBDB4C15BF3F6400F527A1 /* Table_GameSystem.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = Table_GameSystem.cpp; path = ../lmce_game/Table_GameSystem.cpp; sourceTree = "<group>"; };
+		95BBDB4D15BF3F6400F527A1 /* Table_psc_game_batdet.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = Table_psc_game_batdet.cpp; path = ../lmce_game/Table_psc_game_batdet.cpp; sourceTree = "<group>"; };
+		95BBDB4E15BF3F6400F527A1 /* Table_psc_game_bathdr.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = Table_psc_game_bathdr.cpp; path = ../lmce_game/Table_psc_game_bathdr.cpp; sourceTree = "<group>"; };
+		95BBDB4F15BF3F6400F527A1 /* Table_psc_game_batuser.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = Table_psc_game_batuser.cpp; path = ../lmce_game/Table_psc_game_batuser.cpp; sourceTree = "<group>"; };
+		95BBDB5015BF3F6400F527A1 /* Table_psc_game_repset.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = Table_psc_game_repset.cpp; path = ../lmce_game/Table_psc_game_repset.cpp; sourceTree = "<group>"; };
+		95BBDB5115BF3F6400F527A1 /* Table_psc_game_schema.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = Table_psc_game_schema.cpp; path = ../lmce_game/Table_psc_game_schema.cpp; sourceTree = "<group>"; };
+		95BBDB5215BF3F6400F527A1 /* Table_psc_game_tables.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = Table_psc_game_tables.cpp; path = ../lmce_game/Table_psc_game_tables.cpp; sourceTree = "<group>"; };
+		95BBDB5315BF3F6400F527A1 /* Table_Rom_RomAttribute.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = Table_Rom_RomAttribute.cpp; path = ../lmce_game/Table_Rom_RomAttribute.cpp; sourceTree = "<group>"; };
+		95BBDB5415BF3F6400F527A1 /* Table_Rom.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = Table_Rom.cpp; path = ../lmce_game/Table_Rom.cpp; sourceTree = "<group>"; };
+		95BBDB5515BF3F6400F527A1 /* Table_RomAttribute.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = Table_RomAttribute.cpp; path = ../lmce_game/Table_RomAttribute.cpp; sourceTree = "<group>"; };
+		95BBDB5615BF3F6400F527A1 /* Table_RomAttributeType.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = Table_RomAttributeType.cpp; path = ../lmce_game/Table_RomAttributeType.cpp; sourceTree = "<group>"; };
+/* End PBXFileReference section */
+
+/* Begin PBXFrameworksBuildPhase section */
+		95BBDB2215BF3E4800F527A1 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				95BBDB4A15BF3F4500F527A1 /* libDCECommon.dylib in Frameworks */,
+				95BBDB4B15BF3F4500F527A1 /* libmysqlclient.dylib in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXFrameworksBuildPhase section */
+
+/* Begin PBXGroup section */
+		95BBDB1A15BF3E4700F527A1 = {
+			isa = PBXGroup;
+			children = (
+				95BBDB4215BF3ED100F527A1 /* Database_lmce_game.cpp */,
+				95BBDB4015BF3EB000F527A1 /* Includes */,
+				95BBDB4115BF3EB700F527A1 /* Libraries */,
+				95BBDB2615BF3E4800F527A1 /* Products */,
+			);
+			sourceTree = "<group>";
+		};
+		95BBDB2615BF3E4800F527A1 /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				95BBDB2515BF3E4800F527A1 /* liblmce_game.dylib */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+		95BBDB4015BF3EB000F527A1 /* Includes */ = {
+			isa = PBXGroup;
+			children = (
+				95BBDB4415BF3F1A00F527A1 /* TableRow.cpp */,
+				95BBDB4615BF3F2500F527A1 /* mysql.h */,
+				95BBDB4C15BF3F6400F527A1 /* Table_GameSystem.cpp */,
+				95BBDB4D15BF3F6400F527A1 /* Table_psc_game_batdet.cpp */,
+				95BBDB4E15BF3F6400F527A1 /* Table_psc_game_bathdr.cpp */,
+				95BBDB4F15BF3F6400F527A1 /* Table_psc_game_batuser.cpp */,
+				95BBDB5015BF3F6400F527A1 /* Table_psc_game_repset.cpp */,
+				95BBDB5115BF3F6400F527A1 /* Table_psc_game_schema.cpp */,
+				95BBDB5215BF3F6400F527A1 /* Table_psc_game_tables.cpp */,
+				95BBDB5315BF3F6400F527A1 /* Table_Rom_RomAttribute.cpp */,
+				95BBDB5415BF3F6400F527A1 /* Table_Rom.cpp */,
+				95BBDB5515BF3F6400F527A1 /* Table_RomAttribute.cpp */,
+				95BBDB5615BF3F6400F527A1 /* Table_RomAttributeType.cpp */,
+			);
+			name = Includes;
+			sourceTree = "<group>";
+		};
+		95BBDB4115BF3EB700F527A1 /* Libraries */ = {
+			isa = PBXGroup;
+			children = (
+				95BBDB4815BF3F4500F527A1 /* libDCECommon.dylib */,
+				95BBDB4915BF3F4500F527A1 /* libmysqlclient.dylib */,
+			);
+			name = Libraries;
+			sourceTree = "<group>";
+		};
+/* End PBXGroup section */
+
+/* Begin PBXHeadersBuildPhase section */
+		95BBDB2315BF3E4800F527A1 /* Headers */ = {
+			isa = PBXHeadersBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				95BBDB4715BF3F2500F527A1 /* mysql.h in Headers */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXHeadersBuildPhase section */
+
+/* Begin PBXNativeTarget section */
+		95BBDB2415BF3E4800F527A1 /* liblmce_game */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 95BBDB3215BF3E4800F527A1 /* Build configuration list for PBXNativeTarget "liblmce_game" */;
+			buildPhases = (
+				95BBDB2115BF3E4800F527A1 /* Sources */,
+				95BBDB2215BF3E4800F527A1 /* Frameworks */,
+				95BBDB2315BF3E4800F527A1 /* Headers */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = liblmce_game;
+			productName = liblmce_game;
+			productReference = 95BBDB2515BF3E4800F527A1 /* liblmce_game.dylib */;
+			productType = "com.apple.product-type.library.dynamic";
+		};
+/* End PBXNativeTarget section */
+
+/* Begin PBXProject section */
+		95BBDB1C15BF3E4700F527A1 /* Project object */ = {
+			isa = PBXProject;
+			attributes = {
+				LastUpgradeCheck = 0420;
+			};
+			buildConfigurationList = 95BBDB1F15BF3E4700F527A1 /* Build configuration list for PBXProject "liblmce_game" */;
+			compatibilityVersion = "Xcode 3.2";
+			developmentRegion = English;
+			hasScannedForEncodings = 0;
+			knownRegions = (
+				en,
+			);
+			mainGroup = 95BBDB1A15BF3E4700F527A1;
+			productRefGroup = 95BBDB2615BF3E4800F527A1 /* Products */;
+			projectDirPath = "";
+			projectRoot = "";
+			targets = (
+				95BBDB2415BF3E4800F527A1 /* liblmce_game */,
+			);
+		};
+/* End PBXProject section */
+
+/* Begin PBXSourcesBuildPhase section */
+		95BBDB2115BF3E4800F527A1 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				95BBDB4315BF3ED100F527A1 /* Database_lmce_game.cpp in Sources */,
+				95BBDB4515BF3F1A00F527A1 /* TableRow.cpp in Sources */,
+				95BBDB5715BF3F6400F527A1 /* Table_GameSystem.cpp in Sources */,
+				95BBDB5815BF3F6400F527A1 /* Table_psc_game_batdet.cpp in Sources */,
+				95BBDB5915BF3F6400F527A1 /* Table_psc_game_bathdr.cpp in Sources */,
+				95BBDB5A15BF3F6400F527A1 /* Table_psc_game_batuser.cpp in Sources */,
+				95BBDB5B15BF3F6400F527A1 /* Table_psc_game_repset.cpp in Sources */,
+				95BBDB5C15BF3F6400F527A1 /* Table_psc_game_schema.cpp in Sources */,
+				95BBDB5D15BF3F6400F527A1 /* Table_psc_game_tables.cpp in Sources */,
+				95BBDB5E15BF3F6400F527A1 /* Table_Rom_RomAttribute.cpp in Sources */,
+				95BBDB5F15BF3F6400F527A1 /* Table_Rom.cpp in Sources */,
+				95BBDB6015BF3F6400F527A1 /* Table_RomAttribute.cpp in Sources */,
+				95BBDB6115BF3F6400F527A1 /* Table_RomAttributeType.cpp in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXSourcesBuildPhase section */
+
+/* Begin XCBuildConfiguration section */
+		95BBDB3015BF3E4800F527A1 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				ARCHS = "$(ARCHS_STANDARD_64_BIT)";
+				CLANG_ENABLE_OBJC_ARC = YES;
+				COPY_PHASE_STRIP = NO;
+				GCC_C_LANGUAGE_STANDARD = gnu99;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_ENABLE_OBJC_EXCEPTIONS = YES;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"DEBUG=1",
+					"$(inherited)",
+				);
+				GCC_SYMBOLS_PRIVATE_EXTERN = NO;
+				GCC_VERSION = com.apple.compilers.llvm.clang.1_0;
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_MISSING_PROTOTYPES = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				MACOSX_DEPLOYMENT_TARGET = 10.7;
+				ONLY_ACTIVE_ARCH = YES;
+				SDKROOT = macosx;
+			};
+			name = Debug;
+		};
+		95BBDB3115BF3E4800F527A1 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				ARCHS = "$(ARCHS_STANDARD_64_BIT)";
+				CLANG_ENABLE_OBJC_ARC = YES;
+				COPY_PHASE_STRIP = YES;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				GCC_C_LANGUAGE_STANDARD = gnu99;
+				GCC_ENABLE_OBJC_EXCEPTIONS = YES;
+				GCC_VERSION = com.apple.compilers.llvm.clang.1_0;
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_MISSING_PROTOTYPES = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				MACOSX_DEPLOYMENT_TARGET = 10.7;
+				SDKROOT = macosx;
+			};
+			name = Release;
+		};
+		95BBDB3315BF3E4800F527A1 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CONFIGURATION_BUILD_DIR = lib;
+				HEADER_SEARCH_PATHS = (
+					../DCE,
+					..,
+				);
+				INSTALL_PATH = /usr/pluto/lib;
+				LIBRARY_SEARCH_PATHS = (
+					"$(inherited)",
+					"\"$(SRCROOT)/lib\"",
+					"\"$(SRCROOT)/mysql/lib\"",
+				);
+				PRODUCT_NAME = "$(TARGET_NAME)";
+			};
+			name = Debug;
+		};
+		95BBDB3415BF3E4800F527A1 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CONFIGURATION_BUILD_DIR = lib;
+				HEADER_SEARCH_PATHS = (
+					../DCE,
+					..,
+				);
+				INSTALL_PATH = /usr/pluto/lib;
+				LIBRARY_SEARCH_PATHS = (
+					"$(inherited)",
+					"\"$(SRCROOT)/lib\"",
+					"\"$(SRCROOT)/mysql/lib\"",
+				);
+				PRODUCT_NAME = "$(TARGET_NAME)";
+			};
+			name = Release;
+		};
+/* End XCBuildConfiguration section */
+
+/* Begin XCConfigurationList section */
+		95BBDB1F15BF3E4700F527A1 /* Build configuration list for PBXProject "liblmce_game" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				95BBDB3015BF3E4800F527A1 /* Debug */,
+				95BBDB3115BF3E4800F527A1 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		95BBDB3215BF3E4800F527A1 /* Build configuration list for PBXNativeTarget "liblmce_game" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				95BBDB3315BF3E4800F527A1 /* Debug */,
+				95BBDB3415BF3E4800F527A1 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+/* End XCConfigurationList section */
+	};
+	rootObject = 95BBDB1C15BF3E4700F527A1 /* Project object */;
+}

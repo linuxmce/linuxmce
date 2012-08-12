@@ -1,0 +1,259 @@
+// !$*UTF8*$!
+{
+	archiveVersion = 1;
+	classes = {
+	};
+	objectVersion = 46;
+	objects = {
+
+/* Begin PBXBuildFile section */
+		95BBDBB115D7A36500F527A1 /* Database_lmce_datalog.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 95BBDBB015D7A36500F527A1 /* Database_lmce_datalog.cpp */; };
+		95BBDBB415D7A39100F527A1 /* mysql.h in Headers */ = {isa = PBXBuildFile; fileRef = 95BBDBB315D7A39100F527A1 /* mysql.h */; };
+		95BBDBB615D7A39900F527A1 /* TableRow.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 95BBDBB515D7A39900F527A1 /* TableRow.cpp */; };
+		95BBDBB915D7A3B300F527A1 /* Table_Datapoints.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 95BBDBB715D7A3B300F527A1 /* Table_Datapoints.cpp */; };
+		95BBDBBA15D7A3B300F527A1 /* Table_Unit.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 95BBDBB815D7A3B300F527A1 /* Table_Unit.cpp */; };
+		95BBDBBE15D7A42B00F527A1 /* libDCECommon.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 95BBDBBC15D7A42B00F527A1 /* libDCECommon.dylib */; };
+		95BBDBBF15D7A42B00F527A1 /* libmysqlclient.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 95BBDBBD15D7A42B00F527A1 /* libmysqlclient.dylib */; };
+/* End PBXBuildFile section */
+
+/* Begin PBXFileReference section */
+		95BBDB9C15D7A2EB00F527A1 /* liblmce_datalog.dylib */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.dylib"; includeInIndex = 0; path = liblmce_datalog.dylib; sourceTree = BUILT_PRODUCTS_DIR; };
+		95BBDBB015D7A36500F527A1 /* Database_lmce_datalog.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = Database_lmce_datalog.cpp; path = ../../lmce_datalog/Database_lmce_datalog.cpp; sourceTree = "<group>"; };
+		95BBDBB315D7A39100F527A1 /* mysql.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = mysql.h; path = ../mysql/include/mysql.h; sourceTree = "<group>"; };
+		95BBDBB515D7A39900F527A1 /* TableRow.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = TableRow.cpp; path = ../../lmce_datalog/TableRow.cpp; sourceTree = "<group>"; };
+		95BBDBB715D7A3B300F527A1 /* Table_Datapoints.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = Table_Datapoints.cpp; path = ../../lmce_datalog/Table_Datapoints.cpp; sourceTree = "<group>"; };
+		95BBDBB815D7A3B300F527A1 /* Table_Unit.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = Table_Unit.cpp; path = ../../lmce_datalog/Table_Unit.cpp; sourceTree = "<group>"; };
+		95BBDBBC15D7A42B00F527A1 /* libDCECommon.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libDCECommon.dylib; path = ../lib/libDCECommon.dylib; sourceTree = "<group>"; };
+		95BBDBBD15D7A42B00F527A1 /* libmysqlclient.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libmysqlclient.dylib; path = ../mysql/lib/libmysqlclient.dylib; sourceTree = "<group>"; };
+/* End PBXFileReference section */
+
+/* Begin PBXFrameworksBuildPhase section */
+		95BBDB9915D7A2EB00F527A1 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				95BBDBBE15D7A42B00F527A1 /* libDCECommon.dylib in Frameworks */,
+				95BBDBBF15D7A42B00F527A1 /* libmysqlclient.dylib in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXFrameworksBuildPhase section */
+
+/* Begin PBXGroup section */
+		95BBDB9115D7A2EB00F527A1 = {
+			isa = PBXGroup;
+			children = (
+				95BBDBB015D7A36500F527A1 /* Database_lmce_datalog.cpp */,
+				95BBDBB215D7A37C00F527A1 /* Includes */,
+				95BBDBBB15D7A41600F527A1 /* Libraries */,
+				95BBDB9D15D7A2EB00F527A1 /* Products */,
+			);
+			sourceTree = "<group>";
+		};
+		95BBDB9D15D7A2EB00F527A1 /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				95BBDB9C15D7A2EB00F527A1 /* liblmce_datalog.dylib */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+		95BBDBB215D7A37C00F527A1 /* Includes */ = {
+			isa = PBXGroup;
+			children = (
+				95BBDBB315D7A39100F527A1 /* mysql.h */,
+				95BBDBB515D7A39900F527A1 /* TableRow.cpp */,
+				95BBDBB715D7A3B300F527A1 /* Table_Datapoints.cpp */,
+				95BBDBB815D7A3B300F527A1 /* Table_Unit.cpp */,
+			);
+			name = Includes;
+			sourceTree = "<group>";
+		};
+		95BBDBBB15D7A41600F527A1 /* Libraries */ = {
+			isa = PBXGroup;
+			children = (
+				95BBDBBC15D7A42B00F527A1 /* libDCECommon.dylib */,
+				95BBDBBD15D7A42B00F527A1 /* libmysqlclient.dylib */,
+			);
+			name = Libraries;
+			sourceTree = "<group>";
+		};
+/* End PBXGroup section */
+
+/* Begin PBXHeadersBuildPhase section */
+		95BBDB9A15D7A2EB00F527A1 /* Headers */ = {
+			isa = PBXHeadersBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				95BBDBB415D7A39100F527A1 /* mysql.h in Headers */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXHeadersBuildPhase section */
+
+/* Begin PBXNativeTarget section */
+		95BBDB9B15D7A2EB00F527A1 /* liblmce_datalog */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 95BBDBA915D7A2EB00F527A1 /* Build configuration list for PBXNativeTarget "liblmce_datalog" */;
+			buildPhases = (
+				95BBDB9815D7A2EB00F527A1 /* Sources */,
+				95BBDB9915D7A2EB00F527A1 /* Frameworks */,
+				95BBDB9A15D7A2EB00F527A1 /* Headers */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = liblmce_datalog;
+			productName = liblmce_datalog;
+			productReference = 95BBDB9C15D7A2EB00F527A1 /* liblmce_datalog.dylib */;
+			productType = "com.apple.product-type.library.dynamic";
+		};
+/* End PBXNativeTarget section */
+
+/* Begin PBXProject section */
+		95BBDB9315D7A2EB00F527A1 /* Project object */ = {
+			isa = PBXProject;
+			attributes = {
+				LastUpgradeCheck = 0420;
+			};
+			buildConfigurationList = 95BBDB9615D7A2EB00F527A1 /* Build configuration list for PBXProject "liblmce_datalog" */;
+			compatibilityVersion = "Xcode 3.2";
+			developmentRegion = English;
+			hasScannedForEncodings = 0;
+			knownRegions = (
+				en,
+			);
+			mainGroup = 95BBDB9115D7A2EB00F527A1;
+			productRefGroup = 95BBDB9D15D7A2EB00F527A1 /* Products */;
+			projectDirPath = "";
+			projectRoot = "";
+			targets = (
+				95BBDB9B15D7A2EB00F527A1 /* liblmce_datalog */,
+			);
+		};
+/* End PBXProject section */
+
+/* Begin PBXSourcesBuildPhase section */
+		95BBDB9815D7A2EB00F527A1 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				95BBDBB115D7A36500F527A1 /* Database_lmce_datalog.cpp in Sources */,
+				95BBDBB615D7A39900F527A1 /* TableRow.cpp in Sources */,
+				95BBDBB915D7A3B300F527A1 /* Table_Datapoints.cpp in Sources */,
+				95BBDBBA15D7A3B300F527A1 /* Table_Unit.cpp in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXSourcesBuildPhase section */
+
+/* Begin XCBuildConfiguration section */
+		95BBDBA715D7A2EB00F527A1 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				ARCHS = "$(ARCHS_STANDARD_64_BIT)";
+				CLANG_ENABLE_OBJC_ARC = YES;
+				COPY_PHASE_STRIP = NO;
+				GCC_C_LANGUAGE_STANDARD = gnu99;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_ENABLE_OBJC_EXCEPTIONS = YES;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"DEBUG=1",
+					"$(inherited)",
+				);
+				GCC_SYMBOLS_PRIVATE_EXTERN = NO;
+				GCC_VERSION = com.apple.compilers.llvm.clang.1_0;
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_MISSING_PROTOTYPES = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				MACOSX_DEPLOYMENT_TARGET = 10.7;
+				ONLY_ACTIVE_ARCH = YES;
+				SDKROOT = macosx;
+			};
+			name = Debug;
+		};
+		95BBDBA815D7A2EB00F527A1 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				ARCHS = "$(ARCHS_STANDARD_64_BIT)";
+				CLANG_ENABLE_OBJC_ARC = YES;
+				COPY_PHASE_STRIP = YES;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				GCC_C_LANGUAGE_STANDARD = gnu99;
+				GCC_ENABLE_OBJC_EXCEPTIONS = YES;
+				GCC_VERSION = com.apple.compilers.llvm.clang.1_0;
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_MISSING_PROTOTYPES = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				MACOSX_DEPLOYMENT_TARGET = 10.7;
+				SDKROOT = macosx;
+			};
+			name = Release;
+		};
+		95BBDBAA15D7A2EB00F527A1 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CONFIGURATION_BUILD_DIR = ../lib;
+				HEADER_SEARCH_PATHS = (
+					../../DCE,
+					../..,
+				);
+				INSTALL_PATH = /usr/pluto/lib;
+				LIBRARY_SEARCH_PATHS = (
+					"$(inherited)",
+					"\"$(SRCROOT)/../lib\"",
+					"\"$(SRCROOT)/../mysql/lib\"",
+				);
+				PRODUCT_NAME = "$(TARGET_NAME)";
+			};
+			name = Debug;
+		};
+		95BBDBAB15D7A2EB00F527A1 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CONFIGURATION_BUILD_DIR = ../lib;
+				HEADER_SEARCH_PATHS = (
+					../../DCE,
+					../..,
+				);
+				INSTALL_PATH = /usr/pluto/lib;
+				LIBRARY_SEARCH_PATHS = (
+					"$(inherited)",
+					"\"$(SRCROOT)/../lib\"",
+					"\"$(SRCROOT)/../mysql/lib\"",
+				);
+				PRODUCT_NAME = "$(TARGET_NAME)";
+			};
+			name = Release;
+		};
+/* End XCBuildConfiguration section */
+
+/* Begin XCConfigurationList section */
+		95BBDB9615D7A2EB00F527A1 /* Build configuration list for PBXProject "liblmce_datalog" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				95BBDBA715D7A2EB00F527A1 /* Debug */,
+				95BBDBA815D7A2EB00F527A1 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		95BBDBA915D7A2EB00F527A1 /* Build configuration list for PBXNativeTarget "liblmce_datalog" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				95BBDBAA15D7A2EB00F527A1 /* Debug */,
+				95BBDBAB15D7A2EB00F527A1 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+/* End XCConfigurationList section */
+	};
+	rootObject = 95BBDB9315D7A2EB00F527A1 /* Project object */;
+}
