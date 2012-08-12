@@ -49,6 +49,7 @@ class FileDetailsClass : public QObject
     Q_PROPERTY(QUrl screenshot READ getScreenShot WRITE setScreenshot NOTIFY imageChanged)
     Q_PROPERTY(QString filename READ getFilename WRITE setFilename NOTIFY fileNameChanged)
     Q_PROPERTY(QString path READ getPath WRITE setPath NOTIFY pathChanged)
+    Q_PROPERTY(QString qs_storageDevice READ getStorageDevice READ getStorageDevice NOTIFY storageDeviceChanged)
 
     Q_PROPERTY(QImage titleImage READ getTitleImage WRITE setTitleImage NOTIFY titleImageChanged)
    // Q_PROPERTY(QImage program READ getProgramImage WRITE setProgramImage NOTIFY objectChanged)
@@ -121,7 +122,13 @@ public:
     QString filename;
     QString path;
 
+    //storage device related
+    QString qs_storageDevice;
+    int storageDeviceNo;
+
+
 signals:
+    void storageDeviceChanged();
     void objectChanged();
     void pathChanged();
     void synopChanged();
@@ -172,6 +179,21 @@ signals:
 
 public slots:
     void clear();
+
+    void setStorageDevice(QString device) {
+        qs_storageDevice = device;
+        if(device=="-1")
+        {
+            storageDeviceNo=-1;
+        }
+        else
+        {
+            storageDeviceNo = qs_storageDevice.toInt();
+        }
+        emit storageDeviceChanged();
+    }
+
+    QString getStorageDevice() {return qs_storageDevice;}
 
 
 

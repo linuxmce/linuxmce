@@ -1353,6 +1353,7 @@ signals:
     void fd_synopChanged(QString s);
     void fd_imageUrlChanged(QUrl loc);
     void fd_pathChanged(QString path);
+    void fd_storageDeviceChanged(QString device);
     void fd_titleChanged(QString t);
     void fd_programChanged(QString p);
     void fd_mediaTitleChanged(QString s);

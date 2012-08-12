@@ -29,12 +29,6 @@ Rectangle {
         }
 
     }
-
-    Connections{
-        target:dcerouter
-        onDeviceIdChanged: console.log("Device Id changed to: "+dcerouter.m_dwPK_Device)
-    }
-
     color: "slategrey"
     signal setupStart(string x, string y)
     signal splashLoaded()

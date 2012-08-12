@@ -284,7 +284,13 @@ int main(int argc, char* argv[])
         bool glpresent = false;
 #endif
 
+        QThread *dceThread = new QThread;
+        qOrbiter *pqOrbiter = new qOrbiter(PK_Device, sRouter_IP,true,bLocalMode);
+        pqOrbiter->moveToThread(dceThread);
+
         orbiterWindow orbiterWin(PK_Device, sRouter_IP);
+        orbiterWin.mainView.rootContext()->setContextProperty("dcerouter", pqOrbiter); //dcecontext object
+
         gWeatherModel *theWeather= new gWeatherModel(new gWeatherItem);
 
         //qmlRegisterType<gWeatherModel>("GoogleWeather", 0,1,"GoogleWeather");
@@ -292,14 +298,10 @@ int main(int argc, char* argv[])
         int throwaway = qRegisterMetaType<myMap>("myMap");
 
         orbiterWin.setMessage("Setting up Lmce");
-        qorbiterManager  *w= new qorbiterManager(&orbiterWin.mainView);
 
+        qorbiterManager  *w= new qorbiterManager(&orbiterWin.mainView);
         AbstractImageProvider *modelimageprovider = new AbstractImageProvider(w);
         orbiterWin.mainView.engine()->addImageProvider("listprovider", modelimageprovider);
-
-        QThread *dceThread = new QThread;
-        qOrbiter *pqOrbiter = new qOrbiter(PK_Device, sRouter_IP,true,bLocalMode);
-        pqOrbiter->moveToThread(dceThread);
 
         QThread *epgThread = new QThread; //for playlists and epg of all types. only one will be active a given time inthe app
         //stored video playlist for managing any media that isnt live broacast essentially
@@ -322,7 +324,7 @@ int main(int argc, char* argv[])
         TimeCodeManager *timecode = new TimeCodeManager();
         orbiterWin.mainView.rootContext()->setContextProperty("dceTimecode", timecode);
 
-        orbiterWin.mainView.rootContext()->setContextProperty("dcerouter", pqOrbiter); //dcecontext object
+
         orbiterWin.mainView.rootContext()->setContextProperty("dataModel", mediaModel);
         orbiterWin.mainView.rootContext()->setContextProperty("mediaplaylist", storedVideoPlaylist);
         orbiterWin.mainView.rootContext()->setContextProperty("simpleepg", simpleEPGmodel);
@@ -346,6 +348,7 @@ int main(int argc, char* argv[])
 
         //filedetails
         QObject::connect(pqOrbiter, SIGNAL(fd_titleChanged(QString)), w->filedetailsclass, SLOT(setTitle(QString)), Qt::QueuedConnection);
+        QObject::connect(pqOrbiter,SIGNAL(fd_storageDeviceChanged(QString)), w->filedetailsclass, SLOT(setStorageDevice(QString)), Qt::QueuedConnection);
         QObject::connect(pqOrbiter,SIGNAL(fd_titleImageChanged(QImage)), w->filedetailsclass, SLOT(setTitleImage(QImage)),Qt::QueuedConnection);
         QObject::connect(pqOrbiter, SIGNAL(fd_mediaTitleChanged(QString)), w->filedetailsclass, SLOT(setMediaTitle(QString)),Qt::QueuedConnection);
         QObject::connect(pqOrbiter, SIGNAL(fd_directorChanged(QString)), w->filedetailsclass, SLOT(setDirector(QString)),Qt::QueuedConnection);

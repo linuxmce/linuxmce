@@ -108,6 +108,18 @@ Rectangle {
                 }
 
                 Text {
+                    id: storageDeviceText
+                    width: scaleX(35)
+                    text: qsTr("Located on: ") + filedetailsclass.qs_storageDevice
+                    font.family: "Droid Sans"
+                    wrapMode: "WrapAtWordBoundaryOrAnywhere"
+
+                    smooth: true
+                    font.pixelSize: scaleY(2)
+
+                }
+
+                Text {
                     id: programtext
                     width: scaleX(35)
                     text: qsTr("Album: ") + filedetailsclass.album

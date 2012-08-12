@@ -217,6 +217,7 @@ public:
     QDir skinsDir;
     QString m_SkinsDirectoryPath;
 
+
     //ui
     QString currentSkin;
     QString currentSkinURL;
