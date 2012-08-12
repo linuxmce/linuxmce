@@ -41,7 +41,7 @@ VDPAU_REV_C_SUPPORTED="06c0 06c4 06ca 06cd 06d1 06d2 06d8 06d9 06da 06dc 06dd 06
 
 VDPAU_REV_D_SUPPORTED="1040 1042 1051 1055 1056"
 
-Backports_Required="0a20 0a22 0a23 0a28 0a29 0a2a 0a2b 0a2d 0a34 0a35 0a64 0a6f 0a76 0ca2 0ca3 0ca4 0ca8 0ca9 0caf 0cb0 0cb1 0dc4 0d1 0de1 0de 0df0 0df1 0df2 0df3 0e22 0e23 0e24 1080 1081"
+Backports_Required="0a20 0a22 0a23 0a28 0a29 0a2a 0a2b 0a2d 0a34 0a35 0a64 0a6f 0a76 0ca2 0ca3 0ca4 0ca8 0ca9 0caf 0cb0 0cb1 0dc4 0de0 0de1 0de2 0de5 0df0 0df1 0df2 0df3 0e22 0e23 0e24 1080 1081"
 
 #######################################################################################################################
 # getPCI_ID()
@@ -123,7 +123,7 @@ getVDPAUSupport() {
                 return 1
         esac
         case " $VDPAU_REV_C_SUPPORTED " in *" $PCI_ID "*)
-                echo "C"
+               echo "C"
                 return 1
         esac
         case " $VDPAU_REV_D_SUPPORTED " in *" $PCI_ID "*)
