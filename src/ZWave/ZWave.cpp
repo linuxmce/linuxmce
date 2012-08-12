@@ -337,7 +337,13 @@ void ZWave::CMD_StatusReport(string sArguments,string &sCMD_Result,Message *pMes
 //<-dceag-c788-e->
 {
 	LoggerWrapper::GetInstance()->Write(LV_ZWAVE,"Received command #788 - StatusReport");
-	if (sArguments.find('B') != std::string::npos) {
+	if (sArguments.find('SR') != std::string::npos) {
+		myZWApi->zwStatusReport();
+	} else if (sArguments.find('NU') != std::string::npos) {
+		myZWApi->zwRequestNodeNeighborUpdate(atoi(sArguments.substr(2).c_str()));
+	} else if (sArguments.find('NI') != std::string::npos) {
+		myZWApi->zwRequestNodeInfo(atoi(sArguments.substr(2).c_str()));
+	} else if (sArguments.find('B') != std::string::npos) {
 		myZWApi->zwControllerBackup();
 	} else if (sArguments.find('R') != std::string::npos) {
 		myZWApi->zwControllerRestore();
@@ -565,9 +571,8 @@ void ZWave::CMD_Remove_Node(string sOptions,int iValue,string sTimeout,bool bMul
 	if (iValue == 5) {
 		// we only honor "node stop" for now
 		myZWApi->zwRemoveNodeFromNetwork(0);
-	} else if (iValue == 6) {
-		// hack, node id 3 hard coded for testing
-		myZWApi->zwRemoveFailedNodeId(3);
+	} else if (iValue < 0) {
+		myZWApi->zwRemoveFailedNodeId(-iValue);
 	} else {
 		// we simply call start (param==1), that implements "Node Any"
 		myZWApi->zwRemoveNodeFromNetwork(1);
