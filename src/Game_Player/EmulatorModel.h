@@ -21,6 +21,9 @@ namespace DCE
 
   class EmulatorModel
   {
+
+    friend class EmulatorController; // for updateConfig()
+    
   private:
   protected:
     virtual bool updateConfig();
@@ -31,12 +34,27 @@ namespace DCE
     string m_sConfigFile;
     string m_sVideoAccelleration;
     string m_sEmulatorBinary;
+    string m_sProcessName;
+    string m_sHostName;
+    string m_sMediaPosition; // Used for Play Media commands to have a preloaded bookmark
+    int m_iStreamID;
+    int m_iSpeed;
+    useconds_t m_tStreamingClientLaunchDelay; // usleep time for # of seconds before launching.
     bool m_bChangeRequiresRestart;
     bool m_bRunning;
+    bool m_bIsPaused;
     bool m_bHasArgs;
+    bool m_bIsStreaming; // Are we streaming game to multiple media directors?
+    bool m_bIsStreamingSource; // Are we the master machine?
     string m_sArgs;
     bool m_bRunning_get() { return m_bRunning; }
     void m_bRunning_set(bool bRunning) { m_bRunning = bRunning; }
+    int m_iActiveMenu;
+    bool m_bIsRecording;
+    string m_sRecordingFilename;
+    long int m_dwPK_Device_Orbiter;
+    string m_sSystemConfiguration;
+
     map<string, string> m_mapConfigTemplateItems;
 
     map<string, string> m_mapMedia;

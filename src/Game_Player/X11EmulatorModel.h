@@ -13,6 +13,7 @@
 
 using namespace std;
 #include "EmulatorModel.h"
+#include "VideoFrameGeometry.h"
 
 #include <map>
 #include <string>
@@ -30,9 +31,24 @@ namespace DCE
     ~X11EmulatorModel();
     Display *m_pDisplay;
     Window m_iWindowId;
+    Window m_iPreviousWindowId;
     string m_sWindowName;
+    int m_iEventSerialNum;
+
+    enum eKeyModifier 
+    {
+      SHIFT_LEFT     = 1,
+      SHIFT_RIGHT    = 2,
+      ALT_LEFT       = 4,
+      ALT_RIGHT      = 8,
+      CONTROL        = 16
+    } m_eKeyModifier;
+
+    int m_iCurrentKeyModifier;
 
     map<string, pair<int, int> > m_mapActionsToKeysyms;
+    map<int, int> m_mapButtonToKeysyms;    
+
     pair<int, int> m_mapActionsToKeysyms_Find(string sAction) 
     {
       map<string, pair<int, int> >::iterator it = m_mapActionsToKeysyms.find(sAction);
@@ -43,18 +59,38 @@ namespace DCE
       map<string, pair<int, int> >::iterator it = m_mapActionsToKeysyms.find(sAction);
       return it != m_mapActionsToKeysyms.end();
     }
-  protected:
-    virtual void initializeActionstoKeysyms() = 0; // subclass and set key mappings.
-    virtual bool updateConfig();
-    virtual void initializeButtontoKeysyms();
-  private:
-    map<int, int> m_mapButtonToKeysyms;
+    int m_mapButtonToKeysyms_Exists(int iPK_Button)
+    {
+      map<int, int>::iterator it = m_mapButtonToKeysyms.find(iPK_Button);
+      return it != m_mapButtonToKeysyms.end();
+    }
     int m_mapButtonToKeysyms_Find(int iPK_Button) 
     {
       map<int, int>::iterator it = m_mapButtonToKeysyms.find(iPK_Button);
       return it == m_mapButtonToKeysyms.end() ? 0 : (*it).second;
     }
-    
+
+    virtual void updateVideoFrameGeometry(long int iPK_Device, int iWidth, int iHeight);
+    virtual pair<int, int> getVideoFrameGeometry(long int iPK_Device);
+  protected:
+    virtual void initializeActionstoKeysyms() = 0; // subclass and set key mappings.
+    virtual bool updateConfig();
+    virtual void initializeButtontoKeysyms();
+  private:
+    map<long int, VideoFrameGeometry *> m_mapVideoFrameGeometry;
+
+    bool m_mapVideoFrameGeometry_Exists(long int iPK_Device)
+    {
+      map<long int, VideoFrameGeometry *>::iterator it = m_mapVideoFrameGeometry.find(iPK_Device);
+      return it != m_mapVideoFrameGeometry.end();
+    }
+
+    VideoFrameGeometry* m_mapVideoFrameGeometry_Find(long int iPK_Device)
+    {
+      map<long int, VideoFrameGeometry *>::iterator it = m_mapVideoFrameGeometry.find(iPK_Device);
+      return it == m_mapVideoFrameGeometry.end() ? NULL : (*it).second;
+    }
+
   };
 
 }

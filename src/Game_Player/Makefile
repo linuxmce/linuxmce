@@ -24,7 +24,49 @@ sources = Main.cpp Game_Player.cpp $(Gen_Dev_Files) \
 	X11EmulatorModel.cpp \
 	X11EmulatorController.cpp \
 	MAMEEmulatorModel.cpp \
-	MAMEEmulatorController.cpp
+	MAMEEmulatorController.cpp \
+	MESSEmulatorModel.cpp \
+	MESSEmulatorController.cpp \
+	A2600EmulatorModel.cpp \
+	A2600EmulatorController.cpp \
+	A7800EmulatorModel.cpp \
+	A7800EmulatorController.cpp \
+	SecondGenEmulatorModel.cpp \
+	SecondGenEmulatorController.cpp \
+	IntellivisionEmulatorModel.cpp \
+	IntellivisionEmulatorController.cpp \
+	A5200EmulatorModel.cpp \
+	A5200EmulatorController.cpp \
+	ColecoVisionEmulatorModel.cpp \
+	ColecoVisionEmulatorController.cpp \
+	NESEmulatorModel.cpp \
+	NESEmulatorController.cpp \
+	FamicomEmulatorModel.cpp \
+	FamicomEmulatorController.cpp \
+	SG1000EmulatorModel.cpp \
+	SG1000EmulatorController.cpp \
+	SMSEmulatorModel.cpp \
+	SMSEmulatorController.cpp \
+	GenesisEmulatorModel.cpp \
+	GenesisEmulatorController.cpp \
+	MegadriveEmulatorModel.cpp \
+	MegadriveEmulatorController.cpp \
+	PCEngineEmulatorModel.cpp \
+	PCEngineEmulatorController.cpp \
+	TG16EmulatorModel.cpp \
+	TG16EmulatorController.cpp \
+	SGXEmulatorModel.cpp \
+	SGXEmulatorController.cpp \
+	SNESEmulatorModel.cpp \
+	SNESEmulatorController.cpp \
+	VectrexEmulatorModel.cpp \
+	VectrexEmulatorController.cpp \
+	VICEEmulatorModel.cpp \
+	VICEEmulatorController.cpp \
+	VIC20EmulatorModel.cpp \
+	VIC20EmulatorController.cpp \
+	C64EmulatorModel.cpp \
+	C64EmulatorController.cpp
 #<-dceag-mh-e->
 
 CXXFLAGS += 
@@ -52,7 +94,7 @@ Game_Player.so: $(sources:.cpp=.o)
 	cp $@ ../bin
 	chmod +x post_make.sh
 	./post_make.sh $@
-		
+
 Game_Player: $(sources:.cpp=.o)
 	$(CXX) -o $(MYNAME) $(call cpath,$+) $(LDFLAGS) $(LDLIBS)
 	cp $@ ../bin
@@ -71,7 +113,3 @@ ifeq (,$(findstring clean, $(MAKECMDGOALS)))
 endif
 #<-dceag-mf-e->
 
-
-install: 
-	mkdir -p /usr/pluto/bin
-	cp Game_Player $(DESTPATH)/usr/pluto/bin

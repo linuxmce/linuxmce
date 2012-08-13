@@ -29,17 +29,19 @@ namespace DCE
 
     virtual bool run();
     virtual bool stop();
-
+    virtual bool init();
+    virtual void EmulatorHasExited();
+    
     void findWindow();
 
     virtual bool doAction(string sAction);
     virtual bool pressButton(int iPK_Button);
     virtual bool pressClick(int iPositionX, int iPositionY, int iButtons);
-    virtual bool getSnap(char **pData, int iData_Size);
+    virtual bool getSnap(long int iPK_Device, int iWidth, int iHeight, char **pData, int& iData_Size);
     virtual bool setSpeed(int iSpeed);
     virtual bool gotoMenu(int iMenu);
-    virtual bool saveState();
-    virtual bool loadState();
+    virtual bool saveState(string& sPosition, string& sText, bool bAutoSave=false, string sAutoSaveName="");
+    virtual bool loadState(string sPosition);
 
   protected:
     X11EmulatorModel *m_pEmulatorModel;

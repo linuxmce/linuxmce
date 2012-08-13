@@ -46,16 +46,20 @@
 #include <libxml/xpath.h>
 #include <map>
 
+#include "EmulatorFactory.h"
+
 //<-dceag-decl-b->
 namespace DCE
 {
+
+  class EmulatorFactory;
+  class EmulatorController;
 
   class Game_Player:public Game_Player_Command, public AlarmEvent
   {
 //<-dceag-decl-e->
 
     friend class EmulatorController;
-
     // Private member variables
 
     // Private methods
@@ -64,71 +68,35 @@ namespace DCE
 
   private:
     pluto_pthread_mutex_t m_GameMutex;
-    unsigned long m_iMAMEWindowId;
+    EmulatorFactory *m_pEmulatorFactory;
+    EmulatorController *m_pEmulatorController;
+    EmulatorController *m_pEmulatorController_prev;
     int m_iStreamID;
-    string m_sMAMEWindowId;
     DeviceData_Base *m_pDevice_Game_Plugin;
     DeviceData_Base *m_pDevice_App_Server;
     DeviceData_Base *m_pDevice_Joystick;
     Display *m_pDisplay;
     class AlarmManager *m_pAlarmManager;
-    bool checkWindowName (long unsigned int window, string windowName);
-    bool m_bMAMEIsRunning;
-    bool m_bOSDIsVisible;	// toggled when OSD is requested so we use alternate frame grabber.
-    int m_iEventSerialNum;	// X event Serial #, incremented each event. 
     string m_sJoystick_Configuration;	// If a joystick configuration devicedata is found, it is put here.
 
     // Private methods
-    string GetSaveGamePath ();	// Get save game path for mediatype
   public:
-    bool LaunchEmulator(string sEnginePath, string sMediaFilename);
-      virtual void PrepareToDelete ();
+    virtual void PrepareToDelete ();
+    virtual void CreateChildren();
     bool Connect (int iPK_DeviceTemplate);
 
-    string m_sROMName;
-    string m_sMachineType;
-    string m_sPeripheralType;
-    string m_sFilename;
     int m_iPK_MediaType;	// Used by the stop media method.
     int m_iModifier;		// The current button modifier.
     bool m_bLoadSavedGame;
-      map < int, VideoFrameGeometry * >m_mapVideoFrameGeometry;
-    int m_iNowPlayingX, m_iNowPlayingY, m_iNowPlayingW, m_iNowPlayingH;
     // Public member variables
 
-  protected:
-      bool UpdateControllerFile ();
-    void ParseControllerFile ();
-    void ParseControllerEntry (string sEntryName, string sKeyCode);
-    xmlXPathObjectPtr getnodeset (xmlDocPtr doc, xmlChar * xpath);
-    string GetMessParametersFor (string sMediaURL);
-    bool UpdateMESSConfig (string sMediaURL);
-    bool LaunchMESS (string sMediaURL);
-    void PostLaunchMESS ();
-    bool StopMESS ();
-    bool LaunchPCSX (string sMediaURL);
-    bool StopPCSX ();
-    bool LaunchPCSX2 (string sMediaURL);
-    bool StopPCSX2 ();
-    bool UpdateMAMEConfig (string sMediaURL);
-    bool LaunchMAME (string sMediaURL);
-    bool StopMAME ();
-    void AlarmCallback (int id, void *param);
-    void CheckMAME ();
-  
-    Display *getDisplay ()
-    {
-      return m_pDisplay;
-    };
-    void processKeyBoardInputRequest (int iXKeySym);
-    // This should be Window but if i put #include <X11/Xlib.h>  in this it will break the compilation.
-    bool locateMAMEWindow (long unsigned int window);
-    string CreateWindowIDString (long unsigned int window);	// used by alternate OSD grabber
-    void ProcessPoundForMediaType (int iPK_MediaType);	// Key remapping for (*)
-    void ProcessAsteriskForMediaType (int iPK_MediaType);	// key remapping for (#), thanks a lot MESS.
-    void ProcessModifier (int iPK_Button);
-    void ProcessAlphanumeric (int iXKeySym);
+    void LaunchEmulator();
+    void KillEmulator();
+    void TranscodeAfterRecord(string sPath, string sFilename, long dwPK_Device_Orbiter);
 
+  protected:
+    void AlarmCallback (int id, void *param);
+  
 //<-dceag-const-b->
   public:
     // Constructors/Destructor
@@ -1049,6 +1017,9 @@ namespace DCE
 				       Message * pMessage);
 
 //<-dceag-h-e->
+
+    virtual void CMD_Record(string & sCMD_Result, Message *pMessage);
+
   };
 
 //<-dceag-end-b->

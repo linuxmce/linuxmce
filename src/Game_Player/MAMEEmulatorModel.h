@@ -1,7 +1,5 @@
 /** 
- * X11EmulatorModel - Creates a simple model that can be used 
- * to hold configuration and state information for the
- * an emulator controlled via X11 keys and events
+ * MAMEEmulatorModel - Store information needed by the MAME emulation
  *
  * Author: Thomas Cherryhomes <thom.cherryhomes@gmail.com>
  *

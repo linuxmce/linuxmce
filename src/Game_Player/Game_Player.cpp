@@ -36,11 +36,13 @@ using namespace DCE;
 #include "pluto_main/Define_DesignObj.h"
 #include "pluto_main/Define_MediaType.h"
 #include "pluto_main/Define_Button.h"
+#include "pluto_main/Define_Variable.h"
 #include "Gen_Devices/AllScreens.h"
 
-#include <sstream>
 #include <pthread.h>
 #include <math.h>
+
+#include <X11/Xlib.h>
 
 //<-dceag-const-b->
 // The primary constructor when the class is created as a stand-alone device
@@ -57,11 +59,12 @@ m_GameMutex ("game_player")
   m_GameMutex.Init (NULL);
   m_pAlarmManager = NULL;
   m_pDevice_App_Server = NULL;
+  m_pEmulatorFactory=NULL;
+  m_pEmulatorController=NULL;
+  m_pEmulatorController_prev=NULL;
   m_iPK_MediaType = 0;
   m_iStreamID = 0;
   m_bLoadSavedGame = 0;
-  m_sMachineType = "";
-  m_sPeripheralType = "";
   m_iModifier = 0;
 }
 
@@ -74,26 +77,12 @@ Game_Player::~Game_Player ()
 
   EVENT_Playback_Completed ("", 0, false);	// In case media plugin thought something was playing, let it know that there's not
 
-  {
-    PLUTO_SAFETY_LOCK (gm, m_GameMutex);
-    // Delete the VideoFrameGeometry map
-    for (map < int, VideoFrameGeometry * >::iterator it =
-	 m_mapVideoFrameGeometry.begin ();
-	 it != m_mapVideoFrameGeometry.end (); it++)
-      {
-	delete (*it).second;
-      }
-  }
 }
 
 bool Game_Player::Connect (int iPK_DeviceTemplate)
 {
   if (!Command_Impl::Connect (iPK_DeviceTemplate))
     return false;
-
-  StopMAME ();
-  StopMESS ();
-  StopPCSX ();
 
   EVENT_Playback_Completed ("", 0, false);	// In case media plugin thought something was playing, let it know that there's not
 
@@ -106,6 +95,7 @@ Game_Player::PrepareToDelete ()
 {
   Command_Impl::PrepareToDelete ();
   delete m_pAlarmManager;
+  delete m_pEmulatorFactory;
   m_pAlarmManager = NULL;
   m_pDevice_App_Server = NULL;
   m_iPK_MediaType = 0;
@@ -168,9 +158,6 @@ bool Game_Player::GetConfig ()
 	}
     }
 
-  m_iMAMEWindowId = 0;
-  m_iEventSerialNum = 0;
-
   return true;
 }
 
@@ -182,1558 +169,12 @@ bool Game_Player::Register ()
   return Connect (PK_DeviceTemplate_get ());
 }
 
-/**
- * Launch Emulator - Called from the Emulator Engine to spawn the app with the app server.
- */
-bool Game_Player::LaunchEmulator(string sEnginePath, string sMediaFilename)
-{
-  // FIXME: come back here and implement this. Should call the app server.
-}
-
-/**
- * UpdateMESSConfig() - similar to the function just below, except.
- * tailored for Stella's configuration file.
- */
-bool Game_Player::UpdateMESSConfig (string sMediaURL)
-{
-  // Vars to replace inside the config file:
-  string
-    s_MediaPath = FileUtils::BasePath (sMediaURL);	// for rompath
-  string
-    s_HardwareAccelleration = DATA_Get_Hardware_acceleration ();	// for mapping Video Driver values.
-  string
-    s_VideoDriver;
-  const string
-    s_OutputFile = "/root/.mess/mess.ini";
-  const string
-    s_OutputDir = "/root/.mess";
-
-  // map hardware accelleration values
-  if (s_HardwareAccelleration == "opengl")
-    {
-      s_VideoDriver = "opengl";
-    }
-  else
-    {
-      s_VideoDriver = "soft";
-    }
-
-  string
-    s_ConfigFile =
-    "<UNADORNED0>\r\n"
-    "\r\n"
-    "#\r\n"
-    "# CORE CONFIGURATION OPTIONS\r\n"
-    "#\r\n"
-    "readconfig                1\r\n"
-    "\r\n"
-    "#\r\n"
-    "# CORE SEARCH PATH OPTIONS\r\n"
-    "#\r\n"
-    "rompath                   ##ROMPATH##\r\n"
-    "hashpath		   /home/mamedata/hash\r\n"
-    "samplepath                /home/mamedata/samples\r\n"
-    "artpath                   /home/mamedata/artwork\r\n"
-    "ctrlrpath                 /home/mamedata/ctrlr\r\n"
-    "inipath                   $HOME/.mess;.;ini\r\n"
-    "fontpath                  .\r\n"
-    "\r\n"
-    "#\r\n"
-    "# CORE OUTPUT DIRECTORY OPTIONS\r\n"
-    "#\r\n"
-    "cfg_directory             /home/mamedata/cfg\r\n"
-    "nvram_directory           /home/mamedata/nvram\r\n"
-    "memcard_directory         /home/mamedata/memcard\r\n"
-    "input_directory           /home/mamedata/inp\r\n"
-    "state_directory           /home/mamedata/sta\r\n"
-    "snapshot_directory        /home/mamedata/shots\r\n"
-    "diff_directory            /home/mamedata/diff\r\n"
-    "comment_directory         /home/mamedata/comments\r\n"
-    "\r\n"
-    "#\r\n"
-    "# CORE FILENAME OPTIONS\r\n"
-    "#\r\n"
-    "cheat_file                cheat.dat\r\n"
-    "\r\n"
-    "#\r\n"
-    "# CORE STATE/PLAYBACK OPTIONS\r\n"
-    "#\r\n"
-    "state\r\n"
-    "autosave                  0\r\n"
-    "playback\r\n"
-    "record\r\n"
-    "aviwrite                  \r\n"
-    "mngwrite\r\n"
-    "wavwrite\r\n"
-    "\r\n"
-    "#\r\n"
-    "# CORE PERFORMANCE OPTIONS\r\n"
-    "#\r\n"
-    "autoframeskip             0\r\n"
-    "frameskip                 0\r\n"
-    "seconds_to_run            0\r\n"
-    "throttle                  1\r\n"
-    "sleep                     1\r\n"
-    "speed                     1.0\r\n"
-    "refreshspeed              0\r\n"
-    "\r\n"
-    "#\r\n"
-    "# CORE ROTATION OPTIONS\r\n"
-    "#\r\n"
-    "rotate                    1\r\n"
-    "ror                       0\r\n"
-    "rol                       0\r\n"
-    "autoror                   0\r\n"
-    "autorol                   0\r\n"
-    "flipx                     0\r\n"
-    "flipy                     0\r\n"
-    "\r\n"
-    "#\r\n"
-    "# CORE ARTWORK OPTIONS\r\n"
-    "#\r\n"
-    "artwork_crop              1\r\n"
-    "use_backdrops             1\r\n"
-    "use_overlays              1\r\n"
-    "use_bezels                1\r\n"
-    "\r\n"
-    "#\r\n"
-    "# CORE SCREEN OPTIONS\r\n"
-    "#\r\n"
-    "brightness                1.0\r\n"
-    "contrast                  1.0\r\n"
-    "gamma                     1.0\r\n"
-    "pause_brightness          0.65\r\n"
-    "\r\n"
-    "\r\n#"
-    "# CORE VECTOR OPTIONS\r\n"
-    "#\r\n"
-    "antialias                 1\r\n"
-    "beam                      2.0\r\n"
-    "flicker                   0\r\n"
-    "\r\n"
-    "#\r\n"
-    "# CORE SOUND OPTIONS\r\n"
-    "#\r\n"
-    "sound                     1\r\n"
-    "samplerate                48000\r\n"
-    "samples                   1\r\n"
-    "volume                    0\r\n"
-    "\r\n"
-    "#\r\n"
-    "# CORE INPUT OPTIONS\r\n"
-    "#\r\n"
-    "ctrlr			   ##CTRLR##\r\n"
-    "mouse                     0\r\n"
-    "joystick                  1\r\n"
-    "lightgun                  0\r\n"
-    "multikeyboard             0\r\n"
-    "multimouse                0\r\n"
-    "steadykey                 0\r\n"
-    "offscreen_reload          0\r\n"
-    "joystick_map              auto\r\n"
-    "joystick_deadzone         0.3\r\n"
-    "joystick_saturation       0.85\r\n"
-    "\r\n"
-    "#\r\n"
-    "# CORE INPUT AUTOMATIC ENABLE OPTIONS\r\n"
-    "#\r\n"
-    "paddle_device             mouse\r\n"
-    "adstick_device            keyboard\r\n"
-    "pedal_device              keyboard\r\n"
-    "dial_device               keyboard\r\n"
-    "trackball_device          mouse\r\n"
-    "lightgun_device           keyboard\r\n"
-    "positional_device         keyboard\r\n"
-    "mouse_device              mouse\r\n"
-    "\r\n"
-    "#\r\n"
-    "# CORE DEBUGGING OPTIONS\r\n"
-    "#\r\n"
-    "log                       0\r\n"
-    "verbose                   0\r\n"
-    "update_in_pause           0\r\n"
-    "\r\n"
-    "#\r\n"
-    "# CORE MISC OPTIONS\r\n"
-    "#\r\n"
-    "bios                      default\r\n"
-    "cheat                     0\r\n"
-    "skip_gameinfo             1\r\n"
-    "\r\n"
-    "#\r\n"
-    "# DEBUGGING OPTIONS\r\n"
-    "#\r\n"
-    "oslog                     0\r\n"
-    "\r\n"
-    "#\r\n"
-    "# PERFORMANCE OPTIONS\r\n"
-    "#\r\n"
-    "multithreading            1\r\n"
-    "sdlvideofps               0\r\n"
-    "\r\n"
-    "#\r\n"
-    "# VIDEO OPTIONS\r\n"
-    "#\r\n"
-    "video                     ##VIDEO##\r\n"
-    "numscreens                1\r\n"
-    "window                    1\r\n"
-    "keepaspect                1\r\n"
-    "unevenstretch             1\r\n"
-    "effect                    none\r\n"
-    "centerh                   1\r\n"
-    "centerv                   1\r\n"
-    "waitvsync                 0\r\n"
-    "yuvmode                   none\r\n"
-    "\r\n"
-    "#\r\n"
-    "# OpenGL-SPECIFIC OPTIONS\r\n"
-    "#\r\n"
-    "filter                    1\r\n"
-    "prescale                  1\r\n"
-    "gl_forcepow2texture       0\r\n"
-    "gl_notexturerect          0\r\n"
-    "gl_vbo                    1\r\n"
-    "gl_pbo                    1\r\n"
-    "gl_glsl                   0\r\n"
-    "gl_glsl_filter            1\r\n"
-    "glsl_shader_mame0         none\r\n"
-    "glsl_shader_mame1         none\r\n"
-    "glsl_shader_mame2         none\r\n"
-    "glsl_shader_mame3         none\r\n"
-    "glsl_shader_mame4         none\r\n"
-    "glsl_shader_mame5         none\r\n"
-    "glsl_shader_mame6         none\r\n"
-    "glsl_shader_mame7         none\r\n"
-    "glsl_shader_mame8         none\r\n"
-    "glsl_shader_mame9         none\r\n"
-    "glsl_shader_screen0       none\r\n"
-    "glsl_shader_screen1       none\r\n"
-    "glsl_shader_screen2       none\r\n"
-    "glsl_shader_screen3       none\r\n"
-    "glsl_shader_screen4       none\r\n"
-    "glsl_shader_screen5       none\r\n"
-    "glsl_shader_screen6       none\r\n"
-    "glsl_shader_screen7       none\r\n"
-    "glsl_shader_screen8       none\r\n"
-    "glsl_shader_screen9       none\r\n"
-    "gl_glsl_vid_attr          1\r\n"
-    "\r\n"
-    "#\r\n"
-    "# PER-WINDOW VIDEO OPTIONS\r\n"
-    "#\r\n"
-    "screen                    auto\r\n"
-    "aspect                    auto\r\n"
-    "resolution                auto\r\n"
-    "view                      auto\r\n"
-    "screen0                   auto\r\n"
-    "aspect0                   auto\r\n"
-    "resolution0               auto\r\n"
-    "view0                     auto\r\n"
-    "screen1                   auto\r\n"
-    "aspect1                   auto\r\n"
-    "resolution1               auto\r\n"
-    "view1                     auto\r\n"
-    "screen2                   auto\r\n"
-    "aspect2                   auto\r\n"
-    "resolution2               auto\r\n"
-    "view2                     auto\r\n"
-    "screen3                   auto\r\n"
-    "aspect3                   auto\r\n"
-    "resolution3               auto\r\n"
-    "view3                     auto\r\n"
-    "\r\n"
-    "#\r\n"
-    "# FULL SCREEN OPTIONS\r\n"
-    "#\r\n"
-    "switchres                 0\r\n"
-    "useallheads               0\r\n"
-    "\r\n"
-    "#\r\n"
-    "# SOUND OPTIONS\r\n"
-    "#\r\n"
-    "audio_latency             3\r\n"
-    "\r\n"
-    "#\r\n"
-    "# SDL KEYBOARD MAPPING\r\n"
-    "#\r\n"
-    "keymap                    0\r\n"
-    "keymap_file               keymap.dat\r\n"
-    "\r\n"
-    "#\r\n"
-    "# SDL JOYSTICK MAPPING\r\n"
-    "#\r\n"
-    "remapjoys                 0\r\n"
-    "remapjoyfile              joymap.dat\r\n"
-    "sixaxis                   0\r\n";
-
-  // replace, and spit out the config.
-
-  s_ConfigFile =
-    StringUtils::Replace (s_ConfigFile, "##ROMPATH##", s_MediaPath);
-  s_ConfigFile =
-    StringUtils::Replace (s_ConfigFile, "##VIDEO##", s_VideoDriver);
-
-  if (m_sJoystick_Configuration == "")
-    {
-      // Do nothing.
-    }
-  else
-    {
-      // Custom Controller Information found, specify and update controller file.
-      s_ConfigFile =
-	StringUtils::Replace (s_ConfigFile, "##CTRLR##", "GamePlayer");
-      UpdateControllerFile ();
-      ParseControllerFile ();
-    }
-
-  if (!FileUtils::DirExists (s_OutputDir))
-    {
-      // hopefully try to create it.
-      LoggerWrapper::GetInstance ()->Write (LV_CRITICAL,
-					    "%s didn't exist, attempting to create.",
-					    s_OutputDir.c_str ());
-      FileUtils::MakeDir (s_OutputDir);
-      if (!FileUtils::DirExists (s_OutputDir))
-	{
-	  LoggerWrapper::GetInstance ()->Write (LV_CRITICAL,
-						"Couldn't create %s, bailing...",
-						s_OutputDir.c_str ());
-	  return false;
-	}
-      else
-	{
-	  LoggerWrapper::GetInstance ()->Write (LV_STATUS,
-						"Created %s Successfully.",
-						s_OutputDir.c_str ());
-	}
-    }
-
-  if (!FileUtils::WriteTextFile (s_OutputFile, s_ConfigFile))
-    {
-      LoggerWrapper::GetInstance ()->Write (LV_CRITICAL, "Couldn't write %s",
-					    s_OutputFile.c_str ());
-      return false;
-    }
-  else
-    {
-      LoggerWrapper::GetInstance ()->Write (LV_STATUS, "Wrote %s",
-					    s_OutputFile.c_str ());
-      return true;
-    }
-
-}
-
-xmlXPathObjectPtr Game_Player::getnodeset (xmlDocPtr doc, xmlChar * xpath)
-{
-
-  xmlXPathContextPtr
-    context;
-  xmlXPathObjectPtr
-    result;
-
-  context = xmlXPathNewContext (doc);
-  if (context == NULL)
-    {
-      return NULL;
-    }
-  result = xmlXPathEvalExpression (xpath, context);
-  xmlXPathFreeContext (context);
-  if (result == NULL)
-    {
-      return NULL;
-    }
-  if (xmlXPathNodeSetIsEmpty (result->nodesetval))
-    {
-      xmlXPathFreeObject (result);
-      return NULL;
-    }
-  return result;
-}
-
-
-/**
- * ParseControllerEntry(sEntryName, sKeyCode) - parses a key code, and shoves it into the
- * Controller map for use elsewhere in this code.
- */
-void
-Game_Player::ParseControllerEntry (string sEntryName, string sKeyCode)
-{
-  // for now, this is super ($#@%@# simple. It 
-}
-
-/**
- * ParseControllerFile() - If a controller file is updated, parse it and grab the relevant 
- * controller information into a Controller class so we can map keys appropriately for Orbiter.
- */
-void
-Game_Player::ParseControllerFile ()
-{
-
-  xmlDocPtr doc;
-  doc = xmlParseFile ("/home/mamedata/ctrlr/GamePlayer.cfg");
-
-  if (doc == NULL)
-    {
-      return;
-    }
-
-
-
-  xmlNodeSetPtr nodeset;
-  xmlXPathObjectPtr result;
-  xmlChar *resultText;
-
-  if (doc == NULL)
-    return;
-
-  // now evaluate specific xpath expressions to grab needed mappings
-  // for orbiter commands. This is hardcoded, yes.. we can do it better
-  // but that comes later. 
-
-  // Grab/Parse P1 Start Key if there.
-  result =
-    getnodeset (doc,
-		(xmlChar *)
-		"//mameconfig/system[@name='default']/input/port[@type='START1']/*");
-  if (result)
-    {
-      nodeset = result->nodesetval;
-      resultText =
-	xmlNodeListGetString (doc, nodeset->nodeTab[0]->xmlChildrenNode, 1);
-      string resultString = (char *) resultText;
-      ParseControllerEntry ("P1", resultString);
-      xmlFree (resultText);
-      xmlXPathFreeObject (result);
-    }
-
-  // Grab/Parse P2 Start Key if there.
-  result =
-    getnodeset (doc,
-		(xmlChar *)
-		"//mameconfig/system[@name='default']/input/port[@type='START2']/*");
-  if (result)
-    {
-      nodeset = result->nodesetval;
-      resultText =
-	xmlNodeListGetString (doc, nodeset->nodeTab[0]->xmlChildrenNode, 1);
-      string resultString = (char *) resultText;
-      ParseControllerEntry ("P2", resultString);
-      xmlFree (resultText);
-      xmlXPathFreeObject (result);
-    }
-
-  // Grab/Parse Coin 1 key if there.
-  result =
-    getnodeset (doc,
-		(xmlChar *)
-		"//mameconfig/system[@name='default']/input/port[@type='COIN1']/*");
-  if (result)
-    {
-      nodeset = result->nodesetval;
-      resultText =
-	xmlNodeListGetString (doc, nodeset->nodeTab[0]->xmlChildrenNode, 1);
-      string resultString = (char *) resultText;
-      ParseControllerEntry ("C1", resultString);
-      xmlFree (resultText);
-      xmlXPathFreeObject (result);
-    }
-
-  // Grab/Parse Coin 2 Key if there.
-  result =
-    getnodeset (doc,
-		(xmlChar *)
-		"//mameconfig/system[@name='default']/input/port[@type='COIN2']/*");
-  if (result)
-    {
-      nodeset = result->nodesetval;
-      resultText =
-	xmlNodeListGetString (doc, nodeset->nodeTab[0]->xmlChildrenNode, 1);
-      string resultString = (char *) resultText;
-      ParseControllerEntry ("C2", resultString);
-      xmlFree (resultText);
-      xmlXPathFreeObject (result);
-    }
-
-  // Done.
-
-  xmlFreeDoc (doc);
-  return;
-
-}
-
-/**
- * UpdateControllerFile() - If a joystick device is found, with configuration devicedata
- * then this is run to update the controller file. It does no sanity checking.
- */
-bool Game_Player::UpdateControllerFile ()
-{
-
-  string
-    s_OutputDir = "/home/mamedata/ctrlr";
-  string
-    s_OutputFile = "/home/mamedata/ctrlr/GamePlayer.cfg";
-
-  if (!FileUtils::DirExists (s_OutputDir))
-    {
-      // hopefully try to create it.
-      LoggerWrapper::GetInstance ()->Write (LV_CRITICAL,
-					    "%s didn't exist, attempting to create.",
-					    s_OutputDir.c_str ());
-      FileUtils::MakeDir (s_OutputDir);
-      if (!FileUtils::DirExists (s_OutputDir))
-	{
-	  LoggerWrapper::GetInstance ()->Write (LV_CRITICAL,
-						"Couldn't create %s, bailing...",
-						s_OutputDir.c_str ());
-	  return false;
-	}
-      else
-	{
-	  LoggerWrapper::GetInstance ()->Write (LV_STATUS,
-						"Created %s Successfully.",
-						s_OutputDir.c_str ());
-	}
-    }
-
-  if (!FileUtils::WriteTextFile (s_OutputFile, m_sJoystick_Configuration))
-    {
-      LoggerWrapper::GetInstance ()->Write (LV_CRITICAL, "Couldn't write %s",
-					    s_OutputFile.c_str ());
-      return false;
-    }
-  else
-    {
-      LoggerWrapper::GetInstance ()->Write (LV_STATUS, "Wrote %s",
-					    s_OutputFile.c_str ());
-      return true;
-    }
-
-}
-
-
-/**
- * UpdateMAMEConfig(sMediaURL) - Update MAME Configuration before MAME
- * Launches. This is mainly used to point rompath inside the config 
- * file to the appropriate place where the actual rom being selected.
- * it is also used for setting things like ctrlr files. It uses a
- * standard MAME configuration file, which has the appropriate 
- * values substituted
- */
-bool Game_Player::UpdateMAMEConfig (string sMediaURL)
-{
-
-  // Vars to replace inside the config file:
-  string
-    s_MediaPath = FileUtils::BasePath (sMediaURL);	// for rompath
-  string
-    s_HardwareAccelleration = DATA_Get_Hardware_acceleration ();	// for mapping Video Driver values.
-  string
-    s_VideoDriver;
-  const string
-    s_OutputFile = "/root/.mame/mame.ini";
-  const string
-    s_OutputDir = "/root/.mame";
-
-  // map hardware accelleration values
-  if (s_HardwareAccelleration == "opengl")
-    {
-      s_VideoDriver = "opengl";
-    }
-  else
-    {
-      s_VideoDriver = "soft";
-    }
-
-  string
-    s_ConfigFile =
-    "<UNADORNED0>\r\n"
-    "\r\n"
-    "#\r\n"
-    "# CORE CONFIGURATION OPTIONS\r\n"
-    "#\r\n"
-    "readconfig                1\r\n"
-    "\r\n"
-    "#\r\n"
-    "# CORE SEARCH PATH OPTIONS\r\n"
-    "#\r\n"
-    "rompath                   ##ROMPATH##\r\n"
-    "samplepath                /home/mamedata/samples\r\n"
-    "artpath                   /home/mamedata/artwork\r\n"
-    "ctrlrpath                 /home/mamedata/ctrlr\r\n"
-    "inipath                   $HOME/.mame;.;ini\r\n"
-    "fontpath                  .\r\n"
-    "\r\n"
-    "#\r\n"
-    "# CORE OUTPUT DIRECTORY OPTIONS\r\n"
-    "#\r\n"
-    "cfg_directory             /home/mamedata/cfg\r\n"
-    "nvram_directory           /home/mamedata/nvram\r\n"
-    "memcard_directory         /home/mamedata/memcard\r\n"
-    "input_directory           /home/mamedata/inp\r\n"
-    "state_directory           /home/mamedata/sta\r\n"
-    "snapshot_directory        /home/mamedata/shots\r\n"
-    "diff_directory            /home/mamedata/diff\r\n"
-    "comment_directory         /home/mamedata/comments\r\n"
-    "\r\n"
-    "#\r\n"
-    "# CORE FILENAME OPTIONS\r\n"
-    "#\r\n"
-    "cheat_file                cheat.dat\r\n"
-    "\r\n"
-    "#\r\n"
-    "# CORE STATE/PLAYBACK OPTIONS\r\n"
-    "#\r\n"
-    "state\r\n"
-    "autosave                  0\r\n"
-    "playback\r\n"
-    "record\r\n"
-    "aviwrite		   \r\n"
-    "mngwrite\r\n"
-    "wavwrite\r\n"
-    "\r\n"
-    "#\r\n"
-    "# CORE PERFORMANCE OPTIONS\r\n"
-    "#\r\n"
-    "autoframeskip             0\r\n"
-    "frameskip                 0\r\n"
-    "seconds_to_run            0\r\n"
-    "throttle                  1\r\n"
-    "sleep                     1\r\n"
-    "speed                     1.0\r\n"
-    "refreshspeed              0\r\n"
-    "\r\n"
-    "#\r\n"
-    "# CORE ROTATION OPTIONS\r\n"
-    "#\r\n"
-    "rotate                    1\r\n"
-    "ror                       0\r\n"
-    "rol                       0\r\n"
-    "autoror                   0\r\n"
-    "autorol                   0\r\n"
-    "flipx                     0\r\n"
-    "flipy                     0\r\n"
-    "\r\n"
-    "#\r\n"
-    "# CORE ARTWORK OPTIONS\r\n"
-    "#\r\n"
-    "artwork_crop              1\r\n"
-    "use_backdrops             1\r\n"
-    "use_overlays              1\r\n"
-    "use_bezels                1\r\n"
-    "\r\n"
-    "#\r\n"
-    "# CORE SCREEN OPTIONS\r\n"
-    "#\r\n"
-    "brightness                1.0\r\n"
-    "contrast                  1.0\r\n"
-    "gamma                     1.0\r\n"
-    "pause_brightness          0.65\r\n"
-    "\r\n"
-    "\r\n#"
-    "# CORE VECTOR OPTIONS\r\n"
-    "#\r\n"
-    "antialias                 1\r\n"
-    "beam                      1.8\r\n"
-    "flicker                   0\r\n"
-    "\r\n"
-    "#\r\n"
-    "# CORE SOUND OPTIONS\r\n"
-    "#\r\n"
-    "sound                     1\r\n"
-    "samplerate                48000\r\n"
-    "samples                   1\r\n"
-    "volume                    0\r\n"
-    "\r\n"
-    "#\r\n"
-    "# CORE INPUT OPTIONS\r\n"
-    "#\r\n"
-    "ctrlr		           ##CTRLR##\r\n"
-    "mouse                     0\r\n"
-    "joystick                  1\r\n"
-    "lightgun                  0\r\n"
-    "multikeyboard             1\r\n"
-    "multimouse                1\r\n"
-    "steadykey                 0\r\n"
-    "offscreen_reload          0\r\n"
-    "joystick_map              auto\r\n"
-    "joystick_deadzone         0.3\r\n"
-    "joystick_saturation       0.85\r\n"
-    "\r\n"
-    "#\r\n"
-    "# CORE INPUT AUTOMATIC ENABLE OPTIONS\r\n"
-    "#\r\n"
-    "paddle_device             mouse\r\n"
-    "adstick_device            joystick\r\n"
-    "pedal_device              keyboard\r\n"
-    "dial_device               keyboard\r\n"
-    "trackball_device          mouse\r\n"
-    "lightgun_device           keyboard\r\n"
-    "positional_device         mouse\r\n"
-    "mouse_device              mouse\r\n"
-    "\r\n"
-    "#\r\n"
-    "# CORE DEBUGGING OPTIONS\r\n"
-    "#\r\n"
-    "log                       0\r\n"
-    "verbose                   0\r\n"
-    "update_in_pause           0\r\n"
-    "\r\n"
-    "#\r\n"
-    "# CORE MISC OPTIONS\r\n"
-    "#\r\n"
-    "bios                      default\r\n"
-    "cheat                     0\r\n"
-    "skip_gameinfo             1\r\n"
-    "\r\n"
-    "#\r\n"
-    "# DEBUGGING OPTIONS\r\n"
-    "#\r\n"
-    "oslog                     0\r\n"
-    "\r\n"
-    "#\r\n"
-    "# PERFORMANCE OPTIONS\r\n"
-    "#\r\n"
-    "multithreading            1\r\n"
-    "sdlvideofps               0\r\n"
-    "\r\n"
-    "#\r\n"
-    "# VIDEO OPTIONS\r\n"
-    "#\r\n"
-    "video                     ##VIDEO##\r\n"
-    "numscreens                1\r\n"
-    "window                    1\r\n"
-    "keepaspect                1\r\n"
-    "unevenstretch             1\r\n"
-    "effect                    none\r\n"
-    "centerh                   1\r\n"
-    "centerv                   1\r\n"
-    "waitvsync                 0\r\n"
-    "yuvmode                   none\r\n"
-    "\r\n"
-    "#\r\n"
-    "# OpenGL-SPECIFIC OPTIONS\r\n"
-    "#\r\n"
-    "filter                    1\r\n"
-    "prescale                  1\r\n"
-    "gl_forcepow2texture       0\r\n"
-    "gl_notexturerect          0\r\n"
-    "gl_vbo                    1\r\n"
-    "gl_pbo                    1\r\n"
-    "gl_glsl                   0\r\n"
-    "gl_glsl_filter            1\r\n"
-    "glsl_shader_mame0         none\r\n"
-    "glsl_shader_mame1         none\r\n"
-    "glsl_shader_mame2         none\r\n"
-    "glsl_shader_mame3         none\r\n"
-    "glsl_shader_mame4         none\r\n"
-    "glsl_shader_mame5         none\r\n"
-    "glsl_shader_mame6         none\r\n"
-    "glsl_shader_mame7         none\r\n"
-    "glsl_shader_mame8         none\r\n"
-    "glsl_shader_mame9         none\r\n"
-    "glsl_shader_screen0       none\r\n"
-    "glsl_shader_screen1       none\r\n"
-    "glsl_shader_screen2       none\r\n"
-    "glsl_shader_screen3       none\r\n"
-    "glsl_shader_screen4       none\r\n"
-    "glsl_shader_screen5       none\r\n"
-    "glsl_shader_screen6       none\r\n"
-    "glsl_shader_screen7       none\r\n"
-    "glsl_shader_screen8       none\r\n"
-    "glsl_shader_screen9       none\r\n"
-    "gl_glsl_vid_attr          1\r\n"
-    "\r\n"
-    "#\r\n"
-    "# PER-WINDOW VIDEO OPTIONS\r\n"
-    "#\r\n"
-    "screen                    auto\r\n"
-    "aspect                    auto\r\n"
-    "resolution                auto\r\n"
-    "view                      auto\r\n"
-    "screen0                   auto\r\n"
-    "aspect0                   auto\r\n"
-    "resolution0               auto\r\n"
-    "view0                     auto\r\n"
-    "screen1                   auto\r\n"
-    "aspect1                   auto\r\n"
-    "resolution1               auto\r\n"
-    "view1                     auto\r\n"
-    "screen2                   auto\r\n"
-    "aspect2                   auto\r\n"
-    "resolution2               auto\r\n"
-    "view2                     auto\r\n"
-    "screen3                   auto\r\n"
-    "aspect3                   auto\r\n"
-    "resolution3               auto\r\n"
-    "view3                     auto\r\n"
-    "\r\n"
-    "#\r\n"
-    "# FULL SCREEN OPTIONS\r\n"
-    "#\r\n"
-    "switchres                 0\r\n"
-    "useallheads               0\r\n"
-    "\r\n"
-    "#\r\n"
-    "# SOUND OPTIONS\r\n"
-    "#\r\n"
-    "audio_latency             3\r\n"
-    "\r\n"
-    "#\r\n"
-    "# SDL KEYBOARD MAPPING\r\n"
-    "#\r\n"
-    "keymap                    0\r\n"
-    "keymap_file               keymap.dat\r\n"
-    "\r\n"
-    "#\r\n"
-    "# SDL JOYSTICK MAPPING\r\n"
-    "#\r\n"
-    "remapjoys                 0\r\n"
-    "remapjoyfile              joymap.dat\r\n"
-    "sixaxis                   0\r\n";
-
-  // replace, and spit out the config.
-
-  s_ConfigFile =
-    StringUtils::Replace (s_ConfigFile, "##ROMPATH##", s_MediaPath);
-  s_ConfigFile =
-    StringUtils::Replace (s_ConfigFile, "##VIDEO##", s_VideoDriver);
-
-  if (m_sJoystick_Configuration == "")
-    {
-      // Do nothing.
-    }
-  else
-    {
-      // Custom Controller Information found, specify and update controller file.
-      s_ConfigFile =
-	StringUtils::Replace (s_ConfigFile, "##CTRLR##", "GamePlayer");
-      UpdateControllerFile ();
-    }
-
-  if (!FileUtils::DirExists (s_OutputDir))
-    {
-      // hopefully try to create it.
-      LoggerWrapper::GetInstance ()->Write (LV_CRITICAL,
-					    "%s didn't exist, attempting to create.",
-					    s_OutputDir.c_str ());
-      FileUtils::MakeDir (s_OutputDir);
-      if (!FileUtils::DirExists (s_OutputDir))
-	{
-	  LoggerWrapper::GetInstance ()->Write (LV_CRITICAL,
-						"Couldn't create %s, bailing...",
-						s_OutputDir.c_str ());
-	  return false;
-	}
-      else
-	{
-	  LoggerWrapper::GetInstance ()->Write (LV_STATUS,
-						"Created %s Successfully.",
-						s_OutputDir.c_str ());
-	}
-    }
-
-  if (!FileUtils::WriteTextFile (s_OutputFile, s_ConfigFile))
-    {
-      LoggerWrapper::GetInstance ()->Write (LV_CRITICAL, "Couldn't write %s",
-					    s_OutputFile.c_str ());
-      return false;
-    }
-  else
-    {
-      LoggerWrapper::GetInstance ()->Write (LV_STATUS, "Wrote %s",
-					    s_OutputFile.c_str ());
-      return true;
-    }
-}
-
-// Attempt to figure out what to pass to MESS.
-string Game_Player::GetMessParametersFor (string sMediaURL)
-{
-  string
-    sParameters,
-    sPeripheralType,
-    sExtra;			// The final parameters to send.
-  string
-    sTmpPath = FileUtils::BasePath (sMediaURL);
-  string
-    sFileName = FileUtils::FilenameWithoutPath (sMediaURL);
-  string
-    sToken = "/";
-  vector < string > vect_Path;
-
-  StringUtils::Tokenize (sTmpPath, sToken, vect_Path);	// split it up
-
-  string
-    sMachineType = vect_Path[vect_Path.size () - 1];	// Get the last element.
-  m_sMachineType = sMachineType;
-
-  string
-    sLFileName = StringUtils::ToLower (sFileName);
-
-  // Apple 2 disk types
-  if (m_iPK_MediaType == MEDIATYPE_lmce_Game_apple2_CONST)
-    {
-      sPeripheralType = "-flop1";	// TODO: support 2 floppies?
-      m_bOSDIsVisible = true;	// apple 2 hack for now
-    }
-
-  if (m_iPK_MediaType == MEDIATYPE_lmce_Game_jaguar_CONST)
-    {
-      sPeripheralType = "-cart";
-    }
-
-  if (m_iPK_MediaType == MEDIATYPE_lmce_Game_vic20_CONST)
-    {
-      m_bOSDIsVisible = true;
-      sPeripheralType = "-cart";	// usually cart, unless...
-      if (sFileName.find (StringUtils::ToLower (".prg")) != string::npos ||
-	  sFileName.find (StringUtils::ToLower (".p00")) != string::npos)
-	{
-	  sPeripheralType = "-quik";	// quicklaunch. TODO: Add case in Game Plugin
-	}
-    }
-
-  if (m_iPK_MediaType == MEDIATYPE_lmce_Game_c64_CONST)
-    {
-      sPeripheralType = "-flop";	// Usually floppy, unless...
-      m_bOSDIsVisible = true;
-      if (sFileName.find (StringUtils::ToLower (".crt")) != string::npos ||
-	  sFileName.find (StringUtils::ToLower (".80")) != string::npos)
-	{
-	  sPeripheralType = "-cart1";	// cartridge
-	}
-      if (sFileName.find (StringUtils::ToLower (".prg")) != string::npos ||
-	  sFileName.find (StringUtils::ToLower (".p00")) != string::npos ||
-	  sFileName.find (StringUtils::ToLower (".t64")) != string::npos)
-	{
-	  sPeripheralType = "-quik";	// quicklaunch.
-	}
-    }
-
-  if (m_iPK_MediaType == MEDIATYPE_lmce_Game_Atari800_CONST)
-    {
-      m_bOSDIsVisible = true;
-      sPeripheralType = "-flop1";	// usually floppy, unless...
-      if (sFileName.find (StringUtils::ToLower (".rom")) != string::npos ||
-	  sFileName.find (StringUtils::ToLower (".bin")) != string::npos)
-	{
-	  sPeripheralType = "-cart1";
-	}
-    }
-
-  if ((sFileName.find (StringUtils::ToLower (".fds")) != string::npos))
-    {
-      sPeripheralType = "-flop";
-    }
-
-  if ((sLFileName.find (".bin") != string::npos) ||
-      (sLFileName.find (".a26") != string::npos) ||
-      (sLFileName.find (".a52") != string::npos) ||
-      (sLFileName.find (".a78") != string::npos) ||
-      (sLFileName.find (".col") != string::npos) ||
-      (sLFileName.find (".int") != string::npos) ||
-      (sLFileName.find (".itv") != string::npos) ||
-      (sLFileName.find (".sg") != string::npos) ||
-      (sLFileName.find (".sms") != string::npos) ||
-      (sLFileName.find (".nes") != string::npos) ||
-      (sLFileName.find (".zip") != string::npos) ||
-      (sLFileName.find (".smc") != string::npos) ||
-      (sLFileName.find (".sfc") != string::npos) ||
-      (sLFileName.find (".fig") != string::npos) ||
-      (sLFileName.find (".swc") != string::npos) ||
-      (sLFileName.find (".gen") != string::npos) ||
-      (sLFileName.find (".smd") != string::npos) ||
-      (sLFileName.find (".md") != string::npos) ||
-      (sLFileName.find (".pce") != string::npos) ||
-      (sLFileName.find (".vec") != string::npos))
-    {
-      sPeripheralType = "-cart";
-    }
-
-  // If Peripheral type is still unset here, it may be a zip file. 
-  // come back here and write this when we need it.
-
-  // Hack to add overlays for the Vectrex.
-  if (m_sMachineType == "vectrex")
-    {
-      string
-	sTmp = sLFileName.substr (0, sLFileName.length () - 4);
-      if (sTmp.find ("(") != string::npos)
-	{
-	  sTmp = sTmp.substr (0, sTmp.find ("("));	// get only the name
-	  sExtra = "-view\t" + sTmp + "";
-	}
-    }
-
-  m_sPeripheralType = sPeripheralType;	// used by PostLaunchMESS()
-
-  sParameters =
-    sMachineType + "\t" + sPeripheralType + "\t" + sMediaURL + "\t" + sExtra +
-    "";
-
-  return sParameters;
-}
-
-string Game_Player::CreateWindowIDString (long unsigned int window)
-{
-  // FIXME: Provide some sanity checking later.
-  stringstream
-    ss;
-  ss << window;
-  return ss.str ();
-}
-
-bool Game_Player::LaunchMESS (string sMediaURL)
-{
-  if (m_bMAMEIsRunning)
-    StopMESS ();		// Do some housecleaning.
-
-  m_pDisplay = XOpenDisplay (getenv ("DISPLAY"));
-
-  string
-    sState = "";
-  size_t
-    iROMNameSize = FileUtils::FilenameWithoutPath (sMediaURL).size ();
-  m_sROMName =
-    FileUtils::FilenameWithoutPath (sMediaURL).substr (0, iROMNameSize - 4);
-  m_sFilename = FileUtils::FilenameWithoutPath (sMediaURL);
-  LoggerWrapper::GetInstance ()->Write (LV_STATUS, "ROM is: %s",
-					m_sROMName.c_str ());
-  DeviceData_Base *
-    pDevice_App_Server =
-    m_pData->FindFirstRelatedDeviceOfCategory
-    (DEVICECATEGORY_App_Server_CONST, this);
-  if (pDevice_App_Server)
-    {
-      string
-	sMessage =
-	StringUtils::itos (m_dwPK_Device) + " " +
-	StringUtils::itos (m_dwPK_Device) +
-	" 1 " TOSTRING (COMMAND_Application_Exited_CONST) " "
-	TOSTRING (COMMANDPARAMETER_Exit_Code_CONST) " ";
-
-      if (!UpdateMESSConfig (sMediaURL))
-	{
-	  return false;
-	}			// Make sure stella's configuration is correct. 
-
-      string
-	sParameters = GetMessParametersFor (sMediaURL);
-
-      LoggerWrapper::GetInstance ()->Write (LV_CRITICAL,
-					    "sParameters is: %s%s",
-					    sParameters.c_str (),
-					    sState.c_str ());
-
-      if (m_bLoadSavedGame)	// m_bLoadSavedGame is set in CMD_Play_Media
-	{
-	  //sState = "\t-state\t9";
-	}
-
-      DCE::CMD_Spawn_Application CMD_Spawn_Application (m_dwPK_Device,
-							pDevice_App_Server->m_dwPK_Device,
-							"mess", "mess",
-							sParameters + sState,
-							sMessage + "1",
-							sMessage + "0", false,
-							false, true, false);
-      if (SendCommand (CMD_Spawn_Application))
-	{
-	  m_bMAMEIsRunning = true;
-
-	  Sleep (5000);		// FIXME !!!!
-
-	  if (!WindowUtils::FindWindowMatchingWMCLASS
-	      (m_pDisplay, "mess.mess", 0, m_iMAMEWindowId))
-	    {
-	      LoggerWrapper::GetInstance ()->Write (LV_CRITICAL,
-						    "Couldn't find MESS Window");
-	    }
-	  else
-	    {
-	      LoggerWrapper::GetInstance ()->Write (LV_STATUS,
-						    "MESS window found: Window ID %d",
-						    m_iMAMEWindowId);
-	      m_sMAMEWindowId = CreateWindowIDString (m_iMAMEWindowId);
-	    }
-	  m_pAlarmManager->AddRelativeAlarm (5, this, CHECK_MAME, NULL);
-	  PostLaunchMESS ();
-
-	  return true;
-	}
-      LoggerWrapper::GetInstance ()->Write (LV_CRITICAL,
-					    "Game_Player::LaunchMESS - failed to launch");
-    }
-  else
-    LoggerWrapper::GetInstance ()->Write (LV_CRITICAL,
-					  "Game_Player::LaunchMESS - no app server");
-  return false;
-
-}
-
-/**
- * This is used, in some emulators to send keypresses to the emulated window
- * after launch, eg. to facilitate -quik loaded images in vic20/c64
- */
-void
-Game_Player::PostLaunchMESS ()
-{
-
-  Sleep (4000);			// Hackorama.
-
-  if (m_iPK_MediaType == MEDIATYPE_lmce_Game_c64_CONST)
-    {
-      if (m_sPeripheralType == "-quik")
-	{
-	  // Quik Launch. type RUN<enter>
-	  WindowUtils::SendKeyToWindow (m_pDisplay, m_iMAMEWindowId, XK_R,
-					m_iEventSerialNum++);
-	  Sleep (100);
-	  WindowUtils::SendKeyToWindow (m_pDisplay, m_iMAMEWindowId, XK_U,
-					m_iEventSerialNum++);
-	  Sleep (100);
-	  WindowUtils::SendKeyToWindow (m_pDisplay, m_iMAMEWindowId, XK_N,
-					m_iEventSerialNum++);
-	  Sleep (100);
-	  WindowUtils::SendKeyToWindow (m_pDisplay, m_iMAMEWindowId,
-					XK_Return, m_iEventSerialNum++);
-	  Sleep (100);
-	  return;
-	}
-
-      if (m_sPeripheralType == "-flop")
-	{
-	  // A disk was loaded, type LOAD"*",8,1
-	  WindowUtils::SendKeyToWindow (m_pDisplay, m_iMAMEWindowId, XK_L,
-					m_iEventSerialNum++);
-	  Sleep (100);
-	  WindowUtils::SendKeyToWindow (m_pDisplay, m_iMAMEWindowId, XK_O,
-					m_iEventSerialNum++);
-	  Sleep (100);
-	  WindowUtils::SendKeyToWindow (m_pDisplay, m_iMAMEWindowId, XK_A,
-					m_iEventSerialNum++);
-	  Sleep (100);
-	  WindowUtils::SendKeyToWindow (m_pDisplay, m_iMAMEWindowId, XK_D,
-					m_iEventSerialNum++);
-	  Sleep (100);
-	  WindowUtils::SendKeyToWindow (m_pDisplay, m_iMAMEWindowId, XK_2,
-					m_iEventSerialNum++, XK_Shift_L);
-	  WindowUtils::SendKeyToWindow (m_pDisplay, m_iMAMEWindowId,
-					XK_bracketright, m_iEventSerialNum++);
-	  Sleep (100);
-
-	  Sleep (100);
-	  WindowUtils::SendKeyToWindow (m_pDisplay, m_iMAMEWindowId, XK_2,
-					m_iEventSerialNum++, XK_Shift_L);
-	  Sleep (100);
-	  WindowUtils::SendKeyToWindow (m_pDisplay, m_iMAMEWindowId, XK_comma,
-					m_iEventSerialNum++);
-	  Sleep (100);
-	  WindowUtils::SendKeyToWindow (m_pDisplay, m_iMAMEWindowId, XK_8,
-					m_iEventSerialNum++);
-	  Sleep (100);
-	  WindowUtils::SendKeyToWindow (m_pDisplay, m_iMAMEWindowId, XK_comma,
-					m_iEventSerialNum++);
-	  Sleep (100);
-	  WindowUtils::SendKeyToWindow (m_pDisplay, m_iMAMEWindowId, XK_1,
-					m_iEventSerialNum++);
-	  Sleep (100);
-	  WindowUtils::SendKeyToWindow (m_pDisplay, m_iMAMEWindowId,
-					XK_semicolon, m_iEventSerialNum++);
-	  Sleep (100);
-	  WindowUtils::SendKeyToWindow (m_pDisplay, m_iMAMEWindowId, XK_R,
-					m_iEventSerialNum++);
-	  Sleep (100);
-	  WindowUtils::SendKeyToWindow (m_pDisplay, m_iMAMEWindowId, XK_U,
-					m_iEventSerialNum++);
-	  Sleep (100);
-	  WindowUtils::SendKeyToWindow (m_pDisplay, m_iMAMEWindowId, XK_N,
-					m_iEventSerialNum++);
-	  Sleep (100);
-
-	  WindowUtils::SendKeyToWindow (m_pDisplay, m_iMAMEWindowId,
-					XK_Return, m_iEventSerialNum++);
-	  Sleep (100);
-	  return;
-	}
-    }
-}
-
-bool Game_Player::LaunchMAME (string sMediaURL)
-{
-
-  if (m_bMAMEIsRunning)
-    StopMAME ();		// Do some housecleaning.
-
-  m_pDisplay = XOpenDisplay (getenv ("DISPLAY"));
-
-  string
-    sState = "";
-
-  size_t
-    iROMNameSize = FileUtils::FilenameWithoutPath (sMediaURL).size ();
-  m_sROMName =
-    FileUtils::FilenameWithoutPath (sMediaURL).substr (0, iROMNameSize - 4);
-  LoggerWrapper::GetInstance ()->Write (LV_STATUS, "ROM is: %s",
-					m_sROMName.c_str ());
-  DeviceData_Base *
-    pDevice_App_Server =
-    m_pData->FindFirstRelatedDeviceOfCategory
-    (DEVICECATEGORY_App_Server_CONST, this);
-  if (pDevice_App_Server)
-    {
-      string
-	sMessage =
-	StringUtils::itos (m_dwPK_Device) + " " +
-	StringUtils::itos (m_dwPK_Device) +
-	" 1 " TOSTRING (COMMAND_Application_Exited_CONST) " "
-	TOSTRING (COMMANDPARAMETER_Exit_Code_CONST) " ";
-
-      if (!UpdateMAMEConfig (sMediaURL))
-	{
-	  return false;
-	}			// Make sure MAME's configuration is correct. 
-
-      // m_bLoadSavedGame is set in CMD_Play_Media
-      if (m_bLoadSavedGame)
-	{
-	  //sState = "\t-state\t9"; // load saved state from slot 9
-	}
-
-      DCE::CMD_Spawn_Application CMD_Spawn_Application (m_dwPK_Device,
-							pDevice_App_Server->m_dwPK_Device,
-							"mame", "mame",
-							sMediaURL + sState,
-							sMessage + "1",
-							sMessage + "0", false,
-							false, true, false);
-      if (SendCommand (CMD_Spawn_Application))
-	{
-	  m_bMAMEIsRunning = true;
-
-	  Sleep (5000);		// FIXME !!!!
-
-	  if (!WindowUtils::FindWindowMatchingWMCLASS
-	      (m_pDisplay, "mame.mame", 0, m_iMAMEWindowId))
-	    {
-	      LoggerWrapper::GetInstance ()->Write (LV_CRITICAL,
-						    "Couldn't find MAME Window");
-	    }
-	  else
-	    {
-	      LoggerWrapper::GetInstance ()->Write (LV_STATUS,
-						    "MAME window found: Window ID %d",
-						    m_iMAMEWindowId);
-	      m_sMAMEWindowId = CreateWindowIDString (m_iMAMEWindowId);
-	    }
-	  m_pAlarmManager->AddRelativeAlarm (5, this, CHECK_MAME, NULL);
-	  return true;
-	}
-      LoggerWrapper::GetInstance ()->Write (LV_CRITICAL,
-					    "Game_Player::LaunchMAME - failed to launch");
-    }
-  else
-    LoggerWrapper::GetInstance ()->Write (LV_CRITICAL,
-					  "Game_Player::LaunchMAME - no app server");
-  return false;
-
-}
-
-bool Game_Player::StopMESS ()
-{
-  DeviceData_Base *
-    pDevice_App_Server = NULL;
-  string
-    sResponse;
-  if (!m_bRouterReloading)
-    {
-      m_pAlarmManager->CancelAlarmByType (CHECK_MAME);
-      pDevice_App_Server =
-	m_pData->FindFirstRelatedDeviceOfCategory
-	(DEVICECATEGORY_App_Server_CONST, this);
-      if (pDevice_App_Server)
-	{
-	  DCE::CMD_Kill_Application CMD_Kill_Application (m_dwPK_Device,
-							  pDevice_App_Server->m_dwPK_Device,
-							  "mess", false);
-	  m_iMAMEWindowId = 0;
-	  m_bMAMEIsRunning = false;
-
-	  if (m_bMAMEIsRunning)
-	    XCloseDisplay (m_pDisplay);
-
-	  return SendCommand (CMD_Kill_Application, &sResponse);	// Get return confirmation so we know it's gone before we continue
-	}
-    }
-
-  LoggerWrapper::GetInstance ()->Write (LV_STATUS,
-					"Game_Player::StopMESS %p %s",
-					pDevice_App_Server,
-					sResponse.c_str ());
-  return false;
-}
-
-bool Game_Player::StopMAME ()
-{
-
-  DeviceData_Base *
-    pDevice_App_Server = NULL;
-  string
-    sResponse;
-  if (!m_bRouterReloading)
-    {
-      m_pAlarmManager->CancelAlarmByType (CHECK_MAME);
-      pDevice_App_Server =
-	m_pData->FindFirstRelatedDeviceOfCategory
-	(DEVICECATEGORY_App_Server_CONST, this);
-      if (pDevice_App_Server)
-	{
-	  DCE::CMD_Kill_Application CMD_Kill_Application (m_dwPK_Device,
-							  pDevice_App_Server->m_dwPK_Device,
-							  "mame", false);
-	  m_iMAMEWindowId = 0;
-	  m_bMAMEIsRunning = false;
-
-	  if (m_bMAMEIsRunning)
-	    XCloseDisplay (m_pDisplay);
-
-	  return SendCommand (CMD_Kill_Application, &sResponse);	// Get return confirmation so we know it's gone before we continue
-	}
-    }
-
-  LoggerWrapper::GetInstance ()->Write (LV_STATUS,
-					"Game_Player::StopMAME %p %s",
-					pDevice_App_Server,
-					sResponse.c_str ());
-  return false;
-
-}
-
-bool Game_Player::LaunchPCSX (string sMediaURL)
-{
-
-  string
-    sParams;
-
-  DeviceData_Base *
-    pDevice_App_Server =
-    m_pData->FindFirstRelatedDeviceOfCategory
-    (DEVICECATEGORY_App_Server_CONST, this);
-  if (pDevice_App_Server)
-    {
-      string
-	sMessage =
-	StringUtils::itos (m_dwPK_Device) + " " +
-	StringUtils::itos (m_dwPK_Device) +
-	" 1 " TOSTRING (COMMAND_Application_Exited_CONST) " "
-	TOSTRING (COMMANDPARAMETER_Exit_Code_CONST) " ";
-
-      // NoDisc.img/iso/bin is a special file. It means start the console without a disc.
-      if (sMediaURL.find ("NoDisc") != string::npos)
-	{
-	  sParams = "-nogui\t-psxout";
-	}
-      else
-	{
-	  sParams = "-nogui\t-psxout\t-cdfile\t" + sMediaURL;
-	}
-
-      DCE::CMD_Spawn_Application CMD_Spawn_Application (m_dwPK_Device,
-							pDevice_App_Server->m_dwPK_Device,
-							"pcsx", "pcsx",
-							sParams,
-							sMessage + "1",
-							sMessage + "0", false,
-							false, true, false);
-      if (SendCommand (CMD_Spawn_Application))
-	{
-	  m_bMAMEIsRunning = true;
-
-	  Sleep (5000);		// FIXME !!!!
-
-	  if (!WindowUtils::FindWindowMatchingWMCLASS
-	      (m_pDisplay, "pcsx.pcsx", 0, m_iMAMEWindowId))
-	    {
-	      LoggerWrapper::GetInstance ()->Write (LV_CRITICAL,
-						    "Couldn't find PCSX Window");
-	    }
-	  else
-	    {
-	      LoggerWrapper::GetInstance ()->Write (LV_STATUS,
-						    "PCSX window found: Window ID %d",
-						    m_iMAMEWindowId);
-	      m_sMAMEWindowId = CreateWindowIDString (m_iMAMEWindowId);
-	    }
-
-	  return true;
-	}
-      LoggerWrapper::GetInstance ()->Write (LV_CRITICAL,
-					    "Game_Player::LaunchMAME - failed to launch");
-    }
-  else
-    LoggerWrapper::GetInstance ()->Write (LV_CRITICAL,
-					  "Game_Player::LaunchMAME - no app server");
-  return false;
-
-}
-
-bool Game_Player::StopPCSX ()
-{
-  DeviceData_Base *
-    pDevice_App_Server = NULL;
-  string
-    sResponse;
-  if (!m_bRouterReloading)
-    {
-      pDevice_App_Server =
-	m_pData->FindFirstRelatedDeviceOfCategory
-	(DEVICECATEGORY_App_Server_CONST, this);
-      if (pDevice_App_Server)
-	{
-	  DCE::CMD_Kill_Application CMD_Kill_Application (m_dwPK_Device,
-							  pDevice_App_Server->m_dwPK_Device,
-							  "pcsx", false);
-	  m_iMAMEWindowId = 0;
-	  return SendCommand (CMD_Kill_Application, &sResponse);	// Get return confirmation so we know it's gone before we continue
-	}
-    }
-
-  LoggerWrapper::GetInstance ()->Write (LV_STATUS,
-					"Game_Player::StopMESS %p %s",
-					pDevice_App_Server,
-					sResponse.c_str ());
-  return false;
-}
-
-// come back here
-bool Game_Player::LaunchPCSX2 (string sMediaURL)
-{
-
-  DeviceData_Base *
-    pDevice_App_Server =
-    m_pData->FindFirstRelatedDeviceOfCategory
-    (DEVICECATEGORY_App_Server_CONST, this);
-  if (pDevice_App_Server)
-    {
-      string
-	sMessage =
-	StringUtils::itos (m_dwPK_Device) + " " +
-	StringUtils::itos (m_dwPK_Device) +
-	" 1 " TOSTRING (COMMAND_Application_Exited_CONST) " "
-	TOSTRING (COMMANDPARAMETER_Exit_Code_CONST) " ";
-
-      DCE::CMD_Spawn_Application CMD_Spawn_Application (m_dwPK_Device,
-							pDevice_App_Server->m_dwPK_Device,
-							"/usr/pcsx2/bin/pcsx2-dev",
-							"pcsx2",
-							"--nogui\t" +
-							sMediaURL,
-							sMessage + "1",
-							sMessage + "0", false,
-							false, true, false);
-      if (SendCommand (CMD_Spawn_Application))
-	{
-	  m_bMAMEIsRunning = true;
-
-	  Sleep (5000);		// FIXME !!!!
-
-	  if (!WindowUtils::FindWindowMatchingWMCLASS
-	      (m_pDisplay, "pcsx2.pcsx2", 0, m_iMAMEWindowId))
-	    {
-	      LoggerWrapper::GetInstance ()->Write (LV_CRITICAL,
-						    "Couldn't find PCSX Window");
-	    }
-	  else
-	    {
-	      LoggerWrapper::GetInstance ()->Write (LV_STATUS,
-						    "PCSX window found: Window ID %d",
-						    m_iMAMEWindowId);
-	      m_sMAMEWindowId = CreateWindowIDString (m_iMAMEWindowId);
-	    }
-
-	  return true;
-	}
-      LoggerWrapper::GetInstance ()->Write (LV_CRITICAL,
-					    "Game_Player::LaunchMAME - failed to launch");
-    }
-  else
-    LoggerWrapper::GetInstance ()->Write (LV_CRITICAL,
-					  "Game_Player::LaunchMAME - no app server");
-  return false;
-
-}
-
-bool Game_Player::StopPCSX2 ()
-{
-  DeviceData_Base *
-    pDevice_App_Server = NULL;
-  string
-    sResponse;
-  if (!m_bRouterReloading)
-    {
-      pDevice_App_Server =
-	m_pData->FindFirstRelatedDeviceOfCategory
-	(DEVICECATEGORY_App_Server_CONST, this);
-      if (pDevice_App_Server)
-	{
-	  DCE::CMD_Kill_Application CMD_Kill_Application (m_dwPK_Device,
-							  pDevice_App_Server->m_dwPK_Device,
-							  "pcsx2", false);
-	  m_iMAMEWindowId = 0;
-	  return SendCommand (CMD_Kill_Application, &sResponse);	// Get return confirmation so we know it's gone before we continue
-	}
-    }
-
-  LoggerWrapper::GetInstance ()->Write (LV_STATUS,
-					"Game_Player::StopMESS %p %s",
-					pDevice_App_Server,
-					sResponse.c_str ());
-  return false;
-}
-
-/**
- * Periodically check the game player's window geometry.
- */
-void
-Game_Player::CheckMAME ()
-{
-
-  int x, y, w, h;
-  if (WindowUtils::GetWindowGeometry
-      (m_pDisplay, m_iMAMEWindowId, x, y, w, h))
-    {
-
-#ifdef DEBUG
-      LoggerWrapper::GetInstance ()->Write (LV_DEBUG,
-					    "Game_Player::CheckMAME() - Current Window Geometry is x:%d y:%d w:%dpx h:%dpx",
-					    x, y, w, h);
-#endif
-
-      m_iNowPlayingX = x;
-      m_iNowPlayingY = y;
-      m_iNowPlayingW = w;
-      m_iNowPlayingH = h;
-
-    }
-  else
-    {
-      LoggerWrapper::GetInstance ()->Write (LV_CRITICAL,
-					    "Game_Player::CheckMAME() - Called and could not get Window Geometry, is Emulator running?");
-    }
-
-  // reset the alarm thread
-  m_pAlarmManager->CancelAlarmByType (CHECK_MAME);
-  m_pAlarmManager->AddRelativeAlarm (5, this, CHECK_MAME, NULL);
-
-}
-
 void
 Game_Player::AlarmCallback (int id, void *param)
 {
   switch (id)
     {
     case CHECK_MAME:
-      CheckMAME ();
       break;
     }
 }
@@ -1773,135 +214,68 @@ Game_Player::ReceivedUnknownCommand (string & sCMD_Result, Message * pMessage)
   sCMD_Result = "UNKNOWN COMMAND";
 }
 
-//<-dceag-sample-b->
-/*		**** SAMPLE ILLUSTRATING HOW TO USE THE BASE CLASSES ****
-
-**** IF YOU DON'T WANT DCEGENERATOR TO KEEP PUTTING THIS AUTO-GENERATED SECTION ****
-**** ADD AN ! AFTER THE BEGINNING OF THE AUTO-GENERATE TAG, LIKE //<=dceag-sample-b->! ****
-Without the !, everything between <=dceag-sometag-b-> and <=dceag-sometag-e->
-will be replaced by DCEGenerator each time it is run with the normal merge selection.
-The above blocks are actually <- not <=.  We don't want a substitution here
-
-void Game_Player::SomeFunction()
+/**
+ * CreateChildren() - This is used to instantiate the EmulatorFactory, which
+ * will instantiate the individual EmulatorControllers for use. 
+ * 
+ * This is deliberately done after GetConfig() so that we do not waste memory
+ * if the initial bootstrap to the DCE Router can't be made.
+ */
+void
+Game_Player::CreateChildren ()
 {
-	// If this is going to be loaded into the router as a plug-in, you can implement: 	virtual bool Register();
-	// to do all your registration, such as creating message interceptors
-
-	// If you use an IDE with auto-complete, after you type DCE:: it should give you a list of all
-	// commands and requests, including the parameters.  See "AllCommandsRequests.h"
-
-	// Examples:
-	
-	// Send a specific the "CMD_Simulate_Mouse_Click" command, which takes an X and Y parameter.  We'll use 55,77 for X and Y.
-	DCE::CMD_Simulate_Mouse_Click CMD_Simulate_Mouse_Click(m_dwPK_Device,OrbiterID,55,77);
-	SendCommand(CMD_Simulate_Mouse_Click);
-
-	// Send the message to orbiters 32898 and 27283 (ie a device list, hence the _DL)
-	// And we want a response, which will be "OK" if the command was successfull
-	string sResponse;
-	DCE::CMD_Simulate_Mouse_Click_DL CMD_Simulate_Mouse_Click_DL(m_dwPK_Device,"32898,27283",55,77)
-	SendCommand(CMD_Simulate_Mouse_Click_DL,&sResponse);
-
-	// Send the message to all orbiters within the house, which is all devices with the category DEVICECATEGORY_Orbiter_CONST (see pluto_main/Define_DeviceCategory.h)
-	// Note the _Cat for category
-	DCE::CMD_Simulate_Mouse_Click_Cat CMD_Simulate_Mouse_Click_Cat(m_dwPK_Device,DEVICECATEGORY_Orbiter_CONST,true,BL_SameHouse,55,77)
-    SendCommand(CMD_Simulate_Mouse_Click_Cat);
-
-	// Send the message to all "DeviceTemplate_Orbiter_CONST" devices within the room (see pluto_main/Define_DeviceTemplate.h)
-	// Note the _DT.
-	DCE::CMD_Simulate_Mouse_Click_DT CMD_Simulate_Mouse_Click_DT(m_dwPK_Device,DeviceTemplate_Orbiter_CONST,true,BL_SameRoom,55,77);
-	SendCommand(CMD_Simulate_Mouse_Click_DT);
-
-	// This command has a normal string parameter, but also an int as an out parameter
-	int iValue;
-	DCE::CMD_Get_Signal_Strength CMD_Get_Signal_Strength(m_dwDeviceID, DestDevice, sMac_address,&iValue);
-	// This send command will wait for the destination device to respond since there is
-	// an out parameter
-	SendCommand(CMD_Get_Signal_Strength);  
-
-	// This time we don't care about the out parameter.  We just want the command to 
-	// get through, and don't want to wait for the round trip.  The out parameter, iValue,
-	// will not get set
-	SendCommandNoResponse(CMD_Get_Signal_Strength);  
-
-	// This command has an out parameter of a data block.  Any parameter that is a binary
-	// data block is a pair of int and char *
-	// We'll also want to see the response, so we'll pass a string for that too
-
-	int iFileSize;
-	char *pFileContents
-	string sResponse;
-	DCE::CMD_Request_File CMD_Request_File(m_dwDeviceID, DestDevice, "filename",&pFileContents,&iFileSize,&sResponse);
-	SendCommand(CMD_Request_File);
-
-	// If the device processed the command (in this case retrieved the file),
-	// sResponse will be "OK", and iFileSize will be the size of the file
-	// and pFileContents will be the file contents.  **NOTE**  We are responsible
-	// free deleting pFileContents.
-
-
-	// To access our data and events below, you can type this-> if your IDE supports auto complete to see all the data and events you can access
-
-	// Get our IP address from our data
-	string sIP = DATA_Get_IP_Address();
-
-	// Set our data "Filename" to "myfile"
-	DATA_Set_Filename("myfile");
-
-	// Fire the "Finished with file" event, which takes no parameters
-	EVENT_Finished_with_file();
-	// Fire the "Touch or click" which takes an X and Y parameter
-	EVENT_Touch_or_click(10,150);
+  m_pEmulatorFactory = new EmulatorFactory(this);
+  m_pEmulatorFactory->init();
 }
-*/
-//<-dceag-sample-e->
 
+/** 
+ * Called from the emulator controller to launch the emulator
+ */
+void Game_Player::LaunchEmulator()
+{
+
+    string sMessage = 
+      StringUtils::itos(m_dwPK_Device) + " " +
+      StringUtils::itos(m_dwPK_Device) +
+      " 1 " TOSTRING (COMMAND_Application_Exited_CONST) " "
+      TOSTRING (COMMANDPARAMETER_Exit_Code_CONST) " ";
+
+    DCE::CMD_Spawn_Application CMD_Spawn_Application(m_dwPK_Device,
+						     m_pDevice_App_Server->m_dwPK_Device,
+						     m_pEmulatorController->m_pEmulatorModel->m_sEmulatorBinary,
+						     "emulator",
+						     m_pEmulatorController->m_pEmulatorModel->m_sArgs,
+						     sMessage + "1",
+						     sMessage + "0",
+						     false,
+						     false,
+						     true,
+						     false);
+
+    SendCommand(CMD_Spawn_Application);
+
+}
+
+/**
+ * Called from the emulator controller to kill the current emulator engine.
+ */
+void Game_Player::KillEmulator()
+{
+    DCE::CMD_Kill_Application CMD_Kill_Application(m_dwPK_Device,
+						   m_pDevice_App_Server->m_dwPK_Device,
+						   "emulator",
+						   false);
+    
+    SendCommand(CMD_Kill_Application);
+
+}
+
+//<-dceag-sample-b->!
 /*
 
 	COMMANDS TO IMPLEMENT
 
 */
-
-/**
- * Process modifier. If Shift/Ctrl/etc are pressed. Set flags. 
- */
-void
-Game_Player::ProcessModifier (int iPK_Button)
-{
-  m_iModifier = iPK_Button;
-}
-
-/**
- * Process alphanumeric keys.
- */
-void
-Game_Player::ProcessAlphanumeric (int iXKeySym)
-{
-  if (m_iModifier == BUTTON_Shift_Left_CONST)
-    {
-      WindowUtils::SendKeyToWindow (m_pDisplay, m_iMAMEWindowId, iXKeySym,
-				    m_iEventSerialNum++, XK_Shift_L);
-      m_iModifier = 0;
-    }
-  else if (m_iModifier == BUTTON_Shift_Right_CONST)
-    {
-      WindowUtils::SendKeyToWindow (m_pDisplay, m_iMAMEWindowId, iXKeySym,
-				    m_iEventSerialNum++, XK_Shift_R);
-      m_iModifier = 0;
-    }
-  else if (m_iModifier == BUTTON_Control_CONST)
-    {
-      WindowUtils::SendKeyToWindow (m_pDisplay, m_iMAMEWindowId, iXKeySym,
-				    m_iEventSerialNum++, XK_Control_L);
-      m_iModifier = 0;
-    }
-  else
-    {
-      WindowUtils::SendKeyToWindow (m_pDisplay, m_iMAMEWindowId, iXKeySym,
-				    m_iEventSerialNum++);
-    }
-}
-
 
 //<-dceag-c28-b->
 
@@ -1925,328 +299,16 @@ Game_Player::CMD_Simulate_Keypress (string sPK_Button, int iStreamID,
   cout << "Parm #41 - StreamID=" << iStreamID << endl;
   cout << "Parm #50 - Name=" << sName << endl;
 
-  // Basic alphanumeric processing.
-  int iPK_Button = atoi (sPK_Button.c_str ());
+  int iPK_Button = atoi(sPK_Button.c_str());
 
-  // Shift and control key processing.
-  switch (iPK_Button)
+  if (!m_pEmulatorController)
     {
-    case BUTTON_Shift_Left_CONST:
-      ProcessModifier (BUTTON_Shift_Left_CONST);
-      break;
-    case BUTTON_Shift_Right_CONST:
-      ProcessModifier (BUTTON_Shift_Right_CONST);
-      break;
-    case BUTTON_Control_CONST:
-      ProcessModifier (BUTTON_Control_CONST);
-      break;
+      LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"CMD_Simulate_Keypress called, but no emulator controller! bsiling!");
+      return;
     }
 
-  // Function keys
-  switch (iPK_Button)
-    {
-    case BUTTON_F1_CONST:
-      ProcessAlphanumeric (XK_F1);
-      break;
-    case BUTTON_F2_CONST:
-      ProcessAlphanumeric (XK_F2);
-      break;
-    case BUTTON_F3_CONST:
-      ProcessAlphanumeric (XK_F3);
-      break;
-    case BUTTON_F4_CONST:
-      ProcessAlphanumeric (XK_F4);
-      break;
-    case BUTTON_F5_CONST:
-      ProcessAlphanumeric (XK_F5);
-      break;
-    case BUTTON_F6_CONST:
-      ProcessAlphanumeric (XK_F6);
-      break;
-    case BUTTON_F7_CONST:
-      ProcessAlphanumeric (XK_F7);
-      break;
-    case BUTTON_F8_CONST:
-      ProcessAlphanumeric (XK_F8);
-      break;
-    case BUTTON_F9_CONST:
-      ProcessAlphanumeric (XK_F9);
-      break;
-    case BUTTON_F10_CONST:
-      ProcessAlphanumeric (XK_F10);
-      break;
+  m_pEmulatorController->pressButton(iPK_Button);
 
-    }
-
-  // Standard Alphanumeric Processing.
-  switch (iPK_Button)
-    {
-    case BUTTON_1_CONST:
-      ProcessAlphanumeric (XK_1);
-      break;
-    case BUTTON_2_CONST:
-      ProcessAlphanumeric (XK_2);
-      break;
-    case BUTTON_3_CONST:
-      ProcessAlphanumeric (XK_3);
-      break;
-    case BUTTON_4_CONST:
-      ProcessAlphanumeric (XK_4);
-      break;
-    case BUTTON_5_CONST:
-      ProcessAlphanumeric (XK_5);
-      break;
-    case BUTTON_6_CONST:
-      ProcessAlphanumeric (XK_6);
-      break;
-    case BUTTON_7_CONST:
-      ProcessAlphanumeric (XK_7);
-      break;
-    case BUTTON_8_CONST:
-      ProcessAlphanumeric (XK_8);
-      break;
-    case BUTTON_9_CONST:
-      ProcessAlphanumeric (XK_9);
-      break;
-    case BUTTON_0_CONST:
-      ProcessAlphanumeric (XK_0);
-      break;
-    case BUTTON_q_CONST:
-      ProcessAlphanumeric (XK_q);
-      break;
-    case BUTTON_w_CONST:
-      ProcessAlphanumeric (XK_w);
-      break;
-    case BUTTON_e_CONST:
-      ProcessAlphanumeric (XK_e);
-      break;
-    case BUTTON_r_CONST:
-      ProcessAlphanumeric (XK_r);
-      break;
-    case BUTTON_t_CONST:
-      ProcessAlphanumeric (XK_t);
-      break;
-    case BUTTON_y_CONST:
-      ProcessAlphanumeric (XK_y);
-      break;
-    case BUTTON_u_CONST:
-      ProcessAlphanumeric (XK_u);
-      break;
-    case BUTTON_i_CONST:
-      ProcessAlphanumeric (XK_i);
-      break;
-    case BUTTON_o_CONST:
-      ProcessAlphanumeric (XK_o);
-      break;
-    case BUTTON_p_CONST:
-      ProcessAlphanumeric (XK_p);
-      break;
-    case BUTTON_a_CONST:
-      ProcessAlphanumeric (XK_a);
-      break;
-    case BUTTON_s_CONST:
-      ProcessAlphanumeric (XK_s);
-      break;
-    case BUTTON_d_CONST:
-      ProcessAlphanumeric (XK_d);
-      break;
-    case BUTTON_f_CONST:
-      ProcessAlphanumeric (XK_f);
-      break;
-    case BUTTON_g_CONST:
-      ProcessAlphanumeric (XK_g);
-      break;
-    case BUTTON_h_CONST:
-      ProcessAlphanumeric (XK_h);
-      break;
-    case BUTTON_j_CONST:
-      ProcessAlphanumeric (XK_j);
-      break;
-    case BUTTON_k_CONST:
-      ProcessAlphanumeric (XK_k);
-      break;
-    case BUTTON_l_CONST:
-      ProcessAlphanumeric (XK_l);
-      break;
-    case BUTTON_z_CONST:
-      ProcessAlphanumeric (XK_z);
-      break;
-    case BUTTON_x_CONST:
-      ProcessAlphanumeric (XK_x);
-      break;
-    case BUTTON_c_CONST:
-      ProcessAlphanumeric (XK_c);
-      break;
-    case BUTTON_v_CONST:
-      ProcessAlphanumeric (XK_v);
-      break;
-    case BUTTON_b_CONST:
-      ProcessAlphanumeric (XK_b);
-      break;
-    case BUTTON_n_CONST:
-      ProcessAlphanumeric (XK_n);
-      break;
-    case BUTTON_m_CONST:
-      ProcessAlphanumeric (XK_m);
-      break;
-    case BUTTON_Enter_CONST:
-      ProcessAlphanumeric (XK_Return);
-      break;
-    case BUTTON_Back_CONST:
-      ProcessAlphanumeric (XK_BackSpace);
-      break;
-    case BUTTON_space_CONST:
-      ProcessAlphanumeric (XK_space);
-      break;
-    case BUTTON_tab_CONST:
-      ProcessAlphanumeric (XK_Tab);
-      break;
-    case BUTTON_escape_CONST:
-      ProcessAlphanumeric (XK_Escape);
-      break;
-    case BUTTON_dash_CONST:
-      if (m_iPK_MediaType == MEDIATYPE_lmce_Game_vic20_CONST ||
-	  m_iPK_MediaType == MEDIATYPE_lmce_Game_c64_CONST)
-	{
-	  ProcessAlphanumeric (XK_equal);
-	}
-      else
-	ProcessAlphanumeric (XK_minus);
-      break;
-    case BUTTON_equals_sign_CONST:
-      if (m_iPK_MediaType == MEDIATYPE_lmce_Game_vic20_CONST ||
-	  m_iPK_MediaType == MEDIATYPE_lmce_Game_c64_CONST)
-	{
-	  ProcessAlphanumeric (XK_backslash);
-	}
-      else
-	ProcessAlphanumeric (XK_equal);
-      break;
-    case BUTTON_Bracket_Left_CONST:
-      ProcessAlphanumeric (XK_bracketleft);
-      break;
-    case BUTTON_Bracket_Right_CONST:
-      ProcessAlphanumeric (XK_bracketright);
-      break;
-    case BUTTON_Backslash_CONST:
-      ProcessAlphanumeric (XK_backslash);
-      break;
-    case BUTTON_colon_CONST:
-      ProcessAlphanumeric (XK_semicolon);
-      break;
-    case BUTTON_semicolumn_CONST:
-      if (m_iPK_MediaType == MEDIATYPE_lmce_Game_vic20_CONST ||
-	  m_iPK_MediaType == MEDIATYPE_lmce_Game_c64_CONST)
-	{
-	  ProcessAlphanumeric (XK_apostrophe);
-	}
-      else
-	ProcessAlphanumeric (XK_semicolon);
-      break;
-    case BUTTON_single_quote_CONST:
-      ProcessAlphanumeric (XK_apostrophe);
-      break;
-    case BUTTON_comma_CONST:
-      ProcessAlphanumeric (XK_comma);
-      break;
-    case BUTTON_period_CONST:
-      ProcessAlphanumeric (XK_period);
-      break;
-    case BUTTON_slash_CONST:
-      ProcessAlphanumeric (XK_slash);
-      break;
-    case BUTTON_plus_CONST:
-      if (m_iPK_MediaType == MEDIATYPE_lmce_Game_vic20_CONST ||
-	  m_iPK_MediaType == MEDIATYPE_lmce_Game_c64_CONST)
-	{
-	  ProcessAlphanumeric (XK_minus);
-	}
-      break;
-    case BUTTON_sterling_CONST:
-      // FIXME: DEADKEY. NO KNOWN KEYCODE.
-      // ProcessAlphanumeric(XK_asciicircum);
-      break;
-    case BUTTON_commoClrHome_CONST:
-      ProcessAlphanumeric (XK_Insert);
-      break;
-    case BUTTON_commoInsDel_CONST:
-      ProcessAlphanumeric (XK_BackSpace);
-      break;
-    case BUTTON_Restore_CONST:
-      ProcessAlphanumeric (XK_Print);	// is this right??
-      break;
-    case BUTTON_at_CONST:
-      ProcessAlphanumeric (XK_bracketleft);
-      break;
-    case BUTTON_asterisk_CONST:
-      ProcessAlphanumeric (XK_bracketright);
-      break;
-    case BUTTON_commoUp_CONST:
-      ProcessAlphanumeric (XK_Delete);
-      break;
-    case BUTTON_commoLeft_CONST:
-      ProcessAlphanumeric (XK_asciitilde);
-      break;
-    case BUTTON_Run_Stop_CONST:
-      ProcessAlphanumeric (XK_Home);
-      break;
-    case BUTTON_commoKey_CONST:
-      // FIXME is this a meta? Talk to a c64 user.
-      break;
-    case BUTTON_commoCRSRLR_CONST:
-      ProcessAlphanumeric (XK_Control_R);
-      break;
-    case BUTTON_commoCRSRUD_CONST:
-      ProcessAlphanumeric (XK_Meta_R);
-      break;
-    }
-
-}
-
-void
-Game_Player::ProcessPoundForMediaType (int iPK_MediaType)
-{
-  switch (iPK_MediaType)
-    {
-    case MEDIATYPE_lmce_Game_a5200_CONST:
-      WindowUtils::SendKeyToWindow (m_pDisplay, m_iMAMEWindowId, XK_KP_Enter,
-				    m_iEventSerialNum++);
-      break;
-    case MEDIATYPE_lmce_Game_coleco_CONST:
-      WindowUtils::SendKeyToWindow (m_pDisplay, m_iMAMEWindowId, XK_minus,
-				    m_iEventSerialNum++);
-      break;
-    case MEDIATYPE_lmce_Game_intv_CONST:
-      WindowUtils::SendKeyToWindow (m_pDisplay, m_iMAMEWindowId, XK_KP_Add,
-				    m_iEventSerialNum++);
-      break;
-    default:
-      // Do we need a default?
-      break;
-    }
-}
-
-void
-Game_Player::ProcessAsteriskForMediaType (int iPK_MediaType)
-{
-  switch (iPK_MediaType)
-    {
-    case MEDIATYPE_lmce_Game_a5200_CONST:
-      WindowUtils::SendKeyToWindow (m_pDisplay, m_iMAMEWindowId, XK_KP_Add,
-				    m_iEventSerialNum++);
-      break;
-    case MEDIATYPE_lmce_Game_coleco_CONST:
-      WindowUtils::SendKeyToWindow (m_pDisplay, m_iMAMEWindowId, XK_equal,
-				    m_iEventSerialNum++);
-      break;
-    case MEDIATYPE_lmce_Game_intv_CONST:
-      WindowUtils::SendKeyToWindow (m_pDisplay, m_iMAMEWindowId,
-				    XK_KP_Subtract, m_iEventSerialNum++);
-      break;
-    default:
-      // Do we need a default?
-      break;
-    }
 }
 
 //<-dceag-c29-b->
@@ -2271,22 +333,6 @@ Game_Player::CMD_Simulate_Mouse_Click (int iPosition_X, int iPosition_Y,
   cout << "Parm #12 - Position_Y=" << iPosition_Y << endl;
   cout << "Parm #41 - StreamID=" << iStreamID << endl;
 
-  VideoFrameGeometry *vfg =
-    m_mapVideoFrameGeometry[pMessage->m_dwPK_Device_From];
-  double iScaleW = (double) m_iNowPlayingW / (double) vfg->m_iWidth;
-  double iScaleH = (double) m_iNowPlayingH / (double) vfg->m_iHeight;
-  int iScaledX = floor ((double) iPosition_X * iScaleW);
-  int iScaledY = floor ((double) iPosition_Y * iScaleH);
-
-  cout << "iScaleW = " << iScaleW << " : iScaleH = " << iScaleH << endl;
-  cout << "iScaledX = " << iScaledX << " : iScaledY = " << iScaledY << endl;
-
-  // Send a double click, due to MAME's assumption that it is a mouse.
-  WindowUtils::SendClickToWindow (m_pDisplay, m_iMAMEWindowId, 1, iScaledX,
-				  iScaledY);
-  Sleep (100);
-  WindowUtils::SendClickToWindow (m_pDisplay, m_iMAMEWindowId, 1, iScaledX,
-				  iScaledY);
 }
 
 //<-dceag-c32-b->
@@ -2342,60 +388,54 @@ Game_Player::CMD_Play_Media (int iPK_MediaType, int iStreamID,
   cout << "Parm #42 - MediaPosition=" << sMediaPosition << endl;
   cout << "Parm #59 - MediaURL=" << sMediaURL << endl;
 
-  m_bOSDIsVisible = false;
-  m_iPK_MediaType = iPK_MediaType;
-  m_iStreamID = iStreamID;
+  if (m_pEmulatorController)
+    m_pEmulatorController_prev = m_pEmulatorController;
 
-  if (!sMediaPosition.empty ())
+  m_pEmulatorController = m_pEmulatorFactory->getEmulatorForMediaType(iPK_MediaType);
+
+  if (!m_pEmulatorController)
     {
-      m_bLoadSavedGame = true;
-      string sPath = GetSaveGamePath ();
-      string sCopyCmd = "cp " + sMediaPosition + " " + sPath + "/9.sta";
-      system (sCopyCmd.c_str ());
+      LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"I could not get an emulator controller for type %d from the EmulatorFactory. Bailing!",iPK_MediaType);
+      return;
+    }
+
+  // Detect if we are a streaming slave, and if so, parse URL, and point back to server.
+  if (sMediaURL.find("slave://") != string::npos)
+    {
+      size_t pos=0;
+      m_pEmulatorController->setStreaming(true);
+      m_pEmulatorController->setStreamingMaster(false);
+      string sURL1 = StringUtils::Tokenize(sMediaURL,"/",pos); // slave:
+      string sURL2 = StringUtils::Tokenize(sMediaURL,"/",pos); // [ ]
+      string sURL3 = StringUtils::Tokenize(sMediaURL,"/",pos); // ip address
+      string sURL4 = sMediaURL.substr(pos,sMediaURL.size()); // The rest of URL
+      m_pEmulatorController->setHostName(sURL3);
+      sMediaURL=sURL4;
+    }
+
+  // If the media URL contains a system configuration bit, send it to the controller,
+  // and strip it away from the media URL for further processing.
+  if (sMediaURL.find("~") != string::npos)
+    {
+      m_pEmulatorController->setSystemConfiguration(sMediaURL.substr(sMediaURL.find("~")+1));
+      sMediaURL = sMediaURL.substr(0,sMediaURL.find("~"));
+    }
+
+  m_pEmulatorController->insertMediaNamed(sMediaURL);
+
+  // If this was filled, then the media was called from a bookmark in the file browser.
+  if (!sMediaPosition.empty() && !m_pEmulatorController->m_pEmulatorModel->m_bIsStreaming)
+    {
+      m_pEmulatorController->setMediaPosition(sMediaPosition);
     }
   else
     {
-      m_bLoadSavedGame = false;
+      m_pEmulatorController->setMediaPosition("");
     }
 
-  switch (iPK_MediaType)
-    {
-    case MEDIATYPE_lmce_Game_CONST:
-      LaunchMAME (sMediaURL);
-      break;
-    case MEDIATYPE_lmce_Game_a2600_CONST:
-    case MEDIATYPE_lmce_Game_a5200_CONST:
-    case MEDIATYPE_lmce_Game_a7800_CONST:
-    case MEDIATYPE_lmce_Game_coleco_CONST:
-    case MEDIATYPE_lmce_Game_intv_CONST:
-    case MEDIATYPE_lmce_Game_sg1000_CONST:
-    case MEDIATYPE_lmce_Game_sms_CONST:
-    case MEDIATYPE_lmce_Game_nes_CONST:
-    case MEDIATYPE_lmce_Game_famicom_CONST:
-    case MEDIATYPE_lmce_Game_snes_CONST:
-    case MEDIATYPE_lmce_Game_genesis_CONST:
-    case MEDIATYPE_lmce_Game_megadriv_CONST:
-    case MEDIATYPE_lmce_Game_tg16_CONST:
-    case MEDIATYPE_lmce_Game_pce_CONST:
-    case MEDIATYPE_lmce_Game_sgx_CONST:
-    case MEDIATYPE_lmce_Game_vectrex_CONST:
-    case MEDIATYPE_lmce_Game_apple2_CONST:
-    case MEDIATYPE_lmce_Game_jaguar_CONST:
-    case MEDIATYPE_lmce_Game_vic20_CONST:
-    case MEDIATYPE_lmce_Game_c64_CONST:
-    case MEDIATYPE_lmce_Game_Atari800_CONST:
-      LaunchMESS (sMediaURL);
-      break;
-    case MEDIATYPE_lmce_Game_ps1_CONST:
-      LaunchPCSX (sMediaURL);
-      break;
-    case MEDIATYPE_lmce_Game_ps2_CONST:
-      LaunchPCSX2 (sMediaURL);
-      break;
-    default:
-      LaunchMAME (sMediaURL);
-      break;
-    }
+  m_pEmulatorController->setStreamID(iStreamID);
+  m_pEmulatorController->run();
+
 }
 
 //<-dceag-c38-b->
@@ -2416,70 +456,28 @@ Game_Player::CMD_Stop_Media (int iStreamID, string * sMediaPosition,
   cout << "Parm #41 - StreamID=" << iStreamID << endl;
   cout << "Parm #42 - MediaPosition=" << sMediaPosition << endl;
 
-  // First, send a command to save to slot 1.
-  WindowUtils::SendKeyToWindow (m_pDisplay, m_iMAMEWindowId, XK_F7,
-				m_iEventSerialNum++, XK_Shift_L);
-  Sleep (100);
-  WindowUtils::SendKeyToWindow (m_pDisplay, m_iMAMEWindowId, XK_1,
-				m_iEventSerialNum++);
+  string sSavedMediaPosition = "";
+  string sSavedText = "";
 
-  string sPath = GetSaveGamePath ();
-  char *cName;
-
-  // FIXME: come back here and handle case for PCSX.
-
-  if (m_iPK_MediaType == MEDIATYPE_lmce_Game_CONST)
+  if (!m_pEmulatorController)
     {
-      cName = tempnam (sPath.c_str (), m_sROMName.c_str ());
+      LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"Game_Player::CMD_Stop_Media called with no EmulatorController; Probably because Game Player was restarted after a crash. Not sending a stop.");
+      return;
+    }
+
+  if (!m_pEmulatorController->saveState(sSavedMediaPosition,sSavedText,true))
+    {
+      LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"Game_Player::CMD_Stop_Media - EmulatorController's saveState failed. See above messages for further explanation.");
     }
   else
     {
-      cName = tempnam (sPath.c_str (), m_sMachineType.c_str ());
+      *sMediaPosition  = sSavedMediaPosition; // sSavedText ultimately not used.
     }
 
-  string sName = cName;
-  string sMoveCmd = "mv " + sPath + "/1.sta " + sName;
+  m_pEmulatorController->stop(); // finally, stop everything.
+  m_pEmulatorController->setStreaming(false);
+  m_pEmulatorController->setStreamingMaster(false);
 
-  system (sMoveCmd.c_str ());
-
-  *sMediaPosition = sName;
-
-  switch (m_iPK_MediaType)
-    {
-    case MEDIATYPE_lmce_Game_CONST:
-      StopMAME ();
-      break;
-    case MEDIATYPE_lmce_Game_a2600_CONST:
-    case MEDIATYPE_lmce_Game_a5200_CONST:
-    case MEDIATYPE_lmce_Game_a7800_CONST:
-    case MEDIATYPE_lmce_Game_coleco_CONST:
-    case MEDIATYPE_lmce_Game_intv_CONST:
-    case MEDIATYPE_lmce_Game_sg1000_CONST:
-    case MEDIATYPE_lmce_Game_sms_CONST:
-    case MEDIATYPE_lmce_Game_famicom_CONST:
-    case MEDIATYPE_lmce_Game_nes_CONST:
-    case MEDIATYPE_lmce_Game_snes_CONST:
-    case MEDIATYPE_lmce_Game_genesis_CONST:
-    case MEDIATYPE_lmce_Game_megadriv_CONST:
-    case MEDIATYPE_lmce_Game_pce_CONST:
-    case MEDIATYPE_lmce_Game_sgx_CONST:
-    case MEDIATYPE_lmce_Game_tg16_CONST:
-    case MEDIATYPE_lmce_Game_vectrex_CONST:
-    case MEDIATYPE_lmce_Game_apple2_CONST:
-    case MEDIATYPE_lmce_Game_jaguar_CONST:
-    case MEDIATYPE_lmce_Game_vic20_CONST:
-    case MEDIATYPE_lmce_Game_c64_CONST:
-    case MEDIATYPE_lmce_Game_Atari800_CONST:
-      StopMESS ();
-      break;
-    case MEDIATYPE_lmce_Game_ps1_CONST:
-      StopPCSX ();
-      break;
-    case MEDIATYPE_lmce_Game_ps2_CONST:
-      StopPCSX2 ();
-      break;
-    }
-  m_bOSDIsVisible = false;
 }
 
 //<-dceag-c39-b->
@@ -2497,10 +495,9 @@ Game_Player::CMD_Pause_Media (int iStreamID, string & sCMD_Result,
   cout << "Need to implement command #39 - Pause Media" << endl;
   cout << "Parm #41 - StreamID=" << iStreamID << endl;
 
-  WindowUtils::SendKeyToWindow (m_pDisplay, m_iMAMEWindowId, XK_p,
-				m_iEventSerialNum++);
-
-
+  if (m_pEmulatorController)
+    m_pEmulatorController->pause();
+  
 }
 
 //<-dceag-c40-b->
@@ -2518,9 +515,8 @@ Game_Player::CMD_Restart_Media (int iStreamID, string & sCMD_Result,
   cout << "Need to implement command #40 - Restart Media" << endl;
   cout << "Parm #41 - StreamID=" << iStreamID << endl;
 
-  WindowUtils::SendKeyToWindow (m_pDisplay, m_iMAMEWindowId, XK_p,
-				m_iEventSerialNum++);
-
+  if (m_pEmulatorController)
+    m_pEmulatorController->unpause();
 
 }
 
@@ -2546,6 +542,10 @@ Game_Player::CMD_Change_Playback_Speed (int iStreamID,
   cout << "Parm #41 - StreamID=" << iStreamID << endl;
   cout << "Parm #43 - MediaPlaybackSpeed=" << iMediaPlaybackSpeed << endl;
   cout << "Parm #220 - Report=" << bReport << endl;
+
+  if (m_pEmulatorController)
+    m_pEmulatorController->setSpeed(iMediaPlaybackSpeed);
+
 }
 
 //<-dceag-c42-b->
@@ -2705,164 +705,9 @@ Game_Player::CMD_Get_Video_Frame (string sDisable_Aspect_Lock, int iStreamID,
   cout << "Parm #60 - Width=" << iWidth << endl;
   cout << "Parm #61 - Height=" << iHeight << endl;
 
-  PLUTO_SAFETY_LOCK (mm, m_GameMutex);
-
-  string sPath, screenName, sGeometry;
-  stringstream ssWidth, ssHeight;
-
-  ssWidth << iWidth;
-  ssHeight << iHeight;
-  sGeometry = ssWidth.str () + "x" + ssHeight.str ();
-
-  m_mapVideoFrameGeometry[pMessage->m_dwPK_Device_From] =
-    new VideoFrameGeometry (iWidth, iHeight);
-
-  if (m_bOSDIsVisible)
-    {
-      // Use alternate code to display OSD
-      sPath = "/tmp/";
-      screenName = "OSD";
-
-      // use ImageMagick. Awfully slow!
-      // string cmd = "import -window " + m_sMAMEWindowId + " "+sPath+screenName+".png";
-      string cmd =
-	"scrot -u -t " + sGeometry + " " + sPath + screenName + ".jpg";
-      system (cmd.c_str ());
-      cmd =
-	"mv " + sPath + screenName + "-thumb.jpg " + sPath + screenName +
-	".jpg";
-      system (cmd.c_str ());
-      *sFormat = "2";		// JPEG.
-    }
-  else
-    {
-
-      switch (m_iPK_MediaType)
-	{
-	case MEDIATYPE_lmce_Game_CONST:
-	  sPath = "/home/mamedata/shots/";
-	  screenName = m_sROMName + "/0000";
-	  break;
-	case MEDIATYPE_lmce_Game_a2600_CONST:
-	  sPath = "/home/mamedata/shots/a2600";
-	  screenName = "/0000";
-	  break;
-	case MEDIATYPE_lmce_Game_a5200_CONST:
-	  sPath = "/home/mamedata/shots/a5200";
-	  screenName = "/0000";
-	  break;
-	case MEDIATYPE_lmce_Game_a7800_CONST:
-	  sPath = "/home/mamedata/shots/a7800";
-	  screenName = "/0000";
-	  break;
-	case MEDIATYPE_lmce_Game_coleco_CONST:
-	  sPath = "/home/mamedata/shots/coleco";
-	  screenName = "/0000";
-	  break;
-	case MEDIATYPE_lmce_Game_intv_CONST:
-	  sPath = "/home/mamedata/shots/intv";
-	  screenName = "/0000";
-	  break;
-	case MEDIATYPE_lmce_Game_sg1000_CONST:
-	  sPath = "/home/mamedata/shots/sg1000";
-	  screenName = "/0000";
-	  break;
-	case MEDIATYPE_lmce_Game_sms_CONST:
-	  sPath = "/home/mamedata/shots/sms";
-	  screenName = "/0000";
-	  break;
-	case MEDIATYPE_lmce_Game_famicom_CONST:
-	  sPath = "/home/mamedata/shots/famicom";
-	  screenName = "/0000";
-	  break;
-	case MEDIATYPE_lmce_Game_nes_CONST:
-	  sPath = "/home/mamedata/shots/nes";
-	  screenName = "/0000";
-	  break;
-	case MEDIATYPE_lmce_Game_snes_CONST:
-	  sPath = "/home/mamedata/shots/snes";
-	  screenName = "/0000";
-	  break;
-	case MEDIATYPE_lmce_Game_genesis_CONST:
-	  sPath = "/home/mamedata/shots/genesis";
-	  screenName = "/0000";
-	  break;
-	case MEDIATYPE_lmce_Game_megadriv_CONST:
-	  sPath = "/home/mamedata/shots/megadriv";
-	  screenName = "/0000";
-	  break;
-	case MEDIATYPE_lmce_Game_tg16_CONST:
-	  sPath = "/home/mamedata/shots/tg16";
-	  screenName = "/0000";
-	  break;
-	case MEDIATYPE_lmce_Game_pce_CONST:
-	  sPath = "/home/mamedata/shots/pce";
-	  screenName = "/0000";
-	  break;
-	case MEDIATYPE_lmce_Game_sgx_CONST:
-	  sPath = "/home/mamedata/shots/sgx";
-	  screenName = "/0000";
-	  break;
-	case MEDIATYPE_lmce_Game_vectrex_CONST:
-	  sPath = "/home/mamedata/shots/vectrex";
-	  screenName = "/0000";
-	  break;
-	case MEDIATYPE_lmce_Game_apple2_CONST:
-	  sPath = "/home/mamedata/shots/apple2cp";
-	  screenName = "/0000";
-	  break;
-	case MEDIATYPE_lmce_Game_jaguar_CONST:
-	  sPath = "/home/mamedata/shots/jaguar";
-	  screenName = "/0000";
-	  break;
-	case MEDIATYPE_lmce_Game_vic20_CONST:
-	  sPath = "/home/mamedata/shots/vic20";
-	  screenName = "/0000";
-	  break;
-	case MEDIATYPE_lmce_Game_c64_CONST:
-	  sPath = "/home/mamedata/shots/c64";
-	  screenName = "/0000";
-	  break;
-	case MEDIATYPE_lmce_Game_Atari800_CONST:
-	  sPath = "/home/mamedata/shots/a800";
-	  screenName = "/0000";
-	}
-
-      string snapPath = sPath + m_sROMName + "/";
-      FileUtils::DelFile (sPath + screenName + ".png");
-      FileUtils::DelFile (sPath + screenName + ".jpg");
-
-      WindowUtils::SendKeyToWindow (m_pDisplay, m_iMAMEWindowId, XK_F12, m_iEventSerialNum++);	// hehe, hack++
-    }
-
-  // Only run Imagemagick to downsize if OSD isn't visible. Let's make this faster too later.
-  if (!m_bOSDIsVisible)
-    {
-      Sleep (50);
-      string s_OutputString =
-	"convert -sample 800x800 " + sPath + screenName + ".png " + sPath +
-	screenName + ".jpg";
-      system (s_OutputString.c_str ());
-    }
-
-  size_t size;
-  LoggerWrapper::GetInstance ()->Write (LV_STATUS,
-					"MAME_Player::CMD_Get_Video_Frame got %d",
-					size);
-  if (!m_bOSDIsVisible)
-    {
-      *pData =
-	FileUtils::ReadFileIntoBuffer (sPath + screenName + ".png", size);
-    }
-  else
-    {
-      *pData =
-	FileUtils::ReadFileIntoBuffer (sPath + screenName + ".jpg", size);
-    }
-  *iData_Size = size;
-
-  FileUtils::DelFile (sPath + screenName + ".png");
-  FileUtils::DelFile (sPath + screenName + ".jpg");
+  PLUTO_SAFETY_LOCK (gm, m_GameMutex);
+  *sFormat="2"; // We are assuming JPEG now, this may change later!
+  m_pEmulatorController->getSnap(pMessage->m_dwPK_Device_From, iWidth, iHeight, pData, *iData_Size);
 
   return;
 
@@ -2890,40 +735,16 @@ Game_Player::CMD_Goto_Media_Menu (int iStreamID, int iMenuType,
   cout << "Parm #41 - StreamID=" << iStreamID << endl;
   cout << "Parm #64 - MenuType=" << iMenuType << endl;
 
-  switch (iMenuType)
+  m_pEmulatorController->gotoMenu(iMenuType);
+
+  if (iMenuType > 0)
     {
-    case SHOW_GAME_VIEW:
-      if (m_bOSDIsVisible)
-	{
-	  CMD_Simulate_Keypress (StringUtils::itos (BUTTON_tab_CONST), iStreamID, "");	// toggle off
-	}
-      m_bOSDIsVisible = false;
-      EVENT_Menu_Onscreen (iStreamID, true);
-      break;
-    case SHOW_REMOTE:
-      if (m_bOSDIsVisible)
-	{
-	  CMD_Simulate_Keypress (StringUtils::itos (BUTTON_tab_CONST), iStreamID, "");	// toggle off
-	}
-      m_bOSDIsVisible = false;
-      EVENT_Menu_Onscreen (iStreamID, false);
-      break;
-    case SHOW_OSD:
-      m_bOSDIsVisible = !m_bOSDIsVisible;	// Toggle.
-      CMD_Simulate_Keypress (StringUtils::itos (BUTTON_tab_CONST), iStreamID, "");	// also a toggle.
-      if (m_bOSDIsVisible)
-	{
-	  EVENT_Menu_Onscreen (iStreamID, true);
-	}
-      else
-	{
-	  EVENT_Menu_Onscreen (iStreamID, false);
-	}
-      break;
-    default:
-      m_bOSDIsVisible = false;
-      EVENT_Menu_Onscreen (iStreamID, false);
-      break;
+      // Fire a menu onscreen event.
+      EVENT_Menu_Onscreen(iStreamID,true);
+    }
+  else
+    {
+      EVENT_Menu_Onscreen(iStreamID,false);
     }
 
 }
@@ -2942,9 +763,6 @@ Game_Player::CMD_Pause (int iStreamID, string & sCMD_Result,
 {
   cout << "Need to implement command #92 - Pause" << endl;
   cout << "Parm #41 - StreamID=" << iStreamID << endl;
-
-  WindowUtils::SendKeyToWindow (m_pDisplay, m_iMAMEWindowId, XK_p,
-				m_iEventSerialNum++);
 
 }
 
@@ -2977,8 +795,6 @@ Game_Player::CMD_Guide (string & sCMD_Result, Message * pMessage)
 //<-dceag-c126-e->
 {
   cout << "Need to implement command #126 - Guide" << endl;
-  WindowUtils::SendKeyToWindow (m_pDisplay, m_iMAMEWindowId, XK_Tab,
-				m_iEventSerialNum++);
 }
 
 //<-dceag-c139-b->
@@ -2997,15 +813,6 @@ Game_Player::CMD_Play (int iStreamID, string & sCMD_Result,
   cout << "Parm #41 - StreamID=" << iStreamID << endl;
 }
 
-//<-dceag-c140-b->
-
-	/** @brief COMMAND: #140 - Audio Track */
-	/** Go to an audio track */
-		/** @param #5 Value To Assign */
-			/** The audio track to go to.  Simple A/V equipment ignores this and just toggles. */
-		/** @param #41 StreamID */
-			/** ID of stream to apply */
-
 //<-dceag-c190-b->
 
 	/** @brief COMMAND: #190 - Enter/Go */
@@ -3020,10 +827,7 @@ Game_Player::CMD_EnterGo (int iStreamID, string & sCMD_Result,
 {
   cout << "Need to implement command #190 - Enter/Go" << endl;
   cout << "Parm #41 - StreamID=" << iStreamID << endl;
-
-  WindowUtils::SendKeyToWindow (m_pDisplay, m_iMAMEWindowId, XK_Return,
-				m_iEventSerialNum++);
-
+  m_pEmulatorController->uiOK();
 }
 
 //<-dceag-c200-b->
@@ -3040,10 +844,7 @@ Game_Player::CMD_Move_Up (int iStreamID, string & sCMD_Result,
 {
   cout << "Need to implement command #200 - Move Up" << endl;
   cout << "Parm #41 - StreamID=" << iStreamID << endl;
-
-  WindowUtils::SendKeyToWindow (m_pDisplay, m_iMAMEWindowId, XK_Up,
-				m_iEventSerialNum++);
-
+  m_pEmulatorController->uiUp();
 }
 
 //<-dceag-c201-b->
@@ -3060,11 +861,7 @@ Game_Player::CMD_Move_Down (int iStreamID, string & sCMD_Result,
 {
   cout << "Need to implement command #201 - Move Down" << endl;
   cout << "Parm #41 - StreamID=" << iStreamID << endl;
-
-  WindowUtils::SendKeyToWindow (m_pDisplay, m_iMAMEWindowId, XK_Down,
-				m_iEventSerialNum++);
-
-
+  m_pEmulatorController->uiDown();
 }
 
 //<-dceag-c202-b->
@@ -3081,10 +878,7 @@ Game_Player::CMD_Move_Left (int iStreamID, string & sCMD_Result,
 {
   cout << "Need to implement command #202 - Move Left" << endl;
   cout << "Parm #41 - StreamID=" << iStreamID << endl;
-
-  WindowUtils::SendKeyToWindow (m_pDisplay, m_iMAMEWindowId, XK_Left,
-				m_iEventSerialNum++);
-
+  m_pEmulatorController->uiLeft();
 }
 
 //<-dceag-c203-b->
@@ -3101,11 +895,7 @@ Game_Player::CMD_Move_Right (int iStreamID, string & sCMD_Result,
 {
   cout << "Need to implement command #203 - Move Right" << endl;
   cout << "Parm #41 - StreamID=" << iStreamID << endl;
-
-  WindowUtils::SendKeyToWindow (m_pDisplay, m_iMAMEWindowId, XK_Right,
-				m_iEventSerialNum++);
-
-
+  m_pEmulatorController->uiRight();
 }
 
 //<-dceag-c204-b->
@@ -3118,18 +908,7 @@ Game_Player::CMD_0 (string & sCMD_Result, Message * pMessage)
 //<-dceag-c204-e->
 {
   cout << "Need to implement command #204 - 0" << endl;
-
-  switch (m_iPK_MediaType)
-    {
-    case MEDIATYPE_lmce_Game_a5200_CONST:
-      WindowUtils::SendKeyToWindow (m_pDisplay, m_iMAMEWindowId, XK_KP_0,
-				    m_iEventSerialNum++);
-      break;
-    default:
-      WindowUtils::SendKeyToWindow (m_pDisplay, m_iMAMEWindowId, XK_0,
-				    m_iEventSerialNum++);
-      break;
-    }
+  m_pEmulatorController->press0();
 }
 
 //<-dceag-c205-b->
@@ -3142,20 +921,7 @@ Game_Player::CMD_1 (string & sCMD_Result, Message * pMessage)
 //<-dceag-c205-e->
 {
   cout << "Need to implement command #205 - 1" << endl;
-
-  switch (m_iPK_MediaType)
-    {
-    case MEDIATYPE_lmce_Game_a5200_CONST:
-    case MEDIATYPE_lmce_Game_coleco_CONST:
-    case MEDIATYPE_lmce_Game_intv_CONST:
-      WindowUtils::SendKeyToWindow (m_pDisplay, m_iMAMEWindowId, XK_KP_1,
-				    m_iEventSerialNum++);
-      break;
-    default:
-      WindowUtils::SendKeyToWindow (m_pDisplay, m_iMAMEWindowId, XK_1,
-				    m_iEventSerialNum++);
-      break;
-    }
+  m_pEmulatorController->press1();
 }
 
 //<-dceag-c206-b->
@@ -3168,20 +934,7 @@ Game_Player::CMD_2 (string & sCMD_Result, Message * pMessage)
 //<-dceag-c206-e->
 {
   cout << "Need to implement command #206 - 2" << endl;
-
-  switch (m_iPK_MediaType)
-    {
-    case MEDIATYPE_lmce_Game_a5200_CONST:
-    case MEDIATYPE_lmce_Game_coleco_CONST:
-    case MEDIATYPE_lmce_Game_intv_CONST:
-      WindowUtils::SendKeyToWindow (m_pDisplay, m_iMAMEWindowId, XK_KP_2,
-				    m_iEventSerialNum++);
-      break;
-    default:
-      WindowUtils::SendKeyToWindow (m_pDisplay, m_iMAMEWindowId, XK_2,
-				    m_iEventSerialNum++);
-      break;
-    }
+  m_pEmulatorController->press2();
 }
 
 //<-dceag-c207-b->
@@ -3194,20 +947,7 @@ Game_Player::CMD_3 (string & sCMD_Result, Message * pMessage)
 //<-dceag-c207-e->
 {
   cout << "Need to implement command #207 - 3" << endl;
-
-  switch (m_iPK_MediaType)
-    {
-    case MEDIATYPE_lmce_Game_a5200_CONST:
-    case MEDIATYPE_lmce_Game_coleco_CONST:
-    case MEDIATYPE_lmce_Game_intv_CONST:
-      WindowUtils::SendKeyToWindow (m_pDisplay, m_iMAMEWindowId, XK_KP_3,
-				    m_iEventSerialNum++);
-    default:
-      WindowUtils::SendKeyToWindow (m_pDisplay, m_iMAMEWindowId, XK_3,
-				    m_iEventSerialNum++);
-      break;
-    }
-
+  m_pEmulatorController->press3();
 }
 
 //<-dceag-c208-b->
@@ -3220,20 +960,7 @@ Game_Player::CMD_4 (string & sCMD_Result, Message * pMessage)
 //<-dceag-c208-e->
 {
   cout << "Need to implement command #208 - 4" << endl;
-
-  switch (m_iPK_MediaType)
-    {
-    case MEDIATYPE_lmce_Game_a5200_CONST:
-    case MEDIATYPE_lmce_Game_coleco_CONST:
-    case MEDIATYPE_lmce_Game_intv_CONST:
-      WindowUtils::SendKeyToWindow (m_pDisplay, m_iMAMEWindowId, XK_KP_4,
-				    m_iEventSerialNum++);
-      break;
-    default:
-      WindowUtils::SendKeyToWindow (m_pDisplay, m_iMAMEWindowId, XK_4,
-				    m_iEventSerialNum++);
-      break;
-    }
+  m_pEmulatorController->press4();
 }
 
 //<-dceag-c209-b->
@@ -3246,21 +973,7 @@ Game_Player::CMD_5 (string & sCMD_Result, Message * pMessage)
 //<-dceag-c209-e->
 {
   cout << "Need to implement command #209 - 5" << endl;
-
-  switch (m_iPK_MediaType)
-    {
-    case MEDIATYPE_lmce_Game_a5200_CONST:
-    case MEDIATYPE_lmce_Game_coleco_CONST:
-    case MEDIATYPE_lmce_Game_intv_CONST:
-      WindowUtils::SendKeyToWindow (m_pDisplay, m_iMAMEWindowId, XK_KP_5,
-				    m_iEventSerialNum++);
-      break;
-    default:
-      WindowUtils::SendKeyToWindow (m_pDisplay, m_iMAMEWindowId, XK_5,
-				    m_iEventSerialNum++);
-      break;
-    }
-
+  m_pEmulatorController->press5();
 }
 
 //<-dceag-c210-b->
@@ -3273,20 +986,7 @@ Game_Player::CMD_6 (string & sCMD_Result, Message * pMessage)
 //<-dceag-c210-e->
 {
   cout << "Need to implement command #210 - 6" << endl;
-
-  switch (m_iPK_MediaType)
-    {
-    case MEDIATYPE_lmce_Game_a5200_CONST:
-    case MEDIATYPE_lmce_Game_coleco_CONST:
-    case MEDIATYPE_lmce_Game_intv_CONST:
-      WindowUtils::SendKeyToWindow (m_pDisplay, m_iMAMEWindowId, XK_KP_6,
-				    m_iEventSerialNum++);
-      break;
-    default:
-      WindowUtils::SendKeyToWindow (m_pDisplay, m_iMAMEWindowId, XK_6,
-				    m_iEventSerialNum++);
-      break;
-    }
+  m_pEmulatorController->press6();
 }
 
 //<-dceag-c211-b->
@@ -3299,19 +999,7 @@ Game_Player::CMD_7 (string & sCMD_Result, Message * pMessage)
 //<-dceag-c211-e->
 {
   cout << "Need to implement command #211 - 7" << endl;
-
-  switch (m_iPK_MediaType)
-    {
-    case MEDIATYPE_lmce_Game_a5200_CONST:
-    case MEDIATYPE_lmce_Game_coleco_CONST:
-    case MEDIATYPE_lmce_Game_intv_CONST:
-      WindowUtils::SendKeyToWindow (m_pDisplay, m_iMAMEWindowId, XK_KP_7,
-				    m_iEventSerialNum++);
-    default:
-      WindowUtils::SendKeyToWindow (m_pDisplay, m_iMAMEWindowId, XK_7,
-				    m_iEventSerialNum++);
-      break;
-    }
+  m_pEmulatorController->press7();
 }
 
 //<-dceag-c212-b->
@@ -3324,21 +1012,7 @@ Game_Player::CMD_8 (string & sCMD_Result, Message * pMessage)
 //<-dceag-c212-e->
 {
   cout << "Need to implement command #212 - 8" << endl;
-
-  switch (m_iPK_MediaType)
-    {
-    case MEDIATYPE_lmce_Game_a5200_CONST:
-    case MEDIATYPE_lmce_Game_coleco_CONST:
-    case MEDIATYPE_lmce_Game_intv_CONST:
-      WindowUtils::SendKeyToWindow (m_pDisplay, m_iMAMEWindowId, XK_KP_8,
-				    m_iEventSerialNum++);
-      break;
-    default:
-      WindowUtils::SendKeyToWindow (m_pDisplay, m_iMAMEWindowId, XK_8,
-				    m_iEventSerialNum++);
-      break;
-
-    }
+  m_pEmulatorController->press8();
 }
 
 //<-dceag-c213-b->
@@ -3351,20 +1025,7 @@ Game_Player::CMD_9 (string & sCMD_Result, Message * pMessage)
 //<-dceag-c213-e->
 {
   cout << "Need to implement command #213 - 9" << endl;
-
-  switch (m_iPK_MediaType)
-    {
-    default:
-      WindowUtils::SendKeyToWindow (m_pDisplay, m_iMAMEWindowId, XK_9,
-				    m_iEventSerialNum++);
-      break;
-    case MEDIATYPE_lmce_Game_a5200_CONST:
-    case MEDIATYPE_lmce_Game_coleco_CONST:
-    case MEDIATYPE_lmce_Game_intv_CONST:
-      WindowUtils::SendKeyToWindow (m_pDisplay, m_iMAMEWindowId, XK_KP_9,
-				    m_iEventSerialNum++);
-      break;
-    }
+  m_pEmulatorController->press9();
 }
 
 //<-dceag-c240-b->
@@ -3381,8 +1042,7 @@ Game_Player::CMD_Back_Prior_Menu (int iStreamID, string & sCMD_Result,
 {
   cout << "Need to implement command #240 - Back / Prior Menu" << endl;
   cout << "Parm #41 - StreamID=" << iStreamID << endl;
-  WindowUtils::SendKeyToWindow (m_pDisplay, m_iMAMEWindowId, XK_Escape,
-				m_iEventSerialNum++);
+  m_pEmulatorController->uiBack();
 }
 
 //<-dceag-c249-b->
@@ -3413,91 +1073,39 @@ Game_Player::CMD_Start_Streaming (int iPK_MediaType, int iStreamID,
   cout << "Parm #42 - MediaPosition=" << sMediaPosition << endl;
   cout << "Parm #59 - MediaURL=" << sMediaURL << endl;
   cout << "Parm #105 - StreamingTargets=" << sStreamingTargets << endl;
-}
+  
+  string sFinalURL;
 
-/**
- * Get Save Game Path for a given media type.
- */
-string Game_Player::GetSaveGamePath ()
-{
-
-  string
-    sPath;
-
-  switch (m_iPK_MediaType)
+  if (!sStreamingTargets.empty())
     {
-    case MEDIATYPE_lmce_Game_CONST:
-      sPath = "/home/mamedata/sta/" + m_sROMName + "";
-      break;
-    case MEDIATYPE_lmce_Game_a2600_CONST:
-      sPath = "/home/mamedata/sta/a2600";
-      break;
-    case MEDIATYPE_lmce_Game_a5200_CONST:
-      sPath = "/home/mamedata/sta/a5200";
-      break;
-    case MEDIATYPE_lmce_Game_a7800_CONST:
-      sPath = "/home/mamedata/sta/a7800";
-      break;
-    case MEDIATYPE_lmce_Game_coleco_CONST:
-      sPath = "/home/mamedata/sta/coleco";
-      break;
-    case MEDIATYPE_lmce_Game_intv_CONST:
-      sPath = "/home/mamedata/sta/intv";
-      break;
-    case MEDIATYPE_lmce_Game_sg1000_CONST:
-      sPath = "/home/mamedata/sta/sg1000";
-      break;
-    case MEDIATYPE_lmce_Game_sms_CONST:
-      sPath = "/home/mamedata/sta/sms";
-      break;
-    case MEDIATYPE_lmce_Game_famicom_CONST:
-      sPath = "/home/mamedata/sta/famicom";
-      break;
-    case MEDIATYPE_lmce_Game_nes_CONST:
-      sPath = "/home/mamedata/sta/nes";
-      break;
-    case MEDIATYPE_lmce_Game_snes_CONST:
-      sPath = "/home/mamedata/sta/snes";
-      break;
-    case MEDIATYPE_lmce_Game_genesis_CONST:
-      sPath = "/home/mamedata/sta/genesis";
-      break;
-    case MEDIATYPE_lmce_Game_megadriv_CONST:
-      sPath = "/home/mamedata/sta/megadriv";
-      break;
-    case MEDIATYPE_lmce_Game_tg16_CONST:
-      sPath = "/home/mamedata/sta/tg16";
-      break;
-    case MEDIATYPE_lmce_Game_pce_CONST:
-      sPath = "/home/mamedata/sta/pce";
-      break;
-    case MEDIATYPE_lmce_Game_sgx_CONST:
-      sPath = "/home/mamedata/sta/sgx";
-      break;
-    case MEDIATYPE_lmce_Game_vectrex_CONST:
-      sPath = "/home/mamedata/sta/vectrex";
-      break;
-    case MEDIATYPE_lmce_Game_apple2_CONST:
-      sPath = "/home/mamedata/sta/apple2cp";
-      break;
-    case MEDIATYPE_lmce_Game_jaguar_CONST:
-      sPath = "/home/mamedata/sta/jaguar";
-      break;
-    case MEDIATYPE_lmce_Game_vic20_CONST:
-      sPath = "/home/mamedata/sta/vic20";
-      break;
-    case MEDIATYPE_lmce_Game_c64_CONST:
-      sPath = "/home/mamedata/sta/c64";
-      break;
-    case MEDIATYPE_lmce_Game_Atari800_CONST:
-      sPath = "/home/mamedata/sta/a800";
-    default:
-      sPath = "";
-      break;
+      m_pEmulatorController->setStreaming(true);
+      m_pEmulatorController->setStreamingMaster(true);
+      size_t pos=0;
+      while (pos<sStreamingTargets.size())
+	{
+	  string sCurrentTarget = StringUtils::Tokenize(sStreamingTargets,",",pos);
+	  if (atoi(sCurrentTarget.c_str()) == m_dwPK_Device)
+	    {
+	      // Master
+	      LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"MASTER Device %d sending Local play",atoi(sCurrentTarget.c_str()));
+	      sFinalURL = sMediaURL;
+	      CMD_Play_Media(iPK_MediaType,iStreamID,"",sFinalURL); // smediaposition blank for now
+	    }
+	  else
+	    {
+	      if (m_sIPAddress == "127.0.0.1")
+		m_sIPAddress = "192.168.80.1";   // derp!
+	      LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"SLAVE Device %d sending Remote play",atoi(sCurrentTarget.c_str()));
+	      sFinalURL = "slave://" + m_sIPAddress + "/" + sMediaURL;
+	      DCE::CMD_Play_Media CMD_Play_Media(m_dwPK_Device,
+					    atoi(sCurrentTarget.c_str()),
+					    iPK_MediaType,iStreamID,
+						 "", // smediaposition blank for now
+					    sFinalURL);
+	      SendCommand(CMD_Play_Media);
+	    }
+	}      
     }
-
-  return sPath;
-
 }
 
 //<-dceag-c259-b->
@@ -3523,32 +1131,18 @@ Game_Player::CMD_Report_Playback_Position (int iStreamID, string * sText,
   cout << "Parm #41 - StreamID=" << iStreamID << endl;
   cout << "Parm #42 - MediaPosition=" << sMediaPosition << endl;
 
-  // First, send a command to save to slot 1.
-  WindowUtils::SendKeyToWindow (m_pDisplay, m_iMAMEWindowId, XK_F7,
-				m_iEventSerialNum++, XK_Shift_L);
-  Sleep (100);
-  WindowUtils::SendKeyToWindow (m_pDisplay, m_iMAMEWindowId, XK_9,
-				m_iEventSerialNum++);
+  string sSavePosition, sSaveText;
 
-  string sPath = GetSaveGamePath ();
-  char *cName;
-
-  if (m_iPK_MediaType == MEDIATYPE_lmce_Game_CONST)
+  if (m_pEmulatorController->saveState(sSavePosition,sSaveText))
     {
-      cName = tempnam (sPath.c_str (), m_sROMName.c_str ());
+      LoggerWrapper::GetInstance()->Write(LV_STATUS,"Game_Player::CMD_Report_Playback_Position - Successfully saved state %s",sSavePosition.c_str());
+      *sMediaPosition = sSavePosition;
+      *sText = sSaveText;
     }
   else
     {
-      cName = tempnam (sPath.c_str (), m_sMachineType.c_str ());
+      LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"Game_Player::CMD_Report_Playback_Position - Failed saving state. See previous messages for more explanation.");
     }
-
-  string sName = cName;
-  string sMoveCmd = "mv " + sPath + "/9.sta " + sName;
-
-  system (sMoveCmd.c_str ());
-
-  *sMediaPosition = sName;
-  *sText = "Save Game";
 
 }
 
@@ -3570,20 +1164,12 @@ Game_Player::CMD_Set_Media_Position (int iStreamID, string sMediaPosition,
   cout << "Parm #41 - StreamID=" << iStreamID << endl;
   cout << "Parm #42 - MediaPosition=" << sMediaPosition << endl;
 
-  if (FileUtils::FileExists(sMediaPosition)) // A Simple sanity check.
+  if (!m_pEmulatorController->loadState(sMediaPosition))
     {
-      string sPath = GetSaveGamePath ();
-      string sCopyCmd = "cp " + sMediaPosition + " " + sPath + "/9.sta";
-      system (sCopyCmd.c_str ());
-      // Send a command to load the game back.
-      WindowUtils::SendKeyToWindow (m_pDisplay, m_iMAMEWindowId, XK_F7,
-				    m_iEventSerialNum++);
-      Sleep (100);
-      WindowUtils::SendKeyToWindow (m_pDisplay, m_iMAMEWindowId, XK_9,
-				    m_iEventSerialNum++);
-      Sleep (1000);
-      CMD_Pause (iStreamID);	// because the game will just start up from that point.
+      LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"Game_Player::CMD_Set_Media_Position - unable to restore state %s bailing!",sMediaPosition.c_str());
+      // TODO: Add A call to Orbiter Plugin's Display Alert to display an error to the user.
     }
+
 }
 
 //<-dceag-c548-b->
@@ -3624,8 +1210,11 @@ Game_Player::CMD_Application_Exited (int iPID, int iExit_Code,
   cout << "Parm #228 - Exit_Code=" << iExit_Code << endl;
 
 #ifndef WIN32
-  LoggerWrapper::GetInstance ()->Write (LV_STATUS, "Process exited %d %d",
+  LoggerWrapper::GetInstance ()->Write (LV_CRITICAL, "Process exited %d %d",
 					iPID, iExit_Code);
+
+  // Tell the controller the emulator process has exited.
+  m_pEmulatorController->EmulatorHasExited();
 
   // void *data;
 
@@ -3710,34 +1299,7 @@ void
 Game_Player::CMD_Game_1P_Start (string & sCMD_Result, Message * pMessage)
 //<-dceag-c943-e->
 {
-  int iKey;
-  cout << "Need to implement command #943 - Game 1P Start" << endl;
-  switch (m_iPK_MediaType)
-    {
-    case MEDIATYPE_lmce_Game_CONST:
-    case MEDIATYPE_lmce_Game_snes_CONST:
-    case MEDIATYPE_lmce_Game_genesis_CONST:
-    case MEDIATYPE_lmce_Game_megadriv_CONST:
-      iKey = XK_1;
-      break;
-    case MEDIATYPE_lmce_Game_a2600_CONST:
-    case MEDIATYPE_lmce_Game_nes_CONST:
-      iKey = XK_2;
-      break;
-    case MEDIATYPE_lmce_Game_a5200_CONST:
-      iKey = XK_F1;
-      break;
-    case MEDIATYPE_lmce_Game_a7800_CONST:
-      iKey = XK_r;
-      break;
-    case MEDIATYPE_lmce_Game_coleco_CONST:
-    case MEDIATYPE_lmce_Game_intv_CONST:
-      iKey = XK_KP_1;
-      break;
-    }
-  WindowUtils::SendKeyToWindow (m_pDisplay, m_iMAMEWindowId, iKey,
-				m_iEventSerialNum++);
-
+  m_pEmulatorController->P1Start();
 }
 
 //<-dceag-c944-b->
@@ -3750,9 +1312,7 @@ Game_Player::CMD_Game_2P_Start (string & sCMD_Result, Message * pMessage)
 //<-dceag-c944-e->
 {
   cout << "Need to implement command #944 - Game 2P Start" << endl;
-  WindowUtils::SendKeyToWindow (m_pDisplay, m_iMAMEWindowId, XK_2,
-				m_iEventSerialNum++);
-
+  m_pEmulatorController->P2Start();
 }
 
 //<-dceag-c945-b->
@@ -3765,8 +1325,7 @@ Game_Player::CMD_Game_3P_Start (string & sCMD_Result, Message * pMessage)
 //<-dceag-c945-e->
 {
   cout << "Need to implement command #945 - Game 3P Start" << endl;
-  WindowUtils::SendKeyToWindow (m_pDisplay, m_iMAMEWindowId, XK_3,
-				m_iEventSerialNum++);
+  m_pEmulatorController->P3Start();
 }
 
 //<-dceag-c946-b->
@@ -3779,9 +1338,7 @@ Game_Player::CMD_Game_4P_Start (string & sCMD_Result, Message * pMessage)
 //<-dceag-c946-e->
 {
   cout << "Need to implement command #946 - Game 4P Start" << endl;
-  WindowUtils::SendKeyToWindow (m_pDisplay, m_iMAMEWindowId, XK_4,
-				m_iEventSerialNum++);
-
+  m_pEmulatorController->P4Start();
 }
 
 //<-dceag-c947-b->
@@ -3794,9 +1351,7 @@ Game_Player::CMD_Game_Insert_Coin (string & sCMD_Result, Message * pMessage)
 //<-dceag-c947-e->
 {
   cout << "Need to implement command #947 - Game Insert Coin" << endl;
-  WindowUtils::SendKeyToWindow (m_pDisplay, m_iMAMEWindowId, XK_5,
-				m_iEventSerialNum++);
-
+  m_pEmulatorController->coin1();
 }
 
 //<-dceag-c948-b->
@@ -3809,9 +1364,7 @@ Game_Player::CMD_Game_Service (string & sCMD_Result, Message * pMessage)
 //<-dceag-c948-e->
 {
   cout << "Need to implement command #948 - Game Service" << endl;
-  WindowUtils::SendKeyToWindow (m_pDisplay, m_iMAMEWindowId, XK_F2,
-				m_iEventSerialNum++);
-
+  m_pEmulatorController->service1();
 }
 
 //<-dceag-c949-b->
@@ -3824,17 +1377,7 @@ Game_Player::CMD_Game_Start (string & sCMD_Result, Message * pMessage)
 //<-dceag-c949-e->
 {
   cout << "Need to implement command #949 - Game Start" << endl;
-  switch (m_iPK_MediaType)
-    {
-    case MEDIATYPE_lmce_Game_nes_CONST:
-      WindowUtils::SendKeyToWindow (m_pDisplay, m_iMAMEWindowId, XK_2,
-				    m_iEventSerialNum++);
-      break;
-    default:
-      WindowUtils::SendKeyToWindow (m_pDisplay, m_iMAMEWindowId, XK_1,
-				    m_iEventSerialNum++);
-      break;
-    }
+  m_pEmulatorController->start();
 }
 
 //<-dceag-c950-b->
@@ -3846,25 +1389,7 @@ void
 Game_Player::CMD_Game_Select (string & sCMD_Result, Message * pMessage)
 //<-dceag-c950-e->
 {
-  int iKey;
-  switch (m_iPK_MediaType)
-    {
-    case MEDIATYPE_lmce_Game_CONST:
-      break;
-    case MEDIATYPE_lmce_Game_a2600_CONST:
-      iKey = XK_1;
-      break;
-    case MEDIATYPE_lmce_Game_a7800_CONST:
-      iKey = XK_s;
-      break;
-    case MEDIATYPE_lmce_Game_nes_CONST:
-      iKey = XK_6;
-      break;
-    }
-
-  WindowUtils::SendKeyToWindow (m_pDisplay, m_iMAMEWindowId, iKey,
-				m_iEventSerialNum++);
-
+  m_pEmulatorController->select();
 }
 
 //<-dceag-c951-b->
@@ -3877,6 +1402,7 @@ Game_Player::CMD_Game_Option (string & sCMD_Result, Message * pMessage)
 //<-dceag-c951-e->
 {
   cout << "Need to implement command #951 - Game Option" << endl;
+  m_pEmulatorController->option();
 }
 
 //<-dceag-c942-b->
@@ -3932,23 +1458,51 @@ void
 Game_Player::CMD_Game_Reset (string & sCMD_Result, Message * pMessage)
 //<-dceag-c952-e->
 {
-  int iKey;
+  m_pEmulatorController->reset();
+}
 
-  switch (m_iPK_MediaType)
+void Game_Player::TranscodeAfterRecord(string sPath,string sFilename, long int dwPK_Device_Orbiter)
+{
+  
+  // Find Media Plugin
+  DeviceData_Base *pDevice_Media_Plugin = 
+    m_pData->m_AllDevices.m_mapDeviceData_Base_FindFirstOfTemplate(DEVICETEMPLATE_Media_Plugin_CONST);
+
+  if (!pDevice_Media_Plugin)
     {
-    case MEDIATYPE_lmce_Game_CONST:
-      break;
-    case MEDIATYPE_lmce_Game_a2600_CONST:
-      iKey = XK_1;
-      break;
-    case MEDIATYPE_lmce_Game_a7800_CONST:
-      iKey = XK_R;
-      break;
-    default:
-      iKey = XK_F3;
-      break;
+      LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"Game_Player::TranscodeAfterRecord - Could not find Media Plugin Device. Sorry.");
+      return;
     }
 
-  WindowUtils::SendKeyToWindow (m_pDisplay, m_iMAMEWindowId, iKey,
-				m_iEventSerialNum++);
+  // The following sformat string is for ffmpeg.
+  //  string sFormat = "acodec=ac3|ab=128k|vcodec=mpeg4|b=4000k|mbd=2|flags=+mv4+aic|trellis=2|cmp=2|subcmp=2";
+  string sFormat = "oac=mp3lame|ovc=xvid|xvidbitrate=687";
+  string sCaption="Enter a name for the game recording. I will notify you when the file is ready for playback.";
+  string sCommand = StringUtils::itos(dwPK_Device_Orbiter) + " " +
+    StringUtils::itos(pDevice_Media_Plugin->m_dwPK_Device) + " 1 " +
+    TOSTRING (COMMAND_Transcode_File_CONST) + " " +
+    TOSTRING(COMMANDPARAMETER_Format_CONST) + " \"" + sFormat + "\" " +
+    TOSTRING(COMMANDPARAMETER_Filename_CONST) + " \"" + sPath + "/" + sFilename + "\" " +
+    TOSTRING(COMMANDPARAMETER_Directory_CONST) + " " + "\"<%=9%>\" " +
+    TOSTRING(COMMANDPARAMETER_Name_CONST) + " " + "\"<%=17%>.avi\"";
+  
+  LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"Game_Player::TranscodeAfterRecord - sCommand is %s",sCommand.c_str());
+
+  DCE::SCREEN_FileSave screen_FileSave(m_dwPK_Device,
+				       dwPK_Device_Orbiter,
+				       MEDIATYPE_pluto_StoredVideo_CONST,
+				       0,
+				       sCaption,
+				       sCommand,
+				       true);
+
+  SendCommand(screen_FileSave);
+
+}
+
+void Game_Player::CMD_Record(string &sCMD_Result, Message *pMessage)
+{
+  // This is simply a toggle, the EmulatorController will do the right thing.
+  m_pEmulatorController->setOrbiter(pMessage->m_dwPK_Device_From);
+  m_pEmulatorController->record();
 }

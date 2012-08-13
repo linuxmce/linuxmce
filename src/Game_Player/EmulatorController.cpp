@@ -8,6 +8,7 @@
 
 #include "EmulatorController.h"
 #include "PlutoUtils/FileUtils.h"
+#include "PlutoUtils/StringUtils.h"
 
 namespace DCE
 {
@@ -24,6 +25,112 @@ namespace DCE
     m_pGame_Player = NULL;
     delete m_pEmulatorModel;
     m_pEmulatorModel = NULL;
+  }
+
+  /**
+   * Initialization routine called when the factory creates
+   * the instance of this controller object. In the base class
+   * it merely checks for the existance of an emulator
+   * and then kills its process, if it does exist.
+   */
+  bool EmulatorController::init()
+  {
+    if (!m_pEmulatorModel->m_sProcessName.empty())
+      {
+	string sCmd = "killall -9 "+m_pEmulatorModel->m_sProcessName;
+	  system(sCmd.c_str());
+      }
+    return true;
+  }
+
+  /**
+   * Insert media into the emulator into a given slot.
+   * If not specified, the 'default' slot is used.
+   */
+  void EmulatorController::insertMediaNamed(string sMediaFile, string sSlot)
+  {
+    LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"Inserting media %s into slot %s",sMediaFile.c_str(),sSlot.c_str());
+    m_pEmulatorModel->m_mapMedia[sSlot] = sMediaFile;
+  }
+
+  /**
+   * Eject media from specified slot. If no slot specified,
+   * the default slot is used.
+   */
+  void EmulatorController::ejectMediaFromSlot(string sSlot)
+  {
+    map<string,string>::iterator it = m_pEmulatorModel->m_mapMedia.find(sSlot);
+    if (it != m_pEmulatorModel->m_mapMedia.end())
+      {
+	m_pEmulatorModel->m_mapMedia.erase(it);
+      }
+  }
+
+  /**
+   * return the media in the specified slot.
+   */
+  bool EmulatorController::getMediaInSlot(string& sMediaFile,string sSlot)
+  {
+    if (m_pEmulatorModel->m_mapMedia_Exists(sSlot))
+      {
+	sMediaFile=m_pEmulatorModel->m_mapMedia_Find(sSlot);
+	return true;
+      }
+    else
+      {
+	sMediaFile="";
+	return false;
+      }
+  }
+
+  /**
+   * Set whether streaming should be used.
+   */
+  void EmulatorController::setStreaming(bool bStreaming)
+  {
+    if (m_pEmulatorModel)
+      {
+	m_pEmulatorModel->m_bIsStreaming=bStreaming;
+      }
+  }
+
+  /**
+   * Set whether this is the master backend
+   */
+  void EmulatorController::setStreamingMaster(bool bStreamingMaster)
+  {
+    if (m_pEmulatorModel)
+      m_pEmulatorModel->m_bIsStreamingSource = bStreamingMaster;
+  }
+
+  /**
+   * Set stream ID used by this emulator
+   */
+  void EmulatorController::setStreamID(int iStreamID)
+  {
+    if (m_pEmulatorModel)
+      m_pEmulatorModel->m_iStreamID=iStreamID;
+    return;
+  }
+
+  /**
+   * Set the media position for this emulator - Used when a CMD_Play_Media is issued
+   * with a set positon for automatic loading of a save state.
+   */
+  void EmulatorController::setMediaPosition(string sMediaPosition)
+  {
+    if (m_pEmulatorModel)
+      m_pEmulatorModel->m_sMediaPosition=sMediaPosition;
+    return;
+  }
+
+  /**
+   * Set the emulator master hostname.
+   */
+  void EmulatorController::setHostName(string sHostName)
+  {
+    if (m_pEmulatorModel)
+      m_pEmulatorModel->m_sHostName=sHostName;
   }
 
   /**
@@ -59,9 +166,9 @@ namespace DCE
 	return false;
       }
 
-    if (FileUtils::FileExists(m_pEmulatorModel->m_sEmulatorBinary))
+    if (!FileUtils::FileExists(m_pEmulatorModel->m_sEmulatorBinary))
       {
-	LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"EmulatorController::run() - Could not find emulator binary. Bailing.");
+	LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"EmulatorController::run() - Could not find emulator binary. %s Bailing.",m_pEmulatorModel->m_sEmulatorBinary.c_str());
 	return false;
       }
 
@@ -73,39 +180,28 @@ namespace DCE
 
     LoggerWrapper::GetInstance()->Write(LV_STATUS,"EmulatorController::run() - Launching %s with args %s",m_pEmulatorModel->m_sEmulatorBinary.c_str(),m_pEmulatorModel->m_sArgs.c_str());
 
-    if (!m_pGame_Player->m_pDevice_App_Server)
+    if (m_pEmulatorModel->m_bRunning && m_pEmulatorModel->m_bChangeRequiresRestart)
       {
-	// This should never happen, but I put this here just in case.
-	LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"EmulatorController::run() - Unable to find a pointer to the nearest app server. Bailing.");
-	return false;
-      }
-
-    if (m_pEmulatorModel->m_bChangeRequiresRestart)
-      {
+	LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"Emulator is running, and we need to restart.");
 	EmulatorController::stop();
       }
-    
-    string sMessage = 
-      StringUtils::itos(m_pGame_Player->m_dwPK_Device) + " " +
-      StringUtils::itos(m_pGame_Player->m_dwPK_Device) +
-      " 1 " TOSTRING (COMMAND_Application_Exited_CONST) " "
-      TOSTRING (COMMANDPARAMETER_Exit_Code_CONST) " ";
+    // Update the configuration file for the emulator ///////////////////////////////////////////////////
+
+    m_pEmulatorModel->updateConfig();
 
     // Send the command back to the Game Player to launch the app ///////////////////////////////////////
 
-    DCE::CMD_Spawn_Application CMD_Spawn_Application(m_pGame_Player->m_dwPK_Device,
-						     m_pGame_Player->m_pDevice_App_Server->m_dwPK_Device,
-						     "emulator",
-						     m_pEmulatorModel->m_sEmulatorBinary,
-						     m_pEmulatorModel->m_sArgs,
-						     sMessage + "1",
-						     sMessage + "0",
-						     false,
-						     false,
-						     true,
-						     false);
+    if (m_pEmulatorModel->m_bIsStreaming && !m_pEmulatorModel->m_bIsStreamingSource)
+      {
+	// incur a small delay so that the master may have time to properly
+	// initialize.
 
-    m_pGame_Player->SendCommand(CMD_Spawn_Application);
+	// TODO: replace with proper API call like isEmulatorReady()
+
+	usleep(m_pEmulatorModel->m_tStreamingClientLaunchDelay);
+      }
+
+    m_pGame_Player->LaunchEmulator();
 
     LoggerWrapper::GetInstance()
       ->Write(LV_STATUS,"EmulatorController::run() - sent command back to game player to spawn application");
@@ -127,18 +223,24 @@ namespace DCE
 	  ->Write(LV_CRITICAL,"EmulatorController::stop() - Sanity checks failed.");
       }
     
-    DCE::CMD_Kill_Application CMD_Kill_Application(m_pGame_Player->m_dwPK_Device,
-						   m_pGame_Player->m_pDevice_App_Server->m_dwPK_Device,
-						   "emulator",
-						   false);
-    
-    m_pGame_Player->SendCommand(CMD_Kill_Application);
+    LoggerWrapper::GetInstance()->Write(LV_STATUS,"EmulatorController::stop() called.");
+
+    m_pGame_Player->KillEmulator();
+    setMediaPosition(""); // clear it.
 
     m_pEmulatorModel->m_bRunning_set(false);
+
+    // Clear all media from slots.
+    m_pEmulatorModel->m_mapMedia.clear();
 
     // any further deinitialization should be handled in the subclasses.
 
     return true;
+  }
+
+  void EmulatorController::EmulatorHasExited()
+  {
+    stop();
   }
 
   bool EmulatorController::P1Start()
@@ -173,12 +275,41 @@ namespace DCE
 
   bool EmulatorController::pause()
   {
-    return doAction("PAUSE");
+    string sAction;
+    if (!m_pEmulatorModel->m_bIsPaused)
+      {
+	m_pEmulatorModel->m_bIsPaused=!m_pEmulatorModel->m_bIsPaused;
+	sAction="PAUSE";
+      }
+    else
+      {
+	LoggerWrapper::GetInstance()->Write(LV_STATUS,"EmulatorController::pause() - called while already paused.");
+      }
+	return doAction(sAction);
   }
 
   bool EmulatorController::unpause()
   {
-    return doAction("UNPAUSE");
+    string sAction;
+    if (m_pEmulatorModel->m_bIsPaused)
+      {
+	m_pEmulatorModel->m_bIsPaused=!m_pEmulatorModel->m_bIsPaused;
+	sAction="UNPAUSE";
+      }
+    else
+      {
+	LoggerWrapper::GetInstance()->Write(LV_STATUS,"EmulatorController::unpause() - called while already resumed.");
+	sAction="";
+      }
+    return doAction(sAction);
+  }
+
+  bool EmulatorController::setSpeed(int iSpeed)
+  {
+    // This is ultimately overridden by subclasses, but here, we just pass
+    // the current speed to the model.
+    m_pEmulatorModel->m_iSpeed=iSpeed;
+    return doAction("SPEED_"+StringUtils::itos(iSpeed));
   }
 
   bool EmulatorController::uiUp()
@@ -256,6 +387,16 @@ namespace DCE
     return doAction("9");
   }
 
+  bool EmulatorController::pressAsterisk()
+  {
+    return doAction("*");
+  }
+
+  bool EmulatorController::pressPound()
+  {
+    return doAction("#");
+  }
+
   bool EmulatorController::uiBack()
   {
     return doAction("UI_BACK");
@@ -279,7 +420,7 @@ namespace DCE
 
   bool EmulatorController::start()
   {
-    return doAction("SERVICE2");
+    return doAction("START");
   }
   
   bool EmulatorController::select()
@@ -297,5 +438,26 @@ namespace DCE
     return doAction("RESET");
   }
 
+  bool EmulatorController::gotoMenu(int iMenu)
+  {
+    m_pEmulatorModel->m_iActiveMenu = iMenu;
+    return true;
+  }
+
+  bool EmulatorController::record()
+  {
+    m_pEmulatorModel->m_bIsRecording=!m_pEmulatorModel->m_bIsRecording;
+    return doAction("RECORD");
+  }
+  
+  void EmulatorController::setOrbiter(long int dwPK_Device_Orbiter)
+  {
+    m_pEmulatorModel->m_dwPK_Device_Orbiter=dwPK_Device_Orbiter;
+  }
+
+  void EmulatorController::setSystemConfiguration(string sSystemConfiguration)
+  {
+    m_pEmulatorModel->m_sSystemConfiguration=sSystemConfiguration;
+  }
 
 }

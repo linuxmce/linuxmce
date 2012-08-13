@@ -7,12 +7,16 @@
  */
 
 #ifndef EMULATORFACTORY_H
+#define EMULATORFACTORY_H
 
 #include "EmulatorController.h"
 #include "Game_Player.h"
 
 namespace DCE
 {
+  class Game_Player;
+  class EmulatorController;
+
   class EmulatorFactory
   {
   public:
@@ -31,5 +35,4 @@ namespace DCE
   };
 }
 
-#define EMULATORFACTORY_H
 #endif

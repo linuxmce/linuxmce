@@ -23,19 +23,37 @@ namespace DCE
   {
     m_bRunning_set(false);
     m_bHasArgs=true;
+    m_bIsPaused=false;
     m_sArgs="";
     m_sConfigFile="";
     m_sConfigFileTemplate="";
     m_sVideoAccelleration="";
     m_bChangeRequiresRestart=true;
+    m_iSpeed=1000; // 1x speed when initialized.
+    m_iActiveMenu=0;
+    m_iStreamID=0;
+    m_sMediaPosition="";
+    m_bIsStreaming=false;
+    m_bIsStreamingSource=false;
+    m_tStreamingClientLaunchDelay=3000000; // 3 sec delay by default.
+    m_bIsRecording=false;
   }
 
   EmulatorModel::~EmulatorModel()
   {
     m_bRunning_set(false);
+    m_bIsPaused=false;
     m_sConfigFile.clear();
     m_sConfigFileTemplate.clear();
     m_mapMedia.clear();
+    m_iActiveMenu=0;
+    m_iStreamID=0;
+    m_iSpeed=0;
+    m_sMediaPosition="";
+    m_bIsStreaming=false;
+    m_bIsStreamingSource=false;
+    m_sHostName="";
+    m_bIsRecording=false;
   }
 
   bool EmulatorModel::updateConfig()
@@ -74,13 +92,34 @@ namespace DCE
 	LoggerWrapper::GetInstance()->Write(LV_STATUS,"EmulatorModel::updateConfig() read config file template %s successfully.",m_sConfigFileTemplate.c_str());
       }
     
-    // Substitute template variables, as needed.
+    // Merge in System Configuration Items
+    if (!m_sSystemConfiguration.empty())
+      {
+	vector<string> vectLines;
+	LoggerWrapper::GetInstance()->Write(LV_STATUS,"EmulatorModel::updateConfig() - System Configuration part of URL, parsing.");
+	// Split into \n and then split each into values.
+	StringUtils::Tokenize(m_sSystemConfiguration,"\n",vectLines);
+	for (vector<string>::iterator it=vectLines.begin(); it!=vectLines.end(); ++it)
+	  {
+	    string sItem = *it;
+	    string::size_type pos=0;
+	    LoggerWrapper::GetInstance()->Write(LV_STATUS,"EmulatorModel::updateConfig() - Line %s",sItem.c_str());
+	    string sParameter = StringUtils::Tokenize(sItem,"|",pos);
+	    string sValue = StringUtils::Tokenize(sItem,"|",pos);
+	    LoggerWrapper::GetInstance()->Write(LV_STATUS,"EmulatorModel::updateConfig() - sParameter %s sValue %s",
+						sParameter.c_str(),
+						sValue.c_str());
+	    m_mapConfigTemplateItems[sParameter] = sValue;
+	  }
+      }
 
+    // Substitute template variables, as needed.
+    LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"EmulatorModel::updateConfig() - %d config items found.",m_mapConfigTemplateItems.size());
     for (map<string, string>::iterator it=m_mapConfigTemplateItems.begin();
 	 it != m_mapConfigTemplateItems.end();
 	 ++it)
       {
-	LoggerWrapper::GetInstance()->Write(LV_STATUS,"EmulatorModel::updateConfig() Replacing %s, with %s",it->first.c_str(), it->second.c_str());
+	LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"EmulatorModel::updateConfig() Replacing %s, with %s",it->first.c_str(), it->second.c_str());
 	sBuffer = StringUtils::Replace(sBuffer,it->first, it->second);
       }
 
