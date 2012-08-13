@@ -1,3 +1,0 @@
-#qmldir desktop-default
-Main main.qml
-Style style.qml
