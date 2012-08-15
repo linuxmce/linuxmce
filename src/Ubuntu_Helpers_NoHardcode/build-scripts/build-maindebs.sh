@@ -74,6 +74,8 @@ function build_main_debs() {
 	exclude_list=$exclude_list,$mkr_diskless_default_boot_file_package
 	exclude_list=$exclude_list,$mkr_diskless_base_filesystem_package
 
+	# The default version string is 2.0.0.44 and gets amended by the svn revision plus time of day and date
+	Main_Version='2.0.0.44.'
 	case "${build_name}" in
 		"gutsy")
 			Distro_ID="15"
@@ -84,6 +86,8 @@ function build_main_debs() {
 		"intrepid")
 			Distro_ID="17"
 			exclude_list=$exclude_list,$mkr_tira
+			# USB Game Pad
+			exclude_list=$exclude_list,795,796
 #			exclude_list=$exclude_list,$mkr_shift_key_state
 #			exclude_list=$exclude_list,$mkr_simplephone
 #			exclude_list=$exclude_list,$mkr_launch_manager_package
@@ -91,26 +95,29 @@ function build_main_debs() {
 			;;
 		"lucid")
 			Distro_ID="18"
+			Main_Version='2.0.0.45.'
 			exclude_list=$exclude_list,$mkr_tira
-			exclude_list=$exclude_list,$mkr_usb_uirt_0038_package
+#			exclude_list=$exclude_list,$mkr_usb_uirt_0038_package
 			exclude_list=$exclude_list,$mkr_vloopback_driver_package
-			exclude_list=$exclude_list,672,674 #
+#			exclude_list=$exclude_list,672,674 #
+			# usb game pad
+#			exclude_list=$exclude_list,795,796
 			# 674  # game
 #			# does not compile atm
-			exclude_list=$exclude_list,683
+#			exclude_list=$exclude_list,683
 			# SDLMESS 
 			# does not compile atm
-			exclude_list=$exclude_list,717
+#			exclude_list=$exclude_list,717
                         # MAME SNAPS and metadata
                         exclude_list=$exclude_list,680,681
 			# 721 LinuxMCE DPMS Monitor Source
-			exclude_list=$exclude_list,721,722
+#			exclude_list=$exclude_list,721,722
 			;;
 	esac
 
 
 	# Set version of packages to todays date, plus 00:19 as time
-	Q="Update Version Set VersionName= concat('2.0.0.44.',substr(now()+0,3,6),'$SVNrevision') Where PK_Version = 1;"
+	Q="Update Version Set VersionName= concat('$Main_Version',substr(now()+0,3,6),'$SVNrevision') Where PK_Version = 1;"
 	mysql $PLUTO_BUILD_CRED -D 'pluto_main_build' -e "$Q"
 
 	# Compile the packages

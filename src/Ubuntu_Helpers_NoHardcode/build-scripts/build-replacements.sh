@@ -65,8 +65,7 @@ function Build_Replacements_Common
 	Build_Replacement_Package freepbx ubuntu/asterisk/freepbx
 
         #Package: chan-sccp
-	DisplayMessage "NOT building chan-sccp atm"
-#	Build_Replacement_Package chan-sccp ubuntu/asterisk/chan_sccp
+#	DisplayMessage "NOT building chan-sccp atm"
 
 	#Package: pluto-asterisk
 	dir_="${svn_dir}/${svn_branch_name}/ubuntu/asterisk"
@@ -229,34 +228,37 @@ function Build_Replacements_Lucid
 	# 4) export PATCHVARIANT=mypatchvariant and dpkg-buildpackge
 	# 5) install vdr-dev (this is done in this script)
 	# 6) build ALL the plug-ins you would like to use (this is done in this script)
-	
-	DisplayMessage "Building VDR packages and plugins"
-	export PATCHVARIANT=multipatch
-	Build_Replacement_Package vdr ubuntu/vdr-1.7.15
-	# To build the plugins, we need to have the current -dev package installed
-	dpkg -i ${svn_dir}/${svn_branch_name}/ubuntu/vdr-dev_*.deb
-	
-	Build_Replacement_Package vdr-plugin-control ubuntu/vdr-plugin-control-0.0.2a
-	Build_Replacement_Package vdr-plugin-svdrpservice ubuntu/vdr-plugin-svdrpservice-0.0.4
-	# Before installing svdrservce-dev vdr needs to be installed
-	dpkg -i ${svn_dir}/${svn_branch_name}/ubuntu/vdr_*.deb
-	/etc/init.d/vdr stop
-	# The dev package needs to be installed to build the remote timers plugin.
-	
-        dpkg -i ${svn_dir}/${svn_branch_name}/ubuntu/svdrpservice-dev_*.deb
-	Build_Replacement_Package vdr-plugin-remotetimers ubuntu/vdr-plugin-remotetimers-0.1.3
-	Build_Replacement_Package vdr-plugin-streamdev ubuntu/vdr-plugin-streamdev-0.5.0~pre20090706+cvs20091108.2341
-#	Build_Replacement_Package vdr-plugin-streamdev ubuntu/vdr-plugin-streamdev-0.5.0~pre20090706+cvs20100307.2102
-	Build_Replacement_Package vdr-plugin-vompserver ubuntu/vdr-plugin-vompserver-0.3.1
-#	Build_Replacement_Package vdr-addon-noad ubuntu/vdr-addon-noad-0.7.2
-#	Build_Replacement_Package vdr-plugin-xineliboutput ubuntu/vdr-plugin-xineliboutput-1.0.4+cvs20091215.2049
-	Build_Replacement_Package vdr-plugin-xineliboutput ubuntu/vdr-plugin-xineliboutput-1.0.6+cvs20100608.2009
-	Build_Replacement_Package vdr-plugin-wirbelscan ubuntu/vdr-plugin-wirbelscan-0.0.5~pre12a
-	Build_Replacement_Package vdr-plugin-iptv ubuntu/vdr-plugin-iptv-0.4.2
-	Build_Replacement_Package vdrnfofs ubuntu/vdrnfofs-0.5
 
-	cp ${svn_dir}/${svn_branch_name}/ubuntu/libxine*.deb ${replacements_dir}
-	cp ${svn_dir}/${svn_branch_name}/ubuntu/xineliboutput-*.deb ${replacements_dir}
+
+	if [ "1" == "0" ]; then	
+		DisplayMessage "Building VDR packages and plugins"
+		export PATCHVARIANT=multipatch
+		Build_Replacement_Package vdr ubuntu/vdr-1.7.15
+		# To build the plugins, we need to have the current -dev package installed
+		dpkg -i ${svn_dir}/${svn_branch_name}/ubuntu/vdr-dev_*.deb
+		
+		Build_Replacement_Package vdr-plugin-control ubuntu/vdr-plugin-control-0.0.2a
+		Build_Replacement_Package vdr-plugin-svdrpservice ubuntu/vdr-plugin-svdrpservice-0.0.4
+		# Before installing svdrservce-dev vdr needs to be installed
+		dpkg -i ${svn_dir}/${svn_branch_name}/ubuntu/vdr_*.deb
+		/etc/init.d/vdr stop
+		# The dev package needs to be installed to build the remote timers plugin.
+		
+	        dpkg -i ${svn_dir}/${svn_branch_name}/ubuntu/svdrpservice-dev_*.deb
+		Build_Replacement_Package vdr-plugin-remotetimers ubuntu/vdr-plugin-remotetimers-0.1.3
+		Build_Replacement_Package vdr-plugin-streamdev ubuntu/vdr-plugin-streamdev-0.5.0~pre20090706+cvs20091108.2341
+	#	Build_Replacement_Package vdr-plugin-streamdev ubuntu/vdr-plugin-streamdev-0.5.0~pre20090706+cvs20100307.2102
+		Build_Replacement_Package vdr-plugin-vompserver ubuntu/vdr-plugin-vompserver-0.3.1
+	#	Build_Replacement_Package vdr-addon-noad ubuntu/vdr-addon-noad-0.7.2
+	#	Build_Replacement_Package vdr-plugin-xineliboutput ubuntu/vdr-plugin-xineliboutput-1.0.4+cvs20091215.2049
+		Build_Replacement_Package vdr-plugin-xineliboutput ubuntu/vdr-plugin-xineliboutput-1.0.6+cvs20100608.2009
+		Build_Replacement_Package vdr-plugin-wirbelscan ubuntu/vdr-plugin-wirbelscan-0.0.5~pre12a
+		Build_Replacement_Package vdr-plugin-iptv ubuntu/vdr-plugin-iptv-0.4.2
+	
+		cp ${svn_dir}/${svn_branch_name}/ubuntu/libxine*.deb ${replacements_dir}
+		cp ${svn_dir}/${svn_branch_name}/ubuntu/xineliboutput-*.deb ${replacements_dir}
+	fi
+	Build_Replacement_Package vdrnfofs ubuntu/vdrnfofs-0.5
 
 	# SqueezeSlave
 	Build_Replacement_Package squeezeslave ubuntu/squeezeslave
@@ -264,7 +266,14 @@ function Build_Replacements_Lucid
 	# shairport (AirPlay Audio)
 	Build_Replacement_Package shairport ubuntu/shairport-0.05
 
+	# asterisk-mysql
+#	Build_Replacement_Package asterisk-mysql ubuntu/asterisk-addons-1.6.2.0
+#        cp ${svn_dir}/${svn_branch_name}/ubuntu/asterisk-mysql*.deb ${replacements_dir}
 
+	# lmce-asterisk
+	Build_Replacement_Package lmce-asterisk src/lmce-asterisk
+        cp ${svn_dir}/${svn_branch_name}/src/lmce-asterisk*.deb ${replacements_dir}
+        Build_Replacement_Package chan-sccp-b ubuntu/asterisk/chan_sccp_v4                
 	#Package: zaptel-modules
 	DisplayMessage "NOT Building zaptel-modules"
 #	m-a --non-inter -ft -l $KVER a-b zaptel
@@ -278,6 +287,7 @@ function Build_Replacements_Lucid
 	else
 		DisplayMessage "Not building alsa-modules, as the drivers archive does not exist"
 	fi
+	Build_Replacement_Package python-coherence ubuntu/Coherence-0.6.6.2	        
 }
 
 function Build_Replacements_Intrepid
@@ -287,6 +297,7 @@ function Build_Replacements_Intrepid
 
 	#Package: djmount
 	Build_Replacement_Package djmount ubuntu/djmount-0.71
+	Build_Replacement_Package chan-sccp-b ubuntu/asterisk/Chan_SCCP-3.0.4_STABLE
 
 
 #	#Package: lirc

@@ -6,47 +6,58 @@
 set -e
 #set -x
 
+function try_deb() {
+	# we try to download the needed file
+	# from deb.linuxmce.org, and only 
+	# create an empty file, if deb doesn't
+	# carry it.
+	file=$1
+	wget http://deb.linuxmce.org/$1 || touch $1
+}
+	
+
 function fake_win32bins() {
 	pushd ${svn_dir}/${svn_branch_name}/src/bin
-	touch Pluto_S60.sis
-	touch Pluto_S60.sisx
-	touch Orbiter.CAB
-	touch Orbiter_Treo.CAB
+	try_deb Pluto_S60.sis
+	try_deb Pluto_S60.sisx
+	try_deb Orbiter.CAB
+	try_deb Orbiter_Treo.CAB
 
-	touch UpdateBinary.exe
-	touch UpdateBinaryCE.exe 
-	touch UpdateBinaryCE_x86.exe
-	touch {Orbiter_Win32.dat,Orbiter_CeNet4_XScale.dat}
+	try_deb UpdateBinary.exe
+	try_deb UpdateBinaryCE.exe 
+	try_deb UpdateBinaryCE_x86.exe
+	try_deb Orbiter_CeNet4_XScale.dat
+	try_deb Orbiter_Win32.dat
 	touch "Symbian Series 60 mobile.vmc"
 	touch "Windows Mobile Smartphone.vmc"
-	touch Orbiter_CeNet4_x86.dat
+	try_deb Orbiter_CeNet4_x86.dat
 
-	touch OrbiterInstaller.msi
-	touch OrbiterCE_SDL.CAB
-	touch Orbiter_CeNet4_XScale.CAB
-	touch Orbiter_CeNet4_x86.CAB
-	touch ImportContacts.zip
+	try_deb OrbiterInstaller.msi
+	try_deb OrbiterCE_SDL.CAB
+	try_deb Orbiter_CeNet4_XScale.CAB
+	try_deb Orbiter_CeNet4_x86.CAB
+	try_deb ImportContacts.zip
 
-	touch Orbiter.exe
-	touch Orbiter_CeNet4_XScale.exe
-	touch OrbiterSmartphone.exe
-	touch OrbiterCE_SDL.exe
-	touch Orbiter_CeNet4_x86.exe
+	try_deb Orbiter.exe
+	try_deb Orbiter_CeNet4_XScale.exe
+	try_deb OrbiterSmartphone.exe
+	try_deb OrbiterCE_SDL.exe
+	try_deb Orbiter_CeNet4_x86.exe
 
-	touch AYGSHELL.DLL
-	touch PthreadsCE.dll
-	touch Orbiter.MD5
-	touch logo.gif
+	try_deb AYGSHELL.DLL
+	try_deb PthreadsCE.dll
+	try_deb Orbiter.MD5
+	try_deb logo.gif
 
-	touch PlutoBaSInstaller.msi
-	touch PlutoRebootSetup.msi
+	try_deb PlutoBaSInstaller.msi
+	try_deb PlutoRebootSetup.msi
 
 #	wget -q http://hob.dyndns.org/javamo/JavaMO.jar
 #	wget -q http://hob.dyndns.org/javamo/JavaMO.jad
         cp ${svn_dir}/${svn_branch_name}/src/Orbiter/Maemo/fremantle.install .
         
-	touch JavaMO.jar
-	touch JavaMO.jad
+	try_deb JavaMO.jar
+	try_deb JavaMO.jad
 	popd
 		
 
