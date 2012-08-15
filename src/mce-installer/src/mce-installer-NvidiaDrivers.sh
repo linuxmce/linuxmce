@@ -25,7 +25,7 @@ fi
 mount /dev/cdrom /media/cdrom || :
 
 if [[ "$(aptitude show nvidia-glx | grep State | cut -d ' ' -f2)" == "installed" ]] ;then
-	if [[ "$(aptitude show nvidia-glx | grep Version | cut -d' ' -f2)" == "$nvidia_glx_version" ]] ;then
+	if [[ "$(aptitude show nvidia-glx* | grep Version | cut -d' ' -f2)" == "$nvidia_glx_version" ]] ;then
 		nvidia_glx_installed="true"
 	fi
 fi
