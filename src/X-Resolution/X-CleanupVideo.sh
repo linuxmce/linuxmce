@@ -31,9 +31,9 @@ CleanupVideo()
 	# Check for video card changes and update system accordingly
 	# Package name lists are treated as prefixes
 	local Pkgs_nVidia
-	Pkgs_nVidia=(nvidia-driver nvidia-glx "nvidia-kernel-.*" pluto-nvidia-video-drivers)
+	Pkgs_nVidia=(pluto-nvidia-video-drivers)
 	local Pkgs_ATI
-	Pkgs_ATI=(xorg-driver-fglrx pluto-ati-video-drivers)
+	Pkgs_ATI=(pluto-ati-video-drivers)
 	local Pkgs_VIA
 	Pkgs_VIA=(xserver-xorg-video-viaprop)
 	local nV_inst ATI_inst VIA_inst
