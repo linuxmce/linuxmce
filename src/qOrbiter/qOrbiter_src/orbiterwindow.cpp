@@ -72,6 +72,8 @@ orbiterWindow::orbiterWindow(long deviceid, std::string routerip, QObject *paren
 
     userList.append(new PromptData("null",0));
     roomList.append(new PromptData("null",0));
+    mainView.engine()->addImportPath("/imports");
+    mainView.engine()->addImportPath("imports");
 
     mainView.rootContext()->setContextProperty("users", QVariant::fromValue(userList));
     mainView.rootContext()->setContextProperty("rooms", QVariant::fromValue(roomList));

@@ -113,7 +113,7 @@ folder_03.source = config.xml
 folder_03.target = $$DESTDIR
 
 DEFINES+=for_android
-QT+= phonon
+
 LIBS += -L/usr/lib/ao/plugins-4 -lpulse -lpulse-mainloop-glib
 }
 
@@ -341,11 +341,13 @@ SOURCES += main.cpp \
     contextobjects/bookmarkitem.cpp \
     plugins/GoogleWeather/googleweather.cpp \
     contextobjects/promptdata.cpp \
-    ../../qMediaPlayer/AudioVisual/audiowidget.cpp
+
 
 !ANDROID|!QT5{
  SOURCES+= ../../qMediaPlayer/AudioVisual/audiovisual.cpp \
-    ../../qMediaPlayer/AudioVisual/videowidgetplayer.cpp
+    ../../qMediaPlayer/AudioVisual/videowidgetplayer.cpp \
+../../qMediaPlayer/AudioVisual/audiowidget.cpp
+
 }
 
 
@@ -456,11 +458,12 @@ HEADERS += \
     contextobjects/bookmarkitem.h \
     plugins/GoogleWeather/googleweather.h \
     contextobjects/promptdata.h \
-    ../../qMediaPlayer/AudioVisual/audiowidget.h
+
 
 !ANDROID||!QT5{
  HEADERS+=   ../../qMediaPlayer/AudioVisual/audiovisual.h \
-    ../../qMediaPlayer/AudioVisual/videowidgetplayer.h
+    ../../qMediaPlayer/AudioVisual/videowidgetplayer.h \
+../../qMediaPlayer/AudioVisual/audiowidget.h
 }
 
 OTHER_FILES += Readme.txt \

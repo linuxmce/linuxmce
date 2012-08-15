@@ -127,6 +127,7 @@ void QmlApplicationViewer::setMainQmlFile(const QString &file)
 void QmlApplicationViewer::addImportPath(const QString &path)
 {
     engine()->addImportPath(QmlApplicationViewerPrivate::adjustPath(path));
+
 }
 
 void QmlApplicationViewer::setOrientation(ScreenOrientation orientation)

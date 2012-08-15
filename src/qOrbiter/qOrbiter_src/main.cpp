@@ -37,6 +37,7 @@ Q_IMPORT_PLUGIN(UIKit)
 #else
 #include <QApplication>
 #include <QtDeclarative/QDeclarativeEngine>
+
 #endif
 
 #include <datamodels/listModel.h>
@@ -173,7 +174,9 @@ int main(int argc, char* argv[])
 #endif
 
 
+
     QApplication  a(argc, argv);
+    QCoreApplication::setApplicationName("LinuxMCE QOrbiter");
 #ifdef __ANDROID__ // workaround for 'text as boxes' issue.
     QFont f = a.font();
     f.setFamily("Droid Sans");
@@ -294,6 +297,7 @@ int main(int argc, char* argv[])
         gWeatherModel *theWeather= new gWeatherModel(new gWeatherItem);
 
         //qmlRegisterType<gWeatherModel>("GoogleWeather", 0,1,"GoogleWeather");
+
         typedef QMap <int, QString> myMap;
         int throwaway = qRegisterMetaType<myMap>("myMap");
 
@@ -464,6 +468,8 @@ int main(int argc, char* argv[])
         QObject::connect(simpleEPGmodel, SIGNAL(networkChanged(QString)), w->nowPlayingButton, SLOT(setChannelID(QString)), Qt::QueuedConnection);
         QObject::connect(timecode, SIGNAL(seekToTime(QString)), pqOrbiter, SLOT(JogStream(QString)), Qt::QueuedConnection );
         //attributes
+        QObject::connect(pqOrbiter, SIGNAL(np_storageDeviceChanged(QString)), w->nowPlayingButton, SLOT(setStorageDevice(QString)), Qt::QueuedConnection);
+        QObject::connect(pqOrbiter, SIGNAL(np_pathChanged(QString)), w->nowPlayingButton, SLOT(setPath(QString)), Qt::QueuedConnection);
         QObject::connect(pqOrbiter, SIGNAL(np_filename(QString)), w->nowPlayingButton, SLOT(setFilePath(QString)),Qt::QueuedConnection);
 
         QObject::connect(pqOrbiter, SIGNAL(np_mediaTitleChanged(QString)), w->nowPlayingButton, SLOT(setMediaTitle(QString)),Qt::QueuedConnection);
@@ -571,6 +577,7 @@ int main(int argc, char* argv[])
             if( pqOrbiter->m_bReload )
                 bReload=true;
 
+            PK_Device = pqOrbiter->m_dwPK_Device;
             a.quit();
         }
 

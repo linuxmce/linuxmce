@@ -2,6 +2,7 @@ import QtQuick 1.0
 import "../components"
 import "../js/ComponentLoader.js" as MyJs
 import Qt.labs.shaders 1.0
+import AudioVisual 1.0
 import "../effects"
 
 Rectangle {
@@ -13,6 +14,9 @@ Rectangle {
     radius: 0
     opacity: 1
     color: "transparent"
+
+
+
 
 
     Column{
@@ -49,7 +53,7 @@ Rectangle {
         {
             id:metadata
             height: scaleY(50)
-            width: dcenowplaying.aspect=="wide"? nowplayingimage.width : childrenRect.width
+            width: 480
             spacing: scaleY(1)
 
             Rectangle {
@@ -96,6 +100,30 @@ Rectangle {
                 height:dcenowplaying.aspect=="wide"? scaleY(30) : scaleY(50)
                 source: ""
                 Component.onCompleted: manager.setBoundStatus(true)
+                AudioVisual{
+                    id:mediaPlayer
+                    height: mediaPlayer.height
+                    width: mediaPlayer.width
+                    anchors.centerIn: nowplayingimage
+                    playerType:5
+                    mediaType: 5
+                    onMediaSourceChanged: play()
+                    Text {
+                        id: srsLabel
+                        text:mediaPlayer.mediaSource
+                        anchors.centerIn: mediaPlayer
+                        color: "white"
+                        z:2
+                        wrapMode: Text.WrapAtWordBoundaryOrAnywhere
+                        width: 320
+
+                    }
+                    Connections{
+                        target: dcenowplaying
+                        onFilePathChanged:mediaPlayer.mediaSource = ("/home/public/"+dcenowplaying.qs_storageDevice+"/public/data/videos"+dcenowplaying.path+"/"+dcenowplaying.filepath)
+                    }
+                  //  onSourceChanged: console.log("Mediasource::"+mediaPlayer.mediaSource)
+                }
             }
 
         }
@@ -105,8 +133,8 @@ Rectangle {
             height: childrenRect.height
             width: dcenowplaying.aspect=="wide"?  textcol.width : scaleX(20)
             color:"transparent"
-            anchors.left:  imageholder.right;
-            anchors.top:   imageholder.top
+            anchors.left:  metadata.right;
+            anchors.top:   metadata.top
             /*
             BorderImage {
                 id: metaborder
@@ -220,6 +248,48 @@ Rectangle {
                         onExited: {synopsis.elide = "ElideRight"; }
                     }
                 }
+
+                Text {
+                    id: path
+                    width: parent.width
+                    wrapMode: "WrapAtWordBoundaryOrAnywhere"
+                    text: qsTr("Path: ") + dcenowplaying.path
+                    font.family: "Droid Sans"
+                    font.bold: true
+                    smooth: true
+                    font.pixelSize: scaleY(1.5)
+                    elide: "ElideRight"
+                    visible:  dcenowplaying.path =="" ? false: true
+
+                    MouseArea{
+                        anchors.fill: path
+                        hoverEnabled: true
+                        onEntered: { filepath.elide = "ElideNone" ; }
+                        onExited: {filepath.elide = "ElideRight"; }
+                    }
+                }
+
+                Text {
+                    id: sd
+                    width: parent.width
+                    wrapMode: "WrapAtWordBoundaryOrAnywhere"
+                    text: qsTr("Storage Device: ") + dcenowplaying.qs_storageDevice
+                    font.family: "Droid Sans"
+                    font.bold: true
+                    smooth: true
+                    font.pixelSize: scaleY(1.5)
+                    elide: "ElideRight"
+                    visible:  dcenowplaying.qs_storageDevice =="" ? false: true
+
+                    MouseArea{
+                        anchors.fill: sd
+                        hoverEnabled: true
+                        onEntered: { filepath.elide = "ElideNone" ; }
+                        onExited: {filepath.elide = "ElideRight"; }
+                    }
+                }
+
+
             }
         }
     }

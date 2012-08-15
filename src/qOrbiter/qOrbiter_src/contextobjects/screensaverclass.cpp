@@ -5,7 +5,9 @@
 ScreenSaverClass::ScreenSaverClass(QObject *parent) :
     QObject(parent)
 {
-
+    qi_currentImage = QImage();
+    qi_newImage = QImage();
+    primary = true;
 }
 
 void ScreenSaverClass::setImageList(QStringList imgList)
@@ -30,9 +32,9 @@ void ScreenSaverClass::clearImageList()
 
 void ScreenSaverClass::setImageData(const uchar *data, int iData_size)
 {
-    QImage img;
-    qi_currentImage = img;
-    qi_currentImage.loadFromData(data, iData_size);
+    QImage t;
+    t.loadFromData(data, iData_size);
+    qi_currentImage = t;
     emit imageChanged();
     delete data;
 }
@@ -61,8 +63,6 @@ void ScreenSaverClass::pickImage()
     QTimer *timer = new QTimer(this);
         connect(timer, SIGNAL(timeout()), this, SLOT(selectNew()));
         timer->start(10000);
-
-
 }
 
 void ScreenSaverClass::selectNew()

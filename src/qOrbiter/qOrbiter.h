@@ -1306,6 +1306,8 @@ signals:
     void stopTimeCode();
 
     //attributes. granular instead of grouped because i can. i figure the strongly interwoven orbiter got us in trouble the 1st time right? Right?!
+    void np_pathChanged(QString f);
+    void np_storageDeviceChanged(QString f);
     void np_title1Changed(QString t1);
     void np_title2Changed(QString t2);
     void np_mediaTitleChanged(QString m_title);

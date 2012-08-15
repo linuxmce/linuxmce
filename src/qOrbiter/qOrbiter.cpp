@@ -2972,7 +2972,33 @@ void DCE::qOrbiter::GetNowPlayingAttributes()
         placeholder = details.indexOf("PATH");
         if(placeholder != -1)
         {
-            filepath = details.at(placeholder+1) + "/";
+            emit np_pathChanged(details.at(placeholder+1));
+            //begin ugly bit to determine the storage device for later use. its not passed explicitly, so i use a regex to determine it for media files
+            QRegExp deviceNo("(\\\[\\\d+\\\])");
+            int l = deviceNo.indexIn(details.at(placeholder+1));
+
+            if (l ==-1){
+                emit np_storageDeviceChanged("mediatype");
+                setCommandResponse("Stored in /mediaType");
+            }
+            else
+            {
+                if(!deviceNo.isEmpty()){
+                    QString f = deviceNo.cap(0);
+                    f.remove("[");
+                    f.remove("]");
+                    emit np_storageDeviceChanged(f);
+                    QString localPath = details.at(placeholder+1).split(deviceNo).at(1);
+                    emit np_pathChanged(localPath);
+                }
+                else
+                {
+                    emit np_storageDeviceChanged("local");
+                }
+            }
+            //end ugly bit of regex. pretty because it works unless a user decides to also have [\d\d\d] type directories. I try to counter that by choosing only
+            //the first match as that will be the first indexed by the regex engine.
+
         }
 
         placeholder = details.indexOf("FILENAME");

@@ -1,5 +1,6 @@
 import QtQuick 1.1
 import Qt.labs.shaders 1.0
+import AudioVisual 1.0
 import "effects"
 import "components"
 import "js/ComponentLoader.js" as MyJs
@@ -48,6 +49,12 @@ DebugInfoPanel{
 id:orbiterInfo
 z:2
 }
+
+
+
+
+
+
 
 Connections{
     target: manager

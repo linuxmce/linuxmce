@@ -73,7 +73,8 @@ class NowPlayingClass : public QDeclarativeItem
 
     Q_PROPERTY (QImage fileImage READ getImage WRITE setImage NOTIFY imageChanged)
     Q_PROPERTY (QImage streamImage READ getStreamImage WRITE setStreamImage NOTIFY streamImageChanged)
-
+    Q_PROPERTY(QString path READ getPath WRITE setPath NOTIFY pathChanged)
+    Q_PROPERTY(QString qs_storageDevice READ getStorageDevice READ getStorageDevice NOTIFY storageDeviceChanged)
 
     //set now playing - text to assign
     Q_PROPERTY (QString qs_mainTitle READ getTitle WRITE setTitle NOTIFY titleChanged) //the text set sent by now playing command
@@ -133,6 +134,8 @@ public:
     QString qs_subTitle;
     int i_mediaType;
     int i_streamID;
+    int storageDeviceNo;
+    QString qs_storageDevice;
 
     //dont laugh, not sure where these come from but are relevant for other functions
     bool b_mediaPlaying;
@@ -162,10 +165,12 @@ public:
     QStringList composer;
     QString releasedate;
     QString aspect;
-
+    QString filename;
+    QString path;
 
 signals:
     //general signals
+    void storageDeviceChanged();
     void mediaTitleChanged();
     void playlistChanged();
     void mediaChanged();
@@ -179,7 +184,13 @@ signals:
     void titleChanged2();
     void mediaTypeChanged();
     void mediaStatusChanged();
+
+    void pathChanged();
     void filePathChanged();
+    void fileNameChanged();
+    void FileChanged(QString f);
+
+
     void mediaSpeedChanged();
     void playListPositionChanged(int p);
     void genreChanged();
@@ -208,6 +219,27 @@ signals:
 
 public slots:
     void resetData();
+
+    void setStorageDevice(QString device) {
+        qs_storageDevice = device;
+        if(device=="-1")
+        {
+            storageDeviceNo=-1;
+        }
+        else
+        {
+            storageDeviceNo = qs_storageDevice.toInt();
+        }
+        emit storageDeviceChanged();
+    }
+
+    inline QString getFilename() {return filename;}
+    inline void setFilename (QString f) {filename = f; emit fileNameChanged();}
+
+    inline QString getPath() {return path;}
+    inline void setPath (QString f) {path = f; emit pathChanged();}
+
+  QString getStorageDevice() {return qs_storageDevice;}
 
     void setNetwork(QString bcast_network) {network = bcast_network; emit networkChanged();}
     QString getNetwork() {return network;}
