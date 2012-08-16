@@ -112,6 +112,20 @@ folder_05.target = $$DESTDIR/qml
 folder_03.source = config.xml
 folder_03.target = $$DESTDIR
 
+  qmlcomponents.source = androidComponents
+    qmlcomponents.target = /
+    DEPLOYMENTFOLDERS += qmlcomponents
+    qmlplugins.files =
+
+        x86 {
+            qmlplugins.path = /libs/x86
+        } else: armeabi-v7a {
+            qmlplugins.path = /libs/armeabi-v7a
+        } else {
+            qmlplugins.path = /libs/armeabi
+        }
+    INSTALLS += qmlplugins
+
 DEFINES+=for_android
 
 LIBS += -L/usr/lib/ao/plugins-4 -lpulse -lpulse-mainloop-glib

@@ -575,7 +575,7 @@ int main(int argc, char* argv[])
             pthread_join(pqOrbiter->m_RequestHandlerThread, NULL);  // This function will return when the device is shutting down
     */
             if( pqOrbiter->m_bReload )
-                bReload=true;
+                 { bReload=true; }
 
             PK_Device = pqOrbiter->m_dwPK_Device;
             a.quit();
