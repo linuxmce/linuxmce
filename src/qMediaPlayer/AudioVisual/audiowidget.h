@@ -1,11 +1,13 @@
 #ifndef AUDIOWIDGET_H
 #define AUDIOWIDGET_H
+#ifndef ANDROID
 
 #ifdef QT5
 #include <QtWidgets/QWidget>
 #else
 #include <QWidget>
 #include <phonon/Phonon>
+
 #endif
 
 
@@ -29,5 +31,5 @@ public slots:
     void seekBackward(int speed);
     
 };
-
+#endif
 #endif // AUDIOWIDGET_H

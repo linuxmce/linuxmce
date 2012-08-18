@@ -18,8 +18,11 @@
 CONFIG += qt thread
 # define deployment destination and target executable name
 
-DESTDIR = ../QOrbiter-build-$$QT_VERSION
+ANDROID{
 
+} else {
+DESTDIR = ../QOrbiter-build-$$QT_VERSION
+}
 
 contains(QT_VERSION,4.8.*){
 message("$$QT_VERSION Core")
@@ -112,10 +115,11 @@ folder_05.target = $$DESTDIR/qml
 folder_03.source = config.xml
 folder_03.target = $$DESTDIR
 
-  qmlcomponents.source = androidComponents
-    qmlcomponents.target = /
-    DEPLOYMENTFOLDERS += qmlcomponents
-    qmlplugins.files =
+    qmlcomponents.source = androidComponents/
+    qmlcomponents.target = imports/
+
+
+    qmlplugins.files = androidPlugins/libqmlshadersplugin.so
 
         x86 {
             qmlplugins.path = /libs/x86
@@ -124,11 +128,13 @@ folder_03.target = $$DESTDIR
         } else {
             qmlplugins.path = /libs/armeabi
         }
-    INSTALLS += qmlplugins
+
+DEPLOYMENTFOLDERS+= qmlcomponents
+    INSTALLS+= qmlplugins
 
 DEFINES+=for_android
+DEFINES+=ANDROID
 
-LIBS += -L/usr/lib/ao/plugins-4 -lpulse -lpulse-mainloop-glib
 }
 
 for_freemantle{
@@ -169,12 +175,6 @@ macx{
     ICON = osxicons.icns
 }
 
-ANDROID{
-folder_01.source = qml/android/
-folder_05.source = qml/template
-folder_05.target = $$DESTDIR/qml
-DEFINES+=ANDROID
-}
 
 #plugins_folder.source = plugins/
 #plugins_folder.target = $$DESTDIR
@@ -191,6 +191,37 @@ DEPLOYMENTFOLDERS = folder_01 files_01 folder_05
 plugins_folder.source = imports/
 plugins_folder.target = $$DESTDIR
 DEPLOYMENTFOLDERS+= plugins_folder
+}
+
+ANDROID{
+
+folder_01.source = qml/android/
+folder_01.target =qml
+
+folder_05.source = qml/template
+folder_05.target = qml
+
+folder_03.source = config.xml
+folder_03.target = $$DESTDIR
+    qmlcomponents.source = androidComponents/
+    qmlcomponents.target = imports/
+
+
+    qmlplugins.files = androidPlugins/libqmlshadersplugin.so
+
+        x86 {
+            qmlplugins.path = /libs/x86
+        } else: armeabi-v7a {
+            qmlplugins.path = /libs/armeabi-v7a
+        } else {
+            qmlplugins.path = /libs/armeabi
+        }
+
+DEPLOYMENTFOLDERS+= qmlcomponents
+    INSTALLS+= qmlplugins
+
+DEFINES+=ANDROID
+DEPLOYMENTFOLDERS = qmlcomponents folder_01 folder_03
 }
 
 # Additional import path used to resolve QML modules in Creator's code model

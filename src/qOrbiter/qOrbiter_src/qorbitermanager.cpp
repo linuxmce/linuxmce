@@ -42,6 +42,7 @@
 
 
 
+
 //#include "OrbiterData.h"
 
 
@@ -98,15 +99,8 @@ qorbiterManager::qorbiterManager(QDeclarativeView *view, QObject *parent) :
     qorbiterUIwin->rootContext()->setContextProperty("manager", this); //providing a direct object for qml to call c++ functions of this class
     qorbiterUIwin->rootContext()->setContextProperty("dcemessage", dceResponse);
 
-#ifndef __ANDROID__
-#ifdef GLENABLED
-    fileReader = new FileReader;
-    qorbiterUIwin->rootContext()->setContextProperty("fileReader", fileReader);
-#endif
-    //uncomment these for_Pi
-    //fileReader = new FileReader;
-    //qorbiterUIwin->rootContext()->setContextProperty("fileReader", fileReader);
-#endif
+
+
     appHeight = qorbiterUIwin->height() ;
     appWidth = qorbiterUIwin->width() ;
 

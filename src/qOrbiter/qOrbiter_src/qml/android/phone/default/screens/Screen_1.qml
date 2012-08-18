@@ -1,4 +1,6 @@
 import QtQuick 1.1
+//import Qt.labs.shaders 1.0
+import "../effects"
 import "../components"
 import "../js/ComponentLoader.js" as MyJs
 
@@ -10,10 +12,6 @@ Rectangle {
     height: appH
     width: appW
     color: "transparent"
-    Connections{
-        target: dcenowplaying
-        onImageChanged:np_bg.source = "image://listprovider/updateobject/"+securityvideo.timestamp
-    }
 
     Image {
         id: bg
@@ -41,6 +39,7 @@ Rectangle {
         anchors.left: manager.b_orientation ? parent.horizontalCenter : parent.left
         anchors.leftMargin: manager.b_orientation ? (fs_npButton.width / 2) * -1 : scaleX(2)
     }
+
   /*
     Image {
         id: np_bg
@@ -59,7 +58,25 @@ Rectangle {
         anchors.left: manager.b_orientation ? stage.left : fs_npButton.right
         anchors.leftMargin: manager.b_orientation ? scaleX(15) : scaleX(1)
     }
+/*
+    EffectGaussianBlur{
+        id: blur
+        anchors.fill: bg
+        divider: false
+        dividerValue: 1
+        opacity: 1
+        radius: 0.75
+        targetHeight: bg.height
+        targetWidth: bg.width
+        source: ShaderEffectSource { sourceItem: bg; hideSource: true }
+        Component.onCompleted: console.log("blur loaded?")
+    }
 
+    EffectBillboard{
+        id:billboard
+
+    }
+*/
 
 
     Image {

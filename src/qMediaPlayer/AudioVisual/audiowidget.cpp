@@ -6,7 +6,7 @@
 #include <QtWidgets/qwidget.h>
 #else
 #include <phonon/Phonon>
-#include <phonon/VideoWidget>
+#include <phonon/AudioOutput>
 #endif
 
 #include <QUrl>

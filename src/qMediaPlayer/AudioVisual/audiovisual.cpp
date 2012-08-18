@@ -12,9 +12,9 @@
 #else
 #include <QApplication>
 #include <phonon/VideoPlayer>
-#endif
 #include <QDeclarativeItem>
 #include <QGraphicsProxyWidget>
+#endif
 #ifdef debug
 #include <QDebug>
 #endif
@@ -29,31 +29,42 @@ AudioVisual::AudioVisual(QDeclarativeItem *parent) :
     QDeclarativeItem(parent)
   #endif
 {
+    setFlag(ItemHasNoContents, false);
+    playerType = -1;
+
+    ColorFilterProxyWidget * proxy = new ColorFilterProxyWidget(this);
+    videoWidgetPlayer *videoPlayer = new videoWidgetPlayer();
+
+    proxy->setWidget(videoPlayer);
+    proxy->show();
+    QObject::connect(this, SIGNAL(stop()), videoPlayer, SLOT(stopPlayback()));
+    QObject::connect(this, SIGNAL(play()), videoPlayer, SLOT(startPlayback()));
+    QObject::connect(this, SIGNAL(setPlayerSource(QString)), videoPlayer, SLOT(setSource(QString)));
+
+    AudioWidget* audioPlayer = new AudioWidget();
+    //QObject::connect(this, SIGNAL(stop()), audioPlayer->audioObject, SLOT(stop()));
 
 
 }
 
-#endif
+
 
 
 void AudioVisual::setupPlayer()
 {
-    if(mediaType == 5)
-    {
-        videoWidgetPlayer *videoPlayer = new videoWidgetPlayer();
 
-    }
-    else
-        if (mediaType ==4)
-        {
-            AudioWidget* audioPlayer = new AudioWidget();
-        }
+
+}
+
+void AudioVisual::switchTypes()
+{
 
 }
 
 
 void AudioVisual::stopMedia()
 {
+    emit stop();
 }
 
 void AudioVisual::rwMedia(int spd)
@@ -70,15 +81,17 @@ void AudioVisual::seekToPosition(int position)
 
 void AudioVisual::setSource(QString source)
 {
-    switch(mediaType){
+
+    mediaSource = source;
+    switch(playerType){
     case 5 :
-        videoPlayer->qPlayer->setCurrentSource(Phonon::MediaSource(source));
+        emit setPlayerSource(mediaSource);
         break;
     case 4:
-        audioPlayer->audioObject->setCurrentSource(Phonon::MediaSource(source));
+        emit setPlayerSource(mediaSource);
         break;
     }
-
+    emit sourceChanged();
 }
 
 QString AudioVisual::getSource()
@@ -89,5 +102,7 @@ QString AudioVisual::getSource()
 
 void AudioVisual::playItem(QString track)
 {
+    emit setPlayerSource(track);
+    emit play();
 }
-
+#endif

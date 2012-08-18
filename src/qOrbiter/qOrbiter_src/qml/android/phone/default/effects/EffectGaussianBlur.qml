@@ -77,7 +77,7 @@ Item {
         fragmentShaderFilename: "gaussianblur_h.fsh"
         source: horizontalShaderSource
 
-        ShaderEffectSource {
+        ShaderEffectSource2 {
             id: horizontalShaderSource
             sourceItem: verticalShader
             smooth: true

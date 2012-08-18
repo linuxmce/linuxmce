@@ -46,10 +46,15 @@
 #include <QtCore/QFileInfo>
 #include <QtCore/QTextStream>
 #include <QDir>
-
+#include <QDebug>
 
 QString adjustPath(const QString &path)
 {
+#ifdef ANDROID
+
+    return path;
+
+#endif
 
 #ifdef Q_OS_UNIX
 #ifdef Q_OS_MAC
@@ -70,6 +75,7 @@ QString adjustPath(const QString &path)
 
 QString FileReader::readFile(const QString &fileName)
 {
+#ifndef ANDROID
     qDebug() << "FileReader::readFile" << "fileName" << fileName << "adjusted" << adjustPath(fileName);
     QString content;
     QFile file(QCoreApplication::applicationDirPath()+"/qml/desktop/default/effects/"+fileName);
@@ -83,4 +89,22 @@ QString FileReader::readFile(const QString &fileName)
         qDebug() << "Couldnt open"  << file.fileName();
     }
     return content;
+#endif
+    qDebug() << "FileReader::readFile" << "fileName" << fileName << "adjusted" << adjustPath(fileName);
+     QFile file(QCoreApplication::applicationDirPath()+"/qml/android/phone/default/effects/"+fileName);
+     QString content;
+     if (file.open(QIODevice::ReadOnly)) {
+         QTextStream stream(&file);
+         content = stream.readAll();
+         qDebug("Opened file");
+         return content;
+     }
+     else
+     {
+         qDebug() << "Couldnt open"  << file.fileName();
+         return content.append("fileErr");
+     }
+
 }
+
+

@@ -13,6 +13,7 @@
 
 #if GLENABLED
 #include <QtOpenGL/QGLWidget>
+#include <shaders/filereader.h>
 #endif
 #include <QtNetwork/QNetworkReply>
 
@@ -48,6 +49,7 @@ public:
     QList<QObject*> roomList;
 #if GLENABLED
     QGLWidget *glWidget;
+    FileReader *fileReader;
 #endif
 
     long deviceno;

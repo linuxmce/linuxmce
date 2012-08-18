@@ -38,13 +38,18 @@
 ** $QT_END_LICENSE$
 **
 ****************************************************************************/
-
+#ifndef FILEREADER_H
+#define FILEREADER_H
 #include <QtCore/QObject>
 
 class FileReader : public QObject
 {
     Q_OBJECT
+
+
+
 public:
     Q_INVOKABLE QString readFile(const QString &fileName);
-};
 
+};
+#endif

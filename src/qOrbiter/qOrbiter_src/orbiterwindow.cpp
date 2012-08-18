@@ -24,6 +24,7 @@
 #include <contextobjects/existingorbiter.h>
 #include <contextobjects/promptdata.h>
 #include <QtCore/QDir>
+#include <shaders/filereader.h>
 
 #if (QT_VERSION >= 0x050000)
 #include <QtQml/QtQml>
@@ -70,13 +71,21 @@ orbiterWindow::orbiterWindow(long deviceid, std::string routerip, QObject *paren
     router = routerip;
     deviceno = deviceid;
 
-    userList.append(new PromptData("null",0));
-    roomList.append(new PromptData("null",0));
-    mainView.engine()->addImportPath("/imports");
+    userList.append(new PromptData("No Users",0));
+    roomList.append(new PromptData("No Rooms",0));
+
     mainView.engine()->addImportPath("imports");
 
     mainView.rootContext()->setContextProperty("users", QVariant::fromValue(userList));
     mainView.rootContext()->setContextProperty("rooms", QVariant::fromValue(roomList));
+
+#ifdef GLENABLED
+    fileReader = new FileReader();
+     mainView.rootContext()->setContextProperty("fileReader", fileReader);
+    //uncomment these for_Pi
+    //fileReader = new FileReader;
+    //qorbiterUIwin->rootContext()->setContextProperty("fileReader", fileReader);
+#endif
 
 #if (QT_VERSION >= 0x050000)
     mainView.setResizeMode(QQuickView::SizeRootObjectToView);
@@ -148,6 +157,14 @@ orbiterWindow::orbiterWindow(long deviceid, std::string routerip, QObject *paren
 #endif
 
     mainView.setSource(QUrl(qrcPath));
+#ifdef ANDROID
+
+#ifdef Q_OS_ANDROID
+     mainView.rootContext()->setBaseUrl(QUrl::fromLocalFile("/"));
+     mainView.rootContext()->engine()->addImportPath("/imports/");
+     mainView.rootContext()->engine()->addPluginPath(QDir::homePath()+"/../lib");
+#endif
+#endif
 
 #ifdef Q_OS_SYMBIAN
     mainView.showFullScreen();

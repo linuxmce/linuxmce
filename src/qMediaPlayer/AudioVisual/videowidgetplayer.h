@@ -9,40 +9,42 @@
 #include <QPainter>
 #include <QGraphicsItem>
 #include <QGraphicsProxyWidget>
+#include <phonon/VideoWidget>
+#include <QUrl>
+#include <QVBoxLayout>
 #endif
 
-class ColorFilterProxyWidget : public QGraphicsProxyWidget
-{
-public:
-    ColorFilterProxyWidget(QGraphicsItem *parent = 0, Qt::WindowFlags wFlags = 0):
-    QGraphicsProxyWidget(parent,wFlags)
-    {
-    }
 
-protected:
-  void paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget){
-    QPainter *painter_inverted = new QPainter();
-    QImage invertedColor(boundingRect().width(),boundingRect().height(),QImage::Format_RGB32);
-    painter_inverted->begin(&invertedColor);
-    QGraphicsProxyWidget::paint(painter_inverted,option,widget);
-    painter_inverted->end();
-    painter->drawImage(0,0,invertedColor.rgbSwapped());
-  }
-
-};
 
 class videoWidgetPlayer : public QWidget
 {
     Q_OBJECT
 public:
     explicit videoWidgetPlayer(QWidget *parent = 0);
-    Phonon::MediaObject *qPlayer;
-    Phonon::VideoWidget *videoOutput;
-    ColorFilterProxyWidget *hack;
+    Phonon::MediaObject *videoObject;
+    Phonon::AudioOutput *videoAudio;
+   Phonon::VideoWidget *videoSurface;
+    Phonon::VideoPlayer *qPlayer;
+
+   // QWidget * w;
+   // QVBoxLayout *l;
+
+    QString currentSource;
+    qint64 currentTime;
 
 signals:
+    void sourceChanged(QUrl f);
+    void play();
+    void stop();
 
 public slots:
+    void setSource(QString f) {
+        QString g = f;
+        currentSource = g;
+    }
+    void startPlayback();
+    void stopPlayback() { emit stop(); }
+
 
 
 };

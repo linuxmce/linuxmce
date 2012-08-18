@@ -55,7 +55,7 @@ ShaderEffectItem {
 
     QtObject {
         id: d
-        property string fragmentShaderCommon: "
+        property string fragmentShaderCommon:"
             #ifdef GL_ES
                 precision mediump float;
             #else
@@ -71,7 +71,7 @@ ShaderEffectItem {
     // rather than being inline in the QML file
 
     onFragmentShaderFilenameChanged:
-    {   console.log(fragmentShaderFilename)
+    {   console.log("vertex shader filename")+fragmentShaderFilename)
         fragmentShader =  d.fragmentShaderCommon+fileReader.readFile(fragmentShaderFilename)
     }
     onVertexShaderFilenameChanged:

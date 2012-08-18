@@ -91,8 +91,8 @@ Rectangle {
         targetHeight: ssimg.height
         targetWidth: ssimg.width
         source: ShaderEffectSource { sourceItem: ssimg; hideSource: true }
-
     }
+
     SequentialAnimation{
         id:animation_section2
 
