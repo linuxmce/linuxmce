@@ -19,7 +19,7 @@ CONFIG += qt thread
 # define deployment destination and target executable name
 
 ANDROID{
-
+DESTDIR = ../QOrbiter-Android-Arm-$$QT_VERSION
 } else {
 DESTDIR = ../QOrbiter-build-$$QT_VERSION
 }
@@ -79,6 +79,7 @@ symbian {
 }
 TRANSLATIONS += app_de.ts
 # Add more folders to ship with the application, here
+#linux deploy configuration
 for_desktop{
 folder_01.source = qml/desktop
 folder_01.target = $$DESTDIR/qml
@@ -90,8 +91,14 @@ folder_03.source = config.xml
 folder_03.target = $$DESTDIR
 DEFINES += for_desktop
 QT+= phonon
+
+plugins_folder.source = imports/
+plugins_folder.target = $$DESTDIR
+DEPLOYMENTFOLDERS+= plugins_folder
+DEPLOYMENTFOLDERS += folder_01 folder_02 folder_03 folder_05
 }
 
+#windows deployment and module config
 WIN32{
 folder_01.source = qml/desktop
 folder_01.target = $$DESTDIR/qml
@@ -103,8 +110,13 @@ files_01.source = "../qOrbiter_src/config.xml/"
 files_01.path =$$DESTDIR/
 
 DEFINES += for_windows
+plugins_folder.source = imports/
+plugins_folder.target = $$DESTDIR
+DEPLOYMENTFOLDERS+= plugins_folder
+DEPLOYMENTFOLDERS += folder_01 files_01 folder_05
 }
 
+#android simulation config
 for_android{
 folder_01.source = qml/android/
 folder_01.target = $$DESTDIR/qml
@@ -134,9 +146,10 @@ DEPLOYMENTFOLDERS+= qmlcomponents
 
 DEFINES+=for_android
 DEFINES+=ANDROID
-
+DEPLOYMENTFOLDERS += folder_01 folder_02 folder_03 folder_05
 }
 
+#freemantle config
 for_freemantle{
 folder_01.source = qml/freemantle
 folder_01.target = $$DESTDIR/qml
@@ -150,8 +163,10 @@ folder_02.target=     #left blank so it will appear in the root
 folder_03.source = config.xml
 folder_03.target = $$DESTDIR/config
 DEFINES += for_freemantle
+DEPLOYMENTFOLDERS += folder_01 folder_02 folder_03 folder_05
 }
 
+#harmattan config
 for_harmattan{
 folder_01.source = qml/harmattan
 folder_01.target =
@@ -160,8 +175,10 @@ folder_05.target = $$DESTDIR/qml
 folder_02.source= img
 folder_02.target=     #left blank so it will appear in the root
 DEFINES += for_harmattan
+DEPLOYMENTFOLDERS += folder_01 folder_02 folder_05
 }
 
+#mac desktop config
 macx{
     APP_RESOURCES_PATH=../../../$$DESTDIR/$$TARGET".app"/Contents/resources
     folder_01.source = qml/desktop
@@ -173,26 +190,10 @@ macx{
     folder_03.source = config.xml
     folder_03.target = $$APP_RESOURCES_PATH
     ICON = osxicons.icns
+DEPLOYMENTFOLDERS += folder_01 folder_02 folder_03 folder_05
 }
 
-
-#plugins_folder.source = plugins/
-#plugins_folder.target = $$DESTDIR
-#uncomment this line to work on skins locally
-
-!win32{DEPLOYMENTFOLDERS = folder_01 folder_02 folder_03 folder_05 }
-
-win32{
-DEPLOYMENTFOLDERS = folder_01 files_01 folder_05
-}
-
-
-!ANDROID{
-plugins_folder.source = imports/
-plugins_folder.target = $$DESTDIR
-DEPLOYMENTFOLDERS+= plugins_folder
-}
-
+#android deployment
 ANDROID{
 
 folder_01.source = qml/android/
@@ -217,11 +218,9 @@ folder_03.target = $$DESTDIR
             qmlplugins.path = /libs/armeabi
         }
 
-DEPLOYMENTFOLDERS+= qmlcomponents
     INSTALLS+= qmlplugins
-
-DEFINES+=ANDROID
-DEPLOYMENTFOLDERS = qmlcomponents folder_01 folder_03
+    DEFINES+=ANDROID
+DEPLOYMENTFOLDERS = qmlcomponents
 }
 
 # Additional import path used to resolve QML modules in Creator's code model
