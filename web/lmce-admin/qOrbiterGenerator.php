@@ -306,7 +306,7 @@ function getRooms($conn, $doc, $orbiterData)
 {	
 echo ("Looking up Rooms now.. ");	
 
-	$sql = "SELECT Room.*,EntertainArea.PK_EntertainArea, Icon.MainFileName, Icon.SelectedFileName, Icon.AltFileNames, Icon.BackgroundFileName FROM `Room`
+	$sql = "SELECT Room.*,EntertainArea.PK_EntertainArea, EntertainArea.Description as EA, Icon.MainFileName, Icon.SelectedFileName, Icon.AltFileNames, Icon.BackgroundFileName FROM `Room`
 	        Left Join EntertainArea On Room.PK_Room = EntertainArea.FK_Room
                 Left Join Icon On FK_Icon = PK_Icon ";
 	
@@ -323,6 +323,7 @@ echo ("Looking up Rooms now.. ");
 		$att1= $r->setAttribute("PK_Room", $row['PK_Room']);
 		$att1= $r->setAttribute("FK_RoomType", $row['FK_RoomType']);
 		$att2= $r->setAttribute("Description", $row['Description']);
+		$att2= $r->setAttribute("EA", $row['EA']);
 		$attrib2= $r->setAttribute("ManuallyConfigureEA", $row['ManuallyConfigureEA']);
 		$attrib2= $r->setAttribute("HideFromOrbiter", $row['HideFromOrbiter']);
 		$attrib2= $r->setAttribute("PK_EntertainArea", $row['PK_EntertainArea']);
