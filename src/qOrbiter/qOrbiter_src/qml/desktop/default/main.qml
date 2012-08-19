@@ -4,12 +4,14 @@ import AudioVisual 1.0
 import "effects"
 import "components"
 import "js/ComponentLoader.js" as MyJs
-
+import GoogleWeatherPlugin 1.0
 
 Item {
     id: item
   width:appW
     height:appH
+
+
 
     signal close()
     signal changeScreen(string s)
