@@ -89,7 +89,8 @@ QString FileReader::readFile(const QString &fileName)
         qDebug() << "Couldnt open"  << file.fileName();
     }
     return content;
-#endif
+#else
+
     qDebug() << "FileReader::readFile" << "fileName" << fileName << "adjusted" << adjustPath(fileName);
      QFile file(QCoreApplication::applicationDirPath()+"/qml/android/phone/default/effects/"+fileName);
      QString content;
@@ -104,7 +105,7 @@ QString FileReader::readFile(const QString &fileName)
          qDebug() << "Couldnt open"  << file.fileName();
          return content.append("fileErr");
      }
-
+#endif
 }
 
 

@@ -144,6 +144,7 @@ qOrbiter_Command *Create_qOrbiter(Command_Impl *pPrimaryDeviceCommand, DeviceDat
 void qOrbiter::ReceivedCommandForChild(DeviceData_Impl *pDeviceData_Impl,string &sCMD_Result,Message *pMessage)
 //<-dceag-cmdch-e->
 {
+    SetStatus("unhandled child");
     sCMD_Result = "UNHANDLED CHILD";
 }
 
@@ -1035,7 +1036,7 @@ void qOrbiter::CMD_Set_Now_Playing(string sPK_DesignObj,string sValue_To_Assign,
     GetDevicesByTemplate(DEVICETEMPLATE_OnScreen_Orbiter_CONST, &mds);
 
 
-    i_current_mediaType = iPK_MediaType;
+    setMediaType(iPK_MediaType);
     /* string::size_type pos=0;
     m_dwPK_Device_NowPlaying = atoi(StringUtils::Tokenize(sList_PK_Device,",",pos).c_str());
     m_dwPK_Device_NowPlaying_Video = atoi(StringUtils::Tokenize(sList_PK_Device,",",pos).c_str());
@@ -1862,7 +1863,9 @@ bool DCE::qOrbiter::initialize()
                 setCommandResponse("Please run http://dcerouter/lmce-admin/qOrbiterGenerator.php?d=" + QString::number(m_dwPK_Device)) ;
                 return false;
             }
+
             emit configReady(configData);
+             //CreateChildren();
             return true;
         }
         else
@@ -4363,6 +4366,13 @@ int qOrbiter::SetupNewOrbiter()
     return PK_Device;  // Retry loading as the specified device
 }
 
+void qOrbiter::CreateChildren()
+{
+  //  qMediaPlayer *player = new qMediaPlayer( m_pPrimaryDeviceCommand,m_pData, m_pEvent, m_pRouter );
+
+
+}
+
 void qOrbiter::populateSetupInformation()
 {
     PromptFor("Users");
@@ -4896,8 +4906,9 @@ void qOrbiter::verifyInstall(QNetworkReply *r)
         setCommandResponse("Found installation, connecting.");
         if ( initialize() == true )
         {
+
             LoggerWrapper::GetInstance()->Write(LV_STATUS, "Connect OK");
-            CreateChildren();
+           CreateChildren();
             if( m_bLocalMode )
                 RunLocalMode();
         }

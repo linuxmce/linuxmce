@@ -4,20 +4,25 @@ QT += declarative phonon threads
 CONFIG += qt plugin
 
 TARGET = $$qtLibraryTarget($$TARGET)
-uri = AudioVisual
 
+#DESTDIR=../../imports/
+uri = AudioVisual
 # Input
 SOURCES += \
-    audiovisual_plugin.cpp \
-    ../../../../qMediaPlayer/AudioVisual/audiovisual.cpp \
-    ../../../../qMediaPlayer/AudioVisual/videowidgetplayer.cpp \
-    ../../../../qMediaPlayer/AudioVisual/audiowidget.cpp
+    audiovisual_plugin.cpp \   
+    videoplayer.cpp \
+    videoplayerbase.cpp \
+    colorfilterproxywidget.cpp \
+    audioplayerbase.cpp \
+    audioplayer.cpp
 
 HEADERS += \
-    audiovisual_plugin.h \
-   ../../../../qMediaPlayer/AudioVisual/audiovisual.h \
-    ../../../../qMediaPlayer/AudioVisual/videowidgetplayer.h \
-    ../../../../qMediaPlayer/AudioVisual/audiowidget.h
+    audiovisual_plugin.h \  
+    videoplayer.h \
+    videoplayerbase.h \
+    colorfilterproxywidget.h \
+    audioplayerbase.h \
+    audioplayer.h
 
 OTHER_FILES = qmldir
 

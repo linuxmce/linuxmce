@@ -40,6 +40,7 @@
 
 #include <QtNetwork/QNetworkAccessManager>
 #include <QtNetwork/QNetworkReply>
+#include <qMediaPlayer/qMediaPlayer.h>
 
 //	DCE Implemenation for #2186 qOrbiter
 
@@ -77,6 +78,10 @@ class qOrbiter : public qOrbiter_Command
 public:
     // Public member variables
 typedef QMap <int, QString> myMap;
+
+    //child devices
+    qMediaPlayer *player;
+
 
     Virtual_Device_Translator coreDevices;
     //DataGridTable pDataGridTable;
@@ -200,6 +205,7 @@ public:
     virtual int PromptUser(std::string sPrompt, int iTimeoutSeconds, map<int, std::string> *p_mapPrompts);
     virtual int DeviceIdInvalid();
     virtual int SetupNewOrbiter();
+   virtual void CreateChildren();
 
 
     //<-dceag-const-e->

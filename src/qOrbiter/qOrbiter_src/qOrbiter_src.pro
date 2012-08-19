@@ -224,7 +224,7 @@ DEPLOYMENTFOLDERS = qmlcomponents
 }
 
 # Additional import path used to resolve QML modules in Creator's code model
-QML_IMPORT_PATH = imports
+#QML_IMPORT_PATH = "imports/"
 QML_IMPORT_TRACE = 1
 
 symbian:TARGET.UID3 = 0xE0D07D4D
@@ -379,8 +379,7 @@ SOURCES += main.cpp \
     contextobjects/avcommand.cpp \
     shaders/filereader.cpp \
     contextobjects/timecodemanager.cpp \
-    imageProviders/floorplandeviceprovider.cpp \
-    ../qMediaPlayer.cpp \
+    imageProviders/floorplandeviceprovider.cpp \   
     ../../Gen_Devices/qMediaPlayerBase.cpp \
     contextobjects/bookmarkitem.cpp \
     plugins/GoogleWeather/googleweather.cpp \
@@ -496,8 +495,7 @@ HEADERS += \
     shaders/filereader.h \
     shaders/trace.h \
     contextobjects/timecodemanager.h \
-    imageProviders/floorplandeviceprovider.h \
-    ../qMediaPlayer.h \
+    imageProviders/floorplandeviceprovider.h \    
     ../../Gen_Devices/qMediaPlayerBase.h \
     contextobjects/bookmarkitem.h \
     plugins/GoogleWeather/googleweather.h \

@@ -1,5 +1,6 @@
 import QtQuick 1.0
 import Qt.labs.shaders 1.0
+import AudioVisual 1.0
 import "../effects"
 import "../components"
 import "../animation"
@@ -181,6 +182,9 @@ Rectangle {
                     smooth: true
                     asynchronous: true
                 }
+
+
+
                 Rectangle{
                     id:textmask
                     color: "grey"

@@ -20,7 +20,6 @@ Item
         width: appW
         color: "transparent"
 
-
         Image {
             id: headerbg
             source: "../img/ui3/header.png"
