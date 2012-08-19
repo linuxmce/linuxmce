@@ -9,7 +9,10 @@ Item
     anchors.centerIn: parent
     GoogleWeather{
         id:weatherSource
-        Component.onCompleted: postalCode = ("90043")
+        Component.onCompleted:  {
+               postalCode = ("90043")
+            getWeather(postalCode)
+        }
 
     }
 

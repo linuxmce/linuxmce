@@ -474,10 +474,14 @@ void qorbiterManager::processConfig(QByteArray config)
     for(int index = 0; index < roomListXml.count(); index++)
     {
         QString m_name = roomListXml.at(index).attributes().namedItem("Description").nodeValue();
+        QString ea= roomListXml.at(index).attributes().namedItem("EA").nodeValue();
         int m_val = roomListXml.at(index).attributes().namedItem("PK_Room").nodeValue().toInt();
         int m_iEA = roomListXml.at(index).attributes().namedItem("PK_EntertainArea").nodeValue().toInt();
         int m_iType = roomListXml.at(index).attributes().namedItem("FK_RoomType").nodeValue().toInt();
-        QString m_title = roomListXml.at(index).attributes().namedItem("Description").nodeValue();
+        if (ea.isEmpty()){
+            ea = roomListXml.at(index).attributes().namedItem("Description").nodeValue();
+        }
+
         QUrl imagePath;
 
         switch (m_iType){
@@ -498,7 +502,7 @@ void qorbiterManager::processConfig(QByteArray config)
             break;
         }
         RroomMapping.insert(m_name, m_val);
-        m_lRooms->appendRow(new LocationItem(m_name, m_val, m_title, m_iEA, m_iType, imagePath, m_lRooms));
+        m_lRooms->appendRow(new LocationItem(m_name, m_val, ea, m_iEA, m_iType, imagePath, m_lRooms));
     }
     m_lRooms->sdefault_Ea = defaults.attribute("DefaultLocation");
     m_lRooms->idefault_Ea = RroomMapping.value(m_lRooms->sdefault_Ea);
@@ -541,8 +545,9 @@ void qorbiterManager::processConfig(QByteArray config)
     {
         QDomNodeList mScenarioRoom = mScenarioList.at(index).childNodes();
         MediaScenarioModel *mediaModelHolder = new MediaScenarioModel(new MediaScenarioItem, this);
+        QString eaTitle = mScenarioList.at(index).attributes().namedItem("EAstring").nodeValue();
 
-        int MroomMapNo = mScenarioList.at(index).attributes().namedItem("int").nodeValue().toInt();
+        int MroomMapNo = mScenarioList.at(index).attributes().namedItem("EntertainArea").nodeValue().toInt();
         for (int innerIndex = 0; innerIndex < mScenarioRoom.count(); innerIndex++)
         {
             QString m_name = mScenarioRoom.at(innerIndex).attributes().namedItem("Description").nodeValue();
@@ -552,11 +557,13 @@ void qorbiterManager::processConfig(QByteArray config)
             QString m_goto = mScenarioRoom.at(innerIndex).attributes().namedItem("FK_CommandGroup").nodeValue();
             QString imgName = mScenarioRoom.at(innerIndex).attributes().namedItem("Description").nodeValue();
             QImage m_image = QImage("Qrc:/icons/"+imgName);
-            mediaModelHolder->appendRow(new MediaScenarioItem(m_name,m_label, m_param, m_command, m_goto, m_image, mediaModelHolder));
+            mediaModelHolder->appendRow(new MediaScenarioItem(eaTitle,m_label, m_param, m_command, m_goto, m_image, mediaModelHolder));
         }
+
         roomMediaScenarios.insert(MroomMapNo, mediaModelHolder);
         roomMedia = roomMediaScenarios.value(m_lRooms->idefault_Ea);
     }
+
     setDceResponse("Media Done");
 
     //CLIMATE-----------SCENARIOS---------------------------------------------------------------------------------
@@ -842,7 +849,7 @@ void qorbiterManager::setActiveRoom(int room,int ea)
     m_lRooms->setLocation(ea, room);
 
     roomLights = roomLightingScenarios.value(room);
-    roomMedia = roomMediaScenarios.value(room);
+    roomMedia = roomMediaScenarios.value(ea);
     roomClimate = roomClimateScenarios.value(room);
     roomTelecom = roomTelecomScenarios.value(room);
     roomSecurity = roomSecurityScenarios.value(room);
