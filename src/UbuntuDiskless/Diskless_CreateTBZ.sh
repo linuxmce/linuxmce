@@ -219,6 +219,7 @@ mount none -t proc $TEMP_DIR/proc
 ## Setup apt in pluto style
 ## FIXME: maybe we need to make sources.list from scratch ?
 cp {,"$TEMP_DIR"}/etc/apt/sources.list
+cp -r /etc/apt/sources.lis* $TEMP_DIR/etc/apt 
 
 [[ -f /etc/apt/apt.conf.d/30pluto ]] && cp {,"$TEMP_DIR"}/etc/apt/apt.conf.d/30pluto
 [[ -f /etc/apt/preferences ]] && cp {,"$TEMP_DIR"}/etc/apt/preferences
