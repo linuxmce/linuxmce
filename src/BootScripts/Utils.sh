@@ -527,7 +527,7 @@ FindVideoDriver () {
 			prop_driver="nvidia" ;;
 		[1002)
 			prop_driver="fglrx"
-                        if echo "$vga_pci" | grep -Ei '((R.)([2-7])|(9|X|ES)(1|2?)([0-9])(5|0)0|Xpress)'; then
+                        if echo "$vga_pci" | grep -Ei '((R.)([2-5])|(9|X|ES)(1|2?)([0-9])(5|0)0|Xpress)'; then
                                 prop_driver="radeon" 
 			fi ;;
 
