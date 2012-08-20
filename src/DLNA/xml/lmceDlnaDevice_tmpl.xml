@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="utf-8"?>
+<root xmlns="urn:schemas-upnp-org:device-1-0">
+    <specVersion>
+        <major>1</major>
+        <minor>0</minor>
+    </specVersion>
+    <device>
+        <deviceType>urn:schemas-upnp-org:device:MediaRenderer:1</deviceType>
+	<dlna:X_DLNADOC xmlns:dlna="urn:schemas-dlna-org:device-1-0">DMR-1.50</dlna:X_DLNADOC>
+        <friendlyName>%DEVICE_NAME%</friendlyName>
+        <manufacturer>Herqq</manufacturer>
+        <manufacturerURL>www.herqq.org</manufacturerURL>
+        <modelDescription>Media Renderer for testing HUPnPAv</modelDescription>
+        <modelName>HerqqTestMediaRenderer</modelName>
+        <modelNumber>0.1</modelNumber>
+        <modelURL>www.herqq.org</modelURL>
+	<serialNumber>%SERIALNUMBER%</serialNumber>
+        <UDN>uuid:%UUID%</UDN>
+        <serviceList>
+            <service>
+                <serviceType>urn:schemas-upnp-org:service:RenderingControl:1</serviceType>
+                <serviceId>urn:upnp-org:serviceId:RenderingControl</serviceId>
+                <SCPDURL>RenderingControl.xml</SCPDURL>
+                <controlURL>HerqqTestMediaRenderer/RenderingControl/Control</controlURL>
+                <eventSubURL>HerqqTestMediaRenderer/RenderingControl/Events</eventSubURL>
+            </service>
+            <service>
+                <serviceType>urn:schemas-upnp-org:service:ConnectionManager:1</serviceType> 
+                <serviceId>urn:upnp-org:serviceId:ConnectionManager</serviceId>
+                <SCPDURL>ConnectionManager.xml</SCPDURL>
+                <controlURL>HerqqTestMediaRenderer/ConnectionManager/Control</controlURL>
+                <eventSubURL>HerqqTestMediaRenderer/ConnectionManager/Events</eventSubURL>
+            </service>
+            <service>
+                <serviceType>urn:schemas-upnp-org:service:AVTransport:1</serviceType>
+                <serviceId>urn:upnp-org:serviceId:AVTransport</serviceId>
+                <SCPDURL>AVTransport.xml</SCPDURL>
+                <controlURL>HerqqTestMediaRenderer/AVTransport/Control</controlURL>
+                <eventSubURL>HerqqTestMediaRenderer/AVTransport/Events</eventSubURL>
+            </service>
+        </serviceList>
+    </device>
+</root>
