@@ -32,7 +32,9 @@ UseAlternativeLibs
 #Setup Log file variable
 log_file=/var/log/pluto/AVWizard_Run_$(date +%Y%m%d_%H%M%S).log
 
-
+# remove the current xorgs to start clean, and prevent toggling issues.
+mv /etc/X11/xorg.conf /etc/X11/xorg.conf.bu
+rm -f /etc/X11/xorg.conf /etc/X11/xorg.conf.pluto.avwizard
 
 ###########################################################
 ### Setup Functions - Error checking and logging
