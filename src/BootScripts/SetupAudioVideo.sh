@@ -164,10 +164,6 @@ Setup_AsoundConf()
 	esac
 
 	Setup_XineConf "$AudioSetting" "$SoundCard" "$AnalogPlaybackCard"
-	alsa_backports=$(dpkg-query -l "linux-backports-modules-alsa*" | grep "^ii" | awk '{print $2}') 2>/dev/null
-	if [[ -n "$alsa_backports" ]]; then
-		aplay -D plughw:"$SoundCard",7 /usr/share/sounds/pop.wav
-	fi
 }
 
 Setup_XineConf()

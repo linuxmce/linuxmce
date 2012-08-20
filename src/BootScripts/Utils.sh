@@ -518,18 +518,20 @@ FindVideoDriver () {
 				cat /root/xorg.conf.new > /etc/X11/xorg.conf
 			fi
 		fi 
-	chip_man=$(echo "$vga_pci" | grep -Eiwo '(ATI|VIA|nVidia|Intel)' | tr -s '[:lower:]' '[:upper:]')
+	# Change to pciid manufacturer due to case intensive problems.
+	# 1002=ATI, 1106=VIA, 10de=nVidia, 8086=Intel
+	chip_man=$(echo "$vga_pci" | grep -Ewo '(\[1002|\[1106|\[10de|\[8086)')
  
 	case "$chip_man" in 
-		NVIDIA)
+		[10de)
 			prop_driver="nvidia" ;;
-		ATI)
+		[1002)
 			prop_driver="fglrx"
                         if echo "$vga_pci" | grep -Ei '((R.)([2-7])|(9|X|ES)(1|2?)([0-9])(5|0)0|Xpress)'; then
                                 prop_driver="radeon" 
 			fi ;;
 
-		INTEL)
+		[8086)
                         prop_driver="intel"
                         if echo $vga_pci | grep "i740"; then
                                 prop_driver="i740"
@@ -541,7 +543,7 @@ FindVideoDriver () {
 				prop_driver="mach64"
 			fi ;;
 
-		VIA)
+		[1106)
                         prop_driver="openchrome" ;
 			if echo $vga_pci | grep -i "Savage"; then
 				prop_driver="savage"
@@ -628,7 +630,7 @@ InstallVideoDriver () {
 			fi ;;
                 esac
 
-	if [[ "$chip_man" == "INTEL" ]] && [[ -n $online ]]; then
+	if [[ "$chip_man" == "[8086" ]] && [[ -n $online ]]; then
 		if [[ "$distro" = "precise" ]]; then
 			if ! PackageIsInstalled "i965-va-driver"; then
 				apt-get -yf install i965-va-driver
