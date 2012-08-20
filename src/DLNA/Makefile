@@ -22,7 +22,7 @@ sources = Main.cpp DLNA.cpp $(Gen_Dev_Files)
 CXXFLAGS +=
 CPPFLAGS += -I../../external/hupnp/trunk/herqq/hupnp/include/ -I/usr/include/qt4/ -I../../external/hupnp/trunk/herqq/hupnp_av/include/
 LDFLAGS +=
-XTRALDLIBS = -lmysqlclient_r -lQtGui -lQtCore -lHUpnp -lHUpnpAv 
+XTRALDLIBS = -lmysqlclient_r -lQtGui -lQtCore -lHUpnp -lHUpnpAv -lpluto_main
 
 Gen_Dev_Files +=
 sources += DLNAEngine.cpp LMCERenderer.cpp LMCERendererConnectionManager.cpp

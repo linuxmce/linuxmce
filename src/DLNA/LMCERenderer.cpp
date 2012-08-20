@@ -56,11 +56,15 @@ LMCERenderer::LMCERenderer(QObject* parent, DLNA* pDLNA) :
 		m_PK_EntArea = 0;
 	}
 
-	// TODO: Handle different media types... Audio goes to Xine, but pictures should go to the picture player.
-	// Squeezeboxes are simpler as they only do audio, but networked_video_players probably does audio,video and picture
-
 	// Use EntArea for everyone... Then the LMCERenderer can figure out what to do, and return a failed staus at its discresion
 	m_pDLNA = pDLNA;
+
+
+	// TODO: Handle different media types... Audio goes to Xine, but pictures should go to the picture player.
+	// Squeezeboxes are simpler as they only do audio, but networked_video_players probably does audio,video and picture
+	// Load all rooms, entertainment areas and the devices in them
+	// need to find out what we can play in our EA
+	// load ea - device information,
 
 	HRendererConnectionInfo *info = writableInfo();
 	info->setVolume(HChannel::Master, 50);

@@ -58,11 +58,7 @@ int DLNAEngine::Init()
 // need to keep it all the way through to LMCERenderer
 // maybe it can be solved with some clever sub-classing of, and implementation of
 // HAvDeviceModelCreator::createDevice, HMediaRendererDevice::createMediaConnection, 
-
-// HMediaRendererDevice is a subclass of HServerDevice, and that has the HDeviceInfo
-// so how to get to it from the RendererConnection...?
-
-// Is some of the creator or configuration classes cloned? if so, it could be that the parent-child hierarchy is as follows:
+// Solved by object hiearchy :
 // HMediaRendererConnection -> LMCERendererConnectionManager -> LMCERenderer
 
 	LMCEMediaRendererDeviceConfiguration mrConf;
@@ -76,22 +72,35 @@ int DLNAEngine::Init()
 	hostConf.setDeviceModelCreator(creator);
 
 
-	// Write a xml file describing all possible renderers(xine, squeezeboxes, etc)
-	// One per MD : xine for audio/video, picture_player for pictures
-	// Also one for varoius networked players
-	// DEVICECATEGORY_Media_Players_CONST, DEVICECATEGORY_Network_Audio_Players_CONST, DEVICECATEGORY_Network_Video_Players_CONST
-// maybe there is a way to get all available players in the system? MEdia_Plugin?
-	QString deviceFile = "./xml/testdevice.xml";
-	QString deviceFile2 = "./xml/testdevice2.xml";
+	// Write a xml file representing a DLNA device for each entertainment areas
+	map<int, EntertainArea*> *pMapEntertainAreas = m_pDLNA->GetEntertainAreas();
+	string path = "./xml/lmceDlnaDevice_";
+	string templateFile = "./xml/lmceDlnaDevice_tmpl.xml";
+	string data;
+	FileUtils::ReadTextFile(templateFile, data);
+	for(map<int,EntertainArea *>::iterator it=pMapEntertainAreas->begin();it!=pMapEntertainAreas->end();++it)
+	{
+		int PK_EntArea = (*it).first;
+		LoggerWrapper::GetInstance ()->Write (LV_STATUS, "DLNAEngine() writing device description xml file for ent area %d", (unsigned int)PK_EntArea);
+		string file = path + StringUtils::itos(PK_EntArea) + ".xml";
+		QString deviceFile(file.c_str());
+		
+		string sConfigData;
+		sConfigData += data;
+ 
+		// Replace the template tags
+		sConfigData=StringUtils::Replace(sConfigData, "%SERIALNUMBER%", StringUtils::itos(PK_EntArea));
+		sConfigData=StringUtils::Replace(sConfigData, "%DEVICE_NAME%", "LinuxMCE " + (*it).second->m_sDescription);
+		sConfigData=StringUtils::Replace(sConfigData, "%UUID%", "3a75ea42-1a88-7e1d-30aa-4b87ae459" + StringUtils::itos(100+PK_EntArea));
 
-	HDeviceConfiguration deviceConf;
-	deviceConf.setPathToDeviceDescription(deviceFile);
-	deviceConf.setCacheControlMaxAge(1800);
-	hostConf.add(deviceConf);
+		FileUtils::WriteTextFile(file, sConfigData);
 
-	HDeviceConfiguration deviceConf2;
-	deviceConf2.setPathToDeviceDescription(deviceFile2);
-	hostConf.add(deviceConf2);
+		HDeviceConfiguration deviceConf;
+		deviceConf.setPathToDeviceDescription(deviceFile);
+		deviceConf.setCacheControlMaxAge(1800);
+		hostConf.add(deviceConf);
+
+	}
 
 	if (!m_pDeviceHost->init(hostConf)) 
 	{
