@@ -410,12 +410,12 @@ GamePad_Setup () {
 
 Enable_Audio_Channels () {
 	# Added this to correctly unmute channels for setup wizard
-	amixdigital=$(amixer | grep Simple | cut -d' ' -f4,5,6 | sort | uniq)
+	amixdigital=$(amixer | grep Simple | cut -d' ' -f4,5,6 | sort | uniq) ||
 	for output in $amixdigital; do
 		amixer sset $output unmute
 		amixer sset $output 80%
-	done 2>/dev/null 
-	alsactl store
+	done 2>/dev/null ||
+	alsactl store ||
 	VerifyExitCode "Storing audio channel settings failed"
 }
 
