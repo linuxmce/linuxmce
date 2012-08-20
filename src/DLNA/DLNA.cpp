@@ -27,6 +27,8 @@ using namespace DCE;
 #include "Gen_Devices/AllCommandsRequests.h"
 //<-dceag-d-e->
 
+#include "DLNAEngine.h"
+
 //<-dceag-const-b->
 // The primary constructor when the class is created as a stand-alone device
 DLNA::DLNA(int DeviceID, string ServerAddress,bool bConnectEventHandler,bool bLocalMode,class Router *pRouter)
@@ -47,7 +49,7 @@ DLNA::DLNA(Command_Impl *pPrimaryDeviceCommand, DeviceData_Impl *pData, Event_Im
 DLNA::~DLNA()
 //<-dceag-dest-e->
 {
-	
+	delete m_pEngine;
 }
 
 //<-dceag-getconfig-b->
@@ -59,7 +61,23 @@ bool DLNA::GetConfig()
 
 	// Put your code here to initialize the data in this class
 	// The configuration parameters DATA_ are now populated
+
+	m_pEngine = new DLNAEngine(this);
+	m_pEngine->Init();
+
 	return true;
+}
+
+void DLNA::OnQuit()
+{
+	DLNA_Command::OnQuit();
+	m_pApp->exit();
+}
+
+void DLNA::OnReload()
+{
+	DLNA_Command::OnQuit();
+        m_pApp->exit();
 }
 
 //<-dceag-reg-b->

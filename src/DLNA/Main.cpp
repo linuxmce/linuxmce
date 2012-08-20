@@ -22,6 +22,8 @@
 #include "PlutoUtils/Other.h"
 #include "DCERouter.h"
 
+#include <QtCore/QCoreApplication>
+
 // In source files stored in archives and packages, these 2 lines will have the release version (build)
 // and the svn revision as a global variable that can be inspected within a core dump
 #define  VERSION "<=version=>"
@@ -195,11 +197,14 @@ int main(int argc, char* argv[])
 
 	LoggerWrapper::GetInstance()->Write(LV_STATUS, "Device: %d starting.  Connecting to: %s",PK_Device,sRouter_IP.c_str());
 
+	QCoreApplication app(argc, argv);
+
 	bool bAppError=false;
 	bool bReload=false;
 	try
 	{
 		DLNA *pDLNA = new DLNA(PK_Device, sRouter_IP,true,bLocalMode);
+		pDLNA->SetQtApp(&app);
 		if ( pDLNA->GetConfig() && pDLNA->Connect(pDLNA->PK_DeviceTemplate_get()) ) 
 		{
 			g_pCommand_Impl=pDLNA;
@@ -211,6 +216,7 @@ int main(int argc, char* argv[])
 				pDLNA->RunLocalMode();
 			else
 			{
+				app.exec();
 				if(pDLNA->m_RequestHandlerThread)
 					pthread_join(pDLNA->m_RequestHandlerThread, NULL);  // This function will return when the device is shutting down
 			}

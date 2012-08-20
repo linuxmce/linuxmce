@@ -20,12 +20,12 @@ sources = Main.cpp DLNA.cpp $(Gen_Dev_Files)
 #<-dceag-mh-e->
 
 CXXFLAGS +=
-CPPFLAGS +=
+CPPFLAGS += -I../../external/hupnp/trunk/herqq/hupnp/include/ -I/usr/include/qt4/ -I../../external/hupnp/trunk/herqq/hupnp_av/include/
 LDFLAGS +=
-XTRALDLIBS = -lmysqlclient_r
+XTRALDLIBS = -lmysqlclient_r -lQtGui -lQtCore -lHUpnp -lHUpnpAv 
 
 Gen_Dev_Files +=
-sources +=
+sources += DLNAEngine.cpp LMCERenderer.cpp LMCERendererConnectionManager.cpp
 
 #<-dceag-mf-b->
 LDLIBS = $(XTRALDLIBS) $(BASELDLIBS)
