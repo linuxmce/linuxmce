@@ -23,6 +23,7 @@
 //<-dceag-d-e->
 
 #include <QtCore/QCoreApplication>
+#include "EntertainArea.h"
 
 namespace DCE {
 	class DLNAEngine;
@@ -38,6 +39,7 @@ namespace DCE
 		DLNAEngine* m_pEngine;
 
 		// Private methods
+		map<int,EntertainArea*> m_mapEntertainAreas;
 public:
 		// Public member variables
 
@@ -55,7 +57,8 @@ public:
 
 		void OnQuit();
 		void OnReload();
-
+		bool LoadEntertainAreas();
+		map<int, EntertainArea*>* GetEntertainAreas();
 //<-dceag-const2-b->
 		// The following constructor is only used if this a class instance embedded within a DCE Device.  In that case, it won't create it's own connection to the router
 		// You can delete this whole section and put an ! after dceag-const2-b tag if you don't want this constructor.  Do the same in the implementation file

@@ -20,6 +20,12 @@
 #include "PlutoUtils/StringUtils.h"
 #include "PlutoUtils/Other.h"
 
+#include "pluto_main/Database_pluto_main.h"
+#include "pluto_main/Table_EntertainArea.h"
+#include "pluto_main/Table_Device_EntertainArea.h"
+#include "pluto_main/Table_Room.h"
+#include "pluto_main/Table_Installation.h"
+
 #include <iostream>
 using namespace std;
 using namespace DCE;
@@ -49,6 +55,8 @@ DLNA::DLNA(Command_Impl *pPrimaryDeviceCommand, DeviceData_Impl *pData, Event_Im
 DLNA::~DLNA()
 //<-dceag-dest-e->
 {
+	for(map<int,EntertainArea *>::iterator it=m_mapEntertainAreas.begin();it!=m_mapEntertainAreas.end();++it)
+		delete (*it).second;
 	delete m_pEngine;
 }
 
@@ -61,6 +69,8 @@ bool DLNA::GetConfig()
 
 	// Put your code here to initialize the data in this class
 	// The configuration parameters DATA_ are now populated
+
+	LoadEntertainAreas();
 
 	m_pEngine = new DLNAEngine(this);
 	m_pEngine->Init();
@@ -214,4 +224,54 @@ void DLNA::SomeFunction()
 
 */
 
+bool DLNA::LoadEntertainAreas()
+{
+	LoggerWrapper::GetInstance()->Write( LV_STATUS, "DLNA::LoadEntertainAreas() start %d",  m_pData->m_dwPK_Installation );
 
+	Database_pluto_main* pDatabase_pluto_main = new Database_pluto_main(LoggerWrapper::GetInstance());
+// TODO: don't hardcode
+	string host = "localhost", dbuser = "root", dbpass = "", dbname = "pluto_main";
+	int dbport = 3306;
+	if( !pDatabase_pluto_main->Connect( host, dbuser, dbpass, dbname, dbport ) )
+	{
+		LoggerWrapper::GetInstance()->Write( LV_CRITICAL, "Cannot connect to database!" );
+		OnQuit();
+		return false;
+	}
+
+	Row_Installation *pRow_Installation = pDatabase_pluto_main->Installation_get( )->GetRow( m_pData->m_dwPK_Installation );
+	vector<Row_Room *> vectRow_Room; // Ent Areas are specified by room. Get all the rooms first
+	pRow_Installation->Room_FK_Installation_getrows( &vectRow_Room );
+	for( size_t iRoom=0;iRoom<vectRow_Room.size( );++iRoom )
+	{
+		Row_Room *pRow_Room=vectRow_Room[iRoom];
+		vector<Row_EntertainArea *> vectRow_EntertainArea;
+		pRow_Room->EntertainArea_FK_Room_getrows( &vectRow_EntertainArea );
+		for( size_t s=0;s<vectRow_EntertainArea.size( );++s )
+		{
+			Row_EntertainArea *pRow_EntertainArea = vectRow_EntertainArea[s];
+			EntertainArea *pEntertainArea = new EntertainArea( pRow_EntertainArea->PK_EntertainArea_get( ),
+									   pRow_EntertainArea->Description_get() );
+			m_mapEntertainAreas[pEntertainArea->m_iPK_EntertainArea]=pEntertainArea;
+			// Now find all the devices in the ent area
+			vector<Row_Device_EntertainArea *> vectRow_Device_EntertainArea;
+			pRow_EntertainArea->Device_EntertainArea_FK_EntertainArea_getrows( &vectRow_Device_EntertainArea );
+			for( size_t s2=0;s2<vectRow_Device_EntertainArea.size( );++s2 )
+			{
+				Row_Device_EntertainArea *pRow_Device_EntertainArea = vectRow_Device_EntertainArea[s2];
+				if( !pRow_Device_EntertainArea || !pRow_Device_EntertainArea->FK_Device_getrow( ) )
+				{
+					LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"Device_EntertainArea refers to a NULL device %d %d",pRow_Device_EntertainArea->FK_EntertainArea_get(),pRow_Device_EntertainArea->FK_Device_get());
+					continue;
+				}
+				pEntertainArea->m_vectDevices.push_back(pRow_Device_EntertainArea->FK_Device_get());
+			}
+		}
+	}
+	LoggerWrapper::GetInstance()->Write( LV_STATUS, "DLNA::LoadEntertainAreas() end" );
+}
+
+map<int, EntertainArea*>* DLNA::GetEntertainAreas()
+{
+	return &m_mapEntertainAreas;
+}
