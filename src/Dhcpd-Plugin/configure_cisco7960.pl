@@ -28,7 +28,7 @@ else
 }
 
 # Sync with Asterisk DB (practically do nothing but create a new extension number)
-`/usr/pluto/bin/db_phone_config.sh`;
+#`/usr/pluto/bin/db_phone_config.sh`;
 
 # Let's see what the database thinks about the extension of this phone
 $Device_EXT = get_device_devicedata($Device_ID,31);

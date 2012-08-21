@@ -4,6 +4,7 @@ use strict;
 use diagnostics;
 use DBI;
 require "/usr/pluto/bin/config_ops.pl";
+require "/usr/pluto/bin/lmce.pl";
 
 sub getIP {
         my $dbh = DBI->connect(&read_pluto_cred()) or die "Can't connect to database: $DBI::errstr\n";
@@ -48,12 +49,7 @@ if ($IntIP eq "") {
         $IntIP="192.168.80.1";
 }
 
-#sync with asterisk DB (practically do nothing but create a new extension number)
-`/usr/pluto/bin/db_phone_config.sh`;
-
-open(FILE,"/tmp/phone${Device_ID}extension");
-$Device_EXT=<FILE>;
-close(FILE);
+$Device_EXT=$Device_EXT = get_device_devicedata($Device_ID,31);
 
 chomp($Device_EXT);
 $Device_MAC =~ s/[^0-9A-Fa-f]//g;
