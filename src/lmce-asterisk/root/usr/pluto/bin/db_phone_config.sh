@@ -386,7 +386,7 @@ switch => Realtime
 	LINESSQL="$LINESSQL INSERT INTO $DB_Extensions_Table (context,exten,priority,app,appdata) VALUES \
         ('$context','$phonenumber','1','Set','__FROM_DID=\${EXTEN}'), \
         ('$context','$phonenumber','2','Set','PAI=\${SIP_HEADER(P-Asserted-Identity)}'),\
-        ('$context','$phonenumber','3','gotoif','\$[\"\${PAI}\" = \"\"] ? 4:8'), \
+        ('$context','$phonenumber','3','gotoif','\$[\${LEN(\${PAI})} > 0]?8'),
         ('$context','$phonenumber','4','Set','CALLERID(num)=\${CALLERID(name)}'), \
         ('$context','$phonenumber','5','Noop','Incoming call from \${CALLERID(num)}'), \
         ('$context','$phonenumber','6','Set','FAX_RX='), \
