@@ -1,8 +1,9 @@
 lmce-asterisk (0+0.3.2-1ubuntu2) lucid; urgency=low
 
   * Some bug fixes
+  * Fix for incoming fax
 
- -- Serge Wagener <serge@linuxmce.org>  Sun, 03 Jun 2012 20:47:32 +0200
+ -- Serge Wagener <serge@linuxmce.org>  Tue, 21 Aug 2012 21:03:45 +0200
 
 lmce-asterisk (0+0.3.2-1ubuntu1) lucid; urgency=low
 
