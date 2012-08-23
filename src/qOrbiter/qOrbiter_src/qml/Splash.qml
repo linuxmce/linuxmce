@@ -422,7 +422,8 @@ Rectangle {
                 id:goButton
                 height: scaleY(5)
                 width: scaleY(5)
-
+                anchors.bottom: orbiter_options.bottom
+                anchors.horizontalCenter: orbiter_options.horizontalCenter
                 gradient: Gradient {
                     GradientStop {
                         position: 0
@@ -435,7 +436,7 @@ Rectangle {
                 }
                 Text {
                     id: goLabel
-                    text: qsTr("Go")
+                    text: qsTr("Create Orbiter")
                     anchors.centerIn: parent
                 }
                 MouseArea{

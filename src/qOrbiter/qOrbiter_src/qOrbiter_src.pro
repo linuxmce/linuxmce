@@ -389,7 +389,8 @@ SOURCES += main.cpp \
 !ANDROID|!QT5{
  SOURCES+= ../../qMediaPlayer/AudioVisual/audiovisual.cpp \
     ../../qMediaPlayer/AudioVisual/videowidgetplayer.cpp \
-../../qMediaPlayer/AudioVisual/audiowidget.cpp
+../../qMediaPlayer/AudioVisual/audiowidget.cpp \
+../../qMediaPlayer/qMediaPlayer.cpp
 
 }
 
@@ -505,7 +506,8 @@ HEADERS += \
 !ANDROID||!QT5{
  HEADERS+=   ../../qMediaPlayer/AudioVisual/audiovisual.h \
     ../../qMediaPlayer/AudioVisual/videowidgetplayer.h \
-../../qMediaPlayer/AudioVisual/audiowidget.h
+../../qMediaPlayer/AudioVisual/audiowidget.h\
+../../qMediaPlayer/qMediaPlayer.h
 }
 
 OTHER_FILES += Readme.txt \

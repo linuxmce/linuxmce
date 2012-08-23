@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE QtCreatorProject>
-<!-- Written by Qt Creator 2.5.0, 2012-08-19T01:04:30. -->
+<!-- Written by Qt Creator 2.5.0, 2012-08-19T18:14:26. -->
 <qtcreator>
  <data>
   <variable>ProjectExplorer.Project.ActiveTarget</variable>
@@ -106,7 +106,7 @@
     <value type="QString" key="ProjectExplorer.ProjectConfiguration.DisplayName"></value>
     <value type="QString" key="ProjectExplorer.ProjectConfiguration.Id">Qt4ProjectManager.Qt4BuildConfiguration</value>
     <value type="int" key="Qt4ProjectManager.Qt4BuildConfiguration.BuildConfiguration">0</value>
-    <value type="QString" key="Qt4ProjectManager.Qt4BuildConfiguration.BuildDirectory">/home/langston/linuxmce/qOrbiter/qOrbiter_src/plugins/GoogleWeather/GoogleWeatherPlugin-build-desktop-Qt_4_8_2__Qt-4_8_2__Release</value>
+    <value type="QString" key="Qt4ProjectManager.Qt4BuildConfiguration.BuildDirectory">/home/langston/linuxmce/qOrbiter/qOrbiter_src/imports/GoogleWeatherPlugin</value>
     <value type="int" key="Qt4ProjectManager.Qt4BuildConfiguration.QtVersionId">7</value>
     <value type="bool" key="Qt4ProjectManager.Qt4BuildConfiguration.UseShadowBuild">true</value>
    </valuemap>
