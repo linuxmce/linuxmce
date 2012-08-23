@@ -45,11 +45,8 @@ videoWidgetPlayer::videoWidgetPlayer(QWidget *parent) :
     w->setLayout(l);
 
 //videoObject->play();
-
     QObject::connect(this, SIGNAL(play()), videoObject,SLOT(play()));
     QObject::connect(this, SIGNAL(stop()), videoObject, SLOT(stop()));
-
-
 #endif
 
 }

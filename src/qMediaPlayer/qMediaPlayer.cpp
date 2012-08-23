@@ -19,12 +19,14 @@
 #include "PlutoUtils/FileUtils.h"
 #include "PlutoUtils/StringUtils.h"
 #include "PlutoUtils/Other.h"
+#include <QDebug>
 
 #include <iostream>
 using namespace std;
 using namespace DCE;
 
 #include "Gen_Devices/AllCommandsRequests.h"
+#include <Gen_Devices/AllCommandsRequests.h>
 //<-dceag-d-e->
 
 //<-dceag-const-b->
@@ -33,6 +35,10 @@ qMediaPlayer::qMediaPlayer(int DeviceID, string ServerAddress,bool bConnectEvent
 	: qMediaPlayer_Command(DeviceID, ServerAddress,bConnectEventHandler,bLocalMode,pRouter)
 //<-dceag-const-e->
 {
+    qDebug() <<"created video player as standalone with device number " << DeviceID;
+   GetConfig();
+
+
 }
 
 //<-dceag-const2-b->
@@ -41,6 +47,14 @@ qMediaPlayer::qMediaPlayer(Command_Impl *pPrimaryDeviceCommand, DeviceData_Impl 
 	: qMediaPlayer_Command(pPrimaryDeviceCommand, pData, pEvent, pRouter)
 //<-dceag-const2-e->
 {
+
+     if(GetConfig()){
+        qDebug() <<"created video player as embedded device ";
+     qDebug() << "Device:: " << m_dwPK_Device ;}
+     else{
+         qDebug() <<"error getting embedded video player started";    
+     }
+
 }
 
 //<-dceag-dest-b->
@@ -59,7 +73,10 @@ bool qMediaPlayer::GetConfig()
 
 	// Put your code here to initialize the data in this class
 	// The configuration parameters DATA_ are now populated
+
+
 	return true;
+
 }
 
 //<-dceag-reg-b->

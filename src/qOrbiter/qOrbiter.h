@@ -205,7 +205,8 @@ public:
     virtual int PromptUser(std::string sPrompt, int iTimeoutSeconds, map<int, std::string> *p_mapPrompts);
     virtual int DeviceIdInvalid();
     virtual int SetupNewOrbiter();
-   virtual void CreateChildren();
+    virtual void CreateChildren();
+
 
 
     //<-dceag-const-e->
@@ -1259,6 +1260,8 @@ signals:
     void mediaResponseChanged();
     void  deviceValid(bool s);
     void deviceIdChanged();
+    void setEa(int room, int ea);
+
 
     //connections
     void checkReload();
@@ -1446,6 +1449,7 @@ public slots:
     void qmlSetup(QString device, QString address);
     void setCurrentScreen(QString s);
     void setOrbiterSetupVars(int users, int room, int skin, int lang, int height, int width);
+     void finishSetup();
 
     void pingCore();
     void checkPing(QHostInfo info);

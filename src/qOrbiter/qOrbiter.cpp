@@ -1865,7 +1865,7 @@ bool DCE::qOrbiter::initialize()
             }
 
             emit configReady(configData);
-             //CreateChildren();
+             CreateChildren();
             return true;
         }
         else
@@ -2000,13 +2000,29 @@ void qOrbiter::setOrbiterSetupVars(int users, int room, int skin, int lang, int 
         else
         {
             setDeviceId(t);
-            OnReload();
+            QNetworkAccessManager eaSetter;
+            QNetworkRequest eaRequest;
+            qDebug() << "setting ea";
+            eaRequest.setUrl(QString::fromStdString(m_sIPAddress).append("/lmce-admin/setEa2.php?d="+QString::number(t)+"&r="+QString::number(sPK_Room)));
+            QNetworkReply *rep = eaSetter.get(eaRequest);
+            QObject::connect(rep, SIGNAL(finished()), this, SLOT(finishSetup()));
+
         }
     }
     else
     {
         qDebug()<<sPK_Users << "-" << sPK_Room;
     }
+}
+
+void qOrbiter::finishSetup()
+{
+    QNetworkAccessManager eaSetter;
+    QNetworkRequest eaRequest;
+    eaRequest.setUrl(QString::fromStdString(m_sIPAddress).append("/lmce-admin/qOrbiterGenerator.php?d="+m_dwPK_Device) );
+    QNetworkReply *rep = eaSetter.get(eaRequest);
+    setCommandResponse("Setup Complete, restarting");
+    initialize();
 }
 
 void qOrbiter::connectionError()
@@ -4304,15 +4320,17 @@ int qOrbiter::DeviceIdInvalid()
 int qOrbiter::SetupNewOrbiter()
 {
     LoggerWrapper::GetInstance()->Write(LV_STATUS,"start SetupNewOrbiter");
+    qDebug() << m_sIPAddress.c_str();
     Event_Impl event_Impl(DEVICEID_MESSAGESEND, 0, m_sIPAddress);
     while(true)
     {
         string sResponse;
         if( !event_Impl.m_pClientSocket->SendString("READY") ||
                 !event_Impl.m_pClientSocket->ReceiveString(sResponse) ||
-                sResponse.size()==0 )
+                sResponse.size()==0 ){
             qDebug()<< "setup response error!";
         return 0;  // Something went wrong
+        }
 
         if( sResponse=="YES" )
             break;
@@ -4368,10 +4386,10 @@ int qOrbiter::SetupNewOrbiter()
 
 void qOrbiter::CreateChildren()
 {
-  //  qMediaPlayer *player = new qMediaPlayer( m_pPrimaryDeviceCommand,m_pData, m_pEvent, m_pRouter );
-
-
+    qMediaPlayer * player = new qMediaPlayer(158, m_sIPAddress, true, false );
+    player->Connect(2205);
 }
+
 
 void qOrbiter::populateSetupInformation()
 {
@@ -4908,7 +4926,7 @@ void qOrbiter::verifyInstall(QNetworkReply *r)
         {
 
             LoggerWrapper::GetInstance()->Write(LV_STATUS, "Connect OK");
-           CreateChildren();
+
             if( m_bLocalMode )
                 RunLocalMode();
         }

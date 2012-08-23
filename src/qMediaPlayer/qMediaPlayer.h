@@ -640,8 +640,21 @@ public:
 	virtual void CMD_Remove_Station_from_QuickMix(string sID,int iStreamID) { string sCMD_Result; CMD_Remove_Station_from_QuickMix(sID.c_str(),iStreamID,sCMD_Result,NULL);};
 	virtual void CMD_Remove_Station_from_QuickMix(string sID,int iStreamID,string &sCMD_Result,Message *pMessage);
 
-//<-dceag-h-e->
-	};
+        //<-dceag-h-e->
+        void CMD_Save_playlist(int iPK_Users, string sPK_EntertainArea, string sName, bool bSave_as_new, string &sCMD_Result, Message *pMessage);
+        void CMD_Info(string sText, string &sCMD_Result, Message *pMessage);
+        void CMD_Mute(string &sCMD_Result, Message *pMessage);
+        void CMD_Load_Playlist(string sPK_EntertainArea, int iEK_Playlist, string &sCMD_Result, Message *pMessage);
+        void CMD_Move_Playlist_entry_Up(int iValue, string &sCMD_Result, Message *pMessage);
+        void CMD_Move_Playlist_entry_Down(int iValue, string &sCMD_Result, Message *pMessage);
+        void CMD_Remove_playlist_entry(int iValue, string &sCMD_Result, Message *pMessage);
+        void CMD_Blue(string &sCMD_Result, Message *pMessage);
+        void CMD_Green(string &sCMD_Result, Message *pMessage);
+        void CMD_Red(string &sCMD_Result, Message *pMessage);
+        void CMD_Yellow(string &sCMD_Result, Message *pMessage);
+        void CMD_Remove_playlist(int iEK_Playlist, string &sCMD_Result, Message *pMessage);
+        void CMD_Application_Exited(int iPID, int iExit_Code, string &sCMD_Result, Message *pMessage);
+    };
 
 //<-dceag-end-b->
 }

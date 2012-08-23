@@ -2,8 +2,6 @@
 #ifndef ANDROID
 #include <QUrl>
 #include <QFile>
-#include <QPainter>
-
 #ifdef QT5
 #include <QtWidgets/QApplication>
 #include <QtQuick/QQuickItem>
