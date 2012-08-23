@@ -136,7 +136,8 @@ void Row_Size::SetDefaultValues()
 {
 	m_PK_Size = 0;
 is_null[0] = false;
-is_null[1] = true;
+m_Description = "";
+is_null[1] = false;
 is_null[2] = true;
 m_Width = 0;
 is_null[3] = false;
@@ -277,9 +278,6 @@ void Row_Size::psc_restrict_set(long int val){PLUTO_SAFETY_LOCK_ERRORSONLY(sl,ta
 m_psc_restrict = val; is_modified=true; is_null[16]=false;}
 
 		
-bool Row_Size::Description_isNull() {PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
-
-return is_null[1];}
 bool Row_Size::Define_isNull() {PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
 
 return is_null[2];}
@@ -309,10 +307,6 @@ bool Row_Size::psc_restrict_isNull() {PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->dat
 return is_null[16];}
 
 			
-void Row_Size::Description_setNull(bool val){PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
-is_null[1]=val;
-is_modified=true;
-}
 void Row_Size::Define_setNull(bool val){PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
 is_null[2]=val;
 is_modified=true;

@@ -135,7 +135,8 @@ void Row_psc_designer_repset::SetDefaultValues()
 {
 	m_PK_psc_designer_repset = 0;
 is_null[0] = false;
-is_null[1] = true;
+m_Setting = "";
+is_null[1] = false;
 is_null[2] = true;
 
 
@@ -166,18 +167,11 @@ void Row_psc_designer_repset::Value_set(string val){PLUTO_SAFETY_LOCK_ERRORSONLY
 m_Value = val; is_modified=true; is_null[2]=false;}
 
 		
-bool Row_psc_designer_repset::Setting_isNull() {PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
-
-return is_null[1];}
 bool Row_psc_designer_repset::Value_isNull() {PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
 
 return is_null[2];}
 
 			
-void Row_psc_designer_repset::Setting_setNull(bool val){PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
-is_null[1]=val;
-is_modified=true;
-}
 void Row_psc_designer_repset::Value_setNull(bool val){PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
 is_null[2]=val;
 is_modified=true;

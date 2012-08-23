@@ -144,7 +144,8 @@ is_null[2] = true;
 m_FK_OperatingSystem = 0;
 is_null[3] = true;
 m_FK_Distro = 0;
-is_null[4] = true;
+m_File = "";
+is_null[4] = false;
 is_null[5] = true;
 is_null[6] = true;
 is_null[7] = true;
@@ -254,9 +255,6 @@ return is_null[2];}
 bool Row_Package_Directory_File::FK_Distro_isNull() {PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
 
 return is_null[3];}
-bool Row_Package_Directory_File::File_isNull() {PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
-
-return is_null[4];}
 bool Row_Package_Directory_File::Search_isNull() {PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
 
 return is_null[5];}
@@ -286,10 +284,6 @@ is_modified=true;
 }
 void Row_Package_Directory_File::FK_Distro_setNull(bool val){PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
 is_null[3]=val;
-is_modified=true;
-}
-void Row_Package_Directory_File::File_setNull(bool val){PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
-is_null[4]=val;
 is_modified=true;
 }
 void Row_Package_Directory_File::Search_setNull(bool val){PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);

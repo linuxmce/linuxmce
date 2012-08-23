@@ -137,8 +137,7 @@ void psc_mod_set(string val);
 void psc_restrict_set(long int val);
 
 		
-		bool Description_isNull();
-bool Define_isNull();
+		bool Define_isNull();
 bool SourceOnly_isNull();
 bool PathToFile_isNull();
 bool Instructions_isNull();
@@ -149,8 +148,7 @@ bool psc_frozen_isNull();
 bool psc_restrict_isNull();
 
 			
-		void Description_setNull(bool val);
-void Define_setNull(bool val);
+		void Define_setNull(bool val);
 void SourceOnly_setNull(bool val);
 void PathToFile_setNull(bool val);
 void Instructions_setNull(bool val);

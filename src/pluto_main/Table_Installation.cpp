@@ -154,7 +154,8 @@ void Row_Installation::SetDefaultValues()
 {
 	m_PK_Installation = 0;
 is_null[0] = false;
-is_null[1] = true;
+m_Description = "";
+is_null[1] = false;
 is_null[2] = true;
 is_null[3] = true;
 is_null[4] = true;
@@ -346,9 +347,6 @@ void Row_Installation::psc_restrict_set(long int val){PLUTO_SAFETY_LOCK_ERRORSON
 m_psc_restrict = val; is_modified=true; is_null[23]=false;}
 
 		
-bool Row_Installation::Description_isNull() {PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
-
-return is_null[1];}
 bool Row_Installation::Name_isNull() {PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
 
 return is_null[2];}
@@ -411,10 +409,6 @@ bool Row_Installation::psc_restrict_isNull() {PLUTO_SAFETY_LOCK_ERRORSONLY(sl,ta
 return is_null[23];}
 
 			
-void Row_Installation::Description_setNull(bool val){PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
-is_null[1]=val;
-is_modified=true;
-}
 void Row_Installation::Name_setNull(bool val){PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
 is_null[2]=val;
 is_modified=true;

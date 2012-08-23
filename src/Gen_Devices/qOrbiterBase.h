@@ -308,12 +308,28 @@ public:
 	{
 		SetParm(DEVICEDATA_Enable_Memory_Management_CONST,(Value ? "1" : "0"));
 	}
+	int Get_Border_Size()
+	{
+		if( m_bRunningWithoutDeviceData )
+			return atoi(m_pEvent_Impl->GetDeviceDataFromDatabase(m_dwPK_Device,DEVICEDATA_Border_Size_CONST).c_str());
+		else
+			return atoi(m_mapParameters[DEVICEDATA_Border_Size_CONST].c_str());
+	}
+
 	string Get_Model()
 	{
 		if( m_bRunningWithoutDeviceData )
 			return m_pEvent_Impl->GetDeviceDataFromDatabase(m_dwPK_Device,DEVICEDATA_Model_CONST);
 		else
 			return m_mapParameters[DEVICEDATA_Model_CONST];
+	}
+
+	string Get_Alert_Filter_Level()
+	{
+		if( m_bRunningWithoutDeviceData )
+			return m_pEvent_Impl->GetDeviceDataFromDatabase(m_dwPK_Device,DEVICEDATA_Alert_Filter_Level_CONST);
+		else
+			return m_mapParameters[DEVICEDATA_Alert_Filter_Level_CONST];
 	}
 
 	bool Get_Ignore_First_Event()
@@ -357,7 +373,7 @@ public:
 class qOrbiter_Command : public Command_Impl, public QObject
 {
 public:
-    qOrbiter_Command(int DeviceID, string ServerAddress,bool bConnectEventHandler=true,bool bLocalMode=false,class Router *pRouter=NULL, QObject*parent=0)
+	qOrbiter_Command(int DeviceID, string ServerAddress,bool bConnectEventHandler=true,bool bLocalMode=false,class Router *pRouter=NULL)
 	: Command_Impl(DeviceID, ServerAddress, bLocalMode, pRouter)
 	{
 	}
@@ -484,7 +500,9 @@ public:
 	string DATA_Get_AV_Adjustment_Rules() { return GetData()->Get_AV_Adjustment_Rules(); }
 	bool DATA_Get_Enable_Memory_Management() { return GetData()->Get_Enable_Memory_Management(); }
 	void DATA_Set_Enable_Memory_Management(bool Value,bool bUpdateDatabase=false) { GetData()->Set_Enable_Memory_Management(Value); if( bUpdateDatabase ) SetDeviceDataInDB(m_dwPK_Device,222,Value); }
+	int DATA_Get_Border_Size() { return GetData()->Get_Border_Size(); }
 	string DATA_Get_Model() { return GetData()->Get_Model(); }
+	string DATA_Get_Alert_Filter_Level() { return GetData()->Get_Alert_Filter_Level(); }
 	bool DATA_Get_Ignore_First_Event() { return GetData()->Get_Ignore_First_Event(); }
 	void DATA_Set_Ignore_First_Event(bool Value,bool bUpdateDatabase=false) { GetData()->Set_Ignore_First_Event(Value); if( bUpdateDatabase ) SetDeviceDataInDB(m_dwPK_Device,274,Value); }
 	bool DATA_Get_Automatically_Go_to_Remote() { return GetData()->Get_Automatically_Go_to_Remote(); }

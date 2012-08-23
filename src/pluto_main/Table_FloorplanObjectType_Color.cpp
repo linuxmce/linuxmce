@@ -138,8 +138,10 @@ void Row_FloorplanObjectType_Color::SetDefaultValues()
 is_null[0] = false;
 m_FK_FloorplanObjectType = 0;
 is_null[1] = false;
-is_null[2] = true;
-is_null[3] = true;
+m_Description = "";
+is_null[2] = false;
+m_Define = "";
+is_null[3] = false;
 m_Color = 0;
 is_null[4] = false;
 is_null[5] = true;
@@ -231,12 +233,6 @@ void Row_FloorplanObjectType_Color::psc_restrict_set(long int val){PLUTO_SAFETY_
 m_psc_restrict = val; is_modified=true; is_null[10]=false;}
 
 		
-bool Row_FloorplanObjectType_Color::Description_isNull() {PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
-
-return is_null[2];}
-bool Row_FloorplanObjectType_Color::Define_isNull() {PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
-
-return is_null[3];}
 bool Row_FloorplanObjectType_Color::psc_id_isNull() {PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
 
 return is_null[5];}
@@ -254,14 +250,6 @@ bool Row_FloorplanObjectType_Color::psc_restrict_isNull() {PLUTO_SAFETY_LOCK_ERR
 return is_null[10];}
 
 			
-void Row_FloorplanObjectType_Color::Description_setNull(bool val){PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
-is_null[2]=val;
-is_modified=true;
-}
-void Row_FloorplanObjectType_Color::Define_setNull(bool val){PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
-is_null[3]=val;
-is_modified=true;
-}
 void Row_FloorplanObjectType_Color::psc_id_setNull(bool val){PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
 is_null[5]=val;
 is_modified=true;

@@ -206,10 +206,8 @@ void psc_mod_set(string val);
 void psc_restrict_set(long int val);
 
 		
-		bool Description_isNull();
-bool Comments_isNull();
+		bool Comments_isNull();
 bool FK_Manufacturer_isNull();
-bool Define_isNull();
 bool IsEmbedded_isNull();
 bool CommandLine_isNull();
 bool IRFrequency_isNull();
@@ -235,10 +233,8 @@ bool psc_frozen_isNull();
 bool psc_restrict_isNull();
 
 			
-		void Description_setNull(bool val);
-void Comments_setNull(bool val);
+		void Comments_setNull(bool val);
 void FK_Manufacturer_setNull(bool val);
-void Define_setNull(bool val);
 void IsEmbedded_setNull(bool val);
 void CommandLine_setNull(bool val);
 void IRFrequency_setNull(bool val);

@@ -3,6 +3,8 @@
 #include "Logger.h"
 
 using namespace DCE;
+#include "qOrbiterBase.h"
+extern qOrbiter_Command *Create_qOrbiter(Command_Impl *pPrimaryDeviceCommand, DeviceData_Impl *pData, Event_Impl *pEvent, Router *pRouter);
 #include "qMediaPlayerBase.h"
 extern qMediaPlayer_Command *Create_qMediaPlayer(Command_Impl *pPrimaryDeviceCommand, DeviceData_Impl *pData, Event_Impl *pEvent, Router *pRouter);
 DeviceData_Impl *qMediaPlayer_Data::CreateData(DeviceData_Impl *Parent,char *pDataBlock,unsigned long AllocatedSize,char *CurrentPosition)
@@ -14,6 +16,8 @@ DeviceData_Impl *qMediaPlayer_Data::CreateData(DeviceData_Impl *Parent,char *pDa
 	int iPK_Installation = b.Read_unsigned_long();
 	int iPK_DeviceTemplate = b.Read_unsigned_long();
 	switch(iPK_DeviceTemplate) {
+		case 2186:
+			return new qOrbiter_Data();
 		case 2205:
 			return new qMediaPlayer_Data();
 	};
@@ -24,6 +28,8 @@ DeviceData_Impl *qMediaPlayer_Data::CreateData(DeviceData_Impl *Parent,char *pDa
 Event_Impl *qMediaPlayer_Event::CreateEvent( unsigned long dwPK_DeviceTemplate, ClientSocket *pOCClientSocket, unsigned long dwDevice )
 {
 	switch(dwPK_DeviceTemplate) {
+		case 2186:
+			return (Event_Impl *) new qOrbiter_Event(pOCClientSocket, dwDevice);
 		case 2205:
 			return (Event_Impl *) new qMediaPlayer_Event(pOCClientSocket, dwDevice);
 	};
@@ -32,6 +38,11 @@ Event_Impl *qMediaPlayer_Event::CreateEvent( unsigned long dwPK_DeviceTemplate, 
 }
 Command_Impl  *qMediaPlayer_Command::CreateCommand(int PK_DeviceTemplate, Command_Impl *pPrimaryDeviceCommand, DeviceData_Impl *pData, Event_Impl *pEvent)
 {
+	switch(PK_DeviceTemplate)
+	{
+		case 2205:
+			return (Command_Impl *) Create_qMediaPlayer(pPrimaryDeviceCommand, pData, pEvent, m_pRouter);
+	};
 	LoggerWrapper::GetInstance()->Write(LV_STATUS, "Got CreateCommand for unknown type %d.", PK_DeviceTemplate);
 	return NULL;
 }

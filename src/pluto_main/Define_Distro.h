@@ -19,6 +19,7 @@
 #define DISTRO_Ubuntu_Hurdy_CONST 16
 #define DISTRO_Ubuntu_Intrepid_CONST 17
 #define DISTRO_Ubuntu_Lucid_CONST 18
+#define DISTRO_Raspian_Wheezy_CONST 19
 
 #define DISTRO_TABLE "Distro"
 #define DISTRO_PK_DISTRO_FIELD "PK_Distro"

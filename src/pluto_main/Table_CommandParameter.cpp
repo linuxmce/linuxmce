@@ -140,8 +140,10 @@ void Row_CommandParameter::SetDefaultValues()
 {
 	m_PK_CommandParameter = 0;
 is_null[0] = false;
-is_null[1] = true;
-is_null[2] = true;
+m_Description = "";
+is_null[1] = false;
+m_Define = "";
+is_null[2] = false;
 is_null[3] = true;
 m_FK_ParameterType = 0;
 is_null[4] = false;
@@ -234,12 +236,6 @@ void Row_CommandParameter::psc_restrict_set(long int val){PLUTO_SAFETY_LOCK_ERRO
 m_psc_restrict = val; is_modified=true; is_null[10]=false;}
 
 		
-bool Row_CommandParameter::Description_isNull() {PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
-
-return is_null[1];}
-bool Row_CommandParameter::Define_isNull() {PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
-
-return is_null[2];}
 bool Row_CommandParameter::Comments_isNull() {PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
 
 return is_null[3];}
@@ -260,14 +256,6 @@ bool Row_CommandParameter::psc_restrict_isNull() {PLUTO_SAFETY_LOCK_ERRORSONLY(s
 return is_null[10];}
 
 			
-void Row_CommandParameter::Description_setNull(bool val){PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
-is_null[1]=val;
-is_modified=true;
-}
-void Row_CommandParameter::Define_setNull(bool val){PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
-is_null[2]=val;
-is_modified=true;
-}
 void Row_CommandParameter::Comments_setNull(bool val){PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
 is_null[3]=val;
 is_modified=true;

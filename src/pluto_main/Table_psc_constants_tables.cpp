@@ -135,7 +135,8 @@ void Row_psc_constants_tables::SetDefaultValues()
 {
 	m_PK_psc_constants_tables = 0;
 is_null[0] = false;
-is_null[1] = true;
+m_Tablename = "";
+is_null[1] = false;
 is_null[2] = true;
 m_frozen = 0;
 is_null[3] = false;
@@ -198,18 +199,11 @@ void Row_psc_constants_tables::last_psc_batch_set(long int val){PLUTO_SAFETY_LOC
 m_last_psc_batch = val; is_modified=true; is_null[6]=false;}
 
 		
-bool Row_psc_constants_tables::Tablename_isNull() {PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
-
-return is_null[1];}
 bool Row_psc_constants_tables::filter_isNull() {PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
 
 return is_null[2];}
 
 			
-void Row_psc_constants_tables::Tablename_setNull(bool val){PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
-is_null[1]=val;
-is_modified=true;
-}
 void Row_psc_constants_tables::filter_setNull(bool val){PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
 is_null[2]=val;
 is_modified=true;

@@ -143,7 +143,8 @@ void Row_Language::SetDefaultValues()
 {
 	m_PK_Language = 0;
 is_null[0] = false;
-is_null[1] = true;
+m_Description = "";
+is_null[1] = false;
 is_null[2] = true;
 m_FK_Language_TextPlacement = 0;
 is_null[3] = true;
@@ -223,9 +224,6 @@ void Row_Language::psc_restrict_set(long int val){PLUTO_SAFETY_LOCK_ERRORSONLY(s
 m_psc_restrict = val; is_modified=true; is_null[8]=false;}
 
 		
-bool Row_Language::Description_isNull() {PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
-
-return is_null[1];}
 bool Row_Language::FK_Language_TextPlacement_isNull() {PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
 
 return is_null[2];}
@@ -246,10 +244,6 @@ bool Row_Language::psc_restrict_isNull() {PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table-
 return is_null[8];}
 
 			
-void Row_Language::Description_setNull(bool val){PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
-is_null[1]=val;
-is_modified=true;
-}
 void Row_Language::FK_Language_TextPlacement_setNull(bool val){PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
 is_null[2]=val;
 is_modified=true;

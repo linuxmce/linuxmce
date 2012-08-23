@@ -137,8 +137,10 @@ void Row_Version::SetDefaultValues()
 {
 	m_PK_Version = 0;
 is_null[0] = false;
-is_null[1] = true;
-is_null[2] = true;
+m_VersionName = "";
+is_null[1] = false;
+m_BuildName = "";
+is_null[2] = false;
 is_null[3] = true;
 is_null[4] = true;
 m_Repository = 0;
@@ -267,12 +269,6 @@ void Row_Version::psc_restrict_set(long int val){PLUTO_SAFETY_LOCK_ERRORSONLY(sl
 m_psc_restrict = val; is_modified=true; is_null[15]=false;}
 
 		
-bool Row_Version::VersionName_isNull() {PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
-
-return is_null[1];}
-bool Row_Version::BuildName_isNull() {PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
-
-return is_null[2];}
 bool Row_Version::Date_isNull() {PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
 
 return is_null[3];}
@@ -311,14 +307,6 @@ bool Row_Version::psc_restrict_isNull() {PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->
 return is_null[15];}
 
 			
-void Row_Version::VersionName_setNull(bool val){PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
-is_null[1]=val;
-is_modified=true;
-}
-void Row_Version::BuildName_setNull(bool val){PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
-is_null[2]=val;
-is_modified=true;
-}
 void Row_Version::Date_setNull(bool val){PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
 is_null[3]=val;
 is_modified=true;

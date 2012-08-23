@@ -141,7 +141,8 @@ m_FK_ConfigType_File = 0;
 is_null[1] = false;
 m_FindStr = "";
 is_null[2] = false;
-is_null[3] = true;
+m_ReplaceStr = "";
+is_null[3] = false;
 is_null[4] = true;
 m_psc_id = 0;
 is_null[5] = true;
@@ -225,9 +226,6 @@ void Row_ConfigType_Token::psc_restrict_set(long int val){PLUTO_SAFETY_LOCK_ERRO
 m_psc_restrict = val; is_modified=true; is_null[9]=false;}
 
 		
-bool Row_ConfigType_Token::ReplaceStr_isNull() {PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
-
-return is_null[3];}
 bool Row_ConfigType_Token::psc_id_isNull() {PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
 
 return is_null[4];}
@@ -245,10 +243,6 @@ bool Row_ConfigType_Token::psc_restrict_isNull() {PLUTO_SAFETY_LOCK_ERRORSONLY(s
 return is_null[9];}
 
 			
-void Row_ConfigType_Token::ReplaceStr_setNull(bool val){PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
-is_null[3]=val;
-is_modified=true;
-}
 void Row_ConfigType_Token::psc_id_setNull(bool val){PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
 is_null[4]=val;
 is_modified=true;

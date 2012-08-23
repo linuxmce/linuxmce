@@ -136,7 +136,8 @@ void Row_Effect::SetDefaultValues()
 {
 	m_PK_Effect = 0;
 is_null[0] = false;
-is_null[1] = true;
+m_Description = "";
+is_null[1] = false;
 is_null[2] = true;
 is_null[3] = true;
 m_psc_id = 0;
@@ -215,9 +216,6 @@ void Row_Effect::psc_restrict_set(long int val){PLUTO_SAFETY_LOCK_ERRORSONLY(sl,
 m_psc_restrict = val; is_modified=true; is_null[8]=false;}
 
 		
-bool Row_Effect::Description_isNull() {PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
-
-return is_null[1];}
 bool Row_Effect::Define_isNull() {PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
 
 return is_null[2];}
@@ -238,10 +236,6 @@ bool Row_Effect::psc_restrict_isNull() {PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->d
 return is_null[8];}
 
 			
-void Row_Effect::Description_setNull(bool val){PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
-is_null[1]=val;
-is_modified=true;
-}
 void Row_Effect::Define_setNull(bool val){PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
 is_null[2]=val;
 is_modified=true;

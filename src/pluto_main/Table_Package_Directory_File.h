@@ -142,7 +142,6 @@ void psc_restrict_set(long int val);
 		
 		bool FK_OperatingSystem_isNull();
 bool FK_Distro_isNull();
-bool File_isNull();
 bool Search_isNull();
 bool MakeCommand_isNull();
 bool psc_id_isNull();
@@ -154,7 +153,6 @@ bool psc_restrict_isNull();
 			
 		void FK_OperatingSystem_setNull(bool val);
 void FK_Distro_setNull(bool val);
-void File_setNull(bool val);
 void Search_setNull(bool val);
 void MakeCommand_setNull(bool val);
 void psc_id_setNull(bool val);

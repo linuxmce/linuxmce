@@ -173,12 +173,14 @@ is_null[3] = true;
 m_FK_Installation = 0;
 is_null[4] = true;
 m_FK_DesignObj = 0;
-is_null[5] = true;
+m_Description = "";
+is_null[5] = false;
 m_FK_DeviceTemplate = 0;
 is_null[6] = false;
 is_null[7] = true;
 m_FK_Device_ControlledVia = 0;
-is_null[8] = true;
+m_IPaddress = "";
+is_null[8] = false;
 is_null[9] = true;
 m_IgnoreOnOff = 0;
 is_null[10] = false;
@@ -186,8 +188,10 @@ is_null[11] = true;
 m_FK_Device_RouteTo = 0;
 m_NeedConfigure = 1;
 is_null[12] = false;
-is_null[13] = true;
-is_null[14] = true;
+m_State = "";
+is_null[13] = false;
+m_Status = "";
+is_null[14] = false;
 is_null[15] = true;
 m_PingTest = 0;
 is_null[16] = true;
@@ -386,18 +390,12 @@ return is_null[3];}
 bool Row_Device::FK_DesignObj_isNull() {PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
 
 return is_null[4];}
-bool Row_Device::Description_isNull() {PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
-
-return is_null[5];}
 bool Row_Device::FK_DeviceTemplate_isNull() {PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
 
 return is_null[6];}
 bool Row_Device::FK_Device_ControlledVia_isNull() {PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
 
 return is_null[7];}
-bool Row_Device::IPaddress_isNull() {PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
-
-return is_null[8];}
 bool Row_Device::MACaddress_isNull() {PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
 
 return is_null[9];}
@@ -407,12 +405,6 @@ return is_null[11];}
 bool Row_Device::NeedConfigure_isNull() {PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
 
 return is_null[12];}
-bool Row_Device::State_isNull() {PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
-
-return is_null[13];}
-bool Row_Device::Status_isNull() {PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
-
-return is_null[14];}
 bool Row_Device::PingTest_isNull() {PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
 
 return is_null[15];}
@@ -448,20 +440,12 @@ void Row_Device::FK_DesignObj_setNull(bool val){PLUTO_SAFETY_LOCK_ERRORSONLY(sl,
 is_null[4]=val;
 is_modified=true;
 }
-void Row_Device::Description_setNull(bool val){PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
-is_null[5]=val;
-is_modified=true;
-}
 void Row_Device::FK_DeviceTemplate_setNull(bool val){PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
 is_null[6]=val;
 is_modified=true;
 }
 void Row_Device::FK_Device_ControlledVia_setNull(bool val){PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
 is_null[7]=val;
-is_modified=true;
-}
-void Row_Device::IPaddress_setNull(bool val){PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
-is_null[8]=val;
 is_modified=true;
 }
 void Row_Device::MACaddress_setNull(bool val){PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
@@ -474,14 +458,6 @@ is_modified=true;
 }
 void Row_Device::NeedConfigure_setNull(bool val){PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
 is_null[12]=val;
-is_modified=true;
-}
-void Row_Device::State_setNull(bool val){PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
-is_null[13]=val;
-is_modified=true;
-}
-void Row_Device::Status_setNull(bool val){PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
-is_null[14]=val;
 is_modified=true;
 }
 void Row_Device::PingTest_setNull(bool val){PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
