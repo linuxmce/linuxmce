@@ -59,6 +59,11 @@ public:
 		void OnReload();
 		bool LoadEntertainAreas();
 		map<int, EntertainArea*>* GetEntertainAreas();
+
+		bool MediaCommandIntercepted( class Socket *pSocket, class Message *pMessage, class DeviceData_Base *pDeviceFrom, class DeviceData_Base *pDeviceTo );
+		EntertainArea* FindEntertainAreaForDevice(int PK_Device);
+		EntertainArea* FindEntertainArea(int PK_EntertainArea);
+
 //<-dceag-const2-b->
 		// The following constructor is only used if this a class instance embedded within a DCE Device.  In that case, it won't create it's own connection to the router
 		// You can delete this whole section and put an ! after dceag-const2-b tag if you don't want this constructor.  Do the same in the implementation file

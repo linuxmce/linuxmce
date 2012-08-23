@@ -33,8 +33,9 @@ DLNAEngine::DLNAEngine(DLNA* pDlna)
 
 DLNAEngine::~DLNAEngine()
 {
-	delete m_pDeviceHost;
+	//TODO: delete files
 
+	delete m_pDeviceHost;
 }
 
 int DLNAEngine::Init()
@@ -116,12 +117,11 @@ int DLNAEngine::Init()
 //		cout << m_pDeviceHost->rootDevices()[i]->description().toStdString().c_str();
 		LoggerWrapper::GetInstance ()->Write (LV_STATUS, "isStarted %i", m_pDeviceHost->isStarted());
 		
-		for (int j = 0; j < m_pDeviceHost->rootDevices()[i]->services().size(); j++)
+/*		for (int j = 0; j < m_pDeviceHost->rootDevices()[i]->services().size(); j++)
 		{
-//			cout << m_pDeviceHost->rootDevices()[i]->services()[j]->description().toStdString().c_str();
+			cout << m_pDeviceHost->rootDevices()[i]->services()[j]->description().toStdString().c_str();
 		}
-	}
-
-
+*/	}
+	
 }
 

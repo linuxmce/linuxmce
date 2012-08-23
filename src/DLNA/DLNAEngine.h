@@ -17,6 +17,7 @@
 #include <HUpnpCore/HDeviceHost>
 
 #include "DLNA.h"
+#include "LMCERenderer.h"
 
 using namespace Herqq::Upnp;
 
@@ -35,6 +36,7 @@ public:
 	virtual ~DLNAEngine();
 
 	int Init();
+
 };
 }
 #endif

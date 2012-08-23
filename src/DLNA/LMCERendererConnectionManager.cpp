@@ -28,7 +28,8 @@ LMCERendererConnectionManager::~LMCERendererConnectionManager()
 HRendererConnection* LMCERendererConnectionManager::doCreate (const QString &contentFormat, qint32 connectionId)
 {
 	LoggerWrapper::GetInstance ()->Write (LV_STATUS, "LMCERendererConnectionManager::doCreate() start, connectionId = %d", connectionId);
-	return new LMCERenderer(this, m_pDLNA);
+	LMCERenderer *pRenderer = new LMCERenderer(this, m_pDLNA);
+	return pRenderer;
 }
 
 DLNA* LMCERendererConnectionManager::GetDLNA()

@@ -20,12 +20,6 @@
 #include "PlutoUtils/StringUtils.h"
 #include "PlutoUtils/Other.h"
 
-#include "pluto_main/Database_pluto_main.h"
-#include "pluto_main/Table_EntertainArea.h"
-#include "pluto_main/Table_Device_EntertainArea.h"
-#include "pluto_main/Table_Room.h"
-#include "pluto_main/Table_Installation.h"
-
 #include <iostream>
 using namespace std;
 using namespace DCE;
@@ -34,6 +28,13 @@ using namespace DCE;
 //<-dceag-d-e->
 
 #include "DLNAEngine.h"
+#include "LMCERenderer.h"
+
+#include "pluto_main/Database_pluto_main.h"
+#include "pluto_main/Table_EntertainArea.h"
+#include "pluto_main/Table_Device_EntertainArea.h"
+#include "pluto_main/Table_Room.h"
+#include "pluto_main/Table_Installation.h"
 
 //<-dceag-const-b->
 // The primary constructor when the class is created as a stand-alone device
@@ -74,6 +75,11 @@ bool DLNA::GetConfig()
 
 	m_pEngine = new DLNAEngine(this);
 	m_pEngine->Init();
+
+	PurgeInterceptors();
+
+	RegisterMsgInterceptor(( MessageInterceptorFn )( &DLNA::MediaCommandIntercepted ), 0, 0, 0, 0, MESSAGETYPE_COMMAND, COMMAND_Start_Streaming_CONST );
+	RegisterMsgInterceptor(( MessageInterceptorFn )( &DLNA::MediaCommandIntercepted ), 0, 0, 0, 0, MESSAGETYPE_COMMAND, COMMAND_Play_Media_CONST );
 
 	return true;
 }
@@ -264,7 +270,8 @@ bool DLNA::LoadEntertainAreas()
 					LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"Device_EntertainArea refers to a NULL device %d %d",pRow_Device_EntertainArea->FK_EntertainArea_get(),pRow_Device_EntertainArea->FK_Device_get());
 					continue;
 				}
-				pEntertainArea->m_vectDevices.push_back(pRow_Device_EntertainArea->FK_Device_get());
+				LoggerWrapper::GetInstance ()->Write (LV_STATUS, "DLNA::LoadEntertainAreas() assigning PK_Device %d to EA %d", pRow_Device_EntertainArea->FK_Device_get(), pEntertainArea->m_iPK_EntertainArea);
+				pEntertainArea->m_setDevices.insert(pRow_Device_EntertainArea->FK_Device_get());
 			}
 		}
 	}
@@ -274,4 +281,67 @@ bool DLNA::LoadEntertainAreas()
 map<int, EntertainArea*>* DLNA::GetEntertainAreas()
 {
 	return &m_mapEntertainAreas;
+}
+
+bool DLNA::MediaCommandIntercepted( class Socket *pSocket, class Message *pMessage, class DeviceData_Base *pDeviceFrom, class DeviceData_Base *pDeviceTo )
+{
+	LoggerWrapper::GetInstance ()->Write (LV_STATUS, "DLNA::MediaCommandIntercepted() start");
+	LoggerWrapper::GetInstance ()->Write (LV_STATUS, "DLNA::MediaCommandIntercepted() pMessage->m_dwID = %d", pMessage->m_dwID);
+	
+        // Find out what PK_Device is playing, and if it is one of ours
+	long PK_Device = 0;
+	EntertainArea *pEntertainArea = NULL;
+	if (pMessage->m_dwID == COMMAND_Start_Streaming_CONST)
+	{
+		// devices like Slim Server Streamer will need to receive commands for its childen (Pause Media command is sent to that one when playing to Squeezeboxes)
+		PK_Device = pDeviceTo->m_dwPK_Device;
+		vector<string>vectPK_Devices;
+		StringUtils::Tokenize(pMessage->m_mapParameters[COMMANDPARAMETER_StreamingTargets_CONST], ",", vectPK_Devices);
+		for (int i = 0; i < vectPK_Devices.size() && pEntertainArea == NULL; i++) {
+			int iPK_Device = atoi(vectPK_Devices[i].c_str());
+			pEntertainArea = FindEntertainAreaForDevice(iPK_Device);
+			if (pEntertainArea != NULL)
+			{
+				LoggerWrapper::GetInstance ()->Write (LV_STATUS, "DLNA::MediaCommandIntercepted() StreamingTargets = %d, Pk_EA = %d, pEA = %d",iPK_Device, pEntertainArea->m_iPK_EntertainArea, pEntertainArea);
+			}
+		}
+	} else if (pMessage->m_dwID == COMMAND_Play_Media_CONST) 
+	{
+		PK_Device = pDeviceTo->m_dwPK_Device;
+		pEntertainArea = FindEntertainAreaForDevice(PK_Device);
+	}
+	if (pEntertainArea != NULL && pEntertainArea->m_pRenderer != NULL)
+	{
+		LoggerWrapper::GetInstance ()->Write (LV_STATUS, "DLNA::MediaCommandIntercepted() PK_EntArea = %d, pRenderer = %d", pEntertainArea->m_iPK_EntertainArea, pEntertainArea->m_pRenderer);
+		pEntertainArea->m_pRenderer->MediaCommandIntercepted(pMessage, PK_Device);
+	} else {
+		LoggerWrapper::GetInstance ()->Write (LV_STATUS, "DLNA::MediaCommandIntercepted() Message not handled!!");
+	}
+
+	return false;
+}
+
+EntertainArea* DLNA::FindEntertainAreaForDevice(int PK_Device)
+{
+	for (map<int, EntertainArea*>::iterator it = m_mapEntertainAreas.begin(); it != m_mapEntertainAreas.end(); it++)
+	{
+		EntertainArea *pEA = (*it).second;
+		if (pEA != NULL && pEA->m_setDevices.find(PK_Device) != pEA->m_setDevices.end())
+		{
+//			LoggerWrapper::GetInstance ()->Write (LV_STATUS, "DLNA::FindEntertainAreaForDevice() PK_Device = %d, PK_EA = %d, pEA = %d", PK_Device, pEA->m_iPK_EntertainArea, pEA);
+			return pEA;
+		}
+	}
+	return NULL;
+}
+
+EntertainArea* DLNA::FindEntertainArea(int PK_EntertainArea)
+{
+	
+	map<int, EntertainArea*>::iterator it = m_mapEntertainAreas.find(PK_EntertainArea);
+	if (it != m_mapEntertainAreas.end())
+	{
+		return (*it).second;
+	}
+	return NULL;
 }

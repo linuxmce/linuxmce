@@ -14,21 +14,19 @@
 #define EntertainArea_h
 
 namespace DCE {
-/*	class LMCEDevice {
-	public:
-		LMCEDevice(long PK_Device, long PK_MediaType
-		long m_dwPK_Device;
-	        long m_dwPK_MediaType;
-	};
-*/	class EntertainArea {
+	class LMCERenderer;
+
+	class EntertainArea {
 	public:
 		EntertainArea(int iPK_EntArea, string description) {
 			m_iPK_EntertainArea = iPK_EntArea;
 			m_sDescription = description;
+			m_pRenderer = NULL;
 		}
 		int m_iPK_EntertainArea;
 		string m_sDescription;
-		vector<long> m_vectDevices;
+		set<long> m_setDevices;
+		LMCERenderer* m_pRenderer;
 	};
 }
 #endif

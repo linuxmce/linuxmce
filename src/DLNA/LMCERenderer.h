@@ -16,17 +16,25 @@
 #include <HUpnpAv/HRendererConnection>
 #include <HUpnpAv/HSeekInfo>
 #include <HUpnpAv/HObject>
+
 #include <QtCore/QUrl>
-#include "DLNA.h"
+#include "Message.h"
 
 using namespace Herqq::Upnp::Av;
 using namespace DCE;
+
+namespace DCE {
+class DLNA;
 
 class LMCERenderer : public HRendererConnection {
 private:
 	unsigned int m_PK_EntArea;
 	QUrl* m_Url;
+	int m_iMediaType;
 	DLNA* m_pDLNA;
+	int m_iStreamID;
+	long m_dwPK_Device_Playing;
+	bool m_bIsPlaying;
 public:
 	LMCERenderer(QObject* parent, DLNA* pDLNA);
 	virtual ~LMCERenderer();
@@ -41,5 +49,11 @@ public:
 	qint32 doSetNextResource ( const QUrl &  resourceUri, HObject *  cdsMetadata = 0);
 	qint32 doSelectPreset ( const QString &  presetName);
 
+	int GetMediaType(HObject* metadata, QUrl* url);
+	int GetPK_EntertainArea();
+	void MediaCommandIntercepted(Message *pMessage, long PK_Device);
+
 };
+
+}
 #endif
