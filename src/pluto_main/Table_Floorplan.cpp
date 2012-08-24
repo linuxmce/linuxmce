@@ -139,8 +139,7 @@ void Row_Floorplan::SetDefaultValues()
 is_null[0] = false;
 m_Page = 0;
 is_null[1] = false;
-m_Description = "";
-is_null[2] = false;
+is_null[2] = true;
 is_null[3] = true;
 m_FK_Icon = 0;
 is_null[4] = true;
@@ -226,6 +225,9 @@ void Row_Floorplan::psc_restrict_set(long int val){PLUTO_SAFETY_LOCK_ERRORSONLY(
 m_psc_restrict = val; is_modified=true; is_null[9]=false;}
 
 		
+bool Row_Floorplan::Description_isNull() {PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
+
+return is_null[2];}
 bool Row_Floorplan::FK_Icon_isNull() {PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
 
 return is_null[3];}
@@ -246,6 +248,10 @@ bool Row_Floorplan::psc_restrict_isNull() {PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table
 return is_null[9];}
 
 			
+void Row_Floorplan::Description_setNull(bool val){PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
+is_null[2]=val;
+is_modified=true;
+}
 void Row_Floorplan::FK_Icon_setNull(bool val){PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
 is_null[3]=val;
 is_modified=true;

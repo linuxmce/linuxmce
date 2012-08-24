@@ -149,7 +149,9 @@ void psc_mod_set(string val);
 void psc_restrict_set(long int val);
 
 		
-		bool Date_isNull();
+		bool VersionName_isNull();
+bool BuildName_isNull();
+bool Date_isNull();
 bool Description_isNull();
 bool Repository_isNull();
 bool Comments_isNull();
@@ -163,7 +165,9 @@ bool psc_frozen_isNull();
 bool psc_restrict_isNull();
 
 			
-		void Date_setNull(bool val);
+		void VersionName_setNull(bool val);
+void BuildName_setNull(bool val);
+void Date_setNull(bool val);
 void Description_setNull(bool val);
 void Repository_setNull(bool val);
 void Comments_setNull(bool val);

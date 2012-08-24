@@ -143,8 +143,7 @@ void Row_Distro::SetDefaultValues()
 {
 	m_PK_Distro = 0;
 is_null[0] = false;
-m_Description = "";
-is_null[1] = false;
+is_null[1] = true;
 is_null[2] = true;
 m_FK_OperatingSystem = 0;
 is_null[3] = false;
@@ -298,6 +297,9 @@ void Row_Distro::psc_restrict_set(long int val){PLUTO_SAFETY_LOCK_ERRORSONLY(sl,
 m_psc_restrict = val; is_modified=true; is_null[18]=false;}
 
 		
+bool Row_Distro::Description_isNull() {PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
+
+return is_null[1];}
 bool Row_Distro::Define_isNull() {PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
 
 return is_null[2];}
@@ -333,6 +335,10 @@ bool Row_Distro::psc_restrict_isNull() {PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->d
 return is_null[18];}
 
 			
+void Row_Distro::Description_setNull(bool val){PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
+is_null[1]=val;
+is_modified=true;
+}
 void Row_Distro::Define_setNull(bool val){PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
 is_null[2]=val;
 is_modified=true;

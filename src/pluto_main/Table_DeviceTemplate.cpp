@@ -171,15 +171,13 @@ void Row_DeviceTemplate::SetDefaultValues()
 {
 	m_PK_DeviceTemplate = 0;
 is_null[0] = false;
-m_Description = "";
-is_null[1] = false;
+is_null[1] = true;
 is_null[2] = true;
 m_FK_DeviceCategory = 0;
 is_null[3] = false;
 is_null[4] = true;
 m_FK_Manufacturer = 0;
-m_Define = "";
-is_null[5] = false;
+is_null[5] = true;
 m_ImplementsDCE = 0;
 is_null[6] = false;
 m_IsEmbedded = 0;
@@ -452,12 +450,18 @@ void Row_DeviceTemplate::psc_restrict_set(long int val){PLUTO_SAFETY_LOCK_ERRORS
 m_psc_restrict = val; is_modified=true; is_null[34]=false;}
 
 		
+bool Row_DeviceTemplate::Description_isNull() {PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
+
+return is_null[1];}
 bool Row_DeviceTemplate::Comments_isNull() {PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
 
 return is_null[2];}
 bool Row_DeviceTemplate::FK_Manufacturer_isNull() {PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
 
 return is_null[4];}
+bool Row_DeviceTemplate::Define_isNull() {PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
+
+return is_null[5];}
 bool Row_DeviceTemplate::IsEmbedded_isNull() {PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
 
 return is_null[7];}
@@ -529,12 +533,20 @@ bool Row_DeviceTemplate::psc_restrict_isNull() {PLUTO_SAFETY_LOCK_ERRORSONLY(sl,
 return is_null[34];}
 
 			
+void Row_DeviceTemplate::Description_setNull(bool val){PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
+is_null[1]=val;
+is_modified=true;
+}
 void Row_DeviceTemplate::Comments_setNull(bool val){PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
 is_null[2]=val;
 is_modified=true;
 }
 void Row_DeviceTemplate::FK_Manufacturer_setNull(bool val){PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
 is_null[4]=val;
+is_modified=true;
+}
+void Row_DeviceTemplate::Define_setNull(bool val){PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
+is_null[5]=val;
 is_modified=true;
 }
 void Row_DeviceTemplate::IsEmbedded_setNull(bool val){PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);

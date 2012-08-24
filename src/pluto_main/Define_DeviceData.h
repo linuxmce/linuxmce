@@ -257,9 +257,6 @@
 #define DEVICEDATA_EmailSettings_CONST 304
 #define DEVICEDATA_Video_Support_CONST 305
 #define DEVICEDATA_Temperature_Measurement_Units_CONST 306
-#define DEVICEDATA_Send_Date_Time_to_KNX_bus_CONST 307
-#define DEVICEDATA_GA_for_date_object_CONST 308
-#define DEVICEDATA_GA_for_time_object_CONST 309
 
 #define DEVICEDATA_TABLE "DeviceData"
 #define DEVICEDATA_PK_DEVICEDATA_FIELD "PK_DeviceData"

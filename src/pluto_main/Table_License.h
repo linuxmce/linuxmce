@@ -137,7 +137,9 @@ void psc_mod_set(string val);
 void psc_restrict_set(long int val);
 
 		
-		bool Summary_isNull();
+		bool Description_isNull();
+bool Define_isNull();
+bool Summary_isNull();
 bool URL_isNull();
 bool RequiresPayment_isNull();
 bool psc_id_isNull();
@@ -147,7 +149,9 @@ bool psc_frozen_isNull();
 bool psc_restrict_isNull();
 
 			
-		void Summary_setNull(bool val);
+		void Description_setNull(bool val);
+void Define_setNull(bool val);
+void Summary_setNull(bool val);
 void URL_setNull(bool val);
 void RequiresPayment_setNull(bool val);
 void psc_id_setNull(bool val);

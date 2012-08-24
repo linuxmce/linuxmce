@@ -151,8 +151,7 @@ is_null[1] = true;
 m_FK_Array = 0;
 is_null[2] = true;
 m_FK_Installation = 0;
-m_Description = "";
-is_null[3] = false;
+is_null[3] = true;
 is_null[4] = true;
 m_CanTurnOff = 0;
 is_null[5] = false;
@@ -353,6 +352,9 @@ return is_null[1];}
 bool Row_CommandGroup::FK_Installation_isNull() {PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
 
 return is_null[2];}
+bool Row_CommandGroup::Description_isNull() {PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
+
+return is_null[3];}
 bool Row_CommandGroup::Hint_isNull() {PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
 
 return is_null[4];}
@@ -406,6 +408,10 @@ is_modified=true;
 }
 void Row_CommandGroup::FK_Installation_setNull(bool val){PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
 is_null[2]=val;
+is_modified=true;
+}
+void Row_CommandGroup::Description_setNull(bool val){PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
+is_null[3]=val;
 is_modified=true;
 }
 void Row_CommandGroup::Hint_setNull(bool val){PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);

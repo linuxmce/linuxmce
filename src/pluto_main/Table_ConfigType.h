@@ -134,7 +134,9 @@ void psc_mod_set(string val);
 void psc_restrict_set(long int val);
 
 		
-		bool FK_DeviceTemplate_isNull();
+		bool Description_isNull();
+bool Define_isNull();
+bool FK_DeviceTemplate_isNull();
 bool FK_DeviceCategory_isNull();
 bool psc_id_isNull();
 bool psc_batch_isNull();
@@ -143,7 +145,9 @@ bool psc_frozen_isNull();
 bool psc_restrict_isNull();
 
 			
-		void FK_DeviceTemplate_setNull(bool val);
+		void Description_setNull(bool val);
+void Define_setNull(bool val);
+void FK_DeviceTemplate_setNull(bool val);
 void FK_DeviceCategory_setNull(bool val);
 void psc_id_setNull(bool val);
 void psc_batch_setNull(bool val);

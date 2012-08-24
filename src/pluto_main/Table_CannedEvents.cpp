@@ -138,8 +138,7 @@ void Row_CannedEvents::SetDefaultValues()
 {
 	m_PK_CannedEvents = 0;
 is_null[0] = false;
-m_Description = "";
-is_null[1] = false;
+is_null[1] = true;
 m_FK_Event = 0;
 is_null[2] = false;
 m_bIsAnd = 0;
@@ -235,6 +234,9 @@ void Row_CannedEvents::psc_restrict_set(long int val){PLUTO_SAFETY_LOCK_ERRORSON
 m_psc_restrict = val; is_modified=true; is_null[10]=false;}
 
 		
+bool Row_CannedEvents::Description_isNull() {PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
+
+return is_null[1];}
 bool Row_CannedEvents::psc_id_isNull() {PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
 
 return is_null[5];}
@@ -252,6 +254,10 @@ bool Row_CannedEvents::psc_restrict_isNull() {PLUTO_SAFETY_LOCK_ERRORSONLY(sl,ta
 return is_null[10];}
 
 			
+void Row_CannedEvents::Description_setNull(bool val){PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
+is_null[1]=val;
+is_modified=true;
+}
 void Row_CannedEvents::psc_id_setNull(bool val){PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
 is_null[5]=val;
 is_modified=true;

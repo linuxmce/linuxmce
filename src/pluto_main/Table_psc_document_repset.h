@@ -110,10 +110,12 @@ void Setting_set(string val);
 void Value_set(string val);
 
 		
-		bool Value_isNull();
+		bool Setting_isNull();
+bool Value_isNull();
 
 			
-		void Value_setNull(bool val);
+		void Setting_setNull(bool val);
+void Value_setNull(bool val);
 	
 	
 		void Delete();

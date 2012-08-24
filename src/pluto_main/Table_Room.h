@@ -147,6 +147,7 @@ void psc_restrict_set(long int val);
 
 		
 		bool FK_RoomType_isNull();
+bool Description_isNull();
 bool FK_Icon_isNull();
 bool ManuallyConfigureEA_isNull();
 bool FK_FloorplanObjectType_isNull();
@@ -159,6 +160,7 @@ bool psc_restrict_isNull();
 
 			
 		void FK_RoomType_setNull(bool val);
+void Description_setNull(bool val);
 void FK_Icon_setNull(bool val);
 void ManuallyConfigureEA_setNull(bool val);
 void FK_FloorplanObjectType_setNull(bool val);

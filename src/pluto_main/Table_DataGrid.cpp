@@ -135,8 +135,7 @@ void Row_DataGrid::SetDefaultValues()
 {
 	m_PK_DataGrid = 0;
 is_null[0] = false;
-m_Description = "";
-is_null[1] = false;
+is_null[1] = true;
 is_null[2] = true;
 is_null[3] = true;
 is_null[4] = true;
@@ -222,6 +221,9 @@ void Row_DataGrid::psc_restrict_set(long int val){PLUTO_SAFETY_LOCK_ERRORSONLY(s
 m_psc_restrict = val; is_modified=true; is_null[9]=false;}
 
 		
+bool Row_DataGrid::Description_isNull() {PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
+
+return is_null[1];}
 bool Row_DataGrid::Define_isNull() {PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
 
 return is_null[2];}
@@ -245,6 +247,10 @@ bool Row_DataGrid::psc_restrict_isNull() {PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table-
 return is_null[9];}
 
 			
+void Row_DataGrid::Description_setNull(bool val){PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
+is_null[1]=val;
+is_modified=true;
+}
 void Row_DataGrid::Define_setNull(bool val){PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
 is_null[2]=val;
 is_modified=true;

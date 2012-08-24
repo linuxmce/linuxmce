@@ -149,7 +149,8 @@ void psc_mod_set(string val);
 void psc_restrict_set(long int val);
 
 		
-		bool Comments_isNull();
+		bool Description_isNull();
+bool Comments_isNull();
 bool Parm_isNull();
 bool DefaultValue_isNull();
 bool ExtraInfo_isNull();
@@ -160,7 +161,8 @@ bool psc_frozen_isNull();
 bool psc_restrict_isNull();
 
 			
-		void Comments_setNull(bool val);
+		void Description_setNull(bool val);
+void Comments_setNull(bool val);
 void Parm_setNull(bool val);
 void DefaultValue_setNull(bool val);
 void ExtraInfo_setNull(bool val);

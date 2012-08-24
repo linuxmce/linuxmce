@@ -140,8 +140,7 @@ void Row_Pipe::SetDefaultValues()
 {
 	m_PK_Pipe = 0;
 is_null[0] = false;
-m_Description = "";
-is_null[1] = false;
+is_null[1] = true;
 is_null[2] = true;
 is_null[3] = true;
 m_psc_id = 0;
@@ -220,6 +219,9 @@ void Row_Pipe::psc_restrict_set(long int val){PLUTO_SAFETY_LOCK_ERRORSONLY(sl,ta
 m_psc_restrict = val; is_modified=true; is_null[8]=false;}
 
 		
+bool Row_Pipe::Description_isNull() {PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
+
+return is_null[1];}
 bool Row_Pipe::Define_isNull() {PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
 
 return is_null[2];}
@@ -240,6 +242,10 @@ bool Row_Pipe::psc_restrict_isNull() {PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->dat
 return is_null[8];}
 
 			
+void Row_Pipe::Description_setNull(bool val){PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
+is_null[1]=val;
+is_modified=true;
+}
 void Row_Pipe::Define_setNull(bool val){PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
 is_null[2]=val;
 is_modified=true;

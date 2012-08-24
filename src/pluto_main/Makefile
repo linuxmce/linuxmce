@@ -253,8 +253,13 @@ libpluto_main.so: $(sources:.cpp=.o)
 	$(CXX) -shared $(CXXFLAGS) $(CPPFLAGS) -o $@ $(call cpath,$+)
 	cp $@ ../lib
 
+distclean: clean
 clean: clean-recursive
 	rm -f *.o *.d libpluto_main.so >/dev/null
+
+install: 
+	mkdir -p pluto/lib 
+	cp libpluto_main.so $(DESTPATH)pluto/lib 
 
 include $(ROOT)/PlutoUtils/make.rules
 -include $(sources:.cpp=.d)

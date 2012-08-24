@@ -86,8 +86,6 @@
 #define EVENT_Power_Usage_Changed_CONST 85
 #define EVENT_Energy_Cost_Changed_CONST 86
 #define EVENT_Url_Loaded_CONST 87
-#define EVENT_Contact_List_Presence_Cha_CONST 88
-#define EVENT_Skype_Ring_CONST 89
 
 #define EVENT_TABLE "Event"
 #define EVENT_PK_EVENT_FIELD "PK_Event"

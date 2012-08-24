@@ -142,8 +142,7 @@ m_FK_CannedEvents = 0;
 is_null[1] = false;
 m_FK_CriteriaParmList = 0;
 is_null[2] = false;
-m_Description = "";
-is_null[3] = false;
+is_null[3] = true;
 is_null[4] = true;
 m_Operator = 0;
 is_null[5] = false;
@@ -271,6 +270,9 @@ void Row_CannedEvents_CriteriaParmList::psc_restrict_set(long int val){PLUTO_SAF
 m_psc_restrict = val; is_modified=true; is_null[15]=false;}
 
 		
+bool Row_CannedEvents_CriteriaParmList::Description_isNull() {PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
+
+return is_null[3];}
 bool Row_CannedEvents_CriteriaParmList::Comments_isNull() {PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
 
 return is_null[4];}
@@ -300,6 +302,10 @@ bool Row_CannedEvents_CriteriaParmList::psc_restrict_isNull() {PLUTO_SAFETY_LOCK
 return is_null[15];}
 
 			
+void Row_CannedEvents_CriteriaParmList::Description_setNull(bool val){PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
+is_null[3]=val;
+is_modified=true;
+}
 void Row_CannedEvents_CriteriaParmList::Comments_setNull(bool val){PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
 is_null[4]=val;
 is_modified=true;

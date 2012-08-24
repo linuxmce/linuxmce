@@ -152,7 +152,8 @@ void psc_mod_set(string val);
 void psc_restrict_set(long int val);
 
 		
-		bool Define_isNull();
+		bool Description_isNull();
+bool Define_isNull();
 bool FK_UI_isNull();
 bool ScaleMenuBg_isNull();
 bool ScaleOtherGraphics_isNull();
@@ -163,7 +164,8 @@ bool psc_frozen_isNull();
 bool psc_restrict_isNull();
 
 			
-		void Define_setNull(bool val);
+		void Description_setNull(bool val);
+void Define_setNull(bool val);
 void FK_UI_setNull(bool val);
 void ScaleMenuBg_setNull(bool val);
 void ScaleOtherGraphics_setNull(bool val);

@@ -142,12 +142,9 @@ void Row_FloorplanObjectType::SetDefaultValues()
 is_null[0] = false;
 m_FK_FloorplanType = 0;
 is_null[1] = false;
-m_Description = "";
-is_null[2] = false;
-m_Define = "";
-is_null[3] = false;
-m_Direction = "";
-is_null[4] = false;
+is_null[2] = true;
+is_null[3] = true;
+is_null[4] = true;
 is_null[5] = true;
 m_FK_DesignObj_Control = 0;
 is_null[6] = true;
@@ -268,6 +265,15 @@ void Row_FloorplanObjectType::psc_restrict_set(long int val){PLUTO_SAFETY_LOCK_E
 m_psc_restrict = val; is_modified=true; is_null[14]=false;}
 
 		
+bool Row_FloorplanObjectType::Description_isNull() {PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
+
+return is_null[2];}
+bool Row_FloorplanObjectType::Define_isNull() {PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
+
+return is_null[3];}
+bool Row_FloorplanObjectType::Direction_isNull() {PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
+
+return is_null[4];}
 bool Row_FloorplanObjectType::FK_DesignObj_Control_isNull() {PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
 
 return is_null[5];}
@@ -291,6 +297,18 @@ bool Row_FloorplanObjectType::psc_restrict_isNull() {PLUTO_SAFETY_LOCK_ERRORSONL
 return is_null[14];}
 
 			
+void Row_FloorplanObjectType::Description_setNull(bool val){PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
+is_null[2]=val;
+is_modified=true;
+}
+void Row_FloorplanObjectType::Define_setNull(bool val){PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
+is_null[3]=val;
+is_modified=true;
+}
+void Row_FloorplanObjectType::Direction_setNull(bool val){PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
+is_null[4]=val;
+is_modified=true;
+}
 void Row_FloorplanObjectType::FK_DesignObj_Control_setNull(bool val){PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
 is_null[5]=val;
 is_modified=true;

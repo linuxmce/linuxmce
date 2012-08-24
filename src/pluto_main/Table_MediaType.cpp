@@ -147,8 +147,7 @@ m_FK_DesignObj = 0;
 m_DCEAware = 0;
 is_null[4] = false;
 is_null[5] = true;
-m_Subdirectory = "";
-is_null[6] = false;
+is_null[6] = true;
 m_IsExternalTransmission = 0;
 is_null[7] = false;
 is_null[8] = true;
@@ -294,6 +293,9 @@ return is_null[3];}
 bool Row_MediaType::Extensions_isNull() {PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
 
 return is_null[5];}
+bool Row_MediaType::Subdirectory_isNull() {PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
+
+return is_null[6];}
 bool Row_MediaType::FK_Pipe_isNull() {PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
 
 return is_null[8];}
@@ -331,6 +333,10 @@ is_modified=true;
 }
 void Row_MediaType::Extensions_setNull(bool val){PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
 is_null[5]=val;
+is_modified=true;
+}
+void Row_MediaType::Subdirectory_setNull(bool val){PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
+is_null[6]=val;
 is_modified=true;
 }
 void Row_MediaType::FK_Pipe_setNull(bool val){PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);

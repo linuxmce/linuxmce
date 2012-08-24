@@ -138,14 +138,11 @@ void Row_Icon::SetDefaultValues()
 {
 	m_PK_Icon = 0;
 is_null[0] = false;
-m_Define = "";
-is_null[1] = false;
-m_Description = "";
-is_null[2] = false;
+is_null[1] = true;
+is_null[2] = true;
 is_null[3] = true;
 m_TransparentColor = 0;
-m_MainFileName = "";
-is_null[4] = false;
+is_null[4] = true;
 is_null[5] = true;
 is_null[6] = true;
 is_null[7] = true;
@@ -256,9 +253,18 @@ void Row_Icon::psc_restrict_set(long int val){PLUTO_SAFETY_LOCK_ERRORSONLY(sl,ta
 m_psc_restrict = val; is_modified=true; is_null[13]=false;}
 
 		
+bool Row_Icon::Define_isNull() {PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
+
+return is_null[1];}
+bool Row_Icon::Description_isNull() {PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
+
+return is_null[2];}
 bool Row_Icon::TransparentColor_isNull() {PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
 
 return is_null[3];}
+bool Row_Icon::MainFileName_isNull() {PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
+
+return is_null[4];}
 bool Row_Icon::SelectedFileName_isNull() {PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
 
 return is_null[5];}
@@ -285,8 +291,20 @@ bool Row_Icon::psc_restrict_isNull() {PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->dat
 return is_null[13];}
 
 			
+void Row_Icon::Define_setNull(bool val){PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
+is_null[1]=val;
+is_modified=true;
+}
+void Row_Icon::Description_setNull(bool val){PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
+is_null[2]=val;
+is_modified=true;
+}
 void Row_Icon::TransparentColor_setNull(bool val){PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
 is_null[3]=val;
+is_modified=true;
+}
+void Row_Icon::MainFileName_setNull(bool val){PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
+is_null[4]=val;
 is_modified=true;
 }
 void Row_Icon::SelectedFileName_setNull(bool val){PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);

@@ -173,7 +173,8 @@ void psc_mod_set(string val);
 void psc_restrict_set(long int val);
 
 		
-		bool Name_isNull();
+		bool Description_isNull();
+bool Name_isNull();
 bool Address_isNull();
 bool City_isNull();
 bool State_isNull();
@@ -195,7 +196,8 @@ bool psc_frozen_isNull();
 bool psc_restrict_isNull();
 
 			
-		void Name_setNull(bool val);
+		void Description_setNull(bool val);
+void Name_setNull(bool val);
 void Address_setNull(bool val);
 void City_setNull(bool val);
 void State_setNull(bool val);

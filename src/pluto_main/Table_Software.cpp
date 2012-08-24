@@ -137,8 +137,7 @@ void Row_Software::SetDefaultValues()
 {
 	m_PK_Software = 0;
 is_null[0] = false;
-m_PackageName = "unknown";
-is_null[1] = false;
+is_null[1] = true;
 is_null[2] = true;
 m_psc_id = 0;
 is_null[3] = true;
