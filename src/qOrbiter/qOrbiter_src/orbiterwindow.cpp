@@ -129,34 +129,43 @@ orbiterWindow::orbiterWindow(long deviceid, std::string routerip, QObject *paren
 
 #ifdef for_desktop
     buildType = "/qml/desktop";
-    qrcPath = "qrc:desktop/Splash.qml";
+    qrcPath = buildType+"/Splash.qml";
+    mainView.setSource(QApplication::applicationDirPath()+qrcPath);
 #elif defined (for_freemantle)
     buildType = "/qml/freemantle";
     qrcPath = "qrc:freemantle/Splash.qml";
+    mainView.setSource(QUrl(qrcPath));
 #elif defined (WIN32)
     buildType="/qml/desktop";
     qrcPath = "qrc:desktop/Splash.qml";
+    mainView.setSource(QUrl(qrcPath));
 #elif defined (for_harmattan)
     buildType="/qml/harmattan";
     qrcPath = "qrc:harmattan/Splash.qml";
+    mainView.setSource(QUrl(qrcPath));
 #elif defined (IOS)
     buildType="/qml/desktop";
     NSString *resourcePath = [[NSBundle mainBundle] resourcePath];
     qrcPath = qStringFromNSString([resourcePath stringByAppendingPathComponent:@"qml/Splash.qml"]);
+    mainView.setSource(QUrl(qrcPath));
 #elif defined(Q_OS_MACX)
     buildType="/qml/desktop";
     qrcPath = "qrc:osx/Splash.qml";
+    mainView.setSource(QUrl(qrcPath));
 #elif defined __ANDROID__
     qrcPath = "qrc:android/Splash.qml";
+    mainView.setSource(QUrl(qrcPath));
 #elif defined for_android
     buildType = "/qml/android";
     qrcPath = "qrc:android/Splash.qml";
+    mainView.setSource(QUrl(qrcPath));
 #else
     buildType = "/qml/desktop";
     qrcPath = "qrc:desktop/Splash.qml";
+    mainView.setSource(QUrl(qrcPath));
 #endif
 
-    mainView.setSource(QUrl(qrcPath));
+
 #ifdef ANDROID
 
 #ifdef Q_OS_ANDROID

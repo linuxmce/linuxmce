@@ -570,6 +570,7 @@ public slots: //note: Q_INVOKABLE means it can be called directly from qml
     void setActiveSkin(QString name);
     bool loadSkins(QUrl url);
 
+
     void changedPlaylistPosition(QString position);
 
     //datagrid related

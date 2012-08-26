@@ -9,10 +9,10 @@
         <file alias="SetupNewOrbiter.qml">qml/SetupNewOrbiter.qml</file>
     </qresource>
     <qresource prefix="/desktop">
-        <file alias="Splash.qml">qml/Splash.qml</file>
+        <file alias="Splash.qml">qml/desktop/Splash.qml</file>
     </qresource>
     <qresource prefix="/osx">
-        <file alias="Splash.qml">qml/Splash.qml</file>
+        <file alias="Splash.qml">qml/desktop/Splash.qml</file>
     </qresource>
     <qresource prefix="/harmattan">
         <file alias="Splash.qml">qml/harmattan/default/Splash.qml</file>

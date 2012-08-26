@@ -126,7 +126,8 @@ qorbiterManager::qorbiterManager(QDeclarativeView *view, QObject *parent) :
 #endif
 #ifdef for_desktop
     buildType = "/qml/desktop";
-    qrcPath = "qrc:desktop/Splash.qml";
+    qrcPath = buildType+"/Splash.qml";
+    //mainView.setSource(QApplication::applicationDirPath()+qrcPath);
 #elif defined (WIN32)
     buildType="/qml/desktop";
     qrcPath = "qrc:desktop/Splash.qml";
