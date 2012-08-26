@@ -199,7 +199,7 @@ public:
     qOrbiter(int DeviceID, string ServerAddress,bool bConnectEventHandler=true,bool bLocalMode=false,class Router *pRouter=NULL, QObject *parent = 0);
     virtual ~qOrbiter();
 //<-dceag-const-e->
-    virtual bool GetConfig();
+  //  virtual bool GetConfig();
     virtual bool Register();
     virtual void ReceivedCommandForChild(DeviceData_Impl *pDeviceData_Impl,string &sCMD_Result,Message *pMessage);
     virtual void ReceivedUnknownCommand(string &sCMD_Result,Message *pMessage);
@@ -211,8 +211,6 @@ public:
     virtual int DeviceIdInvalid();
     virtual int SetupNewOrbiter();
     virtual void CreateChildren();
-
-
 
     //<-dceag-const-e->
 

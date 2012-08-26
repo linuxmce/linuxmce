@@ -10,7 +10,7 @@
 #include <QtWidgets/QWidget>
 #else
 #include <QWidget>
-#include <phonon/Phonon>
+#include <Phonon>
 #include <QPainter>
 #include <QGraphicsItem>
 #include <QGraphicsProxyWidget>

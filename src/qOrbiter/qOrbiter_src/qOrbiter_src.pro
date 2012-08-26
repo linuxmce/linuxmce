@@ -80,7 +80,7 @@ symbian {
 TRANSLATIONS += app_de.ts
 # Add more folders to ship with the application, here
 #linux deploy configuration
-for_desktop{
+linux-g++{
 folder_01.source = qml/desktop
 folder_01.target = $$DESTDIR/qml
 
@@ -129,7 +129,6 @@ folder_03.target = $$DESTDIR
 
     qmlcomponents.source = androidComponents/
     qmlcomponents.target = imports/
-
 
     qmlplugins.files = androidPlugins/libqmlshadersplugin.so
 

@@ -4371,8 +4371,8 @@ int qOrbiter::SetupNewOrbiter()
 
 void qOrbiter::CreateChildren()
 {
-    qMediaPlayer * player = new qMediaPlayer(158, m_sIPAddress, true, false );
-    player->Connect(2205);
+    qMediaPlayer * player = new qMediaPlayer(158 , m_sIPAddress, true, false );
+    player->Connect(DEVICETEMPLATE_qMediaPlayer_CONST );
 }
 
 
@@ -4932,12 +4932,7 @@ void qOrbiter::verifyInstall(QNetworkReply *r)
 }
 
 //<-dceag-getconfig-b->
-bool qOrbiter::GetConfig()
-{
-	if( !qOrbiter_Command::GetConfig() )
-		return false;
-//<-dceag-getconfig-e->
-}
+
 //<-dceag-c126-b->
 
 	/** @brief COMMAND: #126 - Guide */
