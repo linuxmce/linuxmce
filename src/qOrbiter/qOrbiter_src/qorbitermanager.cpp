@@ -994,6 +994,7 @@ bool qorbiterManager::loadSkins(QUrl base)
       should suffice and improper skins are dealt with later.
       */
 
+
 #ifdef for_harmattan
     tskinModel->addSkin("default");
 
@@ -1002,9 +1003,14 @@ bool qorbiterManager::loadSkins(QUrl base)
 
 #elif for_android
     tskinModel->addSkin("default");
-#else
-    tskinModel->addSkin("default,aeon,crystalshades,noir");
-
+#else    
+    QDir desktopQmlPath(QString(base.toLocalFile()),"",QDir::Name, QDir::NoDotAndDotDot);
+    setDceResponse("Skin Search Path:"+ desktopQmlPath.dirName());
+    QStringList localSkins = desktopQmlPath.entryList(QDir::Dirs |QDir::NoDotAndDotDot);
+#ifdef QT_DEBUG
+    qDebug()<<"inside of skins we find" << localSkins.join(",");
+#endif
+    tskinModel->addSkin(localSkins.join(","));
 #endif
     return true;
 }
@@ -1566,7 +1572,7 @@ void qorbiterManager::processError(QString msg)
 
 void qorbiterManager::setActiveSkin(QString name)
 {
-#ifdef debug
+#ifdef QT_DEBUG
     qDebug("Setting Skin");
 #endif
     swapSkins(name);
@@ -1598,7 +1604,8 @@ void qorbiterManager::setDceResponse(QString response)
     dceResponse = response;
     emit loadingMessage(dceResponse);
     emit dceResponseChanged();
-#ifdef debug
+
+#ifdef QT_DEBUG
     qDebug() << dceResponse;
 #endif
 
