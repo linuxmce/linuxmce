@@ -16,6 +16,7 @@ Rectangle {
     clip: true
     property int mouselocY: 0
     property int mouselocX: 0
+    Component.onCompleted: dcerouter.requestTypes(dcerouter.i_current_mediaType)
 
     function runEffects()
     {

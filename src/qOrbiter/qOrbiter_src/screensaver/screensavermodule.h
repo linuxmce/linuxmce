@@ -60,9 +60,6 @@ public slots:
 
     void startAlternate();
 
-
-
-
 };
 
 #endif // SCREENSAVERMODULE_H

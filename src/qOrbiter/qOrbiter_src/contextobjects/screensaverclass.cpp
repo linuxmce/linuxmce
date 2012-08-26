@@ -32,9 +32,8 @@ void ScreenSaverClass::clearImageList()
 
 void ScreenSaverClass::setImageData(const uchar *data, int iData_size)
 {
-    QImage t;
-    t.loadFromData(data, iData_size);
-    qi_currentImage = t;
+
+    qi_currentImage.loadFromData(data, iData_size);
     emit imageChanged();
     delete data;
 }
@@ -71,14 +70,13 @@ void ScreenSaverClass::selectNew()
 
     int count = images.count();
 
-    if (count > index+1)
+    if (count > images.count()+1)
     {
         setImage(images.at(index+1));
     }
     else
     {
         setImage(images.at(0));
-
     }
 }
 
@@ -91,5 +89,4 @@ void ScreenSaverClass::setImage(QString url)
 {
     currentImage =  url;
     emit requestNewImage(currentImage);
-
 }

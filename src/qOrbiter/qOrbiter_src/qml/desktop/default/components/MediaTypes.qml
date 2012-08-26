@@ -9,7 +9,7 @@ Rectangle {
            border.color: style.button_system_color
            border.width: 1
            clip: true
-
+ Component.onCompleted: dcerouter.requestAttributeTypes()
 
            Component{
                  id:mediatypedelegate

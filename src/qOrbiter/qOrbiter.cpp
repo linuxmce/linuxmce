@@ -2016,6 +2016,45 @@ void qOrbiter::connectionError()
 
 }
 
+void qOrbiter::requestAttributeTypes()
+{
+    string sName="";
+    setCommandResponse("Requesting Subtypes");
+    string pResponse;
+    CMD_Get_Media_Sub_Type reqSubtype(m_dwPK_Device, iMediaPluginID, i_current_mediaType, &sName );
+
+    if(SendCommand(reqSubtype, &pResponse) && pResponse=="OK"){
+        setCommandResponse("Got subtype for media");
+#ifdef QT_DEBUG
+        qDebug()<< sName.c_str();
+#endif
+    }
+    else
+    {
+        setCommandResponse("Command to get subtypes failed!");
+    }
+
+
+}
+
+void qOrbiter::requestTypes(int type)
+{
+    string pResponse = "";
+    string sText = "";
+
+    CMD_Get_Attributes_For_Type getTypesCmd(m_dwPK_Device, iMediaPluginID, i_current_mediaType , &sText );
+    if(SendCommand(getTypesCmd, &pResponse) && pResponse=="OK"){
+        setCommandResponse("Got types for attribute");
+#ifdef QT_DEBUG
+        qDebug()<< QString::fromStdString(sText.c_str());
+#endif
+    }
+    else
+    {
+        setCommandResponse("Command to get types for attribute failed!");
+    }
+}
+
 
 
 void qOrbiter::getFloorplanDeviceCommand(int device)
@@ -4381,6 +4420,7 @@ void qOrbiter::populateSetupInformation()
 {
     PromptFor("Users");
     PromptFor("Room");
+
 }
 
 void DCE::qOrbiter::adjustLighting(int level, myMap devices)

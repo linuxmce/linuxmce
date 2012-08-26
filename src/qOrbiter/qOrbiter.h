@@ -1501,6 +1501,10 @@ public slots:
 
 
     //media grid
+
+    void requestAttributeTypes();
+    void requestTypes(int type);
+
     void setGridSeperator(int sep);
     int getGridSeperator() { return media_pageSeperator; emit newPageSeperator();}
 

@@ -24,19 +24,6 @@ Rectangle {
     width: appW 
     color: "transparent"
 
-
-
-    EffectVignette{
-        id:vignetteEffect
-      //  grid: 2
-        targetWidth: filler.width
-        targetHeight: filler.height
-        anchors.fill: filler
-        dividerValue:1
-        divider:false
-        source:ShaderEffectSource {sourceItem: filler; smooth: false; hideSource: true }
-    }
-
     Rectangle{
         id:filler
         color: "lightgrey"
