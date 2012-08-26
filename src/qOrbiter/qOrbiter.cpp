@@ -4369,12 +4369,13 @@ int qOrbiter::SetupNewOrbiter()
     return PK_Device;  // Retry loading as the specified device
 }
 
+/*
 void qOrbiter::CreateChildren()
 {
     qMediaPlayer * player = new qMediaPlayer(158 , m_sIPAddress, true, false );
     player->Connect(DEVICETEMPLATE_qMediaPlayer_CONST );
 }
-
+*/
 
 void qOrbiter::populateSetupInformation()
 {

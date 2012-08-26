@@ -210,7 +210,7 @@ public:
     virtual int PromptUser(std::string sPrompt, int iTimeoutSeconds, map<int, std::string> *p_mapPrompts);
     virtual int DeviceIdInvalid();
     virtual int SetupNewOrbiter();
-    virtual void CreateChildren();
+   // virtual void CreateChildren();
 
     //<-dceag-const-e->
 
