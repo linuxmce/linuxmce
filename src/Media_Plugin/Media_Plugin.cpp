@@ -8306,7 +8306,7 @@ void Media_Plugin::CMD_Get_Attribute_Types(int iPK_MediaType,string *sText,strin
 									 &vectRow_MediaType_AttributeType);
 		for(vector<Row_MediaType_AttributeType *>::iterator it=vectRow_MediaType_AttributeType.begin();it!=vectRow_MediaType_AttributeType.end();++it)
 		{
-			result += (*it)->FK_AttributeType_get() + ":" + (*it)->FK_AttributeType_getrow()->Description_get() + "\n";
+			result += StringUtils::itos((*it)->FK_AttributeType_get()) + ":" + (*it)->FK_AttributeType_getrow()->Description_get() + "\n";
 		}
 	} else {
 		// Look up all attribute types
@@ -8314,7 +8314,7 @@ void Media_Plugin::CMD_Get_Attribute_Types(int iPK_MediaType,string *sText,strin
 		m_pDatabase_pluto_media->AttributeType_get()->GetRows("1=1", &vectRow_AttributeType);
 		for(vector<Row_AttributeType *>::iterator it=vectRow_AttributeType.begin();it!=vectRow_AttributeType.end();++it)
 		{
-			result += (*it)->PK_AttributeType_get() + ":" + (*it)->Description_get() + "\n";
+			result += StringUtils::itos((*it)->PK_AttributeType_get()) + ":" + (*it)->Description_get() + "\n";
 		}
 
 	}
@@ -8339,7 +8339,7 @@ void Media_Plugin::CMD_Get_Attributes_For_Type(int iEK_AttributeType,string *sTe
 									 &vectRow_Attribute);
 	for(vector<Row_Attribute *>::iterator it=vectRow_Attribute.begin();it!=vectRow_Attribute.end();++it)
 	{
-		result += (*it)->PK_Attribute_get() + ":" + (*it)->Name_get() + "\n";
+		result += StringUtils::itos((*it)->PK_Attribute_get()) + ":" + (*it)->Name_get() + "\n";
 	}
 	(*sText) = result;
 }
@@ -8364,7 +8364,7 @@ void Media_Plugin::CMD_Get_File_Formats(int iPK_MediaType,string *sFormat,string
 									 &vectRow_MediaType_FileFormat);
 		for(vector<Row_MediaType_FileFormat *>::iterator it=vectRow_MediaType_FileFormat.begin();it!=vectRow_MediaType_FileFormat.end();++it)
 		{
-			result += (*it)->FK_FileFormat_get() + ":" + (*it)->FK_FileFormat_getrow()->Description_get() + "\n";
+			result += StringUtils::itos((*it)->FK_FileFormat_get()) + ":" + (*it)->FK_FileFormat_getrow()->Description_get() + "\n";
 		}
 	} else {
 		// Look up all file format
@@ -8372,7 +8372,7 @@ void Media_Plugin::CMD_Get_File_Formats(int iPK_MediaType,string *sFormat,string
 		m_pDatabase_pluto_media->FileFormat_get()->GetRows("1=1", &vectRow_FileFormat);
 		for(vector<Row_FileFormat *>::iterator it=vectRow_FileFormat.begin();it!=vectRow_FileFormat.end();++it)
 		{
-			result += (*it)->PK_FileFormat_get() + ":" + (*it)->Description_get() + "\n";
+			result += StringUtils::itos((*it)->PK_FileFormat_get()) + ":" + (*it)->Description_get() + "\n";
 		}
 
 	}
@@ -8401,7 +8401,7 @@ void Media_Plugin::CMD_Get_Media_Sub_Type(int iPK_MediaType,string *sName,string
 									 &vectRow_MediaType_MediaSubType);
 		for(vector<Row_MediaType_MediaSubType *>::iterator it=vectRow_MediaType_MediaSubType.begin();it!=vectRow_MediaType_MediaSubType.end();++it)
 		{
-			result += (*it)->FK_MediaSubType_get() + ":" + (*it)->FK_MediaSubType_getrow()->Description_get() + "\n";
+			result += StringUtils::itos((*it)->FK_MediaSubType_get()) + ":" + (*it)->FK_MediaSubType_getrow()->Description_get() + "\n";
 		}
 	} else {
 		// Look up all media sub types
@@ -8409,7 +8409,7 @@ void Media_Plugin::CMD_Get_Media_Sub_Type(int iPK_MediaType,string *sName,string
 		m_pDatabase_pluto_media->MediaSubType_get()->GetRows("1=1", &vectRow_MediaSubType);
 		for(vector<Row_MediaSubType *>::iterator it=vectRow_MediaSubType.begin();it!=vectRow_MediaSubType.end();++it)
 		{
-			result += (*it)->PK_MediaSubType_get() + ":" + (*it)->Description_get() + "\n";
+			result += StringUtils::itos((*it)->PK_MediaSubType_get()) + ":" + (*it)->Description_get() + "\n";
 		}
 
 	}
