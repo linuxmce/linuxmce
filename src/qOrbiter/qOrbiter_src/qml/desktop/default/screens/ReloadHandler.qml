@@ -14,13 +14,12 @@ Rectangle {
         text: qsTr("Router is Reloading, Please be patient")
         font.pixelSize: scaleY(8)
         color: "black"
-        font.bold: true
+        font.bold: false
         anchors.horizontalCenter: parent.horizontalCenter
     }
     WebView {
         id:web_regen
-        anchors.top: reload_text.bottom
-        anchors.horizontalCenter: parent.horizontalCenter
+        anchors.centerIn: parent
         height: parent.height - 200
         width: parent.width - 100
         url: "http://"+srouterip+"/lmce-admin/qOrbiterGenerator.php?d="+iPK_Device

@@ -339,11 +339,7 @@ Param 10 - pk_attribute
     Q_INVOKABLE QDateTime getCurrentDateTime() const { return QDateTime::currentDateTimeUtc();}
     QString currentRoom;
 
-
-
-
     //class objects
-
 
     //QT Functions to initialize lmce data
     bool initialize(int dev_id);
