@@ -14,7 +14,6 @@ spec=linux-g++
 srcroot=~/lmce-1004
 projectdir=$srcroot/qOrbiter/qOrbiter_src
 buildoutput=$srcroot/qOrbiter/build-output
-config=CONFIG+=debug CONFIG+=for_desktop
 config="CONFIG+=debug CONFIG+=for_desktop"
 
 # mkdir -p $buildoutput
