@@ -16,6 +16,10 @@ QMediaStream::QMediaStream(
     m_iPK_DesignObj_Remote_After_Menu=m_iPK_DesignObj_RemoteOSD_After_Menu=m_iPK_DesignObj_Remote_Popup_After_Menu=0;
 }
 
+QMediaStream::~QMediaStream()
+{
+}
+
 int QMediaStream::GetType()
 {
     return MEDIASTREAM_TYPE_GENERIC ;

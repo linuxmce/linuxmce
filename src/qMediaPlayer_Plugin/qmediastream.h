@@ -17,7 +17,7 @@ class QMediaStream: public MediaStream
 
 {
 public:
-
+    QMediaStream( class qMediaPlayer_Plugin *pQtPlugin, class MediaHandlerInfo *pMediaHandlerInfo, int iPK_MediaProvider,MediaDevice *pMediaDevice, int PK_Users,enum SourceType sourceType,int iStreamID);
 private:
     bool					m_bIsStreaming;
 
@@ -26,16 +26,14 @@ public:
     int 	m_iPK_DesignObj_RemoteOSD_After_Menu;
     int 	m_iPK_DesignObj_Remote_Popup_After_Menu;
 
-    QMediaStream( class qMediaPlayer_Plugin *pQtPlugin, class MediaHandlerInfo *pMediaHandlerInfo, int iPK_MediaProvider,MediaDevice *pMediaDevice, int PK_Users,enum SourceType sourceType,int iStreamID);
-
     virtual ~QMediaStream();
     virtual int GetType();
 
-    bool ShouldUseStreaming();
+  virtual  bool ShouldUseStreaming();
 
-    bool CanPlayMore();
-    bool ContainsVideo();
+   virtual bool CanPlayMore();
+   virtual  bool ContainsVideo();
+    };
 };
-}
 
 #endif // QMEDIASTREAM_H
