@@ -542,14 +542,3 @@ contains(MEEGO_EDITION,harmattan) {
     desktopfile.path = /usr/share/applications
     INSTALLS += desktopfile
 }
-
-
-
-
-
-
-
-
-
-
-

@@ -5,7 +5,8 @@ CONFIG += qt plugin
 
 TARGET = $$qtLibraryTarget($$TARGET)
 
-#DESTDIR=../../imports/
+DESTDIR=../../imports/AudioVisual
+
 uri = AudioVisual
 # Input
 SOURCES += \
@@ -35,6 +36,7 @@ OTHER_FILES = qmldir
 }
 
 qmldir.files = qmldir
+
 symbian {
     TARGET.EPOCALLOWDLLDATA = 1
 } else:unix {

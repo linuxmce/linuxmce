@@ -26,23 +26,34 @@ using namespace DCE;
 
 #include "Gen_Devices/AllCommandsRequests.h"
 //<-dceag-d-e->
+#include "Orbiter_Plugin/Orbiter_Plugin.h"
+#include "pluto_main/Define_MediaType.h"
+#include "pluto_main/Define_DeviceCategory.h"
+#include "pluto_main/Define_Event.h"
+#include "pluto_main/Define_EventParameter.h"
+#include "pluto_main/Define_DesignObj.h"
+#include "pluto_main/Define_Variable.h"
 
 //<-dceag-const-b->
 // The primary constructor when the class is created as a stand-alone device
 qMediaPlayer_Plugin::qMediaPlayer_Plugin(int DeviceID, string ServerAddress,bool bConnectEventHandler,bool bLocalMode,class Router *pRouter)
 	: qMediaPlayer_Plugin_Command(DeviceID, ServerAddress,bConnectEventHandler,bLocalMode,pRouter)
 //<-dceag-const-e->
+    , m_QMediaMediaMutex("Qt media mutex")
 {
+    m_QMediaMediaMutex.Init(NULL);
 }
+
 
 //<-dceag-const2-b->
 // The constructor when the class is created as an embedded instance within another stand-alone device
+/*
 qMediaPlayer_Plugin::qMediaPlayer_Plugin(Command_Impl *pPrimaryDeviceCommand, DeviceData_Impl *pData, Event_Impl *pEvent, Router *pRouter)
 	: qMediaPlayer_Plugin_Command(pPrimaryDeviceCommand, pData, pEvent, pRouter)
 //<-dceag-const2-e->
 {
 }
-
+*/
 //<-dceag-dest-b->
 qMediaPlayer_Plugin::~qMediaPlayer_Plugin()
 //<-dceag-dest-e->
@@ -208,6 +219,7 @@ void qMediaPlayer_Plugin::SomeFunction()
 
 void qMediaPlayer_Plugin::CMD_Create_Media(string sFilename,int iStreamID,string &sCMD_Result,Message *pMessage)
 //<-dceag-c36-e->
+{}
 //<-dceag-c37-b->
 
 	/** @brief COMMAND: #37 - Play Media */
@@ -223,6 +235,7 @@ void qMediaPlayer_Plugin::CMD_Create_Media(string sFilename,int iStreamID,string
 
 void qMediaPlayer_Plugin::CMD_Play_Media(int iPK_MediaType,int iStreamID,string sMediaPosition,string sMediaURL,string &sCMD_Result,Message *pMessage)
 //<-dceag-c37-e->
+{}
 //<-dceag-c38-b->
 
 	/** @brief COMMAND: #38 - Stop Media */
@@ -234,6 +247,7 @@ void qMediaPlayer_Plugin::CMD_Play_Media(int iPK_MediaType,int iStreamID,string 
 
 void qMediaPlayer_Plugin::CMD_Stop_Media(int iStreamID,string *sMediaPosition,string &sCMD_Result,Message *pMessage)
 //<-dceag-c38-e->
+{}
 //<-dceag-c39-b->
 
 	/** @brief COMMAND: #39 - Pause Media */
@@ -243,6 +257,7 @@ void qMediaPlayer_Plugin::CMD_Stop_Media(int iStreamID,string *sMediaPosition,st
 
 void qMediaPlayer_Plugin::CMD_Pause_Media(int iStreamID,string &sCMD_Result,Message *pMessage)
 //<-dceag-c39-e->
+{}
 //<-dceag-c40-b->
 
 	/** @brief COMMAND: #40 - Restart Media */
@@ -252,6 +267,7 @@ void qMediaPlayer_Plugin::CMD_Pause_Media(int iStreamID,string &sCMD_Result,Mess
 
 void qMediaPlayer_Plugin::CMD_Restart_Media(int iStreamID,string &sCMD_Result,Message *pMessage)
 //<-dceag-c40-e->
+{}
 //<-dceag-c41-b->
 
 	/** @brief COMMAND: #41 - Change Playback Speed */
@@ -265,6 +281,7 @@ void qMediaPlayer_Plugin::CMD_Restart_Media(int iStreamID,string &sCMD_Result,Me
 
 void qMediaPlayer_Plugin::CMD_Change_Playback_Speed(int iStreamID,int iMediaPlaybackSpeed,bool bReport,string &sCMD_Result,Message *pMessage)
 //<-dceag-c41-e->
+{}
 //<-dceag-c65-b->
 
 	/** @brief COMMAND: #65 - Jump Position In Playlist */
@@ -276,3 +293,35 @@ void qMediaPlayer_Plugin::CMD_Change_Playback_Speed(int iStreamID,int iMediaPlay
 
 void qMediaPlayer_Plugin::CMD_Jump_Position_In_Playlist(string sValue_To_Assign,int iStreamID,string &sCMD_Result,Message *pMessage)
 //<-dceag-c65-e->
+{}
+
+
+MediaStream *qMediaPlayer_Plugin::CreateMediaStream(MediaHandlerInfo *pMediaHandlerInfo, int iPK_MediaProvider, vector<EntertainArea *> &vectEntertainArea, MediaDevice *pMediaDevice, int iPK_Users, deque<MediaFile *> *dequeFilenames, int StreamID)
+{
+}
+
+bool qMediaPlayer_Plugin::StartMedia(MediaStream *pMediaStream, string &sError)
+{
+}
+
+bool qMediaPlayer_Plugin::StopMedia(MediaStream *pMediaStream)
+{
+}
+
+MediaDevice *qMediaPlayer_Plugin::FindMediaDeviceForEntertainArea(EntertainArea *pEntertainArea)
+{
+}
+
+bool qMediaPlayer_Plugin::MenuOnScreen(Socket *pSocket, Message *pMessage, DeviceData_Base *pDeviceFrom, DeviceData_Base *pDeviceTo)
+{
+}
+
+QMediaStream *qMediaPlayer_Plugin::ConvertToXineMediaStream(MediaStream *pMediaStream, string callerIdMessage)
+{
+}
+
+bool qMediaPlayer_Plugin::ConfirmSourceIsADestination(string &sMRL, QMediaStream *pQMediaStream, int PK_Device_Drive)
+{
+}
+
+

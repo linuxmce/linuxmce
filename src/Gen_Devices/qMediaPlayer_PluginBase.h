@@ -32,8 +32,8 @@ public:
 	* @brief Constructors
 	*/
 	qMediaPlayer_Plugin_Event(int DeviceID, string ServerAddress, bool bConnectEventHandler=true) :
-		Event_Impl(DeviceID, DEVICETEMPLATE_qMediaPlayer_Plugin_CONST, ServerAddress, bConnectEventHandler, SOCKET_TIMEOUT) {};
-	qMediaPlayer_Plugin_Event(class ClientSocket *pOCClientSocket, int DeviceID) : Event_Impl(pOCClientSocket, DeviceID) {};
+        Event_Impl(DeviceID, DEVICETEMPLATE_qMediaPlayer_Plugin_CONST, ServerAddress, bConnectEventHandler, SOCKET_TIMEOUT) {}
+    qMediaPlayer_Plugin_Event(class ClientSocket *pOCClientSocket, int DeviceID) : Event_Impl(pOCClientSocket, DeviceID) {}
 
 	/**
 	* @brief Events builder method
@@ -58,7 +58,7 @@ public:
 	/**
 	* @brief No-op destructor
 	*/
-	virtual ~qMediaPlayer_Plugin_Data() {};
+    virtual ~qMediaPlayer_Plugin_Data() {}
 
 	/**
 	* @brief Builder data method
@@ -69,12 +69,12 @@ public:
 	/**
 	* @brief Returns the id of the device template
 	*/
-	virtual int GetPK_DeviceList() { return DEVICETEMPLATE_qMediaPlayer_Plugin_CONST; } ;
+    virtual int GetPK_DeviceList() { return DEVICETEMPLATE_qMediaPlayer_Plugin_CONST; }
 
 	/**
 	* @brief Returns the description of the device
 	*/
-	virtual const char *GetDeviceDescription() { return "qMediaPlayer_Plugin"; } ;
+    virtual const char *GetDeviceDescription() { return "qMediaPlayer_Plugin"; }
 
 	/**
 	* @brief Device data access methods:

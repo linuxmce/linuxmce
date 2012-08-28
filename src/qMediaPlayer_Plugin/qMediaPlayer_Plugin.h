@@ -20,19 +20,55 @@
 //	DCE Implemenation for #2206 qMediaPlayer Plug-in
 
 #include "Gen_Devices/qMediaPlayer_PluginBase.h"
+
 //<-dceag-d-e->
+
+#include "DCE/Command_Impl.h"
+#include "../Media_Plugin/Media_Plugin.h"
+#include "../Media_Plugin/MediaStream.h"
+#include "../Media_Plugin/MediaHandlerBase.h"
+#include "qmediastream.h"
 
 //<-dceag-decl-b->
 namespace DCE
 {
-	class qMediaPlayer_Plugin : public qMediaPlayer_Plugin_Command
+    class qMediaPlayer_Plugin : public qMediaPlayer_Plugin_Command, public MediaHandlerBase
 	{
 //<-dceag-decl-e->
+        pluto_pthread_mutex_t m_QMediaMediaMutex; //protect us from ourselves --holdover from pluto because we are in their ecosystem
 		// Private member variables
-
+protected:
+        class Orbiter_Plugin *m_pOrbiter_Plugin;
 		// Private methods
 public:
 		// Public member variables
+        /** Mandatory implementations */
+
+            /**
+            * @brief
+            */
+            virtual class MediaStream *CreateMediaStream( class MediaHandlerInfo *pMediaHandlerInfo, int iPK_MediaProvider, vector<class EntertainArea *> &vectEntertainArea, MediaDevice *pMediaDevice, int iPK_Users, deque<MediaFile *> *dequeFilenames, int StreamID );
+
+            /**
+            * @brief Start media playback
+            */
+            virtual bool StartMedia( class MediaStream *pMediaStream,string &sError );
+
+            /**
+            * @brief Stop media playback
+            */
+            virtual bool StopMedia( class MediaStream *pMediaStream );
+
+            virtual MediaDevice *FindMediaDeviceForEntertainArea(EntertainArea *pEntertainArea);
+            /**
+            * @brief We need to see all media inserted events so we can start the appropriate media devices
+            */
+
+            bool MenuOnScreen( class Socket *pSocket, class Message *pMessage, class DeviceData_Base *pDeviceFrom, class DeviceData_Base *pDeviceTo );
+
+            QMediaStream *ConvertToXineMediaStream(MediaStream *pMediaStream, string callerIdMessage = "");
+
+            bool ConfirmSourceIsADestination(string &sMRL,QMediaStream *pQMediaStream,int PK_Device_Drive);
 
 //<-dceag-const-b->
 public:
@@ -43,7 +79,10 @@ public:
 		virtual bool Register();
 		virtual void ReceivedCommandForChild(DeviceData_Impl *pDeviceData_Impl,string &sCMD_Result,Message *pMessage);
 		virtual void ReceivedUnknownCommand(string &sCMD_Result,Message *pMessage);
-//<-dceag-const-e->
+
+        //<-dceag-const-e->
+
+
 
 //<-dceag-const2-b->
 		// The following constructor is only used if this a class instance embedded within a DCE Device.  In that case, it won't create it's own connection to the router
