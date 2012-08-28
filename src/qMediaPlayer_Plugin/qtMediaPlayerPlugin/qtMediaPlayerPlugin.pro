@@ -4,7 +4,7 @@
 #
 #-------------------------------------------------
 
-QT       += network opengl sql xml phonon multimedia
+QT       += network xml
 
 QT       -= gui
 
@@ -14,7 +14,7 @@ INCLUDEPATH += ../../ ../../DCE/ ../../Gen_Devices
 
 TARGET = qMediaPlayer_Plugin
 TEMPLATE = lib
-CONFIG += console
+
 
 DEFINES += QTMEDIAPLAYERPLUGIN_LIBRARY
 
@@ -22,12 +22,14 @@ SOURCES += \
     ../qMediaPlayer_Plugin.cpp \
     ../../Gen_Devices/qMediaPlayer_PluginBase.cpp \
     ../Main.cpp \
-    ../qmediastream.cpp
+    ../qmediastream.cpp \
+    ../../Media_Plugin/MediaStream.cpp
 
 HEADERS +=\
     ../qMediaPlayer_Plugin.h \
     ../../Gen_Devices/qMediaPlayer_PluginBase.h \
-    ../qmediastream.h
+    ../qmediastream.h \
+    ../../Media_Plugin/MediaStream.h
 
 unix:!macx:!symbian: LIBS += -L$$PWD/../../lib/ -lDCECommon
 unix:!macx:!symbian: LIBS += -L$$PWD/../../lib/ -lpluto_main
@@ -35,6 +37,7 @@ unix:!macx:!symbian: LIBS += -L$$PWD/../../lib/ -lPlutoUtils
 unix:!macx:!symbian: LIBS += -L$$PWD/../../lib/ -lSerializeClass
 unix:!macx:!symbian: LIBS += -L$$PWD/../../lib/ -lMessageTranslation
 unix:!macx:!symbian: LIBS += -L$$PWD/../../lib/ -lSerial
+unix:!macx:!symbian: LIBS += -L$$PWD/../../lib/ -lpluto_media
 
 INCLUDEPATH += $$PWD/../../
 DEPENDPATH += $$PWD/../../
@@ -59,3 +62,4 @@ unix:!symbian {
     }
     INSTALLS += target
 }
+

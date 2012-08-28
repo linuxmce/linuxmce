@@ -13,7 +13,7 @@ namespace DCE
 {
 using namespace std;
 
-class QMediaStream:public MediaStream
+class QMediaStream: public MediaStream
 
 {
 public:
@@ -34,6 +34,7 @@ public:
     bool ShouldUseStreaming();
 
     bool CanPlayMore();
+    bool ContainsVideo();
 };
 }
 

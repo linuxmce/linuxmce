@@ -66,7 +66,7 @@ public:
 
             bool MenuOnScreen( class Socket *pSocket, class Message *pMessage, class DeviceData_Base *pDeviceFrom, class DeviceData_Base *pDeviceTo );
 
-            QMediaStream *ConvertToXineMediaStream(MediaStream *pMediaStream, string callerIdMessage = "");
+            QMediaStream *ConvertToQtMediaStream(MediaStream *pMediaStream, string callerIdMessage = "");
 
             bool ConfirmSourceIsADestination(string &sMRL,QMediaStream *pQMediaStream,int PK_Device_Drive);
 
