@@ -19,13 +19,17 @@
 #include <HUpnpAv/HStorageMedium>
 #include <HUpnpAv/HAbstractMediaRendererDevice>
 #include <HUpnpAv/HAbstractRenderingControlService>
+#include <HUpnpAv/HAbstractConnectionManagerService>
+#include <HUpnpAv/HConnectionManagerInfo>
 #include <HUpnpAv/HChannel>
 #include <HUpnpAv/HProtocolInfo>
-//#include <HUpnpAv/../../src/mediarenderer/hconnectionmanager_sinkservice_p.h>
+#include <HUpnpAv/../../src/mediarenderer/hconnectionmanager_sinkservice_p.h>
+#include <HUpnpAv/HConnectionInfo>
 #include <HUpnpAv/HTransportState>
 #include <HUpnpAv/HTransportStatus>
 #include <HUpnpAv/HTransportSettings>
 #include <HUpnpAv/HRecordQualityMode>
+#include <HUpnpAv/HDuration>
 
 #include <QtCore/QUrl>
 #include <QtCore/QSet>
@@ -74,7 +78,7 @@ LMCERenderer::LMCERenderer(QObject* parent, DLNA* pDLNA) :
 	info->setTransportStatus(HTransportStatus::OK);
 	
 	// TODO: hack: implement our own ConnectionManager
-	//	HConnectionManagerSinkService* s = dynamic_cast<HConnectionManagerSinkService*>(pDevice->connectionManager());
+	HConnectionManagerSinkService* s = dynamic_cast<HConnectionManagerSinkService*>(pDevice->connectionManager());
 	HProtocolInfos piList;
 /*
 
@@ -104,9 +108,32 @@ http-get:*:audio/x-flac:*
 	piList.append(HProtocolInfo("http-get","*","audio/application/ogg","*"));
 	piList.append(HProtocolInfo("http-get","*","audio/x-flac","*"));
 
-	//	s->setSinkProtocolInfo(piList);
+//	s->setSinkProtocolInfo(piList);
 
 /*	LoggerWrapper::GetInstance ()->Write (LV_CRITICAL, "LMCERenderer() getCapabilitied %s", info->deviceCapabilities().playMedia().count()); */
+
+	HConnectionInfo cinfo;
+	HAbstractConnectionManagerService *cmService = pDevice->connectionManager();
+	qint32 retval = cmService->getCurrentConnectionInfo(0, &cinfo);
+	if (retval == UpnpSuccess) 
+	{
+		cinfo.setDirection(HConnectionManagerInfo::DirectionInput);
+		cinfo.setStatus(HConnectionManagerInfo::StatusOk);
+
+		LoggerWrapper::GetInstance ()->Write (LV_STATUS, "LMCERenderer() HConnectionInfo.isValid() = %d", cinfo.isValid());
+		LoggerWrapper::GetInstance ()->Write (LV_STATUS, "LMCERenderer() HConnectionInfo.protocolInfo().isValid() = %d, %s", cinfo.protocolInfo().isValid(), cinfo.protocolInfo().toString().toStdString().c_str());
+	}else{
+		LoggerWrapper::GetInstance ()->Write (LV_STATUS, "LMCERenderer() FAILED, adding new connection info");
+		HProtocolInfo pinfo("http-get:*:*:*");
+		HConnectionInfo connectionInfo(0, pinfo);
+		//TODO: wrong, not necessarily id=0 on these services if implementing PrepareConnection:
+		connectionInfo.setAvTransportId(0);
+		connectionInfo.setRcsId(0);
+
+		connectionInfo.setDirection(HConnectionManagerInfo::DirectionInput);
+		connectionInfo.setStatus(HConnectionManagerInfo::StatusOk);
+		s->addConnection(connectionInfo);
+	}
 	HDeviceCapabilities caps;
 	QSet<HStorageMedium> playMediaSet;
 	playMediaSet.insert(HStorageMedium::Network);
@@ -134,7 +161,11 @@ http-get:*:audio/x-flac:*
 
 LMCERenderer::~LMCERenderer()
 {
-
+	LoggerWrapper::GetInstance ()->Write (LV_STATUS, "LMCERenderer~() deleting renderer");
+	EntertainArea* pEntertainArea = m_pDLNA->FindEntertainArea(m_PK_EntArea);
+	if (pEntertainArea != NULL) {
+		pEntertainArea->m_pRenderer = NULL;
+	}
 }
 
 int LMCERenderer::GetPK_EntertainArea() 
@@ -142,19 +173,52 @@ int LMCERenderer::GetPK_EntertainArea()
 	return m_PK_EntArea;
 }
 
+int LMCERenderer::GetStreamID()
+{
+	return m_iStreamID;
+}
+
 void LMCERenderer::MediaCommandIntercepted(Message *pMessage, long PK_Device)
 {
 	LoggerWrapper::GetInstance ()->Write (LV_STATUS, "LMCERenderer::MediaCommandIntercepted() m_PK_EntArea = %d, this = %d", m_PK_EntArea, this);
-	if (pMessage->m_dwID == COMMAND_Start_Streaming_CONST ||
-	    pMessage->m_dwID == COMMAND_Play_Media_CONST)
+	if (pMessage->m_dwMessage_Type == MESSAGETYPE_COMMAND && 
+	    (pMessage->m_dwID == COMMAND_Start_Streaming_CONST ||
+	     pMessage->m_dwID == COMMAND_Play_Media_CONST))
 	{
 		m_dwPK_Device_Playing = PK_Device;
 		string sStreamID = pMessage->m_mapParameters[COMMANDPARAMETER_StreamID_CONST];
 		int streamID = atoi(sStreamID.c_str());
-		LoggerWrapper::GetInstance ()->Write (LV_STATUS, "LMCERenderer::MediaCommandIntercepted() streamID = %d", streamID);
-		if (streamID > 0) 
+		LoggerWrapper::GetInstance ()->Write (LV_STATUS, "LMCERenderer::MediaCommandIntercepted() Play Media/Start Streaming, streamID = %d", streamID);
+		if (streamID > 0) {
 			m_iStreamID = streamID;
+		
+			// TODO tie into playing event
+			writableInfo()->setTransportState(HTransportState::Playing);
+		}
 
+	} else if (pMessage->m_dwMessage_Type == MESSAGETYPE_EVENT && pMessage->m_dwID == EVENT_Playback_Completed_CONST)
+	{
+		string sStreamID = pMessage->m_mapParameters[COMMANDPARAMETER_StreamID_CONST];
+		int streamID = atoi(sStreamID.c_str());
+		LoggerWrapper::GetInstance ()->Write (LV_STATUS, "LMCERenderer::MediaCommandIntercepted() Playback Completed, streamID = %d", streamID);
+		if (streamID > 0 && m_iStreamID == streamID) {
+			m_iStreamID = 0;
+			m_dwPK_Device_Playing = 0;
+			writableInfo()->setTransportState(HTransportState::Stopped);
+/*
+ &lt;AVTransportURI val=&quot;&quot; /&gt;
+  &lt;AVTransportURIMetaData val=&quot;&quot; /&gt;
+  &lt;CurrentMediaDuration val=&quot;00:00:00&quot; /&gt;
+  &lt;CurrentTrack val=&quot;0&quot; /&gt;
+  &lt;CurrentTrackDuration val=&quot;00:00:00&quot; /&gt;
+  &lt;CurrentTrackMetaData val=&quot;&quot; /&gt;
+  &lt;CurrentTrackURI val=&quot;&quot; /&gt;
+  &lt;NumberOfTracks val=&quot;0&quot; /&gt;
+  &lt;PlaybackStorageMedium val=&quot;NONE&quot; /&gt;
+  &lt;TransportState val=&quot;NO_MEDIA_PRESENT&quot; /&gt;
+??? TODO ???
+ */
+		}
 	}
 }
 int LMCERenderer::GetMediaType(HObject *metadata, QUrl* url)
@@ -191,9 +255,6 @@ qint32 LMCERenderer::doPlay(const QString& speed)
 							  0,StringUtils::itos(m_PK_EntArea),false,0,false,false,false);
 		if (m_pDLNA->SendCommand(CMD_MH_Play_Media_DT)) {
 			LoggerWrapper::GetInstance ()->Write (LV_STATUS, "LMCERenderer::doPlay() successful");
-			
-			// TODO tie into playing and playback stopped events
-			writableInfo()->setTransportState(HTransportState::Playing);
 			return UpnpSuccess;
 		}
 	}
@@ -209,18 +270,13 @@ qint32 LMCERenderer::doStop()
 	if (m_pDLNA->SendCommand(CMD_MH_Stop_Media_DT)) {
 		LoggerWrapper::GetInstance ()->Write (LV_STATUS, "LMCERenderer::doStop() successful");
 
-		// TODO tie into playing and playback stopped events
-		writableInfo()->setTransportState(HTransportState::Stopped);
-		
-		m_dwPK_Device_Playing = 0;
-		m_iStreamID = 0;
 		return UpnpSuccess;
 	}
 }
 
 qint32 LMCERenderer::doPause()
 {
-	LoggerWrapper::GetInstance ()->Write (LV_STATUS, "LMCERenderer::doPause() start m_iPK_EntArea = %d", m_iPK_EntArea);
+	LoggerWrapper::GetInstance ()->Write (LV_STATUS, "LMCERenderer::doPause() start m_PK_EntArea = %d", m_PK_EntArea);
 	if (m_iStreamID > 0)
 	{
 		CMD_Pause_Media CMD_Pause_Media(m_pDLNA->m_dwPK_Device, m_dwPK_Device_Playing, m_iStreamID);
@@ -264,6 +320,9 @@ qint32 LMCERenderer::doSetResource ( const QUrl &  resourceUri, HObject *  cdsMe
 	LoggerWrapper::GetInstance ()->Write (LV_STATUS, "LMCERenderer::doSetResource() start: resourceUri = %s, cdsMetadata = %d", resourceUri.toString().toStdString().c_str(), cdsMetadata);
 	m_Url = new QUrl(resourceUri);
 	m_iMediaType = GetMediaType(cdsMetadata, m_Url);
+	
+	writableInfo()->setRelativeTimePosition(HDuration());
+
 	LoggerWrapper::GetInstance ()->Write (LV_STATUS, "LMCERenderer::doSetResource() end, mediatype = %d", m_iMediaType);
 	return UpnpSuccess;
 }

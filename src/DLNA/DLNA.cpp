@@ -80,6 +80,7 @@ bool DLNA::GetConfig()
 
 	RegisterMsgInterceptor(( MessageInterceptorFn )( &DLNA::MediaCommandIntercepted ), 0, 0, 0, 0, MESSAGETYPE_COMMAND, COMMAND_Start_Streaming_CONST );
 	RegisterMsgInterceptor(( MessageInterceptorFn )( &DLNA::MediaCommandIntercepted ), 0, 0, 0, 0, MESSAGETYPE_COMMAND, COMMAND_Play_Media_CONST );
+	RegisterMsgInterceptor(( MessageInterceptorFn )( &DLNA::MediaCommandIntercepted ), 0, 0, 0, 0, MESSAGETYPE_EVENT, EVENT_Playback_Completed_CONST );
 
 	return true;
 }
@@ -291,7 +292,7 @@ bool DLNA::MediaCommandIntercepted( class Socket *pSocket, class Message *pMessa
         // Find out what PK_Device is playing, and if it is one of ours
 	long PK_Device = 0;
 	EntertainArea *pEntertainArea = NULL;
-	if (pMessage->m_dwID == COMMAND_Start_Streaming_CONST)
+	if ((pMessage->m_dwMessage_Type == MESSAGETYPE_COMMAND && pMessage->m_dwID == COMMAND_Start_Streaming_CONST))
 	{
 		// devices like Slim Server Streamer will need to receive commands for its childen (Pause Media command is sent to that one when playing to Squeezeboxes)
 		PK_Device = pDeviceTo->m_dwPK_Device;
@@ -305,11 +306,26 @@ bool DLNA::MediaCommandIntercepted( class Socket *pSocket, class Message *pMessa
 				LoggerWrapper::GetInstance ()->Write (LV_STATUS, "DLNA::MediaCommandIntercepted() StreamingTargets = %d, Pk_EA = %d, pEA = %d",iPK_Device, pEntertainArea->m_iPK_EntertainArea, pEntertainArea);
 			}
 		}
-	} else if (pMessage->m_dwID == COMMAND_Play_Media_CONST) 
+	} else if ((pMessage->m_dwMessage_Type == MESSAGETYPE_COMMAND && pMessage->m_dwID == COMMAND_Play_Media_CONST))		
 	{
 		PK_Device = pDeviceTo->m_dwPK_Device;
 		pEntertainArea = FindEntertainAreaForDevice(PK_Device);
+	} else if (pMessage->m_dwMessage_Type == MESSAGETYPE_EVENT && pMessage->m_dwID == EVENT_Playback_Completed_CONST) {
+		// Event only has StreamID, need to look up renderer with that
+		string sStreamID = pMessage->m_mapParameters[COMMANDPARAMETER_StreamID_CONST];
+		int iStreamID = atoi(sStreamID.c_str());
+		if (iStreamID > 0)
+		{
+			for(map<int,EntertainArea *>::iterator it=m_mapEntertainAreas.begin();it!=m_mapEntertainAreas.end();++it)
+			{
+				if ((*it).second->m_pRenderer != NULL && (*it).second->m_pRenderer->GetStreamID() == iStreamID)
+				{
+					pEntertainArea = (*it).second;
+				}
+			}
+		}
 	}
+
 	if (pEntertainArea != NULL && pEntertainArea->m_pRenderer != NULL)
 	{
 		LoggerWrapper::GetInstance ()->Write (LV_STATUS, "DLNA::MediaCommandIntercepted() PK_EntArea = %d, pRenderer = %d", pEntertainArea->m_iPK_EntertainArea, pEntertainArea->m_pRenderer);

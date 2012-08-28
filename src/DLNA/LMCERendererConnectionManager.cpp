@@ -18,6 +18,7 @@ using namespace DCE;
 LMCERendererConnectionManager::LMCERendererConnectionManager(DLNA* pDLNA)
 {
 	m_pDLNA = pDLNA;
+	m_iCount = 0;
 }
 
 LMCERendererConnectionManager::~LMCERendererConnectionManager()
@@ -30,6 +31,12 @@ HRendererConnection* LMCERendererConnectionManager::doCreate (const QString &con
 	LoggerWrapper::GetInstance ()->Write (LV_STATUS, "LMCERendererConnectionManager::doCreate() start, connectionId = %d", connectionId);
 	LMCERenderer *pRenderer = new LMCERenderer(this, m_pDLNA);
 	return pRenderer;
+}
+
+bool LMCERendererConnectionManager::connectionComplete ( qint32  connectionId) 
+{
+	LoggerWrapper::GetInstance ()->Write (LV_STATUS, "LMCERendererConnectionManager::connectionComplete() , connectionId = %d", connectionId);
+	HRendererConnectionManager::connectionComplete(connectionId);
 }
 
 DLNA* LMCERendererConnectionManager::GetDLNA()

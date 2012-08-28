@@ -44,7 +44,7 @@ DLNA.so: $(sources:.cpp=.o)
 	cp $@ ../bin
 	chmod +x post_make.sh
 	./post_make.sh $@
-		
+
 DLNA: $(sources:.cpp=.o)
 	$(CXX) -o $(MYNAME) $(call cpath,$+) $(LDFLAGS) $(LDLIBS)
 	cp $@ ../bin

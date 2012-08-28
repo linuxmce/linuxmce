@@ -23,11 +23,13 @@ using namespace Herqq::Upnp;
 class LMCERendererConnectionManager : public HRendererConnectionManager {
 private:
 	DLNA* m_pDLNA;
+	int m_iCount;
 public:
 	LMCERendererConnectionManager(DLNA* pDLNA);
 	virtual ~LMCERendererConnectionManager();
 
 	virtual HRendererConnection * doCreate (const QString &contentFormat, qint32 connectionId);
+	bool connectionComplete ( qint32  connectionId);
 	virtual DLNA* GetDLNA();
 };
 #endif

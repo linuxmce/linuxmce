@@ -42,7 +42,10 @@ int DLNAEngine::Init()
 {
 	LoggerWrapper::GetInstance ()->Write (LV_STATUS, "DLNAEngine::Start() start");
 
-	Herqq::Upnp::SetLoggingLevel(Warning);
+	Herqq::Upnp::SetLoggingLevel(Information);
+
+	// TODO hack
+	qRegisterMetaType<Herqq::Upnp::Av::HRendererConnectionEventInfo>("Herqq::Upnp::Av::HRendererConnectionEventInfo");
 
 	// Initialize hupnp with the xml file
 	m_pDeviceHost = new HDeviceHost(this);
@@ -54,13 +57,6 @@ int DLNAEngine::Init()
 	hostConf.setNetworkAddressesToUse(list);
 
 	LMCEDeviceModelCreator creator;
-
-// TODO: currently the HDeviceInfo object stops at the HAvDeviceModelCreator::createDevice, while we
-// need to keep it all the way through to LMCERenderer
-// maybe it can be solved with some clever sub-classing of, and implementation of
-// HAvDeviceModelCreator::createDevice, HMediaRendererDevice::createMediaConnection, 
-// Solved by object hiearchy :
-// HMediaRendererConnection -> LMCERendererConnectionManager -> LMCERenderer
 
 	LMCEMediaRendererDeviceConfiguration mrConf;
 	//  	HMediaRendererDeviceConfiguration mrConf;
@@ -114,14 +110,8 @@ int DLNAEngine::Init()
 	LoggerWrapper::GetInstance ()->Write (LV_STATUS, "DLNAEngine::Run(): rootDevices: %d", m_pDeviceHost->rootDevices().size());
 	for (int i = 0; i < m_pDeviceHost->rootDevices().size(); i++)
 	{
-//		cout << m_pDeviceHost->rootDevices()[i]->description().toStdString().c_str();
 		LoggerWrapper::GetInstance ()->Write (LV_STATUS, "isStarted %i", m_pDeviceHost->isStarted());
-		
-/*		for (int j = 0; j < m_pDeviceHost->rootDevices()[i]->services().size(); j++)
-		{
-			cout << m_pDeviceHost->rootDevices()[i]->services()[j]->description().toStdString().c_str();
-		}
-*/	}
+	}
 	
 }
 

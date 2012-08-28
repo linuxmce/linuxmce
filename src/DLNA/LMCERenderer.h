@@ -27,6 +27,8 @@ namespace DCE {
 class DLNA;
 
 class LMCERenderer : public HRendererConnection {
+Q_OBJECT
+
 private:
 	unsigned int m_PK_EntArea;
 	QUrl* m_Url;
@@ -51,6 +53,7 @@ public:
 
 	int GetMediaType(HObject* metadata, QUrl* url);
 	int GetPK_EntertainArea();
+	int GetStreamID();
 	void MediaCommandIntercepted(Message *pMessage, long PK_Device);
 
 };
