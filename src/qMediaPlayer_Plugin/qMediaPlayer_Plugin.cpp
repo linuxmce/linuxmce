@@ -89,7 +89,7 @@ bool qMediaPlayer_Plugin::Register()
     }
 
     vector<int> vectPK_DeviceTemplate;
-    vectPK_DeviceTemplate.push_back(DEVICETEMPLATE_qMediaPlayer_Plugin_CONST);
+    vectPK_DeviceTemplate.push_back(DEVICETEMPLATE_qMediaPlayer_CONST);
     m_pMedia_Plugin->RegisterMediaPlugin( this, this, vectPK_DeviceTemplate, true );
 
     RegisterMsgInterceptor(( MessageInterceptorFn )( &qMediaPlayer_Plugin::MenuOnScreen ), 0, 0, 0, 0, MESSAGETYPE_EVENT, EVENT_Menu_Onscreen_CONST );
@@ -340,7 +340,7 @@ MediaStream *qMediaPlayer_Plugin::CreateMediaStream(MediaHandlerInfo *pMediaHand
          pMediaDevice->m_pDeviceData_Router->m_dwPK_DeviceTemplate != DEVICETEMPLATE_SqueezeBox_Player_CONST )
     {
         pMediaDevice_PassedIn = pMediaDevice;
-        pMediaDevice = m_pMedia_Plugin->m_mapMediaDevice_Find(m_pRouter->FindClosestRelative(DEVICETEMPLATE_qMediaPlayer_Plugin_CONST, pMediaDevice->m_pDeviceData_Router->m_dwPK_Device));
+        pMediaDevice = m_pMedia_Plugin->m_mapMediaDevice_Find(m_pRouter->FindClosestRelative(DEVICETEMPLATE_qMediaPlayer_CONST, pMediaDevice->m_pDeviceData_Router->m_dwPK_Device));
     }
 
     if ( !pMediaDevice )
