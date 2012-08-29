@@ -21,23 +21,28 @@
 
 #include "Gen_Devices/qMediaPlayerBase.h"
 //<-dceag-d-e->
+#include <QTime>
+#include <QString>
 
 //<-dceag-decl-b->
 namespace DCE
 {
-	class qMediaPlayer : public qMediaPlayer_Command
+    class qMediaPlayer : public QObject,  public qMediaPlayer_Command
 	{
+        Q_OBJECT
 //<-dceag-decl-e->
 		// Private member variables
 
 		// Private methods
 public:
 		// Public member variables
+        QString commandResponse;
+        QString mediaResponse;
 
 //<-dceag-const-b->
 public:
 		// Constructors/Destructor
-		qMediaPlayer(int DeviceID, string ServerAddress,bool bConnectEventHandler=true,bool bLocalMode=false,class Router *pRouter=NULL);
+        qMediaPlayer(int DeviceID, string ServerAddress, bool bConnectEventHandler=true, bool bLocalMode=false, class Router *pRouter=NULL);
 		virtual ~qMediaPlayer();
 		virtual bool GetConfig();
 		virtual bool Register();
@@ -48,7 +53,7 @@ public:
 //<-dceag-const2-b->
 		// The following constructor is only used if this a class instance embedded within a DCE Device.  In that case, it won't create it's own connection to the router
 		// You can delete this whole section and put an ! after dceag-const2-b tag if you don't want this constructor.  Do the same in the implementation file
-		qMediaPlayer(Command_Impl *pPrimaryDeviceCommand, DeviceData_Impl *pData, Event_Impl *pEvent, Router *pRouter);
+        qMediaPlayer(Command_Impl *pPrimaryDeviceCommand, DeviceData_Impl *pData, Event_Impl *pEvent, Router *pRouter);
 //<-dceag-const2-e->
 
 //<-dceag-h-b->
@@ -654,6 +659,16 @@ public:
         void CMD_Yellow(string &sCMD_Result, Message *pMessage);
         void CMD_Remove_playlist(int iEK_Playlist, string &sCMD_Result, Message *pMessage);
         void CMD_Application_Exited(int iPID, int iExit_Code, string &sCMD_Result, Message *pMessage);
+
+    signals:
+        void commandResponseChanged();
+        void mediaResponseChanged();
+
+    public slots:
+        void setCommandResponse(QString r);
+        void setMediaResponse(QString m) {mediaResponse = QTime::currentTime().toString()+"::QMediaPlayer:: "+ m; emit mediaResponseChanged();}
+
+
     };
 
 //<-dceag-end-b->

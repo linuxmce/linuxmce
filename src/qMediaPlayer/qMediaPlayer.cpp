@@ -32,10 +32,10 @@ using namespace DCE;
 //<-dceag-const-b->
 // The primary constructor when the class is created as a stand-alone device
 qMediaPlayer::qMediaPlayer(int DeviceID, string ServerAddress,bool bConnectEventHandler,bool bLocalMode,class Router *pRouter)
-	: qMediaPlayer_Command(DeviceID, ServerAddress,bConnectEventHandler,bLocalMode,pRouter)
+    : qMediaPlayer_Command(DeviceID, ServerAddress,bConnectEventHandler,bLocalMode,pRouter)
 //<-dceag-const-e->
 {
-    qDebug() <<"created video player as standalone with device number " << DeviceID;
+    setCommandResponse("Created video player as standalone with device number " + QString::number(DeviceID));
    GetConfig();
 
 
@@ -44,15 +44,16 @@ qMediaPlayer::qMediaPlayer(int DeviceID, string ServerAddress,bool bConnectEvent
 //<-dceag-const2-b->
 // The constructor when the class is created as an embedded instance within another stand-alone device
 qMediaPlayer::qMediaPlayer(Command_Impl *pPrimaryDeviceCommand, DeviceData_Impl *pData, Event_Impl *pEvent, Router *pRouter)
-	: qMediaPlayer_Command(pPrimaryDeviceCommand, pData, pEvent, pRouter)
+    : qMediaPlayer_Command(pPrimaryDeviceCommand, pData, pEvent, pRouter)
 //<-dceag-const2-e->
 {
 
      if(GetConfig()){
-        qDebug() <<"created video player as embedded device ";
-     qDebug() << "Device:: " << m_dwPK_Device ;}
+         setCommandResponse("created video player as embedded device ");
+               setCommandResponse("Device:: "+ m_dwPK_Device );
+     }
      else{
-         qDebug() <<"error getting embedded video player started";    
+         setCommandResponse("error getting embedded video player started");
      }
 
 }
@@ -61,7 +62,7 @@ qMediaPlayer::qMediaPlayer(Command_Impl *pPrimaryDeviceCommand, DeviceData_Impl 
 qMediaPlayer::~qMediaPlayer()
 //<-dceag-dest-e->
 {
-	
+
 }
 
 //<-dceag-getconfig-b->
@@ -93,7 +94,7 @@ bool qMediaPlayer::Register()
 //<-dceag-createinst-b->
 qMediaPlayer_Command *Create_qMediaPlayer(Command_Impl *pPrimaryDeviceCommand, DeviceData_Impl *pData, Event_Impl *pEvent, Router *pRouter)
 {
-	return new qMediaPlayer(pPrimaryDeviceCommand, pData, pEvent, pRouter);
+    return new qMediaPlayer(pPrimaryDeviceCommand, pData, pEvent, pRouter);
 }
 //<-dceag-createinst-e->
 
@@ -247,7 +248,7 @@ void qMediaPlayer::CMD_Simulate_Keypress(string sPK_Button,int iStreamID,string 
 void qMediaPlayer::CMD_Simulate_Mouse_Click(int iPosition_X,int iPosition_Y,int iStreamID,string &sCMD_Result,Message *pMessage)
 //<-dceag-c29-e->
 {
-	cout << "Need to implement command #29 - Simulate Mouse Click" << endl;
+    setCommandResponse("Need to implement command #29 - Simulate Mouse Click");
 	cout << "Parm #11 - Position_X=" << iPosition_X << endl;
 	cout << "Parm #12 - Position_Y=" << iPosition_Y << endl;
 	cout << "Parm #41 - StreamID=" << iStreamID << endl;
@@ -292,6 +293,8 @@ void qMediaPlayer::CMD_Update_Object_Image(string sPK_DesignObj,string sType,cha
 void qMediaPlayer::CMD_Play_Media(int iPK_MediaType,int iStreamID,string sMediaPosition,string sMediaURL,string &sCMD_Result,Message *pMessage)
 //<-dceag-c37-e->
 {
+    setCommandResponse("Recieved play command!");
+    setCommandResponse("MediaURL: "+ QString::fromStdString(sMediaURL));
 	cout << "Need to implement command #37 - Play Media" << endl;
 	cout << "Parm #29 - PK_MediaType=" << iPK_MediaType << endl;
 	cout << "Parm #41 - StreamID=" << iStreamID << endl;
@@ -311,7 +314,7 @@ void qMediaPlayer::CMD_Play_Media(int iPK_MediaType,int iStreamID,string sMediaP
 void qMediaPlayer::CMD_Stop_Media(int iStreamID,string *sMediaPosition,string &sCMD_Result,Message *pMessage)
 //<-dceag-c38-e->
 {
-	cout << "Need to implement command #38 - Stop Media" << endl;
+    setCommandResponse("Need to implement command #38 - Stop Media");
 	cout << "Parm #41 - StreamID=" << iStreamID << endl;
 	cout << "Parm #42 - MediaPosition=" << sMediaPosition << endl;
 }
@@ -326,7 +329,7 @@ void qMediaPlayer::CMD_Stop_Media(int iStreamID,string *sMediaPosition,string &s
 void qMediaPlayer::CMD_Pause_Media(int iStreamID,string &sCMD_Result,Message *pMessage)
 //<-dceag-c39-e->
 {
-	cout << "Need to implement command #39 - Pause Media" << endl;
+    setCommandResponse("Need to implement command #39 - Pause Media");
 	cout << "Parm #41 - StreamID=" << iStreamID << endl;
 }
 
@@ -376,7 +379,7 @@ void qMediaPlayer::CMD_Change_Playback_Speed(int iStreamID,int iMediaPlaybackSpe
 void qMediaPlayer::CMD_Jump_to_Position_in_Stream(string sValue_To_Assign,int iStreamID,string &sCMD_Result,Message *pMessage)
 //<-dceag-c42-e->
 {
-	cout << "Need to implement command #42 - Jump to Position in Stream" << endl;
+    setCommandResponse("Need to implement command #42 - Jump to Position in Stream");
 	cout << "Parm #5 - Value_To_Assign=" << sValue_To_Assign << endl;
 	cout << "Parm #41 - StreamID=" << iStreamID << endl;
 }
@@ -581,7 +584,7 @@ void qMediaPlayer::CMD_Guide(string &sCMD_Result,Message *pMessage)
 void qMediaPlayer::CMD_Play(int iStreamID,string &sCMD_Result,Message *pMessage)
 //<-dceag-c139-e->
 {
-	cout << "Need to implement command #139 - Play" << endl;
+    setCommandResponse("Need to implement command #139 - Play");
 	cout << "Parm #41 - StreamID=" << iStreamID << endl;
 }
 
@@ -1275,3 +1278,9 @@ void qMediaPlayer::CMD_Remove_Station_from_QuickMix(string sID,int iStreamID,str
 }
 
 
+
+
+void qMediaPlayer::setCommandResponse(QString r)
+{
+     {commandResponse = QTime::currentTime().toString()+"-QMediaPlayer:: "+ r; emit commandResponseChanged();}
+}

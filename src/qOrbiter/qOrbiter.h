@@ -193,6 +193,7 @@ typedef QMap <int, QString> myMap;
     map<int,string> m_mapPK_AttributeType_Description; // The description for all attribute types
     bool m_bIsOSD,m_bNewOrbiter,m_bUseAlphaBlending,m_bUseMask;
 
+
     //<-dceag-const-b->
 public:
     // Constructors/Destructor
@@ -210,7 +211,7 @@ public:
     virtual int PromptUser(std::string sPrompt, int iTimeoutSeconds, map<int, std::string> *p_mapPrompts);
     virtual int DeviceIdInvalid();
     virtual int SetupNewOrbiter();
-   // virtual void CreateChildren();
+   virtual void CreateChildren();
 
     //<-dceag-const-e->
 
@@ -1589,6 +1590,11 @@ public slots:
     void sendAvCommand(int deviceto, int command);
     //floorplans
     void getFloorplanDeviceCommand(int device);
+
+    //child devices
+
+    void getMediaPlayerResponse(){setMediaResponse(player->mediaResponse);}
+    void getMediaPlayerCommandResponse(){setCommandResponse(player->commandResponse);}
 
 };
 

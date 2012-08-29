@@ -38,7 +38,7 @@ Item
 
         Text{
             id:connectstatus
-            text: weatherSource.currentTemp ==0 ? weatherSource.statusMessage +weatherSource.postalCode : qsTr("Orbiter")+ iPK_Device + qsTr(" Is Connected") + " and the current temp is:" + weatherSource.currentTemp
+            text: weatherSource.currentTemp ==0 ?"Orbiter "+ deviceid + " is connected but "+ weatherSource.statusMessage +weatherSource.postalCode : qsTr("Orbiter")+ iPK_Device + qsTr(" Is Connected") + " and the current temp is:" + weatherSource.currentTemp
             color: "aliceblue"
             font.letterSpacing: 2
             anchors.left: parent.left
