@@ -4427,6 +4427,7 @@ void qOrbiter::CreateChildren()
              player = new qMediaPlayer(pDeviceData_Impl_Child->m_dwPK_Device , m_sIPAddress, true, false );
              if(player->Connect(DEVICETEMPLATE_qMediaPlayer_CONST ))
              {
+
                  QObject::connect(player, SIGNAL(commandResponseChanged()), this , SLOT(getMediaPlayerCommandResponse()));
                  QObject::connect(player, SIGNAL(mediaResponseChanged()), this ,SLOT(getMediaPlayerResponse()));
              }

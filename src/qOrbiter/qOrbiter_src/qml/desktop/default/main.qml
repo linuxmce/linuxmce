@@ -12,6 +12,16 @@ Item {
     height:appH
 
 
+VideoComponent{
+id:videoPlayer
+anchors.centerIn: parent
+
+    }
+
+AudioComponent{
+    id:audioPlayer
+    anchors.centerIn: parent
+}
 
     signal close()
     signal changeScreen(string s)
@@ -88,6 +98,15 @@ Connections{
         pageLoader.source = "screens/"+screenname
         if (pageLoader.status == Component.Ready)
         {
+            var s = String(screenname)
+            if(s === "Screen_70.qml")
+            {
+                videoPlayer.z = 2
+            }
+            else
+            {
+                videoPlayer.z = -1
+            }
             manager.setDceResponse("Command to change to:" + screenname+ " was successfull")
         }
         else if (pageLoader.status == Component.Loading)
@@ -110,6 +129,7 @@ Connections{
             console.log("finishing load")
             pageLoader.source = "screens/"+screenname
             console.log("screen" + screenname + " loaded.")
+
         }
         else
         {

@@ -23,6 +23,7 @@
 //<-dceag-d-e->
 #include <QTime>
 #include <QString>
+#include "AudioVisual/audiovisual.h"
 
 //<-dceag-decl-b->
 namespace DCE
@@ -30,6 +31,8 @@ namespace DCE
     class qMediaPlayer : public QObject,  public qMediaPlayer_Command
 	{
         Q_OBJECT
+        Q_PROPERTY(QString commandResponse READ getCommandResponse WRITE setCommandResponse NOTIFY commandResponseChanged)
+        Q_PROPERTY(QString mediaResponse READ getMediaResponse WRITE setMediaResponse NOTIFY mediaResponseChanged)
 //<-dceag-decl-e->
 		// Private member variables
 
@@ -43,7 +46,8 @@ public:
 public:
 		// Constructors/Destructor
         qMediaPlayer(int DeviceID, string ServerAddress, bool bConnectEventHandler=true, bool bLocalMode=false, class Router *pRouter=NULL);
-		virtual ~qMediaPlayer();
+
+        virtual ~qMediaPlayer();
 		virtual bool GetConfig();
 		virtual bool Register();
 		virtual void ReceivedCommandForChild(DeviceData_Impl *pDeviceData_Impl,string &sCMD_Result,Message *pMessage);
@@ -666,8 +670,10 @@ public:
 
     public slots:
         void setCommandResponse(QString r);
-        void setMediaResponse(QString m) {mediaResponse = QTime::currentTime().toString()+"::QMediaPlayer:: "+ m; emit mediaResponseChanged();}
+        QString getCommandResponse() {return commandResponse;}
 
+        void setMediaResponse(QString m) {mediaResponse = QTime::currentTime().toString()+"::QMediaPlayer:: "+ m; emit mediaResponseChanged();}
+        QString getMediaResponse() {return mediaResponse;}
 
     };
 

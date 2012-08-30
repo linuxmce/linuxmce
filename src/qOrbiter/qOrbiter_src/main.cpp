@@ -288,15 +288,18 @@ int main(int argc, char* argv[])
 #endif
 
         QThread *dceThread = new QThread;
-        qOrbiter *pqOrbiter = new qOrbiter(PK_Device, sRouter_IP,true,bLocalMode);
+        qOrbiter *pqOrbiter = new qOrbiter(PK_Device, sRouter_IP,true,bLocalMode );
         pqOrbiter->moveToThread(dceThread);
 
         orbiterWindow orbiterWin(PK_Device, sRouter_IP);
         orbiterWin.mainView.rootContext()->setContextProperty("dcerouter", pqOrbiter); //dcecontext object
 
-      gWeatherModel *theWeather= new gWeatherModel(new gWeatherItem);
+        orbiterWin.mainView.rootContext()->setContextProperty("mediaplayer", pqOrbiter->player);
+
+        gWeatherModel *theWeather= new gWeatherModel(new gWeatherItem);
 
         //qmlRegisterType<gWeatherModel>("GoogleWeather", 0,1,"GoogleWeather");
+
 
         typedef QMap <int, QString> myMap;
         int throwaway = qRegisterMetaType<myMap>("myMap");
@@ -400,7 +403,7 @@ int main(int argc, char* argv[])
         QObject::connect(w,SIGNAL(showSetup()), &orbiterWin, SLOT( showSetup()) );
 #ifndef ANDROID
         QObject::connect(pqOrbiter, SIGNAL(screenSaverImages(QStringList)), w->ScreenSaver, SLOT(setImageList(QStringList)),Qt::QueuedConnection);
-      #endif
+#endif
         QObject::connect(pqOrbiter, SIGNAL(setMyIp(QString)), w, SLOT(setInternalIp(QString)),Qt::QueuedConnection);
         QObject::connect(&orbiterWin, SIGNAL(setupNewOrbiter()), pqOrbiter,SLOT(populateSetupInformation()));
         QObject::connect(pqOrbiter,SIGNAL(promptResponse(int,QList<QObject*>)), &orbiterWin, SLOT(displayPromptResponse(int, QList<QObject*> )));
@@ -547,9 +550,9 @@ int main(int argc, char* argv[])
         pqOrbiter->m_sIPAddress = w->qs_routerip.toStdString();
         pqOrbiter->m_sExternalIP = w->qs_ext_routerip.toStdString();
         qDebug() << "Initializing connection";
-      pqOrbiter->pingCore();
+        pqOrbiter->pingCore();
 
-     /*   if (pqOrbiter->routerCheck() == true)
+        /*   if (pqOrbiter->routerCheck() == true)
         {
 
 
@@ -570,18 +573,18 @@ int main(int argc, char* argv[])
                 qDebug() << "Connect Failed!";
                 pqOrbiter->Disconnect();
             } */
-            a.exec();
+        a.exec();
 
-            /*
+        /*
  if(pqOrbiter->m_RequestHandlerThread)
             pthread_join(pqOrbiter->m_RequestHandlerThread, NULL);  // This function will return when the device is shutting down
     */
-            if( pqOrbiter->m_bReload )
-                 { bReload=true; }
+        if( pqOrbiter->m_bReload )
+        { bReload=true; }
 
-            PK_Device = pqOrbiter->m_dwPK_Device;
-            a.quit();
-        }
+        PK_Device = pqOrbiter->m_dwPK_Device;
+        a.quit();
+    }
 
 
     catch(string s)

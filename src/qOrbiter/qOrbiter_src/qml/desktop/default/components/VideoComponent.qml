@@ -2,6 +2,7 @@
 import QtQuick 1.1
 import AudioVisual 1.0
 
+
 Rectangle {
     id:videoPlayerContainer
     width: requestedWidth
@@ -11,6 +12,13 @@ Rectangle {
     property int requestedHeight:320
     property int  requestedWidth:480
     property int mediaType:dcerouter.i_current_mediaType
+
+    Connections{
+        target: mediaplayer
+        onMediaResponseChanged:console.log(mediaplayer.mediaResponse)
+        onCommandResponseChanged:console.log(mediaplayer.commandResponse)
+    }
+
     clip: true
     function startPlayback(path){
         mediaPlayer.setSource(path)

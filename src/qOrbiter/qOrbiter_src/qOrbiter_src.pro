@@ -15,6 +15,8 @@
 #    You should have received a copy of the GNU General Public License
 #    along with QOrbiter.  If not, see <http://www.gnu.org/licenses/>.
 
+# NOTE!! You should build the AudioVisual Plugin in the Plugins directory and make sure its output path is set to the 'imports folder!'
+
 CONFIG += qt thread
 # define deployment destination and target executable name
 

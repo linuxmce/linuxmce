@@ -2,19 +2,12 @@ import QtQuick 1.0
 import "../components"
 import "../effects"
 import Qt.labs.shaders 1.0
-import GoogleWeatherPlugin 1.0
+
 
 Item
 {
     anchors.centerIn: parent
-    GoogleWeather{
-        id:weatherSource
-        Component.onCompleted:  {
-               postalCode = ("90043")
-            getWeather(postalCode)
-        }
 
-    }
 
     Rectangle {
         id:stage
@@ -30,32 +23,19 @@ Item
             anchors.top: stage.top
             height: scaleY(7)
             width: scaleX(99)
-            MouseArea{
-                       anchors.fill: headerbg
-                       onClicked: weatherSource.getWeather(weatherSource.postalCode)
-                   }
+
         }
 
         Text{
             id:connectstatus
-            text: weatherSource.currentTemp ==0 ?"Orbiter "+ deviceid + " is connected but "+ weatherSource.statusMessage +weatherSource.postalCode : qsTr("Orbiter")+ iPK_Device + qsTr(" Is Connected") + " and the current temp is:" + weatherSource.currentTemp
+            text: "Orbiter "+ deviceid + " is connected."
             color: "aliceblue"
             font.letterSpacing: 2
             anchors.left: parent.left
             anchors.leftMargin: scaleX(5)
             anchors.verticalCenter: headerbg.verticalCenter
 
-        }
-        Image {
-            id: weatherImage
-            source: weatherSource.currentIcon
-            anchors.left: connectstatus.right
-            anchors.verticalCenter: connectstatus.verticalCenter
-            anchors.leftMargin: 20
-            opacity: .75
-            height:25
-            fillMode: Image.PreserveAspectFit
-        }
+        }     
 
         Clock{
             id:screen1time
