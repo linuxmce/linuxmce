@@ -10,6 +10,7 @@
 #include "../pluto_main/Define_Event.h"
 #include "../pluto_main/Define_EventParameter.h"
 #include "../pluto_main/Define_DeviceData.h"
+#include <QObject>
 
 
 /**
@@ -143,7 +144,7 @@ public:
 
 //   OUR COMMAND CLASS 
 
-class qMediaPlayer_Command : public Command_Impl
+class qMediaPlayer_Command : public Command_Impl, public QObject
 {
 public:
 	qMediaPlayer_Command(int DeviceID, string ServerAddress,bool bConnectEventHandler=true,bool bLocalMode=false,class Router *pRouter=NULL)

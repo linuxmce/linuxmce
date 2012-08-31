@@ -34,17 +34,16 @@ VideoPlayer::VideoPlayer(QDeclarativeItem *parent) :
     playerType = -1;
 
     ColorFilterProxyWidget * proxy = new ColorFilterProxyWidget(this);
-    VideoPlayerBase *videoPlayer = new VideoPlayerBase();
+    videoPlayer = new VideoPlayerBase();
 
     proxy->setWidget(videoPlayer);
     proxy->show();
     QObject::connect(this, SIGNAL(stop()), videoPlayer, SLOT(stopPlayback()));
     QObject::connect(this, SIGNAL(play()), videoPlayer, SLOT(startPlayback()));
     QObject::connect(this, SIGNAL(setPlayerSource(QString)), videoPlayer, SLOT(setSource(QString)));
+    QObject::connect(videoPlayer, SIGNAL(mediaSourceError()), this, SLOT(getError()));
 
     //QObject::connect(this, SIGNAL(stop()), audioPlayer->audioObject, SLOT(stop()));
-
-
 }
 
 

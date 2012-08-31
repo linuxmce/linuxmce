@@ -106,8 +106,8 @@ Rectangle {
         height: childrenRect.height
         width: dcenowplaying.aspect=="wide"?  textcol.width : scaleX(20)
         color:"transparent"
-        anchors.left:  metadata.right;
-        anchors.top:   metadata.top
+        anchors.left:  mainrow.right;
+        anchors.top:   mainrow.top
         /*
             BorderImage {
                 id: metaborder

@@ -30,15 +30,15 @@ VideoPlayerBase::VideoPlayerBase(QWidget *parent) :
     //  Phonon::VideoWidget * w = new Phonon::VideoWidget(this);
 
     videoObject = new Phonon::MediaObject();
-   videoSurface = new Phonon::VideoWidget();
-
-    Phonon::createPath(videoObject, videoSurface);
+    videoSurface = new Phonon::VideoWidget();
     videoAudio = new Phonon::AudioOutput();
+
+    Phonon::createPath(videoObject, videoSurface);    
     Phonon::createPath(videoObject, videoAudio);
+
     videoSurface->setScaleMode(Phonon::VideoWidget::FitInView);
 
-    l->addWidget(videoSurface);
-   // videoObject->setCurrentSource(Phonon::MediaSource("/home/public/121/public/data/videos/musicVideos/Queen-BohemianRhapsody.avi"));
+    l->addWidget(videoSurface);    
     videoSurface->setFixedSize(480,320);
 
     QWidget * w = new QWidget(this);

@@ -1,36 +1,39 @@
 // import QtQuick 1.0 // to target S60 5th Edition or Maemo 5
 import QtQuick 1.1
 import AudioVisual 1.0
-
-
 Rectangle {
     id:videoPlayerContainer
     width: requestedWidth
     height: requestedHeight
-    property alias player:mediaPlayer
+    property alias player:vplayer
     property int scaling:1
     property int requestedHeight:320
     property int  requestedWidth:480
     property int mediaType:dcerouter.i_current_mediaType
+ clip: true
 
-    Connections{
-        target: mediaplayer
-        onMediaResponseChanged:console.log(mediaplayer.mediaResponse)
-        onCommandResponseChanged:console.log(mediaplayer.commandResponse)
-    }
-
-    clip: true
     function startPlayback(path){
-        mediaPlayer.setSource(path)
+        vplayer.setSource(path)
     }
+Connections{
+    target:dcerouter
+    onVideoFileUrlChanged:vplayer.mediaSource = dcerouter.videoFileUrl
+    onStopPlayer:{
+        vplayer.stopMedia()
+    }
+}
 
     VideoPlayer{
-        id:mediaPlayer
+        id:vplayer
         height: requestedHeight
         width: requestedWidth
         scale:scaling
         playerType:videoPlayerContainer.mediaType
         //  mediaType: 5
-        onMediaSourceChanged: play()
+        onMediaSourceChanged: {playItem(mediaSource)
+           console.log(vplayer.mediaSource)
+       }
+        onPlayerStatusChanged: {console.log(vplayer.playerStaus)
+        }
     }
 }

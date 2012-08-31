@@ -29,6 +29,7 @@ class VideoPlayer : public QDeclarativeItem
     Q_PROPERTY (int height READ getHeight WRITE setHeight NOTIFY heightChanged)
     Q_PROPERTY(int width READ getWidth WRITE setWidth NOTIFY widthChanged)
     Q_PROPERTY(QSize videoSize READ getVideoSize WRITE setVideoSize NOTIFY videoSizeChanged)
+    Q_PROPERTY(QString playerStatus READ getPlayerStatus WRITE setStatusMessage NOTIFY playerStatusChanged)
 
     Q_OBJECT
 public:
@@ -77,6 +78,8 @@ signals:
     void stop();
 
 public slots:
+
+    void getError() {setStatusMessage(videoPlayer->getSourceErrorMsg());}
 
     void setVideoSize(QSize size) {videoSize = size; emit videoSizeChanged();}
     QSize getVideoSize(){return videoSize;}

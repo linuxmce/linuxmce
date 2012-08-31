@@ -21,6 +21,7 @@
 #include "PlutoUtils/Other.h"
 #include <QDebug>
 
+
 #include <iostream>
 using namespace std;
 using namespace DCE;
@@ -28,7 +29,8 @@ using namespace DCE;
 #include "Gen_Devices/AllCommandsRequests.h"
 #include <Gen_Devices/AllCommandsRequests.h>
 //<-dceag-d-e->
-
+#include <QRegExp>
+#include <QStringList>
 //<-dceag-const-b->
 // The primary constructor when the class is created as a stand-alone device
 qMediaPlayer::qMediaPlayer(int DeviceID, string ServerAddress,bool bConnectEventHandler,bool bLocalMode,class Router *pRouter)
@@ -40,6 +42,8 @@ qMediaPlayer::qMediaPlayer(int DeviceID, string ServerAddress,bool bConnectEvent
 
 
 }
+
+
 
 //<-dceag-const2-b->
 // The constructor when the class is created as an embedded instance within another stand-alone device
@@ -294,12 +298,59 @@ void qMediaPlayer::CMD_Play_Media(int iPK_MediaType,int iStreamID,string sMediaP
 //<-dceag-c37-e->
 {
     setCommandResponse("Recieved play command!");
-    setCommandResponse("MediaURL: "+ QString::fromStdString(sMediaURL));
+
+     setMediaType(iPK_MediaType);
+     setStreamID(iStreamID);
+     setStartPosition(QString::fromStdString(sMediaPosition));
+
 	cout << "Need to implement command #37 - Play Media" << endl;
 	cout << "Parm #29 - PK_MediaType=" << iPK_MediaType << endl;
 	cout << "Parm #41 - StreamID=" << iStreamID << endl;
 	cout << "Parm #42 - MediaPosition=" << sMediaPosition << endl;
 	cout << "Parm #59 - MediaURL=" << sMediaURL << endl;
+
+    QString deviceNumber;
+    QString path;
+    QString finishedPath;
+    QString localPath;
+
+    if(iPK_MediaType==5)
+    {
+        path = "/public/data/videos";
+    }
+    else if(iPK_MediaType ==4){
+        path = "/public/data/audio";
+    }
+
+        //begin ugly bit to determine the storage device for later use. its not passed explicitly, so i use a regex to determine it for media files
+        QRegExp deviceNo("(\\\[\\\d+\\\])");
+        int l = deviceNo.indexIn(QString::fromStdString(sMediaURL));
+
+        if (l ==-1){
+            setCommandResponse("Stored in /mediaType");
+        }
+        else
+        {
+            if(!deviceNo.isEmpty()){
+                QString f = deviceNo.cap(0);
+                f.remove("[");
+                f.remove("]");
+                deviceNumber = f;
+                localPath = (QString::fromStdString(sMediaURL)).split(deviceNo).at(1);
+
+            }
+            else
+            {
+
+            }
+        }
+        //end ugly bit of regex. pretty because it works unless a user decides to also have [\d\d\d] type directories. I try to counter that by choosing only
+        //the first match as that will be the first indexed by the regex engine.
+
+
+    finishedPath = "/mnt/remote/"+deviceNumber+path+localPath;
+
+     setCurrentMediaUrl(finishedPath);
 }
 
 //<-dceag-c38-b->
@@ -317,6 +368,8 @@ void qMediaPlayer::CMD_Stop_Media(int iStreamID,string *sMediaPosition,string &s
     setCommandResponse("Need to implement command #38 - Stop Media");
 	cout << "Parm #41 - StreamID=" << iStreamID << endl;
 	cout << "Parm #42 - MediaPosition=" << sMediaPosition << endl;
+    emit stopCurrentMedia();
+
 }
 
 //<-dceag-c39-b->

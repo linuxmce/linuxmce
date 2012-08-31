@@ -4,7 +4,7 @@ import AudioVisual 1.0
 import "effects"
 import "components"
 import "js/ComponentLoader.js" as MyJs
-import GoogleWeatherPlugin 1.0
+
 
 Item {
     id: item
@@ -55,6 +55,12 @@ DebugPanel{
     debugMessage: dcerouter.commandResponse
     z:2
     anchors.top: mediaMessages.bottom
+}
+DebugPanel{
+    id:mediaPlayerMessages
+    debugMessage: dcerouter.videoFileUrl
+    z:2
+    anchors.top: commandmessages.bottom
 }
 
 DebugInfoPanel{

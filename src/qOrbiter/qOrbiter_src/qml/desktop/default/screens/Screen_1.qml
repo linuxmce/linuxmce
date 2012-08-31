@@ -7,8 +7,6 @@ import Qt.labs.shaders 1.0
 Item
 {
     anchors.centerIn: parent
-
-
     Rectangle {
         id:stage
 

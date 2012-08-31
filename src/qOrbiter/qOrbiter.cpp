@@ -4430,6 +4430,8 @@ void qOrbiter::CreateChildren()
 
                  QObject::connect(player, SIGNAL(commandResponseChanged()), this , SLOT(getMediaPlayerCommandResponse()));
                  QObject::connect(player, SIGNAL(mediaResponseChanged()), this ,SLOT(getMediaPlayerResponse()));
+                 QObject::connect(player, SIGNAL(currentMediaUrlChanged()) , this , SLOT(setVideoFileUrl()));
+                 QObject::connect(player, SIGNAL(stopCurrentMedia()), this, SIGNAL(stopPlayer()));
              }
         }
     }

@@ -293,8 +293,8 @@ int main(int argc, char* argv[])
 
         orbiterWindow orbiterWin(PK_Device, sRouter_IP);
         orbiterWin.mainView.rootContext()->setContextProperty("dcerouter", pqOrbiter); //dcecontext object
+       // qmlRegisterType<qMediaPlayer>('DCEPlayer',0,1, "qMediaPlayer");
 
-        orbiterWin.mainView.rootContext()->setContextProperty("mediaplayer", pqOrbiter->player);
 
         gWeatherModel *theWeather= new gWeatherModel(new gWeatherItem);
 
@@ -573,6 +573,7 @@ int main(int argc, char* argv[])
                 qDebug() << "Connect Failed!";
                 pqOrbiter->Disconnect();
             } */
+        PK_Device = pqOrbiter->m_dwPK_Device;
         a.exec();
 
         /*
@@ -582,7 +583,7 @@ int main(int argc, char* argv[])
         if( pqOrbiter->m_bReload )
         { bReload=true; }
 
-        PK_Device = pqOrbiter->m_dwPK_Device;
+
         a.quit();
     }
 

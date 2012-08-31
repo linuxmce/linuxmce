@@ -23,17 +23,22 @@
 //<-dceag-d-e->
 #include <QTime>
 #include <QString>
-#include "AudioVisual/audiovisual.h"
+
 
 //<-dceag-decl-b->
 namespace DCE
 {
-    class qMediaPlayer : public QObject,  public qMediaPlayer_Command
+    class qMediaPlayer :public qMediaPlayer_Command
 	{
         Q_OBJECT
         Q_PROPERTY(QString commandResponse READ getCommandResponse WRITE setCommandResponse NOTIFY commandResponseChanged)
         Q_PROPERTY(QString mediaResponse READ getMediaResponse WRITE setMediaResponse NOTIFY mediaResponseChanged)
-//<-dceag-decl-e->
+        Q_PROPERTY(QString currentMediaUrl READ getCurrentMediaUrl WRITE setCurrentMediaUrl NOTIFY currentMediaUrlChanged)
+        Q_PROPERTY(QString startPosition READ getStartPosition WRITE setStartPosition NOTIFY startPositionChanged)
+        Q_PROPERTY(int i_StreamId READ getStreamID WRITE setStreamID NOTIFY streamIdChanged)
+        Q_PROPERTY(int i_pkMediaType READ getMediaType WRITE setMediaType NOTIFY mediaTypeChanged)
+
+        //<-dceag-decl-e->
 		// Private member variables
 
 		// Private methods
@@ -41,6 +46,13 @@ public:
 		// Public member variables
         QString commandResponse;
         QString mediaResponse;
+        QString currentMediaUrl;
+
+        int i_StreamId;
+        int i_pkMediaType;
+        QString mediaPosition;
+        QString startPosition;
+
 
 //<-dceag-const-b->
 public:
@@ -667,8 +679,27 @@ public:
     signals:
         void commandResponseChanged();
         void mediaResponseChanged();
+        void currentMediaUrlChanged();
+
+        void streamIdChanged();
+        void mediaTypeChanged();
+        void startPositionChanged();
+
+        void stopCurrentMedia();
 
     public slots:
+        void setStartPosition(QString s) {startPosition = s; emit startPositionChanged();}
+        QString getStartPosition() {return startPosition;}
+
+        void setMediaType(int t) {i_pkMediaType = t; emit mediaTypeChanged();}
+        int getMediaType() {return i_pkMediaType;}
+
+        void setStreamID(int i) {i_StreamId = i; emit streamIdChanged();}
+        int getStreamID(){return i_StreamId;}
+
+        void setCurrentMediaUrl(QString m) {currentMediaUrl = m; emit currentMediaUrlChanged();}
+        QString getCurrentMediaUrl(){return currentMediaUrl;}
+
         void setCommandResponse(QString r);
         QString getCommandResponse() {return commandResponse;}
 
