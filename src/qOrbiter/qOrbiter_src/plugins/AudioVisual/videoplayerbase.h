@@ -24,7 +24,7 @@ public:
     Phonon::MediaObject *videoObject;
     Phonon::AudioOutput *videoAudio;
     Phonon::VideoWidget *videoSurface;
-    Phonon::VideoPlayer *qPlayer;
+   // Phonon::VideoPlayer *qPlayer;
 
     // QWidget * w;
     // QVBoxLayout *l;
@@ -36,10 +36,10 @@ public:
 
 signals:
     void sourceChanged(QUrl f);
-    void play();
+    void playingMedia();
     void stop();
     void mediaSourceError();
-      void mediaSourceErrorMsg();
+    void mediaSourceErrorMsg();
 
 public slots:
     void setSource(QString f) {
@@ -48,7 +48,9 @@ public slots:
     }
     void startPlayback();
     void stopPlayback() { emit stop(); }
-
+    void pause();
+    void setPlayBackSpeed();
+    void setMediaPosition(int msec);
     void setCurrentSize(int h, int w) {videoSurface->setFixedSize(h, w);}
     QSize getCurrentSize() {return videoSurface->size();}
 

@@ -16,13 +16,20 @@ Rectangle {
         vplayer.setSource(path)
     }
 Connections{
-    target:dcerouter
+    target:dcerouter.player
     onVideoFileUrlChanged:vplayer.mediaSource = dcerouter.videoFileUrl
     onStopPlayer:{
         vplayer.stopMedia()
     }
 }
 
+
+Text{
+    id:tc
+    text:vplayer.qs_currentPosition
+    anchors.bottom: parent.bottom
+    font.bold: true
+}
     VideoPlayer{
         id:vplayer
         height: requestedHeight
@@ -33,7 +40,6 @@ Connections{
         onMediaSourceChanged: {playItem(mediaSource)
            console.log(vplayer.mediaSource)
        }
-        onPlayerStatusChanged: {console.log(vplayer.playerStaus)
-        }
+
     }
 }

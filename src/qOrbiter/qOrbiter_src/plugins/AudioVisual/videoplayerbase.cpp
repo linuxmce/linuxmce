@@ -43,10 +43,12 @@ VideoPlayerBase::VideoPlayerBase(QWidget *parent) :
 
     QWidget * w = new QWidget(this);
     w->setLayout(l);
+    videoObject->setTickInterval(1000);
+
 
 //videoObject->play();
-    QObject::connect(this, SIGNAL(play()), videoObject,SLOT(play()));
-    QObject::connect(this, SIGNAL(stop()), videoObject, SLOT(stop()));
+
+
 #endif
 
 }

@@ -16,6 +16,7 @@
 #include <QGraphicsProxyWidget>
 #include <colorfilterproxywidget.h>
 #endif
+#include <QTime>
 #ifdef debug
 #include <QDebug>
 #endif
@@ -42,8 +43,15 @@ VideoPlayer::VideoPlayer(QDeclarativeItem *parent) :
     QObject::connect(this, SIGNAL(play()), videoPlayer, SLOT(startPlayback()));
     QObject::connect(this, SIGNAL(setPlayerSource(QString)), videoPlayer, SLOT(setSource(QString)));
     QObject::connect(videoPlayer, SIGNAL(mediaSourceError()), this, SLOT(getError()));
+    QObject::connect(videoPlayer->videoObject, SIGNAL(tick(qint64)), this, SLOT(setTimeCode(qint64)));
+    QObject::connect(videoPlayer->videoObject, SIGNAL(finished()), this, SIGNAL(mediaEnded()));
+    QObject::connect(videoPlayer->videoObject, SIGNAL(aboutToFinish()), this, SIGNAL(mediaAboutToEnd()));
+    QObject::connect(videoPlayer->videoObject, SIGNAL(bufferStatus(int)), this, SLOT(setBufferStatus(int)));
+
+    //QObject::connect(videoPlayer->videoObject, SIGNAL())
 
     //QObject::connect(this, SIGNAL(stop()), audioPlayer->audioObject, SLOT(stop()));
+    setStatusMessage("Video player initialized");
 }
 
 
@@ -63,19 +71,22 @@ void VideoPlayer::switchTypes()
 
 void VideoPlayer::stopMedia()
 {
-    emit stop();
+  videoPlayer->videoObject->stop();
 }
 
 void VideoPlayer::rwMedia(int spd)
 {
+
 }
 
 void VideoPlayer::ffMedia(int spd)
 {
+
 }
 
-void VideoPlayer::seekToPosition(int position)
+void VideoPlayer::seekToPosition(qint64 position)
 {
+    videoPlayer->videoObject->seek(position);
 }
 
 void VideoPlayer::setSource(QString source)
@@ -83,8 +94,8 @@ void VideoPlayer::setSource(QString source)
 
     mediaSource = source;
 
-        emit setPlayerSource(mediaSource);
-
+    videoPlayer->videoObject->setCurrentSource(Phonon::MediaSource(mediaSource));
+    setStatusMessage("Video player Set Source::"+mediaSource);
     emit sourceChanged();
 }
 
@@ -96,7 +107,20 @@ QString VideoPlayer::getSource()
 
 void VideoPlayer::playItem(QString track)
 {
-    emit setPlayerSource(track);
-    emit play();
+    setStatusMessage("Playing item::"+track);
+    videoPlayer->setSource(track);
+    videoPlayer->videoObject->play();
+}
+
+
+
+void VideoPlayer::setTimeCode(qint64 t)
+{
+    currentPosition = t;
+    QString currentPos = QString::number(t);
+    setCurrentPosition(currentPos);
+    setStatusMessage("Processing timecode");
+
+
 }
 #endif

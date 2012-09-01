@@ -1,6 +1,6 @@
 TEMPLATE = lib
 TARGET = AudioVisual
-QT += declarative phonon threads
+QT += declarative phonon thread
 CONFIG += qt plugin
 
 TARGET = $$qtLibraryTarget($$TARGET)
@@ -15,7 +15,8 @@ SOURCES += \
     videoplayerbase.cpp \
     colorfilterproxywidget.cpp \
     audioplayerbase.cpp \
-    audioplayer.cpp
+    audioplayer.cpp \
+    mediamanager.cpp
 
 HEADERS += \
     audiovisual_plugin.h \  
@@ -23,7 +24,8 @@ HEADERS += \
     videoplayerbase.h \
     colorfilterproxywidget.h \
     audioplayerbase.h \
-    audioplayer.h
+    audioplayer.h \
+    mediamanager.h
 
 OTHER_FILES = qmldir
 

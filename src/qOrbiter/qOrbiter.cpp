@@ -4412,6 +4412,7 @@ int qOrbiter::SetupNewOrbiter()
 
 void qOrbiter::CreateChildren()
 {
+
     for( int i=0; i < (int)m_pData->m_vectDeviceData_Impl_Children.size(); i++ )
     {
         DeviceData_Impl *pDeviceData_Impl_Child = m_pData->m_vectDeviceData_Impl_Children[i];
@@ -4432,6 +4433,7 @@ void qOrbiter::CreateChildren()
                  QObject::connect(player, SIGNAL(mediaResponseChanged()), this ,SLOT(getMediaPlayerResponse()));
                  QObject::connect(player, SIGNAL(currentMediaUrlChanged()) , this , SLOT(setVideoFileUrl()));
                  QObject::connect(player, SIGNAL(stopCurrentMedia()), this, SIGNAL(stopPlayer()));
+                 //QObject::connect(player, SIGNAL())
              }
         }
     }

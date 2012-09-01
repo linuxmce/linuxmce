@@ -12,7 +12,7 @@
 #include <QGraphicsProxyWidget>
 #include <QDebug>
 #endif
-
+#include <QTime>
 #include <QString>
 #include <QUrl>
 #include "videoplayerbase.h"
@@ -30,6 +30,8 @@ class VideoPlayer : public QDeclarativeItem
     Q_PROPERTY(int width READ getWidth WRITE setWidth NOTIFY widthChanged)
     Q_PROPERTY(QSize videoSize READ getVideoSize WRITE setVideoSize NOTIFY videoSizeChanged)
     Q_PROPERTY(QString playerStatus READ getPlayerStatus WRITE setStatusMessage NOTIFY playerStatusChanged)
+    Q_PROPERTY(QString qs_currentPosition READ getCurrentPosition WRITE setCurrentPosition NOTIFY currentPositionChanged)
+    Q_PROPERTY(int buffer READ getBufferStatus WRITE setBufferStatus NOTIFY loadingStatusChanged)
 
     Q_OBJECT
 public:
@@ -50,6 +52,8 @@ public:
     QString playerStatus;
     QString  mediaSource;
     int playerType;
+
+    int buffer;
 
     int height;
     int width;
@@ -75,9 +79,21 @@ signals:
 
     void playerStatusChanged();
     void sourceChanged();
-    void stop();
+    void mediaEnded();
+    void mediaAboutToEnd();
+    void currentPositionChanged();
+    void loadingStatusChanged();
+
 
 public slots:
+    void setTimeCode(qint64 t);
+    void pause () {videoPlayer->videoObject->pause();}
+
+    void setBufferStatus(int l) {buffer = l; emit loadingStatusChanged();}
+    int getBufferStatus(){return buffer;}
+
+    void setCurrentPosition(QString p) {qs_currentPosition = p; emit currentPositionChanged(); }
+    QString getCurrentPosition() {return qs_currentPosition;}
 
     void getError() {setStatusMessage(videoPlayer->getSourceErrorMsg());}
 
@@ -94,7 +110,8 @@ public slots:
     void stopMedia();
     void rwMedia(int spd);
     void ffMedia(int spd);
-    void seekToPosition(int position);
+    void pauseMedia() {videoPlayer->videoObject->pause();}
+    void seekToPosition(qint64 position);
 
     int getMediaType() {return mediaType;}
     void setMediaType(int t) {
@@ -110,7 +127,7 @@ public slots:
 
     }
 
-    void setStatusMessage(QString msg) {playerStatus = msg;emit playerStatusChanged();}
+    void setStatusMessage(QString msg) {playerStatus = QTime::currentTime().toString()+msg;emit playerStatusChanged();}
     QString getPlayerStatus() {return playerStatus;}
 
     void setSource(QString source);

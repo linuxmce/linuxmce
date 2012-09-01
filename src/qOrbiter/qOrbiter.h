@@ -1439,6 +1439,7 @@ signals:
     void streamingAudioIpChanged();
     void mediaPlayerTimeCodeChanged();
     void stopPlayer();
+    void pausePlayer();
 
 public slots:
 

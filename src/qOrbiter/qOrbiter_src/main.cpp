@@ -293,14 +293,7 @@ int main(int argc, char* argv[])
 
         orbiterWindow orbiterWin(PK_Device, sRouter_IP);
         orbiterWin.mainView.rootContext()->setContextProperty("dcerouter", pqOrbiter); //dcecontext object
-       // qmlRegisterType<qMediaPlayer>('DCEPlayer',0,1, "qMediaPlayer");
-
-
         gWeatherModel *theWeather= new gWeatherModel(new gWeatherItem);
-
-        //qmlRegisterType<gWeatherModel>("GoogleWeather", 0,1,"GoogleWeather");
-
-
         typedef QMap <int, QString> myMap;
         int throwaway = qRegisterMetaType<myMap>("myMap");
 
