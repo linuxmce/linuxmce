@@ -1,5 +1,0 @@
-?package(alsa-utils):needs="text" section="Apps/System/Admin" \
-	title="alsaconf" \
-	longtitle="ALSA configuration tool" \
-	description="Configure your soundcards for the ALSA system" \
-	command="su-to-root -p root -c /usr/sbin/alsaconf"

@@ -1,7 +1,0 @@
-etc/alsa/modprobe-post-install.d
-etc/udev/rules.d
-lib/udev
-usr/bin
-usr/sbin
-usr/share/lintian/overrides
-var/lib/alsa
