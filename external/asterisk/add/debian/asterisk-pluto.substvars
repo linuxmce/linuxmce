@@ -1,1 +1,0 @@
-shlibs:Depends=libasound2 (>> 1.0.9), libc6 (>= 2.3.5-1), libglib1.2 (>= 1.2.0), libgtk1.2 (>= 1.2.10-4), libmysqlclient12, libncurses5 (>= 5.4-5), libpri1 (>= 1.0.9), libssl0.9.7, libx11-6 | xlibs (>> 4.1.0), libxext6 | xlibs (>> 4.1.0), libxi6 | xlibs (>> 4.1.0), unixodbc, zlib1g (>= 1:1.2.1)
