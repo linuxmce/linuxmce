@@ -1,9 +1,0 @@
-MythTV for Debian
------------------
-
-This package is set up so that mythtv should be run as the mythtv
-user.  For a dedicated mythtv system, you may wish to set up your
-display manager (e.g., gdm) to automatically login as the mythtv user
-and start mythfrontend.
-
- -- Matt Zimmerman <mdz@debian.org>, Mon May 23 14:13:46 2005

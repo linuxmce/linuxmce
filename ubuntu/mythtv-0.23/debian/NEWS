@@ -1,8 +1,0 @@
-mythtv (0.20-svn20070223-0.0) unstable; urgency=low
-
-  The cron.daily file has been removed because we are killing zap2it's
-  servers.
-
-  http://mythtv.org/pipermail/mythtv-users/2004-June/thread.html#45708
-
- -- Christian Marillat <marillat@debian.org>  Fri, 23 Feb 2007 17:24:13 +0100

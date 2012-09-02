@@ -1,4 +1,0 @@
-version=3
-
-opts=uversionmangle=s/-/~/ \
-http://www.mythtv.org/ ftp://ftp.osuosl.org/pub/mythtv/mythplugins-(.*)\.tar\.bz2

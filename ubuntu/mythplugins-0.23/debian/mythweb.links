@@ -1,4 +1,0 @@
-etc/mythtv/mythweb-canned_searches.conf.php usr/share/mythtv/mythweb/modules/tv/canned_searches.conf.php
-etc/mythtv/mythweb.conf etc/apache2/conf.d/mythweb.conf
-etc/mythtv/mythweb-config.php usr/share/mythtv/mythweb/includes/config.php
-usr/share/mythtv/mythweb var/www/mythweb
