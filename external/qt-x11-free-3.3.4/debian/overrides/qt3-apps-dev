@@ -1,4 +1,0 @@
-qt3-apps-dev: executable-not-elf-or-script ./usr/include/qt/qassistantclient.h
-qt3-apps-dev: executable-not-elf-or-script ./usr/share/qt3/lib/libdesigner.prl
-qt3-apps-dev: executable-not-elf-or-script ./usr/share/qt3/lib/libqassistantclient.prl
-qt3-apps-dev: executable-not-elf-or-script ./usr/share/qt3/lib/libeditor.prl

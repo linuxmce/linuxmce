@@ -1,5 +1,0 @@
-qt3-assistant: executable-not-elf-or-script ./usr/share/qt3/translations/assistant_de.qm
-qt3-assistant: executable-not-elf-or-script ./usr/share/qt3/translations/assistant_fr.qm
-qt3-assistant: menu-item-contains-unknown-tag kderemove /usr/lib/menu/qt3-assistant:7
-qt3-assistant: executable-not-elf-or-script ./usr/share/qt3/doc/html/logo32-assistant.png
-qt3-assistant: executable-not-elf-or-script ./usr/share/applnk/System/assistant.desktop

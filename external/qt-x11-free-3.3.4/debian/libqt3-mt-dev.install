@@ -1,9 +1,0 @@
-usr/lib/libqt-mt.la
-usr/lib/libqt-mt.prl
-usr/lib/libqt-mt.so
-usr/lib/libqui.prl
-usr/lib/libqui.so
-usr/lib/pkgconfig/qt-mt.pc
-usr/include/qt3/qgl.h
-usr/include/qt3/qglcolormap.h
-usr/include/qt3/qwidgetfactory.h

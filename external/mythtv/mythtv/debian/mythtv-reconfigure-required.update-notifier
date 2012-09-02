@@ -1,9 +1,0 @@
-Name: MythTV-Database reconfigure required
-Priority: High
-Terminal: False
-DontShowAfterReboot: True
-Description: The mythtv-database was upgraded or installed, but couldn't contact
- Your mysql server.  Verify that you provided the correct information and that
- the server is running, and re-run sudo dpkg-reconfigure mythtv-database.
- If you were dist-upgrading, this is normal as mysql-server is stopped for the
- upgrade.

@@ -1,9 +1,0 @@
-usr/share/qt3/mkspecs/*
-usr/share/qt3/doc/html/qmake*html
-usr/share/qt3/doc/html/qmake*dcf
-usr/bin/qmake
-usr/bin/lupdate
-usr/bin/lrelease
-usr/bin/uic
-usr/bin/moc
-usr/bin/qembed

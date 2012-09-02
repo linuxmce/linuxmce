@@ -1,5 +1,0 @@
-qt3-designer: executable-not-elf-or-script ./usr/share/qt3/translations/designer_fr.qm
-qt3-designer: executable-not-elf-or-script ./usr/share/qt3/translations/designer_de.qm
-qt3-designer: menu-item-contains-unknown-tag kderemove /usr/lib/menu/qt3-designer:7
-qt3-designer: executable-not-elf-or-script ./usr/share/qt3/doc/html/logo32-designer.png
-qt3-designer: executable-not-elf-or-script ./usr/share/applnk/Development/designer-qt3.desktop

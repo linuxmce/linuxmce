@@ -1,9 +1,0 @@
-#!/bin/sh
-
-if [ "$1" = "purge" ]; then
-  if [ -d "/usr/share/doc/libqt3c102/" ]; then
-    rm -rf /usr/share/doc/libqt3c102/
-  fi
-fi
-
-#DEBHELPER#

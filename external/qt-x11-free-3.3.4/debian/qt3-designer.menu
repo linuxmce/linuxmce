@@ -1,7 +1,0 @@
-?package(qt3-designer):\
-        needs=x11\
-        section=Apps/Programming\
-        hints="KDE"\
-        kderemove="1"\
-        title="Qt Designer"\
-        command=/usr/bin/designer-qt3

@@ -1,8 +1,0 @@
-usr/bin/designer
-usr/bin/createcw
-usr/bin/conv2ui
-usr/share/qt3/templates/*
-usr/share/qt3/doc/html/designer*html
-usr/share/qt3/doc/html/designer*dcf
-usr/share/qt3/doc/html/designer*jpg
-usr/lib/qt3/plugins/designer/*

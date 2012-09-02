@@ -1,7 +1,0 @@
-/usr/share/qt3/mkspecs/linux-g++ /usr/share/qt3/mkspecs/default
-/usr/bin/qmake /usr/share/qt3/bin/qmake
-/usr/bin/lupdate /usr/share/qt3/bin/lupdate
-/usr/bin/lrelease /usr/share/qt3/bin/lrelease
-/usr/bin/uic-qt3 /usr/share/qt3/bin/uic
-/usr/bin/moc-qt3 /usr/share/qt3/bin/moc
-/usr/bin/qembed /usr/share/qt3/bin/qembed

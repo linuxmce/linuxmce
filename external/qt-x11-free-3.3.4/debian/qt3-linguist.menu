@@ -1,7 +1,0 @@
-?package(qt3-linguist):\
-        needs=x11\
-        section=Apps/Programming\
-        hints="KDE"\
-        kderemove="1"\
-        title="Qt Linguist"\
-        command=/usr/bin/linguist

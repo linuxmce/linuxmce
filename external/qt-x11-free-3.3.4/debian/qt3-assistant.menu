@@ -1,7 +1,0 @@
-?package(qt3-assistant):\
-        needs=x11\
-        section=Apps/System\
-        hints="KDE"\
-        kderemove="1"\
-        title="Qt Assistant"\
-        command=/usr/bin/assistant

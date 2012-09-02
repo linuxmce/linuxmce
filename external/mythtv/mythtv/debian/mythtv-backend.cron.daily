@@ -1,5 +1,0 @@
-#!/bin/sh
-
-test -x /usr/bin/mythfilldatabase || exit 0
-
-su - mythtv -c "mythfilldatabase --quiet"

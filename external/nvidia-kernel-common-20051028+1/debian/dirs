@@ -1,5 +1,0 @@
-etc/devfs/conf.d
-etc/devfs/devices.d
-etc/modutils
-etc/modprobe.d
-usr/share/nvidia-kernel-common

@@ -1,7 +1,0 @@
-libqt3-i18n: executable-not-elf-or-script ./usr/share/qt3/translations/qt_ar.qm
-libqt3-i18n: executable-not-elf-or-script ./usr/share/qt3/translations/qt_iw.qm
-libqt3-i18n: executable-not-elf-or-script ./usr/share/qt3/translations/qt_fr.qm
-libqt3-i18n: executable-not-elf-or-script ./usr/share/qt3/translations/qt_de.qm
-libqt3-i18n: executable-not-elf-or-script ./usr/share/qt3/translations/qt_ru.qm
-libqt3-i18n: executable-not-elf-or-script ./usr/share/qt3/translations/qt_sk.qm
-libqt3-i18n: executable-not-elf-or-script ./usr/share/qt3/translations/qt_cs.qm

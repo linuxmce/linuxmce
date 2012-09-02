@@ -1,2 +1,0 @@
-qt3-qtconfig: whitespace-after-continuation-character /usr/lib/menu/qt3-qtconfig:2
-qt3-qtconfig: executable-not-elf-or-script ./usr/share/applnk/Settingsmenu/qtconfig.desktop

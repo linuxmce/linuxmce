@@ -1,3 +1,0 @@
-libqt3-mt-dev: executable-not-elf-or-script ./usr/include/qt3/qwidgetfactory.h
-libqt3-mt-dev: executable-not-elf-or-script ./usr/share/qt3/lib/libqt-mt.prl
-libqt3-mt-dev: executable-not-elf-or-script ./usr/share/qt3/lib/libqui.prl
