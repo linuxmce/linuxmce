@@ -690,6 +690,7 @@ public:
 
         void stopCurrentMedia();
         void startPlayback();
+        void pausePlayback();
 
     public slots:
 

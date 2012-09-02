@@ -11,5 +11,5 @@
     <defaultview id="flat"/>
     <phone id="false"/>
     <networkload id="true" />
-    <debug id="false"/>
+    <debug id="true"/>
 </orbiter>

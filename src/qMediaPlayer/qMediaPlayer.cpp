@@ -347,6 +347,8 @@ void qMediaPlayer::CMD_Play_Media(int iPK_MediaType,int iStreamID,string sMediaP
 
     finishedPath = "/mnt/remote/"+deviceNumber+path+localPath;
     setCurrentMediaUrl(finishedPath);
+    emit startPlayback();
+
 }
 
 //<-dceag-c38-b->
@@ -378,6 +380,7 @@ void qMediaPlayer::CMD_Stop_Media(int iStreamID,string *sMediaPosition,string &s
 void qMediaPlayer::CMD_Pause_Media(int iStreamID,string &sCMD_Result,Message *pMessage)
 //<-dceag-c39-e->
 {
+    emit pausePlayback();
     setCommandResponse("Need to implement command #39 - Pause Media");
     cout << "Parm #41 - StreamID=" << iStreamID << endl;
 }

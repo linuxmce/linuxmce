@@ -4,11 +4,14 @@
 #include <QObject>
 #include <qdeclarative.h>
 #include <QDeclarativeItem>
+#include <Phonon>
 #include <qMediaPlayer/qMediaPlayer.h>
 #include "../qOrbiter/qOrbiter_src/plugins/AudioVisual/videoplayerbase.h"
 #include "../qOrbiter/qOrbiter_src/plugins/AudioVisual/audioplayerbase.h"
 #include <colorfilterproxywidget.h>
 #include <QTime>
+#include <QBoxLayout>
+
 
 using namespace DCE;
 using namespace Qt;
@@ -24,8 +27,12 @@ public:
     qMediaPlayer *mediaPlayer;
     QString currentStatus;
     QWidget *window;
-    VideoPlayerBase *videoOutput;
-    AudioPlayerBase *audioOutput;
+    QVBoxLayout *layout;
+
+    Phonon::VideoWidget *videoSurface;
+    Phonon::AudioOutput *audioSink;
+    Phonon::MediaObject *mediaObject;
+
     ColorFilterProxyWidget *filterProxy;
 
     bool connected;
@@ -38,6 +45,7 @@ signals:
 
 
 public slots:
+    void setMediaUrl(QString url);
 
     void setCurrentStatus(QString s) {currentStatus = QTime::currentTime().toString()+"::"+s; emit currentStatusChanged();}
     QString getCurrentStatus() {return currentStatus;}
@@ -47,8 +55,15 @@ public slots:
     void setConnectionStatus(bool stat){connected = stat; emit connectedChanged();}
     bool getConnectionStatus(){return connected;}
 
+    void setWindowSize(int h, int w) {videoSurface->setFixedSize(w, h);}
+
 private:
  void initializePlayer();
+ void initializeConnections();
+ void shutdownDevice();
+
+private slots:
+
 };
 
 #endif // MEDIAMANAGER_H
