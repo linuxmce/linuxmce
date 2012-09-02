@@ -2,7 +2,7 @@
 #define AUDIOPLAYER_H
 
 #include <QDeclarativeItem>
-#include <colorfilterproxywidget.h>
+#include "colorfilterproxywidget.h"
 
 class AudioPlayer : public QDeclarativeItem
 {

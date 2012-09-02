@@ -41,8 +41,6 @@ public:
     explicit VideoPlayer(QDeclarativeItem *parent = 0);
 #endif
     VideoPlayerBase  *videoPlayer;
-
-
     int mediaType;
     bool mediaInProgress;
     QString qs_currentPosition;
@@ -86,6 +84,9 @@ signals:
 
 
 public slots:
+
+    void startPlayback() {videoPlayer->videoObject->play();}
+
     void setTimeCode(qint64 t);
     void pause () {videoPlayer->videoObject->pause();}
 

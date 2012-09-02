@@ -7,6 +7,13 @@ import Qt.labs.shaders 1.0
 Item
 {
     anchors.centerIn: parent
+
+    Component.onCompleted:  {
+        console.log("Starting media player")
+        dceplayer.setConnectionDetails(dcerouter.qMediaPlayerID, dcerouter.dceIP)
+    }
+
+
     Rectangle {
         id:stage
 
@@ -33,7 +40,7 @@ Item
             anchors.leftMargin: scaleX(5)
             anchors.verticalCenter: headerbg.verticalCenter
 
-        }     
+        }
 
         Clock{
             id:screen1time

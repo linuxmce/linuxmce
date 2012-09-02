@@ -12,16 +12,18 @@ Item {
     height:appH
 
 
-VideoComponent{
-id:videoPlayer
-anchors.centerIn: parent
 
-    }
 
-AudioComponent{
-    id:audioPlayer
+MediaManager{
+    id:dceplayer
+    height: 320
+    width: 480
     anchors.centerIn: parent
+    z:-1
+
 }
+
+
 
     signal close()
     signal changeScreen(string s)
@@ -56,23 +58,13 @@ DebugPanel{
     z:2
     anchors.top: mediaMessages.bottom
 }
+
 DebugPanel{
-    id:mediaPlayerMessages
-    debugMessage: dcerouter.videoFileUrl
-    z:2
+    id:mediaplayerMessages
+    debugMessage: dceplayer.currentStatus
     anchors.top: commandmessages.bottom
+    z:2
 }
-
-DebugInfoPanel{
-id:orbiterInfo
-z:2
-}
-
-
-
-
-
-
 
 Connections{
     target: manager
@@ -107,11 +99,11 @@ Connections{
             var s = String(screenname)
             if(s === "Screen_70.qml")
             {
-                videoPlayer.z = 2
+                dceplayer.z = 2
             }
             else
             {
-                videoPlayer.z = -1
+                dceplayer.z = -1
             }
             manager.setDceResponse("Command to change to:" + screenname+ " was successfull")
         }

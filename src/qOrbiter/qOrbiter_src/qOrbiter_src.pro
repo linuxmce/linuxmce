@@ -381,19 +381,20 @@ SOURCES += main.cpp \
     shaders/filereader.cpp \
     contextobjects/timecodemanager.cpp \
     imageProviders/floorplandeviceprovider.cpp \   
-    ../../Gen_Devices/qMediaPlayerBase.cpp \
+   # ../../Gen_Devices/qMediaPlayerBase.cpp \
     contextobjects/bookmarkitem.cpp \
     plugins/GoogleWeather/googleweather.cpp \
     contextobjects/promptdata.cpp \
 
 
-!ANDROID|!QT5{
- SOURCES+= ../../qMediaPlayer/AudioVisual/audiovisual.cpp \
-    ../../qMediaPlayer/AudioVisual/videowidgetplayer.cpp \
-../../qMediaPlayer/AudioVisual/audiowidget.cpp \
-../../qMediaPlayer/qMediaPlayer.cpp
 
-}
+#!ANDROID|!QT5{
+# SOURCES+= ../../qMediaPlayer/AudioVisual/audiovisual.cpp \
+#    ../../qMediaPlayer/AudioVisual/videowidgetplayer.cpp \
+#../../qMediaPlayer/AudioVisual/audiowidget.cpp \
+#../../qMediaPlayer/qMediaPlayer.cpp
+
+#}
 
 
 # Please do not modify the following two lines. Required for deployment.
@@ -498,18 +499,19 @@ HEADERS += \
     shaders/trace.h \
     contextobjects/timecodemanager.h \
     imageProviders/floorplandeviceprovider.h \    
-    ../../Gen_Devices/qMediaPlayerBase.h \
+   # ../../Gen_Devices/qMediaPlayerBase.h \
     contextobjects/bookmarkitem.h \
     plugins/GoogleWeather/googleweather.h \
     contextobjects/promptdata.h \
 
 
-!ANDROID||!QT5{
- HEADERS+=   ../../qMediaPlayer/AudioVisual/audiovisual.h \
-    ../../qMediaPlayer/AudioVisual/videowidgetplayer.h \
-../../qMediaPlayer/AudioVisual/audiowidget.h\
-../../qMediaPlayer/qMediaPlayer.h
-}
+
+#!ANDROID||!QT5{
+# HEADERS+=   ../../qMediaPlayer/AudioVisual/audiovisual.h \
+#    ../../qMediaPlayer/AudioVisual/videowidgetplayer.h \
+#../../qMediaPlayer/AudioVisual/audiowidget.h\
+#../../qMediaPlayer/qMediaPlayer.h
+#}
 
 OTHER_FILES += Readme.txt \
     qml/Splash.qml \

@@ -44,7 +44,7 @@
 #include <contextobjects/promptdata.h>
 #include <QtNetwork/QNetworkAccessManager>
 #include <QtNetwork/QNetworkReply>
-#include <qMediaPlayer/qMediaPlayer.h>
+
 
 //dceag-d-e->
 
@@ -59,6 +59,10 @@ class qOrbiter : public qOrbiter_Command
 {
     //<-dceag-decl-e->
     Q_OBJECT
+
+    Q_PROPERTY(QString dceIP READ getdceIP WRITE setdceIP NOTIFY dceIPChanged)
+    Q_PROPERTY(QString DCEHost READ getDCEHost WRITE setDCEHost NOTIFY DCEHostChanged)
+
     Q_PROPERTY (QString mediaResponse READ getMediaResponse WRITE setMediaResponse NOTIFY mediaResponseChanged)
 
     Q_PROPERTY (QString commandResponse READ getCommandResponse WRITE setCommandResponse NOTIFY commandResponseChanged)//for use in displaying command related dce replies.
@@ -75,7 +79,9 @@ class qOrbiter : public qOrbiter_Command
     Q_PROPERTY (bool monitorAvailible READ getMonitorStatus WRITE setMonitorStatus NOTIFY monitorStatusChanged)
     Q_PROPERTY (int m_dwPK_Device READ getDeviceId WRITE setDeviceId NOTIFY deviceIdChanged)
 
-    Q_PROPERTY(QString videoFileUrl READ getVideoFileUrl NOTIFY videoFileUrlChanged)
+
+    Q_PROPERTY(int qMediaPlayerID READ getqMediaPlayerID WRITE setqMediaPlayerID NOTIFY qMediaPlayerIDChanged)
+    Q_PROPERTY(int qCommunicatorID READ getqCommunicatorID WRITE setqCommunicatorID NOTIFY qCommunicatorIDChanged)
 
     // Private member variables
 
@@ -100,7 +106,8 @@ public:
     typedef QMap <int, QString> myMap;
 
     //child devices
-    qMediaPlayer *player;
+  int qMediaPlayerID;
+  int qCommunicatorID;
 
 
     Virtual_Device_Translator coreDevices;
@@ -134,7 +141,11 @@ public:
 
     bool pause;
 
+    QString dceIP;
+    QString DCEHost;
+
     string m_sExternalIP;
+
     int iPK_Device_DatagridPlugIn;
     int iPK_Device_OrbiterPlugin;
     int iPK_Device_GeneralInfoPlugin;
@@ -1441,14 +1452,27 @@ signals:
     void stopPlayer();
     void pausePlayer();
 
+    void qMediaPlayerIDChanged();
+    void qCommunicatorIDChanged();
+
+    void dceIPChanged();
+    void DCEHostChanged();
+
 public slots:
 
-    /*
-     *Media
-     */
+    void setdceIP(QString ip) {dceIP = ip; emit dceIPChanged();}
+    QString getdceIP() {return dceIP;}
 
-    void setVideoFileUrl() {videoFileUrl = player->currentMediaUrl; emit videoFileUrlChanged(); }
-    QString getVideoFileUrl() {return videoFileUrl;}
+    void setDCEHost(QString host) { DCEHost = host; emit DCEHostChanged();}
+    QString getDCEHost() {return DCEHost;}
+
+    void setqMediaPlayerID(int deviceID) {qMediaPlayerID = deviceID; emit qMediaPlayerIDChanged();}
+    int getqMediaPlayerID(){return qMediaPlayerID;}
+
+    void setqCommunicatorID(int deviceID ) {qMediaPlayerID = deviceID; emit qCommunicatorIDChanged();}
+    int getqCommunicatorID(){return qCommunicatorID;}
+
+
 
     void setDeviceId(int d) {m_dwPK_Device = d; emit deviceIdChanged();}
     int getDeviceId() {return m_dwPK_Device;}
@@ -1627,8 +1651,6 @@ public slots:
 
     //child devices
 
-    void getMediaPlayerResponse(){setMediaResponse(player->mediaResponse);}
-    void getMediaPlayerCommandResponse(){setCommandResponse(player->commandResponse);}
 
 };
 

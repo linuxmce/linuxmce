@@ -1,7 +1,10 @@
 TEMPLATE = lib
 TARGET = AudioVisual
-QT += declarative phonon thread
+QT += declarative phonon network
 CONFIG += qt plugin
+CONFIG +=warn_off
+QMAKE_CXXFLAGS += -DUSE_LZO_DATAGRID
+INCLUDEPATH += ../../../../ ../../../../DCE/
 
 TARGET = $$qtLibraryTarget($$TARGET)
 
@@ -16,7 +19,37 @@ SOURCES += \
     colorfilterproxywidget.cpp \
     audioplayerbase.cpp \
     audioplayer.cpp \
-    mediamanager.cpp
+    mediamanager.cpp \
+    ../../../../qMediaPlayer/qMediaPlayer.cpp \
+    ../../../../PlutoUtils/uuencode.cpp \
+    ../../../../PlutoUtils/ThreadedClass.cpp \
+    ../../../../PlutoUtils/Other.cpp \
+    ../../../../PlutoUtils/MultiThreadIncludes.cpp \
+    ../../../../PlutoUtils/minilzo.cpp \
+    ../../../../PlutoUtils/md5c.cpp \
+    ../../../../PlutoUtils/FileUtils.cpp \
+    ../../../../PlutoUtils/CommonIncludes.cpp \
+    ../../../../SerializeClass/SerializeClass.cpp \
+    ../../../../DCE/Virtual_Device_Translator.cpp \
+    ../../../../DCE/Socket.cpp \
+../../../../DCE/DCEConfig.cpp \
+    ../../../../DCE/ServerLogger.cpp \
+    ../../../../DCE/PlainClientSocket.cpp \
+    ../../../../DCE/MessageBuffer.cpp \
+    ../../../..//DCE/Message.cpp \
+    ../../../../DCE/HandleRequestSocket.cpp \
+    ../../../../DCE/Logger.cpp \
+    ../../../../DCE/Event_Impl.cpp \
+    ../../../../DCE/DataGrid.cpp \
+    ../../../../DCE/Command_Impl.cpp \
+   ../../../../DCE/AlarmManager.cpp \
+    ../../../../PlutoUtils/StringUtils.cpp \
+    ../../../../DCE/ClientSocket.cpp \
+    ../../../../DCE/DeviceData_Base.cpp \
+    ../../../../DCE/DeviceData_Impl.cpp \
+   ../../../../PlutoUtils/getch.cpp \
+  ../../../../Gen_Devices/qMediaPlayerBase.cpp \
+    ../../../../Gen_Devices/qOrbiterBase.cpp
 
 HEADERS += \
     audiovisual_plugin.h \  
@@ -25,7 +58,30 @@ HEADERS += \
     colorfilterproxywidget.h \
     audioplayerbase.h \
     audioplayer.h \
-    mediamanager.h
+    mediamanager.h \
+   ../../../../qMediaPlayer/qMediaPlayer.h \
+    ../../../../PlutoUtils/ThreadedClass.h \
+    ../../../../PlutoUtils/MultiThreadIncludes.h \
+    ../../../../PlutoUtils/StringUtils.h \
+    ../../../../PlutoUtils/CommonIncludes.h \
+    ../../../../PlutoUtils/Other.h \
+    ../../../../PlutoUtils/getch.h \
+    ../../../../PlutoUtils/MyStl.h \
+    ../../../../DCE/DeviceData_Base.h \
+   ../../../../DCE/Message.h \
+    ../../../../DCE/ServerLogger.h \
+    ../../../../DCE/Logger.h \
+    ../../../../DCE/Virtual_Device_Translator.h \
+    ../../../../DCE/PlutoLockLogger.h \
+    ../../../../DCE/ClientSocket.h \
+    ../../../../DCE/PlainClientSocket.h \
+    ../../../../DCE/AlarmManager.h \
+    ../../../../SerializeClass/SerializeClass.h \
+    ../../../../PlutoUtils/FileUtils.h \
+    ../../../../pluto_main/Define_DeviceCategory.h \
+    ../../../../pluto_main/Define_DeviceTemplate.h \
+../../../../Gen_Devices/qMediaPlayerBase.h \
+    ../../../../Gen_Devices/qOrbiterBase.h
 
 OTHER_FILES = qmldir
 

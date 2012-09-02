@@ -39,7 +39,7 @@ signals:
     void playingMedia();
     void stop();
     void mediaSourceError();
-    void mediaSourceErrorMsg();
+    void mediaSourceErrorMsg(QString);
 
 public slots:
     void setSource(QString f) {
@@ -54,7 +54,7 @@ public slots:
     void setCurrentSize(int h, int w) {videoSurface->setFixedSize(h, w);}
     QSize getCurrentSize() {return videoSurface->size();}
 
-    void setSourceErrorMsg(QString e) {sourceErrorMsg = e; emit mediaSourceErrorMsg();}
+    void setSourceErrorMsg(QString e) {sourceErrorMsg = e; emit mediaSourceErrorMsg(sourceErrorMsg);}
     QString getSourceErrorMsg(){return sourceErrorMsg;}
 
 

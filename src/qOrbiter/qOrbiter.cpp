@@ -4412,9 +4412,12 @@ int qOrbiter::SetupNewOrbiter()
 
 void qOrbiter::CreateChildren()
 {
-
+    setCommandResponse("Creating Children");
+ setCommandResponse("Size of children devices::"+QString::number((int)m_pData->m_vectDeviceData_Impl_Children.size()));
     for( int i=0; i < (int)m_pData->m_vectDeviceData_Impl_Children.size(); i++ )
     {
+
+        setCommandResponse("Finding Child devices...");
         DeviceData_Impl *pDeviceData_Impl_Child = m_pData->m_vectDeviceData_Impl_Children[i];
 
         // This device was marked as disabled
@@ -4423,21 +4426,16 @@ void qOrbiter::CreateChildren()
             LoggerWrapper::GetInstance()->Write(LV_WARNING, "Child device %d is disabled", pDeviceData_Impl_Child->m_dwPK_Device);
             continue;
         }
+        setCommandResponse("Current device template::"+QString::number(pDeviceData_Impl_Child->m_dwPK_DeviceTemplate));
 
-        if (pDeviceData_Impl_Child->m_dwPK_DeviceTemplate == DEVICETEMPLATE_qMediaPlayer_CONST){
-             player = new qMediaPlayer(pDeviceData_Impl_Child->m_dwPK_Device , m_sIPAddress, true, false );
-             if(player->Connect(DEVICETEMPLATE_qMediaPlayer_CONST ))
-             {
+        if (pDeviceData_Impl_Child->m_dwPK_DeviceCategory == 180){
+            setqMediaPlayerID(pDeviceData_Impl_Child->m_dwPK_Device);
+            setCommandResponse("QMediaPlayer ID::"+qMediaPlayerID);
+            emit qMediaPlayerIDChanged();
 
-                 QObject::connect(player, SIGNAL(commandResponseChanged()), this , SLOT(getMediaPlayerCommandResponse()));
-                 QObject::connect(player, SIGNAL(mediaResponseChanged()), this ,SLOT(getMediaPlayerResponse()));
-                 QObject::connect(player, SIGNAL(currentMediaUrlChanged()) , this , SLOT(setVideoFileUrl()));
-                 QObject::connect(player, SIGNAL(stopCurrentMedia()), this, SIGNAL(stopPlayer()));
-                 //QObject::connect(player, SIGNAL())
-             }
         }
     }
-
+    setCommandResponse("Finished spawning children!");
 }
 
 
@@ -4986,7 +4984,7 @@ void qOrbiter::verifyInstall(QNetworkReply *r)
         setCommandResponse("Found installation, connecting.");
         if ( initialize() == true )
         {
-
+            setdceIP(QString::fromStdString(m_sIPAddress));
             LoggerWrapper::GetInstance()->Write(LV_STATUS, "Connect OK");
 
             if( m_bLocalMode )
