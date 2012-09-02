@@ -1,5 +1,0 @@
-# Have udev pass data over a socket to hal 
-RUN+="socket:/org/freedesktop/hal/udev_event"
-
-# unmount block devices when they are removed
-SUBSYSTEM=="block", ACTION=="remove", RUN+="/usr/lib/hal/hal-unmount.sh"

@@ -1,7 +1,0 @@
-#!/bin/sh -e
-
-if [ "$1" = "remove" ]; then
-    /etc/dbus-1/event.d/20hal stop || true
-fi
-
-#DEBHELPER#

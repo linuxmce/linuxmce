@@ -1,6 +1,0 @@
- For now only the powermanagement callouts are enabled in the default hal
- config (org.freedesktop.Hal.Device.SystemPowerManagement and
- org.freedesktop.Hal.Device.LaptopPanel). The users in group powerdev can 
- access these. 
-
- -- Sjoerd Simons <sjoerd@debian.org>

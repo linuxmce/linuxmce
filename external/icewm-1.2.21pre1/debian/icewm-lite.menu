@@ -1,4 +1,0 @@
-
-?package(icewm-lite):command="/usr/bin/icewm-lite" needs="wm" \
-               section="WindowManagers" title="IceWM-lite" \
-               icon="/usr/share/icewm/icons/icewm_16x16.xpm"

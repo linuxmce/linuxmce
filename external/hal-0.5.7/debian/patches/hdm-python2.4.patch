@@ -1,9 +1,0 @@
-diff -ruN tools/device-manager/hal-device-manager tools/device-manager/hal-device-manager
---- tools/device-manager/hal-device-manager.in	2005-08-26 17:51:51.000000000 +0200
-+++ tools/device-manager/hal-device-manager.in	2005-10-30 18:56:39.000000000 +0100
-@@ -1,4 +1,4 @@
--#!/usr/bin/python
-+#!/usr/bin/python2.4
- 
- """This is the main executable for DeviceManager. GTK+/Glade code is based
- on simplepy from Shannon -jj Behrens <jjinux@yahoo.com>"""

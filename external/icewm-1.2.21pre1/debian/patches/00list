@@ -1,7 +1,0 @@
-package_build_fixes
-debian_defaults
-compiler_defaults
-#less_verbosity
-#menu_parser_fix
-#pluto_debug_log
-patch-icewm-1.2.21pre1-alpha-v3

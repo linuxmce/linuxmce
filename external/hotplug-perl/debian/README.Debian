@@ -1,8 +1,0 @@
-hotplug-perl for Debian
------------------
-
-hotplug-perl is a replacement for hotplug written in perl with a focus on boot
-and device detection performance.
-
- -- Anthony L. Awtrey <tony@idealcorp.com>, Tue Dec  7 2004 14:34:00 -0500
-
