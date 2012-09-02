@@ -1,8 +1,0 @@
-alevt.diff
-  Fixes incorrect v4l2 defines (probably derived from older v4l2 API
-  revisions). The patch is for version 1.6.1 and this teletext decoder/browser
-  can be found here: http://www.goron.de/~froese (although this site seems
-  to be down a lot).
-
-MPlayer-1.0pre7try2-ivtvosd.diff
-  Adds ivtv and ivtvosd vidouts to MPlayer

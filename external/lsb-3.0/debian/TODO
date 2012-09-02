@@ -1,8 +1,0 @@
-A quickie TODO list for lsb*:
-
-* Make output format for logging functions configurable.  (#321963)
-* Finish lsbinstall
-* Move lsb-release into this package; rewrite.  (#135832)
-* Move dynamic linker symlinks from postinst into package itself.
-* Support additional Debian architectures.
-* Only build lsb-* for LSB architectures in Debian.

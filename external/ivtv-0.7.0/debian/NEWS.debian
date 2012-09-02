@@ -1,6 +1,0 @@
-ivtv (0.6.0-1)
-
-  * The IVTV devices have been renumbered starting with 1 instead of
-    zero. i.e. "Tuner 0" has become "Tuner 1" etc.
-
- -- Ian Campbell <ijc@hellion.org.uk>  Wed, 22 Mar 2006 19:07:08 +0000

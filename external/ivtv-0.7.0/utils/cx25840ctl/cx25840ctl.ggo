@@ -1,6 +1,0 @@
-package "cx25840ctl"
-version "1.0"
-purpose "Set and list registers on a CX25840 chip via i2c-dev"
-
-option  "list-registers" l "dump CX25840 settings to stdout"  flag off
-option  "set-registers"  s "read CX25840 settings from stdin" flag off

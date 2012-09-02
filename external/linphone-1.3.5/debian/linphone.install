@@ -1,9 +1,0 @@
-usr/bin/linphone
-usr/lib/bonobo/servers/GNOME_LinphoneApplet.server
-usr/libexec/linphone_applet				/usr/lib/gnome-applets
-usr/share/man/man1/linphone.1
-usr/share/pixmaps/linphone
-usr/share/applications/linphone.desktop
-usr/share/gnome-2.0/ui/GNOME_LinphoneApplet.xml
-usr/share/gnome/help/linphone
-usr/share/doc/linphone/html

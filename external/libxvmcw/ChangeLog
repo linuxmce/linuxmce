@@ -1,4 +1,0 @@
-0.9.3 - Adjusted to latest version of Xorg. Try to load libxx.so.1 instead of libxx.so
-	Updated to XvMC Protocol revision 1.1 for automatic loading of the HW-specific library.
-	
-	
