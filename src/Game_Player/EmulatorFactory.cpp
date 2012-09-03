@@ -102,6 +102,7 @@ namespace DCE
     addEmulatorForMediaType(MEDIATYPE_lmce_Game_sms_CONST,new SMSEmulatorController(m_pGame_Player, new SMSEmulatorModel()));
     addEmulatorForMediaType(MEDIATYPE_lmce_Game_genesis_CONST,new GenesisEmulatorController(m_pGame_Player, new GenesisEmulatorModel()));
     addEmulatorForMediaType(MEDIATYPE_lmce_Game_megadriv_CONST,new MegadriveEmulatorController(m_pGame_Player, new MegadriveEmulatorModel()));
+    addEmulatorForMediaType(MEDIATYPE_lmce_Game_pce_CONST,new PCEngineEmulatorController(m_pGame_Player, new PCEngineEmulatorModel()));
     addEmulatorForMediaType(MEDIATYPE_lmce_Game_tg16_CONST,new TG16EmulatorController(m_pGame_Player, new TG16EmulatorModel()));
     addEmulatorForMediaType(MEDIATYPE_lmce_Game_sgx_CONST,new SGXEmulatorController(m_pGame_Player, new SGXEmulatorModel()));
     addEmulatorForMediaType(MEDIATYPE_lmce_Game_snes_CONST,new SNESEmulatorController(m_pGame_Player, new SNESEmulatorModel()));
