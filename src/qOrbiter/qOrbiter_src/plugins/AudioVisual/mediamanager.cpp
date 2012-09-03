@@ -21,7 +21,9 @@ MediaManager::MediaManager(QDeclarativeItem *parent) :
     Phonon::createPath(mediaObject, videoSurface);
     setCurrentStatus("Video Player Initialized");
 
-    videoSurface->setFixedSize(480,320);
+    videoSurface->setFixedSize(1280 ,720);
+    videoSurface->setAspectRatio(Phonon::VideoWidget::AspectRatioAuto);
+    videoSurface->setScaleMode(Phonon::VideoWidget::FitInView);
     window = new QWidget();
 
     layout = new QVBoxLayout(window);

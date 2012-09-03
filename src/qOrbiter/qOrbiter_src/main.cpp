@@ -289,11 +289,12 @@ int main(int argc, char* argv[])
 
         QThread *dceThread = new QThread;
         qOrbiter *pqOrbiter = new qOrbiter(PK_Device, sRouter_IP,true,bLocalMode );
-        pqOrbiter->moveToThread(dceThread);
+
 
         orbiterWindow orbiterWin(PK_Device, sRouter_IP);
         orbiterWin.mainView.rootContext()->setContextProperty("dcerouter", pqOrbiter); //dcecontext object
-        gWeatherModel *theWeather= new gWeatherModel(new gWeatherItem);
+pqOrbiter->moveToThread(dceThread);
+       // gWeatherModel *theWeather= new gWeatherModel(new gWeatherItem);
         typedef QMap <int, QString> myMap;
         int throwaway = qRegisterMetaType<myMap>("myMap");
 
@@ -329,7 +330,7 @@ int main(int argc, char* argv[])
         orbiterWin.mainView.rootContext()->setContextProperty("mediaplaylist", storedVideoPlaylist);
         orbiterWin.mainView.rootContext()->setContextProperty("simpleepg", simpleEPGmodel);
         orbiterWin.mainView.rootContext()->setContextProperty("opengl", glpresent);
-        orbiterWin.mainView.rootContext()->setContextProperty("GoogleWeather", theWeather);
+        //orbiterWin.mainView.rootContext()->setContextProperty("GoogleWeather", theWeather);
 
         //shutdown signals
 
@@ -544,39 +545,12 @@ int main(int argc, char* argv[])
         pqOrbiter->m_sExternalIP = w->qs_ext_routerip.toStdString();
         qDebug() << "Initializing connection";
         pqOrbiter->pingCore();
-
-        /*   if (pqOrbiter->routerCheck() == true)
-        {
-
-
-            if ( pqOrbiter->initialize() == true )
-            {
-                LoggerWrapper::GetInstance()->Write(LV_STATUS, "Connect OK");
-                pqOrbiter->CreateChildren();
-                if( bLocalMode )
-                    pqOrbiter->RunLocalMode();
-                else
-                {
-
-                }
-            }
-        }
-            else
-            {
-                qDebug() << "Connect Failed!";
-                pqOrbiter->Disconnect();
-            } */
         PK_Device = pqOrbiter->m_dwPK_Device;
         a.exec();
 
-        /*
- if(pqOrbiter->m_RequestHandlerThread)
-            pthread_join(pqOrbiter->m_RequestHandlerThread, NULL);  // This function will return when the device is shutting down
-    */
         if( pqOrbiter->m_bReload )
+
         { bReload=true; }
-
-
         a.quit();
     }
 

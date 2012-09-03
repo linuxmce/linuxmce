@@ -15,7 +15,7 @@ Rectangle {
     radius: 0
     opacity: 1
     color: "transparent"
-
+    z:5
     Column{
         anchors.right: storedvideoremote.right
         anchors.rightMargin: scaleX(1)

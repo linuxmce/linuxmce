@@ -1069,7 +1069,7 @@ void qOrbiter::CMD_Set_Now_Playing(string sPK_DesignObj,string sValue_To_Assign,
     int pos1 = scrn.indexOf(",");
     scrn.remove(pos1, scrn.length());
     // qDebug() << sValue_To_Assign.c_str();
-
+ internal_streamID = iStreamID;
 
     if (iPK_MediaType == 0)
     {
@@ -2742,23 +2742,28 @@ void DCE::qOrbiter::StopMedia()
 
 void DCE::qOrbiter::RwMedia()
 {
-    CMD_Change_Playback_Speed rewind_media(m_dwPK_Device, iMediaPluginID, internal_streamID , -2, true);
-    SendCommand(rewind_media);
+  //  CMD_Change_Playback_Speed rewind_media(m_dwPK_Device, iMediaPluginID, internal_streamID , -2, true);
+  //  SendCommand(rewind_media);
 }
 
 void DCE::qOrbiter::FfMedia()
 {
 
-    CMD_Change_Playback_Speed forward_media(m_dwPK_Device, iMediaPluginID, internal_streamID, +2, true);
-    SendCommand(forward_media);
+   // CMD_Change_Playback_Speed forward_media(m_dwPK_Device, iMediaPluginID, internal_streamID, +2, true);
+  //  SendCommand(forward_media);
 }
 
 void DCE::qOrbiter::PauseMedia()
 {
     CMD_Pause_Media pause_media(m_dwPK_Device, iMediaPluginID,internal_streamID);
-    if(SendCommand(pause_media))
+    string pResponse;
+    if(SendCommand(pause_media, &pResponse) && pResponse=="OK")
     {
-
+        setCommandResponse("Sent pause to "+ QString::number(internal_streamID) );
+    }
+    else
+    {
+        setCommandResponse("Pause() command failed for stream "+QString::number(internal_streamID) );
     }
     //  nowPlayingButton->setMediaSpeed(0);
 }
@@ -3335,6 +3340,8 @@ void DCE::qOrbiter::changedTrack(QString direction)
     }
     else
     {
+        setCommandResponse("Changing tracks");
+
         CMD_Jump_Position_In_Playlist jump_playlist(m_dwPK_Device, iMediaPluginID, direction.toStdString(), internal_streamID );
         string sResponse = "";
         if(SendCommand(jump_playlist, &sResponse) && sResponse=="OK")
