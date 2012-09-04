@@ -2755,7 +2755,7 @@ void DCE::qOrbiter::FfMedia()
 
 void DCE::qOrbiter::PauseMedia()
 {
-    CMD_Pause_Media pause_media(m_dwPK_Device, this->m_dwPK_Device_NowPlaying ,internal_streamID);
+    CMD_Pause_Media pause_media(m_dwPK_Device, m_dwPK_Device_NowPlaying ,internal_streamID);
     string pResponse;
     if(SendCommand(pause_media, &pResponse) && pResponse=="OK")
     {

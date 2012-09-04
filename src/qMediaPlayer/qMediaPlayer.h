@@ -54,6 +54,8 @@ public:
         QString mediaPosition;
         QString startPosition;
 
+        bool m_bPaused;
+
 
 
 //<-dceag-const-b->

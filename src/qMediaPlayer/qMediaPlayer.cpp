@@ -77,7 +77,7 @@ bool qMediaPlayer::GetConfig()
     // Put your code here to initialize the data in this class
     // The configuration parameters DATA_ are now populated
 
-
+    m_bPaused = false;
     return true;
 
 }
@@ -319,33 +319,41 @@ void qMediaPlayer::CMD_Play_Media(int iPK_MediaType,int iStreamID,string sMediaP
         path = "/public/data/audio";
     }
 
-    //begin ugly bit to determine the storage device for later use. its not passed explicitly, so i use a regex to determine it for media files
-    QRegExp deviceNo("(\\\[\\\d+\\\])");
-    int l = deviceNo.indexIn(QString::fromStdString(sMediaURL));
-
-    if (l ==-1){
-        setCommandResponse("Stored in /mediaType");
+    if(QString::fromStdString(sMediaURL).contains("http")){
+        finishedPath = QString::fromStdString(sMediaURL);
     }
     else
     {
-        if(!deviceNo.isEmpty()){
-            QString f = deviceNo.cap(0);
-            f.remove("[");
-            f.remove("]");
-            deviceNumber = f;
-            localPath = (QString::fromStdString(sMediaURL)).split(deviceNo).at(1);
+        //begin ugly bit to determine the storage device for later use. its not passed explicitly, so i use a regex to determine it for media files
+        QRegExp deviceNo("(\\\[\\\d+\\\])");
+        int l = deviceNo.indexIn(QString::fromStdString(sMediaURL));
 
+        if (l ==-1){
+            setCommandResponse("Stored in /mediaType");
         }
         else
         {
+            if(!deviceNo.isEmpty()){
+                QString f = deviceNo.cap(0);
+                f.remove("[");
+                f.remove("]");
+                deviceNumber = f;
+                localPath = (QString::fromStdString(sMediaURL)).split(deviceNo).at(1);
 
+            }
+            else
+            {
+
+            }
         }
+        //end ugly bit of regex. pretty because it works unless a user decides to also have [\d\d\d] type directories. I try to counter that by choosing only
+        //the first match as that will be the first indexed by the regex engine.
+         finishedPath = "/mnt/remote/"+deviceNumber+path+localPath;
     }
-    //end ugly bit of regex. pretty because it works unless a user decides to also have [\d\d\d] type directories. I try to counter that by choosing only
-    //the first match as that will be the first indexed by the regex engine.
 
 
-    finishedPath = "/mnt/remote/"+deviceNumber+path+localPath;
+
+
     setCurrentMediaUrl(finishedPath);
     emit startPlayback();
 
@@ -380,8 +388,17 @@ void qMediaPlayer::CMD_Stop_Media(int iStreamID,string *sMediaPosition,string &s
 void qMediaPlayer::CMD_Pause_Media(int iStreamID,string &sCMD_Result,Message *pMessage)
 //<-dceag-c39-e->
 {
-    emit pausePlayback();
-    setCommandResponse("Need to implement command #39 - Pause Media");
+    if(!m_bPaused){
+    emit pausePlayback();   
+      setCommandResponse("Need to implement command #39 - Pause Media");
+    }
+    else
+    {
+        emit startPlayback();
+
+    }
+
+m_bPaused = !m_bPaused;
     cout << "Parm #41 - StreamID=" << iStreamID << endl;
 }
 
