@@ -47,7 +47,6 @@ qMediaPlayer_Plugin::qMediaPlayer_Plugin(int DeviceID, string ServerAddress,bool
 
 //<-dceag-const2-b->
 // The constructor when the class is created as an embedded instance within another stand-alone device
-/*
 qMediaPlayer_Plugin::qMediaPlayer_Plugin(Command_Impl *pPrimaryDeviceCommand, DeviceData_Impl *pData, Event_Impl *pEvent, Router *pRouter)
 	: qMediaPlayer_Plugin_Command(pPrimaryDeviceCommand, pData, pEvent, pRouter)
 //<-dceag-const2-e->

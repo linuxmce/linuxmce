@@ -16,7 +16,7 @@ VERSION = 2.0.0
 MYDEVTEMPLATEID = 2206mplateID
 
 Gen_Dev_Files = $(GENDEV)/qMediaPlayer_PluginBase.cpp
-sources = Main.cpp qMediaPlayer_Plugin.cpp  $(Gen_Dev_Files)
+sources = Main.cpp qMediaPlayer_Plugin.cpp $(Gen_Dev_Files)
 #<-dceag-mh-e->
 
 CXXFLAGS += -fmessage-length=0
