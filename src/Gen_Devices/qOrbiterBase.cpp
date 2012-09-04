@@ -5,8 +5,6 @@
 using namespace DCE;
 #include "qOrbiterBase.h"
 extern qOrbiter_Command *Create_qOrbiter(Command_Impl *pPrimaryDeviceCommand, DeviceData_Impl *pData, Event_Impl *pEvent, Router *pRouter);
-//#include "qMediaPlayerBase.h"
-//extern qMediaPlayer_Command *Create_qMediaPlayer(Command_Impl *pPrimaryDeviceCommand, DeviceData_Impl *pData, Event_Impl *pEvent, Router *pRouter);
 DeviceData_Impl *qOrbiter_Data::CreateData(DeviceData_Impl *Parent,char *pDataBlock,unsigned long AllocatedSize,char *CurrentPosition)
 {
 	// Peek ahead in the stream.  We're going to pass in the above pointers anyway so it won't affect the position
@@ -18,8 +16,6 @@ DeviceData_Impl *qOrbiter_Data::CreateData(DeviceData_Impl *Parent,char *pDataBl
 	switch(iPK_DeviceTemplate) {
 		case 2186:
 			return new qOrbiter_Data();
-        //case 2205:
-        //	return new qMediaPlayer_Data();
 	};
 	LoggerWrapper::GetInstance()->Write(LV_STATUS, "Got CreateData for unknown type %d.", iPK_DeviceTemplate);
 	return NULL;
@@ -30,19 +26,12 @@ Event_Impl *qOrbiter_Event::CreateEvent( unsigned long dwPK_DeviceTemplate, Clie
 	switch(dwPK_DeviceTemplate) {
 		case 2186:
 			return (Event_Impl *) new qOrbiter_Event(pOCClientSocket, dwDevice);
-        //case 2205:
-        //	return (Event_Impl *) new qMediaPlayer_Event(pOCClientSocket, dwDevice);
 	};
 	LoggerWrapper::GetInstance()->Write(LV_STATUS, "Got CreateEvent for unknown type %d.", dwPK_DeviceTemplate);
 	return NULL;
 }
 Command_Impl  *qOrbiter_Command::CreateCommand(int PK_DeviceTemplate, Command_Impl *pPrimaryDeviceCommand, DeviceData_Impl *pData, Event_Impl *pEvent)
 {
-	switch(PK_DeviceTemplate)
-	{
-        //case 2205:
-        //	return (Command_Impl *) Create_qMediaPlayer(pPrimaryDeviceCommand, pData, pEvent, m_pRouter);
-	};
 	LoggerWrapper::GetInstance()->Write(LV_STATUS, "Got CreateCommand for unknown type %d.", PK_DeviceTemplate);
 	return NULL;
 }
