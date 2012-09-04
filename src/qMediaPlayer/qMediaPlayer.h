@@ -30,9 +30,16 @@
 //<-dceag-decl-b->
 namespace DCE
 {
-	class qMediaPlayer : public qMediaPlayer_Command
+    class qMediaPlayer : public qMediaPlayer_Command
 	{
 //<-dceag-decl-e->
+        Q_OBJECT
+        Q_PROPERTY(QString commandResponse READ getCommandResponse WRITE setCommandResponse NOTIFY commandResponseChanged)
+        Q_PROPERTY(QString mediaResponse READ getMediaResponse WRITE setMediaResponse NOTIFY mediaResponseChanged)
+        Q_PROPERTY(QString currentMediaUrl READ getCurrentMediaUrl WRITE setCurrentMediaUrl NOTIFY currentMediaUrlChanged)
+        Q_PROPERTY(QString startPosition READ getStartPosition WRITE setStartPosition NOTIFY startPositionChanged)
+        Q_PROPERTY(int i_StreamId READ getStreamID WRITE setStreamID NOTIFY streamIdChanged)
+        Q_PROPERTY(int i_pkMediaType READ getMediaType WRITE setMediaType NOTIFY mediaTypeChanged)
 		// Private member variables
 
 		// Private methods
@@ -308,6 +315,7 @@ public:
 	/** Record the current game. Toggle on off */
 
 	virtual void CMD_Record() { string sCMD_Result; CMD_Record(sCMD_Result,NULL);};
+
 	virtual void CMD_Record(string &sCMD_Result,Message *pMessage);
 
 
@@ -888,19 +896,6 @@ public:
 	virtual void CMD_Remove_Station_from_QuickMix(string sID,int iStreamID,string &sCMD_Result,Message *pMessage);
 
 //<-dceag-h-e->
-        void CMD_Save_playlist(int iPK_Users, string sPK_EntertainArea, string sName, bool bSave_as_new, string &sCMD_Result, Message *pMessage);
-        void CMD_Info(string sText, string &sCMD_Result, Message *pMessage);
-        void CMD_Mute(string &sCMD_Result, Message *pMessage);
-        void CMD_Load_Playlist(string sPK_EntertainArea, int iEK_Playlist, string &sCMD_Result, Message *pMessage);
-        void CMD_Move_Playlist_entry_Up(int iValue, string &sCMD_Result, Message *pMessage);
-        void CMD_Move_Playlist_entry_Down(int iValue, string &sCMD_Result, Message *pMessage);
-        void CMD_Remove_playlist_entry(int iValue, string &sCMD_Result, Message *pMessage);
-        void CMD_Blue(string &sCMD_Result, Message *pMessage);
-        void CMD_Green(string &sCMD_Result, Message *pMessage);
-        void CMD_Red(string &sCMD_Result, Message *pMessage);
-        void CMD_Yellow(string &sCMD_Result, Message *pMessage);
-        void CMD_Remove_playlist(int iEK_Playlist, string &sCMD_Result, Message *pMessage);
-        void CMD_Application_Exited(int iPID, int iExit_Code, string &sCMD_Result, Message *pMessage);
 
     signals:
         void commandResponseChanged(QString);
