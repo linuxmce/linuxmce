@@ -14,39 +14,59 @@ function eibDevices($output,$dbADO,$eibADO) {
 	$installationID = (int)@$_SESSION['installationID'];
 	$type=$_REQUEST['type'];
 	
+	// target GA adresses into the Channel field of devices
+	$targetDeviceData=$GLOBALS['Channel'];
+	$allowedTemplates=array();
+	
 	switch ($type){
 		case 'lights':
-			$allowedTemplates=array($GLOBALS['LightSwitchOnOff']=>'Light Switch On/Off',$GLOBALS['LightSwitchDimmable']=>'Light Switch Dimmable');
-			$targetDeviceData=$GLOBALS['Channel'];
-			$labels=array(translate('TEXT_KNX_ONOFF'),translate('TEXT_KNX_STATUS'),translate('TEXT_KNX_DIM'));
+			$allowedTemplates[$GLOBALS['LightSwitchOnOff']]['label']='Light switch (on/off)';
+			$allowedTemplates[$GLOBALS['LightSwitchOnOff']]['GA'][]=translate('TEXT_KNX_ONOFF');
+			$allowedTemplates[$GLOBALS['LightSwitchOnOff']]['GA'][]=translate('TEXT_KNX_STATUS');
+			
+			$allowedTemplates[$GLOBALS['LightSwitchDimmable']]['label']='Light switch (dimmable)';
+			$allowedTemplates[$GLOBALS['LightSwitchDimmable']]['GA'][]=translate('TEXT_KNX_ONOFF');
+			$allowedTemplates[$GLOBALS['LightSwitchDimmable']]['GA'][]=translate('TEXT_KNX_STATUS');
+			$allowedTemplates[$GLOBALS['LightSwitchDimmable']]['GA'][]=translate('TEXT_KNX_DIM');
+			$allowedTemplates[$GLOBALS['LightSwitchDimmable']]['GA'][]=translate('TEXT_KNX_DIM_STATUS');
+			
+			$allowedTemplates[$GLOBALS['LightSwitchRGB']]['label']='Light switch (RGB)';
+			$allowedTemplates[$GLOBALS['LightSwitchRGB']]['GA'][]=translate('TEXT_KNX_ONOFF');
+			$allowedTemplates[$GLOBALS['LightSwitchRGB']]['GA'][]=translate('TEXT_KNX_R_LEVEL');
+			$allowedTemplates[$GLOBALS['LightSwitchRGB']]['GA'][]=translate('TEXT_KNX_G_LEVEL');
+			$allowedTemplates[$GLOBALS['LightSwitchRGB']]['GA'][]=translate('TEXT_KNX_B_LEVEL');
+			$allowedTemplates[$GLOBALS['LightSwitchRGB']]['GA'][]=translate('TEXT_KNX_STATUS');
+			$allowedTemplates[$GLOBALS['LightSwitchRGB']]['GA'][]=translate('TEXT_KNX_R_STATUS');
+			$allowedTemplates[$GLOBALS['LightSwitchRGB']]['GA'][]=translate('TEXT_KNX_G_STATUS');
+			$allowedTemplates[$GLOBALS['LightSwitchRGB']]['GA'][]=translate('TEXT_KNX_B_STATUS');
 		break;
 		case 'security':
 			$resDT=$dbADO->Execute('SELECT DT.PK_DeviceTemplate,DT.Description FROM DeviceTemplate AS DT,DeviceTemplate_DeviceCategory_ControlledVia as CV WHERE DT.PK_DeviceTemplate= CV.FK_DeviceTemplate AND CV.FK_DeviceCategory=? AND DT.FK_DeviceCategory=? ORDER BY DT.Description ASC',array($GLOBALS['specialized'],$GLOBALS['rootSecurity']));
-			$allowedTemplates=array();
 			while($rowDT=$resDT->FetchRow()){
-				$allowedTemplates[$rowDT['PK_DeviceTemplate']]=$rowDT['Description'];
+				$allowedTemplates[$rowDT['PK_DeviceTemplate']]['label']=$rowDT['Description'];
+				$allowedTemplates[$rowDT['PK_DeviceTemplate']]['GA'][]=translate('TEXT_KNX_ACTIVATED');
 			}
-			$targetDeviceData=$GLOBALS['Channel'];
-			$labels=array(translate('TEXT_KNX_ONOFF'));
 		break;
 		case 'climate':
-			$resDT=$dbADO->Execute('SELECT DT.PK_DeviceTemplate,DT.Description FROM DeviceTemplate AS DT,DeviceTemplate_DeviceCategory_ControlledVia as CV WHERE DT.PK_DeviceTemplate= CV.FK_DeviceTemplate AND CV.FK_DeviceCategory=? AND DT.FK_DeviceCategory=? ORDER BY DT.Description ASC',array($GLOBALS['specialized'],$GLOBALS['rootClimate']));
-			$allowedTemplates=array();
-			while($rowDT=$resDT->FetchRow()){
-				$allowedTemplates[$rowDT['PK_DeviceTemplate']]=$rowDT['Description'];
-			}
-			$targetDeviceData=$GLOBALS['Channel'];
-			$labels=array(translate('TEXT_KNX_ONOFF'));
+			$allowedTemplates[$GLOBALS['StandardThermostat']]['label']='Standard thermostat';
+			$allowedTemplates[$GLOBALS['StandardThermostat']]['GA'][]=translate('TEXT_KNX_SETPOINT_TEMP');
+			$allowedTemplates[$GLOBALS['StandardThermostat']]['GA'][]=translate('TEXT_KNX_ACTUAL_TEMP');
+
+			$allowedTemplates[$GLOBALS['StandardThermometer']]['label']='Temperature sensor';
+			$allowedTemplates[$GLOBALS['StandardThermometer']]['GA'][]=translate('TEXT_KNX_ACTUAL_TEMP');
 		break;
 		case 'drapes':
-			$allowedTemplates=array($GLOBALS['DrapesSwitch']=>'Drapes Switch');
-			$targetDeviceData=$GLOBALS['Channel'];
-			$labels=array('MOVE','STEP');
-		break;
-		case 'thermostats':
-			$allowedTemplates=array($GLOBALS['StandardThermostat']=>'Standard Thermostat');
-			$targetDeviceData=$GLOBALS['Channel'];
-			$labels=array('SetPoint Temperature','Actual Temperature');
+			$allowedTemplates[$GLOBALS['DrapesSwitch']]['label']='Drapes switch';
+			$allowedTemplates[$GLOBALS['DrapesSwitch']]['GA'][]=translate('TEXT_KNX_LEVEL');
+			$allowedTemplates[$GLOBALS['DrapesSwitch']]['GA'][]=translate('TEXT_KNX_LEVEL_STATUS');
+			$allowedTemplates[$GLOBALS['DrapesSwitch']]['GA'][]=translate('TEXT_KNX_OPENCLOSE');
+			$allowedTemplates[$GLOBALS['DrapesSwitch']]['GA'][]=translate('TEXT_KNX_STOP');
+
+			/*$allowedTemplates[$GLOBALS['BlindsSwitch']]['label']='Blinds Switch';
+			$allowedTemplates[$GLOBALS['BlindsSwitch']]['GA'][]=translate('TEXT_KNX_LEVEL');
+			$allowedTemplates[$GLOBALS['BlindsSwitch']]['GA'][]=translate('TEXT_KNX_ANGLE');
+			$allowedTemplates[$GLOBALS['BlindsSwitch']]['GA'][]=translate('TEXT_KNX_LEVEL_STATUS');
+			$allowedTemplates[$GLOBALS['BlindsSwitch']]['GA'][]=translate('TEXT_KNX_ANGLE_STATUS');*/
 		break;
 		default:
 			$out='<div class="err">'.translate('TEXT_EIB_INVALID_PARAMETER_CONST').'</div>';
@@ -72,14 +92,38 @@ function eibDevices($output,$dbADO,$eibADO) {
 			window.open(locationA,\'\',attributes);
 		}
 		
-		function enableSecond()
+		function changeTemplate()
 		{
-			if(document.eibDevices.deviceTemplate.value=='.$GLOBALS['LightSwitchDimmable'].' || document.eibDevices.deviceTemplate.value=='.$GLOBALS['DrapesSwitch'].' || document.eibDevices.deviceTemplate.value=='.$GLOBALS['StandardThermostat'].'){
-				document.eibDevices.setNewDim.disabled=false;
-			}else
-				document.eibDevices.setNewDim.disabled=true;
+			var allowedTemplates = {};
+			var templateID=document.eibDevices.deviceTemplate.value;';
+
+			foreach($allowedTemplates as $templateID=>$template) {
+				$out.='
+				allowedTemplates["'.$templateID.'"] = {};
+				allowedTemplates["'.$templateID.'"].label="'.$template['label'].'";
+				allowedTemplates["'.$templateID.'"].GA= {};';
+				$num_ga=count($template['GA']);
+				for($i=0; $i < $num_ga; $i++ ) {
+					$out.='allowedTemplates["'.$templateID.'"].GA['.$i.']="'.$template["GA"][$i].'";';
+				}
+			}
+			$out.='
+			var out = "";
+			out = "<table>";
+			for (var i in allowedTemplates[templateID].GA) {
+				out += "<tr>";
+				out += "<td>"+allowedTemplates[templateID].GA[i]+"</td>";
+				out += "<td><input type=\"text\" name=\"newNAME_"+i+"\" size=\"50\" value=\"\" disabled> <input type=\"hidden\" name=\"newGA_"+i+"\" value=\"\"></td>";
+				out += "<td><input type=\"button\" class=\"button\" name=\"setGroup\" value=\"'.translate('TEXT_EIB_PICK_CONST').'\" onClick=\"pickGroupAddress(\'newNAME_"+i+"\',\'newGA_"+i+"\');\"></td>";
+				out += "</tr>";
+			}
+			out += "</table>";
+			document.getElementById("ga_list").innerHTML  = out;
 		}
-		
+	
+			//<td><input type="text" name="newNAME_'.$i.'" size="50" value="" disabled> <input type="hidden" name="newGA_'.$i.'" value=""></td>
+			//<td><input type="button" class="button" name="setGroup" value="'.translate('TEXT_EIB_PICK_CONST').'" onClick="pickGroupAddress(\'newNAME_'.$i.'\',\'newGA_'.$i.'\');"></td>
+			
 		function pickGroupAddress(groupName,groupAddress)
 		{
 			document.getElementById("addressPicker").style.display="";
@@ -178,34 +222,21 @@ function eibDevices($output,$dbADO,$eibADO) {
 			<td align="center">'.translate('TEXT_DEVICE_CONST').': <B>'.$rowDevices['Description'].' # '.$rowDevices['PK_Device'].'</B><br> '.translate('TEXT_DEVICE_TEMPLATE_CONST').': <B>'.$rowDevices['Template'].'</B></td>
 			<td align="right">
 				<fieldset><legend><B>'.translate('TEXT_GROUP_ADDRESSES_CONST').'</B></legend>
-				<table>
-					<tr>
-						<td>'.$labels[0].'</td>
-						<td><input type="text" name="onOffName_'.@$rowDevices['PK_Device'].'" size="50" value="'.@$channelArray[$channelParts[0]].' ('.@$channelParts[0].')'.'" disabled> <input type="hidden" name="onOff_'.$rowDevices['PK_Device'].'" value="'.@$channelParts[0].'"></td>
-						<td><input type="button" class="button" name="setGroup" value="'.translate('TEXT_EIB_PICK_CONST').'" onClick="pickGroupAddress(\'onOffName_'.$rowDevices['PK_Device'].'\',\'onOff_'.$rowDevices['PK_Device'].'\');"></td>
-					</tr>';
-		if(count($labels) >= 2){
-			$out.='	<tr>
-						<td>'.@$labels[1].'</td>
-						<td><input type="text" name="statusName_'.$rowDevices['PK_Device'].'" size="50" value="'.@$channelArray[$channelParts[1]].' ('.@$channelParts[1].')'.'" disabled> <input type="hidden" name="status_'.$rowDevices['PK_Device'].'" value="'.@$channelParts[1].'"></td>
-						<td><input type="button" class="button" name="setGroup" value="'.translate('TEXT_EIB_PICK_CONST').'" onClick="pickGroupAddress(\'statusName_'.$rowDevices['PK_Device'].'\',\'status_'.$rowDevices['PK_Device'].'\');"></td>
-					</tr>
-			';
-		}
-		if((count($labels) >= 3) && $rowDevices['FK_DeviceTemplate'] != $GLOBALS['LightSwitchOnOff']){
-			$out.='	<tr>
-						<td>'.@$labels[2].'</td>
-						<td><input type="text" name="dimName_'.$rowDevices['PK_Device'].'" size="50" value="'.@$channelArray[$channelParts[2]].' ('.@$channelParts[2].')'.'" disabled> <input type="hidden" name="dim_'.$rowDevices['PK_Device'].'" value="'.@$channelParts[2].'"></td>
-						<td><input type="button" class="button" name="setGroup" value="'.translate('TEXT_EIB_PICK_CONST').'" onClick="pickGroupAddress(\'dimName_'.$rowDevices['PK_Device'].'\',\'dim_'.$rowDevices['PK_Device'].'\');"></td>
-					</tr>
-			';
-
-		}
+				<table>';
+					$template=$allowedTemplates[$rowDevices['FK_DeviceTemplate']];
+					$num_ga=count($template['GA']);
+					for($i=0; $i < $num_ga; $i++ ) {
+						$out.='
+						<tr>
+							<td>'.$template['GA'][$i].'</td>
+							<td><input type="text" name="NAME_'.@$rowDevices['PK_Device'].'_'.$i.'" size="50" value="'.@$channelArray[$channelParts[$i]].' ('.@$channelParts[$i].')'.'" disabled> <input type="hidden" name="GA_'.$rowDevices['PK_Device'].'_'.$i.'" value="'.@$channelParts[$i].'"></td>
+							<td><input type="button" class="button" name="setGroup" value="'.translate('TEXT_EIB_PICK_CONST').'" onClick="pickGroupAddress(\'NAME_'.$rowDevices['PK_Device'].'_'.$i.'\',\'GA_'.$rowDevices['PK_Device'].'_'.$i.'\');"></td>
+						</tr>';
+					}
 		$out.='</table>
 			</fieldset></td>
 			<td><input type="button" class="button" name="del" value="'.translate('TEXT_DELETE_CONST').'" onClick="if(confirm(\''.translate('TEXT_EIB_CONFIRM_DELETE_CONST').'\'))self.location=\'index.php?section=eibDevices&action=delDevice&type='.$type.'&delID='.$rowDevices['PK_Device'].'\';"></td>
-		</tr>
-';
+		</tr>';
 	}
 	$firstTemplate=array_shift(array_keys($allowedTemplates));
 	$out.='
@@ -222,38 +253,28 @@ function eibDevices($output,$dbADO,$eibADO) {
 			<td><input type="text" name="newDevice"></td>
 			<td align="right" rowspan="3">
 				<fieldset><legend><B>'.translate('TEXT_GROUP_ADDRESSES_CONST').'</B></legend>
-					<table>
+					<span id="ga_list"><table>';
+					$template=$allowedTemplates[$firstTemplate];
+					$num_ga=count($template['GA']);
+					for($i=0; $i < $num_ga; $i++ ) {
+						$out.='
 						<tr>
-							<td>'.$labels[0].'</td>
-							<td><input type="text" name="newOnOffName" size="50" value="" disabled> <input type="hidden" name="newOnOff" value=""></td>
-							<td><input type="button" class="button" name="setGroup" value="'.translate('TEXT_EIB_PICK_CONST').'" onClick="pickGroupAddress(\'newOnOffName\',\'newOnOff\');"></td>
+							<td>'.$template['GA'][$i].'</td>
+							<td><input type="text" name="newNAME_'.$i.'" size="50" value="" disabled> <input type="hidden" name="newGA_'.$i.'" value=""></td>
+							<td><input type="button" class="button" name="setGroup" value="'.translate('TEXT_EIB_PICK_CONST').'" onClick="pickGroupAddress(\'newNAME_'.$i.'\',\'newGA_'.$i.'\');"></td>
 						</tr>';
-	if(isset($labels[1])){
-		$out.='
-						<tr>
-							<td>'.@$labels[1].'</td>
-							<td><input type="text" name="newStatusName" size="50" value="" disabled></td>
-							<td><input type="hidden" name="newStatus" value=""><input type="button" class="button" name="setNewStatus" '.((in_array($firstTemplate,$multiGroupAddress))?'':'disabled').' value="'.translate('TEXT_EIB_PICK_CONST').'" onClick="pickGroupAddress(\'newStatusName\',\'newStatus\');"></td>
-						</tr>';
-	}
-	if(isset($labels[2])){
-		$out.='
-						<tr>
-							<td>'.@$labels[2].'</td>
-							<td><input type="text" name="newDimName" size="50" value="" disabled></td>
-							<td><input type="hidden" name="newDim" value=""><input type="button" class="button" name="setNewDim" '.((in_array($firstTemplate,$multiGroupAddress))?'':'disabled').' value="'.translate('TEXT_EIB_PICK_CONST').'" onClick="pickGroupAddress(\'newDimName\',\'newDim\');"></td>
-						</tr>';
-	}	$out.='
-					</table>
+					}
+						$out.='
+					</table></span>
 				</fieldset>
 			</td>
 			<td rowspan="3"><input type="submit" class="button" name="addDevice" value="'.translate('TEXT_ADD_DEVICE_CONST').'"></td>
 		</tr>					
 		<tr>
 			<td>Device template:</td>
-			<td><select name="deviceTemplate" onChange="enableSecond();">';
-			foreach($allowedTemplates AS $key=>$description){
-				$out.='<option value="'.$key.'">'.$description.'</option>';
+			<td><select name="deviceTemplate" onChange="changeTemplate();">';
+			foreach($allowedTemplates AS $templateID=>$template){
+				$out.='<option value="'.$templateID.'">'.$template['label'].'</option>';
 			}
 			$out.='
 			</select></td>	
@@ -307,25 +328,13 @@ function eibDevices($output,$dbADO,$eibADO) {
 		if(isset($_POST['update'])){
 			$devicesArray=unserialize(urldecode($_POST['devicesArray']));
 			foreach ($devicesArray as $deviceID=>$templateID){
-				switch($templateID) {
-				
-					case $GLOBALS['LightSwitchOnOff']:
-						$newDeviceData=$_POST['onOff_'.$deviceID].'|'.$_POST['status_'.$deviceID];
-						break;
-						
-					case $GLOBALS['LightSwitchDimmable']:
-						$newDeviceData=$_POST['onOff_'.$deviceID].'|'.$_POST['status_'.$deviceID].'|'.$_POST['dim_'.$deviceID];
-						break;
-				
-					default:
-						if(in_array($templateID,$multiGroupAddress)){
-							$newDeviceData=$_POST['onOff_'.$deviceID].'|'.$_POST['status_'.$deviceID].'|'.$_POST['dim_'.$deviceID];
-						}else{
-							$newDeviceData=$_POST['onOff_'.$deviceID];
-						}
-						break;
+				$newDeviceData='';
+				$template=$allowedTemplates[$templateID];
+				$num_ga=count($template['GA']);
+				for($i=0; $i < $num_ga; $i++ ) {
+					if($i > 0) $newDeviceData.='|';
+					$newDeviceData.=$_POST['GA_'.$deviceID.'_'.$i];
 				}
-				
 				$oldDeviceData=$_POST['oldDD_'.$deviceID];
 				if($oldDeviceData!=$newDeviceData){
 					if(is_null($oldDeviceData)){
@@ -354,36 +363,25 @@ function eibDevices($output,$dbADO,$eibADO) {
 			$deviceTemplate=(int)$_POST['deviceTemplate'];
 			$controlledBy=(int)$_POST['controlledBy'];
 			
-			switch($deviceTemplate) {
-			
-				case $GLOBALS['LightSwitchOnOff']:
-					$deviceData=$_POST['newOnOff'].'|'.$_POST['newStatus'];
-					break;
-					
-				case $GLOBALS['LightSwitchDimmable']:
-					$deviceData=$_POST['newOnOff'].'|'.$_POST['newStatus'].'|'.$_POST['newDim'];
-					break;
-			
-				default:
-					$deviceData=(in_array($deviceTemplate,$multiGroupAddress))?$_POST['newOnOff'].'|'.$_POST['newDim']:$_POST['newOnOff'];
-					break;
+			$template=$allowedTemplates[$deviceTemplate];
+			$num_ga=count($template['GA']);
+			for($i=0; $i < $num_ga; $i++ ) {
+				if($i > 0) $deviceData.='|';
+				$deviceData.=$_POST['newGA_'.$i];
 			}
 
-			if($newDevice!=''){
-				$insertID=createDevice($deviceTemplate,$installationID,$controlledBy,NULL,$dbADO);				
-				
-				$dbADO->Execute('UPDATE Device SET Description=? WHERE PK_Device=?',array($newDevice,$insertID));
-				$dbADO->Execute('UPDATE Device_DeviceData SET IK_DeviceData=? WHERE FK_Device=? AND FK_DeviceData=?',array($deviceData,$insertID,$targetDeviceData));
-				
-				if($type=='sensors'){
-					$dbADO->Execute('UPDATE Device_DeviceData SET IK_DeviceData=? WHERE FK_Device=? AND FK_DeviceData=?',array(2,$insertID,$GLOBALS['InputOrOutput']));
-				}
-				header("Location: index.php?section=eibDevices&type=$type&msg=".translate('TEXT_EIB_DEVICE_ADDED_CONST'));
-				exit();
-			}else{
-				header("Location: index.php?section=eibDevices&type=$type&error=".translate('TEXT_DEVICE_NAME_REQUIRED_CONST'));
-				exit();
+			if($newDevice == '') $newDevice=$allowedTemplates[$deviceTemplate]['label'];
+
+			$insertID=createDevice($deviceTemplate,$installationID,$controlledBy,NULL,$dbADO);				
+			
+			$dbADO->Execute('UPDATE Device SET Description=? WHERE PK_Device=?',array($newDevice,$insertID));
+			$dbADO->Execute('UPDATE Device_DeviceData SET IK_DeviceData=? WHERE FK_Device=? AND FK_DeviceData=?',array($deviceData,$insertID,$targetDeviceData));
+			
+			if($type=='sensors'){
+				$dbADO->Execute('UPDATE Device_DeviceData SET IK_DeviceData=? WHERE FK_Device=? AND FK_DeviceData=?',array(2,$insertID,$GLOBALS['InputOrOutput']));
 			}
+			header("Location: index.php?section=eibDevices&type=$type&msg=".translate('TEXT_EIB_DEVICE_ADDED_CONST'));
+			exit();
 		}
 	}
 

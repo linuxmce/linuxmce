@@ -66,7 +66,9 @@
 	$GLOBALS['KNX']=2195;						// KNX via eibd
 	$GLOBALS['GenericInputOuput']=43;			// Generic Input Ouput 
 	$GLOBALS['DrapesSwitch']=68;				// Drapes Switch
+	$GLOBALS['BlindsSwitch']=68;				// Blinds Switch
 	$GLOBALS['StandardThermostat']=4;			// Standard Thermostat
+	$GLOBALS['StandardThermometer']=1744;		// Standard Thermometer
 	$GLOBALS['Tuner']=75;						// Generic Tuner
 	$GLOBALS['ONScreenOrbiter']=62;				// On screen orbiter
 	$GLOBALS['EventPlugIn']=52;					// Event plugin

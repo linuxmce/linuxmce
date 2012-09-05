@@ -22,4 +22,13 @@ $TEXT_KNX_B_LEVEL='Niveau du bleu';
 $TEXT_KNX_R_STATUS='Etat du niveau de rouge';
 $TEXT_KNX_G_STATUS='Etat du niveau de vert';
 $TEXT_KNX_B_STATUS='Etat du niveau de bleu';
+$TEXT_KNX_LEVEL='Regler niveau';
+$TEXT_KNX_LEVEL_STATUS='Niveau actuel';
+$TEXT_KNX_ANGLE='Regler angle';
+$TEXT_KNX_ANGLE_STATUS='Angle actuel';
+$TEXT_KNX_OPENCLOSE='Ouvrir/Fermer';
+$TEXT_KNX_STOP='Stop';
+$TEXT_KNX_ACTIVATED='Activé';
+$TEXT_KNX_SETPOINT_TEMP='Temperature souhaité';
+$TEXT_KNX_ACTUAL_TEMP='Temperature actuelle';
 ?>
