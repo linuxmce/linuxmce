@@ -49,6 +49,7 @@
 
 //each command wich could be sent to a knxDevice shall be declared using DEFINE_COMMAND( command(args) ) ;
 #define DEFINE_COMMAND( x ) virtual Telegram *Command_##x{commandUnhandled(string( #x )); return NULL;}
+#define DEFINE_COMMAND_ARRAY( x ) virtual vector<Telegram *> Command_##x{commandUnhandled(string( #x )); }
 
 //each class inheriting knxDevice must start with DEVICEHEADER( name ,number of address t read from, char* of adresses values) ; where name is its exact name
 #define DEVICEHEADER( x , numberread , tableread ) \
@@ -89,6 +90,7 @@ namespace knx
 		DEFINE_COMMAND( Close() ) ;
 		DEFINE_COMMAND( Stop() ) ;
 		DEFINE_COMMAND( Set_Level(int Level) ) ;
+		DEFINE_COMMAND_ARRAY( Set_Color(int R, int G, int B) ) ;
 		DEFINE_COMMAND( Set_Angle_Percent(int Angle) ) ;
 		DEFINE_COMMAND( Set_Mode(int Mode) ) ;
 		DEFINE_COMMAND( Set_Temperature(float Temperature) ) ;
@@ -142,6 +144,21 @@ namespace knx
 		virtual Telegram *Command_On(){return createsTelegramFromAddress(1,0);};
 		virtual Telegram *Command_Off(){return createsTelegramFromAddress(0,0);};
 		virtual Telegram *Command_Set_Level(int level){return createcharTelegramFromAddress(level,1);};
+	};
+
+	class LightSwitchRGB:public knxDevice
+	{
+		DEVICEHEADER( LightSwitchRGB , 4, "\0\1\2\3" ) ;
+		virtual Telegram *Command_On(){return createsTelegramFromAddress(1,0);};
+		virtual Telegram *Command_Off(){return createsTelegramFromAddress(0,0);};
+		virtual vector<Telegram *> Command_Set_Color(int R, int G, int B){
+			vector<Telegram *> commands;
+			commands.reserve(3);
+			commands.push_back(createcharTelegramFromAddress(R,1));
+			commands.push_back(createcharTelegramFromAddress(G,2));
+			commands.push_back(createcharTelegramFromAddress(B,3));
+			return commands;
+		};
 	};
 
 	class Drapes_Switch:public knxDevice

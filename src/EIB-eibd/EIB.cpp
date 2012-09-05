@@ -119,6 +119,7 @@ void EIB::ReceivedCommandForChild(DeviceData_Impl *pDeviceData_Impl,string &sCMD
 	knxDevice *devicefound=it->second;
 	sCMD_Result="OK";
 	Telegram *ptel=NULL;
+	vector<Telegram *> aptel;
 	switch(pMessage->m_dwID)
 	{
 		case COMMAND_Read_CONST:
@@ -137,6 +138,13 @@ void EIB::ReceivedCommandForChild(DeviceData_Impl *pDeviceData_Impl,string &sCMD
 			int level= ((unsigned int)atoi(pMessage->m_mapParameters[COMMANDPARAMETER_Level_CONST].c_str())*255)/100;
 			ptel=devicefound->Command_Set_Level(level) ;
 		}break;
+		case COMMAND_Set_Color_RGB_CONST:
+		{
+			int R = ((unsigned int)atoi(pMessage->m_mapParameters[COMMANDPARAMETER_Red_Level_CONST].c_str())*255)/100;
+			int G = ((unsigned int)atoi(pMessage->m_mapParameters[COMMANDPARAMETER_Green_Level_CONST].c_str())*255)/100;
+			int B = ((unsigned int)atoi(pMessage->m_mapParameters[COMMANDPARAMETER_Blue_Level_CONST].c_str())*255)/100;
+			aptel=devicefound->Command_Set_Color(R,G,B) ;
+		}break;
 		case COMMAND_Set_Angle_Percent_CONST:
 		{
 			int angle= ((unsigned int)atoi(pMessage->m_mapParameters[COMMANDPARAMETER_Angle_Percent_CONST].c_str())*255)/100;
@@ -153,11 +161,15 @@ void EIB::ReceivedCommandForChild(DeviceData_Impl *pDeviceData_Impl,string &sCMD
 			ptel=devicefound->Command_Set_Temperature(ftemp) ;
 		}break;
 	}
-	if(ptel==NULL) sCMD_Result = "UNHANDLED CHILD";
-	else
+	// check if there is no command to send (ptel = NULL and array of ptel, aptel is empty)
+	if(ptel==NULL && aptel.size() == 0)
+	{ 
+		sCMD_Result = "UNHANDLED CHILD"; 
+	}
+	else if(ptel != NULL)
 	{
 		string aff=string("[")+StringUtils::itos(ptel->getShortUserData())+string("]");
-		LoggerWrapper::GetInstance()->Write(LV_STATUS, "  sending Telegram from: %s; to: %s; type: %s shortdata %s",
+		LoggerWrapper::GetInstance()->Write(LV_STATUS, "  KNX: sending Telegram from: %s; to: %s; type: %s shortdata %s",
 								Telegram::paddrtostring(ptel->getSrcAddress()).c_str(),
 								Telegram::gaddrtostring(ptel->getGroupAddress()).c_str(),
 								ptel->decodeType().c_str(),
@@ -165,6 +177,33 @@ void EIB::ReceivedCommandForChild(DeviceData_Impl *pDeviceData_Impl,string &sCMD
 		sendTelegram(ptel);
 		// cleanup regarding http://forum.linuxmce.org/index.php?topic=5648.msg57082#msg57082
 		delete(ptel);
+	}
+	else if(aptel.size() > 0)
+	{
+		int i=0;
+		int j=aptel.size();
+		for(i=0; i < j; i++)
+		{
+			ptel = aptel.at(i);
+			if(ptel != NULL)
+			{
+				string aff=string("[")+StringUtils::itos(ptel->getShortUserData())+string("]");
+				LoggerWrapper::GetInstance()->Write(LV_STATUS, "  KNX: sending Telegram %d/%d from: %s; to: %s; type: %s shortdata %s",
+									i+1,
+									j,
+									Telegram::paddrtostring(ptel->getSrcAddress()).c_str(),
+									Telegram::gaddrtostring(ptel->getGroupAddress()).c_str(),
+									ptel->decodeType().c_str(),
+									aff.c_str());
+				sendTelegram(ptel);
+				delete(ptel);
+				aptel.at(i)=NULL;
+			}
+		}
+		// Clear objects from vector ...
+		aptel.clear();
+		// ... and trim vector to size 0
+		vector<Telegram *>().swap(aptel); 
 	}
 }
 

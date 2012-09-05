@@ -31,11 +31,12 @@ namespace knx
 		switch(pDevData->m_dwPK_DeviceTemplate)
 		{
 			case DEVICETEMPLATE_Standard_Thermostat_CONST: return new Standard_Thermostat(pDevData);break;
-			case DEVICETEMPLATE_Light_Switch_onoff_CONST: return new LightSwitchOnOff(pDevData);break;
-			case DEVICETEMPLATE_Light_Switch_dimmable_CONST: return new LightSwitchdimmable(pDevData);break;
+			case DEVICETEMPLATE_Light_Switch_onoff_CONST: return new LightSwitchOnOff(pDevData);break;			// <ON/OFF>|<ON/OFF STATUS>
+			case DEVICETEMPLATE_Light_Switch_dimmable_CONST: return new LightSwitchdimmable(pDevData);break;	// <ON/OFF>|<DIM VALUE>|<ON/OFF STATUS>|<DIM STATUS>
+			case DEVICETEMPLATE_Light_Switch_RGB_CONST: return new LightSwitchRGB(pDevData);break;				// <ON/OFF>|<R VALUE>|<G VALUE>|<B VALUE>|<ON/OFF STATUS>|<R STATUS>|<G STATUS>|<B STATUS>
 			case DEVICETEMPLATE_Drapes_Switch_CONST: return new Drapes_Switch(pDevData);break;
-			case DEVICETEMPLATE_Blinds_Switch_CONST: return new Blinds_Switch(pDevData);break;
-			case DEVICETEMPLATE_Temperature_sensor_CONST: return new TemperatureSensor(pDevData);break;
+			case DEVICETEMPLATE_Blinds_Switch_CONST: return new Blinds_Switch(pDevData);break;					// <LEVEL>|<ANGLE>|<LEVEL STATUS>|<ANGLE STATUS>
+			case DEVICETEMPLATE_Temperature_sensor_CONST: return new TemperatureSensor(pDevData);break;			// <TEMP>
 			case DEVICETEMPLATE_Generic_Input_Ouput_CONST:
 			case DEVICETEMPLATE_Air_Quality_Sensor_CONST:
 			case DEVICETEMPLATE_Door_Sensor_CONST:
@@ -114,7 +115,7 @@ namespace knx
 
 // here must be implemented the commands the device must handle: those redeclared in its declaration
 // handleTelegram must be re declared too
-	Message *LightSwitchOnOff::handleTelegram(const Telegram *tl)
+	Message *LightSwitchOnOff::handleTelegram(const Telegram *tl) // <ON/OFF>|<ON/OFF STATUS>
 	{
 		try
 		{
@@ -141,7 +142,7 @@ namespace knx
 		return NULL;
 	}
 
-	Message *LightSwitchdimmable::handleTelegram(const Telegram *tl)
+	Message *LightSwitchdimmable::handleTelegram(const Telegram *tl) // <ON/OFF>|<DIM VALUE>|<ON/OFF STATUS>|<DIM STATUS>
 	{
 		try
 		{
@@ -175,8 +176,59 @@ namespace knx
 		}
 		return NULL;
 	}
+	
+Message *LightSwitchRGB::handleTelegram(const Telegram *tl) // // <ON/OFF>|<R VALUE>|<G VALUE>|<B VALUE>|<ON/OFF STATUS>|<R STATUS>|<G STATUS>|<B STATUS>
+	{
+		try
+		{
+			switch(tl->getType())
+			{
+				case(EIBWRITE):
+				{
+					if(tl->getGroupAddress()==_v_addrlist.at(4)) // ON/OFF STATUS
+					{
+						return createStateChangedEventMessage(tl->getShortUserData());
+					}
+					if(tl->getGroupAddress()==_v_addrlist.at(5)) // R STATUS
+					{
+						return createLevelChangedEventMessage(tl->getIntData());
+					}
+					if(tl->getGroupAddress()==_v_addrlist.at(6)) // G STATUS
+					{
+						return createLevelChangedEventMessage(tl->getIntData());
+					}
+					if(tl->getGroupAddress()==_v_addrlist.at(7)) // B STATUS
+					{
+						return createLevelChangedEventMessage(tl->getIntData());
+					}
+				}break;
+				case(EIBRESPONSE):
+				{
+					if(tl->getGroupAddress()==_v_addrlist.at(0)) // ON/OFF
+					{
+						return createStateChangedEventMessage(tl->getShortUserData());
+					}
+					if(tl->getGroupAddress()==_v_addrlist.at(1)) // R VALUE
+					{
+						return createLevelChangedEventMessage(tl->getIntData());
+					}
+					if(tl->getGroupAddress()==_v_addrlist.at(2)) // G VALUE
+					{
+						return createLevelChangedEventMessage(tl->getIntData());
+					}
+					if(tl->getGroupAddress()==_v_addrlist.at(3)) // B VALUE
+					{
+						return createLevelChangedEventMessage(tl->getIntData());
+					}
+				}break;
+			}
+		}catch(out_of_range e){
+			return NULL;
+		}
+		return NULL;
+	}
 
-	Message *Drapes_Switch::handleTelegram(const Telegram *tl)
+	Message *Drapes_Switch::handleTelegram(const Telegram *tl) // <LEVEL>|<LEVEL STATUS> (|<OPEN/CLOSE>|<STOP>)
 	{
 		try
 		{
@@ -203,7 +255,7 @@ namespace knx
 		return NULL;
 	}
 
-	Message *Blinds_Switch::handleTelegram(const Telegram *tl)
+	Message *Blinds_Switch::handleTelegram(const Telegram *tl) // <LEVEL>|<ANGLE>|<LEVEL STATUS>|<ANGLE STATUS>
 	{
 		try
 		{
@@ -211,22 +263,22 @@ namespace knx
 			{
 				case(EIBWRITE):
 				{
-					if(tl->getGroupAddress()==_v_addrlist.at(2))
+					if(tl->getGroupAddress()==_v_addrlist.at(2))	// Actual level
 					{
 						return createLevelChangedEventMessage(tl->getIntData());
 					}
-					if(tl->getGroupAddress()==_v_addrlist.at(3))
+					if(tl->getGroupAddress()==_v_addrlist.at(3))	// Actuel angle
 					{
 						return createAngleChangedEventMessage(tl->getIntData());
 					}
 				}break;
 				case(EIBRESPONSE):
 				{
-					if(tl->getGroupAddress()==_v_addrlist.at(0))
+					if(tl->getGroupAddress()==_v_addrlist.at(0))	// Set level
 					{
 						return createLevelChangedEventMessage(tl->getIntData());
 					}
-					if(tl->getGroupAddress()==_v_addrlist.at(1))
+					if(tl->getGroupAddress()==_v_addrlist.at(1))	// Set angle
 					{
 						return createAngleChangedEventMessage(tl->getIntData());
 					}
@@ -277,7 +329,7 @@ namespace knx
 		return NULL;
 	}
 	
-	Message *TemperatureSensor::handleTelegram(const Telegram *tl)
+	Message *TemperatureSensor::handleTelegram(const Telegram *tl) // <TEMP>
 	{
 		try
 		{
