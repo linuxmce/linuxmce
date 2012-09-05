@@ -17,7 +17,8 @@
 #ifndef Game_Player_h
 #define Game_Player_h
 
-//      DCE Implemenation for #1965 Game Player
+//	DCE Implemenation for #1965 Game Player
+
 #include "Gen_Devices/Game_PlayerBase.h"
 //<-dceag-d-e->
 
@@ -47,16 +48,15 @@
 #include <map>
 
 #include "EmulatorFactory.h"
+#include "EmulatorController.h"
 
 //<-dceag-decl-b->
 namespace DCE
 {
-
-  class EmulatorFactory;
-  class EmulatorController;
-
-  class Game_Player:public Game_Player_Command, public AlarmEvent
-  {
+	class EmulatorFactory;
+	class EmulatorController;
+	class Game_Player : public Game_Player_Command
+	{
 //<-dceag-decl-e->
 
     friend class EmulatorController;
@@ -98,49 +98,42 @@ namespace DCE
     void AlarmCallback (int id, void *param);
   
 //<-dceag-const-b->
-  public:
-    // Constructors/Destructor
-      Game_Player (int DeviceID, string ServerAddress,
-		   bool bConnectEventHandler = true, bool bLocalMode =
-		   false, class Router * pRouter = NULL);
-      virtual ~ Game_Player ();
-    virtual bool GetConfig ();
-    virtual bool Register ();
-    virtual void ReceivedCommandForChild (DeviceData_Impl * pDeviceData_Impl,
-					  string & sCMD_Result,
-					  Message * pMessage);
-    virtual void ReceivedUnknownCommand (string & sCMD_Result,
-					 Message * pMessage);
+public:
+		// Constructors/Destructor
+		Game_Player(int DeviceID, string ServerAddress,bool bConnectEventHandler=true,bool bLocalMode=false,class Router *pRouter=NULL);
+		virtual ~Game_Player();
+		virtual bool GetConfig();
+		virtual bool Register();
+		virtual void ReceivedCommandForChild(DeviceData_Impl *pDeviceData_Impl,string &sCMD_Result,Message *pMessage);
+		virtual void ReceivedUnknownCommand(string &sCMD_Result,Message *pMessage);
 //<-dceag-const-e->
 
 //<-dceag-const2-b->
-    // The following constructor is only used if this a class instance embedded within a DCE Device.  In that case, it won't create it's own connection to the router
-    // You can delete this whole section and put an ! after dceag-const2-b tag if you don't want this constructor.  Do the same in the implementation file
-      Game_Player (Command_Impl * pPrimaryDeviceCommand,
-		   DeviceData_Impl * pData, Event_Impl * pEvent,
-		   Router * pRouter);
+		// The following constructor is only used if this a class instance embedded within a DCE Device.  In that case, it won't create it's own connection to the router
+		// You can delete this whole section and put an ! after dceag-const2-b tag if you don't want this constructor.  Do the same in the implementation file
+		Game_Player(Command_Impl *pPrimaryDeviceCommand, DeviceData_Impl *pData, Event_Impl *pEvent, Router *pRouter);
 //<-dceag-const2-e->
 
 //<-dceag-h-b->
-    /*
-       AUTO-GENERATED SECTION
-       Do not change the declarations
-     */
+	/*
+				AUTO-GENERATED SECTION
+				Do not change the declarations
+	*/
 
-    /*
-     *****DATA***** accessors inherited from base class
-     string DATA_Get_Name();
-     bool DATA_Get_Only_One_Per_PC();
-     string DATA_Get_Hardware_acceleration();
+	/*
+			*****DATA***** accessors inherited from base class
+	string DATA_Get_Name();
+	bool DATA_Get_Only_One_Per_PC();
+	string DATA_Get_Hardware_acceleration();
 
-     *****EVENT***** accessors inherited from base class
-     void EVENT_Playback_Info_Changed(string sMediaDescription,string sSectionDescription,string sSynposisDescription);
-     void EVENT_Menu_Onscreen(int iStream_ID,bool bOnOff);
-     void EVENT_Playback_Completed(string sMRL,int iStream_ID,bool bWith_Errors);
-     void EVENT_Playback_Started(string sMRL,int iStream_ID,string sSectionDescription,string sAudio,string sVideo);
+			*****EVENT***** accessors inherited from base class
+	void EVENT_Playback_Info_Changed(string sMediaDescription,string sSectionDescription,string sSynposisDescription);
+	void EVENT_Menu_Onscreen(int iStream_ID,bool bOnOff);
+	void EVENT_Playback_Completed(string sMRL,int iStream_ID,bool bWith_Errors);
+	void EVENT_Playback_Started(string sMRL,int iStream_ID,string sSectionDescription,string sAudio,string sVideo);
 
-     *****COMMANDS***** we need to implement
-     */
+			*****COMMANDS***** we need to implement
+	*/
 
 
 	/** @brief COMMAND: #28 - Simulate Keypress */
@@ -152,16 +145,8 @@ namespace DCE
 		/** @param #50 Name */
 			/** The application to send the keypress to. If not specified, it goes to the DCE device. */
 
-    virtual void CMD_Simulate_Keypress (string sPK_Button, int iStreamID,
-					string sName)
-    {
-      string sCMD_Result;
-        CMD_Simulate_Keypress (sPK_Button.c_str (), iStreamID, sName.c_str (),
-			       sCMD_Result, NULL);
-    };
-    virtual void CMD_Simulate_Keypress (string sPK_Button, int iStreamID,
-					string sName, string & sCMD_Result,
-					Message * pMessage);
+	virtual void CMD_Simulate_Keypress(string sPK_Button,int iStreamID,string sName) { string sCMD_Result; CMD_Simulate_Keypress(sPK_Button.c_str(),iStreamID,sName.c_str(),sCMD_Result,NULL);};
+	virtual void CMD_Simulate_Keypress(string sPK_Button,int iStreamID,string sName,string &sCMD_Result,Message *pMessage);
 
 
 	/** @brief COMMAND: #29 - Simulate Mouse Click */
@@ -173,17 +158,8 @@ namespace DCE
 		/** @param #41 StreamID */
 			/** ID of stream to apply */
 
-    virtual void CMD_Simulate_Mouse_Click (int iPosition_X, int iPosition_Y,
-					   int iStreamID)
-    {
-      string sCMD_Result;
-      CMD_Simulate_Mouse_Click (iPosition_X, iPosition_Y, iStreamID,
-				sCMD_Result, NULL);
-    };
-    virtual void CMD_Simulate_Mouse_Click (int iPosition_X, int iPosition_Y,
-					   int iStreamID,
-					   string & sCMD_Result,
-					   Message * pMessage);
+	virtual void CMD_Simulate_Mouse_Click(int iPosition_X,int iPosition_Y,int iStreamID) { string sCMD_Result; CMD_Simulate_Mouse_Click(iPosition_X,iPosition_Y,iStreamID,sCMD_Result,NULL);};
+	virtual void CMD_Simulate_Mouse_Click(int iPosition_X,int iPosition_Y,int iStreamID,string &sCMD_Result,Message *pMessage);
 
 
 	/** @brief COMMAND: #32 - Update Object Image */
@@ -197,20 +173,8 @@ namespace DCE
 		/** @param #23 Disable Aspect Lock */
 			/** If 1, the image will be stretched to fit the object */
 
-    virtual void CMD_Update_Object_Image (string sPK_DesignObj, string sType,
-					  char *pData, int iData_Size,
-					  string sDisable_Aspect_Lock)
-    {
-      string sCMD_Result;
-      CMD_Update_Object_Image (sPK_DesignObj.c_str (), sType.c_str (), pData,
-			       iData_Size, sDisable_Aspect_Lock.c_str (),
-			       sCMD_Result, NULL);
-    };
-    virtual void CMD_Update_Object_Image (string sPK_DesignObj, string sType,
-					  char *pData, int iData_Size,
-					  string sDisable_Aspect_Lock,
-					  string & sCMD_Result,
-					  Message * pMessage);
+	virtual void CMD_Update_Object_Image(string sPK_DesignObj,string sType,char *pData,int iData_Size,string sDisable_Aspect_Lock) { string sCMD_Result; CMD_Update_Object_Image(sPK_DesignObj.c_str(),sType.c_str(),pData,iData_Size,sDisable_Aspect_Lock.c_str(),sCMD_Result,NULL);};
+	virtual void CMD_Update_Object_Image(string sPK_DesignObj,string sType,char *pData,int iData_Size,string sDisable_Aspect_Lock,string &sCMD_Result,Message *pMessage);
 
 
 	/** @brief COMMAND: #37 - Play Media */
@@ -224,16 +188,8 @@ namespace DCE
 		/** @param #59 MediaURL */
 			/** The file to play, or other media id.  The format is specific on the media type and the media player. */
 
-    virtual void CMD_Play_Media (int iPK_MediaType, int iStreamID,
-				 string sMediaPosition, string sMediaURL)
-    {
-      string sCMD_Result;
-      CMD_Play_Media (iPK_MediaType, iStreamID, sMediaPosition.c_str (),
-		      sMediaURL.c_str (), sCMD_Result, NULL);
-    };
-    virtual void CMD_Play_Media (int iPK_MediaType, int iStreamID,
-				 string sMediaPosition, string sMediaURL,
-				 string & sCMD_Result, Message * pMessage);
+	virtual void CMD_Play_Media(int iPK_MediaType,int iStreamID,string sMediaPosition,string sMediaURL) { string sCMD_Result; CMD_Play_Media(iPK_MediaType,iStreamID,sMediaPosition.c_str(),sMediaURL.c_str(),sCMD_Result,NULL);};
+	virtual void CMD_Play_Media(int iPK_MediaType,int iStreamID,string sMediaPosition,string sMediaURL,string &sCMD_Result,Message *pMessage);
 
 
 	/** @brief COMMAND: #38 - Stop Media */
@@ -243,13 +199,8 @@ namespace DCE
 		/** @param #42 MediaPosition */
 			/** The position at which this stream was last played. */
 
-    virtual void CMD_Stop_Media (int iStreamID, string * sMediaPosition)
-    {
-      string sCMD_Result;
-      CMD_Stop_Media (iStreamID, sMediaPosition, sCMD_Result, NULL);
-    };
-    virtual void CMD_Stop_Media (int iStreamID, string * sMediaPosition,
-				 string & sCMD_Result, Message * pMessage);
+	virtual void CMD_Stop_Media(int iStreamID,string *sMediaPosition) { string sCMD_Result; CMD_Stop_Media(iStreamID,sMediaPosition,sCMD_Result,NULL);};
+	virtual void CMD_Stop_Media(int iStreamID,string *sMediaPosition,string &sCMD_Result,Message *pMessage);
 
 
 	/** @brief COMMAND: #39 - Pause Media */
@@ -257,13 +208,8 @@ namespace DCE
 		/** @param #41 StreamID */
 			/** The media stream for which we need to pause playback. */
 
-    virtual void CMD_Pause_Media (int iStreamID)
-    {
-      string sCMD_Result;
-      CMD_Pause_Media (iStreamID, sCMD_Result, NULL);
-    };
-    virtual void CMD_Pause_Media (int iStreamID, string & sCMD_Result,
-				  Message * pMessage);
+	virtual void CMD_Pause_Media(int iStreamID) { string sCMD_Result; CMD_Pause_Media(iStreamID,sCMD_Result,NULL);};
+	virtual void CMD_Pause_Media(int iStreamID,string &sCMD_Result,Message *pMessage);
 
 
 	/** @brief COMMAND: #40 - Restart Media */
@@ -271,13 +217,8 @@ namespace DCE
 		/** @param #41 StreamID */
 			/** The media stream that we need to restart playback for. */
 
-    virtual void CMD_Restart_Media (int iStreamID)
-    {
-      string sCMD_Result;
-      CMD_Restart_Media (iStreamID, sCMD_Result, NULL);
-    };
-    virtual void CMD_Restart_Media (int iStreamID, string & sCMD_Result,
-				    Message * pMessage);
+	virtual void CMD_Restart_Media(int iStreamID) { string sCMD_Result; CMD_Restart_Media(iStreamID,sCMD_Result,NULL);};
+	virtual void CMD_Restart_Media(int iStreamID,string &sCMD_Result,Message *pMessage);
 
 
 	/** @brief COMMAND: #41 - Change Playback Speed */
@@ -289,19 +230,8 @@ namespace DCE
 		/** @param #220 Report */
 			/** If true, report this speed to the user on the OSD */
 
-    virtual void CMD_Change_Playback_Speed (int iStreamID,
-					    int iMediaPlaybackSpeed,
-					    bool bReport)
-    {
-      string sCMD_Result;
-      CMD_Change_Playback_Speed (iStreamID, iMediaPlaybackSpeed, bReport,
-				 sCMD_Result, NULL);
-    };
-    virtual void CMD_Change_Playback_Speed (int iStreamID,
-					    int iMediaPlaybackSpeed,
-					    bool bReport,
-					    string & sCMD_Result,
-					    Message * pMessage);
+	virtual void CMD_Change_Playback_Speed(int iStreamID,int iMediaPlaybackSpeed,bool bReport) { string sCMD_Result; CMD_Change_Playback_Speed(iStreamID,iMediaPlaybackSpeed,bReport,sCMD_Result,NULL);};
+	virtual void CMD_Change_Playback_Speed(int iStreamID,int iMediaPlaybackSpeed,bool bReport,string &sCMD_Result,Message *pMessage);
 
 
 	/** @brief COMMAND: #42 - Jump to Position in Stream */
@@ -311,17 +241,8 @@ namespace DCE
 		/** @param #41 StreamID */
 			/** The stream */
 
-    virtual void CMD_Jump_to_Position_in_Stream (string sValue_To_Assign,
-						 int iStreamID)
-    {
-      string sCMD_Result;
-      CMD_Jump_to_Position_in_Stream (sValue_To_Assign.c_str (), iStreamID,
-				      sCMD_Result, NULL);
-    };
-    virtual void CMD_Jump_to_Position_in_Stream (string sValue_To_Assign,
-						 int iStreamID,
-						 string & sCMD_Result,
-						 Message * pMessage);
+	virtual void CMD_Jump_to_Position_in_Stream(string sValue_To_Assign,int iStreamID) { string sCMD_Result; CMD_Jump_to_Position_in_Stream(sValue_To_Assign.c_str(),iStreamID,sCMD_Result,NULL);};
+	virtual void CMD_Jump_to_Position_in_Stream(string sValue_To_Assign,int iStreamID,string &sCMD_Result,Message *pMessage);
 
 
 	/** @brief COMMAND: #63 - Skip Fwd - Channel/Track Greater */
@@ -329,14 +250,8 @@ namespace DCE
 		/** @param #41 StreamID */
 			/** ID of stream to apply */
 
-    virtual void CMD_Skip_Fwd_ChannelTrack_Greater (int iStreamID)
-    {
-      string sCMD_Result;
-      CMD_Skip_Fwd_ChannelTrack_Greater (iStreamID, sCMD_Result, NULL);
-    };
-    virtual void CMD_Skip_Fwd_ChannelTrack_Greater (int iStreamID,
-						    string & sCMD_Result,
-						    Message * pMessage);
+	virtual void CMD_Skip_Fwd_ChannelTrack_Greater(int iStreamID) { string sCMD_Result; CMD_Skip_Fwd_ChannelTrack_Greater(iStreamID,sCMD_Result,NULL);};
+	virtual void CMD_Skip_Fwd_ChannelTrack_Greater(int iStreamID,string &sCMD_Result,Message *pMessage);
 
 
 	/** @brief COMMAND: #64 - Skip Back - Channel/Track Lower */
@@ -344,14 +259,8 @@ namespace DCE
 		/** @param #41 StreamID */
 			/** ID of stream to apply */
 
-    virtual void CMD_Skip_Back_ChannelTrack_Lower (int iStreamID)
-    {
-      string sCMD_Result;
-      CMD_Skip_Back_ChannelTrack_Lower (iStreamID, sCMD_Result, NULL);
-    };
-    virtual void CMD_Skip_Back_ChannelTrack_Lower (int iStreamID,
-						   string & sCMD_Result,
-						   Message * pMessage);
+	virtual void CMD_Skip_Back_ChannelTrack_Lower(int iStreamID) { string sCMD_Result; CMD_Skip_Back_ChannelTrack_Lower(iStreamID,sCMD_Result,NULL);};
+	virtual void CMD_Skip_Back_ChannelTrack_Lower(int iStreamID,string &sCMD_Result,Message *pMessage);
 
 
 	/** @brief COMMAND: #65 - Jump Position In Playlist */
@@ -361,17 +270,8 @@ namespace DCE
 		/** @param #41 StreamID */
 			/** ID of stream to apply */
 
-    virtual void CMD_Jump_Position_In_Playlist (string sValue_To_Assign,
-						int iStreamID)
-    {
-      string sCMD_Result;
-      CMD_Jump_Position_In_Playlist (sValue_To_Assign.c_str (), iStreamID,
-				     sCMD_Result, NULL);
-    };
-    virtual void CMD_Jump_Position_In_Playlist (string sValue_To_Assign,
-						int iStreamID,
-						string & sCMD_Result,
-						Message * pMessage);
+	virtual void CMD_Jump_Position_In_Playlist(string sValue_To_Assign,int iStreamID) { string sCMD_Result; CMD_Jump_Position_In_Playlist(sValue_To_Assign.c_str(),iStreamID,sCMD_Result,NULL);};
+	virtual void CMD_Jump_Position_In_Playlist(string sValue_To_Assign,int iStreamID,string &sCMD_Result,Message *pMessage);
 
 
 	/** @brief COMMAND: #81 - Navigate Next */
@@ -379,13 +279,8 @@ namespace DCE
 		/** @param #41 StreamID */
 			/** The stream on which to do the navigation. */
 
-    virtual void CMD_Navigate_Next (int iStreamID)
-    {
-      string sCMD_Result;
-      CMD_Navigate_Next (iStreamID, sCMD_Result, NULL);
-    };
-    virtual void CMD_Navigate_Next (int iStreamID, string & sCMD_Result,
-				    Message * pMessage);
+	virtual void CMD_Navigate_Next(int iStreamID) { string sCMD_Result; CMD_Navigate_Next(iStreamID,sCMD_Result,NULL);};
+	virtual void CMD_Navigate_Next(int iStreamID,string &sCMD_Result,Message *pMessage);
 
 
 	/** @brief COMMAND: #82 - Navigate Prev */
@@ -393,13 +288,8 @@ namespace DCE
 		/** @param #41 StreamID */
 			/** The stream on which to do the navigation. */
 
-    virtual void CMD_Navigate_Prev (int iStreamID)
-    {
-      string sCMD_Result;
-      CMD_Navigate_Prev (iStreamID, sCMD_Result, NULL);
-    };
-    virtual void CMD_Navigate_Prev (int iStreamID, string & sCMD_Result,
-				    Message * pMessage);
+	virtual void CMD_Navigate_Prev(int iStreamID) { string sCMD_Result; CMD_Navigate_Prev(iStreamID,sCMD_Result,NULL);};
+	virtual void CMD_Navigate_Prev(int iStreamID,string &sCMD_Result,Message *pMessage);
 
 
 	/** @brief COMMAND: #84 - Get Video Frame */
@@ -417,21 +307,8 @@ namespace DCE
 		/** @param #61 Height */
 			/** Frame height */
 
-    virtual void CMD_Get_Video_Frame (string sDisable_Aspect_Lock,
-				      int iStreamID, int iWidth, int iHeight,
-				      char **pData, int *iData_Size,
-				      string * sFormat)
-    {
-      string sCMD_Result;
-      CMD_Get_Video_Frame (sDisable_Aspect_Lock.c_str (), iStreamID, iWidth,
-			   iHeight, pData, iData_Size, sFormat, sCMD_Result,
-			   NULL);
-    };
-    virtual void CMD_Get_Video_Frame (string sDisable_Aspect_Lock,
-				      int iStreamID, int iWidth, int iHeight,
-				      char **pData, int *iData_Size,
-				      string * sFormat, string & sCMD_Result,
-				      Message * pMessage);
+	virtual void CMD_Get_Video_Frame(string sDisable_Aspect_Lock,int iStreamID,int iWidth,int iHeight,char **pData,int *iData_Size,string *sFormat) { string sCMD_Result; CMD_Get_Video_Frame(sDisable_Aspect_Lock.c_str(),iStreamID,iWidth,iHeight,pData,iData_Size,sFormat,sCMD_Result,NULL);};
+	virtual void CMD_Get_Video_Frame(string sDisable_Aspect_Lock,int iStreamID,int iWidth,int iHeight,char **pData,int *iData_Size,string *sFormat,string &sCMD_Result,Message *pMessage);
 
 
 	/** @brief COMMAND: #87 - Goto Media Menu */
@@ -445,14 +322,8 @@ namespace DCE
 1 - Title menu
 2 - Media menu */
 
-    virtual void CMD_Goto_Media_Menu (int iStreamID, int iMenuType)
-    {
-      string sCMD_Result;
-      CMD_Goto_Media_Menu (iStreamID, iMenuType, sCMD_Result, NULL);
-    };
-    virtual void CMD_Goto_Media_Menu (int iStreamID, int iMenuType,
-				      string & sCMD_Result,
-				      Message * pMessage);
+	virtual void CMD_Goto_Media_Menu(int iStreamID,int iMenuType) { string sCMD_Result; CMD_Goto_Media_Menu(iStreamID,iMenuType,sCMD_Result,NULL);};
+	virtual void CMD_Goto_Media_Menu(int iStreamID,int iMenuType,string &sCMD_Result,Message *pMessage);
 
 
 	/** @brief COMMAND: #92 - Pause */
@@ -460,13 +331,8 @@ namespace DCE
 		/** @param #41 StreamID */
 			/** ID of stream to apply */
 
-    virtual void CMD_Pause (int iStreamID)
-    {
-      string sCMD_Result;
-      CMD_Pause (iStreamID, sCMD_Result, NULL);
-    };
-    virtual void CMD_Pause (int iStreamID, string & sCMD_Result,
-			    Message * pMessage);
+	virtual void CMD_Pause(int iStreamID) { string sCMD_Result; CMD_Pause(iStreamID,sCMD_Result,NULL);};
+	virtual void CMD_Pause(int iStreamID,string &sCMD_Result,Message *pMessage);
 
 
 	/** @brief COMMAND: #95 - Stop */
@@ -476,24 +342,22 @@ namespace DCE
 		/** @param #203 Eject */
 			/** If true, the drive will be ejected if there is no media currently playing, so a remote's stop button acts as stop/eject. */
 
-    virtual void CMD_Stop (int iStreamID, bool bEject)
-    {
-      string sCMD_Result;
-      CMD_Stop (iStreamID, bEject, sCMD_Result, NULL);
-    };
-    virtual void CMD_Stop (int iStreamID, bool bEject, string & sCMD_Result,
-			   Message * pMessage);
+	virtual void CMD_Stop(int iStreamID,bool bEject) { string sCMD_Result; CMD_Stop(iStreamID,bEject,sCMD_Result,NULL);};
+	virtual void CMD_Stop(int iStreamID,bool bEject,string &sCMD_Result,Message *pMessage);
+
+
+	/** @brief COMMAND: #102 - Record */
+	/** Record the current game. Toggle on off */
+
+	virtual void CMD_Record() { string sCMD_Result; CMD_Record(sCMD_Result,NULL);};
+	virtual void CMD_Record(string &sCMD_Result,Message *pMessage);
 
 
 	/** @brief COMMAND: #126 - Guide */
 	/** Show guide information.  For a dvd this may be the menu, just like the menu command */
 
-    virtual void CMD_Guide ()
-    {
-      string sCMD_Result;
-      CMD_Guide (sCMD_Result, NULL);
-    };
-    virtual void CMD_Guide (string & sCMD_Result, Message * pMessage);
+	virtual void CMD_Guide() { string sCMD_Result; CMD_Guide(sCMD_Result,NULL);};
+	virtual void CMD_Guide(string &sCMD_Result,Message *pMessage);
 
 
 	/** @brief COMMAND: #139 - Play */
@@ -501,13 +365,8 @@ namespace DCE
 		/** @param #41 StreamID */
 			/** ID of stream to apply */
 
-    virtual void CMD_Play (int iStreamID)
-    {
-      string sCMD_Result;
-      CMD_Play (iStreamID, sCMD_Result, NULL);
-    };
-    virtual void CMD_Play (int iStreamID, string & sCMD_Result,
-			   Message * pMessage);
+	virtual void CMD_Play(int iStreamID) { string sCMD_Result; CMD_Play(iStreamID,sCMD_Result,NULL);};
+	virtual void CMD_Play(int iStreamID,string &sCMD_Result,Message *pMessage);
 
 
 	/** @brief COMMAND: #190 - Enter/Go */
@@ -515,13 +374,8 @@ namespace DCE
 		/** @param #41 StreamID */
 			/** ID of stream to apply */
 
-    virtual void CMD_EnterGo (int iStreamID)
-    {
-      string sCMD_Result;
-      CMD_EnterGo (iStreamID, sCMD_Result, NULL);
-    };
-    virtual void CMD_EnterGo (int iStreamID, string & sCMD_Result,
-			      Message * pMessage);
+	virtual void CMD_EnterGo(int iStreamID) { string sCMD_Result; CMD_EnterGo(iStreamID,sCMD_Result,NULL);};
+	virtual void CMD_EnterGo(int iStreamID,string &sCMD_Result,Message *pMessage);
 
 
 	/** @brief COMMAND: #200 - Move Up */
@@ -529,13 +383,8 @@ namespace DCE
 		/** @param #41 StreamID */
 			/** ID of stream to apply */
 
-    virtual void CMD_Move_Up (int iStreamID)
-    {
-      string sCMD_Result;
-      CMD_Move_Up (iStreamID, sCMD_Result, NULL);
-    };
-    virtual void CMD_Move_Up (int iStreamID, string & sCMD_Result,
-			      Message * pMessage);
+	virtual void CMD_Move_Up(int iStreamID) { string sCMD_Result; CMD_Move_Up(iStreamID,sCMD_Result,NULL);};
+	virtual void CMD_Move_Up(int iStreamID,string &sCMD_Result,Message *pMessage);
 
 
 	/** @brief COMMAND: #201 - Move Down */
@@ -543,13 +392,8 @@ namespace DCE
 		/** @param #41 StreamID */
 			/** ID of stream to apply */
 
-    virtual void CMD_Move_Down (int iStreamID)
-    {
-      string sCMD_Result;
-      CMD_Move_Down (iStreamID, sCMD_Result, NULL);
-    };
-    virtual void CMD_Move_Down (int iStreamID, string & sCMD_Result,
-				Message * pMessage);
+	virtual void CMD_Move_Down(int iStreamID) { string sCMD_Result; CMD_Move_Down(iStreamID,sCMD_Result,NULL);};
+	virtual void CMD_Move_Down(int iStreamID,string &sCMD_Result,Message *pMessage);
 
 
 	/** @brief COMMAND: #202 - Move Left */
@@ -557,13 +401,8 @@ namespace DCE
 		/** @param #41 StreamID */
 			/** ID of stream to apply */
 
-    virtual void CMD_Move_Left (int iStreamID)
-    {
-      string sCMD_Result;
-      CMD_Move_Left (iStreamID, sCMD_Result, NULL);
-    };
-    virtual void CMD_Move_Left (int iStreamID, string & sCMD_Result,
-				Message * pMessage);
+	virtual void CMD_Move_Left(int iStreamID) { string sCMD_Result; CMD_Move_Left(iStreamID,sCMD_Result,NULL);};
+	virtual void CMD_Move_Left(int iStreamID,string &sCMD_Result,Message *pMessage);
 
 
 	/** @brief COMMAND: #203 - Move Right */
@@ -571,123 +410,78 @@ namespace DCE
 		/** @param #41 StreamID */
 			/** ID of stream to apply */
 
-    virtual void CMD_Move_Right (int iStreamID)
-    {
-      string sCMD_Result;
-      CMD_Move_Right (iStreamID, sCMD_Result, NULL);
-    };
-    virtual void CMD_Move_Right (int iStreamID, string & sCMD_Result,
-				 Message * pMessage);
+	virtual void CMD_Move_Right(int iStreamID) { string sCMD_Result; CMD_Move_Right(iStreamID,sCMD_Result,NULL);};
+	virtual void CMD_Move_Right(int iStreamID,string &sCMD_Result,Message *pMessage);
 
 
 	/** @brief COMMAND: #204 - 0 */
 	/** 0 */
 
-    virtual void CMD_0 ()
-    {
-      string sCMD_Result;
-      CMD_0 (sCMD_Result, NULL);
-    };
-    virtual void CMD_0 (string & sCMD_Result, Message * pMessage);
+	virtual void CMD_0() { string sCMD_Result; CMD_0(sCMD_Result,NULL);};
+	virtual void CMD_0(string &sCMD_Result,Message *pMessage);
 
 
 	/** @brief COMMAND: #205 - 1 */
 	/** 1 */
 
-    virtual void CMD_1 ()
-    {
-      string sCMD_Result;
-      CMD_1 (sCMD_Result, NULL);
-    };
-    virtual void CMD_1 (string & sCMD_Result, Message * pMessage);
+	virtual void CMD_1() { string sCMD_Result; CMD_1(sCMD_Result,NULL);};
+	virtual void CMD_1(string &sCMD_Result,Message *pMessage);
 
 
 	/** @brief COMMAND: #206 - 2 */
 	/** 2 */
 
-    virtual void CMD_2 ()
-    {
-      string sCMD_Result;
-      CMD_2 (sCMD_Result, NULL);
-    };
-    virtual void CMD_2 (string & sCMD_Result, Message * pMessage);
+	virtual void CMD_2() { string sCMD_Result; CMD_2(sCMD_Result,NULL);};
+	virtual void CMD_2(string &sCMD_Result,Message *pMessage);
 
 
 	/** @brief COMMAND: #207 - 3 */
 	/** 3 */
 
-    virtual void CMD_3 ()
-    {
-      string sCMD_Result;
-      CMD_3 (sCMD_Result, NULL);
-    };
-    virtual void CMD_3 (string & sCMD_Result, Message * pMessage);
+	virtual void CMD_3() { string sCMD_Result; CMD_3(sCMD_Result,NULL);};
+	virtual void CMD_3(string &sCMD_Result,Message *pMessage);
 
 
 	/** @brief COMMAND: #208 - 4 */
 	/** 4 */
 
-    virtual void CMD_4 ()
-    {
-      string sCMD_Result;
-      CMD_4 (sCMD_Result, NULL);
-    };
-    virtual void CMD_4 (string & sCMD_Result, Message * pMessage);
+	virtual void CMD_4() { string sCMD_Result; CMD_4(sCMD_Result,NULL);};
+	virtual void CMD_4(string &sCMD_Result,Message *pMessage);
 
 
 	/** @brief COMMAND: #209 - 5 */
 	/** 5 */
 
-    virtual void CMD_5 ()
-    {
-      string sCMD_Result;
-      CMD_5 (sCMD_Result, NULL);
-    };
-    virtual void CMD_5 (string & sCMD_Result, Message * pMessage);
+	virtual void CMD_5() { string sCMD_Result; CMD_5(sCMD_Result,NULL);};
+	virtual void CMD_5(string &sCMD_Result,Message *pMessage);
 
 
 	/** @brief COMMAND: #210 - 6 */
 	/** 6 */
 
-    virtual void CMD_6 ()
-    {
-      string sCMD_Result;
-      CMD_6 (sCMD_Result, NULL);
-    };
-    virtual void CMD_6 (string & sCMD_Result, Message * pMessage);
+	virtual void CMD_6() { string sCMD_Result; CMD_6(sCMD_Result,NULL);};
+	virtual void CMD_6(string &sCMD_Result,Message *pMessage);
 
 
 	/** @brief COMMAND: #211 - 7 */
 	/** 7 */
 
-    virtual void CMD_7 ()
-    {
-      string sCMD_Result;
-      CMD_7 (sCMD_Result, NULL);
-    };
-    virtual void CMD_7 (string & sCMD_Result, Message * pMessage);
+	virtual void CMD_7() { string sCMD_Result; CMD_7(sCMD_Result,NULL);};
+	virtual void CMD_7(string &sCMD_Result,Message *pMessage);
 
 
 	/** @brief COMMAND: #212 - 8 */
 	/** 8 */
 
-    virtual void CMD_8 ()
-    {
-      string sCMD_Result;
-      CMD_8 (sCMD_Result, NULL);
-    };
-    virtual void CMD_8 (string & sCMD_Result, Message * pMessage);
+	virtual void CMD_8() { string sCMD_Result; CMD_8(sCMD_Result,NULL);};
+	virtual void CMD_8(string &sCMD_Result,Message *pMessage);
 
 
 	/** @brief COMMAND: #213 - 9 */
 	/** 9 */
 
-    virtual void CMD_9 ()
-    {
-      string sCMD_Result;
-      CMD_9 (sCMD_Result, NULL);
-    };
-    virtual void CMD_9 (string & sCMD_Result, Message * pMessage);
+	virtual void CMD_9() { string sCMD_Result; CMD_9(sCMD_Result,NULL);};
+	virtual void CMD_9(string &sCMD_Result,Message *pMessage);
 
 
 	/** @brief COMMAND: #240 - Back / Prior Menu */
@@ -695,13 +489,8 @@ namespace DCE
 		/** @param #41 StreamID */
 			/** ID of stream to apply */
 
-    virtual void CMD_Back_Prior_Menu (int iStreamID)
-    {
-      string sCMD_Result;
-      CMD_Back_Prior_Menu (iStreamID, sCMD_Result, NULL);
-    };
-    virtual void CMD_Back_Prior_Menu (int iStreamID, string & sCMD_Result,
-				      Message * pMessage);
+	virtual void CMD_Back_Prior_Menu(int iStreamID) { string sCMD_Result; CMD_Back_Prior_Menu(iStreamID,sCMD_Result,NULL);};
+	virtual void CMD_Back_Prior_Menu(int iStreamID,string &sCMD_Result,Message *pMessage);
 
 
 	/** @brief COMMAND: #249 - Start Streaming */
@@ -717,20 +506,8 @@ namespace DCE
 		/** @param #105 StreamingTargets */
 			/** Target destinations for streaming. Semantics dependent on the target device. */
 
-    virtual void CMD_Start_Streaming (int iPK_MediaType, int iStreamID,
-				      string sMediaPosition, string sMediaURL,
-				      string sStreamingTargets)
-    {
-      string sCMD_Result;
-      CMD_Start_Streaming (iPK_MediaType, iStreamID, sMediaPosition.c_str (),
-			   sMediaURL.c_str (), sStreamingTargets.c_str (),
-			   sCMD_Result, NULL);
-    };
-    virtual void CMD_Start_Streaming (int iPK_MediaType, int iStreamID,
-				      string sMediaPosition, string sMediaURL,
-				      string sStreamingTargets,
-				      string & sCMD_Result,
-				      Message * pMessage);
+	virtual void CMD_Start_Streaming(int iPK_MediaType,int iStreamID,string sMediaPosition,string sMediaURL,string sStreamingTargets) { string sCMD_Result; CMD_Start_Streaming(iPK_MediaType,iStreamID,sMediaPosition.c_str(),sMediaURL.c_str(),sStreamingTargets.c_str(),sCMD_Result,NULL);};
+	virtual void CMD_Start_Streaming(int iPK_MediaType,int iStreamID,string sMediaPosition,string sMediaURL,string sStreamingTargets,string &sCMD_Result,Message *pMessage);
 
 
 	/** @brief COMMAND: #259 - Report Playback Position */
@@ -742,17 +519,8 @@ namespace DCE
 		/** @param #42 MediaPosition */
 			/** A media player readable representation of the current position including all options */
 
-    virtual void CMD_Report_Playback_Position (int iStreamID, string * sText,
-					       string * sMediaPosition)
-    {
-      string sCMD_Result;
-      CMD_Report_Playback_Position (iStreamID, sText, sMediaPosition,
-				    sCMD_Result, NULL);
-    };
-    virtual void CMD_Report_Playback_Position (int iStreamID, string * sText,
-					       string * sMediaPosition,
-					       string & sCMD_Result,
-					       Message * pMessage);
+	virtual void CMD_Report_Playback_Position(int iStreamID,string *sText,string *sMediaPosition) { string sCMD_Result; CMD_Report_Playback_Position(iStreamID,sText,sMediaPosition,sCMD_Result,NULL);};
+	virtual void CMD_Report_Playback_Position(int iStreamID,string *sText,string *sMediaPosition,string &sCMD_Result,Message *pMessage);
 
 
 	/** @brief COMMAND: #412 - Set Media Position */
@@ -762,15 +530,8 @@ namespace DCE
 		/** @param #42 MediaPosition */
 			/** The media position.  When MediaPlugin gets this, it will be a bookmark ID, when a media player gets it, the string */
 
-    virtual void CMD_Set_Media_Position (int iStreamID, string sMediaPosition)
-    {
-      string sCMD_Result;
-      CMD_Set_Media_Position (iStreamID, sMediaPosition.c_str (), sCMD_Result,
-			      NULL);
-    };
-    virtual void CMD_Set_Media_Position (int iStreamID, string sMediaPosition,
-					 string & sCMD_Result,
-					 Message * pMessage);
+	virtual void CMD_Set_Media_Position(int iStreamID,string sMediaPosition) { string sCMD_Result; CMD_Set_Media_Position(iStreamID,sMediaPosition.c_str(),sCMD_Result,NULL);};
+	virtual void CMD_Set_Media_Position(int iStreamID,string sMediaPosition,string &sCMD_Result,Message *pMessage);
 
 
 	/** @brief COMMAND: #548 - Menu */
@@ -780,13 +541,8 @@ namespace DCE
 		/** @param #41 StreamID */
 			/** ID of stream to apply */
 
-    virtual void CMD_Menu (string sText, int iStreamID)
-    {
-      string sCMD_Result;
-      CMD_Menu (sText.c_str (), iStreamID, sCMD_Result, NULL);
-    };
-    virtual void CMD_Menu (string sText, int iStreamID, string & sCMD_Result,
-			   Message * pMessage);
+	virtual void CMD_Menu(string sText,int iStreamID) { string sCMD_Result; CMD_Menu(sText.c_str(),iStreamID,sCMD_Result,NULL);};
+	virtual void CMD_Menu(string sText,int iStreamID,string &sCMD_Result,Message *pMessage);
 
 
 	/** @brief COMMAND: #812 - Application Exited */
@@ -796,14 +552,8 @@ namespace DCE
 		/** @param #228 Exit Code */
 			/** Exit Code to be passed to the ApplicationExited function */
 
-    virtual void CMD_Application_Exited (int iPID, int iExit_Code)
-    {
-      string sCMD_Result;
-      CMD_Application_Exited (iPID, iExit_Code, sCMD_Result, NULL);
-    };
-    virtual void CMD_Application_Exited (int iPID, int iExit_Code,
-					 string & sCMD_Result,
-					 Message * pMessage);
+	virtual void CMD_Application_Exited(int iPID,int iExit_Code) { string sCMD_Result; CMD_Application_Exited(iPID,iExit_Code,sCMD_Result,NULL);};
+	virtual void CMD_Application_Exited(int iPID,int iExit_Code,string &sCMD_Result,Message *pMessage);
 
 
 	/** @brief COMMAND: #916 - Set Aspect Ratio */
@@ -813,15 +563,8 @@ namespace DCE
 		/** @param #260 Aspect Ratio */
 			/** aspect ratio to set: auto, 1:1, 4:3, 16:9, 2.11:1 */
 
-    virtual void CMD_Set_Aspect_Ratio (int iStreamID, string sAspect_Ratio)
-    {
-      string sCMD_Result;
-      CMD_Set_Aspect_Ratio (iStreamID, sAspect_Ratio.c_str (), sCMD_Result,
-			    NULL);
-    };
-    virtual void CMD_Set_Aspect_Ratio (int iStreamID, string sAspect_Ratio,
-				       string & sCMD_Result,
-				       Message * pMessage);
+	virtual void CMD_Set_Aspect_Ratio(int iStreamID,string sAspect_Ratio) { string sCMD_Result; CMD_Set_Aspect_Ratio(iStreamID,sAspect_Ratio.c_str(),sCMD_Result,NULL);};
+	virtual void CMD_Set_Aspect_Ratio(int iStreamID,string sAspect_Ratio,string &sCMD_Result,Message *pMessage);
 
 
 	/** @brief COMMAND: #917 - Set Zoom */
@@ -831,13 +574,8 @@ namespace DCE
 		/** @param #261 Zoom Level */
 			/** Zoom level to set */
 
-    virtual void CMD_Set_Zoom (int iStreamID, string sZoom_Level)
-    {
-      string sCMD_Result;
-      CMD_Set_Zoom (iStreamID, sZoom_Level.c_str (), sCMD_Result, NULL);
-    };
-    virtual void CMD_Set_Zoom (int iStreamID, string sZoom_Level,
-			       string & sCMD_Result, Message * pMessage);
+	virtual void CMD_Set_Zoom(int iStreamID,string sZoom_Level) { string sCMD_Result; CMD_Set_Zoom(iStreamID,sZoom_Level.c_str(),sCMD_Result,NULL);};
+	virtual void CMD_Set_Zoom(int iStreamID,string sZoom_Level,string &sCMD_Result,Message *pMessage);
 
 
 	/** @brief COMMAND: #920 - Set Media ID */
@@ -847,13 +585,8 @@ namespace DCE
 		/** @param #41 StreamID */
 			/** ID of stream to set media information for */
 
-    virtual void CMD_Set_Media_ID (string sID, int iStreamID)
-    {
-      string sCMD_Result;
-      CMD_Set_Media_ID (sID.c_str (), iStreamID, sCMD_Result, NULL);
-    };
-    virtual void CMD_Set_Media_ID (string sID, int iStreamID,
-				   string & sCMD_Result, Message * pMessage);
+	virtual void CMD_Set_Media_ID(string sID,int iStreamID) { string sCMD_Result; CMD_Set_Media_ID(sID.c_str(),iStreamID,sCMD_Result,NULL);};
+	virtual void CMD_Set_Media_ID(string sID,int iStreamID,string &sCMD_Result,Message *pMessage);
 
 
 	/** @brief COMMAND: #942 - Get Ripping Status */
@@ -861,125 +594,78 @@ namespace DCE
 		/** @param #199 Status */
 			/** Ripping status */
 
-    virtual void CMD_Get_Ripping_Status (string * sStatus)
-    {
-      string sCMD_Result;
-      CMD_Get_Ripping_Status (sStatus, sCMD_Result, NULL);
-    };
-    virtual void CMD_Get_Ripping_Status (string * sStatus,
-					 string & sCMD_Result,
-					 Message * pMessage);
+	virtual void CMD_Get_Ripping_Status(string *sStatus) { string sCMD_Result; CMD_Get_Ripping_Status(sStatus,sCMD_Result,NULL);};
+	virtual void CMD_Get_Ripping_Status(string *sStatus,string &sCMD_Result,Message *pMessage);
 
 
 	/** @brief COMMAND: #943 - Game 1P Start */
 	/** 1P start */
 
-    virtual void CMD_Game_1P_Start ()
-    {
-      string sCMD_Result;
-      CMD_Game_1P_Start (sCMD_Result, NULL);
-    };
-    virtual void CMD_Game_1P_Start (string & sCMD_Result, Message * pMessage);
+	virtual void CMD_Game_1P_Start() { string sCMD_Result; CMD_Game_1P_Start(sCMD_Result,NULL);};
+	virtual void CMD_Game_1P_Start(string &sCMD_Result,Message *pMessage);
 
 
 	/** @brief COMMAND: #944 - Game 2P Start */
 	/** 2P Start */
 
-    virtual void CMD_Game_2P_Start ()
-    {
-      string sCMD_Result;
-      CMD_Game_2P_Start (sCMD_Result, NULL);
-    };
-    virtual void CMD_Game_2P_Start (string & sCMD_Result, Message * pMessage);
+	virtual void CMD_Game_2P_Start() { string sCMD_Result; CMD_Game_2P_Start(sCMD_Result,NULL);};
+	virtual void CMD_Game_2P_Start(string &sCMD_Result,Message *pMessage);
 
 
 	/** @brief COMMAND: #945 - Game 3P Start */
 	/** 3P Start */
 
-    virtual void CMD_Game_3P_Start ()
-    {
-      string sCMD_Result;
-      CMD_Game_3P_Start (sCMD_Result, NULL);
-    };
-    virtual void CMD_Game_3P_Start (string & sCMD_Result, Message * pMessage);
+	virtual void CMD_Game_3P_Start() { string sCMD_Result; CMD_Game_3P_Start(sCMD_Result,NULL);};
+	virtual void CMD_Game_3P_Start(string &sCMD_Result,Message *pMessage);
 
 
 	/** @brief COMMAND: #946 - Game 4P Start */
 	/** 4P Start */
 
-    virtual void CMD_Game_4P_Start ()
-    {
-      string sCMD_Result;
-      CMD_Game_4P_Start (sCMD_Result, NULL);
-    };
-    virtual void CMD_Game_4P_Start (string & sCMD_Result, Message * pMessage);
+	virtual void CMD_Game_4P_Start() { string sCMD_Result; CMD_Game_4P_Start(sCMD_Result,NULL);};
+	virtual void CMD_Game_4P_Start(string &sCMD_Result,Message *pMessage);
 
 
 	/** @brief COMMAND: #947 - Game Insert Coin */
 	/** Insert Coin */
 
-    virtual void CMD_Game_Insert_Coin ()
-    {
-      string sCMD_Result;
-      CMD_Game_Insert_Coin (sCMD_Result, NULL);
-    };
-    virtual void CMD_Game_Insert_Coin (string & sCMD_Result,
-				       Message * pMessage);
+	virtual void CMD_Game_Insert_Coin() { string sCMD_Result; CMD_Game_Insert_Coin(sCMD_Result,NULL);};
+	virtual void CMD_Game_Insert_Coin(string &sCMD_Result,Message *pMessage);
 
 
 	/** @brief COMMAND: #948 - Game Service */
 	/** Service Mode */
 
-    virtual void CMD_Game_Service ()
-    {
-      string sCMD_Result;
-      CMD_Game_Service (sCMD_Result, NULL);
-    };
-    virtual void CMD_Game_Service (string & sCMD_Result, Message * pMessage);
+	virtual void CMD_Game_Service() { string sCMD_Result; CMD_Game_Service(sCMD_Result,NULL);};
+	virtual void CMD_Game_Service(string &sCMD_Result,Message *pMessage);
 
 
 	/** @brief COMMAND: #949 - Game Start */
 	/** Game Start */
 
-    virtual void CMD_Game_Start ()
-    {
-      string sCMD_Result;
-      CMD_Game_Start (sCMD_Result, NULL);
-    };
-    virtual void CMD_Game_Start (string & sCMD_Result, Message * pMessage);
+	virtual void CMD_Game_Start() { string sCMD_Result; CMD_Game_Start(sCMD_Result,NULL);};
+	virtual void CMD_Game_Start(string &sCMD_Result,Message *pMessage);
 
 
 	/** @brief COMMAND: #950 - Game Select */
 	/** Game Select */
 
-    virtual void CMD_Game_Select ()
-    {
-      string sCMD_Result;
-      CMD_Game_Select (sCMD_Result, NULL);
-    };
-    virtual void CMD_Game_Select (string & sCMD_Result, Message * pMessage);
+	virtual void CMD_Game_Select() { string sCMD_Result; CMD_Game_Select(sCMD_Result,NULL);};
+	virtual void CMD_Game_Select(string &sCMD_Result,Message *pMessage);
 
 
 	/** @brief COMMAND: #951 - Game Option */
 	/** Game Option */
 
-    virtual void CMD_Game_Option ()
-    {
-      string sCMD_Result;
-      CMD_Game_Option (sCMD_Result, NULL);
-    };
-    virtual void CMD_Game_Option (string & sCMD_Result, Message * pMessage);
+	virtual void CMD_Game_Option() { string sCMD_Result; CMD_Game_Option(sCMD_Result,NULL);};
+	virtual void CMD_Game_Option(string &sCMD_Result,Message *pMessage);
 
 
 	/** @brief COMMAND: #952 - Game Reset */
 	/** Game Reset */
 
-    virtual void CMD_Game_Reset ()
-    {
-      string sCMD_Result;
-      CMD_Game_Reset (sCMD_Result, NULL);
-    };
-    virtual void CMD_Game_Reset (string & sCMD_Result, Message * pMessage);
+	virtual void CMD_Game_Reset() { string sCMD_Result; CMD_Game_Reset(sCMD_Result,NULL);};
+	virtual void CMD_Game_Reset(string &sCMD_Result,Message *pMessage);
 
 
 	/** @brief COMMAND: #982 - Set Game Options */
@@ -987,14 +673,8 @@ namespace DCE
 		/** @param #5 Value To Assign */
 			/** Dependent on driver, but usually a single line in the format of key,value */
 
-    virtual void CMD_Set_Game_Options (string sValue_To_Assign)
-    {
-      string sCMD_Result;
-      CMD_Set_Game_Options (sValue_To_Assign.c_str (), sCMD_Result, NULL);
-    };
-    virtual void CMD_Set_Game_Options (string sValue_To_Assign,
-				       string & sCMD_Result,
-				       Message * pMessage);
+	virtual void CMD_Set_Game_Options(string sValue_To_Assign) { string sCMD_Result; CMD_Set_Game_Options(sValue_To_Assign.c_str(),sCMD_Result,NULL);};
+	virtual void CMD_Set_Game_Options(string sValue_To_Assign,string &sCMD_Result,Message *pMessage);
 
 
 	/** @brief COMMAND: #983 - Get Game Options */
@@ -1004,21 +684,10 @@ namespace DCE
 		/** @param #219 Path */
 			/** The Parameter to return, usually left side of comma in Set Game Options. */
 
-    virtual void CMD_Get_Game_Options (string sPath,
-				       string * sValue_To_Assign)
-    {
-      string sCMD_Result;
-      CMD_Get_Game_Options (sPath.c_str (), sValue_To_Assign, sCMD_Result,
-			    NULL);
-    };
-    virtual void CMD_Get_Game_Options (string sPath,
-				       string * sValue_To_Assign,
-				       string & sCMD_Result,
-				       Message * pMessage);
+	virtual void CMD_Get_Game_Options(string sPath,string *sValue_To_Assign) { string sCMD_Result; CMD_Get_Game_Options(sPath.c_str(),sValue_To_Assign,sCMD_Result,NULL);};
+	virtual void CMD_Get_Game_Options(string sPath,string *sValue_To_Assign,string &sCMD_Result,Message *pMessage);
 
 //<-dceag-h-e->
-
-    virtual void CMD_Record(string & sCMD_Result, Message *pMessage);
 
   };
 

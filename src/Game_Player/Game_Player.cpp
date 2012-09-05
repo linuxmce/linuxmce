@@ -46,11 +46,8 @@ using namespace DCE;
 
 //<-dceag-const-b->
 // The primary constructor when the class is created as a stand-alone device
-Game_Player::Game_Player (int DeviceID, string ServerAddress,
-			  bool bConnectEventHandler, bool bLocalMode,
-			  class Router * pRouter):
-Game_Player_Command (DeviceID, ServerAddress, bConnectEventHandler,
-		     bLocalMode, pRouter)
+Game_Player::Game_Player(int DeviceID, string ServerAddress,bool bConnectEventHandler,bool bLocalMode,class Router *pRouter)
+	: Game_Player_Command(DeviceID, ServerAddress,bConnectEventHandler,bLocalMode,pRouter)
 //<-dceag-const-e->
 ,
 m_GameMutex ("game_player")
@@ -71,7 +68,7 @@ m_GameMutex ("game_player")
 //<-dceag-const2-b->!
 
 //<-dceag-dest-b->
-Game_Player::~Game_Player ()
+Game_Player::~Game_Player()
 //<-dceag-dest-e->
 {
 
@@ -102,10 +99,10 @@ Game_Player::PrepareToDelete ()
 }
 
 //<-dceag-getconfig-b->
-bool Game_Player::GetConfig ()
+bool Game_Player::GetConfig()
 {
-  if (!Game_Player_Command::GetConfig ())
-    return false;
+	if( !Game_Player_Command::GetConfig() )
+		return false;
 //<-dceag-getconfig-e->
 
   // Put your code here to initialize the data in this class
@@ -163,7 +160,7 @@ bool Game_Player::GetConfig ()
 
 //<-dceag-reg-b->
 // This function will only be used if this device is loaded into the DCE Router's memory space as a plug-in.  Otherwise Connect() will be called from the main()
-bool Game_Player::Register ()
+bool Game_Player::Register()
 //<-dceag-reg-e->
 {
   return Connect (PK_DeviceTemplate_get ());
@@ -192,10 +189,7 @@ Game_Player::AlarmCallback (int id, void *param)
 	should change the sCMD_Result to OK
 */
 //<-dceag-cmdch-b->
-void
-Game_Player::ReceivedCommandForChild (DeviceData_Impl * pDeviceData_Impl,
-				      string & sCMD_Result,
-				      Message * pMessage)
+void Game_Player::ReceivedCommandForChild(DeviceData_Impl *pDeviceData_Impl,string &sCMD_Result,Message *pMessage)
 //<-dceag-cmdch-e->
 {
   sCMD_Result = "UNHANDLED CHILD";
@@ -207,8 +201,7 @@ Game_Player::ReceivedCommandForChild (DeviceData_Impl * pDeviceData_Impl,
 	should change the sCMD_Result to OK
 */
 //<-dceag-cmduk-b->
-void
-Game_Player::ReceivedUnknownCommand (string & sCMD_Result, Message * pMessage)
+void Game_Player::ReceivedUnknownCommand(string &sCMD_Result,Message *pMessage)
 //<-dceag-cmduk-e->
 {
   sCMD_Result = "UNKNOWN COMMAND";
@@ -288,10 +281,7 @@ void Game_Player::KillEmulator()
 		/** @param #50 Name */
 			/** The application to send the keypress to. If not specified, it goes to the DCE device. */
 
-void
-Game_Player::CMD_Simulate_Keypress (string sPK_Button, int iStreamID,
-				    string sName, string & sCMD_Result,
-				    Message * pMessage)
+void Game_Player::CMD_Simulate_Keypress(string sPK_Button,int iStreamID,string sName,string &sCMD_Result,Message *pMessage)
 //<-dceag-c28-e->
 {
   cout << "Need to implement command #28 - Simulate Keypress" << endl;
@@ -322,10 +312,7 @@ Game_Player::CMD_Simulate_Keypress (string sPK_Button, int iStreamID,
 		/** @param #41 StreamID */
 			/** ID of stream to apply */
 
-void
-Game_Player::CMD_Simulate_Mouse_Click (int iPosition_X, int iPosition_Y,
-				       int iStreamID, string & sCMD_Result,
-				       Message * pMessage)
+void Game_Player::CMD_Simulate_Mouse_Click(int iPosition_X,int iPosition_Y,int iStreamID,string &sCMD_Result,Message *pMessage)
 //<-dceag-c29-e->
 {
   cout << "Need to implement command #29 - Simulate Mouse Click" << endl;
@@ -348,12 +335,7 @@ Game_Player::CMD_Simulate_Mouse_Click (int iPosition_X, int iPosition_Y,
 		/** @param #23 Disable Aspect Lock */
 			/** If 1, the image will be stretched to fit the object */
 
-void
-Game_Player::CMD_Update_Object_Image (string sPK_DesignObj, string sType,
-				      char *pData, int iData_Size,
-				      string sDisable_Aspect_Lock,
-				      string & sCMD_Result,
-				      Message * pMessage)
+void Game_Player::CMD_Update_Object_Image(string sPK_DesignObj,string sType,char *pData,int iData_Size,string sDisable_Aspect_Lock,string &sCMD_Result,Message *pMessage)
 //<-dceag-c32-e->
 {
   cout << "Need to implement command #32 - Update Object Image" << endl;
@@ -376,10 +358,7 @@ Game_Player::CMD_Update_Object_Image (string sPK_DesignObj, string sType,
 		/** @param #59 MediaURL */
 			/** The file to play, or other media id.  The format is specific on the media type and the media player. */
 
-void
-Game_Player::CMD_Play_Media (int iPK_MediaType, int iStreamID,
-			     string sMediaPosition, string sMediaURL,
-			     string & sCMD_Result, Message * pMessage)
+void Game_Player::CMD_Play_Media(int iPK_MediaType,int iStreamID,string sMediaPosition,string sMediaURL,string &sCMD_Result,Message *pMessage)
 //<-dceag-c37-e->
 {
   cout << "Need to implement command #37 - Play Media" << endl;
@@ -447,9 +426,7 @@ Game_Player::CMD_Play_Media (int iPK_MediaType, int iStreamID,
 		/** @param #42 MediaPosition */
 			/** The position at which this stream was last played. */
 
-void
-Game_Player::CMD_Stop_Media (int iStreamID, string * sMediaPosition,
-			     string & sCMD_Result, Message * pMessage)
+void Game_Player::CMD_Stop_Media(int iStreamID,string *sMediaPosition,string &sCMD_Result,Message *pMessage)
 //<-dceag-c38-e->
 {
   cout << "Need to implement command #38 - Stop Media" << endl;
@@ -487,9 +464,7 @@ Game_Player::CMD_Stop_Media (int iStreamID, string * sMediaPosition,
 		/** @param #41 StreamID */
 			/** The media stream for which we need to pause playback. */
 
-void
-Game_Player::CMD_Pause_Media (int iStreamID, string & sCMD_Result,
-			      Message * pMessage)
+void Game_Player::CMD_Pause_Media(int iStreamID,string &sCMD_Result,Message *pMessage)
 //<-dceag-c39-e->
 {
   cout << "Need to implement command #39 - Pause Media" << endl;
@@ -507,9 +482,7 @@ Game_Player::CMD_Pause_Media (int iStreamID, string & sCMD_Result,
 		/** @param #41 StreamID */
 			/** The media stream that we need to restart playback for. */
 
-void
-Game_Player::CMD_Restart_Media (int iStreamID, string & sCMD_Result,
-				Message * pMessage)
+void Game_Player::CMD_Restart_Media(int iStreamID,string &sCMD_Result,Message *pMessage)
 //<-dceag-c40-e->
 {
   cout << "Need to implement command #40 - Restart Media" << endl;
@@ -531,11 +504,7 @@ Game_Player::CMD_Restart_Media (int iStreamID, string & sCMD_Result,
 		/** @param #220 Report */
 			/** If true, report this speed to the user on the OSD */
 
-void
-Game_Player::CMD_Change_Playback_Speed (int iStreamID,
-					int iMediaPlaybackSpeed, bool bReport,
-					string & sCMD_Result,
-					Message * pMessage)
+void Game_Player::CMD_Change_Playback_Speed(int iStreamID,int iMediaPlaybackSpeed,bool bReport,string &sCMD_Result,Message *pMessage)
 //<-dceag-c41-e->
 {
   cout << "Need to implement command #41 - Change Playback Speed" << endl;
@@ -557,11 +526,7 @@ Game_Player::CMD_Change_Playback_Speed (int iStreamID,
 		/** @param #41 StreamID */
 			/** The stream */
 
-void
-Game_Player::CMD_Jump_to_Position_in_Stream (string sValue_To_Assign,
-					     int iStreamID,
-					     string & sCMD_Result,
-					     Message * pMessage)
+void Game_Player::CMD_Jump_to_Position_in_Stream(string sValue_To_Assign,int iStreamID,string &sCMD_Result,Message *pMessage)
 //<-dceag-c42-e->
 {
   cout << "Need to implement command #42 - Jump to Position in Stream" <<
@@ -577,10 +542,7 @@ Game_Player::CMD_Jump_to_Position_in_Stream (string sValue_To_Assign,
 		/** @param #41 StreamID */
 			/** ID of stream to apply */
 
-void
-Game_Player::CMD_Skip_Fwd_ChannelTrack_Greater (int iStreamID,
-						string & sCMD_Result,
-						Message * pMessage)
+void Game_Player::CMD_Skip_Fwd_ChannelTrack_Greater(int iStreamID,string &sCMD_Result,Message *pMessage)
 //<-dceag-c63-e->
 {
   cout << "Need to implement command #63 - Skip Fwd - Channel/Track Greater"
@@ -595,10 +557,7 @@ Game_Player::CMD_Skip_Fwd_ChannelTrack_Greater (int iStreamID,
 		/** @param #41 StreamID */
 			/** ID of stream to apply */
 
-void
-Game_Player::CMD_Skip_Back_ChannelTrack_Lower (int iStreamID,
-					       string & sCMD_Result,
-					       Message * pMessage)
+void Game_Player::CMD_Skip_Back_ChannelTrack_Lower(int iStreamID,string &sCMD_Result,Message *pMessage)
 //<-dceag-c64-e->
 {
   cout << "Need to implement command #64 - Skip Back - Channel/Track Lower" <<
@@ -615,11 +574,7 @@ Game_Player::CMD_Skip_Back_ChannelTrack_Lower (int iStreamID,
 		/** @param #41 StreamID */
 			/** ID of stream to apply */
 
-void
-Game_Player::CMD_Jump_Position_In_Playlist (string sValue_To_Assign,
-					    int iStreamID,
-					    string & sCMD_Result,
-					    Message * pMessage)
+void Game_Player::CMD_Jump_Position_In_Playlist(string sValue_To_Assign,int iStreamID,string &sCMD_Result,Message *pMessage)
 //<-dceag-c65-e->
 {
   cout << "Need to implement command #65 - Jump Position In Playlist" << endl;
@@ -648,9 +603,7 @@ Game_Player::CMD_Jump_Position_In_Playlist (string sValue_To_Assign,
 		/** @param #41 StreamID */
 			/** The stream on which to do the navigation. */
 
-void
-Game_Player::CMD_Navigate_Next (int iStreamID, string & sCMD_Result,
-				Message * pMessage)
+void Game_Player::CMD_Navigate_Next(int iStreamID,string &sCMD_Result,Message *pMessage)
 //<-dceag-c81-e->
 {
   cout << "Need to implement command #81 - Navigate Next" << endl;
@@ -664,9 +617,7 @@ Game_Player::CMD_Navigate_Next (int iStreamID, string & sCMD_Result,
 		/** @param #41 StreamID */
 			/** The stream on which to do the navigation. */
 
-void
-Game_Player::CMD_Navigate_Prev (int iStreamID, string & sCMD_Result,
-				Message * pMessage)
+void Game_Player::CMD_Navigate_Prev(int iStreamID,string &sCMD_Result,Message *pMessage)
 //<-dceag-c82-e->
 {
   cout << "Need to implement command #82 - Navigate Prev" << endl;
@@ -690,11 +641,7 @@ Game_Player::CMD_Navigate_Prev (int iStreamID, string & sCMD_Result,
 		/** @param #61 Height */
 			/** Frame height */
 
-void
-Game_Player::CMD_Get_Video_Frame (string sDisable_Aspect_Lock, int iStreamID,
-				  int iWidth, int iHeight, char **pData,
-				  int *iData_Size, string * sFormat,
-				  string & sCMD_Result, Message * pMessage)
+void Game_Player::CMD_Get_Video_Frame(string sDisable_Aspect_Lock,int iStreamID,int iWidth,int iHeight,char **pData,int *iData_Size,string *sFormat,string &sCMD_Result,Message *pMessage)
 //<-dceag-c84-e->
 {
   cout << "Need to implement command #84 - Get Video Frame" << endl;
@@ -726,9 +673,7 @@ Game_Player::CMD_Get_Video_Frame (string sDisable_Aspect_Lock, int iStreamID,
 1 - Title menu
 2 - Media menu */
 
-void
-Game_Player::CMD_Goto_Media_Menu (int iStreamID, int iMenuType,
-				  string & sCMD_Result, Message * pMessage)
+void Game_Player::CMD_Goto_Media_Menu(int iStreamID,int iMenuType,string &sCMD_Result,Message *pMessage)
 //<-dceag-c87-e->
 {
   cout << "Need to implement command #87 - Goto Media Menu" << endl;
@@ -756,9 +701,7 @@ Game_Player::CMD_Goto_Media_Menu (int iStreamID, int iMenuType,
 		/** @param #41 StreamID */
 			/** ID of stream to apply */
 
-void
-Game_Player::CMD_Pause (int iStreamID, string & sCMD_Result,
-			Message * pMessage)
+void Game_Player::CMD_Pause(int iStreamID,string &sCMD_Result,Message *pMessage)
 //<-dceag-c92-e->
 {
   cout << "Need to implement command #92 - Pause" << endl;
@@ -775,9 +718,7 @@ Game_Player::CMD_Pause (int iStreamID, string & sCMD_Result,
 		/** @param #203 Eject */
 			/** If true, the drive will be ejected if there is no media currently playing, so a remote's stop button acts as stop/eject. */
 
-void
-Game_Player::CMD_Stop (int iStreamID, bool bEject, string & sCMD_Result,
-		       Message * pMessage)
+void Game_Player::CMD_Stop(int iStreamID,bool bEject,string &sCMD_Result,Message *pMessage)
 //<-dceag-c95-e->
 {
   cout << "Need to implement command #95 - Stop" << endl;
@@ -790,8 +731,7 @@ Game_Player::CMD_Stop (int iStreamID, bool bEject, string & sCMD_Result,
 	/** @brief COMMAND: #126 - Guide */
 	/** Show guide information.  For a dvd this may be the menu, just like the menu command */
 
-void
-Game_Player::CMD_Guide (string & sCMD_Result, Message * pMessage)
+void Game_Player::CMD_Guide(string &sCMD_Result,Message *pMessage)
 //<-dceag-c126-e->
 {
   cout << "Need to implement command #126 - Guide" << endl;
@@ -804,9 +744,7 @@ Game_Player::CMD_Guide (string & sCMD_Result, Message * pMessage)
 		/** @param #41 StreamID */
 			/** ID of stream to apply */
 
-void
-Game_Player::CMD_Play (int iStreamID, string & sCMD_Result,
-		       Message * pMessage)
+void Game_Player::CMD_Play(int iStreamID,string &sCMD_Result,Message *pMessage)
 //<-dceag-c139-e->
 {
   cout << "Need to implement command #139 - Play" << endl;
@@ -820,9 +758,7 @@ Game_Player::CMD_Play (int iStreamID, string & sCMD_Result,
 		/** @param #41 StreamID */
 			/** ID of stream to apply */
 
-void
-Game_Player::CMD_EnterGo (int iStreamID, string & sCMD_Result,
-			  Message * pMessage)
+void Game_Player::CMD_EnterGo(int iStreamID,string &sCMD_Result,Message *pMessage)
 //<-dceag-c190-e->
 {
   cout << "Need to implement command #190 - Enter/Go" << endl;
@@ -837,9 +773,7 @@ Game_Player::CMD_EnterGo (int iStreamID, string & sCMD_Result,
 		/** @param #41 StreamID */
 			/** ID of stream to apply */
 
-void
-Game_Player::CMD_Move_Up (int iStreamID, string & sCMD_Result,
-			  Message * pMessage)
+void Game_Player::CMD_Move_Up(int iStreamID,string &sCMD_Result,Message *pMessage)
 //<-dceag-c200-e->
 {
   cout << "Need to implement command #200 - Move Up" << endl;
@@ -854,9 +788,7 @@ Game_Player::CMD_Move_Up (int iStreamID, string & sCMD_Result,
 		/** @param #41 StreamID */
 			/** ID of stream to apply */
 
-void
-Game_Player::CMD_Move_Down (int iStreamID, string & sCMD_Result,
-			    Message * pMessage)
+void Game_Player::CMD_Move_Down(int iStreamID,string &sCMD_Result,Message *pMessage)
 //<-dceag-c201-e->
 {
   cout << "Need to implement command #201 - Move Down" << endl;
@@ -871,9 +803,7 @@ Game_Player::CMD_Move_Down (int iStreamID, string & sCMD_Result,
 		/** @param #41 StreamID */
 			/** ID of stream to apply */
 
-void
-Game_Player::CMD_Move_Left (int iStreamID, string & sCMD_Result,
-			    Message * pMessage)
+void Game_Player::CMD_Move_Left(int iStreamID,string &sCMD_Result,Message *pMessage)
 //<-dceag-c202-e->
 {
   cout << "Need to implement command #202 - Move Left" << endl;
@@ -888,9 +818,7 @@ Game_Player::CMD_Move_Left (int iStreamID, string & sCMD_Result,
 		/** @param #41 StreamID */
 			/** ID of stream to apply */
 
-void
-Game_Player::CMD_Move_Right (int iStreamID, string & sCMD_Result,
-			     Message * pMessage)
+void Game_Player::CMD_Move_Right(int iStreamID,string &sCMD_Result,Message *pMessage)
 //<-dceag-c203-e->
 {
   cout << "Need to implement command #203 - Move Right" << endl;
@@ -903,8 +831,7 @@ Game_Player::CMD_Move_Right (int iStreamID, string & sCMD_Result,
 	/** @brief COMMAND: #204 - 0 */
 	/** 0 */
 
-void
-Game_Player::CMD_0 (string & sCMD_Result, Message * pMessage)
+void Game_Player::CMD_0(string &sCMD_Result,Message *pMessage)
 //<-dceag-c204-e->
 {
   cout << "Need to implement command #204 - 0" << endl;
@@ -916,8 +843,7 @@ Game_Player::CMD_0 (string & sCMD_Result, Message * pMessage)
 	/** @brief COMMAND: #205 - 1 */
 	/** 1 */
 
-void
-Game_Player::CMD_1 (string & sCMD_Result, Message * pMessage)
+void Game_Player::CMD_1(string &sCMD_Result,Message *pMessage)
 //<-dceag-c205-e->
 {
   cout << "Need to implement command #205 - 1" << endl;
@@ -929,8 +855,7 @@ Game_Player::CMD_1 (string & sCMD_Result, Message * pMessage)
 	/** @brief COMMAND: #206 - 2 */
 	/** 2 */
 
-void
-Game_Player::CMD_2 (string & sCMD_Result, Message * pMessage)
+void Game_Player::CMD_2(string &sCMD_Result,Message *pMessage)
 //<-dceag-c206-e->
 {
   cout << "Need to implement command #206 - 2" << endl;
@@ -942,8 +867,7 @@ Game_Player::CMD_2 (string & sCMD_Result, Message * pMessage)
 	/** @brief COMMAND: #207 - 3 */
 	/** 3 */
 
-void
-Game_Player::CMD_3 (string & sCMD_Result, Message * pMessage)
+void Game_Player::CMD_3(string &sCMD_Result,Message *pMessage)
 //<-dceag-c207-e->
 {
   cout << "Need to implement command #207 - 3" << endl;
@@ -955,8 +879,7 @@ Game_Player::CMD_3 (string & sCMD_Result, Message * pMessage)
 	/** @brief COMMAND: #208 - 4 */
 	/** 4 */
 
-void
-Game_Player::CMD_4 (string & sCMD_Result, Message * pMessage)
+void Game_Player::CMD_4(string &sCMD_Result,Message *pMessage)
 //<-dceag-c208-e->
 {
   cout << "Need to implement command #208 - 4" << endl;
@@ -968,8 +891,7 @@ Game_Player::CMD_4 (string & sCMD_Result, Message * pMessage)
 	/** @brief COMMAND: #209 - 5 */
 	/** 5 */
 
-void
-Game_Player::CMD_5 (string & sCMD_Result, Message * pMessage)
+void Game_Player::CMD_5(string &sCMD_Result,Message *pMessage)
 //<-dceag-c209-e->
 {
   cout << "Need to implement command #209 - 5" << endl;
@@ -981,8 +903,7 @@ Game_Player::CMD_5 (string & sCMD_Result, Message * pMessage)
 	/** @brief COMMAND: #210 - 6 */
 	/** 6 */
 
-void
-Game_Player::CMD_6 (string & sCMD_Result, Message * pMessage)
+void Game_Player::CMD_6(string &sCMD_Result,Message *pMessage)
 //<-dceag-c210-e->
 {
   cout << "Need to implement command #210 - 6" << endl;
@@ -994,8 +915,7 @@ Game_Player::CMD_6 (string & sCMD_Result, Message * pMessage)
 	/** @brief COMMAND: #211 - 7 */
 	/** 7 */
 
-void
-Game_Player::CMD_7 (string & sCMD_Result, Message * pMessage)
+void Game_Player::CMD_7(string &sCMD_Result,Message *pMessage)
 //<-dceag-c211-e->
 {
   cout << "Need to implement command #211 - 7" << endl;
@@ -1007,8 +927,7 @@ Game_Player::CMD_7 (string & sCMD_Result, Message * pMessage)
 	/** @brief COMMAND: #212 - 8 */
 	/** 8 */
 
-void
-Game_Player::CMD_8 (string & sCMD_Result, Message * pMessage)
+void Game_Player::CMD_8(string &sCMD_Result,Message *pMessage)
 //<-dceag-c212-e->
 {
   cout << "Need to implement command #212 - 8" << endl;
@@ -1020,8 +939,7 @@ Game_Player::CMD_8 (string & sCMD_Result, Message * pMessage)
 	/** @brief COMMAND: #213 - 9 */
 	/** 9 */
 
-void
-Game_Player::CMD_9 (string & sCMD_Result, Message * pMessage)
+void Game_Player::CMD_9(string &sCMD_Result,Message *pMessage)
 //<-dceag-c213-e->
 {
   cout << "Need to implement command #213 - 9" << endl;
@@ -1035,9 +953,7 @@ Game_Player::CMD_9 (string & sCMD_Result, Message * pMessage)
 		/** @param #41 StreamID */
 			/** ID of stream to apply */
 
-void
-Game_Player::CMD_Back_Prior_Menu (int iStreamID, string & sCMD_Result,
-				  Message * pMessage)
+void Game_Player::CMD_Back_Prior_Menu(int iStreamID,string &sCMD_Result,Message *pMessage)
 //<-dceag-c240-e->
 {
   cout << "Need to implement command #240 - Back / Prior Menu" << endl;
@@ -1060,11 +976,7 @@ Game_Player::CMD_Back_Prior_Menu (int iStreamID, string & sCMD_Result,
 		/** @param #105 StreamingTargets */
 			/** Target destinations for streaming. Semantics dependent on the target device. */
 
-void
-Game_Player::CMD_Start_Streaming (int iPK_MediaType, int iStreamID,
-				  string sMediaPosition, string sMediaURL,
-				  string sStreamingTargets,
-				  string & sCMD_Result, Message * pMessage)
+void Game_Player::CMD_Start_Streaming(int iPK_MediaType,int iStreamID,string sMediaPosition,string sMediaURL,string sStreamingTargets,string &sCMD_Result,Message *pMessage)
 //<-dceag-c249-e->
 {
   cout << "Need to implement command #249 - Start Streaming" << endl;
@@ -1119,11 +1031,7 @@ Game_Player::CMD_Start_Streaming (int iPK_MediaType, int iStreamID,
 		/** @param #42 MediaPosition */
 			/** A media player readable representation of the current position including all options */
 
-void
-Game_Player::CMD_Report_Playback_Position (int iStreamID, string * sText,
-					   string * sMediaPosition,
-					   string & sCMD_Result,
-					   Message * pMessage)
+void Game_Player::CMD_Report_Playback_Position(int iStreamID,string *sText,string *sMediaPosition,string &sCMD_Result,Message *pMessage)
 //<-dceag-c259-e->
 {
   cout << "Need to implement command #259 - Report Playback Position" << endl;
@@ -1155,9 +1063,7 @@ Game_Player::CMD_Report_Playback_Position (int iStreamID, string * sText,
 		/** @param #42 MediaPosition */
 			/** The media position.  When MediaPlugin gets this, it will be a bookmark ID, when a media player gets it, the string */
 
-void
-Game_Player::CMD_Set_Media_Position (int iStreamID, string sMediaPosition,
-				     string & sCMD_Result, Message * pMessage)
+void Game_Player::CMD_Set_Media_Position(int iStreamID,string sMediaPosition,string &sCMD_Result,Message *pMessage)
 //<-dceag-c412-e->
 {
   cout << "Need to implement command #412 - Set Media Position" << endl;
@@ -1181,9 +1087,7 @@ Game_Player::CMD_Set_Media_Position (int iStreamID, string sMediaPosition,
 		/** @param #41 StreamID */
 			/** ID of stream to apply */
 
-void
-Game_Player::CMD_Menu (string sText, int iStreamID, string & sCMD_Result,
-		       Message * pMessage)
+void Game_Player::CMD_Menu(string sText,int iStreamID,string &sCMD_Result,Message *pMessage)
 //<-dceag-c548-e->
 {
   cout << "Need to implement command #548 - Menu" << endl;
@@ -1200,9 +1104,7 @@ Game_Player::CMD_Menu (string sText, int iStreamID, string & sCMD_Result,
 		/** @param #228 Exit Code */
 			/** Exit Code to be passed to the ApplicationExited function */
 
-void
-Game_Player::CMD_Application_Exited (int iPID, int iExit_Code,
-				     string & sCMD_Result, Message * pMessage)
+void Game_Player::CMD_Application_Exited(int iPID,int iExit_Code,string &sCMD_Result,Message *pMessage)
 //<-dceag-c812-e->
 {
   cout << "Need to implement command #812 - Application Exited" << endl;
@@ -1242,9 +1144,7 @@ Game_Player::CMD_Application_Exited (int iPID, int iExit_Code,
 		/** @param #260 Aspect Ratio */
 			/** aspect ratio to set: auto, 1:1, 4:3, 16:9, 2.11:1 */
 
-void
-Game_Player::CMD_Set_Aspect_Ratio (int iStreamID, string sAspect_Ratio,
-				   string & sCMD_Result, Message * pMessage)
+void Game_Player::CMD_Set_Aspect_Ratio(int iStreamID,string sAspect_Ratio,string &sCMD_Result,Message *pMessage)
 //<-dceag-c916-e->
 {
   cout << "Need to implement command #916 - Set Aspect Ratio" << endl;
@@ -1261,9 +1161,7 @@ Game_Player::CMD_Set_Aspect_Ratio (int iStreamID, string sAspect_Ratio,
 		/** @param #261 Zoom Level */
 			/** Zoom level to set */
 
-void
-Game_Player::CMD_Set_Zoom (int iStreamID, string sZoom_Level,
-			   string & sCMD_Result, Message * pMessage)
+void Game_Player::CMD_Set_Zoom(int iStreamID,string sZoom_Level,string &sCMD_Result,Message *pMessage)
 //<-dceag-c917-e->
 {
   cout << "Need to implement command #917 - Set Zoom" << endl;
@@ -1280,9 +1178,7 @@ Game_Player::CMD_Set_Zoom (int iStreamID, string sZoom_Level,
 		/** @param #41 StreamID */
 			/** ID of stream to set media information for */
 
-void
-Game_Player::CMD_Set_Media_ID (string sID, int iStreamID,
-			       string & sCMD_Result, Message * pMessage)
+void Game_Player::CMD_Set_Media_ID(string sID,int iStreamID,string &sCMD_Result,Message *pMessage)
 //<-dceag-c920-e->
 {
   cout << "Need to implement command #920 - Set Media ID" << endl;
@@ -1295,8 +1191,7 @@ Game_Player::CMD_Set_Media_ID (string sID, int iStreamID,
 	/** @brief COMMAND: #943 - Game 1P Start */
 	/** 1P start */
 
-void
-Game_Player::CMD_Game_1P_Start (string & sCMD_Result, Message * pMessage)
+void Game_Player::CMD_Game_1P_Start(string &sCMD_Result,Message *pMessage)
 //<-dceag-c943-e->
 {
   m_pEmulatorController->P1Start();
@@ -1307,8 +1202,7 @@ Game_Player::CMD_Game_1P_Start (string & sCMD_Result, Message * pMessage)
 	/** @brief COMMAND: #944 - Game 2P Start */
 	/** 2P Start */
 
-void
-Game_Player::CMD_Game_2P_Start (string & sCMD_Result, Message * pMessage)
+void Game_Player::CMD_Game_2P_Start(string &sCMD_Result,Message *pMessage)
 //<-dceag-c944-e->
 {
   cout << "Need to implement command #944 - Game 2P Start" << endl;
@@ -1320,8 +1214,7 @@ Game_Player::CMD_Game_2P_Start (string & sCMD_Result, Message * pMessage)
 	/** @brief COMMAND: #945 - Game 3P Start */
 	/** 3P Start */
 
-void
-Game_Player::CMD_Game_3P_Start (string & sCMD_Result, Message * pMessage)
+void Game_Player::CMD_Game_3P_Start(string &sCMD_Result,Message *pMessage)
 //<-dceag-c945-e->
 {
   cout << "Need to implement command #945 - Game 3P Start" << endl;
@@ -1333,8 +1226,7 @@ Game_Player::CMD_Game_3P_Start (string & sCMD_Result, Message * pMessage)
 	/** @brief COMMAND: #946 - Game 4P Start */
 	/** 4P Start */
 
-void
-Game_Player::CMD_Game_4P_Start (string & sCMD_Result, Message * pMessage)
+void Game_Player::CMD_Game_4P_Start(string &sCMD_Result,Message *pMessage)
 //<-dceag-c946-e->
 {
   cout << "Need to implement command #946 - Game 4P Start" << endl;
@@ -1346,8 +1238,7 @@ Game_Player::CMD_Game_4P_Start (string & sCMD_Result, Message * pMessage)
 	/** @brief COMMAND: #947 - Game Insert Coin */
 	/** Insert Coin */
 
-void
-Game_Player::CMD_Game_Insert_Coin (string & sCMD_Result, Message * pMessage)
+void Game_Player::CMD_Game_Insert_Coin(string &sCMD_Result,Message *pMessage)
 //<-dceag-c947-e->
 {
   cout << "Need to implement command #947 - Game Insert Coin" << endl;
@@ -1359,8 +1250,7 @@ Game_Player::CMD_Game_Insert_Coin (string & sCMD_Result, Message * pMessage)
 	/** @brief COMMAND: #948 - Game Service */
 	/** Service Mode */
 
-void
-Game_Player::CMD_Game_Service (string & sCMD_Result, Message * pMessage)
+void Game_Player::CMD_Game_Service(string &sCMD_Result,Message *pMessage)
 //<-dceag-c948-e->
 {
   cout << "Need to implement command #948 - Game Service" << endl;
@@ -1372,8 +1262,7 @@ Game_Player::CMD_Game_Service (string & sCMD_Result, Message * pMessage)
 	/** @brief COMMAND: #949 - Game Start */
 	/** Game Start */
 
-void
-Game_Player::CMD_Game_Start (string & sCMD_Result, Message * pMessage)
+void Game_Player::CMD_Game_Start(string &sCMD_Result,Message *pMessage)
 //<-dceag-c949-e->
 {
   cout << "Need to implement command #949 - Game Start" << endl;
@@ -1385,8 +1274,7 @@ Game_Player::CMD_Game_Start (string & sCMD_Result, Message * pMessage)
 	/** @brief COMMAND: #950 - Game Select */
 	/** Game Select */
 
-void
-Game_Player::CMD_Game_Select (string & sCMD_Result, Message * pMessage)
+void Game_Player::CMD_Game_Select(string &sCMD_Result,Message *pMessage)
 //<-dceag-c950-e->
 {
   m_pEmulatorController->select();
@@ -1397,8 +1285,7 @@ Game_Player::CMD_Game_Select (string & sCMD_Result, Message * pMessage)
 	/** @brief COMMAND: #951 - Game Option */
 	/** Game Option */
 
-void
-Game_Player::CMD_Game_Option (string & sCMD_Result, Message * pMessage)
+void Game_Player::CMD_Game_Option(string &sCMD_Result,Message *pMessage)
 //<-dceag-c951-e->
 {
   cout << "Need to implement command #951 - Game Option" << endl;
@@ -1412,9 +1299,7 @@ Game_Player::CMD_Game_Option (string & sCMD_Result, Message * pMessage)
 		/** @param #199 Status */
 			/** Ripping status */
 
-void
-Game_Player::CMD_Get_Ripping_Status (string * sStatus, string & sCMD_Result,
-				     Message * pMessage)
+void Game_Player::CMD_Get_Ripping_Status(string *sStatus,string &sCMD_Result,Message *pMessage)
 //<-dceag-c942-e->
 {
 }
@@ -1426,9 +1311,7 @@ Game_Player::CMD_Get_Ripping_Status (string * sStatus, string & sCMD_Result,
 		/** @param #5 Value To Assign */
 			/** Dependent on driver, but usually a single line in the format of key,value */
 
-void
-Game_Player::CMD_Set_Game_Options (string sValue_To_Assign,
-				   string & sCMD_Result, Message * pMessage)
+void Game_Player::CMD_Set_Game_Options(string sValue_To_Assign,string &sCMD_Result,Message *pMessage)
 //<-dceag-c982-e->
 {
 }
@@ -1442,9 +1325,7 @@ Game_Player::CMD_Set_Game_Options (string sValue_To_Assign,
 		/** @param #219 Path */
 			/** The Parameter to return, usually left side of comma in Set Game Options. */
 
-void
-Game_Player::CMD_Get_Game_Options (string sPath, string * sValue_To_Assign,
-				   string & sCMD_Result, Message * pMessage)
+void Game_Player::CMD_Get_Game_Options(string sPath,string *sValue_To_Assign,string &sCMD_Result,Message *pMessage)
 //<-dceag-c983-e->
 {
 }
@@ -1454,8 +1335,7 @@ Game_Player::CMD_Get_Game_Options (string sPath, string * sValue_To_Assign,
 	/** @brief COMMAND: #952 - Game Reset */
 	/** Game Reset */
 
-void
-Game_Player::CMD_Game_Reset (string & sCMD_Result, Message * pMessage)
+void Game_Player::CMD_Game_Reset(string &sCMD_Result,Message *pMessage)
 //<-dceag-c952-e->
 {
   m_pEmulatorController->reset();
@@ -1500,8 +1380,15 @@ void Game_Player::TranscodeAfterRecord(string sPath,string sFilename, long int d
 
 }
 
-void Game_Player::CMD_Record(string &sCMD_Result, Message *pMessage)
+//<-dceag-c102-b->
+
+	/** @brief COMMAND: #102 - Record */
+	/** Record the current game. Toggle on off */
+
+void Game_Player::CMD_Record(string &sCMD_Result,Message *pMessage)
+//<-dceag-c102-e->
 {
+  LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"RECORD CALLED!!!!!");
   // This is simply a toggle, the EmulatorController will do the right thing.
   m_pEmulatorController->setOrbiter(pMessage->m_dwPK_Device_From);
   m_pEmulatorController->record();

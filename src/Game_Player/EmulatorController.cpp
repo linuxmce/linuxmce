@@ -446,6 +446,7 @@ namespace DCE
 
   bool EmulatorController::record()
   {
+    LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"EmulatorController::record()");
     m_pEmulatorModel->m_bIsRecording=!m_pEmulatorModel->m_bIsRecording;
     return doAction("RECORD");
   }

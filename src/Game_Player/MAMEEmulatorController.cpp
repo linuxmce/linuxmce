@@ -316,6 +316,7 @@ namespace DCE
 
   bool MAMEEmulatorController::record()
   {
+    LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"MAMEEmulatorController::record()");
     string sPath = "/home/mamedata/shots/"+getRomFromSlot();
     if (!m_pEmulatorModel->m_bIsRecording)
       {
