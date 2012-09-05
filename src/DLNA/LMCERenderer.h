@@ -9,7 +9,6 @@
      See the GNU General Public License for more details.
 
 */
-//<-dceag-d-b->
 #ifndef LMCERenderer_h
 #define LMCERenderer_h
 
@@ -18,7 +17,11 @@
 #include <HUpnpAv/HObject>
 
 #include <QtCore/QUrl>
+#include <QtCore/QTime>
+
 #include "Message.h"
+#include "PlutoUtils/MultiThreadIncludes.h"
+#include "AlarmManager.h"
 
 using namespace Herqq::Upnp::Av;
 using namespace DCE;
@@ -26,12 +29,15 @@ using namespace DCE;
 namespace DCE {
 class DLNA;
 
-class LMCERenderer : public HRendererConnection {
+class LMCERenderer : public HRendererConnection, public AlarmEvent {
 Q_OBJECT
 
 private:
+	class AlarmManager *m_pAlarmManager;
+
 	unsigned int m_PK_EntArea;
 	QUrl* m_Url;
+	QTime m_Time;
 	int m_iMediaType;
 	DLNA* m_pDLNA;
 	int m_iStreamID;
@@ -56,6 +62,8 @@ public:
 	int GetStreamID();
 	void MediaCommandIntercepted(Message *pMessage, long PK_Device);
 
+	void PlayBackCompleted();
+        void AlarmCallback(int id, void* param);
 };
 
 }

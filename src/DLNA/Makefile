@@ -25,7 +25,7 @@ LDFLAGS +=
 XTRALDLIBS = -lmysqlclient_r -lQtGui -lQtCore -lHUpnp -lHUpnpAv -lpluto_main
 
 Gen_Dev_Files +=
-sources += DLNAEngine.cpp LMCERenderer.cpp LMCERendererConnectionManager.cpp
+sources += DLNAEngine.cpp LMCERenderer.cpp moc_LMCERenderer.cpp LMCERendererConnectionManager.cpp
 
 #<-dceag-mf-b->
 LDLIBS = $(XTRALDLIBS) $(BASELDLIBS)

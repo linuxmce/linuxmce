@@ -34,7 +34,6 @@ DLNAEngine::DLNAEngine(DLNA* pDlna)
 DLNAEngine::~DLNAEngine()
 {
 	//TODO: delete files
-
 	delete m_pDeviceHost;
 }
 
@@ -56,10 +55,9 @@ int DLNAEngine::Init()
 	list.append(QHostAddress("192.168.0.50"));
 	hostConf.setNetworkAddressesToUse(list);
 
+	// Set up device creator and configuration manager
 	LMCEDeviceModelCreator creator;
-
 	LMCEMediaRendererDeviceConfiguration mrConf;
-	//  	HMediaRendererDeviceConfiguration mrConf;
 	LMCERendererConnectionManager* pRcm = new LMCERendererConnectionManager(m_pDLNA);
 	LoggerWrapper::GetInstance ()->Write (LV_STATUS, "DLNAEngine() pRcm = %d", (unsigned int)pRcm);
 
@@ -92,19 +90,17 @@ int DLNAEngine::Init()
 
 		FileUtils::WriteTextFile(file, sConfigData);
 
+		// Add device to host configuration
 		HDeviceConfiguration deviceConf;
 		deviceConf.setPathToDeviceDescription(deviceFile);
 		deviceConf.setCacheControlMaxAge(1800);
 		hostConf.add(deviceConf);
-
 	}
 
 	if (!m_pDeviceHost->init(hostConf)) 
 	{
 		LoggerWrapper::GetInstance ()->Write (LV_STATUS, "DLNAEngine::Run(): devicehost init failed:");
 		LoggerWrapper::GetInstance ()->Write (LV_STATUS, "DLNAEngine::Run(): Error: %s", m_pDeviceHost->errorDescription().toStdString().c_str());
-
-
 	}
 	
 	LoggerWrapper::GetInstance ()->Write (LV_STATUS, "DLNAEngine::Run(): rootDevices: %d", m_pDeviceHost->rootDevices().size());

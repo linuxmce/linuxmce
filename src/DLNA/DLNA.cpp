@@ -78,8 +78,13 @@ bool DLNA::GetConfig()
 
 	PurgeInterceptors();
 
+	// We intercept play and stop commands (and events) to update the status of our renderers
+        // the start/stop streaming are used in some cases, and play/stop media in other cases, so we need both
+	// also, we need to intercept the playback completed event, as this is emited when the device itself are done playing(song over etc.)
 	RegisterMsgInterceptor(( MessageInterceptorFn )( &DLNA::MediaCommandIntercepted ), 0, 0, 0, 0, MESSAGETYPE_COMMAND, COMMAND_Start_Streaming_CONST );
+	RegisterMsgInterceptor(( MessageInterceptorFn )( &DLNA::MediaCommandIntercepted ), 0, 0, 0, 0, MESSAGETYPE_COMMAND, COMMAND_Stop_Streaming_CONST );
 	RegisterMsgInterceptor(( MessageInterceptorFn )( &DLNA::MediaCommandIntercepted ), 0, 0, 0, 0, MESSAGETYPE_COMMAND, COMMAND_Play_Media_CONST );
+	RegisterMsgInterceptor(( MessageInterceptorFn )( &DLNA::MediaCommandIntercepted ), 0, 0, 0, 0, MESSAGETYPE_COMMAND, COMMAND_Stop_Media_CONST );
 	RegisterMsgInterceptor(( MessageInterceptorFn )( &DLNA::MediaCommandIntercepted ), 0, 0, 0, 0, MESSAGETYPE_EVENT, EVENT_Playback_Completed_CONST );
 
 	return true;
@@ -142,87 +147,7 @@ void DLNA::ReceivedUnknownCommand(string &sCMD_Result,Message *pMessage)
 	sCMD_Result = "UNKNOWN COMMAND";
 }
 
-//<-dceag-sample-b->
-/*		**** SAMPLE ILLUSTRATING HOW TO USE THE BASE CLASSES ****
-
-**** IF YOU DON'T WANT DCEGENERATOR TO KEEP PUTTING THIS AUTO-GENERATED SECTION ****
-**** ADD AN ! AFTER THE BEGINNING OF THE AUTO-GENERATE TAG, LIKE //<=dceag-sample-b->! ****
-Without the !, everything between <=dceag-sometag-b-> and <=dceag-sometag-e->
-will be replaced by DCEGenerator each time it is run with the normal merge selection.
-The above blocks are actually <- not <=.  We don't want a substitution here
-
-void DLNA::SomeFunction()
-{
-	// If this is going to be loaded into the router as a plug-in, you can implement: 	virtual bool Register();
-	// to do all your registration, such as creating message interceptors
-
-	// If you use an IDE with auto-complete, after you type DCE:: it should give you a list of all
-	// commands and requests, including the parameters.  See "AllCommandsRequests.h"
-
-	// Examples:
-	
-	// Send a specific the "CMD_Simulate_Mouse_Click" command, which takes an X and Y parameter.  We'll use 55,77 for X and Y.
-	DCE::CMD_Simulate_Mouse_Click CMD_Simulate_Mouse_Click(m_dwPK_Device,OrbiterID,55,77);
-	SendCommand(CMD_Simulate_Mouse_Click);
-
-	// Send the message to orbiters 32898 and 27283 (ie a device list, hence the _DL)
-	// And we want a response, which will be "OK" if the command was successfull
-	string sResponse;
-	DCE::CMD_Simulate_Mouse_Click_DL CMD_Simulate_Mouse_Click_DL(m_dwPK_Device,"32898,27283",55,77)
-	SendCommand(CMD_Simulate_Mouse_Click_DL,&sResponse);
-
-	// Send the message to all orbiters within the house, which is all devices with the category DEVICECATEGORY_Orbiter_CONST (see pluto_main/Define_DeviceCategory.h)
-	// Note the _Cat for category
-	DCE::CMD_Simulate_Mouse_Click_Cat CMD_Simulate_Mouse_Click_Cat(m_dwPK_Device,DEVICECATEGORY_Orbiter_CONST,true,BL_SameHouse,55,77)
-    SendCommand(CMD_Simulate_Mouse_Click_Cat);
-
-	// Send the message to all "DeviceTemplate_Orbiter_CONST" devices within the room (see pluto_main/Define_DeviceTemplate.h)
-	// Note the _DT.
-	DCE::CMD_Simulate_Mouse_Click_DT CMD_Simulate_Mouse_Click_DT(m_dwPK_Device,DeviceTemplate_Orbiter_CONST,true,BL_SameRoom,55,77);
-	SendCommand(CMD_Simulate_Mouse_Click_DT);
-
-	// This command has a normal string parameter, but also an int as an out parameter
-	int iValue;
-	DCE::CMD_Get_Signal_Strength CMD_Get_Signal_Strength(m_dwDeviceID, DestDevice, sMac_address,&iValue);
-	// This send command will wait for the destination device to respond since there is
-	// an out parameter
-	SendCommand(CMD_Get_Signal_Strength);  
-
-	// This time we don't care about the out parameter.  We just want the command to 
-	// get through, and don't want to wait for the round trip.  The out parameter, iValue,
-	// will not get set
-	SendCommandNoResponse(CMD_Get_Signal_Strength);  
-
-	// This command has an out parameter of a data block.  Any parameter that is a binary
-	// data block is a pair of int and char *
-	// We'll also want to see the response, so we'll pass a string for that too
-
-	int iFileSize;
-	char *pFileContents
-	string sResponse;
-	DCE::CMD_Request_File CMD_Request_File(m_dwDeviceID, DestDevice, "filename",&pFileContents,&iFileSize,&sResponse);
-	SendCommand(CMD_Request_File);
-
-	// If the device processed the command (in this case retrieved the file),
-	// sResponse will be "OK", and iFileSize will be the size of the file
-	// and pFileContents will be the file contents.  **NOTE**  We are responsible
-	// free deleting pFileContents.
-
-
-	// To access our data and events below, you can type this-> if your IDE supports auto complete to see all the data and events you can access
-
-	// Get our IP address from our data
-	string sIP = DATA_Get_IP_Address();
-
-	// Set our data "Filename" to "myfile"
-	DATA_Set_Filename("myfile");
-
-	// Fire the "Finished with file" event, which takes no parameters
-	EVENT_Finished_with_file();
-	// Fire the "Touch or click" which takes an X and Y parameter
-	EVENT_Touch_or_click(10,150);
-}
-*/
+//<-dceag-sample-b->!
 //<-dceag-sample-e->
 
 /*
@@ -236,7 +161,7 @@ bool DLNA::LoadEntertainAreas()
 	LoggerWrapper::GetInstance()->Write( LV_STATUS, "DLNA::LoadEntertainAreas() start %d",  m_pData->m_dwPK_Installation );
 
 	Database_pluto_main* pDatabase_pluto_main = new Database_pluto_main(LoggerWrapper::GetInstance());
-// TODO: don't hardcode
+// TODO: don't hardcode, load using command. The same command should be possible to use for qOrbiter to load EAs and Rooms
 	string host = "localhost", dbuser = "root", dbpass = "", dbname = "pluto_main";
 	int dbport = 3306;
 	if( !pDatabase_pluto_main->Connect( host, dbuser, dbpass, dbname, dbport ) )
@@ -292,7 +217,8 @@ bool DLNA::MediaCommandIntercepted( class Socket *pSocket, class Message *pMessa
         // Find out what PK_Device is playing, and if it is one of ours
 	long PK_Device = 0;
 	EntertainArea *pEntertainArea = NULL;
-	if ((pMessage->m_dwMessage_Type == MESSAGETYPE_COMMAND && pMessage->m_dwID == COMMAND_Start_Streaming_CONST))
+	if (pMessage->m_dwMessage_Type == MESSAGETYPE_COMMAND && 
+	    (pMessage->m_dwID == COMMAND_Start_Streaming_CONST || pMessage->m_dwID == COMMAND_Stop_Streaming_CONST))
 	{
 		// devices like Slim Server Streamer will need to receive commands for its childen (Pause Media command is sent to that one when playing to Squeezeboxes)
 		PK_Device = pDeviceTo->m_dwPK_Device;
@@ -314,6 +240,7 @@ bool DLNA::MediaCommandIntercepted( class Socket *pSocket, class Message *pMessa
 		// Event only has StreamID, need to look up renderer with that
 		string sStreamID = pMessage->m_mapParameters[COMMANDPARAMETER_StreamID_CONST];
 		int iStreamID = atoi(sStreamID.c_str());
+		LoggerWrapper::GetInstance ()->Write (LV_STATUS, "DLNA::MediaCommandIntercepted() Playback completed streamID = %d",iStreamID);
 		if (iStreamID > 0)
 		{
 			for(map<int,EntertainArea *>::iterator it=m_mapEntertainAreas.begin();it!=m_mapEntertainAreas.end();++it)
