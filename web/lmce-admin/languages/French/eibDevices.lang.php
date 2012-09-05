@@ -15,4 +15,11 @@ $TEXT_NO_GROUP_ADDRESS_AVAILABLE_CONST='Pas d\'adresse de groupe disponible';
 $TEXT_KNX_ONOFF='Allumer/Eteindre';
 $TEXT_KNX_STATUS='Etat';
 $TEXT_KNX_DIM='Grader';
+$TEXT_KNX_DIM_STATUS='Etat grade';
+$TEXT_KNX_R_LEVEL='Niveau du rouge';
+$TEXT_KNX_G_LEVEL='Niveau du vert';
+$TEXT_KNX_B_LEVEL='Niveau du bleu';
+$TEXT_KNX_R_STATUS='Etat du niveau de rouge';
+$TEXT_KNX_G_STATUS='Etat du niveau de vert';
+$TEXT_KNX_B_STATUS='Etat du niveau de bleu';
 ?>

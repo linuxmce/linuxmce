@@ -13,6 +13,13 @@ $TEXT_EIB_DEVICE_ADDED_CONST='The device was added.';
 $TEXT_DEVICE_NAME_REQUIRED_CONST='Please type the name of the device.';
 $TEXT_NO_GROUP_ADDRESS_AVAILABLE_CONST='No Group Address available';
 $TEXT_KNX_ONOFF='On/Off';
-$TEXT_KNX_STATUS='Status';
-$TEXT_KNX_DIM='Dim';
+$TEXT_KNX_STATUS='On/Off status';
+$TEXT_KNX_DIM='Dim value';
+$TEXT_KNX_DIM_STATUS='Dim status';
+$TEXT_KNX_R_LEVEL='Red level value';
+$TEXT_KNX_G_LEVEL='Green level value';
+$TEXT_KNX_B_LEVEL='Blue level value';
+$TEXT_KNX_R_STATUS='Red level status';
+$TEXT_KNX_G_STATUS='Green level status';
+$TEXT_KNX_B_STATUS='Blue level status';
 ?>
