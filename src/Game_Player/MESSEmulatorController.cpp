@@ -391,7 +391,13 @@ namespace DCE
 
   bool MESSEmulatorController::record()
   {
-    string sPath = "/home/mamedata/shots/"+getRomFromSlot();
+    if (!m_pEmulatorModel)
+    {
+      LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"MESSEmulatorController::record() - called with no emulator model. Aborting.");
+      return false;
+    }
+
+    string sPath = "/home/mamedata/shots/"+m_pEmulatorModel->m_sSystemName;
     if (!m_pEmulatorModel->m_bIsRecording)
       {
 	// Not recording. Start a recording.
