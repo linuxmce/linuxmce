@@ -1430,7 +1430,7 @@ static UINT32 handler_ingame(running_machine &machine, render_container *contain
 	{
 		if (!machine.video().is_recording())
 		{
-			machine.video().begin_recording(NULL, video_manager::MF_MNG);
+			machine.video().begin_recording(NULL, video_manager::MF_AVI);
 			popmessage("REC START");
 		}
 		else
