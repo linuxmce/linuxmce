@@ -22,13 +22,20 @@ fi
 
 Moon_RootLocation="/usr/pluto/diskless/${Moon_DeviceID}"
 Moon_Architecture=$(RunSQL "SELECT IK_DeviceData FROM Device_DeviceData WHERE FK_Device='$Moon_DeviceID' AND FK_DeviceData='$DEVICEDATA_Architecture'")
+
 if [[ -z "$Moon_Architecture" ]]; then
 	Moon_Architecture=i386
 fi
+
 Moon_RootArchive="/usr/pluto/install/PlutoMD-$Moon_Architecture.tar.bz2"
+DisklessImages=$(GetDeviceData "$Moon_DeviceID" "$DEVICEDATA_DisklessImages")
+
+echo "INFO ::::: root:archive = $Moon_RootArchive"
+echo "INFO ::::: disklessimage = $DisklessImages"
 
 function unpack_filesystem {
-	local DisklessImages=$(GetDeviceData "$Moon_DeviceID" "$DEVICEDATA_DisklessImages")
+	echo "INFO : Unpacking filesystem"
+#	local DisklessImages=$(GetDeviceData "$Moon_DeviceID" "$DEVICEDATA_DisklessImages")
 	local NameKernel Kernel Name Value
 	if [[ -n "$DisklessImages" ]]; then
 		if [[ -d "$Moon_RootLocation" ]]; then
@@ -46,7 +53,12 @@ function unpack_filesystem {
 			Value="${line#*=}"
 			mkdir -p "$Moon_RootLocation/$Name"
 			pushd "$Moon_RootLocation/$Name"
-				tar -xf "/usr/pluto/install/$Value"
+				if [[ ! -f "/usr/pluto/install/$Value" ]]; then
+					echo "INFO : Diskless archive not found"
+					exit 1
+				else
+					tar -xf "/usr/pluto/install/$Value"
+				fi
 			popd
 		done
 	elif [[ ! -e ${Moon_RootLocation}/var/lib/dpkg/status ]] ;then
@@ -62,10 +74,12 @@ function unpack_filesystem {
 }
 
 function is_image_upgradable {
+	echo "INFO : Testing if diskimage is upgradeable"
 	## Test to see if the image is upgradable
 	cp /etc/resolv.conf ${Moon_RootLocation}/etc/resolv.conf
-	[[ -f /etc/apt/apt.conf ]] &&  cp /etc/apt/apt.conf ${Moon_RootLocation}/etc/apt/apt.conf
-	cp /etc/apt/sources.list ${Moon_RootLocation}/etc/apt/sources.list
+
+#	[[ -f /etc/apt/apt.conf ]] &&  cp /etc/apt/apt.conf ${Moon_RootLocation}/etc/apt/apt.conf
+#	cp /etc/apt/sources.list ${Moon_RootLocation}/etc/apt/sources.list
 
 	chroot $Moon_RootLocation apt-get update 2>/dev/null 1>/dev/null
 	UpgradablePkgs=$(chroot $Moon_RootLocation apt-get -s dist-upgrade 2>/dev/null | grep "^Conf\|^Inst" | wc -l)
@@ -78,6 +92,7 @@ function is_image_upgradable {
 }
 
 function create_diskless_conf {
+	echo "INFO : Creating ${Moon_RootLocation}/etc/diskless.conf"
 	## Create /etc/diskless.conf
 	local R=$(RunSQL "SELECT IPaddress,MACaddress FROM Device WHERE PK_Device='$Moon_DeviceID'")
 	local IP=$(Field 1 "$R")
@@ -90,11 +105,12 @@ Code="
 
 }
 
-if [[ ! -f $Moon_RootArchive ]] ;then
+if [[ ! -f $Moon_RootArchive && -z "$DisklessImages" ]]; then
+	echo "INFO : Diskless archive not found or not specified, exiting"
 	exit 1
 #	/usr/pluto/bin/Diskless_CreateTBZ.sh
-#	unpack_filesystem
-else
-	unpack_filesystem
-	create_diskless_conf	
 fi
+
+echo "INFO : Unpacking diskless archive"
+unpack_filesystem
+create_diskless_conf	

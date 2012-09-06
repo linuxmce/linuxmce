@@ -106,7 +106,11 @@ for Client in $DisklessMDs; do
 				fi
 				Value="${line#*=}"
 				if [[ -z "$Kernel" ]]; then
-					continue
+					if [[ -z "$Name" && -n "$Value" ]]; then
+						Exports_DisklessMDRoots="$Exports_DisklessMDRoots\n$DisklessMD_Root	$INTERNAL_SUBNET/$INTERNAL_SUBNET_MASK(rw,no_root_squash,no_all_squash,sync,no_subtree_check)"
+					else
+						continue
+					fi
 				fi
 				Exports_DisklessMDRoots="$Exports_DisklessMDRoots\n$DisklessMD_Root/$Name	$INTERNAL_SUBNET/$INTERNAL_SUBNET_MASK(rw,no_root_squash,no_all_squash,sync,no_subtree_check)"
 			done

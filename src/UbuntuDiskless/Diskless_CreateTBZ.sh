@@ -3,19 +3,27 @@
 ###########################################################
 ### Setup global variables
 ###########################################################
-DISTRO="$(lsb_release -c -s)"
+DEVICEDATA_Operating_System=209
 DEVICEDATA_Architecture=112
-Architecture=$(apt-config dump | grep 'APT::Architecture' | sed 's/.*"\(.*\)".*/\1/g')
+
+#TARGET_TYPES="ubuntu-i386 raspbian-armhf"
+#TARGET_TYPES="raspbian-armhf"
+TARGET_TYPES="ubuntu-i386"
+
+HOST_DISTRO=`lsb_release -i -s | tr '[:upper:]' '[:lower:]'`
+HOST_RELEASE=`lsb_release -c -s`
+HOST_ARCH=`apt-config dump | grep 'APT::Architecture' | sed 's/.*"\(.*\)".*/\1/g' | head -1`
+
 #Assign latest installed kernel and not running kernel
-KVER=`ls /lib/modules/ --sort time|head -1`
-DBST_SCRIPT='/usr/pluto/bin/Diskless_DebootstrapPluto.sh'
-ARH_DIR='/usr/pluto/install'
-DisklessFS="PlutoMD-${Architecture}.tar.bz2"
+HOST_KVER=`ls /lib/modules/ --sort time|head -1`
+
+#host file locations
+ARCHIVE_DIR='/usr/pluto/install'
 log_file=/var/log/pluto/Diskless_MD_Creation_$(date +%Y%m%d_%H%M%S).log
-TEMP_DIR=$(mktemp -d /tmp/Diskless_CreateTBZ.XXXXXXXXX)
+
+#db credentials
 MYSQL_DB_CRED=""
 SQL_DB="pluto_main"
-
 
 ###########################################################
 ### Setup Functions - Error checking and logging and trapping
@@ -24,9 +32,10 @@ SQL_DB="pluto_main"
 Trap_Exit () {
 	umount -fl $TEMP_DIR/var/cache/apt
 	umount -fl $TEMP_DIR/usr/pluto/deb-cache
+	umount -fl $TEMP_DIR/dev/pts
 	umount -fl $TEMP_DIR/proc
 	umount -fl $TEMP_DIR/sys
-	umount -fl $TEMP_DIR/lib/modules/${KVER}/volatile
+	umount -fl $TEMP_DIR/lib/modules/${HOST_KVER}/volatile
 
 	rm -rf $TEMP_DIR
 }
@@ -35,7 +44,7 @@ Setup_Logfile () {
 mkdir -p /var/log/pluto
 if [ ! -f ${log_file} ]; then
 	touch ${log_file}
-	if [ $? = 1 ]; then
+	if [ "$?" = 1 ]; then
 		echo "`date` - Unable to write to ${log_file} - re-run script as root"
 		exit 1
 	fi
@@ -171,18 +180,45 @@ echo "$Row" | cut -d$'\x01' -f"$FieldNumber" | tr $'\x02' ' '
 ### Setup Functions - General functions
 ###########################################################
 
+function do_debootstrap {
+	local release_name="$1"
+	local temp_dir="$2"
+	local repository="$3"
+
+	qemu_arch=""
+	case "$TARGET_ARCH" in
+		i386)
+			qemu_arch="$arch"
+		;;
+		amd64)
+			qemu_arch="x86_64"
+		;;
+		armel|armhf)
+			qemu_arch="arm"
+		;;
+	esac
+
+	[ `which "qemu-$qemu_arch-static"` ] && qemu_static_bin=`which "qemu-$qemu_arch-static"`
+	debootstrap --arch "$TARGET_ARCH" --foreign "$release_name" "$temp_dir" "$repository"
+	mkdir -p "$temp_dir/usr/bin"
+	[[ -f "$qemu_static_bin" ]] && cp "$qemu_static_bin" "$temp_dir/usr/bin"
+	chroot "$temp_dir" /debootstrap/debootstrap --second-stage
+}
+
 MD_Create_And_Populate_Temp_Dir () {
-StatsMessage "Creating Necessary files for MD creation to:"
+StatsMessage "Creating chroot for MD creation at: $TEMP_DIR"
 #Create the temp dir used for MD Staging
-if [[ -r /usr/pluto/install/PlutoMD_Debootstraped.tar.bz2 ]] ;then
-	pushd $TEMP_DIR
-		StatsMessage "Untarring $ARH_DIR/PlutoMD_Debootstraped.tar.bz2"
-		tar -xf "$ARH_DIR"/PlutoMD_Debootstraped.tar.bz2
-	popd
+if [[ -r "$ARCHIVE_DIR/$DBST_ARCHIVE" ]] ;then
+	mkdir -p "$TEMP_DIR"
+	pushd "$TEMP_DIR" >/dev/null
+		StatsMessage "Untarring $ARCHIVE_DIR/$DBST_ARCHIVE"
+		tar -xf "$ARCHIVE_DIR"/"$DBST_ARCHIVE"
+	popd >/dev/null
 else
 	StatsMessage "Creating debootstrap"
-	debootstrap "$(lsb_release -c -s)" "$TEMP_DIR" "http://archive.ubuntu.com/ubuntu/"
+	do_debootstrap "$TARGET_RELEASE" "$TEMP_DIR" "$TARGET_REPO"
 fi
+
 }
 
 MD_System_Level_Prep () {
@@ -196,7 +232,7 @@ host = dcerouter
 
 ## Disable invoke-rc.d scripts
 mv "$TEMP_DIR"/sbin/start-stop-daemon{,.pluto-install}
-mv "$TEMP_DIR"/sbin/initctl{,.pluto-install}
+[[ -f "$TEMP_DIR"/sbin/initctl ]] && mv "$TEMP_DIR"/sbin/initctl{,.pluto-install}
 echo -en '#!/bin/bash\necho "WARNING: we dont want invoke-rc.d to run right now"\nexit 101\n' >"$TEMP_DIR"/usr/sbin/policy-rc.d
 echo -en '#!/bin/bash\necho "WARNING: fake start-stop-daemon called"\n' >"$TEMP_DIR"/sbin/start-stop-daemon
 echo -en '#!/bin/bash\necho "WARNING: fake initctl called"\n' >"$TEMP_DIR"/sbin/initctl
@@ -212,14 +248,44 @@ mkdir -p $TEMP_DIR/var/cache/apt
 mkdir -p $TEMP_DIR/usr/pluto/deb-cache
 mount --bind /var/cache/apt $TEMP_DIR/var/cache/apt
 mount --bind /usr/pluto/deb-cache $TEMP_DIR/usr/pluto/deb-cache
+mount --bind /dev/pts $TEMP_DIR/dev/pts
 mount none -t sysfs $TEMP_DIR/sys
 mount none -t proc $TEMP_DIR/proc
 
-
 ## Setup apt in pluto style
-## FIXME: maybe we need to make sources.list from scratch ?
-cp {,"$TEMP_DIR"}/etc/apt/sources.list
-cp -r /etc/apt/sources.lis* $TEMP_DIR/etc/apt 
+case "$TARGET_DISTRO" in
+	"$HOST_DISTRO")
+		StatsMessage "Setting up /etc/sources.list for HOST_DISTRO: $TARGET_DISTRO"
+		cp {,"$TEMP_DIR"}/etc/apt/sources.list
+		cp -R {,"$TEMP_DIR"}/etc/apt/sources.list.d
+		;;
+	"ubuntu")
+		StatsMessage "Setting up /etc/sources.list for ubuntu"
+		echo "deb file:/usr/pluto/deb-cache ./
+deb $TARGET_REPO $TARGET_RELEASE main restricted universe multiverse
+deb-src $TARGET_REPO $TARGET_RELEASE main restricted universe multiverse
+deb $TARGET_REPO $TARGET_RELEASE-updates main restricted universe multiverse
+deb-src $TARGET_REPO $TARGET_RELEASE-updates main restricted universe multiverse
+deb http://security.ubuntu.com/ubuntu/ $TARGET_RELEASE-security main restricted universe multiverse
+deb-src http://security.ubuntu.com/ubuntu/ $TARGET_RELEASE-security main restricted universe multiverse
+deb http://deb.linuxmce.org/ubuntu/ $TARGET_RELEASE  beta2
+deb http://debian.slimdevices.com/ stable  main
+deb http://archive.canonical.com/ubuntu $TARGET_RELEASE partner
+deb http://packages.medibuntu.org/ $TARGET_RELEASE  free non-free
+" > $TEMP_DIR/etc/apt/sources.list
+		;;
+	"raspbian")
+		StatsMessage "Setting up /etc/sources.list for raspbian"
+		echo "deb file:/usr/pluto/deb-cache ./
+deb $TARGET_REPO $TARGET_RELEASE main contrib non-free rpi
+deb-src $TARGET_REPO $TARGET_RELEASE main contrib non-free rpi
+#deb http://deb.linuxmce.org/raspbian/ $TARGET_RELEASE main
+" > $TEMP_DIR/etc/apt/sources.list
+		echo "deb http://archive.raspberrypi.org/debian/ $TARGET_RELEASE main
+deb-src http://archive.raspberrypi.org/debian/ $TARGET_RELEASE main
+" > $TEMP_DIR/etc/apt/sources.list.d/raspi.list
+		;;
+esac
 
 [[ -f /etc/apt/apt.conf.d/30pluto ]] && cp {,"$TEMP_DIR"}/etc/apt/apt.conf.d/30pluto
 [[ -f /etc/apt/preferences ]] && cp {,"$TEMP_DIR"}/etc/apt/preferences
@@ -231,6 +297,7 @@ StatsMessage "Setting up SSH"
 }
 
 MD_Seamless_Compatability () {
+if [[ "$TARGET_DISTRO" == "ubuntu" ]]; then
 ######################
 #Foxconn NT330i
 ######################
@@ -255,23 +322,23 @@ if ! grep atl1c /etc/initramfs-tools-interactor/modules >/dev/null; then
 	modprobe atl1c
 	VerifyExitCode "Modprobe for atl1c failed"
 fi
-
 ######################
 #End Foxconn NT330i
 ######################
-
+fi
 }
 
 MD_Preseed () {
 ## Setup debconf interface to 'noninteractive'
 StatsMessage "PreSeeding package installation preferences"
-
 LC_ALL=C chroot $TEMP_DIR apt-get -y -qq update
 VerifyExitCode "apt update"
 
-#Setup the medibuntu repo
-LC_ALL=C chroot $TEMP_DIR apt-get -y --force-yes install medibuntu-keyring 
-VerifyExitCode "medibuntu apt add keyring"
+if [[ "$TARGET_DISTRO" == "ubuntu" ]]; then
+	#Setup the medibuntu repo
+	LC_ALL=C chroot $TEMP_DIR apt-get -y --force-yes install medibuntu-keyring 
+	VerifyExitCode "medibuntu apt add keyring"
+fi
 
 LC_ALL=C chroot $TEMP_DIR apt-get -y --force-yes install debconf-utils
 VerifyExitCode "install of debconf-utils"
@@ -307,66 +374,81 @@ sed -i 's/Value:  /Value: /g' $TEMP_DIR/var/cache/debconf/config.dat
 #remove preseed file, no need to clutter things up
 rm $TEMP_DIR/tmp/preseed.cfg
 
-
 }
 
 MD_Install_Packages () {
 StatsMessage "Installing packages to MD"
-
 ## Update the chrooted system (needed when created from archive)
 LC_ALL=C chroot $TEMP_DIR apt-get -f -y install
 LC_ALL=C chroot $TEMP_DIR apt-get -f -y dist-upgrade
 VerifyExitCode "Dist-upgrade failed"
-
-
-#Install headers and run depmod for the seamless integraiton function, ensure no errors exist
-LC_ALL=C chroot $TEMP_DIR apt-get -y install linux-headers-generic
-VerifyExitCode "Install linux headers package failed"
-KVER=`ls $TEMP_DIR/lib/modules/ --sort time|head -1`
-LC_ALL=C chroot $TEMP_DIR depmod -v $KVER
-VerifyExitCode "depmod failed - ensure you run an apt-get dist-upgrade on your core before running again"
 
 # generate locales
 StatsMessage "Generating locales"
 echo "en_US.UTF-8 UTF-8" >"$TEMP_DIR"/etc/locale.gen
 LC_ALL=C chroot "$TEMP_DIR" apt-get -f -y install locales
 
-StatsMessage "Installing kernel"
-LC_ALL=C chroot "$TEMP_DIR" apt-get -f -y --no-install-recommends install linux-image-generic
+# FIXME: need to add raspbian kernel headers
+if [[ "$TARGET_DISTRO" = "ubuntu" ]]; then
+	#Install headers and run depmod for the seamless integraiton function, ensure no errors exist
+	LC_ALL=C chroot $TEMP_DIR apt-get -y install linux-headers-generic
+	VerifyExitCode "Install linux headers package failed"
+	#HOST_KVER=`ls $TEMP_DIR/lib/modules/ --sort time|head -1`
+	LC_ALL=C chroot $TEMP_DIR depmod -v $HOST_KVER
+	VerifyExitCode "depmod failed - ensure you run an apt-get dist-upgrade on your core before running again"
 
+	StatsMessage "Installing kernel"
+	LC_ALL=C chroot "$TEMP_DIR" apt-get -f -y --no-install-recommends install linux-image-generic
 
-########## START CREATE LIST OF DEVICES #################"
-## that will run on the md so we will know
-## what software to preinstall there
-## FIXME: get this list from the database 
-DEVICE_LIST="28 62 1759 5 11 1825 26 1808 1901"
-
-# Determine if MythTV is installed by looking for MythTV_Plugin...
-Q="SELECT PK_Device FROM Device WHERE FK_DeviceTemplate=36"
-MythTV_Installed=$(RunSQL "$Q")
-if [ $MythTV_Installed ];then
-	#MythTV_Plugin is installed, so install MythTV_Player on MD
-	DEVICE_LIST="$DEVICE_LIST 35"
+	## Prevent lpadmin from running as it blocks the system
+	LC_ALL=C chroot "$TEMP_DIR" apt-get -y install cupsys-client
+	cp "$TEMP_DIR"/usr/sbin/lpadmin{,.disabled}
+	echo > "$TEMP_DIR"/usr/sbin/lpadmin 
+	LC_ALL=C chroot "$TEMP_DIR" apt-get -y install cups-pdf
+	mv "$TEMP_DIR"/usr/sbin/lpadmin{.disabled,}
 fi
-########## END CREATE LIST OF DEVICES ###################"
 
-
-## Prevent lpadmin from running as it blocks the system
-LC_ALL=C chroot "$TEMP_DIR" apt-get -y install cupsys-client
-cp "$TEMP_DIR"/usr/sbin/lpadmin{,.disabled}
-echo > "$TEMP_DIR"/usr/sbin/lpadmin 
-LC_ALL=C chroot "$TEMP_DIR" apt-get -y install cups-pdf
-mv "$TEMP_DIR"/usr/sbin/lpadmin{.disabled,}
-
+case "$TARGET_ARCH" in
+	i386|amd64)
+		echo "do_initrd = Yes" > $TEMP_DIR/etc/kernel-img.conf
+		;;
+esac
 
 ## Prevent discover from running as it blocks the system
 LC_ALL=C chroot "$TEMP_DIR" apt-get -y install discover
 cp "$TEMP_DIR"/sbin/discover "$TEMP_DIR"/sbin/discover.disabled
 echo > "$TEMP_DIR"/sbin/discover
 
+
+########## START CREATE LIST OF DEVICES #################"
+## that will run on the md so we will know
+## what software to preinstall there
+## FIXME: get this list from the database 
+case "$TARGET_DISTRO" in
+	"ubuntu")
+		DEVICE_LIST="28 62 1759 5 11 1825 26 1808 1901"
+		;;
+	"raspbian")
+		# more required device template required
+#		DEVICE_LIST="26 1808" 
+		DEVICE_LIST=""
+		;;
+esac
+
+# Determine if MythTV is installed by looking for MythTV_Plugin...
+# Don't install mythtv into raspbian
+if [[ "$TARGET_DISTRO" != "raspbian" ]]; then
+	Q="SELECT PK_Device FROM Device WHERE FK_DeviceTemplate=36"
+	MythTV_Installed=$(RunSQL "$Q")
+	if [ $MythTV_Installed ];then
+		#MythTV_Plugin is installed, so install MythTV_Player on MD
+		DEVICE_LIST="$DEVICE_LIST 35"
+	fi
+fi
+########## END CREATE LIST OF DEVICES ###################"
+
 ## Begin installing the packages needed for the pluto devices
 StatsMessage "Prep for MCE device installation"
-echo "do_initrd = Yes" > $TEMP_DIR/etc/kernel-img.conf
 
 for device in $DEVICE_LIST; do
 	Q="SELECT
@@ -377,7 +459,7 @@ for device in $DEVICE_LIST; do
 	   WHERE
 		PK_DeviceTemplate = $device
 	   AND
-		FK_RepositorySource = 2					
+		FK_RepositorySource = $TARGET_REPO_LMCE_SRC
 	"
 
 	R=$(RunSQL "$Q")
@@ -401,43 +483,61 @@ for device in $DEVICE_LIST; do
 	done
 done
 
-StatsMessage "Install other ancillary programs for MCE"
-## Packages that are marked as dependencies only in the database
-LC_ALL=C chroot $TEMP_DIR apt-get -y install id-my-disc
+case "$TARGET_ARCH" in
+	i386|amd64)
+		StatsMessage "Install other ancillary programs for MCE"
+		## Packages that are marked as dependencies only in the database
+		LC_ALL=C chroot $TEMP_DIR apt-get -y install id-my-disc
+		;;
+esac
 
 ## Put back discover
 mv "$TEMP_DIR"/sbin/discover.disabled "$TEMP_DIR"/sbin/discover
 
-## If libdvdcss2 is installed on the hybrid/core
-if [[ -d /usr/share/doc/libdvdcss2 ]] ;then
-	pushd $TEMP_DIR >/dev/null
-	chroot $TEMP_DIR apt-get install libdvdcss2
-	VerifyExitCode "Installation of libdvdcss2 failed"
-	popd
-fi
+## Install additional packages
+case "$TARGET_DISTRO" in
+	"ubuntu")
+		## If libdvdcss2 is installed on the hybrid/core
+		if [[ -d /usr/share/doc/libdvdcss2 ]] ;then
+			pushd $TEMP_DIR >/dev/null
+			chroot $TEMP_DIR apt-get install libdvdcss2
+			VerifyExitCode "Installation of libdvdcss2 failed"
+			popd >/dev/null
+		fi
 
-LC_ALL=C chroot $TEMP_DIR apt-get -y install kubuntu-desktop
-echo '/bin/false' >"$TEMP_DIR/etc/X11/default-display-manager"
-# Update startup to remove kdm and network manager
-LC_ALL=C chroot $TEMP_DIR update-rc.d -f kdm remove
-LC_ALL=C chroot $TEMP_DIR update-rc.d -f NetworkManager remove
+		if [[ "$INSTALL_KUBUNTU_DESKTOP" != "no" ]]; then
+			LC_ALL=C chroot $TEMP_DIR apt-get -y install kubuntu-desktop
+		fi
+		echo '/bin/false' >"$TEMP_DIR/etc/X11/default-display-manager"
+
+		# Update startup to remove kdm and network manager
+		LC_ALL=C chroot $TEMP_DIR update-rc.d -f kdm remove
+		LC_ALL=C chroot $TEMP_DIR update-rc.d -f NetworkManager remove
+
+		#Install ancillary programs
+		LC_ALL=C chroot $TEMP_DIR apt-get -y install xserver-xorg-video-all linux-firmware
+		VerifyExitCode "Ancillary programs install failed"
+
+		;;
+	"raspbian")
+                #Install nfs-common and openssh-server
+                LC_ALL=C chroot $TEMP_DIR apt-get -y install nfs-common openssh-server
+                VerifyExitCode "nfs-common or openssh-server programs install failed"
+		;;
+esac
 
 #implement external_media_identifier fix
 LC_ALL=C chroot $TEMP_DIR ln -s /usr/lib/libdvdread.so.4 /usr/lib/libdvdread.so.3
 
-#Install ancillary programs
-LC_ALL=C chroot $TEMP_DIR apt-get -y install xserver-xorg-video-all linux-firmware
-VerifyExitCode "Ancillary programs install failed"
-
 # Install plymouth theme on MD in Lucid
-if [[ "$DISTRO" = "lucid" ]] ; then
+if [[ "$TARGET_RELEASE" = "lucid" ]] ; then
 	LC_ALL=C chroot $TEMP_DIR apt-get -y install lmce-plymouth-theme
 	VerifyExitCode "MCE plymouth theme install failed"
 fi
 
 #Install backported alsa modules for HDMI audio for legacy hardware
 #tkmedia mentioned there are conflicts with this and capture cards using V4L, disabling for now
-#if [[ "$DISTRO" = "lucid" ]] ; then
+#if [[ "$TARGET_RELEASE" = "lucid" ]] ; then
 	#LC_ALL=C chroot $TEMP_DIR apt-get -y install linux-backports-modules-alsa-lucid-generic
 	#VerifyExitCode "Alsa backport modules install failed for HDMI"
 #fi
@@ -448,9 +548,10 @@ MD_Cleanup () {
 StatsMessage "Cleaning up from package installations..."
 umount $TEMP_DIR/var/cache/apt
 umount $TEMP_DIR/usr/pluto/deb-cache
+umount $TEMP_DIR/dev/pts
 umount $TEMP_DIR/sys
 umount $TEMP_DIR/proc
-umount $TEMP_DIR/lib/modules/${KVER}/volatile
+umount $TEMP_DIR/lib/modules/${HOST_KVER}/volatile
 
 #Copy the packages.gz file to ensure apt-get update does not fail
 mkdir -p $TEMP_DIR/usr/pluto/deb-cache/
@@ -460,8 +561,8 @@ mv -f "$TEMP_DIR"/sbin/start-stop-daemon{.pluto-install,}
 mv -f "$TEMP_DIR"/sbin/initctl{.pluto-install,}
 rm -f "$TEMP_DIR"/usr/sbin/policy-rc.d
 
-
 #Copy the orbiter activation command to the MD's desktop
+mkdir -p "$TEMP_DIR"/root/Desktop
 cp -r "$TEMP_DIR"/etc/skel/Desktop/* "$TEMP_DIR"/root/Desktop
 
 #Remove the xorg file(s) from installation, need to start with a fresh slate
@@ -477,36 +578,47 @@ COLUMNS=1024 chroot "$TEMP_DIR" dpkg -l | awk '/^ii/ {print $2}' >/tmp/pkglist-d
 }
 
 Create_Diskless_Tar () {
-StatsMessage "Creating the compressed tar image file, this will take up to 1 hour depending on your system..."
-mkdir -p "$ARH_DIR"
+StatsMessage "Creating the compressed tar image file, this could take up to 1 hour depending on your system..."
+mkdir -p "$ARCHIVE_DIR"
 pushd "$TEMP_DIR" >/dev/null
-tar -cjf "$ARH_DIR/$DisklessFS" *
+tar -cjf "$ARCHIVE_DIR/$DisklessFS" *
 VerifyExitCode "create tar file failed"
-echo "$PlutoVersion" > "$ARH_DIR/$DisklessFS.version"
+echo "$PlutoVersion" > "$ARCHIVE_DIR/$DisklessFS.version"
 popd >/dev/null
 
-rm -rf $TEMP_DIR
+rm -rf "$TEMP_DIR"
 
-# HACK'O'MATIC And make sure, we have files for both architectures.
-if [ -f /usr/pluto/install/PlutoMD-i386.tar.bz2 ]; then
-	FILENEEDED=PlutoMD-amd64
-else
-	FILENEEDED=PlutoMD-i386
-fi
-if [ ! -f /usr/pluto/install/$FILENEEDED.tar.bz2 ]; then
-	ln -sf /usr/pluto/install/$DisklessFS /usr/pluto/install/$FILENEEDED.tar.bz2
-fi	
-if [ ! -f /usr/pluto/install/$FILENEEDED.tar.bz2.version ]; then
-	ln -sf /usr/pluto/install/$DisklessFS.version /usr/pluto/install/$FILENEEDED.tar.bz2.version
-fi	
+case "$TARGET_DISTRO" in
+	"ubuntu")
+		# HACK'O'MATIC And make sure, we have files for both architectures.
+		if [ -f /usr/pluto/install/PlutoMD-i386.tar.bz2 ]; then
+			FILENEEDED=PlutoMD-amd64
+		else
+			FILENEEDED=PlutoMD-i386
+		fi
+		if [ ! -f /usr/pluto/install/$FILENEEDED.tar.bz2 ]; then
+			ln -sf /usr/pluto/install/$DisklessFS /usr/pluto/install/$FILENEEDED.tar.bz2
+		fi
+		if [ ! -f /usr/pluto/install/$FILENEEDED.tar.bz2.version ]; then
+			ln -sf /usr/pluto/install/$DisklessFS.version /usr/pluto/install/$FILENEEDED.tar.bz2.version
+		fi
+		;;
+esac
 
 }
 
 Create_PXE_Initramfs_Vmlinuz () {
-StatsMessage "Building the initial initramfs and vmlinuz files for PXE booting"
-# Let's create the default files needed for successful PXE boot.
-/usr/pluto/bin/Diskless_BuildDefaultImage.sh
-VerifyExitCode "PXE vmlinuz and initramfs"
+case "$TARGET_DISTRO" in
+	"ubuntu")
+		StatsMessage "Building the initial initramfs and vmlinuz files for PXE booting"
+		# Let's create the default files needed for successful PXE boot.
+		/usr/pluto/bin/Diskless_BuildDefaultImage.sh
+		VerifyExitCode "PXE vmlinuz and initramfs"
+		;;
+	"raspbian")
+		StatsMessage "No initramfs/boot files at this time"
+		;;
+esac
 }
 
 ###########################################################
@@ -519,20 +631,82 @@ trap "Trap_Exit" EXIT
 #Set up logging
 Setup_Logfile
 
-#Function execution
-MD_Create_And_Populate_Temp_Dir
-MD_System_Level_Prep
-MD_Seamless_Compatability
-MD_Preseed
-MD_Install_Packages
-MD_Cleanup
-Create_Diskless_Tar
-Create_PXE_Initramfs_Vmlinuz
+#TODO get as much of this from database as possible
+for TARGET in $TARGET_TYPES; do
+	case "$TARGET" in
+		"ubuntu-i386")
+			TARGET_DISTRO="ubuntu"
+			TARGET_RELEASE="$HOST_RELEASE"
+			TARGET_ARCH="$HOST_ARCH"
+			TARGET_REPO="http://archive.ubuntu.com/ubuntu/"
+			DBST_ARCHIVE="PlutoMD_Debootstraped.tar.bz2"
+			DisklessFS="PlutoMD-${TARGET_ARCH}.tar.bz2"
+			case "$TARGET_RELEASE" in
+				lucid)
+					TARGET_DISTRO_ID=18
+					;;
+			esac
+			TARGET_REPO_DISTRO_SRC=20
+			TARGET_REPO_LMCE_SRC=21
+			;;
+		"raspbian-armhf")
+			TARGET_DISTRO="raspbian"
+			TARGET_RELEASE="wheezy" #TODO: get from ?
+			TARGET_ARCH="armhf"
+			TARGET_REPO="http://mirrordirector.raspbian.org/raspbian/"
+			DBST_ARCHIVE="LMCEMD_Debootstraped-raspbian-armhf.tar.bz2"
+			DisklessFS="LMCEMD-$TARGET_DISTRO-$TARGET_ARCH.tar.bz2"
+			TARGET_DISTRO_ID=19
+			TARGET_REPO_DISTRO_SRC=22
+			TARGET_REPO_LMCE_SRC=23
+			;;
+	esac
+
+	# install cross arch utilities if target_arch is different from host_arch
+	if [ "$TARGET_ARCH" != "$HOST_ARCH" ]; then
+		StatsMessage "Installing cross-arch utilities for $TARGET_RELEASE"
+		apt-get -y install binfmt-support qemu debootstrap
+
+		case "$HOST_RELEASE" in 
+			"lucid")
+				# lucid's qemu-arm-static is buggy and missing wheezy definition, need version from precise
+				if [[ ! -d /usr/share/doc/qemu-user-static ]]; then 
+					wget http://archive.ubuntu.com/ubuntu/pool/universe/q/qemu-linaro/qemu-user-static_1.0.50-2012.03-0ubuntu2_i386.deb
+					dpkg -i qemu-user-static_1.0.50-2012.03-0ubuntu2_i386.deb
+					rm  -f qemu-user-static_1.0.50-2012.03-0ubuntu2_i386.deb
+				fi
+				[[ ! -f /usr/share/debootstrap/scripts/wheezy ]] && cp /usr/share/debootstrap/scripts/squeeze /usr/share/debootstrap/scripts/wheezy
+				;;
+			"precise")
+				apt-get -y install qemu-user-static
+				;;
+		esac
+
+	fi
+
+	StatsMessage "BEGIN: Target: $TARGET_DISTRO - $TARGET_RELEASE - $TARGET_ARCH"
+	StatsMessage "BEGIN: Host: $HOST_DISTRO - $HOST_RELEASE - $HOST_ARCH"
+
+	TEMP_DIR=$(mktemp -d /tmp/Diskless_CreateTBZ.XXXXXXXXX)
+
+	#Function execution
+	MD_Create_And_Populate_Temp_Dir
+	MD_System_Level_Prep
+	MD_Seamless_Compatability
+	MD_Preseed
+	MD_Install_Packages
+	MD_Cleanup
+	Create_Diskless_Tar
+	Create_PXE_Initramfs_Vmlinuz
+
+	StatsMessage "END: $TARGET_DISTRO - $TARGET_RELEASE - $TARGET_ARCH"
+
+done
 
 #Disable trap, everything was umounted and removed in the cleanup function
 trap - EXIT
 
-StatsMessage "Diskless media director image setup completed without a detected issue!"
+StatsMessage "Diskless media director images setup completed without a detected issue!"
 
 #Exit successfully
 exit 0

@@ -300,6 +300,7 @@ for Row in $R; do
 		echo "INFO : Skiping moon$Moon_DeviceID because NeedConfigure flag is not set"
 		continue
 	fi
+	echo "INFO : Processing moon$Moon_DeviceID because NeedConfigure flag is set"
 
 	Moon_DeviceTemplate=$(Field 6 "$Row")
 
@@ -323,7 +324,9 @@ for Row in $R; do
 	hosts_DisklessMD="${hosts_DisklessMD}${Moon_IP}	moon${Moon_DeviceID}\n"
 
 	## Create the a filesystem for this MD
+	echo "INFO : Run Diskless_CreateFS.sh $Moon_DeviceID"
 	/usr/pluto/bin/Diskless_CreateFS.sh "$Moon_DeviceID"
+	echo "INFO : Run Diskless_InstallKernel.sh $Moon_DeviceID"
 	/usr/pluto/bin/Diskless_InstallKernel.sh "$Moon_DeviceID"
 
 	## Setting Up
@@ -341,6 +344,13 @@ for Row in $R; do
 #	if [[ ! -e "$Moon_RootLocation"/var/log/pluto ]]; then
 #		ln -s "/home/logs/diskless_$Moon_DeviceID" "$Moon_RootLocation/var/log/pluto"
 #	fi
+
+	## Configure ssh for this device
+	if [[ ! -d $Moon_RootLocation/root/.ssh ]]; then 
+		mkdir -p $Moon_RootLocation/root/.ssh
+	fi
+	cat /usr/pluto/keys/id_dsa_pluto.pub > $Moon_RootLocation/root/.ssh/authorized_keys
+	(cd /usr/pluto/diskless/${Moon_DeviceID}/usr/pluto/deb-cache; dpkg-scanpackages -m . dev/null | tee Packages | gzip -c > Packages.gz)
 
 	## Dome configuring this MD
 	RunSQL "UPDATE Device SET NeedConfigure = 0 WHERE PK_Device=$Moon_DeviceID"
@@ -379,11 +389,6 @@ for dir in /usr/pluto/diskless/* ;do
 	fi
 
 done
-if [[ ! -d $Moon_RootLocation/root/.ssh ]]; then 
-	mkdir -p $Moon_RootLocation/root/.ssh
-fi
-cat /usr/pluto/keys/id_dsa_pluto.pub > $Moon_RootLocation/root/.ssh/authorized_keys
-(cd /usr/pluto/diskless/${Moon_DeviceID}/usr/pluto/deb-cache; dpkg-scanpackages -m . dev/null | tee Packages | gzip -c > Packages.gz)
 . /usr/pluto/bin/Config_Ops.sh
 if [[ "$PK_Users" -lt "1" ]]; then
 	/usr/pluto/bin/MessageSend "dcerouter" 0 7 7 1 163 "First MD headless reload"
