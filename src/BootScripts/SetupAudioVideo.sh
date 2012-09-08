@@ -23,9 +23,6 @@ SettingsFile=/etc/pluto/lastaudiovideo.conf
 
 # don't let KDE override xorg.conf
 rm -f {/home/*,/root}/.kde/share/config/displayconfigrc
-# remove the current xorgs
-mv /etc/X11/xorg.conf /etc/X11/xorg.conf.bu
-rm -f /etc/X11/xorg.conf /etc/X11/xorg.conf.pluto.avwizard
 
 Reboot=NoReboot
 ReloadX=NoReloadX
