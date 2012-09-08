@@ -11,6 +11,7 @@
 #include <colorfilterproxywidget.h>
 #include <QTime>
 #include <QBoxLayout>
+#include <QTcpServer>
 
 
 using namespace DCE;
@@ -24,24 +25,33 @@ class MediaManager : public QDeclarativeItem
 public:
     explicit MediaManager(QDeclarativeItem *parent = 0);
 
-    qMediaPlayer *mediaPlayer;
     QString currentStatus;
+    QString qs_totalTime;
+
+
+    QTcpServer *timeCodeServer;
+    QString current_position;
+    int iCurrent_Position;
+
     QWidget *window;
     QVBoxLayout *layout;
-
+    qMediaPlayer *mediaPlayer;
     Phonon::VideoWidget *videoSurface;
     Phonon::AudioOutput *audioSink;
     Phonon::MediaObject *mediaObject;
-
     ColorFilterProxyWidget *filterProxy;
 
-    bool connected;
     QString serverAddress;
     int deviceNumber;
+    bool connected;
+
+    int videoHeight;
+    int videoWidth;
 
 signals:
-    bool connectedChanged();
-    QString currentStatusChanged();
+    void connectedChanged();
+    void currentStatusChanged();
+    void totalTimeChanged();
 
 
 public slots:
@@ -57,10 +67,26 @@ public slots:
 
     void setWindowSize(int h, int w) {videoSurface->setFixedSize(w, h);}
 
+    void newClientConnected();
+    void startTimeCodeServer();
+
+    void setMediaPosition(int msec) {mediaObject->seek(msec); }
+    void setZoomLevel(QString zoom);
+    void setAspectRatio(QString aspect);
+    void getScreenShot();
+
+    void setVideoSize(int h, int w) { videoSurface->setFixedSize(w, h);  }
+
+    void setTotalTime(QString t) { qs_totalTime = t; emit totalTimeChanged();}
+    QString getTotalTime() {return qs_totalTime;}
+
+    void processTimeCode(qint64 f);
+
 private:
- void initializePlayer();
- void initializeConnections();
- void shutdownDevice();
+    void initializePlayer();
+    void initializeConnections();
+    void shutdownDevice();
+
 
 private slots:
 

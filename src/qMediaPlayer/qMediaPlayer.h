@@ -168,7 +168,8 @@ public:
 		/** @param #41 StreamID */
 			/** The media stream for which we need to pause playback. */
 
-	virtual void CMD_Pause_Media(int iStreamID) { string sCMD_Result; CMD_Pause_Media(iStreamID,sCMD_Result,NULL);};
+    virtual void CMD_Pause_Media(int iStreamID) { string sCMD_Result; CMD_Pause_Media(iStreamID,sCMD_Result,NULL);}
+
 	virtual void CMD_Pause_Media(int iStreamID,string &sCMD_Result,Message *pMessage);
 
 
@@ -177,7 +178,7 @@ public:
 		/** @param #41 StreamID */
 			/** The media stream that we need to restart playback for. */
 
-	virtual void CMD_Restart_Media(int iStreamID) { string sCMD_Result; CMD_Restart_Media(iStreamID,sCMD_Result,NULL);};
+    virtual void CMD_Restart_Media(int iStreamID) { string sCMD_Result; CMD_Restart_Media(iStreamID,sCMD_Result,NULL);}
 	virtual void CMD_Restart_Media(int iStreamID,string &sCMD_Result,Message *pMessage);
 
 
@@ -190,7 +191,7 @@ public:
 		/** @param #220 Report */
 			/** If true, report this speed to the user on the OSD */
 
-	virtual void CMD_Change_Playback_Speed(int iStreamID,int iMediaPlaybackSpeed,bool bReport) { string sCMD_Result; CMD_Change_Playback_Speed(iStreamID,iMediaPlaybackSpeed,bReport,sCMD_Result,NULL);};
+    virtual void CMD_Change_Playback_Speed(int iStreamID,int iMediaPlaybackSpeed,bool bReport) { string sCMD_Result; CMD_Change_Playback_Speed(iStreamID,iMediaPlaybackSpeed,bReport,sCMD_Result,NULL);}
 	virtual void CMD_Change_Playback_Speed(int iStreamID,int iMediaPlaybackSpeed,bool bReport,string &sCMD_Result,Message *pMessage);
 
 
@@ -201,7 +202,7 @@ public:
 		/** @param #41 StreamID */
 			/** The stream */
 
-	virtual void CMD_Jump_to_Position_in_Stream(string sValue_To_Assign,int iStreamID) { string sCMD_Result; CMD_Jump_to_Position_in_Stream(sValue_To_Assign.c_str(),iStreamID,sCMD_Result,NULL);};
+    virtual void CMD_Jump_to_Position_in_Stream(string sValue_To_Assign,int iStreamID) { string sCMD_Result; CMD_Jump_to_Position_in_Stream(sValue_To_Assign.c_str(),iStreamID,sCMD_Result,NULL);}
 	virtual void CMD_Jump_to_Position_in_Stream(string sValue_To_Assign,int iStreamID,string &sCMD_Result,Message *pMessage);
 
 
@@ -210,7 +211,7 @@ public:
 		/** @param #41 StreamID */
 			/** ID of stream to apply */
 
-	virtual void CMD_Skip_Fwd_ChannelTrack_Greater(int iStreamID) { string sCMD_Result; CMD_Skip_Fwd_ChannelTrack_Greater(iStreamID,sCMD_Result,NULL);};
+    virtual void CMD_Skip_Fwd_ChannelTrack_Greater(int iStreamID) { string sCMD_Result; CMD_Skip_Fwd_ChannelTrack_Greater(iStreamID,sCMD_Result,NULL);}
 	virtual void CMD_Skip_Fwd_ChannelTrack_Greater(int iStreamID,string &sCMD_Result,Message *pMessage);
 
 
@@ -219,7 +220,7 @@ public:
 		/** @param #41 StreamID */
 			/** ID of stream to apply */
 
-	virtual void CMD_Skip_Back_ChannelTrack_Lower(int iStreamID) { string sCMD_Result; CMD_Skip_Back_ChannelTrack_Lower(iStreamID,sCMD_Result,NULL);};
+    virtual void CMD_Skip_Back_ChannelTrack_Lower(int iStreamID) { string sCMD_Result; CMD_Skip_Back_ChannelTrack_Lower(iStreamID,sCMD_Result,NULL);}
 	virtual void CMD_Skip_Back_ChannelTrack_Lower(int iStreamID,string &sCMD_Result,Message *pMessage);
 
 
@@ -230,7 +231,7 @@ public:
 		/** @param #41 StreamID */
 			/** ID of stream to apply */
 
-	virtual void CMD_Jump_Position_In_Playlist(string sValue_To_Assign,int iStreamID) { string sCMD_Result; CMD_Jump_Position_In_Playlist(sValue_To_Assign.c_str(),iStreamID,sCMD_Result,NULL);};
+    virtual void CMD_Jump_Position_In_Playlist(string sValue_To_Assign,int iStreamID) { string sCMD_Result; CMD_Jump_Position_In_Playlist(sValue_To_Assign.c_str(),iStreamID,sCMD_Result,NULL);}
 	virtual void CMD_Jump_Position_In_Playlist(string sValue_To_Assign,int iStreamID,string &sCMD_Result,Message *pMessage);
 
 
@@ -239,7 +240,7 @@ public:
 		/** @param #41 StreamID */
 			/** The stream on which to do the navigation. */
 
-	virtual void CMD_Navigate_Next(int iStreamID) { string sCMD_Result; CMD_Navigate_Next(iStreamID,sCMD_Result,NULL);};
+    virtual void CMD_Navigate_Next(int iStreamID) { string sCMD_Result; CMD_Navigate_Next(iStreamID,sCMD_Result,NULL);}
 	virtual void CMD_Navigate_Next(int iStreamID,string &sCMD_Result,Message *pMessage);
 
 
@@ -248,7 +249,7 @@ public:
 		/** @param #41 StreamID */
 			/** The stream on which to do the navigation. */
 
-	virtual void CMD_Navigate_Prev(int iStreamID) { string sCMD_Result; CMD_Navigate_Prev(iStreamID,sCMD_Result,NULL);};
+    virtual void CMD_Navigate_Prev(int iStreamID) { string sCMD_Result; CMD_Navigate_Prev(iStreamID,sCMD_Result,NULL);}
 	virtual void CMD_Navigate_Prev(int iStreamID,string &sCMD_Result,Message *pMessage);
 
 
@@ -267,7 +268,7 @@ public:
 		/** @param #61 Height */
 			/** Frame height */
 
-	virtual void CMD_Get_Video_Frame(string sDisable_Aspect_Lock,int iStreamID,int iWidth,int iHeight,char **pData,int *iData_Size,string *sFormat) { string sCMD_Result; CMD_Get_Video_Frame(sDisable_Aspect_Lock.c_str(),iStreamID,iWidth,iHeight,pData,iData_Size,sFormat,sCMD_Result,NULL);};
+    virtual void CMD_Get_Video_Frame(string sDisable_Aspect_Lock,int iStreamID,int iWidth,int iHeight,char **pData,int *iData_Size,string *sFormat) { string sCMD_Result; CMD_Get_Video_Frame(sDisable_Aspect_Lock.c_str(),iStreamID,iWidth,iHeight,pData,iData_Size,sFormat,sCMD_Result,NULL);}
 	virtual void CMD_Get_Video_Frame(string sDisable_Aspect_Lock,int iStreamID,int iWidth,int iHeight,char **pData,int *iData_Size,string *sFormat,string &sCMD_Result,Message *pMessage);
 
 
@@ -282,7 +283,7 @@ public:
 1 - Title menu
 2 - Media menu */
 
-	virtual void CMD_Goto_Media_Menu(int iStreamID,int iMenuType) { string sCMD_Result; CMD_Goto_Media_Menu(iStreamID,iMenuType,sCMD_Result,NULL);};
+    virtual void CMD_Goto_Media_Menu(int iStreamID,int iMenuType) { string sCMD_Result; CMD_Goto_Media_Menu(iStreamID,iMenuType,sCMD_Result,NULL);}
 	virtual void CMD_Goto_Media_Menu(int iStreamID,int iMenuType,string &sCMD_Result,Message *pMessage);
 
 
@@ -291,7 +292,7 @@ public:
 		/** @param #41 StreamID */
 			/** ID of stream to apply */
 
-	virtual void CMD_Pause(int iStreamID) { string sCMD_Result; CMD_Pause(iStreamID,sCMD_Result,NULL);};
+    virtual void CMD_Pause(int iStreamID) { string sCMD_Result; CMD_Pause(iStreamID,sCMD_Result,NULL);}
 	virtual void CMD_Pause(int iStreamID,string &sCMD_Result,Message *pMessage);
 
 
@@ -302,21 +303,21 @@ public:
 		/** @param #203 Eject */
 			/** If true, the drive will be ejected if there is no media currently playing, so a remote's stop button acts as stop/eject. */
 
-	virtual void CMD_Stop(int iStreamID,bool bEject) { string sCMD_Result; CMD_Stop(iStreamID,bEject,sCMD_Result,NULL);};
+    virtual void CMD_Stop(int iStreamID,bool bEject) { string sCMD_Result; CMD_Stop(iStreamID,bEject,sCMD_Result,NULL);}
 	virtual void CMD_Stop(int iStreamID,bool bEject,string &sCMD_Result,Message *pMessage);
 
 
 	/** @brief COMMAND: #97 - Mute */
 	/** VDR mute */
 
-	virtual void CMD_Mute() { string sCMD_Result; CMD_Mute(sCMD_Result,NULL);};
+    virtual void CMD_Mute() { string sCMD_Result; CMD_Mute(sCMD_Result,NULL);}
 	virtual void CMD_Mute(string &sCMD_Result,Message *pMessage);
 
 
 	/** @brief COMMAND: #102 - Record */
 	/** Record the current game. Toggle on off */
 
-	virtual void CMD_Record() { string sCMD_Result; CMD_Record(sCMD_Result,NULL);};
+    virtual void CMD_Record() { string sCMD_Result; CMD_Record(sCMD_Result,NULL);}
 
 	virtual void CMD_Record(string &sCMD_Result,Message *pMessage);
 
@@ -326,14 +327,14 @@ public:
 		/** @param #9 Text */
 			/** nimic */
 
-	virtual void CMD_Info(string sText) { string sCMD_Result; CMD_Info(sText.c_str(),sCMD_Result,NULL);};
+    virtual void CMD_Info(string sText) { string sCMD_Result; CMD_Info(sText.c_str(),sCMD_Result,NULL);}
 	virtual void CMD_Info(string sText,string &sCMD_Result,Message *pMessage);
 
 
 	/** @brief COMMAND: #126 - Guide */
 	/** Show guide information.  For a dvd this may be the menu, just like the menu command */
 
-	virtual void CMD_Guide() { string sCMD_Result; CMD_Guide(sCMD_Result,NULL);};
+    virtual void CMD_Guide() { string sCMD_Result; CMD_Guide(sCMD_Result,NULL);}
 	virtual void CMD_Guide(string &sCMD_Result,Message *pMessage);
 
 
@@ -342,7 +343,7 @@ public:
 		/** @param #41 StreamID */
 			/** ID of stream to apply */
 
-	virtual void CMD_Play(int iStreamID) { string sCMD_Result; CMD_Play(iStreamID,sCMD_Result,NULL);};
+    virtual void CMD_Play(int iStreamID) { string sCMD_Result; CMD_Play(iStreamID,sCMD_Result,NULL);}
 	virtual void CMD_Play(int iStreamID,string &sCMD_Result,Message *pMessage);
 
 
@@ -353,7 +354,7 @@ public:
 		/** @param #41 StreamID */
 			/** ID of stream to apply */
 
-	virtual void CMD_Audio_Track(string sValue_To_Assign,int iStreamID) { string sCMD_Result; CMD_Audio_Track(sValue_To_Assign.c_str(),iStreamID,sCMD_Result,NULL);};
+    virtual void CMD_Audio_Track(string sValue_To_Assign,int iStreamID) { string sCMD_Result; CMD_Audio_Track(sValue_To_Assign.c_str(),iStreamID,sCMD_Result,NULL);}
 	virtual void CMD_Audio_Track(string sValue_To_Assign,int iStreamID,string &sCMD_Result,Message *pMessage);
 
 
@@ -364,7 +365,7 @@ public:
 		/** @param #41 StreamID */
 			/** ID of stream to apply */
 
-	virtual void CMD_Subtitle(string sValue_To_Assign,int iStreamID) { string sCMD_Result; CMD_Subtitle(sValue_To_Assign.c_str(),iStreamID,sCMD_Result,NULL);};
+    virtual void CMD_Subtitle(string sValue_To_Assign,int iStreamID) { string sCMD_Result; CMD_Subtitle(sValue_To_Assign.c_str(),iStreamID,sCMD_Result,NULL);}
 	virtual void CMD_Subtitle(string sValue_To_Assign,int iStreamID,string &sCMD_Result,Message *pMessage);
 
 
@@ -375,7 +376,7 @@ public:
 		/** @param #41 StreamID */
 			/** ID of stream to apply */
 
-	virtual void CMD_Angle(string sValue_To_Assign,int iStreamID) { string sCMD_Result; CMD_Angle(sValue_To_Assign.c_str(),iStreamID,sCMD_Result,NULL);};
+    virtual void CMD_Angle(string sValue_To_Assign,int iStreamID) { string sCMD_Result; CMD_Angle(sValue_To_Assign.c_str(),iStreamID,sCMD_Result,NULL);}
 	virtual void CMD_Angle(string sValue_To_Assign,int iStreamID,string &sCMD_Result,Message *pMessage);
 
 
@@ -384,7 +385,7 @@ public:
 		/** @param #41 StreamID */
 			/** ID of stream to apply */
 
-	virtual void CMD_EnterGo(int iStreamID) { string sCMD_Result; CMD_EnterGo(iStreamID,sCMD_Result,NULL);};
+    virtual void CMD_EnterGo(int iStreamID) { string sCMD_Result; CMD_EnterGo(iStreamID,sCMD_Result,NULL);}
 	virtual void CMD_EnterGo(int iStreamID,string &sCMD_Result,Message *pMessage);
 
 
@@ -393,7 +394,7 @@ public:
 		/** @param #41 StreamID */
 			/** ID of stream to apply */
 
-	virtual void CMD_Move_Up(int iStreamID) { string sCMD_Result; CMD_Move_Up(iStreamID,sCMD_Result,NULL);};
+    virtual void CMD_Move_Up(int iStreamID) { string sCMD_Result; CMD_Move_Up(iStreamID,sCMD_Result,NULL);}
 	virtual void CMD_Move_Up(int iStreamID,string &sCMD_Result,Message *pMessage);
 
 
@@ -402,7 +403,7 @@ public:
 		/** @param #41 StreamID */
 			/** ID of stream to apply */
 
-	virtual void CMD_Move_Down(int iStreamID) { string sCMD_Result; CMD_Move_Down(iStreamID,sCMD_Result,NULL);};
+    virtual void CMD_Move_Down(int iStreamID) { string sCMD_Result; CMD_Move_Down(iStreamID,sCMD_Result,NULL);}
 	virtual void CMD_Move_Down(int iStreamID,string &sCMD_Result,Message *pMessage);
 
 
@@ -411,7 +412,7 @@ public:
 		/** @param #41 StreamID */
 			/** ID of stream to apply */
 
-	virtual void CMD_Move_Left(int iStreamID) { string sCMD_Result; CMD_Move_Left(iStreamID,sCMD_Result,NULL);};
+    virtual void CMD_Move_Left(int iStreamID) { string sCMD_Result; CMD_Move_Left(iStreamID,sCMD_Result,NULL);}
 	virtual void CMD_Move_Left(int iStreamID,string &sCMD_Result,Message *pMessage);
 
 
@@ -420,77 +421,77 @@ public:
 		/** @param #41 StreamID */
 			/** ID of stream to apply */
 
-	virtual void CMD_Move_Right(int iStreamID) { string sCMD_Result; CMD_Move_Right(iStreamID,sCMD_Result,NULL);};
+    virtual void CMD_Move_Right(int iStreamID) { string sCMD_Result; CMD_Move_Right(iStreamID,sCMD_Result,NULL);}
 	virtual void CMD_Move_Right(int iStreamID,string &sCMD_Result,Message *pMessage);
 
 
 	/** @brief COMMAND: #204 - 0 */
 	/** 0 */
 
-	virtual void CMD_0() { string sCMD_Result; CMD_0(sCMD_Result,NULL);};
+    virtual void CMD_0() { string sCMD_Result; CMD_0(sCMD_Result,NULL);}
 	virtual void CMD_0(string &sCMD_Result,Message *pMessage);
 
 
 	/** @brief COMMAND: #205 - 1 */
 	/** 1 */
 
-	virtual void CMD_1() { string sCMD_Result; CMD_1(sCMD_Result,NULL);};
+    virtual void CMD_1() { string sCMD_Result; CMD_1(sCMD_Result,NULL);}
 	virtual void CMD_1(string &sCMD_Result,Message *pMessage);
 
 
 	/** @brief COMMAND: #206 - 2 */
 	/** 2 */
 
-	virtual void CMD_2() { string sCMD_Result; CMD_2(sCMD_Result,NULL);};
+    virtual void CMD_2() { string sCMD_Result; CMD_2(sCMD_Result,NULL);}
 	virtual void CMD_2(string &sCMD_Result,Message *pMessage);
 
 
 	/** @brief COMMAND: #207 - 3 */
 	/** 3 */
 
-	virtual void CMD_3() { string sCMD_Result; CMD_3(sCMD_Result,NULL);};
+    virtual void CMD_3() { string sCMD_Result; CMD_3(sCMD_Result,NULL);}
 	virtual void CMD_3(string &sCMD_Result,Message *pMessage);
 
 
 	/** @brief COMMAND: #208 - 4 */
 	/** 4 */
 
-	virtual void CMD_4() { string sCMD_Result; CMD_4(sCMD_Result,NULL);};
+    virtual void CMD_4() { string sCMD_Result; CMD_4(sCMD_Result,NULL);}
 	virtual void CMD_4(string &sCMD_Result,Message *pMessage);
 
 
 	/** @brief COMMAND: #209 - 5 */
 	/** 5 */
 
-	virtual void CMD_5() { string sCMD_Result; CMD_5(sCMD_Result,NULL);};
+    virtual void CMD_5() { string sCMD_Result; CMD_5(sCMD_Result,NULL);}
 	virtual void CMD_5(string &sCMD_Result,Message *pMessage);
 
 
 	/** @brief COMMAND: #210 - 6 */
 	/** 6 */
 
-	virtual void CMD_6() { string sCMD_Result; CMD_6(sCMD_Result,NULL);};
+    virtual void CMD_6() { string sCMD_Result; CMD_6(sCMD_Result,NULL);}
 	virtual void CMD_6(string &sCMD_Result,Message *pMessage);
 
 
 	/** @brief COMMAND: #211 - 7 */
 	/** 7 */
 
-	virtual void CMD_7() { string sCMD_Result; CMD_7(sCMD_Result,NULL);};
+    virtual void CMD_7() { string sCMD_Result; CMD_7(sCMD_Result,NULL);}
 	virtual void CMD_7(string &sCMD_Result,Message *pMessage);
 
 
 	/** @brief COMMAND: #212 - 8 */
 	/** 8 */
 
-	virtual void CMD_8() { string sCMD_Result; CMD_8(sCMD_Result,NULL);};
+    virtual void CMD_8() { string sCMD_Result; CMD_8(sCMD_Result,NULL);}
 	virtual void CMD_8(string &sCMD_Result,Message *pMessage);
 
 
 	/** @brief COMMAND: #213 - 9 */
 	/** 9 */
 
-	virtual void CMD_9() { string sCMD_Result; CMD_9(sCMD_Result,NULL);};
+    virtual void CMD_9() { string sCMD_Result; CMD_9(sCMD_Result,NULL);}
 	virtual void CMD_9(string &sCMD_Result,Message *pMessage);
 
 
@@ -912,8 +913,14 @@ public:
         void startPlayback();
         void pausePlayback();
 
+        void getScreenShot();
+        void setZoomLevel(QString zoom);
+        void setAspectRatio(QString aspect);
+
+
     public slots:
 
+        void mediaEnded();
 
         void setStartPosition(QString s) {startPosition = s; emit startPositionChanged(startPosition);}
         QString getStartPosition() {return startPosition;}

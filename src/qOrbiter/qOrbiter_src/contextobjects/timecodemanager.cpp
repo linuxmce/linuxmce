@@ -2,10 +2,11 @@
 #include "PlutoUtils/StringUtils.h"
 #include <QStringList>
 #include <QMetaType>
-#ifdef debug
+#ifdef QT_DEBUG
 #include <QDebug>
 #endif
 #include <QMetaProperty>
+#include <QtNetwork/QHostAddress>
 
 #ifdef QT5
 TimeCodeManager::TimeCodeManager(QQuickItem *parent) :
@@ -58,7 +59,7 @@ void TimeCodeManager::start(QString server, int iport)
     if(!dceMediaSocket->isOpen())
     {
 #ifdef QT_DEBUG
-        qDebug() <<"opening connection to " << port;
+        qDebug() <<"opening connection to " << server + ":" + QString::number(iport);
  #endif
         dceMediaSocket->connectToHost(mediaPlayerIp, port, QFile::ReadOnly );
         if ( dceMediaSocket->isValid() )
@@ -76,7 +77,16 @@ void TimeCodeManager::start(QString server, int iport)
     else
     {
 #ifdef QT_DEBUG
-        qDebug("Time code running, moving on.");
+        if(server != dceMediaSocket->peerAddress().toString())
+        {
+            stop();
+                    start(server, port);
+                     qDebug()<< "New Server! "<< server <<"::"<<port;
+        }
+        else{
+           qDebug("Time code running, moving on.");
+        }
+
 #endif
     }
 }
@@ -102,6 +112,8 @@ void TimeCodeManager::restart()
 void TimeCodeManager::updateTimeCode()
 {
     socketData = dceMediaSocket->readLine();
+    qDebug() << QString::fromAscii(socketData);
+
     std::string sLine = QString::fromAscii(socketData.data(), socketData.size()).toStdString();
     if (sLine.length() > 0)
     {
@@ -166,13 +178,16 @@ void TimeCodeManager::convertToSeconds()
 
 void TimeCodeManager::setPosition()
 {
+
     QStringList current = qsCurrentTime.split(":");
+    if(current.length() > 2){
     int hoursToSec = current.at(0).toInt() * 3600 ;
     int minuteToSec = (current.at(1).toInt() * 60);
     int seconds = current.at(2).toInt();
     int currentPosition = hoursToSec + minuteToSec + seconds;
     setTime(currentPosition);
     setProgressBar((currentPosition));
+    }
 }
 
 void TimeCodeManager::showDragTime(int seconds)

@@ -350,11 +350,8 @@ void qMediaPlayer::CMD_Play_Media(int iPK_MediaType,int iStreamID,string sMediaP
         //the first match as that will be the first indexed by the regex engine.
          finishedPath = "/mnt/remote/"+deviceNumber+path+localPath;
     }
-
-
-
-
     setCurrentMediaUrl(finishedPath);
+    //EVENT_Playback_Started(sMediaURL, i_StreamId, "Stored Media", "", "");
     emit startPlayback();
 
 }
@@ -553,6 +550,9 @@ void qMediaPlayer::CMD_Get_Video_Frame(string sDisable_Aspect_Lock,int iStreamID
     cout << "Parm #41 - StreamID=" << iStreamID << endl;
     cout << "Parm #60 - Width=" << iWidth << endl;
     cout << "Parm #61 - Height=" << iHeight << endl;
+
+    emit getScreenShot();
+
 }
 
 //<-dceag-c87-b->
@@ -1182,6 +1182,7 @@ void qMediaPlayer::CMD_Set_Aspect_Ratio(int iStreamID,string sAspect_Ratio,strin
     cout << "Need to implement command #916 - Set Aspect Ratio" << endl;
     cout << "Parm #41 - StreamID=" << iStreamID << endl;
     cout << "Parm #260 - Aspect_Ratio=" << sAspect_Ratio << endl;
+    emit setAspectRatio(QString::fromStdString(sAspect_Ratio));
 }
 
 //<-dceag-c917-b->
@@ -1199,6 +1200,7 @@ void qMediaPlayer::CMD_Set_Zoom(int iStreamID,string sZoom_Level,string &sCMD_Re
     cout << "Need to implement command #917 - Set Zoom" << endl;
     cout << "Parm #41 - StreamID=" << iStreamID << endl;
     cout << "Parm #261 - Zoom_Level=" << sZoom_Level << endl;
+    emit setZoomLevel(QString::fromStdString(sZoom_Level));
 }
 
 //<-dceag-c920-b->
@@ -1351,10 +1353,6 @@ void qMediaPlayer::setCommandResponse(QString r)
     {commandResponse = QTime::currentTime().toString()+"-QMediaPlayer:: "+ r; emit commandResponseChanged(commandResponse);}
 }
 
-
-
-
-
 //<-dceag-c102-b->
 
 	/** @brief COMMAND: #102 - Record */
@@ -1485,3 +1483,11 @@ void qMediaPlayer::CMD_Set_Game_Options(string sValue_To_Assign,string &sCMD_Res
 void qMediaPlayer::CMD_Get_Game_Options(string sPath,string *sValue_To_Assign,string &sCMD_Result,Message *pMessage)
 //<-dceag-c983-e->
 {}
+
+
+void qMediaPlayer::mediaEnded()
+{
+    DCE::CMD_Stop finished(this->m_dwPK_Device, this->m_dwPK_Device, i_StreamId, false );
+    SendCommand(finished);
+   // EVENT_Playback_Started(currentMediaUrl.toStdString(), i_StreamId, "Media", "none", "none");
+}

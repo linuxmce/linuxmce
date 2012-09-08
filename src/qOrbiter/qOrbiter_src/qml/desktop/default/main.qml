@@ -12,15 +12,19 @@ Item {
     height:appH
     MediaManager{
         id:dceplayer
-        height: 320
-        width: 480
+
         anchors.top: parent.top
         anchors.left:parent.left
         z:0
+        Component.onCompleted: setWindowSize(appH, appW)
         MouseArea{
             anchors.fill: dceplayer
             acceptedButtons: Qt.LeftButton | Qt.RightButton
             onClicked:  Qt.RightButton ? pageLoader.visible = !pageLoader.visible: ""
+        }
+        Connections{
+            target:manager
+            onOrientationChanged:dceplayer.setWindowSize(appH, appW)
         }
     }
 

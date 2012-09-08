@@ -96,7 +96,7 @@ qOrbiter::~qOrbiter()
 */
 }
 
-//<-dceag-getconfig-b->
+
 
 
 //<-dceag-reg-b->
@@ -1087,7 +1087,8 @@ void qOrbiter::CMD_Set_Now_Playing(string sPK_DesignObj,string sValue_To_Assign,
     }
     else
     {
-        emit updateTimeCode(QString::fromStdString(m_sIPAddress), 12000);
+      checkTimeCode();
+
         emit setNowPlaying(true);
         emit currentScreenChanged("Screen_"+scrn+".qml");
         currentScreen = "Screen_"+scrn+".qml";
@@ -1943,6 +1944,8 @@ void qOrbiter::registerDevice(int user, QString ea, int room)
     {
         setCommandResponse("DCERouter Responded to Register with " + QString::fromStdString(pResponse));
         setLocation(room, ea.toInt());
+        DATA_Set_PK_Users(i_user, true);
+        DATA_Set_FK_EntertainArea(StringUtils::itos(i_ea),true);
         GetScreenSaverImages();
     }
     else
@@ -2832,6 +2835,26 @@ void DCE::qOrbiter::requestMediaPlaylist()
 void qOrbiter::checkTimeCode()
 {
     emit setMyIp(QString::fromStdString(m_sIPAddress));
+
+    DeviceData_Base *pDevice = m_dwPK_Device_NowPlaying ? m_pData->m_AllDevices.m_mapDeviceData_Base_Find(m_dwPK_Device_NowPlaying) : NULL;
+
+    string sIPAddress = pDevice->m_sIPAddress;
+    if( sIPAddress.empty() )
+    {
+        if( pDevice->m_pDevice_MD && !pDevice->m_pDevice_MD->m_sIPAddress.empty() )
+            sIPAddress = pDevice->m_pDevice_MD->m_sIPAddress;
+        else if( pDevice->m_pDevice_Core && !pDevice->m_pDevice_Core->m_sIPAddress.empty() )
+            sIPAddress = pDevice->m_pDevice_Core->m_sIPAddress;
+        else
+        {
+            LoggerWrapper::GetInstance()->Write(LV_WARNING,"Media Player Has No Address");
+            return;
+        }
+    }
+
+    if(i_current_mediaType!=11 && !sIPAddress.empty() ){
+    emit updateTimeCode(QString::fromStdString(sIPAddress), 12000);
+    }
 }
 
 void qOrbiter::getStreamingVideo()
@@ -4992,6 +5015,7 @@ void qOrbiter::verifyInstall(QNetworkReply *r)
         if ( initialize() == true )
         {
             setdceIP(QString::fromStdString(m_sIPAddress));
+
             LoggerWrapper::GetInstance()->Write(LV_STATUS, "Connect OK");
 
             if( m_bLocalMode )
@@ -5002,7 +5026,7 @@ void qOrbiter::verifyInstall(QNetworkReply *r)
 
 }
 
-//<-dceag-getconfig-b->
+
 
 //<-dceag-c126-b->
 
