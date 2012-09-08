@@ -23,6 +23,9 @@ SettingsFile=/etc/pluto/lastaudiovideo.conf
 
 # don't let KDE override xorg.conf
 rm -f {/home/*,/root}/.kde/share/config/displayconfigrc
+# remove the current xorgs
+mv /etc/X11/xorg.conf /etc/X11/xorg.conf.bu
+rm -f /etc/X11/xorg.conf /etc/X11/xorg.conf.pluto.avwizard
 
 Reboot=NoReboot
 ReloadX=NoReloadX
@@ -101,12 +104,11 @@ EnableDigitalOutputs()
 	local SoundCard="$1"
 	# Added this to correctly unmute channels for setup wizard, and to 
 	# inject necessary unmuting commands for later bootup.
-	amixdigital=$(amixer -c "$SoundCard" | grep Simple | cut -d' ' -f4,5,6 | sort | uniq) ||
-	for output in $amixdigital; do
-		amixer -c "$SoundCard" sset $output unmute
-		amixer -c "$SoundCard" sset $output 80%
-	done 2>/dev/null ||
-	alsactl store ||
+	amixer -c "$SoundCard" | grep '\[off\]' -B5 | grep "Simple" | sed "s/.*'\(.*\)'[^']*$/\1/" | while read MuteStatus; do 
+		amixer -c "$SoundCard" sset "$MuteStatus" unmute; done 2>&1> /dev/null
+	amixer -c "$SoundCard" | grep '\[.*\%\]' -B5 | grep "Simple" | sed "s/.*'\(.*\)'[^']*$/\1/" | while read VolLevel; do 
+		amixer -c "$SoundCard" sset "$VolLevel" 80%; done 2>&1> /dev/null
+	alsactl store
 }
 
 Setup_AsoundConf()
@@ -179,12 +181,12 @@ Setup_XineConf()
 		*[CO]*)
 			XineConfSet audio.device.alsa_front_device asym_spdif "$XineConf"
 			XineConfSet audio.device.alsa_default_device asym_spdif "$XineConf"
-			XineConfSet audio.device.alsa_passthrough_device "iec958:CARD=$SoundCard,AES0=0x6,AES1=0x82,AES2=0x0,AES3=0x2" "$XineConf"
+			#XineConfSet audio.device.alsa_passthrough_device "iec958:CARD=$SoundCard,AES0=0x6,AES1=0x82,AES2=0x0,AES3=0x2" "$XineConf"
 			;;
 		*H*)
 			XineConfSet audio.device.alsa_front_device asym_hdmi "$XineConf"
 			XineConfSet audio.device.alsa_default_device asym_hdmi "$XineConf"
-			XineConfSet audio.device.alsa_passthrough_device "hdmi:CARD=$SoundCard,AES0=0x6,AES1=0x82,AES2=0x0,AES3=0x2" "$XineConf"
+			#XineConfSet audio.device.alsa_passthrough_device "hdmi:CARD=$SoundCard,AES0=0x6,AES1=0x82,AES2=0x0,AES3=0x2" "$XineConf"
 			;;
 		*)
 			XineConfSet audio.device.alsa_front_device "$AnalogPlaybackCard" "$XineConf"
