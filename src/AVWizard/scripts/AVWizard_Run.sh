@@ -411,14 +411,14 @@ GamePad_Setup () {
 }
 
 Enable_Audio_Channels () {
-	# Added this to correctly unmute channels for setup wizard
-	amixdigital=$(amixer | grep Simple | cut -d' ' -f4,5,6 | sort | uniq) ||
-	for output in $amixdigital; do
-		amixer sset $output unmute
-		amixer sset $output 80%
-	done 2>/dev/null ||
-	alsactl store ||
-	VerifyExitCode "Storing audio channel settings failed"
+	# Added this to correctly unmute channels for setup wizard, and to 
+	# inject necessary unmuting commands for later bootup.
+	aplay -l | grep card | awk '{print $2}' | uniq | sed 's/://g' | while read CardNumber; do 
+		amixer -c "$CardNumber" | grep '\[off\]' -B5 | grep "Simple" | sed "s/.*'\(.*\)'[^']*$/\1/" | while read MuteStatus; do 
+			amixer -c "$CardNumber" sset "$MuteStatus" unmute; done 2>&1> /dev/null
+		amixer -c "$CardNumber" | grep '\[.*\%\]' -B5 | grep "Simple" | sed "s/.*'\(.*\)'[^']*$/\1/" | while read VolLevel; do 
+			amixer -c "$CardNumber" sset "$VolLevel" 80%; done 2>&1> /dev/null
+	done
 }
 
 Start_AVWizard () {

@@ -890,7 +890,13 @@ void GenerateWizardConfigDefaults::GeneratePage_AudioVolume(
 
 	Page->AddChild(CreateControlButton("BtnOK",
 		" OK ",
-		320, 450,
+		220, 450,
+		0,
+		true
+		));
+	Page->AddChild(CreateControlButton("TryNext",
+		" Try Next ",
+		410, 450,
 		0,
 		true
 		));
