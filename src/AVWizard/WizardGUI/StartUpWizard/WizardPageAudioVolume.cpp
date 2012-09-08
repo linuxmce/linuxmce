@@ -210,13 +210,6 @@ void WizardPageAudioVolume::DoDecreaseSetting()
 					Event.key.keysym.sym = SDLK_RETURN;
 					SDL_PushEvent(&Event);
 				}
-				else if (ClickedImage->GetName() == "TryNext")
-				{
-					Event.type = SDL_KEYUP;
-					Event.key.state = SDL_RELEASED;
-					Event.key.keysym.sym = SDLK_DOWN;
-					SDL_PushEvent(&Event);
-				}
 			}
 		}
 	}
