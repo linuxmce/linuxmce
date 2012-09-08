@@ -21,6 +21,7 @@ namespace DCE
     m_sConfigFile = MAME_CONFIG_FILE;
     m_sConfigFileTemplate = MAME_CONFIG_FILE_TEMPLATE;
     m_sWindowName = "mame.mame";
+    m_bCanSaveState=true;
     initializeActionstoKeysyms();
   }
 

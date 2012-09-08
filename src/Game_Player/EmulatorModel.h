@@ -46,6 +46,7 @@ namespace DCE
     bool m_bHasArgs;
     bool m_bIsStreaming; // Are we streaming game to multiple media directors?
     bool m_bIsStreamingSource; // Are we the master machine?
+    bool m_bCanSaveState; // Can this emulation save state?
     string m_sArgs;
     bool m_bRunning_get() { return m_bRunning; }
     void m_bRunning_set(bool bRunning) { m_bRunning = bRunning; }

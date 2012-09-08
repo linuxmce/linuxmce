@@ -93,6 +93,9 @@ namespace DCE
     virtual bool option();
     virtual bool reset();
     virtual bool record();
+
+    bool canSaveState(); 
+
   };
 
 }

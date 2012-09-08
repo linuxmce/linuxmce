@@ -83,7 +83,9 @@ namespace DCE
 
     // If a media position was set (i.e. as part of the CMD_Play_Media, then put it in
     // the mame configuration file to load. Otherwise, blank it out.
-    if (!m_pEmulatorModel->m_sMediaPosition.empty() && !m_pEmulatorModel->m_bIsStreamingSource)
+    if (!m_pEmulatorModel->m_sMediaPosition.empty() && 
+	!m_pEmulatorModel->m_bIsStreamingSource && 
+	m_pEmulatorModel->m_bCanSaveState)
       {
 	m_pEmulatorModel->m_mapConfigTemplateItems["###STATE###"] = "1";
 
@@ -187,7 +189,8 @@ namespace DCE
   bool MAMEEmulatorController::saveState(string& sPosition, string& sText, bool bAutoSave, string sAutoSaveName)
   {
 
-    if (!m_pEmulatorModel->m_bIsStreaming)
+    if (!m_pEmulatorModel->m_bIsStreaming && 
+	m_pEmulatorModel->m_bCanSaveState)
       {
 	doAction("SAVE_STATE");
 	doAction("1");
@@ -248,7 +251,7 @@ namespace DCE
   bool MAMEEmulatorController::loadState(string sPosition)
   {
     
-    if (!m_pEmulatorModel->m_bIsStreaming)
+    if (!m_pEmulatorModel->m_bIsStreaming && m_pEmulatorModel->m_bCanSaveState)
       {
 	string sPath = "/home/mamedata/sta/"+getRomFromSlot();
 	string sSource = sPath + "/" + sPosition;

@@ -262,7 +262,8 @@ namespace DCE
   bool MESSEmulatorController::saveState(string& sPosition, string& sText, bool bAutoSave, string sAutoSaveName)
   {
 
-    if (!m_pEmulatorModel->m_bIsStreaming)
+    if (!m_pEmulatorModel->m_bIsStreaming && 
+	m_pEmulatorModel->m_bCanSaveState)
       {
 	doAction("SAVE_STATE");
 	doAction("1");
@@ -323,7 +324,8 @@ namespace DCE
   bool MESSEmulatorController::loadState(string sPosition)
   {
     
-    if (!m_pEmulatorModel->m_bIsStreaming)
+    if (!m_pEmulatorModel->m_bIsStreaming && 
+	m_pEmulatorModel->m_bCanSaveState)
       {
 	string sPath = "/home/mamedata/sta/"+getSystemName();
 	string sSource = sPath + "/" + sPosition;

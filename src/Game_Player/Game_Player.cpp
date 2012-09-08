@@ -1039,19 +1039,26 @@ void Game_Player::CMD_Report_Playback_Position(int iStreamID,string *sText,strin
   cout << "Parm #41 - StreamID=" << iStreamID << endl;
   cout << "Parm #42 - MediaPosition=" << sMediaPosition << endl;
 
-  string sSavePosition, sSaveText;
-
-  if (m_pEmulatorController->saveState(sSavePosition,sSaveText))
+  if (m_pEmulatorController->canSaveState())
     {
-      LoggerWrapper::GetInstance()->Write(LV_STATUS,"Game_Player::CMD_Report_Playback_Position - Successfully saved state %s",sSavePosition.c_str());
-      *sMediaPosition = sSavePosition;
-      *sText = sSaveText;
+      string sSavePosition, sSaveText;
+      
+      if (m_pEmulatorController->saveState(sSavePosition,sSaveText))
+	{
+	  LoggerWrapper::GetInstance()->Write(LV_STATUS,"Game_Player::CMD_Report_Playback_Position - Successfully saved state %s",sSavePosition.c_str());
+	  *sMediaPosition = sSavePosition;
+	  *sText = sSaveText;
+	}
+      else
+	{
+	  LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"Game_Player::CMD_Report_Playback_Position - Failed saving state. See previous messages for more explanation.");
+	}
     }
   else
     {
-      LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"Game_Player::CMD_Report_Playback_Position - Failed saving state. See previous messages for more explanation.");
+      LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"Game_Player::CMD_Report_Playback_Position - Emulation does not support save states, returning ERROR.");
+      sCMD_Result = "ERROR";
     }
-
 }
 
 //<-dceag-c412-b->
@@ -1070,12 +1077,19 @@ void Game_Player::CMD_Set_Media_Position(int iStreamID,string sMediaPosition,str
   cout << "Parm #41 - StreamID=" << iStreamID << endl;
   cout << "Parm #42 - MediaPosition=" << sMediaPosition << endl;
 
-  if (!m_pEmulatorController->loadState(sMediaPosition))
+  if (m_pEmulatorController->canSaveState())
     {
-      LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"Game_Player::CMD_Set_Media_Position - unable to restore state %s bailing!",sMediaPosition.c_str());
-      // TODO: Add A call to Orbiter Plugin's Display Alert to display an error to the user.
+      if (!m_pEmulatorController->loadState(sMediaPosition))
+	{
+	  LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"Game_Player::CMD_Set_Media_Position - unable to restore state %s bailing!",sMediaPosition.c_str());
+	  // TODO: Add A call to Orbiter Plugin's Display Alert to display an error to the user.
+	}
     }
-
+  else
+    {
+      LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"Game_Player::CMD_Set_Media_Position - Emulation does not support save state restore. Sending ERROR");
+      sCMD_Result = "ERROR";
+    }
 }
 
 //<-dceag-c548-b->

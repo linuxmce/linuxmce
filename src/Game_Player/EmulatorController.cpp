@@ -119,7 +119,7 @@ namespace DCE
    */
   void EmulatorController::setMediaPosition(string sMediaPosition)
   {
-    if (m_pEmulatorModel)
+    if (m_pEmulatorModel && m_pEmulatorModel->m_bCanSaveState)
       m_pEmulatorModel->m_sMediaPosition=sMediaPosition;
     return;
   }
@@ -459,6 +459,11 @@ namespace DCE
   void EmulatorController::setSystemConfiguration(string sSystemConfiguration)
   {
     m_pEmulatorModel->m_sSystemConfiguration=sSystemConfiguration;
+  }
+
+  bool EmulatorController::canSaveState()
+  {
+    return m_pEmulatorModel->m_bCanSaveState;
   }
 
 }
