@@ -32,8 +32,11 @@ Q_IMPORT_PLUGIN(UIKit)
 #include <QtGlobal>
 #ifdef QT5
 #include <QtWidgets/QApplication>
-#include <QtQml/QQmlEngine>
 #include <QQmlContext>
+#include <QQmlEngine>
+#include <QtQuick/QQuickView>
+
+
 #else
 #include <QApplication>
 #include <QtDeclarative/QDeclarativeEngine>

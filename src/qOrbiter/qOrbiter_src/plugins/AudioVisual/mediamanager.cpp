@@ -61,7 +61,9 @@ void MediaManager::initializeConnections()
     QObject::connect(mediaObject, SIGNAL(finished()), mediaPlayer, SLOT(mediaEnded()));
     QObject::connect(mediaPlayer, SIGNAL(startPlayback()), this, SLOT(startTimeCodeServer()));
     QObject::connect(mediaObject, SIGNAL(tick(qint64)), this, SLOT(processTimeCode(qint64)));
-mediaObject->setTickInterval(quint32(1000));
+    QObject::connect(mediaObject, SIGNAL(finished()), videoSurface, SLOT(lower()));
+    QObject::connect(mediaPlayer, SIGNAL(startPlayback()), videoSurface, SLOT(raise()));
+    mediaObject->setTickInterval(quint32(1000));
     //mediaObject->setCurrentSource(Phonon::MediaSource("/mnt/remote/121/public/data/videos/The Venture Brothers/TVB Season 1/The.Venture.Brothers.S01E12.The.Trial.of.the.Monarch.avi"));
     //mediaObject->play();
 }
@@ -119,6 +121,21 @@ void MediaManager::setMediaUrl(QString url)
 
 void MediaManager::processTimeCode(qint64 f)
 {
+    /*
+     *
+     *socket template - comma dilineated
+     *"1000,00:01:05.899,00:22:17.668,1007,0,0,F,147209,/home/public/data/videos/MediaDrive [121]/musicVideos/electronic/Eminence - E65 Podcast (Trance Edition).mp4
+     * param 1) speed, x 1000 ? ie 1000 2000 4000 16000 32000 etc
+     * param 2) curent time in this breakdown- HH:MM:SS:MSEC
+     * param 3) total time - breakdown- HH:MM:SS:MSEC
+     * param 4) stream id
+     * param 5) ? number, example was 0
+     * param 6) ? number, provided example was 0
+     * param 7) F in the case of stored media? investigation is required
+     * param 8) correlates to 7 in some sense as its the linuxmce file number for the file in param 9
+     * param 9) the full path of the file, including the linuxmce sub path (home/public/data)
+     */
+
     int seconds = f / 1000;
     int displayHours = seconds / (3600);
     int remainder = seconds % 3600;

@@ -37,7 +37,7 @@ DEFINES+=QT4_7
 }
 
 
-contains(QT_VERSION,5.*.*){
+contains(QT_VERSION,5.0.*){
 message("$$QT_VERSION Core")
 DEFINES+=QT5
 }
@@ -92,7 +92,7 @@ folder_05.target = $$DESTDIR/template
 folder_03.source = config.xml
 folder_03.target = $$DESTDIR
 DEFINES += for_desktop
-QT+= phonon
+
 
 plugins_folder.source = imports/
 plugins_folder.target = $$DESTDIR
@@ -226,19 +226,19 @@ DEPLOYMENTFOLDERS = qmlcomponents
 
 # Additional import path used to resolve QML modules in Creator's code model
 #QML_IMPORT_PATH = "imports/"
-QML_IMPORT_TRACE = 1
+#QML_IMPORT_TRACE = 1
 
 symbian:TARGET.UID3 = 0xE0D07D4D
 QMAKE_CXXFLAGS += -DUSE_LZO_DATAGRID
 
 INCLUDEPATH += ../../ ../../DCE/
 
-QT4_*{
-QT+= webkit declarative
+QT4{
+QT+= webkit declarative phonon
 }
 
 QT5{
-QT+= webkit quick mobility multimedia widgets qtcore
+QT+= qml quick1 webkit mobility widgets qtcore
 }
 
 macx{

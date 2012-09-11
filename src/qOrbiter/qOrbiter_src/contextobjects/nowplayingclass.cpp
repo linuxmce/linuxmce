@@ -1,6 +1,6 @@
 #include "nowplayingclass.h"
 
-#if (QT_VERSION >= 0x050000)
+#if (QT5)
 NowPlayingClass::NowPlayingClass(QQuickItem *parent) :
     QQuickItem(parent)
 #else

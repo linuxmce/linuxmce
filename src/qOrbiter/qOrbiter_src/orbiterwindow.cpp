@@ -26,7 +26,7 @@
 #include <QtCore/QDir>
 #include <shaders/filereader.h>
 
-#if (QT_VERSION >= 0x050000)
+#if (QT5)
 #include <QtQml/QtQml>
 #include <QQmlContext>
 #include <QQmlEngine>
@@ -87,7 +87,7 @@ orbiterWindow::orbiterWindow(long deviceid, std::string routerip, QObject *paren
     //qorbiterUIwin->rootContext()->setContextProperty("fileReader", fileReader);
 #endif
 
-#if (QT_VERSION >= 0x050000)
+#if (QT5)
     mainView.setResizeMode(QQuickView::SizeRootObjectToView);
 #else
     mainView.setResizeMode(QDeclarativeView::SizeRootObjectToView);

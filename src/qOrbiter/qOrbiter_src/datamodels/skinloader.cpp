@@ -20,7 +20,7 @@ void SkinLoader::loadSkin(QString name) {
     // qDebug() <<style;
 
     ui_reference->setDceResponse("Skin loader is loading Style.qml: " + name);
-#if (QT_VERSION >= 0x050000)
+#if (QT5)
     current_component = new QQmlComponent(ui_reference->qorbiterUIwin->engine(), style);
 #else
     current_component = new QDeclarativeComponent(ui_reference->qorbiterUIwin->engine(), style);
@@ -85,7 +85,7 @@ void SkinLoader::continueLoading() {
 
 void SkinLoader::checkLoadingStatus()
 {
-#if (QT_VERSION >= 0x050000)
+#if (QT5)
     if(current_component->status() == QQmlComponent::Ready)
 #else
     if(current_component->status() == QDeclarativeComponent::Ready)

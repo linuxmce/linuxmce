@@ -30,6 +30,9 @@ using namespace DCE;
 
 #include "Gen_Devices/AllCommandsRequests.h"
 //<-dceag-d-e->
+#ifdef QT5
+#include <QtWidgets/QApplication>
+#endif
 
 //<-dceag-const-b->
 // The primary constructor when the class is created as a stand-alone device

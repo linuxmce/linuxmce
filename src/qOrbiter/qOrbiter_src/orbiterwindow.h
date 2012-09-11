@@ -2,8 +2,9 @@
 #define ORBITERWINDOW_H
 
 #include <QObject>
-#if (QT_VERSION >= 0x050000)
-#include <QtQml/QQmlContext>
+#if (QT5)
+#include <QQmlEngine>
+#include <QQmlContext>
 #include <QtQuick/QQuickView>
 #else
 #include <QtDeclarative/QDeclarativeView>
@@ -36,7 +37,7 @@ public:
     //public members
 
     QString message;
-#if (QT_VERSION >= 0x050000)
+#if (QT5)
     QQuickView  mainView;
 #else
     QDeclarativeView  mainView;

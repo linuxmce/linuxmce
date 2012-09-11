@@ -11,9 +11,18 @@
 #ifndef QMLAPPLICATIONVIEWER_H
 #define QMLAPPLICATIONVIEWER_H
 
+#include <QtGlobal>
+#ifdef QT5
+#include <QtQuick/QQuickView>
+#else
 #include <QtDeclarative/QDeclarativeView>
+#endif
 
+#ifdef QT5
+class QmlApplicationViewer : public QQuickView
+        #else
 class QmlApplicationViewer : public QDeclarativeView
+        #endif
 {
     Q_OBJECT
 
@@ -24,10 +33,18 @@ public:
         ScreenOrientationAuto
     };
 
+#ifdef QT5
+    explicit QmlApplicationViewer(QWindow *parent = 0);
+    static QmlApplicationViewer *create();
+#else
     explicit QmlApplicationViewer(QWidget *parent = 0);
-    virtual ~QmlApplicationViewer();
 
     static QmlApplicationViewer *create();
+
+#endif
+    virtual ~QmlApplicationViewer();
+
+
 
     void setMainQmlFile(const QString &file);
     void addImportPath(const QString &path);
@@ -38,7 +55,11 @@ public:
     void showExpanded();
 
 private:
+#ifdef QT5
+    explicit QmlApplicationViewer(QQuickView *view, QWidget *parent);
+#else
     explicit QmlApplicationViewer(QDeclarativeView *view, QWidget *parent);
+#endif
     class QmlApplicationViewerPrivate *d;
 };
 

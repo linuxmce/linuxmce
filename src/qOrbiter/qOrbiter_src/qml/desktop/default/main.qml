@@ -10,11 +10,12 @@ Item {
     id: item
     width:appW
     height:appH
+
     MediaManager{
         id:dceplayer
-
         anchors.top: parent.top
         anchors.left:parent.left
+
         z:0
         Component.onCompleted: setWindowSize(appH, appW)
         MouseArea{

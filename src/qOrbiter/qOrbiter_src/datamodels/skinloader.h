@@ -4,7 +4,7 @@
 #include <QObject>
 #include <QUrl>
 #include <QStringList>
-#if (QT_VERSION >= 0x050000)
+#if (QT5)
 #include <QtQuick/QQuickItem>
 #include <QQmlComponent>
 #else
@@ -35,7 +35,7 @@ signals:
     void skinItemComplete();
 
   private:
-#if (QT_VERSION >= 0x050000)
+#if (QT5)
     QQmlComponent *current_component;
 #else
     QDeclarativeComponent *current_component;

@@ -17,7 +17,7 @@
 
 #include <QtGlobal>
 #include <QtXml/QtXml>
-#if (QT_VERSION >= 0x050000)
+#if (QT5)
 #include <QtCore/QFile>
 #include <QtQml/QtQml>
 #include <QtCore/QTimer>
@@ -59,7 +59,7 @@ using namespace DCE;
   then (hopefully) notify us of background progress. A splash bar or loading indicator needs to be added, but a textual
   messaging system will be the initial method of communication
 */
-#if (QT_VERSION >= 0x050000)
+#if (QT5)
 qorbiterManager::qorbiterManager(QQuickView *view, QObject *parent) :
     #else
 qorbiterManager::qorbiterManager(QDeclarativeView *view, QObject *parent) :
@@ -349,7 +349,7 @@ void qorbiterManager::refreshUI(QUrl url)
 {
     qorbiterUIwin->rootContext()->setBaseUrl(skin->entryUrl());
     qorbiterUIwin->setSource(skin->entryUrl());
-#if (QT_VERSION >= 0x050000)
+#if (QT5)
     qorbiterUIwin->setResizeMode(QQuickView::SizeRootObjectToView);
 #else
     qorbiterUIwin->setResizeMode(QDeclarativeView::SizeRootObjectToView);
@@ -776,7 +776,7 @@ void qorbiterManager::swapSkins(QString incSkin)
         //load the actual skin entry point
         currentSkin = incSkin;
         qorbiterUIwin->engine()->rootContext()->setContextProperty("style", skin->styleView());
-#if (QT_VERSION >= 0x050000)
+#if (QT5)
         QObject::connect(qorbiterUIwin, SIGNAL(statusChanged(QQuickView::Status)),
                          this, SLOT(skinLoaded(QQuickView::Status)));
 #else
@@ -791,14 +791,14 @@ void qorbiterManager::swapSkins(QString incSkin)
     }
 }
 
-#if (QT_VERSION >= 0x050000)
+#if (QT5)
 void qorbiterManager::skinLoaded(QQuickView::Status status)
 #else
 void qorbiterManager::skinLoaded(QDeclarativeView::Status status)
 #endif
 {
     setDceResponse("Skin appears to have finished loading ..");
-#if (QT_VERSION >= 0x050000)
+#if (QT5)
     if (status == QQuickView::Error) {
 #else
     if (status == QDeclarativeView::Error) {
@@ -904,7 +904,8 @@ int qorbiterManager::getlocation() const
 
 void qorbiterManager::regenOrbiter(int deviceNo)
 {
-
+//rewrite to use qNetworkrequest, connect reply to finished slot
+    //possible to dl xml from there??
     if(qs_routerip =="127.0.0.1")
     {
         //splashView->showFullScreen();
@@ -1137,6 +1138,7 @@ bool qorbiterManager::readLocalConfig()
 
             if(!configVariables.namedItem("routerip").attributes().namedItem("id").nodeValue().isEmpty())
             {
+
                 qs_routerip = configVariables.namedItem("routerip").attributes().namedItem("id").nodeValue();
             }
 
@@ -1146,17 +1148,30 @@ bool qorbiterManager::readLocalConfig()
 
             if(configVariables.namedItem("device").attributes().namedItem("id").nodeValue().toLong() !=0)
             {
+
                 iPK_Device = configVariables.namedItem("device").attributes().namedItem("id").nodeValue().toLong();
             }
 
             if(!configVariables.namedItem("externalip").attributes().namedItem("id").nodeValue().isEmpty() )
             {
-                qs_ext_routerip = configVariables.namedItem("externalip").attributes().namedItem("id").nodeValue();
+                setExternalIp(configVariables.namedItem("externalip").attributes().namedItem("id").nodeValue());
+
             }
             else
             {
-                qs_ext_routerip = "fill.me.in.com";
+                setExternalIp("fill.me.in.com");
+
             }
+
+            if(!configVariables.namedItem("debug").attributes().namedItem("id").nodeValue().toInt() == 0 )
+            {
+               setDebugMode(false);
+            }
+            else
+            {
+               setDebugMode(true);
+            }
+
         }
         return true;
     }
@@ -1548,7 +1563,7 @@ void qorbiterManager::startOrbiter()
 
         m_bStartingUp = false;
         qorbiterUIwin->setWindowTitle("LinuxMCE Orbiter " + QString::number(iPK_Device));
-#if (QT_VERSION >= 0x050000)
+#if (QT5)
         qorbiterUIwin->setResizeMode(QQuickView::SizeRootObjectToView);
 #else
         qorbiterUIwin->setResizeMode(QDeclarativeView::SizeRootObjectToView);

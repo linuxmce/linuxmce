@@ -1,6 +1,6 @@
 #include "skindatamodel.h"
 #include "qorbitermanager.h"
-#if (QT_VERSION >= 0x050000)
+#if (QT5)
 #include <QtQml/QQmlComponent>
 #include <QtQml/QQmlEngine>
 #include <QtQuick/QQuickView>
@@ -170,7 +170,7 @@ void SkinDataModel::setActiveSkin(QString name)
 
     QString skinURL = find(name)->path();
    //dir -l qDebug() << skinURL;
-#if (QT_VERSION >= 0x050000)
+#if (QT5)
     QQmlComponent skinData(ui_reference->qorbiterUIwin->engine(), skinURL);
 #else
     QDeclarativeComponent skinData(ui_reference->qorbiterUIwin->engine(), skinURL);

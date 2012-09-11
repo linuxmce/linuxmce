@@ -5,7 +5,7 @@
 #include <QUrl>
 #include <QtNetwork/QtNetwork>
 #include <QtXml/QDomDocument>
-#if   (QT_VERSION >= 0x050000)
+#if   (QT5)
 //FIXME: Another unnecessary hdr?
 #else
 #include <QtDeclarative/QDeclarativeItem>

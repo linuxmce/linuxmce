@@ -44,7 +44,7 @@
   */
 
 #include <QtGlobal>
-#if (QT_VERSION >= 0x050000)
+#if (QT5)
 #include <QtQuick/QQuickPaintedItem>
 #include <QtQuick/QQuickItem>
 #else
@@ -60,7 +60,7 @@
 #include <QImageReader>
 #endif
 
-#if (QT_VERSION >= 0x050000)
+#if (QT5)
 class NowPlayingClass : public QQuickItem
 #else
 class NowPlayingClass : public QDeclarativeItem
@@ -117,7 +117,7 @@ class NowPlayingClass : public QDeclarativeItem
 
     Q_PROPERTY (QString aspect READ getImageAspect WRITE setImageAspect NOTIFY imageAspectChanged )
 public:
-#if (QT_VERSION >= 0x050000)
+#if (QT5)
     explicit NowPlayingClass(QQuickItem *parent = 0);
 #else
     explicit NowPlayingClass(QDeclarativeItem *parent = 0);

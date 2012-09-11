@@ -3,7 +3,7 @@
 
 
 GridIndexProvider::GridIndexProvider(ListModel *model  , int pathRole, int pixmapRole) :
-#if (QT_VERSION >= 0x050000)
+#if (QT5)
     QQmlImageProvider(QQmlImageProvider::Image), mModel(*model),  mPathRole(pathRole), mPixmapRole(pixmapRole)
 #else
     QDeclarativeImageProvider(QDeclarativeImageProvider::Image), mModel(*model),  mPathRole(pathRole), mPixmapRole(pixmapRole)

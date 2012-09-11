@@ -36,7 +36,7 @@
 
 /*---qt includes----*/
 #include <QtGlobal>
-#if (QT_VERSION >= 0x050000)
+#if (QT5)
 
 #include <QtQuick/QQuickView>
 #include <QtQuick/QtQuick>
@@ -167,7 +167,7 @@ class qorbiterManager : public QObject
 
 
 public:
-#if (QT_VERSION >= 0x050000)
+#if (QT5)
     qorbiterManager(QQuickView * view, QObject *parent=0);  //constructor
 #else
     qorbiterManager(QDeclarativeView * view, QObject *parent=0);  //constructor
@@ -224,7 +224,7 @@ public:
     QString remoteDirectoryPath;
     SkinDataItem* skin;
 
-#if (QT_VERSION >= 0x050000)
+#if (QT5)
     QQuickView *qorbiterUIwin;
 #else
     QDeclarativeView *qorbiterUIwin;    //Qml declarativeview
@@ -615,7 +615,7 @@ public slots: //note: Q_INVOKABLE means it can be called directly from qml
     void setHouseMode(int mode, int pass);
     void activateScreenSaver();
     void killScreenSaver();
-#if (QT_VERSION >= 0x050000)
+#if (QT5)
     void skinLoaded(QQuickView::Status status);
 #else
     void skinLoaded(QDeclarativeView::Status status);

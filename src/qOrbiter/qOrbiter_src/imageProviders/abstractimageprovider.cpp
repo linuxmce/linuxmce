@@ -3,7 +3,7 @@
   the functions herein correlate to the different list models that we have. this allows us to keep
   1 image provider as opposed to multiple.
   */
-#if (QT_VERSION >= 0x050000)
+#if (QT5)
 AbstractImageProvider::AbstractImageProvider(qorbiterManager *manager):QQmlImageProvider(QQmlImageProvider::Image), managerreference(manager)
   #else
 AbstractImageProvider::AbstractImageProvider(qorbiterManager *manager):QDeclarativeImageProvider(QDeclarativeImageProvider::Image), managerreference(manager)
