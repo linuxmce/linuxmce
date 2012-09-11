@@ -33,7 +33,7 @@ while [ 1 ]
 do
     
 # Check for running USB Game Pad process.
-    if [[ -n "$(pidof USB_Game_Pad)" ]]; then
+    if [[ -n "$(pgrep USBGP_up.sh)" ]]; then
     # USB_Game_Pad is running, don't do anything.
 	echo "USB Game Pad already running."
     else
@@ -42,6 +42,7 @@ do
 	# USB Joystick detected, add USB game pad.
 	    PK_Device_MD=$(FindDevice_Template "$PK_Device" "$DEVICETEMPLATE_Generic_PC_as_MD" norecursion)
 	    /usr/pluto/bin/MessageSend "$DCERouter" $PK_Device -1001 2 65 52 4 53 2 49 2189
+	    /usr/pluto/bin/USBGP_up.sh &
 	else
 	    echo "No USB Game Pads detected."
 	# USB Joystick was not detected.
