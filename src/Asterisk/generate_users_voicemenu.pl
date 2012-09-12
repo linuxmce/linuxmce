@@ -19,6 +19,8 @@ my $DB_ROW;
 my $TTS_Device;
 my $FK_Language;
 
+$ENV{'LIA_PHON_REP'} = '/usr/share/mbrola/lia_phon'; 
+
 $DB_PL_HANDLE = DBI->connect(&read_pluto_cred()) or die "Can't connect to database: $DBI::errstr\n";
 
 # Get PK_Device of TTS device
