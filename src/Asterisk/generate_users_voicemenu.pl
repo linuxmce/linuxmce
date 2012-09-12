@@ -145,14 +145,12 @@ sub get_text()
 sub generate_voice()
 {
 	given($FK_Language) {
+		# french
+		when(2) { &generate_voice_mbrola(@_); }
 		# german
-		when(3) {
-			&generate_voice_mbrola(@_);
-		}
+		when(3) { &generate_voice_mbrola(@_); }
 		# english and everything else :-)
-		default {
-			&generate_voice_festival(@_);
-		}
+		default { &generate_voice_festival(@_); }
 	}
 }
 
