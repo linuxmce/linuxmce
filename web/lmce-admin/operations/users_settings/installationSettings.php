@@ -90,6 +90,7 @@ function installationSettings($output,$dbADO) {
 		<input type="hidden" name="lastAction" value="">
 		<input type="hidden" name="from" value="'.$from.'">
 		<input type="hidden" name="timeZoneText" value="update">
+		<input type="hidden" name="old_telecom_language" value="'.$telecom_selectedLanguage.'">
 
 		<div align="center" class="err">'.@$_REQUEST['error'].'</div>
 		<div align="center" class="confirm"><B>'.@$_REQUEST['msg'].'</B></div>
@@ -223,8 +224,8 @@ function installationSettings($output,$dbADO) {
 		$Longitude=$_POST['Longitude'];
 		$Latitude=$_POST['Latitude'];
 		
+		$old_tts_Language=(int)@$_POST['old_telecom_language'];
 		$tts_Language=((int)$_POST['telecom_language']!=0)?(int)$_POST['telecom_language']:1;
-		
 		$updateDD='UPDATE Device_DeviceData SET IK_DeviceData=? WHERE FK_Device=? AND FK_DeviceData=?';
 		
 		$err='';
@@ -285,13 +286,16 @@ function installationSettings($output,$dbADO) {
 				}
 			}
 			
+			if($tts_Language != $old_tts_Language) {
+				$cmdToSend='sudo -u root /usr/pluto/bin/generate_users_voicemenu.pl';
+				exec($cmdToSend);	
+			}
 			$suffix=(isset($err))?'&error='.$err:'';
 			header("Location: index.php?section=installationSettings&from=$from&msg=".translate('TEXT_INSTALLATION_UPDATED_CONST').$suffix);
 			exit();
 		} else {
 			header("Location: index.php?section=installationSettings&error=".translate('TEXT_ERROR_INVALID_ID_OR_EMPTY_NAME_CONST'));
 		}
-				
 	}
 	
 	$output->setMenuTitle(translate('TEXT_WIZARD_CONST').' |');
