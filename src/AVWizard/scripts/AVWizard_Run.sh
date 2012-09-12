@@ -33,8 +33,12 @@ UseAlternativeLibs
 log_file=/var/log/pluto/AVWizard_Run_$(date +%Y%m%d_%H%M%S).log
 
 # remove the current xorgs to start clean, and prevent toggling issues.
-mv /etc/X11/xorg.conf /etc/X11/xorg.conf.bu
-rm -f /etc/X11/xorg.conf /etc/X11/xorg.conf.pluto.avwizard
+if [[ -f /etc/X11/xorg.conf ]]; then
+	mv /etc/X11/xorg.conf /etc/X11/backup.xorg.conf
+fi
+if [[ -f /etc/X11/xorg.conf.pluto.avwizard ]]; then
+	rm -f /etc/X11/xorg.conf.pluto.avwizard
+fi
 
 ###########################################################
 ### Setup Functions - Error checking and logging
@@ -414,11 +418,17 @@ Enable_Audio_Channels () {
 	# Added this to correctly unmute channels for setup wizard, and to 
 	# inject necessary unmuting commands for later bootup.
 	aplay -l | grep card | awk '{print $2}' | uniq | sed 's/://g' | while read CardNumber; do 
-		amixer -c "$CardNumber" | grep '\[off\]' -B5 | grep "Simple" | sed "s/.*'\(.*\)'[^']*$/\1/" | while read MuteStatus; do 
-			amixer -c "$CardNumber" sset "$MuteStatus" unmute; done 2>&1> /dev/null
-		amixer -c "$CardNumber" | grep '\[.*\%\]' -B5 | grep "Simple" | sed "s/.*'\(.*\)'[^']*$/\1/" | while read VolLevel; do 
-			amixer -c "$CardNumber" sset "$VolLevel" 80%; done 2>&1> /dev/null
+		amixer -c "$CardNumber" | grep '\[off\]' -B5 | grep "Simple" | sed 's/Simple mixer control //g' | grep -vi capture | while read MuteStatus; do 
+			amixer -c "$CardNumber" sset "$MuteStatus" unmute 
+		done
+		amixer -c "$CardNumber" | grep '\[.*\%\]' -B5 | grep "Simple" | sed 's/Simple mixer control //g' | while read VolLevel; do 
+			amixer -c "$CardNumber" sset "$VolLevel" 80%
+		done
 	done
+	sleep 2
+	if aplay -l | grep "card 1" | grep "device 7"; then 
+		aplay -Dplughw:1,7 /usr/share/sounds/linphone/rings/orig.wav
+	fi
 }
 
 Start_AVWizard () {
@@ -477,10 +487,10 @@ Start_AVWizard () {
 trap 'StatsMessage "Exiting"' EXIT
 
 #Execute Functions
+Enable_Audio_Channels
 Video_Driver_Detection
 SetupViaXine
 GamePad_Setup
-Enable_Audio_Channels
 Start_AVWizard
 
 StatsMessage "AVWizard completed without any detected error"
