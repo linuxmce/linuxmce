@@ -1,8 +1,9 @@
 lmce-asterisk (0+0.3.3-1) lucid; urgency=low
 
   * Add mbrola for french and german tts
+  * Added googletts support for voice generation
 
- -- Serge Wagener <serge@linuxmce.org>  Wed, 12 Sep 2012 09:52:21 +0200
+ -- Serge Wagener <serge@linuxmce.org>  Wed, 12 Sep 2012 14:29:24 +0200
 
 lmce-asterisk (0+0.3.2-1ubuntu2) lucid; urgency=low
 
