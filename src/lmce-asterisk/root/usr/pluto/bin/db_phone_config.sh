@@ -24,6 +24,7 @@ DEVICEDATA_ServerIp=260
 DEVICEDATA_EmergencyNumbers=296
 DEVICEDATA_EmergencyPhoneLine=297
 DEVICEDATA_CallToken=298
+DEVICEDATA_VideoSupport=305
 DEVICE_TelecomPlugIn=11
 DEVICECATEGORY_HARDPHONE=90
 DEVICECATEGORY_SOFTPHONE=91
@@ -50,12 +51,6 @@ astdbfamily="AMPUSER"
 # Context names in dialplan
 Context_From_Lmce="from-lmce-custom"
 Context_Ext_Local="ext-local"
-Q="SELECT IK_DeviceData FROM Device_DeviceData WHERE FK_DeviceData=32"
-R=$(RunSQL "$Q")
-ExtPart=$(echo "$R" | cut -d'|' -f1)
-IntPart=$(echo "$R" | cut -d'|' -sf2)
-netExtName="$(echo $ExtPart | cut -d',' -f1)"
-netExtIP=$(ifconfig $netExtName | grep "inet addr" | grep -v '127.0.0.1' | cut -d: -f2 | awk '{ print $1 }')
 
 CreateDialAllPhones()
 {
@@ -80,9 +75,18 @@ WriteExtLocal()
 
 WriteSipPhone()
 {
+		# If peer supports video, add needed codecs, else add audio only codecs
+	if [[ "$VideoSupport" == "1" ]]; then
+		codecs="alaw;ulaw;h263p;h263;h264"
+		videosupported="yes"
+	else
+		codecs="alaw;ulaw"
+		videosupported="no"
+	fi
+
 	# adds configuration of current SIP phone to SQL query buffer.
-	PHONESSQL="$PHONESSQL INSERT INTO $DB_SIP_Device_Table (name,defaultuser,port,mailbox,secret,callerid,context)
-	VALUES ('$PhoneNumber','$PhoneNumber','$Port','$PhoneNumber@device','$Secret','device <$PhoneNumber>','from-internal');"
+	PHONESSQL="$PHONESSQL INSERT INTO $DB_SIP_Device_Table (name,defaultuser,port,mailbox,secret,callerid,context,allow,videosupport)
+	VALUES ('$PhoneNumber','$PhoneNumber','$Port','$PhoneNumber@device','$Secret','device <$PhoneNumber>','from-internal','$codecs','$videosupported');"
 }
 
 WriteIAXPhone()
@@ -106,15 +110,9 @@ WriteSccpPhone()
 	# remove : from MAC address
 	local name=$(echo SEP$MacAddress|sed 's/://g'|tr '[:lower:]' '[:upper:]')
 	# adds configuration of current SCCP phone to SQL query buffer.
-	SQL="SELECT Description FROM pluto_main.Device WHERE MACaddress='$MacAddress'"
-	echo $SQL
-	res=$(RunSQL "$SQL")
-	CiscoModel=${res:6:4};
-	#echo $CiscoModel
-	#echo "\n"
-        PHONESSQL="$PHONESSQL INSERT INTO $DB_SCCP_Device_Table (type,name,description)
-	VALUES ($CiscoModel,'$name','LinuxMCE ext $PhoneNumber');"
-
+	PHONESSQL="$PHONESSQL INSERT INTO $DB_SCCP_Device_Table (type,name,description)
+	VALUES ('7970','$name','LinuxMCE ext $PhoneNumber');"
+	
 	# adds buttons of current SCCP phone to SQL query buffer.
 	PHONESSQL="$PHONESSQL INSERT INTO $DB_SCCP_Buttons_Table (device,instance,type,name)
 	VALUES ('$name','1','line','$PhoneNumber');"
@@ -122,7 +120,6 @@ WriteSccpPhone()
 	# adds configuration of current SCCP line to SQL query buffer.
 	PHONESSQL="$PHONESSQL INSERT INTO $DB_SCCP_Line_Table (id,name,label,description,cid_name,cid_num,context)
 	VALUES ('$PhoneNumber','$PhoneNumber','$PhoneNumber','$PhoneNumber','pl_$DeviceID','$PhoneNumber','from-internal');"
-	echo $PHONESSQL 
 }
 
 GetMacAddress()
@@ -131,16 +128,12 @@ GetMacAddress()
 	local R
 	local Row
 	
-	SQL="SELECT MACaddress From pluto_main.Device Where PK_Device = $DeviceID"
-	echo $SQL
-
+	SQL="SELECT MACaddress From Device Where PK_Device = $DeviceID"
 	R=$(RunSQL "$SQL")
 	for Row in $R; do
 		MacAddress=$(Field 1 "$Row")
-	
 	done
 	echo $MacAddress
-	
 }
 
 RunConfigureScript()
@@ -199,6 +192,7 @@ WorkThePhones()
 	    PhoneType=$(Field 3 "$Row")
 	    ServerIp=$(Field 4 "$Row")
 	    Secret=$(Field 5 "$Row")
+		VideoSupport=$(Field 6 "$Row")
 		# If it's a new device it does not yet have a phonenumber
 		if [[ ! -n $PhoneNumber ]]; then
 			# get next free extension
@@ -232,8 +226,7 @@ WorkThePhones()
 	            "SCCP")
 	                    PhoneProtocol=SCCP
 	                    # The SCCP phones need the MAC address to function
-	                    #MacAddress=$(GetMacAddress)
-	                    GetMacAddress
+	                    MacAddress=$(GetMacAddress)
 	                    ;;
 	            "IAX")
 	            		PhoneProtocol=IAX
@@ -247,7 +240,7 @@ WorkThePhones()
 		# create device configuration entries
 		case "$PhoneProtocol" in
 			"SIP")
-				#RunConfigureScript
+				RunConfigureScript
 				WriteSipPhone
 				if [[ reloadSIP -eq 0 ]]; then
 					
@@ -325,51 +318,56 @@ AddTrunk()
   			context="from-trunk"
    			LINESSQL="$LINESSQL INSERT INTO $DB_IAX_Device_Table (name,username,secret,host,port,context,type,callerid,disallow,allow)
 			VALUES ('$username','$username','$password','$host','4569','$context','peer','$phonenumber','all','alaw;ulaw');"
-   ;;
-        "SIP")
-        	# provider registry
-			LINESSQL="$LINESSQL INSERT INTO $DB_astconfig_Table (var_metric,filename,category,var_name,var_val) VALUES
-				('$(( 100+$id ))', 'sip.conf', 'general', 'register', '$username:$password@$host/$phonenumber');"
+		;;
+        "SIP"|"SPA")
 			# create SIP peer
 			context="from-trunk"
+			# For SPA converters as phoneline, don't try to register to them
+			if [[ "$protocol" == "SPA" ]]; then
+				type='friend'
+				host='dynamic'
+			else
+				# provider registry if not SPA
+				LINESSQL="$LINESSQL INSERT INTO $DB_astconfig_Table (var_metric,filename,category,var_name,var_val) VALUES
+				('$(( 100+$id ))', 'sip.conf', 'general', 'register', '$username:$password@$host/$phonenumber');"
+				type='peer'
+			fi
 			LINESSQL="$LINESSQL INSERT INTO $DB_SIP_Device_Table (name,defaultuser,secret,host,port,context,qualify,nat,type,fromuser,fromdomain,callerid,allow,insecure,directmedia) VALUES \
-			('$phonenumber','$username','$password','$host','5060','$context','yes','yes','peer','$username','$host','$phonenumber','alaw;ulaw','port,invite','no');"
+			('$phonenumber','$username','$password','$host','5060','$context','yes','yes','$type','$username','$host','$phonenumber','alaw;ulaw','port,invite','no');"
         ;;
-        "SPA")
-			context="from-trunk"
-			LINESSQL="$LINESSQL INSERT INTO $DB_SIP_Device_Table (name,defaultuser,secret,host,port,context,qualify,nat,type,fromuser,fromdomain,callerid,allow,insecure,directmedia) VALUES \
-			('$phonenumber','$username','$password','$host','5060','$context','yes','yes','peer','$username','$host','$phonenumber','alaw;ulaw','port,invite','no');"
-			
-        ;;
-
         "GTALK")
         	# provider registry
 			LINESSQL="$LINESSQL INSERT INTO $DB_astconfig_Table (cat_metric,var_metric,filename,category,var_name,var_val) VALUES
-				('1', '0', 'jabber.conf', '$protocol', 'type', 'client'),
-				('1', '1', 'jabber.conf', '$protocol', 'serverhost', 'talk.google.com'),
-				('1', '2', 'jabber.conf', '$protocol', 'username', '$username/Talk'),
-				('1', '3', 'jabber.conf', '$protocol', 'secret', '$password'),
-				('1', '4', 'jabber.conf', '$protocol', 'port', '5222'),
-				('1', '5', 'jabber.conf', '$protocol', 'usetls', 'yes'),
-				('1', '6', 'jabber.conf', '$protocol', 'usesasl', 'yes'),
-				('1', '7', 'jabber.conf', '$protocol', 'status', 'available'),
-				('1', '8', 'jabber.conf', '$protocol', 'statusmessage', 'LinuxMCE asterisk server'),
-				('1', '9', 'jabber.conf', '$protocol', 'timeout', '100');"
-			LINESSQL="$LINESSQL UPDATE $DB_astconfig_Table SET var_val='$protocol' WHERE filename='gtalk.conf' AND category='guest' AND var_name='connection';"	
-			LINESSQL="$LINESSQL UPDATE $DB_astconfig_Table SET var_val='$netExtIP' WHERE filename='gtalk.conf' AND category='general' AND var_name='bindaddr';"
-			GTALK="@gmail.com"
+				('1', '0', 'jabber.conf', 'asterisk', 'type', 'client'),
+				('1', '1', 'jabber.conf', 'asterisk', 'serverhost', 'talk.google.com'),
+				('1', '2', 'jabber.conf', 'asterisk', 'username', '$username/Talk'),
+				('1', '3', 'jabber.conf', 'asterisk', 'secret', '$password'),
+				('1', '4', 'jabber.conf', 'asterisk', 'port', '5222'),
+				('1', '5', 'jabber.conf', 'asterisk', 'usetls', 'yes'),
+				('1', '6', 'jabber.conf', 'asterisk', 'usesasl', 'yes'),
+				('1', '7', 'jabber.conf', 'asterisk', 'status', 'available'),
+				('1', '8', 'jabber.conf', 'asterisk', 'statusmessage', 'LinuxMCE asterisk server'),
+				('1', '9', 'jabber.conf', 'asterisk', 'timeout', '100');"
         ;;
-   esac
+	esac
+   
+	# Everything SPA specific has been done, for the rest fallback to SIP
+	if [[ "$protocol" == "SPA" ]]; then
+		protocol="SIP"
+	fi
 	
 	# add outbound context in realtime extensions
 	context="outbound-allroutes"
-	if [[ $protocol == "SPA" ]]; then protocol="SIP"; fi
-
-
-	LINESSQL="$LINESSQL INSERT INTO $DB_Extensions_Table (context,exten,priority,app,appdata) VALUES \
-	('$context','_$prefix.','1','Macro','dialout-trunk,$protocol/$phonenumber,\${EXTEN:1}$GTALK,,'),\
-	('$context','_$prefix.','2','Macro','outisbusy,');"
-	GTALK=""
+	if [[ $protocol == "GTALK" ]]; then
+		LINESSQL="$LINESSQL INSERT INTO $DB_Extensions_Table (context,exten,priority,app,appdata) VALUES \
+		('$context','_$prefix.','1','Macro','dialout-trunk,$protocol/$phonenumber,\${EXTEN:1}@voice.google.com,,'),\
+		('$context','_$prefix.','2','Macro','outisbusy,');"		
+	else
+		LINESSQL="$LINESSQL INSERT INTO $DB_Extensions_Table (context,exten,priority,app,appdata) VALUES \
+		('$context','_$prefix.','1','Macro','dialout-trunk,$protocol/$phonenumber,\${EXTEN:1},,'),\
+		('$context','_$prefix.','2','Macro','outisbusy,');"
+	fi
+	
 	# create incoming context and redirect to realtime
 	echo "[from-trunk-$phonenumber]
 switch => Realtime
@@ -385,33 +383,21 @@ switch => Realtime
 	# add external did catch
 	context="ext-did"
 	line=$((100+$id))
-	
-	if [[ $protocol == "GTALK" ]]; then
-		LINESSQL="$LINESSQL INSERT INTO $DB_Extensions_Table (context,exten,priority,app,appdata) VALUES \
-        ('$context','$phonenumber','1','Set','__FROM_DID=\${EXTEN}'), \
-        ('$context','$phonenumber','2','Set','FAX_RX='), \
-        ('$context','$phonenumber','3','Goto','custom-linuxmce,$line,1'),\
-        ('$context','$phonenumber','4','Set','CALLERID(number)=\${EXTEN}'),\
-        ('$context','$phonenumber','5','Noop','Incoming call from \${CALLERID(number)}'),\
-        ('$context','$phonenumber','6','Set','FAX_RX='), \
-        ('$context','$phonenumber','7','Goto','custom-linuxmce,$line,1');"
-		
-	else
-		LINESSQL="$LINESSQL INSERT INTO $DB_Extensions_Table (context,exten,priority,app,appdata) VALUES \
+	LINESSQL="$LINESSQL INSERT INTO $DB_Extensions_Table (context,exten,priority,app,appdata) VALUES \
         ('$context','$phonenumber','1','Set','__FROM_DID=\${EXTEN}'), \
         ('$context','$phonenumber','2','Set','PAI=\${SIP_HEADER(P-Asserted-Identity)}'),\
-        ('$context','$phonenumber','3','gotoif','(\$[\${LEN(\${PAI})} >= 9]?7)'), \
-        ('$context','$phonenumber','4','Noop','Incoming call from \${CALLERID(number)}'), \
-        ('$context','$phonenumber','5','Set','FAX_RX='), \
-        ('$context','$phonenumber','6','Goto','custom-linuxmce,$line,1'),\
-        ('$context','$phonenumber','7','noop','config p asserted id ${PAI}'),\
-        ('$context','$phonenumber','8','set','tmpcid=\${CUT(PAI,:,2)}'), \
-        ('$context','$phonenumber','9','Set','tmpcid=\${CUT(tmpcid,@,1)}'), \
-        ('$context','$phonenumber','10','Set','CALLERID(number)=\${tmpcid}'),\
-        ('$context','$phonenumber','11','Noop','Incoming call from \${CALLERID(number)}'),\
-        ('$context','$phonenumber','12','Set','FAX_RX='), \
-        ('$context','$phonenumber','13','Goto','custom-linuxmce,$line,1');"
-        fi
+        ('$context','$phonenumber','3','gotoif','\$[\"\${PAI}\" = \"\"] ? 4:8'), \
+        ('$context','$phonenumber','4','Set','CALLERID(num)=\${CALLERID(name)}'), \
+        ('$context','$phonenumber','5','Noop','Incoming call from \${CALLERID(num)}'), \
+        ('$context','$phonenumber','6','Set','FAX_RX='), \
+        ('$context','$phonenumber','7','Goto','custom-linuxmce,$line,1'),\
+        ('$context','$phonenumber','8','noop','Using p-asserted-id SIP header: ${PAI}'),\
+        ('$context','$phonenumber','9','set','tmpcid=\${CUT(PAI,:,2)}'), \
+        ('$context','$phonenumber','10','Set','tmpcid=\${CUT(tmpcid,@,1)}'), \
+        ('$context','$phonenumber','11','Set','CALLERID(num)=\${tmpcid}'),\
+        ('$context','$phonenumber','12','Noop','Incoming call from \${CALLERID(num)}'),\
+        ('$context','$phonenumber','13','Set','FAX_RX='), \
+        ('$context','$phonenumber','14','Goto','custom-linuxmce,$line,1');"
 }
 
 WorkTheLines()
