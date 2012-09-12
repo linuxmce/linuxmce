@@ -16,6 +16,7 @@ $TEXT_MISCELANEOUS_CONST='Miscelaneous';
 $TEXT_RIPPING_FORMAT_CONST='Ripping format for cd\'s';
 $TEXT_INSTALLATION_DESCRIPTION_REQUIRED_CONST='Please enter a description';
 $TEXT_ERROR_UNABLE_TO_FIND_DCE_ROUTER_CONST='Error: unable to find DCE router device.';
+$TEXT_ERROR_UNABLE_TO_FIND_TTS_CONST='Error: unable to find Text To Speech device.';
 $TEXT_ERROR_UNABLE_TO_FIND_EVENT_PLUGIN_CONST='Error: unable to find Event plugin device.';
 $TEXT_ERROR_UNABLE_TO_FIND_MEDIA_PLUGIN_CONST='Error: unable to find Media plugin device.';
 $TEXT_INSTALLATION_UPDATED_CONST='Installation was updated.';
@@ -32,4 +33,6 @@ $TEXT_SET_LOGLEVELS_CONST = "Set Logging Levels";
 $TEXT_CURRENT_LOGLEVELS_CONST = "Current Logging Levels";
 $TEXT_LOGLEVELS_UPDATED_CONST='Logging Levels updated. You will need to perform a router quick reload in order to apply.';
 $TEXT_SYSTEM_CONST = "System";
+$TEXT_LANGUAGE_SETTINGS = "Language settings";
+$TEXT_LANGUAGE_ASTERISK = "Telecom default voice language";
 ?>

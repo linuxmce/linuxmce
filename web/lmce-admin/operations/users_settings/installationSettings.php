@@ -11,11 +11,13 @@ function installationSettings($output,$dbADO) {
 	
 	$currentTimeZone=str_replace('/usr/share/zoneinfo/','',exec('readlink /etc/localtime'));
 	$ripFormats=array('mp3'=>'mp3','ogg'=>'ogg', 'flac'=>'flac', 'wav'=>'wav');
+	$telecom_language=array('1'=>'English', '2'=>utf8_encode('Français'), '3'=>'Deutsch');
+	$telecom_selectedLanguage='1'; // default 
 	
-
 	$installationID = cleanInteger($_SESSION['installationID']);
 	$dceRouterID=getDeviceFromDT($installationID,$GLOBALS['rootDCERouter'],$dbADO);
-
+	$ttsDeviceID=getDeviceFromDT($installationID,$GLOBALS['TTS'],$dbADO);
+	
 	if($dceRouterID!==null){
 		$dceRouterDD=getDD($dceRouterID,$GLOBALS['Language'].','.$GLOBALS['PK_City'],$dbADO);
 		$defLanguage=$dceRouterDD[$GLOBALS['Language']];
@@ -24,6 +26,12 @@ function installationSettings($output,$dbADO) {
 			$cityData=getFieldsAsArray('City','FK_Region,FK_Country',$dbADO,'WHERE PK_City='.$selectedCity);
 			$selectedRegion=$cityData['FK_Region'][0];
 		}
+	}
+
+	if($ttsDeviceID!==null){
+		$ttsDD=getDD($ttsDeviceID,$GLOBALS['Language'],$dbADO);
+		$telecom_selectedLanguage=(int)$ttsDD[$GLOBALS['Language']];
+		if($telecom_selectedLanguage < 1) $telecom_selectedLanguage = 1;
 	}
 	
 	$eventPluginID=getDeviceFromDT($installationID,$GLOBALS['EventPlugIn'],$dbADO);
@@ -85,14 +93,16 @@ function installationSettings($output,$dbADO) {
 
 		<div align="center" class="err">'.@$_REQUEST['error'].'</div>
 		<div align="center" class="confirm"><B>'.@$_REQUEST['msg'].'</B></div>
-			<table width="300">			
+			<table width="600px">			
+				<!-- LOCATION -->
 				<tr>
-					<td colspan="2" align="center" class="tablehead"><B>'.translate('TEXT_LOCATION_CONST').'</B>:</td>
+					<td colspan="4" align="center" class="tablehead"><B>'.translate('TEXT_LOCATION_CONST').'</B>:</td>
 				</tr>		
 				<tr>
 					<td width="100"><B>'.translate('TEXT_DESCRIPTION_CONST').'&nbsp;*</B></td>
 					<td><input type="text" size="30" name="Description" value="'.((isset($_REQUEST['Description']))?$_REQUEST['Description']:$rowInstallation['Description']).'"></td>
 				</tr>
+				
 				<tr>
 					<td><B>'.translate('TEXT_NAME_CONST').'</B></td>
 					<td><input type="text" size="30" name="Name" value="'.((isset($_REQUEST['Name']))?$_REQUEST['Name']:$rowInstallation['Name']).'"></td>
@@ -102,18 +112,16 @@ function installationSettings($output,$dbADO) {
 					<td><input type="text" size="30" name="Address" value="'.((isset($_REQUEST['Address']))?$_REQUEST['Address']:$rowInstallation['Address']).'"></td>
 				</tr>
 				<tr>
-					<td colspan="2">'.translate('TEXT_ADDRESS_INFO_CONST').'</td>
+					<td colspan="4">'.translate('TEXT_ADDRESS_INFO_CONST').'</td>
 				</tr>
 				<tr>
 					<td><B>'.translate('TEXT_CITY_CONST').'</B></td>
 					<td><input type="text" size="30" name="City" value="'.((isset($_REQUEST['City']))?$_REQUEST['City']:$rowInstallation['City']).'"></td>
-				</tr>
-				<tr>
 					<td><B>'.translate('TEXT_STATE_CONST').'</B></td>
 					<td><input type="text" size="30" name="State" value="'.((isset($_REQUEST['State']))?$_REQUEST['State']:$rowInstallation['State']).'"></td>
 				</tr>
 				<tr>
-					<td colspan="2" class="tablehead" align="center"><B>'.translate('TEXT_LONGITUDE_CONST').'/'.translate('TEXT_LATITUDE_CONST').'</B></td>
+					<td colspan="4" class="tablehead" align="center"><B>'.translate('TEXT_LONGITUDE_CONST').'/'.translate('TEXT_LATITUDE_CONST').'</B></td>
 				</tr>
 				<tr>
 					<td><B>'.translate('TEXT_COUNTRY_CONST').'</B></td>
@@ -142,52 +150,47 @@ function installationSettings($output,$dbADO) {
 				}
 				$out.='		
 				<tr>
-					<td>
-						<B>'.translate('TEXT_LONGITUDE_CONST').'</B> 
-					</td>
-					<td>
-						<input type="text" size="30" name="Longitude" value="'.@$Longitude.'">
-					</td>
-				</tr>
-				<tr>
-					<td>
-						<B>'.translate('TEXT_LATITUDE_CONST').'</B>
-					</td>
-					<td>
-						 <input type="text" size="30" name="Latitude" value="'.@$Latitude.'">
-					</td>
+					<td><B>'.translate('TEXT_LONGITUDE_CONST').'</B></td>
+					<td><input type="text" size="30" name="Longitude" value="'.@$Longitude.'"></td>
+					<td><B>'.translate('TEXT_LATITUDE_CONST').'</B></td>
+					<td><input type="text" size="30" name="Latitude" value="'.@$Latitude.'"></td>
 				</tr>
 				<tr>
 					<td><B>'.translate('TEXT_ZIP_CODE_CONST').'</B></td>
 					<td><input type="text" size="30" name="Zip" value="'.$rowInstallation['Zip'].'"></td>
 				</tr>
 				<tr>
-					<td colspan="2" align="center" class="tablehead"><B>'.translate('TEXT_CURRENT_TIMEZONE_CONST').'</B></td>
+					<td colspan="4" class="tablehead" align="center"><B>'.translate('TEXT_LANGUAGE_SETTINGS').'</B></td>
 				</tr>
 				<tr>
-					<td colspan="2" align="center" class="normal_row"><B>'.$currentTimeZone.'</B> <input type="button" class="button" name="setTimezone" value="'.translate('TEXT_SET_TIMEZONE_CONST').'" onclick="windowOpen(\'index.php?section=setTimezone\',\'width=640,height=480,toolbar=1,scrollbars=1,resizable=1\');"></td>
+					<td><B>'.translate('TEXT_LANGUAGE_ASTERISK').'</B></td>
+					<td>'.pulldownFromArray($telecom_language,'telecom_language',$telecom_selectedLanguage,'').'</td>
 				</tr>
 				<tr>
-					<td colspan="2" align="center" class="tablehead"><B>'.translate('TEXT_LOGLEVELS_CONST').'</B></td>
+					<td colspan="4" align="center" class="tablehead"><B>'.translate('TEXT_CURRENT_TIMEZONE_CONST').'</B></td>
 				</tr>
 				<tr>
-					<td colspan="2" align="center" class="normal_Row"><B><input type="button" class="button" name="setTimezone" value="'.translate('TEXT_SET_LOGLEVELS_CONST').'" onclick="windowOpen(\'index.php?section=setLoglevels\',\'width=640,height=,toolbar=1,scrollbars=1,resizable=1\');"></td>
+					<td colspan="4" align="center" class="normal_row"><B>'.$currentTimeZone.'</B> <input type="button" class="button" name="setTimezone" value="'.translate('TEXT_SET_TIMEZONE_CONST').'" onclick="windowOpen(\'index.php?section=setTimezone\',\'width=640,height=480,toolbar=1,scrollbars=1,resizable=1\');"></td>
+				</tr>
+				<tr>
+					<td colspan="4" align="center" class="tablehead"><B>'.translate('TEXT_LOGLEVELS_CONST').'</B></td>
+				</tr>
+				<tr>
+					<td colspan="4" align="center" class="normal_Row"><B><input type="button" class="button" name="setTimezone" value="'.translate('TEXT_SET_LOGLEVELS_CONST').'" onclick="windowOpen(\'index.php?section=setLoglevels\',\'width=640,height=,toolbar=1,scrollbars=1,resizable=1\');"></td>
 				';
 			
 		$pulldownValue=(strpos($selectedRipFormat,';')!==false)?substr($selectedRipFormat,0,strpos($selectedRipFormat,';')):$selectedRipFormat;
 		$out.='
 				<tr>
-					<td colspan="2" align="center" class="tablehead"><B>'.translate('TEXT_MISCELANEOUS_CONST').'</B>:</td>
+					<td colspan="4" align="center" class="tablehead"><B>'.translate('TEXT_MISCELANEOUS_CONST').'</B>:</td>
 				</tr>
 				<tr>
-					<td align="left""><B>'.translate('TEXT_RIPPING_FORMAT_CONST').': </B></td>
-					<td align="right">'.pulldownFromArray($ripFormats,'rip',$pulldownValue,'onChange="setOptions();" style="width:180px;"').'</td>
+					<td><B>'.translate('TEXT_RIPPING_FORMAT_CONST').': </B></td>
+					<td>'.pulldownFromArray($ripFormats,'rip',$pulldownValue,'onChange="setOptions();" style="width:180px;"').'</td>
 				</tr>				
-				<tr>
 				'.rippingSettings($selectedRipFormat).'
-				</tr>		
 				<tr>
-					<td colspan="2" align="center"><input type="submit" class="button" name="submitX" value="'.translate('TEXT_SAVE_CONST').'"  > <input type="reset" class="button" name="cancelBtn" value="'.translate('TEXT_CANCEL_CONST').'"></td>
+					<td colspan="4" align="center"><input type="submit" class="button" name="submitX" value="'.translate('TEXT_SAVE_CONST').'"  > <input type="reset" class="button" name="cancelBtn" value="'.translate('TEXT_CANCEL_CONST').'"></td>
 				</tr>
 			</table>
 			<em>* '.translate('TEXT_REQUIRED_FIELDS_CONST').'</em>
@@ -219,13 +222,24 @@ function installationSettings($output,$dbADO) {
 		$city_coords=(int)@$_POST['city_coords'];
 		$Longitude=$_POST['Longitude'];
 		$Latitude=$_POST['Latitude'];
+		
+		$tts_Language=((int)$_POST['telecom_language']!=0)?(int)$_POST['telecom_language']:1;
+		
 		$updateDD='UPDATE Device_DeviceData SET IK_DeviceData=? WHERE FK_Device=? AND FK_DeviceData=?';
+		
 		$err='';
 		if($dceRouterID!==null){
 			$dbADO->Execute($updateDD,array($city_coords,$dceRouterID,$GLOBALS['PK_City']));
 		}else{
 			$err.=translate('TEXT_ERROR_UNABLE_TO_FIND_DCE_ROUTER_CONST').'<br>';
 		}	
+		
+		if($ttsDeviceID!==null){
+			$dbADO->Execute($updateDD,array($tts_Language,$ttsDeviceID,$GLOBALS['Language']));
+		}else{
+			$err.=translate('TEXT_ERROR_UNABLE_TO_FIND_TTS_CONST').'<br>';
+		}
+
 		if($eventPluginID!==null){
 			$dbADO->Execute($updateDD,array($Longitude,$eventPluginID,$GLOBALS['Longitude']));
 			$dbADO->Execute($updateDD,array($Latitude,$eventPluginID,$GLOBALS['Latitude']));
@@ -351,22 +365,26 @@ function rippingSettings($selectedRipFormat){
 	$ql=(!isset($ql))?3:$ql;
 	
 	$out='
-
-			<td><B>'.translate('TEXT_SETTINGS_CONST').'</B></td>
-			<td><div id="mp3_opt" style="display:'.(($ripFormat=='mp3')?'':'none').';">
-				'.translate('TEXT_BIT_RATE_CONST').': '.pulldownFromArray($bitRateArray,'bit_rate_predefined',@$bit_rate,'onchange="document.installationSettings.bit_rate_user.value=document.installationSettings.bit_rate_predefined.value;" style="width:180px;"','key','').' or type <input type="text" name="bit_rate_user" value="'.@$bit_rate.'"><br>
-				<input type="radio" name="cbr_vbr" value="cbr" '.((!isset($cbr_vbr) || @$cbr_vbr=='cbr')?'checked':'').'>CBR <input type="radio" name="cbr_vbr" value="vbr" '.((@$cbr_vbr=='vbr')?'checked':'').'> VBR
-			</div>
-			<div id="ogg_opt" style="display:'.(($ripFormat=='ogg')?'':'none').';">
-				'.translate('TEXT_QUALITY_CONST').': '.pulldownFromArray($optarray,'ogg_ql',@$ql,'style="width:180px;"','key','').'
-			</div>	
-			<div id="flac_opt" style="display:'.(($ripFormat=='flac')?'':'none').';">
-				'.translate('TEXT_NO_OPTIONS_AVAILABLE_CONST').'
-			</div>	
-			<div id="wav_opt" style="display:'.(($ripFormat=='wav')?'':'none').';">
-				'.translate('TEXT_NO_OPTIONS_AVAILABLE_CONST').'
-			</div>	
-			</td>
+			<tr id="mp3_opt" style="display:'.(($ripFormat=='mp3')?'':'none').';">
+				<td><B>'.translate('TEXT_BIT_RATE_CONST').'</B></td>
+				<td>'.pulldownFromArray($bitRateArray,'bit_rate_predefined',@$bit_rate,'onchange="document.installationSettings.bit_rate_user.value=document.installationSettings.bit_rate_predefined.value;" style="width:180px;"','key','').'</td>
+				<td>or type</td>
+				<td><input type="text" name="bit_rate_user" value="'.@$bit_rate.'"></td>
+				<tr>
+					<td>&nbsp;</td>
+					<td><input type="radio" name="cbr_vbr" value="cbr" '.((!isset($cbr_vbr) || @$cbr_vbr=='cbr')?'checked':'').'>CBR <input type="radio" name="cbr_vbr" value="vbr" '.((@$cbr_vbr=='vbr')?'checked':'').'> VBR</td>
+				</tr>
+			</tr>
+			<tr id="ogg_opt" style="display:'.(($ripFormat=='ogg')?'':'none').';">
+				<td><B>'.translate('TEXT_QUALITY_CONST').'</B></td>
+				<td>'.pulldownFromArray($optarray,'ogg_ql',@$ql,'style="width:180px;"','key','').'</td>
+			</tr>
+			<tr id="flac_opt" style="display:'.(($ripFormat=='flac')?'':'none').';">
+				<td colspan="2">'.translate('TEXT_NO_OPTIONS_AVAILABLE_CONST').'</td>
+			</tr>
+			<tr id="wav_opt" style="display:'.(($ripFormat=='wav')?'':'none').';">
+				<td colspan="2">'.translate('TEXT_NO_OPTIONS_AVAILABLE_CONST').'</td>
+			</tr>
 ';
 	
 	return $out;

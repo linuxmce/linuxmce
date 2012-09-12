@@ -16,6 +16,7 @@ $TEXT_MISCELANEOUS_CONST='Divers';
 $TEXT_RIPPING_FORMAT_CONST='Format de copie des CD\'s';
 $TEXT_INSTALLATION_DESCRIPTION_REQUIRED_CONST='Veuillez entrer une description';
 $TEXT_ERROR_UNABLE_TO_FIND_DCE_ROUTER_CONST='Erreur: impossible de trouver le routeur DCE.';
+$TEXT_ERROR_UNABLE_TO_FIND_TTS_CONST='Erreur: impossible de trouver le périphérique Text To Speech.';
 $TEXT_ERROR_UNABLE_TO_FIND_EVENT_PLUGIN_CONST='Erreur: impossible de trouver le plugin des événements.';
 $TEXT_ERROR_UNABLE_TO_FIND_MEDIA_PLUGIN_CONST='Erreur: impossible de trouver le plugin des médias.';
 $TEXT_INSTALLATION_UPDATED_CONST='L\'installation à été mise à jour.';
@@ -32,4 +33,6 @@ $TEXT_SET_LOGLEVELS_CONST = "Régler niveaux de journalisation";
 $TEXT_CURRENT_LOGLEVELS_CONST = "Niveaux de journalisation actuels";
 $TEXT_LOGLEVELS_UPDATED_CONST='Niveaux de journalisation mis à jour. Pour activer veuillez faire un redémarrage rapide du routeur DCE.';
 $TEXT_SYSTEM_CONST = "Système";
+$TEXT_LANGUAGE_SETTINGS = "Choix des langues";
+$TEXT_LANGUAGE_ASTERISK = "Langue par défaut de la voix télécom";
 ?>
