@@ -23,7 +23,7 @@ Item {
     {
         console.log("c++ slot orientation changed")
         console.log(appW+" x " + appH)
-        }
+    }
 
 
     Connections{
@@ -37,6 +37,17 @@ Item {
     anchors.fill:parent
     }
 */
+    ScreenSaver{
+        id:pss
+        anchors.centerIn: parent
+    }
+
+    function toggleUI()
+    {
+        mediaHeader.visible = !mediaHeader.visible
+        lmceScenarios.visible = !lmceScenarios.visible
+    }
+
 
 
     function scaleX(x){
@@ -87,18 +98,37 @@ Item {
         console.log(component.progress)
     }
 
+    FocusScope{
+        id:loaderScop
+        width: parent.width
+        height: parent.height
+        focus: true
+         Keys.onPressed:{
 
-    Loader {
-        id:pageLoader
-        objectName: "loadbot"
+                 if(event.key === Qt.Key_T){
+                     toggleUI()
+                 console.log("Key toggle")
+                 }
 
-        onSourceChanged:  loadin
-        onLoaded: {
+         }
 
-            console.log("Screen Changed:" + pageLoader.source)
+        Loader {
+            id:pageLoader
+            objectName: "loadbot"
+            focus: true
+            onSourceChanged:  loadin
+
+            onLoaded: {
+
+                console.log("Screen Changed:" + pageLoader.source)
+
+            }
+
 
         }
+
     }
+
     //=================Components==================================================//
     function loadComponent(componentName )
     {
@@ -166,5 +196,15 @@ Item {
 
 
     //floorplans
+
+
+    MediaHeader{
+        id:mediaHeader
+        anchors.top: parent.top
+    }
+    //BottomPanel{id: advanced; anchors.top: stage.top}
+    ScenarioRow{
+        id:lmceScenarios; anchors.bottom: parent.bottom
+    }
 }
 

@@ -6,7 +6,7 @@ import "../js/ComponentLoader.js" as MyJs
 Rectangle {
     id:scenarios
     width: appW
-    height:appH *.20
+    height:appH *.10
    // color: "grey"
     radius: 5
     gradient: style.generalGradient
