@@ -149,6 +149,8 @@ sub generate_voice()
 		when(2) { &generate_voice_mbrola(@_); }
 		# german
 		when(3) { &generate_voice_mbrola(@_); }
+		#portuguese (brazilian)
+		when(11) { &generate_voice_googletts(@_, 'pt-br'); }
 		# english and everything else :-)
 		default { &generate_voice_festival(@_); }
 	}
@@ -200,6 +202,15 @@ sub generate_voice_mbrola()
 	# Resample and create permanent file
 	`/usr/bin/sox /tmp/tts.wav -r 8000 -c1 $FILE`;
 	unlink "/tmp/tts.wav";
+}
+
+sub generate_voice_googletts()
+{
+	my $TEXT = shift;
+	my $FILE = shift;
+	my $LANGUAGE = shift;
+
+	system('/usr/pluto/bin/googletts-cli.pl -r 8000 -o '.$FILE.'  -l '.$LANGUAGE.' -t "'.$TEXT.'"');
 }
 
 `/usr/pluto/bin/db_create_dialplan.sh`;
