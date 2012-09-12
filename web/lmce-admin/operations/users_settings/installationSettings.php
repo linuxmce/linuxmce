@@ -11,7 +11,7 @@ function installationSettings($output,$dbADO) {
 	
 	$currentTimeZone=str_replace('/usr/share/zoneinfo/','',exec('readlink /etc/localtime'));
 	$ripFormats=array('mp3'=>'mp3','ogg'=>'ogg', 'flac'=>'flac', 'wav'=>'wav');
-	$telecom_language=array('1'=>'English', '2'=>utf8_encode('Français'), '3'=>'Deutsch');
+	$telecom_language=array('1'=>'English', '2'=>utf8_encode('French'), '3'=>'German', '11'=>'Portuguese (Brazilian)');
 	$telecom_selectedLanguage='1'; // default 
 	
 	$installationID = cleanInteger($_SESSION['installationID']);
