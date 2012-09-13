@@ -105,7 +105,7 @@ EnableDigitalOutputs()
 		amixer -c "$CardNumber" | grep '\[off\]' -B5 | grep "Simple" | sed 's/Simple mixer control //g' | grep -vi capture | while read MuteStatus; do 
 			amixer -c "$CardNumber" sset "$MuteStatus" unmute 
 		done
-		amixer -c "$CardNumber" | grep '\[.*\%\]' -B5 | grep "Simple" | sed "s/.*'\(.*\)'[^']*$/\1/" | while read VolLevel; do 
+		amixer -c "$CardNumber" | grep '\[.*\%\]' -B5 | grep "Simple" | sed 's/Simple mixer control //g' | grep -vi capture | while read VolLevel; do 
 			amixer -c "$CardNumber" sset "$VolLevel" 80% 
 		done
 	done
