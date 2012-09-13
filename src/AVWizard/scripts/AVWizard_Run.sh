@@ -33,12 +33,12 @@ UseAlternativeLibs
 log_file=/var/log/pluto/AVWizard_Run_$(date +%Y%m%d_%H%M%S).log
 
 # remove the current xorgs to start clean, and prevent toggling issues.
-if [[ -f /etc/X11/xorg.conf ]]; then
-	mv /etc/X11/xorg.conf /etc/X11/backup.xorg.conf
-fi
-if [[ -f /etc/X11/xorg.conf.pluto.avwizard ]]; then
-	rm -f /etc/X11/xorg.conf.pluto.avwizard
-fi
+#if [[ -f /etc/X11/xorg.conf ]]; then
+#	mv /etc/X11/xorg.conf /etc/X11/backup.xorg.conf
+#fi
+#if [[ -f /etc/X11/xorg.conf.pluto.avwizard ]]; then
+#	rm -f /etc/X11/xorg.conf.pluto.avwizard
+#fi
 
 ###########################################################
 ### Setup Functions - Error checking and logging
