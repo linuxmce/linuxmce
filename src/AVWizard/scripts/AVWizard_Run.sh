@@ -421,7 +421,7 @@ Enable_Audio_Channels () {
 		amixer -c "$CardNumber" | grep '\[off\]' -B5 | grep "Simple" | sed 's/Simple mixer control //g' | grep -vi capture | while read MuteStatus; do 
 			amixer -c "$CardNumber" sset "$MuteStatus" unmute 
 		done
-		amixer -c "$CardNumber" | grep '\[.*\%\]' -B5 | grep "Simple" | sed 's/Simple mixer control //g' | while read VolLevel; do 
+		amixer -c "$CardNumber" | grep '\[.*\%\]' -B5 | grep "Simple" | sed 's/Simple mixer control //g' | grep -vi capture | while read VolLevel; do 
 			amixer -c "$CardNumber" sset "$VolLevel" 80%
 		done
 	done
@@ -487,9 +487,9 @@ Start_AVWizard () {
 trap 'StatsMessage "Exiting"' EXIT
 
 #Execute Functions
-Enable_Audio_Channels
 Video_Driver_Detection
 SetupViaXine
+Enable_Audio_Channels
 GamePad_Setup
 Start_AVWizard
 
