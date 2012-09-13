@@ -96,21 +96,6 @@ SaveSettings()
 	done >"$SettingsFile"
 }
 
-EnableDigitalOutputs()
-{
-	# Added this to correctly unmute channels for setup wizard, and to 
-	# inject necessary unmuting commands for later bootup.
-
-	aplay -l | grep card | awk '{print $2}' | uniq | sed 's/://g' | while read CardNumber; do 
-		amixer -c "$CardNumber" | grep '\[off\]' -B5 | grep "Simple" | sed 's/Simple mixer control //g' | grep -vi capture | while read MuteStatus; do 
-			amixer -c "$CardNumber" sset "$MuteStatus" unmute 
-		done
-		amixer -c "$CardNumber" | grep '\[.*\%\]' -B5 | grep "Simple" | sed 's/Simple mixer control //g' | grep -vi capture | while read VolLevel; do 
-			amixer -c "$CardNumber" sset "$VolLevel" 80% 
-		done
-	done
-}
-
 Setup_AsoundConf()
 {
 	local AudioSetting="$1"
@@ -151,18 +136,15 @@ Setup_AsoundConf()
 		*[CO]*)
 			# audio setting is Coaxial or Optical, i.e. S/PDIF
 			echo 'pcm.!default asym_spdif' >>/etc/asound.conf
-			EnableDigitalOutputs
 		;;
 		*H*)
 			# audio setting is HDMI
 			echo 'pcm.!default asym_hdmi' >>/etc/asound.conf
-			EnableDigitalOutputs 
 
 		;;
 		*)
 			# audio setting is Stereo or something unknown
 			echo 'pcm.!default asym_analog' >>/etc/asound.conf
-			EnableDigitalOutputs
 		;;
 	esac
 
@@ -182,12 +164,10 @@ Setup_XineConf()
 		*[CO]*)
 			XineConfSet audio.device.alsa_front_device asym_spdif "$XineConf"
 			XineConfSet audio.device.alsa_default_device asym_spdif "$XineConf"
-			XineConfSet audio.device.alsa_passthrough_device "iec958:CARD=$SoundCard,AES0=0x6,AES1=0x82,AES2=0x0,AES3=0x2" "$XineConf"
 			;;
 		*H*)
 			XineConfSet audio.device.alsa_front_device asym_hdmi "$XineConf"
 			XineConfSet audio.device.alsa_default_device asym_hdmi "$XineConf"
-			XineConfSet audio.device.alsa_passthrough_device "hdmi:CARD=$SoundCard,AES0=0x6,AES1=0x82,AES2=0x0,AES3=0x2" "$XineConf"
 			;;
 		*)
 			XineConfSet audio.device.alsa_front_device "$AnalogPlaybackCard" "$XineConf"
