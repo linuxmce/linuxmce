@@ -114,7 +114,7 @@ function viewCameras($output,$dbADO) {
 			if(isset($_POST['camera_'.$cameraid])){
 				$out.='
 				<tr>
-					<td><fieldset><legend><B># '.$cameraid.'</B></legend><IFRAME src="viewCamera.php?cameraID='.$cameraid.'" style="width:660px; height:500px;"></IFRAME></td>
+					<td><fieldset><legend><B># '.$cameraid.'</B></legend><IFRAME src="viewCamera.php?cameraID='.$cameraid.'&interval='.$interval.'" style="width:660px; height:500px;"></IFRAME></td>
 				</tr>
 				<tr>
 					<td>&nbsp;</td>
