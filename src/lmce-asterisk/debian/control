@@ -7,7 +7,7 @@ Standards-Version: 3.6.1
 
 Package: lmce-asterisk
 Architecture: any
-Depends: pluto-boot-scripts, chan-sccp-b, asterisk-sounds-extra, asterisk-mysql, libtiff-tools mbrola mbrola-de7 mbrola-fr4 mpg123
+Depends: pluto-boot-scripts, chan-sccp-b, asterisk-sounds-extra, asterisk-mysql, libtiff-tools, mbrola, mbrola-de7, mbrola-fr4, mpg123
 Provides: asterisk-config-custom
 Conflicts: freepbx, asterisk-pluto, asterisk-custom-config
 Replaces: asterisk-config
