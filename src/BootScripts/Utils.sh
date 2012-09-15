@@ -665,6 +665,7 @@ CheckVideoDriver () {
 
 		if [[ "$prop_driver" == "$cur_driver" ]] && [[ "$cur_driver" == "nvidia" ]] && [[ -n "$online" ]]; then
 			StartService "Checking nVidia driver" ". /usr/pluto/bin/nvidia-install.sh"
+			checkAlsaBackportNeeds
 			current_nvidia=$(getInstalledNvidiaDriver)
 			preferred_nvidia=$(getPreferredNvidiaDriver)
 				if [[ "$current_nvidia" != "$preferred_nvidia" ]]; then 
