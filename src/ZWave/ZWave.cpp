@@ -449,11 +449,16 @@ void ZWave::CMD_Set_Association(int iNodeID,int iGroup_ID,string sNodes_List,str
 			StringUtils::Tokenize((*it), std::string("/"), target2);
 			std::vector<string>::iterator it2=target2.begin();
 			int nodeid = atoi((*it2).c_str());
+			LoggerWrapper::GetInstance()->Write(LV_ZWAVE, "node: %i %s", nodeid, (*it2).c_str());
 			int instance = -1;
 			if (it2!=target2.end()) {
 				instance = atoi((*it2).c_str());
+				LoggerWrapper::GetInstance()->Write(LV_ZWAVE, "instance: %i %s", instance, (*it2).c_str());
 			}
+			// FIXME: hack until the instance parsing above is working correctly
+			instance = -1;
 			if (instance == -1) {	
+				LoggerWrapper::GetInstance()->Write(LV_ZWAVE, "sending single instance association");
 				if (nodeid > 0) {
 					myZWApi->zwAssociationSet(iNodeID,iGroup_ID,nodeid);
 				}
@@ -461,6 +466,7 @@ void ZWave::CMD_Set_Association(int iNodeID,int iGroup_ID,string sNodes_List,str
 					myZWApi->zwAssociationRemove(iNodeID,iGroup_ID,nodeid * -1);
 				}
 			} else {
+				LoggerWrapper::GetInstance()->Write(LV_ZWAVE, "sending multi instance association");
 				if (nodeid > 0) {
 					myZWApi->zwAssociationSetMulti(iNodeID,iGroup_ID,nodeid, instance);
 				}
