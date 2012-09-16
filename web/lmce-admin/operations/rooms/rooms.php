@@ -56,7 +56,7 @@ function rooms($output,$dbADO) {
 			function confirmCheck(room,label){
 				eval('isChecked=document.rooms.manually_'+room+'.checked');
 				if(isChecked===true){
-					if(confirm(".translate('TEXT_MANUALY_CONFIGURE_EA_CONFIRMATION_CONST')." '+label+'?')){
+					if(confirm('".translate('TEXT_MANUALY_CONFIGURE_EA_CONFIRMATION_CONST')." '+label+'?')){
 						setMan=1;
 					}else{
 						setMan=-1;
