@@ -283,24 +283,24 @@ for Row in $R; do
 	Moon_IP=$(Field 2 "$Row")
 	Moon_IP=$(/usr/pluto/bin/PlutoDHCP.sh -d "$Moon_DeviceID" -a)
 	if [[ -z "$Moon_IP" ]]; then
-		echo "WARNING : No free IP left to assign for moon$Moon_DeviceID"
+		echo "WARNING : No free IP left to assign for moon${Moon_DeviceID}"
 		continue
 	fi
 	
 	Moon_MAC=$(Field 3 "$Row")
 	Moon_MAC=$(echo ${Moon_MAC//-/:} | tr 'a-z' 'A-Z')
 	if ! /usr/pluto/bin/CheckMAC.sh "$Moon_MAC" ;then
-		echo "WARNING : Mac ($Moon_MAC) of moon$Moon_DeviceID is invalid"
+		echo "WARNING : Mac ($Moon_MAC) of moon${Moon_DeviceID} is invalid"
 		continue
 	fi
 
 	Moon_Description=$(Field 4 "$Row")
 	Moon_NeedConfigure=$(Field 5 "$Row")
 	if [[ "$Moon_NeedConfigure" != "1" ]] ;then
-		echo "INFO : Skiping moon$Moon_DeviceID because NeedConfigure flag is not set"
+		echo "INFO : Skiping moon${Moon_DeviceID} because NeedConfigure flag is not set"
 		continue
 	fi
-	echo "INFO : Processing moon$Moon_DeviceID because NeedConfigure flag is set"
+	echo "INFO : Processing moon${Moon_DeviceID} because NeedConfigure flag is set"
 
 	Moon_DeviceTemplate=$(Field 6 "$Row")
 
@@ -314,7 +314,7 @@ for Row in $R; do
 	RunSQL "UPDATE Device_DeviceData SET IK_DeviceData='$Moon_Model' WHERE FK_Device='$Moon_DeviceID' AND FK_DeviceData='$DEVICEDATA_Model'"
 
 
-	Moon_RootLocation="/usr/pluto/diskless/$Moon_DeviceID"
+	Moon_RootLocation="/usr/pluto/diskless/${Moon_DeviceID}"
 	Moon_BootConfFile="/tftpboot/pxelinux.cfg/01-$(echo ${Moon_MAC//:/-} | tr 'A-Z' 'a-z')"
 	Moon_DisklessImages=$(GetDeviceData "$Moon_DeviceID" "$DEVICEDATA_DisklessImages")
 
@@ -346,10 +346,10 @@ for Row in $R; do
 #	fi
 
 	## Configure ssh for this device
-	if [[ ! -d $Moon_RootLocation/root/.ssh ]]; then 
-		mkdir -p $Moon_RootLocation/root/.ssh
+	if [[ ! -d ${Moon_RootLocation}/root/.ssh ]]; then 
+		mkdir -p ${Moon_RootLocation}/root/.ssh
 	fi
-	cat /usr/pluto/keys/id_dsa_pluto.pub > $Moon_RootLocation/root/.ssh/authorized_keys
+	cat /usr/pluto/keys/id_dsa_pluto.pub > ${Moon_RootLocation}/root/.ssh/authorized_keys
 	(cd /usr/pluto/diskless/${Moon_DeviceID}/usr/pluto/deb-cache; dpkg-scanpackages -m . dev/null | tee Packages | gzip -c > Packages.gz)
 
 	## Dome configuring this MD
@@ -383,9 +383,9 @@ fi
 
 ## Do the update fix for current debian computers
 for dir in /usr/pluto/diskless/* ;do
-	if [[ -f "$dir/debian/etc/init.d/fastboot/rcS" ]] ;then
-		sed -i 's/ApplyUpdates.sh/LMCEUpdate_Apply.sh/g' "$dir/debian/etc/init.d/fastboot/rcS" || :
-		rm -f "$dir/debian/etc/rc2.d/S98LMCEUpdate" || :
+	if [[ -f "${dir}/debian/etc/init.d/fastboot/rcS" ]] ;then
+		sed -i 's/ApplyUpdates.sh/LMCEUpdate_Apply.sh/g' "${dir}/debian/etc/init.d/fastboot/rcS" || :
+		rm -f "${dir}/debian/etc/rc2.d/S98LMCEUpdate" || :
 	fi
 done
 
