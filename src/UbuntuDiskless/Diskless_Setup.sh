@@ -387,12 +387,22 @@ for dir in /usr/pluto/diskless/* ;do
 		sed -i 's/ApplyUpdates.sh/LMCEUpdate_Apply.sh/g' "$dir/debian/etc/init.d/fastboot/rcS" || :
 		rm -f "$dir/debian/etc/rc2.d/S98LMCEUpdate" || :
 	fi
-
 done
+
+if ! [[ -f /usr/pluto/deb-cache/Packages.gz ]]; then
+	pushd /usr/pluto/deb-cache
+	dpkg-scanpackages -m . /dev/null | tee Packages | gzip -c > Packages.gz
+	popd
+fi
+
+if [[ ! -d ${Moon_RootLocation}/root/.ssh ]]; then 
+	mkdir -p ${Moon_RootLocation}/root/.ssh
+fi
+cat /usr/pluto/keys/id_dsa_pluto.pub > ${Moon_RootLocation}/root/.ssh/authorized_keys
+
 . /usr/pluto/bin/Config_Ops.sh
 if [[ "$PK_Users" -lt "1" ]]; then
 	/usr/pluto/bin/MessageSend "dcerouter" 0 7 7 1 163 "First MD headless reload"
 fi
 echo "Finished setting up network boot for media directors."
 echo "If new media director(s) were added, do a quick reload router."
-
