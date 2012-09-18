@@ -44,7 +44,8 @@ INSERT INTO ast_config (cat_metric, var_metric, commented, filename, category, v
 (0, 17, 0, 'sip.conf', 'general', 'tcpbindaddr', '0.0.0.0'),
 (0, 18, 0, 'sip.conf', 'general', 'registerattempts', '0'),
 (0, 19, 0, 'sip.conf', 'general', 'registertimeout', '15'),
-(0, 20, 0, 'sip.conf', 'general', 'language', 'en');
+(0, 20, 0, 'sip.conf', 'general', 'language', 'en'),
+(0, 21, 0, 'sip.conf', 'general', 'alwaysauthreject', 'yes');
 
 --
 -- Insert static iax.conf in  DB

@@ -7,8 +7,8 @@
 #
 # Version 1.0 - 27. sep 2011 - Serge Wagener (foxi352) - first version
 # Version 1.1 - 29. nov 2011 - Serge Wagener (foxi352) - added fax support
+# Version 1.2 - 18. sep 2012 - Serge Wagener (foxi352) - added german and french voice and tts support
 
-#pushd /etc/asterisk
 . /usr/pluto/bin/pluto.func
 . /usr/pluto/bin/Config_Ops.sh
 . /usr/pluto/bin/SQL_Ops.sh
@@ -28,6 +28,7 @@ DEVICEDATA_VideoSupport=305
 DEVICE_TelecomPlugIn=11
 DEVICECATEGORY_HARDPHONE=90
 DEVICECATEGORY_SOFTPHONE=91
+DEVICEDATA_Language=26
 
 DIAL_ALL_PHONES=
 ALL_TRUNKS=
@@ -85,8 +86,8 @@ WriteSipPhone()
 	fi
 
 	# adds configuration of current SIP phone to SQL query buffer.
-	PHONESSQL="$PHONESSQL INSERT INTO $DB_SIP_Device_Table (name,defaultuser,port,mailbox,secret,callerid,context,allow,videosupport)
-	VALUES ('$PhoneNumber','$PhoneNumber','$Port','$PhoneNumber@device','$Secret','device <$PhoneNumber>','from-internal','$codecs','$videosupported');"
+	PHONESSQL="$PHONESSQL INSERT INTO $DB_SIP_Device_Table (name,defaultuser,port,mailbox,secret,callerid,context,allow,videosupport,language)
+	VALUES ('$PhoneNumber','$PhoneNumber','$Port','$PhoneNumber@device','$Secret','device <$PhoneNumber>','from-internal','$codecs','$videosupported','$LANGUAGE');"
 }
 
 WriteIAXPhone()
@@ -101,8 +102,8 @@ WriteIAXPhone()
 		callToken="no"
 	fi	
 	# adds configuration of current IAX phone to SQL query buffer.
-	PHONESSQL="$PHONESSQL INSERT INTO $DB_IAX_Device_Table (name,username,mailbox, secret, callerid, requirecalltoken,permit,deny)
-	VALUES ('$PhoneNumber','$PhoneNumber','$PhoneNumber@device','$Secret','device <$PhoneNumber>', '$callToken', '$IntIP/$IntNetmask', '0.0.0.0/0');"
+	PHONESSQL="$PHONESSQL INSERT INTO $DB_IAX_Device_Table (name,username,mailbox, secret, callerid, requirecalltoken,permit,deny,language)
+	VALUES ('$PhoneNumber','$PhoneNumber','$PhoneNumber@device','$Secret','device <$PhoneNumber>', '$callToken', '$IntIP/$IntNetmask', '0.0.0.0/0','$LANGUAGE');"
 }
 
 WriteSccpPhone()
@@ -332,8 +333,8 @@ AddTrunk()
 				('$(( 100+$id ))', 'sip.conf', 'general', 'register', '$username:$password@$host/$phonenumber');"
 				type='peer'
 			fi
-			LINESSQL="$LINESSQL INSERT INTO $DB_SIP_Device_Table (name,defaultuser,secret,host,port,context,qualify,nat,type,fromuser,fromdomain,callerid,allow,insecure,directmedia) VALUES \
-			('$phonenumber','$username','$password','$host','5060','$context','yes','yes','$type','$username','$host','$phonenumber','alaw;ulaw','port,invite','no');"
+			LINESSQL="$LINESSQL INSERT INTO $DB_SIP_Device_Table (name,defaultuser,secret,host,port,context,qualify,nat,type,fromuser,fromdomain,callerid,allow,insecure,directmedia,language) VALUES \
+			('$phonenumber','$username','$password','$host','5060','$context','yes','yes','$type','$username','$host','$phonenumber','alaw;ulaw','port,invite','no','$LANGUAGE');"
         ;;
         "GTALK")
         	# provider registry
@@ -471,6 +472,24 @@ GetTimeout()
 	TIMEOUT=$(RunSQL "$SQL")
 }
 
+GetLanguage() 
+{
+	SQL="SELECT IK_DeviceData FROM Device_DeviceData JOIN Device ON FK_Device = PK_Device WHERE FK_DeviceTemplate =57 and FK_DeviceData = $DEVICEDATA_Language;"
+	LANGUAGE=$(RunSQL "$SQL")
+	
+	case "$LANGUAGE" in
+		"2")
+			LANGUAGE='fr';
+		;;
+		"3")
+			LANGUAGE='de';
+		;;
+		*)
+			LANGUAGE='en';		
+		;;
+	esac
+}
+
 users2astdb()
 {
 	echo "Users2astdb: rebuilding $astdbfamily tree"
@@ -572,6 +591,7 @@ devices2astdb()
 chmod g+w /etc/asterisk/*
 
 GetTimeout
+GetLanguage
 
 # work the different lmce devices
 WorkThePhones
@@ -591,4 +611,3 @@ asterisk -r -x "iax2 reload" >> /dev/null
 asterisk -r -x "sccp reload" >> /dev/null
 asterisk -r -x "jabber reload" >> /dev/null
 
-#popd

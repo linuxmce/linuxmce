@@ -15,11 +15,32 @@ Context_Voice_Menu="voice-menu-lmce-custom"
 . /usr/pluto/bin/Section_Ops.sh
 . /usr/pluto/bin/Utils.sh
 
+# LinuxMCE hardcoded ID's
+DEVICEDATA_Language=26
+
 GetTimeout()
 {
 	UseDB
 	SQL="SELECT IK_DeviceData FROM Device_DeviceData JOIN Device ON FK_Device = PK_Device WHERE FK_DeviceTemplate =34 and FK_DeviceData=247;"
 	TIMEOUT=$(RunSQL "$SQL")
+}
+
+GetLanguage() 
+{
+	SQL="SELECT IK_DeviceData FROM Device_DeviceData JOIN Device ON FK_Device = PK_Device WHERE FK_DeviceTemplate =57 and FK_DeviceData = $DEVICEDATA_Language;"
+	LANGUAGE=$(RunSQL "$SQL")
+	
+	case "$LANGUAGE" in
+		"2")
+			LANGUAGE='fr';
+		;;
+		"3")
+			LANGUAGE='de';
+		;;
+		*)
+			LANGUAGE='en';		
+		;;
+	esac
 }
 
 GetUserExtensions()
@@ -68,8 +89,9 @@ CreateDialplanLines()
 			SQL="$SQL INSERT INTO $DB_Extensions_Table (context,exten,priority,app,appdata) VALUES
 			('$Context_From_Lmce','$Line','1','AGI','lmce-phonebook-lookup.agi'),
 			('$Context_From_Lmce','$Line','2','AGI','lmce-gethousemode.agi'),
-			('$Context_From_Lmce','$Line','3','Goto','$Context_From_Lmce,$Line-hm\${HOUSEMODE},1'),
-			('$Context_From_Lmce','$Line','4','Hangup','');"
+			('$Context_From_Lmce','$Line','3','Set','CHANNEL(language)=\'$LANGUAGE\''),
+			('$Context_From_Lmce','$Line','4','Goto','$Context_From_Lmce,$Line-hm\${HOUSEMODE},1'),
+			('$Context_From_Lmce','$Line','5','Hangup','');"
 		fi
 
 		App="NoOp"
@@ -310,6 +332,7 @@ DeleteExistingDialplan ()
 
 # fetch values from LinuxMCE
 GetTimeout
+GetLanguage
 GetUserExtensions
 GetPhoneExtensions
 
