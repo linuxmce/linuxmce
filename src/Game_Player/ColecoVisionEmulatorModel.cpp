@@ -26,8 +26,8 @@ namespace DCE
   {
 
     MESSEmulatorModel::initializeActionstoKeysyms();
-    m_mapActionsToKeysyms["*"] = make_pair(XK_KP_Add,0);
-    m_mapActionsToKeysyms["#"] = make_pair(XK_KP_Subtract,0);
+    m_mapActionsToKeysyms["*"] = make_pair(XK_minus,0);
+    m_mapActionsToKeysyms["#"] = make_pair(XK_equal,0);
 
   }
 
