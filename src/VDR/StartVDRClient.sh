@@ -10,6 +10,7 @@
 
 ConfEval
 
+LOCKFILE="/usr/pluto/locks/VDRrunning"
 if [[ "$PK_Device" -eq "1" ]]; then
 	# We are running on the core, and do not want to stop VDR
 	trap 'killall -KILL vdr-sxfe' EXIT
@@ -17,18 +18,19 @@ if [[ "$PK_Device" -eq "1" ]]; then
 	invoke-rc.d vdr start
 else
 	# We are running on a MD, and don't want VDR running after the user closes the TV app.
-	trap 'killall -KILL vdr-sxfe ; invoke-rc.d vdr stop' EXIT
-	invoke-rc.d vdr restart
+	trap 'killall -KILL vdr-sxfe ; rm -f $LOCKFILE ;  invoke-rc.d vdr restart' EXIT
+	invoke-rc.d vdr start
 
-	if  [ -x /usr/bin/nmap ] ; then
-		VDRRUNNING=0
-		while [[ "$VDRRUNNING" = "0" ]]; do
-			# Wait for VDR to accept commands via SVDRP.
-			nmap 127.0.0.1 -p 2001 --open | grep open -iq && VDRRUNNING=1
-			sleep 1
-		done
-	else
-		sleep 5
-	fi
 fi
+if  [ -x /usr/bin/nmap ] ; then
+	VDRRUNNING=0
+	while [[ "$VDRRUNNING" = "0" ]]; do
+		nmap 127.0.0.1 -p 22 --open | grep open -iq && VDRRUNNING=1
+		sleep 1
+	done
+else
+	sleep 5
+fi
+svdrpsend -p 2001 HITK Ok
+touch $LOCKFILE
 /usr/bin/vdr-sxfe --reconnect xvdr://127.0.0.1 --post tvtime:method=use_vo_driver --tcp --syslog --verbose
