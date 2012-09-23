@@ -64,9 +64,9 @@ while : ;do
 	fi
 	
 	Q="
-		SELECT IPaddress FROM Device INNER JOIN DeviceTemplate ON FK_DeviceTemplate=PK_DeviceTemplate WHERE FK_DeviceCategory IN ($CAT_MD, $CAT_FILESERVER);
-		SELECT IPaddress FROM UnknownDevices;
-		SELECT IPaddress FROM PnpQueue WHERE Category='fileserver';
+		SELECT IPaddress FROM Device INNER JOIN DeviceTemplate ON FK_DeviceTemplate=PK_DeviceTemplate WHERE FK_DeviceCategory IN ($CAT_MD, $CAT_FILESERVER) WHERE IPaddress != '';
+		SELECT IPaddress FROM UnknownDevices WHERE IPaddress != '';
+		SELECT IPaddress FROM PnpQueue WHERE Category='fileserver' AND IPaddress != '';
 	"
 	IP_List="_$(RunSQL "$Q" | sed 's/  */_/g')_"
 	
