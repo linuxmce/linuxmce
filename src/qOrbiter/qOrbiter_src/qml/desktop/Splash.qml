@@ -442,9 +442,9 @@ Rectangle {
                 MouseArea{
                     anchors.fill: goButton
                     onClicked: {console.log("Going");
-                        window.setupNewOrbiter(users_options.currentIndex+1, rooms_options.currentIndex+1,1,1,1,1);
+                        window.setupNewOrbiter(users_options.currentIndex+1, rooms_options.currentIndex+1,1,1,appH,appW);
                         orbiter_options.visible = false
-
+                        newOrbiterOptionContainer.visible = false
                     }
                 }
             }
@@ -474,7 +474,7 @@ Rectangle {
                     delegate: Rectangle{
                         height: scaleY(5)
                         width: scaleX(15)
-                        color: users.currentIndex ? "green" : "slategrey"
+                        color: users_options.currentIndex ===index ? "green" : "slategrey"
                         Text {
                             text:dataTitle
                             anchors.centerIn: parent
@@ -482,7 +482,7 @@ Rectangle {
                         }
                         MouseArea{
                             anchors.fill: parent
-                            onClicked:{console.log(dataTitle); users.currentIndex=index}
+                            onClicked:{console.log(dataTitle+"::"+data_id); users_options.currentIndex=index}
                         }
                     }
                 }
@@ -511,15 +511,15 @@ Rectangle {
                     delegate: Rectangle{
                         height: scaleY(5)
                         width: scaleX(15)
-                        color: rooms.currentIndex ? "green" : "slategrey"
+                        color: rooms_options.currentIndex  === index ? "green" : "slategrey"
                         Text {
                             text:dataTitle
                             anchors.centerIn: parent
                         }
                         MouseArea{
                             anchors.fill: parent
-                            onClicked: {console.log(dataTitle);
-                                rooms.currentIndex = index
+                            onClicked: {console.log(dataTitle+"::"+data_id);
+                                rooms_options.currentIndex = index
                             }
                         }
                     }

@@ -172,6 +172,9 @@ public:
     int sPK_Users;
     int sHeight;
     int sWidth;
+    QNetworkAccessManager * httpOrbiterSettings;
+    QNetworkRequest * httpSettingsRequest;
+    QNetworkReply * httpSettingsReply;
 
     QList<QObject*> screenshotVars;
     QList<QObject*> resendAvButtons;

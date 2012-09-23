@@ -31,6 +31,7 @@ MediaManager::MediaManager(QDeclarativeItem *parent) :
     filterProxy->setWidget(videoSurface);
     filterProxy->setAutoFillBackground(false);
     setCurrentStatus("Window Initialized");
+
 }
 
 void MediaManager::initializePlayer()

@@ -1072,7 +1072,7 @@ void qOrbiter::CMD_Set_Now_Playing(string sPK_DesignObj,string sValue_To_Assign,
     int pos1 = scrn.indexOf(",");
     scrn.remove(pos1, scrn.length());
     // qDebug() << sValue_To_Assign.c_str();
- internal_streamID = iStreamID;
+    internal_streamID = iStreamID;
 
     if (iPK_MediaType == 0)
     {
@@ -1942,13 +1942,14 @@ void qOrbiter::registerDevice(int user, QString ea, int room)
     iSize = 0;
     string pResponse ="";
     //on-off  PkUsers -int entArea -string  int room
+    DATA_Set_PK_Users(i_user, true);
+    DATA_Set_FK_EntertainArea(StringUtils::itos(i_ea), true);
     DCE::CMD_Orbiter_Registered CMD_Orbiter_Registered(m_dwPK_Device, iOrbiterPluginID,  "1" ,      i_user,         StringUtils::itos(i_ea),          i_room,           &pData, &iSize);
     if (SendCommand(CMD_Orbiter_Registered, &pResponse) && pResponse=="OK")
     {
         setCommandResponse("DCERouter Responded to Register with " + QString::fromStdString(pResponse));
         setLocation(room, ea.toInt());
-        DATA_Set_PK_Users(i_user, true);
-        DATA_Set_FK_EntertainArea(StringUtils::itos(i_ea),true);
+        setUser(i_user);
         GetScreenSaverImages();
     }
     else
@@ -1974,6 +1975,9 @@ void qOrbiter::setCurrentScreen(QString s)
 
 void qOrbiter::setOrbiterSetupVars(int users, int room, int skin, int lang, int height, int width)
 {
+    httpOrbiterSettings = new QNetworkAccessManager();
+    httpSettingsRequest = new QNetworkRequest();
+
     qDebug()<< "Processing New orbiter Setup";
     sPK_Room = room;
     sPK_Users = users;
@@ -1981,24 +1985,26 @@ void qOrbiter::setOrbiterSetupVars(int users, int room, int skin, int lang, int 
     sPK_Lang = lang;
     sHeight = height;
     sWidth = width;
+
     if (sHeight > 0){
         qDebug() << "Setting up a new orbiter";
 
         int t = SetupNewOrbiter();
-        qDebug() << "New Device ID:" << t;
+
         if (t == 0){
             statusMessage("Error Setting up orbiter!");
+         m_dwPK_Device = -1;
+            initialize();
         }
         else
         {
-            setDeviceId(t);
-            QNetworkAccessManager eaSetter;
-            QNetworkRequest eaRequest;
-            qDebug() << "setting ea";
-            eaRequest.setUrl(QString::fromStdString(m_sIPAddress).append("/lmce-admin/setEa2.php?d="+QString::number(t)+"&r="+QString::number(sPK_Room)));
-            QNetworkReply *rep = eaSetter.get(eaRequest);
-            QObject::connect(rep, SIGNAL(finished()), this, SLOT(finishSetup()));
-
+            setCommandResponse("New Device ID:" +QString::number(t));
+            m_dwPK_Device = t ;
+            setCommandResponse("setting ea");
+            httpSettingsRequest->setUrl("http://"+QString::fromStdString(m_sIPAddress).append("/lmce-admin/setEa2.php?d="+QString::number(t)+"&r="+QString::number(sPK_Room)));
+            qDebug() << "Ea url::" <<httpSettingsRequest->url();
+            httpSettingsReply = httpOrbiterSettings->get(*httpSettingsRequest);
+            QObject::connect(httpSettingsReply, SIGNAL(finished()), this, SLOT(finishSetup()));
         }
     }
     else
@@ -2009,12 +2015,16 @@ void qOrbiter::setOrbiterSetupVars(int users, int room, int skin, int lang, int 
 
 void qOrbiter::finishSetup()
 {
-    QNetworkAccessManager eaSetter;
-    QNetworkRequest eaRequest;
-    eaRequest.setUrl(QString::fromStdString(m_sIPAddress).append("/lmce-admin/qOrbiterGenerator.php?d="+m_dwPK_Device) );
-    QNetworkReply *rep = eaSetter.get(eaRequest);
-    setCommandResponse("Setup Complete, restarting");
-    initialize();
+    httpSettingsReply->disconnect(this, SLOT(finishSetup()));
+    setCommandResponse("Finishing setup...");
+    qDebug() << httpSettingsReply->readAll();
+    QString settingsUrl = "http://"+ QString::fromStdString(m_sIPAddress);
+    settingsUrl.append("/lmce-admin/qOrbiterGenerator.php?d="+QString::number(m_dwPK_Device)) ;
+    httpSettingsRequest->setUrl(settingsUrl);
+    qDebug() << "Settings url :: " << httpSettingsRequest->url();
+    httpSettingsReply = httpOrbiterSettings->get(*httpSettingsRequest);
+   QObject::connect(httpSettingsReply,SIGNAL(finished()), this, SLOT(initialize()));
+   setCommandResponse("Setup Complete, restarting");
 }
 
 void qOrbiter::connectionError()
@@ -2748,15 +2758,15 @@ void DCE::qOrbiter::StopMedia()
 
 void DCE::qOrbiter::RwMedia()
 {
-  //  CMD_Change_Playback_Speed rewind_media(m_dwPK_Device, iMediaPluginID, internal_streamID , -2, true);
-  //  SendCommand(rewind_media);
+    //  CMD_Change_Playback_Speed rewind_media(m_dwPK_Device, iMediaPluginID, internal_streamID , -2, true);
+    //  SendCommand(rewind_media);
 }
 
 void DCE::qOrbiter::FfMedia()
 {
 
-   // CMD_Change_Playback_Speed forward_media(m_dwPK_Device, iMediaPluginID, internal_streamID, +2, true);
-  //  SendCommand(forward_media);
+    // CMD_Change_Playback_Speed forward_media(m_dwPK_Device, iMediaPluginID, internal_streamID, +2, true);
+    //  SendCommand(forward_media);
 }
 
 void DCE::qOrbiter::PauseMedia()
@@ -3491,6 +3501,8 @@ void DCE::qOrbiter::setLocation(int location, int ea) // sets the ea and room
 {
     i_room = location;
     i_ea = ea;
+
+    DATA_Set_FK_EntertainArea(StringUtils::itos(i_ea));
 
     CMD_Set_Entertainment_Area_DL set_entertain_area(m_dwPK_Device, StringUtils::itos(iOrbiterPluginID), StringUtils::itos(ea));
     SendCommand(set_entertain_area);
@@ -4357,14 +4369,13 @@ int qOrbiter::DeviceIdInvalid()
     if( mapDevices.size()==0 )
     {
         setCommandResponse("No orbiters of this type found. Would you like to setup a new one?");
-        QApplication::processEvents(QEventLoop::AllEvents);
+        //        QApplication::processEvents(QEventLoop::AllEvents);
         populateSetupInformation();
         return 0;
     }
     else{
         for(map<int,string>::iterator it=mapDevices.begin();it!=mapDevices.end();++it)
         {
-
             temp_orbiter_list.append(new ExistingOrbiter((int)it->first, QString::fromStdString(it->second)));
             cout << it->first << " " << it->second << endl;
         }
@@ -4378,32 +4389,33 @@ int qOrbiter::DeviceIdInvalid()
 int qOrbiter::SetupNewOrbiter()
 {
     LoggerWrapper::GetInstance()->Write(LV_STATUS,"start SetupNewOrbiter");
-    qDebug() << m_sIPAddress.c_str();
+    qDebug() << "Opening setup connection via Event_Impl to " << m_sIPAddress.c_str();
     Event_Impl event_Impl(DEVICEID_MESSAGESEND, 0, m_sIPAddress);
     while(true)
     {
         string sResponse;
-        if( !event_Impl.m_pClientSocket->SendString("READY") ||
-                !event_Impl.m_pClientSocket->ReceiveString(sResponse) ||
-                sResponse.size()==0 ){
-            qDebug()<< "setup response error!";
+        if( !event_Impl.m_pClientSocket->SendString("READY") || !event_Impl.m_pClientSocket->ReceiveString(sResponse) || sResponse.size()==0 )
+        {
+            setCommandResponse("Setup connection hung");
+            qDebug() << "setup error in socket";
+            qDebug() << sResponse.c_str();
             return 0;  // Something went wrong
         }
-
-        if( sResponse=="YES" )
-            break;
-        Sleep(2000);
+        else
+        {
+            if( sResponse=="YES" )
+                break;
+            Sleep(2000);
+        }
     }
-    int PK_Users;
 
-    LoggerWrapper::GetInstance()->Write(LV_STATUS,"SetupNewOrbiter prompting for inputs");
-
+    LoggerWrapper::GetInstance()->Write(LV_STATUS,"Calling CMD_NEW_ORBITER");
     int PK_Device=0;
 
-    string sType;
+    string sType = "Linux";
     statusMessage("Setting up orbiter with core");
-    DCE::CMD_New_Orbiter_DT CMD_New_Orbiter_DT(m_dwPK_Device, DEVICETEMPLATE_Orbiter_Plugin_CONST, BL_SameHouse, sType,
-                                               sPK_Users,DEVICETEMPLATE_qOrbiter_CONST ,m_sMacAddress,sPK_Room,sHeight,sWidth,sPK_Skin,sPK_Lang,1,&PK_Device);
+
+    DCE::CMD_New_Orbiter_DT CMD_New_Orbiter_DT(m_dwPK_Device, DEVICETEMPLATE_Orbiter_Plugin_CONST, BL_SameHouse, sType,sPK_Users,DEVICETEMPLATE_qOrbiter_CONST ,m_sMacAddress,sPK_Room,sWidth,sHeight,sPK_Skin,sPK_Lang,1,&PK_Device);
 
     CMD_New_Orbiter_DT.m_pMessage->m_eExpectedResponse = ER_ReplyMessage;
     Message *pResponse = event_Impl.SendReceiveMessage( CMD_New_Orbiter_DT.m_pMessage );
@@ -4411,13 +4423,17 @@ int qOrbiter::SetupNewOrbiter()
     {
         if(pResponse)
             delete pResponse;
-
+        setCommandResponse("SetupNewOrbiter unable to create orbiter");
         LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"SetupNewOrbiter unable to create orbiter");
         qDebug("Sorry.  There is a problem creating the new orbiter.  Please check the logs.");
         return 0;
     }
+
     CMD_New_Orbiter_DT.ParseResponse( pResponse );
     delete pResponse;
+    qDebug() << "Device ID::" << PK_Device;
+
+
 
     if( !PK_Device )
     {
@@ -4428,17 +4444,16 @@ int qOrbiter::SetupNewOrbiter()
 
     statusMessage("success, the device ID is:"+ PK_Device);
 
-
     LoggerWrapper::GetInstance()->Write(LV_STATUS,"SetupNewOrbiter new orbiter %d",PK_Device);
-    /*
-    if( MonitorRegen(PK_Device)==0 )  // User hit cancel
-    {
-        OnReload();
-        exit(1);
-        return 0; // Don't retry to load now
-    }
 
-*/
+    //    if( MonitorRegen(PK_Device)==0 )  // User hit cancel
+    //    {
+    //        OnReload();
+    //        exit(1);
+    //        return 0; // Don't retry to load now
+    //    }
+
+
     return PK_Device;  // Retry loading as the specified device
 }
 
@@ -4446,7 +4461,7 @@ int qOrbiter::SetupNewOrbiter()
 void qOrbiter::CreateChildren()
 {
     setCommandResponse("Creating Children");
- setCommandResponse("Size of children devices::"+QString::number((int)m_pData->m_vectDeviceData_Impl_Children.size()));
+    setCommandResponse("Size of children devices::"+QString::number((int)m_pData->m_vectDeviceData_Impl_Children.size()));
     for( int i=0; i < (int)m_pData->m_vectDeviceData_Impl_Children.size(); i++ )
     {
 
