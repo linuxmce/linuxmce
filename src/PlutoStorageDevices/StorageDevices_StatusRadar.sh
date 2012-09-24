@@ -114,7 +114,7 @@ while : ;do
 	fi
 
 	## Get a list with all the File Servers from the database
-	## reserve operation for file server handling to core only
+	## Reserve operation for file server handling to core only
 	ConfEval
 	if [[ "$PK_Device" -eq "1" ]]; then
 		Q="
@@ -374,7 +374,7 @@ while : ;do
 			
 
 		## Is a internal drive located on a remote computer
-		else
+		elif [[ "$PK_Device" -eq "1" ]]; then
 
 			## Get the ip of the parent device
 			IDrive_IP=$(RunCSQL "SELECT IPaddress FROM Device WHERE PK_Device='${IDrive_Parent}'")
