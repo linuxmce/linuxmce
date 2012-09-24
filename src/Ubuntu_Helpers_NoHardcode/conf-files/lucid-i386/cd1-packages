@@ -69,7 +69,6 @@ linphone-common
 locales
 mplayer
 mysql-client-5.1
-nvidia-glx-new
 openssl
 perl
 perl-modules

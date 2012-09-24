@@ -40,7 +40,6 @@ mplayer
 mysql-client-5.0
 mythtv-common
 mythtv-frontend
-nvidia-glx
 openssl
 perl
 perl-modules

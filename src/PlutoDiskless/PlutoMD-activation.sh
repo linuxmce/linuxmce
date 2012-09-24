@@ -685,50 +685,6 @@ done
 ok=0
 while [ "$ok" -eq 0 ]; do
 	dpkg --configure -a --force-confold
-	# PK_Package: 73
-	# Rep. type: 1
-	# Package: X protocol trapping Type: Package (.deb, .rpm, etc.)
-	if /usr/pluto/install/ConfirmDependencies_Debian.sh "libxtrap6" "deb http://deb.plutohome.com/debian" "sarge" "1" "4.3.0.dfsg.1-8" "" "" "" "" "" "" "" "" "73"; then
-		echo "Confirmation of package 73 'X protocol trapping' went ok."
-		ok=1
-	else
-		echo "***************************************************"
-		echo "***ERROR*** Processing of package 'X protocol trapping' failed"
-		echo "***************************************************"
-		echo -n 'Do you want to try again? [Y/n]: '
-		read answer
-		if [ "$answer" == n -o "$answer" == N ]; then
-			echo '*** Leaving package uninstalled'
-			ok=1
-			error=1
-		fi
-	fi
-done
-ok=0
-while [ "$ok" -eq 0 ]; do
-	dpkg --configure -a --force-confold
-	# PK_Package: 75
-	# Rep. type: 1
-	# Package: X event record&test Type: Package (.deb, .rpm, etc.)
-	if /usr/pluto/install/ConfirmDependencies_Debian.sh "libxtst6" "deb http://deb.plutohome.com/debian" "sarge" "1" "4.3.0.dfsg.1-8" "" "" "" "" "" "" "" "" "75"; then
-		echo "Confirmation of package 75 'X event record&test' went ok."
-		ok=1
-	else
-		echo "***************************************************"
-		echo "***ERROR*** Processing of package 'X event record&test' failed"
-		echo "***************************************************"
-		echo -n 'Do you want to try again? [Y/n]: '
-		read answer
-		if [ "$answer" == n -o "$answer" == N ]; then
-			echo '*** Leaving package uninstalled'
-			ok=1
-			error=1
-		fi
-	fi
-done
-ok=0
-while [ "$ok" -eq 0 ]; do
-	dpkg --configure -a --force-confold
 	# PK_Package: 99
 	# Rep. type: 1
 	# Package: X cursor management library Type: Package (.deb, .rpm, etc.)

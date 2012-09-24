@@ -1,4 +1,4 @@
-aalib1
+alib1
 abcde
 adduser
 alsa-base
@@ -310,8 +310,6 @@ libxrandr2
 libxrender1
 libxss1
 libxt6
-libxtrap6
-libxtst6
 libxv1
 libxvidcore4
 libxvmc1

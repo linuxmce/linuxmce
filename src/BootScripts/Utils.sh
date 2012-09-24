@@ -562,7 +562,7 @@ InstallVideoDriver () {
 	distro="$(lsb_release -c -s)"
 	case "$prop_driver" in
         	nvidia)
-			if ! PackageIsInstalled nvidia-glx && ! PackageIsInstalled nvidia-glx-new && ! PackageIsInstalled nvidia-glx-71 && ! PackageIsInstalled nvidia-glx-96 && ! PackageIsInstalled nvidia-glx-173 && ! PackageIsInstalled nvidia-glx-180 && ! PackageIsInstalled nvidia-glx-190 && ! PackageIsInstalled nvidia-glx-195 && ! PackageIsInstalled nvidia-glx-260 && ! PackageIsInstalled nvidia-glx-185 && ! PackageIsInstalled nvidia-current; then 
+			if ! PackageIsInstalled nvidia-glx-71 && ! PackageIsInstalled nvidia-glx-96 && ! PackageIsInstalled nvidia-glx-173 && ! PackageIsInstalled nvidia-glx-180 && ! PackageIsInstalled nvidia-glx-190 && ! PackageIsInstalled nvidia-glx-195 && ! PackageIsInstalled nvidia-glx-260 && ! PackageIsInstalled nvidia-glx-185 && ! PackageIsInstalled nvidia-current; then 
 				apt-get -yf install pluto-nvidia-video-drivers
 				VerifyExitCode "Install Pluto nVidia Driver"
 				nv_pid=$(pidof nvidia-install.sh)
