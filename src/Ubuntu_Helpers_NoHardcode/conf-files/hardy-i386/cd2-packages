@@ -509,6 +509,10 @@ libxdamage1
 libxdmcp6
 libxdmcp-dev
 libxext6
+libxtrap6 
+libxtrap-dev 
+libxtst6 
+libxtst-dev
 libxext-dev
 libxfce4mcs-client3
 libxfce4mcs-manager3

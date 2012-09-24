@@ -618,6 +618,8 @@ libxrender1
 libxslt1.1
 libxss1
 libxt6
+libxtrap6 
+libxtrap-dev
 libxv1
 libxvmc1
 libxxf86dga1
