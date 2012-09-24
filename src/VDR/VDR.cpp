@@ -714,7 +714,7 @@ void VDR::ParseCurrentChannel(string sChannel)
 	string sCommand="PLUG status status";
 	string cLIVETV="LIVETV";
 	SendVDRCommand(m_sVDRIp,sCommand,sVDRResponse);
-	if ( (sVDRResponse.empty() == true) || ( sVDRResponse == cLIVETV ) ) {
+	if (sVDRResponse.empty() == true)  {
 		string sVDRResponse="";
 		string sCommand="LSTE " + StringUtils::itos(m_iChannelNumber) + " now";
 		SendVDRCommand(m_sVDRIp,sCommand,sVDRResponse);
