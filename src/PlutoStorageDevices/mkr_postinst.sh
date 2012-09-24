@@ -18,12 +18,15 @@ if [[ ! -e /etc/cron.d/StorageDevicesRadar ]] ;then
 fi
 
 ## Add a cron entry that scans existing file servers for new shares
-cronEntry="*/10 * * * * root bash -c '/usr/pluto/bin/StorageDevices_FileServerRadar.sh &>/dev/null'"
-if [[ ! -e /etc/cron.d/StorageDevicesFileServerRadar ]] ;then
-        echo "$cronEntry" >>/etc/cron.d/StorageDevicesFileServerRadar
-        invoke-rc.d cron reload || :
+## On the core ONLY - l3mce
+ConfEval
+if [[ "$PK_Device" -eq "1" ]]; then
+	cronEntry="*/10 * * * * root bash -c '/usr/pluto/bin/StorageDevices_FileServerRadar.sh &>/dev/null'"
+	if [[ ! -e /etc/cron.d/StorageDevicesFileServerRadar ]] ;then
+	        echo "$cronEntry" >>/etc/cron.d/StorageDevicesFileServerRadar
+	        invoke-rc.d cron reload || :
+	fi
 fi
-
 
 ## Samba Share Helper 
 if [[ "$(id -u sambahelper)" == "" ]] ;then
