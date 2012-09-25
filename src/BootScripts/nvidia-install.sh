@@ -142,9 +142,7 @@ checkAlsaBackportNeeds() {
 			Log "$LogFile" "Alsa backports being installed."
 			NotifyMessage "Installing alsa backports modules."
 			apt-get install -yf linux-backports-modules-alsa-$(uname -r)
-			/usr/pluto/bin/RestartALSA.sh
-			cp /usr/pluto/templates/asound.conf /usr/pluto/templates/asound.conf.backup
-			cp /usr/pluto/templates/asound.conf.backports /usr/pluto/templates/asound.conf ;;
+			/usr/pluto/bin/RestartALSA.sh ;;
 		esac
 	fi
 
@@ -156,11 +154,7 @@ checkAlsaBackportNeeds() {
 			Log "$LogFile" "Alsa backports is installed and requires removal."
 			NotifyMessage "Removing alsa backports modules."
 			apt-get remove -yf linux-backports-modules-alsa-$(uname -r)
-			/usr/pluto/bin/RestartALSA.sh
-			if [[ -f /usr/pluto/templates/asound.conf.backup ]]; then
-				cp /usr/pluto/templates/asound.conf.backup /usr/pluto/templates/asound.conf
-			fi
-		;;
+			/usr/pluto/bin/RestartALSA.sh ;;
 		esac
 	fi
 }
