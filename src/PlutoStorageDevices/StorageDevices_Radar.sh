@@ -1,14 +1,15 @@
 #!/bin/bash
 . /usr/pluto/bin/SQL_Ops.sh
 
+export PATH="$PATH:/sbin:/usr/sbin:/usr/local/sbin"
 availPath=""
 mountedDevPath=""
 mountedPath=""
 Hdds=""
 Hdd_DT="DT:1790"
 DD_Uuid="267"
-export PATH="$PATH:/sbin:/usr/sbin:/usr/local/sbin"
 shopt -u nullglob
+
 ## Function to remove undesired paths
 diff_Funk(){
         awk 'BEGIN{RS=ORS=" "}
@@ -105,7 +106,7 @@ Detect() {
                 done 
                 availPath="$auxPath" 
         fi 
-echo "$availPath"
+
         ## Test to see if we found any available paths
         if [[ "$availPath" != "" ]]; then
 
