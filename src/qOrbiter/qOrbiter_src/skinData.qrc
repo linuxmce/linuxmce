@@ -6,11 +6,10 @@
     </qresource>
     <qresource prefix="/main">
         <file>config.xml</file>
-        <file alias="SetupNewOrbiter.qml">qml/SetupNewOrbiter.qml</file>
+        <file>qml/desktop/SetupNewOrbiter.qml</file>
+        <file alias="Splash.qml">qml/Splash.qml</file>
     </qresource>
-    <qresource prefix="/desktop">
-        <file alias="Splash.qml">qml/desktop/Splash.qml</file>
-    </qresource>
+    <qresource prefix="/desktop"/>
     <qresource prefix="/osx">
         <file alias="Splash.qml">qml/desktop/Splash.qml</file>
     </qresource>

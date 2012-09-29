@@ -31,6 +31,7 @@ class orbiterWindow : public QObject
     Q_PROPERTY (bool b_skinIndexReady READ getSkinIndexState WRITE setSkinIndexState NOTIFY skinIndexStatus )
     Q_PROPERTY (bool b_skinDataReady READ getSkinDataState WRITE setSkinDataState NOTIFY skinDataLoaded  )
     Q_PROPERTY(bool b_reloadStatus READ getReloadStatus WRITE setReloadStatus NOTIFY reloadStatusChanged)
+    Q_PROPERTY (QString qmlPage READ getQmlPage WRITE setQmlPage NOTIFY pageChanged)
 
 public:
     explicit orbiterWindow(long deviceid, std::string routerip, QObject *parent = 0);
@@ -62,9 +63,14 @@ public:
     bool b_skinIndexReady;
     bool b_skinDataReady;
     bool b_reloadStatus;
+    QString qmlPage;
 
 public slots:
+    void setQmlPage(QString p) {qmlPage = p; emit pageChanged(); }
+    QString getQmlPage() {return qmlPage;}
+
     Q_INVOKABLE void forceResponse (QString forced);
+    void loadSetupPage();
 
     void qmlSetupLmce(QString device, QString ip);
 
@@ -120,6 +126,7 @@ signals:
     void setupNewOrbiter();
     void reloadStatusChanged();
     void newOrbiterData(int u, int r, int s, int l, int h, int w);
+    void pageChanged();
 
 };
 #endif

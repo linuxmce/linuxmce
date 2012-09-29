@@ -146,7 +146,7 @@ DEPLOYMENTFOLDERS+= qmlcomponents
     INSTALLS+= qmlplugins
 
 DEFINES+=for_android
-DEFINES+=ANDROID
+
 DEPLOYMENTFOLDERS += folder_01 folder_02 folder_03 folder_05
 }
 
