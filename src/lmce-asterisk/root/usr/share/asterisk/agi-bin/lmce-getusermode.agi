@@ -44,7 +44,7 @@ $DB_TC_HANDLE = DBI->connect("dbi:mysql:database=pluto_telecom;host=".$CONF_HOST
 
 &get_all_users_extensions();
 
-$PRIORITYCALLERID = $1 if ($AGI{'callerid'} =~ /[<]([ +0-9-]+)[>]/);
+$PRIORITYCALLERID = $AGI{'callerid'};
 $USEREXTENSION = $AGI{'extension'};
 
 print "EXEC NoOp \"Finding if ".$PRIORITYCALLERID." is a priority call for user ".$HASH_E2U{$USEREXTENSION}."\"\n";
