@@ -10,7 +10,6 @@ if [[ $1 != "background" ]] ;then
 fi
 
 . /usr/pluto/bin/SQL_Ops.sh
-. /usr/pluto/bin/Config_Ops.sh
 . /usr/pluto/bin/Network_Parameters.sh
 
 CAT_FILESERVER=164
@@ -64,9 +63,9 @@ while : ;do
 	fi
 	
 	Q="
-		SELECT IPaddress FROM Device INNER JOIN DeviceTemplate ON FK_DeviceTemplate=PK_DeviceTemplate WHERE FK_DeviceCategory IN ($CAT_MD, $CAT_FILESERVER) WHERE IPaddress != '';
-		SELECT IPaddress FROM UnknownDevices WHERE IPaddress != '';
-		SELECT IPaddress FROM PnpQueue WHERE Category='fileserver' AND IPaddress != '';
+		SELECT IPaddress FROM Device INNER JOIN DeviceTemplate ON FK_DeviceTemplate=PK_DeviceTemplate WHERE FK_DeviceCategory IN ($CAT_MD, $CAT_FILESERVER) AND IPaddress is not null;
+		SELECT IPaddress FROM UnknownDevices WHERE IPaddress is not null;
+		SELECT IPaddress FROM PnpQueue WHERE Category='fileserver' AND IPaddress is not null;
 	"
 	IP_List="_$(RunSQL "$Q" | sed 's/  */_/g')_"
 	
