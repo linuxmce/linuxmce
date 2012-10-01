@@ -54,7 +54,7 @@ WizardPageDTSTest::~WizardPageDTSTest(void)
 #ifdef DEBUG
 	std::cout<<"WizardPageDTSTest::DoApplySetting()"<<std::endl;
 #endif
-	if(Selected == NULL) || (Dictionary == NULL)
+	if ((Selected == NULL) || (Dictionary == NULL))
 		return -1;
 	OutputValue = Selected->GetCaption();
 	Dictionary->Set("DTSTest", OutputValue!= "No, I cannot hear it");
