@@ -29,7 +29,7 @@ Item {
 
     function screenchange(screenname )
     {
-        pageLoader.source = window.localPath+screenname
+        pageLoader.source = screenname
         if (pageLoader.status == 1)
         {
             //manager.setDceResponse("Command to change to:" + screenname+ " was successfull")

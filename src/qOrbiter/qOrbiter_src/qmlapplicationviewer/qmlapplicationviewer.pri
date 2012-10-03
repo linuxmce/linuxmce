@@ -45,6 +45,7 @@ symbian {
     isEmpty(ICON):exists($${TARGET}.svg):ICON = $${TARGET}.svg
     isEmpty(TARGET.EPOCHEAPSIZE):TARGET.EPOCHEAPSIZE = 0x20000 0x2000000
 } else:android {
+installPrefix = /assets
     for(deploymentfolder, DEPLOYMENTFOLDERS) {
         item = item$${deploymentfolder}
         itemfiles = $${item}.files

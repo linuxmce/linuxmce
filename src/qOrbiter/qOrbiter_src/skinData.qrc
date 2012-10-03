@@ -18,6 +18,8 @@
     </qresource>
     <qresource prefix="/android">
         <file alias="Splash.qml">qml/android/Splash.qml</file>
+        <file alias="SetupNewOrbiter.qml">qml/android/SetupNewOrbiter.qml</file>
+        <file alias="SplashView.qml">qml/android/SplashView.qml</file>
     </qresource>
     <qresource prefix="/icons">
         <file alias="icon.png">img/harmattan_splash.png</file>

@@ -159,7 +159,7 @@ orbiterWindow::orbiterWindow(long deviceid, std::string routerip, QObject *paren
     localPath = "desktop/";
 #elif defined __ANDROID__
     qrcPath = "qrc:android/Splash.qml";
-localPath = "android/"
+localPath = "android/";
 #elif defined for_android
     buildType = "/qml/android";
     qrcPath = "qrc:android/Splash.qml";
@@ -169,16 +169,18 @@ localPath = "android/"
     qrcPath = "qrc:desktop/Splash.qml";
 
 #endif
+       #ifdef Q_OS_ANDROID
+     mainView.setSource(qrcPath);
+#else
     mainView.setSource(QApplication::applicationDirPath()+buildType+"/Splash.qml");
-
-#ifdef ANDROID
+#endif
 
 #ifdef Q_OS_ANDROID
      mainView.rootContext()->setBaseUrl(QUrl::fromLocalFile("/"));
      mainView.rootContext()->engine()->addImportPath("/imports/");
      mainView.rootContext()->engine()->addPluginPath(QDir::homePath()+"/../lib");
 #endif
-#endif
+
 
 #ifdef Q_OS_SYMBIAN
     mainView.showFullScreen();

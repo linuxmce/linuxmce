@@ -133,7 +133,6 @@ folder_03.target = $$DESTDIR
     qmlcomponents.target = imports/
 
     qmlplugins.files = androidPlugins/libqmlshadersplugin.so
-
         x86 {
             qmlplugins.path = /libs/x86
         } else: armeabi-v7a {
@@ -196,8 +195,9 @@ DEPLOYMENTFOLDERS += folder_01 folder_02 folder_03 folder_05
 
 #android deployment
 ANDROID{
-
-folder_01.source = qml/android/
+#nfs mount to work with skins on core directly
+folder_01.source = ../../../../mnt/remote/android-qml/android
+#folder_01.source = qml/android/
 folder_01.target =qml
 
 folder_05.source = qml/template
@@ -207,7 +207,6 @@ folder_03.source = config.xml
 folder_03.target = $$DESTDIR
     qmlcomponents.source = androidComponents/
     qmlcomponents.target = imports/
-
 
     qmlplugins.files = androidPlugins/libqmlshadersplugin.so
 
@@ -221,7 +220,7 @@ folder_03.target = $$DESTDIR
 
     INSTALLS+= qmlplugins
     DEFINES+=ANDROID
-DEPLOYMENTFOLDERS = qmlcomponents
+DEPLOYMENTFOLDERS = qmlcomponents folder_01
 }
 
 # Additional import path used to resolve QML modules in Creator's code model
