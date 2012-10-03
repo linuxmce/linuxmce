@@ -51,7 +51,8 @@
 orbiterWindow::orbiterWindow(long deviceid, std::string routerip, QObject *parent) :
     QObject(parent)
 {
-
+    phoneSize = false;
+    localPath = "";
     newOrbiter = false;
     setConnectionState(false);
     setLocalConfigState(false);
@@ -78,6 +79,7 @@ orbiterWindow::orbiterWindow(long deviceid, std::string routerip, QObject *paren
 
     mainView.rootContext()->setContextProperty("users", QVariant::fromValue(userList));
     mainView.rootContext()->setContextProperty("rooms", QVariant::fromValue(roomList));
+    mainView.rootContext()->setContextProperty("localPath", localPath);
 
 #ifdef GLENABLED
     fileReader = new FileReader();
@@ -117,8 +119,8 @@ orbiterWindow::orbiterWindow(long deviceid, std::string routerip, QObject *paren
     mainView.rootContext()->setContextProperty("appW", (mainView.window()->width()/ 2));//this is done because android reports the desktop width as 2x what it is.at least on my phone
     mainView.rootContext()->setContextProperty("appH", mainView.window()->height());
 #elif for_android
-    mainView.rootContext()->setContextProperty("appW", 480);
-    mainView.rootContext()->setContextProperty("appH", 800);
+    mainView.rootContext()->setContextProperty("appW", 1280);
+    mainView.rootContext()->setContextProperty("appH", 720);
 #elif for_desktop
     mainView.rootContext()->setContextProperty("appW", 1280);
     mainView.rootContext()->setContextProperty("appH", 720);
@@ -133,35 +135,35 @@ orbiterWindow::orbiterWindow(long deviceid, std::string routerip, QObject *paren
 #ifdef for_desktop
     buildType = "/qml/desktop";
     qrcPath = buildType+"/Splash.qml";
-
+    localPath = "desktop/";
 #elif defined (for_freemantle)
     buildType = "/qml/freemantle";
     qrcPath = "qrc:freemantle/Splash.qml";
-
+    localPath = "freemantle/";
 #elif defined (WIN32)
     buildType="/qml/desktop";
     qrcPath = "qrc:desktop/Splash.qml";
-
+    localPath = "desktop/";
 #elif defined (for_harmattan)
     buildType="/qml/harmattan";
     qrcPath = "qrc:harmattan/Splash.qml";
-
+    localPath = "harmattan/";
 #elif defined (IOS)
     buildType="/qml/desktop";
     NSString *resourcePath = [[NSBundle mainBundle] resourcePath];
     qrcPath = qStringFromNSString([resourcePath stringByAppendingPathComponent:@"qml/Splash.qml"]);
-
+    localPath = "desktop/";
 #elif defined(Q_OS_MACX)
     buildType="/qml/desktop";
     qrcPath = "qrc:osx/Splash.qml";
-
+    localPath = "desktop/";
 #elif defined __ANDROID__
     qrcPath = "qrc:android/Splash.qml";
-
+localPath = "android/"
 #elif defined for_android
     buildType = "/qml/android";
     qrcPath = "qrc:android/Splash.qml";
-
+    localPath = "android/";
 #else
     buildType = "/qml/desktop";
     qrcPath = "qrc:desktop/Splash.qml";

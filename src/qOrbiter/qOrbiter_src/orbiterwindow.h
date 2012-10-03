@@ -64,6 +64,8 @@ public:
     bool b_skinDataReady;
     bool b_reloadStatus;
     QString qmlPage;
+    QString localPath;
+    bool phoneSize;
 
 public slots:
     void setQmlPage(QString p) {qmlPage = p; emit pageChanged(); }

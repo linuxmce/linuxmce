@@ -82,7 +82,7 @@ symbian {
 TRANSLATIONS += app_de.ts
 # Add more folders to ship with the application, here
 #linux deploy configuration
-linux-g++{
+for_desktop{
 folder_01.source = qml/desktop
 folder_01.target = $$DESTDIR/qml
 
@@ -524,7 +524,8 @@ OTHER_FILES += Readme.txt \
     qml/shaders/gaussianblur_v.fsh \
     qml/shaders/gaussianblur_h.fsh \
     qml/effects/EffectGaussianBlur.qml \
-    qmldir
+    qmldir \
+    qml/SplashView.qml
 
 
 for_harmattan{
