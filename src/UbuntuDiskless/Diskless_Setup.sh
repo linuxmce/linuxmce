@@ -100,8 +100,8 @@ function setup_tftp_boot
                                 chroot "${Moon_RootLocation}" apt-get install "linux-image-${Kernel}"
                         fi
 			# Changed to point to the always updated buntu softlink at device root. 
-                        ln -s "${Moon_RootLocation}/vmlinuz" "/tftpboot/${Moon_DeviceID}/$Name/vmlinuz"
-			ln -s "${Moon_RootLocation}/initrd.img" "/tftpboot/${Moon_DeviceID}/$Name/initrd.img"
+                        ln -s ${Moon_RootLocation}/vmlinuz /tftpboot/${Moon_DeviceID}/$Name/vmlinuz
+			ln -s ${Moon_RootLocation}/initrd.img /tftpboot/${Moon_DeviceID}/$Name/initrd.img
 		done
 
 		BootConf="${BootConf}DEFAULT Pluto\n"
