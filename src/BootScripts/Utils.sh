@@ -495,6 +495,49 @@ VerifyExitCode () {
         fi
 }
 
+IntelBridgeDetect () {
+	Ibridge="none"
+	CurKernel="-generic"
+	CPUid=$(cpuid | grep Version | awk '{print $2}')
+	grep -Eiq '(0206A7|0206D6|0206D7|0206D6)' <<< "$CPUid" && Ibridge="Sandy"
+	grep -iq "0306A9" <<< "$CPUid" && Ibridge="Ivy"
+
+	if [[ "$Ibridge" == "none" ]]; then
+		continue
+	fi
+
+	if uname -r | grep "pae"; then 
+		CurKernel="-generic-pae"
+	fi
+	
+	if [[ "$Ibridge" == "Sandy" ]]; then
+		NewKernel="linux-image${CurKernel}-lts-backport-natty"
+		NewHeaders="linux-headers${CurKernel}-lts-backport-natty"
+		NewKernelId="natty"
+	fi
+
+	if [[ "$Ibridge" == "Ivy" ]]; then
+		NewKernel="linux-image-3.0.0-26${CurKernel}"
+		NewHeaders="linux-headers-3.0.0-26${CurKernel}"
+		NewKernelId="latest oneiric"
+	fi
+
+	if [[ "$Ibridge" != "none" ]]; then
+		if [[ $(apt-cache policy "$NewKernel" | grep Installed | awk '{print $2}') == "(none)" ]]; then 
+			StatusMessage "$Ibridge bridge detected. Addjusting repositories and updating."
+			apt-add-repository ppa:kernel-ppa/ppa
+			apt-add-repository ppa:glasen/intel-driver
+			# apt-add-repository ppa:f-hackenberger/x220-intel-mesa
+			apt-get update
+			StatusMessage "Installing "$NewKernelId" backported kernel and supporting intel drivers"
+			apt-get -yf install "$NewKernel" "$NewHeaders"
+			apt-get -yf dist-upgrade
+			sleep 10
+			reboot
+		fi
+	fi
+}
+
 FindVideoDriver () {
 	#####################################################################
 	# Switching our default to fbdev for interoperability 
@@ -566,12 +609,12 @@ InstallVideoDriver () {
 				apt-get -yf install pluto-nvidia-video-drivers
 				VerifyExitCode "Install Pluto nVidia Driver"
 				nv_pid=$(pidof nvidia-install.sh)
-					if [[ -n $nv_pid ]] ; then
-						StatusMessage "Installing nVidia driver this may take a few minutes"
-						installCorrectNvidiaDriver
-					else StartService "Installing nVidia driver this may take a few minutes" ". /usr/pluto/bin/nvidia-install.sh"
-						installCorrectNvidiaDriver
-					fi 
+				if [[ -n $nv_pid ]] ; then
+					StatusMessage "Installing nVidia driver this may take a few minutes"
+					installCorrectNvidiaDriver
+				else StartService "Installing nVidia driver this may take a few minutes" ". /usr/pluto/bin/nvidia-install.sh"
+					installCorrectNvidiaDriver
+				fi 
 			fi ;;
 		nouveau)
 			if ! PackageIsInstalled xserver-xorg-video-nouveau; then
@@ -636,11 +679,18 @@ InstallVideoDriver () {
 				apt-get -yf install i965-va-driver
 				VerifyExitCode "Install Intel Graphics Accelerator"
 			fi
-		else	
+		else
+			if ! PackageIsInstalled "cpuid"; then
+				apt-get -yf install cpuid
+			fi
+
 			if ! PackageIsInstalled "libva-driver-i965"; then 
 				apt-get -yf install libva-driver-i965
 				VerifyExitCode "Install Intel Graphics Accelerator"
 			fi
+
+			IntelBridgeDetect
+
 		fi
 	fi
 }
