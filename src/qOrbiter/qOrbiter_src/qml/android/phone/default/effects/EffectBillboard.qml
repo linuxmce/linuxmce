@@ -40,7 +40,7 @@
 ****************************************************************************/
 
 import QtQuick 1.0
-import Qt.labs.shaders 1.0
+
 
 Effect {
     parameters: ListModel {

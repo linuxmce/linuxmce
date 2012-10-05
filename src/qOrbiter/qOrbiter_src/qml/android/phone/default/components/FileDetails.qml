@@ -75,7 +75,7 @@ Rectangle {
         width:childrenRect.width
         color: "transparent"
         anchors.verticalCenter: parent.verticalCenter
-
+  
         anchors.left: parent.left
         anchors.leftMargin: filedetailsclass.aspect=="wide"? scaleX(2.6) : scaleX(7)
         BorderImage {
@@ -104,6 +104,7 @@ transform: Rotation { origin.x: 30; origin.y: 30; axis { x: 0; y: 1; z: 0 } angl
             opacity: .5
         }
     }
+    
 
 
 

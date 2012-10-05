@@ -1,19 +1,11 @@
 import QtQuick 1.0
 import "../components"
-import "../effects"
-import Qt.labs.shaders 1.0
-
 
 Item
 {
     anchors.centerIn: parent
 
-    Component.onCompleted:  {
-        if(!dceplayer.connected){
-        console.log("Starting media player")
-        dceplayer.setConnectionDetails(dcerouter.qMediaPlayerID, dcerouter.dceIP)
-        }
-    }
+
 
 
     Rectangle {
@@ -22,7 +14,8 @@ Item
         signal swapStyle()
         height: appH
         width: appW
-        color: "transparent"
+        color:"transparent"
+
 
         Image {
             id: headerbg

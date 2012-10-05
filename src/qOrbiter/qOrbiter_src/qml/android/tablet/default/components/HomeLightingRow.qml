@@ -5,7 +5,7 @@ import QtQuick 1.0
         id:lightingrow
         height: scaleY(16)
         width: scaleX(100)
-
+//    transform: Rotation { origin.x: 30; origin.y: 30; axis { x: 0; y: 1; z: 0 } angle: 15 }
         clip:true
         color:"transparent"
         radius: 20

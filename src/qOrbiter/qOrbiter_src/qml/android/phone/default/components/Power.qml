@@ -110,7 +110,7 @@ Rectangle {
 
                 ButtonSq{
                     id: mdofflabel
-                    buttontext : qsTr("Media Director Off")
+                    buttontext: "Media Director Off"
                     buttonsqradius: 20
                     MouseArea{
                         anchors.fill: parent

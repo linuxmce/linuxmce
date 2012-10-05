@@ -193,10 +193,11 @@ var stgscreen
 function createStageComponent(incavcomponent, screen) {
 
     stagecomponent = Qt.createComponent("../components/"+incavcomponent);
-    stagescreen = stagecomponent.createObject(stage, {"x":0, "y": 0});
+
     if(stagecomponent.status === Component.Ready)
     {
-        finishStageCreation()
+        stagescreen = stagecomponent.createObject(stage, {"x":0, "y": 0});
+
     }
     else if (stagecomponent.status === Component.Error)
     {

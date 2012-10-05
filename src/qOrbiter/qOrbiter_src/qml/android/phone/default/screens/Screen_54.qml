@@ -24,6 +24,33 @@ source: b_orientation ? "../img/audioProfile.png" : "../img/audioWide.png"
 
     Component.onCompleted: dcerouter.BindMediaRemote(true)
 
+    function changeTracksTransition()
+    {
+        if (nowplayingimage.source === "")
+        {
+            img_add.running = true
+        }
+        else
+        {
+            img_remove.running = true
+        }
+    }
+
+    ParallelAnimation {
+        id:img_add
+        running: false
+        PropertyAnimation { target: nowplayingimage; property: "scale"; to: 1; duration: 1500}
+         PropertyAnimation { target: nowplayingimage; property: "opacity"; to: 1; duration: 1500}
+    }
+
+    ParallelAnimation {
+        id:img_remove
+        running:false
+        PropertyAction { target: nowplayingimage; property: "scale"; value: 0 }
+
+        onCompleted: img_add.running = true
+    }
+
     Image {
        id: nowplayingimage
        height: scaleX(55)
@@ -31,7 +58,8 @@ source: b_orientation ? "../img/audioProfile.png" : "../img/audioWide.png"
        fillMode: Image.PreserveAspectFit
        source: ""
        opacity: 0
-       onSourceChanged: PropertyAnimation { target: nowplayingimage; property: "opacity"; to: 1; duration: 1500}
+       scale:0
+       onSourceChanged: changeTracksTransition()
        anchors.top: parent.top
        anchors.horizontalCenter: parent.horizontalCenter
    }
@@ -73,7 +101,7 @@ source: b_orientation ? "../img/audioProfile.png" : "../img/audioWide.png"
         Text {
             id: album
             width: parent.width
-            text:  dcenowplaying.album + "|" + dcenowplaying.releasedate            
+            text:  dcenowplaying.album + "|" + dcenowplaying.releasedate
             wrapMode: "WrapAtWordBoundaryOrAnywhere"
             font.bold: true
             smooth: true

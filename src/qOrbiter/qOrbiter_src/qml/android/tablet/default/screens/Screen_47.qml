@@ -1,9 +1,9 @@
 import QtQuick 1.0
-import Qt.labs.shaders 1.0
-import AudioVisual 1.0
-import "../effects"
+
+
+
 import "../components"
-import "../animation"
+
 
 import "../js/ComponentLoader.js" as MyJs
 

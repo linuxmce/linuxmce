@@ -40,7 +40,7 @@
 ****************************************************************************/
 
 import QtQuick 1.0
-import Qt.labs.shaders 1.0
+
 
 Rectangle {
     id: root

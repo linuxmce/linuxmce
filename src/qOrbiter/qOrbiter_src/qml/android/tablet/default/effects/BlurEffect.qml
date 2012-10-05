@@ -42,7 +42,7 @@
  // Based on http://www.geeks3d.com/20100909/shader-library-gaussian-blur-post-processing-filter-in-glsl/
 
  import QtQuick 1.0
- import Qt.labs.shaders 1.0
+ 
 
  Item {
      id: root

@@ -1,5 +1,6 @@
 import QtQuick 1.1
 
+
 import "components"
 import "js/ComponentLoader.js" as MyJs
 
@@ -8,6 +9,16 @@ Item {
     id: item
   width:appW
     height:appH
+
+    Rectangle{
+        anchors.fill: parent
+        gradient: Gradient {
+                GradientStop { position: 0.0; color: "darkslategrey" }
+                GradientStop { position: .85; color: "slategrey" }
+            }
+    }
+
+
 
     signal close()
     signal changeScreen(string s)
@@ -35,12 +46,7 @@ Connections{
     anchors.fill:parent
     }
 */
-    ScreenSaver
-    {
-        height: appH
-        width: appW
-        anchors.centerIn: parent
-    }
+
     function scaleX(x){
     return x/100*appW
     }
@@ -111,7 +117,7 @@ Connections{
         }
         else if (componentLoader.status == Component.Loading)
         {
-            console.log("loading page from network")
+            console.log("loading Component from network")
             finishLoadingComponent(componentName)
         }
         else
@@ -119,14 +125,14 @@ Connections{
             console.log("Command to add: " + componentName + " failed!")
             componentFile = componentName
 
-        }
+    }
     }
 
     function finishLoadingComponent (componentName)
     {
         if(componentLoader.status != Component.Ready)
         {
-            console.log("finishing network load")
+            console.log("Finished loading network component")
             componentLoader.source = "components/"+componentName
             console.log("screen" + componentName + " loaded.")
         }
@@ -144,6 +150,14 @@ Connections{
         width: parent.width
         objectName: "componentbot"
         onLoaded: {console.log("Component is loaded")}
+        onSourceChanged: {opacity = 0; fadein.start()}
+
+        PropertyAnimation{
+            id: fadein
+            target:pageLoader
+            properties: "opacity"; to: "1"; duration: 5000
+        }
+
     }
 
     SequentialAnimation{
@@ -155,13 +169,6 @@ Connections{
         properties: "opacity"; to: "0"; duration: 5000
 
     }
-    PropertyAnimation{
-        id: fadein
-        target:pageLoader
-        properties: "opacity"; to: "1"; duration: 5000
-    }
 
-    }
-
-
+   }
 }

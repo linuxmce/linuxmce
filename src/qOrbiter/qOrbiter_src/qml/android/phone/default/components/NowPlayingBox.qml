@@ -21,9 +21,10 @@ Rectangle {
       id: nowplayingimage
      anchors.fill: np_box
       fillMode: Image.PreserveAspectFit
+  height:scaleX(50)
+width:scaleX(50)
       source: ""
-      opacity: 0
-      onSourceChanged: PropertyAnimation { target: nowplayingimage; property: "opacity"; to: 1; duration: 1500}
+     
   }
    Text {
        id: np
