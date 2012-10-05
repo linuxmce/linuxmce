@@ -1,9 +1,21 @@
 import QtQuick 1.0
 import "../components"
+import "../effects"
+import Qt.labs.shaders 1.0
+
 
 Item
 {
     anchors.centerIn: parent
+
+    Component.onCompleted:  {
+        if(!dceplayer.connected){
+        console.log("Starting media player")
+        dceplayer.setConnectionDetails(dcerouter.qMediaPlayerID, dcerouter.dceIP)
+        }
+    }
+
+
     Rectangle {
         id:stage
 
@@ -18,17 +30,18 @@ Item
             anchors.top: stage.top
             height: scaleY(7)
             width: scaleX(99)
+
         }
 
         Text{
             id:connectstatus
-            text: qsTr("Orbiter")+ iPK_Device + qsTr(" Is Connected")
+            text: "Orbiter "+ deviceid + " is connected."
             color: "aliceblue"
             font.letterSpacing: 2
             anchors.left: parent.left
             anchors.leftMargin: scaleX(5)
             anchors.verticalCenter: headerbg.verticalCenter
-            font.pixelSize: scaleY(3)
+
         }
 
         Clock{
@@ -36,7 +49,6 @@ Item
             anchors.right: headerbg.right
             anchors.rightMargin: scaleX(25)
             anchors.verticalCenter: headerbg.verticalCenter
-
         }
 
         Column{

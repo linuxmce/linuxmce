@@ -27,7 +27,7 @@ Rectangle {
 
     Image {
         id: splash
-        source: "../img/lmcesplash.png"
+        source: "../../../../img/lmcesplash.png"
         height: 480
         width: 800
         anchors.centerIn: parent

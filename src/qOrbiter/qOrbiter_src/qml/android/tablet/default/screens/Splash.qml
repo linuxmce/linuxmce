@@ -7,8 +7,8 @@ import "../components"
 
 Rectangle {
     id: rectangle1
-    width: style.orbiterW
-    height: style.orbiterH
+    height: appH
+    width: appW
     color: "transparent"
     //signal setupStart(int x, string y)
 
@@ -31,7 +31,7 @@ Rectangle {
         id: splash
         anchors.centerIn: rectangle1
         fillMode: Image.PreserveAspectFit
-        source: "../img/lmcesplash.png"
+        source: "../../../../img/lmcesplash.png"
         anchors.fill: parent
     }
     Rectangle {

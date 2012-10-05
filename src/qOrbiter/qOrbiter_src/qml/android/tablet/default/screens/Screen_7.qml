@@ -4,8 +4,8 @@ Item{
     id:misc
 
     Rectangle{
-        height: style.orbiterH
-        width: style.orbiterW
+        height: appH
+        width: appW
         color: "transparent"
         Text {
             id: misclabel

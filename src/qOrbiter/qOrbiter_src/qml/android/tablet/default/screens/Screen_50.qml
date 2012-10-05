@@ -5,11 +5,11 @@ Rectangle {
 
     // property alias synText:
     id: dvdmenu
-    height: style.orbiterH
-    width: style.orbiterW
+    height: appH
+    width: appW
     radius: 0
     opacity: 1
-    color: style.darkhighlight
+    color: "transparent"
 
     Image {
         id: bgimage
@@ -17,17 +17,19 @@ Rectangle {
     }
 
     Timer{
-        id:singleshot
-        repeat: false
-        interval: 2000
-        triggeredOnStart: false
+        id:streamtimer
+        repeat: true
+        interval: 1000
+        triggeredOnStart: true
         running: true
-        onTriggered: nowplayingimage.source = "image://listprovider/updateobject/"+securityvideo.timestamp
+        onTriggered: manager.grabStreamImage()
     }
 
     Connections{
-        target:dcenowplaying
-        onPlayListPositionChanged: { nowplayingimage.source = "image://listprovider/updateobject/"+securityvideo.timestamp;}
+        target:dcenowplaying        
+        onStreamImageChanged: { nowplayingimage.source = "image://listprovider/stream/"+securityvideo.timestamp;
+
+        }
     }
 
     Component.onCompleted:setNowPlayingData()
@@ -68,75 +70,15 @@ Rectangle {
                 height: childrenRect.height
                 spacing: scaleX(1)
 
-                Column
-                {
-                    id:metadata
-                    height: scaleY(50)
-                    width: dcenowplaying.aspect=="wide"? nowplayingimage.width : childrenRect.width
-                    spacing: scaleY(1)
 
-                    Rectangle {
-                        id: gradientheader
-                        width:metadata.width
-                        height: childrenRect.height
-                        color:"transparent"
-
-                        Image {
-                            id: headerimage
-                            source: "../img/icons/header.png"
-                            height:parent.height
-                            width:parent.width
-                            opacity: .75
-                        }
-
-                        Text {
-                            id: headertext
-                            height:scaleY(2)
-                            text:qsTr("Speed: ") + dcenowplaying.qs_playbackSpeed
-                            font.family: "Droid Sans"
-                            font.pixelSize: scaleY(2)
-                            color: "aliceblue"
-                        }
-
-                        Text {
-                            id: timecode
-                            height:scaleY(2)
-                            text: dceTimecode.qsCurrentTime + qsTr(" of ") + dcenowplaying.duration
-                            font.family: "Droid Sans"
-                            font.pixelSize: scaleY(1) *2.15
-                            anchors.bottom:parent.bottom
-                            anchors.horizontalCenter: parent.horizontalCenter
-                            font.bold: true
-                            color:"aliceblue"
-                        }
-                    }
-
-                    Rectangle{
-                        id:imageholder
-                        height:childrenRect.height
-                        width:childrenRect.width
-                        color: "transparent"
-                        anchors.top:gradientheader.bottom
-                        anchors.topMargin: scaleY(.5)
-
-                        BorderImage {
-                            id: borderimg
-                            horizontalTileMode: BorderImage.Repeat
-                            source: "../img/icons/drpshadow.png"
-                            anchors.fill: nowplayingimage
-                            anchors { leftMargin: -6; topMargin: -6; rightMargin: -8; bottomMargin: -8 }
-                            border { left: 10; top: 10; right: 10; bottom: 10 }
-                            smooth: true
-                        }
-                        Image {
-                            id: nowplayingimage
-                            width: dcenowplaying.aspect=="wide"? scaleX(30) : scaleX(20)
-                            height:dcenowplaying.aspect=="wide"? scaleY(30) : scaleY(50)
-                            source: "image://listprovider/updateobject/"+dcenowplaying.m_iplaylistPosition
-                        }
-                    }
-
+                Image {
+                    id: nowplayingimage
+                    width: scaleX(65)
+                    height:scaleY(65)
+                    fillMode: Image.PreserveAspectFit
+                    source: ""
                 }
+
                 Remote_lighting_controls{ id: remote_lighting_controls1; }
                 Remote_Audio_controls{ id: remote1; }
             }

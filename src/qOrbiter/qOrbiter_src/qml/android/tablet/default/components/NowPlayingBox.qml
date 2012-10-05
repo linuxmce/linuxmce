@@ -33,7 +33,7 @@ Rectangle {
             font.bold: true
             smooth: true
             horizontalAlignment: Text.AlignHCenter
-           font.pixelSize: scaleY(2)
+            font.pixelSize: 12
         }
 
         Text {
@@ -41,7 +41,8 @@ Rectangle {
             x: 255
             y: 12
             text: dcenowplaying.qs_playbackSpeed
-           font.pixelSize: scaleY(2)
+            font.pixelSize: scaleY(1)
+            font.bold: true
         }
     }
 

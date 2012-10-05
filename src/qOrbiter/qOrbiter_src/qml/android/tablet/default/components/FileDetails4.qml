@@ -20,13 +20,9 @@ Rectangle {
 
     }
 
-    Timer{
-        id:singleshot
-        repeat: false
-        interval: 250
-        triggeredOnStart: false
-        onTriggered: filedetailsimage.source = "image://listprovider/filedetailsprovider/"+securityvideo.timestamp
-        running: true
+    Connections{
+        target:filedetailsclass
+        onImageChanged:filedetailsimage.source = "image://listprovider/filedetailsprovider/"+securityvideo.timestamp
     }
 
     Rectangle{
@@ -205,7 +201,7 @@ Rectangle {
             MouseArea
             {
                 anchors.fill: parent
-                onClicked: playMedia(filedetailsclass.file)  //dce function
+                onClicked: dcerouter.playMedia(filedetailsclass.file)  //dce function
             }
         }
 
@@ -226,7 +222,7 @@ Rectangle {
             x: ((parent.width/3)*2)
             MouseArea{
                 anchors.fill:  parent
-                onClicked: { dataModel.checkForMore();filedetailrect.destroy()}
+                onClicked: { filedetailrect.destroy()}
             }
         }
     }

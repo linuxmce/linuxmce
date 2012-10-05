@@ -27,8 +27,13 @@ color:"transparent"
 
                 MouseArea{
                     id: mousearea1
-                    onClicked:showfloorplan(4)
-                    z:5 }
+                    anchors.fill: parent
+                    onClicked:{
+                        manager.setFloorplanType(4)
+                        dcerouter.ShowFloorPlan(4)
+
+                     }
+                }
 
 
                 Image {

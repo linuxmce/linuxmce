@@ -1,8 +1,11 @@
 import QtQuick 1.0
-
+import Qt.labs.shaders 1.0
+import AudioVisual 1.0
+import "../effects"
 import "../components"
-import "../js/ComponentLoader.js" as MyJs
+import "../animation"
 
+import "../js/ComponentLoader.js" as MyJs
 
 
 Rectangle {
@@ -11,11 +14,63 @@ Rectangle {
     height: appH
     color: "transparent"
     clip: true
+    property int mouselocY: 0
+    property int mouselocX: 0
+    Component.onCompleted: dcerouter.requestTypes(dcerouter.i_current_mediaType)
 
+    function runEffects()
+    {
+        MyJs.createStageComponent("FileDetails"+dcerouter.i_current_mediaType+".qml" , fileviewscreen)
+    }
 
-    Image {
-        id: gb
-        source: "../img/icons/mediatime.png"
+    Connections
+    {
+        target: filedetailsclass
+        onShowDetailsChanged:
+        {
+            runEffects()
+        }
+    }
+    Rectangle{
+        id: pos_label
+        anchors.top: fileviewscreen.top
+        anchors.horizontalCenter: fileviewscreen.horizontalCenter
+        radius:5
+        color:style.darkhighlight
+        width: scaleX(75)
+        height: scaleY(5)
+        Row{
+            id:label_row
+            width: childrenRect.width
+            height: scaleY(5)
+            anchors.centerIn: pos_label
+            spacing: scaleX(1)
+            Text {
+                id: grid_position_label
+                text: qsTr("You are browsing by:") + dcerouter.i_current_mediaType
+            }
+            Text {
+                id: grid_attritbute_label
+                text: qsTr("Attribute Type Sort") + manager.q_attributetype_sort
+            }
+            Text {
+                id: page_label
+                text: qsTr("Current Page") + dcerouter.media_currentPage
+            }
+            TextInput{
+                id:seperationSetter
+                width: page_label.width
+                text: dcerouter.media_pageSeperator
+            }
+        }
+
+    }
+    Connections
+    {
+        target: dataModel
+        onProgressChanged:{progress_bar_fill.height = ((progress_bar.height) * (dataModel.progress / 100)); console.log(dataModel.progress)}
+        onReady:progress_bar_fill.height = 0
+        onLoadingStatusChanged:progress_bar_fill.color = dataModel.loadingStatus ? "green" : "red"
     }
 
     Rectangle
@@ -31,42 +86,29 @@ Rectangle {
         Rectangle{
             id:progress_bar_fill
             height: 0
-            width: parent.width
-            color: dataModel.loadingStatus ? "green" : "red"
+            width: parent.width-1
+            color: height === progress_bar.height ? "green" : "red"
             anchors.bottom: parent.bottom
-            opacity: .5
+            opacity: .25
         }
 
         Text {
             id: total_cells
-            text: dataModel.totalcells
+            text: dcerouter.media_pageSeperator
             color: "grey"
             font.bold: false
             font.pixelSize: scaleY(4)
-            anchors.top: progress_bar.top
+            anchors.bottom: progress_bar.top
         }
-        Text {
-            id: current_cells
-            text: dataModel.currentCells
-            color: "grey"
-            font.bold: false
-            font.pixelSize: scaleY(4)
-            anchors.top: progress_bar_fill.top
-        }
+
     }
 
-    Connections
-    {
-        target: filedetailsclass
-        onShowDetailsChanged:
-        {
-            MyJs.createStageComponent("FileDetails.qml", fileviewscreen)
-        }
-    }
+
 
     Component
     {
         id: contactDelegate
+
 
         Rectangle
         {
@@ -75,7 +117,9 @@ Rectangle {
             height: scaleY(20)
             color: "transparent"
             opacity: 0
-            Component.onCompleted: PropertyAnimation { target: mainItem; property: "opacity"; to: 1; duration: 1000}
+            scale:0
+            rotation: 360
+
             MouseArea{
                 anchors.fill: mainItem
                 hoverEnabled: true
@@ -86,14 +130,21 @@ Rectangle {
 
                 }
                 onExited: {
-                    mainItem.color = style.lighthighlight
+                    mainItem.color = "transparent"
                     mainItem.scale = 1
                     mainItem.z = 1
                 }
             }
+            ParallelAnimation {
+                id:fade_and_scale
+                running: false
+                PropertyAnimation { target: mainItem; property: "opacity"; to: 1; duration: 1000}
+                PropertyAnimation { target: mainItem; property: "scale"; to: 1; duration: 500}
+                PropertyAnimation { target: mainItem; property: "rotation"; to: 0; duration: 500}
 
+            }
 
-
+            Component.onCompleted: fade_and_scale.running = true
             Rectangle
             {
                 id:frame
@@ -107,7 +158,8 @@ Rectangle {
                 MouseArea
                 {
                     anchors.fill: frame
-                    onClicked: setStringParam(4, id)
+                    onClicked: {setStringParam(4, id); mouselocX = mouseX; mouselocY = mouseY}
+
                 }
 
                 BorderImage {
@@ -117,7 +169,7 @@ Rectangle {
                     anchors.fill: imagerect
                     anchors { leftMargin: -6; topMargin: -6; rightMargin: -8; bottomMargin: -8 }
                     border { left: 10; top: 10; right: 10; bottom: 10 }
-                    //smooth: true
+                    smooth: true
                 }
 
                 Image
@@ -128,10 +180,12 @@ Rectangle {
                     width: scaleX(18);
                     anchors.centerIn: parent;
                     fillMode: Image.PreserveAspectCrop
-                    opacity: 1
-                    asynchronous: true
                     smooth: true
+                    asynchronous: true
                 }
+
+
+
                 Rectangle{
                     id:textmask
                     color: "grey"
@@ -146,7 +200,6 @@ Rectangle {
                     font.pointSize: 12;
                     color: "white" ;
                     wrapMode: "WrapAtWordBoundaryOrAnywhere"
-
                     width: imagerect.width
                     font.bold: true
                     anchors.top: imagerect.top
@@ -162,6 +215,7 @@ Rectangle {
         Item {
             width: list_view1.width;
             height: 120
+
             Rectangle {
                 id: background
                 x: 2; y: 2; width: parent.width - x*2; height: parent.height - y*2
@@ -207,7 +261,8 @@ Rectangle {
     }
 
 
-    MultiStateFileDisplay{id:grid_view1}
+    MultiStateFileDisplay{id:grid_view1; anchors.top: pos_label.bottom}
+
 
     ListView{
         id:model_pages
@@ -220,12 +275,13 @@ Rectangle {
             width: scaleX(10)
             color: "transparent"
             Text {
-                id:page_label
+                id:page_label2
                 text: label
                 font.pixelSize: scaleY(3.5)
                 anchors.centerIn: parent
-                color: "slategrey"
+                color: label == dcerouter.media_currentPage ? "green":"slategrey"
                 font.bold: true
+
             }
 
             MouseArea{
@@ -257,6 +313,8 @@ Rectangle {
                 text: name
                 font.pixelSize: 18
                 anchors.centerIn: parent
+                color:"aliceblue"
+
             }
             MouseArea{
                 anchors.fill: parent
@@ -268,10 +326,13 @@ Rectangle {
 
                     alphabetrect.scale = 1
                 }
-                onClicked: dcerouter.setSeekLetter(name)
+                onClicked: dcerouter.seekToGridPosition(name)
             }
         }
     }
+
+
+
 
     Row
     {
@@ -348,6 +409,9 @@ Rectangle {
 
         ListElement{
             name:"M"
+        }
+        ListElement{
+            name:"N"
         }
 
         ListElement{

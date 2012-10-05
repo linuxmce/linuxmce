@@ -10,10 +10,11 @@ Rectangle {
 
     HomeButton{}
 
+
     Rectangle{
         height: scaleY(75)
         width: scaleX(75)
-        color: style.darkhighlight
+        color: "slategrey"
         radius: 5
         border.color: style.highlight1
         border.width: 2
@@ -36,7 +37,7 @@ Rectangle {
                 MouseArea{
                     anchors.fill:parent
                     z:5
-                    onClicked: regenOrbiter(35)
+                    onClicked: manager.regenOrbiter(35)
                 }
             }
 
@@ -65,7 +66,7 @@ Rectangle {
                 MouseArea{
                     anchors.fill: parent
                     z:10
-                    onClicked: quickReload()
+                    onClicked: manager.quickReload()
                 }
             }
 
@@ -121,7 +122,7 @@ Rectangle {
                 radius: 5
                 MouseArea{
                     anchors.fill: parent
-                    onClicked: MyJs.createComponentObjects("SkinSelector.qml")
+                    onClicked: MyJs.createStageComponent("SkinSelector.qml", advancedscreen)
                 }
             }
 
@@ -148,7 +149,23 @@ Rectangle {
                 buttontext: qsTr("IR Codes")
                 radius: 5
             }
+
+            AdvancedButton{
+                id:qorbiterConfig
+                height: scaleY(style.buttonH)
+                width: scaleX(style.buttonW)
+                buttontext: qsTr("Local Config")
+                radius: 5
+                MouseArea{
+                    id:showConfig
+                    anchors.fill: parent
+                    onClicked: localConfigPanel.state="showing"
+                }
+            }
         }
+    }
+    ConfigPanel{
+        id:localConfigPanel
     }
 }
 

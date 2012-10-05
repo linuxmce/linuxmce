@@ -59,7 +59,7 @@ Rectangle {
                                    z:0
                                    onClicked:
                                    {
-                                        loadComponent("NullComponent.qml")
+                                       rect.destroy()
                                    }
                               }
 

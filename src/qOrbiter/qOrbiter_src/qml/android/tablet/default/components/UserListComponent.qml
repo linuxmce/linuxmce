@@ -22,9 +22,8 @@ Rectangle {
     }
     Text {
         id: nameLabel
-        text: currentuser
+        text: manager.sPK_User
         font.bold: true
-        font.pixelSize: scaleY(2)
 
 
     }
@@ -59,7 +58,6 @@ Rectangle {
             text: username
             anchors.centerIn: parent
             font.bold: true
-            font.pixelSize: scaleY(2)
         }
 
         MouseArea{
@@ -87,7 +85,7 @@ Text {
     y: 4
     text: currentuser
     visible: false
-   font.pixelSize: scaleY(2)
+    font.pixelSize: 12
     opacity: 0
 }
 states: [
@@ -133,8 +131,8 @@ states: [
                     text: "Select User"
                     smooth: true
                     visible: true
-                    font.family: "Droid Sans"
-                    font.pixelSize: scaleY(3)
+                    font.family: "Nimbus Sans L"
+                    font.pointSize: 11
                     verticalAlignment: "AlignTop"
                     horizontalAlignment: "AlignHCenter"
                     opacity: 1

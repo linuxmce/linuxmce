@@ -17,7 +17,6 @@ property bool verticalMirror: false
         font.letterSpacing: 2
         smooth: true
         anchors.centerIn: parent
-        font.pixelSize: scaleY(3)
 
     }
 }

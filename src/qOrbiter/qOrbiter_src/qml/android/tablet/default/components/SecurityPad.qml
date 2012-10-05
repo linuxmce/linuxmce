@@ -248,16 +248,17 @@ Item{
                             }
                         }
 
-                        //number 0
+                        //number 9
                         AvOptionButton{
                             id:number0
                             buttontext: qsTr("0")
                             color: "black"
+
                             MouseArea
                             {
                                 anchors.fill: parent
                                 hoverEnabled: true
-                                onClicked: text_input1.text = text_input1.text + "0"
+                                onClicked: text_input1.text = text_input1.text + "9"
 
                             }
                         }

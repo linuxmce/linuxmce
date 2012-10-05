@@ -1,31 +1,64 @@
 import QtQuick 1.0
+import Qt.labs.shaders 1.0
+import "../effects"
+
 Item{
     id:jogpanel
  Component.onCompleted: hidetimer.running = true
+ anchors.bottom: parent.bottom
+ anchors.bottomMargin: scaleY(15)
+ anchors.horizontalCenter: parent.horizontalCenter
+ height: buttonContainer.height
+ width: buttonContainer.width
+
+SequentialAnimation{
+    id:opacityAnimation
+    running:false
+    PropertyAnimation{
+        target: buttonContainer
+        property:"opacity"
+        to:0
+        duration:2500
+    }
+    ScriptAction{script:jogpanel.destroy()}
+
+}
+
 
  Timer{
         id:hidetimer
         repeat: false
         interval: 5000
         triggeredOnStart: false
-         onTriggered: jogpanel.destroy()
-
+         onTriggered: opacityAnimation.start()
     }
 
 
 
     Rectangle {
+        id:buttonContainer
         width: buttonrow.width + scaleX(1)
         height: buttonrow.height + scaleY(1)
-        color:style.darkhighlight
-        radius: 2.5
+        color:"transparent"
+        opacity: 0
+        Component.onCompleted:  PropertyAnimation {
 
+            target:buttonContainer
+            property:"opacity"
+            to:1
+            duration: 2500
+        }
 
         Row{
             id:buttonrow
             height: childrenRect.height
             width: childrenRect.width
             spacing: scaleX(1)
+            MouseArea{
+                anchors.fill: parent
+                hoverEnabled: true
+                onEntered: hidetimer.restart()
+            }
 
             AvOptionButton{
                 buttontext: "-8"
@@ -39,7 +72,7 @@ Item{
                 buttontext: "-4"
                 MouseArea{
                     anchors.fill: parent
-                    onClicked:  { dcerouter.JogStream("-240"); hidetimer.running = false; hidetimer.running = true  }
+                    onClicked:  {dcerouter.JogStream("-240"); hidetimer.running = false; hidetimer.running = true  }
                 }
             }
 
@@ -47,7 +80,7 @@ Item{
                 buttontext: "-2"
                 MouseArea{
                     anchors.fill: parent
-                    onClicked: { dcerouter.JogStream("-120"); hidetimer.running = false; hidetimer.running = true  }
+                    onClicked: {dcerouter.JogStream("-120"); hidetimer.running = false; hidetimer.running = true  }
                 }
             }
 
@@ -55,7 +88,7 @@ Item{
                 buttontext: "-30"
                 MouseArea{
                     anchors.fill: parent
-                    onClicked: { dcerouter.JogStream("-30"); hidetimer.running = false; hidetimer.running = true  }
+                    onClicked: {dcerouter.JogStream("-30"); hidetimer.running = false; hidetimer.running = true  }
                 }
             }
 
@@ -63,7 +96,7 @@ Item{
                 buttontext: "-15"
                 MouseArea{
                     anchors.fill: parent
-                    onClicked: {  dcerouter.JogStream("-15"); hidetimer.running = false; hidetimer.running = true  }
+                    onClicked: { dcerouter.JogStream("-15"); hidetimer.running = false; hidetimer.running = true  }
                 }
             }
 
@@ -71,7 +104,7 @@ Item{
                 buttontext: "+15"
                 MouseArea{
                     anchors.fill: parent
-                    onClicked: {  dcerouter.JogStream("+15"); hidetimer.running = false; hidetimer.running = true  }
+                    onClicked: { dcerouter.JogStream("+15"); hidetimer.running = false; hidetimer.running = true  }
                 }
             }
 
@@ -79,7 +112,7 @@ Item{
                 buttontext: "+3-"
                 MouseArea{
                     anchors.fill: parent
-                    onClicked: {  dcerouter.JogStream("+30"); hidetimer.running = false; hidetimer.running = true  }
+                    onClicked: { dcerouter.JogStream("+30"); hidetimer.running = false; hidetimer.running = true  }
                 }
             }
 
@@ -87,7 +120,7 @@ Item{
                 buttontext: "+2"
                 MouseArea{
                     anchors.fill: parent
-                    onClicked: {  dcerouter.JogStream("+120"); hidetimer.running = false; hidetimer.running = true  }
+                    onClicked: { dcerouter.JogStream("+120"); hidetimer.running = false; hidetimer.running = true  }
                 }
             }
 
@@ -95,7 +128,7 @@ Item{
                 buttontext: "+4"
                 MouseArea{
                     anchors.fill: parent
-                    onClicked: {  dcerouter.JogStream("+240"); hidetimer.running = false; hidetimer.running = true  }
+                    onClicked: { dcerouter.JogStream("+240"); hidetimer.running = false; hidetimer.running = true  }
                 }
             }
 
@@ -103,7 +136,7 @@ Item{
                 buttontext: "+8"
                 MouseArea{
                     anchors.fill: parent
-                    onClicked: {  dcerouter.JogStream("+480"); hidetimer.running = false; hidetimer.running = true  }
+                    onClicked: { dcerouter.JogStream("+480"); hidetimer.running = false; hidetimer.running = true  }
                 }
             }
 

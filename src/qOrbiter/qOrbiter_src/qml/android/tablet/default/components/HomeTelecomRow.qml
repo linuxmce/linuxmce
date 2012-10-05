@@ -20,7 +20,6 @@ Rectangle{
             anchors.topMargin: scaleY(2)
             height: scaleY(13)
             width: scaleX(8)
-
             radius: style.but_smooth
             color:"transparent"
 
@@ -32,9 +31,13 @@ Rectangle{
             }
             MouseArea{
                 id: mousearea1
-                onClicked: showfloorplan(6)
-            }
+                anchors.fill: rowheader
+                onClicked: {
+                    manager.setFloorplanType(6)
+                    dcerouter.ShowFloorPlan(6)
 
+                }
+            }
         }
 
         Flickable{
@@ -56,7 +59,6 @@ Rectangle{
                 orientation:ListView.Horizontal
                 delegate: telecomDelegate
             }
-
         }
     }
 }

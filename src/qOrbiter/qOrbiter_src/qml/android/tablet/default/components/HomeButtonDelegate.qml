@@ -7,21 +7,46 @@ Component{
         height: scaleY(13)
         width: scaleX(8)
 
+        /*
+        //this image displays a second button-image beneath the buttons
+        //from the Climate-, Lighting-, Media-, Security- and Telecom-Rows;
+        //if it has no purpose it can be deleted
+        */
+        Image {
+            id: overlay
+            fillMode: Image.PreserveAspectFit
+            source: "../img/ui3/linuxmcewidebutton.png"
+            height: parent.height
+            width: parent.width
+        }
+        Image {
+            id: overlay_hover
+            fillMode: Image.PreserveAspectFit
+            source: "../img/ui3/linuxmcewidebuttongrn.png"
+            height: parent.height
+            width: parent.width
+            visible:false
+        }
+
+
         ImgButton
         {       id:delegateButton
             anchors.top: parent.top
             anchors.topMargin: scaleY(2)
             color:"transparent"
-            // height: style.stdbuttonh
-            // width: style.stdbuttonw
+            height: style.stdbuttonh
+            width: style.stdbuttonw
             buttontext: title
             buttontextbold: true
             buttontextitalic: true
             buttonopacity: .85
 
+
             MouseArea{
                 anchors.fill: delegateButton
                 onClicked: dcerouter.executeCommandGroup(params);
+                onPressed: overlay_hover.visible = true
+                onReleased: overlay_hover.visible= false
                 hoverEnabled: true
 
                 onEntered: {

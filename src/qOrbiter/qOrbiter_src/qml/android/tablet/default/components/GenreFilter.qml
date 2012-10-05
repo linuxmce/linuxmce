@@ -55,7 +55,7 @@ Rectangle {
                        onClicked:{
 
                            setStringParam(3, pk)
-                           loadComponent("NullComponent.qml")
+                                   rect.destroy()
                        }
                    }
 

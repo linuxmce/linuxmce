@@ -3,8 +3,8 @@ import "../components"
 
     Rectangle{
         id:requestingregen
-        height: style.orbiterH
-        width: style.orbiterW
+        height: appH
+        width: appW
        // color: style.highlight2
         Image {
             id: bgimage
@@ -22,7 +22,7 @@ source: "../img/icons/drpshadow.png"
 
         Rectangle{
             id:regenrequestcontainer
-            height: childrenRect.height + scaleY(2)
+            height: scaleY(85)
             width:scaleX(50)
             anchors.centerIn: parent
             color: style.darkhighlight

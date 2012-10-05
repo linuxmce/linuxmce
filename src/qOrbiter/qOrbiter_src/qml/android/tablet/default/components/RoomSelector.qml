@@ -49,7 +49,6 @@ Rectangle {
                     text: title + ": In EA: " + entertain_area
                     wrapMode: "WrapAnywhere"
                     font.bold: true
-                    font.pixelSize: scaleY(2)
                 }
             }
 
@@ -58,13 +57,12 @@ Rectangle {
             MouseArea{
                 anchors.fill: parent
                 onClicked: {
-                    setActiveRoom(intRoom, entertain_area)
                     currentroom = title
-                    loadComponent("NullComponent.qml")
+                   setActiveRoom(intRoom, entertain_area)
                     roombutton.buttontext = title
+                    roomselectorrect.destroy()
                 }
             }
-
         }
     }
 
@@ -87,7 +85,6 @@ Rectangle {
         Text {
             id: headertext
             text: "Select Room Please"
-            font.pixelSize: scaleY(2)
         }
 
     }

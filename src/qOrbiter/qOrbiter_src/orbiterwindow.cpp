@@ -177,7 +177,7 @@ localPath = "android/";
 
 #ifdef Q_OS_ANDROID
      mainView.rootContext()->setBaseUrl(QUrl::fromLocalFile("/"));
-     mainView.rootContext()->engine()->addImportPath("/imports/");
+     mainView.rootContext()->engine()->addImportPath("assets:imports/");
      mainView.rootContext()->engine()->addPluginPath(QDir::homePath()+"/../lib");
 #endif
 

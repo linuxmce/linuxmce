@@ -1,5 +1,6 @@
 import QtQuick 1.0
-
+import Qt.labs.shaders 1.0
+import "../effects"
 
 Rectangle {
     id: filedetailrect
@@ -13,7 +14,7 @@ Rectangle {
     border.width: 3
     //opacity: 0
     scale:0
-    Component.onCompleted: PropertyAnimation { target: filedetailrect; property: "scale"; to:1; duration: 1000}
+    Component.onCompleted: PropertyAnimation { target: filedetailrect; property: "scale"; to:1; duration: 500}
 
     Image {
         id: fdbg
@@ -28,18 +29,17 @@ Rectangle {
         color: "darkgrey"
         opacity: .75
         z:-1
-
         anchors.centerIn: parent
         MouseArea{
-            anchors.fill: parent
-            onClicked: filedetailrect.destroy()
+            anchors.fill: parent            
+            onClicked: loadComponent("NullComponent")
         }
     }
 
 
     Connections{
         target:filedetailsclass
-        onObjectChanged:filedetailsimage.source = "image://listprovider/filedetailsprovider/"+securityvideo.timestamp
+        onImageChanged:filedetailsimage.source = "image://listprovider/filedetailsprovider/"+securityvideo.timestamp
     }
 
     Rectangle{
@@ -136,6 +136,7 @@ Rectangle {
                     color:"aliceblue"
                     wrapMode: "WrapAtWordBoundaryOrAnywhere"
                      width: rectangle1.width *.95
+                     font.bold: true
                 }
 
                 Text {
@@ -342,7 +343,7 @@ Rectangle {
             MouseArea
             {
                 anchors.fill: parent
-                onClicked:{ dcerouter.playMedia(filedetailsclass.file); filedetailrect.destroy() }  //dce function
+                onClicked:{dcerouter.setGridStatus(true); dcerouter.populateAdditionalMedia(); dcerouter.playMedia(filedetailsclass.file); filedetailrect.destroy() }  //dce function
             }
         }
 
@@ -354,7 +355,7 @@ Rectangle {
             buttontext: "Move"
             MouseArea{
                 anchors.fill:  parent
-                onClicked: { dataModel.setLoadingStatus(true);filedetailsclass.clear(); dcerouter.setGridStatus(true); filedetailrect.destroy()}
+                onClicked: {  filedetailsclass.clear(); dcerouter.setGridStatus(true); dcerouter.populateAdditionalMedia();filedetailrect.destroy()}
             }
         }
 
@@ -367,7 +368,7 @@ Rectangle {
             x: ((parent.width/3)*2)
             MouseArea{
                 anchors.fill:  parent
-                onClicked: { dataModel.setLoadingStatus(true);filedetailsclass.clear(); dcerouter.setGridStatus(true); filedetailrect.destroy()}
+                onClicked: {  filedetailsclass.clear(); dcerouter.setGridStatus(true); dcerouter.populateAdditionalMedia();filedetailrect.destroy()}
             }
         }
     }

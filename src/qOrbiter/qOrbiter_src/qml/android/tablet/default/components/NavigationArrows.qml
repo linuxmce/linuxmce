@@ -25,7 +25,7 @@ Rectangle {
                  hoverEnabled: true
                 onEntered: parent.scale = .75
                 onExited: parent.scale = 1
-                onClicked: moveDirection("left")
+                onClicked: dcerouter.moveDirection("left")
             }
         }
 
@@ -46,7 +46,7 @@ Rectangle {
                  hoverEnabled: true
                 onEntered: parent.scale = .75
                 onExited: parent.scale = 1
-                onClicked: moveDirection("up")
+                onClicked: dcerouter.moveDirection("up")
             }
         }
 
@@ -66,7 +66,7 @@ Rectangle {
                  hoverEnabled: true
                 onEntered: parent.scale = .75
                 onExited: parent.scale = 1
-                onClicked: moveDirection("down")
+                onClicked: dcerouter.moveDirection("down")
             }
 
         }
@@ -84,7 +84,7 @@ Rectangle {
                  hoverEnabled: true
                 onEntered: parent.scale = .75
                 onExited: parent.scale = 1
-                onClicked: moveDirection("right")
+                onClicked: dcerouter.moveDirection("right")
             }
         }
 
@@ -100,7 +100,7 @@ Rectangle {
                  hoverEnabled: true
                 onEntered: parent.scale = .75
                 onExited: parent.scale = 1
-                onClicked: moveDirection("enter")
+                onClicked: dcerouter.moveDirection("enter")
             }
         }
     }

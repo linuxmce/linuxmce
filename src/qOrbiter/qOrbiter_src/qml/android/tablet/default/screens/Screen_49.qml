@@ -4,9 +4,9 @@ import "../js/ComponentLoader.js" as MyJs
 Rectangle {
 
     // property alias synText:
-    id: dvdremote
-    height: style.orbiterH
-    width: style.orbiterW
+    id: dvd_remote
+    height: appH
+    width: appW
     radius: 0
     opacity: 1
     color: style.darkhighlight
@@ -16,17 +16,11 @@ Rectangle {
         source: "../img/icons/orbiterbg.png"
     }
 
-    Timer{
-        id:singleshot
-        repeat: false
-        interval: 2000
-        triggeredOnStart: false
-        running: true
-        onTriggered: nowplayingimage.source = "image://listprovider/updateobject/"+securityvideo.timestamp
-    }
+
 
     Connections{
         target:dcenowplaying
+        onImageChanged:nowplayingimage.source = "image://listprovider/updateobject/"+securityvideo.timestamp;
         onPlayListPositionChanged: { nowplayingimage.source = "image://listprovider/updateobject/"+securityvideo.timestamp;}
     }
 
@@ -94,7 +88,7 @@ Rectangle {
                         Text {
                             id: headertext
                             height:scaleY(2)
-                            text:qsTr("Speed: ") + dcenowplaying.qs_playbackSpeed
+                            text:qsTr("Speed: ") + dceTimecode.playbackSpeed
                             font.family: "Droid Sans"
                             font.pixelSize: scaleY(2)
                             color: "aliceblue"
@@ -103,7 +97,7 @@ Rectangle {
                         Text {
                             id: timecode
                             height:scaleY(2)
-                            text: dceTimecode.qsCurrentTime + qsTr(" of ") + dcenowplaying.duration
+                            text: dceTimecode.qsCurrentTime + qsTr(" of ") + dceTimecode.qsTotalTime
                             font.family: "Droid Sans"
                             font.pixelSize: scaleY(1) *2.15
                             anchors.bottom:parent.bottom
@@ -294,7 +288,7 @@ Rectangle {
                         MouseArea{
                             anchors.fill: parent
                             onClicked:  {
-                                MyJs.createAvComponent("../components/ZoomAspect.qml", dvdremote)
+                                MyJs.createStageComponent("../components/ZoomAspect.qml", dvd_remote)
                             }
                         }
                     }
@@ -306,7 +300,7 @@ Rectangle {
                         MouseArea{
                             anchors.fill: parent
                             onClicked:  {
-                                MyJs.createAvComponent("../components/Avcodes.qml", dvdremote)
+                                MyJs.createStageComponent("../components/Avcodes.qml", dvd_remote)
                             }
                         }
                     }
@@ -314,7 +308,7 @@ Rectangle {
                         buttontext: qsTr("Menu")
                         MouseArea{
                             anchors.fill: parent
-                            onClicked: showMenu()
+                            onClicked: dcerouter.showMenu()
                         }
                     }
                     AvOptionButton{
@@ -322,7 +316,7 @@ Rectangle {
                         MouseArea{
                             anchors.fill: parent
                             onClicked:  {
-                                MyJs.createAvComponent("../components/JogPanel.qml", storedvideoremote)
+                                MyJs.createStageComponent("../components/JogPanel.qml", dvd_remote)
                             }
                         }
                     }

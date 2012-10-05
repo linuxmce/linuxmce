@@ -14,7 +14,7 @@ import QtQuick 1.0
 
         Row {
             id: guide
-            spacing:2
+            spacing:5
             x: scaleX(2)
 
             Rectangle {
@@ -35,7 +35,12 @@ import QtQuick 1.0
 
                 MouseArea{
                     id: mousearea1
-                    onClicked: showfloorplan(2)
+                    anchors.fill: parent
+                    onClicked: {
+                            dcerouter.ShowFloorPlan(2)
+                        manager.setFloorplanType(2)
+                    }
+
                 }
 
             }

@@ -2,19 +2,14 @@ import QtQuick 1.0
 
 Rectangle {
            id:rect
-           width: scaleX(35)
-           height: scaleY(65)
+           width: 200
+           height: 200
            color: "transparent"
            anchors.centerIn: parent
            border.color: style.button_system_color
            border.width: 1
            clip: true
            property string cindex
-           focus: true
-           MouseArea{
-               anchors.fill: parent
-
-           }
 
            Component{
                  id:fileformatdelegate
@@ -36,7 +31,7 @@ Rectangle {
                                    z:0
                                    onClicked:
                                    {
-                                      loadComponent("NullComponent.qml")
+                                       rect.destroy()
                                    }
                               }
 
@@ -53,8 +48,7 @@ Rectangle {
                                  id: fileformatcell
                                  text: name
                                  font.pointSize: 14
-                                 onFocusChanged: {loadComponent("NullComponent.qml")}
-                                 font.pixelSize: scaleY(2)
+                                 onFocusChanged: {rect.destroy()}
 
                                   }
 
@@ -75,7 +69,10 @@ Rectangle {
                                                 }
                                           }
                                       }
+
                                }
+
+
                          }
                      }
                  }
@@ -88,6 +85,7 @@ Rectangle {
             width: parent.width
             model: fileformatmodel
             delegate: fileformatdelegate
+            focus:true
 
 
             }

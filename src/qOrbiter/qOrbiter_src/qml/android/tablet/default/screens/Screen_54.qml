@@ -1,6 +1,8 @@
 import QtQuick 1.0
+import Qt.labs.shaders 1.0
 import "../components"
 import "../js/ComponentLoader.js" as MyJs
+import "../effects"
 
 Rectangle {
     id: storedaudioremote
@@ -19,10 +21,16 @@ Rectangle {
  Component.onCompleted: manager.setBoundStatus(true)
 
     height: appH
-    width: appW
-    radius: 0
-    opacity: 1
+    width: appW 
     color: "transparent"
+
+    Rectangle{
+        id:filler
+        color: "lightgrey"
+        anchors.fill:parent
+        opacity: .15
+
+    }
 
     Text {
         id: bignowplaying
@@ -248,7 +256,7 @@ Rectangle {
                     buttontext: qsTr("Manage Playlist")
                     MouseArea{
                         anchors.fill: parent
-                        onClicked: playlist.visible = !playlist.visible
+                        onClicked: playlist.optionVisible ? playlist.optionVisible =false: playlist.optionVisible=true
                     }
                 }
                 AvOptionButton{
@@ -256,7 +264,7 @@ Rectangle {
                     MouseArea{
                         anchors.fill: parent
                         onClicked:  {
-                            MyJs.createAvComponent("../components/Avcodes.qml", storedaudioremote)
+                            MyJs.createStageComponent("../components/Avcodes.qml", storedaudioremote)
                         }
                     }
                 }

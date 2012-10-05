@@ -1,6 +1,9 @@
 import QtQuick 1.0
 import "../components"
 import "../js/ComponentLoader.js" as MyJs
+import "../effects"
+import Qt.labs.shaders 1.0
+
 Rectangle {
 
     // property alias synText:
@@ -27,7 +30,10 @@ Rectangle {
             anchors.top:parent.top
             anchors.topMargin: scaleY(2)
             anchors.horizontalCenter: parent.horizontalCenter
+
+
             EPGPlaylist{id:tvchannellist }
+
 
             Rectangle {
                 id:metarect
@@ -135,6 +141,18 @@ Rectangle {
                             font.pixelSize: scaleY(2)
                             color: "white"
                         }
+
+                        Text {
+                            id: live_av
+                            wrapMode: "NoWrap"
+                            text: qsTr("ScreenShot Availible:") + dcerouter.monitorAvailible
+                            font.family: "Droid Sans"
+                            font.bold: true
+                            smooth: true
+                            horizontalAlignment: Text.AlignHCenter
+                            font.pixelSize: scaleY(2)
+                            color: "white"
+                        }
                     }
                 }
             }
@@ -171,7 +189,7 @@ Rectangle {
                         MouseArea{
                             anchors.fill: parent
                             onClicked:  {
-                                loadComponent("ZoomAspect.qml")
+                                MyJs.createStageComponent("../components/ZoomAspect.qml",satcableboxremote )
                             }
                         }
                     }
@@ -187,7 +205,7 @@ Rectangle {
                         MouseArea{
                             anchors.fill: parent
                             onClicked:  {
-                                loadComponent("Avcodes.qml")
+                                MyJs.createStageComponent("../components/Avcodes.qml",satcableboxremote )
                             }
                         }
                     }

@@ -20,7 +20,7 @@ Rectangle {
     radius: 1
     Image {
         id: buttonimage
-        source: "../img/ui3/linuxmcewidebutton.png"
+        source: ""
         height: style.stdbuttonh
         width: style.stdbuttonw
 

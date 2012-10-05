@@ -2,8 +2,9 @@ import QtQuick 1.0
 import "../components"
 Rectangle{
     id:lights
-    height: style.orbiterH
-    width: style.orbiterW
+    height: appH
+    width: appW
+    color: "transparent"
 
 FloorPlanDisplay{id: lightingfloorplan; anchors.centerIn: parent}
 

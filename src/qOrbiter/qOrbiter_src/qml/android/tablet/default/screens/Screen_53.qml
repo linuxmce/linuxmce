@@ -1,8 +1,8 @@
 import QtQuick 1.0
 import "../components"
 Rectangle {
-    width: 100
-    height: 62
+    height: appH
+    width: appW
 
     ButtonSq {
     height: 50
@@ -10,7 +10,7 @@ Rectangle {
     buttontext: "home"
     Image {
         id: homeimage
-        source: "../img/icons/kfm_home.png"
+        source: "../../../img/icons/kfm_home.png"
         height:50
         width: 50
     }

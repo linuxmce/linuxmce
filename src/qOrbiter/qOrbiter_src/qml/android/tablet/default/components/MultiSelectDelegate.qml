@@ -20,7 +20,7 @@ Component{
                         z:0
                         onClicked:
                         {
-                             loadComponent("NullComponent.qml")
+                            rect.destroy()
                         }
                    }
 
@@ -52,7 +52,7 @@ Component{
                            anchors.fill: parent
                            onClicked:{
                                cindex=desc
-                               dcerouter.setSelectionStatus(name)
+                               setSelectionStatus(name)
                                fileformatcell.color = status ? "green" : "red"
 
                                      }

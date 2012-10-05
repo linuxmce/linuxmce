@@ -4,14 +4,14 @@ Item{
     id:securitystatus
 
     Rectangle{
-        height: style.orbiterH
-        width: style.orbiterW
+        height: appH
+        width: appW
         color: "transparent"
         Text {
             id: statussec
             x: 74
             y: 101
-            text: "Make Call Phone Book"
+            text: qsTr("Make Call Phone Book")
             font.family: "Droid Sans"
             font.bold: false
             font.pointSize: 15

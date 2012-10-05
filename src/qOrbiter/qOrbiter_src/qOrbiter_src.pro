@@ -198,7 +198,7 @@ ANDROID{
 #nfs mount to work with skins on core directly
 folder_01.source = ../../../../mnt/remote/android-qml/android
 #folder_01.source = qml/android/
-folder_01.target =qml
+folder_01.target = qml
 
 folder_05.source = qml/template
 folder_05.target = qml

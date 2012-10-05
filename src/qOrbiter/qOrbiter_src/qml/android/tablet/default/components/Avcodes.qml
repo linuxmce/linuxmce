@@ -113,7 +113,7 @@ Rectangle {
                         hoverEnabled: true
                         onEntered: device_box.color = "white"
                         onExited: device_box.color = "slateblue"
-                        onClicked: dcerouter.sendAvCommand(i_parentDevice, i_commandnum)
+                        onClicked: manager.resendCode(i_parentDevice, i_commandnum)
                     }
                 }
             }
