@@ -10,7 +10,12 @@ Rectangle {
 
     Connections{
         target: window
-        onShowList:existing_orbiters.visible = true
+        onShowList:{
+            existing_orbiters.visible = true
+            if(existing_orbiters.count === 0){
+                screenChange("NewOrbiterSetup.qml")
+            }
+        }
         onPageChanged:screenchange(qmlPage)
     }
     Image {

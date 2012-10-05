@@ -106,7 +106,6 @@ Rectangle {
                             text:qs_command
                             font.pixelSize: scaleY(2)
                         }
-
                     }
                     MouseArea{
                         anchors.fill: parent
