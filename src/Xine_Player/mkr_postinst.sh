@@ -339,7 +339,6 @@ video.driver:$video_driver
 
 # file browsing start location
 # string, default: /home/work/pluto-svn/trunk/bin
-input.file_origin_path:/home/public/data/music/AC-DC/The Razors Edge
 
 # network bandwidth
 # { 14.4 Kbps (Modem)  19.2 Kbps (Modem)  28.8 Kbps (Modem)  33.6 Kbps (Modem)  34.4 Kbps (Modem)  57.6 Kbps (Modem)  115.2 Kbps (ISDN)  262.2 Kbps (Cable/DSL)  393.2 Kbps (Cable/DSL)  524.3 Kbps (Cable/DSL)  1.5 Mbps (T1)  10.5 Mbps (LAN) }, default: 10
