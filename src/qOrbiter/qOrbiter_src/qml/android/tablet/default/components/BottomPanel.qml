@@ -24,13 +24,10 @@ Rectangle {
         spacing:10
         clip: false
 
-        AdvancedButton {
-            width: style.widebuttonw
-            height: style.widebuttonh
+        AdvancedButton {          
             id: buttonsq1
             buttontext: "Advanced"
             radius: 5
-
             MouseArea{
                 anchors.fill: parent
                 onClicked:gotoQScreen("Screen_44.qml")
@@ -38,11 +35,7 @@ Rectangle {
         }
 
         AdvancedButton {
-            id: buttonsq2
-            x: 63
-            y: 1
-            width: style.widebuttonw
-            height: style.widebuttonh
+            id: buttonsq2                     
             buttontext: "Power"
             radius: 5
             MouseArea{
@@ -54,10 +47,6 @@ Rectangle {
 
         AdvancedButton {
             id: buttonsq3
-            x: 125
-            y: 1
-            width: style.widebuttonw
-            height: style.widebuttonh
             buttontext: "Sleeping Menu"
             radius: 5
 
@@ -72,9 +61,7 @@ Rectangle {
 
 
         AdvancedButton{
-            id:roombutton
-            width: style.widebuttonw
-            height: style.widebuttonh
+            id:roombutton           
             buttontext: currentroom
             MouseArea{
                 anchors.fill: parent
@@ -85,9 +72,7 @@ Rectangle {
         UserListComponent {id:user}
 
         AdvancedButton{
-            id:exit
-            width: style.widebuttonw
-            height: style.widebuttonh
+            id:exit           
             buttontext: "Exit Orbiter"
             MouseArea{
                 anchors.fill: exit

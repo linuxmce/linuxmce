@@ -4,8 +4,8 @@ Component{
 
     Item{
         //important!! these need to be set on an imported component otherwise its appears all wrong!
-        height: scaleY(13)
-        width: scaleX(8)
+        height: style.stdbuttonh
+        width: style.stdbuttonw
 
         /*
         //this image displays a second button-image beneath the buttons

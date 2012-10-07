@@ -18,8 +18,8 @@ Rectangle{
         x: scaleX(2)
         Rectangle {
             id: rowheader
-            height: scaleY(13)
-            width: scaleX(8)
+            height: style.stdbuttonh
+            width: style.stdbuttonw
             anchors.top: parent.top
             anchors.topMargin: scaleY(2)
             color: "transparent"

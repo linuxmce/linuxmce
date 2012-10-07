@@ -18,8 +18,8 @@ Rectangle{
             id: rowheader
             anchors.top: parent.top
             anchors.topMargin: scaleY(2)
-            height: scaleY(13)
-            width: scaleX(8)
+            height: style.stdbuttonh
+            width: style.stdbuttonw
             color: "transparent"
             radius: style.but_smooth
 
@@ -46,9 +46,8 @@ Rectangle{
             anchors.top: parent.top
             anchors.topMargin: scaleY(2)
             visible: dcenowplaying.b_mediaPlaying ? true : false
-            height: scaleY(13)
-            width: scaleX(8)
-
+            height: style.stdbuttonh
+            width: style.stdbuttonw
             radius: style.but_smooth
             buttontext: dcenowplaying.qs_mainTitle +" \n " + dceTimecode.qsCurrentTime
 
