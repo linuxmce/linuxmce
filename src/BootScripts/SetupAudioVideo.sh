@@ -158,7 +158,7 @@ Setup_AsoundConf()
 		;;
 		*H*)
 			# audio setting is HDMI
-			echo 'pcm.!default asym_hdmi' >>/etc/asound.conf
+			echo 'pcm.!default !hdmi' >>/etc/asound.conf
 
 		;;
 		*)
@@ -197,6 +197,7 @@ Setup_XineConf()
 
 	case "$AudioSetting" in
 		*3*)
+                        XineConfSet audio.device.alsa_passthrough_device 'plughw:' "${SoundCard},${SoundDevice}"
 			XineConfSet audio.output.speaker_arrangement 'Pass Through' "$XineConf"
 			;;
 		*)
