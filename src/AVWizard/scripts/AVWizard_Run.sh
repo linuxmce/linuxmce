@@ -1,10 +1,8 @@
 #!/bin/bash -x
 
 . /usr/pluto/bin/AVWizard-Common.sh
-. /usr/pluto/bin/Config_Ops.sh
 . /usr/pluto/bin/Utils.sh
 . /usr/pluto/bin/X-Common.sh
-
 
 ###########################################################
 ### Setup global variables
@@ -30,7 +28,7 @@ ConfFile="/etc/X11/xorg.conf"
 #From /usr/pluto/bin/Utils.sh - Sets LD_Library_Path
 UseAlternativeLibs
 #Setup Log file variable
-log_file=/var/log/pluto/AVWizard_Run_$(date +%Y%m%d_%H%M%S).log
+log_file="/var/log/pluto/AVWizard_Run_$(date +%Y%m%d_%H%M%S).log"
 
 # remove the current xorgs to start clean, and prevent toggling issues.
 #if [[ -f /etc/X11/xorg.conf ]]; then
@@ -47,7 +45,7 @@ log_file=/var/log/pluto/AVWizard_Run_$(date +%Y%m%d_%H%M%S).log
 VerifyExitCode () {
         local EXITCODE=$?
         if [ "$EXITCODE" != "0" ] ; then
-        	echo "An error (Exit code $EXITCODE) occured during the last action"
+        	echo "An error (Exit code ${EXITCODE}) occured during the last action"
         	echo "$1"
                 exit 1
         fi
@@ -107,7 +105,7 @@ DualBus () {
 vga_pci=$(lspci | grep ' VGA ')
 gpus=$(echo "$vga_pci" | wc -l)
 	if [[ "$gpus" -gt "1" ]]; then
-		bus_id=$(echo "$vga_pci" | awk 'NR==2' | while IFS=':. ' read -r tok1 tok2 tok3 rest; do printf '%2s %2s %s\n' "$((16#$tok1))":"$((16#$tok2))":"$((16#$tok3))" | sed -e 's/ //g'; done)		
+		bus_id=$(echo "$vga_pci" | awk 'NR==2' | while IFS=':. ' read -r tok1 tok2 tok3 rest; do printf '%2s %2s %s\n' "$((16#${tok1}))":"$((16#${tok2}))":"$((16#${tok3}))" | sed -e 's/ //g'; done)		
 		if grep "\#BusID" $XineConf; then
 			sed -ie "s/\#BusID.*/BusID\t\t\"PCI:${bus_id}\"/g" $XineConf
 		elif grep "BusID" $XineConf; then
@@ -188,7 +186,7 @@ UpdateAudioSettings () {
 		SELECT FK_DeviceCategory
 		FROM Device
 		JOIN DeviceTemplate ON FK_DeviceTemplate=PK_DeviceTemplate
-		WHERE PK_Device='$PK_Device'
+		WHERE PK_Device='${PK_Device}'
 	"
 	Category=$(RunSQL "$Q")
 
@@ -201,7 +199,7 @@ UpdateAudioSettings () {
 			FROM Device
 			JOIN DeviceTemplate ON FK_DeviceTemplate=PK_DeviceTemplate
 			JOIN DeviceCategory ON FK_DeviceCategory=PK_DeviceCategory
-			WHERE FK_Device_ControlledVia='$PK_Device' AND PK_DeviceCategory='$DEVICECATEGORY_Media_Director'
+			WHERE FK_Device_ControlledVia='${PK_Device}' AND PK_DeviceCategory='${DEVICECATEGORY_Media_Director}'
 		"
 		MD=$(RunSQL "$Q")
 		if [[ -z "$MD" ]]; then
@@ -242,15 +240,15 @@ UpdateAudioSettings () {
 
 	Q="
 		REPLACE INTO Device_DeviceData(FK_Device, FK_DeviceData, IK_DeviceData)
-		VALUES('$MD', '$DEVICEDATA_Sound_card', '$WizSoundCard')
+		VALUES('${MD}', '${DEVICEDATA_Sound_card}', '${WizSoundCard}')
 	"
 	RunSQL "$Q"
 
-	NewAudioSetting="$AudioOutput$PassThrough"
+	NewAudioSetting="${AudioOutput}${PassThrough}"
 
 	Q="
 		REPLACE INTO Device_DeviceData(FK_Device, FK_DeviceData, IK_DeviceData)
-		VALUES('$MD', '$DEVICEDATA_Audio_Settings', '$NewAudioSetting')
+		VALUES('${MD}', '${DEVICEDATA_Audio_Settings}', '${NewAudioSetting}')
 	"
 	RunSQL "$Q"
 }
@@ -272,7 +270,7 @@ UpdateOrbiterUI () {
 			UI_SetOptions "$OrbiterDev" 1 1 "$UI_V2_Normal_Horizontal"
 		;;
 		*)
-			echo "Unknown UIVersion value: '$UIVersion'"
+			echo "Unknown UIVersion value: '${UIVersion}'"
 		;;
 	esac
 }
@@ -314,13 +312,13 @@ UpdateOrbiterDimensions () {
 	OrbiterShiftY=$((OrbiterTop-OrbiterBorder))
 
 	# Store screen width and hight
-	Q="UPDATE Device_DeviceData SET IK_DeviceData='$OrbiterWidth' WHERE FK_Device='$OrbiterDev' AND FK_DeviceData='$DEVICEDATA_ScreenWidth'"
+	Q="UPDATE Device_DeviceData SET IK_DeviceData='${OrbiterWidth}' WHERE FK_Device='${OrbiterDev}' AND FK_DeviceData='${DEVICEDATA_ScreenWidth}'"
 	RunSQL "$Q"
-	Q="UPDATE Device_DeviceData SET IK_DeviceData='$OrbiterHeight' WHERE FK_Device='$OrbiterDev' AND FK_DeviceData='$DEVICEDATA_ScreenHeight'"
+	Q="UPDATE Device_DeviceData SET IK_DeviceData='${OrbiterHeight}' WHERE FK_Device='${OrbiterDev}' AND FK_DeviceData='${DEVICEDATA_ScreenHeight}'"
 	RunSQL "$Q"
 
 	# Store value for "Video settings"
-	Video_settings="$OrbiterWidth $OrbiterHeight$Iletter/$OrbiterRefresh"
+	Video_settings="$OrbiterWidth ${OrbiterHeight}${Iletter}/${OrbiterRefresh}"
 	Q="UPDATE Device_DeviceData SET IK_DeviceData='$Video_settings' WHERE FK_Device='$ComputerDev' AND FK_DeviceData='$DEVICEDATA_Video_settings'"
 	RunSQL "$Q"
 
@@ -330,30 +328,30 @@ UpdateOrbiterDimensions () {
 	RunSQL "$Q"
 	
 	# Store value for "TV Standard"
-	Q="UPDATE Device_DeviceData SET IK_DeviceData='$TVStandard' WHERE FK_Device='$ComputerDev' AND FK_DeviceData='$DEVICEDATA_TV_Standard'"
+	Q="UPDATE Device_DeviceData SET IK_DeviceData='${TVStandard}' WHERE FK_Device='${ComputerDev}' AND FK_DeviceData='${DEVICEDATA_TV_Standard}'"
 	RunSQL "$Q"
 
 	# Store PK_Size
-	Q="SELECT PK_Size FROM Size WHERE Description LIKE '%$OrbiterResolutionName%'"
+	Q="SELECT PK_Size FROM Size WHERE Description LIKE '%${OrbiterResolutionName}%'"
 	PK_Size=$(RunSQL "$Q")
 	if [[ -n "$PK_Size" ]]; then
-		Q="UPDATE Device_DeviceData SET IK_DeviceData='$PK_Size' WHERE FK_Device='$OrbiterDev' AND FK_DeviceData='$DEVICEDATA_PK_Size'"
+		Q="UPDATE Device_DeviceData SET IK_DeviceData='${PK_Size}' WHERE FK_Device='${OrbiterDev}' AND FK_DeviceData='${DEVICEDATA_PK_Size}'"
 		RunSQL "$Q"
 	fi
 
 	# Store value for "Reduce image size by %" (DeviceData 150, "Spacing")
-	Q="UPDATE Device_DeviceData SET IK_DeviceData='$ReducePercent' WHERE FK_Device='$OrbiterDev' AND FK_DeviceData='$DEVICEDATA_Spacing'"
+	Q="UPDATE Device_DeviceData SET IK_DeviceData='${ReducePercent}' WHERE FK_Device='${OrbiterDev}' AND FK_DeviceData='${DEVICEDATA_Spacing}'"
 	RunSQL "$Q"
 
 	# Store value for "Offset"
-	Q="UPDATE Device_DeviceData SET IK_DeviceData='$OrbiterShiftX,$OrbiterShiftY' WHERE FK_Device='$OrbiterDev' AND FK_DeviceData='$DEVICEDATA_Offset'"
+	Q="UPDATE Device_DeviceData SET IK_DeviceData='${OrbiterShiftX},${OrbiterShiftY}' WHERE FK_Device='${OrbiterDev}' AND FK_DeviceData='${DEVICEDATA_Offset}'"
 	RunSQL "$Q"
 
 	# Orbiter Regen
 	Q="
 		UPDATE Orbiter
 		SET Regen=1
-		WHERE PK_Orbiter='$OrbiterDev'
+		WHERE PK_Orbiter='${OrbiterDev}'
 	"
 	RunSQL "$Q"
 }
@@ -442,7 +440,7 @@ Start_AVWizard () {
 		StatsMessage "AVWizard Main loop"
 		rm -f /tmp/*.xml
 		SetupX
-		"$BaseDir"/AVWizardWrapper.sh
+		${BaseDir}/AVWizardWrapper.sh
 		Ret="$?"
 		mv "$WMTweaksFile"{.orig,}
 		StatsMessage "AVWizard Main loop ret code $Ret"
@@ -481,7 +479,7 @@ Start_AVWizard () {
 ###########################################################
 
 #Create AVWizard.log
-. /usr/pluto/bin/TeeMyOutput.sh --outfile $log_file --infile /dev/null --stdboth -- "$@"
+. /usr/pluto/bin/TeeMyOutput.sh --outfile "$log_file" --infile /dev/null --stdboth -- "$@"
 
 #Trap
 trap 'StatsMessage "Exiting"' EXIT
