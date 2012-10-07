@@ -100,7 +100,8 @@ Setup_AsoundConf()
 {
 	local AudioSetting="$1"
 	local SoundCard
-
+	local SoundDevice
+	
 	# Do not mess with asound.conf if Audio Setting is set to Manual. This will only happen after the asound.conf has been generated at least once.
 	if [[ "$AudioSetting" == "M" ]]; then
 		return
@@ -129,9 +130,27 @@ Setup_AsoundConf()
 	fi
 
 	local AnalogPlaybackCard="plug:dmix:$SoundCard"
+	
+	case "$AudioSetting" in
+		*[CO]*)
+			# audio setting is Coaxial or Optical, i.e. S/PDIF
+			SoundDevice=$(aplay -l | grep -i "digital" | grep -wo "device ." | awk '{print $2}')
+		;;
+		*H*)
+			# audio setting is HDMI
+			SoundDevice=$(aplay -l | grep -i "hdmi" | grep -wo "device ." | awk '{print $2}')
+			if [[ $(echo "$SoundDevice" | wc -l) -gt "3" ]] && [[ $(echo "$SoundDevice" | grep "7") ]]; then
+				SoundDevice="7"
+			fi
 
-	sed -r "s,%MAIN_CARD%,$SoundCard,g; s,%ANALOG_PLAYBACK_CARD%,$AnalogPlaybackCard,g" /usr/pluto/templates/asound.conf >/etc/asound.conf
-
+		;;
+		*)
+			# audio setting is Stereo or something unknown
+			SoundDevice=$(aplay -l | grep -i "analog" | grep -wo "device ." | awk '{print $2}')
+		;;
+	esac
+	
+	sed -r "s,%MAIN_CARD%,$SoundCard,g; s,%SOUND_DEVICE%,$SoundDevice,g; s,%ANALOG_PLAYBACK_CARD%,$AnalogPlaybackCard,g" /usr/pluto/templates/asound.conf >/etc/asound.conf
 	case "$AudioSetting" in
 		*[CO]*)
 			# audio setting is Coaxial or Optical, i.e. S/PDIF
@@ -149,6 +168,7 @@ Setup_AsoundConf()
 	esac
 
 	Setup_XineConf "$AudioSetting" "$SoundCard" "$AnalogPlaybackCard"
+	alsa force-reload
 }
 
 Setup_XineConf()
