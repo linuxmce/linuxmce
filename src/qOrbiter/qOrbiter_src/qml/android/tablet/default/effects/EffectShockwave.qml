@@ -40,12 +40,41 @@
 ****************************************************************************/
 
 import QtQuick 1.0
-import Qt.labs.shaders 1.0
 
-
-
-    Effect {
-        fragmentShaderFilename: "vignette.fsh"
+Effect {
+    id: root
+    parameters: ListModel {
+        ListElement {
+            name: "amplitude"
+            value: 0.5
+        }
     }
 
+    // Transform slider values, and bind result to shader uniforms
+    property real granularity: parameters.get(0).value * 20
+    property real weight: parameters.get(0).value
 
+    property real centerX
+    property real centerY
+    property real time
+
+    SequentialAnimation {
+        running: true
+        loops: Animation.Infinite
+        ScriptAction {
+            script: {
+                centerX = Math.random()
+                centerY = Math.random()
+            }
+        }
+        NumberAnimation {
+            target: root
+            property: "time"
+            from: 0
+            to: 1
+            duration: 1000
+        }
+    }
+
+    fragmentShaderFilename: "shaders/shockwave.fsh"
+}

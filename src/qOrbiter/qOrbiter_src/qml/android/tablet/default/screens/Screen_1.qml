@@ -1,10 +1,11 @@
 import QtQuick 1.0
+import com.nokia.android 1.1
+//import "../androidComponents"
 import "../components"
 
 Item
 {
     anchors.centerIn: parent
-
 
 
 
@@ -26,9 +27,10 @@ Item
 
         }
 
-        Text{
+        Label{
             id:connectstatus
             text: "Orbiter "+ deviceid + " is connected."
+            font.family: "Droid Sans"
             color: "aliceblue"
             font.letterSpacing: 2
             anchors.left: parent.left

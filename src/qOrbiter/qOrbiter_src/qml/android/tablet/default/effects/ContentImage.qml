@@ -40,12 +40,8 @@
 ****************************************************************************/
 
 import QtQuick 1.0
-import Qt.labs.shaders 1.0
 
-
-
-    Effect {
-        fragmentShaderFilename: "vignette.fsh"
-    }
-
-
+Image {
+    fillMode: Image.PreserveAspectFit
+    smooth: true
+}

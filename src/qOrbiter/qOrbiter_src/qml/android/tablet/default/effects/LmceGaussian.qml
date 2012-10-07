@@ -4,7 +4,7 @@
 ** All rights reserved.
 ** Contact: Nokia Corporation (qt-info@nokia.com)
 **
-** This file is part of the Qt Mobility Components.
+** This file is part of the examples of the Qt Toolkit.
 **
 ** $QT_BEGIN_LICENSE:LGPL$
 ** GNU Lesser General Public License Usage
@@ -39,16 +39,12 @@
 **
 ****************************************************************************/
 
-// Based on http://www.geeks3d.com/20100909/shader-library-gaussian-blur-post-processing-filter-in-glsl/
-
 import QtQuick 1.0
 import Qt.labs.shaders 1.0
+Item{
 
-Item {
-    id: root
     property bool divider: true
     property real dividerValue: 0.5
-   property real radius: 0.5
 
     property ListModel parameters: ListModel {
         ListElement {
@@ -61,20 +57,74 @@ Item {
     property alias targetHeight: verticalShader.targetHeight
     property alias source: verticalShader.source
 
-    Effect {
+    ShaderEffectItem {
         id: verticalShader
         anchors.fill:  parent
         dividerValue: parent.dividerValue
-        property real blurSize: 4.0 *radius / targetHeight
-        fragmentShaderFilename: "gaussianblur_v.fsh"
+        property real blurSize: 1.0 * parent.parameters.get(0).value / targetHeight
+        fragmentShader: "
+uniform float dividerValue;
+uniform float blurSize;
+uniform sampler2D source;
+uniform lowp float qt_Opacity;
+varying vec2 qt_TexCoord0;
+
+void main()
+{
+vec2 uv = qt_TexCoord0.xy;
+vec4 c = vec4(0.0);
+if (uv.x < dividerValue) {
+    c += texture2D(source, uv - vec2(0.0, 4.0*blurSize)) * 0.05;
+    c += texture2D(source, uv - vec2(0.0, 3.0*blurSize)) * 0.09;
+    c += texture2D(source, uv - vec2(0.0, 2.0*blurSize)) * 0.12;
+    c += texture2D(source, uv - vec2(0.0, 1.0*blurSize)) * 0.15;
+    c += texture2D(source, uv) * 0.18;
+    c += texture2D(source, uv + vec2(0.0, 1.0*blurSize)) * 0.15;
+    c += texture2D(source, uv + vec2(0.0, 2.0*blurSize)) * 0.12;
+    c += texture2D(source, uv + vec2(0.0, 3.0*blurSize)) * 0.09;
+    c += texture2D(source, uv + vec2(0.0, 4.0*blurSize)) * 0.05;
+} else {
+    c = texture2D(source, qt_TexCoord0);
+}
+// First pass we don't apply opacity
+gl_FragColor = c;
+}
+"
     }
 
-    Effect {
+    ShaderEffectItem{
         id: horizontalShader
         anchors.fill: parent
         dividerValue: parent.dividerValue
-        property real blurSize: 4.0 * radius / parent.targetWidth
-        fragmentShaderFilename: "gaussianblur_h.fsh"
+        property real blurSize: 4.0 * parent.parameters.get(0).value / parent.targetWidth
+        fragmentShader: "
+uniform float dividerValue;
+uniform float blurSize;
+
+uniform sampler2D source;
+uniform lowp float qt_Opacity;
+varying vec2 qt_TexCoord0;
+
+void main()
+{
+    vec2 uv = qt_TexCoord0.xy;
+    vec4 c = vec4(0.0);
+    if (uv.x < dividerValue) {
+        c += texture2D(source, uv - vec2(4.0*blurSize, 0.0)) * 0.05;
+        c += texture2D(source, uv - vec2(3.0*blurSize, 0.0)) * 0.09;
+        c += texture2D(source, uv - vec2(2.0*blurSize, 0.0)) * 0.12;
+        c += texture2D(source, uv - vec2(1.0*blurSize, 0.0)) * 0.15;
+        c += texture2D(source, uv) * 0.18;
+        c += texture2D(source, uv + vec2(1.0*blurSize, 0.0)) * 0.15;
+        c += texture2D(source, uv + vec2(2.0*blurSize, 0.0)) * 0.12;
+        c += texture2D(source, uv + vec2(3.0*blurSize, 0.0)) * 0.09;
+        c += texture2D(source, uv + vec2(4.0*blurSize, 0.0)) * 0.05;
+    } else {
+        c = texture2D(source, qt_TexCoord0);
+    }
+    gl_FragColor = qt_Opacity * c;
+}
+"
         source: horizontalShaderSource
 
         ShaderEffectSource {
@@ -85,3 +135,4 @@ Item {
         }
     }
 }
+

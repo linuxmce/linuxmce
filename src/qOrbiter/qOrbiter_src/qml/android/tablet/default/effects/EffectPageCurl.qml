@@ -40,12 +40,18 @@
 ****************************************************************************/
 
 import QtQuick 1.0
-import Qt.labs.shaders 1.0
 
-
-
-    Effect {
-        fragmentShaderFilename: "vignette.fsh"
+Effect {
+    divider: false
+    parameters: ListModel {
+        ListElement {
+            name: "extent"
+            value: 0.5
+        }
     }
 
+    // Transform slider values, and bind result to shader uniforms
+    property real curlExtent: 1.0 - parameters.get(0).value
 
+    fragmentShaderFilename: "shaders/pagecurl.fsh"
+}

@@ -1,4 +1,5 @@
 import QtQuick 1.1
+import com.nokia.android 1.1
 
 Rectangle {
     objectName: "floorplan_display"

@@ -40,12 +40,24 @@
 ****************************************************************************/
 
 import QtQuick 1.0
-import Qt.labs.shaders 1.0
 
-
-
-    Effect {
-        fragmentShaderFilename: "vignette.fsh"
+Effect {
+    parameters: ListModel {
+        ListElement {
+            name: "threshold"
+            value: 0.5
+        }
     }
 
+    // Transform slider values, and bind result to shader uniforms
+    property real threshold: parameters.get(0).value
+    property real targetSize: 250 - (200 * threshold) // TODO: fix ...
+    property real resS: targetSize
+    property real resT: targetSize
 
+    // TODO
+    property real magTol: 0.3
+    property real quantize: 8.0
+
+    fragmentShaderFilename: "shaders/toon.fsh"
+}

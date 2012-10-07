@@ -39,13 +39,29 @@
 **
 ****************************************************************************/
 
-import QtQuick 1.0
-import Qt.labs.shaders 1.0
+// Based on http://www.reddit.com/r/programming/comments/losip/shader_toy/c2upn1e
 
+uniform sampler2D source;
+uniform lowp float qt_Opacity;
+varying vec2 qt_TexCoord0;
+uniform float radius;
+uniform float diffractionIndex;
+uniform float targetWidth;
+uniform float targetHeight;
+uniform float posX;
+uniform float posY;
 
-
-    Effect {
-        fragmentShaderFilename: "vignette.fsh"
+void main()
+{
+    vec2 tc = qt_TexCoord0;
+    vec2 center = vec2(posX, posY);
+    vec2 xy = gl_FragCoord.xy - center.xy;
+    float r = sqrt(xy.x * xy.x + xy.y * xy.y);
+    if (r < radius) {
+        float h = diffractionIndex * 0.5 * radius;
+        vec2 new_xy = r < radius ? xy * (radius - h) / sqrt(radius * radius - r * r) : xy;
+        vec2 targetSize = vec2(targetWidth, targetHeight);
+        tc = (new_xy + center) / targetSize;
     }
-
-
+    gl_FragColor = qt_Opacity * texture2D(source, tc);
+}

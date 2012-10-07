@@ -1,8 +1,7 @@
 import QtQuick 1.1
-
-
 import "components"
 import "js/ComponentLoader.js" as MyJs
+
 
 
 Item {

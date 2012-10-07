@@ -40,12 +40,22 @@
 ****************************************************************************/
 
 import QtQuick 1.0
-import Qt.labs.shaders 1.0
 
-
-
-    Effect {
-        fragmentShaderFilename: "vignette.fsh"
+Effect {
+    parameters: ListModel {
+        ListElement {
+            name: "amplitude"
+            value: 0.5
+        }
     }
 
+    // Transform slider values, and bind result to shader uniforms
+    property real amplitude: parameters.get(0).value * 0.05
 
+    property real frequency: 20
+    property real time: 0
+
+    NumberAnimation on time { loops: Animation.Infinite; from: 0; to: Math.PI * 2; duration: 600 }
+
+    fragmentShaderFilename: "shaders/wobble.fsh"
+}

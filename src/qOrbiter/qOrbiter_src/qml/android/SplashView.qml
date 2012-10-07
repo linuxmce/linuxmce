@@ -2,6 +2,7 @@
 import QtQuick 1.1
 import com.nokia.android 1.1
 
+
 Rectangle {
     height:appH
     width:appW

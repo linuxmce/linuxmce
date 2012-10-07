@@ -40,12 +40,22 @@
 ****************************************************************************/
 
 import QtQuick 1.0
-import Qt.labs.shaders 1.0
 
-
-
-    Effect {
-        fragmentShaderFilename: "vignette.fsh"
+Effect {
+    parameters: ListModel {
+        ListElement {
+            name: "hue"
+            value: 0.5
+        }
+        ListElement {
+            name: "width"
+            value: 0.5
+        }
     }
 
+    // Transform slider values, and bind result to shader uniforms
+    property real targetHue: parameters.get(0).value * 360
+    property real windowWidth: parameters.get(1).value * 60
 
+    fragmentShaderFilename: "shaders/isolate.fsh"
+}

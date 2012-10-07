@@ -42,10 +42,17 @@
 import QtQuick 1.0
 import Qt.labs.shaders 1.0
 
-
-
-    Effect {
-        fragmentShaderFilename: "vignette.fsh"
+Effect {
+    parameters: ListModel {
+        ListElement {
+            name: "grid spacing"
+            value: 0.5
+        }
     }
 
-
+    // Transform slider values, and bind result to shader uniforms
+    property real grid: parameters.get(0).value * 10
+    property real step_x: 0.0015625
+    property real step_y: targetHeight ? (step_x * targetWidth / targetHeight) : 0.0
+    fragmentShaderFilename: "billboard.fsh"
+}

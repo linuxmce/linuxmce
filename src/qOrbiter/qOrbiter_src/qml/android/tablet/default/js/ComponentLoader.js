@@ -26,7 +26,7 @@ function createStageComponent(incavcomponent, screen) {
 
 function finishStageCreation()
 {
-    if (stagescreen.status === Component.Ready)
+    if (component.status === Component.Ready)
     {
         component_sprite = component.createObject(screen, {"x":0, "y": 0});
     }
@@ -47,28 +47,36 @@ var sprite;
 
 function createComponentObjects(toBeCreated) {
     component = Qt.createComponent("../components/SkinSelector.qml");
-       sprite = component.createObject(advancedscreen , {"x": 0, "y": 0});
+    sprite = component.createObject(advancedscreen , {"x": 0, "y": 0});
     console.log("showing!")
-       if (sprite == null) {
-           // Error Handling
-           console.log("Error creating object")
-}
+    if (sprite == null) {
+        // Error Handling
+        console.log("Error creating object")
+    }
 }
 
 var toBeCreated
 var component
 
 function createFilterObjects(toBeCreated) {
-    console.log(toBeCreated)
-    component = Qt.createComponent(toBeCreated);
-       sprite = component.createObject(fileviewscreen , {"x": 0, "y": 0});
-   setRequestMore(false)
+    component = Qt.createComponent("../components/"+toBeCreated);
 
-    console.log("showing!")
-       if (sprite == null) {
-           // Error Handling
-           console.log("Error creating object")
+    if(component.status === Component.Ready)
+    {
+        component_sprite = component.createObject(fileviewscreen, {"x":0, "y": 0});
+    }
+    else if (component.status === Component.Error)
+    {
+        console.log("Error in stage component object")
+    }
+    else if (component.status === Component.Loading)
+    {
+        component.statusChanged.connect(finishFilterCreation())
+    }
 }
+
+function finishFilterCreation(){
+
 }
 
 var toBeDeleted
@@ -76,12 +84,12 @@ var toBeDeleted
 function deleteFilterObjects(toBeDeleted) {
     console.log(toBeCreated)
     component = Qt.createComponent(toBeCreated);
-       sprite = component.createObject(fileviewscreen , {"x": 0, "y": 0});
+    sprite = component.createObject(fileviewscreen , {"x": 0, "y": 0});
     console.log("showing!")
-       if (sprite == null) {
-           // Error Handling
-           console.log("Error creating object")
-}
+    if (sprite == null) {
+        // Error Handling
+        console.log("Error creating object")
+    }
 }
 
 
@@ -95,11 +103,11 @@ function createFileDetails(mediatype) {
     detailcomponent = Qt.createComponent("../components/FileDetails"+mediatype+".qml");
     detailsprite = detailcomponent.createObject(fileviewscreen , {"x": 0, "y": 0, "z": 10});
 
-       if (detailsprite == null) {
-           // Error Handling
-           console.log("Error File Detail object")
-           detailcomponent = Qt.createComponent("../components/FileDetails.qml");
-           detailsprite = detailcomponent.createObject(fileviewscreen , {"x": 0, "y": 0, "z": 10});
+    if (detailsprite == null) {
+        // Error Handling
+        console.log("Error File Detail object")
+        detailcomponent = Qt.createComponent("../components/FileDetails.qml");
+        detailsprite = detailcomponent.createObject(fileviewscreen , {"x": 0, "y": 0, "z": 10});
     }
 }
 
@@ -109,12 +117,12 @@ var roomsprite
 function createRoomSelector() {
 
     roomcomponent = Qt.createComponent("../components/RoomSelector.qml");
-       roomsprite = roomcomponent.createObject(stage, {"x":200, "y": 200});
+    roomsprite = roomcomponent.createObject(stage, {"x":200, "y": 200});
 
-       if (roomsprite == null) {
-           // Error Handling
-           console.log("Error File Detail object")
-}
+    if (roomsprite == null) {
+        // Error Handling
+        console.log("Error File Detail object")
+    }
 }
 
 var powercomponent
@@ -123,12 +131,12 @@ var powersprite
 function createPowerButton() {
 
     powercomponent = Qt.createComponent("../components/Power.qml");
-       powersprite = powercomponent.createObject(stage, {"x":200, "y": 500});
+    powersprite = powercomponent.createObject(stage, {"x":200, "y": 500});
 
-       if (powersprite == null) {
-           // Error Handling
-           console.log("Error File Detail object")
-}
+    if (powersprite == null) {
+        // Error Handling
+        console.log("Error File Detail object")
+    }
 }
 
 var avcomponent
@@ -138,12 +146,12 @@ var screen
 function createAvComponent(incavcomponent, screen) {
 
     avcomponent = Qt.createComponent(incavcomponent);
-       avsprite = avcomponent.createObject(screen, {"x":200, "y": 500});
+    avsprite = avcomponent.createObject(screen, {"x":200, "y": 500});
 
-       if (avsprite == null) {
-           // Error Handling
-           console.log("Error in av component object")
-}
+    if (avsprite == null) {
+        // Error Handling
+        console.log("Error in av component object")
+    }
 }
 
 
@@ -154,10 +162,10 @@ var thumbscreen
 function createThumbComponent(incavcomponent, thumbscreen) {
 
     thumbcomponent = Qt.createComponent(incavcomponent);
-       thumbsprite = thumbcomponent.createObject(thumbscreen, {"x":200, "y": 50});
+    thumbsprite = thumbcomponent.createObject(thumbscreen, {"x":200, "y": 50});
 
-       if (thumbsprite == null) {
-           // Error Handling
-           console.log("Error in av component object")
-}
+    if (thumbsprite == null) {
+        // Error Handling
+        console.log("Error in av component object")
+    }
 }

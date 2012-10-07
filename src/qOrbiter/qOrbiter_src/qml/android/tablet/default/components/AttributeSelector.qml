@@ -6,6 +6,15 @@ Rectangle {
             height: childrenRect.height
             width: childrenRect.width
             color: "transparent"
+
+            function createSelectorComponent(componentName){
+
+            }
+
+            function finishSelectorComponent(componentName){
+
+            }
+
             Row{
                 id:attributerow
                 height: scaleY(style.buttonH )
@@ -33,7 +42,7 @@ Rectangle {
                     width:  scaleX(style.buttonW)
                     MouseArea{
                         anchors.fill:parent
-                        onClicked: MyJs.createFilterObjects("../components/AttributeTypes.qml")
+                        onClicked: MyJs.createStageComponent("../components/AttributeTypes.qml", fileviewscreen)
                         }
                 }
 

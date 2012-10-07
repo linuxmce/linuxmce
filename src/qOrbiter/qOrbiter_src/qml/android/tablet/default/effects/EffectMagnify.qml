@@ -40,12 +40,54 @@
 ****************************************************************************/
 
 import QtQuick 1.0
-import Qt.labs.shaders 1.0
 
-
-
-    Effect {
-        fragmentShaderFilename: "vignette.fsh"
+Effect {
+    id: root
+    divider: false
+    parameters: ListModel {
+        ListElement {
+            name: "radius"
+            value: 0.5
+        }
+        ListElement {
+            name: "diffraction"
+            value: 0.5
+        }
     }
 
+    property real posX: -1
+    property real posY: -1
 
+    QtObject {
+        id: d
+        property real oldTargetWidth: root.targetWidth
+        property real oldTargetHeight: root.targetHeight
+    }
+
+    // Transform slider values, and bind result to shader uniforms
+    property real radius: parameters.get(0).value * 100
+    property real diffractionIndex: parameters.get(1).value
+
+    onTargetWidthChanged: {
+        if (posX == -1)
+            posX = targetWidth / 2
+        else if (d.oldTargetWidth != 0)
+            posX *= (targetWidth / d.oldTargetWidth)
+        d.oldTargetWidth = targetWidth
+    }
+
+    onTargetHeightChanged: {
+        if (posY == -1)
+            posY = targetHeight / 2
+        else if (d.oldTargetHeight != 0)
+            posY *= (targetHeight / d.oldTargetHeight)
+        d.oldTargetHeight = targetHeight
+    }
+
+    fragmentShaderFilename: "shaders/magnify.fsh"
+
+    MouseArea {
+        anchors.fill: parent
+        onPositionChanged: { root.posX = mouse.x; root.posY = root.targetHeight - mouse.y }
+    }
+}

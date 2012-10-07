@@ -40,12 +40,20 @@
 ****************************************************************************/
 
 import QtQuick 1.0
-import Qt.labs.shaders 1.0
 
-
-
-    Effect {
-        fragmentShaderFilename: "vignette.fsh"
+Effect {
+    parameters: ListModel {
+        ListElement {
+            name: "threshold"
+            value: 0.5
+        }
     }
 
+    // Transform slider values, and bind result to shader uniforms
+    property real mixLevel: parameters.get(0).value
+    property real targetSize: 250 - (200 * mixLevel) // TODO: fix ...
+    property real resS: targetSize
+    property real resT: targetSize
 
+    fragmentShaderFilename: "shaders/sobeledgedetection1.fsh"
+}

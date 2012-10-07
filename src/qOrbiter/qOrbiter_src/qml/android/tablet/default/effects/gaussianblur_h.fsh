@@ -39,13 +39,29 @@
 **
 ****************************************************************************/
 
-import QtQuick 1.0
-import Qt.labs.shaders 1.0
+uniform float dividerValue;
+uniform float blurSize;
 
+uniform sampler2D source;
+uniform lowp float qt_Opacity;
+varying vec2 qt_TexCoord0;
 
-
-    Effect {
-        fragmentShaderFilename: "vignette.fsh"
+void main()
+{
+    vec2 uv = qt_TexCoord0.xy;
+    vec4 c = vec4(0.0);
+    if (uv.x < dividerValue) {
+        c += texture2D(source, uv - vec2(4.0*blurSize, 0.0)) * 0.05;
+        c += texture2D(source, uv - vec2(3.0*blurSize, 0.0)) * 0.09;
+        c += texture2D(source, uv - vec2(2.0*blurSize, 0.0)) * 0.12;
+        c += texture2D(source, uv - vec2(1.0*blurSize, 0.0)) * 0.15;
+        c += texture2D(source, uv) * 0.18;
+        c += texture2D(source, uv + vec2(1.0*blurSize, 0.0)) * 0.15;
+        c += texture2D(source, uv + vec2(2.0*blurSize, 0.0)) * 0.12;
+        c += texture2D(source, uv + vec2(3.0*blurSize, 0.0)) * 0.09;
+        c += texture2D(source, uv + vec2(4.0*blurSize, 0.0)) * 0.05;
+    } else {
+        c = texture2D(source, qt_TexCoord0);
     }
-
-
+    gl_FragColor = qt_Opacity * c;
+}
