@@ -82,7 +82,7 @@ symbian {
 TRANSLATIONS += app_de.ts
 # Add more folders to ship with the application, here
 #linux deploy configuration
-for_desktop{
+linux-g++{
 folder_01.source = qml/desktop
 folder_01.target = $$DESTDIR/qml
 
@@ -97,7 +97,7 @@ DEFINES += for_desktop
 plugins_folder.source = imports/
 plugins_folder.target = $$DESTDIR
 DEPLOYMENTFOLDERS+= plugins_folder
-DEPLOYMENTFOLDERS += folder_01 folder_02 folder_03 folder_05
+DEPLOYMENTFOLDERS += folder_01  folder_03 folder_05
 }
 
 #windows deployment and module config
