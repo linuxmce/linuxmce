@@ -164,8 +164,8 @@ Rectangle {
             }
         }
     }
-    ConfigPanel{
-        id:localConfigPanel
-    }
+//    ConfigPanel{
+//        id:localConfigPanel
+//    }
 }
 
