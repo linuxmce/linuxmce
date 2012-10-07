@@ -9,6 +9,7 @@
 #else
 #include <QtDeclarative/QDeclarativeView>
 #include <QtDeclarative/QDeclarativeContext>
+#include <qmlapplicationviewer.h>
 #endif
 #include <QVariant>
 
@@ -41,7 +42,7 @@ public:
 #if (QT5)
     QQuickView  mainView;
 #else
-    QDeclarativeView  mainView;
+    QmlApplicationViewer  mainView;
 #endif
     QString buildType;
     QString qrcPath;

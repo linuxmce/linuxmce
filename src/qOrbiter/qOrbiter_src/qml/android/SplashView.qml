@@ -1,5 +1,6 @@
 // import QtQuick 1.0 // to target S60 5th Edition or Maemo 5
 import QtQuick 1.1
+import com.nokia.android 1.1
 
 Rectangle {
     height:appH
@@ -15,7 +16,7 @@ Rectangle {
     }
     Image {
         id: splash
-        anchors.centerIn: splashPage
+        anchors.centerIn: parent
         fillMode: Image.PreserveAspectFit
         source: "qrc:/img/desktop_splash.png"
         anchors.fill: parent
@@ -144,7 +145,7 @@ Rectangle {
         height: scaleY(20)
         radius: 7
         anchors.horizontalCenterOffset: 1
-        anchors.centerIn: splashPage
+        anchors.centerIn: parent
         border.width: 1
         border.color: "#000000"
         gradient: Gradient {

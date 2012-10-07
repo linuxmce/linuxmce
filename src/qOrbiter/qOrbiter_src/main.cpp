@@ -294,9 +294,10 @@ int main(int argc, char* argv[])
         qOrbiter *pqOrbiter = new qOrbiter(PK_Device, sRouter_IP,true,bLocalMode );
 
 
+
         orbiterWindow orbiterWin(PK_Device, sRouter_IP);
         orbiterWin.mainView.rootContext()->setContextProperty("dcerouter", pqOrbiter); //dcecontext object
-pqOrbiter->moveToThread(dceThread);
+        pqOrbiter->moveToThread(dceThread);
        // gWeatherModel *theWeather= new gWeatherModel(new gWeatherItem);
         typedef QMap <int, QString> myMap;
         int throwaway = qRegisterMetaType<myMap>("myMap");

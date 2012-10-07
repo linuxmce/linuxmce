@@ -3,6 +3,7 @@
   */
 import QtQuick 1.0
 
+
 Item {
     id: splashLogic
     height:appH
@@ -53,7 +54,7 @@ Item {
 
     Connections{
         target:window
-        onMessageChanged:loadingStatus.text = window.message
+//        onMessageChanged:loadingStatus.text = window.message
         //onStatusChanged: screenchange("SetupNewOrbiter.qml")
     }
 }

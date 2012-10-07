@@ -129,10 +129,16 @@ folder_05.target = $$DESTDIR/qml
 folder_03.source = config.xml
 folder_03.target = $$DESTDIR
 
-    qmlcomponents.source = androidComponents/
-    qmlcomponents.target = imports/
+    qmlcomponents.source = androidComponents/Qt \ androidComponents/com
+    qmlcomponents.target = qml/imports/
 
-    qmlplugins.files = androidPlugins/libqmlshadersplugin.so
+qmlbase.source = qml/android/base.qml
+qmlbase.target = $$DESTDIR/qml
+
+    qmlplugins.files = \
+ androidPlugins/libqmlshadersplugin.so \
+androidPlugins/libandroidplugin_1_1.so \
+
         x86 {
             qmlplugins.path = /libs/x86
         } else: armeabi-v7a {
@@ -205,10 +211,13 @@ folder_05.target = qml
 
 folder_03.source = config.xml
 folder_03.target = $$DESTDIR
-    qmlcomponents.source = androidComponents/
-    qmlcomponents.target = imports/
 
-    qmlplugins.files = androidPlugins/libqmlshadersplugin.so
+ qmlcomponents.source = androidComponents
+ qmlcomponents.target = imports/
+
+qmlplugins.files = \
+androidPlugins/libqmlshadersplugin.so \
+androidPlugins/libandroidplugin_1_1.so
 
         x86 {
             qmlplugins.path = /libs/x86
@@ -221,10 +230,11 @@ folder_03.target = $$DESTDIR
     INSTALLS+= qmlplugins
     DEFINES+=ANDROID
 DEPLOYMENTFOLDERS = qmlcomponents folder_01
+QML_IMPORT_PATH = "androidComponents"
 }
 
 # Additional import path used to resolve QML modules in Creator's code model
-#QML_IMPORT_PATH = "imports/"
+
 #QML_IMPORT_TRACE = 1
 
 symbian:TARGET.UID3 = 0xE0D07D4D

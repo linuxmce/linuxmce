@@ -32,6 +32,7 @@
 #include <QQmlEngine>
 #include <QtWidgets/QApplication>
 #else
+#include <qmlapplicationviewer.h>
 #include <QtDeclarative/QDeclarativeView>
 #include <QtDeclarative/qdeclarative.h>
 #include <QtDeclarative/QDeclarativeEngine>
@@ -170,17 +171,13 @@ localPath = "android/";
 
 #endif
        #ifdef Q_OS_ANDROID
-     mainView.setSource(qrcPath);
+    mainView.addImportPath("assets:/imports/androidComponents");
+    mainView.engine()->addPluginPath(QDir::homePath()+"/../lib");
+    mainView.rootContext()->setBaseUrl(QUrl::fromLocalFile("/"));
+    mainView.setMainQmlFile("qml/android/Base.qml");
 #else
     mainView.setSource(QApplication::applicationDirPath()+buildType+"/Splash.qml");
 #endif
-
-#ifdef Q_OS_ANDROID
-     mainView.rootContext()->setBaseUrl(QUrl::fromLocalFile("/"));
-     mainView.rootContext()->engine()->addImportPath("assets:imports/");
-     mainView.rootContext()->engine()->addPluginPath(QDir::homePath()+"/../lib");
-#endif
-
 
 #ifdef Q_OS_SYMBIAN
     mainView.showFullScreen();
