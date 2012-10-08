@@ -361,6 +361,7 @@ void Event_Plugin::GetHouseModes(Message* pMessage) {
 bool Event_Plugin::ProcessEvent(class Socket *pSocket,class Message *pMessage,class DeviceData_Base *pDeviceFrom,class DeviceData_Base *pDeviceTo)
 {
 	PLUTO_SAFETY_LOCK(em,m_EventMutex);
+	LoggerWrapper::GetInstance()->Write(LV_EVENT, "Entering Event_Plugin::ProcessEvent()");
 	ListEventHandler *pListEventHandler = m_mapListEventHandler_Find(pMessage->m_dwID);
 	if( pListEventHandler==NULL ) // No handlers for this type of event
 	{
@@ -372,7 +373,7 @@ bool Event_Plugin::ProcessEvent(class Socket *pSocket,class Message *pMessage,cl
 	EventInfo *pEventInfo = new EventInfo(pMessage->m_dwID,pMessage,(DeviceData_Router *)pDeviceFrom, m_mapPK_HouseMode[0]);
 //	m_listEventInfo.push_back(pEventInfo);
 
-//	LoggerWrapper::GetInstance()->Write(LV_EVENT,"Event #%d has %d handlers",pEventInfo->m_iPKID_Event,(int)pEvent->m_vectEventHandlers.size());
+	LoggerWrapper::GetInstance()->Write(LV_EVENT,"Event #%d has %d handlers",pEventInfo->m_iPKID_Event,(int)pEvent->m_vectEventHandlers.size());
 	for(ListEventHandler::iterator it=pListEventHandler->begin();it!=pListEventHandler->end();++it)
 	{
 		EventHandler *pEventHandler = *it;
