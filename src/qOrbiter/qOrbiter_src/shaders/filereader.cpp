@@ -92,7 +92,8 @@ QString FileReader::readFile(const QString &fileName)
 #else
 
     qDebug() << "FileReader::readFile" << "fileName" << fileName << "adjusted" << adjustPath(fileName);
-     QFile file(QCoreApplication::applicationDirPath()+"/qml/android/phone/default/effects/"+fileName);
+    QFile file("assets:/qml/android/phone/default/effects/"+fileName);
+//     QFile file(QCoreApplication::applicationDirPath()+"/qml/android/phone/default/effects/"+fileName);
      QString content;
      if (file.open(QIODevice::ReadOnly)) {
          QTextStream stream(&file);

@@ -228,9 +228,10 @@ androidPlugins/libandroidplugin_1_1.so
         }
 
     INSTALLS+= qmlplugins
-    DEFINES+=ANDROID
+    DEFINES+=ANDROID GLENABLED
 DEPLOYMENTFOLDERS = qmlcomponents folder_01
 QML_IMPORT_PATH = "androidComponents"
+
 }
 
 # Additional import path used to resolve QML modules in Creator's code model
@@ -534,7 +535,8 @@ OTHER_FILES += Readme.txt \
     qml/shaders/gaussianblur_h.fsh \
     qml/effects/EffectGaussianBlur.qml \
     qmldir \
-    qml/SplashView.qml
+    qml/SplashView.qml \
+    ../../../../mnt/remote/android-qml/android/tablet/default/effects/qmldir
 
 
 for_harmattan{

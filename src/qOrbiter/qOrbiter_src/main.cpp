@@ -399,9 +399,9 @@ int main(int argc, char* argv[])
         QObject::connect(pqOrbiter, SIGNAL(configReady(QByteArray)), w, SLOT(processConfig(QByteArray)),Qt::QueuedConnection);
         QObject::connect(w, SIGNAL(raiseSplash()), &orbiterWin, SLOT(showSplash()) );
         QObject::connect(w,SIGNAL(showSetup()), &orbiterWin, SLOT( showSetup()) );
-#ifndef ANDROID
+
         QObject::connect(pqOrbiter, SIGNAL(screenSaverImages(QStringList)), w->ScreenSaver, SLOT(setImageList(QStringList)),Qt::QueuedConnection);
-#endif
+
         QObject::connect(pqOrbiter, SIGNAL(setMyIp(QString)), w, SLOT(setInternalIp(QString)),Qt::QueuedConnection);
         QObject::connect(&orbiterWin, SIGNAL(setupNewOrbiter()), pqOrbiter,SLOT(populateSetupInformation()));
         QObject::connect(pqOrbiter,SIGNAL(promptResponse(int,QList<QObject*>)), &orbiterWin, SLOT(displayPromptResponse(int, QList<QObject*> )));
@@ -419,10 +419,10 @@ int main(int argc, char* argv[])
         QObject::connect(w, SIGNAL(userChanged(int)), pqOrbiter, SLOT(setUser(int)),Qt::QueuedConnection);
         QObject::connect(w, SIGNAL(bindMediaRemote(bool)), pqOrbiter, SLOT(BindMediaRemote(bool)), Qt::QueuedConnection);
         QObject::connect(w, SIGNAL(startPlayback(QString)), pqOrbiter, SLOT(playMedia(QString)),Qt::QueuedConnection);
-#ifndef ANDROID
+
         QObject::connect(w->ScreenSaver, SIGNAL(requestNewImage(QString)), pqOrbiter, SLOT(getScreenSaverImage(QString)), Qt::QueuedConnection);
         QObject::connect(pqOrbiter, SIGNAL(currentScreenSaverImage(const uchar*,int)), w->ScreenSaver, SLOT(setImageData(const uchar*,int)),Qt::QueuedConnection);
-#endif
+
         // QObject::connect(w, SIGNAL(liveTVrequest()), simpleEPGmodel, SLOT(populate()));
 
         //sleeping alarms

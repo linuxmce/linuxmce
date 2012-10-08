@@ -107,8 +107,8 @@ orbiterWindow::orbiterWindow(long deviceid, std::string routerip, QObject *paren
 #elif for_android
 
 #elif __ANDROID__
-    glWidget = new QGLWidget();
-    mainView.setViewport(glWidget);
+//    glWidget = new QGLWidget();
+//    mainView.setViewport(glWidget);
     mainView.setViewportUpdateMode(QGraphicsView::FullViewportUpdate);
 #endif
 

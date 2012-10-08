@@ -121,9 +121,9 @@ qorbiterManager::qorbiterManager(QDeclarativeView *view, QObject *parent) :
 
     QObject::connect(this, SIGNAL(orbiterReady(bool)), this, SLOT(showUI(bool)));
     QObject::connect(this, SIGNAL(skinDataLoaded(bool)), SLOT(showUI(bool)));
-#ifndef ANDROID
+
     ScreenSaver = new ScreenSaverClass(this);
-#endif
+
 #ifdef for_desktop
     buildType = "/qml/desktop";
     qrcPath = buildType+"/Splash.qml";
@@ -747,9 +747,8 @@ void qorbiterManager::processConfig(QByteArray config)
 
     configData.clear();
     tConf.clear();
-#ifndef ANDROID
     activateScreenSaver();
-#endif
+
     emit registerOrbiter((userList->find(sPK_User)->data(4).toInt()), QString::number(iea_area), iFK_Room );
     setOrbiterStatus(true);
 }
