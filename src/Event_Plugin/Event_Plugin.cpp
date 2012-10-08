@@ -373,15 +373,17 @@ bool Event_Plugin::ProcessEvent(class Socket *pSocket,class Message *pMessage,cl
 	EventInfo *pEventInfo = new EventInfo(pMessage->m_dwID,pMessage,(DeviceData_Router *)pDeviceFrom, m_mapPK_HouseMode[0]);
 //	m_listEventInfo.push_back(pEventInfo);
 
-	LoggerWrapper::GetInstance()->Write(LV_EVENT,"Event #%d has %d handlers",pEventInfo->m_iPKID_Event,(int)pEvent->m_vectEventHandlers.size());
+	LoggerWrapper::GetInstance()->Write(LV_EVENT,"Event #%d has %d handlers",pEventInfo->m_iPK_Event,(int)pEventInfo->m_vectEventHandlers.size());
 	for(ListEventHandler::iterator it=pListEventHandler->begin();it!=pListEventHandler->end();++it)
 	{
 		EventHandler *pEventHandler = *it;
 //		pEventInfo->m_vectEventHandlers.push_back(pEventHandler);
 //		pEventInfo->pEventHandler = pEventHandler;
 
-		if(pEventHandler->m_pCommandGroup==NULL)
+		if(pEventHandler->m_pCommandGroup==NULL) {
+			LoggerWrapper::GetInstance()->Write(LV_EVENT,"no command group for this eventhandler");
 			continue;  // This event handler doesn't have anything to do anyway
+		}
 
 		bool bResult = true;  // it's true unless there's a criteria that evaluates to false
 
