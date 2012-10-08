@@ -32,13 +32,13 @@ Item {
         sprite.border.width = selected ? 1 : 0
     }
 
-    Image {
-        id: fpDevice_image
-        source: "../img/floorplanitems/"+deviceType+".png"
-        sourceSize:Qt.size(scaleY(5), scaleY(5))
-        anchors.centerIn: parent
-        cache: false
-    }
+//    Image {
+//        id: fpDevice_image
+//        source: "../img/floorplanitems/"+deviceType+".png"
+//        sourceSize:Qt.size(scaleY(5), scaleY(5))
+//        anchors.centerIn: parent
+//        cache: false
+//    }
 
     Text {
         id: device_number

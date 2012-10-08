@@ -1,12 +1,15 @@
 import QtQuick 1.0
-
-
+import Qt.labs.shaders 1.0
 
 Rectangle {
     id:ssholder
     width: appW
     height: appH
     color: "black"
+
+    Component.onCompleted: screensaver.transitionDuration = 60000
+
+
 
     function changeStuff()
     {
@@ -16,12 +19,9 @@ Rectangle {
 
     function changePic()
     {
-
-
             ssimg.source = "image://listprovider/screensaver/"+securityvideo.timestamp
             raise.running = true
             animation_section2.running = true
-
     }
 
     function startZoom()
@@ -56,31 +56,7 @@ Rectangle {
             onImageChanged:changeStuff()
         }
     }
-    /*
-    EffectBillboard{
-        id: billboard
-        anchors.fill: ssimg
-        divider: false
-        dividerValue: 1.0
 
-        targetHeight: ssimg.height
-        targetWidth: ssimg.width
-        source: ssimg
-        grid:6.0
-
-        //source: ShaderEffectSource { sourceItem: ssimg; hideSource: true }
-        SequentialAnimation{
-            id:animation_section
-            loops: Animation.Infinite
-            running: true
-           // PropertyAnimation {target: blur; property: "opacity"; to:0 ; duration: 1000 }
-            PropertyAnimation { target: billboard; property: "grid"; to: 3.0; duration: 5000}
-          //  PropertyAnimation {target: blur; property: "opacity"; to:1 ; duration: 1000 }
-            PropertyAnimation { target: billboard; property: "grid"; to: 6.0; duration: 5000}
-             PropertyAnimation { target: billboard; property: "grid"; to: 3.0; duration: 5000}
-        }
-    }
-*/
     EffectGaussianBlur{
         id: blur
         anchors.fill: ssimg
@@ -99,7 +75,7 @@ Rectangle {
         running: false
         PropertyAnimation { target: blur; property: "radius"; to: 0.75; duration: 250}
         // PropertyAnimation {target: blur; property: "opacity"; to:0 ; duration: 1000 }
-        PropertyAnimation { target: blur; property: "radius"; to: 0.0; duration: 2000}
+        PropertyAnimation { target: blur; property: "radius"; to: 0.0; duration: screensaver.transitionDuration-10000}
         //  PropertyAnimation {target: blur; property: "opacity"; to:1 ; duration: 1000 }
         PauseAnimation { duration: 5500 }
         PropertyAnimation { target: blur; property: "radius"; to: 0.75; duration: 1000}

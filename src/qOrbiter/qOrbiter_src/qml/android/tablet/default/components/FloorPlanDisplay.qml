@@ -24,7 +24,8 @@ Rectangle {
         console.log("Creating Sprite")
         c = Qt.createComponent("FpSprite.qml");
         if(c.status === Component.Loading)
-        {   console.log("Component Loading")
+        {
+            console.log("Component Loading")
            finishPlacingSprites(c,pX,pY, num, state, devtype)
         }
         else if (c.status === Component.Error)
@@ -44,10 +45,21 @@ Rectangle {
         if(c.status === Component.Ready )
         {
             var sprite = c.createObject(floorplanimage, {"x": x, "y": y, "deviceNum": num, "deviceType": devtype});
+            if(sprite === null){
+                console.log("Component Load Error")
+                return
+            }
+            console.log("Finished with sprite")
         }
-        else
+        else if (c.status === Component.Error)
         {
-            finishPlacingSprites(c,x,y,num, state, devtype)
+            console.log("Component is not ready")
+                   console.log("Component Error::"+c.errorString())
+        }
+        else if (c.status === Component.Loading){
+            console.log("Still loading"+c.progress)
+            if (component.progress !== 0)
+            finishPlacingSprites()
         }
 
     }

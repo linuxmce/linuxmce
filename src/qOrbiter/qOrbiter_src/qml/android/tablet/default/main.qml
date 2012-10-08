@@ -1,7 +1,7 @@
 import QtQuick 1.1
 import "components"
 import "js/ComponentLoader.js" as MyJs
-
+import "effects"
 
 
 Item {
@@ -16,6 +16,8 @@ Item {
                 GradientStop { position: .85; color: "slategrey" }
             }
     }
+
+
 
 
 

@@ -1,5 +1,6 @@
 import QtQuick 1.1
 import com.nokia.android 1.1
+import Qt.labs.shaders 1.0
 
 Item {
     anchors.fill: parent
@@ -8,5 +9,7 @@ Item {
         anchors.fill: parent
         source:"http://"+dcerouter.dceIP+"lmce-admin/skins/android/Splash.qml"
     }
+
+
 
 }
