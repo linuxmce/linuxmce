@@ -182,7 +182,7 @@ Setup_XineConf()
 		*H*)
 			XineConfSet audio.device.alsa_front_device asym_hdmi "$XineConf"
 			XineConfSet audio.device.alsa_default_device asym_hdmi "$XineConf"
-			XineConfSet audio.device.alsa_passthrough_device 'plughw' "${SoundCard},${SoundDevice}" "$XineConf" 
+			XineConfSet audio.device.alsa_passthrough_device:plughw "${SoundCard},${SoundDevice}" "$XineConf" 
 			;;
 		*)
 			XineConfSet audio.device.alsa_front_device "$AnalogPlaybackCard" "$XineConf"
