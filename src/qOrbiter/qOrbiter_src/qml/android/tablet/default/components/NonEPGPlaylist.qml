@@ -1,4 +1,5 @@
 import QtQuick 1.0
+import com.nokia.android 1.1
 
 Rectangle {
     id:nonepgplaylist
@@ -9,12 +10,21 @@ Rectangle {
     property bool optionVisible: false
     Connections{
         target: mediaplaylist
-        onActiveItemChanged:{
-            nonepgplaylistview.positionViewAtIndex(mediaplaylist.currentIndex, ListView.Beginning)
+        onActiveItemChanged: indexUpdate.start()
+}
+        Timer{
+            id:indexUpdate
+            interval: mediaplaylist.count()*10
+            running: false
+            onTriggered: {
+                console.log("interval is" + interval)
+                nonepgplaylistview.positionViewAtIndex(mediaplaylist.currentIndex, ListView.Beginning)
+                console.log("Current index is " + mediaplaylist.currentIndex)
+            }
         }
 
 
-    }
+
     /*
     BorderImage {
         id: borderimg
@@ -38,13 +48,9 @@ Rectangle {
         model: mediaplaylist
 
         delegate:
-            Rectangle {
-            border.color: "black"
-            border.width: 1
+            ListItem {
             width:scaleX(25)
             height: scaleY(12)
-            anchors.horizontalCenter: parent.horizontalCenter
-            color: "transparent"
             clip: true
             Image {
                 id: playlistimage
@@ -54,7 +60,7 @@ Rectangle {
                 opacity: .5
 
             }
-            Text {
+            ListItemText {
                 id: position
                 text: qsTr("Item #") + index
                 font.family: "DroidSans"
@@ -65,7 +71,7 @@ Rectangle {
                 opacity: .75
             }
 
-            Text {
+            ListItemText {
                 text:  index === dcenowplaying.m_iplaylistPosition ? "Now Playing - " + name : name
                 font.family: "DroidSans"
                 color: "aliceblue"
@@ -84,10 +90,8 @@ Rectangle {
                 opacity:index === dcenowplaying.m_iplaylistPosition ? .25 :  .15
             }
 
-            MouseArea{
-                anchors.fill: parent
-                onClicked: dcerouter.jumpToPlaylistPosition(index)
-            }
+             onClicked: dcerouter.jumpToPlaylistPosition(index)
+
 
             Column{
                 id:options

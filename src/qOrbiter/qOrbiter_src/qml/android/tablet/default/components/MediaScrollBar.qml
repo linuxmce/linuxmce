@@ -13,8 +13,8 @@ Rectangle {
 
     Rectangle{
         id:drag_indicator
-        height: scaleY(5)
-        width: scaleY(10)
+        height: scaleY(6)
+        width: scaleY(12)
         opacity: 0
         Text {
             id: drag_label
@@ -28,16 +28,16 @@ Rectangle {
     Image {
         id: scroller_transit
         source: "../img/icons/blue.png"
-        height: parent.height
-        width: parent.width
+        width: scaleX(44)
+        height: scaleY(3)
         anchors.centerIn: parent
 
     }
     Image {
         id: scroll_tab
         source: "../img/icons/scroller.png"
-        height: scaleY(5)
-        width: scaleX(2)
+        height: scaleY(7)
+        width: scaleX(4)
         anchors.verticalCenter: scroller_transit.verticalCenter
         x: ( dceTimecode.runningTimer / dceTimecode.tcTotalTime) * scroller.width
 
