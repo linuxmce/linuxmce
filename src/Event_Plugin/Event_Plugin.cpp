@@ -361,7 +361,6 @@ void Event_Plugin::GetHouseModes(Message* pMessage) {
 bool Event_Plugin::ProcessEvent(class Socket *pSocket,class Message *pMessage,class DeviceData_Base *pDeviceFrom,class DeviceData_Base *pDeviceTo)
 {
 	PLUTO_SAFETY_LOCK(em,m_EventMutex);
-	LoggerWrapper::GetInstance()->Write(LV_EVENT, "Entering Event_Plugin::ProcessEvent()");
 	ListEventHandler *pListEventHandler = m_mapListEventHandler_Find(pMessage->m_dwID);
 	if( pListEventHandler==NULL ) // No handlers for this type of event
 	{
@@ -373,10 +372,9 @@ bool Event_Plugin::ProcessEvent(class Socket *pSocket,class Message *pMessage,cl
 	EventInfo *pEventInfo = new EventInfo(pMessage->m_dwID,pMessage,(DeviceData_Router *)pDeviceFrom, m_mapPK_HouseMode[0]);
 //	m_listEventInfo.push_back(pEventInfo);
 
-	LoggerWrapper::GetInstance()->Write(LV_EVENT,"Event #%d has %d handlers",pEventInfo->m_iPK_Event,(int)pEventInfo->m_vectEventHandlers.size());
+//	LoggerWrapper::GetInstance()->Write(LV_EVENT,"Event #%d has %d handlers",pEventInfo->m_iPK_Event,(int)pEventInfo->m_vectEventHandlers.size());
 	for(ListEventHandler::iterator it=pListEventHandler->begin();it!=pListEventHandler->end();++it)
 	{
-		LoggerWrapper::GetInstance()->Write(LV_EVENT, "HARI DBEUG: iterating pListEventHandler");
 		EventHandler *pEventHandler = *it;
 //		pEventInfo->m_vectEventHandlers.push_back(pEventHandler);
 //		pEventInfo->pEventHandler = pEventHandler;
@@ -387,7 +385,6 @@ bool Event_Plugin::ProcessEvent(class Socket *pSocket,class Message *pMessage,cl
 		}
 
 		bool bResult = true;  // it's true unless there's a criteria that evaluates to false
-		LoggerWrapper::GetInstance()->Write(LV_EVENT,"Criteria: %i", bResult);
 
 		if( pEventHandler->m_OncePerSeconds && pEventHandler->m_tLastFired && time(NULL)-pEventHandler->m_tLastFired<pEventHandler->m_OncePerSeconds )
 		{
@@ -407,7 +404,6 @@ bool Event_Plugin::ProcessEvent(class Socket *pSocket,class Message *pMessage,cl
 				bResult=false;
 			}
 		}
-		LoggerWrapper::GetInstance()->Write(LV_EVENT,"Criteria: %i", bResult);
 
 		LoggerWrapper::GetInstance()->Write(LV_EVENTHANDLER,"Evaluated Event Handler: %d to: %d once per: %d last fired %d (time is %d)",
 			pEventHandler->m_PK_EventHander,(int) bResult,
