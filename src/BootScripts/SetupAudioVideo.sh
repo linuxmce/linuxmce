@@ -1,37 +1,41 @@
 #!/bin/bash
 . /usr/pluto/bin/pluto.func
+. /usr/pluto/bin/Config_Ops.sh
 . /usr/pluto/bin/Utils.sh
+. /usr/pluto/bin/SQL_Ops.sh
 
-DEVICECATEGORY_Media_Director=8
-DEVICECATEGORY_Video_Cards=125
-DEVICECATEGORY_Sound_Cards=124
-DEVICETEMPLATE_OnScreen_Orbiter=62
-DEVICEDATA_Video_settings=89
-DEVICEDATA_Audio_settings=88
-DEVICEDATA_Reboot=236
-DEVICEDATA_Connector=68
-DEVICEDATA_TV_Standard=229
-DEVICEDATA_Setup_Script=189
-DEVICEDATA_Sound_Card=288
-SettingsFile=/etc/pluto/lastaudiovideo.conf
+DEVICECATEGORY_Media_Director="8"
+DEVICECATEGORY_Video_Cards="125"
+DEVICECATEGORY_Sound_Cards="124"
+DEVICETEMPLATE_OnScreen_Orbiter="62"
+DEVICEDATA_Video_settings="89"
+DEVICEDATA_Audio_settings="88"
+DEVICEDATA_Reboot="236"
+DEVICEDATA_Connector="68"
+DEVICEDATA_TV_Standard="229"
+DEVICEDATA_Setup_Script="189"
+DEVICEDATA_Sound_Card="288"
+SettingsFile="/etc/pluto/lastaudiovideo.conf"
 
 # don't let KDE override xorg.conf
 rm -f {/home/*,/root}/.kde/share/config/displayconfigrc
 
-Reboot=NoReboot
-ReloadX=NoReloadX
+Reboot="NoReboot"
+ReloadX="NoReloadX"
 AudioSetting_Override="$1"
 SoundCard_Override="$2"
 XineConf_Override="$3"
 ComputerDev=$(FindDevice_Category "$PK_Device" "$DEVICECATEGORY_Media_Director" '' 'include-parent')
 OrbiterDev=$(FindDevice_Template "$ComputerDev" "$DEVICETEMPLATE_OnScreen_Orbiter")
 VideoCardDev=$(FindDevice_Category "$ComputerDev" "$DEVICECATEGORY_Video_Cards")
+Yalpa=$(aplay -l)
 
 if [[ -z "$VideoCardDev" ]]; then
 	VideoCardDev=$(FindDevice_Category "$PK_Device" "$DEVICECATEGORY_Video_Cards")
 fi
 
 SoundCardDev=$(FindDevice_Category "$ComputerDev" "$DEVICECATEGORY_Sound_Cards")
+
 if [[ -z "$SoundCardDev" ]]; then
 	SoundCardDev=$(FindDevice_Category "$PK_Device" "$DEVICECATEGORY_Sound_Cards")
 fi
@@ -55,12 +59,12 @@ GetVideoSetting()
 	VideoSetting=$(GetDeviceData "$ComputerDev" "$DEVICEDATA_Video_settings")
 
 	if [[ -n "$VideoSetting" ]]; then
-		Refresh=$(echo $VideoSetting | cut -d '/' -f2)
-		ResolutionInfo=$(echo $VideoSetting | cut -d '/' -f1)
-		ResX=$(echo $ResolutionInfo | cut -d' ' -f1)
-		ResY=$(echo $ResolutionInfo | cut -d' ' -f2)
+		Refresh=$(echo "$VideoSetting" | cut -d '/' -f2)
+		ResolutionInfo=$(echo "$VideoSetting" | cut -d '/' -f1)
+		ResX=$(echo "$ResolutionInfo" | cut -d' ' -f1)
+		ResY=$(echo "$ResolutionInfo" | cut -d' ' -f2)
 		if [[ -z "$Refresh" || -z "$ResX" || -z "$ResY" ]]; then
-			Logging "$TYPE" "$SEVERITY_CRITICAL" "SetupAudioVideo.sh" "Malformed DeviceData: VideoSetting='$VideoSetting'"
+			Logging "$TYPE" "$SEVERITY_CRITICAL" "SetupAudioVideo.sh" "Malformed DeviceData: VideoSetting='${VideoSetting}'"
 			MalformedVideoSetting='Malformed VideoSetting'
 		fi
 	fi
@@ -93,8 +97,10 @@ SaveSettings()
 Setup_AsoundConf()
 {
 	local AudioSetting="$1"
-	local SoundCard
-	local SoundDevice
+	local SoundCard="0"
+	local HDMIDevice="3"
+	local HWOnlyCard="0"
+	local AnalogPlaybackCard="plug:dmix:${SoundCard}"
 
 	# Do not mess with asound.conf if Audio Setting is set to Manual. This will only happen after the asound.conf has been generated at least once.
 	if [[ "$AudioSetting" == "M" ]]; then
@@ -107,7 +113,7 @@ Setup_AsoundConf()
 	Q="SELECT FK_DeviceTemplate FROM Device WHERE PK_Device=$PK_Device"
 	R=$(RunSQL "$Q")
 
-	if [[ "$R" == 7 ]]; then
+	if [[ "$R" == "7" ]]; then
 		Q="SELECT PK_Device FROM Device WHERE FK_DeviceTemplate=28 AND FK_Device_ControlledVia=$PK_Device"
 		R=$(RunSQL "$Q")
 		MD_Device=$(Field 1 "$R")
@@ -120,32 +126,23 @@ Setup_AsoundConf()
 	fi
 
 	SoundCard=$(TranslateSoundCard "$SoundCard")
+	HWOnlyCard="$SoundCard"
+	Yalpa=$(aplay -l)
+	HDMIDevice=$(grep -i "hdmi" <<< "$Yalpa" | grep -wo "device ." | awk '{print $2}')
 
-	if [[ -z "$SoundCard" ]]; then
-		SoundCard=0
-	fi
-
-	local AnalogPlaybackCard="plug:dmix:$SoundCard"
-
+	# Handle nVidia GT card types
 	case "$AudioSetting" in
-		*[CO]*)
-			# audio setting is Coaxial or Optical, i.e. S/PDIF
-			SoundDevice=$(aplay -l | grep -i "digital" | grep -wo "device ." | awk '{print $2}')
-		;;
 		*H*)
-			# audio setting is HDMI
-			SoundDevice=$(aplay -l | grep -i "hdmi" | grep -wo "device ." | awk '{print $2}')
-			if [[ $(echo "$SoundDevice" | wc -l) -gt "3" ]] && [[ $(echo "$SoundDevice" | grep "7") ]]; then
-				SoundDevice="7"
+			if [[ $(wc -l <<< "$HDMIDevice") -gt "3" ]]; then
+				if grep "7" <<< "$HDMIDevice"; then
+					HDMIDevice="7"
+				fi
+				SoundCard="${SoundCard},${HDMIDevice}"
 			fi
 		;;
-		*)
-			# audio setting is Stereo or something unknown
-			SoundDevice=$(aplay -l | grep -i "analog" | grep -wo "device ." | awk '{print $2}')
-		;;
-	esac
+	esac	
 
-	sed -r "s,%MAIN_CARD%,$SoundCard,g; s,%SOUND_DEVICE%,$SoundDevice,g; s,%ANALOG_PLAYBACK_CARD%,$AnalogPlaybackCard,g" /usr/pluto/templates/asound.conf >/etc/asound.conf
+	sed -r "s,%MAIN_CARD%,$SoundCard,g; s,%HWONLY_CARD%,$HWOnlyCard,; s,%SOUND_DEVICE%,$HDMIDevice,; s,%ANALOG_PLAYBACK_CARD%,$AnalogPlaybackCard,g" /usr/pluto/templates/asound.conf >/etc/asound.conf
 	case "$AudioSetting" in
 		*[CO]*)
 			# audio setting is Coaxial or Optical, i.e. S/PDIF
@@ -161,13 +158,13 @@ Setup_AsoundConf()
 		;;
 	esac
 
-	Setup_XineConf "$AudioSetting" "$SoundCard" "$AnalogPlaybackCard" "$SoundDevice"
+	Setup_XineConf "$AudioSetting" "$SoundCard" "$AnalogPlaybackCard"
 	alsa force-reload
 }
 
 Setup_XineConf()
 {
-	local AudioSetting="$1" SoundCard="$2" AnalogPlaybackCard="$3" SoundDevice="$4"
+	local AudioSetting="$1" SoundCard="$2" AnalogPlaybackCard="$3"
 	local XineConf=/etc/pluto/xine.conf
 
 	if [[ -n "$XineConf_Override" ]]; then
@@ -182,7 +179,7 @@ Setup_XineConf()
 		*H*)
 			XineConfSet audio.device.alsa_front_device asym_hdmi "$XineConf"
 			XineConfSet audio.device.alsa_default_device asym_hdmi "$XineConf"
-			XineConfSet audio.device.alsa_passthrough_device:plughw "${SoundCard},${SoundDevice}" "$XineConf" 
+			XineConfSet audio.device.alsa_passthrough_device:plughw "$SoundCard" "$XineConf" 
 			;;
 		*)
 			XineConfSet audio.device.alsa_front_device "$AnalogPlaybackCard" "$XineConf"
@@ -282,12 +279,12 @@ AudioSettings_Check()
 
 	if [[ "$NewSetting_AudioSetting" == *S* ]]; then
 		# S3 is not a valid combination and will break things
-		NewSetting_AudioSetting="${NewSetting_AudioSetting//3}"
+		NewSetting_AudioSetting=${NewSetting_AudioSetting//3}
 	fi
 
 	Setup_AsoundConf "$NewSetting_AudioSetting"
 
-	if [[ "$DB_Reboot" == 1 ]]; then
+	if [[ "$DB_Reboot" == "1" ]]; then
 		Reboot="Reboot"
 	fi
 }
@@ -302,9 +299,9 @@ if [[ -z "$(pidof X)" ]]; then
 	exit # no X is running
 fi
 
-if [[ "$Reboot" == Reboot ]]; then
+if [[ "$Reboot" == "Reboot" ]]; then
 	reboot
-elif [[ "$ReloadX" == ReloadX ]]; then
+elif [[ "$ReloadX" == "ReloadX" ]]; then
 	/usr/pluto/bin/RestartLocalX.sh &
 	disown -a
 fi
