@@ -1,29 +1,30 @@
 #!/bin/bash -x
 
 . /usr/pluto/bin/AVWizard-Common.sh
+. /usr/pluto/bin/Config_Ops.sh
 . /usr/pluto/bin/Utils.sh
 . /usr/pluto/bin/X-Common.sh
 
 ###########################################################
 ### Setup global variables
 ###########################################################
-DEVICETEMPLATE_OnScreen_Orbiter=62
-DEVICETEMPLATE_OrbiterPlugin=12
-DEVICECATEGORY_Media_Director=8
-DEVICEDATA_ScreenWidth=100
-DEVICEDATA_ScreenHeight=101
-DEVICEDATA_PK_Size=25
-DEVICEDATA_Video_settings=89
-DEVICEDATA_Connector=68
-DEVICEDATA_Spacing=150
-DEVICEDATA_Offset=167
-DEVICEDATA_TV_Standard=229
-DEVICEDATA_Sound_card=288
-COMMANDPARAMETER_PK_Device=2
-COMMANDPARAMETER_Force=21
-COMMANDPARAMETER_Reset=24
-UI_Normal_Horizontal=1
-UI_V2_Normal_Horizontal=4
+DEVICETEMPLATE_OnScreen_Orbiter="62"
+DEVICETEMPLATE_OrbiterPlugin="12"
+DEVICECATEGORY_Media_Director="8"
+DEVICEDATA_ScreenWidth="100"
+DEVICEDATA_ScreenHeight="101"
+DEVICEDATA_PK_Size="25"
+DEVICEDATA_Video_settings="89"
+DEVICEDATA_Connector="68"
+DEVICEDATA_Spacing="150"
+DEVICEDATA_Offset="167"
+DEVICEDATA_TV_Standard="229"
+DEVICEDATA_Sound_card="288"
+COMMANDPARAMETER_PK_Device="2"
+COMMANDPARAMETER_Force="21"
+COMMANDPARAMETER_Reset="24"
+UI_Normal_Horizontal="1"
+UI_V2_Normal_Horizontal="4"
 ConfFile="/etc/X11/xorg.conf"
 #From /usr/pluto/bin/Utils.sh - Sets LD_Library_Path
 UseAlternativeLibs
@@ -67,30 +68,30 @@ SetupX () {
 	fi
 	rmmod nvidia &>/dev/null || :
 	# default test assumes HDMI connection
-	bash -x "$BaseDir"/Xconfigure.sh --conffile "$XF86Config" --resolution '1280x720@60' --output HDMI-0 --tv-standard '720p (16:9)' --no-test
+	bash -x ${BaseDir}/Xconfigure.sh --conffile "$XF86Config" --resolution '1280x720@60' --output HDMI-0 --tv-standard '720p (16:9)' --no-test
 	if ! TestXConfig "$Display" "$XF86Config"; then
 		# Try a VGA connection with 640x480
-		bash -x "$BaseDir"/Xconfigure.sh --conffile "$XF86Config" --resolution '640x480@60' --output VGA --no-test
+		bash -x ${BaseDir}/Xconfigure.sh --conffile "$XF86Config" --resolution '640x480@60' --output VGA --no-test
 		if ! TestXConfig "$Display" "$XF86Config"; then
 			# vesa test
-			bash -x "$BaseDir"/Xconfigure.sh --conffile "$XF86Config" --resolution '640x480@60' --output VGA --force-vesa --no-test
+			bash -x ${BaseDir}/Xconfigure.sh --conffile "$XF86Config" --resolution '640x480@60' --output VGA --force-vesa --no-test
 			if ! TestXConfig "$Display" "$XF86Config"; then
 				# all tests failed
 				beep -l 350 -f 300 &
 				chvt 8
 				whiptail --msgbox "Failed to setup X" 0 0 --title "AVWizard" --clear </dev/tty8 &>/dev/tty8
 			else
-				"$BaseDir"/AVWizard-XineDefaultConfig.sh
+				${BaseDir}/AVWizard-XineDefaultConfig.sh
 				SetDefaults
 				DualBus
 			fi
 		else
-			"$BaseDir"/AVWizard-XineDefaultConfig.sh
+			${BaseDir}/AVWizard-XineDefaultConfig.sh
 			SetDefaults
 			DualBus
 		fi
 	else
-		"$BaseDir"/AVWizard-XineDefaultConfig.sh
+		${BaseDir}/AVWizard-XineDefaultConfig.sh
 		SetDefaults_720p
 		DualBus
 	fi
@@ -179,8 +180,8 @@ SetDefaults_720p () {
 
 UpdateAudioSettings () {
 	# Update audio settings of this machine
-	DEVICEDATA_Audio_Settings=88
-	DEVICECATEGORY_Media_Director=8
+	DEVICEDATA_Audio_Settings="88"
+	DEVICECATEGORY_Media_Director="8"
 
 	Q="
 		SELECT FK_DeviceCategory
@@ -234,7 +235,7 @@ UpdateAudioSettings () {
 	esac
 	
 	# if at least one of the digital streams passed the test, enable passthrough
-	if [[ "$WizAC3_Result" != 0 || "$WizDTS_Result" != 0 ]]; then
+	if [[ "$WizAC3_Result" != "0" || "$WizDTS_Result" != "0" ]]; then
 		PassThrough="3"
 	fi
 
@@ -366,12 +367,12 @@ Video_Driver_Detection () {
 	# the binary drivers
 	DriverInstalled="0"
 	driverConfig="none"
-	grep "Driver" /etc/X11/xorg.conf |grep -v "keyboard"| grep -v "#" | grep -v "vesa"|grep -v "mouse"|grep -vq "kbd" && DriverInstalled="1"
+	grep "Driver" /etc/X11/xorg.conf |grep -v "keyboard" | grep -v "#" | grep -v "vesa" | grep -v "mouse" | grep -vq "kbd" && DriverInstalled="1"
 	# Check if we have nVidia or ATI cards in here, and specify proper config programs and commandline options.
 	if [[ "$DriverInstalled" -eq "0" ]]; then
 		if [[ "$Best_Video_Driver" == "nvidia" ]]; then 
 			driverConfig="nvidia-xconfig"
-			driverLine=""
+			driverLine=
 		fi
 		if [[ "$Best_Video_Driver" == "fglrx" ]]; then 
 			driverConfig="aticonfig"
@@ -383,10 +384,10 @@ Video_Driver_Detection () {
 		fi
 	fi
 	
-	if [[ "$driverConfig" != none ]]; then
+	if [[ "$driverConfig" != "none" ]]; then
 		# Is it installed, if so execute it with any line params
-		driverConfigLocation=`which $driverConfig`
-		if [[ -x $driverConfigLocation ]]; then
+		driverConfigLocation=$(which "$driverConfig")
+		if [[ -x "$driverConfigLocation" ]]; then
 			$driverConfigLocation $driverLine
 			VerifyExitCode "Running $driverConfigLocation $driverLine failed!"
 		fi
@@ -415,17 +416,20 @@ GamePad_Setup () {
 Enable_Audio_Channels () {
 	# Added this to correctly unmute channels for setup wizard, and to 
 	# inject necessary unmuting commands for later bootup.
-	aplay -l | grep card | awk '{print $2}' | uniq | sed 's/://g' | while read CardNumber; do 
-		amixer -c "$CardNumber" | grep '\[off\]' -B5 | grep "Simple" | sed 's/Simple mixer control //g' | grep -vi capture | while read MuteStatus; do 
+	yalpa=$(aplay -l)
+	grep -iwo "card ." <<< "$yalpa" | awk '{print $2}' | uniq | while read CardNumber; do
+		amixer -c "$CardNumber" | grep '\[off\]' -B5 | grep "Simple" | sed 's/Simple mixer control //g' | grep -vi "capture" | while read MuteStatus; do 
 			amixer -c "$CardNumber" sset "$MuteStatus" unmute 
 		done
-		amixer -c "$CardNumber" | grep '\[.*\%\]' -B5 | grep "Simple" | sed 's/Simple mixer control //g' | grep -vi capture | while read VolLevel; do 
+		amixer -c "$CardNumber" | grep '\[.*\%\]' -B5 | grep "Simple" | sed 's/Simple mixer control //g' | grep -vi "capture" | while read VolLevel; do 
 			amixer -c "$CardNumber" sset "$VolLevel" 80%
 		done
 	done
-	sleep 2
-	if aplay -l | grep "card 1" | grep "device 7"; then 
-		aplay -Dplughw:1,7 /usr/share/sounds/linphone/rings/orig.wav
+	alsactl store
+
+	if grep -qi "device 7" <<< "$yalpa"; then 
+		CardNumber=$(grep -i "device 7" <<< "$yalpa" | grep -iwo "card ." | awk '{print $2}')
+		aplay -Dplughw:${CardNumber},7 /usr/share/sounds/linphone/rings/orig.wav
 	fi
 }
 
@@ -436,7 +440,7 @@ Start_AVWizard () {
 
 	#Setup Main AVWizard loop
 	Done=0
-	while [[ "$Done" -eq 0 ]]; do
+	while [[ "$Done" -eq "0" ]]; do
 		StatsMessage "AVWizard Main loop"
 		rm -f /tmp/*.xml
 		SetupX
