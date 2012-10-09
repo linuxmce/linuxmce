@@ -387,6 +387,7 @@ bool Event_Plugin::ProcessEvent(class Socket *pSocket,class Message *pMessage,cl
 		}
 
 		bool bResult = true;  // it's true unless there's a criteria that evaluates to false
+		LoggerWrapper::GetInstance()->Write(LV_EVENT,"Criteria: %i", bResult);
 
 		if( pEventHandler->m_OncePerSeconds && pEventHandler->m_tLastFired && time(NULL)-pEventHandler->m_tLastFired<pEventHandler->m_OncePerSeconds )
 		{
@@ -406,6 +407,7 @@ bool Event_Plugin::ProcessEvent(class Socket *pSocket,class Message *pMessage,cl
 				bResult=false;
 			}
 		}
+		LoggerWrapper::GetInstance()->Write(LV_EVENT,"Criteria: %i", bResult);
 
 		LoggerWrapper::GetInstance()->Write(LV_EVENTHANDLER,"Evaluated Event Handler: %d to: %d once per: %d last fired %d (time is %d)",
 			pEventHandler->m_PK_EventHander,(int) bResult,
