@@ -376,6 +376,7 @@ bool Event_Plugin::ProcessEvent(class Socket *pSocket,class Message *pMessage,cl
 	LoggerWrapper::GetInstance()->Write(LV_EVENT,"Event #%d has %d handlers",pEventInfo->m_iPK_Event,(int)pEventInfo->m_vectEventHandlers.size());
 	for(ListEventHandler::iterator it=pListEventHandler->begin();it!=pListEventHandler->end();++it)
 	{
+		LoggerWrapper::GetInstance()->Write(LV_EVENT, "HARI DBEUG: iterating pListEventHandler");
 		EventHandler *pEventHandler = *it;
 //		pEventInfo->m_vectEventHandlers.push_back(pEventHandler);
 //		pEventInfo->pEventHandler = pEventHandler;
