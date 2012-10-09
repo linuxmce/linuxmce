@@ -122,11 +122,9 @@ void Event_Plugin::Initialize(bool bReload)
 		if (bReload)
 			pRow_EventHandler->Reload();
 
-		if( pRow_EventHandler->Disabled_get() )
-			continue;
-
 		if( pRow_EventHandler->TimedEvent_get() )
 		{
+			// Load all timed events, even disabled ones - this is needed to be able to enable/disable them from the orbiter
 			TimedEvent *pTimedEvent = new TimedEvent(pRow_EventHandler, m_mapCriteria_Find(pRow_EventHandler->FK_Criteria_get()));
 #ifdef DEBUG
 			LoggerWrapper::GetInstance()->Write(LV_STATUS,"Adding timed event %d",pRow_EventHandler->PK_EventHandler_get());
@@ -143,6 +141,9 @@ void Event_Plugin::Initialize(bool bReload)
 		}
 		else
 		{
+			if( pRow_EventHandler->Disabled_get() )
+				continue;
+
 			EventHandler *pEventHandler = new EventHandler(pRow_EventHandler->PK_EventHandler_get(),
 				pRow_EventHandler->FK_Event_get(),m_pRouter->m_mapCommandGroup_Find(pRow_EventHandler->FK_CommandGroup_get()),
 				m_mapCriteria_Find(pRow_EventHandler->FK_Criteria_get()),pRow_EventHandler->OncePerSeconds_get());
