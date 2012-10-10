@@ -80,7 +80,7 @@ if [[ ! -f /etc/diskless.conf ]]; then
 			Logging $TYPE $SEVERITY_CRITICAL $module "Filesystem ( / ) was auto cleaned but there is still not much space left"
 			SystemFilesystemFull="true"
 		else
-			Logging $TYPE $SEVERITY_NORMAL $module "Filesyste ( / ) was auto cleaned and now looks ok"
+			Logging $TYPE $SEVERITY_NORMAL $module "Filesystem ( / ) was auto cleaned and now looks ok"
 		fi
 	fi
 
@@ -97,7 +97,7 @@ if [[ ! -f /etc/diskless.conf ]]; then
 		homeFree=$(echo $dfOutput | awk '{ print $4 }')
 
 		if [[ $homeUsed -gt 95 || $homeFree -lt 204800 ]] ;then
-			Logging $TYPE $SEVERITY_CRITICAL $module "Fielsystem ( /home ) wan auto cleaned but there is still no much space left"
+			Logging $TYPE $SEVERITY_CRITICAL $module "Filesystem ( /home ) wan auto cleaned but there is still not much space left"
 			SystemFilesystemFull="true"
 		else
 			Logging $TYPE $SEVERITY_NORMAL $module "Filesystem ( /home ) was auto cleaned and looks ok now"
@@ -110,7 +110,7 @@ if [[ ! -f /etc/diskless.conf ]]; then
 	RunSQL "$Q"
 
 	if [[ $SystemFilesystemFull == "true" ]]; then
-		# Triger the Low System Disk Space (64) event
+		# Trigger the Low System Disk Space (64) event
 		touch /var/DiskSpaceMonitor.stamp
 		LastEventTrigered=$(cat /var/DiskSpaceMonitor.stamp)
 		Now=$(date +%s)
