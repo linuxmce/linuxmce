@@ -27,7 +27,7 @@ public:
 
     QString currentStatus;
     QString qs_totalTime;
-
+    QThread *dcethread;
 
     QTcpServer *timeCodeServer;
     QString current_position;

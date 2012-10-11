@@ -1,5 +1,5 @@
 #include "mediamanager.h"
-
+#include <QThread>
 using namespace DCE;
 
 MediaManager::MediaManager(QDeclarativeItem *parent) :
@@ -37,6 +37,9 @@ MediaManager::MediaManager(QDeclarativeItem *parent) :
 void MediaManager::initializePlayer()
 {
     mediaPlayer = new qMediaPlayer(deviceNumber, serverAddress.toStdString(), true, false);
+    dcethread = new QThread(this);
+    mediaPlayer->moveToThread(dcethread);
+    dcethread->start();
     if (mediaPlayer->GetConfig() && mediaPlayer->Connect(DEVICETEMPLATE_qMediaPlayer_CONST))
     {
         setCurrentStatus("Connected to router, device running");
@@ -53,17 +56,17 @@ void MediaManager::initializePlayer()
 
 void MediaManager::initializeConnections()
 {
-    QObject::connect(mediaPlayer,SIGNAL(currentMediaUrlChanged(QString)), this, SLOT(setMediaUrl(QString)));
-    QObject::connect(mediaPlayer,SIGNAL(startPlayback()), mediaObject, SLOT(play()));
-    QObject::connect(mediaPlayer, SIGNAL(stopCurrentMedia()), mediaObject, SLOT(stop()));
-    QObject::connect(mediaPlayer, SIGNAL(pausePlayback()), mediaObject, SLOT(pause()));
-    QObject::connect(mediaPlayer,SIGNAL(commandResponseChanged(QString)), this ,SLOT(setCurrentStatus(QString)));
-    QObject::connect(mediaPlayer,SIGNAL(setZoomLevel(QString)), this, SLOT(setZoomLevel(QString)));
-    QObject::connect(mediaObject, SIGNAL(finished()), mediaPlayer, SLOT(mediaEnded()));
-    QObject::connect(mediaPlayer, SIGNAL(startPlayback()), this, SLOT(startTimeCodeServer()));
-    QObject::connect(mediaObject, SIGNAL(tick(qint64)), this, SLOT(processTimeCode(qint64)));
-    QObject::connect(mediaObject, SIGNAL(finished()), videoSurface, SLOT(lower()));
-    QObject::connect(mediaPlayer, SIGNAL(startPlayback()), videoSurface, SLOT(raise()));
+    QObject::connect(mediaPlayer,SIGNAL(currentMediaUrlChanged(QString)), this, SLOT(setMediaUrl(QString)),Qt::QueuedConnection);
+    QObject::connect(mediaPlayer,SIGNAL(startPlayback()), mediaObject, SLOT(play()),Qt::QueuedConnection);
+    QObject::connect(mediaPlayer, SIGNAL(stopCurrentMedia()), mediaObject, SLOT(stop()),Qt::QueuedConnection);
+    QObject::connect(mediaPlayer, SIGNAL(pausePlayback()), mediaObject, SLOT(pause()),Qt::QueuedConnection);
+    QObject::connect(mediaPlayer,SIGNAL(commandResponseChanged(QString)), this ,SLOT(setCurrentStatus(QString)),Qt::QueuedConnection);
+    QObject::connect(mediaPlayer,SIGNAL(setZoomLevel(QString)), this, SLOT(setZoomLevel(QString)),Qt::QueuedConnection);
+    QObject::connect(mediaObject, SIGNAL(finished()), mediaPlayer, SLOT(mediaEnded()),Qt::QueuedConnection);
+    QObject::connect(mediaPlayer, SIGNAL(startPlayback()), this, SLOT(startTimeCodeServer()),Qt::QueuedConnection);
+    QObject::connect(mediaObject, SIGNAL(tick(qint64)), this, SLOT(processTimeCode(qint64)),Qt::QueuedConnection);
+    QObject::connect(mediaObject, SIGNAL(finished()), videoSurface, SLOT(lower()),Qt::QueuedConnection);
+    QObject::connect(mediaPlayer, SIGNAL(startPlayback()), videoSurface, SLOT(raise()),Qt::QueuedConnection);
     mediaObject->setTickInterval(quint32(1000));
     //mediaObject->setCurrentSource(Phonon::MediaSource("/mnt/remote/121/public/data/videos/The Venture Brothers/TVB Season 1/The.Venture.Brothers.S01E12.The.Trial.of.the.Monarch.avi"));
     //mediaObject->play();
