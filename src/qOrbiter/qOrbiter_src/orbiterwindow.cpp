@@ -174,7 +174,7 @@ localPath = "android/";
     mainView.addImportPath("assets:/imports/androidComponents");
     mainView.engine()->addPluginPath(QDir::homePath()+"/../lib");
     mainView.rootContext()->setBaseUrl(QUrl::fromLocalFile("/"));
-    mainView.setMainQmlFile("qml/android/Base.qml");
+    mainView.setMainQmlFile("qml/Base.qml");
 #else
     mainView.setSource(QApplication::applicationDirPath()+buildType+"/Splash.qml");
 #endif

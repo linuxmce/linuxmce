@@ -74,6 +74,7 @@ class NowPlayingClass : public QDeclarativeItem
     Q_PROPERTY (QImage fileImage READ getImage WRITE setImage NOTIFY imageChanged)
     Q_PROPERTY (QImage streamImage READ getStreamImage WRITE setStreamImage NOTIFY streamImageChanged)
     Q_PROPERTY(QString path READ getPath WRITE setPath NOTIFY pathChanged)
+    Q_PROPERTY(QString localpath READ getLocalPath WRITE setLocalPath NOTIFY localPathChanged)
     Q_PROPERTY(QString qs_storageDevice READ getStorageDevice READ getStorageDevice NOTIFY storageDeviceChanged)
 
     //set now playing - text to assign
@@ -126,7 +127,9 @@ public:
 
 
     //general variables - set by now playing slot from dce router when media is started or paused
+
     QString filepath;
+    QString localpath;
     QString qs_screen;
     QString qs_imagePath;
     QString qs_mainTitle;
@@ -188,6 +191,7 @@ signals:
     void pathChanged();
     void filePathChanged();
     void fileNameChanged();
+    void localPathChanged();
     void FileChanged(QString f);
 
 
@@ -219,6 +223,9 @@ signals:
 
 public slots:
     void resetData();
+
+    void setLocalPath(QString p) {localpath = p; emit localPathChanged();}
+    QString getLocalPath(){return localpath;}
 
     void setStorageDevice(QString device) {
         qs_storageDevice = device;

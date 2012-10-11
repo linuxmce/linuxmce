@@ -328,7 +328,7 @@ Rectangle {
                     MouseArea{
                         anchors.fill: parent
                         onClicked:  {
-                            dcerouter.grabScreenshot(dcenowplaying.filepath)
+                            dcerouter.grabScreenshot(dcenowplaying.path)
                             MyJs.createStageComponent("../components/AssignScreenShot.qml", storedvideoremote)
 
                         }

@@ -487,8 +487,9 @@ int main(int argc, char* argv[])
         QObject::connect(pqOrbiter,SIGNAL(np_episode(QString)), w->nowPlayingButton, SLOT(setEpisode(QString)),Qt::QueuedConnection);
         QObject::connect(pqOrbiter, SIGNAL(np_filename(QString)), w->nowPlayingButton, SLOT(setFilePath(QString)),Qt::QueuedConnection);
         QObject::connect(pqOrbiter, SIGNAL(np_genre(QString)), w->nowPlayingButton, SLOT(setGenre(QString)),Qt::QueuedConnection);
-
+        QObject::connect(pqOrbiter, SIGNAL(np_localpathChanged(QString)), w->nowPlayingButton, SLOT(setLocalPath(QString)),Qt::QueuedConnection);
         QObject::connect(pqOrbiter, SIGNAL(np_performer(QString)), w->nowPlayingButton, SLOT(setPerformers(QString)),Qt::QueuedConnection);
+
         QObject::connect(pqOrbiter, SIGNAL(np_program(QString)), w->nowPlayingButton, SLOT(setProgram(QString)),Qt::QueuedConnection);
         QObject::connect(pqOrbiter, SIGNAL(np_releaseDate(QString)), w->nowPlayingButton, SLOT(setRelease(QString)),Qt::QueuedConnection);
         QObject::connect(pqOrbiter, SIGNAL(np_title1Changed(QString)), w->nowPlayingButton, SLOT(setTitle(QString)),Qt::QueuedConnection);
@@ -499,7 +500,7 @@ int main(int argc, char* argv[])
 
         QObject::connect(pqOrbiter, SIGNAL(screenshotVariablesReady(QList<QObject*>)), w, SLOT(setScreenShotVariables(QList<QObject*>)),Qt::QueuedConnection);
         QObject::connect(pqOrbiter, SIGNAL(screenShotReady(QImage)), w, SLOT(setMediaScreenShot(QImage)),Qt::QueuedConnection);
-        QObject::connect(w, SIGNAL(saveMediaScreenShot(QString,QByteArray)), pqOrbiter, SLOT(saveScreenAttribute(QString,QByteArray)),Qt::QueuedConnection);
+        QObject::connect(w, SIGNAL(saveMediaScreenShot(QString,QImage)), pqOrbiter, SLOT(saveScreenAttribute(QString,QImage)),Qt::QueuedConnection);
         // myth  now playing requires special handling
         QObject::connect(pqOrbiter, SIGNAL(mythTvUpdate(QString)), simpleEPGmodel, SLOT(setMythProgram(QString)),Qt::QueuedConnection);
         QObject::connect(pqOrbiter, SIGNAL(epgDone()), simpleEPGmodel, SLOT(updatePosition()),Qt::QueuedConnection);

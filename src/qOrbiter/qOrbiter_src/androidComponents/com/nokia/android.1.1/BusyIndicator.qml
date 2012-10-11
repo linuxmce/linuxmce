@@ -63,8 +63,9 @@ Item {
         height: parent.height
         sourceSize.width: width
         sourceSize.height: height
-        source: privateStyle.imagePath("qtg_anim_spinner_large_" + index,
-                                       root.platformInverted)
+        source: ":/icon/handle"
+        /* privateStyle.imagePath("qtg_anim_spinner_large_" + index,
+                                       root.platformInverted)*/
         smooth: true
 
         NumberAnimation on index {

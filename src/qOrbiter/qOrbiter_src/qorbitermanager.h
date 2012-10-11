@@ -404,7 +404,7 @@ signals:
     void objectUpdated();
     void setMediaDetails();
     void mediaScreenShotReady();
-    void saveMediaScreenShot(QString attribute, QByteArray pic);
+    void saveMediaScreenShot(QString attribute, QImage pic);
     void mediaSeperatorChanged(int sep);
     void requestStreamImage();
     void debugModeChanged();

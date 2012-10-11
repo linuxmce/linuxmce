@@ -29,6 +29,7 @@ DESTDIR = ../QOrbiter-build-$$QT_VERSION
 contains(QT_VERSION,4.8.*){
 message("$$QT_VERSION Core")
 DEFINES+=QT4_8
+
 }
 
 contains(QT_VERSION,4.7.*){
@@ -202,18 +203,18 @@ DEPLOYMENTFOLDERS += folder_01 folder_02 folder_03 folder_05
 #android deployment
 ANDROID{
 #nfs mount to work with skins on core directly
-folder_01.source = ../../../../mnt/remote/android-qml/android
+#folder_01.source = ../../../../mnt/remote/android-qml/android
 #folder_01.source = qml/android/
-folder_01.target = qml
+#folder_01.target = qml
 
-folder_05.source = qml/template
-folder_05.target = qml
+base.source = qml/android/Base.qml
+base.target = qml/
 
 folder_03.source = config.xml
 folder_03.target = $$DESTDIR
 
- qmlcomponents.source = androidComponents
- qmlcomponents.target = imports/
+qmlcomponents.source = androidComponents
+qmlcomponents.target = imports/
 
 qmlplugins.files = \
 androidPlugins/libqmlshadersplugin.so \
@@ -229,7 +230,7 @@ androidPlugins/libandroidplugin_1_1.so
 
     INSTALLS+= qmlplugins
     DEFINES+=ANDROID GLENABLED
-DEPLOYMENTFOLDERS = qmlcomponents folder_01
+DEPLOYMENTFOLDERS = qmlcomponents base #folder_01
 QML_IMPORT_PATH = "androidComponents"
 
 }

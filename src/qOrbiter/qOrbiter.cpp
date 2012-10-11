@@ -1073,7 +1073,7 @@ void qOrbiter::CMD_Set_Now_Playing(string sPK_DesignObj,string sValue_To_Assign,
     scrn.remove(pos1, scrn.length());
     // qDebug() << sValue_To_Assign.c_str();
     internal_streamID = iStreamID;
-
+emit np_playlistIndexChanged(iValue);
     if (iPK_MediaType == 0)
     {
         emit resetNowPlaying();
@@ -3030,15 +3030,14 @@ void DCE::qOrbiter::GetNowPlayingAttributes()
     if (SendCommand(attribute_detail_get, &pResponse) && pResponse == "OK")
     {
         setCommandResponse("Getting Media Attributes");
-        QString breaker = s_val.c_str();
-
+        QString breaker = s_val.c_str();       
         QStringList details = breaker.split(QRegExp("\\t"));
         int placeholder;
         QString filepath;
         placeholder = details.indexOf("TITLE");
         if(placeholder != -1)
         {
-
+            setMediaResponse(details.at(placeholder+1));
         }
 
         placeholder = details.indexOf("SYNOPSIS");
@@ -3057,6 +3056,8 @@ void DCE::qOrbiter::GetNowPlayingAttributes()
         placeholder = details.indexOf("PATH");
         if(placeholder != -1)
         {
+            qDebug() << details.at(placeholder+1);
+
             emit np_pathChanged(details.at(placeholder+1));
             //begin ugly bit to determine the storage device for later use. its not passed explicitly, so i use a regex to determine it for media files
             QRegExp deviceNo("(\\\[\\\d+\\\])");
@@ -3074,7 +3075,7 @@ void DCE::qOrbiter::GetNowPlayingAttributes()
                     f.remove("]");
                     emit np_storageDeviceChanged(f);
                     QString localPath = details.at(placeholder+1).split(deviceNo).at(1);
-                    emit np_pathChanged(localPath);
+                     emit np_localpathChanged(localPath);
                 }
                 else
                 {
@@ -3090,11 +3091,10 @@ void DCE::qOrbiter::GetNowPlayingAttributes()
         if(placeholder != -1)
         {
             filepath.append(details.at(placeholder+1));
+            setMediaResponse(details.at(placeholder+1));
         }
 
         emit np_filename(filepath);
-        //  qDebug() <<filepath;
-
         int gHeight = 0;
         int gWidth = 0;
         int pkVar = 0;
@@ -3931,7 +3931,7 @@ void DCE::qOrbiter::addToPlaylist(bool now, std::string playlist)
 
 void DCE::qOrbiter::grabScreenshot(QString fileWithPath)
 {
-
+    setCommandResponse("Requesting id for: "+ fileWithPath);
     char *screenieData;         //screenshot data using the char** data structure for passing of data
     int screenieDataSize=0;       //var for size of data
     string s_format ="jpg";   //the format we want returned
@@ -3988,7 +3988,6 @@ void DCE::qOrbiter::grabScreenshot(QString fileWithPath)
             DataGridCell *pCell;
             for(MemoryDataTable::iterator it=pDataGridTable->m_MemoryDataTable.begin();it!=pDataGridTable->m_MemoryDataTable.end(); it++)
             {
-
                 pCell= it->second;
                 cellTitle = pCell->GetText();
                 cellAttribute = pCell->GetValue();
@@ -3996,19 +3995,20 @@ void DCE::qOrbiter::grabScreenshot(QString fileWithPath)
                 QStringList parser = cellTitle.split(QRegExp("(\\n|:\\s)"), QString::KeepEmptyParts);
                 //qDebug() << parser;
                 screenshotVars.append(new screenshotAttributes( cellfk, cellTitle, cellAttribute.prepend("!A") ));
-
             }
 
         }
 
-        int iEK_File;
+        int iEK_File = 0;
+
         CMD_Get_ID_from_Filename getFileID(m_dwPK_Device, iMediaPluginID, fileWithPath.toStdString(), &iEK_File);
         string fResp = "";
-        if(SendCommand(getFileID, &fResp) && fResp == "OK")
+        if(SendCommand(getFileID, &fResp) && fResp == "OK" && iEK_File !=0)
         {
             QString fk;
-            fk.append("!F"+ QString::fromStdString(StringUtils::itos(iEK_File)));
-            setCommandResponse(fk);
+            qDebug() << "File number::"+iEK_File;
+            fk.append("!F"+ QString::number(iEK_File));
+            setCommandResponse("Screenshot filename: "+fk);
             // string *fk = StringUtils::itos(&iEK_File);
             screenshotVars.prepend(new screenshotAttributes(fk, QString("Filename"),fk ));
         }
@@ -4172,6 +4172,7 @@ void qOrbiter::OnDisconnect()
     emit routerDisconnect();
     qDebug("Router disconnected!");
     m_bOrbiterConnected = false;
+    setNowPlaying(false);
     setEventResponse("Connection Lost");
 }
 
@@ -4179,6 +4180,7 @@ void qOrbiter::OnReload()
 {
     LoggerWrapper::GetInstance()->Write(LV_STATUS,"Command_Impl::OnReload %d", m_dwPK_Device);
     m_bOrbiterConnected = false;
+    setNowPlaying(false);
     qDebug("Router Reloaded!");
     pthread_cond_broadcast( &m_listMessageQueueCond );
 
@@ -4190,6 +4192,7 @@ void qOrbiter::OnReload()
     emit routerDisconnect();
     emit checkReload();
     Disconnect();
+    deinitialize();
 }
 
 bool qOrbiter::OnReplaceHandler(string msg)
@@ -4271,22 +4274,18 @@ void DCE::qOrbiter::extraButtons(QString button)
 
 }
 
-void DCE::qOrbiter::saveScreenAttribute(QString attribute, QByteArray data)
+void DCE::qOrbiter::saveScreenAttribute(QString attribute, QImage data)
 {
-
+    setMediaResponse("Saving Screenshot for attribute: "+attribute);
     string sAttribute = attribute.toStdString();
-    char *pData = (char*) data.constData();
-    int pDataSize = data.size();
-    CMD_Make_Thumbnail thumb(m_dwPK_Device, iMediaPluginID, sAttribute, pData, pDataSize );
+
+    char *pData = (char*) data.bits();
+    int pDataSize = data.byteCount();
+    DCE::CMD_Make_Thumbnail thumb(m_dwPK_Device, iMediaPluginID, sAttribute, pData, pDataSize );
     string cResp = "";
-    if(SendCommand(thumb))
-    {
-        setMediaResponse("Created Thumbnail");
-    }
-    else
-    {
-        setMediaResponse("Couldnt Save");
-    }
+   SendCommand(thumb);
+
+
 }
 
 void DCE::qOrbiter::newOrbiter()

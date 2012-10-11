@@ -1408,10 +1408,10 @@ void qorbiterManager::saveScreenShot(QString attribute)
     QByteArray bytes;
     QBuffer ba(&bytes);
     ba.open(QIODevice::WriteOnly);
+    setDceResponse("Screenshot attribute: "+attribute);
     mediaScreenShot.save(&ba, "JPG");
     ba.close();
-    emit saveMediaScreenShot(attribute, bytes);
-    cleanupScreenie();
+    emit saveMediaScreenShot(attribute, mediaScreenShot);
 }
 
 void qorbiterManager::showDeviceCodes(QList<QObject *> t)

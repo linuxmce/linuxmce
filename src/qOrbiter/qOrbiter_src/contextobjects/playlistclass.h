@@ -51,6 +51,7 @@ public:
     int currentIndex;
     void sortModel(int column, Qt::SortOrder order);
 
+
 signals:
     void ItemAdded();
     void dataChanged(const QModelIndex &topLeft, const QModelIndex &bottomRight, const int &sRow);
@@ -62,6 +63,8 @@ signals:
 public slots:
     bool checkDupe(QString name, int position);
     void setItemStatus(int b);
+
+    int count() {return m_list.count();}
 
     void setCurrentIndex(int i);
     int getCurrentIndex();

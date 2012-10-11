@@ -1352,6 +1352,7 @@ signals:
 
     //attributes. granular instead of grouped because i can. i figure the strongly interwoven orbiter got us in trouble the 1st time right? Right?!
     void np_pathChanged(QString f);
+    void np_localpathChanged(QString p);
     void np_storageDeviceChanged(QString f);
     void np_title1Changed(QString t1);
     void np_title2Changed(QString t2);
@@ -1647,7 +1648,7 @@ public slots:
     void CopyDisc();
     void ShowBookMarks();
 
-    void saveScreenAttribute(QString attribute, QByteArray data);
+    void saveScreenAttribute(QString attribute, QImage data);
     void sendAvCommand(int deviceto, int command);
     //floorplans
     void getFloorplanDeviceCommand(int device);
