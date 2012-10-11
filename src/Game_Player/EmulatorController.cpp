@@ -231,7 +231,7 @@ namespace DCE
     m_pEmulatorModel->m_bRunning_set(false);
 
     // Clear all media from slots.
-    m_pEmulatorModel->m_mapMedia.clear();
+    // m_pEmulatorModel->m_mapMedia.clear();
 
     // any further deinitialization should be handled in the subclasses.
 
