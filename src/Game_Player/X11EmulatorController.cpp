@@ -167,7 +167,6 @@ namespace DCE
 
   bool X11EmulatorController::stop()
   {
-    EmulatorController::stop(); // superclass, unsets running flag.
 
     m_pEmulatorModel->m_iWindowId = 0; // reset Window ID as it is no longer valid.
 
@@ -176,11 +175,14 @@ namespace DCE
       {
 	XCloseDisplay(m_pEmulatorModel->m_pDisplay);
       }
-    return true;
+
+    return EmulatorController::stop(); // superclass, unsets running flag.
+
   }
 
-  void X11EmulatorController::EmulatorHasExited()
+  void X11EmulatorController::EmulatorHasExited(int iExit_Code)
   {
+    m_pEmulatorModel->m_iExit_Code = iExit_Code;
     stop();
   }
 

@@ -210,6 +210,7 @@ namespace DCE
 
     // Any further processing should be taken care of by subclasses.
 
+    m_pEmulatorModel->m_iExit_Code=-1;
     m_pEmulatorModel->m_bRunning_set(true);
     return true;
   }
@@ -225,6 +226,14 @@ namespace DCE
     
     LoggerWrapper::GetInstance()->Write(LV_STATUS,"EmulatorController::stop() called.");
 
+    if (!m_pEmulatorModel->emulatorHasCrashed() && m_pEmulatorModel->m_iActiveMenu > 0)
+      {
+	gotoMenu(0);
+      }
+
+    if (m_pEmulatorModel->emulatorHasCrashed())
+      gracefulExit(); // Attempt a Graceful exit. If it doesn't, KillEmulator() will try other means.
+
     m_pGame_Player->KillEmulator();
     setMediaPosition(""); // clear it.
 
@@ -238,8 +247,9 @@ namespace DCE
     return true;
   }
 
-  void EmulatorController::EmulatorHasExited()
+  void EmulatorController::EmulatorHasExited(int iExit_Code)
   {
+    m_pEmulatorModel->m_iExit_Code = iExit_Code;
     stop();
   }
 
@@ -451,6 +461,11 @@ namespace DCE
     return doAction("RECORD");
   }
   
+  bool EmulatorController::gracefulExit()
+  {
+    return doAction("EXIT");
+  }
+
   void EmulatorController::setOrbiter(long int dwPK_Device_Orbiter)
   {
     m_pEmulatorModel->m_dwPK_Device_Orbiter=dwPK_Device_Orbiter;

@@ -38,7 +38,7 @@ namespace DCE
     virtual bool init();
     virtual bool run();
     virtual bool stop();
-    virtual void EmulatorHasExited();
+    virtual void EmulatorHasExited(int iExit_Code);
     virtual void insertMediaNamed(string sMediaFile, string sSlot="default");
     virtual void ejectMediaFromSlot(string sSlot="default");
     virtual bool getMediaInSlot(string& sMediaFile, string sSlot="default");
@@ -93,6 +93,7 @@ namespace DCE
     virtual bool option();
     virtual bool reset();
     virtual bool record();
+    virtual bool gracefulExit();
 
     bool canSaveState(); 
 

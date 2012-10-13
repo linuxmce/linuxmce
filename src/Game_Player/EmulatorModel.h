@@ -16,6 +16,8 @@ using namespace std;
 #include <string>
 #include <map>
 
+#include "DCE/Logger.h"
+
 namespace DCE
 {
 
@@ -55,7 +57,8 @@ namespace DCE
     string m_sRecordingFilename;
     long int m_dwPK_Device_Orbiter;
     string m_sSystemConfiguration;
-
+    int m_iExit_Code;
+    bool emulatorHasCrashed() { return (m_iExit_Code > 0); }
     map<string, string> m_mapConfigTemplateItems;
 
     map<string, string> m_mapMedia;

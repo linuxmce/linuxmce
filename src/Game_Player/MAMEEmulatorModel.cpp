@@ -94,6 +94,7 @@ namespace DCE
     m_mapActionsToKeysyms["UI_PAGE_DOWN"] = make_pair(XK_Page_Down,0);  
     m_mapActionsToKeysyms["UI_ENTER"] = make_pair(XK_Tab,0);
     m_mapActionsToKeysyms["UI_EXIT"] = make_pair(XK_Tab,0);
+    m_mapActionsToKeysyms["EXIT"] = make_pair(XK_Escape,0);
   }
 
 }

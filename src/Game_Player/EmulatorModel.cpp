@@ -38,6 +38,7 @@ namespace DCE
     m_tStreamingClientLaunchDelay=3000000; // 3 sec delay by default.
     m_bIsRecording=false;
     m_bCanSaveState=false; // assume that emulator can't save state unless overriden.
+    m_iExit_Code=-1; // -1 = hasn't started yet.
   }
 
   EmulatorModel::~EmulatorModel()
@@ -55,6 +56,7 @@ namespace DCE
     m_bIsStreamingSource=false;
     m_sHostName="";
     m_bIsRecording=false;
+    m_iExit_Code=-1;
   }
 
   bool EmulatorModel::updateConfig()

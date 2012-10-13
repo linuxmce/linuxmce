@@ -260,6 +260,7 @@ void Game_Player::KillEmulator()
 						   false);
     
     SendCommand(CMD_Kill_Application);
+    Sleep(2000); // Hack, but maybe this will stop some problems.
 
 }
 
@@ -440,6 +441,25 @@ void Game_Player::CMD_Stop_Media(int iStreamID,string *sMediaPosition,string &sC
     {
       LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"Game_Player::CMD_Stop_Media called with no EmulatorController; Probably because Game Player was restarted after a crash. Not sending a stop.");
       return;
+    }
+
+  if (m_pEmulatorController->m_pEmulatorModel)
+    {
+      if (m_pEmulatorController->m_pEmulatorModel->emulatorHasCrashed())
+	{
+	  LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"Game_Player::CMD_Stop_Media - Emulator has crashed. Reporting it to Orbiters.");
+	  string sText = "I am sorry, the Game you were playing has unexpectedly crashed. If this persists, please try a different game.";
+	  string sOptions = "Ok|";
+	  CMD_Display_Dialog_Box_On_Orbiter_Cat db(m_dwPK_Device,DEVICECATEGORY_Orbiter_Plugins_CONST,
+					       false, BL_SameHouse,
+					       sText,
+					       sOptions,
+					       ""); // FIXME: make proper list.
+	  SendCommandNoResponse(db);
+	  m_pEmulatorController->setStreaming(false);
+	  m_pEmulatorController->setStreamingMaster(false);
+	  return;
+	}
     }
 
   if (!m_pEmulatorController->saveState(sSavedMediaPosition,sSavedText,true))
@@ -1130,7 +1150,7 @@ void Game_Player::CMD_Application_Exited(int iPID,int iExit_Code,string &sCMD_Re
 					iPID, iExit_Code);
 
   // Tell the controller the emulator process has exited.
-  m_pEmulatorController->EmulatorHasExited();
+  m_pEmulatorController->EmulatorHasExited(iExit_Code);
 
   // void *data;
 

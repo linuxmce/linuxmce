@@ -30,7 +30,7 @@ namespace DCE
     virtual bool run();
     virtual bool stop();
     virtual bool init();
-    virtual void EmulatorHasExited();
+    virtual void EmulatorHasExited(int iExit_Code);
     
     void findWindow();
 
