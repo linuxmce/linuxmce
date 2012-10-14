@@ -8,6 +8,7 @@ DEVICECATEGORY_Media_Director="8"
 DEVICECATEGORY_Video_Cards="125"
 DEVICECATEGORY_Sound_Cards="124"
 DEVICETEMPLATE_OnScreen_Orbiter="62"
+DEVICETEMPLATE_Stereo_virtual_sound_card="2223"
 DEVICEDATA_Video_settings="89"
 DEVICEDATA_Audio_settings="88"
 DEVICEDATA_Reboot="236"
@@ -15,6 +16,10 @@ DEVICEDATA_Connector="68"
 DEVICEDATA_TV_Standard="229"
 DEVICEDATA_Setup_Script="189"
 DEVICEDATA_Sound_Card="288"
+DEVICEDATA_Channel_Left="311"
+DEVICEDATA_Channel_Right="312"
+DEVICEDATA_Channel="81"
+DEVICEDATA_Sampling_Rate="310"
 SettingsFile="/etc/pluto/lastaudiovideo.conf"
 
 # don't let KDE override xorg.conf
@@ -94,6 +99,63 @@ SaveSettings()
 	done >"$SettingsFile"
 }
 
+Setup_VirtualCards()
+{
+	local Q R
+
+	mkdir -p /etc/pluto/alsa
+	local Vfile=/etc/pluto/alsa/virtual_cards.conf
+
+	local Devices=$(FindDevice_Template "$PK_Device" "$DEVICETEMPLATE_Stereo_virtual_sound_card" "" "" all)
+	local Dev ParentDev SoundCard
+	local Channel_Left Channel_Right
+	local SampleRate IpcKey
+
+	>"$Vfile"
+	for Dev in $Devices; do
+		Channel_Left=$(GetDeviceData "$Dev" "$DEVICEDATA_Channel_Left")
+		Channel_Right=$(GetDeviceData "$Dev" "$DEVICEDATA_Channel_Right")
+		Q="SELECT FK_Device_ControlledVia FROM Device WHERE PK_Device=$Dev"
+		R=$(RunSQL "$Q")
+
+		ParentDev=$(Field 1 "$R")
+		SoundCard=$(GetDeviceData "$ParentDev" "$DEVICEDATA_Sound_Card")
+		SoundCard=$(TranslateSoundCard "$SoundCard")
+
+		if [[ -z "$SoundCard" ]]; then
+			continue
+		fi
+
+		Channels=$(GetDeviceData "$ParentDev" "$DEVICEDATA_Channel")
+		if [[ ! "$Channels" =~ ^[0-9]+$ ]]; then
+			continue
+		fi
+
+		SampleRate=$(GetDeviceData "$ParentDev" "$DEVICEDATA_Sampling_Rate")
+		if [[ -z "$SampleRate" ]]; then
+			SampleRate=44100
+		fi
+
+		IpcKey=$(printf "0x%08x" $((0x72380000 + ParentDev)))
+		cat >>"$Vfile" <<END
+pcm.Virtual_$Dev {
+	type plug
+	slave.pcm {
+		type dmix
+		ipc_key $IpcKey
+		bindings.0 $Channel_Left
+		bindings.1 $Channel_Right
+		slave {
+			pcm "hw:$SoundCard,0"
+			channels $Channels
+			rate $SampleRate
+		}
+	}
+}
+END
+	done
+}
+
 Setup_AsoundConf()
 {
 	local AudioSetting="$1"
@@ -109,6 +171,8 @@ Setup_AsoundConf()
 
 	local Q R
 	local MD_Device="$PK_Device"
+
+	Setup_VirtualCards
 
 	Q="SELECT FK_DeviceTemplate FROM Device WHERE PK_Device=$PK_Device"
 	R=$(RunSQL "$Q")
