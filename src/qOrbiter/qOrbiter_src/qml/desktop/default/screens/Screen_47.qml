@@ -68,7 +68,7 @@ Rectangle {
     Connections
     {
         target: dataModel
-        onProgressChanged:{progress_bar_fill.height = ((progress_bar.height) * (dataModel.progress / 100)); console.log(dataModel.progress)}
+        onProgressChanged:{progress_bar_fill.height = ((progress_bar.height) * (dataModel.progress / 100))}
         onReady:progress_bar_fill.height = 0
         onLoadingStatusChanged:progress_bar_fill.color = dataModel.loadingStatus ? "green" : "red"
     }

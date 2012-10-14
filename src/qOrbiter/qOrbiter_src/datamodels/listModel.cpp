@@ -74,10 +74,8 @@ void ListModel::appendRows(const QList<gridItem *> &items)
 {
     beginInsertRows(QModelIndex(), rowCount(), rowCount()+items.size()-1);
     foreach(gridItem *item, items) {
-
-        QObject::connect(item, SIGNAL(dataChanged()), this , SLOT(handleItemChange()));
         m_list.append(item);
-
+        QObject::connect(item, SIGNAL(dataChanged()), this , SLOT(handleItemChange()));
     }
 
     endInsertRows();
@@ -90,7 +88,7 @@ void ListModel::appendRows(const QList<gridItem *> &items)
     setProgress(p);
     emit dataChanged(index2, index, currentRows);
     setLoadingStatus(false);
-    QApplication::processEvents(QEventLoop::AllEvents);
+  // QApplication::processEvents(QEventLoop::AllEvents);
 
 }
 

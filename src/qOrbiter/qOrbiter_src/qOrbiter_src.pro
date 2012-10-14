@@ -17,7 +17,7 @@
 
 # NOTE!! You should build the AudioVisual Plugin in the Plugins directory and make sure its output path is set to the 'imports folder!'
 
-CONFIG += qt thread
+CONFIG += thread
 # define deployment destination and target executable name
 
 ANDROID{
@@ -249,7 +249,7 @@ QT+= webkit declarative phonon
 }
 
 QT5{
-QT+= qml quick1 webkit mobility widgets qtcore
+QT+= qml quick webkit mobility widgets qtcore
 }
 
 macx{
@@ -559,3 +559,4 @@ contains(MEEGO_EDITION,harmattan) {
     desktopfile.path = /usr/share/applications
     INSTALLS += desktopfile
 }
+

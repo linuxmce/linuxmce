@@ -73,13 +73,29 @@ Rectangle {
             }
         }
 
-        Text {
-            id: welcome
-            text: qsTr("Setup A New Orbiter")
-            color:"white"
-            font.pointSize: 18
-            font.bold: true
+        Row{
+            Text {
+                id: welcome
+                text: qsTr("Setup A New Orbiter")
+                color:"white"
+                font.pointSize: 18
+                font.bold: true
+            }
+            Rectangle{
+                height: scaleX(14)
+                width: scaleX(14)
+                color: "blue"
+                Text{
+                    text:"Go!"
+                    anchors.centerIn: parent
+                    color:"white"
+
+                }
+
+            }
         }
+
+
 
         Column{
             id:contentColumn

@@ -4,7 +4,7 @@ import QtQuick 1.1
 Rectangle {
     width: appW
     height: appH
-    color: "transparent"
+    color: "slategrey"
     //palette?
     property string orangeRed: "#993300"
     property string deYork: "#99CC99"
@@ -72,13 +72,26 @@ Rectangle {
                 duration:500
             }
         }
+        Row{
+            Text {
+                id: welcome
+                text: qsTr("Setup A New Orbiter")
+                color:"white"
+                font.pointSize: 18
+                font.bold: true
+            }
+            Rectangle{
+                height: scaleX(14)
+                width: scaleX(14)
+                color: "blue"
+                Text{
+                    text:"Go!"
+                    anchors.centerIn: parent
+                    color:"white"
 
-        Text {
-            id: welcome
-            text: qsTr("Setup A New Orbiter")
-            color:"white"
-            font.pointSize: 18
-            font.bold: true
+                }
+
+            }
         }
 
         Column{

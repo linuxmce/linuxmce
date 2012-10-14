@@ -1,10 +1,13 @@
 import QtQuick 1.0
-Component
+Item
 {
+    property int listHeight:viewMode ? scaleX(3): appH
+    property int listWidth: viewMode ? appW :scaleX(3)
+    property string listlabelColor:"aliceblue"
+    property int listlabelpixelsize:12
+    property string listLabelFont
+    property bool viewMode: false //true is landscape
 
-
-
-Item{
     ListModel{
         id:alphabetlist
 
@@ -108,5 +111,47 @@ Item{
             name:"Z"
         }
     }
-}
+    Rectangle{
+        id:alphaDisplay
+        height: childrenRect.height
+        width: childrenRect.width
+        color: "grey"
+        clip:true
+        ListView{
+            id:alphalist
+            height: listHeight
+            width: listWidth
+            orientation: viewMode ? ListView.Horizontal :ListView.Vertical
+            clip:true
+            model:alphabetlist
+            delegate:
+                Rectangle {
+                id:alphabetrect
+                height: scaleY(5)
+                width: scaleX(4)
+                color: "transparent"
+                clip:false
+                Text {
+                    id: test
+                    text: name
+                    font.pixelSize: listlabelpixelsize
+                    anchors.centerIn: parent
+                    color:listlabelColor
+                    font.family: listLabelFont
+                }
+                MouseArea{
+                    anchors.fill: parent
+                    hoverEnabled: true
+                    onEntered: {
+                        alphabetrect.scale = 1.5
+                    }
+                    onExited: {
+
+                        alphabetrect.scale = 1
+                    }
+                    onClicked: dcerouter.seekToGridPosition(name)
+                }
+            }
+        }
+    }
 }

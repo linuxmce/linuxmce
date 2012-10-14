@@ -4,6 +4,7 @@ import QtQuick 1.1
 Rectangle {
     height:appH
     width:appW
+    id:splashPage
     color: "slategrey"
     signal setupStart(string x, string y)
     signal splashLoaded()
