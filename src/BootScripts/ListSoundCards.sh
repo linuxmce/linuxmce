@@ -1,5 +1,12 @@
 #!/bin/bash
 
+DEVICETEMPLATE_Stereo_virtual_sound_card=2223
+DEVICEDATA_Channel_Left=311
+DEVICEDATA_Channel_Right=312
+
+. /usr/pluto/bin/Config_Ops.sh
+. /usr/pluto/bin/Utils.sh
+
 shopt -s nullglob
 if [[ -d /sys/class/sound ]]; then
 	pushd /sys/class/sound &>/dev/null
@@ -17,3 +24,8 @@ if [[ -d /sys/class/sound ]]; then
 	echo "${Ports# }" | tr ' ' '\n'
 	popd &>/dev/null
 fi
+
+Devices=$(FindDevice_Template "$PK_Device" "$DEVICETEMPLATE_Stereo_virtual_sound_card" "" "" all)
+for Dev in $Devices; do
+	echo "Virtual_$Dev"
+done
