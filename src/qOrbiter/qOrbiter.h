@@ -1476,6 +1476,7 @@ public slots:
     void setqCommunicatorID(int deviceID ) {qMediaPlayerID = deviceID; emit qCommunicatorIDChanged();}
     int getqCommunicatorID(){return qCommunicatorID;}
 
+    void getAttributeImage(QString param);
 
 
     void setDeviceId(int d) {m_dwPK_Device = d; emit deviceIdChanged();}
@@ -1571,7 +1572,7 @@ public slots:
     void setGridSeperator(int sep);
     int getGridSeperator() { return media_pageSeperator; emit newPageSeperator();}
 
-    void setCurrentPage(int page) {media_currentPage = page; emit mediaPageChanged();  }
+    void setCurrentPage(int page) {media_currentPage = page; qDebug() << page;  emit mediaPageChanged();  }
     int getCurrentPage() {return media_currentPage;}
 
     bool checkLoadingStatus();

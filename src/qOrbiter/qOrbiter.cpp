@@ -395,6 +395,7 @@ void qOrbiter::CMD_Remove_Screen_From_History(string sID,int iPK_Screen,string &
     cout << "Need to implement command #8 - Remove Screen From History" << endl;
     cout << "Parm #10 - ID=" << sID << endl;
     cout << "Parm #159 - PK_Screen=" << iPK_Screen << endl;
+
 }
 
 //<-dceag-c9-b->
@@ -2391,7 +2392,7 @@ void qOrbiter::requestPage(int page)
 {
 
     media_pos = page * media_pageSeperator;
-    setCurrentPage(page);
+    //setCurrentPage(page);
     setGridStatus(true);
     //qDebug() << "Navigating to page " << media_currentPage;
     //qDebug() << "Cell Range::" << media_pos << "to" << media_pos + media_pageSeperator;
@@ -2517,8 +2518,9 @@ void DCE::qOrbiter::GetFileInfoForQml(QString qs_file_reference)
 
     if (SendCommand(cmd_file_info, &pResponse) && pResponse == "OK")
     {
-        GetMediaAttributeGrid(qs_file_reference);
+        GetMediaAttributeGrid(qs_file_reference);      
         setCommandResponse("Requesting file information for "+ qs_file_reference );
+
     }
     else
     {
@@ -2623,8 +2625,6 @@ void DCE::qOrbiter::GetMediaAttributeGrid(QString  qs_fk_fileno)
     {
         emit fd_fileNameChanged(details.at(placeholder+1));
     }
-
-
 
     CMD_Populate_Datagrid cmd_populate_attribute_grid(m_dwPK_Device, iPK_Device_DatagridPlugIn, StringUtils::itos( m_dwIDataGridRequestCounter ), string(m_sGridID), 83, qs_fk_fileno.toStdString(), DEVICETEMPLATE_Datagrid_Plugin_CONST, &pkVar, &valassign,  &isSuccessfull, &gHeight, &gWidth );
 
@@ -3446,7 +3446,7 @@ void DCE::qOrbiter::populateAdditionalMedia() //additional media grid that popul
 
                 return;
             }
-            setCurrentPage((GridCurRow / media_totalPages)+1) ;
+            setCurrentPage((std::abs(GridCurRow /  media_pageSeperator))) ;
             setMediaResponse("Page: "+ QString::number(media_currentPage));
 
             /*
@@ -4661,11 +4661,11 @@ void DCE::qOrbiter::prepareFileList(int iPK_MediaType)
                 emit gridModelSizeChange(pDataGridTable->GetRows());
                 i_mediaModelRows = cellsToRender;
                 QList <QObject*> modelPages;
-                media_totalPages = (i_mediaModelRows / media_pageSeperator)+1; //16 being the items per page.
+                media_totalPages = (i_mediaModelRows / media_pageSeperator); //16 being the items per page.
 
-                for (int i=0; i < (media_totalPages); i++)
+                for (int i=0; i < (media_totalPages)+1; i++)
                 {
-                    modelPage * item = new modelPage(i, QString::number(i+1));
+                    modelPage * item = new modelPage(i, QString::number(i));
                     modelPages.append(item);
                 }
 
@@ -4681,7 +4681,7 @@ void DCE::qOrbiter::prepareFileList(int iPK_MediaType)
 
                 if(SendCommand(req_data_grid_pics))
                 {
-                    DataGridTable *pDataGridTable = new DataGridTable(iData_Size,pData,false);
+                    DataGridTable *pDataGridTable = new DataGridTable(iData_Size,pData,true);
 
                     setCommandResponse("sent image dg request");
 #ifndef ANDROID
@@ -4845,6 +4845,15 @@ void DCE::qOrbiter::sendAvCommand(int deviceto, int command)
 void DCE::qOrbiter::setGridSeperator(int sep)
 {
     media_pageSeperator = sep;
+    media_totalPages = (i_mediaModelRows / media_pageSeperator); //16 being the items per page.
+QList <QObject*> modelPages;
+    for (int i=0; i < (media_totalPages)+1; i++)
+    {
+        modelPage * item = new modelPage(i, QString::number(i));
+        modelPages.append(item);
+    }
+
+    emit modelPageCount(modelPages);
     emit pageSeperatorChanged(media_pageSeperator);
 }
 
@@ -5055,3 +5064,10 @@ void qOrbiter::CMD_Guide(string &sCMD_Result,Message *pMessage)
 {
 
 }
+
+
+void qOrbiter::getAttributeImage(QString param)
+{
+    CMD_Get_Attribute_Image attributeImage(m_dwPK_Device , iMediaPluginID );
+}
+
