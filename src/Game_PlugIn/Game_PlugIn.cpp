@@ -331,8 +331,6 @@ class MediaStream *Game_PlugIn::CreateMediaStream( class MediaHandlerInfo *pMedi
 
 bool Game_PlugIn::StartMedia( MediaStream *pMediaStream,string &sError )
 {
-	LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"StartMedia Called");
- 
 	PLUTO_SAFETY_LOCK( mm, m_pMedia_Plugin->m_MediaMutex );
  
 	LoggerWrapper::GetInstance()->Write( LV_STATUS, "Game_PlugIn::StartMedia() Starting media stream playback. pos: %d", pMediaStream->m_iDequeMediaFile_Pos );
@@ -375,6 +373,10 @@ bool Game_PlugIn::StartMedia( MediaStream *pMediaStream,string &sError )
 // yes, i know this is a hack. hopefully it will be replaced later.
 // -tschak
 ///////////////////////////////////////////////////////////////////////
+
+	// First, assume MAME, unless otherwise changed here.
+	pGameMediaStream->m_sAppName = "mame.mame";
+	pGameMediaStream->m_iPK_MediaType = MEDIATYPE_lmce_Game_CONST;
 
 	if (mediaURL.find("/a2600") != string::npos || StringUtils::ToLower(mediaURL).find(".a26") != string::npos)
 	{
