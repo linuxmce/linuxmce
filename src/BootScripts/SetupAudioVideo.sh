@@ -194,7 +194,7 @@ Setup_XineConf()
 		*)
 			XineConfSet audio.output.speaker_arrangement 'Stereo 2.0' "$XineConf"
 			sed -i 's/audio\.device\.alsa_passthrough_device.*//' /etc/pluto/xine.conf 
-;;
+			;;
 	esac
 }
 
@@ -279,7 +279,7 @@ AudioSettings_Check()
 
 	if [[ "$NewSetting_AudioSetting" == *S* ]]; then
 		# S3 is not a valid combination and will break things
-		NewSetting_AudioSetting=${NewSetting_AudioSetting//3}
+		NewSetting_AudioSetting="${NewSetting_AudioSetting//3}"
 	fi
 echo "NewSetting = $NewSetting_AudioSetting"
 	Setup_AsoundConf "$NewSetting_AudioSetting"
