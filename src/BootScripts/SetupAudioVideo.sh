@@ -160,9 +160,8 @@ Setup_AsoundConf()
 {
 	local AudioSetting="$1"
 	local SoundCard="0"
-	local HDMIDevice="3"
+	local CardDevice="3"
 	local HWOnlyCard="0"
-	local AnalogPlaybackCard="plug:dmix:${SoundCard}"
 
 	# Do not mess with asound.conf if Audio Setting is set to Manual. This will only happen after the asound.conf has been generated at least once.
 	if [[ "$AudioSetting" == "M" ]]; then
@@ -192,21 +191,29 @@ Setup_AsoundConf()
 	SoundCard=$(TranslateSoundCard "$SoundCard")
 	HWOnlyCard="$SoundCard"
 	Yalpa=$(aplay -l)
-	HDMIDevice=$(grep -i "hdmi" <<< "$Yalpa" | grep -wo "device ." | awk '{print $2}')
 
 	# Handle nVidia GT card types
 	case "$AudioSetting" in
+		*[CO]*)
+			CardDevice=$(grep -i "digital" <<< "$Yalpa" | grep -wo "device ." | awk '{print $2}')
+		;;
 		*H*)
-			if [[ $(wc -l <<< "$HDMIDevice") -gt "3" ]]; then
-				if grep "7" <<< "$HDMIDevice"; then
-					HDMIDevice="7"
+			CardDevice=$(grep -i "hdmi" <<< "$Yalpa" | grep -wo "device ." | awk '{print $2}')
+			if [[ $(wc -l <<< "$CardDevice") -gt "3" ]]; then
+				if grep "7" <<< "$CardDevice"; then
+					CardDevice="7"
 				fi
-				SoundCard="${SoundCard},${HDMIDevice}"
 			fi
+		;;
+		*)
+			CardDevice=$(grep -i "analog" <<< "$Yalpa" | grep -wo "device ." | awk '{print $2}')
 		;;
 	esac
 
-	sed -r "s,%MAIN_CARD%,$SoundCard,g; s,%HWONLY_CARD%,$HWOnlyCard,; s,%SOUND_DEVICE%,$HDMIDevice,; s,%ANALOG_PLAYBACK_CARD%,$AnalogPlaybackCard,g" /usr/pluto/templates/asound.conf >/etc/asound.conf
+	SoundCard="${SoundCard},${CardDevice}"
+	local AnalogPlaybackCard="plug:dmix:${SoundCard}"
+
+	sed -r "s,%MAIN_CARD%,$SoundCard,g; s,%HWONLY_CARD%,$HWOnlyCard,; s,%SOUND_DEVICE%,$CardDevice,g; s,%ANALOG_PLAYBACK_CARD%,$AnalogPlaybackCard,g" /usr/pluto/templates/asound.conf >/etc/asound.conf
 	case "$AudioSetting" in
 		*[CO]*)
 			# audio setting is Coaxial or Optical, i.e. S/PDIF
@@ -236,14 +243,11 @@ Setup_XineConf()
 	fi
 
 	case "$AudioSetting" in
-		*[CO]*)
-			XineConfSet audio.device.alsa_front_device asym_spdif "$XineConf"
-			XineConfSet audio.device.alsa_default_device asym_spdif "$XineConf"
-			;;
-		*H*)
+		*[COH]*)
 			XineConfSet audio.device.alsa_front_device:plughw "$SoundCard" "$XineConf"
 			XineConfSet audio.device.alsa_default_device:plughw "$SoundCard" "$XineConf"
 			XineConfSet audio.device.alsa_passthrough_device:plughw "$SoundCard" "$XineConf" 
+			XineConfSet audio.output.speaker_arrangement 'Pass Through' "$SoundCard" "$XineConf"
 			;;
 		*)
 			XineConfSet audio.device.alsa_front_device "$AnalogPlaybackCard" "$XineConf"
@@ -253,10 +257,10 @@ Setup_XineConf()
 
 	case "$AudioSetting" in
 		*3*)
-			XineConfSet audio.output.speaker_arrangement 'Pass Through' "$XineConf"
+			XineConfSet audio.output.speaker_arrangement 'Pass Through' "$SoundCard,$CardDevice"
 			;;
 		*)
-			XineConfSet audio.output.speaker_arrangement 'Stereo 2.0' "$XineConf"
+			XineConfSet audio.output.speaker_arrangement 'Stereo 2.0' "$SoundCard,$CardDevice"
 			sed -i 's/audio\.device\.alsa_passthrough_device.*//' /etc/pluto/xine.conf 
 			;;
 	esac
