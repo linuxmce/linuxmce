@@ -1322,6 +1322,8 @@ void Xine_Player::ReportTimecodeViaIP(int iStreamID, int Speed)
         string sIPTimeCodeInfo = mediaInfo.ToString();
 
 	LoggerWrapper::GetInstance()->Write(LV_STATUS,"reporting timecode stream %d speed %d %s", iStreamID, Speed, sIPTimeCodeInfo.c_str() );
+	EVENT_Media_Position_Changed(atoi(pStream->m_sMediaType.c_str()), pStream->m_sCurrentFile, StringUtils::itos(pStream->m_iMediaID), iStreamID, mediaInfo.FormatTotalTime(), mediaInfo.FormatCurrentTime(), Speed);
+
 	m_pNotificationSocket->SendStringToAll( sIPTimeCodeInfo );
 }
 
