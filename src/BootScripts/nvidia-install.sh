@@ -225,6 +225,7 @@ installCorrectNvidiaDriver() {
                         Log "$LogFile" "Unable to install driver:"
                         Log "$LogFile" "$ERROR"
 			apt-get remove -yf "$preferred_driver"
+			dpkg --configure -a
                         beep -l 100 -f 500 -d 50 -r 3
                         sleep 10
 			CountErr=$(($CountErr + 1))
