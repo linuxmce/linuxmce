@@ -207,14 +207,14 @@ installCorrectNvidiaDriver() {
 			add-apt-repository ppa:team-iquik/alsa
 			add-apt-repository ppa:ubuntu-x-swat/x-updates
 			apt-get update
-			apt-get install -y alsa-base 2> >(tee $tmpfile)
-			apt-get install -y $preferred_driver 2> >(tee $tmpfile)
+			apt-get install -y alsa-base 2> >(tee "$tmpfile")
+			apt-get install -y "$preferred_driver" 2> >(tee "$tmpfile")
 			rm /etc/apt/sources.list.d/*
 			apt-get update
 		else
-	                apt-get install -y $preferred_driver 2> >(tee $tmpfile)
+	                apt-get install -y "$preferred_driver" 2> >(tee "$tmpfile")
 		fi
-
+		CountErr="0"
                 if [[ "$?" > "0" ]] ; then
                         ERROR=$( cat $tmpfile )
                         INSTALLED="0"
@@ -224,10 +224,15 @@ installCorrectNvidiaDriver() {
                         echo ""
                         Log "$LogFile" "Unable to install driver:"
                         Log "$LogFile" "$ERROR"
+			apt-get remove -yf "$preferred_driver"
                         beep -l 100 -f 500 -d 50 -r 3
                         sleep 10
+			CountErr=$(($CountErr + 1))
+			if [[ "$CountErr" == "3" ]]; then
+				ErrorMessage "Cannot install after 3 tries. Giving up"
+			fi
                 fi
-                rm $tmpfile
+                rm "$tmpfile"
 
         else
                 echo "Preferred driver $preferred_driver already installed."
@@ -244,8 +249,8 @@ installCorrectNvidiaDriver() {
         Log "$LogFile" "== End NVidia driver installation ($(date)) =="
 
         # Reboot only if requested and a new driver was installed
-	#if [[ "$param" == "reboot" && "$INSTALLED" == "1" ]];then
-	if [[ "$INSTALLED" == "1" ]]; then
+	if [[ "$param" == "reboot" && "$INSTALLED" == "1" ]];then
+	#if [[ "$INSTALLED" == "1" ]]; then
                 # Give the user a warning message and beep, then reboot
                 echo ""
                 StatusMessage "Nvidia driver installation requires a reboot."
@@ -256,8 +261,8 @@ installCorrectNvidiaDriver() {
                                 ConfSet AVWizardOverride 1
                 beep -l 100 -f 500 -d 50 -r 3
                 sleep 2
-		# Reboot now happens in Utils.sh
-                #reboot
+		
+                reboot
         fi
 }
 #######################################################################################################################

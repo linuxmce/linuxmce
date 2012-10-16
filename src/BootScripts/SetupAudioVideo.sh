@@ -213,7 +213,7 @@ Setup_AsoundConf()
 	SoundCard="${SoundCard},${CardDevice}"
 	local AnalogPlaybackCard="plug:dmix:${SoundCard}"
 
-	sed -r "s,%MAIN_CARD%,$SoundCard,g; s,%HWONLY_CARD%,$HWOnlyCard,; s,%SOUND_DEVICE%,$CardDevice,g; s,%ANALOG_PLAYBACK_CARD%,$AnalogPlaybackCard,g" /usr/pluto/templates/asound.conf >/etc/asound.conf
+	sed -r "s#%MAIN_CARD%#$SoundCard#g; s#%HWONLY_CARD%#$HWOnlyCard#; s#%SOUND_DEVICE%#$CardDevice#g; s#%ANALOG_PLAYBACK_CARD%#$AnalogPlaybackCard#g" /usr/pluto/templates/asound.conf >/etc/asound.conf
 	case "$AudioSetting" in
 		*[CO]*)
 			# audio setting is Coaxial or Optical, i.e. S/PDIF
