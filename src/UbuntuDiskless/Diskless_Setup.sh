@@ -72,13 +72,13 @@ function setup_tftp_boot
 
         	mkdir -p /tftpboot/${Moon_DeviceID}
 		# Changed to point to the always updated buntu softlink at device root. 
-		if [[ -f /tftpboot/${Moon_DeviceID}/vmlinuz ]]; then
+		if [[ -f ${Moon_RootLocation}/vmlinuz ]]; then
         		ln -sf ${Moon_RootLocation}/vmlinuz /tftpboot/${Moon_DeviceID}/vmlinuz
 		else 
 			ln -s "${Moon_RootLocation}/boot/vmlinuz-${Kernel}" "/tftpboot/${Moon_DeviceID}/$Name/vmlinuz"
 		fi
 
-		if [[ -f /tftpboot/${Moon_DeviceID}/initrd.img ]]; then
+		if [[ -f ${Moon_RootLocation}/initrd.img ]]; then
 			ln -sf ${Moon_RootLocation}/initrd.img /tftpboot/${Moon_DeviceID}/initrd.img
 		else 
 			ln -s "${Moon_RootLocation}/boot/initrd.img-${Kernel}" "/tftpboot/${Moon_DeviceID}/$Name/initrd.img" 
