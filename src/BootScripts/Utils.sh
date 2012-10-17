@@ -530,7 +530,8 @@ IntelBridgeDetect () {
 			# apt-add-repository ppa:f-hackenberger/x220-intel-mesa
 			apt-get update
 			StatusMessage "Installing "$NewKernelId" backported kernel and supporting intel drivers"
-			apt-get -yf install "$NewKernel" "$NewHeaders"
+			apt-get -yf install "$NewKernel"
+			apt-get -yf install "$NewHeaders"
 			apt-get -yf dist-upgrade
 			sleep 10
 			reboot
