@@ -522,7 +522,9 @@ IntelBridgeDetect () {
 		NewKernelId="latest oneiric"
 	fi
 
-	if [[ "$Ibridge" != "none" ]]; then
+	# Let's just go for sandy bridge right now
+	#if [[ "$Ibridge" != "none" ]]; then
+	if [[ "$Ibridge" == "Sandy" ]]; then
 		if [[ $(apt-cache policy "$NewKernel" | grep Installed | awk '{print $2}') == "(none)" ]]; then 
 			StatusMessage "$Ibridge bridge detected. Addjusting repositories and updating."
 			apt-add-repository ppa:kernel-ppa/ppa
