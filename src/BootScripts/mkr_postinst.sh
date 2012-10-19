@@ -54,9 +54,10 @@ if ! BlacklistConfFiles '/etc/logrotate.d/pluto' ;then
 fi
 
 ## Copy our asound.conf to the system
-if ! BlacklistConfFiles '/etc/asound.conf' ;then
-	cp /usr/pluto/templates/asound.conf /etc/asound.conf
-fi
+# This causes alsa to break on first install with bad values. Let's stop doing that. L3mce
+#if ! BlacklistConfFiles '/etc/asound.conf' ;then
+#	cp /usr/pluto/templates/asound.conf /etc/asound.conf
+#fi
 
 ## Advertise SSH and file sharing via AVAHI
 test -d "/etc/avahi" || mkdir -p "/etc/avahi"
@@ -115,4 +116,3 @@ if [[ -f /root/Desktop ]] ; then
 fi
 mkdir -p /root/Desktop
 cp -r /etc/skel/Desktop/* /root/Desktop
-
