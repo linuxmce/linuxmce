@@ -23,7 +23,7 @@
 #include <QtCore/QTimer>
 #include <QtCore/QProcess>
 #include <QtWidgets/QApplication>
-#include <QQmlContext>
+#include <QtQml/QQmlContext>
 #include <QtQuick/QQuickView>
 #else
 #include <QtDeclarative/QDeclarativeProperty>
@@ -318,6 +318,15 @@ bool qorbiterManager::initializeManager(string sRouterIP, int device_id)
         return false;
     }
 #elif for_desktop
+    if(b_localLoading == true)
+    {
+        if( !loadSkins(QUrl(localDir)))
+        {
+            emit skinIndexReady(false);
+            return false;
+        }
+    }
+#elif for_harmattan
     if(b_localLoading == true)
     {
         if( !loadSkins(QUrl(localDir)))
@@ -1398,7 +1407,7 @@ void qorbiterManager::setMediaScreenShot(QImage screen_shot)
 {
     mediaScreenShot = screen_shot;
 #ifdef debug
-    qDebug() << mediaScreenShot.size();
+   // qDebug() << mediaScreenShot.size();
 #endif
     emit mediaScreenShotReady();
 }
