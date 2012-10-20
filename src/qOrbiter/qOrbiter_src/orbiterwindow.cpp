@@ -28,8 +28,8 @@
 
 #if (QT5)
 #include <QtQml/QtQml>
-#include <QQmlContext>
-#include <QQmlEngine>
+#include <QtQml/QQmlContext>
+#include <QtQml/QQmlEngine>
 #include <QtWidgets/QApplication>
 #else
 #include <qmlapplicationviewer.h>
@@ -175,8 +175,10 @@ localPath = "android/";
     mainView.engine()->addPluginPath(QDir::homePath()+"/../lib");
     mainView.rootContext()->setBaseUrl(QUrl::fromLocalFile("/"));
     mainView.setMainQmlFile("qml/Base.qml");
-#else
+#elif !for_harmattan
     mainView.setSource(QApplication::applicationDirPath()+buildType+"/Splash.qml");
+ #elif for_harmattan
+     mainView.setSource(QApplication::applicationDirPath()+"qml/Splash.qml");
 #endif
 
 #ifdef Q_OS_SYMBIAN
