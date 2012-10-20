@@ -30,6 +30,7 @@ ReloadX="NoReloadX"
 AudioSetting_Override="$1"
 SoundCard_Override="$2"
 XineConf_Override="$3"
+AlternateSC="$4"
 ComputerDev=$(FindDevice_Category "$PK_Device" "$DEVICECATEGORY_Media_Director" '' 'include-parent')
 OrbiterDev=$(FindDevice_Template "$ComputerDev" "$DEVICETEMPLATE_OnScreen_Orbiter")
 VideoCardDev=$(FindDevice_Category "$ComputerDev" "$DEVICECATEGORY_Video_Cards")
@@ -159,6 +160,7 @@ END
 Setup_AsoundConf()
 {
 	local AudioSetting="$1"
+	local AlternateSC="$2"
 	local SoundCard="0"
 	local CardDevice="3"
 	local HWOnlyCard="0"
@@ -209,8 +211,15 @@ Setup_AsoundConf()
 			CardDevice=$(grep -i "analog" <<< "$Yalpa" | grep -wo "device ." | awk '{print $2}')
 		;;
 	esac
+	if [[ "$AlternateSC" != "1" ]]; then
+		SoundCard="${SoundCard},${CardDevice}"
+	else 
+		cp /usr/pluto/templates/asound.conf /tmp/alt.asound.conf
+		cp /usr/pluto/templates/asound.conf.backup /usr/pluto/templates/asound.conf
+		cp /tmp/alt.asound.conf /usr/pluto/templates/asound.conf.backup
+	fi
 
-	SoundCard="${SoundCard},${CardDevice}"
+	local DigitalPlaybackCard="plughw:${SoundCard}"
 	local AnalogPlaybackCard="plug:dmix:${SoundCard}"
 
 	sed -r "s#%MAIN_CARD%#$SoundCard#g; s#%HWONLY_CARD%#$HWOnlyCard#; s#%SOUND_DEVICE%#$CardDevice#g; s#%ANALOG_PLAYBACK_CARD%#$AnalogPlaybackCard#g" /usr/pluto/templates/asound.conf >/etc/asound.conf
@@ -229,14 +238,16 @@ Setup_AsoundConf()
 		;;
 	esac
 
-	Setup_XineConf "$AudioSetting" "$SoundCard" "$AnalogPlaybackCard"
+	Setup_XineConf "$AudioSetting" "$DigitalPlaybackCard" "$AnalogPlaybackCard"
 	alsa force-reload
 }
 
 Setup_XineConf()
 {
-	local AudioSetting="$1" SoundCard="$2" AnalogPlaybackCard="$3"
+	local AudioSetting="$1" DigitalPlaybackCard="$2" AnalogPlaybackCard="$3"
 	local XineConf=/etc/pluto/xine.conf
+	sed -i '/audio\.device.*/d' "$XineConf"
+	sed -i '/audio\.output.*/d' "$XineConf"
 
 	if [[ -n "$XineConf_Override" ]]; then
 		XineConf="$XineConf_Override"
@@ -244,10 +255,9 @@ Setup_XineConf()
 
 	case "$AudioSetting" in
 		*[COH]*)
-			XineConfSet audio.device.alsa_front_device:plughw "$SoundCard" "$XineConf"
-			XineConfSet audio.device.alsa_default_device:plughw "$SoundCard" "$XineConf"
-			XineConfSet audio.device.alsa_passthrough_device:plughw "$SoundCard" "$XineConf" 
-			XineConfSet audio.output.speaker_arrangement 'Pass Through' "$SoundCard" "$XineConf"
+			XineConfSet audio.device.alsa_front_device "$DigitalPlaybackCard" "$XineConf"
+			XineConfSet audio.device.alsa_default_device "$DigitalPlaybackCard" "$XineConf"
+			XineConfSet audio.device.alsa_passthrough_device "$DigitalPlaybackCard" "$XineConf" 
 			;;
 		*)
 			XineConfSet audio.device.alsa_front_device "$AnalogPlaybackCard" "$XineConf"
@@ -257,11 +267,11 @@ Setup_XineConf()
 
 	case "$AudioSetting" in
 		*3*)
-			XineConfSet audio.output.speaker_arrangement 'Pass Through' "$SoundCard,$CardDevice"
+			echo ""
 			;;
-		*)
-			XineConfSet audio.output.speaker_arrangement 'Stereo 2.0' "$SoundCard,$CardDevice"
-			sed -i 's/audio\.device\.alsa_passthrough_device.*//' /etc/pluto/xine.conf 
+		
+		*)	XineConfSet audio.output.speaker_arrangement 'Stereo 2.0' "$XineConf"
+			sed -i '/audio\.device\.alsa_passthrough_device.*/d' "$XineConf"
 			;;
 	esac
 }
@@ -349,8 +359,14 @@ AudioSettings_Check()
 		# S3 is not a valid combination and will break things
 		NewSetting_AudioSetting="${NewSetting_AudioSetting//3}"
 	fi
-echo "NewSetting = $NewSetting_AudioSetting"
-	Setup_AsoundConf "$NewSetting_AudioSetting"
+
+	if [[ -z "$AlternateSC" ]]; then
+		AlternateSC="0"
+	else
+		AlternateSC="$AlternateSC"
+	fi
+
+	Setup_AsoundConf "$NewSetting_AudioSetting" "$AlternateSC"
 
 	if [[ "$DB_Reboot" == "1" ]]; then
 		Reboot="Reboot"
