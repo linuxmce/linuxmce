@@ -235,6 +235,12 @@ QML_IMPORT_PATH = "androidComponents"
 
 }
 
+linux-rasp-pi-g++{
+
+DEFINES+= RPI
+DEPLOYMENTFOLDERS = qmlcomponents base #folder_01
+}
+
 # Additional import path used to resolve QML modules in Creator's code model
 
 #QML_IMPORT_TRACE = 1
