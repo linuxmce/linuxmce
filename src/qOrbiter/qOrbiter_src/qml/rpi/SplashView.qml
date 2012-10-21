@@ -168,10 +168,11 @@ Rectangle {
     Text {
         id: connectionlabel
         text: qsTr("Set Connection Details")
-        font.pointSize: 11
+        font.pointSize: 36
         font.bold: false
         anchors.top: rectangle2.top
         anchors.horizontalCenter: parent.horizontalCenter
+        color:"white"
     }
 
     Row{
@@ -180,20 +181,20 @@ Rectangle {
         spacing: 10
         Text {
             text: qsTr("Host:")
-            font.pointSize: 18
+            font.pointSize: 28
             font.family: "Droid Sans"
-
+            font.bold: true
         }
 
         TextInput {
             id: routerip
             width: 80
             text: srouterip
-            font.pointSize: 10
+            font.pointSize: 28
             font.family: "Droid Sans"
             //  onTextChanged: setRouterIp(routerip.text)
-            color: "grey"
-
+            color: "black"
+            font.bold: true
 
         }
 
@@ -211,19 +212,23 @@ Rectangle {
 
         Text {
             text: qsTr("Device:")
-            font.pointSize: 11
+            font.pointSize: 28
             font.family: "Droid Sans"
+            //  onTextChanged: setRouterIp(routerip.text)
+            color: "black"
+            font.bold: true
+
 
         }
         TextInput {
             id: devicenumber
             width: scaleX(10)
             text: deviceid
+            font.pointSize: 28
             font.family: "Droid Sans"
-            font.pointSize: 12
-            //onTextChanged: setDeviceNo(devicenumber.text)
-            color: "grey"
-
+            //  onTextChanged: setRouterIp(routerip.text)
+            color: "black"
+            font.bold: true
 
         }
 
@@ -240,9 +245,12 @@ Rectangle {
                 anchors.centerIn: parent
                 anchors.fill: parent
                 text: qsTr("Go!")
-                font.pointSize: 12
-                verticalAlignment: Text.AlignTop
+                font.pointSize: 28
+                font.family: "Droid Sans"
+                //  onTextChanged: setRouterIp(routerip.text)
+                color: "black"
                 font.bold: true
+
             }
 
             radius:  5
@@ -287,6 +295,11 @@ Rectangle {
         color: "white"
         anchors.top: rectangle2.bottom
         anchors.horizontalCenter: rectangle2.horizontalCenter
+    }
+    Connections{
+        target:manager
+        onDceResponseChanged:console.log(manager.dceResponse)
+
     }
 
     ListView{

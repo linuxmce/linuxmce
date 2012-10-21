@@ -242,9 +242,10 @@ folder_01.source= qml/rpi
 folder_01.target= qml
 
 folder_02.source = config.xml
-folder_02.target =
+folder_02.target = configks
+
 DEFINES+=RPI
-DEPLOYMENTFOLDERS += folder_01 folder_03
+DEPLOYMENTFOLDERS += folder_01 folder_02
 }
 
 # Additional import path used to resolve QML modules in Creator's code model

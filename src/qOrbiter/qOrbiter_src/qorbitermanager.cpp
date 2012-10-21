@@ -84,7 +84,7 @@ qorbiterManager::qorbiterManager(QDeclarativeView *view, QObject *parent) :
     if (readLocalConfig())
     {
         emit localConfigReady(true);
-        QApplication::processEvents(QEventLoop::AllEvents);
+       // QApplication::processEvents(QEventLoop::AllEvents);
     }
     else
     {
@@ -1114,7 +1114,7 @@ void qorbiterManager::qmlSetupLmce(QString incdeviceid, QString incrouterip)
 
 bool qorbiterManager::readLocalConfig()
 {
-    QApplication::processEvents(QEventLoop::AllEvents);
+
     QDomDocument localConfig;
 #ifdef Q_OS_MAC
     QString xmlPath = QString::fromStdString(QApplication::applicationDirPath().remove("MacOS").append("Resources").append("/config.xml").toStdString());
@@ -1123,7 +1123,7 @@ bool qorbiterManager::readLocalConfig()
 #elif WIN32
     QString xmlPath = QString::fromStdString(QApplication::applicationDirPath().toStdString())+"/config.xml";
 #elif RPI
-    QString xmlPath = QString::fromStdString(QApplication::applicationDirPath().toStdString())+"/config.xml";
+    QString xmlPath = QString::fromStdString(QApplication::applicationDirPath().toStdString())+"../config/config.xml";
 #else
     QString xmlPath = QString::fromStdString(QApplication::applicationDirPath().toStdString())+"/config.xml";
 #endif
