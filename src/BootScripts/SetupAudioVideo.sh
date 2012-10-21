@@ -30,7 +30,6 @@ ReloadX="NoReloadX"
 AudioSetting_Override="$1"
 SoundCard_Override="$2"
 XineConf_Override="$3"
-AlternateSC="$4"
 ComputerDev=$(FindDevice_Category "$PK_Device" "$DEVICECATEGORY_Media_Director" '' 'include-parent')
 OrbiterDev=$(FindDevice_Template "$ComputerDev" "$DEVICETEMPLATE_OnScreen_Orbiter")
 VideoCardDev=$(FindDevice_Category "$ComputerDev" "$DEVICECATEGORY_Video_Cards")
@@ -160,7 +159,6 @@ END
 Setup_AsoundConf()
 {
 	local AudioSetting="$1"
-	local AlternateSC="$2"
 	local SoundCard="0"
 	local CardDevice="3"
 	local HWOnlyCard="0"
@@ -213,16 +211,16 @@ Setup_AsoundConf()
 	esac
 	if [[ "$AlternateSC" != "1" ]]; then
 		SoundCard="${SoundCard},${CardDevice}"
-	else 
-		cp /usr/pluto/templates/asound.conf /tmp/alt.asound.conf
-		cp /usr/pluto/templates/asound.conf.backup /usr/pluto/templates/asound.conf
-		cp /tmp/alt.asound.conf /usr/pluto/templates/asound.conf.backup
 	fi
 
 	local DigitalPlaybackCard="plughw:${SoundCard}"
 	local AnalogPlaybackCard="plug:dmix:${SoundCard}"
 
-	sed -r "s#%MAIN_CARD%#$SoundCard#g; s#%HWONLY_CARD%#$HWOnlyCard#; s#%SOUND_DEVICE%#$CardDevice#g; s#%ANALOG_PLAYBACK_CARD%#$AnalogPlaybackCard#g" /usr/pluto/templates/asound.conf >/etc/asound.conf
+	if [[ "$AlternateSC" != "1" ]]; then
+		sed -r "s#%MAIN_CARD%#$SoundCard#g; s#%HWONLY_CARD%#$HWOnlyCard#; s#%SOUND_DEVICE%#$CardDevice#g; s#%ANALOG_PLAYBACK_CARD%#$AnalogPlaybackCard#g" /usr/pluto/templates/asound.conf >/etc/asound.conf
+	else
+		sed -r "s#%MAIN_CARD%#$SoundCard#g; s#%ANALOG_PLAYBACK_CARD%#$AnalogPlaybackCard#g" /usr/pluto/templates/asound.conf >/etc/asound.conf.backup
+	fi
 	case "$AudioSetting" in
 		*[CO]*)
 			# audio setting is Coaxial or Optical, i.e. S/PDIF
