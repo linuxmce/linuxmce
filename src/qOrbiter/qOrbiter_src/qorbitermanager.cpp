@@ -138,6 +138,9 @@ qorbiterManager::qorbiterManager(QDeclarativeView *view, QObject *parent) :
 #elif defined (Q_OS_MACX)
     buildType="/qml/desktop";
     qrcPath = "qrc:osx/Splash.qml";
+#elif defined (RPI)
+    buildType="/qml/rpi";
+
 #elif defined (__ANDROID__)
     if (qorbiterUIwin->width() > 480 && qorbiterUIwin-> height() > 854 || qorbiterUIwin->height() > 480 && qorbiterUIwin-> width() > 854 )
     {
@@ -346,22 +349,11 @@ bool qorbiterManager::initializeManager(string sRouterIP, int device_id)
 
 #elif RPI
 
-
     if( !loadSkins(QUrl(localDir)))
     {
         emit skinIndexReady(false);
         return false;
     }
-    else
-    {
-        if( !loadSkins(QUrl(remoteDirectoryPath)))
-        {
-            emit skinIndexReady(false);
-            return false;
-        }
-    }
-
-
 #else
     if( !loadSkins(QUrl(localDir)))
     {
@@ -374,13 +366,15 @@ bool qorbiterManager::initializeManager(string sRouterIP, int device_id)
 //this functions purpose is to change the UI to the new skin pointed to. It will evolve to encompass orbiter regen to some extent
 void qorbiterManager::refreshUI(QUrl url)
 {
-    qorbiterUIwin->rootContext()->setBaseUrl(skin->entryUrl());
-    qorbiterUIwin->setSource(skin->entryUrl());
+
 #if (QT5)
     qorbiterUIwin->setResizeMode(QQuickView::SizeRootObjectToView);
 #else
     qorbiterUIwin->setResizeMode(QDeclarativeView::SizeRootObjectToView);
 #endif
+    qorbiterUIwin->rootContext()->setBaseUrl(skin->entryUrl());
+    qorbiterUIwin->setSource(skin->entryUrl());
+
 }
 
 
@@ -774,7 +768,7 @@ void qorbiterManager::processConfig(QByteArray config)
 
     configData.clear();
     tConf.clear();
-    activateScreenSaver();
+   // activateScreenSaver();
 
     emit registerOrbiter((userList->find(sPK_User)->data(4).toInt()), QString::number(iea_area), iFK_Room );
     setOrbiterStatus(true);
@@ -787,6 +781,7 @@ bool qorbiterManager::OrbiterGen()
 
 void qorbiterManager::swapSkins(QString incSkin)
 {    
+    qDebug() << "swapping sking to::" << incSkin;
 #ifdef WIN32
     incSkin = "default";
 #endif
@@ -813,7 +808,8 @@ void qorbiterManager::swapSkins(QString incSkin)
     }
     else
     {
-        swapSkins(incSkin);
+        qDebug() << "Major skin Error!!";
+        exit(0);
     }
 }
 
@@ -977,17 +973,25 @@ QString qorbiterManager::adjustPath(const QString &path)
 
 #ifdef Q_OS_UNIX
 
+#endif
+
 #ifdef Q_OS_MAC
     return QCoreApplication::applicationDirPath().remove("MacOS").append("Resources");
-#else
-    const QString pathInShareDir = QCoreApplication::applicationDirPath()
-            + QLatin1String("/../share/")
-            + QFileInfo(QCoreApplication::applicationFilePath()).fileName()
-            + QLatin1Char('/') + path;
-    if (QFileInfo(pathInShareDir).exists())
-        return pathInShareDir;
+
 #endif
+
+#ifdef for_harmattan
+    path.remove("/bin");
 #endif
+
+//#else  !RPI
+//    const QString pathInShareDir = QCoreApplication::applicationDirPath()
+//            + QLatin1String("/../share/")
+//            + QFileInfo(QCoreApplication::applicationFilePath()).fileName()
+//            + QLatin1Char('/') + path;
+//    if (QFileInfo(pathInShareDir).exists())
+//        return pathInShareDir;
+//#endif
     return path;
 
 }
@@ -1010,7 +1014,7 @@ void qorbiterManager::nowPlayingChanged(bool b)
 
 bool qorbiterManager::loadSkins(QUrl base)
 {
-
+    qDebug() << "Local Skins path" << base.toString();
     tskinModel = new SkinDataModel(base, new SkinDataItem, this);
     qorbiterUIwin->rootContext()->setContextProperty("skinsList", tskinModel);
     QObject::connect(tskinModel, SIGNAL(skinsFinished(bool)), this, SLOT(setSkinStatus(bool)));
@@ -1032,9 +1036,11 @@ bool qorbiterManager::loadSkins(QUrl base)
 #elif for_android
     tskinModel->addSkin("default");
 #elif RPI
-    QDir desktopQmlPath(QString(base.toLocalFile()),"",QDir::Name, QDir::NoDotAndDotDot);
+    QDir desktopQmlPath(QString(base.toString()),"",QDir::Name, QDir::NoDotAndDotDot);
     setDceResponse("Skin Search Path:"+ desktopQmlPath.dirName());
     QStringList localSkins = desktopQmlPath.entryList(QDir::Dirs |QDir::NoDotAndDotDot);
+    qDebug()<<"inside of skins we find" << localSkins.join(",");
+    tskinModel->addSkin(localSkins.join(","));
 #else    
     QDir desktopQmlPath(QString(base.toLocalFile()),"",QDir::Name, QDir::NoDotAndDotDot);
     setDceResponse("Skin Search Path:"+ desktopQmlPath.dirName());
@@ -1181,7 +1187,7 @@ bool qorbiterManager::readLocalConfig()
             currentSkin = configVariables.namedItem("skin").attributes().namedItem("id").nodeValue();
             if (currentSkin.isEmpty())
 #ifdef RPI
-                currentSkin = "noir";
+                currentSkin = "default";
 #else
                 currentSkin = "default";
 #endif

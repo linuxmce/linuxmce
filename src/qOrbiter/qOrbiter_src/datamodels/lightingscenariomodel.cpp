@@ -25,9 +25,14 @@ QVariant LightingScenarioModel::data(const QModelIndex &index, int role) const
 
 LightingScenarioModel::~LightingScenarioModel() {
   delete m_prototype;
-  clear();
+    clear();
 }
-
+#ifdef QT5
+QHash<int, QByteArray> LightingScenarioModel::roleNames() const
+{
+      return m_prototype->roleNames();
+}
+#endif
 void LightingScenarioModel::appendRow(LightingScenarioItem *item)
 {
   appendRows(QList<LightingScenarioItem*>() << item);

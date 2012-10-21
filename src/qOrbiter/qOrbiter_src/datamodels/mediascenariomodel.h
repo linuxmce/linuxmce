@@ -18,6 +18,10 @@ public:
   explicit MediaScenarioModel(MediaScenarioItem *prototype, QObject* parent = 0);
   ~MediaScenarioModel();
 
+#ifdef QT5
+   QHash<int, QByteArray> roleNames() const;
+#endif
+
   int rowCount(const QModelIndex &parent = QModelIndex()) const;
   QVariant data(const QModelIndex &index, int role = Qt::DisplayRole) const;
   void appendRow(MediaScenarioItem* item);

@@ -3,6 +3,7 @@
 ExistingOrbiter::ExistingOrbiter(int deviceno, QString title, QObject *parent) :
     QObject(parent)
 {
+
     set_device_number(deviceno);
     set_title(title);
     set_label(title);

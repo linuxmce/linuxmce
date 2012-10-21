@@ -23,8 +23,14 @@ QVariant MediaScenarioModel::data(const QModelIndex &index, int role) const
 
 MediaScenarioModel::~MediaScenarioModel() {
   delete m_prototype;
-  clear();
+    clear();
 }
+#ifdef QT5
+QHash<int, QByteArray> MediaScenarioModel::roleNames() const
+{
+     return m_prototype->roleNames();
+}
+#endif
 
 void MediaScenarioModel::appendRow(MediaScenarioItem *item)
 {

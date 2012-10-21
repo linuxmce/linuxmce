@@ -6,6 +6,7 @@
 class ExistingOrbiter : public QObject
 {
     Q_OBJECT
+
     Q_PROPERTY(QString label READ get_label WRITE set_label NOTIFY titleChanged)
     Q_PROPERTY(QString location READ get_title WRITE set_title NOTIFY locationChanged)
     Q_PROPERTY(int i_device_number READ get_device_number WRITE set_device_number NOTIFY deviceChanged)

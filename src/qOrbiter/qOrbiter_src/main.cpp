@@ -295,9 +295,11 @@ int main(int argc, char* argv[])
         qOrbiter *pqOrbiter = new qOrbiter(PK_Device, sRouter_IP,true,bLocalMode );
         orbiterWindow orbiterWin(-1, "192.168.80.1");
         orbiterWin.mainView.rootContext()->setContextProperty("dcerouter", pqOrbiter); //dcecontext object
-    #ifndef RPI
+
+
+
         pqOrbiter->moveToThread(dceThread);
-#endif
+
        // gWeatherModel *theWeather= new gWeatherModel(new gWeatherItem);
         typedef QMap <int, QString> myMap;
         int throwaway = qRegisterMetaType<myMap>("myMap");
@@ -316,20 +318,20 @@ int main(int argc, char* argv[])
 
         //epg listmodel, no imageprovider as of yet
         EPGChannelList *simpleEPGmodel = new EPGChannelList(new EPGItemClass);
-#ifndef RPI
+
         simpleEPGmodel->moveToThread(dceThread);
-#endif
+
 
         QThread * mediaThread = new QThread();
         ListModel *mediaModel = new ListModel(new gridItem);
-#ifndef RPI
+
         mediaModel->moveToThread(mediaThread);
-#endif
+
         GridIndexProvider * advancedProvider = new GridIndexProvider(mediaModel , 6, 4);
         orbiterWin.mainView.engine()->addImageProvider("datagridimg", advancedProvider);
-#ifndef RPI
+
         advancedProvider->moveToThread(mediaThread);
-#endif
+
 
         TimeCodeManager *timecode = new TimeCodeManager();
         orbiterWin.mainView.rootContext()->setContextProperty("dceTimecode", timecode);
@@ -391,7 +393,7 @@ int main(int argc, char* argv[])
         //setup
         QObject::connect(w, SIGNAL(registerOrbiter(int,QString,int)), pqOrbiter,SLOT(registerDevice(int,QString,int)),Qt::QueuedConnection);
         QObject::connect(pqOrbiter,SIGNAL(startManager(QString,QString)), w, SLOT(qmlSetupLmce(QString,QString)),Qt::QueuedConnection);
-        QObject::connect(pqOrbiter, SIGNAL(deviceInvalid(QList<QObject*>)), &orbiterWin,SLOT(prepareExistingOrbiters(QList<QObject *>)),Qt::QueuedConnection);
+        QObject::connect(pqOrbiter, SIGNAL(deviceInvalid(QList<ExistingOrbiter>)), &orbiterWin,SLOT(prepareExistingOrbiters(QList<ExistingOrbiter>)),Qt::QueuedConnection);
         QObject::connect(pqOrbiter,SIGNAL(routerInvalid()), &orbiterWin, SIGNAL(showExternal()),Qt::QueuedConnection);
         QObject::connect(pqOrbiter, SIGNAL(connectionValid(bool)), &orbiterWin, SLOT(setConnectionState(bool)), Qt::QueuedConnection);
         QObject::connect(&orbiterWin,SIGNAL(setupLmce(QString,QString)), pqOrbiter, SLOT(qmlSetup(QString,QString)),Qt::QueuedConnection);
