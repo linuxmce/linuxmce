@@ -165,6 +165,10 @@ localPath = "android/";
     buildType = "/qml/android";
     qrcPath = "qrc:android/Splash.qml";
     localPath = "android/";
+#elif defined RPI
+    buildType = "/qml/rpi";
+    qrcPath = "qrc:android/Splash.qml";
+    localPath = "rpi/";
 #else
     buildType = "/qml/desktop";
     qrcPath = "qrc:desktop/Splash.qml";
@@ -176,7 +180,7 @@ localPath = "android/";
     mainView.rootContext()->setBaseUrl(QUrl::fromLocalFile("/"));
     mainView.setMainQmlFile("qml/Base.qml");
 #elif !for_harmattan
-    mainView.setSource(QApplication::applicationDirPath()+buildType+"/Splash.qml");
+    mainView.setSource(QApplication::applicationDirPath().remove("/bin")+buildType+"/Splash.qml");
  #elif for_harmattan
      mainView.setSource(QApplication::applicationDirPath()+"qml/Splash.qml");
 #endif

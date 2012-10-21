@@ -1,4 +1,4 @@
-import QtQuick 1.0
+import QtQuick 2.0
 import "../components"
 
 /*
@@ -46,7 +46,7 @@ import "../components"
                 font.bold: false
                 color: "aliceblue"
                 wrapMode: Text.WrapAnywhere
-                font.pixelSize: 18
+                font.pointSize: 18
                 anchors.centerIn: containerrect
             }
 

@@ -4,7 +4,9 @@
 
 LightingScenarioModel::LightingScenarioModel(LightingScenarioItem* prototype, QObject* parent): QAbstractListModel(parent), m_prototype(prototype)
 {
+   #ifndef QT5
     setRoleNames(m_prototype->roleNames());
+#endif
 }
 
 

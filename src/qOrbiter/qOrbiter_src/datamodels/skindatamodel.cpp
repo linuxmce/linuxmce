@@ -16,7 +16,9 @@ SkinDataModel::SkinDataModel(QUrl &baseUrl, SkinDataItem* prototype, qorbiterMan
 {
     m_baseUrl = baseUrl ;
     uiRef->setDceResponse("Setting skin source: " + m_baseUrl.toString());
+   #ifndef QT5
     setRoleNames(m_prototype->roleNames());
+#endif
     qRegisterMetaType<QModelIndex>("QModelIndex");
     ui_reference = uiRef;
     SkinLoader* load = new SkinLoader(m_baseUrl, ui_reference, this);

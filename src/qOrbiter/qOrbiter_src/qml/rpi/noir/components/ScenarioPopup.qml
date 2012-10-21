@@ -1,5 +1,5 @@
-// import QtQuick 1.0 // to target S60 5th Edition or Maemo 5
-import QtQuick 1.1
+// import QtQuick 2.0 // to target S60 5th Edition or Maemo 5
+import QtQuick 2.0
 
 Rectangle {
     id:scenarioPopup
@@ -41,7 +41,7 @@ Rectangle {
             Text {
                 id: scenarioItem
                 text: title
-                font.pixelSize: 12
+                font.pointSize: 12
                 anchors.centerIn: parent
             }
             MouseArea{

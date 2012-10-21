@@ -1,4 +1,4 @@
-import QtQuick 1.0
+import QtQuick 2.0
 import "../components"
 import "../js/ComponentLoader.js" as MyJs
 Rectangle {
@@ -68,7 +68,7 @@ Rectangle {
                         height:scaleY(2)
                         text:qsTr("Speed: ") + dceTimecode.playbackSpeed
                         font.family: "Droid Sans"
-                        font.pixelSize: scaleY(2)
+                        font.pointSize: scaleY(2)
                         color: "aliceblue"
                     }
 
@@ -77,7 +77,7 @@ Rectangle {
                         height:scaleY(2)
                         text: dceTimecode.qsCurrentTime + qsTr(" of ") + dceTimecode.qsTotalTime
                         font.family: "Droid Sans"
-                        font.pixelSize: scaleY(1) *2.15
+                        font.pointSize: scaleY(1) *2.15
                         anchors.bottom:parent.bottom
                         anchors.horizontalCenter: parent.horizontalCenter
                         font.bold: true
@@ -149,7 +149,7 @@ Rectangle {
                         wrapMode: "WrapAtWordBoundaryOrAnywhere"
                         font.bold: true
                         smooth: true
-                        font.pixelSize: scaleY(3)
+                        font.pointSize: scaleY(3)
                         visible:  dcenowplaying.qs_mainTitle =="" ? false: true
                     }
 
@@ -161,7 +161,7 @@ Rectangle {
                         wrapMode: "WrapAtWordBoundaryOrAnywhere"
                         //  font.bold: true
                         smooth: true
-                        font.pixelSize: scaleY(1.5)
+                        font.pointSize: scaleY(1.5)
                         visible:  dcenowplaying.tvProgram =="" ? false: true
                     }
 
@@ -173,7 +173,7 @@ Rectangle {
                         font.family: "Droid Sans"
                         //  font.bold: true
                         smooth: true
-                        font.pixelSize: scaleY(1.5)
+                        font.pointSize: scaleY(1.5)
                         visible:  dcenowplaying.episode =="" ? false: true
                     }
 
@@ -185,7 +185,7 @@ Rectangle {
                         font.family: "Droid Sans"
                         // font.bold: true
                         smooth: true
-                        font.pixelSize: scaleY(1.5)
+                        font.pointSize: scaleY(1.5)
                         visible:  dcenowplaying.genre =="" ? false: true
                         MouseArea{
                             anchors.fill: genre
@@ -204,7 +204,7 @@ Rectangle {
                         font.family: "Droid Sans"
                         //  font.bold: true
                         smooth: true
-                        font.pixelSize: scaleY(2)
+                        font.pointSize: scaleY(2)
                         elide: "ElideRight"
                         visible:  dcenowplaying.performerlist =="" ? false: true
 
@@ -224,7 +224,7 @@ Rectangle {
                         font.family: "Droid Sans"
                         font.bold: true
                         smooth: true
-                        font.pixelSize: scaleY(1.5)
+                        font.pointSize: scaleY(1.5)
                         elide: "ElideRight"
                         visible:  dcenowplaying.synop =="" ? false: true
 

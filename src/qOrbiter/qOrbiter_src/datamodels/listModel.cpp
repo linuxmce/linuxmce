@@ -32,7 +32,12 @@
 ListModel::ListModel(gridItem* prototype, QObject* parent) :
     QAbstractListModel(parent),  m_prototype(prototype)
 {
+
+#ifndef QT5
     setRoleNames(m_prototype->roleNames());
+#endif
+
+
     qRegisterMetaType<QModelIndex>("QModelIndex");
     totalcells = 0;
     seperator = 16;
@@ -88,7 +93,7 @@ void ListModel::appendRows(const QList<gridItem *> &items)
     setProgress(p);
     emit dataChanged(index2, index, currentRows);
     setLoadingStatus(false);
-  // QApplication::processEvents(QEventLoop::AllEvents);
+    // QApplication::processEvents(QEventLoop::AllEvents);
 
 }
 
@@ -107,7 +112,7 @@ void ListModel::handleItemChange()
 {
     gridItem* item = static_cast<gridItem*>(sender());
     QModelIndex index = indexFromItem(item);
-     qDebug() << "Handling item change for:" << index;
+    qDebug() << "Handling item change for:" << index;
     if(index.isValid())
     {
         emit dataChanged(index, index, 0);
@@ -140,7 +145,7 @@ void ListModel::resetInternalData()
 {
 
     qDeleteAll(m_list.begin(), m_list.end());
-     m_list.clear();
+    m_list.clear();
 }
 
 gridItem * ListModel::find(const QString &id) const
@@ -338,19 +343,19 @@ void ListModel::clearForPaging()
     if(removeRows(0, m_list.count(), QModelIndex()))
         emit pagingCleared();
         */
-QApplication::processEvents(QEventLoop::AllEvents);
+    QApplication::processEvents(QEventLoop::AllEvents);
     emit modelAboutToBeReset();
     beginResetModel();
-   resetInternalData();
+    resetInternalData();
     setProgress(0.0);
-     QApplication::processEvents(QEventLoop::AllEvents);
+    QApplication::processEvents(QEventLoop::AllEvents);
     endResetModel();
     emit modelReset();
     emit pagingCleared();
-QApplication::processEvents(QEventLoop::AllEvents);
+    QApplication::processEvents(QEventLoop::AllEvents);
 #else
     clearing = true;
-     emit modelAboutToBeReset();
+    emit modelAboutToBeReset();
     beginResetModel();
     setProgress(0.0);
     resetInternalData();

@@ -1,4 +1,4 @@
-import QtQuick 1.0
+import QtQuick 2.0
 
 Rectangle {
     width: 640
@@ -13,7 +13,7 @@ Rectangle {
         text: qsTr("LinuxMCE is Initializing")
         font.family: "Pothana2000"
         font.bold: false
-        font.pixelSize: 22
+        font.pointSize: 22
     }
 
     Text {
@@ -21,7 +21,7 @@ Rectangle {
         x: 103
         y: 183
         text: qsTr("DCE Connected")
-        font.pixelSize: 12
+        font.pointSize: 12
     }
 
     Text {
@@ -29,7 +29,7 @@ Rectangle {
         x: 103
         y: 213
         text: qsTr("Skin Data")
-        font.pixelSize: 12
+        font.pointSize: 12
     }
 
     Text {
@@ -37,6 +37,6 @@ Rectangle {
         x: 103
         y: 243
         text: qsTr("Orbiter Data")
-        font.pixelSize: 12
+        font.pointSize: 12
     }
 }

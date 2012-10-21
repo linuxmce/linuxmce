@@ -6,7 +6,9 @@
 FloorPlanModel::FloorPlanModel(FloorplanDevice* prototype, qorbiterManager *r, QObject *parent) :
     QAbstractListModel(parent), m_prototype(prototype), uiRef(r)
 {
+   #ifndef QT5
     setRoleNames(m_prototype->roleNames());
+#endif
     qRegisterMetaType<QModelIndex>("QModelIndex");
     setStatus(false);
 
@@ -177,7 +179,9 @@ void FloorPlanModel::clear()
 {
     qDeleteAll(m_list);
     m_list.clear();
-    this->reset();
+    #ifndef QT5
+  this->reset();
+#endif
 }
 
 bool FloorPlanModel::removeRow(int row, const QModelIndex &parent)

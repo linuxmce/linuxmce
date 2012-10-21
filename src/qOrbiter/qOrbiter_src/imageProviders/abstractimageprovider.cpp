@@ -4,7 +4,7 @@
   1 image provider as opposed to multiple.
   */
 #if (QT5)
-AbstractImageProvider::AbstractImageProvider(qorbiterManager *manager):QQmlImageProvider(QQmlImageProvider::Image), managerreference(manager)
+AbstractImageProvider::AbstractImageProvider(qorbiterManager *manager):QQuickImageProvider(QQuickImageProvider::Image), managerreference(manager)
   #else
 AbstractImageProvider::AbstractImageProvider(qorbiterManager *manager):QDeclarativeImageProvider(QDeclarativeImageProvider::Image), managerreference(manager)
 #endif

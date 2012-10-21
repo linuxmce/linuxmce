@@ -164,6 +164,7 @@ extern "C" {
 */
 int main(int argc, char* argv[])
 {
+#ifndef QT5
 #ifdef for_harmattan
     QApplication::setGraphicsSystem("meego");
 #elif GLENABLED
@@ -171,14 +172,14 @@ int main(int argc, char* argv[])
 #else
     QApplication::setGraphicsSystem("raster");
 #endif
-
+#endif
 #if(QT_VERSION >= 0x040800)
     Qt::AA_X11InitThreads;
 #endif
 
 
 
-    QApplication  a(argc, argv);
+    QGuiApplication  a(argc, argv);
     QCoreApplication::setApplicationName("LinuxMCE QOrbiter");
 #ifdef __ANDROID__ // workaround for 'text as boxes' issue.
     QFont f = a.font();

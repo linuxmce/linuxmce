@@ -1,4 +1,4 @@
-import QtQuick 1.0
+import QtQuick 2.0
 import "../components"
 Rectangle {
 
@@ -12,7 +12,7 @@ Rectangle {
         text: "pnp Hard Drive Screen"
         font.family: "Droid Sans Fallback"
         font.pointSize: 24
-        font.pixelSize: 12
+        font.pointSize: 12
         anchors.bottom: ignoreonce.top
         anchors.horizontalCenter: parent.horizontalCenter
     }

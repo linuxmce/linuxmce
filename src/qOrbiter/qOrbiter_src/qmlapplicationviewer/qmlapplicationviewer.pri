@@ -6,7 +6,7 @@
 # may offer an updated version of it.
 
 contains(QT_VERSION,5.0.*) {
-    QT += quick1
+    QT += quick
 } else {
     QT += declarative
 }

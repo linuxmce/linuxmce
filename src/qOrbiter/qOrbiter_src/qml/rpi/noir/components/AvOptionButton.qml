@@ -1,4 +1,4 @@
-import QtQuick 1.0
+import QtQuick 2.0
 
 Rectangle{
 
@@ -39,7 +39,7 @@ horizontalTileMode: BorderImage.Repeat
             width: -1
             height: 0
             text:"null ipsum delorium"
-            font.pixelSize: scaleY(1.5)
+            font.pointSize: scaleY(1.5)
             verticalAlignment: Text.AlignVCenter
             horizontalAlignment: Text.AlignHCenter
             anchors.fill: parent

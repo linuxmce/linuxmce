@@ -8,7 +8,8 @@
 
 #include <QtGlobal>
 #if (QT5)
-#include <QtQml/QQmlImageProvider>
+
+#include <QtQuick/QQuickImageProvider>
 #include <QtCore/QObject>
 #include <QtCore/QDebug>
 #include <QtCore/QVariant>
@@ -25,7 +26,7 @@
 #include <qorbitermanager.h>
 
 #if (QT5)
-class basicImageProvider : public QQmlImageProvider, public QObject
+class basicImageProvider : public QQuickImageProvider, public QObject
 #else
 class basicImageProvider : public QDeclarativeImageProvider, public QObject
 #endif
@@ -33,7 +34,7 @@ class basicImageProvider : public QDeclarativeImageProvider, public QObject
 
 public:
 #if (QT5)
-    basicImageProvider():QQmlImageProvider(QQmlImageProvider::Image)
+    basicImageProvider():QQuickImageProvider(QQuickImageProvider::Image)
   #else
     basicImageProvider():QDeclarativeImageProvider(QDeclarativeImageProvider::Image)
 #endif

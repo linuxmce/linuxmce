@@ -11,7 +11,7 @@
 
 
 #ifdef QT5
-FloorplanDeviceProvider::FloorplanDeviceProvider(qorbiterManager *ui): QQmlImageProvider(QQmlImageProvider::Pixmap), ui_reference(ui)
+FloorplanDeviceProvider::FloorplanDeviceProvider(qorbiterManager *ui): QQuickImageProvider(QQuickImageProvider::Pixmap), ui_reference(ui)
 #else
 FloorplanDeviceProvider::FloorplanDeviceProvider(qorbiterManager *ui): QDeclarativeImageProvider(QDeclarativeImageProvider::Pixmap), ui_reference(ui)
 #endif

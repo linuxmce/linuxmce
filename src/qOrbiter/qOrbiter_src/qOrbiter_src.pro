@@ -23,7 +23,9 @@ CONFIG += thread
 ANDROID{
 DESTDIR = ../QOrbiter-Android-Arm-$$QT_VERSION
 } else {
+!linux-rasp-pi-g++{
 DESTDIR = ../QOrbiter-build-$$QT_VERSION
+}
 }
 
 contains(QT_VERSION,4.8.*){
@@ -232,13 +234,17 @@ androidPlugins/libandroidplugin_1_1.so
     DEFINES+=ANDROID GLENABLED
 DEPLOYMENTFOLDERS = qmlcomponents base #folder_01
 QML_IMPORT_PATH = "androidComponents"
-
 }
 
 linux-rasp-pi-g++{
 
-DEFINES+= RPI
-DEPLOYMENTFOLDERS = qmlcomponents base #folder_01
+folder_01.source= qml/rpi
+folder_01.target= qml
+
+folder_02.source = config.xml
+folder_02.target =
+DEFINES+=RPI
+DEPLOYMENTFOLDERS += folder_01 folder_03
 }
 
 # Additional import path used to resolve QML modules in Creator's code model

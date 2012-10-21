@@ -1,4 +1,4 @@
-import QtQuick 1.0
+import QtQuick 2.0
 
 Rectangle {
     id: remoteControl
@@ -63,7 +63,7 @@ Rectangle {
             x: 6
             y: 5
             text: "Home"
-            font.pixelSize: 12
+            font.pointSize: 12
         }
 
         MouseArea {

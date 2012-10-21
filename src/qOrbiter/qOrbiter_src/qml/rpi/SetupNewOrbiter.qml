@@ -1,5 +1,5 @@
-// import QtQuick 1.0 // to target S60 5th Edition or Maemo 5
-import QtQuick 1.1
+// import QtQuick 2.0 // to target S60 5th Edition or Maemo 5
+import QtQuick 2.0
 
 Rectangle {
     width: appW
@@ -228,7 +228,7 @@ Rectangle {
                     text: qsTr("Please Select a Default User")
                     font.bold: true
                     color: deYork
-                    font.pixelSize: 14
+                    font.pointSize: 14
                     x:0
                     onTextChanged: {
                         x = -50

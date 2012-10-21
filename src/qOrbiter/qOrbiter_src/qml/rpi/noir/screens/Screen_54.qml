@@ -1,4 +1,4 @@
-import QtQuick 1.0
+import QtQuick 2.0
 import "../components"
 import "../js/ComponentLoader.js" as MyJs
 
@@ -8,7 +8,7 @@ Rectangle {
     Text {
         id: messages
         text: dcerouter.mediaResponse
-        font.pixelSize: scaleY(4)
+        font.pointSize: scaleY(4)
         anchors.bottom: parent.bottom
     }
 
@@ -28,7 +28,7 @@ Rectangle {
         id: bignowplaying
         text: dcenowplaying.qs_mainTitle
         anchors.centerIn: parent
-        font.pixelSize: scaleY(5)
+        font.pointSize: scaleY(5)
         opacity: .5
        font.bold: true
 
@@ -57,7 +57,7 @@ Rectangle {
             height:scaleY(2.15)
             text: qsTr("Speed: ") + dceTimecode.playbackSpeed +" || " +dceTimecode.qsCurrentTime + qsTr(" of ") + dceTimecode.qsTotalTime
             font.family: "Droid Sans"
-            font.pixelSize: scaleY(2.15)
+            font.pointSize: scaleY(2.15)
             anchors.verticalCenter: parent.verticalCenter
             anchors.horizontalCenter: parent.horizontalCenter
             font.bold: true
@@ -136,7 +136,7 @@ Rectangle {
                         font.family: "Droid Sans"
                         font.bold: true
                         smooth: true
-                        font.pixelSize: scaleY(4)
+                        font.pointSize: scaleY(4)
                         elide: "ElideRight"
                         visible:  dcenowplaying.performerlist =="" ? false: true
 
@@ -154,7 +154,7 @@ Rectangle {
                         font.family: "Droid Sans"
                         wrapMode: "WrapAtWordBoundaryOrAnywhere"
                         smooth: true
-                        font.pixelSize: scaleY(3.5)
+                        font.pointSize: scaleY(3.5)
                         visible:  dcenowplaying.mediatitle =="" ? false: true
                     }
 
@@ -165,7 +165,7 @@ Rectangle {
                         font.family: "Droid Sans"
                         wrapMode: "WrapAtWordBoundaryOrAnywhere"
                         smooth: true
-                        font.pixelSize: scaleY(2)
+                        font.pointSize: scaleY(2)
                         visible:  dcenowplaying.album =="" ? false: true
                     }
 
@@ -178,7 +178,7 @@ Rectangle {
                         //font.bold: true
                         font.italic: true
                         smooth: true
-                        font.pixelSize: scaleY(2)
+                        font.pointSize: scaleY(2)
                         visible:  dcenowplaying.track =="" ? false: true
                     }
 
@@ -191,7 +191,7 @@ Rectangle {
                         //font.bold: true
                         font.italic: true
                         smooth: true
-                        font.pixelSize: scaleY(2)
+                        font.pointSize: scaleY(2)
                         visible:  dcenowplaying.genre =="" ? false: true
                         MouseArea{
                             anchors.fill: genre
@@ -209,7 +209,7 @@ Rectangle {
                         // font.bold: true
                         font.italic: true
                         smooth: true
-                        font.pixelSize: scaleY(2)
+                        font.pointSize: scaleY(2)
                         visible:  dcenowplaying.releasedate =="" ? false: true
 
                     }

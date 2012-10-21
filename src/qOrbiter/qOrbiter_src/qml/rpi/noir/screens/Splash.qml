@@ -2,7 +2,7 @@
   Depreciated splash.qml, use the one in root
   */
 
-import QtQuick 1.0
+import QtQuick 2.0
 import "../components"
 
 Rectangle {
@@ -22,7 +22,7 @@ Rectangle {
         Text {
             id: welcome
             text: qsTr("Welcome To LinuxMCE!")
-            font.pixelSize: 30
+            font.pointSize: 30
             anchors.horizontalCenter: parent.horizontalCenter
             anchors.verticalCenter: parent.verticalCenter
         }
@@ -77,7 +77,7 @@ Rectangle {
             id: routerip
             width: 110
             text: srouterip
-            font.pixelSize: 12
+            font.pointSize: 12
           //  onTextChanged: setRouterIp(routerip.text)
             fillColor: style.highlight1
             anchors.verticalCenter: parent.verticalCenter
@@ -92,7 +92,7 @@ Rectangle {
             id: devicenumber
             width: 25
             text: deviceid
-            font.pixelSize: 12
+            font.pointSize: 12
             //onTextChanged: setDeviceNo(devicenumber.text)
             fillColor: style.highlight1
             anchors.verticalCenter: parent.verticalCenter

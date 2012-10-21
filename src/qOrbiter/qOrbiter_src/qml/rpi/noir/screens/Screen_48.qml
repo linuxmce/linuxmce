@@ -1,4 +1,4 @@
-import QtQuick 1.0
+import QtQuick 2.0
 import "../components"
 
 Rectangle {
@@ -67,7 +67,7 @@ Rectangle {
                     id: headertext
                     text:"Speed: " + dcenowplaying.qs_playbackSpeed
                     font.family: "Droid Sans"
-                    font.pixelSize: 12
+                    font.pointSize: 12
                 }
             }
 
@@ -112,7 +112,7 @@ Rectangle {
                         wrapMode: "NoWrap"
                         font.bold: true
                         smooth: true
-                        font.pixelSize: 12
+                        font.pointSize: 12
                     }
 
 
@@ -124,7 +124,7 @@ Rectangle {
                         font.bold: true
                         smooth: true
                         horizontalAlignment: Text.AlignHCenter
-                        font.pixelSize: 12
+                        font.pointSize: 12
                     }
 
                     Text {
@@ -135,7 +135,7 @@ Rectangle {
                         font.bold: true
                         smooth: true
                         horizontalAlignment: Text.AlignHCenter
-                        font.pixelSize: 12
+                        font.pointSize: 12
                     }
                 }
             }

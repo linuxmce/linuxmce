@@ -1,4 +1,4 @@
-import QtQuick 1.0
+import QtQuick 2.0
 import "../components"
 
 Rectangle{
@@ -44,7 +44,7 @@ Rectangle{
                 text: qsTr("You have recently changed scenarios, floorplans, or other settings. I need to regenerate the graphical screens so you can see the new buttons. This will take from 2 - 20 minutes")
                 wrapMode: "WrapAtWordBoundaryOrAnywhere"
                 width: parent.width * .85
-                font.pixelSize: scaleY(2.5)
+                font.pointSize: scaleY(2.5)
                 anchors.horizontalCenter: parent.horizontalCenter
                 color: "aliceblue"
             }

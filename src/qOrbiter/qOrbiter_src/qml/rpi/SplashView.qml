@@ -1,5 +1,5 @@
-// import QtQuick 1.0 // to target S60 5th Edition or Maemo 5
-import QtQuick 1.1
+// import QtQuick 2.0 // to target S60 5th Edition or Maemo 5
+import QtQuick 2.0
 
 Rectangle {
     height:appH
@@ -44,7 +44,7 @@ Rectangle {
                 id: connection_label
                 text: qsTr("Connection")
                 color: window.b_connectionPresent ? "green" : "red"
-                font.pixelSize: window.b_connectionPresent ? 14 : 12
+                font.pointSize: window.b_connectionPresent ? 14 : 12
             }
         }
 
@@ -62,7 +62,7 @@ Rectangle {
                 id: device_Label
                 text: qsTr("Device")
                 color: window.b_devicePresent ? "green" : "red"
-                font.pixelSize: window.b_devicePresent ? 14 : 12
+                font.pointSize: window.b_devicePresent ? 14 : 12
             }
         }
 /*
@@ -80,7 +80,7 @@ Rectangle {
                 id: config_label
                 text: qsTr("Config")
                 color: window.b_localConfigReady ? "green" : "red"
-                font.pixelSize: window.b_localConfigReady ? 14 : 12
+                font.pointSize: window.b_localConfigReady ? 14 : 12
             }
         }
 
@@ -98,7 +98,7 @@ Rectangle {
                 id: skin_label
                 text: qsTr("Skins")
                 color: window.b_skinIndexReady ? "green" : "red"
-                font.pixelSize: window.b_skinIndexReady ? 14 : 12
+                font.pointSize: window.b_skinIndexReady ? 14 : 12
             }
         }
 
@@ -116,7 +116,7 @@ Rectangle {
                 id: skin_data_label
                 text: qsTr("Orbiter Ready")
                 color: window.b_orbiterConfigReady ? "green" : "red"
-                font.pixelSize: window.b_orbiterConfigReady ? 14 : 12
+                font.pointSize: window.b_orbiterConfigReady ? 14 : 12
             }
         }
 */
@@ -168,7 +168,7 @@ Rectangle {
     Text {
         id: connectionlabel
         text: qsTr("Set Connection Details")
-        font.pixelSize: 11
+        font.pointSize: 11
         font.bold: false
         anchors.top: rectangle2.top
         anchors.horizontalCenter: parent.horizontalCenter
@@ -180,20 +180,20 @@ Rectangle {
         spacing: 10
         Text {
             text: qsTr("Host:")
-            font.pixelSize: 11
+            font.pointSize: 18
             font.family: "Droid Sans"
-            anchors.verticalCenter: parent.verticalCenter
+
         }
 
         TextInput {
             id: routerip
             width: 80
             text: srouterip
-            font.pixelSize: 10
+            font.pointSize: 10
             font.family: "Droid Sans"
             //  onTextChanged: setRouterIp(routerip.text)
-            fillColor: "grey"
-            anchors.verticalCenter: parent.verticalCenter
+            color: "grey"
+
 
         }
 
@@ -201,29 +201,29 @@ Rectangle {
             id: ext_routerip
             width: 80
             text: extip
-            font.pixelSize: 10
+            font.pointSize: 10
             font.family: "Droid Sans"
             //  onTextChanged: setRouterIp(routerip.text)
-            fillColor: "grey"
-            anchors.verticalCenter: parent.verticalCenter
+            color: "grey"
+
             visible: false
         }
 
         Text {
             text: qsTr("Device:")
-            font.pixelSize: 11
+            font.pointSize: 11
             font.family: "Droid Sans"
-            anchors.verticalCenter: parent.verticalCenter
+
         }
         TextInput {
             id: devicenumber
             width: scaleX(10)
             text: deviceid
             font.family: "Droid Sans"
-            font.pixelSize: 12
+            font.pointSize: 12
             //onTextChanged: setDeviceNo(devicenumber.text)
-            fillColor: "grey"
-            anchors.verticalCenter: parent.verticalCenter
+            color: "grey"
+
 
         }
 
@@ -233,14 +233,14 @@ Rectangle {
             width: scaleX(10)
             color:"red"
 
-            anchors.left: devicenumber.right
-            anchors.leftMargin: scaleX(5)
+//            anchors.left: devicenumber.right
+//            anchors.leftMargin: scaleX(5)
             Text {
                 id: name
                 anchors.centerIn: parent
                 anchors.fill: parent
                 text: qsTr("Go!")
-                font.pixelSize: 12
+                font.pointSize: 12
                 verticalAlignment: Text.AlignTop
                 font.bold: true
             }
@@ -260,14 +260,14 @@ Rectangle {
             id: exitbutton
             height: scaleY(5)
             width: scaleX(6)
-            anchors.left: connectbutton.right
-            anchors.leftMargin: scaleX(5)
+//            anchors.left: connectbutton.right
+//            anchors.leftMargin: scaleX(5)
             Text {
                 id: exitlabel
                 anchors.centerIn: parent
                 anchors.fill: parent
                 text: qsTr("Exit")
-                font.pixelSize: 11
+                font.pointSize: 11
             }
 
             radius:  4
@@ -282,7 +282,7 @@ Rectangle {
         id: loadingStatus
         text: "Status " + dcerouter.commandResponse
         anchors.topMargin: scaleY(15)
-        font.pixelSize: 14
+        font.pointSize: 14
         font.family: "Droid Sans"
         color: "white"
         anchors.top: rectangle2.bottom
@@ -314,13 +314,13 @@ Rectangle {
                 Text {
                     id: orbiter_label
                     text: qsTr("Orbiter:")+ label
-                    font.pixelSize: 12
+                    font.pointSize: 12
                     wrapMode: Text.WrapAtWordBoundaryOrAnywhere
                 }
                 Text {
                     id: dev_num
                     text:qsTr("Device:")+ i_device_number
-                    font.pixelSize: 12
+                    font.pointSize: 12
                     font.italic: true
                     wrapMode: Text.WrapAtWordBoundaryOrAnywhere
                 }
@@ -350,7 +350,7 @@ Rectangle {
         Text {
             id: newOrbiterLabel
             text: qsTr("Create New Orbiter?")
-            font.pixelSize: 15
+            font.pointSize: 15
             width: parent.width
             anchors.centerIn: parent
             wrapMode: Text.WrapAtWordBoundaryOrAnywhere

@@ -276,6 +276,8 @@ bool qorbiterManager::initializeManager(string sRouterIP, int device_id)
     remoteDirectoryPath = "http://"+QString::fromStdString(sRouterIP)+"/lmce-admin/skins/desktop";
 #elif WIN32
     remoteDirectoryPath = "http://"+QString::fromStdString(sRouterIP)+"/lmce-admin/skins/desktop";
+#elif RPI
+    remoteDirectoryPath = "http://"+QString::fromStdString(sRouterIP)+"/lmce-admin/skins/rpi";
 #elif for_harmattan
     remoteDirectoryPath = "http://"+QString::fromStdString(sRouterIP)+"/lmce-admin/skins/harmattan";
 #elif for_android
@@ -327,6 +329,25 @@ bool qorbiterManager::initializeManager(string sRouterIP, int device_id)
         }
     }
 #elif for_harmattan
+    if(b_localLoading == true)
+    {
+        if( !loadSkins(QUrl(localDir)))
+        {
+            emit skinIndexReady(false);
+            return false;
+        }
+    }
+    else
+    {
+        if( !loadSkins(QUrl(remoteDirectoryPath)))
+        {
+            emit skinIndexReady(false);
+            return false;
+        }
+    }
+
+#elif RPI
+
     if(b_localLoading == true)
     {
         if( !loadSkins(QUrl(localDir)))
@@ -1101,6 +1122,8 @@ bool qorbiterManager::readLocalConfig()
     QString xmlPath = "/mnt/sdcard/LinuxMCE/config.xml";
 #elif WIN32
     QString xmlPath = QString::fromStdString(QApplication::applicationDirPath().toStdString())+"/config.xml";
+#elif RPI
+    QString xmlPath = QString::fromStdString(QApplication::applicationDirPath().toStdString())+"/config.xml";
 #else
     QString xmlPath = QString::fromStdString(QApplication::applicationDirPath().toStdString())+"/config.xml";
 #endif
@@ -1149,15 +1172,26 @@ bool qorbiterManager::readLocalConfig()
 
                 qs_routerip = configVariables.namedItem("routerip").attributes().namedItem("id").nodeValue();
             }
+            else
+            {
+                qs_routerip = "192.168.80.1";
+            }
 
             currentSkin = configVariables.namedItem("skin").attributes().namedItem("id").nodeValue();
             if (currentSkin.isEmpty())
-                currentSkin = "default";
-
+#ifdef RPI
+        currentSkin = "noir";
+#else
+                 currentSkin = "default";
+#endif
             if(configVariables.namedItem("device").attributes().namedItem("id").nodeValue().toLong() !=0)
             {
 
                 iPK_Device = configVariables.namedItem("device").attributes().namedItem("id").nodeValue().toLong();
+            }
+            else
+            {
+                iPK_Device = -1;
             }
 
             if(!configVariables.namedItem("externalip").attributes().namedItem("id").nodeValue().isEmpty() )

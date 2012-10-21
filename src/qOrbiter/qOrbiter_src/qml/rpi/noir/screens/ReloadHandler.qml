@@ -1,5 +1,5 @@
-// import QtQuick 1.0 // to target S60 5th Edition or Maemo 5
-import QtQuick 1.1
+// import QtQuick 2.0 // to target S60 5th Edition or Maemo 5
+import QtQuick 2.0
 import QtWebKit 1.0
 
 Rectangle {
@@ -12,7 +12,7 @@ Rectangle {
     Text {
         id: reload_text
         text: qsTr("Router is Reloading, Please be patient")
-        font.pixelSize: scaleY(8)
+        font.pointSize: scaleY(8)
         color: "black"
         font.bold: true
         anchors.horizontalCenter: parent.horizontalCenter
@@ -28,7 +28,7 @@ Rectangle {
     Text {
         id: reload_status
         text: dcemessage
-        font.pixelSize: scaleY(5)
+        font.pointSize: scaleY(5)
         color: "black"
         font.bold: true
         anchors.top: web_regen.bottom

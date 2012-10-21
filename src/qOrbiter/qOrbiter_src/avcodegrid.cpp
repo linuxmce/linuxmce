@@ -21,7 +21,9 @@
 AvCodeGrid::AvCodeGrid(AvItem* prototype, QObject *parent) :
     QAbstractItemModel(parent), m_prototype(prototype)
 {
+   #ifndef QT5
     setRoleNames(m_prototype->roleNames());
+#endif
      qRegisterMetaType<QModelIndex>("QModelIndex");
 }
 
@@ -113,7 +115,9 @@ void AvCodeGrid::clear()
 
   qDeleteAll(m_list);
   m_list.clear();
+  #ifndef QT5
   this->reset();
+#endif
 
 }
 

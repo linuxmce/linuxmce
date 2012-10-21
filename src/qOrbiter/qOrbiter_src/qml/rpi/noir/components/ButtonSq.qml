@@ -1,4 +1,4 @@
-import QtQuick 1.0
+import QtQuick 2.0
 
 Rectangle{
 
@@ -31,7 +31,7 @@ Rectangle{
             width: -1
             height: 0
             text:"null ipsum delorium"
-            font.pixelSize: 14
+            font.pointSize: 14
             verticalAlignment: Text.AlignVCenter
             horizontalAlignment: Text.AlignHCenter
             anchors.fill: parent

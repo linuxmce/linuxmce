@@ -14,6 +14,7 @@
 #include <QtGlobal>
 #ifdef QT5
 #include <QtQuick/QQuickView>
+#include <QGuiApplication>
 #else
 #include <QtDeclarative/QDeclarativeView>
 #endif
@@ -55,6 +56,6 @@ private:
     class QmlApplicationViewerPrivate *d;
 };
 
-QApplication *createApplication(int &argc, char **argv);
+QGuiApplication *createApplication(int &argc, char **argv);
 
 #endif // QMLAPPLICATIONVIEWER_H

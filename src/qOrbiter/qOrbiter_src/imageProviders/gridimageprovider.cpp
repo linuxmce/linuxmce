@@ -4,7 +4,7 @@
 
 GridIndexProvider::GridIndexProvider(ListModel *model  , int pathRole, int pixmapRole) :
 #if (QT5)
-    QQmlImageProvider(QQmlImageProvider::Image), mModel(*model),  mPathRole(pathRole), mPixmapRole(pixmapRole)
+    QQuickImageProvider(QQuickImageProvider::Image), mModel(*model),  mPathRole(pathRole), mPixmapRole(pixmapRole)
 #else
     QDeclarativeImageProvider(QDeclarativeImageProvider::Image), mModel(*model),  mPathRole(pathRole), mPixmapRole(pixmapRole)
 #endif

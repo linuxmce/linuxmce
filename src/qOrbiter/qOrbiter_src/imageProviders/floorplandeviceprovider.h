@@ -4,7 +4,7 @@
 
 #include <QtGlobal>
 #ifdef QT5
-#include <QQmlImageProvider>
+#include <QQuickImageProvider>
 
 #else
 #include <QtDeclarative/QDeclarativeImageProvider>
@@ -13,7 +13,7 @@
 #include <qorbitermanager.h>
 
 #ifdef QT5
-class FloorplanDeviceProvider : public QObject, public QQmlImageProvider
+class FloorplanDeviceProvider : public QObject, public QQuickImageProvider
 #else
 class FloorplanDeviceProvider : public QObject, public QDeclarativeImageProvider
 #endif

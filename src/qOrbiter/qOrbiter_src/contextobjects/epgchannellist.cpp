@@ -5,7 +5,9 @@
 EPGChannelList::EPGChannelList(EPGItemClass* prototype) :
     m_prototype(prototype)
 {
+   #ifndef QT5
     setRoleNames(m_prototype->roleNames());
+#endif
     qRegisterMetaType<QModelIndex>("QModelIndex");
     isActive = false;
 

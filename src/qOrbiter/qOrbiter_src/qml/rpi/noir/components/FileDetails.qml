@@ -1,4 +1,4 @@
-import QtQuick 1.0
+import QtQuick 2.0
 import Qt.labs.shaders 1.0
 import "../effects"
 
@@ -52,7 +52,7 @@ Rectangle {
             id: text2
             anchors.horizontalCenter: parent.horizontalCenter
                text: "Location: " + filedetailsclass.path
-               font.pixelSize: scaleY(2)
+               font.pointSize: scaleY(2)
             font.bold: true
             wrapMode: Text.WrapAtWordBoundaryOrAnywhere
         }
@@ -62,7 +62,7 @@ Rectangle {
         id: filename_block
         anchors.horizontalCenter: parent.horizontalCenter
            text: "Filename: " + filedetailsclass.file
-           font.pixelSize: scaleY(3)
+           font.pointSize: scaleY(3)
         font.bold: true
         wrapMode: Text.WrapAtWordBoundaryOrAnywhere
         anchors.bottom: parent.bottom
@@ -132,7 +132,7 @@ Rectangle {
                 Text {
                     id: fnametext
 
-                    font.pixelSize: scaleY(2)
+                    font.pointSize: scaleY(2)
                     color:"aliceblue"
                     wrapMode: "WrapAtWordBoundaryOrAnywhere"
                      width: rectangle1.width *.95
@@ -142,7 +142,7 @@ Rectangle {
                 Text {
                     id:  titletext
                     text:filedetailsclass.mediatitle
-                    font.pixelSize: scaleY(3)
+                    font.pointSize: scaleY(3)
                     font.bold: true
                     color:"aliceblue"
                     wrapMode: "WrapAtWordBoundaryOrAnywhere"
@@ -152,7 +152,7 @@ Rectangle {
                 Text {
                     id:  program_block
                     text:qsTr("Program") + filedetailsclass.program
-                    font.pixelSize: scaleY(2)
+                    font.pointSize: scaleY(2)
                     font.bold: true
                     color:"aliceblue"
                     wrapMode: "WrapAtWordBoundaryOrAnywhere"
@@ -163,7 +163,7 @@ Rectangle {
                 Text {
                     id:  episode
                     text:qsTr("Episode") + filedetailsclass.episode
-                    font.pixelSize: scaleY(2)
+                    font.pointSize: scaleY(2)
                     font.bold: true
                     color:"aliceblue"
                     wrapMode: "WrapAtWordBoundaryOrAnywhere"
@@ -177,7 +177,7 @@ Rectangle {
                     font.family: "Droid Sans"
                     wrapMode: "WrapAtWordBoundaryOrAnywhere"
                     smooth: true
-                    font.pixelSize: scaleY(2)
+                    font.pointSize: scaleY(2)
                     visible:  filedetailsclass.album =="" ? false: true
                 }
 
@@ -189,7 +189,7 @@ Rectangle {
                     font.family: "Droid Sans"
                     //  font.bold: true
                     smooth: true
-                    font.pixelSize: scaleY(2)
+                    font.pointSize: scaleY(2)
                      color:"aliceblue"
                     elide: "ElideRight"
                     visible:  filedetailsclass.rating =="" ? false: true
@@ -203,7 +203,7 @@ Rectangle {
                     font.family: "Droid Sans"
                     //  font.bold: true
                     smooth: true
-                    font.pixelSize: scaleY(2)
+                    font.pointSize: scaleY(2)
                      color:"aliceblue"
                     elide: "ElideRight"
                     visible:  filedetailsclass.genre =="" ? false: true
@@ -223,7 +223,7 @@ Rectangle {
                     font.family: "Droid Sans"
                     //  font.bold: true
                     smooth: true
-                    font.pixelSize: scaleY(2)
+                    font.pointSize: scaleY(2)
                      color:"aliceblue"
                     elide: "ElideRight"
                     visible:  filedetailsclass.director =="" ? false: true
@@ -244,7 +244,7 @@ Rectangle {
                     font.family: "Droid Sans"
                     //  font.bold: true
                     smooth: true
-                    font.pixelSize: scaleY(2)
+                    font.pointSize: scaleY(2)
                      color:"aliceblue"
                     elide: "ElideRight"
                     visible:  filedetailsclass.performerlist =="" ? false: true
@@ -262,7 +262,7 @@ Rectangle {
                     width: rectangle1.width *.95
                     wrapMode: "WrapAtWordBoundaryOrAnywhere"
                     text: filedetailsclass.synop
-                    font.pixelSize: scaleY(2)
+                    font.pointSize: scaleY(2)
                     color:"aliceblue"
                 }
             }
@@ -273,7 +273,7 @@ Rectangle {
             text: "More..."
             anchors.horizontalCenterOffset: 294
             anchors.horizontalCenter: parent.horizontalCenter
-            font.pixelSize: scaleY(2)
+            font.pointSize: scaleY(2)
             color:"aliceblue"
             visible: !contentFlick.atYEnd
         }
@@ -285,7 +285,7 @@ Rectangle {
             text: "More..."
             anchors.horizontalCenterOffset: 294
             anchors.horizontalCenter: parent.horizontalCenter
-            font.pixelSize: scaleY(2)
+            font.pointSize: scaleY(2)
             color:"aliceblue"
             visible: !contentFlick.atYBeginning
         }

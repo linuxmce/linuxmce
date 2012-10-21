@@ -1,4 +1,4 @@
-import QtQuick 1.0
+import QtQuick 2.0
 import Qt.labs.shaders 1.0
 import "../effects"
 import "../components"
@@ -83,7 +83,7 @@ Rectangle {
             text: dataModel.totalcells
             color: "grey"
             font.bold: false
-            font.pixelSize: scaleY(4)
+            font.pointSize: scaleY(4)
             anchors.top: progress_bar.top
         }
         Text {
@@ -91,7 +91,7 @@ Rectangle {
             text: dataModel.currentCells
             color: "grey"
             font.bold: false
-            font.pixelSize: scaleY(4)
+            font.pointSize: scaleY(4)
             anchors.top: progress_bar_fill.top
         }
     }
@@ -265,7 +265,7 @@ Rectangle {
             Text {
                 id:page_label
                 text: label
-                font.pixelSize: scaleY(3.5)
+                font.pointSize: scaleY(3.5)
                 anchors.centerIn: parent
                 color: "slategrey"
                 font.bold: true
@@ -298,7 +298,7 @@ Rectangle {
             Text {
                 id: test
                 text: name
-                font.pixelSize: 18
+                font.pointSize: 18
                 anchors.centerIn: parent
                 color:"aliceblue"
             }

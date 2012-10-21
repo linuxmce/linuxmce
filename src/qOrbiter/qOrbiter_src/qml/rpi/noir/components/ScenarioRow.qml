@@ -1,5 +1,5 @@
-// import QtQuick 1.0 // to target S60 5th Edition or Maemo 5
-import QtQuick 1.1
+// import QtQuick 2.0 // to target S60 5th Edition or Maemo 5
+import QtQuick 2.0
 import "../js/ComponentLoader.js" as MyJs
 
 
@@ -33,7 +33,7 @@ Rectangle {
                 text: qsTr("Lights")
                 anchors.centerIn: parent
                 color: "white"
-                font.pixelSize: scenarioFontSize
+                font.pointSize: scenarioFontSize
             }
             MouseArea{
                 anchors.fill: parent
@@ -59,7 +59,7 @@ Rectangle {
                 text: qsTr("Media")
                 anchors.centerIn: parent
                 color: "white"
-                font.pixelSize: scenarioFontSize
+                font.pointSize: scenarioFontSize
             }
             MouseArea{
                 anchors.fill: parent
@@ -85,7 +85,7 @@ Rectangle {
                 text: qsTr("Climate")
                 anchors.centerIn: parent
                 color: "white"
-                font.pixelSize: scenarioFontSize
+                font.pointSize: scenarioFontSize
             }
             MouseArea{
                 anchors.fill: parent
@@ -112,7 +112,7 @@ Rectangle {
                 anchors.centerIn: parent
                 color: "white"
                 font.family: "Nimbus Sans L"
-                font.pixelSize: scenarioFontSize
+                font.pointSize: scenarioFontSize
             }
             MouseArea{
                 anchors.fill: parent
@@ -139,7 +139,7 @@ Rectangle {
                 anchors.centerIn: parent
                 color: "white"
                 font.family: "Nimbus Sans L"
-                font.pixelSize: scenarioFontSize
+                font.pointSize: scenarioFontSize
             }
             MouseArea{
                 anchors.fill: parent
@@ -165,7 +165,7 @@ Rectangle {
                 anchors.centerIn: parent
                 color: "white"
                 font.family: "Nimbus Sans L"
-                font.pixelSize: scenarioFontSize
+                font.pointSize: scenarioFontSize
             }
         }
     }
@@ -196,7 +196,7 @@ Rectangle {
             Text {
                 id: roomTitle
                 text: currentroom
-                font.pixelSize: 18
+                font.pointSize: 18
                 anchors.left: roomLabel.right
                 color: "white"
                 font.family: "Nimbus Sans L"
@@ -211,7 +211,7 @@ Rectangle {
             Text {
                 id: userLabel
                 text: qsTr("user:")
-                font.pixelSize: 12
+                font.pointSize: 12
                 anchors.left: userRect.left
                 color: "white"
                 font.family: "Nimbus Sans L"
@@ -219,7 +219,7 @@ Rectangle {
             Text {
                 id: userName
                 text: currentuser
-                font.pixelSize: 18
+                font.pointSize: 18
                 anchors.left: userLabel.right
                 color: "white"
                 font.family: "Nimbus Sans L"

@@ -1,4 +1,4 @@
-import QtQuick 1.0
+import QtQuick 2.0
 
 Rectangle {
     id:nonepgplaylist
@@ -59,7 +59,7 @@ Rectangle {
                 text: qsTr("Item #") + index
                 font.family: "DroidSans"
                 color: "aliceblue"
-                font.pixelSize: scaleY(2.25)
+                font.pointSize: scaleY(2.25)
                 font.bold: true
                 anchors.bottom: parent.bottom
                 opacity: .75
@@ -71,7 +71,7 @@ Rectangle {
                 color: "aliceblue"
                 width: parent.width
                 wrapMode: "WrapAtWordBoundaryOrAnywhere"
-                font.pixelSize: scaleY(2.15)
+                font.pointSize: scaleY(2.15)
                 //font.bold: true
 
             }

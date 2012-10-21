@@ -4,7 +4,9 @@
 UserModel::UserModel(UserItem* prototype, QObject *parent) :
     QAbstractListModel(parent), m_prototype(prototype)
 {
-  setRoleNames(m_prototype->roleNames());
+ #ifndef QT5
+    setRoleNames(m_prototype->roleNames());
+#endif
 
 }
 

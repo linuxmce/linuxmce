@@ -1,4 +1,4 @@
-import QtQuick 1.0
+import QtQuick 2.0
 
 Rectangle {
     id:avcodes_rect
@@ -26,7 +26,7 @@ Rectangle {
             text: qsTr("These are the devices in use. Touch a device name to send it a command, or touch the other cells to resend inputs or jump to advanced")
             width: parent.width * .75
             wrapMode: "WrapAtWordBoundaryOrAnywhere"
-            font.pixelSize: scaleY(2)
+            font.pointSize: scaleY(2)
             anchors.horizontalCenter: parent.horizontalCenter
         }
 
@@ -64,13 +64,13 @@ Rectangle {
                         Text{
                             id:av_label
                             text:qs_device
-                            font.pixelSize: scaleY(2)
+                            font.pointSize: scaleY(2)
                         }
 
                         Text {
                             id: device_number
                             text: qsTr("Device Number:") + i_deviceNo
-                            font.pixelSize: scaleY(2)
+                            font.pointSize: scaleY(2)
                         }
                     }
                     MouseArea{
@@ -104,7 +104,7 @@ Rectangle {
                         Text{
                             id:command_label
                             text:qs_command
-                            font.pixelSize: scaleY(2)
+                            font.pointSize: scaleY(2)
                         }
 
                     }

@@ -1,4 +1,4 @@
-import QtQuick 1.0
+import QtQuick 2.0
 
 
 Rectangle {
@@ -83,7 +83,7 @@ Text {
     y: 4
     text: currentuser
     visible: false
-    font.pixelSize: 12
+    font.pointSize: 12
     opacity: 0
 }
 states: [

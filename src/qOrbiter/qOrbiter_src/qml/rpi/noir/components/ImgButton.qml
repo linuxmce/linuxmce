@@ -1,4 +1,4 @@
-import QtQuick 1.0
+import QtQuick 2.0
 
 
 
@@ -29,7 +29,7 @@ Rectangle {
         id: buttonLabel
         anchors.centerIn: parent
         text:"null ipsum delorium"
-        font.pixelSize: 14
+        font.pointSize: 14
         verticalAlignment: Text.AlignVCenter
         horizontalAlignment: Text.AlignHCenter
         anchors.fill: parent

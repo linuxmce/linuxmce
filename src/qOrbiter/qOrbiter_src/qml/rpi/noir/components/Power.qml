@@ -1,4 +1,4 @@
-import QtQuick 1.0
+import QtQuick 2.0
 Rectangle{
     id:power_rect_container
     height: appH
@@ -68,7 +68,7 @@ Rectangle{
                     id: exit_label
                     text: qsTr("Close")
                     anchors.centerIn: parent
-                    font.pixelSize: scaleY(3)
+                    font.pointSize: scaleY(3)
                     font.bold: true
                 }
                 MouseArea{

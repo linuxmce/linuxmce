@@ -3,7 +3,9 @@
 LocationModel::LocationModel(LocationItem* prototype, QObject *parent) :
     QAbstractListModel(parent), m_prototype(prototype)
 {
-  setRoleNames(m_prototype->roleNames());
+ #ifndef QT5
+    setRoleNames(m_prototype->roleNames());
+#endif
 }
 
 int LocationModel::rowCount(const QModelIndex &parent) const

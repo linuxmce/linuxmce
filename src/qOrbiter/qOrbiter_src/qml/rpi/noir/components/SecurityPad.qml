@@ -1,4 +1,4 @@
-import QtQuick 1.0
+import QtQuick 2.0
 Item{
     width: scaleX(20)
     height: remotenumberpad.height
@@ -50,7 +50,7 @@ Item{
                     anchors.centerIn: numberdisplay
                     horizontalAlignment: TextInput.AlignHCenter
                     anchors.fill: parent
-                    font.pixelSize: 23
+                    font.pointSize: 23
                 }
             }
 

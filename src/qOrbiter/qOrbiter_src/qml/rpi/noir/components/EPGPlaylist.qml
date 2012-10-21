@@ -1,4 +1,4 @@
-import QtQuick 1.0
+import QtQuick 2.0
 
 Rectangle {
     width: scaleX(26)
@@ -55,7 +55,7 @@ Rectangle {
                         width: parent.width
 
                         wrapMode: "WrapAnywhere"
-                        font.pixelSize: 12
+                        font.pointSize: 12
                         anchors.top: parent.top
                         font.bold: true
                         color: "whitesmoke"
@@ -70,7 +70,7 @@ Rectangle {
                         font.family: "DroidSans"
                         opacity: .5
                         anchors.centerIn: parent
-                        font.pixelSize: 18
+                        font.pointSize: 18
                     }
                 }
                 Text {
@@ -82,7 +82,7 @@ Rectangle {
                     width: parent.width *.75
 
                     wrapMode: "WrapAtWordBoundaryOrAnywhere"
-                     font.pixelSize: 1 * scaleY(2.5)
+                     font.pointSize: 1 * scaleY(2.5)
                     color: "aliceblue"
                 }
 

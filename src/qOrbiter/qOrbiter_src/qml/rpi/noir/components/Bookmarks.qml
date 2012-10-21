@@ -1,4 +1,4 @@
-import QtQuick 1.0
+import QtQuick 2.0
 
 Rectangle {
     id:bookmarks_popup
@@ -11,7 +11,7 @@ Rectangle {
     Text {
         id: bookmarkslabel
         text: qsTr("Media Bookmarks")
-        font.pixelSize: 20
+        font.pointSize: 20
 
     }
 
@@ -54,7 +54,7 @@ Rectangle {
                     Text {
                         id: media_bookmark_name
                         text: qsTr("Media Bookmark")
-                        font.pixelSize: scaleY(2)
+                        font.pointSize: scaleY(2)
                     }
                 }
 
@@ -72,7 +72,7 @@ Rectangle {
                     Text {
                         id: media_resume_name
                         text: qsTr("Media Resume")
-                        font.pixelSize: scaleY(2)
+                        font.pointSize: scaleY(2)
                     }
                 }
 
@@ -87,7 +87,7 @@ Rectangle {
                     Text {
                         id: media_resume_label
                         text:title
-                        font.pixelSize: scaleY(2)
+                        font.pointSize: scaleY(2)
                     }
                 }
             }

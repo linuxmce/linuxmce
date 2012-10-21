@@ -10,7 +10,9 @@
 GoogleWeather::GoogleWeather(gWeatherItem *prototype, QObject *parent) :
     QAbstractListModel(parent), m_prototype(prototype)
 {
+   #ifndef QT5
     setRoleNames(m_prototype->roleNames());
+#endif
     qRegisterMetaType<QModelIndex>("QModelIndex");
     googleDataSource.setEncodedUrl("http://www.google.com/ig/api?weather=");
     setStatus("Starting");

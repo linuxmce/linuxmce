@@ -29,7 +29,7 @@
 #include <QObject>
 
 #if (QT5)
-#include <QQmlImageProvider>
+#include <QtQuick/QQuickImageProvider>
 #else
 #include <QtDeclarative/QDeclarativeImageProvider>
 #endif
@@ -40,7 +40,7 @@
 #include <qorbitermanager.h>
 
 #if (QT5)
-class AbstractImageProvider: public QObject , public QQmlImageProvider
+class AbstractImageProvider: public QObject , public QQuickImageProvider
 #else
 class AbstractImageProvider: public QObject , public QDeclarativeImageProvider
 #endif

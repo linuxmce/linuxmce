@@ -9,7 +9,7 @@
 #if (QT5)
 #include <QtCore/QObject>
 #include <QtCore/QModelIndex>
-#include <QtQml/QQmlImageProvider>
+#include <QtQuick/QQuickImageProvider>
 #include <QtGui/QImage>
 #else
 #include <QObject>
@@ -26,7 +26,7 @@ class qorbiterManager;
 class ListModel;
 
 #if (QT5)
-class GridIndexProvider :public QObject , public QQmlImageProvider
+class GridIndexProvider :public QObject , public QQuickImageProvider
 #else
 class GridIndexProvider :public QObject , public QDeclarativeImageProvider
 #endif

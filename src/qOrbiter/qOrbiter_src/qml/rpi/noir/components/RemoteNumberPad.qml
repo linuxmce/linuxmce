@@ -1,4 +1,4 @@
-import QtQuick 1.0
+import QtQuick 2.0
 
 Rectangle {
     width: scaleX(20)
@@ -37,7 +37,7 @@ Rectangle {
                 // anchors.centerIn: numberdisplay
                 horizontalAlignment: TextInput.AlignHCenter
                 // anchors.fill: parent
-                font.pixelSize: 23
+                font.pointSize: 23
             }
         }
 
@@ -74,7 +74,7 @@ Rectangle {
                             id: numberonelabel
                             text: qsTr("1")
 
-                            font.pixelSize: parent.height * .50
+                            font.pointSize: parent.height * .50
                             anchors.centerIn: parent
                         }
 
@@ -115,7 +115,7 @@ Rectangle {
                             id: numbero2label
                             text: qsTr("2")
                             color: "black"
-                            font.pixelSize: parent.height * .50
+                            font.pointSize: parent.height * .50
                             anchors.centerIn: parent
                         }
 
@@ -156,7 +156,7 @@ Rectangle {
                             id: number3label
                             text: qsTr("3")
                             color: "black"
-                            font.pixelSize: parent.height * .50
+                            font.pointSize: parent.height * .50
                             anchors.centerIn: parent
                         }
 
@@ -206,7 +206,7 @@ Rectangle {
                             id: numberonelabe4
                             text: qsTr("4")
                             color: "black"
-                            font.pixelSize: parent.height * .50
+                            font.pointSize: parent.height * .50
                             anchors.centerIn: parent
                         }
 
@@ -247,7 +247,7 @@ Rectangle {
                             id: numbero5label
                             text: qsTr("5")
                             color: "black"
-                            font.pixelSize: parent.height * .50
+                            font.pointSize: parent.height * .50
                             anchors.centerIn: parent
                         }
 
@@ -288,7 +288,7 @@ Rectangle {
                             id: number6label
                             text: qsTr("6")
                             color: "black"
-                            font.pixelSize: parent.height * .50
+                            font.pointSize: parent.height * .50
                             anchors.centerIn: parent
                         }
 
@@ -338,7 +338,7 @@ Rectangle {
                             id: number7label
                             text: qsTr("7")
                             color: "black"
-                            font.pixelSize: parent.height * .50
+                            font.pointSize: parent.height * .50
                             anchors.centerIn: parent
                         }
 
@@ -379,7 +379,7 @@ Rectangle {
                             id: number8label
                             text: qsTr("8")
                             color: "black"
-                            font.pixelSize: parent.height * .50
+                            font.pointSize: parent.height * .50
                             anchors.centerIn: parent
                         }
 
@@ -420,7 +420,7 @@ Rectangle {
                             id: number9label
                             text: qsTr("9")
                             color: "black"
-                            font.pixelSize: parent.height * .50
+                            font.pointSize: parent.height * .50
                             anchors.centerIn: parent
                         }
 
@@ -486,7 +486,7 @@ Rectangle {
                             id: number0label
                             text: qsTr("0")
                             color: "black"
-                            font.pixelSize: parent.height * .50
+                            font.pointSize: parent.height * .50
                             anchors.centerIn: parent
                         }
 

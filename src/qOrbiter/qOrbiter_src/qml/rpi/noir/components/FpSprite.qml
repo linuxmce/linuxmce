@@ -1,5 +1,5 @@
-// import QtQuick 1.0 // to target S60 5th Edition or Maemo 5
-import QtQuick 1.1
+// import QtQuick 2.0 // to target S60 5th Edition or Maemo 5
+import QtQuick 2.0
 
 Item {
     id:sprite_root
@@ -39,7 +39,7 @@ Item {
         id: device_number
         text: deviceNum
         anchors.centerIn: parent
-        font.pixelSize: scaleY(2)
+        font.pointSize: scaleY(2)
     }
 
     Rectangle{

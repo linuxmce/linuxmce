@@ -1,4 +1,4 @@
-import QtQuick 1.0
+import QtQuick 2.0
 import "../components"
 import "../js/ComponentLoader.js" as MyJs
 Rectangle {
@@ -50,7 +50,7 @@ Rectangle {
                         text:"Speed: " + dcenowplaying.qs_playbackSpeed
                         height: scaleY(2.5)
                         font.family: "Droid Sans"
-                        font.pixelSize: 1 * scaleY(2)
+                        font.pointSize: 1 * scaleY(2)
                         color: "aliceblue"
                     }
                 }
@@ -94,7 +94,7 @@ Rectangle {
                             wrapMode: "NoWrap"
                             font.bold: true
                             smooth: true
-                            font.pixelSize: 1 * scaleY(2)
+                            font.pointSize: 1 * scaleY(2)
                             color: "aliceblue"
                         }
 
@@ -107,7 +107,7 @@ Rectangle {
                             font.bold: true
                             smooth: true
                             horizontalAlignment: Text.AlignHCenter
-                            font.pixelSize: scaleY(2)
+                            font.pointSize: scaleY(2)
                             color: "white"
                         }
 
@@ -120,7 +120,7 @@ Rectangle {
                             font.bold: true
                             smooth: true
                             horizontalAlignment: Text.AlignHCenter
-                            font.pixelSize: scaleY(2)
+                            font.pointSize: scaleY(2)
                             color: "white"
                         }
 
@@ -132,7 +132,7 @@ Rectangle {
                             font.bold: true
                             smooth: true
                             horizontalAlignment: Text.AlignHCenter
-                            font.pixelSize: scaleY(2)
+                            font.pointSize: scaleY(2)
                             color: "white"
                         }
 
@@ -144,7 +144,7 @@ Rectangle {
                             font.bold: true
                             smooth: true
                             horizontalAlignment: Text.AlignHCenter
-                            font.pixelSize: scaleY(2)
+                            font.pointSize: scaleY(2)
                             color: "white"
                         }
                     }

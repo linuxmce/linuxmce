@@ -3,7 +3,7 @@
 
 #include <QtGlobal>
 #if (QT_VERSION >= QT_VERSION_CHECK(5,0,0))
-#include <QQmlImageProvider>
+#include <QtQuick/QQuickImageProvider>
 #else
 #include <QDeclarativeImageProvider>
 #include <QtDeclarative/QDeclarativeImageProvider>
@@ -13,7 +13,7 @@
 #include <contextobjects/filedetailsclass.h>
 
 #if (QT_VERSION >= QT_VERSION_CHECK(5,0,0))
-class FileDetailsImageProvider: public QQmlImageProvider
+class FileDetailsImageProvider: public QQuickImageProvider
 #else
 class FileDetailsImageProvider: public QDeclarativeImageProvider
 #endif

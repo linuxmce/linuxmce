@@ -6,7 +6,9 @@
 MediaSubTypeModel::MediaSubTypeModel(MediaSubTypeItem* prototype, QObject *parent) :
     QAbstractListModel(parent), m_prototype(prototype)
 {
-  setRoleNames(m_prototype->roleNames());
+ #ifndef QT5
+    setRoleNames(m_prototype->roleNames());
+#endif
    qRegisterMetaType<QModelIndex>("QModelIndex");
 
 }
@@ -100,7 +102,9 @@ void MediaSubTypeModel::clear()
 
   qDeleteAll(m_list);
   m_list.clear();
+  #ifndef QT5
   this->reset();
+#endif
 
 }
 

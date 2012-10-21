@@ -1,4 +1,4 @@
-import QtQuick 1.0
+import QtQuick 2.0
 
 
 Rectangle {
@@ -39,7 +39,7 @@ Rectangle {
             id: text2
             anchors.horizontalCenter: parent.horizontalCenter
             text: filedetailsclass.filename
-            font.pixelSize: 14
+            font.pointSize: 14
             font.bold: true
             wrapMode: Text.WrapAtWordBoundaryOrAnywhere
         }
@@ -104,7 +104,7 @@ Rectangle {
                 Text {
                     id: fnametext
                     text: "Title: " + filedetailsclass.objecttitle
-                    font.pixelSize: scaleY(2)
+                    font.pointSize: scaleY(2)
                     color:"aliceblue"
                     wrapMode: "WrapAtWordBoundaryOrAnywhere"
                      width: rectangle1.width *.95
@@ -118,7 +118,7 @@ Rectangle {
                     wrapMode: "WrapAtWordBoundaryOrAnywhere"
 
                     smooth: true
-                    font.pixelSize: scaleY(2)
+                    font.pointSize: scaleY(2)
                     visible:  filedetailsclass.album =="" ? false: true
                 }
 
@@ -130,7 +130,7 @@ Rectangle {
                     font.family: "Droid Sans"
 
                     smooth: true
-                    font.pixelSize: scaleY(2)
+                    font.pointSize: scaleY(2)
                     visible:  filedetailsclass.track =="" ? false: true
                 }
 
@@ -142,7 +142,7 @@ Rectangle {
                     font.family: "Droid Sans"
                     //font.bold: true
                     smooth: true
-                    font.pixelSize: scaleY(2)
+                    font.pointSize: scaleY(2)
                     visible:  filedetailsclass.genre =="" ? false: true
                     MouseArea{
                         anchors.fill: genre
@@ -159,7 +159,7 @@ Rectangle {
                     font.family: "Droid Sans"
                     // font.bold: true
                     smooth: true
-                    font.pixelSize: scaleY(2)
+                    font.pointSize: scaleY(2)
                     visible:  filedetailsclass.releasedate ==="" ? false: true
 
                 }
@@ -173,7 +173,7 @@ Rectangle {
                     font.family: "Droid Sans"
                     //  font.bold: true
                     smooth: true
-                    font.pixelSize: scaleY(2)
+                    font.pointSize: scaleY(2)
                     elide: "ElideRight"
                     visible:  filedetailsclass.performerlist =="" ? false: true
 

@@ -1,4 +1,4 @@
-import QtQuick 1.0
+import QtQuick 2.0
 
 Rectangle {
     id: rectangle1
@@ -10,7 +10,7 @@ Rectangle {
         x: 160
         y: 404
         text: "text"
-        font.pixelSize: 12
+        font.pointSize: 12
 
         Text {
             id: welcome
@@ -21,7 +21,7 @@ Rectangle {
             anchors.horizontalCenterOffset: 216
             anchors.horizontalCenter: parent.horizontalCenter
             anchors.verticalCenter: parent.verticalCenter
-            font.pixelSize: 30
+            font.pointSize: 30
         }
     }
 
@@ -62,7 +62,7 @@ Rectangle {
             width: 80
             height: 20
             text: "RouterIP"
-            font.pixelSize: 12
+            font.pointSize: 12
         }
 
         TextEdit {
@@ -72,7 +72,7 @@ Rectangle {
             width: 80
             height: 20
             text: "Device Number"
-            font.pixelSize: 12
+            font.pointSize: 12
         }
 
         ButtonSq {
