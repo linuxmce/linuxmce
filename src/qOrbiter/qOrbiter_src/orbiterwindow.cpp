@@ -230,8 +230,8 @@ void orbiterWindow::qmlSetupLmce(QString device, QString ip)
 {
     router = ip.toStdString();
     deviceno = device.toLong();
-    mainView.rootContext()->setContextProperty("deviceid", int(deviceno));
-    mainView.rootContext()->setContextProperty("srouterip", QString::fromStdString(router));
+//    mainView.rootContext()->setContextProperty("deviceid", int(deviceno));
+//    mainView.rootContext()->setContextProperty("srouterip", QString::fromStdString(router));
     emit setupLmce(device, ip);
 }
 

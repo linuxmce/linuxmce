@@ -293,12 +293,11 @@ int main(int argc, char* argv[])
 
         QThread *dceThread = new QThread;
         qOrbiter *pqOrbiter = new qOrbiter(PK_Device, sRouter_IP,true,bLocalMode );
-
-
-
-        orbiterWindow orbiterWin(PK_Device, sRouter_IP);
+        orbiterWindow orbiterWin(-1, "192.168.80.1");
         orbiterWin.mainView.rootContext()->setContextProperty("dcerouter", pqOrbiter); //dcecontext object
+    #ifndef RPI
         pqOrbiter->moveToThread(dceThread);
+#endif
        // gWeatherModel *theWeather= new gWeatherModel(new gWeatherItem);
         typedef QMap <int, QString> myMap;
         int throwaway = qRegisterMetaType<myMap>("myMap");
@@ -317,15 +316,20 @@ int main(int argc, char* argv[])
 
         //epg listmodel, no imageprovider as of yet
         EPGChannelList *simpleEPGmodel = new EPGChannelList(new EPGItemClass);
-        //simpleEPGmodel->moveToThread(dceThread);
-
+#ifndef RPI
+        simpleEPGmodel->moveToThread(dceThread);
+#endif
 
         QThread * mediaThread = new QThread();
         ListModel *mediaModel = new ListModel(new gridItem);
+#ifndef RPI
         mediaModel->moveToThread(mediaThread);
+#endif
         GridIndexProvider * advancedProvider = new GridIndexProvider(mediaModel , 6, 4);
         orbiterWin.mainView.engine()->addImageProvider("datagridimg", advancedProvider);
+#ifndef RPI
         advancedProvider->moveToThread(mediaThread);
+#endif
 
         TimeCodeManager *timecode = new TimeCodeManager();
         orbiterWin.mainView.rootContext()->setContextProperty("dceTimecode", timecode);
@@ -549,6 +553,7 @@ int main(int argc, char* argv[])
         pqOrbiter->m_sHostName = w->qs_routerip.toStdString();
         pqOrbiter->m_sIPAddress = w->qs_routerip.toStdString();
         pqOrbiter->m_sExternalIP = w->qs_ext_routerip.toStdString();
+
         qDebug() << "Initializing connection";
         pqOrbiter->pingCore();
         PK_Device = pqOrbiter->m_dwPK_Device;

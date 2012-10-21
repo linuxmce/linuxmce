@@ -31,7 +31,7 @@ Rectangle {
 
         height: childrenRect.height
         width: scaleX(85)
-        spacing: scaleX(10)
+        spacing: scaleX(15)
 
         Rectangle{
 
@@ -44,7 +44,7 @@ Rectangle {
                 id: connection_label
                 text: qsTr("Connection")
                 color: window.b_connectionPresent ? "green" : "red"
-                font.pointSize: window.b_connectionPresent ? 14 : 12
+                font.pointSize: window.b_connectionPresent ? 32: 30
             }
         }
 
@@ -62,10 +62,10 @@ Rectangle {
                 id: device_Label
                 text: qsTr("Device")
                 color: window.b_devicePresent ? "green" : "red"
-                font.pointSize: window.b_devicePresent ? 14 : 12
+                font.pointSize: window.b_devicePresent ? 32 : 30
             }
         }
-/*
+
         Rectangle{
             id:config_indicator
             height: scaleX(5)
@@ -80,10 +80,10 @@ Rectangle {
                 id: config_label
                 text: qsTr("Config")
                 color: window.b_localConfigReady ? "green" : "red"
-                font.pointSize: window.b_localConfigReady ? 14 : 12
+                font.pointSize: window.b_localConfigReady ? 32 : 30
             }
         }
-
+/*
         Rectangle{
             id:skin_indicator
             height: scaleX(5)
@@ -195,6 +195,7 @@ Rectangle {
             //  onTextChanged: setRouterIp(routerip.text)
             color: "black"
             font.bold: true
+            onTextChanged: console.log(srouterip)
 
         }
 
@@ -229,7 +230,7 @@ Rectangle {
             //  onTextChanged: setRouterIp(routerip.text)
             color: "black"
             font.bold: true
-
+            onTextChanged: console.log(deviceid)
         }
 
         Rectangle {

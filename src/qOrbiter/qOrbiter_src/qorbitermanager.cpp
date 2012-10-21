@@ -84,7 +84,7 @@ qorbiterManager::qorbiterManager(QDeclarativeView *view, QObject *parent) :
     if (readLocalConfig())
     {
         emit localConfigReady(true);
-       // QApplication::processEvents(QEventLoop::AllEvents);
+        // QApplication::processEvents(QEventLoop::AllEvents);
     }
     else
     {
@@ -98,8 +98,6 @@ qorbiterManager::qorbiterManager(QDeclarativeView *view, QObject *parent) :
     qorbiterUIwin->rootContext()->setContextProperty("extip", qs_ext_routerip );
     qorbiterUIwin->rootContext()->setContextProperty("manager", this); //providing a direct object for qml to call c++ functions of this class
     qorbiterUIwin->rootContext()->setContextProperty("dcemessage", dceResponse);
-
-
 
     appHeight = qorbiterUIwin->height() ;
     appWidth = qorbiterUIwin->width() ;
@@ -348,13 +346,11 @@ bool qorbiterManager::initializeManager(string sRouterIP, int device_id)
 
 #elif RPI
 
-    if(b_localLoading == true)
+
+    if( !loadSkins(QUrl(localDir)))
     {
-        if( !loadSkins(QUrl(localDir)))
-        {
-            emit skinIndexReady(false);
-            return false;
-        }
+        emit skinIndexReady(false);
+        return false;
     }
     else
     {
@@ -364,6 +360,7 @@ bool qorbiterManager::initializeManager(string sRouterIP, int device_id)
             return false;
         }
     }
+
 
 #else
     if( !loadSkins(QUrl(localDir)))
@@ -933,7 +930,7 @@ int qorbiterManager::getlocation() const
 
 void qorbiterManager::regenOrbiter(int deviceNo)
 {
-//rewrite to use qNetworkrequest, connect reply to finished slot
+    //rewrite to use qNetworkrequest, connect reply to finished slot
     //possible to dl xml from there??
     if(qs_routerip =="127.0.0.1")
     {
@@ -1034,6 +1031,10 @@ bool qorbiterManager::loadSkins(QUrl base)
 
 #elif for_android
     tskinModel->addSkin("default");
+#elif RPI
+    QDir desktopQmlPath(QString(base.toLocalFile()),"",QDir::Name, QDir::NoDotAndDotDot);
+    setDceResponse("Skin Search Path:"+ desktopQmlPath.dirName());
+    QStringList localSkins = desktopQmlPath.entryList(QDir::Dirs |QDir::NoDotAndDotDot);
 #else    
     QDir desktopQmlPath(QString(base.toLocalFile()),"",QDir::Name, QDir::NoDotAndDotDot);
     setDceResponse("Skin Search Path:"+ desktopQmlPath.dirName());
@@ -1104,7 +1105,7 @@ void qorbiterManager::setFloorplanType(int t)
 
 void qorbiterManager::qmlSetupLmce(QString incdeviceid, QString incrouterip)
 {
-    //setDceResponse("Triggering connection to LMCE Device ID [" + incdeviceid + "] port Router Address [" + incrouterip + "]") ;
+    setDceResponse("Triggering connection to LMCE Device ID [" + incdeviceid + "] port Router Address [" + incrouterip + "]") ;
     qs_routerip = incrouterip;
     iPK_Device = long(incdeviceid.toInt());
     setDceResponse("Initializing Local Manager");
@@ -1123,7 +1124,7 @@ bool qorbiterManager::readLocalConfig()
 #elif WIN32
     QString xmlPath = QString::fromStdString(QApplication::applicationDirPath().toStdString())+"/config.xml";
 #elif RPI
-    QString xmlPath = QString::fromStdString(QApplication::applicationDirPath().toStdString())+"../config/config.xml";
+    QString xmlPath = QString::fromStdString(QApplication::applicationDirPath().remove("/bin").toStdString())+"/config/config.xml";
 #else
     QString xmlPath = QString::fromStdString(QApplication::applicationDirPath().toStdString())+"/config.xml";
 #endif
@@ -1151,7 +1152,7 @@ bool qorbiterManager::readLocalConfig()
 
     if (!localConfigFile.open(QFile::ReadWrite))
     {
-        setDceResponse("config not found!");
+        setDceResponse("config not found!::"+localConfigFile.fileName());
         return false;
     }
     else
@@ -1180,9 +1181,9 @@ bool qorbiterManager::readLocalConfig()
             currentSkin = configVariables.namedItem("skin").attributes().namedItem("id").nodeValue();
             if (currentSkin.isEmpty())
 #ifdef RPI
-        currentSkin = "noir";
+                currentSkin = "noir";
 #else
-                 currentSkin = "default";
+                currentSkin = "default";
 #endif
             if(configVariables.namedItem("device").attributes().namedItem("id").nodeValue().toLong() !=0)
             {
@@ -1207,11 +1208,11 @@ bool qorbiterManager::readLocalConfig()
 
             if(!configVariables.namedItem("debug").attributes().namedItem("id").nodeValue().toInt() == 0 )
             {
-               setDebugMode(false);
+                setDebugMode(false);
             }
             else
             {
-               setDebugMode(true);
+                setDebugMode(true);
             }
 
         }
@@ -1441,7 +1442,7 @@ void qorbiterManager::setMediaScreenShot(QImage screen_shot)
 {
     mediaScreenShot = screen_shot;
 #ifdef debug
-   // qDebug() << mediaScreenShot.size();
+    // qDebug() << mediaScreenShot.size();
 #endif
     emit mediaScreenShotReady();
 }

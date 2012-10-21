@@ -242,7 +242,7 @@ folder_01.source= qml/rpi
 folder_01.target= qml
 
 folder_02.source = config.xml
-folder_02.target = configks
+folder_02.target = config
 
 DEFINES+=RPI
 DEPLOYMENTFOLDERS += folder_01 folder_02
