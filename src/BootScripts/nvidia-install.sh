@@ -5,8 +5,8 @@
 #######################################################################################################################
 # TODO: Possibly separate these into their own file and include that file here in Utils.sh?
 
-# These functions are to help determine which driver to install for the Currently Installed nVidia card,
-# as well as determining if vdpau support is available on the Installed card.
+# These functions are to help determine which driver to install for the currently installed nVidia card,
+# as well as determining if vdpau support is available on the installed card.
 
 # Information was gleened from these sources.
 # ftp://download.nvidia.com/XFree86/Linux-x86/190.42/README/appendix-a.html
@@ -44,7 +44,7 @@ Backports_Required="0a20 0a22 0a23 0a28 0a29 0a2a 0a2b 0a2d 0a34 0a35 0a64 0a6f 
 
 #######################################################################################################################
 # getPCI_Id()
-# returns the last 4 digits of the PCI ID of the Currently Installed nVidia card.
+# returns the last 4 digits of the PCI ID of the currently installed nVidia card.
 getPCI_Id() {
 	vga_pci=$(lspci -nn | grep -w 'VGA' | sed 's/.*://;s/\].*//')
 	gpus=$(echo "$vga_pci" | sort -u | wc -l)
@@ -56,89 +56,88 @@ getPCI_Id() {
 
 
 # getNvidiaInstalled()
-# returns true if an nvidia card is Installed in the system, false otherwise
+# returns true if an nvidia card is installed in the system, false otherwise
 getNvidiaInstalled() {
-        if ! lspci -nn | grep -iq "vga.*nvidia";then
-                return 1
-        else
-                return 0
-        fi
+	if ! lspci -nn | grep -iq "vga.*nvidia";then
+		return 1
+	else
+		return 0
+	fi
 }
 
 # getInstalledNvidiaDriver()
-# echos the Currently Installed nVidia driver (if there is one)
+# echos the currently installed nVidia driver (if there is one)
 getInstalledNvidiaDriver() {
-        (dpkg-query -l "nvidia-glx*" "nvidia-Current" | grep "^ii" | awk '{print $2}') 2>/dev/null
+	(dpkg-query -l "nvidia-glx*" "nvidia-current" | grep "^ii" | awk '{print $2}') 2>/dev/null
 }
 
 # getPreferredNvidiaDriver()
-# returns the preferred driver to install for the Currently Installed nVidia card.
+# returns the preferred driver to install for the currently installed nVidia card.
 getPreferredNvidiaDriver() {
-        PCI_Id=$(getPCI_Id)
-        DISTRO="$(lsb_release -c -s)"
+	PCI_Id=$(getPCI_Id)
+	Distro="$(lsb_release -c -s)"
  
-        case " $Driver_Current_Supported " in *" $PCI_Id "*)
-                echo "nvidia-Current"
-                return 1
-        esac
+	case " $Driver_295_Supported " in *" $PCI_Id "*)
+		echo "nvidia-current"
+		return 1
+	esac
 
-        case " $Driver_260_Supported " in *" $PCI_Id "*)
-                echo "nvidia-glx-260"
-                return 1
-        esac
+	case " $Driver_260_Supported " in *" $PCI_Id "*)
+		echo "nvidia-glx-260"
+		return 1
+	esac
 
-        case " $Driver_173_Supported " in *" $PCI_Id "*)
-                echo "nvidia-glx-173"
-                return 1
-        esac
+	case " $Driver_173_Supported " in *" $PCI_Id "*)
+		echo "nvidia-glx-173"
+		return 1
+	esac
 
-        case " $Driver_96_Supported " in *" $PCI_Id "*)
-                echo "nvidia-glx-96"
-                return 1
-        esac
+	case " $Driver_96_Supported " in *" $PCI_Id "*)
+		echo "nvidia-glx-96"
+		return 1
+	esac
 
-        case " $Driver_71_Supported " in *" $PCI_Id "*)
-                echo "nvidia-glx-71"
-                return 0
-        esac
-
-        #Could not map PCI_Id to a correct nVidia device.
-        return 0
+	case " $Driver_71_Supported " in *" $PCI_Id "*)
+		echo "nvidia-glx-71"
+		return 0
+	esac
+	#Could not map PCI_Id to a correct nVidia device.
+	return 0
 
 }
 
 # getVDPAUSupport()
-# Returns which vdpau revision (A,B or C) supported by the Currently Installed nVidia card.
+# Returns which vdpau revision (A,B or C) supported by the currently installed nVidia card.
 # returns nothing if vdpau is NOT supported!
 getVDPAUSupport() {
-        PCI_Id=$(getPCI_Id)
+	PCI_Id=$(getPCI_Id)
 
-        case " $VDPAU_Rev_A_Supported " in *" $PCI_Id "*)
-                echo "A"
-                return 1
-        esac
-        case " $VDPAU_Rev_B_Supported " in *" $PCI_Id "*)
-                echo "B"
-                return 1
-        esac
-        case " $VDPAU_Rev_C_Supported " in *" $PCI_Id "*)
-               echo "C"
-                return 1
-        esac
-        case " $VDPAU_Rev_D_Supported " in *" $PCI_Id "*)
-                echo "D"
-                return
-        esac
-        # Could not map a PCI_Id to a supported vdpau revision
-        return 0
+	case " $VDPAU_Rev_A_Supported " in *" $PCI_Id "*)
+		echo "A"
+		return 1
+	esac
+	case " $VDPAU_Rev_B_Supported " in *" $PCI_Id "*)
+		echo "B"
+		return 1
+	esac
+	case " $VDPAU_Rev_C_Supported " in *" $PCI_Id "*)
+	       echo "C"
+		return 1
+	esac
+	case " $VDPAU_Rev_D_Supported " in *" $PCI_Id "*)
+		echo "D"
+		return
+	esac
+	# Could not map a PCI_Id to a supported vdpau revision
+	return 0
 }
 
 checkAlsaBackportNeeds() {
 	PCI_Id=$(getPCI_Id)
-        alsa_backports=$(dpkg-query -l "linux-backports-modules-alsa*" | grep "^ii" | awk '{print $2}') 2>/dev/null
+	alsa_backports=$(dpkg-query -l "linux-backports-modules-alsa*" | grep "^ii" | awk '{print $2}') 2>/dev/null
 	if [[ -z $alsa_backports ]]; then
 		case " $Backports_Required " in *" $PCI_Id "*)
-			Log "$LogFile" "Alsa backports being Installed."
+			Log "$LogFile" "Alsa backports being installed."
 			NotifyMessage "Installing alsa backports modules."
 			apt-get install -yf linux-backports-modules-alsa-$(uname -r)
 			/usr/pluto/bin/RestartALSA.sh ;;
@@ -147,58 +146,63 @@ checkAlsaBackportNeeds() {
 
 	if [[ -n $alsa_backports ]]; then
 		case " $Backports_Required " in *" $PCI_Id "*)
-			NotifyMessage "Alsa backports modules already Installed."
-		;;
+			NotifyMessage "Alsa backports modules already installed."
+			;;
 		*)
-			Log "$LogFile" "Alsa backports is Installed and requires removal."
+			Log "$LogFile" "Alsa backports is installed and requires removal."
 			NotifyMessage "Removing alsa backports modules."
 			apt-get remove -yf linux-backports-modules-alsa-$(uname -r)
-			/usr/pluto/bin/RestartALSA.sh ;;
+			/usr/pluto/bin/RestartALSA.sh
+			;;
 		esac
 	fi
 }
 
 # installCorrectNvidiaDriver()
-# This function will install the correct nVidia driver for the Currently Installed card.
-# if the first parameter is set to "reboot", it will also reboot the system after the driver is Installed.
+# This function will install the correct nVidia driver for the currently installed card.
+# if the first parameter is set to "reboot", it will also reboot the system after the driver is installed.
 installCorrectNvidiaDriver() {
-        # first, lets see if there is even an nvidia card Installed in the system
-        # If there is no nVidia card even Installed, lets get out of here.
-        if ! getNvidiaInstalled; then
-                return
-        fi
+	#see if the caller wanted to reboot after installing packages
+	#TODO This function not working, so changed.
+	#param="$1"
 
-        echo "*************************************************"
+	# first, lets see if there is even an nvidia card installed in the system
+	# If there is no nVidia card even installed, lets get out of here.
+	if ! getNvidiaInstalled; then
+		return
+	fi
+
+	echo "*************************************************"
 	echo -n "       " 
 	StatusMessage "Begin nVidia driver installation"
 	echo "*************************************************"
-        Log "$LogFile" "== Begin NVidia driver installation ($(date)) =="
-        Log "$LogFile" "Card Detected: $(lspci -nn | grep -vi 'non-vga' | grep -i 'vga')"
-        Log "$LogFile" "PCI_Id Detected: $(getPCI_Id)"
+	Log "$LogFile" "== Begin NVidia driver installation ($(date)) =="
+	Log "$LogFile" "Card Detected: $(lspci -nn | grep -vi 'non-vga' | grep -i 'vga')"
+	Log "$LogFile" "PCI_Id Detected: $(getPCI_Id)"
 	checkAlsaBackportNeeds
-        # Now lets get the Currently Installed nvidia driver (if there is one)
-        Current_driver=$(getInstalledNvidiaDriver)
-        if echo "$Current_driver" | grep "nvidia"; then
-                echo "Detected Installed driver $Current_driver"
-                Log "$LogFile" "Detected Installed driver $Current_driver"
-        fi
+	# Now lets get the currently installed nvidia driver (if there is one)
+	current_driver=$(getInstalledNvidiaDriver)
+	if echo "$current_driver" | grep "nvidia"; then
+		echo "Detected installed driver $current_driver"
+		Log "$LogFile" "Detected installed driver $current_driver"
+	fi
 
-        # Get the preferred driver to install
-        preferred_driver=$(getPreferredNvidiaDriver)
-        echo "LMCE prefers driver $preferred_driver"
-        Log "$LogFile" "LMCE prefers driver $preferred_driver"
+	# Get the preferred driver to install
+	preferred_driver=$(getPreferredNvidiaDriver)
+	echo "LMCE prefers driver $preferred_driver"
+	Log "$LogFile" "LMCE prefers driver $preferred_driver"
 
-        # Install the driver if needed
-        if [[ "$Current_driver" != "$preferred_driver" ]]; then
-                echo "installing NEW driver $preferred_driver!"
-                Log "$LogFile" "installing NEW driver $preferred_driver!"
-                Installed="1"
-                tmpfile=$( /bin/mktemp -t )
-		if [[ -n "$Current_driver" ]]; then
+	# Install the driver if needed
+	if [[ "$current_driver" != "$preferred_driver" ]]; then
+		echo "installing NEW driver $preferred_driver!"
+		Log "$LogFile" "installing NEW driver $preferred_driver!"
+		INSTALLED="1"
+		tmpfile=$( /bin/mktemp -t )
+		if [[ -n "$current_driver" ]]; then
 			apt-get -y remove "$currrent_driver" --force-yes
 		fi
 
-		if [[ "$preferred_driver" == "nvidia-Current" ]]; then
+		if [[ "$preferred_driver" == "nvidia-current" ]]; then
 			add-apt-repository ppa:team-iquik/alsa
 			add-apt-repository ppa:ubuntu-x-swat/x-updates
 			apt-get update
@@ -208,23 +212,23 @@ installCorrectNvidiaDriver() {
 			apt-get update
 			local param="reboot"
 		else
-	                apt-get install -y "$preferred_driver" 2> >(tee "$tmpfile")
+			apt-get install -y "$preferred_driver" 2> >(tee "$tmpfile")
 			local param="reboot"
 		fi
 		CountErr="0"
-                if [[ "$?" > "0" ]] ; then
-                        ERROR=$( cat $tmpfile )
-                        Installed="0"
-                        echo ""
-                        echo -e "\e[1;31mUnable to install $preferred_driver!\e[0m"
-                        echo -e "\e[1;31mRefer to the above message, which is also logged to $LogFile.\e[0m"
-                        echo ""
-                        Log "$LogFile" "Unable to install driver:"
-                        Log "$LogFile" "$ERROR"
+		if [[ "$?" > "0" ]] ; then
+			ERROR=$( cat $tmpfile )
+			Installed="0"
+			echo ""
+			echo -e "\e[1;31mUnable to install $preferred_driver!\e[0m"
+			echo -e "\e[1;31mRefer to the above message, which is also logged to $LogFile.\e[0m"
+			echo ""
+			Log "$LogFile" "Unable to install driver:"
+			Log "$LogFile" "$ERROR"
 			apt-get remove -yf "$preferred_driver"
 			dpkg --configure -a
-                        beep -l 100 -f 500 -d 50 -r 3
-                        sleep 10
+			beep -l 100 -f 500 -d 50 -r 3
+			sleep 10
 			CountErr=$(($CountErr + 1))
 			/etc/init.d/networking restart
 			apt-get update
@@ -233,40 +237,38 @@ installCorrectNvidiaDriver() {
 				return
 			fi
 			installCorrectNvidiaDriver
-			
-                fi
-                rm "$tmpfile"
+		fi
+		rm "$tmpfile"
+	else
+		echo "Preferred driver $preferred_driver already installed."
+		Log "$LogFile" "Preferred driver $preferred_driver already installed."
+		INSTALLED="0"
+	fi
 
-        else
-                echo "Preferred driver $preferred_driver already Installed."
-                Log "$LogFile" "Preferred driver $preferred_driver already Installed."
-                Installed="0"
-        fi
+	echo "*************************************************"
+	echo -n "       "
+	NotifyMessage "End NVidia driver installation"
+	echo "*************************************************"
+	echo ""
 
-        echo "*************************************************"
-        echo -n "       "
-        NotifyMessage "End NVidia driver installation"
-        echo "*************************************************"
-        echo ""
+	Log "$LogFile" "== End NVidia driver installation ($(date)) =="
 
-        Log "$LogFile" "== End NVidia driver installation ($(date)) =="
-
-        # Reboot only if requested and a new driver was Installed
-	if [[ "$param" == "reboot" && "$Installed" == "1" ]];then
-	#if [[ "$Installed" == "1" ]]; then
-                # Give the user a warning message and beep, then reboot
-                echo ""
-                StatusMessage "Nvidia driver installation requires a reboot."
-                NotifyMessage "Please stand by while your system is rebooted."
-                echo ""
-                                #need to force AVWizard to run, and remove the xorg.conf file created by the nvidia installer so it starts clean
-                                rm /etc/X11/xorg.conf*
-                                ConfSet AVWizardOverride 1
-                beep -l 100 -f 500 -d 50 -r 3
-                sleep 2
+	# Reboot only if requested and a new driver was installed
+	if [[ "$param" == "reboot" && "$INSTALLED" == "1" ]];then
+	#if [[ "$INSTALLED" == "1" ]]; then
+		# Give the user a warning message and beep, then reboot
+		echo ""
+		StatusMessage "Nvidia driver installation requires a reboot."
+		NotifyMessage "Please stand by while your system is rebooted."
+		echo ""
+		#need to force AVWizard to run, and remove the xorg.conf file created by the nvidia installer so it starts clean
+		#rm /etc/X11/xorg.conf*
+		ConfSet AVWizardOverride 1
+		beep -l 100 -f 500 -d 50 -r 3
+		sleep 2
 		
-                reboot
-        fi
+		reboot
+	fi
 }
 #######################################################################################################################
 # END NVIDIA DRIVER HELPER FUNCTIONS
