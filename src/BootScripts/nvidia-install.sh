@@ -5,8 +5,8 @@
 #######################################################################################################################
 # TODO: Possibly separate these into their own file and include that file here in Utils.sh?
 
-# These functions are to help determine which driver to install for the currently installed nVidia card,
-# as well as determining if vdpau support is available on the installed card.
+# These functions are to help determine which driver to install for the Currently Installed nVidia card,
+# as well as determining if vdpau support is available on the Installed card.
 
 # Information was gleened from these sources.
 # ftp://download.nvidia.com/XFree86/Linux-x86/190.42/README/appendix-a.html
@@ -18,35 +18,34 @@
 LogFile="/var/log/pluto/nvidia-install.log";
 
 # DRIVER LISTS
-# Make lists of all PCI_ID's supported under each driver version
-# 295, while not yet supported, is added here along with revision D. Some versions of 295 require a version of ALSA we are not keeping up with.
-# This sets all 295 to 260 for now, and all rev D to rev C.
-DRIVER_295_SUPPORTED="0a26 0a27 0a7a 0dc0 0dcd 0dce 0dd2 0dd6 0de0 0de2 0de5 0deb 0dec 0df4 0df5 0df6 0df7 0e30 0e31 1040 1042 1050 1051 1055 1082 1088 1091 0974 1094 1096 10c5 1200 1201 1203 1210 1211 1241 1244 1245 1247 1251 0dda 0dfa 0dfc 0e3a 0e3b 1056 109a 109b"
+# Make lists of all PCI_Id's supported under each driver version
 
-DRIVER_260_SUPPORTED="0040 0041 0042 0043 0044 0045 0046 0047 0048 004e 0090 0091 0092 0093 0095 0098 0099 009d 00c0 00c1 00c2 00c3 00c8 00c9 00cc 00cd 00ce 00f1 00f2 00f3 00f4 00f5 00f6 00f8 00f9 0140 0141 0142 0143 0144 0145 0146 0147 0148 0149 014a 014c 014d 014e 014f 0160 0161 0162 0163 0164 0165 0166 0167 0168 0169 016a 0191 0193 0194 0197 019d 019e 01d0 01d1 01d2 01d3 01d6 01d7 01d8 01da 01db 01dc 01dd 01de 01df 0221 0222 0240 0241 0242 0244 0245 0247 0290 0291 0292 0293 0294 0295 0297 0298 0299 029a 029b 029c 029d 029e 029f 02e0 02e1 02e2 02e3 02e4 038b 0390 0391 0392 0393 0394 0395 0397 0398 0399 039c 039e 03d0 03d1 03d2 03d5 03d6 0400 0401 0402 0403 0404 0405 0406 0407 0408 0409 040a 040b 040c 040d 040e 040f 0410 0420 0421 0422 0423 0424 0425 0426 0427 0428 0429 042a 042b 042c 042d 042e 042f 0531 0533 053a 053b 053e 0595 05e0 05e1 05e2 05e3 05e6 05e7 05ea 05eb 05ed 05f8 05f9 05fd 05fe 05ff 0600 0601 0602 0603 0604 0605 0606 0607 0608 0609 060a 060b 060c 060d 060f 0610 0611 0612 0613 0614 0615 0617 0618 0619 061a 061b 061c 061d 061e 061f 0622 0623 0625 0626 0627 0628 062a 062b 062c 062d 062e 0631 0632 0635 0637 0638 063a 0640 0641 0643 0644 0645 0646 0647 0648 0649 064a 064b 064c 0651 0652 0653 0654 0656 0658 0659 065a 065b 065c 068f 0697 06c0 06c4 06ca 06cd 06d1 06d2 06d8 06d9 06da 06dc 06dd 06de 06df 06e0 06e1 06e2 06e3 06e4 06e5 06e6 06e7 06e8 06e9 06ea 06eb 06ec 06ef 06f1 06f8 06f9 06fa 06fb 06fd 06ff 0743 0772 077a 07e0 07e1 07e2 07e3 07e5 082f 0843 0844 0845 0846 0847 0848 0849 084a 084b 084c 084d 084f 0860 0861 0862 0863 0864 0865 0866 0867 0868 086a 086c 086d 086e 086f 0870 0871 0872 0873 0874 0876 087a 087d 087e 087f 08a4 08a5 0914 0a20 0a22 0a23 0a28 0a29 0a2a 0a2b 0a2c 0a2d 0a34 0a35 0a38 0a3c 0a60 0a62 0a63 0a64 0a65 0a66 0a67 0a68 0a69 0a6a 0a6c 0a6e 0a6f 0a70 0a71 0a72 0a73 0a74 0a75 0a76 0a78 0a7c 0ca0 0ca2 0ca3 0ca4 0ca7 0ca8 0ca9 0cac 0caf 0cb0 0cb1 0cbc 0dc4 0dd1 0dd8 0de0 0de1 0de2 0de4 0de5 0deb 0dec 0dee 0df0 0df1 0df2 0df3 0df8 0e22 0e23 0e24 10c3 1080 1081 10d8"
+Driver_Current_Supported="0a26 0a27 0a7a 0dc0 0dcd 0dce 0dd2 0dd6 0de0 0de2 0de5 0deb 0dec 0df4 0df5 0df6 0df7 0e30 0e31 1040 1042 1050 1051 1055 1082 1088 1091 0974 1094 1096 10c5 1200 1201 1203 1210 1211 1241 1244 1245 1247 1251 0dda 0dfa 0dfc 0e3a 0e3b 1056 109a 109b"
 
-DRIVER_173_SUPPORTED="00fa 00fb 00fc 00fd 00fe 0301 0302 0308 0309 0311 0312 0314 031a 031b 031c 0320 0321 0322 0323 0324 0325 0326 0327 0328 032a 032b 032c 032d 0330 0331 0332 0333 0334 0338 033f 0341 0342 0343 0344 0347 0348 034c 034e"
+Driver_260_Supported="0040 0041 0042 0043 0044 0045 0046 0047 0048 004e 0090 0091 0092 0093 0095 0098 0099 009d 00c0 00c1 00c2 00c3 00c8 00c9 00cc 00cd 00ce 00f1 00f2 00f3 00f4 00f5 00f6 00f8 00f9 0140 0141 0142 0143 0144 0145 0146 0147 0148 0149 014a 014c 014d 014e 014f 0160 0161 0162 0163 0164 0165 0166 0167 0168 0169 016a 0191 0193 0194 0197 019d 019e 01d0 01d1 01d2 01d3 01d6 01d7 01d8 01da 01db 01dc 01dd 01de 01df 0221 0222 0240 0241 0242 0244 0245 0247 0290 0291 0292 0293 0294 0295 0297 0298 0299 029a 029b 029c 029d 029e 029f 02e0 02e1 02e2 02e3 02e4 038b 0390 0391 0392 0393 0394 0395 0397 0398 0399 039c 039e 03d0 03d1 03d2 03d5 03d6 0400 0401 0402 0403 0404 0405 0406 0407 0408 0409 040a 040b 040c 040d 040e 040f 0410 0420 0421 0422 0423 0424 0425 0426 0427 0428 0429 042a 042b 042c 042d 042e 042f 0531 0533 053a 053b 053e 0595 05e0 05e1 05e2 05e3 05e6 05e7 05ea 05eb 05ed 05f8 05f9 05fd 05fe 05ff 0600 0601 0602 0603 0604 0605 0606 0607 0608 0609 060a 060b 060c 060d 060f 0610 0611 0612 0613 0614 0615 0617 0618 0619 061a 061b 061c 061d 061e 061f 0622 0623 0625 0626 0627 0628 062a 062b 062c 062d 062e 0631 0632 0635 0637 0638 063a 0640 0641 0643 0644 0645 0646 0647 0648 0649 064a 064b 064c 0651 0652 0653 0654 0656 0658 0659 065a 065b 065c 068f 0697 06c0 06c4 06ca 06cd 06d1 06d2 06d8 06d9 06da 06dc 06dd 06de 06df 06e0 06e1 06e2 06e3 06e4 06e5 06e6 06e7 06e8 06e9 06ea 06eb 06ec 06ef 06f1 06f8 06f9 06fa 06fb 06fd 06ff 0743 0772 077a 07e0 07e1 07e2 07e3 07e5 082f 0843 0844 0845 0846 0847 0848 0849 084a 084b 084c 084d 084f 0860 0861 0862 0863 0864 0865 0866 0867 0868 086a 086c 086d 086e 086f 0870 0871 0872 0873 0874 0876 087a 087d 087e 087f 08a4 08a5 0914 0a20 0a22 0a23 0a28 0a29 0a2a 0a2b 0a2c 0a2d 0a34 0a35 0a38 0a3c 0a60 0a62 0a63 0a64 0a65 0a66 0a67 0a68 0a69 0a6a 0a6c 0a6e 0a6f 0a70 0a71 0a72 0a73 0a74 0a75 0a76 0a78 0a7c 0ca0 0ca2 0ca3 0ca4 0ca7 0ca8 0ca9 0cac 0caf 0cb0 0cb1 0cbc 0dc4 0dd1 0dd8 0de0 0de1 0de2 0de4 0de5 0deb 0dec 0dee 0df0 0df1 0df2 0df3 0df8 0e22 0e23 0e24 10c3 1080 1081 10d8"
 
-DRIVER_96_SUPPORTED="0110 0111 0112 0113 0170 0171 0172 0173 0174 0175 0176 0177 0178 0179 017a 017c 017d 0181 0182 0183 0185 0188 018a 018b 018c 01a0 01f0 0200 0201 0202 0203 0250 0251 0253 0258 0259 025b 0280 0281 0282 0286 0288 0289 028c"
+Driver_173_Supported="00fa 00fb 00fc 00fd 00fe 0301 0302 0308 0309 0311 0312 0314 031a 031b 031c 0320 0321 0322 0323 0324 0325 0326 0327 0328 032a 032b 032c 032d 0330 0331 0332 0333 0334 0338 033f 0341 0342 0343 0344 0347 0348 034c 034e"
 
-DRIVER_71_SUPPORTED="0020 0028 0029 002c 002d 00a0 0100 0101 0103 0150 0151 0152 0153"
+Driver_96_Supported="0110 0111 0112 0113 0170 0171 0172 0173 0174 0175 0176 0177 0178 0179 017a 017c 017d 0181 0182 0183 0185 0188 018a 018b 018c 01a0 01f0 0200 0201 0202 0203 0250 0251 0253 0258 0259 025b 0280 0281 0282 0286 0288 0289 028c"
+
+Driver_71_Supported="0020 0028 0029 002c 002d 00a0 0100 0101 0103 0150 0151 0152 0153"
 
 # VDPAU LISTS
-# Make lists of all PCI_ID's that support each vdpau revision
-VDPAU_REV_A_SUPPORTED="016d 0400 0401 0402 0403 0404 0405 0407 0408 0409 040a 040b 040c 040d 040e 040f 0410 0421 0422 0424 0425 0426 0427 0428 0429 042a 042b 042c 042d 042e 042f 0595 05e0 05e1 05e2 05e3 05e6 05e7 05ea 05eb 05ed 05f8 05f9 05fd 05fe 05ff 0600 0601 0602 0603 0604 0605 0606 0607 0608 0609 060a 060b 060c 060d 060f 0610 0611 0612 0613 0614 0615 0617 0618 0619 061a 061b 061c 061d 061e 061f 0622 0623 0625 0626 0627 0628 062a 062b 062c 062d 062e 0638 063a 0640 0641 0643 0644 0645 0646 0647 0648 0649 064a 064b 064c 0651 0652 0653 0654 0656 0658 0659 065a 065b 065c 068f 0697 06e4 0743 0ca0 0ca7 10c3"
+# Make lists of all PCI_Id's that support each vdpau revision
+VDPAU_Rev_A_Supported="016d 0400 0401 0402 0403 0404 0405 0407 0408 0409 040a 040b 040c 040d 040e 040f 0410 0421 0422 0424 0425 0426 0427 0428 0429 042a 042b 042c 042d 042e 042f 0595 05e0 05e1 05e2 05e3 05e6 05e7 05ea 05eb 05ed 05f8 05f9 05fd 05fe 05ff 0600 0601 0602 0603 0604 0605 0606 0607 0608 0609 060a 060b 060c 060d 060f 0610 0611 0612 0613 0614 0615 0617 0618 0619 061a 061b 061c 061d 061e 061f 0622 0623 0625 0626 0627 0628 062a 062b 062c 062d 062e 0638 063a 0640 0641 0643 0644 0645 0646 0647 0648 0649 064a 064b 064c 0651 0652 0653 0654 0656 0658 0659 065a 065b 065c 068f 0697 06e4 0743 0ca0 0ca7 10c3"
 
-VDPAU_REV_B_SUPPORTED="06e0 06e1 06e2 06e5 06e6 06e8 06e9 06ea 06eb 06ec 06ef 06f1 06f8 06f9 06fa 06fb 06fd 06ff 0844 0845 0846 0847 0848 0849 084a 084b 084c 084d 0860 0861 0862 0863 0864 0865 0866 0867 086a 086c 086d 086e 086f 0870 0871 0872 0873 0874 0876 087a 087d 087e 087f 0a68 0a69"
+VDPAU_Rev_B_Supported="06e0 06e1 06e2 06e5 06e6 06e8 06e9 06ea 06eb 06ec 06ef 06f1 06f8 06f9 06fa 06fb 06fd 06ff 0844 0845 0846 0847 0848 0849 084a 084b 084c 084d 0860 0861 0862 0863 0864 0865 0866 0867 086a 086c 086d 086e 086f 0870 0871 0872 0873 0874 0876 087a 087d 087e 087f 0a68 0a69"
 
-VDPAU_REV_C_SUPPORTED="06c0 06c4 06ca 06cd 06d1 06d2 06d8 06d9 06da 06dc 06dd 06de 06df 0772 082f 0846 08a4 08a5 0914 0974 0a20 0a23 0a26 0a27 0a28 0a29 0a2a 0a2b 0a2c 0a2d 0a34 0a35 0a38 0a3c 0a60 0a62 0a63 0a64 0a65 0a66 0a6a 0a6c 0a6e 0a6f 0a70 0a71 0a72 0a73 0a74 0a75 0a76 0a78 0a7a 0a7c 0ca2 0ca3 0ca4 0ca8 0ca9 0caf 0cb0 0cb1 0cbc 0dc0 0dc4 0dcd 0dce 0dd1 0dd2 0dd6 0dd8 0dda 0de0 0de1 0de2 0de4 0de5 0deb 0dec 0dee 0df0 0df1 0df2 0df3 0df4 0df5 0df6 0df7 0df8 0dfa 0dfc 0e22 0e23 0e24 0e30 0e31 0e3a 0e3b 1050 1080 1081 1082 1088 1091 1094 1096 109a 109b 10c5 10d8 1200 1201 1203 1210 1211 1241 1244 1245 1247 1251"
+VDPAU_Rev_C_Supported="06c0 06c4 06ca 06cd 06d1 06d2 06d8 06d9 06da 06dc 06dd 06de 06df 0772 082f 0846 08a4 08a5 0914 0974 0a20 0a23 0a26 0a27 0a28 0a29 0a2a 0a2b 0a2c 0a2d 0a34 0a35 0a38 0a3c 0a60 0a62 0a63 0a64 0a65 0a66 0a6a 0a6c 0a6e 0a6f 0a70 0a71 0a72 0a73 0a74 0a75 0a76 0a78 0a7a 0a7c 0ca2 0ca3 0ca4 0ca8 0ca9 0caf 0cb0 0cb1 0cbc 0dc0 0dc4 0dcd 0dce 0dd1 0dd2 0dd6 0dd8 0dda 0de0 0de1 0de2 0de4 0de5 0deb 0dec 0dee 0df0 0df1 0df2 0df3 0df4 0df5 0df6 0df7 0df8 0dfa 0dfc 0e22 0e23 0e24 0e30 0e31 0e3a 0e3b 1050 1080 1081 1082 1088 1091 1094 1096 109a 109b 10c5 10d8 1200 1201 1203 1210 1211 1241 1244 1245 1247 1251"
 
-VDPAU_REV_D_SUPPORTED="1040 1042 1051 1055 1056"
+VDPAU_Rev_D_Supported="1040 1042 1051 1055 1056"
 
 Backports_Required="0a20 0a22 0a23 0a28 0a29 0a2a 0a2b 0a2d 0a34 0a35 0a64 0a6f 0a76 0ca2 0ca3 0ca4 0ca8 0ca9 0caf 0cb0 0cb1 0dc4 0de0 0de1 0de2 0de4 0de5 0df0 0df1 0df2 0df3 0e22 0e23 0e24 1080 1081"
 
 #######################################################################################################################
-# getPCI_ID()
-# returns the last 4 digits of the PCI ID of the currently installed nVidia card.
-getPCI_ID() {
+# getPCI_Id()
+# returns the last 4 digits of the PCI ID of the Currently Installed nVidia card.
+getPCI_Id() {
 	vga_pci=$(lspci -nn | grep -w 'VGA' | sed 's/.*://;s/\].*//')
 	gpus=$(echo "$vga_pci" | sort -u | wc -l)
 		if [[ "$gpus" -gt "1" ]]; then 
@@ -57,7 +56,7 @@ getPCI_ID() {
 
 
 # getNvidiaInstalled()
-# returns true if an nvidia card is installed in the system, false otherwise
+# returns true if an nvidia card is Installed in the system, false otherwise
 getNvidiaInstalled() {
         if ! lspci -nn | grep -iq "vga.*nvidia";then
                 return 1
@@ -67,79 +66,79 @@ getNvidiaInstalled() {
 }
 
 # getInstalledNvidiaDriver()
-# echos the currently installed nVidia driver (if there is one)
+# echos the Currently Installed nVidia driver (if there is one)
 getInstalledNvidiaDriver() {
-        (dpkg-query -l "nvidia-glx*" "nvidia-current" | grep "^ii" | awk '{print $2}') 2>/dev/null
+        (dpkg-query -l "nvidia-glx*" "nvidia-Current" | grep "^ii" | awk '{print $2}') 2>/dev/null
 }
 
 # getPreferredNvidiaDriver()
-# returns the preferred driver to install for the currently installed nVidia card.
+# returns the preferred driver to install for the Currently Installed nVidia card.
 getPreferredNvidiaDriver() {
-        PCI_ID=$(getPCI_ID)
+        PCI_Id=$(getPCI_Id)
         DISTRO="$(lsb_release -c -s)"
  
-        case " $DRIVER_295_SUPPORTED " in *" $PCI_ID "*)
-                echo "nvidia-current"
+        case " $Driver_Current_Supported " in *" $PCI_Id "*)
+                echo "nvidia-Current"
                 return 1
         esac
 
-        case " $DRIVER_260_SUPPORTED " in *" $PCI_ID "*)
+        case " $Driver_260_Supported " in *" $PCI_Id "*)
                 echo "nvidia-glx-260"
                 return 1
         esac
 
-        case " $DRIVER_173_SUPPORTED " in *" $PCI_ID "*)
+        case " $Driver_173_Supported " in *" $PCI_Id "*)
                 echo "nvidia-glx-173"
                 return 1
         esac
 
-        case " $DRIVER_96_SUPPORTED " in *" $PCI_ID "*)
+        case " $Driver_96_Supported " in *" $PCI_Id "*)
                 echo "nvidia-glx-96"
                 return 1
         esac
 
-        case " $DRIVER_71_SUPPORTED " in *" $PCI_ID "*)
+        case " $Driver_71_Supported " in *" $PCI_Id "*)
                 echo "nvidia-glx-71"
                 return 0
         esac
 
-        #Could not map PCI_ID to a correct nVidia device.
+        #Could not map PCI_Id to a correct nVidia device.
         return 0
 
 }
 
 # getVDPAUSupport()
-# Returns which vdpau revision (A,B or C) supported by the currently installed nVidia card.
+# Returns which vdpau revision (A,B or C) supported by the Currently Installed nVidia card.
 # returns nothing if vdpau is NOT supported!
 getVDPAUSupport() {
-        PCI_ID=$(getPCI_ID)
+        PCI_Id=$(getPCI_Id)
 
-        case " $VDPAU_REV_A_SUPPORTED " in *" $PCI_ID "*)
+        case " $VDPAU_Rev_A_Supported " in *" $PCI_Id "*)
                 echo "A"
                 return 1
         esac
-        case " $VDPAU_REV_B_SUPPORTED " in *" $PCI_ID "*)
+        case " $VDPAU_Rev_B_Supported " in *" $PCI_Id "*)
                 echo "B"
                 return 1
         esac
-        case " $VDPAU_REV_C_SUPPORTED " in *" $PCI_ID "*)
+        case " $VDPAU_Rev_C_Supported " in *" $PCI_Id "*)
                echo "C"
                 return 1
         esac
-        case " $VDPAU_REV_D_SUPPORTED " in *" $PCI_ID "*)
+        case " $VDPAU_Rev_D_Supported " in *" $PCI_Id "*)
                 echo "D"
                 return
         esac
-        # Could not map a PCI_ID to a supported vdpau revision
+        # Could not map a PCI_Id to a supported vdpau revision
         return 0
 }
 
 checkAlsaBackportNeeds() {
-	PCI_ID=$(getPCI_ID)
+	PCI_Id=$(getPCI_Id)
         alsa_backports=$(dpkg-query -l "linux-backports-modules-alsa*" | grep "^ii" | awk '{print $2}') 2>/dev/null
 	if [[ -z $alsa_backports ]]; then
-		case " $Backports_Required " in *" $PCI_ID "*)
-			Log "$LogFile" "Alsa backports being installed."
+		case " $Backports_Required " in *" $PCI_Id "*)
+			Log "$LogFile" "Alsa backports being Installed."
 			NotifyMessage "Installing alsa backports modules."
 			apt-get install -yf linux-backports-modules-alsa-$(uname -r)
 			/usr/pluto/bin/RestartALSA.sh ;;
@@ -147,11 +146,11 @@ checkAlsaBackportNeeds() {
 	fi
 
 	if [[ -n $alsa_backports ]]; then
-		case " $Backports_Required " in *" $PCI_ID "*)
-			NotifyMessage "Alsa backports modules already installed."
+		case " $Backports_Required " in *" $PCI_Id "*)
+			NotifyMessage "Alsa backports modules already Installed."
 		;;
 		*)
-			Log "$LogFile" "Alsa backports is installed and requires removal."
+			Log "$LogFile" "Alsa backports is Installed and requires removal."
 			NotifyMessage "Removing alsa backports modules."
 			apt-get remove -yf linux-backports-modules-alsa-$(uname -r)
 			/usr/pluto/bin/RestartALSA.sh ;;
@@ -160,15 +159,11 @@ checkAlsaBackportNeeds() {
 }
 
 # installCorrectNvidiaDriver()
-# This function will install the correct nVidia driver for the currently installed card.
-# if the first parameter is set to "reboot", it will also reboot the system after the driver is installed.
+# This function will install the correct nVidia driver for the Currently Installed card.
+# if the first parameter is set to "reboot", it will also reboot the system after the driver is Installed.
 installCorrectNvidiaDriver() {
-        #see if the caller wanted to reboot after installing packages
-	#TODO This function not working, so changed.
-        #param="$1"
-
-        # first, lets see if there is even an nvidia card installed in the system
-        # If there is no nVidia card even installed, lets get out of here.
+        # first, lets see if there is even an nvidia card Installed in the system
+        # If there is no nVidia card even Installed, lets get out of here.
         if ! getNvidiaInstalled; then
                 return
         fi
@@ -179,13 +174,13 @@ installCorrectNvidiaDriver() {
 	echo "*************************************************"
         Log "$LogFile" "== Begin NVidia driver installation ($(date)) =="
         Log "$LogFile" "Card Detected: $(lspci -nn | grep -vi 'non-vga' | grep -i 'vga')"
-        Log "$LogFile" "PCI_ID Detected: $(getPCI_ID)"
+        Log "$LogFile" "PCI_Id Detected: $(getPCI_Id)"
 	checkAlsaBackportNeeds
-        # Now lets get the currently installed nvidia driver (if there is one)
-        current_driver=$(getInstalledNvidiaDriver)
-        if echo "$current_driver" | grep "nvidia"; then
-                echo "Detected installed driver $current_driver"
-                Log "$LogFile" "Detected installed driver $current_driver"
+        # Now lets get the Currently Installed nvidia driver (if there is one)
+        Current_driver=$(getInstalledNvidiaDriver)
+        if echo "$Current_driver" | grep "nvidia"; then
+                echo "Detected Installed driver $Current_driver"
+                Log "$LogFile" "Detected Installed driver $Current_driver"
         fi
 
         # Get the preferred driver to install
@@ -194,16 +189,16 @@ installCorrectNvidiaDriver() {
         Log "$LogFile" "LMCE prefers driver $preferred_driver"
 
         # Install the driver if needed
-        if [[ "$current_driver" != "$preferred_driver" ]]; then
+        if [[ "$Current_driver" != "$preferred_driver" ]]; then
                 echo "installing NEW driver $preferred_driver!"
                 Log "$LogFile" "installing NEW driver $preferred_driver!"
-                INSTALLED="1"
+                Installed="1"
                 tmpfile=$( /bin/mktemp -t )
-		if [[ -n "$current_driver" ]]; then
+		if [[ -n "$Current_driver" ]]; then
 			apt-get -y remove "$currrent_driver" --force-yes
 		fi
 
-		if [[ "$preferred_driver" == "nvidia-current" ]]; then
+		if [[ "$preferred_driver" == "nvidia-Current" ]]; then
 			add-apt-repository ppa:team-iquik/alsa
 			add-apt-repository ppa:ubuntu-x-swat/x-updates
 			apt-get update
@@ -211,13 +206,15 @@ installCorrectNvidiaDriver() {
 			apt-get install -y "$preferred_driver" 2> >(tee "$tmpfile")
 			rm /etc/apt/sources.list.d/*
 			apt-get update
+			local param="reboot"
 		else
 	                apt-get install -y "$preferred_driver" 2> >(tee "$tmpfile")
+			local param="reboot"
 		fi
 		CountErr="0"
                 if [[ "$?" > "0" ]] ; then
                         ERROR=$( cat $tmpfile )
-                        INSTALLED="0"
+                        Installed="0"
                         echo ""
                         echo -e "\e[1;31mUnable to install $preferred_driver!\e[0m"
                         echo -e "\e[1;31mRefer to the above message, which is also logged to $LogFile.\e[0m"
@@ -229,16 +226,21 @@ installCorrectNvidiaDriver() {
                         beep -l 100 -f 500 -d 50 -r 3
                         sleep 10
 			CountErr=$(($CountErr + 1))
+			/etc/init.d/networking restart
+			apt-get update
 			if [[ "$CountErr" == "3" ]]; then
 				ErrorMessage "Cannot install after 3 tries. Giving up"
+				return
 			fi
+			installCorrectNvidiaDriver
+			
                 fi
                 rm "$tmpfile"
 
         else
-                echo "Preferred driver $preferred_driver already installed."
-                Log "$LogFile" "Preferred driver $preferred_driver already installed."
-                INSTALLED="0"
+                echo "Preferred driver $preferred_driver already Installed."
+                Log "$LogFile" "Preferred driver $preferred_driver already Installed."
+                Installed="0"
         fi
 
         echo "*************************************************"
@@ -249,9 +251,9 @@ installCorrectNvidiaDriver() {
 
         Log "$LogFile" "== End NVidia driver installation ($(date)) =="
 
-        # Reboot only if requested and a new driver was installed
-	if [[ "$param" == "reboot" && "$INSTALLED" == "1" ]];then
-	#if [[ "$INSTALLED" == "1" ]]; then
+        # Reboot only if requested and a new driver was Installed
+	if [[ "$param" == "reboot" && "$Installed" == "1" ]];then
+	#if [[ "$Installed" == "1" ]]; then
                 # Give the user a warning message and beep, then reboot
                 echo ""
                 StatusMessage "Nvidia driver installation requires a reboot."
