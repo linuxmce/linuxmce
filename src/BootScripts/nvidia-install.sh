@@ -77,7 +77,7 @@ getPreferredNvidiaDriver() {
 	PCI_Id=$(getPCI_Id)
 	Distro="$(lsb_release -c -s)"
  
-	case " $Driver_295_Supported " in *" $PCI_Id "*)
+	case " $Driver_Current_Supported " in *" $PCI_Id "*)
 		echo "nvidia-current"
 		return 1
 	esac
@@ -196,7 +196,7 @@ installCorrectNvidiaDriver() {
 	if [[ "$current_driver" != "$preferred_driver" ]]; then
 		echo "installing NEW driver $preferred_driver!"
 		Log "$LogFile" "installing NEW driver $preferred_driver!"
-		INSTALLED="1"
+		Installed="1"
 		tmpfile=$( /bin/mktemp -t )
 		if [[ -n "$current_driver" ]]; then
 			apt-get -y remove "$currrent_driver" --force-yes
@@ -242,7 +242,7 @@ installCorrectNvidiaDriver() {
 	else
 		echo "Preferred driver $preferred_driver already installed."
 		Log "$LogFile" "Preferred driver $preferred_driver already installed."
-		INSTALLED="0"
+		Installed="0"
 	fi
 
 	echo "*************************************************"
@@ -254,8 +254,8 @@ installCorrectNvidiaDriver() {
 	Log "$LogFile" "== End NVidia driver installation ($(date)) =="
 
 	# Reboot only if requested and a new driver was installed
-	if [[ "$param" == "reboot" && "$INSTALLED" == "1" ]];then
-	#if [[ "$INSTALLED" == "1" ]]; then
+	if [[ "$param" == "reboot" && "$Installed" == "1" ]];then
+	#if [[ "$Installed" == "1" ]]; then
 		# Give the user a warning message and beep, then reboot
 		echo ""
 		StatusMessage "Nvidia driver installation requires a reboot."
