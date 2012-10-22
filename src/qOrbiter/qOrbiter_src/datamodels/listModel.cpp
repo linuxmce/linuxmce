@@ -63,7 +63,12 @@ QVariant ListModel::data(const QModelIndex &index, int role) const
         return QVariant();
     return m_list.at(index.row())->data(role);
 }
-
+#ifdef QT5
+QHash<int, QByteArray> ListModel::roleNames() const
+{
+    return m_prototype->roleNames();
+}
+#endif
 ListModel::~ListModel() {
     delete m_prototype;
     clear();

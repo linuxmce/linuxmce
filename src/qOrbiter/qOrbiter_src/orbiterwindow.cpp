@@ -286,10 +286,12 @@ void orbiterWindow::setDeviceState(bool b)
     b_devicePresent = b; emit deviceChanged();
 }
 
-void orbiterWindow::prepareExistingOrbiters(QList<ExistingOrbiter *> ex_list)
+void orbiterWindow::prepareExistingOrbiters(QList<QObject*> ex_list)
 {
+
+
     mainView.rootContext()->setContextProperty("orbiterList", QVariant::fromValue(ex_list));
-    emit showList();
+  emit showList();
 }
 
 void orbiterWindow::displayPromptResponse(int type, QList<QObject*> pList)

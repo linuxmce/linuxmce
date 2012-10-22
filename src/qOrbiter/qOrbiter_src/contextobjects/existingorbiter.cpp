@@ -1,13 +1,8 @@
 #include "existingorbiter.h"
 
 ExistingOrbiter::ExistingOrbiter(int deviceno, QString title, QObject *parent) :
-    QObject(parent)
+    QObject(parent), i_device_number(deviceno), label(title)
 {
-
-    set_device_number(deviceno);
-    set_title(title);
-    set_label(title);
-
 }
 
 void ExistingOrbiter::set_title(QString t)

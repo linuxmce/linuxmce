@@ -246,6 +246,7 @@ folder_02.target = config
 
 DEFINES+=RPI
 DEPLOYMENTFOLDERS += folder_01 folder_02
+QT+= qml
 }
 
 # Additional import path used to resolve QML modules in Creator's code model

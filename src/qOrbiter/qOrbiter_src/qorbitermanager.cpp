@@ -1187,7 +1187,7 @@ bool qorbiterManager::readLocalConfig()
             currentSkin = configVariables.namedItem("skin").attributes().namedItem("id").nodeValue();
             if (currentSkin.isEmpty())
 #ifdef RPI
-                currentSkin = "default";
+                currentSkin = "noir";
 #else
                 currentSkin = "default";
 #endif

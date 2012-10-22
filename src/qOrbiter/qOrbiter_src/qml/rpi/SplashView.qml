@@ -30,7 +30,7 @@ Rectangle {
     Row{
 
         height: childrenRect.height
-        width: scaleX(85)
+        width: scaleX(95)
         spacing: scaleX(15)
 
         Rectangle{
@@ -123,10 +123,6 @@ Rectangle {
 
     }
 
-
-
-
-
     Connections{
         target:window
         onMessageChanged:loadingStatus.text = window.message
@@ -146,7 +142,7 @@ Rectangle {
         anchors.verticalCenter: parent.verticalCenter
         anchors.horizontalCenter: parent.horizontalCenter
         anchors.verticalCenterOffset:10
-        width: scaleX(99)
+        width: appW*.75
         height: scaleY(20)
         radius: 7
         anchors.horizontalCenterOffset: 1
@@ -178,7 +174,8 @@ Rectangle {
     Row{
         anchors.centerIn: rectangle2
         anchors.verticalCenter: parent.verticalCenter
-        spacing: 10
+        spacing: 150
+        width: rectangle2.width
         Text {
             text: qsTr("Host:")
             font.pointSize: 28
@@ -311,7 +308,7 @@ Rectangle {
         anchors.centerIn: rectangle2
         model:orbiterList
         visible: false
-        opacity: existing_orbiters.visible
+
         delegate: Rectangle{
             id:existing_orbiter_delegate
             height: scaleY(5)
@@ -327,13 +324,13 @@ Rectangle {
 
                 Text {
                     id: orbiter_label
-                    text: qsTr("Orbiter:")+ label
+                    text: qsTr("Orbiter:")+ dataTitle
                     font.pointSize: 12
                     wrapMode: Text.WrapAtWordBoundaryOrAnywhere
                 }
                 Text {
                     id: dev_num
-                    text:qsTr("Device:")+ i_device_number
+                    text:qsTr("Device:")+ data_id
                     font.pointSize: 12
                     font.italic: true
                     wrapMode: Text.WrapAtWordBoundaryOrAnywhere
@@ -341,7 +338,7 @@ Rectangle {
             }
             MouseArea {
                 anchors.fill: parent
-                onClicked: window.qmlSetupLmce(i_device_number, routerip.text)
+                onClicked: window.qmlSetupLmce(data_id, routerip.text)
             }
         }
     }

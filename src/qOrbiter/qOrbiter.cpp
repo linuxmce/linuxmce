@@ -75,6 +75,8 @@ qOrbiter::qOrbiter(int DeviceID, string ServerAddress,bool bConnectEventHandler,
     m_bOrbiterConnected = false;
     initializeGrid();
     setOrbiterSetupVars(0,0,0,0,0,0);
+
+    qRegisterMetaType< QList<ExistingOrbiter*> >("QList<ExistingOrbiter*>");
 }
 
 //<-dceag-const2-b->
@@ -1815,6 +1817,9 @@ bool DCE::qOrbiter::initialize()
     setCommandResponse("Starting dce initialization");
 
     if(m_bOrbiterConnected==false){
+#ifdef RPI
+
+#endif
         if ((GetConfig() == true) && (Connect(PK_DeviceTemplate_get()) == true))
         {
             m_dwMaxRetries = 1;
@@ -1823,7 +1828,7 @@ bool DCE::qOrbiter::initialize()
             m_bOrbiterConnected = true;
             emit deviceValid(true);
             setCommandResponse("Starting Manager");
-            emit startManager(QString::number(m_dwPK_Device), QString::fromStdString(m_sHostName) );
+            emit startManager(QString::number(m_dwPK_Device), QString::fromStdString(m_sIPAddress) );
 
             DCE::LoggerWrapper::GetInstance()->Write(LV_CRITICAL, "Orbiter Connected, requesting configuration for device %d", m_dwPK_Device);
 
@@ -3706,7 +3711,7 @@ void DCE::qOrbiter::GetAlarms(bool toggle, int grp)
 void DCE::qOrbiter::setZoom(QString zoomLevel)
 {
     string sResponse;
-    CMD_Set_Zoom setMediaZoom(m_dwPK_Device, iMediaPluginID, internal_streamID, string(zoomLevel.toAscii()));
+    CMD_Set_Zoom setMediaZoom(m_dwPK_Device, iMediaPluginID, internal_streamID, string(zoomLevel.toStdString()));
     if (SendCommand(setMediaZoom))
     {
 
@@ -4360,7 +4365,7 @@ int qOrbiter::DeviceIdInvalid()
 {
     setCommandResponse("Device ID is invalid. Finding Existing Orbiters of this type");
     QApplication::processEvents(QEventLoop::AllEvents);
-    QList<QObject*>  temp_orbiter_list ;
+    QList<QObject*> * temp_orbiter_list = new QList<QObject*>;
 
     map<int,string> mapDevices;
     GetDevicesByTemplate(PK_DeviceTemplate_get(),&mapDevices);
@@ -4375,11 +4380,16 @@ int qOrbiter::DeviceIdInvalid()
     else{
         for(map<int,string>::iterator it=mapDevices.begin();it!=mapDevices.end();++it)
         {
-            temp_orbiter_list.append(new ExistingOrbiter((int)it->first, QString::fromStdString(it->second)));
+            int i = (int)it->first;
+            QString s = QString::fromStdString(it->second);
+
+           temp_orbiter_list->append( new PromptData(QString::fromStdString(it->second),(int)it->first));
+
             cout << it->first << " " << it->second << endl;
         }
         setCommandResponse("Returning List of Orbiters");
-        emit deviceInvalid(temp_orbiter_list);
+        setCommandResponse(QString::number(temp_orbiter_list->count()) + " Orbiter(s)");
+        emit deviceInvalid(*temp_orbiter_list);
         return 0;
     }
 
@@ -4659,7 +4669,9 @@ void DCE::qOrbiter::prepareFileList(int iPK_MediaType)
             else
             {
                 emit gridModelSizeChange(pDataGridTable->GetRows());
+
                 i_mediaModelRows = cellsToRender;
+#ifndef RPI
                 QList <QObject*> modelPages;
                 media_totalPages = (i_mediaModelRows / media_pageSeperator); //16 being the items per page.
 
@@ -4670,6 +4682,7 @@ void DCE::qOrbiter::prepareFileList(int iPK_MediaType)
                 }
 
                 emit modelPageCount(modelPages);
+#endif
                 //qDebug() << cellsToRender << " Cells converted to " << modelPages.count() ;
 
 
@@ -4976,7 +4989,7 @@ void qOrbiter::pingCore()
 
     setCommandResponse("initiating ping to core");
 
-    QString url = QString::fromStdString(m_sIPAddress);
+    QString url = QString::fromStdString("DCEROUTER");
     if(!url.contains(QRegExp("(\\D)"))){
 
         setCommandResponse("Host name provided, doing lookup");
@@ -5026,7 +5039,7 @@ void qOrbiter::checkInstall()
 {
     setCommandResponse("Checking for LinuxMCE installtion in checkInstall()");
     if(m_bOrbiterConnected == false){
-        QString url = "http://"+QString::fromStdString(m_sIPAddress)+"/lmce-admin/index.php";
+        QString url = "http://"+QString::fromStdString("192.168.80.1")+"/lmce-admin/index.php";
         QNetworkAccessManager *pingManager = new QNetworkAccessManager();
         connect(pingManager, SIGNAL(finished(QNetworkReply*)), this, SLOT(verifyInstall(QNetworkReply*)));
         QNetworkReply *badReply = pingManager->get(QNetworkRequest(url));
