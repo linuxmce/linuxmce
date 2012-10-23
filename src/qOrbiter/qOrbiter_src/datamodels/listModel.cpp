@@ -135,7 +135,6 @@ void ListModel::reset()
     QApplication::processEvents(QEventLoop::AllEvents);
     endResetModel();
     emit modelReset();
-
     QApplication::processEvents(QEventLoop::AllEvents);
    clearing = false;
 }
@@ -156,10 +155,22 @@ void ListModel::reset()
 //    emit modelReset();
 //}
 
-void ListModel::resetInternalData()
+bool ListModel::resetInternalData()
 {
 
   m_list.clear();
+  while(!m_list.empty())
+  {
+      QApplication::processEvents(QEventLoop::AllEvents);
+      qDebug() << m_list.count();
+  }
+  if(m_list.empty())
+  {
+      qDebug() << "Container Empty::" << m_list.count();
+      return true;
+  }
+  else
+  {qDebug()<< "Application Error!";}
     //emit dataChanged(QModelIndex(),QModelIndex(), 0);
 }
 
@@ -345,16 +356,20 @@ void ListModel::clearAndRequest(int type)
     QApplication::processEvents(QEventLoop::AllEvents);
     emit modelAboutToBeReset();
     beginResetModel();
-    resetInternalData();
-    setProgress(0.0);
-    QApplication::processEvents(QEventLoop::AllEvents);
-    endResetModel();
-    emit modelReset();
+    if(    resetInternalData()){
+        setProgress(0.0);
+        QApplication::processEvents(QEventLoop::AllEvents);
+        endResetModel();
+        emit modelReset();
 
-    QApplication::processEvents(QEventLoop::AllEvents);
-    clearing = false;
-    emit ready(gridType);
+        QApplication::processEvents(QEventLoop::AllEvents);
+        clearing = false;
+        emit ready(gridType);
+    }
+    else
+    {
 
+    }
 }
 
 void ListModel::clearForPaging()
@@ -376,16 +391,26 @@ void ListModel::clearForPaging()
     QApplication::processEvents(QEventLoop::AllEvents);
 #else
     clearing = true;
+
+    QApplication::processEvents(QEventLoop::AllEvents);
     emit modelAboutToBeReset();
     beginResetModel();
-    setProgress(0.0);
-    resetInternalData();
-    //qDeleteAll(m_list);
-    endResetModel();
-    emit modelReset();
-    clearing = false;
+    if(    resetInternalData()){
+        setProgress(0.0);
+        QApplication::processEvents(QEventLoop::AllEvents);
+        emit modelReset();
+        endResetModel();
+        QApplication::processEvents(QEventLoop::AllEvents);
+        clearing = false;
 
-    emit pagingCleared();
+        emit pagingCleared();
+    }
+    else
+    {
+
+    }
+
+
 #endif
 
 }

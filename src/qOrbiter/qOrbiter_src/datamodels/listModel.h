@@ -93,7 +93,7 @@ private slots:
 //    virtual void beginResetModel();
 //    virtual void endResetModel();
 private:
-    void resetInternalData();
+    bool resetInternalData();
     gridItem* m_prototype;
     QList<gridItem*> m_list;
     // qorbiterManager *manager_ref;
