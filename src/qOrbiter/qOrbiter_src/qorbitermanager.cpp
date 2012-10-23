@@ -119,6 +119,7 @@ qorbiterManager::qorbiterManager(QDeclarativeView *view, QObject *parent) :
 
     QObject::connect(this, SIGNAL(orbiterReady(bool)), this, SLOT(showUI(bool)));
     QObject::connect(this, SIGNAL(skinDataLoaded(bool)), SLOT(showUI(bool)));
+    QObject::connect(view->engine(), SIGNAL(quit()), this, SLOT(closeOrbiter()));
 
     ScreenSaver = new ScreenSaverClass(this);
 
@@ -768,7 +769,7 @@ void qorbiterManager::processConfig(QByteArray config)
 
     configData.clear();
     tConf.clear();
-   // activateScreenSaver();
+   activateScreenSaver();
 
     emit registerOrbiter((userList->find(sPK_User)->data(4).toInt()), QString::number(iea_area), iFK_Room );
     setOrbiterStatus(true);
@@ -1694,6 +1695,7 @@ void qorbiterManager::activateScreenSaver()
 
 void qorbiterManager::killScreenSaver()
 {
+
 }
 
 bool qorbiterManager::createAndroidConfig()

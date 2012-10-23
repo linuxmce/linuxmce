@@ -35,7 +35,7 @@ Item
 
         Text{
             id:connectstatus
-            text: "Orbiter "+ deviceid + " is connected."
+            text: "Orbiter "+ dcerouter.m_dwPK_Device + " is connected."
             color: "aliceblue"
             font.letterSpacing: 2
             anchors.left: parent.left

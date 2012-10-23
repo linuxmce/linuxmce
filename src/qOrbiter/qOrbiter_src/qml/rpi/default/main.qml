@@ -28,7 +28,14 @@ Item {
 //            onOrientationChanged:dceplayer.setWindowSize(appH, appW)
 //        }
 //    }
+MouseArea{
+    anchors.fill: item
+}
 
+Rectangle{
+    id:bg
+    color: "darkslategrey"
+   }
     signal close()
     signal changeScreen(string s)
     signal setupStart(int x, string y)

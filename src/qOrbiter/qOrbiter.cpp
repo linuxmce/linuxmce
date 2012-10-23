@@ -75,8 +75,9 @@ qOrbiter::qOrbiter(int DeviceID, string ServerAddress,bool bConnectEventHandler,
     m_bOrbiterConnected = false;
     initializeGrid();
     setOrbiterSetupVars(0,0,0,0,0,0);
-
+#ifndef for_harmattan
     qRegisterMetaType< QList<ExistingOrbiter*> >("QList<ExistingOrbiter*>");
+#endif
 }
 
 //<-dceag-const2-b->
@@ -4383,7 +4384,7 @@ int qOrbiter::DeviceIdInvalid()
             int i = (int)it->first;
             QString s = QString::fromStdString(it->second);
 
-           temp_orbiter_list->append( new PromptData(QString::fromStdString(it->second),(int)it->first));
+           temp_orbiter_list->append( new ExistingOrbiter((int)it->first,QString::fromStdString(it->second)));
 
             cout << it->first << " " << it->second << endl;
         }

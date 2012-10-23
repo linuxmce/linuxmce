@@ -79,7 +79,7 @@ Rectangle {
             text: srouterip
             font.pixelSize: 12
           //  onTextChanged: setRouterIp(routerip.text)
-            fillColor: style.highlight1
+            //fillColor: style.highlight1
             anchors.verticalCenter: parent.verticalCenter
 
 
@@ -94,7 +94,7 @@ Rectangle {
             text: deviceid
             font.pixelSize: 12
             //onTextChanged: setDeviceNo(devicenumber.text)
-            fillColor: style.highlight1
+            //fillColor: style.highlight1
             anchors.verticalCenter: parent.verticalCenter
 
         }

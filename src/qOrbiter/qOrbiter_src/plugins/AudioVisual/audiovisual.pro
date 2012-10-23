@@ -8,7 +8,7 @@ INCLUDEPATH += ../../../../ ../../../../DCE/
 
 TARGET = $$qtLibraryTarget($$TARGET)
 
-DESTDIR=../../imports/AudioVisual
+DESTDIR=../../imports/AudioVisual-$$QT_VERSION
 
 uri = AudioVisual
 # Input

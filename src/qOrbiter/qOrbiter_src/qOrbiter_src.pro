@@ -99,6 +99,8 @@ DEFINES += for_desktop
 
 plugins_folder.source = imports/
 plugins_folder.target = $$DESTDIR
+
+
 DEPLOYMENTFOLDERS+= plugins_folder
 DEPLOYMENTFOLDERS += folder_01  folder_03 folder_05
 }
@@ -263,7 +265,7 @@ QT+= webkit declarative phonon
 }
 
 QT5{
-QT+= qml quick webkit mobility widgets qtcore
+QT+= webkit mobility widgets qtcore
 }
 
 macx{

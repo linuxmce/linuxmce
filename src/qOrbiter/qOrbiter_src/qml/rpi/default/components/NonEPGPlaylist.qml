@@ -159,7 +159,7 @@ Rectangle {
                     id: save_as
                     text: qsTr("Edit name")
                     anchors.centerIn: parent
-                    fillColor: "white"
+                    //fillColor: "white"
                     onFocusChanged: save_as.text=""
                 }
 

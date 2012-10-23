@@ -22,7 +22,7 @@ Rectangle {
 
     height: appH
     width: appW 
-    color: "transparent"
+    color: "darkslategrey"
 
     Rectangle{
         id:filler
@@ -94,7 +94,7 @@ Rectangle {
                 height:childrenRect.height
                 width:scaleX(30)
                 color: "transparent"
-                anchors.top:parent.top
+
 
                 BorderImage {
                     id: borderimg
@@ -110,16 +110,17 @@ Rectangle {
                     width: dcenowplaying.aspect=="wide"? scaleX(18) : scaleX(18)
                     height:dcenowplaying.aspect=="wide"? scaleY(30) : scaleY(30)
                     source: "image://listprovider/updateobject/"+dcenowplaying.m_iplaylistPosition
-                    anchors.horizontalCenter: parent.horizontalCenter
+
                     smooth: true
+                    Image {
+                        id: npmask
+                        source: "../img/icons/transparencymask.png"
+                        anchors.fill: nowplayingimage
+                        opacity: .5
+                    }
                 }
 
-                Image {
-                    id: npmask
-                    source: "../img/icons/transparencymask.png"
-                    anchors.fill: nowplayingimage
-                    opacity: .5
-                }
+
             }
 
             Rectangle{
@@ -128,9 +129,9 @@ Rectangle {
                 height: childrenRect.height
                 width: scaleX(40)
                 color:"transparent"
-                anchors.left:  imageholder.right;
-                anchors.top:  imageholder.top
-                anchors.bottomMargin: dcenowplaying.aspect == "wide"? 10 : 20
+//                anchors.left:  imageholder.right;
+//                anchors.top:  imageholder.top
+//                anchors.bottomMargin: dcenowplaying.aspect == "wide"? 10 : 20
                 clip:true
                 Column{
                     spacing: scaleY(.5)
@@ -282,8 +283,6 @@ Rectangle {
             }
         }
     }
-
-
 
 }
 

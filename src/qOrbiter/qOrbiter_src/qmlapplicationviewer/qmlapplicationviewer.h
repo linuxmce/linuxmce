@@ -55,7 +55,9 @@ public:
 private:
     class QmlApplicationViewerPrivate *d;
 };
-
+#ifdef QT5
 QGuiApplication *createApplication(int &argc, char **argv);
-
+#else
+QApplication *createApplication(int &argc, char **argv);
+#endif
 #endif // QMLAPPLICATIONVIEWER_H

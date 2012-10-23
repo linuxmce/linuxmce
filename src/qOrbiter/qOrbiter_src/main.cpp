@@ -41,7 +41,6 @@ Q_IMPORT_PLUGIN(UIKit)
 #else
 #include <QApplication>
 #include <QtDeclarative/QDeclarativeEngine>
-
 #endif
 
 #include <datamodels/listModel.h>
@@ -62,10 +61,6 @@ Q_IMPORT_PLUGIN(UIKit)
 #ifdef debug
 #include <QDebug>
 #endif
-
-//these includes will be made into plugins
-#include "plugins/GoogleWeather/googleweather.h"
-
 
 //--end includes to be made plugins
 
@@ -173,17 +168,20 @@ int main(int argc, char* argv[])
 #else
     QApplication::setGraphicsSystem("raster");
 #endif
+
 #endif
 #if(QT_VERSION >= 0x040800)
-
     Qt::AA_X11InitThreads;
-
 #endif
 
-
-
+#ifdef QT5
     QGuiApplication  a(argc, argv);
+#else
+    QApplication  a(argc, argv);
+#endif
+
     QCoreApplication::setApplicationName("LinuxMCE QOrbiter");
+
 #ifdef __ANDROID__ // workaround for 'text as boxes' issue.
     QFont f = a.font();
     f.setFamily("Droid Sans");
@@ -193,14 +191,11 @@ int main(int argc, char* argv[])
 
     g_sBinary = FileUtils::FilenameWithoutPath(argv[0]);
     g_sBinaryPath = FileUtils::BasePath(argv[0]);
-
     cout << "qOrbiter, v." << VERSION << endl
          << "Visit www.linuxmce.org for source code and license information" << endl << endl;
-
     string sRouter_IP="192.168.80.1";
     int PK_Device;
     string sLogger="stdout";
-
     bool bLocalMode=false,bError=false; // An error parsing the command line
     char c;
     for(int optnum=1;optnum<argc;++optnum)
@@ -269,25 +264,19 @@ int main(int argc, char* argv[])
             LoggerWrapper::SetType(LT_LOGGER_NULL);
         else if( sLogger!="stdout" )
             LoggerWrapper::SetType(LT_LOGGER_FILE,sLogger);
-
     }
     catch(...)
     {
         cerr << "Unable to create logger" << endl;
     }
-
-
     bool bAppError=false;
     bool bReload=false;
-
     try
-    {
-        /*
-          move main pqOrbiter initialization here.
-          */
+    {   
 #ifdef IOS
         //        NSAutoreleasePool * pool = [[NSAutoreleasePool alloc] init];
 #endif
+
 #if GLENABLED
         bool glpresent= true;
 #else
@@ -298,15 +287,15 @@ int main(int argc, char* argv[])
         qOrbiter *pqOrbiter = new qOrbiter(PK_Device, sRouter_IP,true,bLocalMode );
         orbiterWindow orbiterWin(-1, "192.168.80.1");
         orbiterWin.mainView.rootContext()->setContextProperty("dcerouter", pqOrbiter); //dcecontext object
+
 #ifndef RPI
         pqOrbiter->moveToThread(dceThread);
 #endif
-       // gWeatherModel *theWeather= new gWeatherModel(new gWeatherItem);
+
         typedef QMap <int, QString> myMap;
         int throwaway = qRegisterMetaType<myMap>("myMap");
 
         orbiterWin.setMessage("Setting up Lmce");
-
         qorbiterManager  *w= new qorbiterManager(&orbiterWin.mainView);
         AbstractImageProvider *modelimageprovider = new AbstractImageProvider(w);
         orbiterWin.mainView.engine()->addImageProvider("listprovider", modelimageprovider);
@@ -337,16 +326,13 @@ int main(int argc, char* argv[])
 
         TimeCodeManager *timecode = new TimeCodeManager();
         orbiterWin.mainView.rootContext()->setContextProperty("dceTimecode", timecode);
-
-
         orbiterWin.mainView.rootContext()->setContextProperty("dataModel", mediaModel);
         orbiterWin.mainView.rootContext()->setContextProperty("mediaplaylist", storedVideoPlaylist);
         orbiterWin.mainView.rootContext()->setContextProperty("simpleepg", simpleEPGmodel);
         orbiterWin.mainView.rootContext()->setContextProperty("opengl", glpresent);
-        //orbiterWin.mainView.rootContext()->setContextProperty("GoogleWeather", theWeather);
+
 
         //shutdown signals
-
         QObject::connect(w, SIGNAL(orbiterClosing()), dceThread, SLOT(quit()),Qt::QueuedConnection);
         QObject::connect(w, SIGNAL(orbiterClosing()), mediaThread, SLOT(quit()),Qt::QueuedConnection);
         QObject::connect(w, SIGNAL(orbiterClosing()), epgThread, SLOT(quit()),Qt::QueuedConnection);
@@ -354,7 +340,6 @@ int main(int argc, char* argv[])
 
         //tv epg signals
         QObject::connect(pqOrbiter, SIGNAL(addChannel(EPGItemClass*)), simpleEPGmodel, SLOT(appendRow(EPGItemClass*)), Qt::QueuedConnection );
-
 
         //security video frames
         QObject::connect(w, SIGNAL(getSingleCam(int,int,int)), pqOrbiter, SLOT(GetSingleSecurityCam(int,int,int)));
@@ -538,10 +523,9 @@ int main(int argc, char* argv[])
         QObject::connect(pqOrbiter, SIGNAL(closeOrbiter()), w, SLOT(closeOrbiter()),Qt::QueuedConnection);
         QObject::connect(w, SIGNAL(resendDeviceCode(int,int)), pqOrbiter, SLOT(sendAvCommand(int,int)), Qt::QueuedConnection);
 
-
         QObject::connect(pqOrbiter,SIGNAL(routerReloading(QString)), w, SLOT(reloadHandler()) );
         //FIXME: below emits error: QObject::connect: Attempt to bind non-signal orbiterWindow::close()
-        QObject::connect(&orbiterWin, SLOT(close()), w, SLOT(closeOrbiter()), Qt::DirectConnection);
+        //QObject::connect(w,SIGNAL, w, SLOT(closeOrbiter()), Qt::DirectConnection);
         QObject::connect(w, SIGNAL(reloadRouter()), pqOrbiter, SLOT(quickReload()), Qt::QueuedConnection);
         QObject::connect(pqOrbiter, SIGNAL(routerDisconnect()), w, SLOT(reloadHandler()),Qt::QueuedConnection);
         QObject::connect(pqOrbiter, SIGNAL(checkReload()), w, SLOT(connectionWatchdog()), Qt::QueuedConnection);

@@ -28,7 +28,13 @@ PlaylistClass::~PlaylistClass() {
     delete m_prototype;
     clear();
 }
+#ifdef QT5
 
+QHash<int, QByteArray> PlaylistClass::roleNames() const
+{
+    return m_prototype->roleNames();
+}
+#endif
 void PlaylistClass::appendRow(PlaylistItemClass *item)
 {
     appendRows(QList<PlaylistItemClass*>() << item);

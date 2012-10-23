@@ -14,7 +14,7 @@
 #endif
 #include <QVariant>
 
-#if GLENABLED
+#if defined (GLENABLED) || (QT5)
 #include <QtOpenGL/QGLWidget>
 #include <shaders/filereader.h>
 #endif
@@ -48,10 +48,10 @@ public:
     QString buildType;
     QString qrcPath;
     std::string router;
-    QList<QObject*> orbiterList;
+    QList<ExistingOrbiter*> orbiterList;
     QList<QObject*> userList;
     QList<QObject*> roomList;
-#if GLENABLED
+#if defined (GLENABLED) || (QT5)
     QGLWidget *glWidget;
     FileReader *fileReader;
 #endif

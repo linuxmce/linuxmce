@@ -82,12 +82,9 @@ orbiterWindow::orbiterWindow(long deviceid, std::string routerip, QObject *paren
     mainView.rootContext()->setContextProperty("rooms", QVariant::fromValue(roomList));
     mainView.rootContext()->setContextProperty("localPath", localPath);
 
-#ifdef GLENABLED
+#if defined (GLENABLED) || (QT5)
     fileReader = new FileReader();
-     mainView.rootContext()->setContextProperty("fileReader", fileReader);
-    //uncomment these for_Pi
-    //fileReader = new FileReader;
-    //qorbiterUIwin->rootContext()->setContextProperty("fileReader", fileReader);
+     mainView.rootContext()->setContextProperty("fileReader", fileReader);    
 #endif
 
 #if (QT5)
@@ -288,9 +285,8 @@ void orbiterWindow::setDeviceState(bool b)
 
 void orbiterWindow::prepareExistingOrbiters(QList<QObject*> ex_list)
 {
-
-
-    mainView.rootContext()->setContextProperty("orbiterList", QVariant::fromValue(ex_list));
+    QList<QObject*> t = ex_list;
+    mainView.rootContext()->setContextProperty("orbiterList", QVariant::fromValue(t));
   emit showList();
 }
 

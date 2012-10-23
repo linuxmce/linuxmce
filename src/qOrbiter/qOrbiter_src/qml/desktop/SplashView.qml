@@ -313,7 +313,7 @@ Rectangle {
 
                 Text {
                     id: orbiter_label
-                    text: qsTr("Orbiter:")+ label
+                    text: qsTr("Orbiter:")+ location
                     font.pixelSize: 12
                     wrapMode: Text.WrapAtWordBoundaryOrAnywhere
                 }
