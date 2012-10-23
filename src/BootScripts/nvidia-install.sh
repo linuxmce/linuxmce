@@ -127,7 +127,7 @@ getVDPAUSupport() {
 		return 1
 	esac
 	case " $VDPAU_Rev_C_Supported " in *" $PCI_Id "*)
-	       echo "C"
+		echo "C"
 		return 1
 	esac
 	case " $VDPAU_Rev_D_Supported " in *" $PCI_Id "*)
