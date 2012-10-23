@@ -1,3 +1,5 @@
+</etc/pluto/alsa/virtual_cards.conf>
+
 pcm_slave.spdif_convert48k {
 	pcm "spdif:%MAIN_CARD%"
 	rate 48000
@@ -34,4 +36,51 @@ pcm.asym_analog {
 	type asym
 	playback.pcm "plug:dmix:%MAIN_CARD%"
 	capture.pcm "plughw:%MAIN_CARD%"
+}
+
+pcm.!hdmi {
+	@args [ AES0 AES1 AES2 AES3 ]
+	@args.AES0 {
+		type integer
+		# consumer, not-copyright, emphasis-none, mode=0
+		default 0x04
+	}
+	@args.AES1 {
+		type integer
+		# original, PCM coder
+		default 0x00
+	}
+	@args.AES2 {
+		type integer
+		# source and channel
+		default 0x00
+	}
+	@args.AES3 {
+		type integer
+		# fs=48000Hz, clock accuracy=1000ppm
+		default 0x00
+	}
+	type hooks
+	slave.pcm {
+		type hw
+		card %HWONLY_CARD%
+		device %SOUND_DEVICE%
+	}
+	hooks.0 {
+		type ctl_elems
+		hook_args [
+		{
+			name "IEC958 Playback Default"
+			lock true
+			preserve true
+			value [ $AES0 $AES1 $AES2 $AES3 ]
+		}
+		{
+			name "IEC958 Playback Switch"
+			lock true
+			preserve true
+			value true
+		}
+		]
+	}
 }

@@ -266,7 +266,6 @@ installCorrectNvidiaDriver() {
 		ConfSet AVWizardOverride 1
 		beep -l 100 -f 500 -d 50 -r 3
 		sleep 2
-		
 		reboot
 	fi
 }

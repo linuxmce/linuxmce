@@ -21,7 +21,6 @@ DEVICEDATA_Channel_Right="312"
 DEVICEDATA_Channel="81"
 DEVICEDATA_Sampling_Rate="310"
 SettingsFile="/etc/pluto/lastaudiovideo.conf"
-
 # don't let KDE override xorg.conf
 rm -f {/home/*,/root}/.kde/share/config/displayconfigrc
 
@@ -33,7 +32,7 @@ XineConf_Override="$3"
 ComputerDev=$(FindDevice_Category "$PK_Device" "$DEVICECATEGORY_Media_Director" '' 'include-parent')
 OrbiterDev=$(FindDevice_Template "$ComputerDev" "$DEVICETEMPLATE_OnScreen_Orbiter")
 VideoCardDev=$(FindDevice_Category "$ComputerDev" "$DEVICECATEGORY_Video_Cards")
-Yalpa=$(aplay -l)
+AsoundConf="/usr/pluto/templates/asound.conf"
 
 if [[ -z "$VideoCardDev" ]]; then
 	VideoCardDev=$(FindDevice_Category "$PK_Device" "$DEVICECATEGORY_Video_Cards")
@@ -102,10 +101,8 @@ SaveSettings()
 Setup_VirtualCards()
 {
 	local Q R
-
 	mkdir -p /etc/pluto/alsa
 	local Vfile=/etc/pluto/alsa/virtual_cards.conf
-
 	local Devices=$(FindDevice_Template "$PK_Device" "$DEVICETEMPLATE_Stereo_virtual_sound_card" "" "" all)
 	local Dev ParentDev SoundCard
 	local Channel_Left Channel_Right
@@ -196,31 +193,36 @@ Setup_AsoundConf()
 	case "$AudioSetting" in
 		*[CO]*)
 			CardDevice=$(grep -i "digital" <<< "$Yalpa" | grep -wo "device ." | awk '{print $2}')
-		;;
+			;;
 		*H*)
 			CardDevice=$(grep -i "hdmi" <<< "$Yalpa" | grep -wo "device ." | awk '{print $2}')
 			if [[ $(wc -l <<< "$CardDevice") -gt "3" ]]; then
+				AsoundConf="/usr/pluto/template/asound.conf.backup"
 				if grep "7" <<< "$CardDevice"; then
 					CardDevice="7"
+					AsoundConf="/usr/pluto/template/asound.conf.backup"
+					SoundCard="${SoundCard},${CardDevice}"
 				fi
 			fi
-		;;
+			;;
 		*)
 			CardDevice=$(grep -i "analog" <<< "$Yalpa" | grep -wo "device ." | awk '{print $2}')
-		;;
+			;;
 	esac
-	if [[ "$AlternateSC" != "1" ]]; then
+
+	if [[ "$AlternateSC" == "1" ]]; then
 		SoundCard="${SoundCard},${CardDevice}"
+	fi
+	if [[ "$AlternateSC" == "2" ]]; then
+		SoundCard="${SoundCard},${CardDevice}"
+		AsoundConfig="/usr/pluto/templates/asound.conf.backup"
 	fi
 
 	local DigitalPlaybackCard="plughw:${SoundCard}"
 	local AnalogPlaybackCard="plug:dmix:${SoundCard}"
 
-	if [[ "$AlternateSC" != "1" ]]; then
-		sed -r "s#%MAIN_CARD%#$SoundCard#g; s#%HWONLY_CARD%#$HWOnlyCard#; s#%SOUND_DEVICE%#$CardDevice#g; s#%ANALOG_PLAYBACK_CARD%#$AnalogPlaybackCard#g" /usr/pluto/templates/asound.conf >/etc/asound.conf
-	else
-		sed -r "s#%MAIN_CARD%#$SoundCard#g; s#%ANALOG_PLAYBACK_CARD%#$AnalogPlaybackCard#g" /usr/pluto/templates/asound.conf >/etc/asound.conf.backup
-	fi
+	sed -r "s#%MAIN_CARD%#$SoundCard#g; s#%HWONLY_CARD%#$HWOnlyCard#; s#%SOUND_DEVICE%#$CardDevice#g; s#%ANALOG_PLAYBACK_CARD%#$AnalogPlaybackCard#g" "$AsoundConf" > /etc/asound.conf
+
 	case "$AudioSetting" in
 		*[CO]*)
 			# audio setting is Coaxial or Optical, i.e. S/PDIF
@@ -237,7 +239,7 @@ Setup_AsoundConf()
 	esac
 
 	Setup_XineConf "$AudioSetting" "$DigitalPlaybackCard" "$AnalogPlaybackCard"
-	alsa force-reload
+	/usr/pluto/bin/RestartALSA.sh
 }
 
 Setup_XineConf()
@@ -267,8 +269,9 @@ Setup_XineConf()
 		*3*)
 			echo ""
 			;;
-		
-		*)	XineConfSet audio.output.speaker_arrangement 'Stereo 2.0' "$XineConf"
+
+		*)
+			XineConfSet audio.output.speaker_arrangement 'Stereo 2.0' "$XineConf"
 			sed -i '/audio\.device\.alsa_passthrough_device.*/d' "$XineConf"
 			;;
 	esac
