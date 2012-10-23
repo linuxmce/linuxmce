@@ -127,30 +127,40 @@ void ListModel::handleItemChange()
 void ListModel::reset()
 {
     clearing = true;
+    QApplication::processEvents(QEventLoop::AllEvents);
     emit modelAboutToBeReset();
     beginResetModel();
-    setProgress(0.0);
     resetInternalData();
-    //qDeleteAll(m_list);
+    setProgress(0.0);
+    QApplication::processEvents(QEventLoop::AllEvents);
     endResetModel();
     emit modelReset();
-    clearing = false;
 
+    QApplication::processEvents(QEventLoop::AllEvents);
+   clearing = false;
 }
 
-void ListModel::beginResetModel()
-{
-}
+//void ListModel::beginResetModel()
+//{
+//    emit modelAboutToBeReset();
+//    for (int i = 0; i < m_list.count(); i++)
+//    {
+//        m_list.removeAt(i);
+//    }
+//    endResetModel();
+//}
 
-void ListModel::endResetModel()
-{
-}
+//void ListModel::endResetModel()
+//{
+//    m_list.clear();
+//    emit modelReset();
+//}
 
 void ListModel::resetInternalData()
 {
 
-    qDeleteAll(m_list.begin(), m_list.end());
-    m_list.clear();
+  m_list.clear();
+    //emit dataChanged(QModelIndex(),QModelIndex(), 0);
 }
 
 gridItem * ListModel::find(const QString &id) const
@@ -195,13 +205,16 @@ QModelIndex ListModel::indexFromItem(const gridItem *item) const
 void ListModel::clear()
 {
     clearing = true;
+    QApplication::processEvents(QEventLoop::AllEvents);
     emit modelAboutToBeReset();
     beginResetModel();
-    setProgress(0.0);
     resetInternalData();
-    //qDeleteAll(m_list);
+    setProgress(0.0);
+    QApplication::processEvents(QEventLoop::AllEvents);
     endResetModel();
     emit modelReset();
+
+    QApplication::processEvents(QEventLoop::AllEvents);
     clearing = false;
 
 }
@@ -329,13 +342,16 @@ void ListModel::clearAndRequest(int type)
 {
     clearing = true;
     gridType = type;
+    QApplication::processEvents(QEventLoop::AllEvents);
     emit modelAboutToBeReset();
     beginResetModel();
-    setProgress(0.0);
     resetInternalData();
-    //qDeleteAll(m_list);
+    setProgress(0.0);
+    QApplication::processEvents(QEventLoop::AllEvents);
     endResetModel();
     emit modelReset();
+
+    QApplication::processEvents(QEventLoop::AllEvents);
     clearing = false;
     emit ready(gridType);
 

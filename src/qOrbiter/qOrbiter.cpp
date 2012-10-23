@@ -59,7 +59,7 @@ qOrbiter::qOrbiter(int DeviceID, string ServerAddress,bool bConnectEventHandler,
     i_current_mediaType = 0;
     i_current_floorplanType = 0;
     setCurrentPage(0);
-
+    modelPages = 0;
     media_currentPage=0;
     media_pos=0;
     media_seek="";
@@ -4671,19 +4671,11 @@ void DCE::qOrbiter::prepareFileList(int iPK_MediaType)
             {
                 emit gridModelSizeChange(pDataGridTable->GetRows());
 
-                i_mediaModelRows = cellsToRender;
-#ifndef RPI
-                QList <QObject*> modelPages;
-                media_totalPages = (i_mediaModelRows / media_pageSeperator); //16 being the items per page.
+                i_mediaModelRows = cellsToRender;               
+                media_totalPages = (i_mediaModelRows / media_pageSeperator); //16 being the items per page.                
+                setModelPages(media_totalPages);
 
-                for (int i=0; i < (media_totalPages)+1; i++)
-                {
-                    modelPage * item = new modelPage(i, QString::number(i));
-                    modelPages.append(item);
-                }
 
-                emit modelPageCount(modelPages);
-#endif
                 //qDebug() << cellsToRender << " Cells converted to " << modelPages.count() ;
 
 

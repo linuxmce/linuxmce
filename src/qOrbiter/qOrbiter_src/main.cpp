@@ -286,12 +286,10 @@ int main(int argc, char* argv[])
         QThread *dceThread = new QThread;
         qOrbiter *pqOrbiter = new qOrbiter(PK_Device, sRouter_IP,true,bLocalMode );
         orbiterWindow orbiterWin(-1, "192.168.80.1");
-        orbiterWin.mainView.rootContext()->setContextProperty("dcerouter", pqOrbiter); //dcecontext object
 
-#ifndef RPI
-        pqOrbiter->moveToThread(dceThread);
-#endif
 
+
+orbiterWin.mainView.rootContext()->setContextProperty("dcerouter", pqOrbiter); //dcecontext object
         typedef QMap <int, QString> myMap;
         int throwaway = qRegisterMetaType<myMap>("myMap");
 
@@ -531,9 +529,13 @@ int main(int argc, char* argv[])
         QObject::connect(pqOrbiter, SIGNAL(checkReload()), w, SLOT(connectionWatchdog()), Qt::QueuedConnection);
         QObject::connect(w, SIGNAL(reInitialize()), pqOrbiter, SLOT(initialize()), Qt::QueuedConnection);
 
+        #ifndef RPI
+                pqOrbiter->moveToThread(dceThread);
+                 dceThread->start();
+        #endif
 #ifndef RPI
 
-        dceThread->start();
+
         // tcThread->start();
         mediaThread->start();
         epgThread->start();

@@ -126,7 +126,7 @@ Rectangle {
                 width: scaleX(20);
                 height: scaleY(20)
                 color: "transparent"
-                opacity: 0
+
                 scale:0
                 rotation: 360
 
@@ -148,9 +148,9 @@ Rectangle {
                 ParallelAnimation {
                     id:fade_and_scale
                     running: false
-                    PropertyAnimation { target: mainItem; property: "opacity"; to: 1; duration: 1000}
+                    //PropertyAnimation { target: mainItem; property: "opacity"; to: 1; duration: 1000}
                     PropertyAnimation { target: mainItem; property: "scale"; to: 1; duration: 500}
-                    PropertyAnimation { target: mainItem; property: "rotation"; to: 0; duration: 500}
+                   // PropertyAnimation { target: mainItem; property: "rotation"; to: 0; duration: 500}
 
                 }
 
@@ -163,14 +163,7 @@ Rectangle {
                     height: scaleY(19)
                     anchors.centerIn: mainItem
                     clip:true
-                    color: "transparent"
-
-                    MouseArea
-                    {
-                        anchors.fill: frame
-                        onClicked: {dcerouter.setStringParam(4, id); mouselocX = mouseX; mouselocY = mouseY}
-
-                    }
+                    color: "transparent"                   
 
                     BorderImage {
                         id: borderimg
@@ -215,6 +208,15 @@ Rectangle {
                         anchors.top: imagerect.top
                         anchors.horizontalCenter: imagerect.horizontalCenter
                     }
+                }
+                MouseArea
+                {
+                    anchors.fill: frame
+                    onClicked: {dcerouter.setStringParam(4, id);
+                        console.log("clicked "+id)
+                        // mouselocX = mouseX; mouselocY = mouseY
+                    }
+
                 }
             }
         }
@@ -278,7 +280,7 @@ Rectangle {
             id:model_pages
             height: appH
             width: scaleX(10)
-            model: pageList
+            model: dcerouter.modelPages
             anchors.left: parent.left
             delegate: Rectangle{
                 height: scaleY(10)
@@ -286,10 +288,10 @@ Rectangle {
                 color: "transparent"
                 Text {
                     id:page_label2
-                    text: label
+                    text: index
                     font.pixelSize: scaleY(3.5)
                     anchors.centerIn: parent
-                    color: label == dcerouter.media_currentPage ? "green":"slategrey"
+                    color: index == dcerouter.media_currentPage ? "green":"slategrey"
                     font.bold: true
                 }
 

@@ -278,7 +278,7 @@ Rectangle {
             id:model_pages
             height: appH
             width: scaleX(10)
-            model: pageList
+            model: dcerouter.modelPages
             anchors.left: parent.left
             delegate: Rectangle{
                 height: scaleY(10)
@@ -286,10 +286,10 @@ Rectangle {
                 color: "transparent"
                 Text {
                     id:page_label2
-                    text: label
+                    text: index
                     font.pixelSize: scaleY(3.5)
                     anchors.centerIn: parent
-                    color: label == dcerouter.media_currentPage ? "green":"slategrey"
+                    color: index == dcerouter.media_currentPage ? "green":"slategrey"
                     font.bold: true
 
                 }

@@ -324,13 +324,13 @@ Rectangle {
 
                 Text {
                     id: orbiter_label
-                    text: qsTr("Orbiter:")+ dataTitle
+                    text: qsTr("Orbiter:")+ location
                     font.pointSize: 12
                     wrapMode: Text.WrapAtWordBoundaryOrAnywhere
                 }
                 Text {
                     id: dev_num
-                    text:qsTr("Device:")+ data_id
+                    text:qsTr("Device:")+ i_device_number
                     font.pointSize: 12
                     font.italic: true
                     wrapMode: Text.WrapAtWordBoundaryOrAnywhere
@@ -338,7 +338,7 @@ Rectangle {
             }
             MouseArea {
                 anchors.fill: parent
-                onClicked: window.qmlSetupLmce(data_id, routerip.text)
+                onClicked: window.qmlSetupLmce(i_device_number, routerip.text)
             }
         }
     }

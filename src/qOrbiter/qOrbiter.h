@@ -71,6 +71,7 @@ class qOrbiter : public qOrbiter_Command
 
     Q_PROPERTY (int media_pageSeperator READ getGridSeperator WRITE setGridSeperator NOTIFY newPageSeperator )
     Q_PROPERTY (int media_currentPage READ getCurrentPage WRITE setCurrentPage NOTIFY mediaPageChanged)
+    Q_PROPERTY (int modelPages READ getModelPages WRITE setModelPages NOTIFY modelPagesChanged)
     Q_PROPERTY (int i_current_mediaType READ getMediaType WRITE setMediaType NOTIFY mediaTypeChanged)
     Q_PROPERTY (bool discreteAudio READ getDiscreteAudio WRITE setDiscreteAudio NOTIFY discreteAudioChanged )
     Q_PROPERTY (bool m_bContainsVideo READ getContainsVideo WRITE setContainsVideo NOTIFY containsVideo())
@@ -137,6 +138,7 @@ public:
     int media_currentPage;
     int media_pos;
     int media_pageSeperator;
+    int modelPages;
     string media_seek;
 
     bool pause;
@@ -1310,6 +1312,7 @@ signals:
     void screenShotReady(QImage data);
     void waitForScreenShot(char picData, int picDataSize, string fileFormat);
     void videoGrabReady(QImage grab);
+    void modelPagesChanged();
 
     void screenSaverImages(QStringList images);
     void objectUpdate(QImage bytes);
@@ -1463,6 +1466,8 @@ signals:
     void DCEHostChanged();
 
 public slots:
+    void setModelPages(int p) {modelPages = p; emit modelPagesChanged();}
+    int getModelPages() {return modelPages;}
 
     void setdceIP(QString ip) {dceIP = ip; emit dceIPChanged();}
     QString getdceIP() {return dceIP;}
