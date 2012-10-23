@@ -146,6 +146,7 @@ checkAlsaBackportNeeds() {
 			;;
 		esac
 	fi
+
 	if [[ -z $alsa_backports ]]; then
 		case " $Backports_Required " in *" $PCI_Id "*)
 			Log "$LogFile" "Alsa backports being installed."
