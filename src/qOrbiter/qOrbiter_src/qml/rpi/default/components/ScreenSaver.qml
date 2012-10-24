@@ -1,6 +1,6 @@
 import QtQuick 2.0
 //import Qt.labs.shaders 1.0
-//import "../effects"
+import "../effects"
 
 Rectangle {
     id:ssholder
@@ -10,18 +10,16 @@ Rectangle {
 
     function changeStuff()
     {
+        console.log("Pic Change")
         lower.running =true
         animation_section2.running = false
     }
 
     function changePic()
     {
-
-
             ssimg.source = "image://listprovider/screensaver/"+securityvideo.timestamp
             raise.running = true
-            animation_section2.running = true
-
+            //animation_section2.running = true
     }
 
     function startZoom()
@@ -81,28 +79,28 @@ Rectangle {
         }
     }
 */
-    EffectGaussianBlur{
-        id: blur
-        anchors.fill: ssimg
-        divider: false
-        dividerValue: 1
-        opacity: 1
-        radius: 0.75
-        targetHeight: ssimg.height
-        targetWidth: ssimg.width
-        source: ShaderEffectSource { sourceItem: ssimg; hideSource: true }
-    }
+//    EffectGaussianBlur{
+//        id: blur
+//        anchors.fill: ssimg
+//        divider: false
+//        dividerValue: 1
+//        opacity: 1
+//        radius: 0.75
+//        targetHeight: ssimg.height
+//        targetWidth: ssimg.width
+//        source: ShaderEffectSource { sourceItem: ssimg; hideSource: true }
+//    }
 
-    SequentialAnimation{
-        id:animation_section2
+//    SequentialAnimation{
+//        id:animation_section2
 
-        running: false
-        PropertyAnimation { target: blur; property: "radius"; to: 0.75; duration: 250}
-        // PropertyAnimation {target: blur; property: "opacity"; to:0 ; duration: 1000 }
-        PropertyAnimation { target: blur; property: "radius"; to: 0.0; duration: 2000}
-        //  PropertyAnimation {target: blur; property: "opacity"; to:1 ; duration: 1000 }
-        PauseAnimation { duration: 5500 }
-        PropertyAnimation { target: blur; property: "radius"; to: 0.75; duration: 1000}
-        // PropertyAnimation { target: blur; property: "radius"; to: .5; duration: 5000}
-    }
+//        running: false
+//        PropertyAnimation { target: blur; property: "radius"; to: 0.75; duration: 250}
+//        // PropertyAnimation {target: blur; property: "opacity"; to:0 ; duration: 1000 }
+//        PropertyAnimation { target: blur; property: "radius"; to: 0.0; duration: 2000}
+//        //  PropertyAnimation {target: blur; property: "opacity"; to:1 ; duration: 1000 }
+//        PauseAnimation { duration: 5500 }
+//        PropertyAnimation { target: blur; property: "radius"; to: 0.75; duration: 1000}
+//        // PropertyAnimation { target: blur; property: "radius"; to: .5; duration: 5000}
+//    }
 }

@@ -131,7 +131,11 @@ orbiterWindow::orbiterWindow(long deviceid, std::string routerip, QObject *paren
     mainView.rootContext()->setContextProperty("srouterip", QString::fromStdString(router));
 
 #ifdef for_desktop
+#ifndef QT5
     buildType = "/qml/desktop";
+ #else
+    buildType = "/qml/rpi";
+#endif
     qrcPath = buildType+"/Splash.qml";
     localPath = "desktop/";
 #elif defined (for_freemantle)

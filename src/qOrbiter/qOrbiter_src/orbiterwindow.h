@@ -10,10 +10,10 @@
 #else
 #include <QtDeclarative/QDeclarativeView>
 #include <QtDeclarative/QDeclarativeContext>
-#include <qmlapplicationviewer.h>
+
 #endif
 #include <QVariant>
-
+#include <qmlapplicationviewer.h>
 #if defined (GLENABLED) || (QT5)
 #include <QtOpenGL/QGLWidget>
 #include <shaders/filereader.h>
@@ -40,11 +40,8 @@ public:
     //public members
 
     QString message;
-#if (QT5)
-    QQuickView  mainView;
-#else
     QmlApplicationViewer  mainView;
-#endif
+
     QString buildType;
     QString qrcPath;
     std::string router;
@@ -131,7 +128,6 @@ signals:
     void reloadStatusChanged();
     void newOrbiterData(int u, int r, int s, int l, int h, int w);
     void pageChanged();
-
 };
 #endif
 

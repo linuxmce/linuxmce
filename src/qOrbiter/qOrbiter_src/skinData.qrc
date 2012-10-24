@@ -7,7 +7,6 @@
     <qresource prefix="/main">
         <file>config.xml</file>
         <file>qml/desktop/SetupNewOrbiter.qml</file>
-        <file alias="Splash.qml">qml/Splash.qml</file>
     </qresource>
     <qresource prefix="/desktop"/>
     <qresource prefix="/osx">

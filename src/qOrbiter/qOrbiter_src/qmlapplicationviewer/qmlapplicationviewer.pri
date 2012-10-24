@@ -5,7 +5,7 @@
 # It is recommended not to modify this file, since newer versions of Qt Creator
 # may offer an updated version of it.
 
-contains(QT_VERSION,5.0.*) {
+contains(QT_VERSION,5.*.*) {
     QT += qml quick
 } else {
     QT += declarative

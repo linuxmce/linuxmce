@@ -283,13 +283,14 @@ int main(int argc, char* argv[])
         bool glpresent = false;
 #endif
 
+#ifndef QT5
         QThread *dceThread = new QThread;
+#endif
+
         qOrbiter *pqOrbiter = new qOrbiter(PK_Device, sRouter_IP,true,bLocalMode );
         orbiterWindow orbiterWin(-1, "192.168.80.1");
 
-
-
-orbiterWin.mainView.rootContext()->setContextProperty("dcerouter", pqOrbiter); //dcecontext object
+        orbiterWin.mainView.rootContext()->setContextProperty("dcerouter", pqOrbiter); //dcecontext object
         typedef QMap <int, QString> myMap;
         int throwaway = qRegisterMetaType<myMap>("myMap");
 
@@ -297,28 +298,30 @@ orbiterWin.mainView.rootContext()->setContextProperty("dcerouter", pqOrbiter); /
         qorbiterManager  *w= new qorbiterManager(&orbiterWin.mainView);
         AbstractImageProvider *modelimageprovider = new AbstractImageProvider(w);
         orbiterWin.mainView.engine()->addImageProvider("listprovider", modelimageprovider);
-
+#ifndef QT5
         QThread *epgThread = new QThread; //for playlists and epg of all types. only one will be active a given time inthe app
+#endif
         //stored video playlist for managing any media that isnt live broacast essentially
         PlaylistClass *storedVideoPlaylist = new PlaylistClass (new PlaylistItemClass);
 
-        //storedVideoPlaylist->moveToThread(dceThread);
-
         //epg listmodel, no imageprovider as of yet
         EPGChannelList *simpleEPGmodel = new EPGChannelList(new EPGItemClass);
-#ifndef RPI
+#ifndef QT5
         simpleEPGmodel->moveToThread(dceThread);
 #endif
 
+#ifndef QT5
         QThread * mediaThread = new QThread();
+#endif
+
         ListModel *mediaModel = new ListModel(new gridItem);
-#ifndef RPI
+#ifndef QT5
         mediaModel->moveToThread(mediaThread);
 #endif
         GridIndexProvider * advancedProvider = new GridIndexProvider(mediaModel , 6, 4);
         orbiterWin.mainView.engine()->addImageProvider("datagridimg", advancedProvider);
 
-   #ifndef RPI
+   #ifndef QT5
         advancedProvider->moveToThread(mediaThread);
 #endif
 
@@ -330,12 +333,15 @@ orbiterWin.mainView.rootContext()->setContextProperty("dcerouter", pqOrbiter); /
         orbiterWin.mainView.rootContext()->setContextProperty("opengl", glpresent);
 
 
+#ifndef QT5
         //shutdown signals
         QObject::connect(w, SIGNAL(orbiterClosing()), dceThread, SLOT(quit()),Qt::QueuedConnection);
         QObject::connect(w, SIGNAL(orbiterClosing()), mediaThread, SLOT(quit()),Qt::QueuedConnection);
         QObject::connect(w, SIGNAL(orbiterClosing()), epgThread, SLOT(quit()),Qt::QueuedConnection);
         QObject::connect(dceThread, SIGNAL(finished()), &a, SLOT(quit()),Qt::QueuedConnection);
-
+#else
+        QObject::connect(w, SIGNAL(orbiterClosing()), &a, SLOT(quit()));
+#endif
         //tv epg signals
         QObject::connect(pqOrbiter, SIGNAL(addChannel(EPGItemClass*)), simpleEPGmodel, SLOT(appendRow(EPGItemClass*)), Qt::QueuedConnection );
 
@@ -378,7 +384,9 @@ orbiterWin.mainView.rootContext()->setContextProperty("dcerouter", pqOrbiter); /
         //setup
         QObject::connect(w, SIGNAL(registerOrbiter(int,QString,int)), pqOrbiter,SLOT(registerDevice(int,QString,int)),Qt::QueuedConnection);
         QObject::connect(pqOrbiter,SIGNAL(startManager(QString,QString)), w, SLOT(qmlSetupLmce(QString,QString)),Qt::QueuedConnection);
-        QObject::connect(pqOrbiter, SIGNAL(deviceInvalid(QList<QObject*>)), &orbiterWin,SLOT(prepareExistingOrbiters(QList<QObject*>)),Qt::QueuedConnection);
+
+        QObject::connect(pqOrbiter, SIGNAL(deviceInvalid(QList<QObject*>)), &orbiterWin,SLOT(prepareExistingOrbiters(QList<QObject*>)), Qt::AutoConnection);
+
         QObject::connect(pqOrbiter,SIGNAL(routerInvalid()), &orbiterWin, SIGNAL(showExternal()),Qt::QueuedConnection);
         QObject::connect(pqOrbiter, SIGNAL(connectionValid(bool)), &orbiterWin, SLOT(setConnectionState(bool)), Qt::QueuedConnection);
         QObject::connect(&orbiterWin,SIGNAL(setupLmce(QString,QString)), pqOrbiter, SLOT(qmlSetup(QString,QString)),Qt::QueuedConnection);
@@ -529,17 +537,14 @@ orbiterWin.mainView.rootContext()->setContextProperty("dcerouter", pqOrbiter); /
         QObject::connect(pqOrbiter, SIGNAL(checkReload()), w, SLOT(connectionWatchdog()), Qt::QueuedConnection);
         QObject::connect(w, SIGNAL(reInitialize()), pqOrbiter, SLOT(initialize()), Qt::QueuedConnection);
 
-        #ifndef RPI
-                pqOrbiter->moveToThread(dceThread);
+        #ifndef QT5
+          pqOrbiter->moveToThread(dceThread);
                  dceThread->start();
+                 // tcThread->start();
+                 mediaThread->start();
+                 epgThread->start();
         #endif
-#ifndef RPI
 
-
-        // tcThread->start();
-        mediaThread->start();
-        epgThread->start();
-#endif
         pqOrbiter->setDeviceId(w->iPK_Device);
         pqOrbiter->m_sHostName = w->qs_routerip.toStdString();
         pqOrbiter->m_sIPAddress = w->qs_routerip.toStdString();

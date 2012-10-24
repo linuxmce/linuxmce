@@ -11,7 +11,6 @@
 #    but WITHOUT ANY WARRANTY; without even the implied warranty of
 #    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 #    GNU General Public License for more details.
-
 #    You should have received a copy of the GNU General Public License
 #    along with QOrbiter.  If not, see <http://www.gnu.org/licenses/>.
 
@@ -86,23 +85,25 @@ TRANSLATIONS += app_de.ts
 # Add more folders to ship with the application, here
 #linux deploy configuration
 linux-g++{
+
+contains(QT_VERSION,4.*.*){
 folder_01.source = qml/desktop
 folder_01.target = $$DESTDIR/qml
-
-folder_05.source = qml/template
-folder_05.target = $$DESTDIR/template
+}
+else:contains(QT_VERSION,5.0.*){
+folder_01.source = qml/rpi
+folder_01.target = $$DESTDIR/qml
+}
 
 folder_03.source = config.xml
 folder_03.target = $$DESTDIR
 DEFINES += for_desktop
 
-
 plugins_folder.source = imports/
 plugins_folder.target = $$DESTDIR
 
-
 DEPLOYMENTFOLDERS+= plugins_folder
-DEPLOYMENTFOLDERS += folder_01  folder_03 folder_05
+DEPLOYMENTFOLDERS += folder_01  folder_03
 }
 
 #windows deployment and module config
@@ -257,17 +258,19 @@ QT+= qml
 
 symbian:TARGET.UID3 = 0xE0D07D4D
 QMAKE_CXXFLAGS += -DUSE_LZO_DATAGRID
-
+#LinuxMCE Specific include path. Linking in the app instead of against dce libs for multi-platform expediency.
 INCLUDEPATH += ../../ ../../DCE/
 
-QT4{
-QT+= webkit declarative phonon
+#Modules, by platform
+QT4_*{
+QT+= webkit declarative phonon #note that the qml module declarations are in the qmlapplicationviewer
 }
 
 QT5{
-QT+= webkit mobility widgets qtcore
+QT+= webkit mobility widgets qtcore #note that the qml module declarations are in the qmlapplicationviewer
 }
 
+#turtlenecks and such
 macx{
     QT += xml
     QT += network
@@ -277,6 +280,7 @@ macx{
     LIBS += -lQtXml
 }
 
+#windows builds require a special pthreads.
 win32{
 INCLUDEPATH += ../qorbiter-pthreads/Prebuilt/include/
 LIBS+= -L../qorbiter-pthreads/Prebuilt/lib/ -lpthreadVC2
@@ -302,15 +306,14 @@ symbian:TARGET.CAPABILITY += NetworkServices
 # lines and add the respective components to the MOBILITY variable.
 # CONFIG += mobility
 # MOBILITY +=
+
+# The .cpp file which was generated for your project. Feel free to hack it.
+#CONFIG += ordered
+
 message(Qt version: $$[QT_VERSION])
 message(Qt is installed in $$[QT_INSTALL_PREFIX])
 message (Build Type: $$DEFINES)
 message( Opengl Status: $$glmsg )
-
-
-# The .cpp file which was generated for your project. Feel free to hack it.
-#CONFIG += ordered
-#SOURCES += plugins/googleWeatherPlugin/googleweatherplugin.pro
 
 SOURCES += main.cpp \
         ../../Gen_Devices/qOrbiterBase.cpp \
@@ -540,20 +543,9 @@ HEADERS += \
 #../../qMediaPlayer/qMediaPlayer.h
 #}
 
-OTHER_FILES += Readme.txt \
-    qml/Splash.qml \
-    qml/SetupNewOrbiter.qml \
-    OrbiterVariables.txt \
-    qml/harmattan/js/nowPlayingWorker.js \
-    config.xml \    
-    qml/effects/EffectVignette.qml \
-    qml/shaders/vignette.fsh \
-    qml/shaders/gaussianblur_v.fsh \
-    qml/shaders/gaussianblur_h.fsh \
-    qml/effects/EffectGaussianBlur.qml \
-    qmldir \
-    qml/SplashView.qml \
-    ../../../../mnt/remote/android-qml/android/tablet/default/effects/qmldir
+OTHER_FILES += Readme.txt \   
+    OrbiterVariables.txt \ 
+    config.xml \
 
 
 for_harmattan{

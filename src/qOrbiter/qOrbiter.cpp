@@ -3399,6 +3399,9 @@ void DCE::qOrbiter::populateAdditionalMedia() //additional media grid that popul
     if(checkLoadingStatus() == true)
     {
         //setCommandResponse("requesting additional media");
+#ifdef QT5
+    QApplication::processEvents(QEventLoop::AllEvents);
+#endif
 
         int gHeight = media_pageSeperator;;            //how many rows we want
         int gWidth = 1;             //how many columns we want. in this case, just the one
@@ -3484,6 +3487,9 @@ void DCE::qOrbiter::populateAdditionalMedia() //additional media grid that popul
                 }
 
                 emit addItem(new gridItem(fk_file, cellTitle, filePath, index, cellImg));
+#ifdef QT5
+    QApplication::processEvents(QEventLoop::AllEvents);
+#endif
             }
             media_seek="";
             delete pDataGridTable;
@@ -4536,6 +4542,9 @@ void DCE::qOrbiter::prepareFileList(int iPK_MediaType)
     media_currentRow = 0;
     cellsToRender = 0;
     setMediaResponse("Initial media request");
+#ifdef QT5
+    QApplication::processEvents(QEventLoop::AllEvents);
+#endif
     //emit cleanupGrid();
 
     int gHeight = media_pageSeperator;            //how many rows we want
@@ -4636,6 +4645,9 @@ void DCE::qOrbiter::prepareFileList(int iPK_MediaType)
         q_mediaType = QString::number(iPK_MediaType);
         goBack<< s;
     }
+#ifdef QT5
+    QApplication::processEvents(QEventLoop::AllEvents);
+#endif
     //qDebug() << s;
     CMD_Populate_Datagrid populateDataGrid(m_dwPK_Device, iPK_Device_DatagridPlugIn, StringUtils::itos( m_dwIDataGridRequestCounter ), string(m_sGridID), 63, s.toStdString(), 0, &pkVar, &valassign,  &isSuccessfull,  &gWidth, &gHeight);
 
@@ -4723,10 +4735,16 @@ void DCE::qOrbiter::prepareFileList(int iPK_MediaType)
                             cellImg.load(":/icons/icon.png");
                         }
                         emit addItem(new gridItem(fk_file, cellTitle, filePath, index, cellImg));
+#ifdef QT5
+    QApplication::processEvents(QEventLoop::AllEvents);
+#endif
                     }
                 }
             }
             delete pDataGridTable;
+#ifdef QT5
+    QApplication::processEvents(QEventLoop::AllEvents);
+#endif
         }
     }
 
@@ -4810,6 +4828,9 @@ void qOrbiter::getFloorPlanImage(QString fp_path)
     string p_sResponse="";
     if(SendCommand(reqFile, &p_sResponse) && p_sResponse=="OK")
     {
+#ifdef QT5
+    QApplication::processEvents(QEventLoop::AllEvents);
+#endif
         const uchar *data = (uchar*)picData;
         emit floorPlanImageData(data, picData_Size);
     }
@@ -4827,6 +4848,9 @@ void qOrbiter::getScreenSaverImage(QString inc_requested_img_path)
     string p_sResponse="";
     if(SendCommand(reqFile, &p_sResponse) && p_sResponse=="OK")
     {
+#ifdef QT5
+    QApplication::processEvents(QEventLoop::AllEvents);
+#endif
         setMediaResponse("Recieved Screensaver image");
         data = (uchar*)picData;
         emit currentScreenSaverImage(data, picData_Size);

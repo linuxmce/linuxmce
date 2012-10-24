@@ -124,7 +124,11 @@ qorbiterManager::qorbiterManager(QDeclarativeView *view, QObject *parent) :
     ScreenSaver = new ScreenSaverClass(this);
 
 #ifdef for_desktop
+#ifndef QT5
     buildType = "/qml/desktop";
+ #else
+    buildType = "/qml/rpi";
+#endif
     qrcPath = buildType+"/Splash.qml";
     //mainView.setSource(QApplication::applicationDirPath()+qrcPath);
 #elif defined (WIN32)
@@ -1043,7 +1047,7 @@ bool qorbiterManager::loadSkins(QUrl base)
     qDebug()<<"inside of skins we find" << localSkins.join(",");
     tskinModel->addSkin(localSkins.join(","));
 #else    
-    QDir desktopQmlPath(QString(base.toLocalFile()),"",QDir::Name, QDir::NoDotAndDotDot);
+    QDir desktopQmlPath(QString(base.toString()),"",QDir::Name, QDir::NoDotAndDotDot);
     setDceResponse("Skin Search Path:"+ desktopQmlPath.dirName());
     QStringList localSkins = desktopQmlPath.entryList(QDir::Dirs |QDir::NoDotAndDotDot);
 #ifdef QT_DEBUG
