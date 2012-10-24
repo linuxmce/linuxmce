@@ -146,23 +146,26 @@ checkAlsaBackportNeeds() {
 			;;
 		esac
 		case " $Backports_Required " in *" $PCI_Id "*)
-			ConfSet "AlternateSC" "2" 
-			;;
-		esac		
+			ConfSet "AlternateSC" "1"
+		esac
+		CurDrv=$(getPreferredNvidiaDriver)
+		if [[ "$CurDrv" == "nvidia-current" ]]; then
+			ConfSet "AlternateSC" "2"
+		fi
 	fi
 
-	if [[ -z $alsa_backports ]]; then
+	if [[ -z "$alsa_backports" ]]; then
 		case " $Backports_Required " in *" $PCI_Id "*)
 			Log "$LogFile" "Alsa backports being installed."
 			NotifyMessage "Installing alsa backports modules."
 			apt-get install -yf linux-backports-modules-alsa-$(uname -r)
-			ConfSet "AlternateSC" "2" 
+			ConfSet "AlternateSC" "2"
 			/usr/pluto/bin/RestartALSA.sh
 			;;
 		esac
 	fi
 
-	if [[ -n $alsa_backports ]]; then
+	if [[ -n "$alsa_backports" ]]; then
 		case " $Backports_Required " in *" $PCI_Id "*)
 			NotifyMessage "Alsa backports modules already installed."
 			;;
@@ -228,7 +231,7 @@ installCorrectNvidiaDriver() {
 			apt-get install -y "$preferred_driver" 2> >(tee "$tmpfile")
 			rm /etc/apt/sources.list.d/*
 			apt-get update
-			ConfSet "AlternateSC" "2"
+			ConfSet "AlternateSC" "1"
 			local param="reboot"
 		else
 			apt-get install -y "$preferred_driver" 2> >(tee "$tmpfile")

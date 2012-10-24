@@ -154,25 +154,25 @@ END
 }
 
 Enable_Audio_Channels () {
-        # Added this to correctly unmute channels for setup wizard, and to 
-        # inject necessary unmuting commands for later bootup.
-        yalpa=$(aplay -l)
-        grep -iwo "card ." <<< "$yalpa" | awk '{print $2}' | uniq | while read CardNumber; do
-                amixer -c "$CardNumber" | grep '\[off\]' -B5 | grep "Simple" | sed 's/Simple mixer control //g' | grep -vi "capture" | while read MuteStatus; do 
-                        amixer -c "$CardNumber" sset "$MuteStatus" unmute 
-                done
+	# Added this to correctly unmute channels for setup wizard, and to 
+	# inject necessary unmuting commands for later bootup.
+	yalpa=$(aplay -l)
+	grep -iwo "card ." <<< "$yalpa" | awk '{print $2}' | uniq | while read CardNumber; do
+		amixer -c "$CardNumber" | grep '\[off\]' -B5 | grep "Simple" | sed 's/Simple mixer control //g' | grep -vi "capture" | while read MuteStatus; do 
+			amixer -c "$CardNumber" sset "$MuteStatus" unmute 
+		done
 		alsactl store
-                amixer -c "$CardNumber" | grep '\[.*\%\]' -B5 | grep "Simple" | sed 's/Simple mixer control //g' | grep -vi "capture" | while read VolLevel; do 
-                        amixer -c "$CardNumber" sset "$VolLevel" 80%
-                done
+		amixer -c "$CardNumber" | grep '\[.*\%\]' -B5 | grep "Simple" | sed 's/Simple mixer control //g' | grep -vi "capture" | while read VolLevel; do 
+			amixer -c "$CardNumber" sset "$VolLevel" 80%
+		done
 		alsactl store
-        done
+	done
 
 
-        if grep -qi "device 7" <<< "$yalpa"; then 
-                CardNumber=$(grep -i "device 7" <<< "$yalpa" | grep -iwo "card ." | awk '{print $2}')
-                aplay -Dplughw:${CardNumber},7 /usr/share/sounds/linphone/rings/orig.wav
-        fi
+	if grep -qi "device 7" <<< "$yalpa"; then 
+		CardNumber=$(grep -i "device 7" <<< "$yalpa" | grep -iwo "card ." | awk '{print $2}')
+		aplay -Dplughw:${CardNumber},7 /usr/share/sounds/linphone/rings/orig.wav
+	fi
 }
 
 Setup_AsoundConf()
@@ -232,18 +232,21 @@ Setup_AsoundConf()
 			;;
 	esac
 
+	SoundOut="hw"
 	if [[ "$AlternateSC" == "1" ]]; then
 		SoundCard="${SoundCard},${CardDevice}"
+		SoundOut="plughw"
 	fi
 	if [[ "$AlternateSC" == "2" ]]; then
 		SoundCard="${SoundCard},${CardDevice}"
 		AsoundConfig="/usr/pluto/templates/asound.conf.backup"
+		SoundOut="plughw"
 	fi
 
-	local DigitalPlaybackCard="plughw:${SoundCard}"
+	local DigitalPlaybackCard="${SoundCard}"
 	local AnalogPlaybackCard="plug:dmix:${SoundCard}"
 
-	sed -r "s#%MAIN_CARD%#$SoundCard#g; s#%HWONLY_CARD%#$HWOnlyCard#; s#%SOUND_DEVICE%#$CardDevice#g; s#%ANALOG_PLAYBACK_CARD%#$AnalogPlaybackCard#g" "$AsoundConf" > /etc/asound.conf
+	sed -r "s#%MAIN_CARD%#$SoundCard#g; s#%HWONLY_CARD%#$HWOnlyCard#; s#%SOUND_DEVICE%#$CardDevice#g; s#%ANALOG_PLAYBACK_CARD%#$AnalogPlaybackCard#g; s#%SOUND_OUT%#$SoundOut#g" "$AsoundConf" > /etc/asound.conf
 
 	case "$AudioSetting" in
 		*[CO]*)
@@ -386,8 +389,6 @@ AudioSettings_Check()
 
 	if [[ -z "$AlternateSC" ]]; then
 		AlternateSC="0"
-	else
-		AlternateSC="$AlternateSC"
 	fi
 
 	Setup_AsoundConf "$NewSetting_AudioSetting" "$AlternateSC"
