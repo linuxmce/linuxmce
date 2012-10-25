@@ -164,7 +164,7 @@ Enable_Audio_Channels () {
 		alsactl store
 		amixer -c "$CardNumber" | grep '\[.*\%\]' -B5 | grep "Simple" | sed 's/Simple mixer control //g' | grep -vi "capture" | while read VolLevel; do 
 			amixer -c "$CardNumber" sset "$VolLevel" 80%
-		done
+		done 2>&1>/dev/null
 		alsactl store
 	done
 
@@ -243,10 +243,10 @@ Setup_AsoundConf()
 		SoundOut="plughw"
 	fi
 
-	local DigitalPlaybackCard="${SoundCard}"
+	local DigitalPlaybackCard="${SoundOut}:${SoundCard}"
 	local AnalogPlaybackCard="plug:dmix:${SoundCard}"
 
-	sed -r "s#%MAIN_CARD%#$SoundCard#g; s#%HWONLY_CARD%#$HWOnlyCard#; s#%SOUND_DEVICE%#$CardDevice#g; s#%ANALOG_CARD%#$AnalogPlaybackCard#g; s#%SOUND_OUT%#$SoundOut#g" "$AsoundConf" > /etc/asound.conf
+	sed -r "s#%MAIN_CARD%#$SoundCard#g; s#%HWONLY_CARD%#$HWOnlyCard#; s#%SOUND_DEVICE%#$CardDevice#g; s#%ANALOG_CARD%#$AnalogPlaybackCard#g; s#%DIGITAL_CARD%#$DigitalPlaybackCard#g" "$AsoundConf" > /etc/asound.conf
 
 	case "$AudioSetting" in
 		*[CO]*)
