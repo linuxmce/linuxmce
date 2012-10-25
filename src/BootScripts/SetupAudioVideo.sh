@@ -246,7 +246,7 @@ Setup_AsoundConf()
 	local DigitalPlaybackCard="${SoundCard}"
 	local AnalogPlaybackCard="plug:dmix:${SoundCard}"
 
-	sed -r "s#%MAIN_CARD%#$SoundCard#g; s#%HWONLY_CARD%#$HWOnlyCard#; s#%SOUND_DEVICE%#$CardDevice#g; s#%ANALOG_PLAYBACK_CARD%#$AnalogPlaybackCard#g; s#%SOUND_OUT%#$SoundOut#g" "$AsoundConf" > /etc/asound.conf
+	sed -r "s#%MAIN_CARD%#$SoundCard#g; s#%HWONLY_CARD%#$HWOnlyCard#; s#%SOUND_DEVICE%#$CardDevice#g; s#%ANALOG_CARD%#$AnalogPlaybackCard#g; s#%SOUND_OUT%#$SoundOut#g" "$AsoundConf" > /etc/asound.conf
 
 	case "$AudioSetting" in
 		*[CO]*)
