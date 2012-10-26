@@ -64,6 +64,7 @@
 #define FUNC_ID_ZW_REMOVE_NODE_FROM_NETWORK		0x4b
 #define FUNC_ID_ZW_REQUEST_NODE_INFO                    0x60
 #define FUNC_ID_ZW_REMOVE_FAILED_NODE_ID                0x61
+#define FUNC_ID_ZW_IS_FAILED_NODE_ID			0x62
 #define ZW_GET_ROUTING_INFO			0x80
 
 #define ADD_NODE_ANY					0x01
@@ -303,7 +304,17 @@
 #define COMMAND_CLASS_SCENE_CONTROLLER_CONF		0x2D
 #define COMMAND_CLASS_SCREEN_ATTRIBUTES			0x93
 #define COMMAND_CLASS_SCREEN_MD				0x92
+
 #define COMMAND_CLASS_SECURITY				0x98
+#define SECURITY_SCHEME_GET				0x04
+#define SECURITY_SCHEME_REPORT				0x5
+#define SECURITY_NONCE_GET				0x40
+#define SECURITY_NONCE_REPORT				0x80
+#define NETWORK_KEY_SET		0x06
+#define NETWORK_KEY_VERIFY	0x07
+#define SECURITY_MESSAGE_ENCAPSULATION 0x81
+#define SECURITY_MESSAGE_ENCAPSULATION_NONCE_GET 0xc1
+
 #define COMMAND_CLASS_SENSOR_CONFIGURATION		0x9E
 #define COMMAND_CLASS_SILENCE_ALARM			0x9d
 
@@ -426,6 +437,9 @@ namespace ZWApi {
 	int typeGeneric;
 	int typeSpecific;
 	bool sleepingDevice;
+	bool secureDevice;
+	int nonceCounter;
+	unsigned char nonce[8];
 	std::map <int, int>mapCCInstanceCount;
 	int plutoDeviceTemplateConst;
 	// holds the device state (used by setback schedule thermostat)
@@ -640,6 +654,11 @@ namespace ZWApi {
 	bool zwSetPromiscMode(bool promisc);
 	void zwGetRoutingInfo(int node_id);
 
+	void zwSecuritySchemeGet(int node_id);
+	void zwSecurityNonceGet(int node_id);
+	void zwSecurityKeySet(int node_id);
+
+	void zwIsFailedNode(int node_id);
 	void resetNodeInstanceCount(ZWNode *node, std::string capa);
 	void multiInstanceGetAllCCsForNode(unsigned int node_id);
 	void handleCommandSensorMultilevelReport(int nodeid, int instance_id, int sensortype, int metadata,

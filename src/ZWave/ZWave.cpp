@@ -578,6 +578,7 @@ void ZWave::CMD_Remove_Node(string sOptions,int iValue,string sTimeout,bool bMul
 		// we only honor "node stop" for now
 		myZWApi->zwRemoveNodeFromNetwork(0);
 	} else if (iValue < 0) {
+		myZWApi->zwIsFailedNode(-iValue);
 		myZWApi->zwRemoveFailedNodeId(-iValue);
 	} else {
 		// we simply call start (param==1), that implements "Node Any"

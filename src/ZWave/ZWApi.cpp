@@ -665,6 +665,28 @@ void *ZWApi::ZWApi::decodeFrame(char *frame, size_t length) {
 			case FUNC_ID_APPLICATION_COMMAND_HANDLER:
 				DCE::LoggerWrapper::GetInstance()->Write(LV_ZWAVE,"FUNC_ID_APPLICATION_COMMAND_HANDLER:");
 				switch ((unsigned char)frame[5]) {
+					case COMMAND_CLASS_SECURITY:
+						if ((unsigned char)frame[6] == SECURITY_SCHEME_REPORT) {
+							DCE::LoggerWrapper::GetInstance()->Write(LV_ZWAVE,"Got SECURITY_SCHEME_REPORT from node %i, scheme: %x - requesting nonce",(unsigned char)frame[3],(unsigned char)frame[7]);
+							zwSecurityNonceGet((unsigned char)frame[3]);
+
+						} else if ((unsigned char)frame[6] == SECURITY_NONCE_REPORT) {
+							DCE::LoggerWrapper::GetInstance()->Write(LV_ZWAVE,"Got SECURITY_NONCE_REPORT from node %i, nonce: %x %x %x %x %x %x %x %x ",(unsigned char)frame[3],(unsigned char)frame[7],(unsigned char)frame[8],(unsigned char)frame[9],(unsigned char)frame[10],(unsigned char)frame[11],(unsigned char)frame[12],(unsigned char)frame[13],(unsigned char)frame[14]);
+							ZWNodeMapIt = ZWNodeMap.find((unsigned int)frame[3]);
+							if (ZWNodeMapIt != ZWNodeMap.end()) {
+								(*ZWNodeMapIt).second->nonce[0] = (unsigned char)frame[7];
+								(*ZWNodeMapIt).second->nonce[1] = (unsigned char)frame[8];
+								(*ZWNodeMapIt).second->nonce[2] = (unsigned char)frame[9];
+								(*ZWNodeMapIt).second->nonce[3] = (unsigned char)frame[10];
+								(*ZWNodeMapIt).second->nonce[4] = (unsigned char)frame[11];
+								(*ZWNodeMapIt).second->nonce[5] = (unsigned char)frame[12];
+								(*ZWNodeMapIt).second->nonce[6] = (unsigned char)frame[13];
+								(*ZWNodeMapIt).second->nonce[7] = (unsigned char)frame[14];
+							}
+							zwSecurityKeySet((unsigned char)frame[3]);
+						}
+						break;
+					;;
 					case COMMAND_CLASS_CONTROLLER_REPLICATION:
 						DCE::LoggerWrapper::GetInstance()->Write(LV_ZWAVE,"COMMAND_CLASS_CONTROLLER_REPLICATION");
 						// 0x1 0xb 0x0 0x4 0x2 0xef 0x5 0x21 0x31 0x7 0x1 0x1 0xf (#######!1####)
@@ -2439,6 +2461,7 @@ string ZWApi::ZWApi::commandClassToString(char nodeinfo) {
 void ZWApi::ZWApi::parseNodeInfo(int nodeid, char *nodeinfo, size_t length) {
 	bool wakeup = false;
 	bool multicommand = false;
+	bool security = false;
 	bool multiinstance = false;
 	bool association = false;
 	bool manufacturerspecific = false;
@@ -2461,6 +2484,9 @@ void ZWApi::ZWApi::parseNodeInfo(int nodeid, char *nodeinfo, size_t length) {
 		case COMMAND_CLASS_MULTI_INSTANCE:
 			multiinstance = true;
 			break;
+		case COMMAND_CLASS_SECURITY:
+			security = true;
+			break;
 		case COMMAND_CLASS_MARK:	
 			DCE::LoggerWrapper::GetInstance()->Write(LV_ZWAVE, "Can control the following command classes:");
 			break;
@@ -2475,9 +2501,10 @@ void ZWApi::ZWApi::parseNodeInfo(int nodeid, char *nodeinfo, size_t length) {
 		if (wakeup) zwWakeupSet(nodeid,15,true); // wakeup interval
 
 	} else {
-		if (manufacturerspecific) zwRequestManufacturerSpecificReport(nodeid);
-		if (wakeup) zwWakeupSet(nodeid,60,false); // wakeup interval
+		if (security) zwSecuritySchemeGet(nodeid);
 		if (association) zwAssociationSet(nodeid, 1, ournodeid); // associate to group 1
+		if (wakeup) zwWakeupSet(nodeid,60,false); // wakeup interval
+		if (manufacturerspecific) zwRequestManufacturerSpecificReport(nodeid);
 	}
 }
 
@@ -2972,7 +2999,7 @@ void ZWApi::ZWApi::zwSetClock(int node_id) {
 
         mybuf[0] = FUNC_ID_ZW_SEND_DATA;
         mybuf[1] = node_id;
-        mybuf[2] = 5; // length of command
+        mybuf[2] = 4; // length of command
 	mybuf[3] = COMMAND_CLASS_CLOCK;
 //	mybuf[4] = CLOCK_SET;
 	mybuf[4]=CLOCK_REPORT;
@@ -3289,6 +3316,15 @@ void ZWApi::ZWApi::parseManufacturerSpecific(int nodeid, int manuf, int type, in
 					break;
 			}
 			break;
+		case 0x109: sManufacturer = "Vision";
+			switch (type) {
+				case 0x2006: switch(prod) {
+						case 0x620: sProduct = "ZM 1702 Door Lock";
+							break;
+					}
+					break;
+			}
+			break;
 		default: sManufacturer = "unknown";
 	}
         DCE::LoggerWrapper::GetInstance()->Write(LV_ZWAVE, "Manufacturer Specific: Node %i is a %s %s",nodeid,sManufacturer.c_str(),sProduct.c_str());
@@ -3301,5 +3337,82 @@ void ZWApi::ZWApi::parseManufacturerSpecific(int nodeid, int manuf, int type, in
 		iPKDevice = (*ZWNodeMapIt).second->iPKDevice;
 	}
 	DCEcallback->SetManufacturerSpecificString(iPKDevice,sManufacturer);
+}
+
+void ZWApi::ZWApi::zwSecuritySchemeGet(int node_id) {
+	char mybuf[1024];
+
+        mybuf[0] = FUNC_ID_ZW_SEND_DATA;
+        mybuf[1] = node_id;
+        mybuf[2] = 3; // length of command
+	mybuf[3] = COMMAND_CLASS_SECURITY;
+	mybuf[4] = SECURITY_SCHEME_GET;
+	mybuf[5]= 0; // security scheme 0 
+        mybuf[6] = TRANSMIT_OPTION_ACK | TRANSMIT_OPTION_AUTO_ROUTE;
+        sendFunction( mybuf , 7, REQUEST, 1);
+}
+
+void ZWApi::ZWApi::zwSecurityNonceGet(int node_id) {
+	char mybuf[1024];
+
+        mybuf[0] = FUNC_ID_ZW_SEND_DATA;
+        mybuf[1] = node_id;
+        mybuf[2] = 2; // length of command
+	mybuf[3] = COMMAND_CLASS_SECURITY;
+	mybuf[4] = SECURITY_NONCE_GET;
+        mybuf[5] = TRANSMIT_OPTION_ACK | TRANSMIT_OPTION_AUTO_ROUTE;
+        sendFunction( mybuf , 6, REQUEST, 1);
+}
+
+void ZWApi::ZWApi::zwSecurityKeySet(int node_id) {
+	char mybuf[1024];
+	ZWNodeMapIt = ZWNodeMap.find(node_id);
+	if (ZWNodeMapIt != ZWNodeMap.end()) {
+		mybuf[0] = FUNC_ID_ZW_SEND_DATA;
+		mybuf[1] = node_id;
+		mybuf[2] = 30; // length of command
+		mybuf[3] = COMMAND_CLASS_SECURITY;
+		mybuf[4] = SECURITY_MESSAGE_ENCAPSULATION;
+		mybuf[5] = (*ZWNodeMapIt).second->nonce[0];
+		mybuf[6] = (*ZWNodeMapIt).second->nonce[0];
+		mybuf[7] = (*ZWNodeMapIt).second->nonce[0];
+		mybuf[8] = (*ZWNodeMapIt).second->nonce[0];
+		mybuf[9] = (*ZWNodeMapIt).second->nonce[0];
+		mybuf[10] = (*ZWNodeMapIt).second->nonce[0];
+		mybuf[11] = (*ZWNodeMapIt).second->nonce[0];
+		mybuf[12] = (*ZWNodeMapIt).second->nonce[0];
+		mybuf[13] = 0; // no sequence
+		mybuf[14] = COMMAND_CLASS_SECURITY;
+		mybuf[15] = NETWORK_KEY_SET;
+		mybuf[16] = 0x01;
+		mybuf[17] = 0x02;
+		mybuf[18] = 0x03;
+		mybuf[19] = 0x04;
+		mybuf[20] = 0x05;
+		mybuf[21] = 0x06;
+		mybuf[22] = 0x07;
+		mybuf[23] = 0x08;
+		mybuf[24] = 0; // receiver nonce id
+		mybuf[25] = 0; // mac
+		mybuf[26] = 0; // mac
+		mybuf[27] = 0; // mac
+		mybuf[28] = 0; // mac
+		mybuf[29] = 0; // mac
+		mybuf[30] = 0; // mac
+		mybuf[31] = 0; // mac
+		mybuf[32] = 0; // mac
+		mybuf[33] = TRANSMIT_OPTION_ACK | TRANSMIT_OPTION_AUTO_ROUTE;
+		sendFunction( mybuf , 34, REQUEST, 1);
+	}
+}
+
+void ZWApi::ZWApi::zwIsFailedNode(int node_id) {
+	char mybuf[1024];
+
+	DCE::LoggerWrapper::GetInstance()->Write(LV_ZWAVE, "Removing failed node %i",node_id);
+	mybuf[0] = FUNC_ID_ZW_IS_FAILED_NODE_ID;
+	mybuf[1] = (unsigned char)node_id;
+	sendFunction( mybuf , 2, REQUEST, 1); 
+
 }
 
