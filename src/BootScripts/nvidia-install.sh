@@ -141,7 +141,7 @@ checkAlsaBackportNeeds() {
 	PCI_Id=$(getPCI_Id)
 	alsa_backports=$(dpkg-query -l "linux-backports-modules-alsa*" | grep "^ii" | awk '{print $2}') 2>/dev/null
 	if [[ -z "$AlternateSC" ]]; then
-		case " $Gt_Series " in *" $PCI_Id "*)
+		case " $GT_Series " in *" $PCI_Id "*)
 			ConfSet "AlternateSC" "1"
 			;;
 		esac

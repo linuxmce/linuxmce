@@ -33,6 +33,7 @@ ComputerDev=$(FindDevice_Category "$PK_Device" "$DEVICECATEGORY_Media_Director" 
 OrbiterDev=$(FindDevice_Template "$ComputerDev" "$DEVICETEMPLATE_OnScreen_Orbiter")
 VideoCardDev=$(FindDevice_Category "$ComputerDev" "$DEVICECATEGORY_Video_Cards")
 AsoundConf="/usr/pluto/templates/asound.conf"
+ConfGet "AlternateSC"
 
 if [[ -z "$VideoCardDev" ]]; then
 	VideoCardDev=$(FindDevice_Category "$PK_Device" "$DEVICECATEGORY_Video_Cards")

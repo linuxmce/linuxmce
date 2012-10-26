@@ -432,19 +432,19 @@ ValidIP()
 # [XX; is the text color
 # XXm' is the background color
 # \033 is the an escape
-# [1m bold     [0m unbold
-# "" around text   '' around color
-# COLOR         FOREGROUND      BACKGROUND
-# black         30              40
-# red           31              41
-# green         32              42
-# yellow        33              43
-# blue          34              44
-# magenta       35              45
-# cyan          36              46
-# white         37              47
+# [1m bold	[0m unbold
+# "" around text	'' around color
+# COLOR		FOREGROUND	BACKGROUND
+# black		30		40
+# red		31		41
+# green		32		42
+# yellow	33		43
+# blue		34		44
+# magenta	35		45
+# cyan		36		46
+# white		37		47
 
-StatusMessage () { 
+StatusMessage () {
 	echo -e '\E[33;40m'"\033[1m  $* \033[0m" 
 }
 ErrorMessage () { 
@@ -487,12 +487,12 @@ ServiceBkg="$3"
 }
 
 VerifyExitCode () {
-        local EXITCODE=$?
-        if [ "$EXITCODE" != "0" ] ; then
-        	echo "An error (Exit code $EXITCODE) occured during the last action"
-        	echo "$1"
-                exit 1
-        fi
+	local EXITCODE=$?
+	if [ "$EXITCODE" != "0" ] ; then
+		echo "An error (Exit code $EXITCODE) occured during the last action"
+		echo "$1"
+		exit 1
+	fi
 }
 
 IntelBridgeDetect () {
@@ -546,10 +546,10 @@ FindVideoDriver () {
 	# Switching our default to fbdev for interoperability 
 	# with KVM & nVidia no-test in AVWizard_Run.sh
 	#####################################################################
-        prop_driver="fbdev"
+	prop_driver="fbdev"
 	gpus=$(echo "$vga_pci" | wc -l) 
 		if [[ "$gpus" -gt "1" ]]; then 
-			pci_id1=$(echo "$vga_pci" | head -1 |  sed 's/.*\[\(....:....\)\].*/\1/')
+			pci_id1=$(echo "$vga_pci" | head -1 | sed 's/.*\[\(....:....\)\].*/\1/')
 			vga_pci=$(echo "$vga_pci" | awk 'NR==2')
 			gpu_modules=$(lspci -nnv -d "$pci_id1" | grep "modules" | cut -d':' -f2 | sed 's/ //' | awk 'BEGIN { while(getline < "/etc/modprobe.d/blacklist.conf") if ($1 == "blacklist") a[$2]; RS = "[,[:space:]]+" } !($0 in a) { printf "blacklist %s\n", $0 }')
 			if [[ -n "$gpu_modules" ]]; then
@@ -573,41 +573,41 @@ FindVideoDriver () {
 			prop_driver="nvidia" ;;
 		[1002)
 			prop_driver="fglrx"
-                        if echo "$vga_pci" | grep -Ei '((R.)([2-5])|(9|X|ES)(1|2?)([0-9])(5|0)0|Xpress)'; then
-                                prop_driver="radeon" 
+			if echo "$vga_pci" | grep -Ei '((R.)([2-5])|(9|X|ES)(1|2?)([0-9])(5|0)0|Xpress)'; then
+				prop_driver="radeon" 
 			fi ;;
 
 		[8086)
-                        prop_driver="intel"
-                        if echo $vga_pci | grep "i740"; then
-                                prop_driver="i740"
+			prop_driver="intel"
+			if echo $vga_pci | grep "i740"; then
+				prop_driver="i740"
 			fi
-                        if echo $vga_pci | grep "i128"; then
-                                prop_driver="i128"
+			if echo $vga_pci | grep "i128"; then
+				prop_driver="i128"
 			fi 
 			if echo $vga_driver | grep "mach"; then
 				prop_driver="mach64"
 			fi ;;
 
 		[1106)
-                        prop_driver="openchrome" ;
+			prop_driver="openchrome" ;
 			if echo $vga_pci | grep -i "Savage"; then
 				prop_driver="savage"
 			fi
 			#if echo $vga_pci | grep -i "s3"; then
 				#prop_driver="via"; fi 
 			if echo $vga_pci | grep -i "virge"; then
-                               	prop_driver="virge"
+				prop_driver="virge"
 			fi ;;
 		*)
 			prop_driver="fbdev" ;;
-        esac
+	esac
 }
 
 InstallVideoDriver () {
 	distro="$(lsb_release -c -s)"
 	case "$prop_driver" in
-        	nvidia)
+		nvidia)
 			if ! PackageIsInstalled nvidia-glx-71 && ! PackageIsInstalled nvidia-glx-96 && ! PackageIsInstalled nvidia-glx-173 && ! PackageIsInstalled nvidia-glx-180 && ! PackageIsInstalled nvidia-glx-190 && ! PackageIsInstalled nvidia-glx-195 && ! PackageIsInstalled nvidia-glx-260 && ! PackageIsInstalled nvidia-glx-185 && ! PackageIsInstalled nvidia-current; then 
 				apt-get -yf install pluto-nvidia-video-drivers
 				VerifyExitCode "Install Pluto nVidia Driver"
@@ -674,7 +674,7 @@ InstallVideoDriver () {
 				apt-get -yf install xserver-xorg-video-s3virge
 				VerifyExitCode "Install VIA S3 Virge Driver"
 			fi ;;
-                esac
+	esac
 
 	if [[ "$chip_man" == "[8086" ]] && [[ -n $online ]]; then
 		if [[ "$distro" = "precise" ]]; then
@@ -699,7 +699,7 @@ InstallVideoDriver () {
 }
 
 CheckVideoDriver () {
-        vga_pci=$(lspci -nn | grep -w 'VGA')
+	vga_pci=$(lspci -nn | grep -w 'VGA')
 	FindVideoDriver
 	online=$(ping -c 2 google.com)
 	card_detail=$(echo "$vga_pci" | cut -d':' -f3)
@@ -707,8 +707,8 @@ CheckVideoDriver () {
 	online_mismatch="false"
 	if [[ -f /etc/X11/xorg.conf ]]; then
 		# TODO figure out a better way to isolate the video driver in the xorg.conf list of "Driver" options
-        	cur_driver=$(grep "Driver" /etc/X11/xorg.conf | grep -Eo '(nvidia|nouveau|radeon|fglrx|savage|openchrome|via|virge|intel|i740|i128|mach64|fbdev)')
-		if [[ "$prop_driver" != "$cur_driver" ]] &&  [[ -z $online ]]; then
+		cur_driver=$(grep "Driver" /etc/X11/xorg.conf | grep -Eo '(nvidia|nouveau|radeon|fglrx|savage|openchrome|via|virge|intel|i740|i128|mach64|fbdev)')
+		if [[ "$prop_driver" != "$cur_driver" ]] && [[ -z $online ]]; then
 			offline_mismatch="true"
 		elif [[ "$prop_driver" != "$cur_driver" ]] && [[ -n $online ]]; then
 			online_mismatch="true"
@@ -731,8 +731,8 @@ CheckVideoDriver () {
 			StatusMessage "Correct driver '$prop_driver' already loaded"
 			return 0
 		# Remove fglrx or nVidia drivers if they are installed, but do not match current requirements
-                elif ([[ "$online_mismatch" == "true" ]]) || ([[ "$offine_mismatch" == "true" ]] && echo "$prop_driver" | grep -Eq '(nouveau|radeon|openchrome)'); then
-                        ErrorMessage "Video chipset change detected !!!"
+		elif ([[ "$online_mismatch" == "true" ]]) || ([[ "$offine_mismatch" == "true" ]] && echo "$prop_driver" | grep -Eq '(nouveau|radeon|openchrome)'); then
+			ErrorMessage "Video chipset change detected !!!"
 			if [[ "$cur_driver" == "fglrx" ]]; then
 				echo ""
 				echo ""
@@ -780,8 +780,8 @@ CheckVideoDriver () {
 				ConfSet "AVWizardOverride" "1"
 				InstallVideoDriver
 			fi
-                fi
-        else
+	fi
+	else
 		# If there is no xorg.conf, install driver and run AVWizard
 		if [[ -z $online ]]; then
 			case "$prop_driver" in
@@ -796,7 +796,7 @@ CheckVideoDriver () {
 		StatusMessage "/etc/X11/xorg.conf is missing. Using video driver '$prop_driver' for $card_detail"
 		ConfSet "AVWizardOverride" "1"
 		InstallVideoDriver
-        fi
+	fi
 export Best_Video_Driver="$prop_driver"
 }
 
@@ -805,7 +805,7 @@ GetVideoDriver() {
 		echo fbdev
 		return 0
 	fi
-	       
+
 	local VideoDriver
 	#<-mkr_B_via_b->
 	VideoDriver="$Best_Video_Driver"
@@ -915,29 +915,29 @@ UI_SetOptions()
 
 function GeneratePassword() {
 	#TODO: Replace with this --->  </dev/urandom tr -dc A-Za-z0-9_ | head -c8
-        local -a alpha1=(Q W E R T Y U I O P A S D F G H J K L Z X C V B N M)
-        local -a alpha2=(q w e r t y u i o p a s d f g h j k l z x c v b n m)
-        local -a alpha3=(1 2 3 4 5 6 7 8 9 0)
+	local -a alpha1=(Q W E R T Y U I O P A S D F G H J K L Z X C V B N M)
+	local -a alpha2=(q w e r t y u i o p a s d f g h j k l z x c v b n m)
+	local -a alpha3=(1 2 3 4 5 6 7 8 9 0)
 
-        local pass=""
-        pass=$pass"${alpha1[$(($RANDOM%26))]}${alpha1[$(($RANDOM%26))]}${alpha1[$(($RANDOM%26))]}"
-        pass=$pass"${alpha2[$(($RANDOM%26))]}${alpha2[$(($RANDOM%26))]}${alpha2[$(($RANDOM%26))]}"
-        pass=$pass"${alpha3[$(($RANDOM%10))]}${alpha3[$(($RANDOM%10))]}"
+	local pass=""
+	pass=$pass"${alpha1[$(($RANDOM%26))]}${alpha1[$(($RANDOM%26))]}${alpha1[$(($RANDOM%26))]}"
+	pass=$pass"${alpha2[$(($RANDOM%26))]}${alpha2[$(($RANDOM%26))]}${alpha2[$(($RANDOM%26))]}"
+	pass=$pass"${alpha3[$(($RANDOM%10))]}${alpha3[$(($RANDOM%10))]}"
 
-        local fromwhere=$(( $RANDOM % 3 + 1 ))
-        [[ $fromwhere == 1 ]] && pass=$pass"${alpha1[$(($RANDOM%26))]}"
-        [[ $fromwhere == 2 ]] && pass=$pass"${alpha2[$(($RANDOM%26))]}"
-        [[ $fromwhere == 3 ]] && pass=$pass"${alpha3[$(($RANDOM%10))]}"
+	local fromwhere=$(( $RANDOM % 3 + 1 ))
+	[[ $fromwhere == 1 ]] && pass=$pass"${alpha1[$(($RANDOM%26))]}"
+	[[ $fromwhere == 2 ]] && pass=$pass"${alpha2[$(($RANDOM%26))]}"
+	[[ $fromwhere == 3 ]] && pass=$pass"${alpha3[$(($RANDOM%10))]}"
 
 
-        for i in `seq 1 100` ;do
-                local split=$(( $RANDOM % ${#pass} + 1 ))
-                pass1=${pass:$split}
-                pass2=${pass:0:$split}
-                pass="${pass1}${pass2}"
-        done
+	for i in `seq 1 100` ;do
+		local split=$(( $RANDOM % ${#pass} + 1 ))
+		pass1=${pass:$split}
+		pass2=${pass:0:$split}
+		pass="${pass1}${pass2}"
+	done
 
-        echo $pass
+	echo $pass
 }
 
 function GeneratePasswordOf6Digits()
@@ -978,12 +978,12 @@ function VDRInstalled() {
 	# Return true if VDR is installed
 	DEVICETEMPLATE_VDR_Plugin="1704"
 	Q="SELECT PK_Device FROM Device Where FK_DeviceTemplate = $DEVICETEMPLATE_VDR_Plugin" 
-	VDRDevice=$(RunSQL "$Q")                                          
-	if [ "$VDRDevice" == "" ] ; then                                  
-		RETURNVALUE=1                                             
-	else                                                              
-		RETURNVALUE=0                                             
-	fi                                                                
+	VDRDevice=$(RunSQL "$Q")
+	if [ "$VDRDevice" == "" ] ; then
+		RETURNVALUE=1
+	else
+		RETURNVALUE=0
+	fi					
 	return $RETURNVALUE
 }
 
