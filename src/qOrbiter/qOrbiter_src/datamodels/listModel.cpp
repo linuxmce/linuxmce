@@ -32,18 +32,16 @@
 ListModel::ListModel(gridItem* prototype, QObject* parent) :
     QAbstractListModel(parent),  m_prototype(prototype)
 {
-
 #ifndef QT5
     setRoleNames(m_prototype->roleNames());
 #endif
-
-
     qRegisterMetaType<QModelIndex>("QModelIndex");
     totalcells = 0;
     seperator = 16;
     loadingStatus = false;
     progress = 0;
     clearing = false;
+    clear();
 }
 
 int ListModel::rowCount(const QModelIndex &parent) const
@@ -78,6 +76,7 @@ void ListModel::appendRow(gridItem *item)
 {
     setLoadingStatus(true);
     appendRows(QList<gridItem*>() << item);
+    qDebug() << m_list.count();
 }
 
 void ListModel::appendRows(const QList<gridItem *> &items)
@@ -98,7 +97,7 @@ void ListModel::appendRows(const QList<gridItem *> &items)
     setProgress(p);
     emit dataChanged(index2, index, currentRows);
     setLoadingStatus(false);
-    // QApplication::processEvents(QEventLoop::AllEvents);
+    QApplication::processEvents(QEventLoop::AllEvents);
 
 }
 
@@ -219,14 +218,14 @@ void ListModel::clear()
     QApplication::processEvents(QEventLoop::AllEvents);
     emit modelAboutToBeReset();
     beginResetModel();
-    resetInternalData();
+    if(resetInternalData()){
     setProgress(0.0);
     QApplication::processEvents(QEventLoop::AllEvents);
     endResetModel();
     emit modelReset();
-
     QApplication::processEvents(QEventLoop::AllEvents);
     clearing = false;
+    }
 
 }
 

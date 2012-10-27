@@ -69,6 +69,13 @@ void LocationModel::sortModel(int column, Qt::SortOrder order)
 {
 }
 
+#ifdef QT5
+QHash<int, QByteArray> LocationModel::roleNames() const
+{
+    return m_prototype->roleNames();
+}
+#endif
+
 QModelIndex LocationModel::indexFromItem(const LocationItem *item) const
 {
   Q_ASSERT(item);

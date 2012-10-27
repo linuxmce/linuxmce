@@ -21,15 +21,15 @@ public:
     explicit ListModel(gridItem* prototype, QObject* parent = 0);
     ~ListModel();
     int rowCount(const QModelIndex &parent = QModelIndex()) const;
-    int columnCount(const QModelIndex &parent) const {return 1;}
+    //int columnCount(const QModelIndex &parent) const {return 1;}
     QVariant data(const QModelIndex &index, int role = Qt::DisplayRole) const;
 #ifdef QT5
  QHash<int, QByteArray> roleNames() const;
 #endif
 
     void appendRows(const QList<gridItem*> &items);
-
-    bool insertRows(int row, int count, gridItem *item);
+  Q_INVOKABLE  void appendRow(gridItem* item);
+   // bool insertRows(int row, int count, gridItem *item);
     void insertRow(int row, gridItem* item);
     bool removeRow(int row, const QModelIndex &parent = QModelIndex());
     bool removeRows(int row, int count, const QModelIndex &parent = QModelIndex());
@@ -69,7 +69,7 @@ signals:
 public slots:
     void setSeperator(int s) {seperator = s;}
     void checkForMore();
-    void appendRow(gridItem* item);
+
     void populateGrid(int mediaType);
     void setTotalCells(int cells);
     int getTotalCells();

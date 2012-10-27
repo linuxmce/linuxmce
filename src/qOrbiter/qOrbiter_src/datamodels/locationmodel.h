@@ -27,6 +27,9 @@ public:
     LocationItem* takeRow(int row);
     LocationItem* find(const QString &id) const;
     void sortModel(int column, Qt::SortOrder order);
+#ifdef QT5
+ QHash<int, QByteArray> roleNames() const;
+#endif
 
 
     QModelIndex indexFromItem( const LocationItem* item) const;
