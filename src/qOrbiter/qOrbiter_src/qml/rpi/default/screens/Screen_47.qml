@@ -16,7 +16,11 @@ Rectangle {
     clip: true
     property int mouselocY: 0
     property int mouselocX: 0
-    Component.onCompleted: dcerouter.requestPage(0)
+
+    Connections{
+        target: dcerouter
+        onNewGrid:dcerouter.requestPage(0)
+    }
 
     function runEffects()
     {

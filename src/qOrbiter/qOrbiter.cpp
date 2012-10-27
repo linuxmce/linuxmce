@@ -4688,7 +4688,7 @@ void DCE::qOrbiter::prepareFileList(int iPK_MediaType)
                 media_totalPages = (i_mediaModelRows / media_pageSeperator)+1; //16 being the items per page.
                 pDataGridTable = NULL;
                 setModelPages(media_totalPages);
-              // requestPage(0);
+                emit newGrid();
 
             }
 

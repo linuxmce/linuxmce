@@ -1325,6 +1325,7 @@ signals:
     void screenshotVariablesReady(QList<QObject*> vars);
 
     //media datagrid
+    void newGrid();
     void initializeSorting();
     void newPageSeperator();
     void mediaPageChanged();
