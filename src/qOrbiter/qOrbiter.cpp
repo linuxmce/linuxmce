@@ -4697,14 +4697,9 @@ void DCE::qOrbiter::sendAvCommand(int deviceto, int command)
 void DCE::qOrbiter::setGridSeperator(int sep)
 {
     media_pageSeperator = sep;
-    media_totalPages = (i_mediaModelRows / media_pageSeperator); //16 being the items per page.
-    QList <QObject*> modelPages;
-    for (int i=0; i < (media_totalPages)+1; i++)
-    {
-        modelPage * item = new modelPage(i, QString::number(i));
-        modelPages.append(item);
-    }
 
+    media_totalPages = (i_mediaModelRows / media_pageSeperator); //16 being the items per page.
+   setModelPages(media_totalPages);
     emit modelPageCount(modelPages);
     emit pageSeperatorChanged(media_pageSeperator);
 }
