@@ -185,4 +185,12 @@ void AttributeSortModel::resetStates()
     }
 }
 
+#ifdef QT5
+QHash<int, QByteArray> AttributeSortModel::roleNames() const
+{
+     return m_prototype->roleNames();
+}
+#endif
+
+
 

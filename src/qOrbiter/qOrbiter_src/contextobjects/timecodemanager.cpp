@@ -22,6 +22,7 @@ TimeCodeManager::TimeCodeManager(QDeclarativeItem *parent) :
     tcTotalTime = 0;
     socketData = NULL;
     mediaPlayerIp = "";
+    portConnected = false;
 #ifdef QT_DEBUG
     qDebug("Setup Timecode Manager");
 #endif
@@ -56,38 +57,54 @@ void TimeCodeManager::start(QString server, int iport)
     port = iport;
     mediaPlayerIp = server;
 
-    if(!dceMediaSocket->isOpen())
+    if(!dceMediaSocket->isOpen() && portConnected==false)
     {
 #ifdef QT_DEBUG
         qDebug() <<"opening connection to " << server + ":" + QString::number(iport);
- #endif
+#endif
         dceMediaSocket->connectToHost(mediaPlayerIp, port, QFile::ReadOnly );
         if ( dceMediaSocket->isValid() )
         {
-            // setDceResponse("Time Code Socket connected! " + QString::fromStdString(qs_routerip.toStdString()));
+            //qDebug() << "Time Code Socket connected! " << QString::fromStdString(qs_routerip.toStdString());
             QObject::connect(dceMediaSocket,SIGNAL(readyRead()), this, SLOT(updateTimeCode()));
+            portConnected= true;
         }
         else
-        {   //setDceResponse("couldnt start timecode");
+        {
+            qDebug("couldnt start timecode");
 #ifdef QT_DEBUG
             qDebug() << dceMediaSocket->errorString();
+
 #endif
+            portConnected = false;
+            stop();
         }
     }
     else
     {
-#ifdef QT_DEBUG
-        if(server != dceMediaSocket->peerAddress().toString())
-        {
-            stop();
-                    start(server, port);
-                     qDebug()<< "New Server! "<< server <<"::"<<port;
-        }
-        else{
-           qDebug("Time code running, moving on.");
-        }
+        if(dceMediaSocket->isOpen() || portConnected == true){
 
-#endif
+
+            if(dceMediaSocket->peerName()== server)
+            {
+                qDebug() << "Its already connected";
+               // break;
+            }
+            else
+            {
+                qDebug() << dceMediaSocket->peerName() << "is different from " << server << ". reconnecting";
+                restart();
+                //break;
+            }
+        }
+        else
+        {
+            qDebug() << "Cannot connect to server, check internals";
+            qDebug()<< dceMediaSocket->peerAddress();
+            qDebug() << dceMediaSocket->peerPort();
+            qDebug()<< dceMediaSocket->errorString();
+            stop();
+        }
     }
 }
 
@@ -99,6 +116,7 @@ void TimeCodeManager::stop()
     setStringTime("0");
     setSpeed(0);
     dceMediaSocket->close();
+    dceMediaSocket->disconnectFromHost();
 }
 
 void TimeCodeManager::restart()
@@ -107,12 +125,15 @@ void TimeCodeManager::restart()
     setTime(0);
     setSpeed(0);
     dceMediaSocket->close();
+    dceMediaSocket->disconnectFromHost();
+
+    start(mediaPlayerIp, port);
 }
 
 void TimeCodeManager::updateTimeCode()
 {
     socketData = dceMediaSocket->readLine();
-   // qDebug() << QString::fromAscii(socketData);
+    // qDebug() << QString::fromAscii(socketData);
 
     std::string sLine = QString::fromLocal8Bit(socketData.data(), socketData.size()).toStdString();
     if (sLine.length() > 0)
@@ -181,12 +202,12 @@ void TimeCodeManager::setPosition()
 
     QStringList current = qsCurrentTime.split(":");
     if(current.length() > 2){
-    int hoursToSec = current.at(0).toInt() * 3600 ;
-    int minuteToSec = (current.at(1).toInt() * 60);
-    int seconds = current.at(2).toInt();
-    int currentPosition = hoursToSec + minuteToSec + seconds;
-    setTime(currentPosition);
-    setProgressBar((currentPosition));
+        int hoursToSec = current.at(0).toInt() * 3600 ;
+        int minuteToSec = (current.at(1).toInt() * 60);
+        int seconds = current.at(2).toInt();
+        int currentPosition = hoursToSec + minuteToSec + seconds;
+        setTime(currentPosition);
+        setProgressBar((currentPosition));
     }
 }
 

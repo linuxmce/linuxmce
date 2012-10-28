@@ -37,6 +37,9 @@ class AttributeSortModel: public QAbstractListModel
 public:
   explicit AttributeSortModel(AttributeSortItem* prototype, QObject* parent = 0);
   ~AttributeSortModel();
+#ifdef QT5
+   QHash<int, QByteArray> roleNames() const;
+#endif
   Q_INVOKABLE int rowCount(const QModelIndex &parent = QModelIndex()) const;
   QVariant data(const QModelIndex &index, int role = Qt::DisplayRole) const;
   void appendRow(AttributeSortItem* item);

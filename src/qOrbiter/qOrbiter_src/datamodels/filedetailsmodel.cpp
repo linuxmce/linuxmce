@@ -173,5 +173,11 @@ void FileDetailsModel::sortModel(int column, Qt::SortOrder order)
 }
 
 
+#ifdef QT5
+QHash<int, QByteArray> FileDetailsModel::roleNames() const
+{
+     return m_prototype->roleNames();
+}
+#endif
 
 

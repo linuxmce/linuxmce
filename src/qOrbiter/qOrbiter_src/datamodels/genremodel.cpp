@@ -190,3 +190,9 @@ void GenreModel::ReturnSelectedItems()
     emit SetTypeSort(3, qs_sorting_string);
 }
 
+#ifdef QT5
+QHash<int, QByteArray> GenreModel::roleNames() const
+{
+     return m_prototype->roleNames();
+}
+#endif

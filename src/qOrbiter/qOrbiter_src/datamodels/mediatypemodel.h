@@ -16,6 +16,9 @@ class MediaSubTypeModel: public QAbstractListModel
 public:
   explicit MediaSubTypeModel(MediaSubTypeItem* prototype, QObject* parent = 0);
   ~MediaSubTypeModel();
+#ifdef QT5
+   QHash<int, QByteArray> roleNames() const;
+#endif
   int rowCount(const QModelIndex &parent = QModelIndex()) const;
   QVariant data(const QModelIndex &index, int role = Qt::DisplayRole) const;
   void appendRow(MediaSubTypeItem* item);

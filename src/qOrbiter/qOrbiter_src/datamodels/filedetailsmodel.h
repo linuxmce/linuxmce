@@ -41,6 +41,9 @@ class FileDetailsModel: public QAbstractListModel
 public:
     explicit FileDetailsModel(FileDetailsItem* prototype, QObject* parent = 0);
     ~FileDetailsModel();
+#ifdef QT5
+   QHash<int, QByteArray> roleNames() const;
+#endif
     int rowCount(const QModelIndex &parent = QModelIndex()) const;
     QVariant data(const QModelIndex &index, int role = Qt::DisplayRole) const;
     void appendRow(FileDetailsItem* item);

@@ -176,4 +176,10 @@ void FilterModel::ReturnSelectedItems()
     emit SetTypeSort(2, qs_sorting_string);
 }
 
+#ifdef QT5
+QHash<int, QByteArray> FilterModel::roleNames() const
+{
+     return m_prototype->roleNames();
+}
+#endif
 

@@ -43,6 +43,7 @@ public:
     int tcTotalTime;
     int tcCurrentTime;
     double runningTimer;
+    bool portConnected;
 
     QString qsTotalTime;
     QString qsCurrentTime;

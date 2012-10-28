@@ -168,3 +168,10 @@ void GenericSetupModel::checkForMore()
         //manager_ref->pqOrbiter->populateAdditionalMedia();
     }
 }
+
+#ifdef QT5
+QHash<int, QByteArray> GenericSetupModel::roleNames() const
+{
+     return m_prototype->roleNames();
+}
+#endif

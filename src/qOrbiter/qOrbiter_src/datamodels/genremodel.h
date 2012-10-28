@@ -15,6 +15,9 @@ class GenreModel : public QAbstractListModel
 public:
     explicit GenreModel(GenreItem* prototype, QObject* parent = 0);
     ~GenreModel();
+#ifdef QT5
+   QHash<int, QByteArray> roleNames() const;
+#endif
     Q_INVOKABLE int rowCount(const QModelIndex &parent = QModelIndex()) const;
     QVariant data(const QModelIndex &index, int role = Qt::DisplayRole) const;
     void appendRow(GenreItem* item);

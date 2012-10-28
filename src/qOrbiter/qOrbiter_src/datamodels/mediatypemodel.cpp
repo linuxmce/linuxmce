@@ -183,5 +183,10 @@ void MediaSubTypeModel::ReturnSelectedItems()
 
     emit SetTypeSort(1, qs_sorting_string);
 }
-
+#ifdef QT5
+QHash<int, QByteArray> MediaSubTypeModel::roleNames() const
+{
+     return m_prototype->roleNames();
+}
+#endif
 

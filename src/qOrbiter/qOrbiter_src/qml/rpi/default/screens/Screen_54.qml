@@ -22,7 +22,7 @@ Rectangle {
 
     height: appH
     width: appW 
-    color: "darkslategrey"
+    color: "transparent"
 
     Rectangle{
         id:filler

@@ -40,6 +40,9 @@ class FilterModel: public QAbstractListModel
 public:
   explicit FilterModel(FilterModelItem* prototype, QObject* parent = 0);
   ~FilterModel();
+#ifdef QT5
+   QHash<int, QByteArray> roleNames() const;
+#endif
   Q_INVOKABLE int rowCount(const QModelIndex &parent = QModelIndex()) const;
   QVariant data(const QModelIndex &index, int role = Qt::DisplayRole) const;
   void appendRow(FilterModelItem* item);
