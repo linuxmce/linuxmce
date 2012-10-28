@@ -13,6 +13,12 @@ FloorPlanModel::FloorPlanModel(FloorplanDevice* prototype, qorbiterManager *r, Q
     setStatus(false);
 
 }
+#ifdef QT5
+QHash<int, QByteArray> FloorPlanModel::roleNames() const
+{
+     return m_prototype->roleNames();
+}
+#endif
 
 int FloorPlanModel::rowCount(const QModelIndex &parent) const
 {

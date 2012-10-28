@@ -31,6 +31,13 @@ void TelecomScenarioModel::appendRow(TelecomScenarioItem *item)
   appendRows(QList<TelecomScenarioItem*>() << item);
 }
 
+#ifdef QT5
+QHash<int, QByteArray> TelecomScenarioModel::roleNames() const
+{
+     return m_prototype->roleNames();
+}
+#endif
+
 void TelecomScenarioModel::appendRows(const QList<TelecomScenarioItem *> &items)
 {
   beginInsertRows(QModelIndex(), rowCount(), rowCount()+items.size()-1);

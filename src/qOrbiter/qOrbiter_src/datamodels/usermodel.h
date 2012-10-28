@@ -17,6 +17,10 @@ class UserModel : public QAbstractListModel
 public:
     explicit UserModel(UserItem* prototype, QObject* parent = 0);
     ~UserModel();
+
+#ifdef QT5
+   QHash<int, QByteArray> roleNames() const;
+#endif
     int rowCount(const QModelIndex &parent = QModelIndex()) const;
     QVariant data(const QModelIndex &index, int role = Qt::DisplayRole) const;
     void appendRow(UserItem* item);

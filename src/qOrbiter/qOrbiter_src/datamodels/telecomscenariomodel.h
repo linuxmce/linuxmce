@@ -16,6 +16,9 @@ public:
   explicit TelecomScenarioModel(TelecomScenarioItem *prototype, QObject* parent = 0);
   ~TelecomScenarioModel();
 
+#ifdef QT5
+   QHash<int, QByteArray> roleNames() const;
+#endif
   int rowCount(const QModelIndex &parent = QModelIndex()) const;
   QVariant data(const QModelIndex &index, int role = Qt::DisplayRole) const;
   void appendRow(TelecomScenarioItem* item);

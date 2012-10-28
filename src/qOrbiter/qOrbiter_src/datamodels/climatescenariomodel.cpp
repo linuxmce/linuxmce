@@ -7,6 +7,13 @@ ClimateScenarioModel::ClimateScenarioModel(ClimateScenarioItem* prototype, QObje
 #endif
 }
 
+#ifdef QT5
+QHash<int, QByteArray> ClimateScenarioModel::roleNames() const
+{
+     return m_prototype->roleNames();
+}
+#endif
+
 
 int ClimateScenarioModel::rowCount(const QModelIndex &parent) const
 {

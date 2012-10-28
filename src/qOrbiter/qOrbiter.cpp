@@ -4541,7 +4541,7 @@ void DCE::qOrbiter::prepareFileList(int iPK_MediaType)
     requestMore = true;
     media_currentRow = 0;
     cellsToRender = 0;
-    setMediaResponse("Initial media request");
+    setMediaResponse("Initial media request for media type " + QString::number(iPK_MediaType));
 #ifdef QT5
     QApplication::processEvents(QEventLoop::AllEvents);
 #endif
@@ -4676,7 +4676,7 @@ void DCE::qOrbiter::prepareFileList(int iPK_MediaType)
 #endif
             if (cellsToRender == 0)
             {
-                //performing checks
+                setMediaResponse("No Media");
                 return;
                 // exit ; //exit the loop because there is no grid? - eventually provide "no media" feedback
             }
@@ -4688,8 +4688,9 @@ void DCE::qOrbiter::prepareFileList(int iPK_MediaType)
                 media_totalPages = (i_mediaModelRows / media_pageSeperator)+1; //16 being the items per page.
                 pDataGridTable = NULL;
                 setModelPages(media_totalPages);
-                emit newGrid();
-
+                setMediaResponse(QString::number(media_totalPages)+ " pages from request, populating first page.");
+                qDebug() << "Emitting:: newGrid()";
+                requestPage(0);
             }
 
         }

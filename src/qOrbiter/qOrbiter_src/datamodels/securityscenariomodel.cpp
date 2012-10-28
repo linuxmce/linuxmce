@@ -6,6 +6,12 @@ SecurityScenarioModel::SecurityScenarioModel(SecurityScenarioItem* prototype, QO
 #endif
 }
 
+#ifdef QT5
+QHash<int, QByteArray> SecurityScenarioModel::roleNames() const
+{
+     return m_prototype->roleNames();
+}
+#endif
 
 int SecurityScenarioModel::rowCount(const QModelIndex &parent) const
 {

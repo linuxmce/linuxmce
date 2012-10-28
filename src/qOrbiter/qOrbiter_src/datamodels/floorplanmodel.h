@@ -44,6 +44,9 @@ class FloorPlanModel : public QAbstractListModel
 public:
     explicit FloorPlanModel(FloorplanDevice *m_prototype, qorbiterManager *r, QObject *parent = 0);
 typedef QMap <int, QString> myMap;
+#ifdef QT5
+   QHash<int, QByteArray> roleNames() const;
+#endif
     int rowCount(const QModelIndex &parent = QModelIndex()) const;
     QVariant data(const QModelIndex &index, int role = Qt::DisplayRole) const;
     void appendRow(FloorplanDevice* item);

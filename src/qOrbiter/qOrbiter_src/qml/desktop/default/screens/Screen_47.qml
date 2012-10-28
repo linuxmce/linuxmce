@@ -16,7 +16,10 @@ Rectangle {
     clip: true
     property int mouselocY: 0
     property int mouselocX: 0
-    Component.onCompleted: dcerouter.requestTypes(dcerouter.i_current_mediaType)
+//    Connections{
+//        target:dcerouter
+//        onNewGrid:{dcerouter.requestPage(0); console.log("New Orbiter Grid Ready")}
+//    }
 
     function runEffects()
     {

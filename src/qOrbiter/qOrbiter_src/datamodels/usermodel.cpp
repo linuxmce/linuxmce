@@ -10,6 +10,13 @@ UserModel::UserModel(UserItem* prototype, QObject *parent) :
 
 }
 
+#ifdef QT5
+QHash<int, QByteArray> UserModel::roleNames() const
+{
+     return m_prototype->roleNames();
+}
+#endif
+
 int UserModel::rowCount(const QModelIndex &parent) const
 {
   Q_UNUSED(parent);

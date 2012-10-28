@@ -138,39 +138,19 @@ void ListModel::reset()
    clearing = false;
 }
 
-//void ListModel::beginResetModel()
-//{
-//    emit modelAboutToBeReset();
-//    for (int i = 0; i < m_list.count(); i++)
-//    {
-//        m_list.removeAt(i);
-//    }
-//    endResetModel();
-//}
-
-//void ListModel::endResetModel()
-//{
-//    m_list.clear();
-//    emit modelReset();
-//}
-
 bool ListModel::resetInternalData()
 {
+    qDebug("Resetting listmodel data");
+    int total = m_list.count();
+    for(int i = 0; i <= m_list.count(); ++i){
+        QApplication::processEvents(QEventLoop::AllEvents);
+        qDebug() <<"removing::" << m_list.count() << " of " << total;
+        m_list.removeAt(i);
+    }
+    m_list.clear();
+    qDebug() << "Items cleared. Count:: "<< m_list.count();
+    return true;
 
-  m_list.clear();
-  while(!m_list.empty())
-  {
-      QApplication::processEvents(QEventLoop::AllEvents);
-      qDebug() << m_list.count();
-  }
-  if(m_list.empty())
-  {
-      qDebug() << "Container Empty::" << m_list.count();
-      return true;
-  }
-  else
-  {qDebug()<< "Application Error!";}
-    //emit dataChanged(QModelIndex(),QModelIndex(), 0);
 }
 
 gridItem * ListModel::find(const QString &id) const
@@ -373,7 +353,7 @@ void ListModel::clearAndRequest(int type)
 
 void ListModel::clearForPaging()
 {
-#ifndef for_desktop
+
     /*
     if(removeRows(0, m_list.count(), QModelIndex()))
         emit pagingCleared();
@@ -381,36 +361,14 @@ void ListModel::clearForPaging()
     QApplication::processEvents(QEventLoop::AllEvents);
     emit modelAboutToBeReset();
     beginResetModel();
-    resetInternalData();
-    setProgress(0.0);
-    QApplication::processEvents(QEventLoop::AllEvents);
-    endResetModel();
-    emit modelReset();
-    emit pagingCleared();
-    QApplication::processEvents(QEventLoop::AllEvents);
-#else
-    clearing = true;
-
-    QApplication::processEvents(QEventLoop::AllEvents);
-    emit modelAboutToBeReset();
-    beginResetModel();
-    if(    resetInternalData()){
+    if(resetInternalData()){
         setProgress(0.0);
         QApplication::processEvents(QEventLoop::AllEvents);
-        emit modelReset();
         endResetModel();
-        QApplication::processEvents(QEventLoop::AllEvents);
-        clearing = false;
-
+        emit modelReset();
         emit pagingCleared();
+        QApplication::processEvents(QEventLoop::AllEvents);
     }
-    else
-    {
-
-    }
-
-
-#endif
 
 }
 
