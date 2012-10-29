@@ -168,12 +168,6 @@ Enable_Audio_Channels () {
 		done 2>&1>/dev/null
 		alsactl store
 	done
-
-
-	if grep -qi "device 7" <<< "$yalpa"; then 
-		CardNumber=$(grep -i "device 7" <<< "$yalpa" | grep -iwo "card ." | awk '{print $2}')
-		aplay -Dplughw:${CardNumber},7 /usr/share/sounds/linphone/rings/orig.wav
-	fi
 }
 
 Setup_AsoundConf()
@@ -220,11 +214,11 @@ Setup_AsoundConf()
 		*H*)
 			CardDevice=$(grep -i "hdmi" <<< "$Yalpa" | grep -wo "device ." | awk '{print $2}')
 			if [[ $(wc -l <<< "$CardDevice") -gt "3" ]]; then
-				AsoundConf="/usr/pluto/template/asound.conf.backup"
+				AsoundConf="/usr/pluto/templates/asound.conf.backup"
 				if grep "7" <<< "$CardDevice"; then
 					CardDevice="7"
-					AsoundConf="/usr/pluto/template/asound.conf.backup"
-					SoundCard="${SoundCard},${CardDevice}"
+					AsoundConf="/usr/pluto/templates/asound.conf.backup"
+					SoundCard="${HWOnlyCard},${CardDevice}"
 				fi
 			fi
 			;;
@@ -235,13 +229,13 @@ Setup_AsoundConf()
 
 	SoundOut="hw"
 	if [[ "$AlternateSC" == "1" ]]; then
-		SoundCard="${SoundCard},${CardDevice}"
 		SoundOut="plughw"
+		SoundCard="${HWOnlyCard},${CardDevice}"
 	fi
 	if [[ "$AlternateSC" == "2" ]]; then
-		SoundCard="${SoundCard},${CardDevice}"
-		AsoundConfig="/usr/pluto/templates/asound.conf.backup"
 		SoundOut="plughw"
+		AsoundConfig="/usr/pluto/templates/asound.conf.backup"
+		SoundCard="${HWOnlyCard},${CardDevice}"
 	fi
 
 	local DigitalPlaybackCard="${SoundOut}:${SoundCard}"
@@ -398,7 +392,7 @@ AudioSettings_Check()
 		Reboot="Reboot"
 	fi
 }
-
+	
 Logging "$TYPE" "$SEVERITY_NORMAL" "SetupAudioVideo" "Starting"
 ReadConf
 VideoSettings_Check
