@@ -60,6 +60,7 @@ namespace DCE
 		bool m_bIsDaytime;
 		time_t m_tNextSunriseSunset;
 		map<int,int> m_mapPK_HouseMode;
+		int m_isDst;
 
 		// Private methods
 		void GetHouseModes(Message* pMessage);

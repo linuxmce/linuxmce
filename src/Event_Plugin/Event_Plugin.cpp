@@ -52,7 +52,7 @@ using namespace DCE;
 
 #define ALARM_TIMED_EVENT	1
 #define ALARM_SUNRISE_SUNSET	2
-
+#define ALARM_CHECK_DST         3
 
 //<-dceag-const-b->
 // The primary constructor when the class is created as a stand-alone device
@@ -69,6 +69,7 @@ Event_Plugin::Event_Plugin(int DeviceID, string ServerAddress,bool bConnectEvent
 	m_pTimedEvent_Next=NULL;
 	m_pDatabase_pluto_main=NULL;
 	m_pAlarmManager=NULL;
+	m_isDst = -1;
 }
 
 //<-dceag-getconfig-b->
@@ -87,6 +88,13 @@ bool Event_Plugin::GetConfig()
     }
     m_pAlarmManager = new AlarmManager();
     m_pAlarmManager->Start(2);      //4 = number of worker threads
+
+    time_t t=time(NULL);
+    struct tm tm_DstNow;
+    localtime_r(&t,&tm_DstNow);
+    m_isDst = tm_DstNow.tm_isdst;
+    
+    m_pAlarmManager->AddRelativeAlarm(60,this,ALARM_CHECK_DST,NULL);
 
     Initialize(false);
 	return true;
@@ -507,6 +515,21 @@ void Event_Plugin::AlarmCallback(int id, void* param)
 	}
 	else if( id==ALARM_SUNRISE_SUNSET )
 		FireSunriseSunsetEvent();
+	else if ( id==ALARM_CHECK_DST )
+	  {
+	    time_t t=time(NULL);
+	    struct tm tm_DstNow;
+	    localtime_r(&t,&tm_DstNow);
+	    int isDst = tm_DstNow.tm_isdst;
+	    if (isDst != m_isDst)
+	      {
+		// DST has changed, reload everything.
+		LoggerWrapper::GetInstance()->Write(LV_WARNING,"Daylight Savings time has changed. Reloading events.");
+		Initialize(true);
+	      }
+	    m_isDst = isDst;
+	    m_pAlarmManager->AddRelativeAlarm(1,this,ALARM_CHECK_DST,NULL);
+	  }
 }
 
 class DataGridTable *Event_Plugin::AlarmsInRoom( string GridID, string Parms, void *ExtraData, int *iPK_Variable, string *sValue_To_Assign, class Message *pMessage )
