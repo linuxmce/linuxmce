@@ -24,7 +24,7 @@ Rectangle {
 
     function runEffects()
     {
-        MyJs.createStageComponent("FileDetails"+dcerouter.i_current_mediaType+".qml" , fileviewscreen)
+        MyJs.createStageComponent("FileDetails"+manager.i_current_mediaType+".qml" , fileviewscreen)
     }
 
     Connections
