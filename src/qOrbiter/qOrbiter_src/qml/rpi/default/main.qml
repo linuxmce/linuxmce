@@ -32,11 +32,7 @@ MouseArea{
     anchors.fill: item
 }
 
-Rectangle{
-    id:bg
-    color: "darkslategrey"
-    anchors.fill: item
-   }
+
     signal close()
     signal changeScreen(string s)
     signal setupStart(int x, string y)
@@ -89,19 +85,19 @@ Rectangle{
     anchors.fill:parent
     }
 */
-//    ScreenSaver
-//    {   id:ss
-//        height: appH
-//        width: appW
-//        anchors.centerIn: parent
-//        z:-1
-//        MouseArea{
-//            anchors.fill: ss
-//            acceptedButtons: Qt.LeftButton | Qt.RightButton
-//            onClicked:  Qt.RightButton ? pageLoader.visible = !pageLoader.visible: ""
-//        }
+    ScreenSaver
+    {   id:ss
+        height: appH
+        width: appW
+        anchors.centerIn: parent
+        z:-1
+        MouseArea{
+            anchors.fill: ss
+            acceptedButtons: Qt.LeftButton | Qt.RightButton
+            onClicked:  Qt.RightButton ? pageLoader.visible = !pageLoader.visible: ""
+        }
 
-//    }
+    }
     function scaleX(x){
         return x/100*appW
     }

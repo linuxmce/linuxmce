@@ -285,7 +285,7 @@ int main(int argc, char* argv[])
 
         QThread dceThread;
         qOrbiter pqOrbiter(PK_Device, sRouter_IP,true,bLocalMode );
-        orbiterWindow orbiterWin(-1, "192.168.80.1");
+        orbiterWindow orbiterWin(-1, sRouter_IP);
         pqOrbiter.moveToThread(&dceThread);
         QObject::connect(&dceThread, SIGNAL(started()), &pqOrbiter, SLOT(beginSetup()));
 
@@ -433,6 +433,7 @@ int main(int argc, char* argv[])
         QObject::connect(&pqOrbiter,SIGNAL(gotoQml(QString)), &w, SLOT(gotoQScreen(QString)),Qt::QueuedConnection);
 
         //floorplans
+        QObject::connect(&w, SIGNAL(floorplanTypeChanged(int)), &pqOrbiter, SLOT(ShowFloorPlan(int)), Qt::QueuedConnection);
         QObject::connect(&pqOrbiter, SIGNAL(floorPlanImageData(const uchar*,int)), w.floorplans, SLOT(setImageData(const uchar*,int)), Qt::QueuedConnection);
         QObject::connect(w.floorplans, SIGNAL(pageChanged(QString)), &pqOrbiter, SLOT(getFloorPlanImage(QString)), Qt::QueuedConnection);
         QObject::connect(w.floorplans, SIGNAL(requestNewFloorPlanData(QString)), &pqOrbiter, SLOT(updateFloorPlan(QString)), Qt::QueuedConnection);
@@ -440,6 +441,8 @@ int main(int argc, char* argv[])
         QObject::connect(w.floorplans, SIGNAL(adjustLevel(int,myMap)), &pqOrbiter, SLOT(adjustLighting(int,myMap)),Qt::QueuedConnection);
 
         //mediagrid
+        QObject::connect(&w, SIGNAL(gridStatus(bool)), &pqOrbiter, SLOT(setGridStatus(bool)),Qt::QueuedConnection);
+        QObject::connect(&w, SIGNAL(gridGoBack()), &pqOrbiter, SLOT(goBackGrid()), Qt::QueuedConnection);
         QObject::connect(mediaModel, SIGNAL(pagingCleared()), &pqOrbiter,SLOT(populateAdditionalMedia()), Qt::QueuedConnection);
         QObject::connect(&pqOrbiter, SIGNAL(clearPageGrid()), mediaModel, SLOT(clearForPaging()), Qt::QueuedConnection);
         QObject::connect(mediaModel, SIGNAL(itemAdded(int)), &pqOrbiter, SLOT(setCurrentRow(int)),Qt::QueuedConnection);

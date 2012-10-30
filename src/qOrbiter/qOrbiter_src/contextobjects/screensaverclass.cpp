@@ -8,7 +8,7 @@ ScreenSaverClass::ScreenSaverClass(QObject *parent) :
     qi_currentImage = QImage();
     qi_newImage = QImage();
     primary = true;
-    transitionDuration = 10000;
+    transitionDuration = 60000;
 }
 
 void ScreenSaverClass::setImageList(QStringList imgList)
@@ -67,7 +67,7 @@ void ScreenSaverClass::pickImage()
 
 void ScreenSaverClass::selectNew()
 {
-    int index = images.lastIndexOf(currentImage);  
+    int index = images.lastIndexOf(currentImage);
 
 
     if (index+1 < images.count())

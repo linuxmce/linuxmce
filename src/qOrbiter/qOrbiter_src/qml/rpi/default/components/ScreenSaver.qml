@@ -19,6 +19,7 @@ Rectangle {
     {
         blur.source = undefined
          ssimg.source = "image://listprovider/screensaver/"+securityvideo.timestamp
+        console.log(ssimg.sourceSize)
          blur.source = ssimg
         raise.running = true
         animation_section2.running = true
@@ -33,7 +34,7 @@ Rectangle {
         id: ssimg
         height: appH
         width: appW
-        source: "image://listprovider/screensaver"+screensaver.timestamp
+        source: "image://listprovider/screensaver/"+securityvideo.timestamp
         anchors.centerIn: parent
         smooth: true
         visible: false

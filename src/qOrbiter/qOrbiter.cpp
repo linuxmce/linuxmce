@@ -2088,7 +2088,7 @@ void qOrbiter::beginSetup()
 #ifndef for_harmattan
     qRegisterMetaType< QList<ExistingOrbiter*> >("QList<ExistingOrbiter*>");
 #endif
-    qDebug() <<"Run function executed" << currentThreadId();
+    qDebug() <<"Run function executed" << this->thread()->currentThreadId();
 }
 
 void qOrbiter::setRecievingStatus(bool b)
@@ -2843,9 +2843,8 @@ void DCE::qOrbiter::ShowFloorPlan(int floorplantype)
 {
     i_current_floorplanType = floorplantype;
     emit floorplanTypeChanged(floorplantype);
-    QString Screen = QString("Screen_").append(StringUtils::itos(i_current_floorplanType).c_str()).append(".qml");
-    emit gotoQml(Screen);
 
+    //emit gotoQml(Screen);
 }
 
 /*
@@ -4831,7 +4830,7 @@ void qOrbiter::pingCore()
 
     setCommandResponse("initiating ping to core");
 
-    QString url = QString::fromStdString("DCEROUTER");
+    QString url = QString::fromStdString(m_sHostName);
     if(!url.contains(QRegExp("(\\D)"))){
 
         setCommandResponse("Host name provided, doing lookup");
@@ -4881,7 +4880,7 @@ void qOrbiter::checkInstall()
 {
     setCommandResponse("Checking for LinuxMCE installtion in checkInstall()");
     if(m_bOrbiterConnected == false){
-        QString url = "http://"+QString::fromStdString("192.168.80.1")+"/lmce-admin/index.php";
+        QString url = "http://"+QString::fromStdString(m_sIPAddress)+"/lmce-admin/index.php";
         QNetworkAccessManager *pingManager = new QNetworkAccessManager();
         connect(pingManager, SIGNAL(finished(QNetworkReply*)), this, SLOT(verifyInstall(QNetworkReply*)));
         QNetworkReply *badReply = pingManager->get(QNetworkRequest(url));

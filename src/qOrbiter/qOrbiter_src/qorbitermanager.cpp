@@ -304,7 +304,7 @@ bool qorbiterManager::initializeManager(string sRouterIP, int device_id)
 #else
     remoteDirectoryPath = "http://"+QString::fromStdString(sRouterIP)+"/lmce-admin/skins"+qmlPath;
 #endif
-    QString qmlPath = adjustPath(QApplication::applicationDirPath().remove("/bin"));
+    QString qmlPath = adjustPath(QApplication::applicationDirPath().remove("bin"));
     QString localDir = qmlPath.append(buildType);
 
 
@@ -775,9 +775,9 @@ void qorbiterManager::processConfig(QByteArray config)
 
     configData.clear();
     tConf.clear();
-#ifndef RPI
+
    activateScreenSaver();
-#endif
+
     emit registerOrbiter((userList->find(sPK_User)->data(4).toInt()), QString::number(iea_area), iFK_Room );
     setOrbiterStatus(true);
 }
@@ -788,7 +788,7 @@ bool qorbiterManager::OrbiterGen()
 }
 
 void qorbiterManager::swapSkins(QString incSkin)
-{    
+{
     qDebug() << "swapping sking to::" << incSkin;
 #ifdef WIN32
     incSkin = "default";
@@ -989,7 +989,8 @@ QString qorbiterManager::adjustPath(const QString &path)
 #endif
 
 #ifdef for_harmattan
-    path.remove("/bin");
+    QString p = path;
+    return p.remove("bin");
 #endif
 
 //#else  !RPI
@@ -1049,7 +1050,7 @@ bool qorbiterManager::loadSkins(QUrl base)
     QStringList localSkins = desktopQmlPath.entryList(QDir::Dirs |QDir::NoDotAndDotDot);
     qDebug()<<"inside of skins we find" << localSkins.join(",");
     tskinModel->addSkin(localSkins.join(","));
-#else    
+#else
     QDir desktopQmlPath(QString(base.toString()),"",QDir::Name, QDir::NoDotAndDotDot);
     setDceResponse("Skin Search Path:"+ desktopQmlPath.dirName());
     QStringList localSkins = desktopQmlPath.entryList(QDir::Dirs |QDir::NoDotAndDotDot);
@@ -1113,7 +1114,7 @@ void qorbiterManager::getFloorplanDevices(int floorplantype)
 void qorbiterManager::setFloorplanType(int t)
 {
     i_currentFloorplanType = t;
-    emit floorplanTypeChanged();
+    emit floorplanTypeChanged(t);
 }
 
 
@@ -1336,36 +1337,37 @@ void qorbiterManager::initializeGridModel()
 
 void qorbiterManager::goBackGrid()
 {
-    setRequestMore(false);
-    backwards= true;
+    setRequestMore(true);
+    emit gridGoBack();
+//    backwards= true;
 
-    if(goBack.isEmpty())
-    {
-        initializeSortString();
-        emit clearAndContinue();
-    }
-    else
-    {
-        goBack.removeLast();
-        int back = goBack.count() - 1;
-#ifdef debug
-        qDebug() << back;
-        qDebug() << "Going back to::" << goBack.at(back);
-#endif
+//    if(goBack.isEmpty())
+//    {
+//        initializeSortString();
+//        emit clearAndContinue();
+//    }
+//    else
+//    {
+//        goBack.removeLast();
+//        int back = goBack.count() - 1;
+//#ifdef debug
+//        qDebug() << back;
+//        qDebug() << "Going back to::" << goBack.at(back);
+//#endif
 
-        QStringList reverseParams = goBack.at(back).split("|", QString::KeepEmptyParts);
-        q_mediaType = reverseParams.first();
-        q_subType = reverseParams.at(1);
-        q_fileFormat = reverseParams.at(2);
-        q_attribute_genres = reverseParams.at(3);
-        q_mediaSources = reverseParams.at(4);
-        q_usersPrivate = reverseParams.at(5);
-        q_attributetype_sort = reverseParams.at(6);
-        q_pk_users = reverseParams.at(7);
-        q_last_viewed = reverseParams.at(8);
-        q_pk_attribute = reverseParams.at(9);
-        emit clearAndContinue();
-    }
+//        QStringList reverseParams = goBack.at(back).split("|", QString::KeepEmptyParts);
+//        q_mediaType = reverseParams.first();
+//        q_subType = reverseParams.at(1);
+//        q_fileFormat = reverseParams.at(2);
+//        q_attribute_genres = reverseParams.at(3);
+//        q_mediaSources = reverseParams.at(4);
+//        q_usersPrivate = reverseParams.at(5);
+//        q_attributetype_sort = reverseParams.at(6);
+//        q_pk_users = reverseParams.at(7);
+//        q_last_viewed = reverseParams.at(8);
+//        q_pk_attribute = reverseParams.at(9);
+//        emit clearAndContinue(i_current_mediaType);
+
 
     //datagridVariableString.append(q_mediaType).append("|").append(q_subType).append("|").append(q_fileFormat).append("|").append(q_attribute_genres).append("|").append(q_mediaSources).append("|").append(q_usersPrivate).append("|").append(q_attributetype_sort).append("|").append(q_pk_users).append("|").append(q_last_viewed).append("|").append(q_pk_attribute);
 
@@ -1420,6 +1422,10 @@ void qorbiterManager::pauseMedia()
 
 void qorbiterManager::showfloorplan(int fptype)
 {
+    setFloorplanType(fptype);
+    QString Screen = QString("Screen_").append(QString::number(fptype).append(".qml"));
+    gotoQScreen(Screen);
+
     //pqOrbiter->ShowFloorPlan(fptype);
 }
 
@@ -1516,7 +1522,7 @@ void qorbiterManager::changeChannels(QString chan)
 }
 
 void qorbiterManager::getLiveTVPlaylist()
-{   
+{
 
 }
 

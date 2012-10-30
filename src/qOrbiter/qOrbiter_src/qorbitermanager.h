@@ -401,6 +401,8 @@ Param 10 - pk_attribute
     QString applicationPath;
 
 signals:
+    void gridLoadingStatus(bool s);
+    void gridGoBack();
     void mediaTypeChanged();
     void requestDcePages(int i);
     void showList();
@@ -431,7 +433,7 @@ signals:
     void continueSetup();
     void screenChange(QString s);
     void clearModel();
-    void clearAndContinue();
+    void clearAndContinue(int t);
     void registerOrbiter(int user, QString ea, int room);
     void unregisterOrbiter(int user, QString ea, int room);
     void startPlayback(QString file);
@@ -469,7 +471,7 @@ signals:
     void skinDataLoaded(bool b);
     void roomChanged();
 
-    void floorplanTypeChanged();
+    void floorplanTypeChanged(int t);
     void setAlarm(bool s, int g);
     void getSingleCam(int i_pk_camera_device, int h, int w);
 
@@ -495,7 +497,7 @@ public slots: //note: Q_INVOKABLE means it can be called directly from qml
     void setDebugMode(bool b) {debugMode = b; emit debugModeChanged();}
     bool getDebugMode() {return debugMode;}
 
-    void displayModelPages(QList<QObject*> pages);    
+    void displayModelPages(QList<QObject*> pages);
 
     void setInternalIp(QString s) { m_ipAddress = s; emit internalIpChanged(); }
     QString getInternalIp() {return m_ipAddress; }
@@ -580,6 +582,7 @@ public slots: //note: Q_INVOKABLE means it can be called directly from qml
     void changedPlaylistPosition(QString position);
 
     //datagrid related
+    void setGridStatus(bool s) {emit gridLoadingStatus(s);}
     void setSorting(int i);
     void setMediaType(int m) {i_current_mediaType = m; emit mediaTypeChanged();}
     int getMediaType(){return i_current_mediaType;}
@@ -618,6 +621,7 @@ public slots: //note: Q_INVOKABLE means it can be called directly from qml
 
     //floorplans
     void showfloorplan(int fptype);
+
     //random c++ related slots
     bool requestDataGrid();
 
