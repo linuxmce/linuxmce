@@ -42,6 +42,7 @@ ListModel::ListModel(gridItem* prototype, QObject* parent) :
     progress = 0;
     clearing = false;
     clear();
+    setTotalPages(0);
 }
 
 int ListModel::rowCount(const QModelIndex &parent) const

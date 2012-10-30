@@ -51,7 +51,7 @@ Rectangle {
             spacing: scaleX(1)
             Text {
                 id: grid_position_label
-                text: qsTr("You are browsing by:") + dcerouter.i_current_mediaType
+                text: qsTr("You are browsing by:") + manager.i_current_mediaType
                 font.pixelSize: 14
             }
             Text {
@@ -72,7 +72,7 @@ Rectangle {
                     if (!seperationSetter.text.match("/D"))
                     {
                         dcerouter.setGridSeperator(seperationSetter.text)
-                        dcerouter.requestPage(dcerouter.media_currentPage)
+                        manager.requestPage(0)
                     }
                 }
             }
@@ -216,7 +216,7 @@ Rectangle {
                 MouseArea
                 {
                     anchors.fill: frame
-                    onClicked: {dcerouter.setStringParam(4, id);
+                    onClicked: {manager.setStringParam(4, id);
                         console.log("clicked "+id)
                         // mouselocX = mouseX; mouselocY = mouseY
                     }
@@ -284,7 +284,7 @@ Rectangle {
             id:model_pages
             height: appH
             width: scaleX(10)
-            model: dcerouter.modelPages
+            model: dataModel.totalPages
             anchors.left: parent.left
             delegate: Rectangle{
                 height: scaleY(10)
@@ -295,14 +295,15 @@ Rectangle {
                     text: index
                     font.pixelSize: scaleY(3.5)
                     anchors.centerIn: parent
-                    color: index == dcerouter.media_currentPage ? "green":"slategrey"
+                    color:"slategrey"
                     font.bold: true
                 }
 
                 MouseArea{
                     anchors.fill: parent
                     onReleased: {  page_label.font.italic = true ;
-                        dcerouter.requestPage(index);  }
+                        manager.requestPage(index);
+                    }
                     onPressed: page_label.font.italic = false
                 }
 
@@ -367,7 +368,7 @@ Rectangle {
                 MouseArea
                 {
                     anchors.fill:parent
-                    onClicked: dcerouter.goBackGrid()
+                    onClicked: manager.goBackGrid()
                 }
             }
             AttributeSelector {}

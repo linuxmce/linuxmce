@@ -10,7 +10,7 @@ Rectangle {
     signal splashLoaded()
 
     Connections{
-        target: window
+        target: manager
         onShowList:{
             existing_orbiters.visible = true
             if(existing_orbiters.count === 0){
@@ -294,11 +294,7 @@ Rectangle {
         anchors.top: rectangle2.bottom
         anchors.horizontalCenter: rectangle2.horizontalCenter
     }
-    Connections{
-        target:manager
-        onDceResponseChanged:console.log(manager.dceResponse)
 
-    }
 
     ListView{
         id:existing_orbiters
@@ -324,13 +320,13 @@ Rectangle {
 
                 Text {
                     id: orbiter_label
-                    text: qsTr("Orbiter:")+ location
+                    text: qsTr("Orbiter:")+ label
                     font.pointSize: 12
                     wrapMode: Text.WrapAtWordBoundaryOrAnywhere
                 }
                 Text {
                     id: dev_num
-                    text:qsTr("Device:")+ i_device_number
+                    text:qsTr("Device:")+ device
                     font.pointSize: 12
                     font.italic: true
                     wrapMode: Text.WrapAtWordBoundaryOrAnywhere
@@ -338,7 +334,7 @@ Rectangle {
             }
             MouseArea {
                 anchors.fill: parent
-                onClicked: window.qmlSetupLmce(i_device_number, routerip.text)
+                onClicked: window.qmlSetupLmce(device, routerip.text)
             }
         }
     }

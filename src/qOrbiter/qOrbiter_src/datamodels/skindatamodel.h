@@ -21,7 +21,9 @@ public:
 
     explicit SkinDataModel(QUrl &baseUrl, SkinDataItem *prototype, qorbiterManager *uiRef, QObject* parent = 0);
     ~SkinDataModel();
-
+#ifdef QT5
+   QHash<int, QByteArray> roleNames() const;
+#endif
     int rowCount(const QModelIndex &parent = QModelIndex()) const;
     QVariant data(const QModelIndex &index, int role = Qt::DisplayRole) const;
     void appendRow(SkinDataItem* item);

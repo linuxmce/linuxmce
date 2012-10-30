@@ -44,7 +44,7 @@ Component{
 
             MouseArea{
                 anchors.fill: delegateButton
-                onClicked: dcerouter.executeCommandGroup(params);
+                onClicked: manager.execGrp(params);
                 onPressed: overlay_hover.visible = true
                 onReleased: overlay_hover.visible= false
                 hoverEnabled: true

@@ -208,3 +208,9 @@ void SkinDataModel::checkStatus()
     qDebug("Finished loading skins") ;
         emit skinsFinished(true);
 }
+#ifdef QT5
+QHash<int, QByteArray> SkinDataModel::roleNames() const
+{
+     return m_prototype->roleNames();
+}
+#endif

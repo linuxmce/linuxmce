@@ -15,6 +15,7 @@ class ListModel : public QAbstractListModel
     Q_PROPERTY (bool loadingStatus READ getLoadingStatus WRITE setLoadingStatus NOTIFY loadingStatusChanged)
     Q_PROPERTY (int totalcells READ getTotalCells WRITE setTotalCells NOTIFY sizeChanged)
     Q_PROPERTY (int currentCells READ getCurrentCells WRITE setCurrentCells NOTIFY cellsChanged)
+    Q_PROPERTY (int totalPages READ getTotalPages WRITE setTotalPages NOTIFY totalPagesChanged())
 
 
 public:
@@ -47,6 +48,7 @@ public:
     double progress;
     int currentCells;
     bool clearing;
+    int totalPages;
 
 
 signals:
@@ -64,9 +66,12 @@ signals:
     void modelReset();
     void cellsChanged();
     void pagingCleared();
+    void totalPagesChanged();
 
 
 public slots:
+    void setTotalPages(int p){totalPages = p;qDebug() << "New page count " << totalPages; emit totalPagesChanged();}
+    int  getTotalPages() {return totalPages;}
     void setSeperator(int s) {seperator = s;}
     void checkForMore();
 

@@ -415,6 +415,7 @@ SOURCES += main.cpp \
     contextobjects/bookmarkitem.cpp \
     plugins/GoogleWeather/googleweather.cpp \
     contextobjects/promptdata.cpp \
+    datamodels/existingorbitermodel.cpp
 
 
 
@@ -533,6 +534,7 @@ HEADERS += \
     contextobjects/bookmarkitem.h \
     plugins/GoogleWeather/googleweather.h \
     contextobjects/promptdata.h \
+    datamodels/existingorbitermodel.h
 
 
 

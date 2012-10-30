@@ -21,7 +21,7 @@ Rectangle {
          ssimg.source = "image://listprovider/screensaver/"+securityvideo.timestamp
          blur.source = ssimg
         raise.running = true
-            animation_section2.running = true
+        animation_section2.running = true
     }
 
     function startZoom()

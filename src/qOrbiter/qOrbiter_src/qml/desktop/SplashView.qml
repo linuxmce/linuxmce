@@ -10,7 +10,7 @@ Rectangle {
     signal splashLoaded()
 
     Connections{
-        target: window
+        target: manager
         onShowList:{
             existing_orbiters.visible = true
             if(existing_orbiters.count === 0){
@@ -313,13 +313,13 @@ Rectangle {
 
                 Text {
                     id: orbiter_label
-                    text: qsTr("Orbiter:")+ location
+                    text: qsTr("Orbiter:")+ label
                     font.pixelSize: 12
                     wrapMode: Text.WrapAtWordBoundaryOrAnywhere
                 }
                 Text {
                     id: dev_num
-                    text:qsTr("Device:")+ i_device_number
+                    text:qsTr("Device:")+ device
                     font.pixelSize: 12
                     font.italic: true
                     wrapMode: Text.WrapAtWordBoundaryOrAnywhere
@@ -327,7 +327,7 @@ Rectangle {
             }
             MouseArea {
                 anchors.fill: parent
-                onClicked: window.qmlSetupLmce(i_device_number, routerip.text)
+                onClicked: window.qmlSetupLmce(device, routerip.text)
             }
         }
     }

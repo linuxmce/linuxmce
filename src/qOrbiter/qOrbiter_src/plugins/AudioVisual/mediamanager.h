@@ -1,16 +1,22 @@
 #ifndef MEDIAMANAGER_H
 #define MEDIAMANAGER_H
 
-#include <QObject>
+#ifdef QT5
 #include <qdeclarative.h>
 #include <QDeclarativeItem>
+#include <QtWidgets/QBoxLayout>
+#else
+#include <QBoxLayout>
 #include <Phonon>
+#endif
+
+#include <QObject>
+
 #include <qMediaPlayer/qMediaPlayer.h>
 #include "../qOrbiter/qOrbiter_src/plugins/AudioVisual/videoplayerbase.h"
 #include "../qOrbiter/qOrbiter_src/plugins/AudioVisual/audioplayerbase.h"
 #include <colorfilterproxywidget.h>
 #include <QTime>
-#include <QBoxLayout>
 #include <QTcpServer>
 
 

@@ -250,7 +250,7 @@ public:
     //<-dceag-const2-b->
     // The following constructor is only used if this a class instance embedded within a DCE Device.  In that case, it won't create it's own connection to the router
     // You can delete this whole section and put an ! after dceag-const2-b tag if you don't want this constructor.  Do the same in the implementation file
-    qOrbiter(Command_Impl *pPrimaryDeviceCommand, DeviceData_Impl *pData, Event_Impl *pEvent, Router *pRouter, QObject *parent);
+    qOrbiter(Command_Impl *pPrimaryDeviceCommand, DeviceData_Impl *pData, Event_Impl *pEvent, Router *pRouter, QThread *parent);
     //<-dceag-const2-e->
 
     //<-dceag-h-b->
@@ -1283,8 +1283,9 @@ signals:
     void bookmarksReady(QList<QObject*>);
 
     //setup
+    void addExistingOrbiter(ExistingOrbiter* o);
     void startManager(QString, QString);
-    void deviceInvalid(QList<QObject*>);
+    void deviceInvalid();
     void promptResponse(int, QList<QObject*>);
     void routerInvalid();
     void connectionValid(bool v);
@@ -1312,7 +1313,7 @@ signals:
     void screenShotReady(QImage data);
     void waitForScreenShot(char picData, int picDataSize, string fileFormat);
     void videoGrabReady(QImage grab);
-    void modelPagesChanged();
+    void modelPagesChanged(int p);
 
     void screenSaverImages(QStringList images);
     void objectUpdate(QImage bytes);
@@ -1337,7 +1338,7 @@ signals:
     void clearAndContinue(int type);
     void showFileInfo(bool state);
     void setFocusFile(QString);
-    void modelPageCount(QList<QObject*> count);
+    void modelPageCount(int t);
     void clearModel();
     void pageSeperatorChanged(int s);
 
@@ -1467,7 +1468,8 @@ signals:
     void DCEHostChanged();
 
 public slots:
-    void setModelPages(int p) {modelPages = p; emit modelPagesChanged();}
+    void beginSetup();
+    void setModelPages(int p) {modelPages = p; emit modelPagesChanged(modelPages);}
     int getModelPages() {return modelPages;}
 
     void setdceIP(QString ip) {dceIP = ip; emit dceIPChanged();}
@@ -1661,6 +1663,8 @@ public slots:
     void getFloorplanDeviceCommand(int device);
 
     //child devices
+protected:
+
 
 
 };

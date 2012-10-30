@@ -93,11 +93,13 @@ qorbiterManager::qorbiterManager(QDeclarativeView *view, QObject *parent) :
 
     QApplication::processEvents(QEventLoop::AllEvents);
 
+    myOrbiters = new ExistingOrbiterModel(new ExistingOrbiter(), this);
     qorbiterUIwin->rootContext()->setContextProperty("srouterip", QString(qs_routerip) );
     qorbiterUIwin->rootContext()->setContextProperty("deviceid", QString::number((iPK_Device)) );
     qorbiterUIwin->rootContext()->setContextProperty("extip", qs_ext_routerip );
     qorbiterUIwin->rootContext()->setContextProperty("manager", this); //providing a direct object for qml to call c++ functions of this class
     qorbiterUIwin->rootContext()->setContextProperty("dcemessage", dceResponse);
+    qorbiterUIwin->rootContext()->setContextProperty("orbiterList", myOrbiters);
 
     appHeight = qorbiterUIwin->height() ;
     appWidth = qorbiterUIwin->width() ;
@@ -773,8 +775,9 @@ void qorbiterManager::processConfig(QByteArray config)
 
     configData.clear();
     tConf.clear();
+#ifndef RPI
    activateScreenSaver();
-
+#endif
     emit registerOrbiter((userList->find(sPK_User)->data(4).toInt()), QString::number(iea_area), iFK_Room );
     setOrbiterStatus(true);
 }
@@ -1370,6 +1373,11 @@ void qorbiterManager::goBackGrid()
 
 }
 
+void qorbiterManager::requestPage(int p)
+{
+    emit requestDcePages(p);
+}
+
 void qorbiterManager::showFileInfo(QString fk_file)
 {
 
@@ -1804,4 +1812,12 @@ void qorbiterManager::connectionWatchdog()
     qDebug("Starting Watchdog");
 #endif
 
+}
+
+
+void qorbiterManager::showExistingOrbiter(const QList<QObject*> l )
+{
+    QList<QObject*> t ;
+    t = l ;
+qorbiterUIwin->rootContext()->setContextProperty("orbiterList", QVariant::fromValue(t));
 }

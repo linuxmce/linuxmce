@@ -52,6 +52,8 @@
 #include <QMainWindow>
 #endif
 
+#include<datamodels/existingorbitermodel.h>
+
 #include <QStringList>
 #include <QThread>
 #include <QFile>
@@ -98,6 +100,7 @@
 #include <datamodels/skindatamodel.h>
 #include <contextobjects/floorplandevice.h>
 #include <contextobjects/screenshotattributes.h>
+#include <contextobjects/existingorbiter.h>
 
 
 //own version of OrbiterData.h
@@ -141,6 +144,7 @@ class qorbiterManager : public QObject
 {
     Q_OBJECT
 
+    Q_PROPERTY(int i_current_mediaType READ getMediaType WRITE setMediaType NOTIFY mediaTypeChanged)
     Q_PROPERTY (QString q_mediaType READ getSorting NOTIFY gridTypeChanged)
     Q_PROPERTY (QString sPK_User READ getCurrentUser WRITE setCurrentUser NOTIFY userChanged)
     Q_PROPERTY (QString currentRoom READ getCurrentRoom WRITE setCurrentRoom NOTIFY roomChanged)
@@ -208,6 +212,7 @@ public:
 
     //skins
     SkinDataModel* tskinModel;
+    ExistingOrbiterModel *myOrbiters;
     QString qrcPath;
     //TODO, remove the below in favour of the data structure
     QMap <QString*, QString*> availibleSkins;
@@ -317,6 +322,7 @@ Param 10 - pk_attribute
     QStringList *skinNames;
     QList<QObject*> current_floorplan_devices;
     QList<QObject*> current_bookmarks;
+    QList<QObject*> existingOrbiters;
 
     MediaSubTypeModel *mediaTypeFilter;
     FilterModel *uiFileFilter;
@@ -395,6 +401,9 @@ Param 10 - pk_attribute
     QString applicationPath;
 
 signals:
+    void mediaTypeChanged();
+    void requestDcePages(int i);
+    void showList();
     void filterChanged();
     void resetFilter();
     void locationChanged(int cRoom, int cEA);
@@ -472,6 +481,7 @@ signals:
 
 
 public slots: //note: Q_INVOKABLE means it can be called directly from qml
+    void showExistingOrbiter(const QList<QObject *> l )  ;
     void connectionWatchdog();
     QString getCurrentUser() {return sPK_User;}
     void setCurrentUser(QString inc_user );
@@ -571,6 +581,8 @@ public slots: //note: Q_INVOKABLE means it can be called directly from qml
 
     //datagrid related
     void setSorting(int i);
+    void setMediaType(int m) {i_current_mediaType = m; emit mediaTypeChanged();}
+    int getMediaType(){return i_current_mediaType;}
     QString getSorting() {return q_mediaType;}
     void initializeSortString();
     void clearMediaModel();
@@ -579,6 +591,7 @@ public slots: //note: Q_INVOKABLE means it can be called directly from qml
     void updateModel();
     void setStringParam(int paramType, QString param);
     void goBackGrid();
+    void requestPage(int p);
 
     void showFileInfo(QString fk_file);
 

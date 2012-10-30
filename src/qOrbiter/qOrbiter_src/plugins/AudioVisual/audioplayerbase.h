@@ -1,8 +1,15 @@
 #ifndef AUDIOPLAYERBASE_H
 #define AUDIOPLAYERBASE_H
 
+#ifdef QT5
+#include <QtWidgets/QWidget>
+
+#else
 #include <QWidget>
 #include <Phonon>
+#endif
+
+
 
 class AudioPlayerBase : public QWidget
 {

@@ -25,6 +25,7 @@
 #include <contextobjects/promptdata.h>
 #include <QtCore/QDir>
 #include <shaders/filereader.h>
+#include <QThread>
 
 #if (QT5)
 #include <QtQml/QtQml>
@@ -94,7 +95,7 @@ orbiterWindow::orbiterWindow(long deviceid, std::string routerip, QObject *paren
 #endif
     mainView.rootContext()->setContextProperty("window", this);
     mainView.setWindowTitle("LinuxMCE Orbiter ");
-    mainView.rootContext()->setContextProperty("orbiterList" , "");
+  //  mainView.rootContext()->setContextProperty("orbiterList" , "");
 #if GLENABLED
 
 #ifdef for_desktop
@@ -198,11 +199,14 @@ localPath = "android/";
     mainView.showFullScreen();
 #elif defined(for_android)
     mainView.show();
+#elif RPI
+     mainView.showFullScreen();
 #else
     mainView.showNormal();
     // mainView.setResizeMode(QDeclarativeView::SizeRootObjectToView);
 #endif
 
+    qDebug() << mainView.thread()->currentThread();
 }
 
 void orbiterWindow::setMessage(QString imsg)

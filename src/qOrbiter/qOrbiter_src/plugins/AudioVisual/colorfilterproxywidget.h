@@ -1,7 +1,12 @@
 #ifndef COLORFILTERPROXYWIDGET_H
 #define COLORFILTERPROXYWIDGET_H
 
+#ifdef QT5
+#include <QtWidgets/QGraphicsProxyWidget>
+
+#else
 #include <QGraphicsProxyWidget>
+#endif
 #include <QPainter>
 
 class ColorFilterProxyWidget : public QGraphicsProxyWidget

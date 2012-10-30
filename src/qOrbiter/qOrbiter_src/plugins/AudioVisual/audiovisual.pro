@@ -1,6 +1,17 @@
 TEMPLATE = lib
 TARGET = AudioVisual
+
+contains(QT_VERSION,4.8.*){
 QT += declarative phonon network
+DEFINES+=QT4
+}
+
+contains(QT_VERSION,5.0.*){
+message("$$QT_VERSION DCE-Av-Plugin")
+QT += quick1 phonon network
+DEFINES+=QT5
+}
+
 CONFIG += qt plugin
 CONFIG +=warn_off
 QMAKE_CXXFLAGS += -DUSE_LZO_DATAGRID

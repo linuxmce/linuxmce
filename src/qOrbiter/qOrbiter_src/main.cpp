@@ -137,19 +137,19 @@ extern "C" {
                 LoggerWrapper::SetInstance(pPlutoLogger);
                 LoggerWrapper::GetInstance()->Write(LV_STATUS, "Device: %d loaded as plug-in",PK_Device);
 
-                qOrbiter *pqOrbiter = new qOrbiter(PK_Device, "localhost",true,false,pRouter);
-                if( pqOrbiter->m_bQuit_get()|| !pqOrbiter->GetConfig() )
+                qOrbiter *&pqOrbiter = new qOrbiter(PK_Device, "localhost",true,false,pRouter);
+                if( &pqOrbiter->m_bQuit_get()|| !&pqOrbiter->GetConfig() )
                 {
-                        delete pqOrbiter;
+                        delete &pqOrbiter;
                         return NULL;
                 }
                 else
                 {
-                        g_pCommand_Impl=pqOrbiter;
+                        g_pCommand_Impl=&pqOrbiter;
                         g_pDeadlockHandler=Plugin_DeadlockHandler;
                         g_pSocketCrashHandler=Plugin_SocketCrashHandler;
                 }
-                return pqOrbiter;
+                return &pqOrbiter;
         }
 }
 //<-dceag-plug-e->
@@ -164,7 +164,7 @@ int main(int argc, char* argv[])
 #ifdef for_harmattan
     QApplication::setGraphicsSystem("meego");
 #elif GLENABLED
-   QApplication::setGraphicsSystem("opengl");
+    QApplication::setGraphicsSystem("opengl");
 #else
     QApplication::setGraphicsSystem("raster");
 #endif
@@ -272,7 +272,7 @@ int main(int argc, char* argv[])
     bool bAppError=false;
     bool bReload=false;
     try
-    {   
+    {
 #ifdef IOS
         //        NSAutoreleasePool * pool = [[NSAutoreleasePool alloc] init];
 #endif
@@ -283,21 +283,20 @@ int main(int argc, char* argv[])
         bool glpresent = false;
 #endif
 
-#ifndef QT5
-        QThread *dceThread = new QThread;
-#endif
-
-        qOrbiter *pqOrbiter = new qOrbiter(PK_Device, sRouter_IP,true,bLocalMode );
+        QThread dceThread;
+        qOrbiter pqOrbiter(PK_Device, sRouter_IP,true,bLocalMode );
         orbiterWindow orbiterWin(-1, "192.168.80.1");
+        pqOrbiter.moveToThread(&dceThread);
+        QObject::connect(&dceThread, SIGNAL(started()), &pqOrbiter, SLOT(beginSetup()));
 
-        orbiterWin.mainView.rootContext()->setContextProperty("dcerouter", pqOrbiter); //dcecontext object
+        // orbiterWin.mainView.rootContext()->setContextProperty("dcerouter", &pqOrbiter); //dcecontext object bad!
         typedef QMap <int, QString> myMap;
         int throwaway = qRegisterMetaType<myMap>("myMap");
 
         orbiterWin.setMessage("Setting up Lmce");
-        qorbiterManager  *w= new qorbiterManager(&orbiterWin.mainView);
-        AbstractImageProvider *modelimageprovider = new AbstractImageProvider(w);
-        orbiterWin.mainView.engine()->addImageProvider("listprovider", modelimageprovider);
+        qorbiterManager  w(&orbiterWin.mainView);
+        AbstractImageProvider modelimageprovider(&w);
+        orbiterWin.mainView.engine()->addImageProvider("listprovider", &modelimageprovider);
 #ifndef QT5
         QThread *epgThread = new QThread; //for playlists and epg of all types. only one will be active a given time inthe app
 #endif
@@ -307,7 +306,7 @@ int main(int argc, char* argv[])
         //epg listmodel, no imageprovider as of yet
         EPGChannelList *simpleEPGmodel = new EPGChannelList(new EPGItemClass);
 #ifndef QT5
-        simpleEPGmodel->moveToThread(dceThread);
+      //  simpleEPGmodel->moveToThread(dceThread);
 #endif
 
 #ifndef QT5
@@ -316,13 +315,13 @@ int main(int argc, char* argv[])
 
         ListModel *mediaModel = new ListModel(new gridItem);
 #ifndef QT5
-        mediaModel->moveToThread(mediaThread);
+     //   mediaModel->moveToThread(mediaThread);
 #endif
-        GridIndexProvider * advancedProvider = new GridIndexProvider(mediaModel , 6, 4);
-        orbiterWin.mainView.engine()->addImageProvider("datagridimg", advancedProvider);
+        GridIndexProvider  advancedProvider(mediaModel , 6, 4);
+        orbiterWin.mainView.engine()->addImageProvider("datagridimg",&advancedProvider);
 
-   #ifndef QT5
-        advancedProvider->moveToThread(mediaThread);
+#ifndef QT5
+        //advancedProvider->moveToThread(mediaThread);
 #endif
 
         TimeCodeManager *timecode = new TimeCodeManager();
@@ -335,227 +334,230 @@ int main(int argc, char* argv[])
 
 #ifndef QT5
         //shutdown signals
-        QObject::connect(w, SIGNAL(orbiterClosing()), dceThread, SLOT(quit()),Qt::QueuedConnection);
-        QObject::connect(w, SIGNAL(orbiterClosing()), mediaThread, SLOT(quit()),Qt::QueuedConnection);
-        QObject::connect(w, SIGNAL(orbiterClosing()), epgThread, SLOT(quit()),Qt::QueuedConnection);
-        QObject::connect(dceThread, SIGNAL(finished()), &a, SLOT(quit()),Qt::QueuedConnection);
+        QObject::connect (&w, SIGNAL(orbiterClosing()), &dceThread, SLOT(quit()),Qt::QueuedConnection);
+        QObject::connect (&w, SIGNAL(orbiterClosing()), mediaThread, SLOT(quit()),Qt::QueuedConnection);
+        QObject::connect (&w, SIGNAL(orbiterClosing()), epgThread, SLOT(quit()),Qt::QueuedConnection);
+        QObject::connect(&dceThread, SIGNAL(finished()), &a, SLOT(quit()),Qt::QueuedConnection);
 #else
-        QObject::connect(w, SIGNAL(orbiterClosing()), &a, SLOT(quit()));
+        QObject::connect(&w, SIGNAL(orbiterClosing()), &a, SLOT(quit()));
 #endif
         //tv epg signals
-        QObject::connect(pqOrbiter, SIGNAL(addChannel(EPGItemClass*)), simpleEPGmodel, SLOT(appendRow(EPGItemClass*)), Qt::QueuedConnection );
+        QObject::connect(&pqOrbiter, SIGNAL(addChannel(EPGItemClass*)), simpleEPGmodel, SLOT(appendRow(EPGItemClass*)), Qt::QueuedConnection );
 
         //security video frames
-        QObject::connect(w, SIGNAL(getSingleCam(int,int,int)), pqOrbiter, SLOT(GetSingleSecurityCam(int,int,int)));
-        QObject::connect(pqOrbiter, SIGNAL(securityImageReady(int, QImage)), w->SecurityVideo, SLOT(setCameraImage(int,QImage)),Qt::QueuedConnection);
+        QObject::connect(&w, SIGNAL(getSingleCam(int,int,int)), &pqOrbiter, SLOT(GetSingleSecurityCam(int,int,int)));
+        QObject::connect(&pqOrbiter, SIGNAL(securityImageReady(int, QImage)), w.SecurityVideo, SLOT(setCameraImage(int,QImage)),Qt::QueuedConnection);
 
         //filedetails
-        QObject::connect(pqOrbiter, SIGNAL(fd_titleChanged(QString)), w->filedetailsclass, SLOT(setTitle(QString)), Qt::QueuedConnection);
-        QObject::connect(pqOrbiter,SIGNAL(fd_storageDeviceChanged(QString)), w->filedetailsclass, SLOT(setStorageDevice(QString)), Qt::QueuedConnection);
-        QObject::connect(pqOrbiter,SIGNAL(fd_titleImageChanged(QImage)), w->filedetailsclass, SLOT(setTitleImage(QImage)),Qt::QueuedConnection);
-        QObject::connect(pqOrbiter, SIGNAL(fd_mediaTitleChanged(QString)), w->filedetailsclass, SLOT(setMediaTitle(QString)),Qt::QueuedConnection);
-        QObject::connect(pqOrbiter, SIGNAL(fd_directorChanged(QString)), w->filedetailsclass, SLOT(setDirector(QString)),Qt::QueuedConnection);
-        QObject::connect(pqOrbiter, SIGNAL(fd_programChanged(QString)), w->filedetailsclass, SLOT(setProgram(QString)),Qt::QueuedConnection);
-        QObject::connect(pqOrbiter, SIGNAL(fd_synopChanged(QString)), w->filedetailsclass, SLOT(setSynop(QString)),Qt::QueuedConnection);
-        QObject::connect(pqOrbiter, SIGNAL(fd_albumChanged(QString)), w->filedetailsclass, SLOT(setAlbum(QString)),Qt::QueuedConnection);
-        QObject::connect(pqOrbiter, SIGNAL(fd_performersChanged(QString)), w->filedetailsclass, SLOT(setPerformers(QString)),Qt::QueuedConnection);
-        QObject::connect(pqOrbiter, SIGNAL(fd_genreChanged(QString)), w->filedetailsclass, SLOT(setGenre(QString)),Qt::QueuedConnection);
-        QObject::connect(pqOrbiter, SIGNAL(fd_channelChanged(QString)), w->filedetailsclass, SLOT(setChannel(QString)),Qt::QueuedConnection);
-        QObject::connect(pqOrbiter, SIGNAL(fd_pathChanged(QString)), w->filedetailsclass, SLOT(setPath(QString)),Qt::QueuedConnection);
-        QObject::connect(pqOrbiter, SIGNAL(fd_fileChanged(QString)), w->filedetailsclass, SLOT(setFile(QString)),Qt::QueuedConnection);
-        QObject::connect(pqOrbiter, SIGNAL(fd_fileNameChanged(QString)), w->filedetailsclass, SLOT(setFilename(QString)),Qt::QueuedConnection);
-        QObject::connect(pqOrbiter, SIGNAL(fd_episodeChanged(QString)), w->filedetailsclass, SLOT(setEpisode(QString)),Qt::QueuedConnection);
-        QObject::connect(pqOrbiter, SIGNAL(fd_trackChanged(QString)), w->nowPlayingButton, SLOT(setTrack(QString)),Qt::QueuedConnection);
+        QObject::connect(&pqOrbiter, SIGNAL(fd_titleChanged(QString)), w.filedetailsclass, SLOT(setTitle(QString)), Qt::QueuedConnection);
+        QObject::connect(&pqOrbiter,SIGNAL(fd_storageDeviceChanged(QString)), w.filedetailsclass, SLOT(setStorageDevice(QString)), Qt::QueuedConnection);
+        QObject::connect(&pqOrbiter,SIGNAL(fd_titleImageChanged(QImage)), w.filedetailsclass, SLOT(setTitleImage(QImage)),Qt::QueuedConnection);
+        QObject::connect(&pqOrbiter, SIGNAL(fd_mediaTitleChanged(QString)), w.filedetailsclass, SLOT(setMediaTitle(QString)),Qt::QueuedConnection);
+        QObject::connect(&pqOrbiter, SIGNAL(fd_directorChanged(QString)), w.filedetailsclass, SLOT(setDirector(QString)),Qt::QueuedConnection);
+        QObject::connect(&pqOrbiter, SIGNAL(fd_programChanged(QString)), w.filedetailsclass, SLOT(setProgram(QString)),Qt::QueuedConnection);
+        QObject::connect(&pqOrbiter, SIGNAL(fd_synopChanged(QString)), w.filedetailsclass, SLOT(setSynop(QString)),Qt::QueuedConnection);
+        QObject::connect(&pqOrbiter, SIGNAL(fd_albumChanged(QString)), w.filedetailsclass, SLOT(setAlbum(QString)),Qt::QueuedConnection);
+        QObject::connect(&pqOrbiter, SIGNAL(fd_performersChanged(QString)), w.filedetailsclass, SLOT(setPerformers(QString)),Qt::QueuedConnection);
+        QObject::connect(&pqOrbiter, SIGNAL(fd_genreChanged(QString)), w.filedetailsclass, SLOT(setGenre(QString)),Qt::QueuedConnection);
+        QObject::connect(&pqOrbiter, SIGNAL(fd_channelChanged(QString)), w.filedetailsclass, SLOT(setChannel(QString)),Qt::QueuedConnection);
+        QObject::connect(&pqOrbiter, SIGNAL(fd_pathChanged(QString)), w.filedetailsclass, SLOT(setPath(QString)),Qt::QueuedConnection);
+        QObject::connect(&pqOrbiter, SIGNAL(fd_fileChanged(QString)), w.filedetailsclass, SLOT(setFile(QString)),Qt::QueuedConnection);
+        QObject::connect(&pqOrbiter, SIGNAL(fd_fileNameChanged(QString)), w.filedetailsclass, SLOT(setFilename(QString)),Qt::QueuedConnection);
+        QObject::connect(&pqOrbiter, SIGNAL(fd_episodeChanged(QString)), w.filedetailsclass, SLOT(setEpisode(QString)),Qt::QueuedConnection);
+        QObject::connect(&pqOrbiter, SIGNAL(fd_trackChanged(QString)), w.nowPlayingButton, SLOT(setTrack(QString)),Qt::QueuedConnection);
 
-        QObject::connect(w, SIGNAL(mediaSeperatorChanged(int)), pqOrbiter, SLOT(setGridSeperator(int)), Qt::QueuedConnection);
+        QObject::connect(&w, SIGNAL(mediaSeperatorChanged(int)), &pqOrbiter, SLOT(setGridSeperator(int)), Qt::QueuedConnection);
 
         //stored media signal
-        QObject::connect(pqOrbiter,SIGNAL(playlistItemAdded(PlaylistItemClass*)), storedVideoPlaylist,SLOT(appendRow(PlaylistItemClass*)), Qt::QueuedConnection);
+        QObject::connect(&pqOrbiter,SIGNAL(playlistItemAdded(PlaylistItemClass*)), storedVideoPlaylist,SLOT(appendRow(PlaylistItemClass*)), Qt::QueuedConnection);
 
-        QObject::connect(pqOrbiter,SIGNAL(resetNowPlaying()), w->nowPlayingButton, SLOT(resetData()));
-        QObject::connect(pqOrbiter, SIGNAL(setPlaylistPosition(int)), w->nowPlayingButton, SLOT(setPlaylistPostion(int)),Qt::QueuedConnection);
+        QObject::connect(&pqOrbiter,SIGNAL(resetNowPlaying()), w.nowPlayingButton, SLOT(resetData()));
+        QObject::connect(&pqOrbiter, SIGNAL(setPlaylistPosition(int)), w.nowPlayingButton, SLOT(setPlaylistPostion(int)),Qt::QueuedConnection);
 
-        QObject::connect(w->nowPlayingButton, SIGNAL(playListPositionChanged(int)), storedVideoPlaylist, SLOT(setCurrentIndex(int)) ,Qt::QueuedConnection);
+        QObject::connect(w.nowPlayingButton, SIGNAL(playListPositionChanged(int)), storedVideoPlaylist, SLOT(setCurrentIndex(int)) ,Qt::QueuedConnection);
 
         //timecodemanager signals / slots
-        QObject::connect(pqOrbiter, SIGNAL(updateTimeCode(QString,int)), timecode, SLOT(start(QString,int)), Qt::QueuedConnection);
-        QObject::connect(pqOrbiter, SIGNAL(stopTimeCode()), timecode, SLOT(restart()), Qt::QueuedConnection);
+        QObject::connect(&pqOrbiter, SIGNAL(updateTimeCode(QString,int)), timecode, SLOT(start(QString,int)), Qt::QueuedConnection);
+        QObject::connect(&pqOrbiter, SIGNAL(stopTimeCode()), timecode, SLOT(restart()), Qt::QueuedConnection);
 
         //setup
-        QObject::connect(w, SIGNAL(registerOrbiter(int,QString,int)), pqOrbiter,SLOT(registerDevice(int,QString,int)),Qt::QueuedConnection);
-        QObject::connect(pqOrbiter,SIGNAL(startManager(QString,QString)), w, SLOT(qmlSetupLmce(QString,QString)),Qt::QueuedConnection);
+        QObject::connect(&w, SIGNAL(registerOrbiter(int,QString,int)), &pqOrbiter,SLOT(registerDevice(int,QString,int)),Qt::QueuedConnection);
+        QObject::connect(&pqOrbiter,SIGNAL(startManager(QString,QString)), &w, SLOT(qmlSetupLmce(QString,QString)),Qt::QueuedConnection);
+        QObject::connect(&pqOrbiter, SIGNAL(addExistingOrbiter(ExistingOrbiter*)), w.myOrbiters, SLOT(appendRow(ExistingOrbiter*)));
+        QObject::connect(&pqOrbiter, SIGNAL(deviceInvalid()), &w, SIGNAL(showList()), Qt::AutoConnection);
+        QObject::connect(&pqOrbiter,SIGNAL(routerInvalid()), &orbiterWin, SIGNAL(showExternal()),Qt::QueuedConnection);
+        QObject::connect(&pqOrbiter, SIGNAL(connectionValid(bool)), &orbiterWin, SLOT(setConnectionState(bool)), Qt::QueuedConnection);
+        QObject::connect(&orbiterWin,SIGNAL(setupLmce(QString,QString)), &pqOrbiter, SLOT(qmlSetup(QString,QString)),Qt::QueuedConnection);
+        QObject::connect(&w,SIGNAL(connectionValid(bool)), &orbiterWin, SLOT(setConnectionState(bool)));
+        QObject::connect(&pqOrbiter,SIGNAL(deviceValid(bool)), &orbiterWin, SLOT(setDeviceState(bool)));
+        QObject::connect(&w,SIGNAL(localConfigReady(bool)), &orbiterWin, SLOT(setLocalConfigState(bool)),Qt::QueuedConnection);
+        QObject::connect(&w, SIGNAL(skinDataLoaded(bool)), &orbiterWin, SLOT(setSkinDataState(bool)));
+        QObject::connect(&w,SIGNAL(skinIndexReady(bool)), &orbiterWin,SLOT(setSkinIndexState(bool)),Qt::QueuedConnection);
+        QObject::connect(&w,SIGNAL(orbiterConfigReady(bool)), &orbiterWin, SLOT(setOrbiterConfigState(bool)));
+        QObject::connect(&pqOrbiter, SIGNAL(configReady(QByteArray)), &w, SLOT(processConfig(QByteArray)),Qt::QueuedConnection);
+        QObject::connect(&w, SIGNAL(raiseSplash()), &orbiterWin, SLOT(showSplash()) );
+        QObject::connect(&w,SIGNAL(showSetup()), &orbiterWin, SLOT( showSetup()) );
 
-        QObject::connect(pqOrbiter, SIGNAL(deviceInvalid(QList<QObject*>)), &orbiterWin,SLOT(prepareExistingOrbiters(QList<QObject*>)), Qt::AutoConnection);
+        QObject::connect(&w, SIGNAL(executeCMD(int)), &pqOrbiter, SLOT(executeCommandGroup(int)));
 
-        QObject::connect(pqOrbiter,SIGNAL(routerInvalid()), &orbiterWin, SIGNAL(showExternal()),Qt::QueuedConnection);
-        QObject::connect(pqOrbiter, SIGNAL(connectionValid(bool)), &orbiterWin, SLOT(setConnectionState(bool)), Qt::QueuedConnection);
-        QObject::connect(&orbiterWin,SIGNAL(setupLmce(QString,QString)), pqOrbiter, SLOT(qmlSetup(QString,QString)),Qt::QueuedConnection);
-        QObject::connect(w,SIGNAL(connectionValid(bool)), &orbiterWin, SLOT(setConnectionState(bool)));
-        QObject::connect(pqOrbiter,SIGNAL(deviceValid(bool)), &orbiterWin, SLOT(setDeviceState(bool)));
-        QObject::connect(w,SIGNAL(localConfigReady(bool)), &orbiterWin, SLOT(setLocalConfigState(bool)),Qt::QueuedConnection);
-        QObject::connect(w, SIGNAL(skinDataLoaded(bool)), &orbiterWin, SLOT(setSkinDataState(bool)));
-        QObject::connect(w,SIGNAL(skinIndexReady(bool)), &orbiterWin,SLOT(setSkinIndexState(bool)),Qt::QueuedConnection);
-        QObject::connect(w,SIGNAL(orbiterConfigReady(bool)), &orbiterWin, SLOT(setOrbiterConfigState(bool)));
-        QObject::connect(pqOrbiter, SIGNAL(configReady(QByteArray)), w, SLOT(processConfig(QByteArray)),Qt::QueuedConnection);
-        QObject::connect(w, SIGNAL(raiseSplash()), &orbiterWin, SLOT(showSplash()) );
-        QObject::connect(w,SIGNAL(showSetup()), &orbiterWin, SLOT( showSetup()) );
+        QObject::connect(&pqOrbiter, SIGNAL(screenSaverImages(QStringList)), w.ScreenSaver, SLOT(setImageList(QStringList)),Qt::QueuedConnection);
 
-        QObject::connect(pqOrbiter, SIGNAL(screenSaverImages(QStringList)), w->ScreenSaver, SLOT(setImageList(QStringList)),Qt::QueuedConnection);
-
-        QObject::connect(pqOrbiter, SIGNAL(setMyIp(QString)), w, SLOT(setInternalIp(QString)),Qt::QueuedConnection);
-        QObject::connect(&orbiterWin, SIGNAL(setupNewOrbiter()), pqOrbiter,SLOT(populateSetupInformation()));
-        QObject::connect(pqOrbiter,SIGNAL(promptResponse(int,QList<QObject*>)), &orbiterWin, SLOT(displayPromptResponse(int, QList<QObject*> )));
-        QObject::connect(&orbiterWin, SIGNAL(newOrbiterData(int , int , int , int , int , int )), pqOrbiter, SLOT(setOrbiterSetupVars(int,int,int,int,int,int)));
+        QObject::connect(&pqOrbiter, SIGNAL(setMyIp(QString)), &w, SLOT(setInternalIp(QString)),Qt::QueuedConnection);
+        QObject::connect(&orbiterWin, SIGNAL(setupNewOrbiter()), &pqOrbiter,SLOT(populateSetupInformation()));
+        QObject::connect(&pqOrbiter,SIGNAL(promptResponse(int,QList<QObject*>)), &orbiterWin, SLOT(displayPromptResponse(int, QList<QObject*> )));
+        QObject::connect(&orbiterWin, SIGNAL(newOrbiterData(int , int , int , int , int , int )), &pqOrbiter, SLOT(setOrbiterSetupVars(int,int,int,int,int,int)));
 
         //messaging
-        QObject::connect(mediaModel, SIGNAL(statusMessage(QString)), w, SLOT(setDceResponse(QString)),Qt::QueuedConnection);
-        QObject::connect(w->nowPlayingButton, SIGNAL(statusMessage(QString)), w, SLOT(setDceResponse(QString)));
-        QObject::connect(pqOrbiter, SIGNAL(statusMessage(QString)), w , SLOT(setDceResponse(QString)),Qt::QueuedConnection);
-        QObject::connect(w, SIGNAL(loadingMessage(QString)), &orbiterWin,SLOT(setMessage(QString)), Qt::DirectConnection);
+        QObject::connect(mediaModel, SIGNAL(statusMessage(QString)), &w, SLOT(setDceResponse(QString)),Qt::QueuedConnection);
+        QObject::connect(w.nowPlayingButton, SIGNAL(statusMessage(QString)), &w, SLOT(setDceResponse(QString)));
+        QObject::connect(&pqOrbiter, SIGNAL(statusMessage(QString)), &w , SLOT(setDceResponse(QString)),Qt::QueuedConnection);
+        QObject::connect(&w, SIGNAL(loadingMessage(QString)), &orbiterWin,SLOT(setMessage(QString)), Qt::DirectConnection);
 
         //operations
-        QObject::connect(pqOrbiter, SIGNAL(addScreenParam(QString,int)), w->ScreenParameters, SLOT(addParam(QString, int)), Qt::QueuedConnection);
-        QObject::connect(w, SIGNAL(locationChanged(int,int)), pqOrbiter, SLOT(setLocation(int,int)),Qt::QueuedConnection);
-        QObject::connect(w, SIGNAL(userChanged(int)), pqOrbiter, SLOT(setUser(int)),Qt::QueuedConnection);
-        QObject::connect(w, SIGNAL(bindMediaRemote(bool)), pqOrbiter, SLOT(BindMediaRemote(bool)), Qt::QueuedConnection);
-        QObject::connect(w, SIGNAL(startPlayback(QString)), pqOrbiter, SLOT(playMedia(QString)),Qt::QueuedConnection);
+        QObject::connect(&pqOrbiter, SIGNAL(addScreenParam(QString,int)), w.ScreenParameters, SLOT(addParam(QString, int)), Qt::QueuedConnection);
+        QObject::connect(&w, SIGNAL(locationChanged(int,int)), &pqOrbiter, SLOT(setLocation(int,int)),Qt::QueuedConnection);
+        QObject::connect(&w, SIGNAL(userChanged(int)), &pqOrbiter, SLOT(setUser(int)),Qt::QueuedConnection);
+        QObject::connect(&w, SIGNAL(bindMediaRemote(bool)), &pqOrbiter, SLOT(BindMediaRemote(bool)), Qt::QueuedConnection);
+        QObject::connect(&w, SIGNAL(startPlayback(QString)), &pqOrbiter, SLOT(playMedia(QString)),Qt::QueuedConnection);
 
-        QObject::connect(w->ScreenSaver, SIGNAL(requestNewImage(QString)), pqOrbiter, SLOT(getScreenSaverImage(QString)), Qt::QueuedConnection);
-        QObject::connect(pqOrbiter, SIGNAL(currentScreenSaverImage(const uchar*,int)), w->ScreenSaver, SLOT(setImageData(const uchar*,int)),Qt::QueuedConnection);
+        QObject::connect(w.ScreenSaver, SIGNAL(requestNewImage(QString)), &pqOrbiter, SLOT(getScreenSaverImage(QString)), Qt::QueuedConnection);
+        QObject::connect(&pqOrbiter, SIGNAL(currentScreenSaverImage(const uchar*,int)), w.ScreenSaver, SLOT(setImageData(const uchar*,int)),Qt::QueuedConnection);
 
-        // QObject::connect(w, SIGNAL(liveTVrequest()), simpleEPGmodel, SLOT(populate()));
+        // QObject::connect (&w, SIGNAL(liveTVrequest()), simpleEPGmodel, SLOT(populate()));
 
         //sleeping alarms
-        QObject::connect(pqOrbiter, SIGNAL(sleepingAlarmsReady(QList<QObject*>)), w, SLOT(showSleepingAlarms(QList<QObject*>)), Qt::QueuedConnection);
-        QObject::connect(w, SIGNAL(setAlarm(bool,int)), pqOrbiter, SLOT(GetAlarms(bool,int)), Qt::QueuedConnection);
+        QObject::connect(&pqOrbiter, SIGNAL(sleepingAlarmsReady(QList<QObject*>)), &w, SLOT(showSleepingAlarms(QList<QObject*>)), Qt::QueuedConnection);
+        QObject::connect(&w, SIGNAL(setAlarm(bool,int)), &pqOrbiter, SLOT(GetAlarms(bool,int)), Qt::QueuedConnection);
 
         //navigation
-        QObject::connect(pqOrbiter,SIGNAL(gotoQml(QString)), w, SLOT(gotoQScreen(QString)),Qt::QueuedConnection);
+        QObject::connect(&pqOrbiter,SIGNAL(gotoQml(QString)), &w, SLOT(gotoQScreen(QString)),Qt::QueuedConnection);
 
         //floorplans
-        QObject::connect(pqOrbiter, SIGNAL(floorPlanImageData(const uchar*,int)), w->floorplans, SLOT(setImageData(const uchar*,int)), Qt::QueuedConnection);
-        QObject::connect(w->floorplans, SIGNAL(pageChanged(QString)), pqOrbiter, SLOT(getFloorPlanImage(QString)), Qt::QueuedConnection);
-        QObject::connect(w->floorplans, SIGNAL(requestNewFloorPlanData(QString)), pqOrbiter, SLOT(updateFloorPlan(QString)), Qt::QueuedConnection);
-        QObject::connect(pqOrbiter,SIGNAL(floorplanTypeChanged(int)), w->floorplans, SLOT(setCurrentFloorPlanType(int)),Qt::QueuedConnection);
-        QObject::connect(w->floorplans, SIGNAL(adjustLevel(int,myMap)), pqOrbiter, SLOT(adjustLighting(int,myMap)),Qt::QueuedConnection);
+        QObject::connect(&pqOrbiter, SIGNAL(floorPlanImageData(const uchar*,int)), w.floorplans, SLOT(setImageData(const uchar*,int)), Qt::QueuedConnection);
+        QObject::connect(w.floorplans, SIGNAL(pageChanged(QString)), &pqOrbiter, SLOT(getFloorPlanImage(QString)), Qt::QueuedConnection);
+        QObject::connect(w.floorplans, SIGNAL(requestNewFloorPlanData(QString)), &pqOrbiter, SLOT(updateFloorPlan(QString)), Qt::QueuedConnection);
+        QObject::connect(&pqOrbiter,SIGNAL(floorplanTypeChanged(int)), w.floorplans, SLOT(setCurrentFloorPlanType(int)),Qt::QueuedConnection);
+        QObject::connect(w.floorplans, SIGNAL(adjustLevel(int,myMap)), &pqOrbiter, SLOT(adjustLighting(int,myMap)),Qt::QueuedConnection);
 
         //mediagrid
-        QObject::connect(mediaModel, SIGNAL(pagingCleared()), pqOrbiter,SLOT(populateAdditionalMedia()), Qt::QueuedConnection);
-        QObject::connect(pqOrbiter, SIGNAL(clearPageGrid()), mediaModel, SLOT(clearForPaging()), Qt::QueuedConnection);
-        QObject::connect(mediaModel, SIGNAL(itemAdded(int)), pqOrbiter, SLOT(setCurrentRow(int)),Qt::QueuedConnection);
-        QObject::connect(w, SIGNAL(clearModel()), mediaModel,SLOT(clear()), Qt::QueuedConnection);
-        QObject::connect(pqOrbiter, SIGNAL(clearAndContinue(int)), mediaModel, SLOT(clearAndRequest(int)), Qt::QueuedConnection);
-        QObject::connect(pqOrbiter,SIGNAL(addItem(gridItem*)), mediaModel, SLOT(appendRow(gridItem*)),Qt::QueuedConnection);
-        QObject::connect(pqOrbiter,SIGNAL(gridModelSizeChange(int)), mediaModel, SLOT(setTotalCells(int)), Qt::QueuedConnection);
-        QObject::connect(pqOrbiter, SIGNAL(clearModel()), mediaModel, SLOT(reset()), Qt::DirectConnection);
-        QObject::connect(mediaModel,SIGNAL(ready(int)), pqOrbiter, SLOT(prepareFileList(int)), Qt::QueuedConnection);
-        QObject::connect(w, SIGNAL(gridTypeChanged(int)), mediaModel, SLOT(setGridType(int)), Qt::QueuedConnection);
-        QObject::connect(w, SIGNAL(setDceGridParam(int,QString)), pqOrbiter, SLOT(setStringParam(int,QString)),Qt::QueuedConnection);
-        QObject::connect(w, SIGNAL(keepLoading(bool)), pqOrbiter,SLOT(setGridStatus(bool)),Qt::QueuedConnection);
-        QObject::connect(pqOrbiter, SIGNAL(showFileInfo(bool)), w->filedetailsclass, SLOT(setVisible(bool)),Qt::QueuedConnection);
-        QObject::connect(pqOrbiter, SIGNAL(setFocusFile(QString)), w->filedetailsclass, SLOT(setFile(QString)),Qt::QueuedConnection);
-        QObject::connect(pqOrbiter, SIGNAL(modelPageCount(QList<QObject*>)), w, SLOT(displayModelPages(QList<QObject*>)),Qt::QueuedConnection);
-        QObject::connect(pqOrbiter, SIGNAL(pageSeperatorChanged(int)) , mediaModel, SLOT(setSeperator(int)), Qt::QueuedConnection);
+        QObject::connect(mediaModel, SIGNAL(pagingCleared()), &pqOrbiter,SLOT(populateAdditionalMedia()), Qt::QueuedConnection);
+        QObject::connect(&pqOrbiter, SIGNAL(clearPageGrid()), mediaModel, SLOT(clearForPaging()), Qt::QueuedConnection);
+        QObject::connect(mediaModel, SIGNAL(itemAdded(int)), &pqOrbiter, SLOT(setCurrentRow(int)),Qt::QueuedConnection);
+        QObject::connect(&w, SIGNAL(clearModel()), mediaModel,SLOT(clear()), Qt::QueuedConnection);
+        QObject::connect(&pqOrbiter, SIGNAL(clearAndContinue(int)), mediaModel, SLOT(clearAndRequest(int)), Qt::QueuedConnection);
+        QObject::connect(&pqOrbiter,SIGNAL(addItem(gridItem*)), mediaModel, SLOT(appendRow(gridItem*)),Qt::QueuedConnection);
+        QObject::connect(&pqOrbiter,SIGNAL(gridModelSizeChange(int)), mediaModel, SLOT(setTotalCells(int)), Qt::QueuedConnection);
+        QObject::connect(&pqOrbiter, SIGNAL(clearModel()), mediaModel, SLOT(reset()), Qt::DirectConnection);
+        QObject::connect(mediaModel,SIGNAL(ready(int)), &pqOrbiter, SLOT(prepareFileList(int)), Qt::QueuedConnection);
+        QObject::connect(&w, SIGNAL(gridTypeChanged(int)), mediaModel, SLOT(setGridType(int)), Qt::QueuedConnection);
+        QObject::connect(&w, SIGNAL(setDceGridParam(int,QString)), &pqOrbiter, SLOT(setStringParam(int,QString)),Qt::QueuedConnection);
+        QObject::connect(&w, SIGNAL(keepLoading(bool)), &pqOrbiter,SLOT(setGridStatus(bool)),Qt::QueuedConnection);
+        QObject::connect(&pqOrbiter, SIGNAL(showFileInfo(bool)), w.filedetailsclass, SLOT(setVisible(bool)),Qt::QueuedConnection);
+        QObject::connect(&pqOrbiter, SIGNAL(setFocusFile(QString)), w.filedetailsclass, SLOT(setFile(QString)),Qt::QueuedConnection);
+        QObject::connect(&pqOrbiter, SIGNAL(modelPagesChanged(int)), mediaModel, SLOT(setTotalPages(int)),Qt::QueuedConnection);
+        QObject::connect(&pqOrbiter, SIGNAL(pageSeperatorChanged(int)) , mediaModel, SLOT(setSeperator(int)), Qt::QueuedConnection);
+        QObject::connect(&w, SIGNAL(requestDcePages(int)), &pqOrbiter, SLOT(requestPage(int)), Qt::QueuedConnection);
         //now playing signals
-        QObject::connect(pqOrbiter, SIGNAL(setNowPlaying(bool)), w->nowPlayingButton,SLOT(setStatus(bool)),Qt::QueuedConnection);
-        QObject::connect(pqOrbiter,SIGNAL(streamIdChanged(int)), w->nowPlayingButton, SLOT(setStreamID(int)),Qt::QueuedConnection);
-        QObject::connect(pqOrbiter, SIGNAL(currentScreenChanged(QString)), w->nowPlayingButton, SLOT(setScreen(QString)),Qt::QueuedConnection);
-        QObject::connect(w, SIGNAL(requestStreamImage()), pqOrbiter, SLOT(getStreamingVideo()), Qt::QueuedConnection);
-        QObject::connect(pqOrbiter, SIGNAL(videoGrabReady(QImage)), w->nowPlayingButton, SLOT(setStreamImage(QImage)), Qt::QueuedConnection);
+        QObject::connect(&pqOrbiter, SIGNAL(setNowPlaying(bool)), w.nowPlayingButton,SLOT(setStatus(bool)),Qt::QueuedConnection);
+        QObject::connect(&pqOrbiter,SIGNAL(streamIdChanged(int)), w.nowPlayingButton, SLOT(setStreamID(int)),Qt::QueuedConnection);
+        QObject::connect(&pqOrbiter, SIGNAL(currentScreenChanged(QString)), w.nowPlayingButton, SLOT(setScreen(QString)),Qt::QueuedConnection);
+        QObject::connect(&w, SIGNAL(requestStreamImage()), &pqOrbiter, SLOT(getStreamingVideo()), Qt::QueuedConnection);
+        QObject::connect(&pqOrbiter, SIGNAL(videoGrabReady(QImage)), w.nowPlayingButton, SLOT(setStreamImage(QImage)), Qt::QueuedConnection);
+        QObject::connect(&pqOrbiter, SIGNAL(mediaTypeChanged(int)), &w, SLOT(setMediaType(int)), Qt::QueuedConnection);
+        //QObject::connect(&pqOrbiter,SIGNAL(objectDataUpdate( char,int)), w.nowPlayingButton, SLOT(setDroidImageData(char,int)),Qt::QueuedConnection);
+        QObject::connect(&pqOrbiter,SIGNAL(objectUpdate(QImage)), w.nowPlayingButton, SLOT(setImageData(QImage)), Qt::QueuedConnection);
 
-        //QObject::connect(pqOrbiter,SIGNAL(objectDataUpdate( char,int)), w->nowPlayingButton, SLOT(setDroidImageData(char,int)),Qt::QueuedConnection);
-        QObject::connect(pqOrbiter,SIGNAL(objectUpdate(QImage)), w->nowPlayingButton, SLOT(setImageData(QImage)), Qt::QueuedConnection);
-
-        QObject::connect(simpleEPGmodel, SIGNAL(channelNumberChanged(QString)), w->nowPlayingButton, SLOT(setChannel(QString)), Qt::QueuedConnection);
-        QObject::connect(simpleEPGmodel, SIGNAL(programChanged(QString)), w->nowPlayingButton, SLOT(setProgram(QString)), Qt::QueuedConnection);
-        QObject::connect(simpleEPGmodel, SIGNAL(networkChanged(QString)), w->nowPlayingButton, SLOT(setChannelID(QString)), Qt::QueuedConnection);
-        QObject::connect(timecode, SIGNAL(seekToTime(QString)), pqOrbiter, SLOT(JogStream(QString)), Qt::QueuedConnection );
+        QObject::connect(simpleEPGmodel, SIGNAL(channelNumberChanged(QString)), w.nowPlayingButton, SLOT(setChannel(QString)), Qt::QueuedConnection);
+        QObject::connect(simpleEPGmodel, SIGNAL(programChanged(QString)), w.nowPlayingButton, SLOT(setProgram(QString)), Qt::QueuedConnection);
+        QObject::connect(simpleEPGmodel, SIGNAL(networkChanged(QString)), w.nowPlayingButton, SLOT(setChannelID(QString)), Qt::QueuedConnection);
+        QObject::connect(timecode, SIGNAL(seekToTime(QString)), &pqOrbiter, SLOT(JogStream(QString)), Qt::QueuedConnection );
         //attributes
-        QObject::connect(pqOrbiter, SIGNAL(np_storageDeviceChanged(QString)), w->nowPlayingButton, SLOT(setStorageDevice(QString)), Qt::QueuedConnection);
-        QObject::connect(pqOrbiter, SIGNAL(np_pathChanged(QString)), w->nowPlayingButton, SLOT(setPath(QString)), Qt::QueuedConnection);
-        QObject::connect(pqOrbiter, SIGNAL(np_filename(QString)), w->nowPlayingButton, SLOT(setFilePath(QString)),Qt::QueuedConnection);
+        QObject::connect(&pqOrbiter, SIGNAL(np_storageDeviceChanged(QString)), w.nowPlayingButton, SLOT(setStorageDevice(QString)), Qt::QueuedConnection);
+        QObject::connect(&pqOrbiter, SIGNAL(np_pathChanged(QString)), w.nowPlayingButton, SLOT(setPath(QString)), Qt::QueuedConnection);
+        QObject::connect(&pqOrbiter, SIGNAL(np_filename(QString)), w.nowPlayingButton, SLOT(setFilePath(QString)),Qt::QueuedConnection);
 
-        QObject::connect(pqOrbiter, SIGNAL(np_mediaTitleChanged(QString)), w->nowPlayingButton, SLOT(setMediaTitle(QString)),Qt::QueuedConnection);
-        QObject::connect(pqOrbiter, SIGNAL(np_album(QString)), w->nowPlayingButton, SLOT(setAlbum(QString)),Qt::QueuedConnection);
-        QObject::connect(pqOrbiter, SIGNAL(np_track(QString)), w->nowPlayingButton, SLOT(setTrack(QString)),Qt::QueuedConnection);
-        QObject::connect(pqOrbiter,SIGNAL(np_channel(QString)), w->nowPlayingButton, SLOT(setChannel(QString)),Qt::QueuedConnection);
-        QObject::connect(pqOrbiter, SIGNAL(np_network(QString)), w->nowPlayingButton, SLOT(setNetwork(QString)) ,Qt::QueuedConnection);
-        QObject::connect(pqOrbiter, SIGNAL(np_channelID(QString)), w->nowPlayingButton, SLOT(setChannelID(QString)),Qt::QueuedConnection);
-        QObject::connect(pqOrbiter, SIGNAL(np_program(QString)), w->nowPlayingButton, SLOT(setProgram(QString)),Qt::QueuedConnection);
+        QObject::connect(&pqOrbiter, SIGNAL(np_mediaTitleChanged(QString)), w.nowPlayingButton, SLOT(setMediaTitle(QString)),Qt::QueuedConnection);
+        QObject::connect(&pqOrbiter, SIGNAL(np_album(QString)), w.nowPlayingButton, SLOT(setAlbum(QString)),Qt::QueuedConnection);
+        QObject::connect(&pqOrbiter, SIGNAL(np_track(QString)), w.nowPlayingButton, SLOT(setTrack(QString)),Qt::QueuedConnection);
+        QObject::connect(&pqOrbiter,SIGNAL(np_channel(QString)), w.nowPlayingButton, SLOT(setChannel(QString)),Qt::QueuedConnection);
+        QObject::connect(&pqOrbiter, SIGNAL(np_network(QString)), w.nowPlayingButton, SLOT(setNetwork(QString)) ,Qt::QueuedConnection);
+        QObject::connect(&pqOrbiter, SIGNAL(np_channelID(QString)), w.nowPlayingButton, SLOT(setChannelID(QString)),Qt::QueuedConnection);
+        QObject::connect(&pqOrbiter, SIGNAL(np_program(QString)), w.nowPlayingButton, SLOT(setProgram(QString)),Qt::QueuedConnection);
 
-        QObject::connect(pqOrbiter, SIGNAL(np_director(QString)), w->nowPlayingButton, SLOT(setDirector(QString)),Qt::QueuedConnection);
-        QObject::connect(pqOrbiter,SIGNAL(np_episode(QString)), w->nowPlayingButton, SLOT(setEpisode(QString)),Qt::QueuedConnection);
-        QObject::connect(pqOrbiter, SIGNAL(np_filename(QString)), w->nowPlayingButton, SLOT(setFilePath(QString)),Qt::QueuedConnection);
-        QObject::connect(pqOrbiter, SIGNAL(np_genre(QString)), w->nowPlayingButton, SLOT(setGenre(QString)),Qt::QueuedConnection);
-        QObject::connect(pqOrbiter, SIGNAL(np_localpathChanged(QString)), w->nowPlayingButton, SLOT(setLocalPath(QString)),Qt::QueuedConnection);
-        QObject::connect(pqOrbiter, SIGNAL(np_performer(QString)), w->nowPlayingButton, SLOT(setPerformers(QString)),Qt::QueuedConnection);
+        QObject::connect(&pqOrbiter, SIGNAL(np_director(QString)), w.nowPlayingButton, SLOT(setDirector(QString)),Qt::QueuedConnection);
+        QObject::connect(&pqOrbiter,SIGNAL(np_episode(QString)), w.nowPlayingButton, SLOT(setEpisode(QString)),Qt::QueuedConnection);
+        QObject::connect(&pqOrbiter, SIGNAL(np_filename(QString)), w.nowPlayingButton, SLOT(setFilePath(QString)),Qt::QueuedConnection);
+        QObject::connect(&pqOrbiter, SIGNAL(np_genre(QString)), w.nowPlayingButton, SLOT(setGenre(QString)),Qt::QueuedConnection);
+        QObject::connect(&pqOrbiter, SIGNAL(np_localpathChanged(QString)), w.nowPlayingButton, SLOT(setLocalPath(QString)),Qt::QueuedConnection);
+        QObject::connect(&pqOrbiter, SIGNAL(np_performer(QString)), w.nowPlayingButton, SLOT(setPerformers(QString)),Qt::QueuedConnection);
 
-        QObject::connect(pqOrbiter, SIGNAL(np_program(QString)), w->nowPlayingButton, SLOT(setProgram(QString)),Qt::QueuedConnection);
-        QObject::connect(pqOrbiter, SIGNAL(np_releaseDate(QString)), w->nowPlayingButton, SLOT(setRelease(QString)),Qt::QueuedConnection);
-        QObject::connect(pqOrbiter, SIGNAL(np_title1Changed(QString)), w->nowPlayingButton, SLOT(setTitle(QString)),Qt::QueuedConnection);
-        QObject::connect(pqOrbiter, SIGNAL(np_title2Changed(QString)), w->nowPlayingButton, SLOT(setTitle2(QString)),Qt::QueuedConnection);
-        QObject::connect(pqOrbiter, SIGNAL(subtitleChanged(QString)), w->nowPlayingButton, SLOT(setSubTitle(QString)),Qt::QueuedConnection);
-        QObject::connect(pqOrbiter, SIGNAL(np_synopsisChanged(QString)), w->nowPlayingButton, SLOT(setSynop(QString)),Qt::QueuedConnection);
-        QObject::connect(pqOrbiter,SIGNAL(playlistPositionChanged(int)), w->nowPlayingButton, SLOT(setPlaylistPostion(int)),Qt::QueuedConnection);
+        QObject::connect(&pqOrbiter, SIGNAL(np_program(QString)), w.nowPlayingButton, SLOT(setProgram(QString)),Qt::QueuedConnection);
+        QObject::connect(&pqOrbiter, SIGNAL(np_releaseDate(QString)), w.nowPlayingButton, SLOT(setRelease(QString)),Qt::QueuedConnection);
+        QObject::connect(&pqOrbiter, SIGNAL(np_title1Changed(QString)), w.nowPlayingButton, SLOT(setTitle(QString)),Qt::QueuedConnection);
+        QObject::connect(&pqOrbiter, SIGNAL(np_title2Changed(QString)), w.nowPlayingButton, SLOT(setTitle2(QString)),Qt::QueuedConnection);
+        QObject::connect(&pqOrbiter, SIGNAL(subtitleChanged(QString)), w.nowPlayingButton, SLOT(setSubTitle(QString)),Qt::QueuedConnection);
+        QObject::connect(&pqOrbiter, SIGNAL(np_synopsisChanged(QString)), w.nowPlayingButton, SLOT(setSynop(QString)),Qt::QueuedConnection);
+        QObject::connect(&pqOrbiter,SIGNAL(playlistPositionChanged(int)), w.nowPlayingButton, SLOT(setPlaylistPostion(int)),Qt::QueuedConnection);
 
-        QObject::connect(pqOrbiter, SIGNAL(screenshotVariablesReady(QList<QObject*>)), w, SLOT(setScreenShotVariables(QList<QObject*>)),Qt::QueuedConnection);
-        QObject::connect(pqOrbiter, SIGNAL(screenShotReady(QImage)), w, SLOT(setMediaScreenShot(QImage)),Qt::QueuedConnection);
-        QObject::connect(w, SIGNAL(saveMediaScreenShot(QString,QImage)), pqOrbiter, SLOT(saveScreenAttribute(QString,QImage)),Qt::QueuedConnection);
+        QObject::connect(&pqOrbiter, SIGNAL(screenshotVariablesReady(QList<QObject*>)), &w, SLOT(setScreenShotVariables(QList<QObject*>)),Qt::QueuedConnection);
+        QObject::connect(&pqOrbiter, SIGNAL(screenShotReady(QImage)), &w, SLOT(setMediaScreenShot(QImage)),Qt::QueuedConnection);
+        QObject::connect (&w, SIGNAL(saveMediaScreenShot(QString,QImage)), &pqOrbiter, SLOT(saveScreenAttribute(QString,QImage)),Qt::QueuedConnection);
         // myth  now playing requires special handling
-        QObject::connect(pqOrbiter, SIGNAL(mythTvUpdate(QString)), simpleEPGmodel, SLOT(setMythProgram(QString)),Qt::QueuedConnection);
-        QObject::connect(pqOrbiter, SIGNAL(epgDone()), simpleEPGmodel, SLOT(updatePosition()),Qt::QueuedConnection);
-        QObject::connect(pqOrbiter, SIGNAL(livetvDone()), simpleEPGmodel, SLOT(updateLivePosition()), Qt::QueuedConnection);
+        QObject::connect(&pqOrbiter, SIGNAL(mythTvUpdate(QString)), simpleEPGmodel, SLOT(setMythProgram(QString)),Qt::QueuedConnection);
+        QObject::connect(&pqOrbiter, SIGNAL(epgDone()), simpleEPGmodel, SLOT(updatePosition()),Qt::QueuedConnection);
+        QObject::connect(&pqOrbiter, SIGNAL(livetvDone()), simpleEPGmodel, SLOT(updateLivePosition()), Qt::QueuedConnection);
 
-        QObject::connect(simpleEPGmodel, SIGNAL(requestEpg()), pqOrbiter, SLOT(requestLiveTvPlaylist()), Qt::QueuedConnection);
+        QObject::connect(simpleEPGmodel, SIGNAL(requestEpg()), &pqOrbiter, SLOT(requestLiveTvPlaylist()), Qt::QueuedConnection);
 
-        QObject::connect(pqOrbiter, SIGNAL(clearTVplaylist()), simpleEPGmodel, SLOT(populate()), Qt::QueuedConnection);
-        QObject::connect(w, SIGNAL(liveTVrequest()), simpleEPGmodel, SLOT(populate()),Qt::DirectConnection);
-        QObject::connect(w, SIGNAL(managerPlaylistRequest()), storedVideoPlaylist,SLOT(populate()),Qt::QueuedConnection );
+        QObject::connect(&pqOrbiter, SIGNAL(clearTVplaylist()), simpleEPGmodel, SLOT(populate()), Qt::QueuedConnection);
+        QObject::connect (&w, SIGNAL(liveTVrequest()), simpleEPGmodel, SLOT(populate()),Qt::DirectConnection);
+        QObject::connect (&w, SIGNAL(managerPlaylistRequest()), storedVideoPlaylist,SLOT(populate()),Qt::QueuedConnection );
 
         //controls
-        QObject::connect(pqOrbiter, SIGNAL(resendAvButtonList(QList<QObject*>)), w, SLOT(showDeviceCodes(QList<QObject*>)), Qt::QueuedConnection);
-        QObject::connect(pqOrbiter, SIGNAL(deviceCommandList(QList<QObject*>)), w, SLOT(setCommandList(QList<QObject*>)), Qt::QueuedConnection);
-        QObject::connect(pqOrbiter, SIGNAL(bookmarkList(QList<QObject*>)), w, SLOT(showBookmarks(QList<QObject*>)), Qt::QueuedConnection);
+        QObject::connect(&pqOrbiter, SIGNAL(resendAvButtonList(QList<QObject*>)), &w, SLOT(showDeviceCodes(QList<QObject*>)), Qt::QueuedConnection);
+        QObject::connect(&pqOrbiter, SIGNAL(deviceCommandList(QList<QObject*>)), &w, SLOT(setCommandList(QList<QObject*>)), Qt::QueuedConnection);
+        QObject::connect(&pqOrbiter, SIGNAL(bookmarkList(QList<QObject*>)), &w, SLOT(showBookmarks(QList<QObject*>)), Qt::QueuedConnection);
         //so does live tv
-        QObject::connect(w, SIGNAL(clearModel()), simpleEPGmodel, SLOT(empty()),Qt::QueuedConnection);
+        QObject::connect(&w, SIGNAL(clearModel()), simpleEPGmodel, SLOT(empty()),Qt::QueuedConnection);
 
-        QObject::connect(pqOrbiter, SIGNAL(liveTvUpdate(QString)), simpleEPGmodel, SLOT(setProgram(QString)), Qt::QueuedConnection);
+        QObject::connect(&pqOrbiter, SIGNAL(liveTvUpdate(QString)), simpleEPGmodel, SLOT(setProgram(QString)), Qt::QueuedConnection);
         //epg specific
 
         //storemediaplaylist specific
-        QObject::connect(storedVideoPlaylist,SIGNAL(playlistReady()), pqOrbiter,SLOT(requestMediaPlaylist()),Qt::QueuedConnection);
-        QObject::connect(pqOrbiter, SIGNAL(clearPlaylist()), storedVideoPlaylist,  SLOT(populate()),Qt::QueuedConnection);
-        QObject::connect(pqOrbiter, SIGNAL(playlistDone()), storedVideoPlaylist, SIGNAL(activeItemChanged()),Qt::QueuedConnection);
-        QObject::connect(pqOrbiter, SIGNAL(closeOrbiter()), w, SLOT(closeOrbiter()),Qt::QueuedConnection);
-        QObject::connect(w, SIGNAL(resendDeviceCode(int,int)), pqOrbiter, SLOT(sendAvCommand(int,int)), Qt::QueuedConnection);
+        QObject::connect(storedVideoPlaylist,SIGNAL(playlistReady()), &pqOrbiter,SLOT(requestMediaPlaylist()),Qt::QueuedConnection);
+        QObject::connect(&pqOrbiter, SIGNAL(clearPlaylist()), storedVideoPlaylist,  SLOT(populate()),Qt::QueuedConnection);
+        QObject::connect(&pqOrbiter, SIGNAL(playlistDone()), storedVideoPlaylist, SIGNAL(activeItemChanged()),Qt::QueuedConnection);
+        QObject::connect(&pqOrbiter, SIGNAL(closeOrbiter()), &w, SLOT(closeOrbiter()),Qt::QueuedConnection);
+        QObject::connect(&w, SIGNAL(resendDeviceCode(int,int)), &pqOrbiter, SLOT(sendAvCommand(int,int)), Qt::QueuedConnection);
 
-        QObject::connect(pqOrbiter,SIGNAL(routerReloading(QString)), w, SLOT(reloadHandler()) );
+        QObject::connect(&pqOrbiter,SIGNAL(routerReloading(QString)), &w, SLOT(reloadHandler()) );
         //FIXME: below emits error: QObject::connect: Attempt to bind non-signal orbiterWindow::close()
-        //QObject::connect(w,SIGNAL, w, SLOT(closeOrbiter()), Qt::DirectConnection);
-        QObject::connect(w, SIGNAL(reloadRouter()), pqOrbiter, SLOT(quickReload()), Qt::QueuedConnection);
-        QObject::connect(pqOrbiter, SIGNAL(routerDisconnect()), w, SLOT(reloadHandler()),Qt::QueuedConnection);
-        QObject::connect(pqOrbiter, SIGNAL(checkReload()), w, SLOT(connectionWatchdog()), Qt::QueuedConnection);
-        QObject::connect(w, SIGNAL(reInitialize()), pqOrbiter, SLOT(initialize()), Qt::QueuedConnection);
+        //QObject::connect (&w,SIGNAL, &w, SLOT(closeOrbiter()), Qt::DirectConnection);
+        QObject::connect(&w, SIGNAL(reloadRouter()), &pqOrbiter, SLOT(quickReload()), Qt::QueuedConnection);
+        QObject::connect(&pqOrbiter, SIGNAL(routerDisconnect()), &w, SLOT(reloadHandler()),Qt::QueuedConnection);
+        QObject::connect(&pqOrbiter, SIGNAL(checkReload()), &w, SLOT(connectionWatchdog()), Qt::QueuedConnection);
+        QObject::connect(&w, SIGNAL(reInitialize()), &pqOrbiter, SLOT(initialize()), Qt::QueuedConnection);
 
-        #ifndef QT5
-          pqOrbiter->moveToThread(dceThread);
-                 dceThread->start();
-                 // tcThread->start();
-                 mediaThread->start();
-                 epgThread->start();
-        #endif
 
-        pqOrbiter->setDeviceId(w->iPK_Device);
-        pqOrbiter->m_sHostName = w->qs_routerip.toStdString();
-        pqOrbiter->m_sIPAddress = w->qs_routerip.toStdString();
-        pqOrbiter->m_sExternalIP = w->qs_ext_routerip.toStdString();
+
+        dceThread.start();
+        // tcThread->start();
+#ifndef QT5
+        //mediaThread->start();
+        //epgThread->start();
+#endif
+
+        pqOrbiter.setDeviceId(w.iPK_Device);
+        pqOrbiter.m_sHostName = w.qs_routerip.toStdString();
+        pqOrbiter.m_sIPAddress = w.qs_routerip.toStdString();
+        pqOrbiter.m_sExternalIP = w.qs_ext_routerip.toStdString();
 
         qDebug() << "Initializing connection";
-        pqOrbiter->pingCore();
-        PK_Device = pqOrbiter->m_dwPK_Device;
+        pqOrbiter.pingCore();
+        PK_Device = pqOrbiter.m_dwPK_Device;
         a.exec();
 
-        if( pqOrbiter->m_bReload )
+        if( pqOrbiter.m_bReload )
 
         { bReload=true; }
         a.quit();

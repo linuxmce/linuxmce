@@ -40,49 +40,12 @@ qOrbiter::qOrbiter(int DeviceID, string ServerAddress,bool bConnectEventHandler,
     : qOrbiter_Command(DeviceID, ServerAddress,bConnectEventHandler,bLocalMode,pRouter)
     //<-dceag-const-e->
 {
-    iPK_Device_DatagridPlugIn =  long(6);
-    iPK_Device_OrbiterPlugin = long(9);
-    iPK_Device_GeneralInfoPlugin = long(4);
-    iPK_Device_SecurityPlugin = long(13);
-    iPK_Device_LightingPlugin = long(8);
-    m_dwIDataGridRequestCounter = 0;
-    iOrbiterPluginID = 9;
-    iMediaPluginID = 10;
-    iPK_Device_eventPlugin = 12;
-    m_pOrbiterCat = 5;
-    internal_streamID = 0;
-    videoDefaultSort = "13";
-    audioDefaultSort = "2";
-    photoDefaultSort = "13";
-    gamesDefaultSort = "49";
-    backwards = false;
-    i_current_mediaType = 0;
-    i_current_floorplanType = 0;
-    setCurrentPage(0);
-    modelPages = 0;
-    media_currentPage=0;
-    media_pos=0;
-    media_seek="";
-    cellsToRender = 0;
-    setGridSeperator(16);
-    b_mediaPlaying = false;
-    m_dwPK_Device_NowPlaying = 0;
-    m_dwPK_Device_NowPlaying_Video = 0;
-    m_dwPK_Device_NowPlaying_Audio = 0;
-    m_dwPK_Device_CaptureCard = 0;
-    m_dwMaxRetries = 3;
-    m_sExternalIP = "";
-    m_bOrbiterConnected = false;
-    initializeGrid();
-    setOrbiterSetupVars(0,0,0,0,0,0);
-#ifndef for_harmattan
-    qRegisterMetaType< QList<ExistingOrbiter*> >("QList<ExistingOrbiter*>");
-#endif
+
 }
 
 //<-dceag-const2-b->
 // The constructor when the class is created as an embedded instance within another stand-alone device
-qOrbiter::qOrbiter(Command_Impl *pPrimaryDeviceCommand, DeviceData_Impl *pData, Event_Impl *pEvent, Router *pRouter, QObject *parent)
+qOrbiter::qOrbiter(Command_Impl *pPrimaryDeviceCommand, DeviceData_Impl *pData, Event_Impl *pEvent, Router *pRouter, QThread *parent)
     : qOrbiter_Command(pPrimaryDeviceCommand, pData, pEvent, pRouter, parent)
     //<-dceag-const2-e->
 {
@@ -117,7 +80,7 @@ bool qOrbiter::Register()
  cannot include the actual implementation.  Instead there's an extern function declared, and the actual new exists here.  You
  can safely remove this block (put a ! after the dceag-createinst-b block) if this device is not embedded within other devices. */
 //<-dceag-createinst-b->
-qOrbiter_Command *Create_qOrbiter(Command_Impl *pPrimaryDeviceCommand, DeviceData_Impl *pData, Event_Impl *pEvent, Router *pRouter, QObject *parent)
+qOrbiter_Command *Create_qOrbiter(Command_Impl *pPrimaryDeviceCommand, DeviceData_Impl *pData, Event_Impl *pEvent, Router *pRouter, QThread *parent)
 {
     return new qOrbiter(pPrimaryDeviceCommand, pData, pEvent, pRouter, parent);
 }
@@ -1869,14 +1832,14 @@ bool DCE::qOrbiter::initialize()
         {
             // qDebug("Checking Connection Error Type:");
 
-            QApplication::processEvents(QEventLoop::AllEvents);
+            //QApplication::processEvents(QEventLoop::AllEvents);
             if(  m_pEvent->m_pClientSocket->m_eLastError==ClientSocket::cs_err_CannotConnect )
             {
 
                 LoggerWrapper::GetInstance()->Write(LV_CRITICAL, "No Router");
                 setCommandResponse("No Connection to Router");
                 emit routerInvalid();
-                QApplication::processEvents(QEventLoop::AllEvents);
+                //QApplication::processEvents(QEventLoop::AllEvents);
                 return false;
 
             }
@@ -1887,7 +1850,7 @@ bool DCE::qOrbiter::initialize()
                 setCommandResponse("Bad Device");
                 // int errorType =  this->DeviceIdInvalid();
                 emit connectionValid(true);
-                QApplication::processEvents(QEventLoop::AllEvents);
+                //QApplication::processEvents(QEventLoop::AllEvents);
                 return false;
             }
 
@@ -1896,7 +1859,7 @@ bool DCE::qOrbiter::initialize()
 
                 LoggerWrapper::GetInstance()->Write(LV_CRITICAL, "Router Needs Reload");
                 setCommandResponse("Needs Reload");
-                QApplication::processEvents(QEventLoop::AllEvents);
+                //QApplication::processEvents(QEventLoop::AllEvents);
                 return false;
             }
             else
@@ -1905,13 +1868,13 @@ bool DCE::qOrbiter::initialize()
                 LoggerWrapper::GetInstance()->Write(LV_CRITICAL, "Connect() Failed");
                 Disconnect();
                 setCommandResponse("QOrbiter Connect() Failed for"+QString::number(this->m_dwPK_Device) );
-                QApplication::processEvents(QEventLoop::AllEvents);
+                //QApplication::processEvents(QEventLoop::AllEvents);
                 return false;
             }
 
             Disconnect();
             return false;
-            QApplication::processEvents(QEventLoop::AllEvents);
+            //QApplication::processEvents(QEventLoop::AllEvents);
         }
     }
 }
@@ -2083,6 +2046,49 @@ void qOrbiter::requestTypes(int type)
 
 void qOrbiter::getFloorplanDeviceCommand(int device)
 {
+}
+
+void qOrbiter::beginSetup()
+{
+    iPK_Device_DatagridPlugIn =  long(6);
+    iPK_Device_OrbiterPlugin = long(9);
+    iPK_Device_GeneralInfoPlugin = long(4);
+    iPK_Device_SecurityPlugin = long(13);
+    iPK_Device_LightingPlugin = long(8);
+    m_dwIDataGridRequestCounter = 0;
+    iOrbiterPluginID = 9;
+    iMediaPluginID = 10;
+    iPK_Device_eventPlugin = 12;
+    m_pOrbiterCat = 5;
+    internal_streamID = 0;
+    videoDefaultSort = "13";
+    audioDefaultSort = "2";
+    photoDefaultSort = "13";
+    gamesDefaultSort = "49";
+    backwards = false;
+    i_current_mediaType = 0;
+    i_current_floorplanType = 0;
+    setCurrentPage(0);
+    modelPages = 0;
+    media_currentPage=0;
+    media_pos=0;
+    media_seek="";
+    cellsToRender = 0;
+    setGridSeperator(16);
+    b_mediaPlaying = false;
+    m_dwPK_Device_NowPlaying = 0;
+    m_dwPK_Device_NowPlaying_Video = 0;
+    m_dwPK_Device_NowPlaying_Audio = 0;
+    m_dwPK_Device_CaptureCard = 0;
+    m_dwMaxRetries = 3;
+    m_sExternalIP = "";
+    m_bOrbiterConnected = false;
+    initializeGrid();
+    setOrbiterSetupVars(0,0,0,0,0,0);
+#ifndef for_harmattan
+    qRegisterMetaType< QList<ExistingOrbiter*> >("QList<ExistingOrbiter*>");
+#endif
+    qDebug() <<"Run function executed" << currentThreadId();
 }
 
 void qOrbiter::setRecievingStatus(bool b)
@@ -2483,7 +2489,7 @@ void DCE::qOrbiter::GetMediaAttributeGrid(QString  qs_fk_fileno)
 
     QStringList details = breaker.split(QRegExp("\\t"));
     int placeholder;
-
+//QApplication::processEvents(QEventLoop::AllEvents);
 #ifdef QT_DEBUG
     //qDebug() << details.join("||");
 #endif
@@ -2542,7 +2548,7 @@ void DCE::qOrbiter::GetMediaAttributeGrid(QString  qs_fk_fileno)
         //the first match as that will be the first indexed by the regex engine.
 
     }
-
+//QApplication::processEvents(QEventLoop::AllEvents);
     placeholder = details.indexOf("FILENAME");
     if(placeholder != -1)
     {
@@ -2578,6 +2584,7 @@ void DCE::qOrbiter::GetMediaAttributeGrid(QString  qs_fk_fileno)
             DataGridCell *pCell;
             for(MemoryDataTable::iterator it=pDataGridTable->m_MemoryDataTable.begin();it!=pDataGridTable->m_MemoryDataTable.end();++it)
             {
+                //QApplication::processEvents(QEventLoop::AllEvents);
                 pCell = it->second;
                 // fk.remove("!F");
                 const char *pPath = pCell->GetImagePath();
@@ -2585,7 +2592,7 @@ void DCE::qOrbiter::GetMediaAttributeGrid(QString  qs_fk_fileno)
                 QString attributeType = pCell->m_mapAttributes_Find("Title").c_str();
                 QString attribute  = pCell->m_mapAttributes_Find("Name").c_str();
                 cellfk = pCell->GetValue();
-
+//QApplication::processEvents(QEventLoop::AllEvents);
                 if(attributeType == "Program")
                 {
                     emit fd_programChanged(attribute);
@@ -2751,7 +2758,7 @@ void DCE::qOrbiter::requestMediaPlaylist()
                 fk_file = pCell->GetValue();
                 emit playlistItemAdded(new PlaylistItemClass(cellTitle, fk_file, index));
                 index++;
-                QApplication::processEvents(QEventLoop::AllEvents);
+                //QApplication::processEvents(QEventLoop::AllEvents);
             }
 
         }
@@ -2796,7 +2803,7 @@ void qOrbiter::getStreamingVideo()
     string sFormat ="png";
     string grabResponse="";
 
-    QApplication::processEvents(QEventLoop::AllEvents);
+    //QApplication::processEvents(QEventLoop::AllEvents);
 
     CMD_Get_Video_Frame grabVideoFrame( m_dwPK_Device, m_dwPK_Device_NowPlaying, "0", this->internal_streamID, 800, 800, &grabData, &grabData_size, &sFormat );
 
@@ -3200,7 +3207,7 @@ void DCE::qOrbiter::requestLiveTvPlaylist()
 
             for(MemoryDataTable::iterator it=pDataGridTable->m_MemoryDataTable.begin();it!=pDataGridTable->m_MemoryDataTable.end();++it)
             {
-                QApplication::processEvents(QEventLoop::AllEvents);
+                //QApplication::processEvents(QEventLoop::AllEvents);
                 pCell = it->second;
                 QStringList breaker = QString::fromStdString(pCell->m_mapAttributes_Find("Name").c_str()).split(" ");
                 channelName = breaker.at(1);
@@ -3212,7 +3219,7 @@ void DCE::qOrbiter::requestLiveTvPlaylist()
                 EPGItemClass *t = new EPGItemClass(channelName, channelNumber, channelIndex, program, index, channelimage, channelimage);
                 emit addChannel(t);
                 index++;
-                QApplication::processEvents(QEventLoop::AllEvents);
+                //QApplication::processEvents(QEventLoop::AllEvents);
             }
         }
     }
@@ -3311,7 +3318,7 @@ void DCE::qOrbiter::populateAdditionalMedia() //additional media grid that popul
     {
         //setCommandResponse("requesting additional media");
 #ifdef QT5
-        QApplication::processEvents(QEventLoop::AllEvents);
+        //QApplication::processEvents(QEventLoop::AllEvents);
 #endif
 
         int gHeight = media_pageSeperator;;            //how many rows we want
@@ -3383,8 +3390,9 @@ void DCE::qOrbiter::populateAdditionalMedia() //additional media grid that popul
                 }
 
                 emit addItem(new gridItem(fk_file, cellTitle, filePath, index, cellImg));
+                QThread::msleep(100);
 #ifdef QT5
-                QApplication::processEvents(QEventLoop::AllEvents);
+                //QApplication::processEvents(QEventLoop::AllEvents);
 #endif
             }
             media_seek="";
@@ -4256,7 +4264,7 @@ int qOrbiter::PromptUser(std::string sPrompt, int iTimeoutSeconds, map<int, std:
 int qOrbiter::DeviceIdInvalid()
 {
     setCommandResponse("Device ID is invalid. Finding Existing Orbiters of this type");
-    QApplication::processEvents(QEventLoop::AllEvents);
+    //QApplication::processEvents(QEventLoop::AllEvents);
     QList<QObject*> * temp_orbiter_list = new QList<QObject*>;
 
     map<int,string> mapDevices;
@@ -4265,7 +4273,7 @@ int qOrbiter::DeviceIdInvalid()
     if( mapDevices.size()==0 )
     {
         setCommandResponse("No orbiters of this type found. Would you like to setup a new one?");
-        //        QApplication::processEvents(QEventLoop::AllEvents);
+        //        //QApplication::processEvents(QEventLoop::AllEvents);
         populateSetupInformation();
         return 0;
     }
@@ -4275,13 +4283,13 @@ int qOrbiter::DeviceIdInvalid()
             int i = (int)it->first;
             QString s = QString::fromStdString(it->second);
 
-            temp_orbiter_list->append( new ExistingOrbiter((int)it->first,QString::fromStdString(it->second)));
-
+            ExistingOrbiter *f = new ExistingOrbiter((int)it->first,QString::fromStdString(it->second));
+            emit addExistingOrbiter(f);
             cout << it->first << " " << it->second << endl;
         }
         setCommandResponse("Returning List of Orbiters");
         setCommandResponse(QString::number(temp_orbiter_list->count()) + " Orbiter(s)");
-        emit deviceInvalid(*temp_orbiter_list);
+        emit deviceInvalid();
         return 0;
     }
 
@@ -4418,7 +4426,7 @@ void DCE::qOrbiter::prepareFileList(int iPK_MediaType)
     cellsToRender = 0;
     setMediaResponse("Initial media request for media type " + QString::number(iPK_MediaType));
 #ifdef QT5
-    QApplication::processEvents(QEventLoop::AllEvents);
+    //QApplication::processEvents(QEventLoop::AllEvents);
 #endif
     //emit cleanupGrid();
 
@@ -4521,7 +4529,7 @@ void DCE::qOrbiter::prepareFileList(int iPK_MediaType)
         goBack<< s;
     }
 #ifdef QT5
-    QApplication::processEvents(QEventLoop::AllEvents);
+    //QApplication::processEvents(QEventLoop::AllEvents);
 #endif
     //qDebug() << s;
     CMD_Populate_Datagrid populateDataGrid(m_dwPK_Device, iPK_Device_DatagridPlugIn, StringUtils::itos( m_dwIDataGridRequestCounter ), string(m_sGridID), 63, s.toStdString(), 0, &pkVar, &valassign,  &isSuccessfull,  &gWidth, &gHeight);
@@ -4561,6 +4569,7 @@ void DCE::qOrbiter::prepareFileList(int iPK_MediaType)
                // emit gridModelSizeChange(cellsToRender);
                 i_mediaModelRows = cellsToRender;
                 media_totalPages = (i_mediaModelRows / media_pageSeperator)+1; //16 being the items per page.
+
                 pDataGridTable = NULL;
                 setModelPages(media_totalPages);
                 setMediaResponse(QString::number(media_totalPages)+ " pages from request, populating first page.");
@@ -4651,7 +4660,7 @@ void qOrbiter::getFloorPlanImage(QString fp_path)
     if(SendCommand(reqFile, &p_sResponse) && p_sResponse=="OK")
     {
 #ifdef QT5
-        QApplication::processEvents(QEventLoop::AllEvents);
+        //QApplication::processEvents(QEventLoop::AllEvents);
 #endif
         const uchar *data = (uchar*)picData;
         emit floorPlanImageData(data, picData_Size);
@@ -4671,7 +4680,7 @@ void qOrbiter::getScreenSaverImage(QString inc_requested_img_path)
     if(SendCommand(reqFile, &p_sResponse) && p_sResponse=="OK")
     {
 #ifdef QT5
-        QApplication::processEvents(QEventLoop::AllEvents);
+        //QApplication::processEvents(QEventLoop::AllEvents);
 #endif
         setMediaResponse("Recieved Screensaver image");
         data = (uchar*)picData;
@@ -4700,7 +4709,6 @@ void DCE::qOrbiter::setGridSeperator(int sep)
 
     media_totalPages = (i_mediaModelRows / media_pageSeperator); //16 being the items per page.
    setModelPages(media_totalPages);
-    emit modelPageCount(modelPages);
     emit pageSeperatorChanged(media_pageSeperator);
 }
 

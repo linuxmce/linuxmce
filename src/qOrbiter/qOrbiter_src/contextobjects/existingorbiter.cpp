@@ -6,6 +6,31 @@ ExistingOrbiter::ExistingOrbiter(int deviceno, QString title, QObject *parent) :
 
 }
 
+QVariant ExistingOrbiter::data(int role) const
+{
+    switch(role) {
+    case LabelRole:
+      return id();
+    case LocationRole:
+      return locationData();
+    case DeviceRole:
+      return deviceData();
+    default:
+      return QVariant();
+    }
+}
+
+QHash<int, QByteArray> ExistingOrbiter::roleNames() const
+{
+    QHash<int, QByteArray> names;
+    names[LabelRole] = "label";
+    names[LocationRole] = "location";
+    names[DeviceRole] = "device";
+    return names;
+}
+
+
+
 void ExistingOrbiter::set_title(QString t)
 {
     label = t;
