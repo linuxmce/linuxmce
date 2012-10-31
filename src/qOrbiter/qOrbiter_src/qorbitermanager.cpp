@@ -1392,13 +1392,6 @@ void qorbiterManager::requestSecurityPic(int i_pk_camera_device, int h, int w)
     emit  getSingleCam(i_pk_camera_device,  h,  w);
 }
 
-void qorbiterManager::playMedia(QString FK_Media)
-{
-    //  pqOrbiter->playMedia(FK_Media);
-    emit startPlayback(FK_Media);
-}
-
-
 
 void qorbiterManager::showfloorplan(int fptype)
 {

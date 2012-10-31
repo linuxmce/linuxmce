@@ -57,7 +57,7 @@ void TimeCodeManager::start(QString server, int iport)
     port = iport;
     mediaPlayerIp = server;
 
-    if(!dceMediaSocket->isOpen() && portConnected==false)
+    if(!dceMediaSocket->canReadLine() && portConnected==false)
     {
 #ifdef QT_DEBUG
         qDebug() <<"opening connection to " << server + ":" + QString::number(iport);
@@ -117,6 +117,7 @@ void TimeCodeManager::stop()
     setSpeed(0);
     dceMediaSocket->close();
     dceMediaSocket->disconnectFromHost();
+    portConnected = false;
 }
 
 void TimeCodeManager::restart()
@@ -126,7 +127,6 @@ void TimeCodeManager::restart()
     setSpeed(0);
     dceMediaSocket->close();
     dceMediaSocket->disconnectFromHost();
-
     start(mediaPlayerIp, port);
 }
 

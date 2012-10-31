@@ -378,7 +378,7 @@ int main(int argc, char* argv[])
 
         //timecodemanager signals / slots
         QObject::connect(&pqOrbiter, SIGNAL(updateTimeCode(QString,int)), timecode, SLOT(start(QString,int)), Qt::QueuedConnection);
-        QObject::connect(&pqOrbiter, SIGNAL(stopTimeCode()), timecode, SLOT(restart()), Qt::QueuedConnection);
+        QObject::connect(&pqOrbiter, SIGNAL(stopTimeCode()), timecode, SLOT(stop()), Qt::QueuedConnection);
 
         //setup
         QObject::connect(&w, SIGNAL(registerOrbiter(int,QString,int)), &pqOrbiter,SLOT(registerDevice(int,QString,int)),Qt::QueuedConnection);

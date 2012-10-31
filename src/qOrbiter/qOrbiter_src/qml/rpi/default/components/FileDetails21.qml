@@ -343,7 +343,7 @@ Rectangle {
             MouseArea
             {
                 anchors.fill: parent
-                onClicked:{dcerouter.playMedia(filedetailsclass.file); filedetailrect.destroy() }  //dce function
+                onClicked:{manager.playMedia(filedetailsclass.file); filedetailrect.destroy() }  //dce function
             }
         }
 

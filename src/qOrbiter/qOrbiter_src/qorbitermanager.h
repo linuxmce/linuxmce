@@ -564,7 +564,7 @@ public slots:
     void nowPlayingChanged(bool b);
 
     /*Media Control Slots*/
-    void playMedia(QString FK_Media);
+    void playMedia(QString FK_Media) { emit startPlayback(FK_Media);}
     void stopMedia() {emit stopPlayback();}
     void setPlaybackSpeed(int s) {emit setStreamSpeed(s);}
     void pauseMedia() {emit pause();}

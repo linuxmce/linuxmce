@@ -2793,6 +2793,10 @@ void qOrbiter::checkTimeCode()
     if(i_current_mediaType!=11 && !sIPAddress.empty() ){
         emit updateTimeCode(QString::fromStdString(sIPAddress), 12000);
     }
+    else
+    {
+        emit stopTimeCode();
+    }
 }
 
 void qOrbiter::getStreamingVideo()
