@@ -1600,7 +1600,11 @@ public slots:
     void requestPage(int page);
     void setMediaType(int t) { i_current_mediaType = t; emit mediaTypeChanged( i_current_mediaType);}
     int getMediaType () {return i_current_mediaType;}
-
+    void setPlaybackSpeed(int s) {
+        if (s < 0)
+        {RwMedia();} else
+        { FfMedia();}
+                                 }
     void jumpMobileGrid(int page);
     void getGridView(bool direction);
     void seekToGridPosition(QString s);

@@ -1398,27 +1398,7 @@ void qorbiterManager::playMedia(QString FK_Media)
     emit startPlayback(FK_Media);
 }
 
-void qorbiterManager::stopMedia()
-{
-    //  pqOrbiter->StopMedia();
-}
 
-void qorbiterManager::rw_media(int speed)
-{
-    //nowPlayingButton->setMediaSpeed(speed);
-    //pqOrbiter->RwMedia();
-}
-
-void qorbiterManager::ff_media(int speed)
-{
-    //nowPlayingButton->setMediaSpeed(speed);
-    //pqOrbiter->FfMedia();
-}
-
-void qorbiterManager::pauseMedia()
-{
-    //  pqOrbiter->PauseMedia();
-}
 
 void qorbiterManager::showfloorplan(int fptype)
 {
@@ -1430,29 +1410,11 @@ void qorbiterManager::showfloorplan(int fptype)
 }
 
 
-
-void qorbiterManager::changedPlaylistPosition(QString position)
-{
-
-
-}
-
-void qorbiterManager::setNowPlayingData()
-{
-
-
-}
-
 void qorbiterManager::updateImageChanged(QImage img)
 {
 
 }
 
-void qorbiterManager::setNowPlayingTv()
-{
-    emit bindMediaRemote(true);
-    emit liveTVrequest();
-}
 
 void qorbiterManager::setScreenShotVariables(QList<QObject *> l)
 {
@@ -1495,17 +1457,6 @@ void qorbiterManager::setCommandList(QList<QObject *> l)
     qorbiterUIwin->rootContext()->setContextProperty("device_commands", QVariant::fromValue(commandList));
 }
 
-void qorbiterManager::setBoundStatus(bool b)
-{
-    emit bindMediaRemote(b);
-}
-
-void qorbiterManager::grabStreamImage()
-{
-    emit requestStreamImage();
-
-}
-
 void qorbiterManager::showBookmarks(QList<QObject *> t)
 {
 
@@ -1515,29 +1466,6 @@ void qorbiterManager::showBookmarks(QList<QObject *> t)
 #endif
     qorbiterUIwin->rootContext()->setContextProperty("currentBookmarks", QVariant::fromValue(current_bookmarks));
 }
-
-void qorbiterManager::changeChannels(QString chan)
-{
-    //  pqOrbiter->TuneToChannel(chan.toInt(), chan );
-}
-
-void qorbiterManager::getLiveTVPlaylist()
-{
-
-}
-
-void qorbiterManager::getStoredPlaylist()
-{
-    emit bindMediaRemote(true);
-
-
-}
-
-void qorbiterManager::gridChangeChannel(QString chan, QString chanid)
-{
-    ////    pqOrbiter->TuneToChannel(chan.toInt(), chanid);
-}
-
 
 void qorbiterManager::setHouseMode(int mode, int pass)
 {
@@ -1795,10 +1723,6 @@ void qorbiterManager::getGrid(int i)
     emit mediaRequest(i);
 }
 
-void qorbiterManager::adjustVolume(int vol)
-{
-    //  pqOrbiter->adjustVolume( vol);
-}
 
 QString qorbiterManager::getCurrentScreen()
 {

@@ -2684,14 +2684,14 @@ void DCE::qOrbiter::StopMedia()
 
 void DCE::qOrbiter::RwMedia()
 {
-    //  CMD_Change_Playback_Speed rewind_media(m_dwPK_Device, iMediaPluginID, internal_streamID , -2, true);
-    //  SendCommand(rewind_media);
+      CMD_Change_Playback_Speed rewind_media(m_dwPK_Device, iMediaPluginID, internal_streamID , -2, true);
+      SendCommand(rewind_media);
 }
 
 void DCE::qOrbiter::FfMedia()
 {
-    // CMD_Change_Playback_Speed forward_media(m_dwPK_Device, iMediaPluginID, internal_streamID, +2, true);
-    //  SendCommand(forward_media);
+     CMD_Change_Playback_Speed forward_media(m_dwPK_Device, iMediaPluginID, internal_streamID, +2, true);
+      SendCommand(forward_media);
 }
 
 void DCE::qOrbiter::PauseMedia()
@@ -3389,10 +3389,10 @@ void DCE::qOrbiter::populateAdditionalMedia() //additional media grid that popul
                 }
 
                 emit addItem(new gridItem(fk_file, cellTitle, filePath, index, cellImg));
+#ifdef RPI
                 QThread::msleep(100);
-#ifdef QT5
-                //QApplication::processEvents(QEventLoop::AllEvents);
 #endif
+
             }
             media_seek="";
             delete pDataGridTable;

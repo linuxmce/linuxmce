@@ -401,6 +401,9 @@ Param 10 - pk_attribute
     QString applicationPath;
 
 signals:
+
+    /* Media Controls */
+    void setVolume(int vol);
     void gridLoadingStatus(bool s);
     void gridGoBack();
     void mediaTypeChanged();
@@ -419,6 +422,12 @@ signals:
     void mediaSeperatorChanged(int sep);
     void requestStreamImage();
     void debugModeChanged();
+    void changeTrack(QString track);
+    void pause();
+    void newChannel(QString channel);
+    void newGridChannel(QString channel, QString chanid);
+    void setStreamSpeed(int speed);
+    void stopPlayback();
 
     void liveTVrequest();
     void managerPlaylistRequest();
@@ -482,58 +491,15 @@ signals:
     void externalHostChanged();
 
 
-public slots: //note: Q_INVOKABLE means it can be called directly from qml
+public slots:
+    /*Splash screen related slots*/
     void showExistingOrbiter(const QList<QObject *> l )  ;
     void connectionWatchdog();
-    QString getCurrentUser() {return sPK_User;}
-    void setCurrentUser(QString inc_user );
-    void setCurrentRoom(QString room) {currentRoom = room; writeConfig(); emit roomChanged();}
-    QString getCurrentRoom () {return currentRoom;}
-    void processConfig(QByteArray config);
-    bool OrbiterGen();              //prelim orbter generation
-    void quickReload();
     void showUI(bool b);
-
-    void setDebugMode(bool b) {debugMode = b; emit debugModeChanged();}
-    bool getDebugMode() {return debugMode;}
-
-    void displayModelPages(QList<QObject*> pages);
-
-    void setInternalIp(QString s) { m_ipAddress = s; emit internalIpChanged(); }
-    QString getInternalIp() {return m_ipAddress; }
-
-    void setInternalHost(QString h) { internalHost = h; emit internalHostChanged();}
-    QString getInternalHost() {return internalHost;}
-
-    void setExternalIp(QString ex) {externalip = ex; emit externalIpChanged();}
-    QString getExternalIp() {return externalip;}
-
-    void setExternalHost(QString h) { externalHost = h; emit externalHostChanged();}
-    QString getExternalHost() {return externalHost;}
-
-
-
-    void getFloorplanDevices(int floorplantype);
-    void setFloorplanType(int t);
-    void setActiveRoom(int room,int ea);
-    void setSkinStatus(bool status) { b_skinReady = status ; emit skinDataLoaded(b_skinReady); }
-    void setOrbiterStatus(bool status) {b_orbiterReady = status ; emit orbiterReady(b_orbiterReady);}
-
-    //void setAppPath(QString p) {appPath;}
-
-    void qmlSetupLmce(QString incdeviceid, QString incrouterip);
-    void setRequestMore(bool state);
-    bool getRequestMore();
     int loadSplash();
     void startOrbiter();
     bool createAndroidConfig();
-    void gotoQScreen(QString ) ;
-    void checkOrientation(QSize);
-    bool getOrientation (){return b_orientation;}
-    void setOrientation (bool s) { b_orientation = s; setDceResponse("orientation changed!! "); emit orientationChanged();}
-    QString getCurrentScreen();
-    void setCurrentScreen(QString s);
-
+    void processConfig(QByteArray config);
     bool writeConfig();
     bool readLocalConfig();
     void setConnectedState(bool state) { connectedState = state;  if(state == false) {checkConnection("Connection Changed");} emit connectedStateChanged(); }
@@ -541,47 +507,97 @@ public slots: //note: Q_INVOKABLE means it can be called directly from qml
     void setDceResponse(QString response);
     QString getDceResponse () ;
 
+    /*Environment Slots. i.e. user, location, etc*/
+    QString getCurrentUser() {return sPK_User;}
+    void setCurrentUser(QString inc_user );
+    void setCurrentRoom(QString room) {currentRoom = room; writeConfig(); emit roomChanged();}
+    QString getCurrentRoom () {return currentRoom;}
+    void setDebugMode(bool b) {debugMode = b; emit debugModeChanged();}
+    bool getDebugMode() {return debugMode;}
+    void setActiveRoom(int room,int ea);
+    int getlocation() const ;
+    void setLocation(const int& , const int& ) ;
+    void qmlSetupLmce(QString incdeviceid, QString incrouterip);
+    void displayModelPages(QList<QObject*> pages);
+
+    /*Network State property functions*/
+    void setInternalIp(QString s) { m_ipAddress = s; emit internalIpChanged(); }
+    QString getInternalIp() {return m_ipAddress; }
+    void setInternalHost(QString h) { internalHost = h; emit internalHostChanged();}
+    QString getInternalHost() {return internalHost;}
+    void setExternalIp(QString ex) {externalip = ex; emit externalIpChanged();}
+    QString getExternalIp() {return externalip;}
+    void setExternalHost(QString h) { externalHost = h; emit externalHostChanged();}
+    QString getExternalHost() {return externalHost;}
+
+    /*floorplan slots*/
+    void getFloorplanDevices(int floorplantype);
+    void setFloorplanType(int t);
+    void showfloorplan(int fptype);
+
+    void setSkinStatus(bool status) { b_skinReady = status ; emit skinDataLoaded(b_skinReady); }
+    void setOrbiterStatus(bool status) {b_orbiterReady = status ; emit orbiterReady(b_orbiterReady);}
+
+    /*Runtime Screen handling*/
+    void gotoQScreen(QString ) ;
+    void checkOrientation(QSize);
+    bool getOrientation (){return b_orientation;}
+    void setOrientation (bool s) { b_orientation = s; setDceResponse("orientation changed!! "); emit orientationChanged();}
+    QString getCurrentScreen();
+    void setCurrentScreen(QString s);
+
     //security related
     void requestSecurityPic(int i_pk_camera_device, int h, int w);
+    void setHouseMode(int mode, int pass);
 
-    //livetv related
-    void changeChannels(QString chan);
-    void gridChangeChannel(QString chan, QString chanid);
 
-    //media related
-    void getLiveTVPlaylist();
-    void getStoredPlaylist();
-    void setNowPlayingData();
-    void setNowPlayingTv();
+    /*Media Metadata Slots*/
+    void getLiveTVPlaylist() { }
+    void getStoredPlaylist() { emit bindMediaRemote(true);}
+    void changedPlaylistPosition(QString position) {emit changeTrack(position);}
+
+    /*Media Mode control slots*/
+    void setNowPlayingData() {}
+    void setNowPlayingTv() {emit bindMediaRemote(true); emit liveTVrequest(); }
+    void setBoundStatus(bool b) {emit bindMediaRemote(b);}
+    void setNowPlayingIcon(bool b);
+    void nowPlayingChanged(bool b);
+
+    /*Media Control Slots*/
+    void playMedia(QString FK_Media);
+    void stopMedia() {emit stopPlayback();}
+    void setPlaybackSpeed(int s) {emit setStreamSpeed(s);}
+    void pauseMedia() {emit pause();}
+    void adjustVolume(int vol) {emit setVolume(vol);}
+    void newTrack(QString track) { emit changeTrack(track); }
+    void jogPosition(QString jog);
+    void showBookmarks(QList<QObject*> t);
+    void changeChannels(QString chan) {emit newChannel(chan);  }
+    void gridChangeChannel(QString chan, QString chanid) {emit newGridChannel(chan, chanid);}
+
+    /*Screenshot & Images slots*/
+    void updateImageChanged(QImage img);
+    void grabStreamImage(){emit requestStreamImage();}
     void setScreenShotVariables(QList <QObject*> l);
     void setMediaScreenShot(QImage screen_shot);
     void saveScreenShot(QString attribute);
-    void showDeviceCodes(QList<QObject*> t);
-    void setCommandList(QList<QObject*> l);
-    void setBoundStatus(bool b);
-    void grabStreamImage();
-    void resendCode(int from, int to) { emit resendDeviceCode( from,  to);}
-    void showBookmarks(QList<QObject*> t);
-
-    void playMedia(QString FK_Media);
-    void stopMedia();
-    void ff_media(int speed);
-    void rw_media(int speed);
-    void pauseMedia();
-    void adjustVolume(int vol);
-
-    void jogPosition(QString jog);
-    void updateImageChanged(QImage img);
-
     void cleanupScreenie();
 
+    /*Media Devices slots*/
+    void showDeviceCodes(QList<QObject*> t);
+    void setCommandList(QList<QObject*> l);
+    void resendCode(int from, int to) { emit resendDeviceCode( from,  to);}
+
+    /*QML Skin Function slots*/
     void setActiveSkin(QString name);
     bool loadSkins(QUrl url);
+#if (QT5)
+    void skinLoaded(QQuickView::Status status);
+#else
+    void skinLoaded(QDeclarativeView::Status status);
+#endif
 
-
-    void changedPlaylistPosition(QString position);
-
-    //datagrid related
+    /*Datagrid Slots*/
     void setGridStatus(bool s) {emit gridLoadingStatus(s);}
     void setSorting(int i);
     void setMediaType(int m) {i_current_mediaType = m; emit mediaTypeChanged();}
@@ -595,17 +611,12 @@ public slots: //note: Q_INVOKABLE means it can be called directly from qml
     void setStringParam(int paramType, QString param);
     void goBackGrid();
     void requestPage(int p);
-
     void showFileInfo(QString fk_file);
-
-    //ui related
-    int getlocation() const ;
-    void setLocation(const int& , const int& ) ;
-
-    void setNowPlayingIcon(bool b);
-    void nowPlayingChanged(bool b);
     void initializeGridModel();
     void showMessage(QString message, int duration, bool critical);
+    void setRequestMore(bool state);
+    bool getRequestMore();
+    bool requestDataGrid();
 
     //initialization related
     void regenOrbiter(int deviceNo);
@@ -614,34 +625,24 @@ public slots: //note: Q_INVOKABLE means it can be called directly from qml
     QString adjustPath(const QString&);
     void checkConnection(QString s);
     void processError(QString msg);
+
     //dce related slots
     void execGrp(int grp);        //for command groups
     void closeOrbiter();
     void reloadHandler();
+    bool OrbiterGen();              //prelim orbter generation
+    void quickReload();
 
-    //floorplans
-    void showfloorplan(int fptype);
-
-    //random c++ related slots
-    bool requestDataGrid();
-
-    //sleeping menu
+    /*Sleeping menu slots. */
     void sleepingMenu(bool toggle, int grp);
     void showSleepingAlarms(QList<QObject*> s);
-    //security
-    void setHouseMode(int mode, int pass);
-    void activateScreenSaver();
+
+    /*ScreenSaver*/
     void killScreenSaver();
-#if (QT5)
-    void skinLoaded(QQuickView::Status status);
-#else
-    void skinLoaded(QDeclarativeView::Status status);
-#endif
+    void activateScreenSaver();
 private:
     void initializeConnections();
     void setupQMLview();
-
-
 };
 
 #endif // QORBITERMANAGER_H

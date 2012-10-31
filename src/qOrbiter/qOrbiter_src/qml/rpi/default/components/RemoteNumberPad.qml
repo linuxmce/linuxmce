@@ -502,7 +502,7 @@ Rectangle {
                             {
                               parent.color = style.lighthighlight
                             }
-
+                            onPressed: text_input1.text = text_input1.text + "0"
                         }
                     }
 
