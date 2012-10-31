@@ -8,12 +8,12 @@ Item
 {
     anchors.centerIn: parent
 
-    Component.onCompleted:  {
-        if(!dceplayer.connected){
-        console.log("Starting media player")
-        dceplayer.setConnectionDetails(dcerouter.qMediaPlayerID, dcerouter.dceIP)
-        }
-    }
+//    Component.onCompleted:  {
+//        if(!dceplayer.connected){
+//        console.log("Starting media player")
+//        dceplayer.setConnectionDetails(dcerouter.qMediaPlayerID, dcerouter.dceIP)
+//        }
+//    }
 
 
     Rectangle {

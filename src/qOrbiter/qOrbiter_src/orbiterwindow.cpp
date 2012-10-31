@@ -40,9 +40,9 @@
 #include <QApplication>
 #endif
 
-#ifdef QT_DEBUG
+
 #include <QDebug>
-#endif
+
 
 #include "orbiterwindow.h"
 
@@ -85,7 +85,7 @@ orbiterWindow::orbiterWindow(long deviceid, std::string routerip, QObject *paren
 
 #if defined (GLENABLED) || (QT5)
     fileReader = new FileReader();
-     mainView.rootContext()->setContextProperty("fileReader", fileReader);    
+     mainView.rootContext()->setContextProperty("fileReader", fileReader);
 #endif
 
 #if (QT5)
@@ -96,21 +96,24 @@ orbiterWindow::orbiterWindow(long deviceid, std::string routerip, QObject *paren
     mainView.rootContext()->setContextProperty("window", this);
     mainView.setWindowTitle("LinuxMCE Orbiter ");
   //  mainView.rootContext()->setContextProperty("orbiterList" , "");
-#if GLENABLED
 
-#ifdef for_desktop
+#ifdef GLENABLED
+#ifdef QT4
     glWidget = new QGLWidget();
     mainView.setViewport(glWidget);
     mainView.setViewportUpdateMode(QGraphicsView::FullViewportUpdate);
-#elif for_android
+#else
 
-#elif __ANDROID__
 //    glWidget = new QGLWidget();
-//    mainView.setViewport(glWidget);
-    mainView.setViewportUpdateMode(QGraphicsView::FullViewportUpdate);
+//    mainView.setsetViewport(glWidget);
+//    mainView.setViewportUpdateMode(QGraphicsView::FullViewportUpdate);
+//#elif for_android
+
+//#elif __ANDROID__
+////    glWidget = new QGLWidget();
+////    mainView.setViewport(glWidget);
+//    mainView.setViewportUpdateMode(QGraphicsView::FullViewportUpdate);
 #endif
-
-
 #endif
     // QObject::connect(&mainView, SIGNAL(sceneResized(QSize)), this, SIGNAL(orientationChanged(QSize)));
 

@@ -35,6 +35,7 @@ void ScreenSaverClass::setImageData(const uchar *data, int iData_size)
 {
 
     qi_currentImage.loadFromData(data, iData_size);
+    qi_currentImage = qi_currentImage.scaledToHeight(1080);
     emit imageChanged();
     delete data;
 }

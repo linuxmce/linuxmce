@@ -78,13 +78,18 @@ MouseArea{
         target: manager
         onOrientationChanged: checkLayout()
     }
-    /*
-    Image {
-    id: bg
-    source: "img/icons/backgrounds/livingroom.png"
-    anchors.fill:parent
-    }
-*/
+
+//    Image {
+//    id: bg
+//    source: "image://listprovider/screensaver/"+securityvideo.timestamp
+//    anchors.fill:parent
+
+//    Connections{
+//        target:screensaver
+//        onImageChanged:bg.source="image://listprovider/screensaver/"+securityvideo.timestamp
+//    }
+//    }
+
     ScreenSaver
     {   id:ss
         height: appH
@@ -95,6 +100,16 @@ MouseArea{
             anchors.fill: ss
             acceptedButtons: Qt.LeftButton | Qt.RightButton
             onClicked:  Qt.RightButton ? pageLoader.visible = !pageLoader.visible: ""
+            onEntered: pageLoader.visible
+        }
+
+        Timer{
+            interval: 15000
+            running: true
+            repeat: false
+            onTriggered: {
+                pageLoader.visible=false
+            }
         }
 
     }

@@ -60,18 +60,18 @@ Rectangle {
             }
             Text {
                 id: page_label
-                text: qsTr("Current Page") + dcerouter.media_currentPage
+                text: qsTr("Current Page") + manager.media_currentPage
             }
 
             TextInput{
                 id:seperationSetter
                 width: page_label.width
-                text: dcerouter.media_pageSeperator
+                text: manager.media_pageSeperator
 
                 Keys.onEnterPressed: {
                     if (!seperationSetter.text.match("/D"))
                     {
-                        dcerouter.setGridSeperator(seperationSetter.text)
+                        manager.setGridSeperator(seperationSetter.text)
                         manager.requestPage(0)
                     }
                 }
@@ -167,7 +167,7 @@ Rectangle {
                     height: scaleY(19)
                     anchors.centerIn: mainItem
                     clip:true
-                    color: "transparent"                   
+                    color: "transparent"
 
                     BorderImage {
                         id: borderimg
@@ -295,7 +295,7 @@ Rectangle {
                     text: index
                     font.pixelSize: scaleY(3.5)
                     anchors.centerIn: parent
-                    color:"slategrey"
+                    color:index===manager.media_currentPage ? "green" : "slategrey"
                     font.bold: true
                 }
 
@@ -343,7 +343,7 @@ Rectangle {
 
                         alphabetrect.scale = 1
                     }
-                    onClicked: dcerouter.seekToGridPosition(name)
+                    onClicked: manager.setSeekLetter(name)
                 }
             }
         }

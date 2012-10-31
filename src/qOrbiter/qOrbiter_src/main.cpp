@@ -158,18 +158,24 @@ extern "C" {
 //<-dceag-main-b->
 
 */
+
 int main(int argc, char* argv[])
 {
-#ifndef QT5
+
+
+
 #ifdef for_harmattan
     QApplication::setGraphicsSystem("meego");
 #elif GLENABLED
+#ifndef QT5
     QApplication::setGraphicsSystem("opengl");
+#endif
 #else
     QApplication::setGraphicsSystem("raster");
 #endif
 
-#endif
+
+
 #if(QT_VERSION >= 0x040800)
     Qt::AA_X11InitThreads;
 #endif
@@ -277,7 +283,7 @@ int main(int argc, char* argv[])
         //        NSAutoreleasePool * pool = [[NSAutoreleasePool alloc] init];
 #endif
 
-#if GLENABLED
+#ifdef GLENABLED
         bool glpresent= true;
 #else
         bool glpresent = false;
@@ -306,7 +312,7 @@ int main(int argc, char* argv[])
         //epg listmodel, no imageprovider as of yet
         EPGChannelList *simpleEPGmodel = new EPGChannelList(new EPGItemClass);
 #ifndef QT5
-      //  simpleEPGmodel->moveToThread(dceThread);
+        //  simpleEPGmodel->moveToThread(dceThread);
 #endif
 
 #ifndef QT5
@@ -315,7 +321,7 @@ int main(int argc, char* argv[])
 
         ListModel *mediaModel = new ListModel(new gridItem);
 #ifndef QT5
-     //   mediaModel->moveToThread(mediaThread);
+        //   mediaModel->moveToThread(mediaThread);
 #endif
         GridIndexProvider  advancedProvider(mediaModel , 6, 4);
         orbiterWin.mainView.engine()->addImageProvider("datagridimg",&advancedProvider);
@@ -331,16 +337,21 @@ int main(int argc, char* argv[])
         orbiterWin.mainView.rootContext()->setContextProperty("simpleepg", simpleEPGmodel);
         orbiterWin.mainView.rootContext()->setContextProperty("opengl", glpresent);
 
-
-#ifndef QT5
         //shutdown signals
-        QObject::connect (&w, SIGNAL(orbiterClosing()), &dceThread, SLOT(quit()),Qt::QueuedConnection);
-        QObject::connect (&w, SIGNAL(orbiterClosing()), mediaThread, SLOT(quit()),Qt::QueuedConnection);
-        QObject::connect (&w, SIGNAL(orbiterClosing()), epgThread, SLOT(quit()),Qt::QueuedConnection);
-        QObject::connect(&dceThread, SIGNAL(finished()), &a, SLOT(quit()),Qt::QueuedConnection);
-#else
-        QObject::connect(&w, SIGNAL(orbiterClosing()), &a, SLOT(quit()));
-#endif
+        QObject::connect(&w, SIGNAL(orbiterClosing()), &pqOrbiter, SLOT(deinitialize()), Qt::QueuedConnection);
+        QObject::connect(&pqOrbiter, SIGNAL(closeOrbiter()), &dceThread, SLOT(quit()), Qt::QueuedConnection);
+       // QObject::connect(&pqOrbiter, SIGNAL(closeOrbiter()), &pqOrbiter, SLOT(deleteLater()));
+
+        QObject::connect(&dceThread, SIGNAL(finished()), &dceThread, SLOT(deleteLater()));
+        QObject::connect(&dceThread, SIGNAL(destroyed()), &w, SLOT(exitApp()));
+        QObject::connect(&w, SIGNAL(destroyed()), &a, SLOT(quit()));
+
+
+        // QObject::connect (&w, SIGNAL(orbiterClosing()), &dceThread, SLOT(quit()),Qt::QueuedConnection);
+        //  QObject::connect (&w, SIGNAL(orbiterClosing()), mediaThread, SLOT(quit()),Qt::QueuedConnection);
+        //  QObject::connect (&w, SIGNAL(orbiterClosing()), epgThread, SLOT(quit()),Qt::QueuedConnection);
+        //  QObject::connect(&dceThread, SIGNAL(finished()), &a, SLOT(quit()),Qt::QueuedConnection);
+
         //tv epg signals
         QObject::connect(&pqOrbiter, SIGNAL(addChannel(EPGItemClass*)), simpleEPGmodel, SLOT(appendRow(EPGItemClass*)), Qt::QueuedConnection );
 
@@ -463,6 +474,7 @@ int main(int argc, char* argv[])
         QObject::connect(&pqOrbiter, SIGNAL(modelPagesChanged(int)), mediaModel, SLOT(setTotalPages(int)),Qt::QueuedConnection);
         QObject::connect(&pqOrbiter, SIGNAL(pageSeperatorChanged(int)) , mediaModel, SLOT(setSeperator(int)), Qt::QueuedConnection);
         QObject::connect(&w, SIGNAL(requestDcePages(int)), &pqOrbiter, SLOT(requestPage(int)), Qt::QueuedConnection);
+        QObject::connect(&w, SIGNAL(seekGrid(QString)), &pqOrbiter, SLOT(seekToGridPosition(QString)), Qt::QueuedConnection);
         //now playing signals
         QObject::connect(&pqOrbiter, SIGNAL(setNowPlaying(bool)), w.nowPlayingButton,SLOT(setStatus(bool)),Qt::QueuedConnection);
         QObject::connect(&pqOrbiter,SIGNAL(streamIdChanged(int)), w.nowPlayingButton, SLOT(setStreamID(int)),Qt::QueuedConnection);
@@ -533,7 +545,7 @@ int main(int argc, char* argv[])
         QObject::connect(storedVideoPlaylist,SIGNAL(playlistReady()), &pqOrbiter,SLOT(requestMediaPlaylist()),Qt::QueuedConnection);
         QObject::connect(&pqOrbiter, SIGNAL(clearPlaylist()), storedVideoPlaylist,  SLOT(populate()),Qt::QueuedConnection);
         QObject::connect(&pqOrbiter, SIGNAL(playlistDone()), storedVideoPlaylist, SIGNAL(activeItemChanged()),Qt::QueuedConnection);
-        QObject::connect(&pqOrbiter, SIGNAL(closeOrbiter()), &w, SLOT(closeOrbiter()),Qt::QueuedConnection);
+
         QObject::connect(&w, SIGNAL(resendDeviceCode(int,int)), &pqOrbiter, SLOT(sendAvCommand(int,int)), Qt::QueuedConnection);
 
         QObject::connect(&pqOrbiter,SIGNAL(routerReloading(QString)), &w, SLOT(reloadHandler()) );

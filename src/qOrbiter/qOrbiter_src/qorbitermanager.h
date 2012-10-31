@@ -157,7 +157,8 @@ class qorbiterManager : public QObject
     Q_PROPERTY (QString internalHost READ getInternalHost WRITE setInternalHost NOTIFY internalHostChanged)
     Q_PROPERTY (QString externalip READ getExternalIp WRITE setExternalIp NOTIFY externalIpChanged)
     Q_PROPERTY (QString externalHost READ getExternalHost WRITE setExternalHost NOTIFY externalHostChanged )
-
+ Q_PROPERTY (int media_pageSeperator READ getGridSeperator WRITE setGridSeperator NOTIFY newPageSeperator )
+     Q_PROPERTY (int media_currentPage READ getCurrentPage WRITE setCurrentPage NOTIFY mediaPageChanged)
     /*
      *Need to move runtime options here so that we can tie into a configuration panel
      *first run - self explanitory?
@@ -176,7 +177,7 @@ public:
 #else
     qorbiterManager(QDeclarativeView * view, QObject *parent=0);  //constructor
 #endif
-
+    ~qorbiterManager();
 #ifndef __ANDROID__
 #if GLENABLED
     FileReader * fileReader;
@@ -309,7 +310,9 @@ Param 10 - pk_attribute
     bool backwards;
     bool requestMore;
 
-    void setSeekLetter(QString letter);
+    int media_currentPage;
+    int modelPages;
+    int media_pageSeperator;
 
     //listmodels
     LocationModel *m_lRooms;
@@ -420,6 +423,8 @@ signals:
     void mediaScreenShotReady();
     void saveMediaScreenShot(QString attribute, QImage pic);
     void mediaSeperatorChanged(int sep);
+    void mediaPageChanged();
+    void newPageSeperator(int t);
     void requestStreamImage();
     void debugModeChanged();
     void changeTrack(QString track);
@@ -428,6 +433,7 @@ signals:
     void newGridChannel(QString channel, QString chanid);
     void setStreamSpeed(int speed);
     void stopPlayback();
+    void seekGrid(QString s);
 
     void liveTVrequest();
     void managerPlaylistRequest();
@@ -610,13 +616,20 @@ public slots:
     void updateModel();
     void setStringParam(int paramType, QString param);
     void goBackGrid();
-    void requestPage(int p);
+    void requestPage(int p){ setCurrentPage(p); emit requestDcePages(p);}
     void showFileInfo(QString fk_file);
     void initializeGridModel();
     void showMessage(QString message, int duration, bool critical);
     void setRequestMore(bool state);
     bool getRequestMore();
     bool requestDataGrid();
+    void setSeekLetter(QString letter) {qs_seek = letter; emit seekGrid(qs_seek); }
+
+    void setGridSeperator(int sep) { media_pageSeperator = sep; emit newPageSeperator(sep);}
+    int getGridSeperator() { return media_pageSeperator; }
+
+    void setCurrentPage(int page) {media_currentPage = page;   emit mediaPageChanged();  }
+    int getCurrentPage() {return media_currentPage;}
 
     //initialization related
     void regenOrbiter(int deviceNo);
@@ -629,6 +642,7 @@ public slots:
     //dce related slots
     void execGrp(int grp);        //for command groups
     void closeOrbiter();
+    void exitApp() { this->deleteLater();}
     void reloadHandler();
     bool OrbiterGen();              //prelim orbter generation
     void quickReload();
@@ -640,6 +654,8 @@ public slots:
     /*ScreenSaver*/
     void killScreenSaver();
     void activateScreenSaver();
+
+
 private:
     void initializeConnections();
     void setupQMLview();

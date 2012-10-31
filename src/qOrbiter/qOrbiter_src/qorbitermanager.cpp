@@ -232,6 +232,11 @@ qorbiterManager::qorbiterManager(QDeclarativeView *view, QObject *parent) :
     QApplication::processEvents(QEventLoop::AllEvents);
 }
 
+qorbiterManager::~qorbiterManager()
+{
+     this->deleteLater();
+}
+
 
 void qorbiterManager::gotoQScreen(QString s)
 {
@@ -853,7 +858,7 @@ void qorbiterManager::closeOrbiter()
 #ifndef __ANDROID__
     LoggerWrapper::GetInstance()->Write(LV_CRITICAL, "Orbiter Exiting, Unregistering 1st");
 #endif
-    emit unregisterOrbiter((userList->find(sPK_User)->data(4).toInt()), QString(iFK_Room), iea_area );
+  //  emit unregisterOrbiter((userList->find(sPK_User)->data(4).toInt()), QString(iFK_Room), iea_area );
     emit orbiterClosing();
 }
 
@@ -1375,10 +1380,7 @@ void qorbiterManager::goBackGrid()
 
 }
 
-void qorbiterManager::requestPage(int p)
-{
-    emit requestDcePages(p);
-}
+
 
 void qorbiterManager::showFileInfo(QString fk_file)
 {
@@ -1533,11 +1535,6 @@ bool qorbiterManager::cleanupData()
     return true;
 }
 
-void qorbiterManager::setSeekLetter(QString letter)
-{
-    qs_seek = letter;
-}
-
 void qorbiterManager::showMessage(QString message, int duration, bool critical)
 {
 
@@ -1630,6 +1627,7 @@ int qorbiterManager::loadSplash()
 void qorbiterManager::activateScreenSaver()
 {
     qorbiterUIwin->engine()->rootContext()->setContextProperty("screensaver", ScreenSaver);
+    ScreenSaver->setActive(true);
 }
 
 void qorbiterManager::killScreenSaver()

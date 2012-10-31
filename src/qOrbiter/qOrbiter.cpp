@@ -45,8 +45,8 @@ qOrbiter::qOrbiter(int DeviceID, string ServerAddress,bool bConnectEventHandler,
 
 //<-dceag-const2-b->
 // The constructor when the class is created as an embedded instance within another stand-alone device
-qOrbiter::qOrbiter(Command_Impl *pPrimaryDeviceCommand, DeviceData_Impl *pData, Event_Impl *pEvent, Router *pRouter, QThread *parent)
-    : qOrbiter_Command(pPrimaryDeviceCommand, pData, pEvent, pRouter, parent)
+qOrbiter::qOrbiter(Command_Impl *pPrimaryDeviceCommand, DeviceData_Impl *pData, Event_Impl *pEvent, Router *pRouter)
+    : qOrbiter_Command(pPrimaryDeviceCommand, pData, pEvent, pRouter)
     //<-dceag-const2-e->
 {
 
@@ -80,9 +80,9 @@ bool qOrbiter::Register()
  cannot include the actual implementation.  Instead there's an extern function declared, and the actual new exists here.  You
  can safely remove this block (put a ! after the dceag-createinst-b block) if this device is not embedded within other devices. */
 //<-dceag-createinst-b->
-qOrbiter_Command *Create_qOrbiter(Command_Impl *pPrimaryDeviceCommand, DeviceData_Impl *pData, Event_Impl *pEvent, Router *pRouter, QThread *parent)
+qOrbiter_Command *Create_qOrbiter(Command_Impl *pPrimaryDeviceCommand, DeviceData_Impl *pData, Event_Impl *pEvent, Router *pRouter)
 {
-    return new qOrbiter(pPrimaryDeviceCommand, pData, pEvent, pRouter, parent);
+    return new qOrbiter(pPrimaryDeviceCommand, pData, pEvent, pRouter);
 }
 //<-dceag-createinst-e->
 
@@ -1879,7 +1879,7 @@ bool DCE::qOrbiter::initialize()
     }
 }
 
-bool DCE::qOrbiter::deinitialize()
+void DCE::qOrbiter::deinitialize()
 {
     char *pData;
     int iSize;
@@ -1888,7 +1888,8 @@ bool DCE::qOrbiter::deinitialize()
     BindMediaRemote(false);
     DCE::CMD_Orbiter_Registered CMD_Orbiter_Registered(m_dwPK_Device, iOrbiterPluginID, StringUtils::itos(m_dwPK_Device) ,i_user, StringUtils::itos(i_ea), i_room, &pData, &iSize);
     SendCommand(CMD_Orbiter_Registered);
-    return true;
+    emit closeOrbiter();
+
 }
 
 
@@ -4100,12 +4101,13 @@ void qOrbiter::OnReload()
     emit routerDisconnect();
     emit checkReload();
     Disconnect();
-    deinitialize();
+
 }
 
 bool qOrbiter::OnReplaceHandler(string msg)
 {
-    emit closeOrbiter();
+    deinitialize();
+
 }
 
 void DCE::qOrbiter::extraButtons(QString button)

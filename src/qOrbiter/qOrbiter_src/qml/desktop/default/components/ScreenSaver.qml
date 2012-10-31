@@ -10,18 +10,16 @@ Rectangle {
 
     function changeStuff()
     {
+        console.log("New Image processed")
         lower.running =true
         animation_section2.running = false
     }
 
     function changePic()
     {
-
-
             ssimg.source = "image://listprovider/screensaver/"+securityvideo.timestamp
             raise.running = true
             animation_section2.running = true
-
     }
 
     function startZoom()

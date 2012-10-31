@@ -247,7 +247,7 @@ folder_01.target= qml
 folder_02.source = config.xml
 folder_02.target = config
 
-DEFINES+=RPI
+DEFINES+=RPI GLENABLED
 DEPLOYMENTFOLDERS += folder_01 folder_02
 QT+= qml
 }
@@ -317,8 +317,8 @@ message( Opengl Status: $$glmsg )
 
 SOURCES += main.cpp \
         ../../Gen_Devices/qOrbiterBase.cpp \
-    ../qOrbiter.cpp \   
-    qorbitermanager.cpp \    
+    ../qOrbiter.cpp \
+    qorbitermanager.cpp \
     datamodels/listModel.cpp \
     datamodels/gridItem.cpp \
     imageProviders/gridimageprovider.cpp \
@@ -410,7 +410,7 @@ SOURCES += main.cpp \
     contextobjects/avcommand.cpp \
     shaders/filereader.cpp \
     contextobjects/timecodemanager.cpp \
-    imageProviders/floorplandeviceprovider.cpp \   
+    imageProviders/floorplandeviceprovider.cpp \
    # ../../Gen_Devices/qMediaPlayerBase.cpp \
     contextobjects/bookmarkitem.cpp \
     plugins/GoogleWeather/googleweather.cpp \
@@ -461,7 +461,7 @@ HEADERS += \
     ../../pluto_main/Define_DeviceCategory.h \
     ../../pluto_main/Define_DeviceTemplate.h \
     ../qOrbiter.h \
-    ../../Gen_Devices/qOrbiterBase.h \   
+    ../../Gen_Devices/qOrbiterBase.h \
     qorbitermanager.h \
     qOrbiterData.h \
     datamodels/listModel.h \
@@ -529,7 +529,7 @@ HEADERS += \
     shaders/filereader.h \
     shaders/trace.h \
     contextobjects/timecodemanager.h \
-    imageProviders/floorplandeviceprovider.h \    
+    imageProviders/floorplandeviceprovider.h \
    # ../../Gen_Devices/qMediaPlayerBase.h \
     contextobjects/bookmarkitem.h \
     plugins/GoogleWeather/googleweather.h \
@@ -545,8 +545,8 @@ HEADERS += \
 #../../qMediaPlayer/qMediaPlayer.h
 #}
 
-OTHER_FILES += Readme.txt \   
-    OrbiterVariables.txt \ 
+OTHER_FILES += Readme.txt \
+    OrbiterVariables.txt \
     config.xml \
 
 

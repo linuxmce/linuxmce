@@ -69,8 +69,8 @@ class qOrbiter : public qOrbiter_Command
     Q_PROPERTY (QString eventResponse READ getEventResponse WRITE setEventResponse NOTIFY eventResponseChanged) // for use in displaying message associated with incoming events
     Q_PROPERTY (QString deviceResponse READ getDeviceResponse WRITE setDeviceResponse NOTIFY deviceResponseChanged) // for use in display of messages associated with specific devices
 
-    Q_PROPERTY (int media_pageSeperator READ getGridSeperator WRITE setGridSeperator NOTIFY newPageSeperator )
-    Q_PROPERTY (int media_currentPage READ getCurrentPage WRITE setCurrentPage NOTIFY mediaPageChanged)
+
+
     Q_PROPERTY (int modelPages READ getModelPages WRITE setModelPages NOTIFY modelPagesChanged)
     Q_PROPERTY (int i_current_mediaType READ getMediaType WRITE setMediaType NOTIFY mediaTypeChanged)
     Q_PROPERTY (bool discreteAudio READ getDiscreteAudio WRITE setDiscreteAudio NOTIFY discreteAudioChanged )
@@ -250,7 +250,7 @@ public:
     //<-dceag-const2-b->
     // The following constructor is only used if this a class instance embedded within a DCE Device.  In that case, it won't create it's own connection to the router
     // You can delete this whole section and put an ! after dceag-const2-b tag if you don't want this constructor.  Do the same in the implementation file
-    qOrbiter(Command_Impl *pPrimaryDeviceCommand, DeviceData_Impl *pData, Event_Impl *pEvent, Router *pRouter, QThread *parent);
+    qOrbiter(Command_Impl *pPrimaryDeviceCommand, DeviceData_Impl *pData, Event_Impl *pEvent, Router *pRouter);
     //<-dceag-const2-e->
 
     //<-dceag-h-b->
@@ -1520,7 +1520,7 @@ public slots:
     void executeCommandGroup(int cmdGrp);
     void shutdownMD();
     bool initialize();
-    bool deinitialize();
+    void deinitialize();
     bool getConfiguration();
     void registerDevice(int user, QString ea, int room);
     void qmlSetup(QString device, QString address);
