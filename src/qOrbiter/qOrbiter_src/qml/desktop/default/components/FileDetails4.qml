@@ -201,7 +201,7 @@ Rectangle {
             MouseArea
             {
                 anchors.fill: parent
-                onClicked: dcerouter.playMedia(filedetailsclass.file)  //dce function
+                onClicked: manager.playMedia(filedetailsclass.file)  //dce function
             }
         }
 

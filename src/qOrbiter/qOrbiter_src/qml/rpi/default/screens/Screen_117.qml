@@ -60,7 +60,7 @@ Rectangle {
                             width: parent.width / 5
                             height: parent.height
                             MouseArea{
-                                onClicked: dcerouter.redButton()
+                                onClicked: manager.redButton()
                             }
                         }
                         Rectangle {
@@ -71,7 +71,7 @@ Rectangle {
                             width: parent.width / 5
                             height: parent.height
                             MouseArea{
-                                onClicked: dcerouter.greenButton()
+                                onClicked: manager.greenButton()
                             }
                         }
                         Rectangle {
@@ -82,7 +82,7 @@ Rectangle {
                             width: parent.width / 5
                             height: parent.height
                             MouseArea{
-                                onClicked: dcerouter.yellowButton()
+                                onClicked: manager.yellowButton()
                             }
                         }
                         Rectangle {
@@ -93,7 +93,7 @@ Rectangle {
                             width: parent.width / 5
                             height: parent.height
                             MouseArea{
-                                onClicked: dcerouter.blueButton()
+                                onClicked: manager.blueButton()
                             }
                         }
                 }

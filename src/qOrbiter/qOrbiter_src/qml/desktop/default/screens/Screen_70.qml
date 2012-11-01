@@ -301,7 +301,7 @@ Rectangle {
                         anchors.fill: parent
                         onClicked:  {
 
-                            dcerouter.ShowBookMarks()
+                            manager.ShowBookMarks()
                             MyJs.createStageComponent("../components/Bookmarks.qml", storedvideoremote)
 
                         }
@@ -328,7 +328,7 @@ Rectangle {
                     MouseArea{
                         anchors.fill: parent
                         onClicked:  {
-                            dcerouter.grabScreenshot(dcenowplaying.path)
+                            manager.grabScreenshot(dcenowplaying.path)
                             MyJs.createStageComponent("../components/AssignScreenShot.qml", storedvideoremote)
 
                         }

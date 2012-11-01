@@ -351,7 +351,7 @@ Text {
             MouseArea
             {
                 anchors.fill: parent
-                onClicked:{ dcerouter.playMedia(filedetailsclass.file); loadComponent("NullComponent") }  //dce function
+                onClicked:{ manager.playMedia(filedetailsclass.file); loadComponent("NullComponent") }  //dce function
             }
         }
 
@@ -372,7 +372,7 @@ Text {
             x: ((parent.width/3)*2)
             MouseArea{
                 anchors.fill:  parent
-                onClicked: { dataModel.setLoadingStatus(true);filedetailsclass.clear(); dcerouter.setGridStatus(true); loadComponent("NullComponent.qml")}
+                onClicked: { dataModel.setLoadingStatus(true);filedetailsclass.clear(); manager.setGridStatus(true); loadComponent("NullComponent.qml")}
             }
         }
     }

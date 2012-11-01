@@ -169,7 +169,7 @@ Rectangle {
             font.pixelSize: scaleY(4)
             wrapMode: Text.WrapAtWordBoundaryOrAnywhere
             color: "white"
-            visible:  dceTimecode.qsCurrentTime ==="00:00:00" && dcerouter.i_current_mediaType ==4 ? false: true
+            visible:  dceTimecode.qsCurrentTime ==="00:00:00" && manager.i_current_mediaType ==4 ? false: true
         }
 
         /*  Text {

@@ -34,7 +34,7 @@ Rectangle {
                 onEntered: attributedelegate.color = "aliceblue"
                 onExited: attributedelegate.color = style.accentcolor
                 onClicked: {
-                    dcerouter.saveScreenAttribute(attributeNo);
+                    manager.saveScreenAttribute(attributeNo);
                      assignscreenshot.destroy()
                 }
             }

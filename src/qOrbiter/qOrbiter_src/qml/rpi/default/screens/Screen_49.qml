@@ -308,7 +308,7 @@ Rectangle {
                         buttontext: qsTr("Menu")
                         MouseArea{
                             anchors.fill: parent
-                            onClicked: dcerouter.showMenu()
+                            onClicked: manager.showMenu()
                         }
                     }
                     AvOptionButton{

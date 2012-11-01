@@ -21,7 +21,7 @@ Rectangle {
                     width:  scaleX(style.buttonW)
                     MouseArea{
                         anchors.fill:parent
-                        onClicked: dcerouter.playMedia("!G"+iPK_Device)
+                        onClicked: manager.playMedia("!G"+iPK_Device)
                     }
                 }
 

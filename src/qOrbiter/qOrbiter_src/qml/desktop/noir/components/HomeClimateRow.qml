@@ -30,7 +30,7 @@ color:"transparent"
                     anchors.fill: parent
                     onClicked:{
                         manager.setFloorplanType(4)
-                        dcerouter.ShowFloorPlan(4)
+                        manager.ShowFloorPlan(4)
 
                      }
                 }

@@ -79,7 +79,7 @@ Column {
         }
         MouseArea{
             anchors.fill: parent
-            onClicked: dcerouter.adjustLighting(10)
+            onClicked: manager.adjustLighting(10)
             onPressed: hoverimgup.visible = true
             onReleased:{ hoverimgup.visible = false; closeTimer.start()}
         }
@@ -171,7 +171,7 @@ Column {
         MouseArea{
             anchors.fill: parent
 
-            onClicked: dcerouter.adjustLighting(-10)
+            onClicked: manager.adjustLighting(-10)
             onPressed: hoverimg.visible = true
             onReleased: { hoverimg.visible = false; closeTimer.restart() }
         }

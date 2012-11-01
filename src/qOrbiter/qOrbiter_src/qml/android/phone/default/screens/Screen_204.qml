@@ -47,7 +47,7 @@ Rectangle{
 
                     MouseArea{
                         anchors.fill: parent
-                        onClicked:dcerouter.QuickReload()
+                        onClicked:manager.QuickReload()
                     }
                 }
 

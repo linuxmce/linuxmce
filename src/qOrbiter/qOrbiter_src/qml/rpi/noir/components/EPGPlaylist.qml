@@ -89,7 +89,7 @@ Rectangle {
                 MouseArea{
                     anchors.fill: parent
                     onClicked:{
-                        dcerouter.TuneToChannel(channelnumber, channelid)
+                        manager.TuneToChannel(channelnumber, channelid)
                           epgplaylistview.positionViewAtIndex(index, ListView.Beginning)
 
                     }

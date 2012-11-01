@@ -120,8 +120,8 @@ Page {
 
         SwipeArea {
             anchors.fill: parent;
-            onSwipeRight: dcerouter.changedTrack("-1");
-            onSwipeLeft: dcerouter.changedTrack("+1");
+            onSwipeRight: manager.changedTrack("-1");
+            onSwipeLeft: manager.changedTrack("+1");
         }
         ToolIcon {
             anchors.right: parent.right;

@@ -15,7 +15,7 @@ Rectangle {
         onImageChanged: nowplayingimage.source = "image://listprovider/updateobject/"+securityvideo.timestamp
     }
 
-   Component.onCompleted: dcerouter.BindMediaRemote(true)
+   Component.onCompleted: manager.BindMediaRemote(true)
 
    Image {
       id: nowplayingimage

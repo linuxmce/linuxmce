@@ -161,7 +161,7 @@ Rectangle {
 
             MouseArea{
                 anchors.fill: parent
-                onClicked: dcerouter.getFloorplanDeviceCommand(type)
+                onClicked: manager.getFloorplanDeviceCommand(type)
             }
         }
     }

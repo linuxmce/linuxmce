@@ -16,7 +16,7 @@ Rectangle {
         target: filedetailsclass
         onShowDetailsChanged:
         {
-            MyJs.createFileDetails("FileDetails"+dcerouter.i_current_mediaType+".qml", fileviewscreen  )
+            MyJs.createFileDetails("FileDetails"+manager.i_current_mediaType+".qml", fileviewscreen  )
         }
     }
     Rectangle{
@@ -277,7 +277,7 @@ Rectangle {
                 MouseArea
                 {
                     anchors.fill:parent
-                    onClicked: dcerouter.goBackGrid()
+                    onClicked: manager.goBackGrid()
                 }
             }
             AttributeSelector {}

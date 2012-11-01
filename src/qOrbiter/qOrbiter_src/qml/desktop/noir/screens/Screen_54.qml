@@ -7,7 +7,7 @@ Rectangle {
 
     Text {
         id: messages
-        text: dcerouter.mediaResponse
+        text: manager.mediaResponse
         font.pixelSize: scaleY(4)
         anchors.bottom: parent.bottom
     }

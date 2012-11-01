@@ -12,14 +12,14 @@ Rectangle {
     id:fileviewscreen
     width: appW
     height: appH
-    color: "black"
+    color: "transparent"
     clip: true
     property int mouselocY: 0
     property int mouselocX: 0
 
 //    Connections{
 //        target: dcerouter
-//        onNewGrid:dcerouter.requestPage(0)
+//        onNewGrid:manager.requestPage(0)
 //    }
 
     function runEffects()
@@ -76,7 +76,6 @@ Rectangle {
                     }
                 }
             }
-
         }
     }
         Connections
@@ -108,7 +107,7 @@ Rectangle {
 
             Text {
                 id: total_cells
-                text: dcerouter.media_pageSeperator
+                text: manager.media_pageSeperator
                 color: "grey"
                 font.bold: false
                 font.pixelSize: scaleY(4)

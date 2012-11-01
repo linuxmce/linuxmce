@@ -330,7 +330,7 @@ Item
                         console.log("Clicked on:",index)
                         submenu.currentIndex = index
                         //execGrp(params) //RayBe
-                        dcerouter.executeCommandGroup(params)
+                        manager.executeCommandGroup(params)
                     }
                 }
             }

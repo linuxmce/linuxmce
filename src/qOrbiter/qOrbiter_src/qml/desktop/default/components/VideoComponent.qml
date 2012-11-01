@@ -9,7 +9,7 @@ Rectangle {
     property int scaling:1
     property int requestedHeight:320
     property int  requestedWidth:480
-    property int mediaType:dcerouter.i_current_mediaType
+    property int mediaType:manager.i_current_mediaType
  clip: true
 
     function startPlayback(path){

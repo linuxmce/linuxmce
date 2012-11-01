@@ -73,7 +73,7 @@ Rectangle {
             MouseArea{
                 anchors.fill: parent
                 z:10
-                onClicked: dcerouter.quickReload()
+                onClicked: manager.quickReload()
             }
         }
 

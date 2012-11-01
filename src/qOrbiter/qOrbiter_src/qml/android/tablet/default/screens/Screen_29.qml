@@ -8,7 +8,7 @@ Item{
         width: appW
         color: style.darkhighlight
         HomeButton{ x: 5; y: 5; width: 75; height: 75; smooth: true}
-        Component.onCompleted: dcerouter.GetAlarms(false, 0)
+        Component.onCompleted: manager.GetAlarms(false, 0)
         Rectangle{
             id:mainsleepingrect
             height:scaleY(65)

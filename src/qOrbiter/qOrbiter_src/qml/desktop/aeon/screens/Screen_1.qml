@@ -195,7 +195,7 @@ Item
                 MouseArea{
                     anchors.fill: parent
                     onClicked: {
-                        dcerouter.executeCommandGroup(params)
+                        manager.executeCommandGroup(params)
                         console.log("Clicked on:",index)
                         submenu.currentIndex = index
 

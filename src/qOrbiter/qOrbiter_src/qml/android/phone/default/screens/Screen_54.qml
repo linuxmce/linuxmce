@@ -22,7 +22,7 @@ source: b_orientation ? "../img/audioProfile.png" : "../img/audioWide.png"
         anchors.fill: storedVideoRemote
     }
 
-    Component.onCompleted: dcerouter.BindMediaRemote(true)
+    Component.onCompleted: manager.BindMediaRemote(true)
 
     function changeTracksTransition()
     {

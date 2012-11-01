@@ -44,7 +44,7 @@ Rectangle {
             spacing: scaleX(1)
             Text {
                 id: grid_position_label
-                text: qsTr("You are browsing by:") + dcerouter.i_current_mediaType
+                text: qsTr("You are browsing by:") + manager.i_current_mediaType
             }
             Text {
                 id: grid_attritbute_label
@@ -273,7 +273,7 @@ Rectangle {
 
             MouseArea{
                 anchors.fill: parent
-                onReleased: {  page_label.font.italic = true ; dcerouter.requestPage(index);  }
+                onReleased: {  page_label.font.italic = true ; manager.requestPage(index);  }
                 onPressed: page_label.font.italic = false
             }
 
@@ -312,7 +312,7 @@ Rectangle {
 
                     alphabetrect.scale = 1
                 }
-                onClicked: dcerouter.seekToGridPosition(name)
+                onClicked: manager.seekToGridPosition(name)
             }
         }
     }
@@ -337,7 +337,7 @@ Rectangle {
             MouseArea
             {
                 anchors.fill:parent
-                onClicked: dcerouter.goBackGrid()
+                onClicked: manager.goBackGrid()
             }
         }
         AttributeSelector {}

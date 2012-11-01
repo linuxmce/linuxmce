@@ -24,7 +24,7 @@ AvOptionButton {
         }
         MouseArea{
             anchors.fill: parent
-            onClicked: dcerouter.mute()
+            onClicked: manager.mute()
         }
     }
 
@@ -40,7 +40,7 @@ AvOptionButton {
         source: "../img/icons/player_fwd.png"
         MouseArea{
             anchors.fill: parent
-            onClicked: dcerouter.adjustVolume(1)
+            onClicked: manager.adjustVolume(1)
         }
 
     }
@@ -56,7 +56,7 @@ AvOptionButton {
         source: "../img/icons/player_fwd.png"
         MouseArea{
             anchors.fill: parent
-            onClicked: dcerouter.adjustVolume(-1)
+            onClicked: manager.adjustVolume(-1)
         }
     }
 

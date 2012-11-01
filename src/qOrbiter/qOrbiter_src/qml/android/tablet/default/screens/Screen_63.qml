@@ -145,7 +145,7 @@ Rectangle {
                         Text {
                             id: live_av
                             wrapMode: "NoWrap"
-                            text: qsTr("ScreenShot Availible:") + dcerouter.monitorAvailible
+                            text: qsTr("ScreenShot Availible:") + manager.monitorAvailible
                             font.family: "Droid Sans"
                             font.bold: true
                             smooth: true
@@ -197,7 +197,7 @@ Rectangle {
                         buttontext: qsTr("PVR Menu")
                         MouseArea{
                             anchors.fill: parent
-                            onClicked: dcerouter.extraButtons("pvrmenu")
+                            onClicked: manager.extraButtons("pvrmenu")
                         }
                     }
                     AvOptionButton{
@@ -213,7 +213,7 @@ Rectangle {
                         buttontext: qsTr("Thumbnail")
                         MouseArea{
                             anchors.fill: parent
-                            onClicked: dcerouter.grabScreenshot()
+                            onClicked: manager.grabScreenshot()
                         }
                     }
                     Flickable{
@@ -232,119 +232,119 @@ Rectangle {
                                 buttontext: qsTr("Live")
                                 MouseArea{
                                     anchors.fill: parent
-                                    onClicked: dcerouter.extraButtons("livetv")
+                                    onClicked: manager.extraButtons("livetv")
                                 }
                             }
                             AvOptionButton{
                                 buttontext: qsTr("Schedule")
                                 MouseArea{
                                     anchors.fill: parent
-                                    onClicked: dcerouter.extraButtons("schedule")
+                                    onClicked: manager.extraButtons("schedule")
                                 }
                             }
                             AvOptionButton{
                                 buttontext: qsTr("Recordings")
                                 MouseArea{
                                     anchors.fill: parent
-                                    onClicked: dcerouter.extraButtons("recordings")
+                                    onClicked: manager.extraButtons("recordings")
                                 }
                             }
                             AvOptionButton{
                                 buttontext: qsTr("Music")
                                 MouseArea{
                                     anchors.fill: parent
-                                    onClicked: dcerouter.extraButtons("music")
+                                    onClicked: manager.extraButtons("music")
                                 }
                             }
                             AvOptionButton{
                                 buttontext: qsTr("Guide")
                                 MouseArea{
                                     anchors.fill: parent
-                                    onClicked: dcerouter.extraButtons("guide")
+                                    onClicked: manager.extraButtons("guide")
                                 }
                             }
                             AvOptionButton{
                                 buttontext: qsTr("Menu")
                                 MouseArea{
                                     anchors.fill: parent
-                                    onClicked: dcerouter.extraButtons("menu")
+                                    onClicked: manager.extraButtons("menu")
                                 }
                             }
                             AvOptionButton{
                                 buttontext: qsTr("Info")
                                 MouseArea{
                                     anchors.fill: parent
-                                    onClicked: dcerouter.extraButtons("info")
+                                    onClicked: manager.extraButtons("info")
                                 }
                             }
                             AvOptionButton{
                                 buttontext: qsTr("Exit")
                                 MouseArea{
                                     anchors.fill: parent
-                                    onClicked: dcerouter.extraButtons("exit")
+                                    onClicked: manager.extraButtons("exit")
                                 }
                             }
                             AvOptionButton{
                                 buttontext: qsTr("Favorites")
                                 MouseArea{
                                     anchors.fill: parent
-                                    onClicked: dcerouter.extraButtons("favorites")
+                                    onClicked: manager.extraButtons("favorites")
                                 }
                             }
                             AvOptionButton{
                                 buttontext: qsTr("Record")
                                 MouseArea{
                                     anchors.fill: parent
-                                    onClicked: dcerouter.extraButtons("record")
+                                    onClicked: manager.extraButtons("record")
                                 }
                             }
                             AvOptionButton{
                                 buttontext: qsTr("Help")
                                 MouseArea{
                                     anchors.fill: parent
-                                    onClicked: dcerouter.extraButtons("help")
+                                    onClicked: manager.extraButtons("help")
                                 }
                             }
                             AvOptionButton{
                                 buttontext: qsTr("Bookmark Channel")
                                 MouseArea{
                                     anchors.fill: parent
-                                    onClicked: dcerouter.extraButtons("channelbookmark")
+                                    onClicked: manager.extraButtons("channelbookmark")
                                 }
                             }
                             AvOptionButton{
                                 buttontext: qsTr("Change Inputs")
                                 MouseArea{
                                     anchors.fill: parent
-                                    onClicked: dcerouter.extraButtons("changeinputs")
+                                    onClicked: manager.extraButtons("changeinputs")
                                 }
                             }
                             AvOptionButton{
                                 buttontext: qsTr("Page Up")
                                 MouseArea{
                                     anchors.fill: parent
-                                    onClicked: dcerouter.extraButtons("pageup")
+                                    onClicked: manager.extraButtons("pageup")
                                 }
                             }
                             AvOptionButton{
                                 buttontext: qsTr("Page Down")
                                 MouseArea{
                                     anchors.fill: parent
-                                    onClicked: dcerouter.extraButtons("pagedown")
+                                    onClicked: manager.extraButtons("pagedown")
                                 }
                             }
                             AvOptionButton{
                                 buttontext: qsTr("Next Day")
                                 MouseArea{
                                     anchors.fill: parent
-                                    onClicked: dcerouter.extraButtons("nextday")
+                                    onClicked: manager.extraButtons("nextday")
                                 }
                             }
                             AvOptionButton{
                                 buttontext: qsTr("Previous day")
                                 MouseArea{
                                     anchors.fill: parent
-                                    onClicked: dcerouter.extraButtons("previousday")
+                                    onClicked: manager.extraButtons("previousday")
                                 }
                             }
                         }
@@ -354,7 +354,7 @@ Rectangle {
                         buttontext: qsTr("Power")
                         MouseArea{
                             anchors.fill: parent
-                            onClicked: dcerouter.stopMedia()
+                            onClicked: manager.stopMedia()
                         }
                     }
                     HomeButton{}

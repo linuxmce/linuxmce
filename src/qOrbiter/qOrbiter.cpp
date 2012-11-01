@@ -3211,7 +3211,7 @@ void DCE::qOrbiter::requestLiveTvPlaylist()
 
             for(MemoryDataTable::iterator it=pDataGridTable->m_MemoryDataTable.begin();it!=pDataGridTable->m_MemoryDataTable.end();++it)
             {
-                //QApplication::processEvents(QEventLoop::AllEvents);
+
                 pCell = it->second;
                 QStringList breaker = QString::fromStdString(pCell->m_mapAttributes_Find("Name").c_str()).split(" ");
                 channelName = breaker.at(1);
@@ -3223,7 +3223,9 @@ void DCE::qOrbiter::requestLiveTvPlaylist()
                 EPGItemClass *t = new EPGItemClass(channelName, channelNumber, channelIndex, program, index, channelimage, channelimage);
                 emit addChannel(t);
                 index++;
-                //QApplication::processEvents(QEventLoop::AllEvents);
+#ifdef RPI
+                QThread::msleep(20);
+        #endif
             }
         }
     }
@@ -3395,7 +3397,7 @@ void DCE::qOrbiter::populateAdditionalMedia() //additional media grid that popul
 
                 emit addItem(new gridItem(fk_file, cellTitle, filePath, index, cellImg));
 #ifdef RPI
-                QThread::msleep(100);
+                QThread::msleep(150);
 #endif
 
             }

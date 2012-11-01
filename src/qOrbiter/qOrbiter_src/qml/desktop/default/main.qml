@@ -51,14 +51,14 @@ Item {
 
     DebugPanel{
         id:mediaMessages
-        debugMessage: dcerouter.mediaResponse
+        debugMessage: manager.mediaResponse
         z:2
         anchors.top: dcemessages.bottom
     }
 
     DebugPanel{
         id:commandmessages
-        debugMessage: dcerouter.commandResponse
+        debugMessage: manager.commandResponse
         z:2
         anchors.top: mediaMessages.bottom
     }

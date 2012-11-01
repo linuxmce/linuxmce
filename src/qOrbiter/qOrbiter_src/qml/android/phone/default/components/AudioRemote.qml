@@ -33,7 +33,7 @@ Rectangle {
             anchors.verticalCenter: parent.verticalCenter
             MouseArea{
                 anchors.fill: parent               
-                onClicked: dcerouter.changedTrack("-1")
+                onClicked: manager.changedTrack("-1")
             }
         }
 
@@ -45,7 +45,7 @@ Rectangle {
             anchors.verticalCenter: parent.verticalCenter
             MouseArea{
                 anchors.fill: parent                
-                onClicked: dcerouter.RwMedia(-2)
+                onClicked: manager.RwMedia(-2)
             }
         }
 
@@ -58,7 +58,7 @@ Rectangle {
             anchors.verticalCenter: parent.verticalCenter
             MouseArea {
                 anchors.fill: parent                
-                onClicked: dcerouter.PauseMedia()
+                onClicked: manager.PauseMedia()
             }
         }
 
@@ -70,7 +70,7 @@ Rectangle {
             anchors.verticalCenter: parent.verticalCenter
             MouseArea{
                 anchors.fill: parent                 
-                onClicked: dcerouter.FfMedia(+2)
+                onClicked: manager.FfMedia(+2)
             }
 
         }
@@ -82,7 +82,7 @@ Rectangle {
             anchors.verticalCenter: parent.verticalCenter
             MouseArea{
                 anchors.fill: parent                
-                onClicked: dcerouter.changedTrack("+1")
+                onClicked: manager.changedTrack("+1")
             }
         }
 
@@ -97,7 +97,7 @@ Rectangle {
             MouseArea
             {
                 anchors.fill: parent                 
-                onClicked: dcerouter.StopMedia()
+                onClicked: manager.StopMedia()
             }
         }
     }

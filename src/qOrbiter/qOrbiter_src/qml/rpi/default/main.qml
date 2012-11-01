@@ -55,14 +55,14 @@ MouseArea{
 
     DebugPanel{
         id:mediaMessages
-        debugMessage: dcerouter.mediaResponse
+        debugMessage: manager.mediaResponse
         z:2
         anchors.top: dcemessages.bottom
     }
 
     DebugPanel{
         id:commandmessages
-        debugMessage: dcerouter.commandResponse
+        debugMessage: manager.commandResponse
         z:2
         anchors.top: mediaMessages.bottom
     }
@@ -97,18 +97,24 @@ MouseArea{
         anchors.centerIn: parent
         z:-1
         MouseArea{
+            id:hitArea
             anchors.fill: ss
+            hoverEnabled: true
+            onHoveredChanged: fadeInUi()
             acceptedButtons: Qt.LeftButton | Qt.RightButton
             onClicked:  Qt.RightButton ? pageLoader.visible = !pageLoader.visible: ""
-            onEntered: pageLoader.visible
+            onEntered: fadeInUi()
+            onMouseXChanged: fadeInUi()
+            onMouseYChanged: fadeInUi()
         }
 
         Timer{
-            interval: 15000
+            id:hideTimer
+            interval: 10000
             running: true
             repeat: false
-            onTriggered: {
-                pageLoader.visible=false
+            onTriggered: {               
+                fadeUi.start()
             }
         }
 
@@ -119,6 +125,33 @@ MouseArea{
     function scaleY(y){
         return y/100*appH
     }
+
+    function fadeInUi(){
+        if (pageLoader.opacity == 0){
+
+        fadeIn.start()
+        }
+        hideTimer.restart()
+    }
+
+   PropertyAnimation{
+       id:fadeUi
+       target: pageLoader
+       property: "opacity"
+       from:1
+       to:0
+       duration: 3000
+   }
+
+   PropertyAnimation{
+       id:fadeIn
+       target: pageLoader
+       property: "opacity"
+       from:0
+       to:1
+       duration: 1000
+
+   }
 
 
     function screenchange(screenname )

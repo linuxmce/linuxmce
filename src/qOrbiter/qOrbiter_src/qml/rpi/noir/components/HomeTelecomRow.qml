@@ -34,7 +34,7 @@ Rectangle{
                 anchors.fill: rowheader
                 onClicked: {
                     manager.setFloorplanType(6)
-                    dcerouter.ShowFloorPlan(6)
+                    manager.ShowFloorPlan(6)
 
                 }
             }

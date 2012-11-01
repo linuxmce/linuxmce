@@ -70,7 +70,7 @@ Rectangle {
                     MouseArea{
                         anchors.fill: parent
                         onClicked: {
-                            dcerouter.displayToggle(1)
+                            manager.displayToggle(1)
                             loadComponent("NullComponent.qml")
                         }
                     }
@@ -102,7 +102,7 @@ Rectangle {
                     MouseArea{
                         anchors.fill: parent
                         onClicked: {
-                            dcerouter.displayToggle(0)
+                            manager.displayToggle(0)
                            loadComponent("NullComponent.qml")
                         }
                     }

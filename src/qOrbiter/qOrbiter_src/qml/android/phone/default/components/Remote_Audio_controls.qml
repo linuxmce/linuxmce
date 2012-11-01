@@ -88,7 +88,7 @@ Column {
         }
         MouseArea{
             anchors.fill: parent
-            onClicked: dcerouter.adjustVolume(1)
+            onClicked: manager.adjustVolume(1)
             onPressed: hoverimg.visible = true
             onReleased: { hoverimg.visible = false; closeTimer.restart()}
         }
@@ -135,7 +135,7 @@ Column {
         }
         MouseArea{
             anchors.fill: parent
-            onClicked: dcerouter.mute()
+            onClicked: manager.mute()
         }
     }
 
@@ -169,7 +169,7 @@ Column {
         }
         MouseArea{
             anchors.fill: parent
-            onClicked: dcerouter.adjustVolume(-1)
+            onClicked: manager.adjustVolume(-1)
             onPressed: hoverimg2.visible = true
             onReleased: {hoverimg2.visible = false; closeTimer.restart()}
         }

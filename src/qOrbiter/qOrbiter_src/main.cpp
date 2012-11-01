@@ -354,6 +354,7 @@ int main(int argc, char* argv[])
 
         //tv epg signals
         QObject::connect(&pqOrbiter, SIGNAL(addChannel(EPGItemClass*)), simpleEPGmodel, SLOT(appendRow(EPGItemClass*)), Qt::QueuedConnection );
+        QObject::connect(&w, SIGNAL(newGridChannel(QString,QString)), &pqOrbiter, SLOT(TuneToChannel(QString,QString)), Qt::QueuedConnection );
 
         //security video frames
         QObject::connect(&w, SIGNAL(getSingleCam(int,int,int)), &pqOrbiter, SLOT(GetSingleSecurityCam(int,int,int)));
@@ -475,6 +476,7 @@ int main(int argc, char* argv[])
         QObject::connect(&pqOrbiter, SIGNAL(pageSeperatorChanged(int)) , mediaModel, SLOT(setSeperator(int)), Qt::QueuedConnection);
         QObject::connect(&w, SIGNAL(requestDcePages(int)), &pqOrbiter, SLOT(requestPage(int)), Qt::QueuedConnection);
         QObject::connect(&w, SIGNAL(seekGrid(QString)), &pqOrbiter, SLOT(seekToGridPosition(QString)), Qt::QueuedConnection);
+
         //now playing signals
         QObject::connect(&pqOrbiter, SIGNAL(setNowPlaying(bool)), w.nowPlayingButton,SLOT(setStatus(bool)),Qt::QueuedConnection);
         QObject::connect(&pqOrbiter,SIGNAL(streamIdChanged(int)), w.nowPlayingButton, SLOT(setStreamID(int)),Qt::QueuedConnection);
@@ -484,6 +486,7 @@ int main(int argc, char* argv[])
         QObject::connect(&pqOrbiter, SIGNAL(mediaTypeChanged(int)), &w, SLOT(setMediaType(int)), Qt::QueuedConnection);
         //QObject::connect(&pqOrbiter,SIGNAL(objectDataUpdate( char,int)), w.nowPlayingButton, SLOT(setDroidImageData(char,int)),Qt::QueuedConnection);
         QObject::connect(&pqOrbiter,SIGNAL(objectUpdate(QImage)), w.nowPlayingButton, SLOT(setImageData(QImage)), Qt::QueuedConnection);
+
 
         QObject::connect(simpleEPGmodel, SIGNAL(channelNumberChanged(QString)), w.nowPlayingButton, SLOT(setChannel(QString)), Qt::QueuedConnection);
         QObject::connect(simpleEPGmodel, SIGNAL(programChanged(QString)), w.nowPlayingButton, SLOT(setProgram(QString)), Qt::QueuedConnection);
@@ -520,6 +523,7 @@ int main(int argc, char* argv[])
         QObject::connect(&pqOrbiter, SIGNAL(screenshotVariablesReady(QList<QObject*>)), &w, SLOT(setScreenShotVariables(QList<QObject*>)),Qt::QueuedConnection);
         QObject::connect(&pqOrbiter, SIGNAL(screenShotReady(QImage)), &w, SLOT(setMediaScreenShot(QImage)),Qt::QueuedConnection);
         QObject::connect (&w, SIGNAL(saveMediaScreenShot(QString,QImage)), &pqOrbiter, SLOT(saveScreenAttribute(QString,QImage)),Qt::QueuedConnection);
+
         // myth  now playing requires special handling
         QObject::connect(&pqOrbiter, SIGNAL(mythTvUpdate(QString)), simpleEPGmodel, SLOT(setMythProgram(QString)),Qt::QueuedConnection);
         QObject::connect(&pqOrbiter, SIGNAL(epgDone()), simpleEPGmodel, SLOT(updatePosition()),Qt::QueuedConnection);
@@ -535,6 +539,8 @@ int main(int argc, char* argv[])
         QObject::connect(&pqOrbiter, SIGNAL(resendAvButtonList(QList<QObject*>)), &w, SLOT(showDeviceCodes(QList<QObject*>)), Qt::QueuedConnection);
         QObject::connect(&pqOrbiter, SIGNAL(deviceCommandList(QList<QObject*>)), &w, SLOT(setCommandList(QList<QObject*>)), Qt::QueuedConnection);
         QObject::connect(&pqOrbiter, SIGNAL(bookmarkList(QList<QObject*>)), &w, SLOT(showBookmarks(QList<QObject*>)), Qt::QueuedConnection);
+        QObject::connect(&w, SIGNAL(extraButton(QString)), &pqOrbiter, SLOT(extraButtons(QString)), Qt::QueuedConnection);
+
         //so does live tv
         QObject::connect(&w, SIGNAL(clearModel()), simpleEPGmodel, SLOT(empty()),Qt::QueuedConnection);
 

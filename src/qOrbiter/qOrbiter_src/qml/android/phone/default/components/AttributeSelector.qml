@@ -19,7 +19,7 @@ Rectangle {
             buttontextbold: true
             MouseArea{
                 anchors.fill:parent
-                onClicked: dcerouter.playMedia("!G"+iPK_Device)
+                onClicked: manager.playMedia("!G"+iPK_Device)
             }
         }
 
@@ -32,7 +32,7 @@ Rectangle {
             MouseArea
             {
                 anchors.fill:parent
-                onReleased: dcerouter.goBackGrid()
+                onReleased: manager.goBackGrid()
             }
         }
         ButtonSq{

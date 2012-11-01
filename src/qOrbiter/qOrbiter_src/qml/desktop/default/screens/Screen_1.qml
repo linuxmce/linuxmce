@@ -11,7 +11,7 @@ Item
     Component.onCompleted:  {
         if(!dceplayer.connected){
         console.log("Starting media player")
-        dceplayer.setConnectionDetails(dcerouter.qMediaPlayerID, dcerouter.dceIP)
+        dceplayer.setConnectionDetails(manager.qMediaPlayerID, manager.dceIP)
         }
     }
 
@@ -35,7 +35,7 @@ Item
 
         Text{
             id:connectstatus
-            text: "Orbiter "+ dcerouter.m_dwPK_Device + " is connected."
+            text: "Orbiter "+ manager.m_dwPK_Device + " is connected."
             color: "aliceblue"
             font.letterSpacing: 2
             anchors.left: parent.left

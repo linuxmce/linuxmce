@@ -36,7 +36,7 @@ Component{
                 id:delegateHit
                 anchors.fill: parent
                 onClicked: {
-                    dcerouter.executeCommandGroup(params);
+                    manager.executeCommandGroup(params);
                     loadComponent("NullComponent.qml")
                 }
                 onPressed:  delegatemenu.color = "orange"

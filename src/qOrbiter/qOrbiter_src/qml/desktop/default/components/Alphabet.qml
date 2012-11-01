@@ -149,7 +149,7 @@ Item
 
                         alphabetrect.scale = 1
                     }
-                    onClicked: dcerouter.seekToGridPosition(name)
+                    onClicked: manager.seekToGridPosition(name)
                 }
             }
         }

@@ -412,7 +412,7 @@ Item {
                         submenu.currentIndex = index
                         //execGrp(params) //RayBe
                         gotoQScreen("Screen_1.qml") //RayBe to reset the screen in main erea
-                        dcerouter.executeCommandGroup(params)
+                        manager.executeCommandGroup(params)
                     }
                 }
             }

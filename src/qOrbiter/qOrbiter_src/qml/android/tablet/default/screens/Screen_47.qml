@@ -16,11 +16,11 @@ Rectangle {
     clip: true
     property int mouselocY: 0
     property int mouselocX: 0
-    Component.onCompleted: dcerouter.requestTypes(dcerouter.i_current_mediaType)
+    Component.onCompleted: manager.requestTypes(manager.i_current_mediaType)
 
     function runEffects()
     {
-        MyJs.createStageComponent("FileDetails"+dcerouter.i_current_mediaType+".qml" , fileviewscreen)
+        MyJs.createStageComponent("FileDetails"+manager.i_current_mediaType+".qml" , fileviewscreen)
     }
 
     Connections
@@ -47,7 +47,7 @@ Rectangle {
             spacing: scaleX(1)
             Text {
                 id: grid_position_label
-                text: qsTr("You are browsing by:") + dcerouter.i_current_mediaType
+                text: qsTr("You are browsing by:") + manager.i_current_mediaType
             }
             Text {
                 id: grid_attritbute_label
@@ -55,12 +55,12 @@ Rectangle {
             }
             Text {
                 id: page_label
-                text: qsTr("Current Page") + dcerouter.media_currentPage
+                text: qsTr("Current Page") + manager.media_currentPage
             }
             TextInput{
                 id:seperationSetter
                 width: page_label.width
-                text: dcerouter.media_pageSeperator
+                text: manager.media_pageSeperator
             }
         }
 
@@ -94,7 +94,7 @@ Rectangle {
 
         Text {
             id: total_cells
-            text: dcerouter.media_pageSeperator
+            text: manager.media_pageSeperator
             color: "grey"
             font.bold: false
             font.pixelSize: scaleY(4)
@@ -279,14 +279,14 @@ Rectangle {
                 text: label
                 font.pixelSize: scaleY(3.5)
                 anchors.centerIn: parent
-                color: label == dcerouter.media_currentPage ? "green":"slategrey"
+                color: label == manager.media_currentPage ? "green":"slategrey"
                 font.bold: true
 
             }
 
             MouseArea{
                 anchors.fill: parent
-                onReleased: {  page_label.font.italic = true ; dcerouter.requestPage(index);  }
+                onReleased: {  page_label.font.italic = true ; manager.requestPage(index);  }
                 onPressed: page_label.font.italic = false
             }
 
@@ -326,7 +326,7 @@ Rectangle {
 
                     alphabetrect.scale = 1
                 }
-                onClicked: dcerouter.seekToGridPosition(name)
+                onClicked: manager.seekToGridPosition(name)
             }
         }
     }
@@ -351,7 +351,7 @@ Rectangle {
             MouseArea
             {
                 anchors.fill:parent
-                onClicked: dcerouter.goBackGrid()
+                onClicked: manager.goBackGrid()
             }
         }
         AttributeSelector {}

@@ -38,7 +38,7 @@ Rectangle{
 
                 onClicked:{
 
-                    dcerouter.ShowFloorPlan(5)
+                    manager.ShowFloorPlan(5)
                     manager.setFloorplanType(5)
                 }
             }

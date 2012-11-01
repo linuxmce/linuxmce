@@ -407,6 +407,7 @@ signals:
 
     /* Media Controls */
     void setVolume(int vol);
+    void extraButton(QString b);
     void gridLoadingStatus(bool s);
     void gridGoBack();
     void mediaTypeChanged();
@@ -580,6 +581,7 @@ public slots:
     void showBookmarks(QList<QObject*> t);
     void changeChannels(QString chan) {emit newChannel(chan);  }
     void gridChangeChannel(QString chan, QString chanid) {emit newGridChannel(chan, chanid);}
+    void extraButtonPressed(QString b) {emit extraButton(b);}
 
     /*Screenshot & Images slots*/
     void updateImageChanged(QImage img);

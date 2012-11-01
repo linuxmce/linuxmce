@@ -24,7 +24,7 @@ Rectangle {
                 hoverEnabled: true
                 onEntered: back.scale = .75
                 onExited: back.scale = 1
-                onClicked: dcerouter.changedTrack("-1")
+                onClicked: manager.changedTrack("-1")
             }
         }
 
@@ -98,7 +98,7 @@ Rectangle {
                  hoverEnabled: true
                 onEntered: parent.scale = .75
                 onExited: parent.scale = 1
-                onClicked: dcerouter.changedTrack("+1")
+                onClicked: manager.changedTrack("+1")
             }
         }
 

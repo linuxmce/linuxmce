@@ -43,6 +43,9 @@ public:
     explicit EPGChannelList(EPGItemClass* prototype);
     ~EPGChannelList();
 
+#ifdef QT5
+    QHash <int, QByteArray> roleNames() const ;
+#endif
     void clear();
     bool isActive;
  //nowPlayingButton->setProgram(simpleEPGmodel->data(simpleEPGmodel->getChannelIndex(chanid), 5).toString());

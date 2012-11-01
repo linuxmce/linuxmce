@@ -89,7 +89,7 @@ Rectangle {
 
             MouseArea{
                 anchors.fill: parent
-                onClicked: dcerouter.changedPlaylistPosition(path)
+                onClicked: manager.changedPlaylistPosition(path)
                 onPressed: border.color = "orange"
                 onReleased: border.color="silver"
             }

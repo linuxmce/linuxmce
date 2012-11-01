@@ -48,15 +48,15 @@ void EPGChannelList::appendRows(const QList<EPGItemClass *> &items)
     QModelIndex index = indexFromItem(m_list.last());
     QModelIndex index2 = indexFromItem(m_list.first());
     int currentRows= m_list.count() - 1;
-    // emit dataChanged(index2, index, currentRows);
+    emit dataChanged(index2, index, currentRows);
     isActive = true;
 }
 
 void EPGChannelList::insertRow(int row, EPGItemClass *item)
 {
     beginInsertRows(QModelIndex(), row, row);
-    //connect(item, SIGNAL(dataChanged()), this, SLOT(handleItemChange()));
-    //qDebug() << "Inserting at:" << row;
+    connect(item, SIGNAL(dataChanged()), this, SLOT(handleItemChange()));
+    qDebug() << "Inserting at:" << row;
     m_list.insert(row, item);
     endInsertRows();
 }
@@ -321,3 +321,10 @@ void EPGChannelList::updateLivePosition()
         //qDebug() << "Cant find live tv station" << id;
     }
 }
+
+#ifdef QT5
+QHash<int, QByteArray> EPGChannelList::roleNames() const
+{
+    return m_prototype->roleNames();
+}
+#endif

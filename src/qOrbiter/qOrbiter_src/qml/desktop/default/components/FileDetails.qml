@@ -343,7 +343,7 @@ Rectangle {
             MouseArea
             {
                 anchors.fill: parent
-                onClicked:{dcerouter.setGridStatus(true); dcerouter.populateAdditionalMedia(); dcerouter.playMedia(filedetailsclass.file); filedetailrect.destroy() }  //dce function
+                onClicked:{manager.setGridStatus(true); manager.populateAdditionalMedia(); manager.playMedia(filedetailsclass.file); filedetailrect.destroy() }  //dce function
             }
         }
 
@@ -355,7 +355,7 @@ Rectangle {
             buttontext: "Move"
             MouseArea{
                 anchors.fill:  parent
-                onClicked: {  filedetailsclass.clear(); dcerouter.setGridStatus(true); dcerouter.populateAdditionalMedia();filedetailrect.destroy()}
+                onClicked: {  filedetailsclass.clear(); manager.setGridStatus(true); manager.populateAdditionalMedia();filedetailrect.destroy()}
             }
         }
 
@@ -368,7 +368,7 @@ Rectangle {
             x: ((parent.width/3)*2)
             MouseArea{
                 anchors.fill:  parent
-                onClicked: {  filedetailsclass.clear(); dcerouter.setGridStatus(true); dcerouter.populateAdditionalMedia();filedetailrect.destroy()}
+                onClicked: {  filedetailsclass.clear(); manager.setGridStatus(true); manager.populateAdditionalMedia();filedetailrect.destroy()}
             }
         }
     }

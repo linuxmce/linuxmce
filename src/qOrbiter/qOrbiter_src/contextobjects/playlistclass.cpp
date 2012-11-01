@@ -29,7 +29,6 @@ PlaylistClass::~PlaylistClass() {
     clear();
 }
 #ifdef QT5
-
 QHash<int, QByteArray> PlaylistClass::roleNames() const
 {
     return m_prototype->roleNames();
@@ -51,7 +50,6 @@ void PlaylistClass::populate()
     {
         //  qDebug() << "List Cleared";
         m_list.clear();
-
     }
     endResetModel();
     emit modelReset();
@@ -125,14 +123,11 @@ QModelIndex PlaylistClass::indexFromItem(const PlaylistItemClass *item) const
 
 void PlaylistClass::clear()
 {
-
     emit modelAboutToBeReset();
     beginResetModel();
     resetInternalData();
     endResetModel();
     emit modelReset();
-
-
 }
 
 bool PlaylistClass::removeRow(int row, const QModelIndex &parent)

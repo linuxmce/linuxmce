@@ -95,7 +95,7 @@ Rectangle{
                         MouseArea{
                             anchors.fill: parent
                             onClicked: {
-                                dcerouter.displayToggle(1)
+                                manager.displayToggle(1)
                                 power_rect_container.destroy()
                             }
                         }
@@ -115,7 +115,7 @@ Rectangle{
                         MouseArea{
                             anchors.fill: parent
                             onClicked: {
-                                dcerouter.displayToggle(0)
+                                manager.displayToggle(0)
                                  power_rect_container.destroy()
                             }
                         }

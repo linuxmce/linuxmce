@@ -90,7 +90,7 @@ Rectangle {
                 opacity:index === dcenowplaying.m_iplaylistPosition ? .25 :  .15
             }
 
-             onClicked: dcerouter.jumpToPlaylistPosition(index)
+             onClicked: manager.jumpToPlaylistPosition(index)
 
 
             Column{
@@ -111,7 +111,7 @@ Rectangle {
                     }
                     MouseArea{
                         anchors.fill: parent
-                        onClicked: dcerouter.movePlaylistEntry("", index)
+                        onClicked: manager.movePlaylistEntry("", index)
                     }
                 }
 
@@ -122,7 +122,7 @@ Rectangle {
                     color:"yellow"
                     MouseArea{
                         anchors.fill: remove_box
-                        onClicked: dcerouter.removePlaylistItem(index)
+                        onClicked: manager.removePlaylistItem(index)
                     }
                 }
 
@@ -137,7 +137,7 @@ Rectangle {
                     }
                     MouseArea{
                         anchors.fill: parent
-                        onClicked: dcerouter.movePlaylistEntry("+", index)
+                        onClicked: manager.movePlaylistEntry("+", index)
                     }
                 }
             }
@@ -181,7 +181,7 @@ Rectangle {
                 }
                 MouseArea{
                     anchors.fill: parent
-                    onClicked: dcerouter.saveCurrentPlaylist(save_as.text, true)
+                    onClicked: manager.saveCurrentPlaylist(save_as.text, true)
                 }
 
             }

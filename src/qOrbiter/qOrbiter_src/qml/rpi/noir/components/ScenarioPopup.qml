@@ -48,7 +48,7 @@ Rectangle {
                 anchors.fill: parent
                 id:delegateHit
                 hoverEnabled: true
-                onClicked:dcerouter.executeCommandGroup(params);
+                onClicked:manager.executeCommandGroup(params);
                 onExited: closeTimer.start()
                 onEntered: closeTimer.stop()
             }

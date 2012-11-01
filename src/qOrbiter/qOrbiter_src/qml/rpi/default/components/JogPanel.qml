@@ -64,7 +64,7 @@ SequentialAnimation{
                 buttontext: "-8"
                 MouseArea{
                     anchors.fill: parent
-                    onClicked: { dcerouter.JogStream("-480") ; hidetimer.running = false; hidetimer.running = true  }
+                    onClicked: { manager.JogStream("-480") ; hidetimer.running = false; hidetimer.running = true  }
                 }
             }
 
@@ -72,7 +72,7 @@ SequentialAnimation{
                 buttontext: "-4"
                 MouseArea{
                     anchors.fill: parent
-                    onClicked:  {dcerouter.JogStream("-240"); hidetimer.running = false; hidetimer.running = true  }
+                    onClicked:  {manager.JogStream("-240"); hidetimer.running = false; hidetimer.running = true  }
                 }
             }
 
@@ -80,7 +80,7 @@ SequentialAnimation{
                 buttontext: "-2"
                 MouseArea{
                     anchors.fill: parent
-                    onClicked: {dcerouter.JogStream("-120"); hidetimer.running = false; hidetimer.running = true  }
+                    onClicked: {manager.JogStream("-120"); hidetimer.running = false; hidetimer.running = true  }
                 }
             }
 
@@ -88,7 +88,7 @@ SequentialAnimation{
                 buttontext: "-30"
                 MouseArea{
                     anchors.fill: parent
-                    onClicked: {dcerouter.JogStream("-30"); hidetimer.running = false; hidetimer.running = true  }
+                    onClicked: {manager.JogStream("-30"); hidetimer.running = false; hidetimer.running = true  }
                 }
             }
 
@@ -96,7 +96,7 @@ SequentialAnimation{
                 buttontext: "-15"
                 MouseArea{
                     anchors.fill: parent
-                    onClicked: { dcerouter.JogStream("-15"); hidetimer.running = false; hidetimer.running = true  }
+                    onClicked: { manager.JogStream("-15"); hidetimer.running = false; hidetimer.running = true  }
                 }
             }
 
@@ -104,7 +104,7 @@ SequentialAnimation{
                 buttontext: "+15"
                 MouseArea{
                     anchors.fill: parent
-                    onClicked: { dcerouter.JogStream("+15"); hidetimer.running = false; hidetimer.running = true  }
+                    onClicked: { manager.JogStream("+15"); hidetimer.running = false; hidetimer.running = true  }
                 }
             }
 
@@ -112,7 +112,7 @@ SequentialAnimation{
                 buttontext: "+3-"
                 MouseArea{
                     anchors.fill: parent
-                    onClicked: { dcerouter.JogStream("+30"); hidetimer.running = false; hidetimer.running = true  }
+                    onClicked: { manager.JogStream("+30"); hidetimer.running = false; hidetimer.running = true  }
                 }
             }
 
@@ -120,7 +120,7 @@ SequentialAnimation{
                 buttontext: "+2"
                 MouseArea{
                     anchors.fill: parent
-                    onClicked: { dcerouter.JogStream("+120"); hidetimer.running = false; hidetimer.running = true  }
+                    onClicked: { manager.JogStream("+120"); hidetimer.running = false; hidetimer.running = true  }
                 }
             }
 
@@ -128,7 +128,7 @@ SequentialAnimation{
                 buttontext: "+4"
                 MouseArea{
                     anchors.fill: parent
-                    onClicked: { dcerouter.JogStream("+240"); hidetimer.running = false; hidetimer.running = true  }
+                    onClicked: { manager.JogStream("+240"); hidetimer.running = false; hidetimer.running = true  }
                 }
             }
 
@@ -136,7 +136,7 @@ SequentialAnimation{
                 buttontext: "+8"
                 MouseArea{
                     anchors.fill: parent
-                    onClicked: { dcerouter.JogStream("+480"); hidetimer.running = false; hidetimer.running = true  }
+                    onClicked: { manager.JogStream("+480"); hidetimer.running = false; hidetimer.running = true  }
                 }
             }
 

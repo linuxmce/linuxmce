@@ -155,7 +155,7 @@ Rectangle {
 
             MouseArea{
                 anchors.fill: parent
-                onReleased: { dcerouter.requestPage(index) ; parent.color = "transparent"}
+                onReleased: { manager.requestPage(index) ; parent.color = "transparent"}
                 onPressed: parent.color = "orange"
 
             }

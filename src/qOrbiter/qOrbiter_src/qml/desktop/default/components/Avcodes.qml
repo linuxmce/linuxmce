@@ -9,7 +9,7 @@ Rectangle {
     border.width: 2
     color: "aliceblue"
     anchors.centerIn: parent
-    Component.onCompleted: dcerouter.showAdvancedButtons()
+    Component.onCompleted: manager.showAdvancedButtons()
     MouseArea{
         anchors.fill:avcodes_rect
 
@@ -44,7 +44,7 @@ Rectangle {
 
             Text {
                 id: blah
-                text: qsTr("Router Reply") + dcerouter.mediaResponse
+                text: qsTr("Router Reply") + manager.mediaResponse
             }
             ListView
             {
@@ -78,7 +78,7 @@ Rectangle {
                         hoverEnabled: true
                         onEntered: av_code_top.color = "white"
                         onExited: av_code_top.color = style.lighthighlight
-                        onClicked: dcerouter.GetAdvancedMediaOptions(i_deviceNo)
+                        onClicked: manager.GetAdvancedMediaOptions(i_deviceNo)
 
                     }
                 }

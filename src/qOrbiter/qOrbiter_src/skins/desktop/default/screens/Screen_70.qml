@@ -304,7 +304,7 @@ Rectangle {
                             MouseArea{
                                 anchors.fill: parent
                                 onClicked:  {
-                                    dcerouter.grabScreenshot()
+                                    manager.grabScreenshot()
                                     MyJs.createThumbComponent("../components/AssignScreenShot.qml", storedvideoremote)
 
                                 }

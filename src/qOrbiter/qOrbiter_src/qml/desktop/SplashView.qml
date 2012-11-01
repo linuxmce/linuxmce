@@ -280,7 +280,7 @@ Rectangle {
     }
     Text {
         id: loadingStatus
-        text: "Status " + dcerouter.commandResponse
+        text: "Status " + manager.commandResponse
         anchors.topMargin: scaleY(15)
         font.pixelSize: 14
         font.family: "Droid Sans"
