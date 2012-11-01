@@ -1,6 +1,4 @@
 import QtQuick 2.0
-
-
 import "components"
 import "js/ComponentLoader.js" as MyJs
 
@@ -18,6 +16,8 @@ Item {
     property string screenfile
     property string dynamic_height
     property string dynamic_width
+
+    signal toggleInterface()
 
     function checkLayout()
     {
@@ -44,8 +44,8 @@ Item {
 
     function toggleUI()
     {
-        mediaHeader.visible = !mediaHeader.visible
-        lmceScenarios.visible = !lmceScenarios.visible
+        mediaHeader.currentState = !mediaHeader.currentState
+        lmceScenarios.currentState = !lmceScenarios.currentState
     }
 
 
@@ -200,11 +200,10 @@ Item {
 
     MediaHeader{
         id:mediaHeader
-        anchors.top: parent.top
     }
     //BottomPanel{id: advanced; anchors.top: stage.top}
     ScenarioRow{
-        id:lmceScenarios; anchors.bottom: parent.bottom
+        id:lmceScenarios;
     }
 }
 

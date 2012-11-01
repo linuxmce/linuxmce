@@ -1200,7 +1200,7 @@ bool qorbiterManager::readLocalConfig()
 
             currentSkin = configVariables.namedItem("skin").attributes().namedItem("id").nodeValue();
             if (currentSkin.isEmpty())
-#ifdef RPI
+#ifdef QT5
                 currentSkin = "noir";
 #else
                 currentSkin = "default";

@@ -128,8 +128,8 @@ MouseArea{
 
     function fadeInUi(){
         if (pageLoader.opacity == 0){
-
         fadeIn.start()
+
         }
         hideTimer.restart()
     }

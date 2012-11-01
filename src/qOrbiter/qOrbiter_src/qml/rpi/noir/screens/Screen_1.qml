@@ -10,11 +10,6 @@ Rectangle {
     width: appW
     color: "transparent"
     //focus:true
-
-
-
-
-
 }
 
 

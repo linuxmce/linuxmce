@@ -10,10 +10,51 @@ Rectangle {
    // color: "grey"
     radius: 5
     gradient: style.generalGradient
+    property bool currentState:true
     property double buttonWidth:150
     property double buttonHeight:50
     property double scenarioFontSize:appH * .03
-    anchors.horizontalCenter: parent.horizontalCenter
+    state:"show"
+    onCurrentStateChanged: {
+        if(scenarios.state==="hide")
+        {
+            scenarios.state="show"
+        }
+        else
+        {
+            scenarios.state = "hide"
+        }
+    }
+
+    states: [
+        State {
+            name: "show"
+            AnchorChanges {
+                target: scenarios
+              //  anchors.bottom: undefined
+                anchors.bottom: item.bottom
+
+            }
+        },
+        State {
+            name: "hide"
+            AnchorChanges {
+                target:scenarios
+              //  anchors.top: undefined
+                anchors.top: item.bottom
+            }
+        }
+    ]
+    transitions: [
+        Transition {
+            from: "*"
+            to: "*"
+            AnchorAnimation{
+                duration: 750
+                targets: scenarios
+            }
+        }
+    ]
 
     Row{
         id:modelRow
@@ -175,8 +216,7 @@ Rectangle {
         id:presenceRow
         height: 100
         width: modelRow.width
-        anchors.bottom: scenarios.bottom
-        anchors.horizontalCenter: parent.horizontalCenter
+
         spacing: 5
 
         Rectangle{

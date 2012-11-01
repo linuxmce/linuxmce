@@ -48,7 +48,7 @@ Rectangle {
                 anchors.fill: parent
                 id:delegateHit
                 hoverEnabled: true
-                onClicked:manager.executeCommandGroup(params);
+                onClicked:manager.execGrp(params);
                 onExited: closeTimer.start()
                 onEntered: closeTimer.stop()
             }
