@@ -173,9 +173,7 @@ Enable_Audio_Channels () {
 Setup_AsoundConf()
 {
 	local AudioSetting="$1"
-	local SoundCard="0"
-	local CardDevice="3"
-	local HWOnlyCard="0"
+	SoundOut="hw:"
 
 	# Do not mess with asound.conf if Audio Setting is set to Manual. This will only happen after the asound.conf has been generated at least once.
 	if [[ "$AudioSetting" == "M" ]]; then
@@ -210,62 +208,54 @@ Setup_AsoundConf()
 	case "$AudioSetting" in
 		*[CO]*)
 			CardDevice=$(grep -i "digital" <<< "$Yalpa" | grep -wo "device ." | awk '{print $2}')
-			;;
+			ConnectType="spdif"
+			PlaybackPCM="${ConnectType}_playback"
+			;; 
 		*H*)
 			CardDevice=$(grep -i "hdmi" <<< "$Yalpa" | grep -wo "device ." | awk '{print $2}')
 			if [[ $(wc -l <<< "$CardDevice") -gt "3" ]]; then
-				AsoundConf="/usr/pluto/templates/asound.conf.backup"
 				if grep "7" <<< "$CardDevice"; then
 					CardDevice="7"
-					AsoundConf="/usr/pluto/templates/asound.conf.backup"
-					SoundCard="${HWOnlyCard},${CardDevice}"
 				fi
 			fi
+			for i in 1 2; do 
+				if [[ "$AlternateSC" == "$i" ]]; then
+					if [[ "$AlternateSC" == "$i" ]]; then
+						SoundOut="plughw:"
+						SoundCard="${HWOnlyCard},${CardDevice}"
+					fi
+				fi
+			done
+			ConnectType="hdmi"
+			PlaybackPCM="${ConnectType}_playback"
 			;;
 		*)
 			CardDevice=$(grep -i "analog" <<< "$Yalpa" | grep -wo "device ." | awk '{print $2}')
+			SoundOut="plug:dmix:"
+			ConnectType="analog"
+			for i in 1 2; do
+				if [[ "$AlternateSC" == "$i" ]]; then
+					if [[ "$AlternateSC" == "$i" ]]; then
+						SoundOut="plughw:"
+						SoundCard="${HWOnlyCard},${CardDevice}"
+					fi
+				fi
+			done
+			PlaybackPCM="${SoundOut}${SoundCard}"
 			;;
-	esac
+	esac	
+	
+	local PlaybackCard="${SoundOut}${SoundCard}"
+	sed -r "s#%CONNECT_TYPE%#$ConnectType#g; s#%MAIN_CARD%#$SoundCard#g; s#%PLAYBACK_PCM%#$PlaybackPCM#g;" "$AsoundConf" > /etc/asound.conf
 
-	SoundOut="hw"
-	if [[ "$AlternateSC" == "1" ]]; then
-		SoundOut="plughw"
-		SoundCard="${HWOnlyCard},${CardDevice}"
-	fi
-	if [[ "$AlternateSC" == "2" ]]; then
-		SoundOut="plughw"
-		AsoundConfig="/usr/pluto/templates/asound.conf.backup"
-		SoundCard="${HWOnlyCard},${CardDevice}"
-	fi
-
-	local DigitalPlaybackCard="${SoundOut}:${SoundCard}"
-	local AnalogPlaybackCard="plug:dmix:${SoundCard}"
-
-	sed -r "s#%MAIN_CARD%#$SoundCard#g; s#%HWONLY_CARD%#$HWOnlyCard#; s#%SOUND_DEVICE%#$CardDevice#g; s#%ANALOG_CARD%#$AnalogPlaybackCard#g; s#%DIGITAL_CARD%#$DigitalPlaybackCard#g" "$AsoundConf" > /etc/asound.conf
-
-	case "$AudioSetting" in
-		*[CO]*)
-			# audio setting is Coaxial or Optical, i.e. S/PDIF
-			echo 'pcm.!default asym_spdif' >>/etc/asound.conf
-		;;
-		*H*)
-			# audio setting is HDMI
-			echo 'pcm.!default asym_hdmi' >>/etc/asound.conf
-		;;
-		*)
-			# audio setting is Stereo or something unknown
-			echo 'pcm.!default asym_analog' >>/etc/asound.conf
-		;;
-	esac
-
-	Setup_XineConf "$AudioSetting" "$DigitalPlaybackCard" "$AnalogPlaybackCard"
+	Setup_XineConf "$AudioSetting" "$PlaybackCard"
 	/usr/pluto/bin/RestartALSA.sh
 	Enable_Audio_Channels
 }
 
 Setup_XineConf()
 {
-	local AudioSetting="$1" DigitalPlaybackCard="$2" AnalogPlaybackCard="$3"
+	local AudioSetting="$1" PlaybackCard="$2"
 	local XineConf=/etc/pluto/xine.conf
 	sed -i '/audio\.device.*/d' "$XineConf"
 	sed -i '/audio\.output.*/d' "$XineConf"
@@ -276,13 +266,13 @@ Setup_XineConf()
 
 	case "$AudioSetting" in
 		*[COH]*)
-			XineConfSet audio.device.alsa_front_device "$DigitalPlaybackCard" "$XineConf"
-			XineConfSet audio.device.alsa_default_device "$DigitalPlaybackCard" "$XineConf"
-			XineConfSet audio.device.alsa_passthrough_device "$DigitalPlaybackCard" "$XineConf" 
+			XineConfSet audio.device.alsa_front_device "$PlaybackCard" "$XineConf"
+			XineConfSet audio.device.alsa_default_device "$PlaybackCard" "$XineConf"
+			XineConfSet audio.device.alsa_passthrough_device "$PlaybackCard" "$XineConf" 
 			;;
 		*)
-			XineConfSet audio.device.alsa_front_device "$AnalogPlaybackCard" "$XineConf"
-			XineConfSet audio.device.alsa_default_device "$AnalogPlaybackCard" "$XineConf"
+			XineConfSet audio.device.alsa_front_device "$PlaybackCard" "$XineConf"
+			XineConfSet audio.device.alsa_default_device "$PlaybackCard" "$XineConf"
 			;;
 	esac
 
