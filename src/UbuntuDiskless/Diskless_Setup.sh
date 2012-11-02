@@ -407,11 +407,6 @@ if ! [[ -f /usr/pluto/deb-cache/Packages.gz ]]; then
 	popd
 fi
 
-if [[ ! -d ${Moon_RootLocation}/root/.ssh ]]; then 
-	mkdir -p ${Moon_RootLocation}/root/.ssh
-fi
-cat /usr/pluto/keys/id_dsa_pluto.pub > ${Moon_RootLocation}/root/.ssh/authorized_keys
-
 . /usr/pluto/bin/Config_Ops.sh
 if [[ "$PK_Users" -lt "1" ]]; then
 	/usr/pluto/bin/MessageSend "dcerouter" 0 7 7 1 163 "First MD headless reload"
