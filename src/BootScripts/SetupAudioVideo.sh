@@ -210,6 +210,10 @@ Setup_AsoundConf()
 			CardDevice=$(grep -i "digital" <<< "$Yalpa" | grep -wo "device ." | awk '{print $2}')
 			ConnectType="spdif"
 			PlaybackPCM="${ConnectType}_playback"
+			if [[ "$AlternateSC" == "2" ]]; then
+				SoundOut="plughw:"
+				SoundCard="${HWOnlyCard},${CardDevice}"
+			fi
 			;; 
 		*H*)
 			CardDevice=$(grep -i "hdmi" <<< "$Yalpa" | grep -wo "device ." | awk '{print $2}')
@@ -220,10 +224,8 @@ Setup_AsoundConf()
 			fi
 			for i in 1 2; do 
 				if [[ "$AlternateSC" == "$i" ]]; then
-					if [[ "$AlternateSC" == "$i" ]]; then
-						SoundOut="plughw:"
-						SoundCard="${HWOnlyCard},${CardDevice}"
-					fi
+					SoundOut="plughw:"
+					SoundCard="${HWOnlyCard},${CardDevice}"
 				fi
 			done
 			ConnectType="hdmi"
@@ -233,14 +235,15 @@ Setup_AsoundConf()
 			CardDevice=$(grep -i "analog" <<< "$Yalpa" | grep -wo "device ." | awk '{print $2}')
 			SoundOut="plug:dmix:"
 			ConnectType="analog"
-			for i in 1 2; do
-				if [[ "$AlternateSC" == "$i" ]]; then
-					if [[ "$AlternateSC" == "$i" ]]; then
-						SoundOut="plughw:"
-						SoundCard="${HWOnlyCard},${CardDevice}"
-					fi
-				fi
-			done
+
+			if [[ "$AlternateSC" == "1" ]]; then
+				SoundOut="plughw:"
+				SoundCard="${HWOnlyCard},${CardDevice}"
+			fi
+
+			if [[ "$AlternateSC" == "2" ]]; then
+				AsoundConf="/usr/pluto/templates/asound.conf.backup"
+			fi
 			PlaybackPCM="${SoundOut}${SoundCard}"
 			;;
 	esac	
