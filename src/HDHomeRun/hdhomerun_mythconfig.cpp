@@ -196,7 +196,7 @@ printf("%s\n",Message);
 
 	/* Valid signal - put it into the database in the dtv_multiplex table */
 	char sSQL[1000];
-	sprintf(sSQL, "SELECT mplexid FROM dtv_multiplex where frequency=%d AND sourceid=%d",g_Frequency,sourceid);
+	sprintf(sSQL, "SELECT mplexid FROM dtv_multiplex WHERE frequency=%d AND sourceid=%d",g_Frequency,sourceid);
 printf("sql123: %s\n",sSQL);
 	MYSQL_RES *pMYSQL_RES;
 	MYSQL_ROW row;
@@ -489,9 +489,9 @@ static int myth_scan_tuner(struct hdhomerun_device_t *pHD)
 	// Find the tuner in myth's database
 	char sSQL[1000];
 	sprintf(sSQL,
-		"SELECT capturecard.cardid,cardinput.cardinputid,cardinput.sourceid from capturecard "
+		"SELECT capturecard.cardid,cardinput.cardinputid,cardinput.sourceid FROM capturecard "
 		"LEFT JOIN cardinput ON capturecard.cardid=cardinput.cardid "
-		"WHERE videodevice='%08lX-%u' AND cardtype='HDHOMERUN' and dbox2_port='31338'",
+		"WHERE videodevice='%08lX-%u' AND cardtype='HDHOMERUN' AND dbox2_port='31338'",
 		(unsigned long)DeviceID, Tuner);
 
 
@@ -536,7 +536,7 @@ static int myth_scan_tuner(struct hdhomerun_device_t *pHD)
 		sourceid = atoi(row[2]);
 	if( sourceid==0 )
 	{
-		sprintf(sSQL, "SELECT sourceid FROM videosource where name='UNKNOWN_%d'",cardid);
+		sprintf(sSQL, "SELECT sourceid FROM videosource WHERE name='UNKNOWN_%d'",cardid);
 		MYSQL_RES *pMYSQL_RES;
 		MYSQL_ROW row;
 		if( (iresult=mysql_query(g_pMySQL,sSQL))!=0 || (pMYSQL_RES = mysql_store_result(g_pMySQL))==NULL
