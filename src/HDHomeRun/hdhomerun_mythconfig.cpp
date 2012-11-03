@@ -491,7 +491,7 @@ static int myth_scan_tuner(struct hdhomerun_device_t *pHD)
 	sprintf(sSQL,
 		"SELECT capturecard.cardid,cardinput.cardinputid,cardinput.sourceid FROM capturecard "
 		"LEFT JOIN cardinput ON capturecard.cardid=cardinput.cardid "
-		"WHERE videodevice='%08lX-%u' AND cardtype='HDHOMERUN' AND dbox2_port='31338'",
+		"WHERE videodevice='%08lX-%u' AND cardtype='HDHOMERUN'",
 		(unsigned long)DeviceID, Tuner);
 
 
