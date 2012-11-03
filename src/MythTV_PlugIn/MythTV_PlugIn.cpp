@@ -531,7 +531,7 @@ MythTvMediaStream* MythTV_PlugIn::ConvertToMythMediaStream(MediaStream *pMediaSt
 bool MythTV_PlugIn::GetPicturePath(string sBaseName, string sHostName, string sStorageGroup, string &sPicturePath)
 {
   LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"MythTV_Plugin::GetPicturePath(%s,%s,%s)",sBaseName.c_str(),sHostName.c_str(),sStorageGroup.c_str());
-  string sSQL = "SELECT dirname from storagegroup WHERE hostname = '"+sHostName+"' and groupname = '"+sStorageGroup+"'";
+  string sSQL = "SELECT dirname FROM storagegroup WHERE hostname = '"+sHostName+"' AND groupname = '"+sStorageGroup+"'";
   PlutoSqlResult result;
   DB_ROW row;
   if ((result.r=m_pDBHelper_Myth->db_wrapper_query_result(sSQL))!=NULL)
@@ -587,7 +587,7 @@ string MythTV_PlugIn::GetRecordingURL(string sBaseName, string sHostName, string
   string sRet="";
   string sFullPath="";
   string sFilePath="";
-  string sSQL = "SELECT dirname from storagegroup WHERE hostname = '"+sHostName+"' and groupname = '"+sStorageGroup+"'";
+  string sSQL = "SELECT dirname FROM storagegroup WHERE hostname = '"+sHostName+"' AND groupname = '"+sStorageGroup+"'";
   PlutoSqlResult result;
   DB_ROW row;
   if ((result.r=m_pDBHelper_Myth->db_wrapper_query_result(sSQL))!=NULL)
@@ -1958,7 +1958,7 @@ void MythTV_PlugIn::CMD_Sync_Providers_and_Cards(int iPK_Device,int iPK_Orbiter,
 	LoggerWrapper::GetInstance()->Write(LV_STATUS,"MythTV_PlugIn::SyncCardsAndProviders");
     DB_ROW row,row2;
 
-	string sSQL = "select data from settings where value='DBSchemaVer'";
+	string sSQL = "SELECT data FROM settings WHERE value='DBSchemaVer'";
 	PlutoSqlResult result_set_check;
 	if( (result_set_check.r=m_pDBHelper_Myth->db_wrapper_query_result(sSQL))==NULL || (row=db_wrapper_fetch_row(result_set_check.r))==NULL || atoi(row[0])<MINIMUM_MYTH_SCHEMA )
 	{
@@ -1968,7 +1968,7 @@ void MythTV_PlugIn::CMD_Sync_Providers_and_Cards(int iPK_Device,int iPK_Orbiter,
 	}
 
 	// Find either inputs with a provider specified, or certain types of devices which should be added, but still need a provider
-	sSQL = "select PK_Device,IK_DeviceData FROM Device LEFT JOIN Device_DeviceData ON FK_Device=PK_Device AND FK_DeviceData=" TOSTRING(DEVICEDATA_EK_MediaProvider_CONST) " AND IK_DeviceData IS NOT NULL AND IK_DeviceData<>'' AND IK_DeviceData<>'NONE' "
+	sSQL = "SELECT PK_Device,IK_DeviceData FROM Device LEFT JOIN Device_DeviceData ON FK_Device=PK_Device AND FK_DeviceData=" TOSTRING(DEVICEDATA_EK_MediaProvider_CONST) " AND IK_DeviceData IS NOT NULL AND IK_DeviceData<>'' AND IK_DeviceData<>'NONE' "
 		"WHERE IK_DeviceData IS NOT NULL OR (IK_DeviceData IS NULL AND FK_DeviceTemplate IN (" TOSTRING(DEVICETEMPLATE_Antenna_Port_CONST) "))";
 
 	bool bModifiedRows=false; // Keep track of whether or not we changed anything
@@ -2065,7 +2065,7 @@ void MythTV_PlugIn::CMD_Sync_Providers_and_Cards(int iPK_Device,int iPK_Orbiter,
 				// Don't delete the card, because then the whole source and everything are deleted when the card is removed.
 				// Just delete the inputs so Myth won't use them, because we can add back inputs easily when the card is enabled again
 				LoggerWrapper::GetInstance()->Write(LV_STATUS,"MythTV_PlugIn::CMD_Sync_Providers_and_Cards deleting disabled cardid %d from device %d",cardid,pRow_Device->PK_Device_get());
-				sSQL = "UPDATE `capturecard` SET hostname=NULL where cardid=" + StringUtils::itos(cardid);
+				sSQL = "UPDATE `capturecard` SET hostname=NULL WHERE cardid=" + StringUtils::itos(cardid);
 				m_pDBHelper_Myth->threaded_db_wrapper_query(sSQL);
 				continue;
 			}
@@ -2076,7 +2076,7 @@ void MythTV_PlugIn::CMD_Sync_Providers_and_Cards(int iPK_Device,int iPK_Orbiter,
 			}
 
 			PlutoSqlResult result_confirm_cardid_is_valid;
-			sSQL = "select cardid from capturecard where cardid=" + StringUtils::itos(cardid);
+			sSQL = "SELECT cardid FROM capturecard WHERE cardid=" + StringUtils::itos(cardid);
 			if( ( result_confirm_cardid_is_valid.r=m_pDBHelper_Myth->db_wrapper_query_result( sSQL ) )==NULL 
 				|| result_confirm_cardid_is_valid.r->row_count<1 )
 			{
@@ -2137,12 +2137,12 @@ void MythTV_PlugIn::CMD_Sync_Providers_and_Cards(int iPK_Device,int iPK_Orbiter,
 				LoggerWrapper::GetInstance()->Write(LV_STATUS,"MythTV_PlugIn::SyncCardsAndProviders added card %d", cardid);
 			}
 
-			sSQL = "UPDATE `capturecard` SET hostname='" + sHostname + "' where cardid=" + StringUtils::itos(cardid);
+			sSQL = "UPDATE `capturecard` SET hostname='" + sHostname + "' WHERE cardid=" + StringUtils::itos(cardid);
 			m_pDBHelper_Myth->threaded_db_wrapper_query(sSQL);
 
 			if( sBlockDevice.empty()==false )
 			{
-				sSQL = "UPDATE `capturecard` set videodevice='" + sBlockDevice + "' WHERE cardid=" + StringUtils::itos(cardid);
+				sSQL = "UPDATE `capturecard` SET videodevice='" + sBlockDevice + "' WHERE cardid=" + StringUtils::itos(cardid);
 				if( m_pDBHelper_Myth->threaded_db_wrapper_query(sSQL)>0 )
 				{
 					LoggerWrapper::GetInstance()->Write(LV_STATUS,"MythTV_PlugIn::CMD_Sync_Providers_and_Cards bModifiedRows=true %s",sSQL.c_str());
@@ -2246,7 +2246,7 @@ void MythTV_PlugIn::CMD_Sync_Providers_and_Cards(int iPK_Device,int iPK_Orbiter,
 						while(true)  
 						{
 							string s = sProviderName + (iAppendValue ? "_" + StringUtils::itos(iAppendValue) : "");
-							sSQL = "SELECT name from `videosource` WHERE name='" + s + "' AND sourceid<>" + StringUtils::itos(sourceid);
+							sSQL = "SELECT name FROM `videosource` WHERE name='" + s + "' AND sourceid<>" + StringUtils::itos(sourceid);
 							PlutoSqlResult result_set2;
 							if( (result_set2.r=m_pDBHelper_Myth->db_wrapper_query_result(sSQL)) && result_set2.r->row_count>0 )
 							{
@@ -2324,7 +2324,7 @@ void MythTV_PlugIn::CMD_Sync_Providers_and_Cards(int iPK_Device,int iPK_Orbiter,
 		row=db_wrapper_fetch_row( result_videosource.r );
 		if(result_videosource.r->row_count==0) {
 			//LMCE-Default does not exist, create it!
-			sSQL = "INSERT INTO videosource (name,xmltvgrabber,freqtable) values ('LMCE-Default','/bin/true','us-bcast')";
+			sSQL = "INSERT INTO videosource (name,xmltvgrabber,freqtable) VALUES ('LMCE-Default','/bin/true','us-bcast')";
 			m_pDBHelper_Myth->threaded_db_wrapper_query(sSQL);
 		}
 	}
@@ -2373,11 +2373,11 @@ void MythTV_PlugIn::CMD_Sync_Providers_and_Cards(int iPK_Device,int iPK_Orbiter,
 	}
 
 	// Use LMCE-Default for any videosource that does not exist
-	sSQL = "UPDATE cardinput LEFT JOIN videosource on cardinput.sourceid=videosource.sourceid SET cardinput.sourceid='"+sDefaultSourceID+"' WHERE videosource.sourceid IS NULL";
+	sSQL = "UPDATE cardinput LEFT JOIN videosource ON cardinput.sourceid=videosource.sourceid SET cardinput.sourceid='"+sDefaultSourceID+"' WHERE videosource.sourceid IS NULL";
 	m_pDBHelper_Myth->threaded_db_wrapper_query(sSQL);	
 	
 	// If for some reason there is a problem and cardinput table is incorrect, delete the hostname to keep some cards from crashing MythTV out (this should never happen, as we make sure its populated above)
-	sSQL = "update capturecard LEFT JOIN cardinput on capturecard.cardid=cardinput.cardid set hostname=NULL WHERE cardinput.cardid IS NULL";
+	sSQL = "UPDATE capturecard LEFT JOIN cardinput ON capturecard.cardid=cardinput.cardid SET hostname=NULL WHERE cardinput.cardid IS NULL";
 	m_pDBHelper_Myth->threaded_db_wrapper_query(sSQL);
 		
 	// Delete any stray rows for cards that no longer exist
@@ -2393,9 +2393,9 @@ void MythTV_PlugIn::CMD_Sync_Providers_and_Cards(int iPK_Device,int iPK_Orbiter,
 
 	// Since we're sometimes removing and re-adding devices as the user unplugs/plugs them in, be sure we cleanup the database
 	// and don't leave any stray channel or programs around
-	sSQL = "delete channel FROM channel left join videosource on channel.sourceid=videosource.sourceid where videosource.sourceid is null";
+	sSQL = "DELETE channel FROM channel left JOIN videosource ON channel.sourceid=videosource.sourceid WHERE videosource.sourceid IS NULL";
 	m_pDBHelper_Myth->threaded_db_wrapper_query(sSQL);
-	sSQL = "delete program FROM program left join channel on program.chanid=channel.chanid where channel.chanid is null";
+	sSQL = "DELETE program FROM program left JOIN channel ON program.chanid=channel.chanid WHERE channel.chanid IS NULL";
 	m_pDBHelper_Myth->threaded_db_wrapper_query(sSQL);
 
 	if( iPK_Device )
@@ -2405,7 +2405,7 @@ void MythTV_PlugIn::CMD_Sync_Providers_and_Cards(int iPK_Device,int iPK_Orbiter,
 		return;
 
 	// Find cards with invalid starting channels
-	sSQL = "SELECT cardinputid,cardinput.sourceid FROM cardinput LEFT JOIN channel on startchan=channum AND cardinput.sourceid=channel.sourceid WHERE channum IS NULL";
+	sSQL = "SELECT cardinputid,cardinput.sourceid FROM cardinput LEFT JOIN channel ON startchan=channum AND cardinput.sourceid=channel.sourceid WHERE channum IS NULL";
 	PlutoSqlResult result_set2;
 	if( (result_set2.r=m_pDBHelper_Myth->db_wrapper_query_result(sSQL)) )
 	{
@@ -2417,7 +2417,7 @@ void MythTV_PlugIn::CMD_Sync_Providers_and_Cards(int iPK_Device,int iPK_Orbiter,
 				string sourceid=row[1];
 				string sChanNum="1";
 
-				sSQL = "SELECT min(channum) FROM channel where sourceid=" + sourceid;
+				sSQL = "SELECT min(channum) FROM channel WHERE sourceid=" + sourceid;
 				PlutoSqlResult result_set3;
 				if( (result_set3.r=m_pDBHelper_Myth->db_wrapper_query_result(sSQL)) && (row = db_wrapper_fetch_row(result_set3.r)) && row[0] )
 					sChanNum = row[0];
@@ -2434,7 +2434,7 @@ void MythTV_PlugIn::CMD_Sync_Providers_and_Cards(int iPK_Device,int iPK_Orbiter,
 	}
 
 	// Be sure we have some valid capture cards and sources before we do a fill
-	sSQL = "select videosource.sourceid from videosource JOIN cardinput on videosource.sourceid=cardinput.sourceid join capturecard on capturecard.cardid=cardinput.cardid where hostname is not null limit 1";
+	sSQL = "SELECT videosource.sourceid FROM videosource JOIN cardinput ON videosource.sourceid=cardinput.sourceid JOIN capturecard ON capturecard.cardid=cardinput.cardid WHERE hostname IS NOT NULL limit 1";
 	PlutoSqlResult result_set_sources;
 	bool bContainsVideoSources = (result_set_sources.r=m_pDBHelper_Myth->db_wrapper_query_result(sSQL))!=NULL && result_set_sources.r->row_count>0;
 
@@ -2501,7 +2501,7 @@ bool MythTV_PlugIn::UpdateMythSetting(string value,string data,string hostname,b
 	if( row[0] && (data==row[0]) )
 		return false;
 
-	sSQL = "UPDATE settings set data='" + StringUtils::SQLEscape(data) + "' WHERE value='" + StringUtils::SQLEscape(value) + "' "
+	sSQL = "UPDATE settings SET data='" + StringUtils::SQLEscape(data) + "' WHERE value='" + StringUtils::SQLEscape(value) + "' "
 		" AND hostname " + (hostname.empty() ? "IS NULL" : "='" + StringUtils::SQLEscape(hostname) + "'");
 
 	m_pDBHelper_Myth->threaded_db_wrapper_query(sSQL);
@@ -2814,7 +2814,7 @@ bool MythTV_PlugIn::TuneToChannel( class Socket *pSocket, class Message *pMessag
 		if( sProgramID.size()>1 && sProgramID[0]=='i' )
 		{
 			// It's a channel ID, not a channel number.  Convert it
-			string sSQL = "SELECT channum from channel where chanid=" + sProgramID.substr(1);
+			string sSQL = "SELECT channum FROM channel WHERE chanid=" + sProgramID.substr(1);
 			PlutoSqlResult result_set_check;
 			DB_ROW row;
 			if( (result_set_check.r=m_pDBHelper_Myth->db_wrapper_query_result(sSQL))!=NULL && (row=db_wrapper_fetch_row(result_set_check.r))!=NULL && row && row[0] )
@@ -2908,7 +2908,7 @@ void MythTV_PlugIn::BuildChannelList()
 
 	string sSQL = "SELECT channel.chanid, channum, callsign, name, icon, pic.EK_Picture, sourceid "
 		"FROM channel "
-		"LEFT JOIN `pluto_myth`.`Picture` AS pic on channel.chanid=pic.chanid";
+		"LEFT JOIN `pluto_myth`.`Picture` AS pic ON channel.chanid=pic.chanid";
 	PlutoSqlResult result;
 	DB_ROW row;
 	if( (result.r=m_pDBHelper_Myth->db_wrapper_query_result(sSQL))!=NULL )
@@ -2920,7 +2920,7 @@ void MythTV_PlugIn::BuildChannelList()
 			{
 				string sDescription = row[6];
 
-				sSQL = "select name from videosource where sourceid=" + string(row[6]);
+				sSQL = "SELECT name FROM videosource WHERE sourceid=" + string(row[6]);
 				PlutoSqlResult result2;
 				DB_ROW row2;
 				if( (result2.r=m_pDBHelper_Myth->db_wrapper_query_result(sSQL))!=NULL && (row2 = db_wrapper_fetch_row(result2.r))!=NULL )
@@ -3153,7 +3153,7 @@ void MythTV_PlugIn::StartScanJob(ScanJob *pScanJob)
 		sBlockDevice = DatabaseUtils::GetDeviceData(m_pMedia_Plugin->m_pDatabase_pluto_main,pScanJob->m_pRow_Device_CaptureCard->PK_Device_get(),DEVICEDATA_Block_Device_CONST);
 	if( sBlockDevice.empty()==false )
 	{
-		string sSQL = "UPDATE `capturecard` set videodevice='" + sBlockDevice + "' WHERE cardid=" + StringUtils::itos(cardid);
+		string sSQL = "UPDATE `capturecard` SET videodevice='" + sBlockDevice + "' WHERE cardid=" + StringUtils::itos(cardid);
 		m_pDBHelper_Myth->threaded_db_wrapper_query(sSQL);
 	}
 
@@ -3339,7 +3339,7 @@ bool MythTV_PlugIn::SetPaths()
 	int PK_Device_Storage = atoi(DATA_Get_PK_Device().c_str());
 	string sFilename = PK_Device_Storage ? "/mnt/device/" + StringUtils::itos(PK_Device_Storage) + "/public/data/videos/tv_shows_" : "/home/public/data/videos/tv_shows_";
 
-	string sSQL = "SELECT data,hostname from settings where value='BackendServerIP'";
+	string sSQL = "SELECT data,hostname FROM settings WHERE value='BackendServerIP'";
 	PlutoSqlResult result;
 	DB_ROW row;
 	if( (result.r = m_pDBHelper_Myth->db_wrapper_query_result(sSQL)) )
@@ -3619,7 +3619,7 @@ void MythTV_PlugIn::CMD_Remove_Scheduled_Recording(string sID,string sProgramID,
 //<-dceag-c911-e->
 {
 	PLUTO_SAFETY_LOCK(mm,m_pMedia_Plugin->m_MediaMutex);
-	string sSQL = "delete from record where recordid=" + sID;
+	string sSQL = "DELETE FROM record WHERE recordid=" + sID;
 	m_pDBHelper_Myth->threaded_db_wrapper_query(sSQL);
 
 	if( m_pMythBackEnd_Socket )
@@ -3709,7 +3709,7 @@ bool MythTV_PlugIn::PlaybackStarted( class Socket *pSocket,class Message *pMessa
 	pMythTvMediaStream->m_sMediaDescription = pMythChannel->m_sLongName;
 	pMythTvMediaStream->m_iCurrentProgramChannelID = pMythTvMediaStream->m_iTrackOrSectionOrChannel = pMythChannel->m_dwID;
 
-	string sSQL = "select title,subtitle,description FROM program where chanid=" + sMRL + " AND "
+	string sSQL = "SELECT title,subtitle,description FROM program WHERE chanid=" + sMRL + " AND "
 		"starttime <= '" + StringUtils::SQLDateTime() + "' AND endtime>='" + StringUtils::SQLDateTime() + "'";
 	PlutoSqlResult result;
 	DB_ROW row;
