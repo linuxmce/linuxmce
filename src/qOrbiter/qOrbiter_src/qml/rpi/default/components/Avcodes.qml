@@ -9,7 +9,7 @@ Rectangle {
     border.width: 2
     color: "aliceblue"
     anchors.centerIn: parent
-    Component.onCompleted: manager.showAdvancedButtons()
+    Component.onCompleted: manager.showAvControl()
     MouseArea{
         anchors.fill:avcodes_rect
 

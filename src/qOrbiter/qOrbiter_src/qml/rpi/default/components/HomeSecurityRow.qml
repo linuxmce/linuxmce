@@ -37,9 +37,7 @@ Rectangle{
                 anchors.fill:parent
 
                 onClicked:{
-
-                    manager.ShowFloorPlan(5)
-                    manager.setFloorplanType(5)
+manager.showfloorplan(5)
                 }
             }
         }

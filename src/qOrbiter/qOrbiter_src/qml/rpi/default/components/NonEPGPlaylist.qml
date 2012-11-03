@@ -86,7 +86,7 @@ Rectangle {
 
             MouseArea{
                 anchors.fill: parent
-                onClicked: manager.jumpToPlaylistPosition(index)
+                onClicked: manager.changedPlaylistPosition(index)
             }
 
             Column{

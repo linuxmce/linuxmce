@@ -29,9 +29,7 @@ color:"transparent"
                     id: mousearea1
                     anchors.fill: parent
                     onClicked:{
-                        manager.setFloorplanType(4)
-                        manager.ShowFloorPlan(4)
-
+                       manager.showfloorplan(4)
                      }
                 }
 

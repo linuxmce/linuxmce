@@ -107,8 +107,8 @@ public:
     typedef QMap <int, QString> myMap;
 
     //child devices
-  int qMediaPlayerID;
-  int qCommunicatorID;
+    int qMediaPlayerID;
+    int qCommunicatorID;
 
 
     Virtual_Device_Translator coreDevices;
@@ -1437,7 +1437,7 @@ signals:
     void currentScreenSaverImage(const uchar* ,int);
 
     //sleeping alarms
-    void sleepingAlarmsReady(QList<QObject*> s);
+    void sleepingAlarmsReady(SleepingAlarm *t);
 
     void discreteAudioChanged();
     void liveAvPath();
@@ -1468,6 +1468,8 @@ signals:
     void DCEHostChanged();
 
 public slots:
+    void setAlarm(bool toggle, int grp);
+
     void beginSetup();
     void setModelPages(int p) {modelPages = p; emit modelPagesChanged(modelPages);}
     int getModelPages() {return modelPages;}
@@ -1485,7 +1487,6 @@ public slots:
     int getqCommunicatorID(){return qCommunicatorID;}
 
     void getAttributeImage(QString param);
-
 
     void setDeviceId(int d) {m_dwPK_Device = d; emit deviceIdChanged();}
     int getDeviceId() {return m_dwPK_Device;}
@@ -1604,14 +1605,14 @@ public slots:
         if (s < 0)
         {RwMedia();} else
         { FfMedia();}
-                                 }
+    }
     void jumpMobileGrid(int page);
     void getGridView(bool direction);
     void seekToGridPosition(QString s);
 
 
     //media
-    void displayToggle(int);
+    void displayToggle(bool t);
     void setMediaSpeed(int s);
     QImage getfileForDG(string filename);
     void GetFileInfoForQml(QString qs_file_reference);
@@ -1651,7 +1652,7 @@ public slots:
     void powerOff(QString deviceType);
 
     void GetAdvancedMediaOptions(int device);
-    void GetAlarms(bool toggle, int grp);
+    void GetAlarms();
     void setZoom(QString zoomLevel);
     void setAspect(QString ratio);
     void GetText(int textno);

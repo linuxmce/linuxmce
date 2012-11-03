@@ -75,12 +75,11 @@ public slots:
     void populate();
 private slots:
     void handleItemChange();
-    virtual void beginResetModel();
-    virtual void endResetModel();
+
 private:
     PlaylistItemClass* m_prototype;
     QList<PlaylistItemClass*> m_list;
-    virtual void resetInternalData();
+     bool resetInternalData();
 };
 
 #endif // PLAYLISTCLASS_H

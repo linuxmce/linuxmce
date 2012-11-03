@@ -6,6 +6,7 @@ LocationModel::LocationModel(LocationItem* prototype, QObject *parent) :
  #ifndef QT5
     setRoleNames(m_prototype->roleNames());
 #endif
+
 }
 
 int LocationModel::rowCount(const QModelIndex &parent) const

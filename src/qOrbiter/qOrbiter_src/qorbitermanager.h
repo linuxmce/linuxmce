@@ -53,6 +53,7 @@
 #endif
 
 #include<datamodels/existingorbitermodel.h>
+#include <sleepingalarmmodel.h>
 
 #include <QStringList>
 #include <QThread>
@@ -157,8 +158,9 @@ class qorbiterManager : public QObject
     Q_PROPERTY (QString internalHost READ getInternalHost WRITE setInternalHost NOTIFY internalHostChanged)
     Q_PROPERTY (QString externalip READ getExternalIp WRITE setExternalIp NOTIFY externalIpChanged)
     Q_PROPERTY (QString externalHost READ getExternalHost WRITE setExternalHost NOTIFY externalHostChanged )
- Q_PROPERTY (int media_pageSeperator READ getGridSeperator WRITE setGridSeperator NOTIFY newPageSeperator )
-     Q_PROPERTY (int media_currentPage READ getCurrentPage WRITE setCurrentPage NOTIFY mediaPageChanged)
+    Q_PROPERTY (int media_pageSeperator READ getGridSeperator WRITE setGridSeperator NOTIFY newPageSeperator )
+    Q_PROPERTY (int media_currentPage READ getCurrentPage WRITE setCurrentPage NOTIFY mediaPageChanged)
+    Q_PROPERTY(bool osdStatus READ getDisplayStatus WRITE toggleDisplay NOTIFY osdChanged )
     /*
      *Need to move runtime options here so that we can tie into a configuration panel
      *first run - self explanitory?
@@ -202,7 +204,7 @@ public:
     QList<QObject*> screenshotVars;
 
     //-------------sleeping menu----------------------
-    QList<QObject*> sleeping_alarms;
+    SleepingAlarmModel * sleeping_alarms;
 
     //------------media vars-----------------------------------
     FileDetailsClass *filedetailsclass;
@@ -250,6 +252,7 @@ public:
     bool b_skinReady;
     bool b_skinDataReady;
     bool b_orbiterReady;
+    bool osdStatus;
     Q_INVOKABLE void refreshUI(QUrl url);
     void swapSkins(QString incSkin);
 
@@ -408,7 +411,7 @@ signals:
     /* Media Controls */
     void setVolume(int vol);
     void extraButton(QString b);
-    void gridLoadingStatus(bool s);
+    void gridStatus(bool s);
     void gridGoBack();
     void mediaTypeChanged();
     void requestDcePages(int i);
@@ -435,6 +438,8 @@ signals:
     void setStreamSpeed(int speed);
     void stopPlayback();
     void seekGrid(QString s);
+    void newPlaylistPosition(int pos);
+    void resendAvCodes();
 
     void liveTVrequest();
     void managerPlaylistRequest();
@@ -456,6 +461,10 @@ signals:
     void setDceGridParam(int a, QString p );
     void keepLoading(bool s);
     void updateScreen(QString screen);
+
+    /*device related*/
+    void osdChanged(bool);
+    void newLightLevel(int l);
 
     //setup related
     void orbiterReady(bool);
@@ -489,6 +498,7 @@ signals:
 
     void floorplanTypeChanged(int t);
     void setAlarm(bool s, int g);
+    void getAlarms();
     void getSingleCam(int i_pk_camera_device, int h, int w);
 
     //runtime
@@ -561,7 +571,7 @@ public slots:
     /*Media Metadata Slots*/
     void getLiveTVPlaylist() { }
     void getStoredPlaylist() { emit bindMediaRemote(true);}
-    void changedPlaylistPosition(QString position) {emit changeTrack(position);}
+    void changedPlaylistPosition(int position) {emit newPlaylistPosition(position);}
 
     /*Media Mode control slots*/
     void setNowPlayingData() {}
@@ -569,6 +579,7 @@ public slots:
     void setBoundStatus(bool b) {emit bindMediaRemote(b);}
     void setNowPlayingIcon(bool b);
     void nowPlayingChanged(bool b);
+
 
     /*Media Control Slots*/
     void playMedia(QString FK_Media) { emit startPlayback(FK_Media);}
@@ -595,6 +606,10 @@ public slots:
     void showDeviceCodes(QList<QObject*> t);
     void setCommandList(QList<QObject*> l);
     void resendCode(int from, int to) { emit resendDeviceCode( from,  to);}
+    void toggleDisplay(bool display) { osdStatus = display; emit osdChanged(osdStatus); }
+    bool getDisplayStatus() { return osdStatus; }
+    void adjustLights(int l) {emit newLightLevel(l); }
+    void showAvControl() {emit resendAvCodes();}
 
     /*QML Skin Function slots*/
     void setActiveSkin(QString name);
@@ -606,7 +621,7 @@ public slots:
 #endif
 
     /*Datagrid Slots*/
-    void setGridStatus(bool s) {emit gridLoadingStatus(s);}
+    void setGridStatus(bool s) {emit gridStatus(s);}
     void setSorting(int i);
     void setMediaType(int m) {i_current_mediaType = m; emit mediaTypeChanged();}
     int getMediaType(){return i_current_mediaType;}
@@ -650,8 +665,8 @@ public slots:
     void quickReload();
 
     /*Sleeping menu slots. */
-    void sleepingMenu(bool toggle, int grp);
-    void showSleepingAlarms(QList<QObject*> s);
+    void updateAlarm(bool toggle, int grp);
+    void showSleepingAlarms(SleepingAlarm *s);
 
     /*ScreenSaver*/
     void killScreenSaver();

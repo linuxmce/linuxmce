@@ -33,9 +33,7 @@ Rectangle{
                 id: mousearea1
                 anchors.fill: rowheader
                 onClicked: {
-                    manager.setFloorplanType(6)
-                    manager.ShowFloorPlan(6)
-
+                   manager.showfloorplan(6)
                 }
             }
         }

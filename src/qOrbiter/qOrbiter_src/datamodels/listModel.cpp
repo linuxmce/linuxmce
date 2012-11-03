@@ -144,7 +144,7 @@ bool ListModel::resetInternalData()
     qDebug("Resetting listmodel data");
     int total = m_list.count();
     for(int i = 0; i <= m_list.count(); ++i){
-        QApplication::processEvents(QEventLoop::AllEvents);
+
         qDebug() <<"removing::" << m_list.count() << " of " << total;
         m_list.removeAt(i);
     }

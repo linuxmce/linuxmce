@@ -1058,7 +1058,6 @@ void qOrbiter::CMD_Set_Now_Playing(string sPK_DesignObj,string sValue_To_Assign,
     else
     {
         checkTimeCode();
-
         emit setNowPlaying(true);
         emit currentScreenChanged("Screen_"+scrn+".qml");
         currentScreen = "Screen_"+scrn+".qml";
@@ -2088,6 +2087,8 @@ void qOrbiter::beginSetup()
     setOrbiterSetupVars(0,0,0,0,0,0);
 #ifndef for_harmattan
     qRegisterMetaType< QList<ExistingOrbiter*> >("QList<ExistingOrbiter*>");
+  //  qRegisterMetaType<SleepingAlarm>("SleepingAlarm");
+
 #endif
     qDebug() <<"Run function executed" << this->thread()->currentThreadId();
 }
@@ -2350,10 +2351,17 @@ void DCE::qOrbiter::executeCommandGroup(int cmdGrp)
     SendCommand(execCommandGroup);
 }
 
-void qOrbiter::displayToggle(int i)
+void qOrbiter::displayToggle(bool t)
 {
+    int state;
+
+    if(t)
+        state=1;
+    else
+        state=0;
+
     // qDebug() << m_pData->FindFirstRelatedDeviceOfTemplate(DEVICETEMPLATE_OnScreen_Orbiter_CONST)->m_dwPK_Device;
-    DCE::CMD_Display_OnOff display(m_dwPK_Device, m_pData->FindFirstRelatedDeviceOfTemplate(DEVICETEMPLATE_OnScreen_Orbiter_CONST)->m_dwPK_Device, StringUtils::itos(i), false );
+    DCE::CMD_Display_OnOff display(m_dwPK_Device, m_pData->FindFirstRelatedDeviceOfTemplate(DEVICETEMPLATE_OnScreen_Orbiter_CONST)->m_dwPK_Device, StringUtils::itos(state), false );
     SendCommand(display);
     setCommandResponse("Attempting to toggle the display" );
 }
@@ -2758,8 +2766,7 @@ void DCE::qOrbiter::requestMediaPlaylist()
                 index = qs_plsIndex.toInt();
                 fk_file = pCell->GetValue();
                 emit playlistItemAdded(new PlaylistItemClass(cellTitle, fk_file, index));
-                index++;
-                //QApplication::processEvents(QEventLoop::AllEvents);
+                index++;               
             }
 
         }
@@ -3521,16 +3528,10 @@ void DCE::qOrbiter::GetAdvancedMediaOptions(int device) // prepping for advanced
   its supposed to select the alarms and present them in a dg. Dg selection works currently, parsing does not.
   */
 
-void DCE::qOrbiter::GetAlarms(bool toggle, int grp)
+void DCE::qOrbiter::GetAlarms()
 {
     bool state;
-    string *sResponse;
-    if (grp != 0)
-    {
-
-        CMD_Toggle_Event_Handler toggleAlarm(m_dwPK_Device, iPK_Device_eventPlugin, grp);
-        SendCommand(toggleAlarm);
-    }
+    string *sResponse;   
 
     setCommandResponse("Getting alarm state");
     int cellsToRender= 0;
@@ -3610,16 +3611,13 @@ void DCE::qOrbiter::GetAlarms(bool toggle, int grp)
                     timeleft = "";
                 }
 
-                sleepingAlarms.append(new SleepingAlarm( eventgrp, name, alarmtime, state, timeleft, days));
+               SleepingAlarm *t = new SleepingAlarm( eventgrp, name, alarmtime, state, timeleft, days);
+                emit sleepingAlarmsReady(t);
                 col++;
                 row=0;
-            }
-
-            emit sleepingAlarmsReady(sleepingAlarms);
-        }
-        sleepingAlarms.clear();
+            }            
+        }        
     }
-
 }
 
 //zoom level for current media player
@@ -4933,3 +4931,15 @@ void qOrbiter::getAttributeImage(QString param)
     CMD_Get_Attribute_Image attributeImage(m_dwPK_Device , iMediaPluginID );
 }
 
+
+void qOrbiter::setAlarm(bool toggle, int grp)
+{
+     if (grp != 0)
+            {
+
+                CMD_Toggle_Event_Handler toggleAlarm(m_dwPK_Device, iPK_Device_eventPlugin, grp);
+                SendCommand(toggleAlarm);
+                GetAlarms();
+            }
+
+}

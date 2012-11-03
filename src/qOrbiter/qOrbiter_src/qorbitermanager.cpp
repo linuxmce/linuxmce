@@ -226,7 +226,7 @@ qorbiterManager::qorbiterManager(QDeclarativeView *view, QObject *parent) :
     qorbiterUIwin->rootContext()->setContextProperty("securityvideo", SecurityVideo);
 
     //-alarms
-    sleeping_alarms.clear();
+    sleeping_alarms = new SleepingAlarmModel(this);
     qorbiterUIwin->rootContext()->setContextProperty("alarms", QVariant::fromValue(sleeping_alarms) );
 
     QApplication::processEvents(QEventLoop::AllEvents);
@@ -702,7 +702,7 @@ void qorbiterManager::processConfig(QByteArray config)
     qorbiterUIwin->rootContext()->setContextProperty("avcodes", QVariant::fromValue(buttonList));
     qorbiterUIwin->rootContext()->setContextProperty("device_commands", QVariant::fromValue(commandList));
     qorbiterUIwin->rootContext()->setContextProperty("currentBookmarks", QVariant::fromValue(current_bookmarks));
-
+ qorbiterUIwin->rootContext()->setContextProperty("alarms", QVariant::fromValue(sleeping_alarms) );
     setDceResponse("Properties Done");
 
     setDceResponse("Setting location");
@@ -1488,18 +1488,16 @@ bool qorbiterManager::getRequestMore()
     return requestMore;
 }
 
-void qorbiterManager::sleepingMenu(bool toggle, int grp)
+void qorbiterManager::updateAlarm(bool toggle, int grp)
 {
-    emit setAlarm(toggle, grp);
-    sleeping_alarms.clear();
-    qorbiterUIwin->rootContext()->setContextProperty("alarms", QVariant::fromValue(sleeping_alarms) );
+    sleeping_alarms->clear();
+    emit setAlarm(toggle, grp);   
+
 }
 
-void qorbiterManager::showSleepingAlarms(QList<QObject *> s)
+void qorbiterManager::showSleepingAlarms(SleepingAlarm *s)
 {
-
-    sleeping_alarms = s;
-    qorbiterUIwin->rootContext()->setContextProperty("alarms", QVariant::fromValue(sleeping_alarms) );
+    sleeping_alarms->appendRow(s);
 }
 
 

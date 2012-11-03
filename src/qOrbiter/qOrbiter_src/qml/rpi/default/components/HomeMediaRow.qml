@@ -34,9 +34,7 @@ Rectangle{
                 id: mousearea1
                 anchors.fill: parent
                 onClicked:{
-                    manager.setFloorplanType(3)
-                    manager.ShowFloorPlan(3)
-
+                    manager.showfloorplan(3)
                 }
             }
         }
@@ -48,6 +46,7 @@ Rectangle{
             visible: dcenowplaying.b_mediaPlaying ? true : false
             height: scaleY(13)
             width: scaleX(8)
+            clip:true
 
             radius: style.but_smooth
             buttontext: dcenowplaying.qs_mainTitle +" \n " + dceTimecode.qsCurrentTime
