@@ -16,49 +16,52 @@
 
 # NOTE!! You should build the AudioVisual Plugin in the Plugins directory and make sure its output path is set to the 'imports folder!'
 
+# NOTE2!! Please add any source or header file to the relevant part of this file. 
+#         This ensures that stuff like remote building will work. 
+#         Thanks
+#		possy
+
+
 CONFIG += thread
 # define deployment destination and target executable name
 
 ANDROID{
-DESTDIR = ../QOrbiter-Android-Arm-$$QT_VERSION
+	DESTDIR = ../QOrbiter-Android-Arm-$$QT_VERSION
 } else {
-!linux-rasp-pi-g++{
-DESTDIR = ../QOrbiter-build-$$QT_VERSION
-}
+	!linux-rasp-pi-g++{
+		DESTDIR = ../QOrbiter-build-$$QT_VERSION
+	}
 }
 
 contains(QT_VERSION,4.8.*){
-message("$$QT_VERSION Core")
-DEFINES+=QT4_8
-
+	message("$$QT_VERSION Core")
+	DEFINES+=QT4_8
 }
 
 contains(QT_VERSION,4.7.*){
-message("$$QT_VERSION Core")
-DEFINES+=QT4_7
+	message("$$QT_VERSION Core")
+	DEFINES+=QT4_7
 }
 
 
 contains(QT_VERSION,5.0.*){
-message("$$QT_VERSION Core")
-DEFINES+=QT5
+	message("$$QT_VERSION Core")
+	DEFINES+=QT5
 }
 
 
 opengl{
-TARGET = qorbiter-$$QT_VERSION-core-gl
-DEFINES+=GLENABLED
-glmsg= yes
-QT+= opengl
-
+	TARGET = qorbiter-$$QT_VERSION-core-gl
+	DEFINES+=GLENABLED
+	glmsg= yes
+	QT+= opengl
 }else{
-
-TARGET =qorbiter-$$QT_VERSION
-glmsg = no
+	TARGET =qorbiter-$$QT_VERSION
+	glmsg = no
 }
 
 ANDROID{
-TARGET=qorbiter-$$QT_VERSION
+	TARGET=qorbiter-$$QT_VERSION
 }
 
 symbian:TARGET.UID3 = 0xE15A481D
@@ -75,134 +78,129 @@ symbian:TARGET.CAPABILITY += NetworkServices
 
 # When we do stuff for Symbian, why not define the target in here...
 symbian {
-    DEFINES += for_symbian
-    INCLUDEPATH += $$EPOCROOT/epoc32/include/stdapis/stlport
-    INCLUDEPATH += $$EPOCROOT/epoc32/include/stdapis/stlport/stl
-    INCLUDEPATH += $$EPOCROOT/epoc32/include/libc
-    DEFINES += Q_OS_SYMBIAN
+	DEFINES += for_symbian
+	INCLUDEPATH += $$EPOCROOT/epoc32/include/stdapis/stlport
+	INCLUDEPATH += $$EPOCROOT/epoc32/include/stdapis/stlport/stl
+	INCLUDEPATH += $$EPOCROOT/epoc32/include/libc
+	DEFINES += Q_OS_SYMBIAN
 }
 TRANSLATIONS += app_de.ts
 # Add more folders to ship with the application, here
 #linux deploy configuration
 linux-g++{
+	contains(QT_VERSION,4.*.*){
+		folder_01.source = qml/desktop
+		folder_01.target = $$DESTDIR/qml
+	}
+	else:contains(QT_VERSION,5.0.*){
+		folder_01.source = qml/rpi
+		folder_01.target = $$DESTDIR/qml
+	}
+	folder_03.source = config.xml
+	folder_03.target = $$DESTDIR
+	DEFINES += for_desktop
 
-contains(QT_VERSION,4.*.*){
-folder_01.source = qml/desktop
-folder_01.target = $$DESTDIR/qml
-}
-else:contains(QT_VERSION,5.0.*){
-folder_01.source = qml/rpi
-folder_01.target = $$DESTDIR/qml
-}
+	plugins_folder.source = imports/
+	plugins_folder.target = $$DESTDIR
 
-folder_03.source = config.xml
-folder_03.target = $$DESTDIR
-DEFINES += for_desktop
-
-plugins_folder.source = imports/
-plugins_folder.target = $$DESTDIR
-
-DEPLOYMENTFOLDERS+= plugins_folder
-DEPLOYMENTFOLDERS += folder_01  folder_03
+	DEPLOYMENTFOLDERS+= plugins_folder
+	DEPLOYMENTFOLDERS += folder_01  folder_03
 }
 
 #windows deployment and module config
 WIN32{
-folder_01.source = qml/desktop
-folder_01.target = $$DESTDIR/qml
+	folder_01.source = qml/desktop
+	folder_01.target = $$DESTDIR/qml
 
-folder_05.source = plugins
-folder_05.target = $$DESTDIR/plugins
+	folder_05.source = plugins
+	folder_05.target = $$DESTDIR/plugins
 
-files_01.source = "../qOrbiter_src/config.xml/"
-files_01.path =$$DESTDIR/
+	files_01.source = "../qOrbiter_src/config.xml/"
+	files_01.path =$$DESTDIR/
 
-DEFINES += for_windows
-plugins_folder.source = imports/
-plugins_folder.target = $$DESTDIR
-DEPLOYMENTFOLDERS+= plugins_folder
-DEPLOYMENTFOLDERS += folder_01 files_01 folder_05
+	DEFINES += for_windows
+	plugins_folder.source = imports/
+	plugins_folder.target = $$DESTDIR
+	DEPLOYMENTFOLDERS += plugins_folder
+	DEPLOYMENTFOLDERS += folder_01 files_01 folder_05
 }
 
 #android simulation config
 for_android{
-folder_01.source = qml/android/
-folder_01.target = $$DESTDIR/qml
+	folder_01.source = qml/android/
+	folder_01.target = $$DESTDIR/qml
 
-folder_05.source = qml/template
-folder_05.target = $$DESTDIR/qml
+	folder_05.source = qml/template
+	folder_05.target = $$DESTDIR/qml
 
-folder_03.source = config.xml
-folder_03.target = $$DESTDIR
+	folder_03.source = config.xml
+	folder_03.target = $$DESTDIR
 
-    qmlcomponents.source = androidComponents/Qt \ androidComponents/com
-    qmlcomponents.target = qml/imports/
+	qmlcomponents.source = androidComponents/Qt \ androidComponents/com
+	qmlcomponents.target = qml/imports/
 
-qmlbase.source = qml/android/base.qml
-qmlbase.target = $$DESTDIR/qml
+	qmlbase.source = qml/android/base.qml
+	qmlbase.target = $$DESTDIR/qml
 
-    qmlplugins.files = \
- androidPlugins/libqmlshadersplugin.so \
-androidPlugins/libandroidplugin_1_1.so \
+	qmlplugins.files = androidPlugins/libqmlshadersplugin.so
+	qmlplugins.files += androidPlugins/libandroidplugin_1_1.so
 
-        x86 {
-            qmlplugins.path = /libs/x86
-        } else: armeabi-v7a {
-            qmlplugins.path = /libs/armeabi-v7a
-        } else {
-            qmlplugins.path = /libs/armeabi
-        }
+	x86 {
+		qmlplugins.path = /libs/x86
+	} else: armeabi-v7a {
+		qmlplugins.path = /libs/armeabi-v7a
+	} else {
+		qmlplugins.path = /libs/armeabi
+	}
 
-DEPLOYMENTFOLDERS+= qmlcomponents
-    INSTALLS+= qmlplugins
-
-DEFINES+=for_android
-
-DEPLOYMENTFOLDERS += folder_01 folder_02 folder_03 folder_05
+	DEPLOYMENTFOLDERS+= qmlcomponents
+	INSTALLS+= qmlplugins
+	DEFINES+=for_android
+	DEPLOYMENTFOLDERS += folder_01 folder_02 folder_03 folder_05
 }
 
 #freemantle config
 for_freemantle{
-folder_01.source = qml/freemantle
-folder_01.target = $$DESTDIR/qml
+	folder_01.source = qml/freemantle
+	folder_01.target = $$DESTDIR/qml
 
-folder_05.source = qml/template
-folder_05.target = $$DESTDIR/qml
+	folder_05.source = qml/template
+	folder_05.target = $$DESTDIR/qml
 
-folder_02.source= img
-folder_02.target=     #left blank so it will appear in the root
+	folder_02.source= img
+	folder_02.target=     #left blank so it will appear in the root
 
-folder_03.source = config.xml
-folder_03.target = $$DESTDIR/config
-DEFINES += for_freemantle
-DEPLOYMENTFOLDERS += folder_01 folder_02 folder_03 folder_05
+	folder_03.source = config.xml
+	folder_03.target = $$DESTDIR/config
+	DEFINES += for_freemantle
+	DEPLOYMENTFOLDERS += folder_01 folder_02 folder_03 folder_05
 }
 
 #harmattan config
 for_harmattan{
-folder_01.source = qml/harmattan
-folder_01.target =
-folder_05.source = qml/template
-folder_05.target = $$DESTDIR/qml
-folder_02.source= img
-folder_02.target=     #left blank so it will appear in the root
-DEFINES += for_harmattan
-DEPLOYMENTFOLDERS += folder_01 folder_02 folder_05
+	folder_01.source = qml/harmattan
+	folder_01.target =
+	folder_05.source = qml/template
+	folder_05.target = $$DESTDIR/qml
+	folder_02.source= img
+	folder_02.target=     #left blank so it will appear in the root
+	DEFINES += for_harmattan
+	DEPLOYMENTFOLDERS += folder_01 folder_02 folder_05
 }
 
 #mac desktop config
 macx{
-    APP_RESOURCES_PATH=../../../$$DESTDIR/$$TARGET".app"/Contents/resources
-    folder_01.source = qml/desktop
-    folder_01.target = $$APP_RESOURCES_PATH/qml
-    folder_02.source= img
-    folder_02.target= $$APP_RESOURCES_PATH   #left blank so it will appear in the root
-    folder_05.source = qml/template
-    folder_05.target = $$DESTDIR/qml
-    folder_03.source = config.xml
-    folder_03.target = $$APP_RESOURCES_PATH
-    ICON = osxicons.icns
-DEPLOYMENTFOLDERS += folder_01 folder_02 folder_03 folder_05
+	APP_RESOURCES_PATH=../../../$$DESTDIR/$$TARGET".app"/Contents/resources
+	folder_01.source = qml/desktop
+	folder_01.target = $$APP_RESOURCES_PATH/qml
+	folder_02.source= img
+	folder_02.target= $$APP_RESOURCES_PATH   #left blank so it will appear in the root
+	folder_05.source = qml/template
+	folder_05.target = $$DESTDIR/qml
+	folder_03.source = config.xml
+	folder_03.target = $$APP_RESOURCES_PATH
+	ICON = osxicons.icns
+	DEPLOYMENTFOLDERS += folder_01 folder_02 folder_03 folder_05
 }
 
 #android deployment
@@ -212,44 +210,43 @@ ANDROID{
 #folder_01.source = qml/android/
 #folder_01.target = qml
 
-base.source = qml/android/Base.qml
-base.target = qml/
+	base.source = qml/android/Base.qml
+	base.target = qml/
 
-folder_03.source = config.xml
-folder_03.target = $$DESTDIR
+	folder_03.source = config.xml
+	folder_03.target = $$DESTDIR
 
-qmlcomponents.source = androidComponents
-qmlcomponents.target = imports/
+	qmlcomponents.source = androidComponents
+	qmlcomponents.target = imports/
 
-qmlplugins.files = \
-androidPlugins/libqmlshadersplugin.so \
-androidPlugins/libandroidplugin_1_1.so
+	qmlplugins.files = androidPlugins/libqmlshadersplugin.so
+	qmlplugins.files += androidPlugins/libandroidplugin_1_1.so
 
-        x86 {
-            qmlplugins.path = /libs/x86
-        } else: armeabi-v7a {
-            qmlplugins.path = /libs/armeabi-v7a
-        } else {
-            qmlplugins.path = /libs/armeabi
-        }
+	x86 {
+		qmlplugins.path = /libs/x86
+	} else: armeabi-v7a {
+		qmlplugins.path = /libs/armeabi-v7a
+	} else {
+		qmlplugins.path = /libs/armeabi
+	}
 
-    INSTALLS+= qmlplugins
-    DEFINES+=ANDROID GLENABLED
-DEPLOYMENTFOLDERS = qmlcomponents base #folder_01
-QML_IMPORT_PATH = "androidComponents"
+	INSTALLS+= qmlplugins
+	DEFINES+=ANDROID GLENABLED
+	DEPLOYMENTFOLDERS = qmlcomponents base #folder_01
+	QML_IMPORT_PATH = "androidComponents"
 }
 
 linux-rasp-pi-g++{
 
-folder_01.source= qml/rpi
-folder_01.target= qml
+	folder_01.source= qml/rpi
+	folder_01.target= qml
 
-folder_02.source = config.xml
-folder_02.target = config
+	folder_02.source = config.xml
+	folder_02.target = config
 
-DEFINES+=RPI GLENABLED
-DEPLOYMENTFOLDERS += folder_01 folder_02
-QT+= qml
+	DEFINES+=RPI GLENABLED
+	DEPLOYMENTFOLDERS += folder_01 folder_02
+	QT+= qml
 }
 
 # Additional import path used to resolve QML modules in Creator's code model
@@ -263,31 +260,31 @@ INCLUDEPATH += ../../ ../../DCE/
 
 #Modules, by platform
 QT4_*{
-QT+= webkit declarative phonon #note that the qml module declarations are in the qmlapplicationviewer
+	QT+= webkit declarative phonon #note that the qml module declarations are in the qmlapplicationviewer
 }
 
 QT5{
-QT+= webkit mobility widgets qtcore #note that the qml module declarations are in the qmlapplicationviewer
+	QT+= webkit mobility widgets qtcore #note that the qml module declarations are in the qmlapplicationviewer
 }
 
 #turtlenecks and such
 macx{
-    QT += xml
-    QT += network
+	QT += xml
+	QT += network
 }
 
 !macx{
-    LIBS += -lQtXml
+	LIBS += -lQtXml
 }
 
 #windows builds require a special pthreads.
 win32{
-INCLUDEPATH += ../qorbiter-pthreads/Prebuilt/include/
-LIBS+= -L../qorbiter-pthreads/Prebuilt/lib/ -lpthreadVC2
-LIBS +=  -lWS2_32 -luser32
-#LIBS +=  -lpthreadVC2
-DEFINES += USE_MYSQL_WRAPPER
-QT += network
+	INCLUDEPATH += ../qorbiter-pthreads/Prebuilt/include/
+	LIBS+= -L../qorbiter-pthreads/Prebuilt/lib/ -lpthreadVC2
+	LIBS +=  -lWS2_32 -luser32
+	#LIBS +=  -lpthreadVC2
+	DEFINES += USE_MYSQL_WRAPPER
+	QT += network
 }
 
 CONFIG +=warn_off
@@ -316,109 +313,109 @@ message (Build Type: $$DEFINES)
 message( Opengl Status: $$glmsg )
 
 SOURCES += main.cpp \
-        ../../Gen_Devices/qOrbiterBase.cpp \
-    ../qOrbiter.cpp \
-    qorbitermanager.cpp \
-    datamodels/listModel.cpp \
-    datamodels/gridItem.cpp \
-    imageProviders/gridimageprovider.cpp \
-    imageProviders/basicImageProvider.cpp \
-    datamodels/orbiterbuttonitem.cpp \
-    datamodels/locationmodel.cpp \
-    datamodels/locationitem.cpp \
-    datamodels/usermodel.cpp \
-    datamodels/useritem.cpp \
-    datamodels/lightingscenariomodel.cpp \
-    datamodels/lightingscenarioitem.cpp \
-    datamodels/mediascenariomodel.cpp \
-    datamodels/mediascenarioitem.cpp \
-    datamodels/telecomscenariomodel.cpp \
-    datamodels/climatescenariomodel.cpp \
-    datamodels/securityscenariomodel.cpp \
-    datamodels/climatescenarioitem.cpp \
-    datamodels/securityscenarioitem.cpp \
-    datamodels/telecomscenarioitem.cpp \
-    screensaver/screensavermodule.cpp \
-    ../../PlutoUtils/uuencode.cpp \
-    ../../PlutoUtils/ThreadedClass.cpp \
-    ../../PlutoUtils/Other.cpp \
-    ../../PlutoUtils/MultiThreadIncludes.cpp \
-    ../../PlutoUtils/minilzo.cpp \
-    ../../PlutoUtils/md5c.cpp \
-    ../../PlutoUtils/FileUtils.cpp \
-    ../../PlutoUtils/CommonIncludes.cpp \
-    ../../SerializeClass/SerializeClass.cpp \
-    ../../DCE/Virtual_Device_Translator.cpp \
-    ../../DCE/Socket.cpp \
-    ../../DCE/ServerLogger.cpp \
-    ../../DCE/PlainClientSocket.cpp \
-    ../../DCE/MessageBuffer.cpp \
-    ../../DCE/Message.cpp \
-    ../../DCE/HandleRequestSocket.cpp \
-    ../../DCE/Logger.cpp \
-    ../../DCE/Event_Impl.cpp \
-    ../../DCE/DCEConfig.cpp \
-    ../../DCE/DataGrid.cpp \
-    ../../DCE/Command_Impl.cpp \
-    ../../DCE/AlarmManager.cpp \
-    ../../PlutoUtils/StringUtils.cpp \
-    ../../DCE/ClientSocket.cpp \
-    ../../DCE/DeviceData_Base.cpp \
-    ../../DCE/DeviceData_Impl.cpp \
-    datamodels/skindatamodel.cpp \
-    datamodels/skindataitem.cpp \
-    datamodels/filtermodel.cpp \
-    datamodels/genremodel.cpp \
-    datamodels/attributemodel.cpp \
-    datamodels/DataModelItems/filtermodelitem.cpp \
-    datamodels/DataModelItems/genreitem.cpp \
-    ../../PlutoUtils/getch.cpp \
-    datamodels/DataModelItems/attributesortitem.cpp \
-    datamodels/attributesortmodel.cpp \
-    datamodels/mediatypemodel.cpp \
-    datamodels/DataModelItems/mediatypeitem.cpp \
-    datamodels/filedetailsmodel.cpp \
-    datamodels/DataModelItems/filedetailsitem.cpp \
-    contextobjects/nowplayingclass.cpp \
-    datamodels/DatagridClasses/datagriditemmodelclass.cpp \
-    contextobjects/screenparamsclass.cpp \
-    contextobjects/playlistclass.cpp \
-    contextobjects/playlistitemclass.cpp \
-    datamodels/DatagridClasses/datagriditem.cpp \
-    contextobjects/securityvideoclass.cpp \
-    contextobjects/epgchannellist.cpp \
-    playlists/epgitemclass.cpp \
-    datamodels/floorplanmodel.cpp \
-    datamodels/floorplanitem.cpp \
-    imageProviders/abstractimageprovider.cpp \
-    datamodels/DataModelItems/sleepingalarm.cpp \
-    contextobjects/filedetailsclass.cpp \
-    avcodegrid.cpp \
-    avitem.cpp \
-    contextobjects/floorplandevice.cpp \
-    contextobjects/screenshotattributes.cpp \
-    threadedClasses/threadedsplash.cpp \
-    orbiterwindow.cpp \
-    contextobjects/screensaverclass.cpp \
-    datamodels/skinloader.cpp \
-    datamodels/genericsetupmodel.cpp \
-    datamodels/genericsetupitem.cpp \
-    dgmanager.cpp \
-    datamodels/avdevice.cpp \
-    contextobjects/existingorbiter.cpp \
-    contextobjects/modelpage.cpp \
-    contextobjects/avcommand.cpp \
-    shaders/filereader.cpp \
-    contextobjects/timecodemanager.cpp \
-    imageProviders/floorplandeviceprovider.cpp \
-   # ../../Gen_Devices/qMediaPlayerBase.cpp \
-    contextobjects/bookmarkitem.cpp \
-    plugins/GoogleWeather/googleweather.cpp \
-    contextobjects/promptdata.cpp \
-    datamodels/existingorbitermodel.cpp \
-    sleepingalarmmodel.cpp \
-    datamodels/devicemodel.cpp
-
+	../../Gen_Devices/qOrbiterBase.cpp \
+	../qOrbiter.cpp \
+	qorbitermanager.cpp \
+	datamodels/listModel.cpp \
+	datamodels/gridItem.cpp \
+	imageProviders/gridimageprovider.cpp \
+	imageProviders/basicImageProvider.cpp \
+	datamodels/orbiterbuttonitem.cpp \
+	datamodels/locationmodel.cpp \
+	datamodels/locationitem.cpp \
+	datamodels/usermodel.cpp \
+	datamodels/useritem.cpp \
+	datamodels/lightingscenariomodel.cpp \
+	datamodels/lightingscenarioitem.cpp \
+	datamodels/mediascenariomodel.cpp \
+	datamodels/mediascenarioitem.cpp \
+	datamodels/telecomscenariomodel.cpp \
+	datamodels/climatescenariomodel.cpp \
+	datamodels/securityscenariomodel.cpp \
+	datamodels/climatescenarioitem.cpp \
+	datamodels/securityscenarioitem.cpp \
+	datamodels/telecomscenarioitem.cpp \
+	screensaver/screensavermodule.cpp \
+	../../PlutoUtils/uuencode.cpp \
+	../../PlutoUtils/ThreadedClass.cpp \
+	../../PlutoUtils/Other.cpp \
+	../../PlutoUtils/MultiThreadIncludes.cpp \
+	../../PlutoUtils/minilzo.cpp \
+	../../PlutoUtils/md5c.cpp \
+	../../PlutoUtils/FileUtils.cpp \
+	../../PlutoUtils/CommonIncludes.cpp \
+	../../SerializeClass/SerializeClass.cpp \
+	../../DCE/Virtual_Device_Translator.cpp \
+	../../DCE/Socket.cpp \
+	../../DCE/ServerLogger.cpp \
+	../../DCE/PlainClientSocket.cpp \
+	../../DCE/MessageBuffer.cpp \
+	../../DCE/Message.cpp \
+	../../DCE/HandleRequestSocket.cpp \
+	../../DCE/Logger.cpp \
+	../../DCE/Event_Impl.cpp \
+	../../DCE/DCEConfig.cpp \
+	../../DCE/DataGrid.cpp \
+	../../DCE/Command_Impl.cpp \
+	../../DCE/AlarmManager.cpp \
+	../../PlutoUtils/StringUtils.cpp \
+	../../DCE/ClientSocket.cpp \
+	../../DCE/DeviceData_Base.cpp \
+	../../DCE/DeviceData_Impl.cpp \
+	datamodels/skindatamodel.cpp \
+	datamodels/skindataitem.cpp \
+	datamodels/filtermodel.cpp \
+	datamodels/genremodel.cpp \
+	datamodels/attributemodel.cpp \
+	datamodels/DataModelItems/filtermodelitem.cpp \
+	datamodels/DataModelItems/genreitem.cpp \
+	../../PlutoUtils/getch.cpp \
+	datamodels/DataModelItems/attributesortitem.cpp \
+	datamodels/attributesortmodel.cpp \
+	datamodels/mediatypemodel.cpp \
+	datamodels/DataModelItems/mediatypeitem.cpp \
+	datamodels/filedetailsmodel.cpp \
+	datamodels/DataModelItems/filedetailsitem.cpp \
+	contextobjects/nowplayingclass.cpp \
+	datamodels/DatagridClasses/datagriditemmodelclass.cpp \
+	contextobjects/screenparamsclass.cpp \
+	contextobjects/playlistclass.cpp \
+	contextobjects/playlistitemclass.cpp \
+	datamodels/DatagridClasses/datagriditem.cpp \
+	contextobjects/securityvideoclass.cpp \
+	contextobjects/epgchannellist.cpp \
+	playlists/epgitemclass.cpp \
+	datamodels/floorplanmodel.cpp \
+	datamodels/floorplanitem.cpp \
+	imageProviders/abstractimageprovider.cpp \
+	datamodels/DataModelItems/sleepingalarm.cpp \
+	contextobjects/filedetailsclass.cpp \
+	avcodegrid.cpp \
+	avitem.cpp \
+	contextobjects/floorplandevice.cpp \
+	contextobjects/screenshotattributes.cpp \
+	threadedClasses/threadedsplash.cpp \
+	orbiterwindow.cpp \
+	contextobjects/screensaverclass.cpp \
+	datamodels/skinloader.cpp \
+	datamodels/genericsetupmodel.cpp \
+	datamodels/genericsetupitem.cpp \
+	dgmanager.cpp \
+	datamodels/avdevice.cpp \
+	contextobjects/existingorbiter.cpp \
+	contextobjects/modelpage.cpp \
+	contextobjects/avcommand.cpp \
+	shaders/filereader.cpp \
+	contextobjects/timecodemanager.cpp \
+	imageProviders/floorplandeviceprovider.cpp \
+	# ../../Gen_Devices/qMediaPlayerBase.cpp \
+	contextobjects/bookmarkitem.cpp \
+	plugins/GoogleWeather/googleweather.cpp \
+	contextobjects/promptdata.cpp \
+	datamodels/existingorbitermodel.cpp \
+	sleepingalarmmodel.cpp \
+	datamodels/devicemodel.cpp
+	
 
 
 #!ANDROID|!QT5{
@@ -442,135 +439,135 @@ qtcAddDeployment()
 
 
 HEADERS += \
-    ../../PlutoUtils/ThreadedClass.h \
-    ../../PlutoUtils/MultiThreadIncludes.h \
-    ../../PlutoUtils/StringUtils.h \
-    ../../PlutoUtils/CommonIncludes.h \
-    ../../PlutoUtils/Other.h \
-    ../../PlutoUtils/getch.h \
-    ../../PlutoUtils/MyStl.h \
-    ../../DCE/DeviceData_Base.h \
-    ../../DCE/Message.h \
-    ../../DCE/ServerLogger.h \
-    ../../DCE/Logger.h \
-    ../../DCE/Virtual_Device_Translator.h \
-    ../../DCE/PlutoLockLogger.h \
-    ../../DCE/ClientSocket.h \
-    ../../DCE/PlainClientSocket.h \
-    ../../DCE/AlarmManager.h \
-    ../../SerializeClass/SerializeClass.h \
-    ../../PlutoUtils/FileUtils.h \
-    ../../pluto_main/Define_DeviceCategory.h \
-    ../../pluto_main/Define_DeviceTemplate.h \
-    ../qOrbiter.h \
-    ../../Gen_Devices/qOrbiterBase.h \
-    qorbitermanager.h \
-    qOrbiterData.h \
-    datamodels/listModel.h \
-    datamodels/gridItem.h \
-    imageProviders/gridimageprovider.h \
-    imageProviders/basicImageProvider.h \
-    datamodels/orbiterbuttonitem.h \
-    datamodels/locationmodel.h \
-    datamodels/locationitem.h \
-    datamodels/usermodel.h \
-    datamodels/useritem.h \
-    datamodels/lightingscenariomodel.h \
-    datamodels/lightingscenarioitem.h \
-    datamodels/mediascenariomodel.h \
-    datamodels/mediascenarioitem.h \
-    datamodels/telecomscenariomodel.h \
-    datamodels/climatescenariomodel.h \
-    datamodels/securityscenariomodel.h \
-    datamodels/climatescenarioitem.h \
-    datamodels/securityscenarioitem.h \
-    datamodels/telecomscenarioitem.h \
-    screensaver/screensavermodule.h \
-    datamodels/skindatamodel.h \
-    datamodels/skindataitem.h \
-    datamodels/filtermodel.h \
-    datamodels/genremodel.h \
-    datamodels/attributemodel.h \
-    datamodels/DataModelItems/filtermodelitem.h \
-    datamodels/DataModelItems/genreitem.h \
-    datamodels/DataModelItems/attributesortitem.h \
-    datamodels/attributesortmodel.h \
-    datamodels/mediatypemodel.h \
-    datamodels/DataModelItems/mediatypeitem.h \
-    datamodels/filedetailsmodel.h \
-    datamodels/DataModelItems/filedetailsitem.h \
-    contextobjects/filedetailsclass.h \
-    contextobjects/nowplayingclass.h \
-    datamodels/DatagridClasses/datagriditemmodelclass.h \
-    contextobjects/screenparamsclass.h \
-    contextobjects/playlistclass.h \
-    contextobjects/playlistitemclass.h \
-    datamodels/DatagridClasses/datagriditem.h \
-    contextobjects/securityvideoclass.h \
-    contextobjects/epgchannellist.h \
-    playlists/epgitemclass.h \
-    datamodels/floorplanmodel.h \
-    imageProviders/abstractimageprovider.h \
-    datamodels/DataModelItems/sleepingalarm.h \
-    avcodegrid.h \
-    avitem.h \
-    datamodels/floorplanimageitem.h \
-    contextobjects/floorplandevice.h \
-    contextobjects/screenshotattributes.h \
-    threadedClasses/threadedsplash.h \
-    orbiterwindow.h \
-    contextobjects/screensaverclass.h \
-    datamodels/skinloader.h  \
-    datamodels/genericsetupmodel.h \
-    datamodels/genericsetupitem.h \
-    dgmanager.h \
-    datamodels/avdevice.h \
-    contextobjects/existingorbiter.h \
-    contextobjects/modelpage.h \
-    contextobjects/avcommand.h \
-    shaders/filereader.h \
-    shaders/trace.h \
-    contextobjects/timecodemanager.h \
-    imageProviders/floorplandeviceprovider.h \
-   # ../../Gen_Devices/qMediaPlayerBase.h \
-    contextobjects/bookmarkitem.h \
-    plugins/GoogleWeather/googleweather.h \
-    contextobjects/promptdata.h \
-    datamodels/existingorbitermodel.h \
-    sleepingalarmmodel.h \
-    datamodels/devicemodel.h
-
-
-
+	../../PlutoUtils/ThreadedClass.h \
+	../../PlutoUtils/MultiThreadIncludes.h \
+	../../PlutoUtils/StringUtils.h \
+	../../PlutoUtils/CommonIncludes.h \
+	../../PlutoUtils/Other.h \
+	../../PlutoUtils/getch.h \
+	../../PlutoUtils/MyStl.h \
+	../../DCE/DeviceData_Base.h \
+	../../DCE/Message.h \
+	../../DCE/ServerLogger.h \
+	../../DCE/Logger.h \
+	../../DCE/Virtual_Device_Translator.h \
+	../../DCE/PlutoLockLogger.h \
+	../../DCE/ClientSocket.h \
+	../../DCE/PlainClientSocket.h \
+	../../DCE/AlarmManager.h \
+	../../SerializeClass/SerializeClass.h \
+	../../PlutoUtils/FileUtils.h \
+	../../pluto_main/Define_DeviceCategory.h \
+	../../pluto_main/Define_DeviceTemplate.h \
+	../qOrbiter.h \
+	../../Gen_Devices/qOrbiterBase.h \
+	qorbitermanager.h \
+	qOrbiterData.h \
+	datamodels/listModel.h \
+	datamodels/gridItem.h \
+	imageProviders/gridimageprovider.h \
+	imageProviders/basicImageProvider.h \
+	datamodels/orbiterbuttonitem.h \
+	datamodels/locationmodel.h \
+	datamodels/locationitem.h \
+	datamodels/usermodel.h \
+	datamodels/useritem.h \
+	datamodels/lightingscenariomodel.h \
+	datamodels/lightingscenarioitem.h \
+	datamodels/mediascenariomodel.h \
+	datamodels/mediascenarioitem.h \
+	datamodels/telecomscenariomodel.h \
+	datamodels/climatescenariomodel.h \
+	datamodels/securityscenariomodel.h \
+	datamodels/climatescenarioitem.h \
+	datamodels/securityscenarioitem.h \
+	datamodels/telecomscenarioitem.h \
+	screensaver/screensavermodule.h \
+	datamodels/skindatamodel.h \
+	datamodels/skindataitem.h \
+	datamodels/filtermodel.h \
+	datamodels/genremodel.h \
+	datamodels/attributemodel.h \
+	datamodels/DataModelItems/filtermodelitem.h \
+	datamodels/DataModelItems/genreitem.h \
+	datamodels/DataModelItems/attributesortitem.h \
+	datamodels/attributesortmodel.h \
+	datamodels/mediatypemodel.h \
+	datamodels/DataModelItems/mediatypeitem.h \
+	datamodels/filedetailsmodel.h \
+	datamodels/DataModelItems/filedetailsitem.h \
+	contextobjects/filedetailsclass.h \
+	contextobjects/nowplayingclass.h \
+	datamodels/DatagridClasses/datagriditemmodelclass.h \
+	contextobjects/screenparamsclass.h \
+	contextobjects/playlistclass.h \
+	contextobjects/playlistitemclass.h \
+	datamodels/DatagridClasses/datagriditem.h \
+	contextobjects/securityvideoclass.h \
+	contextobjects/epgchannellist.h \
+	playlists/epgitemclass.h \
+	datamodels/floorplanmodel.h \
+	imageProviders/abstractimageprovider.h \
+	datamodels/DataModelItems/sleepingalarm.h \
+	avcodegrid.h \
+	avitem.h \
+	datamodels/floorplanimageitem.h \
+	contextobjects/floorplandevice.h \
+	contextobjects/screenshotattributes.h \
+	threadedClasses/threadedsplash.h \
+	orbiterwindow.h \
+	contextobjects/screensaverclass.h \
+	datamodels/skinloader.h  \
+	datamodels/genericsetupmodel.h \
+	datamodels/genericsetupitem.h \
+	dgmanager.h \
+	datamodels/avdevice.h \
+	contextobjects/existingorbiter.h \
+	contextobjects/modelpage.h \
+	contextobjects/avcommand.h \
+	shaders/filereader.h \
+	shaders/trace.h \
+	contextobjects/timecodemanager.h \
+	imageProviders/floorplandeviceprovider.h \
+	# ../../Gen_Devices/qMediaPlayerBase.h \
+	contextobjects/bookmarkitem.h \
+	plugins/GoogleWeather/googleweather.h \
+	contextobjects/promptdata.h \
+	datamodels/existingorbitermodel.h \
+	sleepingalarmmodel.h \
+	datamodels/devicemodel.h
+	
+	
+	
 #!ANDROID||!QT5{
 # HEADERS+=   ../../qMediaPlayer/AudioVisual/audiovisual.h \
-#    ../../qMediaPlayer/AudioVisual/videowidgetplayer.h \
+#../../qMediaPlayer/AudioVisual/videowidgetplayer.h \
 #../../qMediaPlayer/AudioVisual/audiowidget.h\
 #../../qMediaPlayer/qMediaPlayer.h
 #}
 
 OTHER_FILES += Readme.txt \
-    OrbiterVariables.txt \
-    config.xml \
+	OrbiterVariables.txt \
+	config.xml
 
 
 for_harmattan{
-OTHER_FILES= \
-    qtc_packaging/debian_harmattan/rules \
-    qtc_packaging/debian_harmattan/README \
-    qtc_packaging/debian_harmattan/copyright \
-    qtc_packaging/debian_harmattan/control \
-    qtc_packaging/debian_harmattan/compat \
-    qtc_packaging/debian_harmattan/changelog \
+	OTHER_FILES= \
+		qtc_packaging/debian_harmattan/rules \
+		qtc_packaging/debian_harmattan/README \
+		qtc_packaging/debian_harmattan/copyright \
+		qtc_packaging/debian_harmattan/control \
+		qtc_packaging/debian_harmattan/compat \
+		qtc_packaging/debian_harmattan/changelog \
 }
 
 
 RESOURCES += \
-    skinData.qrc
+	skinData.qrc
 
 contains(MEEGO_EDITION,harmattan) {
-    desktopfile.files = $${TARGET}.desktop
-    desktopfile.path = /usr/share/applications
-    INSTALLS += desktopfile
+	desktopfile.files = $${TARGET}.desktop
+	desktopfile.path = /usr/share/applications
+	INSTALLS += desktopfile
 }
 
