@@ -2088,6 +2088,7 @@ void qOrbiter::beginSetup()
 #ifndef for_harmattan
     qRegisterMetaType< QList<ExistingOrbiter*> >("QList<ExistingOrbiter*>");
   //  qRegisterMetaType<SleepingAlarm>("SleepingAlarm");
+    qRegisterMetaType< QList<QObject*> >("QList<QObject*>");
 
 #endif
     qDebug() <<"Run function executed" << this->thread()->currentThreadId();
@@ -3515,10 +3516,9 @@ void DCE::qOrbiter::GetAdvancedMediaOptions(int device) // prepping for advanced
                 {
 
                 }
-                deviceCommands.append(new AvCommand(fk_file.toInt(), cellTitle, false, device));
+               emit newDeviceCommand(new AvCommand(fk_file.toInt(), cellTitle, false, device));
             }
-            emit deviceCommandList(deviceCommands);
-            deviceCommands.clear();
+
         }
     }
 }
@@ -3814,10 +3814,11 @@ void DCE::qOrbiter::showAdvancedButtons()
                 //
                 QStringList splitter;
                 splitter = cellTitle.split("/");
+                qDebug() << splitter.join("--");
 
-                resendAvButtons.append(new AvDevice(fk_file.toInt(), splitter.at(0), "core"));
+                 emit addDevice(new AvDevice(fk_file.toInt(), splitter.at(0), splitter.at(splitter.length()-2), "null", -1, false ));
             }
-            emit resendAvButtonList(resendAvButtons);
+            //emit resendAvButtonList(resendAvButtons);
             resendAvButtons.clear();
 
             //  qorbiterUIwin->rootContext()->setContextProperty("buttonList" ,QVariant::fromValue(buttonList));

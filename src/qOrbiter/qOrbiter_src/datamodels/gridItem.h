@@ -9,9 +9,6 @@
 class gridItem: public QObject
 {
     Q_OBJECT
-
-
-public:
     enum Roles {
         NameRole = Qt::UserRole+1,
         IndexRole =Qt::UserRole+2,
@@ -20,10 +17,9 @@ public:
         AttributeRole = Qt::UserRole+5,
         FKRole = Qt::DisplayRole+6,
         AspectRole= Qt::DisplayRole+7
-
     };
 
-
+public:
     gridItem() {}
     explicit gridItem( QString &ident, QString &name,  QString &path,  int &index,  QImage &img);
     QVariant data(int role) const;

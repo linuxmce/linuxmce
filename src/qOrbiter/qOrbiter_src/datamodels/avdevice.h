@@ -25,33 +25,43 @@
 #define AVDEVICE_H
 
 #include <QObject>
+#include <QHash>
+#include <QVariant>
 
 class AvDevice : public QObject
 {
     Q_OBJECT
-    Q_PROPERTY (QString qs_device READ getDeviceName WRITE setDeviceName NOTIFY deviceNameSet )
-    Q_PROPERTY (QString qs_controlledBy READ getController WRITE setController NOTIFY controllerSet)
-    Q_PROPERTY (int i_deviceNo READ getDeviceNo WRITE setDeviceNo NOTIFY deviceSet)
+    enum Roles {
+        NameRole = Qt::UserRole+1,
+        ControllerRole =Qt::UserRole+2,
+       DeviceNumberRole= Qt::DisplayRole+3,
+       ActiveRole = Qt::DisplayRole+4,
+       LocationRole = Qt::UserRole+5,
+        TypeRole = Qt::UserRole+6
+    };
 public:
-    explicit AvDevice(int inc_deviceNo, QString device_name, QString qs_controller, QObject *parent = 0);
-    int i_deviceNo;
-    QString qs_controlledBy;
-    QString qs_device;
-    
-signals:
-    void deviceSet();
-    void controllerSet();
-    void deviceNameSet();
-    
-public slots:
-    void setDeviceNo(int d);
-    int getDeviceNo();
+    AvDevice() {}
+    explicit AvDevice(int inc_deviceNo, QString device_name, QString qs_controller, QString loc, int type, bool state, QObject *parent = 0);
+    QVariant data(int role) const;
+    QHash<int, QByteArray> roleNames() const;
 
-    void setController(QString controller);
-    QString getController();
-
-    void setDeviceName(QString d);
-    QString getDeviceName();
+    inline QString id() const {  return qs_device; }
+    inline QString controlled() const { return qs_controlledBy; }
+    inline QString located() const { return location; }
+    inline int deviceNumber() const {return i_deviceNo;}
+    inline bool activity() const {return active;}
+    inline int device_Type() const {return deviceType;}
+    
+signals: 
+    void dataChanged();
+    
+private:
+        int i_deviceNo;
+        QString qs_controlledBy;
+        QString qs_device;
+        QString location;
+        bool active;
+        int deviceType;
     
 };
 

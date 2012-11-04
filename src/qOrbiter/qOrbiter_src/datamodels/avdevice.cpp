@@ -1,43 +1,40 @@
 #include "avdevice.h"
 
-AvDevice::AvDevice(int inc_deviceNo, QString device_name, QString qs_controller, QObject *parent) :
-    QObject(parent)
+AvDevice::AvDevice(int inc_deviceNo, QString device_name, QString qs_controller, QString loc, int type, bool state, QObject *parent) :
+    QObject(parent) , i_deviceNo(inc_deviceNo), qs_device(device_name),  qs_controlledBy(qs_controller), location(loc), deviceType(type), active(state)
 {
-    setDeviceNo(inc_deviceNo);
-    setDeviceName(device_name);
-    setController(qs_controller);
+
 }
 
-void AvDevice::setDeviceNo(int d)
+QHash<int, QByteArray> AvDevice::roleNames() const
 {
-    i_deviceNo = d;
-    emit deviceSet();
+
+  QHash<int, QByteArray> names;
+  names[NameRole] = "name";
+  names[ControllerRole] = "controller";
+  names[DeviceNumberRole] = "devicenumber";
+  names[ActiveRole] = "state";
+  names[TypeRole] = "type";
+  names[LocationRole]= "location";
+  return names;
 }
 
-int AvDevice::getDeviceNo()
+QVariant AvDevice::data(int role) const
 {
-    return i_deviceNo;
-}
-
-void AvDevice::setController(QString controller)
-{
-    qs_controlledBy = controller;
-    emit controllerSet();
-}
-
-QString AvDevice::getController()
-{
-
-    return qs_controlledBy;
-}
-
-void AvDevice::setDeviceName(QString d)
-{
-    qs_device = d;
-    emit deviceNameSet();
-}
-
-QString AvDevice::getDeviceName()
-{
-    return qs_device;
+  switch(role) {
+  case NameRole:
+    return id();
+  case ControllerRole:
+    return controlled();
+  case DeviceNumberRole:
+    return deviceNumber();
+  case ActiveRole:
+    return activity();
+  case LocationRole:
+    return located();
+  case TypeRole:
+  return device_Type();
+  default:
+    return QVariant();
+  }
 }

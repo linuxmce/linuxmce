@@ -98,7 +98,8 @@ orbiterWindow::orbiterWindow(long deviceid, std::string routerip, QObject *paren
   //  mainView.rootContext()->setContextProperty("orbiterList" , "");
 
 #ifdef GLENABLED
-#ifdef QT4
+
+#if (QT_VERSION < QT_VERSION_CHECK(5,0,0))
     glWidget = new QGLWidget();
     mainView.setViewport(glWidget);
     mainView.setViewportUpdateMode(QGraphicsView::FullViewportUpdate);

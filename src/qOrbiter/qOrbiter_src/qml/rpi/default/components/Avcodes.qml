@@ -52,7 +52,7 @@ Rectangle {
                 height: parent.height
                 width: scaleX(15)
                 anchors.top:blah.bottom
-                model: avcodes
+                model: deviceList
                 clip:true
                 delegate: Rectangle{
                     id:av_code_top
@@ -63,13 +63,17 @@ Rectangle {
                         spacing: scaleY(1)
                         Text{
                             id:av_label
-                            text:qs_device
+                            text:name
                             font.pixelSize: scaleY(2)
                         }
-
+                        Text{
+                            id:controlledby
+                            text:controller
+                            font.pixelSize: scaleY(2)
+                        }
                         Text {
                             id: device_number
-                            text: qsTr("Device Number:") + i_deviceNo
+                            text: qsTr("Device Number:") + devicenumber
                             font.pixelSize: scaleY(2)
                         }
                     }
@@ -78,7 +82,7 @@ Rectangle {
                         hoverEnabled: true
                         onEntered: av_code_top.color = "white"
                         onExited: av_code_top.color = style.lighthighlight
-                        onClicked: manager.GetAdvancedMediaOptions(i_deviceNo)
+                        onClicked: manager.showDeviceCodes(devicenumber)
 
                     }
                 }
@@ -93,7 +97,7 @@ Rectangle {
                 anchors.left: codelist.right
                 anchors.leftMargin: scaleY(5)
                 clip: true
-                model: device_commands
+                model: deviceCommands
                 delegate: Rectangle{
                     id:device_box
                     height: scaleY(8)
@@ -103,7 +107,7 @@ Rectangle {
                         spacing: scaleY(1)
                         Text{
                             id:command_label
-                            text:qs_command
+                            text:commandnumber
                             font.pixelSize: scaleY(2)
                         }
                     }

@@ -97,6 +97,8 @@
 #include <contextobjects/screenparamsclass.h>
 #include <contextobjects/playlistclass.h>
 #include <contextobjects/securityvideoclass.h>
+#include <datamodels/devicemodel.h>
+#include <avcodegrid.h>
 
 #include <datamodels/skindatamodel.h>
 #include <contextobjects/floorplandevice.h>
@@ -145,6 +147,7 @@ class qorbiterManager : public QObject
 {
     Q_OBJECT
 
+    Q_PROPERTY (int m_dwPK_Device READ getDeviceNumber WRITE setDeviceNumber NOTIFY deviceNumberChanged)
     Q_PROPERTY(int i_current_mediaType READ getMediaType WRITE setMediaType NOTIFY mediaTypeChanged)
     Q_PROPERTY (QString q_mediaType READ getSorting NOTIFY gridTypeChanged)
     Q_PROPERTY (QString sPK_User READ getCurrentUser WRITE setCurrentUser NOTIFY userChanged)
@@ -253,6 +256,7 @@ public:
     bool b_skinDataReady;
     bool b_orbiterReady;
     bool osdStatus;
+    bool dvdMenuShowing;
     Q_INVOKABLE void refreshUI(QUrl url);
     void swapSkins(QString incSkin);
 
@@ -318,9 +322,11 @@ Param 10 - pk_attribute
     int media_pageSeperator;
 
     //listmodels
+    AvCodeGrid *deviceCommands;
     LocationModel *m_lRooms;
     ListModel *model;      //media grid model
     UserModel *userList;
+    DeviceModel *devices;
     SkinDataModel *skinModel;
     QList<QObject*> buttonList;
     QList<QObject*> commandList;
@@ -408,29 +414,9 @@ Param 10 - pk_attribute
 
 signals:
 
-    /* Media Controls */
+    /* Media Playback Controls */
     void setVolume(int vol);
     void extraButton(QString b);
-    void gridStatus(bool s);
-    void gridGoBack();
-    void mediaTypeChanged();
-    void requestDcePages(int i);
-    void showList();
-    void filterChanged();
-    void resetFilter();
-    void locationChanged(int cRoom, int cEA);
-    void modelChanged();
-    void gridTypeChanged(int i);
-    void mediaRequest(int);
-    void objectUpdated();
-    void setMediaDetails();
-    void mediaScreenShotReady();
-    void saveMediaScreenShot(QString attribute, QImage pic);
-    void mediaSeperatorChanged(int sep);
-    void mediaPageChanged();
-    void newPageSeperator(int t);
-    void requestStreamImage();
-    void debugModeChanged();
     void changeTrack(QString track);
     void pause();
     void newChannel(QString channel);
@@ -439,27 +425,70 @@ signals:
     void stopPlayback();
     void seekGrid(QString s);
     void newPlaylistPosition(int pos);
-    void resendAvCodes();
+    void bindMediaRemote(bool b);
+    void startPlayback(QString file);
 
+    /*Dvd Specific*/
+    void show_dvdMenu(bool m);
+
+    /*Metadata signals*/
+    void objectUpdated();
+    void setMediaDetails();
+    void mediaScreenShotReady();
+    void saveMediaScreenShot(QString attribute, QImage pic);
+    void requestStreamImage();
     void liveTVrequest();
     void managerPlaylistRequest();
-    void bindMediaRemote(bool b);
-    void userChanged(int user);
-    void requestMoreGridData();
-    void resendDeviceCode(int from, int to);
 
+    /*Datagrid Signals*/
+    void gridStatus(bool s);
+    void gridGoBack();
+    void mediaTypeChanged();
+    void requestDcePages(int i);
+    void filterChanged();
+    void resetFilter();
+    void modelChanged();
+    void gridTypeChanged(int i);
+    void mediaRequest(int);
+    void mediaSeperatorChanged(int sep);
+    void mediaPageChanged();
+    void newPageSeperator(int t);
+    void requestMoreGridData();
+    void clearModel();
+    void clearAndContinue(int t);
+    void showList();
+    void setDceGridParam(int a, QString p );
+    void keepLoading(bool s);
+    void stillLoading(bool b);
+
+    /*Message and notification signals*/
     void dceResponseChanged();
     void imageAspectChanged();
     void connectedStateChanged();
-    void continueSetup();
+
+    /*Settings Signals*/
+    void debugModeChanged();
+    void userChanged(int user);
+    void locationChanged(int cRoom, int cEA);
     void screenChange(QString s);
-    void clearModel();
-    void clearAndContinue(int t);
-    void registerOrbiter(int user, QString ea, int room);
-    void unregisterOrbiter(int user, QString ea, int room);
-    void startPlayback(QString file);
-    void setDceGridParam(int a, QString p );
-    void keepLoading(bool s);
+    void localConfigReady(bool b);
+    void orbiterConfigReady(bool b);
+    void deviceValid(bool b);
+    void connectionValid(bool b);
+    void skinIndexReady(bool b);
+    void skinDataLoaded(bool b);
+    void roomChanged();
+    void floorplanTypeChanged(int t);
+    void internalIpChanged();
+    void externalIpChanged();
+    void internalHostChanged();
+    void externalHostChanged();
+    void deviceNumberChanged(int d);
+
+    /*Media Device Control Signals*/
+    void resendAvCodes();
+    void populateDeviceCommands(int);
+    void resendDeviceCode(int from, int to);
     void updateScreen(QString screen);
 
     /*device related*/
@@ -477,35 +506,24 @@ signals:
     void error(QString msg);
     void orientationChanged();
     void appPath(QString ap);
-
+    void registerOrbiter(int user, QString ea, int room);
+    void unregisterOrbiter(int user, QString ea, int room);
     void loadingMessage(QString msg);
     void splashReady();
     void raiseSplash();
     void reInitialize();
     void showSetup();
+    void continueSetup();
+
+    /*DCE Signals*/
     void reloadRouter();
-
-    void stillLoading(bool b);
     void executeCMD(int);
-
-    void localConfigReady(bool b);
-    void orbiterConfigReady(bool b);
-    void deviceValid(bool b);
-    void connectionValid(bool b);
-    void skinIndexReady(bool b);
-    void skinDataLoaded(bool b);
-    void roomChanged();
-
-    void floorplanTypeChanged(int t);
     void setAlarm(bool s, int g);
     void getAlarms();
     void getSingleCam(int i_pk_camera_device, int h, int w);
 
     //runtime
-    void internalIpChanged();
-    void externalIpChanged();
-    void internalHostChanged();
-    void externalHostChanged();
+
 
 
 public slots:
@@ -579,6 +597,8 @@ public slots:
     void setBoundStatus(bool b) {emit bindMediaRemote(b);}
     void setNowPlayingIcon(bool b);
     void nowPlayingChanged(bool b);
+    void addDeviceToList(AvDevice* d) {devices->appendRow(d);}
+    void addCommandToList(AvCommand* c) {deviceCommands->appendRow(c);}
 
 
     /*Media Control Slots*/
@@ -593,6 +613,7 @@ public slots:
     void changeChannels(QString chan) {emit newChannel(chan);  }
     void gridChangeChannel(QString chan, QString chanid) {emit newGridChannel(chan, chanid);}
     void extraButtonPressed(QString b) {emit extraButton(b);}
+    void dvd_showMenu(bool b) { dvdMenuShowing = b ; emit show_dvdMenu(dvdMenuShowing);}
 
     /*Screenshot & Images slots*/
     void updateImageChanged(QImage img);
@@ -603,8 +624,8 @@ public slots:
     void cleanupScreenie();
 
     /*Media Devices slots*/
-    void showDeviceCodes(QList<QObject*> t);
-    void setCommandList(QList<QObject*> l);
+    void showDeviceCodes(int code) {emit populateDeviceCommands(code);}
+    void setCommandList(QList<QObject*> &l);
     void resendCode(int from, int to) { emit resendDeviceCode( from,  to);}
     void toggleDisplay(bool display) { osdStatus = display; emit osdChanged(osdStatus); }
     bool getDisplayStatus() { return osdStatus; }
@@ -656,6 +677,9 @@ public slots:
     void checkConnection(QString s);
     void processError(QString msg);
 
+    void setDeviceNumber(int d) {iPK_Device = d; emit deviceNumberChanged(iPK_Device);}
+    int getDeviceNumber() {return iPK_Device;}
+
     //dce related slots
     void execGrp(int grp);        //for command groups
     void closeOrbiter();
@@ -667,6 +691,7 @@ public slots:
     /*Sleeping menu slots. */
     void updateAlarm(bool toggle, int grp);
     void showSleepingAlarms(SleepingAlarm *s);
+    void getSleepingAlarms() {emit getAlarms();}
 
     /*ScreenSaver*/
     void killScreenSaver();

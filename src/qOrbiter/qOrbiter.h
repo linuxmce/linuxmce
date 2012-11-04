@@ -29,7 +29,6 @@
 //<-dceag-d-b->!
 #include <DataGrid.h>
 #include "Virtual_Device_Translator.h"
-#include <contextobjects/avcommand.h>
 #include <contextobjects/bookmarkitem.h>
 #include <contextobjects/floorplandevice.h>
 #include <contextobjects/modelpage.h>
@@ -1425,8 +1424,9 @@ signals:
     void fd_titleImageChanged(QImage t);
 
     //controls
-    void resendAvButtonList(QList<QObject*> t);
-    void deviceCommandList(QList<QObject*> f);
+    void addDevice(AvDevice *d);
+    void resendAvButtonList(const QList<QObject*> &t);
+    void newDeviceCommand(AvCommand *f);
     void bookmarkList(QList<QObject*> b);
 
     //security cameras

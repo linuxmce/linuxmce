@@ -94,12 +94,16 @@ qorbiterManager::qorbiterManager(QDeclarativeView *view, QObject *parent) :
     QApplication::processEvents(QEventLoop::AllEvents);
 
     myOrbiters = new ExistingOrbiterModel(new ExistingOrbiter(), this);
+    devices = new DeviceModel(new AvDevice(), this );
+    deviceCommands = new AvCodeGrid(new AvCommand(), this);
     qorbiterUIwin->rootContext()->setContextProperty("srouterip", QString(qs_routerip) );
     qorbiterUIwin->rootContext()->setContextProperty("deviceid", QString::number((iPK_Device)) );
     qorbiterUIwin->rootContext()->setContextProperty("extip", qs_ext_routerip );
     qorbiterUIwin->rootContext()->setContextProperty("manager", this); //providing a direct object for qml to call c++ functions of this class
     qorbiterUIwin->rootContext()->setContextProperty("dcemessage", dceResponse);
     qorbiterUIwin->rootContext()->setContextProperty("orbiterList", myOrbiters);
+     qorbiterUIwin->rootContext()->setContextProperty("deviceList", devices);
+     qorbiterUIwin->rootContext()->setContextProperty("deviceCommands", deviceCommands);
 
     appHeight = qorbiterUIwin->height() ;
     appWidth = qorbiterUIwin->width() ;
@@ -128,7 +132,7 @@ qorbiterManager::qorbiterManager(QDeclarativeView *view, QObject *parent) :
 #ifdef for_desktop
 #ifndef QT5
     buildType = "/qml/desktop";
- #else
+#else
     buildType = "/qml/rpi";
 #endif
     qrcPath = buildType+"/Splash.qml";
@@ -227,14 +231,14 @@ qorbiterManager::qorbiterManager(QDeclarativeView *view, QObject *parent) :
 
     //-alarms
     sleeping_alarms = new SleepingAlarmModel(this);
-    qorbiterUIwin->rootContext()->setContextProperty("alarms", QVariant::fromValue(sleeping_alarms) );
+    qorbiterUIwin->rootContext()->setContextProperty("alarms",sleeping_alarms );
 
     QApplication::processEvents(QEventLoop::AllEvents);
 }
 
 qorbiterManager::~qorbiterManager()
 {
-     this->deleteLater();
+    this->deleteLater();
 }
 
 
@@ -266,6 +270,7 @@ void qorbiterManager::gotoQScreen(QString s)
 //this function begins the initialization of the 'manager' object
 bool qorbiterManager::initializeManager(string sRouterIP, int device_id)
 {
+    setDeviceNumber(device_id);
     setDceResponse("Starting Manager");
     QObject::connect(this,SIGNAL(screenChange(QString)), this, SLOT(gotoQScreen(QString)));
 
@@ -702,7 +707,7 @@ void qorbiterManager::processConfig(QByteArray config)
     qorbiterUIwin->rootContext()->setContextProperty("avcodes", QVariant::fromValue(buttonList));
     qorbiterUIwin->rootContext()->setContextProperty("device_commands", QVariant::fromValue(commandList));
     qorbiterUIwin->rootContext()->setContextProperty("currentBookmarks", QVariant::fromValue(current_bookmarks));
- qorbiterUIwin->rootContext()->setContextProperty("alarms", QVariant::fromValue(sleeping_alarms) );
+
     setDceResponse("Properties Done");
 
     setDceResponse("Setting location");
@@ -781,7 +786,7 @@ void qorbiterManager::processConfig(QByteArray config)
     configData.clear();
     tConf.clear();
 
-   activateScreenSaver();
+    activateScreenSaver();
 
     emit registerOrbiter((userList->find(sPK_User)->data(4).toInt()), QString::number(iea_area), iFK_Room );
     setOrbiterStatus(true);
@@ -858,7 +863,7 @@ void qorbiterManager::closeOrbiter()
 #ifndef __ANDROID__
     LoggerWrapper::GetInstance()->Write(LV_CRITICAL, "Orbiter Exiting, Unregistering 1st");
 #endif
-  //  emit unregisterOrbiter((userList->find(sPK_User)->data(4).toInt()), QString(iFK_Room), iea_area );
+    //  emit unregisterOrbiter((userList->find(sPK_User)->data(4).toInt()), QString(iFK_Room), iea_area );
     emit orbiterClosing();
 }
 
@@ -998,14 +1003,14 @@ QString qorbiterManager::adjustPath(const QString &path)
     return p.remove("bin");
 #endif
 
-//#else  !RPI
-//    const QString pathInShareDir = QCoreApplication::applicationDirPath()
-//            + QLatin1String("/../share/")
-//            + QFileInfo(QCoreApplication::applicationFilePath()).fileName()
-//            + QLatin1Char('/') + path;
-//    if (QFileInfo(pathInShareDir).exists())
-//        return pathInShareDir;
-//#endif
+    //#else  !RPI
+    //    const QString pathInShareDir = QCoreApplication::applicationDirPath()
+    //            + QLatin1String("/../share/")
+    //            + QFileInfo(QCoreApplication::applicationFilePath()).fileName()
+    //            + QLatin1Char('/') + path;
+    //    if (QFileInfo(pathInShareDir).exists())
+    //        return pathInShareDir;
+    //#endif
     return path;
 
 }
@@ -1344,34 +1349,34 @@ void qorbiterManager::goBackGrid()
 {
     setRequestMore(true);
     emit gridGoBack();
-//    backwards= true;
+    //    backwards= true;
 
-//    if(goBack.isEmpty())
-//    {
-//        initializeSortString();
-//        emit clearAndContinue();
-//    }
-//    else
-//    {
-//        goBack.removeLast();
-//        int back = goBack.count() - 1;
-//#ifdef debug
-//        qDebug() << back;
-//        qDebug() << "Going back to::" << goBack.at(back);
-//#endif
+    //    if(goBack.isEmpty())
+    //    {
+    //        initializeSortString();
+    //        emit clearAndContinue();
+    //    }
+    //    else
+    //    {
+    //        goBack.removeLast();
+    //        int back = goBack.count() - 1;
+    //#ifdef debug
+    //        qDebug() << back;
+    //        qDebug() << "Going back to::" << goBack.at(back);
+    //#endif
 
-//        QStringList reverseParams = goBack.at(back).split("|", QString::KeepEmptyParts);
-//        q_mediaType = reverseParams.first();
-//        q_subType = reverseParams.at(1);
-//        q_fileFormat = reverseParams.at(2);
-//        q_attribute_genres = reverseParams.at(3);
-//        q_mediaSources = reverseParams.at(4);
-//        q_usersPrivate = reverseParams.at(5);
-//        q_attributetype_sort = reverseParams.at(6);
-//        q_pk_users = reverseParams.at(7);
-//        q_last_viewed = reverseParams.at(8);
-//        q_pk_attribute = reverseParams.at(9);
-//        emit clearAndContinue(i_current_mediaType);
+    //        QStringList reverseParams = goBack.at(back).split("|", QString::KeepEmptyParts);
+    //        q_mediaType = reverseParams.first();
+    //        q_subType = reverseParams.at(1);
+    //        q_fileFormat = reverseParams.at(2);
+    //        q_attribute_genres = reverseParams.at(3);
+    //        q_mediaSources = reverseParams.at(4);
+    //        q_usersPrivate = reverseParams.at(5);
+    //        q_attributetype_sort = reverseParams.at(6);
+    //        q_pk_users = reverseParams.at(7);
+    //        q_last_viewed = reverseParams.at(8);
+    //        q_pk_attribute = reverseParams.at(9);
+    //        emit clearAndContinue(i_current_mediaType);
 
 
     //datagridVariableString.append(q_mediaType).append("|").append(q_subType).append("|").append(q_fileFormat).append("|").append(q_attribute_genres).append("|").append(q_mediaSources).append("|").append(q_usersPrivate).append("|").append(q_attributetype_sort).append("|").append(q_pk_users).append("|").append(q_last_viewed).append("|").append(q_pk_attribute);
@@ -1440,16 +1445,12 @@ void qorbiterManager::saveScreenShot(QString attribute)
     emit saveMediaScreenShot(attribute, mediaScreenShot);
 }
 
-void qorbiterManager::showDeviceCodes(QList<QObject *> t)
-{
-    buttonList = t;
-    qorbiterUIwin->rootContext()->setContextProperty("avcodes", QVariant::fromValue(buttonList));
-}
 
-void qorbiterManager::setCommandList(QList<QObject *> l)
+
+void qorbiterManager::setCommandList(QList<QObject *> &l)
 {
     commandList = l;
-    qorbiterUIwin->rootContext()->setContextProperty("device_commands", QVariant::fromValue(commandList));
+  //  qorbiterUIwin->rootContext()->setContextProperty("device_commands", QVariant::fromValue(commandList));
 }
 
 void qorbiterManager::showBookmarks(QList<QObject *> t)
@@ -1459,7 +1460,7 @@ void qorbiterManager::showBookmarks(QList<QObject *> t)
 #ifdef debug
     qDebug() << current_bookmarks.size();
 #endif
-    qorbiterUIwin->rootContext()->setContextProperty("currentBookmarks", QVariant::fromValue(current_bookmarks));
+  //  qorbiterUIwin->rootContext()->setContextProperty("currentBookmarks", QVariant::fromValue(current_bookmarks));
 }
 
 void qorbiterManager::setHouseMode(int mode, int pass)
@@ -1491,7 +1492,7 @@ bool qorbiterManager::getRequestMore()
 void qorbiterManager::updateAlarm(bool toggle, int grp)
 {
     sleeping_alarms->clear();
-    emit setAlarm(toggle, grp);   
+    emit setAlarm(toggle, grp);
 
 }
 
@@ -1738,5 +1739,5 @@ void qorbiterManager::showExistingOrbiter(const QList<QObject*> l )
 {
     QList<QObject*> t ;
     t = l ;
-qorbiterUIwin->rootContext()->setContextProperty("orbiterList", QVariant::fromValue(t));
+    qorbiterUIwin->rootContext()->setContextProperty("orbiterList", QVariant::fromValue(t));
 }

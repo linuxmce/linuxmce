@@ -539,8 +539,9 @@ int main(int argc, char* argv[])
         QObject::connect (&w, SIGNAL(managerPlaylistRequest()), storedVideoPlaylist,SLOT(populate()),Qt::QueuedConnection );
 
         //controls
-        QObject::connect(&pqOrbiter, SIGNAL(resendAvButtonList(QList<QObject*>)), &w, SLOT(showDeviceCodes(QList<QObject*>)), Qt::QueuedConnection);
-        QObject::connect(&pqOrbiter, SIGNAL(deviceCommandList(QList<QObject*>)), &w, SLOT(setCommandList(QList<QObject*>)), Qt::QueuedConnection);
+        QObject::connect(&pqOrbiter,SIGNAL(newDeviceCommand(AvCommand*)), &w, SLOT(addCommandToList(AvCommand*)),Qt::QueuedConnection);
+        QObject::connect(&w, SIGNAL(populateDeviceCommands(int)), &pqOrbiter, SLOT(GetAdvancedMediaOptions(int)), Qt::QueuedConnection);
+        QObject::connect(&pqOrbiter,SIGNAL(addDevice(AvDevice*)), &w, SLOT(addDeviceToList(AvDevice*)), Qt::QueuedConnection);
         QObject::connect(&pqOrbiter, SIGNAL(bookmarkList(QList<QObject*>)), &w, SLOT(showBookmarks(QList<QObject*>)), Qt::QueuedConnection);
         QObject::connect(&w, SIGNAL(extraButton(QString)), &pqOrbiter, SLOT(extraButtons(QString)), Qt::QueuedConnection);
         QObject::connect(&w, SIGNAL(resendAvCodes()), &pqOrbiter, SLOT(showAdvancedButtons()), Qt::QueuedConnection );

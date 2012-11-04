@@ -416,7 +416,8 @@ SOURCES += main.cpp \
     plugins/GoogleWeather/googleweather.cpp \
     contextobjects/promptdata.cpp \
     datamodels/existingorbitermodel.cpp \
-    sleepingalarmmodel.cpp
+    sleepingalarmmodel.cpp \
+    datamodels/devicemodel.cpp
 
 
 
@@ -536,7 +537,8 @@ HEADERS += \
     plugins/GoogleWeather/googleweather.h \
     contextobjects/promptdata.h \
     datamodels/existingorbitermodel.h \
-    sleepingalarmmodel.h
+    sleepingalarmmodel.h \
+    datamodels/devicemodel.h
 
 
 

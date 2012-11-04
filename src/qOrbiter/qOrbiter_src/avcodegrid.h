@@ -22,38 +22,51 @@
 #define AVCODEGRID_H
 
 #include <QAbstractItemModel>
-#include <avitem.h>
+#include <contextobjects/avcommand.h>
 #include <QModelIndex>
 
-class AvCodeGrid : public QAbstractItemModel
+class AvCodeGrid : public QAbstractListModel
 {
     Q_OBJECT
 public:
-    explicit AvCodeGrid(AvItem *m_prototype, QObject *parent = 0);
+#ifdef QT5
+    QHash<int, QByteArray> roleNames() const;
+   #endif
+
+    explicit AvCodeGrid(AvCommand *m_prototype, QObject *parent = 0);
     int rowCount(const QModelIndex &parent = QModelIndex()) const;
     QVariant data(const QModelIndex &index, int role = Qt::DisplayRole) const;
-    void appendRow(AvItem* item);
-    void appendRows(const QList<AvItem*> &items);
-    void insertRow(int row, AvItem* item);
+    void appendRow(AvCommand* item);
+    void appendRows(const QList<AvCommand*> &items);
+    void insertRow(int row, AvCommand* item);
     bool removeRow(int row, const QModelIndex &parent = QModelIndex());
     bool removeRows(int row, int count, const QModelIndex &parent = QModelIndex());
-    AvItem* takeRow(int row);
-    AvItem* find(const QString &id) const;
-    QModelIndex indexFromItem( const AvItem* item) const;
-    AvItem* currentRow();
-    void handleItemChange();
+    AvCommand* takeRow(int row);
+    AvCommand* find(const QString &id) const;
+    QModelIndex indexFromItem( const AvCommand* item) const;
+    AvCommand* currentRow();
+
     void clear();
     void sortModel(int column, Qt::SortOrder order);
 
 
 signals:
     void deviceAdded();
+    void dataChanged(const QModelIndex &topLeft, const QModelIndex &bottomRight, const int &sRow);
+    void modelAboutToBeReset();
+    void modelReset();
 
 public slots:
 
+private slots:
+    void handleItemChange();
+    void reset();
+    bool resetInternalData();
+
 private:
-    AvItem* m_prototype;
-    QList<AvItem*> m_list;
+    AvCommand* m_prototype;
+    QList<AvCommand*> m_list;
+
 };
 
 #endif // AVCODEGRID_H

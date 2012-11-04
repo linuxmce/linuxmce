@@ -17,15 +17,25 @@
 
 */
 #include "avcodegrid.h"
+#include <QDebug>
 
-AvCodeGrid::AvCodeGrid(AvItem* prototype, QObject *parent) :
-    QAbstractItemModel(parent), m_prototype(prototype)
+AvCodeGrid::AvCodeGrid(AvCommand* prototype, QObject *parent) :
+    QAbstractListModel(parent), m_prototype(prototype)
 {
    #ifndef QT5
     setRoleNames(m_prototype->roleNames());
 #endif
+
      qRegisterMetaType<QModelIndex>("QModelIndex");
+
 }
+
+#ifdef QT5
+QHash<int, QByteArray> AvCodeGrid::roleNames() const
+{
+    return m_prototype->roleNames();
+}
+#endif
 
 int AvCodeGrid::rowCount(const QModelIndex &parent) const
 {
@@ -47,16 +57,16 @@ AvCodeGrid::~AvCodeGrid() {
 }
 */
 
-void AvCodeGrid::appendRow(AvItem *item)
+void AvCodeGrid::appendRow(AvCommand *item)
 {
-  appendRows(QList<AvItem*>() << item);
+  appendRows(QList<AvCommand*>() << item);
 }
 
-void AvCodeGrid::appendRows(const QList<AvItem *> &items)
+void AvCodeGrid::appendRows(const QList<AvCommand *> &items)
 {
   beginInsertRows(QModelIndex(), rowCount(), rowCount()+items.size()-1);
-  foreach(AvItem *item, items) {
-
+  foreach(AvCommand *item, items) {
+ qDebug() << "Inserting at:" << rowCount() << item->name();
    QObject::connect(item, SIGNAL(dataChanged()), this, SLOT(handleItemChange()));
     m_list.append(item);
   }
@@ -65,40 +75,40 @@ void AvCodeGrid::appendRows(const QList<AvItem *> &items)
   QModelIndex index = indexFromItem(m_list.last());
   QModelIndex index2 = indexFromItem(m_list.first());
   int currentRows= m_list.count() - 1;
-  //emit dataChanged(index2, index, currentRows);
+  emit dataChanged(index2, index, currentRows);
 
 }
 
-void AvCodeGrid::insertRow(int row, AvItem *item)
+void AvCodeGrid::insertRow(int row, AvCommand *item)
 {
   beginInsertRows(QModelIndex(), row, row);
   connect(item, SIGNAL(dataChanged()), this, SLOT(handleItemChange()));
-  //qDebug() << "Inserting at:" << row;
+
   m_list.insert(row, item);
   endInsertRows();
 }
 
 void AvCodeGrid::handleItemChange()
 {
-  AvItem* item = static_cast<AvItem*>(sender());
+  AvCommand* item = static_cast<AvCommand*>(sender());
   QModelIndex index = indexFromItem(item);
-  //qDebug() << "Handling item change for:" << index;
+  qDebug() << "Handling item change for:" << index;
   if(index.isValid())
   {
-    emit dataChanged(index, index);
+    emit dataChanged(index, index, 0);
     emit deviceAdded();
   }
 }
 
-AvItem * AvCodeGrid::find(const QString &id) const
+AvCommand * AvCodeGrid::find(const QString &id) const
 {
-  foreach(AvItem* item, m_list) {
-    if(item->device_number() == id.toInt()) return item;            //note this line is different in that it keys on device number, which i have mapped to a field named device_number in the class avitem
+  foreach(AvCommand* item, m_list) {
+    if(item->command() == id.toInt()) return item;            //note this line is different in that it keys on device number, which i have mapped to a field named device_number in the class AvCommand
   }
   return 0;
 }
 
-QModelIndex AvCodeGrid::indexFromItem(const AvItem *item) const
+QModelIndex AvCodeGrid::indexFromItem(const AvCommand *item) const
 {
   Q_ASSERT(item);
   for(int row=0; row<m_list.size(); ++row) {
@@ -147,16 +157,35 @@ bool AvCodeGrid::removeRows(int row, int count, const QModelIndex &parent)
   return true;
 }
 
-AvItem * AvCodeGrid::takeRow(int row)
+AvCommand * AvCodeGrid::takeRow(int row)
 {
   beginRemoveRows(QModelIndex(), row, row);
-  AvItem* item = m_list.takeAt(row);
+  AvCommand* item = m_list.takeAt(row);
   endRemoveRows();
   return item;
 }
 
-AvItem * AvCodeGrid::currentRow()
+AvCommand * AvCodeGrid::currentRow()
 {
-    AvItem* item = m_list.at(0);
+    AvCommand* item = m_list.at(0);
     return item;
 }
+
+void AvCodeGrid::reset()
+{
+
+    resetInternalData();
+  //  setProgress(0.0);
+
+}
+
+bool AvCodeGrid::resetInternalData()
+{
+    emit modelAboutToBeReset();
+    beginResetModel();
+    removeRows(0, m_list.count(), QModelIndex());
+  //  setProgress(0.0);
+    endResetModel();
+    emit modelReset();
+}
+

@@ -8,7 +8,7 @@ Item{
         width: appW
         color: style.darkhighlight
         HomeButton{ x: 5; y: 5; width: 75; height: 75; smooth: true}
-        Component.onCompleted: manager.GetAlarms(false, 0)
+        Component.onCompleted: manager.getSleepingAlarms()
         Rectangle{
             id:mainsleepingrect
             height:scaleY(65)
@@ -88,7 +88,7 @@ Item{
                                             id:indicator
                                             height: scaleY(10)
                                             width: parent.width *.25
-                                            color: b_state ?"green":  "red"
+                                            color: status ?"green":  "red"
                                             border.color: "black"
                                             border.width: 2
                                             Component.onCompleted: console.log(b_state)
@@ -112,16 +112,16 @@ Item{
                                                 text:qsTr("Name: ") + name
                                             }
                                             Text {
-                                                id: alarmtime
-                                                text:qsTr("Alarm Set For: ") + alarmTime
+                                                id: alarmtimeLabel
+                                                text:qsTr("Alarm Set For: ") + alarmtime
                                             }
                                             Text {
                                                 id: daysactive
-                                                text: qsTr("Active on: ")+ activeDays
+                                                text: qsTr("Active on: ")+ active
                                             }
                                             Text {
                                                 id: countdown
-                                                text: qsTr("Time Left: ") +timeLeft
+                                                text: qsTr("Time Left: ") +remaining
                                             }
                                         }
                                     }
