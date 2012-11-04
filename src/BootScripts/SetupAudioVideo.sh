@@ -158,6 +158,7 @@ Enable_Audio_Channels () {
 	# Added this to correctly unmute channels for setup wizard, and to 
 	# inject necessary unmuting commands for later bootup.
 	yalpa=$(aplay -l)
+	if (grep 
 	grep -iwo "card ." <<< "$yalpa" | awk '{print $2}' | uniq | while read CardNumber; do
 		amixer -c "$CardNumber" | grep '\[off\]' -B5 | grep "Simple" | sed 's/Simple mixer control //g' | grep -vi "capture" | while read MuteStatus; do 
 			amixer -c "$CardNumber" sset "$MuteStatus" unmute 
@@ -177,6 +178,9 @@ Setup_AsoundConf()
 
 	# Do not mess with asound.conf if Audio Setting is set to Manual. This will only happen after the asound.conf has been generated at least once.
 	if [[ "$AudioSetting" == "M" ]]; then
+		return
+	fi
+	if grep 'no soundcards found' <<< "$yalpa"; then
 		return
 	fi
 
