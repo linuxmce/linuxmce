@@ -20,17 +20,17 @@ function eibDevices($output,$dbADO,$eibADO) {
 	
 	switch ($type){
 		case 'lights':
-			$allowedTemplates[$GLOBALS['LightSwitchOnOff']]['label']='Light switch (on/off)';
+			$allowedTemplates[$GLOBALS['LightSwitchOnOff']]['label']=translate('TEXT_KNX_SWITCHONOFF');
 			$allowedTemplates[$GLOBALS['LightSwitchOnOff']]['GA'][]=translate('TEXT_KNX_ONOFF');
 			$allowedTemplates[$GLOBALS['LightSwitchOnOff']]['GA'][]=translate('TEXT_KNX_STATUS');
 			
-			$allowedTemplates[$GLOBALS['LightSwitchDimmable']]['label']='Light switch (dimmable)';
+			$allowedTemplates[$GLOBALS['LightSwitchDimmable']]['label']=translate('TEXT_KNX_SWITCHDIMMABLE');
 			$allowedTemplates[$GLOBALS['LightSwitchDimmable']]['GA'][]=translate('TEXT_KNX_ONOFF');
-			$allowedTemplates[$GLOBALS['LightSwitchDimmable']]['GA'][]=translate('TEXT_KNX_STATUS');
 			$allowedTemplates[$GLOBALS['LightSwitchDimmable']]['GA'][]=translate('TEXT_KNX_DIM');
+			$allowedTemplates[$GLOBALS['LightSwitchDimmable']]['GA'][]=translate('TEXT_KNX_STATUS');
 			$allowedTemplates[$GLOBALS['LightSwitchDimmable']]['GA'][]=translate('TEXT_KNX_DIM_STATUS');
 			
-			$allowedTemplates[$GLOBALS['LightSwitchRGB']]['label']='Light switch (RGB)';
+			$allowedTemplates[$GLOBALS['LightSwitchRGB']]['label']=translate('TEXT_KNX_SWITCHRGB');
 			$allowedTemplates[$GLOBALS['LightSwitchRGB']]['GA'][]=translate('TEXT_KNX_ONOFF');
 			$allowedTemplates[$GLOBALS['LightSwitchRGB']]['GA'][]=translate('TEXT_KNX_R_LEVEL');
 			$allowedTemplates[$GLOBALS['LightSwitchRGB']]['GA'][]=translate('TEXT_KNX_G_LEVEL');
@@ -39,6 +39,9 @@ function eibDevices($output,$dbADO,$eibADO) {
 			$allowedTemplates[$GLOBALS['LightSwitchRGB']]['GA'][]=translate('TEXT_KNX_R_STATUS');
 			$allowedTemplates[$GLOBALS['LightSwitchRGB']]['GA'][]=translate('TEXT_KNX_G_STATUS');
 			$allowedTemplates[$GLOBALS['LightSwitchRGB']]['GA'][]=translate('TEXT_KNX_B_STATUS');
+
+			$allowedTemplates[$GLOBALS['BrightnessSensor']]['label']=translate('TEXT_KNX_BRIGHTNESS_SENSOR');
+			$allowedTemplates[$GLOBALS['BrightnessSensor']]['GA'][]=translate('TEXT_KNX_BRIGHTNESS');
 		break;
 		case 'security':
 			$resDT=$dbADO->Execute('SELECT DT.PK_DeviceTemplate,DT.Description FROM DeviceTemplate AS DT,DeviceTemplate_DeviceCategory_ControlledVia as CV WHERE DT.PK_DeviceTemplate= CV.FK_DeviceTemplate AND CV.FK_DeviceCategory=? AND DT.FK_DeviceCategory=? ORDER BY DT.Description ASC',array($GLOBALS['specialized'],$GLOBALS['rootSecurity']));
@@ -113,7 +116,7 @@ function eibDevices($output,$dbADO,$eibADO) {
 			for (var i in allowedTemplates[templateID].GA) {
 				out += "<tr>";
 				out += "<td>"+allowedTemplates[templateID].GA[i]+"</td>";
-				out += "<td><input type=\"text\" name=\"newNAME_"+i+"\" size=\"50\" value=\"\" disabled> <input type=\"hidden\" name=\"newGA_"+i+"\" value=\"\"></td>";
+				out += "<td><input type=\"text\" name=\"newGA_"+i+"\" size=\"5\" value=\"\"> <input type=\"text\" name=\"newNAME_"+i+"\" size=\"50\" value=\"\" disabled></td>";
 				out += "<td><input type=\"button\" class=\"button\" name=\"setGroup\" value=\"'.translate('TEXT_EIB_PICK_CONST').'\" onClick=\"pickGroupAddress(\'newNAME_"+i+"\',\'newGA_"+i+"\');\"></td>";
 				out += "</tr>";
 			}
@@ -219,7 +222,7 @@ function eibDevices($output,$dbADO,$eibADO) {
 		$out.='
 		<input type="hidden" name="oldDD_'.$rowDevices['PK_Device'].'" value="'.$rowDevices['IK_DeviceData'].'">
 		<tr>
-			<td align="center">'.translate('TEXT_DEVICE_CONST').': <B>'.$rowDevices['Description'].' # '.$rowDevices['PK_Device'].'</B><br> '.translate('TEXT_DEVICE_TEMPLATE_CONST').': <B>'.$rowDevices['Template'].'</B></td>
+			<td align="center">'.translate('TEXT_DEVICE_CONST').': <B>'.$rowDevices['Description'].' # '.$rowDevices['PK_Device'].'</B><br> '.translate('TEXT_DEVICE_TEMPLATE_CONST').': <B>'.$rowDevices['Template'].' # '.$rowDevices['FK_DeviceTemplate'].'</B></td>
 			<td align="right">
 				<fieldset><legend><B>'.translate('TEXT_GROUP_ADDRESSES_CONST').'</B></legend>
 				<table>';
@@ -229,8 +232,13 @@ function eibDevices($output,$dbADO,$eibADO) {
 						$out.='
 						<tr>
 							<td>'.$template['GA'][$i].'</td>
-							<td><input type="text" name="NAME_'.@$rowDevices['PK_Device'].'_'.$i.'" size="50" value="'.@$channelArray[$channelParts[$i]].' ('.@$channelParts[$i].')'.'" disabled> <input type="hidden" name="GA_'.$rowDevices['PK_Device'].'_'.$i.'" value="'.@$channelParts[$i].'"></td>
-							<td><input type="button" class="button" name="setGroup" value="'.translate('TEXT_EIB_PICK_CONST').'" onClick="pickGroupAddress(\'NAME_'.$rowDevices['PK_Device'].'_'.$i.'\',\'GA_'.$rowDevices['PK_Device'].'_'.$i.'\');"></td>
+							<td>
+								<input type="test" size="5" name="GA_'.$rowDevices['PK_Device'].'_'.$i.'" value="'.@$channelParts[$i].'">
+								<input type="text" name="NAME_'.@$rowDevices['PK_Device'].'_'.$i.'" size="50" value="'.@$channelArray[$channelParts[$i]].'" disabled>
+							</td>
+							<td>
+								<input type="button" class="button" name="setGroup" value="'.translate('TEXT_EIB_PICK_CONST').'" onClick="pickGroupAddress(\'NAME_'.$rowDevices['PK_Device'].'_'.$i.'\',\'GA_'.$rowDevices['PK_Device'].'_'.$i.'\');">
+							</td>
 						</tr>';
 					}
 		$out.='</table>
@@ -260,7 +268,10 @@ function eibDevices($output,$dbADO,$eibADO) {
 						$out.='
 						<tr>
 							<td>'.$template['GA'][$i].'</td>
-							<td><input type="text" name="newNAME_'.$i.'" size="50" value="" disabled> <input type="hidden" name="newGA_'.$i.'" value=""></td>
+							<td>
+								<input type="text" name="newGA_'.$i.'" size="5" value="">
+								<input type="text" name="newNAME_'.$i.'" size="50" value="" disabled>
+							</td>
 							<td><input type="button" class="button" name="setGroup" value="'.translate('TEXT_EIB_PICK_CONST').'" onClick="pickGroupAddress(\'newNAME_'.$i.'\',\'newGA_'.$i.'\');"></td>
 						</tr>';
 					}
@@ -406,7 +417,7 @@ function channelPullDown($channelArray,$pulldownName,$selectedValue,$extra='')
 	else{
 		$out.='<option value="">- '.translate('TEXT_PLEASE_SELECT_CONST').' -</option>';
 		foreach ($channelArray AS $address=>$name){
-			$out.='<option value="'.$address.'" '.(($address==$selectedValue)?'selected':'').'>'.$name.' ('.$address.')</option>';
+			$out.='<option value="'.$address.'" '.(($address==$selectedValue)?'selected':'').'>'.$name.'</option>';
 		}
 	}
 	$out.='</select>';

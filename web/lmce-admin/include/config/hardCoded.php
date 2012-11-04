@@ -62,6 +62,7 @@
 	$GLOBALS['LightSwitchOnOff']=37;			// Light Switch (on/off)
 	$GLOBALS['LightSwitchDimmable']=38;			// Light Switch (dimmable)
 	$GLOBALS['LightSwitchRGB']=1993;			// Light Switch (RGB)
+	$GLOBALS['BrightnessSensor']=1745;			// Brightness sensor
 	$GLOBALS['InfraredPlugIn'] = 39; 			// Infrared Plug In
 	$GLOBALS['EIB']=49;							// EIB
 	$GLOBALS['KNX']=2195;						// KNX via eibd
