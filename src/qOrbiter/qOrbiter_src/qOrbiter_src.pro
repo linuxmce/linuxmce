@@ -47,6 +47,7 @@ contains(QT_VERSION,4.7.*){
 contains(QT_VERSION,5.0.*){
 	message("$$QT_VERSION Core")
 	DEFINES+=QT5
+        DEFINES+=GLENABLED
 }
 
 

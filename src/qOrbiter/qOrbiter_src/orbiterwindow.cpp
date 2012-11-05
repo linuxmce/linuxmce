@@ -89,7 +89,7 @@ orbiterWindow::orbiterWindow(long deviceid, std::string routerip, QObject *paren
 #endif
 
 #if (QT5)
-    mainView.setResizeMode(QQuickView::SizeRootObjectToView);
+    mainView.setResizeMode(QQuickView::SizeViewToRootObject);
 #else
     mainView.setResizeMode(QDeclarativeView::SizeRootObjectToView);
 #endif
@@ -295,10 +295,9 @@ void orbiterWindow::setDeviceState(bool b)
     b_devicePresent = b; emit deviceChanged();
 }
 
-void orbiterWindow::prepareExistingOrbiters(QList<QObject*> ex_list)
+void orbiterWindow::prepareExistingOrbiters()
 {
-    QList<QObject*> t = ex_list;
-    mainView.rootContext()->setContextProperty("orbiterList", QVariant::fromValue(t));
+    qDebug()<< "showing List";
   emit showList();
 }
 

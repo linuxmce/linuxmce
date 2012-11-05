@@ -167,9 +167,7 @@ int main(int argc, char* argv[])
 #ifdef for_harmattan
     QApplication::setGraphicsSystem("meego");
 #elif GLENABLED
-#ifndef QT5
     QApplication::setGraphicsSystem("opengl");
-#endif
 #else
     QApplication::setGraphicsSystem("raster");
 #endif
@@ -341,10 +339,10 @@ int main(int argc, char* argv[])
         //shutdown signals
         QObject::connect(&w, SIGNAL(orbiterClosing()), &pqOrbiter, SLOT(deinitialize()), Qt::QueuedConnection);
         QObject::connect(&pqOrbiter, SIGNAL(closeOrbiter()), &dceThread, SLOT(quit()), Qt::QueuedConnection);
-       // QObject::connect(&pqOrbiter, SIGNAL(closeOrbiter()), &pqOrbiter, SLOT(deleteLater()));
-
-        QObject::connect(&dceThread, SIGNAL(finished()), &dceThread, SLOT(deleteLater()));
-        QObject::connect(&dceThread, SIGNAL(destroyed()), &w, SLOT(exitApp()));
+        // QObject::connect(&pqOrbiter, SIGNAL(closeOrbiter()), &pqOrbiter, SLOT(deleteLater()));
+        QObject::connect(&dceThread, SIGNAL(finished()), &orbiterWin, SLOT(deleteLater()));
+        //  QObject::connect(&dceThread, SIGNAL(finished()), &dceThread, SLOT(deleteLater()));
+        QObject::connect(&dceThread, SIGNAL(finished()), &w, SLOT(exitApp()));
         QObject::connect(&w, SIGNAL(destroyed()), &a, SLOT(quit()));
 
 
@@ -398,7 +396,7 @@ int main(int argc, char* argv[])
         QObject::connect(&w, SIGNAL(registerOrbiter(int,QString,int)), &pqOrbiter,SLOT(registerDevice(int,QString,int)),Qt::QueuedConnection);
         QObject::connect(&pqOrbiter,SIGNAL(startManager(QString,QString)), &w, SLOT(qmlSetupLmce(QString,QString)),Qt::QueuedConnection);
         QObject::connect(&pqOrbiter, SIGNAL(addExistingOrbiter(ExistingOrbiter*)), w.myOrbiters, SLOT(appendRow(ExistingOrbiter*)));
-        QObject::connect(&pqOrbiter, SIGNAL(deviceInvalid()), &w, SIGNAL(showList()), Qt::AutoConnection);
+        QObject::connect(&pqOrbiter, SIGNAL(deviceInvalid()), &orbiterWin, SLOT(prepareExistingOrbiters()), Qt::QueuedConnection);
         QObject::connect(&pqOrbiter,SIGNAL(routerInvalid()), &orbiterWin, SIGNAL(showExternal()),Qt::QueuedConnection);
         QObject::connect(&pqOrbiter, SIGNAL(connectionValid(bool)), &orbiterWin, SLOT(setConnectionState(bool)), Qt::QueuedConnection);
         QObject::connect(&orbiterWin,SIGNAL(setupLmce(QString,QString)), &pqOrbiter, SLOT(qmlSetup(QString,QString)),Qt::QueuedConnection);

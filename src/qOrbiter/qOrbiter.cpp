@@ -4295,7 +4295,7 @@ int qOrbiter::DeviceIdInvalid()
             cout << it->first << " " << it->second << endl;
         }
         setCommandResponse("Returning List of Orbiters");
-        setCommandResponse(QString::number(temp_orbiter_list->count()) + " Orbiter(s)");
+
         emit deviceInvalid();
         return 0;
     }

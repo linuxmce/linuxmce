@@ -22,6 +22,7 @@ public:
     QModelIndex indexFromItem( const ExistingOrbiter* item) const;
 signals:
     void dataChanged(const QModelIndex &topLeft, const QModelIndex &bottomRight);
+
 public slots:
   void appendRow(ExistingOrbiter * item);
  void handleItemChange();

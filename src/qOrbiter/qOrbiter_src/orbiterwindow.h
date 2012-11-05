@@ -102,7 +102,7 @@ public slots:
     void setDeviceState (bool b) ;
     bool getdeviceState () {return b_devicePresent;}
 
-    void prepareExistingOrbiters(QList<QObject *> ex_list);
+    void prepareExistingOrbiters();
     void displayPromptResponse(int type, QList<QObject *> pList);
 
     void setupNewOrbiter(int user, int room, int skin, int lang, int height, int w);
