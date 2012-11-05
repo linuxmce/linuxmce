@@ -8,8 +8,6 @@
 #  a device detected event for all of them
 
 . /usr/pluto/bin/TeeMyOutput.sh --outfile /var/log/pluto/Configure_1794.log --infile /dev/null --stdboth -- "$@"
-
-. /usr/pluto/bin/Config_Ops.sh
 . /usr/pluto/bin/SQL_Ops.sh
 
 DD_SHARE=126
