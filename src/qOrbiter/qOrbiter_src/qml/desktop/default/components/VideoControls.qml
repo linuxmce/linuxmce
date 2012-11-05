@@ -24,7 +24,7 @@ Rectangle {
                 hoverEnabled: true
                 onEntered: back.scale = .75
                 onExited: back.scale = 1
-                onClicked: manager.changedTrack("-1")
+                onClicked: manager.newTrack("-1")
             }
         }
 
@@ -42,7 +42,7 @@ Rectangle {
                  hoverEnabled: true
                 onEntered: parent.scale = .75
                 onExited: parent.scale = 1
-                onClicked: manager.RwMedia(-2)
+                onClicked: manager.setPlaybackSpeed(-2)
             }
         }
 
@@ -62,7 +62,7 @@ Rectangle {
                  hoverEnabled: true
                 onEntered: parent.scale = .75
                 onExited: parent.scale = 1
-                onClicked: manager.PauseMedia()
+                onClicked: manager.pauseMedia()
             }
         }
 
@@ -80,7 +80,7 @@ Rectangle {
                  hoverEnabled: true
                 onEntered: parent.scale = .75
                 onExited: parent.scale = 1
-                onClicked: manager.FfMedia(2)
+                onClicked: manager.setPlaybackSpeed(+2)
             }
 
         }
@@ -98,7 +98,7 @@ Rectangle {
                  hoverEnabled: true
                 onEntered: parent.scale = .75
                 onExited: parent.scale = 1
-                onClicked: manager.changedTrack("+1")
+                onClicked: manager.newTrack("+1")
             }
         }
 
@@ -119,7 +119,7 @@ Rectangle {
                  hoverEnabled: true
                 onEntered: parent.scale = .75
                 onExited: parent.scale = 1
-                onClicked: manager.StopMedia()
+                onClicked: manager.stopMedia()
             }
         }
     }

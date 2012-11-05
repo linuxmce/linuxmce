@@ -36,8 +36,9 @@ MediaManager::MediaManager(QDeclarativeItem *parent) :
 
 void MediaManager::initializePlayer()
 {
+    setCurrentStatus("Initializing Media Player");
     mediaPlayer = new qMediaPlayer(deviceNumber, serverAddress.toStdString(), true, false);
-    dcethread = new QThread(this);
+    dcethread = new QThread();
     mediaPlayer->moveToThread(dcethread);
     dcethread->start();
     if (mediaPlayer->GetConfig() && mediaPlayer->Connect(DEVICETEMPLATE_qMediaPlayer_CONST))
@@ -76,7 +77,7 @@ void MediaManager::setConnectionDetails(int t, QString r)
 {
     serverAddress = r;
     deviceNumber = t;
-    setCurrentStatus("Got address "+serverAddress+" and device number "+deviceNumber+", initializing");
+    setCurrentStatus("Got address "+serverAddress+" and device number "+QString::number(deviceNumber)+", initializing");
     initializePlayer();
 }
 

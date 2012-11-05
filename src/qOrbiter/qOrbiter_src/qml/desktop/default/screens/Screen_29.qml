@@ -91,9 +91,9 @@ Item{
                                             color: status ?"green":  "red"
                                             border.color: "black"
                                             border.width: 2
-                                            Component.onCompleted: console.log(b_state)
+                                            Component.onCompleted: console.log(status)
                                             Text {
-                                                id: handler
+                                                id: statelabel
                                                 text: status
                                                 anchors.centerIn: parent
                                             }
@@ -101,7 +101,7 @@ Item{
                                             MouseArea{
                                                 anchors.fill: parent
                                                 onClicked: {
-                                                    manager.sleepingMenu(true, eventHandler)
+                                                    manager.updateAlarm(!status, handler)
                                                 }
                                             }
                                         }

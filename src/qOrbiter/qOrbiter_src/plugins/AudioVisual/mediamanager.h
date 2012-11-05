@@ -63,7 +63,7 @@ signals:
 public slots:
     void setMediaUrl(QString url);
 
-    void setCurrentStatus(QString s) {currentStatus = QTime::currentTime().toString()+"::"+s; emit currentStatusChanged();}
+    void setCurrentStatus(QString s) {currentStatus = QTime::currentTime().toString()+"::"+s; emit currentStatusChanged(); qDebug() << currentStatus;}
     QString getCurrentStatus() {return currentStatus;}
 
     void setConnectionDetails(int t, QString r);

@@ -164,6 +164,7 @@ class qorbiterManager : public QObject
     Q_PROPERTY (int media_pageSeperator READ getGridSeperator WRITE setGridSeperator NOTIFY newPageSeperator )
     Q_PROPERTY (int media_currentPage READ getCurrentPage WRITE setCurrentPage NOTIFY mediaPageChanged)
     Q_PROPERTY(bool osdStatus READ getDisplayStatus WRITE toggleDisplay NOTIFY osdChanged )
+    Q_PROPERTY(int mediaPlayerID READ getMediaPlayerID WRITE setMediaPlayerID NOTIFY mediaPlayerIdChanged)
     /*
      *Need to move runtime options here so that we can tie into a configuration panel
      *first run - self explanitory?
@@ -197,7 +198,6 @@ public:
     QByteArray binaryConfig;
     long iPK_Device;
     QString qs_ext_routerip;
-
     //------------------------------------------------------playlist classes
 
 
@@ -412,7 +412,19 @@ Param 10 - pk_attribute
     int i_currentFloorplanType;
     QString applicationPath;
 
+    /*Child Device IDs*/
+    int mediaPlayerID;
+    int communicatorID;
+
 signals:
+
+    /*child devices */
+    void mediaPlayerConnected(bool connect);
+    void mediaPlayerIdChanged();
+    void communicatorIdChanged();
+    void communicatorConnected(bool connect);
+
+
 
     /* Media Playback Controls */
     void setVolume(int vol);
@@ -427,6 +439,8 @@ signals:
     void newPlaylistPosition(int pos);
     void bindMediaRemote(bool b);
     void startPlayback(QString file);
+    void zoomLevelChanged(QString zoom);
+    void aspectRatioChanged(QString ratio);
 
     /*Dvd Specific*/
     void show_dvdMenu(bool m);
@@ -527,6 +541,14 @@ signals:
 
 
 public slots:
+
+    /*Child devices*/
+    void setCommunicatorID(int i){communicatorID = i;emit communicatorIdChanged(); }
+    int getCommunicatorID() {return communicatorID;}
+
+    void setMediaPlayerID(int i) { mediaPlayerID = i; emit mediaPlayerIdChanged(); qDebug() << "New Media Player ID" << mediaPlayerID;}
+    int getMediaPlayerID(){return mediaPlayerID;}
+
     /*Splash screen related slots*/
     void showExistingOrbiter(const QList<QObject *> l )  ;
     void connectionWatchdog();
@@ -614,6 +636,8 @@ public slots:
     void gridChangeChannel(QString chan, QString chanid) {emit newGridChannel(chan, chanid);}
     void extraButtonPressed(QString b) {emit extraButton(b);}
     void dvd_showMenu(bool b) { dvdMenuShowing = b ; emit show_dvdMenu(dvdMenuShowing);}
+    void setZoomLevel(QString zoom) {emit zoomLevelChanged(zoom);}
+    void setAspectRatio(QString r) {emit aspectRatioChanged(r);}
 
     /*Screenshot & Images slots*/
     void updateImageChanged(QImage img);

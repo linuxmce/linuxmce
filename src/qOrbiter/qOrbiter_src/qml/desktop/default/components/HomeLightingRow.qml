@@ -37,8 +37,8 @@ import QtQuick 1.0
                     id: mousearea1
                     anchors.fill: parent
                     onClicked: {
-                            manager.ShowFloorPlan(2)
-                        manager.setFloorplanType(2)
+
+                        manager.showfloorplan(2)
                     }
 
                 }

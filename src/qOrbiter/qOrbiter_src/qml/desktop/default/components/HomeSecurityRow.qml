@@ -38,7 +38,7 @@ Rectangle{
 
                 onClicked:{
 
-                    manager.ShowFloorPlan(5)
+                    manager.showfloorplan(5)
                     manager.setFloorplanType(5)
                 }
             }

@@ -11,7 +11,7 @@ Item
     Component.onCompleted:  {
         if(!dceplayer.connected){
         console.log("Starting media player")
-        dceplayer.setConnectionDetails(manager.qMediaPlayerID, manager.dceIP)
+        dceplayer.setConnectionDetails(manager.mediaPlayerID, manager.m_ipAddress)
         }
     }
 

@@ -89,7 +89,7 @@ Rectangle {
                 MouseArea{
                     anchors.fill: parent
                     onClicked:{
-                        manager.TuneToChannel(channelnumber, channelid)
+                        manager.gridChangeChannel(channelnumber, channelid)
                           epgplaylistview.positionViewAtIndex(index, ListView.Beginning)
 
                     }

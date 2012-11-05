@@ -25,7 +25,7 @@
 CONFIG += thread
 # define deployment destination and target executable name
 
-ANDROID{
+ android-g++{
 	DESTDIR = ../QOrbiter-Android-Arm-$$QT_VERSION
 } else {
 	!linux-rasp-pi-g++{
@@ -60,7 +60,7 @@ opengl{
 	glmsg = no
 }
 
-ANDROID{
+ android-g++{
 	TARGET=qorbiter-$$QT_VERSION
 }
 
@@ -204,7 +204,7 @@ macx{
 }
 
 #android deployment
-ANDROID{
+ android-g++{
 #nfs mount to work with skins on core directly
 #folder_01.source = ../../../../mnt/remote/android-qml/android
 #folder_01.source = qml/android/

@@ -1461,8 +1461,8 @@ signals:
     void stopPlayer();
     void pausePlayer();
 
-    void qMediaPlayerIDChanged();
-    void qCommunicatorIDChanged();
+    void qMediaPlayerIDChanged(int i);
+    void qCommunicatorIDChanged(int i);
 
     void dceIPChanged();
     void DCEHostChanged();
@@ -1480,10 +1480,10 @@ public slots:
     void setDCEHost(QString host) { DCEHost = host; emit DCEHostChanged();}
     QString getDCEHost() {return DCEHost;}
 
-    void setqMediaPlayerID(int deviceID) {qMediaPlayerID = deviceID; emit qMediaPlayerIDChanged();}
+    void setqMediaPlayerID(int deviceID) {qMediaPlayerID = deviceID; emit qMediaPlayerIDChanged(qMediaPlayerID); qDebug()<< "Sent "<< qMediaPlayerID; }
     int getqMediaPlayerID(){return qMediaPlayerID;}
 
-    void setqCommunicatorID(int deviceID ) {qMediaPlayerID = deviceID; emit qCommunicatorIDChanged();}
+    void setqCommunicatorID(int deviceID ) {qMediaPlayerID = deviceID; emit qCommunicatorIDChanged(qCommunicatorID);}
     int getqCommunicatorID(){return qCommunicatorID;}
 
     void getAttributeImage(QString param);

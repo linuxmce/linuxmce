@@ -281,7 +281,7 @@ Rectangle {
             id:model_pages
             height: appH
             width: scaleX(10)
-            model: manager.modelPages
+            model: dataModel.totalPages
             anchors.left: parent.left
             delegate: Rectangle{
                 height: scaleY(10)
@@ -339,7 +339,7 @@ Rectangle {
 
                         alphabetrect.scale = 1
                     }
-                    onClicked: manager.seekToGridPosition(name)
+                    onClicked: manager.setSeekLetter(name)
                 }
             }
         }

@@ -3623,11 +3623,12 @@ void DCE::qOrbiter::GetAlarms()
 //zoom level for current media player
 void DCE::qOrbiter::setZoom(QString zoomLevel)
 {
-    string sResponse;
-    CMD_Set_Zoom setMediaZoom(m_dwPK_Device, iMediaPluginID, internal_streamID, string(zoomLevel.toStdString()));
-    if (SendCommand(setMediaZoom))
+    qDebug() << zoomLevel;
+    string sResponse="";
+    CMD_Set_Zoom setMediaZoom(m_dwPK_Device, iMediaPluginID, internal_streamID, zoomLevel.toStdString());
+    if (SendCommand(setMediaZoom, &sResponse) && sResponse=="OK")
     {
-
+        setCommandResponse(QString::fromStdString(sResponse));
     }
     else
     {
@@ -3638,11 +3639,11 @@ void DCE::qOrbiter::setZoom(QString zoomLevel)
 
 void DCE::qOrbiter::setAspect(QString ratio) //set aspect ratio for current media player
 {
-    string sResponse;
+    string sResponse = "";
     CMD_Set_Aspect_Ratio setMediaAspect(m_dwPK_Device, iMediaPluginID, internal_streamID, ratio.toStdString());
-    if (SendCommand(setMediaAspect))
+    if (SendCommand(setMediaAspect, &sResponse) && sResponse=="OK")
     {
-
+        qDebug() << sResponse.c_str();
     }
     else
     {
@@ -4382,9 +4383,10 @@ void qOrbiter::CreateChildren()
         setCommandResponse("Current device template::"+QString::number(pDeviceData_Impl_Child->m_dwPK_DeviceTemplate));
 
         if (pDeviceData_Impl_Child->m_dwPK_DeviceCategory == 180){
-            setqMediaPlayerID(pDeviceData_Impl_Child->m_dwPK_Device);
-            setCommandResponse("QMediaPlayer ID::"+qMediaPlayerID);
-            emit qMediaPlayerIDChanged();
+            int t = pDeviceData_Impl_Child->m_dwPK_Device;
+            setqMediaPlayerID(t);
+            setCommandResponse("QMediaPlayer ID::"+t);
+        //   emit qMediaPlayerIDChanged(qMediaPlayerID);
 
         }
     }

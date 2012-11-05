@@ -1124,6 +1124,7 @@ void qorbiterManager::getFloorplanDevices(int floorplantype)
 void qorbiterManager::setFloorplanType(int t)
 {
     i_currentFloorplanType = t;
+
     emit floorplanTypeChanged(t);
 }
 
