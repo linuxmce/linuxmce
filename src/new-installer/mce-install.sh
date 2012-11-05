@@ -867,6 +867,9 @@ if [[ -f /etc/pluto/install_cleandb ]]; then
         . /usr/pluto/bin/SQL_Ops.sh
         . /usr/pluto/bin/Config_Ops.sh
 
+	# Raise max char limit on php.ini
+	echo "max_input_vars = 15000;" >> /etc/php5/apache2/php.ini
+
         # Mark remote assistance as diabled
         ConfDel remote
 
@@ -912,28 +915,7 @@ nohup /usr/pluto/bin/Diskless_CreateTBZ.sh >> \${diskless_log} 2>&1 &
 
 VideoDriver () {
 . /usr/pluto/bin/Utils.sh
-	GetVideoDriver
-	online=\$(ping -c 2 google.com)
-	card_detail=\$(lspci | grep 'VGA' | cut -d':' -f3)
-	# If there is no xorg.conf, install driver and run AVWizard
-	if [[ -z \$online ]]; then
-		case "\$prop_driver" in
-			nvidia)
-				prop_driver="nouveau" ;;
-			fglrx)
-				prop_driver="radeon" ;;
-			savage)
-				prop_driver="openchrome" ;;
-			via)
-				prop_driver="openchrome" ;;
-			virge)
-				prop_driver="openchrome" ;;
-		esac
-	fi
-	StatusMessage "Installing video driver '\$prop_driver' for \$card_detail"
-	InstallVideoDriver
-	sleep 2
-	ConfSet "AVWizardOverride" "1"
+	CheckVideoDriver
 }
 
 
