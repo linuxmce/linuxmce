@@ -33,7 +33,7 @@ QVariant DeviceModel::data(const QModelIndex &index, int role) const
         return QVariant();
     return m_list.at(index.row())->data(role);
 }
-#ifdef QT5
+#ifndef QT5
 QHash<int, QByteArray> DeviceModel::roleNames() const
 {
     return m_prototype->roleNames();

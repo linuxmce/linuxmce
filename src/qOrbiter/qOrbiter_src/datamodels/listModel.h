@@ -24,9 +24,9 @@ public:
     int rowCount(const QModelIndex &parent = QModelIndex()) const;
     //int columnCount(const QModelIndex &parent) const {return 1;}
     QVariant data(const QModelIndex &index, int role = Qt::DisplayRole) const;
-#ifdef QT5
+
  QHash<int, QByteArray> roleNames() const;
-#endif
+
 
     void appendRows(const QList<gridItem*> &items);
   Q_INVOKABLE  void appendRow(gridItem* item);

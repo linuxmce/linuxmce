@@ -3346,7 +3346,7 @@ void DCE::qOrbiter::populateAdditionalMedia() //additional media grid that popul
         if(m_sSeek !=""){
             GridCurRow = 0;
             GridCurCol =0;
-            imgDG = "MediaFile_"+QString::number(m_dwPK_Device).toStdString();
+            imgDG = "_MediaFile_"+QString::number(m_dwPK_Device).toStdString();
         }
 
         int iData_Size=0;

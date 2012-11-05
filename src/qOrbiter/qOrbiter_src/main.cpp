@@ -299,10 +299,10 @@ int main(int argc, char* argv[])
         typedef QMap <int, QString> myMap;
         int throwaway = qRegisterMetaType<myMap>("myMap");
 
-
         orbiterWin.setMessage("Setting up Lmce");
         qorbiterManager  w(&orbiterWin.mainView);
         AbstractImageProvider modelimageprovider(&w);
+
         orbiterWin.mainView.engine()->addImageProvider("listprovider", &modelimageprovider);
 #ifndef QT5
         QThread *epgThread = new QThread; //for playlists and epg of all types. only one will be active a given time inthe app

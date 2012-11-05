@@ -32,9 +32,9 @@
 ListModel::ListModel(gridItem* prototype, QObject* parent) :
     QAbstractListModel(parent),  m_prototype(prototype)
 {
-#ifndef QT5
+
     setRoleNames(m_prototype->roleNames());
-#endif
+
     qRegisterMetaType<QModelIndex>("QModelIndex");
     totalcells = 0;
     seperator = 16;
@@ -62,12 +62,12 @@ QVariant ListModel::data(const QModelIndex &index, int role) const
         return QVariant();
     return m_list.at(index.row())->data(role);
 }
-#ifdef QT5
+
 QHash<int, QByteArray> ListModel::roleNames() const
 {
     return m_prototype->roleNames();
 }
-#endif
+
 ListModel::~ListModel() {
     delete m_prototype;
     clear();
@@ -77,7 +77,7 @@ void ListModel::appendRow(gridItem *item)
 {
     setLoadingStatus(true);
     appendRows(QList<gridItem*>() << item);
-    qDebug() << m_list.count();
+  //  qDebug() << m_list.count();
 }
 
 void ListModel::appendRows(const QList<gridItem *> &items)
@@ -86,6 +86,7 @@ void ListModel::appendRows(const QList<gridItem *> &items)
     foreach(gridItem *item, items) {
         m_list.append(item);
         QObject::connect(item, SIGNAL(dataChanged()), this , SLOT(handleItemChange()));
+
     }
 
     endInsertRows();
@@ -120,7 +121,7 @@ void ListModel::handleItemChange()
     qDebug() << "Handling item change for:" << index;
     if(index.isValid())
     {
-        emit dataChanged(index, index, 0);
+        emit dataChanged(index, index, index.row() );
     }
 }
 
@@ -145,11 +146,11 @@ bool ListModel::resetInternalData()
     int total = m_list.count();
     for(int i = 0; i <= m_list.count(); ++i){
 
-        qDebug() <<"removing::" << m_list.count() << " of " << total;
+      //  qDebug() <<"removing::" << m_list.count() << " of " << total;
         m_list.removeAt(i);
     }
     m_list.clear();
-    qDebug() << "Items cleared. Count:: "<< m_list.count();
+  //  qDebug() << "Items cleared. Count:: "<< m_list.count();
     return true;
 
 }

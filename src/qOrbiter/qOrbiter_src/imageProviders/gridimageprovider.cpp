@@ -34,15 +34,15 @@ QImage GridIndexProvider::requestImage(const QString &id, QSize *size, const QSi
 
     QString key = QString("image://datagridimg/%1").arg(id);
     QModelIndex index = mPixmapIndex.value(id);
-    //  QImage image = mModel.data(index, mPixmapRole).value<QImage>();
-    QImage image = mModel.data(index, 4).value<QImage>();
 
-    if (image.isNull())
-    {
+    gridItem * t = mModel.find(id);
+
+    QImage image = t->cellImage();
+   // QString t =  mModel.data(index, 2).value<QString>();
+    if(image.size().isEmpty()){
         image.load(":/icons/icon.png");
     }
-    else
-    {
+
         QImage result;
         if (image.height() < image.width())
         {
@@ -58,7 +58,7 @@ QImage GridIndexProvider::requestImage(const QString &id, QSize *size, const QSi
         } else {
             result = image;
         }
-    }
+
 
 
     return image;
