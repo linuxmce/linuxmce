@@ -32,9 +32,9 @@
 ListModel::ListModel(gridItem* prototype, QObject* parent) :
     QAbstractListModel(parent),  m_prototype(prototype)
 {
-
+#ifndef RPI
     setRoleNames(m_prototype->roleNames());
-
+#endif
     qRegisterMetaType<QModelIndex>("QModelIndex");
     totalcells = 0;
     seperator = 16;

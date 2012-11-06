@@ -57,7 +57,7 @@ Rectangle {
             Text {
                 id: position
                 text: qsTr("Item #") + index
-                font.family: "DroidSans"
+                font.family: keyFont.name
                 color: "aliceblue"
                 font.pixelSize: scaleY(2.25)
                 font.bold: true
@@ -67,7 +67,7 @@ Rectangle {
 
             Text {
                 text:  index === dcenowplaying.m_iplaylistPosition ? "Now Playing - " + name : name
-                font.family: "DroidSans"
+                font.family: keyFont.name
                 color: "aliceblue"
                 width: parent.width
                 wrapMode: "WrapAtWordBoundaryOrAnywhere"

@@ -245,9 +245,12 @@ linux-rasp-pi-g++{
 	folder_02.source = config.xml
 	folder_02.target = config
 
-	DEFINES+=RPI GLENABLED
-	DEPLOYMENTFOLDERS += folder_01 folder_02
-	QT+= qml
+        fonts_folder.source = qml/fonts
+        fonts_folder.target = qml/
+
+        DEFINES+=RPI GLENABLED
+        DEPLOYMENTFOLDERS += folder_01 folder_02 fonts_folder
+        QT+= qml
 }
 
 # Additional import path used to resolve QML modules in Creator's code model

@@ -3405,7 +3405,7 @@ void DCE::qOrbiter::populateAdditionalMedia() //additional media grid that popul
 
                 emit addItem(new gridItem(fk_file, cellTitle, filePath, index, cellImg));
 #ifdef RPI
-                QThread::msleep(150);
+                QThread::msleep(100);
 #endif
 
             }

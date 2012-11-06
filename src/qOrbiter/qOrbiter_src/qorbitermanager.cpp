@@ -1058,6 +1058,7 @@ bool qorbiterManager::loadSkins(QUrl base)
     QDir desktopQmlPath(QString(base.toString()),"",QDir::Name, QDir::NoDotAndDotDot);
     setDceResponse("Skin Search Path:"+ desktopQmlPath.dirName());
     QStringList localSkins = desktopQmlPath.entryList(QDir::Dirs |QDir::NoDotAndDotDot);
+
     qDebug()<<"inside of skins we find" << localSkins.join(",");
     tskinModel->addSkin(localSkins.join(","));
 #else
@@ -1627,7 +1628,9 @@ int qorbiterManager::loadSplash()
 void qorbiterManager::activateScreenSaver()
 {
     qorbiterUIwin->engine()->rootContext()->setContextProperty("screensaver", ScreenSaver);
+#ifndef RPI
     ScreenSaver->setActive(true);
+#endif
 }
 
 void qorbiterManager::killScreenSaver()

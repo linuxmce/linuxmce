@@ -15,6 +15,7 @@ property bool verticalMirror: false
         text: getDate()
         color: "aliceblue"
         font.letterSpacing: 2
+        font.family: keyFont.name
         smooth: true
         anchors.centerIn: parent
 

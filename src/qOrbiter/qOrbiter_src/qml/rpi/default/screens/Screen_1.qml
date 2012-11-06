@@ -38,6 +38,7 @@ Item
             text: "Orbiter "+ manager.m_dwPK_Device + " is connected."
             color: "aliceblue"
             font.letterSpacing: 2
+            font.family: keyFont.name
             anchors.left: parent.left
             anchors.leftMargin: scaleX(5)
             anchors.verticalCenter: headerbg.verticalCenter

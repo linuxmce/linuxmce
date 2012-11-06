@@ -16,7 +16,7 @@ Rectangle {
 
     height: style.stdbuttonh
     width: style.stdbuttonw
-
+    clip:true
     radius: 1
     Image {
         id: buttonimage
@@ -27,15 +27,13 @@ Rectangle {
     }
     Text {
         id: buttonLabel
-        anchors.centerIn: parent
         text:"null ipsum delorium"
         font.pixelSize: 14
-        verticalAlignment: Text.AlignVCenter
-        horizontalAlignment: Text.AlignHCenter
-        anchors.fill: parent
-        anchors.margins: 5
-        font.family: "Droid Sans"
+
+        font.family: keyFont.name
         wrapMode: Text.WordWrap
+        anchors.centerIn: buttonimage
+        anchors.verticalCenterOffset: -15
        }
 
     MouseArea{

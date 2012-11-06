@@ -31,6 +31,11 @@ Item {
 MouseArea{
     anchors.fill: item
 }
+FontLoader{
+    id:keyFont
+    name:"Sawasdee"
+
+}
 
 
     signal close()

@@ -43,7 +43,7 @@ Rectangle{
             anchors.horizontalCenter: parent.horizontalCenter
             anchors.verticalCenter: parent.verticalCenter
             anchors.margins: 5
-            font.family: "Droid Sans"
+            font.family: keyFont.name
             wrapMode: "WrapAtWordBoundaryOrAnywhere"
             // elide: "ElideRight"
             color:"black"

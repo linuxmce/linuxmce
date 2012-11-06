@@ -53,6 +53,7 @@ Rectangle {
                 id: grid_position_label
                 text: qsTr("You are browsing by:") + manager.i_current_mediaType
                 font.pixelSize: 14
+
             }
             Text {
                 id: grid_attritbute_label
@@ -205,6 +206,7 @@ Rectangle {
                         text: name;
                         font.pointSize: 12;
                         color: "white" ;
+                        font.family: keyFont.name
                         wrapMode: "WrapAtWordBoundaryOrAnywhere"
                         width: imagerect.width
                         font.bold: true

@@ -8,12 +8,7 @@ Rectangle{
     color: "black"
     state: "starting"
     Component.onCompleted: state="waiting"
-    property alias myFont: welcomeLabel.font
-
-    Image {
-        id: myBackground
-        source: "default/img/icons/orbiterbg.png"
-    }
+    onStateChanged: lateEffectTimer.restart()
 
     Timer{
         id:lateEffectTimer
@@ -35,11 +30,11 @@ Rectangle{
         color: "aliceblue"
         font.letterSpacing: 2
         smooth: true
-        font.family: myFont
-        font.pointSize: 28
+        font.family: keyFont.name
+        font.pixelSize: 28
         width: txtDate.paintedWidth
         anchors.right: splashPage.right
-        anchors.bottom: splashPage.bottom
+        anchors.top: splashPage.top
 
     }
     Timer { // Update the clock element periodically
@@ -51,6 +46,8 @@ Rectangle{
     FontLoader{
         id:keyFont
         name:"Sawasdee"
+        source: "../fonts"
+
     }
 
     Rectangle{
@@ -76,7 +73,7 @@ Rectangle{
         font.family: "Sawasdee"
         anchors.horizontalCenter: welcomeBox.horizontalCenter
         y: welcomeBox.y + 20
-        font.pointSize: 18
+        font.pixelSize: 36
         scale:1
 
         SequentialAnimation{
@@ -105,6 +102,27 @@ Rectangle{
         }
     }
 
+    Text {
+        id: selectLabel
+        text: qsTr("Please select from existing Qt Orbiters")
+        font.family: keyFont.name
+        color: "white"
+        font.pixelSize: 20
+        visible: false
+        anchors.centerIn: welcomeBox
+    }
+
+    Text {
+        id: createLabel
+        text: qsTr("Or Create a new Qt Orbiter")
+        font.family: keyFont.name
+        color: "white"
+        font.pixelSize: 20
+        visible: selectLabel.visible
+        anchors.top: selectLabel.bottom
+        anchors.left: welcomeBox.left
+    }
+
     Column{
         id:connectionColumn
         width: welcomeBox.width*.65
@@ -119,6 +137,7 @@ Rectangle{
             }
         }
 
+
         Rectangle{
             id:hostBox
             width: parent.width*.65
@@ -128,15 +147,15 @@ Rectangle{
             Text {
                 id: serverName
                 text: qsTr("Connect To")
-                font.family: myFont
-                font.pointSize: 16
+                font.family: keyFont.name
+                font.pixelSize: 16
                 color: "darkgrey"
             }
             TextInput {
                 id: routerip
                 text: srouterip
-                font.pointSize: 28
-                font.family: myFont
+                font.pixelSize: 28
+                font.family: keyFont.name
                 //  onTextChanged: setRouterIp(routerip.text)
                 color: "white"
                 font.bold: true
@@ -156,16 +175,16 @@ Rectangle{
             Text {
                 id: deviceName
                 text: qsTr("Device Number")
-                font.family: myFont
-                font.pointSize: 16
+                font.family: keyFont.name
+                font.pixelSize: 16
                 color: "darkgrey"
             }
             TextInput {
                 id: devicenumber
                 width: scaleX(10)
                 text: deviceid
-                font.pointSize: 28
-                font.family: myFont
+                font.pixelSize: 28
+                font.family: keyFont.name
                 anchors.left: deviceName.left
                 anchors.top:deviceName.bottom
                 //  onTextChanged: setRouterIp(routerip.text)
@@ -189,7 +208,7 @@ Rectangle{
                 Text{
                     id:confirmLabel
                     text:"Connect!"
-                    font.family: myfont
+                    font.family: keyFont.name
                     font.pixelSize: 20
                 }
 
@@ -206,21 +225,30 @@ Rectangle{
 
     ListView{
            id:existing_orbiters
-           height: scaleY(35)
-           width: parent.width
+           height: scaleY(10)
+           width: parent.width-welcomeBox.width
            clip: true
-           anchors.centerIn: parent
+           anchors.right: splashPage.right
+           anchors.verticalCenter: splashPage.verticalCenter
            model:orbiterList
            visible: false
            orientation:ListView.Horizontal
            spacing:scaleX(10)
            delegate: Rectangle{
                id:existing_orbiter_delegate
-               height: scaleY(10)
-               width: existing_orbiters.width / 4
-               color: "slategrey"
+               height: scaleY(8)
+               width: scaleX(30)
+               clip:true
+               color: "transparent"
                border.color: "white"
                border.width: 1
+               Rectangle{
+                   id:transparency
+                   anchors.fill: parent
+                   color: "darkslategrey"
+                   opacity: .15
+               }
+
                Column
                {
                    height: childrenRect.height
@@ -229,16 +257,17 @@ Rectangle{
 
                    Text {
                        id: orbiter_label
-                       text: qsTr("Orbiter:")+ label
-                       font.pointSize: 12
-                       font.family: myFont
+                       text: qsTr("Orbiter:\n")+ label
+                       font.pixelSize: 12
+                       font.family: keyFont.name
+                       color: "white"
                        wrapMode: Text.WrapAtWordBoundaryOrAnywhere
                    }
                    Text {
                        id: dev_num
                        text:qsTr("Device:")+ device
-                       font.pointSize: 12
-                       font.italic: true
+                       font.pixelSize: 12
+                       font.family: keyFont.name
                        wrapMode: Text.WrapAtWordBoundaryOrAnywhere
                    }
                }
@@ -254,6 +283,71 @@ Connections{
     onShowList:state = "orbiterselect"
 }
 
+Row{
+    id:indicatorContainer
+    width: splashPage.width - welcomeBox.width
+    height: scaleY(8)
+    anchors.bottom: splashPage.bottom
+    anchors.right: splashPage.right
+
+    Rectangle{
+        id:connectionIndicator
+        width: scaleX(10)
+        height: scaleY(8)
+        color: "transparent"
+        Image {
+            id: connectionImage
+            source: "default/img/icons/jabber_protocol.png"
+            anchors.fill: parent
+            visible:window.b_connectionPresent ? true:false
+        }
+        Text {
+            id: connectionStatus
+            text: qsTr("Connection")
+            font.family: keyFont.name
+            color: window.b_connectionPresent ? "white" : "red"
+        }
+    }
+
+    Rectangle{
+        id:deviceIndicator
+        width: scaleX(10)
+        height: scaleY(10)
+        color: "transparent"
+        Image {
+            id: deviceImage
+            source: "default/img/icons/harddrive2.png"
+            anchors.fill: parent
+            visible: window.b_devicePresent ? true :false
+        }
+        Text {
+            id: deviceStatus
+            text: qsTr("Device")
+            font.family: keyFont.name
+            color: window.b_devicePresent ? "white" : "red"
+        }
+    }
+
+    Rectangle{
+        id:configIndicator
+        width: scaleX(10)
+        height: scaleY(10)
+        color: "transparent"
+        Image {
+            id: configImage
+            source: "default/img/icons/package_editors.png"
+            anchors.fill: parent
+            visible: window.b_devicePresent ? true :false
+        }
+        Text {
+            id: configStatus
+            text: qsTr("Local Config")
+            font.family: keyFont.name
+            color: window.b_localConfigReady ? "white" : "red"
+        }
+    }
+}
+
 
     states: [
         State {
@@ -267,17 +361,16 @@ Connections{
             name: "orbiterselect"
 
             PropertyChanges {
-                target: welcomeBox
-                x:splashPage.width - welcomeBox.width
-            }
-            PropertyChanges {
                 target: existing_orbiters
                 visible:true
             }
             PropertyChanges {
                 target: connectionColumn
                 opacity:0
-
+            }
+            PropertyChanges {
+                target: selectLabel
+                visible:true
             }
         },
         State {
@@ -349,7 +442,7 @@ Connections{
 //                id: connection_label
 //                text: qsTr("Connection")
 //                color: window.b_connectionPresent ? "green" : "red"
-//                font.pointSize: window.b_connectionPresent ? 32: 30
+//                font.pixelSize: window.b_connectionPresent ? 32: 30
 //            }
 //        }
 
@@ -367,7 +460,7 @@ Connections{
 //                id: device_Label
 //                text: qsTr("Device")
 //                color: window.b_devicePresent ? "green" : "red"
-//                font.pointSize: window.b_devicePresent ? 32 : 30
+//                font.pixelSize: window.b_devicePresent ? 32 : 30
 //            }
 //        }
 
@@ -385,7 +478,7 @@ Connections{
 //                id: config_label
 //                text: qsTr("Config")
 //                color: window.b_localConfigReady ? "green" : "red"
-//                font.pointSize: window.b_localConfigReady ? 32 : 30
+//                font.pixelSize: window.b_localConfigReady ? 32 : 30
 //            }
 //        }
 /*
@@ -403,7 +496,7 @@ Connections{
                 id: skin_label
                 text: qsTr("Skins")
                 color: window.b_skinIndexReady ? "green" : "red"
-                font.pointSize: window.b_skinIndexReady ? 14 : 12
+                font.pixelSize: window.b_skinIndexReady ? 14 : 12
             }
         }
 
@@ -421,7 +514,7 @@ Connections{
                 id: skin_data_label
                 text: qsTr("Orbiter Ready")
                 color: window.b_orbiterConfigReady ? "green" : "red"
-                font.pointSize: window.b_orbiterConfigReady ? 14 : 12
+                font.pixelSize: window.b_orbiterConfigReady ? 14 : 12
             }
         }
 */
@@ -469,7 +562,7 @@ Connections{
 //    Text {
 //        id: connectionlabel
 //        text: qsTr("Set Connection Details")
-//        font.pointSize: 36
+//        font.pixelSize: 36
 //        font.bold: false
 //        anchors.top: rectangle2.top
 //        anchors.horizontalCenter: parent.horizontalCenter
@@ -483,7 +576,7 @@ Connections{
 //        width: rectangle2.width
 //        Text {
 //            text: qsTr("Host:")
-//            font.pointSize: 28
+//            font.pixelSize: 28
 //            font.family: "Droid Sans"
 //            font.bold: true
 //        }
@@ -492,7 +585,7 @@ Connections{
 //            id: routerip
 //            width: 80
 //            text: srouterip
-//            font.pointSize: 28
+//            font.pixelSize: 28
 //            font.family: "Droid Sans"
 //            //  onTextChanged: setRouterIp(routerip.text)
 //            color: "black"
@@ -505,7 +598,7 @@ Connections{
 //            id: ext_routerip
 //            width: 80
 //            text: extip
-//            font.pointSize: 10
+//            font.pixelSize: 10
 //            font.family: "Droid Sans"
 //            //  onTextChanged: setRouterIp(routerip.text)
 //            color: "grey"
@@ -515,7 +608,7 @@ Connections{
 
 //        Text {
 //            text: qsTr("Device:")
-//            font.pointSize: 28
+//            font.pixelSize: 28
 //            font.family: "Droid Sans"
 //            //  onTextChanged: setRouterIp(routerip.text)
 //            color: "black"
@@ -527,7 +620,7 @@ Connections{
 //            id: devicenumber
 //            width: scaleX(10)
 //            text: deviceid
-//            font.pointSize: 28
+//            font.pixelSize: 28
 //            font.family: "Droid Sans"
 //            //  onTextChanged: setRouterIp(routerip.text)
 //            color: "black"
@@ -548,7 +641,7 @@ Connections{
 //                anchors.centerIn: parent
 //                anchors.fill: parent
 //                text: qsTr("Go!")
-//                font.pointSize: 28
+//                font.pixelSize: 28
 //                font.family: "Droid Sans"
 //                //  onTextChanged: setRouterIp(routerip.text)
 //                color: "black"
@@ -578,7 +671,7 @@ Connections{
 //                anchors.centerIn: parent
 //                anchors.fill: parent
 //                text: qsTr("Exit")
-//                font.pointSize: 11
+//                font.pixelSize: 11
 //            }
 
 //            radius:  4
@@ -593,7 +686,7 @@ Connections{
 //        id: loadingStatus
 //        text: "Status " + manager.commandResponse
 //        anchors.topMargin: scaleY(15)
-//        font.pointSize: 14
+//        font.pixelSize: 14
 //        font.family: "Droid Sans"
 //        color: "white"
 //        anchors.top: rectangle2.bottom
@@ -626,13 +719,13 @@ Connections{
 //                Text {
 //                    id: orbiter_label
 //                    text: qsTr("Orbiter:")+ label
-//                    font.pointSize: 12
+//                    font.pixelSize: 12
 //                    wrapMode: Text.WrapAtWordBoundaryOrAnywhere
 //                }
 //                Text {
 //                    id: dev_num
 //                    text:qsTr("Device:")+ device
-//                    font.pointSize: 12
+//                    font.pixelSize: 12
 //                    font.italic: true
 //                    wrapMode: Text.WrapAtWordBoundaryOrAnywhere
 //                }
@@ -662,7 +755,7 @@ Connections{
 //        Text {
 //            id: newOrbiterLabel
 //            text: qsTr("Create New Orbiter?")
-//            font.pointSize: 15
+//            font.pixelSize: 15
 //            width: parent.width
 //            anchors.centerIn: parent
 //            wrapMode: Text.WrapAtWordBoundaryOrAnywhere

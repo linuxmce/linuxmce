@@ -37,6 +37,7 @@ Rectangle {
         text: dcenowplaying.qs_mainTitle
         anchors.centerIn: parent
         font.pixelSize: scaleY(5)
+        font.family: keyFont.name
         opacity: .5
        font.bold: true
 
@@ -64,7 +65,7 @@ Rectangle {
             id: timecode
             height:scaleY(2.15)
             text: qsTr("Speed: ") + dceTimecode.playbackSpeed +" || " +dceTimecode.qsCurrentTime + qsTr(" of ") + dceTimecode.qsTotalTime
-            font.family: "Droid Sans"
+            font.family: keyFont.name
             font.pixelSize: scaleY(2.15)
             anchors.verticalCenter: parent.verticalCenter
             anchors.horizontalCenter: parent.horizontalCenter
@@ -142,7 +143,7 @@ Rectangle {
                         width: scaleX(40)
                         wrapMode: "WrapAtWordBoundaryOrAnywhere"
                         text: dcenowplaying.performerlist
-                        font.family: "Droid Sans"
+                        font.family:keyFont.name
                         font.bold: true
                         smooth: true
                         font.pixelSize: scaleY(4)
