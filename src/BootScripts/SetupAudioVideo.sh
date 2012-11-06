@@ -154,11 +154,11 @@ END
 	done
 }
 
-Enable_Audio_Channels () {
+Enable_Audio_Channels () 
+{
 	# Added this to correctly unmute channels for setup wizard, and to 
 	# inject necessary unmuting commands for later bootup.
 	yalpa=$(aplay -l)
-	if (grep 
 	grep -iwo "card ." <<< "$yalpa" | awk '{print $2}' | uniq | while read CardNumber; do
 		amixer -c "$CardNumber" | grep '\[off\]' -B5 | grep "Simple" | sed 's/Simple mixer control //g' | grep -vi "capture" | while read MuteStatus; do 
 			amixer -c "$CardNumber" sset "$MuteStatus" unmute 
