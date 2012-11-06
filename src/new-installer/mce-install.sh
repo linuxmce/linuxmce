@@ -868,7 +868,10 @@ if [[ -f /etc/pluto/install_cleandb ]]; then
         . /usr/pluto/bin/Config_Ops.sh
 
 	# Raise max char limit on php.ini
-	echo "max_input_vars = 15000" >> /etc/php5/apache2/php.ini
+	if ! grep -q 'max_input_vars' /etc/php5/apache2/php.ini; then 
+		echo "max_input_vars = 15000" >> /etc/php5/apache2/php.ini
+	fi
+
 
         # Mark remote assistance as diabled
         ConfDel remote
