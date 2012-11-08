@@ -5,9 +5,9 @@ Rectangle {
     width: 150
     height: 25
 
-    Text {
+    StyledText {
         id: alert_text
-        text: ""
+        textLabel: ""
         font.pointSize: 14
         anchors.centerIn: parent
           }

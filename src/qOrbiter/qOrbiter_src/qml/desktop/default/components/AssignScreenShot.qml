@@ -14,9 +14,9 @@ Rectangle {
 
     }
 
-    Text {
+    StyledText {
         id: labelscreenshot
-        text: qsTr("Choose Attribute for screenshot")
+        textLabel: qsTr("Choose Attribute for screenshot")
         anchors.horizontalCenter: parent.horizontalCenter
         anchors.top: parent.top
     }
@@ -62,9 +62,9 @@ Rectangle {
         color: style.lighthighlight
         radius:10
         clip:true
-        Text {
+        StyledText {
             id: label2
-            text: qsTr("choose attribute")
+            textLabel: qsTr("choose attribute")
         }
         ListView{
             id:propertydisplay

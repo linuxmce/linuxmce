@@ -29,9 +29,9 @@ Rectangle {
         anchors.verticalCenter: infoPanel.verticalCenter
         color: "darkgrey"
         radius: 5
-        Text {
+        StyledText {
 
-            text: qsTr("debug")
+            textLabel: qsTr("debug")
         }
         MouseArea{
             anchors.fill: activityTab
@@ -49,14 +49,14 @@ Rectangle {
         height:50
         anchors.top: parent.top
         anchors.left: parent.left
-        Text {
+        StyledText {
             id: titleColHdr
-            text: qsTr("Variable")
+            textLabel: qsTr("Variable")
             width:titleColWidth
         }
-        Text {
+        StyledText {
             id: valColWidth
-            text: qsTr("Value")
+            textLabel: qsTr("Value")
             width:valueColWidth
         }
     }
@@ -69,11 +69,12 @@ Rectangle {
         delegate: Row{
             width: infoPanel.width
             height: 50
-            Text {
-                text: title
+            StyledText {
+                textLabel: title
                 width: titleColWidth
+                isBold: true
            }
-            Text {
+            StyledText {
                text: value
                width: valueColWidth
             }

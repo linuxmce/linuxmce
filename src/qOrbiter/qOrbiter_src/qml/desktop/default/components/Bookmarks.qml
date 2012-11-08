@@ -8,9 +8,9 @@ Rectangle {
     color: "slategrey"
     anchors.centerIn: parent
 
-    Text {
+    StyledText {
         id: bookmarkslabel
-        text: qsTr("Media Bookmarks")
+        textLabel: qsTr("Media Bookmarks")
         font.pixelSize: 20
 
     }
@@ -51,9 +51,9 @@ Rectangle {
                         id: media_bookmark_image
                         source: ""
                     }
-                    Text {
+                    StyledText {
                         id: media_bookmark_name
-                        text: qsTr("Media Bookmark")
+                        textLabel: qsTr("Media Bookmark")
                         font.pixelSize: scaleY(2)
                     }
                 }
@@ -69,9 +69,9 @@ Rectangle {
                         id: media_resume_image
                         source: ""
                     }
-                    Text {
+                    StyledText {
                         id: media_resume_name
-                        text: qsTr("Media Resume")
+                        textLabel: qsTr("Media Resume")
                         font.pixelSize: scaleY(2)
                     }
                 }
@@ -84,9 +84,9 @@ Rectangle {
                     border.color: "white"
                     border.width: 1
 
-                    Text {
+                    StyledText {
                         id: media_resume_label
-                        text:title
+                        textLabel:title
                         font.pixelSize: scaleY(2)
                     }
                 }

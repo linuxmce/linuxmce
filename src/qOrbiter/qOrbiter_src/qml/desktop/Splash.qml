@@ -15,7 +15,7 @@ Item {
     FontLoader{
         id:myFont
         name:"Sawasdee"
-        source: "../../fonts/Sawasdee.ttf"
+        source: "default/fonts/Sawasdee.ttf"
     }
 
     function scaleX(x){

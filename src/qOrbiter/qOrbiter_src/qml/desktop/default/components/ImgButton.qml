@@ -25,16 +25,15 @@ Rectangle {
         width: style.stdbuttonw
 
     }
-    Text {
+    StyledText {
         id: buttonLabel
         anchors.centerIn: parent
-        text:"null ipsum delorium"
-        font.pixelSize: 14
+        textLabel:"null ipsum delorium"
+        fontSize: 14
         verticalAlignment: Text.AlignVCenter
         horizontalAlignment: Text.AlignHCenter
         anchors.fill: parent
-        anchors.margins: 5
-        font.family: "Droid Sans"
+        anchors.margins: 5      
         wrapMode: Text.WordWrap
        }
 

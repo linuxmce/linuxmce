@@ -650,7 +650,7 @@ public slots:
     /*Media Devices slots*/
     void showDeviceCodes(int code) {emit populateDeviceCommands(code);}
     void setCommandList(QList<QObject*> &l);
-    void resendCode(int from, int to) { emit resendDeviceCode( from,  to);}
+    void resendCode(int from, int to) { deviceCommands->clear(); emit resendDeviceCode( from,  to);}
     void toggleDisplay(bool display) { osdStatus = display; emit osdChanged(osdStatus); }
     bool getDisplayStatus() { return osdStatus; }
     void adjustLights(int l) {emit newLightLevel(l); }

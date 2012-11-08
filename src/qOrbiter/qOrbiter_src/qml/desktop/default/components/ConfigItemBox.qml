@@ -26,9 +26,9 @@ Rectangle {
         anchors.top: parent.top
         radius: 5
         color: "#E89F6B"
-        Text {
+        StyledText {
             id: hdrLabel
-            text: headerText
+            textLabel: headerText
             color:"black"
             font.pixelSize: 12
         }
@@ -58,9 +58,9 @@ Rectangle {
                 height: parent.height /2
                 radius: 5
                 color: "green"
-                Text {
+                StyledText {
                     id: lbk
-                    text: qsTr("Confirm")
+                    textLabel: qsTr("Confirm")
                     anchors.centerIn: parent
                 }
                 MouseArea{
@@ -88,9 +88,9 @@ Rectangle {
                 state: toggleValue ? "yes" : "no"
 
                 anchors.verticalCenter: parent.verticalCenter
-                Text {
+                StyledText {
                     id: keyText
-                    text: toggleValue
+                    textLabel: toggleValue
                     anchors.centerIn: parent
                 }
                 MouseArea{

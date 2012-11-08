@@ -14,7 +14,7 @@ Item {
     FontLoader{
         id:myFont
         name:"Sawasdee"
-        source: "../../fonts/Sawasdee.ttf"
+        source: "fonts/Sawasdee.ttf"
     }
 
     MediaManager{

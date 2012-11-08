@@ -24,13 +24,13 @@ Rectangle{
         border.color: style.highlight1
         radius: 5
 
-        Text {
+        StyledText {
             id: buttonLabel
             x: 50
             y: 50
             width: -1
             height: 0
-            text:"null ipsum delorium"
+            textLabel:"null ipsum delorium"
             font.pixelSize: 14
             verticalAlignment: Text.AlignVCenter
             horizontalAlignment: Text.AlignHCenter

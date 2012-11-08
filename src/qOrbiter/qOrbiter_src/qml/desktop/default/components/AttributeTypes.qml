@@ -39,12 +39,12 @@ Rectangle {
                              width: childrenRect.width
                              spacing: 10
 
-                             Text {
+                             StyledText {
                                  width: 75
                                  height: parent.height
                                  id: fileformatcell
-                                 text: name
-                                 font.pointSize: 12
+                                 textLabel: name
+                                 fontSize:12
                                  wrapMode: "WrapAtWordBoundaryOrAnywhere"
                                  onFocusChanged: {rect.destroy()}
 

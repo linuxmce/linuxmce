@@ -48,9 +48,9 @@ Rectangle {
                     border.color: style.darkhighlight
                     border.width: 2
 
-                    Text {
+                    StyledText {
                         id:channelID
-                        text: name
+                        textLabel: name
                         font.capitalization: Font.SmallCaps
                         width: parent.width
 

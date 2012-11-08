@@ -34,23 +34,21 @@ horizontalTileMode: BorderImage.Repeat
         border.color: style.highlight1
         radius: 2.5
 
-        Text {
+        StyledText {
             id: buttonLabel
             width: -1
             height: 0
-            text:"null ipsum delorium"
-            font.pixelSize: scaleY(1.5)
+            textLabel:"null ipsum delorium"
+            fontSize: scaleY(1.5)
             verticalAlignment: Text.AlignVCenter
             horizontalAlignment: Text.AlignHCenter
             anchors.fill: parent
             anchors.horizontalCenter: parent.horizontalCenter
             anchors.verticalCenter: parent.verticalCenter
-            anchors.margins: 5
-            font.family: "Droid Sans"
+            anchors.margins: 5            
             wrapMode: "WrapAtWordBoundaryOrAnywhere"
             // elide: "ElideRight"
             color:"black"
-
             z:1
         }
         MouseArea{

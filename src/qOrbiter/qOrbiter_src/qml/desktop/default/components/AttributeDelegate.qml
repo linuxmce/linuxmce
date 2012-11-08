@@ -12,9 +12,9 @@ Rectangle {
     width: parent.width
     height: parent.height
 
-    Text {
+    StyledText {
         id: attributeName
-        text: attributelabel
+        textLabel: attributelabel
         }
 
     }

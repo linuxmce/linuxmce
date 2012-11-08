@@ -131,13 +131,13 @@ Item
                 width: scaleX(4)
                 color: "transparent"
                 clip:false
-                Text {
+                StyledText {
                     id: test
-                    text: name
+                    textLabel: name
                     font.pixelSize: listlabelpixelsize
                     anchors.centerIn: parent
                     color:listlabelColor
-                    font.family: listLabelFont
+
                 }
                 MouseArea{
                     anchors.fill: parent

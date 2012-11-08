@@ -102,10 +102,10 @@ linux-g++{
 	DEFINES += for_desktop
 
 	plugins_folder.source = imports/
-	plugins_folder.target = $$DESTDIR
+	plugins_folder.target = $$DESTDIR      
 
 	DEPLOYMENTFOLDERS+= plugins_folder
-	DEPLOYMENTFOLDERS += folder_01  folder_03
+        DEPLOYMENTFOLDERS += folder_01  folder_03
 }
 
 #windows deployment and module config

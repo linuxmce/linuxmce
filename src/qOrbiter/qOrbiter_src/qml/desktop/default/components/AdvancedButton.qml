@@ -29,21 +29,21 @@ Rectangle{
             opacity: .5
         }
 
-        Text {
+        StyledText {
             id: buttonLabel
             x: 50
             y: 50
             width: -1
             height: 0
-            text:"null ipsum delorium"
-            font.pixelSize: scaleY(2)
+            textLabel:"null ipsum delorium"
+            fontSize: scaleY(2)
             verticalAlignment: Text.AlignVCenter
             horizontalAlignment: Text.AlignHCenter
             anchors.fill: parent
             anchors.horizontalCenter: parent.horizontalCenter
             anchors.verticalCenter: parent.verticalCenter
             anchors.margins: 5
-            font.family: "Droid Sans"
+
             wrapMode: "WrapAtWordBoundaryOrAnywhere"
             // elide: "ElideRight"
             color:"black"

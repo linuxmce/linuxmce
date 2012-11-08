@@ -15,12 +15,11 @@ Rectangle {
         smooth:  true
         opacity: 1
 
-    Text {
+    StyledText {
         id: buttonLabel
-        text:parent.text
+        textLabel:parent.text
         font.pointSize: 10
-        anchors.centerIn:parent
-        font.family: "Droid Sans"
+        anchors.centerIn:parent       
         wrapMode: Text.WordWrap
 
          }

@@ -10,9 +10,9 @@ property bool verticalMirror: false
         onTriggered: txtDate.text = getDate()
     }
 
-    Text{
+    StyledText{
         id: txtDate
-        text: getDate()
+        textLabel: getDate()
         color: "aliceblue"
         font.letterSpacing: 2
         smooth: true

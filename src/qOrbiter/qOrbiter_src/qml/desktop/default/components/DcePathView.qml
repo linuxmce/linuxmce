@@ -46,10 +46,10 @@ Rectangle {
                 asynchronous: true
             }
 
-            Text
+            StyledText
             {
                 id:celllabel
-                text: name;
+                textLabel: name;
                 font.pointSize: 12;
                 color: "white" ;
                 wrapMode: "WrapAtWordBoundaryOrAnywhere"

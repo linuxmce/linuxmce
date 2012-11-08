@@ -36,14 +36,14 @@ Rectangle {
                 }
 
 
-                Row{
-                    height: childrenRect.height
-                    width: childrenRect.width
-
-                    Text {
+                Rectangle{
+                   anchors.fill:parent
+                   color:"transparent"
+                    StyledText {
 
                         width: scaleX(10)
                         height: parent.height
+                        isBold: true
                         id: fileformatcell
                         text: status ? name +" Is selected": name
                         font.pointSize: 12

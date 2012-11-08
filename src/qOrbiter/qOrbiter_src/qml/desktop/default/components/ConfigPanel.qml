@@ -26,9 +26,9 @@ Rectangle {
         width: 50
         color: "grey"
         anchors.left: parent.left
-        Text {
+        StyledText {
             id: exlbl
-            text: qsTr("Close")
+            textLabel: qsTr("Close")
             anchors.centerIn: parent
         }
         MouseArea{

@@ -21,9 +21,9 @@ Rectangle {
         anchors.horizontalCenter: parent.horizontalCenter
 
         spacing: scaleY(1)
-        Text {
+        StyledText {
             id: avcodeslabel
-            text: qsTr("These are the devices in use. Touch a device name to send it a command, or touch the other cells to resend inputs or jump to advanced")
+            textLabel: qsTr("These are the devices in use. Touch a device name to send it a command, or touch the other cells to resend inputs or jump to advanced")
             width: parent.width * .75
             wrapMode: "WrapAtWordBoundaryOrAnywhere"
             font.pixelSize: scaleY(2)
@@ -107,10 +107,10 @@ Rectangle {
                     color: "slateblue"
                     Column{
                         spacing: scaleY(1)
-                        Text{
+                        StyledText{
                             id:command_label
-                            text:qs_command
-                            font.pixelSize: scaleY(2)
+                            textLabel:name
+                            fontSize: scaleY(2)
                         }
                     }
                     MouseArea{
@@ -118,7 +118,7 @@ Rectangle {
                         hoverEnabled: true
                         onEntered: device_box.color = "white"
                         onExited: device_box.color = "slateblue"
-                        onClicked: manager.resendCode(i_parentDevice, i_commandnum)
+                        onClicked: manager.resendCode(parent, commandnumber)
                     }
                 }
             }
