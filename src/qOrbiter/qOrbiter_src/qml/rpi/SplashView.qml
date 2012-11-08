@@ -46,8 +46,7 @@ Rectangle{
     FontLoader{
         id:keyFont
         name:"Sawasdee"
-        source: "../fonts"
-
+        source: "../fonts/Sawasdee.ttf"
     }
 
     Rectangle{
@@ -92,14 +91,7 @@ Rectangle{
 
             }
         }
-        DropShadow{
-            source: welcomeLabel
-            radius: 5
-            horizontalOffset: 5
-            verticalOffset: 10
-            samples:8
-            spread: 3
-        }
+
     }
 
     Text {

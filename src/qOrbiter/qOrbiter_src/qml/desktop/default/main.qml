@@ -11,6 +11,12 @@ Item {
     width:appW
     height:appH
 
+    FontLoader{
+        id:myFont
+        name:"Sawasdee"
+        source: "../../fonts/Sawasdee.ttf"
+    }
+
     MediaManager{
         id:dceplayer
         anchors.top: parent.top

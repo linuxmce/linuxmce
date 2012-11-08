@@ -9,7 +9,7 @@ Rectangle {
     border.width: 2
     color: "aliceblue"
     anchors.centerIn: parent
-    Component.onCompleted: manager.showAdvancedButtons()
+    Component.onCompleted: manager.showAvControl()
     MouseArea{
         anchors.fill:avcodes_rect
 
@@ -42,9 +42,9 @@ Rectangle {
             border.width: 2
             radius: 20
 
-            Text {
+            StyledText {
                 id: blah
-                text: qsTr("Router Reply") + manager.mediaResponse
+                textLabel: qsTr("Router Reply") + manager.mediaResponse
             }
             ListView
             {
@@ -52,25 +52,31 @@ Rectangle {
                 height: parent.height
                 width: scaleX(15)
                 anchors.top:blah.bottom
-                model: avcodes
+                model: deviceList
                 clip:true
+                spacing:5
                 delegate: Rectangle{
                     id:av_code_top
                     height: scaleY(8)
                     width: scaleX(20)
                     color: "grey"
+                    border.color: "white"
+                    border.width: 1
                     Column{
                         spacing: scaleY(1)
-                        Text{
+                        StyledText{
                             id:av_label
-                            text:qs_device
-                            font.pixelSize: scaleY(2)
+                            textLabel:name
+                            fontSize: scaleY(2)
+                            isBold: true
+
                         }
 
-                        Text {
+                        StyledText {
                             id: device_number
-                            text: qsTr("Device Number:") + i_deviceNo
-                            font.pixelSize: scaleY(2)
+                            textLabel: qsTr("Device Number:") + devicenumber
+                            fontSize: scaleY(2)
+
                         }
                     }
                     MouseArea{
@@ -78,7 +84,7 @@ Rectangle {
                         hoverEnabled: true
                         onEntered: av_code_top.color = "white"
                         onExited: av_code_top.color = style.lighthighlight
-                        onClicked: manager.GetAdvancedMediaOptions(i_deviceNo)
+                        onClicked: manager.showDeviceCodes(devicenumber)
 
                     }
                 }
@@ -93,7 +99,7 @@ Rectangle {
                 anchors.left: codelist.right
                 anchors.leftMargin: scaleY(5)
                 clip: true
-                model: device_commands
+                model: deviceCommands
                 delegate: Rectangle{
                     id:device_box
                     height: scaleY(8)

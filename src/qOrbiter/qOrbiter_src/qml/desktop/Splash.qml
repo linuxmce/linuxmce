@@ -12,6 +12,12 @@ Item {
     onOrbiterSetupChanged:{  console.log(orbiterSetup) ; existing_orbiters.visible = false; orbiter_options.visible = true; newOrbiterOptionContainer.visible=true; window.showSetup()}
     onWidthChanged: console.log("detected size change")
 
+    FontLoader{
+        id:myFont
+        name:"Sawasdee"
+        source: "../../fonts/Sawasdee.ttf"
+    }
+
     function scaleX(x){
         return x/100*appH
     }

@@ -10,8 +10,9 @@ Rectangle {
     signal splashLoaded()
 
     Connections{
-        target: manager
+        target: window
         onShowList:{
+
             existing_orbiters.visible = true
             if(existing_orbiters.count === 0){
                 screenChange("NewOrbiterSetup.qml")
@@ -45,6 +46,7 @@ Rectangle {
                 text: qsTr("Connection")
                 color: window.b_connectionPresent ? "green" : "red"
                 font.pixelSize: window.b_connectionPresent ? 14 : 12
+                font.family: myFont.name
             }
         }
 
@@ -63,6 +65,7 @@ Rectangle {
                 text: qsTr("Device")
                 color: window.b_devicePresent ? "green" : "red"
                 font.pixelSize: window.b_devicePresent ? 14 : 12
+                font.family: myFont.name
             }
         }
 /*
@@ -172,6 +175,7 @@ Rectangle {
         font.bold: false
         anchors.top: rectangle2.top
         anchors.horizontalCenter: parent.horizontalCenter
+        font.family: myFont.name
     }
 
     Row{
@@ -181,7 +185,7 @@ Rectangle {
         Text {
             text: qsTr("Host:")
             font.pixelSize: 11
-            font.family: "Droid Sans"
+font.family: myFont.name
             anchors.verticalCenter: parent.verticalCenter
         }
 
@@ -190,7 +194,7 @@ Rectangle {
             width: 80
             text: srouterip
             font.pixelSize: 10
-            font.family: "Droid Sans"
+            font.family: myFont.name
             //  onTextChanged: setRouterIp(routerip.text)
             fillColor: "grey"
             anchors.verticalCenter: parent.verticalCenter
@@ -202,7 +206,7 @@ Rectangle {
             width: 80
             text: extip
             font.pixelSize: 10
-            font.family: "Droid Sans"
+            font.family: myFont.name
             //  onTextChanged: setRouterIp(routerip.text)
             fillColor: "grey"
             anchors.verticalCenter: parent.verticalCenter
@@ -212,14 +216,14 @@ Rectangle {
         Text {
             text: qsTr("Device:")
             font.pixelSize: 11
-            font.family: "Droid Sans"
+            font.family: myFont.name
             anchors.verticalCenter: parent.verticalCenter
         }
         TextInput {
             id: devicenumber
             width: scaleX(10)
             text: deviceid
-            font.family: "Droid Sans"
+            font.family: myFont.name
             font.pixelSize: 12
             //onTextChanged: setDeviceNo(devicenumber.text)
             fillColor: "grey"
@@ -243,6 +247,7 @@ Rectangle {
                 font.pixelSize: 12
                 verticalAlignment: Text.AlignTop
                 font.bold: true
+                font.family: myFont.name
             }
 
             radius:  5
@@ -268,6 +273,7 @@ Rectangle {
                 anchors.fill: parent
                 text: qsTr("Exit")
                 font.pixelSize: 11
+                font.family: myFont.name
             }
 
             radius:  4
@@ -283,7 +289,7 @@ Rectangle {
         text: "Status " + manager.commandResponse
         anchors.topMargin: scaleY(15)
         font.pixelSize: 14
-        font.family: "Droid Sans"
+        font.family: myFont.name
         color: "white"
         anchors.top: rectangle2.bottom
         anchors.horizontalCenter: rectangle2.horizontalCenter
@@ -308,14 +314,17 @@ Rectangle {
             Column
             {
                 height: childrenRect.height
-                width: childrenRect.width
+                width: parent.width *.65
                 anchors.centerIn: parent
 
                 Text {
                     id: orbiter_label
                     text: qsTr("Orbiter:")+ label
-                    font.pixelSize: 12
+                    font.pixelSize: 18
                     wrapMode: Text.WrapAtWordBoundaryOrAnywhere
+                    font.family: myFont.name
+                    font.bold: true
+                    width: parent.width
                 }
                 Text {
                     id: dev_num
@@ -323,6 +332,8 @@ Rectangle {
                     font.pixelSize: 12
                     font.italic: true
                     wrapMode: Text.WrapAtWordBoundaryOrAnywhere
+                    font.family: myFont.name
+                    width: parent.width
                 }
             }
             MouseArea {
@@ -354,6 +365,8 @@ Rectangle {
             width: parent.width
             anchors.centerIn: parent
             wrapMode: Text.WrapAtWordBoundaryOrAnywhere
+            font.family: myFont.name
+
         }
         visible: existing_orbiters.visible
         anchors.bottom: existing_orbiters.top

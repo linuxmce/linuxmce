@@ -28,13 +28,20 @@ Item {
 //            onOrientationChanged:dceplayer.setWindowSize(appH, appW)
 //        }
 //    }
-MouseArea{
-    anchors.fill: item
-}
+
+//    Rectangle{
+//        anchors.fill: parent
+//        color: "black"
+
+//    }
+
+    MouseArea{
+        anchors.fill: parent
+    }
 FontLoader{
     id:keyFont
     name:"Sawasdee"
-
+    source: "../../fonts/Sawasdee.ttf"
 }
 
 
@@ -118,7 +125,7 @@ FontLoader{
             interval: 10000
             running: true
             repeat: false
-            onTriggered: {               
+            onTriggered: {
                 fadeUi.start()
             }
         }
