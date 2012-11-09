@@ -8,10 +8,17 @@ Item {
     height:appH
     width:appW
     property bool orbiterSetup:false
+    property string router_ip: ""
 
     onOrbiterSetupChanged:{  console.log(orbiterSetup) ; existing_orbiters.visible = false; orbiter_options.visible = true; newOrbiterOptionContainer.visible=true; window.showSetup()}
     onWidthChanged: console.log("detected size change")
-
+    Image {
+        id: splash
+        anchors.centerIn: parent
+        fillMode: Image.PreserveAspectFit
+        source: "default/img/icons/backgrounds/bedroom.png"
+        anchors.fill: parent
+    }
     FontLoader{
         id:myFont
         name:"Sawasdee"

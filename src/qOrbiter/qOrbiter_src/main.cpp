@@ -419,7 +419,7 @@ int main(int argc, char* argv[])
         QObject::connect(&pqOrbiter, SIGNAL(setMyIp(QString)), &w, SLOT(setInternalIp(QString)),Qt::QueuedConnection);
         QObject::connect(&orbiterWin, SIGNAL(setupNewOrbiter()), &pqOrbiter,SLOT(populateSetupInformation()));
         QObject::connect(&pqOrbiter,SIGNAL(promptResponse(int,QList<QObject*>)), &orbiterWin, SLOT(displayPromptResponse(int, QList<QObject*> )));
-        QObject::connect(&orbiterWin, SIGNAL(newOrbiterData(int , int , int , int , int , int )), &pqOrbiter, SLOT(setOrbiterSetupVars(int,int,int,int,int,int)));
+        QObject::connect(&orbiterWin, SIGNAL(newOrbiterData(int , int , int , int , int , int )), &pqOrbiter, SLOT(setOrbiterSetupVars(int,int,int,int,int,int)), Qt::QueuedConnection);
 
         /*CHild Devices*/
         QObject::connect(&pqOrbiter, SIGNAL(qMediaPlayerIDChanged(int)), &w, SLOT(setMediaPlayerID(int)), Qt::QueuedConnection);

@@ -33,7 +33,7 @@ Item
 
         }
 
-        Text{
+        StyledText{
             id:connectstatus
             text: "Orbiter "+ manager.m_dwPK_Device + " is connected."
             color: "aliceblue"
@@ -41,6 +41,7 @@ Item
             anchors.left: parent.left
             anchors.leftMargin: scaleX(5)
             anchors.verticalCenter: headerbg.verticalCenter
+            isBold: true
 
         }
 
