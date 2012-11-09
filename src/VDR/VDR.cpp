@@ -908,7 +908,10 @@ void VDR::CMD_Navigate_Next(int iStreamID,string &sCMD_Result,Message *pMessage)
         {
          sCommand = "HITK Up";
         }
-        SendVDRCommand(m_sVDRIp,sCommand,sVDRResponse);
+//        SendVDRCommand(m_sVDRIp,sCommand,sVDRResponse);
+	// We try to only send the command, and don't care what we get back. 
+	// Should provide for a faster,better user experience.
+	SendOnlyVDRCommand(m_sVDRIp, sCommand);
 
 }
 //<-dceag-c82-b->
@@ -934,7 +937,8 @@ void VDR::CMD_Navigate_Prev(int iStreamID,string &sCMD_Result,Message *pMessage)
         {
          sCommand = "HITK Down";
         }
-        SendVDRCommand(m_sVDRIp,sCommand,sVDRResponse);
+//	SendVDRCommand(m_sVDRIp,sCommand,sVDRResponse);
+	SendOnlyVDRCommand(m_sVDRIp, sCommand);
 
 }
 //<-dceag-c87-b->

@@ -5,6 +5,22 @@
 
 #define VDR_SOCKET_TIMEOUT	3  // SECONDS
 
+bool SendOnlyVDRCommand(string sIP, string sCommand)
+{
+	PlainClientSocket _PlainClientSocket(sIP + ":2001");
+	if( !_PlainClientSocket.Connect() )
+	{
+		LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"Unable to connect to VDR client");
+		return false;
+	}
+	LoggerWrapper::GetInstance()->Write(LV_STATUS,"svdrPort connected");
+	if( !_PlainClientSocket.SendString(sCommand) )
+	{
+		LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"SendVDRCommand Could not send string");
+		return false;
+	}
+}	
+
 bool SendVDRCommand(string sIP, string sCommand,string &sVDRResponse)
 {
 //	LoggerWrapper::GetInstance()->Write(LV_WARNING,"SendVDRCommand Going to send command %s",sCommand.c_str());
@@ -14,7 +30,7 @@ bool SendVDRCommand(string sIP, string sCommand,string &sVDRResponse)
 //		LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"Unable to connect to VDR client");
 		return false;
 	}
-LoggerWrapper::GetInstance()->Write(LV_STATUS,"connected");
+	LoggerWrapper::GetInstance()->Write(LV_STATUS,"svdrPort connected");
 	string sResponse;
 	if( !_PlainClientSocket.ReceiveString(sResponse,VDR_SOCKET_TIMEOUT) || sResponse.substr(0,3)!="220" )
 	{
@@ -22,6 +38,7 @@ LoggerWrapper::GetInstance()->Write(LV_STATUS,"connected");
 		return false;
 	}
 
+	LoggerWrapper::GetInstance()->Write(LV_STATUS,"svdrPort response received (%s)",sResponse.c_str());
 	if( !_PlainClientSocket.SendString(sCommand) )
 	{
 //		LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"SendVDRCommand Could not send string");
