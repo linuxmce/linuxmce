@@ -370,7 +370,7 @@ void VDR::CMD_Pause_Media(int iStreamID,string &sCMD_Result,Message *pMessage)
 	string sCommand;
 	string sVDRResponse;
 	sCommand = "HITK Pause";
-	bool bResult = SendVDRCommand(m_sVDRIp,sCommand,sVDRResponse);
+	SendVDRCommand(m_sVDRIp,sCommand,sVDRResponse);
 	
 }
 
@@ -388,7 +388,7 @@ void VDR::CMD_Restart_Media(int iStreamID,string &sCMD_Result,Message *pMessage)
 	string sVDRResponse;
 	sCommand = "MESG restartmedia";
 	sCommand = "HITK Play";
-	bool bResult = SendVDRCommand(m_sVDRIp,sCommand,sVDRResponse);
+	SendVDRCommand(m_sVDRIp,sCommand,sVDRResponse);
 }
 
 //<-dceag-c41-b->
@@ -502,7 +502,7 @@ void VDR::CMD_Tune_to_channel(string sOptions,string sProgramID,string &sCMD_Res
 	string sCommand;
 	string sVDRResponse;
 	sCommand = "CHAN " + sProgramID;
-	bool bResult = SendVDRCommand(m_sVDRIp,sCommand,sVDRResponse);
+	SendVDRCommand(m_sVDRIp,sCommand,sVDRResponse);
 	Sleep(1000);
 	ParseCurrentChannel(sVDRResponse);
 
@@ -730,7 +730,6 @@ void VDR::ParseCurrentChannel(string sChannel)
 	
 	m_sSeriesDescription="",m_sEpisodeDescription="",m_sDescription="";
 	string::size_type pos=0;
-	string::size_type pos_line=0;
 	string sLine;
 	while( true )
 	{
