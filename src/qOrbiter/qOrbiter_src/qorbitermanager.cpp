@@ -102,8 +102,8 @@ qorbiterManager::qorbiterManager(QDeclarativeView *view, QObject *parent) :
     qorbiterUIwin->rootContext()->setContextProperty("manager", this); //providing a direct object for qml to call c++ functions of this class
     qorbiterUIwin->rootContext()->setContextProperty("dcemessage", dceResponse);
     qorbiterUIwin->rootContext()->setContextProperty("orbiterList", myOrbiters);
-     qorbiterUIwin->rootContext()->setContextProperty("deviceList", devices);
-     qorbiterUIwin->rootContext()->setContextProperty("deviceCommands", deviceCommands);
+    qorbiterUIwin->rootContext()->setContextProperty("deviceList", devices);
+    qorbiterUIwin->rootContext()->setContextProperty("deviceCommands", deviceCommands);
 
     appHeight = qorbiterUIwin->height() ;
     appWidth = qorbiterUIwin->width() ;
@@ -1452,7 +1452,7 @@ void qorbiterManager::saveScreenShot(QString attribute)
 void qorbiterManager::setCommandList(QList<QObject *> &l)
 {
     commandList = l;
-  //  qorbiterUIwin->rootContext()->setContextProperty("device_commands", QVariant::fromValue(commandList));
+    //  qorbiterUIwin->rootContext()->setContextProperty("device_commands", QVariant::fromValue(commandList));
 }
 
 void qorbiterManager::showBookmarks(QList<QObject *> t)
@@ -1462,7 +1462,7 @@ void qorbiterManager::showBookmarks(QList<QObject *> t)
 #ifdef debug
     qDebug() << current_bookmarks.size();
 #endif
-  //  qorbiterUIwin->rootContext()->setContextProperty("currentBookmarks", QVariant::fromValue(current_bookmarks));
+    //  qorbiterUIwin->rootContext()->setContextProperty("currentBookmarks", QVariant::fromValue(current_bookmarks));
 }
 
 void qorbiterManager::setHouseMode(int mode, int pass)

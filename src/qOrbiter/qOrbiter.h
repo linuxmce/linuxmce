@@ -62,24 +62,9 @@ class qOrbiter : public qOrbiter_Command
     Q_PROPERTY(QString dceIP READ getdceIP WRITE setdceIP NOTIFY dceIPChanged)
     Q_PROPERTY(QString DCEHost READ getDCEHost WRITE setDCEHost NOTIFY DCEHostChanged)
 
-    Q_PROPERTY (QString mediaResponse READ getMediaResponse WRITE setMediaResponse NOTIFY mediaResponseChanged)
-
-    Q_PROPERTY (QString commandResponse READ getCommandResponse WRITE setCommandResponse NOTIFY commandResponseChanged)//for use in displaying command related dce replies.
-    Q_PROPERTY (QString eventResponse READ getEventResponse WRITE setEventResponse NOTIFY eventResponseChanged) // for use in displaying message associated with incoming events
-    Q_PROPERTY (QString deviceResponse READ getDeviceResponse WRITE setDeviceResponse NOTIFY deviceResponseChanged) // for use in display of messages associated with specific devices
-
-
-
     Q_PROPERTY (int modelPages READ getModelPages WRITE setModelPages NOTIFY modelPagesChanged)
-    Q_PROPERTY (int i_current_mediaType READ getMediaType WRITE setMediaType NOTIFY mediaTypeChanged)
-    Q_PROPERTY (bool discreteAudio READ getDiscreteAudio WRITE setDiscreteAudio NOTIFY discreteAudioChanged )
-    Q_PROPERTY (bool m_bContainsVideo READ getContainsVideo WRITE setContainsVideo NOTIFY containsVideo())
-    Q_PROPERTY (bool usingLiveAv READ getLiveAvPath WRITE setLiveAvPath NOTIFY liveAvPath)
-    Q_PROPERTY (bool m_bIsOSD READ getOsd WRITE setOsd NOTIFY isOsd)
-    Q_PROPERTY (bool monitorAvailible READ getMonitorStatus WRITE setMonitorStatus NOTIFY monitorStatusChanged)
+    Q_PROPERTY (int i_current_mediaType READ getMediaType WRITE setMediaType NOTIFY mediaTypeChanged)  
     Q_PROPERTY (int m_dwPK_Device READ getDeviceId WRITE setDeviceId NOTIFY deviceIdChanged)
-
-
     Q_PROPERTY(int qMediaPlayerID READ getqMediaPlayerID WRITE setqMediaPlayerID NOTIFY qMediaPlayerIDChanged)
     Q_PROPERTY(int qCommunicatorID READ getqCommunicatorID WRITE setqCommunicatorID NOTIFY qCommunicatorIDChanged)
 
@@ -114,22 +99,13 @@ public:
     //DataGridTable pDataGridTable;
     int m_dwPK_Device_NowPlaying,m_dwPK_Device_NowPlaying_Video,m_dwPK_Device_NowPlaying_Audio,m_dwPK_Device_CaptureCard;  /** < set by the media engine, this is whatever media device is currently playing.  Capture Card is non null if we're displaying media via this card */
     bool m_bPK_Device_NowPlaying_Audio_DiscreteVolume,m_bContainsVideo,m_bUsingLiveAVPath;
-
-    bool discreteAudio;
-    bool usingLiveAv;
-    bool monitorAvailible;
-
     bool retrieving;
     bool finished;
     bool b_mediaPlaying;
 
-    QString mediaResponse;
     DataGridTable *pDataGridTable;
 
     //special Q_Properties which are always availible through the 'dcerouter object' for display of various responses
-    QString commandResponse;
-    QString eventResponse;
-    QString deviceResponse;
 
     int i_mediaModelRows;
     int media_currentRow;
@@ -139,7 +115,6 @@ public:
     int media_pageSeperator;
     int modelPages;
     string media_seek;
-
     bool pause;
 
     QString dceIP;
@@ -176,12 +151,6 @@ public:
     QNetworkAccessManager * httpOrbiterSettings;
     QNetworkRequest * httpSettingsRequest;
     QNetworkReply * httpSettingsReply;
-
-    QList<QObject*> screenshotVars;
-    QList<QObject*> resendAvButtons;
-    QList<QObject*> deviceCommands;
-    QList<QObject*> bookmarks;
-    QList<QObject*> sleepingAlarms;
 
     string *s_user;
     QString currentScreen;
@@ -229,7 +198,7 @@ public:
 public:
     // Constructors/Destructor
     qOrbiter(int DeviceID, string ServerAddress,bool bConnectEventHandler=true,bool bLocalMode=false,class Router *pRouter=NULL, QObject *parent = 0);
-    virtual ~qOrbiter();
+
     //<-dceag-const-e->
     //  virtual bool GetConfig();
     virtual bool Register();
@@ -1295,7 +1264,7 @@ signals:
     void configReady(QByteArray config);
     void setMyIp(QString ip);
     void newTCport(int port);
-    void mediaResponseChanged();
+    void mediaResponseChanged(QString r);
     void  deviceValid(bool s);
     void deviceIdChanged();
     void setEa(int room, int ea);
@@ -1428,6 +1397,7 @@ signals:
     void resendAvButtonList(const QList<QObject*> &t);
     void newDeviceCommand(AvCommand *f);
     void bookmarkList(QList<QObject*> b);
+    void deviceAudioLevelChanged(int l);
 
     //security cameras
     void securityImageReady(int c, QImage s);
@@ -1439,24 +1409,24 @@ signals:
     //sleeping alarms
     void sleepingAlarmsReady(SleepingAlarm *t);
 
-    void discreteAudioChanged();
-    void liveAvPath();
-    void containsVideo();
-    void isOsd();
-    void monitorStatusChanged();
+    void discreteAudioChanged(bool discreteState);
+    void liveAvPath(bool liveTvAvailible);
+    void containsVideo(bool videoPresent);
+    void isOsd(bool osdState);
+    void monitorStatusChanged(bool monitorModeState);
 
     //messaging
-    void commandResponseChanged();
-    void eventResponseChanged();
-    void deviceResponseChanged();
+    void commandResponseChanged(QString r);
+    void eventResponseChanged(QString e);
+    void deviceResponseChanged(QString d);
 
     /*
      *Media Player
      */
-    void videoFileUrlChanged();
-    void audioFileUrlChanged();
-    void streamingVideoIpChanged();
-    void streamingAudioIpChanged();
+    void videoFileUrlChanged(QString fileUrl);
+    void audioFileUrlChanged(QString fileUrl);
+    void streamingVideoIpChanged(QString newVideoIp);
+    void streamingAudioIpChanged(QString audioIp);
     void mediaPlayerTimeCodeChanged();
     void stopPlayer();
     void pausePlayer();
@@ -1468,6 +1438,8 @@ signals:
     void DCEHostChanged();
 
 public slots:
+    void getVolume();
+
     void setAlarm(bool toggle, int grp);
 
     void beginSetup();
@@ -1493,29 +1465,9 @@ public slots:
 
     void populateSetupInformation();
 
-    void setDiscreteAudio(bool audio) { discreteAudio = audio;  emit discreteAudioChanged(); }
-    bool getDiscreteAudio() {return discreteAudio; }
-
-    void setLiveAvPath(bool path) { usingLiveAv = path; qDebug() ; emit liveAvPath();}
-    bool getLiveAvPath() { return usingLiveAv;}
-
-    void setContainsVideo(bool video) {m_bContainsVideo = video; emit containsVideo();}
-    bool getContainsVideo() {return m_bContainsVideo;}
-
-    void setOsd(bool osd) { m_bIsOSD = osd; emit isOsd();}
+    void setOsd(bool osd) { m_bIsOSD = osd; emit isOsd(m_bIsOSD);}
     bool getOsd() { return m_bIsOSD;}
 
-    void setMonitorStatus(bool state) { monitorAvailible = state; emit monitorStatusChanged();}
-    bool getMonitorStatus() {return monitorAvailible;}
-
-    void setCommandResponse(QString response) {commandResponse =QTime::currentTime().toString()+"::"+response; qDebug() << commandResponse; emit commandResponseChanged();}
-    QString getCommandResponse() {return commandResponse;}
-
-    void setEventResponse(QString eResponse){eventResponse = eResponse; emit eventResponseChanged();}
-    QString getEventResponse() {return eventResponse;}
-
-    void setDeviceResponse(QString dResponse) {deviceResponse = deviceResponse; emit deviceResponseChanged();}
-    QString getDeviceResponse() {return deviceResponse;}
 
     //setup
     void executeCommandGroup(int cmdGrp);
@@ -1557,11 +1509,6 @@ public slots:
     void extraButtons(QString button);
 
     void newOrbiter();
-
-
-    //operations
-    void setMediaResponse(QString r) {mediaResponse = r; emit mediaResponseChanged();}
-    QString getMediaResponse() {return mediaResponse;}
 
     //floorplans
     void getFloorPlanImage(QString fp_path);

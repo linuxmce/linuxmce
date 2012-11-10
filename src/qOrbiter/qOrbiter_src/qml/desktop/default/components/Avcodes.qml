@@ -10,6 +10,8 @@ Rectangle {
     color: "aliceblue"
     anchors.centerIn: parent
     Component.onCompleted: manager.showAvControl()
+    property int selectedDevice
+    onSelectedDeviceChanged: deviceCommands.clear()
     MouseArea{
         anchors.fill:avcodes_rect
 
@@ -84,7 +86,7 @@ Rectangle {
                         hoverEnabled: true
                         onEntered: av_code_top.color = "white"
                         onExited: av_code_top.color = style.lighthighlight
-                        onClicked: manager.showDeviceCodes(devicenumber)
+                        onClicked: {manager.showDeviceCodes(devicenumber);selectedDevice = devicenumber}
 
                     }
                 }
@@ -118,7 +120,7 @@ Rectangle {
                         hoverEnabled: true
                         onEntered: device_box.color = "white"
                         onExited: device_box.color = "slateblue"
-                        onClicked: manager.resendCode(parent, commandnumber)
+                        onClicked: manager.resendCode(selectedDevice , commandnumber)
                     }
                 }
             }

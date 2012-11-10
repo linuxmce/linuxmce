@@ -52,18 +52,6 @@ qOrbiter::qOrbiter(Command_Impl *pPrimaryDeviceCommand, DeviceData_Impl *pData, 
 
 }
 
-//<-dceag-dest-b->
-qOrbiter::~qOrbiter()
-//<-dceag-dest-e->
-{
-
-    /*  char *pData; int iSize;
-    pData= "NULL"; iSize = 0;
-
-    CMD_Orbiter_Registered CMD_Orbiter_unRegistered(m_dwPK_Device, iOrbiterPluginID, "0" ,iPK_User, StringUtils::itos(1), iFK_Room, &pData, &iSize);
-    SendMessage (CMD_Orbiter_unRegistered);
-*/
-}
 
 
 
@@ -615,7 +603,7 @@ void qOrbiter::CMD_Set_Text(string sPK_DesignObj,string sText,int iPK_Text,strin
     //   cout << "Parm #3 - PK_DesignObj=" << sPK_DesignObj << endl;
     //  cout << "Parm #9 - Text=" << sText << endl;
     //  cout << "Parm #25 - PK_Text=" << iPK_Text << endl;
-    setCommandResponse(QString::fromStdString(sText));
+    emit commandResponseChanged(QString::fromStdString(sText));
 }
 
 //<-dceag-c26-b->
@@ -656,7 +644,7 @@ void qOrbiter::CMD_Set_Variable(int iPK_Variable,string sValue_To_Assign,string 
     cout << "Need to implement command #27 - Set Variable" << endl;
     cout << "Parm #4 - PK_Variable=" << iPK_Variable << endl;
     cout << "Parm #5 - Value_To_Assign=" << sValue_To_Assign << endl;
-    //setCommandResponse(QString::fromStdString(sValue_To_Assign));
+    //emit commandResponseChanged(QString::fromStdString(sValue_To_Assign));
 }
 
 //<-dceag-c28-b->
@@ -1011,18 +999,19 @@ void qOrbiter::CMD_Set_Now_Playing(string sPK_DesignObj,string sValue_To_Assign,
 
     if(m_dwPK_Device_CaptureCard != 0)
     {
-        setMonitorStatus(true);
+        emit monitorStatusChanged(true);
     }
 
     m_bPK_Device_NowPlaying_Audio_DiscreteVolume = atoi(StringUtils::Tokenize(sList_PK_Device,",",pos).c_str())==1;
-    setDiscreteAudio(m_bPK_Device_NowPlaying_Audio_DiscreteVolume);
+    emit discreteAudioChanged(m_bPK_Device_NowPlaying_Audio_DiscreteVolume);
 
     m_bContainsVideo = atoi(StringUtils::Tokenize(sList_PK_Device,",",pos).c_str())==1;
-    setContainsVideo(m_bContainsVideo);
+    emit containsVideo(m_bContainsVideo);
 
 
     m_bUsingLiveAVPath = atoi(StringUtils::Tokenize(sList_PK_Device,",",pos).c_str())==1;
-    setLiveAvPath(m_bUsingLiveAVPath);
+    emit liveAvPath(m_bUsingLiveAVPath);
+    getVolume();
 #ifdef debug
     qDebug() << m_bUsingLiveAVPath;
 #endif
@@ -1378,7 +1367,7 @@ void qOrbiter::CMD_Show_File_List(int iPK_MediaType,string &sCMD_Result,Message 
     q_mediaType = QString::number(iPK_MediaType);
     emit gotoQml("Screen_47.qml");
     currentScreen= "Screen_47.qml";
-    setCommandResponse("Show File List Complete, Calling request Media Grid");
+    emit commandResponseChanged("Show File List Complete, Calling request Media Grid");
     setGridStatus(true);
     prepareFileList(iPK_MediaType);
 }
@@ -1776,8 +1765,8 @@ void qOrbiter::CMD_Assisted_Make_Call(int iPK_Users,string sPhoneExtension,strin
 bool DCE::qOrbiter::initialize()
 {
 
-    setCommandResponse("Connecting to router");
-    setCommandResponse("Starting dce initialization");
+    emit commandResponseChanged("Connecting to router");
+    emit commandResponseChanged("Starting dce initialization");
 
     if(m_bOrbiterConnected==false){
 #ifdef RPI
@@ -1790,7 +1779,7 @@ bool DCE::qOrbiter::initialize()
             m_bReload = false;
             m_bOrbiterConnected = true;
             emit deviceValid(true);
-            setCommandResponse("Starting Manager");
+            emit commandResponseChanged("Starting Manager");
             emit startManager(QString::number(m_dwPK_Device), QString::fromStdString(m_sIPAddress) );
 
             DCE::LoggerWrapper::GetInstance()->Write(LV_CRITICAL, "Orbiter Connected, requesting configuration for device %d", m_dwPK_Device);
@@ -1806,7 +1795,7 @@ bool DCE::qOrbiter::initialize()
 
             if (SendCommand(configFileRequest))
             {
-                setCommandResponse("Requesting remote configuration..");
+                emit commandResponseChanged("Requesting remote configuration..");
             }
             else
             {
@@ -1818,8 +1807,8 @@ bool DCE::qOrbiter::initialize()
             configData = oData;
             if (configData.size() == 0)
             {
-                setCommandResponse("Invalid config for device: " + QString::number(m_dwPK_Device));
-                setCommandResponse("Please run http://dcerouter/lmce-admin/qOrbiterGenerator.php?d=" + QString::number(m_dwPK_Device)) ;
+                emit commandResponseChanged("Invalid config for device: " + QString::number(m_dwPK_Device));
+                emit commandResponseChanged("Please run http://dcerouter/lmce-admin/qOrbiterGenerator.php?d=" + QString::number(m_dwPK_Device)) ;
                 return false;
             }
 
@@ -1836,7 +1825,7 @@ bool DCE::qOrbiter::initialize()
             {
 
                 LoggerWrapper::GetInstance()->Write(LV_CRITICAL, "No Router");
-                setCommandResponse("No Connection to Router");
+                emit commandResponseChanged("No Connection to Router");
                 emit routerInvalid();
                 //QApplication::processEvents(QEventLoop::AllEvents);
                 return false;
@@ -1846,7 +1835,7 @@ bool DCE::qOrbiter::initialize()
             {
 
                 LoggerWrapper::GetInstance()->Write(LV_CRITICAL, "Bad Device");
-                setCommandResponse("Bad Device");
+                emit commandResponseChanged("Bad Device");
                 // int errorType =  this->DeviceIdInvalid();
                 emit connectionValid(true);
                 //QApplication::processEvents(QEventLoop::AllEvents);
@@ -1857,7 +1846,7 @@ bool DCE::qOrbiter::initialize()
             {
 
                 LoggerWrapper::GetInstance()->Write(LV_CRITICAL, "Router Needs Reload");
-                setCommandResponse("Needs Reload");
+                emit commandResponseChanged("Needs Reload");
                 //QApplication::processEvents(QEventLoop::AllEvents);
                 return false;
             }
@@ -1866,7 +1855,7 @@ bool DCE::qOrbiter::initialize()
 
                 LoggerWrapper::GetInstance()->Write(LV_CRITICAL, "Connect() Failed");
                 Disconnect();
-                setCommandResponse("QOrbiter Connect() Failed for"+QString::number(this->m_dwPK_Device) );
+                emit commandResponseChanged("QOrbiter Connect() Failed for"+QString::number(this->m_dwPK_Device) );
                 //QApplication::processEvents(QEventLoop::AllEvents);
                 return false;
             }
@@ -1901,7 +1890,7 @@ bool qOrbiter::getConfiguration()
 
 void qOrbiter::registerDevice(int user, QString ea, int room)
 {
-    //  setCommandResponse("registering");
+    //  emit commandResponseChanged("registering");
 
     char *pData;
     int iSize;
@@ -1917,7 +1906,7 @@ void qOrbiter::registerDevice(int user, QString ea, int room)
     DCE::CMD_Orbiter_Registered CMD_Orbiter_Registered(m_dwPK_Device, iOrbiterPluginID,  "1" ,      i_user,         StringUtils::itos(i_ea),          i_room,           &pData, &iSize);
     if (SendCommand(CMD_Orbiter_Registered, &pResponse) && pResponse=="OK")
     {
-        setCommandResponse("DCERouter Responded to Register with " + QString::fromStdString(pResponse));
+        emit commandResponseChanged("DCERouter Responded to Register with " + QString::fromStdString(pResponse));
         setLocation(room, ea.toInt());
         setUser(i_user);
         GetScreenSaverImages();
@@ -1968,9 +1957,9 @@ void qOrbiter::setOrbiterSetupVars(int users, int room, int skin, int lang, int 
         }
         else
         {
-            setCommandResponse("New Device ID:" +QString::number(t));
+            emit commandResponseChanged("New Device ID:" +QString::number(t));
             m_dwPK_Device = t ;
-            setCommandResponse("setting ea");
+            emit commandResponseChanged("setting ea");
             httpSettingsRequest->setUrl("http://"+QString::fromStdString(m_sIPAddress).append("/lmce-admin/setEa2.php?d="+QString::number(t)+"&r="+QString::number(sPK_Room)));
             qDebug() << "Ea url::" <<httpSettingsRequest->url();
             httpSettingsReply = httpOrbiterSettings->get(*httpSettingsRequest);
@@ -1979,22 +1968,22 @@ void qOrbiter::setOrbiterSetupVars(int users, int room, int skin, int lang, int 
     }
     else
     {
-       // qDebug()<<sPK_Users << "-" << sPK_Room;
+        // qDebug()<<sPK_Users << "-" << sPK_Room;
     }
 }
 
 void qOrbiter::finishSetup()
 {
     httpSettingsReply->disconnect(this, SLOT(finishSetup()));
-    setCommandResponse("Finishing setup...");
-  //  qDebug() << httpSettingsReply->readAll();
+    emit commandResponseChanged("Finishing setup...");
+    //  qDebug() << httpSettingsReply->readAll();
     QString settingsUrl = "http://"+ QString::fromStdString(m_sIPAddress);
     settingsUrl.append("/lmce-admin/qOrbiterGenerator.php?d="+QString::number(m_dwPK_Device)) ;
     httpSettingsRequest->setUrl(settingsUrl);
-   // qDebug() << "Settings url :: " << httpSettingsRequest->url();
+    // qDebug() << "Settings url :: " << httpSettingsRequest->url();
     httpSettingsReply = httpOrbiterSettings->get(*httpSettingsRequest);
     QObject::connect(httpSettingsReply,SIGNAL(finished()), this, SLOT(initialize()));
-    setCommandResponse("Setup Complete, restarting");
+    emit commandResponseChanged("Setup Complete, restarting");
 }
 
 void qOrbiter::connectionError()
@@ -2006,19 +1995,19 @@ void qOrbiter::connectionError()
 void qOrbiter::requestAttributeTypes()
 {
     string sName="";
-    setCommandResponse("Requesting Subtypes");
+    emit commandResponseChanged("Requesting Subtypes");
     string pResponse;
     CMD_Get_Media_Sub_Type reqSubtype(m_dwPK_Device, iMediaPluginID, i_current_mediaType, &sName );
 
     if(SendCommand(reqSubtype, &pResponse) && pResponse=="OK"){
-        setCommandResponse("Got subtype for media");
+        emit commandResponseChanged("Got subtype for media");
 #ifdef QT_DEBUG
-     //   qDebug()<< sName.c_str();
+        //   qDebug()<< sName.c_str();
 #endif
     }
     else
     {
-        setCommandResponse("Command to get subtypes failed!");
+        emit commandResponseChanged("Command to get subtypes failed!");
     }
 
 
@@ -2031,14 +2020,14 @@ void qOrbiter::requestTypes(int type)
 
     CMD_Get_Attributes_For_Type getTypesCmd(m_dwPK_Device, iMediaPluginID, i_current_mediaType , &sText );
     if(SendCommand(getTypesCmd, &pResponse) && pResponse=="OK"){
-        setCommandResponse("Got types for attribute");
+        emit commandResponseChanged("Got types for attribute");
 #ifdef QT_DEBUG
-      //  qDebug()<< QString::fromStdString(sText.c_str());
+        //  qDebug()<< QString::fromStdString(sText.c_str());
 #endif
     }
     else
     {
-        setCommandResponse("Command to get types for attribute failed!");
+        emit commandResponseChanged("Command to get types for attribute failed!");
     }
 }
 
@@ -2087,7 +2076,7 @@ void qOrbiter::beginSetup()
     setOrbiterSetupVars(0,0,0,0,0,0);
 #ifndef for_harmattan
     qRegisterMetaType< QList<ExistingOrbiter*> >("QList<ExistingOrbiter*>");
-  //  qRegisterMetaType<SleepingAlarm>("SleepingAlarm");
+    //  qRegisterMetaType<SleepingAlarm>("SleepingAlarm");
     qRegisterMetaType< QList<QObject*> >("QList<QObject*>");
 
 #endif
@@ -2147,7 +2136,7 @@ void qOrbiter::initializeGrid()
     datagridVariableString.append(q_mediaType).append("|").append(q_subType).append("|").append(q_fileFormat).append("|").append(q_attribute_genres).append("|").append(q_mediaSources).append("|").append(q_usersPrivate).append("|").append(q_attributetype_sort).append("|").append(q_pk_users).append("|").append(q_last_viewed).append("|").append(q_pk_attribute);
 
     // goBack.append(datagridVariableString);
-    setCommandResponse("Dg Variables Reset");
+    emit commandResponseChanged("Dg Variables Reset");
 }
 
 void qOrbiter::setStringParam(int paramType, QString param)
@@ -2364,7 +2353,7 @@ void qOrbiter::displayToggle(bool t)
     // qDebug() << m_pData->FindFirstRelatedDeviceOfTemplate(DEVICETEMPLATE_OnScreen_Orbiter_CONST)->m_dwPK_Device;
     DCE::CMD_Display_OnOff display(m_dwPK_Device, m_pData->FindFirstRelatedDeviceOfTemplate(DEVICETEMPLATE_OnScreen_Orbiter_CONST)->m_dwPK_Device, StringUtils::itos(state), false );
     SendCommand(display);
-    setCommandResponse("Attempting to toggle the display" );
+    emit commandResponseChanged("Attempting to toggle the display" );
 }
 
 void qOrbiter::setMediaSpeed(int s)
@@ -2389,22 +2378,22 @@ void qOrbiter::removePlaylistItem(int index)
     string cmd_resp = "";
     if(SendCommand(strikeItem, &cmd_resp) && cmd_resp =="OK")
     {
-        setMediaResponse("Item Removed");
+        emit mediaResponseChanged("Item Removed");
     }
 }
 
 void qOrbiter::saveCurrentPlaylist( QString name, bool SaveAsNew)
 {
-    setMediaResponse("Saving playlist-"+name);
+    emit mediaResponseChanged("Saving playlist-"+name);
     CMD_Save_playlist savePlaylist(m_dwPK_Device, iMediaPluginID, i_user, StringUtils::itos(this->i_ea), name.toStdString(), SaveAsNew);
     string saveResp = "";
     if(SendCommand(savePlaylist, & saveResp) && saveResp == "OK")
     {
-        setMediaResponse("Playlist Saved");
+        emit mediaResponseChanged("Playlist Saved");
     }
     else
     {
-        setMediaResponse("Playlist not saved::"+QString::fromStdString(saveResp.c_str()));
+        emit mediaResponseChanged("Playlist not saved::"+QString::fromStdString(saveResp.c_str()));
     }
 
 }
@@ -2432,7 +2421,7 @@ QImage DCE::qOrbiter::getfileForDG(string filePath)
 
         if (!returnImage.loadFromData(tempData))
         {
-            setCommandResponse("Couldnt Load From Data, setting default icon image");
+            emit commandResponseChanged("Couldnt Load From Data, setting default icon image");
             returnImage.load(":/icons/icon.png");
             return returnImage;
         }
@@ -2441,7 +2430,7 @@ QImage DCE::qOrbiter::getfileForDG(string filePath)
     }
     else
     {
-        setCommandResponse("Couldnt Load From Router, setting default icon image");
+        emit commandResponseChanged("Couldnt Load From Router, setting default icon image");
         returnImage.load(":/icons/icon.png");
         return returnImage;
     }
@@ -2458,12 +2447,12 @@ void DCE::qOrbiter::GetFileInfoForQml(QString qs_file_reference)
     if (SendCommand(cmd_file_info, &pResponse) && pResponse == "OK")
     {
         GetMediaAttributeGrid(qs_file_reference);
-        setCommandResponse("Requesting file information for "+ qs_file_reference );
+        emit commandResponseChanged("Requesting file information for "+ qs_file_reference );
 
     }
     else
     {
-        setCommandResponse("Unable to request file information");
+        emit commandResponseChanged("Unable to request file information");
         checkReload();
     }
 
@@ -2471,7 +2460,7 @@ void DCE::qOrbiter::GetFileInfoForQml(QString qs_file_reference)
 
 void DCE::qOrbiter::GetMediaAttributeGrid(QString  qs_fk_fileno)
 {
-    setCommandResponse("Getting file info");
+    emit commandResponseChanged("Getting file info");
     int gHeight = 1;
     int gWidth = 1;
     int pkVar = 0;
@@ -2499,7 +2488,7 @@ void DCE::qOrbiter::GetMediaAttributeGrid(QString  qs_fk_fileno)
 
     QStringList details = breaker.split(QRegExp("\\t"));
     int placeholder;
-//QApplication::processEvents(QEventLoop::AllEvents);
+    //QApplication::processEvents(QEventLoop::AllEvents);
 #ifdef QT_DEBUG
     //qDebug() << details.join("||");
 #endif
@@ -2522,7 +2511,7 @@ void DCE::qOrbiter::GetMediaAttributeGrid(QString  qs_fk_fileno)
     {
         // filedetailsclass->setScreenshot(details.at(placeholder+1));
         // filedetailsclass->setScreenshotimage(getfileForDG(details.at(placeholder+1).toStdString()));
-        setMediaResponse(details.at(placeholder+1));
+        emit mediaResponseChanged(details.at(placeholder+1));
         QImage temp =  getfileForDG(details.at(placeholder+1).toStdString());
         emit fd_titleImageChanged(temp);
     }
@@ -2537,7 +2526,7 @@ void DCE::qOrbiter::GetMediaAttributeGrid(QString  qs_fk_fileno)
 
         if (l ==-1){
             emit fd_storageDeviceChanged("mediatype");
-            setCommandResponse("Stored in /mediaType");
+            emit commandResponseChanged("Stored in /mediaType");
         }
         else
         {
@@ -2558,7 +2547,7 @@ void DCE::qOrbiter::GetMediaAttributeGrid(QString  qs_fk_fileno)
         //the first match as that will be the first indexed by the regex engine.
 
     }
-//QApplication::processEvents(QEventLoop::AllEvents);
+    //QApplication::processEvents(QEventLoop::AllEvents);
     placeholder = details.indexOf("FILENAME");
     if(placeholder != -1)
     {
@@ -2602,7 +2591,7 @@ void DCE::qOrbiter::GetMediaAttributeGrid(QString  qs_fk_fileno)
                 QString attributeType = pCell->m_mapAttributes_Find("Title").c_str();
                 QString attribute  = pCell->m_mapAttributes_Find("Name").c_str();
                 cellfk = pCell->GetValue();
-//QApplication::processEvents(QEventLoop::AllEvents);
+                //QApplication::processEvents(QEventLoop::AllEvents);
                 if(attributeType == "Program")
                 {
                     emit fd_programChanged(attribute);
@@ -2694,14 +2683,14 @@ void DCE::qOrbiter::StopMedia()
 
 void DCE::qOrbiter::RwMedia()
 {
-      CMD_Change_Playback_Speed rewind_media(m_dwPK_Device, iMediaPluginID, internal_streamID , -2, true);
-      SendCommand(rewind_media);
+    CMD_Change_Playback_Speed rewind_media(m_dwPK_Device, iMediaPluginID, internal_streamID , -2, true);
+    SendCommand(rewind_media);
 }
 
 void DCE::qOrbiter::FfMedia()
 {
-     CMD_Change_Playback_Speed forward_media(m_dwPK_Device, iMediaPluginID, internal_streamID, +2, true);
-      SendCommand(forward_media);
+    CMD_Change_Playback_Speed forward_media(m_dwPK_Device, iMediaPluginID, internal_streamID, +2, true);
+    SendCommand(forward_media);
 }
 
 void DCE::qOrbiter::PauseMedia()
@@ -2710,11 +2699,11 @@ void DCE::qOrbiter::PauseMedia()
     string pResponse;
     if(SendCommand(pause_media, &pResponse) && pResponse=="OK")
     {
-        setCommandResponse("Sent pause to "+ QString::number(internal_streamID) );
+        emit commandResponseChanged("Sent pause to "+ QString::number(internal_streamID) );
     }
     else
     {
-        setCommandResponse("Pause() command failed for stream "+QString::number(internal_streamID) );
+        emit commandResponseChanged("Pause() command failed for stream "+QString::number(internal_streamID) );
     }
     //  nowPlayingButton->setMediaSpeed(0);
 }
@@ -2767,7 +2756,7 @@ void DCE::qOrbiter::requestMediaPlaylist()
                 index = qs_plsIndex.toInt();
                 fk_file = pCell->GetValue();
                 emit playlistItemAdded(new PlaylistItemClass(cellTitle, fk_file, index));
-                index++;               
+                index++;
             }
 
         }
@@ -2775,7 +2764,7 @@ void DCE::qOrbiter::requestMediaPlaylist()
     }
     else
     {
-        setCommandResponse("Could not populate playlist!");
+        emit commandResponseChanged("Could not populate playlist!");
     }
 }
 
@@ -2827,11 +2816,11 @@ void qOrbiter::getStreamingVideo()
         buf.setRawData(grabData, grabData_size);
         tgrab.loadFromData(buf);
         emit  videoGrabReady(tgrab);
-        setCommandResponse("Image Retrieved");
+        emit commandResponseChanged("Image Retrieved");
     }
     else
     {
-        setCommandResponse("Couldnt get the stream image!");
+        emit commandResponseChanged("Couldnt get the stream image!");
     }
 
 }
@@ -2876,7 +2865,7 @@ void qOrbiter::updateFloorPlan(QString p)
     string pResponse="";
     if(SendCommand(getFloorPlan, &pResponse) && pResponse=="OK")
     {
-        setCommandResponse("Got floorplan for page "+p);
+        emit commandResponseChanged("Got floorplan for page "+p);
     }
     // qDebug() << "This Page Floorplan Data for Page " <<  p << ", Floorplan device type " << i_current_floorplanType << "::" <<sval.c_str();
 }
@@ -2965,7 +2954,7 @@ void DCE::qOrbiter::GetNowPlayingAttributes()
     CMD_Get_Attributes_For_Media attribute_detail_get(m_dwPK_Device, iMediaPluginID, "" , StringUtils::itos(i_ea),&s_val );
     if (SendCommand(attribute_detail_get, &pResponse) && pResponse == "OK")
     {
-        setCommandResponse("Getting Media Attributes");
+        emit commandResponseChanged("Getting Media Attributes");
         QString breaker = s_val.c_str();
         QStringList details = breaker.split(QRegExp("\\t"));
         int placeholder;
@@ -2973,7 +2962,7 @@ void DCE::qOrbiter::GetNowPlayingAttributes()
         placeholder = details.indexOf("TITLE");
         if(placeholder != -1)
         {
-            setMediaResponse(details.at(placeholder+1));
+            emit mediaResponseChanged(details.at(placeholder+1));
         }
 
         placeholder = details.indexOf("SYNOPSIS");
@@ -2992,7 +2981,7 @@ void DCE::qOrbiter::GetNowPlayingAttributes()
         placeholder = details.indexOf("PATH");
         if(placeholder != -1)
         {
-          //  qDebug() << details.at(placeholder+1);
+            //  qDebug() << details.at(placeholder+1);
 
             emit np_pathChanged(details.at(placeholder+1));
             //begin ugly bit to determine the storage device for later use. its not passed explicitly, so i use a regex to determine it for media files
@@ -3001,7 +2990,7 @@ void DCE::qOrbiter::GetNowPlayingAttributes()
 
             if (l ==-1){
                 emit np_storageDeviceChanged("mediatype");
-                setCommandResponse("Stored in /mediaType");
+                emit commandResponseChanged("Stored in /mediaType");
             }
             else
             {
@@ -3027,7 +3016,7 @@ void DCE::qOrbiter::GetNowPlayingAttributes()
         if(placeholder != -1)
         {
             filepath.append(details.at(placeholder+1));
-            setMediaResponse(details.at(placeholder+1));
+            emit mediaResponseChanged(details.at(placeholder+1));
         }
 
         emit np_filename(filepath);
@@ -3233,13 +3222,13 @@ void DCE::qOrbiter::requestLiveTvPlaylist()
                 index++;
 #ifdef RPI
                 QThread::msleep(20);
-        #endif
+#endif
             }
         }
     }
     else
     {
-        setCommandResponse("Could Not Populate");
+        emit commandResponseChanged("Could Not Populate");
     }
 
     if(i_current_mediaType == 1)
@@ -3258,7 +3247,7 @@ void DCE::qOrbiter::TuneToChannel(QString channel, QString chanid) //tunes to ch
 
     if(i_current_mediaType = 11)
     {
-        setMediaResponse("Setting Channel! " + channel);
+        emit mediaResponseChanged("Setting Channel! " + channel);
         CMD_Tune_to_channel changeChannel(m_dwPK_Device, iMediaPluginID, chanid.toStdString(), chanid.toStdString());
         SendCommand(changeChannel);
         emit np_channel(chanid);
@@ -3298,7 +3287,7 @@ void DCE::qOrbiter::changedTrack(QString direction)
             CMD_Channel_up tvChanUp(m_dwPK_Device, iMediaPluginID );
             if(SendCommand(tvChanUp, &pResponse) && pResponse =="OK")
             {
-                setMediaResponse("Channel Up sent");
+                emit mediaResponseChanged("Channel Up sent");
             }
         }
         else
@@ -3306,7 +3295,7 @@ void DCE::qOrbiter::changedTrack(QString direction)
             CMD_Channel_up tvChanDwn(m_dwPK_Device, iMediaPluginID );
             if(SendCommand(tvChanDwn, &pResponse) && pResponse =="OK")
             {
-                setMediaResponse("Channel down sent");
+                emit mediaResponseChanged("Channel down sent");
             }
         }
 
@@ -3314,13 +3303,13 @@ void DCE::qOrbiter::changedTrack(QString direction)
     }
     else
     {
-        setCommandResponse("Changing tracks");
+        emit commandResponseChanged("Changing tracks");
 
         CMD_Jump_Position_In_Playlist jump_playlist(m_dwPK_Device, iMediaPluginID, direction.toStdString(), internal_streamID );
         string sResponse = "";
         if(SendCommand(jump_playlist, &sResponse) && sResponse=="OK")
         {
-            setMediaResponse("Jumped to" + direction);
+            emit mediaResponseChanged("Jumped to" + direction);
         }
     }
 }
@@ -3330,7 +3319,7 @@ void DCE::qOrbiter::populateAdditionalMedia() //additional media grid that popul
 
     if(checkLoadingStatus() == true)
     {
-        //setCommandResponse("requesting additional media");
+        //emit commandResponseChanged("requesting additional media");
 #ifdef QT5
         //QApplication::processEvents(QEventLoop::AllEvents);
 #endif
@@ -3360,7 +3349,7 @@ void DCE::qOrbiter::populateAdditionalMedia() //additional media grid that popul
         {
 
             DataGridTable *pDataGridTable = new DataGridTable(iData_Size,pData,false);
-            setMediaResponse("grid request ok");
+            emit mediaResponseChanged("grid request ok");
 
             // LoggerWrapper::GetInstance()->Write(LV_CRITICAL, "Pic Datagrid Dimensions: Height %i, Width %i", gHeight, gWidth);
             DataGridCell *pCell;
@@ -3379,7 +3368,7 @@ void DCE::qOrbiter::populateAdditionalMedia() //additional media grid that popul
                 return;
             }
             setCurrentPage((std::abs(GridCurRow /  media_pageSeperator))) ;
-            setMediaResponse("Page: "+ QString::number(media_currentPage));
+            emit mediaResponseChanged("Page: "+ QString::number(media_currentPage));
 
             for(MemoryDataTable::iterator it=pDataGridTable->m_MemoryDataTable.begin();it!=pDataGridTable->m_MemoryDataTable.end();++it)
             {
@@ -3516,7 +3505,7 @@ void DCE::qOrbiter::GetAdvancedMediaOptions(int device) // prepping for advanced
                 {
 
                 }
-               emit newDeviceCommand(new AvCommand(fk_file.toInt(), cellTitle, false, device));
+                emit newDeviceCommand(new AvCommand(fk_file.toInt(), cellTitle, false, device));
             }
 
         }
@@ -3531,9 +3520,9 @@ void DCE::qOrbiter::GetAdvancedMediaOptions(int device) // prepping for advanced
 void DCE::qOrbiter::GetAlarms()
 {
     bool state;
-    string *sResponse;   
+    string *sResponse;
 
-    setCommandResponse("Getting alarm state");
+    emit commandResponseChanged("Getting alarm state");
     int cellsToRender= 0;
     int gHeight = 0;
     int gWidth = 0;
@@ -3611,12 +3600,12 @@ void DCE::qOrbiter::GetAlarms()
                     timeleft = "";
                 }
 
-               SleepingAlarm *t = new SleepingAlarm( eventgrp, name, alarmtime, state, timeleft, days);
+                SleepingAlarm *t = new SleepingAlarm( eventgrp, name, alarmtime, state, timeleft, days);
                 emit sleepingAlarmsReady(t);
                 col++;
                 row=0;
-            }            
-        }        
+            }
+        }
     }
 }
 
@@ -3628,11 +3617,11 @@ void DCE::qOrbiter::setZoom(QString zoomLevel)
     CMD_Set_Zoom setMediaZoom(m_dwPK_Device, iMediaPluginID, internal_streamID, zoomLevel.toStdString());
     if (SendCommand(setMediaZoom, &sResponse) && sResponse=="OK")
     {
-        setCommandResponse(QString::fromStdString(sResponse));
+        emit commandResponseChanged(QString::fromStdString(sResponse));
     }
     else
     {
-        setCommandResponse(QString("Error sending command!"));
+        emit commandResponseChanged(QString("Error sending command!"));
     }
 }
 
@@ -3647,7 +3636,7 @@ void DCE::qOrbiter::setAspect(QString ratio) //set aspect ratio for current medi
     }
     else
     {
-        setCommandResponse("Error sending command!");
+        emit commandResponseChanged("Error sending command!");
     }
 }
 
@@ -3685,12 +3674,12 @@ void DCE::qOrbiter::setPosition(QString position)
 
 void qOrbiter::setPosition(int position)
 {
-    setCommandResponse("Jumping position in stream to "+ QString::number(position)) ;
+    emit commandResponseChanged("Jumping position in stream to "+ QString::number(position)) ;
     CMD_Set_Media_Position setPosition(m_dwPK_Device, this->m_dwPK_Device_NowPlaying, internal_streamID, StringUtils::itos(position));
     string cResp = "";
     if(SendCommand(setPosition, &cResp) && cResp == "OK")
     {
-        setMediaResponse("Jumping to Position");
+        emit mediaResponseChanged("Jumping to Position");
     }
 }
 
@@ -3817,10 +3806,9 @@ void DCE::qOrbiter::showAdvancedButtons()
                 splitter = cellTitle.split("/");
                 qDebug() << splitter.join("--");
 
-                 emit addDevice(new AvDevice(fk_file.toInt(), splitter.at(0), splitter.at(splitter.length()-2), "null", -1, false ));
+                emit addDevice(new AvDevice(fk_file.toInt(), splitter.at(0), splitter.at(splitter.length()-2), "null", -1, false ));
             }
-            //emit resendAvButtonList(resendAvButtons);
-            resendAvButtons.clear();
+
 
             //  qorbiterUIwin->rootContext()->setContextProperty("buttonList" ,QVariant::fromValue(buttonList));
         }
@@ -3851,7 +3839,7 @@ void DCE::qOrbiter::addToPlaylist(bool now, std::string playlist)
 
 void DCE::qOrbiter::grabScreenshot(QString fileWithPath)
 {
-    setCommandResponse("Requesting id for: "+ fileWithPath);
+    emit commandResponseChanged("Requesting id for: "+ fileWithPath);
     char *screenieData;         //screenshot data using the char** data structure for passing of data
     int screenieDataSize=0;       //var for size of data
     string s_format ="jpg";   //the format we want returned
@@ -3914,7 +3902,7 @@ void DCE::qOrbiter::grabScreenshot(QString fileWithPath)
                 cellfk = pCell->GetValue();
                 QStringList parser = cellTitle.split(QRegExp("(\\n|:\\s)"), QString::KeepEmptyParts);
                 //qDebug() << parser;
-                screenshotVars.append(new screenshotAttributes( cellfk, cellTitle, cellAttribute.prepend("!A") ));
+                //screenshotVars.append(new screenshotAttributes( cellfk, cellTitle, cellAttribute.prepend("!A") ));
             }
 
         }
@@ -3926,16 +3914,16 @@ void DCE::qOrbiter::grabScreenshot(QString fileWithPath)
         if(SendCommand(getFileID, &fResp) && fResp == "OK" && iEK_File !=0)
         {
             QString fk;
-          //  qDebug() << "File number::"+iEK_File;
+            //  qDebug() << "File number::"+iEK_File;
             fk.append("!F"+ QString::number(iEK_File));
-            setCommandResponse("Screenshot filename: "+fk);
+            emit commandResponseChanged("Screenshot filename: "+fk);
             // string *fk = StringUtils::itos(&iEK_File);
-            screenshotVars.prepend(new screenshotAttributes(fk, QString("Filename"),fk ));
+            //screenshotVars.prepend(new screenshotAttributes(fk, QString("Filename"),fk ));
         }
     }
-    emit screenshotVariablesReady(screenshotVars);
+    //emit screenshotVariablesReady(screenshotVars);
     //   qDebug("sending screenshot variables");
-    screenshotVars.clear();
+    //screenshotVars.clear();
 
     CMD_Get_Video_Frame grabMediaScreenshot(long(m_dwPK_Device), long(m_dwPK_Device_NowPlaying), sDisableAspectLock,internal_streamID, 800 , 800, &screenieData, &screenieDataSize, &s_format);
     string mpResp= "";
@@ -3950,7 +3938,7 @@ void DCE::qOrbiter::grabScreenshot(QString fileWithPath)
     }
     else
     {
-        setMediaResponse("Couldnt Create Screenshot!");
+        emit mediaResponseChanged("Couldnt Create Screenshot!");
     }
 }
 
@@ -4043,7 +4031,7 @@ void DCE::qOrbiter::ShowBookMarks()
 
                 if(outer_index==2)
                 {
-                    bookmarks.append(new BookmarkItem(cellTitle, titleImg, bookmarkImg));
+                    //bookmarks.append(new BookmarkItem(cellTitle, titleImg, bookmarkImg));
                     outer_index = 0;
                 }
                 else
@@ -4051,9 +4039,9 @@ void DCE::qOrbiter::ShowBookMarks()
                     outer_index++;
                 }
             }
-            emit bookmarkList(bookmarks);
+            //emit bookmarkList(bookmarks);
         }
-        bookmarks.clear();
+        //bookmarks.clear();
 
     }
 }
@@ -4066,16 +4054,25 @@ void DCE::qOrbiter::processScreenShot(char picData, int picDataSize, std::string
 
 void DCE::qOrbiter::adjustVolume(int vol)
 {
-    if (vol > 0)
-    {
-        CMD_Vol_Up raiseVol(m_dwPK_Device, iMediaPluginID, vol);
+    if(m_bPK_Device_NowPlaying_Audio_DiscreteVolume){
+        CMD_Set_Volume raiseVol(m_dwPK_Device, iMediaPluginID, StringUtils::itos(vol));
         SendCommand(raiseVol);
     }
     else
     {
-        CMD_Vol_Down lowerVolume(m_dwPK_Device, iMediaPluginID, vol);
-        SendCommand(lowerVolume);
+        if (vol > 0)
+        {
+            CMD_Vol_Up raiseVol(m_dwPK_Device, iMediaPluginID, vol);
+            SendCommand(raiseVol);
+        }
+        else
+        {
+            CMD_Vol_Down lowerVolume(m_dwPK_Device, iMediaPluginID, vol);
+            SendCommand(lowerVolume);
+
+        }
     }
+
 }
 
 void qOrbiter::OnDisconnect()
@@ -4084,7 +4081,7 @@ void qOrbiter::OnDisconnect()
     qDebug("Router disconnected!");
     m_bOrbiterConnected = false;
     setNowPlaying(false);
-    setEventResponse("Connection Lost");
+    emit eventResponseChanged("Connection Lost");
 }
 
 void qOrbiter::OnReload()
@@ -4188,7 +4185,7 @@ void DCE::qOrbiter::extraButtons(QString button)
 
 void DCE::qOrbiter::saveScreenAttribute(QString attribute, QImage data)
 {
-    setMediaResponse("Saving Screenshot for attribute: "+attribute);
+    emit mediaResponseChanged("Saving Screenshot for attribute: "+attribute);
     string sAttribute = attribute.toStdString();
 
     char *pData = (char*) data.bits();
@@ -4270,7 +4267,7 @@ int qOrbiter::PromptUser(std::string sPrompt, int iTimeoutSeconds, map<int, std:
 
 int qOrbiter::DeviceIdInvalid()
 {
-    setCommandResponse("Device ID is invalid. Finding Existing Orbiters of this type");
+    emit commandResponseChanged("Device ID is invalid. Finding Existing Orbiters of this type");
     //QApplication::processEvents(QEventLoop::AllEvents);
     QList<QObject*> * temp_orbiter_list = new QList<QObject*>;
 
@@ -4279,7 +4276,7 @@ int qOrbiter::DeviceIdInvalid()
 
     if( mapDevices.size()==0 )
     {
-        setCommandResponse("No orbiters of this type found. Would you like to setup a new one?");
+        emit commandResponseChanged("No orbiters of this type found. Would you like to setup a new one?");
         //        //QApplication::processEvents(QEventLoop::AllEvents);
         populateSetupInformation();
         return 0;
@@ -4294,7 +4291,7 @@ int qOrbiter::DeviceIdInvalid()
             emit addExistingOrbiter(f);
             cout << it->first << " " << it->second << endl;
         }
-        setCommandResponse("Returning List of Orbiters");
+        emit commandResponseChanged("Returning List of Orbiters");
 
         emit deviceInvalid();
         return 0;
@@ -4312,7 +4309,7 @@ int qOrbiter::SetupNewOrbiter()
         string sResponse;
         if( !event_Impl.m_pClientSocket->SendString("READY") || !event_Impl.m_pClientSocket->ReceiveString(sResponse) || sResponse.size()==0 )
         {
-            setCommandResponse("Setup connection hung");
+            emit commandResponseChanged("Setup connection hung");
             qDebug() << "setup error in socket";
             qDebug() << sResponse.c_str();
             return 0;  // Something went wrong
@@ -4339,7 +4336,7 @@ int qOrbiter::SetupNewOrbiter()
     {
         if(pResponse)
             delete pResponse;
-        setCommandResponse("SetupNewOrbiter unable to create orbiter");
+        emit commandResponseChanged("SetupNewOrbiter unable to create orbiter");
         LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"SetupNewOrbiter unable to create orbiter");
         qDebug("Sorry.  There is a problem creating the new orbiter.  Please check the logs.");
         return 0;
@@ -4366,12 +4363,12 @@ int qOrbiter::SetupNewOrbiter()
 
 void qOrbiter::CreateChildren()
 {
-    setCommandResponse("Creating Children");
-    setCommandResponse("Size of children devices::"+QString::number((int)m_pData->m_vectDeviceData_Impl_Children.size()));
+    emit commandResponseChanged("Creating Children");
+    emit commandResponseChanged("Size of children devices::"+QString::number((int)m_pData->m_vectDeviceData_Impl_Children.size()));
     for( int i=0; i < (int)m_pData->m_vectDeviceData_Impl_Children.size(); i++ )
     {
 
-        setCommandResponse("Finding Child devices...");
+        emit commandResponseChanged("Finding Child devices...");
         DeviceData_Impl *pDeviceData_Impl_Child = m_pData->m_vectDeviceData_Impl_Children[i];
 
         // This device was marked as disabled
@@ -4380,17 +4377,17 @@ void qOrbiter::CreateChildren()
             LoggerWrapper::GetInstance()->Write(LV_WARNING, "Child device %d is disabled", pDeviceData_Impl_Child->m_dwPK_Device);
             continue;
         }
-        setCommandResponse("Current device template::"+QString::number(pDeviceData_Impl_Child->m_dwPK_DeviceTemplate));
+        emit commandResponseChanged("Current device template::"+QString::number(pDeviceData_Impl_Child->m_dwPK_DeviceTemplate));
 
         if (pDeviceData_Impl_Child->m_dwPK_DeviceCategory == 180){
             int t = pDeviceData_Impl_Child->m_dwPK_Device;
             setqMediaPlayerID(t);
-            setCommandResponse("QMediaPlayer ID::"+t);
-        //   emit qMediaPlayerIDChanged(qMediaPlayerID);
+            emit commandResponseChanged("QMediaPlayer ID::"+t);
+            //   emit qMediaPlayerIDChanged(qMediaPlayerID);
 
         }
     }
-    setCommandResponse("Finished spawning children!");
+    emit commandResponseChanged("Finished spawning children!");
 }
 
 
@@ -4412,7 +4409,7 @@ void DCE::qOrbiter::adjustLighting(int level, myMap devices)
 #ifdef QT_DEBUG
             qDebug()<< QString::fromStdString(pResponse.c_str());
 #endif
-        setCommandResponse(QString::fromStdString(pResponse.c_str()));
+        emit commandResponseChanged(QString::fromStdString(pResponse.c_str()));
         ;
     }
 
@@ -4432,7 +4429,7 @@ void DCE::qOrbiter::prepareFileList(int iPK_MediaType)
     requestMore = true;
     media_currentRow = 0;
     cellsToRender = 0;
-    setMediaResponse("Initial media request for media type " + QString::number(iPK_MediaType));
+    emit mediaResponseChanged("Initial media request for media type " + QString::number(iPK_MediaType));
 #ifdef QT5
     //QApplication::processEvents(QEventLoop::AllEvents);
 #endif
@@ -4462,7 +4459,7 @@ void DCE::qOrbiter::prepareFileList(int iPK_MediaType)
 
     if(backwards == true)                               //this deals with screen handlers
     {
-        setCommandResponse("Going back a level");
+        emit commandResponseChanged("Going back a level");
 
     }
     else
@@ -4567,20 +4564,20 @@ void DCE::qOrbiter::prepareFileList(int iPK_MediaType)
 #endif
             if (cellsToRender == 0)
             {
-                setMediaResponse("No Media");
+                emit mediaResponseChanged("No Media");
                 return;
                 // exit ; //exit the loop because there is no grid? - eventually provide "no media" feedback
             }
             else
             {
                 qDebug()<<"changing size";
-               // emit gridModelSizeChange(cellsToRender);
+                // emit gridModelSizeChange(cellsToRender);
                 i_mediaModelRows = cellsToRender;
                 media_totalPages = (i_mediaModelRows / media_pageSeperator)+1; //16 being the items per page.
 
                 pDataGridTable = NULL;
                 setModelPages(media_totalPages);
-                setMediaResponse(QString::number(media_totalPages)+ " pages from request, populating first page.");
+                emit mediaResponseChanged(QString::number(media_totalPages)+ " pages from request, populating first page.");
 
                 requestPage(0);
             }
@@ -4630,7 +4627,7 @@ void DCE::qOrbiter::prepareFileList(int iPK_MediaType)
 
 void DCE::qOrbiter::cleanupGrid()
 {
-    setCommandResponse("Clearing Grid");
+    emit commandResponseChanged("Clearing Grid");
     //emit clearPageGrid();
 }
 
@@ -4640,7 +4637,7 @@ bool qOrbiter::checkLoadingStatus()
     {
         if(currentScreen=="Screen_47.qml")
         {
-            //setCommandResponse("Count" + QString::number(i_currentMediaModelRow)+ "/" + QString::number(i_mediaModelRows));
+            //emit commandResponseChanged("Count" + QString::number(i_currentMediaModelRow)+ "/" + QString::number(i_mediaModelRows));
             return true;
         }
         else
@@ -4651,7 +4648,7 @@ bool qOrbiter::checkLoadingStatus()
     }
     else
     {
-        //setCommandResponse("Loading Ended");
+        //emit commandResponseChanged("Loading Ended");
         return false;
     }
 }
@@ -4690,7 +4687,7 @@ void qOrbiter::getScreenSaverImage(QString inc_requested_img_path)
 #ifdef QT5
         //QApplication::processEvents(QEventLoop::AllEvents);
 #endif
-        setMediaResponse("Recieved Screensaver image");
+        emit mediaResponseChanged("Recieved Screensaver image");
         data = (uchar*)picData;
         emit currentScreenSaverImage(data, picData_Size);
     }
@@ -4700,13 +4697,12 @@ void qOrbiter::getScreenSaverImage(QString inc_requested_img_path)
 
 void DCE::qOrbiter::sendAvCommand(int deviceto, int command)
 {
-    string cmd_resp="";
+
+    qDebug() << deviceto << "::" << command;
     string cmd_string;
     QString commandString =  QString::number(m_dwPK_Device) + " " + QString::number(deviceto) + " " + "1" + " " + QString::number(command);
     cmd_string = commandString.toStdString();
     DCE::Message *avMessage = new Message(cmd_string);
-    //  Event_Impl *msg_event(m_pEvent->m_pClientSocket, -1003);
-    //  msg_event->SendMessage(&avMessage);
     SendMessageToRouter(avMessage);
 
 }
@@ -4716,7 +4712,7 @@ void DCE::qOrbiter::setGridSeperator(int sep)
     media_pageSeperator = sep;
 
     media_totalPages = (i_mediaModelRows / media_pageSeperator); //16 being the items per page.
-   setModelPages(media_totalPages);
+    setModelPages(media_totalPages);
     emit pageSeperatorChanged(media_pageSeperator);
 }
 
@@ -4837,19 +4833,19 @@ void qOrbiter::CMD_Menu(string sText,int iStreamID,string &sCMD_Result,Message *
 void qOrbiter::pingCore()
 {
 
-    setCommandResponse("initiating ping to core");
+    emit commandResponseChanged("initiating ping to core");
 
     QString url = QString::fromStdString(m_sHostName);
     if(!url.contains(QRegExp("(\\D)"))){
 
-        setCommandResponse("Host name provided, doing lookup");
+        emit commandResponseChanged("Host name provided, doing lookup");
 
         QHostInfo::lookupHost(url, this, SLOT(checkPing(QHostInfo)));
     }
     else{
 
         if(!m_bOrbiterConnected){
-            setCommandResponse("No hostname, checking installation");
+            emit commandResponseChanged("No hostname, checking installation");
             checkInstall();
         }
     }
@@ -4865,20 +4861,20 @@ void qOrbiter::pingCore()
 void qOrbiter::checkPing(QHostInfo info)
 {
 
-    setCommandResponse("Ping router says response is: "+ info.lookupId());
+    emit commandResponseChanged("Ping router says response is: "+ info.lookupId());
     if (info.error() != QHostInfo::NoError){
         emit routerInvalid();
     }
     else{
 
-        setCommandResponse("ip address: " + info.addresses().at(0).toString());
+        emit commandResponseChanged("ip address: " + info.addresses().at(0).toString());
         m_sHostName = info.addresses().at(0).toString().toStdString();
         m_sIPAddress = info.addresses().at(0).toString().toStdString();
 
-        setCommandResponse("Router found, checking for LinuxMCE installation");
+        emit commandResponseChanged("Router found, checking for LinuxMCE installation");
 
         if(!m_bRunning ){
-            setCommandResponse("Checking for linuxmce installation" + QString::fromStdString(m_sIPAddress));
+            emit commandResponseChanged("Checking for linuxmce installation" + QString::fromStdString(m_sIPAddress));
             checkInstall();
         }
     }
@@ -4887,7 +4883,7 @@ void qOrbiter::checkPing(QHostInfo info)
 
 void qOrbiter::checkInstall()
 {
-    setCommandResponse("Checking for LinuxMCE installtion in checkInstall()");
+    emit commandResponseChanged("Checking for LinuxMCE installtion in checkInstall()");
     if(m_bOrbiterConnected == false){
         QString url = "http://"+QString::fromStdString(m_sIPAddress)+"/lmce-admin/index.php";
         QNetworkAccessManager *pingManager = new QNetworkAccessManager();
@@ -4900,7 +4896,7 @@ void qOrbiter::verifyInstall(QNetworkReply *r)
 {
     if(r->bytesAvailable() !=0 && this->m_bOrbiterConnected == false)
     {
-        setCommandResponse("Found installation, connecting.");
+        emit commandResponseChanged("Found installation, connecting.");
         if ( initialize() == true )
         {
             setdceIP(QString::fromStdString(m_sIPAddress));
@@ -4937,12 +4933,30 @@ void qOrbiter::getAttributeImage(QString param)
 
 void qOrbiter::setAlarm(bool toggle, int grp)
 {
-     if (grp != 0)
-            {
+    if (grp != 0)
+    {
 
-                CMD_Toggle_Event_Handler toggleAlarm(m_dwPK_Device, iPK_Device_eventPlugin, grp);
-                SendCommand(toggleAlarm);
-                GetAlarms();
-            }
+        CMD_Toggle_Event_Handler toggleAlarm(m_dwPK_Device, iPK_Device_eventPlugin, grp);
+        SendCommand(toggleAlarm);
+        GetAlarms();
+    }
 
+}
+
+
+void qOrbiter::getVolume()
+{
+    //DeviceData_Base *aDevice = m_dwPK_Device_NowPlaying_Audio;
+    string level="";
+    string pResp="";
+    CMD_Get_Device_Data getAudioLevel(m_dwPK_Device,iMediaPluginID, m_dwPK_Device_NowPlaying, DEVICEDATA_Volume_Level_CONST, true, &level );
+    if(SendCommand(getAudioLevel, &pResp) && pResp=="OK")
+    {
+        emit deviceAudioLevelChanged(QString::fromStdString(level).toInt());
+    }
+    else
+    {
+        qDebug() << "Get Audio Level Failed";
+        emit deviceAudioLevelChanged(0);
+    }
 }

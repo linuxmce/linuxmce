@@ -148,6 +148,8 @@ class qorbiterManager : public QObject
     Q_OBJECT
 
     Q_PROPERTY (int m_dwPK_Device READ getDeviceNumber WRITE setDeviceNumber NOTIFY deviceNumberChanged)
+    Q_PROPERTY (int deviceVolume READ getDeviceVolume WRITE setDeviceVolume NOTIFY deviceVolumeChanged())
+
     Q_PROPERTY(int i_current_mediaType READ getMediaType WRITE setMediaType NOTIFY mediaTypeChanged)
     Q_PROPERTY (QString q_mediaType READ getSorting NOTIFY gridTypeChanged)
     Q_PROPERTY (QString sPK_User READ getCurrentUser WRITE setCurrentUser NOTIFY userChanged)
@@ -165,6 +167,18 @@ class qorbiterManager : public QObject
     Q_PROPERTY (int media_currentPage READ getCurrentPage WRITE setCurrentPage NOTIFY mediaPageChanged)
     Q_PROPERTY(bool osdStatus READ getDisplayStatus WRITE toggleDisplay NOTIFY osdChanged )
     Q_PROPERTY(int mediaPlayerID READ getMediaPlayerID WRITE setMediaPlayerID NOTIFY mediaPlayerIdChanged)
+    Q_PROPERTY (bool discreteAudio READ getDiscreteAudio WRITE setDiscreteAudio NOTIFY discreteAudioChanged )
+    Q_PROPERTY (bool m_bContainsVideo READ getContainsVideo WRITE setContainsVideo NOTIFY containsVideo())
+    Q_PROPERTY (bool usingLiveAvPath READ getLiveAvPath WRITE setLiveAvPath NOTIFY liveAvPath)
+    Q_PROPERTY (bool m_bIsOSD READ getOsd WRITE setOsd NOTIFY isOsd)
+    Q_PROPERTY (bool monitorAvailible READ getMonitorStatus WRITE setMonitorStatus NOTIFY monitorStatusChanged)
+    Q_PROPERTY(int deviceVolume READ getDeviceVolume WRITE setDeviceVolume NOTIFY deviceVolumeChanged)
+
+    Q_PROPERTY (QString mediaResponse READ getMediaResponse WRITE setMediaResponse NOTIFY mediaResponseChanged)
+    Q_PROPERTY (QString commandResponse READ getCommandResponse WRITE setCommandResponse NOTIFY commandResponseChanged)//for use in displaying command related dce replies.
+    Q_PROPERTY (QString eventResponse READ getEventResponse WRITE setEventResponse NOTIFY eventResponseChanged) // for use in displaying message associated with incoming events
+    Q_PROPERTY (QString deviceResponse READ getDeviceResponse WRITE setDeviceResponse NOTIFY deviceResponseChanged) // for use in display of messages associated with specific devices
+
     /*
      *Need to move runtime options here so that we can tie into a configuration panel
      *first run - self explanitory?
@@ -198,6 +212,19 @@ public:
     QByteArray binaryConfig;
     long iPK_Device;
     QString qs_ext_routerip;
+    /*messaging*/
+    QString commandResponse;
+    QString eventResponse;
+    QString deviceResponse;
+    QString mediaResponse;
+
+    /*state related*/
+    bool discreteAudio;
+    bool m_bContainsVideo;
+    bool usingLiveAvPath;
+    bool m_bIsOSD;
+    bool monitorAvailible;
+
     //------------------------------------------------------playlist classes
 
 
@@ -410,6 +437,7 @@ Param 10 - pk_attribute
     int m_pDevice_ScreenSaver;
     int m_dwIDataGridRequestCounter;
     int i_currentFloorplanType;
+    int deviceVolume;
     QString applicationPath;
 
     /*Child Device IDs*/
@@ -504,6 +532,7 @@ signals:
     void populateDeviceCommands(int);
     void resendDeviceCode(int from, int to);
     void updateScreen(QString screen);
+    void deviceVolumeChanged();
 
     /*device related*/
     void osdChanged(bool);
@@ -537,7 +566,16 @@ signals:
     void getSingleCam(int i_pk_camera_device, int h, int w);
 
     //runtime
+    void commandResponseChanged();
+    void eventResponseChanged();
+    void deviceResponseChanged();
+    void mediaResponseChanged();
 
+    void discreteAudioChanged();
+    void liveAvPath( );
+    void containsVideo( );
+    void isOsd( );
+    void monitorStatusChanged( );
 
 
 public slots:
@@ -621,6 +659,36 @@ public slots:
     void nowPlayingChanged(bool b);
     void addDeviceToList(AvDevice* d) {devices->appendRow(d);}
     void addCommandToList(AvCommand* c) {deviceCommands->appendRow(c);}
+
+    void setDeviceVolume(int d){ deviceVolume = d; emit deviceVolumeChanged();}
+    int getDeviceVolume() {return deviceVolume;}
+
+    void setLiveAvPath(bool path) { usingLiveAvPath = path; qDebug() ; emit liveAvPath();}
+    bool getLiveAvPath() { return usingLiveAvPath;}
+
+    void setContainsVideo(bool video) {m_bContainsVideo = video; emit containsVideo();}
+    bool getContainsVideo() {return m_bContainsVideo;}
+
+    void setOsd(bool osd) { m_bIsOSD = osd; emit isOsd();}
+    bool getOsd() { return m_bIsOSD;}
+
+    void setMonitorStatus(bool state) { monitorAvailible = state; emit monitorStatusChanged();}
+    bool getMonitorStatus() {return monitorAvailible;}
+
+    void setDiscreteAudio(bool d) {discreteAudio = d; emit discreteAudioChanged();}
+    bool getDiscreteAudio() {return discreteAudio;}
+
+    void setCommandResponse(QString response) {commandResponse =QTime::currentTime().toString()+"::"+response; qDebug() << commandResponse; emit commandResponseChanged();}
+    QString getCommandResponse() {return commandResponse;}
+
+    void setEventResponse(QString eResponse){eventResponse = eResponse; emit eventResponseChanged();}
+    QString getEventResponse() {return eventResponse;}
+
+    void setDeviceResponse(QString dResponse) {deviceResponse = deviceResponse; emit deviceResponseChanged();}
+    QString getDeviceResponse() {return deviceResponse;}
+
+    void setMediaResponse (QString r) {mediaResponse = r; emit mediaResponseChanged();}
+    QString getMediaResponse(){return mediaResponse;}
 
 
     /*Media Control Slots*/
@@ -707,7 +775,7 @@ public slots:
     //dce related slots
     void execGrp(int grp);        //for command groups
     void closeOrbiter();
-    void exitApp() { this->deleteLater();}
+    void exitApp() { qorbiterUIwin->close();}
     void reloadHandler();
     bool OrbiterGen();              //prelim orbter generation
     void quickReload();
@@ -722,9 +790,12 @@ public slots:
     void activateScreenSaver();
 
 
+
 private:
     void initializeConnections();
     void setupQMLview();
+
+
 };
 
 #endif // QORBITERMANAGER_H

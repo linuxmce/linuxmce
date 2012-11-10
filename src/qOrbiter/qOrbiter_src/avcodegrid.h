@@ -46,10 +46,6 @@ public:
     QModelIndex indexFromItem( const AvCommand* item) const;
     AvCommand* currentRow();
 
-    void clear();
-    void sortModel(int column, Qt::SortOrder order);
-
-
 signals:
     void deviceAdded();
     void dataChanged(const QModelIndex &topLeft, const QModelIndex &bottomRight, const int &sRow);
@@ -57,6 +53,8 @@ signals:
     void modelReset();
 
 public slots:
+    void clear();
+    void sortModel(int column, Qt::SortOrder order);
 
 private slots:
     void handleItemChange();

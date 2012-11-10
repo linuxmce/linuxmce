@@ -19,8 +19,14 @@ AvOptionButton {
            anchors.centerIn: parent
             width: 50
             height: 50
-
             source: "../img/icons/kmix.png"
+            StyledText{
+                text:manager.deviceVolume
+                color:"green"
+                fontSize: 42
+                font.bold: true
+                anchors.centerIn: parent
+            }
         }
         MouseArea{
             anchors.fill: parent
@@ -40,7 +46,7 @@ AvOptionButton {
         source: "../img/icons/player_fwd.png"
         MouseArea{
             anchors.fill: parent
-            onClicked: manager.adjustVolume(1)
+            onClicked: manager.adjustVolume(5)
         }
 
     }
@@ -56,7 +62,7 @@ AvOptionButton {
         source: "../img/icons/player_fwd.png"
         MouseArea{
             anchors.fill: parent
-            onClicked: manager.adjustVolume(-1)
+            onClicked: manager.adjustVolume(-5)
         }
     }
 

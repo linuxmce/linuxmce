@@ -289,21 +289,25 @@ int main(int argc, char* argv[])
         bool glpresent = false;
 #endif
 
-        QThread dceThread;
-        qOrbiter pqOrbiter(PK_Device, sRouter_IP,true,bLocalMode );
-        orbiterWindow orbiterWin(-1, sRouter_IP);
-        pqOrbiter.moveToThread(&dceThread);
-        QObject::connect(&dceThread, SIGNAL(started()), &pqOrbiter, SLOT(beginSetup()));
+
 
         // orbiterWin.mainView.rootContext()->setContextProperty("dcerouter", &pqOrbiter); //dcecontext object bad!
         typedef QMap <int, QString> myMap;
         int throwaway = qRegisterMetaType<myMap>("myMap");
 
+        orbiterWindow orbiterWin(-1, sRouter_IP);
         orbiterWin.setMessage("Setting up Lmce");
-        qorbiterManager  w(&orbiterWin.mainView);
-        AbstractImageProvider modelimageprovider(&w);
 
+        qorbiterManager  w(&orbiterWin.mainView);
+
+        AbstractImageProvider modelimageprovider(&w);
         orbiterWin.mainView.engine()->addImageProvider("listprovider", &modelimageprovider);
+
+        QThread dceThread;
+        qOrbiter pqOrbiter(PK_Device, sRouter_IP,true,bLocalMode );
+
+        pqOrbiter.moveToThread(&dceThread);
+        QObject::connect(&dceThread, SIGNAL(started()), &pqOrbiter, SLOT(beginSetup()));
 #ifndef QT5
         QThread *epgThread = new QThread; //for playlists and epg of all types. only one will be active a given time inthe app
 #endif
@@ -340,11 +344,11 @@ int main(int argc, char* argv[])
 
         //shutdown signals
         QObject::connect(&w, SIGNAL(orbiterClosing()), &pqOrbiter, SLOT(deinitialize()), Qt::QueuedConnection);
+      //  QObject::connect(&pqOrbiter, SIGNAL(closeOrbiter()), &pqOrbiter, SLOT(deleteLater()));
         QObject::connect(&pqOrbiter, SIGNAL(closeOrbiter()), &dceThread, SLOT(quit()), Qt::QueuedConnection);
-        // QObject::connect(&pqOrbiter, SIGNAL(closeOrbiter()), &pqOrbiter, SLOT(deleteLater()));
-        QObject::connect(&dceThread, SIGNAL(finished()), &orbiterWin, SLOT(deleteLater()));
+        QObject::connect(&dceThread, SIGNAL(finished()),&orbiterWin.mainView, SLOT(close()));
         //  QObject::connect(&dceThread, SIGNAL(finished()), &dceThread, SLOT(deleteLater()));
-        QObject::connect(&dceThread, SIGNAL(finished()), &w, SLOT(exitApp()));
+       QObject::connect(&orbiterWin.mainView, SIGNAL(destroyed()), &a, SLOT(quit()));
         QObject::connect(&w, SIGNAL(destroyed()), &a, SLOT(quit()));
 
 
@@ -389,6 +393,17 @@ int main(int argc, char* argv[])
         QObject::connect(&w, SIGNAL(changeTrack(QString)), &pqOrbiter, SLOT(changedTrack(QString)), Qt::QueuedConnection);
         QObject::connect(w.nowPlayingButton, SIGNAL(playListPositionChanged(int)), storedVideoPlaylist, SLOT(setCurrentIndex(int)) ,Qt::QueuedConnection);
 
+        /*Misc*/
+
+        QObject::connect(&pqOrbiter, SIGNAL(discreteAudioChanged(bool)), &w, SLOT(setDiscreteAudio(bool)));
+        QObject::connect(&pqOrbiter, SIGNAL(commandResponseChanged(QString)), &w, SLOT(setCommandResponse(QString)));
+        QObject::connect(&pqOrbiter, SIGNAL(mediaResponseChanged(QString)), &w, SLOT(setMediaResponse(QString)));
+        QObject::connect(&pqOrbiter, SIGNAL(deviceResponseChanged(QString)), &w, SLOT(setDeviceResponse(QString)));
+        QObject::connect(&pqOrbiter, SIGNAL(eventResponseChanged(QString)), &w, SLOT(setEventResponse(QString)));
+        QObject::connect(&pqOrbiter, SIGNAL(liveAvPath(bool)), &w, SLOT(setLiveAvPath(bool)));
+        QObject::connect(&pqOrbiter, SIGNAL(containsVideo(bool)), &w, SLOT(setContainsVideo(bool)));
+        QObject::connect(&pqOrbiter, SIGNAL(isOsd(bool)), &w, SLOT(setOsd(bool)));
+        QObject::connect(&pqOrbiter, SIGNAL(monitorStatusChanged(bool)), &w, SLOT(setMonitorStatus(bool)));
 
         //timecodemanager signals / slots
         QObject::connect(&pqOrbiter, SIGNAL(updateTimeCode(QString,int)), timecode, SLOT(start(QString,int)), Qt::QueuedConnection);
@@ -549,7 +564,7 @@ int main(int argc, char* argv[])
         QObject::connect(&pqOrbiter, SIGNAL(bookmarkList(QList<QObject*>)), &w, SLOT(showBookmarks(QList<QObject*>)), Qt::QueuedConnection);
         QObject::connect(&w, SIGNAL(extraButton(QString)), &pqOrbiter, SLOT(extraButtons(QString)), Qt::QueuedConnection);
         QObject::connect(&w, SIGNAL(resendAvCodes()), &pqOrbiter, SLOT(showAdvancedButtons()), Qt::QueuedConnection );
-
+        QObject::connect(&pqOrbiter, SIGNAL(deviceAudioLevelChanged(int)), &w, SLOT(setDeviceVolume(int)));
         //so does live tv
         QObject::connect(&w, SIGNAL(clearModel()), simpleEPGmodel, SLOT(empty()),Qt::QueuedConnection);
         QObject::connect(&pqOrbiter, SIGNAL(liveTvUpdate(QString)), simpleEPGmodel, SLOT(setProgram(QString)), Qt::QueuedConnection);
