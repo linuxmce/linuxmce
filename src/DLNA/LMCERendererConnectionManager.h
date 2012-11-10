@@ -14,6 +14,7 @@
 #define LMCERendererConnectionManager_h
 
 #include <HUpnpAv/HRendererConnectionManager>
+#include <HUpnpAv/HAbstractConnectionManagerService>
 
 #include "LMCERenderer.h"
 #include "DLNA.h"
@@ -28,8 +29,8 @@ public:
 	LMCERendererConnectionManager(DLNA* pDLNA);
 	virtual ~LMCERendererConnectionManager();
 
-	virtual HRendererConnection * doCreate (const QString &contentFormat, qint32 connectionId);
-	bool connectionComplete ( qint32  connectionId);
+	virtual HRendererConnection * doCreate (HAbstractConnectionManagerService* cmService, const QString &contentFormat, qint32 connectionId);
+	bool connectionComplete (HAbstractConnectionManagerService* cmService, qint32  connectionId);
 	virtual DLNA* GetDLNA();
 };
 #endif

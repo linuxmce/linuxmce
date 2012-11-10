@@ -43,9 +43,6 @@ int DLNAEngine::Init()
 
 	Herqq::Upnp::SetLoggingLevel(Information);
 
-	// TODO hack
-	qRegisterMetaType<Herqq::Upnp::Av::HRendererConnectionEventInfo>("Herqq::Upnp::Av::HRendererConnectionEventInfo");
-
 	// Initialize hupnp with the xml file
 	m_pDeviceHost = new HDeviceHost(this);
 
@@ -56,8 +53,11 @@ int DLNAEngine::Init()
 	hostConf.setNetworkAddressesToUse(list);
 
 	// Set up device creator and configuration manager
-	LMCEDeviceModelCreator creator;
-	LMCEMediaRendererDeviceConfiguration mrConf;
+	HAvDeviceModelCreator creator;
+//	LMCEDeviceModelCreator creator;
+	
+	HMediaRendererDeviceConfiguration mrConf;
+//	LMCEMediaRendererDeviceConfiguration mrConf;
 	LMCERendererConnectionManager* pRcm = new LMCERendererConnectionManager(m_pDLNA);
 	LoggerWrapper::GetInstance ()->Write (LV_STATUS, "DLNAEngine() pRcm = %d", (unsigned int)pRcm);
 

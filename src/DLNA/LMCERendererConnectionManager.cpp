@@ -26,17 +26,17 @@ LMCERendererConnectionManager::~LMCERendererConnectionManager()
 
 }
 
-HRendererConnection* LMCERendererConnectionManager::doCreate (const QString &contentFormat, qint32 connectionId)
+HRendererConnection* LMCERendererConnectionManager::doCreate (HAbstractConnectionManagerService* cmService, const QString &contentFormat, qint32 connectionId)
 {
-	LoggerWrapper::GetInstance ()->Write (LV_STATUS, "LMCERendererConnectionManager::doCreate() start, connectionId = %d", connectionId);
-	LMCERenderer *pRenderer = new LMCERenderer(this, m_pDLNA);
+	LoggerWrapper::GetInstance ()->Write (LV_STATUS, "LMCERendererConnectionManager::doCreate() start, connectionId = %d, cmService = %d", connectionId, (unsigned int)cmService);
+	LMCERenderer *pRenderer = new LMCERenderer(cmService, this, m_pDLNA);
 	return pRenderer;
 }
 
-bool LMCERendererConnectionManager::connectionComplete ( qint32  connectionId) 
+bool LMCERendererConnectionManager::connectionComplete (HAbstractConnectionManagerService* cmService, qint32  connectionId) 
 {
 	LoggerWrapper::GetInstance ()->Write (LV_STATUS, "LMCERendererConnectionManager::connectionComplete() , connectionId = %d", connectionId);
-	HRendererConnectionManager::connectionComplete(connectionId);
+	HRendererConnectionManager::connectionComplete(cmService, connectionId);
 }
 
 DLNA* LMCERendererConnectionManager::GetDLNA()

@@ -36,7 +36,7 @@ private:
 	class AlarmManager *m_pAlarmManager;
 
 	unsigned int m_PK_EntArea;
-	QUrl* m_Url;
+	QUrl m_Url;
 	QTime m_Time;
 	int m_iMediaType;
 	DLNA* m_pDLNA;
@@ -44,7 +44,7 @@ private:
 	long m_dwPK_Device_Playing;
 	bool m_bIsPlaying;
 public:
-	LMCERenderer(QObject* parent, DLNA* pDLNA);
+	LMCERenderer(HAbstractConnectionManagerService *cmService, QObject* parent, DLNA* pDLNA);
 	virtual ~LMCERenderer();
 
 	qint32 doPlay(const QString& speed);
@@ -57,12 +57,16 @@ public:
 	qint32 doSetNextResource ( const QUrl &  resourceUri, HObject *  cdsMetadata = 0);
 	qint32 doSelectPreset ( const QString &  presetName);
 
-	int GetMediaType(HObject* metadata, QUrl* url);
+	int GetMediaType(HObject* metadata, QUrl& url);
 	int GetPK_EntertainArea();
 	int GetStreamID();
-	void MediaCommandIntercepted(Message *pMessage, long PK_Device);
 
+	void MediaCommandIntercepted(Message *pMessage, long PK_Device);
 	void PlayBackCompleted();
+	void MediaPositionChanged(int MediaType, string currentTime, string totalTime, string mrl, string mediaID, int speed);
+
+	void UpdateNowPlaying();
+
         void AlarmCallback(int id, void* param);
 };
 

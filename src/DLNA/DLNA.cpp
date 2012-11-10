@@ -31,6 +31,7 @@ using namespace DCE;
 #include "LMCERenderer.h"
 
 #include "pluto_main/Database_pluto_main.h"
+#include "pluto_main/Define_EventParameter.h"
 #include "pluto_main/Table_EntertainArea.h"
 #include "pluto_main/Table_Device_EntertainArea.h"
 #include "pluto_main/Table_Room.h"
@@ -86,6 +87,7 @@ bool DLNA::GetConfig()
 	RegisterMsgInterceptor(( MessageInterceptorFn )( &DLNA::MediaCommandIntercepted ), 0, 0, 0, 0, MESSAGETYPE_COMMAND, COMMAND_Play_Media_CONST );
 	RegisterMsgInterceptor(( MessageInterceptorFn )( &DLNA::MediaCommandIntercepted ), 0, 0, 0, 0, MESSAGETYPE_COMMAND, COMMAND_Stop_Media_CONST );
 	RegisterMsgInterceptor(( MessageInterceptorFn )( &DLNA::MediaCommandIntercepted ), 0, 0, 0, 0, MESSAGETYPE_EVENT, EVENT_Playback_Completed_CONST );
+	RegisterMsgInterceptor(( MessageInterceptorFn )( &DLNA::MediaCommandIntercepted ), 0, 0, 0, 0, MESSAGETYPE_EVENT, EVENT_Media_Position_Changed_CONST );
 
 	return true;
 }
@@ -236,11 +238,12 @@ bool DLNA::MediaCommandIntercepted( class Socket *pSocket, class Message *pMessa
 	{
 		PK_Device = pDeviceTo->m_dwPK_Device;
 		pEntertainArea = FindEntertainAreaForDevice(PK_Device);
-	} else if (pMessage->m_dwMessage_Type == MESSAGETYPE_EVENT && pMessage->m_dwID == EVENT_Playback_Completed_CONST) {
+	} else if (pMessage->m_dwMessage_Type == MESSAGETYPE_EVENT && 
+		   (pMessage->m_dwID == EVENT_Playback_Completed_CONST || pMessage->m_dwID == EVENT_Media_Position_Changed_CONST)) {
 		// Event only has StreamID, need to look up renderer with that
-		string sStreamID = pMessage->m_mapParameters[COMMANDPARAMETER_StreamID_CONST];
+		string sStreamID = pMessage->m_mapParameters[EVENTPARAMETER_Stream_ID_CONST];
 		int iStreamID = atoi(sStreamID.c_str());
-		LoggerWrapper::GetInstance ()->Write (LV_STATUS, "DLNA::MediaCommandIntercepted() Playback completed streamID = %d",iStreamID);
+		LoggerWrapper::GetInstance ()->Write (LV_STATUS, "DLNA::MediaCommandIntercepted() Playback completed|Media_position_Changed streamID = %d",iStreamID);
 		if (iStreamID > 0)
 		{
 			for(map<int,EntertainArea *>::iterator it=m_mapEntertainAreas.begin();it!=m_mapEntertainAreas.end();++it)
