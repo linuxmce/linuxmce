@@ -503,10 +503,11 @@ void VDR::CMD_Tune_to_channel(string sOptions,string sProgramID,string &sCMD_Res
 	string sVDRResponse;
 	sCommand = "CHAN " + sProgramID;
 	SendVDRCommand(m_sVDRIp,sCommand,sVDRResponse);
-	Sleep(1000);
+/* POS	Sleep(1000);
 	ParseCurrentChannel(sVDRResponse);
 
 	EVENT_Playback_Started("[" + StringUtils::itos(m_iChannelNumber) +  "] " + m_sChannelName,m_iStreamID,m_sSeriesDescription,"bbb","ccc");  
+*/
 }
 
 
@@ -696,7 +697,9 @@ LoggerWrapper::GetInstance()->Write(LV_STATUS,"connected");
 void VDR::ParseCurrentChannel(string sChannel)
 {
  
-  LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"VDR.parser: given input was %s",sChannel.c_str());
+ 	return;
+ 	
+	LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"VDR.parser: given input was %s",sChannel.c_str());
 
 	//CHANNELSTUFF
 	if( sChannel.size()<3 )
@@ -817,10 +820,10 @@ void VDR::CMD_Simulate_Keypress(string sPK_Button,int iStreamID,string sName,str
 		
 	SendVDRCommand(m_sVDRIp,"HITK " + convkey,sVDRResponse);
 	sVDRResponse="";
-	SendVDRCommand(m_sVDRIp,"CHAN",sVDRResponse);
+// POS	SendVDRCommand(m_sVDRIp,"CHAN",sVDRResponse);
 	ParseCurrentChannel(sVDRResponse);
 	//burgi 2008-04-01 BBB
-	EVENT_Playback_Started("[" + StringUtils::itos(m_iChannelNumber) +  "] " + m_sChannelName,m_iStreamID,m_sSeriesDescription,"bbb","ccc");  
+// POS	EVENT_Playback_Started("[" + StringUtils::itos(m_iChannelNumber) +  "] " + m_sChannelName,m_iStreamID,m_sSeriesDescription,"bbb","ccc");  
 		
 //	if( !SendVDRCommand("", "HITK " + convkey,sResponse) )
 //		LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"Failed to send HITK %s",sResponse.c_str());
@@ -1533,7 +1536,8 @@ void VDR::pollVDRStatus()
 	
 		string sResult;
 		time_t timeout=60+time(NULL);
-		bool bPlaybackStarted=false,bCommunication=false;
+//		bool bPlaybackStarted=false;
+		bool bCommunication=false;
 		do
 		{
 			if( g_pVDR->m_bExiting==true )
@@ -1570,7 +1574,7 @@ void VDR::pollVDRStatus()
 				bCommunication=true;  // We at least have communication
 
 			mm.Release();
-      Sleep(1000);
+			Sleep(1000);
 			mm.Relock();
 			
 		} while(time(NULL) < timeout);
@@ -1645,7 +1649,7 @@ void VDR::pollVDRStatus()
 					if( m_sChannel != vectResults[6] )
 					{
 						m_sChannel = vectResults[6];
-						EVENT_Playback_Started(m_sChannel,m_iStreamID,"cc","ddd",m_sChannelName);
+						// EVENT_Playback_Started(m_sChannel,m_iStreamID,"cc","ddd",m_sChannelName);
 					}
 					
 					// Have a 2 second "buffer" for switching between live and nonlive modes so we don't get 
