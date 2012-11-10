@@ -344,11 +344,11 @@ int main(int argc, char* argv[])
 
         //shutdown signals
         QObject::connect(&w, SIGNAL(orbiterClosing()), &pqOrbiter, SLOT(deinitialize()), Qt::QueuedConnection);
-      //  QObject::connect(&pqOrbiter, SIGNAL(closeOrbiter()), &pqOrbiter, SLOT(deleteLater()));
+        //  QObject::connect(&pqOrbiter, SIGNAL(closeOrbiter()), &pqOrbiter, SLOT(deleteLater()));
         QObject::connect(&pqOrbiter, SIGNAL(closeOrbiter()), &dceThread, SLOT(quit()), Qt::QueuedConnection);
         QObject::connect(&dceThread, SIGNAL(finished()),&orbiterWin.mainView, SLOT(close()));
         //  QObject::connect(&dceThread, SIGNAL(finished()), &dceThread, SLOT(deleteLater()));
-       QObject::connect(&orbiterWin.mainView, SIGNAL(destroyed()), &a, SLOT(quit()));
+        QObject::connect(&orbiterWin.mainView, SIGNAL(destroyed()), &a, SLOT(quit()));
         QObject::connect(&w, SIGNAL(destroyed()), &a, SLOT(quit()));
 
 
@@ -502,8 +502,11 @@ int main(int argc, char* argv[])
         QObject::connect(&pqOrbiter, SIGNAL(setNowPlaying(bool)), w.nowPlayingButton,SLOT(setStatus(bool)),Qt::QueuedConnection);
         QObject::connect(&pqOrbiter,SIGNAL(streamIdChanged(int)), w.nowPlayingButton, SLOT(setStreamID(int)),Qt::QueuedConnection);
         QObject::connect(&pqOrbiter, SIGNAL(currentScreenChanged(QString)), w.nowPlayingButton, SLOT(setScreen(QString)),Qt::QueuedConnection);
-        QObject::connect(&w, SIGNAL(requestStreamImage()), &pqOrbiter, SLOT(getStreamingVideo()), Qt::QueuedConnection);
-        QObject::connect(&pqOrbiter, SIGNAL(videoGrabReady(QImage)), w.nowPlayingButton, SLOT(setStreamImage(QImage)), Qt::QueuedConnection);
+        QObject::connect(&w, SIGNAL(requestStreamImage(QString)), &pqOrbiter, SLOT(grabScreenshot(QString)), Qt::QueuedConnection);
+        QObject::connect(&w, SIGNAL(requestVideoFrame()), &pqOrbiter, SLOT(getStreamingVideo()), Qt::QueuedConnection );
+        QObject::connect(&pqOrbiter, SIGNAL(videoGrabReady(QImage)), &w, SLOT(setMediaScreenShot(QImage)), Qt::QueuedConnection);
+        QObject::connect(&pqOrbiter, SIGNAL(screenShotReady(QImage)), &w, SLOT(setMediaScreenShot(QImage)), Qt::QueuedConnection);
+
         QObject::connect(&pqOrbiter, SIGNAL(mediaTypeChanged(int)), &w, SLOT(setMediaType(int)), Qt::QueuedConnection);
         //QObject::connect(&pqOrbiter,SIGNAL(objectDataUpdate( char,int)), w.nowPlayingButton, SLOT(setDroidImageData(char,int)),Qt::QueuedConnection);
         QObject::connect(&pqOrbiter,SIGNAL(objectUpdate(QImage)), w.nowPlayingButton, SLOT(setImageData(QImage)), Qt::QueuedConnection);
@@ -542,7 +545,8 @@ int main(int argc, char* argv[])
         QObject::connect(&pqOrbiter, SIGNAL(np_synopsisChanged(QString)), w.nowPlayingButton, SLOT(setSynop(QString)),Qt::QueuedConnection);
         QObject::connect(&pqOrbiter,SIGNAL(playlistPositionChanged(int)), w.nowPlayingButton, SLOT(setPlaylistPostion(int)),Qt::QueuedConnection);
 
-        QObject::connect(&pqOrbiter, SIGNAL(screenshotVariablesReady(QList<QObject*>)), &w, SLOT(setScreenShotVariables(QList<QObject*>)),Qt::QueuedConnection);
+        QObject::connect(&pqOrbiter, SIGNAL(screenshotVariablesReady()), &w, SLOT(showScreenShotVariables()),Qt::QueuedConnection);
+        QObject::connect(&pqOrbiter, SIGNAL(addScreenShotVar(screenshotAttributes*)), &w, SLOT(setScreenShotVariables(screenshotAttributes*)));
         QObject::connect(&pqOrbiter, SIGNAL(screenShotReady(QImage)), &w, SLOT(setMediaScreenShot(QImage)),Qt::QueuedConnection);
         QObject::connect (&w, SIGNAL(saveMediaScreenShot(QString,QImage)), &pqOrbiter, SLOT(saveScreenAttribute(QString,QImage)),Qt::QueuedConnection);
 

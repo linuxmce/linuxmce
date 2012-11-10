@@ -69,7 +69,7 @@ Row{
                 MouseArea{
                     anchors.fill: parent
                     onClicked:  {
-                        manager.grabScreenshot(dcenowplaying.path)
+                        manager.grabStreamImage(dcenowplaying.path)
                         MyJs.createStageComponent("../components/AssignScreenShot.qml", storedvideoremote)
                         
                     }

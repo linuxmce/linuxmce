@@ -44,6 +44,12 @@ Rectangle {
         height:dcenowplaying.aspect=="wide"? scaleY(30) : scaleY(50)
         source: ""
         Component.onCompleted: manager.setBoundStatus(true)
+
+        Connections{
+            target: dcenowplaying
+            onImageChanged:"image://listprovider/updateobject/"+securityvideo.timestamp;
+        }
+
         Timer{
             interval: 500
             running: true
@@ -57,13 +63,33 @@ Rectangle {
         anchors.top: gradientheader.bottom
     }
 
+    Image {
+        id: transitPreview
+        source: ""
+        height: 320
+        width: 240
+        anchors.bottom: media_transit.top
+        anchors.horizontalCenter: parent.horizontalCenter
+
+        Connections{
+            target: manager
+            onMediaScreenShotReady: transitPreview.source="image://listprovider/screenshot/"+securityvideo.timestamp
+        }
+        Timer{
+            id:previewTimer
+            interval: 1000
+            repeat: true
+            running: dceTimecode.playbackSpeed !==1 ? true : false
+            onTriggered: manager.getVideoFrame()
+        }
+
+    }
 
 
     MediaScrollBar{id:media_transit; anchors.bottom: controlrow.top; anchors.horizontalCenter: controlrow.horizontalCenter}
 
     StoredVideoControls {
         id: controlrow
-
     }
 
 }

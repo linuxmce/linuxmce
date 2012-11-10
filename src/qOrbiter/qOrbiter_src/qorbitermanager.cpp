@@ -1418,21 +1418,18 @@ void qorbiterManager::updateImageChanged(QImage img)
 }
 
 
-void qorbiterManager::setScreenShotVariables(QList<QObject *> l)
+void qorbiterManager::setScreenShotVariables(screenshotAttributes *t)
 {
-#ifdef debug
+
     qDebug("Setting thumbnail attributes to screen");
-#endif
-    screenshotVars = l;
-    qorbiterUIwin->rootContext()->setContextProperty("screenshotAttributes", QVariant::fromValue(screenshotVars));
+
+  screenshotVars.append(t);
+
 }
 
 void qorbiterManager::setMediaScreenShot(QImage screen_shot)
 {
     mediaScreenShot = screen_shot;
-#ifdef debug
-    // qDebug() << mediaScreenShot.size();
-#endif
     emit mediaScreenShotReady();
 }
 

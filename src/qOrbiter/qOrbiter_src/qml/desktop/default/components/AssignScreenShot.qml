@@ -11,7 +11,6 @@ Rectangle {
     Connections{
         target: manager
         onMediaScreenShotReady: screenshotImage.source="image://listprovider/screenshot/"+securityvideo.timestamp
-
     }
 
     StyledText {

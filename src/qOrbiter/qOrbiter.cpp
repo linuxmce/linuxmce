@@ -3902,7 +3902,7 @@ void DCE::qOrbiter::grabScreenshot(QString fileWithPath)
                 cellfk = pCell->GetValue();
                 QStringList parser = cellTitle.split(QRegExp("(\\n|:\\s)"), QString::KeepEmptyParts);
                 //qDebug() << parser;
-                //screenshotVars.append(new screenshotAttributes( cellfk, cellTitle, cellAttribute.prepend("!A") ));
+               emit (new screenshotAttributes( cellfk, cellTitle, cellAttribute.prepend("!A") ));
             }
 
         }
@@ -3918,11 +3918,12 @@ void DCE::qOrbiter::grabScreenshot(QString fileWithPath)
             fk.append("!F"+ QString::number(iEK_File));
             emit commandResponseChanged("Screenshot filename: "+fk);
             // string *fk = StringUtils::itos(&iEK_File);
-            //screenshotVars.prepend(new screenshotAttributes(fk, QString("Filename"),fk ));
+            screenshotAttributes *t(new screenshotAttributes(fk, QString("Filename"),fk ));
+            emit addScreenShotVar(t);
         }
     }
-    //emit screenshotVariablesReady(screenshotVars);
-    //   qDebug("sending screenshot variables");
+    emit screenshotVariablesReady();
+      qDebug("sending screenshot variables");
     //screenshotVars.clear();
 
     CMD_Get_Video_Frame grabMediaScreenshot(long(m_dwPK_Device), long(m_dwPK_Device_NowPlaying), sDisableAspectLock,internal_streamID, 800 , 800, &screenieData, &screenieDataSize, &s_format);

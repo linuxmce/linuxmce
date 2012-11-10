@@ -478,7 +478,8 @@ signals:
     void setMediaDetails();
     void mediaScreenShotReady();
     void saveMediaScreenShot(QString attribute, QImage pic);
-    void requestStreamImage();
+    void requestStreamImage(QString i);
+    void requestVideoFrame();
     void liveTVrequest();
     void managerPlaylistRequest();
 
@@ -706,11 +707,13 @@ public slots:
     void dvd_showMenu(bool b) { dvdMenuShowing = b ; emit show_dvdMenu(dvdMenuShowing);}
     void setZoomLevel(QString zoom) {emit zoomLevelChanged(zoom);}
     void setAspectRatio(QString r) {emit aspectRatioChanged(r);}
+    void getVideoFrame() { emit requestVideoFrame();}
 
     /*Screenshot & Images slots*/
     void updateImageChanged(QImage img);
-    void grabStreamImage(){emit requestStreamImage();}
-    void setScreenShotVariables(QList <QObject*> l);
+    void grabStreamImage(){emit requestStreamImage(nowPlayingButton->path+"/"+nowPlayingButton->filepath);}
+    void setScreenShotVariables(screenshotAttributes*t);
+    void showScreenShotVariables() { qorbiterUIwin->rootContext()->setContextProperty("screenshotAttributes", QVariant::fromValue(screenshotVars)); }
     void setMediaScreenShot(QImage screen_shot);
     void saveScreenShot(QString attribute);
     void cleanupScreenie();

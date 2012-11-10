@@ -30,7 +30,7 @@ signals:
     void imageUpdated();
 
 public slots:
-     void setCameraImage(int cam, QImage img) { cameras.find(cam).value()= img;  }
+    void setCameraImage(int cam, QImage img) { if(!img.isNull()) {cameras.find(cam).value()= img;}  }
 
 
 };

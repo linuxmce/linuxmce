@@ -1291,8 +1291,8 @@ signals:
     void checkGridStatus();
     void liveTvUpdate(QString id);
     void mythTvUpdate(QString id);
-    void screenshotVariablesReady(QList<QObject*> vars);
-
+    void screenshotVariablesReady();
+    void addScreenShotVar(screenshotAttributes* t);
     //media datagrid
     void newGrid();
     void initializeSorting();

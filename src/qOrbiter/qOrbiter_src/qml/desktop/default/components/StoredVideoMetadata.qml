@@ -141,8 +141,8 @@ Rectangle{
             MouseArea{
                 anchors.fill: path
                 hoverEnabled: true
-                onEntered: { filepath.elide = "ElideNone" ; }
-                onExited: {filepath.elide = "ElideRight"; }
+                onEntered: { path.elide = "ElideNone" ; }
+                onExited: {path.elide = "ElideRight"; }
             }
         }
         
@@ -161,8 +161,8 @@ Rectangle{
             MouseArea{
                 anchors.fill: sd
                 hoverEnabled: true
-                onEntered: { filepath.elide = "ElideNone" ; }
-                onExited: {filepath.elide = "ElideRight"; }
+                onEntered: { sd.elide = "ElideNone" ; }
+                onExited: {sd.elide = "ElideRight"; }
             }
         }
     }
