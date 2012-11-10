@@ -47,11 +47,12 @@ Rectangle {
 
         Connections{
             target: dcenowplaying
-            onImageChanged:"image://listprovider/updateobject/"+securityvideo.timestamp;
+            onImageChanged: updateTimer.start()// "image://listprovider/updateobject/"+securityvideo.timestamp;
         }
 
         Timer{
-            interval: 500
+            id:updateTimer
+            interval: 100
             running: true
             onTriggered: nowplayingimage.source = "image://listprovider/updateobject/"+securityvideo.timestamp;
         }
@@ -66,11 +67,11 @@ Rectangle {
     Image {
         id: transitPreview
         source: ""
-        height: 320
-        width: 240
+        width: dcenowplaying.aspect=="wide"? scaleX(10) : scaleX(7)
+        height:dcenowplaying.aspect=="wide"? scaleY(10) : scaleY(17)
         anchors.bottom: media_transit.top
         anchors.horizontalCenter: parent.horizontalCenter
-
+        visible: dceTimecode.playbackSpeed !=1000 ? true : false
         Connections{
             target: manager
             onMediaScreenShotReady: transitPreview.source="image://listprovider/screenshot/"+securityvideo.timestamp
@@ -79,7 +80,7 @@ Rectangle {
             id:previewTimer
             interval: 1000
             repeat: true
-            running: dceTimecode.playbackSpeed !==1 ? true : false
+            running: dceTimecode.playbackSpeed !=1000 ? true : false
             onTriggered: manager.getVideoFrame()
         }
 
