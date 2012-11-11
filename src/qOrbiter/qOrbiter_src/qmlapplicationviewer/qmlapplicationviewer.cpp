@@ -27,6 +27,8 @@
 #include <QtDeclarative/QDeclarativeContext>
 #endif
 
+#include <QDebug>
+
 #include <qplatformdefs.h> // MEEGO_EDITION_HARMATTAN
 
 #ifdef HARMATTAN_BOOSTER
@@ -120,11 +122,15 @@ QmlApplicationViewer *QmlApplicationViewer::create()
 
 void QmlApplicationViewer::setMainQmlFile(const QString &file)
 {
+     qDebug()<< file;
+
 #ifndef Q_OS_ANDROID
     d->mainQmlFile = QmlApplicationViewerPrivate::adjustPath(file);
 #endif
 
+
 #ifdef Q_OS_ANDROID
+     d->mainQmlFile = file;
     setSource(QUrl(QLatin1String("assets:/")+d->mainQmlFile));
 #else
     setSource(QUrl::fromLocalFile(d->mainQmlFile));

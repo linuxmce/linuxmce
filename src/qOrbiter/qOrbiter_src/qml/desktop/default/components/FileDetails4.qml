@@ -19,6 +19,9 @@ Rectangle {
         anchors.fill: filedetailrect
 
     }
+    MouseArea{
+        anchors.fill: filedetailrect
+    }
 
     Connections{
         target:filedetailsclass

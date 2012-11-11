@@ -350,6 +350,8 @@ Param 10 - pk_attribute
     int modelPages;
     int media_pageSeperator;
 
+    QString mobileStorageLocation;
+
     //listmodels
     AvCodeGrid *deviceCommands;
     LocationModel *m_lRooms;
@@ -471,6 +473,7 @@ signals:
     void startPlayback(QString file);
     void zoomLevelChanged(QString zoom);
     void aspectRatioChanged(QString ratio);
+    void mobileStorageChanged();
 
     /*Dvd Specific*/
     void show_dvdMenu(bool m);
@@ -582,6 +585,11 @@ signals:
 
 
 public slots:
+
+    //mobile device specfic
+    bool setupMobileStorage();
+    void setMobileStorage(QString s){mobileStorageLocation = s; emit mobileStorageChanged();}
+    QString getMobileStorage(){return mobileStorageLocation;}
 
     /*Child devices*/
     void setCommunicatorID(int i){communicatorID = i;emit communicatorIdChanged(); }

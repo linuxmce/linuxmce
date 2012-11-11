@@ -16,6 +16,10 @@ Rectangle {
     scale:0
     Component.onCompleted: PropertyAnimation { target: filedetailrect; property: "scale"; to:1; duration: 500}
 
+    MouseArea{
+        anchors.fill: filedetailrect
+    }
+
     Image {
         id: fdbg
         source: "../img/icons/nowplaying.png"

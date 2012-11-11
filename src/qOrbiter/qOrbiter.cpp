@@ -2097,7 +2097,7 @@ bool qOrbiter::getRecievingStatus()
 
 void qOrbiter::setGridStatus(bool b)
 {
-    requestMore = b;
+    requestMore = true;
 }
 
 bool qOrbiter::getGridStatus()

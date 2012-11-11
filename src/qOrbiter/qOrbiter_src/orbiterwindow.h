@@ -48,7 +48,7 @@ public:
     QList<ExistingOrbiter*> orbiterList;
     QList<QObject*> userList;
     QList<QObject*> roomList;
-#if defined (GLENABLED) || (QT5)
+#ifdef GLENABLED
     QGLWidget *glWidget;
     FileReader *fileReader;
 #endif

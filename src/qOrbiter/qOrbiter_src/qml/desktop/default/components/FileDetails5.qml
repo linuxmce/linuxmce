@@ -19,7 +19,9 @@ Rectangle {
         anchors.fill: filedetailrect
 
     }
-
+    MouseArea{
+        anchors.fill: filedetailrect
+    }
     Connections{
         target:filedetailsclass
         onImageChanged:filedetailsimage.source = "image://listprovider/filedetailsprovider/"+securityvideo.timestamp

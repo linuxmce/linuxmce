@@ -15,11 +15,15 @@ Rectangle {
     //opacity: 0
     scale:0
     Component.onCompleted: PropertyAnimation { target: filedetailrect; property: "scale"; to:1; duration: 500}
-
+    MouseArea{
+        anchors.fill: filedetailrect
+        hoverEnabled: true
+    }
     Image {
         id: fdbg
         source: "../img/icons/nowplaying.png"
         anchors.fill: filedetailrect
+
     }
 
     Rectangle{

@@ -99,7 +99,7 @@ orbiterWindow::orbiterWindow(long deviceid, std::string routerip, QObject *paren
 
 #ifdef GLENABLED
 
-#if (QT_VERSION < QT_VERSION_CHECK(5,0,0))
+#ifdef for_desktop
     glWidget = new QGLWidget();
     mainView.setViewport(glWidget);
     mainView.setViewportUpdateMode(QGraphicsView::FullViewportUpdate);
@@ -180,11 +180,11 @@ localPath = "android/";
     qrcPath = "qrc:desktop/Splash.qml";
 
 #endif
-       #ifdef Q_OS_ANDROID
+       #ifdef ANDROID
     mainView.addImportPath("assets:/imports/androidComponents");
     mainView.engine()->addPluginPath(QDir::homePath()+"/../lib");
     mainView.rootContext()->setBaseUrl(QUrl::fromLocalFile("/"));
-    mainView.setMainQmlFile("qml/Base.qml");
+    mainView.setMainQmlFile(QString("qml/Base.qml"));
 #elif !for_harmattan
     mainView.setSource(QApplication::applicationDirPath().remove("/bin")+buildType+"/Splash.qml");
  #elif for_harmattan

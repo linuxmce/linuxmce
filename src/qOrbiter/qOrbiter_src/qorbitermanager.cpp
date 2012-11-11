@@ -81,6 +81,7 @@ qorbiterManager::qorbiterManager(QDeclarativeView *view, QObject *parent) :
     //pqOrbiter->qmlUI = this;
     setDceResponse("Starting...");
 
+
     if (readLocalConfig())
     {
         emit localConfigReady(true);
@@ -1053,7 +1054,7 @@ bool qorbiterManager::loadSkins(QUrl base)
     tskinModel->addSkin("default");
 
 #elif __ANDROID__
-    tskinModel->addSkin("default");
+    tskinModel->addSkin("default,data,wip");
 
 #elif for_android
     tskinModel->addSkin("default");
@@ -1150,7 +1151,11 @@ bool qorbiterManager::readLocalConfig()
 #ifdef Q_OS_MAC
     QString xmlPath = QString::fromStdString(QApplication::applicationDirPath().remove("MacOS").append("Resources").append("/config.xml").toStdString());
 #elif __ANDROID__
-    QString xmlPath = "/mnt/sdcard/LinuxMCE/config.xml";
+    QString xmlPath;
+    if(setupMobileStorage()){
+        xmlPath = mobileStorageLocation+"/config.xml" ;
+    }
+
 #elif WIN32
     QString xmlPath = QString::fromStdString(QApplication::applicationDirPath().toStdString())+"/config.xml";
 #elif RPI
@@ -1259,7 +1264,7 @@ bool qorbiterManager::writeConfig()
 #ifdef Q_OS_MAC
     QString xmlPath = QString::fromStdString(QApplication::applicationDirPath().remove("MacOS").append("Resources").append("/config.xml").toStdString());
 #elif __ANDROID__
-    QString xmlPath = "/mnt/sdcard/LinuxMCE/config.xml";
+    QString xmlPath = mobileStorageLocation+"/config.xml";
 #elif WIN32
     QString xmlPath = QString::fromStdString(QApplication::applicationDirPath().toStdString())+"/config.xml";
 #else
@@ -1608,9 +1613,9 @@ void qorbiterManager::setDceResponse(QString response)
     emit loadingMessage(dceResponse);
     emit dceResponseChanged();
 
-#ifdef QT_DEBUG
+
     qDebug() << dceResponse;
-#endif
+
 
 }
 
@@ -1640,7 +1645,8 @@ void qorbiterManager::killScreenSaver()
 
 bool qorbiterManager::createAndroidConfig()
 {
-    QFile droidConfig("/mnt/sdcard/LinuxMCE/config.xml");
+
+    QFile droidConfig(mobileStorageLocation);
     if (droidConfig.exists() && droidConfig.size() != 0)
     {   setDceResponse("Data exists, exiting 1st run");
         return true;
@@ -1648,14 +1654,14 @@ bool qorbiterManager::createAndroidConfig()
     else
     {
         QDir filePath;
-        if(filePath.mkpath("/mnt/sdcard/Linuxmce/"))
+        if(filePath.mkpath(mobileStorageLocation))
         {
             setDceResponse("Made path");
         }
 
         QFile defaultConfig(":main/config.xml");
 
-        if(defaultConfig.copy("/mnt/sdcard/Linuxmce/config.xml"))
+        if(defaultConfig.copy(mobileStorageLocation+"/config.xml"))
         {
             setDceResponse("file copied, verifying");
             /*
@@ -1755,4 +1761,29 @@ void qorbiterManager::showExistingOrbiter(const QList<QObject*> l )
     QList<QObject*> t ;
     t = l ;
     qorbiterUIwin->rootContext()->setContextProperty("orbiterList", QVariant::fromValue(t));
+}
+
+
+bool qorbiterManager::setupMobileStorage()
+{
+
+#ifdef ANDROID
+    QStringList androidStorageLocation;
+    androidStorageLocation <<"/mnt/sdcard/"<< "/data/"<< "/mnt/external/"<< "/mnt/sdcard/ext_sd/" << "/mnt/sdcard-ext/"<< "/mnt/sdcard/external_sd"<< "/mnt/extSdCard/"<< "/mnt/external1/"<< "/Removable/MicroSD/";
+
+    QDir extLocation;
+
+    for(int i = 0; i < androidStorageLocation.count(); i++)
+    {
+        extLocation.setPath(androidStorageLocation.at(i));
+
+        if(extLocation.isReadable())
+        {
+           setMobileStorage(androidStorageLocation.at(i)+"LinuxMCE/");
+           return true;
+        }
+    }
+    return false;
+#endif
+
 }

@@ -3,6 +3,7 @@ TEMPLATE = lib
 # TARGET = AudioVisual
 
 contains(QT_VERSION,4.8.*){
+message("$$QT_VERSION DCE-Av-Plugin")
 	QT += declarative phonon network
 	DEFINES+=QT4
 }
