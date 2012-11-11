@@ -21,7 +21,7 @@ Rectangle {
         anchors.horizontalCenter: parent.horizontalCenter
 
         spacing: scaleY(1)
-        Text {
+        StyledText {
             id: avcodeslabel
             text: qsTr("These are the devices in use. Touch a device name to send it a command, or touch the other cells to resend inputs or jump to advanced")
             width: parent.width * .75
@@ -42,7 +42,7 @@ Rectangle {
             border.width: 2
             radius: 20
 
-            Text {
+            StyledText {
                 id: blah
                 text: qsTr("Router Reply") + manager.mediaResponse
             }
@@ -61,19 +61,19 @@ Rectangle {
                     color: "grey"
                     Column{
                         spacing: scaleY(1)
-                        Text{
+                        StyledText{
                             id:av_label
                             text:name
                             font.pixelSize: scaleY(2)
                         }
-                        Text{
+                        StyledText{
                             id:controlledby
                             text:controller
                             font.pixelSize: scaleY(2)
                         }
-                        Text {
+                        StyledText {
                             id: device_number
-                            text: qsTr("Device Number:") + devicenumber
+                            text: qsTr("Device Number:") + i_devicenumber
                             font.pixelSize: scaleY(2)
                         }
                     }
@@ -105,7 +105,7 @@ Rectangle {
                     color: "slateblue"
                     Column{
                         spacing: scaleY(1)
-                        Text{
+                        StyledText{
                             id:command_label
                             text:commandnumber
                             font.pixelSize: scaleY(2)

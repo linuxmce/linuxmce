@@ -3,7 +3,7 @@ import "../components"
 
 Rectangle {
 
-    // property alias synText:
+    // property alias synStyledText:
     id: mythtvremote
     anchors.centerIn: parent
 
@@ -21,8 +21,8 @@ Rectangle {
         target:dcenowplaying
         onPlayListPositionChanged: nowplayingimage.source = "image://listprovider/updateobject/"+securityvideo.timestamp
     }
-    height: appH
-    width: appW
+    height: manager.appHeight
+    width: manager.appWidth
     radius: 0
     opacity: 1
     color: style.darkhighlight
@@ -63,7 +63,7 @@ Rectangle {
                         color: "#3878a0"
                     }
                 }
-                Text {
+                StyledText {
                     id: headertext
                     text:"Speed: " + dcenowplaying.qs_playbackSpeed
                     font.family: "Droid Sans"
@@ -104,7 +104,7 @@ Rectangle {
                     spacing: 5
                     height: childrenRect.height
 
-                    Text {
+                    StyledText {
                         id: artist
                         width: parent.width
                         text: qsTr("Device: ")  + dcenowplaying.qs_mainTitle
@@ -116,25 +116,25 @@ Rectangle {
                     }
 
 
-                    Text {
+                    StyledText {
                         id: album
                         wrapMode: "NoWrap"
                         text: qsTr("Channel: ") + dcenowplaying.qs_mainTitle2
                         font.family: "Droid Sans"
                         font.bold: true
                         smooth: true
-                        horizontalAlignment: Text.AlignHCenter
+                        horizontalAlignment: StyledText.AlignHCenter
                         font.pixelSize: 12
                     }
 
-                    Text {
+                    StyledText {
                         id: title
                         wrapMode: "NoWrap"
                         text: qsTr("Program:") + dcenowplaying.program
                         font.family: "Droid Sans"
                         font.bold: true
                         smooth: true
-                        horizontalAlignment: Text.AlignHCenter
+                        horizontalAlignment: StyledText.AlignHCenter
                         font.pixelSize: 12
                     }
                 }

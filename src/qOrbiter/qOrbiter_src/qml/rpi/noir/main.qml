@@ -6,8 +6,8 @@ import "js/ComponentLoader.js" as MyJs
 
 Item {
     id: item
-    width:manager.manager.appWidthidth
-    height:manager.manager.appHeighteight
+    width:manager.appWidth
+    height:manager.appHeight
     //focus:true
     signal close()
     signal changeScreen(string s)
@@ -113,8 +113,24 @@ Item {
         console.log(component.progress)
     }
 
+    function shiftFocus(){
+
+        if(pageLoader.focus)
+        {
+          //  pageLoader.focus = false
+            lmceScenarios.forceActiveFocus()
+
+        }
+        else
+        {
+          // lmceScenarios.focus = false
+            pageLoader.focus = true
+
+        }
+    }
+
     FocusScope{
-        id:loaderScop
+        id:loaderScope
         width: parent.width
         height: parent.height
         focus: true
@@ -124,23 +140,52 @@ Item {
                 toggleUI()
                 console.log("Key toggle")
             }
-
-        }
-
-        Loader {
-            id:pageLoader
-            objectName: "loadbot"
-            focus: true
-            onSourceChanged:  loadin
-
-            onLoaded: {
-
-                console.log("Screen Changed:" + pageLoader.source)
+            else if(event.key ===Qt.Key_Tab)
+            {
+                shiftFocus();
             }
+            else if(event.key===Qt.Key_Up)
+            {
+                pageLoader.focus = true
+                lmceScenarios.focus = false
+            }
+            else if(event.key===Qt.Key_Down)
+            {
+                lmceScenarios.focus = true
+                pageLoader.focus = false
+            }
+
         }
 
 
 
+        //floorplans
+
+        //BottomPanel{id: advanced; anchors.top: stage.top}
+        ScenarioRow{
+            id:lmceScenarios;
+        }
+
+
+    }
+
+    Loader {
+        id:pageLoader
+        objectName: "loadbot"
+        focus: true
+        onSourceChanged:  loadin
+        onFocusChanged: {
+            pageLoader.item.focus=focus
+            onActiveFocusChanged: console.log("Pageloader focus::"+focus)
+        }
+        Keys.onTabPressed:{ shiftFocus(); console.log("Changing page loader focus")}
+        onLoaded: {
+            console.log("Screen Changed:" + pageLoader.source)
+
+        }
+    }
+    MediaHeader{
+        id:mediaHeader
     }
 
     //=================Components==================================================//
@@ -209,14 +254,7 @@ Item {
     //-----------------------------shader related---------------------------//
 
 
-    //floorplans
-    MediaHeader{
-        id:mediaHeader
-    }
-    //BottomPanel{id: advanced; anchors.top: stage.top}
-    ScenarioRow{
-        id:lmceScenarios;
-    }
+
 
 }
 

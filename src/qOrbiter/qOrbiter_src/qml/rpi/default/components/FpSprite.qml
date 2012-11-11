@@ -40,7 +40,7 @@ Item {
         cache: false
     }
 
-    Text {
+    StyledText {
         id: device_number
         text: deviceNum
         anchors.centerIn: parent

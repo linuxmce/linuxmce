@@ -31,7 +31,7 @@ Rectangle {
         width: parent.width
         color:style.highlight1
         radius:2.5
-        Text {
+        StyledText {
             id: text2
             anchors.horizontalCenter: parent.horizontalCenter
             text: qsTr("Filename")+filedetailsclass.path+ "/"+filedetailsclass.filename
@@ -98,7 +98,7 @@ Rectangle {
                 anchors.margins: scaleY(1)
                 width: parent.width
                 height: childrenRect.height
-                Text {
+                StyledText {
                     id: fnametext
                     text: "Title: " + filedetailsclass.objecttitle
                     font.pixelSize: scaleY(2)
@@ -107,8 +107,8 @@ Rectangle {
                      width: rectangle1.width *.95
                 }
 
-                Text {
-                    id: storageDeviceText
+                StyledText {
+                    id: storageDeviceStyledText
                     width: scaleX(35)
                     text: qsTr("Located on: ") + filedetailsclass.qs_storageDevice
                     font.family: "Droid Sans"
@@ -119,7 +119,7 @@ Rectangle {
 
                 }
 
-                Text {
+                StyledText {
                     id: programtext
                     width: scaleX(35)
                     text: qsTr("Album: ") + filedetailsclass.album
@@ -131,7 +131,7 @@ Rectangle {
                     visible:  filedetailsclass.album =="" ? false: true
                 }
 
-                Text {
+                StyledText {
                     id: episode
                     width: scaleX(35)
                     wrapMode: "WrapAtWordBoundaryOrAnywhere"
@@ -143,7 +143,7 @@ Rectangle {
                     visible:  filedetailsclass.track =="" ? false: true
                 }
 
-                Text {
+                StyledText {
                     id: genre
                     width: scaleX(35)
                     wrapMode: "WrapAtWordBoundaryOrAnywhere"
@@ -160,7 +160,7 @@ Rectangle {
                         onExited: {genre.elide = "ElideRight"; }
                     }
                 }
-                Text {
+                StyledText {
                     id: released
                     width: scaleX(35)
                     wrapMode: "WrapAtWordBoundaryOrAnywhere"
@@ -174,7 +174,7 @@ Rectangle {
                 }
 
 
-                Text {
+                StyledText {
                     id: starring
                     width: scaleX(35)
                     wrapMode: "WrapAtWordBoundaryOrAnywhere"

@@ -6,8 +6,8 @@ import QtQuick 2.0
   Button sienna
   Rows   lightbrwn
   Grids  ltgrn
-  Button Text white
-  Title Text white
+  Button StyledText white
+  Title StyledText white
 
   */
 
@@ -17,10 +17,10 @@ QtObject{
     objectName: "orbiter_style"
 
     function scaleX(x){
-        return x/100*appW
+        return x/100*manager.appWidth
     }
     function scaleY(y){
-        return y/100*appH
+        return y/100*manager.appHeight
     }
     //skin description
     property string skincreator: "Langston Ball (aka golgoj4)"

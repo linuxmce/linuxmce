@@ -8,8 +8,8 @@ import "js/ComponentLoader.js" as MyJs
 
 Item {
     id: item
-    width:appW
-    height:appH
+    width:manager.appWidth
+    height:manager.appHeight
 
 //    MediaManager{
 //        id:dceplayer
@@ -17,7 +17,7 @@ Item {
 //        anchors.left:parent.left
 
 //        z:0
-//        Component.onCompleted: setWindowSize(appH, appW)
+//        Component.onCompleted: setWindowSize(manager.appHeight, manager.appWidth)
 //        MouseArea{
 //            anchors.fill: dceplayer
 //            acceptedButtons: Qt.LeftButton | Qt.RightButton
@@ -25,7 +25,7 @@ Item {
 //        }
 //        Connections{
 //            target:manager
-//            onOrientationChanged:dceplayer.setWindowSize(appH, appW)
+//            onOrientationChanged:dceplayer.setWindowSize(manager.appHeight, manager.appWidth)
 //        }
 //    }
 
@@ -41,7 +41,7 @@ Item {
 FontLoader{
     id:keyFont
     name:"Sawasdee"
-    source: "../../fonts/Sawasdee.ttf"
+    source: "fonts/Sawasdee.ttf"
 }
 
 
@@ -104,8 +104,8 @@ FontLoader{
 
     ScreenSaver
     {   id:ss
-        height: appH
-        width: appW
+        height: manager.appHeight
+        width: manager.appWidth
         anchors.centerIn: parent
         z:-1
         MouseArea{
@@ -132,10 +132,10 @@ FontLoader{
 
     }
     function scaleX(x){
-        return x/100*appW
+        return x/100*manager.appWidth
     }
     function scaleY(y){
-        return y/100*appH
+        return y/100*manager.appHeight
     }
 
     function fadeInUi(){

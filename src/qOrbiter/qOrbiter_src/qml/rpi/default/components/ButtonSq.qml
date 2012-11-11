@@ -24,7 +24,7 @@ Rectangle{
         border.color: style.highlight1
         radius: 5
 
-        Text {
+        StyledText {
             id: buttonLabel
             x: 50
             y: 50
@@ -32,8 +32,8 @@ Rectangle{
             height: 0
             text:"null ipsum delorium"
             font.pixelSize: 14
-            verticalAlignment: Text.AlignVCenter
-            horizontalAlignment: Text.AlignHCenter
+//            verticalAlignment: StyledText.AlignVCenter
+//            horizontalAlignment: StyledText.AlignHCenter
             anchors.fill: parent
             anchors.horizontalCenter: parent.horizontalCenter
             anchors.verticalCenter: parent.verticalCenter

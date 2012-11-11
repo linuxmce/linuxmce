@@ -20,8 +20,8 @@ Item
         id:stage
 
         signal swapStyle()
-        height: appH
-        width: appW
+        height: manager.appHeight
+        width: manager.appWidth
         color: "transparent"
 
         Image {
@@ -33,7 +33,7 @@ Item
 
         }
 
-        Text{
+        StyledText{
             id:connectstatus
             text: "Orbiter "+ manager.m_dwPK_Device + " is connected."
             color: "aliceblue"

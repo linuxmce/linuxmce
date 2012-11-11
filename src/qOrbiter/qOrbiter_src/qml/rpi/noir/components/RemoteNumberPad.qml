@@ -27,7 +27,7 @@ Rectangle {
             border.color: style.accentcolor
             border.width: 2
 
-            StyledTextInput {
+            TextInput {
                 id: text_input1
                 text: ""
 

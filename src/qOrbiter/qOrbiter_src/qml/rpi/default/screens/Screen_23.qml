@@ -4,10 +4,10 @@ Item{
     id:intercomitem
 
     Rectangle{
-        height: appH
-        width: appW
+        height: manager.appHeight
+        width: manager.appWidth
         color: "transparent"
-        Text {
+        StyledText {
             id: intercomtext
             x: 74
             y: 101

@@ -7,7 +7,7 @@ Item{
     height: childrenRect.height
     width: childrenRect.width
     state: currentState ? "show" : "hide"  //currentState === true ? "SHOW" : "HIDE"
-
+    focus:false
     onStateChanged: console.log(state)
     onCurrentStateChanged: {
         if(hdrContainer.state==="hide")
@@ -25,8 +25,8 @@ Item{
             name: "show"
             AnchorChanges {
                 target: hdrContainer
-              //  anchors.bottom: undefined
-                anchors.top: item.top
+                //  anchors.bottom: undefined
+                anchors.top: parent.top
 
             }
         },
@@ -34,8 +34,8 @@ Item{
             name: "hide"
             AnchorChanges {
                 target:hdrContainer
-              //  anchors.top: undefined
-                anchors.bottom: item.top
+                //  anchors.top: undefined
+                anchors.bottom: parent.top
             }
         }
     ]

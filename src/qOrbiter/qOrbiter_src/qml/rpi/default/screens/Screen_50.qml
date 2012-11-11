@@ -3,10 +3,10 @@ import "../components"
 import "../js/ComponentLoader.js" as MyJs
 Rectangle {
 
-    // property alias synText:
+    // property alias synStyledText:
     id: dvdmenu
-    height: appH
-    width: appW
+    height: manager.appHeight
+    width: manager.appWidth
     radius: 0
     opacity: 1
     color: "transparent"

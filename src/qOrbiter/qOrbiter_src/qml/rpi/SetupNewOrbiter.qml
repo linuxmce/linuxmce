@@ -2,8 +2,8 @@
 import QtQuick 2.0
 
 Rectangle {
-    width: appW
-    height: appH
+    width: manager.appWidth
+    height: manager.appHeight
     color: "slategrey"
     //palette?
     property string orangeRed: "#993300"
@@ -11,10 +11,10 @@ Rectangle {
     property string midnightBlue: "#003366"
     //---------
     function scaleX(x){
-        return x/100*appH
+        return x/100*manager.appHeight
     }
     function scaleY(y){
-        return y/100*appW
+        return y/100*manager.appWidth
     }
     Component.onCompleted: window.showSetup()
 
@@ -73,7 +73,7 @@ Rectangle {
             }
         }
         Row{
-            Text {
+            StyledText {
                 id: welcome
                 text: qsTr("Setup A New Orbiter")
                 color:"white"
@@ -84,7 +84,7 @@ Rectangle {
                 height: scaleX(14)
                 width: scaleX(14)
                 color: "blue"
-                Text{
+                StyledText{
                     text:"Go!"
                     anchors.centerIn: parent
                     color:"white"
@@ -115,10 +115,10 @@ Rectangle {
                     radius:10
                     border.color:usersView.currentIndex === index ? midnightBlue : orangeRed
                     color: usersView.currentIndex === index ? deYork : "white"
-                    Text {
+                    StyledText {
                         text: dataTitle
                         font.pointSize: 12
-                        wrapMode: Text.WrapAtWordBoundaryOrAnywhere
+                        wrapMode: StyledText.WrapAtWordBoundaryOrAnywhere
                         width: parent.width *.75
                         anchors.centerIn: parent
                     }
@@ -151,10 +151,10 @@ Rectangle {
                     radius:10
                     border.color:roomsView.currentIndex === index ? midnightBlue : orangeRed
                     color: roomsView.currentIndex === index ? deYork : "white"
-                    Text {
+                    StyledText {
                         text: dataTitle
                         font.pointSize: 12
-                        wrapMode: Text.WrapAtWordBoundaryOrAnywhere
+                        wrapMode: StyledText.WrapAtWordBoundaryOrAnywhere
                         width: parent.width *.75
                         anchors.centerIn: parent
                     }
@@ -185,10 +185,10 @@ Rectangle {
                     border.color:langView.currentIndex === index ? midnightBlue : orangeRed
                     color: langView.currentIndex === index ? deYork : "white"
 
-                    Text {
+                    StyledText {
                         text: lang
                         font.pointSize: 12
-                        wrapMode: Text.WrapAtWordBoundaryOrAnywhere
+                        wrapMode: StyledText.WrapAtWordBoundaryOrAnywhere
                         width: parent.width *.75
                         anchors.centerIn: parent
                     }
@@ -204,7 +204,7 @@ Rectangle {
             }
         }
 
-        Text {
+        StyledText {
             id: logo
             text: qsTr("LinuxMCE")
             anchors.bottom: parent.bottom
@@ -223,14 +223,14 @@ Rectangle {
             width: parent.width / 3
             spacing:5
 
-                Text {
+                StyledText {
                     id: selectedUser
                     text: qsTr("Please Select a Default User")
                     font.bold: true
                     color: deYork
                     font.pointSize: 14
                     x:0
-                    onTextChanged: {
+                    onStyledTextChanged: {
                         x = -50
                         userSelected.restart()
                     }
@@ -255,20 +255,20 @@ Rectangle {
                 }
 
 
-                Text {
+                StyledText {
                     id: selectedRoom
                     text: qsTr("Please Select A Default Room")
                 }
 
 
 
-                Text{
+                StyledText{
                     id:selectedLang
                     text:qsTr("Please Select a Default Language")
                 }
 
 
-                Text {
+                StyledText {
                     id: selectedResolution
                     text:"Size "+newOrbiterSetupContainer.height
                 }

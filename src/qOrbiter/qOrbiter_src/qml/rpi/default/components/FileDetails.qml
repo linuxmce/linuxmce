@@ -24,8 +24,8 @@ Rectangle {
 
     Rectangle{
         id:masking_rect
-        height: appH
-        width: appW
+        height: manager.appHeight
+        width: manager.appWidth
         color: "darkgrey"
         opacity: .75
         z:-1
@@ -48,23 +48,23 @@ Rectangle {
         width: parent.width
         color:style.highlight1
         radius:2.5
-        Text {
+        StyledText {
             id: text2
             anchors.horizontalCenter: parent.horizontalCenter
                text: "Location: " + filedetailsclass.path
                font.pixelSize: scaleY(2)
             font.bold: true
-            wrapMode: Text.WrapAtWordBoundaryOrAnywhere
+            wrapMode: StyledText.WrapAtWordBoundaryOrAnywhere
         }
 
     }
-    Text {
+    StyledText {
         id: filename_block
         anchors.horizontalCenter: parent.horizontalCenter
            text: "Filename: " + filedetailsclass.file
            font.pixelSize: scaleY(3)
         font.bold: true
-        wrapMode: Text.WrapAtWordBoundaryOrAnywhere
+        wrapMode: StyledText.WrapAtWordBoundaryOrAnywhere
         anchors.bottom: parent.bottom
 
     }
@@ -129,7 +129,7 @@ Rectangle {
                 anchors.margins: scaleY(1)
                 width: parent.width
                 height: childrenRect.height
-                Text {
+                StyledText {
                     id: fnametext
 
                     font.pixelSize: scaleY(2)
@@ -139,7 +139,7 @@ Rectangle {
                      font.bold: true
                 }
 
-                Text {
+                StyledText {
                     id:  titletext
                     text:filedetailsclass.mediatitle
                     font.pixelSize: scaleY(3)
@@ -149,7 +149,7 @@ Rectangle {
                      width: rectangle1.width *.95
                 }
 
-                Text {
+                StyledText {
                     id:  program_block
                     text:qsTr("Program") + filedetailsclass.program
                     font.pixelSize: scaleY(2)
@@ -160,7 +160,7 @@ Rectangle {
                      visible:  filedetailsclass.program =="" ? false: true
                 }
 
-                Text {
+                StyledText {
                     id:  episode
                     text:qsTr("Episode") + filedetailsclass.episode
                     font.pixelSize: scaleY(2)
@@ -170,7 +170,7 @@ Rectangle {
                      width: rectangle1.width *.95
                      visible:  filedetailsclass.episode =="" ? false: true
                 }
-                Text {
+                StyledText {
                     id: album_block
                     width: scaleX(35)
                     text: qsTr("Album: ") + filedetailsclass.album
@@ -181,7 +181,7 @@ Rectangle {
                     visible:  filedetailsclass.album =="" ? false: true
                 }
 
-              /*  Text {
+              /*  StyledText {
                     id: rating
                    width: rectangle1.width *.95
                     wrapMode: "WrapAtWordBoundaryOrAnywhere"
@@ -195,7 +195,7 @@ Rectangle {
                     visible:  filedetailsclass.rating =="" ? false: true
                 }
                 */
-                Text {
+                StyledText {
                     id: genre_block
                    width: rectangle1.width *.95
                     wrapMode: "WrapAtWordBoundaryOrAnywhere"
@@ -215,7 +215,7 @@ Rectangle {
                         onExited: {starring.elide = "ElideRight"; }
                     }
                 }
-                Text {
+                StyledText {
                     id: director_block
                    width: rectangle1.width *.95
                     wrapMode: "WrapAtWordBoundaryOrAnywhere"
@@ -236,7 +236,7 @@ Rectangle {
                     }
                 }
 
-                Text {
+                StyledText {
                     id: starring
                    width: rectangle1.width *.95
                     wrapMode: "WrapAtWordBoundaryOrAnywhere"
@@ -257,7 +257,7 @@ Rectangle {
                     }
                 }
 
-                Text {
+                StyledText {
                     id: synopsistext
                     width: rectangle1.width *.95
                     wrapMode: "WrapAtWordBoundaryOrAnywhere"
@@ -268,7 +268,7 @@ Rectangle {
             }
         }
 
-        Text {
+        StyledText {
             id: txtmoredn
             text: "More..."
             anchors.horizontalCenterOffset: 294
@@ -278,7 +278,7 @@ Rectangle {
             visible: !contentFlick.atYEnd
         }
 
-        Text {
+        StyledText {
             id: txtmoreup
             x: scaleX(60)
             y: scaleY(20)
@@ -299,7 +299,7 @@ Rectangle {
             height: childrenRect.height
             color: style.button_system_color
 
-            Text {
+            StyledText {
                 text: section
                 font.bold: true
             }
@@ -317,7 +317,7 @@ Rectangle {
 
         delegate: Item {
             width: list_view1.width;
-            Text {
+            StyledText {
             id: titleof
             text:pkattribute
             height:  20

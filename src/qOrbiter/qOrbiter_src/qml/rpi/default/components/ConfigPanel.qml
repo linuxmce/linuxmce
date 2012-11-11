@@ -10,8 +10,8 @@ Rectangle {
     state:"hidden"
     Rectangle{
         id:mask
-        height: appH
-        width: appW
+        height: manager.appHeight
+        width: manager.appWidth
         color: "lightgrey"
         opacity:.26
         anchors.centerIn: parent
@@ -26,7 +26,7 @@ Rectangle {
         width: 50
         color: "grey"
         anchors.left: parent.left
-        Text {
+        StyledText {
             id: exlbl
             text: qsTr("Close")
             anchors.centerIn: parent
@@ -53,7 +53,7 @@ Rectangle {
         anchors.topMargin: scaleY(15)
         ConfigItemBox{
             id:debugMode
-            headerText: "Enable Debug mode?"
+            headerStyledText: "Enable Debug mode?"
             useToggle: true
             toggleValue:manager.debugMode
             onConfigSwitchChanged: manager.debugMode = !manager.debugMode

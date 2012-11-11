@@ -89,7 +89,7 @@ Rectangle {
             width: scaleX(18)
             color: style.lighthighlight
             anchors.right: parent.right
-            Text{
+            StyledText{
                 id:fplabel
                 text: qsTr("Floorplans")
                 height: scaleY(5)
@@ -110,7 +110,7 @@ Rectangle {
                     width: scaleX(16)
                     color: style.accentcolor
                     border.color: style.darkhighlight
-                    Text {
+                    StyledText {
                         id: desc
                         text: m_description
                     }
@@ -148,26 +148,26 @@ Rectangle {
 
 
             Column{
-                Text {
+                StyledText {
                     id: fpDevice_name
                     text: "I am " + name
                 }
-                Text {
+                StyledText {
                     id: fpDevice_type
                     text: "I am type" + type
                 }
-                Text {
+                StyledText {
                     id: fp_type
                     text: "Floorplan type" + floorplantype
                 }
-                Text {
+                StyledText {
                     id: fpDevice_no
                     text: "I am Dev#" + deviceno
                 }
-                Text {
+                StyledText {
                     id: fpDevice_pos
                     text: "Position" + floorplan_devices.getDeviceX(deviceno) + "," + floorplan_devices.getDeviceY(deviceno)
-                    // onTextChanged: placeSprites(floorplan_devices.getDeviceX(deviceno),floorplan_devices.getDeviceY(deviceno),deviceno)
+                    // onStyledTextChanged: placeSprites(floorplan_devices.getDeviceX(deviceno),floorplan_devices.getDeviceY(deviceno),deviceno)
                 }
             }
 

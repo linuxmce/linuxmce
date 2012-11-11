@@ -46,7 +46,7 @@ Rectangle {
                 asynchronous: true
             }
 
-            Text
+            StyledText
             {
                 id:celllabel
                 text: name;

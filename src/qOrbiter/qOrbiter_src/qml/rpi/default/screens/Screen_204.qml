@@ -14,16 +14,16 @@ Stage{
         anchors.centerIn: parent
         radius: 10
 
-            Text {
+            StyledText {
                 id: message
                 text: qsTr("The router has requested a reload")
                 width: parent.width
                 height: scaleY(5)
                 font.italic: false
-                horizontalAlignment: Text.AlignHCenter
+                horizontalAlignment: StyledText.AlignHCenter
                 font.bold: false
                 color: "aliceblue"
-                wrapMode: Text.WrapAnywhere
+                wrapMode: StyledText.WrapAnywhere
                 font.pixelSize: 18
                 anchors.centerIn: containerrect
             }

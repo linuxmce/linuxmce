@@ -9,12 +9,12 @@ Rectangle {
 
 
 
-    property string headerText: "enter header text"
+    property string headerStyledText: "enter header text"
     property string configProperty:""
 
     property bool toggleValue:false
     property bool configSwitch:false
-    property bool useText:false
+    property bool useStyledText:false
     property bool useToggle:false
 
     Component.onCompleted: configSwitch = toggleValue
@@ -26,9 +26,9 @@ Rectangle {
         anchors.top: parent.top
         radius: 5
         color: "#E89F6B"
-        Text {
+        StyledText {
             id: hdrLabel
-            text: headerText
+            text: headerStyledText
             color:"black"
             font.pixelSize: 12
         }
@@ -58,7 +58,7 @@ Rectangle {
                 height: parent.height /2
                 radius: 5
                 color: "green"
-                Text {
+                StyledText {
                     id: lbk
                     text: qsTr("Confirm")
                     anchors.centerIn: parent
@@ -88,8 +88,8 @@ Rectangle {
                 state: toggleValue ? "yes" : "no"
 
                 anchors.verticalCenter: parent.verticalCenter
-                Text {
-                    id: keyText
+                StyledText {
+                    id: keyStyledText
                     text: toggleValue
                     anchors.centerIn: parent
                 }

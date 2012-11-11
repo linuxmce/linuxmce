@@ -1,8 +1,8 @@
 import QtQuick 2.0
 import "../components"
 Rectangle {
-    height: appH
-    width: appW
+    height: manager.appHeight
+    width: manager.appWidth
 
     ButtonSq {
     height: 50

@@ -3,8 +3,8 @@ import "../components"
 import "../js/ComponentLoader.js" as MyJs
 
 Rectangle {
-    height: appH
-    width: appW
+    height: manager.appHeight
+    width: manager.appWidth
     color: "transparent"
     id: advancedscreen
 

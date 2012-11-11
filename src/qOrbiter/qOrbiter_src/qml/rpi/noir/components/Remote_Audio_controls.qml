@@ -37,7 +37,7 @@ AvOptionButton {
 
         rotation: -90
         smooth: true
-        source: "../img/icons/player_fwd.png"
+        source: "../img/external/icons/player_fwd.png"
         MouseArea{
             anchors.fill: parent
             onClicked: manager.adjustVolume(1)
@@ -53,7 +53,7 @@ AvOptionButton {
         height: 50
         rotation: 90
         smooth: true
-        source: "../img/icons/player_fwd.png"
+        source: "../img/external/icons/player_fwd.png"
         MouseArea{
             anchors.fill: parent
             onClicked: manager.adjustVolume(-1)

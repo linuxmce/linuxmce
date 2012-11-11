@@ -1,8 +1,8 @@
 import QtQuick 2.0
 Item
 {
-    property int listHeight:viewMode ? scaleX(3): appH
-    property int listWidth: viewMode ? appW :scaleX(3)
+    property int listHeight:viewMode ? scaleX(3): manager.appHeight
+    property int listWidth: viewMode ? manager.appWidth :scaleX(3)
     property string listlabelColor:"aliceblue"
     property int listlabelpixelsize:12
     property string listLabelFont
@@ -131,7 +131,7 @@ Item
                 width: scaleX(4)
                 color: "transparent"
                 clip:false
-                Text {
+                StyledText {
                     id: test
                     text: name
                     font.pixelSize: listlabelpixelsize

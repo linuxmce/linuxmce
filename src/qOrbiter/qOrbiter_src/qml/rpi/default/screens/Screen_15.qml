@@ -28,7 +28,7 @@ Item{
         width: style.orbiterW
         color: "transparent"
         Component.onCompleted: requestSecurityPic(screenparams.getParam(2), 800, 600)
-        Text {
+        StyledText {
             id: singlecamlabel
             x: 74
             y: 101
@@ -63,7 +63,7 @@ Item{
                anchors.top: securityimage.bottom
                anchors.horizontalCenter: securitycamrect.horizontalCenter
 
-               Text {
+               StyledText {
                    id: buttonplaceholder
                    text: qsTr("Camera label and controls go here")
                }

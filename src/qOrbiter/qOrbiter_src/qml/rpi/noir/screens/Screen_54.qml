@@ -4,108 +4,58 @@ import "../js/ComponentLoader.js" as MyJs
 
 Rectangle {
     id: storedaudioremote
-
-    StyledText {
-        id: messages
-        text: manager.mediaResponse
-        font.pointSize: scaleY(4)
-        anchors.bottom: parent.bottom
-    }
-
-    Connections{
-        target:dcenowplaying
-        onImageChanged:nowplayingimage.source = "image://listprovider/updateobject/"+securityvideo.timestamp
-    }
- Component.onCompleted: manager.setBoundStatus(true)
-
+    Component.onCompleted: manager.setBoundStatus(true)
     height: manager.appHeight
     width: manager.appWidth
     radius: 0
     opacity: 1
     color: "transparent"
-
-    StyledText {
-        id: bignowplaying
-        text: dcenowplaying.qs_mainTitle
+    focus:false
+    Keys.onTabPressed: {shiftFocus(); console.log("Tab to next back to scenarios?") }
+    onActiveFocusChanged: console.log(dcenowplaying.qs_screen+ " focus::"+focus)
+    FocusScope{
+        width: parent.width
+        height: parent.height
         anchors.centerIn: parent
-        font.pointSize: scaleY(5)
-        opacity: .5
-       font.bold: true
 
-    }
-
-    //main 'now playing rect containing all the other items
-
-
-
-    Column{
-        anchors.right: storedaudioremote.right
-        anchors.rightMargin: scaleX(1)
-        Remote_lighting_controls{ id: remote_lighting_controls1; }
-        Remote_Audio_controls{ id: remote1; }
-    }
-
-    Row{
-        id:headerrow
-        height:childrenRect.height
-        width: parent.width-1
-        anchors.top: parent.top
-        anchors.topMargin: scaleY(1)
-
-        StyledText {
-            id: timecode
-            height:scaleY(2.15)
-            text: qsTr("Speed: ") + dceTimecode.playbackSpeed +" || " +dceTimecode.qsCurrentTime + qsTr(" of ") + dceTimecode.qsTotalTime
-            font.family: "Droid Sans"
-            font.pointSize: scaleY(2.15)
-            anchors.verticalCenter: parent.verticalCenter
-            anchors.horizontalCenter: parent.horizontalCenter
-            font.bold: true
+        Connections{
+            target:dcenowplaying
+            onImageChanged:nowplayingimage.source = "image://listprovider/updateobject/"+securityvideo.timestamp
         }
-    }
+        //main 'now playing rect containing all the other items
 
-    Row{
-        id:mainrow
-        height: childrenRect.height
-        width: scaleX(95)
-        spacing: scaleX(.5)
-        anchors.top:headerrow.bottom
-        anchors.topMargin: scaleY(2)
-        anchors.horizontalCenter: parent.horizontalCenter
 
-        NonEPGPlaylist{ id:playlist; visible: true}
+        Column{
+            anchors.right: storedaudioremote.right
+            anchors.rightMargin: scaleX(1)
+            Remote_lighting_controls{ id: remote_lighting_controls1; }
+            Remote_Audio_controls{ id: remote1; }
+        }
 
-        Row {
-            id:metarow
-            width: childrenRect.width
-            height: childrenRect.height
+        Rectangle{
+            id:contentDisplay
+            width: parent.width
+            height: scaleY(35)
+            anchors.verticalCenter: parent.verticalCenter
+            color: "transparent"
 
-            spacing: scaleX(.25)
             Rectangle{
-                id:imageholder
-                height:childrenRect.height
-                width:scaleX(30)
-                color: "transparent"
+                id:opacityMask
+                anchors.fill: parent
+                color: "black"
+                opacity: .25
+            }
 
+            Image {
+                id: nowplayingimage
+                width: dcenowplaying.aspect=="wide"? scaleX(18) : scaleX(18)
+                height:dcenowplaying.aspect=="wide"? scaleY(30) : scaleY(30)
+                source: "image://listprovider/updateobject/"+dcenowplaying.m_iplaylistPosition
+                anchors.horizontalCenter: parent.horizontalCenter
+                transform: Rotation { origin.x: 30; origin.y: 30; axis { x: 0; y: 1; z: 0 } angle: 30 }
+                anchors.verticalCenter: parent.verticalCenter
 
-                BorderImage {
-                    id: borderimg
-                    horizontalTileMode: BorderImage.Repeat
-                    source: "../img/external/icons/drpshadow.png"
-                    anchors.fill: nowplayingimage
-                    anchors { leftMargin: -6; topMargin: -6; rightMargin: -8; bottomMargin: -8 }
-                    border { left: 10; top: 10; right: 10; bottom: 10 }
-                    smooth: true
-                }
-                Image {
-                    id: nowplayingimage
-                    width: dcenowplaying.aspect=="wide"? scaleX(18) : scaleX(18)
-                    height:dcenowplaying.aspect=="wide"? scaleY(30) : scaleY(30)
-                    source: "image://listprovider/updateobject/"+dcenowplaying.m_iplaylistPosition
-                    anchors.horizontalCenter: parent.horizontalCenter
-                    smooth: true
-                }
-
+                smooth: true
                 Image {
                     id: npmask
                     source: "../img/external/icons/transparencymask.png"
@@ -114,167 +64,21 @@ Rectangle {
                 }
             }
 
-            Rectangle{
-                id:textrect
-                visible: true
-                height: childrenRect.height
-                width: scaleX(40)
-                color:"transparent"
-                anchors.left:  imageholder.right;
-                anchors.top:  imageholder.top
-                anchors.bottomMargin: dcenowplaying.aspect == "wide"? 10 : 20
-                clip:true
-                Column{
-                    spacing: scaleY(.5)
-                    width: childrenRect.width
-                    height: dcenowplaying.aspect == "wide"?scaleY(25): scaleY(35)
-                    StyledText {
-                        id: starring
-                        width: scaleX(40)
-                        wrapMode: "WrapAtWordBoundaryOrAnywhere"
-                        text: dcenowplaying.performerlist
-                        font.family: "Droid Sans"
-                        font.bold: true
-                        smooth: true
-                        font.pointSize: scaleY(4)
-                        elide: "ElideRight"
-                        visible:  dcenowplaying.performerlist =="" ? false: true
-
-                        MouseArea{
-                            anchors.fill: starring
-                            hoverEnabled: true
-                            onEntered: { starring.elide = "ElideNone" ; }
-                            onExited: {starring.elide = "ElideRight"; }
-                        }
-                    }
-                    StyledText {
-                        id: generaltitle
-                        width: scaleX(35)
-                        text:  dcenowplaying.mediatitle
-                        font.family: "Droid Sans"
-                        wrapMode: "WrapAtWordBoundaryOrAnywhere"
-                        smooth: true
-                        font.pointSize: scaleY(3.5)
-                        visible:  dcenowplaying.mediatitle =="" ? false: true
-                    }
-
-                    StyledText {
-                        id: programtext
-                        width: scaleX(35)
-                        text: qsTr("Album: ") + dcenowplaying.album
-                        font.family: "Droid Sans"
-                        wrapMode: "WrapAtWordBoundaryOrAnywhere"
-                        smooth: true
-                        font.pointSize: scaleY(2)
-                        visible:  dcenowplaying.album =="" ? false: true
-                    }
-
-                    StyledText {
-                        id: episode
-                        width: scaleX(35)
-                        wrapMode: "WrapAtWordBoundaryOrAnywhere"
-                        text: qsTr("Track: ") + dcenowplaying.track
-                        font.family: "Droid Sans"
-                        //font.bold: true
-                        font.italic: true
-                        smooth: true
-                        font.pointSize: scaleY(2)
-                        visible:  dcenowplaying.track =="" ? false: true
-                    }
-
-                    StyledText {
-                        id: genre
-                        width: scaleX(35)
-                        wrapMode: "WrapAtWordBoundaryOrAnywhere"
-                        text: qsTr("Genre(s): ") + dcenowplaying.genre
-                        font.family: "Droid Sans"
-                        //font.bold: true
-                        font.italic: true
-                        smooth: true
-                        font.pointSize: scaleY(2)
-                        visible:  dcenowplaying.genre =="" ? false: true
-                        MouseArea{
-                            anchors.fill: genre
-                            hoverEnabled: true
-                            onEntered: { genre.elide = "ElideNone" ; }
-                            onExited: {genre.elide = "ElideRight"; }
-                        }
-                    }
-                    StyledText {
-                        id: released
-                        width: scaleX(35)
-                        wrapMode: "WrapAtWordBoundaryOrAnywhere"
-                        text: qsTr("Released: ") + dcenowplaying.releasedate
-                        font.family: "Droid Sans"
-                        // font.bold: true
-                        font.italic: true
-                        smooth: true
-                        font.pointSize: scaleY(2)
-                        visible:  dcenowplaying.releasedate =="" ? false: true
-
-                    }
-
-                }
+            AudioMetadataDisplay {
+                id:textMetadata
+                anchors.left: nowplayingimage.right
+                anchors.rightMargin: scaleX(5)
+                anchors.verticalCenter: parent.verticalCenter
             }
         }
-    }
 
+        // MediaScrollBar{id:media_transit; anchors.bottom: controlrow.top; anchors.horizontalCenter: controlrow.horizontalCenter; anchors.bottomMargin: scaleY(2)}
+        AudioButtonControls {
+            id: controlrow
+            focus: true
 
-  // MediaScrollBar{id:media_transit; anchors.bottom: controlrow.top; anchors.horizontalCenter: controlrow.horizontalCenter; anchors.bottomMargin: scaleY(2)}
-    Row{
-        id:controlrow
-        anchors.top: mainrow.bottom
-        anchors.topMargin: scaleY(5)
-        height: controlcol.height
-        width: childrenRect.width
-        anchors.horizontalCenter: parent.horizontalCenter
-        Column{
-            id:controlcol
-            height: childrenRect.height
-            width: childrenRect.width
-            spacing: scaleY(1)
-           // VideoControls {
-//                id: videocontrols1
-//            }
-            Row{
-                height: childrenRect.height
-                width: childrenRect.width
-                spacing: scaleX(1)
-
-                AvOptionButton{
-                    buttontext: qsTr("Bookmarks")
-                }
-                AvOptionButton{
-                    buttontext: qsTr("Manage Playlist")
-                    MouseArea{
-                        anchors.fill: parent
-                        onClicked: playlist.optionVisible ? playlist.optionVisible =false: playlist.optionVisible=true
-                    }
-                }
-                AvOptionButton{
-                    buttontext: qsTr("Resend AV Codes")
-                    MouseArea{
-                        anchors.fill: parent
-                        onClicked:  {
-                            MyJs.createStageComponent("../components/Avcodes.qml", storedaudioremote)
-                        }
-                    }
-                }
-                AvOptionButton{
-                    buttontext: qsTr("Attributes")
-                    MouseArea{
-                        anchors.fill: parent
-                        onClicked: textrect.visible = !textrect.visible
-                    }
-                }
-                AvOptionButton{
-                    buttontext: qsTr("Power")
-                }
-                HomeButton{}
-            }
         }
     }
-
 
 
 }

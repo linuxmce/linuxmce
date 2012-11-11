@@ -63,15 +63,15 @@ Component{
 
         }
         /*
-        Text {
+        StyledText {
             id: daslabel
             text: label
             wrapMode: "WrapAtWordBoundaryOrAnywhere"
             anchors.centerIn: delegateButton
             anchors.fill: delegateButton
             z:2
-            horizontalAlignment: Text.AlignHCenter
-            verticalAlignment: Text.AlignVCenter
+            horizontalAlignment: StyledText.AlignHCenter
+            verticalAlignment: StyledText.AlignVCenter
             font.family: "Droid Sans"
         }
         */

@@ -6,7 +6,7 @@ Rectangle {
     width: 50
     height: 25
     color: style.arrow_color_nav
-    Text {
+    StyledText {
         id: arrow_type
         text: ""
         color:style.arrow_text_nav

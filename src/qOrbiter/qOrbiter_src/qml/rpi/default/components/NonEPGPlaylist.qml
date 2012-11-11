@@ -54,7 +54,7 @@ Rectangle {
                 opacity: .5
 
             }
-            Text {
+            StyledText {
                 id: position
                 text: qsTr("Item #") + index
                 font.family: keyFont.name
@@ -65,7 +65,7 @@ Rectangle {
                 opacity: .75
             }
 
-            Text {
+            StyledText {
                 text:  index === dcenowplaying.m_iplaylistPosition ? "Now Playing - " + name : name
                 font.family: keyFont.name
                 color: "aliceblue"
@@ -101,7 +101,7 @@ Rectangle {
                     height: scaleX(1)
                     width: scaleX(1)
                     color:"green"
-                    Text {
+                    StyledText {
                         id: up
                         text: qsTr("Up")
                     }
@@ -127,7 +127,7 @@ Rectangle {
                     height: scaleX(1)
                     width: scaleX(1)
                     color:"blue"
-                    Text {
+                    StyledText {
                         id: down
                         text: qsTr("down")
                     }
@@ -170,7 +170,7 @@ Rectangle {
                 height: style.avoptionbuttonh
                 width: style.avoptionbuttonw
                 color: style.darkhighlight
-                Text {
+                StyledText {
                     id: public_text
                     text: qsTr("Public")
                     anchors.centerIn: parent
@@ -186,7 +186,7 @@ Rectangle {
                 height: style.avoptionbuttonh
                 width: style.avoptionbuttonw
                 color: style.darkhighlight
-                Text {
+                StyledText {
                     id: private_text
                     text: qsTr("Private")
                     anchors.centerIn: parent

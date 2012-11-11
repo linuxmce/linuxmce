@@ -34,7 +34,7 @@ Rectangle {
         GradientStop{ position: 0.33; color:"darkred"}
     }
 
-    Text {
+    StyledText {
         id: debuggingOutput
         text: debugMessage
         height: parent.height

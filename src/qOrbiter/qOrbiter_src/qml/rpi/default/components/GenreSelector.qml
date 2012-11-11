@@ -40,7 +40,7 @@ Rectangle {
                     height: childrenRect.height
                     width: childrenRect.width
 
-                    Text {
+                    StyledText {
 
                         width: scaleX(10)
                         height: parent.height

@@ -13,14 +13,14 @@ Rectangle {
 
     }
 
-    Text {
+    StyledText {
         id: mnuTitle
         text: "qOrbiter"
         color: "black"
         font.pointSize: 16
     }
 
-    Text {
+    StyledText {
         id: weather
         Image {
             id: weatherimg
@@ -35,7 +35,7 @@ Rectangle {
         anchors.centerIn: parent
     }
 
-    Text {
+    StyledText {
 
         id: clock
         text: currentDateTime

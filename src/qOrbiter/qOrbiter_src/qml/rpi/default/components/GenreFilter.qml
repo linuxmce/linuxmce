@@ -67,7 +67,7 @@ Rectangle {
                        border.color: "white"
                        border.width: 1
 
-                       Text {
+                       StyledText {
                            id: genreselectcell
                            text: name
                            font.pointSize: 14

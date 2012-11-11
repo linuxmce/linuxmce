@@ -4,10 +4,10 @@ Item{
     id:userpincode
 
     Rectangle{
-        height: appH
-        width: appW
+        height: manager.appHeight
+        width: manager.appWidth
         color: "transparent"
-        Text {
+        StyledText {
             id: userpinlabel
             x: 74
             y: 101

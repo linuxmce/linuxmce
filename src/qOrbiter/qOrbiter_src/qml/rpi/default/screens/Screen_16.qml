@@ -7,7 +7,7 @@ Item{
         height: style.orbiterH
         width: style.orbiterW
         color: "transparent"
-        Text {
+        StyledText {
             id: climatelabel
             x: 74
             y: 101

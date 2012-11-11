@@ -3,7 +3,7 @@ import "../components"
 
 Rectangle {
 
-    // property alias synText:
+    // property alias synStyledText:
     id: blurayremote
     anchors.centerIn: parent
 
@@ -22,8 +22,8 @@ Rectangle {
         onPlayListPositionChanged: image1.source = "image://updateobject/"+securityvideo.timestamp
     }
 
-    height: appH
-    width: appW
+    height: manager.appHeight
+    width: manager.appWidth
     radius: 0
     opacity: 1
     color: "transparent"
@@ -75,7 +75,7 @@ Rectangle {
 
 
 
-           Text {
+           StyledText {
                id: text1
                x: 0
                y: 12
@@ -112,7 +112,7 @@ Rectangle {
         spacing: 5
         height: rectangle2.height
 
-           Text {
+           StyledText {
                id: nowplayingboxtext
                x: 0
                y: 10
@@ -129,7 +129,7 @@ Rectangle {
                font.pixelSize: 12
            }
 
-           Text {
+           StyledText {
                id: nowplayingboxtext2
                x: 0
                y: 35
@@ -139,14 +139,14 @@ Rectangle {
                font.family: "Droid Sans"
                anchors.topMargin: 35
                anchors.top: parent.top
-               wrapMode: Text.WrapAnywhere
+               wrapMode: StyledText.WrapAnywhere
                font.bold: true
                smooth: true
 
                font.pixelSize: 12
            }
 
-           Text {
+           StyledText {
                id: titlebox
                x: 0
                y: 61
@@ -158,7 +158,7 @@ Rectangle {
                anchors.bottomMargin: 12
                font.bold: true
                smooth: true
-               horizontalAlignment: Text.AlignHCenter
+               horizontalAlignment: StyledText.AlignHCenter
                font.pixelSize: 12
            }
 

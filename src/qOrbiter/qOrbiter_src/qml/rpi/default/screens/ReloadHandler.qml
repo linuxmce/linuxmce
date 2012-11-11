@@ -4,12 +4,12 @@ import QtWebKit 1.0
 
 Rectangle {
     id:router_reloading
-    width: appW
-    height: appH
+    width: manager.appWidth
+    height: manager.appHeight
     color: "slategrey"
 
 
-    Text {
+    StyledText {
         id: reload_text
         text: qsTr("Router is Reloading, Please be patient")
         font.pixelSize: scaleY(8)
@@ -24,7 +24,7 @@ Rectangle {
         width: parent.width - 100
         url: "http://"+srouterip+"/lmce-admin/qOrbiterGenerator.php?d="+iPK_Device
     }
-    Text {
+    StyledText {
         id: reload_status
         text: dcemessage
         font.pixelSize: scaleY(5)

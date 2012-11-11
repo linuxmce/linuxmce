@@ -7,8 +7,8 @@ import "../components"
 
 Rectangle {
     id: rectangle1
-    height: appH
-    width: appW
+    height: manager.appHeight
+    width: manager.appWidth
     color: "transparent"
     //signal setupStart(int x, string y)
 
@@ -19,7 +19,7 @@ Rectangle {
         height: 75
         opacity: 1
         color: "transparent"
-        Text {
+        StyledText {
             id: welcome
             text: qsTr("Welcome To LinuxMCE!")
             font.pixelSize: 30
@@ -56,7 +56,7 @@ Rectangle {
         }
         opacity: 0.5
     }
-    Text {
+    StyledText {
         id: connectionlabel
         text: qsTr("Set Connection Details")
         font.bold: true
@@ -68,32 +68,32 @@ Rectangle {
         anchors.centerIn: rectangle2
         anchors.verticalCenter: parent.verticalCenter
         spacing: 10
-        Text {
+        StyledText {
             text: qsTr("Host:")
             anchors.verticalCenter: parent.verticalCenter
         }
 
-        TextInput {
+        StyledTextInput {
             id: routerip
             width: 110
             text: srouterip
             font.pixelSize: 12
-          //  onTextChanged: setRouterIp(routerip.text)
+          //  onStyledTextChanged: setRouterIp(routerip.text)
             //fillColor: style.highlight1
             anchors.verticalCenter: parent.verticalCenter
 
 
         }
-        Text {
+        StyledText {
             text: qsTr("Device:")
             anchors.verticalCenter: parent.verticalCenter
         }
-        TextInput {
+        StyledTextInput {
             id: devicenumber
             width: 25
             text: deviceid
             font.pixelSize: 12
-            //onTextChanged: setDeviceNo(devicenumber.text)
+            //onStyledTextChanged: setDeviceNo(devicenumber.text)
             //fillColor: style.highlight1
             anchors.verticalCenter: parent.verticalCenter
 

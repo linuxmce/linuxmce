@@ -4,10 +4,10 @@ Item{
     id:makecallphonebook
 
     Rectangle{
-        height: appH
-        width: appW
+        height: manager.appHeight
+        width: manager.appWidth
         color: "transparent"
-        Text {
+        StyledText {
             id: phonebookcall
             x: 74
             y: 101

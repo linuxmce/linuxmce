@@ -29,7 +29,7 @@ Rectangle {
         anchors.verticalCenter: infoPanel.verticalCenter
         color: "darkgrey"
         radius: 5
-        Text {
+        StyledText {
 
             text: qsTr("debug")
         }
@@ -49,12 +49,12 @@ Rectangle {
         height:50
         anchors.top: parent.top
         anchors.left: parent.left
-        Text {
+        StyledText {
             id: titleColHdr
             text: qsTr("Variable")
             width:titleColWidth
         }
-        Text {
+        StyledText {
             id: valColWidth
             text: qsTr("Value")
             width:valueColWidth
@@ -69,11 +69,11 @@ Rectangle {
         delegate: Row{
             width: infoPanel.width
             height: 50
-            Text {
+            StyledText {
                 text: title
                 width: titleColWidth
            }
-            Text {
+            StyledText {
                text: value
                width: valueColWidth
             }

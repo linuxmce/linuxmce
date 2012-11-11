@@ -4,10 +4,10 @@ Item{
     id:linphones
 
     Rectangle{
-        height: appH
-        width: appW
+        height: manager.appHeight
+        width: manager.appWidth
         color: "transparent"
-        Text {
+        StyledText {
             id: linphoneslabel
             x: 74
             y: 101

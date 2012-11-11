@@ -14,7 +14,7 @@ Rectangle {
 
     }
 
-    Text {
+    StyledText {
         id: labelscreenshot
         text: qsTr("Choose Attribute for screenshot")
         anchors.horizontalCenter: parent.horizontalCenter
@@ -29,7 +29,7 @@ Rectangle {
             height: 50
             width: parent.width-1
             color: style.accentcolor
-            Text {
+            StyledText {
                 id: propertystring
                 text: attributeType
             }
@@ -46,7 +46,7 @@ Rectangle {
                 }
             }
 
-            /* Text {
+            /* StyledText {
             id: propertystring2
             text: attributeNo
         } */
@@ -62,7 +62,7 @@ Rectangle {
         color: style.lighthighlight
         radius:10
         clip:true
-        Text {
+        StyledText {
             id: label2
             text: qsTr("choose attribute")
         }

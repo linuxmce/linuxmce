@@ -4,10 +4,10 @@ Item{
     id:security
 
     Rectangle{
-        height: appH
-        width: appW
+        height: manager.appHeight
+        width: manager.appWidth
         color: "transparent"
-        Text {
+        StyledText {
             id: unknownscreen
             x: 0
             y: 131

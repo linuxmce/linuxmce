@@ -23,7 +23,7 @@ Rectangle {
             }
         }
 
-        Text {
+        StyledText {
             id: nowplayingboxtext2
 
 
@@ -32,11 +32,11 @@ Rectangle {
             text: dcenowplaying.qs_subTitle
             font.bold: true
             smooth: true
-            horizontalAlignment: Text.AlignHCenter
+            horizontalAlignment: StyledText.AlignHCenter
             font.pixelSize: 12
         }
 
-        Text {
+        StyledText {
             id: text1
             x: 255
             y: 12
@@ -63,7 +63,7 @@ Rectangle {
         height: 88
         color: "#ffffff"
 
-        Text {
+        StyledText {
             id: nowplayingboxtext
 
            anchors.fill: parent
@@ -72,7 +72,7 @@ Rectangle {
             text: dcenowplaying.qs_mainTitle
             font.bold: true
             smooth: true
-            horizontalAlignment: Text.AlignHCenter
+            horizontalAlignment: StyledText.AlignHCenter
             font.pixelSize: scaleY(2)
         }
 

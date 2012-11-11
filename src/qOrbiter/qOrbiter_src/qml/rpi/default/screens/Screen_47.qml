@@ -10,8 +10,8 @@ import "../js/ComponentLoader.js" as MyJs
 
 Rectangle {
     id:fileviewscreen
-    width: appW
-    height: appH
+    width: manager.appWidth
+    height: manager.appHeight
     color: "transparent"
     clip: true
     property int mouselocY: 0
@@ -49,17 +49,17 @@ Rectangle {
             height: scaleY(5)
             anchors.centerIn: pos_label
             spacing: scaleX(1)
-            Text {
+            StyledText {
                 id: grid_position_label
                 text: qsTr("You are browsing by:") + manager.i_current_mediaType
                 font.pixelSize: 14
 
             }
-            Text {
+            StyledText {
                 id: grid_attritbute_label
                 text: qsTr("Sorted by Attribute:  ") + manager.q_attributetype_sort
             }
-            Text {
+            StyledText {
                 id: page_label
                 text: qsTr("Current Page") + manager.media_currentPage
             }
@@ -106,7 +106,7 @@ Rectangle {
                 opacity: .25
             }
 
-            Text {
+            StyledText {
                 id: total_cells
                 text: manager.media_pageSeperator
                 color: "grey"
@@ -200,7 +200,7 @@ Rectangle {
                         opacity: .5
                     }
 
-                    Text
+                    StyledText
                     {
                         id:celllabel
                         text: name;
@@ -262,7 +262,7 @@ Rectangle {
                         width: background.width - imagerect.width - 20;
                         height: imagerect.height
                         spacing:5
-                        Text {
+                        StyledText {
                             text: name;
                             opacity: 1;
                             font.pointSize: 12;
@@ -283,7 +283,7 @@ Rectangle {
 
         ListView{
             id:model_pages
-            height: appH
+            height: manager.appHeight
             width: scaleX(10)
             model: dataModel.totalPages
             anchors.left: parent.left
@@ -291,7 +291,7 @@ Rectangle {
                 height: scaleY(10)
                 width: scaleX(10)
                 color: "transparent"
-                Text {
+                StyledText {
                     id:page_label2
                     text: index
                     font.pixelSize: scaleY(3.5)
@@ -326,7 +326,7 @@ Rectangle {
                 width: scaleX(4)
                 color: "transparent"
                 clip:false
-                Text {
+                StyledText {
                     id: test
                     text: name
                     font.pixelSize: 18

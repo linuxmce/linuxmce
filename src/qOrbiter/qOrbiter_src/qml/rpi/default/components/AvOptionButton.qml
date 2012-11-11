@@ -34,7 +34,7 @@ horizontalTileMode: BorderImage.Repeat
         border.color: style.highlight1
         radius: 2.5
 
-        Text {
+        StyledText {
             id: buttonLabel
             width: -1
             height: 0

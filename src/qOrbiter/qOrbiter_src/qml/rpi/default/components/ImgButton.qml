@@ -25,7 +25,7 @@ Rectangle {
         width: style.stdbuttonw
 
     }
-    Text {
+    StyledText {
         id: buttonLabel
         text:"null ipsum delorium"
         font.pixelSize: 14

@@ -2,13 +2,15 @@
 import QtQuick 2.0
 import "../js/ComponentLoader.js" as MyJs
 
-
 Rectangle {
     id:scenarios
     width: manager.appWidth
     height:manager.appHeight *.10
-    color: "transparent"
+    color: activeFocus ? "slategrey" : "transparent"
     radius: 5
+    focus:false
+   // Keys.onTabPressed: {shiftFocus(); console.log("Tab to next focus scope?") }
+    onActiveFocusChanged: console.log("Scenario Row focus::"+focus)
     gradient: style.generalGradient
     property bool currentState:true
     property double buttonWidth:150
@@ -21,7 +23,7 @@ Rectangle {
             AnchorChanges {
                 target: scenarios
               //  anchors.bottom: undefined
-                anchors.bottom: item.bottom
+                anchors.bottom: parent.bottom
 
             }
         },
@@ -30,23 +32,7 @@ Rectangle {
             AnchorChanges {
                 target:scenarios
               //  anchors.top: undefined
-                anchors.top: item.bottom
-            }
-        }, State {
-            name: "focused"
-            when:scenarios.focus ==true
-            PropertyChanges {
-                target: scenarios
-                border.width: 1
-                border.color: "white"
-            }
-        },
-        State {
-            name: "unfocused"
-            PropertyChanges {
-                target: scenarios
-                border.width: 0
-                border.color: "transparent"
+                anchors.top: parent.bottom
             }
         }
     ]
@@ -68,9 +54,17 @@ Rectangle {
         opacity: .25
     }
 
+    FocusScope{
+        width: scenarios.width
+        height:scenarios.height
+        property alias color: scenarios.color
+        Keys.onTabPressed: {shiftFocus(); console.log("Shifting back to controls")}
+
+        onFocusChanged: console.log("Scenarios have focus")
+
     Row{
         id:modelRow
-        height: scenarios.height
+        height:parent.width
         width: buttonWidth*6
         spacing: 10
         anchors.horizontalCenter: parent.horizontalCenter
@@ -88,13 +82,13 @@ Rectangle {
                 color: "white"
                 font.pointSize: scenarioFontSize
             }
+
             MouseArea{
                 anchors.fill: parent
                 hoverEnabled: true
                 onEntered: {
                     if(!parent.popEnabled)
                     {
-
                     MyJs.createScenarioBox(currentRoomLights, 100, 400, parent )
                     }
                 }
@@ -279,4 +273,5 @@ Rectangle {
         }
     }
 
+}
 }

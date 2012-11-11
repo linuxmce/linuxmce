@@ -1,9 +1,10 @@
 // import QtQuick 2.0 // to target S60 5th Edition or Maemo 5
 import QtQuick 2.0
 import QtGraphicalEffects 1.0
+import "noir/components"
 Rectangle{
     id:splashPage
-    height: appH
+    height:appH
     width: appW
     color: "black"
     state: "starting"
@@ -24,7 +25,7 @@ Rectangle{
         return Qt.formatDateTime(d, "dddd ,MMMM d| hh:mm ");
     }
 
-    Text{
+    StyledText{
         id: txtDate
         text: getDate()
         color: "aliceblue"
@@ -46,7 +47,7 @@ Rectangle{
     FontLoader{
         id:keyFont
         name:"Sawasdee"
-        source: "../fonts/Sawasdee.ttf"
+        source: "default/fonts/Sawasdee.ttf"
     }
 
     Rectangle{
@@ -65,7 +66,7 @@ Rectangle{
         }
     }
 
-    Text {
+    StyledText {
         id: welcomeLabel
         text: qsTr("Welcome to LinuxMCE")
         color: "white"
@@ -94,7 +95,7 @@ Rectangle{
 
     }
 
-    Text {
+    StyledText {
         id: selectLabel
         text: qsTr("Please select from existing Qt Orbiters")
         font.family: keyFont.name
@@ -104,7 +105,7 @@ Rectangle{
         anchors.centerIn: welcomeBox
     }
 
-    Text {
+    StyledText {
         id: createLabel
         text: qsTr("Or Create a new Qt Orbiter")
         font.family: keyFont.name
@@ -136,7 +137,7 @@ Rectangle{
             radius:10
             height: parent.height /3
             color: "transparent"
-            Text {
+            StyledText {
                 id: serverName
                 text: qsTr("Connect To")
                 font.family: keyFont.name
@@ -148,7 +149,7 @@ Rectangle{
                 text: srouterip
                 font.pixelSize: 28
                 font.family: keyFont.name
-                //  onTextChanged: setRouterIp(routerip.text)
+                //  onStyledTextChanged: setRouterIp(routerip.text)
                 color: "white"
                 font.bold: true
                 onTextChanged: console.log(srouterip)
@@ -164,7 +165,7 @@ Rectangle{
             radius:10
             height: parent.height /3
             color: "transparent"
-            Text {
+            StyledText {
                 id: deviceName
                 text: qsTr("Device Number")
                 font.family: keyFont.name
@@ -179,7 +180,7 @@ Rectangle{
                 font.family: keyFont.name
                 anchors.left: deviceName.left
                 anchors.top:deviceName.bottom
-                //  onTextChanged: setRouterIp(routerip.text)
+                //  onStyledTextChanged: setRouterIp(routerip.text)
                 color: "black"
                 font.bold: true
                 onTextChanged: console.log(deviceid)
@@ -197,7 +198,7 @@ Rectangle{
                 height: 40
                 width: 80
                 anchors.centerIn: parent
-                Text{
+                StyledText{
                     id:confirmLabel
                     text:"Connect!"
                     font.family: keyFont.name
@@ -225,11 +226,11 @@ Rectangle{
            model:orbiterList
            visible: false
            orientation:ListView.Horizontal
-           spacing:scaleX(10)
+           spacing:scaleX(5)
            delegate: Rectangle{
                id:existing_orbiter_delegate
-               height: scaleY(8)
-               width: scaleX(30)
+               height: scaleY(15)
+               width: scaleX(15)
                clip:true
                color: "transparent"
                border.color: "white"
@@ -247,7 +248,7 @@ Rectangle{
                    width: childrenRect.width
                    anchors.centerIn: parent
 
-                   Text {
+                   StyledText {
                        id: orbiter_label
                        text: qsTr("Orbiter:\n")+ label
                        font.pixelSize: 12
@@ -255,7 +256,7 @@ Rectangle{
                        color: "white"
                        wrapMode: Text.WrapAtWordBoundaryOrAnywhere
                    }
-                   Text {
+                   StyledText {
                        id: dev_num
                        text:qsTr("Device:")+ device
                        font.pixelSize: 12
@@ -293,7 +294,7 @@ Row{
             anchors.fill: parent
             visible:window.b_connectionPresent ? true:false
         }
-        Text {
+        StyledText {
             id: connectionStatus
             text: qsTr("Connection")
             font.family: keyFont.name
@@ -312,7 +313,7 @@ Row{
             anchors.fill: parent
             visible: window.b_devicePresent ? true :false
         }
-        Text {
+        StyledText {
             id: deviceStatus
             text: qsTr("Device")
             font.family: keyFont.name
@@ -331,7 +332,7 @@ Row{
             anchors.fill: parent
             visible: window.b_devicePresent ? true :false
         }
-        Text {
+        StyledText {
             id: configStatus
             text: qsTr("Local Config")
             font.family: keyFont.name
@@ -392,8 +393,8 @@ Row{
 }
 
 //Rectangle {
-//    height:appH
-//    width:appW
+//    height:manager.appHeight
+//    width:manager.appWidth
 //    id:splashPage
 //    color: "black"
 //    signal setupStart(string x, string y)
@@ -430,7 +431,7 @@ Row{
 //            width: scaleX(5)
 //            color: "transparent"
 
-//            Text {
+//            StyledText {
 //                id: connection_label
 //                text: qsTr("Connection")
 //                color: window.b_connectionPresent ? "green" : "red"
@@ -448,7 +449,7 @@ Row{
 //                source: ""
 //            }
 
-//            Text {
+//            StyledText {
 //                id: device_Label
 //                text: qsTr("Device")
 //                color: window.b_devicePresent ? "green" : "red"
@@ -466,7 +467,7 @@ Row{
 //                source: ""
 //            }
 
-//            Text {
+//            StyledText {
 //                id: config_label
 //                text: qsTr("Config")
 //                color: window.b_localConfigReady ? "green" : "red"
@@ -484,7 +485,7 @@ Row{
                 source: ""
             }
 
-            Text {
+            StyledText {
                 id: skin_label
                 text: qsTr("Skins")
                 color: window.b_skinIndexReady ? "green" : "red"
@@ -502,7 +503,7 @@ Row{
                 source: ""
             }
 
-            Text {
+            StyledText {
                 id: skin_data_label
                 text: qsTr("Orbiter Ready")
                 color: window.b_orbiterConfigReady ? "green" : "red"
@@ -532,7 +533,7 @@ Row{
 //        anchors.verticalCenter: parent.verticalCenter
 //        anchors.horizontalCenter: parent.horizontalCenter
 //        anchors.verticalCenterOffset:10
-//        width: appW*.75
+//        width: manager.appWidth*.75
 //        height: scaleY(20)
 //        radius: 7
 //        anchors.horizontalCenterOffset: 1
@@ -551,7 +552,7 @@ Row{
 //        }
 //        opacity: 0.5
 //    }
-//    Text {
+//    StyledText {
 //        id: connectionlabel
 //        text: qsTr("Set Connection Details")
 //        font.pixelSize: 36
@@ -566,58 +567,58 @@ Row{
 //        anchors.verticalCenter: parent.verticalCenter
 //        spacing: 150
 //        width: rectangle2.width
-//        Text {
+//        StyledText {
 //            text: qsTr("Host:")
 //            font.pixelSize: 28
 //            font.family: "Droid Sans"
 //            font.bold: true
 //        }
 
-//        TextInput {
+//        StyledTextInput {
 //            id: routerip
 //            width: 80
 //            text: srouterip
 //            font.pixelSize: 28
 //            font.family: "Droid Sans"
-//            //  onTextChanged: setRouterIp(routerip.text)
+//            //  onStyledTextChanged: setRouterIp(routerip.text)
 //            color: "black"
 //            font.bold: true
-//            onTextChanged: console.log(srouterip)
+//            onStyledTextChanged: console.log(srouterip)
 
 //        }
 
-//        TextInput {
+//        StyledTextInput {
 //            id: ext_routerip
 //            width: 80
 //            text: extip
 //            font.pixelSize: 10
 //            font.family: "Droid Sans"
-//            //  onTextChanged: setRouterIp(routerip.text)
+//            //  onStyledTextChanged: setRouterIp(routerip.text)
 //            color: "grey"
 
 //            visible: false
 //        }
 
-//        Text {
+//        StyledText {
 //            text: qsTr("Device:")
 //            font.pixelSize: 28
 //            font.family: "Droid Sans"
-//            //  onTextChanged: setRouterIp(routerip.text)
+//            //  onStyledTextChanged: setRouterIp(routerip.text)
 //            color: "black"
 //            font.bold: true
 
 
 //        }
-//        TextInput {
+//        StyledTextInput {
 //            id: devicenumber
 //            width: scaleX(10)
 //            text: deviceid
 //            font.pixelSize: 28
 //            font.family: "Droid Sans"
-//            //  onTextChanged: setRouterIp(routerip.text)
+//            //  onStyledTextChanged: setRouterIp(routerip.text)
 //            color: "black"
 //            font.bold: true
-//            onTextChanged: console.log(deviceid)
+//            onStyledTextChanged: console.log(deviceid)
 //        }
 
 //        Rectangle {
@@ -628,14 +629,14 @@ Row{
 
 ////            anchors.left: devicenumber.right
 ////            anchors.leftMargin: scaleX(5)
-//            Text {
+//            StyledText {
 //                id: name
 //                anchors.centerIn: parent
 //                anchors.fill: parent
 //                text: qsTr("Go!")
 //                font.pixelSize: 28
 //                font.family: "Droid Sans"
-//                //  onTextChanged: setRouterIp(routerip.text)
+//                //  onStyledTextChanged: setRouterIp(routerip.text)
 //                color: "black"
 //                font.bold: true
 
@@ -658,7 +659,7 @@ Row{
 //            width: scaleX(6)
 ////            anchors.left: connectbutton.right
 ////            anchors.leftMargin: scaleX(5)
-//            Text {
+//            StyledText {
 //                id: exitlabel
 //                anchors.centerIn: parent
 //                anchors.fill: parent
@@ -674,7 +675,7 @@ Row{
 
 //        }
 //    }
-//    Text {
+//    StyledText {
 //        id: loadingStatus
 //        text: "Status " + manager.commandResponse
 //        anchors.topMargin: scaleY(15)
@@ -708,18 +709,18 @@ Row{
 //                width: childrenRect.width
 //                anchors.centerIn: parent
 
-//                Text {
+//                StyledText {
 //                    id: orbiter_label
 //                    text: qsTr("Orbiter:")+ label
 //                    font.pixelSize: 12
-//                    wrapMode: Text.WrapAtWordBoundaryOrAnywhere
+//                    wrapMode: StyledText.WrapAtWordBoundaryOrAnywhere
 //                }
-//                Text {
+//                StyledText {
 //                    id: dev_num
 //                    text:qsTr("Device:")+ device
 //                    font.pixelSize: 12
 //                    font.italic: true
-//                    wrapMode: Text.WrapAtWordBoundaryOrAnywhere
+//                    wrapMode: StyledText.WrapAtWordBoundaryOrAnywhere
 //                }
 //            }
 //            MouseArea {
@@ -744,13 +745,13 @@ Row{
 //            }
 //        }
 
-//        Text {
+//        StyledText {
 //            id: newOrbiterLabel
 //            text: qsTr("Create New Orbiter?")
 //            font.pixelSize: 15
 //            width: parent.width
 //            anchors.centerIn: parent
-//            wrapMode: Text.WrapAtWordBoundaryOrAnywhere
+//            wrapMode: StyledText.WrapAtWordBoundaryOrAnywhere
 //        }
 //        visible: existing_orbiters.visible
 //        anchors.bottom: existing_orbiters.top

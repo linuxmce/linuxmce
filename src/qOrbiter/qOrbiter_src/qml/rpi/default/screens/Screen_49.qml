@@ -3,10 +3,10 @@ import "../components"
 import "../js/ComponentLoader.js" as MyJs
 Rectangle {
 
-    // property alias synText:
+    // property alias synStyledText:
     id: dvd_remote
-    height: appH
-    width: appW
+    height: manager.appHeight
+    width: manager.appWidth
     radius: 0
     opacity: 1
     color: style.darkhighlight
@@ -85,7 +85,7 @@ Rectangle {
                             opacity: .75
                         }
 
-                        Text {
+                        StyledText {
                             id: headertext
                             height:scaleY(2)
                             text:qsTr("Speed: ") + dceTimecode.playbackSpeed
@@ -94,7 +94,7 @@ Rectangle {
                             color: "aliceblue"
                         }
 
-                        Text {
+                        StyledText {
                             id: timecode
                             height:scaleY(2)
                             text: dceTimecode.qsCurrentTime + qsTr(" of ") + dceTimecode.qsTotalTime
@@ -158,7 +158,7 @@ Rectangle {
                            height: childrenRect.height
 
 
-                            Text {
+                            StyledText {
                                 id: generaltitle
                                 width: parent.width
                                 text: qsTr("Title: ") + dcenowplaying.qs_mainTitle
@@ -170,7 +170,7 @@ Rectangle {
                                 visible:  dcenowplaying.qs_mainTitle =="" ? false: true
                             }
 
-                            Text {
+                            StyledText {
                                 id: programtext
                                 width: parent.width
                                 text: qsTr("Program :") + dcenowplaying.tvProgram
@@ -182,7 +182,7 @@ Rectangle {
                                 visible:  dcenowplaying.tvProgram =="" ? false: true
                             }
 
-                            Text {
+                            StyledText {
                                 id: episode
                                 width: parent.width
                                 wrapMode: "WrapAtWordBoundaryOrAnywhere"
@@ -194,7 +194,7 @@ Rectangle {
                                 visible:  dcenowplaying.episode =="" ? false: true
                             }
 
-                            Text {
+                            StyledText {
                                 id: genre
                                 width: parent.width
                                 wrapMode: "WrapAtWordBoundaryOrAnywhere"
@@ -213,7 +213,7 @@ Rectangle {
                             }
 
 
-                            Text {
+                            StyledText {
                                 id: starring
                                 width: parent.width
                                 wrapMode: "WrapAtWordBoundaryOrAnywhere"
@@ -233,7 +233,7 @@ Rectangle {
                                 }
                             }
 
-                            Text {
+                            StyledText {
                                 id: synopsis
                                 width: parent.width
                                 wrapMode: "WrapAtWordBoundaryOrAnywhere"

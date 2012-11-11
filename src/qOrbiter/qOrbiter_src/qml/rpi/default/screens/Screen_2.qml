@@ -2,8 +2,8 @@ import QtQuick 2.0
 import "../components"
 Rectangle{
     id:lights
-    height: appH
-    width: appW
+    height: manager.appHeight
+    width: manager.appWidth
     color:"transparent"
 
     ListModel{
@@ -90,7 +90,7 @@ Rectangle{
         delegate: Rectangle{
             height: scaleX(8)
             width: scaleY(8)
-            Text {
+            StyledText {
                 height: parent.height
                 width: parent.width
                 text: cmd

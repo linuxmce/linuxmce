@@ -149,6 +149,8 @@ class qorbiterManager : public QObject
 
     Q_PROPERTY (int m_dwPK_Device READ getDeviceNumber WRITE setDeviceNumber NOTIFY deviceNumberChanged)
     Q_PROPERTY (int deviceVolume READ getDeviceVolume WRITE setDeviceVolume NOTIFY deviceVolumeChanged())
+    Q_PROPERTY (int appHeight READ getAppH WRITE setAppH NOTIFY orientationChanged)
+    Q_PROPERTY (int appWidth READ getAppW WRITE setAppW NOTIFY orientationChanged)
 
     Q_PROPERTY(int i_current_mediaType READ getMediaType WRITE setMediaType NOTIFY mediaTypeChanged)
     Q_PROPERTY (QString q_mediaType READ getSorting NOTIFY gridTypeChanged)
@@ -615,7 +617,11 @@ public slots:
     void setLocation(const int& , const int& ) ;
     void qmlSetupLmce(QString incdeviceid, QString incrouterip);
     void displayModelPages(QList<QObject*> pages);
+    void setAppH(int h) {appHeight = h;}
+    int getAppH() {return appHeight;}
 
+    void setAppW(int w) {appWidth = w; checkOrientation(qorbiterUIwin->size());}
+    int getAppW(){return appWidth;  checkOrientation(qorbiterUIwin->size());}
     /*Network State property functions*/
     void setInternalIp(QString s) { m_ipAddress = s; emit internalIpChanged(); }
     QString getInternalIp() {return m_ipAddress; }

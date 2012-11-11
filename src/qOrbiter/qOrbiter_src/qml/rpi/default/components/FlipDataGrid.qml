@@ -81,7 +81,7 @@ Rectangle
             opacity: .5
         }
 
-        Text
+        StyledText
         {
             id:celllabel
             text: name;

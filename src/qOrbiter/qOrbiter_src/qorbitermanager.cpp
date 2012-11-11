@@ -66,7 +66,7 @@ qorbiterManager::qorbiterManager(QDeclarativeView *view, QObject *parent) :
     #endif
     QObject(parent),qorbiterUIwin(view)
 {
-
+//view.setRenderHints(QPainter::Antialiasing | QPainter::SmoothPixmapTransform);
     m_bStartingUp= true;
     // b_skinsReady = false;
     // b_orbiterReady = false;
@@ -119,8 +119,11 @@ qorbiterManager::qorbiterManager(QDeclarativeView *view, QObject *parent) :
     qorbiterUIwin->rootContext()->setContextProperty("appW", appWidth);
 
     //Don't think we need this with Qt5 QQuickView as it resizes Object to View above
-#if QT_VERSION < QT_VERSION_CHECK(5,0,0)
+#ifndef QT5
     QObject::connect(qorbiterUIwin, SIGNAL(sceneResized(QSize)),  SLOT(checkOrientation(QSize)) );
+#else
+    QObject::connect(qorbiterUIwin, SIGNAL(heightChanged(int)), this, SLOT(setAppH(int)));
+    QObject::connect(qorbiterUIwin, SIGNAL(widthChanged(int)), this, SLOT(setAppW(int)));
 #endif
 
     QObject::connect(this, SIGNAL(orbiterReady(bool)), this, SLOT(showUI(bool)));
@@ -1423,7 +1426,7 @@ void qorbiterManager::setScreenShotVariables(screenshotAttributes *t)
 
     qDebug("Setting thumbnail attributes to screen");
 
-  screenshotVars.append(t);
+    screenshotVars.append(t);
 
 }
 
@@ -1682,29 +1685,40 @@ bool qorbiterManager::createAndroidConfig()
 void qorbiterManager::checkOrientation(QSize)
 {
     //NOTE: Is this not handled by the window manager and Orientation change signals?
-#if (QT_VERSION < QT_VERSION_CHECK(5,0,0))
+#ifndef QT5
     if(qorbiterUIwin->height() < qorbiterUIwin->width())
     {
         //setDceResponse("wide");
         appHeight = qorbiterUIwin->window()->rect().height();
         appWidth = qorbiterUIwin->window()->rect().width() ;
-        qorbiterUIwin->rootContext()->setContextProperty("appH", appHeight);
-        qorbiterUIwin->rootContext()->setContextProperty("appW", appWidth);
+
         setOrientation(false);
     }
     else
     {
         appHeight = qorbiterUIwin->window()->rect().height();
         appWidth = qorbiterUIwin->window()->rect().width() ;
-        qorbiterUIwin->rootContext()->setContextProperty("appH", appHeight);
-        qorbiterUIwin->rootContext()->setContextProperty("appW", appWidth);
+
         setOrientation( true);
     }
-#ifdef debug
+
     qDebug() << qorbiterUIwin->window()->rect().size();
-#endif
     setDceResponse("orientation change");
+#else
+
+    if(appHeight < appWidth)
+    {
+        setOrientation(false);
+    }
+    else
+    {
+        setOrientation( true);
+    }
+
 #endif
+    qDebug() << qorbiterUIwin->size();
+
+
 }
 
 void qorbiterManager::getGrid(int i)
