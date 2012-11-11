@@ -21,8 +21,8 @@ Rectangle {
         target:dcenowplaying
         onPlayListPositionChanged: nowplayingimage.source = "image://listprovider/updateobject/"+securityvideo.timestamp
     }
-    height: appH
-    width: appW
+    height: manager.appHeight
+    width: manager.appWidth
     radius: 0
     opacity: 1
     color: style.darkhighlight

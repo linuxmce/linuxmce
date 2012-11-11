@@ -7,14 +7,12 @@ Item
 {
     anchors.centerIn: parent
 
-
-
     Rectangle {
         id:stage
 
         signal swapStyle()
-        height: appH
-        width: appW
+        height: manager.appHeight
+        width: manager.appWidth
         color:"transparent"
 
 

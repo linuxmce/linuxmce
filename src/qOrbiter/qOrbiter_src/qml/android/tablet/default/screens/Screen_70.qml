@@ -1,22 +1,60 @@
 import QtQuick 1.0
-
 import "../components"
 import "../js/ComponentLoader.js" as MyJs
+import com.nokia.android 1.1
 
 
 Rectangle {
 
     // property alias synText:
     id: storedvideoremote
-    height: appH
-    width: appW
+    height: manager.appHeight
+    width: manager.appWidth
     radius: 0
     opacity: 1
     color: "transparent"
     z:5
+
+   Rectangle{
+       id:header
+       width: parent.width
+       height: scaleY(8)
+       color: "transparent"
+       anchors.top: parent.top
+       Image {
+           id: headerbg
+           source: "../img/ui3/header.png"
+           anchors.centerIn: info
+           height: scaleY(8)
+           width: scaleX(99)
+
+       }
+       Row{
+           id:info
+           spacing:10
+           width: childrenRect.width
+           height: childrenRect.height
+           anchors.centerIn: parent
+
+           Label{
+               text:"Stored Video"
+           }
+
+           Label{
+               text:dceTimecode.qsCurrentTime + qsTr(" of ") + dceTimecode.qsTotalTime
+           }
+
+           Label{
+               text: qsTr("Speed: ") + dceTimecode.playbackSpeed
+           }
+
+       }
+
+   }
     Column{
         anchors.right: storedvideoremote.right
         anchors.rightMargin: scaleX(1)
+        anchors.top: header.bottom
         Remote_lighting_controls{ id: remote_lighting_controls1; }
         Remote_Audio_controls{ id: remote1; }
     }
@@ -31,11 +69,10 @@ Rectangle {
 
     Row{
         id:mainrow
-        height: scaleY(65)
+        height: scaleY(60)
         width: scaleX(95)
         spacing: scaleX(1)
-        anchors.top:parent.top
-        anchors.topMargin: scaleY(1.5)
+        anchors.top:header.bottom
         anchors.horizontalCenter: parent.horizontalCenter
 
         NonEPGPlaylist{
@@ -48,63 +85,29 @@ Rectangle {
         {
             id:metadata
             height: scaleY(50)
-            width: 480
+            width: scaleX(55)
             spacing: scaleY(1)
-
-            Rectangle {
-                id: gradientheader
-                width:metadata.width
-                height: childrenRect.height
-                color:"transparent"
-
-                Image {
-                    id: headerimage
-                    source: "../img/icons/header.png"
-                    height:parent.height
-                    width:parent.width
-                    opacity: .75
-                }
-
-                Text {
-                    id: headertext
-                    height:scaleY(2)
-                    text:qsTr("Speed: ") + dceTimecode.playbackSpeed
-                    font.family: "Droid Sans"
-                    font.pixelSize: scaleY(2)
-                    color: "aliceblue"
-                }
-
-                Text {
-                    id: timecode
-                    height:scaleY(2)
-                    text: dceTimecode.qsCurrentTime + qsTr(" of ") + dceTimecode.qsTotalTime
-                    font.family: "Droid Sans"
-                    font.pixelSize: scaleY(1) *2.15
-                    anchors.bottom:parent.bottom
-                    anchors.horizontalCenter: parent.horizontalCenter
-                    font.bold: true
-                    color:"aliceblue"
-                }
-            }
-
             Image {
                 id: nowplayingimage
                 anchors.top:gradientheader.bottom
                 anchors.topMargin: scaleY(.5)
-                width: dcenowplaying.aspect=="wide"? scaleX(30) : scaleX(20)
-                height:dcenowplaying.aspect=="wide"? scaleY(30) : scaleY(50)
+//                width: dcenowplaying.aspect=="wide"? scaleX(30) : scaleX(20)
+//                height:dcenowplaying.aspect=="wide"? scaleY(30) : scaleY(50)
+                height: scaleY(25)
+                fillMode: Image.PreserveAspectFit
+                width: scaleX(55)
                 source: ""
                 Component.onCompleted: manager.setBoundStatus(true)
             }
-        }
 
-        ProgramData {
-            id: textrect
+            ProgramData {
+                id: textrect
+            }
         }
     }
 
 
-    MediaScrollBar{id:media_transit; anchors.bottom: controlrow.top; anchors.horizontalCenter: controlrow.horizontalCenter}
+    MediaScrollBar{id:media_transit; anchors.bottom: controlrow.top; anchors.bottomMargin: 10; anchors.horizontalCenter: controlrow.horizontalCenter}
 
     Row{
         id:controlrow

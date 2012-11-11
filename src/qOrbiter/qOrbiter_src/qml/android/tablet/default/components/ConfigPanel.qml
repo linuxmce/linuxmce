@@ -10,8 +10,8 @@ Rectangle {
     state:"hidden"
     Rectangle{
         id:mask
-        height: appH
-        width: appW
+        height: manager.appHeight
+        width: manager.appWidth
         color: "lightgrey"
         opacity:.26
         anchors.centerIn: parent

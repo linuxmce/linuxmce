@@ -25,11 +25,11 @@ QtObject{
     }
     //skin description
     property string skincreator: "Langston Ball (aka golgoj4)"
-    property string skinname: "Pluto Classic"
-    property string skindir: "default"
-    property string skindescription: "Pluto Classic Skin"
+    property string skinname: "Data"
+    property string skindir: "data"
+    property string skindescription: "Android HIG based skin"
     property string skinversion: "1.0"
-    property string skinvariation: "Desktop 800x600"
+    property string skinvariation: "Android Tablet"
     property color maincolor: "#0D4392"
     property color accentcolor: "#EE873B"
     property color highlight1: "aliceblue"

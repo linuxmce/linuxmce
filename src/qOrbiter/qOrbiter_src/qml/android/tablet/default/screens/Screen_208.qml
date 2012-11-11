@@ -3,8 +3,8 @@ import QtQuick 1.1
 import "../components"
 Rectangle {
     id:myth_pvr_recordings
-    width: appW
-    height: appH
+    width: manager.appWidth
+    height: manager.appHeight
 
 
     HomeButton{id:home}

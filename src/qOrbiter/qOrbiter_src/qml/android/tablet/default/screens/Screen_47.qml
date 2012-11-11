@@ -10,13 +10,13 @@ import "../js/ComponentLoader.js" as MyJs
 
 Rectangle {
     id:fileviewscreen
-    width: appW
-    height: appH
+    width: manager.appWidth
+    height: manager.appHeight
     color: "transparent"
     clip: true
     property int mouselocY: 0
     property int mouselocX: 0
-    Component.onCompleted: manager.requestTypes(manager.i_current_mediaType)
+   // Component.onCompleted: manager.requestTypes(manager.i_current_mediaType)
 
     function runEffects()
     {
@@ -266,9 +266,9 @@ Rectangle {
 
     ListView{
         id:model_pages
-        height: appH
+        height: manager.appHeight
         width: scaleX(10)
-        model: pageList
+        model: dataModel.totalPages
         anchors.left: parent.left
         delegate: Rectangle{
             height: scaleY(10)
@@ -276,10 +276,10 @@ Rectangle {
             color: "transparent"
             Text {
                 id:page_label2
-                text: label
+                text: index
                 font.pixelSize: scaleY(3.5)
                 anchors.centerIn: parent
-                color: label == manager.media_currentPage ? "green":"slategrey"
+                color: index == manager.media_currentPage ? "green":"slategrey"
                 font.bold: true
 
             }
@@ -326,7 +326,7 @@ Rectangle {
 
                     alphabetrect.scale = 1
                 }
-                onClicked: manager.seekToGridPosition(name)
+                onClicked: manager.setSeekLetter(name)
             }
         }
     }

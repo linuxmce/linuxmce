@@ -1,8 +1,8 @@
 import QtQuick 1.0
 Rectangle{
     id:power_rect_container
-    height: appH
-    width: appW
+    height: manager.appHeight
+    width: manager.appWidth
     color: "transparent"
     MouseArea{
         anchors.fill: parent
@@ -36,8 +36,8 @@ Rectangle{
             running:false
             PropertyAnimation { target: powerrect; property: "opacity"; to: 1; duration: 750}
             PropertyAnimation { target: powerrect; property: "scale"; to: 1; duration: 750}
-            PropertyAnimation { target: powerrect; property: "x"; easing.type: Easing.InElastic; to: appW/2; duration: 750}
-            PropertyAnimation { target: powerrect; property: "y"; easing.type: Easing.InElastic; to: appH/2; duration: 750}
+            PropertyAnimation { target: powerrect; property: "x"; easing.type: Easing.InElastic; to: manager.appWidth/2; duration: 750}
+            PropertyAnimation { target: powerrect; property: "y"; easing.type: Easing.InElastic; to: manager.appHeight/2; duration: 750}
         }
 
         ParallelAnimation{
@@ -45,8 +45,8 @@ Rectangle{
             running:false
             PropertyAnimation { target: powerrect; property: "opacity"; to: 0; duration: 750}
             PropertyAnimation { target: powerrect; property: "scale"; to: 0; duration: 750}
-            PropertyAnimation { target: powerrect; property: "x"; to: appW; duration: 750}
-            PropertyAnimation { target: powerrect; property: "y"; to: appH; duration: 750}
+            PropertyAnimation { target: powerrect; property: "x"; to: manager.appWidth; duration: 750}
+            PropertyAnimation { target: powerrect; property: "y"; to: manager.appHeight; duration: 750}
             ScriptAction {script:power_rect_container.destroy()}
         }
 

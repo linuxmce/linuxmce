@@ -5,8 +5,8 @@ Rectangle {
 
     // property alias synText:
     id: dvd_remote
-    height: appH
-    width: appW
+    height: manager.appHeight
+    width: manager.appWidth
     radius: 0
     opacity: 1
     color: style.darkhighlight

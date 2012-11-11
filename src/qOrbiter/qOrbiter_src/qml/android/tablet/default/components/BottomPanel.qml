@@ -4,7 +4,7 @@ import "../js/ComponentLoader.js" as MyJs
 
 Rectangle {
     id:advanced_panel
-    width: appW
+    width: manager.appWidth
     height: style.widebuttonh + scaleY(4)
     color:"transparent"
 

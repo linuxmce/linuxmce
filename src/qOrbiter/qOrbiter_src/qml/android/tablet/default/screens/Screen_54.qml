@@ -20,8 +20,8 @@ Rectangle {
     }
  Component.onCompleted: manager.setBoundStatus(true)
 
-    height: appH
-    width: appW 
+    height: manager.appHeight
+    width: manager.appWidth 
     color: "transparent"
 
     Rectangle{

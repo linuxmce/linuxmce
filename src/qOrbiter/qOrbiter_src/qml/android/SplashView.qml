@@ -259,7 +259,7 @@ Rectangle {
                 }
                 Text {
                     id: dev_num
-                    text:qsTr("Device:")+ i_device_number
+                    text:qsTr("Device:")+ device
                     font.pixelSize: 12
                     font.italic: true
                     wrapMode: Text.WrapAtWordBoundaryOrAnywhere
@@ -267,7 +267,7 @@ Rectangle {
             }
             MouseArea {
                 anchors.fill: parent
-                onClicked: window.qmlSetupLmce(i_device_number, routerip.text)
+                onClicked: window.qmlSetupLmce(device, routerip.text)
             }
         }
     }

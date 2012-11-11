@@ -7,8 +7,8 @@ import "../components"
 
 Rectangle {
     id: rectangle1
-    height: appH
-    width: appW
+    height: manager.appHeight
+    width: manager.appWidth
     color: "transparent"
     //signal setupStart(int x, string y)
 

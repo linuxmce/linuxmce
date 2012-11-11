@@ -3,8 +3,8 @@ import Qt.labs.shaders 1.0
 
 Rectangle {
     id:ssholder
-    width: appW
-    height: appH
+    width: manager.appWidth
+    height: manager.appHeight
     color: "black"
 
     Component.onCompleted: screensaver.transitionDuration = 60000
@@ -31,8 +31,8 @@ Rectangle {
 
     Image {
         id: ssimg
-        height: appH
-        width: appW
+        height: manager.appHeight
+        width: manager.appWidth
         source: "image://listprovider/screensaver"+screensaver.timestamp
         anchors.centerIn: parent
         smooth: true

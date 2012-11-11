@@ -10,10 +10,6 @@ Rectangle {
     color: "transparent"
 
 
-    Connections{
-        target: dcerouter
-        onClearAndContinue:runAnimation()
-    }
 
     function runAnimation()
     {

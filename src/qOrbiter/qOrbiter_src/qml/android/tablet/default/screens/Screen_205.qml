@@ -3,8 +3,8 @@ import "../components"
 
     Rectangle{
         id:requestingregen
-        height: appH
-        width: appW
+        height: manager.appHeight
+        width: manager.appWidth
        // color: style.highlight2
         Image {
             id: bgimage

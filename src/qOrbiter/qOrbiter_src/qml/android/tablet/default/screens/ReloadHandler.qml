@@ -4,8 +4,8 @@ import QtWebKit 1.0
 
 Rectangle {
     id:router_reloading
-    width: appW
-    height: appH
+    width: manager.appWidth
+    height: manager.appHeight
     color: "slategrey"
 
 

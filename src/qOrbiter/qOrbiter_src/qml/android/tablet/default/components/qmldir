@@ -68,3 +68,7 @@ Splash Splash.qml
 SecurityPad SecurityPad.qml
 ControlRow ControlRow.qml
 MediaScrollBar MediaScrollBar.qml
+ConfigPanel ConfigPanel.qml
+DebugPanel DebugPanel.qml
+ProgramData ProgramData.qml
+
