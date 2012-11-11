@@ -6,8 +6,8 @@ import "effects"
 
 Item {
     id: item
-  width:manager.manager.appWidthidth
-    height:manager.manager.appHeighteight
+  width:manager.appWidth
+    height:manager.appHeight
 
     Rectangle{
         anchors.fill: parent
