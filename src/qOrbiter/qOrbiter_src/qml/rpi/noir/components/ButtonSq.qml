@@ -24,7 +24,7 @@ Rectangle{
         border.color: style.highlight1
         radius: 5
 
-        Text {
+        StyledText {
             id: buttonLabel
             x: 50
             y: 50

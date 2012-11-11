@@ -5,27 +5,16 @@ import "../js/ComponentLoader.js" as MyJs
 
 Rectangle {
     id:scenarios
-    width: appW
-    height:appH *.10
-   // color: "grey"
+    width: manager.appWidth
+    height:manager.appHeight *.10
+    color: "transparent"
     radius: 5
     gradient: style.generalGradient
     property bool currentState:true
     property double buttonWidth:150
     property double buttonHeight:50
-    property double scenarioFontSize:appH * .03
+    property double scenarioFontSize:manager.appHeight * .03
     state:"show"
-    onCurrentStateChanged: {
-        if(scenarios.state==="hide")
-        {
-            scenarios.state="show"
-        }
-        else
-        {
-            scenarios.state = "hide"
-        }
-    }
-
     states: [
         State {
             name: "show"
@@ -43,6 +32,22 @@ Rectangle {
               //  anchors.top: undefined
                 anchors.top: item.bottom
             }
+        }, State {
+            name: "focused"
+            when:scenarios.focus ==true
+            PropertyChanges {
+                target: scenarios
+                border.width: 1
+                border.color: "white"
+            }
+        },
+        State {
+            name: "unfocused"
+            PropertyChanges {
+                target: scenarios
+                border.width: 0
+                border.color: "transparent"
+            }
         }
     ]
     transitions: [
@@ -55,6 +60,13 @@ Rectangle {
             }
         }
     ]
+
+    Rectangle{
+        id:transparency
+        anchors.fill: parent
+        color: "black"
+        opacity: .25
+    }
 
     Row{
         id:modelRow
@@ -69,7 +81,7 @@ Rectangle {
             width: buttonWidth
             property bool popEnabled: false
             color: "transparent"
-            Text {
+            StyledText {
                 id: lLabel
                 text: qsTr("Lights")
                 anchors.centerIn: parent
@@ -95,7 +107,7 @@ Rectangle {
             width: buttonWidth
             color: "transparent"
             property bool popEnabled:false
-            Text {
+            StyledText {
                 id: mLabel
                 text: qsTr("Media")
                 anchors.centerIn: parent
@@ -121,7 +133,7 @@ Rectangle {
             width: buttonWidth
             color: "transparent"
             property bool popEnabled:false
-            Text {
+            StyledText {
                 id: cLabel
                 text: qsTr("Climate")
                 anchors.centerIn: parent
@@ -147,7 +159,7 @@ Rectangle {
             width: buttonWidth
             color: "transparent"
             property bool popEnabled:false
-            Text {
+            StyledText {
                 id: sLabel
                 text: qsTr("Security")
                 anchors.centerIn: parent
@@ -174,7 +186,7 @@ Rectangle {
             width: buttonWidth
             color: "transparent"
             property bool popEnabled:false
-            Text {
+            StyledText {
                 id: tLabel
                 text: qsTr("Telecom")
                 anchors.centerIn: parent
@@ -200,7 +212,7 @@ Rectangle {
             height: buttonHeight
             width: buttonWidth
             color: "transparent"
-            Text {
+            StyledText {
                 id: aLabel
                 text: qsTr("Advanced")
                 anchors.centerIn: parent
@@ -224,7 +236,7 @@ Rectangle {
             height: 50
             width: 85
             color: "transparent"
-            Text {
+            StyledText {
                 id: roomLabel
                 text: qsTr("room")
 
@@ -233,7 +245,7 @@ Rectangle {
                 font.family: "Nimbus Sans L"
             }
 
-            Text {
+            StyledText {
                 id: roomTitle
                 text: currentroom
                 font.pointSize: 18
@@ -248,7 +260,7 @@ Rectangle {
             height: 50
             width: 85
             color: "transparent"
-            Text {
+            StyledText {
                 id: userLabel
                 text: qsTr("user:")
                 font.pointSize: 12
@@ -256,7 +268,7 @@ Rectangle {
                 color: "white"
                 font.family: "Nimbus Sans L"
             }
-            Text {
+            StyledText {
                 id: userName
                 text: currentuser
                 font.pointSize: 18

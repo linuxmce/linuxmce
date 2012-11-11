@@ -4,7 +4,7 @@ import "../js/ComponentLoader.js" as MyJs
 
 Rectangle {
     id:advanced_panel
-    width: appW
+    width: manager.appWidth
     height: scaleY(15)
     color:"darkgrey"
 

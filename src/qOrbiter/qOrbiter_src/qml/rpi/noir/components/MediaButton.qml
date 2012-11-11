@@ -12,7 +12,7 @@ Rectangle {
         anchors.centerIn: parent
     }
     radius: 25
-    Text {
+    StyledText {
         id: media_button_text
         x: 0
         y: 26

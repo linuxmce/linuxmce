@@ -34,7 +34,7 @@ import "../components"
             anchors.centerIn: parent
             radius: 10
 
-            Text {
+            StyledText {
                 id: text1
                 width: parent.width -10
                 height: scaleY(5)
@@ -42,10 +42,10 @@ import "../components"
                 z: 2
                 font.family: "Droid Sans"
                 font.italic: false
-                horizontalAlignment: Text.AlignHCenter
+                horizontalAlignment: StyledText.AlignHCenter
                 font.bold: false
                 color: "aliceblue"
-                wrapMode: Text.WrapAnywhere
+                wrapMode: StyledText.WrapAnywhere
                 font.pointSize: 18
                 anchors.centerIn: containerrect
             }

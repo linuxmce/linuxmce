@@ -25,17 +25,17 @@ Rectangle {
         width: style.stdbuttonw
 
     }
-    Text {
+    StyledText {
         id: buttonLabel
         anchors.centerIn: parent
         text:"null ipsum delorium"
         font.pointSize: 14
-        verticalAlignment: Text.AlignVCenter
-        horizontalAlignment: Text.AlignHCenter
+        verticalAlignment: StyledText.AlignVCenter
+        horizontalAlignment: StyledText.AlignHCenter
         anchors.fill: parent
         anchors.margins: 5
         font.family: "Droid Sans"
-        wrapMode: Text.WordWrap
+        wrapMode: StyledText.WordWrap
        }
 
     MouseArea{

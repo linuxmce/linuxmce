@@ -4,8 +4,8 @@ import QtGraphicalEffects 1.0
 
 Rectangle {
     id:ssholder
-    width: appW
-    height: appH
+    width: manager.appWidth
+    height: manager.appHeight
     color: "black"
 
     function changeStuff()
@@ -32,8 +32,8 @@ Rectangle {
 
     Image {
         id: ssimg
-        height: appH
-        width: appW
+        height: manager.appHeight
+        width: manager.appWidth
         source: "image://listprovider/screensaver/"+securityvideo.timestamp
         anchors.centerIn: parent
         smooth: true

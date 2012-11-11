@@ -1,16 +1,16 @@
 import QtQuick 2.0
-import Qt.labs.shaders 1.0
-import "../effects"
+
+
 import "../components"
-import "../animation"
+
 
 import "../js/ComponentLoader.js" as MyJs
 
 
 Rectangle {
     id:fileviewscreen
-    width: appW
-    height: appH
+    width: manager.appWidth
+    height: manager.appHeight
     color: "transparent"
     clip: true
     property int mouselocY: 0
@@ -42,11 +42,11 @@ Rectangle {
             height: scaleY(5)
             anchors.centerIn: pos_label
             spacing: scaleX(1)
-            Text {
+            StyledText {
                 id: grid_position_label
                 text: qsTr("You are browsing by:") + manager.i_current_mediaType
             }
-            Text {
+            StyledText {
                 id: grid_attritbute_label
                 text: qsTr("Attribute Type Sort") + manager.q_attributetype_sort
             }
@@ -78,7 +78,7 @@ Rectangle {
             anchors.bottom: parent.bottom
         }
 
-        Text {
+        StyledText {
             id: total_cells
             text: dataModel.totalcells
             color: "grey"
@@ -86,7 +86,7 @@ Rectangle {
             font.pointSize: scaleY(4)
             anchors.top: progress_bar.top
         }
-        Text {
+        StyledText {
             id: current_cells
             text: dataModel.currentCells
             color: "grey"
@@ -183,7 +183,7 @@ Rectangle {
                     opacity: .5
                 }
 
-                Text
+                StyledText
                 {
                     id:celllabel
                     text: name;
@@ -235,7 +235,7 @@ Rectangle {
                     width: background.width - imagerect.width - 20;
                     height: imagerect.height
                     spacing:5
-                    Text {
+                    StyledText {
                         text: name;
                         opacity: 1;
                         font.pointSize: 12;
@@ -254,7 +254,7 @@ Rectangle {
     MultiStateFileDisplay{id:grid_view1; anchors.top: pos_label.bottom}
     ListView{
         id:model_pages
-        height: appH
+        height: manager.appHeight
         width: scaleX(10)
         model: pageList
         anchors.left: parent.left
@@ -262,7 +262,7 @@ Rectangle {
             height: scaleY(10)
             width: scaleX(10)
             color: "transparent"
-            Text {
+            StyledText {
                 id:page_label
                 text: label
                 font.pointSize: scaleY(3.5)
@@ -295,7 +295,7 @@ Rectangle {
             width: scaleX(4)
             color: "transparent"
             clip:false
-            Text {
+            StyledText {
                 id: test
                 text: name
                 font.pointSize: 18
@@ -330,8 +330,8 @@ Rectangle {
 
         ButtonSq
         {
-            height: scaleY(style.iconHeight)
-            width: scaleX(style.iconWidth)
+            height: style.iconHeight
+            width: style.iconWidth
             buttontext: "Go Back"
             buttontextbold: true
             MouseArea

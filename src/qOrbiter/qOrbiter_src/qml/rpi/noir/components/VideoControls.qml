@@ -18,6 +18,9 @@ Rectangle {
                 rotation: 180
                 height: parent.height
                 width: parent.width
+                StyledText{
+                    text:"Back"
+                }
             }
             MouseArea{
                 anchors.fill: parent

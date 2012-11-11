@@ -28,7 +28,7 @@ Component{
 
 
 
-        Text {
+        StyledText {
             anchors.top: parent.top
             id: nameskin
 
@@ -37,7 +37,7 @@ Component{
             font.pointSize: 14
 
             }
-        Text {
+        StyledText {
             anchors.top: nameskin.bottom
             id: skinDescription
             text: description
@@ -45,13 +45,13 @@ Component{
             }
 
 
-            Text {
+            StyledText {
                 anchors.top: skinDescription.bottom
                 id: skincreator
                 text: "Created By:" + creator
                 wrapMode: "WrapAnywhere"
             }
-            Text {
+            StyledText {
                 anchors.top: skincreator.bottom
                 id: skinvariant
                 text: "Variation for: " + variation

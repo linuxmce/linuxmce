@@ -19,14 +19,14 @@ Stage{
 
     Rectangle{
         id:mainrect
-        height: appH
-        width: appW
+        height: manager.appHeight
+        width: manager.appWidth
         color: style.lighthighlight
         anchors.centerIn: securitystatus
         Column{
             anchors.centerIn: parent
 
-            Text {
+            StyledText {
                 id: modetime
 
                 text: qsTr("Change at time: ")+ screenparams.getParam(166)
@@ -34,7 +34,7 @@ Stage{
                 font.bold: false
                 font.pointSize: 18
             }
-            Text {
+            StyledText {
                 id: statussec
 
                 text: qsTr("House Mode Changed to: ")+ screenparams.getParam(165)
@@ -42,7 +42,7 @@ Stage{
                 font.bold: false
                 font.pointSize: 18
             }
-            Text {
+            StyledText {
                 id: exitdelay
 
                 text: qsTr("Exit Delay: ")+ screenparams.getParam(167)
@@ -50,7 +50,7 @@ Stage{
                 font.bold: false
                 font.pointSize: 18
             }
-            Text {
+            StyledText {
                 id: alerts
 
                 text: qsTr("Alerts: ")+ screenparams.getParam(168)

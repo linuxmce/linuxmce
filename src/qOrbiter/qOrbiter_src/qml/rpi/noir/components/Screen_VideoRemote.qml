@@ -30,7 +30,7 @@ Rectangle {
         anchors.leftMargin: 10
 
         color: style.button_system_color
-        Text {
+        StyledText {
             id: video_title
             text: "text"
         }
@@ -41,7 +41,7 @@ Rectangle {
             color: "darkorange"
             opacity: 5
             anchors.top: parent.top
-            Text {
+            StyledText {
                 id: now_playing_label
                 text: "Now Playing"
                 anchors.top: parent.top
@@ -58,7 +58,7 @@ Rectangle {
         width: 48
         height: 25
 
-        Text {
+        StyledText {
             id: text1
             x: 6
             y: 5

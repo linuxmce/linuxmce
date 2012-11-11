@@ -17,7 +17,7 @@ Component
                 id:delegateheader
                 height: 25
                 width: roomdelegate.width
-                Text {
+                StyledText {
                     id: celllabel
                     text: title + ":" + intRoom + ", In EA: " + entertain_area
                 }

@@ -52,16 +52,16 @@ Item{
 
     Rectangle {
         id:mediaHeader
-        width: appW
-        height: appH *.06
+        width: manager.appWidth
+        height: manager.appHeight *.06
         //color: "transparent"
         opacity: .4
         border.color: "white"
         border.width: 1
         gradient:style.generalGradient
     }
-    Text {
-        id: nowPlayingText
+    StyledText {
+        id: nowPlayingStyledText
         text: dcenowplaying.mediatitle === "" ? dcenowplaying.qs_mainTitle : dcenowplaying.mediatitle
         color: "white"
         font.pointSize: 32
@@ -69,7 +69,7 @@ Item{
         anchors.centerIn: mediaHeader
     }
 
-    Text {
+    StyledText {
         id: mediaClock
         text:dceTimecode.qsCurrentTime+ " :: " + dceTimecode.qsTotalTime
         font.family: "Nimbus Sans L"

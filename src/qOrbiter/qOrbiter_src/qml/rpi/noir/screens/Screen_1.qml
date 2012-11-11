@@ -6,9 +6,10 @@ Rectangle {
     id:stage
 
     signal swapStyle()
-    height: appH
-    width: appW
+    height: manager.appHeight
+    width: manager.appWidth
     color: "transparent"
+    Component.onCompleted: if(dcenowplaying.b_mediaPlaying) {screenChange(dcenowplaying.qs_screen) }
     //focus:true
 }
 

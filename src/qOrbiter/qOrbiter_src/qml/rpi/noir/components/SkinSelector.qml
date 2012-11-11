@@ -11,7 +11,7 @@ Rectangle {
     width: skinchooser.width-5
     height: skinchooser.height -5
     color: "lightsteelblue"
-    Text {
+    StyledText {
         id: labelforview
         text: "Please Choose a skin"
     }

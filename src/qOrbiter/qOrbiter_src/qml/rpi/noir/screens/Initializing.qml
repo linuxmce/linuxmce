@@ -4,7 +4,7 @@ Rectangle {
     width: 640
     height: 480
 
-    Text {
+    StyledText {
         id: text1
         x: 197
         y: 93
@@ -16,7 +16,7 @@ Rectangle {
         font.pointSize: 22
     }
 
-    Text {
+    StyledText {
         id: text2
         x: 103
         y: 183
@@ -24,7 +24,7 @@ Rectangle {
         font.pointSize: 12
     }
 
-    Text {
+    StyledText {
         id: text3
         x: 103
         y: 213
@@ -32,7 +32,7 @@ Rectangle {
         font.pointSize: 12
     }
 
-    Text {
+    StyledText {
         id: text4
         x: 103
         y: 243

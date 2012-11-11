@@ -41,14 +41,14 @@ Item{
                 border.color: style.accentcolor
                 border.width: 2
 
-                TextInput {
+                StyledTextInput {
                     id: text_input1
                     text: ""
                     font.family: "Droid Sans Mono"
                     cursorVisible: true
                     readOnly: false
                     anchors.centerIn: numberdisplay
-                    horizontalAlignment: TextInput.AlignHCenter
+                    horizontalAlignment: StyledTextInput.AlignHCenter
                     anchors.fill: parent
                     font.pointSize: 23
                 }

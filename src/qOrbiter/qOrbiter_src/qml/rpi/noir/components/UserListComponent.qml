@@ -21,7 +21,7 @@ Rectangle {
         anchors.fill:parent
         onClicked: rectangle1.state = "State1"
     }
-    Text {
+    StyledText {
         id: nameLabel
         text: manager.sPK_User
         font.bold: true
@@ -51,7 +51,7 @@ Rectangle {
         color: style.not_color
         clip:true
 
-        Text {
+        StyledText {
             id: usernamelabel
             text: username
             anchors.centerIn: parent
@@ -77,7 +77,7 @@ Rectangle {
 
 }
 
-Text {
+StyledText {
     id: text1
     x: 76
     y: 4

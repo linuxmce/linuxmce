@@ -7,7 +7,7 @@ Rectangle {
     height: 25
     radius: 31
 
-    Text {
+    StyledText {
         id: rnd_but_text
         text: ""
         anchors.centerIn: parent

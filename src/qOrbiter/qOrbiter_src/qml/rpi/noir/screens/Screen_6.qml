@@ -2,8 +2,8 @@ import QtQuick 2.0
 import "../components"
 Rectangle{
     id:lights
-    height: appH
-    width: appW
+    height: manager.appHeight
+    width: manager.appWidth
 
 FloorPlanDisplay{id: lightingfloorplan; anchors.centerIn: parent}
 

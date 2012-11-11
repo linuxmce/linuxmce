@@ -3,8 +3,8 @@ import "../components"
 
 Rectangle{
     id:requestingregen
-    height: appH
-    width: appW
+    height: manager.appHeight
+    width: manager.appWidth
      color: style.stageBg
    /*
     Image {
@@ -39,7 +39,7 @@ Rectangle{
             spacing: scaleY(2)
             anchors.centerIn: parent
 
-            Text {
+            StyledText {
                 id: label
                 text: qsTr("You have recently changed scenarios, floorplans, or other settings. I need to regenerate the graphical screens so you can see the new buttons. This will take from 2 - 20 minutes")
                 wrapMode: "WrapAtWordBoundaryOrAnywhere"

@@ -48,7 +48,7 @@ Rectangle {
                     border.color: style.darkhighlight
                     border.width: 2
 
-                    Text {
+                    StyledText {
                         id:channelID
                         text: name
                         font.capitalization: Font.SmallCaps
@@ -62,7 +62,7 @@ Rectangle {
                         anchors.horizontalCenter: parent.horizontalCenter
                     }
 
-                    Text {
+                    StyledText {
                         id: position
                         text: channelnumber
                         color: "aliceblue"
@@ -73,7 +73,7 @@ Rectangle {
                         font.pointSize: 18
                     }
                 }
-                Text {
+                StyledText {
                     id:proglabel
                     text:program
                     anchors.top: delrect.top

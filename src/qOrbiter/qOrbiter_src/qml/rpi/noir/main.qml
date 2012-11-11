@@ -6,8 +6,8 @@ import "js/ComponentLoader.js" as MyJs
 
 Item {
     id: item
-    width:appW
-    height:appH
+    width:manager.manager.appWidthidth
+    height:manager.manager.appHeighteight
     //focus:true
     signal close()
     signal changeScreen(string s)
@@ -22,7 +22,13 @@ Item {
     function checkLayout()
     {
         console.log("c++ slot orientation changed")
-        console.log(appW+" x " + appH)
+        console.log(manager.appWidth+" x " + manager.appHeight)
+    }
+
+    FontLoader{
+        id:myFont
+        name:"Sawasdee"
+        source: "../default/fonts/Sawasdee.ttf"
     }
 
 
@@ -45,16 +51,25 @@ Item {
     function toggleUI()
     {
         mediaHeader.currentState = !mediaHeader.currentState
-        lmceScenarios.currentState = !lmceScenarios.currentState
+        if(lmceScenarios.state==="show")
+        {
+            lmceScenarios.state = "hide"
+        }
+        else
+        {
+            lmceScenarios.state = "show"
+        }
+
+
     }
 
 
 
     function scaleX(x){
-        return x/100*appW
+        return x/100*manager.appWidth
     }
     function scaleY(y){
-        return y/100*appH
+        return y/100*manager.appHeight
     }
 
 
@@ -103,14 +118,14 @@ Item {
         width: parent.width
         height: parent.height
         focus: true
-         Keys.onPressed:{
+        Keys.onPressed:{
 
-                 if(event.key === Qt.Key_T){
-                     toggleUI()
-                 console.log("Key toggle")
-                 }
+            if(event.key === Qt.Key_T){
+                toggleUI()
+                console.log("Key toggle")
+            }
 
-         }
+        }
 
         Loader {
             id:pageLoader
@@ -121,11 +136,10 @@ Item {
             onLoaded: {
 
                 console.log("Screen Changed:" + pageLoader.source)
-
             }
-
-
         }
+
+
 
     }
 
@@ -196,8 +210,6 @@ Item {
 
 
     //floorplans
-
-
     MediaHeader{
         id:mediaHeader
     }
@@ -205,5 +217,6 @@ Item {
     ScenarioRow{
         id:lmceScenarios;
     }
+
 }
 

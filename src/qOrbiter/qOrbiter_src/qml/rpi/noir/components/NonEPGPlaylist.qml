@@ -54,7 +54,7 @@ Rectangle {
                 opacity: .5
 
             }
-            Text {
+            StyledText {
                 id: position
                 text: qsTr("Item #") + index
                 font.family: "DroidSans"
@@ -65,7 +65,7 @@ Rectangle {
                 opacity: .75
             }
 
-            Text {
+            StyledText {
                 text:  index === dcenowplaying.m_iplaylistPosition ? "Now Playing - " + name : name
                 font.family: "DroidSans"
                 color: "aliceblue"
@@ -76,12 +76,18 @@ Rectangle {
 
             }
 
-            Image {
-                id: overlay
-                fillMode: Image.PreserveAspectCrop
-                source: "../img/icons/header.png"
+//            Image {
+//                id: overlay
+//                fillMode: Image.PreserveAspectCrop
+//                source: "/img/icons/header.png"
+//                anchors.fill: parent
+//                opacity:index === dcenowplaying.m_iplaylistPosition ? .25 :  .15
+//            }
+
+            Rectangle{
                 anchors.fill: parent
-                opacity:index === dcenowplaying.m_iplaylistPosition ? .25 :  .15
+                opacity: .15
+                color: "grey"
             }
 
             MouseArea{
@@ -101,7 +107,7 @@ Rectangle {
                     height: scaleX(1)
                     width: scaleX(1)
                     color:"green"
-                    Text {
+                    StyledText {
                         id: up
                         text: qsTr("Up")
                     }
@@ -127,7 +133,7 @@ Rectangle {
                     height: scaleX(1)
                     width: scaleX(1)
                     color:"blue"
-                    Text {
+                    StyledText {
                         id: down
                         text: qsTr("down")
                     }
@@ -159,7 +165,7 @@ Rectangle {
                     id: save_as
                     text: qsTr("Edit name")
                     anchors.centerIn: parent
-                    fillColor: "white"
+                    color: "white"
                     onFocusChanged: save_as.text=""
                 }
 
@@ -170,7 +176,7 @@ Rectangle {
                 height: style.avoptionbuttonh
                 width: style.avoptionbuttonw
                 color: style.darkhighlight
-                Text {
+                StyledText {
                     id: public_text
                     text: qsTr("Public")
                     anchors.centerIn: parent
@@ -186,7 +192,7 @@ Rectangle {
                 height: style.avoptionbuttonh
                 width: style.avoptionbuttonw
                 color: style.darkhighlight
-                Text {
+                StyledText {
                     id: private_text
                     text: qsTr("Private")
                     anchors.centerIn: parent

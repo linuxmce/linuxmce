@@ -5,14 +5,14 @@ Rectangle {
     width: 800
     height: 800
 
-    Text {
+    StyledText {
         id: text2
         x: 160
         y: 404
         text: "text"
         font.pointSize: 12
 
-        Text {
+        StyledText {
             id: welcome
             x: 50
             y: -396
@@ -55,7 +55,7 @@ Rectangle {
             opacity: 0.3
         }
 
-        TextEdit {
+        StyledTextEdit {
             id: routerip
             x: 241
             y: 402
@@ -65,7 +65,7 @@ Rectangle {
             font.pointSize: 12
         }
 
-        TextEdit {
+        StyledTextEdit {
             id: devicenumber
             x: 598
             y: 402

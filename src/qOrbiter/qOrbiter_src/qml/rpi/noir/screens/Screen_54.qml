@@ -5,7 +5,7 @@ import "../js/ComponentLoader.js" as MyJs
 Rectangle {
     id: storedaudioremote
 
-    Text {
+    StyledText {
         id: messages
         text: manager.mediaResponse
         font.pointSize: scaleY(4)
@@ -18,13 +18,13 @@ Rectangle {
     }
  Component.onCompleted: manager.setBoundStatus(true)
 
-    height: appH
-    width: appW
+    height: manager.appHeight
+    width: manager.appWidth
     radius: 0
     opacity: 1
     color: "transparent"
 
-    Text {
+    StyledText {
         id: bignowplaying
         text: dcenowplaying.qs_mainTitle
         anchors.centerIn: parent
@@ -52,7 +52,7 @@ Rectangle {
         anchors.top: parent.top
         anchors.topMargin: scaleY(1)
 
-        Text {
+        StyledText {
             id: timecode
             height:scaleY(2.15)
             text: qsTr("Speed: ") + dceTimecode.playbackSpeed +" || " +dceTimecode.qsCurrentTime + qsTr(" of ") + dceTimecode.qsTotalTime
@@ -128,7 +128,7 @@ Rectangle {
                     spacing: scaleY(.5)
                     width: childrenRect.width
                     height: dcenowplaying.aspect == "wide"?scaleY(25): scaleY(35)
-                    Text {
+                    StyledText {
                         id: starring
                         width: scaleX(40)
                         wrapMode: "WrapAtWordBoundaryOrAnywhere"
@@ -147,7 +147,7 @@ Rectangle {
                             onExited: {starring.elide = "ElideRight"; }
                         }
                     }
-                    Text {
+                    StyledText {
                         id: generaltitle
                         width: scaleX(35)
                         text:  dcenowplaying.mediatitle
@@ -158,7 +158,7 @@ Rectangle {
                         visible:  dcenowplaying.mediatitle =="" ? false: true
                     }
 
-                    Text {
+                    StyledText {
                         id: programtext
                         width: scaleX(35)
                         text: qsTr("Album: ") + dcenowplaying.album
@@ -169,7 +169,7 @@ Rectangle {
                         visible:  dcenowplaying.album =="" ? false: true
                     }
 
-                    Text {
+                    StyledText {
                         id: episode
                         width: scaleX(35)
                         wrapMode: "WrapAtWordBoundaryOrAnywhere"
@@ -182,7 +182,7 @@ Rectangle {
                         visible:  dcenowplaying.track =="" ? false: true
                     }
 
-                    Text {
+                    StyledText {
                         id: genre
                         width: scaleX(35)
                         wrapMode: "WrapAtWordBoundaryOrAnywhere"
@@ -200,7 +200,7 @@ Rectangle {
                             onExited: {genre.elide = "ElideRight"; }
                         }
                     }
-                    Text {
+                    StyledText {
                         id: released
                         width: scaleX(35)
                         wrapMode: "WrapAtWordBoundaryOrAnywhere"

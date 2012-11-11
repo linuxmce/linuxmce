@@ -6,8 +6,8 @@ import QtQuick 2.0
   Button sienna
   Rows   lightbrwn
   Grids  ltgrn
-  Button Text white
-  Title Text white
+  Button StyledText white
+  Title StyledText white
 
   */
 
@@ -17,10 +17,10 @@ Item{
     objectName: "noir"
     property alias style: classicstyle
     function scaleX(x){
-    return x/100*appW
+    return x/100*manager.appWidth
     }
     function scaleY(y){
-    return y/100*appH
+    return y/100*manager.appHeight
     }
 
     //skin description
@@ -49,8 +49,8 @@ Item{
     //icon sizes
     property int iconHeight: 90
     property int iconWidth: 90
-    property int  stdbuttonh: 90
-    property int  stdbuttonw: 90
+    property int  stdbuttonh: scaleY(8)
+    property int  stdbuttonw: scaleX(8)
 
     //textStyles
 
@@ -90,7 +90,7 @@ Item{
     property color rowbgColor: "darkgrey"
 
     //Notifications bar
-    property int notificationWidth: appW-5
+    property int notificationWidth: manager.appWidth-5
     property color not_color: "darkgrey"
     property string not_pos: "anchors: parent.top"
     property Gradient generalGradient: Gradient {

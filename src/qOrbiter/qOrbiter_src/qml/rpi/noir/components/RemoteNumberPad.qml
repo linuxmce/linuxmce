@@ -27,7 +27,7 @@ Rectangle {
             border.color: style.accentcolor
             border.width: 2
 
-            TextInput {
+            StyledTextInput {
                 id: text_input1
                 text: ""
 
@@ -35,7 +35,7 @@ Rectangle {
                 cursorVisible: true
                 readOnly: false
                 // anchors.centerIn: numberdisplay
-                horizontalAlignment: TextInput.AlignHCenter
+                horizontalAlignment: StyledTextInput.AlignHCenter
                 // anchors.fill: parent
                 font.pointSize: 23
             }
@@ -70,7 +70,7 @@ Rectangle {
                             source: "../img/icons/rndbuttonbase.png"
                             anchors.fill: parent
                         }
-                        Text {
+                        StyledText {
                             id: numberonelabel
                             text: qsTr("1")
 
@@ -111,7 +111,7 @@ Rectangle {
                             source: "../img/icons/rndbuttonbase.png"
                             anchors.fill: parent
                         }
-                        Text {
+                        StyledText {
                             id: numbero2label
                             text: qsTr("2")
                             color: "black"
@@ -152,7 +152,7 @@ Rectangle {
                             source: "../img/icons/rndbuttonbase.png"
                             anchors.fill: parent
                         }
-                        Text {
+                        StyledText {
                             id: number3label
                             text: qsTr("3")
                             color: "black"
@@ -202,7 +202,7 @@ Rectangle {
                             source: "../img/icons/rndbuttonbase.png"
                             anchors.fill: parent
                         }
-                        Text {
+                        StyledText {
                             id: numberonelabe4
                             text: qsTr("4")
                             color: "black"
@@ -243,7 +243,7 @@ Rectangle {
                             source: "../img/icons/rndbuttonbase.png"
                             anchors.fill: parent
                         }
-                        Text {
+                        StyledText {
                             id: numbero5label
                             text: qsTr("5")
                             color: "black"
@@ -284,7 +284,7 @@ Rectangle {
                             source: "../img/icons/rndbuttonbase.png"
                             anchors.fill: parent
                         }
-                        Text {
+                        StyledText {
                             id: number6label
                             text: qsTr("6")
                             color: "black"
@@ -334,7 +334,7 @@ Rectangle {
                             source: "../img/icons/rndbuttonbase.png"
                             anchors.fill: parent
                         }
-                        Text {
+                        StyledText {
                             id: number7label
                             text: qsTr("7")
                             color: "black"
@@ -375,7 +375,7 @@ Rectangle {
                             source: "../img/icons/rndbuttonbase.png"
                             anchors.fill: parent
                         }
-                        Text {
+                        StyledText {
                             id: number8label
                             text: qsTr("8")
                             color: "black"
@@ -416,7 +416,7 @@ Rectangle {
                             source: "../img/icons/rndbuttonbase.png"
                             anchors.fill: parent
                         }
-                        Text {
+                        StyledText {
                             id: number9label
                             text: qsTr("9")
                             color: "black"
@@ -482,7 +482,7 @@ Rectangle {
                         }
 
 
-                        Text {
+                        StyledText {
                             id: number0label
                             text: qsTr("0")
                             color: "black"

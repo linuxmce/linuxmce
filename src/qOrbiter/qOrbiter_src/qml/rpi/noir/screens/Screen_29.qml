@@ -4,8 +4,8 @@ Item{
     id:sleepingmenu
 
     Rectangle{
-        height: appH
-        width: appW
+        height: manager.appHeight
+        width: manager.appWidth
         color: style.darkhighlight
         HomeButton{ x: 5; y: 5; width: 75; height: 75; smooth: true}
         Component.onCompleted: manager.GetAlarms(false, 0)
@@ -51,7 +51,7 @@ Item{
                             width: scaleX(18)
                             color: style.accentcolor
                             radius: 5
-                            Text {
+                            StyledText {
                                 id: alarmtext
                                 text: qsTr("Sleeping Alarms")
                                 anchors.horizontalCenter: parent.horizontalCenter
@@ -92,7 +92,7 @@ Item{
                                             border.color: "black"
                                             border.width: 2
                                             Component.onCompleted: console.log(b_state)
-                                            Text {
+                                            StyledText {
                                                 id: handler
                                                 text: status
                                                 anchors.centerIn: parent
@@ -107,19 +107,19 @@ Item{
                                         }
                                         Column{
                                             spacing: 5
-                                            Text {
+                                            StyledText {
                                                 id: alarmname
                                                 text:qsTr("Name: ") + name
                                             }
-                                            Text {
+                                            StyledText {
                                                 id: alarmtime
                                                 text:qsTr("Alarm Set For: ") + alarmTime
                                             }
-                                            Text {
+                                            StyledText {
                                                 id: daysactive
                                                 text: qsTr("Active on: ")+ activeDays
                                             }
-                                            Text {
+                                            StyledText {
                                                 id: countdown
                                                 text: qsTr("Time Left: ") +timeLeft
                                             }

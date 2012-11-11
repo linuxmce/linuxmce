@@ -7,7 +7,7 @@ Rectangle{
     height: scaleY(10)
     color: "darkgray"
 
-    Text{
+    StyledText{
         id:connectstatus
         text: qsTr("Orbiter")+ iPK_Device + qsTr(" Is Connected")
         color: "aliceblue"

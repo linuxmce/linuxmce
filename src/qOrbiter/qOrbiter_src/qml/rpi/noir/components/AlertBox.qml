@@ -5,7 +5,7 @@ Rectangle {
     width: 150
     height: 25
 
-    Text {
+    StyledText {
         id: alert_text
         text: ""
         font.pointSize: 14

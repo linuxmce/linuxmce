@@ -24,7 +24,7 @@ AvOptionButton {
         }
         MouseArea{
             anchors.fill: parent
-            onClicked: manager.mute()
+            onClicked: manager
         }
     }
 

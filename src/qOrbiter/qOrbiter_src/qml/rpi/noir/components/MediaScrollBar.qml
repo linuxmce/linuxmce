@@ -16,7 +16,7 @@ Rectangle {
         height: scaleY(5)
         width: scaleY(10)
         opacity: 0
-        Text {
+        StyledText {
             id: drag_label
             text: dceTimecode.dragTime
             anchors.centerIn: parent

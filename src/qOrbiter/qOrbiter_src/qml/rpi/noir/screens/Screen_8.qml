@@ -4,10 +4,10 @@ Item{
     id:userstatus
 
     Rectangle{
-        height: appH
-        width: appW
+        height: manager.appHeight
+        width: manager.appWidth
         color: "transparent"
-        Text {
+        StyledText {
             id: userstatuslabel
             x: 74
             y: 101

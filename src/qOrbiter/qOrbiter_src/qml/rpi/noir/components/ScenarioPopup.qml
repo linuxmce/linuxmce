@@ -38,7 +38,7 @@ Rectangle {
             height: 50
             width: componentWidth
             color: delegateHit.containsMouse ? delegateHit.pressed ? delegatePressedColor : delegateHoverColor : delegateActiveColor
-            Text {
+            StyledText {
                 id: scenarioItem
                 text: title
                 font.pointSize: 12

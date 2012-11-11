@@ -2,7 +2,7 @@ import QtQuick 2.0
 import "../components"
 Rectangle {
     id: remoteassist
-    height: appH
-    width: appW
+    height: manager.appHeight
+    width: manager.appWidth
     HomeButton{}
 }

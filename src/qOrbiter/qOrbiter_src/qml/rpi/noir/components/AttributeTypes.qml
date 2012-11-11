@@ -39,7 +39,7 @@ Rectangle {
                              width: childrenRect.width
                              spacing: 10
 
-                             Text {
+                             StyledText {
                                  width: 75
                                  height: parent.height
                                  id: fileformatcell

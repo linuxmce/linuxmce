@@ -42,7 +42,7 @@ Rectangle {
                 width: roomdelegate.width
                 color: "transparent"
                 anchors.top: parent.top
-                Text {
+                StyledText {
                     id: celllabel
                     height: 25
                     width: parent.width
@@ -82,7 +82,7 @@ Rectangle {
             }
         }
         width: roomselectorrect.width
-        Text {
+        StyledText {
             id: headertext
             text: "Select Room Please"
         }

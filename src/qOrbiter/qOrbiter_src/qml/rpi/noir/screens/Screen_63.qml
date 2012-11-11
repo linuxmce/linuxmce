@@ -3,10 +3,10 @@ import "../components"
 import "../js/ComponentLoader.js" as MyJs
 Rectangle {
 
-    // property alias synText:
+    // property alias synStyledText:
     id: satcableboxremote
-    height: appH
-    width: appW
+    height: manager.appHeight
+    width: manager.appWidth
     color:"transparent"
 
 
@@ -45,7 +45,7 @@ Rectangle {
                         height:parent.height
                         width:parent.width
                     }
-                    Text {
+                    StyledText {
                         id: headertext
                         text:"Speed: " + dcenowplaying.qs_playbackSpeed
                         height: scaleY(2.5)
@@ -86,7 +86,7 @@ Rectangle {
                         spacing: 5
                         height: childrenRect.height
 
-                        Text {
+                        StyledText {
                             id: np_device
                             width: parent.width
                             text: qsTr("Device: ")  + dcenowplaying.qs_mainTitle
@@ -99,51 +99,51 @@ Rectangle {
                         }
 
 
-                        Text {
+                        StyledText {
                             id: network_id
                             wrapMode: "NoWrap"
                             text: qsTr("Network: ") + dcenowplaying.channelID
                             font.family: "Droid Sans"
                             font.bold: true
                             smooth: true
-                            horizontalAlignment: Text.AlignHCenter
+                            horizontalAlignment: StyledText.AlignHCenter
                             font.pointSize: scaleY(2)
                             color: "white"
                         }
 
 
-                        Text {
+                        StyledText {
                             id: channel_id
                             wrapMode: "NoWrap"
                             text: qsTr("Channel: ") + dcenowplaying.channel
                             font.family: "Droid Sans"
                             font.bold: true
                             smooth: true
-                            horizontalAlignment: Text.AlignHCenter
+                            horizontalAlignment: StyledText.AlignHCenter
                             font.pointSize: scaleY(2)
                             color: "white"
                         }
 
-                        Text {
+                        StyledText {
                             id: program_title
                             wrapMode: "NoWrap"
                             text: qsTr("Program:") + dcenowplaying.tvProgram
                             font.family: "Droid Sans"
                             font.bold: true
                             smooth: true
-                            horizontalAlignment: Text.AlignHCenter
+                            horizontalAlignment: StyledText.AlignHCenter
                             font.pointSize: scaleY(2)
                             color: "white"
                         }
 
-                        Text {
+                        StyledText {
                             id: live_av
                             wrapMode: "NoWrap"
                             text: qsTr("ScreenShot Availible:") + manager.monitorAvailible
                             font.family: "Droid Sans"
                             font.bold: true
                             smooth: true
-                            horizontalAlignment: Text.AlignHCenter
+                            horizontalAlignment: StyledText.AlignHCenter
                             font.pointSize: scaleY(2)
                             color: "white"
                         }

@@ -5,7 +5,7 @@ Rectangle {
     height: style.orbiterH
     width: style.orbiterW
     color: style.advanced_bg
-    Text {
+    StyledText {
         id: text1
         x: 196
         y: 139
@@ -23,7 +23,7 @@ Rectangle {
         width: scaleX(10)
         y:scaleY(15)
         anchors.centerIn: parent
-        Text {
+        StyledText {
             id: screen116label1
             text: qsTr("Ignore just this time")
         }
@@ -36,7 +36,7 @@ Rectangle {
         y:scaleY(15)
         anchors.left: ignoreonce.left
         anchors.leftMargin: 20
-        Text {
+        StyledText {
             id: screen116label2
             text: qsTr("Ignore Always")
         }

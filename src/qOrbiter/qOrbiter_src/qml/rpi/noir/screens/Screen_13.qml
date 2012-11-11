@@ -86,7 +86,7 @@ Stage{
                 }
             }
 
-            Text {
+            StyledText {
                 id: delegatetext
                 text: name
                 anchors.centerIn: secrect
@@ -106,7 +106,7 @@ Stage{
         width: contentrow.width + scaleX(1)
         radius: 2.5
 
-        Text {
+        StyledText {
             id: securitypanellabel
             anchors.bottom: container.top
             text: "Security Panel"
