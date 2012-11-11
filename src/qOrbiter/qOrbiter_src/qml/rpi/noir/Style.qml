@@ -51,6 +51,10 @@ Item{
     property int iconWidth: 90
     property int  stdbuttonh: scaleY(8)
     property int  stdbuttonw: scaleX(8)
+    property int  mediabuttonH: scaleY(8)
+    property int  mediabuttonW: scaleX(8)
+    property int  avoptionbuttonh:scaleY(8)
+    property int  avoptionbuttonw:scaleX(8)
 
     //textStyles
 

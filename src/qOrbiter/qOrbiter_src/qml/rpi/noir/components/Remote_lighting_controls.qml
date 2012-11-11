@@ -20,7 +20,7 @@ AvOptionButton {
            anchors.centerIn: parent
             width: 50
             height: 50
-            source: "../img/icons/jabber_protocol.png"
+            source: "../img/external/icons/jabber_protocol.png"
         }
     }
 
@@ -32,7 +32,7 @@ AvOptionButton {
         height: 50
         rotation: -90
         smooth: true
-        source: "../img/icons/player_fwd.png"
+        source: "../img/external/icons/player_fwd.png"
         MouseArea{
             anchors.fill: parent
             onClicked: manager.adjustLighting(10)
@@ -47,7 +47,7 @@ AvOptionButton {
         height: 50
         rotation: 90
         smooth: true
-        source: "../img/icons/player_fwd.png"
+        source: "../img/external/icons/player_fwd.png"
         MouseArea{
             anchors.fill: parent
             onClicked: manager.adjustLighting(-10)

@@ -27,7 +27,7 @@ Rectangle {
 
     Image {
         id: scroller_transit
-        source: "../img/icons/blue.png"
+        source: "../img/external/icons/blue.png"
         height: parent.height
         width: parent.width
         anchors.centerIn: parent
@@ -35,7 +35,7 @@ Rectangle {
     }
     Image {
         id: scroll_tab
-        source: "../img/icons/scroller.png"
+        source: "../img/external/icons/scroller.png"
         height: scaleY(5)
         width: scaleX(2)
         anchors.verticalCenter: scroller_transit.verticalCenter
@@ -54,7 +54,7 @@ Rectangle {
                                    dceTimecode.showDragTime(slidertimer)  }
                                else
                                {drag_indicator.opacity = 0
-                                   }
+                               }
             onReleased: {
                 drag_indicator.opacity =0
                 dceTimecode.finishDragging()

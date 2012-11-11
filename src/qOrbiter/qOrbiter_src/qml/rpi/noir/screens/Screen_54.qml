@@ -86,12 +86,12 @@ Rectangle {
                 height:childrenRect.height
                 width:scaleX(30)
                 color: "transparent"
-                anchors.top:parent.top
+
 
                 BorderImage {
                     id: borderimg
                     horizontalTileMode: BorderImage.Repeat
-                    source: "../img/icons/drpshadow.png"
+                    source: "../img/external/icons/drpshadow.png"
                     anchors.fill: nowplayingimage
                     anchors { leftMargin: -6; topMargin: -6; rightMargin: -8; bottomMargin: -8 }
                     border { left: 10; top: 10; right: 10; bottom: 10 }
@@ -108,7 +108,7 @@ Rectangle {
 
                 Image {
                     id: npmask
-                    source: "../img/icons/transparencymask.png"
+                    source: "../img/external/icons/transparencymask.png"
                     anchors.fill: nowplayingimage
                     opacity: .5
                 }
@@ -220,7 +220,7 @@ Rectangle {
     }
 
 
-    MediaScrollBar{id:media_transit; anchors.bottom: controlrow.top; anchors.horizontalCenter: controlrow.horizontalCenter; anchors.bottomMargin: scaleY(2)}
+  // MediaScrollBar{id:media_transit; anchors.bottom: controlrow.top; anchors.horizontalCenter: controlrow.horizontalCenter; anchors.bottomMargin: scaleY(2)}
     Row{
         id:controlrow
         anchors.top: mainrow.bottom
@@ -233,9 +233,9 @@ Rectangle {
             height: childrenRect.height
             width: childrenRect.width
             spacing: scaleY(1)
-            VideoControls {
-                id: videocontrols1
-            }
+           // VideoControls {
+//                id: videocontrols1
+//            }
             Row{
                 height: childrenRect.height
                 width: childrenRect.width
