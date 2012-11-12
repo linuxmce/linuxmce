@@ -8,8 +8,12 @@ import "js/ComponentLoader.js" as MyJs
 
 Item {
     id: item
-    width:appW
-    height:appH
+    width:manager.appWidth
+    height:manager.appHeight
+    property alias skinStyle: style
+    Style{
+       id:style
+   }
 
     FontLoader{
         id:myFont
@@ -22,7 +26,7 @@ Item {
         anchors.top: parent.top
         anchors.left:parent.left
         z:-2
-        Component.onCompleted: {setWindowSize(appH, appW)}
+        Component.onCompleted: {setWindowSize(manager.appHeight, manager.appWidth)}
         MouseArea{
             anchors.fill: dceplayer
             acceptedButtons: Qt.LeftButton | Qt.RightButton
@@ -30,7 +34,7 @@ Item {
         }
         Connections{
             target:manager
-            onOrientationChanged:dceplayer.setWindowSize(appH, appW)
+            onOrientationChanged:dceplayer.setWindowSize(manager.appHeight, manager.appWidth)
             onMediaPlayerIdChanged:{
                  console.log("initializing media player")
                 dceplayer.setConnectionDetails(manager.mediaPlayerID, manager.m_ipAddress)
@@ -104,10 +108,10 @@ Item {
 
     }
     function scaleX(x){
-        return x/100*appW
+        return x/100*manager.appWidth
     }
     function scaleY(y){
-        return y/100*appH
+        return y/100*manager.appHeight
     }
 
 
