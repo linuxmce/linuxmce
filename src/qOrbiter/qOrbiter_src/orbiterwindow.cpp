@@ -100,9 +100,11 @@ orbiterWindow::orbiterWindow(long deviceid, std::string routerip, QObject *paren
 #ifdef GLENABLED
 
 #ifdef for_desktop
+#ifndef QT5
     glWidget = new QGLWidget();
     mainView.setViewport(glWidget);
     mainView.setViewportUpdateMode(QGraphicsView::FullViewportUpdate);
+#endif
 #else
 
 //    glWidget = new QGLWidget();

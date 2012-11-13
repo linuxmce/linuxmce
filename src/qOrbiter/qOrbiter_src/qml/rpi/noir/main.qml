@@ -16,6 +16,8 @@ Item {
     property string screenfile
     property string dynamic_height
     property string dynamic_width
+    property int  mousePos: hitArea.pos
+    property bool uiState:true
 
     signal toggleInterface()
 
@@ -46,7 +48,29 @@ Item {
     ScreenSaver{
         id:pss
         anchors.centerIn: parent
+        MouseArea{
+            id:hitArea
+            hoverEnabled: true
+            onMouseXChanged: uiState ? hideTimer.restart() : toggleUI()
+            anchors.fill: parent
+        }
     }
+
+    Timer{
+        id:hideTimer
+        interval: 10000
+        running: true
+        triggeredOnStart: false
+        onTriggered: {
+            autoHide()
+        }
+    }
+
+    function autoHide(){
+
+        toggleUI()
+    }
+
 
     function toggleUI()
     {

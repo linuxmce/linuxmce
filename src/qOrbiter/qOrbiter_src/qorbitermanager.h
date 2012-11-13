@@ -457,6 +457,9 @@ signals:
     void communicatorConnected(bool connect);
 
 
+    void newMessageSend(QString message);
+
+
 
     /* Media Playback Controls */
     void muteSound();
@@ -591,6 +594,7 @@ signals:
 
 
 public slots:
+    void sendDceMessage(QString m) {emit newMessageSend(m);}
 
     //mobile device specfic
     bool setupMobileStorage();

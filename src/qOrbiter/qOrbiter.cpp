@@ -4958,3 +4958,21 @@ void qOrbiter::getVolume()
         emit deviceAudioLevelChanged(0);
     }
 }
+
+
+void qOrbiter::executeMessageSend(QString outGoing)
+{
+    string cMsg = outGoing.toStdString();
+    string msgResponse="";
+
+    Message elMessage(cMsg);
+    this->m_pEvent->SendMessage(&elMessage, &msgResponse);
+
+    if(msgResponse=="OK"){
+        emit commandResponseChanged("MessageSend OK!");
+    }else
+    {
+        emit commandResponseChanged("MessageSend Failed!");
+    }
+
+}

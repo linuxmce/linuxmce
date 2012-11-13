@@ -63,7 +63,7 @@ class qOrbiter : public qOrbiter_Command
     Q_PROPERTY(QString DCEHost READ getDCEHost WRITE setDCEHost NOTIFY DCEHostChanged)
 
     Q_PROPERTY (int modelPages READ getModelPages WRITE setModelPages NOTIFY modelPagesChanged)
-    Q_PROPERTY (int i_current_mediaType READ getMediaType WRITE setMediaType NOTIFY mediaTypeChanged)  
+    Q_PROPERTY (int i_current_mediaType READ getMediaType WRITE setMediaType NOTIFY mediaTypeChanged)
     Q_PROPERTY (int m_dwPK_Device READ getDeviceId WRITE setDeviceId NOTIFY deviceIdChanged)
     Q_PROPERTY(int qMediaPlayerID READ getqMediaPlayerID WRITE setqMediaPlayerID NOTIFY qMediaPlayerIDChanged)
     Q_PROPERTY(int qCommunicatorID READ getqCommunicatorID WRITE setqCommunicatorID NOTIFY qCommunicatorIDChanged)
@@ -1438,6 +1438,9 @@ signals:
     void DCEHostChanged();
 
 public slots:
+
+    void executeMessageSend(QString outGoing);
+
     void getVolume();
 
     void setAlarm(bool toggle, int grp);
