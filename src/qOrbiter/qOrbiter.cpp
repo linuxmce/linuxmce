@@ -2072,6 +2072,7 @@ void qOrbiter::beginSetup()
     m_dwMaxRetries = 3;
     m_sExternalIP = "";
     m_bOrbiterConnected = false;
+    setGridStatus(true);
     initializeGrid();
     setOrbiterSetupVars(0,0,0,0,0,0);
 #ifndef for_harmattan
@@ -2141,7 +2142,7 @@ void qOrbiter::initializeGrid()
 
 void qOrbiter::setStringParam(int paramType, QString param)
 {
-    setGridStatus(false);
+
     /*
     QString q_mediaType;           //1 passed in inital dg request
     QString q_subType;             //2
@@ -3317,8 +3318,7 @@ void DCE::qOrbiter::changedTrack(QString direction)
 void DCE::qOrbiter::populateAdditionalMedia() //additional media grid that populates after the initial request to break out the threading and allow for a checkpoint across threads
 {
 
-    if(checkLoadingStatus() == true)
-    {
+
         //emit commandResponseChanged("requesting additional media");
 #ifdef QT5
         //QApplication::processEvents(QEventLoop::AllEvents);
@@ -3402,12 +3402,9 @@ void DCE::qOrbiter::populateAdditionalMedia() //additional media grid that popul
             delete pDataGridTable;
         }
     }
-    else
-    {
-        qDebug("Grid set to stop, will not load more.");
-    }
 
-}
+
+
 
 
 void DCE::qOrbiter::SetSecurityMode(int pin, int mode)

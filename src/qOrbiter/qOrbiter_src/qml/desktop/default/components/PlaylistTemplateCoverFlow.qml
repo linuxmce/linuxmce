@@ -12,7 +12,6 @@ ListView {
         onActiveItemChanged:{
             positionViewAtIndex(mediaplaylist.currentIndex, ListView.Beginning)
         }
+    }
 
 }
-
-    }

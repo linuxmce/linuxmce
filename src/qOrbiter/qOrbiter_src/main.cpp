@@ -477,7 +477,7 @@ int main(int argc, char* argv[])
         QObject::connect(w.floorplans, SIGNAL(adjustLevel(int,myMap)), &pqOrbiter, SLOT(adjustLighting(int,myMap)),Qt::QueuedConnection);
 
         //mediagrid
-        QObject::connect(&w, SIGNAL(gridStatus(bool)), &pqOrbiter, SLOT(setGridStatus(bool)),Qt::QueuedConnection);
+       // QObject::connect(&w, SIGNAL(gridStatus(bool)), &pqOrbiter, SLOT(setGridStatus(bool)),Qt::QueuedConnection);
         QObject::connect(&w, SIGNAL(gridGoBack()), &pqOrbiter, SLOT(goBackGrid()), Qt::QueuedConnection);
         QObject::connect(mediaModel, SIGNAL(pagingCleared()), &pqOrbiter,SLOT(populateAdditionalMedia()), Qt::QueuedConnection);
         QObject::connect(&pqOrbiter, SIGNAL(clearPageGrid()), mediaModel, SLOT(clearForPaging()), Qt::QueuedConnection);
@@ -490,7 +490,7 @@ int main(int argc, char* argv[])
         QObject::connect(mediaModel,SIGNAL(ready(int)), &pqOrbiter, SLOT(prepareFileList(int)), Qt::QueuedConnection);
         QObject::connect(&w, SIGNAL(gridTypeChanged(int)), mediaModel, SLOT(setGridType(int)), Qt::QueuedConnection);
         QObject::connect(&w, SIGNAL(setDceGridParam(int,QString)), &pqOrbiter, SLOT(setStringParam(int,QString)),Qt::QueuedConnection);
-        QObject::connect(&w, SIGNAL(keepLoading(bool)), &pqOrbiter,SLOT(setGridStatus(bool)),Qt::QueuedConnection);
+     //   QObject::connect(&w, SIGNAL(keepLoading(bool)), &pqOrbiter,SLOT(setGridStatus(bool)),Qt::QueuedConnection);
         QObject::connect(&pqOrbiter, SIGNAL(showFileInfo(bool)), w.filedetailsclass, SLOT(setVisible(bool)),Qt::QueuedConnection);
         QObject::connect(&pqOrbiter, SIGNAL(setFocusFile(QString)), w.filedetailsclass, SLOT(setFile(QString)),Qt::QueuedConnection);
         QObject::connect(&pqOrbiter, SIGNAL(modelPagesChanged(int)), mediaModel, SLOT(setTotalPages(int)),Qt::QueuedConnection);
