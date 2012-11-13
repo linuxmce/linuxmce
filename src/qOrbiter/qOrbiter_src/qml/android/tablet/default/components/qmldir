@@ -71,4 +71,9 @@ MediaScrollBar MediaScrollBar.qml
 ConfigPanel ConfigPanel.qml
 DebugPanel DebugPanel.qml
 ProgramData ProgramData.qml
-
+AudioMetaData AudioMetaData.qml
+StyledText StyledText.qml
+MediaPlaybackBase MediaPlaybackBase.qml
+PlaylistTemplateCoverFlow PlaylistTemplateCoverFlow.qml 
+VideoButtons VideoButtons.qml
+NowPlayingImage NowPlayingImage.qml

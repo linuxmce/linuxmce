@@ -6,7 +6,7 @@ import "../js/ComponentLoader.js" as MyJs
 Rectangle{
     id:textrect
     height: childrenRect.height
-    width: dcenowplaying.aspect=="wide"?  textcol.width : scaleX(20)
+    width:scaleX(40)
     color:"transparent"
     anchors.left:  mainrow.right;
     anchors.top:   mainrow.top
@@ -15,7 +15,7 @@ Rectangle{
     Column{
         id:textcol
         spacing: scaleY(1.5)
-        width: nowplayingimage.width
+        width: parent.width
         height: childrenRect.height
         
         
