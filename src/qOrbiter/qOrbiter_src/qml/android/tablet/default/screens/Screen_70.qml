@@ -11,8 +11,42 @@ MediaPlaybackBase{
     controlComponent: VideoControls{}
     playlistSource:mediaplaylist
     playlistDelegate: Rectangle{
-        height: 10
-        width: 10
+        height: scaleY(35)
+        width: scaleX(25)
+        color: "darkslategrey"
+        Image {
+            id: playlistimage
+            fillMode: Image.PreserveAspectCrop
+            source:  index === dcenowplaying.m_iplaylistPosition ? playlistimage.source = "image://listprovider/updateobject/"+securityvideo.timestamp: ""
+            anchors.fill: parent
+            opacity: .5
+
+        }
+        Text {
+            id: position
+            text: qsTr("Item #") + index
+            font.family: "DroidSans"
+            color: "aliceblue"
+            font.pixelSize: scaleY(2.25)
+            font.bold: true
+            anchors.bottom: parent.bottom
+            opacity: .75
+        }
+
+        Text {
+            text:  index === dcenowplaying.m_iplaylistPosition ? "Now Playing - " + name : name
+            font.family: "DroidSans"
+            color: "aliceblue"
+            width: parent.width
+            wrapMode: "WrapAtWordBoundaryOrAnywhere"
+            font.pixelSize: scaleY(2.15)
+            //font.bold: true
+
+        }
+        MouseArea{
+            anchors.fill: parent
+            onClicked: manager.changedPlaylistPosition(index)
+        }
     }
     VideoButtons{
         anchors.top: parent.top

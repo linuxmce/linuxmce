@@ -27,7 +27,7 @@ Rectangle {
         }
 
         PlaylistTemplateCoverFlow{
-            id:playlist
+            id:playlist          
             anchors.centerIn: parent
         }
 
@@ -59,6 +59,7 @@ Rectangle {
 
             anchors.bottom: metadataSection.bottom
         }
+
 
     }
 

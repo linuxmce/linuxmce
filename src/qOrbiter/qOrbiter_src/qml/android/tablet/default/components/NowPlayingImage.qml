@@ -1,13 +1,12 @@
 import QtQuick 1.0
-import Qt.labs.shaders 1.0
 import "../components"
 import "../js/ComponentLoader.js" as MyJs
-import "../effects"
+
 
 Rectangle{
     id:imageholder
-    height:childrenRect.height
-    width:scaleX(30)
+    height:nowplayingimage.height
+    width:nowplayingimage.width
     color: "transparent"   
     
     BorderImage {
@@ -21,11 +20,21 @@ Rectangle{
     }
     Image {
         id: nowplayingimage
-        width: dcenowplaying.aspect=="wide"? scaleX(18) : scaleX(18)
-        height:dcenowplaying.aspect=="wide"? scaleY(30) : scaleY(30)
-        source: "image://listprovider/updateobject/"+dcenowplaying.m_iplaylistPosition
+        width: dcenowplaying.aspect=="wide"? scaleX(40) : scaleX(18)
+        height:dcenowplaying.aspect=="wide"? scaleY(55) : scaleY(45)
+        source:nowplayingimage.source = "image://listprovider/updateobject/"+securityvideo.timestamp
         anchors.horizontalCenter: parent.horizontalCenter
         smooth: true
+        Connections{
+            target: dcenowplaying
+            onImageChanged:{nowplayingimage.source = "image://listprovider/updateobject/"+securityvideo.timestamp; console.log(dcenowplaying.m_iplaylistPosition)}
+        }
+        Timer{
+            interval: 1000
+            running:true
+            onTriggered: nowplayingimage.source="image://listprovider/updateobject/"+securityvideo.timestamp
+        }
+
     }
     
     Image {

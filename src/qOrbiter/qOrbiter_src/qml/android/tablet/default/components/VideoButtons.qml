@@ -13,7 +13,7 @@ Row{
         MouseArea{
             anchors.fill: parent
             onClicked:  {
-                MyJs.createStageComponent("../components/ZoomAspect.qml", storedvideoremote)
+                MyJs.createStageComponent("../components/ZoomAspect.qml", storedVideoRemote)
             }
         }
     }
@@ -24,7 +24,7 @@ Row{
             onClicked:  {
                 
                 manager.ShowBookMarks()
-                MyJs.createStageComponent("../components/Bookmarks.qml", storedvideoremote)
+                MyJs.createStageComponent("../components/Bookmarks.qml", storedVideoRemote)
                 
             }
         }
@@ -34,7 +34,7 @@ Row{
         MouseArea{
             anchors.fill: parent
             onClicked:  {
-                MyJs.createStageComponent("../components/Avcodes.qml", storedvideoremote)
+                MyJs.createStageComponent("../components/Avcodes.qml", storedVideoRemote)
             }
         }
     }
@@ -51,7 +51,7 @@ Row{
             anchors.fill: parent
             onClicked:  {
                 manager.grabScreenshot(dcenowplaying.filepath)
-                MyJs.createStageComponent("../components/AssignScreenShot.qml", storedvideoremote)
+                MyJs.createStageComponent("../components/AssignScreenShot.qml", storedVideoRemote)
                 
             }
         }
@@ -61,7 +61,7 @@ Row{
         MouseArea{
             anchors.fill: parent
             onClicked:  {
-                MyJs.createStageComponent("../components/JogPanel.qml", storedvideoremote)
+                MyJs.createStageComponent("../components/JogPanel.qml", storedVideoRemote)
             }
         }
     }

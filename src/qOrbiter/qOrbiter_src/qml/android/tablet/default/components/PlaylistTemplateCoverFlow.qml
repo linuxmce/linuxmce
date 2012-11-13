@@ -2,7 +2,9 @@
 import QtQuick 1.1
 
 ListView {
-    width: manager.appHeight
+    width: manager.appWidth
     height: scaleY(35)
     orientation: ListView.Horizontal
+    spacing: scaleX(1)
+    clip:true
 }
