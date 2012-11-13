@@ -7,7 +7,7 @@ Rectangle{
     width: style.stdbuttonw
     property alias buttontext: buttonLabel.text
     property alias buttontextcolor: buttonLabel.color
-    property alias buttontextfontsize: buttonLabel.font.pointSize
+    property alias buttontextfontsize: buttonLabel.fontSize
     property alias buttontextbold: buttonLabel.font.bold
     property alias buttontextitalic: buttonLabel.font.italic
     property alias buttontextzindex: buttonLabel.z
@@ -30,15 +30,14 @@ Rectangle{
             y: 50
             width: -1
             height: 0
-            textLabel:"null ipsum delorium"
-            font.pixelSize: 14
+            textLabel:"null ipsum delorium"           
             verticalAlignment: Text.AlignVCenter
             horizontalAlignment: Text.AlignHCenter
             anchors.fill: parent
             anchors.horizontalCenter: parent.horizontalCenter
             anchors.verticalCenter: parent.verticalCenter
             anchors.margins: 5
-            font.family: "Droid Sans"
+
             wrapMode: "WrapAtWordBoundaryOrAnywhere"
             // elide: "ElideRight"
             color:"black"
