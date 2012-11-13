@@ -4966,7 +4966,7 @@ void qOrbiter::executeMessageSend(QString outGoing)
     string msgResponse="";
 
     Message elMessage(cMsg);
-    this->m_pEvent->SendMessage(&elMessage, &msgResponse);
+    this->m_pEvent->SendMessage(&elMessage, msgResponse);
 
     if(msgResponse=="OK"){
         emit commandResponseChanged("MessageSend OK!");
