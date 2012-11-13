@@ -105,7 +105,27 @@ Rectangle {
             }
         }
     }
+    Image {
+        id: transitPreview
+        source: ""
+        width: dcenowplaying.aspect=="wide"? scaleX(10) : scaleX(7)
+        height:dcenowplaying.aspect=="wide"? scaleY(10) : scaleY(17)
+        anchors.bottom: media_transit.top
+        anchors.horizontalCenter: parent.horizontalCenter
+        visible: dceTimecode.playbackSpeed !=1000 ? true : false
+        Connections{
+            target: manager
+            onMediaScreenShotReady: transitPreview.source="image://listprovider/screenshot/"+securityvideo.timestamp
+        }
+        Timer{
+            id:previewTimer
+            interval: 1000
+            repeat: true
+            running: dceTimecode.playbackSpeed !=1000 ? true : false
+            onTriggered: manager.getVideoFrame()
+        }
 
+    }
 
     MediaScrollBar{id:media_transit; anchors.bottom: controlrow.top; anchors.bottomMargin: 10; anchors.horizontalCenter: controlrow.horizontalCenter}
 

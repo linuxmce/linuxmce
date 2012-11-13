@@ -8,7 +8,7 @@ Item{
         width: manager.appWidth
         color: style.darkhighlight
         HomeButton{ x: 5; y: 5; width: 75; height: 75; smooth: true}
-        Component.onCompleted: manager.GetAlarms(false, 0)
+        Component.onCompleted: manager.getSleepingAlarms()
         Rectangle{
             id:mainsleepingrect
             height:scaleY(65)
@@ -93,7 +93,7 @@ Item{
                                             border.width: 2
                                             Component.onCompleted: console.log(b_state)
                                             Text {
-                                                id: handler
+                                                id: statelabe
                                                 text: status
                                                 anchors.centerIn: parent
                                             }
@@ -101,7 +101,7 @@ Item{
                                             MouseArea{
                                                 anchors.fill: parent
                                                 onClicked: {
-                                                    manager.sleepingMenu(true, eventHandler)
+                                                     manager.updateAlarm(!status, handler)
                                                 }
                                             }
                                         }
@@ -112,16 +112,16 @@ Item{
                                                 text:qsTr("Name: ") + name
                                             }
                                             Text {
-                                                id: alarmtime
-                                                text:qsTr("Alarm Set For: ") + alarmTime
+                                                id: alarmtimeLabel
+                                                text:qsTr("Alarm Set For: ") + alarmtime
                                             }
                                             Text {
                                                 id: daysactive
-                                                text: qsTr("Active on: ")+ activeDays
+                                                text: qsTr("Active on: ")+ active
                                             }
                                             Text {
                                                 id: countdown
-                                                text: qsTr("Time Left: ") +timeLeft
+                                                text: qsTr("Time Left: ") +remaining
                                             }
                                         }
                                     }

@@ -502,6 +502,7 @@ Rectangle {
                             {
                               parent.color = style.lighthighlight
                             }
+                            onClicked: text_input1.text = text_input1.text+"0"
 
                         }
                     }
@@ -517,7 +518,7 @@ Rectangle {
                         MouseArea{
                             anchors.fill: parent
                             onClicked:{
-                                manager.TuneToChannel(text_input1.text, text_input1.text)
+                                manager.gridChangeChannel(text_input1.text, text_input1.text)
                                 text_input1.text=""
                             }
                         }

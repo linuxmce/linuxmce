@@ -15,6 +15,7 @@ Window {
         height: 654
 	x: 732
 	y: 112
+	z:10
 	visible: true
         Connections{
             target: manager
