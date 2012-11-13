@@ -44,14 +44,11 @@ Rectangle {
             border.width: 2
             radius: 20
 
-            StyledText {
-                id: blah
-                textLabel: qsTr("Router Reply") + manager.mediaResponse
-            }
+
             ListView
             {
                 id:codelist
-                height: parent.height
+                height: parent.height - 10
                 width: scaleX(15)
                 anchors.top:blah.bottom
                 model: deviceList

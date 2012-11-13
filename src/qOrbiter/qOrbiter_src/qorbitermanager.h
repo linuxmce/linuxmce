@@ -459,6 +459,7 @@ signals:
 
 
     /* Media Playback Controls */
+    void muteSound();
     void setVolume(int vol);
     void extraButton(QString b);
     void changeTrack(QString track);
@@ -474,6 +475,11 @@ signals:
     void zoomLevelChanged(QString zoom);
     void aspectRatioChanged(QString ratio);
     void mobileStorageChanged();
+
+ void redButton();
+ void blueButton();
+ void greenButton();
+ void yellowButton();
 
     /*Dvd Specific*/
     void show_dvdMenu(bool m);
@@ -722,6 +728,11 @@ public slots:
     void setZoomLevel(QString zoom) {emit zoomLevelChanged(zoom);}
     void setAspectRatio(QString r) {emit aspectRatioChanged(r);}
     void getVideoFrame() { emit requestVideoFrame();}
+    void redButtonPress(){emit redButton(); }
+    void blueButtonPress(){emit blueButton();}
+    void greenButtonPress(){emit greenButton();}
+    void yellowButtonPress(){emit yellowButton();}
+    void mute(){emit muteSound();}
 
     /*Screenshot & Images slots*/
     void updateImageChanged(QImage img);

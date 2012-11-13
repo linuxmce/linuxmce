@@ -569,6 +569,8 @@ int main(int argc, char* argv[])
         QObject::connect(&w, SIGNAL(extraButton(QString)), &pqOrbiter, SLOT(extraButtons(QString)), Qt::QueuedConnection);
         QObject::connect(&w, SIGNAL(resendAvCodes()), &pqOrbiter, SLOT(showAdvancedButtons()), Qt::QueuedConnection );
         QObject::connect(&pqOrbiter, SIGNAL(deviceAudioLevelChanged(int)), &w, SLOT(setDeviceVolume(int)));
+        QObject::connect(&w, SIGNAL(muteSound()), &pqOrbiter, SLOT(mute()), Qt::QueuedConnection);
+
         //so does live tv
         QObject::connect(&w, SIGNAL(clearModel()), simpleEPGmodel, SLOT(empty()),Qt::QueuedConnection);
         QObject::connect(&pqOrbiter, SIGNAL(liveTvUpdate(QString)), simpleEPGmodel, SLOT(setProgram(QString)), Qt::QueuedConnection);

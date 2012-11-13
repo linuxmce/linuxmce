@@ -92,7 +92,7 @@ Item{
                                             border.color: "black"
                                             border.width: 2
                                             Component.onCompleted: console.log(status)
-                                            Text {
+                                            StyledText {
                                                 id: statelabel
                                                 text: status
                                                 anchors.centerIn: parent
