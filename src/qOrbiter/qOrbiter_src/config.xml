@@ -1,10 +1,10 @@
 <?xml version="1.0"?>
 <orbiter>
     <firstrun id="true" />
-    <routerip id="ballfam.dyndns-home.com"/>
+    <routerip id="192.168.80.1"/>
     <externalip id="" />
     <externalhost id=""/>
-    <device id="251"/>
+    <device id="-1"/>
     <routeraddress id="DCEROUTER"/>
     <skin id="default"/>
     <enablescreensavermode id="false"/>
