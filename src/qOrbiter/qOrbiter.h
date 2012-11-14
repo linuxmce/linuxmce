@@ -158,7 +158,9 @@ public:
     int internal_playback_speed;
 
     //media grid
+
     QStringList goBack;
+    QList<int> indexTracker;
     QString qs_seek;
     QString q_mediaType;           //1
     QString q_subType;             //2
@@ -274,7 +276,6 @@ public:
 
             *****COMMANDS***** we need to implement
     */
-
 
     /** @brief COMMAND: #1 - Capture Keyboard To Variable */
     /** As the user types, using either the keyboard or simulate keypress commands, what he types will be stored in a variable and/or put into a text object. */
@@ -1296,9 +1297,9 @@ signals:
     //media datagrid
     void newGrid();
     void initializeSorting();
-    void newPageSeperator();
-    void mediaPageChanged();
-    void recievingStatusChanged();
+    void newPageSeperator(int seperator);
+    void mediaPageChanged(int page);
+    void recievingStatusChanged(bool s);
     void gridStatusChanged();
     void addItem(gridItem*);
     void requestMediaGrid(int);
@@ -1529,9 +1530,9 @@ public slots:
     void requestTypes(int type);
 
     void setGridSeperator(int sep);
-    int getGridSeperator() { return media_pageSeperator; emit newPageSeperator();}
+    int getGridSeperator() { return media_pageSeperator; emit newPageSeperator(media_pageSeperator);}
 
-    void setCurrentPage(int page) {media_currentPage = page; qDebug() << page;  emit mediaPageChanged();  }
+    void setCurrentPage(int page) {media_currentPage = page; qDebug() << page;  emit mediaPageChanged(media_currentPage);  }
     int getCurrentPage() {return media_currentPage;}
 
     bool checkLoadingStatus();

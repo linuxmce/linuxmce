@@ -66,11 +66,11 @@ Rectangle {
                 id:seperationSetter
                 width: page_label.width
                 text: manager.media_pageSeperator
-
+                onFocusChanged: activeFocus ? text="" : text=manager.media_pageSeperator
                 Keys.onEnterPressed: {
                     if (!seperationSetter.text.match("/D"))
                     {
-                        manager.setGridSeperator(seperationSetter.text)
+                        manager.setDceGridSep(seperationSetter.text)
                         manager.requestPage(manager.media_currentPage)
                     }
                 }

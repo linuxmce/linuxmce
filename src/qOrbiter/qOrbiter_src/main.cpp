@@ -497,7 +497,9 @@ int main(int argc, char* argv[])
         QObject::connect(&pqOrbiter, SIGNAL(pageSeperatorChanged(int)) , mediaModel, SLOT(setSeperator(int)), Qt::QueuedConnection);
         QObject::connect(&w, SIGNAL(requestDcePages(int)), &pqOrbiter, SLOT(requestPage(int)), Qt::QueuedConnection);
         QObject::connect(&w, SIGNAL(seekGrid(QString)), &pqOrbiter, SLOT(seekToGridPosition(QString)), Qt::QueuedConnection);
-
+        QObject::connect(&pqOrbiter, SIGNAL(pageSeperatorChanged(int)), &w, SLOT(setGridSeperator(int)),Qt::QueuedConnection);
+        QObject::connect(&pqOrbiter, SIGNAL(mediaPageChanged(int)), &w, SLOT(setCurrentPage(int)), Qt::QueuedConnection);
+        QObject::connect(&w, SIGNAL(dceGridSepChanged(int)), &pqOrbiter, SLOT(setGridSeperator(int)), Qt::QueuedConnection);
         //now playing signals
         QObject::connect(&pqOrbiter, SIGNAL(setNowPlaying(bool)), w.nowPlayingButton,SLOT(setStatus(bool)),Qt::QueuedConnection);
         QObject::connect(&pqOrbiter,SIGNAL(streamIdChanged(int)), w.nowPlayingButton, SLOT(setStreamID(int)),Qt::QueuedConnection);

@@ -25,14 +25,8 @@ When you compile and run, the device should connect and the proper skins should 
 
 
 |---Stuff Left to Do---|
-FLoor plans - both datagrid and graphic type
-Local file that save critical runtime functions like router ip, device number
-Proper functions for reloading the router, trying to reconnect
-
-Implement floorplans - need to add floorplan devices to qorbiter generator to move forward
+FLoor plans - datagrid type
 Implement security functions - mostly done
-Implement functions on file details screen
-Implement
 
 Tickets for reference to submit against.
 In an effor to keep the history of changes broken up

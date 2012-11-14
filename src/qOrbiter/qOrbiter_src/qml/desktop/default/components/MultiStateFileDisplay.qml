@@ -8,7 +8,7 @@ Rectangle {
     height: scaleY(85)
     clip: true
     anchors.horizontalCenter: parent.horizontalCenter
-    color: "black"
+    color: "transparent"
 
     GridView {
         id: gridView

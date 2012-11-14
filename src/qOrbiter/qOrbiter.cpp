@@ -1362,8 +1362,8 @@ void qOrbiter::CMD_Show_File_List(int iPK_MediaType,string &sCMD_Result,Message 
         initializeGrid();
         media_currentRow = 0;
         i_mediaModelRows = 0;
-
     }
+
     q_mediaType = QString::number(iPK_MediaType);
     emit gotoQml("Screen_47.qml");
     currentScreen= "Screen_47.qml";
@@ -2087,7 +2087,7 @@ void qOrbiter::beginSetup()
 void qOrbiter::setRecievingStatus(bool b)
 {
     finished = b;
-    emit recievingStatusChanged();
+    emit recievingStatusChanged(finished);
 
 }
 
@@ -2120,6 +2120,7 @@ int qOrbiter::getCurrentRow()
 void qOrbiter::initializeGrid()
 {
     goBack.clear();
+    indexTracker.clear();
     QString datagridVariableString ;
     //datagrid option variables
     //  QString q_mediaType;           //1
@@ -2290,16 +2291,21 @@ void qOrbiter::goBackGrid()
 {
 
     backwards= true;
-
-    if(goBack.isEmpty())
+    qDebug() << goBack.count();
+    if(goBack.count() ==0)
     {
         initializeSorting();
         emit clearAndContinue(i_current_mediaType);
     }
     else
     {
+
         goBack.removeLast();
+        indexTracker.removeLast();
+
+        if(!goBack.empty()){
         int back = goBack.count() - 1;
+        media_currentPage = indexTracker.last();
 
         QStringList reverseParams = goBack.at(back).split("|", QString::KeepEmptyParts);
         q_mediaType = reverseParams.first();
@@ -2312,6 +2318,7 @@ void qOrbiter::goBackGrid()
         q_pk_users = reverseParams.at(7);
         q_last_viewed = reverseParams.at(8);
         q_pk_attribute = reverseParams.at(9);
+        }
 
         emit clearAndContinue(q_mediaType.toInt());
 
@@ -3368,6 +3375,7 @@ void DCE::qOrbiter::populateAdditionalMedia() //additional media grid that popul
                 return;
             }
             setCurrentPage((std::abs(GridCurRow /  media_pageSeperator))) ;
+            indexTracker.append((std::abs(GridCurRow /  media_pageSeperator)));
             emit mediaResponseChanged("Page: "+ QString::number(media_currentPage));
 
             for(MemoryDataTable::iterator it=pDataGridTable->m_MemoryDataTable.begin();it!=pDataGridTable->m_MemoryDataTable.end();++it)
@@ -4458,7 +4466,6 @@ void DCE::qOrbiter::prepareFileList(int iPK_MediaType)
     if(backwards == true)                               //this deals with screen handlers
     {
         emit commandResponseChanged("Going back a level");
-
     }
     else
     {
@@ -4562,6 +4569,19 @@ void DCE::qOrbiter::prepareFileList(int iPK_MediaType)
 #endif
             if (cellsToRender == 0)
             {
+                if(q_attributetype_sort=="52" && backwards==false )
+                {
+                    q_attributetype_sort=="11";
+                    goBack.removeLast();
+                    indexTracker.removeLast();
+                    params = "|"+q_subType +"|"+q_fileFormat+"|"+q_attribute_genres+"|"+q_mediaSources+"||"+q_attributetype_sort+"||2|"+q_pk_attribute+"";
+                    s = q_mediaType + params;
+
+                   // backwards = false;
+                    emit clearAndContinue(iPK_MediaType);
+                    return;
+                }
+
                 emit mediaResponseChanged("No Media");
                 return;
                 // exit ; //exit the loop because there is no grid? - eventually provide "no media" feedback
@@ -4576,8 +4596,12 @@ void DCE::qOrbiter::prepareFileList(int iPK_MediaType)
                 pDataGridTable = NULL;
                 setModelPages(media_totalPages);
                 emit mediaResponseChanged(QString::number(media_totalPages)+ " pages from request, populating first page.");
-
-                requestPage(0);
+                if(backwards==true){
+                    requestPage(media_currentPage);
+                }
+                else{
+                    requestPage(0);
+                }
             }
 
         }
@@ -4933,7 +4957,6 @@ void qOrbiter::setAlarm(bool toggle, int grp)
 {
     if (grp != 0)
     {
-
         CMD_Toggle_Event_Handler toggleAlarm(m_dwPK_Device, iPK_Device_eventPlugin, grp);
         SendCommand(toggleAlarm);
         GetAlarms();

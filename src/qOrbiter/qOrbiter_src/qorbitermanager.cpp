@@ -1357,7 +1357,7 @@ void qorbiterManager::initializeGridModel()
 
 void qorbiterManager::goBackGrid()
 {
-    setRequestMore(true);
+  //  setRequestMore(true);
     emit gridGoBack();
     //    backwards= true;
 
@@ -1605,6 +1605,7 @@ void qorbiterManager::initializeConnections()
 void qorbiterManager::reloadHandler()
 {
     gotoQScreen("ReloadHandler.qml");
+
 }
 
 void qorbiterManager::setDceResponse(QString response)

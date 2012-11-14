@@ -579,6 +579,7 @@ signals:
     void setAlarm(bool s, int g);
     void getAlarms();
     void getSingleCam(int i_pk_camera_device, int h, int w);
+    void dceGridSepChanged(int d);
 
     //runtime
     void commandResponseChanged();
@@ -787,6 +788,7 @@ public slots:
     bool requestDataGrid();
     void setSeekLetter(QString letter) {qs_seek = letter; emit seekGrid(qs_seek); }
 
+    void setDceGridSep(int sep) {emit dceGridSepChanged(sep);}
     void setGridSeperator(int sep) { media_pageSeperator = sep; emit newPageSeperator(sep);}
     int getGridSeperator() { return media_pageSeperator; }
 
