@@ -8306,7 +8306,7 @@ void Media_Plugin::CMD_Get_Attribute_Types(int iPK_MediaType,string *sText,strin
 									 &vectRow_MediaType_AttributeType);
 		for(vector<Row_MediaType_AttributeType *>::iterator it=vectRow_MediaType_AttributeType.begin();it!=vectRow_MediaType_AttributeType.end();++it)
 		{
-			result += StringUtils::itos((*it)->FK_AttributeType_get()) + ":" + (*it)->FK_AttributeType_getrow()->Description_get() + "\n";
+			result += StringUtils::itos((*it)->FK_AttributeType_get()) + ":" + StringUtils::itos((*it)->MediaSortOption_get()) + ":" + (*it)->FK_AttributeType_getrow()->Description_get() + "\n";
 		}
 	} else {
 		// Look up all attribute types
