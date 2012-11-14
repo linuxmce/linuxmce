@@ -14,7 +14,7 @@
 
 */
 //<-dceag-incl-b->
-#include "aGoControl_Bridge.h"
+#include "agocontrol_Bridge.h"
 #include "DCE/Logger.h"
 #include "ServerLogger.h"
 #include "PlutoUtils/FileUtils.h"
@@ -79,7 +79,7 @@ extern "C" {
 		// Then the Router will scan for all .so or .dll files, and if found they will be registered with a temporary device number
 		bool bIsRuntimePlugin=false;
 		if( bIsRuntimePlugin )
-			return aGoControl_Bridge::PK_DeviceTemplate_get_static();
+			return agocontrol_Bridge::PK_DeviceTemplate_get_static();
 		else
 			return 0;
 	}
@@ -93,19 +93,19 @@ extern "C" {
 		LoggerWrapper::SetInstance(pPlutoLogger);
 		LoggerWrapper::GetInstance()->Write(LV_STATUS, "Device: %d loaded as plug-in",PK_Device);
 
-		aGoControl_Bridge *paGoControl_Bridge = new aGoControl_Bridge(PK_Device, "localhost",true,false,pRouter);
-		if( paGoControl_Bridge->m_bQuit_get()|| !paGoControl_Bridge->GetConfig() )
+		agocontrol_Bridge *pagocontrol_Bridge = new agocontrol_Bridge(PK_Device, "localhost",true,false,pRouter);
+		if( pagocontrol_Bridge->m_bQuit_get()|| !pagocontrol_Bridge->GetConfig() )
 		{
-			delete paGoControl_Bridge;
+			delete pagocontrol_Bridge;
 			return NULL;
 		}
 		else
 		{
-			g_pCommand_Impl=paGoControl_Bridge;
+			g_pCommand_Impl=pagocontrol_Bridge;
 			g_pDeadlockHandler=Plugin_DeadlockHandler;
 			g_pSocketCrashHandler=Plugin_SocketCrashHandler;
 		}
-		return paGoControl_Bridge;
+		return pagocontrol_Bridge;
 	}
 }
 //<-dceag-plug-e->
@@ -116,7 +116,7 @@ int main(int argc, char* argv[])
 	g_sBinary = FileUtils::FilenameWithoutPath(argv[0]);
 	g_sBinaryPath = FileUtils::BasePath(argv[0]);
 
-	cout << "aGoControl_Bridge, v." << VERSION << endl
+	cout << "agocontrol_Bridge, v." << VERSION << endl
 		<< "Visit www.plutohome.com for source code and license information" << endl << endl;
 
 	string sRouter_IP="dcerouter";
@@ -157,7 +157,7 @@ int main(int argc, char* argv[])
 	if (bError)
 	{
 		cout << "A Pluto DCE Device.  See www.plutohome.com/dce for details." << endl
-			<< "Usage: aGoControl_Bridge [-r Router's IP] [-d My Device ID] [-l dcerouter|stdout|null|filename]" << endl
+			<< "Usage: agocontrol_Bridge [-r Router's IP] [-d My Device ID] [-l dcerouter|stdout|null|filename]" << endl
 			<< "-r -- the IP address of the DCE Router  Defaults to 'dcerouter'." << endl
 			<< "-d -- This device's ID number.  If not specified, it will be requested from the router based on our IP address." << endl
 			<< "-l -- Where to save the log files.  Specify 'dcerouter' to have the messages logged to the DCE Router.  Defaults to stdout." << endl;
@@ -181,7 +181,7 @@ int main(int argc, char* argv[])
 	try
 	{
 		if( sLogger=="dcerouter" )
-			LoggerWrapper::SetInstance(new ServerLogger(PK_Device, aGoControl_Bridge::PK_DeviceTemplate_get_static(), sRouter_IP));
+			LoggerWrapper::SetInstance(new ServerLogger(PK_Device, agocontrol_Bridge::PK_DeviceTemplate_get_static(), sRouter_IP));
 		else if( sLogger=="null" )
 			LoggerWrapper::SetType(LT_LOGGER_NULL);
 		else if( sLogger!="stdout" )
@@ -199,20 +199,20 @@ int main(int argc, char* argv[])
 	bool bReload=false;
 	try
 	{
-		aGoControl_Bridge *paGoControl_Bridge = new aGoControl_Bridge(PK_Device, sRouter_IP,true,bLocalMode);
-		if ( paGoControl_Bridge->GetConfig() && paGoControl_Bridge->Connect(paGoControl_Bridge->PK_DeviceTemplate_get()) ) 
+		agocontrol_Bridge *pagocontrol_Bridge = new agocontrol_Bridge(PK_Device, sRouter_IP,true,bLocalMode);
+		if ( pagocontrol_Bridge->GetConfig() && pagocontrol_Bridge->Connect(pagocontrol_Bridge->PK_DeviceTemplate_get()) ) 
 		{
-			g_pCommand_Impl=paGoControl_Bridge;
+			g_pCommand_Impl=pagocontrol_Bridge;
 			g_pDeadlockHandler=DeadlockHandler;
 			g_pSocketCrashHandler=SocketCrashHandler;
 			LoggerWrapper::GetInstance()->Write(LV_STATUS, "Connect OK");
-			paGoControl_Bridge->CreateChildren();
+			pagocontrol_Bridge->CreateChildren();
 			if( bLocalMode )
-				paGoControl_Bridge->RunLocalMode();
+				pagocontrol_Bridge->RunLocalMode();
 			else
 			{
-				if(paGoControl_Bridge->m_RequestHandlerThread)
-					pthread_join(paGoControl_Bridge->m_RequestHandlerThread, NULL);  // This function will return when the device is shutting down
+				if(pagocontrol_Bridge->m_RequestHandlerThread)
+					pthread_join(pagocontrol_Bridge->m_RequestHandlerThread, NULL);  // This function will return when the device is shutting down
 			}
 			g_pDeadlockHandler=NULL;
 			g_pSocketCrashHandler=NULL;
@@ -220,7 +220,7 @@ int main(int argc, char* argv[])
 		else 
 		{
 			bAppError = true;
-			if( paGoControl_Bridge->m_pEvent && paGoControl_Bridge->m_pEvent->m_pClientSocket && paGoControl_Bridge->m_pEvent->m_pClientSocket->m_eLastError==ClientSocket::cs_err_CannotConnect )
+			if( pagocontrol_Bridge->m_pEvent && pagocontrol_Bridge->m_pEvent->m_pClientSocket && pagocontrol_Bridge->m_pEvent->m_pClientSocket->m_eLastError==ClientSocket::cs_err_CannotConnect )
 			{
 				bAppError = false;
 				bReload = false;
@@ -230,10 +230,10 @@ int main(int argc, char* argv[])
 				LoggerWrapper::GetInstance()->Write(LV_CRITICAL, "Connect() Failed");
 		}
 
-		if( paGoControl_Bridge->m_bReload )
+		if( pagocontrol_Bridge->m_bReload )
 			bReload=true;
 
-		delete paGoControl_Bridge;
+		delete pagocontrol_Bridge;
 	}
 	catch(string s)
 	{

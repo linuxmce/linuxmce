@@ -14,12 +14,12 @@
 
 */
 //<-dceag-d-b->
-#ifndef aGoControl_Bridge_h
-#define aGoControl_Bridge_h
+#ifndef agocontrol_Bridge_h
+#define agocontrol_Bridge_h
 
-//	DCE Implemenation for #2211 aGoControl Bridge
+//	DCE Implemenation for #2211 agocontrol Bridge
 
-#include "Gen_Devices/aGoControl_BridgeBase.h"
+#include "Gen_Devices/agocontrol_BridgeBase.h"
 //<-dceag-d-e->
 
 #include <qpid/messaging/Connection.h>
@@ -34,7 +34,7 @@
 //<-dceag-decl-b->
 namespace DCE
 {
-	class aGoControl_Bridge : public aGoControl_Bridge_Command
+	class agocontrol_Bridge : public agocontrol_Bridge_Command
 	{
 //<-dceag-decl-e->
 		// Private member variables
@@ -50,8 +50,8 @@ public:
 //<-dceag-const-b->
 public:
 		// Constructors/Destructor
-		aGoControl_Bridge(int DeviceID, string ServerAddress,bool bConnectEventHandler=true,bool bLocalMode=false,class Router *pRouter=NULL);
-		virtual ~aGoControl_Bridge();
+		agocontrol_Bridge(int DeviceID, string ServerAddress,bool bConnectEventHandler=true,bool bLocalMode=false,class Router *pRouter=NULL);
+		virtual ~agocontrol_Bridge();
 		virtual bool GetConfig();
 		virtual bool Register();
 		virtual void ReceivedCommandForChild(DeviceData_Impl *pDeviceData_Impl,string &sCMD_Result,Message *pMessage);
@@ -61,7 +61,7 @@ public:
 //<-dceag-const2-b->
 		// The following constructor is only used if this a class instance embedded within a DCE Device.  In that case, it won't create it's own connection to the router
 		// You can delete this whole section and put an ! after dceag-const2-b tag if you don't want this constructor.  Do the same in the implementation file
-		aGoControl_Bridge(Command_Impl *pPrimaryDeviceCommand, DeviceData_Impl *pData, Event_Impl *pEvent, Router *pRouter);
+		agocontrol_Bridge(Command_Impl *pPrimaryDeviceCommand, DeviceData_Impl *pData, Event_Impl *pEvent, Router *pRouter);
 //<-dceag-const2-e->
 
 //<-dceag-h-b->

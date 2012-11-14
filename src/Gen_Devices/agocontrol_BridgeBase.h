@@ -1,5 +1,5 @@
-#ifndef aGoControl_BridgeBase_h
-#define aGoControl_BridgeBase_h
+#ifndef agocontrol_BridgeBase_h
+#define agocontrol_BridgeBase_h
 #include "DeviceData_Impl.h"
 #include "Message.h"
 #include "Command_Impl.h"
@@ -24,16 +24,16 @@ namespace DCE
 * @brief OUR EVENT CLASS
 */
 
-class aGoControl_Bridge_Event : public Event_Impl
+class agocontrol_Bridge_Event : public Event_Impl
 {
 public:
 
 	/**
 	* @brief Constructors
 	*/
-	aGoControl_Bridge_Event(int DeviceID, string ServerAddress, bool bConnectEventHandler=true) :
-		Event_Impl(DeviceID, DEVICETEMPLATE_aGoControl_Bridge_CONST, ServerAddress, bConnectEventHandler, SOCKET_TIMEOUT) {};
-	aGoControl_Bridge_Event(class ClientSocket *pOCClientSocket, int DeviceID) : Event_Impl(pOCClientSocket, DeviceID) {};
+	agocontrol_Bridge_Event(int DeviceID, string ServerAddress, bool bConnectEventHandler=true) :
+		Event_Impl(DeviceID, DEVICETEMPLATE_agocontrol_Bridge_CONST, ServerAddress, bConnectEventHandler, SOCKET_TIMEOUT) {};
+	agocontrol_Bridge_Event(class ClientSocket *pOCClientSocket, int DeviceID) : Event_Impl(pOCClientSocket, DeviceID) {};
 
 	/**
 	* @brief Events builder method
@@ -51,14 +51,14 @@ public:
 * @brief OUR DATA CLASS
 */
 
-class aGoControl_Bridge_Data : public DeviceData_Impl
+class agocontrol_Bridge_Data : public DeviceData_Impl
 {
 public:
 
 	/**
 	* @brief No-op destructor
 	*/
-	virtual ~aGoControl_Bridge_Data() {};
+	virtual ~agocontrol_Bridge_Data() {};
 
 	/**
 	* @brief Builder data method
@@ -69,12 +69,12 @@ public:
 	/**
 	* @brief Returns the id of the device template
 	*/
-	virtual int GetPK_DeviceList() { return DEVICETEMPLATE_aGoControl_Bridge_CONST; } ;
+	virtual int GetPK_DeviceList() { return DEVICETEMPLATE_agocontrol_Bridge_CONST; } ;
 
 	/**
 	* @brief Returns the description of the device
 	*/
-	virtual const char *GetDeviceDescription() { return "aGoControl_Bridge"; } ;
+	virtual const char *GetDeviceDescription() { return "agocontrol_Bridge"; } ;
 
 	/**
 	* @brief Device data access methods:
@@ -110,17 +110,17 @@ public:
 
 //   OUR COMMAND CLASS 
 
-class aGoControl_Bridge_Command : public Command_Impl
+class agocontrol_Bridge_Command : public Command_Impl
 {
 public:
-	aGoControl_Bridge_Command(int DeviceID, string ServerAddress,bool bConnectEventHandler=true,bool bLocalMode=false,class Router *pRouter=NULL)
+	agocontrol_Bridge_Command(int DeviceID, string ServerAddress,bool bConnectEventHandler=true,bool bLocalMode=false,class Router *pRouter=NULL)
 	: Command_Impl(DeviceID, ServerAddress, bLocalMode, pRouter)
 	{
 	}
 	virtual bool GetConfig()
 	{
 		m_pData=NULL;
-		m_pEvent = new aGoControl_Bridge_Event(m_dwPK_Device, m_sHostName, !m_bLocalMode);
+		m_pEvent = new agocontrol_Bridge_Event(m_dwPK_Device, m_sHostName, !m_bLocalMode);
 		if( m_pEvent->m_dwPK_Device )
 			m_dwPK_Device = m_pEvent->m_dwPK_Device;
 		if( m_sIPAddress!=m_pEvent->m_pClientSocket->m_sIPAddress )	
@@ -133,7 +133,7 @@ public:
 				while( m_pEvent->m_pClientSocket->m_eLastError==cs_err_BadDevice && (m_dwPK_Device = DeviceIdInvalid())!=0 )
 				{
 					delete m_pEvent;
-					m_pEvent = new aGoControl_Bridge_Event(m_dwPK_Device, m_sHostName, !m_bLocalMode);
+					m_pEvent = new agocontrol_Bridge_Event(m_dwPK_Device, m_sHostName, !m_bLocalMode);
 					if( m_pEvent->m_dwPK_Device )
 						m_dwPK_Device = m_pEvent->m_dwPK_Device;
 				}
@@ -157,7 +157,7 @@ public:
 		
 		if( m_bLocalMode )
 		{
-			m_pData = new aGoControl_Bridge_Data();
+			m_pData = new agocontrol_Bridge_Data();
 			return true;
 		}
 		if( (m_pEvent->m_pClientSocket->m_eLastError!=cs_err_None && m_pEvent->m_pClientSocket->m_eLastError!=cs_err_NeedReload) || m_pEvent->m_pClientSocket->m_Socket==INVALID_SOCKET )
@@ -166,7 +166,7 @@ public:
 		int Size; char *pConfig = m_pEvent->GetConfig(Size);
 		if( !pConfig )
 			return false;
-		m_pData = new aGoControl_Bridge_Data();
+		m_pData = new agocontrol_Bridge_Data();
 		if( Size )
 		{
 			if( m_pData->SerializeRead(Size,pConfig)==false )
@@ -188,7 +188,7 @@ public:
 			return false;
 		delete[] pConfig;
 		m_pData->m_pEvent_Impl = m_pEvent;
-		m_pcRequestSocket = new Event_Impl(m_dwPK_Device, DEVICETEMPLATE_aGoControl_Bridge_CONST,m_sHostName);
+		m_pcRequestSocket = new Event_Impl(m_dwPK_Device, DEVICETEMPLATE_agocontrol_Bridge_CONST,m_sHostName);
 		if( m_iInstanceID )
 		{
 			m_pEvent->m_pClientSocket->SendString("INSTANCE " + StringUtils::itos(m_iInstanceID));
@@ -197,13 +197,13 @@ public:
 		PostConfigCleanup();
 		return true;
 	};
-	aGoControl_Bridge_Command(Command_Impl *pPrimaryDeviceCommand, DeviceData_Impl *pData, Event_Impl *pEvent, Router *pRouter) : Command_Impl(pPrimaryDeviceCommand, pData, pEvent, pRouter) {};
-	virtual ~aGoControl_Bridge_Command() {};
-	aGoControl_Bridge_Event *GetEvents() { return (aGoControl_Bridge_Event *) m_pEvent; };
-	aGoControl_Bridge_Data *GetData() { return (aGoControl_Bridge_Data *) m_pData; };
-	const char *GetClassName() { return "aGoControl_Bridge_Command"; };
-	virtual int PK_DeviceTemplate_get() { return DEVICETEMPLATE_aGoControl_Bridge_CONST; };
-	static int PK_DeviceTemplate_get_static() { return DEVICETEMPLATE_aGoControl_Bridge_CONST; };
+	agocontrol_Bridge_Command(Command_Impl *pPrimaryDeviceCommand, DeviceData_Impl *pData, Event_Impl *pEvent, Router *pRouter) : Command_Impl(pPrimaryDeviceCommand, pData, pEvent, pRouter) {};
+	virtual ~agocontrol_Bridge_Command() {};
+	agocontrol_Bridge_Event *GetEvents() { return (agocontrol_Bridge_Event *) m_pEvent; };
+	agocontrol_Bridge_Data *GetData() { return (agocontrol_Bridge_Data *) m_pData; };
+	const char *GetClassName() { return "agocontrol_Bridge_Command"; };
+	virtual int PK_DeviceTemplate_get() { return DEVICETEMPLATE_agocontrol_Bridge_CONST; };
+	static int PK_DeviceTemplate_get_static() { return DEVICETEMPLATE_agocontrol_Bridge_CONST; };
 	virtual void ReceivedCommandForChild(DeviceData_Impl *pDeviceData_Impl,string &sCMD_Result,Message *pMessage) { };
 	virtual void ReceivedUnknownCommand(string &sCMD_Result,Message *pMessage) { };
 	Command_Impl *CreateCommand(int PK_DeviceTemplate, Command_Impl *pPrimaryDeviceCommand, DeviceData_Impl *pData, Event_Impl *pEvent);

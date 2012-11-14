@@ -1,7 +1,7 @@
 <-dceag-p-b->
 Package = DCE_Destination_Package
 Dir = 
-desc = DCE Implemenation for #2211 aGoControl Bridge
+desc = DCE Implemenation for #2211 agocontrol Bridge
 Maintainer = hariName
 Email = 
 Depend = DCE_Dependencies

@@ -14,7 +14,7 @@
 
 */
 //<-dceag-d-b->
-#include "aGoControl_Bridge.h"
+#include "agocontrol_Bridge.h"
 #include "DCE/Logger.h"
 #include "PlutoUtils/FileUtils.h"
 #include "PlutoUtils/StringUtils.h"
@@ -32,31 +32,31 @@ using namespace qpid::types;
 
 //<-dceag-const-b->
 // The primary constructor when the class is created as a stand-alone device
-aGoControl_Bridge::aGoControl_Bridge(int DeviceID, string ServerAddress,bool bConnectEventHandler,bool bLocalMode,class Router *pRouter)
-	: aGoControl_Bridge_Command(DeviceID, ServerAddress,bConnectEventHandler,bLocalMode,pRouter)
+agocontrol_Bridge::agocontrol_Bridge(int DeviceID, string ServerAddress,bool bConnectEventHandler,bool bLocalMode,class Router *pRouter)
+	: agocontrol_Bridge_Command(DeviceID, ServerAddress,bConnectEventHandler,bLocalMode,pRouter)
 //<-dceag-const-e->
 {
 }
 
 //<-dceag-const2-b->
 // The constructor when the class is created as an embedded instance within another stand-alone device
-aGoControl_Bridge::aGoControl_Bridge(Command_Impl *pPrimaryDeviceCommand, DeviceData_Impl *pData, Event_Impl *pEvent, Router *pRouter)
-	: aGoControl_Bridge_Command(pPrimaryDeviceCommand, pData, pEvent, pRouter)
+agocontrol_Bridge::agocontrol_Bridge(Command_Impl *pPrimaryDeviceCommand, DeviceData_Impl *pData, Event_Impl *pEvent, Router *pRouter)
+	: agocontrol_Bridge_Command(pPrimaryDeviceCommand, pData, pEvent, pRouter)
 //<-dceag-const2-e->
 {
 }
 
 //<-dceag-dest-b->
-aGoControl_Bridge::~aGoControl_Bridge()
+agocontrol_Bridge::~agocontrol_Bridge()
 //<-dceag-dest-e->
 {
 	
 }
 
 //<-dceag-getconfig-b->
-bool aGoControl_Bridge::GetConfig()
+bool agocontrol_Bridge::GetConfig()
 {
-	if( !aGoControl_Bridge_Command::GetConfig() )
+	if( !agocontrol_Bridge_Command::GetConfig() )
 		return false;
 //<-dceag-getconfig-e->
 	Variant::Map connectionOptions;
@@ -79,7 +79,7 @@ bool aGoControl_Bridge::GetConfig()
 
 //<-dceag-reg-b->
 // This function will only be used if this device is loaded into the DCE Router's memory space as a plug-in.  Otherwise Connect() will be called from the main()
-bool aGoControl_Bridge::Register()
+bool agocontrol_Bridge::Register()
 //<-dceag-reg-e->
 {
 	return Connect(PK_DeviceTemplate_get()); 
@@ -89,9 +89,9 @@ bool aGoControl_Bridge::Register()
 	cannot include the actual implementation.  Instead there's an extern function declared, and the actual new exists here.  You 
 	can safely remove this block (put a ! after the dceag-createinst-b block) if this device is not embedded within other devices. */
 //<-dceag-createinst-b->
-aGoControl_Bridge_Command *Create_aGoControl_Bridge(Command_Impl *pPrimaryDeviceCommand, DeviceData_Impl *pData, Event_Impl *pEvent, Router *pRouter)
+agocontrol_Bridge_Command *Create_agocontrol_Bridge(Command_Impl *pPrimaryDeviceCommand, DeviceData_Impl *pData, Event_Impl *pEvent, Router *pRouter)
 {
-	return new aGoControl_Bridge(pPrimaryDeviceCommand, pData, pEvent, pRouter);
+	return new agocontrol_Bridge(pPrimaryDeviceCommand, pData, pEvent, pRouter);
 }
 //<-dceag-createinst-e->
 
@@ -104,7 +104,7 @@ aGoControl_Bridge_Command *Create_aGoControl_Bridge(Command_Impl *pPrimaryDevice
 	should change the sCMD_Result to OK
 */
 //<-dceag-cmdch-b->
-void aGoControl_Bridge::ReceivedCommandForChild(DeviceData_Impl *pDeviceData_Impl,string &sCMD_Result,Message *pMessage)
+void agocontrol_Bridge::ReceivedCommandForChild(DeviceData_Impl *pDeviceData_Impl,string &sCMD_Result,Message *pMessage)
 //<-dceag-cmdch-e->
 {
 	qpid::messaging::Message command;
@@ -140,7 +140,7 @@ void aGoControl_Bridge::ReceivedCommandForChild(DeviceData_Impl *pDeviceData_Imp
 	should change the sCMD_Result to OK
 */
 //<-dceag-cmduk-b->
-void aGoControl_Bridge::ReceivedUnknownCommand(string &sCMD_Result,Message *pMessage)
+void agocontrol_Bridge::ReceivedUnknownCommand(string &sCMD_Result,Message *pMessage)
 //<-dceag-cmduk-e->
 {
 	sCMD_Result = "UNKNOWN COMMAND";
