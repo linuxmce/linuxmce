@@ -13,6 +13,7 @@ Rectangle{
     property alias buttontextzindex: buttonLabel.z
     property alias buttonsqradius:  buttonBase.radius
     property alias buttonbackground: buttonImage.source
+    property alias clickHandler:buttonHandler
 
 
     Rectangle {
@@ -23,15 +24,15 @@ Rectangle{
         border.width: 2
         border.color: style.highlight1
         radius: 5
- 	
- 	Image {
- 		anchors.fill: parent
- 		id: buttonImage
- 		x: 0
- 	    	y: 0
- 		height: parent.height
- 		width: parent.width
- 	}
+
+    Image {
+        anchors.fill: parent
+        id: buttonImage
+        x: 0
+            y: 0
+        height: parent.height
+        width: parent.width
+    }
 
         StyledText {
             id: buttonLabel
@@ -39,7 +40,7 @@ Rectangle{
             y: 50
             width: -1
             height: 0
-            textLabel:"null ipsum delorium"           
+            textLabel:"null ipsum delorium"
             verticalAlignment: Text.AlignVCenter
             horizontalAlignment: Text.AlignHCenter
             anchors.fill: parent
@@ -53,6 +54,7 @@ Rectangle{
             z:1
         }
         MouseArea{
+            id:buttonHandler
             anchors.fill: buttonLabel
             hoverEnabled: true
             onEntered: {
