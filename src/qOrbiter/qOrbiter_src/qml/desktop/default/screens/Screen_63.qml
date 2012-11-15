@@ -86,8 +86,8 @@ Rectangle {
 
                     color: style.bgcolor
                     anchors.top:nowplayingimage.bottom
-                    LiveTvData {
-                    }
+//                    LiveTvData {
+//                    }
                 }
             }
 
