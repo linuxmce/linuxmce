@@ -11,7 +11,7 @@ Item {
 	function onActivate1785() 
 	{
 	 // Calling Command 741 (Goto Screen) with CommandGroup_Parameters from 17174
-		manager.sendDceMessage(srouterip + " "+deviceid + " -300 1 741 159 \"1\" 195 \"<%=L%>\" ")
+		gotoQScreen("Screen_1.qml")
 	}
 	StyledText {
 		x: 1680
@@ -202,9 +202,9 @@ out"
 	function onActivate5188() 
 	{
 	 // Calling Command 741 (Goto Screen) with CommandGroup_Parameters from 17554
-		manager.sendDceMessage(srouterip + " "+deviceid + " -300 1 741 159 \"46\" ")
+		gotoQScreen("Screen_46.qml")
 	 // Calling Command 826 (Speak in house) with CommandGroup_Parameters from 17207
-		manager.sendDceMessage(srouterip + " "+deviceid + " -107 1 826 2 \"deviceid\" 201 \"<%=1%>\" ")
+		manager.sendDceMessage(srouterip + " "+deviceid + " -107 1 826 2 \"<%=!%>\" 201 \"<%=1%>\" ")
 	}
 	StyledText {
 		x: 1440

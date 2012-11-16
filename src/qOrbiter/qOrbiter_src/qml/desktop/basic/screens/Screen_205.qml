@@ -35,7 +35,7 @@ Item {
 	 // Calling Command 25 (Set Text) with CommandGroup_Parameters from 16662
 		manager.sendDceMessage(srouterip + " "+deviceid + " -300 1 25 3 \"2265\" 9 \"<%=T1140%>\" 25 \"670\" ")
 	 // Calling Command 266 (Regen Orbiter) with CommandGroup_Parameters from 16664
-		manager.sendDceMessage(srouterip + " "+deviceid + " -101 1 266 2 \"deviceid\" ")
+		manager.sendDceMessage(srouterip + " "+deviceid + " -101 1 266 2 \"<%=!%>\" ")
 	 // Calling Command 8 (Remove Screen From History) with CommandGroup_Parameters from 17230
 		manager.sendDceMessage(srouterip + " "+deviceid + " -300 1 8 159 \"205\" ")
 	}

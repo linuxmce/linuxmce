@@ -11,7 +11,7 @@ Item {
 	function onActivate1785() 
 	{
 	 // Calling Command 741 (Goto Screen) with CommandGroup_Parameters from 17174
-		manager.sendDceMessage(srouterip + " "+deviceid + " -300 1 741 159 \"1\" 195 \"<%=L%>\" ")
+		gotoQScreen("Screen_1.qml")
 	}
 	StyledText {
 		x: 1676
@@ -119,7 +119,7 @@ Item {
 	function onActivate2222() 
 	{
 	 // Calling Command 741 (Goto Screen) with CommandGroup_Parameters from 17008
-		manager.sendDceMessage(srouterip + " "+deviceid + " -300 1 741 159 \"<%=NP_R%>\" ")
+		gotoQScreen("Screen_<%=NP_R%>.qml")
 	}
 	ButtonSq {
 		id: button2222_2617
@@ -272,7 +272,7 @@ Item {
 	function onActivate3296() 
 	{
 	 // Calling Command 261 (Set Follow-Me) with CommandGroup_Parameters from 14353
-		manager.sendDceMessage(srouterip + " "+deviceid + " -101 1 261 2 \"deviceid\" 9 \"M<%=GD2228.0.0.2607%>\" 17 \"<%=U%>\" ")
+		manager.sendDceMessage(srouterip + " "+deviceid + " -101 1 261 2 \"<%=!%>\" 9 \"M<%=GD2228.0.0.2607%>\" 17 \"<%=U%>\" ")
 	}
 	ButtonSq {
 		id: button3296_2627
@@ -297,7 +297,7 @@ Item {
 	function onActivate3417() 
 	{
 	 // Calling Command 388 (Set Media Private) with CommandGroup_Parameters from 14826
-		manager.sendDceMessage(srouterip + " "+deviceid + " -106 1 388 45 \"currentRoom\" 119 \"<%=GD2228.0.0.3418%>\" ")
+		manager.sendDceMessage(srouterip + " "+deviceid + " -106 1 388 45 \"<%=E%>\" 119 \"<%=GD2228.0.0.3418%>\" ")
 	}
 	ButtonSq {
 		id: button3417_2629

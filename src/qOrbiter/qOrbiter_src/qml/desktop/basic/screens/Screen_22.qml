@@ -13,7 +13,7 @@ Item {
 	 // Calling Command 27 (Set Variable) with CommandGroup_Parameters from 14147
 		manager.sendDceMessage(srouterip + " "+deviceid + " -300 1 27 4 \"17\" 5 \"<%=2%>\" ")
 	 // Calling Command 741 (Goto Screen) with CommandGroup_Parameters from 2330
-		manager.sendDceMessage(srouterip + " "+deviceid + " -300 1 741 22 \"17\" 159 \"21\" ")
+		gotoQScreen("Screen_21.qml")
 	}
 	ButtonSq {
 		id: button1618_286
@@ -69,7 +69,7 @@ Book"
 	function onActivate1682() 
 	{
 	 // Calling Command 741 (Goto Screen) with CommandGroup_Parameters from 2416
-		manager.sendDceMessage(srouterip + " "+deviceid + " -300 1 741 159 \"23\" ")
+		gotoQScreen("Screen_23.qml")
 	}
 	StyledText {
 		x: 1335
@@ -93,7 +93,7 @@ Intercom"
 	function onActivate1785() 
 	{
 	 // Calling Command 741 (Goto Screen) with CommandGroup_Parameters from 17174
-		manager.sendDceMessage(srouterip + " "+deviceid + " -300 1 741 159 \"1\" 195 \"<%=L%>\" ")
+		gotoQScreen("Screen_1.qml")
 	}
 	StyledText {
 		x: 1678
@@ -115,7 +115,7 @@ Intercom"
 	function onActivate1320() 
 	{
 	 // Calling Command 741 (Goto Screen) with CommandGroup_Parameters from 2210
-		manager.sendDceMessage(srouterip + " "+deviceid + " -300 1 741 159 \"11\" ")
+		gotoQScreen("Screen_11.qml")
 	}
 	StyledText {
 		x: 334
@@ -139,7 +139,7 @@ Direct"
 	function onActivate1321() 
 	{
 	 // Calling Command 741 (Goto Screen) with CommandGroup_Parameters from 2207
-		manager.sendDceMessage(srouterip + " "+deviceid + " -300 1 741 159 \"10\" ")
+		gotoQScreen("Screen_10.qml")
 	}
 	StyledText {
 		x: 668

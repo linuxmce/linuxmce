@@ -11,7 +11,7 @@ Item {
 	function onActivate1785() 
 	{
 	 // Calling Command 741 (Goto Screen) with CommandGroup_Parameters from 17174
-		manager.sendDceMessage(srouterip + " "+deviceid + " -300 1 741 159 \"1\" 195 \"<%=L%>\" ")
+		gotoQScreen("Screen_1.qml")
 	}
 	StyledText {
 		x: 1680
@@ -236,7 +236,7 @@ Item {
 	function onActivate3302() 
 	{
 	 // Calling Command 261 (Set Follow-Me) with CommandGroup_Parameters from 14352
-		manager.sendDceMessage(srouterip + " "+deviceid + " -101 1 261 2 \"deviceid\" 9 \"L<%=GD2211.0.0.2607%>\" 17 \"<%=U%>\" ")
+		manager.sendDceMessage(srouterip + " "+deviceid + " -101 1 261 2 \"<%=!%>\" 9 \"L<%=GD2211.0.0.2607%>\" 17 \"<%=U%>\" ")
 	}
 	ButtonSq {
 		id: button3302_1473

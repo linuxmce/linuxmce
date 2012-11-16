@@ -11,7 +11,7 @@ Item {
 	function onActivate1785() 
 	{
 	 // Calling Command 741 (Goto Screen) with CommandGroup_Parameters from 17174
-		manager.sendDceMessage(srouterip + " "+deviceid + " -300 1 741 159 \"1\" 195 \"<%=L%>\" ")
+		gotoQScreen("Screen_1.qml")
 	}
 	StyledText {
 		x: 1680
@@ -78,7 +78,7 @@ mark"
 	function onActivate3549() 
 	{
 	 // Calling Command 409 (Save Bookmark) with CommandGroup_Parameters from 15051
-		manager.sendDceMessage(srouterip + " "+deviceid + " -106 1 409 45 \"currentRoom\" ")
+		manager.sendDceMessage(srouterip + " "+deviceid + " -106 1 409 45 \"<%=E%>\" ")
 	 // Calling Command 27 (Set Variable) with CommandGroup_Parameters from 15121
 		manager.sendDceMessage(srouterip + " "+deviceid + " -300 1 27 4 \"17\" ")
 	 // Calling Command 14 (Refresh) with CommandGroup_Parameters from 17379
@@ -134,7 +134,7 @@ mark"
 	function onActivate4397() 
 	{
 	 // Calling Command 741 (Goto Screen) with CommandGroup_Parameters from 17015
-		manager.sendDceMessage(srouterip + " "+deviceid + " -300 1 741 159 \"220\" ")
+		gotoQScreen("Screen_220.qml")
 	}
 	ButtonSq {
 		id: button4397_1040
@@ -149,7 +149,7 @@ mark"
 	function onActivate5167() 
 	{
 	 // Calling Command 409 (Save Bookmark) with CommandGroup_Parameters from 17144
-		manager.sendDceMessage(srouterip + " "+deviceid + " -106 1 409 45 \"currentRoom\" 225 \"1\" ")
+		manager.sendDceMessage(srouterip + " "+deviceid + " -106 1 409 45 \"<%=E%>\" 225 \"1\" ")
 	 // Calling Command 14 (Refresh) with CommandGroup_Parameters from 17147
 		manager.sendDceMessage(srouterip + " "+deviceid + " -300 1 14 15 \"*\" ")
 	}

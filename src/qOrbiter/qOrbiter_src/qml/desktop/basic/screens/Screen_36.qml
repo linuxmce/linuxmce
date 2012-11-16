@@ -33,7 +33,7 @@ Item {
 	function onActivate1934() 
 	{
 	 // Calling Command 741 (Goto Screen) with CommandGroup_Parameters from 14802
-		manager.sendDceMessage(srouterip + " "+deviceid + " -300 1 741 159 \"1\" 195 \"<%=L%>\" ")
+		gotoQScreen("Screen_1.qml")
 	}
 	StyledText {
 		x: 970

@@ -11,7 +11,7 @@ Item {
 	function onActivate1785() 
 	{
 	 // Calling Command 741 (Goto Screen) with CommandGroup_Parameters from 17174
-		manager.sendDceMessage(srouterip + " "+deviceid + " -300 1 741 159 \"1\" 195 \"<%=L%>\" ")
+		gotoQScreen("Screen_1.qml")
 	}
 	StyledText {
 		x: 1680
@@ -33,9 +33,9 @@ Item {
 	function onActivate1569() 
 	{
 	 // Calling Command 44 (MH Stop Media) with CommandGroup_Parameters from 13739
-		manager.sendDceMessage(srouterip + " "+deviceid + " -106 1 44 45 \"currentRoom\" ")
+		manager.sendDceMessage(srouterip + " "+deviceid + " -106 1 44 45 \"<%=E%>\" ")
 	 // Calling Command 741 (Goto Screen) with CommandGroup_Parameters from 18035
-		manager.sendDceMessage(srouterip + " "+deviceid + " -300 1 741 159 \"1\" 252 \"0\" ")
+		gotoQScreen("Screen_1.qml")
 	}
 	ButtonSq {
 		id: button1569_1516
@@ -127,7 +127,7 @@ Item {
 	 // Calling Command 126 (Guide) with CommandGroup_Parameters from 16669
 		manager.sendDceMessage(srouterip + " "+deviceid + " -304 1 126 ")
 	 // Calling Command 741 (Goto Screen) with CommandGroup_Parameters from 17308
-		manager.sendDceMessage(srouterip + " "+deviceid + " -300 1 741 159 \"<%=NP_R%>\" ")
+		gotoQScreen("Screen_<%=NP_R%>.qml")
 	}
 	StyledText {
 		x: 1680
@@ -151,7 +151,7 @@ Item {
 	 // Calling Command 123 (Info) with CommandGroup_Parameters from 16671
 		manager.sendDceMessage(srouterip + " "+deviceid + " -304 1 123 ")
 	 // Calling Command 741 (Goto Screen) with CommandGroup_Parameters from 17312
-		manager.sendDceMessage(srouterip + " "+deviceid + " -300 1 741 159 \"<%=NP_R%>\" ")
+		gotoQScreen("Screen_<%=NP_R%>.qml")
 	}
 	StyledText {
 		x: 960
@@ -331,7 +331,7 @@ Item {
 	 // Calling Command 102 (Record) with CommandGroup_Parameters from 13636
 		manager.sendDceMessage(srouterip + " "+deviceid + " -106 1 102 ")
 	 // Calling Command 741 (Goto Screen) with CommandGroup_Parameters from 18381
-		manager.sendDceMessage(srouterip + " "+deviceid + " -300 1 741 159 \"<%=NP_R%>\" ")
+		gotoQScreen("Screen_<%=NP_R%>.qml")
 	}
 	ButtonSq {
 		id: button1566_1532
@@ -371,7 +371,7 @@ Item {
 	 // Calling Command 548 (Menu) with CommandGroup_Parameters from 16673
 		manager.sendDceMessage(srouterip + " "+deviceid + " -304 1 548 9 \"future_recordings\" ")
 	 // Calling Command 741 (Goto Screen) with CommandGroup_Parameters from 17309
-		manager.sendDceMessage(srouterip + " "+deviceid + " -300 1 741 159 \"<%=NP_R%>\" ")
+		gotoQScreen("Screen_<%=NP_R%>.qml")
 	}
 	StyledText {
 		x: 1440

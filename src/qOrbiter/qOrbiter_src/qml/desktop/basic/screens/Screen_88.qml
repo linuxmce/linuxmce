@@ -11,7 +11,7 @@ Item {
 	function onActivate1785() 
 	{
 	 // Calling Command 741 (Goto Screen) with CommandGroup_Parameters from 17174
-		manager.sendDceMessage(srouterip + " "+deviceid + " -300 1 741 159 \"1\" 195 \"<%=L%>\" ")
+		gotoQScreen("Screen_1.qml")
 	}
 	StyledText {
 		x: 1680
@@ -48,7 +48,7 @@ Item {
 	function onActivate3553() 
 	{
 	 // Calling Command 43 (MH Play Media) with CommandGroup_Parameters from 15094
-		manager.sendDceMessage(srouterip + " "+deviceid + " -106 1 43 13 \"!B<%=2%>\" 45 \"currentRoom\" ")
+		manager.sendDceMessage(srouterip + " "+deviceid + " -106 1 43 13 \"!B<%=2%>\" 45 \"<%=E%>\" ")
 	}
 	ButtonSq {
 		id: button3553_1045

@@ -11,7 +11,7 @@ Item {
 	function onActivate5563() 
 	{
 	 // Calling Command 741 (Goto Screen) with CommandGroup_Parameters from 17584
-		manager.sendDceMessage(srouterip + " "+deviceid + " -300 1 741 9 \"Please enter your IP address|OK\" 137 \"<%=!%> <%=!%> 1 27 4 68 5 <%=E17%>\" 159 \"97\" ")
+		gotoQScreen("Screen_97.qml")
 	}
 	StyledText {
 		x: 1083
@@ -33,7 +33,7 @@ Item {
 	function onActivate5572() 
 	{
 	 // Calling Command 741 (Goto Screen) with CommandGroup_Parameters from 17600
-		manager.sendDceMessage(srouterip + " "+deviceid + " -300 1 741 9 \"Please enter the Net Mask|OK\" 137 \"<%=!%> <%=!%> 1 27 4 69 5 <%=E17%>\" 159 \"97\" ")
+		gotoQScreen("Screen_97.qml")
 	}
 	StyledText {
 		x: 1083
@@ -55,7 +55,7 @@ Item {
 	function onActivate5573() 
 	{
 	 // Calling Command 741 (Goto Screen) with CommandGroup_Parameters from 17601
-		manager.sendDceMessage(srouterip + " "+deviceid + " -300 1 741 9 \"Please enter the Gateway|OK\" 137 \"<%=!%> <%=!%> 1 27 4 70 5 <%=E17%>\" 159 \"97\" ")
+		gotoQScreen("Screen_97.qml")
 	}
 	StyledText {
 		x: 1083
@@ -77,7 +77,7 @@ Item {
 	function onActivate5574() 
 	{
 	 // Calling Command 741 (Goto Screen) with CommandGroup_Parameters from 17602
-		manager.sendDceMessage(srouterip + " "+deviceid + " -300 1 741 9 \"Please enter your DNS|OK\" 137 \"<%=!%> <%=!%> 1 27 4 71 5 <%=E17%>\" 159 \"97\" ")
+		gotoQScreen("Screen_97.qml")
 	}
 	StyledText {
 		x: 1083
@@ -131,7 +131,7 @@ Item {
 	function onActivate1785() 
 	{
 	 // Calling Command 741 (Goto Screen) with CommandGroup_Parameters from 17174
-		manager.sendDceMessage(srouterip + " "+deviceid + " -300 1 741 159 \"1\" 195 \"<%=L%>\" ")
+		gotoQScreen("Screen_1.qml")
 	}
 	StyledText {
 		x: 1680

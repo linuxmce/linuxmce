@@ -26,7 +26,7 @@ Item {
 	 // Calling Command 323 (Halt Device) with CommandGroup_Parameters from 14552
 		manager.sendDceMessage(srouterip + " "+deviceid + " -103 1 323 2 \"<%=5%>\" 21 \"R\" ")
 	 // Calling Command 741 (Goto Screen) with CommandGroup_Parameters from 14840
-		manager.sendDceMessage(srouterip + " "+deviceid + " -300 1 741 159 \"53\" ")
+		gotoQScreen("Screen_53.qml")
 	 // Calling Command 25 (Set Text) with CommandGroup_Parameters from 14841
 		manager.sendDceMessage(srouterip + " "+deviceid + " -300 1 25 3 \"2265\" 9 \"<%=T1154%>\" 25 \"670\" ")
 	 // Calling Command 324 (Set Timeout) with CommandGroup_Parameters from 14842
@@ -54,7 +54,7 @@ Item {
 	function onActivate1785() 
 	{
 	 // Calling Command 741 (Goto Screen) with CommandGroup_Parameters from 17174
-		manager.sendDceMessage(srouterip + " "+deviceid + " -300 1 741 159 \"1\" 195 \"<%=L%>\" ")
+		gotoQScreen("Screen_1.qml")
 	}
 	StyledText {
 		x: 1680
@@ -78,7 +78,7 @@ Item {
 	 // Calling Command 27 (Set Variable) with CommandGroup_Parameters from 14735
 		manager.sendDceMessage(srouterip + " "+deviceid + " -300 1 27 4 \"2\" ")
 	 // Calling Command 741 (Goto Screen) with CommandGroup_Parameters from 14736
-		manager.sendDceMessage(srouterip + " "+deviceid + " -300 1 741 159 \"38\" ")
+		gotoQScreen("Screen_38.qml")
 	}
 	StyledText {
 		x: 0
@@ -104,7 +104,7 @@ codes"
 	 // Calling Command 741 (Goto Screen) with CommandGroup_Parameters from 14219
 		manager.sendDceMessage(srouterip + " "+deviceid + " -300 1 741 163 \"<%=T1140%>\" 181 \"0\" 182 \"0\" 183 \"1\" ")
 	 // Calling Command 266 (Regen Orbiter) with CommandGroup_Parameters from 14217
-		manager.sendDceMessage(srouterip + " "+deviceid + " -101 1 266 2 \"deviceid\" ")
+		manager.sendDceMessage(srouterip + " "+deviceid + " -101 1 266 2 \"<%=!%>\" ")
 	}
 	StyledText {
 		x: 1440
@@ -172,7 +172,7 @@ GC100"
 	function onActivate3329() 
 	{
 	 // Calling Command 741 (Goto Screen) with CommandGroup_Parameters from 14246
-		manager.sendDceMessage(srouterip + " "+deviceid + " -300 1 741 9 \"<%=T1130%>\" 159 \"53\" ")
+		gotoQScreen("Screen_53.qml")
 	 // Calling Command 266 (Regen Orbiter) with CommandGroup_Parameters from 14244
 		manager.sendDceMessage(srouterip + " "+deviceid + " -101 1 266 ")
 	}
@@ -224,7 +224,7 @@ Orbiter"
 	function onActivate3429() 
 	{
 	 // Calling Command 741 (Goto Screen) with CommandGroup_Parameters from 14859
-		manager.sendDceMessage(srouterip + " "+deviceid + " -300 1 741 159 \"82\" ")
+		gotoQScreen("Screen_82.qml")
 	}
 	StyledText {
 		x: 0
@@ -261,7 +261,7 @@ Orbiter"
 	function onActivate4325() 
 	{
 	 // Calling Command 266 (Regen Orbiter) with CommandGroup_Parameters from 16074
-		manager.sendDceMessage(srouterip + " "+deviceid + " -101 1 266 2 \"deviceid\" 24 \"Y\" ")
+		manager.sendDceMessage(srouterip + " "+deviceid + " -101 1 266 2 \"<%=!%>\" 24 \"Y\" ")
 	}
 	StyledText {
 		x: 1440
@@ -305,7 +305,7 @@ Orbiter"
 	function onActivate4328() 
 	{
 	 // Calling Command 741 (Goto Screen) with CommandGroup_Parameters from 16084
-		manager.sendDceMessage(srouterip + " "+deviceid + " -300 1 741 159 \"98\" ")
+		gotoQScreen("Screen_98.qml")
 	}
 	StyledText {
 		x: 240
@@ -349,7 +349,7 @@ Orbiter"
 	function onActivate4568() 
 	{
 	 // Calling Command 741 (Goto Screen) with CommandGroup_Parameters from 16322
-		manager.sendDceMessage(srouterip + " "+deviceid + " -300 1 741 159 \"175\" ")
+		gotoQScreen("Screen_175.qml")
 	}
 	StyledText {
 		x: 480
@@ -393,7 +393,7 @@ Orbiter"
 	function onActivate5136() 
 	{
 	 // Calling Command 741 (Goto Screen) with CommandGroup_Parameters from 17127
-		manager.sendDceMessage(srouterip + " "+deviceid + " -300 1 741 159 \"239\" ")
+		gotoQScreen("Screen_239.qml")
 	}
 	StyledText {
 		x: 240
@@ -415,7 +415,7 @@ Orbiter"
 	function onActivate5388() 
 	{
 	 // Calling Command 741 (Goto Screen) with CommandGroup_Parameters from 17371
-		manager.sendDceMessage(srouterip + " "+deviceid + " -300 1 741 159 \"255\" ")
+		gotoQScreen("Screen_255.qml")
 	}
 	StyledText {
 		x: 960
@@ -459,7 +459,7 @@ Orbiter"
 	function onActivate5438() 
 	{
 	 // Calling Command 741 (Goto Screen) with CommandGroup_Parameters from 17389
-		manager.sendDceMessage(srouterip + " "+deviceid + " -300 1 741 159 \"263\" ")
+		gotoQScreen("Screen_263.qml")
 	}
 	StyledText {
 		x: 1680
@@ -501,7 +501,7 @@ Orbiter"
 	function onActivate5559() 
 	{
 	 // Calling Command 741 (Goto Screen) with CommandGroup_Parameters from 17571
-		manager.sendDceMessage(srouterip + " "+deviceid + " -300 1 741 159 \"271\" ")
+		gotoQScreen("Screen_271.qml")
 	}
 	StyledText {
 		x: 480
@@ -523,7 +523,7 @@ Orbiter"
 	function onActivate5961() 
 	{
 	 // Calling Command 741 (Goto Screen) with CommandGroup_Parameters from 18089
-		manager.sendDceMessage(srouterip + " "+deviceid + " -300 1 741 159 \"174\" ")
+		gotoQScreen("Screen_174.qml")
 	}
 	StyledText {
 		x: 960

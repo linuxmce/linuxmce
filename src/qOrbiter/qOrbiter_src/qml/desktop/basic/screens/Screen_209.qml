@@ -51,7 +51,7 @@ Item {
 	function onActivate4831() 
 	{
 	 // Calling Command 231 (Load Playlist) with CommandGroup_Parameters from 16788
-		manager.sendDceMessage(srouterip + " "+deviceid + " -106 1 231 45 \"currentRoom\" 78 \"<%=2%>\" ")
+		manager.sendDceMessage(srouterip + " "+deviceid + " -106 1 231 45 \"<%=E%>\" 78 \"<%=2%>\" ")
 	}
 	ButtonSq {
 		id: button4831_2391
@@ -66,7 +66,7 @@ Item {
 	function onActivate2454() 
 	{
 	 // Calling Command 741 (Goto Screen) with CommandGroup_Parameters from 16961
-		manager.sendDceMessage(srouterip + " "+deviceid + " -300 1 741 159 \"220\" ")
+		gotoQScreen("Screen_220.qml")
 	}
 	StyledText {
 		x: 9
@@ -88,7 +88,7 @@ Item {
 	function onActivate3442() 
 	{
 	 // Calling Command 741 (Goto Screen) with CommandGroup_Parameters from 14846
-		manager.sendDceMessage(srouterip + " "+deviceid + " -300 1 741 159 \"44\" ")
+		gotoQScreen("Screen_44.qml")
 	}
 	StyledText {
 		x: 1440
@@ -110,21 +110,21 @@ Item {
 	function onActivate4843() 
 	{
 	 // Calling Command 231 (Load Playlist) with CommandGroup_Parameters from 16798
-		manager.sendDceMessage(srouterip + " "+deviceid + " -106 1 231 45 \"currentRoom\" 78 \"1\" ")
+		manager.sendDceMessage(srouterip + " "+deviceid + " -106 1 231 45 \"<%=E%>\" 78 \"1\" ")
 	}
 	function onActivate4846() 
 	{
 	 // Calling Command 231 (Load Playlist) with CommandGroup_Parameters from 16799
-		manager.sendDceMessage(srouterip + " "+deviceid + " -106 1 231 45 \"currentRoom\" 78 \"4\" ")
+		manager.sendDceMessage(srouterip + " "+deviceid + " -106 1 231 45 \"<%=E%>\" 78 \"4\" ")
 	}
 	function onActivate4844() 
 	{
 	 // Calling Command 231 (Load Playlist) with CommandGroup_Parameters from 16800
-		manager.sendDceMessage(srouterip + " "+deviceid + " -106 1 231 45 \"currentRoom\" 78 \"2\" ")
+		manager.sendDceMessage(srouterip + " "+deviceid + " -106 1 231 45 \"<%=E%>\" 78 \"2\" ")
 	}
 	function onActivate4845() 
 	{
 	 // Calling Command 231 (Load Playlist) with CommandGroup_Parameters from 16801
-		manager.sendDceMessage(srouterip + " "+deviceid + " -106 1 231 45 \"currentRoom\" 78 \"3\" ")
+		manager.sendDceMessage(srouterip + " "+deviceid + " -106 1 231 45 \"<%=E%>\" 78 \"3\" ")
 	}
 }
