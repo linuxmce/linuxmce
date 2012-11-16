@@ -8,6 +8,7 @@
      See the GNU General Public License for more details.
 
 */
+#include "ZWInterface.h"
 //<-dceag-incl-b->
 #include "ZWave.h"
 #include "DCE/Logger.h"
@@ -105,7 +106,7 @@ extern "C" {
 }
 //<-dceag-plug-e->
 
-//<-dceag-main-b->
+//<!-dceag-main-b->
 int main(int argc, char* argv[]) 
 {
 	g_sBinary = FileUtils::FilenameWithoutPath(argv[0]);
@@ -194,41 +195,71 @@ int main(int argc, char* argv[])
 	bool bReload=false;
 	try
 	{
-		ZWave *pZWave = new ZWave(PK_Device, sRouter_IP,true,bLocalMode);
-		if ( pZWave->GetConfig() && pZWave->Connect(pZWave->PK_DeviceTemplate_get()) ) 
+
+		ZWInterface* pZWInterface = new ZWInterface();
+		ZWave *pZWave = NULL;
+		LoggerWrapper::GetInstance()->Write(LV_ZWAVE, "ZWInterface created.");
+		while (!bAppError && (pZWave == NULL || !pZWave->m_bQuit_get()))
 		{
-			g_pCommand_Impl=pZWave;
-			g_pDeadlockHandler=DeadlockHandler;
-			g_pSocketCrashHandler=SocketCrashHandler;
-			LoggerWrapper::GetInstance()->Write(LV_STATUS, "Connect OK");
-			pZWave->CreateChildren();
-			if( bLocalMode )
-				pZWave->RunLocalMode();
-			else
+			LoggerWrapper::GetInstance()->Write(LV_ZWAVE, "New ZWave instance");
+			pZWave = new ZWave(PK_Device, sRouter_IP,true,bLocalMode);
+			pZWave->SetInterface(pZWInterface);
+			LoggerWrapper::GetInstance()->Write(LV_ZWAVE, "ZWave instance has been assigned the ZWInterface");
+
+			if ( pZWave->GetConfig() && pZWave->Connect(pZWave->PK_DeviceTemplate_get()) ) 
 			{
-				if(pZWave->m_RequestHandlerThread)
-					pthread_join(pZWave->m_RequestHandlerThread, NULL);  // This function will return when the device is shutting down
-			}
-			g_pDeadlockHandler=NULL;
-			g_pSocketCrashHandler=NULL;
-		} 
-		else 
-		{
-			bAppError = true;
-			if( pZWave->m_pEvent && pZWave->m_pEvent->m_pClientSocket && pZWave->m_pEvent->m_pClientSocket->m_eLastError==ClientSocket::cs_err_CannotConnect )
+				g_pCommand_Impl=pZWave;
+				g_pDeadlockHandler=DeadlockHandler;
+				g_pSocketCrashHandler=SocketCrashHandler;
+				LoggerWrapper::GetInstance()->Write(LV_STATUS, "Connect OK");
+				pZWave->CreateChildren();
+				
+				// Now we have our config data from LMCE
+				if (!pZWInterface->IsReady()) {
+					pZWInterface->Init(pZWave->GetConfigData());
+				} else {
+					if (pZWInterface->RequireRestart(pZWave->GetConfigData()))
+					{
+						LoggerWrapper::GetInstance()->Write(LV_ZWAVE, "Restarting ZWInterface.");
+						pZWInterface->Init(pZWave->GetConfigData());
+					}
+				}
+				LoggerWrapper::GetInstance()->Write(LV_ZWAVE, "ZWave+ZWInterface setup done, joining DCE thread");
+
+				if( bLocalMode )
+					pZWave->RunLocalMode();
+				else
+				{
+					if(pZWave->m_RequestHandlerThread)
+						pthread_join(pZWave->m_RequestHandlerThread, NULL);  // This function will return when the device is shutting down
+				}
+				LoggerWrapper::GetInstance()->Write(LV_ZWAVE, "ZWave DCE exited");
+
+				g_pDeadlockHandler=NULL;
+				g_pSocketCrashHandler=NULL;
+			} 
+			else 
 			{
-				bAppError = false;
-				bReload = false;
-				LoggerWrapper::GetInstance()->Write(LV_CRITICAL, "No Router.  Will abort");
+				bAppError = true;
+				if( pZWave->m_pEvent && pZWave->m_pEvent->m_pClientSocket && pZWave->m_pEvent->m_pClientSocket->m_eLastError==ClientSocket::cs_err_CannotConnect )
+				{
+					bAppError = false;
+					bReload = false;
+					LoggerWrapper::GetInstance()->Write(LV_CRITICAL, "No Router.  Will abort");
+				}
+				else
+					LoggerWrapper::GetInstance()->Write(LV_CRITICAL, "Connect() Failed");
 			}
-			else
-				LoggerWrapper::GetInstance()->Write(LV_CRITICAL, "Connect() Failed");
+			
+			if( pZWave->m_bReload ) {
+				LoggerWrapper::GetInstance()->Write(LV_ZWAVE, "ZWave reloading");
+				bReload=true;
+			}
+			delete pZWave;
 		}
+		LoggerWrapper::GetInstance()->Write(LV_ZWAVE, "We are exiting");
+		delete pZWInterface;
 
-		if( pZWave->m_bReload )
-			bReload=true;
-
-		delete pZWave;
 	}
 	catch(string s)
 	{
@@ -251,4 +282,5 @@ int main(int argc, char* argv[])
 	else
 		return 0;
 }
+
 //<-dceag-main-e->

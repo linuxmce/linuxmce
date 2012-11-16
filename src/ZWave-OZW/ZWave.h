@@ -26,6 +26,10 @@
 #include <openzwave/value_classes/Value.h>
 #include <openzwave/value_classes/ValueBool.h>
 
+#include "ZWConfigData.h"
+namespace DCE {
+class ZWInterface;
+}
 
 //<-dceag-decl-b->
 namespace DCE
@@ -34,9 +38,7 @@ namespace DCE
 	{
 //<-dceag-decl-e->
 		// Private member variables
-		uint32 g_homeId;
-		bool   g_initFailed;
-
+	        ZWInterface* m_pZWInterface;
 		typedef struct
 		{
 			uint32			m_homeId;
@@ -46,10 +48,6 @@ namespace DCE
 		}NodeInfo;
 
 		list<NodeInfo*> g_nodes;
-		pthread_mutex_t g_criticalSection;
-		pthread_cond_t  initCond; 
-		pthread_mutex_t initMutex ;
-
 
 		// Private methods
 
@@ -60,6 +58,8 @@ namespace DCE
 public:
 		// Public member variables
 		void OnNotification(OpenZWave::Notification const* _notification, void* _context);
+		ZWConfigData* GetConfigData();
+		void SetInterface(ZWInterface* pZWInterface);
 
 //<-dceag-const-b->
 public:

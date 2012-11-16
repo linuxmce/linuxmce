@@ -22,7 +22,7 @@ using namespace DCE;
 #include "Gen_Devices/AllCommandsRequests.h"
 //<-dceag-d-e->
 #include "PlutoUtils/LinuxSerialUSB.h"
-
+#include "ZWInterface.h"
 
 //<-dceag-const-b->
 // The primary constructor when the class is created as a stand-alone device
@@ -30,10 +30,7 @@ ZWave::ZWave(int DeviceID, string ServerAddress,bool bConnectEventHandler,bool b
 	: ZWave_Command(DeviceID, ServerAddress,bConnectEventHandler,bLocalMode,pRouter)
 //<-dceag-const-e->
 {
-	g_homeId = 0;
-	g_initFailed = false;
-	initCond  = PTHREAD_COND_INITIALIZER;
-	initMutex = PTHREAD_MUTEX_INITIALIZER;
+	m_pZWInterface = NULL;
 }
 
 //<-dceag-const2-b->
@@ -61,50 +58,7 @@ bool ZWave::GetConfig()
 	// Put your code here to initialize the data in this class
 	// The configuration parameters DATA_ are now populated
 
-	string port = TranslateSerialUSB(DATA_Get_COM_Port_on_PC());
-
-	pthread_mutexattr_t mutexattr;
-
-	pthread_mutexattr_init ( &mutexattr );
-	pthread_mutexattr_settype( &mutexattr, PTHREAD_MUTEX_RECURSIVE );
-
-	pthread_mutex_init( &g_criticalSection, &mutexattr );
-	pthread_mutexattr_destroy( &mutexattr );
-
-	pthread_mutex_lock( &initMutex );
-
-	// Create the OpenZWave Manager.
-	// The first argument is the path to the config files (where the manufacturer_specific.xml file is located
-	// The second argument is the path for saved Z-Wave network state and the log file.  If you leave it NULL 
-	// the log file will appear in the program's working directory.
-	OpenZWave::Options::Create( "/etc/openzwave/config/", "", "" );
-	OpenZWave::Options::Get()->Lock();
-
-	OpenZWave::Manager::Create();
-
-	// OpenZWave::Manager::Get()->AddWatcher( OnNotification, NULL );
-
-	OpenZWave::Manager::Get()->AddDriver(port );
-
-	// Now we just wait for the driver to become ready
-	pthread_cond_wait( &initCond, &initMutex );
-
-	if( !g_initFailed )
-	{
-
-		OpenZWave::Manager::Get()->WriteConfig( g_homeId );
-
-		OpenZWave::Driver::DriverData data;
-		OpenZWave::Manager::Get()->GetDriverStatistics( g_homeId, &data );
-		printf("SOF: %d ACK Waiting: %d Read Aborts: %d Bad Checksums: %d\n", data.s_SOFCnt, data.s_ACKWaiting, data.s_readAborts, data.s_badChecksum);
-		printf("Reads: %d Writes: %d CAN: %d NAK: %d ACK: %d Out of Frame: %d\n", data.s_readCnt, data.s_writeCnt, data.s_CANCnt, data.s_NAKCnt, data.s_ACKCnt, data.s_OOFCnt);
-		printf("Dropped: %d Retries: %d\n", data.s_dropped, data.s_retries);
-
-	 	// int ourNodeId = Manager::Get()->GetControllerNodeId(g_homeId);
-		return true;
-	}
-
-	return false;
+	return true;
 }
 
 //<-dceag-reg-b->
@@ -155,26 +109,28 @@ void ZWave::ReceivedCommandForChild(DeviceData_Impl *pDeviceData_Impl,string &sC
 		sCMD_Result = "OK";
 		int level,duration,temp,fan;
 		string heat;
+		uint32 homeId = m_pZWInterface->GetHomeId();
 		switch (pMessage->m_dwID) {
 			case COMMAND_Generic_On_CONST:
 			        LoggerWrapper::GetInstance()->Write(LV_ZWAVE,"ON RECEIVED FOR CHILD %d/%d",node_id, instance_id);
-				pthread_mutex_lock( &g_criticalSection );
-				OpenZWave::Manager::Get()->SetNodeOn(g_homeId,node_id);
-				pthread_mutex_unlock( &g_criticalSection );
+				m_pZWInterface->Lock();
+				OpenZWave::Manager::Get()->SetNodeOn(homeId,node_id);
+				m_pZWInterface->UnLock();
 				break;
 				;;
 			case COMMAND_Generic_Off_CONST:
 				LoggerWrapper::GetInstance()->Write(LV_ZWAVE,"OFF RECEIVED FOR CHILD %d",node_id);
-				pthread_mutex_lock( &g_criticalSection );
-				OpenZWave::Manager::Get()->SetNodeOff(g_homeId,node_id);
+				m_pZWInterface->Lock();
+				OpenZWave::Manager::Get()->SetNodeOff(homeId,node_id);
+				m_pZWInterface->UnLock();
 				break;
 				;;
 			case COMMAND_Set_Level_CONST:
 				level = atoi(pMessage->m_mapParameters[COMMANDPARAMETER_Level_CONST].c_str());
 				LoggerWrapper::GetInstance()->Write(LV_ZWAVE,"SET LEVEL RECEIVED FOR CHILD %d, level: %d",node_id,level);
-				pthread_mutex_lock( &g_criticalSection );
-				OpenZWave::Manager::Get()->SetNodeLevel(g_homeId,node_id,level>99?99:level);
-				pthread_mutex_unlock( &g_criticalSection );
+				m_pZWInterface->Lock();
+				OpenZWave::Manager::Get()->SetNodeLevel(homeId,node_id,level>99?99:level);
+				m_pZWInterface->UnLock();
 				break;
 				;;
 		}
@@ -576,7 +532,7 @@ ZWave::NodeInfo* ZWave::GetNodeInfo(OpenZWave::Notification const* _notification
 
 void ZWave::OnNotification(OpenZWave::Notification const* _notification, void* _context) {
 	// Must do this inside a critical section to avoid conflicts with the main thread
-	pthread_mutex_lock( &g_criticalSection );
+	m_pZWInterface->Lock();
 
 	switch( _notification->GetType() )
 	{
@@ -692,34 +648,26 @@ void ZWave::OnNotification(OpenZWave::Notification const* _notification, void* _
 			break;
 		}
 
-		case OpenZWave::Notification::Type_DriverReady:
-		{
-			g_homeId = _notification->GetHomeId();
-			break;
-		}
-
-
-		case OpenZWave::Notification::Type_DriverFailed:
-		{
-			g_initFailed = true;
-			pthread_cond_broadcast(&initCond);
-			break;
-		}
-
-		case OpenZWave::Notification::Type_AwakeNodesQueried:
-		case OpenZWave::Notification::Type_AllNodesQueried:
-		{
-				pthread_cond_broadcast(&initCond);
-				break;
-		}
-
 		default:
 		{
 		}
 	}
 
-	pthread_mutex_unlock( &g_criticalSection );
+	m_pZWInterface->UnLock();
 
 
 }
 
+void ZWave::SetInterface(ZWInterface* pZWInterface)
+{
+	m_pZWInterface = pZWInterface;
+	if (m_pZWInterface != NULL)
+		m_pZWInterface->SetZWave(this);
+}
+
+ZWConfigData* ZWave::GetConfigData()
+{
+	string port = TranslateSerialUSB(DATA_Get_COM_Port_on_PC());
+
+	return new ZWConfigData(port);
+}
