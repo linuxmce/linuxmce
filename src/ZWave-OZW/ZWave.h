@@ -1,10 +1,5 @@
 /*
-     Copyright (C) 2004 Pluto, Inc., a Florida Corporation
-
-     www.plutohome.com
-
-     Phone: +1 (877) 758-8648
- 
+     Copyright (C) 2012 Harald Klein <hari@vt100.at
 
      This program is free software; you can redistribute it and/or modify it under the terms of the GNU General Public License.
      This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty
@@ -21,6 +16,16 @@
 
 #include "Gen_Devices/ZWaveBase.h"
 //<-dceag-d-e->
+#include <openzwave/Options.h>
+#include <openzwave/Manager.h>
+#include <openzwave/Driver.h>
+#include <openzwave/Node.h>
+#include <openzwave/Group.h>
+#include <openzwave/Notification.h>
+#include <openzwave/value_classes/ValueStore.h>
+#include <openzwave/value_classes/Value.h>
+#include <openzwave/value_classes/ValueBool.h>
+
 
 //<-dceag-decl-b->
 namespace DCE
@@ -29,10 +34,32 @@ namespace DCE
 	{
 //<-dceag-decl-e->
 		// Private member variables
+		uint32 g_homeId;
+		bool   g_initFailed;
+
+		typedef struct
+		{
+			uint32			m_homeId;
+			uint8			m_nodeId;
+			bool			m_polled;
+			list<OpenZWave::ValueID>	m_values;
+		}NodeInfo;
+
+		list<NodeInfo*> g_nodes;
+		pthread_mutex_t g_criticalSection;
+		pthread_cond_t  initCond; 
+		pthread_mutex_t initMutex ;
+
 
 		// Private methods
+
+		void controller_update(OpenZWave::Driver::ControllerState state, void *context);
+		NodeInfo* GetNodeInfo ( OpenZWave::Notification const* _notification);
+
+
 public:
 		// Public member variables
+		void OnNotification(OpenZWave::Notification const* _notification, void* _context);
 
 //<-dceag-const-b->
 public:

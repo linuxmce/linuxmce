@@ -1,10 +1,5 @@
 /*
-     Copyright (C) 2004 Pluto, Inc., a Florida Corporation
-
-     www.plutohome.com
-
-     Phone: +1 (877) 758-8648
- 
+     Copyright (C) 2012 Harald Klein <hari@vt100.at
 
      This program is free software; you can redistribute it and/or modify it under the terms of the GNU General Public License.
      This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty
@@ -117,7 +112,7 @@ int main(int argc, char* argv[])
 	g_sBinaryPath = FileUtils::BasePath(argv[0]);
 
 	cout << "ZWave, v." << VERSION << endl
-		<< "Visit www.plutohome.com for source code and license information" << endl << endl;
+		<< "Visit www.linuxmce.org for source code and license information" << endl << endl;
 
 	string sRouter_IP="dcerouter";
 	int PK_Device=0;

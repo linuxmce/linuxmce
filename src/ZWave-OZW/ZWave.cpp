@@ -1,10 +1,5 @@
 /*
-     Copyright (C) 2004 Pluto, Inc., a Florida Corporation
-
-     www.plutohome.com
-
-     Phone: +1 (877) 758-8648
- 
+     Copyright (C) 2012 Harald Klein <hari@vt100.at
 
      This program is free software; you can redistribute it and/or modify it under the terms of the GNU General Public License.
      This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty
@@ -26,6 +21,8 @@ using namespace DCE;
 
 #include "Gen_Devices/AllCommandsRequests.h"
 //<-dceag-d-e->
+#include "PlutoUtils/LinuxSerialUSB.h"
+
 
 //<-dceag-const-b->
 // The primary constructor when the class is created as a stand-alone device
@@ -33,6 +30,10 @@ ZWave::ZWave(int DeviceID, string ServerAddress,bool bConnectEventHandler,bool b
 	: ZWave_Command(DeviceID, ServerAddress,bConnectEventHandler,bLocalMode,pRouter)
 //<-dceag-const-e->
 {
+	g_homeId = 0;
+	g_initFailed = false;
+	initCond  = PTHREAD_COND_INITIALIZER;
+	initMutex = PTHREAD_MUTEX_INITIALIZER;
 }
 
 //<-dceag-const2-b->
@@ -59,7 +60,51 @@ bool ZWave::GetConfig()
 
 	// Put your code here to initialize the data in this class
 	// The configuration parameters DATA_ are now populated
-	return true;
+
+	string port = TranslateSerialUSB(DATA_Get_COM_Port_on_PC());
+
+	pthread_mutexattr_t mutexattr;
+
+	pthread_mutexattr_init ( &mutexattr );
+	pthread_mutexattr_settype( &mutexattr, PTHREAD_MUTEX_RECURSIVE );
+
+	pthread_mutex_init( &g_criticalSection, &mutexattr );
+	pthread_mutexattr_destroy( &mutexattr );
+
+	pthread_mutex_lock( &initMutex );
+
+	// Create the OpenZWave Manager.
+	// The first argument is the path to the config files (where the manufacturer_specific.xml file is located
+	// The second argument is the path for saved Z-Wave network state and the log file.  If you leave it NULL 
+	// the log file will appear in the program's working directory.
+	OpenZWave::Options::Create( "/etc/openzwave/config/", "", "" );
+	OpenZWave::Options::Get()->Lock();
+
+	OpenZWave::Manager::Create();
+
+	// OpenZWave::Manager::Get()->AddWatcher( OnNotification, NULL );
+
+	OpenZWave::Manager::Get()->AddDriver(port );
+
+	// Now we just wait for the driver to become ready
+	pthread_cond_wait( &initCond, &initMutex );
+
+	if( !g_initFailed )
+	{
+
+		OpenZWave::Manager::Get()->WriteConfig( g_homeId );
+
+		OpenZWave::Driver::DriverData data;
+		OpenZWave::Manager::Get()->GetDriverStatistics( g_homeId, &data );
+		printf("SOF: %d ACK Waiting: %d Read Aborts: %d Bad Checksums: %d\n", data.s_SOFCnt, data.s_ACKWaiting, data.s_readAborts, data.s_badChecksum);
+		printf("Reads: %d Writes: %d CAN: %d NAK: %d ACK: %d Out of Frame: %d\n", data.s_readCnt, data.s_writeCnt, data.s_CANCnt, data.s_NAKCnt, data.s_ACKCnt, data.s_OOFCnt);
+		printf("Dropped: %d Retries: %d\n", data.s_dropped, data.s_retries);
+
+	 	// int ourNodeId = Manager::Get()->GetControllerNodeId(g_homeId);
+		return true;
+	}
+
+	return false;
 }
 
 //<-dceag-reg-b->
@@ -92,7 +137,50 @@ ZWave_Command *Create_ZWave(Command_Impl *pPrimaryDeviceCommand, DeviceData_Impl
 void ZWave::ReceivedCommandForChild(DeviceData_Impl *pDeviceData_Impl,string &sCMD_Result,Message *pMessage)
 //<-dceag-cmdch-e->
 {
-	sCMD_Result = "UNHANDLED CHILD";
+	LoggerWrapper::GetInstance()->Write(LV_ZWAVE,"Received command for child");
+	string nodeInstance = pDeviceData_Impl->m_mapParameters_Find(DEVICEDATA_PortChannel_Number_CONST);
+	int node_id;
+	int instance_id;
+	if (nodeInstance.find("/") != string::npos) {
+	        vector<string> vectNI;
+		StringUtils::Tokenize(nodeInstance, "/", vectNI);
+		node_id = atoi(vectNI[0].c_str());
+		instance_id = atoi(vectNI[1].c_str());
+	} else {
+	        node_id = atoi(nodeInstance.c_str());
+		instance_id = 0;
+	}
+	// TODO: use instance id in commands below
+	if (node_id > 0 && node_id <= 233) {
+		sCMD_Result = "OK";
+		int level,duration,temp,fan;
+		string heat;
+		switch (pMessage->m_dwID) {
+			case COMMAND_Generic_On_CONST:
+			        LoggerWrapper::GetInstance()->Write(LV_ZWAVE,"ON RECEIVED FOR CHILD %d/%d",node_id, instance_id);
+				pthread_mutex_lock( &g_criticalSection );
+				OpenZWave::Manager::Get()->SetNodeOn(g_homeId,node_id);
+				pthread_mutex_unlock( &g_criticalSection );
+				break;
+				;;
+			case COMMAND_Generic_Off_CONST:
+				LoggerWrapper::GetInstance()->Write(LV_ZWAVE,"OFF RECEIVED FOR CHILD %d",node_id);
+				pthread_mutex_lock( &g_criticalSection );
+				OpenZWave::Manager::Get()->SetNodeOff(g_homeId,node_id);
+				break;
+				;;
+			case COMMAND_Set_Level_CONST:
+				level = atoi(pMessage->m_mapParameters[COMMANDPARAMETER_Level_CONST].c_str());
+				LoggerWrapper::GetInstance()->Write(LV_ZWAVE,"SET LEVEL RECEIVED FOR CHILD %d, level: %d",node_id,level);
+				pthread_mutex_lock( &g_criticalSection );
+				OpenZWave::Manager::Get()->SetNodeLevel(g_homeId,node_id,level>99?99:level);
+				pthread_mutex_unlock( &g_criticalSection );
+				break;
+				;;
+		}
+	} else {
+		sCMD_Result = "UNHANDLED CHILD";
+	}
 }
 
 /*
@@ -434,4 +522,204 @@ void ZWave::CMD_Resync_node(int iNodeID,string &sCMD_Result,Message *pMessage)
 	cout << "Parm #239 - NodeID=" << iNodeID << endl;
 }
 
+
+void ZWave::controller_update(OpenZWave::Driver::ControllerState state, void *context) {
+	printf("controller state update:");
+	switch(state) {
+		case OpenZWave::Driver::ControllerState_Normal:
+			printf("no command in progress");
+			// nothing to do
+			break;
+		case OpenZWave::Driver::ControllerState_Waiting:
+			printf("waiting for user action");
+			// waiting for user action
+			break;
+		case OpenZWave::Driver::ControllerState_InProgress:
+			printf("communicating with other device");
+			// communicating with device
+			break;
+		case OpenZWave::Driver::ControllerState_Completed:
+			printf("command has completed successfully");
+			break;
+		case OpenZWave::Driver::ControllerState_Failed:
+			printf("command has failed");
+			// houston..
+			break;
+		case OpenZWave::Driver::ControllerState_NodeOK:
+			printf("node ok");
+			break;
+		case OpenZWave::Driver::ControllerState_NodeFailed:
+			printf("node failed");
+			break;
+		default:
+			printf("unknown response");
+			break;
+	}
+	printf("\n");
+
+}
+
+ZWave::NodeInfo* ZWave::GetNodeInfo(OpenZWave::Notification const* _notification) {
+	uint32 const homeId = _notification->GetHomeId();
+	uint8 const nodeId = _notification->GetNodeId();
+	for( list<NodeInfo*>::iterator it = g_nodes.begin(); it != g_nodes.end(); ++it )
+	{
+		NodeInfo* nodeInfo = *it;
+		if( ( nodeInfo->m_homeId == homeId ) && ( nodeInfo->m_nodeId == nodeId ) )
+		{
+			return nodeInfo;
+		}
+	}
+
+	return NULL;
+}
+
+void ZWave::OnNotification(OpenZWave::Notification const* _notification, void* _context) {
+	// Must do this inside a critical section to avoid conflicts with the main thread
+	pthread_mutex_lock( &g_criticalSection );
+
+	switch( _notification->GetType() )
+	{
+		case OpenZWave::Notification::Type_ValueAdded:
+		{
+			if( NodeInfo* nodeInfo = GetNodeInfo( _notification ) )
+			{
+				// Add the new value to our list
+				nodeInfo->m_values.push_back( _notification->GetValueID() );
+				OpenZWave::ValueID id = _notification->GetValueID();
+				printf("Notification: Value Added Home 0x%08x Node %d Genre %d Class %d Instance %d Index %d Type %d\n", _notification->GetHomeId(), _notification->GetNodeId(), id.GetGenre(), id.GetCommandClassId(), id.GetInstance(), id.GetIndex(), id.GetType());
+			}
+			break;
+		}
+
+		case OpenZWave::Notification::Type_ValueRemoved:
+		{
+			if( NodeInfo* nodeInfo = GetNodeInfo( _notification ) )
+			{
+				// Remove the value from out list
+				for( list<OpenZWave::ValueID>::iterator it = nodeInfo->m_values.begin(); it != nodeInfo->m_values.end(); ++it )
+				{
+					if( (*it) == _notification->GetValueID() )
+					{
+						nodeInfo->m_values.erase( it );
+						break;
+					}
+				}
+			}
+			break;
+		}
+		case OpenZWave::Notification::Type_ValueChanged:
+		{
+			if( NodeInfo* nodeInfo = GetNodeInfo( _notification ) )
+			{
+				// One of the node values has changed
+				// TBD...
+				// nodeInfo = nodeInfo;
+				OpenZWave::ValueID id = _notification->GetValueID();
+				string str;
+				printf("Notification: Value Changed Home 0x%08x Node %d Genre %d Class %d Instance %d Index %d Type %d\n", _notification->GetHomeId(), _notification->GetNodeId(), id.GetGenre(), id.GetCommandClassId(), id.GetInstance(), id.GetIndex(), id.GetType());
+			      if (OpenZWave::Manager::Get()->GetValueAsString(id, &str)) {
+					string label = OpenZWave::Manager::Get()->GetValueLabel(id);
+					string units = OpenZWave::Manager::Get()->GetValueUnits(id);
+					string level = str;
+					if (str == "True") level="255";
+					if (str == "False") level="0";
+					printf("Value: %s Label: %s Unit: %s\n",str.c_str(),label.c_str(),units.c_str());
+						
+				}
+			}
+			break;
+		}
+
+		case OpenZWave::Notification::Type_NodeAdded:
+		{
+			// Add the new node to our list
+			NodeInfo* nodeInfo = new NodeInfo();
+			nodeInfo->m_homeId = _notification->GetHomeId();
+			nodeInfo->m_nodeId = _notification->GetNodeId();
+			nodeInfo->m_polled = false;		
+			g_nodes.push_back( nodeInfo );
+
+
+			break;
+		}
+
+		case OpenZWave::Notification::Type_NodeRemoved:
+		{
+			// Remove the node from our list
+			uint32 const homeId = _notification->GetHomeId();
+			uint8 const nodeId = _notification->GetNodeId();
+			for( list<NodeInfo*>::iterator it = g_nodes.begin(); it != g_nodes.end(); ++it )
+			{
+				NodeInfo* nodeInfo = *it;
+				if( ( nodeInfo->m_homeId == homeId ) && ( nodeInfo->m_nodeId == nodeId ) )
+				{
+					g_nodes.erase( it );
+					break;
+				}
+			}
+			break;
+		}
+		case OpenZWave::Notification::Type_NodeEvent:
+		{
+			if( NodeInfo* nodeInfo = GetNodeInfo( _notification ) )
+			{
+				// We have received an event from the node, caused by a
+				// basic_set or hail message.
+				// TBD...
+
+				nodeInfo = nodeInfo;
+
+			}
+			break;
+		}
+
+		case OpenZWave::Notification::Type_PollingDisabled:
+		{
+			if( NodeInfo* nodeInfo = GetNodeInfo( _notification ) )
+			{
+				nodeInfo->m_polled = false;
+			}
+			break;
+		}
+
+		case OpenZWave::Notification::Type_PollingEnabled:
+		{
+			if( NodeInfo* nodeInfo = GetNodeInfo( _notification ) )
+			{
+				nodeInfo->m_polled = true;
+			}
+			break;
+		}
+
+		case OpenZWave::Notification::Type_DriverReady:
+		{
+			g_homeId = _notification->GetHomeId();
+			break;
+		}
+
+
+		case OpenZWave::Notification::Type_DriverFailed:
+		{
+			g_initFailed = true;
+			pthread_cond_broadcast(&initCond);
+			break;
+		}
+
+		case OpenZWave::Notification::Type_AwakeNodesQueried:
+		case OpenZWave::Notification::Type_AllNodesQueried:
+		{
+				pthread_cond_broadcast(&initCond);
+				break;
+		}
+
+		default:
+		{
+		}
+	}
+
+	pthread_mutex_unlock( &g_criticalSection );
+
+
+}
 
