@@ -6793,6 +6793,18 @@ void Media_Plugin::CMD_Get_Attributes_For_Media(string sFilename,string sPK_Ente
 		  "\tFILENAME\t" + pMediaFile->m_sFilename +
 			"\tTITLE\t" + m_pMediaAttributes->m_pMediaAttributes_LowLevel->GetDefaultDescriptionForMediaFile(pMediaFile) +
 			"\t";
+		// Get attribute values for this media
+		vector<Row_Attribute *> vectRow_Attribute;
+		m_pDatabase_pluto_media->Attribute_get()->GetRows("FK_File=" + StringUtils::itos(pMediaFile->m_dwPK_File),&vectRow_Attribute);
+		if( vectRow_Attribute.size() )
+		{
+			for (int i = 0; i < vectRow_Attribute.size(); i++)
+			{
+				*sValue_To_Assign += StringUtils::ToUpper(vectRow_Attribute[i]->FK_AttributeType_getrow()->Description_get()) + "\t" +
+					vectRow_Attribute[i]->Name_get() + "\t";
+			}
+		}
+		
 		vector<Row_LongAttribute *> vectRow_LongAttribute;
 		m_pDatabase_pluto_media->LongAttribute_get()->GetRows("FK_File=" + StringUtils::itos(pMediaFile->m_dwPK_File) + " AND FK_AttributeType=" TOSTRING(ATTRIBUTETYPE_Synopsis_CONST),&vectRow_LongAttribute);
 		if( vectRow_LongAttribute.size() )
