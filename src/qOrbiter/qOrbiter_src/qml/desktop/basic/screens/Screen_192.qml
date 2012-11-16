@@ -1,0 +1,355 @@
+// UI1 Screen RoomsWizard (192)
+// Created using structure-qml.php from Peer Oliver Schmidt\m// based on the LinuxMCE database
+import QtQuick 1.0
+import "../components"
+Item {
+	Image {
+		source: "skins/Basic/Backgrounds/wizard_smallXine.png"
+		width: 1920
+		height: 1080
+	}
+	function onActivate5067() 
+	{
+	 // Calling Command 741 (Goto Screen) with CommandGroup_Parameters from 17032
+		manager.sendDceMessage(srouterip + " "+deviceid + " -300 1 741 9 \"<%=T1736%>|<%=T1494%>|<%=T453%>\" 137 \"0 <%=V-101%> 1 266 2 <%=!%> 24 Y & 0 -300 1 741 159 1|0 -300 1 741 159 1\" 159 \"53\" ")
+	}
+	StyledText {
+		x: 1680
+		y: 0
+		height: 240
+		width: 180
+		textLabel: "Cancel Wizard"
+	}
+	ButtonSq {
+		id: button5067_2122
+		x: 1680
+		y: 0
+		width: 240
+		height: 180
+		buttonbackground: "skins/Basic/Buttons/squareOn.png"
+		buttontext: "Cancel Wizard"
+		clickHandler.onClicked: onActivate5067()
+	}
+	function onActivate4569() 
+	{
+	 // Calling Command 15 (Regen Screen) with CommandGroup_Parameters from 17507
+		manager.sendDceMessage(srouterip + " "+deviceid + " -300 1 15 ")
+	}
+	StyledText {
+		x: 1680
+		y: 360
+		height: 240
+		width: 180
+		textLabel: "Please repeat"
+	}
+	ButtonSq {
+		id: button4569_2123
+		x: 1680
+		y: 360
+		width: 240
+		height: 180
+		buttonbackground: "skins/Basic/Buttons/squareb.png"
+		buttontext: "Please repeat"
+		clickHandler.onClicked: onActivate4569()
+	}
+	function onActivate4573() 
+	{
+	 // Calling Command 5 (Goto DesignObj) with CommandGroup_Parameters from 16328
+		manager.sendDceMessage(srouterip + " "+deviceid + " -300 1 5 3 \"4553\" ")
+	}
+	StyledText {
+		x: 1444
+		y: 914
+		height: 211
+		width: 237
+		textLabel: "Next ->"
+	}
+	ButtonSq {
+		id: button4573_2124
+		x: 1444
+		y: 914
+		width: 462
+		height: 158
+		buttonbackground: "skins/Basic/Buttons/next.png"
+		buttontext: "Next ->"
+		clickHandler.onClicked: onActivate4573()
+	}
+	function onActivate4658() 
+	{
+	 // Calling Command 38 (Stop Media) with CommandGroup_Parameters from 16418
+		manager.sendDceMessage(srouterip + " "+deviceid + " -152 1 38 ")
+	}
+	StyledText {
+		x: 1680
+		y: 180
+		height: 240
+		width: 180
+		textLabel: "Stop video"
+	}
+	ButtonSq {
+		id: button4658_2125
+		x: 1680
+		y: 180
+		width: 240
+		height: 180
+		buttonbackground: "skins/Basic/Buttons/squareb.png"
+		buttontext: "Stop video"
+		clickHandler.onClicked: onActivate4658()
+	}
+	StyledText {
+		x: 0
+		y: 0
+		height: 60
+		width: 270
+		textLabel: "House Setup"
+	}
+	function onActivate4619() 
+	{
+	 // Calling Command 741 (Goto Screen) with CommandGroup_Parameters from 16441
+		manager.sendDceMessage(srouterip + " "+deviceid + " -300 1 741 159 \"193\" ")
+	}
+	StyledText {
+		x: 0
+		y: 45
+		height: 120
+		width: 270
+		textLabel: "Names"
+	}
+	ButtonSq {
+		id: button4619_2126
+		x: 0
+		y: 45
+		width: 360
+		height: 90
+		buttonbackground: "skins/Basic/Buttons/midsmallbutton.png"
+		buttontext: "Names"
+		clickHandler.onClicked: onActivate4619()
+	}
+	function onActivate4656() 
+	{
+	 // Calling Command 741 (Goto Screen) with CommandGroup_Parameters from 16442
+		manager.sendDceMessage(srouterip + " "+deviceid + " -300 1 741 159 \"192\" ")
+	}
+	StyledText {
+		x: 0
+		y: 225
+		height: 120
+		width: 270
+		textLabel: "Rooms"
+	}
+	ButtonSq {
+		id: button4656_2127
+		x: 0
+		y: 225
+		width: 360
+		height: 90
+		buttonbackground: "skins/Basic/Buttons/midsmallbutton.png"
+		buttontext: "Rooms"
+		clickHandler.onClicked: onActivate4656()
+	}
+	function onActivate4647() 
+	{
+	 // Calling Command 741 (Goto Screen) with CommandGroup_Parameters from 16536
+		manager.sendDceMessage(srouterip + " "+deviceid + " -300 1 741 159 \"198\" ")
+	}
+	StyledText {
+		x: 0
+		y: 315
+		height: 120
+		width: 270
+		textLabel: "Lights"
+	}
+	ButtonSq {
+		id: button4647_2128
+		x: 0
+		y: 315
+		width: 360
+		height: 90
+		buttonbackground: "skins/Basic/Buttons/midsmallbutton.png"
+		buttontext: "Lights"
+		clickHandler.onClicked: onActivate4647()
+	}
+	function onActivate4654() 
+	{
+	 // Calling Command 741 (Goto Screen) with CommandGroup_Parameters from 16537
+		manager.sendDceMessage(srouterip + " "+deviceid + " -300 1 741 159 \"200\" ")
+	}
+	StyledText {
+		x: 0
+		y: 495
+		height: 120
+		width: 270
+		textLabel: "VOIP Provider"
+	}
+	ButtonSq {
+		id: button4654_2129
+		x: 0
+		y: 495
+		width: 360
+		height: 90
+		buttonbackground: "skins/Basic/Buttons/midsmallbutton.png"
+		buttontext: "VOIP Provider"
+		clickHandler.onClicked: onActivate4654()
+	}
+	function onActivate4679() 
+	{
+	 // Calling Command 741 (Goto Screen) with CommandGroup_Parameters from 16438
+		manager.sendDceMessage(srouterip + " "+deviceid + " -300 1 741 159 \"194\" ")
+	}
+	StyledText {
+		x: 0
+		y: 135
+		height: 120
+		width: 270
+		textLabel: "Location"
+	}
+	ButtonSq {
+		id: button4679_2130
+		x: 0
+		y: 135
+		width: 360
+		height: 90
+		buttonbackground: "skins/Basic/Buttons/midsmallbutton.png"
+		buttontext: "Location"
+		clickHandler.onClicked: onActivate4679()
+	}
+	function onActivate4682() 
+	{
+	 // Calling Command 741 (Goto Screen) with CommandGroup_Parameters from 16440
+		manager.sendDceMessage(srouterip + " "+deviceid + " -300 1 741 159 \"199\" ")
+	}
+	StyledText {
+		x: 0
+		y: 405
+		height: 120
+		width: 270
+		textLabel: "Alarm Panel"
+	}
+	ButtonSq {
+		id: button4682_2131
+		x: 0
+		y: 405
+		width: 360
+		height: 90
+		buttonbackground: "skins/Basic/Buttons/midsmallbutton.png"
+		buttontext: "Alarm Panel"
+		clickHandler.onClicked: onActivate4682()
+	}
+	function onActivate5318() 
+	{
+	 // Calling Command 741 (Goto Screen) with CommandGroup_Parameters from 17300
+		manager.sendDceMessage(srouterip + " "+deviceid + " -300 1 741 159 \"250\" ")
+	}
+	StyledText {
+		x: 0
+		y: 585
+		height: 120
+		width: 270
+		textLabel: "PVR Software"
+	}
+	ButtonSq {
+		id: button5318_2132
+		x: 0
+		y: 585
+		width: 360
+		height: 90
+		buttonbackground: "skins/Basic/Buttons/midsmallbutton.png"
+		buttontext: "PVR Software"
+		clickHandler.onClicked: onActivate5318()
+	}
+	function onActivate5319() 
+	{
+	 // Calling Command 741 (Goto Screen) with CommandGroup_Parameters from 17305
+		manager.sendDceMessage(srouterip + " "+deviceid + " -300 1 741 159 \"251\" ")
+	}
+	StyledText {
+		x: 0
+		y: 675
+		height: 120
+		width: 270
+		textLabel: "Done"
+	}
+	ButtonSq {
+		id: button5319_2133
+		x: 0
+		y: 675
+		width: 360
+		height: 90
+		buttonbackground: "skins/Basic/Buttons/midsmallbutton.png"
+		buttontext: "Done"
+		clickHandler.onClicked: onActivate5319()
+	}
+	function onActivate3558() 
+	{
+	}
+	StyledText {
+		x: 1350
+		y: 540
+		height: 240
+		width: 180
+		textLabel: "Remove
+-"
+	}
+	ButtonSq {
+		id: button4720_2134
+		x: 1350
+		y: 540
+		width: 240
+		height: 180
+		buttonbackground: "skins/Basic/Buttons/squareb.png"
+		buttontext: "Remove
+-"
+		clickHandler.onClicked: onActivate4720()
+	}
+	StyledText {
+		x: 1350
+		y: 360
+		height: 240
+		width: 180
+		textLabel: "Add
++"
+	}
+	ButtonSq {
+		id: button4719_2135
+		x: 1350
+		y: 360
+		width: 240
+		height: 180
+		buttonbackground: "skins/Basic/Buttons/squareb.png"
+		buttontext: "Add
++"
+		clickHandler.onClicked: onActivate4719()
+	}
+	ButtonSq {
+		id: button4717_2136
+		x: 361
+		y: 180
+		width: 960
+		height: 720
+		buttonbackground: "skins/Basic/2"
+		buttontext: ""
+		clickHandler.onClicked: onActivate4717()
+	}
+	function onActivate5437() 
+	{
+	 // Calling Command 912 (Activate PC Desktop) with CommandGroup_Parameters from 17388
+		manager.sendDceMessage(srouterip + " "+deviceid + " -300 1 912 119 \"1\" ")
+	}
+	StyledText {
+		x: 1680
+		y: 540
+		height: 240
+		width: 180
+		textLabel: "KDE desktop"
+	}
+	ButtonSq {
+		id: button5437_2137
+		x: 1680
+		y: 540
+		width: 240
+		height: 180
+		buttonbackground: "skins/Basic/Buttons/square.png"
+		buttontext: "KDE desktop"
+		clickHandler.onClicked: onActivate5437()
+	}
+}

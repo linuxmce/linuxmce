@@ -1,0 +1,91 @@
+// UI1 Screen VoicemailMain (27)
+// Created using structure-qml.php from Peer Oliver Schmidt\m// based on the LinuxMCE database
+import QtQuick 1.0
+import "../components"
+Item {
+	Image {
+		source: "skins/Basic/Phone/callmanagerB.png"
+		width: 1920
+		height: 1080
+	}
+	function onActivate1785() 
+	{
+	 // Calling Command 741 (Goto Screen) with CommandGroup_Parameters from 17174
+		manager.sendDceMessage(srouterip + " "+deviceid + " -300 1 741 159 \"1\" 195 \"<%=L%>\" ")
+	}
+	StyledText {
+		x: 1680
+		y: 0
+		height: 1
+		width: 1
+		textLabel: "Main menu"
+	}
+	ButtonSq {
+		id: button1785_330
+		x: 1680
+		y: 0
+		width: 240
+		height: 180
+		buttonbackground: "skins/Basic/Buttons/TabletControls/home.png"
+		buttontext: "Main menu"
+		clickHandler.onClicked: onActivate1785()
+	}
+	function onActivate1784() 
+	{
+	 // Calling Command 4 (Go back) with CommandGroup_Parameters from 2506
+		manager.sendDceMessage(srouterip + " "+deviceid + " -300 1 4 ")
+	}
+	ButtonSq {
+		id: button1784_331
+		x: 1680
+		y: 180
+		width: 240
+		height: 180
+		buttonbackground: "skins/Basic/Buttons/TabletControls/back.png"
+		buttontext: ""
+		clickHandler.onClicked: onActivate1784()
+	}
+	function onActivate1798() 
+	{
+	}
+	function onActivate1780() 
+	{
+	 // Calling Command 269 (Move Playlist entry Up) with CommandGroup_Parameters from 14223
+		manager.sendDceMessage(srouterip + " "+deviceid + " -106 1 269 48 \"<%=35%>\" ")
+	}
+	ButtonSq {
+		id: button1780_332
+		x: 1680
+		y: 360
+		width: 240
+		height: 180
+		buttonbackground: "skins/Basic/Buttons/TabletControls/up.png"
+		buttontext: ""
+		clickHandler.onClicked: onActivate1780()
+	}
+	function onActivate1781() 
+	{
+	 // Calling Command 270 (Move Playlist entry Down) with CommandGroup_Parameters from 14224
+		manager.sendDceMessage(srouterip + " "+deviceid + " -106 1 270 48 \"<%=35%>\" ")
+	}
+	ButtonSq {
+		id: button1781_333
+		x: 1680
+		y: 540
+		width: 240
+		height: 180
+		buttonbackground: "skins/Basic/Buttons/TabletControls/down.png"
+		buttontext: ""
+		clickHandler.onClicked: onActivate1781()
+	}
+	ButtonSq {
+		id: button2046_334
+		x: 487
+		y: 68
+		width: 713
+		height: 934
+		buttonbackground: "skins/Basic/http://pluto/customer_home/telecom/pbx_vmmanagerframe.php?deviceid=<%=!%>&userid=<%=70:1%>"
+		buttontext: ""
+		clickHandler.onClicked: onActivate2046()
+	}
+}
