@@ -258,7 +258,11 @@ clean: clean-recursive
 	rm -f *.o *.d libpluto_main.so >/dev/null
 
 install: 
-	mkdir -p pluto/lib 
+        mkdir -p $(DESTDIR)/usr/lib $(DESTDIR)/pluto/lib $(DESTDIR)/usr/include/lmce
+        cp libpluto_main.so $(DESTDIR)/pluto/lib
+        cp libpluto_main.so $(DESTDIR)/usr/lib
+        cp $(header) $(DESTDIR)/usr/include/lmce	
+        mkdir -p pluto/lib 
 	cp libpluto_main.so $(DESTPATH)pluto/lib 
 
 include $(ROOT)/PlutoUtils/make.rules
