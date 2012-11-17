@@ -23,8 +23,9 @@ QVariant SleepingAlarmModel::data(const QModelIndex &index, int role) const
 }
 
 SleepingAlarmModel::~SleepingAlarmModel() {
-  delete m_prototype;
+
   clear();
+    delete m_prototype;
 }
 
 void SleepingAlarmModel::appendRow(SleepingAlarm *item)
