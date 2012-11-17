@@ -21,11 +21,12 @@ Rectangle{
     }
     Image {
         id: nowplayingimage
-        width: dcenowplaying.aspect=="wide"? scaleX(18) : scaleX(18)
-        height:dcenowplaying.aspect=="wide"? scaleY(30) : scaleY(30)
+        width: dcenowplaying.aspect=="wide"? scaleX(20) : scaleX(25)
+        height:dcenowplaying.aspect=="wide"? scaleY(33) : scaleY(33)
         source: "image://listprovider/updateobject/"+dcenowplaying.m_iplaylistPosition
         anchors.horizontalCenter: parent.horizontalCenter
         smooth: true
+
     }
     
     Image {

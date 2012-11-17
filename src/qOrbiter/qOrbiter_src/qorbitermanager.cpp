@@ -1523,10 +1523,7 @@ void qorbiterManager::checkConnection(QString s)
 
 }
 
-void qorbiterManager::jogPosition(QString jog)
-{
-    // pqOrbiter->JogStream(jog);
-}
+
 
 void qorbiterManager::regenError(QProcess::ProcessError)
 {

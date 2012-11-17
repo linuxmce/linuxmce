@@ -519,6 +519,8 @@ int main(int argc, char* argv[])
         QObject::connect(simpleEPGmodel, SIGNAL(programChanged(QString)), w.nowPlayingButton, SLOT(setProgram(QString)), Qt::QueuedConnection);
         QObject::connect(simpleEPGmodel, SIGNAL(networkChanged(QString)), w.nowPlayingButton, SLOT(setChannelID(QString)), Qt::QueuedConnection);
         QObject::connect(timecode, SIGNAL(seekToTime(QString)), &pqOrbiter, SLOT(JogStream(QString)), Qt::QueuedConnection );
+        QObject::connect(&w, SIGNAL(seekPositionChanged(QString)), &pqOrbiter, SLOT(setPosition(QString)) );
+        QObject::connect(&w, SIGNAL(jogToPosition(QString)), &pqOrbiter, SLOT(JogStream(QString)));
 
         //attributes
         QObject::connect(&pqOrbiter, SIGNAL(np_storageDeviceChanged(QString)), w.nowPlayingButton, SLOT(setStorageDevice(QString)), Qt::QueuedConnection);

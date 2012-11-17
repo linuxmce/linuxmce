@@ -548,6 +548,8 @@ signals:
     void resendDeviceCode(int from, int to);
     void updateScreen(QString screen);
     void deviceVolumeChanged();
+    void seekPositionChanged(QString p) ;
+    void jogToPosition(QString j);
 
     /*device related*/
     void osdChanged(bool);
@@ -724,7 +726,7 @@ public slots:
     void pauseMedia() {emit pause();}
     void adjustVolume(int vol) {emit setVolume(vol);}
     void newTrack(QString track) { emit changeTrack(track); }
-    void jogPosition(QString jog);
+    void jogPosition(QString jog) {emit jogToPosition(jog);}
     void showBookmarks(QList<QObject*> t);
     void changeChannels(QString chan) {emit newChannel(chan);  }
     void gridChangeChannel(QString chan, QString chanid) {emit newGridChannel(chan, chanid);}
@@ -738,6 +740,7 @@ public slots:
     void greenButtonPress(){emit greenButton();}
     void yellowButtonPress(){emit yellowButton();}
     void mute(){emit muteSound();}
+
 
     /*Screenshot & Images slots*/
     void updateImageChanged(QImage img);
@@ -787,7 +790,7 @@ public slots:
     bool getRequestMore();
     bool requestDataGrid();
     void setSeekLetter(QString letter) {qs_seek = letter; emit seekGrid(qs_seek); }
-
+    void setSeekPosition(QString p) {emit seekPositionChanged(p);}
     void setDceGridSep(int sep) {emit dceGridSepChanged(sep);}
     void setGridSeperator(int sep) { media_pageSeperator = sep; emit newPageSeperator(sep);}
     int getGridSeperator() { return media_pageSeperator; }

@@ -4,9 +4,9 @@ import QtQuick 1.1
 
 ListView {
     width: manager.appHeight
-    height: scaleY(35)
+    height: scaleY(30)
     orientation: ListView.Horizontal
-
+    spacing: scaleX(1)
     Connections{
         target: mediaplaylist
         onActiveItemChanged:{

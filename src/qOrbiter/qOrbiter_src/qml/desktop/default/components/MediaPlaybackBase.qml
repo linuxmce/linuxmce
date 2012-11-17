@@ -15,9 +15,10 @@ Rectangle {
     Rectangle{
         id:metadataSection
         width: manager.appWidth
-        height: scaleY(30)
+        height: scaleY(35)
         color: "transparent"
         anchors.verticalCenter: parent.verticalCenter
+        clip:false
 
         Rectangle{
             id:opacityMask
@@ -29,6 +30,7 @@ Rectangle {
         PlaylistTemplateCoverFlow{
             id:playlist
             anchors.centerIn: parent
+            visible:false
         }
 
         StyledText {
