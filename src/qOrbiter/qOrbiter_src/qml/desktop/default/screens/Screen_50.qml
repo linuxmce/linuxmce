@@ -22,14 +22,12 @@ Rectangle {
         interval: 1000
         triggeredOnStart: true
         running: true
-        onTriggered: manager.grabStreamImage()
+        onTriggered: manager.getVideoFrame()
     }
 
     Connections{
-        target:dcenowplaying        
-        onStreamImageChanged: { nowplayingimage.source = "image://listprovider/stream/"+securityvideo.timestamp;
-
-        }
+        target: manager
+        onMediaScreenShotReady: nowplayingimage.source="image://listprovider/screenshot/"+securityvideo.timestamp
     }
 
     Component.onCompleted:setNowPlayingData()

@@ -1128,9 +1128,9 @@ void qOrbiter::CMD_Set_Now_Playing(string sPK_DesignObj,string sValue_To_Assign,
     {
         GetNowPlayingAttributes();
         emit playlistPositionChanged(iValue);
-        if(bRetransmit == 1)
+        if(bRetransmit == 0)
         {
-            //  emit clearPlaylist();
+             emit clearPlaylist();
         }
     }
 

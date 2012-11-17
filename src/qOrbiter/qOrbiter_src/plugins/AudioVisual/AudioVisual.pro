@@ -1,8 +1,8 @@
 TEMPLATE = lib
 # This does not seem to do anything
-# TARGET = AudioVisual
+#TARGET = AudioVisual
 
-contains(QT_VERSION,4.8.*){
+contains(QT_VERSION,4.*.*){
 message("$$QT_VERSION DCE-Av-Plugin")
 	QT += declarative phonon network
 	DEFINES+=QT4

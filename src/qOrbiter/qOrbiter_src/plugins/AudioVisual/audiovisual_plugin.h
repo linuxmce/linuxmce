@@ -4,7 +4,7 @@
 #ifdef QT5
 #include <QtQml/QQmlExtensionPlugin>
 #else
-#include <QDeclarativeExtensionPlugin>
+#include <QtDeclarative/QDeclarativeExtensionPlugin>
 #endif
 
 #ifdef QT5
