@@ -1,0 +1,21 @@
+Source: libpluto-main
+Priority: extra
+Maintainer: LinuxMCE Developers <developers@linuxmce.org>
+Build-Depends: debhelper (>= 7)
+Standards-Version: 3.8.3
+Section: libs
+Homepage: http://www.linuxmce.org
+
+Package: libpluto-main-dev
+Section: libdevel
+Architecture: any
+Depends: libpluto-mainBROKEN (= ${binary:Version})
+Description: <insert up to 60 chars description>
+ <insert long description, indented with spaces>
+
+Package: libpluto-mainBROKEN
+Section: libs
+Architecture: any
+Depends: ${shlibs:Depends}, ${misc:Depends}
+Description: <insert up to 60 chars description>
+ <insert long description, indented with spaces>
