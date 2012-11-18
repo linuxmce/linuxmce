@@ -1,0 +1,21 @@
+Source: libserialize
+Priority: extra
+Maintainer: root <root@fluffybitch.org>
+Build-Depends: debhelper (>= 7)
+Standards-Version: 3.8.3
+Section: libs
+Homepage: <insert the upstream URL, if relevant>
+
+Package: libserialize-dev
+Section: libdevel
+Architecture: any
+Depends: libserialize (= ${binary:Version})
+Description: <insert up to 60 chars description>
+ <insert long description, indented with spaces>
+
+Package: libserialize
+Section: libs
+Architecture: any
+Depends: ${shlibs:Depends}, ${misc:Depends}
+Description: <insert up to 60 chars description>
+ <insert long description, indented with spaces>

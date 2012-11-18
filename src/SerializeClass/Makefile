@@ -9,6 +9,8 @@ CXX = g++
 
 sources = SerializeClass.cpp
 
+header = *.h
+
 all: libSerializeClass.so all-recursive
 
 libSerializeClass.so: $(sources:.cpp=.o)
@@ -29,5 +31,9 @@ include $(ROOT)/PlutoUtils/make.rules
 -include $(sources:.cpp=.d)
 
 install: 
-	mkdir -p pluto/lib
+	# We put it into pluto/lib as well as usr/pluto/lib to make sure older and newer routines
+	# work.
+	mkdir -p $(DESTDIR)/pluto/lib $(DESTDIR)/usr/include/lmce $(DESTDIR)/usr/pluto/lib
 	cp libSerializeClass.so $(DESTPATH)pluto/lib
+	cp libSerializeClass.so $(DESTPATH)/usr/pluto/lib
+	cp $(header) $(DESTDIR)/usr/include/lmce
