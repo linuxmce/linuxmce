@@ -247,6 +247,8 @@ Table_psc_website_repset.cpp \
 Table_psc_website_schema.cpp \
 Table_psc_website_tables.cpp
 
+header=*.h
+
 all: libpluto_main.so all-recursive
 
 libpluto_main.so: $(sources:.cpp=.o)
