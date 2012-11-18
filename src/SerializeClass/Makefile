@@ -15,10 +15,12 @@ all: libSerializeClass.so all-recursive
 
 libSerializeClass.so: $(sources:.cpp=.o)
 	$(CXX) -shared $(CXXFLAGS) $(CPPFLAGS) -o $@ $(call cpath,$+)
+	mkdir -p ../lib
 	cp $@ ../lib
 
 libSerializeClass.a: $(sources:.cpp=.o)
 	$(AR) rc $@ $(call cpath,$+)
+	mkdir -p ../lib
 	cp $@ ../lib
 
 distclean: clean
