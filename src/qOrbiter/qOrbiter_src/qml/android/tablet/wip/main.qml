@@ -3,18 +3,28 @@ import "components"
 import "js/ComponentLoader.js" as MyJs
 import "effects"
 
-
 Item {
     id: item
-  width:manager.appWidth
-    height:manager.appHeight
+    width:appW
+    height:appH
 
     Rectangle{
         anchors.fill: parent
+
+        FontLoader { id: fixedFont; name: "Krungthep" }
+        FontLoader { id: localFont; source: "fonts/Krungthep.ttf" }
+
+
         gradient: Gradient {
-                GradientStop { position: 0.0; color: "darkslategrey" }
-                GradientStop { position: .85; color: "slategrey" }
+                GradientStop { position: 0.0; color: "#dedede" }
+                GradientStop { position: .85; color: "#dedede" }
             }
+        Image {
+            id: mainBg
+            source: "background.png"
+            width:appW
+            height:appH
+        }
     }
 
 
@@ -49,10 +59,10 @@ Connections{
 */
 
     function scaleX(x){
-    return x/100*manager.appWidth
+    return x/100*appW
     }
     function scaleY(y){
-    return y/100*manager.appHeight
+    return y/100*appH
     }
 
 

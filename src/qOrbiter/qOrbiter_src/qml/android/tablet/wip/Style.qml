@@ -18,18 +18,18 @@ QtObject{
     objectName: "orbiter_style"
 
     function scaleX(x){
-        return x/100*manager.appWidth
+        return x/100*appW
     }
     function scaleY(y){
-        return y/100*manager.appHeight
+        return y/100*appH
     }
     //skin description
-    property string skincreator: "Langston Ball (aka golgoj4)"
-    property string skinname: "Data"
-    property string skindir: "data"
-    property string skindescription: "Android HIG based skin"
-    property string skinversion: "1.0"
-    property string skinvariation: "Android Tablet"
+    property string skincreator: "Jochen Roth (aka ochorocho)"
+    property string skinname: "lustylizard"
+    property string skindir: "lustylizard"
+    property string skindescription: "Tablet skin"
+    property string skinversion: "0.1"
+    property string skinvariation: "Tablet 1280x800"
     property color maincolor: "#0D4392"
     property color accentcolor: "#EE873B"
     property color highlight1: "aliceblue"
@@ -37,11 +37,14 @@ QtObject{
     property color alertcolor: "red"
     property color warncolor:"yellow"
 
+    property int  stdbuttonh: !b_orientation ? scaleY(10) : scaleY(10)
+    property int  stdbuttonw: !b_orientation ? scaleX(10) :scaleX(10)
+
     property color darkhighlight: "#628BC7"
     property color lighthighlight: "#3F76C7"
     //main stage styles
-    property int orbiterH: manager.appHeight
-    property int orbiterW: manager.appWidth
+    property int orbiterH: appH
+    property int orbiterW: appW
     property color stageBG: "slategray"
     property int homescreenrowheight:100
     property int homescreenbuttonheight: 9
@@ -54,14 +57,14 @@ QtObject{
     //icon sizes
     property int iconHeight: 9
     property int iconWidth: 9
-    property int  stdbuttonh: !b_orientation ? scaleY(13) : scaleY(8)
-    property int  stdbuttonw: !b_orientation ? scaleX(8) :scaleX(13)
+    property int  stdbuttonh: !b_orientation ? scaleY(10) : scaleY(10)
+    property int  stdbuttonw: !b_orientation ? scaleX(10) :scaleX(10)
     property int widebuttonw: scaleX(10)
     property int widebuttonh: scaleY(10)
-    property int mediabuttonH:!b_orientation ? scaleY(13) : scaleY(12)
-    property int mediabuttonW: !b_orientation ? scaleX(8) :scaleX(11)
-    property int avoptionbuttonh: !b_orientation ? scaleY(13) : scaleY(12)
-    property int avoptionbuttonw: !b_orientation ? scaleX(8) :scaleX(11)
+    property int mediabuttonH: scaleY(9)
+    property int mediabuttonW: scaleX(5)
+    property int avoptionbuttonh: scaleY(10)
+    property int avoptionbuttonw: scaleX(6)
 
 
     //textStyles
@@ -115,5 +118,13 @@ QtObject{
     //stage
     property color stage_bg: "#22416F"
     property color bgcolor: "#0D4392"
+
+    //OCHOROCHO
+    // DEFAULT BUTTON
+    property int  btHomeDefaultH: !b_orientation ? scaleX(12) : scaleY(11)
+    property int  btHomeDefaultW: !b_orientation ? scaleX(14) : scaleY(9.9)
+    property int  btHomeDefaultSpace: !b_orientation ? scaleX(2.500) : scaleX(1.000)
+
+    property int  bottomPanelH: !b_orientation ? scaleX(7) : scaleX(12)
 
 }
