@@ -415,7 +415,8 @@ SOURCES += main.cpp \
         contextobjects/promptdata.cpp \
         datamodels/existingorbitermodel.cpp \
         sleepingalarmmodel.cpp \
-        datamodels/devicemodel.cpp
+        datamodels/devicemodel.cpp \
+    datamodels/attributeobject.cpp
 
 
 
@@ -536,7 +537,8 @@ HEADERS += \
         contextobjects/promptdata.h \
         datamodels/existingorbitermodel.h \
         sleepingalarmmodel.h \
-        datamodels/devicemodel.h
+        datamodels/devicemodel.h \
+    datamodels/attributeobject.h
 
 
 

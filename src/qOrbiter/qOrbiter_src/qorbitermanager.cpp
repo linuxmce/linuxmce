@@ -238,6 +238,7 @@ qorbiterManager::qorbiterManager(QDeclarativeView *view, QObject *parent) :
     qorbiterUIwin->rootContext()->setContextProperty("alarms",sleeping_alarms );
 
     QApplication::processEvents(QEventLoop::AllEvents);
+     attribFilter = new AttributeSortModel(new AttributeSortItem, this);
 }
 
 qorbiterManager::~qorbiterManager()
@@ -254,6 +255,7 @@ void qorbiterManager::gotoQScreen(QString s)
         emit keepLoading(t);
         emit clearModel();
         emit resetFilter();
+
     }
 
     //send the qmlview a request to go to a screen, needs error handling
@@ -768,18 +770,18 @@ void qorbiterManager::processConfig(QByteArray config)
     QObject::connect(this, SIGNAL(resetFilter()), genreFilter, SLOT(resetStates()));
 
     //-----setting up the ATTRIBUTE model------------------------------------------------------------------------
-    QDomElement attribElement = root.firstChildElement("AttributeList");
-    QDomNodeList attriblist = attribElement.childNodes();
-    attribFilter = new AttributeSortModel(new AttributeSortItem, this);
-    for(int index = 0; index < attriblist.count(); index++)
-    {
-        QString name = attriblist.at(index).attributes().namedItem("Name").nodeValue();
-        QString pk= attriblist.at(index).attributes().namedItem("PK_AttributeType").nodeValue();
-        attribFilter->appendRow(new AttributeSortItem(name,pk, attrimg,false,attribFilter));
-    }
+//    QDomElement attribElement = root.firstChildElement("AttributeList");
+//    QDomNodeList attriblist = attribElement.childNodes();
+
+//    for(int index = 0; index < attriblist.count(); index++)
+//    {
+//        QString name = attriblist.at(index).attributes().namedItem("Name").nodeValue();
+//        QString pk= attriblist.at(index).attributes().namedItem("PK_AttributeType").nodeValue();
+//        attribFilter->appendRow(new AttributeSortItem(name,pk, attrimg,false,attribFilter));
+//    }
     this->qorbiterUIwin->rootContext()->setContextProperty("attribfilter", attribFilter); //custom mediatype selection model
     connect(attribFilter, SIGNAL(SetTypeSort(int,QString)), this, SLOT(setStringParam(int,QString)));
-    QObject::connect(this, SIGNAL(resetFilter()), attribFilter, SLOT(resetStates()) );
+    QObject::connect(this, SIGNAL(resetFilter()), attribFilter, SLOT(clear()) );
     binaryConfig.clear();
 
     //---update object image

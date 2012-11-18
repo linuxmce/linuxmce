@@ -23,6 +23,7 @@
 #include "PlutoUtils/FileUtils.h"
 #include "PlutoUtils/StringUtils.h"
 #include "PlutoUtils/Other.h"
+#include <QDebug>
 
 #include <iostream>
 using namespace std;
@@ -523,6 +524,7 @@ void qOrbiter::CMD_Set_Object_Position(string sPK_DesignObj,int iPosition_X,int 
     cout << "Parm #3 - PK_DesignObj=" << sPK_DesignObj << endl;
     cout << "Parm #11 - Position_X=" << iPosition_X << endl;
     cout << "Parm #12 - Position_Y=" << iPosition_Y << endl;
+
 }
 
 //<-dceag-c22-b->
@@ -1130,7 +1132,7 @@ void qOrbiter::CMD_Set_Now_Playing(string sPK_DesignObj,string sValue_To_Assign,
         emit playlistPositionChanged(iValue);
         if(bRetransmit == 0)
         {
-             emit clearPlaylist();
+            emit clearPlaylist();
         }
     }
 
@@ -1315,7 +1317,6 @@ void qOrbiter::CMD_Show_Popup(string sPK_DesignObj,int iPosition_X,int iPosition
     cout << "Parm #50 - Name=" << sName << endl;
     cout << "Parm #126 - Exclusive=" << bExclusive << endl;
     cout << "Parm #127 - Dont_Auto_Hide=" << bDont_Auto_Hide << endl;
-
 }
 
 //<-dceag-c398-b->
@@ -1370,6 +1371,7 @@ void qOrbiter::CMD_Show_File_List(int iPK_MediaType,string &sCMD_Result,Message 
     emit commandResponseChanged("Show File List Complete, Calling request Media Grid");
     setGridStatus(true);
     prepareFileList(iPK_MediaType);
+    requestTypes(iPK_MediaType);
 }
 
 //<-dceag-c402-b->
@@ -2018,17 +2020,31 @@ void qOrbiter::requestTypes(int type)
     string pResponse = "";
     string sText = "";
 
-    CMD_Get_Attributes_For_Type getTypesCmd(m_dwPK_Device, iMediaPluginID, i_current_mediaType , &sText );
+    CMD_Get_Attribute_Types getTypesCmd(m_dwPK_Device, iMediaPluginID, type, &sText);
+    // CMD_Get_Attributes_For_Type getTypesCmd(m_dwPK_Device, iMediaPluginID, 3 , &sText );
     if(SendCommand(getTypesCmd, &pResponse) && pResponse=="OK"){
         emit commandResponseChanged("Got types for attribute");
 #ifdef QT_DEBUG
-        //  qDebug()<< QString::fromStdString(sText.c_str());
+        qDebug()<< QString::fromStdString(sText.c_str());
 #endif
+
+        QStringList data;
+        data = QString::fromStdString(sText.c_str()).split("\n");
+
+        for(int i=0; i < data.count(); i++)
+        {
+            QStringList subSplit = data.at(i).split(":");
+            emit newAttributeSort( new AttributeSortItem( subSplit.last(),subSplit.first(), QImage(),false,  0));
+        }
     }
     else
     {
         emit commandResponseChanged("Command to get types for attribute failed!");
     }
+    emit attributeSortFinished();
+
+
+
 }
 
 
@@ -2120,7 +2136,7 @@ int qOrbiter::getCurrentRow()
 void qOrbiter::initializeGrid()
 {
     goBack.clear();
-    indexTracker.clear();
+
     QString datagridVariableString ;
     //datagrid option variables
     //  QString q_mediaType;           //1
@@ -2301,23 +2317,23 @@ void qOrbiter::goBackGrid()
     {
 
         goBack.removeLast();
-        indexTracker.removeLast();
+
 
         if(!goBack.empty()){
-        int back = goBack.count() - 1;
-        media_currentPage = indexTracker.last();
+            int back = goBack.count() - 1;
 
-        QStringList reverseParams = goBack.at(back).split("|", QString::KeepEmptyParts);
-        q_mediaType = reverseParams.first();
-        q_subType = reverseParams.at(1);
-        q_fileFormat = reverseParams.at(2);
-        q_attribute_genres = reverseParams.at(3);
-        q_mediaSources = reverseParams.at(4);
-        q_usersPrivate = reverseParams.at(5);
-        q_attributetype_sort = reverseParams.at(6);
-        q_pk_users = reverseParams.at(7);
-        q_last_viewed = reverseParams.at(8);
-        q_pk_attribute = reverseParams.at(9);
+
+            QStringList reverseParams = goBack.at(back).split("|", QString::KeepEmptyParts);
+            q_mediaType = reverseParams.first();
+            q_subType = reverseParams.at(1);
+            q_fileFormat = reverseParams.at(2);
+            q_attribute_genres = reverseParams.at(3);
+            q_mediaSources = reverseParams.at(4);
+            q_usersPrivate = reverseParams.at(5);
+            q_attributetype_sort = reverseParams.at(6);
+            q_pk_users = reverseParams.at(7);
+            q_last_viewed = reverseParams.at(8);
+            q_pk_attribute = reverseParams.at(9);
         }
 
         emit clearAndContinue(q_mediaType.toInt());
@@ -2378,6 +2394,12 @@ void qOrbiter::seekToGridPosition(QString s)
 {
     media_seek=s.toStdString();
     emit clearPageGrid();
+}
+
+void qOrbiter::getContextImage(int attributeNumber)
+{
+    CMD_Get_Attribute_Image contextImgGrab(m_dwPK_Device, iMediaPluginID);
+
 }
 
 void qOrbiter::removePlaylistItem(int index)
@@ -3326,90 +3348,94 @@ void DCE::qOrbiter::populateAdditionalMedia() //additional media grid that popul
 {
 
 
-        //emit commandResponseChanged("requesting additional media");
+    //emit commandResponseChanged("requesting additional media");
 #ifdef QT5
-        //QApplication::processEvents(QEventLoop::AllEvents);
+    //QApplication::processEvents(QEventLoop::AllEvents);
 #endif
 
-        int gHeight = media_pageSeperator;;            //how many rows we want
-        int gWidth = 1;             //how many columns we want. in this case, just the one
-        int pkVar = 0;              // ??
-        int iOffset = 0;            // ??
-        int GridCurRow = media_pos;        //the row to start from
-        int GridCurCol= 0;           //column to start from
-        string imgDG ="_MediaFile_"+QString::number(m_dwPK_Device).toStdString();
-        string m_sSeek=media_seek;
-        if(m_sSeek !=""){
-            GridCurRow = 0;
-            GridCurCol =0;
-            imgDG = "_MediaFile_"+QString::number(m_dwPK_Device).toStdString();
-        }
+    int gHeight = media_pageSeperator;;            //how many rows we want
+    int gWidth = 1;             //how many columns we want. in this case, just the one
+    int pkVar = 0;              // ??
+    int iOffset = 0;            // ??
+    int GridCurRow = media_pos;        //the row to start from
+    int GridCurCol= 0;           //column to start from
+    string imgDG ="_MediaFile_"+QString::number(m_dwPK_Device).toStdString();
+    string m_sSeek=media_seek;
+    if(m_sSeek !=""){
+        qDebug() << "seeking to " << m_sSeek.c_str();
+        GridCurRow = 0;
+        GridCurCol =0;
+        imgDG = "MediaFile_"+QString::number(m_dwPK_Device).toStdString();
 
-        int iData_Size=0;
-        char *pData;
-        pData = "NULL";
-        //CMD_Request_Datagrid_Contents(                              long DeviceIDFrom,                long DeviceIDTo,                   string sID,                                string sDataGrid_ID, int iRow_count,int iColumn_count,        bool bKeep_Row_Header,bool bKeep_Column_Header,bool bAdd_UpDown_Arrows,string sSeek,       int iOffset,    char **pData,int *iData_Size,int *iRow,int *iColumn
-
-        DCE::CMD_Request_Datagrid_Contents req_data_grid_pics( long(m_dwPK_Device), long(iPK_Device_DatagridPlugIn), StringUtils::itos( m_dwIDataGridRequestCounter ), string(imgDG),    gHeight,    gWidth,                  false,                 false,                                 true, m_sSeek,   iOffset,  &pData,         &iData_Size, &GridCurRow, &GridCurCol );
-        std::string pResponse ="";
-        if(SendCommand(req_data_grid_pics, &pResponse) && pResponse == "OK")
-        {
-
-            DataGridTable *pDataGridTable = new DataGridTable(iData_Size,pData,false);
-            emit mediaResponseChanged("grid request ok");
-
-            // LoggerWrapper::GetInstance()->Write(LV_CRITICAL, "Pic Datagrid Dimensions: Height %i, Width %i", gHeight, gWidth);
-            DataGridCell *pCell;
-            QString cellTitle;
-            QString fk_file;
-            QString filePath;
-            int index;
-            QImage cellImg;
-            media_pos = GridCurRow;
-
-            if (m_sSeek != "")
-            {
-                media_seek = "";
-                populateAdditionalMedia();
-
-                return;
-            }
-            setCurrentPage((std::abs(GridCurRow /  media_pageSeperator))) ;
-            indexTracker.append((std::abs(GridCurRow /  media_pageSeperator)));
-            emit mediaResponseChanged("Page: "+ QString::number(media_currentPage));
-
-            for(MemoryDataTable::iterator it=pDataGridTable->m_MemoryDataTable.begin();it!=pDataGridTable->m_MemoryDataTable.end();++it)
-            {
-                pCell= it->second;
-                const char *pPath = pCell->GetImagePath();
-                filePath = QString::fromUtf8(pPath);
-                fk_file = pCell->GetValue();
-                cellTitle = QString::fromUtf8(pCell->m_Text);
-
-                index = pDataGridTable->CovertColRowType(it->first).first;
-                if (pPath )
-                {
-#ifndef ANDROID
-                    cellImg = getfileForDG(pPath);
-#else
-                    cellImg = getfileForDG(pPath);
-#endif
-                }
-                else
-                {
-                    cellImg.load(":/icons/icon.png");
-                }
-
-                emit addItem(new gridItem(fk_file, cellTitle, filePath, index, cellImg));
-#ifdef RPI
-                QThread::msleep(100);
-#endif
-
-            }
-            media_seek="";
-            delete pDataGridTable;
-        }
     }
+
+    int iData_Size=0;
+    char *pData;
+    pData = "NULL";
+    //CMD_Request_Datagrid_Contents(                              long DeviceIDFrom,                long DeviceIDTo,                   string sID,                                string sDataGrid_ID, int iRow_count,int iColumn_count,        bool bKeep_Row_Header,bool bKeep_Column_Header,bool bAdd_UpDown_Arrows,string sSeek,       int iOffset,    char **pData,int *iData_Size,int *iRow,int *iColumn
+
+    DCE::CMD_Request_Datagrid_Contents req_data_grid_pics( long(m_dwPK_Device), long(iPK_Device_DatagridPlugIn), StringUtils::itos( m_dwIDataGridRequestCounter ), string(imgDG),    gHeight,    gWidth,                  false,                 false,                                 true, m_sSeek,   iOffset,  &pData,         &iData_Size, &GridCurRow, &GridCurCol );
+    std::string pResponse ="";
+    if(SendCommand(req_data_grid_pics, &pResponse) && pResponse == "OK")
+    {
+
+        DataGridTable *pDataGridTable = new DataGridTable(iData_Size,pData,false);
+        emit mediaResponseChanged("grid request ok");
+
+        // LoggerWrapper::GetInstance()->Write(LV_CRITICAL, "Pic Datagrid Dimensions: Height %i, Width %i", gHeight, gWidth);
+        DataGridCell *pCell;
+        QString cellTitle;
+        QString fk_file;
+        QString filePath;
+        int index;
+        QImage cellImg;
+        media_pos = GridCurRow;
+
+        if (m_sSeek != "")
+        {
+            media_seek = "";
+           populateAdditionalMedia();
+           media_pos = media_pos+media_pageSeperator;
+            return;
+        }
+      setCurrentPage((std::abs(GridCurRow /  media_pageSeperator))) ;
+
+        emit mediaResponseChanged("Page: "+ QString::number(media_currentPage));
+
+        for(MemoryDataTable::iterator it=pDataGridTable->m_MemoryDataTable.begin();it!=pDataGridTable->m_MemoryDataTable.end();++it)
+        {
+            pCell= it->second;
+            const char *pPath = pCell->GetImagePath();
+            filePath = QString::fromUtf8(pPath);
+            fk_file = pCell->GetValue();
+            cellTitle = QString::fromUtf8(pCell->m_Text);
+
+            index = pDataGridTable->CovertColRowType(it->first).first;
+            if (pPath )
+            {
+#ifndef ANDROID
+                cellImg = getfileForDG(pPath);
+#else
+                cellImg = getfileForDG(pPath);
+#endif
+            }
+            else
+            {
+                cellImg.load(":/icons/icon.png");
+            }
+
+
+            emit addItem(new gridItem(fk_file, cellTitle, filePath, index, cellImg));
+
+#ifdef RPI
+            QThread::msleep(100);
+#endif
+
+        }
+        media_seek="";
+        delete pDataGridTable;
+    }
+}
 
 
 
@@ -3813,9 +3839,6 @@ void DCE::qOrbiter::showAdvancedButtons()
 
                 emit addDevice(new AvDevice(fk_file.toInt(), splitter.at(0), splitter.at(splitter.length()-2), "null", -1, false ));
             }
-
-
-            //  qorbiterUIwin->rootContext()->setContextProperty("buttonList" ,QVariant::fromValue(buttonList));
         }
     }
 }
@@ -3907,7 +3930,7 @@ void DCE::qOrbiter::grabScreenshot(QString fileWithPath)
                 cellfk = pCell->GetValue();
                 QStringList parser = cellTitle.split(QRegExp("(\\n|:\\s)"), QString::KeepEmptyParts);
                 //qDebug() << parser;
-               emit (new screenshotAttributes( cellfk, cellTitle, cellAttribute.prepend("!A") ));
+                emit (new screenshotAttributes( cellfk, cellTitle, cellAttribute.prepend("!A") ));
             }
 
         }
@@ -3928,7 +3951,7 @@ void DCE::qOrbiter::grabScreenshot(QString fileWithPath)
         }
     }
     emit screenshotVariablesReady();
-      qDebug("sending screenshot variables");
+    qDebug("sending screenshot variables");
     //screenshotVars.clear();
 
     CMD_Get_Video_Frame grabMediaScreenshot(long(m_dwPK_Device), long(m_dwPK_Device_NowPlaying), sDisableAspectLock,internal_streamID, 800 , 800, &screenieData, &screenieDataSize, &s_format);
@@ -4452,7 +4475,7 @@ void DCE::qOrbiter::prepareFileList(int iPK_MediaType)
     bool isSuccessfull;// = "false";   // holdover from the old orbiter?
 
     string m_sGridID ="MediaFile_"+QString::number(m_dwPK_Device).toStdString(); //identfier that specifies the orbiter device it goes to
-    string m_sSeek=""; //the theoretical seek
+    string m_sSeek=media_seek; //the theoretical seek
 
     int iData_Size=0;
     char *pData;
@@ -4573,11 +4596,11 @@ void DCE::qOrbiter::prepareFileList(int iPK_MediaType)
                 {
                     q_attributetype_sort=="11";
                     goBack.removeLast();
-                    indexTracker.removeLast();
+
                     params = "|"+q_subType +"|"+q_fileFormat+"|"+q_attribute_genres+"|"+q_mediaSources+"||"+q_attributetype_sort+"||2|"+q_pk_attribute+"";
                     s = q_mediaType + params;
 
-                   // backwards = false;
+                    // backwards = false;
                     emit clearAndContinue(iPK_MediaType);
                     return;
                 }
@@ -4596,12 +4619,7 @@ void DCE::qOrbiter::prepareFileList(int iPK_MediaType)
                 pDataGridTable = NULL;
                 setModelPages(media_totalPages);
                 emit mediaResponseChanged(QString::number(media_totalPages)+ " pages from request, populating first page.");
-                if(backwards==true){
-                    requestPage(media_currentPage);
-                }
-                else{
-                    requestPage(0);
-                }
+              requestPage(0);
             }
 
         }

@@ -35,6 +35,7 @@
 #include <datamodels/gridItem.h>
 #include <contextobjects/epgchannellist.h>
 #include <contextobjects/playlistitemclass.h>
+#include <datamodels/DataModelItems/attributesortitem.h>
 #include <avitem.h>
 #include <contextobjects/floorplandevice.h>
 #include <QList>
@@ -160,7 +161,7 @@ public:
     //media grid
 
     QStringList goBack;
-    QList<int> indexTracker;
+
     QString qs_seek;
     QString q_mediaType;           //1
     QString q_subType;             //2
@@ -1294,6 +1295,7 @@ signals:
     void mythTvUpdate(QString id);
     void screenshotVariablesReady();
     void addScreenShotVar(screenshotAttributes* t);
+
     //media datagrid
     void newGrid();
     void initializeSorting();
@@ -1310,6 +1312,8 @@ signals:
     void modelPageCount(int t);
     void clearModel();
     void pageSeperatorChanged(int s);
+    void newAttributeSort(AttributeSortItem*);
+    void attributeSortFinished();
 
 
     //now playing signals
@@ -1511,7 +1515,6 @@ public slots:
     void blueButton();
     //buttons from the more screen
     void extraButtons(QString button);
-
     void newOrbiter();
 
     //floorplans
@@ -1563,6 +1566,7 @@ public slots:
 
 
     //media
+    void getContextImage(int attributeNumber);
     void displayToggle(bool t);
     void setMediaSpeed(int s);
     QImage getfileForDG(string filename);

@@ -3,11 +3,11 @@
 
 
 GridIndexProvider::GridIndexProvider(ListModel *model  , int pathRole, int pixmapRole) :
-#if (QT5)
+    #if (QT5)
     QQuickImageProvider(QQuickImageProvider::Image), mModel(*model),  mPathRole(pathRole), mPixmapRole(pixmapRole)
-#else
+  #else
     QDeclarativeImageProvider(QDeclarativeImageProvider::Image), mModel(*model),  mPathRole(pathRole), mPixmapRole(pixmapRole)
-#endif
+  #endif
 {
     // For each pixmap already in the model, get a mapping between the name and the index
     qRegisterMetaType<QModelIndex>("QModelIndex");
@@ -24,24 +24,30 @@ GridIndexProvider::GridIndexProvider(ListModel *model  , int pathRole, int pixma
 
     QObject::connect(&mModel, SIGNAL(dataChanged(QModelIndex,QModelIndex, int)), this, SLOT(dataUpdated(QModelIndex,QModelIndex, int)),Qt::DirectConnection);
     QObject::connect(&mModel, SIGNAL(rowsRemoved(QModelIndex,int,int)), this, SLOT(dataDeleted(QModelIndex,int,int)) );
-   QObject::connect(&mModel, SIGNAL(modelAboutToBeReset()), this, SLOT(dataReset()), Qt::DirectConnection);
+    QObject::connect(&mModel, SIGNAL(modelAboutToBeReset()), this, SLOT(dataReset()), Qt::DirectConnection);
 
 }
 
 
 QImage GridIndexProvider::requestImage(const QString &id, QSize *size, const QSize &requestedSize)
 {
-
+    QImage image;
     QString key = QString("image://datagridimg/%1").arg(id);
     QModelIndex index = mPixmapIndex.value(id);
-
     gridItem * t = mModel.find(id);
+    if(t == NULL){
+         image.load(":/icons/icon.png");
+        return image;
 
-    QImage image = t->cellImage();
-   // QString t =  mModel.data(index, 2).value<QString>();
-    if(image.size().isEmpty()){
-        image.load(":/icons/icon.png");
     }
+    else
+
+    {
+         image = t->cellImage();
+        // QString t =  mModel.data(index, 2).value<QString>();
+        if(image.size().isEmpty()){
+            image.load(":/icons/icon.png");
+        }
 
         QImage result;
         if (image.height() < image.width())
@@ -58,7 +64,7 @@ QImage GridIndexProvider::requestImage(const QString &id, QSize *size, const QSi
         } else {
             result = image;
         }
-
+    }
 
 
     return image;
@@ -70,7 +76,7 @@ void GridIndexProvider::dataUpdated(const QModelIndex& topLeft, const QModelInde
 
     if(mModel.clearing)
     {
-       this->dataReset();
+        this->dataReset();
     }
     else
     {

@@ -487,7 +487,8 @@ int main(int argc, char* argv[])
         QObject::connect(&pqOrbiter, SIGNAL(clearAndContinue(int)), mediaModel, SLOT(clearAndRequest(int)), Qt::QueuedConnection);
         QObject::connect(&pqOrbiter,SIGNAL(addItem(gridItem*)), mediaModel, SLOT(appendRow(gridItem*)),Qt::QueuedConnection);
         QObject::connect(&pqOrbiter,SIGNAL(gridModelSizeChange(int)), mediaModel, SLOT(setTotalCells(int)), Qt::QueuedConnection);
-        QObject::connect(&pqOrbiter, SIGNAL(clearModel()), mediaModel, SLOT(reset()), Qt::DirectConnection);
+        QObject::connect(&pqOrbiter, SIGNAL(clearModel()), mediaModel, SLOT(reset()), Qt::QueuedConnection);
+        QObject::connect(&pqOrbiter, SIGNAL(clearFileDetails()), w.attribFilter, SLOT(clear()));
         QObject::connect(mediaModel,SIGNAL(ready(int)), &pqOrbiter, SLOT(prepareFileList(int)), Qt::QueuedConnection);
         QObject::connect(&w, SIGNAL(gridTypeChanged(int)), mediaModel, SLOT(setGridType(int)), Qt::QueuedConnection);
         QObject::connect(&w, SIGNAL(setDceGridParam(int,QString)), &pqOrbiter, SLOT(setStringParam(int,QString)),Qt::QueuedConnection);
@@ -501,6 +502,9 @@ int main(int argc, char* argv[])
         QObject::connect(&pqOrbiter, SIGNAL(pageSeperatorChanged(int)), &w, SLOT(setGridSeperator(int)),Qt::QueuedConnection);
         QObject::connect(&pqOrbiter, SIGNAL(mediaPageChanged(int)), &w, SLOT(setCurrentPage(int)), Qt::QueuedConnection);
         QObject::connect(&w, SIGNAL(dceGridSepChanged(int)), &pqOrbiter, SLOT(setGridSeperator(int)), Qt::QueuedConnection);
+
+        QObject::connect(&pqOrbiter, SIGNAL(newAttributeSort(AttributeSortItem*)), w.attribFilter, SLOT(appendRow(AttributeSortItem*)), Qt::QueuedConnection);
+
         //now playing signals
         QObject::connect(&pqOrbiter, SIGNAL(setNowPlaying(bool)), w.nowPlayingButton,SLOT(setStatus(bool)),Qt::QueuedConnection);
         QObject::connect(&pqOrbiter,SIGNAL(streamIdChanged(int)), w.nowPlayingButton, SLOT(setStreamID(int)),Qt::QueuedConnection);

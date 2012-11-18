@@ -53,6 +53,7 @@
 #endif
 
 #include<datamodels/existingorbitermodel.h>
+#include<datamodels/attributeobject.h>
 #include <sleepingalarmmodel.h>
 
 #include <QStringList>
@@ -367,6 +368,8 @@ Param 10 - pk_attribute
     QList<QObject*> current_bookmarks;
     QList<QObject*> existingOrbiters;
 
+    QList<QObject*> aSortModel;
+
     MediaSubTypeModel *mediaTypeFilter;
     FilterModel *uiFileFilter;
     AttributeSortModel *attribFilter;
@@ -598,7 +601,18 @@ signals:
 
 public slots:
     void sendDceMessage(QString m) {emit newMessageSend(m);}
+    void setNewAttributeSort(AttributeObject *a) {
+        qDebug()<< a->name;
+        a->setParent(NULL);
+        QString f = a->name;
+        int d = a->a_id;
+        AttributeObject * j = new AttributeObject(d,f,this);
 
+        aSortModel.append(j);
+        //aSortModel.append(new AttributeObject(a->getIdent(), a->getName()));
+                                                 }
+    void updateSortAttributes(){ qorbiterUIwin->rootContext()->setContextProperty("attributeSort", QVariant::fromValue(aSortModel));
+    }
     //mobile device specfic
     bool setupMobileStorage();
     void setMobileStorage(QString s){mobileStorageLocation = s; emit mobileStorageChanged();}
@@ -643,6 +657,7 @@ public slots:
 
     void setAppW(int w) {appWidth = w; checkOrientation(qorbiterUIwin->size());}
     int getAppW(){return appWidth;  checkOrientation(qorbiterUIwin->size());}
+
     /*Network State property functions*/
     void setInternalIp(QString s) { m_ipAddress = s; emit internalIpChanged(); }
     QString getInternalIp() {return m_ipAddress; }

@@ -42,11 +42,7 @@ public:
 #endif
   Q_INVOKABLE int rowCount(const QModelIndex &parent = QModelIndex()) const;
   QVariant data(const QModelIndex &index, int role = Qt::DisplayRole) const;
-  void appendRow(AttributeSortItem* item);
-  void appendRows(const QList<AttributeSortItem*> &items);
-  void insertRow(int row, AttributeSortItem* item);
-  bool removeRow(int row, const QModelIndex &parent = QModelIndex());
-  bool removeRows(int row, int count, const QModelIndex &parent = QModelIndex());
+
   AttributeSortItem* takeRow(int row);
   AttributeSortItem* find(const QString &id) const;
   QModelIndex indexFromItem( const AttributeSortItem* item) const;
@@ -54,7 +50,6 @@ public:
   void sortModel(int column, Qt::SortOrder order);
 
   void ReturnSelectedItems();
-  void clear();
 
   QModelIndex lastrow;
   QString ident;
@@ -66,14 +61,24 @@ signals:
   void ItemAdded();
   void dataChanged(const QModelIndex &topLeft, const QModelIndex &bottomRight, const bool &state);
    void SetTypeSort(int pos, QString type);
+   void modelAboutToBeReset();
+   void modelReset();
 
 public slots:
    void resetStates();
+   void appendRow(AttributeSortItem* item);
+   void appendRows(const QList<AttributeSortItem*> &items);
+   void insertRow(int row, AttributeSortItem* item);
+   bool removeRow(int row, const QModelIndex &parent = QModelIndex());
+   bool removeRows(int row, int count, const QModelIndex &parent = QModelIndex());
+   void clear();
 
 private slots:
   void handleItemChange();
+  void reset();
 
 private:
+  bool resetInternalData();
   AttributeSortItem* m_prototype;
   QList<AttributeSortItem*> m_list;
 };

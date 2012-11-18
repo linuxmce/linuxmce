@@ -75,6 +75,34 @@ void AttributeSortModel::handleItemChange()
   }
 }
 
+void AttributeSortModel::reset()
+{
+
+    emit modelAboutToBeReset();
+     beginResetModel();
+    if(resetInternalData()){
+         endResetModel();
+    }
+
+
+
+}
+
+bool AttributeSortModel::resetInternalData()
+{
+
+    qDebug("Resetting attribute filter data");
+    int total = m_list.count();
+    for(int i = 0; i <= m_list.count(); ++i){
+
+      //  qDebug() <<"removing::" << m_list.count() << " of " << total;
+        m_list.removeAt(i);
+    }
+    m_list.clear();
+  //  qDebug() << "Items cleared. Count:: "<< m_list.count();
+    return true;
+}
+
 AttributeSortItem * AttributeSortModel::find(const QString &id) const
 {
   foreach(AttributeSortItem* item, m_list) {
@@ -98,11 +126,7 @@ QModelIndex AttributeSortModel::indexFromItem(const AttributeSortItem *item) con
 void AttributeSortModel::clear()
 {
 
-  qDeleteAll(m_list);
-  m_list.clear();
-  #ifndef QT5
-  this->reset();
-#endif
+ this->reset();
 
 }
 

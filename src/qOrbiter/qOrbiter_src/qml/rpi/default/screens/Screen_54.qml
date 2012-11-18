@@ -67,8 +67,7 @@ Rectangle {
             text: qsTr("Speed: ") + dceTimecode.playbackSpeed +" || " +dceTimecode.qsCurrentTime + qsTr(" of ") + dceTimecode.qsTotalTime
             font.family: keyFont.name
             font.pixelSize: scaleY(2.15)
-            anchors.verticalCenter: parent.verticalCenter
-            anchors.horizontalCenter: parent.horizontalCenter
+
             font.bold: true
         }
     }
