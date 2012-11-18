@@ -84,7 +84,10 @@ Rectangle {
                 width:  scaleX(style.buttonW)
                 MouseArea{
                     anchors.fill:parent
-                    onClicked: MyJs.createFilterObjects("../components/MediaTypes.qml")
+                    onClicked: {
+                        MyJs.createFilterObjects("../components/MediaTypes.qml")
+                        manager.requestMediaSubtypes()
+                    }
                 }
          }
 
