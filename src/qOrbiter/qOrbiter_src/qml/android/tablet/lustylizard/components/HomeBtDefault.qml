@@ -2,13 +2,14 @@ import QtQuick 1.0
 
 Rectangle {
     id: btHomeDefault
-    height: parent.height
-    width: scaleX(14)
+    height: style.btHomeDefaultH
+    width: style.btHomeDefaultW
     radius: style.but_smooth
     color:"#000000"
     opacity: 0.800
 
     property string currentImage: "../images/btTelecom.png"
+    property string currentText: "Telecom"
     signal clicked
 
     Image {
@@ -23,7 +24,7 @@ Rectangle {
     }
     Text{
         id: text
-        text: qsTr("Telecom")
+        text: btHomeDefault.currentText
         anchors.bottom: parent.bottom
         anchors.bottomMargin: 10
         anchors.horizontalCenter: btHomeDefault.horizontalCenter

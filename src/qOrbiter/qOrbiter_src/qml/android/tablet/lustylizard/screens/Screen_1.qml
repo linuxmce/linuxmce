@@ -48,7 +48,7 @@ Item
         Rectangle{
             id: mainButtonContainer
             width: scaleX(97)
-            height: scaleX(11)
+            height: style.btHomeDefaultH
             color: "transparent"
             anchors.bottom: parent.bottom
             anchors.bottomMargin: advanced.height + scaleY(1)
@@ -58,31 +58,37 @@ Item
                 id: btFloatMain
                 anchors.fill: parent
                 anchors.margins: 0
-                spacing: scaleX(2.500)
+                spacing: style.btHomeDefaultSpace
 
                 HomeBtDefault {
                     id: btMedia
                     currentImage: "../images/btMedia.png"
+                    currentText: "Media"
                 }
                 HomeBtDefault {
                     id:btLights
                     currentImage: "../images/btLights.png"
+                    currentText: "Lights"
                 }
                 HomeBtDefault {
                     id: btClimate
                     currentImage: "../images/btClimate.png"
+                    currentText: "Climate"
                 }
                 HomeBtDefault {
                     id: btTelecom
                     currentImage: "../images/btTelecom.png"
+                    currentText: "Telecom"
                 }
                 HomeBtDefault {
                     id: btSecurity
                     currentImage: "../images/btSecurity.png"
+                    currentText: "Security"
                 }
                 HomeBtDefault {
                     id: btSettings
                     currentImage: "../images/btSettings.png"
+                    currentText: "Settings"
                 }
             }
         }

@@ -27,15 +27,18 @@ QtObject{
     property string skincreator: "Jochen Roth (aka ochorocho)"
     property string skinname: "lustylizard"
     property string skindir: "lustylizard"
-    property string skindescription: "Pluto Classic Skin"
-    property string skinversion: "1.0"
-    property string skinvariation: "Desktop 800x600"
+    property string skindescription: "Tablet skin"
+    property string skinversion: "0.1"
+    property string skinvariation: "Tablet 1280x800"
     property color maincolor: "#0D4392"
     property color accentcolor: "#EE873B"
     property color highlight1: "aliceblue"
     property color highlight2: "slategrey"
     property color alertcolor: "red"
     property color warncolor:"yellow"
+
+    property int  stdbuttonh: !b_orientation ? scaleY(10) : scaleY(10)
+    property int  stdbuttonw: !b_orientation ? scaleX(10) :scaleX(10)
 
     property color darkhighlight: "#628BC7"
     property color lighthighlight: "#3F76C7"
@@ -115,5 +118,13 @@ QtObject{
     //stage
     property color stage_bg: "#22416F"
     property color bgcolor: "#0D4392"
+
+    //OCHOROCHO
+    // DEFAULT BUTTON
+    property int  btHomeDefaultH: !b_orientation ? scaleX(12) : scaleY(11)
+    property int  btHomeDefaultW: !b_orientation ? scaleX(14) : scaleY(9.9)
+    property int  btHomeDefaultSpace: !b_orientation ? scaleX(2.500) : scaleX(1.000)
+
+    property int  bottomPanelH: !b_orientation ? scaleX(7) : scaleX(12)
 
 }
