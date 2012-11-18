@@ -34,6 +34,6 @@ install:
 	# We put it into pluto/lib as well as usr/pluto/lib to make sure older and newer routines
 	# work.
 	mkdir -p $(DESTDIR)/pluto/lib $(DESTDIR)/usr/include/lmce $(DESTDIR)/usr/pluto/lib
-	cp libSerializeClass.so $(DESTPATH)pluto/lib
-	cp libSerializeClass.so $(DESTPATH)/usr/pluto/lib
+	cp libSerializeClass.so $(DESTDIR)/pluto/lib
+	cp libSerializeClass.so $(DESTDIR)/usr/pluto/lib
 	cp $(header) $(DESTDIR)/usr/include/lmce
