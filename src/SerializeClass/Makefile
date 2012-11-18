@@ -21,6 +21,8 @@ libSerializeClass.a: $(sources:.cpp=.o)
 	$(AR) rc $@ $(call cpath,$+)
 	cp $@ ../lib
 
+distclean: clean
+
 clean:
 	rm -f $(call cpath,$(sources:.cpp=.o) $(sources:.cpp=.d)) libSerializeClass.so libSerializeClass.a >/dev/null
 
