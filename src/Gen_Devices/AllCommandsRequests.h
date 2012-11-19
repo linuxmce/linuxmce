@@ -29920,5 +29920,269 @@ namespace DCE
 			COMMAND_Forward_CONST,
 			0 /* number of parameters */); }
 	};
+	class RESP_Get_Users : public PreformedCommandResponse {
+		string *m_sValue_To_Assign;
+	public:
+		RESP_Get_Users(string *sValue_To_Assign) { 
+		m_sValue_To_Assign=sValue_To_Assign; }
+		void ParseResponse(Message *pMessage) {
+			*m_sValue_To_Assign=pMessage->m_mapParameters[COMMANDPARAMETER_Value_To_Assign_CONST]; };
+	};
+	class CMD_Get_Users : public PreformedCommand {
+	public:
+		CMD_Get_Users(long DeviceIDFrom, long DeviceIDTo,string *sValue_To_Assign) { m_pMessage = new Message(DeviceIDFrom, DeviceIDTo, MESSAGETYPE_COMMAND, PRIORITY_NORMAL, 
+			COMMAND_Get_Users_CONST,
+			1 /* number of parameters */,
+			COMMANDPARAMETER_Value_To_Assign_CONST, (*sValue_To_Assign).c_str());		m_pcResponse = new RESP_Get_Users(sValue_To_Assign); }
+	};
+	class CMD_Get_Users_DL : public PreformedCommand {
+	public:
+		CMD_Get_Users_DL(long DeviceIDFrom, string DeviceIDTo,string *sValue_To_Assign) { m_pMessage = new Message(DeviceIDFrom, DeviceIDTo, MESSAGETYPE_COMMAND, PRIORITY_NORMAL,
+			COMMAND_Get_Users_CONST,
+			1 /* number of parameters */,
+			COMMANDPARAMETER_Value_To_Assign_CONST, (*sValue_To_Assign).c_str());		m_pcResponse = new RESP_Get_Users(sValue_To_Assign); }
+	};
+	class CMD_Get_Users_DT : public PreformedCommand {
+	public:
+		CMD_Get_Users_DT(long DeviceIDFrom, long MasterDevice, eBroadcastLevel eB,string *sValue_To_Assign) { m_pMessage = new Message(DeviceIDFrom, MasterDevice, eB, MESSAGETYPE_COMMAND, PRIORITY_NORMAL,
+			COMMAND_Get_Users_CONST,
+			1 /* number of parameters */,
+			COMMANDPARAMETER_Value_To_Assign_CONST, (*sValue_To_Assign).c_str());		m_pcResponse = new RESP_Get_Users(sValue_To_Assign); }
+	};
+	class CMD_Get_Users_Cat : public PreformedCommand {
+	public:
+		CMD_Get_Users_Cat(long DeviceIDFrom, long DeviceCategory, bool bIncludeChildren, eBroadcastLevel eB,string *sValue_To_Assign) { m_pMessage = new Message(DeviceIDFrom, DeviceCategory, bIncludeChildren, eB, MESSAGETYPE_COMMAND, PRIORITY_NORMAL,
+			COMMAND_Get_Users_CONST,
+			1 /* number of parameters */,
+			COMMANDPARAMETER_Value_To_Assign_CONST, (*sValue_To_Assign).c_str());		m_pcResponse = new RESP_Get_Users(sValue_To_Assign); }
+	};
+	class CMD_NOREP_Get_Users : public PreformedCommand {
+	public:
+		CMD_NOREP_Get_Users(long DeviceIDFrom, long DeviceIDTo) { m_pMessage = new Message(DeviceIDFrom, DeviceIDTo, MESSAGETYPE_COMMAND, PRIORITY_NORMAL,
+			COMMAND_Get_Users_CONST,
+			0 /* number of parameters */); }
+	};
+	class CMD_NOREP_Get_Users_DL : public PreformedCommand {
+	public:
+		CMD_NOREP_Get_Users_DL(long DeviceIDFrom, string DeviceIDTo) { m_pMessage = new Message(DeviceIDFrom, DeviceIDTo, MESSAGETYPE_COMMAND, PRIORITY_NORMAL,
+			COMMAND_Get_Users_CONST,
+			0 /* number of parameters */); }
+	};
+	class CMD_NOREP_Get_Users_DT : public PreformedCommand {
+	public:
+		CMD_NOREP_Get_Users_DT(long DeviceIDFrom, long MasterDevice, eBroadcastLevel eB) { m_pMessage = new Message(DeviceIDFrom, MasterDevice, eB, MESSAGETYPE_COMMAND, PRIORITY_NORMAL,
+			COMMAND_Get_Users_CONST,
+			0 /* number of parameters */); }
+	};
+	class CMD_NOREP_Get_Users_Cat : public PreformedCommand {
+	public:
+		CMD_NOREP_Get_Users_Cat(long DeviceIDFrom, long DeviceCategory, bool bIncludeChildren, eBroadcastLevel eB) { m_pMessage = new Message(DeviceIDFrom, DeviceCategory, bIncludeChildren, eB, MESSAGETYPE_COMMAND, PRIORITY_NORMAL,
+			COMMAND_Get_Users_CONST,
+			0 /* number of parameters */); }
+	};
+	class RESP_Get_Rooms : public PreformedCommandResponse {
+		string *m_sValue_To_Assign;
+	public:
+		RESP_Get_Rooms(string *sValue_To_Assign) { 
+		m_sValue_To_Assign=sValue_To_Assign; }
+		void ParseResponse(Message *pMessage) {
+			*m_sValue_To_Assign=pMessage->m_mapParameters[COMMANDPARAMETER_Value_To_Assign_CONST]; };
+	};
+	class CMD_Get_Rooms : public PreformedCommand {
+	public:
+		CMD_Get_Rooms(long DeviceIDFrom, long DeviceIDTo,string *sValue_To_Assign) { m_pMessage = new Message(DeviceIDFrom, DeviceIDTo, MESSAGETYPE_COMMAND, PRIORITY_NORMAL, 
+			COMMAND_Get_Rooms_CONST,
+			1 /* number of parameters */,
+			COMMANDPARAMETER_Value_To_Assign_CONST, (*sValue_To_Assign).c_str());		m_pcResponse = new RESP_Get_Rooms(sValue_To_Assign); }
+	};
+	class CMD_Get_Rooms_DL : public PreformedCommand {
+	public:
+		CMD_Get_Rooms_DL(long DeviceIDFrom, string DeviceIDTo,string *sValue_To_Assign) { m_pMessage = new Message(DeviceIDFrom, DeviceIDTo, MESSAGETYPE_COMMAND, PRIORITY_NORMAL,
+			COMMAND_Get_Rooms_CONST,
+			1 /* number of parameters */,
+			COMMANDPARAMETER_Value_To_Assign_CONST, (*sValue_To_Assign).c_str());		m_pcResponse = new RESP_Get_Rooms(sValue_To_Assign); }
+	};
+	class CMD_Get_Rooms_DT : public PreformedCommand {
+	public:
+		CMD_Get_Rooms_DT(long DeviceIDFrom, long MasterDevice, eBroadcastLevel eB,string *sValue_To_Assign) { m_pMessage = new Message(DeviceIDFrom, MasterDevice, eB, MESSAGETYPE_COMMAND, PRIORITY_NORMAL,
+			COMMAND_Get_Rooms_CONST,
+			1 /* number of parameters */,
+			COMMANDPARAMETER_Value_To_Assign_CONST, (*sValue_To_Assign).c_str());		m_pcResponse = new RESP_Get_Rooms(sValue_To_Assign); }
+	};
+	class CMD_Get_Rooms_Cat : public PreformedCommand {
+	public:
+		CMD_Get_Rooms_Cat(long DeviceIDFrom, long DeviceCategory, bool bIncludeChildren, eBroadcastLevel eB,string *sValue_To_Assign) { m_pMessage = new Message(DeviceIDFrom, DeviceCategory, bIncludeChildren, eB, MESSAGETYPE_COMMAND, PRIORITY_NORMAL,
+			COMMAND_Get_Rooms_CONST,
+			1 /* number of parameters */,
+			COMMANDPARAMETER_Value_To_Assign_CONST, (*sValue_To_Assign).c_str());		m_pcResponse = new RESP_Get_Rooms(sValue_To_Assign); }
+	};
+	class CMD_NOREP_Get_Rooms : public PreformedCommand {
+	public:
+		CMD_NOREP_Get_Rooms(long DeviceIDFrom, long DeviceIDTo) { m_pMessage = new Message(DeviceIDFrom, DeviceIDTo, MESSAGETYPE_COMMAND, PRIORITY_NORMAL,
+			COMMAND_Get_Rooms_CONST,
+			0 /* number of parameters */); }
+	};
+	class CMD_NOREP_Get_Rooms_DL : public PreformedCommand {
+	public:
+		CMD_NOREP_Get_Rooms_DL(long DeviceIDFrom, string DeviceIDTo) { m_pMessage = new Message(DeviceIDFrom, DeviceIDTo, MESSAGETYPE_COMMAND, PRIORITY_NORMAL,
+			COMMAND_Get_Rooms_CONST,
+			0 /* number of parameters */); }
+	};
+	class CMD_NOREP_Get_Rooms_DT : public PreformedCommand {
+	public:
+		CMD_NOREP_Get_Rooms_DT(long DeviceIDFrom, long MasterDevice, eBroadcastLevel eB) { m_pMessage = new Message(DeviceIDFrom, MasterDevice, eB, MESSAGETYPE_COMMAND, PRIORITY_NORMAL,
+			COMMAND_Get_Rooms_CONST,
+			0 /* number of parameters */); }
+	};
+	class CMD_NOREP_Get_Rooms_Cat : public PreformedCommand {
+	public:
+		CMD_NOREP_Get_Rooms_Cat(long DeviceIDFrom, long DeviceCategory, bool bIncludeChildren, eBroadcastLevel eB) { m_pMessage = new Message(DeviceIDFrom, DeviceCategory, bIncludeChildren, eB, MESSAGETYPE_COMMAND, PRIORITY_NORMAL,
+			COMMAND_Get_Rooms_CONST,
+			0 /* number of parameters */); }
+	};
+	class RESP_Get_Scenarios : public PreformedCommandResponse {
+		string *m_sValue_To_Assign;
+	public:
+		RESP_Get_Scenarios(string *sValue_To_Assign) { 
+		m_sValue_To_Assign=sValue_To_Assign; }
+		void ParseResponse(Message *pMessage) {
+			*m_sValue_To_Assign=pMessage->m_mapParameters[COMMANDPARAMETER_Value_To_Assign_CONST]; };
+	};
+	class CMD_Get_Scenarios : public PreformedCommand {
+	public:
+		CMD_Get_Scenarios(long DeviceIDFrom, long DeviceIDTo,string sPK_EntertainArea,int iValue,int iPK_Room,string *sValue_To_Assign) { m_pMessage = new Message(DeviceIDFrom, DeviceIDTo, MESSAGETYPE_COMMAND, PRIORITY_NORMAL, 
+			COMMAND_Get_Scenarios_CONST,
+			4 /* number of parameters */,
+			COMMANDPARAMETER_PK_EntertainArea_CONST, sPK_EntertainArea.c_str(),
+			COMMANDPARAMETER_Value_CONST, StringUtils::itos(iValue).c_str(),
+			COMMANDPARAMETER_PK_Room_CONST, StringUtils::itos(iPK_Room).c_str(),
+			COMMANDPARAMETER_Value_To_Assign_CONST, (*sValue_To_Assign).c_str());		m_pcResponse = new RESP_Get_Scenarios(sValue_To_Assign); }
+	};
+	class CMD_Get_Scenarios_DL : public PreformedCommand {
+	public:
+		CMD_Get_Scenarios_DL(long DeviceIDFrom, string DeviceIDTo,string sPK_EntertainArea,int iValue,int iPK_Room,string *sValue_To_Assign) { m_pMessage = new Message(DeviceIDFrom, DeviceIDTo, MESSAGETYPE_COMMAND, PRIORITY_NORMAL,
+			COMMAND_Get_Scenarios_CONST,
+			4 /* number of parameters */,
+			COMMANDPARAMETER_PK_EntertainArea_CONST, sPK_EntertainArea.c_str(),
+			COMMANDPARAMETER_Value_CONST, StringUtils::itos(iValue).c_str(),
+			COMMANDPARAMETER_PK_Room_CONST, StringUtils::itos(iPK_Room).c_str(),
+			COMMANDPARAMETER_Value_To_Assign_CONST, (*sValue_To_Assign).c_str());		m_pcResponse = new RESP_Get_Scenarios(sValue_To_Assign); }
+	};
+	class CMD_Get_Scenarios_DT : public PreformedCommand {
+	public:
+		CMD_Get_Scenarios_DT(long DeviceIDFrom, long MasterDevice, eBroadcastLevel eB,string sPK_EntertainArea,int iValue,int iPK_Room,string *sValue_To_Assign) { m_pMessage = new Message(DeviceIDFrom, MasterDevice, eB, MESSAGETYPE_COMMAND, PRIORITY_NORMAL,
+			COMMAND_Get_Scenarios_CONST,
+			4 /* number of parameters */,
+			COMMANDPARAMETER_PK_EntertainArea_CONST, sPK_EntertainArea.c_str(),
+			COMMANDPARAMETER_Value_CONST, StringUtils::itos(iValue).c_str(),
+			COMMANDPARAMETER_PK_Room_CONST, StringUtils::itos(iPK_Room).c_str(),
+			COMMANDPARAMETER_Value_To_Assign_CONST, (*sValue_To_Assign).c_str());		m_pcResponse = new RESP_Get_Scenarios(sValue_To_Assign); }
+	};
+	class CMD_Get_Scenarios_Cat : public PreformedCommand {
+	public:
+		CMD_Get_Scenarios_Cat(long DeviceIDFrom, long DeviceCategory, bool bIncludeChildren, eBroadcastLevel eB,string sPK_EntertainArea,int iValue,int iPK_Room,string *sValue_To_Assign) { m_pMessage = new Message(DeviceIDFrom, DeviceCategory, bIncludeChildren, eB, MESSAGETYPE_COMMAND, PRIORITY_NORMAL,
+			COMMAND_Get_Scenarios_CONST,
+			4 /* number of parameters */,
+			COMMANDPARAMETER_PK_EntertainArea_CONST, sPK_EntertainArea.c_str(),
+			COMMANDPARAMETER_Value_CONST, StringUtils::itos(iValue).c_str(),
+			COMMANDPARAMETER_PK_Room_CONST, StringUtils::itos(iPK_Room).c_str(),
+			COMMANDPARAMETER_Value_To_Assign_CONST, (*sValue_To_Assign).c_str());		m_pcResponse = new RESP_Get_Scenarios(sValue_To_Assign); }
+	};
+	class CMD_NOREP_Get_Scenarios : public PreformedCommand {
+	public:
+		CMD_NOREP_Get_Scenarios(long DeviceIDFrom, long DeviceIDTo,string sPK_EntertainArea,int iValue,int iPK_Room) { m_pMessage = new Message(DeviceIDFrom, DeviceIDTo, MESSAGETYPE_COMMAND, PRIORITY_NORMAL,
+			COMMAND_Get_Scenarios_CONST,
+			3 /* number of parameters */,
+			COMMANDPARAMETER_PK_EntertainArea_CONST, sPK_EntertainArea.c_str(),
+			COMMANDPARAMETER_Value_CONST, StringUtils::itos(iValue).c_str(),
+			COMMANDPARAMETER_PK_Room_CONST, StringUtils::itos(iPK_Room).c_str()); }
+	};
+	class CMD_NOREP_Get_Scenarios_DL : public PreformedCommand {
+	public:
+		CMD_NOREP_Get_Scenarios_DL(long DeviceIDFrom, string DeviceIDTo,string sPK_EntertainArea,int iValue,int iPK_Room) { m_pMessage = new Message(DeviceIDFrom, DeviceIDTo, MESSAGETYPE_COMMAND, PRIORITY_NORMAL,
+			COMMAND_Get_Scenarios_CONST,
+			3 /* number of parameters */,
+			COMMANDPARAMETER_PK_EntertainArea_CONST, sPK_EntertainArea.c_str(),
+			COMMANDPARAMETER_Value_CONST, StringUtils::itos(iValue).c_str(),
+			COMMANDPARAMETER_PK_Room_CONST, StringUtils::itos(iPK_Room).c_str()); }
+	};
+	class CMD_NOREP_Get_Scenarios_DT : public PreformedCommand {
+	public:
+		CMD_NOREP_Get_Scenarios_DT(long DeviceIDFrom, long MasterDevice, eBroadcastLevel eB,string sPK_EntertainArea,int iValue,int iPK_Room) { m_pMessage = new Message(DeviceIDFrom, MasterDevice, eB, MESSAGETYPE_COMMAND, PRIORITY_NORMAL,
+			COMMAND_Get_Scenarios_CONST,
+			3 /* number of parameters */,
+			COMMANDPARAMETER_PK_EntertainArea_CONST, sPK_EntertainArea.c_str(),
+			COMMANDPARAMETER_Value_CONST, StringUtils::itos(iValue).c_str(),
+			COMMANDPARAMETER_PK_Room_CONST, StringUtils::itos(iPK_Room).c_str()); }
+	};
+	class CMD_NOREP_Get_Scenarios_Cat : public PreformedCommand {
+	public:
+		CMD_NOREP_Get_Scenarios_Cat(long DeviceIDFrom, long DeviceCategory, bool bIncludeChildren, eBroadcastLevel eB,string sPK_EntertainArea,int iValue,int iPK_Room) { m_pMessage = new Message(DeviceIDFrom, DeviceCategory, bIncludeChildren, eB, MESSAGETYPE_COMMAND, PRIORITY_NORMAL,
+			COMMAND_Get_Scenarios_CONST,
+			3 /* number of parameters */,
+			COMMANDPARAMETER_PK_EntertainArea_CONST, sPK_EntertainArea.c_str(),
+			COMMANDPARAMETER_Value_CONST, StringUtils::itos(iValue).c_str(),
+			COMMANDPARAMETER_PK_Room_CONST, StringUtils::itos(iPK_Room).c_str()); }
+	};
+	class RESP_Get_Entertainment_Areas : public PreformedCommandResponse {
+		string *m_sValue_To_Assign;
+	public:
+		RESP_Get_Entertainment_Areas(string *sValue_To_Assign) { 
+		m_sValue_To_Assign=sValue_To_Assign; }
+		void ParseResponse(Message *pMessage) {
+			*m_sValue_To_Assign=pMessage->m_mapParameters[COMMANDPARAMETER_Value_To_Assign_CONST]; };
+	};
+	class CMD_Get_Entertainment_Areas : public PreformedCommand {
+	public:
+		CMD_Get_Entertainment_Areas(long DeviceIDFrom, long DeviceIDTo,string *sValue_To_Assign) { m_pMessage = new Message(DeviceIDFrom, DeviceIDTo, MESSAGETYPE_COMMAND, PRIORITY_NORMAL, 
+			COMMAND_Get_Entertainment_Areas_CONST,
+			1 /* number of parameters */,
+			COMMANDPARAMETER_Value_To_Assign_CONST, (*sValue_To_Assign).c_str());		m_pcResponse = new RESP_Get_Entertainment_Areas(sValue_To_Assign); }
+	};
+	class CMD_Get_Entertainment_Areas_DL : public PreformedCommand {
+	public:
+		CMD_Get_Entertainment_Areas_DL(long DeviceIDFrom, string DeviceIDTo,string *sValue_To_Assign) { m_pMessage = new Message(DeviceIDFrom, DeviceIDTo, MESSAGETYPE_COMMAND, PRIORITY_NORMAL,
+			COMMAND_Get_Entertainment_Areas_CONST,
+			1 /* number of parameters */,
+			COMMANDPARAMETER_Value_To_Assign_CONST, (*sValue_To_Assign).c_str());		m_pcResponse = new RESP_Get_Entertainment_Areas(sValue_To_Assign); }
+	};
+	class CMD_Get_Entertainment_Areas_DT : public PreformedCommand {
+	public:
+		CMD_Get_Entertainment_Areas_DT(long DeviceIDFrom, long MasterDevice, eBroadcastLevel eB,string *sValue_To_Assign) { m_pMessage = new Message(DeviceIDFrom, MasterDevice, eB, MESSAGETYPE_COMMAND, PRIORITY_NORMAL,
+			COMMAND_Get_Entertainment_Areas_CONST,
+			1 /* number of parameters */,
+			COMMANDPARAMETER_Value_To_Assign_CONST, (*sValue_To_Assign).c_str());		m_pcResponse = new RESP_Get_Entertainment_Areas(sValue_To_Assign); }
+	};
+	class CMD_Get_Entertainment_Areas_Cat : public PreformedCommand {
+	public:
+		CMD_Get_Entertainment_Areas_Cat(long DeviceIDFrom, long DeviceCategory, bool bIncludeChildren, eBroadcastLevel eB,string *sValue_To_Assign) { m_pMessage = new Message(DeviceIDFrom, DeviceCategory, bIncludeChildren, eB, MESSAGETYPE_COMMAND, PRIORITY_NORMAL,
+			COMMAND_Get_Entertainment_Areas_CONST,
+			1 /* number of parameters */,
+			COMMANDPARAMETER_Value_To_Assign_CONST, (*sValue_To_Assign).c_str());		m_pcResponse = new RESP_Get_Entertainment_Areas(sValue_To_Assign); }
+	};
+	class CMD_NOREP_Get_Entertainment_Areas : public PreformedCommand {
+	public:
+		CMD_NOREP_Get_Entertainment_Areas(long DeviceIDFrom, long DeviceIDTo) { m_pMessage = new Message(DeviceIDFrom, DeviceIDTo, MESSAGETYPE_COMMAND, PRIORITY_NORMAL,
+			COMMAND_Get_Entertainment_Areas_CONST,
+			0 /* number of parameters */); }
+	};
+	class CMD_NOREP_Get_Entertainment_Areas_DL : public PreformedCommand {
+	public:
+		CMD_NOREP_Get_Entertainment_Areas_DL(long DeviceIDFrom, string DeviceIDTo) { m_pMessage = new Message(DeviceIDFrom, DeviceIDTo, MESSAGETYPE_COMMAND, PRIORITY_NORMAL,
+			COMMAND_Get_Entertainment_Areas_CONST,
+			0 /* number of parameters */); }
+	};
+	class CMD_NOREP_Get_Entertainment_Areas_DT : public PreformedCommand {
+	public:
+		CMD_NOREP_Get_Entertainment_Areas_DT(long DeviceIDFrom, long MasterDevice, eBroadcastLevel eB) { m_pMessage = new Message(DeviceIDFrom, MasterDevice, eB, MESSAGETYPE_COMMAND, PRIORITY_NORMAL,
+			COMMAND_Get_Entertainment_Areas_CONST,
+			0 /* number of parameters */); }
+	};
+	class CMD_NOREP_Get_Entertainment_Areas_Cat : public PreformedCommand {
+	public:
+		CMD_NOREP_Get_Entertainment_Areas_Cat(long DeviceIDFrom, long DeviceCategory, bool bIncludeChildren, eBroadcastLevel eB) { m_pMessage = new Message(DeviceIDFrom, DeviceCategory, bIncludeChildren, eB, MESSAGETYPE_COMMAND, PRIORITY_NORMAL,
+			COMMAND_Get_Entertainment_Areas_CONST,
+			0 /* number of parameters */); }
+	};
 }
 #endif
