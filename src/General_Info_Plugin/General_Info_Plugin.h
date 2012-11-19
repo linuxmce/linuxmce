@@ -592,6 +592,48 @@ Delimiter: '\n' */
 	virtual void CMD_Send_Email(string sTo,string sSubject,string sMessageBody) { string sCMD_Result; CMD_Send_Email(sTo.c_str(),sSubject.c_str(),sMessageBody.c_str(),sCMD_Result,NULL);};
 	virtual void CMD_Send_Email(string sTo,string sSubject,string sMessageBody,string &sCMD_Result,Message *pMessage);
 
+
+	/** @brief COMMAND: #1106 - Get Users */
+	/** Get users */
+		/** @param #5 Value To Assign */
+			/** Returns the users in this system as a Pk\tNickName\nPk\tNickName\n etc. */
+
+	virtual void CMD_Get_Users(string *sValue_To_Assign) { string sCMD_Result; CMD_Get_Users(sValue_To_Assign,sCMD_Result,NULL);};
+	virtual void CMD_Get_Users(string *sValue_To_Assign,string &sCMD_Result,Message *pMessage);
+
+
+	/** @brief COMMAND: #1107 - Get Rooms */
+	/** Get the rooms */
+		/** @param #5 Value To Assign */
+			/** Returns the rooms in this installation as Pk\tDescription\nPk\tDescription\n etc. */
+
+	virtual void CMD_Get_Rooms(string *sValue_To_Assign) { string sCMD_Result; CMD_Get_Rooms(sValue_To_Assign,sCMD_Result,NULL);};
+	virtual void CMD_Get_Rooms(string *sValue_To_Assign,string &sCMD_Result,Message *pMessage);
+
+
+	/** @brief COMMAND: #1108 - Get Scenarios */
+	/** Get scenarios */
+		/** @param #5 Value To Assign */
+			/** Returns the scenarios for the specified parameters. */
+		/** @param #45 PK_EntertainArea */
+			/** Entertainment area to get scenarios for. Only valid for media scenarios. */
+		/** @param #48 Value */
+			/** Scenario to get. 1 = Lightning, 2= Climate, 3 = Security, 4 = Telecom, 5 = Media */
+		/** @param #57 PK_Room */
+			/** The Room to get the scenarios for. Required! */
+
+	virtual void CMD_Get_Scenarios(string sPK_EntertainArea,int iValue,int iPK_Room,string *sValue_To_Assign) { string sCMD_Result; CMD_Get_Scenarios(sPK_EntertainArea.c_str(),iValue,iPK_Room,sValue_To_Assign,sCMD_Result,NULL);};
+	virtual void CMD_Get_Scenarios(string sPK_EntertainArea,int iValue,int iPK_Room,string *sValue_To_Assign,string &sCMD_Result,Message *pMessage);
+
+
+	/** @brief COMMAND: #1109 - Get Entertainment Areas */
+	/** Get the entertainment areas */
+		/** @param #5 Value To Assign */
+			/** Returns the entertainment areas for this installation as Pk_EntArea\tFK_Room\tDescription\n etc. */
+
+	virtual void CMD_Get_Entertainment_Areas(string *sValue_To_Assign) { string sCMD_Result; CMD_Get_Entertainment_Areas(sValue_To_Assign,sCMD_Result,NULL);};
+	virtual void CMD_Get_Entertainment_Areas(string *sValue_To_Assign,string &sCMD_Result,Message *pMessage);
+
 //<-dceag-h-e->
 	private:
 		mapMacPKDescription m_mapMacPKDescription;
