@@ -25,8 +25,8 @@ QtObject{
     }
     //skin description
     property string skincreator: "Jochen Roth (aka ochorocho)"
-    property string skinname: "lustylizard"
-    property string skindir: "lustylizard"
+    property string skinname: "wip"
+    property string skindir: "wip"
     property string skindescription: "Tablet skin"
     property string skinversion: "0.1"
     property string skinvariation: "Tablet 1280x800"
@@ -36,9 +36,6 @@ QtObject{
     property color highlight2: "slategrey"
     property color alertcolor: "red"
     property color warncolor:"yellow"
-
-    property int  stdbuttonh: !b_orientation ? scaleY(10) : scaleY(10)
-    property int  stdbuttonw: !b_orientation ? scaleX(10) :scaleX(10)
 
     property color darkhighlight: "#628BC7"
     property color lighthighlight: "#3F76C7"

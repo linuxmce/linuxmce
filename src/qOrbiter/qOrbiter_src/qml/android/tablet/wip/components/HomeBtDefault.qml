@@ -5,12 +5,20 @@ Rectangle {
     height: style.btHomeDefaultH
     width: style.btHomeDefaultW
     radius: style.but_smooth
-    color:"#000000"
-    opacity: 0.800
+    color:"transparent"
 
     property string currentImage: "../images/btTelecom.png"
     property string currentText: "Telecom"
     signal clicked
+
+    Rectangle {
+        id: bgColor
+        height: parent.height
+        width: parent.width
+        radius: parent.radius
+        color:"#000000"
+        opacity: 0.800
+    }
 
     Image {
         id: buttonbg
@@ -32,19 +40,35 @@ Rectangle {
         color: "#ffffff"
         opacity: 1
     }
+    Image {
+        id: buttonbg2
+        source: "../images/arrowDown.png"
+        visible: false
+        height: Image.height
+        width: Image.width
+        anchors.bottom: parent.top
+        anchors.horizontalCenter: btHomeDefault.horizontalCenter
+    }
+
+
     MouseArea{
         id: mousearea1
         anchors.fill: parent
         hoverEnabled: true
         onEntered: {
-            btHomeDefault.opacity=0.500
+            bgColor.opacity=0.500
+            buttonbg2.visible=true
+            submenu.visible=true
         }
-        onExited:  {
-            btHomeDefault.opacity=0.800
-        }
+
         onClicked: {
-            manager.setFloorplanType(6)
-            manager.ShowFloorPlan(6)
+            //manager.setFloorplanType(6)
+            //manager.ShowFloorPlan(6)
+        }
+        onExited: {
+            bgColor.opacity=0.800
+            buttonbg2.visible=false
+            submenu.visible=false
         }
     }
 }

@@ -29,6 +29,7 @@ Avcodes Avcodes.qml
 AssignScreenShot AssignScreenShot.qml
 Button Button.qml
 HomeBtDefault HomeBtDefault.qml
+HomeBtSub HomeBtSub.qml
 ButtonNotify ButtonNotify.qml
 Bookmarks Bookmarks.qml
 Power Power.qml

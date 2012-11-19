@@ -45,6 +45,18 @@ Item
             id:screen1time
             anchors.horizontalCenter: parent.horizontalCenter
         }
+
+
+        HomeBtSub {
+            id: submenu
+            width: scaleX(97)
+            height: 100
+            anchors.bottom: mainButtonContainer.top
+            anchors.bottomMargin:  16
+            anchors.horizontalCenter: parent.horizontalCenter
+        }
+
+
         Rectangle{
             id: mainButtonContainer
             width: scaleX(97)
@@ -58,13 +70,14 @@ Item
                 id: btFloatMain
                 anchors.fill: parent
                 anchors.margins: 0
-                spacing: style.btHomeDefaultSpace
+                spacing: style.btHomeDefaultSpace                
 
                 HomeBtDefault {
                     id: btMedia
                     currentImage: "../images/btMedia.png"
                     currentText: "Media"
                 }
+
                 HomeBtDefault {
                     id:btLights
                     currentImage: "../images/btLights.png"
@@ -92,6 +105,12 @@ Item
                 }
             }
         }
+
+
+
+
+
+
 
         BottomPanel{id: advanced; anchors.bottom: maindisplay.bottom}
     }
