@@ -1,4 +1,5 @@
 import QtQuick 1.0
+import "../lib/handlers"
 
 Rectangle {
     id:nonepgplaylist
@@ -12,21 +13,8 @@ Rectangle {
         onActiveItemChanged:{
             nonepgplaylistview.positionViewAtIndex(mediaplaylist.currentIndex, ListView.Beginning)
         }
-
-
     }
-    /*
-    BorderImage {
-        id: borderimg
-        verticalTileMode: BorderImage.Round
-        horizontalTileMode: BorderImage.Repeat
-        source: "../img/icons/drpshadow.png"
-        anchors.fill: nonepgplaylist
-        anchors { leftMargin: -6; topMargin: -6; rightMargin: -8; bottomMargin: -8 }
-        border { left: 10; top: 10; right: 10; bottom: 10 }
-        smooth: true
-    }
-*/
+
     ListView{
         id:nonepgplaylistview
         width: scaleX(25)
@@ -52,7 +40,6 @@ Rectangle {
                 source:  index === dcenowplaying.m_iplaylistPosition ? playlistimage.source = "image://listprovider/updateobject/"+securityvideo.timestamp: ""
                 anchors.fill: parent
                 opacity: .5
-
             }
             Text {
                 id: position
@@ -73,7 +60,6 @@ Rectangle {
                 wrapMode: "WrapAtWordBoundaryOrAnywhere"
                 font.pixelSize: scaleY(2.15)
                 //font.bold: true
-
             }
 
             Image {
@@ -84,9 +70,7 @@ Rectangle {
                 opacity:index === dcenowplaying.m_iplaylistPosition ? .25 :  .15
             }
 
-            MouseArea{
-                anchors.fill: parent
-                onClicked: manager.changedPlaylistPosition(index)
+            PlaylistClickedHandler {
             }
 
             Column{
@@ -105,9 +89,8 @@ Rectangle {
                         id: up
                         text: qsTr("Up")
                     }
-                    MouseArea{
-                        anchors.fill: parent
-                        onClicked: manager.movePlaylistEntry("", index)
+                    PlaylistMoveHandler {
+                        direction: ""
                     }
                 }
 
@@ -116,9 +99,7 @@ Rectangle {
                     height: scaleX(1)
                     width:scaleX(1)
                     color:"yellow"
-                    MouseArea{
-                        anchors.fill: remove_box
-                        onClicked: manager.removePlaylistItem(index)
+                    PlaylistRemoveItemHandler {
                     }
                 }
 
@@ -131,10 +112,9 @@ Rectangle {
                         id: down
                         text: qsTr("down")
                     }
-                    MouseArea{
-                        anchors.fill: parent
-                        onClicked: manager.movePlaylistEntry("+", index)
-                    }
+                   PlaylistMoveHandler{
+                       direction: "+"
+                   }
                 }
             }
         }
@@ -175,9 +155,8 @@ Rectangle {
                     text: qsTr("Public")
                     anchors.centerIn: parent
                 }
-                MouseArea{
-                    anchors.fill: parent
-                    onClicked: manager.saveCurrentPlaylist(save_as.text, true)
+                PlaylistSavePublicHandler {
+                    playlistname: save_as.text
                 }
 
             }

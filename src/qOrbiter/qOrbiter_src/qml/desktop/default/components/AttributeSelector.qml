@@ -1,5 +1,6 @@
 import QtQuick 1.0
 import "../js/ComponentLoader.js" as MyJs
+import "../lib/handlers"
 
 Rectangle {
             id: attributeitem
@@ -19,10 +20,7 @@ Rectangle {
                     buttonsqradius: 7
                     height: scaleY(style.buttonH)
                     width:  scaleX(style.buttonW)
-                    MouseArea{
-                        anchors.fill:parent
-                        onClicked: manager.playMedia("!G"+iPK_Device)
-                    }
+                   PlayAll{}
                 }
 
                 ButtonSq{
@@ -63,8 +61,6 @@ Rectangle {
                 }
 
 
-
-
             ButtonSq{
                 buttontext: "Resolution"
                 buttonsqradius: 7
@@ -75,7 +71,6 @@ Rectangle {
                     onClicked: MyJs.createFilterObjects("../components/FileFormat.qml")
                 }
             }
-
 
                 ButtonSq{
                  buttontext: "Mediatypes"

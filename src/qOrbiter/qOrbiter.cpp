@@ -2015,6 +2015,35 @@ void qOrbiter::requestAttributeTypes()
 
 }
 
+void qOrbiter::requestMediaSubtypes(int type)
+{
+    string pResponse = "";
+    string sText = "";
+
+    CMD_Get_Media_Sub_Type getTypesCmd(m_dwPK_Device, iMediaPluginID, type, &sText);
+    // CMD_Get_Attributes_For_Type getTypesCmd(m_dwPK_Device, iMediaPluginID, 3 , &sText );
+    if(SendCommand(getTypesCmd, &pResponse) && pResponse=="OK"){
+        emit commandResponseChanged("Got subtypes for attribute");
+#ifdef QT_DEBUG
+        qDebug()<< QString::fromStdString(sText.c_str());
+#endif
+
+        QStringList data;
+        data = QString::fromStdString(sText.c_str()).split("\n");
+
+        for(int i=0; i < data.count(); i++)
+        {
+            QStringList subSplit = data.at(i).split(":");
+            emit newMediaSubtype(new AttributeSortItem( subSplit.last(),subSplit.first(), QImage(),false,  0));
+        }
+    }
+    else
+    {
+        emit commandResponseChanged("Command to get types for attribute failed!");
+    }
+
+}
+
 void qOrbiter::requestTypes(int type)
 {
     string pResponse = "";
@@ -2041,9 +2070,7 @@ void qOrbiter::requestTypes(int type)
     {
         emit commandResponseChanged("Command to get types for attribute failed!");
     }
-    emit attributeSortFinished();
-
-
+requestMediaSubtypes(type);
 
 }
 
@@ -3395,7 +3422,7 @@ void DCE::qOrbiter::populateAdditionalMedia() //additional media grid that popul
         {
             media_seek = "";
            populateAdditionalMedia();
-           media_pos = media_pos+media_pageSeperator;
+
             return;
         }
       setCurrentPage((std::abs(GridCurRow /  media_pageSeperator))) ;
@@ -3409,7 +3436,18 @@ void DCE::qOrbiter::populateAdditionalMedia() //additional media grid that popul
             filePath = QString::fromUtf8(pPath);
             fk_file = pCell->GetValue();
             cellTitle = QString::fromUtf8(pCell->m_Text);
+//            if(fk_file.contains("!A"))
+//            {
+//                string sText = "";
+//                string sTextResp="";
+//                int t = QString(fk_file).remove("!").toInt();
+//                CMD_Get_Attribute attrib(m_dwPK_Device, iMediaPluginID, t, &sText );
 
+//                if(SendCommand(attrib, &sTextResp) && sTextResp=="OK"){
+//                   qDebug() << sText.c_str();
+//                    // cellTitle = QString::fromStdString(sText);
+//                }
+//            }
             index = pDataGridTable->CovertColRowType(it->first).first;
             if (pPath )
             {

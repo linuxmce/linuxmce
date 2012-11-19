@@ -1375,7 +1375,6 @@ lock"
 		height: 120
 		width: 90
 		textLabel: ""
-2"
 	}
 	ButtonSq {
 		id: button6181_1934
@@ -1385,7 +1384,7 @@ lock"
 		height: 90
 		buttonbackground: "skins/Basic/Buttons/Keyboard/Wide%20KB.png"
 		buttontext: ""
-2"
+
 		clickHandler.onClicked: onActivate6181()
 	}
 	function onActivate6182() 

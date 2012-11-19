@@ -74,7 +74,6 @@ void TimeCodeManager::start(QString server, int iport)
             qDebug("couldnt start timecode");
 #ifdef QT_DEBUG
             qDebug() << dceMediaSocket->errorString();
-
 #endif
             portConnected = false;
             stop();
@@ -93,6 +92,9 @@ void TimeCodeManager::start(QString server, int iport)
             else
             {
                 qDebug() << dceMediaSocket->peerName() << "is different from " << server << ". reconnecting";
+                dceMediaSocket->close();
+                dceMediaSocket->connectToHost(server, 12000);
+               mediaPlayerIp = server;
                 restart();
                 //break;
             }

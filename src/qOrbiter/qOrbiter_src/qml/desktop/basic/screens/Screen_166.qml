@@ -108,8 +108,7 @@ Item {
 		y: 720
 		height: 120
 		width: 90
-		textLabel: "|
-\"
+        textLabel: "|"
 	}
 	ButtonSq {
 		id: button6071_1794
@@ -118,8 +117,7 @@ Item {
 		width: 120
 		height: 90
 		buttonbackground: "skins/Basic/Buttons/Keyboard/Wide%20KB.png"
-		buttontext: "|
-\"
+        buttontext: "|"
 		clickHandler.onClicked: onActivate6071()
 	}
 	function onActivate6072() 
@@ -1109,8 +1107,8 @@ Item {
 		height: 120
 		width: 90
 		textLabel: ""
-'"
 	}
+
 	ButtonSq {
 		id: button6120_1840
 		x: 1440
@@ -1119,9 +1117,9 @@ Item {
 		height: 90
 		buttonbackground: "skins/Basic/Buttons/Keyboard/Wide%20KB.png"
 		buttontext: ""
-'"
 		clickHandler.onClicked: onActivate6120()
 	}
+
 	function onActivate6121() 
 	{
 	 // Calling Command 28 (Simulate Keypress) with CommandGroup_Parameters from 18285

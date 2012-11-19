@@ -4,7 +4,7 @@ import AudioVisual 1.0
 import "../effects"
 import "../components"
 import "../animation"
-
+import "../lib/handlers"
 import "../js/ComponentLoader.js" as MyJs
 
 
@@ -38,188 +38,28 @@ Rectangle {
         id: pos_label
         anchors.top: fileviewscreen.top
         anchors.horizontalCenter: fileviewscreen.horizontalCenter
-        radius:5
+
         color:style.darkhighlight
         width: grid_view1.width
         height: scaleY(5)
-        Row{
-            id:label_row
-            width: childrenRect.width
-            height: scaleY(5)
-            anchors.centerIn: pos_label
-            spacing: scaleX(1)
-            Text {
-                id: grid_position_label
-                text: qsTr("You are browsing by:") + manager.i_current_mediaType
-                font.pixelSize: 14
-            }
-            Text {
-                id: grid_attritbute_label
-                text: qsTr("Sorted by Attribute:  ") + manager.q_attributetype_sort
-            }
-            Text {
-                id: page_label
-                text: qsTr("Current Page") + manager.media_currentPage
-            }
+        opacity: .25
 
-            TextInput{
-                id:seperationSetter
-                width: page_label.width
-                text: manager.media_pageSeperator
-                onFocusChanged: activeFocus ? text="" : text=manager.media_pageSeperator
-                Keys.onEnterPressed: {
-                    if (!seperationSetter.text.match("/D"))
-                    {
-                        manager.setDceGridSep(seperationSetter.text)
-                        manager.requestPage(manager.media_currentPage)
-                    }
-                }
-            }
 
-        }
-    }
-    Connections
-    {
-        target: dataModel
-        onProgressChanged:{progress_bar_fill.height = ((progress_bar.height) * (dataModel.progress / 100))}
-        onReady:progress_bar_fill.height = 0
-        onLoadingStatusChanged:progress_bar_fill.color = dataModel.loadingStatus ? "green" : "red"
     }
 
-    Rectangle
-    {
-        id:progress_bar
-        height: scaleY(65)
-        width: scaleX(2)
-        color: "transparent"
-        border.color: "white"
-        border.width: 1
+    MediaListInfoBar {
+        id: label_row
+        anchors.centerIn: pos_label
+    }
+    MediaListProgressBar {
+        id: progress_bar
         anchors.verticalCenter: parent.verticalCenter
-
-        Rectangle{
-            id:progress_bar_fill
-            height: 0
-            width: parent.width-1
-            color: height === progress_bar.height ? "green" : "red"
-            anchors.bottom: parent.bottom
-            opacity: .25
-        }
-
-        Text {
-            id: total_cells
-            text: manager.media_pageSeperator
-            color: "grey"
-            font.bold: false
-            font.pixelSize: scaleY(4)
-            anchors.bottom: progress_bar.top
-        }
-
     }
 
 
 
-    Component
-    {
+    MediaListGridDelagate {
         id: contactDelegate
-
-
-        Rectangle
-        {
-            id:mainItem
-            width: scaleX(20);
-            height: scaleY(20)
-            color: "transparent"
-            opacity: 0
-            scale:0
-            rotation: 360
-
-            MouseArea{
-                anchors.fill: mainItem
-                hoverEnabled: true
-                onEntered: {
-                    mainItem.color = style.darkhighlight
-                    mainItem.scale = 1.25
-                    mainItem.z = 10
-
-                }
-                onExited: {
-                    mainItem.color = "transparent"
-                    mainItem.scale = 1
-                    mainItem.z = 1
-                }
-            }
-            ParallelAnimation {
-                id:fade_and_scale
-                running: false
-                PropertyAnimation { target: mainItem; property: "opacity"; to: 1; duration: 1000}
-                PropertyAnimation { target: mainItem; property: "scale"; to: 1; duration: 500}
-                PropertyAnimation { target: mainItem; property: "rotation"; to: 0; duration: 500}
-
-            }
-
-            Component.onCompleted: fade_and_scale.running = true
-            Rectangle
-            {
-                id:frame
-
-                width: scaleX(19);
-                height: scaleY(19)
-                anchors.centerIn: mainItem
-                clip:true
-                color: "transparent"
-
-                MouseArea
-                {
-                    anchors.fill: frame
-                    onClicked: {setStringParam(4, id); mouselocX = mouseX; mouselocY = mouseY}
-
-                }
-
-                BorderImage {
-                    id: borderimg
-                    horizontalTileMode: BorderImage.Repeat
-                    source: "../img/icons/drpshadow.png"
-                    anchors.fill: imagerect
-                    anchors { leftMargin: -6; topMargin: -6; rightMargin: -8; bottomMargin: -8 }
-                    border { left: 10; top: 10; right: 10; bottom: 10 }
-                    smooth: true
-                }
-
-                Image
-                {
-                    id: imagerect;
-                    source:"image://datagridimg/"+id ;
-                    height: scaleY(18);
-                    width: scaleX(18);
-                    anchors.centerIn: parent;
-                    fillMode: Image.PreserveAspectCrop
-                    smooth: true
-                    asynchronous: true
-                }
-
-
-
-                Rectangle{
-                    id:textmask
-                    color: "grey"
-                    anchors.fill:celllabel
-                    opacity: .5
-                }
-
-                Text
-                {
-                    id:celllabel
-                    text: name;
-                    font.pointSize: 12;
-                    color: "white" ;
-                    wrapMode: "WrapAtWordBoundaryOrAnywhere"
-                    width: imagerect.width
-                    font.bold: true
-                    anchors.top: imagerect.top
-                    anchors.horizontalCenter: imagerect.horizontalCenter
-                }
-            }
-        }
     }
 
     Component
@@ -283,24 +123,25 @@ Rectangle {
         width: scaleX(10)
         model: dataModel.totalPages
         anchors.left: parent.left
+        spacing:scaleY(2)
         delegate: Rectangle{
-            height: scaleY(10)
-            width: scaleX(10)
+            height: scaleY(6)
+            width: scaleX(6)
             color: "transparent"
-            Text {
+            anchors.horizontalCenter: parent.horizontalCenter
+            StyledText {
                 id:page_label2
                 text: index
-                font.pixelSize: scaleY(3.5)
+                font.pixelSize: scaleY(4.5)
                 anchors.centerIn: parent
                 color: index == manager.media_currentPage ? "green":"slategrey"
                 font.bold: true
-
             }
 
             MouseArea{
                 anchors.fill: parent
-                onReleased: {  page_label.font.italic = true ; manager.requestPage(index);  }
-                onPressed: page_label.font.italic = false
+                onReleased: {  page_label2.font.italic = true ; manager.requestPage(index);  }
+                onPressed: page_label2.font.italic = false
             }
 
         }
@@ -321,7 +162,7 @@ Rectangle {
             width: scaleX(4)
             color: "transparent"
             clip:false
-            Text {
+            StyledText {
                 id: test
                 text: name
                 font.pixelSize: 18
@@ -343,9 +184,6 @@ Rectangle {
             }
         }
     }
-
-
-
 
     Row
     {

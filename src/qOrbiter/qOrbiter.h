@@ -1313,6 +1313,7 @@ signals:
     void clearModel();
     void pageSeperatorChanged(int s);
     void newAttributeSort(AttributeSortItem*);
+    void newMediaSubtype(AttributeSortItem*);
     void attributeSortFinished();
 
 
@@ -1530,6 +1531,7 @@ public slots:
     //media grid
 
     void requestAttributeTypes();
+    void requestMediaSubtypes(int type);
     void requestTypes(int type);
 
     void setGridSeperator(int sep);

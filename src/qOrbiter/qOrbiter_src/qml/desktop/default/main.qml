@@ -37,7 +37,7 @@ Item {
             onOrientationChanged:dceplayer.setWindowSize(manager.appHeight, manager.appWidth)
             onMediaPlayerIdChanged:{
                  console.log("initializing media player")
-                dceplayer.setConnectionDetails(manager.mediaPlayerID, manager.m_ipAddress)
+                dceplayer.setConnectionDetails(manager.mediaPlayerID, qs_routerip)
             }
         }
     }
@@ -121,14 +121,14 @@ Item {
         if (pageLoader.status == Component.Ready)
         {
             var s = String(screenname)
-//            if(s === "Screen_70.qml" && dceplayer. )
-//            {
-//                dceplayer.z = 0
-//            }
-//            else
-//            {
-//                dceplayer.z = -1
-//            }
+            if(s === "Screen_70.qml" && dceplayer.getTotalTime() !==0 )
+            {
+                dceplayer.z = 0
+            }
+            else
+            {
+                dceplayer.z = -2
+            }
             manager.setDceResponse("Command to change to:" + screenname+ " was successfull")
         }
         else if (pageLoader.status == Component.Loading)

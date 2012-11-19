@@ -520,6 +520,7 @@ signals:
     void setDceGridParam(int a, QString p );
     void keepLoading(bool s);
     void stillLoading(bool b);
+    void requestSubtypes();
 
     /*Message and notification signals*/
     void dceResponseChanged();
@@ -613,6 +614,10 @@ public slots:
                                                  }
     void updateSortAttributes(){ qorbiterUIwin->rootContext()->setContextProperty("attributeSort", QVariant::fromValue(aSortModel));
     }
+
+    void requestMediaSubtypes(){emit requestSubtypes();}
+    void setNewSubtype(){}
+
     //mobile device specfic
     bool setupMobileStorage();
     void setMobileStorage(QString s){mobileStorageLocation = s; emit mobileStorageChanged();}

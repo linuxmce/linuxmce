@@ -975,7 +975,7 @@ Item {
 		height: 120
 		width: 90
 		textLabel: ""
-'"
+
 	}
 	ButtonSq {
 		id: button2523_396
@@ -985,7 +985,7 @@ Item {
 		height: 90
 		buttonbackground: "skins/Basic/Buttons/Keyboard/Wide%20KB.png"
 		buttontext: ""
-'"
+
 		clickHandler.onClicked: onActivate2523()
 	}
 	function onActivate2524() 
