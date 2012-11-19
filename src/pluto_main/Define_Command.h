@@ -1005,6 +1005,10 @@
 #define COMMAND_Goto_Url_CONST 1103
 #define COMMAND_Back_CONST 1104
 #define COMMAND_Forward_CONST 1105
+#define COMMAND_Get_Users_CONST 1106
+#define COMMAND_Get_Rooms_CONST 1107
+#define COMMAND_Get_Scenarios_CONST 1108
+#define COMMAND_Get_Entertainment_Areas_CONST 1109
 
 #define COMMAND_TABLE "Command"
 #define COMMAND_PK_COMMAND_FIELD "PK_Command"
