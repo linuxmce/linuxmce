@@ -8,30 +8,8 @@ Window {
 	id: mainWindow
 	Component.onCompleted: manager.setBoundStatus(true)
 
-  Image {
-        id: transitPreview
-        source: "img/harmattan_cross.png" 
-        width: 1160 
-        height: 654
-	x: 732
-	y: 112
-	z:10
-	visible: true
-        Connections{
-            target: manager
-            onMediaScreenShotReady: transitPreview.source="image://listprovider/screenshot/"+securityvideo.timestamp
-        }
-        Timer{
-            id:previewTimer
-            interval: 1000
-            repeat: true
-            running: true
-            onTriggered: manager.getVideoFrame()
-        }
-
-    }
-
 	Image {
+	        id: backg
 		anchors.fill: parent
 		source: "img/pictest.png"
 		width: 1920
@@ -59,7 +37,7 @@ Window {
 		text: "Now Playing"
 		font.pointSize: 18 
 		font.family: "Roboto"
-		font.bold: true
+		font.bold: false 
 		color: platformStyle.colorNormalLight
 		x: 100
 		y: 24 
@@ -93,66 +71,135 @@ Window {
 		y: 84 
 	}
 
+	Image {
+	      id: topshadow
+	      anchors.fill: backg
+	      z: 99
+	      source: "img/player_background.png"
+	}
+
+        NowPlayingBar {  
+		id: nowPlaying
+                y: 87
+                x: 1040
+		onClicked: {
+		    nowplayingimage.state == "VISIBLE" ? nowplayingimage.state = "NOTVISIBLE" : nowplayingimage.state = "VISIBLE";
+		    currentPlaylist.state == "NOTVISIBLE" ? currentPlaylist.state = "VISIBLE" : currentPlaylist.state = "NOTVISIBLE";
+		}
+        }
+
     	Connections{
         	target:dcenowplaying
         	onImageChanged: {
             		nowplayingimage.source = "image://listprovider/updateobject/"+securityvideo.timestamp;
-            		console.log("now playing changed")
         	}
     	}
+
+	Playlist {
+	    id: currentPlaylist
+	    x: 0 
+	    y: 86
+	    z: 99
+	    width: 1040
+	    height: 1040
+	    state: "NOTVISIBLE"
+	    states: [
+	        State {
+		    name: "VISIBLE"
+		    PropertyChanges { target: currentPlaylist; opacity: 1.0 }
+		},
+		State {
+		    name: "NOTVISIBLE"
+		    PropertyChanges { target: currentPlaylist; opacity: 0.0 }
+		}	    
+            ]
+	    transitions: [
+	        Transition {
+		    from: "VISIBLE"
+		    to: "NOTVISIBLE"
+		    PropertyAnimation { target: currentPlaylist; property: "opacity"; duration: 100 }
+		},
+		Transition {
+		    from: "NOTVISIBLE"
+		    to: "VISIBLE"
+		    PropertyAnimation { target: currentPlaylist; property: "opacity"; duration: 100 }
+		}
+	    ]
+	}
 
 	Image {
 		id: nowplayingimage
 		x: 0 
 		y: 86 
-		width: 800 
+		width: 1040 
 		height: 1040
 		clip: true
 		fillMode: Image.PreserveAspectFit
-		smooth: true	
+		smooth: true
+		state: "VISIBLE"
+		states: [
+		    State {
+		        name: "VISIBLE"
+			PropertyChanges { target: nowplayingimage; opacity: 1.0 }
+		    },
+		    State {
+		        name: "NOTVISIBLE"
+			PropertyChanges { target: nowplayingimage; opacity: 0.0 }
+		    }
+		]
+
+		transitions: [
+		    Transition {
+		        from: "VISIBLE"
+			to: "NOTVISIBLE"
+			NumberAnimation { target: nowplayingimage; properties: "opacity"; duration: 100 }
+		    },
+		    Transition {
+		        from: "NOTVISIBLE"
+			to: "VISIBLE"
+			NumberAnimation { target: nowplayingimage; properties: "opacity"; duration: 100 }
+		    }
+		]	
 	}
 
-	Text {
-		width: 832 
-		height: 20
-		x: 950 
-		y: 720 
-		text: dcenowplaying.qs_mainTitle
-		font.family: "Roboto"
-		font.bold: true
-		font.pointSize: 16
-		color: platformStyle.colorNormalLight
+	Image {
+	      source: "img/cover_overlay.png"
+	      anchors.fill: nowplayingimage
+	      z: 99
 	}
 
 	MediaScrollBar {
 		id:media_transit
-		width: 832 
-		x: 950 
-		y: 840
+		width: 684 
+		x: 1140 
+		y: 880
 	}
 
 	Row {
-		width: 832
+		width: 684
 		height: 300
-		x: 950 
-		y: 900 
-		spacing: 250 
+		x: 1140 
+		y: 940 
+		spacing: 180
 		Button {
 			width: 112 
 			height: 112
 			iconSource: "img/skip-back.png"
+			onClicked: manager.newTrack("-1")
 		}
 
 		Button {
 			width: 112
 			height: 112
-			iconSource: "img/pause.png"
+			iconSource: dcenowplaying.b_mediaPlaying ? "img/play.png" : "img/pause.png"
+			onClicked: manager.pauseMedia()
 		}
 
 		Button {
 			width: 112
 			height: 112
 			iconSource: "img/skip-fwd.png"
+			onClicked: manager.newTrack("+1")
 		}
 	}
 
