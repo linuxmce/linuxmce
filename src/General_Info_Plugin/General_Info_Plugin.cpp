@@ -4115,9 +4115,9 @@ void General_Info_Plugin::CMD_Get_Home_Symlink(string sPath,string *sSymlink,str
 			/** A pipe delimited list like this: DeviceID1|TemplateName1|CommandLine1\nDeviceID2|DeviceTemplateName2|CommandLine2 etc */
 
 void General_Info_Plugin::CMD_Get_Devices_To_Start(int iPK_Device,string *sValue_To_Assign,string &sCMD_Result,Message *pMessage)
+//<-dceag-c956-e->
 {
 }
-//<-dceag-c956-e->
 //<-dceag-c957-b->
 
 	/** @brief COMMAND: #957 - Update Device */
@@ -4208,4 +4208,54 @@ void General_Info_Plugin::CMD_Send_Email(string sTo,string sSubject,string sMess
 	sCommand = "rm /tmp/MessageBody.tmp";
 
 	system(sCommand.c_str());
+}
+//<-dceag-c1106-b->
+
+	/** @brief COMMAND: #1106 - Get Users */
+	/** Get users */
+		/** @param #5 Value To Assign */
+			/** Returns the users in this system as a Pk\tNickName\nPk\tNickName\n etc. */
+
+void General_Info_Plugin::CMD_Get_Users(string *sValue_To_Assign,string &sCMD_Result,Message *pMessage)
+//<-dceag-c1106-e->
+{
+}
+//<-dceag-c1107-b->
+
+	/** @brief COMMAND: #1107 - Get Rooms */
+	/** Get the rooms */
+		/** @param #5 Value To Assign */
+			/** Returns the rooms in this installation as Pk\tDescription\nPk\tDescription\n etc. */
+
+void General_Info_Plugin::CMD_Get_Rooms(string *sValue_To_Assign,string &sCMD_Result,Message *pMessage)
+//<-dceag-c1107-e->
+{
+}
+//<-dceag-c1108-b->
+
+	/** @brief COMMAND: #1108 - Get Scenarios */
+	/** Get scenarios */
+		/** @param #5 Value To Assign */
+			/** Returns the scenarios for the specified parameters. */
+		/** @param #45 PK_EntertainArea */
+			/** Entertainment area to get scenarios for. Only valid for media scenarios. */
+		/** @param #48 Value */
+			/** Scenario to get. 1 = Lightning, 2= Climate, 3 = Security, 4 = Telecom, 5 = Media */
+		/** @param #57 PK_Room */
+			/** The Room to get the scenarios for. Required! */
+
+void General_Info_Plugin::CMD_Get_Scenarios(string sPK_EntertainArea,int iValue,int iPK_Room,string *sValue_To_Assign,string &sCMD_Result,Message *pMessage)
+//<-dceag-c1108-e->
+{
+}
+//<-dceag-c1109-b->
+
+	/** @brief COMMAND: #1109 - Get Entertainment Areas */
+	/** Get the entertainment areas */
+		/** @param #5 Value To Assign */
+			/** Returns the entertainment areas for this installation as Pk_EntArea\tFK_Room\tDescription\n etc. */
+
+void General_Info_Plugin::CMD_Get_Entertainment_Areas(string *sValue_To_Assign,string &sCMD_Result,Message *pMessage)
+//<-dceag-c1109-e->
+{
 }
