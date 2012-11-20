@@ -107,9 +107,20 @@ namespace DCE {
 	  }
   };
 
-struct CallbackData {
+class CallbackData {
+public:
 	char* buffer;
 	size_t size;
+
+	CallbackData()
+	{
+		buffer = (char*)malloc(1);
+		size = 0;
+	}
+	~CallbackData()
+	{
+		free(buffer);
+	}
 };
 
   

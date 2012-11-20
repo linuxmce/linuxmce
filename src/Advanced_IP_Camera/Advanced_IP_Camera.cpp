@@ -394,6 +394,9 @@ bool Advanced_IP_Camera::DoURLAccess(string sUrl)
 {
 	PLUTO_SAFETY_LOCK (cm, m_CurlMutex);
 	SetupCurl(sUrl);
+	CallbackData data;
+	curl_easy_setopt(m_pCurl, CURLOPT_WRITEFUNCTION, WriteCallback);
+ 	curl_easy_setopt(m_pCurl, CURLOPT_WRITEDATA, (void *)&data);
 	CURLcode res = curl_easy_perform(m_pCurl);
 	
 	if (res != 0)
@@ -417,12 +420,13 @@ size_t Advanced_IP_Camera::WriteCallback(void *ptr, size_t size, size_t nmemb, v
 {
 	struct CallbackData* data = (CallbackData*)ourpointer;
 	size_t realsize = size * nmemb;
-	data->buffer = (char*)realloc(data->buffer, data->size + realsize + 1);
-	if (data->buffer == NULL)
+	char* temp = (char*)realloc(data->buffer, data->size + realsize + 1);
+	if (temp == NULL)
 	{
-		LoggerWrapper::GetInstance ()->Write (LV_CRITICAL, "CMD_Get_Video_Frame: Unable to allocate memory for receive buffer!");
+		LoggerWrapper::GetInstance ()->Write (LV_CRITICAL, "WriteCallback(): Unable to allocate memory for receive buffer!");
 		return 0;
 	}
+	data->buffer = temp;
 	memcpy(&(data->buffer[data->size]), ptr, realsize);
 	data->size += realsize;
 	data->buffer[data->size] = 0;
@@ -471,8 +475,6 @@ void Advanced_IP_Camera::CMD_Get_Video_Frame(string sDisable_Aspect_Lock,int iSt
 {
 
 	CallbackData data;
-	data.buffer = (char*)malloc(1);
-	data.size = 0;
 	string sUrl = m_sBaseURL + m_sImgPath;
 
 	PLUTO_SAFETY_LOCK (gm, m_CurlMutex);
