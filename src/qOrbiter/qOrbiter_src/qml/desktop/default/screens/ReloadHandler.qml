@@ -1,20 +1,20 @@
 // import QtQuick 1.0 // to target S60 5th Edition or Maemo 5
 import QtQuick 1.1
 import QtWebKit 1.0
-
+import "../components"
 Rectangle {
     id:router_reloading
     width: appW
     height: appH
-    color: "slategrey"
+    color: "transparent"
 
 
-    Text {
+    StyledText {
         id: reload_text
         text: qsTr("Router is Reloading, Please be patient")
         font.pixelSize: scaleY(8)
         color: "black"
-        font.bold: false
+        font.bold: true
         anchors.horizontalCenter: parent.horizontalCenter
     }
     WebView {
@@ -24,7 +24,7 @@ Rectangle {
         width: parent.width - 100
         url: "http://"+srouterip+"/lmce-admin/qOrbiterGenerator.php?d="+iPK_Device
     }
-    Text {
+    StyledText {
         id: reload_status
         text: dcemessage
         font.pixelSize: scaleY(5)

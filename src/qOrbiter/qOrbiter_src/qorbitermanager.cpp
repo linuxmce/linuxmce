@@ -1139,8 +1139,10 @@ void qorbiterManager::setFloorplanType(int t)
 void qorbiterManager::qmlSetupLmce(QString incdeviceid, QString incrouterip)
 {
     setDceResponse("Triggering connection to LMCE Device ID [" + incdeviceid + "] port Router Address [" + incrouterip + "]") ;
-    qs_routerip = incrouterip;
-    iPK_Device = long(incdeviceid.toInt());
+
+    setInternalIp(incrouterip);
+    setDeviceNumber(incdeviceid.toInt());
+
     setDceResponse("Initializing Local Manager");
     initializeManager( qs_routerip.toStdString(), iPK_Device);
 }

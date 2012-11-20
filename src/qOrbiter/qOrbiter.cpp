@@ -1892,7 +1892,7 @@ bool qOrbiter::getConfiguration()
 
 void qOrbiter::registerDevice(int user, QString ea, int room)
 {
-    //  emit commandResponseChanged("registering");
+    emit commandResponseChanged("registering");
 
     char *pData;
     int iSize;
@@ -1903,16 +1903,13 @@ void qOrbiter::registerDevice(int user, QString ea, int room)
     iSize = 0;
     string pResponse ="";
     //on-off  PkUsers -int entArea -string  int room
-    DATA_Set_PK_Users(i_user, true);
-    DATA_Set_FK_EntertainArea(StringUtils::itos(i_ea), true);
-    DCE::CMD_Orbiter_Registered CMD_Orbiter_Registered(m_dwPK_Device, iOrbiterPluginID,  "1" ,      i_user,         StringUtils::itos(i_ea),          i_room,           &pData, &iSize);
+
+    DCE::CMD_Orbiter_Registered CMD_Orbiter_Registered(m_dwPK_Device, iOrbiterPluginID,  StringUtils::itos(i_room) ,      i_user,         StringUtils::itos(i_ea),          i_room,           &pData, &iSize);
     if (SendCommand(CMD_Orbiter_Registered, &pResponse) && pResponse=="OK")
     {
         emit commandResponseChanged("DCERouter Responded to Register with " + QString::fromStdString(pResponse));
-        setLocation(room, ea.toInt());
-        setUser(i_user);
-        GetScreenSaverImages();
-    }
+         GetScreenSaverImages();
+}
     else
     {
 
@@ -3490,20 +3487,29 @@ void DCE::qOrbiter::setLocation(int location, int ea) // sets the ea and room
     i_room = location;
     i_ea = ea;
 
-    DATA_Set_FK_EntertainArea(StringUtils::itos(i_ea));
+//    DATA_Set_FK_EntertainArea(StringUtils::itos(i_ea));
 
-    CMD_Set_Entertainment_Area_DL set_entertain_area(m_dwPK_Device, StringUtils::itos(iOrbiterPluginID), StringUtils::itos(ea));
-    SendCommand(set_entertain_area);
+  CMD_Set_Entertainment_Area_DL set_entertain_area(m_dwPK_Device, StringUtils::itos(iOrbiterPluginID), StringUtils::itos(ea));
+   SendCommand(set_entertain_area);
 
-    CMD_Set_Current_Room_DL set_current_room(m_dwPK_Device, StringUtils::itos(iOrbiterPluginID), location);
+   CMD_Set_Current_Room_DL set_current_room(m_dwPK_Device, StringUtils::itos(iOrbiterPluginID), location);
     SendCommand(set_current_room);
 
 }
 
 void DCE::qOrbiter::setUser(int user)
 {
-    CMD_Set_Current_User_DL set_user(m_dwPK_Device, StringUtils::itos(iPK_Device_GeneralInfoPlugin), user);
-    SendCommand(set_user);
+    qDebug() << "user" << user;
+    CMD_Set_Device_Data userData(m_dwPK_Device, this->iPK_Device_GeneralInfoPlugin ,m_dwPK_Device,"1",3);
+    string cResp="";
+
+
+    if(SendCommand(userData, &cResp)){
+            qDebug() << "set user cmd " << cResp.c_str();
+}
+    else{
+        qDebug()<< "Set user failed! " << cResp.c_str();
+    }
 }
 
 void DCE::qOrbiter::quickReload() //experimental function. checkConnection is going to be our watchdog at some point, now its just um. there to restart things.

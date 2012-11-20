@@ -11,6 +11,7 @@
 #endif
 
 #include <QObject>
+#include <QProcess>
 
 #include <qMediaPlayer/qMediaPlayer.h>
 #include "../qOrbiter/qOrbiter_src/plugins/AudioVisual/videoplayerbase.h"
@@ -28,6 +29,14 @@ class MediaManager : public QDeclarativeItem
     Q_OBJECT
     Q_PROPERTY(bool connected READ getConnectionStatus WRITE setConnectionStatus NOTIFY connectedChanged)
     Q_PROPERTY(QString currentStatus READ getCurrentStatus WRITE setCurrentStatus NOTIFY currentStatusChanged)
+    Q_PROPERTY(bool mediaPlaying READ getMediaPlaying WRITE setMediaPlaying NOTIFY mediaPlayingChanged)
+    Q_PROPERTY(bool hasError READ getErrorStatus WRITE setErrorStatus NOTIFY hasErrorChanged)
+    Q_PROPERTY(QString lastError READ getMediaError WRITE setMediaError NOTIFY lastErrorChanged)
+    Q_PROPERTY(int mediaBuffer READ getMediaBuffer WRITE setMediaBuffer NOTIFY mediaBufferChanged)
+
+    Q_PROPERTY(QString serverAddress READ getServerAddress WRITE setServerAddress NOTIFY serverAddressChanged)
+    Q_PROPERTY(int deviceNumber READ getDeviceNumber WRITE setDeviceNumber NOTIFY deviceNumberChanged)
+
 public:
     explicit MediaManager(QDeclarativeItem *parent = 0);
 
@@ -39,6 +48,12 @@ public:
     QString fileReference;
     int fileno;
     QString filepath;
+
+    int mediaBuffer;
+
+    bool mediaPlaying;
+    bool hasError;
+    QString lastError;
 
     //--------------------------
 
@@ -58,9 +73,11 @@ public:
     Phonon::MediaObject *mediaObject;
     ColorFilterProxyWidget *filterProxy;
     QList<QTcpSocket*> clientList;
+    QProcess *mountProcess;
 
     QString serverAddress;
     int deviceNumber;
+
     bool connected;
 
     int videoHeight;
@@ -70,10 +87,42 @@ signals:
     void connectedChanged();
     void currentStatusChanged();
     void totalTimeChanged();
+
     void newData(QByteArray b);
 
+    void mediaPlayingChanged();
+    void hasErrorChanged();
+    void lastErrorChanged();
+    void mediaBufferChanged();
+    void mediaAboutToFinish();
+    void prefinishMark();
+
+    void serverAddressChanged();
+    void deviceNumberChanged();
 
 public slots:
+    void setServerAddress(QString a) {serverAddress = a;emit serverAddressChanged();}
+    QString getServerAddress(){return serverAddress;}
+
+    void setDeviceNumber(int d) {deviceNumber = d; emit deviceNumberChanged();}
+    int getDeviceNumber() {return deviceNumber;}
+
+    void updateMetaData(){}
+
+    void setPrefinishMarkHit(qint32 t ) {}
+
+    void setMediaBuffer(int b) {mediaBuffer = b; emit mediaBufferChanged();}
+    int getMediaBuffer () {return mediaBuffer;}
+
+    void setMediaError(QString e) {lastError = e; emit lastErrorChanged();}
+    QString getMediaError() {return lastError;}
+
+    void setErrorStatus(bool e) {hasError = e; emit hasErrorChanged();}
+    bool getErrorStatus() {return hasError;}
+
+    void setMediaPlaying(bool s) {mediaPlaying = s; emit mediaPlayingChanged(); }
+    bool getMediaPlaying() {return mediaPlaying;}
+
     void setFileReference(QString f){fileReference = f.at(0); setFileNumber(f.remove(0,1).toInt()); }
     QString getFileReference() {return fileReference; }
 
@@ -84,10 +133,10 @@ public slots:
 
     void setMediaUrl(QString url);
 
-    void setCurrentStatus(QString s) {currentStatus = QTime::currentTime().toString()+"::"+s; emit currentStatusChanged(); }
+    void setCurrentStatus(QString s) {currentStatus = QTime::currentTime().toString()+"::"+s; emit currentStatusChanged(); qDebug() <<currentStatus; }
     QString getCurrentStatus() {return currentStatus;}
 
-    void setConnectionDetails(int t, QString r);
+    void setConnectionDetails(int r, QString s);
 
     void setConnectionStatus(bool stat){connected = stat; emit connectedChanged();}
     bool getConnectionStatus(){return connected;}
@@ -96,8 +145,10 @@ public slots:
 
     void newClientConnected();
     void startTimeCodeServer();
+    void stopTimeCodeServer();
 
-    void setMediaPosition(int msec) {mediaObject->seek(msec); }
+
+    void setMediaPosition(int msec) {mediaObject->seek((qint64)msec); }
     void setZoomLevel(QString zoom);
     void setAspectRatio(QString aspect);
     void getScreenShot();
@@ -110,7 +161,19 @@ public slots:
         int remainder = seconds % 3600;
         int minutes = remainder / 60;
         int forseconds = remainder % 60;
-        qs_totalTime =QString::number(displayHours) + ":" + QString::number(minutes) + ":" +QString::number(forseconds);
+        QString hrs = QString::number(displayHours);
+        if(hrs.length()==1)
+            hrs.prepend("0");
+
+        QString min = QString::number(minutes);
+        if(min.length()==1)
+            min.prepend("0");
+
+        QString sec = QString::number(forseconds);
+        if(sec.length()==1)
+            sec.prepend("0");
+
+        qs_totalTime =hrs + ":" + min + ":" +sec;
         totalTime = t;
         emit totalTimeChanged();}
 
@@ -123,6 +186,7 @@ private:
     void initializePlayer();
     void initializeConnections();
     void shutdownDevice();
+    void mountDrive(int device);
 
 
 private slots:

@@ -352,6 +352,7 @@ int main(int argc, char* argv[])
         QObject::connect(&w, SIGNAL(destroyed()), &a, SLOT(quit()));
 
 
+
         // QObject::connect (&w, SIGNAL(orbiterClosing()), &dceThread, SLOT(quit()),Qt::QueuedConnection);
         //  QObject::connect (&w, SIGNAL(orbiterClosing()), mediaThread, SLOT(quit()),Qt::QueuedConnection);
         //  QObject::connect (&w, SIGNAL(orbiterClosing()), epgThread, SLOT(quit()),Qt::QueuedConnection);

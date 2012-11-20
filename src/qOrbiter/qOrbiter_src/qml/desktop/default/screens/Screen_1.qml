@@ -7,15 +7,6 @@ import Qt.labs.shaders 1.0
 Item
 {
     anchors.centerIn: parent
-
-    Component.onCompleted:  {
-        if(!dceplayer.connected){
-        console.log("Starting media player")
-        dceplayer.setConnectionDetails(manager.mediaPlayerID, manager.m_ipAddress)
-        }
-    }
-
-
     Rectangle {
         id:stage
 
@@ -35,7 +26,7 @@ Item
 
         StyledText{
             id:connectstatus
-            text: "Orbiter "+ manager.m_dwPK_Device + " is connected."
+            text: "Orbiter "+ manager.m_dwPK_Device + " is connected to "+ manager.m_ipAddress
             color: "aliceblue"
             font.letterSpacing: 2
             anchors.left: parent.left

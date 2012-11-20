@@ -26,7 +26,7 @@ Item {
         anchors.top: parent.top
         anchors.left:parent.left
         z:-2
-        Component.onCompleted: {setWindowSize(manager.appHeight, manager.appWidth)}
+        Component.onCompleted: {setWindowSize(manager.appHeight, manager.appWidth); dceplayer.setConnectionDetails(manager.mediaPlayerID, manager.m_ipAddress)}
         MouseArea{
             anchors.fill: dceplayer
             acceptedButtons: Qt.LeftButton | Qt.RightButton
@@ -37,7 +37,7 @@ Item {
             onOrientationChanged:dceplayer.setWindowSize(manager.appHeight, manager.appWidth)
             onMediaPlayerIdChanged:{
                  console.log("initializing media player")
-                dceplayer.setConnectionDetails(manager.mediaPlayerID, qs_routerip)
+                dceplayer.setConnectionDetails(manager.mediaPlayerID, manager.m_ipAddress)
             }
         }
     }
@@ -81,6 +81,7 @@ Item {
         debugMessage: dceplayer.currentStatus
         anchors.top: commandmessages.bottom
         z:2
+        color: dceplayer.connected ? "green" : "red"
     }
 
     Connections{

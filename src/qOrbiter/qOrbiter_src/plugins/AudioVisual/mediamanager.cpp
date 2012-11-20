@@ -1,6 +1,7 @@
 #include "mediamanager.h"
 #include <QThread>
 #include <QTcpSocket>
+#include <QProcess>
 using namespace DCE;
 
 MediaManager::MediaManager(QDeclarativeItem *parent) :
@@ -32,9 +33,8 @@ MediaManager::MediaManager(QDeclarativeItem *parent) :
     filterProxy->setWidget(videoSurface);
     filterProxy->setAutoFillBackground(false);
     setCurrentStatus("Window Initialized");
-    initializePlayer();
-
     totalTime=0;
+
 }
 
 void MediaManager::initializePlayer()
@@ -47,36 +47,59 @@ void MediaManager::initializePlayer()
 }
 
 void MediaManager::initializeConnections()
-{   QObject::connect(mediaPlayer,SIGNAL(currentMediaUrlChanged(QString)), this, SLOT(setMediaUrl(QString)),Qt::QueuedConnection);
+{
+    /*setup*/
+
+
+    /*From Dce MediaPlayer*/
+    QObject::connect(mediaPlayer,SIGNAL(currentMediaUrlChanged(QString)), this, SLOT(setMediaUrl(QString)),Qt::QueuedConnection);
     QObject::connect(mediaPlayer,SIGNAL(startPlayback()), mediaObject, SLOT(play()),Qt::QueuedConnection);
     QObject::connect(mediaPlayer, SIGNAL(stopCurrentMedia()), mediaObject, SLOT(stop()),Qt::QueuedConnection);
+    QObject::connect(mediaPlayer, SIGNAL(stopCurrentMedia()), this, SLOT(stopTimeCodeServer()));
     QObject::connect(mediaPlayer, SIGNAL(pausePlayback()), mediaObject, SLOT(pause()),Qt::QueuedConnection);
     QObject::connect(mediaPlayer,SIGNAL(commandResponseChanged(QString)), this ,SLOT(setCurrentStatus(QString)),Qt::QueuedConnection);
     QObject::connect(mediaPlayer,SIGNAL(setZoomLevel(QString)), this, SLOT(setZoomLevel(QString)),Qt::QueuedConnection);
     QObject::connect(mediaPlayer,SIGNAL(streamIdChanged(int)), this , SLOT(setStreamId(int)));
     QObject::connect(mediaPlayer, SIGNAL(mediaIdChanged(QString)), this, SLOT(setFileReference(QString)));
-    QObject::connect(mediaObject, SIGNAL(finished()), mediaPlayer, SLOT(mediaEnded()),Qt::QueuedConnection);
     QObject::connect(mediaPlayer, SIGNAL(startPlayback()), this, SLOT(startTimeCodeServer()),Qt::QueuedConnection);
+    QObject::connect(mediaPlayer, SIGNAL(startPlayback()), videoSurface, SLOT(raise()),Qt::QueuedConnection);
+    QObject::connect(mediaPlayer, SIGNAL(connectionStatusChanged(bool)), this, SLOT(setConnectionStatus(bool)));
+   QObject::connect(mediaPlayer,SIGNAL(jumpToStreamPosition(int)), this, SLOT(setMediaPosition(int)));
+
+    /*From internal plugin*/
+    QObject::connect(mediaObject, SIGNAL(finished()), mediaPlayer, SLOT(mediaEnded()),Qt::QueuedConnection);
     QObject::connect(mediaObject, SIGNAL(tick(qint64)), this, SLOT(processTimeCode(qint64)),Qt::QueuedConnection);
     QObject::connect(mediaObject, SIGNAL(finished()), videoSurface, SLOT(lower()),Qt::QueuedConnection);
     QObject::connect(mediaObject, SIGNAL(totalTimeChanged(qint64)), this, SLOT(setTotalTime(qint64)));
-    QObject::connect(mediaPlayer, SIGNAL(startPlayback()), videoSurface, SLOT(raise()),Qt::QueuedConnection);
+    QObject::connect(mediaObject, SIGNAL(bufferStatus(int)), this, SLOT(setMediaBuffer(int)));
+    QObject::connect(mediaObject, SIGNAL(aboutToFinish()), this, SIGNAL(mediaAboutToFinish()));
+    QObject::connect(mediaObject, SIGNAL(prefinishMarkReached(qint32)), this ,SLOT(setPrefinishMarkHit(qint32)));
+    QObject::connect(mediaObject,SIGNAL(metaDataChanged()), this, SLOT(updateMetaData()));
+
+
+
+    /*internals*/
     QObject::connect(dcethread, SIGNAL(started()), mediaPlayer, SLOT(run()));
+
     mediaObject->setTickInterval(quint32(1000));
     dcethread->start();
 }
 
-void MediaManager::setConnectionDetails(int t, QString r)
+void MediaManager::setConnectionDetails(int r, QString s)
 {
-    serverAddress = r;
-    deviceNumber = t;
-    setCurrentStatus("Got address "+serverAddress+" and device number "+QString::number(deviceNumber)+", initializing");
-    if(r.isEmpty() || !t)
-    {setCurrentStatus("Error in setup information");
+    setServerAddress(s);
+    setDeviceNumber(r);
+
+
+    if(!serverAddress.isEmpty() && deviceNumber > 0)
+    {
+        setCurrentStatus("Got address "+serverAddress+" and device number "+QString::number(deviceNumber)+", initializing");
+        initializePlayer();
 
     }else
     {
-        initializePlayer();
+        setCurrentStatus("Error in setup information");
+        qDebug() << serverAddress <<"::" << deviceNumber;
     }
 
 }
@@ -84,10 +107,12 @@ void MediaManager::setConnectionDetails(int t, QString r)
 void MediaManager::newClientConnected()
 {
     setCurrentStatus("New Client Connected::");
-    QTcpSocket *lastSocket=timeCodeServer->nextPendingConnection();
-    qDebug() << lastSocket->peerAddress();
-
-    clientList.append(lastSocket);
+    if(timeCodeServer->hasPendingConnections()){
+        QTcpSocket *lastSocket=timeCodeServer->nextPendingConnection();
+        if(lastSocket->isValid()){
+            clientList.append(lastSocket);
+        }
+    }
 
 }
 
@@ -102,6 +127,19 @@ void MediaManager::startTimeCodeServer()
     {
 
     }
+}
+
+void MediaManager::stopTimeCodeServer()
+{
+    for(int d = 0; d<clientList.length(); d++){
+        QTcpSocket *c = clientList.at(d);
+        c->close();
+    }
+
+
+    timeCodeServer->close();
+
+
 }
 
 void MediaManager::setZoomLevel(QString zoom)
@@ -151,13 +189,23 @@ void MediaManager::processTimeCode(qint64 f)
     int minutes = remainder / 60;
     int forseconds = remainder % 60;
 
-    QString currentTime = QString::number(displayHours) + ":" + QString::number(minutes) + ":" +QString::number(forseconds);
+    QString hrs = QString::number(displayHours);
+    if(hrs.length()==1)
+        hrs.prepend("0");
 
+    QString min = QString::number(minutes);
+    if(min.length()==1)
+        min.prepend("0");
 
-    QString timeCodeTick = "1000,"+currentTime+","+qs_totalTime+","+QString::number(streamId)+",0,0,"+fileReference+","+QString::number(fileno)+","+filepath;
+    QString sec = QString::number(remainder);
+    if(sec.length()==1)
+        sec.prepend("0");
 
+    currentTime =f;
+    QString t = hrs + ":" + min + ":" +sec+".000";
 
-transmit(timeCodeTick);
+    QString timeCodeTick = "0/"+QString::number(1000)+","+t+","+qs_totalTime+","+QString::number(streamId)+",0,0,"+fileReference+","+QString::number(fileno)+","+filepath;
+    transmit(timeCodeTick);
 
     //  setCurrentStatus("Current position::" +QString::number(displayHours) + ":" + QString::number(minutes) + ":" +QString::number(forseconds));
 }
@@ -165,18 +213,28 @@ transmit(timeCodeTick);
 
 void MediaManager::transmit(QString d)
 {
-    QByteArray t;
-    QDataStream out(&t, QIODevice::WriteOnly);
+    QByteArray chunk;
+    QDataStream out(&chunk, QIODevice::WriteOnly);
     out << (quint16)0;
-    out << d;
-    out.device()->seek(0);
-    out << (quint16)(t.size() -sizeof(quint16));
+    out << d.toLocal8Bit(); //.toStdString().c_str();
+   out.device()->reset();
+    out << (quint16)(chunk.size() -sizeof(quint16));
 
     if(!clientList.isEmpty()){
-    QTcpSocket *tr = clientList.last();
-    qDebug() << d;
-    qDebug() << tr->peerAddress();
-    tr->write(t);
+        for(int s = 0; s< clientList.length(); s++)
+        {
+            QTcpSocket *tr = clientList.at(s);
+        tr->write(chunk);
+        }
     }
 
+}
+
+
+void MediaManager::mountDrive(int device)
+{
+    //    mountProcess = new QProcess();
+    //    QObject::connect(mountProcess, SIGNAL(readyRead()), this, SLOT(setCurrentStatus(QString)));
+    //    mountProcess->execute("gksudo mount 192.168.80.1:/mnt/device/121 /mnt/device/121");
+    //    qDebug() << mountProcess->state();
 }

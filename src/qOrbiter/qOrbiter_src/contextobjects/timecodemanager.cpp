@@ -87,14 +87,14 @@ void TimeCodeManager::start(QString server, int iport)
             if(dceMediaSocket->peerName()== server)
             {
                 qDebug() << "Its already connected";
-               // break;
+                // break;
             }
             else
             {
                 qDebug() << dceMediaSocket->peerName() << "is different from " << server << ". reconnecting";
                 dceMediaSocket->close();
                 dceMediaSocket->connectToHost(server, 12000);
-               mediaPlayerIp = server;
+                mediaPlayerIp = server;
                 restart();
                 //break;
             }
@@ -134,14 +134,18 @@ void TimeCodeManager::restart()
 
 void TimeCodeManager::updateTimeCode()
 {
-    socketData = dceMediaSocket->readLine();
-    // qDebug() << QString::fromAscii(socketData);
+    socketData = dceMediaSocket->readAll();
+  //  qDebug() <<"INC SOCKET DATA \n"<< QString::fromLocal8Bit(socketData, socketData.size());
 
     std::string sLine = QString::fromLocal8Bit(socketData.data(), socketData.size()).toStdString();
     if (sLine.length() > 0)
     {
+
         std::string::size_type pos=0;
-        int iSpeed = atoi(StringUtils::Tokenize( sLine,",",pos ).c_str());
+        std::string spSpeed = StringUtils::Tokenize( sLine,",",pos ).c_str();
+
+        int iSpeed = QString::fromStdString(spSpeed).toInt();
+
         std::string m_sTime = StringUtils::Tokenize( sLine,",",pos );
         std::string m_sTotalTime = StringUtils::Tokenize( sLine,",",pos );
         int iStreamID = atoi(StringUtils::Tokenize( sLine,",",pos ).c_str());
@@ -169,6 +173,16 @@ void TimeCodeManager::updateTimeCode()
         setStringTime(QString::fromStdString(m_sTime));
 
         std::string sSpeed;
+        //hack for truncated data from qt orbite
+
+        QString f = QString::fromStdString(sLine).split(",").first();
+        qDebug()<< f.length();
+        if(f.length()>4)
+        iSpeed= 1000;
+
+        //end hack
+
+        qDebug()<< "Speed "<< iSpeed;
         if( iSpeed!=1000 ) // normal playback
         {
             if( iSpeed>=1000 || iSpeed<=-1000 )
