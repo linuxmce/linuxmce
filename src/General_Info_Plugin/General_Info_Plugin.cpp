@@ -62,6 +62,7 @@ using namespace DCE;
 #include "pluto_main/Define_Screen.h"
 #include "pluto_main/Define_MediaType.h"
 #include "pluto_main/Table_Room.h"
+#include "pluto_main/Table_EntertainArea.h"
 #include "pluto_main/Define_FloorplanType.h"
 #include "pluto_main/Define_FloorplanObjectType.h"
 #include "pluto_main/Table_DeviceTemplate_AV.h"
@@ -4219,6 +4220,14 @@ void General_Info_Plugin::CMD_Send_Email(string sTo,string sSubject,string sMess
 void General_Info_Plugin::CMD_Get_Users(string *sValue_To_Assign,string &sCMD_Result,Message *pMessage)
 //<-dceag-c1106-e->
 {
+	string result = "";
+	vector<Row_Users *> vectRow_Users;
+	m_pDatabase_pluto_main->Users_get()->GetRows("1=1 ORDER BY Nickname", &vectRow_Users);
+	for(size_t s=0; s<vectRow_Users.size(); s++)
+	{
+		result += StringUtils::itos(vectRow_Users[s]->PK_Users_get()) + "\t" + vectRow_Users[s]->Nickname_get() + "\n";
+	}
+	(*sValue_To_Assign) = result;
 }
 //<-dceag-c1107-b->
 
@@ -4230,6 +4239,14 @@ void General_Info_Plugin::CMD_Get_Users(string *sValue_To_Assign,string &sCMD_Re
 void General_Info_Plugin::CMD_Get_Rooms(string *sValue_To_Assign,string &sCMD_Result,Message *pMessage)
 //<-dceag-c1107-e->
 {
+	string result = "";
+	vector<Row_Room *> vectRow_Room;
+	m_pDatabase_pluto_main->Room_get()->GetRows("1=1 ORDER BY Description", &vectRow_Room);
+	for(size_t s=0; s<vectRow_Room.size(); s++)
+	{
+		result += StringUtils::itos(vectRow_Room[s]->PK_Room_get()) + "\t" + vectRow_Room[s]->Description_get() + "\n";
+	}
+	(*sValue_To_Assign) = result;
 }
 //<-dceag-c1108-b->
 
@@ -4247,6 +4264,9 @@ void General_Info_Plugin::CMD_Get_Rooms(string *sValue_To_Assign,string &sCMD_Re
 void General_Info_Plugin::CMD_Get_Scenarios(string sPK_EntertainArea,int iValue,int iPK_Room,string *sValue_To_Assign,string &sCMD_Result,Message *pMessage)
 //<-dceag-c1108-e->
 {
+	string result = "";
+
+	(*sValue_To_Assign) = result;
 }
 //<-dceag-c1109-b->
 
@@ -4258,4 +4278,12 @@ void General_Info_Plugin::CMD_Get_Scenarios(string sPK_EntertainArea,int iValue,
 void General_Info_Plugin::CMD_Get_Entertainment_Areas(string *sValue_To_Assign,string &sCMD_Result,Message *pMessage)
 //<-dceag-c1109-e->
 {
+	string result = "";
+	vector<Row_EntertainArea *> vectRow_EntertainArea;
+	m_pDatabase_pluto_main->EntertainArea_get()->GetRows("1=1 ORDER BY Description", &vectRow_EntertainArea);
+	for(size_t s=0; s<vectRow_EntertainArea.size(); s++)
+	{
+		result += StringUtils::itos(vectRow_EntertainArea[s]->PK_EntertainArea_get()) + "\t"+ StringUtils::itos(vectRow_EntertainArea[s]->FK_Room_get()) + "\t" + vectRow_EntertainArea[s]->Description_get() + "\n";
+	}
+	(*sValue_To_Assign) = result;
 }
