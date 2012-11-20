@@ -3,12 +3,12 @@ SNR_CPPFLAGS ?= -DKDE_LMCE -DDEBUG -DTHREAD_LOG -DLOG_ALL_QUERIES
 ROOT = ..
 VIP = ../VIPShared
 GDEV = ./Gen_Devices
-CXXFLAGS ?= -fpermissive -fPIC -Wall -ggdb3
-CPPFLAGS ?= -I./ -I../ -I../DCE/ -I../VIPShared/ -D_FILE_OFFSET_BITS=64 -D_LARGEFILE_SOURCE $(SNR_CPPFLAGS) -DUSE_LZO_DATAGRID -D_GNU_SOURCE -DLINK_TO_ROUTER $(EXTRA)
-CXX ?= g++
-LDFLAGS ?=
+CXXFLAGS = -fpermissive -fPIC -Wall -ggdb3
+CPPFLAGS = -I./ -I../ -I../DCE/ -I../VIPShared/ -D_FILE_OFFSET_BITS=64 -D_LARGEFILE_SOURCE $(SNR_CPPFLAGS) -DUSE_LZO_DATAGRID -D_GNU_SOURCE -DLINK_TO_ROUTER $(EXTRA)
+CXX = g++
+LDFLAGS =
 LDFLAGS += -L$(ROOT)/lib
-LDLIBS ?= -lpthread -lSerializeClass
+LDLIBS = -lpthread -lSerializeClass
 
 #<-mkr_B_use_mysql_wrapper_b->
 CPPFLAGS += -I/usr/include/mysql
