@@ -52,6 +52,10 @@ public:
 		ZWConfigData* GetConfigData();
 		void SetInterface(ZWInterface* pZWInterface);
 
+		DeviceData_Impl* GetDevice(int iNodeId, int iInstanceID);
+		int GetPKDevice(int iNodeId, int iInstanceID);
+		void ReportBatteryStatus(int iNodeId, int status);
+
 //<-dceag-const-b->
 public:
 		// Constructors/Destructor

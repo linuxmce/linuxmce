@@ -520,23 +520,35 @@ void ZWave::OnNotification(OpenZWave::Notification const* _notification, NodeInf
 	switch( _notification->GetType() )
 	{
 
-		case OpenZWave::Notification::Type_NodeEvent:
+	case OpenZWave::Notification::Type_ValueChanged:
+	{
+		if( nodeInfo != NULL )
 		{
-			if( nodeInfo != NULL )
-			{
-				// We have received an event from the node, caused by a
-				// basic_set or hail message.
-				// TBD...
-
-				nodeInfo = nodeInfo;
-
-			}
-			break;
+			// One of the node values has changed
+			// TBD...
+			OpenZWave::ValueID id = _notification->GetValueID();
 		}
+		break;
+	}
 
-		default:
+	case OpenZWave::Notification::Type_NodeEvent:
+	{
+		if( nodeInfo != NULL )
 		{
+			// We have received an event from the node, caused by a
+			// basic_set or hail message.
+			// TBD...
+			
+			nodeInfo = nodeInfo;
+			
 		}
+		break;
+	}
+	
+	default:
+	{
+	}
+
 	}
 
 }
@@ -553,4 +565,65 @@ ZWConfigData* ZWave::GetConfigData()
 	string port = TranslateSerialUSB(DATA_Get_COM_Port_on_PC());
 
 	return new ZWConfigData(port);
+}
+
+DeviceData_Impl *ZWave::GetDevice(int iNodeId, int iInstanceID) {
+        DeviceData_Impl *pChildDevice = NULL;
+
+	if ( iNodeId <= 0 ) return NULL;
+	string sInternalIDInst = StringUtils::itos(iNodeId);
+	if (iInstanceID > 0) {
+	        sInternalIDInst = sInternalIDInst + "/" + StringUtils::itos(iInstanceID);
+	}
+        for( VectDeviceData_Impl::const_iterator it = m_pData->m_vectDeviceData_Impl_Children.begin();
+                        it != m_pData->m_vectDeviceData_Impl_Children.end(); ++it )
+	{
+                pChildDevice = (*it);
+                if( pChildDevice != NULL )
+                {
+		        string tmp_node_id = pChildDevice->m_mapParameters_Find(DEVICEDATA_PortChannel_Number_CONST);
+			// check if child exists
+			if ( tmp_node_id.compare(sInternalIDInst) == 0) {
+			        return pChildDevice;
+			}
+
+			// iterate over embedded interfaces
+			DeviceData_Impl *pChildDevice1 = NULL;
+			for( VectDeviceData_Impl::const_iterator it1 = pChildDevice->m_vectDeviceData_Impl_Children.begin();
+				it1 != pChildDevice->m_vectDeviceData_Impl_Children.end(); ++it1 )
+			{
+				pChildDevice1 = (*it1);
+				if( pChildDevice1 != NULL )
+				{
+					string tmp_node_id = pChildDevice1->m_mapParameters_Find(DEVICEDATA_PortChannel_Number_CONST);
+					if ( tmp_node_id.compare(sInternalIDInst) == 0) {
+					        return pChildDevice1;
+					}
+				}
+			}
+
+		}
+	}
+        LoggerWrapper::GetInstance()->Write(LV_WARNING, "ZWave::GetDevice() No device found for id %s", sInternalIDInst.c_str());
+	return NULL;
+}
+
+int ZWave::GetPKDevice(int iNodeId, int iInstanceID) {
+	DeviceData_Impl *pDevice = GetDevice(iNodeId, iInstanceID);
+	if (pDevice != NULL)
+		return pDevice->m_dwPK_Device;
+	else
+		return -1;
+}
+
+void ZWave::ReportBatteryStatus(int iNode, int status)
+{
+	int PKDevice = GetPKDevice(iNode, -1);
+	if (PKDevice > 0)
+	{
+		CMD_Set_Device_Data cmd_Set_Device_Data(m_dwPK_Device, 4, PKDevice, StringUtils::itos(status), DEVICEDATA_Battery_state_CONST);
+		SendCommand(cmd_Set_Device_Data);
+	} else {
+		DCE::LoggerWrapper::GetInstance()->Write(LV_ZWAVE,"Unknown node: %d", iNode);
+	}
 }
