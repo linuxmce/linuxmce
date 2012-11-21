@@ -201,7 +201,7 @@ int main(int argc, char* argv[])
 		LoggerWrapper::GetInstance()->Write(LV_ZWAVE, "ZWInterface created.");
 		bool bQuit = false;
 		// TODO: should we add some limit to the number of loops - the same way the normal startup script does
-		while (!bAppError && !bQuit)
+		while (!bAppError && (!bQuit || bReload))
 		{
 			LoggerWrapper::GetInstance()->Write(LV_ZWAVE, "New ZWave instance");
 			pZWave = new ZWave(PK_Device, sRouter_IP,true,bLocalMode);
@@ -235,6 +235,9 @@ int main(int argc, char* argv[])
 					if(pZWave->m_RequestHandlerThread)
 						pthread_join(pZWave->m_RequestHandlerThread, NULL);  // This function will return when the device is shutting down
 				}
+				// Detach and clean up locks
+				pZWInterface->SetZWave(NULL);
+				pZWInterface->UnLock();
 				LoggerWrapper::GetInstance()->Write(LV_ZWAVE, "ZWave DCE exited");
 
 				g_pDeadlockHandler=NULL;

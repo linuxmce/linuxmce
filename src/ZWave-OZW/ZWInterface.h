@@ -13,6 +13,7 @@
 
 #include "ZWave.h"
 #include "ZWConfigData.h"
+#include "NodeInfo.h"
 
 namespace DCE
 {
@@ -25,6 +26,8 @@ namespace DCE
 		pthread_cond_t  initCond; 
 		pthread_mutex_t initMutex;
 		pthread_mutex_t g_criticalSection;
+
+		list<NodeInfo*> g_nodes;
 
 		ZWave* m_pZWave;
 
@@ -45,6 +48,21 @@ namespace DCE
 			pthread_mutex_init( &g_criticalSection, &mutexattr );
 			pthread_mutexattr_destroy( &mutexattr );
 
+		}
+
+		NodeInfo* GetNodeInfo ( OpenZWave::Notification const* _notification) {
+			uint32 const homeId = _notification->GetHomeId();
+			uint8 const nodeId = _notification->GetNodeId();
+			for( list<NodeInfo*>::iterator it = g_nodes.begin(); it != g_nodes.end(); ++it )
+			{
+				NodeInfo* nodeInfo = *it;
+				if( ( nodeInfo->m_homeId == homeId ) && ( nodeInfo->m_nodeId == nodeId ) )
+				{
+					return nodeInfo;
+				}
+			}
+
+			return NULL;
 		}
 
 		uint32 GetHomeId() {
@@ -125,7 +143,8 @@ namespace DCE
 		}
 
 		void OnNotification(OpenZWave::Notification const* _notification) {
-
+			// Must do this inside a critical section to avoid conflicts with the main thread
+			Lock();
 			switch( _notification->GetType() )
 			{
 				
@@ -150,12 +169,113 @@ namespace DCE
 				break;
 			}
 
+			case OpenZWave::Notification::Type_NodeAdded:
+			{
+				// Add the new node to our list
+				NodeInfo* nodeInfo = new NodeInfo();
+				nodeInfo->m_homeId = _notification->GetHomeId();
+				nodeInfo->m_nodeId = _notification->GetNodeId();
+				nodeInfo->m_polled = false;		
+				g_nodes.push_back( nodeInfo );
+				break;
+			}
+
+			case OpenZWave::Notification::Type_NodeRemoved:
+			{
+				// Remove the node from our list
+				uint32 const homeId = _notification->GetHomeId();
+				uint8 const nodeId = _notification->GetNodeId();
+				for( list<NodeInfo*>::iterator it = g_nodes.begin(); it != g_nodes.end(); ++it )
+				{
+					NodeInfo* nodeInfo = *it;
+					if( ( nodeInfo->m_homeId == homeId ) && ( nodeInfo->m_nodeId == nodeId ) )
+					{
+						g_nodes.erase( it );
+						break;
+					}
+				}
+				break;
+			}
+
+			case OpenZWave::Notification::Type_ValueAdded:
+			{
+				if( NodeInfo* nodeInfo = GetNodeInfo( _notification ) )
+				{
+					// Add the new value to our list
+					nodeInfo->m_values.push_back( _notification->GetValueID() );
+					OpenZWave::ValueID id = _notification->GetValueID();
+					printf("Notification: Value Added Home 0x%08x Node %d Genre %d Class %d Instance %d Index %d Type %d\n", _notification->GetHomeId(), _notification->GetNodeId(), id.GetGenre(), id.GetCommandClassId(), id.GetInstance(), id.GetIndex(), id.GetType());
+				}
+				break;
+			}
+			
+			case OpenZWave::Notification::Type_ValueRemoved:
+			{
+				if( NodeInfo* nodeInfo = GetNodeInfo( _notification ) )
+				{
+					// Remove the value from out list
+					for( list<OpenZWave::ValueID>::iterator it = nodeInfo->m_values.begin(); it != nodeInfo->m_values.end(); ++it )
+					{
+						if( (*it) == _notification->GetValueID() )
+						{
+							nodeInfo->m_values.erase( it );
+							break;
+						}
+					}
+				}
+				break;
+			}
+			case OpenZWave::Notification::Type_ValueChanged:
+			{
+				if( NodeInfo* nodeInfo = GetNodeInfo( _notification ) )
+				{
+					// One of the node values has changed
+					// TBD...
+					// nodeInfo = nodeInfo;
+					OpenZWave::ValueID id = _notification->GetValueID();
+					string str;
+					printf("Notification: Value Changed Home 0x%08x Node %d Genre %d Class %d Instance %d Index %d Type %d\n", _notification->GetHomeId(), _notification->GetNodeId(), id.GetGenre(), id.GetCommandClassId(), id.GetInstance(), id.GetIndex(), id.GetType());
+					if (OpenZWave::Manager::Get()->GetValueAsString(id, &str)) {
+						string label = OpenZWave::Manager::Get()->GetValueLabel(id);
+						string units = OpenZWave::Manager::Get()->GetValueUnits(id);
+						string level = str;
+						if (str == "True") level="255";
+						if (str == "False") level="0";
+						printf("Value: %s Label: %s Unit: %s\n",str.c_str(),label.c_str(),units.c_str());
+						
+					}
+				}
+				break;
+			}
+
+			case OpenZWave::Notification::Type_PollingDisabled:
+			{
+				if( NodeInfo* nodeInfo = GetNodeInfo( _notification ) )
+				{
+					nodeInfo->m_polled = false;
+				}
+				break;
+			}
+
+			case OpenZWave::Notification::Type_PollingEnabled:
+			{
+				if( NodeInfo* nodeInfo = GetNodeInfo( _notification ) )
+				{
+					nodeInfo->m_polled = true;
+				}
+				break;
+			}
+
 			default:
 			{
-				if (m_pZWave != NULL)
-					m_pZWave->OnNotification( _notification);
 			}
-			}
+			} // switch
+			if (m_pZWave != NULL)
+				m_pZWave->OnNotification( _notification, GetNodeInfo( _notification ));
+			else
+				LoggerWrapper::GetInstance()->Write(LV_WARNING, "ZWInterface::OnNotification() : m_pZWave == NULL, possible lost notification");
+
+			UnLock();
 		}
 	};
 }

@@ -27,6 +27,7 @@
 #include <openzwave/value_classes/ValueBool.h>
 
 #include "ZWConfigData.h"
+#include "NodeInfo.h"
 namespace DCE {
 class ZWInterface;
 }
@@ -39,25 +40,15 @@ namespace DCE
 //<-dceag-decl-e->
 		// Private member variables
 	        ZWInterface* m_pZWInterface;
-		typedef struct
-		{
-			uint32			m_homeId;
-			uint8			m_nodeId;
-			bool			m_polled;
-			list<OpenZWave::ValueID>	m_values;
-		}NodeInfo;
-
-		list<NodeInfo*> g_nodes;
 
 		// Private methods
 
 		void controller_update(OpenZWave::Driver::ControllerState state, void *context);
-		NodeInfo* GetNodeInfo ( OpenZWave::Notification const* _notification);
 
 
 public:
 		// Public member variables
-		void OnNotification(OpenZWave::Notification const* _notification);
+		void OnNotification(OpenZWave::Notification const* _notification, NodeInfo* nodeInfo);
 		ZWConfigData* GetConfigData();
 		void SetInterface(ZWInterface* pZWInterface);
 
