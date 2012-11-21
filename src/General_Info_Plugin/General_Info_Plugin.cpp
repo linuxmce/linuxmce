@@ -82,6 +82,10 @@ using namespace DCE;
 #include "Orbiter_Plugin/Orbiter_Plugin.h"
 #include "Event_Plugin/Event_Plugin.h"
 #include "Gen_Devices/AllScreens.h"
+#include "pluto_main/Table_Array.h"
+#include "pluto_main/Table_CommandGroup_Room.h"
+#include "pluto_main/Table_CommandGroup.h"
+#include "pluto_main/Table_CommandGroup_EntertainArea.h"
 
 #include "SerializeClass/ShapesColors.h"
 
@@ -4265,6 +4269,63 @@ void General_Info_Plugin::CMD_Get_Scenarios(string sPK_EntertainArea,int iValue,
 //<-dceag-c1108-e->
 {
 	string result = "";
+	switch(iValue)
+	{
+        case ARRAY_Lighting_Scenarios_CONST:
+        case ARRAY_Climate_Scenarios_CONST:
+        case ARRAY_Security_Scenarios_CONST:
+        case ARRAY_Communication_Scenarios_CONST:
+        case ARRAY_Misc_Scenarios_CONST:
+        case ARRAY_Sleeping_Scenarios_CONST:
+	{
+                vector<class Row_CommandGroup_Room *> vectAGs;
+                string sql = string(COMMANDGROUP_ROOM_FK_ROOM_FIELD) + "=" +
+                    StringUtils::itos(iPK_Room) + " ORDER BY " + COMMANDGROUP_ROOM_SORT_FIELD;
+                m_pDatabase_pluto_main->CommandGroup_Room_get()->GetRows(sql,&vectAGs);
+
+                for(size_t s=0;s<vectAGs.size();++s)
+                {
+			Row_CommandGroup_Room *drAG_R = vectAGs[s];
+			Row_CommandGroup *pRow_CommandGroup=drAG_R->FK_CommandGroup_getrow();
+			if( pRow_CommandGroup && pRow_CommandGroup->FK_Array_get()==iValue && !pRow_CommandGroup->Disabled_get() )
+			{
+				result +=  StringUtils::itos(drAG_R->FK_CommandGroup_get()) + "\t" +
+					// PK_Text
+					(drAG_R->FK_CommandGroup_getrow()->FK_Text_isNull() ? "" : StringUtils::itos(drAG_R->FK_CommandGroup_getrow()->FK_Text_get())) + "\t" +
+					// description
+					drAG_R->FK_CommandGroup_getrow()->Description_get() + "\n";
+			}
+                }
+		break;
+	}
+        case ARRAY_Media_Scenarios_CONST:
+	{
+		int PK_EntArea = atoi(sPK_EntertainArea.c_str());
+		if (PK_EntArea > 0)
+		{
+			vector<class Row_CommandGroup_EntertainArea *> vectEGs;
+			string sql = string(COMMANDGROUP_ENTERTAINAREA_FK_ENTERTAINAREA_FIELD) + "=" + \
+				StringUtils::itos(PK_EntArea) + " ORDER BY " + COMMANDGROUP_ENTERTAINAREA_SORT_FIELD;
+			m_pDatabase_pluto_main->CommandGroup_EntertainArea_get()->GetRows(sql,&vectEGs);
+
+			for(size_t s=0;s<vectEGs.size();++s)
+			{
+				Row_CommandGroup_EntertainArea *drAG_E = vectEGs[s];
+				Row_CommandGroup *pRow_CommandGroup=drAG_E->FK_CommandGroup_getrow();
+				if( pRow_CommandGroup && pRow_CommandGroup->FK_Array_get()==iValue && !pRow_CommandGroup->Disabled_get() )
+				{
+					result +=  StringUtils::itos(drAG_E->FK_CommandGroup_get()) + "\t" +
+						// PK_Text
+						(drAG_E->FK_CommandGroup_getrow()->FK_Text_isNull() ? "" : StringUtils::itos(drAG_E->FK_CommandGroup_getrow()->FK_Text_get())) + "\t" +
+						// description
+						drAG_E->FK_CommandGroup_getrow()->Description_get() + "\n";
+				}
+			}
+		}
+
+		break;
+	}
+	}
 
 	(*sValue_To_Assign) = result;
 }
