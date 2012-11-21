@@ -527,6 +527,26 @@ void ZWave::OnNotification(OpenZWave::Notification const* _notification, NodeInf
 			// One of the node values has changed
 			// TBD...
 			OpenZWave::ValueID id = _notification->GetValueID();
+			string label = OpenZWave::Manager::Get()->GetValueLabel(id);
+
+			int PKDevice = GetPKDevice(nodeInfo->m_nodeId, -1);
+			if (PKDevice > 0)
+			{
+				if ( label == "Battery Level" )
+				{
+					int level = 0;
+					OpenZWave::Manager::Get()->GetValueAsInt(id, &level);
+					ReportBatteryStatus(PKDevice, level);
+				} else if ( label == "Temperature" ) {
+					float level = 0;
+					OpenZWave::Manager::Get()->GetValueAsFloat(id, &level);
+					SendTemperatureChangedEvent(PKDevice, level);
+				} else if ( label == "Sensor" ) {
+					
+				} else if ( label == "Basic" ) {
+					
+				}
+			}
 		}
 		break;
 	}
@@ -575,6 +595,22 @@ DeviceData_Impl *ZWave::GetDevice(int iNodeId, int iInstanceID) {
 	if (iInstanceID > 0) {
 	        sInternalIDInst = sInternalIDInst + "/" + StringUtils::itos(iInstanceID);
 	}
+	// if not found with instance id, look up without instance id
+	pChildDevice = GetDeviceForPortChannel(sInternalIDInst);
+	if (pChildDevice == NULL) {
+		LoggerWrapper::GetInstance()->Write(LV_WARNING, "ZWave::GetDevice() No device found for id %s", sInternalIDInst.c_str());
+		sInternalIDInst = StringUtils::itos(iNodeId);
+		pChildDevice = GetDeviceForPortChannel(sInternalIDInst);
+	}
+	if (pChildDevice == NULL) {
+		LoggerWrapper::GetInstance()->Write(LV_WARNING, "ZWave::GetDevice() No device found for id %s", sInternalIDInst.c_str());
+	}
+	return pChildDevice;
+}
+
+DeviceData_Impl *ZWave::GetDeviceForPortChannel(string sPortChannel) {
+        DeviceData_Impl *pChildDevice = NULL;
+
         for( VectDeviceData_Impl::const_iterator it = m_pData->m_vectDeviceData_Impl_Children.begin();
                         it != m_pData->m_vectDeviceData_Impl_Children.end(); ++it )
 	{
@@ -583,7 +619,7 @@ DeviceData_Impl *ZWave::GetDevice(int iNodeId, int iInstanceID) {
                 {
 		        string tmp_node_id = pChildDevice->m_mapParameters_Find(DEVICEDATA_PortChannel_Number_CONST);
 			// check if child exists
-			if ( tmp_node_id.compare(sInternalIDInst) == 0) {
+			if ( tmp_node_id.compare(sPortChannel) == 0) {
 			        return pChildDevice;
 			}
 
@@ -596,7 +632,7 @@ DeviceData_Impl *ZWave::GetDevice(int iNodeId, int iInstanceID) {
 				if( pChildDevice1 != NULL )
 				{
 					string tmp_node_id = pChildDevice1->m_mapParameters_Find(DEVICEDATA_PortChannel_Number_CONST);
-					if ( tmp_node_id.compare(sInternalIDInst) == 0) {
+					if ( tmp_node_id.compare(sPortChannel) == 0) {
 					        return pChildDevice1;
 					}
 				}
@@ -604,7 +640,6 @@ DeviceData_Impl *ZWave::GetDevice(int iNodeId, int iInstanceID) {
 
 		}
 	}
-        LoggerWrapper::GetInstance()->Write(LV_WARNING, "ZWave::GetDevice() No device found for id %s", sInternalIDInst.c_str());
 	return NULL;
 }
 
@@ -616,14 +651,24 @@ int ZWave::GetPKDevice(int iNodeId, int iInstanceID) {
 		return -1;
 }
 
-void ZWave::ReportBatteryStatus(int iNode, int status)
+void ZWave::ReportBatteryStatus(int PK_Device, int status)
 {
-	int PKDevice = GetPKDevice(iNode, -1);
-	if (PKDevice > 0)
-	{
-		CMD_Set_Device_Data cmd_Set_Device_Data(m_dwPK_Device, 4, PKDevice, StringUtils::itos(status), DEVICEDATA_Battery_state_CONST);
-		SendCommand(cmd_Set_Device_Data);
-	} else {
-		DCE::LoggerWrapper::GetInstance()->Write(LV_ZWAVE,"Unknown node: %d", iNode);
-	}
+        LoggerWrapper::GetInstance()->Write(LV_WARNING, "ZWave::ReportBatteryStatus(): PK_Device %d", PK_Device);
+	CMD_Set_Device_Data cmd_Set_Device_Data(m_dwPK_Device, 4, PK_Device, StringUtils::itos(status), DEVICEDATA_Battery_state_CONST);
+	SendCommand(cmd_Set_Device_Data);
+}
+
+void ZWave::SendTemperatureChangedEvent(unsigned int PK_Device, float value)
+{
+        LoggerWrapper::GetInstance()->Write(LV_WARNING, "ZWave::SendTemperatureChangedEvent(): PK_Device %d", PK_Device);
+	char tempstr[512];
+	sprintf(tempstr, "%.2f", value);
+	m_pEvent->SendMessage( new Message(PK_Device,
+			DEVICEID_EVENTMANAGER,
+			PRIORITY_NORMAL,
+			MESSAGETYPE_EVENT,
+			EVENT_Temperature_Changed_CONST, 1, 
+			EVENTPARAMETER_Value_CONST, tempstr)
+		);
+
 }

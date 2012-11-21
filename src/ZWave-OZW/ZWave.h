@@ -53,8 +53,10 @@ public:
 		void SetInterface(ZWInterface* pZWInterface);
 
 		DeviceData_Impl* GetDevice(int iNodeId, int iInstanceID);
+		DeviceData_Impl *GetDeviceForPortChannel(string sPortChannel);
 		int GetPKDevice(int iNodeId, int iInstanceID);
 		void ReportBatteryStatus(int iNodeId, int status);
+		void SendTemperatureChangedEvent(unsigned int PK_Device, float value);
 
 //<-dceag-const-b->
 public:
