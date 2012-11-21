@@ -3,6 +3,7 @@ TEMPLATE = lib
 #TARGET = AudioVisual
 
 contains(QT_VERSION,4.*.*){
+
 message("$$QT_VERSION DCE-Av-Plugin")
 	QT += declarative phonon network
 	DEFINES+=QT4
@@ -10,7 +11,7 @@ message("$$QT_VERSION DCE-Av-Plugin")
 
 contains(QT_VERSION,5.0.*){
 	message("$$QT_VERSION DCE-Av-Plugin")
-	QT += quick1 phonon network
+        QT += quick1 multimedia network
 	DEFINES+=QT5
 }
 
@@ -27,11 +28,7 @@ uri = AudioVisual
 # Input
 SOURCES += \
 	audiovisual_plugin.cpp \   
-	videoplayer.cpp \
-	videoplayerbase.cpp \
 	colorfilterproxywidget.cpp \
-	audioplayerbase.cpp \
-	audioplayer.cpp \
 	mediamanager.cpp \
 	../../../../qMediaPlayer/qMediaPlayer.cpp \
 	../../../../PlutoUtils/uuencode.cpp \
@@ -66,11 +63,7 @@ SOURCES += \
 	
 HEADERS += \
 	audiovisual_plugin.h \  
-	videoplayer.h \
-	videoplayerbase.h \
 	colorfilterproxywidget.h \
-	audioplayerbase.h \
-	audioplayer.h \
 	mediamanager.h \
 	../../../../qMediaPlayer/qMediaPlayer.h \
 	../../../../PlutoUtils/ThreadedClass.h \

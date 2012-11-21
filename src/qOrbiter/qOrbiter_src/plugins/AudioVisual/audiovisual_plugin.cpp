@@ -1,6 +1,4 @@
 #include "audiovisual_plugin.h"
-#include "videoplayer.h"
-#include "audioplayer.h"
 #include "mediamanager.h"
 
 
@@ -13,10 +11,6 @@ void AudioVisualPlugin::registerTypes(const char *uri)
 
 #else
     // @uri AudioVisual
-    qmlRegisterType<VideoPlayer>(uri, 1, 0, "VideoPlayer");
-
-    qmlRegisterType<AudioPlayer>(uri, 1, 0, "AudioPlayer");
-
     qmlRegisterType<MediaManager>(uri, 1, 0, "MediaManager");
 #endif
 

@@ -5,17 +5,17 @@
 #include <qdeclarative.h>
 #include <QDeclarativeItem>
 #include <QtWidgets/QBoxLayout>
+#include <QtMultimedia>
 #else
 #include <QBoxLayout>
 #include <Phonon>
+#include <QDeclarativeItem>
 #endif
 
 #include <QObject>
 #include <QProcess>
 
 #include <qMediaPlayer/qMediaPlayer.h>
-#include "../qOrbiter/qOrbiter_src/plugins/AudioVisual/videoplayerbase.h"
-#include "../qOrbiter/qOrbiter_src/plugins/AudioVisual/audioplayerbase.h"
 #include <colorfilterproxywidget.h>
 #include <QTime>
 #include <QTcpServer>
@@ -68,9 +68,7 @@ public:
     QWidget *window;
     QVBoxLayout *layout;
     qMediaPlayer *mediaPlayer;
-    Phonon::VideoWidget *videoSurface;
-    Phonon::AudioOutput *audioSink;
-    Phonon::MediaObject *mediaObject;
+
     ColorFilterProxyWidget *filterProxy;
     QList<QTcpSocket*> clientList;
     QProcess *mountProcess;
@@ -82,6 +80,14 @@ public:
 
     int videoHeight;
     int videoWidth;
+
+#ifdef QT4
+    Phonon::VideoWidget *videoSurface;
+    Phonon::AudioOutput *audioSink;
+    Phonon::MediaObject *mediaObject;
+#else
+
+#endif
 
 signals:
     void connectedChanged();

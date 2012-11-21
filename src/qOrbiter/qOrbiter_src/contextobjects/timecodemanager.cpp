@@ -204,7 +204,6 @@ void TimeCodeManager::updateTimeCode()
 
 void TimeCodeManager::convertToSeconds()
 {
-
     QStringList times = qsTotalTime.split(":");
     int hoursToSec = times.at(0).toInt() * 3600 ;
     int minuteToSec = (times.at(1).toInt() * 60);

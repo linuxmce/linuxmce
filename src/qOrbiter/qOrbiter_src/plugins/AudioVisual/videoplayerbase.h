@@ -3,6 +3,7 @@
 #ifndef ANDROID
 #ifdef QT5
 #include <QtWidgets/QWidget>
+#include <QtMultimedia>
 #else
 #include <QWidget>
 #include <phonon/Phonon>
@@ -15,19 +16,22 @@
 #endif
 
 
-
 class VideoPlayerBase : public QWidget
 {
     Q_OBJECT
 public:
     explicit VideoPlayerBase(QWidget *parent = 0);
+
+#ifdef QT4
     Phonon::MediaObject *videoObject;
     Phonon::AudioOutput *videoAudio;
     Phonon::VideoWidget *videoSurface;
-   // Phonon::VideoPlayer *qPlayer;
+#else
+    QAbstractAudioOutput *videoAudio;
+    QAbstractVideoBuffer *videoObject;
 
-    // QWidget * w;
-    // QVBoxLayout *l;
+#endif
+
 
     QString currentSource;
     qint64 currentTime;

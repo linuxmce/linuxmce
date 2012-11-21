@@ -47,6 +47,8 @@ In an effor to keep the history of changes broken up
 #1247 - sleeping menu ticket
 #1261 - ui blocking issues
 #1372 - harmattan skin development
+#1438 - internal media player
+
 
 ##Android building information
 versioning codes
