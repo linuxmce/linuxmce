@@ -57,7 +57,7 @@ namespace DCE
 
 public:
 		// Public member variables
-		void OnNotification(OpenZWave::Notification const* _notification, void* _context);
+		void OnNotification(OpenZWave::Notification const* _notification);
 		ZWConfigData* GetConfigData();
 		void SetInterface(ZWInterface* pZWInterface);
 

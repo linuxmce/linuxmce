@@ -530,7 +530,7 @@ ZWave::NodeInfo* ZWave::GetNodeInfo(OpenZWave::Notification const* _notification
 	return NULL;
 }
 
-void ZWave::OnNotification(OpenZWave::Notification const* _notification, void* _context) {
+void ZWave::OnNotification(OpenZWave::Notification const* _notification) {
 	// Must do this inside a critical section to avoid conflicts with the main thread
 	m_pZWInterface->Lock();
 

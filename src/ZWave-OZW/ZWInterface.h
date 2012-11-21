@@ -73,7 +73,7 @@ namespace DCE
 
 			OpenZWave::Manager::Create();
 			
-			//OpenZWave::Manager::Get()->AddWatcher( OnNotification, NULL );
+			OpenZWave::Manager::Get()->AddWatcher( OnNotification_static, this );
 			
 			OpenZWave::Manager::Get()->AddDriver(data->m_sPort );
 			
@@ -119,7 +119,13 @@ namespace DCE
 			return ready;
 		}
 		
-		void OnNotification(OpenZWave::Notification const* _notification, void* _context) {
+		static void OnNotification_static(OpenZWave::Notification const* _notification, void* _context) {
+			ZWInterface *zwI = (ZWInterface*)_context;
+			zwI->OnNotification(_notification);
+		}
+
+		void OnNotification(OpenZWave::Notification const* _notification) {
+
 			switch( _notification->GetType() )
 			{
 				
@@ -147,7 +153,7 @@ namespace DCE
 			default:
 			{
 				if (m_pZWave != NULL)
-					m_pZWave->OnNotification( _notification, _context);
+					m_pZWave->OnNotification( _notification);
 			}
 			}
 		}
