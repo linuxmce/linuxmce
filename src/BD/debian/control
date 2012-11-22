@@ -1,0 +1,23 @@
+Source: libbdcommon
+Priority: extra
+Maintainer: LinuxMCE Developers <developers@linuxmce.org>
+Build-Depends: debhelper (>= 8.0.0), libbluetooth-dev
+Standards-Version: 3.9.2
+Section: libs
+Homepage: http://www.linuxmce.org
+#Vcs-Git: git://git.debian.org/collab-maint/libbdcommon.git
+#Vcs-Browser: http://git.debian.org/?p=collab-maint/libbdcommon.git;a=summary
+
+Package: libbdcommon-dev
+Section: libdevel
+Architecture: any
+Depends: libbdcommon (= ${binary:Version})
+Description: <insert up to 60 chars description>
+ <insert long description, indented with spaces>
+
+Package: libbdcommon
+Section: libs
+Architecture: any
+Depends: ${shlibs:Depends}, ${misc:Depends}
+Description: <insert up to 60 chars description>
+ <insert long description, indented with spaces>

@@ -8,14 +8,18 @@ LDLIBS = -lmysqlclient_r
 sources = BDCommand.cpp BDCommandProcessor.cpp BDCommandProcessor_Linux_Bluetooth.cpp sdpbrowse.cpp
 #sources = BDCommand.cpp BDCommandProcessor.cpp
 
+headers = *.h
+
 all: libBDCommon.so all-recursive
 
 libBDCommon.a: $(sources:.cpp=.o)
 	$(AR) rc $@ $(call cpath,$+)
+	mkdir -p ../lib
 	cp $@ ../lib
 
 libBDCommon.so: $(sources:.cpp=.o)
 	$(CXX) -shared $(CXXFLAGS) $(CPPFLAGS) -o $@ $(call cpath,$+) $(LDFLAGS) $(LDLIBS)
+	mkdir -p ../lib
 	cp $@ ../lib
 
 clean: clean-recursive
@@ -27,5 +31,6 @@ ifeq (,$(findstring clean, $(MAKECMDGOALS)))
 endif
 
 install: 
-	mkdir -p pluto/lib
-	cp libBDCommon.so $(DESTPATH)pluto/lib
+	mkdir -p $(DESTDIR)/usr/pluto/lib $(DESTDIR)/usr/include
+	cp libBDCommon.so $(DESTDIR)/usr/pluto/lib
+	cp $(headers) $(DESTDIR)/usr/include
