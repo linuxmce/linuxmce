@@ -559,7 +559,7 @@ int main(int argc, char* argv[])
         QObject::connect(&pqOrbiter, SIGNAL(screenshotVariablesReady()), &w, SLOT(showScreenShotVariables()),Qt::QueuedConnection);
         QObject::connect(&pqOrbiter, SIGNAL(addScreenShotVar(screenshotAttributes*)), &w, SLOT(setScreenShotVariables(screenshotAttributes*)));
         QObject::connect(&pqOrbiter, SIGNAL(screenShotReady(QImage)), &w, SLOT(setMediaScreenShot(QImage)),Qt::QueuedConnection);
-        QObject::connect (&w, SIGNAL(saveMediaScreenShot(QString,QImage)), &pqOrbiter, SLOT(saveScreenAttribute(QString,QImage)),Qt::QueuedConnection);
+        QObject::connect (&w, SIGNAL(saveMediaScreenShot(QString)), &pqOrbiter, SLOT(saveScreenAttribute(QString)),Qt::QueuedConnection);
 
         // myth  now playing requires special handling
         QObject::connect(&pqOrbiter, SIGNAL(mythTvUpdate(QString)), simpleEPGmodel, SLOT(setMythProgram(QString)),Qt::QueuedConnection);

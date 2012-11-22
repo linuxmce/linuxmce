@@ -3,22 +3,20 @@ import "../components"
 Rectangle {
     height: appH
     width: appW
-
-    ButtonSq {
-    height: 50
-    width: 50
-    buttontext: "home"
-    Image {
-        id: homeimage
-        source: "../../../img/icons/kfm_home.png"
-        height:50
-        width: 50
+    color: "transparent"
+    Rectangle{
+        anchors.fill: parent
+        color: style.warnColor
+        opacity: .25
     }
-    MouseArea
-    {
-        anchors.fill:parent
-        onClicked:gotoQScreen("Screen_1.qml")
+    StyledText{
+        text: qsTr("I finished installing the software for your new devices. You will need to restart the router before you can use them.")
+        font.pointSize: 18
+        anchors.centerIn: parent
+        font.bold: true
     }
+    HomeButton{
+        id:home
     }
 
 }

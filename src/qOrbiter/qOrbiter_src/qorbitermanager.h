@@ -494,7 +494,7 @@ signals:
     void objectUpdated();
     void setMediaDetails();
     void mediaScreenShotReady();
-    void saveMediaScreenShot(QString attribute, QImage pic);
+    void saveMediaScreenShot(QString attribute);
     void requestStreamImage(QString i);
     void requestVideoFrame();
     void liveTVrequest();

@@ -95,6 +95,9 @@ public:
     int qMediaPlayerID;
     int qCommunicatorID;
 
+    char *screenieData;
+    int screenieDataSize;
+
 
     Virtual_Device_Translator coreDevices;
     //DataGridTable pDataGridTable;
@@ -215,6 +218,7 @@ public:
     virtual int DeviceIdInvalid();
     virtual int SetupNewOrbiter();
     virtual void CreateChildren();
+
 
     //<-dceag-const-e->
 
@@ -1499,7 +1503,8 @@ public slots:
 
     void moveDirection(QString direction);
     void JogStream(QString jump);
-    void processScreenShot(char picData, int picDataSize, string fileFormat);
+    void saveScreenAttribute(QString attribute);
+    void cleanupScreenshotData() {screenieData=NULL; screenieData =0; }
     void showAdvancedButtons();
 
     //playlist manipulation
@@ -1619,7 +1624,7 @@ public slots:
     void CopyDisc();
     void ShowBookMarks();
 
-    void saveScreenAttribute(QString attribute, QImage data);
+
     void sendAvCommand(int deviceto, int command);
     //floorplans
     void getFloorplanDeviceCommand(int device);

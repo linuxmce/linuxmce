@@ -1447,13 +1447,8 @@ void qorbiterManager::setMediaScreenShot(QImage screen_shot)
 
 void qorbiterManager::saveScreenShot(QString attribute)
 {
-    QByteArray bytes;
-    QBuffer ba(&bytes);
-    ba.open(QIODevice::WriteOnly);
-    setDceResponse("Screenshot attribute: "+attribute);
-    mediaScreenShot.save(&ba, "JPG");
-    ba.close();
-    emit saveMediaScreenShot(attribute, mediaScreenShot);
+
+    emit saveMediaScreenShot(attribute);
 }
 
 
@@ -1589,10 +1584,10 @@ void qorbiterManager::setActiveSkin(QString name)
 
 void qorbiterManager::cleanupScreenie()
 {
-    mediaScreenShot = QImage();
+  //  mediaScreenShot = QImage();
     screenshotVars.clear();
     setDceResponse("Cleaned up Screenshot model");
-    QApplication::processEvents(QEventLoop::AllEvents);
+
 }
 
 void qorbiterManager::initializeConnections()

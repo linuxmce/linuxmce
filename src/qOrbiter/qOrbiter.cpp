@@ -54,9 +54,6 @@ qOrbiter::qOrbiter(Command_Impl *pPrimaryDeviceCommand, DeviceData_Impl *pData, 
 }
 
 
-
-
-
 //<-dceag-reg-b->
 // This function will only be used if this device is loaded into the DCE Router's memory space as a plug-in.  Otherwise Connect() will be called from the main()
 bool qOrbiter::Register()
@@ -1876,8 +1873,9 @@ void DCE::qOrbiter::deinitialize()
     pData = "NULL";
     iSize = 0;
     BindMediaRemote(false);
-    DCE::CMD_Orbiter_Registered CMD_Orbiter_Registered(m_dwPK_Device, iOrbiterPluginID, StringUtils::itos(m_dwPK_Device) ,i_user, StringUtils::itos(i_ea), i_room, &pData, &iSize);
-    SendCommand(CMD_Orbiter_Registered);
+    //DCE::CMD_Orbiter_Registered CMD_OrbiterUnRegistered(m_dwPK_Device, iOrbiterPluginID, StringUtils::itos(m_dwPK_Device) ,i_user, StringUtils::itos(i_ea), i_room, &pData, &iSize);
+
+   // SendCommand(CMD_OrbiterUnRegistered);
     emit closeOrbiter();
 
 }
@@ -3912,8 +3910,8 @@ void DCE::qOrbiter::addToPlaylist(bool now, std::string playlist)
 void DCE::qOrbiter::grabScreenshot(QString fileWithPath)
 {
     emit commandResponseChanged("Requesting id for: "+ fileWithPath);
-    char *screenieData;         //screenshot data using the char** data structure for passing of data
-    int screenieDataSize=0;       //var for size of data
+  screenieData =NULL;         //screenshot data using the char** data structure for passing of data
+    screenieDataSize=0;       //var for size of data
     string s_format ="jpg";   //the format we want returned
     int imageH;                 //image height of desired screenshot
     int imageW;                 //width of desired screenshot
@@ -4121,9 +4119,7 @@ void DCE::qOrbiter::ShowBookMarks()
 
 
 
-void DCE::qOrbiter::processScreenShot(char picData, int picDataSize, std::string fileFormat)
-{
-}
+
 
 void DCE::qOrbiter::adjustVolume(int vol)
 {
@@ -4161,9 +4157,19 @@ void qOrbiter::OnReload()
 {
     LoggerWrapper::GetInstance()->Write(LV_STATUS,"Command_Impl::OnReload %d", m_dwPK_Device);
     m_bOrbiterConnected = false;
+    m_bRouterReloading = true;
     setNowPlaying(false);
+    BindMediaRemote(false);
+    char *pData;
+    int iSize;
+    pData = "NULL";
+    iSize = 0;
+    DCE::CMD_Orbiter_Registered unregister(m_dwPK_Device, iOrbiterPluginID, StringUtils::itos(m_dwPK_Device) ,i_user, StringUtils::itos(i_ea), i_room, &pData, &iSize);
+    SendCommand(unregister);
+
     qDebug("Router Reloaded!");
     pthread_cond_broadcast( &m_listMessageQueueCond );
+
 
 
 #ifdef LINK_TO_ROUTER
@@ -4172,7 +4178,7 @@ void qOrbiter::OnReload()
 #endif
     emit routerDisconnect();
     emit checkReload();
-    Disconnect();
+ OnQuit();
 
 }
 
@@ -4256,16 +4262,14 @@ void DCE::qOrbiter::extraButtons(QString button)
 
 }
 
-void DCE::qOrbiter::saveScreenAttribute(QString attribute, QImage data)
+void DCE::qOrbiter::saveScreenAttribute(QString attribute)
 {
     emit mediaResponseChanged("Saving Screenshot for attribute: "+attribute);
     string sAttribute = attribute.toStdString();
-
-    char *pData = (char*) data.bits();
-    int pDataSize = data.byteCount();
-    DCE::CMD_Make_Thumbnail thumb(m_dwPK_Device, iMediaPluginID, sAttribute, pData, pDataSize );
+    DCE::CMD_Make_Thumbnail thumb(m_dwPK_Device, iMediaPluginID, sAttribute, screenieData,screenieDataSize );
     string cResp = "";
-    SendCommand(thumb);
+    if(SendCommand(thumb))
+        cleanupScreenshotData();
 
 
 }
@@ -4492,7 +4496,6 @@ void DCE::qOrbiter::adjustLighting(int level, myMap devices)
         if(SendCommand(basic,&pResponse))
             qDebug()<< QString::fromStdString(pResponse.c_str());
     }
-
 }
 
 

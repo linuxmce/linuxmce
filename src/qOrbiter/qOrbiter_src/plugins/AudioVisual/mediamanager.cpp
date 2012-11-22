@@ -211,7 +211,7 @@ void MediaManager::processTimeCode(qint64 f)
         sec.prepend("0");
 
     currentTime =f;
-    QString t = hrs + ":" + min + ":" +forseconds+;
+    QString t = hrs + ":" + min + ":" +sec;
 
     QString timeCodeTick = "0/"+QString::number(1000)+","+t+","+qs_totalTime+","+QString::number(streamId)+",0,0,"+fileReference+","+QString::number(fileno)+","+filepath;
     transmit(timeCodeTick);
@@ -224,8 +224,8 @@ void MediaManager::transmit(QString d)
 {
     QByteArray chunk;
     QDataStream out(&chunk, QIODevice::WriteOnly);
-    out << (quint16)0;
-    out << d.toLocal8Bit(); //.toStdString().c_str();
+    //out << (quint16)0;
+    out << d.toAscii(); //.toStdString().c_str();
    out.device()->reset();
     out << (quint16)(chunk.size() -sizeof(quint16));
 
