@@ -29,6 +29,8 @@ sources = DataGrid.cpp ClientSocket.cpp PlainClientSocket.cpp Logger.cpp Message
 	Virtual_Device_Translator.cpp arp-cache.cpp \
 	MessageBuffer.cpp \
 	../db_wrapper/db_wrapper.cpp ../db_wrapper/ClientSocket.cpp ../db_wrapper/Socket.cpp
+	
+headers = *.h
 
 all: libDCECommon.so all-recursive
 
@@ -39,6 +41,8 @@ libDCECommon.so: $(sources:.cpp=.o)
 libDCECommon.a: $(sources:.cpp=.o)
 	$(AR) rc $@ $(call cpath,$+)
 	cp $@ ../lib
+
+distclean: clean
 
 clean:
 	rm -f $(call cpath,$(sources:.cpp=.o) $(sources:.cpp=.d)) libDCECommon.so libDCECommon.a >/dev/null
@@ -58,5 +62,7 @@ endif
 
 install: 
 	mkdir -p pluto/lib
-	cp libSDL_Helpers.so $(DESTPATH)pluto/lib
-	cp SDL_Helpers-r.lib $(DESTPATH)pluto/lib
+	mkdir -p $(DESTDIR)/usr/lib $(DESTDIR)/usr/include
+	cp libDCECommon.so $(DESTPATH)pluto/lib
+	cp libDCECommon.so $(DESTDIR)/usr/lib
+	cp $(headers) $(DESTDIR)/usr/include	

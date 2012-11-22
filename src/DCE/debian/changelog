@@ -1,0 +1,5 @@
+libdce (2.46-1) unstable; urgency=low
+
+  * Initial release (Closes: #nnnn)  <nnnn is the bug number of your ITP>
+
+ -- root <root@unknown>  Thu, 22 Nov 2012 17:53:31 +0000
