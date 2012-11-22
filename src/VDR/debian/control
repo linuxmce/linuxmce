@@ -1,13 +1,14 @@
 Source: pluto-vdr
 Section: unknown
 Priority: extra
-Maintainer: root <root@fluffybitch.org>
-Build-Depends: debhelper (>= 7)
+Maintainer: LinuxMCE Developers <developers@linuxmce.org>
+Build-Depends: debhelper (>= 7), x11proto-xext-dev, libxtst-dev
 Standards-Version: 3.8.3
-Homepage: <insert the upstream URL, if relevant>
+Homepage: http://www.linuxmce.org
 
 Package: pluto-vdr
 Architecture: any
 Depends: vdr, vdr-plugin-streamdev-client, vdr-plugin-xineliboutput, xineliboutput-sxfe, vdr-plugin-control, vdr-plugin-remotetimers, ${shlibs:Depends}, ${misc:Depends}
-Description: <insert up to 60 chars description>
- <insert long description, indented with spaces>
+Description: LinuxMCE VDR Player device
+ The VDR player device needs to be installed on all MDs where VDR should be
+ used.
