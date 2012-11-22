@@ -30,7 +30,7 @@ sources += AirPlayMediaStream.cpp
 #<-dceag-mf-b->
 LDLIBS = $(XTRALDLIBS) $(BASELDLIBS)
 
-whattodo:
+whattodo: so
 	@echo "type 'make bin', 'make so' or 'make all'"
 
 all: bin so
@@ -41,14 +41,18 @@ so: AirPlay_PlugIn.so
 
 AirPlay_PlugIn.so: $(sources:.cpp=.o)
 	$(CXX) -shared -o $(MYNAME).so $(call cpath,$+) $(LDFLAGS) $(LDLIBS)
+	mkdir -p ../bin
 	cp $@ ../bin
 	chmod +x post_make.sh
 	./post_make.sh $@
 		
 AirPlay_PlugIn: $(sources:.cpp=.o)
 	$(CXX) -o $(MYNAME) $(call cpath,$+) $(LDFLAGS) $(LDLIBS)
+	mkdir ../bin
 	cp $@ ../bin
 	./post_make.sh $@
+
+distclean: clean
 
 clean: clean-recursive
 	rm -f $(call cpath,$(sources:.cpp=.o) $(sources:.cpp=.d)) AirPlay_PlugIn.bin AirPlay_PlugIn.so >/dev/null
@@ -65,5 +69,5 @@ endif
 
 
 install: 
-	mkdir -p /usr/pluto/bin
-	cp AirPlay_PlugIn.so $(DESTPATH)/usr/pluto/bin
+	mkdir -p $(DESTDIR)/usr/pluto/bin
+	cp AirPlay_PlugIn.so $(DESTDIR)/usr/pluto/bin
