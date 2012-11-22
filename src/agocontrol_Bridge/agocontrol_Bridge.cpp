@@ -21,14 +21,32 @@
 #include "PlutoUtils/Other.h"
 
 #include <iostream>
-using namespace std;
-using namespace DCE;
 
 #include "Gen_Devices/AllCommandsRequests.h"
 //<-dceag-d-e->
 
+#include <sys/types.h>
+#include <sys/stat.h>
+#include <fcntl.h>
+
+#include <termios.h>
+#include <stdio.h>
+
+
+
 using namespace qpid::messaging;
 using namespace qpid::types;
+using namespace DCE;
+using namespace std;
+
+extern "C" void *start( void* );
+void *start( void *p ) {
+	agocontrol_Bridge::agocontrol_Bridge *base;
+	base = static_cast<agocontrol_Bridge::agocontrol_Bridge*>(p);
+	base->receiveFunction();
+	return NULL;
+}
+
 
 //<-dceag-const-b->
 // The primary constructor when the class is created as a stand-alone device
@@ -66,14 +84,19 @@ bool agocontrol_Bridge::GetConfig()
 		agoConnection = Connection(DATA_Get_TCP_Address(), connectionOptions);
 		agoConnection.open();
 		agoSession = agoConnection.createSession();
-		agoCommandSender = agoSession.createSender("ago.commands; {create: always, node: {type: topic}}");
-		agoEventReceiver = agoSession.createReceiver("ago.events; {create: always, node: {type: topic}}");
+		agoSender = agoSession.createSender("agocontrol; {create: always, node: {type: topic}}");
+		agoReceiver = agoSession.createReceiver("agocontrol; {create: always, node: {type: topic}}");
 	} catch(const std::exception& error) {
                 std::cerr << error.what() << std::endl;
                 agoConnection.close();
                 printf("could not startup\n");
                 return false;
 	}
+
+	printf("spawning receive thread");
+	static pthread_t receiveThread;
+	pthread_create(&receiveThread, NULL, start, (void*)this);
+
 	return true;
 }
 
@@ -131,7 +154,7 @@ void agocontrol_Bridge::ReceivedCommandForChild(DeviceData_Impl *pDeviceData_Imp
 			break;
 	}
 	encode(content, command);
-	agoCommandSender.send(command);
+	agoSender.send(command);
 }
 
 /*
@@ -155,4 +178,181 @@ void agocontrol_Bridge::ReceivedUnknownCommand(string &sCMD_Result,Message *pMes
 
 */
 
+DeviceData_Impl *agocontrol_Bridge::InternalIDToDevice(string sInternalID) {
+        DeviceData_Impl *pChildDevice = NULL;
+
+	if (sInternalID == "") return NULL;
+
+        for( VectDeviceData_Impl::const_iterator it = m_pData->m_vectDeviceData_Impl_Children.begin();
+                        it != m_pData->m_vectDeviceData_Impl_Children.end(); ++it )
+	{
+                pChildDevice = (*it);
+                if( pChildDevice != NULL )
+                {
+		        string tmp_node_id = pChildDevice->m_mapParameters_Find(DEVICEDATA_PortChannel_Number_CONST);
+			// check if child exists
+			if ( tmp_node_id.compare(sInternalID) == 0) {
+			        return pChildDevice;
+			}
+
+			// iterate over embedded interfaces
+			DeviceData_Impl *pChildDevice1 = NULL;
+			for( VectDeviceData_Impl::const_iterator it1 = pChildDevice->m_vectDeviceData_Impl_Children.begin();
+				it1 != pChildDevice->m_vectDeviceData_Impl_Children.end(); ++it1 )
+			{
+				pChildDevice1 = (*it1);
+				if( pChildDevice1 != NULL )
+				{
+					string tmp_node_id = pChildDevice1->m_mapParameters_Find(DEVICEDATA_PortChannel_Number_CONST);
+					if ( tmp_node_id.compare(sInternalID) == 0) {
+					        return pChildDevice1;
+					}
+				}
+			}
+
+		}
+	}
+        LoggerWrapper::GetInstance()->Write(LV_WARNING, "ZWave::InternalIDToDevice() No device found for id %s", sInternalID.c_str());
+	return NULL;
+}
+
+
+int agocontrol_Bridge::AddDevice(int parent, string sInternalID,int PK_DeviceTemplate, string sName, string sRoom) {
+	int iPK_Device = 0;
+
+	int tmp_parent = 0;
+	if (parent > 0) { tmp_parent = parent; } else { tmp_parent = m_dwPK_Device; }
+
+	string tmp_s = StringUtils::itos(DEVICEDATA_PortChannel_Number_CONST) + "|" + sInternalID;
+	DeviceData_Impl *pDevice = InternalIDToDevice(sInternalID);
+	bool bFound = pDevice != NULL;
+	
+	if (!bFound) {
+		// does not exist, create child
+		LoggerWrapper::GetInstance()->Write(LV_ZWAVE, "Adding device for node: %s",sInternalID.c_str());
+		CMD_Create_Device add_command(m_dwPK_Device,4, PK_DeviceTemplate,"",0,"",
+			StringUtils::itos(DEVICEDATA_PortChannel_Number_CONST) + "|" + sInternalID, 0,tmp_parent,sName,0,0,&iPK_Device) ;
+		SendCommand(add_command);
+		if (iPK_Device > 0) {
+			string sCMD_Result;
+
+			CMD_Set_Room_For_Device set_room(m_dwPK_Device,4,iPK_Device,sRoom,0);
+			SendCommand(set_room, &sCMD_Result);
+			DCE::LoggerWrapper::GetInstance()->Write(LV_DEBUG,"Setting room for device %i - %s, Result: %s",iPK_Device,sRoom.c_str(),sCMD_Result.c_str());
+		}
+	} else {
+	        iPK_Device = pDevice->m_dwPK_Device;
+	}
+
+	return iPK_Device;
+
+} 
+bool agocontrol_Bridge::DeleteDevicesForNode(string sInternalID) {
+	DeviceData_Impl *pTargetChildDevice = NULL;
+
+        vector<DeviceData_Impl *> vectDevices = FindDevicesForNode(sInternalID);
+	if (vectDevices.size() > 0) {
+	        for( vector<DeviceData_Impl*>::const_iterator it = vectDevices.begin(); it != vectDevices.end(); ++it )
+		{
+		        pTargetChildDevice = (*it);
+			CMD_Delete_Device del_command(m_dwPK_Device,4,pTargetChildDevice->m_dwPK_Device);
+			DCE::LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"Deleting DCE child %i, node uuid %s",pTargetChildDevice->m_dwPK_Device,sInternalID.c_str());
+
+			SendCommand(del_command);
+		}
+		return true;
+	} else {
+		return false;
+	}
+}
+
+vector<DeviceData_Impl*> agocontrol_Bridge::FindDevicesForNode(string sInternalID) {
+        vector<DeviceData_Impl*> vecDevices;
+	DeviceData_Impl* pChildDevice = NULL;
+
+	if (sInternalID == "") return vecDevices;
+        string sInternalIDInst = sInternalID;
+        for( VectDeviceData_Impl::const_iterator it = m_pData->m_vectDeviceData_Impl_Children.begin();
+                        it != m_pData->m_vectDeviceData_Impl_Children.end(); ++it )
+        {
+                pChildDevice = (*it);
+                if( pChildDevice != NULL )
+                {
+		        string tmp_node_id = pChildDevice->m_mapParameters_Find(DEVICEDATA_PortChannel_Number_CONST);
+			if (tmp_node_id.find("/") != string::npos) {
+ 	                        vector<string> parts;
+ 	                        StringUtils::Tokenize(tmp_node_id, "/", parts);
+ 	                        tmp_node_id = parts[0];
+ 	                } 
+			// check if child exists
+			if ( tmp_node_id.compare(sInternalIDInst) == 0) {
+			      vecDevices.push_back(pChildDevice);
+			}
+
+			// iterate over embedded interfaces
+			DeviceData_Impl *pChildDevice1 = NULL;
+			for( VectDeviceData_Impl::const_iterator it1 = pChildDevice->m_vectDeviceData_Impl_Children.begin();
+				it1 != pChildDevice->m_vectDeviceData_Impl_Children.end(); ++it1 )
+			{
+				pChildDevice1 = (*it1);
+				if( pChildDevice1 != NULL )
+				{
+					string tmp_node_id = pChildDevice1->m_mapParameters_Find(DEVICEDATA_PortChannel_Number_CONST);
+					if (tmp_node_id.find("/") != string::npos) {
+						vector<string> parts;
+						StringUtils::Tokenize(tmp_node_id, "/", parts);
+						tmp_node_id = parts[0];
+					} 
+					if ( tmp_node_id.compare(sInternalIDInst) == 0) {
+					         vecDevices.push_back(pChildDevice1);
+					}
+				}
+			}
+
+		}
+	}
+	return vecDevices;
+}
+
+void agocontrol_Bridge::receiveFunction() {
+	Variant::Map agocommand;
+	Variant::Map inventoryMap;	
+
+	qpid::messaging::Message inventorymessage;
+	string inventory;
+
+	printf("receive thread startup\n");	
+	try {
+		agocommand["command"] = "inventory";
+		encode(agocommand, inventorymessage);
+
+		Address responseQueue("#response-queue; {create:always, delete:always}");
+		Receiver responseReceiver = agoSession.createReceiver(responseQueue);
+		inventorymessage.setReplyTo(responseQueue);
+
+		agoSender.send(inventorymessage);
+		qpid::messaging::Message response = responseReceiver.fetch();
+		decode(response,inventoryMap);
+		Variant::Map deviceMap = inventoryMap["inventory"].asMap();
+		for (Variant::Map::iterator it = deviceMap.begin(); it!=deviceMap.end(); it++) {
+			Variant::Map device;
+			device = it->second.asMap();
+			LoggerWrapper::GetInstance()->Write(LV_DEBUG,"ago control device found: %s type: %s name: %s", it->first.c_str(),device["type"].asString().c_str(),device["name"].asString().c_str());
+			printf("UUID: %s -", it->first.c_str());
+			printf("name: %s -", device["name"].asString().c_str());
+			printf("type: %s\n", device["devicetype"].asString().c_str());
+			if (device["devicetype"] == "switch") AddDevice(0, it->first.c_str(), DEVICETEMPLATE_Light_Switch_onoff_CONST,device["name"].asString(),device["room"].asString());
+			if (device["devicetype"] == "dimmer") AddDevice(0, it->first.c_str(), DEVICETEMPLATE_Light_Switch_dimmable_CONST,device["name"].asString(),device["room"].asString());
+
+
+		} 
+	} catch(const std::exception& error) {
+                std::cerr << error.what() << std::endl;
+                printf("could not fetch inventory\n");
+	}
+
+	while (1==1) {
+		sleep(1);
+	}
+}
 

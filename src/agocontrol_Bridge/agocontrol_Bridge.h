@@ -40,10 +40,21 @@ namespace DCE
 		// Private member variables
 		qpid::messaging::Connection agoConnection;
 		qpid::messaging::Session agoSession;
-		qpid::messaging::Receiver agoEventReceiver;
-		qpid::messaging::Sender agoCommandSender;
+		qpid::messaging::Receiver agoReceiver;
+		qpid::messaging::Sender agoSender;
 
+		static pthread_t receiveThread;
+		void *mySelf;
+	
 		// Private methods
+		DeviceData_Impl *InternalIDToDevice(string sInternalID);
+		vector<DeviceData_Impl*> FindDevicesForNode(string sInternalID);
+		bool DeleteDevicesForNode(string sInternalID);
+		int AddDevice(int parent, string sInternalID,int PK_DeviceTemplate, string sName, string sRoom);
+
+
+
+
 public:
 		// Public member variables
 
@@ -57,6 +68,7 @@ public:
 		virtual void ReceivedCommandForChild(DeviceData_Impl *pDeviceData_Impl,string &sCMD_Result,Message *pMessage);
 		virtual void ReceivedUnknownCommand(string &sCMD_Result,Message *pMessage);
 //<-dceag-const-e->
+		void receiveFunction();
 
 //<-dceag-const2-b->
 		// The following constructor is only used if this a class instance embedded within a DCE Device.  In that case, it won't create it's own connection to the router
