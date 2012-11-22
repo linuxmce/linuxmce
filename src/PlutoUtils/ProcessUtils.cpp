@@ -136,7 +136,7 @@ LoggerWrapper::GetInstance()->Write(LV_PROCESSUTILS,"dupped arg %d %s",i,ps);
 			{
 				sLogFile = "/dev/null";
 			}
-			int fd = open(sLogFile.c_str(), O_WRONLY | O_CREAT);
+			int fd = open(sLogFile.c_str(), O_WRONLY | O_CREAT,S_IRWXU); // Creating a file needs access rights defined.
 			dup2(fd, 1);
 			dup2(fd, 2);
 			close(fd);
@@ -518,7 +518,7 @@ bool ProcessUtils::SpawnDaemon(const char * path, char * args[], bool bLogOutput
 					// NEVER dup(open(...))!!! You lose the filedescriptor from open and that may cause problems in the child
 					
 					// redirect process output to log file, as selected above
-					int fd = open(sLogFile.c_str(), O_WRONLY | O_CREAT);
+					int fd = open(sLogFile.c_str(), O_WRONLY | O_CREAT,S_IRWXU); // Creating a file needs access rights defined.
 					dup2(fd, 1);
 					dup2(fd, 2);
 					close(fd);

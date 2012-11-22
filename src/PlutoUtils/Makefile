@@ -39,6 +39,8 @@ libPlutoUtils.a: $(sources:.cpp=.o)
 	$(AR) rc $@ $(call cpath,$+)
 	cp $@ ../lib
 
+distclean: clean
+
 clean:
 	rm -f $(call cpath,$(sources:.cpp=.o) $(sources:.cpp=.d)) libPlutoUtils.so libPlutoUtils.a >/dev/null
 
