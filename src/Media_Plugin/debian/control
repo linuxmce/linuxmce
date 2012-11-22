@@ -1,13 +1,13 @@
-Source: pluto-std-plugins
+Source: lmce-media-plugin
 Section: unknown
 Priority: extra
-Maintainer: root <root@fluffybitch.org>
-Build-Depends: debhelper (>= 7)
+Maintainer: LinuxMCE Developers <developers@linuxmce.org>
+Build-Depends: debhelper (>= 7), libcurl4-openssl-dev
 Standards-Version: 3.8.3
 Homepage: <insert the upstream URL, if relevant>
 
-Package: pluto-std-plugins
+Package: lmce-media-plugin
 Architecture: any
-Depends: pluto-dcecommon, pluto-system-database, dcecommon, system-database, pluto-media-database, media-database, pluto-boot-scripts, pluto-pluto-main-db, pluto_main, pluto-pluto-media-db, pluto_media, pluto-security-database, security-database, pluto-pluto-security-db, pluto_security, imagemagick, pluto-pluto-telecom-db, pluto_telecom, pluto-telecom-database, telecom-database, libid3-3.8.3, libhttpfetcher1, libwww-perl, libflickr-api-perl, libxml-parser-lite-tree-perl, libxml-simple-perl, perlmagick, libsoap-lite-perl, libid3-3.8.3c2a, ${shlibs:Depends}, ${misc:Depends}
+Depends: pluto-dcecommon, pluto-system-database, dcecommon, system-database, pluto-media-database, media-database, pluto-boot-scripts,pluto-pluto-main-db,pluto-main, pluto-pluto-media-db, pluto-media, pluto-security-database, security-database, pluto-pluto-security-db, pluto-security, imagemagick, pluto-pluto-telecom-db, pluto-telecom, pluto-telecom-database, telecom-database, libid3-3.8.3, libhttpfetcher1, libwww-perl, libflickr-api-perl, libxml-parser-lite-tree-perl, libxml-simple-perl, perlmagick, libsoap-lite-perl, libid3-3.8.3c2a, ${shlibs:Depends}, ${misc:Depends}
 Description: <insert up to 60 chars description>
  <insert long description, indented with spaces>

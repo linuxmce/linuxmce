@@ -2,7 +2,7 @@
 .\" First parameter, NAME, should be all caps
 .\" Second parameter, SECTION, should be 1-8, maybe w/ subsection
 .\" other parameters are allowed: see man(7), man(1)
-.TH PLUTO-STD-PLUGINS SECTION "May 31, 2012"
+.TH LMCE-MEDIA-PLUGIN SECTION "November 22, 2012"
 .\" Please adjust this date whenever revising the manpage.
 .\"
 .\" Some roff macros, for reference:
@@ -16,16 +16,16 @@
 .\" .sp <n>    insert n+1 empty lines
 .\" for manpage-specific macros, see man(7)
 .SH NAME
-pluto-std-plugins \- program to do something
+lmce-media-plugin \- program to do something
 .SH SYNOPSIS
-.B pluto-std-plugins
+.B lmce-media-plugin
 .RI [ options ] " files" ...
 .br
 .B bar
 .RI [ options ] " files" ...
 .SH DESCRIPTION
 This manual page documents briefly the
-.B pluto-std-plugins
+.B lmce-media-plugin
 and
 .B bar
 commands.
@@ -33,7 +33,7 @@ commands.
 .\" TeX users may be more comfortable with the \fB<whatever>\fP and
 .\" \fI<whatever>\fP escape sequences to invode bold face and italics,
 .\" respectively.
-\fBpluto-std-plugins\fP is a program that...
+\fBlmce-media-plugin\fP is a program that...
 .SH OPTIONS
 These programs follow the usual GNU command line syntax, with long
 options starting with two dashes (`-').
@@ -53,7 +53,7 @@ The programs are documented fully by
 .IR "The Rise and Fall of a Fooish Bar" ,
 available via the Info system.
 .SH AUTHOR
-pluto-std-plugins was written by <upstream author>.
+lmce-media-plugin was written by <upstream author>.
 .PP
-This manual page was written by root <root@fluffybitch.org>,
+This manual page was written by root <root@unknown>,
 for the Debian project (and may be used by others).

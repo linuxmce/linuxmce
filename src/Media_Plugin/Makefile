@@ -51,7 +51,7 @@ sources += \
 #<-dceag-mf-b->!
 LDLIBS_NAMES = $(INTERNAL_LIBS_NAMES) $(EXTERNAL_LIBS_NAMES)
 
-whattodo:
+whattodo: so
 	@echo "type 'make bin', 'make so' or 'make all'"
 
 all: bin so
@@ -62,14 +62,18 @@ so: Media_Plugin.so
 
 Media_Plugin.so: $(sources:.cpp=.o) $(INTERNAL_LIBS_NAMES:%=$(ROOT)/lib/lib%.so) Makefile
 	$(CXX) -shared -o $(MYNAME).so $(call cpath,$(sources:.cpp=.o)) $(LDFLAGS) $(LDLIBS_NAMES:%=-l%)
+	mkdir -p ../bin
 	cp $@ ../bin
 	chmod +x post_make.sh
 	./post_make.sh $@
 
 Media_Plugin: $(sources:.cpp=.o) $(INTERNAL_LIBS_NAMES:%=$(ROOT)/lib/lib%.a) Makefile
 	$(CXX) -o $(MYNAME) $(call cpath,$+) $(LDFLAGS) $(LDLIBS_NAMES:%=-l%)
+	mkdir -p ../bin
 	cp $@ ../bin
 	./post_make.sh $@
+
+distclean: clean
 
 clean:
 	rm -f $(call cpath,$(sources:.cpp=.o) $(sources:.cpp=.d)) Media_Plugin.bin Media_Plugin.so >/dev/null
@@ -87,22 +91,9 @@ endif
 
 
 install: 
-	mkdir -p /home/public
-	cp bookmarks.html $(DESTPATH)/home/public
-	mkdir -p /usr/pluto/bin
-	cp Datagrid_Plugin.so $(DESTPATH)/usr/pluto/bin
-	cp File_Grids_Plugin.so $(DESTPATH)/usr/pluto/bin
-	cp Security_Plugin.so $(DESTPATH)/usr/pluto/bin
-	cp Climate_Plugin.so $(DESTPATH)/usr/pluto/bin
-	cp Orbiter_Plugin.so $(DESTPATH)/usr/pluto/bin
-	cp Media_Plugin.so $(DESTPATH)/usr/pluto/bin
-	cp Telecom_Plugin.so $(DESTPATH)/usr/pluto/bin
-	cp Lighting_Plugin.so $(DESTPATH)/usr/pluto/bin
-	cp General_Info_Plugin.so $(DESTPATH)/usr/pluto/bin
-	cp Event_Plugin.so $(DESTPATH)/usr/pluto/bin
-	cp Infrared_Plugin.so $(DESTPATH)/usr/pluto/bin
-	cp RestartSecurityPlugin.sh $(DESTPATH)/usr/pluto/bin
-	cp Plug_And_Play_Plugin.so $(DESTPATH)/usr/pluto/bin
-	cp flickr.pl $(DESTPATH)/usr/pluto/bin
-	cp *.php $(DESTPATH)/usr/pluto/bin
-	cp flickr_status.sh $(DESTPATH)/usr/pluto/bin
+	mkdir -p $(DESTDIR)/home/public $(DESTDIR)/usr/pluto/bin
+	#cp bookmarks.html $(DESTDIR)/home/public
+	cp ../bin/Media_Plugin.so $(DESTDIR)/usr/pluto/bin
+	#cp flickr.pl $(DESTDIR)/usr/pluto/bin
+	#cp *.php $(DESTDIR)/usr/pluto/bin
+	#cp flickr_status.sh $(DESTDIR)/usr/pluto/bin
