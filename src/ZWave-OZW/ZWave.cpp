@@ -564,14 +564,44 @@ void ZWave::OnNotification(OpenZWave::Notification const* _notification, NodeInf
 
 	case OpenZWave::Notification::Type_NodeEvent:
 	{
+		DCE::LoggerWrapper::GetInstance()->Write(LV_ZWAVE,"Notification::Type_NodeEvent");
 		if( nodeInfo != NULL )
 		{
 			// We have received an event from the node, caused by a
 			// basic_set or hail message.
 			// TBD...
-			
-			nodeInfo = nodeInfo;
-			
+			OpenZWave::ValueID id = _notification->GetValueID();
+			string label = OpenZWave::Manager::Get()->GetValueLabel(id);
+
+			int PKDevice = GetPKDevice(nodeInfo->m_nodeId, -1);
+			if (PKDevice > 0)
+			{
+				uint8 typeGeneric = OpenZWave::Manager::Get()->GetNodeGeneric(_notification->GetHomeId(), _notification->GetNodeId());
+				// TODO
+				int GENERIC_TYPE_SWITCH_REMOTE = 0x12;
+				int GENERIC_TYPE_SENSOR_BINARY = 0x20;
+				int GENERIC_TYPE_SENSOR_MULTILEVEL = 0x21;
+				int GENERIC_TYPE_SWITCH_BINARY = 0x10;
+				int GENERIC_TYPE_SWITCH_MULTILEVEL = 0x11;
+				if  ( typeGeneric == GENERIC_TYPE_SWITCH_REMOTE/* || typeBasic == BASIC_TYPE_CONTROLLER*/ ) {
+					
+					int level;
+					OpenZWave::Manager::Get()->GetValueAsInt(id, &level);
+					DCE::LoggerWrapper::GetInstance()->Write(LV_ZWAVE,"State changed, send light changed");
+					SendOnOffEvent (PKDevice, level);
+					
+				} else if (typeGeneric == GENERIC_TYPE_SENSOR_BINARY || typeGeneric == GENERIC_TYPE_SENSOR_MULTILEVEL) {
+					DCE::LoggerWrapper::GetInstance()->Write(LV_ZWAVE,"This is a binary sensor, so we send sensor tripped events");
+					bool state;
+					OpenZWave::Manager::Get()->GetValueAsBool(id, &state);
+					SendSensorTrippedEvent(PKDevice, state);
+				} else if (typeGeneric == GENERIC_TYPE_SWITCH_BINARY || typeGeneric == GENERIC_TYPE_SWITCH_MULTILEVEL) {
+					int level;
+					OpenZWave::Manager::Get()->GetValueAsInt(id, &level);
+					DCE::LoggerWrapper::GetInstance()->Write(LV_ZWAVE,"State changed, send light changed event");
+					SendLightChangedEvents (PKDevice, level);
+				}
+			}
 		}
 		break;
 	}
@@ -695,5 +725,46 @@ void ZWave::SendSensorTrippedEvent(unsigned int PK_Device, bool value)
 					   1,
 					   EVENTPARAMETER_Tripped_CONST,
 					   value ? "1" : "0")
+		);
+}
+
+void ZWave::SendLightChangedEvents(unsigned int PK_Device, int value)
+{
+	string svalue = StringUtils::itos(value);
+	LoggerWrapper::GetInstance()->Write(LV_ZWAVE,"Sending EVENT_State_Changed_CONST event from PK_Device %d, level %s",PK_Device,svalue.c_str());
+	m_pEvent->SendMessage( new Message(PK_Device,
+					   DEVICEID_EVENTMANAGER,
+					   PRIORITY_NORMAL,
+					   MESSAGETYPE_EVENT,
+					   EVENT_State_Changed_CONST,
+					   1,
+					   EVENTPARAMETER_State_CONST,
+					   svalue)
+		);
+}
+
+void ZWave::SendPowerUsageChangedEvent(unsigned int PK_Device, int value)
+{
+	string svalue = StringUtils::itos(value);
+	LoggerWrapper::GetInstance()->Write(LV_ZWAVE,"Sending EVENT_Power_Usage_Changed_CONST event from PK_Device %d, value %s W",PK_Device,svalue.c_str());
+	m_pEvent->SendMessage( new Message(PK_Device,
+					   DEVICEID_EVENTMANAGER,
+					   PRIORITY_NORMAL,
+					   MESSAGETYPE_EVENT,
+					   EVENT_Power_Usage_Changed_CONST,
+					   1,
+					   EVENTPARAMETER_Watts_CONST,
+					   svalue)
+		);
+}
+
+void ZWave::SendOnOffEvent(unsigned int PK_Device, int value) {
+	LoggerWrapper::GetInstance()->Write(LV_ZWAVE,"Sending EVENT_OnOff_CONST event from PK_Device %d, value %d",PK_Device, value);
+	m_pEvent->SendMessage( new Message(PK_Device,
+					   DEVICEID_EVENTMANAGER, PRIORITY_NORMAL, MESSAGETYPE_EVENT,
+					   EVENT_Device_OnOff_CONST,
+					   1,
+					   EVENTPARAMETER_OnOff_CONST,
+					   (value == 0) ? "0" : "1")
 		);
 }
