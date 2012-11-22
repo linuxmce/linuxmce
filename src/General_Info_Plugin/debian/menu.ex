@@ -1,2 +1,2 @@
-?package(pluto-std-plugins):needs="X11|text|vc|wm" section="Applications/see-menu-manual"\
-  title="pluto-std-plugins" command="/usr/bin/pluto-std-plugins"
+?package(lmce-general-info-plugin):needs="X11|text|vc|wm" section="Applications/see-menu-manual"\
+  title="lmce-general-info-plugin" command="/usr/bin/lmce-general-info-plugin"

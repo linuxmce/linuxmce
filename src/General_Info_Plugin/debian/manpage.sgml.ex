@@ -20,14 +20,14 @@ manpage.1: manpage.sgml
   <!ENTITY dhfirstname "<firstname>FIRSTNAME</firstname>">
   <!ENTITY dhsurname   "<surname>SURNAME</surname>">
   <!-- Please adjust the date whenever revising the manpage. -->
-  <!ENTITY dhdate      "<date>May 31, 2012</date>">
+  <!ENTITY dhdate      "<date>November 22, 2012</date>">
   <!-- SECTION should be 1-8, maybe w/ subsection other parameters are
        allowed: see man(7), man(1). -->
   <!ENTITY dhsection   "<manvolnum>SECTION</manvolnum>">
-  <!ENTITY dhemail     "<email>root@fluffybitch.org</email>">
-  <!ENTITY dhusername  "root">
-  <!ENTITY dhucpackage "<refentrytitle>PLUTO-STD-PLUGINS</refentrytitle>">
-  <!ENTITY dhpackage   "pluto-std-plugins">
+  <!ENTITY dhemail     "<email>developers@linuxmce.org</email>">
+  <!ENTITY dhusername  "LinuxMCE Developers">
+  <!ENTITY dhucpackage "<refentrytitle>LMCE-GENERAL-INFO-PLUGIN</refentrytitle>">
+  <!ENTITY dhpackage   "lmce-general-info-plugin">
 
   <!ENTITY debian      "<productname>Debian</productname>">
   <!ENTITY gnu         "<acronym>GNU</acronym>">

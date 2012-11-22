@@ -1,5 +1,5 @@
 #!/bin/sh
-# postrm script for pluto-std-plugins
+# postrm script for lmce-general-info-plugin
 #
 # see: dh_installdeb(1)
 
