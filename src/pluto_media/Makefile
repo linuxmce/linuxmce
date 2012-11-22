@@ -60,7 +60,10 @@ all: libpluto_media.so all-recursive
 
 libpluto_media.so: $(sources:.cpp=.o)
 	$(CXX) -shared $(CXXFLAGS) $(CPPFLAGS) -o $@ $(call cpath,$+)
+	mkdir -p ../lib
 	cp $@ ../lib
+
+distclean: clean
 
 clean: clean-recursive
 	rm -f *.o *.d libpluto_media.so >/dev/null
@@ -69,5 +72,5 @@ include $(ROOT)/PlutoUtils/make.rules
 -include $(sources:.cpp=.d)
 
 install: 
-	mkdir -p pluto/lib
-	cp libpluto_media.so $(DESTPATH)pluto/lib
+	mkdir -p $(DESTDIR)/pluto/lib
+	cp libpluto_media.so $(DESTDIR)/pluto/lib
