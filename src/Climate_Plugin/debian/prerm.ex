@@ -1,5 +1,5 @@
 #!/bin/sh
-# prerm script for pluto-std-plugins
+# prerm script for lmce-event-plugin
 #
 # see: dh_installdeb(1)
 

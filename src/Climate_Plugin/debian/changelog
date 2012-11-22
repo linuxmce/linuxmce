@@ -1,5 +1,5 @@
-pluto-std-plugins (2.0.0.45.25311-1) unstable; urgency=low
+lmce-event-plugin (2.46-1) unstable; urgency=low
 
   * Initial release (Closes: #nnnn)  <nnnn is the bug number of your ITP>
 
- -- root <root@fluffybitch.org>  Thu, 31 May 2012 18:06:38 +0000
+ -- LinuxMCE Developers <developers@linuxmce.org>  Thu, 22 Nov 2012 20:20:35 +0000

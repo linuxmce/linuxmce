@@ -8,14 +8,14 @@
           -''-param man.charmap.use.subset "0" \
           -''-param make.year.ranges "1" \
           -''-param make.single.year.ranges "1" \
-          /usr/share/xml/docbook/stylesheet/nwalsh/manpages/docbook.xsl \
+          /usr/share/xml/docbook/stylesheet/docbook-xsl/manpages/docbook.xsl \
           manpage.xml'
 
 A manual page <package>.<section> will be generated. You may view the
 manual page with: nroff -man <package>.<section> | less'. A typical entry
 in a Makefile or Makefile.am is:
 
-DB2MAN = /usr/share/sgml/docbook/stylesheet/xsl/nwalsh/manpages/docbook.xsl
+DB2MAN = /usr/share/sgml/docbook/stylesheet/xsl/docbook-xsl/manpages/docbook.xsl
 XP     = xsltproc -''-nonet -''-param man.charmap.use.subset "0"
 
 manpage.1: manpage.xml
@@ -48,17 +48,17 @@ man(1), man(7), http://www.tldp.org/HOWTO/Man-Page/
   <!ENTITY dhfirstname "FIRSTNAME">
   <!ENTITY dhsurname   "SURNAME">
   <!-- dhusername could also be set to "&dhfirstname; &dhsurname;". -->
-  <!ENTITY dhusername  "root">
-  <!ENTITY dhemail     "root@fluffybitch.org">
+  <!ENTITY dhusername  "LinuxMCE Developers">
+  <!ENTITY dhemail     "developers@linuxmce.org">
   <!-- SECTION should be 1-8, maybe w/ subsection other parameters are
        allowed: see man(7), man(1) and
        http://www.tldp.org/HOWTO/Man-Page/q2.html. -->
   <!ENTITY dhsection   "SECTION">
   <!-- TITLE should be something like "User commands" or similar (see
        http://www.tldp.org/HOWTO/Man-Page/q2.html). -->
-  <!ENTITY dhtitle     "pluto-std-plugins User Manual">
-  <!ENTITY dhucpackage "PLUTO-STD-PLUGINS">
-  <!ENTITY dhpackage   "pluto-std-plugins">
+  <!ENTITY dhtitle     "lmce-event-plugin User Manual">
+  <!ENTITY dhucpackage "LMCE-EVENT-PLUGIN">
+  <!ENTITY dhpackage   "lmce-event-plugin">
 ]>
 
 <refentry>
