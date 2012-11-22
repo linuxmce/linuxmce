@@ -17,18 +17,30 @@ sources = \
 	SDL_RenderText.cpp \
 	SDL_RenderUtils.cpp 
 	
+headers = *.h
+	
 all: libSDL_Helpers.so
 
 libSDL_Helpers.so: $(sources:.cpp=.o)
 	$(CXX) -shared $(CXXFLAGS) $(CPPFLAGS) -o $@ $(call cpath,$+) $(LDFLAGS) $(LDLIBS)
+	mkdir -p ../lib
 	cp $@ ../lib
+	
 	
 libSDL_Helpers.a: $(sources:.cpp=.o)
 	$(AR) rc $@ $(call cpath,$+)
+	mkdir -p ../lib
 	cp $@ ../lib
+
+distclean: clean
 	
 clean: 
 	rm -f $(call cpath,$(sources:.cpp=.o) $(sources:.cpp=.d)) libSDL_Helpers.so libSDL_Helpers.a >/dev/null
+
+install: 
+	mkdir -p $(DESTDIR)/usr/lib $(DESTDIR)/usr/include
+	cp libSDL_Helpers.so $(DESTDIR)/usr/lib
+	cp $(headers) $(DESTDIR)/usr/include
 
 include $(ROOT)/PlutoUtils/make.rules
 -include $(sources:.cpp=.d)
