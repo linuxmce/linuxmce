@@ -36,7 +36,10 @@ all: libpluto_telecom.so all-recursive
 
 libpluto_telecom.so: $(sources:.cpp=.o)
 	$(CXX) -shared $(CXXFLAGS) $(CPPFLAGS) -o $@ $(call cpath,$+)
+	mkdir -p ../lib
 	cp $@ ../lib
+
+distclean: clean
 
 clean: clean-recursive
 	rm -f *.o *.d libpluto_telecom.so >/dev/null
@@ -45,5 +48,5 @@ include $(ROOT)/PlutoUtils/make.rules
 -include $(sources:.cpp=.d)
 
 install: 
-	mkdir -p pluto/lib
-	cp libpluto_telecom.so $(DESTPATH)pluto/lib
+	mkdir -p $(DESTDIR)/usr/pluto/lib
+	cp libpluto_telecom.so $(DESTDIR)/usr/pluto/lib
