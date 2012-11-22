@@ -51,6 +51,8 @@ DCERouter: $(sources:.cpp=.o) Makefile
 	$(CXX) -o $@ $(call cpath,$(sources:.cpp=.o)) $(LDFLAGS) $(LDLIBS)
 	cp $@ $(ROOT)/bin
 
+distclean: clean
+
 clean: clean-recursive
 	rm -f $(call cpath,$(sources:.cpp=.o) $(sources:.cpp=.d)) PlutoServer >/dev/null
 
@@ -63,15 +65,15 @@ ifeq (,$(findstring clean, $(MAKECMDGOALS)))
 endif
 
 install: 
-	mkdir -p /usr/bin
-	cp TailDCERouter.sh $(DESTPATH)/usr/bin
-	cp LessDCERouter.sh $(DESTPATH)/usr/bin
-	mkdir -p /usr/pluto/bin
-	cp DCERouter $(DESTPATH)/usr/pluto/bin
-	cp Orbiter_Win32.dat $(DESTPATH)/usr/pluto/bin
-	cp Orbiter_CeNet4_XScale.dat $(DESTPATH)/usr/pluto/bin
-	cp Symbian Series 60 mobile.vmc $(DESTPATH)/usr/pluto/bin
-	cp Windows Mobile Smartphone.vmc $(DESTPATH)/usr/pluto/bin
-	cp Orbiter_CeNet4_x86.dat $(DESTPATH)/usr/pluto/bin
-	cp discovery.py $(DESTPATH)/usr/pluto/bin
-	cp startup-script.sh $(DESTPATH)/usr/pluto/bin
+	mkdir -p $(DESTDIR)/usr/bin
+	cp TailDCERouter.sh $(DESTDIR)/usr/bin
+	cp LessDCERouter.sh $(DESTDIR)/usr/bin
+	mkdir -p $(DESTDIR)/usr/pluto/bin
+	cp DCERouter $(DESTDIR)/usr/pluto/bin
+	cp Orbiter_Win32.dat $(DESTDIR)/usr/pluto/bin || :
+	cp Orbiter_CeNet4_XScale.dat $(DESTDIR)/usr/pluto/bin || :
+	cp Symbian Series 60 mobile.vmc $(DESTDIR)/usr/pluto/bin || :
+	cp Windows Mobile Smartphone.vmc $(DESTDIR)/usr/pluto/bin || :
+	cp Orbiter_CeNet4_x86.dat $(DESTDIR)/usr/pluto/bin || :
+	cp discovery.py $(DESTDIR)/usr/pluto/bin
+	cp startup-script.sh $(DESTDIR)/usr/pluto/bin
