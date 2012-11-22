@@ -176,13 +176,12 @@ void TimeCodeManager::updateTimeCode()
         //hack for truncated data from qt orbite
 
         QString f = QString::fromStdString(sLine).split(",").first();
-        qDebug()<< f.length();
+
         if(f.length()>4)
         iSpeed= 1000;
 
         //end hack
 
-        qDebug()<< "Speed "<< iSpeed;
         if( iSpeed!=1000 ) // normal playback
         {
             if( iSpeed>=1000 || iSpeed<=-1000 )

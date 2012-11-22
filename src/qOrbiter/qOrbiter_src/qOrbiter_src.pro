@@ -245,9 +245,15 @@ linux-rasp-pi-g++{
         folder_02.source = config.xml
         folder_02.target = config
 
+        plugins_folder.source = imports/
+        plugins_folder.target = $$DESTDIR
+
+        DEPLOYMENTFOLDERS+= plugins_folder
+
         DEFINES+=RPI GLENABLED
         DEPLOYMENTFOLDERS += folder_01 folder_02
         QT+= qml
+QML_IMPORT_PATH=imports
 }
 
 # Additional import path used to resolve QML modules in Creator's code model

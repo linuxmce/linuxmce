@@ -12,26 +12,23 @@ MediaManager::MediaManager(QDeclarativeItem *parent) :
     deviceNumber = -1;
 
     setCurrentStatus("Media Manager defaults set, initializing media engines");
-
+#ifdef QT4
     audioSink = new Phonon::AudioOutput();
     videoSurface = new Phonon::VideoWidget();
     mediaObject = new Phonon::MediaObject();
-
     Phonon::createPath(mediaObject, audioSink);
     setCurrentStatus("Audio Sink Initialized");
-
     Phonon::createPath(mediaObject, videoSurface);
     setCurrentStatus("Video Player Initialized");
-
     videoSurface->setAspectRatio(Phonon::VideoWidget::AspectRatioAuto);
     videoSurface->setScaleMode(Phonon::VideoWidget::FitInView);
-
     // layout = new QVBoxLayout();
     // layout->addWidget(videoSurface);
     //  window->setLayout(layout);
     filterProxy = new ColorFilterProxyWidget(this);
     filterProxy->setWidget(videoSurface);
     filterProxy->setAutoFillBackground(false);
+   #endif
     setCurrentStatus("Window Initialized");
     totalTime=0;
 
@@ -80,8 +77,11 @@ void MediaManager::initializeConnections()
 
     /*internals*/
     QObject::connect(dcethread, SIGNAL(started()), mediaPlayer, SLOT(run()));
-
+   #ifdef QT4
     mediaObject->setTickInterval(quint32(1000));
+#elif QT5
+
+#endif
     dcethread->start();
 }
 
@@ -122,11 +122,15 @@ void MediaManager::startTimeCodeServer()
     timeCodeServer = new QTcpServer();
     timeCodeServer->listen(QHostAddress::Any,12000);
     QObject::connect(timeCodeServer, SIGNAL(newConnection()), this , SLOT(newClientConnected()));
-
+#ifdef QT4
     if(mediaObject->errorString() =="")
     {
 
     }
+#elif QT5
+
+#endif
+
 }
 
 void MediaManager::stopTimeCodeServer()
@@ -135,11 +139,7 @@ void MediaManager::stopTimeCodeServer()
         QTcpSocket *c = clientList.at(d);
         c->close();
     }
-
-
     timeCodeServer->close();
-
-
 }
 
 void MediaManager::setZoomLevel(QString zoom)
@@ -155,7 +155,12 @@ void MediaManager::setAspectRatio(QString aspect)
 
 void MediaManager::getScreenShot()
 {
+#ifdef QT4
     QImage screenShot =  videoSurface->snapshot();
+#elif QT5
+
+#endif
+
 }
 
 
@@ -163,7 +168,11 @@ void MediaManager::setMediaUrl(QString url)
 {
     setCurrentStatus("Got New Media Url::"+url);
     filepath=url;
+#ifdef QT4
     mediaObject->setCurrentSource(Phonon::MediaSource(url));
+#elif QT5
+
+#endif
 }
 
 
@@ -202,7 +211,7 @@ void MediaManager::processTimeCode(qint64 f)
         sec.prepend("0");
 
     currentTime =f;
-    QString t = hrs + ":" + min + ":" +sec+".000";
+    QString t = hrs + ":" + min + ":" +forseconds+;
 
     QString timeCodeTick = "0/"+QString::number(1000)+","+t+","+qs_totalTime+","+QString::number(streamId)+",0,0,"+fileReference+","+QString::number(fileno)+","+filepath;
     transmit(timeCodeTick);

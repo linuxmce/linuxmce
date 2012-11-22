@@ -6,6 +6,7 @@
 #include <QDeclarativeItem>
 #include <QtWidgets/QBoxLayout>
 #include <QtMultimedia>
+
 #else
 #include <QBoxLayout>
 #include <Phonon>
@@ -86,7 +87,9 @@ public:
     Phonon::AudioOutput *audioSink;
     Phonon::MediaObject *mediaObject;
 #else
-
+    QAbstractAudioOutput *audioSink;
+    QMediaObject *mediaObject;
+    QAbstractVideoSurface * videoSurface;
 #endif
 
 signals:
@@ -147,19 +150,39 @@ public slots:
     void setConnectionStatus(bool stat){connected = stat; emit connectedChanged();}
     bool getConnectionStatus(){return connected;}
 
-    void setWindowSize(int h, int w) {videoSurface->setFixedSize(w, h);}
+    void setWindowSize(int h, int w) {
+
+#ifdef QT4
+        videoSurface->setFixedSize(w, h);
+#elif QT5
+
+#endif
+    }
 
     void newClientConnected();
     void startTimeCodeServer();
     void stopTimeCodeServer();
 
 
-    void setMediaPosition(int msec) {mediaObject->seek((qint64)msec); }
+    void setMediaPosition(int msec) {
+#ifdef QT4
+        mediaObject->seek((qint64)msec);
+#elif QT5
+
+#endif
+
+    }
     void setZoomLevel(QString zoom);
     void setAspectRatio(QString aspect);
     void getScreenShot();
 
-    void setVideoSize(int h, int w) { videoSurface->setFixedSize(w, h);  }
+    void setVideoSize(int h, int w) {
+#ifdef QT4
+        videoSurface->setFixedSize(w, h);
+#elif QT5
+
+#endif
+    }
 
     void setTotalTime(qint64 t) {
         int seconds = t / 1000;

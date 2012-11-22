@@ -11,23 +11,23 @@ Item {
     width:manager.appWidth
     height:manager.appHeight
 
-//    MediaManager{
-//        id:dceplayer
-//        anchors.top: parent.top
-//        anchors.left:parent.left
+    MediaManager{
+        id:dceplayer
+        anchors.top: parent.top
+        anchors.left:parent.left
 
-//        z:0
-//        Component.onCompleted: setWindowSize(manager.appHeight, manager.appWidth)
-//        MouseArea{
-//            anchors.fill: dceplayer
-//            acceptedButtons: Qt.LeftButton | Qt.RightButton
-//            onClicked:  Qt.RightButton ? pageLoader.visible = !pageLoader.visible: ""
-//        }
-//        Connections{
-//            target:manager
-//            onOrientationChanged:dceplayer.setWindowSize(manager.appHeight, manager.appWidth)
-//        }
-//    }
+        z:0
+        Component.onCompleted: setWindowSize(manager.appHeight, manager.appWidth)
+        MouseArea{
+            anchors.fill: dceplayer
+            acceptedButtons: Qt.LeftButton | Qt.RightButton
+            onClicked:  Qt.RightButton ? pageLoader.visible = !pageLoader.visible: ""
+        }
+        Connections{
+            target:manager
+            onOrientationChanged:dceplayer.setWindowSize(manager.appHeight, manager.appWidth)
+        }
+    }
 
 //    Rectangle{
 //        anchors.fill: parent
