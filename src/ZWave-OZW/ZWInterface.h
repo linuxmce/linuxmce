@@ -49,6 +49,11 @@ namespace DCE
 			pthread_mutexattr_destroy( &mutexattr );
 
 		}
+		~ZWInterface()
+		{
+			LoggerWrapper::GetInstance()->Write(LV_ZWAVE, "ZWInterface::~() destructor, calling OpenZWave::Manager::Destroy()");
+			OpenZWave::Manager::Destroy();
+		}
 
 		NodeInfo* GetNodeInfo ( OpenZWave::Notification const* _notification) {
 			uint32 const homeId = _notification->GetHomeId();
@@ -86,7 +91,7 @@ namespace DCE
 			// The first argument is the path to the config files (where the manufacturer_specific.xml file is located
 			// The second argument is the path for saved Z-Wave network state and the log file.  If you leave it NULL 
 			// the log file will appear in the program's working directory.
-			OpenZWave::Options::Create( "/etc/openzwave/config/", "", "" );
+			OpenZWave::Options::Create( "/etc/openzwave/config/", "/etc/openzwave/", "" );
 			OpenZWave::Options::Get()->Lock();
 
 			OpenZWave::Manager::Create();

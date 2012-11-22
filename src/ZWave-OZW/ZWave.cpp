@@ -540,10 +540,21 @@ void ZWave::OnNotification(OpenZWave::Notification const* _notification, NodeInf
 				} else if ( label == "Temperature" ) {
 					float level = 0;
 					OpenZWave::Manager::Get()->GetValueAsFloat(id, &level);
+					string units = OpenZWave::Manager::Get()->GetValueUnits(id);
+					if ( units == "F" ) 
+					{
+						level = (level-32) *5 / 9;
+					}
 					SendTemperatureChangedEvent(PKDevice, level);
 				} else if ( label == "Sensor" ) {
-					
+					bool state;
+					OpenZWave::Manager::Get()->GetValueAsBool(id, &state);
+					SendSensorTrippedEvent(PKDevice, state);
 				} else if ( label == "Basic" ) {
+
+				} else if ( label == "Luminance" ) {
+
+				} else if ( label == "Power" ) {
 					
 				}
 			}
@@ -671,4 +682,18 @@ void ZWave::SendTemperatureChangedEvent(unsigned int PK_Device, float value)
 			EVENTPARAMETER_Value_CONST, tempstr)
 		);
 
+}
+
+void ZWave::SendSensorTrippedEvent(unsigned int PK_Device, bool value)
+{
+	LoggerWrapper::GetInstance()->Write(LV_ZWAVE,"Sending sensor tripped event from PK_Device %d", PK_Device);
+	m_pEvent->SendMessage( new Message(PK_Device,
+					   DEVICEID_EVENTMANAGER,
+					   PRIORITY_NORMAL,
+					   MESSAGETYPE_EVENT,
+					   EVENT_Sensor_Tripped_CONST,
+					   1,
+					   EVENTPARAMETER_Tripped_CONST,
+					   value ? "1" : "0")
+		);
 }

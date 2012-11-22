@@ -57,6 +57,7 @@ public:
 		int GetPKDevice(int iNodeId, int iInstanceID);
 		void ReportBatteryStatus(int iNodeId, int status);
 		void SendTemperatureChangedEvent(unsigned int PK_Device, float value);
+		void SendSensorTrippedEvent(unsigned int PK_Device, bool state);
 
 //<-dceag-const-b->
 public:
