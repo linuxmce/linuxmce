@@ -1,7 +1,7 @@
 Source: libpluto-main
 Priority: extra
 Maintainer: LinuxMCE Developers <developers@linuxmce.org>
-Build-Depends: debhelper (>= 7)
+Build-Depends: debhelper (>= 7), libmysqlclient-dev
 Standards-Version: 3.8.3
 Section: libs
 Homepage: http://www.linuxmce.org
