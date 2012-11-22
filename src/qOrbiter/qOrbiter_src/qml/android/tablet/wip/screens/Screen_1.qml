@@ -46,16 +46,34 @@ Item
             anchors.horizontalCenter: parent.horizontalCenter
         }
 
+        Rectangle{
+            id:subMenu
+        //    transform: Rotation { origin.x: 30; origin.y: 30; axis { x: 0; y: 1; z: 0 } angle: 15 }
+            clip:true
+            color:"transparent"
 
-        HomeBtSub {
-            id: submenu
             width: scaleX(97)
             height: 100
             anchors.bottom: mainButtonContainer.top
             anchors.bottomMargin:  16
             anchors.horizontalCenter: parent.horizontalCenter
-        }
 
+            HomeClimateRow {
+                id: subClimate
+            }
+            HomeLightingRow {
+                id: subLightning
+            }
+            HomeMediaRow {
+                id: subMedia
+            }
+            HomeSecurityRow {
+                id: subSecurity
+            }
+            HomeTelecomRow {
+                id: subTelecom
+            }
+        }
 
         Rectangle{
             id: mainButtonContainer
@@ -76,32 +94,90 @@ Item
                     id: btMedia
                     currentImage: "../images/btMedia.png"
                     currentText: "Media"
-                }
+                    MouseArea{
+                        id: mediaMouse
+                        anchors.fill: parent
 
+                        onPressed: {
+                            for (var i = 0; i < subMenu.children.length; ++i)
+                            subMenu.children[i].visible = false;
+                            subMedia.visible=true
+                        }
+                    }
+                }
                 HomeBtDefault {
                     id:btLights
                     currentImage: "../images/btLights.png"
                     currentText: "Lights"
+                    MouseArea{
+                        id: mouseLightning
+                        anchors.fill: parent
+
+                        onPressed: {
+                            for (var i = 0; i < subMenu.children.length; ++i)
+                            subMenu.children[i].visible = false;
+                            subLightning.visible=true
+                        }
+                    }
                 }
                 HomeBtDefault {
                     id: btClimate
                     currentImage: "../images/btClimate.png"
                     currentText: "Climate"
+                    MouseArea{
+                        id: mouseCLimate
+                        anchors.fill: parent
+
+                        onPressed: {
+                            for (var i = 0; i < subMenu.children.length; ++i)
+                            subMenu.children[i].visible = false;
+                            subClimate.visible=true
+                        }
+                    }
                 }
                 HomeBtDefault {
                     id: btTelecom
                     currentImage: "../images/btTelecom.png"
                     currentText: "Telecom"
+                    MouseArea{
+                        id: mouseTelecom
+                        anchors.fill: parent
+
+                        onPressed: {
+                            for (var i = 0; i < subMenu.children.length; ++i)
+                            subMenu.children[i].visible = false;
+                            subTelecom.visible=true
+                        }
+                    }
                 }
                 HomeBtDefault {
                     id: btSecurity
                     currentImage: "../images/btSecurity.png"
                     currentText: "Security"
+                    MouseArea{
+                        id: mouseSecurity
+                        anchors.fill: parent
+
+                        onPressed: {
+                            for (var i = 0; i < subMenu.children.length; ++i)
+                            subMenu.children[i].visible = false;
+                            subSecurity.visible=true
+                        }
+                    }
                 }
                 HomeBtDefault {
                     id: btSettings
                     currentImage: "../images/btSettings.png"
                     currentText: "Settings"
+                    MouseArea{
+                        id: mouseSettings
+                        anchors.fill: parent
+
+                        onPressed: {
+                            for (var i = 0; i < subMenu.children.length; ++i)
+                            subMenu.children[i].visible = false;
+                        }
+                    }
                 }
             }
         }

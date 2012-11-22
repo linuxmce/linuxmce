@@ -7,6 +7,7 @@ Rectangle {
     radius: style.but_smooth
     color:"transparent"
 
+    property string currentLink: "submenu"
     property string currentImage: "../images/btTelecom.png"
     property string currentText: "Telecom"
     signal clicked
@@ -52,13 +53,12 @@ Rectangle {
 
 
     MouseArea{
-        id: mousearea1
+        id: mousearea2
         anchors.fill: parent
         hoverEnabled: true
         onEntered: {
             bgColor.opacity=0.500
             buttonbg2.visible=true
-            submenu.visible=true
         }
 
         onClicked: {
@@ -68,7 +68,6 @@ Rectangle {
         onExited: {
             bgColor.opacity=0.800
             buttonbg2.visible=false
-            submenu.visible=false
         }
     }
 }

@@ -1,60 +1,40 @@
 import QtQuick 1.0
 
-Rectangle {
-    id: btHomeClimates
-    height: parent.height
-    width: parent.height
-    radius: style.but_smooth
-    color:"transparent"
+Rectangle{
+    id:btHomeClimates
+    clip:true
+    color:"#000000"
+    opacity: 0.800
+    visible: false
 
-    MouseArea{
-        id: mousearea1
-        anchors.fill: parent
-        onClicked:{
-            manager.setFloorplanType(4)
-            manager.ShowFloorPlan(4)
+    width: scaleX(97)
+    height: 100
+    anchors.bottom: mainButtonContainer.top
+    anchors.bottomMargin:  16
+    anchors.horizontalCenter: parent.horizontalCenter
 
-         }
-    }
+    HomeButtonDelegate{id:climateDelegate}
 
-    Image {
-        id: onimg
-        source: "../images/btClimate.png"
-        width: parent.width
-        height: parent.height
+    Flickable{
 
-    }
-}
-/*
-    Rectangle{
-        id:btHomeClimates
-        clip:true
-        color:"transparent"
-        radius: 20
+        id:climateRow
+        height: scaleY(16)
+        width: scaleX(85)
+        contentHeight: style.buttonH
+        contentWidth: ((style.buttonW + 5) * (climateScenarios.count + 1)) - 5
+        clip: true
+        flickableDirection: "HorizontalFlick"
 
-        HomeButtonDelegate{id:climateDelegate}
-
-            Flickable{
-
-                id:climateRow
-                height: scaleY(16)
-                width: scaleX(85)
-                contentHeight: style.buttonH
-                contentWidth: ((style.buttonW + 5) * (climateScenarios.count + 1)) - 5
-                clip: true
-                flickableDirection: "HorizontalFlick"
-
-                ListView{
-                    id: climateScenarios
-                    height: scaleY(style.buttonH)
-                    width: stage.width
-                    model: currentRoomClimate
-                    spacing: 5
-                    orientation:ListView.Horizontal
-                    interactive:false
-                    delegate: climateDelegate
-                }
-            }
+        ListView{
+            id: climateScenarios
+            height: scaleY(style.buttonH)
+            width: stage.width
+            model: currentRoomClimate
+            spacing: 5
+            orientation:ListView.Horizontal
+            interactive:false
+            delegate: climateDelegate
         }
     }
-*/
+}
+

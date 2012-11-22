@@ -1,38 +1,17 @@
 import QtQuick 1.0
 
-Rectangle {
-    id: btHomeSecurity
-    height: parent.height
-    width: parent.height
-    color: "transparent"
-    radius: style.but_smooth
-
-    Image {
-        id: buttonbg
-        source: "../img/ui3/securitybig.png"
-        height: parent.height
-        width: parent.width
-    }
-
-    MouseArea{
-        id: mousearea1
-        anchors.fill:parent
-
-        onClicked:{
-
-            manager.ShowFloorPlan(5)
-            manager.setFloorplanType(5)
-        }
-    }
-}
-
-
-/*
 Rectangle{
-    id:
-    clip:true
-    color:"transparent"
-    radius: 20
+    id: btHomeSecurity
+    clip: true
+    color:"#000000"
+    opacity: 0.800
+    visible: false
+
+    width: scaleX(97)
+    height: 100
+    anchors.bottom: mainButtonContainer.top
+    anchors.bottomMargin:  16
+    anchors.horizontalCenter: parent.horizontalCenter
 
     HomeButtonDelegate{id:securityDelegate}
 
@@ -58,7 +37,4 @@ Rectangle{
             }
         }
 
-    }
 }
-
-*/

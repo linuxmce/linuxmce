@@ -7,10 +7,12 @@ Rectangle{
     visible: false
 
     width: scaleX(97)
-    height: style.btHomeDefaultH
-    anchors.bottom: parent.top
-    anchors.bottomMargin: parent.buttonbg.height + mainButtonContainer.height + scaleY(1)
-    anchors.horizontalCenter: parent.stage.horizontalCenter
+    height: 100
+    anchors.bottom: mainButtonContainer.top
+    anchors.bottomMargin:  16
+    anchors.horizontalCenter: parent.horizontalCenter
+
+    property string currentText: "Telecom"
 
     HomeButtonDelegate{id:mediaDelegate}
     Flickable{
