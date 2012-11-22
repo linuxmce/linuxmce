@@ -63,6 +63,7 @@ m_GameMutex ("game_player")
   m_iStreamID = 0;
   m_bLoadSavedGame = 0;
   m_iModifier = 0;
+  m_bIsRecording = false;
 }
 
 //<-dceag-const2-b->!
@@ -456,10 +457,23 @@ void Game_Player::CMD_Stop_Media(int iStreamID,string *sMediaPosition,string &sC
 					       sOptions,
 					       ""); // FIXME: make proper list.
 	  SendCommandNoResponse(db);
+	  if (m_bIsRecording)
+	    {
+	      m_bIsRecording = !m_bIsRecording;
+	      // This is simply a toggle, the EmulatorController will do the right thing.
+	      m_pEmulatorController->record();
+	    }
 	  m_pEmulatorController->setStreaming(false);
 	  m_pEmulatorController->setStreamingMaster(false);
 	  return;
 	}
+    }
+
+  if (m_bIsRecording)
+    {
+      m_bIsRecording = !m_bIsRecording;
+      // This is simply a toggle, the EmulatorController will do the right thing.
+      m_pEmulatorController->record();
     }
 
   if (!m_pEmulatorController->saveState(sSavedMediaPosition,sSavedText,true))
@@ -474,7 +488,6 @@ void Game_Player::CMD_Stop_Media(int iStreamID,string *sMediaPosition,string &sC
   m_pEmulatorController->stop(); // finally, stop everything.
   m_pEmulatorController->setStreaming(false);
   m_pEmulatorController->setStreamingMaster(false);
-
 }
 
 //<-dceag-c39-b->
@@ -1422,7 +1435,7 @@ void Game_Player::TranscodeAfterRecord(string sPath,string sFilename, long int d
 void Game_Player::CMD_Record(string &sCMD_Result,Message *pMessage)
 //<-dceag-c102-e->
 {
-  LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"RECORD CALLED!!!!!");
+  m_bIsRecording = !m_bIsRecording;
   // This is simply a toggle, the EmulatorController will do the right thing.
   m_pEmulatorController->setOrbiter(pMessage->m_dwPK_Device_From);
   m_pEmulatorController->record();

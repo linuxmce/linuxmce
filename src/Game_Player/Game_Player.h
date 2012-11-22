@@ -67,6 +67,7 @@ namespace DCE
     // Public member variables
 
   private:
+    bool m_bIsRecording;
     pluto_pthread_mutex_t m_GameMutex;
     EmulatorFactory *m_pEmulatorFactory;
     EmulatorController *m_pEmulatorController;

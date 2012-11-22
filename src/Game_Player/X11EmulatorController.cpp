@@ -216,26 +216,32 @@ namespace DCE
     iKeysym          = pairKeysyms.first;
     iKeysym_modifier = pairKeysyms.second;
 
-    LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"X11EmulatorController::doAction(%s) - Sending %d to window %x",sAction.c_str(),iKeysym,m_pEmulatorModel->m_iWindowId);
-
-    if (iKeysym_modifier != 0)
+    if (m_pEmulatorModel->m_bRunning)
       {
-  	WindowUtils::SendKeyToWindow(m_pEmulatorModel->m_pDisplay,
-				     m_pEmulatorModel->m_iWindowId,
-				     iKeysym,
-				     m_pEmulatorModel->m_iEventSerialNum++,
-				     iKeysym_modifier);
+
+	LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"X11EmulatorController::doAction(%s) - Sending %d to window %x",sAction.c_str(),iKeysym,m_pEmulatorModel->m_iWindowId);
+
+	if (iKeysym_modifier != 0)
+	  {
+	    WindowUtils::SendKeyToWindow(m_pEmulatorModel->m_pDisplay,
+					 m_pEmulatorModel->m_iWindowId,
+					 iKeysym,
+					 m_pEmulatorModel->m_iEventSerialNum++,
+					 iKeysym_modifier);
+	  }
+	else
+	  {
+	    WindowUtils::SendKeyToWindow(m_pEmulatorModel->m_pDisplay,
+					 m_pEmulatorModel->m_iWindowId,
+					 iKeysym,
+					 m_pEmulatorModel->m_iEventSerialNum++);      
+	  }
+	return true; // no way to tell if a key was sent successfully.
       }
     else
       {
-  	WindowUtils::SendKeyToWindow(m_pEmulatorModel->m_pDisplay,
-				     m_pEmulatorModel->m_iWindowId,
-				     iKeysym,
-				     m_pEmulatorModel->m_iEventSerialNum++);      
+	return false; // The emulator was not running, so key was not sent.
       }
-
-    return true; // no way to tell if a key was sent successfully.
-    
   }
 
   bool X11EmulatorController::pressButton(int iPK_Button)
@@ -270,13 +276,17 @@ namespace DCE
 	m_pEmulatorModel->m_iCurrentKeyModifier = XK_Shift_R;
 	break;
       default:
-	if (m_pEmulatorModel->m_mapButtonToKeysyms_Exists(iPK_Button))
+	if (m_pEmulatorModel->m_mapButtonToKeysyms_Exists(iPK_Button) && m_pEmulatorModel->m_bRunning)
 	  {
 	    WindowUtils::SendKeyToWindow(m_pEmulatorModel->m_pDisplay,
 					 m_pEmulatorModel->m_iWindowId,
 					 m_pEmulatorModel->m_mapButtonToKeysyms_Find(iPK_Button),
 					 m_pEmulatorModel->m_iCurrentKeyModifier);
 	    m_pEmulatorModel->m_iCurrentKeyModifier=0; // unpress modifier after use.
+	  }
+	else
+	  {
+	    return false; // Emulator was not running, do not send keysym.
 	  }
       }
     return true;
