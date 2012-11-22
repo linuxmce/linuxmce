@@ -1,0 +1,23 @@
+Source: lmce-datalog
+Priority: extra
+Maintainer: LinuxMCE Developers <developers@linuxmce.org>
+Build-Depends: debhelper (>= 8.0.0)
+Standards-Version: 3.9.2
+Section: libs
+Homepage: http://www.linuxmce.org
+#Vcs-Git: git://git.debian.org/collab-maint/lmce-datalog.git
+#Vcs-Browser: http://git.debian.org/?p=collab-maint/lmce-datalog.git;a=summary
+
+Package: lmce-datalog-dev
+Section: libdevel
+Architecture: any
+Depends: lmce-datalog (= ${binary:Version})
+Description: LinuxMCE Datalogger development files
+ <insert long description, indented with spaces>
+
+Package: lmce-datalog
+Section: libs
+Architecture: any
+Depends: ${shlibs:Depends}, ${misc:Depends}
+Description: <insert up to 60 chars description>
+ <insert long description, indented with spaces>
