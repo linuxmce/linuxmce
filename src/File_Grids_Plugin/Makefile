@@ -37,7 +37,7 @@ LDFLAGS += -lmysqlclient_r
 #<-dceag-mf-b->
 LDLIBS = $(XTRALDLIBS) $(BASELDLIBS)
 
-whattodo:
+whattodo: so
 	@echo "type 'make bin', 'make so' or 'make all'"
 
 all: bin so
@@ -48,14 +48,18 @@ so: File_Grids_Plugin.so
 
 File_Grids_Plugin.so: $(sources:.cpp=.o)
 	$(CXX) -shared -o $(MYNAME).so $(call cpath,$+) $(LDFLAGS) $(LDLIBS)
+	mkdir -p ../bin
 	cp $@ ../bin
 	chmod +x post_make.sh
 	./post_make.sh $@
 		
 File_Grids_Plugin: $(sources:.cpp=.o)
 	$(CXX) -o $(MYNAME) $(call cpath,$+) $(LDFLAGS) $(LDLIBS)
+	mkdir -p ../bin
 	cp $@ ../bin
 	./post_make.sh $@
+	
+distclean: clean
 
 clean: clean-recursive
 	rm -f $(call cpath,$(sources:.cpp=.o) $(sources:.cpp=.d)) File_Grids_Plugin.bin File_Grids_Plugin.so >/dev/null
@@ -72,22 +76,5 @@ endif
 
 
 install: 
-	mkdir -p /home/public
-	cp bookmarks.html $(DESTPATH)/home/public
-	mkdir -p /usr/pluto/bin
-	cp Datagrid_Plugin.so $(DESTPATH)/usr/pluto/bin
-	cp File_Grids_Plugin.so $(DESTPATH)/usr/pluto/bin
-	cp Security_Plugin.so $(DESTPATH)/usr/pluto/bin
-	cp Climate_Plugin.so $(DESTPATH)/usr/pluto/bin
-	cp Orbiter_Plugin.so $(DESTPATH)/usr/pluto/bin
-	cp Media_Plugin.so $(DESTPATH)/usr/pluto/bin
-	cp Telecom_Plugin.so $(DESTPATH)/usr/pluto/bin
-	cp Lighting_Plugin.so $(DESTPATH)/usr/pluto/bin
-	cp General_Info_Plugin.so $(DESTPATH)/usr/pluto/bin
-	cp Event_Plugin.so $(DESTPATH)/usr/pluto/bin
-	cp Infrared_Plugin.so $(DESTPATH)/usr/pluto/bin
-	cp RestartSecurityPlugin.sh $(DESTPATH)/usr/pluto/bin
-	cp Plug_And_Play_Plugin.so $(DESTPATH)/usr/pluto/bin
-	cp flickr.pl $(DESTPATH)/usr/pluto/bin
-	cp *.php $(DESTPATH)/usr/pluto/bin
-	cp flickr_status.sh $(DESTPATH)/usr/pluto/bin
+	mkdir -p $(DESTDIR)/usr/pluto/bin
+	cp File_Grids_Plugin.so $(DESTDIR)/usr/pluto/bin

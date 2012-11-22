@@ -1,5 +1,5 @@
-pluto-std-plugins (2.0.0.45.24537-1) unstable; urgency=low
+lmce-file-grids-plugin (2.46-1) unstable; urgency=low
 
   * Initial release (Closes: #nnnn)  <nnnn is the bug number of your ITP>
 
- -- root <root@fluffybitch.org>  Thu, 31 May 2012 17:53:51 +0000
+ -- LinuxMCE Developers <developers@linuxmce.org>  Thu, 22 Nov 2012 20:37:31 +0000
