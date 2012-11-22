@@ -97,6 +97,16 @@ foreach $dev (@de) {
 	$time = time - $da[$count]*86400;
 	# make expiry time varibles from time differential
 	($ExpSec,$ExpMin,$ExpHour,$ExpDayOfMonth,$ExpMonth,$ExpYear,$ExpDayOfWeek,$ExpDayOfYear,$ExpIsDst) = localtime($time);
+	print $ExpSec." segundos \n";
+	print $ExpMin." minutos \n";
+	print $ExpHour." hora \n";
+	print $ExpDayOfMonth." day \n";
+	print $ExpMonth."mes \n";
+	print $ExpYear."ano \n";
+	print $ExpDayOfWeek." dia da semana\n";
+	print $ExpDayOfYear." dia do ano \n";
+	print $ExpIsDst."\n";
+	#exit;
 	$ExpYear = $ExpYear - 100;
        	$ExpYear = 2000 + $ExpYear;
 	# convert 0-11 months to 1-12
@@ -116,22 +126,29 @@ foreach $dev (@de) {
 			@months = grep {!/^\./} readdir(YEARDIR);
 			foreach $month (@months) {
 				$path3 = $path2."/".$month;
-				if($month >= $curMonth && $month <= $ExpMonth) {
+				
+				
+				if( $month <= $ExpMonth) {
+				        print "-----entroue----".$curMonth."--------\n";
+				        
 					opendir(MONTHDIR, $path3);
 					@days = grep {!/^\./} readdir(MONTHDIR);
-					foreach $day (@days) {
+					foreach $day (@days) {                   	
 						$path4 = $path3."/".$day;
 						
-						if($day <= $ExpDayOfMonth || $day > $curDayOfMonth) {
+						if($day <= $ExpDayOfMonth ) {
 							print "Found expired day! Removing $path4\n";
 							system("rm -rf $path4");
 						}
 					}
+					@days = grep {!/^\./} readdir(MONTHDIR);
+					if (scalar( @days) == 0) {
+							print "Found empty Month! Removing month\n";
+							system("rm -rf $path3");
+					
+					} 
 					closedir(MONTHDIR);
-				} else {
-					print "Found Expired month! Removing $path3\n";
-					system("rm -rf $path3");
-				}
+				} 
 			}
 			closedir(YEARDIR);
 		} else {
