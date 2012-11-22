@@ -30,7 +30,7 @@ sources +=
 #<-dceag-mf-b->
 LDLIBS = $(XTRALDLIBS) $(BASELDLIBS)
 
-whattodo:
+whattodo: so
 	@echo "type 'make bin', 'make so' or 'make all'"
 
 all: bin so
@@ -41,12 +41,14 @@ so: DataLogger_Plugin.so
 
 DataLogger_Plugin.so: $(sources:.cpp=.o)
 	$(CXX) -shared -o $(MYNAME).so $(call cpath,$+) $(LDFLAGS) $(LDLIBS)
+	mkdir -p ../bin
 	cp $@ ../bin
 	chmod +x post_make.sh
 	./post_make.sh $@
 		
 DataLogger_Plugin: $(sources:.cpp=.o)
 	$(CXX) -o $(MYNAME) $(call cpath,$+) $(LDFLAGS) $(LDLIBS)
+	mkdir -p ../bin
 	cp $@ ../bin
 	./post_make.sh $@
 
@@ -65,5 +67,5 @@ endif
 
 
 install: 
-	mkdir -p /usr/pluto/bin
-	cp DataLogger_Plugin.so $(DESTPATH)/usr/pluto/bin
+	mkdir -p $(DESTDIR)/usr/pluto/bin
+	cp DataLogger_Plugin.so $(DESTDIR)/usr/pluto/bin
