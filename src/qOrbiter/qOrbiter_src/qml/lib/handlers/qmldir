@@ -4,3 +4,8 @@ PlaylistClickedHandler 1.0 PlaylistClickedHandler.qml
 PlaylistMoveHandler 1.0 PlaylistMoveHandler.qml
 PlaylistRemoveItemHandler 1.0 PlaylistRemoveItemHandler.qml
 PlaylistSavePublicHandler 1.0 PlaylistSavePublicHandler.qml
+ArrowDownHandler 1.0 ArrowDownHandler.qml
+ArrowUpHandler 1.0 ArrowUpHandler.qml
+ArrowLeftHandler 1.0 ArrowLeftHandler.qml
+ArrowRightHandler 1.0 ArrowRightHandler.qml
+EnterButtonHandler 1.0 EnterButtonHandler.qml
