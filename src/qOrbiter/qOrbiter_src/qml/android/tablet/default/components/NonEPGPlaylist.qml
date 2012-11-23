@@ -1,5 +1,6 @@
 import QtQuick 1.0
 import com.nokia.android 1.1
+import "../lib/handlers"
 
 Rectangle {
     id:nonepgplaylist
@@ -90,7 +91,7 @@ Rectangle {
                 opacity:index === dcenowplaying.m_iplaylistPosition ? .25 :  .15
             }
 
-             onClicked: manager.jumpToPlaylistPosition(index)
+            PlaylistClickedHandler{}
 
 
             Column{
@@ -109,10 +110,7 @@ Rectangle {
                         id: up
                         text: qsTr("Up")
                     }
-                    MouseArea{
-                        anchors.fill: parent
-                        onClicked: manager.movePlaylistEntry("", index)
-                    }
+                    PlaylistMoveHandler{direction: "-"}
                 }
 
                 Rectangle{
@@ -120,10 +118,7 @@ Rectangle {
                     height: scaleX(1)
                     width:scaleX(1)
                     color:"yellow"
-                    MouseArea{
-                        anchors.fill: remove_box
-                        onClicked: manager.removePlaylistItem(index)
-                    }
+                  PlaylistRemoveItemHandler{}
                 }
 
                 Rectangle{
@@ -135,9 +130,8 @@ Rectangle {
                         id: down
                         text: qsTr("down")
                     }
-                    MouseArea{
-                        anchors.fill: parent
-                        onClicked: manager.movePlaylistEntry("+", index)
+                    PlaylistMoveHandler{
+                        direction:"+"
                     }
                 }
             }

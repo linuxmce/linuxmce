@@ -1,5 +1,5 @@
 import QtQuick 1.0
-
+import "../lib/handlers"
 Rectangle {
     id:navigation
     width: childrenRect.width
@@ -20,12 +20,7 @@ Rectangle {
                 width: parent.width
                 rotation: 180
             }
-            MouseArea{
-                anchors.fill: parent
-                 hoverEnabled: true
-                onEntered: parent.scale = .75
-                onExited: parent.scale = 1
-                onClicked: manager.moveDirection("left")
+            ArrowLeftHandler {
             }
         }
 
@@ -41,12 +36,7 @@ Rectangle {
                 rotation: 270
 
             }
-            MouseArea {
-                anchors.fill: parent
-                 hoverEnabled: true
-                onEntered: parent.scale = .75
-                onExited: parent.scale = 1
-                onClicked: manager.moveDirection("up")
+            ArrowUpHandler {
             }
         }
 
@@ -61,12 +51,7 @@ Rectangle {
             }
             media_but_txt: "Down"
 
-            MouseArea{
-                anchors.fill: parent
-                 hoverEnabled: true
-                onEntered: parent.scale = .75
-                onExited: parent.scale = 1
-                onClicked: manager.moveDirection("down")
+            ArrowDownHander {
             }
 
         }
@@ -79,12 +64,7 @@ Rectangle {
                 height: parent.height
                 width: parent.width
             }
-            MouseArea{
-                anchors.fill: parent
-                 hoverEnabled: true
-                onEntered: parent.scale = .75
-                onExited: parent.scale = 1
-                onClicked: manager.moveDirection("right")
+            ArrowRightHandler {
             }
         }
 
@@ -94,14 +74,8 @@ Rectangle {
             color: "transparent"
            buttontext:  "Enter"
 
-            MouseArea
-            {
-                anchors.fill: parent
-                 hoverEnabled: true
-                onEntered: parent.scale = .75
-                onExited: parent.scale = 1
-                onClicked: manager.moveDirection("enter")
-            }
+           EnterButtonHandler {
+           }
         }
     }
 }
