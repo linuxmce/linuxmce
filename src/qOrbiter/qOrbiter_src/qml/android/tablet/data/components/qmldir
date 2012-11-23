@@ -6,3 +6,6 @@ Playlist Playlist.qml
 ScrollBar ScrollBar.qml
 ShowPlaylist ShowPlaylist.qml
 NowPlayingBar NowPlayingBar.qml
+OSDNavigation OSDNavigation.qml
+OSDNavigationBack OSDNavigationBack.qml
+GraphicButton GraphicButton.qml
