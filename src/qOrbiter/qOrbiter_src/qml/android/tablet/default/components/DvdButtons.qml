@@ -30,7 +30,7 @@ Row{
         buttontext: qsTr("Menu")
         MouseArea{
             anchors.fill: parent
-            onClicked: manager.dvd_showMenu(b)
+            onClicked: manager.dvd_showMenu(true)
         }
     }
     AvOptionButton{
