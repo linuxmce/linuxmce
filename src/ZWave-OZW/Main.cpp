@@ -197,6 +197,9 @@ int main(int argc, char* argv[])
 	{
 
 		ZWInterface* pZWInterface = new ZWInterface();
+		if ( LoggerWrapper::GetType() == LT_LOGGER_FILE )
+			pZWInterface->SetLogFileName(sLogger);
+
 		ZWave *pZWave = NULL;
 		LoggerWrapper::GetInstance()->Write(LV_ZWAVE, "ZWInterface created.");
 		bool bQuit = false;

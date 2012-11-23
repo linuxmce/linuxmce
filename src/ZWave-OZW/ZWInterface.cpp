@@ -10,6 +10,7 @@
 */
 
 #include "ZWInterface.h"
+#include <openzwave/platform/Log.h>
 
 using namespace DCE;
 
@@ -19,6 +20,8 @@ ZWInterface::ZWInterface()
 	g_homeId = 0;
 	g_initFailed = false;
 	m_bInitDone = false;
+	m_sLogFile = "";
+
 	initCond  = PTHREAD_COND_INITIALIZER;
 	initMutex = PTHREAD_MUTEX_INITIALIZER;
 	pthread_mutexattr_t mutexattr;
@@ -75,7 +78,13 @@ bool ZWInterface::Init(ZWConfigData* data) {
 	// the log file will appear in the program's working directory.
 	OpenZWave::Options::Create( "/etc/openzwave/config/", "/etc/openzwave/", "" );
 	OpenZWave::Options::Get()->Lock();
-	
+
+	if ( m_sLogFile != "")
+	{
+		LoggerWrapper::GetInstance()->Write(LV_ZWAVE, "ZWInterface::Init() setting OpenZWave log file to %s", m_sLogFile.c_str());
+		OpenZWave::Log::Create(m_sLogFile, true, false, OpenZWave::LogLevel_Info, OpenZWave::LogLevel_Debug, OpenZWave::LogLevel_Error);
+	}
+
 	OpenZWave::Manager::Create();
 	
 	OpenZWave::Manager::Get()->AddWatcher( OnNotification_static, this );
@@ -100,7 +109,9 @@ bool ZWInterface::Init(ZWConfigData* data) {
 		LoggerWrapper::GetInstance()->Write(LV_ZWAVE,"Dropped: %d Retries: %d\n", data.s_dropped, data.s_retries);
 		
 		// int ourNodeId = Manager::Get()->GetControllerNodeId(g_homeId);
-		
+
+		OpenZWave::Manager::Get()->SetPollInterval(60000, false);
+
 		return true;
 	}
 	LoggerWrapper::GetInstance()->Write(LV_ZWAVE, "ZWInterface::Init() init failed!");
@@ -191,7 +202,7 @@ void ZWInterface::OnNotification(OpenZWave::Notification const* _notification) {
 			// Add the new value to our list
 			nodeInfo->m_values.push_back( _notification->GetValueID() );
 			OpenZWave::ValueID id = _notification->GetValueID();
-			printf("Notification: Value Added Home 0x%08x Node %d Genre %d Class %d Instance %d Index %d Type %d\n", _notification->GetHomeId(), _notification->GetNodeId(), id.GetGenre(), id.GetCommandClassId(), id.GetInstance(), id.GetIndex(), id.GetType());
+			LoggerWrapper::GetInstance()->Write(LV_WARNING, "ZWInterface::OnNotification() : Value Added Home 0x%08x Node %d Genre %d Class %d Instance %d Index %d Type %d\n", _notification->GetHomeId(), _notification->GetNodeId(), id.GetGenre(), id.GetCommandClassId(), id.GetInstance(), id.GetIndex(), id.GetType());
 		}
 		break;
 	}
@@ -221,14 +232,14 @@ void ZWInterface::OnNotification(OpenZWave::Notification const* _notification) {
 			// nodeInfo = nodeInfo;
 			OpenZWave::ValueID id = _notification->GetValueID();
 			string str;
-			printf("Notification: Value Changed Home 0x%08x Node %d Genre %d Class %d Instance %d Index %d Type %d\n", _notification->GetHomeId(), _notification->GetNodeId(), id.GetGenre(), id.GetCommandClassId(), id.GetInstance(), id.GetIndex(), id.GetType());
+			LoggerWrapper::GetInstance()->Write(LV_WARNING, "ZWInterface::OnNotification() : Value Changed Home 0x%08x Node %d Genre %d Class %d Instance %d Index %d Type %d\n", _notification->GetHomeId(), _notification->GetNodeId(), id.GetGenre(), id.GetCommandClassId(), id.GetInstance(), id.GetIndex(), id.GetType());
 			if (OpenZWave::Manager::Get()->GetValueAsString(id, &str)) {
 				string label = OpenZWave::Manager::Get()->GetValueLabel(id);
 				string units = OpenZWave::Manager::Get()->GetValueUnits(id);
 				string level = str;
 				if (str == "True") level="255";
 				if (str == "False") level="0";
-				printf("Value: %s Label: %s Unit: %s\n",str.c_str(),label.c_str(),units.c_str());
+				LoggerWrapper::GetInstance()->Write(LV_WARNING, "ZWInterface::OnNotification() : Value: %s Label: %s Unit: %s\n",str.c_str(),label.c_str(),units.c_str());
 				
 			}
 		}

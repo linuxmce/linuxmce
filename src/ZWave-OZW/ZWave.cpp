@@ -520,6 +520,22 @@ void ZWave::OnNotification(OpenZWave::Notification const* _notification, NodeInf
 	switch( _notification->GetType() )
 	{
 
+	case OpenZWave::Notification::Type_ValueAdded:
+	{
+		if( nodeInfo != NULL )
+		{
+			// Do we want this value polled
+			OpenZWave::ValueID id = _notification->GetValueID();
+			string label = OpenZWave::Manager::Get()->GetValueLabel(id);
+			if ( label == "Battery Level" || label == "Temperature" || label == "Luminance" || label == "Power" )
+			{
+				DCE::LoggerWrapper::GetInstance()->Write(LV_ZWAVE,"ZWave::OnNotification() ValueAdded: Set polling for node %d/%d, value label %s", _notification->GetNodeId(), id.GetInstance(), label.c_str());
+				OpenZWave::Manager::Get()->EnablePoll(id);
+			}
+		}
+		break;
+	}
+
 	case OpenZWave::Notification::Type_ValueChanged:
 	{
 		if( nodeInfo != NULL )
@@ -555,7 +571,9 @@ void ZWave::OnNotification(OpenZWave::Notification const* _notification, NodeInf
 				} else if ( label == "Luminance" ) {
 
 				} else if ( label == "Power" ) {
-					
+					float level = 0;
+					OpenZWave::Manager::Get()->GetValueAsFloat(id, &level);
+					SendPowerUsageChangedEvent(PKDevice, level);
 				}
 			}
 		}
@@ -739,7 +757,7 @@ void ZWave::SendLightChangedEvents(unsigned int PK_Device, int value)
 					   EVENT_State_Changed_CONST,
 					   1,
 					   EVENTPARAMETER_State_CONST,
-					   svalue)
+					   svalue.c_str())
 		);
 }
 
@@ -754,7 +772,7 @@ void ZWave::SendPowerUsageChangedEvent(unsigned int PK_Device, int value)
 					   EVENT_Power_Usage_Changed_CONST,
 					   1,
 					   EVENTPARAMETER_Watts_CONST,
-					   svalue)
+					   svalue.c_str())
 		);
 }
 

@@ -30,7 +30,7 @@ namespace DCE
 		list<NodeInfo*> g_nodes;
 
 		ZWave* m_pZWave;
-
+		string m_sLogFile;
 	public:
 		ZWInterface();
 		~ZWInterface();
@@ -45,7 +45,8 @@ namespace DCE
 		void SetZWave(ZWave* pZWave);
 		bool RequireRestart(ZWConfigData* data);
 		bool IsReady();
-		
+		void SetLogFileName(string sFileName) { m_sLogFile = sFileName; };
+
 		static void OnNotification_static(OpenZWave::Notification const* _notification, void* _context);
 		void OnNotification(OpenZWave::Notification const* _notification);
 	};
