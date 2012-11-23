@@ -395,7 +395,9 @@ int main(int argc, char* argv[])
         QObject::connect(&pqOrbiter, SIGNAL(setPlaylistPosition(int)), w.nowPlayingButton, SLOT(setPlaylistPostion(int)),Qt::QueuedConnection);
         QObject::connect(&w, SIGNAL(changeTrack(QString)), &pqOrbiter, SLOT(changedTrack(QString)), Qt::QueuedConnection);
         QObject::connect(w.nowPlayingButton, SIGNAL(playListPositionChanged(int)), storedVideoPlaylist, SLOT(setCurrentIndex(int)) ,Qt::QueuedConnection);
-
+        QObject::connect(&w, SIGNAL(removePlistEntry(int)), &pqOrbiter, SLOT(removePlaylistItem(int)), Qt::QueuedConnection);
+        QObject::connect(&w, SIGNAL(movePlistEntry(QString,int)), &pqOrbiter, SLOT(movePlaylistEntry(QString,int)), Qt::QueuedConnection);
+        QObject::connect(&w, SIGNAL(savePlist(QString,bool)), &pqOrbiter, SLOT(saveCurrentPlaylist(QString,bool)), Qt::QueuedConnection);
         /*Misc*/
 
         QObject::connect(&pqOrbiter, SIGNAL(discreteAudioChanged(bool)), &w, SLOT(setDiscreteAudio(bool)));
@@ -581,6 +583,8 @@ int main(int argc, char* argv[])
         QObject::connect(&w, SIGNAL(resendAvCodes()), &pqOrbiter, SLOT(showAdvancedButtons()), Qt::QueuedConnection );
         QObject::connect(&pqOrbiter, SIGNAL(deviceAudioLevelChanged(int)), &w, SLOT(setDeviceVolume(int)));
         QObject::connect(&w, SIGNAL(muteSound()), &pqOrbiter, SLOT(mute()), Qt::QueuedConnection);
+        QObject::connect(&w, SIGNAL(moveArrowDirection(int)), &pqOrbiter, SLOT(moveDirection(int)), Qt::QueuedConnection);
+        QObject::connect(&w, SIGNAL(show_dvdMenu()), &pqOrbiter, SLOT(showMenu()));
 
         //so does live tv
         QObject::connect(&w, SIGNAL(clearModel()), simpleEPGmodel, SLOT(empty()),Qt::QueuedConnection);

@@ -481,6 +481,8 @@ signals:
     void zoomLevelChanged(QString zoom);
     void aspectRatioChanged(QString ratio);
     void mobileStorageChanged();
+    void moveArrowDirection(int d);
+
 
  void redButton();
  void blueButton();
@@ -488,7 +490,7 @@ signals:
  void yellowButton();
 
     /*Dvd Specific*/
-    void show_dvdMenu(bool m);
+    void show_dvdMenu();
 
     /*Metadata signals*/
     void objectUpdated();
@@ -499,6 +501,10 @@ signals:
     void requestVideoFrame();
     void liveTVrequest();
     void managerPlaylistRequest();
+    void movePlistEntry(QString , int);
+    void removePlistEntry(int);
+    void savePlist(QString, bool);
+
 
     /*Datagrid Signals*/
     void gridStatus(bool s);
@@ -707,7 +713,7 @@ public slots:
     void nowPlayingChanged(bool b);
     void addDeviceToList(AvDevice* d) {devices->appendRow(d);}
     void addCommandToList(AvCommand* c) {deviceCommands->appendRow(c);}
-
+    void moveDirection(int d) {emit moveArrowDirection(d);}
     void setDeviceVolume(int d){ deviceVolume = d; emit deviceVolumeChanged();}
     int getDeviceVolume() {return deviceVolume;}
 
@@ -751,7 +757,7 @@ public slots:
     void changeChannels(QString chan) {emit newChannel(chan);  }
     void gridChangeChannel(QString chan, QString chanid) {emit newGridChannel(chan, chanid);}
     void extraButtonPressed(QString b) {emit extraButton(b);}
-    void dvd_showMenu(bool b) { dvdMenuShowing = b ; emit show_dvdMenu(dvdMenuShowing);}
+    void dvd_showMenu(bool b) { dvdMenuShowing = b ; emit show_dvdMenu();}
     void setZoomLevel(QString zoom) {emit zoomLevelChanged(zoom);}
     void setAspectRatio(QString r) {emit aspectRatioChanged(r);}
     void getVideoFrame() { emit requestVideoFrame();}
@@ -760,6 +766,10 @@ public slots:
     void greenButtonPress(){emit greenButton();}
     void yellowButtonPress(){emit yellowButton();}
     void mute(){emit muteSound();}
+
+    void movePlaylistEntry(QString d, int index) {emit movePlistEntry(d, index); }
+    void removePlaylistEntry(int index) {emit removePlistEntry(index);}
+    void saveCurrentPlaylist(QString name, bool mode) {emit savePlist(name, mode);} /*true is public, false is private*/
 
 
     /*Screenshot & Images slots*/
