@@ -30,7 +30,7 @@ sources +=
 #<-dceag-mf-b->
 LDLIBS = $(XTRALDLIBS) $(BASELDLIBS)
 
-whattodo:
+whattodo: so
 	@echo "type 'make bin', 'make so' or 'make all'"
 
 all: bin so
@@ -51,6 +51,8 @@ Picture_Plugin: $(sources:.cpp=.o)
 	mkdir -p ../bin
 	cp $@ ../bin
 	./post_make.sh $@
+
+distclean: clean
 
 clean: clean-recursive
 	rm -f $(call cpath,$(sources:.cpp=.o) $(sources:.cpp=.d)) Picture_Plugin.bin Picture_Plugin.so >/dev/null
