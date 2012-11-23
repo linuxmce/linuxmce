@@ -41,12 +41,14 @@ so: Picture_Plugin.so
 
 Picture_Plugin.so: $(sources:.cpp=.o)
 	$(CXX) -shared -o $(MYNAME).so $(call cpath,$+) $(LDFLAGS) $(LDLIBS)
+	mkdir -p ../bin
 	cp $@ ../bin
 	chmod +x post_make.sh
 	./post_make.sh $@
 		
 Picture_Plugin: $(sources:.cpp=.o)
 	$(CXX) -o $(MYNAME) $(call cpath,$+) $(LDFLAGS) $(LDLIBS)
+	mkdir -p ../bin
 	cp $@ ../bin
 	./post_make.sh $@
 
@@ -65,5 +67,5 @@ endif
 
 
 install: 
-	mkdir -p /usr/pluto/bin
-	cp Picture_Plugin.so $(DESTPATH)/usr/pluto/bin
+	mkdir -p $(DESTDIR)/usr/pluto/bin
+	cp Picture_Plugin.so $(DESTDIR)/usr/pluto/bin
