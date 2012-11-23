@@ -29,7 +29,7 @@ sources += SlimServerMediaStream.cpp
 #<-dceag-mf-b->
 LDLIBS = $(XTRALDLIBS) $(BASELDLIBS)
 
-whattodo:
+whattodo: so
 	@echo "type 'make bin', 'make so' or 'make all'"
 
 all: bin so
@@ -40,14 +40,18 @@ so: SlimServer_PlugIn.so
 
 SlimServer_PlugIn.so: $(sources:.cpp=.o)
 	$(CXX) -shared -o $(MYNAME).so $(call cpath,$+) $(LDFLAGS) $(LDLIBS)
+	mkdir -p ../bin
 	cp $@ ../bin
 	chmod +x post_make.sh
 	./post_make.sh $@
 		
 SlimServer_PlugIn: $(sources:.cpp=.o)
 	$(CXX) -o $(MYNAME) $(call cpath,$+) $(LDFLAGS) $(LDLIBS)
+	mkdir -p ../bin
 	cp $@ ../bin
 	./post_make.sh $@
+	
+distclean: clean
 
 clean: clean-recursive
 	rm -f $(call cpath,$(sources:.cpp=.o) $(sources:.cpp=.d)) SlimServer_PlugIn.bin SlimServer_PlugIn.so >/dev/null
@@ -64,6 +68,6 @@ endif
 
 
 install: 
-	mkdir -p /usr/pluto/bin
-	cp SlimServer_PlugIn.so $(DESTPATH)/usr/pluto/bin
-	cp mkr_*.sh $(DESTPATH)/usr/pluto/bin
+	mkdir -p $(DESTDIR)/usr/pluto/bin
+	cp SlimServer_PlugIn.so $(DESTDIR)/usr/pluto/bin
+	# cp mkr_*.sh $(DESTDIR)/usr/pluto/bin
