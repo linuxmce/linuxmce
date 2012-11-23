@@ -37,7 +37,7 @@ sources += \
 #<-dceag-mf-b->!
 LDLIBS_NAMES = $(INTERNAL_LIBS_NAMES) $(EXTERNAL_LIBS_NAMES)
 
-whattodo:
+whattodo: so
 	@echo "type 'make bin', 'make so' or 'make all'"
 
 all: bin so
@@ -57,6 +57,8 @@ MythTV_PlugIn: $(sources:.cpp=.o) $(INTERNAL_LIBS_NAMES:%=$(ROOT)/lib/lib%.so) M
 	cp $@ ../bin
 	./post_make.sh $@
 
+distclean: clean
+
 clean: clean-recursive
 	rm -f $(call cpath,$(sources:.cpp=.o) $(sources:.cpp=.d)) MythTV_PlugIn.bin MythTV_PlugIn.so >/dev/null
 
@@ -72,18 +74,17 @@ endif
 
 
 install: 
-	mkdir -p /home/mythtv
-	cp master_iconmap.xml $(DESTPATH)/home/mythtv
-	mkdir -p /usr/pluto/bin
-	cp MythTV_PlugIn.so $(DESTPATH)/usr/pluto/bin
-	cp Tribune*.sh $(DESTPATH)/usr/pluto/bin
-	cp DataDirect*.sh $(DESTPATH)/usr/pluto/bin
-	cp MythTvInitialFillDB.sh $(DESTPATH)/usr/pluto/bin
-	cp Restart_Backend_With_SchemaLock.sh $(DESTPATH)/usr/pluto/bin
-	cp mkr_*.sh $(DESTPATH)/usr/pluto/bin
-	cp MythTvSyncDB.sh $(DESTPATH)/usr/pluto/bin
-	cp MythTvDailyFillDB.sh $(DESTPATH)/usr/pluto/bin
-	cp MythTvCommon.sh $(DESTPATH)/usr/pluto/bin
-	cp mythtv_setup.pl $(DESTPATH)/usr/pluto/bin
-	mkdir -p pluto/database
-	cp myth.sqlcvs $(DESTPATH)pluto/database
+	mkdir -p $(DESTDIR)/home/mythtv $(DESTDIR)/usr/pluto/bin $(DESTDIR)/usr/pluto/database
+	cp master_iconmap.xml $(DESTDIR)/home/mythtv
+	cp MythTV_PlugIn.so $(DESTDIR)/usr/pluto/bin
+	cp Tribune*.sh $(DESTDIR)/usr/pluto/bin
+	cp DataDirect*.sh $(DESTDIR)/usr/pluto/bin
+	cp MythTvInitialFillDB.sh $(DESTDIR)/usr/pluto/bin
+	cp Restart_Backend_With_SchemaLock.sh $(DESTDIR)/usr/pluto/bin
+	cp mkr_*.sh $(DESTDIR)/usr/pluto/bin
+	cp MythTvSyncDB.sh $(DESTDIR)/usr/pluto/bin
+	cp MythTvDailyFillDB.sh $(DESTDIR)/usr/pluto/bin
+	cp MythTvCommon.sh $(DESTDIR)/usr/pluto/bin
+	cp mythtv_setup.pl $(DESTDIR)/usr/pluto/bin
+	mkdir -p $(DESTDIR)/usr/pluto/database
+	cp myth.sqlcvs $(DESTDIR)pluto/database || :
