@@ -346,7 +346,7 @@ void agocontrol_Bridge::receiveFunction() {
 				Variant::Map room = roomIt->second.asMap();
 				sRoomName = room["name"].asString();
 			}
-			LoggerWrapper::GetInstance()->Write(LV_DEBUG,"ago control device found: %s type: %s name: %s room: %s", it->first.c_str(),device["type"].asString().c_str(),device["name"].asString().c_str(),sRoomName.c_str());
+			LoggerWrapper::GetInstance()->Write(LV_DEBUG,"ago control device found: %s type: %s name: %s room: %s", it->first.c_str(),device["devicetype"].asString().c_str(),device["name"].asString().c_str(),sRoomName.c_str());
 
 			if (device["devicetype"] == "switch") AddDevice(0, it->first.c_str(), DEVICETEMPLATE_Light_Switch_onoff_CONST,device["name"].asString(),sRoomName);
 			if (device["devicetype"] == "dimmer") AddDevice(0, it->first.c_str(), DEVICETEMPLATE_Light_Switch_dimmable_CONST,device["name"].asString(),sRoomName);
@@ -388,7 +388,7 @@ void agocontrol_Bridge::receiveFunction() {
 					}
 					if (subject == "event.environment.temperaturechanged") {
 						LoggerWrapper::GetInstance()->Write(LV_DEBUG,"Temperature changed: %s %s",content["uuid"].asString().c_str(),content["level"].asString().c_str());
-						SendTemperatureChangedEvent(pChildDevice->m_dwPK_Device,content["level"].asFloat());
+						SendTemperatureChangedEvent(pChildDevice->m_dwPK_Device,atof(content["level"].asString().c_str()));
 					}
 					if (subject == "event.environment.humiditychanged") {
 						LoggerWrapper::GetInstance()->Write(LV_DEBUG,"Humidity changed: %s %s",content["uuid"].asString().c_str(),content["level"].asString().c_str());
