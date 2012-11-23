@@ -1,7 +1,7 @@
 import QtQuick 1.0
-import "../lib"
 
 MouseArea{
+    property string direction: ""
     anchors.fill: parent
-    onClicked: manager.movePlaylistEntry("", index)
+    onClicked: manager.movePlaylistEntry(direction, index)
 }
