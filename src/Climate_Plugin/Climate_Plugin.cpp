@@ -559,6 +559,7 @@ void Climate_Plugin::SetStateValue(DeviceData_Router *pDevice,
 	switch(pDevice->m_dwPK_DeviceTemplate)
 	{
 		case DEVICETEMPLATE_Temperature_sensor_CONST:
+		case DEVICETEMPLATE_Multilevel_Sensor_CONST:
 			pDevice->m_sState_set(sTemp);
 			break; 
 		default:
