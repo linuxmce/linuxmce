@@ -27,44 +27,46 @@ horizontalTileMode: BorderImage.Repeat
 
     Rectangle {
         id:buttonBase
-        color:style.button_system_color
+        color:style.darkhighlight
         height: parent.height
         width: parent.width
         border.width: 2
         border.color: style.highlight1
-        radius: 2.5
+        radius: 1
 
-        StyledText {
-            id: buttonLabel
-            width: -1
-            height: 0
-            textLabel:"null ipsum delorium"
-            fontSize: scaleY(1.5)
-            verticalAlignment: Text.AlignVCenter
-            horizontalAlignment: Text.AlignHCenter
-            anchors.fill: parent
-            anchors.horizontalCenter: parent.horizontalCenter
-            anchors.verticalCenter: parent.verticalCenter
-            anchors.margins: 5            
-            wrapMode: "WrapAtWordBoundaryOrAnywhere"
-            // elide: "ElideRight"
-            color:"black"
-            z:1
+
+    }
+    StyledText {
+        id: buttonLabel
+        width: -1
+        height: 0
+        textLabel:"null ipsum delorium"
+        fontSize: scaleY(1.5)
+        verticalAlignment: Text.AlignVCenter
+        horizontalAlignment: Text.AlignHCenter
+        anchors.fill: parent
+        anchors.horizontalCenter: parent.horizontalCenter
+        anchors.verticalCenter: parent.verticalCenter
+        anchors.margins: 5
+        wrapMode: "WrapAtWordBoundaryOrAnywhere"
+        // elide: "ElideRight"
+        color:"black"
+        z:1
+    }
+    MouseArea{
+        id:hitArea
+        anchors.fill: buttonLabel
+        hoverEnabled: true
+        onEntered: {
+            buttonBase.color = style.lighthighlight
+            buttonLabel.color = style.lighttext
+            buttonLabel.font.capitalization = Font.AllUppercase
         }
-        MouseArea{
-            anchors.fill: buttonLabel
-            hoverEnabled: true
-            onEntered: {
-                buttonBase.color = style.button_system_color_hover
-                buttonLabel.color = style.lighttext
-                buttonLabel.font.capitalization = Font.AllUppercase
-            }
 
-            onExited: {
-                buttonBase.color = style.button_system_color
-                buttonLabel.font.capitalization = Font.Normal
-                buttonLabel.color = "black"
-            }
+        onExited: {
+            buttonBase.color = style.darkhighlight
+            buttonLabel.font.capitalization = Font.Normal
+            buttonLabel.color = "black"
         }
     }
 }

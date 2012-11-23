@@ -16,6 +16,7 @@ Rectangle {
     opacity: 1
     color: "transparent"
     z:5
+    Component.onCompleted: dceplayer.z=0
 
     MediaDetailHeader {
         id: gradientheader

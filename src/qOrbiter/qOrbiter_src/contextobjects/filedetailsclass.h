@@ -53,7 +53,7 @@ class FileDetailsClass : public QObject
 
     Q_PROPERTY(QImage titleImage READ getTitleImage WRITE setTitleImage NOTIFY titleImageChanged)
    // Q_PROPERTY(QImage program READ getProgramImage WRITE setProgramImage NOTIFY objectChanged)
-
+    Q_PROPERTY(QString rating READ getRating WRITE setRating NOTIFY ratingChanged)
     //media title variable that can be independant of what is passed initially by now playing
     Q_PROPERTY(QString qs_mainTitle READ getTitle WRITE setTitle NOTIFY titleChanged )
     Q_PROPERTY (QString mediatitle READ getMediaTitle WRITE setMediaTitle NOTIFY mediaTitleChanged)
@@ -86,13 +86,15 @@ public:
     QImage titleImage;
     QString file;
     QImage programImage;
-    QUrl Season;
-    QUrl imdb;
+    QString season;
+    QString imdb;
     QString qs_mainTitle;
     QString qs_mainTitle2;
     QString qs_subTitle;
     QString mediatitle;
     QString studio;
+
+    QString duration;
 
     //television related
     QString program;
@@ -168,6 +170,7 @@ signals:
     //video signals
     void directorChanged();
 
+
     //games signals
 
     //dvd signals
@@ -179,6 +182,9 @@ signals:
 
 public slots:
     void clear();
+
+    void setRating(QString r) {rating = r; emit ratingChanged();}
+    QString getRating(){return rating;}
 
     void setStorageDevice(QString device) {
         qs_storageDevice = device;
@@ -248,7 +254,7 @@ public slots:
     QString getDirector() {director = directors.join(" | "); return director;}
 
     void setGenre (QString inc_genre) {genre.append(inc_genre+" | ");  emit genreChanged();}
-    QString getGenre() { return genre.left(genre.indexOf(" | "));}
+    QString getGenre() { return genre;}
 
     void setFileMediaType();
 

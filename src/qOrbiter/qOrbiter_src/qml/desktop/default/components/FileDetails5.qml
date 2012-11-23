@@ -3,46 +3,30 @@ import QtQuick 1.0
 
 Rectangle {
     id: filedetailrect
-    width: scaleX(65)
-    height: scaleY(75)
-    anchors.top: parent.top
-    anchors.topMargin: scaleY(5)
-    anchors.horizontalCenter: parent.horizontalCenter
-    color: style.highlight2
-    clip: true
-    radius: 5
-    border.color: style.highlight1
+    width: scaleX(75)
+    height: scaleY(65)
+    anchors.centerIn: parent
+    color:"transparent"
+    clip: true    
+    border.color: "white"
     border.width: 3
     Image {
         id: fdbg
         source: "../img/icons/nowplaying.png"
         anchors.fill: filedetailrect
+        MouseArea{
+            anchors.fill: filedetailrect
 
+        }
     }
-    MouseArea{
-        anchors.fill: filedetailrect
-    }
+
     Connections{
         target:filedetailsclass
         onImageChanged:filedetailsimage.source = "image://listprovider/filedetailsprovider/"+securityvideo.timestamp
     }
 
-    Rectangle{
-        id:titlerect
-        height: childrenRect.height + 5
-        width: parent.width
-        color:style.highlight1
-        radius:2.5
-        Text {
-            id: text2
-            anchors.horizontalCenter: parent.horizontalCenter
-            text: qsTr("Filename")+filedetailsclass.path+ "/"+filedetailsclass.filename
-            font.pixelSize: 14
-            font.bold: true
-            color: "black"
-            wrapMode: Text.WrapAtWordBoundaryOrAnywhere
-        }
-
+    FileDetailsHeader {
+        id: titlerect
     }
 
     Rectangle{
@@ -76,21 +60,18 @@ Rectangle {
             source: "../img/icons/transparencymask.png"
             anchors.fill: filedetailsimage
             opacity: .5
-
         }
     }
 
 
     Rectangle {
         id: rectangle1
-        anchors.verticalCenter: imageholder.verticalCenter
-
+        anchors.top: imageholder.top
         width:  parent.width *.40
         height: childrenRect.height
         radius: 2.5
-        clip:  true
-        color: style.darkhighlight
-        border.color: style.highlight1
+        clip:  false
+        color:"transparent"
         anchors.left: imageholder.right
         anchors.leftMargin: scaleX(1)
 
@@ -100,58 +81,41 @@ Rectangle {
                 anchors.margins: scaleY(1)
                 width: parent.width
                 height: childrenRect.height
-                Text {
+                StyledText {
                     id: fnametext
-                    text: "Title: " + filedetailsclass.objecttitle
+                    text: "Title: " + filedetailsclass.mediatitle
                     font.pixelSize: scaleY(2)
                     color:"aliceblue"
                     wrapMode: "WrapAtWordBoundaryOrAnywhere"
                      width: rectangle1.width *.95
                 }
 
-                Text {
-                    id: storageDeviceText
-                    width: scaleX(35)
-                    text: qsTr("Located on: ") + filedetailsclass.qs_storageDevice
-                    font.family: "Droid Sans"
-                    wrapMode: "WrapAtWordBoundaryOrAnywhere"
-
-                    smooth: true
-                    font.pixelSize: scaleY(2)
-
-                }
-
-                Text {
+                StyledText {
                     id: programtext
                     width: scaleX(35)
-                    text: qsTr("Album: ") + filedetailsclass.album
-                    font.family: "Droid Sans"
-                    wrapMode: "WrapAtWordBoundaryOrAnywhere"
+                    text: qsTr("Program: ") + filedetailsclass.program
 
+                    wrapMode: "WrapAtWordBoundaryOrAnywhere"
                     smooth: true
                     font.pixelSize: scaleY(2)
-                    visible:  filedetailsclass.album =="" ? false: true
+                    visible:  filedetailsclass.program =="" ? false: true
                 }
 
-                Text {
+                StyledText {
                     id: episode
                     width: scaleX(35)
                     wrapMode: "WrapAtWordBoundaryOrAnywhere"
-                    text: qsTr("Track: ") + filedetailsclass.track
-                    font.family: "Droid Sans"
-
+                    text: qsTr("Episode: ") + filedetailsclass.episode
                     smooth: true
                     font.pixelSize: scaleY(2)
-                    visible:  filedetailsclass.track =="" ? false: true
+                    visible:  filedetailsclass.episode =="" ? false: true
                 }
 
-                Text {
+                StyledText {
                     id: genre
                     width: scaleX(35)
                     wrapMode: "WrapAtWordBoundaryOrAnywhere"
-                    text: qsTr("Genre(s): ") + filedetailsclass.genre
-                    font.family: "Droid Sans"
-                    //font.bold: true
+                    text: qsTr("Genre(s): ") + filedetailsclass.genre                   
                     smooth: true
                     font.pixelSize: scaleY(2)
                     visible:  filedetailsclass.genre =="" ? false: true
@@ -162,27 +126,24 @@ Rectangle {
                         onExited: {genre.elide = "ElideRight"; }
                     }
                 }
-                Text {
+                StyledText {
                     id: released
                     width: scaleX(35)
                     wrapMode: "WrapAtWordBoundaryOrAnywhere"
-                    text: qsTr("Released: ") + dcenowplaying.releasedate
-                    font.family: "Droid Sans"
+                    text: qsTr("Released: ") + filedetailsclass.getProgram()
+
                     // font.bold: true
                     smooth: true
                     font.pixelSize: scaleY(2)
-                    visible:  filedetailsclass.releasedate ==="" ? false: true
-
+                    visible:  filedetailsclass.program ==="" ? false: true
                 }
 
 
-                Text {
+                StyledText {
                     id: starring
                     width: scaleX(35)
                     wrapMode: "WrapAtWordBoundaryOrAnywhere"
                     text: qsTr("Perfomers: ") + filedetailsclass.performerlist
-                    font.family: "Droid Sans"
-                    //  font.bold: true
                     smooth: true
                     font.pixelSize: scaleY(2)
                     elide: "ElideRight"
@@ -195,51 +156,50 @@ Rectangle {
                         onExited: {starring.elide = "ElideRight"; }
                     }
                 }
+                StyledText {
+                    id: studiotext
+                    width: scaleX(35)
+                    text: qsTr("Program: ") + filedetailsclass.studio
+
+                    wrapMode: "WrapAtWordBoundaryOrAnywhere"
+                    smooth: true
+                    font.pixelSize: scaleY(2)
+                    visible:  filedetailsclass.studio =="" ? false: true
+                }
+
+                StyledText{
+                    id:rating
+                    text: filedetailsclass.rating
+                    visible:  filedetailsclass.rating ==="" ? false: true
+                }
+
+                StyledText {
+                    id: synopsis
+                    width: scaleX(40)
+                    wrapMode: "WrapAtWordBoundaryOrAnywhere"
+                    text:  filedetailsclass.synop
+                    smooth: true
+                    font.pixelSize: scaleY(2)
+                   // elide: "ElideRight"
+                    visible:  filedetailsclass.synop =="" ? false: true
+
+                    MouseArea{
+                        anchors.fill: parent
+                        hoverEnabled: true
+                        onEntered: { starring.elide = "ElideNone" ; }
+                        onExited: {starring.elide = "ElideRight"; }
+                    }
+                }
             }
     }
 
 
-    Row{
-        id:controlrow
-        anchors.top: imageholder.bottom
-        anchors.topMargin: scaleY(1)
-        anchors.horizontalCenter: parent.horizontalCenter
-        spacing: scaleY(.5)
-        AvOptionButton {
-            id: buttonsq1
-            width: style.stdbuttonw
-            height: style.stdbuttonh
-            radius: 10
-
-            //anchors.leftMargin: 18
-            buttontext: "Play"
-            MouseArea
-            {
-                anchors.fill: parent
-                onClicked: manager.playMedia(filedetailsclass.file)  //dce function
-            }
-        }
-
-        AvOptionButton {
-            id: buttonsq2
-            width: style.stdbuttonw
-            height: style.stdbuttonh
-            radius: 10
-            buttontext: "Move"
-        }
-
-        AvOptionButton {
-            id: buttonsq3
-            width: style.stdbuttonw
-            height: style.stdbuttonh
-            radius: 10
-            buttontext: "Close"
-            x: ((parent.width/3)*2)
-            MouseArea{
-                anchors.fill:  parent
-                onClicked: { filedetailrect.destroy()}
-            }
-        }
+    FileDetailsActions {
+        id: controlrow
+        anchors.top: rectangle1.bottom
+        anchors.topMargin:  scaleY(3)
+        anchors.horizontalCenter: rectangle1.horizontalCenter
+        width: rectangle1.width
     }
 
 
