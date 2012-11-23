@@ -23,8 +23,6 @@
 //<-dceag-d-e->
 #include <QTime>
 #include <QString>
-#include "../qOrbiter/qOrbiter_src/plugins/AudioVisual/videoplayer.h"
-#include "../qOrbiter/qOrbiter_src/plugins/AudioVisual/audioplayer.h"
 
 
 //<-dceag-decl-b->
@@ -53,11 +51,9 @@ public:
         int i_pkMediaType;
         QString mediaPosition;
         QString startPosition;
-
         bool m_bPaused;
-
-
-
+        QString mediaID;
+        bool connected;
 //<-dceag-const-b->
 public:
 		// Constructors/Destructor
@@ -67,6 +63,7 @@ public:
 		virtual bool Register();
 		virtual void ReceivedCommandForChild(DeviceData_Impl *pDeviceData_Impl,string &sCMD_Result,Message *pMessage);
 		virtual void ReceivedUnknownCommand(string &sCMD_Result,Message *pMessage);
+
 //<-dceag-const-e->
 
 //<-dceag-const2-b->
@@ -906,8 +903,10 @@ public:
         void currentMediaUrlChanged(QString);
 
         void streamIdChanged(int);
+        void mediaIdChanged(QString);
         void mediaTypeChanged(int);
         void startPositionChanged(QString);
+        void newMediaPosition(QString);
 
         void stopCurrentMedia();
         void startPlayback();
@@ -917,10 +916,19 @@ public:
         void setZoomLevel(QString zoom);
         void setAspectRatio(QString aspect);
 
+        void connectionStatusChanged(bool);
+        void jumpToStreamPosition(int);
+
 
     public slots:
 
+        void setConnectionStatus(bool b) {connected = b; emit connectionStatusChanged(connected);}
+
+        void run();
+
         void mediaEnded();
+
+        void setMediaID(QString id) {mediaID = id; emit mediaIdChanged(mediaID);}
 
         void setStartPosition(QString s) {startPosition = s; emit startPositionChanged(startPosition);}
         QString getStartPosition() {return startPosition;}

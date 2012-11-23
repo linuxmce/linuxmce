@@ -5025,7 +5025,7 @@ void qOrbiter::setAlarm(bool toggle, int grp)
         CMD_Toggle_Event_Handler toggleAlarm(m_dwPK_Device, iPK_Device_eventPlugin, grp);
         SendCommand(toggleAlarm);
         GetAlarms();
-    }
+    } 
 
 }
 

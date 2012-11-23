@@ -53,9 +53,12 @@ qMediaPlayer::qMediaPlayer(Command_Impl *pPrimaryDeviceCommand, DeviceData_Impl 
     if(GetConfig()){
         setCommandResponse("created media player as embedded device ");
         setCommandResponse("Device:: "+ m_dwPK_Device );
+        setConnectionStatus(true);
+
     }
     else{
         setCommandResponse("error getting embedded video player started");
+        setConnectionStatus(false);
     }
 
 }
@@ -125,6 +128,19 @@ void qMediaPlayer::ReceivedUnknownCommand(string &sCMD_Result,Message *pMessage)
 //<-dceag-cmduk-e->
 {
     sCMD_Result = "UNKNOWN COMMAND";
+}
+
+void qMediaPlayer::run()
+{
+    if(GetConfig() && Connect(DEVICETEMPLATE_qMediaPlayer_CONST)){
+        setCommandResponse("Device "+QString::number(m_dwPK_Device)+" Connected.");
+        setConnectionStatus(true);
+
+    }else
+    {
+        setCommandResponse("Connection failed for"+QString::fromStdString(this->m_sIPAddress)+" and device number"+QString::number(m_dwPK_Device));
+        setConnectionStatus(false);
+    }
 }
 
 //<-dceag-sample-b->
@@ -339,7 +355,6 @@ void qMediaPlayer::CMD_Play_Media(int iPK_MediaType,int iStreamID,string sMediaP
                 f.remove("]");
                 deviceNumber = f;
                 localPath = (QString::fromStdString(sMediaURL)).split(deviceNo).at(1);
-
             }
             else
             {
@@ -351,6 +366,7 @@ void qMediaPlayer::CMD_Play_Media(int iPK_MediaType,int iStreamID,string sMediaP
          finishedPath = "/mnt/remote/"+deviceNumber+path+localPath;
     }
     setCurrentMediaUrl(finishedPath);
+
     //EVENT_Playback_Started(sMediaURL, i_StreamId, "Stored Media", "", "");
     emit startPlayback();
 
@@ -445,9 +461,10 @@ void qMediaPlayer::CMD_Change_Playback_Speed(int iStreamID,int iMediaPlaybackSpe
 void qMediaPlayer::CMD_Jump_to_Position_in_Stream(string sValue_To_Assign,int iStreamID,string &sCMD_Result,Message *pMessage)
 //<-dceag-c42-e->
 {
-    setCommandResponse("Need to implement command #42 - Jump to Position in Stream");
-    cout << "Parm #5 - Value_To_Assign=" << sValue_To_Assign << endl;
-    cout << "Parm #41 - StreamID=" << iStreamID << endl;
+    setCommandResponse(" Jump to Position in Stream");
+   // cout << "Parm #5 - Value_To_Assign=" << sValue_To_Assign << endl;
+   // cout << "Parm #41 - StreamID=" << iStreamID << endl;
+    emit jumpToStreamPosition(QString::fromStdString(sValue_To_Assign).toInt());
 }
 
 //<-dceag-c63-b->
@@ -1045,6 +1062,9 @@ void qMediaPlayer::CMD_Set_Media_Position(int iStreamID,string sMediaPosition,st
     cout << "Need to implement command #412 - Set Media Position" << endl;
     cout << "Parm #41 - StreamID=" << iStreamID << endl;
     cout << "Parm #42 - MediaPosition=" << sMediaPosition << endl;
+    qDebug() << sMediaPosition.c_str();
+    emit newMediaPosition(QString::fromStdString(sMediaPosition));
+
 }
 
 //<-dceag-c455-b->
@@ -1218,6 +1238,8 @@ void qMediaPlayer::CMD_Set_Media_ID(string sID,int iStreamID,string &sCMD_Result
     cout << "Need to implement command #920 - Set Media ID" << endl;
     cout << "Parm #10 - ID=" << sID << endl;
     cout << "Parm #41 - StreamID=" << iStreamID << endl;
+    setMediaID(QString::fromStdString(sID));
+
 }
 
 //<-dceag-c1076-b->
