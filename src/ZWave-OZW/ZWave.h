@@ -62,7 +62,7 @@ public:
 		void SendPowerUsageChangedEvent(unsigned int PK_Device, int value);
 		void SendVoltageChangedEvent(unsigned int PK_Device, int value);
 		void SendLightChangedEvents(unsigned int PK_Device, int value);
-
+		void SendBrightnessChangedEvent(unsigned int PK_Device, int value);
 //<-dceag-const-b->
 public:
 		// Constructors/Destructor

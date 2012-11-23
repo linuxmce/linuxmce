@@ -601,7 +601,9 @@ void ZWave::OnNotification(OpenZWave::Notification const* _notification, NodeInf
 				} else if ( label == "Basic" ) {
 
 				} else if ( label == "Luminance" ) {
-
+					float level = 0;
+					OpenZWave::Manager::Get()->GetValueAsFloat(id, &level);
+					SendBrightnessChangedEvent(PKDevice, level);
 				} else if ( label == "Power" ) {
 					float level = 0;
 					OpenZWave::Manager::Get()->GetValueAsFloat(id, &level);
@@ -834,5 +836,17 @@ void ZWave::SendOnOffEvent(unsigned int PK_Device, int value) {
 					   1,
 					   EVENTPARAMETER_OnOff_CONST,
 					   (value == 0) ? "0" : "1")
+		);
+}
+
+void ZWave::SendBrightnessChangedEvent(unsigned int PK_Device, int value)
+{
+	LoggerWrapper::GetInstance()->Write(LV_ZWAVE,"Sending brightness level changed event from PK_Device %d, value %d",PK_Device, value);
+	m_pEvent->SendMessage( new Message(PK_Device,
+					   DEVICEID_EVENTMANAGER,
+					   PRIORITY_NORMAL,
+					   MESSAGETYPE_EVENT,
+					   EVENT_Brightness_Changed_CONST, 1, 
+					   EVENTPARAMETER_Value_CONST, StringUtils::itos(value).c_str())
 		);
 }
