@@ -8,16 +8,16 @@ version=3
 
 # Uncomment to examine a Webpage
 # <Webpage URL> <string match>
-#http://www.example.com/downloads.php pluto-std-plugins-(.*)\.tar\.gz
+#http://www.example.com/downloads.php lmce-lighting-plugin-(.*)\.tar\.gz
 
 # Uncomment to examine a Webserver directory
-#http://www.example.com/pub/pluto-std-plugins-(.*)\.tar\.gz
+#http://www.example.com/pub/lmce-lighting-plugin-(.*)\.tar\.gz
 
 # Uncommment to examine a FTP server
-#ftp://ftp.example.com/pub/pluto-std-plugins-(.*)\.tar\.gz debian uupdate
+#ftp://ftp.example.com/pub/lmce-lighting-plugin-(.*)\.tar\.gz debian uupdate
 
 # Uncomment to find new files on sourceforge, for devscripts >= 2.9
-# http://sf.net/pluto-std-plugins/pluto-std-plugins-(.*)\.tar\.gz
+# http://sf.net/lmce-lighting-plugin/lmce-lighting-plugin-(.*)\.tar\.gz
 
 # Uncomment to find new files on GooglePages
-# http://example.googlepages.com/foo.html pluto-std-plugins-(.*)\.tar\.gz
+# http://example.googlepages.com/foo.html lmce-lighting-plugin-(.*)\.tar\.gz
