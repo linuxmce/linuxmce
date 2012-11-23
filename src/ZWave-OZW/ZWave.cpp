@@ -261,7 +261,9 @@ void ZWave::CMD_Report_Child_Devices(string &sCMD_Result,Message *pMessage)
 void ZWave::CMD_Download_Configuration(string sText,string &sCMD_Result,Message *pMessage)
 //<-dceag-c757-e->
 {
+	m_pZWInterface->Lock();
 	OpenZWave::Manager::Get()->BeginControllerCommand(m_pZWInterface->GetHomeId(), OpenZWave::Driver::ControllerCommand_ReceiveConfiguration, controller_update, (void*)NULL, true, 0, 0);
+	m_pZWInterface->UnLock();
 }
 
 //<-dceag-c760-b->
@@ -296,7 +298,9 @@ NOEMON or CANBUS */
 void ZWave::CMD_Reset(string sArguments,string &sCMD_Result,Message *pMessage)
 //<-dceag-c776-e->
 {
+	m_pZWInterface->Lock();
 	OpenZWave::Manager::Get()->SoftReset(m_pZWInterface->GetHomeId());
+	m_pZWInterface->UnLock();
 }
 
 //<-dceag-c788-b->
@@ -375,7 +379,9 @@ void ZWave::CMD_Set_Config_Param(int iValue,int iSize,int iNodeID,int iParameter
 			size = 4;
 		}
 	}
+	m_pZWInterface->Lock();
 	OpenZWave::Manager::Get()->SetConfigParam(m_pZWInterface->GetHomeId(), iNodeID, iParameter_ID, iValue, size);
+	m_pZWInterface->UnLock();
 }
 
 //<-dceag-c842-b->
@@ -392,10 +398,27 @@ void ZWave::CMD_Set_Config_Param(int iValue,int iSize,int iNodeID,int iParameter
 void ZWave::CMD_Set_Association(int iNodeID,int iGroup_ID,string sNodes_List,string &sCMD_Result,Message *pMessage)
 //<-dceag-c842-e->
 {
-	cout << "Need to implement command #842 - Set Association" << endl;
-	cout << "Parm #239 - NodeID=" << iNodeID << endl;
-	cout << "Parm #249 - Group_ID=" << iGroup_ID << endl;
-	cout << "Parm #250 - Nodes_List=" << sNodes_List << endl;
+	int maxGroup = OpenZWave::Manager::Get()->GetNumGroups(m_pZWInterface->GetHomeId(), iNodeID);
+	if (iGroup_ID <= maxGroup)
+	{
+		vector<string> vectNodes;
+		StringUtils::Tokenize(sNodes_List, ",", vectNodes);
+		for (int i = 0; i < vectNodes.size(); i++)
+		{
+			int targetId = atoi(vectNodes[i].c_str());
+			m_pZWInterface->Lock();
+			if (targetId > 0)
+			{
+				DCE::LoggerWrapper::GetInstance()->Write(LV_ZWAVE,"ZWave::OnNotification() Adding association: (node %d, group %d) -> (node %d)", iNodeID, iGroup_ID, targetId);
+				OpenZWave::Manager::Get()->AddAssociation(m_pZWInterface->GetHomeId(), iNodeID, iGroup_ID, targetId);
+			} else if (targetId < 0)
+			{
+				DCE::LoggerWrapper::GetInstance()->Write(LV_ZWAVE,"ZWave::OnNotification() Removing association: (node %d, group %d) -> (node %d)", iNodeID, iGroup_ID, targetId);
+				OpenZWave::Manager::Get()->RemoveAssociation(m_pZWInterface->GetHomeId(), iNodeID, iGroup_ID, targetId);
+			}
+			m_pZWInterface->UnLock();
+		}
+	}
 }
 
 //<-dceag-c966-b->
@@ -440,12 +463,14 @@ H = high power */
 void ZWave::CMD_Add_Node(string sOptions,int iValue,string sTimeout,bool bMultiple,string &sCMD_Result,Message *pMessage)
 //<-dceag-c967-e->
 {
+	m_pZWInterface->Lock();
 	if ( iValue == 5 )
 	{
 		OpenZWave::Manager::Get()->CancelControllerCommand(m_pZWInterface->GetHomeId());
 	} else {
 		OpenZWave::Manager::Get()->BeginControllerCommand(m_pZWInterface->GetHomeId(), OpenZWave::Driver::ControllerCommand_AddDevice, controller_update, NULL, sOptions == "H", 0, 0);
 	}
+	m_pZWInterface->UnLock();
 }
 
 //<-dceag-c968-b->
@@ -464,12 +489,14 @@ void ZWave::CMD_Add_Node(string sOptions,int iValue,string sTimeout,bool bMultip
 void ZWave::CMD_Remove_Node(string sOptions,int iValue,string sTimeout,bool bMultiple,string &sCMD_Result,Message *pMessage)
 //<-dceag-c968-e->
 {
+	m_pZWInterface->Lock();
 	if ( iValue == 5 )
 	{
 		OpenZWave::Manager::Get()->CancelControllerCommand(m_pZWInterface->GetHomeId());
 	} else {
 		OpenZWave::Manager::Get()->BeginControllerCommand(m_pZWInterface->GetHomeId(), OpenZWave::Driver::ControllerCommand_RemoveDevice, controller_update, NULL, true);
 	}
+	m_pZWInterface->UnLock();
 }
 
 //<-dceag-c1085-b->
