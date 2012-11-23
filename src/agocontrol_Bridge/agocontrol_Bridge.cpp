@@ -89,11 +89,11 @@ bool agocontrol_Bridge::GetConfig()
 	} catch(const std::exception& error) {
                 std::cerr << error.what() << std::endl;
                 agoConnection.close();
-                printf("could not startup\n");
+		LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"Could not startup");
                 return false;
 	}
 
-	printf("spawning receive thread");
+	LoggerWrapper::GetInstance()->Write(LV_DEBUG,"Starting receive thread");
 	static pthread_t receiveThread;
 	pthread_create(&receiveThread, NULL, start, (void*)this);
 
@@ -212,7 +212,7 @@ DeviceData_Impl *agocontrol_Bridge::InternalIDToDevice(string sInternalID) {
 
 		}
 	}
-        LoggerWrapper::GetInstance()->Write(LV_WARNING, "ZWave::InternalIDToDevice() No device found for id %s", sInternalID.c_str());
+        LoggerWrapper::GetInstance()->Write(LV_WARNING, "agocontrol_Bridge::InternalIDToDevice() No device found for id %s", sInternalID.c_str());
 	return NULL;
 }
 
@@ -229,7 +229,7 @@ int agocontrol_Bridge::AddDevice(int parent, string sInternalID,int PK_DeviceTem
 	
 	if (!bFound) {
 		// does not exist, create child
-		LoggerWrapper::GetInstance()->Write(LV_ZWAVE, "Adding device for node: %s",sInternalID.c_str());
+		LoggerWrapper::GetInstance()->Write(LV_DEBUG, "Adding device for node: %s",sInternalID.c_str());
 		CMD_Create_Device add_command(m_dwPK_Device,4, PK_DeviceTemplate,"",0,"",
 			StringUtils::itos(DEVICEDATA_PortChannel_Number_CONST) + "|" + sInternalID, 0,tmp_parent,sName,0,0,&iPK_Device) ;
 		SendCommand(add_command);
@@ -334,25 +334,205 @@ void agocontrol_Bridge::receiveFunction() {
 		qpid::messaging::Message response = responseReceiver.fetch();
 		decode(response,inventoryMap);
 		Variant::Map deviceMap = inventoryMap["inventory"].asMap();
+		Variant::Map roomMap = inventoryMap["rooms"].asMap();
 		for (Variant::Map::iterator it = deviceMap.begin(); it!=deviceMap.end(); it++) {
 			Variant::Map device;
+			string sRoomName = "";
 			device = it->second.asMap();
-			LoggerWrapper::GetInstance()->Write(LV_DEBUG,"ago control device found: %s type: %s name: %s", it->first.c_str(),device["type"].asString().c_str(),device["name"].asString().c_str());
-			printf("UUID: %s -", it->first.c_str());
-			printf("name: %s -", device["name"].asString().c_str());
-			printf("type: %s\n", device["devicetype"].asString().c_str());
-			if (device["devicetype"] == "switch") AddDevice(0, it->first.c_str(), DEVICETEMPLATE_Light_Switch_onoff_CONST,device["name"].asString(),device["room"].asString());
-			if (device["devicetype"] == "dimmer") AddDevice(0, it->first.c_str(), DEVICETEMPLATE_Light_Switch_dimmable_CONST,device["name"].asString(),device["room"].asString());
+
+
+			Variant::Map::iterator roomIt = roomMap.find(device["room"].asString());
+			if (roomIt != roomMap.end()) {
+				Variant::Map room = roomIt->second.asMap();
+				sRoomName = room["name"].asString();
+			}
+			LoggerWrapper::GetInstance()->Write(LV_DEBUG,"ago control device found: %s type: %s name: %s room: %s", it->first.c_str(),device["type"].asString().c_str(),device["name"].asString().c_str(),sRoomName.c_str());
+
+			if (device["devicetype"] == "switch") AddDevice(0, it->first.c_str(), DEVICETEMPLATE_Light_Switch_onoff_CONST,device["name"].asString(),sRoomName);
+			if (device["devicetype"] == "dimmer") AddDevice(0, it->first.c_str(), DEVICETEMPLATE_Light_Switch_dimmable_CONST,device["name"].asString(),sRoomName);
+			if (device["devicetype"] == "drapes") AddDevice(0, it->first.c_str(), DEVICETEMPLATE_Drapes_Switch_CONST,device["name"].asString(),sRoomName);
+			if (device["devicetype"] == "binarysensor") AddDevice(0, it->first.c_str(), DEVICETEMPLATE_Generic_Sensor_CONST,device["name"].asString(),sRoomName);
+			if (device["devicetype"] == "multilevelsensor") AddDevice(0, it->first.c_str(), DEVICETEMPLATE_Multilevel_Sensor_CONST,device["name"].asString(),sRoomName);
+			if (device["devicetype"] == "smokedetector") AddDevice(0, it->first.c_str(), DEVICETEMPLATE_Smoke_Detector_CONST,device["name"].asString(),sRoomName);
 
 
 		} 
 	} catch(const std::exception& error) {
                 std::cerr << error.what() << std::endl;
-                printf("could not fetch inventory\n");
+		LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"Could not fetch inventory from ago control");
 	}
 
-	while (1==1) {
-		sleep(1);
+	while (true) {
+		try{
+			Variant::Map content;
+			qpid::messaging::Message message = agoReceiver.fetch(Duration::SECOND * 3);
+
+			// workaround for bug qpid-3445
+			if (message.getContent().size() < 4) {
+				throw qpid::messaging::EncodingException("message too small");
+			}
+
+			decode(message, content);
+			string subject = message.getSubject();
+			if (subject!="") { // subject set, this is an event
+				DeviceData_Impl *pChildDevice = NULL;
+				pChildDevice = InternalIDToDevice(content["uuid"].asString());
+				if (pChildDevice != NULL) {
+					if (subject == "event.device.statechanged") {
+						LoggerWrapper::GetInstance()->Write(LV_DEBUG,"Device state changed: %s %s",content["uuid"].asString().c_str(),content["level"].asString().c_str());
+						SendLightChangedEvent(pChildDevice->m_dwPK_Device,content["level"]);
+					}
+					if (subject == "event.environment.brightnesschanged") {
+						LoggerWrapper::GetInstance()->Write(LV_DEBUG,"Brightness changed: %s %s",content["uuid"].asString().c_str(),content["level"].asString().c_str());
+						SendLightChangedEvent(pChildDevice->m_dwPK_Device,content["level"].asUint8());
+					}
+					if (subject == "event.environment.temperaturechanged") {
+						LoggerWrapper::GetInstance()->Write(LV_DEBUG,"Temperature changed: %s %s",content["uuid"].asString().c_str(),content["level"].asString().c_str());
+						SendTemperatureChangedEvent(pChildDevice->m_dwPK_Device,content["level"].asFloat());
+					}
+					if (subject == "event.environment.humiditychanged") {
+						LoggerWrapper::GetInstance()->Write(LV_DEBUG,"Humidity changed: %s %s",content["uuid"].asString().c_str(),content["level"].asString().c_str());
+						SendHumidityChangedEvent(pChildDevice->m_dwPK_Device,content["level"]);
+					}
+					if (subject == "event.environment.sensorchanged") {
+						LoggerWrapper::GetInstance()->Write(LV_DEBUG,"Sensor status changed: %s %s",content["uuid"].asString().c_str(),content["level"].asString().c_str());
+						SendSensorTrippedEvent(pChildDevice->m_dwPK_Device,content["level"].asUint8() == 0 ? false : true);
+					}
+				}
+			}
+		
+		} catch(const NoMessageAvailable& error) {
+			
+		} catch(const std::exception& error) {
+			std::cerr << error.what() << std::endl;
+		}
+
 	}
+}
+
+
+
+void agocontrol_Bridge::SendTemperatureChangedEvent(unsigned int PK_Device, float value)
+{
+        LoggerWrapper::GetInstance()->Write(LV_WARNING, "agocontrol_Bridge::SendTemperatureChangedEvent(): PK_Device %d", PK_Device);
+	char tempstr[512];
+	sprintf(tempstr, "%.2f", value);
+	m_pEvent->SendMessage( new Message(PK_Device,
+			DEVICEID_EVENTMANAGER,
+			PRIORITY_NORMAL,
+			MESSAGETYPE_EVENT,
+			EVENT_Temperature_Changed_CONST, 1, 
+			EVENTPARAMETER_Value_CONST, tempstr)
+		);
+
+}
+
+void agocontrol_Bridge::SendSensorTrippedEvent(unsigned int PK_Device, bool value)
+{
+	LoggerWrapper::GetInstance()->Write(LV_DEBUG,"Sending sensor tripped event from PK_Device %d", PK_Device);
+	m_pEvent->SendMessage( new Message(PK_Device,
+					   DEVICEID_EVENTMANAGER,
+					   PRIORITY_NORMAL,
+					   MESSAGETYPE_EVENT,
+					   EVENT_Sensor_Tripped_CONST,
+					   1,
+					   EVENTPARAMETER_Tripped_CONST,
+					   value ? "1" : "0")
+		);
+}
+
+void agocontrol_Bridge::SendLightChangedEvent(unsigned int PK_Device, int value)
+{
+	string svalue = StringUtils::itos(value);
+	LoggerWrapper::GetInstance()->Write(LV_DEBUG,"Sending EVENT_State_Changed_CONST event from PK_Device %d, level %s",PK_Device,svalue.c_str());
+	m_pEvent->SendMessage( new Message(PK_Device,
+					   DEVICEID_EVENTMANAGER,
+					   PRIORITY_NORMAL,
+					   MESSAGETYPE_EVENT,
+					   EVENT_State_Changed_CONST,
+					   1,
+					   EVENTPARAMETER_State_CONST,
+					   svalue.c_str())
+		);
+}
+
+void agocontrol_Bridge::SendPowerUsageChangedEvent(unsigned int PK_Device, int value)
+{
+	string svalue = StringUtils::itos(value);
+	LoggerWrapper::GetInstance()->Write(LV_DEBUG,"Sending EVENT_Power_Usage_Changed_CONST event from PK_Device %d, value %s W",PK_Device,svalue.c_str());
+	m_pEvent->SendMessage( new Message(PK_Device,
+					   DEVICEID_EVENTMANAGER,
+					   PRIORITY_NORMAL,
+					   MESSAGETYPE_EVENT,
+					   EVENT_Power_Usage_Changed_CONST,
+					   1,
+					   EVENTPARAMETER_Watts_CONST,
+					   svalue.c_str())
+		);
+}
+void agocontrol_Bridge::SendVoltageChangedEvent(unsigned int PK_Device, int value)
+{
+	string svalue = StringUtils::itos(value);
+	LoggerWrapper::GetInstance()->Write(LV_DEBUG,"Sending EVENT_Voltage_Changed_CONST event from PK_Device %d, value %s W",PK_Device,svalue.c_str());
+	m_pEvent->SendMessage( new Message(PK_Device,
+					   DEVICEID_EVENTMANAGER,
+					   PRIORITY_NORMAL,
+					   MESSAGETYPE_EVENT,
+					   EVENT_Voltage_Changed_CONST,
+					   1,
+					   EVENTPARAMETER_Voltage_CONST,
+					   svalue.c_str())
+		);
+}
+
+void agocontrol_Bridge::SendOnOffEvent(unsigned int PK_Device, int value) {
+	LoggerWrapper::GetInstance()->Write(LV_DEBUG,"Sending EVENT_OnOff_CONST event from PK_Device %d, value %d",PK_Device, value);
+	m_pEvent->SendMessage( new Message(PK_Device,
+					   DEVICEID_EVENTMANAGER, PRIORITY_NORMAL, MESSAGETYPE_EVENT,
+					   EVENT_Device_OnOff_CONST,
+					   1,
+					   EVENTPARAMETER_OnOff_CONST,
+					   (value == 0) ? "0" : "1")
+		);
+}
+
+void agocontrol_Bridge::SendBrightnessChangedEvent(unsigned int PK_Device, int value)
+{
+	LoggerWrapper::GetInstance()->Write(LV_DEBUG,"Sending brightness level changed event from PK_Device %d, value %d",PK_Device, value);
+	m_pEvent->SendMessage( new Message(PK_Device,
+					   DEVICEID_EVENTMANAGER,
+					   PRIORITY_NORMAL,
+					   MESSAGETYPE_EVENT,
+					   EVENT_Brightness_Changed_CONST, 1, 
+					   EVENTPARAMETER_Value_CONST, StringUtils::itos(value).c_str())
+		);
+}
+
+void agocontrol_Bridge::SendFireAlarmEvent(unsigned int PK_Device)
+{
+	LoggerWrapper::GetInstance()->Write(LV_DEBUG,"Sending fire alarm event from PK_Device %d",PK_Device);
+	m_pEvent->SendMessage( new Message(PK_Device,
+			DEVICEID_EVENTMANAGER,
+			PRIORITY_NORMAL,
+			MESSAGETYPE_EVENT,
+			EVENT_Fire_Alarm_CONST,
+			1,
+			EVENTPARAMETER_PK_Device_CONST,
+			PK_Device)
+	);
+}
+
+void agocontrol_Bridge::SendHumidityChangedEvent(unsigned int PK_Device, float value)
+{
+	char tempstr[512];
+	snprintf(tempstr, 512, "%.2f", value);
+	LoggerWrapper::GetInstance()->Write(LV_DEBUG,"Sending humidity level changed event from PK_Device %s",PK_Device);
+	m_pEvent->SendMessage( new Message(PK_Device,
+			DEVICEID_EVENTMANAGER,
+			PRIORITY_NORMAL,
+			MESSAGETYPE_EVENT,
+			EVENT_Humidity_Changed_CONST, 1, 
+			EVENTPARAMETER_Value_CONST, tempstr)
+	);
 }
 

@@ -70,6 +70,18 @@ public:
 //<-dceag-const-e->
 		void receiveFunction();
 
+		void SendTemperatureChangedEvent(unsigned int PK_Device, float value);
+		void SendSensorTrippedEvent(unsigned int PK_Device, bool value);
+		void SendLightChangedEvent(unsigned int PK_Device, int value);
+		void SendPowerUsageChangedEvent(unsigned int PK_Device, int value);
+		void SendVoltageChangedEvent(unsigned int PK_Device, int value);
+		void SendOnOffEvent(unsigned int PK_Device, int value);
+		void SendBrightnessChangedEvent(unsigned int PK_Device, int value);
+		void SendFireAlarmEvent(unsigned int PK_Device);
+		void SendHumidityChangedEvent(unsigned int PK_Device, float value);
+
+
+
 //<-dceag-const2-b->
 		// The following constructor is only used if this a class instance embedded within a DCE Device.  In that case, it won't create it's own connection to the router
 		// You can delete this whole section and put an ! after dceag-const2-b tag if you don't want this constructor.  Do the same in the implementation file
