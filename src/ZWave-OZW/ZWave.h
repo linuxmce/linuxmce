@@ -43,7 +43,7 @@ namespace DCE
 
 		// Private methods
 
-		void controller_update(OpenZWave::Driver::ControllerState state, void *context);
+		static void controller_update(OpenZWave::Driver::ControllerState state, void *context);
 
 
 public:
@@ -60,6 +60,7 @@ public:
 		void SendSensorTrippedEvent(unsigned int PK_Device, bool state);
 		void SendOnOffEvent(unsigned int PK_Device, int value);
 		void SendPowerUsageChangedEvent(unsigned int PK_Device, int value);
+		void SendVoltageChangedEvent(unsigned int PK_Device, int value);
 		void SendLightChangedEvents(unsigned int PK_Device, int value);
 
 //<-dceag-const-b->

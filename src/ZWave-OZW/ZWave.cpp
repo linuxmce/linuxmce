@@ -261,8 +261,7 @@ void ZWave::CMD_Report_Child_Devices(string &sCMD_Result,Message *pMessage)
 void ZWave::CMD_Download_Configuration(string sText,string &sCMD_Result,Message *pMessage)
 //<-dceag-c757-e->
 {
-	cout << "Need to implement command #757 - Download Configuration" << endl;
-	cout << "Parm #9 - Text=" << sText << endl;
+	OpenZWave::Manager::Get()->BeginControllerCommand(m_pZWInterface->GetHomeId(), OpenZWave::Driver::ControllerCommand_ReceiveConfiguration, controller_update, (void*)NULL, true, 0, 0);
 }
 
 //<-dceag-c760-b->
@@ -297,8 +296,7 @@ NOEMON or CANBUS */
 void ZWave::CMD_Reset(string sArguments,string &sCMD_Result,Message *pMessage)
 //<-dceag-c776-e->
 {
-	cout << "Need to implement command #776 - Reset" << endl;
-	cout << "Parm #51 - Arguments=" << sArguments << endl;
+	OpenZWave::Manager::Get()->SoftReset(m_pZWInterface->GetHomeId());
 }
 
 //<-dceag-c788-b->
@@ -365,11 +363,19 @@ void ZWave::CMD_SetWakeUp(int iValue,int iNodeID,string &sCMD_Result,Message *pM
 void ZWave::CMD_Set_Config_Param(int iValue,int iSize,int iNodeID,int iParameter_ID,string &sCMD_Result,Message *pMessage)
 //<-dceag-c841-e->
 {
-	cout << "Need to implement command #841 - Set Config Param" << endl;
-	cout << "Parm #48 - Value=" << iValue << endl;
-	cout << "Parm #222 - Size=" << iSize << endl;
-	cout << "Parm #239 - NodeID=" << iNodeID << endl;
-	cout << "Parm #248 - Parameter_ID=" << iParameter_ID << endl;
+	int size = iSize;
+	if ( size == 0 ) {
+		if ( iValue <= 0xff )
+		{
+			size = 1;
+		} else if ( iValue <= 0xffff )
+		{
+			size = 2;
+		} else {
+			size = 4;
+		}
+	}
+	OpenZWave::Manager::Get()->SetConfigParam(m_pZWInterface->GetHomeId(), iNodeID, iParameter_ID, iValue, size);
 }
 
 //<-dceag-c842-b->
@@ -434,11 +440,12 @@ H = high power */
 void ZWave::CMD_Add_Node(string sOptions,int iValue,string sTimeout,bool bMultiple,string &sCMD_Result,Message *pMessage)
 //<-dceag-c967-e->
 {
-	cout << "Need to implement command #967 - Add Node" << endl;
-	cout << "Parm #39 - Options=" << sOptions << endl;
-	cout << "Parm #48 - Value=" << iValue << endl;
-	cout << "Parm #182 - Timeout=" << sTimeout << endl;
-	cout << "Parm #259 - Multiple=" << bMultiple << endl;
+	if ( iValue == 5 )
+	{
+		OpenZWave::Manager::Get()->CancelControllerCommand(m_pZWInterface->GetHomeId());
+	} else {
+		OpenZWave::Manager::Get()->BeginControllerCommand(m_pZWInterface->GetHomeId(), OpenZWave::Driver::ControllerCommand_AddDevice, controller_update, NULL, sOptions == "H", 0, 0);
+	}
 }
 
 //<-dceag-c968-b->
@@ -457,11 +464,12 @@ void ZWave::CMD_Add_Node(string sOptions,int iValue,string sTimeout,bool bMultip
 void ZWave::CMD_Remove_Node(string sOptions,int iValue,string sTimeout,bool bMultiple,string &sCMD_Result,Message *pMessage)
 //<-dceag-c968-e->
 {
-	cout << "Need to implement command #968 - Remove Node" << endl;
-	cout << "Parm #39 - Options=" << sOptions << endl;
-	cout << "Parm #48 - Value=" << iValue << endl;
-	cout << "Parm #182 - Timeout=" << sTimeout << endl;
-	cout << "Parm #259 - Multiple=" << bMultiple << endl;
+	if ( iValue == 5 )
+	{
+		OpenZWave::Manager::Get()->CancelControllerCommand(m_pZWInterface->GetHomeId());
+	} else {
+		OpenZWave::Manager::Get()->BeginControllerCommand(m_pZWInterface->GetHomeId(), OpenZWave::Driver::ControllerCommand_RemoveDevice, controller_update, NULL, true);
+	}
 }
 
 //<-dceag-c1085-b->
@@ -480,39 +488,37 @@ void ZWave::CMD_Resync_node(int iNodeID,string &sCMD_Result,Message *pMessage)
 
 
 void ZWave::controller_update(OpenZWave::Driver::ControllerState state, void *context) {
-	printf("controller state update:");
+	DCE::LoggerWrapper::GetInstance()->Write(LV_ZWAVE,"controller state update:");
 	switch(state) {
 		case OpenZWave::Driver::ControllerState_Normal:
-			printf("no command in progress");
+			DCE::LoggerWrapper::GetInstance()->Write(LV_ZWAVE,"no command in progress");
 			// nothing to do
 			break;
 		case OpenZWave::Driver::ControllerState_Waiting:
-			printf("waiting for user action");
+			DCE::LoggerWrapper::GetInstance()->Write(LV_ZWAVE,"waiting for user action");
 			// waiting for user action
 			break;
 		case OpenZWave::Driver::ControllerState_InProgress:
-			printf("communicating with other device");
+			DCE::LoggerWrapper::GetInstance()->Write(LV_ZWAVE,"communicating with other device");
 			// communicating with device
 			break;
 		case OpenZWave::Driver::ControllerState_Completed:
-			printf("command has completed successfully");
+			DCE::LoggerWrapper::GetInstance()->Write(LV_ZWAVE,"command has completed successfully");
 			break;
 		case OpenZWave::Driver::ControllerState_Failed:
-			printf("command has failed");
+			DCE::LoggerWrapper::GetInstance()->Write(LV_ZWAVE,"command has failed");
 			// houston..
 			break;
 		case OpenZWave::Driver::ControllerState_NodeOK:
-			printf("node ok");
+			DCE::LoggerWrapper::GetInstance()->Write(LV_ZWAVE,"node ok");
 			break;
 		case OpenZWave::Driver::ControllerState_NodeFailed:
-			printf("node failed");
+			DCE::LoggerWrapper::GetInstance()->Write(LV_ZWAVE,"node failed");
 			break;
 		default:
-			printf("unknown response");
+			DCE::LoggerWrapper::GetInstance()->Write(LV_ZWAVE,"unknown response");
 			break;
 	}
-	printf("\n");
-
 }
 
 void ZWave::OnNotification(OpenZWave::Notification const* _notification, NodeInfo* nodeInfo) {
@@ -527,7 +533,7 @@ void ZWave::OnNotification(OpenZWave::Notification const* _notification, NodeInf
 			// Do we want this value polled
 			OpenZWave::ValueID id = _notification->GetValueID();
 			string label = OpenZWave::Manager::Get()->GetValueLabel(id);
-			if ( label == "Battery Level" || label == "Temperature" || label == "Luminance" || label == "Power" )
+			if ( label == "Battery Level" || label == "Temperature" || label == "Luminance" || label == "Power" || label == "Voltage" )
 			{
 				DCE::LoggerWrapper::GetInstance()->Write(LV_ZWAVE,"ZWave::OnNotification() ValueAdded: Set polling for node %d/%d, value label %s", _notification->GetNodeId(), id.GetInstance(), label.c_str());
 				OpenZWave::Manager::Get()->EnablePoll(id);
@@ -541,7 +547,6 @@ void ZWave::OnNotification(OpenZWave::Notification const* _notification, NodeInf
 		if( nodeInfo != NULL )
 		{
 			// One of the node values has changed
-			// TBD...
 			OpenZWave::ValueID id = _notification->GetValueID();
 			string label = OpenZWave::Manager::Get()->GetValueLabel(id);
 
@@ -574,6 +579,10 @@ void ZWave::OnNotification(OpenZWave::Notification const* _notification, NodeInf
 					float level = 0;
 					OpenZWave::Manager::Get()->GetValueAsFloat(id, &level);
 					SendPowerUsageChangedEvent(PKDevice, level);
+				} else if ( label == "Voltage" ) {
+					float level = 0;
+					OpenZWave::Manager::Get()->GetValueAsFloat(id, &level);
+					SendVoltageChangedEvent(PKDevice, level);
 				}
 			}
 		}
@@ -587,7 +596,6 @@ void ZWave::OnNotification(OpenZWave::Notification const* _notification, NodeInf
 		{
 			// We have received an event from the node, caused by a
 			// basic_set or hail message.
-			// TBD...
 			OpenZWave::ValueID id = _notification->GetValueID();
 			string label = OpenZWave::Manager::Get()->GetValueLabel(id);
 
@@ -772,6 +780,21 @@ void ZWave::SendPowerUsageChangedEvent(unsigned int PK_Device, int value)
 					   EVENT_Power_Usage_Changed_CONST,
 					   1,
 					   EVENTPARAMETER_Watts_CONST,
+					   svalue.c_str())
+		);
+}
+
+void ZWave::SendVoltageChangedEvent(unsigned int PK_Device, int value)
+{
+	string svalue = StringUtils::itos(value);
+	LoggerWrapper::GetInstance()->Write(LV_ZWAVE,"Sending EVENT_Voltage_Changed_CONST event from PK_Device %d, value %s W",PK_Device,svalue.c_str());
+	m_pEvent->SendMessage( new Message(PK_Device,
+					   DEVICEID_EVENTMANAGER,
+					   PRIORITY_NORMAL,
+					   MESSAGETYPE_EVENT,
+					   EVENT_Voltage_Changed_CONST,
+					   1,
+					   EVENTPARAMETER_Voltage_CONST,
 					   svalue.c_str())
 		);
 }
