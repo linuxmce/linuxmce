@@ -577,7 +577,7 @@ void ZWave::OnNotification(OpenZWave::Notification const* _notification, NodeInf
 			OpenZWave::ValueID id = _notification->GetValueID();
 			string label = OpenZWave::Manager::Get()->GetValueLabel(id);
 
-			int PKDevice = GetPKDevice(nodeInfo->m_nodeId, -1);
+			int PKDevice = GetPKDevice(nodeInfo->m_nodeId, id.GetInstance());
 			if (PKDevice > 0)
 			{
 				if ( label == "Battery Level" )
@@ -694,7 +694,7 @@ DeviceData_Impl *ZWave::GetDevice(int iNodeId, int iInstanceID) {
 	// if not found with instance id, look up without instance id
 	pChildDevice = GetDeviceForPortChannel(sInternalIDInst);
 	if (pChildDevice == NULL) {
-		LoggerWrapper::GetInstance()->Write(LV_WARNING, "ZWave::GetDevice() No device found for id %s", sInternalIDInst.c_str());
+		LoggerWrapper::GetInstance()->Write(LV_WARNING, "ZWave::GetDevice() No device found for id %s, trying without instance...", sInternalIDInst.c_str());
 		sInternalIDInst = StringUtils::itos(iNodeId);
 		pChildDevice = GetDeviceForPortChannel(sInternalIDInst);
 	}
@@ -816,7 +816,7 @@ void ZWave::SendPowerUsageChangedEvent(unsigned int PK_Device, int value)
 void ZWave::SendVoltageChangedEvent(unsigned int PK_Device, int value)
 {
 	string svalue = StringUtils::itos(value);
-	LoggerWrapper::GetInstance()->Write(LV_ZWAVE,"Sending EVENT_Voltage_Changed_CONST event from PK_Device %d, value %s W",PK_Device,svalue.c_str());
+	LoggerWrapper::GetInstance()->Write(LV_ZWAVE,"Sending EVENT_Voltage_Changed_CONST event from PK_Device %d, value %s V",PK_Device,svalue.c_str());
 	m_pEvent->SendMessage( new Message(PK_Device,
 					   DEVICEID_EVENTMANAGER,
 					   PRIORITY_NORMAL,
