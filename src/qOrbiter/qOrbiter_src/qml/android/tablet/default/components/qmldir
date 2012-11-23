@@ -77,3 +77,4 @@ MediaPlaybackBase MediaPlaybackBase.qml
 PlaylistTemplateCoverFlow PlaylistTemplateCoverFlow.qml 
 VideoButtons VideoButtons.qml
 NowPlayingImage NowPlayingImage.qml
+DvdButtons DvdButtons.qml

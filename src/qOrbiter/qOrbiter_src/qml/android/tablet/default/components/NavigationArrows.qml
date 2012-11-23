@@ -51,7 +51,7 @@ Rectangle {
             }
             media_but_txt: "Down"
 
-            ArrowDownHander {
+            ArrowDownHandler {
             }
 
         }
