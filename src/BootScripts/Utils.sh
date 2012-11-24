@@ -541,16 +541,79 @@ IntelBridgeDetect () {
 	fi
 }
 
+DriverRank () {
+	# We figure out, based on the driver, which is our favored GPU. 10 being most favored. This list reflects the liklihood of combinations
+	# more than a head to head competition.
+	vga_info="$1"
+	driver_rank="1"
+	FindVideoDriver "$vga_info"
+	case "$prop_driver" in
+		i740|i128|mach64) driver_rank="4" ;;
+		radeon) driver_rank="5" ;;
+		intel) driver_rank="7" ;;
+		fglrx) driver_rank="8" ;;
+		nvidia)
+			nv_pid=$(pidof nvidia-install.sh) 
+			if [[ -z $nv_pid ]] ; then 
+				. /usr/pluto/bin/nvidia-install.sh
+			fi
+			current_nvidia=$(getInstalledNvidiaDriver)
+			preferred_nvidia=$(getPreferredNvidiaDriver)
+			case "$preferred_nvidia" in
+				nvidia-glx-71) driver_rank="2" ;;
+				nvidia-glx-96) driver_rank="3" ;;
+				nvidia-glx-173) driver_rank="6" ;;
+				nvidia-glx-260) driver_rank="9" ;;
+				nvidia-current) driver_rank="10" ;;
+			esac
+	esac
+}
+
+BestGPU () {
+	vga_pci="$1"
+	gpus=$(echo "$vga_pci" | wc -l)
+		# If there are more than one GPU, create an xorg.conf and determine the best to use.
+		if [[ "$gpus" -gt "1" ]]; then 
+			if ! [[ -f /etc/X11/xorg.conf ]]; then
+				Xorg -configure
+				cat /root/xorg.conf.new > /etc/X11/xorg.conf
+			fi
+			vga_1=$(echo "$vga_pci" | head -1)
+			vga_2=$(echo "$vga_pci" | awk 'NR==2')
+			# Run first GPU through the check
+			DriverRank "$vga_1"
+			rank_1="$driver_rank"
+			driver_1="$prop_driver"
+
+			# Run second GPU through the gauntlet
+			DriverRank "$vga_2"
+			rank_2="$driver_rank"
+			driver_2="$prop_driver"
+
+			# Choose the Highest number and complete
+			if [[ "$rank_1" -gt "$rank_2" ]]; then
+				vga_pci="$vga_1"
+				prop_driver="$driver_1"
+			else 
+				vga_pci="$vga_2"
+				prop_driver="$driver_2"
+			fi
+		else
+			DriverRank "$vga_pci"
+ 		fi
+}
+
 FindVideoDriver () {
 	#####################################################################
 	# Switching our default to fbdev for interoperability 
 	# with KVM & nVidia no-test in AVWizard_Run.sh
 	#####################################################################
+	vga_info="$1"
 	prop_driver="fbdev"
-	gpus=$(echo "$vga_pci" | wc -l) 
+	gpus=$(echo "$vga_info" | wc -l) 
 		if [[ "$gpus" -gt "1" ]]; then 
-			pci_id1=$(echo "$vga_pci" | head -1 | sed 's/.*\[\(....:....\)\].*/\1/')
-			vga_pci=$(echo "$vga_pci" | awk 'NR==2')
+			pci_id1=$(echo "$vga_info" | head -1 | sed 's/.*\[\(....:....\)\].*/\1/')
+			vga_info=$(echo "$vga_info" | awk 'NR==2')
 			gpu_modules=$(lspci -nnv -d "$pci_id1" | grep "modules" | cut -d':' -f2 | sed 's/ //' | awk 'BEGIN { while(getline < "/etc/modprobe.d/blacklist.conf") if ($1 == "blacklist") a[$2]; RS = "[,[:space:]]+" } !($0 in a) { printf "blacklist %s\n", $0 }')
 			if [[ -n "$gpu_modules" ]]; then
 				if ! grep 'first GPUs modules' /etc/modprobe.d/blacklist.conf; then
@@ -566,23 +629,23 @@ FindVideoDriver () {
 		fi 
 	# Change to pciid manufacturer due to case intensive problems.
 	# 1002=ATI, 1106=VIA, 10de=nVidia, 8086=Intel
-	chip_man=$(echo "$vga_pci" | grep -Ewo '(\[1002|\[1106|\[10de|\[8086)')
+	chip_man=$(echo "$vga_info" | grep -Ewo '(\[1002|\[1106|\[10de|\[8086|\[1013)')
  
 	case "$chip_man" in 
 		[10de)
 			prop_driver="nvidia" ;;
 		[1002)
 			prop_driver="fglrx"
-			if echo "$vga_pci" | grep -Ei '((R.)([2-5])|(9|X|ES)(1|2?)([0-9])(5|0)0|Xpress)'; then
+			if echo "$vga_info" | grep -Ei '((R.)([2-5])|(9|X|ES)(1|2?)([0-9])(5|0)0|Xpress)'; then
 				prop_driver="radeon" 
 			fi ;;
 
 		[8086)
 			prop_driver="intel"
-			if echo $vga_pci | grep "i740"; then
+			if echo"$vga_info"| grep "i740"; then
 				prop_driver="i740"
 			fi
-			if echo $vga_pci | grep "i128"; then
+			if echo"$vga_info"| grep "i128"; then
 				prop_driver="i128"
 			fi 
 			if echo $vga_driver | grep "mach"; then
@@ -591,14 +654,16 @@ FindVideoDriver () {
 
 		[1106)
 			prop_driver="openchrome" ;
-			if echo $vga_pci | grep -i "Savage"; then
+			if echo"$vga_info"| grep -i "Savage"; then
 				prop_driver="savage"
 			fi
-			#if echo $vga_pci | grep -i "s3"; then
+			#if echo"$vga_info"| grep -i "s3"; then
 				#prop_driver="via"; fi 
-			if echo $vga_pci | grep -i "virge"; then
+			if echo"$vga_info"| grep -i "virge"; then
 				prop_driver="virge"
 			fi ;;
+		[1013)
+			prop_driver="cirrus" ;;
 		*)
 			prop_driver="fbdev" ;;
 	esac
@@ -674,6 +739,11 @@ InstallVideoDriver () {
 				apt-get -yf install xserver-xorg-video-s3virge
 				VerifyExitCode "Install VIA S3 Virge Driver"
 			fi ;;
+		cirrus)
+			if ! PackageIsInstalled xserver-xorg-video-cirrus; then
+				apt-get -yf install xserver-xorg-video-cirrus
+				VerifyExitCode "Install Cirrus Driver"
+			fi ;;
 	esac
 
 	if [[ "$chip_man" == "[8086" ]] && [[ -n $online ]]; then
@@ -699,8 +769,8 @@ InstallVideoDriver () {
 }
 
 CheckVideoDriver () {
-	vga_pci=$(lspci -nn | grep -w 'VGA')
-	FindVideoDriver
+	local vga_pci=$(lspci -nn | grep -w 'VGA')
+	BestGPU "$vga_pci"
 	online=$(ping -c 2 google.com)
 	card_detail=$(echo "$vga_pci" | cut -d':' -f3)
 	offline_mismatch="false"

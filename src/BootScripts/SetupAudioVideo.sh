@@ -154,7 +154,7 @@ END
 	done
 }
 
-Enable_Audio_Channels () 
+Enable_Audio_Channels() 
 {
 	# Added this to correctly unmute channels for setup wizard, and to 
 	# inject necessary unmuting commands for later bootup.
