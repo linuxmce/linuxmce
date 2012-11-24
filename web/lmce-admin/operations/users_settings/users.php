@@ -1,11 +1,18 @@
 <?
-
+//Rob Woodward - Modified to stop enable / disable from re-setting password
 function checkVPNaccess($username) {
 	return (exec("awk '$1==\"$username\" {print $1}' /etc/ppp/chap-secrets") == $username);
 }
 
 function setVPNaccess($username, $access) {
-	$pass="!VPNpass1"; // this is atm default password for newly created VPN users
+	//Rob Woodward - Check if the user already exists in the chap-secrets file
+	if (checkVPNaccess($username)) {
+		//If user is already in the chap-secrets file, get their current/last set password
+		$pass = exec("awk '$1==\"$username\" {print $3}' /etc/ppp/chap-secrets");
+	} else {
+		$pass="!VPNpass1"; // this is atm default password for newly created VPN users
+	}
+
 	if($access) // enable user's VPN access
 	{
 		exec("sudo -u root /usr/pluto/bin/Network_VPN.sh enable $username $pass");
