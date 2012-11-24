@@ -9,3 +9,5 @@ NowPlayingBar NowPlayingBar.qml
 OSDNavigation OSDNavigation.qml
 OSDNavigationBack OSDNavigationBack.qml
 GraphicButton GraphicButton.qml
+MenuItem MenuItem.qml
+Menu Menu.qml

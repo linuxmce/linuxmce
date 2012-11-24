@@ -6,7 +6,7 @@ import "components"
 Window {  
 
 	id: mainWindow
-	Component.onCompleted: manager.setBoundStatus(true)
+	// Component.onCompleted: manager.setBoundStatus(true)
 
 	Image {
 	        id: backg
@@ -68,7 +68,8 @@ Window {
 		height: 2
 		width: 1920
 		x: 0
-		y: 84 
+		y: 84
+		z: 100 
 	}
 
 	Image {
@@ -88,12 +89,12 @@ Window {
 		}
         }
 
-    	Connections{
-        	target:dcenowplaying
-        	onImageChanged: {
-            		nowplayingimage.source = "image://listprovider/updateobject/"+securityvideo.timestamp;
-        	}
-    	}
+//    	Connections{
+//        	target:dcenowplaying
+//        	onImageChanged: {
+//            		nowplayingimage.source = "image://listprovider/updateobject/"+securityvideo.timestamp;
+//        	}
+//    	}
 
 	Playlist {
 	    id: currentPlaylist
@@ -125,6 +126,32 @@ Window {
 		    PropertyAnimation { target: currentPlaylist; property: "opacity"; duration: 100 }
 		}
 	    ]
+	}
+
+        Rectangle {
+            x: 0
+	    y: 86
+            width: 1040
+	    height: 1040
+            color: "#000000"
+            opacity: 0.5
+        }
+
+	Menu {
+	    x: 1140
+	    y: 500
+	    MenuItem {
+	        text: "Text 1"	     
+            }
+	    MenuItem {
+	        text: "Text 2"
+	    }
+	    MenuItem {
+	    	text: "Text 3"
+	    }
+	    MenuItem {
+	        text: "Text 4"
+	    }
 	}
 
 	Image {
@@ -201,6 +228,11 @@ Window {
 			iconSource: "img/skip-fwd.png"
 			onClicked: manager.newTrack("+1")
 		}
+	}
+
+	OSDNavigation {
+              y: 354
+	      x: 1200
 	}
 
 }

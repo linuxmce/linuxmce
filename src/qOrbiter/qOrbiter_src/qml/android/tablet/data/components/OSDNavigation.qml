@@ -5,39 +5,39 @@ Item {
 
 	Timer {
 	    id: upTimer
-	    interval: 50; running: false; repeat: true;
-	    onTriggered: manager.moveDirection("up");
+	    interval: 250; running: false; repeat: true;
+	    onTriggered: manager.moveDirection(1);
 	}
 
 	Timer {
 	    id: downTimer
-	    interval: 50; running: false; repeat: true;
-	    onTriggered: manager.moveDirection("down");
+	    interval: 250; running: false; repeat: true;
+	    onTriggered: manager.moveDirection(2);
 	}
 
 	Timer {
 	    id: leftTimer
-	    interval: 50; running: false; repeat: true;
-	    onTriggered: manager.moveDirection("left");
+	    interval: 250; running: false; repeat: true;
+	    onTriggered: manager.moveDirection(3);
 	}
 
 	Timer {
 	    id: rightTimer
-	    interval: 50; running: false; repeat: true;
-	    onTriggered: manager.moveDirection("right");
+	    interval: 250; running: false; repeat: true;
+	    onTriggered: manager.moveDirection(4);
 	}
 
 	Timer {
 	    id: enterTimer
-	    interval: 50; running: false; repeat: true;
-	    onTriggered: manager.moveDirection("enter");
+	    interval: 250; running: false; repeat: true;
+	    onTriggered: manager.moveDirection(5);
 	}
 
 	GraphicButton {
 		      id: upButton
 		      pressedImage: "../img/arrow_up_pressed.png"
 		      unpressedImage: "../img/arrow_up_unpressed.png"
-		      onClicked: manager.moveDirection("up") 
+		      onClicked: manager.moveDirection(1) 
 		      onPressAndHold: {
 		          upTimer.start();
 		      } 
@@ -59,7 +59,7 @@ Item {
 		      id: leftButton
 		      pressedImage: "../img/arrow_left_pressed.png"
 		      unpressedImage: "../img/arrow_left_unpressed.png"
-		      onClicked: manager.moveDirection("left") 
+		      onClicked: manager.moveDirection(3) 
 		      onPressAndHold: {
 		          leftTimer.start();
 		      } 
@@ -76,7 +76,7 @@ Item {
 		      id: enterButton
 		      pressedImage: "../img/enter_pressed.png"
 		      unpressedImage: "../img/enter_unpressed.png"
-		      onClicked: manager.moveDirection("enter") 
+		      onClicked: manager.moveDirection(5) 
 		      onPressAndHold: {
 		          enterTimer.start();
 		      } 
@@ -93,7 +93,7 @@ Item {
 		      id: rightButton
 		      pressedImage: "../img/arrow_right_pressed.png"
 		      unpressedImage: "../img/arrow_right_unpressed.png"
-		      onClicked: manager.moveDirection("right") 
+		      onClicked: manager.moveDirection(4) 
 		      onPressAndHold: {
 		          rightTimer.start();
 		      } 
@@ -110,7 +110,7 @@ Item {
 		      id: downButton
 		      pressedImage: "../img/arrow_down_pressed.png"
 		      unpressedImage: "../img/arrow_down_unpressed.png"
-		      onClicked: manager.moveDirection("down") 
+		      onClicked: manager.moveDirection(2) 
 		      onPressAndHold: {
 		          downTimer.start();
 		      } 
