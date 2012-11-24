@@ -369,20 +369,22 @@ Video_Driver_Detection () {
         driverConfig="none"
         grep "Driver" /etc/X11/xorg.conf |grep -v "keyboard" | grep -v "#" | grep -v "vesa" | grep -v "mouse" | grep -vq "kbd" && DriverInstalled="1"
         # Check if we have nVidia or ATI cards in here, and specify proper config programs and commandline options.
-        if [[ "$DriverInstalled" -eq "0" ]]; then
-                if [[ "$Best_Video_Driver" == "nvidia" ]]; then 
-                        driverConfig="nvidia-xconfig"
-                        driverLine=
-                fi
-                if [[ "$Best_Video_Driver" == "fglrx" ]]; then 
-                        driverConfig="aticonfig"
-                        driverLine="--initial"
-                fi
-                if [[ "$driverConfig" == "none" ]]; then
-                        driverConfig="Xorg"
-                        driverLine="-configure"
-                fi
-        fi
+	if [[ "$DriverInstalled" -eq "0" ]]; then
+		case "$Best_Video_Driver" in
+			nvidia)
+				driverConfig="nvidia-xconfig"
+				driverLine=
+			;;
+			fglrx)
+				driverConfig="aticonfig"
+				driverLine="--initial"
+			;;
+			*)
+				driverConfig="Xorg"
+				driverLine="-configure"
+			;;
+		esac
+	fi
 
         if [[ "$driverConfig" != "none" ]]; then
                 # Is it installed, if so execute it with any line params
