@@ -103,14 +103,21 @@ SetupX () {
 }
 
 DualBus () {
-vga_pci=$(lspci | grep ' VGA ')
-gpus=$(echo "$vga_pci" | wc -l)
-	if [[ "$gpus" -gt "1" ]]; then
-		bus_id=$(echo "$vga_pci" | awk 'NR==2' | while IFS=':. ' read -r tok1 tok2 tok3 rest; do printf '%2s %2s %s\n' "$((16#${tok1}))":"$((16#${tok2}))":"$((16#${tok3}))" | sed -e 's/ //g'; done)
-		if grep "\#BusID" $XineConf; then
-			sed -ie "s/\#BusID.*/BusID\t\t\"PCI:${bus_id}\"/g" $XineConf
-		elif grep "BusID" $XineConf; then
-			sed -ie "s/BusID.*/BusID\t\t\"PCI:${bus_id}\"/g" $XineConf
+	local vga_pci=$(lspci | grep -w 'VGA')
+	if [[ $(wc -l <<< "$vga_pci") -gt "1" ]]; then
+		BestGPU "$vga_pci"
+		if [[ -e "$XF86Config" ]]; then
+			XorgConfig="$XF86Config"
+		else
+			XorgConfig="$ConfFile"
+		fi
+		bus_id=$(echo "$vga_pci" | while IFS=':. ' read -r tok1 tok2 tok3 rest; do printf '%2s %2s %s\n' "$((16#${tok1}))":"$((16#${tok2}))":"$((16#${tok3}))" | sed -e 's/ //g'; done)
+		if grep "\#BusID" $XorgConfig; then
+			sed -ie "s/\#BusID.*/BusID\t\t\"PCI:${bus_id}\"/g" $XorgConfig
+		elif grep "BusID" $XorgConfig; then
+			sed -ie "s/BusID.*/BusID\t\t\"PCI:${bus_id}\"/g" $XorgConfig
+		elif ! grep "BusID"; then
+			sed -i "/LinearAlloc/a BusID\t\t\"PCI:${bus_id}\"" $XorgConfig
 		fi
 	fi
 }
