@@ -8,4 +8,6 @@ $TEXT_CONFIRMED_PASSWORD_REQUIRED_CONST='Please retype the password';
 $TEXT_ERROR_PASSWORD_DO_NOT_MATCH_CONST='Your password does not match';
 $TEXT_ERROR_OLD_PASSWORD_DO_NOT_MATCH_CONST='Your old password does not match';
 $TEXT_PASSWORD_CHANGED_CONST='Password changed!';
+//Rob Woodward - Added for Admin users
+$TEXT_PASSWORD_CHANGE_ADMIN_USER='No old password required, Admin User!';
 ?>
