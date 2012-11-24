@@ -367,7 +367,7 @@ Param 10 - pk_attribute
     QList<QObject*> current_bookmarks;
     QList<QObject*> existingOrbiters;
 
-
+    QStringList *gotoScreenList;
 
     AttributeSortModel *mediaTypeFilter;
     AttributeSortModel *uiFileFilter;
@@ -680,6 +680,7 @@ public slots:
 
     /*Runtime Screen handling*/
     void gotoQScreen(QString ) ;
+    void goBacktoQScreen();
     void checkOrientation(QSize);
     bool getOrientation (){return b_orientation;}
     void setOrientation (bool s) { b_orientation = s; setDceResponse("orientation changed!! "); emit orientationChanged();}
@@ -705,7 +706,7 @@ public slots:
     void addDeviceToList(AvDevice* d) {devices->appendRow(d);}
     void addCommandToList(AvCommand* c) {deviceCommands->appendRow(c);}
     void moveDirection(int d) {emit moveArrowDirection(d);}
-    void goBack() {emit signalGoBack();}
+    void osdBack() {emit signalGoBack();}
     void setDeviceVolume(int d){ deviceVolume = d; emit deviceVolumeChanged();}
     int getDeviceVolume() {return deviceVolume;}
 

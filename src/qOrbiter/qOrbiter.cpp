@@ -3812,7 +3812,7 @@ void DCE::qOrbiter::showMenu() //show the dvd menu
 
 }
 
-void DCE::qOrbiter::goBack() // connects the Go back action.
+void DCE::qOrbiter::osdBack() // connects the Go back action.
 {
     DCE::CMD_Back_Prior_Menu goBack(m_dwPK_Device, iMediaPluginID, internal_streamID);
     if (!SendCommand(goBack))

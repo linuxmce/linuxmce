@@ -1453,6 +1453,8 @@ signals:
 
 public slots:
 
+    void osdBack();
+
     void executeMessageSend(QString outGoing);
 
     void getVolume();

@@ -243,6 +243,8 @@ qorbiterManager::qorbiterManager(QDeclarativeView *view, QObject *parent) :
     mediaTypeFilter = new AttributeSortModel(new AttributeSortItem,1, this);
     genreFilter = new AttributeSortModel(new AttributeSortItem,3, this);
 
+    gotoScreenList = new QStringList();
+
 }
 
 qorbiterManager::~qorbiterManager()
@@ -272,8 +274,31 @@ void qorbiterManager::gotoQScreen(QString s)
     setDceResponse("About to call screenchange()");
     if (QMetaObject::invokeMethod(item, "screenchange", Qt::QueuedConnection, Q_ARG(QVariant, screenname))) {
         setDceResponse("Done call to screenchange()");
+        if(!currentScreen.contains("187"))
+        gotoScreenList->append(currentScreen);
     } else {
         setDceResponse("screenchange() FAILED");
+    }
+}
+
+void qorbiterManager::goBacktoQScreen()
+{
+    if(gotoScreenList->count() > 10)
+        gotoScreenList->removeFirst();
+
+    if(!gotoScreenList->isEmpty()){
+        gotoScreenList->removeLast();
+        setDceResponse("Starting screen switch");
+        QVariant screenname= QVariant::fromValue(gotoScreenList->last());
+        currentScreen = gotoScreenList->last();
+        QObject *item = qorbiterUIwin->rootObject();
+        setDceResponse("About to call screenchange()");
+        if (QMetaObject::invokeMethod(item, "screenchange", Qt::QueuedConnection, Q_ARG(QVariant, screenname))) {
+            setDceResponse("Done call to screenchange()");
+
+        } else {
+            setDceResponse("screenchange() FAILED");
+        }
     }
 }
 
@@ -738,14 +763,14 @@ void qorbiterManager::processConfig(QByteArray config)
 
     //-----setting up the GENRE model------------------------------------------------------------------------
     QDomElement genreElement = root.firstChildElement("GenreList");
-            QDomNodeList genrelist = genreElement.childNodes();
+    QDomNodeList genrelist = genreElement.childNodes();
 
-            for(int index = 0; index < genrelist.count(); index++)
-            {
-                QString name = genrelist.at(index).attributes().namedItem("Name").nodeValue();
-                QString pk= genrelist.at(index).attributes().namedItem("PK_Attribute").nodeValue();
-                genreFilter->appendRow(new AttributeSortItem(name,pk, QImage(),false,genreFilter));
-            }
+    for(int index = 0; index < genrelist.count(); index++)
+    {
+        QString name = genrelist.at(index).attributes().namedItem("Name").nodeValue();
+        QString pk= genrelist.at(index).attributes().namedItem("PK_Attribute").nodeValue();
+        genreFilter->appendRow(new AttributeSortItem(name,pk, QImage(),false,genreFilter));
+    }
     this->qorbiterUIwin->rootContext()->setContextProperty("genrefilter", genreFilter); //custom mediatype selection model
     connect(genreFilter, SIGNAL(SetTypeSort(int,QString)), this, SLOT(setStringParam(int,QString)));
     QObject::connect(this, SIGNAL(resetFilter()), genreFilter, SLOT(resetStates()));

@@ -89,6 +89,13 @@ Row{
             }
             HomeButton{}
             
+            AvOptionButton{
+                buttontext: "Previous Screen"
+                MouseArea{
+                    anchors.fill: parent
+                    onClicked: manager.goBacktoQScreen()
+                }
+            }
         }
     }
     
