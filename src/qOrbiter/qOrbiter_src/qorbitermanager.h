@@ -482,7 +482,7 @@ signals:
     void aspectRatioChanged(QString ratio);
     void mobileStorageChanged();
     void moveArrowDirection(int d);
-
+    void signalGoBack(); 
 
  void redButton();
  void blueButton();
@@ -705,6 +705,7 @@ public slots:
     void addDeviceToList(AvDevice* d) {devices->appendRow(d);}
     void addCommandToList(AvCommand* c) {deviceCommands->appendRow(c);}
     void moveDirection(int d) {emit moveArrowDirection(d);}
+    void goBack() {emit signalGoBack();}
     void setDeviceVolume(int d){ deviceVolume = d; emit deviceVolumeChanged();}
     int getDeviceVolume() {return deviceVolume;}
 

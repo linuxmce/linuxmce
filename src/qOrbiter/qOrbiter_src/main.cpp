@@ -585,6 +585,7 @@ int main(int argc, char* argv[])
         QObject::connect(&pqOrbiter, SIGNAL(deviceAudioLevelChanged(int)), &w, SLOT(setDeviceVolume(int)));
         QObject::connect(&w, SIGNAL(muteSound()), &pqOrbiter, SLOT(mute()), Qt::QueuedConnection);
         QObject::connect(&w, SIGNAL(moveArrowDirection(int)), &pqOrbiter, SLOT(moveDirection(int)), Qt::QueuedConnection);
+	QObject::connext(&w, SIGNAL(signalGoBack()), &pqOrbiter, SLOT(goBack()), Qt::QueuedConnection);
         QObject::connect(&w, SIGNAL(show_dvdMenu()), &pqOrbiter, SLOT(showMenu()));
 
         //so does live tv
