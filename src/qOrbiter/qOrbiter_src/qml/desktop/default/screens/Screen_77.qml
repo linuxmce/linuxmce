@@ -7,16 +7,6 @@ Rectangle {
     id: genericdvdremote
     anchors.centerIn: parent
 
-    Timer{
-        id:singleshot
-        repeat: false
-        interval: 2000
-        triggeredOnStart: false
-        running: true
-
-        onTriggered: image1.source = "image://updateobject/"+securityvideo.timestamp
-    }
-
     Connections{
         target:dcenowplaying
         onPlayListPositionChanged: image1.source = "image://updateobject/"+securityvideo.timestamp
@@ -85,7 +75,7 @@ Rectangle {
            }
        }
 
-       Image {
+       NowPlayingImage {
            id: image1
            x: 0
            y: 38
@@ -93,10 +83,7 @@ Rectangle {
            height: 224
            anchors.topMargin: 38
            anchors.bottomMargin: 88
-           fillMode: Image.PreserveAspectFit
            anchors.fill: parent
-
-           source: "image://updateobject/"+dcenowplaying.m_iplaylistPosition
        }
 
        Rectangle {

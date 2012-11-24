@@ -38,7 +38,7 @@ Rectangle {
             StyledText{
                 text:name
             }
-            AttributeFilterHandler{onClicked: {filterView.state = "inactive";filterList.model=""}}
+            AttributeFilterHandler{onClicked: {filterView.state = "inactive";/*filterList.model=""*/}}
         }
     }
 
@@ -50,6 +50,7 @@ Rectangle {
                 visible:true
             }
             AnchorChanges{
+                anchors.bottom: undefined
                 anchors.top: parent.top
             }
         },
@@ -60,8 +61,8 @@ Rectangle {
                 visible:false
             }
             AnchorChanges{
-               anchors.top: undefined
-               anchors.bottom: parent.top
+                anchors.top: undefined
+                anchors.bottom: parent.top
             }
         }
     ]

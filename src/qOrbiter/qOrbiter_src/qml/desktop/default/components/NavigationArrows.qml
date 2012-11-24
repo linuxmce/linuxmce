@@ -35,7 +35,7 @@ Rectangle {
                 rotation: 270
 
             }
-           ArrowUpHandler{}
+           ArrowUpHandler{autoTick: 750}
         }
 
         MediaButton {id:dwn ;

@@ -9,7 +9,12 @@ Rectangle{
     height:childrenRect.height
     width:scaleX(30)
     color: "transparent"   
-    
+
+    Connections{
+        target: dcenowplaying
+        onImageChanged: refreshtimer.restart()
+    }
+
     BorderImage {
         id: borderimg
         horizontalTileMode: BorderImage.Repeat
@@ -23,11 +28,19 @@ Rectangle{
         id: nowplayingimage
         width: dcenowplaying.aspect=="wide"? scaleX(20) : scaleX(25)
         height:dcenowplaying.aspect=="wide"? scaleY(33) : scaleY(33)
-        source: "image://listprovider/updateobject/"+dcenowplaying.m_iplaylistPosition
+        source: "image://listprovider/updateobject/"+securityvideo.timestamp
         anchors.horizontalCenter: parent.horizontalCenter
         smooth: true
-
+        visible: source == undefined ? false : true
     }
+
+    Timer{
+        id:refreshtimer
+        interval: 1000
+        onTriggered: nowplayingimage.source = "image://listprovider/updateobject/"+securityvideo.timestamp
+        running: true       
+    }
+
     
     Image {
         id: npmask
