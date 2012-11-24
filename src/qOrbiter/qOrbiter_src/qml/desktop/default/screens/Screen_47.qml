@@ -313,5 +313,8 @@ Rectangle {
             name:"Z"
         }
     }
+    FilterView{
+        id:myFilters
+    }
 }
 

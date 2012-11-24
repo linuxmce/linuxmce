@@ -22,7 +22,7 @@ Rectangle {
         interval: 1000
         triggeredOnStart: true
         running: true
-        onTriggered: manager.getVideoFrame()
+        onTriggered: manager.grabStreamImage()
     }
 
     Connections{
@@ -127,7 +127,7 @@ Rectangle {
                         buttontext: qsTr("Menu")
                         MouseArea{
                             anchors.fill: parent
-                            onClicked: showMenu()
+                            onClicked: manager.dvd_showMenu(true)
                         }
                     }
                     AvOptionButton{

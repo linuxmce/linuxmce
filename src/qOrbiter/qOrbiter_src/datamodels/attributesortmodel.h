@@ -35,26 +35,24 @@ class AttributeSortModel: public QAbstractListModel
   Q_OBJECT
 
 public:
-  explicit AttributeSortModel(AttributeSortItem* prototype, QObject* parent = 0);
+  explicit AttributeSortModel(AttributeSortItem* prototype, int filterNumber, QObject* parent = 0);
   ~AttributeSortModel();
 #ifdef QT5
    QHash<int, QByteArray> roleNames() const;
 #endif
   Q_INVOKABLE int rowCount(const QModelIndex &parent = QModelIndex()) const;
   QVariant data(const QModelIndex &index, int role = Qt::DisplayRole) const;
-
   AttributeSortItem* takeRow(int row);
   AttributeSortItem* find(const QString &id) const;
   QModelIndex indexFromItem( const AttributeSortItem* item) const;
   AttributeSortItem* currentRow();
   void sortModel(int column, Qt::SortOrder order);
-
   void ReturnSelectedItems();
-
+ int filterLevel;
   QModelIndex lastrow;
   QString ident;
 
-  Q_INVOKABLE bool setSelectionStatus(QString format);
+  Q_INVOKABLE void setSelectionStatus(QString format);
   Q_INVOKABLE bool getSelectionStatus(QString format);
 
 signals:
@@ -79,6 +77,7 @@ private slots:
 
 private:
   bool resetInternalData();
+
   AttributeSortItem* m_prototype;
   QList<AttributeSortItem*> m_list;
 };

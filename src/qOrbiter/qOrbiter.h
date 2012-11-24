@@ -1318,6 +1318,7 @@ signals:
     void pageSeperatorChanged(int s);
     void newAttributeSort(AttributeSortItem*);
     void newMediaSubtype(AttributeSortItem*);
+    void newGenreSort(AttributeSortItem*);
     void attributeSortFinished();
 
 
@@ -1396,6 +1397,7 @@ signals:
     void fd_directorChanged(QString dir);
     void fd_albumChanged(QString al);
     void fd_trackChanged(QString track);
+    void fd_ratingChanged(QString rating);
     void fd_performersChanged(QString t);
     void fd_composersChanged(QString c);
     void fd_aspectH(int h);
@@ -1501,7 +1503,7 @@ public slots:
     void verifyInstall(QNetworkReply*r);
 
 
-    void moveDirection(QString direction);
+    void moveDirection(int d);
     void JogStream(QString jump);
     void saveScreenAttribute(QString attribute);
     void cleanupScreenshotData() {screenieData=NULL; screenieData =0; }
@@ -1535,7 +1537,7 @@ public slots:
 
     //media grid
 
-    void requestAttributeTypes();
+    void requestAttributeTypes(int type);
     void requestMediaSubtypes(int type);
     void requestTypes(int type);
 

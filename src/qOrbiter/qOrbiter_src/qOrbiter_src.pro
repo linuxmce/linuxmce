@@ -558,8 +558,7 @@ HEADERS += \
 OTHER_FILES += Readme.txt \
         OrbiterVariables.txt \
         config.xml \
-    ../../../../mnt/remote/android-qml/phone/lib/handlers/qmldir \
-    ../../../../mnt/remote/android-qml/tablet/default/lib/handlers/ArrowDownHandler.qml
+
 
 
 for_harmattan{

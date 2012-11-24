@@ -9,13 +9,7 @@ Rectangle {
     width: appW
     radius: 0
     opacity: 1
-    color: style.darkhighlight
-
-    Image {
-        id: bgimage
-        source: "../img/icons/orbiterbg.png"
-    }
-
+    color: "transparent"
 
 
     Connections{
@@ -211,7 +205,6 @@ Rectangle {
                                     onExited: {genre.elide = "ElideRight"; }
                                 }
                             }
-
 
                             Text {
                                 id: starring

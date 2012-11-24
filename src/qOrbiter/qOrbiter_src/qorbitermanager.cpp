@@ -66,7 +66,7 @@ qorbiterManager::qorbiterManager(QDeclarativeView *view, QObject *parent) :
     #endif
     QObject(parent),qorbiterUIwin(view)
 {
-//view.setRenderHints(QPainter::Antialiasing | QPainter::SmoothPixmapTransform);
+    //view.setRenderHints(QPainter::Antialiasing | QPainter::SmoothPixmapTransform);
     m_bStartingUp= true;
     // b_skinsReady = false;
     // b_orbiterReady = false;
@@ -238,7 +238,11 @@ qorbiterManager::qorbiterManager(QDeclarativeView *view, QObject *parent) :
     qorbiterUIwin->rootContext()->setContextProperty("alarms",sleeping_alarms );
 
     QApplication::processEvents(QEventLoop::AllEvents);
-     attribFilter = new AttributeSortModel(new AttributeSortItem, this);
+    attribFilter = new AttributeSortModel(new AttributeSortItem,6, this);
+    uiFileFilter = new AttributeSortModel(new AttributeSortItem,2, this);
+    mediaTypeFilter = new AttributeSortModel(new AttributeSortItem,1, this);
+    genreFilter = new AttributeSortModel(new AttributeSortItem,3, this);
+
 }
 
 qorbiterManager::~qorbiterManager()
@@ -722,71 +726,28 @@ void qorbiterManager::processConfig(QByteArray config)
     setActiveRoom(iFK_Room, iea_area);
     setCurrentUser(QString::number(iPK_User));
 
-
-    //pqOrbiter->CMD_Set_Current_Room(m_lRooms->idefault_Ea);
-    //pqOrbiter->CMD_Set_Entertainment_Area(m_lRooms->sdefault_Ea.toStdString());
-
-
     //-----setting up the FILEFORMAT model------------------------------------------------------------------------
-    QImage attrimg(":/icons/Skin-Data.png");
-    uiFileFilter = new FilterModel(new FilterModelItem, this);
-    QDomElement fileFormatElement = root.firstChildElement("FileFormats");
-    QDomNodeList fileformatlist = fileFormatElement.childNodes();
-
-    for(int index = 0; index < fileformatlist.count(); index++)
-    {
-        QString name = fileformatlist.at(index).attributes().namedItem("Name").nodeValue();
-        QString pk= fileformatlist.at(index).attributes().namedItem("PK_FileFormat").nodeValue();
-        uiFileFilter->appendRow(new FilterModelItem(name,pk, attrimg,false,uiFileFilter));
-    }
     this->qorbiterUIwin->rootContext()->setContextProperty("fileformatmodel", uiFileFilter); //custom fileformatmodel for selection filter item
     connect(uiFileFilter, SIGNAL(SetTypeSort(int,QString)), this, SLOT(setStringParam(int,QString)));
+    connect(this, SIGNAL(resetFilter()), uiFileFilter, SLOT(clear()));
 
     //-----setting up the MEDIASUBTYPE model------------------------------------------------------------------------
-    QDomElement mediaTypeElement = root.firstChildElement("MediaSubTypes");
-    QDomNodeList mediaTypeList = mediaTypeElement.childNodes();
-    mediaTypeFilter = new MediaSubTypeModel(new MediaSubTypeItem, this);
-    for(int index = 0; index < mediaTypeList.count(); index++)
-    {
-        QString name = mediaTypeList.at(index).attributes().namedItem("Name").nodeValue();
-        QString pk= mediaTypeList.at(index).attributes().namedItem("PK_MediaSubType").nodeValue();
-        mediaTypeFilter->appendRow(new MediaSubTypeItem(name,pk, attrimg,false,mediaTypeFilter));
-    }
     this->qorbiterUIwin->rootContext()->setContextProperty("mediatypefilter", mediaTypeFilter); //custom mediatype selection model
     connect(mediaTypeFilter, SIGNAL(SetTypeSort(int,QString)), this, SLOT(setStringParam(int,QString)));
+    connect(this, SIGNAL(resetFilter()), mediaTypeFilter, SLOT(clear()));
 
     //-----setting up the GENRE model------------------------------------------------------------------------
-    QDomElement genreElement = root.firstChildElement("GenreList");
-    QDomNodeList genrelist = genreElement.childNodes();
-    genreFilter = new GenreModel(new GenreItem, this);
-    for(int index = 0; index < genrelist.count(); index++)
-    {
-        QString name = genrelist.at(index).attributes().namedItem("Name").nodeValue();
-        QString pk= genrelist.at(index).attributes().namedItem("PK_Attribute").nodeValue();
-        genreFilter->appendRow(new GenreItem(name,pk, attrimg,false,genreFilter));
-    }
     this->qorbiterUIwin->rootContext()->setContextProperty("genrefilter", genreFilter); //custom mediatype selection model
     connect(genreFilter, SIGNAL(SetTypeSort(int,QString)), this, SLOT(setStringParam(int,QString)));
     QObject::connect(this, SIGNAL(resetFilter()), genreFilter, SLOT(resetStates()));
 
     //-----setting up the ATTRIBUTE model------------------------------------------------------------------------
-//    QDomElement attribElement = root.firstChildElement("AttributeList");
-//    QDomNodeList attriblist = attribElement.childNodes();
-
-//    for(int index = 0; index < attriblist.count(); index++)
-//    {
-//        QString name = attriblist.at(index).attributes().namedItem("Name").nodeValue();
-//        QString pk= attriblist.at(index).attributes().namedItem("PK_AttributeType").nodeValue();
-//        attribFilter->appendRow(new AttributeSortItem(name,pk, attrimg,false,attribFilter));
-//    }
     this->qorbiterUIwin->rootContext()->setContextProperty("attribfilter", attribFilter); //custom mediatype selection model
     connect(attribFilter, SIGNAL(SetTypeSort(int,QString)), this, SLOT(setStringParam(int,QString)));
     QObject::connect(this, SIGNAL(resetFilter()), attribFilter, SLOT(clear()) );
     binaryConfig.clear();
 
     //---update object image
-
-
     setDceResponse(" Remote Config Complete");
 
     configData.clear();
@@ -1361,7 +1322,7 @@ void qorbiterManager::initializeGridModel()
 
 void qorbiterManager::goBackGrid()
 {
-  //  setRequestMore(true);
+    //  setRequestMore(true);
     emit gridGoBack();
     //    backwards= true;
 
@@ -1584,7 +1545,7 @@ void qorbiterManager::setActiveSkin(QString name)
 
 void qorbiterManager::cleanupScreenie()
 {
-  //  mediaScreenShot = QImage();
+    //  mediaScreenShot = QImage();
     screenshotVars.clear();
     setDceResponse("Cleaned up Screenshot model");
 
@@ -1776,8 +1737,8 @@ bool qorbiterManager::setupMobileStorage()
 
         if(extLocation.isReadable())
         {
-           setMobileStorage(androidStorageLocation.at(i)+"LinuxMCE/");
-           return true;
+            setMobileStorage(androidStorageLocation.at(i)+"LinuxMCE/");
+            return true;
         }
     }
     return false;

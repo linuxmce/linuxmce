@@ -3,8 +3,8 @@
 #include <QDebug>
 #endif
 
-AttributeSortModel::AttributeSortModel(AttributeSortItem* prototype, QObject *parent) :
-    QAbstractListModel(parent), m_prototype(prototype)
+AttributeSortModel::AttributeSortModel(AttributeSortItem* prototype, int filterNumber, QObject *parent) :
+    QAbstractListModel(parent), m_prototype(prototype), filterLevel(filterNumber)
 {
  #ifndef QT5
     setRoleNames(m_prototype->roleNames());
@@ -170,25 +170,22 @@ void AttributeSortModel::sortModel(int column, Qt::SortOrder order)
 {
 }
 
-bool AttributeSortModel::setSelectionStatus(QString format)
+void AttributeSortModel::setSelectionStatus(QString format)
 {
     AttributeSortItem* item = find(format);
-    bool newStatus = item->updateSelection(false);
+    item->updateSelection(true);
     //qDebug() << "Setting State for:" << format;
     //return state;
-
     ReturnSelectedItems();
-    return newStatus;
+
 }
 
 bool AttributeSortModel::getSelectionStatus(QString format)
 {
     //qDebug() << "Looking for status for" << format;
     AttributeSortItem* item = find(format);
-
     bool g = item->selectedStatus();
     return g;
-
 }
 
 void AttributeSortModel::ReturnSelectedItems()
@@ -199,13 +196,13 @@ void AttributeSortModel::ReturnSelectedItems()
     }
     QString qs_sorting_string= t_selected_items.join(",");
     //qDebug() << "Attribute Sort updated sorting filter" << qs_sorting_string;
-    emit SetTypeSort(6, qs_sorting_string);
+    emit SetTypeSort(filterLevel, qs_sorting_string);
 }
 
 void AttributeSortModel::resetStates()
 {
     foreach(AttributeSortItem* item, m_list) {
-        if(item->setStatus(false));
+        item->setStatus(false);
     }
 }
 

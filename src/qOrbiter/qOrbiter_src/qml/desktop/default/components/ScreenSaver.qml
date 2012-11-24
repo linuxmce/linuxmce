@@ -10,7 +10,7 @@ Rectangle {
 
     function changeStuff()
     {
-        console.log("New Image processed")
+
         lower.running =true
         animation_section2.running = false
     }

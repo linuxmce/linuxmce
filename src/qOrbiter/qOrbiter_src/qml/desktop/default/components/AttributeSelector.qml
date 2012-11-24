@@ -7,6 +7,9 @@ Rectangle {
             height: childrenRect.height
             width: childrenRect.width
             color: "transparent"
+            Component.onCompleted: {
+                manager.requestMediaSubtypes()
+            }
             Row{
                 id:attributerow
                 height: scaleY(style.buttonH )
@@ -31,7 +34,7 @@ Rectangle {
                     width:  scaleX(style.buttonW)
                     MouseArea{
                         anchors.fill:parent
-                        onClicked: MyJs.createFilterObjects("../components/AttributeTypes.qml")
+                        onClicked: {myFilters.currentFilterModel=attribfilter}
                         }
                 }
 
@@ -43,7 +46,7 @@ Rectangle {
                     width:  scaleX(style.buttonW)
                     MouseArea{
                         anchors.fill:parent
-                        onClicked: MyJs.createFilterObjects("../components/GenreSelector.qml")
+                        onClicked: myFilters.currentFilterModel = genrefilter
                     }
                 }
 
@@ -68,7 +71,7 @@ Rectangle {
                 width:  scaleX(style.buttonW)
                 MouseArea{
                     anchors.fill:parent
-                    onClicked: MyJs.createFilterObjects("../components/FileFormat.qml")
+                    onClicked: myFilters.currentFilterModel = fileformatmodel
                 }
             }
 
@@ -80,8 +83,9 @@ Rectangle {
                 MouseArea{
                     anchors.fill:parent
                     onClicked: {
-                        MyJs.createFilterObjects("../components/MediaTypes.qml")
-                        manager.requestMediaSubtypes()
+                MyJs.createFilterObjects("../components/MediaTypes.qml")
+                        myFilters.currentFilterModel = mediatypefilter
+
                     }
                 }
          }

@@ -368,12 +368,13 @@ Param 10 - pk_attribute
     QList<QObject*> current_bookmarks;
     QList<QObject*> existingOrbiters;
 
-    QList<QObject*> aSortModel;
 
-    MediaSubTypeModel *mediaTypeFilter;
-    FilterModel *uiFileFilter;
+
+    AttributeSortModel *mediaTypeFilter;
+    AttributeSortModel *uiFileFilter;
     AttributeSortModel *attribFilter;
-    GenreModel *genreFilter;
+    AttributeSortModel *genreFilter;
+
     LightingScenarioModel *roomLights;
     MediaScenarioModel *roomMedia;
     ClimateScenarioModel *roomClimate;
@@ -608,21 +609,12 @@ signals:
 
 public slots:
     void sendDceMessage(QString m) {emit newMessageSend(m);}
-    void setNewAttributeSort(AttributeObject *a) {
-        qDebug()<< a->name;
-        a->setParent(NULL);
-        QString f = a->name;
-        int d = a->a_id;
-        AttributeObject * j = new AttributeObject(d,f,this);
-
-        aSortModel.append(j);
-        //aSortModel.append(new AttributeObject(a->getIdent(), a->getName()));
-                                                 }
-    void updateSortAttributes(){ qorbiterUIwin->rootContext()->setContextProperty("attributeSort", QVariant::fromValue(aSortModel));
-    }
 
     void requestMediaSubtypes(){emit requestSubtypes();}
     void setNewSubtype(){}
+
+    void requestAttributeTypes(){}
+    void requestGenres(){}
 
     //mobile device specfic
     bool setupMobileStorage();
