@@ -449,7 +449,7 @@ if [[ "$VPNenabled" == "on" ]]; then
 	done
         
         # OpenSWAN IPSEC config files
-	CORE_MASK=$(ip addr show $IntIf|awk '/inet / {print $2}'|awk -F \/ '{print $2}')
+	CORE_MASK=$(ip addr show $IntIf|awk '/inet .* '"$IntIf"'/ {print $2}'|awk -F \/ '{print $2}')
         sed -r "s,%VPNPSK%,$VPNPSK,g" /usr/pluto/templates/ipsec.secrets.tmpl >/etc/ipsec.secrets
 	sed -r "s,%CORE_NET%,$IntNetworkAddress,g;s,%CORE_MASK%,$CORE_MASK,g" /usr/pluto/templates/ipsec.conf.tmpl >/etc/ipsec.conf
         
