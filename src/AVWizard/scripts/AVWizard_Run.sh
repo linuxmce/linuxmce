@@ -116,7 +116,7 @@ DualBus () {
 			sed -ie "s/\#BusID.*/BusID\t\t\"PCI:${bus_id}\"/g" $XorgConfig
 		elif grep "BusID" $XorgConfig; then
 			sed -ie "s/BusID.*/BusID\t\t\"PCI:${bus_id}\"/g" $XorgConfig
-		elif ! grep "BusID"; then
+		elif ! grep "BusID" $XorgConfig; then
 			sed -i "/LinearAlloc/a BusID\t\t\"PCI:${bus_id}\"" $XorgConfig
 		fi
 	fi
