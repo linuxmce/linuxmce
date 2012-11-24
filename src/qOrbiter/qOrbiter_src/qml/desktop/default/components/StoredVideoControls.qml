@@ -4,7 +4,8 @@ import Qt.labs.shaders 1.0
 
 import "../components"
 import "../js/ComponentLoader.js" as MyJs
-import "../effects"
+import "../lib/handlers"
+
 
 Row{
     id:controlrow
@@ -91,9 +92,7 @@ Row{
             
             AvOptionButton{
                 buttontext: "Previous Screen"
-                MouseArea{
-                    anchors.fill: parent
-                    onClicked: manager.goBacktoQScreen()
+                ScreenBackHandler {
                 }
             }
         }
