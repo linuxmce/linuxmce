@@ -51,6 +51,7 @@ public:
     QModelIndex indexFromItem( const PlaylistItemClass* item) const;
     PlaylistItemClass* currentRow();
     int currentIndex;
+    int totalSize;
     void sortModel(int column, Qt::SortOrder order);
 
 
@@ -65,7 +66,7 @@ signals:
 public slots:
     bool checkDupe(QString name, int position);
     void setItemStatus(int b);
-
+    void setDceSize(int d){totalSize=d;}
     int count() {return m_list.count();}
 
     void setCurrentIndex(int i);

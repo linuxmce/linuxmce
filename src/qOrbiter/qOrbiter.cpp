@@ -53,7 +53,6 @@ qOrbiter::qOrbiter(Command_Impl *pPrimaryDeviceCommand, DeviceData_Impl *pData, 
 
 }
 
-
 //<-dceag-reg-b->
 // This function will only be used if this device is loaded into the DCE Router's memory space as a plug-in.  Otherwise Connect() will be called from the main()
 bool qOrbiter::Register()
@@ -1096,7 +1095,7 @@ void qOrbiter::CMD_Set_Now_Playing(string sPK_DesignObj,string sValue_To_Assign,
     {
         emit np_channelID(QString::number(iValue));
         emit np_network(QString::fromStdString(sValue_To_Assign));
-        if(bRetransmit == 0 )
+        if(bRetransmit == 0)
         {
 
         }
@@ -1111,8 +1110,9 @@ void qOrbiter::CMD_Set_Now_Playing(string sPK_DesignObj,string sValue_To_Assign,
         //  emit np_title2Changed(QString::fromStdString(sText));
         emit playlistPositionChanged(iValue);
         GetNowPlayingAttributes();
-
+        if(bRetransmit==0){
         emit clearPlaylist();
+        }
 
     }
     else if(iPK_MediaType == 4)
@@ -1120,7 +1120,9 @@ void qOrbiter::CMD_Set_Now_Playing(string sPK_DesignObj,string sValue_To_Assign,
         b_mediaPlaying = true;
         emit playlistPositionChanged(iValue);
         GetNowPlayingAttributes();
+        if(bRetransmit==0){
         emit clearPlaylist();
+        }
 
     }
     else
@@ -2020,10 +2022,6 @@ void qOrbiter::requestMediaSubtypes(int type)
     // CMD_Get_Attributes_For_Type getTypesCmd(m_dwPK_Device, iMediaPluginID, 3 , &sText );
     if(SendCommand(getTypesCmd, &pResponse) && pResponse=="OK"){
         emit commandResponseChanged("Got subtypes for attribute");
-
-        qDebug()<< QString::fromStdString(sText.c_str());
-
-
         QStringList data;
         data = QString::fromStdString(sText.c_str()).split("\n");
 
@@ -2050,7 +2048,7 @@ void qOrbiter::requestTypes(int type)
 
     if(SendCommand(getTypesCmd, &pResponse) && pResponse=="OK"){
         emit commandResponseChanged("Got types for attribute");
-        qDebug()<< QString::fromStdString(sText.c_str());
+        emit newAttributeSort( new AttributeSortItem( "Recent","-1", QImage(),false,  0));
         QStringList data;
         data = QString::fromStdString(sText.c_str()).split("\n");
         for(int i=0; i < data.count(); i++)
@@ -2221,7 +2219,7 @@ void qOrbiter::initializeGrid()
 
     datagridVariableString.append(q_mediaType).append("|").append(q_subType).append("|").append(q_fileFormat).append("|").append(q_attribute_genres).append("|").append(q_mediaSources).append("|").append(q_usersPrivate).append("|").append(q_attributetype_sort).append("|").append(q_pk_users).append("|").append(q_last_viewed).append("|").append(q_pk_attribute);
 
-    // goBack.append(datagridVariableString);
+     goBack.append(datagridVariableString);
     emit commandResponseChanged("Dg Variables Reset");
 }
 
@@ -2388,7 +2386,7 @@ void qOrbiter::goBackGrid()
 
 
         if(!goBack.empty()){
-            int back = goBack.count() - 1;
+            int back = goBack.count()-1;
 
 
             QStringList reverseParams = goBack.at(back).split("|", QString::KeepEmptyParts);
@@ -2403,10 +2401,7 @@ void qOrbiter::goBackGrid()
             q_last_viewed = reverseParams.at(8);
             q_pk_attribute = reverseParams.at(9);
         }
-        goBack.removeLast();
-
         emit clearAndContinue(q_mediaType.toInt());
-
     }
 }
 
@@ -2847,6 +2842,7 @@ void DCE::qOrbiter::requestMediaPlaylist()
             QString qs_plsIndex;
             QString fk_file;
             int index = 0;
+            emit playlistSize(pDataGridTable->GetRows());
 
             for(MemoryDataTable::iterator it=pDataGridTable->m_MemoryDataTable.begin();it!=pDataGridTable->m_MemoryDataTable.end();++it)
             {
@@ -4601,16 +4597,23 @@ void DCE::qOrbiter::prepareFileList(int iPK_MediaType)
             {
                 q_attributetype_sort = "13";
             }
-            else if (q_attributetype_sort =="2" )
+            else if (q_attributetype_sort =="2" && q_pk_attribute !="" ) // performer - sets filter to title
             {
                 q_attributetype_sort = "13";
             }
-            else if (q_attributetype_sort =="8")
+            else if (q_attributetype_sort =="8" && q_pk_attribute !="") // genre?
             {
                 q_attributetype_sort = "13";
             }
-            else if(q_attributetype_sort =="52")
+            else if(q_attributetype_sort =="52" && q_pk_attribute !="")
             {
+                q_attributetype_sort = "13";
+            }
+            else if(q_attributetype_sort =="10" && q_pk_attribute !="")
+            {
+                q_attributetype_sort = "12";
+            }
+            else if (q_pk_attribute !=""){
                 q_attributetype_sort = "13";
             }
 
@@ -4623,15 +4626,15 @@ void DCE::qOrbiter::prepareFileList(int iPK_MediaType)
             {
                 q_attributetype_sort = audioDefaultSort;
             }
-            else if(q_attributetype_sort == "2" && q_pk_attribute !="") //catches performer
+            else if(q_attributetype_sort == "2" ) //catches performer
             {
                 q_attributetype_sort= "3";
             }
-            else if (q_attributetype_sort =="8"  && q_pk_attribute !="")
+            else if (q_attributetype_sort =="8"  && q_pk_attribute !="") //catches genre
             {
-                q_attributetype_sort = "3";
+                q_attributetype_sort = "2";
             }
-            else if(q_attributetype_sort =="3")
+            else if(q_attributetype_sort =="3") //album
             {
                 q_attributetype_sort = "13";
             }

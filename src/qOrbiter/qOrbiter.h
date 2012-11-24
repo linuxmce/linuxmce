@@ -1371,6 +1371,7 @@ signals:
     void resetNowPlaying();
     void setPlaylistPosition(int);
     void clearPlaylist();
+    void playlistSize(int);
     void clearTVplaylist();
     void playlistDone();
     void epgDone();

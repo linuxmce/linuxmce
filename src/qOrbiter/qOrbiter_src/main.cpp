@@ -560,7 +560,7 @@ int main(int argc, char* argv[])
         QObject::connect(&pqOrbiter, SIGNAL(subtitleChanged(QString)), w.nowPlayingButton, SLOT(setSubTitle(QString)),Qt::QueuedConnection);
         QObject::connect(&pqOrbiter, SIGNAL(np_synopsisChanged(QString)), w.nowPlayingButton, SLOT(setSynop(QString)),Qt::QueuedConnection);
         QObject::connect(&pqOrbiter,SIGNAL(playlistPositionChanged(int)), w.nowPlayingButton, SLOT(setPlaylistPostion(int)),Qt::QueuedConnection);
-
+        QObject::connect(&pqOrbiter, SIGNAL(playlistSize(int)), storedVideoPlaylist, SLOT(setDceSize(int)));
         QObject::connect(&pqOrbiter, SIGNAL(screenshotVariablesReady()), &w, SLOT(showScreenShotVariables()),Qt::QueuedConnection);
         QObject::connect(&pqOrbiter, SIGNAL(addScreenShotVar(screenshotAttributes*)), &w, SLOT(setScreenShotVariables(screenshotAttributes*)));
         QObject::connect(&pqOrbiter, SIGNAL(screenShotReady(QImage)), &w, SLOT(setMediaScreenShot(QImage)),Qt::QueuedConnection);
@@ -573,7 +573,7 @@ int main(int argc, char* argv[])
         QObject::connect(simpleEPGmodel, SIGNAL(requestEpg()), &pqOrbiter, SLOT(requestLiveTvPlaylist()), Qt::QueuedConnection);
         QObject::connect(&pqOrbiter, SIGNAL(clearTVplaylist()), simpleEPGmodel, SLOT(populate()), Qt::QueuedConnection);
         QObject::connect (&w, SIGNAL(liveTVrequest()), simpleEPGmodel, SLOT(populate()),Qt::DirectConnection);
-        QObject::connect (&w, SIGNAL(managerPlaylistRequest()), storedVideoPlaylist,SLOT(populate()),Qt::QueuedConnection );
+       // QObject::connect (&w, SIGNAL(managerPlaylistRequest()), storedVideoPlaylist,SLOT(populate()),Qt::QueuedConnection );
 
         //controls
         QObject::connect(&pqOrbiter,SIGNAL(newDeviceCommand(AvCommand*)), &w, SLOT(addCommandToList(AvCommand*)),Qt::QueuedConnection);

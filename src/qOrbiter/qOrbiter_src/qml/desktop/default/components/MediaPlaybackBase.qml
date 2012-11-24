@@ -33,6 +33,11 @@ Rectangle {
             visible:false
         }
 
+        NonEPGPlaylist{
+            anchors.left: parent.left
+            anchors.verticalCenter: parent.verticalCenter
+        }
+
         StyledText {
             id: updating_time
             text: dceTimecode.qsCurrentTime

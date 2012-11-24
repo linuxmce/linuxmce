@@ -8,6 +8,7 @@ Rectangle {
     color: "transparent"
     clip:false
     property bool optionVisible: false
+
     Connections{
         target: mediaplaylist
         onActiveItemChanged:{
