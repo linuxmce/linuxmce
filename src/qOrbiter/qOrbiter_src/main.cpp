@@ -511,6 +511,7 @@ int main(int argc, char* argv[])
 
         QObject::connect(&pqOrbiter, SIGNAL(newAttributeSort(AttributeSortItem*)), w.attribFilter, SLOT(appendRow(AttributeSortItem*)), Qt::QueuedConnection);
         QObject::connect(&pqOrbiter, SIGNAL(newMediaSubtype(AttributeSortItem*)), w.mediaTypeFilter, SLOT(appendRow(AttributeSortItem*)), Qt::QueuedConnection);
+        QObject::connect(&pqOrbiter, SIGNAL(newFileFormatSort(AttributeSortItem*)), w.uiFileFilter, SLOT(appendRow(AttributeSortItem*)), Qt::QueuedConnection);
         //now playing signals
         QObject::connect(&pqOrbiter, SIGNAL(setNowPlaying(bool)), w.nowPlayingButton,SLOT(setStatus(bool)),Qt::QueuedConnection);
         QObject::connect(&pqOrbiter,SIGNAL(streamIdChanged(int)), w.nowPlayingButton, SLOT(setStreamID(int)),Qt::QueuedConnection);

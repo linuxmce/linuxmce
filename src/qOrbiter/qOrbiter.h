@@ -1319,6 +1319,7 @@ signals:
     void newAttributeSort(AttributeSortItem*);
     void newMediaSubtype(AttributeSortItem*);
     void newGenreSort(AttributeSortItem*);
+    void newFileFormatSort(AttributeSortItem*);
     void attributeSortFinished();
 
 
@@ -1537,9 +1538,11 @@ public slots:
 
     //media grid
 
-    void requestAttributeTypes(int type);
-    void requestMediaSubtypes(int type);
-    void requestTypes(int type);
+    void requestAttributeTypes(int type);   //program, performer, etc
+    void requestMediaSubtypes(int type);    //movies, music videos, etc
+    void requestTypes(int type);            //should be fileFormats
+    void requestGenres(int type);           //genres
+    void requestFileFormats(int type);
 
     void setGridSeperator(int sep);
     int getGridSeperator() { return media_pageSeperator; emit newPageSeperator(media_pageSeperator);}

@@ -737,6 +737,15 @@ void qorbiterManager::processConfig(QByteArray config)
     connect(this, SIGNAL(resetFilter()), mediaTypeFilter, SLOT(clear()));
 
     //-----setting up the GENRE model------------------------------------------------------------------------
+    QDomElement genreElement = root.firstChildElement("GenreList");
+            QDomNodeList genrelist = genreElement.childNodes();
+
+            for(int index = 0; index < genrelist.count(); index++)
+            {
+                QString name = genrelist.at(index).attributes().namedItem("Name").nodeValue();
+                QString pk= genrelist.at(index).attributes().namedItem("PK_Attribute").nodeValue();
+                genreFilter->appendRow(new AttributeSortItem(name,pk, QImage(),false,genreFilter));
+            }
     this->qorbiterUIwin->rootContext()->setContextProperty("genrefilter", genreFilter); //custom mediatype selection model
     connect(genreFilter, SIGNAL(SetTypeSort(int,QString)), this, SLOT(setStringParam(int,QString)));
     QObject::connect(this, SIGNAL(resetFilter()), genreFilter, SLOT(resetStates()));

@@ -88,10 +88,9 @@
 
 #include <contextobjects/screensaverclass.h>
 
-#include <datamodels/filtermodel.h>
-#include <datamodels/genremodel.h>
+
 #include <datamodels/attributesortmodel.h>
-#include <datamodels/mediatypemodel.h>
+
 #include <datamodels/filedetailsmodel.h>
 #include <contextobjects/filedetailsclass.h>
 #include <contextobjects/nowplayingclass.h>

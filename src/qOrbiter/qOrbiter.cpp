@@ -2037,6 +2037,7 @@ void qOrbiter::requestMediaSubtypes(int type)
     {
         emit commandResponseChanged("Command to get types for attribute failed!");
     }
+    requestFileFormats(type);
 
 }
 
@@ -2046,16 +2047,12 @@ void qOrbiter::requestTypes(int type)
     string sText = "";
 
     CMD_Get_Attribute_Types getTypesCmd(m_dwPK_Device, iMediaPluginID, type, &sText);
-    // CMD_Get_Attributes_For_Type getTypesCmd(m_dwPK_Device, iMediaPluginID, 3 , &sText );
+
     if(SendCommand(getTypesCmd, &pResponse) && pResponse=="OK"){
         emit commandResponseChanged("Got types for attribute");
-
         qDebug()<< QString::fromStdString(sText.c_str());
-
-
         QStringList data;
         data = QString::fromStdString(sText.c_str()).split("\n");
-
         for(int i=0; i < data.count(); i++)
         {
             QStringList subSplit = data.at(i).split(":");
@@ -2068,6 +2065,54 @@ void qOrbiter::requestTypes(int type)
     }
     requestMediaSubtypes(type);
 
+
+}
+
+void qOrbiter::requestGenres(int type)
+{
+    string pResponse = "";
+    string sText = "";
+
+    CMD_Get_Attributes_For_Type getTypesCmd(m_dwPK_Device, iMediaPluginID,type , &sText);
+    // CMD_Get_Attributes_For_Type getTypesCmd(m_dwPK_Device, iMediaPluginID, 3 , &sText );
+    if(SendCommand(getTypesCmd, &pResponse) && pResponse=="OK"){
+        emit commandResponseChanged("Got types for genres");
+        QStringList data;
+        data = QString::fromStdString(sText.c_str()).split("\n");
+        for(int i=0; i < data.count(); i++)
+        {
+            QStringList subSplit = data.at(i).split(":");
+            qDebug() << data.at(i).split(":");
+          //  emit newFileFormatSort(new AttributeSortItem( subSplit.last(),subSplit.first(), QImage(),false,  0));
+        }
+    }
+    else
+    {
+        emit commandResponseChanged("Command to get types for attribute failed!");
+    }
+}
+
+void qOrbiter::requestFileFormats(int type)
+{
+    string pResponse = "";
+    string sText = "";
+
+    CMD_Get_File_Formats getTypesCmd(m_dwPK_Device, iMediaPluginID,type , &sText);
+    if(SendCommand(getTypesCmd, &pResponse) && pResponse=="OK"){
+        emit commandResponseChanged("Got types for attribute");
+        QStringList data;
+        data = QString::fromStdString(sText.c_str()).split("\n");
+        for(int i=0; i < data.count(); i++)
+        {
+            QStringList subSplit = data.at(i).split(":");
+            qDebug() << data.at(i).split(":");
+            emit newFileFormatSort( new AttributeSortItem( subSplit.last(),subSplit.first(), QImage(),false,  0));
+        }
+    }
+    else
+    {
+        emit commandResponseChanged("Command to get types for attribute failed!");
+    }
 }
 
 
@@ -4670,6 +4715,7 @@ void DCE::qOrbiter::prepareFileList(int iPK_MediaType)
                 setModelPages(media_totalPages);
                 emit mediaResponseChanged(QString::number(media_totalPages)+ " pages from request, populating first page.");
                 requestPage(0);
+                  //requestGenres(iPK_MediaType);
             }
 
         }

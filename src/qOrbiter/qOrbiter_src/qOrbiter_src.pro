@@ -370,16 +370,13 @@ SOURCES += main.cpp \
         ../../DCE/DeviceData_Base.cpp \
         ../../DCE/DeviceData_Impl.cpp \
         datamodels/skindatamodel.cpp \
-        datamodels/skindataitem.cpp \
-        datamodels/filtermodel.cpp \
-        datamodels/genremodel.cpp \
+        datamodels/skindataitem.cpp \     
         datamodels/attributemodel.cpp \
         datamodels/DataModelItems/filtermodelitem.cpp \
         datamodels/DataModelItems/genreitem.cpp \
         ../../PlutoUtils/getch.cpp \
         datamodels/DataModelItems/attributesortitem.cpp \
-        datamodels/attributesortmodel.cpp \
-        datamodels/mediatypemodel.cpp \
+        datamodels/attributesortmodel.cpp \       
         datamodels/DataModelItems/mediatypeitem.cpp \
         datamodels/filedetailsmodel.cpp \
         datamodels/DataModelItems/filedetailsitem.cpp \
@@ -493,14 +490,11 @@ HEADERS += \
         screensaver/screensavermodule.h \
         datamodels/skindatamodel.h \
         datamodels/skindataitem.h \
-        datamodels/filtermodel.h \
-        datamodels/genremodel.h \
         datamodels/attributemodel.h \
         datamodels/DataModelItems/filtermodelitem.h \
         datamodels/DataModelItems/genreitem.h \
         datamodels/DataModelItems/attributesortitem.h \
-        datamodels/attributesortmodel.h \
-        datamodels/mediatypemodel.h \
+        datamodels/attributesortmodel.h \      
         datamodels/DataModelItems/mediatypeitem.h \
         datamodels/filedetailsmodel.h \
         datamodels/DataModelItems/filedetailsitem.h \

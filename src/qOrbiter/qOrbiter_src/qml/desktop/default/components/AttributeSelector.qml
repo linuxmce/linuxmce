@@ -7,9 +7,7 @@ Rectangle {
             height: childrenRect.height
             width: childrenRect.width
             color: "transparent"
-            Component.onCompleted: {
-                manager.requestMediaSubtypes()
-            }
+
             Row{
                 id:attributerow
                 height: scaleY(style.buttonH )
@@ -59,7 +57,7 @@ Rectangle {
 
                     MouseArea{
                         anchors.fill:parent
-                        onClicked: MyJs.createFilterObjects("../components/MediaSources.qml")
+                        onClicked: myFilters.currentFilterModel = mediasourcelist
                     }
                 }
 
@@ -82,8 +80,7 @@ Rectangle {
                 width:  scaleX(style.buttonW)
                 MouseArea{
                     anchors.fill:parent
-                    onClicked: {
-                MyJs.createFilterObjects("../components/MediaTypes.qml")
+                    onClicked: {                
                         myFilters.currentFilterModel = mediatypefilter
 
                     }
@@ -92,6 +89,33 @@ Rectangle {
 
 
 }
+            ListModel{
+                id:mediasourcelist
+
+                ListElement{
+                    name:"Hard Drives"
+                    pk:"1"
+                    isSelected: false
+                }
+
+                ListElement{
+                    name:"Discs & Jukeboxes"
+                    pk:"2"
+                    isSelected: false
+                }
+
+                ListElement{
+                    name:"Bookmarks"
+                    pk:"3"
+                    isSelected: false
+                }
+
+                ListElement{
+                    name:"Downloadable"
+                    pk:"4"
+                    isSelected: false
+                }
+            }
 }
 
 
