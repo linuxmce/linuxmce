@@ -4,8 +4,8 @@ import "../effects"
 
 Rectangle {
     id:ssholder
-    width: appW
-    height: appH
+    width: manager.appWidth
+    height: manager.appHeight
     color: "black"
 
     function changeStuff()
@@ -29,8 +29,8 @@ Rectangle {
 
     Image {
         id: ssimg
-        height: appH
-        width: appW
+        width: manager.appWidth
+        height: manager.appHeight
         source: "image://listprovider/screensaver"+screensaver.timestamp
         anchors.centerIn: parent
         smooth: true
@@ -99,7 +99,7 @@ Rectangle {
         // PropertyAnimation {target: blur; property: "opacity"; to:0 ; duration: 1000 }
         PropertyAnimation { target: blur; property: "radius"; to: 0.0; duration: 2000}
         //  PropertyAnimation {target: blur; property: "opacity"; to:1 ; duration: 1000 }
-        PauseAnimation { duration: 5500 }
+        PauseAnimation { duration: screensaver.transitionDuration - 5000 }
         PropertyAnimation { target: blur; property: "radius"; to: 0.75; duration: 1000}
         // PropertyAnimation { target: blur; property: "radius"; to: .5; duration: 5000}
     }
