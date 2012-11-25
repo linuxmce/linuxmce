@@ -426,6 +426,9 @@ ValidIP()
 
 	return 0
 }
+#!/bin/bash
+. /usr/pluto/bin/SQL_Ops.sh
+. /usr/pluto/bin/Config_Ops.sh
 
 # Colors and bolds messages
 # '\E begin escape sequence
@@ -509,7 +512,7 @@ IntelBridgeDetect () {
 	if uname -r | grep "pae"; then 
 		CurKernel="-generic-pae"
 	fi
-	
+
 	if [[ "$Ibridge" == "Sandy" ]]; then
 		NewKernel="linux-image${CurKernel}-lts-backport-natty"
 		NewHeaders="linux-headers${CurKernel}-lts-backport-natty"
@@ -570,37 +573,40 @@ DriverRank () {
 }
 
 BestGPU () {
-	vga_pci="$1"
-	gpus=$(echo "$vga_pci" | wc -l)
-		# If there are more than one GPU, create an xorg.conf and determine the best to use.
-		if [[ "$gpus" -gt "1" ]]; then 
-			if ! [[ -f /etc/X11/xorg.conf ]]; then
-				Xorg -configure
-				cat /root/xorg.conf.new > /etc/X11/xorg.conf
-			fi
-			vga_1=$(echo "$vga_pci" | head -1)
-			vga_2=$(echo "$vga_pci" | awk 'NR==2')
-			# Run first GPU through the check
-			DriverRank "$vga_1"
-			rank_1="$driver_rank"
-			driver_1="$prop_driver"
+	local vga_pci="$*"
+	# If there are more than one GPU, create an xorg.conf and determine the best to use.
+	if [[ $(wc -l <<< "$vga_pci") -gt "1" ]]; then
+		#if ! [[ -f /etc/X11/xorg.conf ]]; then
+		#	Xorg -configure
+		#	cat /root/xorg.conf.new > /etc/X11/xorg.conf
+		#fi
+		vga_1=$(echo "$vga_pci" | head -1)
+		vga_2=$(echo "$vga_pci" | awk 'NR==2')
 
-			# Run second GPU through the gauntlet
-			DriverRank "$vga_2"
-			rank_2="$driver_rank"
-			driver_2="$prop_driver"
+		# Run first GPU through the check
+		DriverRank "$vga_1"
+		rank_1="$driver_rank"
+		driver_1="$prop_driver"
 
-			# Choose the Highest number and complete
-			if [[ "$rank_1" -gt "$rank_2" ]]; then
-				vga_pci="$vga_1"
-				prop_driver="$driver_1"
-			else 
-				vga_pci="$vga_2"
-				prop_driver="$driver_2"
-			fi
-		else
-			DriverRank "$vga_pci"
- 		fi
+		# Run second GPU through the gauntlet
+		DriverRank "$vga_2"
+		rank_2="$driver_rank"
+		driver_2="$prop_driver"
+
+		# Choose the Highest number and complete
+		if [[ "$rank_1" -gt "$rank_2" ]]; then
+			vga_pci="$vga_1"
+			prop_driver="$driver_1"
+			card_detail=$(echo "$vga_pci" | cut -d':' -f3)
+		else 
+			vga_pci="$vga_2"
+			prop_driver="$driver_2"
+			card_detail=$(echo "$vga_pci" | cut -d':' -f3)
+		fi
+	else
+		DriverRank "$vga_pci"
+	fi
+	echo "$vga_pci"
 }
 
 FindVideoDriver () {
@@ -610,59 +616,42 @@ FindVideoDriver () {
 	#####################################################################
 	vga_info="$1"
 	prop_driver="fbdev"
-	gpus=$(echo "$vga_info" | wc -l) 
-		if [[ "$gpus" -gt "1" ]]; then 
-			pci_id1=$(echo "$vga_info" | head -1 | sed 's/.*\[\(....:....\)\].*/\1/')
-			vga_info=$(echo "$vga_info" | awk 'NR==2')
-			gpu_modules=$(lspci -nnv -d "$pci_id1" | grep "modules" | cut -d':' -f2 | sed 's/ //' | awk 'BEGIN { while(getline < "/etc/modprobe.d/blacklist.conf") if ($1 == "blacklist") a[$2]; RS = "[,[:space:]]+" } !($0 in a) { printf "blacklist %s\n", $0 }')
-			if [[ -n "$gpu_modules" ]]; then
-				if ! grep 'first GPUs modules' /etc/modprobe.d/blacklist.conf; then
-					echo "" >> /etc/modprobe.d/blacklist.conf
-					echo "# Block first GPUs modules for dual GPU system." >> /etc/modprobe.d/blacklist.conf
-				fi
-				echo "$gpu_modules" >> /etc/modprobe.d/blacklist.conf
-			fi
-			if ! [[ -f /etc/X11/xorg.conf ]]; then
-				Xorg -configure
-				cat /root/xorg.conf.new > /etc/X11/xorg.conf
-			fi
-		fi 
-	# Change to pciid manufacturer due to case intensive problems.
-	# 1002=ATI, 1106=VIA, 10de=nVidia, 8086=Intel
+
+	# 1002=ATI, 1106=VIA, 10de=nVidia, 8086=Intel 1013=cirrus
 	chip_man=$(echo "$vga_info" | grep -Ewo '(\[1002|\[1106|\[10de|\[8086|\[1013)')
  
 	case "$chip_man" in 
-		[10de)
+		*10de)
 			prop_driver="nvidia" ;;
-		[1002)
+		*1002)
 			prop_driver="fglrx"
-			if echo "$vga_info" | grep -Ei '((R.)([2-5])|(9|X|ES)(1|2?)([0-9])(5|0)0|Xpress)'; then
+			if grep -Ei '((R.)([2-5])|(9|X|ES)(1|2?)([0-9])(5|0)0|Xpress)' <<< "$vga_info"; then
 				prop_driver="radeon" 
 			fi ;;
 
-		[8086)
+		*8086)
 			prop_driver="intel"
-			if echo"$vga_info"| grep "i740"; then
+			if grep "i740" <<< "$vga_info"; then
 				prop_driver="i740"
 			fi
-			if echo"$vga_info"| grep "i128"; then
+			if grep "i128" <<< "$vga_info"; then
 				prop_driver="i128"
 			fi 
-			if echo $vga_driver | grep "mach"; then
+			if grep "mach" <<< "$vga_info"; then
 				prop_driver="mach64"
 			fi ;;
 
-		[1106)
+		*1106)
 			prop_driver="openchrome" ;
-			if echo"$vga_info"| grep -i "Savage"; then
+			if grep -i "Savage" <<< "$vga_info"; then
 				prop_driver="savage"
 			fi
-			#if echo"$vga_info"| grep -i "s3"; then
+			#if echo "$vga_info"| grep -i "s3"; then
 				#prop_driver="via"; fi 
-			if echo"$vga_info"| grep -i "virge"; then
+			if grep -i "virge" <<< "$vga_info"; then
 				prop_driver="virge"
 			fi ;;
-		[1013)
+		*1013)
 			prop_driver="cirrus" ;;
 		*)
 			prop_driver="fbdev" ;;
@@ -761,21 +750,19 @@ InstallVideoDriver () {
 				apt-get -yf install libva-driver-i965
 				VerifyExitCode "Install Intel Graphics Accelerator"
 			fi
-
 			IntelBridgeDetect
-
 		fi
 	fi
 }
 
 CheckVideoDriver () {
 	local vga_pci=$(lspci -nn | grep -w 'VGA')
+	local card_detail
 	BestGPU "$vga_pci"
 	online=$(ping -c 2 google.com)
-	card_detail=$(echo "$vga_pci" | cut -d':' -f3)
 	offline_mismatch="false"
 	online_mismatch="false"
-	if [[ -f /etc/X11/xorg.conf ]]; then
+	if [[ -f /etc/X11/xorg.conf ]] && [[ $(wc -l <<< "$vga_pci") -lt "2" ]]; then
 		# TODO figure out a better way to isolate the video driver in the xorg.conf list of "Driver" options
 		cur_driver=$(grep "Driver" /etc/X11/xorg.conf | grep -Eo '(nvidia|nouveau|radeon|fglrx|savage|openchrome|via|virge|intel|i740|i128|mach64|fbdev)')
 		if [[ "$prop_driver" != "$cur_driver" ]] && [[ -z $online ]]; then
@@ -830,7 +817,7 @@ CheckVideoDriver () {
 				rm /etc/X11/xorg.con*
 				reboot
 			fi
-		
+
 			# If there is an xorg, but the driver does not match best selection, install driver and run AVWizard
 			StatusMessage "Using video driver '$prop_driver' for $card_detail"
 			ConfSet "AVWizardOverride" "1"
