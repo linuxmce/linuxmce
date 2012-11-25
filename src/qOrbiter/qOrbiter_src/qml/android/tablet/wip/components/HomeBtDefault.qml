@@ -7,9 +7,9 @@ Rectangle {
     radius: style.but_smooth
     color:"transparent"
 
-    property string currentLink: "submenu"
     property string currentImage: "../images/btTelecom.png"
     property string currentText: "Telecom"
+    property string currentOpacity: "0.800"
     signal clicked
 
     Rectangle {
@@ -18,7 +18,7 @@ Rectangle {
         width: parent.width
         radius: parent.radius
         color:"#000000"
-        opacity: 0.800
+        opacity: btHomeDefault.currentOpacity
     }
 
     Image {
@@ -41,24 +41,13 @@ Rectangle {
         color: "#ffffff"
         opacity: 1
     }
-    Image {
-        id: buttonbg2
-        source: "../images/arrowDown.png"
-        visible: false
-        height: Image.height
-        width: Image.width
-        anchors.bottom: parent.top
-        anchors.horizontalCenter: btHomeDefault.horizontalCenter
-    }
-
 
     MouseArea{
         id: mousearea2
         anchors.fill: parent
         hoverEnabled: true
         onEntered: {
-            bgColor.opacity=0.500
-            buttonbg2.visible=true
+            bgColor.opacity=0.700
         }
 
         onClicked: {
@@ -67,7 +56,6 @@ Rectangle {
         }
         onExited: {
             bgColor.opacity=0.800
-            buttonbg2.visible=false
         }
     }
 }

@@ -2,16 +2,17 @@ import QtQuick 1.0
 
 Rectangle{
     id:btHomeClimates
-    clip:true
+    clip:false
     color:"#000000"
     opacity: 0.800
     visible: false
-
     width: scaleX(97)
     height: 100
     anchors.bottom: mainButtonContainer.top
     anchors.bottomMargin:  16
-    anchors.horizontalCenter: parent.horizontalCenter
+    anchors.horizontalCenter: stage.horizontalCenter
+
+    property string arrowPos: "../images/btTelecom.png"
 
     HomeButtonDelegate{id:climateDelegate}
 

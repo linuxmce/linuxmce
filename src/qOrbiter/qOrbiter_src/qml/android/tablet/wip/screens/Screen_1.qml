@@ -16,6 +16,27 @@ Item
         width: appW
         color:"transparent"
 
+        MouseArea{
+            width: stage.width
+            height: stage.height
+
+            onEntered: {
+                // HIDE SUBS
+                subClimate.visible=false
+                subLightning.visible=false
+                subMedia.visible=false
+                subSecurity.visible=false
+                subTelecom.visible=false
+
+                // HIDE ARROWS
+                arrowClimate.visible=false
+                arrowLights.visible=false
+                arrowMedia.visible=false
+                arrowSecurity.visible=false
+                arrowTelecom.visible=false
+            }
+        }
+
         Rectangle {
             id: headerbg
             color: "#000000"
@@ -46,33 +67,22 @@ Item
             anchors.horizontalCenter: parent.horizontalCenter
         }
 
-        Rectangle{
-            id:subMenu
-        //    transform: Rotation { origin.x: 30; origin.y: 30; axis { x: 0; y: 1; z: 0 } angle: 15 }
-            clip:true
-            color:"transparent"
 
-            width: scaleX(97)
-            height: 100
-            anchors.bottom: mainButtonContainer.top
-            anchors.bottomMargin:  16
-            anchors.horizontalCenter: parent.horizontalCenter
-
-            HomeClimateRow {
-                id: subClimate
-            }
-            HomeLightingRow {
-                id: subLightning
-            }
-            HomeMediaRow {
-                id: subMedia
-            }
-            HomeSecurityRow {
-                id: subSecurity
-            }
-            HomeTelecomRow {
-                id: subTelecom
-            }
+        // SUBMENU ITEMS
+        HomeClimateRow {
+            id: subClimate
+        }
+        HomeLightingRow {
+            id: subLightning
+        }
+        HomeMediaRow {
+            id: subMedia
+        }
+        HomeSecurityRow {
+            id: subSecurity
+        }
+        HomeTelecomRow {
+            id: subTelecom
         }
 
         Rectangle{
@@ -94,13 +104,36 @@ Item
                     id: btMedia
                     currentImage: "../images/btMedia.png"
                     currentText: "Media"
+
+                    Image {
+                        id: arrowMedia
+                        visible: false
+                        source: "../images/arrowDown.png"
+                        height: Image.height
+                        width: Image.width
+                        anchors.bottom: btMedia.top
+                        anchors.horizontalCenter: btMedia.horizontalCenter
+                    }
+
                     MouseArea{
                         id: mediaMouse
                         anchors.fill: parent
 
                         onPressed: {
-                            for (var i = 0; i < subMenu.children.length; ++i)
-                            subMenu.children[i].visible = false;
+
+                            // HIDE SUBS
+                            subClimate.visible=false
+                            subLightning.visible=false
+                            subSecurity.visible=false
+                            subTelecom.visible=false
+
+                            // HIDE ARROWS
+                            arrowClimate.visible=false
+                            arrowLights.visible=false
+                            arrowSecurity.visible=false
+                            arrowTelecom.visible=false
+
+                            arrowMedia.visible=true
                             subMedia.visible=true
                         }
                     }
@@ -109,13 +142,36 @@ Item
                     id:btLights
                     currentImage: "../images/btLights.png"
                     currentText: "Lights"
+
+                    Image {
+                        id: arrowLights
+                        visible: false
+                        source: "../images/arrowDown.png"
+                        height: Image.height
+                        width: Image.width
+                        anchors.bottom: btLights.top
+                        anchors.horizontalCenter: btLights.horizontalCenter
+                    }
+
                     MouseArea{
                         id: mouseLightning
                         anchors.fill: parent
 
                         onPressed: {
-                            for (var i = 0; i < subMenu.children.length; ++i)
-                            subMenu.children[i].visible = false;
+
+                            // HIDE SUBS
+                            subClimate.visible=false
+                            subMedia.visible=false
+                            subSecurity.visible=false
+                            subTelecom.visible=false
+
+                            // HIDE ARROWS
+                            arrowClimate.visible=false
+                            arrowMedia.visible=false
+                            arrowSecurity.visible=false
+                            arrowTelecom.visible=false
+
+                            arrowLights.visible=true
                             subLightning.visible=true
                         }
                     }
@@ -124,13 +180,36 @@ Item
                     id: btClimate
                     currentImage: "../images/btClimate.png"
                     currentText: "Climate"
+
+                    Image {
+                        id: arrowClimate
+                        visible: false
+                        source: "../images/arrowDown.png"
+                        height: Image.height
+                        width: Image.width
+                        anchors.bottom: btClimate.top
+                        anchors.horizontalCenter: btClimate.horizontalCenter
+                    }
+
                     MouseArea{
-                        id: mouseCLimate
+                        id: mouseClimate
                         anchors.fill: parent
 
                         onPressed: {
-                            for (var i = 0; i < subMenu.children.length; ++i)
-                            subMenu.children[i].visible = false;
+
+                            // HIDE SUBS
+                            subLightning.visible=false
+                            subMedia.visible=false
+                            subSecurity.visible=false
+                            subTelecom.visible=false
+
+                            // HIDE ARROWS
+                            arrowLights.visible=false
+                            arrowMedia.visible=false
+                            arrowSecurity.visible=false
+                            arrowTelecom.visible=false
+
+                            arrowClimate.visible=true
                             subClimate.visible=true
                         }
                     }
@@ -139,13 +218,36 @@ Item
                     id: btTelecom
                     currentImage: "../images/btTelecom.png"
                     currentText: "Telecom"
+
+                    Image {
+                        id: arrowTelecom
+                        visible: false
+                        source: "../images/arrowDown.png"
+                        height: Image.height
+                        width: Image.width
+                        anchors.bottom: btTelecom.top
+                        anchors.horizontalCenter: btTelecom.horizontalCenter
+                    }
+
                     MouseArea{
                         id: mouseTelecom
                         anchors.fill: parent
 
                         onPressed: {
-                            for (var i = 0; i < subMenu.children.length; ++i)
-                            subMenu.children[i].visible = false;
+
+                            // HIDE SUBS
+                            subClimate.visible=false
+                            subLightning.visible=false
+                            subMedia.visible=false
+                            subSecurity.visible=false
+
+                            // HIDE ARROWS
+                            arrowClimate.visible=false
+                            arrowLights.visible=false
+                            arrowMedia.visible=false
+                            arrowSecurity.visible=false
+
+                            arrowTelecom.visible=true
                             subTelecom.visible=true
                         }
                     }
@@ -154,13 +256,36 @@ Item
                     id: btSecurity
                     currentImage: "../images/btSecurity.png"
                     currentText: "Security"
+
+                    Image {
+                        id: arrowSecurity
+                        visible: false
+                        source: "../images/arrowDown.png"
+                        height: Image.height
+                        width: Image.width
+                        anchors.bottom: btSecurity.top
+                        anchors.horizontalCenter: btSecurity.horizontalCenter
+                    }
+
                     MouseArea{
                         id: mouseSecurity
                         anchors.fill: parent
 
                         onPressed: {
-                            for (var i = 0; i < subMenu.children.length; ++i)
-                            subMenu.children[i].visible = false;
+
+                            // HIDE SUBS
+                            subClimate.visible=false
+                            subLightning.visible=false
+                            subMedia.visible=false
+                            subTelecom.visible=false
+
+                            // HIDE ARROWS
+                            arrowClimate.visible=false
+                            arrowLights.visible=false
+                            arrowMedia.visible=false
+                            arrowTelecom.visible=false
+
+                            arrowSecurity.visible=true
                             subSecurity.visible=true
                         }
                     }
@@ -174,8 +299,6 @@ Item
                         anchors.fill: parent
 
                         onPressed: {
-                            for (var i = 0; i < subMenu.children.length; ++i)
-                            subMenu.children[i].visible = false;
                         }
                     }
                 }

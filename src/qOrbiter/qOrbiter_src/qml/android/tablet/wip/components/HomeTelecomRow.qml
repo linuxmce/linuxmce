@@ -15,26 +15,25 @@ Rectangle{
 
     HomeButtonDelegate{id:telecomDelegate}
 
-        Flickable{
-            id:securityflick
-            height: scaleY(16)
-            width: scaleX(87)
-            contentHeight: style.buttonH
-            contentWidth: ((style.buttonW) * (telecomScenarios.count + 1)) - 5
-            clip: true
-            flickableDirection: "HorizontalFlick"
+    Flickable{
+        id:securityflick
+        height: scaleY(16)
+        width: scaleX(87)
+        contentHeight: style.buttonH
+        contentWidth: ((style.buttonW) * (telecomScenarios.count + 1)) - 5
+        clip: true
+        flickableDirection: "HorizontalFlick"
 
-            ListView{
-                id: telecomScenarios
-                height: scaleY(style.buttonH)
-                width: stage.width
-                model: currentRoomTelecom
-                spacing: 5
-                interactive: false
-                orientation:ListView.Horizontal
-                delegate: telecomDelegate
-            }
+        ListView{
+            id: telecomScenarios
+            height: scaleY(style.buttonH)
+            width: stage.width
+            model: currentRoomTelecom
+            spacing: 5
+            interactive: false
+            orientation:ListView.Horizontal
+            delegate: telecomDelegate
         }
-
+    }
 }
 
