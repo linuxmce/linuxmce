@@ -7,7 +7,35 @@
 # This special exception was added by Craig Small in version 0.37 of dh-make.
 
 # Uncomment this to turn on verbose mode.
-#export DH_VERBOSE=1
+export DH_VERBOSE=1
+
+export buildenv="/opt/pos/QtSDK.121/Desktop/Qt/4.8.1/gcc/bin"
+export spec=linux-g++
+export srcroot=~/lmce-1004
+export projectdir=$(srcroot)/qOrbiter/qOrbiterMaster
+export buildoutput=$(srcroot)/qOrbiter/build-output
+export binoutput=$(srcroot)/qOrbiter/QOrbiter-build-4.8.1
+export config="CONFIG+=debug CONFIG+=for_desktop"
+export project=qOrbiterMaster.pro
 
 %:
-	dh $@ 
+	dh $@ --builddirectory=$(buildoutput)
+
+override_dh_install:
+	rm -fR `find $(binoutput) | grep ".svn"`
+	dh_install --sourcedir=$(binoutput)
+
+override_dh_auto_configure:
+	echo "Starting the QMake process"
+	cd $(buildenv)
+	$(buildenv)/qmake -makefile -nocache $(projectdir)/qOrbiterMaster.pro -o $(buildoutput)/Makefile -r -spec $(spec) $(config)
+
+override_dh_auto_build:
+	echo "Changing into $(buildoutput)"
+	cd $(buildoutput)
+	echo "Starting the actual build process"
+	make -f $(buildoutput)/Makefile clean
+	make -f $(buildoutput)/Makefile -w
+
+override_dh_shlibdeps:
+	
