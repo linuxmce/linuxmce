@@ -16,16 +16,16 @@ Rectangle {
         vplayer.setSource(path)
     }
 
-    VideoPlayer{
-        id:vplayer
-        height: requestedHeight
-        width: requestedWidth
-        scale:scaling
-        playerType:videoPlayerContainer.mediaType
-        //  mediaType: 5
-        onMediaSourceChanged: {playItem(mediaSource)
-           console.log(vplayer.mediaSource)
-       }
+//    VideoPlayer{
+//        id:vplayer
+//        height: requestedHeight
+//        width: requestedWidth
+//        scale:scaling
+//        playerType:videoPlayerContainer.mediaType
+//        //  mediaType: 5
+//        onMediaSourceChanged: {playItem(mediaSource)
+//           console.log(vplayer.mediaSource)
+//       }
 
-    }
+//    }
 }
