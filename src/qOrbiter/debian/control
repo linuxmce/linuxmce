@@ -1,0 +1,15 @@
+Source: qorbiter
+Section: unknown
+Priority: extra
+Maintainer: Langston <langstonius@langstonball.com>
+Build-Depends: debhelper (>= 8.0.0)
+Standards-Version: 3.9.2
+Homepage: <www.linuxmce.org>
+#Vcs-Git: git://git.debian.org/collab-maint/qorbiter.git
+#Vcs-Browser: http://git.debian.org/?p=collab-maint/qorbiter.git;a=summary
+
+Package: qorbiter
+Architecture: any
+Depends: ${shlibs:Depends}, ${misc:Depends}
+Description: <QML based Home automation frontend application.>
+ <QOrbiter, the QML based Home Automation frontend application for LinuxMCE, the open source Home Automation Platform. Support for multiple skins, multimedia and more.>
