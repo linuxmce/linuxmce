@@ -426,9 +426,6 @@ ValidIP()
 
 	return 0
 }
-#!/bin/bash
-. /usr/pluto/bin/SQL_Ops.sh
-. /usr/pluto/bin/Config_Ops.sh
 
 # Colors and bolds messages
 # '\E begin escape sequence
