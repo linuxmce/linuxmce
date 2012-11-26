@@ -257,7 +257,7 @@ case "$TARGET_DISTRO" in
 	"$HOST_DISTRO")
 		StatsMessage "Setting up /etc/sources.list for HOST_DISTRO: $TARGET_DISTRO"
 		cp {,"$TEMP_DIR"}/etc/apt/sources.list
-		cp -R {,"$TEMP_DIR"}/etc/apt/sources.list.d
+		#cp -R {,"$TEMP_DIR"}/etc/apt/sources.list.d/
 		;;
 	"ubuntu")
 		StatsMessage "Setting up /etc/sources.list for ubuntu"
@@ -280,10 +280,13 @@ deb http://packages.medibuntu.org/ $TARGET_RELEASE  free non-free
 deb $TARGET_REPO $TARGET_RELEASE main contrib non-free rpi
 deb-src $TARGET_REPO $TARGET_RELEASE main contrib non-free rpi
 #deb http://deb.linuxmce.org/raspbian/ $TARGET_RELEASE main
-" > $TEMP_DIR/etc/apt/sources.list
-		echo "deb http://archive.raspberrypi.org/debian/ $TARGET_RELEASE main
+" > ${TEMP_DIR}/etc/apt/sources.list
+if ! [[ -d ${TEMP_DIR}/etc/apt/sources.list.d ]]; then 
+	mkdir "${TEMP_DIR}/etc/apt/sources.list.d"
+fi
+echo "deb http://archive.raspberrypi.org/debian/ $TARGET_RELEASE main
 deb-src http://archive.raspberrypi.org/debian/ $TARGET_RELEASE main
-" > $TEMP_DIR/etc/apt/sources.list.d/raspi.list
+" > ${TEMP_DIR}/etc/apt/sources.list.d/raspi.list
 		;;
 esac
 
