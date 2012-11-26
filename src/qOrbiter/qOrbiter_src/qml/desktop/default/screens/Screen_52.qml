@@ -4,8 +4,8 @@ Item{
     id:advancedMediaOptions
 
     Rectangle{
-        height: appH
-        width: appW
+        height: manager.appHeight
+        width: manager.appWidth
         color: "transparent"
         Text {
             id: statussec

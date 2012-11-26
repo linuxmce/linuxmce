@@ -1,8 +1,8 @@
 import QtQuick 1.0
 Rectangle{
     id:power_rect_container
-    height: appH
-    width: appW
+    height: manager.appHeight
+    width: manager.appWidth
     color: "transparent"
     MouseArea{
         anchors.fill: parent

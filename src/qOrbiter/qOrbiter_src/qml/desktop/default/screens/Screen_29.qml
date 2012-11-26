@@ -4,8 +4,8 @@ Item{
     id:sleepingmenu
 
     Rectangle{
-        height: appH
-        width: appW
+        height: manager.appHeight
+        width: manager.appWidth
         color: style.darkhighlight
         HomeButton{ x: 5; y: 5; width: 75; height: 75; smooth: true}
         Component.onCompleted: manager.getSleepingAlarms()

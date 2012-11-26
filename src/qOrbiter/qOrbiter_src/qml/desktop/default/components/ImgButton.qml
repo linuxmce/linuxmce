@@ -21,8 +21,7 @@ Rectangle {
     Image {
         id: buttonimage
         source: ""
-        height: style.stdbuttonh
-        width: style.stdbuttonw
+        anchors.fill: parent
 
     }
     StyledText {
@@ -32,9 +31,10 @@ Rectangle {
         fontSize: 14
         verticalAlignment: Text.AlignVCenter
         horizontalAlignment: Text.AlignHCenter
-        anchors.fill: parent
-        anchors.margins: 5      
-        wrapMode: Text.WordWrap
+        width: parent.width
+        anchors.margins: 10
+        font.bold: false
+        wrapMode: "WrapAtWordBoundaryOrAnywhere"
        }
 
     MouseArea{

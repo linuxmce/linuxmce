@@ -10,8 +10,8 @@ import "../js/ComponentLoader.js" as MyJs
 
 Rectangle {
     id:fileviewscreen
-    width: appW
-    height: appH
+    width: manager.appWidth
+    height: manager.appHeight
     color: "transparent"
     clip: true
     property int mouselocY: 0
@@ -119,7 +119,7 @@ Rectangle {
 
     ListView{
         id:model_pages
-        height: appH
+        height: manager.appHeight
         width: scaleX(10)
         model: dataModel.totalPages
         anchors.left: parent.left

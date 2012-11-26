@@ -5,15 +5,17 @@ import QtQuick 1.1
         property int textWidth
         property bool isBold:true
         property bool isItalic:false
-        property double fontSize:12
+        property double fontSize:14
         property string textColor:skinStyle.lighttext
         id:labelelement
         text: textLabel
         font.bold: isBold
         font.italic: isItalic
-        font.pixelSize: fontSize
+        font.pointSize: fontSize
         font.family: myFont.name
         color: textColor
+        wrapMode: Text.WrapAnywhere
+
     }
 
 

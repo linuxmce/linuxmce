@@ -1625,9 +1625,8 @@ int qorbiterManager::loadSplash()
 void qorbiterManager::activateScreenSaver()
 {
     qorbiterUIwin->engine()->rootContext()->setContextProperty("screensaver", ScreenSaver);
-#ifndef RPI
     ScreenSaver->setActive(true);
-#endif
+
 }
 
 void qorbiterManager::killScreenSaver()

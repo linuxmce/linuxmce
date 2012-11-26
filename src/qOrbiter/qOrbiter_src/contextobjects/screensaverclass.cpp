@@ -61,6 +61,7 @@ void ScreenSaverClass::setStatus(bool status)
 void ScreenSaverClass::pickImage()
 {
 
+
     QTimer *timer = new QTimer(this);
         connect(timer, SIGNAL(timeout()), this, SLOT(selectNew()));
         timer->start(transitionDuration);

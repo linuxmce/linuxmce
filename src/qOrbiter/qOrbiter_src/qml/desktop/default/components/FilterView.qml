@@ -4,7 +4,7 @@ import "../lib/handlers"
 
 Rectangle {
     id:filterView
-    width: appW
+    width: manager.appWidth
     height: scaleY(12)
     color: "transparent"
     property alias currentFilterModel:filterList.model
@@ -37,8 +37,12 @@ Rectangle {
 
             StyledText{
                 text:name
+                anchors.centerIn: parent
+                font.bold: true
+                font.pointSize: scaleY(3)
+
             }
-            AttributeFilterHandler{onClicked: {filterView.state = "inactive";/*filterList.model=""*/}}
+            AttributeFilterHandler{onClicked: {filterView.state = "inactive";filterList.model=""}}
         }
     }
 

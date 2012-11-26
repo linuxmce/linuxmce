@@ -16,8 +16,7 @@ Component{
             id: overlay
             fillMode: Image.PreserveAspectFit
             source: "../img/ui3/linuxmcewidebutton.png"
-            height: parent.height
-            width: parent.width
+            anchors.fill: parent
         }
         Image {
             id: overlay_hover
@@ -34,11 +33,9 @@ Component{
             anchors.top: parent.top
             anchors.topMargin: scaleY(2)
             color:"transparent"
-            height: style.stdbuttonh
-            width: style.stdbuttonw
+        anchors.fill: parent
             buttontext: title
-            buttontextbold: true
-            buttontextitalic: true
+
             buttonopacity: .85
 
 

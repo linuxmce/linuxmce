@@ -2743,6 +2743,9 @@ void DCE::qOrbiter::GetMediaAttributeGrid(QString  qs_fk_fileno)
                     qDebug() << "unhandled attribute" << attributeType << " :: " << attribute;
                 }
             }
+#ifdef RPI
+            QThread::msleep(100);
+#endif
 
         }
 
@@ -3319,7 +3322,7 @@ void DCE::qOrbiter::requestLiveTvPlaylist()
                 emit addChannel(t);
                 index++;
 #ifdef RPI
-                QThread::msleep(20);
+       //         QThread::msleep(20);
 #endif
             }
         }

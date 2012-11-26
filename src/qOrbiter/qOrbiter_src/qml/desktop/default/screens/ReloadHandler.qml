@@ -4,8 +4,8 @@ import QtWebKit 1.0
 import "../components"
 Rectangle {
     id:router_reloading
-    width: appW
-    height: appH
+    width: manager.appWidth
+    height: manager.appHeight
     color: "transparent"
     Rectangle{
         anchors.fill: parent

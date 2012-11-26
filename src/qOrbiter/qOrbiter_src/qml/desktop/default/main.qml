@@ -97,8 +97,8 @@ Item {
 */
     ScreenSaver
     {   id:ss
-        height: appH
-        width: appW
+        height: manager.appHeight
+        width: manager.appWidth
         anchors.centerIn: parent
         z:-1
         MouseArea{

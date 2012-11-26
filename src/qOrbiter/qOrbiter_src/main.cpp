@@ -385,7 +385,6 @@ int main(int argc, char* argv[])
         QObject::connect(&pqOrbiter, SIGNAL(fd_trackChanged(QString)), w.filedetailsclass, SLOT(setTrack(QString)),Qt::QueuedConnection);
         QObject::connect(&pqOrbiter, SIGNAL(fd_ratingChanged(QString)), w.filedetailsclass, SLOT(setRating(QString)));
         QObject::connect(&pqOrbiter,SIGNAL(fd_studioChanged(QString)), w.filedetailsclass, SLOT(setStudio(QString)));
-
         QObject::connect(&w, SIGNAL(mediaSeperatorChanged(int)), &pqOrbiter, SLOT(setGridSeperator(int)), Qt::QueuedConnection);
 
         //stored media signal

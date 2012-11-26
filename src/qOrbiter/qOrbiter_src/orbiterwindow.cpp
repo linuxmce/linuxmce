@@ -32,6 +32,7 @@
 #include <QtQml/QQmlContext>
 #include <QtQml/QQmlEngine>
 #include <QtWidgets/QApplication>
+
 #else
 #include <qmlapplicationviewer.h>
 #include <QtDeclarative/QDeclarativeView>
@@ -107,15 +108,14 @@ orbiterWindow::orbiterWindow(long deviceid, std::string routerip, QObject *paren
 #endif
 #else
 
-//    glWidget = new QGLWidget();
-//    mainView.setsetViewport(glWidget);
-//    mainView.setViewportUpdateMode(QGraphicsView::FullViewportUpdate);
-//#elif for_android
+#ifdef RPI
 
-//#elif __ANDROID__
-////    glWidget = new QGLWidget();
-////    mainView.setViewport(glWidget);
-//    mainView.setViewportUpdateMode(QGraphicsView::FullViewportUpdate);
+    mainView.setSurfaceType(QSurface::OpenGLSurface);
+    qDebug() << "Surface id " <<mainView.OpenGLSurface;
+    qDebug() << "is opengl? " << mainView.openglContext();
+    qDebug() << "surface type " << mainView.surfaceType();
+    //mainView.setViewportUpdateMode(QGraphicsView::FullViewportUpdate);
+#endif
 #endif
 #endif
     // QObject::connect(&mainView, SIGNAL(sceneResized(QSize)), this, SIGNAL(orientationChanged(QSize)));

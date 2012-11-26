@@ -91,17 +91,6 @@ FontLoader{
         onOrientationChanged: checkLayout()
     }
 
-//    Image {
-//    id: bg
-//    source: "image://listprovider/screensaver/"+securityvideo.timestamp
-//    anchors.fill:parent
-
-//    Connections{
-//        target:screensaver
-//        onImageChanged:bg.source="image://listprovider/screensaver/"+securityvideo.timestamp
-//    }
-//    }
-
     ScreenSaver
     {   id:ss
         height: manager.appHeight

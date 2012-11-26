@@ -11,8 +11,8 @@ Item
         id:stage
 
         signal swapStyle()
-        height: appH
-        width: appW
+        height: manager.appHeight
+        width: manager.appWidth
         color: "transparent"
 
         Image {

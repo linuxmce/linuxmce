@@ -131,9 +131,6 @@ Rectangle {
                 height: scaleY(20)
                 color: "transparent"
 
-                scale:0
-                rotation: 360
-
                 MouseArea{
                     anchors.fill: mainItem
                     hoverEnabled: true
@@ -149,16 +146,7 @@ Rectangle {
                         mainItem.z = 1
                     }
                 }
-                ParallelAnimation {
-                    id:fade_and_scale
-                    running: false
-                    //PropertyAnimation { target: mainItem; property: "opacity"; to: 1; duration: 1000}
-                    PropertyAnimation { target: mainItem; property: "scale"; to: 1; duration: 500}
-                   // PropertyAnimation { target: mainItem; property: "rotation"; to: 0; duration: 500}
 
-                }
-
-                Component.onCompleted: fade_and_scale.running = true
                 Rectangle
                 {
                     id:frame

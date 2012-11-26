@@ -14,9 +14,7 @@ Item {
         Image {
             id: homeimage
             source: "../img/ui3/homebig.png"
-            anchors.centerIn: parent
-            height: scaleY(13)
-            width:  scaleX(8)
+         anchors.fill: parent
         }
         MouseArea{
             anchors.fill: parent

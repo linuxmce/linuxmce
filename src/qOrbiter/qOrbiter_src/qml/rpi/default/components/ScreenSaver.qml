@@ -6,7 +6,7 @@ Rectangle {
     id:ssholder
     width: manager.appWidth
     height: manager.appHeight
-    color: "black"
+    color: "transparent"
 
     function changeStuff()
     {
@@ -17,10 +17,10 @@ Rectangle {
 
     function changePic()
     {
-        blur.source = undefined
+       // blur.source = undefined
          ssimg.source = "image://listprovider/screensaver/"+securityvideo.timestamp
         console.log(ssimg.sourceSize)
-         blur.source = ssimg
+        // blur.source = ssimg
         raise.running = true
         animation_section2.running = true
     }
@@ -37,20 +37,20 @@ Rectangle {
         source: "image://listprovider/screensaver/"+securityvideo.timestamp
         anchors.centerIn: parent
         smooth: true
-        visible: false
+        visible: true
 
         ParallelAnimation {
             id:raise
             running: false
            // PropertyAnimation{ target:ssimg; property: "opacity"; to: "1"; duration: 1500}
-            PropertyAnimation{ target:blur; property: "opacity"; to: "1"; duration: 1500}
+         //   PropertyAnimation{ target:blur; property: "opacity"; to: "1"; duration: 1500}
         }
 
         SequentialAnimation on opacity {
             id:lower
             running:false
             ParallelAnimation{
-               PropertyAnimation{ target:blur; property: "opacity"; to: "0"; duration: 1000}
+          //     PropertyAnimation{ target:blur; property: "opacity"; to: "0"; duration: 1000}
               //  PropertyAnimation{ target:ssimg; property: "opacity"; to: "0"; duration: 1000}
             }
 
@@ -64,24 +64,24 @@ Rectangle {
         }
     }
 
-    GaussianBlur{
-        id:blur
-        source: ssimg
-        anchors.fill: ssimg
-        radius: 5
-        samples: 10
-        deviation: 5
-        cached: false
+//    GaussianBlur{
+//        id:blur
+//        source: ssimg
+//        anchors.fill: ssimg
+//        radius: 5
+//        samples: 10
+//        deviation: 5
+//        cached: false
 
-    }
+//    }
 
     SequentialAnimation{
         id:animation_section2
 
         running: false
-        PropertyAnimation { target: blur; property: "radius"; to: 10; duration: 250}
+       // PropertyAnimation { target: blur; property: "radius"; to: 10; duration: 250}
         // PropertyAnimation {target: blur; property: "opacity"; to:0 ; duration: 1000 }
-        PropertyAnimation { target: blur; property: "radius"; to: 0.0; duration: 2000}
+       // PropertyAnimation { target: blur; property: "radius"; to: 0.0; duration: 2000}
         //  PropertyAnimation {target: blur; property: "opacity"; to:1 ; duration: 1000 }
         // PropertyAnimation { target: blur; property: "radius"; to: .5; duration: 5000}
     }

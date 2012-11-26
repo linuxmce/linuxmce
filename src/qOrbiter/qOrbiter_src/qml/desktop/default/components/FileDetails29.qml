@@ -28,8 +28,8 @@ Rectangle {
 
     Rectangle{
         id:masking_rect
-        height: appH
-        width: appW
+        height: manager.appHeight
+        width: manager.appWidth
         color: "orange"
         opacity: .75
         z:-1
