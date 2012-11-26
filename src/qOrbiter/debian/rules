@@ -30,8 +30,13 @@ override_dh_install:
 	rm -fR `find $(binoutput) | grep ".svn"`
 	mkdir -p ./usr/bin ./usr/pluto ./usr/local/lib
 	cp $(binoutput)/qor* ./usr/bin
-	cp -r $(binoutput)/qml ./usr/pluto/
-	cp -r $(binoutput)/imports ./usr/bin/
+	# to get the debs working, we make some VERY
+	# bad things that normally should not be done.
+	# like copying a config file into bin
+	cp $(binoutput)/config.xml ./usr/bin
+	# and blindly copying the qml under usr.
+	cp -r $(binoutput)/qml ./usr
+	cp -r $(binoutput)/imports ./usr
 	# The Qt libs we currently use. 
 	# maybe we should copy the complete lib dir...
 	cp $(buildenv)/../lib/libQtXml.so.4 ./usr/local/lib/
