@@ -15,15 +15,37 @@ export srcroot=~/lmce-1004
 export projectdir=$(srcroot)/qOrbiter/qOrbiterMaster
 export buildoutput=$(srcroot)/qOrbiter/build-output
 export binoutput=$(srcroot)/qOrbiter/QOrbiter-build-4.8.1
-export config="CONFIG+=debug CONFIG+=for_desktop"
+export config="CONFIG+=debug CONFIG+=for_desktop CONFIG+=for_debian"
 export project=qOrbiterMaster.pro
 
 %:
 	dh $@ --builddirectory=$(buildoutput)
 
+override_dh_usrlocal:
+#	We do not want any special handling of the usr/local files
+
 override_dh_install:
+	# The qmake project automatically copies all the svn subdirs
+	# we do not want them.
 	rm -fR `find $(binoutput) | grep ".svn"`
-	dh_install --sourcedir=$(binoutput)
+	mkdir -p ./usr/bin ./usr/pluto ./usr/local/lib
+	cp $(binoutput)/qor* ./usr/bin
+	cp -r $(binoutput)/qml ./usr/pluto/
+	cp -r $(binoutput)/imports ./usr/bin/
+	# The Qt libs we currently use. 
+	# maybe we should copy the complete lib dir...
+	cp $(buildenv)/../lib/libQtXml.so.4 ./usr/local/lib/
+	cp $(buildenv)/../lib/libQtDeclarative.so.4 ./usr/local/lib/
+	cp $(buildenv)/../lib/libQtScript.so.4 ./usr/local/lib/
+	cp $(buildenv)/../lib/libQtSvg.so.4 ./usr/local/lib/
+	cp $(buildenv)/../lib/libQtSql.so.4 ./usr/local/lib/
+	cp $(buildenv)/../lib/libQtXmlPatterns.so.4 ./usr/local/lib/
+	cp $(buildenv)/../lib/libQtNetwork.so.4 ./usr/local/lib/
+	cp $(buildenv)/../lib/libQtGui.so.4 ./usr/local/lib/
+	cp $(buildenv)/../lib/libQtCore.so.4 ./usr/local/lib/
+	dh_install
+
+override_dh_strip:
 
 override_dh_auto_configure:
 	echo "Starting the QMake process"
@@ -38,4 +60,4 @@ override_dh_auto_build:
 	make -f $(buildoutput)/Makefile -w
 
 override_dh_shlibdeps:
-	
+
