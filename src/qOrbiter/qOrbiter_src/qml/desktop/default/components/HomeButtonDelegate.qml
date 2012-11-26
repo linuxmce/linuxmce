@@ -36,6 +36,7 @@ Component{
         anchors.fill: parent
             buttontext: title
 
+            buttontextcolor: "black"
             buttonopacity: .85
 
 
