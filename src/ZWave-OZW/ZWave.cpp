@@ -599,7 +599,10 @@ void ZWave::OnNotification(OpenZWave::Notification const* _notification, NodeInf
 					OpenZWave::Manager::Get()->GetValueAsBool(id, &state);
 					SendSensorTrippedEvent(PKDevice, state);
 				} else if ( label == "Basic" ) {
-
+					uint8 level=0;
+					OpenZWave::Manager::Get()->GetValueAsByte(id, &level);
+					DCE::LoggerWrapper::GetInstance()->Write(LV_ZWAVE,"State changed, send light changed event");
+					SendLightChangedEvents (PKDevice, level);
 				} else if ( label == "Luminance" ) {
 					float level = 0;
 					OpenZWave::Manager::Get()->GetValueAsFloat(id, &level);
@@ -694,12 +697,11 @@ DeviceData_Impl *ZWave::GetDevice(int iNodeId, int iInstanceID) {
 	// if not found with instance id, look up without instance id
 	pChildDevice = GetDeviceForPortChannel(sInternalIDInst);
 	if (pChildDevice == NULL) {
-		LoggerWrapper::GetInstance()->Write(LV_WARNING, "ZWave::GetDevice() No device found for id %s, trying without instance...", sInternalIDInst.c_str());
 		sInternalIDInst = StringUtils::itos(iNodeId);
 		pChildDevice = GetDeviceForPortChannel(sInternalIDInst);
 	}
 	if (pChildDevice == NULL) {
-		LoggerWrapper::GetInstance()->Write(LV_WARNING, "ZWave::GetDevice() No device found for id %s", sInternalIDInst.c_str());
+		LoggerWrapper::GetInstance()->Write(LV_WARNING, "ZWave::GetDevice() No device found for id %s(/%s)", sInternalIDInst.c_str(), StringUtils::itos(iInstanceID).c_str());
 	}
 	return pChildDevice;
 }
