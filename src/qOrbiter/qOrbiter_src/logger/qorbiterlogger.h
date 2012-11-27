@@ -3,7 +3,7 @@
 
 #include <QObject>
 #include <QFile>
-
+#include <QDeclarativeError>
 class QOrbiterLogger : public QObject
 {
     Q_OBJECT
@@ -37,6 +37,7 @@ public slots:
     void logQtMessage(QString message);
     void logSkinMessage(QString message);
     void logMediaMessage(QString message);
+    void logQmlErrors(QList<QDeclarativeError> e );
 
     void setLogLocation(QString l) {logLocation = l; emit logLocationChanged(logLocation);}
     QString getLogLocation() {return logLocation;}
@@ -46,6 +47,10 @@ private:
     bool initializeCommandFile();
     bool initializeGuiFile();
     bool initializeSkinFile();
+
+    bool writeCommandMessage(QString m);
+    bool writeGuiMessage(QString m);
+    bool writeSkinMessage(QString m);
 };
 
 #endif // QORBITERLOGGER_H

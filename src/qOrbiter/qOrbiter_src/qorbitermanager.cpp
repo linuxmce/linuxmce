@@ -131,7 +131,7 @@ qorbiterManager::qorbiterManager(QDeclarativeView *view, QObject *parent) :
     QObject::connect(this, SIGNAL(skinDataLoaded(bool)), SLOT(showUI(bool)));
     QObject::connect(view->engine(), SIGNAL(quit()), this, SLOT(closeOrbiter()));
 
-    ScreenSaver = new ScreenSaverClass(this);
+
 
 #ifdef for_desktop
 #ifndef QT5
@@ -244,7 +244,8 @@ qorbiterManager::qorbiterManager(QDeclarativeView *view, QObject *parent) :
     genreFilter = new AttributeSortModel(new AttributeSortItem,3, this);
 
     gotoScreenList = new QStringList();
-
+ScreenSaver = new ScreenSaverClass(this);
+qorbiterUIwin->engine()->rootContext()->setContextProperty("screensaver", ScreenSaver);
 }
 
 qorbiterManager::~qorbiterManager()
@@ -433,6 +434,8 @@ void qorbiterManager::refreshUI(QUrl url)
 // get conf method that reads config file
 void qorbiterManager::processConfig(QByteArray config)
 {
+
+
     iPK_Device_DatagridPlugIn =  long(6);
     iPK_Device_OrbiterPlugin = long(9);
     iPK_Device_GeneralInfoPlugin = long(4);
@@ -1133,6 +1136,7 @@ void qorbiterManager::setFloorplanType(int t)
 
 void qorbiterManager::qmlSetupLmce(QString incdeviceid, QString incrouterip)
 {
+
     setDceResponse("Triggering connection to LMCE Device ID [" + incdeviceid + "] port Router Address [" + incrouterip + "]") ;
 
     setInternalIp(incrouterip);
@@ -1624,7 +1628,7 @@ int qorbiterManager::loadSplash()
 
 void qorbiterManager::activateScreenSaver()
 {
-    qorbiterUIwin->engine()->rootContext()->setContextProperty("screensaver", ScreenSaver);
+
     ScreenSaver->setActive(true);
 
 }

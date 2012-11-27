@@ -168,7 +168,7 @@ int main(int argc, char* argv[])
     QApplication::setGraphicsSystem("meego");
 #elif GLENABLED
 #ifndef QT5
- //   QApplication::setGraphicsSystem("opengl");
+    //   QApplication::setGraphicsSystem("opengl");
 #endif
 #else
     QApplication::setGraphicsSystem("raster");
@@ -195,7 +195,7 @@ int main(int argc, char* argv[])
     a.setFont(f);
 #endif
     QOrbiterLogger localLogger;
-    localLogger.setLogLocation("~/");
+
     g_sBinary = FileUtils::FilenameWithoutPath(argv[0]);
     g_sBinaryPath = FileUtils::BasePath(argv[0]);
     cout << "qOrbiter, v." << VERSION << endl
@@ -345,8 +345,8 @@ int main(int argc, char* argv[])
 
         // connnect local logger
         QObject::connect(&pqOrbiter, SIGNAL(commandResponseChanged(QString)), &localLogger, SLOT(logCommandMessage(QString)));
-        QObject::connect(&pqOrbiter, SIGNAL(mediaMessage(QString)), &localLogger, SLOT(logCommandMessage(QString)));
-
+        QObject::connect(&pqOrbiter, SIGNAL(mediaMessage(QString)), &localLogger, SLOT(logGuiMessage(QString)));
+        QObject::connect(orbiterWin.mainView.engine(), SIGNAL(warnings(QList<QDeclarativeError>)), &localLogger, SLOT(logQmlErrors(QList<QDeclarativeError>)));
 
         //shutdown signals
         QObject::connect(&w, SIGNAL(orbiterClosing()), &pqOrbiter, SLOT(deinitialize()), Qt::QueuedConnection);
@@ -488,7 +488,7 @@ int main(int argc, char* argv[])
         QObject::connect(w.floorplans, SIGNAL(adjustLevel(int,myMap)), &pqOrbiter, SLOT(adjustLighting(int,myMap)),Qt::QueuedConnection);
 
         //mediagrid
-       // QObject::connect(&w, SIGNAL(gridStatus(bool)), &pqOrbiter, SLOT(setGridStatus(bool)),Qt::QueuedConnection);
+        // QObject::connect(&w, SIGNAL(gridStatus(bool)), &pqOrbiter, SLOT(setGridStatus(bool)),Qt::QueuedConnection);
         QObject::connect(&w, SIGNAL(gridGoBack()), &pqOrbiter, SLOT(goBackGrid()), Qt::QueuedConnection);
         QObject::connect(mediaModel, SIGNAL(pagingCleared()), &pqOrbiter,SLOT(populateAdditionalMedia()), Qt::QueuedConnection);
         QObject::connect(&pqOrbiter, SIGNAL(clearPageGrid()), mediaModel, SLOT(clearForPaging()), Qt::QueuedConnection);
@@ -503,7 +503,7 @@ int main(int argc, char* argv[])
         QObject::connect(&w, SIGNAL(gridTypeChanged(int)), mediaModel, SLOT(setGridType(int)), Qt::QueuedConnection);
         QObject::connect(&w, SIGNAL(setDceGridParam(int,QString)), &pqOrbiter, SLOT(setStringParam(int,QString)),Qt::QueuedConnection);
 
-     //   QObject::connect(&w, SIGNAL(keepLoading(bool)), &pqOrbiter,SLOT(setGridStatus(bool)),Qt::QueuedConnection);
+        //   QObject::connect(&w, SIGNAL(keepLoading(bool)), &pqOrbiter,SLOT(setGridStatus(bool)),Qt::QueuedConnection);
         QObject::connect(&pqOrbiter, SIGNAL(showFileInfo(bool)), w.filedetailsclass, SLOT(setVisible(bool)),Qt::QueuedConnection);
         QObject::connect(&pqOrbiter, SIGNAL(setFocusFile(QString)), w.filedetailsclass, SLOT(setFile(QString)),Qt::QueuedConnection);
         QObject::connect(&pqOrbiter, SIGNAL(modelPagesChanged(int)), mediaModel, SLOT(setTotalPages(int)),Qt::QueuedConnection);
@@ -578,7 +578,7 @@ int main(int argc, char* argv[])
         QObject::connect(simpleEPGmodel, SIGNAL(requestEpg()), &pqOrbiter, SLOT(requestLiveTvPlaylist()), Qt::QueuedConnection);
         QObject::connect(&pqOrbiter, SIGNAL(clearTVplaylist()), simpleEPGmodel, SLOT(populate()), Qt::QueuedConnection);
         QObject::connect (&w, SIGNAL(liveTVrequest()), simpleEPGmodel, SLOT(populate()),Qt::DirectConnection);
-       // QObject::connect (&w, SIGNAL(managerPlaylistRequest()), storedVideoPlaylist,SLOT(populate()),Qt::QueuedConnection );
+        // QObject::connect (&w, SIGNAL(managerPlaylistRequest()), storedVideoPlaylist,SLOT(populate()),Qt::QueuedConnection );
 
         //controls
         QObject::connect(&pqOrbiter,SIGNAL(newDeviceCommand(AvCommand*)), &w, SLOT(addCommandToList(AvCommand*)),Qt::QueuedConnection);
@@ -590,7 +590,7 @@ int main(int argc, char* argv[])
         QObject::connect(&pqOrbiter, SIGNAL(deviceAudioLevelChanged(int)), &w, SLOT(setDeviceVolume(int)));
         QObject::connect(&w, SIGNAL(muteSound()), &pqOrbiter, SLOT(mute()), Qt::QueuedConnection);
         QObject::connect(&w, SIGNAL(moveArrowDirection(int)), &pqOrbiter, SLOT(moveDirection(int)), Qt::QueuedConnection);
-    QObject::connect(&w, SIGNAL(signalGoBack()), &pqOrbiter, SLOT(osdBack()), Qt::QueuedConnection);
+        QObject::connect(&w, SIGNAL(signalGoBack()), &pqOrbiter, SLOT(osdBack()), Qt::QueuedConnection);
         QObject::connect(&w, SIGNAL(show_dvdMenu()), &pqOrbiter, SLOT(showMenu()));
 
         //so does live tv
@@ -626,26 +626,34 @@ int main(int argc, char* argv[])
         //mediaThread->start();
         //epgThread->start();
 #endif
-        if(PK_Device == w.iPK_Device){
+        if(PK_Device != w.iPK_Device){
             pqOrbiter.setDeviceId(w.iPK_Device);
             pqOrbiter.m_sHostName = w.qs_routerip.toStdString();
             pqOrbiter.m_sIPAddress = w.qs_routerip.toStdString();
             pqOrbiter.m_sExternalIP = w.qs_ext_routerip.toStdString();
+
+            pqOrbiter.pingCore();
+            PK_Device = pqOrbiter.m_dwPK_Device;
+
 #ifdef QT_DEBUG
-             qDebug() << "Initializing connection from config file";
+            qDebug() << "Initializing connection from config file";
 #endif
+
         }
         else
         {
             pqOrbiter.m_sHostName = sRouter_IP;
             pqOrbiter.m_sExternalIP = w.qs_ext_routerip.toStdString();
+            pqOrbiter.pingCore();
+            PK_Device = pqOrbiter.m_dwPK_Device;
+
 #ifdef QT_DEBUG
             qDebug() << "Initializing connection from command line host and device";
 #endif
         }
 
-        pqOrbiter.pingCore();
-        PK_Device = pqOrbiter.m_dwPK_Device;
+        //        pqOrbiter.pingCore();
+        //        PK_Device = pqOrbiter.m_dwPK_Device;
         a.exec();
 
         if( pqOrbiter.m_bReload )
