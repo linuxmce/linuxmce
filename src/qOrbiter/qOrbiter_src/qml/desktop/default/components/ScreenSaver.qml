@@ -7,25 +7,23 @@ Rectangle {
     width: manager.appWidth
     height: manager.appHeight
     color: "black"
-    property int currentScalefactor: 4
-    property int currentXoffset:299
-    property int currentYoffset:299
+
+    property int currentXoffset:100
+    property int currentYoffset:100
+    clip:false
 
     function changeStuff()
     {
-
         lower.running =true
         fadeAndBlur.running = false
+
     }
 
     function changePic()
     {
-
-        currentScalefactor = 3
-        ssimg.x = currentXoffset
-        ssimg.y= currentYoffset
-        ssimg.scale = currentScalefactor
         ssimg.source = "image://listprovider/screensaver/"+securityvideo.timestamp
+        blur.scale = 1.5
+        blur.x = currentXoffset
         raise.running = true
         fadeAndBlur.running = true
         burnsEffect.running = true
@@ -40,15 +38,15 @@ Rectangle {
         id: ssimg
         width: manager.appWidth
         height: manager.appHeight
-        source: "image://listprovider/screensaver"+screensaver.timestamp
-        x:currentXoffset
-        y:currentYoffset
+        source: "image://listprovider/screensaver"+screensaver.timestamp      
         smooth: true
-        scale:currentScalefactor
+
         ParallelAnimation {
             id:raise
             running: false
+
             PropertyAnimation{ target:ssimg; property: "opacity"; to: "1"; duration: 1500}
+
 
         }
 
@@ -118,7 +116,7 @@ Rectangle {
        id:burnsEffect
        running:false
        PropertyAnimation{target:blur; property:"scale";to:1; duration: screensaver.transitionDuration }
-       PropertyAnimation{target: ssimg; property: "x"; to:0; duration: screensaver.transitionDuration }
-       PropertyAnimation{target: ssimg; property: "y"; to: 0; duration: screensaver.transitionDuration }
+       PropertyAnimation{target: blur; property: "x"; to:0; duration: screensaver.transitionDuration }
+       PropertyAnimation{target: blur; property: "y"; to: 0; duration: screensaver.transitionDuration }
    }
 }

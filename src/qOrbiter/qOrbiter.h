@@ -36,7 +36,7 @@
 #include <contextobjects/epgchannellist.h>
 #include <contextobjects/playlistitemclass.h>
 #include <datamodels/DataModelItems/attributesortitem.h>
-#include <avitem.h>
+#include <datamodels/avitem.h>
 #include <contextobjects/floorplandevice.h>
 #include <QList>
 #include <datamodels/avdevice.h>

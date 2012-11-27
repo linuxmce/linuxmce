@@ -54,7 +54,7 @@
 
 #include<datamodels/existingorbitermodel.h>
 #include<datamodels/attributeobject.h>
-#include <sleepingalarmmodel.h>
+#include <datamodels/sleepingalarmmodel.h>
 
 #include <QStringList>
 #include <QThread>
@@ -98,7 +98,7 @@
 #include <contextobjects/playlistclass.h>
 #include <contextobjects/securityvideoclass.h>
 #include <datamodels/devicemodel.h>
-#include <avcodegrid.h>
+#include <datamodels/avcodegrid.h>
 
 #include <datamodels/skindatamodel.h>
 #include <contextobjects/floorplandevice.h>

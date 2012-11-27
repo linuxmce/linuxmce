@@ -4,7 +4,7 @@
 #include <QAbstractListModel>
 #include <QList>
 #include <QVariant>
-#include <qOrbiter/qOrbiter_src/datamodels/avdevice.h>
+#include <datamodels/avdevice.h>
 
 class DeviceModel : public QAbstractListModel
 {

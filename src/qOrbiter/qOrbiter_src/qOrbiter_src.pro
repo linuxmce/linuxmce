@@ -394,11 +394,10 @@ SOURCES += main.cpp \
         imageProviders/abstractimageprovider.cpp \
         datamodels/DataModelItems/sleepingalarm.cpp \
         contextobjects/filedetailsclass.cpp \
-        avcodegrid.cpp \
-        avitem.cpp \
+        datamodels/avcodegrid.cpp \
+        datamodels/avitem.cpp \
         contextobjects/floorplandevice.cpp \
         contextobjects/screenshotattributes.cpp \
-        threadedClasses/threadedsplash.cpp \
         orbiterwindow.cpp \
         contextobjects/screensaverclass.cpp \
         datamodels/skinloader.cpp \
@@ -417,7 +416,7 @@ SOURCES += main.cpp \
         plugins/GoogleWeather/googleweather.cpp \
         contextobjects/promptdata.cpp \
         datamodels/existingorbitermodel.cpp \
-        sleepingalarmmodel.cpp \
+        datamodels/sleepingalarmmodel.cpp \
         datamodels/devicemodel.cpp \
     datamodels/attributeobject.cpp
 
@@ -511,12 +510,11 @@ HEADERS += \
         datamodels/floorplanmodel.h \
         imageProviders/abstractimageprovider.h \
         datamodels/DataModelItems/sleepingalarm.h \
-        avcodegrid.h \
-        avitem.h \
+        datamodels/avcodegrid.h \
+        datamodels/avitem.h \
         datamodels/floorplanimageitem.h \
         contextobjects/floorplandevice.h \
         contextobjects/screenshotattributes.h \
-        threadedClasses/threadedsplash.h \
         orbiterwindow.h \
         contextobjects/screensaverclass.h \
         datamodels/skinloader.h  \
@@ -536,7 +534,7 @@ HEADERS += \
         plugins/GoogleWeather/googleweather.h \
         contextobjects/promptdata.h \
         datamodels/existingorbitermodel.h \
-        sleepingalarmmodel.h \
+        datamodels/sleepingalarmmodel.h \
         datamodels/devicemodel.h \
     datamodels/attributeobject.h
 
