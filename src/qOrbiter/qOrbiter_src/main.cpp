@@ -42,7 +42,7 @@ Q_IMPORT_PLUGIN(UIKit)
 #include <QApplication>
 #include <QtDeclarative/QDeclarativeEngine>
 #endif
-
+#include <logger/qorbiterlogger.h>
 #include <datamodels/listModel.h>
 #include <datamodels/gridItem.h>
 #include <qOrbiter/qOrbiter.h>
@@ -194,7 +194,8 @@ int main(int argc, char* argv[])
     f.setBold("true");
     a.setFont(f);
 #endif
-
+    QOrbiterLogger localLogger;
+    localLogger.setLogLocation("~/");
     g_sBinary = FileUtils::FilenameWithoutPath(argv[0]);
     g_sBinaryPath = FileUtils::BasePath(argv[0]);
     cout << "qOrbiter, v." << VERSION << endl
@@ -341,6 +342,11 @@ int main(int argc, char* argv[])
         orbiterWin.mainView.rootContext()->setContextProperty("mediaplaylist", storedVideoPlaylist);
         orbiterWin.mainView.rootContext()->setContextProperty("simpleepg", simpleEPGmodel);
         orbiterWin.mainView.rootContext()->setContextProperty("opengl", glpresent);
+
+        // connnect local logger
+        QObject::connect(&pqOrbiter, SIGNAL(commandResponseChanged(QString)), &localLogger, SLOT(logCommandMessage(QString)));
+        QObject::connect(&pqOrbiter, SIGNAL(mediaMessage(QString)), &localLogger, SLOT(logCommandMessage(QString)));
+
 
         //shutdown signals
         QObject::connect(&w, SIGNAL(orbiterClosing()), &pqOrbiter, SLOT(deinitialize()), Qt::QueuedConnection);
