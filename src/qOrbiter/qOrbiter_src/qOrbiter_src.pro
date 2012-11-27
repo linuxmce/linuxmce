@@ -418,7 +418,7 @@ SOURCES += main.cpp \
         datamodels/existingorbitermodel.cpp \
         datamodels/sleepingalarmmodel.cpp \
         datamodels/devicemodel.cpp \
-    datamodels/attributeobject.cpp
+        datamodels/attributeobject.cpp
 
 
 
