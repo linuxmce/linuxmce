@@ -452,6 +452,8 @@ Param 10 - pk_attribute
     int communicatorID;
 
 signals:
+    void skinMessage(QString s);
+    void qtMessage(QString s);
 
     /*child devices */
     void mediaPlayerConnected(bool connect);

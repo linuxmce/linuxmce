@@ -347,7 +347,8 @@ int main(int argc, char* argv[])
         QObject::connect(&pqOrbiter, SIGNAL(commandResponseChanged(QString)), &localLogger, SLOT(logCommandMessage(QString)));
         QObject::connect(&pqOrbiter, SIGNAL(mediaMessage(QString)), &localLogger, SLOT(logGuiMessage(QString)));
         QObject::connect(orbiterWin.mainView.engine(), SIGNAL(warnings(QList<QDeclarativeError>)), &localLogger, SLOT(logQmlErrors(QList<QDeclarativeError>)));
-
+        QObject::connect(&w, SIGNAL(skinMessage(QString)), &localLogger, SLOT(logSkinMessage(QString)));
+        QObject::connect(&w, SIGNAL(qtMessage) , &localLogger, SLOT(logQtMessage(QString)));
         //shutdown signals
         QObject::connect(&w, SIGNAL(orbiterClosing()), &pqOrbiter, SLOT(deinitialize()), Qt::QueuedConnection);
         //  QObject::connect(&pqOrbiter, SIGNAL(closeOrbiter()), &pqOrbiter, SLOT(deleteLater()));

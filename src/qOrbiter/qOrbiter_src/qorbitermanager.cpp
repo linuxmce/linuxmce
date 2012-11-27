@@ -803,7 +803,7 @@ bool qorbiterManager::OrbiterGen()
 
 void qorbiterManager::swapSkins(QString incSkin)
 {
-    qDebug() << "swapping sking to::" << incSkin;
+    emit skinMessage("swapping sking to::" + incSkin);
 #ifdef WIN32
     incSkin = "default";
 #endif
@@ -813,9 +813,9 @@ void qorbiterManager::swapSkins(QString incSkin)
     checkOrientation(qorbiterUIwin->size());
     if (tskinModel->rowCount() > 0)
     {
-        setDceResponse("Setting Skin to:" + incSkin);
+        emit skinMessage("Setting Skin to:" + incSkin);
         skin = tskinModel->find(incSkin);
-        setDceResponse("Got it from the model : " + skin->baseUrl().toString());
+        emit skinMessage("Got it from the model : " + skin->baseUrl().toString());
         //load the actual skin entry point
         currentSkin = incSkin;
         qorbiterUIwin->engine()->rootContext()->setContextProperty("style", skin->styleView());
@@ -830,7 +830,8 @@ void qorbiterManager::swapSkins(QString incSkin)
     }
     else
     {
-        qDebug() << "Major skin Error!!";
+        emit skinMessage("Major skin Error!!");
+
         exit(0);
     }
 }
@@ -841,7 +842,7 @@ void qorbiterManager::skinLoaded(QQuickView::Status status)
 void qorbiterManager::skinLoaded(QDeclarativeView::Status status)
 #endif
 {
-    setDceResponse("Skin appears to have finished loading ..");
+    emit skinMessage("Skin appears to have finished loading ..");
 #if (QT5)
     if (status == QQuickView::Error) {
 #else
@@ -850,6 +851,9 @@ void qorbiterManager::skinLoaded(QDeclarativeView::Status status)
         qWarning() << "Skin loading has FAILED";
         qWarning() << qorbiterUIwin->errors();
         emit skinDataLoaded(false);
+        emit skinMessage("Loading has failed, falling back to failsafe!");
+        swapSkins("default");
+
     } else {
 
         m_bStartingUp = false;
@@ -888,7 +892,7 @@ void qorbiterManager::setActiveRoom(int room,int ea)
 {
     emit setLocation(room, ea);
 #ifdef debug
-    qDebug() << "LocatioModel::" << m_lRooms->find(QString::number(room)) ;
+    emit qtMessage("LocationModel::" +m_lRooms->find(QString::number(room))) ;
 #endif
     setCurrentRoom(QString::number(room));
     m_lRooms->setLocation(ea, room);
@@ -955,13 +959,11 @@ void qorbiterManager::regenOrbiter(int deviceNo)
         //splashView->showFullScreen();
         qorbiterUIwin->close();
         QApplication::processEvents(QEventLoop::AllEvents);
-#ifdef debug
-        qDebug("Onscreen orbiter");
-#endif
+
         QProcess *regen = new QProcess(this);
         regen->start("/usr/bin/php /var/www/lmce-admin/qOrbiterGenerator.php?d="+QString::number(iPK_Device), QIODevice::ReadOnly);
 #ifdef debug
-        qDebug() <<"status code:" << regen->errorString();
+        emit qtMessage("status code:"+regen->errorString());
 #endif
         QObject::connect(regen,SIGNAL(finished(int)), this, SLOT(regenComplete(int)));
         QObject::connect(regen,SIGNAL(error(QProcess::ProcessError)), this, SLOT(regenError(QProcess::ProcessError)));
@@ -1037,7 +1039,7 @@ void qorbiterManager::nowPlayingChanged(bool b)
 
 bool qorbiterManager::loadSkins(QUrl base)
 {
-    qDebug() << "Local Skins path" << base.toString();
+    emit skinMessage("Local Skins path" +base.toString());
     tskinModel = new SkinDataModel(base, new SkinDataItem, this);
     qorbiterUIwin->rootContext()->setContextProperty("skinsList", tskinModel);
     QObject::connect(tskinModel, SIGNAL(skinsFinished(bool)), this, SLOT(setSkinStatus(bool)));
