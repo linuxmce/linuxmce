@@ -630,6 +630,7 @@ void ZWave::OnNotification(OpenZWave::Notification const* _notification, NodeInf
 			// basic_set or hail message.
 			OpenZWave::ValueID id = _notification->GetValueID();
 			string label = OpenZWave::Manager::Get()->GetValueLabel(id);
+			uint8 value = _notification->GetEvent();
 
 			int PKDevice = GetPKDevice(nodeInfo->m_nodeId, -1);
 			if (PKDevice > 0)
@@ -642,22 +643,15 @@ void ZWave::OnNotification(OpenZWave::Notification const* _notification, NodeInf
 				int GENERIC_TYPE_SWITCH_BINARY = 0x10;
 				int GENERIC_TYPE_SWITCH_MULTILEVEL = 0x11;
 				if  ( typeGeneric == GENERIC_TYPE_SWITCH_REMOTE/* || typeBasic == BASIC_TYPE_CONTROLLER*/ ) {
-					
-					int level;
-					OpenZWave::Manager::Get()->GetValueAsInt(id, &level);
-					DCE::LoggerWrapper::GetInstance()->Write(LV_ZWAVE,"State changed, send light changed");
-					SendOnOffEvent (PKDevice, level);
+					DCE::LoggerWrapper::GetInstance()->Write(LV_ZWAVE,"State changed, send light changed: level = %d", value);
+					SendOnOffEvent (PKDevice, value);
 					
 				} else if (typeGeneric == GENERIC_TYPE_SENSOR_BINARY || typeGeneric == GENERIC_TYPE_SENSOR_MULTILEVEL) {
-					DCE::LoggerWrapper::GetInstance()->Write(LV_ZWAVE,"This is a binary sensor, so we send sensor tripped events");
-					bool state;
-					OpenZWave::Manager::Get()->GetValueAsBool(id, &state);
-					SendSensorTrippedEvent(PKDevice, state);
+					DCE::LoggerWrapper::GetInstance()->Write(LV_ZWAVE,"This is a binary sensor, so we send sensor tripped event: value = %d", value);
+					SendSensorTrippedEvent(PKDevice, value);
 				} else if (typeGeneric == GENERIC_TYPE_SWITCH_BINARY || typeGeneric == GENERIC_TYPE_SWITCH_MULTILEVEL) {
-					int level;
-					OpenZWave::Manager::Get()->GetValueAsInt(id, &level);
-					DCE::LoggerWrapper::GetInstance()->Write(LV_ZWAVE,"State changed, send light changed event");
-					SendLightChangedEvents (PKDevice, level);
+					DCE::LoggerWrapper::GetInstance()->Write(LV_ZWAVE,"State changed, send light changed event: value = %d", value);
+					SendLightChangedEvents (PKDevice, value);
 				}
 			}
 		}
@@ -773,7 +767,7 @@ void ZWave::SendTemperatureChangedEvent(unsigned int PK_Device, float value)
 
 void ZWave::SendSensorTrippedEvent(unsigned int PK_Device, bool value)
 {
-	LoggerWrapper::GetInstance()->Write(LV_ZWAVE,"Sending sensor tripped event from PK_Device %d", PK_Device);
+	LoggerWrapper::GetInstance()->Write(LV_ZWAVE,"Sending sensor tripped event from PK_Device %d, value %s", PK_Device, (value ? "true" : "false"));
 	m_pEvent->SendMessage( new Message(PK_Device,
 					   DEVICEID_EVENTMANAGER,
 					   PRIORITY_NORMAL,
