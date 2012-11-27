@@ -199,8 +199,8 @@ int main(int argc, char* argv[])
     g_sBinaryPath = FileUtils::BasePath(argv[0]);
     cout << "qOrbiter, v." << VERSION << endl
          << "Visit www.linuxmce.org for source code and license information" << endl << endl;
-    string sRouter_IP="192.168.80.1";
-    int PK_Device;
+    string sRouter_IP="DCEROUTER";
+    int PK_Device=1;
     string sLogger="stdout";
     bool bLocalMode=false,bError=false; // An error parsing the command line
     char c;
@@ -220,9 +220,9 @@ int main(int argc, char* argv[])
             break;
         case 'd':
             PK_Device = atoi(argv[++optnum]);
-#ifdef debug
-            qDebug() << "From the command line input:" << PK_Device;
-#endif
+
+            qDebug() << "Command Line Device" << PK_Device <<". Command line hostname: " << sRouter_IP.c_str();
+
             break;
         case 'L':
             bLocalMode = true;
@@ -295,7 +295,7 @@ int main(int argc, char* argv[])
         typedef QMap <int, QString> myMap;
         int throwaway = qRegisterMetaType<myMap>("myMap");
 
-        orbiterWindow orbiterWin(-1, sRouter_IP);
+        orbiterWindow orbiterWin(PK_Device, sRouter_IP);
         orbiterWin.setMessage("Setting up Lmce");
 
         qorbiterManager  w(&orbiterWin.mainView);
@@ -620,13 +620,20 @@ int main(int argc, char* argv[])
         //mediaThread->start();
         //epgThread->start();
 #endif
+        if(PK_Device == w.iPK_Device){
+            pqOrbiter.setDeviceId(w.iPK_Device);
+            pqOrbiter.m_sHostName = w.qs_routerip.toStdString();
+            pqOrbiter.m_sIPAddress = w.qs_routerip.toStdString();
+            pqOrbiter.m_sExternalIP = w.qs_ext_routerip.toStdString();
+             qDebug() << "Initializing connection from config file";
+        }
+        else
+        {
+            pqOrbiter.m_sHostName = sRouter_IP;
+            pqOrbiter.m_sExternalIP = w.qs_ext_routerip.toStdString();
+            qDebug() << "Initializing connection from command line host and device";
+        }
 
-        pqOrbiter.setDeviceId(w.iPK_Device);
-        pqOrbiter.m_sHostName = w.qs_routerip.toStdString();
-        pqOrbiter.m_sIPAddress = w.qs_routerip.toStdString();
-        pqOrbiter.m_sExternalIP = w.qs_ext_routerip.toStdString();
-
-        qDebug() << "Initializing connection";
         pqOrbiter.pingCore();
         PK_Device = pqOrbiter.m_dwPK_Device;
         a.exec();
