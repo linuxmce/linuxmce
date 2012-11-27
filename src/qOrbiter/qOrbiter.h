@@ -1471,7 +1471,7 @@ public slots:
     void setDCEHost(QString host) { DCEHost = host; emit DCEHostChanged();}
     QString getDCEHost() {return DCEHost;}
 
-    void setqMediaPlayerID(int deviceID) {qMediaPlayerID = deviceID; emit qMediaPlayerIDChanged(qMediaPlayerID); qDebug()<< "Sent "<< qMediaPlayerID; }
+    void setqMediaPlayerID(int deviceID) {qMediaPlayerID = deviceID; emit qMediaPlayerIDChanged(qMediaPlayerID); }
     int getqMediaPlayerID(){return qMediaPlayerID;}
 
     void setqCommunicatorID(int deviceID ) {qMediaPlayerID = deviceID; emit qCommunicatorIDChanged(qCommunicatorID);}
@@ -1550,7 +1550,7 @@ public slots:
     void setGridSeperator(int sep);
     int getGridSeperator() { return media_pageSeperator; emit newPageSeperator(media_pageSeperator);}
 
-    void setCurrentPage(int page) {media_currentPage = page; qDebug() << page;  emit mediaPageChanged(media_currentPage);  }
+    void setCurrentPage(int page) {media_currentPage = page; emit mediaMessage("-Media- Page no: "+QString::number(media_currentPage));  emit mediaPageChanged(media_currentPage);  }
     int getCurrentPage() {return media_currentPage;}
 
     bool checkLoadingStatus();

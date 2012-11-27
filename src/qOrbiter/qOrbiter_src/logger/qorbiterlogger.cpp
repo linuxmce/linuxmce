@@ -7,47 +7,33 @@
 QOrbiterLogger::QOrbiterLogger(QObject *parent) :
     QObject(parent)
 {
-
     logLocation = QDir::homePath()+"/QOrbiter-log/";
-    QDir fileLocation;
+    setLogLocation(logLocation);
+}
 
+
+void QOrbiterLogger::setLogLocation(QString l)
+{
+    logLocation = l;
+
+    QDir fileLocation;
     fileLocation.setPath(logLocation);
     if(!fileLocation.exists())
     {
         qDebug() << "-----------------log directory doesnt exit, setting up.";
-
         if(!fileLocation.mkpath(logLocation)){
-
             qDebug() << "---------------------------Cant create logfile directory!";
-
         }
         else{
             qDebug() << "File location created " << fileLocation.exists();
         }
     }
 
-    if (initializeCommandFile()){
-
-        logCommandMessage(" Command file initialized - New log section");
-        logCommandMessage("-----------------------"+QTime::currentTime().toString()+"-----------------------------");
-    }
-    else
-    {
-        qDebug() << "---------------------------Cant open logfile!";
-    }
-
-    if(initializeGuiFile()){
-        logGuiMessage("GUI logfile ready - new Log Section");
-        logGuiMessage("-----------------------"+QTime::currentTime().toString()+"-----------------------------");
-
-    }
-
-    if (initializeSkinFile()){
-        logSkinMessage("Skin logfile ready New Log Section");
-        logSkinMessage("-----------------------"+QTime::currentTime().toString()+"-----------------------------");
-    }
-
+    emit logLocationChanged(logLocation);
+    initLogs();
 }
+
+
 
 void QOrbiterLogger::logCommandMessage(QString message)
 {
@@ -81,6 +67,9 @@ void QOrbiterLogger::logSkinMessage(QString message)
 
 void QOrbiterLogger::logMediaMessage(QString message)
 {
+    mediaMsg = QTime::currentTime().toString()+QString(" - MEDIA - ")+message+"\n";
+    emit mediaMessageRecieved(message);
+    writeCommandMessage(skinMsg);
 }
 
 void QOrbiterLogger::logQmlErrors(QList<QDeclarativeError> e)
@@ -90,6 +79,12 @@ void QOrbiterLogger::logQmlErrors(QList<QDeclarativeError> e)
         writeGuiMessage(QTime::currentTime().toString()+" - QML Error - "+b.toString()+"\n");
     }
 }
+
+void QOrbiterLogger::logUserMessage(QString message)
+{
+    writeSkinMessage(message);
+}
+
 
 
 bool QOrbiterLogger::writeToFile(QString msg)
@@ -102,7 +97,10 @@ bool QOrbiterLogger::initializeCommandFile()
     qDebug()<< "-----------------------Attempting to open logfile " << commandFile.fileName()  ;
     if(!commandFile.exists()){
 
-        if(commandFile.open(QFile::WriteOnly)){
+
+
+        if(commandFile.open(QFile::Append)){
+            commandFile.seek(commandFile.size());
             return true;
         }
         else
@@ -113,8 +111,16 @@ bool QOrbiterLogger::initializeCommandFile()
     }
     else
     {
-
-        return true;
+        if(commandFile.size() > 10000)
+        {
+            QDir t;
+            t.setPath(logLocation);
+            t.remove(commandFile.fileName());
+            initializeCommandFile();
+            return false;
+        }else{
+             return true;
+        }
     }
 }
 
@@ -123,8 +129,8 @@ bool QOrbiterLogger::initializeGuiFile()
     guiFile.setFileName(logLocation+"qorbiter-gui.log");
     qDebug()<< "-----------------------Attempting to open logfile " << guiFile.fileName()  ;
     if(!guiFile.exists()){
-
-        if(guiFile.open(QFile::WriteOnly)){
+        if(guiFile.open(QFile::Append)){
+            guiFile.seek(guiFile.size());
             return true;
         }
         else
@@ -135,8 +141,17 @@ bool QOrbiterLogger::initializeGuiFile()
     }
     else
     {
-
-        return true;
+        if(guiFile.size() > 10000)
+        {
+            QDir t;
+            t.setPath(logLocation);
+            t.remove(guiFile.fileName());
+            initializeGuiFile();
+            return false;
+        }
+        else {
+           return true;
+       }
     }
 }
 
@@ -146,7 +161,8 @@ bool QOrbiterLogger::initializeSkinFile()
     qDebug()<< "-----------------------Attempting to open logfile " << skinFile.fileName()  ;
     if(!skinFile.exists()){
 
-        if(skinFile.open(QFile::WriteOnly)){
+        if(skinFile.open(QFile::Append)){
+            skinFile.seek(skinFile.size());
             return true;
         }
         else
@@ -157,8 +173,20 @@ bool QOrbiterLogger::initializeSkinFile()
     }
     else
     {
+        if(skinFile.size() > 10000)
+        {
+            QDir t;
+            t.setPath(logLocation);
+            t.remove(skinFile.fileName());
+            initializeSkinFile();
+            return false;
+        }
+        else
+        {
+           return true;
+        }
 
-        return true;
+
     }
 }
 
@@ -166,8 +194,9 @@ bool QOrbiterLogger::writeCommandMessage(QString m)
 {
     if(skinFile.isOpen()){
         QTextStream t(&commandFile);
+
         t<< m;
-       return true;
+        return true;
     }
     else if(!commandFile.open(QFile::ReadWrite))
     {
@@ -177,7 +206,7 @@ bool QOrbiterLogger::writeCommandMessage(QString m)
     else{
         QTextStream t(&commandFile);
         t<< m;
-       return true;
+        return true;
     }
 }
 
@@ -186,7 +215,7 @@ bool QOrbiterLogger::writeGuiMessage(QString m)
     if(guiFile.isOpen()){
         QTextStream t(&guiFile);
         t<< m;
-       return true;
+        return true;
     }
     else if(!guiFile.open(QFile::ReadWrite))
     {
@@ -196,7 +225,7 @@ bool QOrbiterLogger::writeGuiMessage(QString m)
     else{
         QTextStream t(&guiFile);
         t<< m;
-       return true;
+        return true;
     }
 }
 
@@ -205,7 +234,7 @@ bool QOrbiterLogger::writeSkinMessage(QString m)
     if(skinFile.isOpen()){
         QTextStream t(&skinFile);
         t<< m;
-       return true;
+        return true;
     }
     else if(!skinFile.open(QFile::ReadWrite))
     {
@@ -215,8 +244,45 @@ bool QOrbiterLogger::writeSkinMessage(QString m)
     else{
         QTextStream t(&skinFile);
         t<< m;
-       return true;
+        return true;
     }
+}
+
+void QOrbiterLogger::initLogs()
+{
+
+
+    if (initializeCommandFile()){
+
+        logCommandMessage(" Command file initialized - New log section");
+        logCommandMessage("-----------------------"+QTime::currentTime().toString()+"-----------------------------");
+        setCommandLogStatus(true);
+    }
+    else
+    {
+
+        setCommandLogStatus(false);
+    }
+
+    if(initializeGuiFile()){
+        logGuiMessage("GUI logfile ready - new Log Section");
+        logGuiMessage("-----------------------"+QTime::currentTime().toString()+"-----------------------------");
+        setGuiLogStatus(true);
+    }
+    else
+    {
+        setGuiLogStatus(false);
+    }
+
+    if (initializeSkinFile()){
+        logSkinMessage("Skin logfile ready New Log Section");
+        logSkinMessage("-----------------------"+QTime::currentTime().toString()+"-----------------------------");
+    }
+    else
+    {
+        setQtLogStatus(false);
+    }
+
 }
 
 

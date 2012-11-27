@@ -1770,10 +1770,7 @@ bool DCE::qOrbiter::initialize()
     emit commandResponseChanged("Connecting to router");
     emit commandResponseChanged("Starting dce initialization");
 
-    if(m_bOrbiterConnected==false){
-#ifdef RPI
 
-#endif
         if ((GetConfig() == true) && (Connect(PK_DeviceTemplate_get()) == true))
         {
             m_dwMaxRetries = 1;
@@ -1820,7 +1817,7 @@ bool DCE::qOrbiter::initialize()
         }
         else
         {
-            // qDebug("Checking Connection Error Type:");
+
 
             //QApplication::processEvents(QEventLoop::AllEvents);
             if(  m_pEvent->m_pClientSocket->m_eLastError==ClientSocket::cs_err_CannotConnect )
@@ -1837,10 +1834,8 @@ bool DCE::qOrbiter::initialize()
             {
 
                 LoggerWrapper::GetInstance()->Write(LV_CRITICAL, "Bad Device");
-                emit commandResponseChanged("Bad Device");
-                // int errorType =  this->DeviceIdInvalid();
-                emit connectionValid(true);
-                //QApplication::processEvents(QEventLoop::AllEvents);
+                emit commandResponseChanged("Bad Device");              
+                emit connectionValid(true);               
                 return false;
             }
 
@@ -1867,7 +1862,7 @@ bool DCE::qOrbiter::initialize()
             //QApplication::processEvents(QEventLoop::AllEvents);
         }
     }
-}
+
 
 void DCE::qOrbiter::deinitialize()
 {
@@ -1937,7 +1932,7 @@ void qOrbiter::setOrbiterSetupVars(int users, int room, int skin, int lang, int 
     httpOrbiterSettings = new QNetworkAccessManager();
     httpSettingsRequest = new QNetworkRequest();
 
-    qDebug()<< "Processing New orbiter Setup";
+     "Processing New orbiter Setup";
     sPK_Room = room;
     sPK_Users = users;
     sPK_Skin = skin;
@@ -1946,7 +1941,7 @@ void qOrbiter::setOrbiterSetupVars(int users, int room, int skin, int lang, int 
     sWidth = width;
 
     if (sHeight > 0){
-        qDebug() << "Setting up a new orbiter";
+       emit commandResponseChanged("Setting up a new orbiter");
 
         int t = SetupNewOrbiter();
 
@@ -1961,7 +1956,7 @@ void qOrbiter::setOrbiterSetupVars(int users, int room, int skin, int lang, int 
             m_dwPK_Device = t ;
             emit commandResponseChanged("setting ea");
             httpSettingsRequest->setUrl("http://"+QString::fromStdString(m_sIPAddress).append("/lmce-admin/setEa2.php?d="+QString::number(t)+"&r="+QString::number(sPK_Room)));
-            qDebug() << "Ea url::" <<httpSettingsRequest->url();
+           // qDebug() << "Ea url::" <<httpSettingsRequest->url();
             httpSettingsReply = httpOrbiterSettings->get(*httpSettingsRequest);
             QObject::connect(httpSettingsReply, SIGNAL(finished()), this, SLOT(finishSetup()));
         }
@@ -2001,8 +1996,8 @@ void qOrbiter::requestAttributeTypes(int type)
 
     if(SendCommand(reqSubtype, &pResponse) && pResponse=="OK"){
         emit commandResponseChanged("Got subtype for media");
-#ifdef QT_DEBUG
-         qDebug()<< sName.c_str();
+#ifdef debug
+       emit commandResponseChanged(QString::fromStdString(sName.c_str()));
 #endif
     }
     else
@@ -2080,7 +2075,9 @@ void qOrbiter::requestGenres(int type)
         for(int i=0; i < data.count(); i++)
         {
             QStringList subSplit = data.at(i).split(":");
+#ifdef debug
             qDebug() << data.at(i).split(":");
+#endif
           //  emit newFileFormatSort(new AttributeSortItem( subSplit.last(),subSplit.first(), QImage(),false,  0));
         }
     }
@@ -2103,7 +2100,9 @@ void qOrbiter::requestFileFormats(int type)
         for(int i=0; i < data.count(); i++)
         {
             QStringList subSplit = data.at(i).split(":");
-            qDebug() << data.at(i).split(":");
+#ifdef debug
+           emit commandResponse(data.at(i).split(":"));
+#endif
             emit newFileFormatSort( new AttributeSortItem( subSplit.last(),subSplit.first(), QImage(),false,  0));
         }
     }
@@ -2163,7 +2162,9 @@ void qOrbiter::beginSetup()
     qRegisterMetaType< QList<QObject*> >("QList<QObject*>");
 
 #endif
-    qDebug() <<"Run function executed" << this->thread()->currentThreadId();
+#ifdef debug
+    emit commandResponse("Run function executed in thread"+thread()->currentThreadId());
+#endif
 }
 
 void qOrbiter::setRecievingStatus(bool b)
@@ -2584,7 +2585,7 @@ void DCE::qOrbiter::GetMediaAttributeGrid(QString  qs_fk_fileno)
 
     int placeholder;
     //QApplication::processEvents(QEventLoop::AllEvents);
-#ifdef QT_DEBUG
+#ifdef debug
     qDebug() << details.join("||");
 #endif
 
@@ -2687,7 +2688,9 @@ void DCE::qOrbiter::GetMediaAttributeGrid(QString  qs_fk_fileno)
                 QString attribute  = pCell->m_mapAttributes_Find("Name").c_str();
                 cellfk = pCell->GetValue();
                 //QApplication::processEvents(QEventLoop::AllEvents);
-                qDebug()<< attributeType << " :: " << attribute;
+#ifdef debug
+               emit commandResponseChanged(attributeType << " :: " << attribute);
+#endif
                 if(attributeType == "Program")
                 {
                     emit fd_programChanged(attribute);
@@ -4225,16 +4228,12 @@ void qOrbiter::OnReload()
     qDebug("Router Reloaded!");
     pthread_cond_broadcast( &m_listMessageQueueCond );
 
-
-
 #ifdef LINK_TO_ROUTER
     if(NULL != m_pRouter && m_pRouter->IsPlugin(m_pcRequestSocket->m_dwPK_Device))
         m_pRouter->Reload();
 #endif
     emit routerDisconnect();
     emit checkReload();
-    OnQuit();
-
 }
 
 bool qOrbiter::OnReplaceHandler(string msg)

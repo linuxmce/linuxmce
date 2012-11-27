@@ -337,18 +337,20 @@ int main(int argc, char* argv[])
 #endif
 
         TimeCodeManager *timecode = new TimeCodeManager();
+        orbiterWin.mainView.rootContext()->setContextProperty("logger", &localLogger);
         orbiterWin.mainView.rootContext()->setContextProperty("dceTimecode", timecode);
         orbiterWin.mainView.rootContext()->setContextProperty("dataModel", mediaModel);
         orbiterWin.mainView.rootContext()->setContextProperty("mediaplaylist", storedVideoPlaylist);
         orbiterWin.mainView.rootContext()->setContextProperty("simpleepg", simpleEPGmodel);
         orbiterWin.mainView.rootContext()->setContextProperty("opengl", glpresent);
 
+
         // connnect local logger
         QObject::connect(&pqOrbiter, SIGNAL(commandResponseChanged(QString)), &localLogger, SLOT(logCommandMessage(QString)));
         QObject::connect(&pqOrbiter, SIGNAL(mediaMessage(QString)), &localLogger, SLOT(logGuiMessage(QString)));
         QObject::connect(orbiterWin.mainView.engine(), SIGNAL(warnings(QList<QDeclarativeError>)), &localLogger, SLOT(logQmlErrors(QList<QDeclarativeError>)));
         QObject::connect(&w, SIGNAL(skinMessage(QString)), &localLogger, SLOT(logSkinMessage(QString)));
-        QObject::connect(&w, SIGNAL(qtMessage) , &localLogger, SLOT(logQtMessage(QString)));
+        QObject::connect(&w, SIGNAL(qtMessage(QString)) , &localLogger, SLOT(logQtMessage(QString)));
         //shutdown signals
         QObject::connect(&w, SIGNAL(orbiterClosing()), &pqOrbiter, SLOT(deinitialize()), Qt::QueuedConnection);
         //  QObject::connect(&pqOrbiter, SIGNAL(closeOrbiter()), &pqOrbiter, SLOT(deleteLater()));

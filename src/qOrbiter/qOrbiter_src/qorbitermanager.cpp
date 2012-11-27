@@ -1747,7 +1747,7 @@ void qorbiterManager::connectionWatchdog()
 {
     QTimer::singleShot(15000, this, SIGNAL(reInitialize()));
 #ifdef debug
-    qDebug("Starting Watchdog");
+    emit qtMessage("Starting Watchdog");
 #endif
 
 }

@@ -14,6 +14,7 @@ Item {
     Style{
        id:style
    }
+    Component.onCompleted: logger.userLogMsg = "Main.qml loaded in default skin"
 
     FontLoader{
         id:myFont
@@ -40,6 +41,7 @@ Item {
                 dceplayer.setConnectionDetails(manager.mediaPlayerID, manager.m_ipAddress)
             }
         }
+        onCurrentStatusChanged:logger.logMediaMessage(dceplayer.currentStatus)
     }
 
     signal close()
@@ -76,13 +78,13 @@ Item {
         anchors.top: mediaMessages.bottom
     }
 
-    DebugPanel{
-        id:mediaplayerMessages
-        debugMessage: dceplayer.currentStatus
-        anchors.top: commandmessages.bottom
-        z:2
-        color: dceplayer.connected ? "green" : "red"
-    }
+//    DebugPanel{
+//        id:mediaplayerMessages
+//        debugMessage: dceplayer.currentStatus
+//        anchors.top: commandmessages.bottom
+//        z:2
+//        color: dceplayer.connected ? "green" : "red"
+//    }
 
     Connections{
         target: manager
@@ -134,12 +136,12 @@ Item {
         }
         else if (pageLoader.status == Component.Loading)
         {
-            console.log("loading page from network")
+           logger.userLogMsg = "loading page from network"
             finishLoading(screenname)
         }
         else
         {
-            console.log("Command to change to:" + screenname + " failed!")
+            logger.userLogMsg ="Command to change to:" + screenname + " failed!"
             screenfile = screenname
             pageLoader.source = "screens/Screen_x.qml"
         }
@@ -149,9 +151,9 @@ Item {
     {
         if(pageLoader.status != Component.Ready)
         {
-            console.log("finishing load")
+           logger.userLogMsg="finishing load";
             pageLoader.source = "screens/"+screenname
-            console.log("screen" + screenname + " loaded.")
+           logger.userLogMsg = "screen" + screenname + " loaded."
 
         }
         else
@@ -163,7 +165,7 @@ Item {
 
     function checkStatus(component)
     {
-        console.log(component.progress)
+      logger.userLogMsg = "Checking progress:"+(component.progress)
     }
 
 
@@ -188,16 +190,16 @@ Item {
         componentLoader.source = "components/"+componentName
         if (componentLoader.status == Component.Ready)
         {
-            manager.setDceResponse("Command to change to:" + componentName+ " was successfull")
+           logger.userLogMsg ="Command to change to:" + componentName+ " was successfull"
         }
         else if (componentLoader.status == Component.Loading)
         {
-            console.log("loading page from network")
+            logger.userLogMsg = "loading page from network"
             finishLoadingComponent(componentName)
         }
         else
         {
-            console.log("Command to add: " + componentName + " failed!")
+            logger.userLogMsg = "Command to add: " + componentName + " failed!"
 
         }
     }
@@ -206,9 +208,9 @@ Item {
     {
         if(componentLoader.status != Component.Ready)
         {
-            console.log("finishing network load")
+            logger.userLogMsg = "finishing network load"
             componentLoader.source = "components/"+componentName
-            console.log("screen" + componentName + " loaded.")
+          logger.userLogMsg="screen" + componentName + " loaded."
         }
         else
         {
