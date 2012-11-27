@@ -605,14 +605,14 @@ void GenerateWizardConfigDefaults::GeneratePage_VideoAdjustSize(
 			"ButtonPlus",
 			"+",
 			520, 260,
-			10,
+			60,
 			false
 		));
 	Page->AddChild(CreateControlButton(
 		"ButtonMinus",
 		"-",
 		520, 295,
-		10,
+		60,
 		false
 		));
 
