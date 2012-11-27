@@ -200,7 +200,7 @@ int main(int argc, char* argv[])
     cout << "qOrbiter, v." << VERSION << endl
          << "Visit www.linuxmce.org for source code and license information" << endl << endl;
     string sRouter_IP="DCEROUTER";
-    int PK_Device=1;
+    int PK_Device=-1;
     string sLogger="stdout";
     bool bLocalMode=false,bError=false; // An error parsing the command line
     char c;
@@ -625,13 +625,17 @@ int main(int argc, char* argv[])
             pqOrbiter.m_sHostName = w.qs_routerip.toStdString();
             pqOrbiter.m_sIPAddress = w.qs_routerip.toStdString();
             pqOrbiter.m_sExternalIP = w.qs_ext_routerip.toStdString();
+#ifdef QT_DEBUG
              qDebug() << "Initializing connection from config file";
+#endif
         }
         else
         {
             pqOrbiter.m_sHostName = sRouter_IP;
             pqOrbiter.m_sExternalIP = w.qs_ext_routerip.toStdString();
+#ifdef QT_DEBUG
             qDebug() << "Initializing connection from command line host and device";
+#endif
         }
 
         pqOrbiter.pingCore();

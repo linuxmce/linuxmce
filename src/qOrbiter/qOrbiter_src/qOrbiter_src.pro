@@ -418,7 +418,8 @@ SOURCES += main.cpp \
         datamodels/existingorbitermodel.cpp \
         datamodels/sleepingalarmmodel.cpp \
         datamodels/devicemodel.cpp \
-        datamodels/attributeobject.cpp
+        datamodels/attributeobject.cpp \
+    logger/qorbiterlogger.cpp
 
 
 
@@ -536,7 +537,8 @@ HEADERS += \
         datamodels/existingorbitermodel.h \
         datamodels/sleepingalarmmodel.h \
         datamodels/devicemodel.h \
-    datamodels/attributeobject.h
+    datamodels/attributeobject.h \
+    logger/qorbiterlogger.h
 
 
 

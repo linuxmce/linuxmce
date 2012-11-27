@@ -16,14 +16,16 @@ Rectangle {
     {
         lower.running =true
         fadeAndBlur.running = false
+        currentYoffset = manager.appHeight *.25
 
     }
 
     function changePic()
     {
         ssimg.source = "image://listprovider/screensaver/"+securityvideo.timestamp
-        blur.scale = 1.5
+        blur.scale = 1.25
         blur.x = currentXoffset
+        blur.y = currentYoffset
         raise.running = true
         fadeAndBlur.running = true
         burnsEffect.running = true
@@ -94,7 +96,7 @@ Rectangle {
         dividerValue: 1
         opacity: 1
         radius: 0.75
-        scale:currentScalefactor
+
         targetHeight: ssimg.height
         targetWidth: ssimg.width
         source: ShaderEffectSource { sourceItem: ssimg; hideSource: true }
