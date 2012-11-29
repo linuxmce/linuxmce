@@ -743,6 +743,98 @@ int ZWave::GetPKDevice(int iNodeId, int iInstanceID) {
 		return -1;
 }
 
+void ZWave::DoNodeToDeviceMapping()
+{
+	LoggerWrapper::GetInstance()->Write(LV_ZWAVE, "ZWave::DoNodeToDeviceMapping(): Listing nodes found in ZWave network");
+	list<NodeInfo*>::iterator it;
+	list<NodeInfo*> nodes = m_pZWInterface->GetNodes();
+	for (it = nodes.begin(); it != nodes.end(); it++)
+	{
+		NodeInfo *node = *it;
+		MapNodeToDevices(node);
+	}
+	// TODO: list unaccounted for children devices - maybe some nodes were removed from the ZWave network
+}
+
+void ZWave::MapNodeToDevices(NodeInfo* node)
+{
+	DeviceData_Impl* pDevice = GetDeviceForPortChannel(StringUtils::itos(node->m_nodeId));
+	LoggerWrapper::GetInstance()->Write(LV_ZWAVE, " * Node id=%d (PK_Device=%d)", node->m_nodeId, pDevice != NULL ? pDevice->m_dwPK_Device : 0);
+	if (pDevice = NULL)
+	{
+		LoggerWrapper::GetInstance()->Write(LV_WARNING, "  -> DEVICE NOT FOUND! Adding new device!");
+	}
+	if (node->m_values.size() > 0)
+	{
+		LoggerWrapper::GetInstance()->Write(LV_ZWAVE, "  -> Values:");
+		list<OpenZWave::ValueID>::iterator valIt;
+		for ( valIt = node->m_values.begin(); valIt != node->m_values.end(); valIt++)
+		{	
+			OpenZWave::ValueID value = *valIt;
+			string label = OpenZWave::Manager::Get()->GetValueLabel(value);
+			DeviceData_Impl* pDevice_Inst = GetDeviceForPortChannel(StringUtils::itos(node->m_nodeId)+"/"+StringUtils::itos(value.GetInstance()));
+			// if NULL, try without instance
+			if (pDevice_Inst == NULL)
+			{
+				pDevice_Inst = GetDeviceForPortChannel(StringUtils::itos(node->m_nodeId));
+			}
+			LoggerWrapper::GetInstance()->Write(LV_ZWAVE, "   - Instance=%d, class=%d, label=%s (PK_Device=%d)", value.GetInstance(), value.GetCommandClassId(), label.c_str(),  pDevice_Inst != NULL ? pDevice_Inst->m_dwPK_Device : 0);
+			if (pDevice_Inst == NULL)
+			{
+				LoggerWrapper::GetInstance()->Write(LV_WARNING, "    -> NOT FOUND! Adding new device!");
+			}
+		}
+	}
+}
+
+int ZWave::AddDevice(int parent, int iNodeId, int iInstanceId, int PK_DeviceTemplate) {
+	int iPK_Device = 0;
+/*
+	int tmp_parent = 0;
+	if (parent > 0) { tmp_parent = parent; } else { tmp_parent = m_dwPK_Device; }
+
+	string tmp_s = StringUtils::itos(DEVICEDATA_PortChannel_Number_CONST) + "|" + sInternalID;
+	DeviceData_Impl *pDevice = InternalIDToDevice(sInternalID, iInstanceID);
+	bool bFound = pDevice != NULL;
+	
+	if (!bFound) {
+	        string sInternalIDInst = sInternalID;
+		if (iInstanceID > 0) {
+		        sInternalIDInst = sInternalIDInst + "/" + StringUtils::itos(iInstanceID);
+		}
+		// does not exist, create child
+		LoggerWrapper::GetInstance()->Write(LV_ZWAVE, "Adding device for node: %s",sInternalIDInst.c_str());
+		// CMD_Create_Device add_command(m_dwPK_Device,DEVICETEMPLATE_VirtDev_General_Info_Plugin_CONST, PK_DeviceTemplate,"",0,"",
+		CMD_Create_Device add_command(m_dwPK_Device,4, PK_DeviceTemplate,"",0,"",
+			StringUtils::itos(DEVICEDATA_PortChannel_Number_CONST) + "|" + sInternalIDInst, 0,tmp_parent,"",0,0,&iPK_Device) ;
+		SendCommand(add_command);
+	} else {
+	        iPK_Device = pDevice->m_dwPK_Device;
+	}
+*/
+	return iPK_Device;
+
+} 
+bool ZWave::DeleteDevicesForNode(int iNodeId) {
+/*	DeviceData_Impl *pTargetChildDevice = NULL;
+	// CMD_Delete_Device del_command(m_dwPK_Device,DEVICETEMPLATE_VirtDev_General_Info_Plugin_CONST,device_id);
+
+        vector<DeviceData_Impl *> vectDevices = FindDevicesForNode(sInternalID);
+	if (vectDevices.size() > 0) {
+	        for( vector<DeviceData_Impl*>::const_iterator it = vectDevices.begin(); it != vectDevices.end(); ++it )
+		{
+		        pTargetChildDevice = (*it);
+			CMD_Delete_Device del_command(m_dwPK_Device,4,pTargetChildDevice->m_dwPK_Device);
+			DCE::LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"Deleting DCE child %i, z-wave node id %s",pTargetChildDevice->m_dwPK_Device,sInternalID.c_str());
+
+			SendCommand(del_command);
+		}
+		return true;
+		} else*/ {
+		return false;
+		}
+}
+
 void ZWave::ReportBatteryStatus(int PK_Device, int status)
 {
         LoggerWrapper::GetInstance()->Write(LV_WARNING, "ZWave::ReportBatteryStatus(): PK_Device %d", PK_Device);

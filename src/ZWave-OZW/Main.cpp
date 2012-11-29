@@ -229,6 +229,7 @@ int main(int argc, char* argv[])
 						pZWInterface->Init(pZWave->GetConfigData());
 					}
 				}
+				pZWave->DoNodeToDeviceMapping();
 				LoggerWrapper::GetInstance()->Write(LV_ZWAVE, "ZWave+ZWInterface setup done, joining DCE thread");
 
 				if( bLocalMode )

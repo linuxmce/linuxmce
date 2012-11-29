@@ -55,6 +55,11 @@ public:
 		DeviceData_Impl* GetDevice(int iNodeId, int iInstanceID);
 		DeviceData_Impl *GetDeviceForPortChannel(string sPortChannel);
 		int GetPKDevice(int iNodeId, int iInstanceID);
+		int AddDevice(int parent, int iNodeID, int iInstanceID, int PK_DeviceTemplate);
+		bool DeleteDevicesForNode(int iNodeId);
+		void DoNodeToDeviceMapping();
+		void MapNodeToDevices(NodeInfo* node);
+
 		void ReportBatteryStatus(int iNodeId, int status);
 		void SendTemperatureChangedEvent(unsigned int PK_Device, float value);
 		void SendSensorTrippedEvent(unsigned int PK_Device, bool state);
