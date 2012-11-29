@@ -52,6 +52,7 @@ public:
 	  int m_iJoy2fd;
 	  int m_iJoy3fd;
 	  int m_iJoy4fd;
+	  int m_iErrors;
 	  class AlarmManager *m_pAlarmManager;
 	  void AlarmCallback (int id, void *param);
 	  string m_sAVWHost;
