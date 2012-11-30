@@ -33,7 +33,7 @@ sources += \
 #<-dceag-mf-b->!
 LDLIBS_NAMES = $(INTERNAL_LIBS_NAMES) $(EXTERNAL_LIBS_NAMES)
 
-whattodo:
+whattodo: so
 	@echo "type 'make bin', 'make so' or 'make all'"
 
 all: bin so
@@ -44,12 +44,14 @@ so: Xine_Plugin.so
 
 Xine_Plugin.so: $(sources:.cpp=.o) $(INTERNAL_LIBS_NAMES:%=$(ROOT)/lib/lib%.so) Makefile
 	$(CXX) -shared -o $(MYNAME).so $(call cpath,$(sources:.cpp=.o)) $(LDFLAGS) $(LDLIBS_NAMES:%=-l%)
+	mkdir -p ../bin
 	cp $@ ../bin
 	chmod +x post_make.sh
 	./post_make.sh $@
 
 Xine_Plugin: $(sources:.cpp=.o) $(INTERNAL_LIBS_NAMES:%=$(ROOT)/lib/lib%.so) Makefile
 	$(CXX) -o $(MYNAME) $(call cpath,$(sources:.cpp=.o)) $(LDFLAGS) $(LDLIBS_NAMES:%=-l%)
+	mkdir -p ../bin
 	cp $@ ../bin
 	./post_make.sh $@
 
@@ -68,5 +70,5 @@ endif
 
 
 install: 
-	mkdir -p $(DESTPATH)/usr/pluto/bin
-	cp Xine_Plugin.so $(DESTPATH)/usr/pluto/bin
+	mkdir -p $(DESTDIR)/usr/pluto/bin
+	cp Xine_Plugin.so $(DESTDIR)/usr/pluto/bin
