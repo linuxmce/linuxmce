@@ -24,14 +24,24 @@ Table_psc_game_repset.cpp \
 Table_psc_game_schema.cpp \
 Table_psc_game_tables.cpp
 
+headers = *.h
+
 all: liblmce_game.so all-recursive
 
 liblmce_game.so: $(sources:.cpp=.o)
 	$(CXX) -shared $(CXXFLAGS) $(CPPFLAGS) -o $@ $(call cpath,$+)
+	mkdir -p ../lib
 	cp $@ ../lib
+
+distclean: clean
 
 clean: clean-recursive
 	rm -f *.o *.d liblmce_game.so >/dev/null
 
 include $(ROOT)/PlutoUtils/make.rules
 -include $(sources:.cpp=.d)
+
+install: 
+	mkdir -p $(DESTDIR)/usr/include $(DESTDIR)/usr/lib
+	cp $(headers) $(DESTDIR)/usr/include
+	cp liblmce_game.so $(DESTDIR)/usr/lib

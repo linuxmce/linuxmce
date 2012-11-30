@@ -1,0 +1,23 @@
+Source: lmce-game
+Priority: extra
+Maintainer: LinuxMCE Developers <developers@linuxmce.org>
+Build-Depends: debhelper (>= 8.0.0)
+Standards-Version: 3.9.2
+Section: libs
+Homepage: http://www.linuxmce.org
+#Vcs-Git: git://git.debian.org/collab-maint/lmce-game.git
+#Vcs-Browser: http://git.debian.org/?p=collab-maint/lmce-game.git;a=summary
+
+Package: lmce-game-dev
+Section: libdevel
+Architecture: any
+Depends: lmce-game (= ${binary:Version})
+Description: Linuxmce game database header
+ <insert long description, indented with spaces>
+
+Package: lmce-game
+Section: libs
+Architecture: any
+Depends: ${shlibs:Depends}, ${misc:Depends}
+Description: LinuxMCE game database library
+ <insert long description, indented with spaces>
