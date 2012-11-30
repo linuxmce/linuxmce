@@ -30,7 +30,7 @@ sources += HuluMediaStream.cpp
 #<-dceag-mf-b->
 LDLIBS = $(XTRALDLIBS) $(BASELDLIBS)
 
-whattodo:
+whattodo: so
 	@echo "type 'make bin', 'make so' or 'make all'"
 
 all: bin so
@@ -41,14 +41,18 @@ so: Hulu_PlugIn.so
 
 Hulu_PlugIn.so: $(sources:.cpp=.o)
 	$(CXX) -shared -o $(MYNAME).so $(call cpath,$+) $(LDFLAGS) $(LDLIBS)
+	mkdir -p ../bin
 	cp $@ ../bin
 	chmod +x post_make.sh
 	./post_make.sh $@
 		
 Hulu_PlugIn: $(sources:.cpp=.o)
 	$(CXX) -o $(MYNAME) $(call cpath,$+) $(LDFLAGS) $(LDLIBS)
+	mkdir -p ../bin
 	cp $@ ../bin
 	./post_make.sh $@
+
+distclean: clean
 
 clean: clean-recursive
 	rm -f $(call cpath,$(sources:.cpp=.o) $(sources:.cpp=.d)) Hulu_PlugIn Hulu_PlugIn.so >/dev/null
@@ -65,5 +69,5 @@ endif
 
 
 install: 
-	mkdir -p /usr/pluto/bin
-	cp Hulu_PlugIn.so $(DESTPATH)/usr/pluto/bin
+	mkdir -p $(DESTDIR)/usr/pluto/bin
+	cp Hulu_PlugIn.so $(DESTDIR)/usr/pluto/bin
