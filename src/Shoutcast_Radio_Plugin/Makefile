@@ -1,8 +1,8 @@
 #<-dceag-mh-b->
 GENDEV=../Gen_Devices
 
-SNR_CPPFLAGS ?= -DKDE_LMCE -DDEBUG -DTHREAD_LOG -DLOG_ALL_QUERIES
-SNR_LDFLAGS ?= 
+SNR_CPPFLAGS = -DKDE_LMCE -DDEBUG -DTHREAD_LOG -DLOG_ALL_QUERIES
+SNR_LDFLAGS = 
 
 ROOT = ..
 CXX = g++
@@ -30,7 +30,7 @@ sources +=
 #<-dceag-mf-b->
 LDLIBS = $(XTRALDLIBS) $(BASELDLIBS)
 
-whattodo:
+whattodo: so
 	@echo "type 'make bin', 'make so' or 'make all'"
 
 all: bin so
@@ -41,12 +41,14 @@ so: Shoutcast_Radio_Plugin.so
 
 Shoutcast_Radio_Plugin.so: $(sources:.cpp=.o)
 	$(CXX) -shared -o $(MYNAME).so $(call cpath,$+) $(LDFLAGS) $(LDLIBS)
+	mkdir -p ../bin
 	cp $@ ../bin
 	chmod +x post_make.sh
 	./post_make.sh $@
 		
 Shoutcast_Radio_Plugin: $(sources:.cpp=.o)
 	$(CXX) -o $(MYNAME) $(call cpath,$+) $(LDFLAGS) $(LDLIBS)
+	mkdir -p ../bin
 	cp $@ ../bin
 	./post_make.sh $@
 
@@ -65,5 +67,5 @@ endif
 
 
 install: 
-	mkdir -p /usr/pluto/bin
-	cp Shoutcast_Radio_Plugin.so $(DESTPATH)/usr/pluto/bin
+	mkdir -p $(DESTDIR)/usr/pluto/bin
+	cp Shoutcast_Radio_Plugin.so $(DESTDIR)/usr/pluto/bin
