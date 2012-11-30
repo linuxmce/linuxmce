@@ -1,8 +1,8 @@
 #<-dceag-mh-b->
 GENDEV=../Gen_Devices
 
-SNR_CPPFLAGS ?= -DKDE_LMCE -DDEBUG -DTHREAD_LOG -DLOG_ALL_QUERIES
-SNR_LDFLAGS ?= 
+SNR_CPPFLAGS = -DKDE_LMCE -DDEBUG -DTHREAD_LOG -DLOG_ALL_QUERIES
+SNR_LDFLAGS = 
 
 ROOT = ..
 CXX = g++
@@ -30,7 +30,7 @@ sources += XML_Data_Factory.cpp XML_Data_CallBack.cpp
 #<-dceag-mf-b->
 LDLIBS = $(XTRALDLIBS) $(BASELDLIBS)
 
-whattodo:
+whattodo: so
 	@echo "type 'make bin', 'make so' or 'make all'"
 
 all: bin so
@@ -50,6 +50,7 @@ XML_Data_Handler_Plugin: $(sources:.cpp=.o)
 	cp $@ ../bin
 	./post_make.sh $@
 
+distclean: clean
 clean: clean-recursive
 	rm -f $(call cpath,$(sources:.cpp=.o) $(sources:.cpp=.d)) XML_Data_Handler_Plugin.bin XML_Data_Handler_Plugin.so >/dev/null
 
@@ -65,6 +66,6 @@ endif
 
 
 install: 
-	mkdir -p /usr/pluto/bin
-	cp Basic_XML_Data_Source_Plugin.so $(DESTPATH)/usr/pluto/bin
-	cp XML_Data_Handler_Plugin.so $(DESTPATH)/usr/pluto/bin
+	mkdir -p $(DESTDIR)/usr/pluto/bin
+#	cp Basic_XML_Data_Source_Plugin.so $(DESTPATH)/usr/pluto/bin
+	cp XML_Data_Handler_Plugin.so $(DESTDIR)/usr/pluto/bin
