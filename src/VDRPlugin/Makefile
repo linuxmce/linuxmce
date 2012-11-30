@@ -30,7 +30,7 @@ sources += VDRMediaStream.cpp
 #<-dceag-mf-b->
 LDLIBS = $(XTRALDLIBS) $(BASELDLIBS)
 
-whattodo:
+whattodo: so
 	@echo "type 'make bin', 'make so' or 'make all'"
 
 all: bin so
@@ -41,14 +41,18 @@ so: VDRPlugin.so
 
 VDRPlugin.so: $(sources:.cpp=.o)
 	$(CXX) -shared -o $(MYNAME).so $(call cpath,$+) $(LDFLAGS) $(LDLIBS)
+	mkdir -p ../bin
 	cp $@ ../bin
 	chmod +x post_make.sh
 	./post_make.sh $@
 		
 VDRPlugin: $(sources:.cpp=.o)
 	$(CXX) -o $(MYNAME) $(call cpath,$+) $(LDFLAGS) $(LDLIBS)
+	mkdir -p ../bin
 	cp $@ ../bin
 	./post_make.sh $@
+
+distclean: clean
 
 clean: clean-recursive
 	rm -f $(call cpath,$(sources:.cpp=.o) $(sources:.cpp=.d)) VDRPlugin.bin VDRPlugin.so >/dev/null
@@ -65,5 +69,5 @@ endif
 
 
 install: 
-	mkdir -p $(DESTPATH)/usr/pluto/bin
-	cp VDRPlugin.so $(DESTPATH)/usr/pluto/bin
+	mkdir -p $(DESTDIR)/usr/pluto/bin
+	cp VDRPlugin.so $(DESTDIR)/usr/pluto/bin

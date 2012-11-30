@@ -11,6 +11,6 @@
 
 %:
 	dh  $@
-build: 
-	make all
+#build: 
+#	make all
 
