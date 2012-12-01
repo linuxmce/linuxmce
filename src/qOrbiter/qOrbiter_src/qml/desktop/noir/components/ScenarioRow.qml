@@ -5,15 +5,28 @@ import "../js/ComponentLoader.js" as MyJs
 
 Rectangle {
     id:scenarios
-    width: appW
-    height:appH *.10
-   // color: "grey"
+    width: parent.width
+    height:manager.appHeight *.10
+    color: "transparent"
     radius: 5
-    gradient: style.generalGradient
+    Image {
+        id: rowBg
+        source: "../img/thin_bar.png"
+        anchors.fill: parent
+    }
     property double buttonWidth:150
     property double buttonHeight:50
-    property double scenarioFontSize:appH * .03
+    property double scenarioFontSize:manager.appHeight * .03
     anchors.horizontalCenter: parent.horizontalCenter
+
+    ScenarioPopup{
+        id:popupHolder
+        scenarioModel: currentRoomLights
+        componentHeight: buttonHeight
+        componentWidth: buttonWidth
+        scenarioName: "Lighting"
+
+    }
 
     Row{
         id:modelRow
@@ -22,136 +35,35 @@ Rectangle {
         spacing: 10
         anchors.horizontalCenter: parent.horizontalCenter
 
-        Rectangle{
-            id:lightsTect
-            height: buttonHeight
-            width: buttonWidth
-            property bool popEnabled: false
-            color: "transparent"
-            Text {
-                id: lLabel
-                text: qsTr("Lights")
-                anchors.centerIn: parent
-                color: "white"
-                font.pixelSize: scenarioFontSize
-            }
-            MouseArea{
-                anchors.fill: parent
-                hoverEnabled: true
-                onEntered: {
-                    if(!parent.popEnabled)
-                    {
-
-                    MyJs.createScenarioBox(currentRoomLights, 100, 400, parent )
-                    }
-                }
-            }
+        ScenarioTrigger {
+            id: lightingTrigger
+            triggerLabel: "Lights"
+            targetModel: currentRoomLights
         }
 
-        Rectangle{
-            id:mediaRect
-            height: buttonHeight
-            width: buttonWidth
-            color: "transparent"
-            property bool popEnabled:false
-            Text {
-                id: mLabel
-                text: qsTr("Media")
-                anchors.centerIn: parent
-                color: "white"
-                font.pixelSize: scenarioFontSize
-            }
-            MouseArea{
-                anchors.fill: parent
-                hoverEnabled: true
-                onEntered: {
-                    if(!parent.popEnabled)
-                    {
 
-                    MyJs.createScenarioBox(currentRoomMedia, 100, 400, parent )
-                    }
-                }
-            }
+       ScenarioTrigger{
+           id:mediaTrigger
+           triggerLabel: "Media"
+           targetModel: currentRoomMedia
+       }
+
+    ScenarioTrigger{
+        id:climateTrigger
+        triggerLabel: "Climate"
+        targetModel: currentRoomClimate
+    }
+
+        ScenarioTrigger{
+            id:securityTrigger
+            triggerLabel:"Security"
+            targetModel: currentRoomSecurity
         }
 
-        Rectangle{
-            id:climateRect
-            height: buttonHeight
-            width: buttonWidth
-            color: "transparent"
-            property bool popEnabled:false
-            Text {
-                id: cLabel
-                text: qsTr("Climate")
-                anchors.centerIn: parent
-                color: "white"
-                font.pixelSize: scenarioFontSize
-            }
-            MouseArea{
-                anchors.fill: parent
-                hoverEnabled: true
-                onEntered: {
-                    if(!parent.popEnabled)
-                    {
-
-                    MyJs.createScenarioBox(currentRoomClimate, 100, 400, parent )
-                    }
-                }
-            }
-        }
-
-        Rectangle{
-            id:securityRect
-            height: buttonHeight
-            width: buttonWidth
-            color: "transparent"
-            property bool popEnabled:false
-            Text {
-                id: sLabel
-                text: qsTr("Security")
-                anchors.centerIn: parent
-                color: "white"
-                font.family: "Nimbus Sans L"
-                font.pixelSize: scenarioFontSize
-            }
-            MouseArea{
-                anchors.fill: parent
-                hoverEnabled: true
-                onEntered: {
-                    if(!parent.popEnabled)
-                    {
-
-                    MyJs.createScenarioBox(currentRoomSecurity, 100, 400, parent )
-                    }
-                }
-            }
-        }
-
-        Rectangle{
-            id:telecomRect
-            height: buttonHeight
-            width: buttonWidth
-            color: "transparent"
-            property bool popEnabled:false
-            Text {
-                id: tLabel
-                text: qsTr("Telecom")
-                anchors.centerIn: parent
-                color: "white"
-                font.family: "Nimbus Sans L"
-                font.pixelSize: scenarioFontSize
-            }
-            MouseArea{
-                anchors.fill: parent
-                hoverEnabled: true
-                onEntered: {
-                    if(!parent.popEnabled)
-                    {
-
-                    MyJs.createScenarioBox(currentRoomTelecom, 100, 400, parent )
-                    }
-                }
-            }
+        ScenarioTrigger{
+            id:telecomTrigger
+            triggerLabel: "Telecom"
+            targetModel: currentRoomTelecom
         }
 
         Rectangle{
@@ -173,12 +85,11 @@ Rectangle {
 
     Row{
         id:presenceRow
-        height: 100
-        width: modelRow.width
-        anchors.bottom: scenarios.bottom
+        height: childrenRect.height
+        width: manager.appWidth
+        anchors.top: modelRow.bottom
         anchors.horizontalCenter: parent.horizontalCenter
         spacing: 5
-
         Rectangle{
             id:roomRect
             height: 50
@@ -187,7 +98,6 @@ Rectangle {
             Text {
                 id: roomLabel
                 text: qsTr("room")
-
                 anchors.left: parent.left
                 color: "white"
                 font.family: "Nimbus Sans L"
@@ -208,6 +118,7 @@ Rectangle {
             height: 50
             width: 85
             color: "transparent"
+
             Text {
                 id: userLabel
                 text: qsTr("user:")

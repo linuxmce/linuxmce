@@ -11,10 +11,6 @@ Rectangle {
     color: "transparent"
     //focus:true
 
-
-
-
-
 }
 
 

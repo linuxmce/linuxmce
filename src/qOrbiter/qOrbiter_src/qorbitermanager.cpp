@@ -71,7 +71,7 @@ qorbiterManager::qorbiterManager(QDeclarativeView *view, QObject *parent) :
     // b_skinsReady = false;
     // b_orbiterReady = false;
     bAppError = false;
-
+    isPhone = 0;
     //this governs local vs remote loading. condensed to one line, and will be configurable from the ui soon.
 #ifndef __ANDROID__
     b_localLoading = true;
@@ -159,11 +159,25 @@ qorbiterManager::qorbiterManager(QDeclarativeView *view, QObject *parent) :
 #elif defined (__ANDROID__)
     if (qorbiterUIwin->width() > 480 && qorbiterUIwin-> height() > 854 || qorbiterUIwin->height() > 480 && qorbiterUIwin-> width() > 854 )
     {
-        buildType = "/qml/android/tablet";
+
+        if (isPhone !=1){
+           buildType = "/qml/android/tablet";
+          setFormFactor(2);
+        }
+        else{
+            buildType = "/qml/android/phone";
+        }
+
     }
     else
-    {
-        buildType = "/qml/android/phone";
+    {   if(isPhone !=2){
+            buildType = "/qml/android/phone";
+            setFormFactor(1);
+        }
+        else{
+           buildType = "/qml/android/tablet";
+        }
+
     }
 
     qrcPath = ":android/Splash.qml";
@@ -866,8 +880,9 @@ void qorbiterManager::skinLoaded(QDeclarativeView::Status status)
 //takes care of un-registering the orbiter from the DCERouter and then shutting down
 void qorbiterManager::closeOrbiter()
 {
-    setDceResponse("Shutting Down");
-    QApplication::processEvents(QEventLoop::AllEvents);
+    if(writeConfig()){
+      setDceResponse("Shutting Down");
+    }
 #ifndef __ANDROID__
     LoggerWrapper::GetInstance()->Write(LV_CRITICAL, "Orbiter Exiting, Unregistering 1st");
 #endif
@@ -1056,7 +1071,13 @@ bool qorbiterManager::loadSkins(QUrl base)
     tskinModel->addSkin("default");
 
 #elif __ANDROID__
-    tskinModel->addSkin("default,data,wip");
+    if(isPhone){
+        tskinModel->addSkin("default");
+    }
+    else{
+       tskinModel->addSkin("default,data,wip");
+    }
+
 
 #elif for_android
     tskinModel->addSkin("default");
@@ -1255,6 +1276,13 @@ bool qorbiterManager::readLocalConfig()
                 setDebugMode(true);
             }
 
+            if(!configVariables.namedItem("phone").attributes().namedItem("id").nodeValue().toInt() == 1 )
+            {
+                setFormFactor(1);
+            }
+            else{
+                setFormFactor(2);
+            }
         }
         return true;
     }
@@ -1307,6 +1335,8 @@ bool qorbiterManager::writeConfig()
             configVariables.namedItem("device").attributes().namedItem("id").setNodeValue(QString::number(iPK_Device));
             configVariables.namedItem("firstrun").attributes().namedItem("id").setNodeValue(QString("false"));
             configVariables.namedItem("debug").attributes().namedItem("id").setNodeValue(debugMode ==true? "true" : "false");
+            configVariables.namedItem("phone").attributes().namedItem("id").setNodeValue(QString::number(isPhone));
+            configVariables.namedItem("mobile_storage").attributes().namedItem("id").setNodeValue(QString::number(isPhone));
             QByteArray output = localConfig.toByteArray();
             localConfigFile.open(QFile::ReadWrite);
             if (!localConfigFile.write(output))
@@ -1643,9 +1673,11 @@ void qorbiterManager::killScreenSaver()
 bool qorbiterManager::createAndroidConfig()
 {
 
-    QFile droidConfig(mobileStorageLocation);
+    QFile droidConfig(mobileStorageLocation+"/config.xml");
+    setDceResponse(mobileStorageLocation);
     if (droidConfig.exists() && droidConfig.size() != 0)
-    {   setDceResponse("Data exists, exiting 1st run");
+    {
+        setDceResponse("Data exists, exiting 1st run");
         return true;
     }
     else

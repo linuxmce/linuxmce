@@ -8,8 +8,8 @@ import "js/ComponentLoader.js" as MyJs
 
 Item {
     id: item
-    width:appW
-    height:appH
+    width:manager.appWidth
+    height:manager.appHeight
     //focus:true
     signal close()
     signal changeScreen(string s)
@@ -22,21 +22,14 @@ Item {
     function checkLayout()
     {
         console.log("c++ slot orientation changed")
-        console.log(appW+" x " + appH)
+        console.log(manager.appHeight+" x " + manager.appWidth)
     }
-
 
     Connections{
         target: manager
         onOrientationChanged: checkLayout()
     }
-    /*
-    Image {
-    id: bg
-    source: "img/icons/backgrounds/livingroom.png"
-    anchors.fill:parent
-    }
-*/
+
     ScreenSaver{
         id:pss
         anchors.centerIn: parent

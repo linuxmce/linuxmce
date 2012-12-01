@@ -5,8 +5,12 @@ Rectangle {
     id:mediaHeader
     width: appW
     height: appH *.06
-    //color: "transparent"
-    gradient:style.generalGradient
+    color: "transparent"
+    Image {
+        id: hdrbg
+        source: "../img/thin_bar.png"
+        anchors.fill: parent
+    }
 
     anchors.top: parent.top
 

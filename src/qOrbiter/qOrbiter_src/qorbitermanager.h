@@ -208,6 +208,7 @@ public:
     //FileReader * fileReader;
 #endif
     bool b_glEnabled;
+    int isPhone;
     //settings
     QString sPK_User;
     QString buildType;
@@ -609,6 +610,8 @@ signals:
 
 
 public slots:
+   void setFormFactor(int f) {isPhone = f;}
+
     void sendDceMessage(QString m) {emit newMessageSend(m);}
 
     void requestMediaSubtypes(){emit requestSubtypes();}

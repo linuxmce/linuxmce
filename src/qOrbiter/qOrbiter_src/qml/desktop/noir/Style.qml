@@ -39,13 +39,13 @@ Item{
     property int homescreenrowheight:100
     property int homescreenbuttonheight: 90
     property int homesreenbuttonwidth: 90
-    property color homescreenscenariobuttoncolor: "darkgrey"
+    property color homescreenscenariobuttoncolor: "#003366"
     property color homescreenfloorplanbuttoncolor: "lightgrey"
     property color homeScreenNowPlayingColorInActive: "black"
     property color homeScreenNowPlayingColorActive: "grey"
-    property color highlight1: "white"
+    property color highlight1: "#993300"
     property color lighttext: "slategrey"
-    property color darkhighlight: "black"
+    property color darkhighlight: "#99CC99"
     //icon sizes
     property int iconHeight: 90
     property int iconWidth: 90

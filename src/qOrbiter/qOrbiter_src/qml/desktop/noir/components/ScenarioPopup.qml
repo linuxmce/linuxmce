@@ -6,55 +6,46 @@ Rectangle {
     property variant scenarioModel
     property int componentHeight
     property int componentWidth
+    property string scenarioName
     property color bgColor :"transparent"
     property color delegateActiveColor:"grey"
     property color delegatePressedColor: "darkgrey"
     property color delegateHoverColor: "lightgrey"
+    property bool popEnabled:false
+    z:10
+    focus: false
     color: bgColor
-    Component.onCompleted: parent.popEnabled = true
+    onPopEnabledChanged: popEnabled ? showScenarios():""
 
+    function showScenarios(){
+        focus = true
+        forceActiveFocus()
+        scenarioView.visible = true
+    }
+
+    width: componentWidth
+    height: componentHeight
     Timer{
         id:closeTimer
         interval: 750
         triggeredOnStart: false
         running: true
         onTriggered: {
-            scenarioPopup.parent.popEnabled = false;
-            scenarioPopup.destroy()
+            popEnabled = false
+            scenarioModel=""
         }
     }
-    width: componentWidth
-    height: componentHeight
-    anchors.bottom: parent.top
-
-    ListView{
-        id:scenarioList
-        height: componentHeight
-        width: componentWidth
-
-        anchors.centerIn: scenarioPopup
-        model: scenarioModel
-        delegate: Rectangle{
-            height: 50
-            width: componentWidth
-            color: delegateHit.containsMouse ? delegateHit.pressed ? delegatePressedColor : delegateHoverColor : delegateActiveColor
-            Text {
-                id: scenarioItem
-                text: title
-                font.pixelSize: 12
-                anchors.centerIn: parent
-            }
-            MouseArea{
-                anchors.fill: parent
-                id:delegateHit
-                hoverEnabled: true
-                onClicked:manager.executeCommandGroup(params);
-                onExited: closeTimer.start()
-                onEntered: closeTimer.stop()
-            }
-        }
-
-
+    MouseArea{
+        anchors.fill: parent
+        hoverEnabled: true
+        onEntered: popEnabled = true
+        onExited: closeTimer.start()
     }
 
+    HorizontalScenarios{
+        id:scenarioView
+        anchors.bottom: scenarioPopup.top
+        anchors.bottomMargin: buttonHeight*.20
+        visible: popEnabled ? true : false
+    }
 }

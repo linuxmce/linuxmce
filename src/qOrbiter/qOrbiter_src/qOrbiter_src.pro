@@ -217,24 +217,31 @@ macx{
         folder_03.source = config.xml
         folder_03.target = $$DESTDIR
 
-        qmlcomponents.source = androidComponents
-        qmlcomponents.target = imports/
+        qmlcomponents.source = ../Android/androidComponents
+        qmlcomponents.target = imports
 
-        qmlplugins.files = androidPlugins/libqmlshadersplugin.so
-        qmlplugins.files += androidPlugins/libandroidplugin_1_1.so
 
         x86 {
+                qmlplugins.files = ../Android/androidPlugins/x86/libqmlshadersplugin.so
+                  qmlplugins.files += ../Android/androidPlugins/x86/libandroidplugin_1_1.so
                 qmlplugins.path = /libs/x86
+
         } else: armeabi-v7a {
+        qmlplugins.files = ../Android/androidPlugins/armeabi-v7a/libqmlshadersplugin.so
+        qmlplugins.files += ../Android/androidPlugins/armeabi-v7a/libandroidplugin_1_1.so
                 qmlplugins.path = /libs/armeabi-v7a
+
         } else {
+        qmlplugins.files = ../Android/androidPlugins/armeabi/libqmlshadersplugin.so
+        qmlplugins.files += ../Android/androidPlugins/armeabi/libandroidplugin_1_1.so
                 qmlplugins.path = /libs/armeabi
+
         }
 
 	INSTALLS+= qmlplugins
         DEFINES+=ANDROID
         DEPLOYMENTFOLDERS = qmlcomponents base #folder_01
-	QML_IMPORT_PATH = "androidComponents"
+        QML_IMPORT_PATH = "androidComponents"
 }
 
 linux-rasp-pi-g++{
