@@ -5,7 +5,7 @@ MouseArea{
     anchors.fill: parent
     onClicked: {
         manager.execGrp(params);
-       parent.destroy()
+        generic_model_display.state = "inactive"
     }
 
 }

@@ -1,12 +1,16 @@
-MediaListClickeHandler 1.0 MediaListClickHandler.qml
-PlayAll 1.0 PlayAll.qml
-PlaylistClickedHandler 1.0 PlaylistClickedHandler.qml
-PlaylistMoveHandler 1.0 PlaylistMoveHandler.qml
-PlaylistRemoveItemHandler 1.0 PlaylistRemoveItemHandler.qml
-PlaylistSavePublicHandler 1.0 PlaylistSavePublicHandler.qml
-ArrowDownHandler 1.0 ArrowDownHandler.qml
-ArrowUpHandler 1.0 ArrowUpHandler.qml
-ArrowLeftHandler 1.0 ArrowLeftHandler.qml
-ArrowRightHandler 1.0 ArrowRightHandler.qml
-EnterButtonHandler 1.0 EnterButtonHandler.qml
-ScenarioButtonHandler 1.0 ScenarioButtonHandler.qml
+MediaListClickeHandler MediaListClickHandler.qml
+PlayAll PlayAll.qml
+PlaylistClickedHandler PlaylistClickedHandler.qml
+PlaylistMoveHandler  PlaylistMoveHandler.qml
+PlaylistRemoveItemHandler  PlaylistRemoveItemHandler.qml
+PlaylistSavePublicHandler PlaylistSavePublicHandler.qml
+ArrowDownHandler  ArrowDownHandler.qml
+ArrowUpHandler  ArrowUpHandler.qml
+ArrowLeftHandler  ArrowLeftHandler.qml
+ArrowRightHandler ArrowRightHandler.qml
+EnterButtonHandler  EnterButtonHandler.qml
+ScenarioButtonHandler  ScenarioButtonHandler.qml
+StopMediaHandler StopMediaHandler.qml
+PauseButtonHandler PauseButtonHandler.qml
+ChangeTrackHandler ChangeTrackHandler.qml
+PlaybackSpeedHandler PlaybackSpeedHandler.qml
