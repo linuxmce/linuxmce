@@ -1,4 +1,5 @@
 import QtQuick 1.0
+import "../../lib/handlers/"
 Component{
 
     Item{
@@ -32,16 +33,12 @@ Component{
                 anchors.right: delegatemenu.right
             }
 
-            MouseArea{
-                id:delegateHit
-                anchors.fill: parent
-                onClicked: {
-                    manager.executeCommandGroup(params);
-                    loadComponent("NullComponent.qml")
-                }
+            ScenarioButtonHandler {
+                id: delegateHit
                 onPressed:  delegatemenu.color = "orange"
                 onReleased: delegatemenu.color = "transparent"
             }
+
         }
     }
     /*

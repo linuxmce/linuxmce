@@ -7,16 +7,16 @@ import QtQuick 1.0
 
 Rectangle {
     id: rectangle1
-    width: appH
-    height: appW
+    width: manager.appWidth
+    height: manager.appHeight
     onHeightChanged: updateOrientation()
     color: "slategrey"
     signal setupStart(string x, string y)
     signal splashLoaded()
 
     function updateOrientation(){
-        rectangle1.height =appH
-        rectangle1.width = appW
+        rectangle1.height =manager.appHeight
+        rectangle1.width = manager.appWidth
     }
 
     Image {
@@ -66,9 +66,6 @@ Rectangle {
             text: qsTr("Orbiter Config")
            // opacity: 0
         }
-
-
-
     }
 
     function screenchange(screenname )

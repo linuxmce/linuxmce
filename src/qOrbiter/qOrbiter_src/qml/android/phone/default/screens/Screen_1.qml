@@ -9,8 +9,8 @@ Rectangle {
     id:stage
     anchors.centerIn: parent
     signal swapStyle()
-    height: appH
-    width: appW
+    width:manager.appWidth
+    height:manager.appHeight
     color: "transparent"
 
     Image {
@@ -104,13 +104,12 @@ Rectangle {
                 anchors.fill: parent
                 onClicked: loadComponent("Power.qml")
             }
-
         }
 
         ButtonSq{
             height: scaleY(10)
             width: scaleX(10)
-            buttontext: currentuser
+            buttontext:manager.sPK_User
             MouseArea{
                 anchors.fill: parent
                 onClicked:  loadComponent("UserSelector.qml")
@@ -121,7 +120,7 @@ Rectangle {
             id:roombutton
             height: scaleY(5)
             width: scaleX(10)
-            buttontext: currentroom
+            buttontext: manager.currentRoom
             MouseArea{
                 anchors.fill: parent
                 onClicked:  loadComponent("RoomSelector.qml")

@@ -5,8 +5,8 @@ import "js/ComponentLoader.js" as MyJs
 
 Item {
     id: item
-    width:appW
-    height:appH
+    width:manager.appWidth
+    height:manager.appHeight
 
     signal close()
     signal changeScreen(string s)
@@ -18,10 +18,10 @@ Item {
     property string dynamic_width
 
     function scaleX(x){
-        return x/100*appW
+        return x/100*manager.appWidth
     }
     function scaleY(y){
-        return y/100*appH
+        return y/100*manager.appHeight
     }
 
 
@@ -80,8 +80,6 @@ Item {
     //=================Components==================================================//
     function loadComponent(componentName)
     {
-
-
         componentLoader.source = "components/"+componentName
         if (componentLoader.status == Component.Ready)
         {
@@ -100,17 +98,17 @@ Item {
         }
     }
 
-    function finishLoadingComponent ()
+    function finishLoadingComponent (comp)
     {
         if(componentLoader.status != Component.Ready)
         {
             console.log("finishing network load")
-            componentLoader.source = "components/"+componentName          
-            console.log("screen" + componentName + " loaded.")
+            componentLoader.source = "components/"+comp
+            console.log("screen" + comp + " loaded.")
         }
         else
         {
-            finishLoadingComponent(componentName)
+            finishLoadingComponent(comp)
         }
 
     }

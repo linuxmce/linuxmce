@@ -24,7 +24,7 @@ Rectangle{
             smooth:true
             MouseArea{
                 anchors.fill: parent
-                onClicked:  loadComponent("LightingSelector.qml")
+                onClicked:loadComponent("LightingSelector.qml")
             }
         }
 
