@@ -172,8 +172,8 @@ namespace DCE
 
     // Close display
     if (m_pEmulatorModel->m_pDisplay)
-      {
-	XCloseDisplay(m_pEmulatorModel->m_pDisplay);
+      { // Somehow this causes a crash. grrr..
+	//XCloseDisplay(m_pEmulatorModel->m_pDisplay);
       }
 
     return EmulatorController::stop(); // superclass, unsets running flag.
@@ -278,6 +278,9 @@ namespace DCE
       default:
 	if (m_pEmulatorModel->m_mapButtonToKeysyms_Exists(iPK_Button) && m_pEmulatorModel->m_bRunning)
 	  {
+	    LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"Sending key %d, modifier %d, to window %x",m_pEmulatorModel->m_mapButtonToKeysyms_Find(iPK_Button),
+													m_pEmulatorModel->m_iCurrentKeyModifier,
+													m_pEmulatorModel->m_iWindowId);
 	    WindowUtils::SendKeyToWindow(m_pEmulatorModel->m_pDisplay,
 					 m_pEmulatorModel->m_iWindowId,
 					 m_pEmulatorModel->m_mapButtonToKeysyms_Find(iPK_Button),

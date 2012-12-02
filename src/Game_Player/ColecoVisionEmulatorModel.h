@@ -17,6 +17,7 @@ namespace DCE
     ~ColecoVisionEmulatorModel();
 
     virtual void initializeActionstoKeysyms();
+    virtual void initializeButtontoKeysyms();
 
   };
 }
