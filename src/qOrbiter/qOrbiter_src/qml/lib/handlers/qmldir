@@ -9,3 +9,4 @@ ArrowUpHandler 1.0 ArrowUpHandler.qml
 ArrowLeftHandler 1.0 ArrowLeftHandler.qml
 ArrowRightHandler 1.0 ArrowRightHandler.qml
 EnterButtonHandler 1.0 EnterButtonHandler.qml
+ScenarioButtonHandler 1.0 ScenarioButtonHandler.qml
