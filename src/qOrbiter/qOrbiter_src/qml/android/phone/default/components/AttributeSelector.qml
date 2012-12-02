@@ -36,14 +36,13 @@ Rectangle {
             }
         }
         ButtonSq{
-
             buttontext: "Attribute Sort"
             buttonsqradius: 7
             height: style.stdbuttonh
             width: style.stdbuttonw
             MouseArea{
                 anchors.fill:parent
-                onReleased:loadComponent("AttributeTypes.qml")
+                onReleased:filterTarget.currentModel = attribfilter
             }
         }
 
@@ -55,7 +54,7 @@ Rectangle {
             width: style.stdbuttonw
             MouseArea{
                 anchors.fill:parent
-                onReleased: loadComponent("GenreSelector.qml")
+                onReleased: filterTarget.currentModel = genrefilter
             }
         }
 
@@ -68,7 +67,7 @@ Rectangle {
 
             MouseArea{
                 anchors.fill:parent
-                onReleased: loadComponent("MediaSources.qml")
+                onReleased: filterTarget.currentModel = mediasourcelist
             }
         }
 
@@ -82,7 +81,7 @@ Rectangle {
             width: style.stdbuttonw
             MouseArea{
                 anchors.fill:parent
-                onReleased: loadComponent("FileFormat.qml")
+                onReleased: filterTarget.currentModel = fileformatmodel
             }
         }
 
@@ -94,7 +93,7 @@ Rectangle {
             width: style.stdbuttonw
             MouseArea{
                 anchors.fill:parent
-                onReleased: loadComponent("MediaTypes.qml")
+                onReleased: filterTarget.currentModel = mediatypefilter
             }
         }
 

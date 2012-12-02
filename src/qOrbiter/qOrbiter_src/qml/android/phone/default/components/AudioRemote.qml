@@ -1,5 +1,5 @@
 import QtQuick 1.0
-
+import "../../lib/handlers"
 
 Rectangle {
     width: childrenRect.width
@@ -31,10 +31,10 @@ Rectangle {
             height: style.stdbuttonh
             width: style.stdbuttonw
             anchors.verticalCenter: parent.verticalCenter
-            MouseArea{
-                anchors.fill: parent               
-                onClicked: manager.changedTrack("-1")
-            }
+ChangeTrackHandler{
+    trackDirection: "-1"
+}
+
         }
 
         MediaButton {id:rw ;
@@ -43,9 +43,8 @@ Rectangle {
             height: style.stdbuttonh
             width: style.stdbuttonw
             anchors.verticalCenter: parent.verticalCenter
-            MouseArea{
-                anchors.fill: parent                
-                onClicked: manager.RwMedia(-2)
+            PlaybackSpeedHandler {
+                speed:-2
             }
         }
 
@@ -56,9 +55,7 @@ Rectangle {
             height: style.stdbuttonh
             width: style.stdbuttonw
             anchors.verticalCenter: parent.verticalCenter
-            MouseArea {
-                anchors.fill: parent                
-                onClicked: manager.PauseMedia()
+            PauseButtonHandler {
             }
         }
 
@@ -68,10 +65,9 @@ Rectangle {
             height: style.stdbuttonh
             width: style.stdbuttonw
             anchors.verticalCenter: parent.verticalCenter
-            MouseArea{
-                anchors.fill: parent                 
-                onClicked: manager.FfMedia(+2)
-            }
+           PlaybackSpeedHandler{
+               speed:2
+           }
 
         }
         MediaButton {id:next ;
@@ -80,9 +76,8 @@ Rectangle {
             height: style.stdbuttonh
             width: style.stdbuttonw
             anchors.verticalCenter: parent.verticalCenter
-            MouseArea{
-                anchors.fill: parent                
-                onClicked: manager.changedTrack("+1")
+            ChangeTrackHandler {
+                trackDirection: "+1"
             }
         }
 
@@ -94,10 +89,7 @@ Rectangle {
             height: style.stdbuttonh
             width: style.stdbuttonw
             anchors.verticalCenter: parent.verticalCenter
-            MouseArea
-            {
-                anchors.fill: parent                 
-                onClicked: manager.StopMedia()
+            StopMediaHandler {
             }
         }
     }

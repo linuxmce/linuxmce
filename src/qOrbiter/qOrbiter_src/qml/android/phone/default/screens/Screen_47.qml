@@ -4,9 +4,9 @@ import "../js/ComponentLoader.js" as MyJs
 
 Rectangle {
     id:fileviewscreen
-    width: appW
-    height: appH
-    color: "transparent"
+    width: manager.appWidth
+    height: manager.appHeight
+    color: "black"
     clip: true
     border.color: "silver"
     Connections
@@ -74,6 +74,7 @@ Rectangle {
         anchors.verticalCenter: fileviewscreen.verticalCenter
     }
 
+
     Component
     {
         id: contactDelegateList
@@ -87,8 +88,8 @@ Rectangle {
                 border.color: "silver"
                 height: scaleY(15)
                 width: scaleX(75)
-               opacity: 0
-    Component.onCompleted: PropertyAnimation { target: background; property: "opacity"; to: 1; duration: 1000}
+                opacity: 0
+                Component.onCompleted: PropertyAnimation { target: background; property: "opacity"; to: 1; duration: 1000}
                 Row{
                     Image
                     {
@@ -138,7 +139,7 @@ Rectangle {
         id:model_pages
         height: appH
         width: scaleX(10)
-        model: pageList
+        model: dataModel.totalPages
         anchors.left: list_view1.right
         delegate: Rectangle{
             height: scaleY(10)
@@ -146,7 +147,7 @@ Rectangle {
             color: "transparent"
             Text {
                 id:page_label
-                text: label
+                text: index
                 font.pixelSize: scaleY(2)
                 anchors.centerIn: parent
                 color: "orange"
@@ -173,5 +174,10 @@ Rectangle {
         anchors.left: parent.left
         color: "silver"
 
+    }
+
+    GenericAttributeFilter{
+        id:filterTarget
+        anchors.centerIn: parent
     }
 }

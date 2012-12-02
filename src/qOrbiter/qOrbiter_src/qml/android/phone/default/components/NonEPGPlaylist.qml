@@ -1,5 +1,5 @@
 import QtQuick 1.0
-
+import "../../lib/handlers"
 Rectangle {
     id:nonepgplaylist
     width: scaleX(80)
@@ -9,6 +9,7 @@ Rectangle {
     border.width: 1
     clip:false    
 
+    Component.onCompleted: mediaplaylist.populate()
 
     Connections{
         target: mediaplaylist
@@ -87,12 +88,11 @@ Rectangle {
                 opacity: .50
             }
 
-            MouseArea{
-                anchors.fill: parent
-                onClicked: manager.changedPlaylistPosition(path)
-                onPressed: border.color = "orange"
-                onReleased: border.color="silver"
-            }
+           PlaylistClickedHandler{
+               onPressed: border.color = "orange"
+               onReleased: border.color="silver"
+           }
+
         }
     }
 }

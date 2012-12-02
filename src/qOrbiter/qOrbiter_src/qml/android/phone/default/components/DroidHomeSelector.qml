@@ -24,7 +24,7 @@ Rectangle{
             smooth:true
             MouseArea{
                 anchors.fill: parent
-                onClicked:loadComponent("LightingSelector.qml")
+                onClicked:scenarioPopup.currentModel =currentRoomLights
             }
         }
 
@@ -36,7 +36,7 @@ Rectangle{
             smooth:true
             MouseArea{
                 anchors.fill: parent
-                onClicked:  loadComponent("MediaSelector.qml")
+                onClicked:  scenarioPopup.currentModel = currentRoomMedia
             }
         }
 
@@ -48,7 +48,7 @@ Rectangle{
             smooth:true
             MouseArea{
                 anchors.fill: parent
-                onClicked:  loadComponent("ClimateSelector.qml")
+                onClicked:  scenarioPopup.currentModel = currentRoomClimate
             }
         }
     }
@@ -68,7 +68,7 @@ Rectangle{
             smooth:true
             MouseArea{
                 anchors.fill: parent
-                onClicked:  loadComponent("SecuritySelector.qml")
+                onClicked:  scenarioPopup.currentModel = currentRoomSecurity
             }
         }
 
@@ -80,7 +80,7 @@ Rectangle{
             smooth:true
             MouseArea{
                 anchors.fill: parent
-                onClicked:  loadComponent("TelecomSelector.qml")
+                onClicked:  scenarioPopup.currentModel = currentRoomTelecom
             }
         }
 

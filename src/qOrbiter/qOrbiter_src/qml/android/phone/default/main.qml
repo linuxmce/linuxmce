@@ -65,11 +65,15 @@ Item {
         console.log(component.progress)
     }
 
+FocusScope{
+    height: pageLoader.height
+    width: pageLoader.width
 
     Loader {
         id:pageLoader
         objectName: "loadbot"
-
+        focus: true
+        Keys.onBackPressed: console.log("back")
         onSourceChanged:  loadin
         onLoaded: {
 
@@ -77,6 +81,7 @@ Item {
 
         }
     }
+}
     //=================Components==================================================//
     function loadComponent(componentName)
     {

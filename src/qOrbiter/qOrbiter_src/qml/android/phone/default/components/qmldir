@@ -71,3 +71,5 @@ DroidHomeSelector DroidHomeSelector.qml
 NowPlayingButton NowPlayingButton.qml
 MediaScrollBar MediaScrollBar.qml
 NullComponent NullComponent.qml
+ScenarioSelector ScenarioSelector.qml
+GenericAttributeFilter GenericAttributeFilter.qml

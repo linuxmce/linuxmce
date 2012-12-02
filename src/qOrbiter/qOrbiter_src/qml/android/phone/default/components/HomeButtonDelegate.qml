@@ -1,45 +1,55 @@
 import QtQuick 1.0
+import com.nokia.android 1.1
 import "../../lib/handlers/"
 Component{
 
     Item{
         id:middle
         //important!! these need to be set on an imported component otherwise its appears all wrong!
-        height:  delegatemenu.height
-        width: delegatemenu.width
+        width: scaleX(61)
+        height: scaleY(12)
 
-        Rectangle{
-            id:delegatemenu
-            width: scaleX(61)
-            height: scaleY(12)
-            border.color: "orange"
-            border.width: 1
-            color:"white"
-
-
-            Text {
+        ListItem{
+            anchors.fill: parent
+            ListItemText {
                 id: generic_label
                 text: title
-                color: "black"
+                color: "orange"
                 font.pixelSize: scaleY(3)
-                anchors.left: delegatemenu.left
-            }
-
-            Image {
-                id: selectionIndicator
-                source: delegateHit.pressed ? "../img/radio_btn_active.png" : "../img/radio_btn_inactive.png"
-                height: 45
-                width: 45
-                anchors.right: delegatemenu.right
+                anchors.centerIn: parent
             }
 
             ScenarioButtonHandler {
                 id: delegateHit
-                onPressed:  delegatemenu.color = "orange"
-                onReleased: delegatemenu.color = "transparent"
             }
-
         }
+
+
+        //        Rectangle{
+        //            id:delegatemenu
+        //            width: scaleX(61)
+        //            height: scaleY(12)
+        //            border.color: "orange"
+        //            border.width: 1
+        //            color:"white"
+
+
+        //            Text {
+        //                id: generic_label
+        //                text: title
+        //                color: "black"
+        //                font.pixelSize: scaleY(3)
+        //                anchors.left: delegatemenu.left
+        //            }
+
+        //            Image {
+        //                id: selectionIndicator
+        //                source: delegateHit.pressed ? "../img/radio_btn_active.png" : "../img/radio_btn_inactive.png"
+        //                height: 45
+        //                width: 45
+        //                anchors.right: delegatemenu.right
+        //            }
+        //        }
     }
     /*
         ImgButton

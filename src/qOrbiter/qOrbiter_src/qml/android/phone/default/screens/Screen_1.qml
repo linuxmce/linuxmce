@@ -58,6 +58,12 @@ Rectangle {
         anchors.left: manager.b_orientation ? stage.left : fs_npButton.right
         anchors.leftMargin: manager.b_orientation ? scaleX(15) : scaleX(1)
     }
+    ScenarioSelector{
+        id:scenarioPopup
+        currentModel: ""
+        anchors.centerIn: parent
+    }
+
 /*
     EffectGaussianBlur{
         id: blur

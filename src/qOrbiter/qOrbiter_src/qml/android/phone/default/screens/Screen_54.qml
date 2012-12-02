@@ -5,8 +5,8 @@ Rectangle {
 
     // property alias synText:
     id: storedAudioRemote
-    height: appH
-    width: appW
+    height: manager.appHeight
+    width: manager.appWidth
     color: "transparent"
 
     Connections
@@ -22,7 +22,7 @@ source: b_orientation ? "../img/audioProfile.png" : "../img/audioWide.png"
         anchors.fill: storedVideoRemote
     }
 
-    Component.onCompleted: manager.BindMediaRemote(true)
+    Component.onCompleted: manager.setBoundStatus(true)
 
     function changeTracksTransition()
     {
