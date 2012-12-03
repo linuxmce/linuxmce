@@ -175,12 +175,12 @@ Setup_AsoundConf()
 {
 	local AudioSetting="$1"
 	SoundOut="hw:"
-
+	Yalpa=$(aplay -l 2>&1)
 	# Do not mess with asound.conf if Audio Setting is set to Manual. This will only happen after the asound.conf has been generated at least once.
 	if [[ "$AudioSetting" == "M" ]]; then
 		return
 	fi
-	if grep 'no soundcards found' <<< "$yalpa"; then
+	if grep 'no soundcards found' <<< "$Yalpa"; then
 		return
 	fi
 
@@ -206,7 +206,6 @@ Setup_AsoundConf()
 
 	SoundCard=$(TranslateSoundCard "$SoundCard")
 	HWOnlyCard="$SoundCard"
-	Yalpa=$(aplay -l)
 
 	# Handle nVidia GT card types
 	case "$AudioSetting" in

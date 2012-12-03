@@ -650,6 +650,8 @@ FindVideoDriver () {
 			fi ;;
 		*1013)
 			prop_driver="cirrus" ;;
+		*80ee)
+			prop_driver="vboxvideo"
 		*)
 			prop_driver="fbdev" ;;
 	esac
@@ -761,7 +763,7 @@ CheckVideoDriver () {
 	online_mismatch="false"
 	if [[ -f /etc/X11/xorg.conf ]] && [[ $(wc -l <<< "$vga_pci") -lt "2" ]]; then
 		# TODO figure out a better way to isolate the video driver in the xorg.conf list of "Driver" options
-		cur_driver=$(grep "Driver" /etc/X11/xorg.conf | grep -Eo '(nvidia|nouveau|radeon|fglrx|savage|openchrome|via|virge|intel|i740|i128|mach64|fbdev)')
+		cur_driver=$(grep "Driver" /etc/X11/xorg.conf | grep -Eo '(nvidia|nouveau|radeon|fglrx|savage|openchrome|via|virge|intel|i740|i128|mach64|cirrus|fbdev)')
 		if [[ "$prop_driver" != "$cur_driver" ]] && [[ -z $online ]]; then
 			offline_mismatch="true"
 		elif [[ "$prop_driver" != "$cur_driver" ]] && [[ -n $online ]]; then
@@ -851,7 +853,7 @@ CheckVideoDriver () {
 		ConfSet "AVWizardOverride" "1"
 		InstallVideoDriver
 	fi
-export Best_Video_Driver="$prop_driver"
+	export Best_Video_Driver="$prop_driver"
 }
 
 GetVideoDriver() {
