@@ -2,15 +2,17 @@
 #include <QThread>
 #include <QTcpSocket>
 #include <QProcess>
+#include <QGraphicsScene>
 using namespace DCE;
 
 MediaManager::MediaManager(QDeclarativeItem *parent) :
     QDeclarativeItem(parent)
 {
+
     setFlag(ItemHasNoContents, false);
     serverAddress = "";
     deviceNumber = -1;
-
+timeCodeServer = new QTcpServer();
     setCurrentStatus("Media Manager defaults set, initializing media engines");
 #ifdef QT4
     audioSink = new Phonon::AudioOutput();
@@ -28,6 +30,7 @@ MediaManager::MediaManager(QDeclarativeItem *parent) :
     filterProxy = new ColorFilterProxyWidget(this);
     filterProxy->setWidget(videoSurface);
     filterProxy->setAutoFillBackground(false);
+
    #endif
     setCurrentStatus("Window Initialized");
     totalTime=0;
@@ -122,7 +125,6 @@ void MediaManager::newClientConnected()
 void MediaManager::startTimeCodeServer()
 {
     setCurrentStatus("Staring timecode server on port 12000");
-    timeCodeServer = new QTcpServer();
     timeCodeServer->listen(QHostAddress::Any,12000);
     QObject::connect(timeCodeServer, SIGNAL(newConnection()), this , SLOT(newClientConnected()));
 #ifdef QT4
@@ -140,9 +142,10 @@ void MediaManager::stopTimeCodeServer()
 {
     for(int d = 0; d<clientList.length(); d++){
         QTcpSocket *c = clientList.at(d);
-        c->close();
+        c->disconnectFromHost();
     }
     timeCodeServer->close();
+
     setMediaPlaying(false);
 }
 

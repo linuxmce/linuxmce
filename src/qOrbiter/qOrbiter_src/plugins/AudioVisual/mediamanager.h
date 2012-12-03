@@ -11,6 +11,7 @@
 #include <QBoxLayout>
 #include <Phonon>
 #include <QDeclarativeItem>
+
 #endif
 
 #include <QObject>
@@ -57,6 +58,7 @@ public:
     QString lastError;
 
     //--------------------------
+
 
     QString currentStatus;
     QString qs_totalTime;

@@ -168,7 +168,7 @@ int main(int argc, char* argv[])
     QApplication::setGraphicsSystem("meego");
 #elif GLENABLED
 #ifndef QT5
-    //   QApplication::setGraphicsSystem("opengl");
+      QApplication::setGraphicsSystem("raster");
 #endif
 #else
     QApplication::setGraphicsSystem("raster");
@@ -201,6 +201,8 @@ int main(int argc, char* argv[])
     cout << "qOrbiter, v." << VERSION << endl
          << "Visit www.linuxmce.org for source code and license information" << endl << endl;
     string sRouter_IP="DCEROUTER";
+    string graphicsmode="raster";
+    string screen = "";
     int PK_Device=-1;
     string sLogger="stdout";
     bool bLocalMode=false,bError=false; // An error parsing the command line
@@ -231,11 +233,17 @@ int main(int argc, char* argv[])
         case 'l':
             sLogger = argv[++optnum];
             break;
+        case 'graphicsmode':
+        graphicsmode = argv[++optnum];
+        break;
+        case 's':
+          screen=  argv[++optnum];
         default:
             bError=true;
             break;
         };
     }
+
 
     if (bError)
     {

@@ -54,6 +54,9 @@
 orbiterWindow::orbiterWindow(long deviceid, std::string routerip, QObject *parent) :
     QObject(parent)
 {
+#ifndef ANDROID
+    mainView.window()->setWindowFlags(Qt::FramelessWindowHint);
+#endif
     phoneSize = false;
     localPath = "";
     newOrbiter = false;
@@ -200,7 +203,7 @@ localPath = "android/";
 #elif defined(for_harmattan)
     mainView.showFullScreen();
 #elif defined(for_desktop)
-    mainView.show();
+    mainView.showFullScreen();
 #elif defined(__ANDROID__)
     mainView.showFullScreen();
 #elif defined(for_android)
