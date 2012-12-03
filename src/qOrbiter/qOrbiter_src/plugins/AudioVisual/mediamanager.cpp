@@ -31,6 +31,8 @@ MediaManager::MediaManager(QDeclarativeItem *parent) :
    #endif
     setCurrentStatus("Window Initialized");
     totalTime=0;
+    setMediaBuffer(0);
+    setMediaPlaying(false);
 
 }
 
@@ -51,6 +53,7 @@ void MediaManager::initializeConnections()
     /*From Dce MediaPlayer*/
     QObject::connect(mediaPlayer,SIGNAL(currentMediaUrlChanged(QString)), this, SLOT(setMediaUrl(QString)),Qt::QueuedConnection);
     QObject::connect(mediaPlayer,SIGNAL(startPlayback()), mediaObject, SLOT(play()),Qt::QueuedConnection);
+    QObject::connect(mediaPlayer, SIGNAL(startPlayback()), this, SLOT(mediaStarted()));
     QObject::connect(mediaPlayer, SIGNAL(stopCurrentMedia()), mediaObject, SLOT(stop()),Qt::QueuedConnection);
     QObject::connect(mediaPlayer, SIGNAL(stopCurrentMedia()), this, SLOT(stopTimeCodeServer()));
     QObject::connect(mediaPlayer, SIGNAL(pausePlayback()), mediaObject, SLOT(pause()),Qt::QueuedConnection);
@@ -243,8 +246,8 @@ void MediaManager::transmit(QString d)
 
 void MediaManager::mountDrive(int device)
 {
-    //    mountProcess = new QProcess();
-    //    QObject::connect(mountProcess, SIGNAL(readyRead()), this, SLOT(setCurrentStatus(QString)));
-    //    mountProcess->execute("gksudo mount 192.168.80.1:/mnt/device/121 /mnt/device/121");
-    //    qDebug() << mountProcess->state();
+       mountProcess = new QProcess();
+       QObject::connect(mountProcess, SIGNAL(readyRead()), this, SLOT(setCurrentStatus(QString)));
+        mountProcess->execute("gksudo mount 192.168.80.1:/mnt/device/121 /mnt/device/121");
+       qDebug() << mountProcess->state();
 }

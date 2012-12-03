@@ -4034,8 +4034,9 @@ void DCE::qOrbiter::grabScreenshot(QString fileWithPath)
                 cellAttribute = pCell->GetValue();
                 cellfk = pCell->GetValue();
                 QStringList parser = cellTitle.split(QRegExp("(\\n|:\\s)"), QString::KeepEmptyParts);
-                //qDebug() << parser;
-                emit (new screenshotAttributes( cellfk, cellTitle, cellAttribute.prepend("!A") ));
+                qDebug() << parser;
+                qDebug() << cellAttribute;
+                emit addScreenShotVar(new screenshotAttributes( cellfk, cellTitle, cellAttribute.prepend("!A") ));
             }
 
         }

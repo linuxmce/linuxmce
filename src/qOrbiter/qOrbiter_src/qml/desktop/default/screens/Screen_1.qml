@@ -36,10 +36,19 @@ Item
 
         }
 
+        StyledText{
+            text:dceplayer.connected ? "Media Player is connected. Buffer:"+ dceplayer.mediaBuffer: "Media Player Disconnected"
+            font.letterSpacing: 2
+            anchors.left: connectstatus.right
+            anchors.leftMargin: scaleX(5)
+            anchors.verticalCenter: headerbg.verticalCenter
+            isBold: true
+        }
+
         Clock{
             id:screen1time
             anchors.right: headerbg.right
-            anchors.rightMargin: scaleX(25)
+            anchors.rightMargin: scaleX(2)
             anchors.verticalCenter: headerbg.verticalCenter
         }
 

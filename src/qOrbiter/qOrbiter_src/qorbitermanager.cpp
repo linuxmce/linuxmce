@@ -161,8 +161,8 @@ qorbiterManager::qorbiterManager(QDeclarativeView *view, QObject *parent) :
     {
 
         if (isPhone !=1){
-           buildType = "/qml/android/tablet";
-          setFormFactor(2);
+            buildType = "/qml/android/tablet";
+            setFormFactor(2);
         }
         else{
             buildType = "/qml/android/phone";
@@ -175,7 +175,7 @@ qorbiterManager::qorbiterManager(QDeclarativeView *view, QObject *parent) :
             setFormFactor(1);
         }
         else{
-           buildType = "/qml/android/tablet";
+            buildType = "/qml/android/tablet";
         }
 
     }
@@ -258,8 +258,8 @@ qorbiterManager::qorbiterManager(QDeclarativeView *view, QObject *parent) :
     genreFilter = new AttributeSortModel(new AttributeSortItem,3, this);
 
     gotoScreenList = new QStringList();
-ScreenSaver = new ScreenSaverClass(this);
-qorbiterUIwin->engine()->rootContext()->setContextProperty("screensaver", ScreenSaver);
+    ScreenSaver = new ScreenSaverClass(this);
+    qorbiterUIwin->engine()->rootContext()->setContextProperty("screensaver", ScreenSaver);
 }
 
 qorbiterManager::~qorbiterManager()
@@ -276,7 +276,6 @@ void qorbiterManager::gotoQScreen(QString s)
         emit keepLoading(t);
         emit clearModel();
         emit resetFilter();
-
     }
 
     //send the qmlview a request to go to a screen, needs error handling
@@ -290,7 +289,7 @@ void qorbiterManager::gotoQScreen(QString s)
     if (QMetaObject::invokeMethod(item, "screenchange", Qt::QueuedConnection, Q_ARG(QVariant, screenname))) {
         setDceResponse("Done call to screenchange()");
         if(!currentScreen.contains("187"))
-        gotoScreenList->append(currentScreen);
+            gotoScreenList->append(currentScreen);
     } else {
         setDceResponse("screenchange() FAILED");
     }
@@ -881,7 +880,7 @@ void qorbiterManager::skinLoaded(QDeclarativeView::Status status)
 void qorbiterManager::closeOrbiter()
 {
     if(writeConfig()){
-      setDceResponse("Shutting Down");
+        setDceResponse("Shutting Down");
     }
 #ifndef __ANDROID__
     LoggerWrapper::GetInstance()->Write(LV_CRITICAL, "Orbiter Exiting, Unregistering 1st");
@@ -906,6 +905,11 @@ bool qorbiterManager::requestDataGrid()
 void qorbiterManager::setActiveRoom(int room,int ea)
 {
     emit setLocation(room, ea);
+    emit keepLoading(false);
+    emit clearModel();
+    emit resetFilter();
+    nowPlayingButton->resetData();
+
 #ifdef debug
     emit qtMessage("LocationModel::" +m_lRooms->find(QString::number(room))) ;
 #endif
@@ -1075,7 +1079,7 @@ bool qorbiterManager::loadSkins(QUrl base)
         tskinModel->addSkin("default");
     }
     else{
-       tskinModel->addSkin("default,data,wip");
+        tskinModel->addSkin("default,data,wip");
     }
 
 

@@ -110,6 +110,9 @@ signals:
     void deviceNumberChanged();
 
 public slots:
+
+    void mediaStarted(){setMediaPlaying(true);}
+
     void setServerAddress(QString a) {serverAddress = a;emit serverAddressChanged();}
     QString getServerAddress(){return serverAddress;}
 
@@ -129,7 +132,7 @@ public slots:
     void setErrorStatus(bool e) {hasError = e; emit hasErrorChanged();}
     bool getErrorStatus() {return hasError;}
 
-    void setMediaPlaying(bool s) {mediaPlaying = s; emit mediaPlayingChanged(); }
+    void setMediaPlaying(bool s) {mediaPlaying = s; qDebug() << "media playback changed in plugin!" << s; emit mediaPlayingChanged(); }
     bool getMediaPlaying() {return mediaPlaying;}
 
     void setFileReference(QString f){fileReference = f.at(0); setFileNumber(f.remove(0,1).toInt()); }

@@ -283,7 +283,6 @@ public slots:
         }
     }
 
-
     void setImage(QImage img) {fileImage = img;  emit imageChanged();}
     QImage getImage() {return fileImage;}
 

@@ -33,7 +33,7 @@ void NowPlayingClass::resetData()
     setSynop(""); emit synopChanged();
     setStreamID(0);
     setProgram("");
- fileImage.load("qrc:/icons/icon.png");
- emit imageChanged();
+    setRelease("");
+    //setImage(QImage());
 }
 

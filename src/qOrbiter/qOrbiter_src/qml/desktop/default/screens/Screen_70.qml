@@ -7,9 +7,6 @@ import "../js/ComponentLoader.js" as MyJs
 import "../effects"
 
 Rectangle {
-
-
-
     // property alias synText:
     id: storedvideoremote
     height: manager.appHeight
@@ -18,7 +15,7 @@ Rectangle {
     opacity: 1
     color: "transparent"
     z:5
-    Component.onCompleted: dceplayer.z=0
+
 
     MediaDetailHeader {
         id: gradientheader
@@ -37,6 +34,7 @@ Rectangle {
         anchors.left: envControls.right
         anchors.rightMargin: scaleX(1)
         anchors.top: gradientheader.bottom
+        Component.onCompleted: manager.setBoundStatus(true)
     }
     Image {
         id: nowplayingimage
@@ -46,16 +44,16 @@ Rectangle {
         width: dcenowplaying.aspect=="wide"? scaleX(30) : scaleX(20)
         height:dcenowplaying.aspect=="wide"? scaleY(30) : scaleY(50)
         source: ""
-        Component.onCompleted: manager.setBoundStatus(true)
+      //  Component.onCompleted: manager.setBoundStatus(true)
 
         Connections{
             target: dcenowplaying
-            onImageChanged: updateTimer.start()// "image://listprovider/updateobject/"+securityvideo.timestamp;
+            onImageChanged: {updateTimer.start();console.log(nowplayingimage.source)} // "image://listprovider/updateobject/"+securityvideo.timestamp;
         }
 
         Timer{
             id:updateTimer
-            interval: 100
+            interval: 250
             running: true
             onTriggered: nowplayingimage.source = "image://listprovider/updateobject/"+securityvideo.timestamp;
         }

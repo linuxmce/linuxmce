@@ -58,7 +58,7 @@ Rectangle {
                 anchors.fill: parent
                 onClicked: {
                     currentroom = title
-                   setActiveRoom(intRoom, entertain_area)
+                   manager.setActiveRoom(intRoom, entertain_area)
                     roombutton.buttontext = title
                     roomselectorrect.destroy()
                 }

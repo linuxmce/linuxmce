@@ -54,11 +54,11 @@ void TimeCodeManager::start(QString server, int iport)
 #ifdef QT_DEBUG
     qDebug("Starting timecode...");
 #endif
+   dceMediaSocket->close();
+//    dceMediaSocket->disconnectFromHost();
     port = iport;
     mediaPlayerIp = server;
 
-    if(!dceMediaSocket->canReadLine() && portConnected==false)
-    {
 #ifdef QT_DEBUG
         qDebug() <<"opening connection to " << server + ":" + QString::number(iport);
 #endif
@@ -78,36 +78,41 @@ void TimeCodeManager::start(QString server, int iport)
             portConnected = false;
             stop();
         }
-    }
-    else
-    {
-        if(dceMediaSocket->isOpen() || portConnected == true){
 
 
-            if(dceMediaSocket->peerName()== server)
-            {
-                qDebug() << "Its already connected";
-                // break;
-            }
-            else
-            {
-                qDebug() << dceMediaSocket->peerName() << "is different from " << server << ". reconnecting";
-                dceMediaSocket->close();
-                dceMediaSocket->connectToHost(server, 12000);
-                mediaPlayerIp = server;
-                restart();
-                //break;
-            }
-        }
-        else
-        {
-            qDebug() << "Cannot connect to server, check internals";
-            qDebug()<< dceMediaSocket->peerAddress();
-            qDebug() << dceMediaSocket->peerPort();
-            qDebug()<< dceMediaSocket->errorString();
-            stop();
-        }
-    }
+//    if(!dceMediaSocket->canReadLine() && portConnected==false)
+//    {
+
+//    }
+//    else
+//    {
+//        if(dceMediaSocket->isOpen() || portConnected == true){
+
+//            if(dceMediaSocket->peerName()== server)
+//            {
+//                qDebug() << "Its already connected";
+//                // break;
+//            }
+//            else
+//            {
+//                qDebug() << dceMediaSocket->peerName() << "is different from " << server << ". reconnecting";
+//                dceMediaSocket->close();
+//                dceMediaSocket->connectToHost(server, 12000);
+//                mediaPlayerIp = server;
+//                restart();
+//                //break;
+//            }
+//        }
+//        else
+//        {
+//            qDebug() << "Cannot connect to server, check internals";
+//            qDebug()<< dceMediaSocket->peerAddress();
+//            qDebug() << dceMediaSocket->peerPort();
+//            qDebug()<< dceMediaSocket->errorString();
+//            stop();
+//        }
+//    }
+
 }
 
 void TimeCodeManager::stop()
@@ -129,6 +134,7 @@ void TimeCodeManager::restart()
     setSpeed(0);
     dceMediaSocket->close();
     dceMediaSocket->disconnectFromHost();
+    portConnected = false;
     start(mediaPlayerIp, port);
 }
 

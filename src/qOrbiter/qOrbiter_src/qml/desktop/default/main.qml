@@ -16,7 +16,7 @@ Item {
     Style{
        id:style
    }
-    Component.onCompleted: logger.userLogMsg = "Main.qml loaded in default skin"
+    Component.onCompleted: {logger.userLogMsg = "Main.qml loaded in default skin"; manager.setBoundStatus(true)}
 
     FontLoader{
         id:myFont
@@ -28,7 +28,7 @@ Item {
         id:dceplayer
         anchors.top: parent.top
         anchors.left:parent.left
-        z:-2
+        z:dceplayer.mediaPlaying ==false ? -5 : 0
         Component.onCompleted: {setWindowSize(manager.appHeight, manager.appWidth); dceplayer.setConnectionDetails(manager.mediaPlayerID, manager.m_ipAddress)}
         MouseArea{
             anchors.fill: dceplayer
@@ -44,7 +44,8 @@ Item {
             }
         }
         onCurrentStatusChanged:logger.logMediaMessage(dceplayer.currentStatus)
-        onMediaPlayingChanged: mediaPlaying ? z = 0 : z = -1
+        onMediaBufferChanged: console.log("media buffer change:"+mediaBuffer)
+        onMediaPlayingChanged: console.log("Media Playback status changed locally "+dceplayer.mediaBuffer)
     }
 
     signal close()
@@ -93,13 +94,7 @@ Item {
         target: manager
         onOrientationChanged: checkLayout()
     }
-    /*
-    Image {
-    id: bg
-    source: "img/icons/backgrounds/livingroom.png"
-    anchors.fill:parent
-    }
-*/
+
     ScreenSaver
     {   id:ss
         height: manager.appHeight
