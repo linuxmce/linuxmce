@@ -2,7 +2,7 @@ Source: pluto-xine-player
 Section: unknown
 Priority: extra
 Maintainer: root <root@fluffybitch.org>
-Build-Depends: debhelper (>= 7)
+Build-Depends: debhelper(>=7),libxine-dev|libxine2-dev,libxxf86vm-dev,libxmu-headers,libcdparanoia-dev,libxmu-dev
 Standards-Version: 3.8.3
 Homepage: <insert the upstream URL, if relevant>
 
