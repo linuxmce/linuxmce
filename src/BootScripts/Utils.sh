@@ -651,7 +651,7 @@ FindVideoDriver () {
 		*1013)
 			prop_driver="cirrus" ;;
 		*80ee)
-			prop_driver="vboxvideo"
+			prop_driver="vboxvideo" ;;
 		*)
 			prop_driver="fbdev" ;;
 	esac
