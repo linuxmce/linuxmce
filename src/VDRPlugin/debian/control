@@ -8,6 +8,6 @@ Homepage: <insert the upstream URL, if relevant>
 
 Package: pluto-vdr-plugin
 Architecture: any
-Depends: libmysqlclient14, mysql-server-4.1, libstdc++5, pluto-dcecommon, dcecommon, libmysqlclient15off, mysql-server, vdr-plugin-streamdev-server, vdr-plugin-streamdev-client, vdr-plugin-control, vdr-plugin-remotetimers, libmysqlclient16, libstdc++6, ${shlibs:Depends}, ${misc:Depends}
-Description: <insert up to 60 chars description>
- <insert long description, indented with spaces>
+Depends: pluto-dcerouter, vdr-plugin-streamdev-server, vdr-plugin-streamdev-client, vdr-plugin-control, vdr-plugin-remotetimers, ${shlibs:Depends}, ${misc:Depends}
+Description: LinuxMCE VDR Plugin
+ DCERouter plugin that interacts with VDR
