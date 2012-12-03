@@ -62,9 +62,9 @@
 
 #if (QT5)
 class NowPlayingClass : public QQuickItem
-#else
+        #else
 class NowPlayingClass : public QDeclarativeItem
-#endif
+        #endif
 
 {
     Q_OBJECT
@@ -246,7 +246,7 @@ public slots:
     inline QString getPath() {return path;}
     inline void setPath (QString f) {path = f; emit pathChanged();}
 
-  QString getStorageDevice() {return qs_storageDevice;}
+    QString getStorageDevice() {return qs_storageDevice;}
 
     void setNetwork(QString bcast_network) {network = bcast_network; emit networkChanged();}
     QString getNetwork() {return network;}
@@ -263,11 +263,11 @@ public slots:
 
     void setImageData(QImage t) {
         emit statusMessage("Now Playing Class::Recieved Image data");
-
+        emit statusMessage("Image valid -" + QString::number(t.height()));
         setImage(t);
     }
     void setImageData( char data, int iData_size) {
-       emit statusMessage("Now Playing Class::Android ARM Now Playing Process Called");
+        emit statusMessage("Now Playing Class::Android ARM Now Playing Process Called");
         QImage t;
         const uchar *localDat =(uchar*)&data;
         int dataSize = iData_size;
@@ -275,16 +275,16 @@ public slots:
         {
 
             setImage(t);
-           emit statusMessage("Now Playing Class::Set Cover Art");
+            emit statusMessage("Now Playing Class::Set Cover Art");
         }
         else
         {
-           emit statusMessage("Now Playing Class::Update Object Image Conversion Failed:");
+            emit statusMessage("Now Playing Class::Update Object Image Conversion Failed:");
         }
     }
 
 
-    void setImage(QImage img) {fileImage = img; emit imageChanged();}
+    void setImage(QImage img) {fileImage = img;  emit imageChanged();}
     QImage getImage() {return fileImage;}
 
     void setStreamImage(QImage t){

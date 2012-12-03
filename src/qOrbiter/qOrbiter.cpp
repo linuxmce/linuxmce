@@ -731,10 +731,15 @@ void qOrbiter::CMD_Update_Object_Image(string sPK_DesignObj,string sType,char *p
     cout << "Parm #23 - Disable_Aspect_Lock=" << sDisable_Aspect_Lock << endl;
 
     QByteArray imgData;
+    qDebug() << iData_Size;
     imgData.setRawData(pData,iData_Size);
     QImage t;
-    t.loadFromData(imgData);
+    t.loadFromData(imgData, "4");
+    if(!t.isNull())
     emit objectUpdate(t);
+    else
+        emit mediaResponseChanged("Screenshot returned is invalid!");
+    qDebug() << t.size();
 }
 
 //<-dceag-c58-b->
@@ -1034,7 +1039,7 @@ void qOrbiter::CMD_Set_Now_Playing(string sPK_DesignObj,string sValue_To_Assign,
         emit setNowPlaying(false);
         emit gotoQml("Screen_1.qml");
         b_mediaPlaying = false;
-        BindMediaRemote(false);
+
         emit currentScreenChanged("Screen_1.qml");
         currentScreen = "Screen_1.qml";
         internal_streamID = iStreamID;
@@ -4324,8 +4329,6 @@ void DCE::qOrbiter::saveScreenAttribute(QString attribute)
     string cResp = "";
     if(SendCommand(thumb))
         cleanupScreenshotData();
-
-
 }
 
 void DCE::qOrbiter::newOrbiter()

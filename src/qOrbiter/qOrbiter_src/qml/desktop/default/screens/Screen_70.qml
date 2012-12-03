@@ -8,6 +8,8 @@ import "../effects"
 
 Rectangle {
 
+
+
     // property alias synText:
     id: storedvideoremote
     height: manager.appHeight

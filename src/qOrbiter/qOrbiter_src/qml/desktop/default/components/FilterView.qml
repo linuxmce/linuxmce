@@ -8,8 +8,8 @@ Rectangle {
     height: scaleY(12)
     color: "transparent"
     property alias currentFilterModel:filterList.model
-    state:"inactive"
-    onCurrentFilterModelChanged: state = "active"
+
+    onCurrentFilterModelChanged: filterList.count===0 ? state = "inactive" : state = "active"
 
     Rectangle{
         anchors.fill: parent

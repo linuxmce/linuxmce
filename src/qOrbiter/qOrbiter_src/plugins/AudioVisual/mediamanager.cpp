@@ -140,6 +140,7 @@ void MediaManager::stopTimeCodeServer()
         c->close();
     }
     timeCodeServer->close();
+    setMediaPlaying(false);
 }
 
 void MediaManager::setZoomLevel(QString zoom)

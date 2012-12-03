@@ -622,6 +622,8 @@ void qMediaPlayer::CMD_Stop(int iStreamID,bool bEject,string &sCMD_Result,Messag
     cout << "Need to implement command #95 - Stop" << endl;
     cout << "Parm #41 - StreamID=" << iStreamID << endl;
     cout << "Parm #203 - Eject=" << bEject << endl;
+    emit stopCurrentMedia();
+
 }
 
 //<-dceag-c97-b->

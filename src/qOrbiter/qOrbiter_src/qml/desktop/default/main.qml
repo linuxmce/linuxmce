@@ -11,6 +11,8 @@ Item {
     width:manager.appWidth
     height:manager.appHeight
     property alias skinStyle: style
+
+
     Style{
        id:style
    }
@@ -42,6 +44,7 @@ Item {
             }
         }
         onCurrentStatusChanged:logger.logMediaMessage(dceplayer.currentStatus)
+        onMediaPlayingChanged: mediaPlaying ? z = 0 : z = -1
     }
 
     signal close()
@@ -124,14 +127,6 @@ Item {
         if (pageLoader.status == Component.Ready)
         {
             var s = String(screenname)
-            if(s === "Screen_70.qml" && dceplayer.getTotalTime() !==0 )
-            {
-                dceplayer.z = 0
-            }
-            else
-            {
-                dceplayer.z = -2
-            }
             manager.setDceResponse("Command to change to:" + screenname+ " was successfull")
         }
         else if (pageLoader.status == Component.Loading)

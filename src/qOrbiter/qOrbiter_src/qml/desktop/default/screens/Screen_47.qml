@@ -16,6 +16,7 @@ Rectangle {
     clip: true
     property int mouselocY: 0
     property int mouselocX: 0
+    property int mpCount: model_pages.count
     //    Connections{
     //        target:dcerouter
     //        onNewGrid:{manager.requestPage(0); console.log("New Orbiter Grid Ready")}
@@ -115,7 +116,6 @@ Rectangle {
 
 
     MultiStateFileDisplay{id:grid_view1; anchors.top: pos_label.bottom}
-
 
     ListView{
         id:model_pages
