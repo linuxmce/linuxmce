@@ -71,7 +71,7 @@ Rectangle{
             Behavior on opacity {
                 PropertyAnimation{duration:enableEffects?fadeTime:0}
             }
-            PropertyAnimation { id: zoomimgBg1; target: imgBg1; property: "scale"; from: 1.0; to: 1.25; duration: enableEffects?zoomTime+fadeTime:0 }
+            PropertyAnimation { id: zoomimgBg1; target: imgBg1; property: "scale"; from: 1.0; to: 1.25; duration: enableEffects?zoomTime:0 }
         }
         Image {
             id: imgBg2
@@ -83,7 +83,7 @@ Rectangle{
             Behavior on opacity {
                 PropertyAnimation{duration:enableEffects?fadeTime:0}
             }
-            PropertyAnimation { id: zoomimgBg2; target: imgBg2; property: "scale"; from: 1.0; to: 1.25; duration: enableEffects?zoomTime+fadeTime:0 }
+            PropertyAnimation { id: zoomimgBg2; target: imgBg2; property: "scale"; from: 1.0; to: 1.25; duration: enableEffects?zoomTime:0 }
         }
 
 
@@ -91,6 +91,6 @@ Rectangle{
     Component.onCompleted: {
         changeBGimage();
         ssTimer.start();
-        screensaver.setDuration(10000)
+        screensaver.setDuration(30000)
     }
 }

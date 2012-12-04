@@ -37,8 +37,7 @@ Item{
 
         //visible: false
         signal swapStyle()
-        height: style.orbiterH
-        width: style.orbiterW
+       anchors.fill: parent
         color: "transparent"
         Clock{
             anchors.right: parent.right

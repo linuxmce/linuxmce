@@ -3,8 +3,7 @@ import QtQuick 1.0
 // File info screen (movies/videos)
 Rectangle{
     id: details
-    height: style.orbiterH
-    width: style.orbiterW
+   anchors.fill: parent
     //visible: false
     opacity: 0
     Behavior on opacity {
