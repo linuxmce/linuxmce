@@ -20,7 +20,7 @@ Component{
                 anchors.fill: parent
                 onClicked:{
                     console.log("Switching to:" + name)
-                    swapSkins(path)
+                    manager.setActiveSkin(path)
 
 
                 }
