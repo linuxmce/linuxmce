@@ -168,7 +168,7 @@ int main(int argc, char* argv[])
     QApplication::setGraphicsSystem("meego");
 #elif GLENABLED
 #ifndef QT5
-      QApplication::setGraphicsSystem("raster");
+    QApplication::setGraphicsSystem("raster");
 #endif
 #else
     QApplication::setGraphicsSystem("raster");
@@ -223,9 +223,7 @@ int main(int argc, char* argv[])
             break;
         case 'd':
             PK_Device = atoi(argv[++optnum]);
-
             qDebug() << "Command Line Device" << PK_Device <<". Command line hostname: " << sRouter_IP.c_str();
-
             break;
         case 'L':
             bLocalMode = true;
@@ -233,11 +231,9 @@ int main(int argc, char* argv[])
         case 'l':
             sLogger = argv[++optnum];
             break;
-        case 'graphicsmode':
-        graphicsmode = argv[++optnum];
-        break;
         case 's':
-          screen=  argv[++optnum];
+            screen="fullscreen";
+            break;
         default:
             bError=true;
             break;
@@ -251,7 +247,8 @@ int main(int argc, char* argv[])
              << "Usage: qOrbiter [-r Router's IP] [-d My Device ID] [-l dcerouter|stdout|null|filename]" << endl
              << "-r -- the IP address of the DCE Router  Defaults to 'dcerouter'." << endl
              << "-d -- This device's ID number.  If not specified, it will be requested from the router based on our IP address." << endl
-             << "-l -- Where to save the log files.  Specify 'dcerouter' to have the messages logged to the DCE Router.  Defaults to stdout." << endl;
+             << "-l -- Where to save the log files.  Specify 'dcerouter' to have the messages logged to the DCE Router.  Defaults to stdout." << endl
+             << "-s --Switch to frameless fullscreen mode." << endl;
 #ifndef __ANDROID__
         exit(1);
 #endif
@@ -297,14 +294,19 @@ int main(int argc, char* argv[])
 #else
         bool glpresent = false;
 #endif
-
-
+        bool fs = false;
+        bool fm = false;
+        if(screen =="fullscreen")
+        {
+            fs=true;
+            fm=true;
+        }
 
         // orbiterWin.mainView.rootContext()->setContextProperty("dcerouter", &pqOrbiter); //dcecontext object bad!
         typedef QMap <int, QString> myMap;
         int throwaway = qRegisterMetaType<myMap>("myMap");
 
-        orbiterWindow orbiterWin(PK_Device, sRouter_IP);
+        orbiterWindow orbiterWin(PK_Device, sRouter_IP, fs, fm);
         orbiterWin.setMessage("Setting up Lmce");
 
         qorbiterManager  w(&orbiterWin.mainView);

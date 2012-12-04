@@ -36,7 +36,7 @@ class orbiterWindow : public QObject
     Q_PROPERTY (QString qmlPage READ getQmlPage WRITE setQmlPage NOTIFY pageChanged)
 
 public:
-    explicit orbiterWindow(long deviceid, std::string routerip, QObject *parent = 0);
+    explicit orbiterWindow(long deviceid, std::string routerip, bool fullScreen, bool frameless,  QObject *parent = 0);
     //public members
 
     QString message;
