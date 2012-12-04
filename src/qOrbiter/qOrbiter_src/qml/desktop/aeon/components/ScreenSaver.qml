@@ -6,8 +6,9 @@ Rectangle{
     width: style.orbiterW
     color: "transparent"
     anchors.fill: parent
+
     property bool enableEffects: opengl
-    property int zoomTime: 10000
+    property int zoomTime: screensaver.transitionDuration - fadeTime
     property int fadeTime: 3500
     property int currentBGimg: 0
     function getBGimage(){
@@ -49,7 +50,7 @@ Rectangle{
     }
     Timer { // Simulate a simple PhotoScreensaver
         id: ssTimer;
-        interval: zoomTime;
+        interval: screensaver.transitionDuration;
         running: false;
         repeat: true
         onTriggered: changeBGimage()
@@ -90,5 +91,6 @@ Rectangle{
     Component.onCompleted: {
         changeBGimage();
         ssTimer.start();
+        screensaver.setDuration(10000)
     }
 }

@@ -15,14 +15,14 @@ Item {
     property int mainMenuIndex
 
     // Style {id:style}
-    width: style.orbiterW;
-    height: style.orbiterH;
+    width: manager.appWidth
+    height: manager.appHeight
 
     function scaleX(x){
-        return x/100*style.orbiterW
+        return x/100*width
     }
     function scaleY(y){
-        return y/100*style.orbiterH
+        return y/100*height
     }
 
     function screenchange(screenname )
@@ -90,8 +90,8 @@ Item {
 
         clip: true;
         signal swapStyle()
-        height: style.orbiterH
-        width: style.orbiterW
+        height: manager.appHeight
+        width: manager.appWidth
         opacity: 1
 
         ScreenSaver{

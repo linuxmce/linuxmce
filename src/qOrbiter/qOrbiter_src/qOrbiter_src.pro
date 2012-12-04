@@ -559,6 +559,8 @@ HEADERS += \
 OTHER_FILES += Readme.txt \
         OrbiterVariables.txt \
         config.xml \
+    qml/desktop/aeon/components/FileDetails5.qml \
+    qml/desktop/aeon/components/FileDetails4.qml
 
 
 

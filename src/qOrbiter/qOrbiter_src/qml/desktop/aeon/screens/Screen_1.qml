@@ -2,6 +2,7 @@ import QtQuick 1.0
 
 import "../components"
 import "../js/ComponentLoader.js" as JsLib
+import "../../default/lib/handlers"
 
 Item
 {
@@ -46,8 +47,7 @@ Item
 
 
         signal swapStyle()
-        height: style.orbiterH
-        width: style.orbiterW
+       anchors.fill: parent
         color: "transparent"
 
         Clock{
@@ -192,13 +192,10 @@ Item
                         smooth: true
                     }
                 }
-                MouseArea{
-                    anchors.fill: parent
-                    onClicked: {
-                        manager.executeCommandGroup(params)
+                ScenarioButtonHandler{
+                    onReleased: {
                         console.log("Clicked on:",index)
                         submenu.currentIndex = index
-
                     }
                 }
             }

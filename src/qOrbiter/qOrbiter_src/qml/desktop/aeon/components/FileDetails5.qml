@@ -16,7 +16,7 @@ Rectangle{
     Connections{
         target: filedetailsclass
         onImageChanged: {
-            coverArt.source = "image://filedetailsprovider/"+filedetailsclass.screenshot
+            coverArt.source = "image://listprovider/filedetailsprovider/"+securityvideo.timestamp
         }
         onSynopChanged:{
             synopsisflick.contentHeight=synopsistext.height
@@ -39,7 +39,7 @@ Rectangle{
             id: coverArt
             anchors.fill: parent
             fillMode: Image.PreserveAspectFit;
-            //source: "image://filedetailsprovider/"+filedetailsclass.screenshot
+            source: ""
             smooth: true
         }
     }

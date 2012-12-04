@@ -16,6 +16,18 @@ Rectangle {
 //            synopsisflick.contentHeight=synopsistext.height
 //        }
 //    }
+    Connections{
+        target: filedetailsclass
+        onImageChanged: {
+            coverArt.source = "image://listprovider/filedetailsprovider/"+securityvideo.timestamp
+        }
+//        onSynopChanged:{
+//            synopsisflick.contentHeight=synopsistext.height
+//        }
+//        onPerformersChanged:{
+//            castList.model = filedetailsclass.performers
+//        }
+    }
     Image {
         anchors.fill: parent
         //source: '../img/common/darkgrey.png'
@@ -34,10 +46,11 @@ Rectangle {
             source: '../img/info/musicinfoshadow.png'
             smooth: true
             Image {
+                id:coverArt
                 anchors.centerIn: parent
                 width: parent.width*.8
                 height: parent.height*.8
-                source: "image://filedetailsprovider/"+filedetailsclass.screenshot
+                source:""
                 smooth: true
             }
         }
@@ -173,7 +186,7 @@ Rectangle {
                         MouseArea{
                             anchors.fill: parent
                             onClicked: {
-                                playMedia(filedetailsclass.file)  //dce function
+                                manager.playMedia(filedetailsclass.file)  //dce function
                             }
                         }
                     }

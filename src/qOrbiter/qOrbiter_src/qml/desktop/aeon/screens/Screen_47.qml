@@ -1,6 +1,7 @@
 import QtQuick 1.0
 import "../components"
 import "../js/ComponentLoader.js" as JsLib
+import "../../default/lib/handlers"
 
 Item{
     id: mediaParent
@@ -9,22 +10,22 @@ Item{
         target: filedetailsclass
         onShowDetailsChanged: {
             var detailsFile = ''
-            switch (gmediaType) {
-            case '4': // audio
-                detailsFile = 'FileDetailsAudio.qml'
+            switch (manager.i_current_mediaType) {
+            case 4: // audio
+                detailsFile = 'FileDetails4.qml'
                 console.log("Loading audio details")
                 break
-            case '5': // video
-                detailsFile = 'FileDetailsMovie.qml'
+            case 5: // video
+                detailsFile = 'FileDetails5.qml'
                 console.log("Loading video details")
                 break
             }
-            console.log("file",detailsFile,gmediaType)
+            console.log("file",detailsFile,i_current_mediaType)
             if (detailsFile.length) {
                 stage.visible = false
                 JsLib.loadComponent(mediaParent,detailsFile)
             } else {
-                console.log("No details file for media type",gmediaType)
+                console.log("No details file for media type:" +i_current_mediaType)
                 JsLib.loadComponent(mediaParent,'FileDetailsError.qml')
             }
         }
@@ -97,6 +98,7 @@ Item{
                 z: PathView.iconZ
                 //            Rectangle{
                 Image {
+
                     anchors.fill: parent
                     clip: true
                     //                radius:7
@@ -114,7 +116,18 @@ Item{
                     //                    anchors.fill: parent
                     fillMode: Image.PreserveAspectCrop;
                     asynchronous: true
+                    MouseArea {
+                        anchors.fill: parent
+                        onClicked: {
 
+                            if(path_view1.currentIndex == index){
+                                console.log("clicked",id)
+                                manager.setStringParam(4, id)
+                            } else {
+                                path_view1.currentIndex = index
+                            }
+                        }
+                    }
 
                 }
                 //            }
@@ -126,18 +139,9 @@ Item{
                 //                visible: wrapper.PathView.isCurrentItem
                 //            }
 
-                MouseArea {
-                    anchors.fill: wrapper
-                    onClicked: {
-                        //setStringParam(4, id)
-                        if(PathView.isCurrentItem){
-                            console.log("clicked",id)
-                            setStringParam(4, id)
-                        } else {
-                            path_view1.currentIndex = index
-                        }
-                    }
-                }
+
+
+
             }
         }
 
@@ -157,7 +161,7 @@ Item{
             Keys.enabled: true
             //anchors.fill: parent
             //offset: 2
-            pathItemCount: 13;
+            pathItemCount: 16;
             //highlight: appHighlight
 
             preferredHighlightBegin: 0.462
