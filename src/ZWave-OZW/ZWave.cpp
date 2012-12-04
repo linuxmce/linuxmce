@@ -31,6 +31,11 @@ ZWave::ZWave(int DeviceID, string ServerAddress,bool bConnectEventHandler,bool b
 //<-dceag-const-e->
 {
 	m_pZWInterface = NULL;
+	m_bReady = false;
+	m_setRecentlyAddedDevices.clear();
+	
+	m_dwPK_ClimateInterface = 0;
+	m_dwPK_SecurityInterface = 0;
 }
 
 //<-dceag-const2-b->
@@ -57,7 +62,12 @@ bool ZWave::GetConfig()
 
 	// Put your code here to initialize the data in this class
 	// The configuration parameters DATA_ are now populated
-
+	DeviceData_Impl* pDevice = m_pData->FindSelfOrChildWithinCategory( DEVICECATEGORY_Climate_Interface_CONST );
+	if ( pDevice != NULL )
+		m_dwPK_ClimateInterface = pDevice->m_dwPK_Device;
+	pDevice = m_pData->FindSelfOrChildWithinCategory( DEVICECATEGORY_Security_Interface_CONST );
+	if ( pDevice != NULL )
+		m_dwPK_SecurityInterface = pDevice->m_dwPK_Device;
 	return true;
 }
 
@@ -493,6 +503,9 @@ void ZWave::CMD_Remove_Node(string sOptions,int iValue,string sTimeout,bool bMul
 	if ( iValue == 5 )
 	{
 		OpenZWave::Manager::Get()->CancelControllerCommand(m_pZWInterface->GetHomeId());
+	} else if ( iValue < 0)
+	{
+		OpenZWave::Manager::Get()->BeginControllerCommand(m_pZWInterface->GetHomeId(), OpenZWave::Driver::ControllerCommand_RemoveFailedNode, controller_update, NULL, true, iValue);
 	} else {
 		OpenZWave::Manager::Get()->BeginControllerCommand(m_pZWInterface->GetHomeId(), OpenZWave::Driver::ControllerCommand_RemoveDevice, controller_update, NULL, true);
 	}
@@ -636,13 +649,8 @@ void ZWave::OnNotification(OpenZWave::Notification const* _notification, NodeInf
 			if (PKDevice > 0)
 			{
 				uint8 typeGeneric = OpenZWave::Manager::Get()->GetNodeGeneric(_notification->GetHomeId(), _notification->GetNodeId());
-				// TODO
-				int GENERIC_TYPE_SWITCH_REMOTE = 0x12;
-				int GENERIC_TYPE_SENSOR_BINARY = 0x20;
-				int GENERIC_TYPE_SENSOR_MULTILEVEL = 0x21;
-				int GENERIC_TYPE_SWITCH_BINARY = 0x10;
-				int GENERIC_TYPE_SWITCH_MULTILEVEL = 0x11;
-				if  ( typeGeneric == GENERIC_TYPE_SWITCH_REMOTE/* || typeBasic == BASIC_TYPE_CONTROLLER*/ ) {
+				uint8 typeBasic = OpenZWave::Manager::Get()->GetNodeBasic(_notification->GetHomeId(), _notification->GetNodeId());
+				if  ( typeGeneric == GENERIC_TYPE_SWITCH_REMOTE || typeBasic == BASIC_TYPE_CONTROLLER ) {
 					DCE::LoggerWrapper::GetInstance()->Write(LV_ZWAVE,"State changed, send light changed: level = %d", value);
 					SendOnOffEvent (PKDevice, value);
 					
@@ -732,6 +740,7 @@ DeviceData_Impl *ZWave::GetDeviceForPortChannel(string sPortChannel) {
 
 		}
 	}
+	
 	return NULL;
 }
 
@@ -760,7 +769,7 @@ void ZWave::MapNodeToDevices(NodeInfo* node)
 {
 	DeviceData_Impl* pDevice = GetDeviceForPortChannel(StringUtils::itos(node->m_nodeId));
 	LoggerWrapper::GetInstance()->Write(LV_ZWAVE, " * Node id=%d (PK_Device=%d)", node->m_nodeId, pDevice != NULL ? pDevice->m_dwPK_Device : 0);
-	if (pDevice = NULL)
+	if (pDevice == NULL)
 	{
 		LoggerWrapper::GetInstance()->Write(LV_WARNING, "  -> DEVICE NOT FOUND! Adding new device!");
 	}
@@ -772,52 +781,142 @@ void ZWave::MapNodeToDevices(NodeInfo* node)
 		{	
 			OpenZWave::ValueID value = *valIt;
 			string label = OpenZWave::Manager::Get()->GetValueLabel(value);
-			DeviceData_Impl* pDevice_Inst = GetDeviceForPortChannel(StringUtils::itos(node->m_nodeId)+"/"+StringUtils::itos(value.GetInstance()));
-			// if NULL, try without instance
-			if (pDevice_Inst == NULL)
+			string sId = StringUtils::itos(node->m_nodeId);
+			if ( value.GetInstance() > 1 )
 			{
-				pDevice_Inst = GetDeviceForPortChannel(StringUtils::itos(node->m_nodeId));
+				sId += "/"+StringUtils::itos(value.GetInstance());
 			}
+			DeviceData_Impl* pDevice_Inst = GetDeviceForPortChannel(sId);
 			LoggerWrapper::GetInstance()->Write(LV_ZWAVE, "   - Instance=%d, class=%d, label=%s (PK_Device=%d)", value.GetInstance(), value.GetCommandClassId(), label.c_str(),  pDevice_Inst != NULL ? pDevice_Inst->m_dwPK_Device : 0);
-			if (pDevice_Inst == NULL)
+
+			// Check that this device has not been added since the last reload
+			// (in which case it wont be returned from GetDeviceForPortChannel)
+			if ( m_setRecentlyAddedDevices.find(sId) != m_setRecentlyAddedDevices.end() )
 			{
-				LoggerWrapper::GetInstance()->Write(LV_WARNING, "    -> NOT FOUND! Adding new device!");
+				LoggerWrapper::GetInstance()->Write(LV_WARNING, "    -> Has been added since last reload - reload required!");
+			} else {
+				if (pDevice_Inst == NULL)
+				{
+					int PK_Parent_Device = 0;
+					LoggerWrapper::GetInstance()->Write(LV_WARNING, "    -> NOT FOUND! Adding new device!");
+					int deviceTemplate = GetDeviceTemplate(node, value, PK_Parent_Device);
+					AddDevice(PK_Parent_Device, sId, deviceTemplate);
+				}
 			}
 		}
 	}
 }
 
-int ZWave::AddDevice(int parent, int iNodeId, int iInstanceId, int PK_DeviceTemplate) {
+int ZWave::GetDeviceTemplate(NodeInfo* node, OpenZWave::ValueID value, int& PK_Device_Parent) {
+	int devicetemplate = 0;
+	uint8 generic = OpenZWave::Manager::Get()->GetNodeGeneric(node->m_homeId, node->m_nodeId);
+	uint8 specific = OpenZWave::Manager::Get()->GetNodeSpecific(node->m_homeId, node->m_nodeId);
+	string label = OpenZWave::Manager::Get()->GetValueLabel(value);
+	
+	if ( value.GetInstance() > 1 )
+	{
+		if ( label == "Temperature" )
+		{
+			devicetemplate = DEVICETEMPLATE_Multilevel_Sensor_CONST;
+			PK_Device_Parent = m_dwPK_ClimateInterface;
+			LoggerWrapper::GetInstance()->Write(LV_WARNING, "    -> Multilevel_Sensor");
+			return devicetemplate;
+		}
+	}
+
+	switch(generic) {
+		case GENERIC_TYPE_GENERIC_CONTROLLER:
+		case GENERIC_TYPE_STATIC_CONTROLLER:
+			devicetemplate = DEVICETEMPLATE_ZWave_Controller_CONST;
+			LoggerWrapper::GetInstance()->Write(LV_WARNING, "    -> ZWave_Controller");
+			break;
+		case GENERIC_TYPE_THERMOSTAT:
+			devicetemplate = DEVICETEMPLATE_Standard_Thermostat_CONST;
+			LoggerWrapper::GetInstance()->Write(LV_WARNING, "    -> Standard_Themostat");
+			break;
+		case GENERIC_TYPE_SWITCH_MULTILEVEL:
+			switch (specific) {
+				case SPECIFIC_TYPE_MOTOR_MULTIPOSITION:
+				case SPECIFIC_TYPE_CLASS_A_MOTOR_CONTROL:
+				case SPECIFIC_TYPE_CLASS_B_MOTOR_CONTROL:
+				case SPECIFIC_TYPE_CLASS_C_MOTOR_CONTROL:
+					devicetemplate = DEVICETEMPLATE_Drapes_Switch_CONST;
+					LoggerWrapper::GetInstance()->Write(LV_WARNING, "    -> Drapes_Switch");
+					break;
+				case SPECIFIC_TYPE_NOT_USED:
+				case SPECIFIC_TYPE_POWER_SWITCH_MULTILEVEL:
+				case SPECIFIC_TYPE_SCENE_SWITCH_MULTILEVEL:
+					devicetemplate = DEVICETEMPLATE_Light_Switch_dimmable_CONST;
+					LoggerWrapper::GetInstance()->Write(LV_WARNING, "    -> Light_Switch");
+					break;
+			}
+				
+			break;
+		case GENERIC_TYPE_SWITCH_REMOTE:
+			devicetemplate = DEVICETEMPLATE_Remote_Switch_CONST;
+			LoggerWrapper::GetInstance()->Write(LV_WARNING, "    -> Remote_Switch");
+			break;
+		case GENERIC_TYPE_SWITCH_BINARY:
+			devicetemplate = DEVICETEMPLATE_Light_Switch_onoff_CONST;
+			LoggerWrapper::GetInstance()->Write(LV_WARNING, "    -> Light_Switch_OnOff");
+			break;
+		case GENERIC_TYPE_SENSOR_BINARY:
+			LoggerWrapper::GetInstance()->Write(LV_WARNING, "    -> Generic_Sensor");
+			devicetemplate = DEVICETEMPLATE_Generic_Sensor_CONST;
+			break;
+		case GENERIC_TYPE_WINDOW_COVERING:
+			devicetemplate = DEVICETEMPLATE_Drapes_Switch_CONST;
+			LoggerWrapper::GetInstance()->Write(LV_WARNING, "    -> Drapes_Switch");
+			break;
+		case GENERIC_TYPE_SENSOR_MULTILEVEL:
+			devicetemplate = DEVICETEMPLATE_Multilevel_Sensor_CONST;
+			LoggerWrapper::GetInstance()->Write(LV_WARNING, "    -> Multilevel_Sensor");
+			break;
+		case GENERIC_TYPE_SENSOR_ALARM:
+			// DCE::LoggerWrapper::GetInstance()->Write(LV_ZWAVE, "alarm sensor found, specific: %i",specific);
+			switch(specific) {
+				case SPECIFIC_TYPE_BASIC_ROUTING_SMOKE_SENSOR:
+				case SPECIFIC_TYPE_ROUTING_SMOKE_SENSOR:
+				case SPECIFIC_TYPE_BASIC_ZENSOR_NET_SMOKE_SENSOR:
+				case SPECIFIC_TYPE_ZENSOR_NET_SMOKE_SENSOR:
+				case SPECIFIC_TYPE_ADV_ZENSOR_NET_SMOKE_SENSOR:
+					devicetemplate = DEVICETEMPLATE_Smoke_Detector_CONST;
+					LoggerWrapper::GetInstance()->Write(LV_WARNING, "    -> Smoke_Detector");
+				break;
+			}
+		case GENERIC_TYPE_AV_CONTROL_POINT:
+			devicetemplate = DEVICETEMPLATE_Generic_Tuner_CONST;
+			LoggerWrapper::GetInstance()->Write(LV_WARNING, "    -> Generic_Tuner");
+			break;
+	}
+	return devicetemplate;
+}
+
+int ZWave::AddDevice(int parent, string sInternalId, int PK_DeviceTemplate) {
 	int iPK_Device = 0;
-/*
+
 	int tmp_parent = 0;
 	if (parent > 0) { tmp_parent = parent; } else { tmp_parent = m_dwPK_Device; }
 
-	string tmp_s = StringUtils::itos(DEVICEDATA_PortChannel_Number_CONST) + "|" + sInternalID;
-	DeviceData_Impl *pDevice = InternalIDToDevice(sInternalID, iInstanceID);
-	bool bFound = pDevice != NULL;
-	
-	if (!bFound) {
-	        string sInternalIDInst = sInternalID;
-		if (iInstanceID > 0) {
-		        sInternalIDInst = sInternalIDInst + "/" + StringUtils::itos(iInstanceID);
+	if ( m_setRecentlyAddedDevices.find(sInternalId) == m_setRecentlyAddedDevices.end() )
+	{
+		DeviceData_Impl* pDevice = GetDeviceForPortChannel(sInternalId);
+		if (pDevice == NULL) {
+			// does not exist, create child
+			LoggerWrapper::GetInstance()->Write(LV_ZWAVE, "Adding device for node: %s to parent device %d",sInternalId.c_str(), tmp_parent);
+			CMD_Create_Device add_command(m_dwPK_Device,4, PK_DeviceTemplate,"",0,"",
+			StringUtils::itos(DEVICEDATA_PortChannel_Number_CONST) + "|" + sInternalId, 0,tmp_parent,"",0,0,&iPK_Device) ;
+			SendCommand(add_command);
+			m_setRecentlyAddedDevices.insert(sInternalId);
+		} else {
+			iPK_Device = pDevice->m_dwPK_Device;
 		}
-		// does not exist, create child
-		LoggerWrapper::GetInstance()->Write(LV_ZWAVE, "Adding device for node: %s",sInternalIDInst.c_str());
-		// CMD_Create_Device add_command(m_dwPK_Device,DEVICETEMPLATE_VirtDev_General_Info_Plugin_CONST, PK_DeviceTemplate,"",0,"",
-		CMD_Create_Device add_command(m_dwPK_Device,4, PK_DeviceTemplate,"",0,"",
-			StringUtils::itos(DEVICEDATA_PortChannel_Number_CONST) + "|" + sInternalIDInst, 0,tmp_parent,"",0,0,&iPK_Device) ;
-		SendCommand(add_command);
-	} else {
-	        iPK_Device = pDevice->m_dwPK_Device;
 	}
-*/
 	return iPK_Device;
 
 } 
 bool ZWave::DeleteDevicesForNode(int iNodeId) {
 /*	DeviceData_Impl *pTargetChildDevice = NULL;
-	// CMD_Delete_Device del_command(m_dwPK_Device,DEVICETEMPLATE_VirtDev_General_Info_Plugin_CONST,device_id);
 
         vector<DeviceData_Impl *> vectDevices = FindDevicesForNode(sInternalID);
 	if (vectDevices.size() > 0) {

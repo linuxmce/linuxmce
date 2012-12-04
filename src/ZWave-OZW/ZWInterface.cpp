@@ -232,14 +232,14 @@ void ZWInterface::OnNotification(OpenZWave::Notification const* _notification) {
 			// nodeInfo = nodeInfo;
 			OpenZWave::ValueID id = _notification->GetValueID();
 			string str;
-			LoggerWrapper::GetInstance()->Write(LV_ZWAVE, "ZWInterface::OnNotification() : Value Changed Home 0x%08x Node %d Genre %d Class %d Instance %d Index %d Type %d\n", _notification->GetHomeId(), _notification->GetNodeId(), id.GetGenre(), id.GetCommandClassId(), id.GetInstance(), id.GetIndex(), id.GetType());
+			LoggerWrapper::GetInstance()->Write(LV_ZWAVE, "ZWInterface::OnNotification() : Value Changed Home 0x%08x Node %d Genre %d Class %d Instance %d Index %d Type %d", _notification->GetHomeId(), _notification->GetNodeId(), id.GetGenre(), id.GetCommandClassId(), id.GetInstance(), id.GetIndex(), id.GetType());
 			if (OpenZWave::Manager::Get()->GetValueAsString(id, &str)) {
 				string label = OpenZWave::Manager::Get()->GetValueLabel(id);
 				string units = OpenZWave::Manager::Get()->GetValueUnits(id);
 				string level = str;
 				if (str == "True") level="255";
 				if (str == "False") level="0";
-				LoggerWrapper::GetInstance()->Write(LV_ZWAVE, "ZWInterface::OnNotification() : Value: %s Label: %s Unit: %s\n",str.c_str(),label.c_str(),units.c_str());
+				LoggerWrapper::GetInstance()->Write(LV_ZWAVE, "ZWInterface::OnNotification() : Value: %s Label: %s Unit: %s",str.c_str(),label.c_str(),units.c_str());
 				
 			}
 		}
@@ -268,10 +268,10 @@ void ZWInterface::OnNotification(OpenZWave::Notification const* _notification) {
 	{
 	}
 	} // switch
-	if (m_pZWave != NULL)
+	if (m_pZWave != NULL && m_pZWave->IsReady())
 		m_pZWave->OnNotification( _notification, GetNodeInfo( _notification ));
 	else
-		LoggerWrapper::GetInstance()->Write(LV_WARNING, "ZWInterface::OnNotification() : m_pZWave == NULL, possible lost notification");
+		LoggerWrapper::GetInstance()->Write(LV_WARNING, "ZWInterface::OnNotification() : m_pZWave == NULL or m_pZWave->IsReady == false, possible lost notification");
 	
 	UnLock();
 }

@@ -40,7 +40,10 @@ namespace DCE
 //<-dceag-decl-e->
 		// Private member variables
 	        ZWInterface* m_pZWInterface;
-
+		bool m_bReady; // set when all DCE initialization has been done
+		set<string> m_setRecentlyAddedDevices;
+		unsigned long m_dwPK_ClimateInterface;
+		unsigned long m_dwPK_SecurityInterface;
 		// Private methods
 
 		static void controller_update(OpenZWave::Driver::ControllerState state, void *context);
@@ -51,14 +54,16 @@ public:
 		void OnNotification(OpenZWave::Notification const* _notification, NodeInfo* nodeInfo);
 		ZWConfigData* GetConfigData();
 		void SetInterface(ZWInterface* pZWInterface);
-
+		void SetReady(bool ready) { m_bReady = ready; }
+		bool IsReady() { return m_bReady; }
 		DeviceData_Impl* GetDevice(int iNodeId, int iInstanceID);
 		DeviceData_Impl *GetDeviceForPortChannel(string sPortChannel);
 		int GetPKDevice(int iNodeId, int iInstanceID);
-		int AddDevice(int parent, int iNodeID, int iInstanceID, int PK_DeviceTemplate);
+		int AddDevice(int parent, string sId, int PK_DeviceTemplate);
 		bool DeleteDevicesForNode(int iNodeId);
 		void DoNodeToDeviceMapping();
 		void MapNodeToDevices(NodeInfo* node);
+		int GetDeviceTemplate(NodeInfo* node, OpenZWave::ValueID value, int& PK_Parent_Device);
 
 		void ReportBatteryStatus(int iNodeId, int status);
 		void SendTemperatureChangedEvent(unsigned int PK_Device, float value);

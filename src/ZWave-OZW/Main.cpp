@@ -218,7 +218,7 @@ int main(int argc, char* argv[])
 				g_pSocketCrashHandler=SocketCrashHandler;
 				LoggerWrapper::GetInstance()->Write(LV_STATUS, "Connect OK");
 				pZWave->CreateChildren();
-				
+				pZWave->SetReady(true);
 				// Now we have our config data from LMCE
 				if (!pZWInterface->IsReady()) {
 					pZWInterface->Init(pZWave->GetConfigData());
