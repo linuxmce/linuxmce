@@ -4195,7 +4195,7 @@ void DCE::qOrbiter::adjustVolume(int vol)
     {
         if (vol > 0)
         {
-            CMD_Vol_Up raiseVol(m_dwPK_Device, iMediaPluginID, vol);
+            CMD_Vol_Up raiseVol(m_dwPK_Device_NowPlaying_Audio, iMediaPluginID, vol);
             SendCommand(raiseVol);
         }
         else
