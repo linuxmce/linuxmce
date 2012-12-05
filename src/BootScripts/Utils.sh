@@ -185,7 +185,7 @@ FindDevice_Template()
 		Q="
 			SELECT PK_Device
 			FROM Device
-			WHERE (FK_Device_ControlledVia='$PK_Device_Parent' OR PK_Device='$PK_Device_Parent') AND FK_DeviceTemplate IN ($FK_DeviceTemplate))
+			WHERE (FK_Device_ControlledVia='$PK_Device_Parent' OR PK_Device='$PK_Device_Parent') AND FK_DeviceTemplate IN ($FK_DeviceTemplate)
 			$Limit
 		"
 	fi
