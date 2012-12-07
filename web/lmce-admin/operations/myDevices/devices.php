@@ -398,6 +398,7 @@ function device_test_buttons($type,$deviceID,$dbADO){
 	define('LIGHT_SWITCH', 37);
 	define('LIGHT_SWITCH_DIMMABLE', 38);
 	define('LIGHT_DRAPES_SWITCH', 68);
+	define('LIGHT_SWITCH_RGB', 1993);
 	define('STANDARD_SPRINKLER', 1637);
 	define('STANDARD_IRRIGATION_SPRINKLER', 1780);
 
@@ -425,7 +426,7 @@ function device_test_buttons($type,$deviceID,$dbADO){
 			<input type="submit" class="button" name="off_'.$deviceID.'" value="'.translate('TEXT_OFF_CONST').'">';
 		}
 
-		else if($deviceTemplate==LIGHT_SWITCH_DIMMABLE) {
+		else if ($deviceTemplate==LIGHT_SWITCH_DIMMABLE or $deviceTemplate==LIGHT_SWITCH_RGB) {
 			$out.='<input type="submit" class="button" name="on_'.$deviceID.'" value="'.translate('TEXT_ON_CONST').'"> 
 			<input type="submit" class="button" name="off_'.$deviceID.'" value="'.translate('TEXT_OFF_CONST').'">
 			<input type="submit" class="button" name="50_'.$deviceID.'" value="50%"><br>';
