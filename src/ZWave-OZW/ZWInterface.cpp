@@ -38,6 +38,14 @@ ZWInterface::~ZWInterface()
 {
 	LoggerWrapper::GetInstance()->Write(LV_ZWAVE, "ZWInterface::~() destructor, calling OpenZWave::Manager::Destroy()");
 	OpenZWave::Manager::Destroy();
+	Lock();
+	for( list<NodeInfo*>::iterator it = g_nodes.begin(); it != g_nodes.end(); ++it )
+	{
+		NodeInfo* nodeInfo = *it;
+		delete nodeInfo;
+		g_nodes.erase( it );
+	}
+	UnLock();
 }
 
 NodeInfo* ZWInterface::GetNodeInfo ( OpenZWave::Notification const* _notification) {
@@ -195,6 +203,7 @@ void ZWInterface::OnNotification(OpenZWave::Notification const* _notification) {
 			if( ( nodeInfo->m_homeId == homeId ) && ( nodeInfo->m_nodeId == nodeId ) )
 			{
 				g_nodes.erase( it );
+				delete nodeInfo;
 				break;
 			}
 		}
