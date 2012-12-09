@@ -65,6 +65,7 @@ namespace DCE
 		~ZWInterface();
 
 		NodeInfo* GetNodeInfo ( OpenZWave::Notification const* _notification);
+		NodeInfo* GetNodeInfo( uint32 homeId, uint8 nodeId);
 		list<NodeInfo*> GetNodes() { return g_nodes; }
 		uint32 GetHomeId();
 		void Lock();

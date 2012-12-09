@@ -43,6 +43,11 @@ ZWInterface::~ZWInterface()
 NodeInfo* ZWInterface::GetNodeInfo ( OpenZWave::Notification const* _notification) {
 	uint32 const homeId = _notification->GetHomeId();
 	uint8 const nodeId = _notification->GetNodeId();
+	return GetNodeInfo(homeId, nodeId);
+}
+
+NodeInfo* ZWInterface::GetNodeInfo( uint32 homeId, uint8 nodeId )
+{
 	for( list<NodeInfo*>::iterator it = g_nodes.begin(); it != g_nodes.end(); ++it )
 	{
 		NodeInfo* nodeInfo = *it;
@@ -93,6 +98,7 @@ bool ZWInterface::Init(ZWConfigData* data) {
 	
 	LoggerWrapper::GetInstance()->Write(LV_ZWAVE, "ZWInterface::Init() waiting for OZW init");
 	// Now we just wait for the driver to become ready
+	// TODO: if ZWave get quit request while we wait, we will not shut down.
 	pthread_cond_wait( &initCond, &initMutex );
 	
 	m_bInitDone = true;

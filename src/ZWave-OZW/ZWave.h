@@ -60,6 +60,7 @@ public:
 		DeviceData_Impl *GetDeviceForPortChannel(string sPortChannel);
 		int GetPKDevice(int iNodeId, int iInstanceID);
 		int AddDevice(int parent, string sId, int PK_DeviceTemplate);
+		void DeleteDevice(unsigned long PK_Device);
 		bool DeleteDevicesForNode(int iNodeId);
 		void DoNodeToDeviceMapping();
 		void MapNodeToDevices(NodeInfo* node);
