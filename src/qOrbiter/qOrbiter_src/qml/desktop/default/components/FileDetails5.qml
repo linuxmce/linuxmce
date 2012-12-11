@@ -4,12 +4,18 @@ import QtQuick 1.0
 Rectangle {
     id: filedetailrect
     width: scaleX(75)
-    height: scaleY(65)
+    height: scaleY(75)
     anchors.centerIn: parent
     color:"transparent"
     clip: true    
     border.color: "white"
     border.width: 3
+    MouseArea{
+        anchors.fill: parent
+        hoverEnabled: true
+
+    }
+
     Image {
         id: fdbg
         source: "../img/icons/nowplaying.png"
@@ -49,8 +55,8 @@ Rectangle {
         }
         Image {
             id: filedetailsimage
-            width: filedetailsclass.aspect=="wide"? scaleX(30) : scaleX(23)
-            height:filedetailsclass.aspect=="wide"?scaleY(40) : scaleY(55)
+            width: filedetailsclass.aspect=="wide"? scaleX(35) : scaleX(25)
+            height:filedetailsclass.aspect=="wide"?scaleY(35) : scaleY(58)
             source: ""
             smooth: true
         }

@@ -117,6 +117,8 @@ Item
                         font.pixelSize: parent.height;
                         color: "white";
                         smooth: true
+                        font.bold: true
+
                     }
                 }
                 MouseArea{
@@ -338,7 +340,7 @@ Item
                 }
                 MouseArea {
                     anchors.fill: parent
-                    onClicked: gotoQScreen("Screen_44.qml")
+                    onClicked: manager.gotoQScreen("Screen_44.qml")
                 }
             }
 

@@ -45,6 +45,7 @@ Item {
     FontLoader {
         id: scout
         source: "../aeon/fonts/scout.ttf"
+
     }
     FontLoader {
         id: scoutLight
