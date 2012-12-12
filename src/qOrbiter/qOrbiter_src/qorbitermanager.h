@@ -595,6 +595,7 @@ signals:
     void getAlarms();
     void getSingleCam(int i_pk_camera_device, int h, int w);
     void dceGridSepChanged(int d);
+    void commandCompleted();
 
     //runtime
     void commandResponseChanged();

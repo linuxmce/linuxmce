@@ -1361,6 +1361,7 @@ void qOrbiter::CMD_Show_Shortcuts(string &sCMD_Result,Message *pMessage)
 void qOrbiter::CMD_Show_File_List(int iPK_MediaType,string &sCMD_Result,Message *pMessage)
 //<-dceag-c401-e->
 {
+    emit gotoQml("Screen_47.qml");
     setMediaType(iPK_MediaType);
     if (iPK_MediaType != q_mediaType.toInt())
     {
@@ -1370,12 +1371,13 @@ void qOrbiter::CMD_Show_File_List(int iPK_MediaType,string &sCMD_Result,Message 
     }
 
     q_mediaType = QString::number(iPK_MediaType);
-    emit gotoQml("Screen_47.qml");
+
     currentScreen= "Screen_47.qml";
     emit commandResponseChanged("Show File List Complete, Calling request Media Grid");
     setGridStatus(true);
     prepareFileList(iPK_MediaType);
     requestTypes(iPK_MediaType);
+    emit commandComplete();
 
 }
 
@@ -1575,6 +1577,7 @@ void qOrbiter::CMD_Goto_Screen(string sID,int iPK_Screen,int iInterruption,bool 
     cout << "Parm #252 - Turn_On=" << bTurn_On << endl;
     cout << "Parm #253 - Queue=" << bQueue << endl;
     cout << "scmdresult" << sCMD_Result << endl;
+    emit gotoQml(QString("Screen_"+QString::number(iPK_Screen)+".qml"));
 
     //qDebug() << "Vect msg count" << pMessage->m_vectExtraMessages.size();
 
@@ -1586,17 +1589,8 @@ void qOrbiter::CMD_Goto_Screen(string sID,int iPK_Screen,int iInterruption,bool 
         // ScreenParameters->addParam( QString::fromStdString(dparam2), dparam );
         emit addScreenParam(QString::fromStdString(dparam2), dparam );
     }
-    map<long, char* >::const_iterator end2 = pMessage->m_mapData_Parameters.end();
-    for (map<long, char* >::const_iterator it2 = pMessage->m_mapData_Parameters.begin(); it2 != end2; ++it2)
-    {
-        long dparam = it2->first;
-        string dparam2 = it2->second;
-    }
 
-    QString params = pMessage->ToString(true).c_str();
-    QStringList paramList = params.split(" ");
-    QString str = QString::number(iPK_Screen);
-    emit gotoQml(QString("Screen_"+str+".qml"));
+
 }
 
 //<-dceag-c795-b->
@@ -2429,10 +2423,10 @@ void DCE::qOrbiter::executeCommandGroup(int cmdGrp)
 #ifndef ANDROID
     LoggerWrapper::GetInstance()->Write(LV_CRITICAL, "Executing Command Group %d", cmdGrp);
 #endif
-    string *pResponse;
-    CMD_Execute_Command_Group execCommandGroup((long)m_dwPK_Device, (long)2, cmdGrp);
-
+    string pResponse="";
+    CMD_Execute_Command_Group execCommandGroup((long)m_dwPK_Device, (long)2, cmdGrp);    
     SendCommand(execCommandGroup);
+    emit commandComplete();
 }
 
 void qOrbiter::displayToggle(bool t)

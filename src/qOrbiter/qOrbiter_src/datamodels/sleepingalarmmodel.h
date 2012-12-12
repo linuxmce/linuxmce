@@ -28,16 +28,18 @@ public:
  QModelIndex indexFromItem( const SleepingAlarm* item) const;
 
 
-signals:
- void modelChanged();
-
+signals: 
+ void modelAboutToBeReset();
+ void modelReset();
     
 public slots:
 void clear();
+
 private slots:
  void handleItemChange();
 
 private:
+ void resetInternalData();
  SleepingAlarm* m_prototype;
  QList<SleepingAlarm*> m_list;
     

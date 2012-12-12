@@ -62,11 +62,14 @@ public:
     bool b_skinIndexReady;
     bool b_skinDataReady;
     bool b_reloadStatus;
+    bool b_commandStatus;
     QString qmlPage;
     QString localPath;
     bool phoneSize;
 
 public slots:
+
+
     void setQmlPage(QString p) {qmlPage = p; emit pageChanged(); }
     QString getQmlPage() {return qmlPage;}
 

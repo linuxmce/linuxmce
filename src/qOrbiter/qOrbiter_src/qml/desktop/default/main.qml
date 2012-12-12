@@ -4,7 +4,7 @@ import AudioVisual 1.0
 import "effects"
 import "components"
 import "js/ComponentLoader.js" as MyJs
-
+import "lib/handlers"
 
 Item {
     id: item
@@ -12,6 +12,10 @@ Item {
     height:manager.appHeight
     property alias skinStyle: style
 
+    WaitSpinner {
+        id: waitSpinner
+        anchors.centerIn: parent
+    }
 
     Style{
        id:style

@@ -1433,6 +1433,7 @@ signals:
     void commandResponseChanged(QString r);
     void eventResponseChanged(QString e);
     void deviceResponseChanged(QString d);
+    void commandComplete();
 
     /*
      *Media Player

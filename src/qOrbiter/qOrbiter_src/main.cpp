@@ -468,7 +468,7 @@ int main(int argc, char* argv[])
         QObject::connect(w.nowPlayingButton, SIGNAL(statusMessage(QString)), &w, SLOT(setDceResponse(QString)));
         QObject::connect(&pqOrbiter, SIGNAL(statusMessage(QString)), &w , SLOT(setDceResponse(QString)),Qt::QueuedConnection);
         QObject::connect(&w, SIGNAL(loadingMessage(QString)), &orbiterWin,SLOT(setMessage(QString)), Qt::DirectConnection);
-
+        QObject::connect(&pqOrbiter,SIGNAL(commandComplete()), &w, SIGNAL(commandCompleted()), Qt::QueuedConnection);
         //operations
         QObject::connect(&pqOrbiter, SIGNAL(addScreenParam(QString,int)), w.ScreenParameters, SLOT(addParam(QString, int)), Qt::QueuedConnection);
         QObject::connect(&w, SIGNAL(locationChanged(int,int)), &pqOrbiter, SLOT(setLocation(int,int)),Qt::QueuedConnection);

@@ -26,9 +26,9 @@ It needs to be expanded to create device numberlists for now playing and other s
 
 #include <QObject>
 #include <QMap>
-#ifdef debug
+
 #include <QDebug>
-#endif
+
 
 
 class ScreenParamsClass : public QObject
@@ -72,7 +72,7 @@ signals:
 
 public slots:
     void setSender(long sender) { sender = deviceFrom; emit senderChanged();}
-    void addParam(QString val, int key) {paramDevices.insert(key, val); }
+    void addParam(QString val, int key) {paramDevices.insert(key, val); qDebug() << val << "::" << key; }
     void clear();
 
 };

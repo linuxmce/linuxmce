@@ -1,12 +1,13 @@
 import QtQuick 1.0
 import "../components"
+import "../lib/handlers"
 Item{
     id:sleepingmenu
 
     Rectangle{
         height: manager.appHeight
         width: manager.appWidth
-        color: style.darkhighlight
+        color: "transparent"
         HomeButton{ x: 5; y: 5; width: 75; height: 75; smooth: true}
         Component.onCompleted: manager.getSleepingAlarms()
         Rectangle{
@@ -19,7 +20,14 @@ Item{
             clip:true
             border.color: "black"
             border.width: 3
-
+            StyledText {
+                id: alarmtext
+                text: qsTr("Sleeping Alarms")
+                anchors.horizontalCenter: parent.horizontalCenter
+                anchors.top: parent.top
+                style: Text.Sunken
+                font.pointSize: scaleY(4)
+            }
             Row{
                 id:containerrow
                 spacing: scaleY(1)
@@ -44,28 +52,17 @@ Item{
                     Column{
                         id:alarmslayoutcolumn
                         spacing: scaleY(1)
-                        width: childrenRect.width
-                        Rectangle{
-                            id:alarmsheader
-                            height: scaleY(4)
-                            width: scaleX(18)
-                            color: style.accentcolor
-                            radius: 5
-                            Text {
-                                id: alarmtext
-                                text: qsTr("Sleeping Alarms")
-                                anchors.horizontalCenter: parent.horizontalCenter
-                            }
-                        }
+                        width: childrenRect.width                      
 
                         Rectangle{
                             height: childrenRect.height
                             width: scaleX(25.25)
-                            color:style.lighthighlight
+                            color:"transparent"
+                            clip:true
 
                             ListView{
                                 id:alarmlist
-                                height: scaleY(20)
+                                height: scaleY(35)
                                 width: scaleX(25)
                                 model:alarms
                                 anchors.centerIn: parent
@@ -73,9 +70,9 @@ Item{
                                 delegate:
                                     Rectangle
                                 {
-                                    height: scaleY(10)
+                                    height: scaleY(15)
                                     width: scaleX(25)
-                                    color:"white"
+                                    color:style.darkhighlight
                                     border.color: "black"
                                     border.width: 2
                                     anchors.margins: 10
@@ -86,40 +83,36 @@ Item{
                                         spacing: 5
                                         Rectangle{
                                             id:indicator
-                                            height: scaleY(10)
+                                            height: scaleY(15)
                                             width: parent.width *.25
                                             color: status ?"green":  "red"
                                             border.color: "black"
                                             border.width: 2
-                                            Component.onCompleted: console.log(status)
+
                                             StyledText {
                                                 id: statelabel
-                                                text: status
+                                                text: status ? qsTr("enabled") : qsTr("disabled")
                                                 anchors.centerIn: parent
                                             }
 
-                                            MouseArea{
-                                                anchors.fill: parent
-                                                onClicked: {
-                                                    manager.updateAlarm(!status, handler)
-                                                }
+                                            AlarmToggleHandler {
                                             }
                                         }
                                         Column{
-                                            spacing: 5
-                                            Text {
+                                            height: parent.height
+                                            StyledText {
                                                 id: alarmname
                                                 text:qsTr("Name: ") + name
                                             }
-                                            Text {
+                                            StyledText {
                                                 id: alarmtimeLabel
                                                 text:qsTr("Alarm Set For: ") + alarmtime
                                             }
-                                            Text {
+                                            StyledText {
                                                 id: daysactive
                                                 text: qsTr("Active on: ")+ active
                                             }
-                                            Text {
+                                            StyledText {
                                                 id: countdown
                                                 text: qsTr("Time Left: ") +remaining
                                             }

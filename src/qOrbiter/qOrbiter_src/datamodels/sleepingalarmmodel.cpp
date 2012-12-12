@@ -56,7 +56,15 @@ void SleepingAlarmModel::handleItemChange()
   SleepingAlarm* item = static_cast<SleepingAlarm*>(sender());
   QModelIndex index = indexFromItem(item);
   if(index.isValid())
-    emit dataChanged(index, index);
+      emit dataChanged(index, index);
+}
+
+void SleepingAlarmModel::resetInternalData()
+{
+    for(int i = 0; i <= m_list.count(); ++i){
+        m_list.removeAt(i);
+    }
+    m_list.clear();
 }
 
 SleepingAlarm * SleepingAlarmModel::find(const QString &id) const
@@ -89,8 +97,12 @@ QModelIndex SleepingAlarmModel::indexFromItem(const SleepingAlarm *item) const
 
 void SleepingAlarmModel::clear()
 {
-    removeRows(0, m_list.count(),QModelIndex());
-  m_list.clear();
+
+    emit modelAboutToBeReset();
+    beginResetModel();
+    resetInternalData();
+    endResetModel();
+    emit modelReset();
 }
 
 
