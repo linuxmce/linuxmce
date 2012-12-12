@@ -1,0 +1,33 @@
+import QtQuick 1.1
+import Qt.labs.shaders 1.0
+
+Rectangle{
+    id:waitSpinner
+    height: scaleX(15)
+    width: scaleX(15)
+    property bool activated:false
+    z:activated ? 50 : -20
+    Connections{
+        target:manager
+        onExecuteCMD:activated = true
+        onCommandCompleted:activated=false
+    }
+
+    PropertyAnimation{
+        target:waitSpinner
+        property: "rotation"
+        from:0
+        to:360
+        duration: 1000
+        loops: Animation.Infinite
+        running: activated
+    }
+
+    SequentialAnimation{
+        running: activated
+        loops: Animation.Infinite
+       ColorAnimation { from: "white"; to: "black"; duration: 500 }
+       ColorAnimation { from: "black"; to: "white"; duration: 500 }
+    }
+
+}
