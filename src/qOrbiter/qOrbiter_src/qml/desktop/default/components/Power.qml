@@ -1,4 +1,5 @@
 import QtQuick 1.0
+import "../lib/handlers"
 Rectangle{
     id:power_rect_container
     height: manager.appHeight
@@ -92,12 +93,9 @@ Rectangle{
                         id:pwron
                         buttontext: qsTr("Display On")
                         buttonsqradius: 20
-                        MouseArea{
-                            anchors.fill: parent
-                            onClicked: {
-                                manager.toggleDisplay(1)
-                                power_rect_container.destroy()
-                            }
+                        PowerToggleHandler {
+                            mode:1
+                            onReleased: power_rect_container.destroy()
                         }
                     }
 
@@ -112,12 +110,9 @@ Rectangle{
                         id: offlabel
                         buttontext: qsTr("Display Off")
                         buttonsqradius: 20
-                        MouseArea{
-                            anchors.fill: parent
-                            onClicked: {
-                                manager.toggleDisplay(0)
-                                 power_rect_container.destroy()
-                            }
+                        PowerToggleHandler{
+                            mode:0
+                            onReleased: power_rect_container.destroy()
                         }
                     }
                 }
