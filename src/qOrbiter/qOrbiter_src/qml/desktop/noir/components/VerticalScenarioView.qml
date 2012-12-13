@@ -6,7 +6,8 @@ ListView{
     width: componentWidth
     model: scenarioModel
 
-    Component.onCompleted:
+    // Component.onCompleted:
+
    delegate: Rectangle{
         height: 50
         width: componentWidth
