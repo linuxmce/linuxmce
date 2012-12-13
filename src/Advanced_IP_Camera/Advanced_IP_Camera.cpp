@@ -399,6 +399,7 @@ bool Advanced_IP_Camera::DoURLAccess(string sUrl)
  	curl_easy_setopt(m_pCurl, CURLOPT_WRITEDATA, (void *)&data);
 	CURLcode res = curl_easy_perform(m_pCurl);
 	
+	bool statusOK = false;
 	if (res != 0)
 	{
 		LoggerWrapper::GetInstance ()->Write (LV_STATUS, "DoURLAccess(): failed to get data: curl error: %s", curl_easy_strerror(res));
@@ -408,14 +409,14 @@ bool Advanced_IP_Camera::DoURLAccess(string sUrl)
 		if (code == 200)
 		{
 			// http OK
-		        curl_easy_reset(m_pCurl);
-			return true;
+			statusOK = true;
 		} else {
 			LoggerWrapper::GetInstance ()->Write (LV_STATUS, "DoURLAccess(): http code: %d, response:",  code);
 		}
 	}
 	curl_easy_reset(m_pCurl);
-	return false;
+	LoggerWrapper::GetInstance ()->Write (LV_STATUS, "DoURLAccess(): end.");
+	return statusOK;
 }
 
 size_t Advanced_IP_Camera::WriteCallback(void *ptr, size_t size, size_t nmemb, void *ourpointer) 
