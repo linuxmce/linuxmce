@@ -1,3 +1,4 @@
+/*Noir*/
 import QtQuick 1.1
 import Qt.labs.shaders 1.0
 
@@ -19,6 +20,14 @@ Item {
     property string dynamic_height
     property string dynamic_width
 
+    Style{
+        id:mystyle
+    }
+
+    FontLoader{
+        id:fontstyle
+        source: "fonts/Sawasdee.ttf"
+    }
     function checkLayout()
     {
         console.log("c++ slot orientation changed")

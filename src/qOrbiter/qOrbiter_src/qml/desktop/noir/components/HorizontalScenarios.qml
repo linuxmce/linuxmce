@@ -20,7 +20,7 @@ Rectangle{
             width: componentWidth
             color: delegateHit.containsMouse ? delegateHit.pressed ? style.darkhighlight : style.darkhighlight : style.highlight1
            // color: "transparent"
-            Text {
+            StyledText {
                 id: scenarioItem
                 text: title
                 font.pixelSize: 12

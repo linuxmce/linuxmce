@@ -25,7 +25,7 @@ Rectangle{
 
     }
 
-    Text {
+    StyledText {
         id: scenario_trigger_label
         text: triggerLabel
         anchors.centerIn: parent

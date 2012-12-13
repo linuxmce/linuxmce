@@ -71,13 +71,17 @@ Rectangle {
             height: buttonHeight
             width: buttonWidth
             color: "transparent"
-            Text {
+            StyledText {
                 id: aLabel
                 text: qsTr("Advanced")
                 anchors.centerIn: parent
                 color: "white"
                 font.family: "Nimbus Sans L"
                 font.pixelSize: scenarioFontSize
+            }
+            MouseArea{
+                anchors.fill: parent
+                onClicked: manager.gotoQScreen("Screen_44.qml")
             }
         }
     }
@@ -95,21 +99,21 @@ Rectangle {
             height: 50
             width: 85
             color: "transparent"
-            Text {
+            StyledText {
                 id: roomLabel
                 text: qsTr("room")
                 anchors.left: parent.left
                 color: "white"
-                font.family: "Nimbus Sans L"
+
             }
 
-            Text {
+            StyledText {
                 id: roomTitle
                 text: currentroom
                 font.pixelSize: 18
                 anchors.left: roomLabel.right
                 color: "white"
-                font.family: "Nimbus Sans L"
+
             }
         }
 
@@ -119,21 +123,20 @@ Rectangle {
             width: 85
             color: "transparent"
 
-            Text {
+            StyledText {
                 id: userLabel
                 text: qsTr("user:")
                 font.pixelSize: 12
                 anchors.left: userRect.left
                 color: "white"
-                font.family: "Nimbus Sans L"
+
             }
-            Text {
+            StyledText {
                 id: userName
                 text: currentuser
                 font.pixelSize: 18
                 anchors.left: userLabel.right
-                color: "white"
-                font.family: "Nimbus Sans L"
+                color: "white"               
             }
         }
     }
