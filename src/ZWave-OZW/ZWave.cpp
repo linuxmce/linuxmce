@@ -423,8 +423,9 @@ void ZWave::CMD_Set_Association(int iNodeID,int iGroup_ID,string sNodes_List,str
 				OpenZWave::Manager::Get()->AddAssociation(m_pZWInterface->GetHomeId(), iNodeID, iGroup_ID, targetId);
 			} else if (targetId < 0)
 			{
-				DCE::LoggerWrapper::GetInstance()->Write(LV_ZWAVE,"ZWave::OnNotification() Removing association: (node %d, group %d) -> (node %d)", iNodeID, iGroup_ID, targetId);
-				OpenZWave::Manager::Get()->RemoveAssociation(m_pZWInterface->GetHomeId(), iNodeID, iGroup_ID, targetId);
+				uint8 id = -targetId;
+				DCE::LoggerWrapper::GetInstance()->Write(LV_ZWAVE,"ZWave::OnNotification() Removing association: (node %d, group %d) -> (node %d)", iNodeID, iGroup_ID, id);
+				OpenZWave::Manager::Get()->RemoveAssociation(m_pZWInterface->GetHomeId(), iNodeID, iGroup_ID, id);
 			}
 			m_pZWInterface->UnLock();
 		}
