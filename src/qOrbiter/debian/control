@@ -10,7 +10,8 @@ Homepage: http://www.linuxmce.org
 
 Package: qorbiter
 Architecture: any
-Depends: ${shlibs:Depends}, ${misc:Depends}
+Depends: ${shlibs:Depends},
+${misc:Depends},libqt4-declarative,libqt4-declarative-folderlistmodel,libqt4-declarative-gestures,libqt4-declarative-particles,libqt4-declarative-shaders
 Description: QML based Home automation frontend application.
  QOrbiter, the QML based Home Automation frontend application 
  for LinuxMCE, the open source Home Automation Platform.
