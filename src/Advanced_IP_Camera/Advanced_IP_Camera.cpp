@@ -408,11 +408,13 @@ bool Advanced_IP_Camera::DoURLAccess(string sUrl)
 		if (code == 200)
 		{
 			// http OK
+		        curl_easy_reset(m_pCurl);
 			return true;
 		} else {
 			LoggerWrapper::GetInstance ()->Write (LV_STATUS, "DoURLAccess(): http code: %d, response:",  code);
 		}
 	}
+	curl_easy_reset(m_pCurl);
 	return false;
 }
 
