@@ -414,6 +414,7 @@ bool Advanced_IP_Camera::DoURLAccess(string sUrl)
 			LoggerWrapper::GetInstance ()->Write (LV_STATUS, "DoURLAccess(): http code: %d, response:",  code);
 		}
 	}
+	data.Clear();
 	curl_easy_reset(m_pCurl);
 	LoggerWrapper::GetInstance ()->Write (LV_STATUS, "DoURLAccess(): end.");
 	return statusOK;
@@ -421,7 +422,7 @@ bool Advanced_IP_Camera::DoURLAccess(string sUrl)
 
 size_t Advanced_IP_Camera::WriteCallback(void *ptr, size_t size, size_t nmemb, void *ourpointer) 
 {
-	struct CallbackData* data = (CallbackData*)ourpointer;
+	CallbackData* data = (CallbackData*)ourpointer;
 	size_t realsize = size * nmemb;
 	char* temp = (char*)realloc(data->buffer, data->size + realsize + 1);
 	if (temp == NULL)

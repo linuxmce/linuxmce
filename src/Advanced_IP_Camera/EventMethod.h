@@ -117,7 +117,7 @@ public:
 		buffer = (char*)malloc(1);
 		size = 0;
 	}
-	~CallbackData()
+	void Clear()
 	{
 		free(buffer);
 	}
