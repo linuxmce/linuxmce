@@ -23,6 +23,8 @@ sqlCVS: $(sqlCVS:.cpp=.o)
 newthing: $(new_thing:.cpp=.o)
 	@echo "*** Something to do here ***"
 
+distclean: clean
+
 clean: clean-recursive
 	rm -f $(call cpath,$(sources:.cpp=.o) $(sources:.cpp=.d)) sqlCVS >/dev/null
 
