@@ -30,7 +30,7 @@ sources += DLNAEngine.cpp LMCERenderer.cpp moc_LMCERenderer.cpp LMCERendererConn
 #<-dceag-mf-b->
 LDLIBS = $(XTRALDLIBS) $(BASELDLIBS)
 
-whattodo:
+whattodo: all
 	@echo "type 'make bin', 'make so' or 'make all'"
 
 all: bin so
@@ -63,3 +63,8 @@ ifeq (,$(findstring clean, $(MAKECMDGOALS)))
 endif
 #<-dceag-mf-e->
 
+
+install:
+	mkdir -p $(DESTDIR)/usr/pluto/bin
+	cp DLNA $(DESTDIR)/usr/pluto/bin
+	
