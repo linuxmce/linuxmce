@@ -1,8 +1,8 @@
 <RCC>
     <qresource prefix="/img">
-        <file alias="desktop_splash.png">img/lmcesplash.png</file>
         <file alias="harmattan_splash_bkg.png">img/harmattan_splash_bkg.png</file>
         <file alias="harmattan_splash.png">img/harmattan_splash.png</file>
+        <file alias="Splash.png">qml/desktop/default/img/icons/backgrounds/bedroom.png</file>
     </qresource>
     <qresource prefix="/main">
         <file>config.xml</file>

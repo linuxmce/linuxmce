@@ -4,7 +4,11 @@ import QtQuick 1.1
 Rectangle {
    height: appH
    width: appW
-   color: "darkslategrey"
+   color: "transparent"
+   Image {
+       id: bg
+       source: "qrc:/img/splash.png"
+   }
     Timer{
         id:wait
         interval: 2500

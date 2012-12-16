@@ -207,7 +207,7 @@ macx{
 #android deployment
  android-g++{
 #nfs mount to work with skins on core directly
-folder_01.source = /mnt/remote/android-qml/
+#folder_01.source = /mnt/remote/android-qml/
 #folder_01.source = qml/android/
 #folder_01.target = qml
 
@@ -240,7 +240,7 @@ folder_01.source = /mnt/remote/android-qml/
 
 	INSTALLS+= qmlplugins
         DEFINES+=ANDROID
-        DEPLOYMENTFOLDERS = qmlcomponents base folder_01
+        DEPLOYMENTFOLDERS = qmlcomponents base #folder_01
         QML_IMPORT_PATH = "androidComponents"
 }
 
@@ -559,8 +559,6 @@ HEADERS += \
 OTHER_FILES += Readme.txt \
         OrbiterVariables.txt \
         config.xml \
-    qml/desktop/aeon/components/FileDetails5.qml \
-    qml/desktop/aeon/components/FileDetails4.qml
 
 
 
