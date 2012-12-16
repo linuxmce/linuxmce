@@ -20,36 +20,36 @@ Item {
     property string dynamic_height
     property string dynamic_width
 
-    Style{
-        id:mystyle
-    }
-
-    FontLoader{
-        id:fontstyle
-        source: "fonts/Sawasdee.ttf"
-    }
-    function checkLayout()
-    {
-        console.log("c++ slot orientation changed")
-        console.log(manager.appHeight+" x " + manager.appWidth)
-    }
-
     Connections{
         target: manager
         onOrientationChanged: checkLayout()
     }
 
-    ScreenSaver{
-        id:pss
-        anchors.centerIn: parent
+    function checkUi(){
+        console.log("Checking focused items")
+        if(lmceScenarios.activeFocus === true){
+            pageLoader.forceActiveFocus()
+        }
+        else
+        {
+            lmceScenarios.forceActiveFocus()
+        }
     }
 
     function toggleUI()
     {
         mediaHeader.visible = !mediaHeader.visible
         lmceScenarios.visible = !lmceScenarios.visible
+        pageLoader.focus = true
     }
 
+
+
+    function checkLayout()
+    {
+        console.log("c++ slot orientation changed")
+        console.log(manager.appHeight+" x " + manager.appWidth)
+    }
 
 
     function scaleX(x){
@@ -99,38 +99,6 @@ Item {
     {
         console.log(component.progress)
     }
-
-    FocusScope{
-        id:loaderScop
-        width: parent.width
-        height: parent.height
-        focus: true
-         Keys.onPressed:{
-
-                 if(event.key === Qt.Key_T){
-                     toggleUI()
-                 console.log("Key toggle")
-                 }
-
-         }
-
-        Loader {
-            id:pageLoader
-            objectName: "loadbot"
-            focus: true
-            onSourceChanged:  loadin
-
-            onLoaded: {
-
-                console.log("Screen Changed:" + pageLoader.source)
-
-            }
-
-
-        }
-
-    }
-
     //=================Components==================================================//
     function loadComponent(componentName )
     {
@@ -166,13 +134,52 @@ Item {
 
     }
 
+    Style{
+        id:mystyle
+    }
+
+    FontLoader{
+        id:fontstyle
+        source: "fonts/Sawasdee.ttf"
+    }
+
+    ScreenSaver{
+        id:pss
+        anchors.centerIn: parent
+    }
+
+    Loader {
+        id:pageLoader
+        objectName: "loadbot"
+        onSourceChanged:  loadin
+        onLoaded: {
+            console.log("Screen Changed:" + pageLoader.source)
+            forceActiveFocus()
+        }
+        Keys.onPressed:{
+            if(event.key === Qt.Key_T){
+                toggleUI()
+                console.log("Key toggle")
+            }
+            else if (event.key === Qt.Key_Tab){
+                checkUi()
+            }
+            else{
+                console.log("Key:"+event.key+" was pressed")
+            }
+        }
+        onFocusChanged: console.log("Focus for page loader is now "+focus)
+        onActiveFocusChanged: console.log("ActiveFocus for page loader is now " +activeFocus)
+    }
 
     Loader{
         id:componentLoader
         height: parent.height
         width: parent.width
         objectName: "componentbot"
-        onLoaded: {console.log("Component is loaded")}
+        onLoaded: {console.log("Component is loaded"); forceActiveFocus()}
+        onFocusChanged: console.log("Focus for Component loader is now "+focus)
+        onActiveFocusChanged: console.log("ActiveFocus for Component loader is now " +activeFocus)
     }
 
 
@@ -207,6 +214,8 @@ Item {
     //BottomPanel{id: advanced; anchors.top: stage.top}
     ScenarioRow{
         id:lmceScenarios; anchors.bottom: parent.bottom
+        focus:true
+
     }
 }
 

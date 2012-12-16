@@ -8,13 +8,16 @@ Rectangle {
     signal swapStyle()
     height: manager.appHeight
     width: manager.appWidth
-    color: "transparent"
+    color:activeFocus ? "red": "transparent"
+    focus:true
+
 
     Timer{
         id:bind_timer
         running: false
         interval: 1000
         onTriggered: dcenowplaying.b_mediaPlaying ? manager.setBoundStatus(true) : manager.setBoundStatus(false)
+        Component.onCompleted: bind_timer.start()
     }
 
 
@@ -27,8 +30,10 @@ Rectangle {
         anchors.centerIn: parent
 
         NowPlayingImage {
-            Component.onCompleted: bind_timer.start()
+        anchors.centerIn: parent
+        largeSize: true
         }
+        focus: true
     }
 
     //focus:true

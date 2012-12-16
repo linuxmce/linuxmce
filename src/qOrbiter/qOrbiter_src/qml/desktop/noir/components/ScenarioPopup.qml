@@ -21,6 +21,7 @@ Rectangle {
         focus = true
         forceActiveFocus()
         scenarioView.visible = true
+        z = 5
     }
 
     width: componentWidth

@@ -14,19 +14,19 @@ Rectangle {
 
     anchors.top: parent.top
 
-    Text {
+    StyledText {
         id: nowPlayingText
         text: dcenowplaying.mediatitle === "" ? dcenowplaying.qs_mainTitle : dcenowplaying.mediatitle
         color: "white"
         font.pixelSize: 16
-        font.family: "Nimbus Sans L"
+
         anchors.centerIn: mediaHeader
     }
 
-    Text {
+    StyledText {
         id: mediaClock
         text:dceTimecode.qsCurrentTime+ " :: " + dceTimecode.qsTotalTime
-        font.family: "Nimbus Sans L"
+
         color: "white"
         font.pixelSize: 14
         anchors.right: mediaHeader.right

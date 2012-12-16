@@ -19,7 +19,7 @@ Rectangle{
         opacity: .25
        // border.color: "white"
        // border.width: 1
-        visible: targetModel === popupHolder.scenarioModel
+        visible: targetModel === popupHolder.scenarioModel ? true : false
         anchors.horizontalCenter: parent.horizontalCenter
         anchors.bottom: parent.top
 
@@ -35,7 +35,7 @@ Rectangle{
     MouseArea{
         anchors.fill: parent
         hoverEnabled: true
-        onEntered: {
+        onEntered: {          
             popupHolder.scenarioModel = targetModel;
             popupHolder.popEnabled = true
         }
