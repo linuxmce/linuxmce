@@ -1,0 +1,21 @@
+// import QtQuick 1.0 // to target S60 5th Edition or Maemo 5
+import QtQuick 1.1
+import "../components"
+Rectangle {
+    id:myth_pvr_recordings
+    width: appW
+    height: appH
+
+
+    HomeButton{id:home}
+
+    ButtonSq{
+        buttontext: "Back to live screen"
+        MouseArea{
+            anchors.fill: parent
+            onReleased: manager.gotoQScreen("Screen_48.qml")
+        }
+    }
+
+
+}
