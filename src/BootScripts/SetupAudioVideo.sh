@@ -210,7 +210,11 @@ Setup_AsoundConf()
 	# Handle nVidia GT card types
 	case "$AudioSetting" in
 		*[CO]*)
-			CardDevice=$(grep -i "digital" <<< "$Yalpa" | grep -wo "device ." | awk '{print $2}')
+			if grep -i "audigy 2" <<< "$Yalpa" | grep "Multichannel Playback"; then
+				CardDevice=$(grep "Multichannel Playback" <<< "$Yalpa" | grep -wo "device ." | awk '{print $2}')
+			else
+				CardDevice=$(grep -i "digital" <<< "$Yalpa" | grep -wo "device ." | awk '{print $2}')
+			fi
 			ConnectType="spdif"
 			PlaybackPCM="${ConnectType}_playback"
 			if [[ "$AlternateSC" == "2" ]]; then
@@ -235,6 +239,11 @@ Setup_AsoundConf()
 			PlaybackPCM="${ConnectType}_playback"
 			;;
 		*)
+			if grep -i "audigy 2" <<< "$Yalpa" | grep "Standard PCM Playback"; then
+				CardDevice=$(grep "Standard PCM Playback" <<< "$Yalpa" | grep -wo "device ." | awk '{print $2}')
+			else
+				CardDevice=$(grep -i "digital" <<< "$Yalpa" | grep -wo "device ." | awk '{print $2}')
+			fi
 			CardDevice=$(grep -i "analog" <<< "$Yalpa" | grep -wo "device ." | awk '{print $2}')
 			SoundOut="plug:dmix:"
 			ConnectType="analog"
