@@ -150,7 +150,7 @@ checkAlsaBackportNeeds() {
 		esac
 		CurDrv=$(getPreferredNvidiaDriver)
 		if [[ "$CurDrv" == "nvidia-current" ]]; then
-			ConfSet "AlternateSC" "2"
+			ConfSet "AlternateSC" "1"
 		fi
 	fi
 
@@ -159,7 +159,7 @@ checkAlsaBackportNeeds() {
 			Log "$LogFile" "Alsa backports being installed."
 			NotifyMessage "Installing alsa backports modules."
 			apt-get install -yf linux-backports-modules-alsa-$(uname -r)
-			ConfSet "AlternateSC" "2"
+			ConfSet "AlternateSC" "1"
 			/usr/pluto/bin/RestartALSA.sh
 			;;
 		esac
