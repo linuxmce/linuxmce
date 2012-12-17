@@ -4,10 +4,6 @@ MouseArea {
     property int autoTick:0
     anchors.fill: parent
     hoverEnabled: true
-    onClicked: manager.moveDirection(3)
-    onPressAndHold: tickTimer.start()
-    onReleased: tickTimer.stop()
-
     Timer{
         id:tickTimer
         running:autoTick === 0 ? false : true
