@@ -56,9 +56,9 @@ public:
 		void SetInterface(ZWInterface* pZWInterface);
 		void SetReady(bool ready) { m_bReady = ready; }
 		bool IsReady() { return m_bReady; }
-		DeviceData_Impl* GetDevice(int iNodeId, int iInstanceID);
+		DeviceData_Impl* GetDevice(int iNodeId, uint8 iCommandClass, int iInstanceID);
 		DeviceData_Impl *GetDeviceForPortChannel(string sPortChannel);
-		int GetPKDevice(int iNodeId, int iInstanceID);
+		int GetPKDevice(int iNodeId, uint8 iCommandClass, int iInstanceID);
 		int AddDevice(int parent, string sId, int PK_DeviceTemplate);
 		void DeleteDevice(unsigned long PK_Device);
 		bool DeleteDevicesForNode(int iNodeId);

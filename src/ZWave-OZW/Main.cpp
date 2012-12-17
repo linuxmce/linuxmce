@@ -206,6 +206,7 @@ int main(int argc, char* argv[])
 		// TODO: should we add some limit to the number of loops - the same way the normal startup script does
 		while (!bAppError && (!bQuit || bReload))
 		{
+			bReload = false;
 			LoggerWrapper::GetInstance()->Write(LV_ZWAVE, "New ZWave instance");
 			pZWave = new ZWave(PK_Device, sRouter_IP,true,bLocalMode);
 			pZWave->SetInterface(pZWInterface);
