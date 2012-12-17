@@ -3,15 +3,27 @@
   */
 import QtQuick 1.0
 
-
 Item {
     id: splashLogic
     height:appH
     width:appW
     property bool orbiterSetup:false
+    property string router_ip: ""
 
     onOrbiterSetupChanged:{  console.log(orbiterSetup) ; existing_orbiters.visible = false; orbiter_options.visible = true; newOrbiterOptionContainer.visible=true; window.showSetup()}
     onWidthChanged: console.log("detected size change")
+    Image {
+        id: splash
+        anchors.centerIn: parent
+        fillMode: Image.PreserveAspectFit
+        source: "default/img/icons/backgrounds/bedroom.png"
+        anchors.fill: parent
+    }
+    FontLoader{
+        id:myFont
+        name:"Sawasdee"
+        source: "default/fonts/Sawasdee.ttf"
+    }
 
     function scaleX(x){
         return x/100*appH
@@ -21,7 +33,7 @@ Item {
     }
 
     Connections{
-        target: window
+        target: window      
         onShowExternal: {
             console.log("showing external ip box")
             ext_routerip.visible = true
@@ -52,9 +64,9 @@ Item {
         }
     }
 
-    Connections{
-        target:window
+//    Connections{
+//        target:window
 //        onMessageChanged:loadingStatus.text = window.message
-        //onStatusChanged: screenchange("SetupNewOrbiter.qml")
-    }
+//        //onStatusChanged: screenchange("SetupNewOrbiter.qml")
+//    }
 }

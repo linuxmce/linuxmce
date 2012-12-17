@@ -1,17 +1,10 @@
 // import QtQuick 1.0 // to target S60 5th Edition or Maemo 5
 import QtQuick 1.1
 
-
 Rectangle {
     width: appW
     height: appH
-    color: "#993300"
-    /* Dev settings to get static size in designer
-
-
-
-    */
-
+    color: "transparent"
     //palette?
     property string orangeRed: "#993300"
     property string deYork: "#99CC99"
@@ -24,9 +17,6 @@ Rectangle {
         return y/100*appW
     }
     Component.onCompleted: window.showSetup()
-    property string selectedUserName:""
-    property string selectedRoomName:""
-    property bool setupReady: selectedUserName.length !==0 && selectedRoomName.length !== 0 ? true : false
 
 
     Timer{
@@ -82,13 +72,15 @@ Rectangle {
                 duration:500
             }
         }
-
-        Text {
-            id: welcome
-            text: qsTr("Setup A New Orbiter")
-            color:"white"
-            font.pointSize: 18
-            font.bold: true
+        Row{
+            Text {
+                id: welcome
+                text: qsTr("Setup A New Orbiter")
+                color:"white"
+                font.pointSize: 18
+                font.bold: true
+                font.family: myFont.name
+            }          
         }
 
         Column{
@@ -118,13 +110,13 @@ Rectangle {
                         wrapMode: Text.WrapAtWordBoundaryOrAnywhere
                         width: parent.width *.75
                         anchors.centerIn: parent
+                        font.family: myFont.name
                     }
                     MouseArea{
                         anchors.fill: parent
                         onClicked: {
                             usersView.currentIndex = index
                             selectedUser.text = "You Selected: "+ dataTitle
-                            selectedUserName = dataTitle
                         }
                         hoverEnabled: true
                     }
@@ -155,13 +147,13 @@ Rectangle {
                         wrapMode: Text.WrapAtWordBoundaryOrAnywhere
                         width: parent.width *.75
                         anchors.centerIn: parent
+                        font.family: myFont.name
                     }
                     MouseArea{
                         anchors.fill: parent
                         onClicked: {
                             roomsView.currentIndex = index
                             selectedRoom.text = dataTitle
-                            selectedRoomName = dataTitle
                         }
                         hoverEnabled: true
                     }
@@ -190,6 +182,7 @@ Rectangle {
                         wrapMode: Text.WrapAtWordBoundaryOrAnywhere
                         width: parent.width *.75
                         anchors.centerIn: parent
+                        font.family: myFont.name
                     }
                     MouseArea{
                         anchors.fill: parent
@@ -212,86 +205,115 @@ Rectangle {
             font.bold: true
             color:"white"
             font.pointSize: 12
+            font.family: myFont.name
         }
 
-        Column{
-            id:confirmCol
+        Rectangle{
+            id:setupButton
+            height: scaleY(8)
+            width: scaleX(14)
+            color: "blue"
+            radius: 8
             anchors.bottom: parent.bottom
-            anchors.left: parent.left
-            height: parent.height *.15
-            width: parent.width / 3
-            spacing:5
+            anchors.horizontalCenter: parent.horizontalCenter
 
-                Text {
-                    id: selectedUser
-                    text: qsTr("Please Select a Default User")
-                    font.bold: true
-                    color: deYork
-                    font.pixelSize: 14
-                    x:0
-                    onTextChanged: {
-                        x = -50
-                        userSelected.restart()
-                    }
-                }
-                ParallelAnimation{
-                    id:userSelected
-
-                    PropertyAnimation{
-                        target: selectedUser
-                        property:"x"
-                        to:confirmCol.width
-                        duration: 2500
-                    }
-
-                    PropertyAnimation{
-                        target:selectedUser
-                        property: "opacity"
-                        from:0
-                        to:1
-                        duration:1000
-                    }
-                }
-
-
-                Text {
-                    id: selectedRoom
-                    text: qsTr("Please Select A Default Room")
-                }
-
-
-
-                Text{
-                    id:selectedLang
-                    text:qsTr("Please Select a Default Language")
-                }
-
-
-                Text {
-                    id: selectedResolution
-                    text:"Size "+newOrbiterSetupContainer.height
-                }
-        }
-
-    }
-
-    Rectangle{
-        id:goTime
-        height: scaleX(14)
-        width: scaleY(15)
-        color: !setupReady ? "red" :  goTimeHit.pressed ? "lightgreen" : "green"
-        Text {
-            id: goLabel
-            text:!setupReady? qsTr("Please Choose") : qsTr("Start Setup")
-            wrapMode: Text.WrapAtWordBoundaryOrAnywhere
-            anchors.centerIn: parent
+            Text{
+                text:"Go!"
+                anchors.centerIn: parent
+                color:"white"
+                font.family: myFont.name
+            }
+            MouseArea{
+                anchors.fill: parent
+                onClicked: window.setupNewOrbiter(selectedUser, selectedRoom, 1, 1, appH, appW)
+            }
 
         }
-        MouseArea{
-            id:goTimeHit
-            anchors.fill: parent
-            enabled: setupReady ? true : false
-            onClicked: window.setupNewOrbiter(usersView.currentIndex+1, roomsView.currentIndex+1,1,1, appH, appW)
+        Rectangle{
+            id:exitButton
+            height: scaleY(8)
+            width: scaleX(14)
+            color: "blue"
+            radius: 8
+            anchors.bottom: parent.bottom
+            anchors.left: setupButton.right
+            anchors.leftMargin: scaleX(2)
+
+            Text{
+                text:"Exit!"
+                anchors.centerIn: parent
+                color:"white"
+                font.family: myFont.name
+            }
+            MouseArea{
+                anchors.fill: parent
+                onClicked: pageLoader.source ="SplashView.qml"       //screenChange("SplashView.qml")
+            }
+
         }
+
+//        Column{
+//            id:confirmCol
+//            anchors.bottom: parent.bottom
+//            anchors.left: parent.left
+//            height: parent.height *.15
+//            width: parent.width / 3
+//            spacing:5
+
+//                Text {
+//                    id: selectedUser
+//                    text: qsTr("Please Select a Default User")
+//                    font.bold: true
+//                    color: deYork
+//                    font.pixelSize: 14
+//                    font.family: myFont.name
+//                    x:0
+//                    onTextChanged: {
+//                        x = -50
+//                        userSelected.restart()
+//                    }
+//                }
+//                ParallelAnimation{
+//                    id:userSelected
+
+//                    PropertyAnimation{
+//                        target: selectedUser
+//                        property:"x"
+//                        to:confirmCol.width
+//                        duration: 2500
+//                    }
+
+//                    PropertyAnimation{
+//                        target:selectedUser
+//                        property: "opacity"
+//                        from:0
+//                        to:1
+//                        duration:1000
+//                    }
+//                }
+
+
+//                Text {
+//                    id: selectedRoom
+//                    text: qsTr("Please Select A Default Room")
+//                    font.family: myFont.name
+//                }
+
+
+
+//                Text{
+//                    id:selectedLang
+//                    text:qsTr("Please Select a Default Language")
+//                    font.family: myFont.name
+//                }
+
+
+//                Text {
+//                    id: selectedResolution
+//                    text:"Size "+newOrbiterSetupContainer.height
+//                    font.family: myFont.name
+//                }
+//        }
+
     }
 }
