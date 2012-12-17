@@ -13,10 +13,7 @@ Rectangle {
     color:"transparent"
 
 
-    Connections{
-        target:dcenowplaying
-        onPlayListPositionChanged: nowplayingimage.source = "image://listprovider/updateobject/"+securityvideo.timestamp
-    }
+
 
     Component.onCompleted:setNowPlayingTv()
 
@@ -61,13 +58,12 @@ Rectangle {
                     }
                 }
 
-                Image {
+                NowPlayingImage {
                     id: nowplayingimage
                     width: scaleX(35)
                     height: scaleY(35)
                     anchors.top: gradientheader.bottom
-                    fillMode: Image.PreserveAspectFit
-                    source: "image://listprovider/updateobject/"+dcenowplaying.m_iplaylistPosition
+
                 }
 
                 Rectangle {

@@ -1,8 +1,5 @@
 import QtQuick 1.1
 Item{
-
-
-
     Row{
         id:statusRow
         height: childrenRect.height

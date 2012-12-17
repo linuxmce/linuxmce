@@ -4,7 +4,7 @@ import QtQuick 1.1
 Rectangle {
    height: appH
    width: appW
-   color: "darkslategrey"
+   color: "black"
     Timer{
         id:wait
         interval: 2500
@@ -22,8 +22,8 @@ Rectangle {
 
     Loader{
         id:mainContent
-        height: appH
-        width: appW
+        height: manager.appHeight
+        width: manager.appWidth
         source:""
         opacity: 0
         onOpacityChanged: PropertyAnimation {target:mainContent; property: "opacity"; to:1 ; duration: 1500}

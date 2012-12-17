@@ -1,6 +1,7 @@
 // import QtQuick 1.0 // to target S60 5th Edition or Maemo 5
 import QtQuick 1.1
 import com.nokia.android 1.1
+
 Rectangle {
     height:appH
     width:appW
@@ -35,11 +36,9 @@ Rectangle {
         color:"white"
     }
 
-
     StatusRow {
         id: statusRow
     }
-
 
     Connections{
         target:window

@@ -102,7 +102,7 @@ Rectangle {
                     MouseArea{
                         anchors.fill: parent
                         onClicked: {
-                            manager.displayToggle(0)
+                            manager.toggleDisplay(false)
                            loadComponent("NullComponent.qml")
                         }
                     }

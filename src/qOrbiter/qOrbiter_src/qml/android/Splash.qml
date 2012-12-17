@@ -16,13 +16,13 @@ Item {
         id: splash
         anchors.centerIn: parent
         fillMode: Image.PreserveAspectFit
-        source: "default/img/icons/backgrounds/bedroom.png"
+        source: "tablet/default/img/icons/backgrounds/bedroom.png"
         anchors.fill: parent
     }
     FontLoader{
         id:myFont
         name:"Sawasdee"
-        source: "default/fonts/Sawasdee.ttf"
+        source: "fonts/Sawasdee.ttf"
     }
 
     function scaleX(x){

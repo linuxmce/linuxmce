@@ -1,6 +1,6 @@
 import QtQuick 1.1
 Rectangle{
-    id: connectionBox
+    id: connectionBoxContainer
     anchors.verticalCenter: parent.verticalCenter
     anchors.horizontalCenter: parent.horizontalCenter
     anchors.verticalCenterOffset:10
@@ -9,7 +9,7 @@ Rectangle{
     color: "transparent"
 
     Rectangle {
-        anchors.fill: connectionBox
+        anchors.fill: parent
         radius: 7
         anchors.horizontalCenterOffset: 1
         anchors.centerIn: parent
@@ -32,14 +32,14 @@ Rectangle{
         text: qsTr("Set Connection Details")
         font.pointSize: 16
         font.bold: false
-        anchors.top: connectionBox.top
+        anchors.top: parent.top
         anchors.horizontalCenter: parent.horizontalCenter
         font.family: myFont.name
     }
 
     Row{
         id:connectionVars
-            anchors.centerIn: connectionBox
+            anchors.centerIn: parent
             anchors.verticalCenter: parent.verticalCenter
             spacing: 10
             Text {
@@ -94,7 +94,7 @@ Rectangle{
     Row{
         id:goBox
         anchors.horizontalCenter: parent.horizontalCenter
-        anchors.bottom: connectionBox.bottom
+        anchors.bottom: parent.bottom
         anchors.bottomMargin: 15
         spacing: scaleX(15)
         Rectangle {
