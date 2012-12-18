@@ -8,22 +8,15 @@ Item {
     signal clicked
 
     id: container
-    width: menuText.length * 12 + 196
+    width: parent.width
     height: 72
     
     Rectangle {
-        id: seperatorLine
-        anchors.fill: parent
-	color: "#505050"
-	visible: parent.showSeperator
-	y: parent.y-1    
-    }
-
-    Rectangle {
         id: mainArea
-        anchors.fill: parent
 	color: "#303030"
 	state: "RELEASED"
+	width: container.width
+	height: container.height
 	states: [
 	    State {
 	        name: "PRESSED"
@@ -50,12 +43,12 @@ Item {
 
     Text {
         id: menuText
-        x: 12
-	y: 24
+        x: 18
+	y: 18
 	text: parent.text
 	color: "#FFFFFF"
 	font.family: "Roboto"
-	font.pixelSize: 24
+	font.pixelSize: 26
 	font.bold: false	 
     }
 

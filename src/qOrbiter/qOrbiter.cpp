@@ -4182,14 +4182,14 @@ void DCE::qOrbiter::ShowBookMarks()
 void DCE::qOrbiter::adjustVolume(int vol)
 {
     if(m_bPK_Device_NowPlaying_Audio_DiscreteVolume){
-        CMD_Set_Volume raiseVol(m_dwPK_Device, iMediaPluginID, StringUtils::itos(vol));
+        CMD_Set_Volume raiseVol(m_dwPK_Device, m_dwPK_Device_NowPlaying_Audio, StringUtils::itos(vol));
         SendCommand(raiseVol);
     }
     else
     {
         if (vol > 0)
         {
-            CMD_Vol_Up raiseVol(m_dwPK_Device_NowPlaying_Audio, iMediaPluginID, vol);
+            CMD_Vol_Up raiseVol(m_dwPK_Device, iMediaPluginID, vol);
             SendCommand(raiseVol);
         }
         else

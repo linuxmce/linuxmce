@@ -11,3 +11,11 @@ OSDNavigationBack OSDNavigationBack.qml
 GraphicButton GraphicButton.qml
 MenuItem MenuItem.qml
 Menu Menu.qml
+MenuLayout MenuLayout.qml
+Tabs Tabs.qml
+TabItem TabItem.qml
+TabDelegate TabDelegate.qml
+TabLayout TabLayout.qml
+MoreInfo MoreInfo.qml
+MoreInfoSynopsis MoreInfoSynopsis.qml
+Scroller Scroller.qml

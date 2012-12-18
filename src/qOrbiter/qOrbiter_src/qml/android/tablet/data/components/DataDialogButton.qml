@@ -4,8 +4,8 @@ Rectangle {
 
 	  property alias buttonText: bText.text
 
-	  width: 623
-	  height: 81
+	  width: parent.width - 2
+	  height: 74
 	  color: "#282828"
 
 	  Text {

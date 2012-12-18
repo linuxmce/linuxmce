@@ -3,12 +3,11 @@ import Qt.labs.shaders 1.0
 
 import "../effects"
 
-Item {
-    id: container
-    width: childrenRect.width
-    height: childrenRect.height
+Rectangle {
+    property int items
+    color: "#505050"
+    height: items
 }
-
 
 
 
