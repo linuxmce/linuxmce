@@ -39,16 +39,25 @@ namespace HAData.Common.TreeBuilder
 					CommandTreeNode tn = new CommandTreeNode(null, ct,ct.fDescription);
 					tvCommand.Nodes.Add(tn);
 					
-					AddCommandCommands(ct,tn);
 					AddCommandChildren(ct,tn);
+					AddCommandCommands(ct,tn);
 					//int i=tn.Index;
 				}
 			}
 		}
+
+		private static int CommandComparer(DataRow d1, DataRow d2)
+		{
+			string v1 = Convert.ToString(d1["Description"]);
+			string v2 = Convert.ToString(d2["Description"]);
+			return v1.CompareTo(v2);
+		}
+
 		private static void AddCommandCommands(CommandCategoryDataRow c,TreeNode tn)
 		{
 			//DataRow[] drc = c.dr.GetChildRows(HARelation.rCommandCategory__CommandHeader_CommandCategory);
 			DataRow[] drc = c.dr.GetChildRows(MyDataSet.MyRelations.Command_FK_CommandCategory);
+			Array.Sort<DataRow>(drc, CommandComparer);
 						
 			foreach( DataRow dr in drc )
 			{

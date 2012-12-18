@@ -659,7 +659,7 @@ namespace HAData.DataAccess {
 		public DataRowCollection LoadAll(MySqlConnection conn, MySqlTransaction trans)
 		{
 			MySqlDataAdapter sqlda = new MySqlDataAdapter();
-			MySqlCommand LoadCommand = new MySqlCommand("SELECT PK_CommandCategory,FK_CommandCategory_Parent,Description FROM CommandCategory", conn);
+			MySqlCommand LoadCommand = new MySqlCommand("SELECT PK_CommandCategory,FK_CommandCategory_Parent,Description FROM CommandCategory ORDER BY Description", conn);
 			LoadCommand.CommandType = CommandType.Text;
 			if( trans!=null )
 				LoadCommand.Transaction = trans;
