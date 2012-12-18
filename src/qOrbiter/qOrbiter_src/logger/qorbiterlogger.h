@@ -31,6 +31,7 @@ public:
     bool commandLogState;
     bool guiLogState;
     bool qtLogState;
+    bool loggingEnabled;
     
 signals:
     void logLocationChanged(QString l);

@@ -483,7 +483,7 @@ signals:
     void startPlayback(QString file);
     void zoomLevelChanged(QString zoom);
     void aspectRatioChanged(QString ratio);
-    void mobileStorageChanged();
+    void mobileStorageChanged(QString location);
     void moveArrowDirection(int d);
     void signalGoBack(); 
 
@@ -566,7 +566,7 @@ signals:
 
     /*device related*/
     void osdChanged(bool);
-    void newLightLevel(int l);
+    void newLightLevel(QString l);
 
     //setup related
     void orbiterReady(bool);
@@ -623,7 +623,7 @@ public slots:
 
     //mobile device specfic
     bool setupMobileStorage();
-    void setMobileStorage(QString s){mobileStorageLocation = s; emit mobileStorageChanged();}
+    void setMobileStorage(QString s){mobileStorageLocation = s; emit mobileStorageChanged(mobileStorageLocation);}
     QString getMobileStorage(){return mobileStorageLocation;}
 
     /*Child devices*/
@@ -786,7 +786,7 @@ public slots:
     void resendCode(int from, int to) { deviceCommands->clear(); emit resendDeviceCode( from,  to);}
     void toggleDisplay(bool display) { osdStatus = display; emit osdChanged(osdStatus); }
     bool getDisplayStatus() { return osdStatus; }
-    void adjustLights(int l) {emit newLightLevel(l); }
+    void adjustLights(QString l) {emit newLightLevel(l); }
     void showAvControl() {emit resendAvCodes();}
 
     /*QML Skin Function slots*/

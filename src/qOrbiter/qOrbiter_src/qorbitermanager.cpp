@@ -159,25 +159,15 @@ qorbiterManager::qorbiterManager(QDeclarativeView *view, QObject *parent) :
 #elif defined (__ANDROID__)
     if (qorbiterUIwin->width() > 480 && qorbiterUIwin-> height() > 854 || qorbiterUIwin->height() > 480 && qorbiterUIwin-> width() > 854 )
     {
-
-        if (isPhone !=1){
-            buildType = "/qml/android/tablet";
-            setFormFactor(2);
-        }
-        else{
-            buildType = "/qml/android/phone";
-        }
-
+        setFormFactor(2);
+        buildType = "/qml/android/tablet";
     }
     else
-    {   if(isPhone !=2){
+    {
+        setFormFactor(1);
+        if(isPhone !=2){
             buildType = "/qml/android/phone";
-            setFormFactor(1);
         }
-        else{
-            buildType = "/qml/android/tablet";
-        }
-
     }
 
     qrcPath = ":android/Splash.qml";
@@ -447,8 +437,6 @@ void qorbiterManager::refreshUI(QUrl url)
 // get conf method that reads config file
 void qorbiterManager::processConfig(QByteArray config)
 {
-
-
     iPK_Device_DatagridPlugIn =  long(6);
     iPK_Device_OrbiterPlugin = long(9);
     iPK_Device_GeneralInfoPlugin = long(4);
@@ -1075,14 +1063,12 @@ bool qorbiterManager::loadSkins(QUrl base)
     tskinModel->addSkin("default");
 
 #elif __ANDROID__
-    if(isPhone){
+    if(isPhone < 2){
         tskinModel->addSkin("default");
     }
     else{
-        tskinModel->addSkin("default,data,wip");
+        tskinModel->addSkin("default,data,wip,lustylizard");
     }
-
-
 #elif for_android
     tskinModel->addSkin("default");
 #elif RPI
@@ -1156,7 +1142,6 @@ void qorbiterManager::getFloorplanDevices(int floorplantype)
 void qorbiterManager::setFloorplanType(int t)
 {
     i_currentFloorplanType = t;
-
     emit floorplanTypeChanged(t);
 }
 

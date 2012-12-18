@@ -7,14 +7,21 @@
 QOrbiterLogger::QOrbiterLogger(QObject *parent) :
     QObject(parent)
 {
+    loggingEnabled = false;
+#ifndef ANDROID
     logLocation = QDir::homePath()+"/QOrbiter-log/";
     setLogLocation(logLocation);
+#else
+    logLocation="";
+#endif
 }
 
 
 void QOrbiterLogger::setLogLocation(QString l)
 {
+    if(!logLocation.isEmpty()){
     logLocation = l;
+    qDebug() << "New Log Location! " << logLocation;
 
     QDir fileLocation;
     fileLocation.setPath(logLocation);
@@ -26,11 +33,18 @@ void QOrbiterLogger::setLogLocation(QString l)
         }
         else{
             qDebug() << "File location created " << fileLocation.exists();
+            loggingEnabled = true;
         }
     }
 
     emit logLocationChanged(logLocation);
+    if(loggingEnabled)
     initLogs();
+    }
+    else
+    {
+        qDebug() << "Bad Location " << l;
+    }
 }
 
 
@@ -39,6 +53,7 @@ void QOrbiterLogger::logCommandMessage(QString message)
 {
     commandMsg = QTime::currentTime().toString()+QString(" - CMD - ")+message+"\n";
     emit commandMessageRecieved(message);
+    if(loggingEnabled)
     writeCommandMessage(commandMsg);
 }
 
@@ -46,6 +61,7 @@ void QOrbiterLogger::logGuiMessage(QString message)
 {
     guiMsg =  QTime::currentTime().toString()+QString(" - GUI - ")+message+"\n";
     emit guiMessageRecieved(guiMsg);
+    if(loggingEnabled)
     writeGuiMessage(guiMsg);
 
 }
@@ -54,6 +70,7 @@ void QOrbiterLogger::logQtMessage(QString message)
 {
     qtMsg = QTime::currentTime().toString()+QString(" - QT - ")+message+"\n";
     emit qtMessageRecieved(qtMsg);
+    if(loggingEnabled)
     writeGuiMessage(qtMsg);
 }
 
@@ -62,6 +79,7 @@ void QOrbiterLogger::logSkinMessage(QString message)
 {
     skinMsg = QTime::currentTime().toString()+QString(" - SKIN - ")+message+"\n";
     emit skinMessageRecieved(message);
+    if(loggingEnabled)
     writeSkinMessage(skinMsg);
 }
 
@@ -69,14 +87,17 @@ void QOrbiterLogger::logMediaMessage(QString message)
 {
     mediaMsg = QTime::currentTime().toString()+QString(" - MEDIA - ")+message+"\n";
     emit mediaMessageRecieved(message);
+    if(loggingEnabled)
     writeCommandMessage(skinMsg);
 }
 
 void QOrbiterLogger::logQmlErrors(QList<QDeclarativeError> e)
 {
+    if(loggingEnabled){
     for(int i = 0; i < e.count(); i++){
         QDeclarativeError b = e.at(i);
         writeGuiMessage(QTime::currentTime().toString()+" - QML Error - "+b.toString()+"\n");
+    }
     }
 }
 

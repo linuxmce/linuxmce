@@ -1612,6 +1612,7 @@ public slots:
     void GetNowPlayingAttributes();
     void TuneToChannel(QString channel, QString chanid);
     void adjustLighting(int level, myMap devices);
+    void adjustRoomLights(QString level);
     void adjustVolume( int vol);
     void mute();
     void changedTrack(QString direction);

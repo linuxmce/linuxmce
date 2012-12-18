@@ -6,11 +6,11 @@
     <externalhost id=""/>
     <device id="-1"/>
     <routeraddress id="DCEROUTER"/>
-    <skin id="noir"/>
+    <skin id="default"/>
     <enablescreensavermode id="false"/>
     <defaultview id="flat"/>
-    <phone id="0"/>
+    <phone id="1"/>
     <mobile_storage id=""/>
     <networkload id="true" />
-    <debug id="true"/>
+    <debug id="false"/>
 </orbiter>

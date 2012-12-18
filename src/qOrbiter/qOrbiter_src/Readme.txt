@@ -88,3 +88,6 @@ experimental
 5
 <<
 #46B1E6
+
+screen handlers info
+golgoj5: all the screen handlers are in src/Orbiter/ScreenHandler.cpp and src/Orbiter/Linux/OSDScreenHandler.cpp

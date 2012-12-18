@@ -1,5 +1,5 @@
 import QtQuick 1.0
-
+import "../lib/handlers"
 AvOptionButton {
     width: 60
     height: 200
@@ -33,9 +33,8 @@ AvOptionButton {
         rotation: -90
         smooth: true
         source: "../img/icons/player_fwd.png"
-        MouseArea{
-            anchors.fill: parent
-            onClicked: manager.adjustLighting(10)
+        AdjustLightingHandler {
+            level: "+10"
         }
     }
 
@@ -48,9 +47,8 @@ AvOptionButton {
         rotation: 90
         smooth: true
         source: "../img/icons/player_fwd.png"
-        MouseArea{
-            anchors.fill: parent
-            onClicked: manager.adjustLighting(-10)
+        AdjustLightingHandler{
+            level: "-10"
         }
     }
 

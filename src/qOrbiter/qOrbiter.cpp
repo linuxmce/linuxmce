@@ -4534,21 +4534,34 @@ void DCE::qOrbiter::adjustLighting(int level, myMap devices)
     for (i = devices.begin(); i != devices.end(); ++i){
         string pResponse="";
         CMD_Set_Level basic(m_dwPK_Device , i.key(), StringUtils::itos(level));
-        if(SendCommand(basic,&pResponse))
-#ifdef QT_DEBUG
-            qDebug()<< QString::fromStdString(pResponse.c_str());
-#endif
+        if(SendCommand(basic,&pResponse)){
+
+        }
+
         emit commandResponseChanged(QString::fromStdString(pResponse.c_str()));
-        ;
+
     }
 
-    for (i = devices.begin(); i != devices.end(); ++i){
-        string pResponse="";
-        CMD_Set_Level basic(m_dwPK_Device , i.key(), StringUtils::itos(level));
-        if(SendCommand(basic,&pResponse))
-            qDebug()<< QString::fromStdString(pResponse.c_str());
-    }
 }
+
+void qOrbiter::adjustRoomLights(QString level)
+{
+    string param="";
+    if(level.contains("-"))
+    {
+        param=level.remove("-").toStdString();
+        param.insert(0,"-");
+    }
+    else{
+        param=level.toStdString();
+    }
+    CMD_Set_Level al(m_dwPK_Device, iPK_Device_LightingPlugin,param);
+    SendCommand(al);
+    emit commandResponseChanged("Set lighting level to" +level);
+
+}
+
+
 
 
 void DCE::qOrbiter::prepareFileList(int iPK_MediaType)
