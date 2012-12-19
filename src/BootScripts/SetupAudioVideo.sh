@@ -210,16 +210,15 @@ Setup_AsoundConf()
 	# Handle nVidia GT card types
 	case "$AudioSetting" in
 		*[CO]*)
-			if grep -i "audigy 2" <<< "$Yalpa" | grep "Multichannel Playback"; then
-				CardDevice=$(grep "Multichannel Playback" <<< "$Yalpa" | grep -wo "device ." | awk '{print $2}')
-			else
-				CardDevice=$(grep -i "digital" <<< "$Yalpa" | grep -wo "device ." | awk '{print $2}')
-			fi
+			CardDevice=$(grep -i "card" <<< "$Yalpa" | grep -v "device 0" | grep -vi "HDMI" | grep -wo "device ." | awk '{print $2}' | head -1)
 			ConnectType="spdif"
 			PlaybackPCM="${ConnectType}_playback"
-			if [[ "$AlternateSC" == "2" ]]; then
+			if [[ "$AlternateSC" -ge "1" ]]; then
 				SoundOut="plughw:"
 				SoundCard="${HWOnlyCard},${CardDevice}"
+			fi
+			if [[ "$AlternateSC" == "2" ]]; then
+				AsoundConf="/usr/pluto/templates/asound.conf.backup"
 			fi
 			;; 
 		*H*)
@@ -229,26 +228,22 @@ Setup_AsoundConf()
 					CardDevice="7"
 				fi
 			fi
-			for i in 1 2; do 
-				if [[ "$AlternateSC" == "$i" ]]; then
-					SoundOut="plughw:"
-					SoundCard="${HWOnlyCard},${CardDevice}"
-				fi
-			done
+			if [[ "$AlternateSC" -ge "1" ]]; then
+				SoundOut="plughw:"
+				SoundCard="${HWOnlyCard},${CardDevice}"
+			fi
+			if [[ "$AlternateSC" == "2" ]]; then
+				AsoundConf="/usr/pluto/templates/asound.conf.backup"
+			fi
 			ConnectType="hdmi"
 			PlaybackPCM="${ConnectType}_playback"
 			;;
 		*)
-			if grep -i "audigy 2" <<< "$Yalpa" | grep "Standard PCM Playback"; then
-				CardDevice=$(grep "Standard PCM Playback" <<< "$Yalpa" | grep -wo "device ." | awk '{print $2}')
-			else
-				CardDevice=$(grep -i "digital" <<< "$Yalpa" | grep -wo "device ." | awk '{print $2}')
-			fi
-			CardDevice=$(grep -i "analog" <<< "$Yalpa" | grep -wo "device ." | awk '{print $2}')
+			CardDevice="0"
 			SoundOut="plug:dmix:"
 			ConnectType="analog"
 
-			if [[ "$AlternateSC" == "1" ]]; then
+			if [[ "$AlternateSC" -ge "1" ]]; then
 				SoundOut="plughw:"
 				SoundCard="${HWOnlyCard},${CardDevice}"
 			fi
