@@ -534,7 +534,10 @@ IntelBridgeDetect () {
 			StatusMessage "Installing "$NewKernelId" backported kernel and supporting intel drivers"
 			apt-get -yf install "$NewKernel"
 			apt-get -yf install "$NewHeaders"
+			apt-get -yf remove linux-headers${CurKernel}
+			apt-get -yf remove linux-image${CurKernel}
 			apt-get -yf dist-upgrade
+			update-grub
 			sleep 10
 			reboot
 		fi
