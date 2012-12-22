@@ -706,6 +706,12 @@ bool UpdateMedia::ScanSubfolders(string sDirectory, FolderType& folder_type)
 			continue;
 		}
 		
+		if ( StringUtils::StartsWith(sSubDir, UpdateMediaVars::sUPnPMountPoint+"/") && (sSubDir.find("Logitech Media Server [dcerouter]")!=string::npos) )
+		{
+			LoggerWrapper::GetInstance()->Write(LV_WARNING, "The directory %s is Logitech Media Server UPnP dir. We'll skip it!", sSubDir.c_str());
+			continue;
+		}
+		
 		if ( !UpdateMediaVars::sLocalUPnPServerName.empty() && StringUtils::StartsWith(sSubDir, UpdateMediaVars::sUPnPMountPoint+"/" + UpdateMediaVars::sLocalUPnPServerName))
 		{
 			LoggerWrapper::GetInstance()->Write(LV_WARNING, "The directory %s is LinuxMCE UPnP dir. We'll skip it!", sSubDir.c_str());
