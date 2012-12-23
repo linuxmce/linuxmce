@@ -1932,13 +1932,16 @@ void Xine_Stream::XineStreamEventListener( void *streamObject, const xine_event_
                                 if(StringUtils::StartsWith(pXineStream->m_sCurrentFile, "http://", true))
                                 {
                                     bool bRead=false;
-                                    string sAlbum, sTitle;
+                                    string sAlbum = "";
+                                    string sTitle = "";
                                     {
                                       PLUTO_SAFETY_LOCK(streamLock, pXineStream->m_streamMutex);
                                       if (pXineStream->m_bInitialized)
                                         {
-                                          sAlbum = xine_get_meta_info(pXineStream->m_pXineStream, XINE_META_INFO_ALBUM);
-                                          sTitle = xine_get_meta_info(pXineStream->m_pXineStream, XINE_META_INFO_TITLE);
+                                          const char *pAlbum = xine_get_meta_info(pXineStream->m_pXineStream, XINE_META_INFO_ALBUM);
+                                          const char *pTitle = xine_get_meta_info(pXineStream->m_pXineStream, XINE_META_INFO_TITLE);
+                                          if (pAlbum) sAlbum = pAlbum;
+                                          if (pTitle) sTitle = pTitle;
                                           bRead=true;
                                         }
                                     }
