@@ -3,7 +3,7 @@ import com.nokia.android 1.1
 
 
 Rectangle{
-    id:lightingrow
+    id:templateRow
     height: scaleY(16)
     width: scaleX(100)
     //    transform: Rotation { origin.x: 30; origin.y: 30; axis { x: 0; y: 1; z: 0 } angle: 15 }
@@ -11,10 +11,13 @@ Rectangle{
     color:"transparent"
     radius: 20
 
-    // HomeButtonDelegate{id:lightingdelegate}
+    property string bgimgSource
+    property int floorplantype
+    property variant scenariomodel
+
 
     Rectangle {
-        id: lightingfloorplan
+        id: templatefloorplan
         height: style.stdbuttonh
         width: style.stdbuttonw
         anchors.top: parent.top
@@ -23,7 +26,7 @@ Rectangle{
         color:"transparent"
         Image {
             id: onimg
-            source: "../img/ui3/lightingbig.png"
+            source: bgimgSource //"../img/ui3/lightingbig.png"
             height: parent.height
             width: parent.width
         }
@@ -31,28 +34,36 @@ Rectangle{
             id: mousearea1
             anchors.fill: parent
             onClicked: {
-                manager.showfloorplan(2)
-                manager.setFloorplanType(2)
+                manager.showfloorplan(floorplantype)
+                manager.setFloorplanType(floorplantype)
             }
+        }
+    }
+    Loader{
+        id:popupButton
+        Component.onCompleted: {
+            if(floorplantype===3)
+                source = "NowPlayingButton.qml"
+            anchors.left =templatefloorplan.right
+
         }
     }
 
     ListView{
-        id: lightingScenarios
+        id: scenarioview
         width: parent.width
         height: parent.height
-        model: currentRoomLights
+        model: scenariomodel
         spacing: 5
         orientation:ListView.Horizontal
-        anchors.left:lightingfloorplan.right
+        anchors.left:popupButton.source !== "" ? popupButton.right: templatefloorplan.right
         clip:true
-        //  anchors.horizontalCenter: lightingfloorplan.horizontalCenter
         delegate: Rectangle{
             height:parent.height
             width:scaleX(20)
             color: "transparent"
             ListItem{
-                id:lightingdelegate
+                id:scenariodelegate
                 width:scaleX(20)
                 height:parent.height
                 enabled:true

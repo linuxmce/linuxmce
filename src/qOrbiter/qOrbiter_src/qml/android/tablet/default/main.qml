@@ -129,7 +129,9 @@ Item {
                 duration: 1000
             }
         }
-        Keys.onPressed: uiTimer.restart()
+        Keys.onPressed: { uiTimer.restart() ;
+            console.log(event.key)
+        }
     }
     //=================Components==================================================//
     function loadComponent(componentName )
