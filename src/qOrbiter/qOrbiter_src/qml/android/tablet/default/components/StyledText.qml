@@ -5,7 +5,7 @@ import QtQuick 1.1
         property int textWidth
         property bool isBold:false
         property bool isItalic:false
-        property double fontSize:12
+        property double fontSize:scaleY(2.5)
         id:labelelement
         text: textLabel
         font.bold: isBold

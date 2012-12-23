@@ -1,84 +1,95 @@
 import QtQuick 1.0
 import Qt.labs.shaders 1.0
+import "../effects"
+Rectangle{
 
-Rectangle {
-    id:ssholder
-    width: manager.appWidth
-    height: manager.appHeight
-    color: "black"
+    color: "transparent"
+    anchors.fill: parent
 
-    Component.onCompleted: screensaver.transitionDuration = 60000
-
-
-
-    function changeStuff()
-    {
-        lower.running =true
-        animation_section2.running = false
+    property bool enableEffects: opengl
+    property int zoomTime: screensaver.transitionDuration - fadeTime
+    property int fadeTime: 3500
+    property int currentBGimg: 0
+    function getBGimage(){
+        return "image://listprovider/screensaver/"+securityvideo.timestamp;
     }
-
-    function changePic()
-    {
-            ssimg.source = "image://listprovider/screensaver/"+securityvideo.timestamp
-            raise.running = true
-            animation_section2.running = true
-    }
-
-    function startZoom()
-    {
-
-    }
-
-    Image {
-        id: ssimg
-        height: manager.appHeight
-        width: manager.appWidth
-        source: "image://listprovider/screensaver"+screensaver.timestamp
-        anchors.centerIn: parent
-        smooth: true
-
-        ParallelAnimation {
-            id:raise
-            running: false
-            PropertyAnimation{ target:ssimg; property: "opacity"; to: "1"; duration: 1500}
-
+    function changeBGimage(){
+        var newSource = getBGimage()
+        var currentImg=imgBg1, newImg=imgBg2;
+        if (imgBg2.opacity == 1) {
+            currentImg = imgBg2;
+            newImg = imgBg1;
+        }
+        newImg.source = newSource;
+        //simulated random zoom function
+        //origin seems to be the bottom middle of the scaled image (not the image element itself)
+        //can maybe do some x,y move here to simulate a pan, but it will have to be within the contsraints of the scaled image
+        //to avoid negative clipping (panning the edge of the image into the image element bounds)
+        var temp = Math.random() * .25 + 1; // max scale factor is 1.25
+        var from, to;
+        if(Math.random() > .5) { // 50% choice between zoom in and out
+            from = 1.0;
+            to = temp;
+        } else {
+            from = temp;
+            to = 1.0;
+        }
+        if (imgBg2.opacity == 1) {
+            zoomimgBg1.from = from;
+            zoomimgBg1.to = to;
+            zoomimgBg1.start();
+        } else {
+            zoomimgBg2.from = from;
+            zoomimgBg2.to = to;
+            zoomimgBg2.start();
         }
 
-        SequentialAnimation on opacity {
-            id:lower
-            running:false
-            PropertyAnimation{ target:ssimg; property: "opacity"; to: "0"; duration: 1000}
-            ScriptAction {script: changePic()}
-        }
-
-        Connections{
-            target: screensaver
-            onImageChanged:changeStuff()
-        }
+        newImg.opacity = 1;
+        currentImg.opacity = 0;
+    }
+    Timer { // Simulate a simple PhotoScreensaver
+        id: ssTimer;
+        interval: screensaver.transitionDuration;
+        running: false;
+        repeat: true
+        onTriggered: changeBGimage()
     }
 
-    EffectGaussianBlur{
-        id: blur
-        anchors.fill: ssimg
-        divider: false
-        dividerValue: 1
-        opacity: 1
-        radius: 0.75
-        targetHeight: ssimg.height
-        targetWidth: ssimg.width
-        source: ShaderEffectSource { sourceItem: ssimg; hideSource: true }
+    Rectangle{
+        id:bgrect
+        anchors.fill: parent
+        z:0
+        color: "black"
+        Image {
+            id: imgBg1
+            anchors.centerIn: parent
+            fillMode: Image.PreserveAspectCrop
+            anchors.fill: parent
+            opacity: 1
+            smooth: true
+            Behavior on opacity {
+                PropertyAnimation{duration:enableEffects?fadeTime:0}
+            }
+            PropertyAnimation { id: zoomimgBg1; target: imgBg1; property: "scale"; from: 1.0; to: 1.25; duration: enableEffects?zoomTime:0 }
+        }
+        Image {
+            id: imgBg2
+            anchors.centerIn: parent
+            fillMode: Image.PreserveAspectCrop
+            anchors.fill: parent
+            opacity: 0
+            smooth: true
+            Behavior on opacity {
+                PropertyAnimation{duration:enableEffects?fadeTime:0}
+            }
+            PropertyAnimation { id: zoomimgBg2; target: imgBg2; property: "scale"; from: 1.0; to: 1.25; duration: enableEffects?zoomTime:0 }
+        }
+
+
     }
-
-    SequentialAnimation{
-        id:animation_section2
-
-        running: false
-        PropertyAnimation { target: blur; property: "radius"; to: 0.75; duration: 250}
-        // PropertyAnimation {target: blur; property: "opacity"; to:0 ; duration: 1000 }
-        PropertyAnimation { target: blur; property: "radius"; to: 0.0; duration: screensaver.transitionDuration-10000}
-        //  PropertyAnimation {target: blur; property: "opacity"; to:1 ; duration: 1000 }
-        PauseAnimation { duration: 5500 }
-        PropertyAnimation { target: blur; property: "radius"; to: 0.75; duration: 1000}
-        // PropertyAnimation { target: blur; property: "radius"; to: .5; duration: 5000}
+    Component.onCompleted: {
+        changeBGimage();
+        ssTimer.start();
+        screensaver.setDuration(30000)
     }
 }

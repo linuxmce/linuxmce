@@ -1,5 +1,5 @@
 import QtQuick 1.0
-
+import com.nokia.android 1.1
 
 
 Rectangle {
@@ -25,16 +25,14 @@ Rectangle {
         width: style.stdbuttonw
 
     }
-    Text {
+    StyledText {
         id: buttonLabel
         anchors.centerIn: parent
-        text:"null ipsum delorium"
-        font.pixelSize: 14
+        text:"null ipsum delorium"        
         verticalAlignment: Text.AlignVCenter
         horizontalAlignment: Text.AlignHCenter
         anchors.fill: parent
-        anchors.margins: 5
-        font.family: "Droid Sans"
+        anchors.margins: 5       
         wrapMode: Text.WordWrap
        }
 
