@@ -54,12 +54,15 @@ Item
                 scenariomodel: currentRoomLights
                 floorplantype: 2
                 bgimgSource: "../img/ui3/lightingbig.png"
+                rowFillColor.opacity: .25
+                rowFillColor.color: "slategrey"
             }
             ScenarioTemplate{
                 id:mediaRow
                 scenariomodel: currentRoomMedia
                 floorplantype: 3
                 bgimgSource: "../img/ui3/mediabig.png"
+                rowFillColor.color: "pink"
 
             }
             ScenarioTemplate{
@@ -67,18 +70,21 @@ Item
                 scenariomodel: currentRoomClimate
                 floorplantype: 4
                 bgimgSource: "../img/ui3/climatebig.png"
+
             }
             ScenarioTemplate{
                 id:telecomRow
                 scenariomodel: currentRoomTelecom
                 floorplantype: 6
                 bgimgSource: "../img/ui3/telephonebig.png"
+                rowFillColor.color: "yellow"
             }
             ScenarioTemplate{
                 id:securityRow
                 scenariomodel: currentRoomSecurity
                 floorplantype: 7
                 bgimgSource: "../img/ui3/securitybig.png"
+                rowFillColor.color:  "red"
             }
 
 

@@ -14,6 +14,8 @@ Rectangle{
     property string bgimgSource
     property int floorplantype
     property variant scenariomodel
+    property alias rowFillImage: imgFill.source
+    property alias rowFillColor: rectFill
 
 
     Rectangle {
@@ -48,6 +50,19 @@ Rectangle{
 
         }
     }
+    Image{
+        id:imgFill
+        anchors.fill: scenarioview
+        source:""
+        Component.onCompleted: {if(source==="") rectFill.visible = false}
+    }
+
+    Rectangle{
+        id:rectFill
+        anchors.fill: scenarioview
+        color: "skyblue"
+        opacity:.25
+    }
 
     ListView{
         id: scenarioview
@@ -77,6 +92,7 @@ Rectangle{
         }
         interactive: true
     }
+
 }
 
 
