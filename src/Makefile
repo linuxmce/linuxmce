@@ -10,7 +10,7 @@ export LDFLAGS=-L/usr/lib64/mysql
 
 LIBRARIES=RA SerializeClass PlutoUtils DCE pluto_main
 APPS=DCERouter MessageSend sqlCVS mysql_wrapper CreateDevice
-DCEDEVS=ZWave
+#DCEDEVS=ZWave
 PLUGINS=Datagrid_Plugin Lighting_Plugin Climate_Plugin 
 CONFLICTING=
 
@@ -42,6 +42,8 @@ packages: all
 	read
 	for i in $(APPS) $(DCEDEVS) $(PLUGINS) $(CONFLICTING); do $(MAKE) -C $$i package; done
 
+distclean: clean
+
 clean:
 	@#for i in $(STANDALONE) $(PLUGINS) $(CONFLICTING); do $(MAKE) -C $$i clean || exit $$?; done
 	for i in '*.d' '*.d.*' '*.o'; do find -type f -name "$$i" -exec rm '{}' ';' ; done
@@ -50,22 +52,10 @@ clean:
 
 
 install: 
-	mkdir -p /home/public
-	cp bookmarks.html $(DESTPATH)/home/public
-	mkdir -p /usr/pluto/bin
-	cp Datagrid_Plugin.so $(DESTPATH)/usr/pluto/bin
-	cp File_Grids_Plugin.so $(DESTPATH)/usr/pluto/bin
-	cp Security_Plugin.so $(DESTPATH)/usr/pluto/bin
-	cp Climate_Plugin.so $(DESTPATH)/usr/pluto/bin
-	cp Orbiter_Plugin.so $(DESTPATH)/usr/pluto/bin
-	cp Media_Plugin.so $(DESTPATH)/usr/pluto/bin
-	cp Telecom_Plugin.so $(DESTPATH)/usr/pluto/bin
-	cp Lighting_Plugin.so $(DESTPATH)/usr/pluto/bin
-	cp General_Info_Plugin.so $(DESTPATH)/usr/pluto/bin
-	cp Event_Plugin.so $(DESTPATH)/usr/pluto/bin
-	cp Infrared_Plugin.so $(DESTPATH)/usr/pluto/bin
-	cp RestartSecurityPlugin.sh $(DESTPATH)/usr/pluto/bin
-	cp Plug_And_Play_Plugin.so $(DESTPATH)/usr/pluto/bin
-	cp flickr.pl $(DESTPATH)/usr/pluto/bin
-	cp *.php $(DESTPATH)/usr/pluto/bin
-	cp flickr_status.sh $(DESTPATH)/usr/pluto/bin
+	for i in $(APPS) $(DCEDEVS) $(PLUGINS) $(CONFLICTING); do $(MAKE) -C $$i install; done
+#	mkdir -p $(DESTDIR)/home/public $(DESTDIR)/usr/pluto/bin $(DESTDIR)/usr/pluto/lib $(DESTDIR)/usr/include
+#	cp BootScripts/bookmarks.html $(DESTDIR)/home/public || :
+#	for i in $(PLUGINS); do cp $$i/$$i.so $(DESTDIR)/usr/pluto/bin; done
+#	for i in $(APPS); do cp $$i/$$i $(DESTDIR)/usr/pluto/bin; done
+#	for i in $(LIBRARIES); do cp lib/lib$$i* $(DESTDIR)/usr/pluto/lib; done
+#	for i in $(LIBRARIES); do mkdir -p $(DESTDIR)/usr/include/$$i ; cp $$i/*.h $(DESTDIR)/usr/include/$$i ; done
