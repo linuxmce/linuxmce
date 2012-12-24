@@ -69,7 +69,14 @@ Rectangle {
             }
         }
 
-        UserListComponent {id:user}
+        AdvancedButton{
+            id:usersButton
+            buttontext: manager.sPK_User
+            MouseArea{
+                anchors.fill: parent
+                onClicked:componentLoader.source="UserListComponent.qml"
+            }
+        }
 
         AdvancedButton{
             id:exit           
