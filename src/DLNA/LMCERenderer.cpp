@@ -62,10 +62,6 @@ LMCERenderer::LMCERenderer(HAbstractConnectionManagerService *cmService, QObject
 	m_pDLNA = pDLNA;
 	m_iStreamID = 0;
 
-	m_pAlarmManager=NULL;
-//	m_pAlarmManager = new AlarmManager();
-//	m_pAlarmManager->Start(1);
-
 	LoggerWrapper::GetInstance ()->Write (LV_STATUS, "LMCERenderer() cmService = %d",(unsigned int)cmService);
 	HServerDevice* pDevice = cmService->parentDevice();
 	if (pDevice != NULL)
@@ -155,8 +151,6 @@ http-get:*:audio/x-flac:*
 		s->addConnection(connectionInfo);
 	}
 */
-	writableConnectionInfo()->setDirection(HConnectionManagerInfo::DirectionInput);
-	writableConnectionInfo()->setStatus(HConnectionManagerInfo::StatusOk);
 	writableRendererConnectionInfo()->setCurrentPlayMode(HPlayMode::Normal);
 
 	HDeviceCapabilities caps;
@@ -191,10 +185,13 @@ LMCERenderer::~LMCERenderer()
 	if (pEntertainArea != NULL) {
 		pEntertainArea->m_pRenderer = NULL;
 	}
-	if (m_pAlarmManager != NULL) {
-		delete m_pAlarmManager;
-		m_pAlarmManager = NULL;
-	}
+}
+
+void LMCERenderer::finalizeInit()
+{
+//	connectionInfo()->setDirection(HConnectionManagerInfo::DirectionInput);
+	setConnectionStatus(HConnectionManagerInfo::StatusOk);
+
 }
 
 int LMCERenderer::GetPK_EntertainArea() 
@@ -367,7 +364,9 @@ qint32 LMCERenderer::doPlay(const QString& speed)
 							  0,m_Url.toString().toStdString(),m_iMediaType,
 							  0,StringUtils::itos(m_PK_EntArea),false,0,false,false,false);
 		if (m_pDLNA->SendCommand(CMD_MH_Play_Media_DT)) {
-			// TODO tie into playing event ?
+			writableRendererConnectionInfo()->setTransportState(HTransportState::Transitioning);
+
+			// TODO not all media are track-aware
 			writableRendererConnectionInfo()->setCurrentMediaCategory(HMediaInfo::TrackAware);
 			
 			LoggerWrapper::GetInstance ()->Write (LV_STATUS, "LMCERenderer::doPlay() successful");
@@ -422,6 +421,7 @@ qint32 LMCERenderer::doNext()
 	CMD_Jump_Position_In_Playlist_DT CMD_Jump_Position_In_Playlist_DT(m_pDLNA->m_dwPK_Device, DEVICETEMPLATE_Media_Plugin_CONST,  BL_SameHouse, "+1", m_iStreamID);
 	if (m_pDLNA->SendCommand(CMD_Jump_Position_In_Playlist_DT))
 	{
+		writableRendererConnectionInfo()->setTransportState(HTransportState::Transitioning);
 		return UpnpSuccess;
 	}
 	LoggerWrapper::GetInstance ()->Write (LV_STATUS, "LMCERenderer::doNext() Failed!");
@@ -433,6 +433,7 @@ qint32 LMCERenderer::doPrevious()
 	CMD_Jump_Position_In_Playlist_DT CMD_Jump_Position_In_Playlist_DT(m_pDLNA->m_dwPK_Device, DEVICETEMPLATE_Media_Plugin_CONST,  BL_SameHouse, "-1", m_iStreamID);
 	if (m_pDLNA->SendCommand(CMD_Jump_Position_In_Playlist_DT))
 	{
+		writableRendererConnectionInfo()->setTransportState(HTransportState::Transitioning);
 		return UpnpSuccess;
 	}
 	LoggerWrapper::GetInstance ()->Write (LV_STATUS, "LMCERenderer::doPrevious() Failed!");
@@ -476,19 +477,5 @@ qint32 LMCERenderer::doSelectPreset ( const QString &  presetName)
 
 void LMCERenderer::AlarmCallback(int id, void* param)
 {
-/*	LoggerWrapper::GetInstance ()->Write (LV_STATUS, "LMCERenderer::AlarmCallback() start");
-	QTime tmp;
-	tmp = tmp.addMSecs(2000);
-	HDuration position(tmp);
-	writableRendererConnectionInfo()->setRelativeTimePosition(position);
-*/
-/*	m_Time = m_Time.addMSecs(1000);
-	HDuration duration(m_Time);
-	writableRendererConnectionInfo()->setAbsoluteTimePosition(duration);
-*/	
-//	m_pAlarmManager->Clear();
-//	m_pAlarmManager->AddRelativeAlarm(1, this, 1, NULL);
-
-//	LoggerWrapper::GetInstance ()->Write (LV_STATUS, "LMCERenderer::AlarmCallback() end");
 }
 

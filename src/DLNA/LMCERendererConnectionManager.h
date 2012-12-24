@@ -29,8 +29,7 @@ public:
 	LMCERendererConnectionManager(DLNA* pDLNA);
 	virtual ~LMCERendererConnectionManager();
 
-	virtual HRendererConnection * doCreate (HAbstractConnectionManagerService* cmService, const QString &contentFormat, qint32 connectionId);
-	bool connectionComplete (HAbstractConnectionManagerService* cmService, qint32  connectionId);
+	virtual HRendererConnection * doCreate (HAbstractConnectionManagerService* cmService, HConnectionInfo* connectionInfo);
 	virtual DLNA* GetDLNA();
 };
 #endif

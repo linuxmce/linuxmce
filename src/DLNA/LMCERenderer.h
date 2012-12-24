@@ -47,6 +47,8 @@ public:
 	LMCERenderer(HAbstractConnectionManagerService *cmService, QObject* parent, DLNA* pDLNA);
 	virtual ~LMCERenderer();
 
+	void finalizeInit();
+
 	qint32 doPlay(const QString& speed);
 	qint32 doStop();
 	qint32 doPause();
