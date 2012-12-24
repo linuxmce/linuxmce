@@ -30,7 +30,8 @@
 #include <HUpnpAv/HCdsDidlLiteSerializer>
 #include <HUpnpAv/HMediaInfo>
 #include <HUpnpAv/HProtocolInfo>
-#include <HUpnpAv/../../src/mediarenderer/hconnectionmanager_sinkservice_p.h>
+#include "habstract_avtransport_service.h"
+#include "hconnectionmanager_sinkservice_p.h"
 #include <HUpnpAv/HConnectionInfo>
 #include <HUpnpAv/HTransportState>
 #include <HUpnpAv/HTransportStatus>
@@ -62,7 +63,8 @@ LMCERenderer::LMCERenderer(HAbstractConnectionManagerService *cmService, QObject
 	m_pDLNA = pDLNA;
 	m_iStreamID = 0;
 
-	LoggerWrapper::GetInstance ()->Write (LV_STATUS, "LMCERenderer() cmService = %d",(unsigned int)cmService);
+//	TODO: atm this fails compiling
+//	LoggerWrapper::GetInstance ()->Write (LV_STATUS, "LMCERenderer() cmService = %d",(unsigned int)cmService);
 	HServerDevice* pDevice = cmService->parentDevice();
 	if (pDevice != NULL)
 	{

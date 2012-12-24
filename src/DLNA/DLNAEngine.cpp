@@ -59,7 +59,7 @@ int DLNAEngine::Init()
 	HMediaRendererDeviceConfiguration mrConf;
 //	LMCEMediaRendererDeviceConfiguration mrConf;
 	LMCERendererConnectionManager* pRcm = new LMCERendererConnectionManager(m_pDLNA);
-	LoggerWrapper::GetInstance ()->Write (LV_STATUS, "DLNAEngine() pRcm = %d", (unsigned int)pRcm);
+//	LoggerWrapper::GetInstance ()->Write (LV_STATUS, "DLNAEngine() pRcm = %d", (unsigned int)pRcm);
 
 	mrConf.setRendererConnectionManager(pRcm, true);
 	creator.setMediaRendererConfiguration(mrConf);

@@ -28,7 +28,8 @@ LMCERendererConnectionManager::~LMCERendererConnectionManager()
 
 HRendererConnection* LMCERendererConnectionManager::doCreate (HAbstractConnectionManagerService* cmService, HConnectionInfo* connectionInfo)
 {
-	LoggerWrapper::GetInstance ()->Write (LV_STATUS, "LMCERendererConnectionManager::doCreate() start, connectionId = %d, cmService = %d", connectionInfo->connectionId(), (unsigned int)cmService);
+//	TODO: stops build due to cast problems
+//	LoggerWrapper::GetInstance ()->Write (LV_STATUS, "LMCERendererConnectionManager::doCreate() start, connectionId = %d, cmService = %d", connectionInfo->connectionId(), (unsigned int)cmService);
 	LMCERenderer *pRenderer = new LMCERenderer(cmService, this, m_pDLNA);
 	return pRenderer;
 }

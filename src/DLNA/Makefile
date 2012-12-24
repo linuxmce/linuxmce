@@ -7,7 +7,7 @@ SNR_LDFLAGS =
 ROOT = ..
 CXX = g++
 CXXFLAGS = -Wall -fPIC -ggdb3
-CPPFLAGS = -I$(ROOT) -I$(ROOT)/DCE -I/usr/include/mysql $(SNR_CPPFLAGS)
+CPPFLAGS = -I$(ROOT) -I$(ROOT)/DCE -I/usr/include/mysql -I./include $(SNR_CPPFLAGS)
 LDFLAGS = $(SNR_LDFLAGS) -L$(ROOT)/lib
 BASELDLIBS = -lSerializeClass -lDCECommon -lPlutoUtils -lpthread
 
@@ -25,7 +25,8 @@ LDFLAGS +=
 XTRALDLIBS = -lmysqlclient_r -lQtGui -lQtCore -lHUpnp -lHUpnpAv -lpluto_main
 
 Gen_Dev_Files +=
-sources += DLNAEngine.cpp LMCERenderer.cpp moc_LMCERenderer.cpp LMCERendererConnectionManager.cpp
+sources += DLNAEngine.cpp LMCERenderer.cpp LMCERendererConnectionManager.cpp
+# moc_LMCERenderer.cpp
 
 #<-dceag-mf-b->
 LDLIBS = $(XTRALDLIBS) $(BASELDLIBS)
@@ -49,6 +50,8 @@ DLNA: $(sources:.cpp=.o)
 	$(CXX) -o $(MYNAME) $(call cpath,$+) $(LDFLAGS) $(LDLIBS)
 	cp $@ ../bin
 	./post_make.sh $@
+
+distclean: clean
 
 clean: clean-recursive
 	rm -f $(call cpath,$(sources:.cpp=.o) $(sources:.cpp=.d)) DLNA.bin DLNA.so >/dev/null
