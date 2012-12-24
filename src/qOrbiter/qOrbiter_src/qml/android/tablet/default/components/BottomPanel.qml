@@ -40,7 +40,7 @@ Rectangle {
             radius: 5
             MouseArea{
                 anchors.fill: parent
-                onClicked:MyJs.createStageComponent("Power.qml" , stage)
+                onClicked:componentLoader.source="Power.qml"
             }
         }
 
@@ -65,7 +65,7 @@ Rectangle {
             buttontext: currentroom
             MouseArea{
                 anchors.fill: parent
-                onClicked:MyJs.createRoomSelector()
+                onClicked:componentLoader.source="RoomSelector.qml"
             }
         }
 

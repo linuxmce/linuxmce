@@ -12,6 +12,7 @@ import QtQuick 1.1
         font.italic: isItalic
         font.pixelSize: fontSize
         font.family: myFont.name
+
     }
 
 

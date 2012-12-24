@@ -48,7 +48,7 @@ Rectangle{
             PropertyAnimation { target: powerrect; property: "scale"; to: 0; duration: 750}
             PropertyAnimation { target: powerrect; property: "x"; to: manager.appWidth; duration: 750}
             PropertyAnimation { target: powerrect; property: "y"; to: manager.appHeight; duration: 750}
-            ScriptAction {script:power_rect_container.destroy()}
+            ScriptAction {script:componentLoader.source=""}
         }
 
         Rectangle{

@@ -7,13 +7,13 @@ Item {
     width:manager.appWidth
     height:manager.appHeight
 
-//    Rectangle{
-//        anchors.fill: parent
-//        gradient: Gradient {
-//            GradientStop { position: 0.0; color: "darkslategrey" }
-//            GradientStop { position: .85; color: "slategrey" }
-//        }
-//    }
+    //    Rectangle{
+    //        anchors.fill: parent
+    //        gradient: Gradient {
+    //            GradientStop { position: 0.0; color: "darkslategrey" }
+    //            GradientStop { position: .85; color: "slategrey" }
+    //        }
+    //    }
 
     ScreenSaver{
         id:ss
@@ -75,6 +75,7 @@ Item {
     function screenchange(screenname )
     {
         fadeout.start()
+        componentLoader.source = ""
         pageLoader.source = "screens/"+screenname
 
         if (pageLoader.status == Component.Ready)
@@ -121,7 +122,7 @@ Item {
     Loader {
         id:pageLoader
         objectName: "loadbot"
-          onLoaded: {
+        onLoaded: {
             console.log("Screen Changed:" + pageLoader.source)
         }
         Behavior on opacity{
@@ -133,6 +134,13 @@ Item {
             console.log(event.key)
         }
     }
+
+    Loader{
+        id:popupLoader
+        anchors.centerIn: parent
+        z:2
+    }
+
     //=================Components==================================================//
     function loadComponent(componentName )
     {
@@ -176,7 +184,7 @@ Item {
         width: parent.width
         objectName: "componentbot"
         onLoaded: {console.log("Component is loaded")}
-        onSourceChanged: {opacity = 0}
+        onSourceChanged: {opacity = 1}
     }
 
     PropertyAnimation{

@@ -1,4 +1,6 @@
 import QtQuick 1.0
+import com.nokia.android 1.1
+
 import "../components"
 
 //roomsList
@@ -13,95 +15,66 @@ import "../components"
 
 Rectangle {
     id:roomselectorrect
-    height:110
-    width: 600
+    height:manager.appHeight
+    width: manager.appWidth
     color: "transparent"
     anchors.centerIn: parent
-
-    Component
-    {
-        id:roomselectioncomponent
-
-
-        //delegate
-        Rectangle{
-            id:roomdelegate
-            height:90
-            width: 160
-            color: style.not_color
-            Image {
-                id: roomimage
-                source: room_image
-                height: 90
-                fillMode: Image.PreserveAspectFit
-                width:160
-            }
-            Rectangle{
-                id:delegateheader
-                height: 20
-                width: roomdelegate.width
-                color: "transparent"
-                anchors.top: parent.top
-                Text {
-                    id: celllabel
-                    height: 25
-                    width: parent.width
-                    text: title + ": In EA: " + entertain_area
-                    wrapMode: "WrapAnywhere"
-                    font.bold: true
-                }
-            }
-
-
-
-            MouseArea{
-                anchors.fill: parent
-                onClicked: {
-                    currentroom = title
-                   setActiveRoom(intRoom, entertain_area)
-                    roombutton.buttontext = title
-                    roomselectorrect.destroy()
-                }
-            }
-        }
+    MouseArea{
+        anchors.fill: parent
+        hoverEnabled: true
     }
-
 
     Rectangle{
-        id:roomselectorheader
-        height: 15
-        gradient: Gradient {
-            GradientStop {
-                position: 0
-                color: "#99e1f1"
-            }
-
-            GradientStop {
-                position: 1
-                color: "#bbc5db"
-            }
-        }
-        width: roomselectorrect.width
-        Text {
-            id: headertext
-            text: "Select Room Please"
-        }
-
+        anchors.fill: parent
+        opacity: .85
+        color:"black"
     }
+    StyledText{
+        anchors.bottom: roomsource.top
+        fontSize: scaleY(7)
+        text: qsTr("Please Select Location")
+        color: "white"
+    }
+
     ListView{
         id:roomsource
-        anchors.top: roomselectorheader.bottom
-        height: 90
-        width: 600
+        anchors.centerIn: parent
+        height: scaleY(45)
+        width: manager.appWidth
         orientation: ListView.Horizontal
-
         spacing: 5
         clip: true
         model: roomList
-        delegate: roomselectioncomponent
+        delegate: Item{
+            height: scaleY(35)
+            width: scaleX(20)
+            ListItem{
+                anchors.fill: parent
+                Image {
+                    id: roomimage
+                    source: room_image
+                    fillMode: Image.PreserveAspectFit
+                    anchors.centerIn: parent
+                    anchors.fill: parent
+                    opacity: .50
+                }
+                StyledText{
+                    text: "Name:"+ title + "\n EA: " + entertain_area
+                    fontSize: scaleY(4)
+                    isBold: true
+                    anchors.centerIn: parent
+                    color: "white"
+                }
+                onClicked: {
+                    currentroom = title
+                    setActiveRoom(intRoom, entertain_area)
+                    //roombutton.buttontext = title
+                    componentLoader.source=""
+                }
+            }
+        }
+
         flickableDirection: "HorizontalFlick"
-
-
     }
 
 }
