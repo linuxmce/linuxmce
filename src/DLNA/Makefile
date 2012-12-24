@@ -1,8 +1,8 @@
 #<-dceag-mh-b->
 GENDEV=../Gen_Devices
 
-SNR_CPPFLAGS ?= -DKDE_LMCE -DDEBUG -DTHREAD_LOG -DLOG_ALL_QUERIES
-SNR_LDFLAGS ?= 
+SNR_CPPFLAGS = -DKDE_LMCE -DDEBUG -DTHREAD_LOG -DLOG_ALL_QUERIES
+SNR_LDFLAGS = 
 
 ROOT = ..
 CXX = g++
@@ -20,7 +20,7 @@ sources = Main.cpp DLNA.cpp $(Gen_Dev_Files)
 #<-dceag-mh-e->
 
 CXXFLAGS +=
-CPPFLAGS += -I../../external/hupnp/trunk/herqq/hupnp/include/ -I/usr/include/qt4/ -I../../external/hupnp/trunk/herqq/hupnp_av/include/
+CPPFLAGS += -I/usr/include/qt4/ 
 LDFLAGS +=
 XTRALDLIBS = -lmysqlclient_r -lQtGui -lQtCore -lHUpnp -lHUpnpAv -lpluto_main
 
