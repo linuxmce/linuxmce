@@ -260,7 +260,9 @@ Setup_AsoundConf()
 
 	Setup_XineConf "$AudioSetting" "$PlaybackCard"
 	/usr/pluto/bin/RestartALSA.sh
-	Enable_Audio_Channels
+	if pgrep AVWizard_Run.sh > /dev/null; then 
+		Enable_Audio_Channels
+	fi
 }
 
 Setup_XineConf()
