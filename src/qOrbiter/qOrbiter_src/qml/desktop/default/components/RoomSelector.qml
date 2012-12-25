@@ -57,9 +57,9 @@ Rectangle {
             MouseArea{
                 anchors.fill: parent
                 onClicked: {
-                    currentroom = title
+                    currentroom = name
                    manager.setActiveRoom(intRoom, entertain_area)
-                    roombutton.buttontext = title
+                    roombutton.buttontext = name
                     roomselectorrect.destroy()
                 }
             }
