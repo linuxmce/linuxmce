@@ -3,6 +3,7 @@ import Qt.labs.shaders 1.0
 import AudioVisual 1.0
 import "effects"
 import "components"
+import "lib/components"
 import "js/ComponentLoader.js" as MyJs
 import "lib/handlers"
 

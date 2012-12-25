@@ -3,8 +3,6 @@ import "../js/ComponentLoader.js" as MyJs
 //FocusScope{
 //    height: scenarios.height
 //    width: scenarios.width
-
-
 //    onFocusChanged: console.log("Focus for Scenario Container is now "+focus)
 //    onActiveFocusChanged: console.log("ActiveFocus for Scenario Container is now " +activeFocus)
 
@@ -13,7 +11,7 @@ Row{
     height: parent.height /2
     width: childrenRect.width
     anchors.horizontalCenter: parent.horizontalCenter
-    spacing: 5
+    spacing: scaleX(25)
     Rectangle{
         id:roomRect
         height: 50
@@ -21,19 +19,17 @@ Row{
         color: "transparent"
         StyledText {
             id: roomLabel
-            text: qsTr("room")
+            text: qsTr("Location: ")
             anchors.left: parent.left
-            color: "white"
-            
+            color: "white"            
         }
         
         StyledText {
             id: roomTitle
-            text: manager.getCurrentRoom()
+            text: "EA: " + roomList.currentEA+ " in Room: " +roomList.currentRoom
             font.pixelSize: 18
             anchors.left: roomLabel.right
-            color: "white"
-            
+            color: "white"            
         }
     }
     
@@ -45,7 +41,7 @@ Row{
         
         StyledText {
             id: userLabel
-            text: qsTr("user:")
+            text: qsTr("User: ")
             font.pixelSize: 12
             anchors.left: userRect.left
             color: "white"

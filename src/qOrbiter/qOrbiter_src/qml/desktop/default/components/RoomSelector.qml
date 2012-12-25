@@ -46,7 +46,7 @@ Rectangle {
                     id: celllabel
                     height: 25
                     width: parent.width
-                    text: title + ": In EA: " + entertain_area
+                    text: name + ": In EA: " + ea_name
                     wrapMode: "WrapAnywhere"
                     font.bold: true
                 }
