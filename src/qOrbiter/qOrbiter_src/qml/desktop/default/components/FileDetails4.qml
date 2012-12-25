@@ -13,15 +13,17 @@ Rectangle {
     radius: 5
     border.color: style.highlight1
     border.width: 3
+    MouseArea{
+        anchors.fill: filedetailrect
+        hoverEnabled: true
+    }
     Image {
         id: fdbg
         source: "../img/icons/nowplaying.png"
         anchors.fill: filedetailrect
 
     }
-    MouseArea{
-        anchors.fill: filedetailrect
-    }
+
 
     Connections{
         target:filedetailsclass
@@ -34,7 +36,7 @@ Rectangle {
         width: parent.width
         color:style.highlight1
         radius:2.5
-        Text {
+        StyledText {
             id: text2
             anchors.horizontalCenter: parent.horizontalCenter
             text: filedetailsclass.filename
@@ -89,8 +91,8 @@ Rectangle {
         height: childrenRect.height
         radius: 2.5
         clip:  true
-        color: style.darkhighlight
-        border.color: style.highlight1
+        color: "transparent"
+
         anchors.left: imageholder.right
         anchors.leftMargin: scaleX(1)
 
@@ -100,16 +102,16 @@ Rectangle {
                 anchors.margins: scaleY(1)
                 width: parent.width
                 height: childrenRect.height
-                Text {
+                StyledText {
                     id: fnametext
-                    text: "Title: " + filedetailsclass.objecttitle
+                    text: "Title: " + filedetailsclass.mediatitle
                     font.pixelSize: scaleY(2)
                     color:"aliceblue"
                     wrapMode: "WrapAtWordBoundaryOrAnywhere"
                      width: rectangle1.width *.95
                 }
 
-                Text {
+                StyledText {
                     id: programtext
                     width: scaleX(35)
                     text: qsTr("Album: ") + filedetailsclass.album
@@ -121,7 +123,7 @@ Rectangle {
                     visible:  filedetailsclass.album =="" ? false: true
                 }
 
-                Text {
+                StyledText {
                     id: episode
                     width: scaleX(35)
                     wrapMode: "WrapAtWordBoundaryOrAnywhere"
@@ -133,15 +135,16 @@ Rectangle {
                     visible:  filedetailsclass.track =="" ? false: true
                 }
 
-                Text {
+                StyledText {
                     id: genre
                     width: scaleX(35)
                     wrapMode: "WrapAtWordBoundaryOrAnywhere"
                     text: qsTr("Genre(s): ") + filedetailsclass.genre
-                    font.family: "Droid Sans"
+
                     //font.bold: true
                     smooth: true
-                    font.pixelSize: scaleY(2)
+                    isBold: false
+                    font.pixelSize: scaleY(5)
                     visible:  filedetailsclass.genre =="" ? false: true
                     MouseArea{
                         anchors.fill: genre
@@ -150,29 +153,30 @@ Rectangle {
                         onExited: {genre.elide = "ElideRight"; }
                     }
                 }
-                Text {
+                StyledText {
                     id: released
                     width: scaleX(35)
                     wrapMode: "WrapAtWordBoundaryOrAnywhere"
                     text: qsTr("Released: ") + dcenowplaying.releasedate
-                    font.family: "Droid Sans"
+
                     // font.bold: true
                     smooth: true
-                    font.pixelSize: scaleY(2)
+                    font.pixelSize: scaleY(4)
                     visible:  filedetailsclass.releasedate ==="" ? false: true
 
                 }
 
 
-                Text {
+                StyledText {
                     id: starring
                     width: scaleX(35)
                     wrapMode: "WrapAtWordBoundaryOrAnywhere"
                     text: qsTr("Perfomers: ") + filedetailsclass.performerlist
-                    font.family: "Droid Sans"
+
                     //  font.bold: true
+                    isBold: false
                     smooth: true
-                    font.pixelSize: scaleY(2)
+                    font.pixelSize: scaleY(3)
                     elide: "ElideRight"
                     visible:  filedetailsclass.performerlist =="" ? false: true
 

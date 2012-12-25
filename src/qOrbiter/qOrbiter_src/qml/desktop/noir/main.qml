@@ -27,20 +27,22 @@ Item {
 
     function checkUi(){
         console.log("Checking focused items")
-        if(lmceScenarios.activeFocus === true){
-            pageLoader.forceActiveFocus()
+        if(lmceScenarios.focus === true){
+            pageLoader.focus = true
         }
         else
         {
-            lmceScenarios.forceActiveFocus()
+            lmceScenarios.focus = true
         }
     }
 
     function toggleUI()
     {
-        mediaHeader.visible = !mediaHeader.visible
-        lmceScenarios.visible = !lmceScenarios.visible
-        pageLoader.focus = true
+        if(lmceScenarios.focus)
+            stageScope.focus = true
+        else
+            lmceScenarios.focus = true
+
     }
 
 
@@ -148,41 +150,64 @@ Item {
         anchors.centerIn: parent
     }
 
-    Loader {
-        id:pageLoader
-        objectName: "loadbot"
-        onSourceChanged:  loadin
-        onLoaded: {
-            console.log("Screen Changed:" + pageLoader.source)
-            forceActiveFocus()
+    FocusScope
+    {
+        id:stageScope
+        height: manager.appHeight
+        width: manager.appWidth
+        focus:true
+
+        MediaHeader{
+            id:mediaHeader
+            anchors.top: parent.top
+            focus:false
         }
-        Keys.onPressed:{
-            if(event.key === Qt.Key_T){
-                toggleUI()
-                console.log("Key toggle")
+
+
+        //BottomPanel{id: advanced; anchors.top: stage.top}
+
+        Loader {
+            id:pageLoader
+            objectName: "loadbot"
+            onSourceChanged:  loadin
+
+            onLoaded: {
+                console.log("Screen Changed:" + pageLoader.source)
+                pageLoader.item.focus = true
             }
-            else if (event.key === Qt.Key_Tab){
-                checkUi()
-            }
-            else{
-                console.log("Key:"+event.key+" was pressed")
+
+            onFocusChanged: {console.log("Focus for page loader is now "+focus);pageLoader.item.focus = focus}
+            onActiveFocusChanged: console.log("ActiveFocus for page loader is now " +activeFocus)
+            Keys.onTabPressed: {lmceScenarios.focus=true; pageLoader.item.focus = false ; console.log("Pageloader tab press")}
+
+            PropertyAnimation{
+                id:wobble
+                target: pageLoader
+                property: "rotation"
+                from:15
+                to:270
+                duration: 500
+                loops: 5
+                onCompleted: pageLoader.rotation = 0
             }
         }
-        onFocusChanged: console.log("Focus for page loader is now "+focus)
-        onActiveFocusChanged: console.log("ActiveFocus for page loader is now " +activeFocus)
+
+        ScenarioRow{
+            id:lmceScenarios;
+            anchors.bottom: parent.bottom
+            Keys.onTabPressed: {pageLoader.focus = true; focus =false}
+        }
+        Loader{
+            id:componentLoader
+            height: parent.height
+            width: parent.width
+            objectName: "componentbot"
+            onLoaded: {console.log("Component is loaded"); focus = true}
+            onFocusChanged: console.log("Focus for Component loader is now "+focus)
+            onActiveFocusChanged: console.log("ActiveFocus for Component loader is now " +activeFocus)
+            focus:false
+        }
     }
-
-    Loader{
-        id:componentLoader
-        height: parent.height
-        width: parent.width
-        objectName: "componentbot"
-        onLoaded: {console.log("Component is loaded"); forceActiveFocus()}
-        onFocusChanged: console.log("Focus for Component loader is now "+focus)
-        onActiveFocusChanged: console.log("ActiveFocus for Component loader is now " +activeFocus)
-    }
-
-
 
     SequentialAnimation{
         id:loadin
@@ -207,15 +232,6 @@ Item {
     //floorplans
 
 
-    MediaHeader{
-        id:mediaHeader
-        anchors.top: parent.top
-    }
-    //BottomPanel{id: advanced; anchors.top: stage.top}
-    ScenarioRow{
-        id:lmceScenarios; anchors.bottom: parent.bottom
-        focus:true
 
-    }
 }
 

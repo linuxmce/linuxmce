@@ -1,14 +1,13 @@
 // import QtQuick 1.0 // to target S60 5th Edition or Maemo 5
 import QtQuick 1.1
 import "../js/ComponentLoader.js" as MyJs
-FocusScope{
-    height: scenarios.height
-    width: scenarios.width
-    property double buttonWidth:150
-    property double buttonHeight:50
-    property double scenarioFontSize:manager.appHeight * .03
+//FocusScope{
+//    height: scenarios.height
+//    width: scenarios.width
 
 
+//    onFocusChanged: console.log("Focus for Scenario Container is now "+focus)
+//    onActiveFocusChanged: console.log("ActiveFocus for Scenario Container is now " +activeFocus)
 
 Rectangle {
     id:scenarios
@@ -16,23 +15,16 @@ Rectangle {
     height:manager.appHeight *.10
     color: "transparent"
     border.color: "red"
-    border.width: activeFocus ? 2 : 0
+
+    property double buttonWidth:150
+    property double buttonHeight:50
+    property double scenarioFontSize:manager.appHeight * .03
+
     radius: 5
     focus:true
-    onFocusChanged: console.log("Focus for Scenario Container is now "+focus)
-    onActiveFocusChanged: console.log("ActiveFocus for Scenario Container is now " +activeFocus)
-    Keys.onPressed:{
-        if(event.key === Qt.Key_T){
-            toggleUI()
-            console.log("Key toggle")
-        }
-        else if (event.key === Qt.Key_Tab){
-            checkUi()
-        }else{
-            console.log("Key:"+event.key+" was pressed")
-        }
-    }
-   // onActiveFocusChanged: activeFocus ? "Scenario Row has active focus" : "Scenario Row lost active focus"
+    // Keys.onTabPressed: lmceScenarios.focus= !lmceScenarios.focus
+    onActiveFocusChanged: activeFocus ? "Scenario Row has active focus" : "Scenario Row lost active focus"
+    onFocusChanged: console.log("Focus inner container is now "+ focus)
 
     Image {
         id: rowBg
@@ -162,6 +154,26 @@ Rectangle {
             }
         }
     }
+    states: [
+        State {
+            name: "focused"
+            when:scenarios.focus
+            PropertyChanges {
+                target: scenarios
+                border.width: 2
+            }
+        },
+        State{
+            name:"unfocused"
+            when:!scenarios.focus
+            PropertyChanges {
+                target: scenarios
+                border.width: 0
 
+            }
+        }
+
+    ]
 }
-}
+
+

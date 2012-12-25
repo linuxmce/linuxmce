@@ -207,7 +207,7 @@ macx{
 #android deployment
  android-g++{
 #nfs mount to work with skins on core directly
-#folder_01.source = /mnt/remote/android-qml/
+folder_01.source = /mnt/remote/android-qml/
 #folder_01.source = qml/android/
 #folder_01.target = qml
 
@@ -240,7 +240,7 @@ macx{
 
 	INSTALLS+= qmlplugins
         DEFINES+=ANDROID
-        DEPLOYMENTFOLDERS = qmlcomponents base #folder_01
+        DEPLOYMENTFOLDERS = qmlcomponents base folder_01
         QML_IMPORT_PATH = "androidComponents"
 }
 
@@ -656,9 +656,6 @@ OTHER_FILES += Readme.txt \
     android/res/layout/splash.xml \
     android/res/values-id/strings.xml \
     android/res/drawable-ldpi/icon.png \
-    ../../../../mnt/remote/android-qml/qmldir
-
-
 
 for_harmattan{
         OTHER_FILES= \

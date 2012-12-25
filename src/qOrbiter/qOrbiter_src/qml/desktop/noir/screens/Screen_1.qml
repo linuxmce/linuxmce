@@ -8,8 +8,8 @@ Rectangle {
     signal swapStyle()
     height: manager.appHeight
     width: manager.appWidth
-    color:activeFocus ? "red": "transparent"
-    focus:true
+    color:focus ? "red": "transparent"
+    focus:parent.focus
 
 
     Timer{

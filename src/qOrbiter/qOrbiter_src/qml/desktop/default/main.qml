@@ -250,6 +250,4 @@ Item {
     //floorplans
 
 
-
-
 }
