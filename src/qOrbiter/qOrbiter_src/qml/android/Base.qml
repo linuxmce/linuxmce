@@ -13,7 +13,7 @@ Rectangle {
     }
     Rectangle{
         id:spinner
-        height: rotation > 270 ? parent.height*.04 : parent.height *.10
+        height:  parent.height *.10
         width: parent.width*.25
         color: rotation > 270 ? "darkgrey" : "white"
         opacity: .75
