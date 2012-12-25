@@ -2,8 +2,7 @@ import QtQuick 1.0
 import Qt.labs.shaders 1.0
 import "../effects"
 Rectangle{
-    height: style.orbiterH
-    width: style.orbiterW
+
     color: "transparent"
     anchors.fill: parent
 

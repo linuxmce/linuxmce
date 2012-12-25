@@ -13,7 +13,7 @@ Rectangle {
     property color delegateHoverColor: "lightgrey"
     property bool popEnabled:false
     z:10
-    focus: false
+    focus: true
     color: bgColor
     onPopEnabledChanged: popEnabled ? showScenarios():""
 
