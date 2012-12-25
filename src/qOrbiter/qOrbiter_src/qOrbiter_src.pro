@@ -656,6 +656,7 @@ OTHER_FILES += Readme.txt \
     android/res/layout/splash.xml \
     android/res/values-id/strings.xml \
     android/res/drawable-ldpi/icon.png \
+    qml/lib/components/ScreenSaver.qml
 
 for_harmattan{
         OTHER_FILES= \

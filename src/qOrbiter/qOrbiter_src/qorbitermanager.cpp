@@ -557,7 +557,7 @@ void qorbiterManager::processConfig(QByteArray config)
         int m_iEA = roomListXml.at(index).attributes().namedItem("PK_EntertainArea").nodeValue().toInt();
         int m_iType = roomListXml.at(index).attributes().namedItem("FK_RoomType").nodeValue().toInt();
         if (ea.isEmpty()){
-            ea = roomListXml.at(index).attributes().namedItem("Description").nodeValue();
+            ea = roomListXml.at(index).attributes().namedItem("Description").nodeValue().append(QString::number(m_iEA));
         }
 
         QUrl imagePath;
@@ -580,7 +580,7 @@ void qorbiterManager::processConfig(QByteArray config)
             break;
         }
         RroomMapping.insert(m_name, m_val);
-        m_lRooms->appendRow(new LocationItem(m_name, m_val, ea, m_iEA, m_iType, imagePath, m_lRooms));
+        m_lRooms->appendRow(new LocationItem(m_name, m_val, m_iEA,ea, m_iType, imagePath, m_lRooms));
     }
     m_lRooms->sdefault_Ea = defaults.attribute("DefaultLocation");
     m_lRooms->idefault_Ea = RroomMapping.value(m_lRooms->sdefault_Ea);
@@ -901,7 +901,7 @@ void qorbiterManager::setActiveRoom(int room,int ea)
 #ifdef debug
     emit qtMessage("LocationModel::" +m_lRooms->find(QString::number(room))) ;
 #endif
-    setCurrentRoom(QString::number(room));
+    //setCurrentRoom(m_lRooms->find(QString::number(room))->data(1).toString());
     m_lRooms->setLocation(ea, room);
 
     roomLights = roomLightingScenarios.value(room);

@@ -12,6 +12,7 @@ class LocationModel : public QAbstractListModel
 {
     Q_PROPERTY(QString currentRoom READ getStringRoom NOTIFY roomChanged)
     Q_PROPERTY(QString currentEA READ getStringEa NOTIFY eaChanged)
+    Q_PROPERTY(int currentItem READ getCurrentItem WRITE setCurrentItem NOTIFY locationChanged)
     Q_OBJECT
 
 public:
@@ -40,21 +41,27 @@ public:
     QString sdefault_Ea;
 
     QString currentRoom;
-    QString currentEA;
+    QString currentEA;   
     QString currentUser;
 
     int i_currentUser;
     int i_currentEA;
     int i_currentRoom;
 
+    int currentItem;
+
 public slots:
+
+    void setCurrentItem(int i) {currentItem=i;emit locationChanged();}
+    int getCurrentItem() {return currentItem;}
+
     void setLocation(int ea, int room);
 
-    void setCurrentEA(int ea) { currentEA = QString::number(ea); i_currentEA= ea; emit eaChanged(); }
+    void setCurrentEA(QString ea) { currentEA = ea;  emit eaChanged(); }
     QString getStringEa() {return currentEA;}
     int getIntEa() {return i_currentEA;}
 
-    void setCurrentRoom (int room) {currentRoom = QString::number(room); i_currentRoom = room; emit roomChanged();}
+    void setCurrentRoom (QString room) {currentRoom = room; emit roomChanged();}
     QString getStringRoom () { return currentRoom;}
     int getIntRoom () { return i_currentRoom;}
 
@@ -67,6 +74,8 @@ signals:
     void eaChanged();
     void roomChanged();
     void userChanged();
+
+    void locationChanged();
 
 private slots:
     void handleItemChange();

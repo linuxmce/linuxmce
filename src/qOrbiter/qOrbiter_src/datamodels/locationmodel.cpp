@@ -98,8 +98,11 @@ void LocationModel::setLocation(int ea, int room)
     foreach(LocationItem* item, m_list) {
       if(item->roomVal()== room && item->entertain_area() == ea)
       {
-          setCurrentEA(item->entertain_area());
-          setCurrentRoom(item->roomVal());
+          i_currentEA = item->entertain_area();
+          i_currentRoom = item->roomVal();
+          setCurrentEA(item->eaId());
+          setCurrentRoom(item->id());
+          setCurrentItem(indexFromItem(item).row());
       }
     }
 
