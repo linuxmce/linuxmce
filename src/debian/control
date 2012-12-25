@@ -1,7 +1,7 @@
 Source: lmce-base
 Priority: extra
 Maintainer: root <root@racky.theinternet.dyndns.org>
-Build-Depends: debhelper (>= 7), libxml2-dev, libattr1-dev
+Build-Depends: debhelper (>= 7), libxml2-dev,libattr1-dev,libmysqlclient-dev
 Standards-Version: 3.9.2
 Section: libs
 Homepage: <insert the upstream URL, if relevant>
