@@ -1,20 +1,21 @@
 // import QtQuick 1.0 // to target S60 5th Edition or Maemo 5
 import QtQuick 1.1
 import QtWebKit 1.0
+import "../components"
 
 Rectangle {
     id:router_reloading
     width: manager.appWidth
     height: manager.appHeight
-    color: "slategrey"
+    color: "transparent"
 
-
-    Text {
+    StyledText {
         id: reload_text
         text: qsTr("Router is Reloading, Please be patient")
         font.pixelSize: scaleY(8)
         color: "black"
-        font.bold: false
+        isBold: true
+        style:Text.Sunken
         anchors.horizontalCenter: parent.horizontalCenter
     }
     WebView {
@@ -32,6 +33,13 @@ Rectangle {
         font.bold: true
         anchors.top: web_regen.bottom
         anchors.horizontalCenter: parent.horizontalCenter
+    }
+
+    Timer{
+        id:continueTimer
+        interval: 5000
+        running: true
+        onTriggered: manager.qmlSetupLmce(iPK_Device,srouterip)
     }
 
 }

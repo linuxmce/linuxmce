@@ -62,7 +62,7 @@ Rectangle {
 
         AdvancedButton{
             id:roombutton           
-            buttontext: currentroom
+            buttontext: roomList.currentEA
             MouseArea{
                 anchors.fill: parent
                 onClicked:componentLoader.source="RoomSelector.qml"

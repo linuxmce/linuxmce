@@ -84,7 +84,6 @@ Rectangle {
     }
 */
 
-
     Image {
         id: bottomBg
         source: "../img/lowerbkg.png"
@@ -126,7 +125,7 @@ Rectangle {
             id:roombutton
             height: scaleY(5)
             width: scaleX(10)
-            buttontext: manager.currentRoom
+            buttontext: roomList.currentEA
             MouseArea{
                 anchors.fill: parent
                 onClicked:  loadComponent("RoomSelector.qml")

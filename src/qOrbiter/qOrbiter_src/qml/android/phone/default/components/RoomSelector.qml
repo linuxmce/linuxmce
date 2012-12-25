@@ -59,7 +59,7 @@ Component{
             color:"transparent"
             Text {
                 id: generic_label
-                text:  title
+                text:  ea_name+" in "+ name
                 color: "white"
                 font.pixelSize: scaleY(3)
                 anchors.centerIn: container
@@ -69,7 +69,7 @@ Component{
             MouseArea{
                 anchors.fill: parent
                 onClicked: {
-                    currentroom = title
+                    currentroom = name
                    setActiveRoom(intRoom, entertain_area)
                     loadComponent("NullComponent.qml")
                 }

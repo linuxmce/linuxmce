@@ -59,14 +59,14 @@ Rectangle {
                     opacity: .50
                 }
                 StyledText{
-                    text: "Name:"+ title + "\n EA: " + entertain_area
+                    text: "Name:"+ name + "\n EA: " + ea_name
                     fontSize: scaleY(4)
                     isBold: true
                     anchors.centerIn: parent
                     color: "white"
                 }
                 onClicked: {
-                    currentroom = title
+                    currentroom = name
                     setActiveRoom(intRoom, entertain_area)
                     //roombutton.buttontext = title
                     componentLoader.source=""
