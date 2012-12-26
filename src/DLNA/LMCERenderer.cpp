@@ -30,8 +30,6 @@
 #include <HUpnpAv/HCdsDidlLiteSerializer>
 #include <HUpnpAv/HMediaInfo>
 #include <HUpnpAv/HProtocolInfo>
-#include "habstract_avtransport_service.h"
-#include "hconnectionmanager_sinkservice_p.h"
 #include <HUpnpAv/HConnectionInfo>
 #include <HUpnpAv/HTransportState>
 #include <HUpnpAv/HTransportStatus>
