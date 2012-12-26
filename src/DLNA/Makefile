@@ -25,8 +25,7 @@ LDFLAGS +=
 XTRALDLIBS = -lmysqlclient_r -lQtGui -lQtCore -lHUpnp -lHUpnpAv -lpluto_main
 
 Gen_Dev_Files +=
-sources += DLNAEngine.cpp LMCERenderer.cpp LMCERendererConnectionManager.cpp
-# moc_LMCERenderer.cpp
+sources += DLNAEngine.cpp LMCERenderer.cpp LMCERendererConnectionManager.cpp moc_LMCERenderer.cpp
 
 #<-dceag-mf-b->
 LDLIBS = $(XTRALDLIBS) $(BASELDLIBS)
@@ -70,4 +69,3 @@ endif
 install:
 	mkdir -p $(DESTDIR)/usr/pluto/bin
 	cp DLNA $(DESTDIR)/usr/pluto/bin
-	
