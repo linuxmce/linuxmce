@@ -61,8 +61,6 @@ LMCERenderer::LMCERenderer(HAbstractConnectionManagerService *cmService, QObject
 	m_pDLNA = pDLNA;
 	m_iStreamID = 0;
 
-//	TODO: atm this fails compiling
-//	LoggerWrapper::GetInstance ()->Write (LV_STATUS, "LMCERenderer() cmService = %d",(unsigned int)cmService);
 	HServerDevice* pDevice = cmService->parentDevice();
 	if (pDevice != NULL)
 	{
