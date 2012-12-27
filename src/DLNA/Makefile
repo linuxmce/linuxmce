@@ -39,6 +39,9 @@ bin: DLNA
 
 so: DLNA.so
 
+moc_LMCERenderer.cpp:
+	moc -o moc_LMCERenderer.cpp LMCERenderer.h
+
 DLNA.so: $(sources:.cpp=.o)
 	$(CXX) -shared -o $(MYNAME).so $(call cpath,$+) $(LDFLAGS) $(LDLIBS)
 	cp $@ ../bin
