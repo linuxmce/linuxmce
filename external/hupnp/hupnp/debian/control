@@ -16,6 +16,7 @@ Description: <insert up to 60 chars description>
 Package: libhupnp-core
 Section: libs
 Architecture: any
-Depends: ${shlibs:Depends}, ${misc:Depends}, libqtsolutions-soap-2.7-1
+Depends: ${shlibs:Depends}, ${misc:Depends}
+Provides: libqtsolutions-soap-2.7-1
 Description: <insert up to 60 chars description>
  <insert long description, indented with spaces>
