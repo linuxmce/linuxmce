@@ -121,6 +121,7 @@ if($action=='form') {
 			$msg=translate('TEXT_SCENARIO_UPDATED_CONST');
 		break;
 		case 1:
+			$out.="processClimateScenario!<br>";
 			processClimateScenario($cgID,$dbADO);
 			$msg=translate('TEXT_SCENARIO_UPDATED_CONST');
 		break;
