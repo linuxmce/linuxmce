@@ -16,7 +16,7 @@ Rectangle {
 
     StyledText {
         id: reload_text
-        text: qsTr("Router is Reloading, Please be patient")
+        text: qsTr("Regenerating user interface")
         font.pixelSize: scaleY(8)
         color: "black"
         font.bold: true
@@ -69,7 +69,7 @@ Rectangle {
     }
     Timer{
         id:continueTimer
-        interval: 5000
+        interval: 6000
         running: true
         onTriggered: manager.qmlSetupLmce(iPK_Device,srouterip)
     }

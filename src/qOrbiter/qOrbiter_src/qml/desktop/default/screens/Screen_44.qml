@@ -37,7 +37,7 @@ Rectangle {
                 MouseArea{
                     anchors.fill:parent
                     z:5
-                    onClicked: manager.regenOrbiter(35)
+                    onClicked: manager.gotoQScreen("Regenerating.qml")
                 }
             }
 
