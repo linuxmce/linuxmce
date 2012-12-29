@@ -110,6 +110,7 @@ Rectangle {
                         width: scaleX(55)
                         height: scaleY(20)
                         font.family: "Droid Sans"
+                        font.bold: true
                     }
                 }
 

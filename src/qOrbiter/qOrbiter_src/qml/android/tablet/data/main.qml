@@ -12,13 +12,13 @@ Window {
 	        id: backg
 		anchors.fill: parent
 		source: "img/pictest.png"
-		width: 1920
-		height: 1200		
+        width: manager.appWidth
+        height: manager.appWidth
 	}
 
 	Rectangle {
 		color: "black"
-		width: 1920
+        width: manager.appWidth
 		height: 84
 		x: 0
 		y: 0		
@@ -73,7 +73,7 @@ Window {
 		id: bluebar
 		color: "#33b5e5"
 		height: 2
-		width: 1920
+        width: manager.appWidth
 		x: 0
 		y: 84
 		z: 100 

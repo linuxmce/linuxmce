@@ -7,27 +7,25 @@ screen params for this screen are
 */
 Item{
     id:singlecameraview
+    property int camera:screenparams.getParam(2)
     Timer{
         id:securitytimer
         repeat: true
-        interval: 5000
+        interval: 2500
         triggeredOnStart: true
         running: true
         onTriggered:{
-            securityimage.source = "image://listprovider/securityimage/"+securityvideo.timestamp
+            "image://listprovider/securityimage/"+camera+"/"+securityvideo.timestamp
+            console.log("requesting new security image")
             manager.requestSecurityPic(screenparams.getParam(2), 640, 480)
-
         }
-
     }
 
-
-
     Rectangle{
-        height: style.orbiterH
-        width: style.orbiterW
+        height:manager.appHeight
+        width: manager.appWidth
         color: "transparent"
-        Component.onCompleted: requestSecurityPic(screenparams.getParam(2), 800, 600)
+        Component.onCompleted: requestSecurityPic(screenparams.getParam(2), 640, 480)
         Text {
             id: singlecamlabel
             x: 74
@@ -49,12 +47,10 @@ Item{
             Image {
                 id: securityimage
                 fillMode: Image.PreserveAspectFit
-                source: "image://listprovider/securityimage/"+securityvideo.timestamp
+                source: "image://listprovider/securityimage/"+camera+"/"+securityvideo.timestamp
                 anchors.centerIn: parent
                 height: scaleY(50)
                 width: scaleX(50)
-
-
             }
 
             Rectangle{

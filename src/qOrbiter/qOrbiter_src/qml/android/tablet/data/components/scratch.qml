@@ -1,8 +1,8 @@
 Rectangle {
 
 	color: "#000000"
-	width: 1920
-	height: 1200
+    width: manager.appWidth
+    height: manager.appWidth
 	x: 0
 	y: 0
 	z: 100
