@@ -1441,6 +1441,9 @@ void VDR::CMD_EnterGo(int iStreamID,string &sCMD_Result,Message *pMessage)
 void VDR::CMD_Input_Select(int iPK_Command_Input,string &sCMD_Result,Message *pMessage)
 //<-dceag-c91-e->
 {
+	string sCommand;
+	sCommand = "HITK Audio";
+	SendOnlyVDRCommand(m_sVDRIp,sCommand);
 }
 //<-dceag-c123-b->
 
