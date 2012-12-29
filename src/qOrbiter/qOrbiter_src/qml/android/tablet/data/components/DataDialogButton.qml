@@ -3,8 +3,7 @@ import QtQuick 1.1
 Rectangle {
 
 	  property alias buttonText: bText.text
-
-	  width: parent.width - 2
+	  width: parent.width / buttonRow.children.length
 	  height: 74
 	  color: "#282828"
 

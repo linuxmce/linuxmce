@@ -19,3 +19,4 @@ TabLayout TabLayout.qml
 MoreInfo MoreInfo.qml
 MoreInfoSynopsis MoreInfoSynopsis.qml
 Scroller Scroller.qml
+DataDialogButtonRow DataDialogButtonRow.qml

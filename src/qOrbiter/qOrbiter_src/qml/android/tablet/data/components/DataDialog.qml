@@ -7,7 +7,9 @@ Item {
      property real dialogHeight
      property string iconSource
      property string dialogTitle
- 
+     property Component contents
+     property Component buttons
+  
      id: container
      width: 1920
      height: 1200
@@ -73,31 +75,34 @@ Item {
 		 text: container.dialogTitle
              }
 	     
-	     Scroller {
-	         x: 32
-		 y: container.dialogHeight / 2
-		 width: container.dialogWidth - 64
-	     }
-
-	     Rectangle {
-	         id: buttonBorder
-		 width: container.dialogWidth
-		 height: 2
-		 x: 0
-		 y: container.dialogHeight - 81
-		 color: "#494949"
-	     }
-	     Row {
-	         width: container.dialogWidth
+             Item {
+                 id: contentFrame
+                 width: parent.width - 48
+		 height: parent.height - dialogBlueBar.y - 48
+		 anchors.fill: parent
+                 anchors.topMargin: 96 + 48
+		 anchors.leftMargin: 48
+		 anchors.rightMargin: 48
+		 anchors.bottomMargin: 48
+                 Loader {
+		     anchors.centerIn: parent
+		     width: contentFrame.width
+		     sourceComponent: container.contents
+		     anchors.verticalCenter: parent.verticalCenter
+		 }
+             }
+	     
+	     Item {
+	         id: buttonsContainer
+	         width: parent.width - 48
 		 height: 81
-		 spacing: 4
 		 x: 0
 		 y: container.dialogHeight - 78
-		 DataDialogButton {
-		     buttonText: "OK"
+ 		 Loader {
+		     sourceComponent: buttons	
 		 }	 
              }
-
+	     
 	 }
 
      }

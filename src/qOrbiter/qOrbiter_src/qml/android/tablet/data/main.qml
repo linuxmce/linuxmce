@@ -300,9 +300,18 @@ Window {
 
 	    DataDialog { 
 	        dialogWidth: 1140
-		dialogHeight: 516
+		dialogHeight: 500
 		iconSource: "../img/lights.png"
 		dialogTitle: "Adjust Lighting"
+                contents: Scroller { }
+		buttons: DataDialogButtonRow {
+		    DataDialogButton {
+		        buttonText: "OK"
+		    }
+		    DataDialogButton {
+		        buttonText: "CANCEL"
+		    }
+		}
 	    }
 
 	    Row {
