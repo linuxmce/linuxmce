@@ -60,7 +60,9 @@ QImage key;
        }
         else if(id.contains("securityimage"))
         {
-            temp = securityProvider();
+           int camId = QString(id.section("/",-2,-2)).toInt();
+            qDebug() << "Camera id" << camId;
+            temp = securityProvider(camId);
         }
         else if(id.contains("updateobject"))
         {
@@ -113,7 +115,7 @@ public slots:
 private:
     qorbiterManager * managerreference;
     QImage floorplanProvider();
-    QImage securityProvider();
+    QImage securityProvider(int cam);
     QImage updateObjectProvider();
     QImage fileDetails();
     QImage screenShot();

@@ -13,6 +13,7 @@ Row{
     height: parent.height/2
     width: buttonWidth*6
     anchors.horizontalCenter: parent.horizontalCenter
+    focus:true
     ListView{
         id:scenarioList
         height: parent.height
@@ -21,6 +22,7 @@ Row{
         model:modelRow.sModel
         orientation: ListView.Horizontal
         focus: true
+        onFocusChanged: console.log("Scenarios Listview has focus")
     }
     
     Rectangle{

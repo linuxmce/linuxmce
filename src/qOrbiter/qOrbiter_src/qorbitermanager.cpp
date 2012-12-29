@@ -1429,8 +1429,7 @@ void qorbiterManager::showFileInfo(QString fk_file)
 
 void qorbiterManager::requestSecurityPic(int i_pk_camera_device, int h, int w)
 {
-
-    emit  getSingleCam(i_pk_camera_device,  h,  w);
+    emit getSingleCam(i_pk_camera_device,  h,  w);
 }
 
 

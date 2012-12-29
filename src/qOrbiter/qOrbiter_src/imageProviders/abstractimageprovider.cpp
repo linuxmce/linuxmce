@@ -34,9 +34,9 @@ QImage AbstractImageProvider::floorplanProvider()
     return key;
 }
 
-QImage AbstractImageProvider::securityProvider()
+QImage AbstractImageProvider::securityProvider(int cam)
 {
-   key = managerreference->SecurityVideo->currentFrame;
+   key = managerreference->SecurityVideo->getCameraImage(cam);
 
    if (key.isNull())
    {

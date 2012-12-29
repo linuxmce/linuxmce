@@ -161,6 +161,7 @@ Item {
             id:mediaHeader
             anchors.top: parent.top
             focus:false
+            opacity: lmceScenarios.opacity
         }
 
 
@@ -178,7 +179,7 @@ Item {
 
             onFocusChanged: {console.log("Focus for page loader is now "+focus);pageLoader.item.focus = focus}
             onActiveFocusChanged: console.log("ActiveFocus for page loader is now " +activeFocus)
-            Keys.onTabPressed: {lmceScenarios.focus=true; pageLoader.item.focus = false ; console.log("Pageloader tab press")}
+            Keys.onTabPressed: {lmceScenarios.showingMenu=true; pageLoader.item.focus = false ; console.log("Pageloader tab press")}
 
             PropertyAnimation{
                 id:wobble
@@ -195,7 +196,7 @@ Item {
         ScenarioRow{
             id:lmceScenarios;
             anchors.bottom: parent.bottom
-            Keys.onTabPressed: {pageLoader.focus = true; focus =false}
+            Keys.onTabPressed: {pageLoader.focus = true; showingMenu =false}
         }
         Loader{
             id:componentLoader

@@ -9,7 +9,7 @@ Rectangle{
     color: "transparent"
     property variant targetModel
     property string triggerLabel:"Ipsum"
-
+    focus:true
     Rectangle{
         id:angle
         rotation: 45

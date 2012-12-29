@@ -113,6 +113,7 @@ Item {
         }
 
     }
+
     function scaleX(x){
         return x/100*manager.appWidth
     }
@@ -173,11 +174,7 @@ Item {
             console.log("Screen Changed:" + pageLoader.source)
         }
         z:5
-        MouseArea{
-            anchors.fill: pageLoader
-            acceptedButtons: Qt.LeftButton | Qt.RightButton
-            onClicked:  Qt.RightButton ? pageLoader.visible = !pageLoader.visible: ""
-        }
+
     }
     //=================Components==================================================//
     function loadComponent(componentName )
