@@ -11,15 +11,13 @@ Item{
     Timer{
         id:securitytimer
         repeat: true
-        interval: 5000
+        interval: 1000
         triggeredOnStart: true
         running: true
         onTriggered:{
             "image://listprovider/securityimage/"+camera+"/"+securityvideo.timestamp
             manager.requestSecurityPic(screenparams.getParam(2), 640, 480)
-
         }
-
     }
 
 

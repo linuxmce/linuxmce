@@ -1493,6 +1493,8 @@ public slots:
     void executeCommandGroup(int cmdGrp);
     void shutdownMD();
     bool initialize();
+    void requestConfigData();
+    void processConfigData(QNetworkReply * r);
     void deinitialize();
     bool getConfiguration();
     void registerDevice(int user, QString ea, int room);
@@ -1506,7 +1508,6 @@ public slots:
 
     void checkInstall();
     void verifyInstall(QNetworkReply*r);
-
 
     void moveDirection(int d);
     void JogStream(QString jump);

@@ -736,7 +736,7 @@ void qOrbiter::CMD_Update_Object_Image(string sPK_DesignObj,string sType,char *p
     QImage t;
     t.loadFromData(imgData, "4");
     if(!t.isNull())
-    emit objectUpdate(t);
+        emit objectUpdate(t);
     else
         emit mediaResponseChanged("Screenshot returned is invalid!");
     qDebug() << t.size();
@@ -1116,7 +1116,7 @@ void qOrbiter::CMD_Set_Now_Playing(string sPK_DesignObj,string sValue_To_Assign,
         emit playlistPositionChanged(iValue);
         GetNowPlayingAttributes();
         if(bRetransmit==0){
-        emit clearPlaylist();
+            emit clearPlaylist();
         }
 
     }
@@ -1126,7 +1126,7 @@ void qOrbiter::CMD_Set_Now_Playing(string sPK_DesignObj,string sValue_To_Assign,
         emit playlistPositionChanged(iValue);
         GetNowPlayingAttributes();
         if(bRetransmit==0){
-        emit clearPlaylist();
+            emit clearPlaylist();
         }
 
     }
@@ -1760,7 +1760,6 @@ void qOrbiter::CMD_Assisted_Make_Call(int iPK_Users,string sPhoneExtension,strin
     cout << "Parm #83 - PhoneExtension=" << sPhoneExtension << endl;
     cout << "Parm #184 - PK_Device_From=" << sPK_Device_From << endl;
     cout << "Parm #263 - PK_Device_To=" << iPK_Device_To << endl;
-
 }
 
 bool DCE::qOrbiter::initialize()
@@ -1770,97 +1769,116 @@ bool DCE::qOrbiter::initialize()
     emit commandResponseChanged("Starting dce initialization");
 
 
-        if ((GetConfig() == true) && (Connect(PK_DeviceTemplate_get()) == true))
+    if ((GetConfig() == true) && (Connect(PK_DeviceTemplate_get()) == true))
+    {
+        m_dwMaxRetries = 1;
+        m_bRouterReloading = false;
+        m_bReload = false;
+        m_bOrbiterConnected = true;
+        emit deviceValid(true);
+        emit commandResponseChanged("Starting Manager");
+        emit startManager(QString::number(m_dwPK_Device), QString::fromStdString(m_sIPAddress));
+        requestConfigData();
+        CreateChildren();
+        return true;
+    }
+    else
+    {
+
+
+        //QApplication::processEvents(QEventLoop::AllEvents);
+        if(  m_pEvent->m_pClientSocket->m_eLastError==ClientSocket::cs_err_CannotConnect )
         {
-            m_dwMaxRetries = 1;
-            m_bRouterReloading = false;
-            m_bReload = false;
-            m_bOrbiterConnected = true;
-            emit deviceValid(true);
-            emit commandResponseChanged("Starting Manager");
-            emit startManager(QString::number(m_dwPK_Device), QString::fromStdString(m_sIPAddress) );
 
-            DCE::LoggerWrapper::GetInstance()->Write(LV_CRITICAL, "Orbiter Connected, requesting configuration for device %d", m_dwPK_Device);
+            LoggerWrapper::GetInstance()->Write(LV_CRITICAL, "No Router");
+            emit commandResponseChanged("No Connection to Router");
+            emit routerInvalid();
+            //QApplication::processEvents(QEventLoop::AllEvents);
+            return false;
 
-            char *oData;
-            oData = NULL;
-            int iData_Size;
-            iData_Size = 0;
-            string *p_sResponse;
-            p_sResponse = NULL;
-            string filePath = "/var/tmp/"+QString::number(m_dwPK_Device).toStdString()+"conf.xml";
-            CMD_Request_File configFileRequest((long)m_dwPK_Device, (long)4 , (string)filePath, &oData, &iData_Size);
+        }
+        else if( m_pEvent->m_pClientSocket->m_eLastError==ClientSocket::cs_err_BadDevice )
+        {
 
-            if (SendCommand(configFileRequest))
-            {
-                emit commandResponseChanged("Requesting remote configuration..");
-            }
-            else
-            {
-                return false;
-            }
+            LoggerWrapper::GetInstance()->Write(LV_CRITICAL, "Bad Device");
+            emit commandResponseChanged("Bad Device");
+            emit connectionValid(true);
+            return false;
+        }
 
-            //setDceResponse("Idata recieved: " +QString::number(iData_Size)) ; // size of xml file
-            QByteArray configData;              //config file put into qbytearray for processing
-            configData = oData;
-            if (configData.size() == 0)
-            {
-                emit commandResponseChanged("Invalid config for device: " + QString::number(m_dwPK_Device));
-                emit commandResponseChanged("Please run http://dcerouter/lmce-admin/qOrbiterGenerator.php?d=" + QString::number(m_dwPK_Device)) ;
-                return false;
-            }
+        else if(  m_pEvent->m_pClientSocket->m_eLastError==ClientSocket::cs_err_NeedReload )
+        {
 
-            emit configReady(configData);
-            CreateChildren();
-            return true;
+            LoggerWrapper::GetInstance()->Write(LV_CRITICAL, "Router Needs Reload");
+            emit commandResponseChanged("Needs Reload");
+            //QApplication::processEvents(QEventLoop::AllEvents);
+            return false;
         }
         else
         {
 
-
-            //QApplication::processEvents(QEventLoop::AllEvents);
-            if(  m_pEvent->m_pClientSocket->m_eLastError==ClientSocket::cs_err_CannotConnect )
-            {
-
-                LoggerWrapper::GetInstance()->Write(LV_CRITICAL, "No Router");
-                emit commandResponseChanged("No Connection to Router");
-                emit routerInvalid();
-                //QApplication::processEvents(QEventLoop::AllEvents);
-                return false;
-
-            }
-            else if( m_pEvent->m_pClientSocket->m_eLastError==ClientSocket::cs_err_BadDevice )
-            {
-
-                LoggerWrapper::GetInstance()->Write(LV_CRITICAL, "Bad Device");
-                emit commandResponseChanged("Bad Device");              
-                emit connectionValid(true);               
-                return false;
-            }
-
-            else if(  m_pEvent->m_pClientSocket->m_eLastError==ClientSocket::cs_err_NeedReload )
-            {
-
-                LoggerWrapper::GetInstance()->Write(LV_CRITICAL, "Router Needs Reload");
-                emit commandResponseChanged("Needs Reload");
-                //QApplication::processEvents(QEventLoop::AllEvents);
-                return false;
-            }
-            else
-            {
-
-                LoggerWrapper::GetInstance()->Write(LV_CRITICAL, "Connect() Failed");
-                Disconnect();
-                emit commandResponseChanged("QOrbiter Connect() Failed for"+QString::number(this->m_dwPK_Device) );
-                //QApplication::processEvents(QEventLoop::AllEvents);
-                return false;
-            }
-
+            LoggerWrapper::GetInstance()->Write(LV_CRITICAL, "Connect() Failed");
             Disconnect();
-            return false;
+            emit commandResponseChanged("QOrbiter Connect() Failed for"+QString::number(this->m_dwPK_Device) );
             //QApplication::processEvents(QEventLoop::AllEvents);
+            return false;
         }
+
+        Disconnect();
+        return false;
+        //QApplication::processEvents(QEventLoop::AllEvents);
     }
+}
+
+void qOrbiter::requestConfigData()
+{
+    QNetworkRequest updateDevice;
+    QNetworkAccessManager *ud= new QNetworkAccessManager(this);
+
+    updateDevice.setUrl("http://"+QString::fromStdString(m_sIPAddress)+"/lmce-admin/qOrbiterGenerator.php?d="+QString::number(m_dwPK_Device));
+
+    QObject::connect(ud, SIGNAL(finished(QNetworkReply*)), this, SLOT(processConfigData(QNetworkReply*)));
+    ud->get(updateDevice);
+    qDebug()<< updateDevice.url();
+    DCE::LoggerWrapper::GetInstance()->Write(LV_CRITICAL, "Orbiter Connected, requesting configuration for device %d", m_dwPK_Device);
+
+
+}
+
+void qOrbiter::processConfigData(QNetworkReply *r)
+{
+    char *oData;
+    oData = NULL;
+    int iData_Size;
+    iData_Size = 0;
+    string *p_sResponse;
+    p_sResponse = NULL;
+    string filePath = "/var/tmp/"+QString::number(m_dwPK_Device).toStdString()+"conf.xml";
+    CMD_Request_File configFileRequest((long)m_dwPK_Device, (long)4 , (string)filePath, &oData, &iData_Size);
+
+    if (SendCommand(configFileRequest))
+    {
+        emit commandResponseChanged("Requesting remote configuration..");
+    }
+    else
+    {
+
+    }
+
+    //setDceResponse("Idata recieved: " +QString::number(iData_Size)) ; // size of xml file
+    QByteArray configData;              //config file put into qbytearray for processing
+    configData = oData;
+    if (configData.size() == 0)
+    {
+        emit commandResponseChanged("Invalid config for device: " + QString::number(m_dwPK_Device));
+        emit commandResponseChanged("Please run http://dcerouter/lmce-admin/qOrbiterGenerator.php?d=" + QString::number(m_dwPK_Device)) ;
+
+    }
+
+    emit configReady(configData);
+}
+
+
 
 
 void DCE::qOrbiter::deinitialize()
@@ -1871,10 +1889,8 @@ void DCE::qOrbiter::deinitialize()
     iSize = 0;
     BindMediaRemote(false);
     //DCE::CMD_Orbiter_Registered CMD_OrbiterUnRegistered(m_dwPK_Device, iOrbiterPluginID, StringUtils::itos(m_dwPK_Device) ,i_user, StringUtils::itos(i_ea), i_room, &pData, &iSize);
-
     // SendCommand(CMD_OrbiterUnRegistered);
     emit closeOrbiter();
-
 }
 
 
@@ -1931,7 +1947,7 @@ void qOrbiter::setOrbiterSetupVars(int users, int room, int skin, int lang, int 
     httpOrbiterSettings = new QNetworkAccessManager();
     httpSettingsRequest = new QNetworkRequest();
 
-     "Processing New orbiter Setup";
+    "Processing New orbiter Setup";
     sPK_Room = room;
     sPK_Users = users;
     sPK_Skin = skin;
@@ -1940,7 +1956,7 @@ void qOrbiter::setOrbiterSetupVars(int users, int room, int skin, int lang, int 
     sWidth = width;
 
     if (sHeight > 0){
-       emit commandResponseChanged("Setting up a new orbiter");
+        emit commandResponseChanged("Setting up a new orbiter");
 
         int t = SetupNewOrbiter();
 
@@ -1955,7 +1971,7 @@ void qOrbiter::setOrbiterSetupVars(int users, int room, int skin, int lang, int 
             m_dwPK_Device = t ;
             emit commandResponseChanged("setting ea");
             httpSettingsRequest->setUrl("http://"+QString::fromStdString(m_sIPAddress).append("/lmce-admin/setEa2.php?d="+QString::number(t)+"&r="+QString::number(sPK_Room)));
-           // qDebug() << "Ea url::" <<httpSettingsRequest->url();
+            // qDebug() << "Ea url::" <<httpSettingsRequest->url();
             httpSettingsReply = httpOrbiterSettings->get(*httpSettingsRequest);
             QObject::connect(httpSettingsReply, SIGNAL(finished()), this, SLOT(finishSetup()));
         }
@@ -1996,7 +2012,7 @@ void qOrbiter::requestAttributeTypes(int type)
     if(SendCommand(reqSubtype, &pResponse) && pResponse=="OK"){
         emit commandResponseChanged("Got subtype for media");
 #ifdef debug
-       emit commandResponseChanged(QString::fromStdString(sName.c_str()));
+        emit commandResponseChanged(QString::fromStdString(sName.c_str()));
 #endif
     }
     else
@@ -2077,7 +2093,7 @@ void qOrbiter::requestGenres(int type)
 #ifdef debug
             qDebug() << data.at(i).split(":");
 #endif
-          //  emit newFileFormatSort(new AttributeSortItem( subSplit.last(),subSplit.first(), QImage(),false,  0));
+            //  emit newFileFormatSort(new AttributeSortItem( subSplit.last(),subSplit.first(), QImage(),false,  0));
         }
     }
     else
@@ -2100,7 +2116,7 @@ void qOrbiter::requestFileFormats(int type)
         {
             QStringList subSplit = data.at(i).split(":");
 #ifdef debug
-           emit commandResponse(data.at(i).split(":"));
+            emit commandResponse(data.at(i).split(":"));
 #endif
             emit newFileFormatSort( new AttributeSortItem( subSplit.last(),subSplit.first(), QImage(),false,  0));
         }
@@ -2219,7 +2235,7 @@ void qOrbiter::initializeGrid()
 
     datagridVariableString.append(q_mediaType).append("|").append(q_subType).append("|").append(q_fileFormat).append("|").append(q_attribute_genres).append("|").append(q_mediaSources).append("|").append(q_usersPrivate).append("|").append(q_attributetype_sort).append("|").append(q_pk_users).append("|").append(q_last_viewed).append("|").append(q_pk_attribute);
 
-     goBack.append(datagridVariableString);
+    goBack.append(datagridVariableString);
     emit commandResponseChanged("Dg Variables Reset");
 }
 
@@ -2424,7 +2440,7 @@ void DCE::qOrbiter::executeCommandGroup(int cmdGrp)
     LoggerWrapper::GetInstance()->Write(LV_CRITICAL, "Executing Command Group %d", cmdGrp);
 #endif
     string pResponse="";
-    CMD_Execute_Command_Group execCommandGroup((long)m_dwPK_Device, (long)2, cmdGrp);    
+    CMD_Execute_Command_Group execCommandGroup((long)m_dwPK_Device, (long)2, cmdGrp);
     SendCommand(execCommandGroup);
     emit commandComplete();
 }
@@ -2688,7 +2704,7 @@ void DCE::qOrbiter::GetMediaAttributeGrid(QString  qs_fk_fileno)
                 cellfk = pCell->GetValue();
                 //QApplication::processEvents(QEventLoop::AllEvents);
 #ifdef debug
-               emit commandResponseChanged(attributeType << " :: " << attribute);
+                emit commandResponseChanged(attributeType << " :: " << attribute);
 #endif
                 if(attributeType == "Program")
                 {
@@ -3326,7 +3342,7 @@ void DCE::qOrbiter::requestLiveTvPlaylist()
                 emit addChannel(t);
                 index++;
 #ifdef RPI
-       //         QThread::msleep(20);
+                //         QThread::msleep(20);
 #endif
             }
         }
@@ -4742,7 +4758,7 @@ void DCE::qOrbiter::prepareFileList(int iPK_MediaType)
                 setModelPages(media_totalPages);
                 emit mediaResponseChanged(QString::number(media_totalPages)+ " pages from request, populating first page.");
                 requestPage(0);
-                  //requestGenres(iPK_MediaType);
+                //requestGenres(iPK_MediaType);
             }
 
         }
