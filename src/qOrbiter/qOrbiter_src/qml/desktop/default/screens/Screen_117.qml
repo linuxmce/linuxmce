@@ -164,7 +164,7 @@ Rectangle {
                     Text {
                         id: artist
                         width: parent.width
-                        text: qsTr("Device: ")  + dcenowplaying.qs_mainTitle
+                        text: qsTr("Channel: ")  + dcenowplaying.qs_mainTitle
                         font.family: "Droid Sans"
                         wrapMode: "NoWrap"
                         font.bold: true
@@ -175,8 +175,8 @@ Rectangle {
 
                     Text {
                         id: album
-                        wrapMode: "NoWrap"
-                        text: qsTr("Channel: ") + dcenowplaying.qs_mainTitle2
+                        // wrapMode: "NoWrap"
+                        text: qsTr("Title: ") + dcenowplaying.qs_subTitle
                         font.family: "Droid Sans"
                         font.bold: true
                         smooth: true
@@ -184,16 +184,16 @@ Rectangle {
                         font.pixelSize: 12
                     }
 
-                    Text {
+                    /* Text {
                         id: title
                         wrapMode: "NoWrap"
-                        text: qsTr("Program:") + dcenowplaying.program
+                        text: qsTr("Program:") + dcenowplaying.episode
                         font.family: "Droid Sans"
                         font.bold: true
                         smooth: true
                         horizontalAlignment: Text.AlignHCenter
                         font.pixelSize: 12
-                    }
+                    } */
                 }
             }
         }
