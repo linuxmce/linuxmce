@@ -5,14 +5,18 @@ all:
 	for i in $(files); do ln -sf "../BootScripts/$$i" ../bin; done
 
 install: 
-	mkdir -p /usr/pluto/bin
-	cp update2utf8.pl $(DESTPATH)/usr/pluto/bin
-	mkdir -p pluto/database
-	cp constants.sqlcvs $(DESTPATH)pluto/database
-	cp dce.sqlcvs $(DESTPATH)pluto/database
-	cp designer.sqlcvs $(DESTPATH)pluto/database
-	cp document.sqlcvs $(DESTPATH)pluto/database
-	cp ir.sqlcvs $(DESTPATH)pluto/database
-	cp website.sqlcvs $(DESTPATH)pluto/database
-	cp mkr_wpostinst_system.bat $(DESTPATH)pluto/database
-	cp city.dump $(DESTPATH)pluto/database
+	mkdir -p $(DESTDIR)/usr/pluto/bin $(DESTDIR)/usr/pluto/database
+	cp update2utf8.pl $(DESTDIR)/usr/pluto/bin
+
+	for i in $(files); do cp "$$i" $(DESTDIR)/usr/pluto/bin || :; done
+
+	# The database dumps are outputs of sqlCVS and need to be provided
+	# before, otherwise this will fail.
+#	cp constants.sqlcvs $(DESTDIR)/usr/pluto/database || :
+#	cp dce.sqlcvs $(DESTDIR)/usr/pluto/database || :
+#	cp designer.sqlcvs $(DESTDIR)/usr/pluto/database || :
+#	cp document.sqlcvs $(DESTDIR)/usr/pluto/database || :
+#	cp ir.sqlcvs $(DESTDIR)/usr/pluto/database || :
+#	cp website.sqlcvs $(DESTDIR)/usr/pluto/database || :
+#	cp mkr_wpostinst_system.bat $(DESTDIR)/usr/pluto/database
+#	cp city.dump $(DESTDIR)/usr/pluto/database || :
