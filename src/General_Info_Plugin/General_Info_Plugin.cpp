@@ -4188,7 +4188,7 @@ void General_Info_Plugin::CMD_Update_Device(int iPK_Device,string sMac_address,i
 		/** @param #284 MessageBody */
 			/** Details about the event. */
 
-void General_Info_Plugin::CMD_Send_Email(string sTo,string sSubject,string sMessageBody,string &sCMD_Result,Message *pMessage)
+void General_Info_Plugin::CMD_Send_Email(string sFrom, string sTo,string sSubject,string sMessageBody,string &sCMD_Result,Message *pMessage)
 //<-dceag-c1075-e->
 {
 	cout << "Need to implement command #1075 - Send Email" << endl;
