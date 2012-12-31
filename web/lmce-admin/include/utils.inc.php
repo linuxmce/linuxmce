@@ -2029,7 +2029,7 @@ function climateDevicesTable($cgID,$dbADO)
 	while ($rowGetRoomsDevice = $resGetRoomsDevice->FetchRow()) {
 		$displayedDevices[]=$rowGetRoomsDevice['PK_Device'];
 		$lineCount++;
-		$climateCommands=$GLOBALS['genericONCommand'].','.$GLOBALS['setCoolHeat'].','.$GLOBALS['setTemperatureCommand'].','.$GLOBALS['genericOFFCommand'].','.$GLOBALS['genericSetLevelCommand'];
+		$climateCommands=$GLOBALS['genericONCommand'].','.$GLOBALS['setCoolHeat'].','.$GLOBALS['genericOFFCommand'].','.$GLOBALS['setTemperatureCommand'];
 		$queryCGCommands='
 			SELECT Device.PK_Device,Device.Description, CommandGroup_Command.FK_Command,FK_CommandParameter,IK_CommandParameter 
 			FROM Command 
