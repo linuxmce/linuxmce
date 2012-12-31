@@ -2029,7 +2029,7 @@ function climateDevicesTable($cgID,$dbADO)
 	while ($rowGetRoomsDevice = $resGetRoomsDevice->FetchRow()) {
 		$displayedDevices[]=$rowGetRoomsDevice['PK_Device'];
 		$lineCount++;
-		$climateCommands=$GLOBALS['genericONCommand'].','.$GLOBALS['setCoolHeat'].','.$GLOBALS['setCoolHeat'].','.$GLOBALS['genericOFFCommand'].','.$GLOBALS['setTemperatureCommand'];
+		$climateCommands=$GLOBALS['genericONCommand'].','.$GLOBALS['setCoolHeat'].','.$GLOBALS['setTemperatureCommand'].','.$GLOBALS['genericOFFCommand'].','.$GLOBALS['genericSetLevelCommand'];
 		$queryCGCommands='
 			SELECT Device.PK_Device,Device.Description, CommandGroup_Command.FK_Command,FK_CommandParameter,IK_CommandParameter 
 			FROM Command 
@@ -2067,6 +2067,7 @@ function climateDevicesTable($cgID,$dbADO)
 				break;
 			}
 			$temperature=(@$rowCGCSetLevel['FK_CommandParameter']==$GLOBALS['commandParameterValueToAsign'])?$rowCGCSetLevel['IK_CommandParameter']:'';
+			
 		}
 		$out.='
 			<tr bgcolor="'.(($lineCount%2==0)?'#DDDDDD':'').'">
@@ -2110,7 +2111,7 @@ function climateDevicesTable($cgID,$dbADO)
 				<td colspan="9">'.translate('TEXT_CLIMATE_NO_DEVICES_AVAILABLE_CONST').'</td>
 			</tr>';
 	}
-	$displayedDevices2=array();
+	//$displayedDevices=array(); // Removed this because if there are thermostat devices without "other" devices the update / cancel buttons are not shown
 	while ($rowGetRoomsDevice = $resGetRoomsDevice->FetchRow()) {
 		$displayedDevices[]=$rowGetRoomsDevice['PK_Device'];
 		$lineCount++;
@@ -2156,7 +2157,6 @@ function climateDevicesTable($cgID,$dbADO)
 			<input type="hidden" name="oldTemperature_'.$rowGetRoomsDevice['PK_Device'].'" value="'.@$temperature.'">		
 		';
 	}
-
 
 	if(count($displayedDevices)>0){
 		$out.='</table></fieldset>
@@ -2217,7 +2217,6 @@ function processLightingScenario($cgID,$dbADO)
 			$dbADO->Execute($deleteCommand,array($cgID,$elem,$GLOBALS['genericOFFCommand']));
 			$dbADO->Execute($deleteCommand,array($cgID,$elem,$GLOBALS['genericSetLevelCommand']));
 			$dbADO->Execute($deleteParameters,array($cgID,$elem));
-
 			switch($deviceCommand){
 				case 1:
 					// do nothing, delete is done above
@@ -2269,7 +2268,6 @@ function processClimateScenario($cgID,$dbADO)
 			$dbADO->Execute($deleteCommand,array($cgID,$elem,$GLOBALS['setCoolHeat']));
 			$dbADO->Execute($deleteCommand,array($cgID,$elem,$GLOBALS['setTemperatureCommand']));
 			$dbADO->Execute($deleteParameters,array($cgID,$elem));
-
 			switch($deviceCommand){
 				case 1:
 					// do nothing, delete is done above
@@ -2310,8 +2308,7 @@ function processClimateScenario($cgID,$dbADO)
 				$insertCG_C='INSERT INTO CommandGroup_Command (FK_CommandGroup, FK_Device, FK_Command) VALUES (?,?,?)';
 				$dbADO->Execute($insertCG_C,array($cgID,$elem,$GLOBALS['setTemperatureCommand']));
 				$cgcInsertID=$dbADO->Insert_ID();
-
-
+				
 				$values=array();
 				$values[$GLOBALS['commandParameterValueToAsign']]=$temperature;
 						
