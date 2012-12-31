@@ -7,6 +7,12 @@ import "lib/components"
 import "js/ComponentLoader.js" as MyJs
 import "lib/handlers"
 
+/*!
+  \qmltype Default Style
+  This is the Default style used on desktop.
+  */
+
+
 Item {
     id: item
     width:manager.appWidth

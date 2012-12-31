@@ -1,0 +1,56 @@
+ # QDoc is a tool that constantly evolves to suit our needs,
+ # and there are some compatibility issues between old and new
+ # practices. For that reason, any QDoc configuration file needs to
+ # include compat.qdocconf.
+
+ #include(compat.qdocconf)
+ project                 = QOrbiter
+ versionsym              =
+ version                 = alpha
+ description             = QOrbiter Reference Documentation
+ url                     = http://www.linuxmce.org
+
+ # The outputdir variable specifies the directory
+ # where QDoc will put the generated documentation.
+
+ outputdir  = html
+
+#Styling
+HTML.style = "h3.fn,span.fn" \
+              "{ margin-left: 1cm; text-indent: -1cm; }\n" \
+              "a:link { color: #004faf; text-decoration: none }\n" \
+              "a:visited" \
+              "{ color: #672967; text-decoration: none }\n" \
+              "td.postheader { font-family: sans-serif }\n" \
+              "tr.address { font-family: sans-serif }\n" \
+              "body { background: #ffffff; color: black; }"
+
+
+
+ # The headerdirs variable specifies the directories
+ # containing the header files associated
+ # with the .cpp source files used in the documentation.
+
+ #headerdirs  = ../qOrbiter_src
+
+ # The sourcedirs variable specifies the
+ # directories containing the .cpp or .qdoc
+ # files used in the documentation.
+
+ sourcedirs  += ../qOrbiter_src/qml
+
+sources.fileextentions +="*.cpp *.qdoc *.qml"
+headers.fileextensions +="*.h"
+
+ # The exampledirs variable specifies the directories containing
+ # the source code of the example files.
+
+# exampledirs = .
+
+ # The imagedirs variable specifies the
+ # directories containing the images used in the documentation.
+
+ imagedirs   = images
+
+#misc
+syntaxhighlighting = true
