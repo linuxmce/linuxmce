@@ -31,13 +31,13 @@ HTML.style = "h3.fn,span.fn" \
  # containing the header files associated
  # with the .cpp source files used in the documentation.
 
- #headerdirs  = ../qOrbiter_src
+ headerdirs  = ../qOrbiter_src
 
  # The sourcedirs variable specifies the
  # directories containing the .cpp or .qdoc
  # files used in the documentation.
 
- sourcedirs  += ../qOrbiter_src/qml
+ sourcedirs  += ../qOrbiter_src
 
 sources.fileextentions +="*.cpp *.qdoc *.qml"
 headers.fileextensions +="*.h"

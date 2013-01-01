@@ -428,7 +428,7 @@ SOURCES += main.cpp \
         datamodels/attributeobject.cpp \
     logger/qorbiterlogger.cpp \
     ../docs/Home.qdoc \
-    Qorbiter.qdoc
+    qorbiter.qdoc
 
 
 
