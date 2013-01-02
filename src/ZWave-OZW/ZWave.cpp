@@ -325,8 +325,12 @@ void ZWave::CMD_StatusReport(string sArguments,string &sCMD_Result,Message *pMes
 {
 	if (sArguments.find("NU") != std::string::npos) {
 		uint8 nodeId = atoi(sArguments.substr(2).c_str());
+		DCE::LoggerWrapper::GetInstance()->Write(LV_ZWAVE,"ZWave::StatusReport() RequestNodeNeighborUpdate node %d", nodeId);
 		OpenZWave::Manager::Get()->BeginControllerCommand(m_pZWInterface->GetHomeId(), OpenZWave::Driver::ControllerCommand_RequestNodeNeighborUpdate, controller_update, NULL, false, nodeId, 0);
-		
+	} else if (sArguments.find("HNN") != std::string::npos) {
+		uint8 nodeId = atoi(sArguments.substr(3).c_str());
+		DCE::LoggerWrapper::GetInstance()->Write(LV_ZWAVE,"ZWave::StatusReport() HealNodeNetwork node %d", nodeId);
+		OpenZWave::Manager::Get()->HealNetworkNode(m_pZWInterface->GetHomeId(), nodeId, true);
 	}
 }
 
@@ -416,7 +420,7 @@ void ZWave::CMD_Set_Association(int iNodeID,int iGroup_ID,string sNodes_List,str
 	{
 		vector<string> vectNodes;
 		StringUtils::Tokenize(sNodes_List, ",", vectNodes);
-		for (int i = 0; i < vectNodes.size(); i++)
+		for (size_t i = 0; i < vectNodes.size(); i++)
 		{
 			int targetId = atoi(vectNodes[i].c_str());
 			m_pZWInterface->Lock();
@@ -532,7 +536,7 @@ void ZWave::CMD_Resync_node(int iNodeID,string &sCMD_Result,Message *pMessage)
 }
 
 
-void ZWave::controller_update(OpenZWave::Driver::ControllerState state, void *context) {
+void ZWave::controller_update(OpenZWave::Driver::ControllerState state, OpenZWave::Driver::ControllerError error, void *context) {
 	DCE::LoggerWrapper::GetInstance()->Write(LV_ZWAVE,"controller state update:");
 	switch(state) {
 		case OpenZWave::Driver::ControllerState_Normal:
@@ -994,6 +998,7 @@ void ZWave::DeleteDevice(unsigned long PK_Device)
 
 bool ZWave::DeleteDevicesForNode(int iNodeId) {
 	LoggerWrapper::GetInstance()->Write(LV_WARNING, "ZWave::DeleteDevicesForNode() nodeId = %d", iNodeId);
+	bool bDeleted = false;
         DeviceData_Impl *pChildDevice = NULL;
         for( VectDeviceData_Impl::const_iterator it = m_pData->m_vectDeviceData_Impl_Children.begin();
                         it != m_pData->m_vectDeviceData_Impl_Children.end(); ++it )
@@ -1008,6 +1013,7 @@ bool ZWave::DeleteDevicesForNode(int iNodeId) {
 				if ( nodeId == iNodeId ) {
 					LoggerWrapper::GetInstance()->Write(LV_WARNING, "ZWave::DeleteDevicesForNode(): Node %d, device %d removed.", nodeId, pChildDevice->m_dwPK_Device);
 					DeleteDevice(pChildDevice->m_dwPK_Device);
+					bDeleted = true;
 				}
 			}
 
@@ -1024,11 +1030,13 @@ bool ZWave::DeleteDevicesForNode(int iNodeId) {
 					if ( nodeId == iNodeId ) {
 						LoggerWrapper::GetInstance()->Write(LV_WARNING, "ZWave::DeleteDevicesForNode(): Node %d, device %d removed.", nodeId, pChildDevice->m_dwPK_Device);
 						DeleteDevice(pChildDevice->m_dwPK_Device);
+						bDeleted = true;
 					}
 				}
 			}
 		}
 	}
+	return bDeleted;
 }
 
 void ZWave::ReportBatteryStatus(int PK_Device, int status)

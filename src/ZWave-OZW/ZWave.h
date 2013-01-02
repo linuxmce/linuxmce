@@ -42,11 +42,11 @@ namespace DCE
 	        ZWInterface* m_pZWInterface;
 		bool m_bReady; // set when all DCE initialization has been done
 		set<string> m_setRecentlyAddedDevices;
-		unsigned long m_dwPK_ClimateInterface;
-		unsigned long m_dwPK_SecurityInterface;
+		long m_dwPK_ClimateInterface;
+		long m_dwPK_SecurityInterface;
 		// Private methods
 
-		static void controller_update(OpenZWave::Driver::ControllerState state, void *context);
+		static void controller_update(OpenZWave::Driver::ControllerState state, OpenZWave::Driver::ControllerError error, void *context);
 
 
 public:
