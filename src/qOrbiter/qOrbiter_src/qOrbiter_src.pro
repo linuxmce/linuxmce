@@ -426,7 +426,9 @@ SOURCES += main.cpp \
         datamodels/sleepingalarmmodel.cpp \
         datamodels/devicemodel.cpp \
         datamodels/attributeobject.cpp \
-    logger/qorbiterlogger.cpp
+    logger/qorbiterlogger.cpp \
+    datamodels/genericflatlistmodel.cpp \
+    datamodels/genericmodelitem.cpp
 
 
 
@@ -545,7 +547,9 @@ HEADERS += \
         datamodels/sleepingalarmmodel.h \
         datamodels/devicemodel.h \
     datamodels/attributeobject.h \
-    logger/qorbiterlogger.h
+    logger/qorbiterlogger.h \
+    datamodels/genericflatlistmodel.h \
+    datamodels/genericmodelitem.h
 
 
 

@@ -26,6 +26,7 @@
 #include <QVariant>
 #include <QImage>
 
+
 class ClimateScenarioItem: public QObject{
          Q_OBJECT
         // Q_PROPERTY(QImage buttonImage READ buttonImage NOTIFY imageChanged)

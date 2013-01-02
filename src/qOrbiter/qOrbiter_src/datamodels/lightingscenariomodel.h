@@ -8,7 +8,7 @@
 #include <QVariant>
 
 
-  class LightingScenarioItem;
+class LightingScenarioItem;
 
 
 class LightingScenarioModel : public QAbstractListModel

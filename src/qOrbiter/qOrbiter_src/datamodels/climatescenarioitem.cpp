@@ -1,6 +1,5 @@
 #include "climatescenarioitem.h"
 
-
 ClimateScenarioItem:: ClimateScenarioItem( const QString &name, const QString &title, const QString &parameter, const QString &scommand,  const QString &gotoScreen , QImage img, QObject *parent):
     m_name(name), m_title(title), m_param(parameter), m_command(scommand), m_goto(gotoScreen), m_image(img)
 {

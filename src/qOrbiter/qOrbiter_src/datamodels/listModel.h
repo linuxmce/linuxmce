@@ -74,7 +74,6 @@ public slots:
     int  getTotalPages() {return totalPages;}
     void setSeperator(int s) {seperator = s;}
     void checkForMore();
-
     void populateGrid(int mediaType);
     void setTotalCells(int cells);
     int getTotalCells();
@@ -90,7 +89,6 @@ public slots:
     void setCurrentCells (int i) {currentCells = i; emit cellsChanged();}
     int getCurrentCells () {return currentCells;}
     void clearForPaging();
-
 
 private slots:
     void handleItemChange();
