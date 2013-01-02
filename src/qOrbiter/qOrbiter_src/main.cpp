@@ -20,13 +20,17 @@
 //<-dceag-incl-b->
 
 /*!
- *\page Qorbiter-Welcome
- *\title QOrbiter QML Documentation
+ *\mainpage LinuxMCE qOrbiter Documentation
  *
  *
  *Welcome to the documentation section of QOrbiter, the Qt/QML based implementation of a DCE system for LinuxMCE. Also known as the
- *best open source home automation application out there. Here you will find information mostly relating to qml documents. CPP Documentation
- *will be done using Doxygen, while qml will use Qt's internal tool, QDoc3
+ *best open source home automation application out there. Here you will find information mostly relating to qml documents. CPP and QML Documentation
+ *will be done using Doxygen.
+ *
+ *\section cplusplus C++ Code
+ This section references the c++ code that is a part of QOrbiter. It is split into two parts. \ref dcesection and the \ref qtsection
+ \subsection dcesection DCE Code
+ \subsection qtsection  Qt Code
  */
 
 #ifdef IOS

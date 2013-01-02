@@ -426,9 +426,7 @@ SOURCES += main.cpp \
         datamodels/sleepingalarmmodel.cpp \
         datamodels/devicemodel.cpp \
         datamodels/attributeobject.cpp \
-    logger/qorbiterlogger.cpp \
-    ../docs/Home.qdoc \
-    qorbiter.qdoc
+    logger/qorbiterlogger.cpp
 
 
 

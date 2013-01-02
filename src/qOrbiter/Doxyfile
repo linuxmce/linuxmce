@@ -25,7 +25,7 @@ DOXYFILE_ENCODING      = UTF-8
 # The PROJECT_NAME tag is a single word (or a sequence of words surrounded
 # by quotes) that should identify the project.
 
-PROJECT_NAME           = LinuxMCE QOrbiter
+PROJECT_NAME           = LinuxMCE-QOrbiter
 
 # The PROJECT_NUMBER tag can be used to enter a project or revision number.
 # This could be handy for archiving the generated documentation or
@@ -480,7 +480,7 @@ SHOW_USED_FILES        = YES
 # then setting the SHOW_DIRECTORIES tag to YES will show the directory hierarchy
 # in the documentation. The default is NO.
 
-SHOW_DIRECTORIES       = NO
+SHOW_DIRECTORIES       = YES
 
 # Set the SHOW_FILES tag to NO to disable the generation of the Files page.
 # This will remove the Files entry from the Quick Index and from the
@@ -574,8 +574,9 @@ WARN_LOGFILE           =
 # directories like "/usr/src/myproject". Separate the files or directories
 # with spaces.
 
-INPUT                  = qOrbiter.cpp \
-			qOrbiter_src 
+INPUT             = . \
+                    qOrbiter_src\
+                    qorbiter_src/qml\
 
 # This tag can be used to specify the character encoding of the source files
 # that doxygen parses. Internally doxygen uses the UTF-8 encoding, which is
@@ -590,15 +591,15 @@ INPUT_ENCODING         = UTF-8
 # and *.h) to filter out the source-files in the directories. If left
 # blank the following patterns are tested:
 # *.c *.cc *.cxx *.cpp *.c++ *.java *.ii *.ixx *.ipp *.i++ *.inl *.h *.hh *.hxx
-# *.hpp *.h++ *.idl *.odl *.cs *.php *.php3 *.inc *.m *.mm *.py *.f90
+# *.hpp *.h++ *.idl *.odl *.cs *.php *.php3 *.inc *.m *.mm *.py *.f90 *.qdoc
 
-FILE_PATTERNS          =
+FILE_PATTERNS          = *.cpp *.qdoc *.qml *.h
 
 # The RECURSIVE tag can be used to turn specify whether or not subdirectories
 # should be searched for input files as well. Possible values are YES and NO.
 # If left blank NO is used.
 
-RECURSIVE              = NO
+RECURSIVE              = yes
 
 # The EXCLUDE tag can be used to specify files and/or directories that should
 # excluded from the INPUT source files. This way you can easily exclude a
@@ -618,7 +619,25 @@ EXCLUDE_SYMLINKS       = NO
 # against the file with absolute path, so to exclude all test directories
 # for example use the pattern */test/*
 
-EXCLUDE_PATTERNS       =
+EXCLUDE_PATTERNS       = */moc_*
+EXCLUDE_PATTERNS       += */docs/*
+EXCLUDE_PATTERNS       += */QOrbiter-*/*
+EXCLUDE_PATTERNS       += */buildoutput/*
+EXCLUDE_PATTERNS       += */builds/*
+EXCLUDE_PATTERNS       += */debian/*
+EXCLUDE_PATTERNS       += */qOrbiterMaster/*
+EXCLUDE_PATTERNS       += */android/*
+EXCLUDE_PATTERNS       += */qOrbiter_src/qOrbiter_src/*
+EXCLUDE_PATTERNS       += */qorbiter-pthreads/*
+EXCLUDE_PATTERNS       += */imports/*
+EXCLUDE_PATTERNS       += */androidComponents/*
+EXCLUDE_PATTERNS       += */qmlapplicationviewer/*
+EXCLUDE_PATTERNS       += */qtc_packaging/*
+EXCLUDE_PATTERNS       += */.svn/*
+EXCLUDE_PATTERNS       += */platforms/*
+EXCLUDE_PATTERNS       += */*build*/*
+
+
 
 # The EXCLUDE_SYMBOLS tag can be used to specify one or more symbol names
 # (namespaces, classes, functions, etc.) that should be excluded from the
@@ -674,7 +693,7 @@ INPUT_FILTER           =
 # info on how filters are used. If FILTER_PATTERNS is empty, INPUT_FILTER
 # is applied to all files.
 
-FILTER_PATTERNS        =
+FILTER_PATTERNS        =*.qml=doxyqml
 
 # If the FILTER_SOURCE_FILES tag is set to YES, the input filter (if set using
 # INPUT_FILTER) will be used to filter the input files when producing source

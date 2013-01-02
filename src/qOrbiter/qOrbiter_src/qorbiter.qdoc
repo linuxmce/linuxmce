@@ -1,7 +1,12 @@
 /*!
- \page QOrbiter-splash
- \title QOrbiter Documentation
- \brief This page is a basic outline of the qml engine associated with the LinuxMCE QOrbiter
+ \mainpage LinuxMCE QOrbiter Documentation
 
- Welcome to the QOrbiter Documentation. Please use the links to get where you want to be!
+ \brief Welcome to the QOrbiter Documentation. Please use the links to get where you want to be!
+
+
+ \section cplusplus C++ Code
+ This section references the c++ code that is a part of QOrbiter. It is split into two parts. \ref dcesection and the \ref qtsection
+ \subsection dcesection DCE Code
+ \subsection qtsection Qt QtCode
+
  */
