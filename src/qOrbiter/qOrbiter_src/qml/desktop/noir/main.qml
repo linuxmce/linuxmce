@@ -1,5 +1,5 @@
 /*!
- *\class Main
+ *\class Main main.qml
  *\brief The main logic component
  *
  *\ingroup desktop_noir

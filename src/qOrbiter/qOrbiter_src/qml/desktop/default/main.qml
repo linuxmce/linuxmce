@@ -8,10 +8,10 @@ import "js/ComponentLoader.js" as MyJs
 import "lib/handlers"
 
 /*!
- *\class Main
+ *\class Main main.qml
  *\brief The main logic component
  *
- *\addtogroup desktop_default
+ *\ingroup desktop_default
  *
  *This file represent the main loading logic of the skin. It contains a loader that loads the subsequent
  *pages over it. This allows Main.qml to keep be a consistent object to manage states and the flow of
