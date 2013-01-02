@@ -1141,7 +1141,7 @@ int Xine_Stream::XServerEventProcessor(XEvent &event )
 			rect.w = 0;
 			rect.h = 0;
 
-//			xine_gui_send_vo_data ( m_pXineStream, XINE_GUI_SEND_TRANSLATE_GUI_TO_VIDEO, ( void* ) & rect );
+			xine_port_send_gui_data ( m_pXineVideoOutput, XINE_GUI_SEND_TRANSLATE_GUI_TO_VIDEO, ( void* ) & rect );
 			LoggerWrapper::GetInstance()->Write( LV_STATUS, "Xine player: mouse button event after translation: mx=%d my=%d", rect.x, rect.y );
 
 			xineEvent.stream = m_pXineStream;
