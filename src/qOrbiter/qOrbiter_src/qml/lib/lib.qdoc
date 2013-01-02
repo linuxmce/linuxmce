@@ -1,6 +1,19 @@
 /*!
- *\qmlmodule lib
- *
- *This is a list of the handlers included in the 'lib' section of qml. These are universal handlers that can be used to build a
- *component that is tied to a LinuxMCE function quickly
+\defgroup lib_handlers
+\ingroup linuxmce_components
+ */
+
+/*!
+ * \defgroup lib_components
+ * \ingroup linuxmce_components
+ */
+
+/*!
+ * \defgroup lib_images
+ * \ingroup linuxmce_components
+ */
+
+/*!
+ * \defgroup lib_startup
+ * \ingroup linuxmce_components
  */

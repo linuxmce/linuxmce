@@ -1,6 +1,17 @@
 import QtQuick 1.1
 import Qt.labs.shaders 1.0
-
+/*!
+ *\class WaitSpinner
+ *\brief This is a spinner to display the app is waiting for a response
+ *
+ *\ingroup lib_components
+ *
+ * The purpose of this generalize component is to provide visual feedback that something was clicked and the application is waiting for
+ * a response from the DCERouter
+ *
+ *\namespace Qt.labs.shaders 1.0
+ *
+ */
 Rectangle{
     id:waitSpinner
     height: scaleX(15)
