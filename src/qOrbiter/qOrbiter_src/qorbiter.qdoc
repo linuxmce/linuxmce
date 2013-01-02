@@ -1,12 +1,42 @@
 /*!
- \mainpage LinuxMCE QOrbiter Documentation
+ *\mainpage LinuxMCE QOrbiter
+ *Welcome to the documentation section of QOrbiter, the Qt/QML based implementation of a DCE system for LinuxMCE. Also known as the
+ *best open source home automation application out there. Here you will find information mostly relating to qml documents. CPP and QML Documentation
+ *will be done using Doxygen.
+ * \section cplusplus C++ Code
+This section references the c++ code that is a part of QOrbiter. It is split into two parts. \ref dcesection and the \ref qtsection
+-# controllers - for both.
+\subsection dcesection DCE Code
+-# \ref dce_controllers
+\subsection qtsection  Qt Code
+-# \ref qt_controllers
+\subsection qml QML Skins and Api Reference
+-# \ref linuxmce_components
+-# \ref qml_skins
+-# \ref qml_api
+*/
 
- \brief Welcome to the QOrbiter Documentation. Please use the links to get where you want to be!
+/*!
+ *\defgroup dce_controllers DCE-Controllers
+ */
 
+/*!
+ *\defgroup qt_controllers Qt-Controllers *
+ */
 
- \section cplusplus C++ Code
- This section references the c++ code that is a part of QOrbiter. It is split into two parts. \ref dcesection and the \ref qtsection
- \subsection dcesection DCE Code
- \subsection qtsection Qt QtCode
+/*!
+ * \defgroup qml_skins QML Skins
+ */
 
+/*!
+ * \defgroup linuxmce_components LinuxMCE Components
+ */
+
+/*!
+ * \defgroup qml_api QML Skin Api
+ */
+
+/*!
+ *\defgroup qml_skins_default
+ *\ingroup qml_skins
  */

@@ -19,6 +19,20 @@
     removing the lag time from the user starting the application and the app appearing on screen.
 */
 
+/*!
+ *\class orbiterWindow
+ *\brief This class is responsible for the initial window setup for the application
+ *
+ *\ingroup qt_controllers
+ *
+ *orbiterWindow is responsible for setting up the initial application window and states of the application. It also initializes opengl
+ *surfaces and other special windowing needs for each platform including setting up the QRC locations and relative skin location for the application.
+ *It provides a means in which the application can kickstart before its connected to the DCErouter to download its configuration. There are some
+ *hard defaults based on platform in this class to establish a usable baseline before the application takes on its 'running' form.
+ *
+ *\sa QObject
+ *
+ */
 
 #include <QtCore/QObject>
 #include <contextobjects/existingorbiter.h>
@@ -50,6 +64,8 @@
 #ifdef IOS
 #include "../iOS/qOrbiter/ioshelpers.h"
 #endif
+
+
 
 orbiterWindow::orbiterWindow(long deviceid, std::string routerip, bool fullScreen, bool frameless, QObject *parent) :
     QObject(parent)
