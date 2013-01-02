@@ -1,6 +1,17 @@
 import QtQuick 1.0
 import Qt.labs.shaders 1.0
-
+/*!
+ *\class ScreenSaver
+ *\brief This is a general screensaver component for LinuxMCE QML based orbiters
+ *
+ *\ingroup linuxmce_components
+ *
+ * This component is a general screen saver component for any skin to use. It will have a common
+ * interface that provides a simple screen saver for designers to add effects or other treatments to in qml
+ *
+ *\namespace Qt.labs.shaders 1.0
+ *
+ */
 Rectangle{
 
     color: "transparent"
