@@ -4,16 +4,16 @@
  */
 
 /*!
- * \defgroup lib_components
+ * \defgroup lib_components Components
  * \ingroup linuxmce_components
  */
 
 /*!
- * \defgroup lib_images
+ * \defgroup lib_images Images
  * \ingroup linuxmce_components
  */
 
 /*!
- * \defgroup lib_startup
+ * \defgroup lib_startup Startup
  * \ingroup linuxmce_components
  */

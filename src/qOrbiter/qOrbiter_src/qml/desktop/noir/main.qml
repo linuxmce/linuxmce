@@ -1,11 +1,17 @@
-/*Noir*/
+/*!
+ *\class Main
+ *\brief The main logic component
+ *
+ *\ingroup desktop_noir
+ *
+ *This is a common component used to implement consistent persistent logic.
+ */
+
 import QtQuick 1.1
 import Qt.labs.shaders 1.0
 import "lib/components"
 import "components"
 import "js/ComponentLoader.js" as MyJs
-
-
 
 Item {
     id: item

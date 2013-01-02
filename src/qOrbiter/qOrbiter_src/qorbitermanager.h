@@ -685,15 +685,40 @@ public slots:
     void setOrbiterStatus(bool status) {b_orbiterReady = status ; emit orbiterReady(b_orbiterReady);}
 
     /*Runtime Screen handling*/
+    //! This function uses the metaobject system to call the screenchange function.
+    /*!
+     * \brief This function can be called from the dce object in the server thread in response to events
+     *in addition to certain user events which require server interaction. It has some special handling for
+     *certain screens and states.
+     * \todo Change this item from using the meta object system to using signals.
+     *\todo Look into the addition of possible designer set options / custom actions
+     */
     void gotoQScreen(QString ) ;
+
+
     void goBacktoQScreen();
+
+    //! This function is called when the application window size changes.
     void checkOrientation(QSize);
+
     bool getOrientation (){return b_orientation;}
     void setOrientation (bool s) { b_orientation = s; setDceResponse("orientation changed!! "); emit orientationChanged();}
+    //! Returns the current screen in string format
     QString getCurrentScreen();
+    //! Sets the current screen in string format.
     void setCurrentScreen(QString s);
 
     //security related
+
+    /*!
+     * \brief Qml invokable slot for the purpose of asking for a security picture.
+     * \param i_pk_camera_device : The camera device from getScreenParams(2)
+     * \param h : The height of the requested picture
+     * \param w : The width of the requested picture
+     * \warning Do not request the security pictures too quickly. The minimum
+     *time should be no less than 1000msec (1 second) or you risk cacheing too many
+     *requests and slowing the response time of the router.
+     */
     void requestSecurityPic(int i_pk_camera_device, int h, int w);
     void setHouseMode(int mode, int pass);
 

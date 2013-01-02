@@ -1,5 +1,17 @@
 #ifndef TIMECODEMANAGER_H
 #define TIMECODEMANAGER_H
+/*!
+ *
+ *\brief This is a c++ based class that is responsible for both consuming and producing timecode.
+ *
+ *\ingroup context_objects
+ *
+ *The timecodemanager class has two responsibilities. To communicate with the currently playing media player if possible,
+ *and get the timecode, using a tcp socket. It is also responsible for setting up a tcp server in the event that the qOrbiter
+ *it is managed by becomes the media playing device.
+ *
+ *
+ */
 
 #include <QtGlobal>
 #ifdef QT5
@@ -24,10 +36,8 @@ class TimeCodeManager : public QDeclarativeItem
     Q_PROPERTY (int tcCurrentTime READ getTime WRITE setTime NOTIFY timeChanged)
     Q_PROPERTY (double runningTimer READ getProgressBar WRITE setProgressBar NOTIFY positionChanged)
     Q_PROPERTY (QString dragTime READ getDragTime WRITE setDragTime NOTIFY dragtimeChanged)
-
     Q_PROPERTY (QString qsTotalTime READ getStringTotalTime WRITE setStringTotalTime NOTIFY totalStringTimeChanged)
     Q_PROPERTY (QString qsCurrentTime READ getStringTime WRITE setStringTime NOTIFY stringTimeChanged)
-
     Q_PROPERTY (QString stringPlaybackSpeed READ getStringPlaybackSpeed WRITE setStringPlaybackSpeed NOTIFY sPlaybackSpeedChanged)
     Q_PROPERTY (int playbackSpeed READ getSpeed WRITE setSpeed NOTIFY playbackSpeedChanged)
 
@@ -81,7 +91,19 @@ signals:
 
     
 public slots:
+    //! Starts the timecode server.
+    /*!
+     * \brief Starts the timecodeserver with the params.
+     * \param server : IP Address to connect to.
+     * \param iport : Port of media player to connect to
+     */
     void start(QString server, int iport);
+
+    //! Stops the timecode server
+    /*!
+     * \brief This tells the timecode server to disconnect and close the socket. Occurs when media is
+     *stopped or when changing EA's
+     */
     void stop();
     void restart();
     void updateTimeCode();

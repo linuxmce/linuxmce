@@ -1,15 +1,15 @@
 import QtQuick 1.0
 
-//sample style file for a qml ui
-/*
-  color scheme
-  Button sienna
-  Rows   lightbrwn
-  Grids  ltgrn
-  Button Text white
-  Title Text white
-
-  */
+/*!
+ *\class Style
+ *\brief This component defines the qml style
+ *
+ *\ingroup android_tablet_data *
+ *
+ *This file is used for defining the style of the QML skin. Errors in this file will result in the QML engine falling back to the default skin.
+ *The default skin is used as a testbed for functionality, and therefore considered to be the most up-to-date
+ *
+ */
 
 
 QtObject{

@@ -28,6 +28,7 @@ This section references the c++ code that is a part of QOrbiter. It is split int
  * \defgroup qml_skins QML Skins
  */
 
+
 /*!
  * \defgroup linuxmce_components LinuxMCE Components
  */
@@ -37,6 +38,11 @@ This section references the c++ code that is a part of QOrbiter. It is split int
  */
 
 /*!
- *\defgroup qml_skins_default
+ * \defgroup context_objects Context Objects
+ * \ingroup qml_api
+ */
+
+/*!
+ *\defgroup qml_skins_default Default
  *\ingroup qml_skins
  */

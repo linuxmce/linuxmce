@@ -296,6 +296,7 @@ void qorbiterManager::gotoQScreen(QString s)
     }
 }
 
+//! Send the user back to the previous screen in the list
 void qorbiterManager::goBacktoQScreen()
 {
     if(gotoScreenList->count() > 10)
@@ -1715,7 +1716,11 @@ bool qorbiterManager::createAndroidConfig()
     }
     return false;
 }
-
+/*!
+ * \brief This function is called when the application window size changes. When it does,
+ * the \ref setOrientation() function is called.
+ *
+ */
 void qorbiterManager::checkOrientation(QSize)
 {
     //NOTE: Is this not handled by the window manager and Orientation change signals?

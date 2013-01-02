@@ -1,32 +1,31 @@
 import QtQuick 1.0
+/*!
+ *\class Style
+ *\brief This component defines the qml style for the Basic QML skin
+ *
+ *\ingroup desktop_basic
+ *
+ *This file is used for defining the style of the QML skin. Errors in this file will result in the QML engine falling back to the default skin.
+ *The default skin is used as a testbed for functionality, and therefore considered to be the most up-to-date
+ *
+ */
 
-//sample style file for a qml ui
-/*
-  color scheme
-  Button sienna
-  Rows   lightbrwn
-  Grids  ltgrn
-  Button Text white
-  Title Text white
 
-  */
-
-
-    QtObject{
-        id:aeonstyle
-        objectName: "orbiter_style"
-        //skin description
-        property string skincreator: "PlutoHome transformed by Peer Oliver Schmidt"
-        property string skinname: "Basic UI1"
-        property string skindir: "basic"
-        property string skindescription: "Transformation of LinuxMCE UI1 Basic To QML"
-        property string skinversion: "0.1"
-        property string skinvariation: "Desktop 1080p"
-        property string maincolor: "aliceblue"
-        property string accentcolor: "lightsteelblue"
-        property color highlight1: "aliceblue"
-        property color darkhighlight: "#628BC7"
-        property color lighthighlight: "#3F76C7"
+QtObject{
+    id:aeonstyle
+    objectName: "orbiter_style"
+    //skin description
+    property string skincreator: "PlutoHome transformed by Peer Oliver Schmidt"
+    property string skinname: "Basic UI1"
+    property string skindir: "basic"
+    property string skindescription: "Transformation of LinuxMCE UI1 Basic To QML"
+    property string skinversion: "0.1"
+    property string skinvariation: "Desktop 1080p"
+    property string maincolor: "aliceblue"
+    property string accentcolor: "lightsteelblue"
+    property color highlight1: "aliceblue"
+    property color darkhighlight: "#628BC7"
+    property color lighthighlight: "#3F76C7"
 
     //main stage styles
     property int orbiterH: 1080*.9
@@ -43,11 +42,11 @@ import QtQuick 1.0
     //icon sizes
     property int iconHeight: 90
     property int iconWidth: 90
-        property int  stdbuttonh: 90
-        property int  stdbuttonw: 90
+    property int  stdbuttonh: 90
+    property int  stdbuttonw: 90
 
     //textStyles
-     property string stylebuttonimage: ""
+    property string stylebuttonimage: ""
     property int title_size: 18
     property color tile_color: "whitesmoke"
 
@@ -57,7 +56,7 @@ import QtQuick 1.0
     property color lighttext: "grey" // added by RayBe
 
     //title and other misc windo accents
- property color titletextcolor: "black"
+    property color titletextcolor: "black"
     //button styling
     property int buttonH:95
     property int buttonW: 95

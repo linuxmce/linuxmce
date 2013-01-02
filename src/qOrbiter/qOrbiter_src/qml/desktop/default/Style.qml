@@ -2,8 +2,7 @@ import QtQuick 1.0
 /*!
  *\class Style
  *\brief This component defines the qml style
- *
- *\ingroup qml_skins_default
+ *\ingroup qml_desktop_default
  *
  *This file is used for defining the style of the QML skin. Errors in this file will result in the QML engine falling back to the default skin.
  *The default skin is used as a testbed for functionality, and therefore considered to be the most up-to-date

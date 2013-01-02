@@ -1,4 +1,15 @@
-// import QtQuick 1.0 // to target S60 5th Edition or Maemo 5
+/*!
+ *\class DebugPanel
+ *\brief The main logic component
+ *
+ *\ingroup linuxmce_components
+ *
+ *The Debug panel is a simple object that allows one to view properties
+ *or messages as they occur. you simply attatch the property to the display
+ *and when it changes, the panel pops up for specified time
+ *
+ *
+ */
 import QtQuick 1.1
 
 Rectangle {

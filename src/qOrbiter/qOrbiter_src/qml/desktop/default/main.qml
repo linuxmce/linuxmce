@@ -8,9 +8,17 @@ import "js/ComponentLoader.js" as MyJs
 import "lib/handlers"
 
 /*!
-  \qmltype Default Style
-  This is the Default style used on desktop.
-  */
+ *\class Main
+ *\brief The main logic component
+ *
+ *\addtogroup desktop_default
+ *
+ *This file represent the main loading logic of the skin. It contains a loader that loads the subsequent
+ *pages over it. This allows Main.qml to keep be a consistent object to manage states and the flow of
+ *information from the dce object.
+ *
+ *
+ */
 
 
 Item {
@@ -119,15 +127,17 @@ Item {
         }
 
     }
-
+    //! Returns the value of the param value passed in scaled to a percentage of the current width value of the application window.
     function scaleX(x){
         return x/100*manager.appWidth
     }
+     //! Returns the value of the param value passed in scaled to a percentage of the current height value of the application window.
     function scaleY(y){
         return y/100*manager.appHeight
     }
 
-
+    //! \warn This function is required by the qml engine.
+    //! this function load pages as called from other threads or in response to user events.
     function screenchange(screenname )
     {
         pageLoader.source = "screens/"+screenname

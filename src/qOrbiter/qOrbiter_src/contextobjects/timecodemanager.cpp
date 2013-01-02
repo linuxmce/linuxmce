@@ -8,6 +8,7 @@
 #include <QMetaProperty>
 #include <QtNetwork/QHostAddress>
 
+
 #ifdef QT5
 TimeCodeManager::TimeCodeManager(QQuickItem *parent) :
     QQuickItem(parent)
@@ -27,6 +28,7 @@ TimeCodeManager::TimeCodeManager(QDeclarativeItem *parent) :
     qDebug("Setup Timecode Manager");
 #endif
 }
+
 
 QString TimeCodeManager::ObjectToString(const QObject *obj)
 {
@@ -48,6 +50,7 @@ QString TimeCodeManager::ObjectToString(const QObject *obj)
     result +="};";
     return result.join("\n");
 }
+
 
 void TimeCodeManager::start(QString server, int iport)
 {
@@ -115,6 +118,7 @@ void TimeCodeManager::start(QString server, int iport)
 
 }
 
+
 void TimeCodeManager::stop()
 {
     setTotalTime(0);
@@ -127,6 +131,7 @@ void TimeCodeManager::stop()
     portConnected = false;
 }
 
+
 void TimeCodeManager::restart()
 {
     setTotalTime(0);
@@ -137,6 +142,7 @@ void TimeCodeManager::restart()
     portConnected = false;
     start(mediaPlayerIp, port);
 }
+
 
 void TimeCodeManager::updateTimeCode()
 {
@@ -207,6 +213,7 @@ void TimeCodeManager::updateTimeCode()
     }
 }
 
+
 void TimeCodeManager::convertToSeconds()
 {
     QStringList times = qsTotalTime.split(":");
@@ -216,6 +223,7 @@ void TimeCodeManager::convertToSeconds()
     int totalSeconds = hoursToSec + minuteToSec + seconds;
     setTotalTime(totalSeconds);
 }
+
 
 void TimeCodeManager::setPosition()
 {
@@ -230,6 +238,7 @@ void TimeCodeManager::setPosition()
         setProgressBar((currentPosition));
     }
 }
+
 
 void TimeCodeManager::showDragTime(int seconds)
 {
