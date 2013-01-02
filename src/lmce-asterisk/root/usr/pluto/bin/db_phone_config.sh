@@ -361,8 +361,8 @@ AddTrunk()
 	context="outbound-allroutes"
 	if [[ $protocol == "GTALK" ]]; then
 		LINESSQL="$LINESSQL INSERT INTO $DB_Extensions_Table (context,exten,priority,app,appdata) VALUES \
-		('$context','_$prefix.','1','Macro','dialout-trunk,$protocol/$phonenumber,\${EXTEN:1}@voice.google.com,,'),\
-		('$context','_$prefix.','2','Macro','outisbusy,');"		
+		('$context','_$prefix.','1','Macro','dialout-trunk,$protocol/$name,+\${EXTEN}@voice.google.com,,r'),\
+		('$context','_$prefix.','2','Macro','outisbusy,');"
 	else
 		LINESSQL="$LINESSQL INSERT INTO $DB_Extensions_Table (context,exten,priority,app,appdata) VALUES \
 		('$context','_$prefix.','1','Macro','dialout-trunk,$protocol/$phonenumber,\${EXTEN:1},,'),\
@@ -384,21 +384,49 @@ switch => Realtime
 	# add external did catch
 	context="ext-did"
 	line=$((100+$id))
-	LINESSQL="$LINESSQL INSERT INTO $DB_Extensions_Table (context,exten,priority,app,appdata) VALUES \
-        ('$context','$phonenumber','1','Set','__FROM_DID=\${EXTEN}'), \
-        ('$context','$phonenumber','2','Set','PAI=\${SIP_HEADER(P-Asserted-Identity)}'),\
-        ('$context','$phonenumber','3','gotoif','\$[\"\${PAI}\" = \"\"] ? 4:8'), \
-        ('$context','$phonenumber','4','Set','CALLERID(num)=\${CALLERID(name)}'), \
-        ('$context','$phonenumber','5','Noop','Incoming call from \${CALLERID(num)}'), \
-        ('$context','$phonenumber','6','Set','FAX_RX='), \
-        ('$context','$phonenumber','7','Goto','custom-linuxmce,$line,1'),\
-        ('$context','$phonenumber','8','noop','Using p-asserted-id SIP header: ${PAI}'),\
-        ('$context','$phonenumber','9','set','tmpcid=\${CUT(PAI,:,2)}'), \
-        ('$context','$phonenumber','10','Set','tmpcid=\${CUT(tmpcid,@,1)}'), \
-        ('$context','$phonenumber','11','Set','CALLERID(num)=\${tmpcid}'),\
-        ('$context','$phonenumber','12','Noop','Incoming call from \${CALLERID(num)}'),\
-        ('$context','$phonenumber','13','Set','FAX_RX='), \
-        ('$context','$phonenumber','14','Goto','custom-linuxmce,$line,1');"
+    if [[ $protocol == "GTALK" ]]; then
+ 		LINESSQL="$LINESSQL INSERT INTO $DB_Extensions_Table (context,exten,priority,app,appdata) VALUES 
+        ('$context','$phonenumber','1','Set','__FROM_DID=\${EXTEN}'), 
+        ('$context','$phonenumber','2','Noop','Incoming Google voice call for \${EXTEN}'), 
+        ('$context','$phonenumber','3','Set','dst=\${CUT(EXTEN,@,1)}'), 
+        ('$context','$phonenumber','4','Set','CALLERID(name)=\${CUT(CALLERID(name),@,1)}'), 
+        ('$context','$phonenumber','5','Gotoif','\$[\"\${CALLERID(name):0:2}\"!=\"+1\"]?7'), 
+        ('$context','$phonenumber','6','Set','CALLERID(name)=\${CALLERID(name):2}'), 
+        ('$context','$phonenumber','7','Set','CALLERID(name)=\${CALLERID(name)}'), 
+        ('$context','$phonenumber','8','Set','FAX_RX='), 
+        ('$context','$phonenumber','9','Answer',''), 
+        ('$context','$phonenumber','10','Wait','1'), 
+        ('$context','$phonenumber','11','SendDTMF','1'), 
+        ('$context','$phonenumber','12','Goto','custom-linuxmce,$line,1');"
+    else
+       LINESSQL="$LINESSQL INSERT INTO $DB_Extensions_Table (context,exten,priority,app,appdata) VALUES 
+        ('$context','$phonenumber','1','Set','__FROM_DID=\${EXTEN}'), 
+        ('$context','$phonenumber','2','Set','PAI=\${SIP_HEADER(P-Asserted-Identity)}'),
+        ('$context','$phonenumber','3','Set','PAF=\${SIP_HEADER(FROM)}'),
+        ('$context','$phonenumber','4','Set','CURRENT_PAI_LENGTH=\${LEN(\${PAI})}'),
+        ('$context','$phonenumber','5','Set','CURRENT_PAF_LENGTH=\${LEN(\${PAF})}'),
+        ('$context','$phonenumber','6','gotoif','\$[\${CURRENT_PAI_LENGTH} > 0] ? 11'),  
+        ('$context','$phonenumber','7','gotoif','\$[\${CURRENT_PAF_LENGTH} > 0] ? 19'),         
+        ('$context','$phonenumber','8','Noop','Incoming call from \${CALLERID(num)}'), 
+        ('$context','$phonenumber','9','Set','FAX_RX='), 
+        ('$context','$phonenumber','10','Goto','custom-linuxmce,$line,1'),
+        ('$context','$phonenumber','11','noop','config p asserted id ${PAI}'),
+        ('$context','$phonenumber','12','set','tmpcid=\${CUT(PAI,:,2)}'), 
+        ('$context','$phonenumber','13','Set','tmpcid=\${CUT(tmpcid,@,1)}'), 
+        ('$context','$phonenumber','14','Set','CALLERID(num)=\${tmpcid}'),
+        ('$context','$phonenumber','15','Noop','Incoming call from \${CALLERID(num)}'),
+        ('$context','$phonenumber','16','Set','FAX_RX='), 
+        ('$context','$phonenumber','17','Set','CALLERID(ani)='), 
+        ('$context','$phonenumber','18','Goto','custom-linuxmce,$line,1'), 
+        ('$context','$phonenumber','19','noop','config SIP Header From ${PAF}'), 
+        ('$context','$phonenumber','20','set','tmpcid=\${CUT(PAF,:,2)}'), 
+        ('$context','$phonenumber','21','Set','tmpcid=\${CUT(tmpcid,@,1)}'), 
+        ('$context','$phonenumber','22','Set','CALLERID(num)=\${tmpcid}'),
+        ('$context','$phonenumber','23','Noop','Incoming call from \${CALLERID(num)}'),
+        ('$context','$phonenumber','24','Set','FAX_RX='), 
+        ('$context','$phonenumber','25','Set','CALLERID(ani)='), 
+        ('$context','$phonenumber','26','Goto','custom-linuxmce,$line,1');"
+	fi
 }
 
 WorkTheLines()

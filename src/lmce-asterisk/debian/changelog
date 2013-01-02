@@ -1,3 +1,10 @@
+lmce-asterisk (0+0.3.3-2ubuntu1) lucid; urgency=low
+
+  * Use incoming CID from PAI or PAF if available.
+  * Try to make gtalk work
+
+ -- Serge Wagener <serge@linuxmce.org>  Wed, 02 Jan 2013 11:25:09 +0100
+
 lmce-asterisk (0+0.3.3-2) lucid; urgency=low
 
   * Add mbrola for french and german tts
