@@ -156,10 +156,10 @@ void TagFileHandler::GetTagInfo(string sFilename, map<int,string>& mapAttributes
 #ifdef UPDATEMEDIA_STATUS
 		LoggerWrapper::GetInstance()->Write(LV_STATUS, "# TagFileHandler::GetTagInfo: tags present");
 #endif
-		mapAttributes[ATTRIBUTETYPE_Performer_CONST] = f->tag()->artist().to8Bit();
-		mapAttributes[ATTRIBUTETYPE_Title_CONST] = f->tag()->title().to8Bit();
-		mapAttributes[ATTRIBUTETYPE_Genre_CONST] = f->tag()->genre().to8Bit();
-		mapAttributes[ATTRIBUTETYPE_Album_CONST] = f->tag()->album().to8Bit();
+		mapAttributes[ATTRIBUTETYPE_Performer_CONST] = f->tag()->artist().to8Bit(true);
+		mapAttributes[ATTRIBUTETYPE_Title_CONST] = f->tag()->title().to8Bit(true);
+		mapAttributes[ATTRIBUTETYPE_Genre_CONST] = f->tag()->genre().to8Bit(true);
+		mapAttributes[ATTRIBUTETYPE_Album_CONST] = f->tag()->album().to8Bit(true);
 
 		if(f->tag()->track() > 0)
 			mapAttributes[ATTRIBUTETYPE_Track_CONST] = StringUtils::ltos(f->tag()->track());
