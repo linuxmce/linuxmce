@@ -32,7 +32,11 @@ $TTS_Device=$DB_ROW->{'PK_Device'};
 $DB_STATEMENT->finish();
 
 # Get language for TTS
-$FK_Language = get_device_devicedata($TTS_Device,26);
+if (defined $TTS_Device && length $TTS_Device > 0) {
+	$FK_Language = get_device_devicedata($TTS_Device,26);
+}
+
+# Fallback to english if no language defined
 if ($FK_Language eq "") {
 	$FK_Language = 1;
 }
@@ -215,4 +219,5 @@ sub generate_voice_googletts()
 	system('/usr/pluto/bin/googletts-cli.pl -r 8000 -o '.$FILE.'  -l '.$LANGUAGE.' -t "'.$TEXT.'"');
 }
 
+`/usr/pluto/bin/db_phone_config.sh`;
 `/usr/pluto/bin/db_create_dialplan.sh`;
