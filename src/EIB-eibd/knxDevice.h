@@ -121,6 +121,8 @@ namespace knx
 		
 		inline Message *createModeChangedEventMessage(int mode){return new Message(_device_DCEID, DEVICEID_EVENTMANAGER, PRIORITY_NORMAL, MESSAGETYPE_EVENT,EVENT_State_Changed_CONST, 1, EVENTPARAMETER_State_CONST, StringUtils::itos(mode).c_str());};
 		
+		inline Message *createBrightnessChangedEventMessage(float value){return new Message(_device_DCEID, DEVICEID_EVENTMANAGER, PRIORITY_NORMAL, MESSAGETYPE_EVENT,EVENT_Brightness_Changed_CONST, 1, EVENTPARAMETER_Value_CONST, StringUtils::ftos(value).c_str());};
+
 		inline Message *createTemperatureChangedEventMessage(float value){return new Message(_device_DCEID, DEVICEID_EVENTMANAGER, PRIORITY_NORMAL, MESSAGETYPE_EVENT,EVENT_Temperature_Changed_CONST, 1, EVENTPARAMETER_Value_CONST, StringUtils::ftos(value).c_str());};
 
 		inline Message *createSensorTrippedEventMessage(int state){return new Message(_device_DCEID, DEVICEID_EVENTMANAGER, PRIORITY_NORMAL, MESSAGETYPE_EVENT,EVENT_Sensor_Tripped_CONST, 1, EVENTPARAMETER_Tripped_CONST, StringUtils::itos(state).c_str());};
@@ -191,10 +193,14 @@ namespace knx
 		virtual Telegram *Command_Set_Mode(int Mode){return createcharTelegramFromAddress(Mode,1);};
 	};
 
+	class BrightnessSensor:public knxDevice
+	{
+		DEVICEHEADER( BrightnessSensor , 1 , "\0" ) ;
+	};
+
 	class TemperatureSensor:public knxDevice
 	{
 		DEVICEHEADER( TemperatureSensor , 1 , "\0" ) ;
-		//virtual Telegram *Command_Get_Temperature(float Temperature){return createfloatTelegramFromAddress(Temperature,0);};
 	};
 
 	class GenericSensor:public knxDevice

@@ -30,12 +30,13 @@ namespace knx
 	{
 		switch(pDevData->m_dwPK_DeviceTemplate)
 		{
-			case DEVICETEMPLATE_Standard_Thermostat_CONST: return new Standard_Thermostat(pDevData);break;
+			case DEVICETEMPLATE_Standard_Thermostat_CONST: return new Standard_Thermostat(pDevData);break;		// <SET TEMP>|<ACTUEL TEMP>
 			case DEVICETEMPLATE_Light_Switch_onoff_CONST: return new LightSwitchOnOff(pDevData);break;			// <ON/OFF>|<ON/OFF STATUS>
 			case DEVICETEMPLATE_Light_Switch_dimmable_CONST: return new LightSwitchdimmable(pDevData);break;	// <ON/OFF>|<DIM VALUE>|<ON/OFF STATUS>|<DIM STATUS>
 			case DEVICETEMPLATE_Light_Switch_RGB_CONST: return new LightSwitchRGB(pDevData);break;				// <ON/OFF>|<R VALUE>|<G VALUE>|<B VALUE>|<ON/OFF STATUS>|<R STATUS>|<G STATUS>|<B STATUS>
 			case DEVICETEMPLATE_Drapes_Switch_CONST: return new Drapes_Switch(pDevData);break;
 			case DEVICETEMPLATE_Blinds_Switch_CONST: return new Blinds_Switch(pDevData);break;					// <LEVEL>|<ANGLE>|<LEVEL STATUS>|<ANGLE STATUS>
+			case DEVICETEMPLATE_Brightness_sensor_CONST: return new BrightnessSensor(pDevData);break;			// <BRIGHTNESS>
 			case DEVICETEMPLATE_Temperature_sensor_CONST: return new TemperatureSensor(pDevData);break;			// <TEMP>
 			case DEVICETEMPLATE_Generic_Input_Ouput_CONST:
 			case DEVICETEMPLATE_Air_Quality_Sensor_CONST:
@@ -290,7 +291,7 @@ Message *LightSwitchRGB::handleTelegram(const Telegram *tl) // // <ON/OFF>|<R VA
 		return NULL;
 	}
 
-	Message *Standard_Thermostat::handleTelegram(const Telegram *tl)
+	Message *Standard_Thermostat::handleTelegram(const Telegram *tl) // <SET TEMP>|<ACTUEL TEMP>
 	{
 		try
 		{
@@ -298,11 +299,11 @@ Message *LightSwitchRGB::handleTelegram(const Telegram *tl) // // <ON/OFF>|<R VA
 			{
 				case(EIBWRITE):
 				{
-					if(tl->getGroupAddress()==_v_addrlist.at(2))
+					if(tl->getGroupAddress()==_v_addrlist.at(2)) // Current set temperature
 					{
 						return createSetPointChangedEventMessage(tl->getFloatData());
 					}
-					if(tl->getGroupAddress()==_v_addrlist.at(3))
+					if(tl->getGroupAddress()==_v_addrlist.at(3)) // Current set mode
 					{
 						return createModeChangedEventMessage(tl->getIntData());
 					}
@@ -313,11 +314,11 @@ Message *LightSwitchRGB::handleTelegram(const Telegram *tl) // // <ON/OFF>|<R VA
 				}break;
 				case(EIBRESPONSE):
 				{
-					if(tl->getGroupAddress()==_v_addrlist.at(0))
+					if(tl->getGroupAddress()==_v_addrlist.at(0)) // Set Temperature
 					{
 						return createSetPointChangedEventMessage(tl->getFloatData());
 					}
-					if(tl->getGroupAddress()==_v_addrlist.at(1))
+					if(tl->getGroupAddress()==_v_addrlist.at(1)) // Set Mode
 					{
 						return createModeChangedEventMessage(tl->getIntData());
 					}
@@ -329,6 +330,28 @@ Message *LightSwitchRGB::handleTelegram(const Telegram *tl) // // <ON/OFF>|<R VA
 		return NULL;
 	}
 	
+	Message *BrightnessSensor::handleTelegram(const Telegram *tl) // <BRIGHTNESS>
+	{
+		try
+		{
+			switch(tl->getType())
+			{
+				case(EIBWRITE):
+				case(EIBRESPONSE):
+				{
+					if(tl->getGroupAddress()==_v_addrlist.at(0)) // Current brightness
+					{
+						LoggerWrapper::GetInstance()->Write(LV_STATUS, "  Actual Brightness is %f",tl->getFloatData());
+						return createBrightnessChangedEventMessage(tl->getFloatData());
+					}
+				}break;
+							}
+		}catch(out_of_range e){
+			return NULL;
+		}
+		return NULL;
+	}
+
 	Message *TemperatureSensor::handleTelegram(const Telegram *tl) // <TEMP>
 	{
 		try
