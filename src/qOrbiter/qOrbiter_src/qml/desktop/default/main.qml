@@ -7,11 +7,13 @@ import "lib/components"
 import "js/ComponentLoader.js" as MyJs
 import "lib/handlers"
 
+
+
 /*!
- *\class Main main.qml
+ *
  *\brief The main logic component
  *
- *\ingroup desktop_default
+ *\ingroup qml_desktop_default
  *
  *This file represent the main loading logic of the skin. It contains a loader that loads the subsequent
  *pages over it. This allows Main.qml to keep be a consistent object to manage states and the flow of
@@ -19,8 +21,6 @@ import "lib/handlers"
  *
  *
  */
-
-
 Item {
     id: item
     width:manager.appWidth

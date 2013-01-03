@@ -22,8 +22,20 @@
 /*!
  *\page main Main.cpp
  *
- *This page describes main.cpp and all its glory
- * 
+ * \brief main.cpp is where the application starts and is glued together with high quality Qt brand glue.
+ *
+ *main.cpp begins the main event loop of the application. Part of initializing this application involves starting QThreads, opening application
+ *windows, and other activities to begin the LinuxMCE orbiter. Most important of these, are the signal and slot connections. These connect
+ *the DCE server object to the Qt and thus QML GUI by emitting images and binary data to \ref qOrbiterManager.
+ *Related objects include:
+ *-# \ref qorbiterlogger - Local logging class
+ *-# \ref listModel - QAbstractlistmodel used for media grid.
+ *-# \ref orbiterwindow - Class to provide splash screen independant of other initialization
+ *#- \ref timecodemanager - QTcpSocket based class for processing timecode from media players.
+ *#- \ref qOrbiter - The server side of the equation
+ *#- \ref qOrbiterManager - the Qt / QML object providing the GUI
+ * \ingroup dce_controllers
+ * \ingroup qt_controllers
  */
 
 #ifdef IOS

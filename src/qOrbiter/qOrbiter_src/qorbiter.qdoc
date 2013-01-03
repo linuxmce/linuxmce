@@ -1,9 +1,9 @@
 /*!
- *\mainpage LinuxMCE QOrbiter
- *Welcome to the documentation section of QOrbiter, the Qt/QML based implementation of a DCE system for LinuxMCE. Also known as the
- *best open source home automation application out there. Here you will find information mostly relating to qml documents. CPP and QML Documentation
- *will be done using Doxygen.
- * \section cplusplus C++ Code
+*\mainpage LinuxMCE QOrbiter
+*Welcome to the documentation section of QOrbiter, the Qt/QML based implementation of a DCE system for LinuxMCE. Also known as the
+*best open source home automation application out there. Here you will find information mostly relating to qml documents. CPP and QML Documentation
+*will be done using Doxygen.
+* \section cplusplus C++ Code
 This section references the c++ code that is a part of QOrbiter. It is split into two parts. \ref dcesection and the \ref qtsection
 -# controllers - for both.
 \subsection dcesection DCE Code
@@ -17,32 +17,62 @@ This section references the c++ code that is a part of QOrbiter. It is split int
 */
 
 /*!
- *\defgroup dce_controllers DCE-Controllers
- */
+*\defgroup dce_controllers DCE-Controllers
+*/
 
 /*!
- *\defgroup qt_controllers Qt-Controllers *
- */
+*\defgroup qt_controllers Qt-Controllers *
+*/
 
 /*!
- * \defgroup qml_skins QML Skins
- */
+* \defgroup qml_skins QML Skins
+*/
 
 
 /*!
- * \defgroup linuxmce_components LinuxMCE Components
- */
+* \defgroup linuxmce_components LinuxMCE Components
+*/
 
 /*!
- * \defgroup qml_api QML Skin Api
- */
+* \defgroup qml_api QML Skin Api
+*/
 
-/*!
+ /*!
  * \defgroup context_objects Context Objects
  * \ingroup qml_api
  */
 
 /*!
- *\defgroup qml_skins_default Default
- *\ingroup qml_skins
+*\defgroup qml_commands Api Commmands
+*\ingroup qml_api
+*/
+
+/*!
+ *\defgroup qml_properties
+ *\ingroup qml_api
  */
+
+/*!
+ *\defgroup security_commands Security Command List
+ *\ingroup qml_commands
+ */
+
+/*!
+ *\defgroup qorbiter_commands QOrbiter Command List
+ *\ingroup qml_commands
+ */
+
+/*!
+ *\defgroup qorbiter_properties QOrbiter Property List
+ *\ingroup qml_properties
+ */
+
+/*!
+ *\defgroup startup_properties Startup Properties
+ *\ingroup qml_properties
+ */
+
+/*!
+*\defgroup qml_skins_default Default
+*\ingroup qml_skins
+*/

@@ -16,6 +16,8 @@
     along with QOrbiter.  If not, see <http://www.gnu.org/licenses/>.
 */
 
+
+
 //<-dceag-d-b->
 #ifndef qOrbiter_h
 #define qOrbiter_h
@@ -55,6 +57,17 @@ class basicImageProvider;
 //<-dceag-decl-b->
 namespace DCE
 {
+/*!
+ *\class qOrbiter
+ * \ingroup dce_controllers
+ *\brief The object represents the c++ api for the LinuxMCE system.
+ *
+ * This Object is the 1/2 man, 1/2 machine interface for the Linuxmce System. It begins as a series of auto generated stubs, which then
+ *are filled in by the software developer building the interface. The object runs in its own thread as it is prone to long wait times
+ *and represents the server in a client / server model. By implementing this in  its own thread, the GUI is not subject to blocking by the
+ *processing of data. Information is emitted across threads via connections.
+ *
+ */
 class qOrbiter : public qOrbiter_Command
 {
     //<-dceag-decl-e->
@@ -77,11 +90,11 @@ public:
     /*
      *Media Player
      */
-    QString videoFileUrl;
-    QString audioFileUrl;
-    QString streamingVideoIp;
-    QString streamingAudioIp;
-    QString mediaPlayerTimeCode;
+    QString videoFileUrl;/**< Contains the full path of the video media  */
+    QString audioFileUrl;/**<  Contains the full path of the audio media */
+    QString streamingVideoIp;/**< Contains the ip address with port if included of streamed video. */
+    QString streamingAudioIp;/**< Contains the ip address with port if included of stremed audio */
+    QString mediaPlayerTimeCode;/**< Contains the timecode for the local media player (QMediaPlayer)  */
 
     /*
      *
@@ -92,20 +105,25 @@ public:
     typedef QMap <int, QString> myMap;
 
     //child devices
-    int qMediaPlayerID;
-    int qCommunicatorID;
+    int qMediaPlayerID;/**< qMediaPlayer device ID */
+    int qCommunicatorID;/**< qCommunicator device ID \warning not implemented */
 
-    char *screenieData;
-    int screenieDataSize;
+    char *screenieData; /**< char pointer to raw screenshot data from dce socket */
+    int screenieDataSize;/**< int to size of \ref screenieData */
 
 
-    Virtual_Device_Translator coreDevices;
+    Virtual_Device_Translator coreDevices;/**< \warning not implemented */
     //DataGridTable pDataGridTable;
-    int m_dwPK_Device_NowPlaying,m_dwPK_Device_NowPlaying_Video,m_dwPK_Device_NowPlaying_Audio,m_dwPK_Device_CaptureCard;  /** < set by the media engine, this is whatever media device is currently playing.  Capture Card is non null if we're displaying media via this card */
-    bool m_bPK_Device_NowPlaying_Audio_DiscreteVolume,m_bContainsVideo,m_bUsingLiveAVPath;
+    int m_dwPK_Device_NowPlaying; /**< set by the media engine, the current media player id  */
+    int m_dwPK_Device_NowPlaying_Video;  /**< set by the media engine with the current video device id  */
+    int m_dwPK_Device_NowPlaying_Audio;/**< set by the media engine with the current audio device id  */
+    int m_dwPK_Device_CaptureCard;  /** < set by the media engine, this is whatever media device is currently playing.  Capture Card is non null if we're displaying media via this card */
+    bool m_bPK_Device_NowPlaying_Audio_DiscreteVolume; /**< set by the media engine if the audio device supports discrete audio  */
+    int m_bContainsVideo; /**< set by the media engine if the content contains video */
+    int m_bUsingLiveAVPath;/**< set by the media engine if the media is using a direct control path (DirectAV)  */
     bool retrieving;
     bool finished;
-    bool b_mediaPlaying;
+    bool b_mediaPlaying;/**< set by the media engine   */
 
     DataGridTable *pDataGridTable;
 
@@ -121,10 +139,10 @@ public:
     string media_seek;
     bool pause;
 
-    QString dceIP;
-    QString DCEHost;
+    QString dceIP; /**< The ip address of the router  */
+    QString DCEHost; /**< The hostname of the router */
 
-    string m_sExternalIP;
+    string m_sExternalIP; /**< The external ip address of the router as seen from a WAN */
 
     int iPK_Device_DatagridPlugIn;
     int iPK_Device_OrbiterPlugin;

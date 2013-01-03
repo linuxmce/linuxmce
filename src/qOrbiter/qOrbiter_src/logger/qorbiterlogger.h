@@ -4,10 +4,17 @@
 #include <QObject>
 #include <QFile>
 #include <QDeclarativeError>
+/*!
+ * \brief qorbiterLogger - C++ logging context object.
+
+ *\ingroup qt_controllers
+ *This class is responsible for writing logs of activity as QOrbiter runs. It is still quite new and under active development. It
+ *automatically begins on desktop builds, but on android it must be started after the application is running.
+ */
 class QOrbiterLogger : public QObject
 {
     Q_OBJECT
-    Q_PROPERTY(QString logLocation READ getLogLocation WRITE setLogLocation NOTIFY logLocationChanged)
+    Q_PROPERTY(QString logLocation READ getLogLocation WRITE setLogLocation NOTIFY logLocationChanged)/*! The location of the log \ingroup qml_properties */
     Q_PROPERTY(QString userLogMsg READ getUserLogMsg WRITE setUserLogMsg NOTIFY userLogMsgChanged )
     Q_PROPERTY(bool commandLogState READ getCommandLogStatus WRITE setCommandLogStatus NOTIFY cmdLogStateChanged)
     Q_PROPERTY(bool guiLogState READ getGuiLogStatus WRITE setGuiLogStatus NOTIFY guiLogStateChanged)
@@ -50,6 +57,12 @@ signals:
 
     
 public slots:
+    /*!
+     * \brief setUserLogMsg - Allows the user to write messages to the log from QML.
+     * \param m - The Message you want written in string format.
+     *Access this function by using \code logger.setUserLogMsg(msg) \endcode
+     * \ingroup qorbiter_commands
+     */
     void setUserLogMsg(QString m) {userLogMsg = m; emit userLogMsgChanged(userLogMsg); logUserMessage(userLogMsg);}
     QString getUserLogMsg() {return userLogMsg;}
 

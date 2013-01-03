@@ -3,6 +3,17 @@
   complex loading of media and network images is done in another imageprovider.
   */
 
+/*!
+ *\class basicImageProvider
+ *\brief This is a simple implementation of an QmlEngines image provider.
+ *
+ *\ingroup qt_controllers
+ *
+ *
+ *
+ *\sa QAbstractImageProvider
+ *
+ */
 #ifndef BASICIMAGEPROVIDER_H
 #define BASICIMAGEPROVIDER_H
 

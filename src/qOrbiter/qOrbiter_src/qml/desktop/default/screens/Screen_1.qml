@@ -3,7 +3,13 @@ import "../components"
 import "../effects"
 import Qt.labs.shaders 1.0
 
-
+/*!
+ *\class Screen_1
+ *\brief Screen 1 component.
+ *
+ *\ingroup qml_desktop_default
+ *In default, this screen is used a place to have all scenarios set in horizontal rows.
+ */
 Item
 {
     anchors.centerIn: parent
