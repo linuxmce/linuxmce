@@ -52,7 +52,7 @@ Item{
                     Column{
                         id:alarmslayoutcolumn
                         spacing: scaleY(1)
-                        width: childrenRect.width                      
+                        width: childrenRect.width
 
                         Rectangle{
                             height: childrenRect.height
@@ -70,52 +70,51 @@ Item{
                                 delegate:
                                     Rectangle
                                 {
-                                    height: scaleY(15)
-                                    width: scaleX(25)
-                                    color:style.darkhighlight
-                                    border.color: "black"
-                                    border.width: 2
-                                    anchors.margins: 10
-                                    Row{
-                                        id:delegatalayoutrow
-                                        anchors.centerIn: parent
-                                        width: parent.width
-                                        spacing: 5
-                                        Rectangle{
-                                            id:indicator
-                                            height: scaleY(15)
-                                            width: parent.width *.25
-                                            color: status ?"green":  "red"
-                                            border.color: "black"
-                                            border.width: 2
+                                height: scaleY(15)
+                                width: scaleX(25)
+                                color:style.darkhighlight
+                                border.color: "black"
+                                border.width: 2
+                                anchors.margins: 10
+                                Row{
+                                    id:delegatalayoutrow
+                                    anchors.centerIn: parent
+                                    width: parent.width
+                                    spacing: 5
+                                    Rectangle{
+                                        id:indicator
+                                        height: scaleY(15)
+                                        width: parent.width *.25
+                                        color: status ?"green":  "red"
+                                        border.color: "black"
+                                        border.width: 2
 
-                                            StyledText {
-                                                id: statelabel
-                                                text: status ? qsTr("enabled") : qsTr("disabled")
-                                                anchors.centerIn: parent
-                                            }
-
-                                            AlarmToggleHandler {
-                                            }
+                                        StyledText {
+                                            id: statelabel
+                                            text: status ? qsTr("enabled") : qsTr("disabled")
+                                            anchors.centerIn: parent
                                         }
-                                        Column{
-                                            height: parent.height
-                                            StyledText {
-                                                id: alarmname
-                                                text:qsTr("Name: ") + name
-                                            }
-                                            StyledText {
-                                                id: alarmtimeLabel
-                                                text:qsTr("Alarm Set For: ") + alarmtime
-                                            }
-                                            StyledText {
-                                                id: daysactive
-                                                text: qsTr("Active on: ")+ active
-                                            }
-                                            StyledText {
-                                                id: countdown
-                                                text: qsTr("Time Left: ") +remaining
-                                            }
+
+                                        AlarmToggleHandler{
+                                        }
+                                    }
+                                    Column{
+                                        height: parent.height
+                                        StyledText {
+                                            id: alarmname
+                                            text:qsTr("Name: ") + name
+                                        }
+                                        StyledText {
+                                            id: alarmtimeLabel
+                                            text:qsTr("Alarm Set For: ") + alarmtime
+                                        }
+                                        StyledText {
+                                            id: daysactive
+                                            text: qsTr("Active on: ")+ active
+                                        }
+                                        StyledText {
+                                            id: countdown
+                                            text: qsTr("Time Left: ") +remaining
                                         }
                                     }
                                 }
@@ -126,4 +125,5 @@ Item{
             }
         }
     }
+}
 }
