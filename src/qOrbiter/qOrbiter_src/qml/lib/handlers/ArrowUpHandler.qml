@@ -1,5 +1,11 @@
 import QtQuick 1.0
-
+/*!
+ *\class ArrowUpHandler
+ *\brief Handler Component for up Arrow.
+ *
+ *\ingroup lib_handlers
+ *
+ */
 MouseArea {
     property int autoTick:0
     anchors.fill: parent

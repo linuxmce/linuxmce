@@ -5,7 +5,7 @@ import QtQuick 1.0
  *
  *\ingroup lib_handlers
  *
- * Simple componet designed to provide a mouse area with predefined functionality to raise / lower lights. See params for values
+ * Simple component designed to provide a mouse area with predefined functionality to raise / lower lights. See params for values
  *
  *
  */

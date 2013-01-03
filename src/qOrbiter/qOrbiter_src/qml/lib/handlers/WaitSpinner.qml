@@ -9,14 +9,14 @@ import Qt.labs.shaders 1.0
  * The purpose of this generalize component is to provide visual feedback that something was clicked and the application is waiting for
  * a response from the DCERouter
  *
- *\namespace Qt.labs.shaders 1.0
+ *
  *
  */
 Rectangle{
     id:waitSpinner
     height: scaleX(15)
     width: scaleX(15)
-    property bool activated:false
+    property bool activated:false /*! bool value to determine when spinner should activate */
     z:activated ? 50 : -20
     Connections{
         target:manager
