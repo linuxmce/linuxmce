@@ -219,5 +219,5 @@ sub generate_voice_googletts()
 	system('/usr/pluto/bin/googletts-cli.pl -r 8000 -o '.$FILE.'  -l '.$LANGUAGE.' -t "'.$TEXT.'"');
 }
 
-`/usr/pluto/bin/db_phone_config.sh`;
+# `/usr/pluto/bin/db_phone_config.sh`;
 `/usr/pluto/bin/db_create_dialplan.sh`;
