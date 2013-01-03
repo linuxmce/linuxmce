@@ -34,6 +34,11 @@ $TEXT_KNX_ANGLE_STATUS='Angle actuel';
 $TEXT_KNX_OPENCLOSE='Ouvrir/Fermer';
 $TEXT_KNX_STOP='Stop';
 $TEXT_KNX_ACTIVATED='Activé';
+$TEXT_KNX_TEMPERATURE_SENSOR='Capteur de température';
+$TEXT_KNX_THERMOSTAT='Thermostat standard';
 $TEXT_KNX_SETPOINT_TEMP='Temperature souhaité';
+$TEXT_KNX_SET_MODE='Changer mode';
+$TEXT_KNX_ACTUAL_SETPOINT='Temperature souhaité actuelle';
+$TEXT_KNX_ACTUAL_MODE='Mode actuel';
 $TEXT_KNX_ACTUAL_TEMP='Temperature actuelle';
 ?>

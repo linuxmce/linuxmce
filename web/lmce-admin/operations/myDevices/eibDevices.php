@@ -51,11 +51,14 @@ function eibDevices($output,$dbADO,$eibADO) {
 			}
 		break;
 		case 'climate':
-			$allowedTemplates[$GLOBALS['StandardThermostat']]['label']='Standard thermostat';
+			$allowedTemplates[$GLOBALS['StandardThermostat']]['label']=translate('TEXT_KNX_THERMOSTAT');
 			$allowedTemplates[$GLOBALS['StandardThermostat']]['GA'][]=translate('TEXT_KNX_SETPOINT_TEMP');
+			$allowedTemplates[$GLOBALS['StandardThermostat']]['GA'][]=translate('TEXT_KNX_SET_MODE');
+			$allowedTemplates[$GLOBALS['StandardThermostat']]['GA'][]=translate('TEXT_KNX_ACTUAL_SETPOINT');
+			$allowedTemplates[$GLOBALS['StandardThermostat']]['GA'][]=translate('TEXT_KNX_ACTUAL_MODE');
 			$allowedTemplates[$GLOBALS['StandardThermostat']]['GA'][]=translate('TEXT_KNX_ACTUAL_TEMP');
 
-			$allowedTemplates[$GLOBALS['StandardThermometer']]['label']='Temperature sensor';
+			$allowedTemplates[$GLOBALS['StandardThermometer']]['label']=translate('TEXT_KNX_TEMPERATURE_SENSOR');
 			$allowedTemplates[$GLOBALS['StandardThermometer']]['GA'][]=translate('TEXT_KNX_ACTUAL_TEMP');
 		break;
 		case 'drapes':

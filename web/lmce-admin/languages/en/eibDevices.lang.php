@@ -34,6 +34,11 @@ $TEXT_KNX_ANGLE_STATUS='Actual angle';
 $TEXT_KNX_OPENCLOSE='Open/Close';
 $TEXT_KNX_STOP='Stop';
 $TEXT_KNX_ACTIVATED='Activated';
+$TEXT_KNX_TEMPERATURE_SENSOR='Temperature sensor';
+$TEXT_KNX_THERMOSTAT='Standard thermostat';
 $TEXT_KNX_SETPOINT_TEMP='SetPoint temperature';
+$TEXT_KNX_SET_MODE='Set mode';
+$TEXT_KNX_ACTUAL_SETPOINT='Actual SetPoint temperature';
+$TEXT_KNX_ACTUAL_MODE='Actual mode';
 $TEXT_KNX_ACTUAL_TEMP='Actual temperature';
 ?>
