@@ -28,14 +28,19 @@ while ((counter > 0)); do
 done
 
 
-function on_exit {
-
+function on_exit()
+{
+	local Pid
 	echo -n "Waiting for update media to shut down"
-	while "$(pidof UpdateMedia)" != "" ;do
-		kill UpdateMedia
+	while :; do
+		Pid="$(pidof UpdateMedia)"
+		if [[ -z "$Pid" ]]; then
+			break
+		fi
+		kill $Pid
 		sleep 0.5
 		echo -n "."
-	fi
+	done
 	echo 
 
 	Unlock "UM" "Update_Media"
