@@ -1,6 +1,11 @@
 // import QtQuick 1.0 // to target S60 5th Edition or Maemo 5
 import QtQuick 1.1
-
+/*!
+  \class MediaScrollBar
+  \brief This is a basic component for scrolling through time in media.
+  This component allows a user to drag the media position to a desired location. All of its functions are tied to
+  \ref dcetimecode.
+  */
 Rectangle {
     id:scroller
     width: scaleX(44)
@@ -8,8 +13,6 @@ Rectangle {
     color: "transparent"
 
     property int slidertimer: (scroll_tab.x / scroller_transit.width) * dceTimecode.tcTotalTime
-
-
 
     Rectangle{
         id:drag_indicator

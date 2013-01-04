@@ -60,6 +60,14 @@
 #include <QImageReader>
 #endif
 
+/*!
+ * \brief The NowPlayingClass class contains information about the currently playing media.
+ *\ingroup context_objects
+ *This class contains all of the metadata associated with media playing in an entertain area. It contains information about the media and
+ *it keeps track of any relevant device information that LinuxMCE provides as well.
+ * \warning Please note that this class is subject to pruning as there may be duplicate attributes.
+ * \ingroup context_objects
+ */
 #if (QT5)
 class NowPlayingClass : public QQuickItem
         #else
@@ -69,20 +77,20 @@ class NowPlayingClass : public QDeclarativeItem
 {
     Q_OBJECT
 
-    Q_PROPERTY (bool b_mediaPlaying READ getStatus WRITE setStatus NOTIFY mediaStatusChanged) //property to know if media is playing
+    Q_PROPERTY (bool b_mediaPlaying READ getStatus WRITE setStatus NOTIFY mediaStatusChanged)/*!< \brief The current playing status of media \ingroup now_playing*/
 
-    Q_PROPERTY (QImage fileImage READ getImage WRITE setImage NOTIFY imageChanged)
-    Q_PROPERTY (QImage streamImage READ getStreamImage WRITE setStreamImage NOTIFY streamImageChanged)
-    Q_PROPERTY(QString path READ getPath WRITE setPath NOTIFY pathChanged)
-    Q_PROPERTY(QString localpath READ getLocalPath WRITE setLocalPath NOTIFY localPathChanged)
-    Q_PROPERTY(QString qs_storageDevice READ getStorageDevice READ getStorageDevice NOTIFY storageDeviceChanged)
+    Q_PROPERTY (QImage fileImage READ getImage WRITE setImage NOTIFY imageChanged)/*!< \brief The image associated with this file \ingroup now_playing*/
+    Q_PROPERTY (QImage streamImage READ getStreamImage WRITE setStreamImage NOTIFY streamImageChanged)/*!< \brief Streamed image. \ingroup now_playing*/
+    Q_PROPERTY(QString path READ getPath WRITE setPath NOTIFY pathChanged)/*!< \brief Path of the current media without filename \ingroup now_playing*/
+    Q_PROPERTY(QString localpath READ getLocalPath WRITE setLocalPath NOTIFY localPathChanged)/*!< \brief Local path...it means something... \ingroup now_playing*/
+    Q_PROPERTY(QString qs_storageDevice READ getStorageDevice READ getStorageDevice NOTIFY storageDeviceChanged)/*!< \brief Storage device of the now playing media \ingroup now_playing*/
 
     //set now playing - text to assign
-    Q_PROPERTY (QString qs_mainTitle READ getTitle WRITE setTitle NOTIFY titleChanged) //the text set sent by now playing command
-    Q_PROPERTY (QString qs_mainTitle2 READ getTitle2 WRITE setTitle2 NOTIFY titleChanged2) // in the case of audio, multiple metada value are sent  thus title 2
+    Q_PROPERTY (QString qs_mainTitle READ getTitle WRITE setTitle NOTIFY titleChanged) /*!< \brief Title of the media. \ingroup now_playing*/
+    Q_PROPERTY (QString qs_mainTitle2 READ getTitle2 WRITE setTitle2 NOTIFY titleChanged2) /*!< \brief Second line title, like tv program, album, etc \ingroup now_playing*/
 
     //set now playing - value
-    Q_PROPERTY (QString qs_subTitle READ getSubTitle WRITE setSubTitle NOTIFY titleChanged )//the secondary text sent in a seperate variable from now playing
+    Q_PROPERTY (QString qs_subTitle READ getSubTitle WRITE setSubTitle NOTIFY titleChanged )/*!< \brief Too many damned titles being sent... \ingroup now_playing*/
 
     //internal reference to know what the current media screen is
     Q_PROPERTY (QString qs_screen READ getScreen WRITE setScreen NOTIFY screenTypeChanged)
@@ -94,29 +102,29 @@ class NowPlayingClass : public QDeclarativeItem
     Q_PROPERTY (QUrl nowPlayingImageUrl READ getImageUrl WRITE setImageUrl NOTIFY imageUrlChanged)
 
     //internal playlist position tracker
-    Q_PROPERTY (int m_iplaylistPosition READ getPlaylistPosition WRITE setPlaylistPostion NOTIFY playListPositionChanged)
+    Q_PROPERTY (int m_iplaylistPosition READ getPlaylistPosition WRITE setPlaylistPostion NOTIFY playListPositionChanged)/*!< \brief The current playlist position. \ingroup now_playing*/
 
     //media title variable that can be independant of what is passed initially by now playing
-    Q_PROPERTY (QString mediatitle READ getMediaTitle WRITE setMediaTitle NOTIFY mediaTitleChanged)
-    Q_PROPERTY (QString genre READ getGenre WRITE setGenre NOTIFY genreChanged)
+    Q_PROPERTY (QString mediatitle READ getMediaTitle WRITE setMediaTitle NOTIFY mediaTitleChanged)/*!< \brief Another damn  title. \ingroup now_playing*/
+    Q_PROPERTY (QString genre READ getGenre WRITE setGenre NOTIFY genreChanged)/*!< \brief Genre \ingroup now_playing*/
     //television related variables
-    Q_PROPERTY (QString tvProgram READ getProgram WRITE setProgram NOTIFY programChanged)
-    Q_PROPERTY (QString channel READ getChannel WRITE setChannel NOTIFY channelChanged)
-    Q_PROPERTY (QString channelID READ getChannelID WRITE setChannelID NOTIFY chanIDchanged)
-    Q_PROPERTY (QString network WRITE setNetwork READ getNetwork NOTIFY networkChanged)
-    Q_PROPERTY (QString episode READ getEpisode WRITE setEpisode NOTIFY episodeChanged)
+    Q_PROPERTY (QString tvProgram READ getProgram WRITE setProgram NOTIFY programChanged)/*!< \brief The current playing tv program. \ingroup now_playing*/
+    Q_PROPERTY (QString channel READ getChannel WRITE setChannel NOTIFY channelChanged)/*!< \brief The current channel. \ingroup now_playing*/
+    Q_PROPERTY (QString channelID READ getChannelID WRITE setChannelID NOTIFY chanIDchanged)/*!< \brief Schedules direct id. \ingroup now_playing*/
+    Q_PROPERTY (QString network WRITE setNetwork READ getNetwork NOTIFY networkChanged)/*!< \brief The current tv network. \ingroup now_playing*/
+    Q_PROPERTY (QString episode READ getEpisode WRITE setEpisode NOTIFY episodeChanged)/*!< \brief The current episode. \ingroup now_playing*/
     //movies
 
     //audio related
-    Q_PROPERTY (QString album READ getAlbum WRITE setAlbum NOTIFY albumChanged)
-    Q_PROPERTY (QString track READ getTrack WRITE setTrack NOTIFY trackChanged)
-    Q_PROPERTY (QString performerlist READ getPerformers WRITE setPerformers NOTIFY performersChanged)
+    Q_PROPERTY (QString album READ getAlbum WRITE setAlbum NOTIFY albumChanged)/*!< \brief The current playing album. \ingroup now_playing*/
+    Q_PROPERTY (QString track READ getTrack WRITE setTrack NOTIFY trackChanged)/*!< \brief The current track number \ingroup now_playing*/
+    Q_PROPERTY (QString performerlist READ getPerformers WRITE setPerformers NOTIFY performersChanged)/*!< \brief '|' seperated list of performers. \ingroup now_playing*/
     //shared
-    Q_PROPERTY(QString synop READ getSynop WRITE setSynop NOTIFY synopChanged)
-    Q_PROPERTY (QString director READ getDirector WRITE setDirector NOTIFY directorChanged)
-    Q_PROPERTY(QString releasedate READ getRelease WRITE setRelease NOTIFY rlsChanged)
+    Q_PROPERTY(QString synop READ getSynop WRITE setSynop NOTIFY synopChanged)/*!< \brief The current media synopsis. \ingroup now_playing*/
+    Q_PROPERTY (QString director READ getDirector WRITE setDirector NOTIFY directorChanged)/*!< \brief The director. \ingroup now_playing*/
+    Q_PROPERTY(QString releasedate READ getRelease WRITE setRelease NOTIFY rlsChanged)/*!< \brief Release date. \ingroup now_playing*/
 
-    Q_PROPERTY (QString aspect READ getImageAspect WRITE setImageAspect NOTIFY imageAspectChanged )
+    Q_PROPERTY (QString aspect READ getImageAspect WRITE setImageAspect NOTIFY imageAspectChanged ) /*!< \brief Aspect ratio \todo Change now playing aspect to enum. \ingroup now_playing*/
 public:
 #if (QT5)
     explicit NowPlayingClass(QQuickItem *parent = 0);
@@ -285,7 +293,16 @@ public slots:
 
     void setImage(QImage img) {fileImage = img;  emit imageChanged();}
     QImage getImage() {return fileImage;}
-
+    /*!
+     * \brief setStreamImage this function sets the stream image only.
+     * This function sets the stream image as opposed to the screenshot, or media image. A stream image is unique in that
+     * it is a screen grab from a current playing media device and instead of triggering the screenshotAttributes, it just
+     * updates the image.
+     * \warning do not request images too quickly
+     * \todo add frame govonor for Now playing stream image grab?
+     * \param t
+     *
+     */
     void setStreamImage(QImage t){
         qDebug("Setting stream image");
         streamImage = t;

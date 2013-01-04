@@ -37,42 +37,46 @@
 #include <QDebug>
 #endif
 
-
+/*!
+ * \brief The FileDetailsClass class is responsible for presenting a files properties in one object.
+ * \ingroup context_objects
+ * \note Access properties of this object using the prefix 'filedetailsclass'.
+ */
 class FileDetailsClass : public QObject
 {
     Q_OBJECT
 
-    Q_PROPERTY (bool showDetails READ isVisible WRITE setVisible NOTIFY VisibleChanged)
-    Q_PROPERTY(QString file READ getFile WRITE setFile NOTIFY FileChanged)
-    Q_PROPERTY(QString objecttitle READ getTitle WRITE setTitle NOTIFY objectChanged)
-    Q_PROPERTY(QString synop READ getSynop WRITE setSynop NOTIFY synopChanged)
-    Q_PROPERTY(QUrl screenshot READ getScreenShot WRITE setScreenshot NOTIFY imageChanged)
-    Q_PROPERTY(QString filename READ getFilename WRITE setFilename NOTIFY fileNameChanged)
-    Q_PROPERTY(QString path READ getPath WRITE setPath NOTIFY pathChanged)
-    Q_PROPERTY(QString qs_storageDevice READ getStorageDevice READ getStorageDevice NOTIFY storageDeviceChanged)
+    Q_PROPERTY (bool showDetails READ isVisible WRITE setVisible NOTIFY VisibleChanged)/*!< \brief If the item is showing or not. Used for popups. \ingroup file_details */
+    Q_PROPERTY(QString file READ getFile WRITE setFile NOTIFY FileChanged)/*!< \brief The current file with full filepath \ingroup file_details */
+    Q_PROPERTY(QString objecttitle READ getTitle WRITE setTitle NOTIFY objectChanged)/*!< \brief The current media objects title, unparsed.  \ingroup file_details*/
+    Q_PROPERTY(QString synop READ getSynop WRITE setSynop NOTIFY synopChanged)/*!< \brief The Current media synopsis \ingroup file_details*/
+    Q_PROPERTY(QUrl screenshot READ getScreenShot WRITE setScreenshot NOTIFY imageChanged)/*!< \brief Contains url to the current screenshot \ingroup file_details*/
+    Q_PROPERTY(QString filename READ getFilename WRITE setFilename NOTIFY fileNameChanged)/*!< \brief Filename of the current file, with no path. \ingroup file_details*/
+    Q_PROPERTY(QString path READ getPath WRITE setPath NOTIFY pathChanged)/*!< \brief Path of file, minus the filename. \ingroup file_details*/
+    Q_PROPERTY(QString qs_storageDevice READ getStorageDevice READ getStorageDevice NOTIFY storageDeviceChanged)/*!< \brief The string value of the storage device. \ingroup file_details*/
 
-    Q_PROPERTY(QImage titleImage READ getTitleImage WRITE setTitleImage NOTIFY titleImageChanged)
+    Q_PROPERTY(QImage titleImage READ getTitleImage WRITE setTitleImage NOTIFY titleImageChanged)/*!< \brief Possibly used later for additional images. \warning not implemented \ingroup file_details*/
    // Q_PROPERTY(QImage program READ getProgramImage WRITE setProgramImage NOTIFY objectChanged)
-    Q_PROPERTY(QString rating READ getRating WRITE setRating NOTIFY ratingChanged)
+    Q_PROPERTY(QString rating READ getRating WRITE setRating NOTIFY ratingChanged)/*!< \brief The rating if availible of the media.  \ingroup file_details*/
     //media title variable that can be independant of what is passed initially by now playing
-    Q_PROPERTY(QString qs_mainTitle READ getTitle WRITE setTitle NOTIFY titleChanged )
-    Q_PROPERTY (QString mediatitle READ getMediaTitle WRITE setMediaTitle NOTIFY mediaTitleChanged)
-    Q_PROPERTY (QString genre READ getGenre WRITE setGenre NOTIFY genreChanged)
-    Q_PROPERTY (QString studio READ getStudio WRITE setStudio NOTIFY studioChanged)
+    Q_PROPERTY(QString qs_mainTitle READ getTitle WRITE setTitle NOTIFY titleChanged )/*!< \brief The main title of the media \ingroup file_details*/
+    Q_PROPERTY (QString mediatitle READ getMediaTitle WRITE setMediaTitle NOTIFY mediaTitleChanged)/*!< \brief Duplicate of qs_maintitle? \ingroup file_details*/
+    Q_PROPERTY (QString genre READ getGenre WRITE setGenre NOTIFY genreChanged) /*!< \brief Genre of media \ingroup file_details*/
+    Q_PROPERTY (QString studio READ getStudio WRITE setStudio NOTIFY studioChanged) /*!< \brief Publishing studio if availible  \ingroup file_details*/
     //television related variables
-    Q_PROPERTY (QString program READ getProgram WRITE setProgram NOTIFY programChanged)
-    Q_PROPERTY (QString channel READ getChannel WRITE setChannel NOTIFY channelChanged)
-    Q_PROPERTY (QString channelID READ getChannelID WRITE setChannelID NOTIFY channelChanged)
-    Q_PROPERTY (QString episode READ getEpisode WRITE setEpisode NOTIFY episodeChanged)
-    Q_PROPERTY (QString director READ getDirector WRITE setDirector NOTIFY directorChanged)
+    Q_PROPERTY (QString program READ getProgram WRITE setProgram NOTIFY programChanged) /*!< \brief The current program. Applies to tv and some broadcast media  \ingroup file_details*/
+    Q_PROPERTY (QString channel READ getChannel WRITE setChannel NOTIFY channelChanged)/*!<  \brief The current channel for broadcast media file_details*/
+    Q_PROPERTY (QString channelID READ getChannelID WRITE setChannelID NOTIFY channelChanged) /*!< \brief Schedules direct channel id  \ingroup file_details*/
+    Q_PROPERTY (QString episode READ getEpisode WRITE setEpisode NOTIFY episodeChanged) /*!< \brief Episode number   \ingroup file_details*/
+    Q_PROPERTY (QString director READ getDirector WRITE setDirector NOTIFY directorChanged) /*!< \brief The director of the current media.  \ingroup file_details*/
     //audio related
-    Q_PROPERTY (QString album READ getAlbum WRITE setAlbum NOTIFY albumChanged)
-    Q_PROPERTY (QString track READ getTrack WRITE setTrack NOTIFY trackChanged)
-    Q_PROPERTY (QString performerlist READ getPerformers WRITE setPerformers NOTIFY performersChanged)
-    Q_PROPERTY (QStringList performers READ getPerformerList)
-    Q_PROPERTY (QString composerlist READ getComposers WRITE setComposers NOTIFY composersChanged)
-    Q_PROPERTY (QStringList composers READ getComposerList)
-    Q_PROPERTY (QString aspect READ getImageAspect WRITE setImageAspect NOTIFY imageAspectChanged )
+    Q_PROPERTY (QString album READ getAlbum WRITE setAlbum NOTIFY albumChanged) /*!< \brief The album  \ingroup file_details*/
+    Q_PROPERTY (QString track READ getTrack WRITE setTrack NOTIFY trackChanged) /*!< \brief The current track \ingroup file_details*/
+    Q_PROPERTY (QString performerlist READ getPerformers WRITE setPerformers NOTIFY performersChanged) /*!< \brief String of '|' seperated performers.  \ingroup file_details*/
+    Q_PROPERTY (QStringList performers READ getPerformerList) /*!< \brief List of performers \warning experimental  \ingroup file_details*/
+    Q_PROPERTY (QString composerlist READ getComposers WRITE setComposers NOTIFY composersChanged) /*!< Composer  \ingroup file_details*/
+    Q_PROPERTY (QStringList composers READ getComposerList) /*!< \brief List of composers \warning Experimental  \ingroup file_details*/
+    Q_PROPERTY (QString aspect READ getImageAspect WRITE setImageAspect NOTIFY imageAspectChanged ) /*!< \brief Aspect ratio \todo change to enum.  \ingroup file_details*/
     Q_PROPERTY (int i_aspectH READ getAspectH WRITE setAspectH NOTIFY aspectHChanged)
     Q_PROPERTY (int i_aspectW READ getAspectW WRITE setAspectW NOTIFY aspectWChanged)
 

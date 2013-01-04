@@ -42,33 +42,38 @@ This section references the c++ code that is a part of QOrbiter. It is split int
  * \ingroup qml_api
  */
 
-/*!
-*\defgroup qml_commands Api Commmands
-*\ingroup qml_api
-*/
 
 /*!
- *\defgroup qml_properties
+ *\defgroup alarms "alarms" Properties and Methods
  *\ingroup qml_api
  */
 
 /*!
- *\defgroup security_commands Security Command List
- *\ingroup qml_commands
+ *\defgroup timecode_properties "dcetimecode" Properties and Methods
+ *\ingroup qml_api
  */
 
 /*!
- *\defgroup qorbiter_commands QOrbiter Command List
- *\ingroup qml_commands
+ *\defgroup file_details "filedetailsclass" Properties and Methods
+ *\ingroup qml_api
  */
 
 /*!
- *\defgroup qorbiter_properties QOrbiter Property List
- *\ingroup qml_properties
+ * \defgroup now_playing "dcenowplaying" Properties and Methods.
+ * \ingroup qml_api
+
+/*!
+ *\defgroup qorbiter_properties "manager" Properties and Methods
+ *\ingroup qml_api
  */
 
 /*!
- *\defgroup startup_properties Startup Properties
+ *\defgroup screen_params "screenparams" Properties and Methods
+ *\ingroup qml_api
+ */
+
+/*!
+ *\defgroup startup_properties Startup Properties and Methods
  *\ingroup qml_properties
  */
 

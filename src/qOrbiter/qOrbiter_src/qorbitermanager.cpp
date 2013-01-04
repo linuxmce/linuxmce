@@ -41,18 +41,7 @@
 #include "qorbitermanager.h"
 
 
-/*!
- *\class qorbiterManager
- *\brief The main object managing the flow of information between the QML interface and the DCE library
- *
- *\ingroup qt_controllers
- *
- *QOrbiterManager is responsible for managing the Qt side of the Qt/DCE connection. In addition, it supports all of the related
- *functions of the user interface not related to DCE.
- *
- *\sa QObject
- *
- */
+
 
 //#include "OrbiterData.h"
 

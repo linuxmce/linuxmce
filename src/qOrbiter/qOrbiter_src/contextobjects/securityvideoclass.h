@@ -24,14 +24,14 @@
 class SecurityVideoClass : public QObject
 {
     Q_OBJECT
-    Q_PROPERTY (QString timestamp WRITE setTimeStamp READ getTimeStamp NOTIFY imageUpdated()) /*! Access via securityVideo.timestamp \return QString time in HH:MM:SS:MMM \ingroup security_commands */
+    Q_PROPERTY (QString timestamp WRITE setTimeStamp READ getTimeStamp NOTIFY imageUpdated())
 
 public:
     explicit SecurityVideoClass(QObject *parent = 0);
     QMap<int, QImage> cameras; /**< The map of cameras */
     QTimer *requestInterval; /**< The requested interval. \warning do not set this too low, as it will slow down the router. */
     QImage currentFrame; /**< The current security image \warning depreciated */
-    QString timestamp; /**< The current timestamp \relates getTimeStamp() \relatesalso setTimeStamp */
+    QString timestamp; /*!< \brief Access via securityVideo.timestamp. Returns QString time in HH:MM:SS:MMM \ingroup qorbiter_properties */
 
     /*!
      * \brief getTimeStamp getter for timestamp
@@ -46,6 +46,9 @@ public:
     void setTimeStamp(QString t) {timestamp = QTime::currentTime().toString(); emit imageUpdated();}
 
 signals:
+    /*!
+     * \brief This signal is updated when the security image changes.
+     */
     void imageUpdated();
 
 public slots:
