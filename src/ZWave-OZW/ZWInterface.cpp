@@ -290,3 +290,32 @@ void ZWInterface::OnNotification(OpenZWave::Notification const* _notification) {
 	
 	UnLock();
 }
+
+OpenZWave::ValueID* ZWInterface::GetValueIdByLabel(NodeInfo* pNodeInfo, string label)
+{
+	for( list<OpenZWave::ValueID>::iterator it = pNodeInfo->m_values.begin(); it != pNodeInfo->m_values.end(); ++it )
+	{
+		string lab = OpenZWave::Manager::Get()->GetValueLabel((*it));
+		if ( lab == label )
+			return &(*it);
+	}
+	return NULL;
+}
+
+bool ZWInterface::SetIntValue(int iNodeId, string label, int iValue)
+{
+	NodeInfo* pNodeInfo = GetNodeInfo(g_homeId, iNodeId);
+	if ( pNodeInfo != NULL )
+	{
+		OpenZWave::ValueID* valueId = GetValueIdByLabel(pNodeInfo, label);
+		if ( valueId != NULL ) {
+			OpenZWave::Manager::Get()->SetValue(*valueId, iValue);
+			return true;
+		}
+	}
+	return false;
+}
+
+bool ZWInterface::SetWakeUp(int iNodeId, int iValue) {
+	return SetIntValue(iNodeId, "Wake-up Interval", iValue);
+}

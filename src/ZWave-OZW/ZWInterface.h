@@ -79,6 +79,10 @@ namespace DCE
 
 		static void OnNotification_static(OpenZWave::Notification const* _notification, void* _context);
 		void OnNotification(OpenZWave::Notification const* _notification);
+
+		OpenZWave::ValueID* GetValueIdByLabel(NodeInfo* pNodeInfo, string label);
+		bool SetIntValue(int iNodeId, string label, int iValue);
+		bool SetWakeUp(int iNodeId, int iValue);
 	};
 }
 #endif

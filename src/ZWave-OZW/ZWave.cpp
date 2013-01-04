@@ -143,6 +143,57 @@ void ZWave::ReceivedCommandForChild(DeviceData_Impl *pDeviceData_Impl,string &sC
 				m_pZWInterface->UnLock();
 				break;
 				;;
+			case COMMAND_Set_Temperature_CONST:
+				temp = atoi(pMessage->m_mapParameters[COMMANDPARAMETER_Value_To_Assign_CONST].c_str());
+				LoggerWrapper::GetInstance()->Write(LV_ZWAVE,"SET TEMPERATURE RECEIVED FOR CHILD %d, level: %d",node_id,temp);
+/*				// tempf = (int)( (9.0/5.0) * (float)temp + 32.0 );
+				myZWApi->zwThermostatSetpointSet(node_id,1,temp); // heating
+				myZWApi->zwThermostatSetpointSet(node_id,2,temp); // cooling
+				myZWApi->zwThermostatSetpointSet(node_id,10,temp); // auto changeover
+				SendSetpointChangedEvent(node_id, instance_id, (float)temp);
+*/				break;
+				;;
+			case COMMAND_Set_Fan_CONST:
+				fan = atoi(pMessage->m_mapParameters[COMMANDPARAMETER_OnOff_CONST].c_str());
+				LoggerWrapper::GetInstance()->Write(LV_ZWAVE,"SET FAN RECEIVED FOR CHILD %d, level: %d",node_id,fan);
+/*				if (fan == 1) {
+					myZWApi->zwThermostatFanModeSet(node_id,3); // on high
+					myZWApi->zwThermostatModeSet(node_id,6); // fan only
+				} else {
+					myZWApi->zwThermostatFanModeSet(node_id,0); // auto 
+					myZWApi->zwThermostatModeSet(node_id,10); // auto changeover
+				}
+*/				break;
+				;;	
+			case COMMAND_Play_Media_CONST:
+//				myZWApi->zwAVControlSet(node_id,sequence,3); // vol up
+				break;
+				;;
+			case COMMAND_Set_HeatCool_CONST:
+				heat = pMessage->m_mapParameters[COMMANDPARAMETER_OnOff_CONST];
+				char mode_tmp = 'A';
+				if (heat.size()>0) {
+					mode_tmp = heat.c_str()[0];
+				}
+				LoggerWrapper::GetInstance()->Write(LV_ZWAVE,"SET HEAT/COOL RECEIVED FOR CHILD %d, string: %s",node_id,heat.c_str());
+/*				// A - auto changeover; H - heat; C - cool; F - fan; 
+				switch(mode_tmp) {
+					default:
+					case 'A':
+						myZWApi->zwThermostatModeSet(node_id,10); // auto changeover
+						break;
+					case 'H':
+						myZWApi->zwThermostatModeSet(node_id,1); // heat
+						break;
+					case 'C':
+						myZWApi->zwThermostatModeSet(node_id,2); // cool
+						break;
+					case 'F':
+						myZWApi->zwThermostatModeSet(node_id,6); // fan only
+						break;
+				}
+*/				break;
+				;;
 		}
 	} else {
 		sCMD_Result = "UNHANDLED CHILD";
@@ -291,10 +342,33 @@ PK_CommandParameter|Value|... */
 void ZWave::CMD_Send_Command_To_Child(string sID,int iPK_Command,string sParameters,string &sCMD_Result,Message *pMessage)
 //<-dceag-c760-e->
 {
-	cout << "Need to implement command #760 - Send Command To Child" << endl;
-	cout << "Parm #10 - ID=" << sID << endl;
-	cout << "Parm #154 - PK_Command=" << iPK_Command << endl;
-	cout << "Parm #202 - Parameters=" << sParameters << endl;
+	int node_id = atoi(sID.c_str());
+	int homeId = m_pZWInterface->GetHomeId();
+	LoggerWrapper::GetInstance()->Write(LV_ZWAVE,"Received command #760 - Send Command To Child, node id: %i",node_id);
+	if (node_id > 0 && node_id <= 233) {
+		sCMD_Result = "OK";
+		switch (iPK_Command) {
+			case COMMAND_Generic_On_CONST:
+				LoggerWrapper::GetInstance()->Write(LV_ZWAVE,"ON RECEIVED FOR CHILD %d",node_id);
+				m_pZWInterface->Lock();
+				OpenZWave::Manager::Get()->SetNodeOn(homeId,node_id);
+				m_pZWInterface->UnLock();
+				break;
+				;;
+			case COMMAND_Generic_Off_CONST:
+				LoggerWrapper::GetInstance()->Write(LV_ZWAVE,"OFF RECEIVED FOR CHILD %d",node_id);
+				m_pZWInterface->Lock();
+				OpenZWave::Manager::Get()->SetNodeOff(homeId,node_id);
+				m_pZWInterface->UnLock();
+				break;
+				;;
+			default:
+				LoggerWrapper::GetInstance()->Write(LV_ZWAVE,"NOT IMPLEMENTED COMMAND RECEIVED FOR CHILD %d",node_id);
+				sCMD_Result = "ZWave NOT IMPLEMENTED";
+		}
+	} else {
+		sCMD_Result = "UNHANDLED CHILD";
+	}
 }
 
 //<-dceag-c776-b->
@@ -323,6 +397,7 @@ void ZWave::CMD_Reset(string sArguments,string &sCMD_Result,Message *pMessage)
 void ZWave::CMD_StatusReport(string sArguments,string &sCMD_Result,Message *pMessage)
 //<-dceag-c788-e->
 {
+	DCE::LoggerWrapper::GetInstance()->Write(LV_ZWAVE,"ZWave::StatusReport() sArgument %s", sArguments.c_str());
 	if (sArguments.find("NU") != std::string::npos) {
 		uint8 nodeId = atoi(sArguments.substr(2).c_str());
 		DCE::LoggerWrapper::GetInstance()->Write(LV_ZWAVE,"ZWave::StatusReport() RequestNodeNeighborUpdate node %d", nodeId);
@@ -346,9 +421,8 @@ void ZWave::CMD_StatusReport(string sArguments,string &sCMD_Result,Message *pMes
 void ZWave::CMD_Assign_Return_Route(int iNodeID,int iDestNodeID,string &sCMD_Result,Message *pMessage)
 //<-dceag-c820-e->
 {
-	cout << "Need to implement command #820 - Assign Return Route" << endl;
-	cout << "Parm #239 - NodeID=" << iNodeID << endl;
-	cout << "Parm #240 - DestNodeID=" << iDestNodeID << endl;
+
+	OpenZWave::Manager::Get()->BeginControllerCommand(m_pZWInterface->GetHomeId(), OpenZWave::Driver::ControllerCommand_AssignReturnRoute, controller_update, NULL, false, iNodeID, iDestNodeID);
 }
 
 //<-dceag-c840-b->
@@ -363,9 +437,8 @@ void ZWave::CMD_Assign_Return_Route(int iNodeID,int iDestNodeID,string &sCMD_Res
 void ZWave::CMD_SetWakeUp(int iValue,int iNodeID,string &sCMD_Result,Message *pMessage)
 //<-dceag-c840-e->
 {
-	cout << "Need to implement command #840 - SetWakeUp" << endl;
-	cout << "Parm #48 - Value=" << iValue << endl;
-	cout << "Parm #239 - NodeID=" << iNodeID << endl;
+	if (m_pZWInterface->SetWakeUp(iNodeID, iValue))
+		sCMD_Result = "OK";
 }
 
 //<-dceag-c841-b->
@@ -682,7 +755,8 @@ void ZWave::OnNotification(OpenZWave::Notification const* _notification, NodeInf
 	case OpenZWave::Notification::Type_NodeRemoved:
 	{
 		// Note: cannot use nodes list from zwinterface at this point, as the node has already been deleted
-		DeleteDevicesForNode(_notification->GetNodeId());
+		// TODO: removed for now as it seem to trigger this when doing some controller commands
+                //DeleteDevicesForNode(_notification->GetNodeId());
 		break;
 	}
 	default:
