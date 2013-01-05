@@ -1,0 +1,15 @@
+Source: lmce-agocontrol-bridge
+Section: unknown
+Priority: extra
+Maintainer: Harald <hari@vt100.at>
+Build-Depends: debhelper (>= 8.0.0),libqpidmessaging2-dev,libqpidtypes1-dev, libqpidcommon2-dev,libqpidclient2-dev, lmce-base-dev
+Standards-Version: 3.9.2
+Homepage: <insert the upstream URL, if relevant>
+#Vcs-Git: git://git.debian.org/collab-maint/lmce-agocontrol-bridge.git
+#Vcs-Browser: http://git.debian.org/?p=collab-maint/lmce-agocontrol-bridge.git;a=summary
+
+Package: lmce-agocontrol-bridge
+Architecture: any
+Depends: ${shlibs:Depends}, ${misc:Depends}, libqpidmessaging2, libqpidclient2, libqpidcommon2, libqpidtypes1
+Description: LinuxMCE - agocontrol bridge device
+ Bridges agocontrol to LinuxMCE. Acts as a LinuxMCE device.
