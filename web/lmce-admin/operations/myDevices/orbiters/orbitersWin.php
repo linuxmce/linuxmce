@@ -19,7 +19,6 @@ function orbitersWin($output,$dbADO) {
 	<form action="index.php" method="POST" name="devices">
 	<input type="hidden" name="section" value="orbitersWin">
 	<input type="hidden" name="action" value="add">	
-		
 	<br>
 	<a href="index.php?section=login" target="_top">'.$TEXT_BACK_CONST.'</a>
 	<table>
@@ -42,6 +41,11 @@ function orbitersWin($output,$dbADO) {
 			<td>Intel x86</td>
 			<td> Windows CE.NET</td>
 			<td><a href="fdownload.php?filepath=installers/Orbiter_CeNet4_x86.CAB" target="_blank">('.$TEXT_DOWNLOAD_CONST.')</a></td>
+		</tr>
+		<tr>
+			<td>Android</td>
+			<td>Orbiter For Android</td>
+			<td><a href="http://deb.linuxmce.org/LinuxMCE-Orbiter.apk" target="_blank">('.$TEXT_DOWNLOAD_CONST.')</td>
 		</tr>
 		<tr bgcolor="#F0F3F8">
 			<td>Nokia n900</td>
