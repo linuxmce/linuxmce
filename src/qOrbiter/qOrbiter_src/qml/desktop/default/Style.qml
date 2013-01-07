@@ -1,13 +1,5 @@
 import QtQuick 1.0
-/*!
- *\class Style
- *\brief This component defines the qml style
- *\ingroup qml_desktop_default
- *
- *This file is used for defining the style of the QML skin. Errors in this file will result in the QML engine falling back to the default skin.
- *The default skin is used as a testbed for functionality, and therefore considered to be the most up-to-date
- *
- */
+
 //sample style file for a qml ui
 /*
   color scheme
@@ -16,10 +8,23 @@ import QtQuick 1.0
   Grids  ltgrn
   Button Text white
   Title Text white
-
   */
 
+/*!
+ *\class Style \name Default Style
+ *\brief This component defines the qml style
+ *\ingroup qml_desktop_default
+ *
+ *This file is used for defining the style of the QML skin. Errors in this file will result in the QML engine falling back to the default skin.
+ *The default skin is used as a testbed for functionality, and therefore considered to be the most up-to-date
+ *
+ */
 
+/**@name Desktop Default
+  * This relates to the Desktop platform, default skin.
+  */
+
+///@{
 QtObject{
     id:style
     objectName: "orbiter_style"
@@ -124,3 +129,4 @@ QtObject{
     property color bgcolor: "#0D4392"
 
 }
+///@}

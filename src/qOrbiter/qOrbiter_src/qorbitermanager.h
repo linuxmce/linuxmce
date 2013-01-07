@@ -617,6 +617,11 @@ signals:
 
 
 public slots:
+    /*!
+    * \brief setFormFactor
+    * \param f
+    * \ingroup qorbiter_properties
+    */
    void setFormFactor(int f) {isPhone = f;}
 
     void sendDceMessage(QString m) {emit newMessageSend(m);}
@@ -726,6 +731,12 @@ public slots:
      *requests and slowing the response time of the router.
      */
     void requestSecurityPic(int i_pk_camera_device, int h, int w);
+    /*!
+     * \brief setHouseMode
+     * \param mode
+     * \param pass
+     * \ingroup qorbiter_properties
+     */
     void setHouseMode(int mode, int pass);
 
 

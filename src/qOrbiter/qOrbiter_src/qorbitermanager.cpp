@@ -307,7 +307,14 @@ void qorbiterManager::goBacktoQScreen()
     }
 }
 
-//this function begins the initialization of the 'manager' object
+/*!
+ * \brief qorbiterManager::initializeManager: Initializes the QorbiterManager startup procedure.
+ * \param sRouterIP
+ * \param device_id
+ * \return
+ *This function is responsible for setting the various paths associated with the QML skins, intiating the loading of those skins
+ *and reporting sucess or failure in loading those skins.
+ */
 bool qorbiterManager::initializeManager(string sRouterIP, int device_id)
 {
     setDeviceNumber(device_id);
@@ -421,6 +428,10 @@ bool qorbiterManager::initializeManager(string sRouterIP, int device_id)
 }
 
 //this functions purpose is to change the UI to the new skin pointed to. It will evolve to encompass orbiter regen to some extent
+/*!
+ * \brief qorbiterManager::refreshUI: This function re-initializes the qml engines skin.
+ * \param url - The relative or absolute path of the skin to the binary.
+ */
 void qorbiterManager::refreshUI(QUrl url)
 {
 
@@ -436,6 +447,14 @@ void qorbiterManager::refreshUI(QUrl url)
 
 
 // get conf method that reads config file
+/*!
+ * \brief qorbiterManager::processConfig: Process XML based config file.
+ * \param config
+ *This function is called when the configuration xml file needs to be processed. It goes through the file and reads the XML into an object
+ *where its data is extracted at various parts to populate the user interface.
+ *
+ * \note Many of the sections here have been made dynamic in an attempt to remove the need for the xml based configuration file.
+ */
 void qorbiterManager::processConfig(QByteArray config)
 {
     iPK_Device_DatagridPlugIn =  long(6);
@@ -725,9 +744,12 @@ void qorbiterManager::processConfig(QByteArray config)
     }
     setDceResponse("Security Done");
     QApplication::processEvents(QEventLoop::AllEvents);
+
+    /*!
+     *Various context objects are set in this function after processing is done
+     */
     //------------------------------------------context objects----------------------------------------------------
     qorbiterUIwin->rootContext()->setContextObject(this);
-
     qorbiterUIwin->rootContext()->setContextProperty("currentRoomLights", roomLights);                 //current room scenarios model
     qorbiterUIwin->rootContext()->setContextProperty("currentRoomMedia", roomMedia);                   //current room media model
     qorbiterUIwin->rootContext()->setContextProperty("currentRoomClimate", roomClimate);               //curent room climate model
@@ -803,6 +825,11 @@ bool qorbiterManager::OrbiterGen()
     return true;
 }
 
+/*!
+ * \brief qorbiterManager::swapSkins: Switches UI skins
+ * \param incSkin
+ * This function switches the engines base path for the style to the incoming path, effectively changing the skin.
+ */
 void qorbiterManager::swapSkins(QString incSkin)
 {
     emit skinMessage("swapping sking to::" + incSkin);
@@ -960,28 +987,7 @@ int qorbiterManager::getlocation() const
 
 void qorbiterManager::regenOrbiter(int deviceNo)
 {
-    //rewrite to use qNetworkrequest, connect reply to finished slot
-    //possible to dl xml from there??
-    if(qs_routerip =="127.0.0.1")
-    {
-        //splashView->showFullScreen();
-        qorbiterUIwin->close();
-        QApplication::processEvents(QEventLoop::AllEvents);
-
-        QProcess *regen = new QProcess(this);
-        regen->start("/usr/bin/php /var/www/lmce-admin/qOrbiterGenerator.php?d="+QString::number(iPK_Device), QIODevice::ReadOnly);
-#ifdef debug
-        emit qtMessage("status code:"+regen->errorString());
-#endif
-        QObject::connect(regen,SIGNAL(finished(int)), this, SLOT(regenComplete(int)));
-        QObject::connect(regen,SIGNAL(error(QProcess::ProcessError)), this, SLOT(regenError(QProcess::ProcessError)));
-    }
-    else
-    {
         emit screenChange("WebRegen.qml");
-    }
-
-
 }
 
 void qorbiterManager::regenComplete(int i)

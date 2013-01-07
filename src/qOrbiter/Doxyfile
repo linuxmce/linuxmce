@@ -539,7 +539,7 @@ WARNINGS               = YES
 # for undocumented members. If EXTRACT_ALL is set to YES then this flag will 
 # automatically be disabled.
 
-WARN_IF_UNDOCUMENTED   = YES
+WARN_IF_UNDOCUMENTED   = NO
 
 # If WARN_IF_DOC_ERROR is set to YES, doxygen will generate warnings for 
 # potential errors in the documentation, such as not documenting some 
@@ -643,7 +643,16 @@ EXCLUDE_PATTERNS       = */moc_* \
                          */qtc_packaging/* \
                          */.svn/* \
                          */platforms/* \
-                         */*build*/*
+                         */*build*/* \
+                         */qOrbiter_src/qml/android/phone/lib/* \
+                         */qOrbiter_src/qml/android/tablet/data/lib/* \
+                         */qOrbiter_src/qml/android/tablet/default/lib/* \
+                         */qOrbiter_src/qml/android/tablet/lustylizard/lib/* \
+                         */qOrbiter_src/qml/android/tablet/wip/lib/* \
+                         */qOrbiter_src/qml/desktop/default/lib/* \
+                         */qOrbiter_src/qml/desktop/noir/lib/* \
+
+
 
 # The EXCLUDE_SYMBOLS tag can be used to specify one or more symbol names 
 # (namespaces, classes, functions, etc.) that should be excluded from the 
