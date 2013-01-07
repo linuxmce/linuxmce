@@ -20,4 +20,13 @@ namespace DCE
   
   }
 
+  void FamicomEmulatorModel::updateTemplateVariables()
+  {
+    MESSEmulatorModel::updateTemplateVariables();
+    if (m_mapConfigTemplateItems["###ROMPATH###"].empty())
+      {
+	m_mapConfigTemplateItems["###ROMPATH###"] = FileUtils::BasePath(m_mapMedia_Find("flop"));
+      }
+  }
+
 }

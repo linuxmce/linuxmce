@@ -17,6 +17,9 @@ namespace DCE
     FamicomEmulatorModel();
     ~FamicomEmulatorModel();
 
+  protected:
+    virtual void updateTemplateVariables();
+
   };
 }
 
