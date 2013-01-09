@@ -41,6 +41,11 @@
 			<td>Outlook sync utility</td>
 			<td>Windows XP</td>
 			<td><a href="fdownload.php?filepath=installers/OutlookSync.msi" target="_blank">(download)</a></td>
+		</tr>
+		<tr>
+			<td>Touch Orbiter for Android</td>
+			<td>Android</td>
+			<td><a href="http://deb.linuxmce.org/LinuxMCE-Orbiter.apk"></a></td>
 		</tr>		
 	</table>
 	
