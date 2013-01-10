@@ -226,7 +226,8 @@ bool Criteria::EvaluateExpression(class CriteriaParm *pCriteriaParm,class EventI
 	}
 	else
 	{
-		pCriteriaParm->m_sComparedValue = *sLValue;
+		if ( sLValue )
+			pCriteriaParm->m_sComparedValue = *sLValue;
 	}
 
 	if( PK_ParameterType==PARAMETERTYPE_string_CONST && sLValue==NULL )
