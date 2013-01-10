@@ -220,20 +220,19 @@ bool Criteria::EvaluateExpression(class CriteriaParm *pCriteriaParm,class EventI
 	else
 		sRValue = pCriteriaParm->m_sValue;
 
+	if( PK_ParameterType==PARAMETERTYPE_string_CONST && sLValue==NULL )
+		throw(string("comparing string, string is null"));
+	else if( (PK_ParameterType==PARAMETERTYPE_int_CONST || PK_ParameterType==PARAMETERTYPE_bool_CONST) && iLValue==NULL )
+		throw(string("comparing int, int is null"));
+
 	if( PK_ParameterType==PARAMETERTYPE_int_CONST || PK_ParameterType==PARAMETERTYPE_bool_CONST )
 	{
 		pCriteriaParm->m_sComparedValue = StringUtils::itos(*iLValue);
 	}
 	else
 	{
-		if ( sLValue )
-			pCriteriaParm->m_sComparedValue = *sLValue;
+		pCriteriaParm->m_sComparedValue = *sLValue;
 	}
-
-	if( PK_ParameterType==PARAMETERTYPE_string_CONST && sLValue==NULL )
-		throw(string("comparing string, string is null"));
-	else if( (PK_ParameterType==PARAMETERTYPE_int_CONST || PK_ParameterType==PARAMETERTYPE_bool_CONST) && iLValue==NULL )
-		throw(string("comparing int, int is null"));
 
 	if (PK_ParameterType==PARAMETERTYPE_int_CONST || PK_ParameterType==PARAMETERTYPE_bool_CONST ) {
 		if (bCriteriaList) {
