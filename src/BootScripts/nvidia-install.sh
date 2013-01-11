@@ -228,9 +228,8 @@ installCorrectNvidiaDriver() {
 			add-apt-repository ppa:ubuntu-x-swat/x-updates
 			apt-get update
 			apt-get install -y alsa-base 2> >(tee "$tmpfile")
+			apt-get install -y alsa-utils 2> >(tee "$tmpfile")
 			apt-get install -y "$preferred_driver" 2> >(tee "$tmpfile")
-			rm /etc/apt/sources.list.d/*
-			apt-get update
 			ConfSet "AlternateSC" "1"
 			local param="reboot"
 		else
