@@ -21,7 +21,7 @@ class gridItem: public QObject
 
 public:
     gridItem() {}
-    explicit gridItem( QString &ident, QString &name,  QString &path,  int &index,  QImage &img);
+    explicit gridItem( QString &ident, QString &name,  QString &path,  int &index );
     QVariant data(int role) const;
     QHash<int, QByteArray> roleNames() const;
 
@@ -29,7 +29,6 @@ public:
     inline QString name() const { return m_name; }
     inline int index() const { return m_index; }
     inline QString path() const { return m_path; }
-    inline QImage cellImage() const {  return m_image; }
     inline QMap <QString*, int> attributes() const {return m_mapAttrib;}
     inline QString imgAspect () const {return m_aspect;}
     void setAspect (QString qs_aspect) {m_aspect = qs_aspect;}
@@ -39,7 +38,6 @@ private:
     QString m_name;
     int m_index;
     QString m_path;
-    QImage m_image;
     QString m_fk_file;
     QString m_aspect;
     QMap <QString*, int> m_mapAttrib;

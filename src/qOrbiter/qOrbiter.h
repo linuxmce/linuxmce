@@ -101,6 +101,7 @@ public:
     /*! @name Misc Member Variables */
     //@{
     typedef QMap <int, QString> myMap;
+
     char *screenieData; /**< char pointer to raw screenshot data from dce socket */
     int screenieDataSize;/**< int to size of \ref screenieData */
     Virtual_Device_Translator coreDevices;/**< \warning not implemented */
@@ -139,6 +140,7 @@ public:
     int media_pos; /*!< \todo find out what this is */
     int media_pageSeperator; /*!< \brief The amount of cells on a given page. Set high for infinite scrolling. */
     string media_seek; /*!< \brief Where the grid is seeking to. */
+    int modelPages; /*!< \brief The total number of pages in the model. */
     //@}
 
     /*! @name Address and ip Member variables */
@@ -1481,6 +1483,8 @@ signals:
     void DCEHostChanged();
 
 public slots:
+    void setModelPages(int p) {modelPages = p; emit modelPagesChanged(modelPages);}
+            int getModelPages() {return modelPages;}
 
     void osdBack();
 

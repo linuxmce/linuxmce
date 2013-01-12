@@ -2161,7 +2161,7 @@ void qOrbiter::beginSetup()
     media_pos=0;
     media_seek="";
     cellsToRender = 0;
-    setGridSeperator(16);
+    setGridSeperator(1000000);
     b_mediaPlaying = false;
     m_dwPK_Device_NowPlaying = 0;
     m_dwPK_Device_NowPlaying_Video = 0;
@@ -3523,20 +3523,8 @@ void DCE::qOrbiter::populateAdditionalMedia() //additional media grid that popul
             //                }
             //            }
             index = pDataGridTable->CovertColRowType(it->first).first;
-            if (pPath )
-            {
-#ifndef ANDROID
-                cellImg = getfileForDG(pPath);
-#else
-                cellImg = getfileForDG(pPath);
-#endif
-            }
-            else
-            {
-                cellImg.load(":/icons/icon.png");
-            }
 
-            gridItem * item = new gridItem(fk_file, cellTitle, filePath, index, cellImg);
+            gridItem * item = new gridItem(fk_file, cellTitle, filePath.remove("/home/mediapics/"), index);
             emit addItem(item);
 #ifdef RPI
             QThread::msleep(100);
@@ -4081,8 +4069,8 @@ void DCE::qOrbiter::grabScreenshot(QString fileWithPath)
         }
     }
     emit screenshotVariablesReady();
-    qDebug("sending screenshot variables");
-    //screenshotVars.clear();
+
+
 
     CMD_Get_Video_Frame grabMediaScreenshot(long(m_dwPK_Device), long(m_dwPK_Device_NowPlaying), sDisableAspectLock,internal_streamID, 800 , 800, &screenieData, &screenieDataSize, &s_format);
     string mpResp= "";

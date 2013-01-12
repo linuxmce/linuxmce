@@ -31,42 +31,7 @@ GridIndexProvider::GridIndexProvider(ListModel *model  , int pathRole, int pixma
 
 QImage GridIndexProvider::requestImage(const QString &id, QSize *size, const QSize &requestedSize)
 {
-    QImage image;
-    QString key = QString("image://datagridimg/%1").arg(id);
-    QModelIndex index = mPixmapIndex.value(id);
-    gridItem * t = mModel.find(id);
-    if(t == NULL){
-         image.load(":/icons/icon.png");
-        return image;
-
-    }
-    else
-
-    {
-         image = t->cellImage();
-        // QString t =  mModel.data(index, 2).value<QString>();
-        if(image.size().isEmpty()){
-            image.load(":/icons/icon.png");
-        }
-
-        QImage result;
-        if (image.height() < image.width())
-        {
-            mModel.find(id)->setAspect("poster");
-        }
-        else
-        {
-            mModel.find(id)->setAspect("wide");
-        }
-
-        if (requestedSize.isValid()) {
-            result = image.scaled(requestedSize);
-        } else {
-            result = image;
-        }
-    }
-
-
+    QImage image;    
     return image;
 
 }
@@ -106,7 +71,6 @@ void GridIndexProvider::dataDeleted(const QModelIndex&, int start, int end)
 
 void GridIndexProvider::dataReset()
 {
-
     mPixmapIndex.clear();
 }
 

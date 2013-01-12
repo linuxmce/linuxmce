@@ -47,7 +47,7 @@ Component
             
         }
         
-        Component.onCompleted: fade_and_scale.running = true
+        Component.onCompleted: {fade_and_scale.running = true}
         Rectangle
         {
             id:frame
@@ -74,16 +74,14 @@ Component
             Image
             {
                 id: imagerect;
-                source:"image://datagridimg/"+id ;
+                source:path !=="" ? "http://192.168.80.1/lmce-admin/MediaImage.php?img="+path : "" ;
                 height: scaleY(18);
                 width: scaleX(18);
                 anchors.centerIn: parent;
                 fillMode: Image.PreserveAspectCrop
-                smooth: true
+               // smooth: true
                 asynchronous: true
             }
-            
-            
             
             Rectangle{
                 id:textmask

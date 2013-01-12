@@ -40,8 +40,17 @@ Item
         }
 
         StyledText {
+            id: loaded_cells
+            text: dataModel.currentCells
+            color: "white"
+            font.bold: true
+            font.pixelSize: scaleY(4)
+           anchors.centerIn: progress_bar
+        }
+
+        StyledText {
             id: total_cells
-            text: manager.media_pageSeperator
+            text: dataModel.totalcells
             color: "grey"
             font.bold: true
             font.pixelSize: scaleY(4)
