@@ -3476,8 +3476,9 @@ void DCE::qOrbiter::populateAdditionalMedia() //additional media grid that popul
 
         DataGridTable *pDataGridTable = new DataGridTable(iData_Size,pData,false);
         emit mediaResponseChanged("grid request ok");
-        delete[] pData;
-        pData = NULL;
+       delete[] pData;
+       pData = NULL;
+       free(pData);
 
         // LoggerWrapper::GetInstance()->Write(LV_CRITICAL, "Pic Datagrid Dimensions: Height %i, Width %i", gHeight, gWidth);
         DataGridCell *pCell;
@@ -3492,8 +3493,10 @@ void DCE::qOrbiter::populateAdditionalMedia() //additional media grid that popul
         {
             media_seek = "";
             populateAdditionalMedia();
-
             delete pDataGridTable;
+            delete[] pData;
+            free(pData);
+
             return;
         }
         setCurrentPage((std::abs(GridCurRow /  media_pageSeperator))) ;
@@ -3533,9 +3536,8 @@ void DCE::qOrbiter::populateAdditionalMedia() //additional media grid that popul
                 cellImg.load(":/icons/icon.png");
             }
 
-
-            emit addItem(new gridItem(fk_file, cellTitle, filePath, index, cellImg));
-
+            gridItem * item = new gridItem(fk_file, cellTitle, filePath, index, cellImg);
+            emit addItem(item);
 #ifdef RPI
             QThread::msleep(100);
 #endif
@@ -3543,12 +3545,10 @@ void DCE::qOrbiter::populateAdditionalMedia() //additional media grid that popul
         }
         media_seek="";
         delete pDataGridTable;
+        pDataGridTable = NULL;
+        free(pDataGridTable);
     }
 }
-
-
-
-
 
 void DCE::qOrbiter::SetSecurityMode(int pin, int mode)
 {
@@ -3754,7 +3754,12 @@ void DCE::qOrbiter::GetAlarms()
                 col++;
                 row=0;
             }
+            delete pDataGridTable;
+            pDataGridTable = NULL;
+            delete[] pData;
+            pData = NULL;
         }
+
     }
 }
 
@@ -4731,10 +4736,7 @@ void DCE::qOrbiter::prepareFileList(int iPK_MediaType)
             //creating a dg table to check for cells. If 0, then we error out and provide a single "error cell"
             DataGridTable *pDataGridTable = new DataGridTable(iData_Size,pData,false);
             cellsToRender= pDataGridTable->GetRows();
-            delete pDataGridTable;
-            delete[] pData;
-            pDataGridTable = NULL;
-            pData = NULL;
+
 #ifndef ANDROID
             LoggerWrapper::GetInstance()->Write(LV_CRITICAL, "Datagrid Dimensions: Height %i, Width %i", gHeight, gWidth);
 #endif
@@ -4764,9 +4766,14 @@ void DCE::qOrbiter::prepareFileList(int iPK_MediaType)
                 i_mediaModelRows = cellsToRender;
                 media_totalPages = (i_mediaModelRows / media_pageSeperator)+1; //16 being the items per page.
 
-                pDataGridTable = NULL;
+
+
                 setModelPages(media_totalPages);
                 emit mediaResponseChanged(QString::number(media_totalPages)+ " pages from request, populating first page.");
+                            delete pDataGridTable;
+                            delete[] pData;
+                            pDataGridTable = NULL;
+                            pData = NULL;
                 requestPage(0);
                 //requestGenres(iPK_MediaType);
             }

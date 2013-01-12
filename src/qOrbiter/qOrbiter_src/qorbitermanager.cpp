@@ -46,7 +46,7 @@
 //#include "OrbiterData.h"
 
 
-/*
+/*!
   this file is responsible for the main connection between the dce thread and the qt thread.
    pqOrbiter->qmlUI = this; inside of setupLMCE initializes the dce thread, while other functions are
    responsible for signals and slots between dce and qml.
@@ -54,7 +54,8 @@
 
 using namespace DCE;
 
-/*
+/*!
+ *
   This is the latest incarnation of the orbiter constructor. its purpose is to quickly spawn a splash window, which can
   then (hopefully) notify us of background progress. A splash bar or loading indicator needs to be added, but a textual
   messaging system will be the initial method of communication
@@ -72,9 +73,9 @@ qorbiterManager::qorbiterManager(QDeclarativeView *view, QObject *parent) :
     // b_orbiterReady = false;
     bAppError = false;
     isPhone = 0;
-    //this governs local vs remote loading. condensed to one line, and will be configurable from the ui soon.
+
 #ifndef __ANDROID__
-    b_localLoading = true;
+    b_localLoading = true; /*! this governs local vs remote loading. condensed to one line, and will be configurable from the ui soon. */
 #else
     b_localLoading = false;
 #endif
@@ -105,7 +106,6 @@ qorbiterManager::qorbiterManager(QDeclarativeView *view, QObject *parent) :
     qorbiterUIwin->rootContext()->setContextProperty("orbiterList", myOrbiters);
     qorbiterUIwin->rootContext()->setContextProperty("deviceList", devices);
     qorbiterUIwin->rootContext()->setContextProperty("deviceCommands", deviceCommands);
-
     appHeight = qorbiterUIwin->height() ;
     appWidth = qorbiterUIwin->width() ;
 
@@ -132,6 +132,9 @@ qorbiterManager::qorbiterManager(QDeclarativeView *view, QObject *parent) :
     QObject::connect(view->engine(), SIGNAL(quit()), this, SLOT(closeOrbiter()));
 
 
+    /*!
+     * \todo move buildtype / qrc path code to its own function and return it here
+     */
 
 #ifdef for_desktop
 #ifndef QT5
@@ -199,13 +202,11 @@ qorbiterManager::qorbiterManager(QDeclarativeView *view, QObject *parent) :
     qrcPath = ":desktop/Splash.qml";
 #endif
 
-    QApplication::processEvents(QEventLoop::AllEvents);
     qmlPath = adjustPath(QApplication::applicationDirPath().remove("/bin"));
     localDir = qmlPath.append(buildType);
 
     initializeGridModel();  //begins setup of media grid listmodel and its properties
     initializeSortString(); //associated logic for navigating media grids
-    QApplication::processEvents(QEventLoop::AllEvents);
 
     //managing where were are variables
     i_current_command_grp = 0;
@@ -250,6 +251,9 @@ qorbiterManager::qorbiterManager(QDeclarativeView *view, QObject *parent) :
     gotoScreenList = new QStringList();
     ScreenSaver = new ScreenSaverClass(this);
     qorbiterUIwin->engine()->rootContext()->setContextProperty("screensaver", ScreenSaver);
+    /*!
+     * \todo move filters to their own initialization function, possibly multiple to account for dynamic setting of each one later.
+     */
 }
 
 qorbiterManager::~qorbiterManager()
@@ -1165,7 +1169,17 @@ void qorbiterManager::qmlSetupLmce(QString incdeviceid, QString incrouterip)
     initializeManager( qs_routerip.toStdString(), iPK_Device);
 }
 
-
+/*!
+ * \brief qorbiterManager::readLocalConfig Read the locally stored xml configuration file
+ * This function reads the configuration file, locally stored and in the xml file format. Inside the configuration file
+ * are various options and settings. These items are read and written to the file over the course of the application
+ * depending on if the user changes user configurable items.
+ *
+ *\note Android requires some additional handling in that the mobile storage location must be determined first, and then file options can
+ * be set. This has to occur everytime the application starts, and we hope to improve this in the future.
+ *
+ * \return
+ */
 bool qorbiterManager::readLocalConfig()
 {
 
@@ -1664,7 +1678,11 @@ void qorbiterManager::killScreenSaver()
 {
 
 }
-
+/*!
+ * \brief qorbiterManager::createAndroidConfig
+ *This function tries to determine the external storage location for a given android device so that it can read / write the user settings.
+ * \return
+ */
 bool qorbiterManager::createAndroidConfig()
 {
 
@@ -1725,7 +1743,6 @@ void qorbiterManager::checkOrientation(QSize)
         //setDceResponse("wide");
         appHeight = qorbiterUIwin->window()->rect().height();
         appWidth = qorbiterUIwin->window()->rect().width() ;
-
         setOrientation(false);
     }
     else
@@ -1791,7 +1808,11 @@ void qorbiterManager::showExistingOrbiter(const QList<QObject*> l )
     qorbiterUIwin->rootContext()->setContextProperty("orbiterList", QVariant::fromValue(t));
 }
 
-
+/*!
+ * \brief qorbiterManager::setupMobileStorage
+ * \return
+ * this function saves the mobile storage devices external storage path.
+ */
 bool qorbiterManager::setupMobileStorage()
 {
 

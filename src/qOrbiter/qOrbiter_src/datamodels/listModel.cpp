@@ -149,9 +149,11 @@ bool ListModel::resetInternalData()
       //  qDebug() <<"removing::" << m_list.count() << " of " << total;
         gridItem* pItem = m_list.takeAt(i);
         if (pItem)
-                delete pItem;
+                pItem->deleteLater();
+
     }
     m_list.clear();
+
   //  qDebug() << "Items cleared. Count:: "<< m_list.count();
     return true;
 

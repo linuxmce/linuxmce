@@ -125,7 +125,6 @@ public:
     bool finished;
     bool b_mediaPlaying;/**< set by the media engine   */
 
-    DataGridTable *pDataGridTable;
 
     //special Q_Properties which are always availible through the 'dcerouter object' for display of various responses
 

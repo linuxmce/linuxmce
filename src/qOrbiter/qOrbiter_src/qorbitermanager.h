@@ -535,7 +535,7 @@ signals:
     void setDceGridParam(int a, QString p );
     void keepLoading(bool s);
     void stillLoading(bool b);
-    void requestSubtypes();
+    void requestSubtypes(int subtype);
 
     /*Message and notification signals*/
     void dceResponseChanged();
@@ -626,9 +626,29 @@ public slots:
 
     void sendDceMessage(QString m) {emit newMessageSend(m);}
 
-    void requestMediaSubtypes(){emit requestSubtypes();}
+    /*!
+     * \brief Requests the media subtypes for given subtype
+     * \param subtype : int value corresponding to media subtypes
+     * -1 Tv Shows
+     * -2 Movies
+     * -3 Home Videos
+     * -4 Sports Events
+     * -5 music videos
+     * -6 Alternative - whatever that is
+     * -7 Popular music
+     * -8 Classical music - clearly not popular *boom!*
+     * -9 Learning
+     * -10 Audio Books
+     * -11 Arcade
+     * -12 Console
+     *
+     */
+    void requestMediaSubtypes(int subtype){emit requestSubtypes(subtype);}
     void setNewSubtype(){}
 
+    /*!
+     * \brief This requests the availible attribute types.
+     */
     void requestAttributeTypes(){}
     void requestGenres(){}
 
@@ -742,11 +762,25 @@ public slots:
 
     /*Media Metadata Slots*/
     void getLiveTVPlaylist() { }
+    /*!
+     * \brief This requests the current playlist of stored media.
+     * \ingroup qorbiter_properties
+     */
     void getStoredPlaylist() { emit bindMediaRemote(true);}
+
+    /*!
+     * \brief This slot is called the PlaylistClickedHandler
+     * \param position
+     * \ingroup qorbiter_properties
+     */
     void changedPlaylistPosition(int position) {emit newPlaylistPosition(position);}
 
     /*Media Mode control slots*/
     void setNowPlayingData() {}
+    /*!
+     * \brief This sets the playlist for tv channels.
+     * \ingroup qorbiter_properties
+     */
     void setNowPlayingTv() {emit bindMediaRemote(true); emit liveTVrequest(); }
     void setBoundStatus(bool b) {emit bindMediaRemote(b);}
     void setNowPlayingIcon(bool b);
