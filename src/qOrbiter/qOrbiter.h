@@ -87,33 +87,35 @@ class qOrbiter : public qOrbiter_Command
     // Private methods
 public:
     // Public member variables
-    /*
-     *Media Player
-     */
-    QString videoFileUrl;/**< Contains the full path of the video media  */
-    QString audioFileUrl;/**<  Contains the full path of the audio media */
-    QString streamingVideoIp;/**< Contains the ip address with port if included of streamed video. */
-    QString streamingAudioIp;/**< Contains the ip address with port if included of stremed audio */
-    QString mediaPlayerTimeCode;/**< Contains the timecode for the local media player (QMediaPlayer)  */
+    /*!
+   *@name MediaPlayer
+   */
+    //@{
+    QString videoFileUrl;/*!< \brief Contains the full path of the video media  */
+    QString audioFileUrl;/*!< \brief Contains the full path of the audio media */
+    QString streamingVideoIp;/*!< \brief Contains the ip address with port if included of streamed video. */
+    QString streamingAudioIp;/*!< \brief Contains the ip address with port if included of stremed audio */
+    QString mediaPlayerTimeCode;/*!< \brief Contains the timecode for the local media player (QMediaPlayer)  */
+    //@}
 
-    /*
-     *
-     *End Media Player
-     *
-     */
-
+    /*! @name Misc Member Variables */
+    //@{
     typedef QMap <int, QString> myMap;
-
-    //child devices
-    int qMediaPlayerID;/**< qMediaPlayer device ID */
-    int qCommunicatorID;/**< qCommunicator device ID \warning not implemented */
-
     char *screenieData; /**< char pointer to raw screenshot data from dce socket */
     int screenieDataSize;/**< int to size of \ref screenieData */
-
-
     Virtual_Device_Translator coreDevices;/**< \warning not implemented */
-    //DataGridTable pDataGridTable;
+    bool m_bOrbiterConnected;
+    QString currentScreen;
+    //@}
+
+    /*! @name Child Device Member Variables */
+    //@{
+    int qMediaPlayerID;/**< qMediaPlayer device ID */
+    int qCommunicatorID;/**< qCommunicator device ID \warning not implemented */
+    //@}
+
+    /*! \name Now Playing Member Variables */
+    //@{
     int m_dwPK_Device_NowPlaying; /**< set by the media engine, the current media player id  */
     int m_dwPK_Device_NowPlaying_Video;  /**< set by the media engine with the current video device id  */
     int m_dwPK_Device_NowPlaying_Audio;/**< set by the media engine with the current audio device id  */
@@ -124,64 +126,69 @@ public:
     bool retrieving;
     bool finished;
     bool b_mediaPlaying;/**< set by the media engine   */
+    int internal_streamID;
+    int internal_playback_speed;
+    //@}
 
+    /*! @name Datagrid Member Variables. */
+    //@{
+    int i_mediaModelRows; /*!< \brief The total rows in the media model */
+    int media_currentRow;/*!< \brief The current row of the media model, representing a paged position */
+    int media_totalPages; /*!< \brief The total pages as divided by the media_pageSeperator */
+    int media_currentPage;/*!< \brief The current page of the grid */
+    int media_pos; /*!< \todo find out what this is */
+    int media_pageSeperator; /*!< \brief The amount of cells on a given page. Set high for infinite scrolling. */
+    string media_seek; /*!< \brief Where the grid is seeking to. */
+    //@}
 
-    //special Q_Properties which are always availible through the 'dcerouter object' for display of various responses
-
-    int i_mediaModelRows;
-    int media_currentRow;
-    int media_totalPages;
-    int media_currentPage;
-    int media_pos;
-    int media_pageSeperator;
-    int modelPages;
-    string media_seek;
-    bool pause;
-
+    /*! @name Address and ip Member variables */
+    //@{
     QString dceIP; /**< The ip address of the router  */
     QString DCEHost; /**< The hostname of the router */
-
     string m_sExternalIP; /**< The external ip address of the router as seen from a WAN */
+    //@}
 
-    int iPK_Device_DatagridPlugIn;
-    int iPK_Device_OrbiterPlugin;
-    int iPK_Device_GeneralInfoPlugin;
-    int  iPK_Device_SecurityPlugin;
-    int  iPK_Device_LightingPlugin;
-    int  m_dwIDataGridRequestCounter;
+    /*! @name Device Id Member Variables */
+    //@{
+    int iPK_Device_DatagridPlugIn; /*!< \brief Datagrid plugin id. */
+    int iPK_Device_OrbiterPlugin; /*!< \brief Orbiter plugin id. */
+    int iPK_Device_GeneralInfoPlugin; /*!< \brief GeneralInfoPlugin id. */
+    int  iPK_Device_SecurityPlugin; /*!< \brief SecurityPlugin id. */
+    int  iPK_Device_LightingPlugin; /*!< \brief LightingPlugin id. */
+    int  m_dwIDataGridRequestCounter; /*!< \brief Datagrid request counter. Incremented per dg request for identifying the current grid. */
     int iOrbiterPluginID;
     int  iMediaPluginID;
     int iPK_Device_eventPlugin;
     int m_pOrbiterCat;
+    //@}
+
+    /*! @name Location, user, and Floorplan Member Variables */
+    //@{
     int i_ea;
     int i_room;
     int i_user;
     int i_current_mediaType;
     int i_current_floorplanType;
-    bool m_bOrbiterConnected;
-    QImage returnImage;
-    QByteArray TconfigData;
+    string *s_user;
+    //@}
 
-    //orbiterSetup
+    /*! @name Orbiter Setup Member Variables */
+    //@{
     int sPK_Room;
     int sPK_Lang;
     int sPK_Skin;
     int sPK_Users;
     int sHeight;
     int sWidth;
+
     QNetworkAccessManager * httpOrbiterSettings;
     QNetworkRequest * httpSettingsRequest;
     QNetworkReply * httpSettingsReply;
+    //@}
 
-    string *s_user;
-    QString currentScreen;
-    int internal_streamID;
-    int internal_playback_speed;
-
-    //media grid
-
+    /*! @name Filter Parameter Member Variables */
+    //@{
     QStringList goBack;
-
     QString qs_seek;
     QString q_mediaType;           //1
     QString q_subType;             //2
@@ -194,18 +201,19 @@ public:
     QString q_last_viewed;        //9
     QString q_pk_attribute;        //10
     int cellsToRender;
-
     QString *datagridVariableString;
     QString videoDefaultSort;
     QString audioDefaultSort;
     QString photoDefaultSort;
     QString gamesDefaultSort;
-
     bool backwards;
     bool requestMore;
-    //end media grid
+    //@}
 
-    //carried over variables from old OrbiterData.h
+    /*! @name Legacy Member Variables
+     * \brief carried over variables from old OrbiterData.h
+     */
+    //@{
     map<int,string> m_mapTextString;
     vector<int> m_vectPK_Users_RequiringPIN;
     map<int,int> m_mapDesignObj; //Used to map a screen to a DesignObj
@@ -214,8 +222,11 @@ public:
     map<int,int> m_mapScreen_Interrupt; // Map of which scripts can be interrupted
     map<int,string> m_mapPK_MediaType_Description; // The description for all the media
     map<int,string> m_mapPK_AttributeType_Description; // The description for all attribute types
-    bool m_bIsOSD,m_bNewOrbiter,m_bUseAlphaBlending,m_bUseMask;
-
+    bool m_bIsOSD ;
+    bool m_bNewOrbiter;
+    bool m_bUseAlphaBlending ;
+    bool m_bUseMask;
+//@}
 
     //<-dceag-const-b->
 public:
@@ -1480,8 +1491,7 @@ public slots:
     void setAlarm(bool toggle, int grp);
 
     void beginSetup();
-    void setModelPages(int p) {modelPages = p; emit modelPagesChanged(modelPages);}
-    int getModelPages() {return modelPages;}
+
 
     void setdceIP(QString ip) {dceIP = ip; emit dceIPChanged();}
     QString getdceIP() {return dceIP;}

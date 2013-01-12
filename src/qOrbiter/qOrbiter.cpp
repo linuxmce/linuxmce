@@ -2156,7 +2156,7 @@ void qOrbiter::beginSetup()
     i_current_mediaType = 0;
     i_current_floorplanType = 0;
     setCurrentPage(0);
-    modelPages = 0;
+
     media_currentPage=0;
     media_pos=0;
     media_seek="";
@@ -2525,7 +2525,7 @@ QImage DCE::qOrbiter::getfileForDG(string filePath)
     string p_sResponse="";
 
     //SendCommand(reqFile, p_sResponse);
-
+    QImage returnImage;
     if(SendCommand(reqFile, &p_sResponse) && p_sResponse=="OK")
     {
         QByteArray tempData;
@@ -3546,7 +3546,7 @@ void DCE::qOrbiter::populateAdditionalMedia() //additional media grid that popul
         media_seek="";
         delete pDataGridTable;
         pDataGridTable = NULL;
-        free(pDataGridTable);
+
     }
 }
 
@@ -4702,14 +4702,12 @@ void DCE::qOrbiter::prepareFileList(int iPK_MediaType)
 
     }
 
-
     params = "|"+q_subType +"|"+q_fileFormat+"|"+q_attribute_genres+"|"+q_mediaSources+"||"+q_attributetype_sort+"||2|"+q_pk_attribute+"";
     s = q_mediaType + params;
     if(backwards == false)
     {
         q_mediaType = QString::number(iPK_MediaType);
         goBack<< s;
-
     }
 #ifdef QT5
     //QApplication::processEvents(QEventLoop::AllEvents);
@@ -4761,7 +4759,7 @@ void DCE::qOrbiter::prepareFileList(int iPK_MediaType)
             }
             else
             {
-                qDebug()<<"changing size";
+
                 // emit gridModelSizeChange(cellsToRender);
                 i_mediaModelRows = cellsToRender;
                 media_totalPages = (i_mediaModelRows / media_pageSeperator)+1; //16 being the items per page.
@@ -4777,11 +4775,7 @@ void DCE::qOrbiter::prepareFileList(int iPK_MediaType)
                 requestPage(0);
                 //requestGenres(iPK_MediaType);
             }
-
         }
-
-
-
         /*
                   Datagrid params
                   # 4 PK_Variable (int) (Out)  The populate grid can optionally return a variable number
