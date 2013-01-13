@@ -2209,7 +2209,6 @@ bool qOrbiter::getGridStatus()
 void qOrbiter::setCurrentRow(int row)
 {
     media_currentRow = row;
-
 }
 
 int qOrbiter::getCurrentRow()
@@ -3503,7 +3502,7 @@ void DCE::qOrbiter::populateAdditionalMedia() //additional media grid that popul
 
         for(MemoryDataTable::iterator it=pMediaGridTable->m_MemoryDataTable.begin();it!=pMediaGridTable->m_MemoryDataTable.end();++it)
         {
-            QApplication::processEvents(QEventLoop::AllEvents);
+
             if(!b_cancelRequest){
                 pCell= it->second;
                 const char *pPath = pCell->GetImagePath();
@@ -3525,12 +3524,13 @@ void DCE::qOrbiter::populateAdditionalMedia() //additional media grid that popul
                 index = pMediaGridTable->CovertColRowType(it->first).first;
                 gridItem * item = new gridItem(fk_file, cellTitle, filePath.remove("/home/mediapics/"), index);
                 emit addItem(item);
+                QApplication::processEvents(QEventLoop::AllEvents);
 #ifdef rpi
                 Sleep(75);
 #elif ANDROID
                 Sleep(50);
 #else
-                Sleep(25);
+                Sleep(10);
 #endif
 
             }
@@ -4592,8 +4592,7 @@ void qOrbiter::adjustRoomLights(QString level)
 
 
 void DCE::qOrbiter::prepareFileList(int iPK_MediaType)
-{
-
+{    
     q_mediaType = QString::number(iPK_MediaType);
     requestMore = false;
     media_currentRow = 0;

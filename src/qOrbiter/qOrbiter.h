@@ -1485,6 +1485,12 @@ signals:
     void DCEHostChanged();
 
 public slots:
+
+    void cancelAllRequests(){
+        b_cancelRequest = true;
+        qDebug() << "Requests cancelled!";
+    }
+
     void setModelPages(int p) {modelPages = p; emit modelPagesChanged(modelPages);}
             int getModelPages() {return modelPages;}
 

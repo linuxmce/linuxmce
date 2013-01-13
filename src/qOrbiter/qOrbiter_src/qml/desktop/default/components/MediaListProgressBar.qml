@@ -3,7 +3,7 @@ Item
 { Connections
     {
         target: dataModel
-        onProgressChanged:{progress_bar_fill.height = ((progress_bar.height) * (dataModel.progress / 100))}
+        onProgressChanged:{progress_bar_fill.height = progress_bar.height* ((dataModel.currentCells / manager.media_pageSeperator))}
         onReady:progress_bar_fill.height = 0
         onLoadingStatusChanged:progress_bar_fill.color = dataModel.loadingStatus ? "green" : "red"
     }
@@ -45,12 +45,14 @@ Item
             color: "white"
             font.bold: true
             font.pixelSize: scaleY(4)
-           anchors.centerIn: progress_bar
+           anchors.top: progress_bar.bottom
+           anchors.left: progress_bar.left
+
         }
 
         StyledText {
             id: total_cells
-            text: dataModel.totalcells
+            text: manager.media_pageSeperator
             color: "grey"
             font.bold: true
             font.pixelSize: scaleY(4)

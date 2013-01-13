@@ -269,6 +269,7 @@ void qorbiterManager::gotoQScreen(QString s)
         bool t = false;
         emit keepLoading(t);
         emit clearModel();
+        emit cancelRequests();
         emit resetFilter();
     }
 

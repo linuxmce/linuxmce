@@ -530,7 +530,8 @@ signals:
     void newPageSeperator(int t);
     void requestMoreGridData();
     void clearModel();
-    void clearAndContinue(int t);
+    void cancelRequests(); /*!< \brief signal used to cancel thread processing activity in the dce thread */
+    void clearAndContinue(int t); /*! \brief signal used to tell the the listmodel to clear itself and request new data of the mediatype t */
     void showList();
     void setDceGridParam(int a, QString p );
     void keepLoading(bool s);
