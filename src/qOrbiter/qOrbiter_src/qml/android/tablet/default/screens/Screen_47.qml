@@ -36,6 +36,7 @@ Rectangle {
         anchors.top: fileviewscreen.top
         anchors.horizontalCenter: fileviewscreen.horizontalCenter
         radius:5
+        focus:true
         color:style.darkhighlight
         width: scaleX(75)
         height: scaleY(5)
@@ -61,6 +62,28 @@ Rectangle {
                 id:seperationSetter
                 width: page_label.width
                 text: manager.media_pageSeperator
+
+            }
+            Rectangle{
+                height: parent.height-1
+                width: childrenRect.width + 10
+                StyledText{
+                    text: qsTr("Set")
+                }
+                MouseArea{
+                    anchors.fill: parent
+                    onClicked: {
+                        pos_label.forceActiveFocus()
+                        if(!seperationSetter.text.match("\d")){
+                        manager.setDceGridSep(seperationSetter.text)
+                            manager.requestPage(0)
+                        }
+                        else
+                        {
+                            seperationSetter.text.color = red
+                        }
+                    }
+                }
             }
         }
 
@@ -68,7 +91,7 @@ Rectangle {
     Connections
     {
         target: dataModel
-        onProgressChanged:{progress_bar_fill.height = ((progress_bar.height) * (dataModel.progress / 100)); console.log(dataModel.progress)}
+        onProgressChanged:{progress_bar_fill.height = progress_bar.height* ((dataModel.currentCells / manager.media_pageSeperator)); console.log(dataModel.progress)}
         onReady:progress_bar_fill.height = 0
         onLoadingStatusChanged:progress_bar_fill.color = dataModel.loadingStatus ? "green" : "red"
     }
@@ -87,18 +110,28 @@ Rectangle {
             id:progress_bar_fill
             height: 0
             width: parent.width-1
-            color: height === progress_bar.height ? "green" : "red"
+            color: dataModel.loadingStatus ? "green" : "red"
             anchors.bottom: parent.bottom
             opacity: .25
         }
+        StyledText {
+            id: current_cells
+            text: dataModel.currentCells
+            color: "grey"
+            font.bold: false
+            font.pixelSize: scaleY(2)
+            anchors.top: progress_bar.bottom
+            anchors.left: progress_bar.left
+        }
 
-        Text {
+        StyledText {
             id: total_cells
-            text: manager.media_pageSeperator
+            text: manager
             color: "grey"
             font.bold: false
             font.pixelSize: scaleY(4)
             anchors.bottom: progress_bar.top
+            anchors.left: progress_bar.left
         }
 
     }
@@ -175,7 +208,7 @@ Rectangle {
                 Image
                 {
                     id: imagerect;
-                    source:"image://datagridimg/"+id ;
+                   source: path !=="" ? "http://192.168.80.1/lmce-admin/MediaImage.php?img="+path : ""
                     height: scaleY(18);
                     width: scaleX(18);
                     anchors.centerIn: parent;
