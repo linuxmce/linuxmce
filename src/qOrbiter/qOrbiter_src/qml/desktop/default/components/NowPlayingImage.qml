@@ -2,32 +2,39 @@ import QtQuick 1.0
 import Qt.labs.shaders 1.0
 import "../components"
 import "../js/ComponentLoader.js" as MyJs
-import "../effects"
+//import "../effects"
 
 Rectangle{
     id:imageholder
     height:childrenRect.height
     width:scaleX(30)
-    color: "transparent"   
+    color: "transparent"
 
     Connections{
         target: dcenowplaying
         onImageChanged: refreshtimer.restart()
     }
 
-    BorderImage {
-        id: borderimg
-        horizontalTileMode: BorderImage.Repeat
-        source: "../img/icons/drpshadow.png"
-        anchors.fill: nowplayingimage
-        anchors { leftMargin: -6; topMargin: -6; rightMargin: -8; bottomMargin: -8 }
-        border { left: 10; top: 10; right: 10; bottom: 10 }
-        smooth: true
+//    BorderImage {
+//        id: borderimg
+//        horizontalTileMode: BorderImage.Repeat
+//        source: "../img/icons/drpshadow.png"
+//        height: nowplayingimage.paintedHeight
+//        width: nowplayingimage.paintedWidth
+//        anchors { leftMargin: -6; topMargin: -6; rightMargin: -8; bottomMargin: -8 }
+//        border { left: 10; top: 10; right: 10; bottom: 10 }
+//        smooth: true
+//    }
+
+    EffectGaussianBlur{
+
     }
+
     Image {
         id: nowplayingimage
-        width: dcenowplaying.aspect=="wide"? scaleX(20) : scaleX(25)
-        height:dcenowplaying.aspect=="wide"? scaleY(33) : scaleY(33)
+        width: dcenowplaying.aspect=="wide"? scaleX(20) : scaleX(32)
+        height:dcenowplaying.aspect=="wide"? scaleY(33) : scaleY(65)
+        fillMode: Image.PreserveAspectFit
         source: "image://listprovider/updateobject/"+securityvideo.timestamp
         anchors.horizontalCenter: parent.horizontalCenter
         smooth: true
@@ -38,14 +45,15 @@ Rectangle{
         id:refreshtimer
         interval: 1000
         onTriggered: nowplayingimage.source = "image://listprovider/updateobject/"+securityvideo.timestamp
-        running: true       
+        running: true
     }
-
     
     Image {
         id: npmask
         source: "../img/icons/transparencymask.png"
-        anchors.fill: nowplayingimage
-        opacity: .5
+        height: nowplayingimage.paintedHeight
+        width: nowplayingimage.paintedWidth
+        anchors.centerIn: nowplayingimage
+        opacity: .75
     }
 }

@@ -33,8 +33,8 @@ Item {
     }
 
     Style{
-       id:style
-   }
+        id:style
+    }
     Component.onCompleted: {logger.userLogMsg = "Main.qml loaded in default skin"; manager.setBoundStatus(true)}
 
     FontLoader{
@@ -58,7 +58,7 @@ Item {
             target:manager
             onOrientationChanged:dceplayer.setWindowSize(manager.appHeight, manager.appWidth)
             onMediaPlayerIdChanged:{
-                 console.log("initializing media player")
+                console.log("initializing media player")
                 dceplayer.setConnectionDetails(manager.mediaPlayerID, manager.m_ipAddress)
             }
         }
@@ -101,37 +101,50 @@ Item {
         anchors.top: mediaMessages.bottom
     }
 
-//    DebugPanel{
-//        id:mediaplayerMessages
-//        debugMessage: dceplayer.currentStatus
-//        anchors.top: commandmessages.bottom
-//        z:2
-//        color: dceplayer.connected ? "green" : "red"
-//    }
+    //    DebugPanel{
+    //        id:mediaplayerMessages
+    //        debugMessage: dceplayer.currentStatus
+    //        anchors.top: commandmessages.bottom
+    //        z:2
+    //        color: dceplayer.connected ? "green" : "red"
+    //    }
 
     Connections{
         target: manager
         onOrientationChanged: checkLayout()
     }
 
-    ScreenSaver
-    {   id:ss
-        height: manager.appHeight
-        width: manager.appWidth
-        anchors.centerIn: parent
-        z:-1
-        MouseArea{
-            anchors.fill: ss
-            acceptedButtons: Qt.LeftButton | Qt.RightButton
-            onClicked:  Qt.RightButton ? pageLoader.visible = !pageLoader.visible: ""
-        }
+    //    ScreenSaver
+    //    {   id:ss
+    //        height: manager.appHeight
+    //        width: manager.appWidth
+    //        anchors.centerIn: parent
+    //        z:-1
+    //        MouseArea{
+    //            anchors.fill: ss
+    //            acceptedButtons: Qt.LeftButton | Qt.RightButton
+    //            onClicked:  Qt.RightButton ? pageLoader.visible = !pageLoader.visible: ""
+    //        }
 
+    //    }
+
+    Rectangle{
+        id:alternate_background
+        anchors.fill: parent
+        gradient: Gradient{
+            GradientStop { position: 0.0; color: "darkslategrey" }
+            GradientStop { position: 0.33; color: "slategrey" }
+            GradientStop { position: 1.0; color: "black" }
+        }
     }
+
+
+
     //! Returns the value of the param value passed in scaled to a percentage of the current width value of the application window.
     function scaleX(x){
         return x/100*manager.appWidth
     }
-     //! Returns the value of the param value passed in scaled to a percentage of the current height value of the application window.
+    //! Returns the value of the param value passed in scaled to a percentage of the current height value of the application window.
     function scaleY(y){
         return y/100*manager.appHeight
     }
@@ -148,7 +161,7 @@ Item {
         }
         else if (pageLoader.status == Component.Loading)
         {
-           logger.userLogMsg = "loading page from network"
+            logger.userLogMsg = "loading page from network"
             finishLoading(screenname)
         }
         else
@@ -163,9 +176,9 @@ Item {
     {
         if(pageLoader.status != Component.Ready)
         {
-           logger.userLogMsg="finishing load";
+            logger.userLogMsg="finishing load";
             pageLoader.source = "screens/"+screenname
-           logger.userLogMsg = "screen" + screenname + " loaded."
+            logger.userLogMsg = "screen" + screenname + " loaded."
 
         }
         else
@@ -177,7 +190,7 @@ Item {
 
     function checkStatus(component)
     {
-      logger.userLogMsg = "Checking progress:"+(component.progress)
+        logger.userLogMsg = "Checking progress:"+(component.progress)
     }
 
 
@@ -198,7 +211,7 @@ Item {
         componentLoader.source = "components/"+componentName
         if (componentLoader.status == Component.Ready)
         {
-           logger.userLogMsg ="Command to change to:" + componentName+ " was successfull"
+            logger.userLogMsg ="Command to change to:" + componentName+ " was successfull"
         }
         else if (componentLoader.status == Component.Loading)
         {
@@ -218,7 +231,7 @@ Item {
         {
             logger.userLogMsg = "finishing network load"
             componentLoader.source = "components/"+componentName
-          logger.userLogMsg="screen" + componentName + " loaded."
+            logger.userLogMsg="screen" + componentName + " loaded."
         }
         else
         {

@@ -49,7 +49,7 @@ Rectangle {
         NowPlayingImage{
             id:npImage
             anchors.centerIn: metadataSection
-            anchors.horizontalCenterOffset: scaleX(-3)
+            anchors.horizontalCenterOffset: scaleX(-10)
         }
 
         Loader{

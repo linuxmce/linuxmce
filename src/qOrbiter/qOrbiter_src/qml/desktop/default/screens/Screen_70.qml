@@ -1,99 +1,65 @@
 import QtQuick 1.0
 import Qt.labs.shaders 1.0
-
-
 import "../components"
 import "../js/ComponentLoader.js" as MyJs
 import "../effects"
 
-Rectangle {
-    // property alias synText:
-    id: storedvideoremote
-    height: manager.appHeight
-    width: manager.appWidth
-    radius: 0
-    opacity: 1
-    color: "transparent"
-    z:5
+MediaPlaybackBase{
+    id:storedVideoRemote
+    metadataComponent: VideoMetaData{ }
+    scrollBarComponent: MediaScrollBar{}
+    controlComponent: VideoControls{}
+    playlistSource:mediaplaylist
+    playlistDelegate: Rectangle{
+        height: scaleY(30)
+        width: scaleX(18)
+        color: "transparent"
+        border.color: "white"
+        border.width: 1
+        Image {
+            id: playlistimage
+            fillMode: Image.PreserveAspectCrop
+            source:  index === dcenowplaying.m_iplaylistPosition ? playlistimage.source = "image://listprovider/updateobject/"+securityvideo.timestamp: ""
+            anchors.fill: parent
+            opacity: .5
 
+        }
+        StyledText {
+            id: position
+            text: qsTr("Item #") + index
 
-    MediaDetailHeader {
-        id: gradientheader
-    }
-    Column{
-        id:envControls
-        anchors.left: parent.left
-        anchors.leftMargin: scaleX(1)
-        anchors.top: gradientheader.bottom
-        Remote_lighting_controls{ id: remote_lighting_controls1; }
-        Remote_Audio_controls{ id: remote1; }
-    }
+            color: "aliceblue"
+            font.pixelSize: scaleY(2.25)
+            font.bold: true
+            anchors.bottom: parent.bottom
+            opacity: .75
+        }
 
-    NonEPGPlaylist{
-        id:playlist
-        anchors.left: envControls.right
-        anchors.rightMargin: scaleX(1)
-        anchors.top: gradientheader.bottom
-        Component.onCompleted: manager.setBoundStatus(true)
+        StyledText {
+            text:  index === dcenowplaying.m_iplaylistPosition ? "Now Playing - " + name : name
+            font.family: "DroidSans"
+            color: "aliceblue"
+            width: parent.width
+            wrapMode: "WrapAtWordBoundaryOrAnywhere"
+            font.pixelSize: scaleY(2.15)
+            //font.bold: true
+
+        }
+
+        Image {
+            id: overlay
+            source: "../img/icons/header.png"
+            anchors.fill: parent
+            opacity:index === dcenowplaying.m_iplaylistPosition ? .25 :  .15
+        }
+
+        MouseArea{
+            anchors.fill: parent
+            onClicked: manager.changedPlaylistPosition(index)
+        }
     }
-    Image {
-        id: nowplayingimage
-        anchors.top:gradientheader.bottom
+    AudioButtons{
+        anchors.top: parent.top
         anchors.horizontalCenter: parent.horizontalCenter
-        anchors.topMargin: scaleY(.5)
-        width: dcenowplaying.aspect=="wide"? scaleX(30) : scaleX(20)
-        height:dcenowplaying.aspect=="wide"? scaleY(30) : scaleY(50)
-        source: ""
-      //  Component.onCompleted: manager.setBoundStatus(true)
-
-        Connections{
-            target: dcenowplaying
-            onImageChanged: {updateTimer.start();console.log(nowplayingimage.source)} // "image://listprovider/updateobject/"+securityvideo.timestamp;
-        }
-
-        Timer{
-            id:updateTimer
-            interval: 250
-            running: true
-            onTriggered: nowplayingimage.source = "image://listprovider/updateobject/"+securityvideo.timestamp;
-        }
     }
-
-    StoredVideoMetadata {
-        id: textrect
-        anchors.right: parent.right
-        anchors.top: gradientheader.bottom
-    }
-
-    Image {
-        id: transitPreview
-        source: ""
-        width: dcenowplaying.aspect=="wide"? scaleX(10) : scaleX(7)
-        height:dcenowplaying.aspect=="wide"? scaleY(10) : scaleY(17)
-        anchors.bottom: media_transit.top
-        anchors.horizontalCenter: parent.horizontalCenter
-        visible: dceTimecode.playbackSpeed !=1000 ? true : false
-        Connections{
-            target: manager
-            onMediaScreenShotReady: transitPreview.source="image://listprovider/screenshot/"+securityvideo.timestamp
-        }
-        Timer{
-            id:previewTimer
-            interval: 1000
-            repeat: true
-            running: dceTimecode.playbackSpeed !=1000 ? true : false
-            onTriggered: manager.getVideoFrame()
-        }
-
-    }
-
-
-    MediaScrollBar{id:media_transit; anchors.bottom: controlrow.top; anchors.horizontalCenter: controlrow.horizontalCenter}
-
-    StoredVideoControls {
-        id: controlrow
-    }
-
 }
-
-
