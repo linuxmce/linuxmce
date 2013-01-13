@@ -2161,7 +2161,7 @@ void qOrbiter::beginSetup()
     media_pos=0;
     media_seek="";
     cellsToRender = 0;
-    setGridSeperator(16);
+    setGridSeperator(100);
     b_mediaPlaying = false;
     m_dwPK_Device_NowPlaying = 0;
     m_dwPK_Device_NowPlaying_Video = 0;
@@ -3528,7 +3528,7 @@ void DCE::qOrbiter::populateAdditionalMedia() //additional media grid that popul
 #ifdef rpi
                 Sleep(75);
 #elif ANDROID
-                Sleep(50);
+                Sleep(75);
 #else
                 Sleep(10);
 #endif
