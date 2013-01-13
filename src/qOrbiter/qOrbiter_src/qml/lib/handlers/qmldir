@@ -3,7 +3,7 @@ ArrowUpHandler  ArrowUpHandler.qml
 ArrowLeftHandler  ArrowLeftHandler.qml
 ArrowRightHandler ArrowRightHandler.qml
 AttributeFilterHandeler AttributeFilterHandler.qml
-AlarmToggleHandler AlarmTogglerHandler.qml
+AlarmToggleHandler AlarmToggleHandler.qml
 ChangeTrackHandler ChangeTrackHandler.qml
 EnterButtonHandler  EnterButtonHandler.qml
 MediaListClickHandler MediaListClickHandler.qml

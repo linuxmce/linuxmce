@@ -10,7 +10,7 @@ import QtQuick 1.0
  *
  */
 MouseArea{
-    property string level:"10"
+    property string level:"10" /*! String value. \note use "10" or "-10" */
     anchors.fill: parent
     onClicked: manager.adjustLights(level)
 }

@@ -1,11 +1,13 @@
 import QtQuick 1.0
 /*!
  *\class AttributeFilterHandler
- *\brief Handler for filtering through a datagrid
+ *\brief Handler for filtering through a datagrid via various attributes.
  *
  *\ingroup lib_handlers
  *
- * This handler is designed to work in conjunction with a pre-defined datagrid. It will filter or prepare a file details based on attribute
+ * This handler is designed to work in conjunction with a pre-defined datagrid.
+ * It sets the property in the selected model and emits the signal to initate filtering
+ * based on that attribute.
  *
  *
  */

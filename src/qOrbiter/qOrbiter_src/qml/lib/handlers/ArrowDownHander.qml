@@ -4,7 +4,8 @@ import QtQuick 1.0
  *\brief Handler Component for down Arrow.
  *
  *\ingroup lib_handlers
- *
+ *The down arrow handler has no parameters. It simply does the job of emitting the move down signal to Linuxmce
+ *\note Use:ArrowDownHandler{}
  */
 MouseArea {
     property int autoTick:0
