@@ -73,7 +73,7 @@ Component
             Image
             {
                 id: imagerect;
-                source:path !=="" ? "http://192.168.80.1/lmce-admin/MediaImage.php?img="+path : "" ;
+                source:path !=="" ? "http://192.168.80.1/lmce-admin/MediaImage.php?img="+path : ""
                 height: scaleY(18);
                 width: scaleX(18);
                 anchors.centerIn: parent;

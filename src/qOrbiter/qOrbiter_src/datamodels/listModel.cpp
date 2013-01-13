@@ -77,7 +77,7 @@ void ListModel::appendRow(gridItem *item)
 {
     setLoadingStatus(true);
     appendRows(QList<gridItem*>() << item);
-  //  qDebug() << m_list.count();
+    //  qDebug() << m_list.count();
 }
 
 void ListModel::appendRows(const QList<gridItem *> &items)
@@ -137,24 +137,24 @@ void ListModel::reset()
     endResetModel();
     emit modelReset();
     QApplication::processEvents(QEventLoop::AllEvents);
-   clearing = false;
+    clearing = false;
 }
 
 bool ListModel::resetInternalData()
 {
     qDebug("Resetting listmodel data");
     m_list.clear();
-//    int total = m_list.count();
-//    for(int i = 0; i < m_list.count(); ++i){
+    //    int total = m_list.count();
+    //    for(int i = 0; i < m_list.count(); ++i){
 
-//        qDebug() <<"removing::" << m_list.count() << " of " << total;
-//        gridItem* pItem = m_list.takeAt(i);
-//        if (pItem)
-//                delete pItem;
-//    }
-//    m_list.clear();
+    //        qDebug() <<"removing::" << m_list.count() << " of " << total;
+    //        gridItem* pItem = m_list.takeAt(i);
+    //        if (pItem)
+    //                delete pItem;
+    //    }
+    //    m_list.clear();
 
-//   qDebug() << "Items cleared. Count:: "<< m_list.count();
+    //   qDebug() << "Items cleared. Count:: "<< m_list.count();
     return true;
 
 }
@@ -205,12 +205,12 @@ void ListModel::clear()
     emit modelAboutToBeReset();
     beginResetModel();
     if(resetInternalData()){
-    setProgress(0.0);
-    QApplication::processEvents(QEventLoop::AllEvents);
-    endResetModel();
-    emit modelReset();
-    QApplication::processEvents(QEventLoop::AllEvents);
-    clearing = false;
+        setProgress(0.0);
+        QApplication::processEvents(QEventLoop::AllEvents);
+        endResetModel();
+        emit modelReset();
+        QApplication::processEvents(QEventLoop::AllEvents);
+        clearing = false;
     }
 
 }
@@ -272,13 +272,12 @@ void ListModel::setTotalCells(int cells)
     emit statusMessage("Size Changed" + QString::number(totalcells));
     if ( m_list.size() < totalcells)
     {
-
-
+        setLoadingStatus(true);
 
     }
     else
     {
-
+        setLoadingStatus(false);
 
     }
     emit sizeChanged(cells);
@@ -346,7 +345,6 @@ void ListModel::clearAndRequest(int type)
         QApplication::processEvents(QEventLoop::AllEvents);
         endResetModel();
         emit modelReset();
-
         QApplication::processEvents(QEventLoop::AllEvents);
         clearing = false;
         emit ready(gridType);

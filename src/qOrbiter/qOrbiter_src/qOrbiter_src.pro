@@ -223,7 +223,7 @@ macx{
 
         x86 {
                 qmlplugins.files = ../platforms/Android/androidPlugins/x86/libqmlshadersplugin.so
-                  qmlplugins.files += ../platforms/Android/androidPlugins/x86/libandroidplugin_1_1.so
+                qmlplugins.files += ../platforms/Android/androidPlugins/x86/libandroidplugin_1_1.so
                 qmlplugins.path = /libs/x86
 
         } else: armeabi-v7a {

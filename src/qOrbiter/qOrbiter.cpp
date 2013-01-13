@@ -2156,12 +2156,12 @@ void qOrbiter::beginSetup()
     i_current_mediaType = 0;
     i_current_floorplanType = 0;
     setCurrentPage(0);
-
+    b_cancelRequest = false;
     media_currentPage=0;
     media_pos=0;
     media_seek="";
     cellsToRender = 0;
-    setGridSeperator(1000000);
+    setGridSeperator(16);
     b_mediaPlaying = false;
     m_dwPK_Device_NowPlaying = 0;
     m_dwPK_Device_NowPlaying_Video = 0;
@@ -2263,6 +2263,9 @@ void qOrbiter::setStringParam(int paramType, QString param)
     QString datagridVariableString;
 
     backwards = false;
+
+    if(!param.contains("!F"))
+        b_cancelRequest = true;
 
     switch (paramType)
     {
@@ -3440,9 +3443,7 @@ void DCE::qOrbiter::changedTrack(QString direction)
 }
 
 void DCE::qOrbiter::populateAdditionalMedia() //additional media grid that populates after the initial request to break out the threading and allow for a checkpoint across threads
-{
-
-    backwards=false;
+{    backwards=false;
     //emit commandResponseChanged("requesting additional media");
 #ifdef QT5
     //QApplication::processEvents(QEventLoop::AllEvents);
@@ -3473,8 +3474,8 @@ void DCE::qOrbiter::populateAdditionalMedia() //additional media grid that popul
     std::string pResponse ="";
     if(SendCommand(req_data_grid_pics, &pResponse) && pResponse == "OK")
     {
+        pMediaGridTable = new DataGridTable(iData_Size,pData,false);
 
-        DataGridTable *pDataGridTable = new DataGridTable(iData_Size,pData,false);
         emit mediaResponseChanged("grid request ok");
         delete[] pData;
         pData = NULL;
@@ -3493,19 +3494,17 @@ void DCE::qOrbiter::populateAdditionalMedia() //additional media grid that popul
         {
             media_seek = "";
             populateAdditionalMedia();
-            delete pDataGridTable;
             delete[] pData;
-
-
             return;
         }
         setCurrentPage((std::abs(GridCurRow /  media_pageSeperator))) ;
 
         emit mediaResponseChanged("Page: "+ QString::number(media_currentPage));
 
-        for(MemoryDataTable::iterator it=pDataGridTable->m_MemoryDataTable.begin();it!=pDataGridTable->m_MemoryDataTable.end();++it)
+        for(MemoryDataTable::iterator it=pMediaGridTable->m_MemoryDataTable.begin();it!=pMediaGridTable->m_MemoryDataTable.end();++it)
         {
-            if(requestMore){
+            QApplication::processEvents(QEventLoop::AllEvents);
+            if(!b_cancelRequest){
                 pCell= it->second;
                 const char *pPath = pCell->GetImagePath();
                 filePath = QString::fromUtf8(pPath);
@@ -3523,24 +3522,27 @@ void DCE::qOrbiter::populateAdditionalMedia() //additional media grid that popul
                 //                    // cellTitle = QString::fromStdString(sText);
                 //                }
                 //            }
-                index = pDataGridTable->CovertColRowType(it->first).first;
-
+                index = pMediaGridTable->CovertColRowType(it->first).first;
                 gridItem * item = new gridItem(fk_file, cellTitle, filePath.remove("/home/mediapics/"), index);
                 emit addItem(item);
-                QApplication::processEvents(QEventLoop::AllEvents);
-                Sleep(10);
+#ifdef rpi
+                Sleep(75);
+#elif ANDROID
+                Sleep(50);
+#else
+                Sleep(25);
+#endif
+
             }
             else
             {
-                media_seek="";
-                delete pDataGridTable;
-                pDataGridTable = NULL;
+                qDebug() << "Stopping";
+               // pMediaGridTable = NULL;
                 return;
             }
         }
         media_seek="";
-        delete pDataGridTable;
-        pDataGridTable = NULL;
+        pMediaGridTable = NULL;
 
     }
 }
@@ -4591,10 +4593,12 @@ void qOrbiter::adjustRoomLights(QString level)
 
 void DCE::qOrbiter::prepareFileList(int iPK_MediaType)
 {
+
     q_mediaType = QString::number(iPK_MediaType);
-    requestMore = true;
+    requestMore = false;
     media_currentRow = 0;
     cellsToRender = 0;
+    pMediaGridTable = NULL;
     emit mediaResponseChanged("Initial media request for media type " + QString::number(iPK_MediaType));
 #ifdef QT5
     //QApplication::processEvents(QEventLoop::AllEvents);
@@ -4727,8 +4731,8 @@ void DCE::qOrbiter::prepareFileList(int iPK_MediaType)
         {
             //not sure what its for
             //creating a dg table to check for cells. If 0, then we error out and provide a single "error cell"
-            DataGridTable *pDataGridTable = new DataGridTable(iData_Size,pData,false);
-            cellsToRender= pDataGridTable->GetRows();
+            pMediaGridTable = new DataGridTable(iData_Size,pData,false);
+            cellsToRender= pMediaGridTable->GetRows();
 
 #ifndef ANDROID
             LoggerWrapper::GetInstance()->Write(LV_CRITICAL, "Datagrid Dimensions: Height %i, Width %i", gHeight, gWidth);
@@ -4755,18 +4759,18 @@ void DCE::qOrbiter::prepareFileList(int iPK_MediaType)
             else
             {
 
-                // emit gridModelSizeChange(cellsToRender);
+
                 i_mediaModelRows = cellsToRender;
+                emit gridModelSizeChange(cellsToRender);
                 media_totalPages = (i_mediaModelRows / media_pageSeperator)+1; //16 being the items per page.
-
-
-
                 setModelPages(media_totalPages);
                 emit mediaResponseChanged(QString::number(media_totalPages)+ " pages from request, populating first page.");
-                delete pDataGridTable;
+
                 delete[] pData;
-                pDataGridTable = NULL;
+                pMediaGridTable = NULL;
                 pData = NULL;
+                if(b_cancelRequest)
+                    b_cancelRequest=false;
                 requestPage(0);
                 //requestGenres(iPK_MediaType);
             }

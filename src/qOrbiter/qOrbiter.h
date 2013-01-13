@@ -141,6 +141,8 @@ public:
     int media_pageSeperator; /*!< \brief The amount of cells on a given page. Set high for infinite scrolling. */
     string media_seek; /*!< \brief Where the grid is seeking to. */
     int modelPages; /*!< \brief The total number of pages in the model. */
+    bool b_cancelRequest;
+    DataGridTable *pMediaGridTable;
     //@}
 
     /*! @name Address and ip Member variables */
