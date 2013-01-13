@@ -11,11 +11,10 @@ import QtQuick 1.0
  *
  */
 MouseArea{
-    id:parent
+    id:scenario_handler
     anchors.fill: parent
     onClicked: {
-        manager.execGrp(params);
+        manager.execGrp(params)
         generic_model_display.state = "inactive"
     }
-
 }

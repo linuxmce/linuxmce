@@ -6,7 +6,7 @@ AttributeFilterHandeler AttributeFilterHandler.qml
 AlarmToggleHandler AlarmTogglerHandler.qml
 ChangeTrackHandler ChangeTrackHandler.qml
 EnterButtonHandler  EnterButtonHandler.qml
-MediaListClickeHandler MediaListClickHandler.qml
+MediaListClickHandler MediaListClickHandler.qml
 PlayAll PlayAll.qml
 PlaylistClickedHandler PlaylistClickedHandler.qml
 PlaylistMoveHandler  PlaylistMoveHandler.qml
