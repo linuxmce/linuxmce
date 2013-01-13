@@ -36,6 +36,13 @@ void SkinLoader::loadSkin(QString name) {
             //qDebug() << "Fooked! :-(";
         }
     }
+    else if(current_component->isError())
+    {
+        qWarning() << current_component->errors();
+        qWarning() << "Style.qml is corrupt, moving to next skin. \n";
+         skinsToLoad.removeAt(loadercounter);
+        loadSkin(skinsToLoad.at(loadercounter));
+    }
     else {
         //qDebug() << "Loaded already?  Attempting to ->create()";
         continueLoading();
@@ -53,7 +60,7 @@ void SkinLoader::continueLoading() {
 
     if (current_component->isError() || current_component->isLoading()) {
         qWarning() << current_component->errors();
-        exit (1);
+        loadSkin(skinsToLoad.at(loadercounter));
     } else {
 
         //qDebug() << "Making style object";

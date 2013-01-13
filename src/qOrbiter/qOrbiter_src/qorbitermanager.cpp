@@ -1070,6 +1070,9 @@ bool qorbiterManager::loadSkins(QUrl base)
       should suffice and improper skins are dealt with later.
       */
 
+QStringList localSkins;
+QStringList excludes;
+excludes << "!lib" << "!startup";
 
 #ifdef for_harmattan
     tskinModel->addSkin("default");
@@ -1085,15 +1088,17 @@ bool qorbiterManager::loadSkins(QUrl base)
     tskinModel->addSkin("default");
 #elif RPI
     QDir desktopQmlPath(QString(base.toString()),"",QDir::Name, QDir::NoDotAndDotDot);
+     desktopQmlPath.setNameFilters(excludes);
     setDceResponse("Skin Search Path:"+ desktopQmlPath.dirName());
-    QStringList localSkins = desktopQmlPath.entryList(QDir::Dirs |QDir::NoDotAndDotDot);
+     localSkins = desktopQmlPath.entryList(QDir::Dirs |QDir::NoDotAndDotDot);
 
     qDebug()<<"inside of skins we find" << localSkins.join(",");
     tskinModel->addSkin(localSkins.join(","));
 #else
     QDir desktopQmlPath(QString(base.toString()),"",QDir::Name, QDir::NoDotAndDotDot);
     setDceResponse("Skin Search Path:"+ desktopQmlPath.dirName());
-    QStringList localSkins = desktopQmlPath.entryList(QDir::Dirs |QDir::NoDotAndDotDot);
+     localSkins = desktopQmlPath.entryList(QDir::Dirs |QDir::NoDotAndDotDot);
+
 #ifdef QT_DEBUG
     qDebug()<<"inside of skins we find" << localSkins.join(",");
 #endif

@@ -5,9 +5,7 @@ import "effects"
 import "components"
 import "lib/components"
 import "js/ComponentLoader.js" as MyJs
-import "lib/handlers"
-
-
+import "../lib/handlers"
 
 /*!
  *
