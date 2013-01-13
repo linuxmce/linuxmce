@@ -2198,7 +2198,7 @@ bool qOrbiter::getRecievingStatus()
 
 void qOrbiter::setGridStatus(bool b)
 {
-    requestMore = true;
+    requestMore = b;
 }
 
 bool qOrbiter::getGridStatus()
@@ -3476,9 +3476,9 @@ void DCE::qOrbiter::populateAdditionalMedia() //additional media grid that popul
 
         DataGridTable *pDataGridTable = new DataGridTable(iData_Size,pData,false);
         emit mediaResponseChanged("grid request ok");
-       delete[] pData;
-       pData = NULL;
-       free(pData);
+        delete[] pData;
+        pData = NULL;
+        free(pData);
 
         // LoggerWrapper::GetInstance()->Write(LV_CRITICAL, "Pic Datagrid Dimensions: Height %i, Width %i", gHeight, gWidth);
         DataGridCell *pCell;
@@ -3505,29 +3505,38 @@ void DCE::qOrbiter::populateAdditionalMedia() //additional media grid that popul
 
         for(MemoryDataTable::iterator it=pDataGridTable->m_MemoryDataTable.begin();it!=pDataGridTable->m_MemoryDataTable.end();++it)
         {
-            pCell= it->second;
-            const char *pPath = pCell->GetImagePath();
-            filePath = QString::fromUtf8(pPath);
-            fk_file = pCell->GetValue();
-            cellTitle = QString::fromUtf8(pCell->m_Text);
-            //            if(fk_file.contains("!A"))
-            //            {
-            //                string sText = "";
-            //                string sTextResp="";
-            //                int t = QString(fk_file).remove("!").toInt();
-            //                CMD_Get_Attribute attrib(m_dwPK_Device, iMediaPluginID, t, &sText );
+            if(requestMore){
+                pCell= it->second;
+                const char *pPath = pCell->GetImagePath();
+                filePath = QString::fromUtf8(pPath);
+                fk_file = pCell->GetValue();
+                cellTitle = QString::fromUtf8(pCell->m_Text);
+                //            if(fk_file.contains("!A"))
+                //            {
+                //                string sText = "";
+                //                string sTextResp="";
+                //                int t = QString(fk_file).remove("!").toInt();
+                //                CMD_Get_Attribute attrib(m_dwPK_Device, iMediaPluginID, t, &sText );
 
-            //                if(SendCommand(attrib, &sTextResp) && sTextResp=="OK"){
-            //                   qDebug() << sText.c_str();
-            //                    // cellTitle = QString::fromStdString(sText);
-            //                }
-            //            }
-            index = pDataGridTable->CovertColRowType(it->first).first;
+                //                if(SendCommand(attrib, &sTextResp) && sTextResp=="OK"){
+                //                   qDebug() << sText.c_str();
+                //                    // cellTitle = QString::fromStdString(sText);
+                //                }
+                //            }
+                index = pDataGridTable->CovertColRowType(it->first).first;
 
-            gridItem * item = new gridItem(fk_file, cellTitle, filePath.remove("/home/mediapics/"), index);
-            emit addItem(item);
-           QApplication::processEvents(QEventLoop::AllEvents);
-           Sleep(10);
+                gridItem * item = new gridItem(fk_file, cellTitle, filePath.remove("/home/mediapics/"), index);
+                emit addItem(item);
+                QApplication::processEvents(QEventLoop::AllEvents);
+                Sleep(10);
+            }
+            else
+            {
+                media_seek="";
+                delete pDataGridTable;
+                pDataGridTable = NULL;
+                return;
+            }
         }
         media_seek="";
         delete pDataGridTable;
@@ -4754,10 +4763,10 @@ void DCE::qOrbiter::prepareFileList(int iPK_MediaType)
 
                 setModelPages(media_totalPages);
                 emit mediaResponseChanged(QString::number(media_totalPages)+ " pages from request, populating first page.");
-                            delete pDataGridTable;
-                            delete[] pData;
-                            pDataGridTable = NULL;
-                            pData = NULL;
+                delete pDataGridTable;
+                delete[] pData;
+                pDataGridTable = NULL;
+                pData = NULL;
                 requestPage(0);
                 //requestGenres(iPK_MediaType);
             }

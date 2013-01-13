@@ -143,18 +143,18 @@ void ListModel::reset()
 bool ListModel::resetInternalData()
 {
     qDebug("Resetting listmodel data");
-    int total = m_list.count();
-    for(int i = 0; i < m_list.count(); ++i){
-
-      //  qDebug() <<"removing::" << m_list.count() << " of " << total;
-        gridItem* pItem = m_list.takeAt(i);
-        if (pItem)
-                pItem->deleteLater();
-
-    }
     m_list.clear();
+//    int total = m_list.count();
+//    for(int i = 0; i < m_list.count(); ++i){
 
-  //  qDebug() << "Items cleared. Count:: "<< m_list.count();
+//        qDebug() <<"removing::" << m_list.count() << " of " << total;
+//        gridItem* pItem = m_list.takeAt(i);
+//        if (pItem)
+//                delete pItem;
+//    }
+//    m_list.clear();
+
+//   qDebug() << "Items cleared. Count:: "<< m_list.count();
     return true;
 
 }
