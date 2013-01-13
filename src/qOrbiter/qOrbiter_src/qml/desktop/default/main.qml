@@ -114,19 +114,19 @@ Item {
         onOrientationChanged: checkLayout()
     }
 
-//    ScreenSaver
-//    {   id:ss
-//        height: manager.appHeight
-//        width: manager.appWidth
-//        anchors.centerIn: parent
-//        z:-1
-//        MouseArea{
-//            anchors.fill: ss
-//            acceptedButtons: Qt.LeftButton | Qt.RightButton
-//            onClicked:  Qt.RightButton ? pageLoader.visible = !pageLoader.visible: ""
-//        }
+    ScreenSaver
+    {   id:ss
+        height: manager.appHeight
+        width: manager.appWidth
+        anchors.centerIn: parent
+        z:-1
+        MouseArea{
+            anchors.fill: ss
+            acceptedButtons: Qt.LeftButton | Qt.RightButton
+            onClicked:  Qt.RightButton ? pageLoader.visible = !pageLoader.visible: ""
+        }
 
-//    }
+    }
     //! Returns the value of the param value passed in scaled to a percentage of the current width value of the application window.
     function scaleX(x){
         return x/100*manager.appWidth

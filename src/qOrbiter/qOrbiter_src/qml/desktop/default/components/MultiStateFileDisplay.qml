@@ -25,6 +25,7 @@ Rectangle {
         cellHeight: scaleY(20)
         opacity:1
         scale:1
+        cacheBuffer: 0
     }
 
 }

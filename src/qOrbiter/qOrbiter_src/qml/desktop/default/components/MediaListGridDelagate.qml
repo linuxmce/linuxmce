@@ -12,7 +12,6 @@ Component
 {
     id: contactDelegate
     
-    
     Rectangle
     {
         id:mainItem
@@ -79,8 +78,8 @@ Component
                 width: scaleX(18);
                 anchors.centerIn: parent;
                 fillMode: Image.PreserveAspectCrop
-               // smooth: true
-                asynchronous: true
+               smooth: true
+                asynchronous: false
             }
             
             Rectangle{

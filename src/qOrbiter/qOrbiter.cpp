@@ -3495,7 +3495,7 @@ void DCE::qOrbiter::populateAdditionalMedia() //additional media grid that popul
             populateAdditionalMedia();
             delete pDataGridTable;
             delete[] pData;
-            free(pData);
+
 
             return;
         }
@@ -3526,10 +3526,8 @@ void DCE::qOrbiter::populateAdditionalMedia() //additional media grid that popul
 
             gridItem * item = new gridItem(fk_file, cellTitle, filePath.remove("/home/mediapics/"), index);
             emit addItem(item);
-#ifdef RPI
-            QThread::msleep(100);
-#endif
-
+           QApplication::processEvents(QEventLoop::AllEvents);
+           Sleep(10);
         }
         media_seek="";
         delete pDataGridTable;
