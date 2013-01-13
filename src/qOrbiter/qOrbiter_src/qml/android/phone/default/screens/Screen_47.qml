@@ -1,6 +1,7 @@
 import QtQuick 1.1
 import "../components"
 import "../js/ComponentLoader.js" as MyJs
+import "../../lib/handlers"
 
 Rectangle {
     id:fileviewscreen
@@ -9,10 +10,12 @@ Rectangle {
     color: "black"
     clip: true
     border.color: "silver"
+
+
     Connections
     {
         target: dataModel
-        onProgressChanged:progress_bar_fill.width = ((progress_bar.width) * (dataModel.progress )) /100
+        onProgressChanged:progress_bar_fill.width = progress_bar.width* ((dataModel.currentCells / manager.media_pageSeperator))
         onReady:progress_bar_fill.width = 0
     }
 
@@ -27,7 +30,7 @@ Rectangle {
         anchors.horizontalCenter: list_view1.horizontalCenter
         Text {
             id: total_cells
-            text: dataModel.totalcells
+            text: manager.media_pageSeperator
             color: "grey"
             font.pixelSize: scaleY(3)
             anchors.left: progress_bar.right
@@ -47,7 +50,7 @@ Rectangle {
             width: 0
             color: "transparent"
             anchors.bottom: parent.bottom
-
+            clip:true
             Image {
                 id: fill_image
                 source: "../img/blue.png"
@@ -94,7 +97,7 @@ Rectangle {
                     Image
                     {
                         id: imagerect;
-                        source:"image://datagridimg/"+id ;
+                        source: path !=="" ? "http://192.168.80.1/lmce-admin/MediaImage.php?img="+path : ""
                         height: scaleX(15);
                         width: scaleY(15);
                         fillMode: Image.PreserveAspectFit;
@@ -114,11 +117,9 @@ Rectangle {
                     }
                 }
 
-                MouseArea {
+              MediaListClickHandler{
                     id:mouseclick
-                    anchors.fill: parent
-                    onReleased: setStringParam(4, id)
-                }
+              }
             }
         }
     }
