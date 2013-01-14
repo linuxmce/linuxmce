@@ -1370,9 +1370,7 @@ bool qorbiterManager::writeConfig()
 
 void qorbiterManager::setStringParam(int paramType, QString param)
 {
-
     emit setDceGridParam(paramType, param);
-
 }
 
 void qorbiterManager::initializeSortString()

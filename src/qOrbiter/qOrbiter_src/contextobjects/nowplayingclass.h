@@ -325,7 +325,7 @@ public slots:
     void setSubTitle (QString inc_subTitle) {qs_subTitle = inc_subTitle; emit titleChanged();}
     QString getSubTitle () {return qs_subTitle;}
 
-    void setStatus (bool status) {resetData(); b_mediaPlaying = status;  emit mediaStatusChanged(); }
+    void setStatus (bool status) {resetData(); b_mediaPlaying = status; if(b_mediaPlaying==false){clearGraphics(); }  emit mediaStatusChanged(); }
     bool getStatus () {return b_mediaPlaying;}
 
     void setMediaType (int inc_mediaType) {i_mediaType = inc_mediaType; emit mediaTypeChanged();}
@@ -354,7 +354,7 @@ public slots:
     QString getEpisode () {return episode;}
 
     //-----audio getters and setter--------//
-    void setAlbum (QString inc_album) {album = inc_album;  emit albumChanged();}
+    void setAlbum (QString inc_album) {   qDebug()<<inc_album; album = inc_album;  emit albumChanged();}
     QString getAlbum () {return album;}
 
     void setTrack (QString inc_track) {track = inc_track;  emit trackChanged();}
@@ -377,6 +377,10 @@ public slots:
 
     void setStreamID(int stream) {i_streamID = stream;}
     int getStreamID() {return i_streamID;}
+
+    void clearGraphics(){
+        setImage(QImage());
+    }
 };
 
 #endif // NOWPLAYINGCLASS_H

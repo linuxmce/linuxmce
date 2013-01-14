@@ -3247,6 +3247,7 @@ void DCE::qOrbiter::GetNowPlayingAttributes()
                     }
                     else if(attributeType == "Album")
                     {
+
                         emit np_album(attribute);
 
                     }

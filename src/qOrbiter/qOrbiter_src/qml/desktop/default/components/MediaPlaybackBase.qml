@@ -43,7 +43,7 @@ Rectangle {
             text: dceTimecode.qsCurrentTime
             fontSize:32
             anchors.left: parent.left
-             anchors.bottom: metadataSection.bottom
+            anchors.bottom: metadataSection.bottom
         }
 
         NowPlayingImage{
@@ -83,12 +83,22 @@ Rectangle {
         color: "transparent"
         anchors.bottom: parent.bottom
         anchors.horizontalCenter: parent.horizontalCenter
-          Loader{
+        Loader{
             id:controlsLoader
             sourceComponent:VideoControls{}
             anchors.centerIn: parent
         }
     }
 
+    Column{
+        id:env_controls
+        height: childrenRect.height
+        width: scaleX(40)
+        anchors.bottom: parent.bottom
+        anchors.left: parent.left
+        AudioControl{
+            id:audio_controls
+        }
+    }
 
 }
