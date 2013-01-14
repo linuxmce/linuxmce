@@ -41,7 +41,7 @@ pcm.%CONNECT_TYPE% {
 	slave.rate 48000
 }
 
-!default {
+pcm.!default {
 	type asym
 	playback.pcm "%PLAYBACK_PCM%"
 	capture.pcm "plughw:%MAIN_CARD%"
