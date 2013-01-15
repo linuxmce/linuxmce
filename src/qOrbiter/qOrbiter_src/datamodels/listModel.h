@@ -80,7 +80,6 @@ public slots:
                return indexFromItem(item).row();
             }
         }
-
     }
 
     void setTotalPages(int p){totalPages = p;qDebug() << "New page count " << totalPages; emit totalPagesChanged();}

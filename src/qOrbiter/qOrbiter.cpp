@@ -2161,11 +2161,9 @@ void qOrbiter::beginSetup()
     media_pos=0;
     media_seek="";
     cellsToRender = 0;
-#ifndef ANDROID
-    setGridSeperator(10000);
-#else
- setGridSeperator(500);
-#endif
+
+    setGridSeperator(16999);
+
     b_mediaPlaying = false;
     m_dwPK_Device_NowPlaying = 0;
     m_dwPK_Device_NowPlaying_Video = 0;
@@ -3531,11 +3529,11 @@ void DCE::qOrbiter::populateAdditionalMedia() //additional media grid that popul
                 emit addItem(item);
                 QApplication::processEvents(QEventLoop::AllEvents);
 #ifdef rpi
-                Sleep(75);
+                Sleep(50);
 #elif ANDROID
-                Sleep(75);
+                Sleep(60);
 #else
-                Sleep(10);
+               // Sleep(10);
 #endif
 
             }
