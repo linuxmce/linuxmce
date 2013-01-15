@@ -15,7 +15,7 @@ Rectangle {
     Connections
     {
         target: dataModel
-        onProgressChanged:progress_bar_fill.width = progress_bar.width* ((dataModel.currentCells / manager.media_pageSeperator))
+        onProgressChanged:progress_bar_fill.width = progress_bar.width* ((dataModel.currentCells / dataModel.totalcells))
         onReady:progress_bar_fill.width = 0
     }
 
@@ -30,7 +30,7 @@ Rectangle {
         anchors.horizontalCenter: list_view1.horizontalCenter
         Text {
             id: total_cells
-            text: manager.media_pageSeperator
+            text: dataModel.totalcells
             color: "grey"
             font.pixelSize: scaleY(3)
             anchors.left: progress_bar.right

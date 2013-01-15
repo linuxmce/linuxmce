@@ -8,7 +8,7 @@ Rectangle {
     clip: true
     anchors.horizontalCenter: parent.horizontalCenter
     color: "transparent"
-
+    property alias maingrid:gridView
 
 
     function runAnimation()

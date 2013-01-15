@@ -91,7 +91,7 @@ Rectangle {
     Connections
     {
         target: dataModel
-        onProgressChanged:{progress_bar_fill.height = progress_bar.height* ((dataModel.currentCells / manager.media_pageSeperator)); console.log(dataModel.progress)}
+        onProgressChanged:{progress_bar_fill.height = progress_bar.height* ((dataModel.currentCells / dataModel.totalcells)); console.log(dataModel.progress)}
         onReady:progress_bar_fill.height = 0
         onLoadingStatusChanged:progress_bar_fill.color = dataModel.loadingStatus ? "green" : "red"
     }
@@ -117,19 +117,19 @@ Rectangle {
         StyledText {
             id: current_cells
             text: dataModel.currentCells
-            color: "grey"
-            font.bold: false
-            font.pixelSize: scaleY(2)
+            color: "white"
+            font.bold: true
+            font.pixelSize: scaleY(4)
             anchors.top: progress_bar.bottom
             anchors.left: progress_bar.left
         }
 
         StyledText {
             id: total_cells
-            text: manager
-            color: "grey"
-            font.bold: false
-            font.pixelSize: scaleY(4)
+            text: dataModel.totalcells
+            color: "white"
+            font.bold: true
+            font.pixelSize: scaleY(5)
             anchors.bottom: progress_bar.top
             anchors.left: progress_bar.left
         }
@@ -344,7 +344,7 @@ Rectangle {
             Text {
                 id: test
                 text: name
-                font.pixelSize: 18
+                font.pixelSize: scaleY(4)
                 anchors.centerIn: parent
                 color:"aliceblue"
 
@@ -359,7 +359,13 @@ Rectangle {
 
                     alphabetrect.scale = 1
                 }
-                onClicked: manager.setSeekLetter(name)
+                onPressed: { if(dataModel.totalPages===1){
+                      grid_view1.maingrid.positionViewAtIndex(dataModel.setSection(name), ListView.Beginning)
+
+                    }else{
+                        manager.setSeekLetter(name)
+                    }
+                }
             }
         }
     }
