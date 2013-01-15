@@ -6,16 +6,17 @@
 #include <QVariant>
 #include <datamodels/gridItem.h>
 #include <qorbitermanager.h>
+#include <QDeclarativeListProperty>
 
 class ListModel : public QAbstractListModel
 {
     Q_OBJECT
-
     Q_PROPERTY (double progress READ getProgress WRITE setProgress NOTIFY progressChanged)
     Q_PROPERTY (bool loadingStatus READ getLoadingStatus WRITE setLoadingStatus NOTIFY loadingStatusChanged)
     Q_PROPERTY (int totalcells READ getTotalCells WRITE setTotalCells NOTIFY sizeChanged)
     Q_PROPERTY (int currentCells READ getCurrentCells WRITE setCurrentCells NOTIFY cellsChanged)
-    Q_PROPERTY (int totalPages READ getTotalPages WRITE setTotalPages NOTIFY totalPagesChanged())
+    Q_PROPERTY (int totalPages READ getTotalPages WRITE setTotalPages NOTIFY totalPagesChanged)
+    Q_PROPERTY(QDeclarativeListProperty<QString> alphabet READ getAlphabet  )
 
 
 public:
@@ -24,13 +25,11 @@ public:
     int rowCount(const QModelIndex &parent = QModelIndex()) const;
     //int columnCount(const QModelIndex &parent) const {return 1;}
     QVariant data(const QModelIndex &index, int role = Qt::DisplayRole) const;
-
- QHash<int, QByteArray> roleNames() const;
-
+    QHash<int, QByteArray> roleNames() const;
 
     void appendRows(const QList<gridItem*> &items);
-  Q_INVOKABLE  void appendRow(gridItem* item);
-   // bool insertRows(int row, int count, gridItem *item);
+    Q_INVOKABLE  void appendRow(gridItem* item);
+    // bool insertRows(int row, int count, gridItem *item);
     void insertRow(int row, gridItem* item);
     bool removeRow(int row, const QModelIndex &parent = QModelIndex());
     bool removeRows(int row, int count, const QModelIndex &parent = QModelIndex());
@@ -40,6 +39,7 @@ public:
     QModelIndex indexFromItem( const gridItem* item) const;
     gridItem* currentRow();
     void sortModel(int column, Qt::SortOrder order);
+
 
     int totalcells;
     int seperator;
@@ -67,9 +67,22 @@ signals:
     void cellsChanged();
     void pagingCleared();
     void totalPagesChanged();
+    void letterLoaded();
+    void alphabetChanged();
 
 
 public slots:
+    QDeclarativeListProperty<QString> getAlphabet() { return QDeclarativeListProperty<QString>(this,m_sortList); }
+    int setSection(QString s){
+
+        foreach(gridItem* item, m_list) {
+            if(item->name().startsWith(s)) {
+               return indexFromItem(item).row();
+            }
+        }
+
+    }
+
     void setTotalPages(int p){totalPages = p;qDebug() << "New page count " << totalPages; emit totalPagesChanged();}
     int  getTotalPages() {return totalPages;}
     void setSeperator(int s) {seperator = s;}
@@ -93,12 +106,13 @@ public slots:
 private slots:
     void handleItemChange();
     void reset();
-//    virtual void beginResetModel();
-//    virtual void endResetModel();
+    //    virtual void beginResetModel();
+    //    virtual void endResetModel();
 private:
     bool resetInternalData();
     gridItem* m_prototype;
     QList<gridItem*> m_list;
+    QList<QString*> m_sortList;
     // qorbiterManager *manager_ref;
 };
 

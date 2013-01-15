@@ -36,6 +36,7 @@ ListModel::ListModel(gridItem* prototype, QObject* parent) :
     setRoleNames(m_prototype->roleNames());
 #endif
     qRegisterMetaType<QModelIndex>("QModelIndex");
+
     totalcells = 0;
     seperator = 16;
     loadingStatus = false;
@@ -43,6 +44,7 @@ ListModel::ListModel(gridItem* prototype, QObject* parent) :
     clearing = false;
     clear();
     setTotalPages(0);
+
 }
 
 int ListModel::rowCount(const QModelIndex &parent) const
@@ -375,4 +377,6 @@ void ListModel::clearForPaging()
     }
 
 }
+
+
 

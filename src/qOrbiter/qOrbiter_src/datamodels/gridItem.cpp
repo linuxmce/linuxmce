@@ -3,7 +3,7 @@
 gridItem::gridItem(QString &ident, QString &name,  QString &path,  int &index) :
     m_fk_file(ident), m_name(name), m_path(path), m_index(index)
 {
-
+setPing(false);
 }
 
 QHash<int, QByteArray> gridItem::roleNames() const
@@ -16,6 +16,7 @@ QHash<int, QByteArray> gridItem::roleNames() const
   names[AttributeRole] = "attributes";
   names[FKRole]= "id";
   names[AspectRole] = "aspect";
+  names[TrackerRole]= "ping";
   return names;
 }
 
@@ -32,6 +33,8 @@ QVariant gridItem::data(int role) const
     return id();
   case AspectRole:
   return imgAspect();
+  case TrackerRole:
+      return pinged();
   default:
     return QVariant();
   }

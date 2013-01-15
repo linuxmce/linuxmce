@@ -13,19 +13,21 @@ Rectangle {
     GridView {
         id: gridView
         //z: 2
-        width: scaleX(82)
-        height: scaleY(82)
+        width: scaleX(85)
+        height: scaleY(85)
         anchors.centerIn: gridholder
         model:dataModel
         delegate: contactDelegate
         focus: true
         //clip: true
         //contentItem.clip: true
-        cellWidth: scaleX(20)
-        cellHeight: scaleY(20)
+        cellWidth: scaleX(21)
+        cellHeight: scaleY(21)
+
         opacity:1
         scale:1
         cacheBuffer: 0
+
     }
 
 }

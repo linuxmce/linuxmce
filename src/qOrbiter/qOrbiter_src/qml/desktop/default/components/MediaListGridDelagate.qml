@@ -15,8 +15,8 @@ Component
     Rectangle
     {
         id:mainItem
-        width: scaleX(20);
-        height: scaleY(20)
+        width: scaleX(21);
+        height: scaleY(21)
         color: "transparent"
         opacity: 0
         scale:0
@@ -47,12 +47,19 @@ Component
         }
         
         Component.onCompleted: {fade_and_scale.running = true}
+        property bool pop:ping
+        onPopChanged:{
+            console.log(pop)
+            if(pop===true)
+
+           gridView.positionViewAtIndex(index,ListView.Beginning)
+        }
         Rectangle
         {
             id:frame
             
-            width: scaleX(19);
-            height: scaleY(19)
+            width: scaleX(21);
+            height: scaleY(21)
             anchors.centerIn: mainItem
             clip:true
             color: "transparent"
@@ -74,21 +81,21 @@ Component
             {
                 id: imagerect;
                 source:path !=="" ? "http://192.168.80.1/lmce-admin/MediaImage.php?img="+path : ""
-                height: scaleY(18);
-                width: scaleX(18);
+                height: scaleY(16);
+                width: scaleX(16);
                 anchors.centerIn: parent;
                 fillMode: Image.PreserveAspectCrop
-               smooth: true
-                asynchronous: false
+                smooth: true
+                asynchronous: true
+
             }
-            
             Rectangle{
                 id:textmask
                 color: "grey"
                 anchors.fill:celllabel
                 opacity: .5
             }
-            
+
             Text
             {
                 id:celllabel
@@ -98,9 +105,12 @@ Component
                 wrapMode: "WrapAtWordBoundaryOrAnywhere"
                 width: imagerect.width
                 font.bold: true
-                anchors.top: imagerect.top
+                anchors.top: imagerect.bottom
                 anchors.horizontalCenter: imagerect.horizontalCenter
             }
+
+            
+
         }
     }
 }

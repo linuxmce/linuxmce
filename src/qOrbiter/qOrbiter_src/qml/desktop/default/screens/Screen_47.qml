@@ -33,6 +33,7 @@ Rectangle {
         onShowDetailsChanged:
         {
             runEffects()
+
         }
     }
     Rectangle{
@@ -115,7 +116,35 @@ Rectangle {
     }
 
 
-    MultiStateFileDisplay{id:grid_view1; anchors.top: pos_label.bottom}
+    Rectangle {
+        id:grid_view1
+        width: scaleX(85)
+        height: scaleY(85)
+        clip: true
+        anchors.horizontalCenter: parent.horizontalCenter
+        color: "transparent"
+
+        GridView {
+            id: gridView
+            //z: 2
+            width: scaleX(85)
+            height: scaleY(85)
+            anchors.centerIn: gridholder
+            model:dataModel
+            delegate: contactDelegate
+            focus: true
+            //clip: true
+            //contentItem.clip: true
+            cellWidth: scaleX(21)
+            cellHeight: scaleY(21)
+
+            opacity:1
+            scale:1
+            cacheBuffer: 0
+
+        }
+
+    }
 
     ListView{
         id:model_pages
@@ -180,7 +209,13 @@ Rectangle {
 
                     alphabetrect.scale = 1
                 }
-                onClicked: manager.setSeekLetter(name)
+                onClicked: { if(dataModel.totalPages===1){
+                        gridView.positionViewAtIndex(dataModel.setSection(name), ListView.Beginning)
+
+                    }else{
+                        manager.setSeekLetter(name)
+                    }
+                }
             }
         }
     }
@@ -316,5 +351,6 @@ Rectangle {
     FilterView{
         id:myFilters
     }
+
 }
 

@@ -7,6 +7,7 @@ Rectangle {
     width: manager.appWidth
     height: scaleY(12)
     color: "transparent"
+    state: "inactive"
     property alias currentFilterModel:filterList.model
 
     onCurrentFilterModelChanged: filterList.count===0 ? state = "inactive" : state = "active"

@@ -16,7 +16,9 @@ class gridItem: public QObject
         ImageRole = Qt::DisplayRole+4,
         AttributeRole = Qt::UserRole+5,
         FKRole = Qt::DisplayRole+6,
-        AspectRole= Qt::DisplayRole+7
+        AspectRole= Qt::DisplayRole+7,
+        TrackerRole=Qt::DisplayRole+8
+
     };
 
 public:
@@ -31,8 +33,10 @@ public:
     inline QString path() const { return m_path; }
     inline QMap <QString*, int> attributes() const {return m_mapAttrib;}
     inline QString imgAspect () const {return m_aspect;}
+    inline bool pinged () const {return sorted;}
     void setAspect (QString qs_aspect) {m_aspect = qs_aspect;}
-
+    void setPing (bool ping) {sorted = ping; emit dataChanged();}
+    void emitPing(){emit ping();}
 
 private:
     QString m_name;
@@ -41,9 +45,11 @@ private:
     QString m_fk_file;
     QString m_aspect;
     QMap <QString*, int> m_mapAttrib;
+    bool sorted;
 
 signals:
     void imageChanged();
     void dataChanged();
+    void ping();
 };
 #endif // GRIDITEM_H

@@ -2161,7 +2161,11 @@ void qOrbiter::beginSetup()
     media_pos=0;
     media_seek="";
     cellsToRender = 0;
-    setGridSeperator(100);
+#ifndef ANDROID
+    setGridSeperator(10000);
+#else
+ setGridSeperator(500);
+#endif
     b_mediaPlaying = false;
     m_dwPK_Device_NowPlaying = 0;
     m_dwPK_Device_NowPlaying_Video = 0;
