@@ -39,23 +39,23 @@ override_dh_install:
 	cp -r $(binoutput)/imports ./usr
 	# The Qt libs we currently use. 
 	# maybe we should copy the complete lib dir...
-	cp $(buildenv)/../lib/libQtXml.so.4 ./usr/local/lib/
-	cp $(buildenv)/../lib/libQtDeclarative.so.4 ./usr/local/lib/
-	cp $(buildenv)/../lib/libQtScript.so.4 ./usr/local/lib/
-	cp $(buildenv)/../lib/libQtSvg.so.4 ./usr/local/lib/
-	cp $(buildenv)/../lib/libQtSql.so.4 ./usr/local/lib/
-	cp $(buildenv)/../lib/libQtXmlPatterns.so.4 ./usr/local/lib/
-	cp $(buildenv)/../lib/libQtNetwork.so.4 ./usr/local/lib/
-	cp $(buildenv)/../lib/libQtGui.so.4 ./usr/local/lib/
-	cp $(buildenv)/../lib/libQtCore.so.4 ./usr/local/lib/
+	#cp $(buildenv)/../lib/libQtXml.so.4 ./usr/local/lib/
+	#cp $(buildenv)/../lib/libQtDeclarative.so.4 ./usr/local/lib/
+	#cp $(buildenv)/../lib/libQtScript.so.4 ./usr/local/lib/
+	#cp $(buildenv)/../lib/libQtSvg.so.4 ./usr/local/lib/
+	#cp $(buildenv)/../lib/libQtSql.so.4 ./usr/local/lib/
+	#cp $(buildenv)/../lib/libQtXmlPatterns.so.4 ./usr/local/lib/
+	#cp $(buildenv)/../lib/libQtNetwork.so.4 ./usr/local/lib/
+	#cp $(buildenv)/../lib/libQtGui.so.4 ./usr/local/lib/
+	#cp $(buildenv)/../lib/libQtCore.so.4 ./usr/local/lib/
 	dh_install
 
 override_dh_strip:
 
 override_dh_auto_configure:
 	echo "Starting the QMake process"
-	cd $(buildenv)
-	$(buildenv)/qmake -makefile -nocache $(projectdir)/qOrbiterMaster.pro -o $(buildoutput)/Makefile -r -spec $(spec) $(config)
+	cd $(buildenv) || :
+	qmake -makefile -nocache $(projectdir)/qOrbiterMaster.pro -o $(buildoutput)/Makefile -r -spec $(spec) $(config)
 
 override_dh_auto_build:
 	echo "Changing into $(buildoutput)"
