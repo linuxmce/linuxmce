@@ -4,7 +4,7 @@ import Qt.labs.shaders 1.0
 
 import "../components"
 import "../js/ComponentLoader.js" as MyJs
-import "../lib/handlers"
+import "../../lib/handlers"
 
 
 Row{

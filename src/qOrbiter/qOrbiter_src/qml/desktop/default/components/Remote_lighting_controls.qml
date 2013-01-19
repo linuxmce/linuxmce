@@ -1,5 +1,5 @@
 import QtQuick 1.0
-import "../lib/handlers"
+import "../../lib/handlers"
 AvOptionButton {
     width: 60
     height: 200

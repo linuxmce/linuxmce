@@ -9,7 +9,7 @@
 
 import QtQuick 1.1
 import Qt.labs.shaders 1.0
-import "lib/components"
+import "../lib/components"
 import "components"
 import "js/ComponentLoader.js" as MyJs
 

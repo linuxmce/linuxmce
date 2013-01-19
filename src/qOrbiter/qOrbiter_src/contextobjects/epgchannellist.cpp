@@ -318,7 +318,6 @@ void EPGChannelList::updateLivePosition()
         emit networkChanged(data(epgLocation,1).toString());
         emit channelNumberChanged(data(epgLocation, 3).toString());
         emit programChanged(data(epgLocation,5).toString());
-
     }
     else
     {

@@ -1,5 +1,5 @@
 import QtQuick 1.0
-import "../lib/handlers"
+import "../../lib/handlers"
 Rectangle{
     id:power_rect_container
     height: manager.appHeight
