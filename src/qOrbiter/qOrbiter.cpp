@@ -3332,8 +3332,7 @@ void DCE::qOrbiter::requestLiveTvPlaylist()
             QString channelIndex;
             QString program;
             int index = 0;
-            int channelNumber;
-            QImage channelimage;
+            int channelNumber;           
             DataGridCell *pCell;
 
             for(MemoryDataTable::iterator it=pDataGridTable->m_MemoryDataTable.begin();it!=pDataGridTable->m_MemoryDataTable.end();++it)
@@ -3347,7 +3346,7 @@ void DCE::qOrbiter::requestLiveTvPlaylist()
                 program = QString::fromStdString(pCell->GetText());
                 program.remove(channelName);
                 program.remove(breaker.at(0));
-                EPGItemClass *t = new EPGItemClass(channelName, channelNumber, channelIndex, program, index, channelimage, channelimage);
+                EPGItemClass *t = new EPGItemClass(channelName, channelNumber, channelIndex, program, index, QString("na"), QString("na"));
                 emit addChannel(t);
                 index++;
 #ifdef RPI
@@ -3531,7 +3530,7 @@ void DCE::qOrbiter::populateAdditionalMedia() //additional media grid that popul
 #ifdef rpi
                 Sleep(50);
 #elif ANDROID
-                Sleep(60);
+                Sleep(50);
 #else
                // Sleep(10);
 #endif

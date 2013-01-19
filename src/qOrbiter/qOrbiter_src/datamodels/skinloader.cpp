@@ -40,8 +40,15 @@ void SkinLoader::loadSkin(QString name) {
     {
         qWarning() << current_component->errors();
         qWarning() << "Style.qml is corrupt, moving to next skin. \n";
-         skinsToLoad.removeAt(loadercounter);
-        loadSkin(skinsToLoad.at(loadercounter));
+        if(loadercounter != skinsToLoad.size()){
+            skinsToLoad.removeAt(loadercounter);
+            totalSkinsToLoad--;
+           loadSkin(skinsToLoad.at(loadercounter));
+        }
+        else{
+            emit finishedList();
+        }
+
     }
     else {
         //qDebug() << "Loaded already?  Attempting to ->create()";
@@ -77,7 +84,7 @@ void SkinLoader::continueLoading() {
         ui_reference->setDceResponse("Adding skin to list" + s_title);
         m_parent->appendRow(new SkinDataItem(skinBase, s_title, s_creator, s_description, s_version, s_target, skinPic, s_path, s_mainc, s_accentc, styleObject));
         loadercounter++;
-       // qDebug() << "Loading counter: " << loadercounter;
+        qDebug() << "Loading counter: " << loadercounter;
         if (loadercounter == totalSkinsToLoad)
 
         {

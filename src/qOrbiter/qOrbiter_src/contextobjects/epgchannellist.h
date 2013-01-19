@@ -38,7 +38,7 @@ class EPGChannelList : public QAbstractListModel
     Q_OBJECT
     Q_PROPERTY(QModelIndex activeIndex READ getCurrentIndex WRITE setCurrentIndex NOTIFY activeIndexChanged)
     Q_PROPERTY(int currentIndex READ getCurrentRow WRITE setCurrentRow NOTIFY activeRowChanged)
-
+    Q_PROPERTY(double progress READ getProgress WRITE setProgress NOTIFY progressChanged)
 public:
     explicit EPGChannelList(EPGItemClass* prototype);
     ~EPGChannelList();
@@ -54,6 +54,7 @@ public:
     QModelIndex activeIndex;
     int currentIndex;
     QString id;
+    double progress;
 
 public slots:
     int rowCount(const QModelIndex &parent = QModelIndex()) const;
@@ -79,9 +80,9 @@ public slots:
     void empty();
     void sortModel(int column, Qt::SortOrder order);
 
+    void setProgress(double d){progress=d; emit progressChanged(); }
+    double getProgress() {return progress;}
 
-    virtual void beginResetModel();
-    virtual void endResetModel();
 
     void setCurrentRow(int row) {currentIndex = row; emit activeRowChanged(); }
     int getCurrentRow() {return currentIndex;}
@@ -99,6 +100,7 @@ signals:
     void networkChanged(QString net);
     void modelAboutToBeReset();
     void modelReset();
+    void progressChanged();
 
 private slots:
     void handleItemChange();

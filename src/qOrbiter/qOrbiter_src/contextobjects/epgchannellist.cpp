@@ -68,15 +68,17 @@ void EPGChannelList::handleItemChange()
     //qDebug() << "Handling item change for:" << index;
     if(index.isValid())
     {
-        //  emit dataChanged(index, index, 0);
+         emit dataChanged(index, index, 0);
     }
 }
 
 void EPGChannelList::resetInternalData()
 {
-
-    qDeleteAll(m_list.begin(), m_list.end());
+    qDebug("Resetting Tv Program list data");
     m_list.clear();
+
+    //qDeleteAll(m_list.begin(), m_list.end());
+    //m_list.clear();
 
 }
 
@@ -287,22 +289,24 @@ QModelIndex EPGChannelList::getMythChannelIndex(QString m)
 
 void EPGChannelList::empty()
 {
-    qDeleteAll(m_list.begin(), m_list.end());
-    m_list.clear();
+
+    QApplication::processEvents(QEventLoop::AllEvents);
+    emit modelAboutToBeReset();
+    beginResetModel();
+    resetInternalData();
+    setProgress(0.0);
+    QApplication::processEvents(QEventLoop::AllEvents);
+    endResetModel();
+    emit modelReset();
+    QApplication::processEvents(QEventLoop::AllEvents);
+
 }
 
 void EPGChannelList::sortModel(int column, Qt::SortOrder order)
 {
 }
 
-void EPGChannelList::beginResetModel()
-{
-}
 
-void EPGChannelList::endResetModel()
-{
-
-}
 
 void EPGChannelList::updateLivePosition()
 {

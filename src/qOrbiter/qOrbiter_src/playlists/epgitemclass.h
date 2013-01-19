@@ -25,7 +25,7 @@ public:
 
 public:
     EPGItemClass() {}
-    explicit EPGItemClass( QString &chanName, int &chanIndex,  QString &channel, QString &program, int &dceIndex, QImage &chanImage, QImage &progImag);
+    explicit EPGItemClass( QString chanName, int chanIndex,  QString channel, QString program, int dceIndex, QString chanImage, QString progImag);
     QVariant data(int role) const;
     QHash<int, QByteArray> roleNames() const;
 
@@ -34,8 +34,8 @@ public:
     inline int channel() const { return channel_number; }
     inline QString program() const { return m_program; }
     inline int id() const {  return m_dceIndex; }
-    inline QImage channelImage() const { return channel_image; }
-    inline QImage programImage() const {return program_image;}
+    inline QString channelImage() const { return channel_image; }
+    inline QString programImage() const {return program_image;}
     inline QString mythid () const {return m_channel;}
 
 
@@ -47,8 +47,8 @@ private:
     QString m_program;
     int channel_number;
     int m_dceIndex;
-    QImage channel_image;
-    QImage program_image;
+    QString channel_image;
+    QString program_image;
 
     QMap <QString*, int> m_mapAttrib;
 

@@ -138,6 +138,8 @@ Item {
 
 
 
+
+
     //! Returns the value of the param value passed in scaled to a percentage of the current width value of the application window.
     function scaleX(x){
         return x/100*manager.appWidth
