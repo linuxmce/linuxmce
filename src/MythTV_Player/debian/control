@@ -1,16 +1,15 @@
 Source: lmce-mythtv-player
 Section: unknown
 Priority: extra
-Maintainer: root <root@racky.theinternet.dyndns.org
->
-Build-Depends: debhelper (>= 8.0.0)
+Maintainer: Peer Oliver Schmidt <developer@linuxmce.org>
+Build-Depends: debhelper (>= 8.0.0),libxtst-dev,libxmu-headers,lmce-windowsutils-dev
 Standards-Version: 3.9.2
-Homepage: <insert the upstream URL, if relevant>
+Homepage: http://www.linuxmce.org
 #Vcs-Git: git://git.debian.org/collab-maint/lmce-mythtv-player.git
 #Vcs-Browser: http://git.debian.org/?p=collab-maint/lmce-mythtv-player.git;a=summary
 
 Package: lmce-mythtv-player
 Architecture: any
-Depends: ${shlibs:Depends}, ${misc:Depends}
+Depends: ${shlibs:Depends}, ${misc:Depends}, lmce-windowutils
 Description: <insert up to 60 chars description>
  <insert long description, indented with spaces>
