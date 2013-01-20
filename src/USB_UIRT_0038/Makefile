@@ -35,7 +35,7 @@ sources += ../LIRC_DCE/IRReceiverBase.cpp
 #<-dceag-mf-b->
 LDLIBS = $(XTRALDLIBS) $(BASELDLIBS)
 
-whattodo:
+whattodo: all
 	@echo "type 'make bin', 'make so' or 'make all'"
 
 all: bin so
@@ -46,12 +46,14 @@ so: USB_UIRT_0038.so
 
 USB_UIRT_0038.so: $(sources:.cpp=.o)
 	$(CXX) -shared -o $(MYNAME).so $(call cpath,$+) $(LDFLAGS) $(LDLIBS)
+	mkdir -p ../bin
 	cp $@ ../bin
 	chmod +x post_make.sh
 	./post_make.sh $@
 		
 USB_UIRT_0038: $(sources:.cpp=.o)
 	$(CXX) -o $(MYNAME) $(call cpath,$+) $(LDFLAGS) $(LDLIBS)
+	mkdir -p ../bin
 	cp $@ ../bin
 	cp $(UUIRTDRV_SO) uuirtdrv.so
 	./post_make.sh $@
@@ -71,7 +73,6 @@ endif
 
 
 install: 
-	mkdir -p /usr/pluto/bin
-	cp USB_UIRT_0038 $(DESTPATH)/usr/pluto/bin
-	mkdir -p pluto/lib
-	cp uuirtdrv.so $(DESTPATH)pluto/lib
+	mkdir -p $(DESTDIR)/usr/pluto/bin $(DESTDIR)/usr/pluto/lib
+	cp USB_UIRT_0038 $(DESTDIR)/usr/pluto/bin
+	cp uuirtdrv.so $(DESTDIR)/usr/pluto/lib
