@@ -1,5 +1,5 @@
 #!/bin/sh
-# prerm script for pluto-media
+# prerm script for pluto-pluto-media-db
 #
 # see: dh_installdeb(1)
 

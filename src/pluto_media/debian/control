@@ -1,14 +1,22 @@
-Source: pluto-media
-Section: unknown
+Source: pluto-pluto-media-db
 Priority: extra
-Maintainer: root <root@unknown>
+Maintainer: Peer Oliver Schmidt <developer@linuxmce.org>
 Build-Depends: debhelper (>= 8.0.0)
 Standards-Version: 3.9.2
+Section: libs
 Homepage: <insert the upstream URL, if relevant>
-#Vcs-Git: git://git.debian.org/collab-maint/pluto-media.git
-#Vcs-Browser: http://git.debian.org/?p=collab-maint/pluto-media.git;a=summary
+#Vcs-Git: git://git.debian.org/collab-maint/pluto-pluto-media-db.git
+#Vcs-Browser: http://git.debian.org/?p=collab-maint/pluto-pluto-media-db.git;a=summary
 
-Package: pluto-media
+Package: pluto-pluto-media-db-dev
+Section: libdevel
+Architecture: any
+Depends: pluto-pluto-media-db (= ${binary:Version})
+Description: <insert up to 60 chars description>
+ <insert long description, indented with spaces>
+
+Package: pluto-pluto-media-db
+Section: libs
 Architecture: any
 Depends: ${shlibs:Depends}, ${misc:Depends}
 Description: <insert up to 60 chars description>

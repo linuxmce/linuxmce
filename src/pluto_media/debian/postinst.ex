@@ -1,5 +1,5 @@
 #!/bin/sh
-# postinst script for pluto-media
+# postinst script for pluto-pluto-media-db
 #
 # see: dh_installdeb(1)
 

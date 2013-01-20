@@ -48,17 +48,17 @@ man(1), man(7), http://www.tldp.org/HOWTO/Man-Page/
   <!ENTITY dhfirstname "FIRSTNAME">
   <!ENTITY dhsurname   "SURNAME">
   <!-- dhusername could also be set to "&dhfirstname; &dhsurname;". -->
-  <!ENTITY dhusername  "root">
-  <!ENTITY dhemail     "root@unknown">
+  <!ENTITY dhusername  "Peer Oliver Schmidt">
+  <!ENTITY dhemail     "developer@linuxmce.org">
   <!-- SECTION should be 1-8, maybe w/ subsection other parameters are
        allowed: see man(7), man(1) and
        http://www.tldp.org/HOWTO/Man-Page/q2.html. -->
   <!ENTITY dhsection   "SECTION">
   <!-- TITLE should be something like "User commands" or similar (see
        http://www.tldp.org/HOWTO/Man-Page/q2.html). -->
-  <!ENTITY dhtitle     "pluto-media User Manual">
-  <!ENTITY dhucpackage "PLUTO-MEDIA">
-  <!ENTITY dhpackage   "pluto-media">
+  <!ENTITY dhtitle     "pluto-pluto-media-db User Manual">
+  <!ENTITY dhucpackage "PLUTO-PLUTO-MEDIA-DB">
+  <!ENTITY dhpackage   "pluto-pluto-media-db">
 ]>
 
 <refentry>

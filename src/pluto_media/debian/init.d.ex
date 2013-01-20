@@ -1,6 +1,6 @@
 #!/bin/sh
 ### BEGIN INIT INFO
-# Provides:          pluto-media
+# Provides:          pluto-pluto-media-db
 # Required-Start:    $network $local_fs
 # Required-Stop:
 # Default-Start:     2 3 4 5
@@ -11,13 +11,13 @@
 #                    <...>
 ### END INIT INFO
 
-# Author: root <root@unknown>
+# Author: Peer Oliver Schmidt <developer@linuxmce.org>
 
 # PATH should only include /usr/* if it runs after the mountnfs.sh script
 PATH=/sbin:/usr/sbin:/bin:/usr/bin
-DESC=pluto-media             # Introduce a short description here
-NAME=pluto-media             # Introduce the short server's name here
-DAEMON=/usr/sbin/pluto-media # Introduce the server's location here
+DESC=pluto-pluto-media-db             # Introduce a short description here
+NAME=pluto-pluto-media-db             # Introduce the short server's name here
+DAEMON=/usr/sbin/pluto-pluto-media-db # Introduce the server's location here
 DAEMON_ARGS=""             # Arguments to run the daemon with
 PIDFILE=/var/run/$NAME.pid
 SCRIPTNAME=/etc/init.d/$NAME

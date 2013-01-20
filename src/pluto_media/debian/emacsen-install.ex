@@ -1,12 +1,12 @@
 #! /bin/sh -e
-# /usr/lib/emacsen-common/packages/install/pluto-media
+# /usr/lib/emacsen-common/packages/install/pluto-pluto-media-db
 
 # Written by Jim Van Zandt <jrv@debian.org>, borrowing heavily
 # from the install scripts for gettext by Santiago Vila
 # <sanvila@ctv.es> and octave by Dirk Eddelbuettel <edd@debian.org>.
 
 FLAVOR=$1
-PACKAGE=pluto-media
+PACKAGE=pluto-pluto-media-db
 
 if [ ${FLAVOR} = emacs ]; then exit 0; fi
 

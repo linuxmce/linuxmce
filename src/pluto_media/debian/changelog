@@ -1,5 +1,5 @@
-pluto-media (2.46-1) unstable; urgency=low
+pluto-pluto-media-db (2.46) unstable; urgency=low
 
-  * Initial release (Closes: #nnnn)  <nnnn is the bug number of your ITP>
+  * Initial Release.
 
- -- root <root@unknown>  Thu, 22 Nov 2012 19:20:00 +0000
+ -- Peer Oliver Schmidt <developer@linuxmce.org>  Sun, 20 Jan 2013 18:50:39 +0100

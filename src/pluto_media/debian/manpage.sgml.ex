@@ -20,14 +20,14 @@ manpage.1: manpage.sgml
   <!ENTITY dhfirstname "<firstname>FIRSTNAME</firstname>">
   <!ENTITY dhsurname   "<surname>SURNAME</surname>">
   <!-- Please adjust the date whenever revising the manpage. -->
-  <!ENTITY dhdate      "<date>November 22, 2012</date>">
+  <!ENTITY dhdate      "<date>January 20, 2013</date>">
   <!-- SECTION should be 1-8, maybe w/ subsection other parameters are
        allowed: see man(7), man(1). -->
   <!ENTITY dhsection   "<manvolnum>SECTION</manvolnum>">
-  <!ENTITY dhemail     "<email>root@unknown</email>">
-  <!ENTITY dhusername  "root">
-  <!ENTITY dhucpackage "<refentrytitle>PLUTO-MEDIA</refentrytitle>">
-  <!ENTITY dhpackage   "pluto-media">
+  <!ENTITY dhemail     "<email>developer@linuxmce.org</email>">
+  <!ENTITY dhusername  "Peer Oliver Schmidt">
+  <!ENTITY dhucpackage "<refentrytitle>PLUTO-PLUTO-MEDIA-DB</refentrytitle>">
+  <!ENTITY dhpackage   "pluto-pluto-media-db">
 
   <!ENTITY debian      "<productname>Debian</productname>">
   <!ENTITY gnu         "<acronym>GNU</acronym>">

@@ -11,6 +11,8 @@ LDFLAGS += -lmysqlclient_r
 
 #
 
+headers += *.h
+
 sources +=  \
 Table_Attribute.cpp \
 Table_AttributeType.cpp \
@@ -72,5 +74,7 @@ include $(ROOT)/PlutoUtils/make.rules
 -include $(sources:.cpp=.d)
 
 install: 
-	mkdir -p $(DESTDIR)/pluto/lib
-	cp libpluto_media.so $(DESTDIR)/pluto/lib
+	mkdir -p $(DESTDIR)/usr/pluto/lib $(DESTDIR)/usr/include/lmce
+	cp libpluto_media.so $(DESTDIR)/usr/pluto/lib
+	cp $(headers) $(DESTDIR)/usr/include/lmce
+	

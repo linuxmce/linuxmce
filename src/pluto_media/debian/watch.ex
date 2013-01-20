@@ -8,16 +8,16 @@ version=3
 
 # Uncomment to examine a Webpage
 # <Webpage URL> <string match>
-#http://www.example.com/downloads.php pluto-media-(.*)\.tar\.gz
+#http://www.example.com/downloads.php pluto-pluto-media-db-(.*)\.tar\.gz
 
 # Uncomment to examine a Webserver directory
-#http://www.example.com/pub/pluto-media-(.*)\.tar\.gz
+#http://www.example.com/pub/pluto-pluto-media-db-(.*)\.tar\.gz
 
 # Uncommment to examine a FTP server
-#ftp://ftp.example.com/pub/pluto-media-(.*)\.tar\.gz debian uupdate
+#ftp://ftp.example.com/pub/pluto-pluto-media-db-(.*)\.tar\.gz debian uupdate
 
 # Uncomment to find new files on sourceforge, for devscripts >= 2.9
-# http://sf.net/pluto-media/pluto-media-(.*)\.tar\.gz
+# http://sf.net/pluto-pluto-media-db/pluto-pluto-media-db-(.*)\.tar\.gz
 
 # Uncomment to find new files on GooglePages
-# http://example.googlepages.com/foo.html pluto-media-(.*)\.tar\.gz
+# http://example.googlepages.com/foo.html pluto-pluto-media-db-(.*)\.tar\.gz
