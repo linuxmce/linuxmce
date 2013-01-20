@@ -17,14 +17,18 @@ VERSION = 2.0.0
 
 sources = MessageTranslation.cpp DefaultMessageTranslation.cpp AVMessageTranslation.cpp
 
+headers = *.h
+
 all: libMessageTranslation.so all-recursive
 
 libMessageTranslation.so: $(sources:.cpp=.o)
 	$(CXX) -shared $(CXXFLAGS) $(CPPFLAGS) -o $@ $(call cpath,$+)
+	mkdir -p $(ROOT)/lib
 	cp $@ $(ROOT)/lib
 
 libMessageTranslation.a: $(sources:.cpp=.o)
 	$(AR) rc $@ $+
+	mkdir -p $(ROOT)/lib
 	cp $@ $(ROOT)/lib
 
 clean:
@@ -39,5 +43,6 @@ ifeq (,$(findstring clean, $(MAKECMDGOALS)))
 endif
 
 install: 
-	mkdir -p pluto/lib
-	cp libMessageTranslation.so $(DESTPATH)pluto/lib
+	mkdir -p $(DESTDIR)/usr/pluto/lib $(DESTDIR)/usr/include/lmce
+	cp libMessageTranslation.so $(DESTDIR)/usr/pluto/lib
+	cp $(headers) $(DESTDIR)/usr/include/lmce
