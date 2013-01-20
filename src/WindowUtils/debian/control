@@ -1,0 +1,23 @@
+Source: lmce-windowsutils
+Priority: extra
+Maintainer: Peer Oliver Schmidt <developer@linuxmce.org>
+Build-Depends: debhelper (>= 8.0.0),libxmu-dev
+Standards-Version: 3.9.2
+Section: libs
+Homepage: http://www.linuxmce.org
+#Vcs-Git: git://git.debian.org/collab-maint/lmce-windowsutils.git
+#Vcs-Browser: http://git.debian.org/?p=collab-maint/lmce-windowsutils.git;a=summary
+
+Package: lmce-windowsutils-dev
+Section: libdevel
+Architecture: any
+Depends: lmce-windowsutils (= ${binary:Version})
+Description: <insert up to 60 chars description>
+ <insert long description, indented with spaces>
+
+Package: lmce-windowsutils
+Section: libs
+Architecture: any
+Depends: ${shlibs:Depends}, ${misc:Depends}, libxmu
+Description: <insert up to 60 chars description>
+ <insert long description, indented with spaces>
