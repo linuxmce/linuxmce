@@ -8,16 +8,20 @@ LDLIBS=-lpthread -lDCECommon -lSerial -lSerializeClass -lPlutoUtils -lMessageTra
 APPNAME = IRBase
 VERSION = 2.0.0
 
+headers = *.h
+
 sources = IRBase.cpp GenerateRcX.cpp
 
 all: libIRBase.so all-recursive
 
 libIRBase.so: $(sources:.cpp=.o)
 	$(CXX) -shared $(CXXFLAGS) $(CPPFLAGS) -o $@ $(call cpath,$+)
+	mkdir -p $(ROOT)/lib
 	cp $@ $(ROOT)/lib
 
 libIRBase.a: $(sources:.cpp=.o)
 	$(AR) rc $@ $+
+	mkdir -p $(ROOT)/lib
 	cp $@ $(ROOT)/lib
 
 clean:
@@ -32,6 +36,7 @@ ifeq (,$(findstring clean, $(MAKECMDGOALS)))
 endif
 
 install: 
-	mkdir -p pluto/lib
-	cp libIRBase.so $(DESTPATH)pluto/lib
-	cp IRBase-r.lib $(DESTPATH)pluto/lib
+	mkdir -p $(DESTDIR)/usr/pluto/lib $(DESTDIR)/usr/include/lmce
+	cp libIRBase.so $(DESTDIR)/usr/pluto/lib
+	cp $(headers) $(DESTDIR)/usr/include/lmce
+#	cp IRBase-r.lib $(DESTDIR)pluto/lib
