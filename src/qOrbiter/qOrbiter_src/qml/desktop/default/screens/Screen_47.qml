@@ -52,6 +52,7 @@ Rectangle {
     MediaListInfoBar {
         id: label_row
         anchors.centerIn: pos_label
+        z:2
     }
     MediaListProgressBar {
         id: progress_bar
@@ -121,6 +122,7 @@ Rectangle {
         width: scaleX(85)
         height: scaleY(85)
         clip: true
+        focus:true
         anchors.horizontalCenter: parent.horizontalCenter
         color: "transparent"
 
@@ -129,7 +131,7 @@ Rectangle {
             //z: 2
             width: scaleX(85)
             height: scaleY(85)
-            anchors.centerIn: gridholder
+            anchors.centerIn: grid_view1
             model:dataModel
             delegate: contactDelegate
             focus: true
@@ -137,10 +139,24 @@ Rectangle {
             //contentItem.clip: true
             cellWidth: scaleX(21)
             cellHeight: scaleY(21)
-
+            flow:GridView.TopToBottom
             opacity:1
             scale:1
             cacheBuffer: 0
+            interactive:true
+            Keys.onPressed: {
+                console.log(event.key)
+            }
+            Keys.onEnterPressed: {
+                manager.setStringParam(4, dataModel.get(currentIndex, "id"))
+
+            }
+            highlightFollowsCurrentItem:true
+            Component.onCompleted:forceActiveFocus()
+
+            highlight:Rectangle{
+                color:"white"
+            }
 
         }
 

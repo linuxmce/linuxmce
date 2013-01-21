@@ -477,7 +477,7 @@ void qorbiterManager::processConfig(QByteArray config)
 
     QDomDocument configData;
     QByteArray tConf =  config;
-    configData.setContent(tConf,false);
+    configData.setContent(config,false);
     if(configData.isDocument() == false)
     {
         setDceResponse("Invalid config for device: " + QString::number(iPK_Device));
@@ -814,10 +814,7 @@ void qorbiterManager::processConfig(QByteArray config)
     binaryConfig.clear();
 
     //---update object image
-    setDceResponse(" Remote Config Complete");
-
-    configData.clear();
-    tConf.clear();
+    setDceResponse(" Remote Config Complete"); 
 
     activateScreenSaver();
 

@@ -25,7 +25,7 @@
 #include <QtCore/QDir>
 #include <shaders/filereader.h>
 #include <QThread>
-
+#include <QGLFormat>
 #if (QT5)
 #include <QtQml/QtQml>
 #include <QtQml/QQmlContext>
@@ -108,7 +108,9 @@ orbiterWindow::orbiterWindow(long deviceid, std::string routerip, bool fullScree
 
 #ifdef for_desktop
 #ifndef QT5
-    glWidget = new QGLWidget();
+     QGLFormat format= QGLFormat::defaultFormat();
+    glWidget = new QGLWidget(format);
+         glWidget->setAutoFillBackground(false);
     mainView.setViewport(glWidget);
     mainView.setViewportUpdateMode(QGraphicsView::FullViewportUpdate);
 #endif

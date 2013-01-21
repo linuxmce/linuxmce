@@ -202,6 +202,7 @@ Item {
         onLoaded: {
             console.log("Screen Changed:" + pageLoader.source)
         }
+        focus:true
         z:5
 
     }
