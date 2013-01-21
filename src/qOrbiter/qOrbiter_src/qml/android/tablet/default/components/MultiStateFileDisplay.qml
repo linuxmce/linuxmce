@@ -11,37 +11,15 @@ Rectangle {
     property alias maingrid:gridView
 
 
-    function runAnimation()
-    {
-        console.log("Switching Grids ")
-        if (gridView.opacity === 1)
-        {
-            hidegrid1.running = true
-            showGrid2.running = true
-
-
-        }
-        else
-        {
-            showGrid1.running = true
-            hidegrid2.running = true
-        }
-
-    }
-
-
-
-
     GridView {
         id: gridView
         //z: 2
         width: scaleX(82)
-        height: scaleY(82)
-
+        height: scaleY(80)
         anchors.centerIn: gridholder
         model:dataModel
         delegate: contactDelegate
-        cacheBuffer: 20
+        cacheBuffer: 0
         focus: true
         //clip: true
         //contentItem.clip: true
@@ -49,54 +27,15 @@ Rectangle {
         cellHeight: scaleY(20)
         opacity:1
         scale:1
+        transform: Rotation { origin.x: width/2; origin.y: y/2; axis { x: 0; y: 1; z: 0 } angle: gridView.moving ? gridView.horizontalVelocity > 0 ? 20 : -20 :0 }
+        flow:GridView.TopToBottom
+        Behavior on transform {
+            PropertyAnimation{
+                duration: 500
+                }
+        }
 
-    }
-
-    GridView {
-        id: gridView2
-        //z: 2
-        width: scaleX(82)
-        height: scaleY(82)
-        anchors.centerIn: gridholder
-        model: dataModel
-        delegate: contactDelegate
-        cacheBuffer: 20
-
-        //clip: true
-        //contentItem.clip: true
-        cellWidth: scaleX(20)
-        cellHeight: scaleY(20)
-        opacity:0
-        scale: 0
-
-    }
-    ParallelAnimation{
-        id:showGrid2
-        running:false
-        PropertyAnimation {target: gridView2; property: "scale"; to: 1; duration:2000}
-        PropertyAnimation {target: gridView2; property: "opacity"; to: 1; duration:750}
-    }
-
-    ParallelAnimation{
-        id:showGrid1
-        running:false
-        PropertyAnimation {target: gridView; property: "scale"; to: 1; duration:2000}
-        PropertyAnimation {target: gridView; property: "opacity"; to: 1; duration:750}
-    }
-
-    ParallelAnimation{
-        id:hidegrid2
-        running:false
-      PropertyAnimation {target: gridView2; property: "scale"; to:0; duration:750}
-        PropertyAnimation {target: gridView2; property: "opacity"; to: 0; duration:750}
-    }
-
-    ParallelAnimation{
-        id:hidegrid1
-        running:false
-       PropertyAnimation {target: gridView; property: "scale"; to: 0; duration:750}
-        PropertyAnimation {target: gridView; property: "opacity"; to:0 ; duration:750}
-    }
+    } 
 
 
 }

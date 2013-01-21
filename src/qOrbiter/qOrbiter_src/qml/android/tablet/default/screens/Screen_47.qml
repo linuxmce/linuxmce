@@ -141,17 +141,12 @@ Rectangle {
     Component
     {
         id: contactDelegate
-
-
         Rectangle
         {
             id:mainItem
             width: scaleX(20);
             height: scaleY(20)
             color: "transparent"
-            opacity: 0
-            scale:0
-            rotation: 360
 
             MouseArea{
                 anchors.fill: mainItem
@@ -168,20 +163,9 @@ Rectangle {
                     mainItem.z = 1
                 }
             }
-            ParallelAnimation {
-                id:fade_and_scale
-                running: false
-                PropertyAnimation { target: mainItem; property: "opacity"; to: 1; duration: 1000}
-                PropertyAnimation { target: mainItem; property: "scale"; to: 1; duration: 500}
-                PropertyAnimation { target: mainItem; property: "rotation"; to: 0; duration: 500}
-
-            }
-
-            Component.onCompleted: fade_and_scale.running = true
             Rectangle
             {
                 id:frame
-
                 width: scaleX(19);
                 height: scaleY(19)
                 anchors.centerIn: mainItem
@@ -217,8 +201,6 @@ Rectangle {
                     asynchronous: true
                 }
 
-
-
                 Rectangle{
                     id:textmask
                     color: "grey"
@@ -230,8 +212,8 @@ Rectangle {
                 {
                     id:celllabel
                     text: name;
-                    font.pointSize: 12;
-                    color: "white" ;
+                    font.pointSize: 14;
+                    color: "Black" ;
                     wrapMode: "WrapAtWordBoundaryOrAnywhere"
                     width: imagerect.width
                     font.bold: true

@@ -15,25 +15,29 @@ Item {
     //        }
     //    }
 
-    ScreenSaver{
-        id:ss
-        anchors.fill: parent
-        MouseArea{
-            anchors.fill: parent
-            onClicked: pageLoader.opacity === 0 ?  pageLoader.opacity = 1 : uiTimer.restart()
-        }
-    }
+    //    ScreenSaver{
+    //        id:ss
+    //        anchors.fill: parent
+    //        MouseArea{
+    //            anchors.fill: parent
+    //            onClicked: pageLoader.opacity === 0 ?  pageLoader.opacity = 1 : uiTimer.restart()
+    //        }
+    //    }
+
+
     FontLoader{
         id:myFont
         name:"Sawasdee"
         source: "../../fonts/Sawasdee.ttf"
     }
 
-    Timer{
-        id:uiTimer
-        interval: 60000
-        onTriggered: pageLoader.opacity = 0
-        running: pageLoader.opacity > 0
+    Rectangle{
+        anchors.fill: parent
+        gradient: Gradient{
+            GradientStop { position: .10; color: "black" }
+            GradientStop { position: 0.65; color: "#657383" }
+            GradientStop { position: .70; color: "black" }
+        }
     }
 
 
@@ -56,13 +60,10 @@ Item {
         target: manager
         onOrientationChanged: checkLayout()
     }
-    /*
-    Image {
-    id: bg
-    source: "img/icons/backgrounds/livingroom.png"
-    anchors.fill:parent
-    }
-*/
+
+
+
+
 
     function scaleX(x){
         return x/100*manager.appWidth
@@ -74,12 +75,12 @@ Item {
 
     function screenchange(screenname )
     {
-        fadeout.start()
+
         componentLoader.source = ""
         pageLoader.source = "screens/"+screenname
 
         if (pageLoader.status == Component.Ready)
-        {fadein.start()
+        {
             manager.setDceResponse("Command to change to:" + screenname+ " was successfull")
         }
         else if (pageLoader.status == Component.Loading)
@@ -88,11 +89,11 @@ Item {
             finishLoading(screenname)
         }
         else
-        {fadein.start()
+        {
             console.log("Command to change to:" + screenname + " failed!")
             screenfile = screenname
             pageLoader.source = "screens/Screen_x.qml"
-            uiTimer.restart()
+
         }
     }
 
@@ -102,9 +103,9 @@ Item {
         {
             console.log("finishing load")
             pageLoader.source = "screens/"+screenname
-            fadein.start()
+
             console.log("screen" + screenname + " loaded.")
-            uiTimer.restart()
+
         }
         else
         {
@@ -130,7 +131,7 @@ Item {
                 duration: 1000
             }
         }
-        Keys.onPressed: { uiTimer.restart() ;
+        Keys.onPressed: {
             console.log(event.key)
         }
     }
