@@ -32,6 +32,7 @@ namespace knx
 		{
 			case DEVICETEMPLATE_Standard_Thermostat_CONST: return new Standard_Thermostat(pDevData);break;		// <SET TEMP>|<ACTUEL TEMP>
 			case DEVICETEMPLATE_Light_Switch_onoff_CONST: return new LightSwitchOnOff(pDevData);break;			// <ON/OFF>|<ON/OFF STATUS>
+			case DEVICETEMPLATE_Wall_Outlet_CONST:return new LightSwitchOnOff(pDevData);break; 
 			case DEVICETEMPLATE_Light_Switch_dimmable_CONST: return new LightSwitchdimmable(pDevData);break;	// <ON/OFF>|<DIM VALUE>|<ON/OFF STATUS>|<DIM STATUS>
 			case DEVICETEMPLATE_Light_Switch_RGB_CONST: return new LightSwitchRGB(pDevData);break;				// <ON/OFF>|<R VALUE>|<G VALUE>|<B VALUE>|<ON/OFF STATUS>|<R STATUS>|<G STATUS>|<B STATUS>
 			case DEVICETEMPLATE_Drapes_Switch_CONST: return new Drapes_Switch(pDevData);break;
