@@ -17,11 +17,42 @@
 class Button : public QDeclarativeItem
 {
     Q_OBJECT
+    Q_PROPERTY(qreal height READ getHeight WRITE setHeight NOTIFY heightChanged)
+    Q_PROPERTY(qreal width READ getWidth WRITE setWidth NOTIFY widthChanged)
     Q_DISABLE_COPY(Button)
     
 public:
     Button(QDeclarativeItem *parent = 0);
     ~Button();
+
+
+    /*! @name Standard Properties */
+    //@{
+    qreal height;
+    qreal width;
+    QColor fillColor;
+    QList<QColor*>gradient;
+    //@}
+
+    /*! @name Effect Properties */
+    //@{
+    bool dropShadowEnabled;
+    int colorTransitionTime;
+    //@}
+
+
+    void setWidth(qreal t) {width = t; emit widthChanged();}
+    qreal getWidth(){return width;}
+
+    void setHeight(qreal h) {height = h; emit heightChanged();}
+    qreal getHeight() {return height;}
+
+signals:
+    void heightChanged();
+    void widthChanged();
+
+protected:
+   void paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget=0);
 };
 
 QML_DECLARE_TYPE(Button)

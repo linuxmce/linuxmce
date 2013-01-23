@@ -17,9 +17,11 @@ Rectangle {
         id:buttonCol
         height: parent.height - scaleY(2)
         width: scaleY(15)
-
+        anchors.top: display.top
                 Button{
                     id:button
+                    height:100
+                    width:100
                 }
     }
 
