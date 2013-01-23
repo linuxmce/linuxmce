@@ -3332,7 +3332,7 @@ void DCE::qOrbiter::requestLiveTvPlaylist()
             QString channelIndex;
             QString program;
             int index = 0;
-            int channelNumber;           
+            int channelNumber;
             DataGridCell *pCell;
 
             for(MemoryDataTable::iterator it=pDataGridTable->m_MemoryDataTable.begin();it!=pDataGridTable->m_MemoryDataTable.end();++it)
@@ -3445,108 +3445,111 @@ void DCE::qOrbiter::changedTrack(QString direction)
 
 void DCE::qOrbiter::populateAdditionalMedia() //additional media grid that populates after the initial request to break out the threading and allow for a checkpoint across threads
 {    backwards=false;
-    //emit commandResponseChanged("requesting additional media");
-#ifdef QT5
-    //QApplication::processEvents(QEventLoop::AllEvents);
-#endif
+     //emit commandResponseChanged("requesting additional media");
+ #ifdef QT5
+     //QApplication::processEvents(QEventLoop::AllEvents);
+ #endif
 
-    int gHeight = media_pageSeperator;;            //how many rows we want
-    int gWidth = 1;             //how many columns we want. in this case, just the one
-    int pkVar = 0;              // ??
-    int iOffset = 0;            // ??
-    int GridCurRow = media_pos;        //the row to start from
-    int GridCurCol= 0;           //column to start from
-    string imgDG ="_MediaFile_"+QString::number(m_dwPK_Device).toStdString();
-    string m_sSeek=media_seek;
-    if(m_sSeek !=""){
-        qDebug() << "seeking to " << m_sSeek.c_str();
-        GridCurRow = 0;
-        GridCurCol =0;
-        imgDG = "MediaFile_"+QString::number(m_dwPK_Device).toStdString();
+     int gHeight = media_pageSeperator;            //how many rows we want
+      int gWidth = 1;             //how many columns we want. in this case, just the one
+       int pkVar = 0;              // ??
+        int iOffset = 0;            // ??
+         int GridCurRow = media_pos;        //the row to start from
+          int GridCurCol= 0;           //column to start from
+           string imgDG ="_MediaFile_"+QString::number(m_dwPK_Device).toStdString();
+            string m_sSeek=media_seek;
+             if(m_sSeek !=""){
+                 qDebug() << "seeking to " << m_sSeek.c_str();
+                 GridCurRow = 0;
+                 GridCurCol =0;
+                 imgDG = "MediaFile_"+QString::number(m_dwPK_Device).toStdString();
 
-    }
+             }
 
-    int iData_Size=0;
-    char *pData;
-    pData = "NULL";
-    //CMD_Request_Datagrid_Contents(                              long DeviceIDFrom,                long DeviceIDTo,                   string sID,                                string sDataGrid_ID, int iRow_count,int iColumn_count,        bool bKeep_Row_Header,bool bKeep_Column_Header,bool bAdd_UpDown_Arrows,string sSeek,       int iOffset,    char **pData,int *iData_Size,int *iRow,int *iColumn
+             int iData_Size=0;
+              char *pData;
+               pData = "NULL";
+                //CMD_Request_Datagrid_Contents(                              long DeviceIDFrom,                long DeviceIDTo,                   string sID,                                string sDataGrid_ID, int iRow_count,int iColumn_count,        bool bKeep_Row_Header,bool bKeep_Column_Header,bool bAdd_UpDown_Arrows,string sSeek,       int iOffset,    char **pData,int *iData_Size,int *iRow,int *iColumn
 
-    DCE::CMD_Request_Datagrid_Contents req_data_grid_pics( long(m_dwPK_Device), long(iPK_Device_DatagridPlugIn), StringUtils::itos( m_dwIDataGridRequestCounter ), string(imgDG),    gHeight,    gWidth,                  false,                 false,                                 true, m_sSeek,   iOffset,  &pData,         &iData_Size, &GridCurRow, &GridCurCol );
-    std::string pResponse ="";
-    if(SendCommand(req_data_grid_pics, &pResponse) && pResponse == "OK")
-    {
-        pMediaGridTable = new DataGridTable(iData_Size,pData,false);
+                DCE::CMD_Request_Datagrid_Contents req_data_grid_pics( long(m_dwPK_Device), long(iPK_Device_DatagridPlugIn), StringUtils::itos( m_dwIDataGridRequestCounter ), string(imgDG),    gHeight,    gWidth,                  false,                 false,                                 true, m_sSeek,   iOffset,  &pData,         &iData_Size, &GridCurRow, &GridCurCol );
+                 std::string pResponse ="";
+                  if(SendCommand(req_data_grid_pics, &pResponse) && pResponse == "OK")
+                  {
+                      pMediaGridTable = new DataGridTable(iData_Size,pData,false);
 
-        emit mediaResponseChanged("grid request ok");
-        delete[] pData;
-        pData = NULL;
-        free(pData);
+                      emit mediaResponseChanged("grid request ok");
+                      delete[] pData;
+                      pData = NULL;
+                      free(pData);
 
-        // LoggerWrapper::GetInstance()->Write(LV_CRITICAL, "Pic Datagrid Dimensions: Height %i, Width %i", gHeight, gWidth);
-        DataGridCell *pCell;
-        QString cellTitle;
-        QString fk_file;
-        QString filePath;
-        int index;
-        QImage cellImg;
-        media_pos = GridCurRow;
+                      // LoggerWrapper::GetInstance()->Write(LV_CRITICAL, "Pic Datagrid Dimensions: Height %i, Width %i", gHeight, gWidth);
+                      DataGridCell *pCell;
+                      QString cellTitle;
+                      QString fk_file;
+                      QString filePath;
+                      int index;
+                      QImage cellImg;
+                      media_pos = GridCurRow;
 
-        if (m_sSeek != "")
-        {
-            media_seek = "";
-            populateAdditionalMedia();
-            delete[] pData;
-            return;
-        }
-        setCurrentPage((std::abs(GridCurRow /  media_pageSeperator))) ;
+                      if (m_sSeek != "")
+                      {
+                          media_seek = "";
+                          populateAdditionalMedia();
+                          delete[] pData;
+                          return;
+                      }
+                      setCurrentPage((std::abs(GridCurRow /  media_pageSeperator))) ;
+                      emit mediaResponseChanged("Page: "+ QString::number(media_currentPage));
 
-        emit mediaResponseChanged("Page: "+ QString::number(media_currentPage));
+                      for(MemoryDataTable::iterator it=pMediaGridTable->m_MemoryDataTable.begin();it!=pMediaGridTable->m_MemoryDataTable.end();++it)
+                      {
 
-        for(MemoryDataTable::iterator it=pMediaGridTable->m_MemoryDataTable.begin();it!=pMediaGridTable->m_MemoryDataTable.end();++it)
-        {
 
-            if(!b_cancelRequest){
-                pCell= it->second;
-                const char *pPath = pCell->GetImagePath();
-                filePath = QString::fromUtf8(pPath);
-                fk_file = pCell->GetValue();
-                cellTitle = QString::fromUtf8(pCell->m_Text);
-                //            if(fk_file.contains("!A"))
-                //            {
-                //                string sText = "";
-                //                string sTextResp="";
-                //                int t = QString(fk_file).remove("!").toInt();
-                //                CMD_Get_Attribute attrib(m_dwPK_Device, iMediaPluginID, t, &sText );
+                          pCell= it->second;
+                          const char *pPath = pCell->GetImagePath();
+                          filePath = QString::fromUtf8(pPath);
+                          fk_file = pCell->GetValue();
+                          cellTitle = QString::fromUtf8(pCell->m_Text);
+                          //            if(fk_file.contains("!A"))
+                          //            {
+                          //                string sText = "";
+                          //                string sTextResp="";
+                          //                int t = QString(fk_file).remove("!").toInt();
+                          //                CMD_Get_Attribute attrib(m_dwPK_Device, iMediaPluginID, t, &sText );
 
-                //                if(SendCommand(attrib, &sTextResp) && sTextResp=="OK"){
-                //                   qDebug() << sText.c_str();
-                //                    // cellTitle = QString::fromStdString(sText);
-                //                }
-                //            }
-                index = pMediaGridTable->CovertColRowType(it->first).first;
-                gridItem * item = new gridItem(fk_file, cellTitle, filePath.remove("/home/mediapics/"), index);
-                emit addItem(item);
-                QApplication::processEvents(QEventLoop::AllEvents);
+                          //                if(SendCommand(attrib, &sTextResp) && sTextResp=="OK"){
+                          //                   qDebug() << sText.c_str();
+                          //                    // cellTitle = QString::fromStdString(sText);
+                          //                }
+                          //            }
+                          index = pMediaGridTable->CovertColRowType(it->first).first;
+                          gridItem * item = new gridItem(fk_file, cellTitle, filePath.remove("/home/mediapics/"), index);
+                          if(!b_cancelRequest){
+                              emit addItem(item);
+                              QApplication::processEvents(QEventLoop::AllEvents);
 #ifdef rpi
-                Sleep(50);
+                              Sleep(60);
 #elif ANDROID
-                Sleep(50);
+                              Sleep(30);
+
 #else
-               // Sleep(10);
+                              // Sleep(10);
 #endif
 
-            }
-            else
-            {
-                qDebug() << "Stopping";
-               // pMediaGridTable = NULL;
-                return;
-            }
-        }
-        media_seek="";
-        pMediaGridTable = NULL;
+                          }
+                          else
+                          {
+                              qDebug() << "Stopping";
+                              // pMediaGridTable = NULL;
+                              item->deleteLater();
+                              return;
+                          }
+                      }
 
-    }
+                      media_seek="";
+                      pMediaGridTable = NULL;
+
+                  }
 }
 
 void DCE::qOrbiter::SetSecurityMode(int pin, int mode)
@@ -3703,8 +3706,8 @@ void DCE::qOrbiter::GetAlarms()
         DCE::CMD_Request_Datagrid_Contents sleeping_alarms( long(m_dwPK_Device), long(iPK_Device_DatagridPlugIn), StringUtils::itos( m_dwIDataGridRequestCounter ), string(dgName),    int(gWidth), int(gHeight),           false, false,        true,   string(m_sSeek),    int(iOffset),  &pData,         &iData_Size, &GridCurRow, &GridCurCol );
         if(SendCommand(sleeping_alarms))
         {
-            DataGridTable *pDataGridTable = new DataGridTable(iData_Size,pData,false);
-            cellsToRender= pDataGridTable->getTotalRowCount();
+            DataGridTable *pSleepingDataGridTable = new DataGridTable(iData_Size,pData,false);
+            cellsToRender= pSleepingDataGridTable->getTotalRowCount();
 #ifndef ANDROID
             LoggerWrapper::GetInstance()->Write(LV_CRITICAL, "sleeping menu alarms Grid Dimensions: Height %i, Width %i", gHeight, gWidth);
 #endif
@@ -3716,12 +3719,18 @@ void DCE::qOrbiter::GetAlarms()
             int counter = 0;
             int col = 0;
             int row = 0;
-
-            for (int counter = 0; counter < pDataGridTable->GetCols(); counter++)
+            QString test;
+            qDebug() << pSleepingDataGridTable->GetCols();
+            qDebug() << pSleepingDataGridTable->getTotalRowCount();
+            for (int counter = -1; counter <= pSleepingDataGridTable->GetCols(); counter++)
             {
-                DataGridCell *pCell = pDataGridTable->GetData(row,col);
-                QString test = pCell->GetText();
-                if (test == "ON")
+                DataGridCell *pCell = pSleepingDataGridTable->GetData(row,col);
+                if(!pCell){
+                    return;
+                }
+
+
+                if (pCell->GetValue()== "ON")
                 {
                     state = true;
                 }
@@ -3730,7 +3739,7 @@ void DCE::qOrbiter::GetAlarms()
                     state= false;
                 }
                 //getting the cell right under it
-                DataGridCell *pCell2 = pDataGridTable->GetData(row+1,col);
+                DataGridCell *pCell2 = pSleepingDataGridTable->GetData(row+1,col);
                 eventgrp = atoi(pCell2->GetValue());
                 QString data = pCell2->GetText();
                 QStringList breakerbreaker = data.split(QRegExp("\n"), QString::KeepEmptyParts );
@@ -3753,8 +3762,8 @@ void DCE::qOrbiter::GetAlarms()
                 col++;
                 row=0;
             }
-            delete pDataGridTable;
-            pDataGridTable = NULL;
+            delete pSleepingDataGridTable;
+            pSleepingDataGridTable = NULL;
             delete[] pData;
             pData = NULL;
         }
