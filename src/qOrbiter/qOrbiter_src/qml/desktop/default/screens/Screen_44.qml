@@ -162,6 +162,19 @@ Rectangle {
                     onClicked: localConfigPanel.state="showing"
                 }
             }
+
+            AdvancedButton{
+                id:componentDisplay
+                height: scaleY(style.buttonH)
+                width: scaleX(style.buttonW)
+                buttontext: qsTr("Display Components")
+                radius: 5
+                MouseArea{
+                    id:showComponents
+                    anchors.fill: parent
+                    onClicked: MyJs.createStageComponent("ComponentViewer.qml", advancedscreen)
+                }
+            }
         }
     }
     ConfigPanel{

@@ -1,7 +1,6 @@
 import QtQuick 1.0
 import "../components"
-import "../effects"
-import Qt.labs.shaders 1.0
+import "../../lib/effects"
 
 /*!
  *\class Screen_1
@@ -27,6 +26,10 @@ Item
             anchors.top: stage.top
             height: scaleY(7)
             width: scaleX(99)
+        }
+        DropShadow{
+            id:headerDrop
+            sourceItem: headerbg
 
         }
 

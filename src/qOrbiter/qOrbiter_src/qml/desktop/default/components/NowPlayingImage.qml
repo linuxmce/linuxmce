@@ -2,7 +2,7 @@ import QtQuick 1.0
 import Qt.labs.shaders 1.0
 import "../components"
 import "../js/ComponentLoader.js" as MyJs
-import "../effects"
+import "../../lib/effects"
 
 Rectangle{
     id:imageholder
@@ -29,7 +29,12 @@ Rectangle{
 //    }
 
 
-
+    DropShadow{
+        sourceItem: nowplayingimage
+        blur:1
+        color:"black"
+        anchors.fill: sourceItem
+    }
     Image {
         id: nowplayingimage
         width: dcenowplaying.aspect=="wide"? scaleX(30) : scaleX(32)
@@ -40,6 +45,8 @@ Rectangle{
         smooth: true
         visible: source == undefined ? false : true
     }
+
+
 
     Timer{
         id:refreshtimer

@@ -23,7 +23,7 @@ class gridItem: public QObject
 
 public:
     gridItem() {}
-    explicit gridItem( QString &ident, QString &name,  QString &path,  int &index );
+    explicit gridItem( QString &ident, QString &name,  QString &path,  int &index, QObject *parent=0 );
     QVariant data(int role) const;
     QHash<int, QByteArray> roleNames() const;
 

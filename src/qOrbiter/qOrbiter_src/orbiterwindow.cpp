@@ -25,7 +25,7 @@
 #include <QtCore/QDir>
 #include <shaders/filereader.h>
 #include <QThread>
-#include <QGLFormat>
+#include <QtOpenGL/QGLFormat> >
 #if (QT5)
 #include <QtQml/QtQml>
 #include <QtQml/QQmlContext>
@@ -114,16 +114,19 @@ orbiterWindow::orbiterWindow(long deviceid, std::string routerip, bool fullScree
     mainView.setViewport(glWidget);
     mainView.setViewportUpdateMode(QGraphicsView::FullViewportUpdate);
 #endif
-#else
-
-#ifdef RPI
+#elif RPI
 
     mainView.setSurfaceType(QSurface::OpenGLSurface);
     qDebug() << "Surface id " <<mainView.OpenGLSurface;
     qDebug() << "is opengl? " << mainView.openglContext();
     qDebug() << "surface type " << mainView.surfaceType();
     //mainView.setViewportUpdateMode(QGraphicsView::FullViewportUpdate);
-#endif
+#elif ANDROID
+    QGLFormat format= QGLFormat::defaultFormat();
+   glWidget = new QGLWidget(format);
+        glWidget->setAutoFillBackground(false);
+   mainView.setViewport(glWidget);
+   mainView.setViewportUpdateMode(QGraphicsView::FullViewportUpdate);
 #endif
 #endif
     // QObject::connect(&mainView, SIGNAL(sceneResized(QSize)), this, SIGNAL(orientationChanged(QSize)));

@@ -106,6 +106,7 @@ linux-g++{
 
         DEPLOYMENTFOLDERS+= plugins_folder
         DEPLOYMENTFOLDERS += folder_01  folder_03
+QML_IMPORT_PATH=imports
 }
 
 #windows deployment and module config
@@ -207,7 +208,7 @@ macx{
 #android deployment
  android-g++{
 #nfs mount to work with skins on core directly
-#folder_01.source = /mnt/remote/android-qml/
+folder_01.source = /mnt/remote/android-qml/
 #folder_01.source = qml/android/
 #folder_01.target = qml
 
@@ -240,7 +241,7 @@ macx{
 
 	INSTALLS+= qmlplugins
         DEFINES+=ANDROID
-        DEPLOYMENTFOLDERS = qmlcomponents base #folder_01
+        DEPLOYMENTFOLDERS = qmlcomponents base folder_01
         QML_IMPORT_PATH = "androidComponents"
 }
 
@@ -661,7 +662,8 @@ OTHER_FILES += Readme.txt \
     android/res/values-pt-rBR/strings.xml \
     android/res/layout/splash.xml \
     android/res/values-id/strings.xml \
-    android/res/drawable-ldpi/icon.png
+    android/res/drawable-ldpi/icon.png \
+    qml/desktop/lib/effects/qmldir
 
 
 for_harmattan{

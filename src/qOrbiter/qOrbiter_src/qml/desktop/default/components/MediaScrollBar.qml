@@ -1,5 +1,6 @@
 // import QtQuick 1.0 // to target S60 5th Edition or Maemo 5
 import QtQuick 1.1
+import "../../lib/effects"
 /*!
   \class MediaScrollBar
   \brief This is a basic component for scrolling through time in media.
@@ -11,6 +12,12 @@ Rectangle {
     width: scaleX(44)
     height: scaleY(3)
     color: "transparent"
+
+    DropShadow{
+sourceItem: scroller_transit
+anchors.fill: scroller_transit
+color:"black"
+    }
 
     property int slidertimer: (scroll_tab.x / scroller_transit.width) * dceTimecode.tcTotalTime
 
