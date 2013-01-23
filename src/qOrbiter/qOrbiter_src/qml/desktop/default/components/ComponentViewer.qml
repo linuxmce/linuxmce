@@ -13,16 +13,28 @@ Rectangle {
         opacity: .75
     }
 
+
     Column{
         id:buttonCol
-        height: parent.height - scaleY(2)
-        width: scaleY(15)
+        height: parent.height /2
+        width: scaleX(15)
         anchors.top: display.top
-                Button{
-                    id:button
-                    height:100
-                    width:100
-                }
+        spacing:scaleY(2)
+
+        QtButton{
+            id:button
+            height:50
+            width:100
+            color:"green"
+            borderColor: "white"
+            borderWidth: 1
+            onPressed:console.log("Pressed!")
+            onClicked: console.log("clicked")
+            onReleased: console.log("released")
+
+        }
+
+
     }
 
     ButtonSq{
