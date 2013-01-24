@@ -16,6 +16,7 @@ function createStageComponent(incavcomponent, screen) {
     else if (component.status === Component.Error)
     {
         console.log("Error in stage component object")
+
     }
     else if (component.status === Component.Loading)
     {

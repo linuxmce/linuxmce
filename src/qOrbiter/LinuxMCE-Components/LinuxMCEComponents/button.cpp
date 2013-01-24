@@ -23,6 +23,8 @@ QtButton::QtButton(QDeclarativeItem *parent):
     qDebug() << acceptTouchEvents();
     borderWidth =0;
     borderColor = Qt::transparent;
+    radius = 0;
+
 }
 
 QtButton::~QtButton()
@@ -46,11 +48,20 @@ void QtButton::paint(QPainter *painter, const QStyleOptionGraphicsItem *option, 
         pen.setColor(Qt::transparent);
     }
 
+    if(!m_PaintImage.isNull()){
+       // brush.setTextureImage(m_PaintImage.scaledToHeight(height));
+    }
+    painter->setRenderHint(QPainter::Antialiasing, true);
     painter->setPen(pen);
     painter->setBrush(brush);
     painter->setRenderHints(QPainter::Antialiasing, true);
-    // painter->fillRect(btn, color);
-    painter->drawRect(btn); //->drawPie(boundingRect(), 90 * 16, 290 * 16);
+    painter->drawRoundRect(btn,radius, radius);
+
+    if(!m_PaintImage.isNull()){
+        QRectF container(10.0, 10.0, 50.0, 60.0);
+        painter->drawImage(btn, m_PaintImage.scaledToHeight(height), container);
+       // brush.setTextureImage(m_PaintImage.scaledToHeight(height));
+    }
 }
 
 void QtButton::mousePressEvent(QGraphicsSceneMouseEvent *event)

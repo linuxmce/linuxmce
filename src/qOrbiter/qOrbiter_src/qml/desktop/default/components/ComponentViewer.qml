@@ -1,5 +1,6 @@
 import QtQuick 1.1
 import Linuxmce.UIElements 1.0
+import "../../lib/effects"
 
 Rectangle {
     id:display
@@ -23,18 +24,19 @@ Rectangle {
 
         QtButton{
             id:button
-            height:50
-            width:100
-            color:"green"
+            height:scaleY(8)
+            width:scaleX(10)
+            radius:8
+            color:isPressed ? "green" : "yellow"
             borderColor: "white"
-            borderWidth: 1
+            borderWidth: 2
             onPressed:console.log("Pressed!")
             onClicked: console.log("clicked")
             onReleased: console.log("released")
+            smooth: true
+            paintImage:"/src/src/qOrbiter/qOrbiter_src/qml/desktop/default/"+"img/bg_bluegradient.jpg"
 
         }
-
-
     }
 
     ButtonSq{
