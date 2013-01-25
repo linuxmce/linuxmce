@@ -926,7 +926,7 @@ public slots:
     /*Sleeping menu slots. */
     void updateAlarm(bool toggle, int grp);
     void showSleepingAlarms(SleepingAlarm *s);
-    void getSleepingAlarms() {emit getAlarms();}
+    void getSleepingAlarms() {sleeping_alarms->clear(); emit getAlarms();}
 
     /*ScreenSaver*/
     void killScreenSaver();

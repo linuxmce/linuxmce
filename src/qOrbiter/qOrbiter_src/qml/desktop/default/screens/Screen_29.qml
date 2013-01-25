@@ -91,7 +91,7 @@ Item{
 
                                         StyledText {
                                             id: statelabel
-                                            text: status ? qsTr("enabled") : qsTr("disabled")
+                                            text: status === true ? qsTr("enabled") : qsTr("disabled")
                                             anchors.centerIn: parent
                                         }
 

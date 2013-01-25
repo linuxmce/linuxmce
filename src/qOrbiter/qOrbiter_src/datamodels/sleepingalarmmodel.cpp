@@ -1,4 +1,5 @@
 #include "sleepingalarmmodel.h"
+#include <QDebug>
 
 SleepingAlarmModel::SleepingAlarmModel(QObject *parent) :
     QAbstractListModel(parent)
@@ -24,7 +25,6 @@ QVariant SleepingAlarmModel::data(const QModelIndex &index, int role) const
 
 SleepingAlarmModel::~SleepingAlarmModel() {
 
-  clear();
     delete m_prototype;
 }
 
@@ -37,7 +37,7 @@ void SleepingAlarmModel::appendRows(const QList<SleepingAlarm *> &items)
 {
   beginInsertRows(QModelIndex(), rowCount(), rowCount()+items.size()-1);
   foreach(SleepingAlarm *item, items) {
-    //connect(item, SIGNAL(dataChanged()), SLOT(handleItemChange()));
+    connect(item, SIGNAL(dataChanged()), SLOT(handleItemChange()));
     m_list.append(item);
   }
   endInsertRows();
@@ -59,12 +59,17 @@ void SleepingAlarmModel::handleItemChange()
       emit dataChanged(index, index);
 }
 
-void SleepingAlarmModel::resetInternalData()
+bool SleepingAlarmModel::resetInternalData()
 {
-    for(int i = 0; i <= m_list.count(); ++i){
-        m_list.removeAt(i);
-    }
-    m_list.clear();
+    qDebug("Resetting Alarms data");
+//    for(int i = 0; i <= m_list.count(); ++i){
+//        m_list.removeAt(i);
+//    }
+    m_list.erase(m_list.begin(), m_list.end());
+    if(m_list.empty())
+        return true;
+    else
+        return false;
 }
 
 SleepingAlarm * SleepingAlarmModel::find(const QString &id) const
@@ -97,12 +102,19 @@ QModelIndex SleepingAlarmModel::indexFromItem(const SleepingAlarm *item) const
 
 void SleepingAlarmModel::clear()
 {
-
+    qDebug() << "Clearing alarms";
     emit modelAboutToBeReset();
     beginResetModel();
-    resetInternalData();
+    if(resetInternalData()){
+
+    }
+    else
+    {
+        qDebug() << "Could clear alarm model! -- " << m_list.size() << " items.";
+    }
     endResetModel();
     emit modelReset();
+
 }
 
 

@@ -31,6 +31,7 @@ public:
 signals: 
  void modelAboutToBeReset();
  void modelReset();
+
     
 public slots:
 void clear();
@@ -39,7 +40,7 @@ private slots:
  void handleItemChange();
 
 private:
- void resetInternalData();
+ bool resetInternalData();
  SleepingAlarm* m_prototype;
  QList<SleepingAlarm*> m_list;
     

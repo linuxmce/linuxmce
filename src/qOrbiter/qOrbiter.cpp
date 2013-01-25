@@ -3708,6 +3708,8 @@ void DCE::qOrbiter::GetAlarms()
         {
             DataGridTable *pSleepingDataGridTable = new DataGridTable(iData_Size,pData,false);
             cellsToRender= pSleepingDataGridTable->getTotalRowCount();
+          //  qDebug() << pSleepingDataGridTable->GetCols();
+          //  qDebug() << pSleepingDataGridTable->GetRows();
 #ifndef ANDROID
             LoggerWrapper::GetInstance()->Write(LV_CRITICAL, "sleeping menu alarms Grid Dimensions: Height %i, Width %i", gHeight, gWidth);
 #endif
@@ -3720,17 +3722,16 @@ void DCE::qOrbiter::GetAlarms()
             int col = 0;
             int row = 0;
             QString test;
-            qDebug() << pSleepingDataGridTable->GetCols();
-            qDebug() << pSleepingDataGridTable->getTotalRowCount();
-            for (int counter = -1; counter <= pSleepingDataGridTable->GetCols(); counter++)
+
+            for (int counter = 0; counter < pSleepingDataGridTable->GetCols(); counter++)
             {
                 DataGridCell *pCell = pSleepingDataGridTable->GetData(row,col);
                 if(!pCell){
                     return;
                 }
-
-
-                if (pCell->GetValue()== "ON")
+                qDebug()<< "Row: " << row << " " << " col: " << col <<" Data: " << pCell->GetText();
+                test = QString::fromStdString(pCell->GetText());
+                if (test.contains("ON"))
                 {
                     state = true;
                 }
@@ -3738,6 +3739,8 @@ void DCE::qOrbiter::GetAlarms()
                 {
                     state= false;
                 }
+                qDebug() << state;
+
                 //getting the cell right under it
                 DataGridCell *pCell2 = pSleepingDataGridTable->GetData(row+1,col);
                 eventgrp = atoi(pCell2->GetValue());
@@ -3760,7 +3763,7 @@ void DCE::qOrbiter::GetAlarms()
                 SleepingAlarm *t = new SleepingAlarm( eventgrp, name, alarmtime, state, timeleft, days);
                 emit sleepingAlarmsReady(t);
                 col++;
-                row=0;
+
             }
             delete pSleepingDataGridTable;
             pSleepingDataGridTable = NULL;
@@ -5135,10 +5138,16 @@ void qOrbiter::setAlarm(bool toggle, int grp)
     if (grp != 0)
     {
         CMD_Toggle_Event_Handler toggleAlarm(m_dwPK_Device, iPK_Device_eventPlugin, grp);
-        SendCommand(toggleAlarm);
-        GetAlarms();
+        string pResponse="";
+        if (SendCommand(toggleAlarm, &pResponse) && pResponse =="OK"){
+            Sleep(1000);
+            GetAlarms();
+        }
+        else
+        {
+            emit commandResponseChanged("Failed to toggle Alarm.");
+        }
     }
-
 }
 
 

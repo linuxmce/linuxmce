@@ -43,35 +43,10 @@ public:
     QString name;
 
 
-signals:
-    void eventHandlerChanged();
-    void stateChanged();
-    void alarmTimeChanged();
-    void countDownChanged();
-    void daysChanged();
-    void statusChanged();
-    void nameChanged();
+signals:  
+    void dataChanged();
+
 public slots:
-    void setHandler(int iHandler) {eventHandler = iHandler; emit eventHandlerChanged();}
-    int getHandler () {return eventHandler;}
-
-    void setState (bool iState) { b_state = iState; emit stateChanged();}
-    bool getState () {return b_state;}
-
-    void setStatus (QString iStatus) {alarmTime = iStatus; emit statusChanged();}
-    QString getStatus () {return status;}
-
-    void setAlarmTime (QString iAlarmTime) {alarmTime = iAlarmTime; emit alarmTimeChanged();}
-    QString getAlarmTime () {return alarmTime;}
-
-    void setTimeLeft(QString iTimeLeft) {timeLeft = iTimeLeft; emit countDownChanged();}
-    QString getTimeLeft () {return timeLeft;}
-
-    void setDaysActive(QString iDaysActive) {activeDays = iDaysActive; emit daysChanged();}
-    QString getDaysActive () {return activeDays;}
-
-    void setName(QString iName) {name = iName; emit nameChanged();}
-    QString getName () {return name;}
 
 
 };

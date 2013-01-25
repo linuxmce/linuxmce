@@ -4,10 +4,7 @@
 #include <QVariant>
 
 SleepingAlarm::SleepingAlarm(int i, QString n, QString f, bool u, QString c, QString k):eventHandler(i), name(n), alarmTime(f), b_state(u), timeLeft(c), activeDays(k) {
-    if (b_state == false)
-    {status = "Off";}
-    else
-    {status = "On";}
+
 }
 
 QHash<int, QByteArray> SleepingAlarm::roleNames() const
