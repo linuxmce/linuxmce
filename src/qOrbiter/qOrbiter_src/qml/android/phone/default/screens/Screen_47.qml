@@ -93,18 +93,18 @@ Rectangle {
                 width: scaleX(75)
                 opacity: 0
                 Component.onCompleted: PropertyAnimation { target: background; property: "opacity"; to: 1; duration: 1000}
+
                 Row{
                     Image
                     {
                         id: imagerect;
-                        source: path !=="" ? "http://192.168.80.1/lmce-admin/MediaImage.php?img="+path : ""
+                        source: path !=="" ?"http://"+srouterip+"/lmce-admin/MediaImage.php?img="+path : ""
                         height: scaleX(15);
                         width: scaleY(15);
                         fillMode: Image.PreserveAspectFit;
-
                     }
 
-                    Text {
+                    StyledText {
                         text: name;
                         font.pixelSize: scaleY(2.5);
                         color: "Silver" ;

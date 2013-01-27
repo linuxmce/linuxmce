@@ -10,11 +10,6 @@ Rectangle {
     color: "transparent"
     Component.onCompleted: manager.getStoredPlaylist()
 
-    Image {
-        id: bg
-        source: b_orientation ? "../img/storedMediaP.png" : "../img/storedMediaW.png"
-        anchors.fill: storedVideoRemote
-    }
 
     NowPlayingBox
     {

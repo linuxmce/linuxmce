@@ -4,13 +4,15 @@ Rectangle {
     id:generic_model_display
     width: generic_view.width
     height: generic_view.height + listClose.height
-    property variant currentModel
-    state: "inactive"
-    visible: false
+    property alias currentModel:generic_view.model
+    state:"inactive"
     color: "black"
 
+    onCurrentModelChanged: currentModel !==undefined ? state = "active" : state = "inactive"
+    ListModel{
+        id:dummy
+    }
 
-    onCurrentModelChanged: currentModel !=="" ? state = "active" : state = "inactive"
     Rectangle{
         id:listClose
         height: scaleY(8)
@@ -31,7 +33,7 @@ Rectangle {
         }
         MouseArea{
             anchors.fill: parent
-            onClicked: generic_model_display.state = "inactive"
+            onClicked: {currentModel=undefined;  }
         }
     }
     ListView{
@@ -39,7 +41,7 @@ Rectangle {
         anchors.top: listClose.bottom
         width: scaleX(61)
         height: scaleY(50)
-        model:currentModel
+        model:undefined
         spacing:1
         orientation:ListView.Vertical
         delegate:  HomeButtonDelegate{}
@@ -63,10 +65,8 @@ Rectangle {
                 target: generic_model_display
                 visible:false
             }
-            PropertyChanges{
-                target: generic_view
-                model:""
-            }
+
+
         }
 
     ]

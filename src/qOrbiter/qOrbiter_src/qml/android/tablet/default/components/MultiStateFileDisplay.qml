@@ -22,16 +22,17 @@ Rectangle {
         cacheBuffer: 0
         focus: true
         //clip: true
-        //contentItem.clip: true
-        cellWidth: scaleX(20)
-        cellHeight: scaleY(20)
+        contentItem.clip: true
+        cellWidth: scaleX(25)
+        cellHeight: scaleY(25)
+
         opacity:1
         scale:1
-        transform: Rotation { origin.x: width/2; origin.y: y/2; axis { x: 0; y: 1; z: 0 } angle: gridView.moving ? gridView.horizontalVelocity > 0 ? 20 : -20 :0 }
+       // transform: Rotation { origin.x: width/2; origin.y: y/2; axis { x: 0; y: 1; z: 0 } angle: gridView.moving ? gridView.horizontalVelocity > 0 ? 20 : -20 :0 }
         flow:GridView.TopToBottom
         Behavior on transform {
             PropertyAnimation{
-                duration: 500
+                duration: 1000
                 }
         }
 

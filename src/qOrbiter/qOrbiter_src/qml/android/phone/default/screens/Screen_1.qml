@@ -13,13 +13,6 @@ Rectangle {
     height:manager.appHeight
     color: "transparent"
 
-    Image {
-        id: bg
-        source: b_orientation ?  "../img/homescreenP.png" : "../img/homescreenW.png"
-        anchors.fill:parent
-    }
-
-
 /*
     Text{
         id:spaceholder
@@ -60,7 +53,7 @@ Rectangle {
     }
     ScenarioSelector{
         id:scenarioPopup
-        currentModel: ""
+        currentModel:undefined
         anchors.centerIn: parent
     }
 

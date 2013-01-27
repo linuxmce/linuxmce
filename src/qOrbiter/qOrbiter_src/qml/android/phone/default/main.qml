@@ -24,6 +24,16 @@ Item {
         return y/100*manager.appHeight
     }
 
+    Rectangle{
+        anchors.fill: parent
+        id:bgFill
+        gradient: Gradient{
+            GradientStop{position: 0.0; color: "Black"}
+            GradientStop{position: .45; color: "darkgrey"}
+            GradientStop{position: .65; color: "black"}
+        }
+    }
+
 
     function screenchange(screenname )
     {
@@ -65,9 +75,6 @@ Item {
         console.log(component.progress)
     }
 
-FocusScope{
-    height: pageLoader.height
-    width: pageLoader.width
 
     Loader {
         id:pageLoader
@@ -76,12 +83,10 @@ FocusScope{
         Keys.onBackPressed: console.log("back")
         onSourceChanged:  loadin
         onLoaded: {
-
             console.log("Screen Changed:" + pageLoader.source)
-
         }
-    }
-}
+   }
+
     //=================Components==================================================//
     function loadComponent(componentName)
     {

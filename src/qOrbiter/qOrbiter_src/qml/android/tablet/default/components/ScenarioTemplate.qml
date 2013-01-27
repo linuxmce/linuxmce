@@ -1,6 +1,6 @@
 import QtQuick 1.0
 import com.nokia.android 1.1
-
+import "../../lib/effects"
 
 Rectangle{
     id:templateRow
@@ -50,6 +50,12 @@ Rectangle{
 
         }
     }
+    DropShadow{
+        sourceItem: rectFill
+        anchors.fill: rectFill
+        color:"black"
+    }
+
     Image{
         id:imgFill
         anchors.fill: scenarioview
@@ -82,10 +88,22 @@ Rectangle{
                 width:scaleX(20)
                 height:parent.height
                 enabled:true
+                clip:true
+                DropShadow{
+                    sourceItem: sT
+                    anchors.fill: sT
+                    color: "darkgrey"
+                    opacity:.5
+                    blur:.75
+                    transform: Translate{x:2}
+
+                }
                 StyledText{
+                    id:sT
                     text:title
                     fontSize: scaleY(4.5)
                     anchors.centerIn: parent
+                    isBold: true
                 }
                 onClicked: manager.execGrp(params)
             }

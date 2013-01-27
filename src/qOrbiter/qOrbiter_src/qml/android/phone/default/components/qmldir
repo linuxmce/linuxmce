@@ -73,3 +73,4 @@ MediaScrollBar MediaScrollBar.qml
 NullComponent NullComponent.qml
 ScenarioSelector ScenarioSelector.qml
 GenericAttributeFilter GenericAttributeFilter.qml
+StyledText StyledText.qml

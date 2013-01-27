@@ -1,12 +1,7 @@
 import QtQuick 1.0
-
-
-
 import "../components"
-
-
 import "../js/ComponentLoader.js" as MyJs
-
+import "../../lib/effects"
 
 Rectangle {
     id:fileviewscreen
@@ -16,7 +11,7 @@ Rectangle {
     clip: true
     property int mouselocY: 0
     property int mouselocX: 0
-   // Component.onCompleted: manager.requestTypes(manager.i_current_mediaType)
+    // Component.onCompleted: manager.requestTypes(manager.i_current_mediaType)
 
     function runEffects()
     {
@@ -75,7 +70,7 @@ Rectangle {
                     onClicked: {
                         pos_label.forceActiveFocus()
                         if(!seperationSetter.text.match("\d")){
-                        manager.setDceGridSep(seperationSetter.text)
+                            manager.setDceGridSep(seperationSetter.text)
                             manager.requestPage(0)
                         }
                         else
@@ -141,85 +136,55 @@ Rectangle {
     Component
     {
         id: contactDelegate
+//        DropShadow{
+//            sourceItem: imagerect
+//            anchors.fill: imagerect
+//            color:"black"
+//            blur:.75
+//        }
         Rectangle
         {
             id:mainItem
-            width: scaleX(20);
-            height: scaleY(20)
+            width: scaleX(25);
+            height: scaleY(25)
             color: "transparent"
+            clip:true
 
-            MouseArea{
-                anchors.fill: mainItem
-                hoverEnabled: true
-                onEntered: {
-                    mainItem.color = style.darkhighlight
-                    mainItem.scale = 1.25
-                    mainItem.z = 10
-
-                }
-                onExited: {
-                    mainItem.color = "transparent"
-                    mainItem.scale = 1
-                    mainItem.z = 1
-                }
-            }
-            Rectangle
+            Image
             {
-                id:frame
-                width: scaleX(19);
-                height: scaleY(19)
-                anchors.centerIn: mainItem
-                clip:true
-                color: "transparent"
+                id: imagerect;
+                source: path !=="" ? "http://192.168.80.1/lmce-admin/MediaImage.php?img="+path : ""
+                height: scaleY(12);
+                width: scaleX(18);
+                anchors.centerIn: parent;
+                fillMode: Image.PreserveAspectCrop
+                 smooth: true
+                asynchronous: true
+            }
 
-                MouseArea
-                {
-                    anchors.fill: frame
-                    onClicked: {setStringParam(4, id); mouselocX = mouseX; mouselocY = mouseY}
+            Rectangle{
+                id:textmask
+                color: "grey"
+                anchors.fill:celllabel
+                opacity: .80
+            }
 
-                }
-
-                BorderImage {
-                    id: borderimg
-                    horizontalTileMode: BorderImage.Repeat
-                    source: "../img/icons/drpshadow.png"
-                    anchors.fill: imagerect
-                    anchors { leftMargin: -6; topMargin: -6; rightMargin: -8; bottomMargin: -8 }
-                    border { left: 10; top: 10; right: 10; bottom: 10 }
-                    smooth: true
-                }
-
-                Image
-                {
-                    id: imagerect;
-                   source: path !=="" ? "http://192.168.80.1/lmce-admin/MediaImage.php?img="+path : ""
-                    height: scaleY(18);
-                    width: scaleX(18);
-                    anchors.centerIn: parent;
-                    fillMode: Image.PreserveAspectCrop
-                    smooth: true
-                    asynchronous: true
-                }
-
-                Rectangle{
-                    id:textmask
-                    color: "grey"
-                    anchors.fill:celllabel
-                    opacity: .5
-                }
-
-                Text
-                {
-                    id:celllabel
-                    text: name;
-                    font.pointSize: 14;
-                    color: "Black" ;
-                    wrapMode: "WrapAtWordBoundaryOrAnywhere"
-                    width: imagerect.width
-                    font.bold: true
-                    anchors.top: imagerect.top
-                    anchors.horizontalCenter: imagerect.horizontalCenter
-                }
+            Text
+            {
+                id:celllabel
+                text: name;
+                font.pointSize: 14;
+                color: "Black" ;
+                wrapMode: "WrapAtWordBoundaryOrAnywhere"
+                width: imagerect.width
+                font.bold: true
+                anchors.top: imagerect.top
+                anchors.horizontalCenter: imagerect.horizontalCenter
+            }
+            MouseArea
+            {
+                anchors.fill: parent
+                onClicked: {setStringParam(4, id); mouselocX = mouseX; mouselocY = mouseY}
             }
         }
     }
@@ -253,7 +218,7 @@ Rectangle {
                     source:"image://datagridimg/"+id ;
                     height: 100;
                     width: 156;
-                    fillMode: Image.PreserveAspectFit;
+                    fillMode: Image.PreserveAspectCrop
                 }
 
                 Column {
@@ -342,7 +307,7 @@ Rectangle {
                     alphabetrect.scale = 1
                 }
                 onPressed: { if(dataModel.totalPages===1){
-                      grid_view1.maingrid.positionViewAtIndex(dataModel.setSection(name), ListView.Beginning)
+                        grid_view1.maingrid.positionViewAtIndex(dataModel.setSection(name), ListView.Beginning)
 
                     }else{
                         manager.setSeekLetter(name)
