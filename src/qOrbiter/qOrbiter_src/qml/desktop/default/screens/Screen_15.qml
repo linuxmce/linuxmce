@@ -2,19 +2,19 @@ import QtQuick 1.0
 import "../components"
 /*
 screen params for this screen are
-2 - value of the device
-159 - the Screen
+@param 2 - value of the device
+@param 159 - the Screen
+
+\note access Screen Parameters via
+\code manager.getParam(int param) \endcode
 */
 Item{
     id:singlecameraview
-    property int camera:screenparams.getParam(2)
-    Timer{
-        id:securitytimer
-        repeat: true
-        interval: 1000
-        triggeredOnStart: true
-        running: true
-        onTriggered:{
+    property int camera:screenparams.getParam(2) /*!< \brief the camera device number in this screen. */
+
+    Connections{
+        target: securityvideo
+        onImageUpdated:{
             "image://listprovider/securityimage/"+camera+"/"+securityvideo.timestamp
             manager.requestSecurityPic(screenparams.getParam(2), 640, 480)
         }
@@ -27,7 +27,7 @@ Item{
         width: style.orbiterW
         color: "transparent"
         Component.onCompleted: requestSecurityPic(screenparams.getParam(2), 640, 480)
-        Text {
+        StyledText {
             id: singlecamlabel
             x: 74
             y: 101

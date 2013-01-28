@@ -25,7 +25,11 @@
 
 using namespace DCE;
 using namespace Qt;
-
+/*!
+ * \brief The MediaManager class provides Video and Audio playback for DCE related video streams.
+ * This class represents a network media player embedded into the application. It runs as a plugin
+ * as opposed to being directly instantiated by the Application to allow for modularity.
+ */
 class MediaManager : public QDeclarativeItem
 {
     Q_OBJECT

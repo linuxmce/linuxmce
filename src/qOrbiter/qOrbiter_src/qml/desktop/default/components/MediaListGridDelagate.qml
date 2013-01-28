@@ -80,7 +80,7 @@ Component
             Image
             {
                 id: imagerect;
-                source:path !=="" ? "http://192.168.80.1/lmce-admin/MediaImage.php?img="+path : ""
+                source:path !=="" ? "http://"+srouterip+"/lmce-admin/MediaImage.php?img="+path : ""
                 height: scaleY(16);
                 width: scaleX(16);
                 anchors.centerIn: parent;

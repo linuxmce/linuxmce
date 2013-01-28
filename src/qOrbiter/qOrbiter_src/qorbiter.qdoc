@@ -21,8 +21,13 @@ This section references the c++ code that is a part of QOrbiter. It is split int
 */
 
 /*!
-*\defgroup qt_controllers Qt-Controllers *
+*\defgroup qt_controllers Qt-Controllers
 */
+
+/*!
+ * \defgroup data_models Datamodels
+ * \ingroup qt_controllers
+ */
 
 /*!
 * \defgroup qml_skins QML Skins
@@ -31,6 +36,15 @@ This section references the c++ code that is a part of QOrbiter. It is split int
 
 /*!
 * \defgroup linuxmce_components LinuxMCE Components
+*/
+
+/*!
+ * \defgroup ui_buttons Ui Buttons
+ * \ingroup linuxmce_components
+ */
+
+/*! \defgroup audio_visual Audio/Visual Components
+    \ingroup linuxmce_components
 */
 
 /*!

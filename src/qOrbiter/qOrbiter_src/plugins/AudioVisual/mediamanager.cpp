@@ -5,6 +5,12 @@
 #include <QGraphicsScene>
 using namespace DCE;
 
+
+/*!
+ * \brief MediaManager::MediaManager
+ * \param parent
+ * \ingroup audio_visual
+ */
 MediaManager::MediaManager(QDeclarativeItem *parent) :
     QDeclarativeItem(parent)
 {

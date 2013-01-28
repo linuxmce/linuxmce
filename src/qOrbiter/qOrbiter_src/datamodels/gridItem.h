@@ -6,6 +6,10 @@
 #include <QImage>
 #include <QMap>
 
+/*!
+ * \brief The gridItem class is the item class associated with ListModel class.
+ * Its purpose is to serve as a representation of the data contaied in a single object.
+ */
 class gridItem: public QObject
 {
     Q_OBJECT
