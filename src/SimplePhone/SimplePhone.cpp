@@ -89,24 +89,29 @@ bool SimplePhone::GetConfig()
 	string sAudioSettings = Get_MD_AudioSettings();
 	LoggerWrapper::GetInstance()->Write(LV_STATUS, "MD Audio Settings: %s", sAudioSettings.c_str());
 	string sAlsaDevice = "asym_analog";
-
+	// TODO: FIX ME with the changes to asound.conf by l3top
 	for (size_t i = 0; i < sAudioSettings.length(); i++)
 	{
 		switch (sAudioSettings[i])
 		{
 			case 'C':
 			case 'O':
-				sAlsaDevice = "asym_spdif";
+				sAlsaDevice = "default"; // used to be "asym_spdif";
 				break;
 			case 'S':
 			case 'L':
-				sAlsaDevice = "asym_analog";
+				sAlsaDevice = "default"; // used to be "asym_analog";
 				break;
 			case 'M':
-				sAlsaDevice = "plughw:1";
+			        if (FileUtils::FileExists("/etc/pluto/simplephone.conf")) {
+                                    sAlsaDevice = "donttouch"; // used to be "plughw:1";
+                                } else {
+                                    sAlsaDevice = "default";   // If we do not have a simplephone.conf we create a default one.
+                                }
 				break;
 			case 'H':
-				sAlsaDevice = "asym_hdmi";
+				sAlsaDevice = "default"; // used to be "asym_hdmi";
+				break;
 			default:
 				LoggerWrapper::GetInstance()->Write(LV_STATUS, "Flag unprocessed: '%c'", sAudioSettings[i]);
 		}
@@ -139,7 +144,10 @@ bool SimplePhone::GetConfig()
 		}
 
 	}
-	FileUtils::WriteVectorToFile("/etc/pluto/simplephone.conf", vectLinphoneConfig);
+
+        if ( sAlsaDevice != "donttouch" ) {	
+            FileUtils::WriteVectorToFile("/etc/pluto/simplephone.conf", vectLinphoneConfig);
+        }
 
 	m_sExtension = m_pEvent->GetDeviceDataFromDatabase(m_dwPK_Device, DEVICEDATA_PhoneNumber_CONST);
 	if (m_sExtension.length() == 0)
