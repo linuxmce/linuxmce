@@ -206,7 +206,6 @@ Setup_AsoundConf()
 
 	SoundCard=$(TranslateSoundCard "$SoundCard")
 	HWOnlyCard="$SoundCard"
-
 	# Handle nVidia GT card types
 	case "$AudioSetting" in
 		*[CO]*)
@@ -224,9 +223,19 @@ Setup_AsoundConf()
 		*H*)
 			CardDevice=$(grep -i "hdmi" <<< "$Yalpa" | grep -wo "device ." | awk '{print $2}')
 			if [[ $(wc -l <<< "$CardDevice") -gt "3" ]]; then
-				if grep "7" <<< "$CardDevice"; then
-					CardDevice="7"
-				fi
+				ELDDevice=$(grep -l "eld_valid.*1" /proc/asound/card{$SoundCard}/eld* | sort -u | head -1)
+					case "$ELDDevice" in
+						*0.0)
+							CardDevice="3" ;;
+						*1.0)
+							CardDevice="7" ;;
+						*2.0)
+							CardDevice="8" ;;
+						*3.0)
+							CardDevice="9" ;;
+						*)
+							CardDevice="7" ;;
+				done
 			fi
 			if [[ "$AlternateSC" -ge "1" ]]; then
 				SoundOut="plughw:"
