@@ -223,7 +223,7 @@ Setup_AsoundConf()
 		*H*)
 			CardDevice=$(grep -i "hdmi" <<< "$Yalpa" | grep -wo "device ." | awk '{print $2}')
 			if [[ $(wc -l <<< "$CardDevice") -gt "3" ]]; then
-				ELDDevice=$(grep -l "eld_valid.*1" /proc/asound/card{$SoundCard}/eld* | sort -u | head -1)
+				ELDDevice=$(grep -l "eld_valid.*1" /proc/asound/card${SoundCard}/eld* | sort -u | head -1)
 					case "$ELDDevice" in
 						*0.0)
 							CardDevice="3" ;;
