@@ -265,7 +265,7 @@ Setup_AsoundConf()
 	esac	
 	
 	local PlaybackCard="${SoundOut}${SoundCard}"
-	sed -r "s#%CONNECT_TYPE%#$ConnectType#g; s#%MAIN_CARD%#$SoundCard#g; s#%PLAYBACK_PCM%#$PlaybackPCM#g;" "$AsoundConf" > /etc/asound.conf
+	sed -r "s#%CONNECT_TYPE%#$ConnectType#g; s#%SOUND_OUT%#$SoundOut#g; s#%MAIN_CARD%#$SoundCard#g; s#%PLAYBACK_PCM%#$PlaybackPCM#g;" "$AsoundConf" > /etc/asound.conf
 
 	Setup_XineConf "$AudioSetting" "$PlaybackCard"
 	/usr/pluto/bin/RestartALSA.sh

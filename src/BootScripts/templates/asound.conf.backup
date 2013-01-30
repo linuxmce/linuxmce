@@ -44,6 +44,6 @@ pcm.%CONNECT_TYPE% {
 pcm.!default {
 	type asym
 	playback.pcm "%PLAYBACK_PCM%"
-	capture.pcm "plughw:%MAIN_CARD%"
+	capture.pcm "%SOUND_OUT%:%MAIN_CARD%"
 }
 
