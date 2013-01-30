@@ -84,8 +84,13 @@ getPreferredNvidiaDriver() {
 	esac
 
 	case " $Driver_260_Supported " in *" $PCI_Id "*)
-		echo "nvidia-glx-260"
-		return 1
+		if [[ "$Distro" == "lucid" ]]; then
+			echo "nvidia-glx-260"
+			return 1
+		else
+			echo "nvidia-current"
+			return 1
+		fi
 	esac
 
 	case " $Driver_173_Supported " in *" $PCI_Id "*)
@@ -134,44 +139,46 @@ getVDPAUSupport() {
 }
 
 checkAlsaBackportNeeds() {
-	PCI_Id=$(getPCI_Id)
-	alsa_backports=$(dpkg-query -l "linux-backports-modules-alsa*" | grep "^ii" | awk '{print $2}') 2>/dev/null
-	if [[ -z "$AlternateSC" ]]; then
-		case " $GT_Series " in *" $PCI_Id "*)
-			ConfSet "AlternateSC" "1"
-			;;
-		esac
-		case " $Backports_Required " in *" $PCI_Id "*)
-			ConfSet "AlternateSC" "1"
-		esac
-		CurDrv=$(getPreferredNvidiaDriver)
-		if [[ "$CurDrv" == "nvidia-current" ]]; then
-			ConfSet "AlternateSC" "1"
+	if [[ "$Distro" == "lucid" ]]; then
+		PCI_Id=$(getPCI_Id)
+		alsa_backports=$(dpkg-query -l "linux-backports-modules-alsa*" | grep "^ii" | awk '{print $2}') 2>/dev/null
+		if [[ -z "$AlternateSC" ]]; then
+			case " $GT_Series " in *" $PCI_Id "*)
+				ConfSet "AlternateSC" "1"
+				;;
+			esac
+			case " $Backports_Required " in *" $PCI_Id "*)
+				ConfSet "AlternateSC" "1"
+			esac
+			CurDrv=$(getPreferredNvidiaDriver)
+			if [[ "$CurDrv" == "nvidia-current" ]]; then
+				ConfSet "AlternateSC" "1"
+			fi
 		fi
-	fi
 
-	if [[ -z "$alsa_backports" ]]; then
-		case " $Backports_Required " in *" $PCI_Id "*)
-			Log "$LogFile" "Alsa backports being installed."
-			NotifyMessage "Installing alsa backports modules."
-			apt-get install -yf linux-backports-modules-alsa-$(uname -r)
-			ConfSet "AlternateSC" "1"
-			/usr/pluto/bin/RestartALSA.sh
-			;;
-		esac
-	fi
+		if [[ -z "$alsa_backports" ]]; then
+			case " $Backports_Required " in *" $PCI_Id "*)
+				Log "$LogFile" "Alsa backports being installed."
+				NotifyMessage "Installing alsa backports modules."
+				apt-get install -yf linux-backports-modules-alsa-$(uname -r)
+				ConfSet "AlternateSC" "1"
+				/usr/pluto/bin/RestartALSA.sh
+				;;
+			esac
+		fi
 
-	if [[ -n "$alsa_backports" ]]; then
-		case " $Backports_Required " in *" $PCI_Id "*)
-			NotifyMessage "Alsa backports modules already installed."
-			;;
-		*)
-			Log "$LogFile" "Alsa backports is installed and requires removal."
-			NotifyMessage "Removing alsa backports modules."
-			apt-get remove -yf linux-backports-modules-alsa-$(uname -r)
-			/usr/pluto/bin/RestartALSA.sh
-			;;
-		esac
+		if [[ -n "$alsa_backports" ]]; then
+			case " $Backports_Required " in *" $PCI_Id "*)
+				NotifyMessage "Alsa backports modules already installed."
+				;;
+			*)
+				Log "$LogFile" "Alsa backports is installed and requires removal."
+				NotifyMessage "Removing alsa backports modules."
+				apt-get remove -yf linux-backports-modules-alsa-$(uname -r)
+				/usr/pluto/bin/RestartALSA.sh
+				;;
+			esac
+		fi
 	fi
 }
 
@@ -226,16 +233,18 @@ installCorrectNvidiaDriver() {
 		fi
 
 		if [[ "$preferred_driver" == "nvidia-current" ]]; then
-			add-apt-repository ppa:team-iquik/alsa
-			add-apt-repository ppa:ubuntu-x-swat/x-updates
-			apt-get update
-			apt-get install -y alsa-base 2> >(tee "$tmpfile")
-			apt-get install -y alsa-utils 2> >(tee "$tmpfile")
-			apt-get install -y "$preferred_driver" 2> >(tee "$tmpfile")
+			if [[ "$Distro" == "lucid" ]]; then
+				add-apt-repository ppa:team-iquik/alsa
+				add-apt-repository ppa:ubuntu-x-swat/x-updates
+				apt-get update
+				apt-get install -y alsa-base 2> >(tee "$tmpfile")
+				apt-get install -y alsa-utils 2> >(tee "$tmpfile")
+			fi
+			apt-get install -yf "$preferred_driver" 2> >(tee "$tmpfile")
 			ConfSet "AlternateSC" "1"
 			local param="reboot"
 		else
-			apt-get install -y "$preferred_driver" 2> >(tee "$tmpfile")
+			apt-get install -yf "$preferred_driver" 2> >(tee "$tmpfile")
 			local param="reboot"
 		fi
 
@@ -256,11 +265,12 @@ installCorrectNvidiaDriver() {
 			CountErr=$(($CountErr + 1))
 			/etc/init.d/networking restart
 			apt-get update
+			apt-get install -yf "$preferred_driver" 2> >(tee "$tmpfile")
 			if [[ "$CountErr" == "3" ]]; then
 				ErrorMessage "Cannot install after 3 tries. Giving up"
+				local param="reboot"
 				return
 			fi
-			installCorrectNvidiaDriver
 		fi
 		rm "$tmpfile"
 	else
