@@ -235,7 +235,7 @@ Setup_AsoundConf()
 							CardDevice="9" ;;
 						*)
 							CardDevice="7" ;;
-				done
+					esac
 			fi
 			if [[ "$AlternateSC" -ge "1" ]]; then
 				SoundOut="plughw:"
