@@ -70,6 +70,7 @@ bool OneWire::GetConfig()
 	myself = (void *)this;
 
 	string port = TranslateSerialUSB(DATA_Get_COM_Port_on_PC());
+	if (port == "") port = "usb";
 
 	LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"Opening port: %s", port.c_str());
 	if (!port.length()) {
