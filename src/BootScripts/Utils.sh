@@ -806,7 +806,7 @@ CheckVideoDriver () {
 			elif [[ "$cur_driver" == "wrongnv" ]]; then
 				StatusMessage "Removing old nVidia driver"
 				apt-get -yf remove --purge nvidia\* --force-yes 
-				apt-get -yf remove --purge "xserver-xorg-video-nouveau" --force-yes 
+				apt-get -yf remove --purge xserver-xorg-video-nouveau --force-yes 
 				rm /etc/X11/xorg.con*
 				reboot
 			elif [[ "$cur_driver" == "nvidia" ]]; then
