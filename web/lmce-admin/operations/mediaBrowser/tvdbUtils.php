@@ -105,7 +105,7 @@ function grabEp ($sID, $seasonNo, $episodeNo)
 
 			$seriesID= $episode->getElementsByTagName('seriesid');
 			$epInfArray['seriesID']= $seriesID->item(0)->nodeValue;
-			
+			echo "Series ID::".$epInfArray['seriesID'];
 			$epInfArray['seasonNo'] = $sNum;
 					}
 					else
@@ -1128,23 +1128,27 @@ function ids($episodeData, $fileID, $con ,$attributeType, $mediadbADO, $dbADO, $
 {//	print_r($episodeData);
 	$idArray = array( array('TV Season ID'=>$episodeData['seasonID']), array('TV Series ID'=>$episodeData['seriesID']), array( 'TV Program ID'=>$episodeData['epid']), array("Release Date" =>$episodeData['firstAir']), array("Episode Number" =>$episodeData['air_epNo']), array("Season Number" =>$episodeData['seasonNo']) );
  	$counter = count($idArray);
+
  //	echo $counter;	
+// echo $idArray['TV Season ID'];
  	$i=0;
  	$flip = array_flip($attributeType);
 	$fileIdent = $fileID;
 while ($i < $counter)
 	{
 	$item = $idArray[$i];
-	$attribType = $flip[key($idArray[$i])];
+	
+	$attribType = $flip[key($idArray[$i])];	
 	$content1 = array_values($idArray[$i]);
 	$content = $content1[0];
-
-	$sql = "SELECT * FROM `Attribute` WHERE `Name` = \"$content\" AND FK_AttributeType = \"$attribType\" ";
 	
+	$sql = "SELECT * FROM `Attribute` WHERE `Name` = \"$content\" AND FK_AttributeType = \"$attribType\" ";
+		
 	$result = mysql_query($sql) or die (mysql_error($content));
 	$count = mysql_num_rows($result);
 	$row = mysql_fetch_assoc($result);
 	$attrib = $row['PK_Attribute'];
+
 	if ($count < 1)
 	{
 			$iQuery = "INSERT INTO Attribute VALUES (\"\" , $attribType , \"$content\" , NULL, NULL, NULL, 0 ,CURTIME() ,NULL )" ;
@@ -1216,7 +1220,10 @@ $query = "SELECT PK_AttributeType, Description from AttributeType";
 $result = mysql_query($query);
 
 while ($row=mysql_fetch_array($result)) {
-	$attributeType[$row['PK_AttributeType']]=$row['Description'];
+	if(!array_search("TV Season ID", $attributeType)){
+		$attributeType[$row['PK_AttributeType']]=$row['Description'];
+	}
+	
 }
  	
 $row=mysql_fetch_array($result);
@@ -1224,7 +1231,16 @@ for ($i = 0; $i < count($row); $i++) {
 	$attributeType[$row['PK_AttributeType']]=$row['Description'];
 }
 
+/*!
+ * \note Temporary work around to fix broken db issue. 
+ * */
+
+
+ 
+ 
 $aTypeProper= array_flip($attributeType);
+
+
 $directors = explode("|", $episodeData['director']);
 $seriesActors = explode("|", $episodeData['series']['seriesactors']);
 $genreArr = explode("|", $episodeData['series']['genre']);
