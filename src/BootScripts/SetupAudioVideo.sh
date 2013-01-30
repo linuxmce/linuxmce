@@ -211,7 +211,6 @@ Setup_AsoundConf()
 		*[CO]*)
 			CardDevice=$(grep -i "card" <<< "$Yalpa" | grep -v "device 0" | grep -vi "HDMI" | grep -wo "device ." | awk '{print $2}' | head -1)
 			ConnectType="spdif"
-			PlaybackPCM="${ConnectType}_playback" 
 			;; 
 		*H*)
 			CardDevice=$(grep -i "hdmi" <<< "$Yalpa" | grep -wo "device ." | awk '{print $2}')
@@ -232,13 +231,11 @@ Setup_AsoundConf()
 			fi
 
 			ConnectType="hdmi"
-			PlaybackPCM="${ConnectType}_playback"
 			;;
 		*)
 			CardDevice="0"
 			SoundOut="plug:dmix:"
 			ConnectType="analog"
-			PlaybackPCM="${SoundOut}${SoundCard}"
 			;;
 	esac	
 
