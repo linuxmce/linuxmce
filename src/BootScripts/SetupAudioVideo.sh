@@ -211,14 +211,6 @@ Setup_AsoundConf()
 		*[CO]*)
 			CardDevice=$(grep -i "card" <<< "$Yalpa" | grep -v "device 0" | grep -vi "HDMI" | grep -wo "device ." | awk '{print $2}' | head -1)
 			ConnectType="spdif"
-			PlaybackPCM="${ConnectType}_playback"
-			if [[ "$AlternateSC" -ge "1" ]]; then
-				SoundOut="plughw:"
-				SoundCard="${HWOnlyCard},${CardDevice}"
-			fi
-			if [[ "$AlternateSC" == "2" ]]; then
-				AsoundConf="/usr/pluto/templates/asound.conf.backup"
-			fi
 			;; 
 		*H*)
 			CardDevice=$(grep -i "hdmi" <<< "$Yalpa" | grep -wo "device ." | awk '{print $2}')
@@ -237,13 +229,7 @@ Setup_AsoundConf()
 							CardDevice="7" ;;
 					esac
 			fi
-			if [[ "$AlternateSC" -ge "1" ]]; then
-				SoundOut="plughw:"
-				SoundCard="${HWOnlyCard},${CardDevice}"
-			fi
-			if [[ "$AlternateSC" == "2" ]]; then
-				AsoundConf="/usr/pluto/templates/asound.conf.backup"
-			fi
+
 			ConnectType="hdmi"
 			PlaybackPCM="${ConnectType}_playback"
 			;;
@@ -251,24 +237,28 @@ Setup_AsoundConf()
 			CardDevice="0"
 			SoundOut="plug:dmix:"
 			ConnectType="analog"
-
-			if [[ "$AlternateSC" -ge "1" ]]; then
-				SoundOut="plughw:"
-				SoundCard="${HWOnlyCard},${CardDevice}"
-			fi
-
-			if [[ "$AlternateSC" == "2" ]]; then
-				AsoundConf="/usr/pluto/templates/asound.conf.backup"
-			fi
 			PlaybackPCM="${SoundOut}${SoundCard}"
 			;;
 	esac	
-	
-	local PlaybackCard="${SoundOut}${SoundCard}"
-	sed -r "s#%CONNECT_TYPE%#$ConnectType#g; s#%SOUND_OUT%#$SoundOut#g; s#%MAIN_CARD%#$SoundCard#g; s#%PLAYBACK_PCM%#$PlaybackPCM#g;" "$AsoundConf" > /etc/asound.conf
 
+	if [[ "$AlternateSC" -ge "1" ]]; then
+		SoundOut="plughw:"
+		SoundCard="${HWOnlyCard},${CardDevice}"
+	fi
+
+	if [[ "$AlternateSC" == "2" ]]; then
+		AsoundConf="/usr/pluto/templates/asound.conf.backup"
+	fi
+
+	PlaybackPCM="${ConnectType}_playback"
+	local PlaybackCard="${SoundOut}${SoundCard}"
+
+	# Replace template values with choices
+	sed -r "s#%CONNECT_TYPE%#$ConnectType#g; s#%SOUND_OUT%#$SoundOut#g; s#%MAIN_CARD%#$SoundCard#g; s#%PLAYBACK_PCM%#$PlaybackPCM#g;" "$AsoundConf" > /etc/asound.conf
 	Setup_XineConf "$AudioSetting" "$PlaybackCard"
+
 	/usr/pluto/bin/RestartALSA.sh
+
 	if pgrep AVWizard_Run.sh > /dev/null; then 
 		Enable_Audio_Channels
 	fi
