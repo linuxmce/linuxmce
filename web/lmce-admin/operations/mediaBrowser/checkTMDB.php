@@ -21,18 +21,26 @@ include(APPROOT.'/languages/'.$GLOBALS['lang'].'/common.lang.php');
 include(APPROOT.'/languages/'.$GLOBALS['lang'].'/editMediaFile.lang.php');
 	
 $fileID=$_GET['fileID'];
+
 error_reporting(1);
-	// tvdb api key 
+
 	
 function initialSetup($fileID,$mediadbADO,$dbADO, $output) {
+	
+ $tmdb = new TMDb('6ba51a94858c1748757dc06f7d4afbaa', $GLOBALS['lang'], false);
+ $config = $tmdb->getConfig();
+ $dump = json_decode($config, false, 512);
 
-searchSeries($fileID,$mediadbADO,$dbADO, $output) ;
+search($fileID,$mediadbADO,$dbADO, $output, $config, $tmdb) ;
 	
 }
 
-function searchSeries($fileID,$mediadbADO,$dbADO, $output){
+function search($fileID,$mediadbADO,$dbADO, $output, $config, $tmdb){
 		include(APPROOT.'/languages/'.$GLOBALS['lang'].'/common.lang.php');
 	include(APPROOT.'/languages/'.$GLOBALS['lang'].'/editMediaFile.lang.php');
+
+$opt = $tmdb->searchMovie("300");
+var_dump($opt);
 
  $externalAttributesBtn3='<input type="button" class="button_fixed" value="Back" onClick="self.location=\'index.php?section=editMediaFile&fileID='.$fileID.'\'">';
  $scriptInHead='<script src="javascript/prototype.js" type="text/javascript" language="JavaScript"></script>
@@ -46,7 +54,9 @@ function box()
 {document.getElementById("specials").innerHTML = "<div id=\"searchBox\" align=\"right\" stlye=\"display: none\"><input type=\"text\" id=\"seriesName\" value=\"Enter Special Name\" onclick=\"clear()\"><br><input type=\"hidden\" value=\"0\" name=\"specSeas\"><br><input type=\"submit\" onclick=\"getSpecials()\"/></div>";
  				}
  				</script>';
+
 $out.="TMDB";
+
 $output->setScriptInHead($scriptInHead);
 $output->setReloadLeftFrame(false);
 $output->setMenuTitle('Search TVDB |');
