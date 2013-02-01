@@ -37,7 +37,7 @@ pcm.analog_8 {
 }
 
 pcm.%CONNECT_TYPE% {
-	slave.pcm "%CONNECT_TYPE%%MAIN_CARD%"
+	slave.pcm "%SOUND_OUT%%MAIN_CARD%"
 	slave.rate 48000
 }
 
