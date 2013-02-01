@@ -37,13 +37,13 @@ pcm.analog_8 {
 }
 
 pcm.%CONNECT_TYPE% {
-	slave.pcm "%CONNECT_TYPE%:%MAIN_CARD%"
+	slave.pcm "%CONNECT_TYPE%%MAIN_CARD%"
 	slave.rate 48000
 }
 
 pcm.!default {
 	type asym
 	playback.pcm "%PLAYBACK_PCM%"
-	capture.pcm "%SOUND_OUT%:%MAIN_CARD%"
+	capture.pcm "%SOUND_OUT%%MAIN_CARD%"
 }
 
