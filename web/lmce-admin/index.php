@@ -1606,6 +1606,12 @@ switch ($section) {
 	    include_once('operations/mediaBrowser/checkTMDB.php');
 	    initialSetup($fileID,$mediadbADO,$dbADO,$output);	 
 	break;
+	case 'tmdbResults':
+		$output = new Template($dbADO);
+		$output->setTemplateFileType('large');
+	    include_once('operations/mediaBrowser/checkTMDB.php');
+	    tmdbResults($output,$mediadbADO,$dbADO);	 
+	break;
 	case 'checkIMDB':
 		$output = new Template($dbADO);
 		$output->setTemplateFileType('large');
