@@ -14,7 +14,6 @@ DEVICEDATA_Architecture=112
 DEVICEDATA_DisklessBoot=9
 DEVICEDATA_DisklessImages=258
 DEVICEDATA_Model=233
-
 DEVICEDATA_PK_Distro=7
 
 function setup_tftp_boot 
@@ -110,6 +109,23 @@ function setup_tftp_boot
                                 # and we try to install the correct version
                                 chroot "${Moon_RootLocation}" apt-get install "linux-image-${Kernel}"
                         fi
+
+			# Handle css2
+			if [[ -e /var/cache/apt/archives/libdvdcss2*.deb ]] && [[ ! -e /usr/pluto/deb-cache/libdvdcss2*.deb ]]; then
+				cp /var/cache/apt/archives/libdvdcss2*.deb /usr/pluto/deb-cache/libdvdcss2*.deb
+				pushd /usr/pluto/deb-cache
+				dpkg-scanpackages -m . /dev/null | tee Packages | gzip -c > Packages.gz
+				popd
+			fi
+
+			TargetDistro=$(chroot "${Moon_RootLocation}" lsb_release -si)
+			case "$TargetDistro" in
+				Ubuntu)
+					## If libdvdcss2 is installed on the hybrid/core
+					if [[ -d /usr/share/doc/libdvdcss2 ]] && [[ ! -d "${Moon_RootLocation}/usr/share/doc/libdvdcss2" ]]; then
+						chroot "${Moon_RootLocation}" apt-get install libdvdcss2
+					fi ;;
+			esac
 			# Changed to point to the always updated buntu softlink at device root. 
                         ln -s ${Moon_RootLocation}/vmlinuz /tftpboot/${Moon_DeviceID}/$Name/vmlinuz
 			ln -s ${Moon_RootLocation}/initrd.img /tftpboot/${Moon_DeviceID}/$Name/initrd.img
