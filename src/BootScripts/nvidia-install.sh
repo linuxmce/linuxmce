@@ -142,26 +142,12 @@ checkAlsaBackportNeeds() {
 	if [[ "$Distro" == "lucid" ]]; then
 		PCI_Id=$(getPCI_Id)
 		alsa_backports=$(dpkg-query -l "linux-backports-modules-alsa*" | grep "^ii" | awk '{print $2}') 2>/dev/null
-		if [[ -z "$AlternateSC" ]]; then
-			case " $GT_Series " in *" $PCI_Id "*)
-				ConfSet "AlternateSC" "1"
-				;;
-			esac
-			case " $Backports_Required " in *" $PCI_Id "*)
-				ConfSet "AlternateSC" "1"
-			esac
-			CurDrv=$(getPreferredNvidiaDriver)
-			if [[ "$CurDrv" == "nvidia-current" ]]; then
-				ConfSet "AlternateSC" "1"
-			fi
-		fi
 
 		if [[ -z "$alsa_backports" ]]; then
 			case " $Backports_Required " in *" $PCI_Id "*)
 				Log "$LogFile" "Alsa backports being installed."
 				NotifyMessage "Installing alsa backports modules."
 				apt-get install -yf linux-backports-modules-alsa-$(uname -r)
-				ConfSet "AlternateSC" "1"
 				/usr/pluto/bin/RestartALSA.sh
 				;;
 			esac
@@ -241,7 +227,6 @@ installCorrectNvidiaDriver() {
 				apt-get install -y alsa-utils 2> >(tee "$tmpfile")
 			fi
 			apt-get install -yf "$preferred_driver" 2> >(tee "$tmpfile")
-			ConfSet "AlternateSC" "1"
 			local param="reboot"
 		else
 			apt-get install -yf "$preferred_driver" 2> >(tee "$tmpfile")

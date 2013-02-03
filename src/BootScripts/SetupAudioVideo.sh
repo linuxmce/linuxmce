@@ -174,7 +174,7 @@ Enable_Audio_Channels()
 Setup_AsoundConf()
 {
 	local AudioSetting="$1"
-	SoundOut="hw:"
+	SoundOut="plughw:"
 	Yalpa=$(aplay -l 2>&1)
 	# Do not mess with asound.conf if Audio Setting is set to Manual. This will only happen after the asound.conf has been generated at least once.
 	if [[ "$AudioSetting" == "M" ]]; then
@@ -239,12 +239,12 @@ Setup_AsoundConf()
 			;;
 	esac	
 
-	if [[ "$AlternateSC" -ge "1" ]]; then
-		SoundOut="plughw:"
-		SoundCard="${HWOnlyCard},${CardDevice}"
+	if [[ "$AlternateSC" == "2" ]]; then
+		SoundOut="hw:"
+		SoundCard="${HWOnlyCard}"
 	fi
 
-	if [[ "$AlternateSC" == "2" ]]; then
+	if [[ "$AlternateSC" == "1" ]]; then
 		AsoundConf="/usr/pluto/templates/asound.conf.backup"
 	fi
 
