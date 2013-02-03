@@ -104,9 +104,10 @@ function editMediaFile($output,$mediadbADO,$dbADO) {
 
 		$externalAttributesBtn='';
 		if(!empty($fileID) && in_array($rowFile['EK_MediaType'],array(3,4,5,28))){			
-			$externalAttributesBtn='<select name="metadata_section"><option value="checkAmazon">'.$OPTION_CHECK_AMAZON.'</option>';
-			$externalAttributesBtn.='<option value="checkIMDB">'.$OPTION_CHECK_IMDB.'</option>';
-			$externalAttributesBtn.='<option value="checkTVDB">'.$OPTION_CHECK_TVDB.'</option></selection>';
+			$externalAttributesBtn='<select name="metadata_section">';			
+			$externalAttributesBtn.='<option value="checkTVDB">'.$OPTION_CHECK_TVDB.'</option>';
+			$externalAttributesBtn.='<option value="checkTMDB">'.$OPTION_CHECK_TMDB.'</option>;
+			</selection>';
 			
 			$externalAttributesBtn.='<input type="button" class="button_fixed" value="'.$BUTTON_GET_METADATA.'"
 			onClick="self.location=\'index.php?section=\'+document.editMediaFile.metadata_section.options[document.editMediaFile.metadata_section.selectedIndex].value+\'&fileID='.$fileID.'\'">';

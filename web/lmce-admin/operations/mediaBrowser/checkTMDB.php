@@ -15,7 +15,7 @@ include ('TMDb.php');
 include (APPROOT . '/languages/' . $GLOBALS['lang'] . '/common.lang.php');
 include (APPROOT . '/languages/' . $GLOBALS['lang'] . '/editMediaFile.lang.php');
 
-error_reporting(0);
+error_reporting(1);
 $fileID = $_GET['fileID'];
 
 function initialSetup($fileID, $mediadbADO, $dbADO, $output) {	
@@ -26,8 +26,8 @@ function initialSetup($fileID, $mediadbADO, $dbADO, $output) {
 function search($fileID, $mediadbADO, $dbADO, $output, $config) {
 	include (APPROOT . '/languages/' . $GLOBALS['lang'] . '/common.lang.php');
 	include (APPROOT . '/languages/' . $GLOBALS['lang'] . '/editMediaFile.lang.php');
-	//var_dump($opt);
-
+	
+$fileFormatEnum = array (1 => "Low Res",2 => "DVD",3 => "Standard Def", 4 => "HD 720", 5 => "HD 1080", 6 => "Low Quality", 7 => "MP3", 8 => "CD Quality", 9 => "High-def audio");
 	$externalAttributesBtn3 = '<input type="button" class="button_fixed" value="Back" onClick="self.location=\'index.php?section=editMediaFile&fileID=' . $fileID . '\'">';
 	$scriptInHead = '<script src="javascript/prototype.js" type="text/javascript" language="JavaScript"></script>
  				<script src="javascript/scriptaculous.js" type="text/javascript" language="JavaScript"> </script>
@@ -63,18 +63,21 @@ function box()
 	</tr>
 	<tr>
 		<td>Guessed Resolution</td>
-		<td>'.$guessedArray['rez'].'</td>
+		<td><select name="rez" maxlength=15><option value="'.$guessedArray['rez'].'" selected="selected">'.$fileFormatEnum[$guessedArray['rez']].'</option>
+			<option value="3">Standard Def</option>
+			<option value="4">HD 720</option>
+			<option value="5">HD 1080</option>
+			</select></td>
 	</tr>
 </table>
-				<input type="hidden" name="section" value="tmdbResults">
+<br>			<input type="hidden" name="section" value="tmdbResults">
                 <input type="hidden" id="fileID" name="fileID" value="'.$fileID.' ">
                 <input type="hidden" id="fname" name="file" value="'.$rawfile.' ">
-                <input type="hidden" id="rez" name="rez" value="'.$guessedArray['rez'].' ">
+              
                ';
 	$out.='<p><input name="submit" type="submit" value="Search!"></p></td><td rowspan="2" width="200">';
 	
-	//var_dump($guessedArray);
-	
+
 $out.=' </form>'.$externalAttributesBtn3;
 
 	$output -> setScriptInHead($scriptInHead);
@@ -146,14 +149,8 @@ $tmdb = new TMDb('6ba51a94858c1748757dc06f7d4afbaa', $GLOBALS['lang'], false);
 $config = $tmdb -> getConfig();
 }
 		$raw = $tmdb->searchMovie($title);
-//var_dump($raw['results']);
 	$out.='<body id="results"> ';
-		$imgTypes = array ();
-		$imgTypes['poster_sizes']=$tmdb->getAvailableImageSizes(TMDb::IMAGE_POSTER);
-		$imgTypes['backdrop_sizes']=$tmdb->getAvailableImageSizes(TMDb::IMAGE_BACKDROP);
-		
-		var_dump($imgTypes);
-	//var_dump($raw);
+	
 	foreach ($raw['results'] as $k => $val) {
 		$image_url = $tmdb->getImageUrl($val['poster_path'], TMDb::IMAGE_POSTER, 'original');
 		$out.='<form action="index.php" method="post" id="TMDBform" name="tmdbSaved"><table border="0" bordercolor="" style="background-color:#C0C0C0" width="45%" cellpadding="3" cellspacing="3" align="center">';
@@ -172,13 +169,10 @@ $config = $tmdb -> getConfig();
 		<tr>		
 	</tr></table>
 	</form>';
-			
-	//var_dump($val);
 	}
 	
 	
 	$out.='</body>';
-	
 	
     $output -> setScriptInHead($scriptInHead);
 	$output -> setReloadLeftFrame(false);
@@ -228,9 +222,15 @@ while ($row=mysql_fetch_array($result)) {
 	/*marshalling up relevant data */
 	$movieId+=$_POST['movie_id'];	
 	$movie = $tmdb->getMovie($movieId, $GLOBALS['lang']);	
-	$actors = $tmdb -> getMovieCast($movieId);
+	$fileID=$_POST['fileID'];
+	$format = $_POST['rez'];
+	$cast = $tmdb -> getMovieCast($movieId);
 	$images = $tmdb ->getMovieImages($movieId, $GLOBALS['lang']);
-	
+	$imgTypes = array ();
+		$imgTypes['poster_sizes']=$tmdb->getAvailableImageSizes(TMDb::IMAGE_POSTER);
+		$imgTypes['backdrop_sizes']=$tmdb->getAvailableImageSizes(TMDb::IMAGE_BACKDROP);
+	$actors = $cast['cast'];
+	$crew = $cast['crew'];
 	$synopsis = $movie['overview'];
 	$backdrop_path = $movie['backdrop_path'];
 	$poster_path = $movie['poster_path'];
@@ -238,31 +238,114 @@ while ($row=mysql_fetch_array($result)) {
 	$title = $movie['title'];
 	$studios = $movie['production_companies'];	
 	array_flip($attribute_type_array);
-	//var_dump($attribute_type_array);
+	
 	$out.=$title;
-	$out.='<table border="1" bordercolor="" style="background-color:" width="25%" cellpadding="3" cellspacing="3">
+	$out.='<table border="1" bordercolor="" style="background-color:" width="75%" cellpadding="3" cellspacing="3">
 	
 	<tr>
 		<td>Attribute</td>
 		<td>Status</td>
 	</tr>';
+	
 
 $typeArray=array_flip($attribute_type_array);
-//var_dump($typeArray['Title']);
+
 	/*processing attributes and writing result to table*/
+	
+	$out.= '<tr>
+		<td>File Image</td>
+		<td>'.saveFileImage ($movie['original_title'],$tmdb->getImageUrl($poster_path, TMDb::IMAGE_POSTER, 'original')).'</td>
+	</tr>';
 	
 $out.= '<tr>
 		<td>Title</td>
-		<td>'.insertAttribute($title, $typeArray['Title'], $mediadbADO, $dbADO).'</td>
+		<td>'.insertAttribute($title, $typeArray['Title'], $hasImage, $imagePath,  $mediadbADO, $dbADO).'</td>
 	</tr>';
-echo $synopsis;
-
+	
 $out.='<tr>
 		<td>Synopsis</td>
-		<td>'.insertAttribute($synopsis, $typeArray['Synopsis'], $mediadbADO, $dbADO).'</td>
+		<td>'.insertAttribute($synopsis, $typeArray['Synopsis'],$hasImage, $imagePath,  $mediadbADO, $dbADO).'</td>
 	</tr>';
+	
+	$out.='<tr>
+		<td>Release Date</td>
+		<td>'.insertAttribute($movie['release_date'], $typeArray['Release Date'], $hasImage, $imagePath, $mediadbADO, $dbADO).'</td>
+	</tr>';
+	
+	foreach ($movie['production_companies'] as $name => $studio) {
+		
+		$out.='<tr>
+		<td>Studio</td>
+		<td>'.insertAttribute($studio['name'], $typeArray['Studio'],$hasImage, $imagePath,  $mediadbADO, $dbADO).'</td>
+	</tr>';
+	}
+	
+	foreach ($movie['genres'] as $name => $genre) {
+		
+		$out.='<tr>
+		<td>Genre</td>
+		<td>'.insertAttribute($genre['name'], $typeArray['Genre'], $hasImage, $imagePath, $mediadbADO, $dbADO).'</td>
+	</tr>';
+	}
+	
+		foreach ($cast['crew'] as $name => $crew) {
+			
+			if($crew['job'] == "Director"){
+				
+		$out.='<tr><td>Director</td>
+	<td>'.insertAttribute($crew['name'], $typeArray['Director'], $hasImage, $imagePath, $mediadbADO, $dbADO).'</td>
+	</tr>';
+	$hasImage=false;
+	$imagePath="";
+	}else if 
+	  	($crew['job'] == "Producer"){
+		$out.='<tr><td>Producer</td>
+	<td>'.insertAttribute($crew['name'], $typeArray['Producer'], $hasImage, $imagePath, $mediadbADO, $dbADO).'</td>
+	</tr>';
+	} else if	
+			($crew['job'] == "Author"){
+		$out.='<tr><td>Producer</td>
+	<td>'.insertAttribute($crew['name'], $typeArray['Composer/Writer'], $hasImage, $imagePath, $mediadbADO, $dbADO).'</td>
+	</tr>';
+	}
+}
+		
+		
+	
+		foreach ($cast['cast'] as $name => $crew) {
+		
+		/*		$tImgPath="";
+			if(!empty($crew['profile_path'])){
+				$tImagePath=$tmdb->getImageUrl($tImagePath,TMDb::IMAGE_PROFILE, 'original');
+				$hasImage= "true";
+				$imagePath =$tImagePath;
+			}
+		 */
+		$out.='<tr><td>Performer</td>
+	<td>'.insertAttribute($crew['name'], $typeArray['Performer'], $hasImage, $imagePath, $mediadbADO, $dbADO).'</td>
+	</tr>';
+	$hasImage=false;
+	$imagePath="";
+		 
+}
 
+		
 
+	$out.='<tr>
+		<td>IMDB</td>
+		<td>'.insertAttribute($movie['imdb_id'], $typeArray['IMDB'],false, $imagePath,  $mediadbADO, $dbADO).'</td>
+	</tr>'; 
+	
+	$out.='<tr>
+		<td>Running Time</td>
+		<td>'.insertAttribute($movie['runtime'], $typeArray['Run Time'],false, $imagePath,  $mediadbADO, $dbADO).'</td>
+	</tr>'; 
+	
+	
+	
+
+mysql_query("UPDATE File SET FK_FileFormat=\"$format\" WHERE `PK_File`=\"$fileID\" ")or die (mysql_error()); 
+mysql_query("UPDATE File SET FK_MediaSubType=2 WHERE `PK_File`=\"$fileID\" ")or die (mysql_error()); 
 	
 	/*attrbiute insertion notification table*/
 	
@@ -276,7 +359,7 @@ $out.='<tr>
 	$output -> output();
 }
 
-function insertAttribute($attribute, $attributeType,$mediadbADO,$dbADO) {
+function insertAttribute($attribute, $attributeType, $hasImage, $imagePath, $mediadbADO,$dbADO) {
 	
 	$sql = "SELECT * FROM `Attribute` WHERE `Name` = \"$attribute\" AND FK_AttributeType = \"$attributeType\"";
 	$result = mysql_query($sql) or die(mysql_error());
@@ -296,7 +379,8 @@ function insertAttribute($attribute, $attributeType,$mediadbADO,$dbADO) {
 			//echo $insertRes;
 			$idQuery="INSERT INTO File_Attribute  VALUES (\"$fileID\", \"$insertRes\", 0, 0, NULL, NULL, NULL, 0, CURTIME(), NULL  )";
 			mysql_query($idQuery)  or die (mysql_error());
-			return "New Attribute:".$attribute." added to database under".$attributeType;
+		
+			return "New Attribute:".$attribute." added to database under".$attributeType."<br>".$imgResponse;
 	}
 	else
 	{
@@ -310,14 +394,130 @@ function insertAttribute($attribute, $attributeType,$mediadbADO,$dbADO) {
 	// echo $attrib;
 	if ($test !== $attrib)
 	{
-   // echo "file not associated, associating...";
+  
 	$idQuery2="INSERT INTO File_Attribute  VALUES (\"$fileID\", \"$attrib\", 0, 0, NULL, NULL, NULL, 0, CURTIME(), NULL  )";
 	mysql_query($idQuery2)  or die (mysql_error());
+	if($hasImage=="true"){
+				$imgResponse=saveAttributeImage($test, $attributeType,  $imagePath);
+		
+			}
 	return "New Attribute:".$attribute." added to database for file.".$fileID." for attribute type ".$attributeType;
 	}
 	else {return "Already Associated <br>";}
 	}
-	 
+}
 
+function saveAttributeImage($attribute, $attributeType,  $imagePath){
+$fileIdent=$_POST['fileID'];
+//print_r($fileIdent);
+$test=mysql_query("SELECT * FROM Picture_Attribute WHERE FK_Attribute=\"$attribute\" ") or die (mysql_error("MYsql Error"));
+$fileCount = mysql_num_rows($test); 
+
+if ($fileCount < 1)
+{
+		
+$fullUrl =$imagePath;
+$img = file_get_contents($fullUrl);
+$fName1 = strrchr($attribute, '/');
+$fName = str_replace (".jpg", "", $fName1);
+$savefile = fopen('/var/tmp'.$fName.'.jpg', 'w');
+fwrite($savefile, $fullUrl);
+fclose($savefile);
+$import_cover_art=$imagePath;
+$extension=strtolower(str_replace('.','',strrchr($import_cover_art,".")));	
+
+	if($import_cover_art!=''){
+		mysql_query("INSERT INTO Picture (Extension,URL) VALUES (\"$extension\", \"$import_cover_art\")");
+		$picID=(int)mysql_insert_id()  or die (mysql_error());
+		mysql_query("INSERT INTO Picture_File (FK_Picture,FK_File) VALUES (\"$picID\",\"$fileIdent\")");
+
+		// create the file and the thumbnail
+		$extension=($extension=='jpeg')?'jpg':$extension;
+		$newPicName=$picID.'.'.$extension;
+			
+			$error='';
+			if($extension!='jpg'){
+				$error=$TEXT_ERROR_NOT_JPEG_CONST;
+				return "Attribute::".$error;
+			}
+			else{
+				// create thumbnail
+				savePic($import_cover_art,$GLOBALS['mediaPicsPath'].$newPicName);
+				if(file_exists($GLOBALS['mediaPicsPath'].$newPicName)){
+					// try to delete exisitng thumbnail if user messed the files and database
+					if(file_exists($GLOBALS['mediaPicsPath'].$picID.'_tn.'.$extension)){
+						$cmd='sudo -u root rm -f "'.$GLOBALS['mediaPicsPath'].$picID.'_tn.'.$extension.'"';
+						exec_batch_command($cmd);
+					}
+					 unlink('/var/tmp/'.$fName.'.jpg');	
+					$resizeFlag=resizeImage($GLOBALS['mediaPicsPath'].$newPicName, $GLOBALS['mediaPicsPath'].$picID.'_tn.'.$extension, 256, 256);
+					if(!$resizeFlag){
+						$error=$TEXT_ERROR_UPLOAD_FAILS_PERMISIONS_CONST.' '.$GLOBALS['mediaPicsPath'];
+						return "Attribute::".$error;
+					}
+				}
+			}		
+	}
+}
+else{
+	return "attribute image set for ".$attribute;
+}
+}
+
+function saveFileImage ($title,$remoteImagePath)
+{
+$fileIdent=$_POST['fileID'];
+//print_r($fileIdent);
+$test=mysql_query("SELECT * FROM Picture_File WHERE FK_File=\"$fileIdent\" ") or die (mysql_error());
+$fileCount = mysql_num_rows($test); 
+
+if ($fileCount < 1)
+{
+$fullUrl =$remoteImagePath;
+$img = file_get_contents($fullUrl);
+$fName1 = strrchr($title, '/');
+$fName = str_replace (".jpg", "", $fName1);
+$savefile = fopen('/var/tmp'.$fName.'.jpg', 'w');
+fwrite($savefile, $fullUrl);
+fclose($savefile);
+$import_cover_art=$remoteImagePath;
+$extension=strtolower(str_replace('.','',strrchr($import_cover_art,".")));	
+
+	if($import_cover_art!=''){
+		mysql_query("INSERT INTO Picture (Extension,URL) VALUES (\"$extension\", \"$import_cover_art\")");
+		$picID=(int)mysql_insert_id()  or die (mysql_error());
+		mysql_query("INSERT INTO Picture_File (FK_Picture,FK_File) VALUES (\"$picID\",\"$fileIdent\")");
+
+		// create the file and the thumbnail
+		$extension=($extension=='jpeg')?'jpg':$extension;
+		$newPicName=$picID.'.'.$extension;
+			
+			$error='';
+			if($extension!='jpg'){
+				$error=$TEXT_ERROR_NOT_JPEG_CONST;
+				return "File::".$error;
+			}
+			else{
+				// create thumbnail
+				savePic($import_cover_art,$GLOBALS['mediaPicsPath'].$newPicName);
+				if(file_exists($GLOBALS['mediaPicsPath'].$newPicName)){
+					// try to delete exisitng thumbnail if user messed the files and database
+					if(file_exists($GLOBALS['mediaPicsPath'].$picID.'_tn.'.$extension)){
+						$cmd='sudo -u root rm -f "'.$GLOBALS['mediaPicsPath'].$picID.'_tn.'.$extension.'"';
+						exec_batch_command($cmd);
+					}
+					 unlink('/var/tmp/'.$fName.'.jpg');	
+					$resizeFlag=resizeImage($GLOBALS['mediaPicsPath'].$newPicName, $GLOBALS['mediaPicsPath'].$picID.'_tn.'.$extension, 256, 256);
+					if(!$resizeFlag){
+						$error=$TEXT_ERROR_UPLOAD_FAILS_PERMISIONS_CONST.' '.$GLOBALS['mediaPicsPath'];
+						return "File::".$error;
+					}
+				}
+			}		
+	}
+}
+else{
+	return "Image already set.";
+}
 }
 ?>
