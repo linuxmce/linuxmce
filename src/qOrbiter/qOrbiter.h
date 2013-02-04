@@ -1315,6 +1315,7 @@ signals:
     //floorplans
     void floorPlanImageData(const uchar* ,int);
     void floorplanTypeChanged(int f);
+
     //media
     void screenShotReady(QImage data);
     void waitForScreenShot(char picData, int picDataSize, string fileFormat);

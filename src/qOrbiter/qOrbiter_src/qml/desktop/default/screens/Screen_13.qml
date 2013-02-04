@@ -1,6 +1,11 @@
 import QtQuick 1.0
 import "../components"
-
+/*!
+ *\brief Security Panel
+ *
+ *\ingroup qml_desktop_default
+ *This screen allows you to set the desired security mode.
+ */
 Stage{
     id:securitypanel
 

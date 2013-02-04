@@ -1,6 +1,11 @@
 import QtQuick 1.0
 import "../components"
-
+/*!
+ *\brief NEEDS LABEL
+ *\todo label this screen!
+ *\ingroup qml_desktop_default
+ *
+ */
 Rectangle {
 
     // property alias synText:

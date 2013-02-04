@@ -1,3 +1,10 @@
+/*!
+ *\brief AppleII Remote
+ *
+ *\ingroup qml_desktop_default
+ *\bug needs better description
+ *
+ */
 import QtQuick 1.0
 import "../components"
 

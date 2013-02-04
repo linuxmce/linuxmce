@@ -1,11 +1,18 @@
 import QtQuick 1.0
 import "../components"
+/*!
+ *\brief Camera Multiple View
+ *
+ *\ingroup qml_desktop_default
+ *
+ * Camera Multi-view. See Screen_15 for more details
+ */
 Item{
-    id:climate
+    id:quad_view_cameras
+    anchors.fill: parent
 
     Rectangle{
-        height: style.orbiterH
-        width: style.orbiterW
+      anchors.fill: parent
         color: "transparent"
         Text {
             id: climatelabel

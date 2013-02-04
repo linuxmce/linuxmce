@@ -1,11 +1,17 @@
+/*!
+ *\brief File Save screen
+ *
+ *\ingroup qml_desktop_default
+ *\bug needs better description.
+ *Save file screen, need more description
+ */
 import QtQuick 1.0
 import "../components"
 Item{
-    id:securitystatus
-
+    id:file_save
+    anchors.fill: parent
     Rectangle{
-        height: style.orbiterH
-        width: style.orbiterW
+       anchors.fill: parent
         color: "transparent"
         Text {
             id: statussec

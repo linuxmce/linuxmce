@@ -1,5 +1,11 @@
 import QtQuick 1.0
 import "../components"
+/*!
+ *\brief Hard Drive detection popup
+ *
+ *\ingroup qml_desktop_default
+ *This screen shows when a new drive is detected, allowing the user to select the desired actions.
+ */
 Rectangle {
 
     height: style.orbiterH

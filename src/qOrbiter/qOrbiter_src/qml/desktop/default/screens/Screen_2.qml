@@ -1,3 +1,10 @@
+/*!
+ *\brief Lighting Floorplan Screen.
+ *
+ *\ingroup qml_desktop_default
+ *
+ *This is the screen displaying the lighting floorplan.
+ */
 import QtQuick 1.0
 import "../components"
 Rectangle{

@@ -1,6 +1,12 @@
 import QtQuick 1.0
 import "../components"
-
+/*!
+ *\brief Remote for CD player of some type.
+ *
+ *\ingroup qml_desktop_default
+ *\bug file better description for this screen.
+ *This screen appears to control an external cd player.
+ */
 Rectangle {
 
     // property alias synText:

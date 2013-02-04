@@ -1,6 +1,11 @@
 import QtQuick 1.0
 import "../components"
-
+/*!
+ *\brief LABEL THIS SCREEN
+ *
+ *\ingroup qml_desktop_default
+ *\bug Needs label and function definition.
+ */
 Rectangle {
 
     // property alias synText:

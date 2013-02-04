@@ -1,11 +1,17 @@
+/*!
+ *\brief Manage playlist screen.
+ *
+ *\ingroup qml_desktop_default
+ *\todo needs better description.
+ *Manage playlist screen.
+ */
 import QtQuick 1.0
 import "../components"
 Item{
-    id:securitystatus
-
+    id:manage_playlist
+    anchors.fill: parent
     Rectangle{
-        height: manager.appHeight
-        width: manager.appWidth
+        anchors.fill: parent
         color: "transparent"
         Text {
             id: statussec

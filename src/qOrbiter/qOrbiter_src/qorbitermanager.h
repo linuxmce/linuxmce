@@ -506,7 +506,8 @@ signals:
     void setMediaDetails();
     void mediaScreenShotReady();
     void saveMediaScreenShot(QString attribute);
-    void requestStreamImage(QString i);
+    void requestStreamImage();
+    void requestStoredMediaImage(QString i);
     void requestVideoFrame();
     void liveTVrequest();
     void managerPlaylistRequest();
@@ -850,7 +851,8 @@ public slots:
 
     /*Screenshot & Images slots*/
     void updateImageChanged(QImage img);
-    void grabStreamImage(){emit requestStreamImage(nowPlayingButton->path+"/"+nowPlayingButton->filepath);}
+    void grabStreamImage(){emit requestStreamImage(); }
+    void grabFileImage() {emit requestStoredMediaImage(nowPlayingButton->path+"/"+nowPlayingButton->filepath);  }
     void setScreenShotVariables(screenshotAttributes*t);
     void showScreenShotVariables() { qorbiterUIwin->rootContext()->setContextProperty("screenshotAttributes", QVariant::fromValue(screenshotVars)); }
     void setMediaScreenShot(QImage screen_shot);

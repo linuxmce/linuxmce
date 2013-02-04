@@ -1,3 +1,10 @@
+/*!
+ *\brief Reload Router Screen.
+ *
+ *\ingroup qml_desktop_default
+ *
+ This screen shows the reload router screen.
+ */
 import QtQuick 1.0
 import "../components"
 Stage{

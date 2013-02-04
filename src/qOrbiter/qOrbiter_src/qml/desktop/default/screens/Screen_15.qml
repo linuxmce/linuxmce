@@ -1,17 +1,20 @@
 import QtQuick 1.0
 import "../components"
-/*
-screen params for this screen are
+/*!
+  \brief single camera view for security camera.
+\note screen params for this screen are
 @param 2 - value of the device
 @param 159 - the Screen
 
 \note access Screen Parameters via
 \code manager.getParam(int param) \endcode
+*\ingroup qml_desktop_default
 */
+
 Item{
     id:singlecameraview
     property int camera:screenparams.getParam(2) /*!< \brief the camera device number in this screen. */
-
+anchors.fill: parent
     Connections{
         target: securityvideo
         onImageUpdated:{
@@ -23,8 +26,7 @@ Item{
 
 
     Rectangle{
-        height: style.orbiterH
-        width: style.orbiterW
+      anchors.fill: parent
         color: "transparent"
         Component.onCompleted: requestSecurityPic(screenparams.getParam(2), 640, 480)
         StyledText {

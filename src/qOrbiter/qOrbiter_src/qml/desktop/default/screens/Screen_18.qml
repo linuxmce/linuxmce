@@ -1,3 +1,10 @@
+/*!
+ *\brief Video Call in progress
+ *
+ *\ingroup qml_desktop_default
+ *\bug needs better description
+ * Screen for video call in progress, needs more definition.
+ */
 import QtQuick 1.0
 import "../components"
 Item{

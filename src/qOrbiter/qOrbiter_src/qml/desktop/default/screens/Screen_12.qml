@@ -1,5 +1,12 @@
 import QtQuick 1.0
 import "../components"
+/*!
+ *\brief Call LinuxMCE user
+ *
+ *\ingroup qml_desktop_default
+ *\bug Better description.
+ *This screen is for the purpose of calling between LinuxMCE installtions.
+ */
 Item{
     id:callplutouser
 

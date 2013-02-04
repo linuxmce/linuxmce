@@ -1,5 +1,11 @@
 import QtQuick 1.0
 import "../components"
+/*!
+ *\brief Make call / Dial Number
+ *
+ *\ingroup qml_desktop_default
+ *Make a call, dial a number from on screen pad or other hardware input.
+ */
 Item{
     id:calldialnumber
 

@@ -1,5 +1,12 @@
 import QtQuick 1.0
 import "../components"
+/*!
+ *\brief LABEL ME
+ *
+ *\ingroup qml_desktop_default
+ *\bug needs better description
+ *This screen pops up with the selected security status after a mode change.
+ */
 Item{
     id:securitystatus
 

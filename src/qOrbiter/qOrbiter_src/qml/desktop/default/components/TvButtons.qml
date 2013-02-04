@@ -2,6 +2,7 @@ import QtQuick 1.0
 import "../components"
 import "../js/ComponentLoader.js" as MyJs
 import "../effects"
+import "../../lib/handlers"
 import Qt.labs.shaders 1.0
 
 Row{
@@ -37,8 +38,9 @@ Row{
         buttontext: qsTr("Thumbnail")
         MouseArea{
             anchors.fill: parent
-            onClicked: manager.grabScreenshot()
+            onClicked: manager.grabFileImage()
         }
+
     }
     Flickable{
         height: zoom.height

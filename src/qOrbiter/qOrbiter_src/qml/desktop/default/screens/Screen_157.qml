@@ -1,7 +1,13 @@
+/*!
+ *\brief LABEL ME
+ *
+ *\ingroup qml_desktop_default
+ *\bug needs better description
+ *
+ */
+
 import QtQuick 1.0
 import Qt.labs.shaders 1.0
-
-
 import "../components"
 import "../js/ComponentLoader.js" as MyJs
 import "../effects"

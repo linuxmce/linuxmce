@@ -1,5 +1,12 @@
 import QtQuick 1.0
 import "../components"
+/*!
+ *
+ *\brief Call from Favorites screen.
+ *
+ *\ingroup qml_desktop_default
+ *Dial a call from the favorites list.
+ */
 Item{
     id:callfromfavorites
 

@@ -1,3 +1,10 @@
+/*!
+ *\brief Hulu Remote screen
+ *
+ *\ingroup qml_desktop_default
+ *
+ * Control Hulu with this screen
+ */
 import QtQuick 1.0
 import "../components"
 
