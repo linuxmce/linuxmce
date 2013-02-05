@@ -241,7 +241,8 @@ Setup_AsoundConf()
 
 	if [[ "$AlternateSC" == "2" ]]; then
 		SoundOut="hw:"
-		SoundCard="${HWOnlyCard}"
+	else
+		SoundCard="${HWOnlyCard},${CardDevice}"
 	fi
 
 	if [[ "$AlternateSC" == "1" ]]; then
