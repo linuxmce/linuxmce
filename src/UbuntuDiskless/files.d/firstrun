@@ -12,6 +12,11 @@ Content="#!/bin/bash
 trap 'rm -f $File' EXIT
 apt-get update
 update-pciids
+
+## Handle libdvdcss2
+dpkg -l libdvdcss2 | grep ^ii || find /usr/pluto/deb-cache/ -iname 'libdvdcss*' -exec dpkg -i {} \;
+
+## Install video driver
 . /usr/pluto/bin/Utils.sh
 CheckVideoDriver 
 sleep 5 

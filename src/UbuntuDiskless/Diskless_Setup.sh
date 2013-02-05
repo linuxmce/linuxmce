@@ -110,22 +110,6 @@ function setup_tftp_boot
                                 chroot "${Moon_RootLocation}" apt-get install "linux-image-${Kernel}"
                         fi
 
-			# Handle css2
-			if [[ -e /var/cache/apt/archives/libdvdcss2*.deb ]] && [[ ! -e /usr/pluto/deb-cache/libdvdcss2*.deb ]]; then
-				cp /var/cache/apt/archives/libdvdcss2*.deb /usr/pluto/deb-cache/libdvdcss2*.deb
-				pushd /usr/pluto/deb-cache
-				dpkg-scanpackages -m . /dev/null | tee Packages | gzip -c > Packages.gz
-				popd
-			fi
-
-			TargetDistro=$(chroot "${Moon_RootLocation}" lsb_release -si)
-			case "$TargetDistro" in
-				Ubuntu)
-					## If libdvdcss2 is installed on the hybrid/core
-					if [[ -d /usr/share/doc/libdvdcss2 ]] && [[ ! -d "${Moon_RootLocation}/usr/share/doc/libdvdcss2" ]]; then
-						chroot "${Moon_RootLocation}" apt-get install libdvdcss2
-					fi ;;
-			esac
 			# Changed to point to the always updated buntu softlink at device root. 
                         ln -s ${Moon_RootLocation}/vmlinuz /tftpboot/${Moon_DeviceID}/$Name/vmlinuz
 			ln -s ${Moon_RootLocation}/initrd.img /tftpboot/${Moon_DeviceID}/$Name/initrd.img
@@ -378,11 +362,20 @@ for Row in $R; do
 		mkdir -p ${Moon_RootLocation}/root/.ssh
 	fi
 	cat /usr/pluto/keys/id_dsa_pluto.pub > ${Moon_RootLocation}/root/.ssh/authorized_keys
-	(cd /usr/pluto/diskless/${Moon_DeviceID}/usr/pluto/deb-cache; dpkg-scanpackages -m . dev/null | tee Packages | gzip -c > Packages.gz)
 
 	## Dome configuring this MD
 	RunSQL "UPDATE Device SET NeedConfigure = 0 WHERE PK_Device=$Moon_DeviceID"
 done
+
+# Handle deb-cache population
+echo "Moving the apt cache to /usr/pluto/deb-cache/"
+find /var/cache/apt/archives/ -iname '*.deb' -exec mv {} /usr/pluto/deb-cache \;
+pushd /var/cache/apt/archives
+dpkg-scanpackages -m . /dev/null | tee Packages | gzip -c > Packages.gz
+popd
+pushd /usr/pluto/deb-cache
+dpkg-scanpackages -m . /dev/null | tee Packages | gzip -c > Packages.gz
+popd
 
 setup_hosts_file
 /usr/pluto/bin/Update_StartupScrips.sh
@@ -416,12 +409,6 @@ for dir in /usr/pluto/diskless/* ;do
 		rm -f "${dir}/debian/etc/rc2.d/S98LMCEUpdate" || :
 	fi
 done
-
-if ! [[ -f /usr/pluto/deb-cache/Packages.gz ]]; then
-	pushd /usr/pluto/deb-cache
-	dpkg-scanpackages -m . /dev/null | tee Packages | gzip -c > Packages.gz
-	popd
-fi
 
 . /usr/pluto/bin/Config_Ops.sh
 if [[ "$PK_Users" -lt "1" ]]; then
