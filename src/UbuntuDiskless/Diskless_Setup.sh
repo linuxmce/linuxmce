@@ -370,9 +370,6 @@ done
 # Handle deb-cache population
 echo "Moving the apt cache to /usr/pluto/deb-cache/"
 find /var/cache/apt/archives/ -iname '*.deb' -exec mv {} /usr/pluto/deb-cache \;
-pushd /var/cache/apt/archives
-dpkg-scanpackages -m . /dev/null | tee Packages | gzip -c > Packages.gz
-popd
 pushd /usr/pluto/deb-cache
 dpkg-scanpackages -m . /dev/null | tee Packages | gzip -c > Packages.gz
 popd
