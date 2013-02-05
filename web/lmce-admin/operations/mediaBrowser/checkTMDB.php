@@ -416,7 +416,7 @@ function insertAttribute($attribute, $attributeType, $hasImage, $imagePath, $med
 		$idQuery2="";
 		switch ($attributeType) {
 			case '13':
-			$idQuery2.="UPDATE  File_Attribute  VALUES (\"$fileID\", \"$attrib\", 0, 0, NULL, NULL, NULL, 0, CURTIME(), NULL  )";
+			$idQuery2.="INSERT INTO File_Attribute  VALUES (\"$fileID\", \"$attrib\", 0, 0, NULL, NULL, NULL, 0, CURTIME(), NULL  )";
 				break;
 			
 			default:
