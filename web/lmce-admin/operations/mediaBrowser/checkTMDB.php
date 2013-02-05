@@ -205,7 +205,31 @@ $out.='<table border="0" bordercolor="" style="background-color:#C0C0C0" width="
 	';
 	$output ->setBody($out);
 /*getting the attribute array from linuxmce db*/
-$attribute_type_array=Array();									
+$attribute_type_array=array(1=>"Director",
+2=>"Performer",
+3=>"Album",
+4=> "Track",
+6=> "ASIN",
+7=> "CDDB",
+8=> "Genre",
+9=> "Ref #",
+10=>"Channel",
+11=>"Episode",
+12=> "Program",
+13=> "Title",
+14=>  "Disc ID",
+15=>"Conductor",
+16=>"Composer/Writer",
+17=>"Studio",
+18=>"Rating",
+19=>"Release Date",
+20=> "Website",
+21=>"Chapter",
+22=>"Encoding",23=> "Format", 24=> "Aspect Ratio(s)", 25=> "Audio Encoding", 26=>"Rated", 27=> "DVD Release Date",28=>"Run Time", 29=> "Keyword", 30=> "Screen Saver For MD",
+31=>"Format", 32=> "Region", 33=> "Language", 34=> "Aspect Ratio", 35=>"Number of Discs", 36=> "IMDB", 37=>"Synopsis", 38=> "Producer", 39=>"Executive Producer", 40=>"Purchase Info",
+41=> "TV Channel ID", 42=> "TV Program ID", 43=>"TV Series ID", 44=>"Creation Date", 45=> "THX Disk ID", 46=>"Screen saver disabled", 47=>"Manufacturer", 48=>"Year",
+49=>"System", 50=>"Season Number", 51=> "Episode Number", 52=> "TV Season ID",  56=> "System Configuration"
+);									
 			//dynamic array to deal with changes to attribute types
 			
 $query = "SELECT PK_AttributeType, Description from AttributeType";
@@ -213,12 +237,6 @@ $query = "SELECT PK_AttributeType, Description from AttributeType";
 $result = mysql_query($query);
 
 
-while ($row=mysql_fetch_array($result)) {
-	if(!array_search("TV Season ID", $attribute_type_array)){
-		$attribute_type_array[$row['PK_AttributeType']]=$row['Description'];
-	}
-	
-}
 	/*marshalling up relevant data */
 	$movieId+=$_POST['movie_id'];	
 	$movie = $tmdb->getMovie($movieId, $GLOBALS['lang']);	
@@ -392,10 +410,20 @@ function insertAttribute($attribute, $attributeType, $hasImage, $imagePath, $med
 	 $test = $chk['FK_Attribute'];
 	// echo "test::".$test."<br>";
 	// echo $attrib;
+
 	if ($test !== $attrib)
 	{
+		$idQuery2="";
+		switch ($attributeType) {
+			case '13':
+			$idQuery2.="UPDATE  File_Attribute  VALUES (\"$fileID\", \"$attrib\", 0, 0, NULL, NULL, NULL, 0, CURTIME(), NULL  )";
+				break;
+			
+			default:
+				$idQuery2.="INSERT INTO File_Attribute  VALUES (\"$fileID\", \"$attrib\", 0, 0, NULL, NULL, NULL, 0, CURTIME(), NULL  )";
+				break;
+		}
   
-	$idQuery2="INSERT INTO File_Attribute  VALUES (\"$fileID\", \"$attrib\", 0, 0, NULL, NULL, NULL, 0, CURTIME(), NULL  )";
 	mysql_query($idQuery2)  or die (mysql_error());
 	if($hasImage=="true"){
 				$imgResponse=saveAttributeImage($test, $attributeType,  $imagePath);
