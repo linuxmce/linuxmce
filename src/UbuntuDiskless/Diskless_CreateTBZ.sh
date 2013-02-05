@@ -394,11 +394,11 @@ LC_ALL=C chroot "$TEMP_DIR" apt-get -f -y install locales
 # FIXME: need to add raspbian kernel headers
 if [[ "$TARGET_DISTRO" = "ubuntu" ]]; then
 	#Install headers and run depmod for the seamless integraiton function, ensure no errors exist
-	LC_ALL=C chroot $TEMP_DIR apt-get -y install linux-headers-generic
+	LC_ALL=C chroot "$TEMP_DIR" apt-get -y install linux-headers-generic
 	VerifyExitCode "Install linux headers package failed"
-	#HOST_KVER=`ls $TEMP_DIR/lib/modules/ --sort time|head -1`
-	LC_ALL=C chroot $TEMP_DIR depmod -v $HOST_KVER
-	VerifyExitCode "depmod failed - ensure you run an apt-get dist-upgrade on your core before running again"
+	TARGET_KVER=$(find /lib/modules * -maxdepth 1 -prune -type d -exec basename {} \; | sort -u | head -1) 
+	LC_ALL=C chroot "$TEMP_DIR" depmod -v "$TARGET_KVER" 
+	VerifyExitCode "depmod failed for $TARGET_KVER" 
 
 	StatsMessage "Installing kernel"
 	LC_ALL=C chroot "$TEMP_DIR" apt-get -f -y --no-install-recommends install linux-image-generic
