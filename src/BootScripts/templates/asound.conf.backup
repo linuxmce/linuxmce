@@ -36,9 +36,14 @@ pcm.analog_8 {
 	ttable.5.7 0.5
 }
 
-pcm.%CONNECT_TYPE% {
-	slave.pcm "%SOUND_OUT%%MAIN_CARD%"
-	slave.rate 48000
+pcm_slave.%CONNECT_TYPE%_convert48k {
+	pcm "%SOUND_OUT%%MAIN_CARD%"
+	rate 48000
+}
+
+pcm.%CONNECT_TYPE%_playback {
+	type plug
+	slave %CONNECT_TYPE%_convert48k
 }
 
 pcm.!default {
