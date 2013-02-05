@@ -1226,10 +1226,7 @@ while ($row=mysql_fetch_array($result)) {
 	
 }
  	
-$row=mysql_fetch_array($result);
-for ($i = 0; $i < count($row); $i++) {
-	$attributeType[$row['PK_AttributeType']]=$row['Description'];
-}
+
 
 /*!
  * \note Temporary work around to fix broken db issue. 
