@@ -70,6 +70,7 @@ public:
 //<-dceag-const-e->
 		virtual void CreateChildren();
 		int Gamepad_Capture(int deviceID);
+		bool IsJoystick(string sGamePadDevice);
 		void FindGamePads();
 		bool ParseJSEvent(int fd, struct js_event js);
 		virtual void SendIR(string Port, string IRCode, int iRepeat); // Required from IRBase

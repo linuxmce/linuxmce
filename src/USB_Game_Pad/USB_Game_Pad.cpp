@@ -256,6 +256,20 @@ void USB_Game_Pad::SendIR(string Port, string sIRCode, int iRepeat)
   // not used, but must be implemented.
 }
 
+bool USB_Game_Pad::IsJoystick(string sGamePadDevice)
+{
+  string sOutput, sStdErr;
+  char csGamePadDevice[100];
+  strcpy(csGamePadDevice,sGamePadDevice.c_str());
+  char * const args[] = {"/sbin/udevadm","info","--query","property","--name",csGamePadDevice,NULL};
+  if ( ProcessUtils::GetCommandOutput(args[0], args, sOutput, sStdErr) == 0)
+    {
+      if ( sOutput.find("ID_INPUT_JOYSTICK=1") != string::npos)
+        return true;
+    }
+  return false;
+}
+
 void USB_Game_Pad::FindGamePads()
 {
 
@@ -266,7 +280,7 @@ void USB_Game_Pad::FindGamePads()
   if (stat("/dev/input/js0", &buf) != -1 && S_ISCHR(buf.st_mode))
     {
       // Joystick inode exists, let's see if we need to open it...
-      if (m_iJoy1fd < 0)
+      if (m_iJoy1fd < 0 && IsJoystick("/dev/input/js0"))
 	{
 	  // not opened. open the joystick device.
 	  m_iJoy1fd = open("/dev/input/js0",O_RDONLY | O_NONBLOCK);
@@ -303,7 +317,7 @@ void USB_Game_Pad::FindGamePads()
   if (stat("/dev/input/js1", &buf) != -1 && S_ISCHR(buf.st_mode))
     {
       // Joystick inode exists, let's see if we need to open it...
-      if (m_iJoy2fd < 0)
+      if (m_iJoy2fd < 0 && IsJoystick("/dev/input/js1"))
 	{
 	  // not opened. open the joystick device.
 	  m_iJoy2fd = open("/dev/input/js1",O_RDONLY | O_NONBLOCK);
@@ -340,7 +354,7 @@ void USB_Game_Pad::FindGamePads()
   if (stat("/dev/input/js2", &buf) != -1 && S_ISCHR(buf.st_mode))
     {
       // Joystick inode exists, let's see if we need to open it...
-      if (m_iJoy3fd < 0)
+      if (m_iJoy3fd < 0 && IsJoystick("/dev/input/js2"))
 	{
 	  // not opened. open the joystick device.
 	  m_iJoy1fd = open("/dev/input/js2",O_RDONLY | O_NONBLOCK);
@@ -377,7 +391,7 @@ void USB_Game_Pad::FindGamePads()
   if (stat("/dev/input/js3", &buf) != -1 && S_ISCHR(buf.st_mode))
     {
       // Joystick inode exists, let's see if we need to open it...
-      if (m_iJoy4fd < 0)
+      if (m_iJoy4fd < 0 && IsJoystick("/dev/input/js3"))
 	{
 	  // not opened. open the joystick device.
 	  m_iJoy1fd = open("/dev/input/js3",O_RDONLY | O_NONBLOCK);
