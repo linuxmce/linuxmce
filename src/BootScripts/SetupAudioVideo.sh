@@ -274,7 +274,7 @@ Setup_XineConf()
 		XineConf="$XineConf_Override"
 	fi
 
-	if [[ "$AlternateSC" -ne "2" ]]; then
+	if [[ "$AlternateSC" -ne "1" ]]; then
 		case "$AudioSetting" in
 			*[COH]*)
 				XineConfSet audio.device.alsa_front_device "$PlaybackCard" "$XineConf"
