@@ -11,7 +11,7 @@
 #                    It starts a couple of needed services and daemons, loads X (if running with AutoStartMedia)
 #                    and executes LMCE_Launch_Manager to start devices and taking care of the rest.
 ### END INIT INFO #
-if [ "$1" == "status" ]; then
+if [[ "$1" == "status" ]; then
 	if pidof DCERouter &>/dev/null ; then
 		echo "* DCERouter is running"
 	fi
@@ -29,7 +29,7 @@ StartService() {
 	ServiceBkg=$3
 
 	if [[ -x $(echo $ServiceCmd | cut -d ' ' -f1) ]] ;then
-                if [ -x /bin/plymouth ]; then
+                if [[ -x /bin/plymouth ]; then
                         /bin/plymouth update --status="$ServiceDescription ... " || :
                 fi
 		echo -n "$ServiceDescription ... "
@@ -56,7 +56,7 @@ StartDaemon() {
 	ServiceScreen=$3
 
 	if [[ -x $(echo $ServiceCmd | cut -d ' ' -f1) ]] ;then
-                if [ -x /bin/plymouth ]; then
+                if [[ -x /bin/plymouth ]; then
                         /bin/plymouth update --status="$ServiceDescription ... " || :
                 fi
 		echo -n "$ServiceDescription ... "
@@ -76,7 +76,7 @@ StartDaemon() {
 function assureXorgSane()
 {
 	xorgLines=$(cat ${XOrgConf} | wc -l)
-	if [ $xorgLines -le 15 ] ;then
+	if [[ $xorgLines -le 15 ]] ;then
 		Logging "$TYPE" "$SEVERITY_NORMAL" "$0" "${XOrgConf} has only $xorgLines lines, rebuilding"
 		EVICETEMPLATE_OnScreen_Orbiter=62
 		DEVICETEMPLATE_OrbiterPlugin=12
@@ -106,7 +106,7 @@ function assureXorgSane()
 	fi
 }
 
-if [ -x /bin/plymouth ]; then
+if [[ -x /bin/plymouth ]; then
         /bin/plymouth message --text="Starting up LinuxMCE..." || :
 fi
 
@@ -119,7 +119,7 @@ mkdir -p /usr/pluto/locks                # clean up locks
 rm -f /usr/pluto/locks/*                 # clean up locks
 rm -f /var/run/plutoX*.pid		 # clean up x11 locks
 rm -f /mnt/optical/*.checksum
-if [ -f /etc/logrotate.d/linuxmce ]; then 
+if [[ -f /etc/logrotate.d/linuxmce ]; then 
         rm -f /etc/logrotate.d/pluto*     # make sure there are not leftover logrotate configuration files 
 fi 
 rm -f /etc/rc{0,6}.d/S*{umountnfs.sh,portmap,networking}
@@ -150,7 +150,7 @@ ConfEval
 StartService "Starting HAL daemon" "/usr/sbin/hald --daemon=yes --use-syslog"
 
 # Start core services
-if [ "$AutostartCore" -eq "1" ] ; then
+if [[ "$AutostartCore" -eq "1" ]] ; then
 	StartService "Starting MySQL Server" "service mysql start"
 
 	if [[ -f /usr/pluto/bin/SQL_Ops.sh  && -f /usr/pluto/bin/Config_Ops.sh ]] ;then
@@ -174,7 +174,7 @@ if [ "$AutostartCore" -eq "1" ] ; then
 	StartDaemon  "Start Voicemail Monitor" "/usr/pluto/bin/VoiceMailMonitor.sh" "VoiceMailMonitor"
          
 fi
-if [ "$AutostartMedia" -eq "1" ] ; then
+if [[ "$AutostartMedia" -eq "1" ]] ; then
         # Load MD modules early in case they are needed for something to work later on
         StartService "Loading Kernel Modules" "/usr/pluto/bin/LoadMDModules.sh"
 fi
@@ -209,7 +209,7 @@ export DISPLAY=":${Display}"
 # local devices to start
 # TODO: remove this when correct locking will be implemented
 rm -f /usr/pluto/locks/pluto_spawned_local_devices.txt
-if [ "$AutostartMedia" -eq "1" ] ; then
+if [[ "$AutostartMedia" -eq "1" ]] ; then
 	# Only start X if we want to autostart the media.
 	if [[ "$Display" == "" ]] ;then
 		if [[ "$DISPLAY" == "" ]] ;then
@@ -218,17 +218,15 @@ if [ "$AutostartMedia" -eq "1" ] ; then
 	else
 		export DISPLAY=":${Display}"
 	fi
-	if [ -r /var/run/plutoX${Display}.pid ]
+	if [[ -r /var/run/plutoX${Display}.pid ]
 	then
 		XPID=$(</var/run/plutoX${Display}.pid)
 	else
 		XPID=""
 	fi
 
-	if [ -z "$XPID" -o ! -d /proc/"$XPID" ]
+	if [[ -z "$XPID" -o ! -d /proc/"$XPID" ]
 	then
-		/usr/pluto/bin/SetupAudioVideo.sh
-
 		AlphaBlending=$(AlphaBlendingEnabled)
 
 		#XClient=/usr/pluto/bin/Start_IceWM.sh
@@ -297,15 +295,16 @@ if VDRInstalled ; then
 	cd $VIDEO_DIR
 	if ! pidof vdr ; then
 		# If we are running on the cure, we need to restart VDR after mounting the relevant devices
-		if [ "$AutostartCore" -eq "1" ] ; then
+		if [[ "$AutostartCore" -eq "1" ]] ; then
 			service vdr restart
 		fi
 	fi
 fi
 StartDaemon  "Starting LinuxMCE Launch Manager" "/usr/pluto/bin/LaunchManagerDaemon.sh" "LMCE_Launch_Manager"
-if [ -x /bin/plymouth ]; then 
+if [[ -x /bin/plymouth ]; then 
         /bin/plymouth --hide-splash || :
 fi
 
+/usr/pluto/bin/SetupAudioVideo.sh
 exit 0
 

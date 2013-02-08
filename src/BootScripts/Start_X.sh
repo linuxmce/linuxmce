@@ -41,8 +41,6 @@ function assureXorgSane()
 	fi
 }
 
-/usr/pluto/bin/SetupAudioVideo.sh
-
 AlphaBlending=$(AlphaBlendingEnabled)
 
 #XClient=/usr/pluto/bin/Start_IceWM.sh
@@ -99,3 +97,4 @@ else
 	Logging "$TYPE" "$SEVERITY_NORMAL" "$0" "X server: foreground"
 	"${Xcmd[@]}"
 fi
+/usr/pluto/bin/SetupAudioVideo.sh
