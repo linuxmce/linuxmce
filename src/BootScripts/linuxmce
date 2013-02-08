@@ -11,7 +11,7 @@
 #                    It starts a couple of needed services and daemons, loads X (if running with AutoStartMedia)
 #                    and executes LMCE_Launch_Manager to start devices and taking care of the rest.
 ### END INIT INFO #
-if [[ "$1" == "status" ]; then
+if [[ "$1" == "status" ]]; then
 	if pidof DCERouter &>/dev/null ; then
 		echo "* DCERouter is running"
 	fi
@@ -29,7 +29,7 @@ StartService() {
 	ServiceBkg=$3
 
 	if [[ -x $(echo $ServiceCmd | cut -d ' ' -f1) ]] ;then
-                if [[ -x /bin/plymouth ]; then
+                if [[ -x /bin/plymouth ]]; then
                         /bin/plymouth update --status="$ServiceDescription ... " || :
                 fi
 		echo -n "$ServiceDescription ... "
@@ -56,7 +56,7 @@ StartDaemon() {
 	ServiceScreen=$3
 
 	if [[ -x $(echo $ServiceCmd | cut -d ' ' -f1) ]] ;then
-                if [[ -x /bin/plymouth ]; then
+                if [[ -x /bin/plymouth ]]; then
                         /bin/plymouth update --status="$ServiceDescription ... " || :
                 fi
 		echo -n "$ServiceDescription ... "
@@ -106,7 +106,7 @@ function assureXorgSane()
 	fi
 }
 
-if [[ -x /bin/plymouth ]; then
+if [[ -x /bin/plymouth ]]; then
         /bin/plymouth message --text="Starting up LinuxMCE..." || :
 fi
 
@@ -119,7 +119,7 @@ mkdir -p /usr/pluto/locks                # clean up locks
 rm -f /usr/pluto/locks/*                 # clean up locks
 rm -f /var/run/plutoX*.pid		 # clean up x11 locks
 rm -f /mnt/optical/*.checksum
-if [[ -f /etc/logrotate.d/linuxmce ]; then 
+if [[ -f /etc/logrotate.d/linuxmce ]]; then 
         rm -f /etc/logrotate.d/pluto*     # make sure there are not leftover logrotate configuration files 
 fi 
 rm -f /etc/rc{0,6}.d/S*{umountnfs.sh,portmap,networking}
@@ -218,15 +218,13 @@ if [[ "$AutostartMedia" -eq "1" ]] ; then
 	else
 		export DISPLAY=":${Display}"
 	fi
-	if [[ -r /var/run/plutoX${Display}.pid ]
-	then
+	if [[ -r /var/run/plutoX${Display}.pid ]]; then
 		XPID=$(</var/run/plutoX${Display}.pid)
 	else
 		XPID=""
 	fi
 
-	if [[ -z "$XPID" -o ! -d /proc/"$XPID" ]
-	then
+	if [ -z "$XPID" -o ! -d /proc/"$XPID" ]; then
 		AlphaBlending=$(AlphaBlendingEnabled)
 
 		#XClient=/usr/pluto/bin/Start_IceWM.sh
@@ -301,7 +299,7 @@ if VDRInstalled ; then
 	fi
 fi
 StartDaemon  "Starting LinuxMCE Launch Manager" "/usr/pluto/bin/LaunchManagerDaemon.sh" "LMCE_Launch_Manager"
-if [[ -x /bin/plymouth ]; then 
+if [[ -x /bin/plymouth ]]; then 
         /bin/plymouth --hide-splash || :
 fi
 
