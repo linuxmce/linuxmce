@@ -1,0 +1,23 @@
+Source: sdl-ttf2.0
+Section: libs
+Priority: optional
+Maintainer: Jerome Marant <jerome@debian.org>
+Uploaders: Sam Hocevar (Debian packages) <sam+deb@zoy.org>
+Standards-Version: 3.6.1
+Build-Depends: debhelper (>> 4.0.0), libsdl1.2-dev (>= 1.2.4), libfreetype6-dev, dpatch (>= 1.23)
+
+Package: libsdl-ttf2.0-0
+Architecture: any
+Depends: ${shlibs:Depends}
+Description: ttf library for Simple DirectMedia Layer with FreeType 2 support
+ SDL_ttf is a sample TrueType font library. It allows you to use
+ TrueType fonts in SDL applications.
+
+Package: libsdl-ttf2.0-dev
+Section: libdevel
+Architecture: any
+Depends: libsdl-ttf2.0-0 (= ${Source-Version}), libc6-dev, libsdl1.2-dev (>= 1.2.4), libfreetype6-dev
+Conflicts: libsdl-ttf1.2-dev
+Description: development files for SDL ttf library (version 2.0)
+ SDL_ttf is a sample TrueType font library. It allows you to use
+ TrueType fonts in SDL applications.

@@ -1,0 +1,31 @@
+#!/bin/sh /usr/share/dpatch/dpatch-run
+
+## fix-transparent patch - _Frank_ @ vdrportal.de
+## (http://vdrportal.de/board/thread.php?postid=314529#post314529)
+##
+## All lines beginning with `## DP:' are a description of the patch.
+## DP: Fixes the transparent background.
+
+@DPATCH@
+--- skinelchi-0.0.1j/setup.h
++++ skinelchi-0.0.1j/setup.h
+@@ -113,7 +113,7 @@
+ THEME_CLR(Theme, clrReplayProgressCurrent,  0xCCCC1111);// 66
+ THEME_CLR(Theme, clrReplaySymbolOn,         clrYellow); // 67
+ THEME_CLR(Theme, clrReplaySymbolOff,        0x77777777);// 68
+-THEME_CLR(Theme, Transparent,	    	    0x01000000);// 69
++THEME_CLR(Theme, Transparent,	    	    0x00000000);// 69
+ THEME_CLR(Theme, changing,	    	    0x00000000);// 70
+ 
+ class cSkinElchiSetupPage : public cMenuSetupPage {
+--- skinelchi-0.0.1j/skinelchi.c
++++ skinelchi-0.0.1j/skinelchi.c
+@@ -187,7 +187,7 @@
+     Theme.AddColor("clrReplayProgressCurrent",  0xCCCC1111);// 66
+     Theme.AddColor("clrReplaySymbolOn",     	clrYellow); // 67
+     Theme.AddColor("clrReplaySymbolOff",    	0x77777777);// 68
+-    Theme.AddColor("Transparent",	    	0x01000000);// 69
++    Theme.AddColor("Transparent",	    	0x00000000);// 69
+     Theme.AddColor("changing",	    	    	0x00000000);// 70
+ 
+   char *filename;

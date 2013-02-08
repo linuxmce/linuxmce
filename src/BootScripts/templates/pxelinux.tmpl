@@ -1,4 +1,5 @@
 DEFAULT Pluto
 LABEL Pluto
 	KERNEL %MOON_ID%/vmlinuz-%KERNEL_VERSION%
-	APPEND initrd=%MOON_ID%/initrd.img-%KERNEL_VERSION% ramdisk_size=10240 rw boot=nfs nfsroot=%CORE_INTERNAL_ADDRESS%:/usr/pluto/diskless/%MOON_ID% %MOON_BOOTPARAMS% %ENABLE_SPLASH% nfsopts=intr,udp,rsize=32768,wsize=32768,retrans=10,timeo=50 quiet apicpmtimer
+	APPEND initrd=%MOON_ID%/initrd.img-%KERNEL_VERSION% ramdisk_size=10240 rw boot=nfs nfsroot=%CORE_INTERNAL_ADDRESS%:/usr/pluto/diskless/%MOON_ID% %MOON_BOOTPARAMS% %ENABLE_SPLASH% nfsopts=intr,udp,rsize=32768,wsize=32768,retrans=10,timeo=50 quiet apicpmtimer nouveau.blacklist=true
+

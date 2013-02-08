@@ -1,0 +1,185 @@
+Introduction
+
+   Welcome to the graphical world of Linux!
+
+   This is the home of the graphical boot process for the linux kernel
+   although it is not yet a part of the official kernel. It is, however
+   included in several major distributions. If your favorite linux
+   distribution isn't listed in the bottom left corner send them an email
+   requesting it to be included!
+
+   Features:
+     * Nice graphics (JPEG)
+     * Antialiased text rendering (TrueType)
+     * Animations (MNG)
+     * Progress Bar
+     * Display / Hiding of boot messages
+     * Fully themeable
+
+   This information, plus a lot more, themes, updates, and so on can be
+   found at http://www.bootsplash.org/
+
+   Project Maintainer: Stefan Reinauer <stepan@bootplash.org>
+   Graphical consultant: Kenneth Wesley Wimer II <kwwii@bootplash.org>
+
+   User space stuff
+    1. When you have a kernel with bootsplash capability (see [10]Kernel
+       stuff) you can use the bootsplash and control it's behaviour with
+       a set of userspace utilities:
+          + "splash" is used to attach a picture to an initrd or change
+            the picture while the system is running. splash can also be
+            used to trigger command execution when a specified runlevel
+            script is reached. This can for example be used to show
+            animations during bootup. Download it at
+            ftp://ftp.suse.com/pub/people/stepan/bootsplash/rpm-sourc
+            es/bootsplash/splashutils.tar.bz2
+          + "fbresolution", written by Florent Villard
+            (warly@mandrakesoft.com) shows the currently used resolution.
+          + "fbmngplay" is a utility to display mng animations on the
+            framebuffer console using libmng. fbmngplay is official part
+            of libmng. Download the latest version from
+            ftp://ftp.suse.com/pub/people/stepan/bootsplash/rpm-sources/bootsplash/fbmngplay-0.5a.tar.bz2
+          + "fbtruetype" is a utility to render text using a truetype
+            font to the framebuffer console. Download the latest version
+            from
+            ftp://ftp.suse.com/pub/people/stepan/bootsplash/rpm-sources/bootsplash/fbtruetype-0.2.tar.bz2
+            The kernel bootsplash can be configured using the
+            /proc/splash interface. To be able to use script triggered
+            startup actions such as moving a progress bar, you have to
+            patch your runlevel scripts to call the "splash.sh" script.
+    2. The "splash" utility. The splash utility is a multifunction tool
+       that allows you to: 
+          + attach pictures to an initrd.
+          + attach a jpg picture including the bootsplash config header
+            to an initrd with:
+            splash -s -f \
+            /etc/bootsplash/themes/current/config/bootsplash-1024x768.cfg
+            \ >> /boot/initrd
+            You can add several pictures like this, if you intend to boot
+            your machine with several resolutions.
+          + use a new picture on the fly
+          + show a new bootsplash graphics on the fly on the first
+            console by using
+            splash -s -u 0 \
+            /etc/bootsplash/themes/current/config/bootsplash-1024x768.cfg
+            any other console can be used by specifying -u [console
+            number] where the console number starts at 0 (i.e. by default
+            you have 0-5)
+          + trigger events during bootup
+            we suggest that you add a function to your init scripts that
+            is called every time an init script is started. This can
+            either be done in the runlevel scripts themselves or by the
+            script/program scheduling it (i.e. /etc/init.d/rc)
+
+   function rc_splash()
+   {
+   test "$SPLASH" != "no" && test "$_rc_splash" -eq 1 && /sbin/splash "$1"
+   progress=$(( $progress + 1 ))
+   }
+   when adding the rc_splash call to your runlevel script scheduler, do
+   it
+   about like this:
+   for i in $runrc/S${rex}*; do
+   [..]
+   # send information to bootsplash handler.
+   rc_splash "$i start"
+   [..]
+   done
+            the splash program will look for the file
+            /etc/bootsplash/themes/current/config/animations.cfg which
+            looks like the following:
+
+   [ .. ]
+   fsck start:bootanim start fsck.mng
+   fsck stop:bootanim stop
+   [ .. ]
+            so when %i is "fsck" and the runlevel script is executed
+            during system start, the bootanim start fsck.mng
+            Basically, it's a list of bootup hooks that are associated
+            with a command to be executed when a certain service is
+            started/stopped during boot/shutdown.
+            The syntax is this:
+            [service] [start|stop]:[command-to-execute]
+            "Service" is almost always the name of an executed init
+            script. There are some additional hooks for finetuning. See
+            the SuSE 8.1 theme's config file "animations.cfg"
+    3. The splash scripts
+          + The splash.sh wrapper script, which:
+            - paints a truetype rendered text during bootup and shutdown
+            at predefined coordinates
+            - moves a progress bar, if there is one, using the proc
+            interface.
+            - reads the config file
+            /etc/bootsplash/themes/current/config/bootsplash-[X]x[Y].cfg
+          + The bootanim wrapper script.
+            This script starts/stops animations played with fbmngplay. It
+            looks for these animations in
+            /etc/bootsplash/themes/current/animations/ per default. It
+            will likely be called from the file animations.cfg. When you
+            want to play an animation when apache is started, you would
+            write: apache start:bootanim start animation.mng To fade out
+            an animation, run 'bootanim stop'. Bootanim can also play
+            multiple animations in a row, each synchronized to a certain
+            point in bootup. This can be used to keep the last picture of
+            an animation visible after playing the animation. To achieve
+            this, use 'bootanim start' with option -m and multiple mng
+            files. To move on to the next animation, use 'bootanim next'
+            later on. Before playing the next animation (esp. at the same
+            position as before), you need to find a hook that can
+            properly stop the boot animation (esp. when playing looped
+            animations). It's also advised to have an entry in your
+            config file that stops running animations as soon as the
+            final system runlevel is reached: master:bootanim stop
+    4. Progress bar handling in the init scripts.
+       To have a progress bar during bootup you need the following
+          + A theme that contains a progress bar. Look in the Theme
+            section
+            for information on how to add a progress bar and for example
+            themes.
+          + The above function rc_splash (or comparable functionality)
+          + The splash.sh script (called from rc_splash as a wrapper to
+            the splash utility)
+            Additionally you need to make your runlevel script scheduler
+            (i.e. /etc/init.d/rc) aware of the number of scripts to be
+            executed in the current runlevel:
+
+   #
+   # initialize boosplash progressbar variables
+   #
+   runrc=/etc/init.d/rc${RUNLEVEL}.d
+   prerc=/etc/init.d/rc${PREVLEVEL}.d
+   SSC=($runrc/S*)
+   case "$SSC" in
+   *\*) sscripts=0 ;;
+   *) sscripts=${#SSC[*]}
+   esac
+   export sscripts
+   if test "$PREVLEVEL" != "N" ; then
+   KSC=($prerc/K*)
+   case "$KSC" in
+   *\*) kscripts=0 ;;
+   *) kscripts=${#KSC[*]}
+   esac
+   export kscripts
+   fi
+   if [ "$PREVLEVEL" == "N" -a "$RUNLEVEL" == "5" ]; then
+   export progress=16
+   sscripts=$(( $sscripts+15 ))
+   else
+   export progress=0
+   fi
+            To switch the bootsplash off when the final runlevel is
+            reached you can add the following to the runlevel script
+            scheduler at the according place:
+            rc_splash "master"
+            This will cause most themes to switch off the bootsplash
+            screen.
+
+    5. What distributions support this per default?
+       Currently only SuSE Linux (8.2+) supports all features of the
+       bootsplash v3. Please note that SuSE Linux 8.2 holds the themes in
+       /usr/share/splash/themes. It keeps a temporary copy of the
+       currently used config files in /etc/bootsplash to be used when
+       /usr is not available (i.e. on a different partition). 
+
+

@@ -1,5 +1,5 @@
 
-$Id: protocol-info.txt 1534 2007-01-26 04:31:33Z isely $
+$Id: protocol-info.txt 1651 2007-09-03 01:37:06Z isely $
 
 Mike Isely <isely@pobox.com>
 
@@ -79,7 +79,7 @@ Normally step #3 only takes 1 or maybe 2 polls.  However I've seen
 cases where the encoder apparently loses its mind and we poll here
 forever.  When this happens, it's possible to recover by reloading the
 encoder's firmware (yuck).  The current implementation of the pvrusb2
-attempts to implement this recovery.
+driver implements this recovery.
 
 Currently the pvrusb2 driver is setting a constant value for the
 "timeout" - which happens to match what the Windows driver mostly
@@ -169,18 +169,15 @@ each command, to the best of my knowledge:
   word.
 
 
-04 - Write 32 bit encoder(?) register
+04 - Write 32 bit encoder register
 
-  There must be some sort of 32 bit register file in this device, and
-  this command is how one sets those registers.  (Best I can tell,
-  these registers are not in the 8051 itself, because the
-  implementation is sequencing these commands using ports IOD, IOE,
-  and IOC).  The expected packet format is:
+  This commmand writes a single word of encoder memory.  The expected
+  packet format is:
 
     +00   : 04
     +01-04: <32 bit little-endian register value>
     +05   : XX
-    +06-07: <16 bit big-endian register ID>
+    +06-07: <16 bit big-endian target address>
 
   There is no return value.
 
@@ -192,7 +189,7 @@ each command, to the best of my knowledge:
 
     +00   : 05
     +01-05: XX
-    +06-07: <24 bit big-endian register ID>
+    +06-07: <16 bit big-endian target address>
 
   Expect 4 bytes in return, which will be the register value in
   little-endian form.

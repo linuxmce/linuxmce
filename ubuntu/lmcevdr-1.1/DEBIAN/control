@@ -1,0 +1,10 @@
+Package: lmcevdr
+Priority: extra
+Section: libs
+Maintainer: root <burkart@system5.net>
+Architecture: all
+Version: 1.1-10
+Depends: vdr (>= 1.6.0), vdr-plugin-xineliboutput (>= 1.0), vdr-plugin-control (>= 0.0.2a-36), libxine1-xvdr (>= 1.0), libxineliboutput-sxfe (>= 1.0), xineliboutput-sxfe (>= 1.0)
+Description: lmce vdr main package
+ installs VDR with all needed and patched packages for linuxmce
+ 2008 - Andre Burkart (burgiman) .

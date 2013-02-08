@@ -79,7 +79,7 @@ TInt CAsciiLineReader::ReadL(TPtrC8& aPtr, TInt& aFilePos)
 	aFilePos=iFilePos;
 	iFilePos+=lfPos;
 	
-	if ((iPtr.Length==0) && (iEof))
+	if ((iPtr.Length()==0) && (iEof))
 		{
 		iFile.Size(aFilePos);
 		return EFalse;	//last line had a LF

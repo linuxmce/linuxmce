@@ -194,6 +194,8 @@ case "$Param_Event" in
 
 			raidSize=$(mdadm --query $Param_Raid | head -1 |cut -d' ' -f2)
 			Raid_SetSize "$DeviceID" "$raidSize"
+
+			
 		fi
 	;;
 

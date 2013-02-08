@@ -1,0 +1,49 @@
+	how to make another device:
+
+let's say a camera that can be given position (int) in x and in y, start and stop recording.
+
+1) in knxDevice.h, be sure you have in the class knxDevice the command defined: you need to see  DEFINE_COMMAND( name+signature ) ; . don't forget to put () around signature if it has more than one arg
+so in the case of the camera you need to have:
+DEFINE_COMMAND( SetPosX(int) );
+DEFINE_COMMAND( SetPosY(int) );
+DEFINE_COMMAND( StartRecording() );
+DEFINE_COMMAND( StopRecording() );
+the names must be obvious but don't need to be the same as the DCE command, and the args the kind of wich the knx device is supposed to get
+
+then you must fill in EIB.cpp the ReceivedCommandForChild for DCE->knx command translation
+basically, you just have to create a case <DCEcommandtemplate>:ptel=devicefound->Command_<knxcommandname>(<way to translate the order>); break;
+yeah, it has to be improved. atm just try to understand the existing ones
+
+3) choose a way to create your group channel. the one i use is important writes | important reads | optionnal writes | optionnal reads , isnce reads are less importants than writes...
+the camera would be writeposX | writeposY | Writerecordingstate | returnposX | returnposY | returnrecordingstate
+pos being int, and recordingstate a shortuserdata(<64 vaues). however, typing has to be done according to knx specifications.. so to the physical device template.
+
+2) in knxDevice.h, create its class inheriting knxDevice
+you must place then DEVICEHEADER( <name> , <number of address to write to>, <list of address to write to> ) ; as first line. the list of address to write to is a char*, such as "\5\a" (here adresses to write to are the 6th and the 11th)
+then you have to fill the telegram it sends back according to the command it receives:
+the camera would be:
+	class Camera:public knxDevice
+	{
+		DEVICEHEADER( Camera , 3, "\0\1\3" ) ;
+		virtual Telegram *Command_SetPosX(int n){return createcharTelegramFromAddress(n,0);};//WritePosX is the first address: pos 0
+		virtual Telegram *Command_SetPosY(int n){return createcharTelegramFromAddress(n,1);};//WritePosY is the 2nd address: pos 1
+		virtual Telegram *Command_StartRecording(){return createsTelegramFromAddress(1,2);};//1 is on and Writerecordingstate address is 3rd
+		virtual Telegram *Command_StopRecording(){return createsTelegramFromAddress(0,2);};//0 is off and Writerecordingstate address is 3rd
+	};
+
+
+
+now you made a camera that can comanded by EIB. not by DCE though..
+3) go in knxDevice.cpp and look at fonction knxDevice *knxDevice::getKnxDevice(DeviceData_Impl *pDevData)
+add a case DEVICETEMPLATE_<DCE Device Name>_CONST:return new <Class Name>(pDevData);break;
+for camera it could be
+case DEVICETEMPLATE_Generic_Camera_CONST:return new Camera(pDevData);break;
+if the DCE name of the template was Generic_Camera
+now DCE can control it
+
+4) to make you device send back event:
+first you need to create the Event creator. that could be modified though.. later. take example on some already present, in knxDevice.h(inline functions..). really, that could(should?) be enhanced.
+
+5)then you need to create a
+Message *<Class Name>::handleTelegram(const Telegram *tl)
+which is supposed to send back a message. like above, look at examples. here you basically choose when to send wich event you created before.like above, that part still has to be enhanced

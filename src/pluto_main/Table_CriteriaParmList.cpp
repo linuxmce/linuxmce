@@ -34,14 +34,8 @@ using namespace std;
 #include "Table_ParameterType.h"
 
 #include "Table_CannedEvents_CriteriaParmList.h"
-#include "Table_CannedEvents_CriteriaParmList_pschist.h"
-#include "Table_CannedEvents_CriteriaParmList_pschmask.h"
 #include "Table_CriteriaList_CriteriaParmList.h"
-#include "Table_CriteriaList_CriteriaParmList_pschist.h"
-#include "Table_CriteriaList_CriteriaParmList_pschmask.h"
 #include "Table_CriteriaParm.h"
-#include "Table_CriteriaParm_pschist.h"
-#include "Table_CriteriaParm_pschmask.h"
 
 
 void Database_pluto_main::CreateTable_CriteriaParmList()
@@ -89,6 +83,7 @@ void Row_CriteriaParmList::Delete()
 	Row_CriteriaParmList *pRow = this; // Needed so we will have only 1 version of get_primary_fields_assign_from_row
 	
 	if (!is_deleted)
+	{
 		if (is_added)	
 		{	
 			vector<TableRow*>::iterator i;	
@@ -110,6 +105,7 @@ void Row_CriteriaParmList::Delete()
 			table->deleted_cachedRows[key] = this;
 			is_deleted = true;	
 		}	
+	}
 }
 
 void Row_CriteriaParmList::Reload()
@@ -145,10 +141,8 @@ void Row_CriteriaParmList::SetDefaultValues()
 is_null[0] = false;
 m_FK_ParameterType = 0;
 is_null[1] = false;
-m_Description = "";
-is_null[2] = false;
-m_Define = "";
-is_null[3] = false;
+is_null[2] = true;
+is_null[3] = true;
 is_null[4] = true;
 m_psc_id = 0;
 is_null[5] = true;
@@ -157,7 +151,8 @@ is_null[6] = true;
 m_psc_user = 0;
 m_psc_frozen = 0;
 is_null[7] = false;
-is_null[8] = true;
+m_psc_mod = "0000-00-00 00:00:00";
+is_null[8] = false;
 is_null[9] = true;
 m_psc_restrict = 0;
 
@@ -231,6 +226,12 @@ void Row_CriteriaParmList::psc_restrict_set(long int val){PLUTO_SAFETY_LOCK_ERRO
 m_psc_restrict = val; is_modified=true; is_null[9]=false;}
 
 		
+bool Row_CriteriaParmList::Description_isNull() {PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
+
+return is_null[2];}
+bool Row_CriteriaParmList::Define_isNull() {PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
+
+return is_null[3];}
 bool Row_CriteriaParmList::psc_id_isNull() {PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
 
 return is_null[4];}
@@ -243,14 +244,19 @@ return is_null[6];}
 bool Row_CriteriaParmList::psc_frozen_isNull() {PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
 
 return is_null[7];}
-bool Row_CriteriaParmList::psc_mod_isNull() {PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
-
-return is_null[8];}
 bool Row_CriteriaParmList::psc_restrict_isNull() {PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
 
 return is_null[9];}
 
 			
+void Row_CriteriaParmList::Description_setNull(bool val){PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
+is_null[2]=val;
+is_modified=true;
+}
+void Row_CriteriaParmList::Define_setNull(bool val){PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
+is_null[3]=val;
+is_modified=true;
+}
 void Row_CriteriaParmList::psc_id_setNull(bool val){PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
 is_null[4]=val;
 is_modified=true;
@@ -265,10 +271,6 @@ is_modified=true;
 }
 void Row_CriteriaParmList::psc_frozen_setNull(bool val){PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
 is_null[7]=val;
-is_modified=true;
-}
-void Row_CriteriaParmList::psc_mod_setNull(bool val){PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
-is_null[8]=val;
 is_modified=true;
 }
 void Row_CriteriaParmList::psc_restrict_setNull(bool val){PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
@@ -310,8 +312,8 @@ PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
 if (is_null[2])
 return "NULL";
 
-char *buf = new char[51];
-db_wrapper_real_escape_string(table->database->m_pDB, buf, m_Description.c_str(), (unsigned long) min((size_t)25,m_Description.size()));
+char *buf = new char[151];
+db_wrapper_real_escape_string(table->database->m_pDB, buf, m_Description.c_str(), (unsigned long) min((size_t)75,m_Description.size()));
 string s=string()+"\""+buf+"\"";
 delete[] buf;
 return s;
@@ -324,8 +326,8 @@ PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
 if (is_null[3])
 return "NULL";
 
-char *buf = new char[51];
-db_wrapper_real_escape_string(table->database->m_pDB, buf, m_Define.c_str(), (unsigned long) min((size_t)25,m_Define.size()));
+char *buf = new char[151];
+db_wrapper_real_escape_string(table->database->m_pDB, buf, m_Define.c_str(), (unsigned long) min((size_t)75,m_Define.size()));
 string s=string()+"\""+buf+"\"";
 delete[] buf;
 return s;
@@ -1011,20 +1013,6 @@ PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
 class Table_CannedEvents_CriteriaParmList *pTable = table->database->CannedEvents_CriteriaParmList_get();
 pTable->GetRows("`FK_CriteriaParmList`=" + StringUtils::itos(m_PK_CriteriaParmList),rows);
 }
-void Row_CriteriaParmList::CannedEvents_CriteriaParmList_pschist_FK_CriteriaParmList_getrows(vector <class Row_CannedEvents_CriteriaParmList_pschist*> *rows)
-{
-PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
-
-class Table_CannedEvents_CriteriaParmList_pschist *pTable = table->database->CannedEvents_CriteriaParmList_pschist_get();
-pTable->GetRows("`FK_CriteriaParmList`=" + StringUtils::itos(m_PK_CriteriaParmList),rows);
-}
-void Row_CriteriaParmList::CannedEvents_CriteriaParmList_pschmask_FK_CriteriaParmList_getrows(vector <class Row_CannedEvents_CriteriaParmList_pschmask*> *rows)
-{
-PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
-
-class Table_CannedEvents_CriteriaParmList_pschmask *pTable = table->database->CannedEvents_CriteriaParmList_pschmask_get();
-pTable->GetRows("`FK_CriteriaParmList`=" + StringUtils::itos(m_PK_CriteriaParmList),rows);
-}
 void Row_CriteriaParmList::CriteriaList_CriteriaParmList_FK_CriteriaParmList_getrows(vector <class Row_CriteriaList_CriteriaParmList*> *rows)
 {
 PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
@@ -1032,39 +1020,11 @@ PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
 class Table_CriteriaList_CriteriaParmList *pTable = table->database->CriteriaList_CriteriaParmList_get();
 pTable->GetRows("`FK_CriteriaParmList`=" + StringUtils::itos(m_PK_CriteriaParmList),rows);
 }
-void Row_CriteriaParmList::CriteriaList_CriteriaParmList_pschist_FK_CriteriaParmList_getrows(vector <class Row_CriteriaList_CriteriaParmList_pschist*> *rows)
-{
-PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
-
-class Table_CriteriaList_CriteriaParmList_pschist *pTable = table->database->CriteriaList_CriteriaParmList_pschist_get();
-pTable->GetRows("`FK_CriteriaParmList`=" + StringUtils::itos(m_PK_CriteriaParmList),rows);
-}
-void Row_CriteriaParmList::CriteriaList_CriteriaParmList_pschmask_FK_CriteriaParmList_getrows(vector <class Row_CriteriaList_CriteriaParmList_pschmask*> *rows)
-{
-PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
-
-class Table_CriteriaList_CriteriaParmList_pschmask *pTable = table->database->CriteriaList_CriteriaParmList_pschmask_get();
-pTable->GetRows("`FK_CriteriaParmList`=" + StringUtils::itos(m_PK_CriteriaParmList),rows);
-}
 void Row_CriteriaParmList::CriteriaParm_FK_CriteriaParmList_getrows(vector <class Row_CriteriaParm*> *rows)
 {
 PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
 
 class Table_CriteriaParm *pTable = table->database->CriteriaParm_get();
-pTable->GetRows("`FK_CriteriaParmList`=" + StringUtils::itos(m_PK_CriteriaParmList),rows);
-}
-void Row_CriteriaParmList::CriteriaParm_pschist_FK_CriteriaParmList_getrows(vector <class Row_CriteriaParm_pschist*> *rows)
-{
-PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
-
-class Table_CriteriaParm_pschist *pTable = table->database->CriteriaParm_pschist_get();
-pTable->GetRows("`FK_CriteriaParmList`=" + StringUtils::itos(m_PK_CriteriaParmList),rows);
-}
-void Row_CriteriaParmList::CriteriaParm_pschmask_FK_CriteriaParmList_getrows(vector <class Row_CriteriaParm_pschmask*> *rows)
-{
-PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
-
-class Table_CriteriaParm_pschmask *pTable = table->database->CriteriaParm_pschmask_get();
 pTable->GetRows("`FK_CriteriaParmList`=" + StringUtils::itos(m_PK_CriteriaParmList),rows);
 }
 

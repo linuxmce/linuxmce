@@ -1,0 +1,214 @@
+#!/bin/bash
+# generateRcScript.sh - Generates the pluto bootscript
+#
+# DESCRIPTION:
+#  This script will autogenerate the pluto rc scripts for a
+#  Pluto system.
+#
+# USAGE :
+#  generateRcScripts.sh [ComputerID]
+#
+# CHANGELOG:
+#   * Initial release
+#  -- Razvan Gavril <razvan.g@plutohome.com> Wed, 11 Jan 2006
+#
+
+#<-mkr_b_ubuntu_b->
+exit 0
+#<-mkr_b_ubuntu_e->
+
+. /usr/pluto/bin/Config_Ops.sh
+. /usr/pluto/bin/pluto.func
+. /usr/pluto/bin/SQL_Ops.sh
+
+DropRcScripts()
+{
+	local compRoot=$1 ; shift    
+	local symlinkFileS="$compRoot/etc/rc2.d/S22-*-Pluto_*"
+	local symlinkFileP0="$compRoot/etc/rc0.d/K10-*-Pluto_*"
+	local symlinkFileP6="$compRoot/etc/rc6.d/K10-*-Pluto_*"
+		
+	local initFiles="$compRoot/etc/init.d/Pluto_*"
+	
+	Logging "$TYPE" "$SEVERITY_NORMAL" "$0" "Droping all Pluto rc scripts from  '$compRoot'"
+	
+	rm -f $symlinkFilesS
+	rm -f $symlinkFilesP0
+	rm -f $symlinkFilesP6
+	rm -f $initFiles
+}
+
+CreateRcScript()
+{
+	local compRoot=$1 ; shift
+	local scriptWhen=$1 ; shift
+	local scriptName=$1 ; shift
+	#local scriptOrder=$1 ; shift
+	local scriptOrder=`printf "%03d" "$1"` ; shift
+	local scriptContent=$1 ; shift
+    
+	local symlinkFileS="$compRoot/etc/rc2.d/S22-$scriptOrder-Pluto_$scriptName"
+	local symlinkFileP0="$compRoot/etc/rc0.d/K10-$scriptOrder-Pluto_$scriptName"
+	local symlinkFileP6="$compRoot/etc/rc6.d/K10-$scriptOrder-Pluto_$scriptName"
+	local initFile="$compRoot/etc/init.d/Pluto_$scriptName"
+
+	Logging "$TYPE" "$SEVERITY_NORMAL" "$0" "Generating rc scripts for '$scriptName'"
+     
+	rm -f $initFile
+	touch $initFile
+	echo -e "$scriptContent" >>$initFile
+
+	chmod 755 $initFile
+	
+	if [[ "$scriptWhen" == "S" ]]; then
+		ln -s $initFile $symlinkFileS 2>/dev/null
+	else
+		ln -s $initFile $symlinkFileP0 2>/dev/null
+		ln -s $initFile $symlinkFileP6 2>/dev/null
+	fi
+}
+
+FindDevice()
+{
+	local PK_Device_Parent="${1//\'}" FK_DeviceTemplate="${2//\'}"
+
+	if [[ -z "$PK_Device_Parent" || -z "$FK_DeviceTemplate" ]]; then
+		echo ""
+		return 1
+	fi
+	
+	local i R Q
+	Q="SELECT PK_Device FROM Device WHERE FK_Device_ControlledVia='$PK_Device_Parent' AND FK_DeviceTemplate='$FK_DeviceTemplate'"
+	R="$(RunSQL "$Q")"
+
+	if [[ -z "$R" ]]; then
+		Q="SELECT PK_Device FROM Device WHERE FK_Device_ControlledVia='$PK_Device_Parent'"
+		R="$(RunSQL "$Q")"
+		for i in $R; do
+			FindDevice "$i" "$FK_DeviceTemplate" && return 0
+		done
+	else
+		echo "$R"
+		return 0
+	fi
+
+	return 1
+}
+
+FindComputerRoot()
+{
+    local PK_Device=$1 ; shift
+    local R Q line
+	Q="SELECT IPaddress, PK_DeviceCategory
+		FROM Device
+		JOIN DeviceTemplate ON FK_DeviceTemplate = PK_DeviceTemplate
+		JOIN DeviceCategory ON FK_DeviceCategory = PK_DeviceCategory
+		WHERE PK_Device = '$PK_Device'"
+	R="$(RunSQL "$Q")"
+
+	for line in $R ;do
+		compIP="$(Field 1 "$line")"
+		compType="$(Field 2 "$line")"
+	done
+    
+	if [[ $compType -eq 7 ]]; then
+		echo "/"
+		return 0
+	else
+		echo "/usr/pluto/diskless/$PK_Device"
+		return 0
+	fi
+	
+	return 1
+}																													
+
+if [[ -z "$1" ]]; then
+	Device="$PK_Device"
+	compRoot=/
+else
+	Device="$1"
+	compRoot="$(FindComputerRoot "$Device")"
+fi
+
+[[ ! -d "$compRoot" ]] && echo "Can not find directory "$compRoot"" && exit
+
+DropRcScripts $compRoot
+
+Q="SELECT Command,Enabled,Background,FK_DeviceTemplate,Parameter,Description, Boot_Order, StartupScript.When
+FROM Device_StartupScript
+JOIN StartupScript ON FK_StartupScript=PK_StartupScript
+WHERE FK_Device='$Device' AND (StartupScript.When='S' OR StartupScript.When='P')"
+
+result="$(RunSQL "$Q")"
+[[ -z "$result" ]] && echo "No boot scripts where configured for this device $Device for '$When'" && exit
+
+for line in $result; do
+    scriptCommand="$(Field 1 "$line")"
+    scriptEnabled="$(Field 2 "$line")"
+    scriptBackground="$(Field 3 "$line")"
+    FK_DeviceTemplate="$(Field 4 "$line")"
+    scriptParameter="$(Field 5 "$line")"
+    scriptDescription="$(Field 6 "$line")"
+    scriptOrder="$(Field 7 "$line")"
+    scriptWhen="$(Field 8 "$line")"
+    
+	if [[ "$scriptBackground" == 1 ]]; then
+		scriptBackground="screen -d -m -S \"BkgSS-$(basename "$scriptCommand")\""
+	else
+		scriptBackground=""
+	fi
+	
+	if [[ "$scriptEnabled" -eq 0 ]]; then
+		continue
+	fi
+	
+	if [[ "$FK_DeviceTemplate" != NULL ]]; then
+		FoundDevice="$(FindDevice "$PK_Device" "$FK_DeviceTemplate")"
+		if [[ -z "$FoundDevice" ]]; then
+			Logging "$TYPE" "$SEVERITY_NORMAL" "$0" "Skipping '$scriptCommand' (no corresponding device found)"
+			continue
+		fi
+	fi
+	
+	# FIXME: The search of the scripts should be relative to $compRoot
+	if [[ -e "/usr/pluto/bin/$scriptCommand" ]]; then
+		scriptCommand="/usr/pluto/bin/$scriptCommand"
+	elif [[ -e "$scriptCommand" ]]; then
+		scriptCommand="$(which $scriptCommand)"
+	else
+		Logging "$TYPE" "$SEVERITY_NORMAL" "$0"  " Command '$scriptCommand' not found"
+	fi
+	
+	scriptName=${scriptCommand##*/}
+	dirName=$(basename "$scriptCommand")
+	
+	scriptContent="#!/bin/bash
+# 
+# $scriptName
+#
+# DESCRIPTION:
+#  This file was automaticaly generated by lmce-admin.
+#  DO NOT MODIFY !
+# 
+# DATE:
+#   $(date -R)
+#
+
+export PATH=\"/usr/pluto/bin:\$PATH\"
+. /usr/pluto/bin/pluto.func
+
+if [[ -e /usr/pluto/install/.notdone ]]; then
+	Logging \"$TYPE\" \"$SEVERITY_NORMAL\" \"\$0\" \"Not running '$scriptName' because .notdone exists\"
+	exit 1
+fi
+
+Logging \"$TYPE\" \"$SEVERITY_NORMAL\" \"\$0\" \"Running '$scriptName' '$scriptParameter' ($scriptBackground \\\"$scriptCommand\\\" $scriptParameter)\"
+
+mkdir -p /home/screenlogs/\"$dirName\"
+pushd /home/screenlogs/\"$dirName\" &>/dev/null
+$scriptBackground \"$scriptCommand\" $scriptParameter
+popd &>/dev/null
+"  
+	CreateRcScript "$compRoot" "$scriptWhen" "$scriptName" "$scriptOrder" "$scriptContent"
+done
+exit 0

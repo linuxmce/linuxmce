@@ -114,7 +114,7 @@ public:
 	string DATA_Get_Alsa_Output_Device();
 
 			*****EVENT***** accessors inherited from base class
-	void EVENT_Device_Detected(string sMac_Address,string sText,string sIP_Address,int iPK_DeviceTemplate,string sVendorModelID,int iPK_CommMethod,int iPK_PnpProtocol,string sPNP_Serial_Number,string sDeviceData,string sCategory,string sSignature);
+	void EVENT_Device_Detected(string sMac_Address,string sText,string sIP_Address,int iPK_DeviceTemplate,string sVendorModelID,int iPK_CommMethod,int iPK_PnpProtocol,string sPNP_Serial_Number,string sDeviceData,string sCategory);
 
 			*****COMMANDS***** we need to implement
 	*/

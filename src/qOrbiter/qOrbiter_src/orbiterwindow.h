@@ -1,0 +1,183 @@
+#ifndef ORBITERWINDOW_H
+#define ORBITERWINDOW_H
+
+#include <QObject>
+#include <contextobjects/existingorbiter.h>
+#if (QT5)
+#include <QQmlEngine>
+#include <QQmlContext>
+#include <QtQuick/QQuickView>
+#else
+#include <QtDeclarative/QDeclarativeView>
+#include <QtDeclarative/QDeclarativeContext>
+
+#endif
+#include <QVariant>
+#include <qmlapplicationviewer.h>
+#if defined (GLENABLED) || (QT5)
+#include <QtOpenGL/QGLWidget>
+#include <shaders/filereader.h>
+#endif
+#include <QtNetwork/QNetworkReply>
+
+/*!
+ * \brief orbiterWindow - Responsible for the initial setup of the application window.
+
+ *\ingroup qt_controllers
+ *orbiterWindow is responsible for setting up the initial application window and states of the application. It also initializes opengl
+ *surfaces and other special windowing needs for each platform including setting up the QRC locations and relative skin location for the application.
+ *It provides a means in which the application can kickstart before its connected to the DCErouter to download its configuration. There are some
+ *hard defaults based on platform in this class to establish a usable baseline before the application takes on its 'running' form.
+ */
+class orbiterWindow : public QObject
+{
+    Q_OBJECT
+    Q_PROPERTY (QString message READ getMessage WRITE setMessage NOTIFY MessageChanged)
+    Q_PROPERTY (bool newOrbiter READ getOrbiterState WRITE setOrbiterState NOTIFY StatusChanged)
+    Q_PROPERTY (bool b_connectionPresent READ getConnectionState WRITE setConnectionState NOTIFY connectionChanged) /*! window.b_connectionPresent:True if router is located \ingroup startup_properties  */
+    Q_PROPERTY (bool b_devicePresent READ getdeviceState WRITE setDeviceState NOTIFY deviceChanged)/*! window.b_devicePresent : This changes when the device number does \warning use only on splash screen. \ingroup startup_properties */
+    Q_PROPERTY (bool b_localConfigReady READ getLocalConfigState WRITE setLocalConfigState NOTIFY configStatus ) /*! window.b_localConfigReady : True when the local xml file is read and is valid. \ingroup startup_properties */
+    Q_PROPERTY (bool b_orbiterConfigReady READ getOrbiterConfigState WRITE setOrbiterConfigState NOTIFY orbiterConfigStatus ) /*! window.b_orbiterConfigReady : The status of the remote configuration \ingroup startup_properties */
+    Q_PROPERTY (bool b_skinIndexReady READ getSkinIndexState WRITE setSkinIndexState NOTIFY skinIndexStatus )/*! window.b_skinIndexReady: The status of the skin loading \ingroup startup_properties  */
+    Q_PROPERTY (bool b_skinDataReady READ getSkinDataState WRITE setSkinDataState NOTIFY skinDataLoaded  ) /*! window.b_skinDataReady: True when skins are done being loaded \ingroup startup_properties */
+    Q_PROPERTY(bool b_reloadStatus READ getReloadStatus WRITE setReloadStatus NOTIFY reloadStatusChanged) /*! window.b_reloadStatus \ingroup startup_properties */
+    Q_PROPERTY (QString qmlPage READ getQmlPage WRITE setQmlPage NOTIFY pageChanged)/*! window.qmlPage \ingroup startup_properties */
+
+public:
+
+    /*!
+ * \brief orbiterWindow - Responsible for the initial setup of the application window.
+ * \param deviceid - Initial device id passed from command line or set by the default (-1)
+ * \param routerip - Initial router ip passed from command line or set by the default (192.168.80.1)
+ * \param fullScreen - Set true if you want the device to be set to full screen \warning desktop only
+ * \param frameless - set to true of no frame is desired.
+ * \param parent
+     */
+    explicit orbiterWindow(long deviceid, std::string routerip, bool fullScreen, bool frameless,  QObject *parent = 0);
+    //public members
+
+    QString message;
+    QmlApplicationViewer  mainView;
+
+    QString buildType;
+    QString qrcPath;
+    std::string router;
+    QList<ExistingOrbiter*> orbiterList;
+    QList<QObject*> userList;
+    QList<QObject*> roomList;
+#ifdef GLENABLED
+    QGLWidget *glWidget;
+    FileReader *fileReader;
+#endif
+
+    long deviceno;
+    bool newOrbiter;
+    bool b_connectionPresent;
+    bool b_devicePresent;
+    bool b_localConfigReady;
+    bool b_orbiterConfigReady;
+    bool b_skinIndexReady;
+    bool b_skinDataReady;
+    bool b_reloadStatus;
+    bool b_commandStatus;
+    QString qmlPage;
+    QString localPath;
+    bool phoneSize;
+
+public slots:
+
+
+    void setQmlPage(QString p) {qmlPage = p; emit pageChanged(); }
+    QString getQmlPage() {return qmlPage;}
+
+    Q_INVOKABLE void forceResponse (QString forced);
+    void loadSetupPage();
+
+    /*!
+     * \brief qmlSetupLmce - Initiates a connection and startup procedure
+     * \param device
+     * \param ip
+     *This function starts a connection to the router given the params. Depending on if the ip and or device are valid, the application
+     *will start or it will present other options.
+     */
+    void qmlSetupLmce(QString device, QString ip);
+
+    void setMessage(QString imsg);
+    QString getMessage();
+
+    void showSetup();
+    void setOrbiterState(bool state);
+    bool getOrbiterState();
+
+    void showSplash();
+
+    void setSkinDataState (bool b);
+    bool getSkinDataState () {return b_skinDataReady;}
+
+    void setSkinIndexState (bool b);
+    bool getSkinIndexState () {return b_skinIndexReady;}
+
+    void setOrbiterConfigState (bool b);
+    bool getOrbiterConfigState () {return b_orbiterConfigReady;}
+
+    void setLocalConfigState (bool b);
+    bool getLocalConfigState () {return b_localConfigReady;}
+
+    void setConnectionState (bool b) ;
+    bool getConnectionState () {return b_connectionPresent;}
+
+    void setDeviceState (bool b) ;
+    bool getdeviceState () {return b_devicePresent;}
+    /*!
+     * \brief prepareExistingOrbiters - This function exists to emit a signal to the router to request a list of ExistingOrbiters
+     */
+    void prepareExistingOrbiters();
+
+    /*!
+     * \brief displayPromptResponse - Populates prompt model with data
+     * \param type - the type of data
+     * \param pList
+     *Returns the last requested prompt data.
+     */
+    void displayPromptResponse(int type, QList<QObject *> pList);
+
+    /*!
+     * \brief setupNewOrbiter - Sets up a new orbiter given the params
+     * \param user
+     * \param room
+     * \param skin
+     * \param lang
+     * \param height
+     * \param w
+     *This function takes the set options from the NewOrbiter screen and passes them to the router connection for a new orbiter to be created
+     *After this is done, a regen occurs to generate to configurations
+     * \warning This function needs more testing and implementing it is not recommended at this time
+     */
+    void setupNewOrbiter(int user, int room, int skin, int lang, int height, int w);
+
+    bool getReloadStatus() {return b_reloadStatus;}
+    void setReloadStatus(bool b) {b_reloadStatus = b ; emit reloadStatusChanged();}
+
+signals:
+    void MessageChanged();
+    void setupLmce(QString device, QString routerIp);
+    void StatusChanged();
+    void connectionChanged();
+    void configStatus();
+    void orbiterConfigStatus();
+    void skinIndexStatus();
+    void skinDataLoaded();
+    void deviceChanged();
+    void orientationChanged(QSize);
+    void checkRes();
+    void showList();
+    void showExternal();
+    void setupNewOrbiter();
+    void reloadStatusChanged();
+    void newOrbiterData(int u, int r, int s, int l, int h, int w);
+    void pageChanged();
+};
+#endif
+
+
+

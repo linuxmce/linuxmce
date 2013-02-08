@@ -1,5 +1,9 @@
 
 PRJ_MMPFILES
-
+#ifdef EKA2 // S60 3rd Ed
+gnumakefile icons.mk
+PlutoMO_3rd.mmp
+#else
 PlutoMO.mmp
+#endif
 

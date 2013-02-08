@@ -11,7 +11,7 @@ fi
 
 FILLDB=/usr/bin/mythfilldatabase
 FILLDB_LOG=/var/log/mythtv/mythfilldatabase.log
-FILLDBINITRUN=/tmp/MythTvInitialFillDBRun
+FILLDBINITRUN=/home/mythtv/MythTvInitialFillDBRun
 
 # If the user installed a their own mythfilldatabase, adjust..
 if test -f /usr/local/bin/mythfilldatabase ; then
@@ -174,6 +174,7 @@ function WaitUntilMythTvInitialRunXMinutesOld {
 
 		# in case end time changed, redo if we waited more
 		# than a few seconds
+		TIMETOWAIT=$(echo $ENDTIME - $NOW | bc)
 		if [ $TIMETOWAIT -gt 5 ] ; then
 			WaitUntilMythTvInitialRunXMinutesOld $MINS
 		fi

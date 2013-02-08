@@ -1,0 +1,9 @@
+<-dceag-p-b->
+Package = DCE_Destination_Package
+Dir = 
+desc = DCE Implemenation for #2122 Picture Viewer
+Maintainer = AdministratorName
+Email = 
+Depend = DCE_Dependencies
+<-dceag-p-e->
+

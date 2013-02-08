@@ -15,6 +15,7 @@
 #define ROOMTYPE_Home_Theater_CONST 12
 #define ROOMTYPE_FoyerEntrance_CONST 13
 #define ROOMTYPE_Bathroom_CONST 14
+#define ROOMTYPE_Unmanaged_CONST 15
 
 #define ROOMTYPE_TABLE "RoomType"
 #define ROOMTYPE_PK_ROOMTYPE_FIELD "PK_RoomType"

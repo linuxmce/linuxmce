@@ -40,24 +40,35 @@
 #include <sstream>
 #include <sys/time.h>
 
+#ifndef DIRECTFB
 #include <X11/Xutil.h>
 #include <X11/Xproto.h>
 #include <X11/keysymdef.h>
 #include <X11/keysym.h>
 #include <X11/extensions/XTest.h>
 #include <X11/extensions/shape.h>
+#endif
 
 #include <SDL/SDL_syswm.h>
 
 #include "pluto_main/Define_Button.h"
 #include "pluto_main/Define_Screen.h"
+#ifndef DIRECTFB
 #include "PlutoUtils/PlutoButtonsToX.h"
+#endif
 #include "../ScreenHistory.h"
+
+#if !defined(DIRECTFB) && !defined(PADORBITER)
 #include "OSDScreenHandler.h"
+#endif
+
+#if !defined(PADORBITER) 
 #include "MouseBehavior_Linux.h"
+#endif
+
 #include "pluto_main/Define_DesignObjParameter.h"
 
-#if defined(VIA_OVERLAY) && defined(ORBITER_OPENGL)
+#if !defined(DIRECTFB) && defined(VIA_OVERLAY) && defined(ORBITER_OPENGL)
 #include "OpenGL/VIA/ViaOverlay.h"
 #endif
 
@@ -76,26 +87,30 @@ OrbiterLinux::OrbiterLinux(int DeviceID, int PK_DeviceTemplate,
         : Orbiter(DeviceID, PK_DeviceTemplate, ServerAddress, sLocalDirectory, bLocalMode,
                      nImageWidth, nImageHeight, NULL)
         , m_strWindowName("Orbiter")
-#ifndef MAEMO_NOKIA770		
+#if !defined(MAEMO_NOKIA770) && !defined(DIRECTFB)		
         , m_pRecordHandler(NULL)
 #endif	
         , m_nDesktopWidth(0)
         , m_nDesktopHeight(0)
         , m_nProgressWidth(0)
         , m_nProgressHeight(0)
-        , m_pProgressWnd(NULL)
+#ifndef DIRECTFB
         , m_pWaitGrid(NULL)
         , m_bButtonPressed_WaitGrid(false)
         , m_pWaitList(NULL)
         , m_bButtonPressed_WaitList(false)
         , m_pWaitUser(NULL)
-		, m_bMaskApplied(false)
+#endif
+	, m_bMaskApplied(false)
         , m_bOrbiterReady(false)
         , m_bIsExclusiveMode(false)
-        , m_pDisplay_SDL(NULL)
+#ifndef DIRECTFB
+	, m_pDisplay_SDL(NULL)
         , m_pWinListManager(NULL)
         , m_pX11(NULL)
+#endif
 {
+#ifndef DIRECTFB
     const char *pDisplayName = getenv("DISPLAY");
     if(NULL != pDisplayName)
         m_strDisplayName = pDisplayName;
@@ -108,6 +123,7 @@ OrbiterLinux::OrbiterLinux(int DeviceID, int PK_DeviceTemplate,
     m_nProgressWidth = 400;
     m_nProgressHeight = 200;
     m_pWinListManager = new WinListManager(m_strWindowName);
+#endif
 }
 
 void *HackThread(void *p)
@@ -126,23 +142,18 @@ OrbiterLinux::~OrbiterLinux()
     pthread_create(&hackthread, NULL, HackThread, (void*)this);
     pthread_detach(hackthread);
 
-
-    if (m_pProgressWnd)
-    {
-        m_pProgressWnd->Terminate();
-        delete m_pProgressWnd;
-    }
-
     KillMaintThread();
 
     Destroy();
-
+#ifndef DIRECTFB
     //re-activate repeated keys
     system("/usr/bin/X11/xset r");  
+#endif
 }
 
 void OrbiterLinux::HideOtherWindows()
 {
+#ifndef DIRECTFB
 	LoggerWrapper::GetInstance()->Write(LV_STATUS, "OrbiterLinux::HideOtherWindows: Hidding other windows...");
 
 	list<WinInfo> listWinInfo;
@@ -166,18 +177,23 @@ void OrbiterLinux::HideOtherWindows()
 			m_pWinListManager->HideWindow(sClassName);
 		}
 	}
+#endif
 }
 
 void OrbiterLinux::HideWindow(string sWindowName)
 {
+#ifndef DIRECTFB
 	LoggerWrapper::GetInstance()->Write(LV_STATUS, "OrbiterLinux::HideWindow %s", sWindowName.c_str());
 	m_pWinListManager->HideWindow(sWindowName);
+#endif
 }
 
 void OrbiterLinux::reinitGraphics()
 {
+#ifndef DIRECTFB
     LoggerWrapper::GetInstance()->Write(LV_STATUS, "OrbiterLinux::reinitGraphics()");
     m_pWinListManager->ShowSdlWindow(m_bIsExclusiveMode, m_bYieldInput);
+#endif
 }
 
 void OrbiterLinux::setWindowName(string strWindowName)
@@ -190,6 +206,7 @@ void OrbiterLinux::setDisplayName(string strDisplayName)
     m_strDisplayName = strDisplayName;
 }
 
+#ifndef DIRECTFB
 bool OrbiterLinux::X11_Init()
 {
     if ((m_pX11 != NULL) && m_pX11->IsInitialized())
@@ -219,10 +236,8 @@ bool OrbiterLinux::X11_Init()
     m_pX11->GetDisplaySize(m_nDesktopWidth, m_nDesktopHeight);
     // initialize other classes
     LoggerWrapper::GetInstance()->Write(LV_STATUS, "OrbiterLinux::X11_Init() : done");
-    
     return true;
 }
-
 bool OrbiterLinux::X11_Exit()
 {
 	LoggerWrapper::GetInstance()->Write(LV_STATUS, "OrbiterLinux::X11_Exit()");
@@ -262,9 +277,11 @@ Display * OrbiterLinux::GetDisplay_MainWindow()
 {
     return m_pDisplay_SDL;
 }
+#endif
 
 bool OrbiterLinux::RenderDesktop( class DesignObj_Orbiter *pObj, PlutoRectangle rectTotal, PlutoPoint point )
 {
+#ifndef DIRECTFB
     m_bOrbiterReady = true;
     m_bIsExclusiveMode = false;
 
@@ -325,10 +342,12 @@ bool OrbiterLinux::RenderDesktop( class DesignObj_Orbiter *pObj, PlutoRectangle 
     LoggerWrapper::GetInstance()->Write(LV_STATUS, "OrbiterLinux::RenderDesktop() : done");
 #endif
 	return true;
+#endif
 }
 
 /*virtual*/ void OrbiterLinux::ActivateExternalWindowAsync(void *)
 {
+#ifndef DIRECTFB
     string sWindowName = m_pWinListManager->GetExternApplicationName();
     PlutoRectangle rectTotal;
     m_pWinListManager->GetExternApplicationPosition(rectTotal);
@@ -358,6 +377,7 @@ bool OrbiterLinux::RenderDesktop( class DesignObj_Orbiter *pObj, PlutoRectangle 
     }
     else
         CallMaintenanceInMiliseconds( bIsWindowAvailable ? 1000 : 200, (OrbiterCallBack)&OrbiterLinux::ActivateExternalWindowAsync, NULL, pe_ALL );
+#endif
 }
 
 // public interface implementations below
@@ -369,13 +389,14 @@ void OrbiterLinux::Initialize(GraphicType Type, int iPK_Room, int iPK_EntertainA
 
     //we know here the ui version!
     LoggerWrapper::GetInstance()->Write(LV_STATUS, "Orbiter UI Version is %d", m_iUiVersion);
-
+#if !defined(DIRECTFB) && !defined(PADORBITER)
     if(UsesUIVersion2())
 	{
 		m_pMouseBehavior = new MouseBehavior_Linux(this);
 		m_pWinListManager->KeepSdlWindowActive(true);
 	}
-#ifndef MAEMO_NOKIA770	
+#endif
+#if !defined(MAEMO_NOKIA770) && !defined(DIRECTFB)	
     m_pRecordHandler = new XRecordExtensionHandler(this, m_strDisplayName);
     m_pRecordHandler->enableRecording(true);
 #endif
@@ -410,11 +431,13 @@ void OrbiterLinux::Initialize(GraphicType Type, int iPK_Room, int iPK_EntertainA
 		}
 	}
 
+#ifndef DIRECTFB
     //temporary workaround for xfwm window manager
     //this will set orbiter above when its window is created
     //then orbiter will set it to the right layer
     if(UsesUIVersion2() && NULL != m_pWinListManager && !m_pWinListManager->ResetOrbiterWindow())
 		OnQuit();    
+#endif
 
     LoggerWrapper::GetInstance()->Write(LV_STATUS, "OrbiterLinux::Initialize() : done");
 }
@@ -422,26 +445,38 @@ void OrbiterLinux::Initialize(GraphicType Type, int iPK_Room, int iPK_EntertainA
 void OrbiterLinux::Destroy()
 {
     LoggerWrapper::GetInstance()->Write(LV_STATUS, "OrbiterLinux::Destroy()");
-#ifndef MAEMO
+#if !defined(MAEMO) && !defined(DIRECTFB)
     delete m_pRecordHandler;
     m_pRecordHandler = NULL;
-#endif	
+#endif
+#if !defined(PADORBITER) && !defined(DIRECTFB)    
     if (m_pMouseBehavior)
     {
 	    LoggerWrapper::GetInstance()->Write(LV_STATUS, "OrbiterLinux::Destroy() killing mouse behavior");
         delete m_pMouseBehavior;
         m_pMouseBehavior = NULL;
     }
+#endif
+#ifndef DIRECTFB
 	LoggerWrapper::GetInstance()->Write(LV_STATUS, "OrbiterLinux::Destroy() calling X11 Exit");
     X11_Exit();
 	LoggerWrapper::GetInstance()->Write(LV_STATUS, "OrbiterLinux::Destroy() deleting Window manager");
     delete m_pWinListManager;
     m_pWinListManager = NULL;
+#endif
     LoggerWrapper::GetInstance()->Write(LV_STATUS, "OrbiterLinux::Destroy() : done");
 }
 
 void OrbiterLinux::CMD_Activate_PC_Desktop(bool bTrueFalse,string &sCMD_Result,Message *pMessage)
 {
+#ifdef MAEMO_NOKIA770
+#ifdef DEBUG
+	LoggerWrapper::GetInstance()->Write(LV_STATUS, "Orbiter::CMD_Activate_PC_Desktop - exit for Maemo Nokia");
+#endif
+
+	OnQuit();
+#else
+#ifndef DIRECTFB	
 	PLUTO_SAFETY_LOCK(sm, m_ScreenMutex);
 
 	static bool bInternalState_DesktopActivated = false;
@@ -484,10 +519,13 @@ void OrbiterLinux::CMD_Activate_PC_Desktop(bool bTrueFalse,string &sCMD_Result,M
 		//disable repeated keys
 		system("/usr/bin/X11/xset r off"); 
 	}
+#endif
+#endif	
 }
 
 void OrbiterLinux::CMD_Activate_Window(string sWindowName,string &sCMD_Result,Message *pMessage)
 {
+#ifndef DIRECTFB
 	m_sApplicationName = sWindowName;
 	LoggerWrapper::GetInstance()->Write(LV_STATUS, "OrbiterLinux::CMD_Activate_Window(%s)", sWindowName.c_str());
 	m_pWinListManager->SetExternApplicationName(sWindowName);
@@ -498,10 +536,12 @@ void OrbiterLinux::CMD_Activate_Window(string sWindowName,string &sCMD_Result,Me
 			m_pWinListManager->ShowWindow(sWindowName);
 		m_pWinListManager->ApplyContext(sWindowName);
 	}
+#endif
 }
 
 void OrbiterLinux::CMD_Simulate_Keypress(string sPK_Button,int iStreamID,string sName,string &sCMD_Result,Message *pMessage)
 {
+#ifndef DIRECTFB
 #ifdef DEBUG
     LoggerWrapper::GetInstance()->Write(LV_STATUS, "OrbiterLinux::CMD_Simulate_Keypress() : m_bYieldInput==%d", m_bYieldInput);
 #endif
@@ -524,21 +564,25 @@ void OrbiterLinux::CMD_Simulate_Keypress(string sPK_Button,int iStreamID,string 
         if( XKeySym.first )
             XTestFakeKeyEvent( dpy, XKeysymToKeycode(dpy, XK_Shift_L), False, 0 );
     }
+#endif
     Orbiter::CMD_Simulate_Keypress(sPK_Button,0,sName,sCMD_Result,pMessage);
 }
 
 void OrbiterLinux::CMD_Set_Mouse_Position_Relative(int iPosition_X,int iPosition_Y,string &sCMD_Result,Message *pMessage)
 {
+#ifndef DIRECTFB
     LoggerWrapper::GetInstance()->Write(LV_STATUS, "Moving mouse (relative %d,%d)", iPosition_X, iPosition_Y);
 
     int nAbsolute_X = 0, nAbsolute_Y = 0;
 
     m_pX11->Mouse_GetPosition(nAbsolute_X, nAbsolute_Y);
     m_pX11->Mouse_SetPosition(nAbsolute_X + iPosition_X, nAbsolute_Y + iPosition_Y);
+#endif
 }
 
 void OrbiterLinux::CMD_Simulate_Mouse_Click_At_Present_Pos(string sType,string &sCMD_Result,Message *pMessage)
 {
+#ifndef DIRECTFB
     LoggerWrapper::GetInstance()->Write(LV_STATUS, "Clicking mouse %s",sType.c_str());
 
     {
@@ -547,10 +591,12 @@ void OrbiterLinux::CMD_Simulate_Mouse_Click_At_Present_Pos(string sType,string &
         XTestFakeButtonEvent(pDisplay, 1, true, 0);
         XTestFakeButtonEvent(pDisplay, 1, false, 0);
     }
+#endif
 }
 
 void OrbiterLinux::CMD_Surrender_to_OS(string sOnOff,bool bFully_release_keyboard,bool bAlways, string &sCMD_Result, Message *pMessage)
 {
+#ifndef DIRECTFB
     // when xine is full-screen, on DVD menu
     // and navigation in the dvd-menu with keyboard is wanted
     // then
@@ -574,27 +620,35 @@ void OrbiterLinux::CMD_Surrender_to_OS(string sOnOff,bool bFully_release_keyboar
 	}
 
     LoggerWrapper::GetInstance()->Write(LV_STATUS, "OrbiterLinux::CMD_Surrender_to_OS(%s, %d) : done", sOnOff.c_str(), bFully_release_keyboard);
+#endif
 }
 
+#if !defined(DIRECTFB) && !defined(PADORBITER)
 /*virtual*/ ScreenHandler *OrbiterLinux::CreateScreenHandler()
 {
 	return new OSDScreenHandler(this, &m_mapDesignObj);
 }
+#endif
 
 void OrbiterLinux::X_LockDisplay()
 {
+#ifndef DIRECTFB
 	if(NULL != m_pX11)
 		m_pX11->Lock();
+#endif
 }
 
 void OrbiterLinux::X_UnlockDisplay()
 {
+#ifndef DIRECTFB
 	if(NULL != m_pX11)
 		m_pX11->Unlock();	
+#endif
 }
 
 void OrbiterLinux::GrabPointer(bool bEnable)
 {
+#ifndef DIRECTFB
 #ifndef MAEMO_NOKIA770
     LoggerWrapper::GetInstance()->Write(LV_STATUS, "OrbiterLinux::GrabPointer(%d)", bEnable);
     if (bEnable)
@@ -607,10 +661,12 @@ void OrbiterLinux::GrabPointer(bool bEnable)
     }
     LoggerWrapper::GetInstance()->Write(LV_STATUS, "OrbiterLinux::GrabPointer(%d) : done", bEnable);
 #endif
+#endif
 }
 
 void OrbiterLinux::GrabKeyboard(bool bEnable)
 {
+#ifndef DIRECTFB
 #ifndef MAEMO_NOKIA770
     LoggerWrapper::GetInstance()->Write(LV_STATUS, "OrbiterLinux::GrabKeyboard(%d)", bEnable);
     if (bEnable)
@@ -623,15 +679,19 @@ void OrbiterLinux::GrabKeyboard(bool bEnable)
     }
     LoggerWrapper::GetInstance()->Write(LV_STATUS, "OrbiterLinux::GrabKeyboard(%d) : done", bEnable);
 #endif
+#endif
 }
 
 bool OrbiterLinux::MaskApplied()
 {
+#ifndef DIRECTFB
 	return m_bMaskApplied;
+#endif
 }
 
 void OrbiterLinux::ResetAppliedMask()
 {
+#ifndef DIRECTFB
 	LoggerWrapper::GetInstance()->Write(LV_STATUS, "Reseting mask - xshape");
 
 	XRectangle rect = {0, 0, m_iImageWidth, m_iImageHeight};
@@ -645,10 +705,12 @@ void OrbiterLinux::ResetAppliedMask()
 		1, ShapeSet, Unsorted);
 	
 	m_bMaskApplied = false;
+#endif
 }
 
 void OrbiterLinux::ApplyMask(PlutoRectangle rectTotal, PlutoPoint point, MaskTypes mask_type)
 {
+#ifndef DIRECTFB
 	if(mask_type == mtShowPopupMask)
 	{
 		LoggerWrapper::GetInstance()->Write(LV_STATUS, "Applying xshape to show popup: rectangle %d,%d,%d,%d",
@@ -764,19 +826,23 @@ void OrbiterLinux::ApplyMask(PlutoRectangle rectTotal, PlutoPoint point, MaskTyp
 			rectTotal.Width, rectTotal.Height, 0x00);
 	}
 #endif
+#endif
 }
 
 bool OrbiterLinux::PreprocessEvent(Orbiter::Event &event)
 {
+#ifndef DIRECTFB
 	if( event.type != Orbiter::Event::BUTTON_DOWN && event.type != Orbiter::Event::BUTTON_UP )
 		return false;
 
 	event.data.button.m_iPK_Button = TranslateXKeyCodeToPlutoButton(event.data.button.m_iKeycode,event.type);
 	return false;
+#endif
 }
 
 int OrbiterLinux::TranslateXKeyCodeToPlutoButton(int Keycode,int Type)
 {
+#ifndef DIRECTFB
 	/* Type == BUTTON_DOWN or BUTTON_UP */
 
 	int iPK_Button=0;
@@ -979,10 +1045,12 @@ int OrbiterLinux::TranslateXKeyCodeToPlutoButton(int Keycode,int Type)
 #endif
 
 	return iPK_Button;
+#endif
 }
 
 void OrbiterLinux::StopActivateExternalWindowTask()
 {
+#ifndef DIRECTFB
 	PLUTO_SAFETY_LOCK( cm, m_MaintThreadMutex );
 	for(map<int,PendingCallBackInfo *>::iterator it=m_mapPendingCallbacks.begin();it!=m_mapPendingCallbacks.end();++it)
 	{
@@ -993,10 +1061,12 @@ void OrbiterLinux::StopActivateExternalWindowTask()
 			return;
 		}
 	}
+#endif
 }
 
 void OrbiterLinux::ConfirmPcDesktop()
 {
+#if !defined(PADORBITER) && !defined(DIRECTFB)
 #if defined(VIA_OVERLAY) && defined(ORBITER_OPENGL)
 	if(!ProcessUtils::SpawnDaemon("/usr/pluto/bin/Fiire_KDE.sh", "", true))
 		LoggerWrapper::GetInstance()->Write(LV_CRITICAL, "Failed to start KDE (with Fiire_KDE.sh)");
@@ -1004,14 +1074,6 @@ void OrbiterLinux::ConfirmPcDesktop()
 	if(!ProcessUtils::SpawnDaemon("/usr/pluto/bin/Start_KDE.sh", "", true))
 		LoggerWrapper::GetInstance()->Write(LV_CRITICAL, "Failed to start KDE");
 #endif
-}
-
-void OrbiterLinux::SetMonitorPowerState(bool bOn)
-{
-    LoggerWrapper::GetInstance()->Write(LV_STATUS, "OrbiterLinux::SetMonitorPowerState %d", (int) bOn);
-	if( bOn )
-		system("/usr/bin/X11/xset -display :0 dpms force on");
-	else
-		system("/usr/bin/X11/xset -display :0 dpms force off");
+#endif
 }
 

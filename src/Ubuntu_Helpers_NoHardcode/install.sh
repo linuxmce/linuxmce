@@ -4,6 +4,7 @@ set -e
 
 
 Distro="$(lsb_release -c -s)"
+Release="$(lsb_release -s -r)"
 Arch="$(apt-config dump | grep '^APT::Architecture' | sed  's/.* "\(.*\)";$/\1/g')"
 
 # Install default config files
@@ -15,16 +16,16 @@ echo "Creating symlink in /usr/local/lmce-build"
 rm -f "/usr/local/lmce-build"
 ln -s "$(pwd)" "/usr/local/lmce-build"
 
-echo "Configure APT preferences"
-echo '
-Package: *
-Pin: origin
-Pin-Priority: 9999
-
-Package: *
-Pin: release v='$(lsb_release -s -r)',o=Ubuntu,a='$(sb_release -c -s)',l=Ubuntu
-Pin-Priority: 9998
-' > /etc/apt/preferences
+#echo "Configure APT preferences"
+#echo '
+#Package: *
+#Pin: origin
+#Pin-Priority: 9999
+#
+#Package: *
+#Pin: release v='${Release}',o=Ubuntu,a='${Distro}',l=Ubuntu
+#Pin-Priority: 9998
+#' > /etc/apt/preferences
 
 # Generate ssh key for builder if !exist
 if [[ ! -f /etc/lmce-build/builder.key ]] ;then

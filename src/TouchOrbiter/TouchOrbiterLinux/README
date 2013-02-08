@@ -1,0 +1,3 @@
+For compiling you need SDL,SDL_image,SDL_ttf library.
+
+On Mini2440 you need also TSLIB.

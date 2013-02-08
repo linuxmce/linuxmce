@@ -40,8 +40,6 @@ using namespace std;
 #include "Table_Skin.h"
 
 #include "Table_RemoteControl.h"
-#include "Table_RemoteControl_pschist.h"
-#include "Table_RemoteControl_pschmask.h"
 
 
 void Database_pluto_main::CreateTable_MediaType_DesignObj()
@@ -89,6 +87,7 @@ void Row_MediaType_DesignObj::Delete()
 	Row_MediaType_DesignObj *pRow = this; // Needed so we will have only 1 version of get_primary_fields_assign_from_row
 	
 	if (!is_deleted)
+	{
 		if (is_added)	
 		{	
 			vector<TableRow*>::iterator i;	
@@ -110,6 +109,7 @@ void Row_MediaType_DesignObj::Delete()
 			table->deleted_cachedRows[key] = this;
 			is_deleted = true;	
 		}	
+	}
 }
 
 void Row_MediaType_DesignObj::Reload()
@@ -174,7 +174,8 @@ is_null[15] = true;
 m_psc_user = 0;
 m_psc_frozen = 0;
 is_null[16] = false;
-is_null[17] = true;
+m_psc_mod = "0000-00-00 00:00:00";
+is_null[17] = false;
 is_null[18] = true;
 m_psc_restrict = 0;
 
@@ -344,9 +345,6 @@ return is_null[15];}
 bool Row_MediaType_DesignObj::psc_frozen_isNull() {PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
 
 return is_null[16];}
-bool Row_MediaType_DesignObj::psc_mod_isNull() {PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
-
-return is_null[17];}
 bool Row_MediaType_DesignObj::psc_restrict_isNull() {PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
 
 return is_null[18];}
@@ -406,10 +404,6 @@ is_modified=true;
 }
 void Row_MediaType_DesignObj::psc_frozen_setNull(bool val){PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
 is_null[16]=val;
-is_modified=true;
-}
-void Row_MediaType_DesignObj::psc_mod_setNull(bool val){PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
-is_null[17]=val;
 is_modified=true;
 }
 void Row_MediaType_DesignObj::psc_restrict_setNull(bool val){PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
@@ -555,8 +549,8 @@ PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
 if (is_null[10])
 return "NULL";
 
-char *buf = new char[101];
-db_wrapper_real_escape_string(table->database->m_pDB, buf, m_Description.c_str(), (unsigned long) min((size_t)50,m_Description.size()));
+char *buf = new char[301];
+db_wrapper_real_escape_string(table->database->m_pDB, buf, m_Description.c_str(), (unsigned long) min((size_t)150,m_Description.size()));
 string s=string()+"\""+buf+"\"";
 delete[] buf;
 return s;
@@ -1506,20 +1500,6 @@ void Row_MediaType_DesignObj::RemoteControl_FK_MediaType_DesignObj_getrows(vecto
 PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
 
 class Table_RemoteControl *pTable = table->database->RemoteControl_get();
-pTable->GetRows("`FK_MediaType_DesignObj`=" + StringUtils::itos(m_PK_MediaType_DesignObj),rows);
-}
-void Row_MediaType_DesignObj::RemoteControl_pschist_FK_MediaType_DesignObj_getrows(vector <class Row_RemoteControl_pschist*> *rows)
-{
-PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
-
-class Table_RemoteControl_pschist *pTable = table->database->RemoteControl_pschist_get();
-pTable->GetRows("`FK_MediaType_DesignObj`=" + StringUtils::itos(m_PK_MediaType_DesignObj),rows);
-}
-void Row_MediaType_DesignObj::RemoteControl_pschmask_FK_MediaType_DesignObj_getrows(vector <class Row_RemoteControl_pschmask*> *rows)
-{
-PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
-
-class Table_RemoteControl_pschmask *pTable = table->database->RemoteControl_pschmask_get();
 pTable->GetRows("`FK_MediaType_DesignObj`=" + StringUtils::itos(m_PK_MediaType_DesignObj),rows);
 }
 

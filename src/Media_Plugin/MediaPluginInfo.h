@@ -51,7 +51,11 @@ namespace DCE
     // ? Shouldn't this be managed using plugin database ID's or something ?
 #define MEDIASTREAM_TYPE_MYTHTV         100
 #define MEDIASTREAM_TYPE_XINE           101
-#define MEDIASTREAM_TYPE_GAME		300	
+#define MEDIASTREAM_TYPE_GAME		106
+#define MEDIASTREAM_TYPE_HULU		107
+#define MEDIASTREAM_TYPE_SMARTQ		108
+#define MEDIASTREAM_TYPE_PANDORA	109
+#define MEDIASTREAM_TYPE_AIRPLAY_AUDIO  110
 
     /** @brief
      *

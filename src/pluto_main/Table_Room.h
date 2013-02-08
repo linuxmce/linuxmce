@@ -147,6 +147,7 @@ void psc_restrict_set(long int val);
 
 		
 		bool FK_RoomType_isNull();
+bool Description_isNull();
 bool FK_Icon_isNull();
 bool ManuallyConfigureEA_isNull();
 bool FK_FloorplanObjectType_isNull();
@@ -155,11 +156,11 @@ bool psc_id_isNull();
 bool psc_batch_isNull();
 bool psc_user_isNull();
 bool psc_frozen_isNull();
-bool psc_mod_isNull();
 bool psc_restrict_isNull();
 
 			
 		void FK_RoomType_setNull(bool val);
+void Description_setNull(bool val);
 void FK_Icon_setNull(bool val);
 void ManuallyConfigureEA_setNull(bool val);
 void FK_FloorplanObjectType_setNull(bool val);
@@ -168,7 +169,6 @@ void psc_id_setNull(bool val);
 void psc_batch_setNull(bool val);
 void psc_user_setNull(bool val);
 void psc_frozen_setNull(bool val);
-void psc_mod_setNull(bool val);
 void psc_restrict_setNull(bool val);
 	
 	
@@ -190,17 +190,9 @@ class Row_FloorplanObjectType* FK_FloorplanObjectType_getrow();
 
 		// Return the rows in other tables with foreign keys pointing here
 		void CommandGroup_Room_FK_Room_getrows(vector <class Row_CommandGroup_Room*> *rows);
-void CommandGroup_Room_pschist_FK_Room_getrows(vector <class Row_CommandGroup_Room_pschist*> *rows);
-void CommandGroup_Room_pschmask_FK_Room_getrows(vector <class Row_CommandGroup_Room_pschmask*> *rows);
 void Device_FK_Room_getrows(vector <class Row_Device*> *rows);
-void Device_pschist_FK_Room_getrows(vector <class Row_Device_pschist*> *rows);
-void Device_pschmask_FK_Room_getrows(vector <class Row_Device_pschmask*> *rows);
 void EntertainArea_FK_Room_getrows(vector <class Row_EntertainArea*> *rows);
-void EntertainArea_pschist_FK_Room_getrows(vector <class Row_EntertainArea_pschist*> *rows);
-void EntertainArea_pschmask_FK_Room_getrows(vector <class Row_EntertainArea_pschmask*> *rows);
 void Room_Users_FK_Room_getrows(vector <class Row_Room_Users*> *rows);
-void Room_Users_pschist_FK_Room_getrows(vector <class Row_Room_Users_pschist*> *rows);
-void Room_Users_pschmask_FK_Room_getrows(vector <class Row_Room_Users_pschmask*> *rows);
 
 
 		// Setup binary serialization

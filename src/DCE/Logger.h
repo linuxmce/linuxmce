@@ -6,11 +6,11 @@
      Phone: +1 (877) 758-8648
 
 
-     This program is free software; you can redistribute it and/or modify it under the terms of the GNU General Public License.
+     This program is free software; you can redistribute it and/or modify it under the terms of the GNU Lesser General Public License.
      This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty
      of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
 
-     See the GNU General Public License for more details.
+     See the GNU Lesser General Public License for more details.
 
 */
 
@@ -23,14 +23,15 @@
 #ifndef DCELogger_H
 #define DCELogger_H
 
-#ifndef SYMBIAN
+#ifndef Q_OS_SYMBIAN
 #include <stdio.h>
 #endif
 
 #include <pthread.h>
-#ifndef WIN32
+#if !defined(WIN32) && !defined(__APPLE_CC__) &&  !defined(Q_OS_SYMBIAN)
 #include <features.h>
 #endif
+
 #include <string>
 #include <set>
 #include <queue>
@@ -73,6 +74,7 @@
 #define LV_TV				39
 #define LV_SEND_DATA		40
 #define LV_RECEIVE_DATA		41
+#define LV_INSTEON			42
 #define LV_COLOR			99
 
 #include "SerializeClass/SerializeClass.h"

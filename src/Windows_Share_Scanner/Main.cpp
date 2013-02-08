@@ -198,7 +198,7 @@ int main(int argc, char* argv[])
 
 	LoggerWrapper::GetInstance()->Write(LV_STATUS, "Device: %d starting.  Connecting to: %s",PK_Device,sRouter_IP.c_str());
 
-	bool bAppError=false;
+	bool bAppError = false;
 	bool bReload=false;
 	try
 	{
@@ -213,10 +213,7 @@ int main(int argc, char* argv[])
 			if( bLocalMode )
 				pWindows_Share_Scanner->RunLocalMode();
 			else
-			{
-				if(pWindows_Share_Scanner->m_RequestHandlerThread)
-					pthread_join(pWindows_Share_Scanner->m_RequestHandlerThread, NULL);  // This function will return when the device is shutting down
-			}
+				pthread_join(pWindows_Share_Scanner->m_RequestHandlerThread, NULL);  // This function will return when the device is shutting down
 			g_pDeadlockHandler=NULL;
 			g_pSocketCrashHandler=NULL;
 		} 
@@ -251,7 +248,7 @@ int main(int argc, char* argv[])
     WSACleanup();
 #endif
 
-	if( bAppError )
+	if(bAppError)
 		return 1;
 
 	if( bReload )

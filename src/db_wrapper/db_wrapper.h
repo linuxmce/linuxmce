@@ -1,7 +1,6 @@
 #ifndef __DB_WRAPPER_H__
 #define __DB_WRAPPER_H__
 
-#ifndef EMBEDDED_LMCE
 #ifdef USE_MYSQL_WRAPPER
 
 // fake define to make it die on non-converted functions
@@ -113,6 +112,5 @@ void db_wrapper_thread_end();
 #include "db_wrapper_mysql.h"
 
 #endif
-#endif // EMBEDDED_LMCE
 
 #endif	// USE_MYSQL_WRAPPER

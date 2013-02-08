@@ -18,8 +18,6 @@
 #include "PlutoUtils/Other.h"
 #include "DCERouter.h"
 
-#include "../include/version.cpp"
-
 using namespace DCE;
 
 // You can override this block if you don't want the app to reload in the event of a problem
@@ -107,8 +105,8 @@ int main(int argc, char* argv[])
 	g_sBinary = FileUtils::FilenameWithoutPath(argv[0]);
 	g_sBinaryPath = FileUtils::BasePath(argv[0]);
 
-	cout << "ZWave, v." << VERSION << endl
-		<< "Visit www.plutohome.com for source code and license information" << endl << endl;
+	cout << "ZWave, open edition, v." << "0.2" << endl
+		<< "Visit www.linuxmce.org for source code and license information" << endl << endl;
 
 	string sRouter_IP="dcerouter";
 	int PK_Device=0;
@@ -147,7 +145,7 @@ int main(int argc, char* argv[])
 
 	if (bError)
 	{
-		cout << "A Pluto DCE Device.  See www.plutohome.com/dce for details." << endl
+		cout << "A Linuxmce DCE Device.  See www.linuxmce.org for details." << endl
 			<< "Usage: ZWave [-r Router's IP] [-d My Device ID] [-l dcerouter|stdout|null|filename]" << endl
 			<< "-r -- the IP address of the DCE Router  Defaults to 'dcerouter'." << endl
 			<< "-d -- This device's ID number.  If not specified, it will be requested from the router based on our IP address." << endl

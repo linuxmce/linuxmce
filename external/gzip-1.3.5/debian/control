@@ -1,0 +1,20 @@
+Source: gzip
+Section: utils
+Priority: required
+Maintainer: Bdale Garbee <bdale@gag.com>
+Build-Depends: debhelper (>= 5), texinfo
+Standards-Version: 3.7.2
+
+Package: gzip
+Architecture: any
+Pre-Depends: ${shlibs:Depends}
+Depends: debianutils (>= 1.6)
+Essential: yes
+Suggests: less
+Description: The GNU compression utility
+ This is the standard GNU file compression utility, which is also the default
+ compression tool for Debian.  It typically operates on files with names 
+ ending in '.gz'.
+ .
+ This package can also decompress '.Z' files created with 'compress'.
+

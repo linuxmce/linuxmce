@@ -1,0 +1,5 @@
+# TMPFS_SIZE sets the max size (in bytes) that /dev/shm can use.  By default,
+# the kernel sets this upper limit to half of available memory.
+# Note that the size will be rounded down to a multiple of the page size (4096
+# bytes).
+TMPFS_SIZE=

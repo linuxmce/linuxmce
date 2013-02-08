@@ -214,6 +214,9 @@ list<Row> & TextLineWrap::Wrap(string text, int atX, int atY, int W, int H,
 			pCurrentTextStyle->m_bUnderline = statU_bk;
 			pCurrentTextStyle->m_bItalic = statI_bk;
 
+			if (lastY + WW.second >= Height)
+				break;
+
 			T.AddWord(line, sCurrentWord);
 			AddImageWord(ImageLine, RI);
 			lastX += WW.first;
@@ -222,8 +225,10 @@ list<Row> & TextLineWrap::Wrap(string text, int atX, int atY, int W, int H,
 		LAttr.Width = lastX;
 		LAttr.Height = WW.second;
 
-        //if (lastY + WW.second <= Height)
+	if (lastY + WW.second < Height)
 		AddRow(line, ImageLine, LAttr);
+	else
+		break;
 
         lastY += WW.second;
 		line.clear();

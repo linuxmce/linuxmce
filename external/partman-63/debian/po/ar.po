@@ -1,0 +1,494 @@
+# translation of debian-installer.packages.partman.partman.po to Arabic
+# translation of debian-installer_packages_po.po to Arabeyes
+# translation of debian-installer_packages_po.po to Arabic
+# Arabic messages for debian-installer.
+# Copyright (C) 2003 Software in the Public Interest, Inc.
+# This file is distributed under the same license as debian-installer.
+# Abdulaziz Al-Arfaj <alarfaj0@yahoo.com>, 2004.
+# Ossama M. Khayat <okhayat@yahoo.com>, 2004.
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: debian-installer.packages.partman.partman\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2006-06-01 14:21+0300\n"
+"PO-Revision-Date: 2004-09-05 12:41+0300\n"
+"Last-Translator: Abdulaziz Al-Arfaj <alarfaj0@yahoo.com>\n"
+"Language-Team: Arabic <support@arabeyes.org>\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"X-Generator: KBabel 1.3\n"
+"Plural-Forms: nplurals=4; plural=n==1 ? 0 : n==2 ? 1 : n>=3 && n<=10 ? 2 : "
+"3\n"
+"n<=10 ? 2 : 3\n"
+"\n"
+
+#. Type: text
+#. Description
+#: ../partman.templates:9
+msgid "Starting up the partitioner"
+msgstr "جاري تشغيل المجزّئ"
+
+#. Type: text
+#. Description
+#: ../partman.templates:17
+msgid "Scanning disks..."
+msgstr "جاري مسح الأقراص..."
+
+#. Type: text
+#. Description
+#: ../partman.templates:21
+msgid "Detecting file systems..."
+msgstr "جاري اكتشاف انظمة الملفّات..."
+
+#. Type: boolean
+#. Description
+#: ../partman.templates:37
+msgid ""
+"This partitioner doesn't have information about the default type of the "
+"partition tables on your architecture.  Please send an e-mail message to "
+"debian-boot@lists.debian.org with information."
+msgstr ""
+"لا يمتلك هذا المجزّيء معلوماتٍ عن الفئة الافتراضيّة لجداول التّجزئة على "
+"معماريّتك. فضلاً ابعث رسالة بريدٍ الكتروني لdebian-boot@lists.debian.org بتلك "
+"المعلومات."
+
+#. Type: boolean
+#. Description
+#: ../partman.templates:37
+msgid ""
+"Please note that if the type of the partition table is unsupported by "
+"libparted, then this partitioner will not work properly."
+msgstr ""
+"فضلاً خذ بعين الاعتبار أنّه إن كانت فئة جدول التّجزئة غير مدعومة من libparted "
+"فلن تعمل هذه التّجزئة بشكلٍ صحيح."
+
+#. Type: boolean
+#. Description
+#: ../partman.templates:48
+msgid "Continue with partitioning?"
+msgstr "هل تريد متابعة التّجزيء؟"
+
+#. Type: boolean
+#. Description
+#: ../partman.templates:48
+msgid ""
+"This partitioner is based on the library libparted which doesn't have "
+"support for the partition tables used on your architecture.  It is strongly "
+"recommended that you exit this partitioner."
+msgstr ""
+"هذا المجزّيء مبني على مكتبة libparted و التي لا تحتوي دعماً لجداول التّجزئة على "
+"معماريّتك. ينصح بشدّة أن تخرج من هذا المجزّيء."
+
+#. Type: boolean
+#. Description
+#: ../partman.templates:48
+msgid ""
+"If you can, please help to add support for your partition table type to "
+"libparted."
+msgstr ""
+"إن كان بالإمكان فمن فضلك ساعد على إضافة الدّعم لفئة جداول تجزئتك إلى "
+"libparted."
+
+#. Type: error
+#. Description
+#: ../partman.templates:58
+msgid "No partitionable media"
+msgstr "لا توجد أوساط قابلة للتّجزيء"
+
+#. Type: error
+#. Description
+#: ../partman.templates:58
+msgid "No partitionable media were found."
+msgstr "لم يعثر على أيّة أوساطٍ قابلة للتّجزئة."
+
+#. Type: error
+#. Description
+#: ../partman.templates:58
+msgid "Please check that a hard disk is attached to this machine."
+msgstr "فضلاً تحقّق من وجود قرصٍ صلب موصول بهذا الجهاز."
+
+#. Type: select
+#. Description
+#: ../partman.templates:66
+msgid ""
+"This is an overview of your currently configured partitions and mount "
+"points. Select a partition to modify its settings (file system, mount point, "
+"etc.), a free space to create partitions, or a device to initialise its "
+"partition table."
+msgstr ""
+"هذه نظرةٌ عامّة للتّجزئات و نقاط التّركيب المعدّة حاليّاً. اختر تجزئةً لتعديل "
+"إعداداتها (نظام الملفّات، نقطة التّركيب إلخ) أو مساحةً متاحة لإنشاء تجزئات أو "
+"جهازاً لتهيئة جدول تجزئاته."
+
+#. Type: boolean
+#. Description
+#: ../partman.templates:71
+msgid "Create new empty partition table on this device?"
+msgstr "هل تريد إنشاء جدول تجزئةٍ جديدٍ و فارغ على هذا الجهاز؟"
+
+#. Type: boolean
+#. Description
+#: ../partman.templates:71
+msgid ""
+"You have selected an entire device to partition. If you proceed with "
+"creating a new partition table on the device, then all current partitions "
+"will be removed."
+msgstr ""
+"لقد اخترت للتّجزيء جهازاً بأكمله. إن تابعت إنشاء جدول تجزئةٍ جديد على الجهاز "
+"فستزال التّجزئات الحاليّة."
+
+#. Type: boolean
+#. Description
+#: ../partman.templates:71
+msgid "Note that you will be able to undo this operation later if you wish."
+msgstr "لاحظ أنّك ستتمكّن من التّراجع عن هذه العمليّة لاحقاً إن شئت."
+
+#. Type: boolean
+#. Description
+#: ../partman.templates:81
+msgid "Write a new empty partition table?"
+msgstr "هل تريد كتابة جدول تجزئةٍ جديدٍ و فارغ؟"
+
+#. Type: boolean
+#. Description
+#: ../partman.templates:81
+msgid ""
+"Because of limitations in the current implementation of the Sun partition "
+"tables in libparted, the newly created partition table has to be written to "
+"the disk immediately."
+msgstr ""
+"بسبب قصورٍ في التّجسيد الحالي لجداول تجزئة صَنْ في libparted يجب كتابة جدول "
+"التّجزئة المنشأ جديداً إلى القرص فوراً."
+
+#. Type: boolean
+#. Description
+#: ../partman.templates:81
+msgid ""
+"You will NOT be able to undo this operation later and all existing data on "
+"the disk will be irreversibly removed."
+msgstr ""
+"لن تتمكّن من التّراجع عن هذه العمليّة لاحقاً و ستزال كل البيانات الموجودة على "
+"القرص نهائيّاً."
+
+#. Type: boolean
+#. Description
+#: ../partman.templates:81
+msgid ""
+"Confirm whether you actually want to create a new partition table and write "
+"it to disk."
+msgstr "أكّد ما إذا كنت فعلاً تريد إنشاء جدول تجزئةٍ جديد و كتابته إلى القرص."
+
+#. Type: boolean
+#. Description
+#: ../partman.templates:95
+msgid "Continue with the installation?"
+msgstr "هل تريد متابعة التّثبيت؟"
+
+#. Type: boolean
+#. Description
+#: ../partman.templates:95
+msgid ""
+"No partition table changes and no creation of file systems have been planned."
+msgstr "لم تخطّط أيّة تغييرات في جدول التّجزئات و لا إنشاء أيّة أنظمة ملفّات."
+
+#. Type: boolean
+#. Description
+#: ../partman.templates:95
+msgid ""
+"If you plan on using already created file systems, be aware that existing "
+"files may prevent the successful installation of the base system."
+msgstr ""
+"إذا كنت تنوي استخدام أنظمة ملفّات منشأة مسبقاً فانتبه إلى أن ملفّاتٍ موجودة قد "
+"تحبط نجاح تثبيت النّظام الأساسي."
+
+#. Type: boolean
+#. Description
+#: ../partman.templates:104
+msgid "Write the changes to disks?"
+msgstr "هل تريد كتابة التّغييرات إلى الأقراص؟"
+
+#. Type: boolean
+#. Description
+#: ../partman.templates:104
+msgid "If you continue, the changes listed below will be written to the disks."
+msgstr "إذا تابعت فستكتب كلّ التّغييرات المسردة أدناه إلى القرص."
+
+#. Type: boolean
+#. Description
+#: ../partman.templates:104
+msgid ""
+"WARNING: This will destroy all data on any partitions you have removed as "
+"well as on the partitions that are going to be formatted."
+msgstr ""
+"تحذير: هذا سيدمّر كلّ البيانات على أيّة تجزئات أزلتها كما على التّجزئات التي "
+"ستنسّق."
+
+#. Type: boolean
+#. Description
+#: ../partman.templates:104
+msgid "${ITEMS}"
+msgstr "${ITEMS}"
+
+#. Type: text
+#. Description
+#: ../partman.templates:115
+msgid "The following partitions are going to be formatted:"
+msgstr "سيتم تنسيق التّجزئات الآتية:"
+
+#. Type: text
+#. Description
+#. for example: "partition #6 of IDE0 master as ext3 journaling file system"
+#: ../partman.templates:120
+msgid "partition #${PARTITION} of ${DEVICE} as ${TYPE}"
+msgstr "التّجزئة #${PARTITION} من ${DEVICE}  ك${TYPE}"
+
+#. Type: text
+#. Description
+#: ../partman.templates:124
+msgid "The partition tables of the following devices are changed:"
+msgstr "غُيّرت جداول تجزئة الأجهزة التّالية:"
+
+#. Type: select
+#. Description
+#: ../partman.templates:129
+msgid "What to do with this device:"
+msgstr "ماذا سيصنع بالجهاز:"
+
+#. Type: select
+#. Description
+#: ../partman.templates:134
+msgid "How to use this free space:"
+msgstr "كيف ستستغل هذه المساحة المتاحة:"
+
+#. Type: select
+#. Description
+#: ../partman.templates:139
+msgid "Partition settings:"
+msgstr "إعدادات التّجزئة:"
+
+#. Type: select
+#. Description
+#: ../partman.templates:139
+msgid ""
+"You are editing partition #${PARTITION} of ${DEVICE}. ${OTHERINFO} "
+"${DESTROYED}"
+msgstr "أنت تحرّر التّجزيء #${PARTITION} من ${DEVICE}. ${OTHERINFO} ${DESTROYED}"
+
+#. Type: text
+#. Description
+#: ../partman.templates:144
+msgid "This partition is formatted with the ${FILESYSTEM}."
+msgstr "هذه التّجزئة منسّقة بنظام ${FILESYSTEM}."
+
+#. Type: text
+#. Description
+#: ../partman.templates:148
+msgid "No existing file system was detected in this partition."
+msgstr "لم يكتشف أي نظام ملفّات موجودٍ على هذه التّجزئة."
+
+#. Type: text
+#. Description
+#: ../partman.templates:152
+msgid "All data in it WILL BE DESTROYED!"
+msgstr "كل البيانات فيها سوف تدمّر!"
+
+#. Type: note
+#. Description
+#: ../partman.templates:156
+msgid "The partition starts from ${FROMCHS} and ends at ${TOCHS}."
+msgstr "يبدأ التّجزيء من ${FROMCHS} وينتهي عند ${TOCHS}."
+
+#. Type: note
+#. Description
+#: ../partman.templates:160
+msgid "The free space starts from ${FROMCHS} and ends at ${TOCHS}."
+msgstr "تبدأ المساحة المتاحة من ${FROMCHS} وتنتهي عند ${TOCHS}."
+
+#. Type: text
+#. Description
+#: ../partman.templates:164
+msgid "Please wait..."
+msgstr "رجاءً انتظر..."
+
+#. Type: text
+#. Description
+#: ../partman.templates:168
+msgid "Partitions formatting"
+msgstr "تنسيق التّجزئات"
+
+#. Type: text
+#. Description
+#: ../partman.templates:172
+msgid "Processing..."
+msgstr "المعالجة جارية..."
+
+#. Type: text
+#. Description
+#: ../partman.templates:184
+msgid "Done setting up the partition"
+msgstr "انتهيت من إعداد التّجزئة"
+
+#. Type: text
+#. Description
+#: ../partman.templates:188
+msgid "Finish partitioning and write changes to disk"
+msgstr "إنهاء التّجزيء و كتابة التّغييرات إلى القرص"
+
+#. Type: text
+#. Description
+#: ../partman.templates:192
+msgid "Undo changes to partitions"
+msgstr "التّراجع عن التّغييرات في التّجزئات"
+
+#. Type: text
+#. Description
+#: ../partman.templates:196
+msgid "Show Cylinder/Head/Sector information"
+msgstr "إظهار معلومات الأسطوانة/الرأس/القطاع"
+
+#. Type: text
+#. Description
+#: ../partman.templates:200
+#, no-c-format
+msgid "Dump partition info in %s"
+msgstr "طرح معلومات التّجزيء في %s"
+
+#. Type: text
+#. Description
+#. Keep short
+#: ../partman.templates:205
+msgid "FREE SPACE"
+msgstr "مساحة متاحة"
+
+#. Type: text
+#. Description
+#. "unusable free space".  No more than 8 symbols.
+#: ../partman.templates:210
+msgid "unusable"
+msgstr "لا تستعمل"
+
+#. Type: text
+#. Description
+#. "primary partition".  No more than 8 symbols.
+#: ../partman.templates:215
+msgid "primary"
+msgstr "أوّليّة"
+
+#. Type: text
+#. Description
+#. "logical partition".  No more than 8 symbols.
+#: ../partman.templates:220
+msgid "logical"
+msgstr "منطقيّة"
+
+#. Type: text
+#. Description
+#. "primary or logical".  No more than 8 symbols.
+#: ../partman.templates:225
+msgid "pri/log"
+msgstr "أوّل/منط"
+
+#. Type: text
+#. Description
+#. How to print the partition numbers in your language
+#. Examples:
+#. %s.
+#. No %s
+#. N. %s
+#: ../partman.templates:234
+#, no-c-format
+msgid "#%s"
+msgstr "رقم %s"
+
+#. Type: text
+#. Description
+#. For example IDE0 master (hda)
+#: ../partman.templates:239
+#, no-c-format
+msgid "IDE%s master (%s)"
+msgstr "IDE%s سيّد (%s)"
+
+#. Type: text
+#. Description
+#. For example IDE1 slave (hdd)
+#: ../partman.templates:244
+#, no-c-format
+msgid "IDE%s slave (%s)"
+msgstr "IDE%s تابع (%s)"
+
+#. Type: text
+#. Description
+#. For example IDE1 master, partition #5 (hdc5)
+#: ../partman.templates:249
+#, no-c-format
+msgid "IDE%s master, partition #%s (%s)"
+msgstr "IDE%s سيّد, التّجزئة #%s (%s)"
+
+#. Type: text
+#. Description
+#. For example IDE2 slave, partition #5 (hdf5)
+#: ../partman.templates:254
+#, no-c-format
+msgid "IDE%s slave, partition #%s (%s)"
+msgstr "IDE%s تابع, التّجزئة #%s (%s)"
+
+#. Type: text
+#. Description
+#: ../partman.templates:258
+#, no-c-format
+msgid "SCSI%s (%s,%s,%s) (%s)"
+msgstr "‮‪SCSI%s‬ (%s،%s،%s) (%s)"
+
+#. Type: text
+#. Description
+#: ../partman.templates:262
+#, no-c-format
+msgid "SCSI%s (%s,%s,%s), partition #%s (%s)"
+msgstr "‮سكزي%s (%s،%s،%s)، التّجزئة #%s (%s)"
+
+#. Type: text
+#. Description
+#: ../partman.templates:266
+#, no-c-format
+msgid "RAID%s device #%s"
+msgstr "ريْد%s الجهاز #%s"
+
+#. Type: text
+#. Description
+#: ../partman.templates:270
+#, no-c-format
+msgid "LVM VG %s, LV %s"
+msgstr "LVM VG %s, LV %s"
+
+#. Type: text
+#. Description
+#: ../partman.templates:274
+msgid "Cancel this menu"
+msgstr "إلغاء هذه القائمة"
+
+#. Type: text
+#. Description
+#. Main menu entry
+#: ../partman.templates:279
+msgid "Partition disks"
+msgstr "تجزيء الأقراص"
+
+#~ msgid "Abort the partitioning and specify the next step?"
+#~ msgstr "هل تريد إجهاض التّجزئة و تحديد الخطوة التّالية؟"
+
+#~ msgid ""
+#~ "If you abort the partitioning, you will be given more control over the "
+#~ "installation process and you will be able to specify the next step."
+#~ msgstr ""
+#~ "إذا أجهضت التّجزئة ستعطى المزيد من التّحكّم في عمليّة التّثبيت و ستتمكّن من "
+#~ "تحديد الخطوة التّالية."
+
+#~ msgid ""
+#~ "If you want to use the guided partitioning tool, do not abort the "
+#~ "partitioning, but choose \"Guided partitioning\" from inside the "
+#~ "partitioner."
+#~ msgstr ""
+#~ "إذا كنت تريد استخدام أداة التّجزئة الموجّهة فلا تجهض التّجزئة بل اختر "
+#~ "\"تجزئة موجّهة\" من داخل المجزّئ."

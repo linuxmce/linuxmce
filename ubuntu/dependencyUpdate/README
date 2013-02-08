@@ -1,0 +1,20 @@
+This directory contains simple package definition for creating
+packages that are used to fulfill dependencies, when upstream 
+packages have changed their name.
+
+The following is a real world example, when Logitech decided
+to rename squeezeboxcenter to logitechmediacenter.
+
+In case you need a new one, create a new directory and name it
+like the original package is named, plus a version number, for 
+example squeezeboxcenter-0.1
+Inside squeezeboxcenter-0.1 execute
+dh_make -e developers@linuxmce.org --createorig
+
+On the question just select single binary, ignore message regarding
+missing Makefile. Edit debian/control and add the dependency for
+the newly named package, in our above example logitechmediaserver,
+i.e. add a line Depends: logitechmediaserver
+
+After that, run dpkg-buildpackage -tc and a few seconds later you will
+have a new deb package.

@@ -7,7 +7,7 @@
 </HEAD>
 <BODY LANG="en-US" DIR="LTR">
 <H1>pvrusb2 chip-level drivers information</H1>
-<P>$Id: chipdrivers.html 1153 2006-05-17 04:39:09Z isely $</P>
+<P>$Id: chipdrivers.html 2247 2009-03-15 20:32:40Z isely $</P>
 <P>Mike Isely &lt;isely at pobox dot com&gt;</P>
 
 <P>You can find the main driver page on the web at <A
@@ -59,33 +59,36 @@ replace tuner.ko with a version that works better.</P>
 <H2><A NAME="Survey">Chip-level driver survey</A></H2>
 
 <P>The exact set of chip-level drivers required by the pvrusb2 driver
-will depend on the hardware type you have (i.e. 24xxx or 29xxx) and
-possible also its tuner type.  The following is a list of these
-chip-level drivers:</P>
+will depend on the hardware type you have (i.e. 24xxx, 29xxx, or
+Gotview) and possible also its tuner type.  The following is a list of
+these chip-level drivers:</P>
 
 <DL>
 
 <DT><TT>cx25840.ko</TT></DT> <DD>This is a driver for the cx2584x
-series of video and audio processor chips, which is used by 24xxx
-hardware.  You do not need this for 29xxx hardware.  This driver did
-not appear in the kernel until 2.6.15.</DD>
+series of video and audio processor chips, which is used by 24xxx and
+Gotview hardware.  You do not need this for 29xxx hardware.  This
+driver did not appear in the kernel until 2.6.15.</DD>
 
 <DT><TT>msp3400.ko</TT></DT> <DD>This is a driver for the msp34xx
 series of audio processors, which is used by 29xxx hardware.  You
-don't need it for 24xxx hardware.</DD>
+don't need it for 24xxx or Gotview hardware.</DD>
 
 <DT><TT>saa7115.ko</TT></DT> <DD>This is a driver for the saa7115
 video digitizer chip, which is used by 29xxx hardware.  You don't need
-it for 24xxx hardware.  Unfortunately this driver did not appear in
-the kernel until 2.6.15.  If you are using an older kernel you will
-definitely have to supply a replacement (keep reading).</DD>
+it for 24xxx or Gotview hardware.  Unfortunately this driver did not
+appear in the kernel until 2.6.15.  If you are using an older kernel
+you will definitely have to supply a replacement (keep reading).</DD>
 
 <DT><TT>tda9887.ko</TT></DT> <DD>This is a driver for the tda9887
 demodulator chip.  Some PVR USB2 devices don't seem to need this
 driver (from looking at the datasheet for this part it's possible to
 hardwire it for NTSC operation).  There are a number of issues with
 this module; the reader is advised to read <A
-HREF="tda9887.html">tda9887.html</A> for further information.</DD>
+HREF="tda9887.html">tda9887.html</A> for further information.  Note
+that more recent V4L tuner.ko modules include tda9887 internally in
+which case there won't be a separate td9887 module - in which case you
+can ignore everything said here.</DD>
 
 <DT><TT>tuner.ko</TT></DT> <DD>This is a generic tuner driver; it
 deals with the RF side of a TV capture device.  If you were to examine
@@ -93,25 +96,32 @@ the inside of your PVR USB2 device, this would be the driver that
 controls the big &quot;metal can&quot; part of the circuit board.</DD>
 
 <DT><TT>tveeprom.ko</TT></DT> <DD>This is a module which knows how to
-interpret the contents of a Hauppauge EEPROM.  All PVR USB2 devices
-include an EEPROM, and its contents tell us things like the serial
-number of the device, the supported video standards, and the type of
-installed tuner (which is translated and passed to <TT>tuner.ko</TT>).
-Unlike the other chip-level drivers which attach to the driver at
-run-time, this driver is unusual in that it has to be bound to
-<TT>pvrusb2.ko</TT> at the time <TT>pvrusb2.ko</TT> is loaded into the
-kernel.  This is because we have to directly call into it to do the
-translation, which forces the module loader to immediately resolve the
-symbolic reference.  This causes a number of subtle issues; the reader
-is advised read <A HREF="eeprom.html">eeprom.html</A> for further
-information if trouble is suspected here.</DD>
+interpret the contents of a Hauppauge EEPROM.  This is not used for
+Gotview hardware.  All Hauppauge devices include an EEPROM, and its
+contents tell us things like the serial number of the device, the
+supported video standards, and the type of installed tuner (which is
+translated and passed to <TT>tuner.ko</TT>).  Unlike the other
+chip-level drivers which attach to the driver at run-time, this driver
+is unusual in that it has to be bound to <TT>pvrusb2.ko</TT> at the
+time <TT>pvrusb2.ko</TT> is loaded into the kernel.  This is because
+we have to directly call into it to do the translation, which forces
+the module loader to immediately resolve the symbolic reference.  This
+causes a number of subtle issues; the reader is advised read <A
+HREF="eeprom.html">eeprom.html</A> for further information if trouble
+is suspected here.</DD>
 
 <DT><TT>wm8775.ko</TT></DT> <DD>This is a driver for the wm8775 audio
 digitizer chip.  It is used only for 24xxx hardware and only comes
 into play if you select composite or s-video input - it is used to
 sample the line level audio input into a bit stream.  You don't need
-this for 29xxx hardware.  Also, this driver did not appear in the
-kernel until 2.6.15.</DD>
+this for 29xxx or Gotview hardware.  Also, this driver did not appear
+in the kernel until 2.6.15.</DD>
+
+<DT><TT>cs53l32a.ko</TT></DT> <DD>This is a driver for the cs53l32a
+audio switching chip.  It is used only for OnAir hardware.  You don't
+need this for other hardware.  Also, this driver did not become usable
+for the pvrusb2 driver until kernel 2.6.17 (it may exist in older
+kernels, but only using a different incompatible API).</DD>
 
 </DL>
 
@@ -134,6 +144,22 @@ tda9887.ko<BR>
 tuner.ko<BR>
 tveeprom.ko<BR>
 wm8775.ko<BR>
+</code></blockquote>
+
+<P>For Gotview hardware:</P>
+<blockquote><code>
+cx25840.ko<BR>
+tda9887.ko<BR>
+tuner.ko<BR>
+tveeprom.ko<BR>
+</code></blockquote>
+
+<P>For OnAir hardware:</P>
+<blockquote><code>
+saa7115.ko<BR>
+tda9887.ko<BR>
+tuner.ko<BR>
+cs53l32a.ko<BR>
 </code></blockquote>
 
 <P>You <em>might not</em> actually need <TT>tda9887.ko</TT> but it is
@@ -161,19 +187,21 @@ replacement</A></H2>
 
 <H4><TT>cx25840.ko</TT> and <TT>wm8775.ko</TT></H4>
 
-<P>The absence of <TT>cx25840.ko</TT> and <TT>wm8775.ko</TT> from the
-kernel for versions older than 2.6.15 is the reason why it is
-difficult to run 24xxx hardware with older kernel releases.  It is not
-impossible, but I've never tried it and I don't recommend it.  However
-if you can locate and install replacement versions of those modules,
-then in theory it should still work for you.</P>
+<P>The absence of <TT>cx25840.ko</TT> (and <TT>wm8775.ko</TT> for
+24xxx hardware) from the kernel for versions older than 2.6.15 is the
+reason why it is difficult to run 24xxx or Gotview hardware with older
+kernel releases.  It is not impossible, but I've never tried it and I
+don't recommend it.  However if you can locate and install replacement
+versions of those modules, then in theory it should still work for
+you.</P>
 
 <H4><TT>saa7115.ko</TT></H4>
 
 <P>The absence of <TT>saa7115.ko</TT> from the kernel for versions
 older than 2.6.15 causes an issue for running 29xxx hardware for older
-kernel releases.  This is not as bad as the 24xxx case because there
-is a replacement supplied with the pvrusb2 driver snapshot.</P>
+kernel releases.  This is not as bad as the 24xxx / Gotview case
+because there is a replacement supplied with the pvrusb2 driver
+snapshot.</P>
 
 <H4><TT>tveeprom.ko</TT> and <TT>tuner.ko</TT></H4>
 
@@ -262,9 +290,9 @@ not really a chip-level driver replacement so much as it is a
 &quot;give up and go run the latest V4L&quot; sort of choice.  As
 mentioned elsewhere, this is an elephant gun solution.  But you gain
 the advantage that it should work cleanly with just about any 2.6.x
-kernel version - and if you're running 24xxx hardware this is really
-your only choice for older kernels.  If you choose to go this route,
-then the procedure you need is outside the scope of this
+kernel version - and if you're running 24xxx or Gotview hardware this
+is really your only choice for older kernels.  If you choose to go
+this route, then the procedure you need is outside the scope of this
 documentation.  What you need to do is go to <A
 HREF="http://linuxtv.org">linuxtv.org</A> and follow their process for
 downloading and building the official v4l repository.</P>

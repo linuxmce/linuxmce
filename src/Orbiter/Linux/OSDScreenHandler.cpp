@@ -398,8 +398,19 @@ bool OSDScreenHandler::UsersWizard_ObjectSelected(CallBackData *pData)
 			if(pObjectInfoData->m_PK_DesignObj_SelectedObject == DESIGNOBJ_butFamilyMembers_CONST)
 			{
 				string sUsername = m_pOrbiter->m_mapVariable_Find(VARIABLE_Seek_Value_CONST);
-				HandleAddUser(naDisplayUserInfo);
-				return true;
+				if (sUsername.empty())
+				{
+					// Go back to the same screen again. 
+					m_pOrbiter->CMD_Goto_DesignObj(0, 
+						StringUtils::ltos(DESIGNOBJ_YourName_CONST),
+						"", "", false, false );
+					return true;	// screen changed.	
+				}
+				else
+				{
+					HandleAddUser(naDisplayUserInfo);
+					return true;
+				}
 			}
 		}
 		break;
@@ -960,6 +971,10 @@ bool OSDScreenHandler::TV_Manufacturer_ObjectSelected(CallBackData *pData)
 					m_pOrbiter->DATA_Set_Ignore_First_Event(true,true);  // We have a TV, so the first click/key/etc. should be ignored since the TV is off and it will just turn it on
 				}
 			}
+			else if(DESIGNOBJ_butModelNotListed2_CONST == pObjectInfoData->m_PK_DesignObj_SelectedObject)
+			{
+				m_pOrbiter->CMD_Goto_Screen("",SCREEN_Receiver_CONST);
+			}
 		}
 		break;
 
@@ -1256,6 +1271,10 @@ bool OSDScreenHandler::Receiver_ObjectSelected(CallBackData *pData)
 					m_pWizardLogic->m_nPK_Device_Receiver = m_pWizardLogic->AddDevice(atoi(sModel.c_str()));
 				}
 			}
+			else if(DESIGNOBJ_butModelNotListed2_CONST == pObjectInfoData->m_PK_DesignObj_SelectedObject)
+			{
+				m_pOrbiter->CMD_Goto_Screen("",SCREEN_AV_Devices_CONST);
+			}
 		}
 		break;
 
@@ -1382,6 +1401,10 @@ bool OSDScreenHandler::AV_Devices_ObjectSelected(CallBackData *pData)
 				//we have the AV Device Manufacturer and AV Device Model!
 				m_pWizardLogic->m_nPK_Device_Last_AV = m_pWizardLogic->AddDevice(atoi(sModel.c_str()));
 				m_pOrbiter->CMD_Set_Variable(VARIABLE_Misc_Data_1_CONST,StringUtils::itos(m_pWizardLogic->m_nPK_Device_Last_AV));
+			}
+			else if(DESIGNOBJ_butModelNotListed2_CONST == pObjectInfoData->m_PK_DesignObj_SelectedObject)
+			{
+				m_pOrbiter->CMD_Goto_Screen("",SCREEN_Get_Capture_Card_Port_CONST);
 			}
 		}
 		break;
@@ -1786,8 +1809,6 @@ void OSDScreenHandler::LightsSetup_Timer()
 	Event_Impl event_Impl(m_pOrbiter->m_dwPK_Device, 0, m_pOrbiter->m_sHostName);
 
 	static bool bLastTimeOn=true;
-	LoggerWrapper::GetInstance()->Write(LV_STATUS,"OSDScreenHandler::LightsSetup_Timer m_bLightsFlashThreadQuit %d m_nLightInDequeToAssign %d size %d",
-		(int) m_bLightsFlashThreadQuit, (int) m_nLightInDequeToAssign, (int) m_pWizardLogic->m_dequeNumLights.size());
 	while( !m_bLightsFlashThreadQuit && m_nLightInDequeToAssign < (int) m_pWizardLogic->m_dequeNumLights.size() )
 	{
 		PLUTO_SAFETY_LOCK(vm,m_pOrbiter->m_VariableMutex);
@@ -1850,8 +1871,6 @@ void OSDScreenHandler::LightsSetup_Timer()
 		while(timeout>time(NULL) && nLightInDequeToAssign==m_nLightInDequeToAssign && !m_bLightsFlashThreadQuit)
 			Sleep(500);  // max 500 ms delay
 	}
-	LoggerWrapper::GetInstance()->Write(LV_STATUS,"OSDScreenHandler::LightsSetup_Timer ending m_bLightsFlashThreadQuit %d m_nLightInDequeToAssign %d size %d",
-		(int) m_bLightsFlashThreadQuit, (int) m_nLightInDequeToAssign, (int) m_pWizardLogic->m_dequeNumLights.size());
 	m_bLightsFlashThreadRunning=false;
 }
 
@@ -1867,8 +1886,8 @@ bool OSDScreenHandler::LightsSetup_ObjectSelected(CallBackData *pData)
 			{
 				if( !m_dwMessageInterceptorCounter_ReportingChildDevices )
 				{
-					m_dwMessageInterceptorCounter_ReportingChildDevices = m_pOrbiter->RegisterMsgInterceptor((MessageInterceptorFn)(&Orbiter::ScreenHandlerMsgInterceptor),0,0,0,0,MESSAGETYPE_EVENT,EVENT_Reporting_Child_Devices_CONST, false);
-					m_pOrbiter->RegisterMsgInterceptor((MessageInterceptorFn)(&Orbiter::ScreenHandlerMsgInterceptor),0,0,0,0,MESSAGETYPE_EVENT,EVENT_Download_Config_Done_CONST, false);
+					m_dwMessageInterceptorCounter_ReportingChildDevices = m_pOrbiter->RegisterMsgInterceptor((MessageInterceptorFn)(&Orbiter::ScreenHandlerMsgInterceptor),0,0,0,0,MESSAGETYPE_EVENT,EVENT_Reporting_Child_Devices_CONST);
+					m_pOrbiter->RegisterMsgInterceptor((MessageInterceptorFn)(&Orbiter::ScreenHandlerMsgInterceptor),0,0,0,0,MESSAGETYPE_EVENT,EVENT_Download_Config_Done_CONST);
 				}
 				DesignObjText *pText = m_pOrbiter->FindText( m_pOrbiter->FindObject(DESIGNOBJ_NoLights_CONST),TEXT_STATUS_CONST );
 				if( pText )
@@ -2760,6 +2779,20 @@ bool OSDScreenHandler::CaptureCardPort_GridRendering(CallBackData *pData)
 bool OSDScreenHandler::CaptureCardPort_DatagridSelected(CallBackData *pData)
 {
 	DatagridCellBackData *pCellInfoData = (DatagridCellBackData *)pData;
+	if( pCellInfoData->m_nPK_Datagrid==DATAGRID_Capture_Card_Audio_Ports_CONST )
+	  {
+	    DCE::CMD_Specify_Capture_Card_Audio_Port CMD_Specify_Capture_Card_Audio_Port(
+						     m_pOrbiter->m_dwPK_Device,
+						     m_pOrbiter->m_dwPK_Device_MediaPlugIn,
+						     atoi(m_pOrbiter->m_mapVariable_Find(VARIABLE_PK_Device_1_CONST).c_str()),
+						     atoi(pCellInfoData->m_sValue.c_str()));
+	    string sResponse; // Send with response so the grid does not refresh.
+	    m_pOrbiter->SendCommand(CMD_Specify_Capture_Card_Audio_Port,&sResponse);
+	    
+	    m_pOrbiter->CMD_Goto_DesignObj(0,TOSTRING(DESIGNOBJ_RoomsForExternalDevice_CONST),"","",false,true);
+	    // Note: VARIABLE_PK_Device_1 is still set from the datagrid below, so we are okay.
+	    return true; // We did a goto screen.
+	  }
 	if( pCellInfoData->m_nPK_Datagrid==DATAGRID_Capture_Card_Port_Devices_CONST )
 	{
 		DCE::CMD_Specify_Capture_Card_Port CMD_Specify_Capture_Card_Port(m_pOrbiter->m_dwPK_Device,m_pOrbiter->m_dwPK_Device_MediaPlugIn,
@@ -2767,12 +2800,83 @@ bool OSDScreenHandler::CaptureCardPort_DatagridSelected(CallBackData *pData)
 		string sResponse;  // Send with return confirmation so the grid doesn't refresh until this command is done
 		m_pOrbiter->SendCommand(CMD_Specify_Capture_Card_Port,&sResponse);
 
-		m_pOrbiter->CMD_Goto_DesignObj(0,TOSTRING(DESIGNOBJ_RoomsForExternalDevice_CONST),"","",false,true);
+		m_pOrbiter->CMD_Goto_DesignObj(0,TOSTRING(DESIGNOBJ_Specify_Audio_Inputs_CONST),"","",false,true);
+		//m_pOrbiter->CMD_Goto_DesignObj(0,TOSTRING(DESIGNOBJ_RoomsForExternalDevice_CONST),"","",false,true);
 		m_pOrbiter->CMD_Set_Variable(VARIABLE_PK_Device_1_CONST, pCellInfoData->m_sValue);
 		return true; // We did a goto screen
 	}
 
 	return false;
+}
+//-----------------------------------------------------------------------------------------------------
+void OSDScreenHandler::SCREEN_Get_Capture_Card_Audio_Port(long PK_Screen)
+{
+  PrepForWizard();
+  m_pOrbiter->CMD_Set_Variable(VARIABLE_PK_DesignObj_CurrentSecti_CONST, TOSTRING(DESIGNOBJ_butInputs_CONST));
+  m_pOrbiter->CMD_Set_Variable(VARIABLE_PK_Device_1_CONST,"");
+  m_pOrbiter->CMD_Set_Variable(VARIABLE_Misc_Data_1_CONST,"");
+  m_pOrbiter->CMD_Set_Variable(VARIABLE_Datagrid_Input_CONST,"");
+  RegisterCallBack(cbObjectSelected, (ScreenHandlerCallBack) &OSDScreenHandler::CaptureCardAudioPort_ObjectSelected, new ObjectInfoBackData());
+  RegisterCallBack(cbDataGridSelected, (ScreenHandlerCallBack) &OSDScreenHandler::CaptureCardAudioPort_DatagridSelected, new DatagridCellBackData());
+  RegisterCallBack(cbDataGridRendering, (ScreenHandlerCallBack) &OSDScreenHandler::CaptureCardAudioPort_GridRendering, new DatagridAcquiredBackData());
+  ScreenHandlerBase::SCREEN_Get_Capture_Card_Audio_Port(PK_Screen);
+}
+//-----------------------------------------------------------------------------------------------------
+bool OSDScreenHandler::CaptureCardAudioPort_ObjectSelected(CallBackData *pData)
+{
+  ObjectInfoBackData *pObjectInfoData = (ObjectInfoBackData *)pData;
+
+  PLUTO_SAFETY_LOCK(vm, m_pOrbiter->m_ScreenMutex);
+  // FIXME: Come back here and implement what we need.
+  return false;
+}
+//-----------------------------------------------------------------------------------------------------
+bool OSDScreenHandler::CaptureCardAudioPort_GridRendering(CallBackData *pData)
+{
+  // This is actually called to deal with hiding/showing check to show already configured ports.
+  DatagridAcquiredBackData *pDatagridAcquiredBackData = (DatagridAcquiredBackData *) pData;
+  
+  if ( pDatagridAcquiredBackData->m_pObj->m_iPK_Datagrid==DATAGRID_Capture_Card_Audio_Ports_CONST )
+    {
+      for (MemoryDataTable::iterator it=pDatagridAcquiredBackData->m_pDataGridTable->m_MemoryDataTable.begin();it!=pDatagridAcquiredBackData->m_pDataGridTable->m_MemoryDataTable.end();++it)
+	{
+	  DataGridCell *pCell = it->second;
+	  pair<int, int> colRow = DataGridTable::CovertColRowType(it->first);
+	  colRow.first  -= pDatagridAcquiredBackData->m_pObj->m_GridCurCol;
+	  colRow.second -= pDatagridAcquiredBackData->m_pObj->m_GridCurRow;
+	  
+	  map< pair<int, int>, DesignObj_Orbiter *>::iterator itobj = pDatagridAcquiredBackData->m_pObj->m_mapChildDgObjects.find( colRow );
+	  if ( itobj != pDatagridAcquiredBackData->m_pObj->m_mapChildDgObjects.end() )
+	    {
+	      DesignObj_Orbiter *pObj = itobj->second; // cell's object
+	      DesignObj_DataList::iterator iHao;
+
+	      for ( iHao=pObj->m_ChildObjects.begin();iHao!=pObj->m_ChildObjects.end();++iHao)
+		{
+		  DesignObj_Orbiter *pDesignObj_Orbiter = (DesignObj_Orbiter *)(*iHao);
+		  if (pDesignObj_Orbiter->m_iBaseObjectID==DESIGNOBJ_iconCheckMark_CONST)
+		    pDesignObj_Orbiter->m_bHidden = pCell->m_mapAttributes_Find("InUse_PK_Device").empty()==true;
+		}
+	    }
+	}
+    }
+  return false;
+}
+//-----------------------------------------------------------------------------------------------------
+bool OSDScreenHandler::CaptureCardAudioPort_DatagridSelected(CallBackData *pData)
+{
+  DatagridCellBackData *pCellInfoData = (DatagridCellBackData *)pData;
+  if ( pCellInfoData->m_nPK_Datagrid==DATAGRID_Capture_Card_Audio_Ports_CONST )
+    {
+      DCE::CMD_Specify_Capture_Card_Port CMD_Specify_Capture_Card_Audio_Port(m_pOrbiter->m_dwPK_Device,m_pOrbiter->m_dwPK_Device_MediaPlugIn, atoi(pCellInfoData->m_sValue.c_str()),atoi(m_pOrbiter->m_mapVariable_Find(VARIABLE_Datagrid_Input_CONST).c_str()));
+      string sResponse;
+      m_pOrbiter->SendCommand(CMD_Specify_Capture_Card_Audio_Port,&sResponse);
+      
+      // FIXME: Come back here and add a Goto DesignObj to the next screen!
+      // FIXME: Come back here and add a Set Variable, as needed for the next screen!
+      return true; // we did a goto screen.
+    }
+  return false; // FIXME: Do we need this?
 }
 //-----------------------------------------------------------------------------------------------------
 // Create some 'choose provider stages' to keep track of where we are

@@ -21,11 +21,11 @@
 
 #ifdef SYMBIAN
 #include "PlutoUtils/MyString.h"
-#include "PlutoUtils/MySTL.h"
+#include "PlutoUtils/MyStl.h"
 #include "PlutoUtils/MyMap.h"
 #endif
 
-#include "Pluto_Main/Define_Button.h"
+#include "pluto_main/Define_Button.h"
 #include "VIPMenu.h"
 
 struct MyRect

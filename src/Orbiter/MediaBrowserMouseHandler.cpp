@@ -63,9 +63,8 @@ MediaBrowserMouseHandler::MediaBrowserMouseHandler(DesignObj_Orbiter *pObj,strin
 		LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"MediaBrowserMouseHandler::MediaBrowserMouseHandler");
 	else
 	{
-		m_pObj_ListGrid->m_iHighlightedRow_set(0);
-		m_pObj_PicGrid->m_iHighlightedRow_set(0);
-		m_pObj_PicGrid->m_iHighlightedColumn_set(0);
+		m_pObj_ListGrid->m_iHighlightedRow=0;
+		m_pObj_PicGrid->m_iHighlightedRow=m_pObj_PicGrid->m_iHighlightedColumn=0;
 		m_pMouseBehavior->m_pOrbiter->m_pObj_Highlighted_set(m_pObj_ListGrid);
 		m_pMouseBehavior->m_pOrbiter->Renderer()->DoHighlightObject();
 		m_rSortFilterMenu = PlutoRectangle::Union(m_pObj_Sort->m_rPosition, m_pObj_More->m_rPosition );
@@ -169,7 +168,7 @@ void MediaBrowserMouseHandler::Move(int X,int Y,int PK_Direction)
 
 	PlutoRectangle rect;
 	m_pMouseBehavior->m_pOrbiter->GetDataGridHighlightCellCoordinates(pObj_ListGrid_Active,rect);
-	if( pObj_ListGrid_Active->m_iHighlightedColumn_get()!=-1 && pObj_ListGrid_Active->m_iHighlightedRow_get()!=-1 && rect.Contains(X,Y) )
+	if( pObj_ListGrid_Active->m_iHighlightedColumn!=-1 && pObj_ListGrid_Active->m_iHighlightedRow!=-1 && rect.Contains(X,Y) )
 	{
 #ifdef DEBUG
 	LoggerWrapper::GetInstance()->Write(LV_STATUS, "MediaBrowserMouseHandler::Move(%d, %d, %d) use hasn't left cell", X, Y, PK_Direction);
@@ -190,25 +189,25 @@ void MediaBrowserMouseHandler::Move(int X,int Y,int PK_Direction)
 	if( pObj_ListGrid_Active==m_pObj_PicGrid )
 	{
 		int Col = (X-m_pObj_PicGrid->m_rPosition.X)/m_pObj_PicGrid->m_FixedColumnWidth;
-		m_pObj_PicGrid->m_iHighlightedColumn_set(Col);
-		m_pObj_PicGrid->m_iHighlightedRow_set(Row);
-		m_pObj_ListGrid->m_iHighlightedRow_set(Row * m_pObj_PicGrid->m_MaxCol + Col);
+		m_pObj_PicGrid->m_iHighlightedColumn=Col;
+		m_pObj_PicGrid->m_iHighlightedRow=Row;
+		m_pObj_ListGrid->m_iHighlightedRow = Row * m_pObj_PicGrid->m_MaxCol + Col;
 	}
 	else
 	{
-		m_pObj_ListGrid->m_iHighlightedRow_set(Row);
+		m_pObj_ListGrid->m_iHighlightedRow = Row;
 		Row = Row / m_pObj_PicGrid->m_MaxCol;
-		int Col = m_pObj_ListGrid->m_iHighlightedRow_get() - (Row * m_pObj_PicGrid->m_MaxCol);
-		m_pObj_PicGrid->m_iHighlightedColumn_set(Col);
-		m_pObj_PicGrid->m_iHighlightedRow_set(Row);
+		int Col = m_pObj_ListGrid->m_iHighlightedRow - (Row * m_pObj_PicGrid->m_MaxCol);
+		m_pObj_PicGrid->m_iHighlightedColumn=Col;
+		m_pObj_PicGrid->m_iHighlightedRow=Row;
 	}
 
 #ifdef DEBUG
-	LoggerWrapper::GetInstance()->Write(LV_STATUS, "MediaBrowserMouseHandler::Move(%d, %d, %d) list grid row now %d", X, Y, PK_Direction,m_pObj_ListGrid->m_iHighlightedRow_get());
+	LoggerWrapper::GetInstance()->Write(LV_STATUS, "MediaBrowserMouseHandler::Move(%d, %d, %d) list grid row now %d", X, Y, PK_Direction,m_pObj_ListGrid->m_iHighlightedRow);
 #endif
-	if( m_pObj_ListGrid->m_iHighlightedRow_get()!=m_LastRow )
+	if( m_pObj_ListGrid->m_iHighlightedRow!=m_LastRow )
 	{
-		m_LastRow=m_pObj_ListGrid->m_iHighlightedRow_get();
+		m_LastRow=m_pObj_ListGrid->m_iHighlightedRow;
 		// This takes care of the list grid
 		NeedToRender render( m_pMouseBehavior->m_pOrbiter, "Move on grid" );
 		ShowCoverArtPopup();
@@ -217,7 +216,7 @@ void MediaBrowserMouseHandler::Move(int X,int Y,int PK_Direction)
 		DataGridTable *pDataGridTable = m_pObj_ListGrid->DataGridTable_Get();
 		if( pDataGridTable )
 		{
-			pCell = pDataGridTable->GetData(0,m_pObj_ListGrid->m_iHighlightedRow_get() + m_pObj_ListGrid->m_GridCurRow );
+			pCell = pDataGridTable->GetData(0,m_pObj_ListGrid->m_iHighlightedRow + m_pObj_ListGrid->m_GridCurRow );
 			if( pCell && pCell->m_Text )
 				m_pMouseBehavior->m_pOrbiter->CMD_Set_Text( TOSTRING(DESIGNOBJ_objLongFileName_CONST), pCell->m_Text, TEXT_STATUS_CONST );
 		}
@@ -233,10 +232,10 @@ void MediaBrowserMouseHandler::ShowCoverArtPopup()
 		return; // Shouldn't happen
 
 	int X=0,Y=0;
-	if( m_pObj_PicGrid->m_iHighlightedColumn_get() )
-		X = m_pObj_PicGrid->m_rPosition.X + (m_pObj_PicGrid->m_iHighlightedColumn_get()*m_pObj_PicGrid->m_FixedColumnWidth) - ((m_pObj_CoverArtPopup->m_rPosition.Width - m_pObj_PicGrid->m_FixedColumnWidth)/2);
-	if( m_pObj_PicGrid->m_iHighlightedRow_get() )
-		Y = m_pObj_PicGrid->m_rPosition.Y + (m_pObj_PicGrid->m_iHighlightedRow_get()*m_pObj_PicGrid->m_FixedRowHeight) - ((m_pObj_CoverArtPopup->m_rPosition.Height - m_pObj_PicGrid->m_FirstRowHeight)/2);
+	if( m_pObj_PicGrid->m_iHighlightedColumn )
+		X = m_pObj_PicGrid->m_rPosition.X + (m_pObj_PicGrid->m_iHighlightedColumn*m_pObj_PicGrid->m_FixedColumnWidth) - ((m_pObj_CoverArtPopup->m_rPosition.Width - m_pObj_PicGrid->m_FixedColumnWidth)/2);
+	if( m_pObj_PicGrid->m_iHighlightedRow )
+		Y = m_pObj_PicGrid->m_rPosition.Y + (m_pObj_PicGrid->m_iHighlightedRow*m_pObj_PicGrid->m_FixedRowHeight) - ((m_pObj_CoverArtPopup->m_rPosition.Height - m_pObj_PicGrid->m_FirstRowHeight)/2);
 
 	if( X + m_pObj_CoverArtPopup->m_rPosition.Width > m_pObj_PicGrid->m_rPosition.Right() )
 		X = m_pObj_PicGrid->m_rPosition.Right() - m_pObj_CoverArtPopup->m_rPosition.Width;
@@ -250,7 +249,7 @@ void MediaBrowserMouseHandler::ShowCoverArtPopup()
 	DataGridCell *pCell = NULL;
 	DataGridTable *pDataGridTable = m_pObj_PicGrid->DataGridTable_Get();
 	if( pDataGridTable )
-		pCell = pDataGridTable->GetData(m_pObj_PicGrid->m_iHighlightedColumn_get() + m_pObj_PicGrid->m_GridCurCol,m_pObj_PicGrid->m_iHighlightedRow_get() + m_pObj_PicGrid->m_GridCurRow );
+		pCell = pDataGridTable->GetData(m_pObj_PicGrid->m_iHighlightedColumn + m_pObj_PicGrid->m_GridCurCol,m_pObj_PicGrid->m_iHighlightedRow + m_pObj_PicGrid->m_GridCurRow );
 
 	PLUTO_SAFETY_LOCK(M, m_pMouseBehavior->m_pOrbiter->m_VariableMutex );
 

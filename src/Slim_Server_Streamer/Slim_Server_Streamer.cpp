@@ -44,7 +44,7 @@ Slim_Server_Streamer::Slim_Server_Streamer(int DeviceID, string ServerAddress,bo
     // Usually the slim server and the application server that is going to spawn it are going to be on the same machine.
     // This is good because you can also restrict the control of the server only to connections from that machine.
     m_strSlimServerCliAddress = "127.0.0.1"; // hard code it here for now.
-    m_iSlimServerCliPort = 7890;
+    m_iSlimServerCliPort = 9090;
 	m_threadPlaybackCompletedChecker = 0;
 
     m_iServerSocket = -1;
@@ -179,69 +179,64 @@ void Slim_Server_Streamer::CMD_Start_Streaming(int iPK_MediaType,int iStreamID,s
 {
 	PLUTO_SAFETY_LOCK(dataMutexLock, m_dataStructureAccessMutex);
 
-    LoggerWrapper::GetInstance()->Write(LV_STATUS, "Processing Start streaming command for target devices: %s", sStreamingTargets.c_str());
+	LoggerWrapper::GetInstance()->Write(LV_STATUS, "Processing Start streaming command for target devices: %s", sStreamingTargets.c_str());
 
-    vector<string> vectPlayersIds;
-    vector<DeviceData_Base*> vectDevices;
+	vector<string> vectPlayersIds;
+	vector<DeviceData_Base*> vectDevices;
 
-    StringUtils::Tokenize(sStreamingTargets, ",", vectPlayersIds);
+	StringUtils::Tokenize(sStreamingTargets, ",", vectPlayersIds);
 
-    string lastPlayerAddress = "-";
-    string currentPlayerAddress = "-";
+	string currentPlayerAddress = "-";
 
-    vector<string>::iterator itPlayerIds = vectPlayersIds.begin();
-    while ( itPlayerIds != vectPlayersIds.end() )
-    {
-        int iPlayerId = atoi((*itPlayerIds).c_str());
+	vector<string>::iterator itPlayerIds;
+	for (itPlayerIds = vectPlayersIds.begin(); itPlayerIds != vectPlayersIds.end(); ++itPlayerIds)
+	{
+		int iPlayerId = atoi((*itPlayerIds).c_str());
 
-        if ( iPlayerId == 0 )
-        {
-            LoggerWrapper::GetInstance()->Write(LV_WARNING, "Player id string %s parsed to 0. Ignoring.", (*itPlayerIds).c_str() );
-			itPlayerIds++;
-            continue;
-        }
+		if (iPlayerId == 0)
+		{
+			LoggerWrapper::GetInstance()->Write(LV_WARNING, "Player id string %s parsed to 0. Ignoring.", (*itPlayerIds).c_str());
+			continue;
+		}
 
-        DeviceData_Base *pPlayerDeviceData = m_pData->m_AllDevices.m_mapDeviceData_Base_Find(iPlayerId);
-        if ( pPlayerDeviceData == NULL )
-        {
-            LoggerWrapper::GetInstance()->Write(LV_WARNING, "Child with id: %d was not found. Ignoring", iPlayerId);
-			itPlayerIds++;
-            continue;
-        }
+		DeviceData_Base *pPlayerDeviceData = m_pData->m_AllDevices.m_mapDeviceData_Base_Find(iPlayerId);
+		if (pPlayerDeviceData == NULL)
+		{
+			LoggerWrapper::GetInstance()->Write(LV_WARNING, "Child with id: %d was not found. Ignoring", iPlayerId);
+			continue;
+		}
 
-        currentPlayerAddress = getMacAddressForDevice(pPlayerDeviceData);
+		currentPlayerAddress = getMacAddressForDevice(pPlayerDeviceData);
 
 		LoggerWrapper::GetInstance()->Write(LV_STATUS, "Slim_Server_Streamer::CMD_Start_Streaming() Making sure that the player \"%s\" is connected before doing anything.", StringUtils::URLDecode(currentPlayerAddress).c_str());
 		int nTries = 10;
-		while ( nTries && SendReceiveCommand(currentPlayerAddress + " connected ?") != currentPlayerAddress + " connected 1" )
+		while (nTries && SendReceiveCommand(currentPlayerAddress + " connected ?") != currentPlayerAddress + " connected 1")
 		{
 			LoggerWrapper::GetInstance()->Write(LV_STATUS, "Slim_Server_Streamer::CMD_Start_Streaming() Not yet connected");
 			Sleep(500);
 			nTries--;
 		}
 
-		if ( nTries == 0 )
+		if (nTries == 0)
 		{
 			LoggerWrapper::GetInstance()->Write(LV_WARNING, "Slim_Server_Streamer::CMD_Start_Streaming() Device %d (%s) with mac address %s was not detected as connected. Ignoring device.",
 				pPlayerDeviceData->m_dwPK_Device, pPlayerDeviceData->m_sDescription.c_str(), currentPlayerAddress.c_str());
-			return;
+			continue;
 		}
 		else
 		{
 			vectDevices.push_back(pPlayerDeviceData);
+#if 0
 			SendReceiveCommand(currentPlayerAddress + " stop"); // stop playback (if any)
 			SendReceiveCommand(currentPlayerAddress + " playlist clear"); // clear previous playlist (if any)
 			SendReceiveCommand(currentPlayerAddress + " playlist repeat 0"); // set the playlist to non repeating.
 			SendReceiveCommand(currentPlayerAddress + " sync -"); // break previous syncronization;
-        	SendReceiveCommand(currentPlayerAddress + " sync " + lastPlayerAddress); // synchronize with the last one.
-	        lastPlayerAddress = currentPlayerAddress;
+#endif
 		}
-
-		itPlayerIds++;
-    }
+	}
 
 	// add this stream to the list of playing streams.
-    m_mapStreamsToPlayers[iStreamID] = make_pair(STATE_PAUSE, vectDevices);
+	m_mapStreamsToPlayers[iStreamID] = make_pair(STATE_PAUSE, vectDevices);
 	pthread_cond_signal(&m_stateChangedCondition);
 }
 
@@ -302,9 +297,10 @@ void Slim_Server_Streamer::CMD_Stop_Streaming(int iStreamID,string sStreamingTar
 		currentPlayerAddress = getMacAddressForDevice(pPlayerDeviceData);
 
 		// break this players syncronization.
-        SendReceiveCommand(currentPlayerAddress + " sync -");
+	        SendReceiveCommand(currentPlayerAddress + " sync -");
 		SendReceiveCommand(currentPlayerAddress + " playlist clear");
 		SendReceiveCommand(currentPlayerAddress + " stop");
+		SendReceiveCommand(currentPlayerAddress + " power 0");
 
 		itPlaybackDevices = vectDevices.begin();
 		while ( itPlaybackDevices != vectDevices.end() && *itPlaybackDevices != pPlayerDeviceData )
@@ -634,9 +630,35 @@ void Slim_Server_Streamer::CMD_Play_Media(int iPK_MediaType,int iStreamID,string
 		return;
 	}
 
+ 	// synchronize the rest of the devices in the stream's list with the main one
+ 	vector<DeviceData_Base *> *pvectDeviceData_Base = &(m_mapStreamsToPlayers[iStreamID].second);
+ 	vector<DeviceData_Base *>::iterator itDeviceData;
+	SendReceiveCommand(sControlledPlayerMac + " sync -");
+ 	for (itDeviceData = pvectDeviceData_Base->begin(); itDeviceData != pvectDeviceData_Base->end(); ++itDeviceData)
+ 	{
+ 		string sMacCurrentDevice = getMacAddressForDevice(*itDeviceData);
+ 		if (sMacCurrentDevice == sControlledPlayerMac)
+ 			continue; // don't sync with ourselves
+ 		SendReceiveCommand(sControlledPlayerMac + " sync " + sMacCurrentDevice);
+ 	}
+ 
 	SetStateForStream(iStreamID, STATE_CHANGING);
-	SendReceiveCommand(sControlledPlayerMac + " playlist play " + StringUtils::URLEncode(string("file://") + StringUtils::Replace(&sMediaURL,"//", "/")));
+	
+	// tschak - adding an if here to handle other URL types. I am looking for two slashes in succession, if so, then 
+	// i simply do not prepend the URL stuff and decode it.
+	
+	if (sMediaURL.find("://") != string::npos)
+	{
+		SendReceiveCommand(sControlledPlayerMac + " playlist play " + StringUtils::URLEncode(StringUtils::Replace(&sMediaURL,"/", "/")));
+	} else if (sMediaURL.find("/asterisk/voicemail") != string::npos)
+	{
+		SendReceiveCommand(sControlledPlayerMac + " playlist play " + sMediaURL);
+	} else	
+	{
+		SendReceiveCommand(sControlledPlayerMac + " playlist play " + StringUtils::URLEncode(string("file://") + StringUtils::Replace(&sMediaURL,"//", "/")));
+	}
 
+#if 0
 	string strResult = SendReceiveCommand(sControlledPlayerMac + " mode ?", false);
 	if( strResult == sControlledPlayerMac + " mode stop" || strResult == sControlledPlayerMac + " mode %3F" )
 	{
@@ -654,9 +676,9 @@ void Slim_Server_Streamer::CMD_Play_Media(int iPK_MediaType,int iStreamID,string
 			SendReceiveCommand(sControlledPlayerMac + " playlist play " + StringUtils::URLEncode(string("file://") + StringUtils::Replace(&sMediaURL,"//", "/")));
 		}
 	}
+#endif
 
-//	if ( sMediaPosition != 0 )
-//		SendReceiveCommand(sControlledPlayerMac + " gototime " + StringUtils::itos(iMediaPosition / 1000));
+	CMD_Set_Media_Position(iStreamID, sMediaPosition, sCMD_Result, pMessage);
 
 	SetStateForStream(iStreamID, STATE_PLAY);
 }
@@ -681,11 +703,9 @@ void Slim_Server_Streamer::CMD_Stop_Media(int iStreamID,string *sMediaPosition,s
 		return;
 
 	LoggerWrapper::GetInstance()->Write(LV_STATUS, "Stop Media for stream %d",iStreamID);
-	string sOptions;
-	int mediaPosition;
-	int mediaLength;
-//	CMD_Report_Playback_Position(iStreamID,&sOptions,&mediaPosition,&mediaLength,sCMD_Result,pMessage);
-//	*iMediaPosition = mediaPosition;
+	string sText;
+	CMD_Report_Playback_Position(iStreamID,&sText,sMediaPosition,sCMD_Result,pMessage);
+
 	m_mapStreamsToPlayers.erase(iStreamID);
 	SendReceiveCommand(sControlledPlayerMac + " playlist clear");
 	SendReceiveCommand(sControlledPlayerMac + " stop");
@@ -812,6 +832,11 @@ void Slim_Server_Streamer::CMD_Report_Playback_Position(int iStreamID,string *sT
 
 	iMedia_Length = (int)(floatValue * 1000);
 
+
+	string sPosition;
+	sPosition += " POS:" + StringUtils::itos(iMediaPosition) + " TOTAL:"+ StringUtils::itos(iMedia_Length);
+	*sMediaPosition = sPosition;
+
 	LoggerWrapper::GetInstance()->Write(LV_STATUS, "Detected data: position %d from %d", iMediaPosition, iMedia_Length);
 }
 //<-dceag-createinst-b->!
@@ -935,6 +960,27 @@ string Slim_Server_Streamer::getMacAddressForDevice(DeviceData_Base *pDevice)
 void Slim_Server_Streamer::CMD_Set_Media_Position(int iStreamID,string sMediaPosition,string &sCMD_Result,Message *pMessage)
 //<-dceag-c412-e->
 {
+
+	PLUTO_SAFETY_LOCK(dataMutexLock, m_dataStructureAccessMutex);
+
+	string sControlledPlayerMac;
+	if ( (sControlledPlayerMac = FindControllingMacForStream(iStreamID)) == "" )
+	{
+		LoggerWrapper::GetInstance()->Write(LV_STATUS, "No controlling mac was found for this stream id: %d", iStreamID);
+		return;
+	}
+
+	uint posPos = sMediaPosition.find(" POS:");
+	int iPos = 0;
+	if( posPos != string::npos )
+	        iPos = atoi( sMediaPosition.substr(posPos+5).c_str() );
+	iPos = iPos / 1000; // slim uses seconds
+
+	if ( iPos > 0 )
+	{
+		SendReceiveCommand(sControlledPlayerMac + " gototime " + StringUtils::itos(iPos));
+	}
+
 }
 
 //<-dceag-c42-b->
@@ -956,10 +1002,8 @@ void Slim_Server_Streamer::CMD_Jump_to_Position_in_Stream(string sValue_To_Assig
 	/** Jump to a specific position in the playlist, or a track, or a chapter.  Smart media players should also understand the skip fwd/skip back (which non-DCE media players use) to be the same thing as a jump +1 or -1 */
 		/** @param #5 Value To Assign */
 			/** The track to go to.  A number is considered an absolute.  "+2" means forward 2, "-1" means back 1. */
-		/** @param #41 StreamID */
-			/** ID of stream to apply */
 
-void Slim_Server_Streamer::CMD_Jump_Position_In_Playlist(string sValue_To_Assign,int iStreamID,string &sCMD_Result,Message *pMessage)
+void Slim_Server_Streamer::CMD_Jump_Position_In_Playlist(string sValue_To_Assign,string &sCMD_Result,Message *pMessage)
 //<-dceag-c65-e->
 {
 }
@@ -1003,12 +1047,10 @@ void Slim_Server_Streamer::StartSlimServer()
 	/** Send a key to the device's OSD, or simulate keypresses on the device's panel */
 		/** @param #26 PK_Button */
 			/** What key to simulate being pressed.  If 2 numbers are specified, separated by a comma, the second will be used if the Shift key is specified. */
-		/** @param #41 StreamID */
-			/** ID of stream to apply */
 		/** @param #50 Name */
 			/** The application to send the keypress to. If not specified, it goes to the DCE device. */
 
-void Slim_Server_Streamer::CMD_Simulate_Keypress(string sPK_Button,int iStreamID,string sName,string &sCMD_Result,Message *pMessage)
+void Slim_Server_Streamer::CMD_Simulate_Keypress(string sPK_Button,string sName,string &sCMD_Result,Message *pMessage)
 //<-dceag-c28-e->
 {
 	//TODO: implement me!
@@ -1020,75 +1062,8 @@ void Slim_Server_Streamer::CMD_Simulate_Keypress(string sPK_Button,int iStreamID
 	/** Show a menu associated with this media */
 		/** @param #9 Text */
 			/** A string indicating which menu should appear.  The parameter is only used for smart media devices */
-		/** @param #41 StreamID */
-			/** ID of stream to apply */
 
-void Slim_Server_Streamer::CMD_Menu(string sText,int iStreamID,string &sCMD_Result,Message *pMessage)
+void Slim_Server_Streamer::CMD_Menu(string sText,string &sCMD_Result,Message *pMessage)
 //<-dceag-c548-e->
-{
-}
-//<-dceag-c32-b->
-
-	/** @brief COMMAND: #32 - Update Object Image */
-	/** Display an image on the media player */
-		/** @param #3 PK_DesignObj */
-			/** The object in which to put the bitmap */
-		/** @param #14 Type */
-			/** 1=bmp, 2=jpg, 3=png */
-		/** @param #19 Data */
-			/** The contents of the bitmap, like reading from the file into a memory buffer */
-		/** @param #23 Disable Aspect Lock */
-			/** If 1, the image will be stretched to fit the object */
-
-void Slim_Server_Streamer::CMD_Update_Object_Image(string sPK_DesignObj,string sType,char *pData,int iData_Size,string sDisable_Aspect_Lock,string &sCMD_Result,Message *pMessage)
-//<-dceag-c32-e->
-{
-}
-//<-dceag-c126-b->
-
-	/** @brief COMMAND: #126 - Guide */
-	/** Show guide information.  For a dvd this may be the menu, just like the menu command */
-
-void Slim_Server_Streamer::CMD_Guide(string &sCMD_Result,Message *pMessage)
-//<-dceag-c126-e->
-{
-}
-//<-dceag-c916-b->
-
-	/** @brief COMMAND: #916 - Set Aspect Ratio */
-	/** Force aspect ratio */
-		/** @param #41 StreamID */
-			/** ID of stream to apply */
-		/** @param #260 Aspect Ratio */
-			/** aspect ratio to set: auto, 1:1, 4:3, 16:9, 2.11:1 */
-
-void Slim_Server_Streamer::CMD_Set_Aspect_Ratio(int iStreamID,string sAspect_Ratio,string &sCMD_Result,Message *pMessage)
-//<-dceag-c916-e->
-{
-}
-//<-dceag-c917-b->
-
-	/** @brief COMMAND: #917 - Set Zoom */
-	/** Sets zoom level, relative, absolute or 'auto' */
-		/** @param #41 StreamID */
-			/** ID of stream to apply */
-		/** @param #261 Zoom Level */
-			/** Zoom level to set */
-
-void Slim_Server_Streamer::CMD_Set_Zoom(int iStreamID,string sZoom_Level,string &sCMD_Result,Message *pMessage)
-//<-dceag-c917-e->
-{
-}
-//<-dceag-c920-b->
-
-	/** @brief COMMAND: #920 - Set Media ID */
-	/** Set Media ID - information about media stream */
-		/** @param #10 ID */
-			/** Media ID (special format) */
-		/** @param #41 StreamID */
-			/** ID of stream to set media information for */
-
-void Slim_Server_Streamer::CMD_Set_Media_ID(string sID,int iStreamID,string &sCMD_Result,Message *pMessage)
-//<-dceag-c920-e->
 {
 }

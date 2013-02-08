@@ -2,10 +2,19 @@
 
 . /etc/lmce-build/builder.conf
 
+set -e
+
+echo ""
+echo "********************************************************************************"
+echo "*** Running: $0"
+echo "********************************************************************************"
+
 rm -rf "${build_dir}/cd2-packages"
-mkdir -p "${build_dir}/cd2-packages/cachecd1-cache"
+mkdir -pv "${build_dir}/cd2-packages/cachecd1-cache"
 
 pushd "${build_dir}/cd2-packages/cachecd1-cache"
-	aptitude download `cat /etc/lmce-build/cd2-packages` || exit 1
+	aptitude download `cat /etc/lmce-build/cd2-packages`
 popd
+
+echo "*** Done: $0"
 

@@ -140,7 +140,6 @@ bool psc_id_isNull();
 bool psc_batch_isNull();
 bool psc_user_isNull();
 bool psc_frozen_isNull();
-bool psc_mod_isNull();
 bool psc_restrict_isNull();
 
 			
@@ -150,7 +149,6 @@ void psc_id_setNull(bool val);
 void psc_batch_setNull(bool val);
 void psc_user_setNull(bool val);
 void psc_frozen_setNull(bool val);
-void psc_mod_setNull(bool val);
 void psc_restrict_setNull(bool val);
 	
 	
@@ -169,23 +167,11 @@ void psc_restrict_setNull(bool val);
 
 		// Return the rows in other tables with foreign keys pointing here
 		void CannedEvents_FK_Event_getrows(vector <class Row_CannedEvents*> *rows);
-void CannedEvents_pschist_FK_Event_getrows(vector <class Row_CannedEvents_pschist*> *rows);
-void CannedEvents_pschmask_FK_Event_getrows(vector <class Row_CannedEvents_pschmask*> *rows);
 void DeviceCategory_Event_FK_Event_getrows(vector <class Row_DeviceCategory_Event*> *rows);
-void DeviceCategory_Event_pschist_FK_Event_getrows(vector <class Row_DeviceCategory_Event_pschist*> *rows);
-void DeviceCategory_Event_pschmask_FK_Event_getrows(vector <class Row_DeviceCategory_Event_pschmask*> *rows);
 void DeviceTemplate_Event_FK_Event_getrows(vector <class Row_DeviceTemplate_Event*> *rows);
-void DeviceTemplate_Event_pschist_FK_Event_getrows(vector <class Row_DeviceTemplate_Event_pschist*> *rows);
-void DeviceTemplate_Event_pschmask_FK_Event_getrows(vector <class Row_DeviceTemplate_Event_pschmask*> *rows);
 void Device_HouseMode_FK_Event_getrows(vector <class Row_Device_HouseMode*> *rows);
-void Device_HouseMode_pschist_FK_Event_getrows(vector <class Row_Device_HouseMode_pschist*> *rows);
-void Device_HouseMode_pschmask_FK_Event_getrows(vector <class Row_Device_HouseMode_pschmask*> *rows);
 void EventHandler_FK_Event_getrows(vector <class Row_EventHandler*> *rows);
-void EventHandler_pschist_FK_Event_getrows(vector <class Row_EventHandler_pschist*> *rows);
-void EventHandler_pschmask_FK_Event_getrows(vector <class Row_EventHandler_pschmask*> *rows);
 void Event_EventParameter_FK_Event_getrows(vector <class Row_Event_EventParameter*> *rows);
-void Event_EventParameter_pschist_FK_Event_getrows(vector <class Row_Event_EventParameter_pschist*> *rows);
-void Event_EventParameter_pschmask_FK_Event_getrows(vector <class Row_Event_EventParameter_pschmask*> *rows);
 
 
 		// Setup binary serialization

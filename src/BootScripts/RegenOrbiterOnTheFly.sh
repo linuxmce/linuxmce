@@ -11,7 +11,7 @@ SkinDir=/usr/pluto/orbiter/skins
 FontDir=/usr/share/fonts/truetype/msttcorefonts
 OutDir=/usr/pluto/orbiter
 
-/usr/pluto/bin/UpdateEntArea -h localhost > >(tee -a /var/log/pluto/updateea.log)
+/usr/pluto/bin/UpdateEntArea $PLUTO_DB_CRED -D "$MySqlDBName" > >(tee -a /var/log/pluto/updateea.log)
 
 export SDL_VIDEODEVICE=dummy
 
@@ -26,7 +26,7 @@ else
 	WHERE PK_Device in ($1)"
 fi
 
-Orbiters=$(echo "$Q;" | /usr/bin/mysql -h $MySqlHost pluto_main | tail -n +2 | tr '\n' ' ')
+Orbiters=$(RunSQL "$Q")
 
 export SDL_VIDEODEVICE=dummy
 
@@ -35,11 +35,11 @@ for OrbiterDev in $Orbiters; do
 
 	Q="UPDATE Orbiter set RegenPercent=0 where PK_Orbiter=$OrbiterDev"
 	RunSQL "$Q"
-	/usr/pluto/bin/MessageSend localhost 0 $OrbiterDev 7 1 163 "RegenOrbiterOnTheFly.sh"
+	/usr/pluto/bin/MessageSend "$DCERouter" 0 $OrbiterDev 7 1 163 "RegenOrbiterOnTheFly.sh"
 
 	echo "on the fly regen of $OrbiterDev $2 $3" >> /var/log/pluto/orbitergen.log
-	/usr/pluto/bin/OrbiterGen -d "$OrbiterDev" $3 -g "$SkinDir" -f "$FontDir" -o "$OutDir" -h "$MySqlHost"  >> /var/log/pluto/orbitergen.log || Logging "$TYPE" "$SEVERITY_CRITICAL" "$0" "Failed to generate Orbiter nr. $OrbiterDev"
+	/usr/pluto/bin/OrbiterGen -d "$OrbiterDev" $3 -g "$SkinDir" -f "$FontDir" -o "$OutDir" $PLUTO_DB_CRED -D "$MySqlDBName"  >> /var/log/pluto/orbitergen.log || Logging "$TYPE" "$SEVERITY_CRITICAL" "$0" "Failed to generate Orbiter nr. $OrbiterDev"
 
 	# Notify the Orbiter Plugin that we finished
-	/usr/pluto/bin/MessageSend localhost 0 $2 1 267 2 $OrbiterDev
+	/usr/pluto/bin/MessageSend "$DCERouter" 0 $2 1 267 2 $OrbiterDev
 done

@@ -1,0 +1,233 @@
+#! /bin/sh /usr/share/dpatch/dpatch-run
+## 25_upstream_2.6.26.dpatch by Mario Limonciello <superm1@ubuntu.com>
+##
+## All lines beginning with `## DP:' are a description of the patch.
+## DP: No description.
+
+@DPATCH@
+diff -urNad ubuntu~/drivers/kcompat.h ubuntu/drivers/kcompat.h
+--- ubuntu~/drivers/kcompat.h	2008-09-24 12:49:35.000000000 -0400
++++ ubuntu/drivers/kcompat.h	2008-09-24 12:54:51.000000000 -0400
+@@ -1,4 +1,4 @@
+-/*      $Id: kcompat.h,v 5.34 2008/01/13 10:26:28 lirc Exp $      */
++/*      $Id: kcompat.h,v 5.36 2008/05/14 16:37:49 lirc Exp $      */
+ 
+ #ifndef _KCOMPAT_H
+ #define _KCOMPAT_H
+@@ -36,10 +36,10 @@
+ 	class_simple_destroy(cls);
+ }
+ 
+-#define lirc_class_device_create(cs, parent, dev, device, fmt, args...) \
+-	class_simple_device_add(cs, dev, device, fmt, ## args)
++#define lirc_device_create(cs, parent, dev, fmt, args...) \
++	class_simple_device_add(cs, dev, parent, fmt, ## args)
+ 
+-static inline void class_device_destroy(lirc_class_t *cls, dev_t devt)
++static inline void lirc_device_destroy(lirc_class_t *cls, dev_t devt)
+ {
+ 	class_simple_device_remove(devt);
+ }
+@@ -48,20 +48,40 @@
+ 
+ #if LINUX_VERSION_CODE < KERNEL_VERSION(2, 6, 15)
+ 
+-#define lirc_class_device_create(cs, parent, dev, device, fmt, args...) \
+-	class_device_create(cs, dev, device, fmt, ## args)
++#define lirc_device_create(cs, parent, dev, fmt, args...) \
++	class_device_create(cs, dev, parent, fmt, ## args)
+ 
+ #else /* >= 2.6.15 */
+ 
+-#define lirc_class_device_create class_device_create
++#if LINUX_VERSION_CODE < KERNEL_VERSION(2, 6, 26)
++
++#define lirc_device_create(cs, parent, dev, fmt, args...) \
++	class_device_create(cs, NULL, dev, parent, fmt, ## args)
++
++#else /* >= 2.6.26 */
++
++#define lirc_device_create device_create
++
++#endif /* >= 2.6.26 */
++
+ #define LIRC_DEVFS_PREFIX
+ 
+-#endif
++#endif /* >= 2.6.15 */
+ 
+ typedef struct class lirc_class_t;
+ 
++#if LINUX_VERSION_CODE < KERNEL_VERSION(2, 6, 26)
++
++#define lirc_device_destroy class_device_destroy
++
++#else
++
++#define lirc_device_destroy device_destroy
++
+ #endif
+ 
++#endif /* >= 2.6.13 */
++
+ #elif LINUX_VERSION_CODE >= KERNEL_VERSION(2, 4, 0)
+ #define LIRC_HAVE_DEVFS
+ #define LIRC_HAVE_DEVFS_24
+@@ -133,8 +153,8 @@
+ #ifndef LIRC_HAVE_SYSFS
+ #define class_destroy(x) do { } while (0)
+ #define class_create(x, y) NULL
+-#define class_device_destroy(x, y) do { } while (0)
+-#define lirc_class_device_create(x, y, z, xx, yy, zz) 0
++#define lirc_class_destroy(x, y) do { } while (0)
++#define lirc_class_create(x, y, z, xx, yy, zz) 0
+ #define IS_ERR(x) 0
+ typedef struct class_simple
+ {
+diff -urNad ubuntu~/drivers/lirc_cmdir/commandir.c ubuntu/drivers/lirc_cmdir/commandir.c
+--- ubuntu~/drivers/lirc_cmdir/commandir.c	2008-09-24 12:49:35.000000000 -0400
++++ ubuntu/drivers/lirc_cmdir/commandir.c	2008-09-24 12:54:51.000000000 -0400
+@@ -865,6 +865,7 @@
+ {
+ 	struct usb_skel *dev;
+ 	int retval = 0;
++	int len;
+ 
+ #if LINUX_VERSION_CODE < KERNEL_VERSION(2, 6, 0)
+ 	if (minor_table[rx_device] == NULL)
+@@ -875,7 +876,7 @@
+ 	down(&dev->sem);
+ 	retval = usb_bulk_msg(dev->udev, usb_rcvbulkpipe(dev->udev,
+ 						dev->bulk_in_endpointAddr),
+-		 dev->bulk_in_buffer, dev->bulk_in_size, &count, HZ*100);
++		 dev->bulk_in_buffer, dev->bulk_in_size, &len, HZ*100);
+ #else
+ 	struct usb_interface *interface;
+ 	interface = usb_find_interface(&cmdir_driver,
+@@ -892,15 +893,15 @@
+ 	retval = usb_bulk_msg(dev->udev, usb_rcvbulkpipe(dev->udev,
+ 						dev->bulk_in_endpointAddr),
+ 		 dev->bulk_in_buffer, min(dev->bulk_in_size, count),
+-		 &count, HZ*10);
++		 &len, HZ*10);
+ #endif
+ 	if (!retval) {
+-		if (!memcpy(buffer, dev->bulk_in_buffer, count))
++		if (!memcpy(buffer, dev->bulk_in_buffer, len))
+ 			retval = -EFAULT;
+ 		else {
+ 			/* current status of the TX buffer */
+ 			curTXFill = buffer[2];
+-			retval = count;
++			retval = len;
+ 		}
+ 	}
+ 	/* suppress errors */
+diff -urNad ubuntu~/drivers/lirc_dev/lirc_dev.c ubuntu/drivers/lirc_dev/lirc_dev.c
+--- ubuntu~/drivers/lirc_dev/lirc_dev.c	2008-09-24 12:49:35.000000000 -0400
++++ ubuntu/drivers/lirc_dev/lirc_dev.c	2008-09-24 12:54:51.000000000 -0400
+@@ -17,7 +17,7 @@
+  *  along with this program; if not, write to the Free Software
+  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+  *
+- * $Id: lirc_dev.c,v 1.56 2008/01/13 10:45:02 lirc Exp $
++ * $Id: lirc_dev.c,v 1.58 2008/05/14 16:37:49 lirc Exp $
+  *
+  */
+ 
+@@ -49,7 +49,7 @@
+ #include <linux/uaccess.h>
+ #include <linux/errno.h>
+ #endif
+-#include <asm/semaphore.h>
++#include <linux/semaphore.h>
+ #if LINUX_VERSION_CODE < KERNEL_VERSION(2, 6, 0)
+ #include <linux/wrapper.h>
+ #endif
+@@ -145,7 +145,8 @@
+ #ifdef LIRC_HAVE_DEVFS_26
+ 	devfs_remove(DEV_LIRC "/%u", ir->p.minor);
+ #endif
+-	class_device_destroy(lirc_class, MKDEV(IRCTL_DEV_MAJOR, ir->p.minor));
++	lirc_device_destroy(lirc_class,
++			    MKDEV(IRCTL_DEV_MAJOR, ir->p.minor));
+ 
+ 	if (ir->buf != ir->p.rbuf) {
+ 		lirc_buffer_free(ir->buf);
+@@ -400,9 +401,9 @@
+ 			S_IFCHR|S_IRUSR|S_IWUSR,
+ 			DEV_LIRC "/%u", ir->p.minor);
+ #endif
+-	(void) lirc_class_device_create(lirc_class, NULL,
+-					MKDEV(IRCTL_DEV_MAJOR, ir->p.minor),
+-					ir->p.dev, "lirc%u", ir->p.minor);
++	(void) device_create(lirc_class, ir->p.dev,
++				  MKDEV(IRCTL_DEV_MAJOR, ir->p.minor),
++				  NULL, "lirc%u", ir->p.minor);
+ 
+ 	if (p->sample_rate || p->get_queue) {
+ 		/* try to fire up polling thread */
+@@ -441,7 +442,8 @@
+ 	return minor;
+ 
+ out_sysfs:
+-	class_device_destroy(lirc_class, MKDEV(IRCTL_DEV_MAJOR, ir->p.minor));
++	lirc_device_destroy(lirc_class,
++			    MKDEV(IRCTL_DEV_MAJOR, ir->p.minor));
+ #ifdef LIRC_HAVE_DEVFS_24
+ 	devfs_unregister(ir->devfs_handle);
+ #endif
+diff -urNad ubuntu~/drivers/lirc_i2c/lirc_i2c.c ubuntu/drivers/lirc_i2c/lirc_i2c.c
+--- ubuntu~/drivers/lirc_i2c/lirc_i2c.c	2008-09-24 12:49:35.000000000 -0400
++++ ubuntu/drivers/lirc_i2c/lirc_i2c.c	2008-09-24 12:54:51.000000000 -0400
+@@ -54,7 +54,7 @@
+ #include <linux/i2c.h>
+ #include <linux/i2c-algo-bit.h>
+ 
+-#include <asm/semaphore.h>
++#include <linux/semaphore.h>
+ 
+ #include "drivers/kcompat.h"
+ #include "drivers/lirc_dev/lirc_dev.h"
+diff -urNad ubuntu~/drivers/lirc_pvr150/lirc_pvr150.c ubuntu/drivers/lirc_pvr150/lirc_pvr150.c
+--- ubuntu~/drivers/lirc_pvr150/lirc_pvr150.c	2008-09-24 12:54:51.000000000 -0400
++++ ubuntu/drivers/lirc_pvr150/lirc_pvr150.c	2008-09-24 12:54:51.000000000 -0400
+@@ -58,7 +58,7 @@
+ #include <linux/firmware.h>
+ #include <linux/vmalloc.h>
+ 
+-#include <asm/semaphore.h>
++#include <linux/semaphore.h>
+ 
+ #include "drivers/kcompat.h"
+ #include "drivers/lirc_dev/lirc_dev.h"
+@@ -1189,16 +1189,15 @@
+ static int i2c_attach(struct i2c_client *client, struct IR *ir)
+ {
+ 	int ret;
+-	
++
+ 	i2c_set_clientdata(client, ir);
+-	
++
+ 	ret = i2c_attach_client(client);
+ 	if (ret != 0) {
+ 		client->addr = 0;
+ 		return ret;
+ 	}
+-	ret = i2c_use_client(client);
+-	if (ret != 0) {
++	if (i2c_use_client(client) == NULL) {
+ 		i2c_detach_client(client);
+ 		client->addr = 0;
+ 		return ret;
+@@ -1330,8 +1329,7 @@
+ 			ir->shutdown = 1;
+ 			{
+ 				struct task_struct *p;
+-				
+-				p = find_task_by_pid(ir->tpid);
++				p = find_task_by_pid_ns(ir->tpid, &init_pid_ns);
+ 				wake_up_process(p);
+ 			}
+ 			complete(&tn2);

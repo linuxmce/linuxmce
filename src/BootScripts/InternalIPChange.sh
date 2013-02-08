@@ -1,4 +1,4 @@
-#!/bin/bash -x
+#!/bin/bash
 
 . /usr/pluto/bin/SQL_Ops.sh
 . /usr/pluto/bin/Config_Ops.sh
@@ -49,11 +49,15 @@ DHCP_Range=$(echo $DHCP_Range | cut -d',' -f1)
 DHCP_Start=$(echo $DHCP_Range | cut -d'-' -f1)
 
 # Update the devices that have an ip address assigned excepting the core
-R=$(RunSQL "SELECT PK_Device FROM Device WHERE IPaddress <> '' AND PK_Device <> 1");
+R=$(RunSQL "SELECT PK_Device,IPaddress FROM Device WHERE IPaddress <> '' AND PK_Device <> 1");
 Next_IP=$DHCP_Start
+## Right now we'll assume that the netmask is always 255.255.255.0 when deciding the prefix
+Prefix="${DHCP_Start%.*}" # just remove the fourth byte
 for Device in $R ;do
 	Device_ID=$(Field 1 "$Device");
-	RunSQL "UPDATE Device SET IPaddress='$Next_IP' WHERE PK_Device='$Device_ID' LIMIT 1"
+	Device_IP=$(Field 2 "$Device")
+	New_IP="$Prefix.${Device_IP##*.}"
+	RunSQL "UPDATE Device SET IPaddress='$New_IP' WHERE PK_Device='$Device_ID' LIMIT 1"
 	RunSQL "UPDATE Device SET NeedConfigure = 1 WHERE PK_Device='$Device_ID' LIMIT 1"
 	RunSQL "UPDATE Device SET Status = '**RUN_CONFIG**' WHERE PK_Device='$Device_ID' LIMIT 1"
 	

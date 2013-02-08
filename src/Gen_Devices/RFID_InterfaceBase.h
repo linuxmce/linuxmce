@@ -1,3 +1,18 @@
+/*
+     Copyright (C) 2004 Pluto, Inc., a Florida Corporation
+
+     www.plutohome.com
+
+     Phone: +1 (877) 758-8648
+ 
+
+     This program is free software; you can redistribute it and/or modify it under the terms of the GNU General Public License.
+     This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty
+     of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+
+     See the GNU General Public License for more details.
+
+*/
 #ifndef RFID_InterfaceBase_h
 #define RFID_InterfaceBase_h
 #include "DeviceData_Impl.h"
@@ -99,7 +114,7 @@ public:
 		if( m_bRunningWithoutDeviceData )
 			return m_pEvent_Impl->GetDeviceDataFromDatabase(m_dwPK_Device,DEVICEDATA_COM_Port_ParityBitStop_CONST);
 		else
-			return m_mapParameters_Find(DEVICEDATA_COM_Port_ParityBitStop_CONST);
+			return m_mapParameters[DEVICEDATA_COM_Port_ParityBitStop_CONST];
 	}
 
 	string Get_COM_Port_BaudRate()
@@ -107,15 +122,7 @@ public:
 		if( m_bRunningWithoutDeviceData )
 			return m_pEvent_Impl->GetDeviceDataFromDatabase(m_dwPK_Device,DEVICEDATA_COM_Port_BaudRate_CONST);
 		else
-			return m_mapParameters_Find(DEVICEDATA_COM_Port_BaudRate_CONST);
-	}
-
-	bool Get_Autoassign_to_parents_room()
-	{
-		if( m_bRunningWithoutDeviceData )
-			return (m_pEvent_Impl->GetDeviceDataFromDatabase(m_dwPK_Device,DEVICEDATA_Autoassign_to_parents_room_CONST)=="1" ? true : false);
-		else
-			return (m_mapParameters_Find(DEVICEDATA_Autoassign_to_parents_room_CONST)=="1" ? true : false);
+			return m_mapParameters[DEVICEDATA_COM_Port_BaudRate_CONST];
 	}
 
 };
@@ -182,10 +189,7 @@ public:
 			return false;
 		m_pData = new RFID_Interface_Data();
 		if( Size )
-		{
-			if( m_pData->SerializeRead(Size,pConfig)==false )
-				return false;
-		}
+			m_pData->SerializeRead(Size,pConfig);
 		else
 		{
 			m_pData->m_dwPK_Device=m_dwPK_Device;  // Assign this here since it didn't get it's own data
@@ -198,8 +202,7 @@ public:
 		}
 		delete[] pConfig;
 		pConfig = m_pEvent->GetDeviceList(Size);
-		if( m_pData->m_AllDevices.SerializeRead(Size,pConfig)==false )
-			return false;
+		m_pData->m_AllDevices.SerializeRead(Size,pConfig);
 		delete[] pConfig;
 		m_pData->m_pEvent_Impl = m_pEvent;
 		m_pcRequestSocket = new Event_Impl(m_dwPK_Device, DEVICETEMPLATE_RFID_Interface_CONST,m_sHostName);
@@ -225,7 +228,6 @@ public:
 	string DATA_Get_COM_Port_on_PC() { return GetData()->Get_COM_Port_on_PC(); }
 	string DATA_Get_COM_Port_ParityBitStop() { return GetData()->Get_COM_Port_ParityBitStop(); }
 	string DATA_Get_COM_Port_BaudRate() { return GetData()->Get_COM_Port_BaudRate(); }
-	bool DATA_Get_Autoassign_to_parents_room() { return GetData()->Get_Autoassign_to_parents_room(); }
 	//Event accessors
 	void EVENT_Reporting_Child_Devices(string sError_Message,string sText) { GetEvents()->Reporting_Child_Devices(sError_Message.c_str(),sText.c_str()); }
 	//Commands - Override these to handle commands from the server

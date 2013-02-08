@@ -10,6 +10,7 @@ cronEntry="*/3 * * * * root bash -c '/usr/pluto/bin/DiskSpaceMonitor.sh &>/dev/n
 
 if [[ ! -e /etc/cron.d/DiskSpaceMonitor ]] ;then
 	echo "$cronEntry" >>/etc/cron.d/DiskSpaceMonitor
-	invoke-rc.d cron reload
+	# We reload cron just because, and if it doesn't work out, we don't care.
+	invoke-rc.d cron reload || :
 fi
 		

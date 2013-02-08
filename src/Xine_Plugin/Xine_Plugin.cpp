@@ -264,26 +264,28 @@ bool Xine_Plugin::StartMedia( MediaStream *pMediaStream,string &sError )
 		}
 	}
 
-	if ( pXineMediaStream->m_iPK_MediaType == MEDIATYPE_pluto_DVD_CONST || FileUtils::FindExtension(mediaURL)=="dvd" || FileUtils::FindExtension(mediaURL)=="iso" )
+	if ( pXineMediaStream->m_iPK_MediaType == MEDIATYPE_pluto_DVD_CONST || FileUtils::FindExtension(mediaURL)=="dvd" || FileUtils::FindExtension(mediaURL)=="iso" ) {
 			mediaURL = "dvd://" + mediaURL;
+
+		// If the source is one ea and the destination in another, it could be remotely playing a disc, so 
+		// let ConfirmSourceIsADestination process it
+		// and see if it can still make it non-streaming by using network block
+		// If it changes the source to use an nbd device, then the subsequent StreamingRequired will return true
+		// Only for DVD, Audio CDs cannot use network block(nbd), so we must always stream
+		if( pXineMediaStream->StreamingRequired() )
+		{
+		        // For now we're not able to have a xine that renders to a NULL window and can do dvd's.  They require 
+		        // a live window with events.  So for the moment this function will confirm that if we're playing a dvd disc remotely that we make the 
+		        // source be one of the destinations, and change the mrl to reference the source disk
+		        if( !ConfirmSourceIsADestination(mediaURL,pXineMediaStream,pMediaFile ? pMediaFile->m_dwPK_Device_Disk_Drive : 0) )
+			        LoggerWrapper::GetInstance()->Write(LV_WARNING,"Xine_Plugin::StartMedia don't know how media will get to destination.  Unless there's some output zones in the mix results won't be right");
+	        }
+	}
 	else if( mediaURL.size()>5 && mediaURL.substr(0,5)=="/dev/" && pXineMediaStream->m_iPK_MediaType == MEDIATYPE_pluto_CD_CONST )
 	{
 		mediaURL = "cdda://" + mediaURL;
 		if( pMediaFile && pMediaFile->m_iTrack )
 			mediaURL += "/" + StringUtils::itos(pMediaFile->m_iTrack);
-	}
-
-	// If the source is one ea and the destination in another, it could be remotely playing a disc, so 
-	// let ConfirmSourceIsADestination process it
-	// and see if it can still make it non-streaming by using network block
-	// If it changes the source to use an nbd device, then the subsequent StreamingRequired will return true
-	if( pXineMediaStream->StreamingRequired() )
-	{
-		// For now we're not able to have a xine that renders to a NULL window and can do dvd's.  They require 
-		// a live window with events.  So for the moment this function will confirm that if we're playing a dvd disc remotely that we make the 
-		// source be one of the destinations, and change the mrl to reference the source disk
-		if( !ConfirmSourceIsADestination(mediaURL,pXineMediaStream,pMediaFile ? pMediaFile->m_dwPK_Device_Disk_Drive : 0) )
-			LoggerWrapper::GetInstance()->Write(LV_WARNING,"Xine_Plugin::StartMedia don't know how media will get to destination.  Unless there's some output zones in the mix results won't be right");
 	}
 
 #ifdef WIN32
@@ -298,11 +300,83 @@ bool Xine_Plugin::StartMedia( MediaStream *pMediaStream,string &sError )
 			( (pXineMediaStream->m_iPK_MediaType == MEDIATYPE_pluto_StoredVideo_CONST) && 
 			( StringUtils::EndsWith(mediaURL, ".EVO", true) || StringUtils::EndsWith(mediaURL, ".M2TS", true) ) 
 			);
-	
-	if (bRedirectToMPlayer)
-		LoggerWrapper::GetInstance()->Write(LV_WARNING, "Redirecting CMD_Play_Media to MPlayer instead of Xine: media type is %i", pXineMediaStream->m_iPK_MediaType);
-	
-	if( !bRedirectToMPlayer && pXineMediaStream->StreamingRequired() )
+
+	// hack: VDR recordings are detected by the info.vdr or info in the recording dir. T
+	bool bVDRRecording = ( StringUtils::EndsWith(mediaURL,"INFO.VDR", true) || StringUtils::EndsWith(mediaURL,"INFO",true) );
+
+	// hack: redirect MythTV recordings to MythTV_Player
+	LoggerWrapper::GetInstance()->Write(LV_WARNING, "Doing MythTV redirection check...");
+
+//	MediaDevice *pMediaDevice_CheckMythTV = m_pMedia_Plugin->m_mapMediaDevice_Find(m_pRouter->FindClosestRelative(DEVICETEMPLATE_MythTV_Player_CONST, pMediaStream->m_pMediaDevice_Source->m_pDeviceData_Router->m_dwPK_Device));
+//
+//	bool bMythTVExists = false;
+//
+//	if (!pMediaDevice_CheckMythTV)
+//	{
+//		bMythTVExists = false;
+//	} else
+//	{
+//		bMythTVExists = true;
+//	}
+//
+	bool bRedirectToMythTV = false;
+
+	if( !bRedirectToMythTV && pXineMediaStream->StreamingRequired() )
+	{
+		LoggerWrapper::GetInstance()->Write(LV_WARNING, "sending CMD_Play_Media from %d to %d with deq pos %d", 
+			m_dwPK_Device, pMediaStream->m_pMediaDevice_Source->m_pDeviceData_Router->m_dwPK_Device,
+			pMediaStream->m_iDequeMediaFile_Pos);
+		DCE::CMD_Start_Streaming cmd(m_dwPK_Device,
+								pMediaStream->m_pMediaDevice_Source->m_pDeviceData_Router->m_dwPK_Device,
+								pXineMediaStream->m_iPK_MediaType,
+								pXineMediaStream->m_iStreamID_get( ),
+								pMediaFile && pMediaFile->m_sStartPosition.size() ? pMediaFile->m_sStartPosition : pXineMediaStream->m_sStartPosition,
+								mediaURL,
+								pXineMediaStream->GetTargets(DEVICETEMPLATE_Xine_Player_CONST));
+		// No handling of errors (it will in some cases deadlock the router.)
+		SendCommand(cmd);
+	}
+	else if (bRedirectToMythTV)
+	{
+		LoggerWrapper::GetInstance()->Write(LV_WARNING,"Redirecting to MythTV.");
+		MediaDevice *pMediaDevice_MythTV = NULL;
+		
+		if (bRedirectToMythTV)
+		{
+			pMediaDevice_MythTV = m_pMedia_Plugin->m_mapMediaDevice_Find(m_pRouter->FindClosestRelative(DEVICETEMPLATE_MythTV_Player_CONST, pMediaStream->m_pMediaDevice_Source->m_pDeviceData_Router->m_dwPK_Device));
+			if (!pMediaDevice_MythTV)
+			{
+				LoggerWrapper::GetInstance()->Write(LV_WARNING, "Failed to find MythTV for redirect, cancelling redirect :("); 
+				bRedirectToMythTV = false;	
+			}
+			else
+			{
+				LoggerWrapper::GetInstance()->Write(LV_WARNING, "Found MythTV for redirect, device #%i", pMediaDevice_MythTV->m_pDeviceData_Router->m_dwPK_Device); 
+				pMediaStream->m_pMediaDevice_Source = pMediaDevice_MythTV;
+			}
+		}
+		
+		// changing window name
+		if (bRedirectToMythTV)
+		{
+			pMediaStream->m_sAppName = "mythfrontend.real.Mythfrontend.real";
+			pMediaStream->m_bContainsTitlesOrSections = false;
+			
+		}
+		
+		LoggerWrapper::GetInstance()->Write(LV_WARNING, "sending CMD_Play_Media from %d to %d with deq pos %d", 
+			m_dwPK_Device, pMediaStream->m_pMediaDevice_Source->m_pDeviceData_Router->m_dwPK_Device,
+			pMediaStream->m_iDequeMediaFile_Pos);
+		DCE::CMD_Play_Media cmd(m_dwPK_Device,
+								pMediaStream->m_pMediaDevice_Source->m_pDeviceData_Router->m_dwPK_Device,
+								pXineMediaStream->m_iPK_MediaType,
+								pXineMediaStream->m_iStreamID_get( ),
+								pMediaFile && pMediaFile->m_sStartPosition.size() ? pMediaFile->m_sStartPosition : pXineMediaStream->m_sStartPosition,
+								mediaURL);
+
+		// No handling of errors (it will in some cases deadlock the router.)
+		SendCommand(cmd);	
+	} else if( !bRedirectToMPlayer && pXineMediaStream->StreamingRequired() )
 	{
 		LoggerWrapper::GetInstance()->Write(LV_WARNING, "sending CMD_Play_Media from %d to %d with deq pos %d", 
 			m_dwPK_Device, pMediaStream->m_pMediaDevice_Source->m_pDeviceData_Router->m_dwPK_Device,
@@ -324,6 +398,7 @@ bool Xine_Plugin::StartMedia( MediaStream *pMediaStream,string &sError )
 		
 		if (bRedirectToMPlayer)
 		{
+			LoggerWrapper::GetInstance()->Write(LV_WARNING, "Redirecting CMD_Play_Media to MPlayer instead of Xine: media type is %i", pXineMediaStream->m_iPK_MediaType);
 			pMediaDevice_MPlayer = m_pMedia_Plugin->m_mapMediaDevice_Find(m_pRouter->FindClosestRelative(DEVICETEMPLATE_MPlayer_Player_CONST, pMediaStream->m_pMediaDevice_Source->m_pDeviceData_Router->m_dwPK_Device));
 			if (!pMediaDevice_MPlayer)
 			{
@@ -414,6 +489,73 @@ bool Xine_Plugin::StartMedia( MediaStream *pMediaStream,string &sError )
 			else
 			{
 				LoggerWrapper::GetInstance()->Write(LV_STATUS, "Not appending extra items to list");
+			}
+		}
+
+		if ( bVDRRecording )
+		{
+			// need this for bookmarking to work
+			int iPK_File = pMediaFile->m_dwPK_File;
+				
+			LoggerWrapper::GetInstance()->Write(LV_STATUS, "Appending extra items to list: ");
+			string sFolder = sFileToPlay;
+			string sExt = "";
+			
+			if ( StringUtils::EndsWith(mediaURL,"INFO.VDR",true) ) {
+                        	sFolder = StringUtils::RemoveStringFromEnd(mediaURL,9);
+				sFileToPlay = sFolder;
+                 		sExt = "0*.vdr";
+                 		mediaURL = sFolder + "/001.vdr";
+			}
+                        if ( StringUtils::EndsWith(mediaURL,"INFO",true) ) {
+                        	sFolder = StringUtils::RemoveStringFromEnd(mediaURL,5);
+                        	sFileToPlay = sFolder;
+                                sExt = "0*.ts";
+                 		mediaURL = sFolder + "/00001.ts";
+			}
+
+			list<string> vItems;
+			FileUtils::FindFiles(vItems, sFolder, sExt);
+			vItems.sort();
+			
+			pMediaStream->m_dequeMediaFile.clear();
+			
+			string sStartPosition = pMediaFile && pMediaFile->m_sStartPosition.size() ? pMediaFile->m_sStartPosition : pXineMediaStream->m_sStartPosition;
+			string sStartFile;
+			string::size_type sPos = sStartPosition.find("FILE:");
+			if (sPos != string::npos)
+			{
+				sStartFile = sStartPosition.substr(sPos+5);					
+			}
+			else
+			{
+				long int iMaxSize = -1;
+				for (list<string>::iterator li=vItems.begin(); li!=vItems.end(); ++li)
+				{
+					string sFullName = sFolder+"/"+ *li;
+					long int iFileSize = FileUtils::FileSize(sFullName);
+					if ( iFileSize > iMaxSize )
+					{
+						iMaxSize = iFileSize;
+						sStartFile = *li;
+					}
+				}
+
+			}
+			
+			int iQueuePos = 0;
+			
+			for (list<string>::iterator li=vItems.begin(); li!=vItems.end(); ++li)
+			{
+				LoggerWrapper::GetInstance()->Write(LV_WARNING, "Item: %s [ripped file %i]", li->c_str(), iPK_File);
+				MediaFile *pItem = new MediaFile(sFolder+"/"+*li);
+				pItem->m_dwPK_File = iPK_File;
+				long long iFileSize = FileUtils::FileSize64(sFolder+"/"+*li) / 1024 / 1024;					
+				pItem->m_sDescription = *li + ", " +StringUtils::itos(iFileSize) + "Mb";
+				pMediaStream->m_dequeMediaFile.push_back(pItem);
+				if (sStartFile == *li)
+					pMediaStream->m_iDequeMediaFile_Pos = iQueuePos;
+				iQueuePos++;
 			}
 		}
 		

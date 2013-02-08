@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<deviceinfo version="0.2">
+  <device>
+     <match key="info.product" contains_ncase="saa7134 ir">
+        <merge key="info.ignore" type="bool">true</merge>
+     </match>
+  </device>
+</deviceinfo>

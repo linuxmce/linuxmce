@@ -1,0 +1,127 @@
+dce-whisperer (3.1) unstable; urgency=low
+
+  * Use dynamic filedescriptor opening to avoid clashes with already open file
+    descriptors.
+
+ -- Radu C <radu.cx@gmail.com>  Sun, 25 Sep 2011 17:12:22 +0100
+
+dce-whisperer (3.0.12) unstable; urgency=low
+
+  * Implement the BuildCommand function.
+  * Use rawurlencode in ParmEncode.
+
+ -- Radu C <radu.cx@gmail.com>  Tue, 06 Sep 2011 19:41:54 +0100
+
+dce-whisperer (3.0.11) unstable; urgency=low
+
+  * Fix file descriptor leaks.
+
+ -- Radu C <radu.cx@gmail.com>  Wed, 20 Jul 2011 00:38:08 +0100
+
+dce-whisperer (3.0.10) unstable; urgency=low
+
+  * Depend on php5-cli.
+
+ -- Radu C <radu.cx@gmail.com>  Wed, 22 Jun 2011 23:51:53 +0100
+
+dce-whisperer (3.0.9) unstable; urgency=low
+
+  * Open the serial port once and use this file descriptor with the rest of
+    the operations (TestSerialPort, etc.). At least one driver forgets the
+    parameters after TestSerialPort sets them if we don't do things this way.
+
+ -- Radu C <radu.cx@gmail.com>  Wed, 11 Aug 2010 23:53:25 +0100
+
+dce-whisperer (3.0.8) unstable; urgency=low
+
+  * Moved TranslateSerialPort out of the framework, into Utils.sh
+
+ -- Radu C <radu.cx@gmail.com>  Tue, 27 Apr 2010 15:38:27 +0100
+
+dce-whisperer (3.0.7) unstable; urgency=low
+
+  * Prevent shell expansion of DCE parameters
+
+ -- Radu C <radu.cx@gmail.com>  Mon, 12 Apr 2010 13:37:58 +0100
+
+dce-whisperer (3.0.6) unstable; urgency=low
+
+  * Fix baud rate handling for serial devices
+  * Send DCE messages, that aren't replies, using QueueMessageToRouter instead
+    of SendMessage
+  * Reset the delayed message queue after sending the messages
+
+ -- Radu C <radu.cx@gmail.com>  Thu, 18 Jun 2009 21:50:50 +0000
+
+dce-whisperer (3.0.5) unstable; urgency=low
+
+  * Fix file descriptor list passed to fdselect when the device gets
+    reconnected
+  * Add support for back-to-back command delay towards the device
+
+ -- Radu C <radu.cx@gmail.com>  Wed, 10 Jun 2009 01:39:04 +0000
+
+dce-whisperer (3.0.4) unstable; urgency=low
+
+  * TranslateSerialPort: call 'builtin echo'
+  * Fix calls for Unknown and Child commands
+  * Fail if serial port is missing parameters
+
+ -- Radu C <radu.cx@gmail.com>  Tue, 09 Jun 2009 01:46:51 +0100
+
+dce-whisperer (3.0.3) unstable; urgency=low
+
+  * Added TranslateSerialPort function
+
+ -- Radu C <radu.cx@gmail.com>  Sun, 07 Jun 2009 04:30:07 +0000
+
+dce-whisperer (3.0.2) unstable; urgency=low
+
+  * Fixes Log function
+  * Prevent commands from being sent before the DCE socket it alive
+
+ -- Radu C <radu.cx@gmail.com>  Wed, 03 Jun 2009 14:58:57 +0000
+
+dce-whisperer (3.0.1) unstable; urgency=low
+
+  * Fixes for DCE-connect.sh: update fdread and fdwrite calls for DCE
+    communication
+
+ -- Radu C <radu.cx@gmail.com>  Tue, 02 Jun 2009 17:29:02 +0100
+
+dce-whisperer (3.0) unstable; urgency=low
+
+  * Remove explicit shutdown notification. If the whisperer crashes, it's un
+    unreliable way to check for a shutdown condition.
+  * Implemented support for script replies
+  * Keep legacy version around. Difference is that the new whisperer's
+    filename has uppercase 'W' in the word "Whisperer", while the legacy one
+    has lowercase 'w'. One day I'll wonder what I was thinking, but today I
+    like this naming style :)
+
+ -- Radu C <radu.cx@gmail.com>  Fri, 01 May 2009 23:20:25 +0100
+
+dce-whisperer (2.0-2) unstable; urgency=low
+
+  * URLDecode the command received from script. Put quotes around spaced
+    parameters.
+
+ -- Radu C <radu.cx@gmail.com>  Wed, 25 Feb 2009 21:05:02 +0000
+
+dce-whisperer (2.0-1) unstable; urgency=low
+
+  * Don't put empty parameters in the commands sent to the shell script
+
+ -- Radu C <radu.cx@gmail.com>  Wed, 25 Feb 2009 21:05:02 +0000
+
+dce-whisperer (2.0) unstable; urgency=low
+
+  * Changed the way the Whisperer signals its termination
+
+ -- Radu C <radu.cx@gmail.com>  Thu, 12 Feb 2009 19:43:30 +0000
+
+dce-whisperer (1.0) unstable; urgency=low
+
+  * Initial Release.
+
+ -- root <root@unknown>  Fri, 18 Jul 2008 14:26:43 +0100

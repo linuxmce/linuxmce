@@ -20,26 +20,40 @@
 
 #include "MathUtils.h"
 
+#include "DCE/Logger.h"
+
 ZoomSimple::ZoomSimple(Frame* PictureObject, int ScreenWidth, int ScreenHeight, int Width, int Height, int StartTime, int ZoomTime)
 : ZoomBase(PictureObject, ScreenWidth, ScreenHeight, Width, Height, StartTime, ZoomTime)
 {
+        ZoomStart = getRandomZoomRect();
+	ZoomEnd = getRandomZoomRect();
+}
+
+FloatRect* ZoomSimple::getRandomZoomRect() {
 	float PictureRatio = (float) this->Width/this->Height;
 
 	ZoomAmount1 = RandomInInterval(500, 1000)/1000.0f;
+	// Delta values are random values between 0 and half the image size
+	// This will make more of the image visible during the zoom than using the screen size
+	DeltaX1 = RandomInInterval(0, int(this->Width/ZoomAmount1 - Width))/2;
+	DeltaY1 = RandomInInterval(0, int(this->Height/ZoomAmount1 - Height))/2;
 
-	DeltaX1 = RandomInInterval(0, int(this->Width/ZoomAmount1 - ScreenWidth))/2;
-	DeltaY1 = RandomInInterval(0, int(this->Height/ZoomAmount1 - ScreenHeight))/2;
+	// Must scale image so it covers screen width and height, keeping aspect ratio
+	int w = this->ScreenWidth;
+	int h = w / PictureRatio;
+	float scale = (float)this->Width / this->ScreenWidth;
+	if (h < this->ScreenHeight) {
+	        // Image not high enough, use height as base
+	        h = this->ScreenHeight;
+		w = h * PictureRatio;
+		scale = (float)this->Height / this->ScreenHeight;
+	}
+	// Adjust Delta values to new image scaling
+	DeltaX1 = DeltaX1 / scale;
+	DeltaY1 = DeltaY1 / scale;
 
-	ZoomStart = new FloatRect(float(-DeltaX1), float(-DeltaY1),
-		(float) this->Width/ZoomAmount1, (float)this->Height/ZoomAmount1);
-
-	ZoomAmount2 = RandomInInterval(500, 1000)/1000.0f;
-
-	DeltaX2 = RandomInInterval(0, int(this->Width/ZoomAmount2 - ScreenWidth))/2;
-	DeltaY2 = RandomInInterval(0, int(this->Height/ZoomAmount2 - ScreenHeight))/2;
-	ZoomEnd = new FloatRect(float(-DeltaX2), float(-DeltaY2), 
-		(float) this->Width/ZoomAmount2, (float)this->Height/ZoomAmount2);
-
+	// */ZoomAmount will adjust image to cover zoom delta also
+	return new FloatRect(float(-DeltaY1), float(-DeltaX1), (float)w/ZoomAmount1, (float)h/ZoomAmount1);
 }
 
 ZoomSimple::~ZoomSimple(void)

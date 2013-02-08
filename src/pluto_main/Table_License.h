@@ -137,25 +137,27 @@ void psc_mod_set(string val);
 void psc_restrict_set(long int val);
 
 		
-		bool Summary_isNull();
+		bool Description_isNull();
+bool Define_isNull();
+bool Summary_isNull();
 bool URL_isNull();
 bool RequiresPayment_isNull();
 bool psc_id_isNull();
 bool psc_batch_isNull();
 bool psc_user_isNull();
 bool psc_frozen_isNull();
-bool psc_mod_isNull();
 bool psc_restrict_isNull();
 
 			
-		void Summary_setNull(bool val);
+		void Description_setNull(bool val);
+void Define_setNull(bool val);
+void Summary_setNull(bool val);
 void URL_setNull(bool val);
 void RequiresPayment_setNull(bool val);
 void psc_id_setNull(bool val);
 void psc_batch_setNull(bool val);
 void psc_user_setNull(bool val);
 void psc_frozen_setNull(bool val);
-void psc_mod_setNull(bool val);
 void psc_restrict_setNull(bool val);
 	
 	
@@ -173,11 +175,7 @@ void psc_restrict_setNull(bool val);
 
 		// Return the rows in other tables with foreign keys pointing here
 		void Package_FK_License_getrows(vector <class Row_Package*> *rows);
-void Package_pschist_FK_License_getrows(vector <class Row_Package_pschist*> *rows);
-void Package_pschmask_FK_License_getrows(vector <class Row_Package_pschmask*> *rows);
 void PaidLicense_FK_License_getrows(vector <class Row_PaidLicense*> *rows);
-void PaidLicense_pschist_FK_License_getrows(vector <class Row_PaidLicense_pschist*> *rows);
-void PaidLicense_pschmask_FK_License_getrows(vector <class Row_PaidLicense_pschmask*> *rows);
 
 
 		// Setup binary serialization

@@ -87,6 +87,7 @@ void Row_DesignObjVariation_DesignObj_Skin_Language::Delete()
 	Row_DesignObjVariation_DesignObj_Skin_Language *pRow = this; // Needed so we will have only 1 version of get_primary_fields_assign_from_row
 	
 	if (!is_deleted)
+	{
 		if (is_added)	
 		{	
 			vector<TableRow*>::iterator i;	
@@ -108,6 +109,7 @@ void Row_DesignObjVariation_DesignObj_Skin_Language::Delete()
 			table->deleted_cachedRows[key] = this;
 			is_deleted = true;	
 		}	
+	}
 }
 
 void Row_DesignObjVariation_DesignObj_Skin_Language::Reload()
@@ -193,7 +195,8 @@ is_null[26] = true;
 m_psc_user = 0;
 m_psc_frozen = 0;
 is_null[27] = false;
-is_null[28] = true;
+m_psc_mod = "0000-00-00 00:00:00";
+is_null[28] = false;
 is_null[29] = true;
 m_psc_restrict = 0;
 
@@ -435,9 +438,6 @@ return is_null[26];}
 bool Row_DesignObjVariation_DesignObj_Skin_Language::psc_frozen_isNull() {PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
 
 return is_null[27];}
-bool Row_DesignObjVariation_DesignObj_Skin_Language::psc_mod_isNull() {PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
-
-return is_null[28];}
 bool Row_DesignObjVariation_DesignObj_Skin_Language::psc_restrict_isNull() {PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
 
 return is_null[29];}
@@ -505,10 +505,6 @@ is_modified=true;
 }
 void Row_DesignObjVariation_DesignObj_Skin_Language::psc_frozen_setNull(bool val){PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
 is_null[27]=val;
-is_modified=true;
-}
-void Row_DesignObjVariation_DesignObj_Skin_Language::psc_mod_setNull(bool val){PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
-is_null[28]=val;
 is_modified=true;
 }
 void Row_DesignObjVariation_DesignObj_Skin_Language::psc_restrict_setNull(bool val){PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
@@ -797,8 +793,8 @@ PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
 if (is_null[21])
 return "NULL";
 
-char *buf = new char[29];
-db_wrapper_real_escape_string(table->database->m_pDB, buf, m_sFK_DesignObj_TiedTo.c_str(), (unsigned long) min((size_t)14,m_sFK_DesignObj_TiedTo.size()));
+char *buf = new char[85];
+db_wrapper_real_escape_string(table->database->m_pDB, buf, m_sFK_DesignObj_TiedTo.c_str(), (unsigned long) min((size_t)42,m_sFK_DesignObj_TiedTo.size()));
 string s=string()+"\""+buf+"\"";
 delete[] buf;
 return s;
@@ -811,8 +807,8 @@ PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
 if (is_null[22])
 return "NULL";
 
-char *buf = new char[21];
-db_wrapper_real_escape_string(table->database->m_pDB, buf, m_VisibleStates.c_str(), (unsigned long) min((size_t)10,m_VisibleStates.size()));
+char *buf = new char[61];
+db_wrapper_real_escape_string(table->database->m_pDB, buf, m_VisibleStates.c_str(), (unsigned long) min((size_t)30,m_VisibleStates.size()));
 string s=string()+"\""+buf+"\"";
 delete[] buf;
 return s;

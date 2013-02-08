@@ -59,7 +59,7 @@
 
 #include "PlutoUtils/FileUtils.h"
 
-#include "../include/version.h"
+#define  VERSION "<=version=>"
 
 using namespace DCE;
 

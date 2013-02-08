@@ -45,7 +45,7 @@
 #include "../pluto_main/Table_Users.h"
 #include "../pluto_main/Table_Package.h"
 
-#include "../include/version.h"
+#define  VERSION "<=version=>"
 
 #ifdef WIN32
 #define EOL "\r\n"
@@ -518,7 +518,7 @@ void DCEGen::CreateDeviceFile(class Row_DeviceTemplate *p_Row_DeviceTemplate,map
 			";";
 		if( pDataInfo->m_pRow_DeviceData->PK_DeviceData_get()!=DEVICEDATA_COM_Port_on_PC_CONST )
 			fstr_DeviceCommand << endl << "\t\telse" << endl << "\t\t\treturn " << 
-			CastStringToType("m_mapParameters_Find(" + GetDeviceDataConstStr(pDataInfo->m_pRow_DeviceData) + ")",pDataInfo->m_pRow_DeviceData->FK_ParameterType_get()) << ";";
+			CastStringToType("m_mapParameters[" + GetDeviceDataConstStr(pDataInfo->m_pRow_DeviceData) + "]",pDataInfo->m_pRow_DeviceData->FK_ParameterType_get()) << ";";
 	
 		fstr_DeviceCommand << endl << "\t}" << endl << endl;
 
@@ -1402,8 +1402,7 @@ void DCEGen::SearchAndReplace(string InputFile,string OutputFile,string Classnam
 void DCEGen::CreateFunctionParms(Row_Command *pRow_Command,CommandInfo *pCommandInfo)
 {
 	vector<Row_Command_CommandParameter *> vectRow_Command_CommandParameter;
-	// Use a sql where so we can specify an order by
-	pRow_Command->Table_Command_get()->Database_pluto_main_get()->Command_CommandParameter_get()->GetRows("FK_Command=" + StringUtils::itos(pRow_Command->PK_Command_get()) + " ORDER BY FK_CommandParameter", &vectRow_Command_CommandParameter);
+	pRow_Command->Command_CommandParameter_FK_Command_getrows(&vectRow_Command_CommandParameter);
 
 	// First all the in's
 	for(size_t i3=0;i3<vectRow_Command_CommandParameter.size();++i3)

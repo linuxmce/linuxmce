@@ -96,34 +96,34 @@ case $diskType in
 		command='/usr/pluto/bin/disc_unlock "$sourceDevice"; nice -n 15 /usr/pluto/bin/disk_copy "$sourceDevice" "$targetFileName.dvd.in-progress" > '"$ProgressOutput"
 	;;
 	0|1|6|7|8)
-#		export HTTPGETOPTS="--connect-timeout=5 --tries=1 -q -O -"
-#		DiscID="$(/usr/bin/cd-discid "$sourceDevice")"		
-#		if ! Query="$(/usr/bin/cddb-tool query "$FreeDB_URL" "$FreeDB_ProtoVersion" "$FreeDB_User" "$FreeDB_Host" "$DiscID")"; then
-#			Err=$Err_Query
-#			echo "Error in query"
-#		else
-#			echo "Query Successful"
-#			Code=$(echo "$Query" | head -1 | cut -d' ' -f1)
-#			case "$Code" in
-#				200) # one match
-#					QueryID=$(echo "$Query" | cut -d' ' -f2,3)
-#					echo "Query ID code 200, QueryID = $QueryID" > /tmp/QueryID
-#				;;
-#				202|403|409|503) # no match/error
-#					Err=$Err_NoMatch
-#				;;
-#				210|211) # multiple match (210 - exact, 211 - inexact)
-#					QueryID=$(echo "$Query" | head -2 | tail -1 | cut -d' ' -f1,2)
-#				;;
-#			esac
-#		fi
+		export HTTPGETOPTS="--connect-timeout=5 --tries=1 -q -O -"
+		DiscID="$(/usr/bin/cd-discid "$sourceDevice")"		
+		if ! Query="$(/usr/bin/cddb-tool query "$FreeDB_URL" "$FreeDB_ProtoVersion" "$FreeDB_User" "$FreeDB_Host" "$DiscID")"; then
+			Err=$Err_Query
+			echo "Error in query"
+		else
+			echo "Query Successful"
+			Code=$(echo "$Query" | head -1 | cut -d' ' -f1)
+			case "$Code" in
+				200) # one match
+					QueryID=$(echo "$Query" | cut -d' ' -f2,3)
+					echo "Query ID code 200, QueryID = $QueryID" > /tmp/QueryID
+				;;
+				202|403|409|503) # no match/error
+					Err=$Err_NoMatch
+				;;
+				210|211) # multiple match (210 - exact, 211 - inexact)
+					QueryID=$(echo "$Query" | head -2 | tail -1 | cut -d' ' -f1,2)
+				;;
+			esac
+		fi
 
-#		/usr/bin/cddb-tool read "$FreeDB_URL" "$FreeDB_ProtoVersion" "$FreeDB_User" "$FreeDB_Host" "$QueryID" > /tmp/cddbread.$$
-#		Read="$(/usr/bin/cddb-tool parse /tmp/cddbread.$$)"
-#		eval "$Read"
-#		rm -f /tmp/cddbread.$$
-#		Tag="$DiscID$Tab$DARTIST$Tab$DALBUM$Tab$CDGENRE$Tab$CDYEAR"
-#		unset HTTPGETOPTS
+		/usr/bin/cddb-tool read "$FreeDB_URL" "$FreeDB_ProtoVersion" "$FreeDB_User" "$FreeDB_Host" "$QueryID" > /tmp/cddbread.$$
+		Read="$(/usr/bin/cddb-tool parse /tmp/cddbread.$$)"
+		eval "$Read"
+		rm -f /tmp/cddbread.$$
+		Tag="$DiscID$Tab$DARTIST$Tab$DALBUM$Tab$CDGENRE$Tab$CDYEAR"
+		unset HTTPGETOPTS
 		
 		Dir="$targetFileName"
 		case "$ripFormat" in
@@ -135,14 +135,12 @@ case $diskType in
 			ogg)
 				FinalExt="ogg"
 				Quality="-q $(echo "$ripFormatString" | cut -d';' -f2)"
-#				OutputFile='>(oggenc -Q --artist "$DARTIST" --album "$DALBUM" --date "$CDYEAR" --genre "$CDGENRE" --tracknum "$TrackNumber" '"$Quality"' -o "$Dir/$FileName.'"$FinalExt"'.in-progress" -)' # encoder
-				OutputFile='>(oggenc -Q '"$Quality"' -o "$Dir/$FileName.'"$FinalExt"'.in-progress" -)' # encoder
+				OutputFile='>(oggenc -Q --artist "$DARTIST" --album "$DALBUM" --date "$CDYEAR" --genre "$CDGENRE" --tracknum "$TrackNumber" '"$Quality"' -o "$Dir/$FileName.'"$FinalExt"'.in-progress" -)' # encoder
 			;;
 			
 			flac)
 				FinalExt="flac"
-#				OutputFile='>(flac -T "Title=$FileName" -T "Artist=$DARTIST" -T "Album=$DALBUM" -T "TrackNumber=$TrackNumber" -T "Year=$CDYEAR" -T "Genre=$CDGENRE" -o "$Dir/$FileName.'"$FinalExt"'.in-progress" -)' # encoder
-				OutputFile='>(flac -o "$Dir/$FileName.'"$FinalExt"'.in-progress" -)' # encoder
+				OutputFile='>(flac -T "Title=$FileName" -T "Artist=$DARTIST" -T "Album=$DALBUM" -T "TrackNumber=$TrackNumber" -T "Year=$CDYEAR" -T "Genre=$CDGENRE" -o "$Dir/$FileName.'"$FinalExt"'.in-progress" -)' # encoder
 
 			;;
 			
@@ -152,8 +150,7 @@ case $diskType in
 				if [[ "$(echo "$ripFormatString" | cut -d';' -f3)" == "vbr" ]]; then
 					BitRate="--vbr-new $BitRate"
 				fi
-#				OutputFile='>(lame -h --tt "$FileName" --ta "$DARTIST" --tl "$DALBUM" --tn "$TrackNumber" --ty "$CDYEAR" --tg "$CDGENRE" '"$BitRate"' - "$Dir/$FileName.'"$FinalExt"'.in-progress")' # encoder
-				OutputFile='>(lame -h '"$BitRate"' - "$Dir/$FileName.'"$FinalExt"'.in-progress")' # encoder
+				OutputFile='>(lame -h --tt "$FileName" --ta "$DARTIST" --tl "$DALBUM" --tn "$TrackNumber" --ty "$CDYEAR" --tg "$CDGENRE" '"$BitRate"' - "$Dir/$FileName.'"$FinalExt"'.in-progress")' # encoder
 			;;
 			
 			*)

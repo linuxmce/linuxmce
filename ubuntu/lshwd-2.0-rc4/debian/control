@@ -1,7 +1,7 @@
 Source: lshwd
 Section: base
 Priority: optional
-Maintainer: Razvan Gavril <razvan.g@plutohome.com>
+Maintainer: LinuxMCE Developers <developers@linuxmce.org>
 Build-Depends: debhelper (>= 4.0.0)
 Standards-Version: 3.6.1
 

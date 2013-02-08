@@ -35,10 +35,6 @@ using namespace std;
 
 #include "Table_Event.h"
 #include "Table_EventCategory.h"
-#include "Table_EventCategory_pschist.h"
-#include "Table_EventCategory_pschmask.h"
-#include "Table_Event_pschist.h"
-#include "Table_Event_pschmask.h"
 
 
 void Database_pluto_main::CreateTable_EventCategory()
@@ -86,6 +82,7 @@ void Row_EventCategory::Delete()
 	Row_EventCategory *pRow = this; // Needed so we will have only 1 version of get_primary_fields_assign_from_row
 	
 	if (!is_deleted)
+	{
 		if (is_added)	
 		{	
 			vector<TableRow*>::iterator i;	
@@ -107,6 +104,7 @@ void Row_EventCategory::Delete()
 			table->deleted_cachedRows[key] = this;
 			is_deleted = true;	
 		}	
+	}
 }
 
 void Row_EventCategory::Reload()
@@ -151,7 +149,8 @@ is_null[5] = true;
 m_psc_user = 0;
 m_psc_frozen = 0;
 is_null[6] = false;
-is_null[7] = true;
+m_psc_mod = "0000-00-00 00:00:00";
+is_null[7] = false;
 is_null[8] = true;
 m_psc_restrict = 0;
 
@@ -237,9 +236,6 @@ return is_null[5];}
 bool Row_EventCategory::psc_frozen_isNull() {PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
 
 return is_null[6];}
-bool Row_EventCategory::psc_mod_isNull() {PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
-
-return is_null[7];}
 bool Row_EventCategory::psc_restrict_isNull() {PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
 
 return is_null[8];}
@@ -267,10 +263,6 @@ is_modified=true;
 }
 void Row_EventCategory::psc_frozen_setNull(bool val){PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
 is_null[6]=val;
-is_modified=true;
-}
-void Row_EventCategory::psc_mod_setNull(bool val){PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
-is_null[7]=val;
 is_modified=true;
 }
 void Row_EventCategory::psc_restrict_setNull(bool val){PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
@@ -312,8 +304,8 @@ PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
 if (is_null[2])
 return "NULL";
 
-char *buf = new char[51];
-db_wrapper_real_escape_string(table->database->m_pDB, buf, m_Description.c_str(), (unsigned long) min((size_t)25,m_Description.size()));
+char *buf = new char[151];
+db_wrapper_real_escape_string(table->database->m_pDB, buf, m_Description.c_str(), (unsigned long) min((size_t)75,m_Description.size()));
 string s=string()+"\""+buf+"\"";
 delete[] buf;
 return s;
@@ -983,34 +975,6 @@ PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
 
 class Table_EventCategory *pTable = table->database->EventCategory_get();
 pTable->GetRows("`FK_EventCategory_Parent`=" + StringUtils::itos(m_PK_EventCategory),rows);
-}
-void Row_EventCategory::EventCategory_pschist_FK_EventCategory_Parent_getrows(vector <class Row_EventCategory_pschist*> *rows)
-{
-PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
-
-class Table_EventCategory_pschist *pTable = table->database->EventCategory_pschist_get();
-pTable->GetRows("`FK_EventCategory_Parent`=" + StringUtils::itos(m_PK_EventCategory),rows);
-}
-void Row_EventCategory::EventCategory_pschmask_FK_EventCategory_Parent_getrows(vector <class Row_EventCategory_pschmask*> *rows)
-{
-PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
-
-class Table_EventCategory_pschmask *pTable = table->database->EventCategory_pschmask_get();
-pTable->GetRows("`FK_EventCategory_Parent`=" + StringUtils::itos(m_PK_EventCategory),rows);
-}
-void Row_EventCategory::Event_pschist_FK_EventCategory_getrows(vector <class Row_Event_pschist*> *rows)
-{
-PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
-
-class Table_Event_pschist *pTable = table->database->Event_pschist_get();
-pTable->GetRows("`FK_EventCategory`=" + StringUtils::itos(m_PK_EventCategory),rows);
-}
-void Row_EventCategory::Event_pschmask_FK_EventCategory_getrows(vector <class Row_Event_pschmask*> *rows)
-{
-PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
-
-class Table_Event_pschmask *pTable = table->database->Event_pschmask_get();
-pTable->GetRows("`FK_EventCategory`=" + StringUtils::itos(m_PK_EventCategory),rows);
 }
 
 

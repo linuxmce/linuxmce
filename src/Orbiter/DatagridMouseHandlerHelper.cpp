@@ -96,15 +96,15 @@ LoggerWrapper::GetInstance()->Write(LV_FESTIVAL,"DatagridMouseHandlerHelper::Scr
 			m_pMouseBehavior->SetMousePosition( m_pObj_ScrollingGrid->m_rPosition.X + m_pObj_ScrollingGrid->m_pPopupPoint.X + m_pObj_ScrollingGrid->m_rPosition.Width/2 , m_pObj_ScrollingGrid->m_rPosition.Y + m_pObj_ScrollingGrid->m_pPopupPoint.Y );
 		else
 		{
-			if( m_pObj_ScrollingGrid->DataGridTable_Get() && m_pObj_ScrollingGrid->m_iHighlightedRow_get()!=-1 && m_pObj_ScrollingGrid->m_GridCurRow + m_pObj_ScrollingGrid->m_iHighlightedRow_get() >= m_pObj_ScrollingGrid->DataGridTable_Get()->GetRows() )
-				m_pObj_ScrollingGrid->m_iHighlightedRow_set( m_pObj_ScrollingGrid->DataGridTable_Get()->GetRows() - m_pObj_ScrollingGrid->m_GridCurRow - 1 );
+			if( m_pObj_ScrollingGrid->DataGridTable_Get() && m_pObj_ScrollingGrid->m_iHighlightedRow!=-1 && m_pObj_ScrollingGrid->m_GridCurRow + m_pObj_ScrollingGrid->m_iHighlightedRow >= m_pObj_ScrollingGrid->DataGridTable_Get()->GetRows() )
+				m_pObj_ScrollingGrid->m_iHighlightedRow = m_pObj_ScrollingGrid->DataGridTable_Get()->GetRows() - m_pObj_ScrollingGrid->m_GridCurRow - 1;
 
 			PlutoRectangle r;
 			m_pObj_ScrollingGrid->GetGridCellDimensions(
 				1, // col span
 				1, // row span
 				0, // column
-				m_pObj_ScrollingGrid->m_iHighlightedRow_get() /* 0 based */, // We only care about the position of the last visible row, whether or not anything is there
+				m_pObj_ScrollingGrid->m_iHighlightedRow /* 0 based */, // We only care about the position of the last visible row, whether or not anything is there
 				r.X,  r.Y,  r.Width,  r.Height );
 
 			// Move back to the bottom of the grid, since we're done with the iterator

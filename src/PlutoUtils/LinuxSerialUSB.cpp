@@ -15,7 +15,8 @@
 */
 
 #include "PlutoUtils/LinuxSerialUSB.h"	 
-
+#include "PlutoUtils/ProcessUtils.h"
+#include "PlutoUtils/StringUtils.h"
 
 string TranslateSerialUSB(string sInput,string sIPAddress)
 {
@@ -27,57 +28,25 @@ string TranslateSerialUSB(string sInput,string sIPAddress)
 		return sInput;
 	}
 
-	size_t pos = 0;
-	string sPciId = StringUtils::Tokenize(sInput, "+", pos);
-	string sUsbId = StringUtils::Tokenize(sInput, "+", pos);
-	sUsbId = StringUtils::Replace(sUsbId,".","\\.");
-
-	char tmpFile[40] = "/tmp/devusbXXXXXX";
-	mktemp(tmpFile);
-	string sCmd;
-
-	if( sIPAddress.empty()==false )
-		sCmd = "ssh " + sIPAddress + " ";
-
-	sCmd += "find /sys/devices -name '*tty*' | egrep '/tty[:/]' | grep usb | grep '" + sPciId + ".*-" + sUsbId + ":.*' | sed -r 's,tty[:/],,g' >" + tmpFile; 
-
-	system(sCmd.c_str());
-
-	vector<string> vectStr;
-	FileUtils::ReadFileIntoVector(tmpFile,vectStr);
-#ifdef DEBUG
-	LoggerWrapper::GetInstance()->Write(LV_STATUS,"TranslateSerialUSB Cmd %s size %d",sCmd.c_str(),(int) vectStr.size());
-#endif
-	for(vector<string>::iterator it=vectStr.begin();it!=vectStr.end();++it)
+	string sCmd, sOutput, sStdErr;
+	if ( sIPAddress.empty()==false )
 	{
-		if( (*it).find(sPciId)!=string::npos )
-		{
-			LoggerWrapper::GetInstance()->Write(LV_STATUS,"TranslateSerialUSB found %s, returning %s",
-				(*it).c_str(),("/dev/" + FileUtils::FilenameWithoutPath(*it)).c_str());
-			return "/dev/" + FileUtils::FilenameWithoutPath(*it);
-		}
+		// Remote address, use ssh.
+		const char *args[] = {"/usr/pluto/bin/TranslateRemoteSerialPort.sh",sIPAddress.c_str(),sInput.c_str(),NULL};
+		ProcessUtils::GetCommandOutput(args[0],args,sOutput,sStdErr);
 	}
-	LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"TranslateSerialUSB %s couldn't find a match",sInput.c_str());
-	
-/*
-	char tmpFile[40] = "/tmp/devusbXXXXXX";
-	mktemp(tmpFile);
-	system(("ls -l /sys/bus/usb-serial/devices/ > " + string(tmpFile)).c_str());
-	
-	vector<string> vectStr;
-	FileUtils::ReadFileIntoVector(tmpFile,vectStr);
-	for(vector<string>::iterator it=vectStr.begin();it!=vectStr.end();++it)
+	else
 	{
-		if( (*it).find(sInput)!=string::npos )
-		{
-			LoggerWrapper::GetInstance()->Write(LV_STATUS,"TranslateSerialUSB found %s, returning %s",
-				(*it).c_str(),("/dev/" + FileUtils::FilenameWithoutPath(*it)).c_str());
-			return "/dev/" + FileUtils::FilenameWithoutPath(*it);
-		}
+		// This is local, just execute it.
+		const char *args[] = {"/usr/pluto/bin/TranslateSerialPort.sh",sInput.c_str(),NULL};
+		ProcessUtils::GetCommandOutput(args[0],args,sOutput,sStdErr);
 	}
-	LoggerWrapper::GetInstance()->Write(LV_STATUS,"TranslateSerialUSB %s couldn't find a match",sInput.c_str());
-*/
-#endif
 
-	return sInput;
+	StringUtils::TrimSpaces(sOutput);
+	LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"TranslateSerialUSB %s result %s", sInput.c_str(), sOutput.c_str());
+#endif
+#ifdef WIN32
+	string sOutput = "";  // fix so win32 will compile.
+#endif
+	return sOutput;
 }

@@ -29,6 +29,7 @@
 #include "../SharedConfig.h"
 #include <iostream>
 #include <sstream>
+#include <string.h>
 
 const std::string LOGNAME = "LameWrapper";
 

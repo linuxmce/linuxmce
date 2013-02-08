@@ -59,10 +59,17 @@
 #include "Orbiter/OrbiterFileBrowser.h"
 #include "Orbiter_Plugin/OH_Orbiter.h"
 #include "Gen_Devices/AllScreens.h"
+#include "JobHandler/JobHandler.h"
+#include "JobHandler/Job.h"
+#include "JobHandler/Task.h"
+
+using namespace nsJobHandler;
+using namespace DCE;
 
 class Database_pluto_main;
 class Database_pluto_media;
 class Row_EntertainArea;
+class Row_File;
 class MediaFile;
 class MediaListGrid;
 class DatabaseInfoOnPath;
@@ -72,7 +79,167 @@ class DatabaseInfoOnPath;
 
 namespace DCE
 {
+  class PendingTaskList;
+}
 
+namespace nsJobHandler
+{
+
+  class MoveJob : public Job
+  {
+    friend class MoveTask;
+  public:
+    bool m_bReportResult;
+    string m_sFileName;
+    string m_sDestinationFileName;
+    Row_File *m_pRow_File;
+    Database_pluto_media *m_pDatabase_pluto_media;
+    int m_iPK_Orbiter;
+  public:
+    MoveJob(Database_pluto_media *pDatabase_pluto_media,
+	    class JobHandler *pJobHandler,
+	    int iPK_Orbiter,
+	    Row_File *pRow_File,
+	    string sFileName,
+	    string sDestinationFileName,
+	    bool bReportResult,
+	   Command_Impl *pCommand_Impl);
+    virtual ~MoveJob();
+
+    virtual bool ReadyToRun();
+    void AddMoveTasks(TasklistPosition position=position_TasklistEnd);
+
+    virtual bool ReportPendingTasks(PendingTaskList *pPendingTaskList);
+    virtual int SecondsRemaining();
+    virtual string ToString();
+    virtual int PercentComplete();
+    virtual string GetType() { return "MoveJob"; }
+
+    int Get_PK_Orbiter();
+
+  };
+
+  class MoveTask : public Task
+  {
+  public:
+    class MoveJob *m_pMoveJob;
+    bool m_bReportResult;
+    Row_File *m_pRow_File;
+    string m_sText;
+    int m_iTime;
+    string m_sFileName;
+    string m_sDestinationFileName;
+    bool m_bAlreadySpawned; 
+    string m_sSpawnName;
+    DeviceData_Base *m_pDevice_App_Server;
+
+    MoveTask(class MoveJob *pMoveJob, 
+	     string sName, 
+	     bool bReportResult,
+	     string sFileName, 
+	     string sDestinationFileName);
+    virtual ~MoveTask();
+    virtual string GetType() { return "MoveTask"; }
+    
+    virtual int Run();
+    virtual bool Abort();
+    int RunAlreadySpawned();
+    void ReportFailure();
+    void ReportSuccess();
+    void ReportProgress();
+    void UpdateProgress(string sStatus, int iPercent, int iTime, string sText);
+    virtual int SecondsRemaining();
+  };
+
+  class MoveDBTask : public Task
+  {
+  public:
+    class MoveJob *m_pMoveJob;
+    bool m_bReportResult;
+    Row_File *m_pRow_File;
+    string m_sText;
+    bool m_bAlreadySpawned;
+    
+    MoveDBTask(class MoveJob *pMoveJob,
+	       string sName,
+	       bool bReportResult);
+    virtual ~MoveDBTask();
+    virtual string GetType() { return "MoveDBTask"; }
+    
+    virtual int Run();
+    virtual bool Abort();
+    int RunAlreadySpawned();
+
+  };
+
+  class TranscodeJob : public Job
+  {
+    friend class TranscodeTask;
+  public:
+    bool m_bDeleteSourceAfterTranscode;
+    bool m_bReportResult;
+    string m_sFileName;
+    string m_sDestinationFileName;
+    int m_iPK_Orbiter;
+    map<string, string> m_mapParametersAndValues;
+  public:
+TranscodeJob(class JobHandler *pJobHandler,
+	     int iPK_Orbiter,
+	     string sFileName,
+	     string sDestinationFileName,
+	     map<string, string> mapParametersAndValues,
+	     bool bDeleteSourceAfterTranscode,
+	     Command_Impl *pCommand_Impl);
+    virtual ~TranscodeJob();
+
+    virtual bool ReadyToRun();
+    void AddTranscodeTask();
+
+    virtual bool ReportPendingTasks(PendingTaskList *pPendingTaskList);
+    virtual int SecondsRemaining();
+    virtual string ToString();
+    virtual int PercentComplete();
+    virtual string GetType() { return "TranscodeJob"; }
+
+    int Get_PK_Orbiter();
+
+  };
+
+  class TranscodeTask : public Task
+  {
+  public:
+    class TranscodeJob *m_pTranscodeJob;
+    string m_sText;
+    int m_iTime;
+    string m_sFileName;
+    string m_sDestinationFileName;
+    bool m_bAlreadySpawned; 
+    string m_sSpawnName;
+    DeviceData_Base *m_pDevice_App_Server;
+    map<string,string> m_mapParametersAndValues;
+
+    TranscodeTask(class TranscodeJob *pTranscodeJob, 
+	     string sName, 
+	     string sFileName, 
+	     string sDestinationFileName);
+    virtual ~TranscodeTask();
+    virtual string GetType() { return "TranscodeTask"; }
+    
+    virtual int Run();
+    virtual bool Abort();
+    int RunAlreadySpawned();
+    void ReportFailure();
+    void ReportSuccess();
+    void ReportProgress();
+    void UpdateProgress(string sStatus, int iPercent, int iTime, string sText);
+    virtual int SecondsRemaining();
+    string GetParameters();
+  };
+
+}
+
+namespace DCE
+{
 
 //<-dceag-decl-b->!
 class Media_Plugin : public Media_Plugin_Command, public DataGridGeneratorPlugIn, public FloorplanInfoProvider, public FollowMe_Device, public AlarmEvent
@@ -96,6 +263,7 @@ public:
 	class Generic_NonPluto_Media *m_pGeneric_NonPluto_Media;
     class MediaHandlerInfo *m_pGenericMediaHandlerInfo;
 	class AlarmManager *m_pAlarmManager;
+	class JobHandler *m_pJobHandler;
 
     friend class MediaHandlerInfo;
     pluto_pthread_mutex_t m_MediaMutex; // Other classes may need this
@@ -405,16 +573,16 @@ public:
 
 	// This version is called by MH_Play_Media.  It may result in multiple handlers and multiple streams
 	// if there isn't 1 handler that can do it all.  If p_vectMediaStream is passed it will have a list of all the streams that were created as a result
-	void StartMedia( int iPK_MediaType, int iPK_MediaProvider, unsigned int iPK_Device_Orbiter, vector<EntertainArea *> &vectEntertainArea, int iPK_Device, int iPK_DeviceTemplate, deque<MediaFile *> *dequeMediaFile, bool bResume, int iRepeat, string sStartingPosition, bool bBypassEvent, bool bDontSetupAV, bool bQueue, vector<MediaStream *> *p_vectMediaStream=NULL);
+	void StartMedia( int iPK_MediaType, int iPK_MediaProvider, unsigned int iPK_Device_Orbiter, vector<EntertainArea *> &vectEntertainArea, int iPK_Device, int iPK_DeviceTemplate, deque<MediaFile *> *dequeMediaFile, bool bQueue, bool bResume, int iRepeat, string sStartingPosition, vector<MediaStream *> *p_vectMediaStream=NULL);
 
 	// This creates a single media stream for a given media handler and starts playing it by calling the next StartMedia, or returns NULL if it cannot create the stream
-    MediaStream *StartMedia(MediaHandlerInfo *pMediaHandlerInfo, int iPK_MediaProvider, unsigned int PK_Device_Orbiter,vector<EntertainArea *> &vectEntertainArea,int PK_Device_Source,deque<MediaFile *> *dequeMediaFile,bool bResume,int iRepeat, string sStartingPosition, bool bBypassEvent, bool bDontSetupAV, bool bQueue, int iPK_Playlist=0, map<int, pair<MediaDevice *,MediaDevice *> > *p_mapEntertainmentArea_OutputZone=NULL);
+	MediaStream *StartMedia(MediaHandlerInfo *pMediaHandlerInfo, int iPK_MediaProvider, unsigned int PK_Device_Orbiter,vector<EntertainArea *> &vectEntertainArea,int PK_Device_Source,deque<MediaFile *> *dequeMediaFile, bool bQueue, bool bResume,int iRepeat, string sStartingPosition, int iPK_Playlist=0, map<int, pair<MediaDevice *,MediaDevice *> > *p_mapEntertainmentArea_OutputZone=NULL);
 
 	// This is the second to the final stage of 'StartMedia'.  
-	bool StartMedia(MediaStream *pMediaStream, bool bQueue, map<int, pair<MediaDevice *,MediaDevice *> > *p_mapEntertainmentArea_OutputZone);
+	bool StartMedia(MediaStream *pMediaStream, map<int, pair<MediaDevice *,MediaDevice *> > *p_mapEntertainmentArea_OutputZone);
 
 	// This is the final stage of 'StartMedia' that starts playing the given stream.  This is also called when the stream changes, or is moved, and needs to be restarted
-	bool StartMedia(MediaStream *pMediaStream, bool bQueue);
+	bool StartMedia(MediaStream *pMediaStream);
 
 	// An alarm callback when we're holding up starting the stream while waiting for a jukebox to load a drive
 	void WaitingForJukebox( MediaStream *pMediaStream );
@@ -529,6 +697,15 @@ public:
 	string GetMRLFromDiscID( int PK_Disc,int PK_Device_Drive );
 	void TransformFilenameToDeque(string sFilename,deque<MediaFile *> &dequeMediaFile);
 
+	/**
+	 * @brief Check a file and add its individual items to the deque if it is a playlist
+	 * sFileName - check this file if it is a playlist
+	 * MediaType - the mediatype to set for each added MediaFile, as we dont load and detect each and every one
+	 * dequeMediaFile - The deque to add the playlist items to
+	 * @returns true if the playlist was succesfully expanded into its components, false if not
+	 */
+	bool ExpandPlaylist(string sFilename, int MediaType, deque<MediaFile* > &dequeMediaFile);
+
 	/*
 	*	Since this class is so big, all the datagrid function have been moved to Media_Plugin_Grids.cpp
 	*/
@@ -542,7 +719,6 @@ public:
 	void PopulateFileBrowserInfoForPlayList(MediaListGrid *pMediaListGrid,string sPK_Users_Private);
 	void PopulateFileBrowserInfoForBookmark(MediaListGrid *pMediaListGrid,string &sPK_File,string &sPK_Disc);
 	void PopulateWithDatabaseInfoOnPath(map<string,DatabaseInfoOnPath *> &mapDatabaseInfoOnPath,string &sSearchPath); // helper for FileBrowser
-	void AddSongAttributes(int PK_AttributeType,const char *pName,FileBrowserInfo *pFileBrowserInfo);
     class DataGridTable *CurrentMedia( string GridID,string Parms,void *ExtraData,int *iPK_Variable,string *sValue_To_Assign,class Message *pMessage );
     class DataGridTable *CurrentMediaSections( string GridID, string Parms, void *ExtraData, int *iPK_Variable, string *sValue_To_Assign, class Message *pMessage );
     class DataGridTable *MediaSections( string GridID,string Parms,void *ExtraData,int *iPK_Variable,string *sValue_To_Assign,class Message *pMessage );
@@ -568,12 +744,12 @@ public:
     class DataGridTable *Bookmarks( string GridID, string Parms, void *ExtraData, int *iPK_Variable, string *sValue_To_Assign, class Message *pMessage );
 	class DataGridTable *BookmarksByMediaType( string GridID, string Parms, void *ExtraData, int *iPK_Variable, string *sValue_To_Assign, class Message *pMessage );
 	class DataGridTable *CaptureCardPorts( string GridID, string Parms, void *ExtraData, int *iPK_Variable, string *sValue_To_Assign, class Message *pMessage );
+	class DataGridTable *CaptureCardAudioPorts( string GridID, string Parms, void *ExtraData, int *iPK_Variable, string *sValue_To_Assign, class Message *pMessage );
 	class DataGridTable *DevicesForCaptureCardPort( string GridID, string Parms, void *ExtraData, int *iPK_Variable, string *sValue_To_Assign, class Message *pMessage );
 	class DataGridTable *DevicesNeedingProviders( string GridID, string Parms, void *ExtraData, int *iPK_Variable, string *sValue_To_Assign, class Message *pMessage );
 	class DataGridTable *ProvidersForDevice( string GridID, string Parms, void *ExtraData, int *iPK_Variable, string *sValue_To_Assign, class Message *pMessage );
 	class DataGridTable *ThumbnailableAttributes( string GridID, string Parms, void *ExtraData, int *iPK_Variable, string *sValue_To_Assign, class Message *pMessage );
 	class DataGridTable *CDTracks( string GridID, string Parms, void *ExtraData, int *iPK_Variable, string *sValue_To_Assign, class Message *pMessage );
-	class DataGridTable *TracksOnDisc( string GridID, string Parms, void *ExtraData, int *iPK_Variable, string *sValue_To_Assign, class Message *pMessage );
 
 	bool CanThumbnail(int PK_AttributeType);
 	void ReleaseDriveLock(MediaStream *pMediaStream);  // When playing media from a disk drive, we issue a CMD_Lock to block others from using the drive.  Call this to release any lock
@@ -965,9 +1141,11 @@ public:
 
 	/** @brief COMMAND: #623 - Shuffle */
 	/** Randomizes the order of the current playlist. */
+		/** @param #45 PK_EntertainArea */
+			/** The Entertainment Area to send the shuffle command to. If not specified, This is assumed to come from an orbiter, and will be automatically determined. */
 
-	virtual void CMD_Shuffle() { string sCMD_Result; CMD_Shuffle(sCMD_Result,NULL);};
-	virtual void CMD_Shuffle(string &sCMD_Result,Message *pMessage);
+	virtual void CMD_Shuffle(string sPK_EntertainArea) { string sCMD_Result; CMD_Shuffle(sPK_EntertainArea.c_str(),sCMD_Result,NULL);};
+	virtual void CMD_Shuffle(string sPK_EntertainArea,string &sCMD_Result,Message *pMessage);
 
 
 	/** @brief COMMAND: #742 - Media Identified */
@@ -1181,6 +1359,131 @@ VI=Video Input */
 	virtual void CMD_Specify_Repeat_Options(string sPK_EntertainArea,int iRepeat) { string sCMD_Result; CMD_Specify_Repeat_Options(sPK_EntertainArea.c_str(),iRepeat,sCMD_Result,NULL);};
 	virtual void CMD_Specify_Repeat_Options(string sPK_EntertainArea,int iRepeat,string &sCMD_Result,Message *pMessage);
 
+
+	/** @brief COMMAND: #1083 - Move File */
+	/** Move a file from one place to another. */
+		/** @param #13 Filename */
+			/** !F notation referring to PK_File entry in the pluto_media File table. */
+		/** @param #219 Path */
+			/** The fully qualified destination Path and Filename */
+
+	virtual void CMD_Move_File(string sFilename,string sPath) { string sCMD_Result; CMD_Move_File(sFilename.c_str(),sPath.c_str(),sCMD_Result,NULL);};
+	virtual void CMD_Move_File(string sFilename,string sPath,string &sCMD_Result,Message *pMessage);
+
+
+	/** @brief COMMAND: #1088 - Specify Capture Card Audio Port */
+	/** Specify the capture card audio port for a device */
+		/** @param #2 PK_Device */
+			/** The Device to set the capture card audio port */
+		/** @param #201 PK_Device_Related */
+			/** The Device to set the capture card audio port to */
+
+	virtual void CMD_Specify_Capture_Card_Audio_Port(int iPK_Device,int iPK_Device_Related) { string sCMD_Result; CMD_Specify_Capture_Card_Audio_Port(iPK_Device,iPK_Device_Related,sCMD_Result,NULL);};
+	virtual void CMD_Specify_Capture_Card_Audio_Port(int iPK_Device,int iPK_Device_Related,string &sCMD_Result,Message *pMessage);
+
+
+	/** @brief COMMAND: #1089 - Update Move Status */
+	/** Update the Status of a Move Task */
+		/** @param #9 Text */
+			/** A Text message to return to the Task. */
+		/** @param #102 Time */
+			/** Time in Seconds remaining. */
+		/** @param #199 Status */
+			/** The status: [p] in progress, [e]rror, [s]uccess */
+		/** @param #256 Percent */
+			/** The Percentage to update. */
+		/** @param #257 Task */
+			/** Task ID to update */
+		/** @param #258 Job */
+			/** Job ID to update */
+
+	virtual void CMD_Update_Move_Status(string sText,string sTime,string sStatus,int iPercent,string sTask,string sJob) { string sCMD_Result; CMD_Update_Move_Status(sText.c_str(),sTime.c_str(),sStatus.c_str(),iPercent,sTask.c_str(),sJob.c_str(),sCMD_Result,NULL);};
+	virtual void CMD_Update_Move_Status(string sText,string sTime,string sStatus,int iPercent,string sTask,string sJob,string &sCMD_Result,Message *pMessage);
+
+
+	/** @brief COMMAND: #1090 - Get Attribute Image */
+	/** Returns PK_Image file for supplied !A */
+
+	virtual void CMD_Get_Attribute_Image() { string sCMD_Result; CMD_Get_Attribute_Image(sCMD_Result,NULL);};
+	virtual void CMD_Get_Attribute_Image(string &sCMD_Result,Message *pMessage);
+
+
+	/** @brief COMMAND: #1091 - Transcode File */
+	/** Transcode a file */
+		/** @param #13 Filename */
+			/** Source Filename */
+		/** @param #20 Format */
+			/** Format parameters key=value separated by | */
+		/** @param #50 Name */
+			/** Destination Filename */
+		/** @param #234 Directory */
+			/** Destination Directory */
+
+	virtual void CMD_Transcode_File(string sFilename,string sFormat,string sName,string sDirectory) { string sCMD_Result; CMD_Transcode_File(sFilename.c_str(),sFormat.c_str(),sName.c_str(),sDirectory.c_str(),sCMD_Result,NULL);};
+	virtual void CMD_Transcode_File(string sFilename,string sFormat,string sName,string sDirectory,string &sCMD_Result,Message *pMessage);
+
+
+	/** @brief COMMAND: #1092 - Update Transcode Status */
+	/** Update the status of a transcode job. */
+		/** @param #9 Text */
+			/** STatus text to return to task */
+		/** @param #102 Time */
+			/** Time remaining */
+		/** @param #199 Status */
+			/** Status e s f */
+		/** @param #256 Percent */
+			/** Percent update for task */
+		/** @param #257 Task */
+			/** Task number */
+		/** @param #258 Job */
+			/** Job Number */
+
+	virtual void CMD_Update_Transcode_Status(string sText,string sTime,string sStatus,int iPercent,string sTask,string sJob) { string sCMD_Result; CMD_Update_Transcode_Status(sText.c_str(),sTime.c_str(),sStatus.c_str(),iPercent,sTask.c_str(),sJob.c_str(),sCMD_Result,NULL);};
+	virtual void CMD_Update_Transcode_Status(string sText,string sTime,string sStatus,int iPercent,string sTask,string sJob,string &sCMD_Result,Message *pMessage);
+
+
+	/** @brief COMMAND: #1095 - Get Attribute Types */
+	/** Get  attribute types */
+		/** @param #9 Text */
+			/** The attribute types in the format of: id:name<newline>id:name<newline> */
+		/** @param #29 PK_MediaType */
+			/** Media type to find attribute types for. If 0, will return all. */
+
+	virtual void CMD_Get_Attribute_Types(int iPK_MediaType,string *sText) { string sCMD_Result; CMD_Get_Attribute_Types(iPK_MediaType,sText,sCMD_Result,NULL);};
+	virtual void CMD_Get_Attribute_Types(int iPK_MediaType,string *sText,string &sCMD_Result,Message *pMessage);
+
+
+	/** @brief COMMAND: #1096 - Get Attributes For Type */
+	/** Get the attributes for attribute type */
+		/** @param #9 Text */
+			/** The attributes for the specified attribute type in the format: id:name<newline>id:name<newline> */
+		/** @param #122 EK_AttributeType */
+			/** The attribute type to get the attributes for */
+
+	virtual void CMD_Get_Attributes_For_Type(int iEK_AttributeType,string *sText) { string sCMD_Result; CMD_Get_Attributes_For_Type(iEK_AttributeType,sText,sCMD_Result,NULL);};
+	virtual void CMD_Get_Attributes_For_Type(int iEK_AttributeType,string *sText,string &sCMD_Result,Message *pMessage);
+
+
+	/** @brief COMMAND: #1097 - Get File Formats */
+	/** Get file formats for the specified media type. */
+		/** @param #20 Format */
+			/** Comma-delimited list of file formats. */
+		/** @param #29 PK_MediaType */
+			/** Media Type to get file formats for. If 0, get all. */
+
+	virtual void CMD_Get_File_Formats(int iPK_MediaType,string *sFormat) { string sCMD_Result; CMD_Get_File_Formats(iPK_MediaType,sFormat,sCMD_Result,NULL);};
+	virtual void CMD_Get_File_Formats(int iPK_MediaType,string *sFormat,string &sCMD_Result,Message *pMessage);
+
+
+	/** @brief COMMAND: #1098 - Get Media Sub Type */
+	/** Get media sub types for specified media type. */
+		/** @param #29 PK_MediaType */
+			/** The Media Type to get sub types for. If 0, gets all. */
+		/** @param #50 Name */
+			/** Comma delimited list of media sub types. */
+
+	virtual void CMD_Get_Media_Sub_Type(int iPK_MediaType,string *sName) { string sCMD_Result; CMD_Get_Media_Sub_Type(iPK_MediaType,sName,sCMD_Result,NULL);};
+	virtual void CMD_Get_Media_Sub_Type(int iPK_MediaType,string *sName,string &sCMD_Result,Message *pMessage);
 
 //<-dceag-h-e->
 };

@@ -114,170 +114,173 @@ while : ;do
 	fi
 
 	## Get a list with all the File Servers from the database
-	Q="
-		SELECT 
-			Device.PK_Device, 
-			Device.IPaddress,
-			Username.IK_DeviceData,
-			Password.IK_DeviceData
-		FROM 
-			Device
-			LEFT JOIN Device_DeviceData Username ON Username.FK_Device = Device.PK_Device AND Username.FK_DeviceData = '$DD_USERNAME'
-			LEFT JOIN Device_DeviceData Password ON Password.FK_Device = Device.PK_Device AND Password.FK_DeviceData = '$DD_PASSWORD'
-		WHERE 
-			Device.FK_DeviceTemplate IN ($TPL_BUFFALO, $TPL_FILESERVER)
+	## Reserve operation for file server handling to core only
+	ConfEval
+	if [[ "$PK_Device" -eq "1" ]]; then
+		Q="
+			SELECT 
+				Device.PK_Device,
+				Device.IPaddress,
+				Username.IK_DeviceData,
+				Password.IK_DeviceData
+			FROM 
+				Device
+				LEFT JOIN Device_DeviceData Username ON Username.FK_Device = Device.PK_Device AND Username.FK_DeviceData = '$DD_USERNAME'
+				LEFT JOIN Device_DeviceData Password ON Password.FK_Device = Device.PK_Device AND Password.FK_DeviceData = '$DD_PASSWORD'
+			WHERE 
+				Device.FK_DeviceTemplate IN ($TPL_BUFFALO, $TPL_FILESERVER)
 			
-	"
-	FileServerList=$(RunCSQL "$Q")
+		"
+		FileServerList=$(RunCSQL "$Q")
 
-	## Test each file server
-	for FileServer in $FileServerList ;do 
-		Device_ID=$(Field 1 "$FileServer")
-		Device_IP=$(Field 2 "$FileServer")
-		Device_Username=$(Field 3 "$FileServer")
-		Device_Password=$(Field 4 "$FileServer")
+		## Test each file server
+		for FileServer in $FileServerList ;do 
+			Device_ID=$(Field 1 "$FileServer")
+			Device_IP=$(Field 2 "$FileServer")
+			Device_Username=$(Field 3 "$FileServer")
+			Device_Password=$(Field 4 "$FileServer")
 	
-		if [[ "$Device_IP" == "" ]] ;then
-			SetKidsOnline "$Device_ID" "0"
-			Log "Device $Device_ID has no IP address associated with it."
-			continue
-		fi
+			if [[ "$Device_IP" == "" ]] ;then
+				SetKidsOnline "$Device_ID" "0"
+				Log "Device $Device_ID has no IP address associated with it."
+				continue
+			fi
 
-		## Test to see if the file server is online or not
-		ping -qnc 1 -W 1 "$Device_IP" &> /dev/null
-		HostIsUp=$?
-		if [[ "$HostIsUp" != "0" ]] ;then
-			SetKidsOnline "$Device_ID" "0"
-			Log "Device $Device_ID ($Device_IP) doesn't respond to our ping."
-			continue
-		fi
+			## Test to see if the file server is online or not
+			ping -qnc 1 -W 1 "$Device_IP" &> /dev/null
+			HostIsUp=$?
+			if [[ "$HostIsUp" != "0" ]] ;then
+				SetKidsOnline "$Device_ID" "0"
+				Log "Device $Device_ID ($Device_IP) doesn't respond to our ping."
+				continue
+			fi
 
 		
-		Log "Device $Device_ID ($Device_IP) is online trying each of samba kids to see it they are still available"
-		## Get a list of samba shares related to this device
-		Q="
-		SELECT 
-			PK_Device,
-			ShareName.IK_DeviceData,
-			Username.IK_DeviceData,
-			Password.IK_DeviceData
-		FROM
-			Device
-			LEFT JOIN Device_DeviceData ShareName ON ShareName.FK_Device = Device.PK_Device AND ShareName.FK_DeviceData = '$DD_SHARE_NAME'
-			LEFT JOIN Device_DeviceData Username ON Username.FK_Device = Device.PK_Device AND Username.FK_DeviceData = '$DD_USERNAME'
-			LEFT JOIN Device_DeviceData Password ON Password.FK_Device = Device.PK_Device AND Password.FK_DeviceData = '$DD_PASSWORD'
-		WHERE
-			FK_Device_ControlledVia = '$Device_ID'
-			AND
-			FK_DeviceTemplate = '$TPL_WINDOWS_SHARE'
-		"
-		SambaShareList=$(RunCSQL "$Q")
+			Log "Device $Device_ID ($Device_IP) is online trying each of samba kids to see it they are still available"
+			## Get a list of samba shares related to this device
+			Q="
+			SELECT 
+				PK_Device,
+				ShareName.IK_DeviceData,
+				Username.IK_DeviceData,
+				Password.IK_DeviceData
+			FROM
+				Device
+				LEFT JOIN Device_DeviceData ShareName ON ShareName.FK_Device = Device.PK_Device AND ShareName.FK_DeviceData = '$DD_SHARE_NAME'
+				LEFT JOIN Device_DeviceData Username ON Username.FK_Device = Device.PK_Device AND Username.FK_DeviceData = '$DD_USERNAME'
+				LEFT JOIN Device_DeviceData Password ON Password.FK_Device = Device.PK_Device AND Password.FK_DeviceData = '$DD_PASSWORD'
+			WHERE
+				FK_Device_ControlledVia = '$Device_ID'
+				AND
+				FK_DeviceTemplate = '$TPL_WINDOWS_SHARE'
+			"
+			SambaShareList=$(RunCSQL "$Q")
 
-		## Test each samba share to see if is available or not
-		for SambaShare in $SambaShareList ;do
+			## Test each samba share to see if is available or not
+			for SambaShare in $SambaShareList ;do
 			
-			if [[ "$SambaShare" == "" ]] ;then
-				continue
-			fi
+				if [[ "$SambaShare" == "" ]] ;then
+					continue
+				fi
 			
-			Share_ID=$(Field "1" "$SambaShare")
-			Share_Name=$(Field "2" "$SambaShare")
-			Share_Username=$(Field "3" "$SambaShare")
-			Share_Password=$(Field "4" "$SambaShare")
+				Share_ID=$(Field "1" "$SambaShare")
+				Share_Name=$(Field "2" "$SambaShare")
+				Share_Username=$(Field "3" "$SambaShare")
+				Share_Password=$(Field "4" "$SambaShare")
 
-			## Test if the share is still in the list
-			smbclient -U $Device_Username%$Device_Password --list=//$Device_IP --grepable 2>/dev/null | grep "^Disk" | cut -d'|' -f2 | grep -q "^${Share_Name}$"
-			isShareInList=$?
-	
-			## Try with the listing the shares with the username/password of the share
-			if [[ "$isShareInList" != 0 ]] ;then
-				set -x
-				smbclient -U $Share_Username%$Share_Password --list=//$Device_IP --grepable 2>/dev/null | grep "^Disk" | cut -d'|' -f2 | grep -q "^${Share_Name}$"
+				## Test if the share is still in the list
+				smbclient -U $Device_Username%$Device_Password --list=//$Device_IP --grepable 2>/dev/null | grep "^Disk" | cut -d'|' -f2 | grep -q "^${Share_Name}$"
 				isShareInList=$?
-				set +x
-			fi
+	
+				## Try with the listing the shares with the username/password of the share
+				if [[ "$isShareInList" != 0 ]] ;then
+					set -x
+					smbclient -U $Share_Username%$Share_Password --list=//$Device_IP --grepable 2>/dev/null | grep "^Disk" | cut -d'|' -f2 | grep -q "^${Share_Name}$"
+					isShareInList=$?
+					set +x
+				fi
 			
-			if [[ "$isShareInList" != "0" ]] ;then
-				Log "Share $Share_ID ($Share_Name) is not advertised by the smb server"
-				SetDeviceOnline "$Share_ID" "0"
-				continue
-			fi
+				if [[ "$isShareInList" != "0" ]] ;then
+					Log "Share $Share_ID ($Share_Name) is not advertised by the smb server, trying any how"
+				#	SetDeviceOnline "$Share_ID" "0"
+				#	continue
+				fi
 
-			## Test if the share is still mountable with the username/password that we have
-			smbclient -U $Share_Username%$Share_Password "//$Device_IP/$Share_Name" -c 'pwd' 1>/dev/null 2>/dev/null
-			isShareMountable=$?
+				## Test if the share is still mountable with the username/password that we have
+				smbclient -U $Share_Username%$Share_Password "//$Device_IP/$Share_Name" -c 'pwd' 1>/dev/null 2>/dev/null
+				isShareMountable=$?
 			
-			if [[ "$isShareMountable" != "0" ]] ;then
-				Msg="Share $Share_ID ($Share_Name) is not mountable with the username/pass that i have"
-				Log "$Msg"
-				/usr/pluto/bin/MessageSend "$DCERouter" 0 -1001 2 "$EV_User_Password_Mismatch" "$EVP_PK_Device" "$Share_ID" "$EVP_Comment" "$Msg"
-				SetDeviceOnline "$Share_ID" "0"
-				continue
-			fi
+				if [[ "$isShareMountable" != "0" ]] ;then
+					Msg="Share $Share_ID ($Share_Name) is not mountable with the username/pass that i have"
+					Log "$Msg"
+					/usr/pluto/bin/MessageSend "$DCERouter" 0 -1001 2 "$EV_User_Password_Mismatch" "$EVP_PK_Device" "$Share_ID" "$EVP_Comment" "$Msg"
+					SetDeviceOnline "$Share_ID" "0"
+					continue
+				fi
 
-			SetDeviceOnline "$Share_ID" "1"
-		done
+				SetDeviceOnline "$Share_ID" "1"
+			done
 
 
-		## Get a list of nfs shares related to this device
-		Q="
-                SELECT 
-                        PK_Device,
-                        ShareName.IK_DeviceData,
-                        Username.IK_DeviceData,
-                        Password.IK_DeviceData
-                FROM
-                        Device
-                        LEFT JOIN Device_DeviceData ShareName ON ShareName.FK_Device = Device.PK_Device AND ShareName.FK_DeviceData = '$DD_SHARE_NAME'
-                        LEFT JOIN Device_DeviceData Username ON Username.FK_Device = Device.PK_Device AND Username.FK_DeviceData = '$DD_USERNAME'
-                        LEFT JOIN Device_DeviceData Password ON Password.FK_Device = Device.PK_Device AND Password.FK_DeviceData = '$DD_PASSWORD'
-                WHERE
-                        FK_Device_ControlledVia = '$Device_ID'
-                        AND
-                        FK_DeviceTemplate = '$TPL_NFS_SHARE'
-                "
-		NFSShareList=$(RunCSQL "$Q")
+			## Get a list of nfs shares related to this device
+			Q="
+                	SELECT 
+                	        PK_Device,
+                	        ShareName.IK_DeviceData,
+                	        Username.IK_DeviceData,
+                	        Password.IK_DeviceData
+                	FROM
+                	        Device
+                	        LEFT JOIN Device_DeviceData ShareName ON ShareName.FK_Device = Device.PK_Device AND ShareName.FK_DeviceData = '$DD_SHARE_NAME'
+                	        LEFT JOIN Device_DeviceData Username ON Username.FK_Device = Device.PK_Device AND Username.FK_DeviceData = '$DD_USERNAME'
+                	        LEFT JOIN Device_DeviceData Password ON Password.FK_Device = Device.PK_Device AND Password.FK_DeviceData = '$DD_PASSWORD'
+                	WHERE
+                	        FK_Device_ControlledVia = '$Device_ID'
+                	        AND
+                	        FK_DeviceTemplate = '$TPL_NFS_SHARE'
+                	"
+			NFSShareList=$(RunCSQL "$Q")
 
-		## Test each nfs share to see if is available on not
-		for NFSShare in $NFSShareList ;do
-			if [[ "$NFSShare" == "" ]] ;then 
-				continue
-			fi
+			## Test each nfs share to see if is available on not
+			for NFSShare in $NFSShareList ;do
+				if [[ "$NFSShare" == "" ]] ;then 
+					continue
+				fi
 			
-			Share_ID=$(Field "1" "$NFSShare")
-                        Share_Name=$(Field "2" "$NFSShare")
-                        Share_Username=$(Field "3" "$NFSShare")
-                        Share_Password=$(Field "4" "$NFSShare")
+				Share_ID=$(Field "1" "$NFSShare")
+	                        Share_Name=$(Field "2" "$NFSShare")
+	                        Share_Username=$(Field "3" "$NFSShare")
+	                        Share_Password=$(Field "4" "$NFSShare")
 								
-			## Test if the share is still in the list
-			showmount -e $Device_IP | cut -d ' ' -f1 | grep "^${Share_Name}$"
-			isShareInList=$?
+				## Test if the share is still in the list
+				showmount -e $Device_IP | cut -d ' ' -f1 | grep "^${Share_Name}$"
+				isShareInList=$?
 
-			if [[ "$isShareInList" != "0" ]] ;then
-				Log "Share $Share_ID ($Share_Name) is not advertised by the nfs server"
-				SetDeviceOnline "$Share_ID" "0"
-				continue
-			fi
+				if [[ "$isShareInList" != "0" ]] ;then
+					Log "Share $Share_ID ($Share_Name) is not advertised by the nfs server"
+					SetDeviceOnline "$Share_ID" "0"
+					continue
+				fi
 
-                        ## See if the share is mountable
-                        mountDirTemp=$(mktemp -d)
-                        mount ${Device_IP}:${Share_Name} $mountDirTemp 1>/dev/null 2>/dev/null
-                        isShareMountable=$?
+	                        ## See if the share is mountable
+	                        mountDirTemp=$(mktemp -d /tmp/StorageDevices_StatusRadar.temp.mount.XXXXXXXXX)
+	                        mount ${Device_IP}:${Share_Name} $mountDirTemp 1>/dev/null 2>/dev/null
+	                        isShareMountable=$?
 
-                        if [[ "$isShareMountable" != "0" ]] ;then
-                                Log "Share $Share_ID ($Share_Name) cannot be mounted"
-                                SetDeviceOnline "$Share_ID" "0"
-				rmdir $mountDirTemp
-				continue
-                        else
-                                umount -lf $mountDirTemp 1>/dev/null 2>/dev/null
-                                rmdir $mountDirTemp
-                        fi
+	                        if [[ "$isShareMountable" != "0" ]] ;then
+	                                Log "Share $Share_ID ($Share_Name) cannot be mounted"
+	                                SetDeviceOnline "$Share_ID" "0"
+					rmdir $mountDirTemp
+					continue
+	                        else
+	                                umount -lf $mountDirTemp 1>/dev/null 2>/dev/null
+	                                rmdir $mountDirTemp
+	                        fi
 
-			SetDeviceOnline "$Share_ID" "1"
+				SetDeviceOnline "$Share_ID" "1"
+			done
 		done
-	done
-
+	fi
 	## Get a list of internal drives
 	Q="
 		SELECT
@@ -311,7 +314,7 @@ while : ;do
 		## then we translate the block device to uuid
 		if [[ "$IDrive_Parent" == "$PK_Device" ]] ;then
 		if [[ "$IDrive_UUID" == "" || "$IDrive_UUID" == "NULL" ]] && [[ "$IDrive_BlockDev" != "NULL" ]] ;then
-			IDrive_UUID=$(udevinfo --query=all --name="$IDrive_BlockDev" |  grep 'ID_FS_UUID=' | cut -d'=' -f2)
+			IDrive_UUID=$(udevadm info --query=all --name="$IDrive_BlockDev" |  grep 'ID_FS_UUID=' | cut -d'=' -f2)
 
 			if [[ "$IDrive_UUID" != "" ]] ;then
 				RunSQL "UPDATE Device_DeviceData SET IK_DeviceData = '$IDrive_UUID' WHERE FK_Device = '$IDrive_ID' AND FK_DeviceData = '$DD_UUID'"
@@ -353,7 +356,7 @@ while : ;do
 			fi
 
 			## See if the drive is mountable
-			mountDirTemp=$(mktemp -d)			
+			mountDirTemp=$(mktemp -d /tmp/StorageDevices_StatusRadar.temp.mount.XXXXXXXXX)			
 			mount ${IDrive_BlockDev} $mountDirTemp 1>/dev/null 2>/dev/null
 			isDriveMountable=$?
 			
@@ -371,7 +374,7 @@ while : ;do
 			
 
 		## Is a internal drive located on a remote computer
-		else
+		elif [[ "$PK_Device" -eq "1" ]]; then
 
 			## Get the ip of the parent device
 			IDrive_IP=$(RunCSQL "SELECT IPaddress FROM Device WHERE PK_Device='${IDrive_Parent}'")

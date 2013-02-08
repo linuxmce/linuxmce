@@ -1,0 +1,55 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+"http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+	<head>
+		<meta name="viewport" content="width = device-width, user-scalable=no, initial-scale=1.0, minimum-scale=1.0, maximum-scale=1.0" />
+		<meta name="apple-mobile-web-app-capable" content="yes" />
+		<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+
+		<title>WebOrbiter: Select Device</title>
+
+		<link rel="stylesheet" type="text/css" href="weborbiter/weborbiter.css" />
+		<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+	</head>
+	<body>
+		<form method="get" action="weborbiter.php">
+<!-- BEGIN HasNoInstallation -->
+			<p>ERROR: this user does not have any installation.</p>
+<!-- END HasNoInstallation -->
+<!-- BEGIN HasInstallations -->
+	<!-- BEGIN OneInstallation -->
+			<p>Installation: #{InstallationNumber}
+			<input type="hidden" name="installation" value="{InstallationNumber}" />
+			</p>
+	<!-- END OneInstallation -->
+	<!-- BEGIN ManyInstallations -->
+			<p>
+			<label for="installation">Installation:</label>
+			<select id="installation" name="installation">
+				<option>- Please select -</option>
+		<!-- BEGIN InstallationOption -->
+				<option value="{InstallationNumber}">{InstallationNumber}</option>
+		<!-- END InstallationOption -->
+			</select>
+			</p>
+	<!-- END ManyInstallations -->
+
+	<!-- BEGIN HasNoDevice -->
+			<p>You don't have any generic web device in current installation.</p>
+	<!-- END HasNoDevice -->
+	<!-- BEGIN HasDevices -->
+			<p>
+			<label for="device_id">Device:</label>
+			<select id="device_id" name="device_id">
+				<option>- Please select -</option>
+		<!-- BEGIN DeviceOption -->
+				<option value="{DeviceNumber}">{DeviceDescription}</option>
+		<!-- END DeviceOption -->
+			</select>
+			</p>
+			<p><input type="submit" value="Open" /></p>
+	<!-- END HasDevices -->
+<!-- END HasInstallations -->
+		</form>
+	</body>
+</html>

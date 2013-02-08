@@ -1,0 +1,269 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003" ToolsVersion="3.5">
+  <PropertyGroup>
+    <ProjectType>Local</ProjectType>
+    <ProductVersion>9.0.30729</ProductVersion>
+    <SchemaVersion>2.0</SchemaVersion>
+    <ProjectGuid>{A34C2628-3F2A-4A28-ADF7-39E13A2C6CFC}</ProjectGuid>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ApplicationIcon>App.ico</ApplicationIcon>
+    <AssemblyKeyContainerName>
+    </AssemblyKeyContainerName>
+    <AssemblyName>HADesigner</AssemblyName>
+    <DefaultClientScript>JScript</DefaultClientScript>
+    <DefaultHTMLPageLayout>Grid</DefaultHTMLPageLayout>
+    <DefaultTargetSchema>IE50</DefaultTargetSchema>
+    <DelaySign>false</DelaySign>
+    <OutputType>WinExe</OutputType>
+    <RootNamespace>HADesigner</RootNamespace>
+    <RunPostBuildEvent>OnBuildSuccess</RunPostBuildEvent>
+    <StartupObject>HADesigner.MDIForm</StartupObject>
+    <FileUpgradeFlags>
+    </FileUpgradeFlags>
+    <UpgradeBackupLocation>
+    </UpgradeBackupLocation>
+    <OldToolsVersion>0.0</OldToolsVersion>
+    <TargetFrameworkVersion>v3.5</TargetFrameworkVersion>
+    <PublishUrl>publish\</PublishUrl>
+    <Install>true</Install>
+    <InstallFrom>Disk</InstallFrom>
+    <UpdateEnabled>false</UpdateEnabled>
+    <UpdateMode>Foreground</UpdateMode>
+    <UpdateInterval>7</UpdateInterval>
+    <UpdateIntervalUnits>Days</UpdateIntervalUnits>
+    <UpdatePeriodically>false</UpdatePeriodically>
+    <UpdateRequired>false</UpdateRequired>
+    <MapFileExtensions>true</MapFileExtensions>
+    <ApplicationRevision>0</ApplicationRevision>
+    <ApplicationVersion>1.0.0.%2a</ApplicationVersion>
+    <IsWebBootstrapper>false</IsWebBootstrapper>
+    <UseApplicationTrust>false</UseApplicationTrust>
+    <BootstrapperEnabled>true</BootstrapperEnabled>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <OutputPath>bin\Debug\</OutputPath>
+    <BaseAddress>285212672</BaseAddress>
+    <ConfigurationOverrideFile>
+    </ConfigurationOverrideFile>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <DocumentationFile>
+    </DocumentationFile>
+    <DebugSymbols>true</DebugSymbols>
+    <FileAlignment>4096</FileAlignment>
+    <Optimize>false</Optimize>
+    <RegisterForComInterop>false</RegisterForComInterop>
+    <RemoveIntegerChecks>false</RemoveIntegerChecks>
+    <WarningLevel>4</WarningLevel>
+    <DebugType>full</DebugType>
+    <ErrorReport>prompt</ErrorReport>
+    <PlatformTarget>x86</PlatformTarget>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <OutputPath>bin\Release\</OutputPath>
+    <BaseAddress>285212672</BaseAddress>
+    <ConfigurationOverrideFile>
+    </ConfigurationOverrideFile>
+    <DefineConstants>TRACE</DefineConstants>
+    <DocumentationFile>
+    </DocumentationFile>
+    <FileAlignment>4096</FileAlignment>
+    <Optimize>true</Optimize>
+    <RegisterForComInterop>false</RegisterForComInterop>
+    <RemoveIntegerChecks>false</RemoveIntegerChecks>
+    <WarningLevel>4</WarningLevel>
+    <DebugType>none</DebugType>
+    <ErrorReport>prompt</ErrorReport>
+    <PlatformTarget>x86</PlatformTarget>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="System">
+      <Name>System</Name>
+    </Reference>
+    <Reference Include="System.Data">
+      <Name>System.Data</Name>
+    </Reference>
+    <Reference Include="System.Drawing">
+      <Name>System.Drawing</Name>
+    </Reference>
+    <Reference Include="System.Windows.Forms">
+      <Name>System.Windows.Forms</Name>
+    </Reference>
+    <Reference Include="System.Xml">
+      <Name>System.XML</Name>
+    </Reference>
+    <Reference Include="MySql.Data, Version=6.1.3.0, Culture=neutral, PublicKeyToken=20449f9ba87f7ae2">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\..\..\..\..\..\..\..\usr\lib\cli\MySql.Data-6.1\MySql.Data.dll</HintPath>
+      <Package>mysql-connector-net</Package>
+    </Reference>
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="About.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="AssemblyInfo.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="CategoryForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="ChooseObject.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="classCommonMethods.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="ColorPicker.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="MainForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="NewObject.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="ObjectDesigner.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="ObjsBrowser2.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Options.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Parameter.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="SkinLanguageForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="SkinLanguageStatus.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="SkinsForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="StringPair.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="StylesForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="TextForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="UI.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="UIChildSkinLanguage.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="UIObject.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="UIObjectVariation.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="UIObjectVariationAction.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="UIObjectVariationActionGroup.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="UIObjectVariationActionParameter.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="UIObjectVariationParameter.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="UIText.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="UITextSkinLanguage.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <EmbeddedResource Include="About.resx">
+      <DependentUpon>About.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="CategoryForm.resx">
+      <DependentUpon>CategoryForm.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="ChooseObject.resx">
+      <DependentUpon>ChooseObject.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="MainForm.resx">
+      <DependentUpon>MainForm.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="NewObject.resx">
+      <DependentUpon>NewObject.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="ObjectDesigner.resx">
+      <DependentUpon>ObjectDesigner.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="ObjsBrowser2.resx">
+      <DependentUpon>ObjsBrowser2.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Options.resx">
+      <DependentUpon>Options.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="SkinLanguageForm.resx">
+      <DependentUpon>SkinLanguageForm.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="SkinsForm.resx">
+      <DependentUpon>SkinsForm.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="StylesForm.resx">
+      <DependentUpon>StylesForm.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="TextForm.resx">
+      <DependentUpon>TextForm.cs</DependentUpon>
+    </EmbeddedResource>
+    <Content Include="App.ico" />
+  </ItemGroup>
+  <ItemGroup>
+    <BootstrapperPackage Include="Microsoft.Net.Client.3.5">
+      <Visible>False</Visible>
+      <ProductName>.NET Framework Client Profile</ProductName>
+      <Install>false</Install>
+    </BootstrapperPackage>
+    <BootstrapperPackage Include="Microsoft.Net.Framework.2.0">
+      <Visible>False</Visible>
+      <ProductName>.NET Framework 2.0 %28x86%29</ProductName>
+      <Install>false</Install>
+    </BootstrapperPackage>
+    <BootstrapperPackage Include="Microsoft.Net.Framework.3.0">
+      <Visible>False</Visible>
+      <ProductName>.NET Framework 3.0 %28x86%29</ProductName>
+      <Install>false</Install>
+    </BootstrapperPackage>
+    <BootstrapperPackage Include="Microsoft.Net.Framework.3.5">
+      <Visible>False</Visible>
+      <ProductName>.NET Framework 3.5</ProductName>
+      <Install>false</Install>
+    </BootstrapperPackage>
+    <BootstrapperPackage Include="Microsoft.Net.Framework.3.5.SP1">
+      <Visible>False</Visible>
+      <ProductName>.NET Framework 3.5 SP1</ProductName>
+      <Install>true</Install>
+    </BootstrapperPackage>
+    <BootstrapperPackage Include="Microsoft.Windows.Installer.3.1">
+      <Visible>False</Visible>
+      <ProductName>Windows Installer 3.1</ProductName>
+      <Install>true</Install>
+    </BootstrapperPackage>
+  </ItemGroup>
+  <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
+  <PropertyGroup>
+    <PreBuildEvent>
+    </PreBuildEvent>
+    <PostBuildEvent>
+    </PostBuildEvent>
+  </PropertyGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\HAData\HAData.csproj">
+      <Project>{C5679AE5-F8FF-451F-A97B-EA58F93B04AF}</Project>
+      <Name>HAData</Name>
+    </ProjectReference>
+  </ItemGroup>
+</Project>

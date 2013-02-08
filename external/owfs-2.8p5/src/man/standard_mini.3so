@@ -1,0 +1,25 @@
+'\"
+'\" Copyright (c) 2003-2004 Paul H Alfille, MD
+'\" (palfille@earthlink.net)
+'\"
+'\" Program manual page for the OWFS -- 1-wire filesystem package
+'\" Based on Dallas Semiconductor, Inc's datasheets, and trial and error.
+'\"
+'\" Free for all use. No waranty. None. Use at your own risk.
+'\" $Id: standard_mini.3so,v 1.2 2010/05/02 19:06:35 alfille Exp $
+'\"
+.B address
+|
+.B crc8
+|
+.B id
+|
+.B locator
+|
+.B r_address
+|
+.B r_id
+|
+.B r_locator
+|
+.B type

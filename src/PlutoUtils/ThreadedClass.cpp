@@ -22,13 +22,22 @@
 #include "PlutoUtils/StringUtils.h"
 #include "PlutoUtils/Other.h"
 
+#ifdef __APPLE_CC__
+#define PTHREAD_MUTEX_RECURSIVE_NP PTHREAD_MUTEX_RECURSIVE
+#endif
+
 using namespace nsThreadedClass;
 using namespace DCE;
 
 ThreadedClass::ThreadedClass() : m_ThreadMutex("ThreadedClass", true)
 {
 	m_bQuit=m_bThreadRunning=false;
-	m_pthread=0;
+#ifdef WIN32
+        m_pthread.p=0;
+#else
+        m_pthread=0;
+#endif
+
 	m_iTimeoutSecondsForStopThread=0;
 	pthread_cond_init( &m_ThreadCondition, NULL );
     pthread_mutexattr_init( &m_ThreadAttribute );
@@ -48,9 +57,12 @@ bool ThreadedClass::StopThread(int iTimeout)
 	PLUTO_SAFETY_LOCK(tm,m_ThreadMutex);
 
 	m_bQuit=true;
-	if( m_pthread==0 )
-		return true;  // The thread's not running anyway
-
+#ifdef WIN32
+        if( m_pthread.p == 0)
+#else
+        if( m_pthread == 0)
+#endif
+            return true;  // The thread's not running anyway
 	if( iTimeout==-1 )
 		iTimeout=m_iTimeoutSecondsForStopThread;
 
@@ -59,9 +71,13 @@ bool ThreadedClass::StopThread(int iTimeout)
 	{
 		tm.Release();
 		LoggerWrapper::GetInstance()->Write(LV_STATUS,"ThreadedClass::StopThread waiting to join");
-		pthread_join(m_pthread, NULL);
-		m_pthread=0;
-		return true;
+                pthread_join(m_pthread, NULL);
+#ifdef WIN32
+                m_pthread.p=0;
+#else
+                m_pthread=0;
+#endif
+                return true;
 	}
 
 	time_t tTimeout = time(NULL) + iTimeout;
@@ -98,7 +114,11 @@ bool ThreadedClass::StartThread()
 	if(pthread_create( &m_pthread, NULL, ThreadedClassThread, (void*)this) )
 	{
 		m_bThreadRunning=false;
-		m_pthread=0;
+#ifdef WIN32
+                m_pthread.p=0;
+#else
+                m_pthread=0;
+#endif
 		LoggerWrapper::GetInstance()->Write( LV_CRITICAL, "Cannot create ThreadedClass::StartThread thread" );
 		return false;
 	}

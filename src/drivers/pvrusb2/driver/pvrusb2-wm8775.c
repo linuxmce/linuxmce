@@ -1,6 +1,6 @@
 /*
  *
- *  $Id: pvrusb2-wm8775.c 1571 2007-02-28 04:27:44Z isely $
+ *  $Id: pvrusb2-wm8775.c 2271 2009-04-05 23:38:09Z isely $
  *
  *  Copyright (C) 2005 Mike Isely <isely@pobox.com>
  *  Copyright (C) 2004 Aurelien Alleaume <slts@free.fr>
@@ -28,7 +28,9 @@
 */
 
 #include "pvrusb2-wm8775.h"
+#ifdef PVR2_ENABLE_OLD_I2COPS
 #include "pvrusb2-i2c-cmd-v4l2.h"
+#endif
 
 #ifdef PVR2_ENABLE_WM8775
 
@@ -41,6 +43,9 @@
 #include <linux/errno.h>
 #include <linux/slab.h>
 #include "compat.h"
+
+#ifdef PVR2_ENABLE_OLD_I2COPS
+
 
 struct pvr2_v4l_wm8775 {
 	struct pvr2_i2c_handler handler;
@@ -189,6 +194,40 @@ int pvr2_i2c_wm8775_setup(struct pvr2_hdw *hdw,struct pvr2_i2c_client *cp)
 }
 
 
+#endif /* PVR2_ENABLE_OLD_I2COPS */
+#ifdef PVR2_ENABLE_V4L2SUBDEV
+void pvr2_wm8775_subdev_update(struct pvr2_hdw *hdw, struct v4l2_subdev *sd)
+{
+	if (hdw->input_dirty || hdw->force_dirty) {
+		u32 input;
+
+		switch (hdw->input_val) {
+		case PVR2_CVAL_INPUT_RADIO:
+			input = 1;
+			break;
+		default:
+			/* All other cases just use the second input */
+			input = 2;
+			break;
+		}
+		pvr2_trace(PVR2_TRACE_CHIPS, "subdev wm8775"
+			   " set_input(val=%d route=0x%x)",
+			   hdw->input_val, input);
+
+#ifdef PVR2_ENABLE_V4L2SUBDEV_THRASH1
+		sd->ops->audio->s_routing(sd, input, 0, 0);
+#else
+		{
+			struct v4l2_routing route;
+			memset(&route,0,sizeof(route));
+			route.input = input;
+			sd->ops->audio->s_routing(sd, &route);
+		}
+#endif
+	}
+}
+
+#endif /* PVR2_ENABLE_V4L2SUBDEV */
 #endif  /* PVR2_ENABLE_WM8775 */
 
 

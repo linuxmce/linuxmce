@@ -36,20 +36,28 @@
 
 #include "../SDL/StartOrbiterSDL.h"
 #include "../Orbiter.h"
+
+#ifndef DIRECTFB
 #include <X11/Xlib.h>
 #include <X11/Xatom.h>
 #include "XRecordExtensionHandler.h"
-
 #include "win_list_manager.h"
 #include "utilities/linux/wrapper/wrapper_x11.h"
 
+#ifndef USE_GTK
 // should be deleted
-#include "XProgressWnd.h"
 #include "XPromptUser.h"
+#endif
+
+#ifdef USE_GTK
+#include "GTKPromptUser.h"
+#endif
 
 class wxDialog_WaitGrid;
 class wxDialog_WaitList;
 class wxDialog_WaitUser;
+
+#endif
 
 #include <string>
 using namespace std;
@@ -75,29 +83,28 @@ private:
     string m_strDisplayName;
 
     bool findWindowByName();
-
+#ifndef DIRECTFB
     Window searchChildsWindowByName(Window current);
     string getWindowName(Window name);
 
     bool X11_Init();
     bool X11_Exit();
-
     XRecordExtensionHandler *m_pRecordHandler;
+#endif
 
     int m_nDesktopWidth;
     int m_nDesktopHeight;
 
     int m_nProgressWidth;
     int m_nProgressHeight;
-
-    XProgressWnd *m_pProgressWnd;
+#ifndef DIRECTFB
 
     wxDialog_WaitGrid *m_pWaitGrid;
     bool m_bButtonPressed_WaitGrid;
     wxDialog_WaitList *m_pWaitList;
     bool m_bButtonPressed_WaitList;
     wxDialog_WaitUser *m_pWaitUser;
-	
+#endif
 	bool m_bMaskApplied;
 
 	virtual bool RenderDesktop( class DesignObj_Orbiter *pObj, PlutoRectangle rectTotal, PlutoPoint point = PlutoPoint(0, 0) );
@@ -111,10 +118,11 @@ private:
 	void ApplyMask(PlutoRectangle rectTotal, PlutoPoint point, MaskTypes mask_type);
 
 	void ConfirmPcDesktop();
-
+#ifndef DIRECTFB
     // grabbed once for info only
     // do not use this
     Display *m_pDisplay_SDL;
+#endif
 
 public:
 	OrbiterLinux(int DeviceID,int PK_DeviceTemplate,
@@ -123,10 +131,10 @@ public:
                  bool bFullScreen);
 
     virtual ~OrbiterLinux();
-
+#ifndef DIRECTFB
     WinListManager *m_pWinListManager;
     X11wrapper *m_pX11;
-
+#endif
 	/**
 	 * @brief Sets up the class right after the constructor is called
 	 */
@@ -134,8 +142,6 @@ public:
 
 	void HideOtherWindows();
 	void HideWindow(string sWindowName);
-
-	virtual void SetMonitorPowerState(bool bOn);
 
     void setWindowName(string strDesktopWindowName);
     void setDisplayName(string strDisplayName);
@@ -146,11 +152,11 @@ public:
     // called by the destructor
     // can be called from outside
     virtual void Destroy();
-
+#ifndef DIRECTFB
 	virtual Display * GetDisplay(); // use this
     virtual Window GetMainWindow(); // use this
     virtual Display * GetDisplay_MainWindow(); // do not use
-
+#endif
 	virtual void CMD_Activate_PC_Desktop(bool bTrueFalse,string &sCMD_Result,Message *pMessage);
 
 	virtual void CMD_Activate_Window(string sWindowName,string &sCMD_Result,Message *pMessage);
@@ -160,7 +166,9 @@ public:
 
     virtual void CMD_Surrender_to_OS(string sOnOff,bool bFully_release_keyboard,bool bAlways,string &sCMD_Result,Message *pMessage);
 
+#if !defined(DIRECTFB) && !defined(PADORBITER)     
 	virtual class ScreenHandler *CreateScreenHandler();
+#endif
 
     void GrabPointer(bool bEnable);
     void GrabKeyboard(bool bEnable);
@@ -170,12 +178,12 @@ public:
 
 	virtual void X_LockDisplay();
     virtual void X_UnlockDisplay();
-
+#ifndef DIRECTFB
 	XRecordExtensionHandler * GetXRecordExtensionHandler()
     {
         return m_pRecordHandler;
     }
-
+#endif
 	void StopActivateExternalWindowTask();
 };
 

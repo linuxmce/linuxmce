@@ -35,11 +35,7 @@ using namespace std;
 #include "Table_FloorplanObjectType.h"
 
 #include "Table_CommandGroup_EntertainArea.h"
-#include "Table_CommandGroup_EntertainArea_pschist.h"
-#include "Table_CommandGroup_EntertainArea_pschmask.h"
 #include "Table_Device_EntertainArea.h"
-#include "Table_Device_EntertainArea_pschist.h"
-#include "Table_Device_EntertainArea_pschmask.h"
 
 
 void Database_pluto_main::CreateTable_EntertainArea()
@@ -87,6 +83,7 @@ void Row_EntertainArea::Delete()
 	Row_EntertainArea *pRow = this; // Needed so we will have only 1 version of get_primary_fields_assign_from_row
 	
 	if (!is_deleted)
+	{
 		if (is_added)	
 		{	
 			vector<TableRow*>::iterator i;	
@@ -108,6 +105,7 @@ void Row_EntertainArea::Delete()
 			table->deleted_cachedRows[key] = this;
 			is_deleted = true;	
 		}	
+	}
 }
 
 void Row_EntertainArea::Reload()
@@ -145,8 +143,7 @@ m_FK_Room = 0;
 is_null[1] = false;
 m_Only1Stream = 0;
 is_null[2] = false;
-m_Description = "";
-is_null[3] = false;
+is_null[3] = true;
 m_Private = 0;
 is_null[4] = false;
 is_null[5] = true;
@@ -160,7 +157,8 @@ is_null[9] = true;
 m_psc_user = 0;
 m_psc_frozen = 0;
 is_null[10] = false;
-is_null[11] = true;
+m_psc_mod = "0000-00-00 00:00:00";
+is_null[11] = false;
 is_null[12] = true;
 m_psc_restrict = 0;
 
@@ -252,6 +250,9 @@ void Row_EntertainArea::psc_restrict_set(long int val){PLUTO_SAFETY_LOCK_ERRORSO
 m_psc_restrict = val; is_modified=true; is_null[12]=false;}
 
 		
+bool Row_EntertainArea::Description_isNull() {PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
+
+return is_null[3];}
 bool Row_EntertainArea::FK_FloorplanObjectType_isNull() {PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
 
 return is_null[5];}
@@ -270,14 +271,15 @@ return is_null[9];}
 bool Row_EntertainArea::psc_frozen_isNull() {PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
 
 return is_null[10];}
-bool Row_EntertainArea::psc_mod_isNull() {PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
-
-return is_null[11];}
 bool Row_EntertainArea::psc_restrict_isNull() {PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
 
 return is_null[12];}
 
 			
+void Row_EntertainArea::Description_setNull(bool val){PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
+is_null[3]=val;
+is_modified=true;
+}
 void Row_EntertainArea::FK_FloorplanObjectType_setNull(bool val){PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
 is_null[5]=val;
 is_modified=true;
@@ -300,10 +302,6 @@ is_modified=true;
 }
 void Row_EntertainArea::psc_frozen_setNull(bool val){PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
 is_null[10]=val;
-is_modified=true;
-}
-void Row_EntertainArea::psc_mod_setNull(bool val){PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
-is_null[11]=val;
 is_modified=true;
 }
 void Row_EntertainArea::psc_restrict_setNull(bool val){PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
@@ -358,8 +356,8 @@ PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
 if (is_null[3])
 return "NULL";
 
-char *buf = new char[101];
-db_wrapper_real_escape_string(table->database->m_pDB, buf, m_Description.c_str(), (unsigned long) min((size_t)50,m_Description.size()));
+char *buf = new char[301];
+db_wrapper_real_escape_string(table->database->m_pDB, buf, m_Description.c_str(), (unsigned long) min((size_t)150,m_Description.size()));
 string s=string()+"\""+buf+"\"";
 delete[] buf;
 return s;
@@ -398,8 +396,8 @@ PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
 if (is_null[6])
 return "NULL";
 
-char *buf = new char[131071];
-db_wrapper_real_escape_string(table->database->m_pDB, buf, m_FloorplanInfo.c_str(), (unsigned long) min((size_t)65535,m_FloorplanInfo.size()));
+char *buf = new char[393211];
+db_wrapper_real_escape_string(table->database->m_pDB, buf, m_FloorplanInfo.c_str(), (unsigned long) min((size_t)196605,m_FloorplanInfo.size()));
 string s=string()+"\""+buf+"\"";
 delete[] buf;
 return s;
@@ -1158,39 +1156,11 @@ PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
 class Table_CommandGroup_EntertainArea *pTable = table->database->CommandGroup_EntertainArea_get();
 pTable->GetRows("`FK_EntertainArea`=" + StringUtils::itos(m_PK_EntertainArea),rows);
 }
-void Row_EntertainArea::CommandGroup_EntertainArea_pschist_FK_EntertainArea_getrows(vector <class Row_CommandGroup_EntertainArea_pschist*> *rows)
-{
-PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
-
-class Table_CommandGroup_EntertainArea_pschist *pTable = table->database->CommandGroup_EntertainArea_pschist_get();
-pTable->GetRows("`FK_EntertainArea`=" + StringUtils::itos(m_PK_EntertainArea),rows);
-}
-void Row_EntertainArea::CommandGroup_EntertainArea_pschmask_FK_EntertainArea_getrows(vector <class Row_CommandGroup_EntertainArea_pschmask*> *rows)
-{
-PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
-
-class Table_CommandGroup_EntertainArea_pschmask *pTable = table->database->CommandGroup_EntertainArea_pschmask_get();
-pTable->GetRows("`FK_EntertainArea`=" + StringUtils::itos(m_PK_EntertainArea),rows);
-}
 void Row_EntertainArea::Device_EntertainArea_FK_EntertainArea_getrows(vector <class Row_Device_EntertainArea*> *rows)
 {
 PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
 
 class Table_Device_EntertainArea *pTable = table->database->Device_EntertainArea_get();
-pTable->GetRows("`FK_EntertainArea`=" + StringUtils::itos(m_PK_EntertainArea),rows);
-}
-void Row_EntertainArea::Device_EntertainArea_pschist_FK_EntertainArea_getrows(vector <class Row_Device_EntertainArea_pschist*> *rows)
-{
-PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
-
-class Table_Device_EntertainArea_pschist *pTable = table->database->Device_EntertainArea_pschist_get();
-pTable->GetRows("`FK_EntertainArea`=" + StringUtils::itos(m_PK_EntertainArea),rows);
-}
-void Row_EntertainArea::Device_EntertainArea_pschmask_FK_EntertainArea_getrows(vector <class Row_Device_EntertainArea_pschmask*> *rows)
-{
-PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
-
-class Table_Device_EntertainArea_pschmask *pTable = table->database->Device_EntertainArea_pschmask_get();
 pTable->GetRows("`FK_EntertainArea`=" + StringUtils::itos(m_PK_EntertainArea),rows);
 }
 

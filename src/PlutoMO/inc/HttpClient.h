@@ -19,8 +19,8 @@
 #ifndef __HTTP_CLIENT_H__
 #define __HTTP_CLIENT_H__
 
-#include <http\rhttpsession.h>
-#include <http\mhttptransactioncallback.h>
+#include <http/rhttpsession.h>
+#include <http/mhttptransactioncallback.h>
 
 #include <uri8.h>
 #include <e32base.h>

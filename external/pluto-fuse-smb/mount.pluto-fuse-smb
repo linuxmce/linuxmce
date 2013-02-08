@@ -1,0 +1,57 @@
+#!/bin/bash
+
+OptValues=()
+OtherOpts=()
+MountOpts=()
+for ((i = 1; i <= "$#"; i++)); do
+	Parm="${!i}"
+	case "$Parm" in
+		-o*)
+			Value="${Parm#-o}"
+			if [[ -z "$Value" ]]; then
+				((i++))
+				Value="${!i}"
+			fi
+			OptValues=("${OptValues[@]}" ${Value//,/ })
+		;;
+		-v)
+			Verbose=y
+		;;
+		-*)
+			OtherOpts=("${OtherOpts[@]}" "${Parm}")
+		;;
+		*)
+			MountOpts=("${MountOpts[@]}" "${Parm}")
+		;;
+	esac
+done
+
+NewOptValues=
+for Opt in "${OptValues[@]}"; do
+	case "$Opt" in
+		username=*)
+			Parm_Username=(-U "${Opt#username=}")
+		;;
+		password=*)
+			Parm_Password=(-P "${Opt#password=}")
+		;;
+		credentials=*)
+			Parm_Credentials=(-C "${Opt#credentials=}")
+		;;
+		dir_mode=*|file_mode=*)
+			: # ignored for now
+		;;
+		*)
+			NewOptValues="$NewOptValues,$Opt"
+		;;
+	esac
+done
+NewOptValues="${NewOptValues#,}"
+if [[ -n "$NewOptValues" ]]; then
+	NewOptValues="-o $NewOptValues"
+fi
+
+if [[ -n "$Verbose" ]]; then
+	echo "Running cmd: " pluto-fuse-smb "${Parm_User[@]}" "${Parm_Password[@]}" "${Parm_Credentials[@]}" "${MountOpts[@]}" $NewOptValues "${OtherOpts[@]}"
+fi
+pluto-fuse-smb "${Parm_User[@]}" "${Parm_Password[@]}" "${Parm_Credentials[@]}" "${MountOpts[@]}" $NewOptValues "${OtherOpts[@]}"

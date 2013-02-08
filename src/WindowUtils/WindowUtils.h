@@ -59,27 +59,42 @@ namespace WindowUtils
 	/**
 	 * GetProperty - Get an X Property.
 	 */
-	char *GetProperty(Display *disp, Window win, Atom xa_prop_type, string s_PropertyName, unsigned long& size);
+	 char *GetProperty(Display *disp, Window win, Atom xa_prop_type, string s_PropertyName, unsigned long& size);
 
 	/**
 	 * GetClientList - Get the list of clients attached to display.
 	 */
-	bool GetClientList(Display *disp,vector<Window>& v_wClientList);
+	 bool GetClientList(Display *disp,vector<Window>& v_wClientList);
 
 	/**
 	 * GetWindowTitle - Get Window Title given Window ID
 	 */
-	bool GetWindowTitle(Display *disp, Window win, string& s_WindowTitle);
+	 bool GetWindowTitle(Display *disp, Window win, string& s_WindowTitle);
 
 	/**
 	 * FindWindowMatching - Return first Window ID matching a title fragment. 
 	 */
-	bool FindWindowMatching(Display *disp, string windowName, Window& win);
+	 bool FindWindowMatching(Display *disp, string windowName, Window& win);
 
 	/**
 	 * SendKeyToWindow - Send a Keypress to the specified window.	
 	 */
-	void SendKeyToWindow(Display *disp, unsigned long win, int iXKeySym, int serial_num);
+	 void SendKeyToWindow(Display *disp, unsigned long win, int iXKeySym, int serial_num, int iXKeySymModifer=0);
+
+	/**
+	 * Click at a specific window coordinate
+	 */
+	 void SendClickToWindow(Display *disp, unsigned long win, int button, int x=0, int y=0);
+
+	/**
+         * Get the geometry of a window
+	 */
+	 bool GetWindowGeometry(Display *disp, unsigned long win, int& x, int& y, int& w, int& h);
+
+	/**
+         * Alternate Find Window # Function
+	 */
+	bool FindWindowMatchingWMCLASS(Display *disp, char *app_name, int repeat,Window& win);
 
 }
 

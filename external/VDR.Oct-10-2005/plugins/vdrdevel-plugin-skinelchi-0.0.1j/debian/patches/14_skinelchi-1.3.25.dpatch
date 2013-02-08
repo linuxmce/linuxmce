@@ -1,0 +1,61 @@
+#!/bin/sh /usr/share/dpatch/dpatch-run
+
+## skinelchi-1.3.25 patch - _Frank_ @ vdrportal.de
+##
+## downloaded from http://vdrportal.de/board/thread.php?postid=314479#post314479
+## original filename skinelchi-0.0.1j_vdr-1.3.25.diff
+##
+## adapted to http://vdrportal.de/board/thread.php?postid=314630#post314630
+##
+## All lines beginning with `## DP:' are a description of the patch.
+## DP: Changes for VDR >= 1.3.25.
+
+@DPATCH@
+diff -Nru skinelchi-0.0.1j/DisplayMenu.c skinelchi-0.0.1j_vdr-1.3.25/DisplayMenu.c
+--- skinelchi-0.0.1j/DisplayMenu.c	Sun Apr  3 15:10:51 2005
++++ skinelchi-0.0.1j_vdr-1.3.25/DisplayMenu.c	Sun May 29 21:19:48 2005
+@@ -646,7 +646,43 @@
+ 
+ void cSkinElchiDisplayMenu::SetRecording(const cRecording *Recording)
+ {
+-  SetText(Recording->Summary(), false); //TODO
++#if VDRVERSNUM >= 10325
++    if (!Recording)
++	return;
++    const cRecordingInfo *Info = Recording->Info();
++    const cFont *font = cFont::GetFont(fontOsd);
++    tColor tr = Theme.Color(Transparent);
++    int y = y3;
++    int x = x6 - x2;
++    if (area == 1) {
++	osd->GetBitmap(1)->Reset();
++	osd->DrawRectangle (x0, y2, x6 - 1, y5 - 1, Theme.Color(clrBackground));
++	}
++    int lh = font->Height();
++    cTextScroller ts;
++    char t[32];
++    snprintf(t, sizeof(t), "%s  %s", *DateString(Recording->start), *TimeString(Recording->start));
++    ts.Set(osd, x2, y, x, y5 - y, t, font, Theme.Color(clrMenuEventTime), tr);
++    y += ts.Height();
++    y += lh;
++    const char *Title = Info->Title();
++    if (isempty(Title))
++	Title = Recording->Name();
++    ts.Set(osd, x2, y, x, y5 - y, Title, font, Theme.Color(clrMenuEventTitle), tr);
++    y += ts.Height();
++    if (!isempty(Info->ShortText())) {
++	const cFont *smallfont = cFont::GetFont(fontSml);
++	ts.Set(osd, x2, y, x, y5 - y, Info->ShortText(), smallfont, Theme.Color(clrMenuEventShortText), tr);
++	y += ts.Height();
++	}
++    y += lh;
++    if (!isempty(Info->Description())) {
++	textScroller.Set(osd, x2, y, x6 - x2, y5 - y, Info->Description(), font, Theme.Color(clrMenuEventDescription), Theme.Color(clrBackground));
++	SetScrollbar();
++    }
++#else
++    SetText(Recording->Summary(), false); //TODO
++#endif
+ }
+ 
+ void cSkinElchiDisplayMenu::SetText(const char *Text, bool FixedFont)

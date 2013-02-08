@@ -1,0 +1,157 @@
+The purpose of this document is to assist in developing user interfaces for qOrbiter.
+It is a list, more than likely non inclusive of the variables, functions and other
+code contained in this application. Please correct anything you verify to be wrong.
+I am human :)
+
+File Structure
+==============================
+Files should be arranged in the following manner
+name of the skin
+     Main.qml
+     Style.qml
+     Splash.qml
+      <folder>images
+      <folder>screens
+      <folder>components
+      <folder>js (if used)
+
+
+Special Qml Pages
+====================================
+The following pages are 'special' in that they serve critical function for the qml application.
+These should be located in the main directory of your skin.
+i.e. - <mySkin>/Main.qml
+
+Main.qml
+    The entire purpose of this qml page is to be the logic behind the runtime of the application. What this means
+    is that this is the highest level page and signals and slots should be added here. Also, the page loading
+    functions need to be implemented here for hiccup free operation. For example, the main.qml file thats is
+    part of the default skin serves as the loader for Screens, emits signals, and provides a constant object for
+    other logic.
+
+Splash.qml
+
+
+Style.qml
+    This qml file is unique because it does nothing more than serve as a static obeject that contains the description of
+    your skin, both for users and the actual application. its where screen sizes are defined, scaling functions can be
+    located, and anything else relating to the visual style of the application as relating to your skin
+
+
+Variables -
+=====================================================================
+ref dcerouter                  used as a reference object to call functions
+QString dcemessage             orbiter messaging output for display in string format
+srouterip                      string of the routerip
+ref manager                    reference object for qorbitermanager
+QObject filedetailsclass       QObject used for holding file information from the router for use in the UI
+bool connectedState            represents the current connected state of the device
+int iPK_Device                 the orbiter device number
+QTime screen1time              clock. will display in
+QTime currentDateTime          current date and time
+---need to outline 'role' data for member data-----
+
+DataModel currentRoomLights    list model of the current room lighting scenarios.
+-----Roles
+    Qurl image                 url or path to image
+    int gotoscreen              the screen to go to on interacting with this button
+    QString params              ??
+    QString command            the commandgroup that will be executed
+    QString label              the label of the scenario
+-------------------------------------------------------------------------------
+
+DataModel currentRoomMedia     list model of the current room media scenarios
+-----Roles
+Qurl image                 url or path to image
+int gotoscreen              the screen to go to on interacting with this button
+QString params              ??
+QString command            the commandgroup that will be executed
+QString label              the label of the scenario
+-------------------------------------------------------------------------------
+
+DataModel currentRoomClimate   list model of current room climate scenarios
+-----Roles
+Qurl image                 url or path to image
+int gotoscreen              the screen to go to on interacting with this button
+QString params              ??
+QString command            the commandgroup that will be executed
+QString label              the label of the scenario
+-------------------------------------------------------------------------------
+
+DataModel currentRoomTelecom   list model of the current room telecom scenarios
+-----Roles
+Qurl image                 url or path to image
+int gotoscreen              the screen to go to on interacting with this button
+QString params              ??
+QString command            the commandgroup that will be executed
+QString label              the label of the scenario
+-------------------------------------------------------------------------------
+
+DataModel currentRoomSecurity  list model of the current room security scenarios
+-----Roles
+Qurl image                 url or path to image
+int gotoscreen              the screen to go to on interacting with this button
+QString params              ??
+QString command            the commandgroup that will be executed
+QString label              the label of the scenario
+-------------------------------------------------------------------------------
+
+DataModel userList             list of the users in the linuxmce system
+DataModel roomList             list of the rooms in this home.
+DataModel mediaplaylist        the current playlist in list model form
+DataModel simpleepg            simple epg model, can sometimes cause router crash.
+DataModel playlistModel        list model of the playlist??
+DataModel skinsList            list model containing the list of availible and ready skins
+ListModel screenshotAttributes listmodel of attributes correlating to thumbnail/screenshot selection
+--------------------------------------------------------------------------------
+QObject dcenowplaying          QObject containing the properties of the now playing object for this ea
+QColor nowPlayingColor         color of now playing button
+int currentcommandgrp          int of the current command group being executed
+int gmediaType                 int correlating to the mediatype the grid is navigating.
+int currentroom                int representing the current EA of the orbiter
+QString currentuser            string of the current user
+
+-QObject filedetailsclass       QObject containing details of a file for a pop up menu.
+Data accessible by roles: i.e filedetailsclass.program will display the program attribute for a file
+bool showDetails               boolean that can be used to govern popup modality
+qstring file                   file id number in string format
+qstring objecttitle            title of media, if any
+qstring synop                  synopsis
+qurl screenshot                the qurl for the image provider to locate and return the image
+qstring filename               full file and path
+qstring title                  attribute 13 - title
+qstring program                attribute 12 - program
+qstring mediatitle             title as provided by media plugin
+qstring genre                  attribute #? genre
+qstring studio                 attribute #? studio
+qstring channel                the channel callsign for tv
+qstring channelid              channel id for mythtv
+qstring episode                episode title?
+qsrting director               director
+qstring album                  album
+qstring track                  track number
+qstringlist performers         list of performers, seperated by '|'
+qstringlist composerlist       composers split by '|'
+QString aspect                 apect ratio
+int i_aspectH                  image height
+int i_aspectW                  image width
+
+
+
+Functions - This will be broken down by section with certain parts relating directly to the screens where they are used
+======================================================================================================================
+
+Images
+=================================================
+
+
+HomeScreen
+    Special Screen that doesnt have to be implemented, but since it can be considered the start page, certain
+    data is provided to make life easier for everyone
+
+Media Functions
+=========================
+GetMediaAttributeGrid(QString qs_fk_fileno)
+This function populates the media attribute grid. This data is accessible via the filedetailsclass object
+
+

@@ -1,0 +1,28 @@
+Index: alsa-lib-1.0.18/src/conf/cards/PC-Speaker.conf
+===================================================================
+--- alsa-lib-1.0.18.orig/src/conf/cards/PC-Speaker.conf	2009-01-14 18:39:25.000000000 -0500
++++ alsa-lib-1.0.18/src/conf/cards/PC-Speaker.conf	2009-01-14 18:40:02.000000000 -0500
+@@ -30,15 +30,15 @@
+ 	}
+ 	type asym
+ 	playback.pcm {
+-		type softvol
+-		control {
+-			name "Master Playback Volume"
+-			card $CARD
+-		}
+-		min_dB -10.0
+-		max_dB 20.0
++		type plug
+ 		slave.pcm {
+-			type plug
++			type softvol
++			control {
++				name "Master Playback Volume"
++				card $CARD
++			}
++			min_dB -10.0
++			max_dB 20.0
+ 			slave.pcm {
+ 				@func concat
+ 				strings [ "dmix:" $CARD ]

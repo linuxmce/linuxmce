@@ -3,12 +3,11 @@
 trap 'echo "Press any key to exit."; read -t 6000' EXIT
 
 . /etc/lmce-build/builder.conf
+. /usr/local/lmce-build/common/env.sh
 
 if [[ -f "$log_file" ]] ;then
 	mv "$log_file" "$log_file.$(date +%d%m%y-%s)"
 fi
-
-build_scripts_dir="/usr/local/lmce-build/build-scripts"
 
 "${build_scripts_dir}/checkout-svn.sh"
 "${build_scripts_dir}/import-win32bins.sh"

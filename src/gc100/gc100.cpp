@@ -78,15 +78,6 @@ void * StartLearningThread_via_Socket(void * Arg)
 void * StartEventThread(void * Arg)
 {
 	gc100 * pgc100 = (gc100 *) Arg;
-
-	/*
-	 * Ref: http://www.mkssoftware.com/docs/man3/pthread_cancel.3.asp
-	 *
-	 * The thread cancellation type determines when the cancellation request is acted on.
-	 * If the cancellation type is set to PTHREAD_CANCEL_ASYNCHRONOUS, the cancellation request is acted on immediately.
-	 * If the cancellation type is set to PTHREAD_CANCEL_DEFERRED, the cancellation request is not acted on until the thread reaches a cancellation point.
-	 */
-	pthread_setcanceltype(PTHREAD_CANCEL_ASYNCHRONOUS, NULL);
 	pgc100->EventThread();
 	return NULL;
 }
@@ -210,7 +201,7 @@ void gc100::ReceivedCommandForChild(DeviceData_Impl *pDeviceData_Impl,string &sC
 			if (pDeviceData_Impl->m_dwPK_DeviceCategory == DEVICECATEGORY_Infrared_Interface_CONST)
 			{
 				LoggerWrapper::GetInstance()->Write(LV_STATUS, "Message recipient is my child");
-				sPort = pDeviceData_Impl->m_mapParameters_Find(DEVICEDATA_PortChannel_Number_CONST);
+				sPort = pDeviceData_Impl->m_mapParameters[DEVICEDATA_PortChannel_Number_CONST];
 			}
 			else
 			{
@@ -220,7 +211,7 @@ void gc100::ReceivedCommandForChild(DeviceData_Impl *pDeviceData_Impl,string &sC
 				if (pChild != NULL)
 				{
 					LoggerWrapper::GetInstance()->Write(LV_STATUS, "Message recipient is my nephew.");
-					sPort = pChild->m_pData->m_mapParameters_Find(DEVICEDATA_PortChannel_Number_CONST);
+					sPort = pChild->m_pData->m_mapParameters[DEVICEDATA_PortChannel_Number_CONST];
 				}
 				else
 				{
@@ -236,6 +227,9 @@ void gc100::ReceivedCommandForChild(DeviceData_Impl *pDeviceData_Impl,string &sC
 		return;
 	}
 
+	// DCE does not populate this structure for our children's children, so we have to do it
+	if (pDeviceData_Impl->m_dwPK_Device_ControlledVia > 0 && pDeviceData_Impl->m_pDevice_ControlledVia == NULL)
+		pDeviceData_Impl->m_pDevice_ControlledVia = m_pData->FindChild(pDeviceData_Impl->m_dwPK_Device_ControlledVia);
 	// Let the IR Base class try to handle the message
 	if (pDeviceData_Impl && pDeviceData_Impl->FindSelfOrParentWithinCategory(DEVICECATEGORY_Infrared_Interface_CONST) != NULL
 		&& IRBase::ProcessMessage(pMessage))
@@ -407,7 +401,7 @@ bool gc100::ConvertPronto(string ProntoCode, string &gc_code)
 			sscanf(token.c_str(),"%4x",&token_int);
 
 			frequency=(((41450/token_int)+5)/10)*1000;
-			gc_code=gc_code+StringUtils::itos(frequency)+",2"; // (Global Cache's IR test program sets this to 3, but 2 seems to be enough)
+			gc_code=gc_code+StringUtils::itos(frequency)+",1"; // (Global Cache's IR test program sets this to 3, but some devices actually interpret all 3 repetitions)
 
 			// # burst pairs for single sequence
 			token=StringUtils::Tokenize(ProntoCode," ",pos);
@@ -804,9 +798,6 @@ void gc100::Start_seriald()
 	//		vect_sMyPorts.insert(vect_sMyPorts.end(), pssPort);
 	//}
 
-	snprintf(command, 512, "/usr/bin/killall -9 socat");
-	LoggerWrapper::GetInstance()->Write(LV_STATUS, "killing all socats: %s", command);
-	system(command);
 	for (serial_iter=module_map.begin(); serial_iter!=module_map.end(); ++serial_iter)
 	{
 		if (serial_iter->second.type == "SERIAL")
@@ -913,10 +904,10 @@ void gc100::parse_message_statechange(std::string message, bool change)
 //			if (pChildDeviceCommand->PK_DeviceTemplate_get() == DEVICETEMPLATE_Generic_Input_Ouput_CONST)
 				Command_Impl * child = pChildDeviceCommand;
 
-			this_pin = child->m_pData->m_mapParameters_Find(DEVICEDATA_PortChannel_Number_CONST);
+			this_pin = child->m_pData->m_mapParameters[DEVICEDATA_PortChannel_Number_CONST];
 
 			LoggerWrapper::GetInstance()->Write(LV_STATUS, "statechange Reply: testing %s, %s (state %d) default state: %s", 
-				child->m_sName.c_str(), this_pin.c_str(), input_state, child->m_pData->m_mapParameters_Find(DEVICEDATA_Default_State_CONST).c_str());
+				child->m_sName.c_str(), this_pin.c_str(), input_state, child->m_pData->m_mapParameters[DEVICEDATA_Default_State_CONST].c_str());
 
 			//LoggerWrapper::GetInstance()->Write(LV_STATUS, "statechange Reply: found a child pin number of %s, direction is %s",this_pin.c_str(),io_direction.c_str());
 
@@ -951,7 +942,7 @@ void gc100::parse_message_statechange(std::string message, bool change)
 
 	if (result!=NULL)
 	{
-		if( result->m_pData->m_mapParameters_Find(DEVICEDATA_Default_State_CONST)=="1" )
+		if( result->m_pData->m_mapParameters[DEVICEDATA_Default_State_CONST]=="1" )
 			input_state = !input_state;
 		if (target_type == "SENSOR")
 		{
@@ -1068,11 +1059,13 @@ std::string gc100::read_from_gc100()
 //	PLUTO_SAFETY_LOCK(sl, gc100_mutex);
 	while (1)
 	{
+		pthread_testcancel();
 		if (recv(gc100_socket, &recv_buffer[recv_pos], 1, 0) <= 0)
 		{
 			return_value = "error";
 			break;
 		}
+		pthread_testcancel();
 		if (recv_buffer[recv_pos] == '\r')
 		{
 			recv_buffer[recv_pos] = '\0';
@@ -1168,7 +1161,7 @@ bool gc100::GetPinDeviceID(class DeviceData_Impl *pDeviceData,string &this_pin,i
 		return false;
 	}
 
-	this_pin = pDeviceData->m_mapParameters_Find(DEVICEDATA_PortChannel_Number_CONST);
+	this_pin = pDeviceData->m_mapParameters[DEVICEDATA_PortChannel_Number_CONST];
 	if( this_pin.empty()==false )
 	{
 		// We found it

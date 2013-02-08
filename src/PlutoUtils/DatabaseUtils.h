@@ -38,8 +38,6 @@ Utilities for Database access.
 */
 namespace DatabaseUtils
 {
-#ifndef EMBEDDED_LMCE
-
     /** SQL to get the device ID ???
     @param pDBHelper is the database pointer.
     @param PK_Device is the device in question.
@@ -104,12 +102,9 @@ namespace DatabaseUtils
 	bool AlreadyHasRooms(DBHelper *pDBHelper,int PK_Installation);
 	long GetRoomForDevice(DBHelper *pDBHelper, int nPK_Device);
 	long GetRoomByName(DBHelper *pDBHelper, string sDescription, int PK_RoomType);
-	int SyncMediaAttributes(DBHelper *pDBHelper); // When media files have pics, but not the attributes, add attributes to the pics.  Returns the affected rows or <0 for error
 	bool DeviceIsWithinCategory(DBHelper *pDBHelper,int PK_Device,int PK_DeviceCategory);
 	void LockTable(DBHelper *pDBHelper,string sTable);
 	void UnLockTables(DBHelper *pDBHelper);
-
-#endif
 };
 
 #endif //#ifndef _DatabaseUtils

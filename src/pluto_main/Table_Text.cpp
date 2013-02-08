@@ -33,18 +33,11 @@ using namespace std;
 #include "Table_Text.h"
 #include "Table_TextCategory.h"
 
+#include "Table_CommandGroup.h"
 #include "Table_DesignObjVariation_Text.h"
 #include "Table_DesignObjVariation_Text.h"
-#include "Table_DesignObjVariation_Text_pschist.h"
-#include "Table_DesignObjVariation_Text_pschist.h"
-#include "Table_DesignObjVariation_Text_pschmask.h"
-#include "Table_DesignObjVariation_Text_pschmask.h"
 #include "Table_Text_LS.h"
 #include "Table_Text_LS_AltVersions.h"
-#include "Table_Text_LS_AltVersions_pschist.h"
-#include "Table_Text_LS_AltVersions_pschmask.h"
-#include "Table_Text_LS_pschist.h"
-#include "Table_Text_LS_pschmask.h"
 
 
 void Database_pluto_main::CreateTable_Text()
@@ -92,6 +85,7 @@ void Row_Text::Delete()
 	Row_Text *pRow = this; // Needed so we will have only 1 version of get_primary_fields_assign_from_row
 	
 	if (!is_deleted)
+	{
 		if (is_added)	
 		{	
 			vector<TableRow*>::iterator i;	
@@ -113,6 +107,7 @@ void Row_Text::Delete()
 			table->deleted_cachedRows[key] = this;
 			is_deleted = true;	
 		}	
+	}
 }
 
 void Row_Text::Reload()
@@ -148,10 +143,8 @@ void Row_Text::SetDefaultValues()
 is_null[0] = false;
 m_FK_TextCategory = 0;
 is_null[1] = false;
-m_Description = "";
-is_null[2] = false;
-m_Define = "";
-is_null[3] = false;
+is_null[2] = true;
+is_null[3] = true;
 m_AddToOrbiter = 0;
 is_null[4] = false;
 is_null[5] = true;
@@ -162,7 +155,8 @@ is_null[7] = true;
 m_psc_user = 0;
 m_psc_frozen = 0;
 is_null[8] = false;
-is_null[9] = true;
+m_psc_mod = "0000-00-00 00:00:00";
+is_null[9] = false;
 is_null[10] = true;
 m_psc_restrict = 0;
 
@@ -242,6 +236,12 @@ void Row_Text::psc_restrict_set(long int val){PLUTO_SAFETY_LOCK_ERRORSONLY(sl,ta
 m_psc_restrict = val; is_modified=true; is_null[10]=false;}
 
 		
+bool Row_Text::Description_isNull() {PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
+
+return is_null[2];}
+bool Row_Text::Define_isNull() {PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
+
+return is_null[3];}
 bool Row_Text::AddToOrbiter_isNull() {PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
 
 return is_null[4];}
@@ -257,14 +257,19 @@ return is_null[7];}
 bool Row_Text::psc_frozen_isNull() {PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
 
 return is_null[8];}
-bool Row_Text::psc_mod_isNull() {PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
-
-return is_null[9];}
 bool Row_Text::psc_restrict_isNull() {PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
 
 return is_null[10];}
 
 			
+void Row_Text::Description_setNull(bool val){PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
+is_null[2]=val;
+is_modified=true;
+}
+void Row_Text::Define_setNull(bool val){PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
+is_null[3]=val;
+is_modified=true;
+}
 void Row_Text::AddToOrbiter_setNull(bool val){PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
 is_null[4]=val;
 is_modified=true;
@@ -283,10 +288,6 @@ is_modified=true;
 }
 void Row_Text::psc_frozen_setNull(bool val){PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
 is_null[8]=val;
-is_modified=true;
-}
-void Row_Text::psc_mod_setNull(bool val){PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
-is_null[9]=val;
 is_modified=true;
 }
 void Row_Text::psc_restrict_setNull(bool val){PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
@@ -328,8 +329,8 @@ PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
 if (is_null[2])
 return "NULL";
 
-char *buf = new char[81];
-db_wrapper_real_escape_string(table->database->m_pDB, buf, m_Description.c_str(), (unsigned long) min((size_t)40,m_Description.size()));
+char *buf = new char[241];
+db_wrapper_real_escape_string(table->database->m_pDB, buf, m_Description.c_str(), (unsigned long) min((size_t)120,m_Description.size()));
 string s=string()+"\""+buf+"\"";
 delete[] buf;
 return s;
@@ -342,8 +343,8 @@ PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
 if (is_null[3])
 return "NULL";
 
-char *buf = new char[81];
-db_wrapper_real_escape_string(table->database->m_pDB, buf, m_Define.c_str(), (unsigned long) min((size_t)40,m_Define.size()));
+char *buf = new char[241];
+db_wrapper_real_escape_string(table->database->m_pDB, buf, m_Define.c_str(), (unsigned long) min((size_t)120,m_Define.size()));
 string s=string()+"\""+buf+"\"";
 delete[] buf;
 return s;
@@ -1057,6 +1058,13 @@ return pTable->GetRow(m_FK_TextCategory);
 }
 
 
+void Row_Text::CommandGroup_FK_Text_getrows(vector <class Row_CommandGroup*> *rows)
+{
+PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
+
+class Table_CommandGroup *pTable = table->database->CommandGroup_get();
+pTable->GetRows("`FK_Text`=" + StringUtils::itos(m_PK_Text),rows);
+}
 void Row_Text::DesignObjVariation_Text_FK_Text_getrows(vector <class Row_DesignObjVariation_Text*> *rows)
 {
 PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
@@ -1071,34 +1079,6 @@ PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
 class Table_DesignObjVariation_Text *pTable = table->database->DesignObjVariation_Text_get();
 pTable->GetRows("`FK_Text_OverrideFromHeader`=" + StringUtils::itos(m_PK_Text),rows);
 }
-void Row_Text::DesignObjVariation_Text_pschist_FK_Text_getrows(vector <class Row_DesignObjVariation_Text_pschist*> *rows)
-{
-PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
-
-class Table_DesignObjVariation_Text_pschist *pTable = table->database->DesignObjVariation_Text_pschist_get();
-pTable->GetRows("`FK_Text`=" + StringUtils::itos(m_PK_Text),rows);
-}
-void Row_Text::DesignObjVariation_Text_pschist_FK_Text_OverrideFromHeader_getrows(vector <class Row_DesignObjVariation_Text_pschist*> *rows)
-{
-PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
-
-class Table_DesignObjVariation_Text_pschist *pTable = table->database->DesignObjVariation_Text_pschist_get();
-pTable->GetRows("`FK_Text_OverrideFromHeader`=" + StringUtils::itos(m_PK_Text),rows);
-}
-void Row_Text::DesignObjVariation_Text_pschmask_FK_Text_getrows(vector <class Row_DesignObjVariation_Text_pschmask*> *rows)
-{
-PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
-
-class Table_DesignObjVariation_Text_pschmask *pTable = table->database->DesignObjVariation_Text_pschmask_get();
-pTable->GetRows("`FK_Text`=" + StringUtils::itos(m_PK_Text),rows);
-}
-void Row_Text::DesignObjVariation_Text_pschmask_FK_Text_OverrideFromHeader_getrows(vector <class Row_DesignObjVariation_Text_pschmask*> *rows)
-{
-PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
-
-class Table_DesignObjVariation_Text_pschmask *pTable = table->database->DesignObjVariation_Text_pschmask_get();
-pTable->GetRows("`FK_Text_OverrideFromHeader`=" + StringUtils::itos(m_PK_Text),rows);
-}
 void Row_Text::Text_LS_FK_Text_getrows(vector <class Row_Text_LS*> *rows)
 {
 PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
@@ -1111,34 +1091,6 @@ void Row_Text::Text_LS_AltVersions_FK_Text_getrows(vector <class Row_Text_LS_Alt
 PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
 
 class Table_Text_LS_AltVersions *pTable = table->database->Text_LS_AltVersions_get();
-pTable->GetRows("`FK_Text`=" + StringUtils::itos(m_PK_Text),rows);
-}
-void Row_Text::Text_LS_AltVersions_pschist_FK_Text_getrows(vector <class Row_Text_LS_AltVersions_pschist*> *rows)
-{
-PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
-
-class Table_Text_LS_AltVersions_pschist *pTable = table->database->Text_LS_AltVersions_pschist_get();
-pTable->GetRows("`FK_Text`=" + StringUtils::itos(m_PK_Text),rows);
-}
-void Row_Text::Text_LS_AltVersions_pschmask_FK_Text_getrows(vector <class Row_Text_LS_AltVersions_pschmask*> *rows)
-{
-PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
-
-class Table_Text_LS_AltVersions_pschmask *pTable = table->database->Text_LS_AltVersions_pschmask_get();
-pTable->GetRows("`FK_Text`=" + StringUtils::itos(m_PK_Text),rows);
-}
-void Row_Text::Text_LS_pschist_FK_Text_getrows(vector <class Row_Text_LS_pschist*> *rows)
-{
-PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
-
-class Table_Text_LS_pschist *pTable = table->database->Text_LS_pschist_get();
-pTable->GetRows("`FK_Text`=" + StringUtils::itos(m_PK_Text),rows);
-}
-void Row_Text::Text_LS_pschmask_FK_Text_getrows(vector <class Row_Text_LS_pschmask*> *rows)
-{
-PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
-
-class Table_Text_LS_pschmask *pTable = table->database->Text_LS_pschmask_get();
 pTable->GetRows("`FK_Text`=" + StringUtils::itos(m_PK_Text),rows);
 }
 

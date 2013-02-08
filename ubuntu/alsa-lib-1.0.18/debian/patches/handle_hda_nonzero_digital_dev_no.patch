@@ -1,0 +1,12 @@
+Index: alsa-lib-1.0.18/src/conf/cards/HDA-Intel.conf
+===================================================================
+--- alsa-lib-1.0.18.orig/src/conf/cards/HDA-Intel.conf	2009-02-14 01:27:21.000000000 -0500
++++ alsa-lib-1.0.18/src/conf/cards/HDA-Intel.conf	2009-02-14 01:27:31.000000000 -0500
+@@ -58,6 +58,7 @@
+ 			resolution 121
+ 		}
+ 	}
++	hint.device 0
+ }
+ 
+ <confdir:pcm/surround40.conf>

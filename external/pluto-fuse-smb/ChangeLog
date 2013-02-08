@@ -1,0 +1,8 @@
+2007-01-24 Radu Cristescu <radu.c@plutohome.com>
+
+	* Took Vincent Wagelaar's fusesmb code and stripped the network
+	neighbourhood functionality. The new program can be used to mount samba
+	shares just like cifs, but with fuse instead of the cifs kernel module.
+	* Removed hashing code
+	* Removed network scanner code
+	* Added check before going into fuse to see if mount succeeded

@@ -1,0 +1,6 @@
+#This file is modified by lirc's maintainer scripts.
+#Any 'options' line asociated with the selected hardware will be replaced.
+#However 'add options' lines will be left alone, so you can use that for
+#additional module parameters.
+#	ej:
+#		add options lirc_serial sense=0

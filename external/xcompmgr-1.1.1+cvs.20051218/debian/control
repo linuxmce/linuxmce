@@ -1,0 +1,15 @@
+Source: xcompmgr
+Section: x11
+Priority: optional
+Maintainer: Gustavo Franco <stratus@debian.org>
+Build-Depends: debhelper (>= 4.0.0), automake1.7(>= 1.7.9-7), cdbs(>= 0.4.32), libx11-dev(>= 6.8.2.dfsg.1-11), libxcomposite-dev(>= 6.8.2.dfsg.1-11), libxfixes-dev(>= 6.8.2.dfsg.1-11), libxdamage-dev(>= 6.8.2.dfsg.1-11), libxrender-dev(>= 1:0.9.0-2), pkg-config(>= 0.20-1)
+Standards-Version: 3.6.2.1
+
+Package: xcompmgr
+Architecture: any
+Depends: ${shlibs:Depends}, ${misc:Depends}
+Description: X composition manager
+ xcompmgr is the standard composition manager for the X Composite extension,
+ which allows clients to modify what is drawn to the screen before it
+ happens.  This composition manager implements shadows, fading, proper
+ translucency, and more.

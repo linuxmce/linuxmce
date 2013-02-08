@@ -1,0 +1,8 @@
+[Plymouth Theme]
+Name=LinuxMCE
+Description=LinuxMCE theme
+ModuleName=script
+
+[script]
+ImageDir=/lib/plymouth/themes/LinuxMCE
+ScriptFile=/lib/plymouth/themes/LinuxMCE/LinuxMCE.script

@@ -1,13 +1,19 @@
-#!/usr/sbin/perl
+#!/usr/bin/perl
 
 use DBI;
-
-$db = DBI->connect("dbi:mysql:database=pluto_main;host=localhost;user=root;password=") or die "Couldn't connect to database: $DBI::errstr\n";
+require "/usr/pluto/bin/config_ops.pl";
+use vars '$DCERouter';
+use vars '$PK_Device';
+use vars '$MySqlHost';
+use vars '$MySqlUser';
+use vars '$MySqlPassword';
+use vars '$MySqlDBName';
+$db = DBI->connect(&read_pluto_cred()) or die "Couldn't connect to database: $DBI::errstr\n";
 
 $devices = "";
 $datas = "";
 
-$sql = "SELECT PK_DeviceCategory FROM DeviceCategory WHERE Description='Surveillance Cameras'";
+$sql = "SELECT PK_DeviceCategory FROM DeviceCategory WHERE Description='Surveillance Cameras' OR Description='IP Cameras'";
 $st = $db->prepare($sql) or die "Error in code";
 $st->execute() or die "Error on execute";
 while($local_row = $st->fetchrow_hashref()) {
@@ -27,6 +33,7 @@ while($local_row = $st->fetchrow_hashref()) {
 			$st4->execute() or die "Error on execute";
 			if($rowl = $st4->fetchrow_hashref()) {
 				$data = $rowl->{'IK_DeviceData'};
+				
 				if($devices eq "") {
 					$devices = $deviceid.",";
 				} else {
@@ -37,6 +44,7 @@ while($local_row = $st->fetchrow_hashref()) {
 				} else {
 					$datas = $datas.$data.",";
 				}
+				print "Camera $deviceid has a purge period of $data days.\n";
 			}
 			$st4->finish();
 		}
@@ -69,56 +77,83 @@ foreach $line (@de) {
 	}
 	$count = $count + 1;
 }
-print "Found $count camera devices. Purgeing ...";
+print "Purging $count camera devices....\n";
 
-($lsec,$lmin,$lhour,$lmday,$lmon,$lyear,$lwday,$lyday,$lisdst) = localtime(time);
-$lmon = $lmon + 1;
+($curSec,$curMin,$curHour,$curDayOfMonth,$curMonth,$curYear,$curDayOfWeek,$curDayOfYear,$curIsDst) = localtime(time);
 
-$lyear = $lyear - 100;
-if($lyear < 10) {
-	$lyear = 2000 + $lyear;
-} else {
-	$lyear = 2000 + $lyear;
-}
+#the month is 0-11, lets make it 1-12 to match the directory structure
+$curMonth = $curMonth + 1;
+
+$curYear = $curYear - 100;
+
+$curYear = 2000 + $curYear;
+
 
 $count = 0;
 $path = "/home/cameras/";
+
 foreach $dev (@de) {
-	$path1 = "/home/cameras/".$dev;
+	# convert purge period days to number of seconds (60*60*24=86400 seconds per day)
 	$time = time - $da[$count]*86400;
-	($osec,$omin,$ohour,$omday,$omon,$oyear,$owday,$oyday,$oisdst) = localtime($time);
-	$oyear = $oyear - 100;
-	if($oyear < 10) {
-        	$oyear = 2000 + $oyear;
-        } else {
-                $oyear = 2000 + $oyear;
-        }
-	$omon = $omon + 1;
+	# make expiry time varibles from time differential
+	($ExpSec,$ExpMin,$ExpHour,$ExpDayOfMonth,$ExpMonth,$ExpYear,$ExpDayOfWeek,$ExpDayOfYear,$ExpIsDst) = localtime($time);
+	print $ExpSec." segundos \n";
+	print $ExpMin." minutos \n";
+	print $ExpHour." hora \n";
+	print $ExpDayOfMonth." day \n";
+	print $ExpMonth."mes \n";
+	print $ExpYear."ano \n";
+	print $ExpDayOfWeek." dia da semana\n";
+	print $ExpDayOfYear." dia do ano \n";
+	print $ExpIsDst."\n";
+	#exit;
+	$ExpYear = $ExpYear - 100;
+       	$ExpYear = 2000 + $ExpYear;
+	# convert 0-11 months to 1-12
+	$ExpMonth = $ExpMonth + 1;
+
+	$path1 = "/home/cameras/".$dev;
 	opendir(ROOTDIR, $path1);
 	@years = grep {!/^\./} readdir(ROOTDIR);
+
 	foreach $year (@years) {
-		if($year >= $lyear && $year <= $oyear) {
+		# Skip the special lastsnap.jpg file
+		next if($year=="lastsnap.jpg");
+
+		if($year >= $curYear && $year <= $ExpYear) {
 			$path2 = $path1."/".$year;
 			opendir(YEARDIR, $path2);
 			@months = grep {!/^\./} readdir(YEARDIR);
 			foreach $month (@months) {
 				$path3 = $path2."/".$month;
-				if($month >= $lmon && $month <= $omon) {
+				
+				
+				if( $month <= $ExpMonth) {
+				        print "-----entroue----".$curMonth."--------\n";
+				        
 					opendir(MONTHDIR, $path3);
 					@days = grep {!/^\./} readdir(MONTHDIR);
-					foreach $day (@days) {
-						if($day >= $lmday && $day <= $omday) {
+					foreach $day (@days) {                   	
+						$path4 = $path3."/".$day;
+						
+						if($day <= $ExpDayOfMonth ) {
+							print "Found expired day! Removing $path4\n";
 							system("rm -rf $path4");
 						}
 					}
+					@days = grep {!/^\./} readdir(MONTHDIR);
+					if (scalar( @days) == 0) {
+							print "Found empty Month! Removing month\n";
+							system("rm -rf $path3");
+					
+					} 
 					closedir(MONTHDIR);
-				} else {
-					system("rm -rf $path3");
-				}
+				} 
 			}
 			closedir(YEARDIR);
 		} else {
 			$path2 = $path1."/".$year;
+			print "Found Expired year! Removing $path2\n";
 			system("rm -rf $path2");
 		}
 	}

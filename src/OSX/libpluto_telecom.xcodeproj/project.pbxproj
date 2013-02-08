@@ -1,0 +1,335 @@
+// !$*UTF8*$!
+{
+	archiveVersion = 1;
+	classes = {
+	};
+	objectVersion = 46;
+	objects = {
+
+/* Begin PBXBuildFile section */
+		95F789B115B4C16B00FB8F5B /* mysql.h in Headers */ = {isa = PBXBuildFile; fileRef = 95F789B015B4C16B00FB8F5B /* mysql.h */; };
+		95F789CC15B4C1CA00FB8F5B /* libDCECommon.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 95F789CA15B4C1CA00FB8F5B /* libDCECommon.dylib */; };
+		95F789CD15B4C1CA00FB8F5B /* libmysqlclient.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 95F789CB15B4C1CA00FB8F5B /* libmysqlclient.dylib */; };
+		95F789D815B4C43900FB8F5B /* Table_CallersForMe.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 95F789D215B4C43900FB8F5B /* Table_CallersForMe.cpp */; };
+		95F789D915B4C43900FB8F5B /* Table_Contact_Users_Sync.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 95F789D315B4C43900FB8F5B /* Table_Contact_Users_Sync.cpp */; };
+		95F789DA15B4C43900FB8F5B /* Table_Contact.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 95F789D415B4C43900FB8F5B /* Table_Contact.cpp */; };
+		95F789DB15B4C43900FB8F5B /* Table_IncomingLog.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 95F789D515B4C43900FB8F5B /* Table_IncomingLog.cpp */; };
+		95F789DC15B4C43900FB8F5B /* Table_Line_HouseMode.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 95F789D615B4C43900FB8F5B /* Table_Line_HouseMode.cpp */; };
+		95F789DD15B4C43900FB8F5B /* Table_OutgoingLog.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 95F789D715B4C43900FB8F5B /* Table_OutgoingLog.cpp */; };
+		95F789EB15B4C45800FB8F5B /* Table_PhoneNumber_Users_Sync.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 95F789DE15B4C45800FB8F5B /* Table_PhoneNumber_Users_Sync.cpp */; };
+		95F789EC15B4C45800FB8F5B /* Table_PhoneNumber.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 95F789DF15B4C45800FB8F5B /* Table_PhoneNumber.cpp */; };
+		95F789ED15B4C45800FB8F5B /* Table_PhoneType.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 95F789E015B4C45800FB8F5B /* Table_PhoneType.cpp */; };
+		95F789EE15B4C45800FB8F5B /* Table_PriorityCallers.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 95F789E115B4C45800FB8F5B /* Table_PriorityCallers.cpp */; };
+		95F789EF15B4C45800FB8F5B /* Table_psc_telecom_batdet.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 95F789E215B4C45800FB8F5B /* Table_psc_telecom_batdet.cpp */; };
+		95F789F015B4C45800FB8F5B /* Table_psc_telecom_bathdr.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 95F789E315B4C45800FB8F5B /* Table_psc_telecom_bathdr.cpp */; };
+		95F789F115B4C45800FB8F5B /* Table_psc_telecom_batuser.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 95F789E415B4C45800FB8F5B /* Table_psc_telecom_batuser.cpp */; };
+		95F789F215B4C45800FB8F5B /* Table_psc_telecom_repset.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 95F789E515B4C45800FB8F5B /* Table_psc_telecom_repset.cpp */; };
+		95F789F315B4C45800FB8F5B /* Table_psc_telecom_schema.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 95F789E615B4C45800FB8F5B /* Table_psc_telecom_schema.cpp */; };
+		95F789F415B4C45800FB8F5B /* Table_psc_telecom_tables.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 95F789E715B4C45800FB8F5B /* Table_psc_telecom_tables.cpp */; };
+		95F789F515B4C45800FB8F5B /* Table_SpeedDial.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 95F789E815B4C45800FB8F5B /* Table_SpeedDial.cpp */; };
+		95F789F615B4C45800FB8F5B /* Table_UserRouting.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 95F789E915B4C45800FB8F5B /* Table_UserRouting.cpp */; };
+		95F789F715B4C45800FB8F5B /* Table_Users.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 95F789EA15B4C45800FB8F5B /* Table_Users.cpp */; };
+		95F789F915B4C4EB00FB8F5B /* Database_pluto_telecom.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 95F789F815B4C4EB00FB8F5B /* Database_pluto_telecom.cpp */; };
+		95F789FB15B4C50B00FB8F5B /* TableRow.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 95F789FA15B4C50B00FB8F5B /* TableRow.cpp */; };
+/* End PBXBuildFile section */
+
+/* Begin PBXFileReference section */
+		95F7899715B4C0A600FB8F5B /* libpluto_telecom.dylib */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.dylib"; includeInIndex = 0; path = libpluto_telecom.dylib; sourceTree = BUILT_PRODUCTS_DIR; };
+		95F789B015B4C16B00FB8F5B /* mysql.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = mysql.h; path = mysql/include/mysql.h; sourceTree = "<group>"; };
+		95F789CA15B4C1CA00FB8F5B /* libDCECommon.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libDCECommon.dylib; path = lib/libDCECommon.dylib; sourceTree = "<group>"; };
+		95F789CB15B4C1CA00FB8F5B /* libmysqlclient.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libmysqlclient.dylib; path = mysql/lib/libmysqlclient.dylib; sourceTree = "<group>"; };
+		95F789D215B4C43900FB8F5B /* Table_CallersForMe.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = Table_CallersForMe.cpp; path = ../pluto_telecom/Table_CallersForMe.cpp; sourceTree = "<group>"; };
+		95F789D315B4C43900FB8F5B /* Table_Contact_Users_Sync.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = Table_Contact_Users_Sync.cpp; path = ../pluto_telecom/Table_Contact_Users_Sync.cpp; sourceTree = "<group>"; };
+		95F789D415B4C43900FB8F5B /* Table_Contact.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = Table_Contact.cpp; path = ../pluto_telecom/Table_Contact.cpp; sourceTree = "<group>"; };
+		95F789D515B4C43900FB8F5B /* Table_IncomingLog.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = Table_IncomingLog.cpp; path = ../pluto_telecom/Table_IncomingLog.cpp; sourceTree = "<group>"; };
+		95F789D615B4C43900FB8F5B /* Table_Line_HouseMode.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = Table_Line_HouseMode.cpp; path = ../pluto_telecom/Table_Line_HouseMode.cpp; sourceTree = "<group>"; };
+		95F789D715B4C43900FB8F5B /* Table_OutgoingLog.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = Table_OutgoingLog.cpp; path = ../pluto_telecom/Table_OutgoingLog.cpp; sourceTree = "<group>"; };
+		95F789DE15B4C45800FB8F5B /* Table_PhoneNumber_Users_Sync.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = Table_PhoneNumber_Users_Sync.cpp; path = ../pluto_telecom/Table_PhoneNumber_Users_Sync.cpp; sourceTree = "<group>"; };
+		95F789DF15B4C45800FB8F5B /* Table_PhoneNumber.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = Table_PhoneNumber.cpp; path = ../pluto_telecom/Table_PhoneNumber.cpp; sourceTree = "<group>"; };
+		95F789E015B4C45800FB8F5B /* Table_PhoneType.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = Table_PhoneType.cpp; path = ../pluto_telecom/Table_PhoneType.cpp; sourceTree = "<group>"; };
+		95F789E115B4C45800FB8F5B /* Table_PriorityCallers.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = Table_PriorityCallers.cpp; path = ../pluto_telecom/Table_PriorityCallers.cpp; sourceTree = "<group>"; };
+		95F789E215B4C45800FB8F5B /* Table_psc_telecom_batdet.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = Table_psc_telecom_batdet.cpp; path = ../pluto_telecom/Table_psc_telecom_batdet.cpp; sourceTree = "<group>"; };
+		95F789E315B4C45800FB8F5B /* Table_psc_telecom_bathdr.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = Table_psc_telecom_bathdr.cpp; path = ../pluto_telecom/Table_psc_telecom_bathdr.cpp; sourceTree = "<group>"; };
+		95F789E415B4C45800FB8F5B /* Table_psc_telecom_batuser.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = Table_psc_telecom_batuser.cpp; path = ../pluto_telecom/Table_psc_telecom_batuser.cpp; sourceTree = "<group>"; };
+		95F789E515B4C45800FB8F5B /* Table_psc_telecom_repset.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = Table_psc_telecom_repset.cpp; path = ../pluto_telecom/Table_psc_telecom_repset.cpp; sourceTree = "<group>"; };
+		95F789E615B4C45800FB8F5B /* Table_psc_telecom_schema.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = Table_psc_telecom_schema.cpp; path = ../pluto_telecom/Table_psc_telecom_schema.cpp; sourceTree = "<group>"; };
+		95F789E715B4C45800FB8F5B /* Table_psc_telecom_tables.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = Table_psc_telecom_tables.cpp; path = ../pluto_telecom/Table_psc_telecom_tables.cpp; sourceTree = "<group>"; };
+		95F789E815B4C45800FB8F5B /* Table_SpeedDial.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = Table_SpeedDial.cpp; path = ../pluto_telecom/Table_SpeedDial.cpp; sourceTree = "<group>"; };
+		95F789E915B4C45800FB8F5B /* Table_UserRouting.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = Table_UserRouting.cpp; path = ../pluto_telecom/Table_UserRouting.cpp; sourceTree = "<group>"; };
+		95F789EA15B4C45800FB8F5B /* Table_Users.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = Table_Users.cpp; path = ../pluto_telecom/Table_Users.cpp; sourceTree = "<group>"; };
+		95F789F815B4C4EB00FB8F5B /* Database_pluto_telecom.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = Database_pluto_telecom.cpp; path = ../pluto_telecom/Database_pluto_telecom.cpp; sourceTree = "<group>"; };
+		95F789FA15B4C50B00FB8F5B /* TableRow.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = TableRow.cpp; path = ../pluto_telecom/TableRow.cpp; sourceTree = "<group>"; };
+/* End PBXFileReference section */
+
+/* Begin PBXFrameworksBuildPhase section */
+		95F7899415B4C0A600FB8F5B /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				95F789CC15B4C1CA00FB8F5B /* libDCECommon.dylib in Frameworks */,
+				95F789CD15B4C1CA00FB8F5B /* libmysqlclient.dylib in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXFrameworksBuildPhase section */
+
+/* Begin PBXGroup section */
+		95F7898C15B4C0A600FB8F5B = {
+			isa = PBXGroup;
+			children = (
+				95F789F815B4C4EB00FB8F5B /* Database_pluto_telecom.cpp */,
+				95F789FA15B4C50B00FB8F5B /* TableRow.cpp */,
+				95F789C915B4C1B500FB8F5B /* Libraries */,
+				95F789AF15B4C15B00FB8F5B /* Includes */,
+				95F7899815B4C0A600FB8F5B /* Products */,
+			);
+			sourceTree = "<group>";
+		};
+		95F7899815B4C0A600FB8F5B /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				95F7899715B4C0A600FB8F5B /* libpluto_telecom.dylib */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+		95F789AF15B4C15B00FB8F5B /* Includes */ = {
+			isa = PBXGroup;
+			children = (
+				95F789B015B4C16B00FB8F5B /* mysql.h */,
+				95F789B215B4C16F00FB8F5B /* Tables */,
+			);
+			name = Includes;
+			sourceTree = "<group>";
+		};
+		95F789B215B4C16F00FB8F5B /* Tables */ = {
+			isa = PBXGroup;
+			children = (
+				95F789DE15B4C45800FB8F5B /* Table_PhoneNumber_Users_Sync.cpp */,
+				95F789DF15B4C45800FB8F5B /* Table_PhoneNumber.cpp */,
+				95F789E015B4C45800FB8F5B /* Table_PhoneType.cpp */,
+				95F789E115B4C45800FB8F5B /* Table_PriorityCallers.cpp */,
+				95F789E215B4C45800FB8F5B /* Table_psc_telecom_batdet.cpp */,
+				95F789E315B4C45800FB8F5B /* Table_psc_telecom_bathdr.cpp */,
+				95F789E415B4C45800FB8F5B /* Table_psc_telecom_batuser.cpp */,
+				95F789E515B4C45800FB8F5B /* Table_psc_telecom_repset.cpp */,
+				95F789E615B4C45800FB8F5B /* Table_psc_telecom_schema.cpp */,
+				95F789E715B4C45800FB8F5B /* Table_psc_telecom_tables.cpp */,
+				95F789E815B4C45800FB8F5B /* Table_SpeedDial.cpp */,
+				95F789E915B4C45800FB8F5B /* Table_UserRouting.cpp */,
+				95F789EA15B4C45800FB8F5B /* Table_Users.cpp */,
+				95F789D215B4C43900FB8F5B /* Table_CallersForMe.cpp */,
+				95F789D315B4C43900FB8F5B /* Table_Contact_Users_Sync.cpp */,
+				95F789D415B4C43900FB8F5B /* Table_Contact.cpp */,
+				95F789D515B4C43900FB8F5B /* Table_IncomingLog.cpp */,
+				95F789D615B4C43900FB8F5B /* Table_Line_HouseMode.cpp */,
+				95F789D715B4C43900FB8F5B /* Table_OutgoingLog.cpp */,
+			);
+			name = Tables;
+			sourceTree = "<group>";
+		};
+		95F789C915B4C1B500FB8F5B /* Libraries */ = {
+			isa = PBXGroup;
+			children = (
+				95F789CA15B4C1CA00FB8F5B /* libDCECommon.dylib */,
+				95F789CB15B4C1CA00FB8F5B /* libmysqlclient.dylib */,
+			);
+			name = Libraries;
+			sourceTree = "<group>";
+		};
+/* End PBXGroup section */
+
+/* Begin PBXHeadersBuildPhase section */
+		95F7899515B4C0A600FB8F5B /* Headers */ = {
+			isa = PBXHeadersBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				95F789B115B4C16B00FB8F5B /* mysql.h in Headers */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXHeadersBuildPhase section */
+
+/* Begin PBXNativeTarget section */
+		95F7899615B4C0A600FB8F5B /* libpluto_telecom */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 95F789A415B4C0A700FB8F5B /* Build configuration list for PBXNativeTarget "libpluto_telecom" */;
+			buildPhases = (
+				95F7899315B4C0A600FB8F5B /* Sources */,
+				95F7899415B4C0A600FB8F5B /* Frameworks */,
+				95F7899515B4C0A600FB8F5B /* Headers */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = libpluto_telecom;
+			productName = libpluto_telecom;
+			productReference = 95F7899715B4C0A600FB8F5B /* libpluto_telecom.dylib */;
+			productType = "com.apple.product-type.library.dynamic";
+		};
+/* End PBXNativeTarget section */
+
+/* Begin PBXProject section */
+		95F7898E15B4C0A600FB8F5B /* Project object */ = {
+			isa = PBXProject;
+			attributes = {
+				LastUpgradeCheck = 0420;
+			};
+			buildConfigurationList = 95F7899115B4C0A600FB8F5B /* Build configuration list for PBXProject "libpluto_telecom" */;
+			compatibilityVersion = "Xcode 3.2";
+			developmentRegion = English;
+			hasScannedForEncodings = 0;
+			knownRegions = (
+				en,
+			);
+			mainGroup = 95F7898C15B4C0A600FB8F5B;
+			productRefGroup = 95F7899815B4C0A600FB8F5B /* Products */;
+			projectDirPath = "";
+			projectRoot = "";
+			targets = (
+				95F7899615B4C0A600FB8F5B /* libpluto_telecom */,
+			);
+		};
+/* End PBXProject section */
+
+/* Begin PBXSourcesBuildPhase section */
+		95F7899315B4C0A600FB8F5B /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				95F789D815B4C43900FB8F5B /* Table_CallersForMe.cpp in Sources */,
+				95F789D915B4C43900FB8F5B /* Table_Contact_Users_Sync.cpp in Sources */,
+				95F789DA15B4C43900FB8F5B /* Table_Contact.cpp in Sources */,
+				95F789DB15B4C43900FB8F5B /* Table_IncomingLog.cpp in Sources */,
+				95F789DC15B4C43900FB8F5B /* Table_Line_HouseMode.cpp in Sources */,
+				95F789DD15B4C43900FB8F5B /* Table_OutgoingLog.cpp in Sources */,
+				95F789EB15B4C45800FB8F5B /* Table_PhoneNumber_Users_Sync.cpp in Sources */,
+				95F789EC15B4C45800FB8F5B /* Table_PhoneNumber.cpp in Sources */,
+				95F789ED15B4C45800FB8F5B /* Table_PhoneType.cpp in Sources */,
+				95F789EE15B4C45800FB8F5B /* Table_PriorityCallers.cpp in Sources */,
+				95F789EF15B4C45800FB8F5B /* Table_psc_telecom_batdet.cpp in Sources */,
+				95F789F015B4C45800FB8F5B /* Table_psc_telecom_bathdr.cpp in Sources */,
+				95F789F115B4C45800FB8F5B /* Table_psc_telecom_batuser.cpp in Sources */,
+				95F789F215B4C45800FB8F5B /* Table_psc_telecom_repset.cpp in Sources */,
+				95F789F315B4C45800FB8F5B /* Table_psc_telecom_schema.cpp in Sources */,
+				95F789F415B4C45800FB8F5B /* Table_psc_telecom_tables.cpp in Sources */,
+				95F789F515B4C45800FB8F5B /* Table_SpeedDial.cpp in Sources */,
+				95F789F615B4C45800FB8F5B /* Table_UserRouting.cpp in Sources */,
+				95F789F715B4C45800FB8F5B /* Table_Users.cpp in Sources */,
+				95F789F915B4C4EB00FB8F5B /* Database_pluto_telecom.cpp in Sources */,
+				95F789FB15B4C50B00FB8F5B /* TableRow.cpp in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXSourcesBuildPhase section */
+
+/* Begin XCBuildConfiguration section */
+		95F789A215B4C0A700FB8F5B /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				ARCHS = "$(ARCHS_STANDARD_64_BIT)";
+				CLANG_ENABLE_OBJC_ARC = YES;
+				COPY_PHASE_STRIP = NO;
+				GCC_C_LANGUAGE_STANDARD = gnu99;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_ENABLE_OBJC_EXCEPTIONS = YES;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"DEBUG=1",
+					"$(inherited)",
+				);
+				GCC_SYMBOLS_PRIVATE_EXTERN = NO;
+				GCC_VERSION = com.apple.compilers.llvm.clang.1_0;
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_MISSING_PROTOTYPES = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				MACOSX_DEPLOYMENT_TARGET = 10.7;
+				ONLY_ACTIVE_ARCH = YES;
+				SDKROOT = macosx;
+			};
+			name = Debug;
+		};
+		95F789A315B4C0A700FB8F5B /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				ARCHS = "$(ARCHS_STANDARD_64_BIT)";
+				CLANG_ENABLE_OBJC_ARC = YES;
+				COPY_PHASE_STRIP = YES;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				GCC_C_LANGUAGE_STANDARD = gnu99;
+				GCC_ENABLE_OBJC_EXCEPTIONS = YES;
+				GCC_VERSION = com.apple.compilers.llvm.clang.1_0;
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_MISSING_PROTOTYPES = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				MACOSX_DEPLOYMENT_TARGET = 10.7;
+				SDKROOT = macosx;
+			};
+			name = Release;
+		};
+		95F789A515B4C0A700FB8F5B /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CONFIGURATION_BUILD_DIR = lib;
+				HEADER_SEARCH_PATHS = (
+					../DCE,
+					..,
+				);
+				INSTALL_PATH = /usr/pluto/lib;
+				LIBRARY_SEARCH_PATHS = (
+					"$(inherited)",
+					"\"$(SRCROOT)/lib\"",
+					"\"$(SRCROOT)/mysql/lib\"",
+				);
+				PRODUCT_NAME = "$(TARGET_NAME)";
+			};
+			name = Debug;
+		};
+		95F789A615B4C0A700FB8F5B /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CONFIGURATION_BUILD_DIR = lib;
+				HEADER_SEARCH_PATHS = (
+					../DCE,
+					..,
+				);
+				INSTALL_PATH = /usr/pluto/lib;
+				LIBRARY_SEARCH_PATHS = (
+					"$(inherited)",
+					"\"$(SRCROOT)/lib\"",
+					"\"$(SRCROOT)/mysql/lib\"",
+				);
+				PRODUCT_NAME = "$(TARGET_NAME)";
+			};
+			name = Release;
+		};
+/* End XCBuildConfiguration section */
+
+/* Begin XCConfigurationList section */
+		95F7899115B4C0A600FB8F5B /* Build configuration list for PBXProject "libpluto_telecom" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				95F789A215B4C0A700FB8F5B /* Debug */,
+				95F789A315B4C0A700FB8F5B /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		95F789A415B4C0A700FB8F5B /* Build configuration list for PBXNativeTarget "libpluto_telecom" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				95F789A515B4C0A700FB8F5B /* Debug */,
+				95F789A615B4C0A700FB8F5B /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+/* End XCConfigurationList section */
+	};
+	rootObject = 95F7898E15B4C0A600FB8F5B /* Project object */;
+}

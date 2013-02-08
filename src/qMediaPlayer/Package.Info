@@ -1,0 +1,9 @@
+<-dceag-p-b->
+Package = DCE_Destination_Package
+Dir = 
+desc = DCE Implemenation for #2205 qMediaPlayer
+Maintainer = LangstonName
+Email = 
+Depend = DCE_Dependencies
+<-dceag-p-e->
+

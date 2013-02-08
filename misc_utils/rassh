@@ -1,15 +1,23 @@
 #!/bin/bash
 
+LmceHome="www.linuxmce.org"
+
+RA_Servers=(ra.linuxmce.org)
+#RA_Servers=(localhost)
+
+# explicitly delete the RA server host keys if present
+# especially useful for root, because fakeroot is useless there
+sed -ri '/ra\.linmuxmce\.org/d' ~/.ssh/known_hosts
+
 Usage()
 {
-	echo "Usage: rassh {-i|--installation} <installation_number> [{-u|--user} <username>] [{-o|--old}] [{-d|--display}] [{-f|--forward {RL}port:host:port]"
+	echo "Usage: rassh {-i|--installation} <installation_number> [{-u|--user} <username>] [{-d|--display}] [{-f|--forward {RL}port:host:port]"
 }
 
 for ((i = 1; i <= "$#"; i++)); do
 	case "${!i}" in
 		-i|--installation) ((i++)); Installation="${!i}" ;;
 		-u|--user) ((i++)); User="${!i}" ;;
-		-o|--old) UseOldMethod=UseOldMethod ;;
 		-d|--display) DisplayOnly=DisplayOnly ;;
 		-f|--forward) ((i++)); Forward="-${!i}" ;;
 		*) echo "ERROR: Unknown option '${!i}'"; Usage; exit 1 ;;
@@ -26,80 +34,49 @@ if [[ -z "$User" ]]; then
 	User=remote
 fi
 
-RA_New()
-{
-	PlutoHome="rassh.linuxmce.org"
-	#PlutoHome="10.0.0.175/plutohome-com"
+PortFile="$(mktemp /tmp/tmp.RA-XXXXXX)"
+trap "rm -f '$PortFile'" EXIT
 
-	RA_Servers=(rassh2.linuxmce.org rassh.linuxmce.org)
+PortPage="http://$LmceHome/get_ra_ports.php?installationID=$Installation&action=display"
+wget -O "$PortFile" "$PortPage" 2>/dev/null
 
-	PortFile="$(mktemp /tmp/tmp.RA-XXXXXX)"
-	trap "rm -f '$PortFile'" EXIT
-
-	PortPage="http://$PlutoHome/get_ra_ports.php?installationID=$Installation&action=display"
-	wget -O "$PortFile" "$PortPage" 2>/dev/null
-
-	if [[ "$(head -1 "$PortFile")" != "#Ports:" || "$(tail -1 "$PortFile")" != "#END" ]]; then
-		echo "ERROR: Received incomplete response from server"
-		exit 1
-	fi
-
-	Index=1
-	while read line; do
-		if [[ "$line" == "#"* ]]; then
-			continue
-		fi
-		Service="${line%=*}"
-		ServicePortRA="${line#*=}"
-		ServicePortUser="${Service##*_}"
-		ServiceName="${Service%_*}"
-
-		if [[ "$ServiceName" == nomon_* ]]; then
-			ServiceName="${ServiceName#nomon_}"
-			ServiceSpecial="nomon"
-		fi
-
-		echo "Service: $ServiceName; RA Port: $ServicePortRA; User Port: $ServicePortUser; Special: $ServiceSpecial"
-		if [[ "$ServiceName" == SSH ]]; then
-			eval "SSH_Port_${Index}=$ServicePortRA"
-			((Index++))
-		fi
-	done < "$PortFile"
-	echo "----------------------------------"
-
-	if [[ "$DisplayOnly" == DisplayOnly ]]; then
-		return 0
-	fi
-
-	for Server in "${RA_Servers[@]}"; do
-		for Var in ${!SSH_Port_*}; do
-			Port="${!Var}"
-			echo "Trying: server=$Server port=${Port}"
-			echo fakeroot ssh -p $Port "$User@$Server" $Forward
-			if fakeroot ssh -p $Port "$User@$Server" $Forward 2>/dev/null; then
-				break 2
-			else
-				echo "FAILED."
-			fi
-		done
-	done
-}
-
-RA_Old()
-{
-	Port=$((10000+Installation*4))
-	echo "Ports: $Port $((Port+1)) $((Port+2)) $((Port+3))"
-
-	echo fakeroot ssh -p $Port "$User@rassh.linuxmce.org"
-	fakeroot ssh -p $Port "$User@rassh.linuxmce.org"
-}
-
-# explicitly delete the RA server host keys if present
-# especially useful for root, because fakeroot is useless there
-sed -ri '/rassh2?\.linmuxmce\.org/d' ~/.ssh/known_hosts
-
-if [[ -z "$UseOldMethod" ]]; then
-	RA_New
-else
-	RA_Old
+if [[ "$(head -1 "$PortFile")" != "#Ports:" || "$(tail -1 "$PortFile")" != "#END" ]]; then
+	echo "ERROR: Received incomplete response from server"
+	exit 1
 fi
+
+Index=1
+while read line; do
+	if [[ "$line" == "#"* ]]; then
+		continue
+	fi
+	Service="${line%=*}"
+	ServicePortRA="${line#*=}"
+	ServicePortUser="${Service##*_}"
+	ServiceName="${Service%_*}"
+	if [[ "$ServiceName" == nomon_* ]]; then
+		ServiceName="${ServiceName#nomon_}"
+		ServiceSpecial="nomon"
+	fi
+	echo "Service: $ServiceName; RA Port: $ServicePortRA; User Port: $ServicePortUser; Special: $ServiceSpecial"
+	if [[ "$ServiceName" == SSH ]]; then
+		eval "SSH_Port_${Index}=$ServicePortRA"
+		((Index++))
+	fi
+done < "$PortFile"
+echo "----------------------------------"
+if [[ "$DisplayOnly" == DisplayOnly ]]; then
+	exit 0
+fi
+for Server in "${RA_Servers[@]}"; do
+	for Var in ${!SSH_Port_*}; do
+		Port="${!Var}"
+		echo "Trying: server=$Server port=${Port}"
+		#echo fakeroot ssh -p $Port "$User@$Server" $Forward
+		if fakeroot ssh -p $Port "$User@$Server" $Forward 2>/dev/null; then
+			break 2
+		else
+			echo "FAILED."
+		fi
+	done
+done

@@ -1,0 +1,3 @@
+/usr/share/vdr/vdr-xine/noSignal-completelyBlack.pes	/etc/vdr/plugins/xine/noSignal-completelyBlack.pes
+/usr/share/vdr/vdr-xine/noSignal.pes			/etc/vdr/plugins/xine/noSignal.pes
+/etc/vdr/plugins/xine					/var/lib/vdr/plugins/xine

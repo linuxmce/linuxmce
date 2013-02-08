@@ -55,6 +55,9 @@ ObjectRenderer::ObjectRenderer(DesignObj_Orbiter *pOwner) : m_pObj_Owner(pOwner)
 
 	//if a button doesn't have a mng as selected state (see bDisableEffects), then the png
 	//used in normal state will be rendered for selected state + a blue rectangle to show the selection
+	//
+	// TODO: The blue button is rendered here!!!
+	// 
 	if(!bIsMNG && m_pObj_Owner->m_GraphicToDisplay == GRAPHIC_SELECTED)
 	{
 		if(m_pObj_Owner->m_vectSelectedGraphic.size() != 0)
@@ -146,6 +149,10 @@ ObjectRenderer::ObjectRenderer(DesignObj_Orbiter *pOwner) : m_pObj_Owner(pOwner)
 				size_t size = 0;
 				char *pData = FileUtils::ReadFileIntoBuffer(sFileName.c_str(), size);
 
+#ifdef DEBUG
+				LoggerWrapper::GetInstance()->Write(LV_STATUS, "Read file to buffer %s, size=%d\n", sFileName.c_str(), size);
+#endif
+
 				if(!size)
 					return;
 
@@ -216,14 +223,26 @@ ObjectRenderer::ObjectRenderer(DesignObj_Orbiter *pOwner) : m_pObj_Owner(pOwner)
 		case GRAPHIC_HIGHLIGHTED:
 			m_pObj_Owner->m_iTime_Highlighted = iTime;
 			m_pObj_Owner->m_bLoop_Highlighted = bLoop;
+#ifdef DEBUG
+			LoggerWrapper::GetInstance()->Write(LV_STATUS, "Display GRAPHIC_HIGHLIGHTED ...\n");
+#endif
+
 			break;
 		case GRAPHIC_SELECTED:
 			m_pObj_Owner->m_iTime_Selected = iTime;
 			m_pObj_Owner->m_bLoop_Selected = bLoop;
+#ifdef DEBUG
+			LoggerWrapper::GetInstance()->Write(LV_STATUS, "Display GRAPHIC_SELECTED ...\n");
+#endif
+		
 			break;
 		case GRAPHIC_NORMAL:
 			m_pObj_Owner->m_iTime_Background = iTime;
 			m_pObj_Owner->m_bLoop_Background = bLoop;
+#ifdef DEBUG
+			LoggerWrapper::GetInstance()->Write(LV_STATUS, "Display GRAPHIC_NORMAL ...\n");
+#endif
+		
 			break;
 			//todo alternate graphics ?
 		}
@@ -244,7 +263,13 @@ ObjectRenderer::ObjectRenderer(DesignObj_Orbiter *pOwner) : m_pObj_Owner(pOwner)
 	#endif
 
 	if(!bIsMNG && m_pObj_Owner->m_GraphicToDisplay == GRAPHIC_SELECTED)
+	{
+#ifdef DEBUG
+		LoggerWrapper::GetInstance()->Write(LV_STATUS, "m_pOrbiter->SelectObject ...\n");
+#endif
+	
 		m_pObj_Owner->m_pOrbiter->SelectObject(m_pObj_Owner, point);
+	}	
 }
 
 /*virtual*/ void ObjectRenderer::RenderObject(DesignObj_Orbiter *pObj_Screen, PlutoPoint point)
@@ -355,8 +380,8 @@ ObjectRenderer::ObjectRenderer(DesignObj_Orbiter *pOwner) : m_pObj_Owner(pOwner)
 
 			// We must be pointing to a datagrid,  and we need to bind to the highlighted row
 			if(
-				(m_pObj_Owner->m_iRowTiedTo == -1 || m_pObj_Owner->m_iRowTiedTo == pObjGrid->m_iHighlightedRow_get()) &&
-				(m_pObj_Owner->m_iColumnTiedTo == -1 || m_pObj_Owner->m_iColumnTiedTo == pObjGrid->m_iHighlightedColumn_get())
+				(m_pObj_Owner->m_iRowTiedTo == -1 || m_pObj_Owner->m_iRowTiedTo == pObjGrid->m_iHighlightedRow) &&
+				(m_pObj_Owner->m_iColumnTiedTo == -1 || m_pObj_Owner->m_iColumnTiedTo == pObjGrid->m_iHighlightedColumn)
 				)
 				m_pObj_Owner->m_GraphicToDisplay_set("or3",GRAPHIC_HIGHLIGHTED);
 			else

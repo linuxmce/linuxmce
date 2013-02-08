@@ -62,8 +62,8 @@ if [[ -f /etc/pluto/install_cleandb ]]; then
 				)
 				AND FK_DeviceData=7
 		"
-		"UPDATE Device_DeviceData SET IK_DeviceData='LMCE_CORE_u0710_$arch' WHERE IK_DeviceData='LMCE_CORE_1_1'"
-		"UPDATE Device_DeviceData SET IK_DeviceData='LMCE_MD_u0710_i386'   WHERE IK_DeviceData='LMCE_MD_1_1'"
+		"UPDATE Device_DeviceData SET IK_DeviceData='LMCE_CORE_u0804_$arch' WHERE IK_DeviceData='LMCE_CORE_1_1'"
+		"UPDATE Device_DeviceData SET IK_DeviceData='LMCE_MD_u0804_i386'   WHERE IK_DeviceData='LMCE_MD_1_1'"
 		"UPDATE Device_DeviceData SET IK_DeviceData='0' WHERE FK_DeviceData='234'"
 		"UPDATE Device_DeviceData SET IK_DeviceData='i386' WHERE FK_DeviceData='112' AND IK_DeviceData='686'"
 		"USE asterisk; UPDATE incoming SET destination=CONCAT('custom-linuxmce', SUBSTR(destination, 18)) WHERE destination LIKE 'from-pluto-custom%'"

@@ -1,0 +1,20 @@
+/.cvsignore/1.3/Sun Jul 10 19:58:31 2005//
+/Makefile/1.12/Sun Jul 10 19:50:05 2005//
+/README/1.4/Tue May 10 20:29:17 2005//
+/atsc_psip_section.pl/1.1/Tue May 10 20:29:17 2005//
+/diseqc.c/1.1/Sat Jan 17 16:59:46 2004//
+/diseqc.h/1.1/Sat Jan 17 16:59:46 2004//
+/dump-vdr.c/1.5/Thu Oct 27 21:23:07 2005//
+/dump-vdr.h/1.3/Thu Oct 27 21:23:07 2005//
+/dump-zap.c/1.2/Tue May 10 20:29:17 2005//
+/dump-zap.h/1.1/Sat Jan 17 16:59:46 2004//
+/list.h/1.1/Sat Jan 17 16:59:46 2004//
+/scan.c/1.24/Thu Oct 27 21:23:07 2005//
+/scan.h/1.1/Sat Jan 17 16:59:46 2004//
+/section.c/1.1/Tue May 10 20:29:17 2005//
+/section.h/1.1/Tue May 10 20:29:17 2005//
+/section_generate.pl/1.1/Tue May 10 20:29:17 2005//
+D/atsc////
+D/dvb-c////
+D/dvb-s////
+D/dvb-t////

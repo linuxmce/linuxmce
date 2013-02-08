@@ -1,0 +1,22 @@
+xcompmgr (1.1.1+cvs.20051218-1) experimental; urgency=low
+
+  * First Debian release (Closes: #343947).
+  * debian/control
+    - Maintainer field changed
+    - Standards-Version updated to 3.6.2.1
+    - Build-Depends versioned
+    - Build-Depends on automake1.7 added
+
+ -- Gustavo Franco <stratus@debian.org>  Sun, 18 Dec 2005 21:44:26 -0200
+
+xcompmgr (1.1.1+cvs.20041109-0ubuntu2) UNRELEASED; urgency=low
+
+  * Add pkg-config to Build-Depends.
+
+ -- Daniel Stone <daniel.stone@canonical.com>  Wed, 24 Nov 2004 14:50:09 +0100
+
+xcompmgr (1.1.1+cvs.20041109-0ubuntu1) UNRELEASED; urgency=low
+
+  * First xcompmgr release.
+
+ -- Daniel Stone <daniel.stone@canonical.com>  Tue,  9 Nov 2004 21:01:19 +0100

@@ -1,0 +1,17 @@
+Source: linuxmce-orbiter
+Section: user/extra
+Priority: optional
+Maintainer: Dianemo <info@dianemo.co.uk>
+Build-Depends: debhelper (>= 5),
+ libmysqlclient15-dev,
+ libsdl-ttf2.0-dev,
+ libsdl-gfx1.2-dev,
+ libsdl-sge-dev,
+Standards-Version: 3.7.2
+
+Package: linuxmce-orbiter
+Architecture: armel
+Depends: ${shlibs:Depends}, ${misc:Depends}, bash
+Description: LinuxMCE Orbiter
+ LinuxMCE Orbiter is an application which allows to control your LinuxMCE home automation system
+ from your Nokia770/N800/N810/N900. For more information, please, visit http://linuxmce.org/

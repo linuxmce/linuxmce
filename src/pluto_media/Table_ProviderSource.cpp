@@ -80,6 +80,7 @@ void Row_ProviderSource::Delete()
 	Row_ProviderSource *pRow = this; // Needed so we will have only 1 version of get_primary_fields_assign_from_row
 	
 	if (!is_deleted)
+	{
 		if (is_added)	
 		{	
 			vector<TableRow*>::iterator i;	
@@ -101,6 +102,7 @@ void Row_ProviderSource::Delete()
 			table->deleted_cachedRows[key] = this;
 			is_deleted = true;	
 		}	
+	}
 }
 
 void Row_ProviderSource::Reload()
@@ -160,8 +162,7 @@ is_null[16] = true;
 m_psc_user = 0;
 m_psc_frozen = 0;
 is_null[17] = false;
-m_psc_mod = "0000-00-00 00:00:00";
-is_null[18] = false;
+is_null[18] = true;
 is_null[19] = true;
 m_psc_restrict = 0;
 
@@ -343,6 +344,9 @@ return is_null[16];}
 bool Row_ProviderSource::psc_frozen_isNull() {PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
 
 return is_null[17];}
+bool Row_ProviderSource::psc_mod_isNull() {PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
+
+return is_null[18];}
 bool Row_ProviderSource::psc_restrict_isNull() {PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
 
 return is_null[19];}
@@ -410,6 +414,10 @@ is_modified=true;
 }
 void Row_ProviderSource::psc_frozen_setNull(bool val){PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
 is_null[17]=val;
+is_modified=true;
+}
+void Row_ProviderSource::psc_mod_setNull(bool val){PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
+is_null[18]=val;
 is_modified=true;
 }
 void Row_ProviderSource::psc_restrict_setNull(bool val){PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);

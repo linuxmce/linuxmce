@@ -1,0 +1,76 @@
+/*!
+ * \defgroup qml_desktop Desktop
+ * \ingroup qml_skins
+ */
+
+/*!
+ * \defgroup qml_android Android
+ * \ingroup qml_skins
+ */
+
+/*!
+ * \defgroup qml_harmattan Harmattan
+ * \ingroup qml_skins
+ */
+
+/*!
+ * \defgroup qml_rpi Raspberry Pi
+ * \ingroup qml_skins
+ */
+
+// End Top level sections
+
+/*!
+ * \defgroup qml_android_phone Android Phone
+ * \ingroup qml_android
+ */
+
+/*!
+ * \defgroup qml_android_tablet Android Tablet
+ * \ingroup qml_android
+ */
+
+/*!
+ * \defgroup qml_android_tv Android TV
+ * \ingroup qml_android
+ */
+// End Android sub cat
+
+
+//Defining the Skins
+
+/*!
+ * \defgroup qml_desktop_default Default
+ * \ingroup qml_desktop
+ */
+
+/*!
+ *\defgroup desktop_aeon Aeon
+ * \ingroup qml_desktop
+ */
+
+/*!
+ *\defgroup desktop_basic Basic
+ * \ingroup qml_desktop
+ */
+
+/*!
+ *\defgroup desktop_noir Noir
+ * \ingroup qml_desktop
+ */
+
+//Android
+/*!
+ * \defgroup android_phone_default Phone-Default
+ * \ingroup qml_android_phone
+ */
+
+/*!
+ * \defgroup android_tablet_data Data
+ * \ingroup qml_android_tablet
+ */
+
+/*!
+ * \defgroup android_tablet_default Tablet-Default
+ * \ingroup qml_android_tablet
+ */

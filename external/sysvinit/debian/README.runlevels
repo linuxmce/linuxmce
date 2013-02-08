@@ -1,0 +1,5 @@
+
+This information is now available in /usr/share/doc/sysv-rc if you're
+running a standard installation, or in /usr/share/doc/file-rc if you
+have installed the `file-rc' package.
+

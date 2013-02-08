@@ -7,11 +7,11 @@
 	
 	Phone: +1 (877) 758-8648
 	
-	This program is free software; you can redistribute it and/or modify it under the terms of the GNU General Public License.
+	This program is free software; you can redistribute it and/or modify it under the terms of the GNU Lesser General Public License.
 	This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty 
 	of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. 
 	
-	See the GNU General Public License for more details.
+	See the GNU Lesser General Public License for more details.
 */
 
 #include "PlutoUtils/minilzo.h"
@@ -333,7 +333,7 @@ DataGridTable::DataGridTable()
 	m_iDownRow=m_iUpRow=-1;
 	m_iPK_Datagrid = 0;
 	m_bRePopulateEachTimeRequested = false;
-	Message::Message();
+    Message();
 	ClearData();
 }
 

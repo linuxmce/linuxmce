@@ -335,14 +335,17 @@ void PlutoLock::DumpOutstandingLocks()
 
 #ifdef WIN32
 #pragma warning(disable: 4311)
-#endif
-
 				sprintf(Message,"^01\t (>%d) %s l:%d time: (%d s) thread: %lu Rel: %s Got: %s",
 					pSafetyLock->m_LockNum,pSafetyLock->m_sFileName.c_str(),pSafetyLock->m_Line,(int) (time(NULL)-pSafetyLock->m_tTime),
-					(unsigned long)pSafetyLock->m_thread,(pSafetyLock->m_bReleased ? "Y" : "N"),(pSafetyLock->m_bGotLock ? "Y" : "N"));
+                                        (unsigned long)pSafetyLock->m_thread.p,(pSafetyLock->m_bReleased ? "Y" : "N"),(pSafetyLock->m_bGotLock ? "Y" : "N"));
 
-#ifdef WIN32
+
 #pragma warning(default: 4311)
+#else
+
+                                sprintf(Message,"^01\t (>%d) %s l:%d time: (%d s) thread: %lu Rel: %s Got: %s",
+                                        pSafetyLock->m_LockNum,pSafetyLock->m_sFileName.c_str(),pSafetyLock->m_Line,(int) (time(NULL)-pSafetyLock->m_tTime),
+                                        (unsigned long)pSafetyLock->m_thread,(pSafetyLock->m_bReleased ? "Y" : "N"),(pSafetyLock->m_bGotLock ? "Y" : "N"));
 #endif
 
 				listMessages.push_back(Message);
@@ -376,14 +379,17 @@ void PlutoLock::DumpOutstandingLocks()
 
 #ifdef WIN32
 #pragma warning(disable: 4311)
-#endif
 
 		sprintf(Message,"OL: (%p) (>%d) %s %s l:%d time: %s (%d s) thread: %lu Rel: %s Got: %s",
 			&pSafetyLock->m_pMyLock->mutex,pSafetyLock->m_LockNum,pSafetyLock->m_pMyLock->m_sName.c_str(),pSafetyLock->m_sFileName.c_str(),pSafetyLock->m_Line,sTime.c_str(),(int) (time(NULL)-pSafetyLock->m_tTime),
-			(unsigned long)pSafetyLock->m_thread,(pSafetyLock->m_bReleased ? "Y" : "N"),(pSafetyLock->m_bGotLock ? "Y" : "N"));
+                        (unsigned long)pSafetyLock->m_thread.p,(pSafetyLock->m_bReleased ? "Y" : "N"),(pSafetyLock->m_bGotLock ? "Y" : "N"));
 
-#ifdef WIN32
 #pragma warning(default: 4311)
+#else
+
+                sprintf(Message,"OL: (%p) (>%d) %s %s l:%d time: %s (%d s) thread: %lu Rel: %s Got: %s",
+                        &pSafetyLock->m_pMyLock->mutex,pSafetyLock->m_LockNum,pSafetyLock->m_pMyLock->m_sName.c_str(),pSafetyLock->m_sFileName.c_str(),pSafetyLock->m_Line,sTime.c_str(),(int) (time(NULL)-pSafetyLock->m_tTime),
+                        (unsigned long)pSafetyLock->m_thread,(pSafetyLock->m_bReleased ? "Y" : "N"),(pSafetyLock->m_bGotLock ? "Y" : "N"));
 #endif
 
 		if( ((int) time(NULL)-pSafetyLock->m_tTime)>=KILL_THREAD_TIMEOUT && pSafetyLock->m_bGotLock && !pSafetyLock->m_bReleased )
@@ -446,7 +452,7 @@ void PlutoLock::DumpOutstandingLocks()
 			for(itMapLock=MutexTracking::GetMap()->begin();itMapLock!=MutexTracking::GetMap()->end();)
 			{
 				PlutoLock *pSafetyLock = (*itMapLock).second;
-				if( pSafetyLock->m_thread == (*itKilledThreads) )
+                                if( pthread_equal(pSafetyLock->m_thread, (*itKilledThreads) ))
 				{
 					listMessages.push_back("already killed (>" + StringUtils::itos(pSafetyLock->m_LockNum) + ")");
 					MutexTracking::GetMap()->erase(itMapLock++);
@@ -461,7 +467,9 @@ void PlutoLock::DumpOutstandingLocks()
 		{
 			pthread_t thread = (*itKilledThreads);
 #ifndef UNDER_CE
+#ifndef ANDROID
 			pthread_cancel(thread);
+#endif
 #endif
 		}
 

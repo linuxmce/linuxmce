@@ -32,16 +32,17 @@ bool TagFileHandler::LoadAttributes(PlutoMediaAttributes *pPlutoMediaAttributes,
 {
 	string sFileWithAttributes = m_sFullFilename;
 
+#ifdef UPDATEMEDIA_STATUS
 	LoggerWrapper::GetInstance()->Write(LV_STATUS, "# TagFileHandler::LoadAttributes: loading %d attributes in the attribute file %s",
 		pPlutoMediaAttributes->m_mapAttributes.size(), sFileWithAttributes.c_str());
-
+#endif
 	//get common tag attributes
 	map<int, string> mapAttributes;
 	GetTagInfo(sFileWithAttributes, mapAttributes, listPicturesForTags);	
-
+#ifdef UPDATEMEDIA_STATUS
 	LoggerWrapper::GetInstance()->Write(LV_STATUS, "# LoadPlutoAttributes: tag attributes loaded (from tag file - common tags) %d", 
 		mapAttributes.size());
-
+#endif
 	//merge attributes
 	for(map<int, string>::iterator it = mapAttributes.begin(), end = mapAttributes.end(); it != end; ++it)
 	{
@@ -67,32 +68,42 @@ bool TagFileHandler::SaveAttributes(PlutoMediaAttributes *pPlutoMediaAttributes)
 {
 	string sFileWithAttributes = m_sFullFilename;
 
+#ifdef UPDATEMEDIA_STATUS
 	LoggerWrapper::GetInstance()->Write(LV_STATUS, "# TagFileHandler::SaveAttributes: saving %d attributes in the attribute file %s",
 		pPlutoMediaAttributes->m_mapAttributes.size(), sFileWithAttributes.c_str());
-
-	//Temporary map with attributes for common tags
-	map<int, string> mapAttributes;
-	for(MapPlutoMediaAttributes::iterator it = pPlutoMediaAttributes->m_mapAttributes.begin(), 
-		end = pPlutoMediaAttributes->m_mapAttributes.end(); it != end; ++it)
+#endif
+	if (pPlutoMediaAttributes->m_mapAttributes.size() != 0)
 	{
-		mapAttributes[it->first] = it->second->m_sName;
+		//Temporary map with attributes for common tags
+		map<int, string> mapAttributes;
+		for(MapPlutoMediaAttributes::iterator it = pPlutoMediaAttributes->m_mapAttributes.begin(), 
+			end = pPlutoMediaAttributes->m_mapAttributes.end(); it != end; ++it)
+		{
+			mapAttributes[it->first] = it->second->m_sName;
+		}
+
+
+		LoggerWrapper::GetInstance()->Write(LV_WARNING, "# TagFileHandler::SaveAttributes: saving %d pictures into APIC tags to %s",
+			pPlutoMediaAttributes->m_mapCoverarts.size(), sFileWithAttributes.c_str());
+
+		list<pair<char *, size_t> > listPictures;
+		for(MapPictures::iterator itc = pPlutoMediaAttributes->m_mapCoverarts.begin();
+			itc != pPlutoMediaAttributes->m_mapCoverarts.end(); ++itc)
+		{
+#ifdef UPDATEMEDIA_STATUS
+			LoggerWrapper::GetInstance()->Write(LV_STATUS, "# TagFileHandler::SaveAttributes: saving into APIC picture size %d", itc->first);
+			listPictures.push_back(make_pair(itc->second, itc->first));
+#endif
+		}
+
+		//Save common tag tags
+		SetTagInfo(sFileWithAttributes, mapAttributes, listPictures);
+		listPictures.clear();
 	}
-
-
-	LoggerWrapper::GetInstance()->Write(LV_WARNING, "# TagFileHandler::SaveAttributes: saving %d pictures into APIC tags to %s",
-		pPlutoMediaAttributes->m_mapCoverarts.size(), sFileWithAttributes.c_str());
-
-	list<pair<char *, size_t> > listPictures;
-	for(MapPictures::iterator itc = pPlutoMediaAttributes->m_mapCoverarts.begin();
-		itc != pPlutoMediaAttributes->m_mapCoverarts.end(); ++itc)
-	{
-		LoggerWrapper::GetInstance()->Write(LV_STATUS, "# TagFileHandler::SaveAttributes: saving into APIC picture size %d", itc->first);
-		listPictures.push_back(make_pair(itc->second, itc->first));
-	}
-
-	//Save common tag tags
-	SetTagInfo(sFileWithAttributes, mapAttributes, listPictures);
-	listPictures.clear();
+	else
+#ifdef UPDATEMEDIA_STATUS
+		LoggerWrapper::GetInstance()->Write(LV_STATUS, "# TagFileHandler::SaveAttributes: No attributes to save");
+#endif
 
 	return true;
 }
@@ -100,10 +111,10 @@ bool TagFileHandler::SaveAttributes(PlutoMediaAttributes *pPlutoMediaAttributes)
 bool TagFileHandler::RemoveAttribute(int nTagType, string sValue, PlutoMediaAttributes *pPlutoMediaAttributes)
 {
 	string sFileWithAttributes = m_sFullFilename;
-
+#ifdef UPDATEMEDIA_STATUS
 	LoggerWrapper::GetInstance()->Write(LV_STATUS, "# TagFileHandler::RemoveAttribute: removing %s type %d attribute from the attribute file %s",
 		sValue.c_str(), nTagType, sFileWithAttributes.c_str());
-
+#endif
 	RemoveTag(sFileWithAttributes, nTagType, sValue);
 	return true;
 }
@@ -140,12 +151,15 @@ string TagFileHandler::GetFileSourceForDB()
 void TagFileHandler::GetTagInfo(string sFilename, map<int,string>& mapAttributes, list<pair<char *, size_t> >& listPictures)
 {
 	FileRef *f = new FileRef(m_sFullFilename.c_str());
-	if(NULL != f)
+	if(!f->isNull()) //ensure tag is present before trying to read and data.
 	{
-		mapAttributes[ATTRIBUTETYPE_Performer_CONST] = f->tag()->artist().to8Bit();
-		mapAttributes[ATTRIBUTETYPE_Title_CONST] = f->tag()->title().to8Bit();
-		mapAttributes[ATTRIBUTETYPE_Genre_CONST] = f->tag()->genre().to8Bit();
-		mapAttributes[ATTRIBUTETYPE_Album_CONST] = f->tag()->album().to8Bit();
+#ifdef UPDATEMEDIA_STATUS
+		LoggerWrapper::GetInstance()->Write(LV_STATUS, "# TagFileHandler::GetTagInfo: tags present");
+#endif
+		mapAttributes[ATTRIBUTETYPE_Performer_CONST] = f->tag()->artist().to8Bit(true);
+		mapAttributes[ATTRIBUTETYPE_Title_CONST] = f->tag()->title().to8Bit(true);
+		mapAttributes[ATTRIBUTETYPE_Genre_CONST] = f->tag()->genre().to8Bit(true);
+		mapAttributes[ATTRIBUTETYPE_Album_CONST] = f->tag()->album().to8Bit(true);
 
 		if(f->tag()->track() > 0)
 			mapAttributes[ATTRIBUTETYPE_Track_CONST] = StringUtils::ltos(f->tag()->track());
@@ -153,6 +167,23 @@ void TagFileHandler::GetTagInfo(string sFilename, map<int,string>& mapAttributes
 		if(f->tag()->year() > 0)
 			mapAttributes[ATTRIBUTETYPE_Release_Date_CONST] = StringUtils::ltos(f->tag()->year());
 
+		// TODO: FIXME: use routines from PlutoUtils
+		//if (FileExists(BasePath(m_sFullFilename) + "/cover.jpg")) {
+		//}
+
+		string coverfilename = m_sFullFilename.substr(0,m_sFullFilename.find_last_of("/\\")) + "/cover.jpg";
+		cout << "fetching cover: "<< coverfilename << "\n";
+		FILE *coverart = fopen(coverfilename.c_str(), "rb");
+		if (coverart != NULL) {
+			fseek(coverart, 0, SEEK_END);
+			size_t nBinSize = (size_t)ftell(coverart);
+			if (nBinSize > 0) {
+				rewind(coverart);
+				char *pPictureData = new char[nBinSize];
+				fread(pPictureData, 1,nBinSize,coverart);	
+				listPictures.push_back(make_pair(pPictureData, nBinSize));
+			}
+		}
 		delete f;
 	}
 }

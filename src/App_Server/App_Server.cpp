@@ -26,6 +26,7 @@
 
 //<-dceag-d-b->
 #include "App_Server.h"
+#include "DCE/DCEConfig.h"
 #include "DCE/Logger.h"
 #include "PlutoUtils/FileUtils.h"
 #include "PlutoUtils/StringUtils.h"
@@ -187,12 +188,10 @@ void App_Server::ReceivedUnknownCommand(string &sCMD_Result,Message *pMessage)
 	/** Send a keypress event to an application */
 		/** @param #26 PK_Button */
 			/** What key to simulate being pressed.  If 2 numbers are specified, separated by a comma, the second will be used if the Shift key is specified. */
-		/** @param #41 StreamID */
-			/** ID of stream to apply */
 		/** @param #50 Name */
 			/** The application to send the keypress to. If not specified, it goes to the DCE device. */
 
-void App_Server::CMD_Simulate_Keypress(string sPK_Button,int iStreamID,string sName,string &sCMD_Result,Message *pMessage)
+void App_Server::CMD_Simulate_Keypress(string sPK_Button,string sName,string &sCMD_Result,Message *pMessage)
 //<-dceag-c28-e->
 {
     cout << "Need to implement command #28 - Simulate Keypress" << endl;
@@ -399,15 +398,33 @@ void App_Server::SendMessageList(string messageList)
 			/** The device to halt */
 		/** @param #21 Force */
 			/** If Force is not specified this will do a suspend if the device supports suspend/resume, otherwise it will do a halt.  Force:  "H"=halt, "S"=suspend, "D"=Display off, "R"=reboot, "N"=net boot, "V"=hard drive boot */
-		/** @param #47 Mac address */
-			/** If PK_Device is not specified (is 0), we'll use the mac address to determine the device id */
 
-void App_Server::CMD_Halt_Device(int iPK_Device,string sForce,string sMac_address,string &sCMD_Result,Message *pMessage)
+void App_Server::CMD_Halt_Device(int iPK_Device,string sForce,string &sCMD_Result,Message *pMessage)
 //<-dceag-c323-e->
 {
-	if( sForce=="" )
-		sForce = "H"; // HACK - todo: figure out how to determine if we have suspend capabilities
-
+        if ( sForce=="" ) {
+	        // Get device data and check power off mode
+	        string powerOffMode = m_pData->m_pEvent_Impl->GetDeviceDataFromDatabase(m_dwPK_Device_MD,DEVICEDATA_PowerOff_mode_CONST);
+		if (powerOffMode == "") {
+		        int ret = system("/usr/bin/pm-is-supported --suspend");
+			if (ret < 0) {
+		                LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"Error checking if suspend is supported (running /usr/bin/pm-is_supported --suspend)");
+				sForce = "H"; // halt, as we don't know what is supported
+			} else {
+			        if ( ret ) {
+				        LoggerWrapper::GetInstance()->Write(LV_WARNING,"Suspend not supported - halting instead");
+					sForce = "H"; // halt if we don't have suspend capabilities
+				} else {
+				        LoggerWrapper::GetInstance()->Write(LV_WARNING,"Suspend supported - suspending");
+					sForce = "S";
+				}
+			}
+		} else {
+		        sForce = powerOffMode;
+			LoggerWrapper::GetInstance()->Write(LV_WARNING,"PowerOff mode overridden from MD device data: %s", sForce.c_str());
+		}
+	}
+	
 	LoggerWrapper::GetInstance()->Write(LV_STATUS,"CMD_Halt_Device %s",sForce.c_str());
 
 	switch( sForce[0] )
@@ -421,8 +438,8 @@ void App_Server::CMD_Halt_Device(int iPK_Device,string sForce,string sMac_addres
 		DisplayMessageOnOrbVFD("Suspending...");
 
 #ifndef WIN32
-		LoggerWrapper::GetInstance()->Write(LV_STATUS,"Calling halt");
-		system("halt");  // Don't know how to do this
+		LoggerWrapper::GetInstance()->Write(LV_STATUS,"Calling initiateSuspend.sh");
+		system("/usr/pluto/bin/initiateSuspend.sh");
 #else
 		EnablePrivileges();
 		::ExitWindowsEx(EWX_POWEROFF | EWX_FORCE, 0);
@@ -431,8 +448,17 @@ void App_Server::CMD_Halt_Device(int iPK_Device,string sForce,string sMac_addres
 	case 'R':
 	case 'N':
 	case 'V':
-		if( sForce[0]=='R' )
+	case 'A':
+		if( sForce[0]=='R')
 			SetStatus("REBOOTING",m_dwPK_Device_MD);
+		else if ( sForce[0]=='A' )
+		{
+			SetStatus("REBOOTING",m_dwPK_Device_MD);
+			LoggerWrapper::GetInstance()->Write(LV_STATUS,"Rebooting with AVWizard");
+			DCEConfig dceconfig;
+			dceconfig.AddString("AVWizardOverride","1");
+			dceconfig.WriteSettings();
+		}
 		else if( sForce[0]=='N' )
 			SetStatus("MD_REBOOTING",m_dwPK_Device_MD);
 		else if( sForce[0]=='V' )
@@ -562,6 +588,24 @@ void App_Server::CMD_Vol_Down(int iRepeat_Command,string &sCMD_Result,Message *p
 	sCMD_Result = "OK";
 }
 
+//<-dceag-c97-b->
+
+	/** @brief COMMAND: #97 - Mute */
+	/** Toggle mute/unmute */
+
+void App_Server::CMD_Mute(string &sCMD_Result,Message *pMessage)
+//<-dceag-c97-e->
+{
+	bool bLastMute = m_bLastMute;
+	m_bLastMute=!m_bLastMute;
+#ifndef WIN32
+	m_MasterMix.SetOn(bLastMute ? 1 : 0); // toggle mute
+#endif
+
+	// TODO: check that the mixer actually worked
+	sCMD_Result = "OK";
+}
+
 //<-dceag-c313-b->
 
 	/** @brief COMMAND: #313 - Set Volume */
@@ -598,23 +642,6 @@ void App_Server::CMD_Set_Volume(string sLevel,string &sCMD_Result,Message *pMess
 	sCMD_Result = "OK";
 }
 
-//<-dceag-c97-b->
-
-	/** @brief COMMAND: #97 - Mute */
-	/** Toggle mute/unmute */
-
-void App_Server::CMD_Mute(string &sCMD_Result,Message *pMessage)
-//<-dceag-c97-e->
-{
-	bool bLastMute = m_bLastMute;
-	m_bLastMute=!m_bLastMute;
-#ifndef WIN32
-	m_MasterMix.SetOn(bLastMute ? 1 : 0); // toggle mute
-#endif
-
-	// TODO: check that the mixer actually worked
-	sCMD_Result = "OK";
-}
 //<-dceag-c696-b->
 
 	/** @brief COMMAND: #696 - Application is Running */

@@ -65,7 +65,7 @@ DisableDevice()
 	
 	# COMMAND: #791 - Set Enable Status
 	GeneralInfoPlugin_DeviceID=$(FindDevice_Template "$PK_Device" "$DEVICETEMPLATE_GeneralInfoPlugin" "" "")
-	/usr/pluto/bin/MessageSend dcerouter 0 $GeneralInfoPlugin_DeviceID 1 791 2 $Device 208 0
+	/usr/pluto/bin/MessageSend "$DCERouter" 0 $GeneralInfoPlugin_DeviceID 1 791 2 $Device 208 0
 
 }
 
@@ -80,7 +80,7 @@ EnableDevice()
 
 	# COMMAND: #791 - Set Enable Status
 	GeneralInfoPlugin_DeviceID=$(FindDevice_Template "$PK_Device" "$DEVICETEMPLATE_GeneralInfoPlugin" "" "")
-	/usr/pluto/bin/MessageSend dcerouter 0 $GeneralInfoPlugin_DeviceID 1 791 2 $Device 208 1
+	/usr/pluto/bin/MessageSend "$DCERouter" 0 $GeneralInfoPlugin_DeviceID 1 791 2 $Device 208 1
 
 	if [[ "$Slot" != "" ]] ;then
 		Q="

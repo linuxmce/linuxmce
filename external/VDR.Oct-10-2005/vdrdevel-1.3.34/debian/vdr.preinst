@@ -1,0 +1,42 @@
+#!/bin/sh
+
+ACTION=$1
+
+# Set development and standard version (prevent renaming)
+V=v
+DEV="${V}drdevel"
+VDR="${V}dr"
+
+# Copy conf files from standard version
+if [ "$ACTION" = "install" ]; then
+    mkdir -p /etc/$DEV
+    if [ -e /var/lib/$VDR/channels.conf -a \
+       ! -e /var/lib/$DEV/channels.conf ]
+    then
+        mkdir -p /var/lib/$DEV
+        cp /var/lib/$VDR/channels.conf /var/lib/$DEV/channels.conf.COPY
+    fi
+    for file in diseqc keymacros sources svdrphosts ; do
+        if [ ! -e /etc/$DEV/$file.conf ]
+        then
+            cp /etc/$VDR/$file.conf /etc/$DEV/$file.conf.COPY
+        fi
+    done
+fi
+
+# Rename old command hooks
+if [ "$ACTION" = "install" -o "$ACTION" = "upgrade" ]; then
+    for file in /etc/$DEV/command-hooks/commands.ct$VDR.conf \
+                /etc/$DEV/command-hooks/commands.shutdown$VDR.conf \
+                /etc/$DEV/command-hooks/commands.$VDR.conf \
+                /etc/$VDR/command-hooks/commands.$DEV.conf ; do
+        [ -e $file ] && mv $file $file.dpkg-old
+    done
+fi
+
+#DEBHELPER#
+
+# give vdr a chance to seddle down, otherwise the updated
+# version will not find any DVB-device
+sleep 2
+exit 0

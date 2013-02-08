@@ -1,0 +1,305 @@
+// !$*UTF8*$!
+{
+	archiveVersion = 1;
+	classes = {
+	};
+	objectVersion = 46;
+	objects = {
+
+/* Begin PBXBuildFile section */
+		956B09A315AB80330006C6C0 /* Main.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 956B09A215AB80330006C6C0 /* Main.cpp */; };
+		956B09A515AB803B0006C6C0 /* Event_Plugin.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 956B09A415AB803B0006C6C0 /* Event_Plugin.cpp */; };
+		956B09AA15AB80AC0006C6C0 /* mysql.h in Headers */ = {isa = PBXBuildFile; fileRef = 956B09A915AB80AC0006C6C0 /* mysql.h */; };
+		956B09AC15AB80EA0006C6C0 /* libDCECommon.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 956B09AB15AB80EA0006C6C0 /* libDCECommon.dylib */; };
+		956B09AE15AB81040006C6C0 /* libpluto_main.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 956B09AD15AB81040006C6C0 /* libpluto_main.dylib */; };
+		956B09B015AB81830006C6C0 /* sunrise.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 956B09AF15AB81830006C6C0 /* sunrise.cpp */; };
+		956B09B215AB819B0006C6C0 /* TimedEvent.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 956B09B115AB819B0006C6C0 /* TimedEvent.cpp */; };
+		956B09B415AB81B90006C6C0 /* Criteria.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 956B09B315AB81B90006C6C0 /* Criteria.cpp */; };
+		956B09B615AB81D80006C6C0 /* Criteria_EvaluateExpression.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 956B09B515AB81D80006C6C0 /* Criteria_EvaluateExpression.cpp */; };
+		956B09B815AB81E10006C6C0 /* CriteriaParmNesting.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 956B09B715AB81E10006C6C0 /* CriteriaParmNesting.cpp */; };
+		956B09BC15AB86250006C6C0 /* Datagrid_Plugin.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 956B09BB15AB86250006C6C0 /* Datagrid_Plugin.cpp */; };
+		956B09C015AB86E30006C6C0 /* Event_Impl.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 956B09BF15AB86E30006C6C0 /* Event_Impl.cpp */; };
+		956B09C215AB883F0006C6C0 /* Event_PluginBase.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 956B09C115AB883F0006C6C0 /* Event_PluginBase.cpp */; };
+		956B09C415AB88630006C6C0 /* Climate_PluginBase.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 956B09C315AB88630006C6C0 /* Climate_PluginBase.cpp */; };
+		956B09C615AB886A0006C6C0 /* Datagrid_PluginBase.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 956B09C515AB886A0006C6C0 /* Datagrid_PluginBase.cpp */; };
+		956B09C815AB89670006C6C0 /* Climate_Plugin.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 956B09C715AB89670006C6C0 /* Climate_Plugin.cpp */; };
+		956B09CA15AB89A00006C6C0 /* libmysqlclient.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 956B09C915AB89A00006C6C0 /* libmysqlclient.dylib */; };
+/* End PBXBuildFile section */
+
+/* Begin PBXFileReference section */
+		956B098215AB76B70006C6C0 /* Event_Plugin.dylib */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.dylib"; includeInIndex = 0; path = Event_Plugin.dylib; sourceTree = BUILT_PRODUCTS_DIR; };
+		956B09A215AB80330006C6C0 /* Main.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = Main.cpp; path = ../../Event_Plugin/Main.cpp; sourceTree = "<group>"; };
+		956B09A415AB803B0006C6C0 /* Event_Plugin.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = Event_Plugin.cpp; path = ../../Event_Plugin/Event_Plugin.cpp; sourceTree = "<group>"; };
+		956B09A915AB80AC0006C6C0 /* mysql.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = mysql.h; path = ../mysql/include/mysql.h; sourceTree = "<group>"; };
+		956B09AB15AB80EA0006C6C0 /* libDCECommon.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libDCECommon.dylib; path = ../lib/libDCECommon.dylib; sourceTree = "<group>"; };
+		956B09AD15AB81040006C6C0 /* libpluto_main.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libpluto_main.dylib; path = ../lib/libpluto_main.dylib; sourceTree = "<group>"; };
+		956B09AF15AB81830006C6C0 /* sunrise.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = sunrise.cpp; path = ../../Event_Plugin/sunrise.cpp; sourceTree = "<group>"; };
+		956B09B115AB819B0006C6C0 /* TimedEvent.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = TimedEvent.cpp; path = ../../Event_Plugin/TimedEvent.cpp; sourceTree = "<group>"; };
+		956B09B315AB81B90006C6C0 /* Criteria.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = Criteria.cpp; path = ../../Event_Plugin/Criteria.cpp; sourceTree = "<group>"; };
+		956B09B515AB81D80006C6C0 /* Criteria_EvaluateExpression.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = Criteria_EvaluateExpression.cpp; path = ../../Event_Plugin/Criteria_EvaluateExpression.cpp; sourceTree = "<group>"; };
+		956B09B715AB81E10006C6C0 /* CriteriaParmNesting.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = CriteriaParmNesting.cpp; path = ../../Event_Plugin/CriteriaParmNesting.cpp; sourceTree = "<group>"; };
+		956B09BB15AB86250006C6C0 /* Datagrid_Plugin.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = Datagrid_Plugin.cpp; path = ../../Datagrid_Plugin/Datagrid_Plugin.cpp; sourceTree = "<group>"; };
+		956B09BF15AB86E30006C6C0 /* Event_Impl.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = Event_Impl.cpp; path = ../../DCE/Event_Impl.cpp; sourceTree = "<group>"; };
+		956B09C115AB883F0006C6C0 /* Event_PluginBase.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = Event_PluginBase.cpp; path = ../../Gen_Devices/Event_PluginBase.cpp; sourceTree = "<group>"; };
+		956B09C315AB88630006C6C0 /* Climate_PluginBase.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = Climate_PluginBase.cpp; path = ../../Gen_Devices/Climate_PluginBase.cpp; sourceTree = "<group>"; };
+		956B09C515AB886A0006C6C0 /* Datagrid_PluginBase.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = Datagrid_PluginBase.cpp; path = ../../Gen_Devices/Datagrid_PluginBase.cpp; sourceTree = "<group>"; };
+		956B09C715AB89670006C6C0 /* Climate_Plugin.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = Climate_Plugin.cpp; path = ../../Climate_Plugin/Climate_Plugin.cpp; sourceTree = "<group>"; };
+		956B09C915AB89A00006C6C0 /* libmysqlclient.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libmysqlclient.dylib; path = ../mysql/lib/libmysqlclient.dylib; sourceTree = "<group>"; };
+/* End PBXFileReference section */
+
+/* Begin PBXFrameworksBuildPhase section */
+		956B097F15AB76B70006C6C0 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				956B09AC15AB80EA0006C6C0 /* libDCECommon.dylib in Frameworks */,
+				956B09AE15AB81040006C6C0 /* libpluto_main.dylib in Frameworks */,
+				956B09CA15AB89A00006C6C0 /* libmysqlclient.dylib in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXFrameworksBuildPhase section */
+
+/* Begin PBXGroup section */
+		956B097715AB76B70006C6C0 = {
+			isa = PBXGroup;
+			children = (
+				956B09A215AB80330006C6C0 /* Main.cpp */,
+				956B09B315AB81B90006C6C0 /* Criteria.cpp */,
+				956B09A415AB803B0006C6C0 /* Event_Plugin.cpp */,
+				956B099515AB7D3A0006C6C0 /* Includes */,
+				956B099415AB7D2F0006C6C0 /* libraries */,
+				956B098315AB76B70006C6C0 /* Products */,
+			);
+			sourceTree = "<group>";
+		};
+		956B098315AB76B70006C6C0 /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				956B098215AB76B70006C6C0 /* Event_Plugin.dylib */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+		956B099415AB7D2F0006C6C0 /* libraries */ = {
+			isa = PBXGroup;
+			children = (
+				956B09AB15AB80EA0006C6C0 /* libDCECommon.dylib */,
+				956B09AD15AB81040006C6C0 /* libpluto_main.dylib */,
+				956B09C915AB89A00006C6C0 /* libmysqlclient.dylib */,
+			);
+			name = libraries;
+			sourceTree = "<group>";
+		};
+		956B099515AB7D3A0006C6C0 /* Includes */ = {
+			isa = PBXGroup;
+			children = (
+				956B09A915AB80AC0006C6C0 /* mysql.h */,
+				956B09AF15AB81830006C6C0 /* sunrise.cpp */,
+				956B09B115AB819B0006C6C0 /* TimedEvent.cpp */,
+				956B09B515AB81D80006C6C0 /* Criteria_EvaluateExpression.cpp */,
+				956B09B715AB81E10006C6C0 /* CriteriaParmNesting.cpp */,
+				956B09BB15AB86250006C6C0 /* Datagrid_Plugin.cpp */,
+				956B09BF15AB86E30006C6C0 /* Event_Impl.cpp */,
+				956B09C115AB883F0006C6C0 /* Event_PluginBase.cpp */,
+				956B09C715AB89670006C6C0 /* Climate_Plugin.cpp */,
+				956B09C315AB88630006C6C0 /* Climate_PluginBase.cpp */,
+				956B09C515AB886A0006C6C0 /* Datagrid_PluginBase.cpp */,
+			);
+			name = Includes;
+			sourceTree = "<group>";
+		};
+/* End PBXGroup section */
+
+/* Begin PBXHeadersBuildPhase section */
+		956B098015AB76B70006C6C0 /* Headers */ = {
+			isa = PBXHeadersBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				956B09AA15AB80AC0006C6C0 /* mysql.h in Headers */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXHeadersBuildPhase section */
+
+/* Begin PBXNativeTarget section */
+		956B098115AB76B70006C6C0 /* Event_Plugin */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 956B098F15AB76B80006C6C0 /* Build configuration list for PBXNativeTarget "Event_Plugin" */;
+			buildPhases = (
+				956B097E15AB76B70006C6C0 /* Sources */,
+				956B097F15AB76B70006C6C0 /* Frameworks */,
+				956B098015AB76B70006C6C0 /* Headers */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = Event_Plugin;
+			productName = Event_Plugin;
+			productReference = 956B098215AB76B70006C6C0 /* Event_Plugin.dylib */;
+			productType = "com.apple.product-type.library.dynamic";
+		};
+/* End PBXNativeTarget section */
+
+/* Begin PBXProject section */
+		956B097915AB76B70006C6C0 /* Project object */ = {
+			isa = PBXProject;
+			attributes = {
+				LastUpgradeCheck = 0420;
+			};
+			buildConfigurationList = 956B097C15AB76B70006C6C0 /* Build configuration list for PBXProject "Event_Plugin" */;
+			compatibilityVersion = "Xcode 3.2";
+			developmentRegion = English;
+			hasScannedForEncodings = 0;
+			knownRegions = (
+				en,
+			);
+			mainGroup = 956B097715AB76B70006C6C0;
+			productRefGroup = 956B098315AB76B70006C6C0 /* Products */;
+			projectDirPath = "";
+			projectRoot = "";
+			targets = (
+				956B098115AB76B70006C6C0 /* Event_Plugin */,
+			);
+		};
+/* End PBXProject section */
+
+/* Begin PBXSourcesBuildPhase section */
+		956B097E15AB76B70006C6C0 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				956B09A315AB80330006C6C0 /* Main.cpp in Sources */,
+				956B09A515AB803B0006C6C0 /* Event_Plugin.cpp in Sources */,
+				956B09B015AB81830006C6C0 /* sunrise.cpp in Sources */,
+				956B09B215AB819B0006C6C0 /* TimedEvent.cpp in Sources */,
+				956B09B415AB81B90006C6C0 /* Criteria.cpp in Sources */,
+				956B09B615AB81D80006C6C0 /* Criteria_EvaluateExpression.cpp in Sources */,
+				956B09B815AB81E10006C6C0 /* CriteriaParmNesting.cpp in Sources */,
+				956B09BC15AB86250006C6C0 /* Datagrid_Plugin.cpp in Sources */,
+				956B09C015AB86E30006C6C0 /* Event_Impl.cpp in Sources */,
+				956B09C215AB883F0006C6C0 /* Event_PluginBase.cpp in Sources */,
+				956B09C415AB88630006C6C0 /* Climate_PluginBase.cpp in Sources */,
+				956B09C615AB886A0006C6C0 /* Datagrid_PluginBase.cpp in Sources */,
+				956B09C815AB89670006C6C0 /* Climate_Plugin.cpp in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXSourcesBuildPhase section */
+
+/* Begin XCBuildConfiguration section */
+		956B098D15AB76B80006C6C0 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				ARCHS = "$(ARCHS_STANDARD_64_BIT)";
+				CLANG_ENABLE_OBJC_ARC = YES;
+				COPY_PHASE_STRIP = NO;
+				GCC_C_LANGUAGE_STANDARD = gnu99;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_ENABLE_OBJC_EXCEPTIONS = YES;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"DEBUG=1",
+					"$(inherited)",
+				);
+				GCC_SYMBOLS_PRIVATE_EXTERN = NO;
+				GCC_VERSION = com.apple.compilers.llvm.clang.1_0;
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_MISSING_PROTOTYPES = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				HEADER_SEARCH_PATHS = ..;
+				MACOSX_DEPLOYMENT_TARGET = 10.7;
+				ONLY_ACTIVE_ARCH = YES;
+				SDKROOT = macosx;
+			};
+			name = Debug;
+		};
+		956B098E15AB76B80006C6C0 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				ARCHS = "$(ARCHS_STANDARD_64_BIT)";
+				CLANG_ENABLE_OBJC_ARC = YES;
+				COPY_PHASE_STRIP = YES;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				GCC_C_LANGUAGE_STANDARD = gnu99;
+				GCC_ENABLE_OBJC_EXCEPTIONS = YES;
+				GCC_VERSION = com.apple.compilers.llvm.clang.1_0;
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_MISSING_PROTOTYPES = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				HEADER_SEARCH_PATHS = ..;
+				MACOSX_DEPLOYMENT_TARGET = 10.7;
+				SDKROOT = macosx;
+			};
+			name = Release;
+		};
+		956B099015AB76B80006C6C0 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CONFIGURATION_BUILD_DIR = ../bin;
+				HEADER_SEARCH_PATHS = (
+					../../DCE,
+					../..,
+				);
+				INSTALL_PATH = /usr/pluto/bin;
+				LIBRARY_SEARCH_PATHS = (
+					"$(inherited)",
+					"\"$(SRCROOT)/../lib\"",
+					"\"$(SRCROOT)/../mysql/lib\"",
+				);
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				USER_HEADER_SEARCH_PATHS = "";
+			};
+			name = Debug;
+		};
+		956B099115AB76B80006C6C0 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CONFIGURATION_BUILD_DIR = ../bin;
+				HEADER_SEARCH_PATHS = (
+					../../DCE,
+					../..,
+				);
+				INSTALL_PATH = /usr/pluto/bin;
+				LIBRARY_SEARCH_PATHS = (
+					"$(inherited)",
+					"\"$(SRCROOT)/../lib\"",
+					"\"$(SRCROOT)/../mysql/lib\"",
+				);
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				USER_HEADER_SEARCH_PATHS = "";
+			};
+			name = Release;
+		};
+/* End XCBuildConfiguration section */
+
+/* Begin XCConfigurationList section */
+		956B097C15AB76B70006C6C0 /* Build configuration list for PBXProject "Event_Plugin" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				956B098D15AB76B80006C6C0 /* Debug */,
+				956B098E15AB76B80006C6C0 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		956B098F15AB76B80006C6C0 /* Build configuration list for PBXNativeTarget "Event_Plugin" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				956B099015AB76B80006C6C0 /* Debug */,
+				956B099115AB76B80006C6C0 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+/* End XCConfigurationList section */
+	};
+	rootObject = 956B097915AB76B70006C6C0 /* Project object */;
+}

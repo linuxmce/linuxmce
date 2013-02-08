@@ -18,6 +18,7 @@
  */
 #include <iostream>
 #include <fstream>
+#include <memory>
 
 #include "PlutoUtils/CommonIncludes.h"	
 #include "PlutoUtils/FileUtils.h"

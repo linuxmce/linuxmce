@@ -14,7 +14,6 @@
 
 */
 
-#ifndef EMBEDDED_LMCE
 /** @file DBHelper.h
  Header file
  */
@@ -24,6 +23,10 @@
 #include "db_wrapper/db_wrapper.h"
 #include "DCE/Logger.h"
 #include "PlutoUtils/MultiThreadIncludes.h"
+
+#ifdef __APPLE_CC__
+#define PTHREAD_MUTEX_RECURSIVE_NP PTHREAD_MUTEX_RECURSIVE
+#endif
 
 using namespace DCE;
 
@@ -304,4 +307,3 @@ public:
 	}
 };
 #endif
-#endif //EMBEDDED_LMCE

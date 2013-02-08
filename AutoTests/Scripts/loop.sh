@@ -46,14 +46,10 @@ PK_Device_Xine=$(echo "$Q;" | /usr/bin/mysql --skip-column-names -h $MySqlHost p
 Q="select PK_Device from Device WHERE FK_DeviceTemplate=2"
 PK_Device_Media_Plugin=$(echo "$Q;" | /usr/bin/mysql --skip-column-names -h $MySqlHost pluto_main)
 
-Q="select PK_Device from Device where FK_Room=$PK_Room and FK_DeviceTemplate=35"
-PK_Device_MythTV_Player=$(echo "$Q;" | /usr/bin/mysql --skip-column-names -h $MySqlHost pluto_main)
-
 Q="select FK_EntertainArea from Device_EntertainArea where FK_Device=$PK_Device_Orbiter"
 PK_EntertainArea=$(echo "$Q;" | /usr/bin/mysql --skip-column-names -h $MySqlHost pluto_main)
 
 
-Msg="/usr/pluto/bin/MessageSend dcerouter"
 while : ;do
 
 echo "Video File $VideoFile" >>/loop.log
@@ -114,35 +110,6 @@ sleep 2
 	data=$(date)
         echo "($data) Tests for file $File done" >>/loop.log
 done
-MythMsg="$Msg $PK_Device_Orbiter $PK_Device_MythTV_Player"
-if [[ -z "$PK_Device_MythTV_Player" ]]; then
-	$MythMsg 1 37 29 1 41 1003
-	sleep 10
-for ((i = 0; i < 20; i++)); do
-	$MythMsg 1 41 43 200
-	sleep 5
-	$MythMsg 1 41 43 -1000
-	sleep 5
-	$MythMsg 1 41 43 0
-	sleep 5
-	$MythMsg 1 41 43 8000
-	sleep 5
-	$MythMsg 1 41 43 1000
-	sleep 5
-	$MythMsg 1 40
-	sleep 5
-	$MythMsg 1 65 5 +
-	sleep 5
-	$MythMsg 1 65 5 +
-	sleep 5
-	$MythMsg 1 65 5 -
-	sleep 5
-	$MythMsg 1 65 5 -
-	sleep 5
-done
-	$MythMsg 1 38
-	sleep 3
-fi
 done
 
 echo 'Ending script loop.sh' 1>>/loop.log

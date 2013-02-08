@@ -1,4 +1,0 @@
-etc/modprobe.d
-lib/linux-sound-base
-usr/share/linux-sound-base
-usr/share/lintian/overrides

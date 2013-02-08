@@ -4,6 +4,20 @@
 . /usr/pluto/bin/SQL_Ops.sh
 . /usr/pluto/bin/Config_Ops.sh
 
+## If the runlevel is wrong, do nothing
+if [[ "$(runlevel)" != *[016] ]]; then
+	exit 0
+fi
+
+## Only the first copy will do anything
+## The rest will synchronized with the first copy
+if ! ln -sn /proc/$$ /tmp/haltMDs 2>/dev/null; then
+	while [[ -d /tmp/haltMDs ]]; do
+		sleep .1
+	done
+	exit 0
+fi
+
 P="$1"
 
 if [ "$P" == "D" ]; then
@@ -34,7 +48,7 @@ for Host in $R; do
 done
 
 offline=0
-tries=30
+tries=60
 while [ "$offline" -eq 0 -a "$tries" -gt 0 ]; do
 	offline=1
 	for Host in $R; do

@@ -1,5 +1,6 @@
 ROOT=..
 
+CXX=g++
 CPPFLAGS=-I$(ROOT)/CreateDevice
 CXXFLAGS=-I. -I.. -I$(ROOT) -I$(ROOT)/DCE -I/usr/include/mysql -ggdb3
 LDFLAGS=-L$(ROOT)/lib

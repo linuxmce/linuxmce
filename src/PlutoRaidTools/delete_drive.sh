@@ -28,3 +28,7 @@ fi
 mdadm --manage --set-faulty $array $disk
 mdadm --manage --remove $array $disk
 mdadm --zero-superblock $disk
+
+# Save RAID configuration
+mdadm --detail --scan >> /etc/mdadm/mdadm.conf
+echo "PROGRAM /usr/pluto/bin/monitoring_RAID.sh" >> /etc/mdadm/mdadm.conf

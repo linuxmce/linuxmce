@@ -1,0 +1,21 @@
+This package was debianized
+by Eduard Bloch <blade@debian.org> on Sat, 22 Sep 2001 03:16:11 +0200.
+by Andreas Mueller <amu@tr.debian.net> on Sat,  4 Jan 2003 16:27:00 +0100
+
+
+It was downloaded from http://www.cadsoft.de/people/kls/vdr/download.htm
+
+Upstream Author: Klaus Schmidinger <kls@cadsoft.de> and others
+
+
+The "Blue LCARS" theme (debian/themes/sttng-blue.theme) from Sascha Volkenandt
+<sascha@akv-soft.de> was downloaded from http://www.magoa.net/sttng-blue.theme
+
+The "Cool" theme (debian/themes/sttng-cool.theme) from clocker@vdrportal.de was
+downloaded from http://vdrportal.de/board/thread.php?postid=260715#post260715
+
+
+Copyright:
+
+It may be redistributed under the terms of the GNU GPL, Version 2 
+found on Debian systems in the file /usr/share/common-licenses/GPL .

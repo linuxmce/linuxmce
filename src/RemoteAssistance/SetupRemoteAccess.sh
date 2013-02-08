@@ -4,11 +4,15 @@
 . /usr/pluto/bin/pluto.func
 . /usr/pluto/bin/SQL_Ops.sh
 
+keepAliveCmd="/usr/pluto/bin/RA_KeepPortsAlive.sh"
 cronCmd="/usr/pluto/bin/SetupRemoteAccess.sh"
 cronCmd_Special="/usr/pluto/bin/SetupRA-Special.sh"
 cronEntry="*/1 * * * * root bash -c '$cronCmd &>/dev/null'"
 cronEntry_Special="*/10 * * * * root bash -c '$cronCmd_Special &>/dev/null'"
 screenName="RemoteAssistance"
+
+RAServer=ra.linuxmce.org
+RAKey="/usr/pluto/keys/id_dsa_remoteassistance"
 
 DEVICEDATA_Remote_Assistance_Ports=212
 
@@ -57,7 +61,6 @@ if [[ ! -L "$cronCmd_Special" ]]; then
 	ln -s "$cronCmd" "$cronCmd_Special"
 fi
 
-RAKey="/usr/pluto/keys/id_dsa_remoteassistance"
 [[ -f "$RAKey" ]] && chmod 700 "$RAKey" || exit
 
 shopt -s nullglob
@@ -66,56 +69,34 @@ shopt -s nullglob
 
 AddCronEntry()
 {
-	# if this script is not in a cron job
-	#if ! grep -qF "$cronCmd" /etc/crontab; then
-		# add it to crontab
-	#	echo "$cronEntry" >>/etc/crontab
-	#	invoke-rc.d cron reload
-	#	Logging "$TYPE" "$SEVERITY_NORMAL" "$0" "Added crontab entry"
-	#else
-	#	Logging "$TYPE" "$SEVERITY_NORMAL" "$0" "Crontab entry already present. Not adding."
-	#fi
+	local CronReload
 
 	if [[ ! -e /etc/cron.d/SetupRemoteAccess ]] ;then
 		echo "$cronEntry" >>/etc/cron.d/SetupRemoteAccess
-		invoke-rc.d cron reload
+		CronReload="1"
 		Logging "$TYPE" "$SEVERITY_NORMAL" "$0" "Added crontab entry"				
 	else
 		Logging "$TYPE" "$SEVERITY_NORMAL" "$0" "Crontab entry already present. Not adding."
 	fi
 	
-	#if ! grep -qF "$cronCmd_Special" /etc/crontab; then
-	#	# add it to crontab
-	#	echo "$cronEntry_Special" >>/etc/crontab
-	#	invoke-rc.d cron reload
-	#	Logging "$TYPE" "$SEVERITY_NORMAL" "$0" "Added crontab entry (special)"
+	#if [[ ! -e /etc/cron.d/SetupRA-Special ]] ;then
+	#	echo "$cronEntry_Special" >>/etc/cron.d/SetupRA-Special
+	#	CronReload="1"
+	#    Logging "$TYPE" "$SEVERITY_NORMAL" "$0" "Added crontab entry (special)"
 	#else
 	#	Logging "$TYPE" "$SEVERITY_NORMAL" "$0" "Crontab entry (special) already present. Not adding."
 	#fi
 
-	if [[ ! -e /etc/cron.d/SetupRA-Special ]] ;then
-		echo "$cronEntry_Special" >>/etc/cron.d/SetupRA-Special
-	    invoke-rc.d cron reload
-	    Logging "$TYPE" "$SEVERITY_NORMAL" "$0" "Added crontab entry (special)"
-	else
-		Logging "$TYPE" "$SEVERITY_NORMAL" "$0" "Crontab entry (special) already present. Not adding."
+	if [[ -n "$CronReload" ]]; then
+		service cron reload
 	fi
+	
 }
 
 DelCronEntry()
 {
 	local CronReload
 
-	# remove script from crontab
-	#if grep -qF "$cronCmd" /etc/crontab; then
-	#	grep -vF "$cronCmd" /etc/crontab >/etc/crontab.$$
-	#	mv /etc/crontab.$$ /etc/crontab
-	#	CronReload="1"
-	#	Logging "$TYPE" "$SEVERITY_NORMAL" "$0" "Crontab entry found. Removed."
-	#else
-	#	Logging "$TYPE" "$SEVERITY_NORMAL" "$0" "Crontab entry not found. Not removing."
-	#fi
-	
 	if [[ -e /etc/cron.d/SetupRemoteAccess ]] ;then
 		rm -f /etc/cron.d/SetupRemoteAccess
 		CronReload="1"
@@ -124,15 +105,6 @@ DelCronEntry()
 		Logging "$TYPE" "$SEVERITY_NORMAL" "$0" "Crontab entry not found. Not removing."
 	fi
 	
-	#if grep -qF "$cronCmd_Special" /etc/crontab; then
-	#	grep -vF "$cronCmd_Special" /etc/crontab >/etc/crontab.$$
-	#	mv /etc/crontab.$$ /etc/crontab
-	#	CronReload="1"
-	#	Logging "$TYPE" "$SEVERITY_NORMAL" "$0" "Crontab entry (special) found. Removed."
-	#else
-	#	Logging "$TYPE" "$SEVERITY_NORMAL" "$0" "Crontab entry (special) not found. Not removing."
-	#fi
-
 	if [[ -e /etc/cron.d/SetupRA-Special ]] ;then
 	    rm -f /etc/cron.d/SetupRA-Special
 	    CronReload="1"
@@ -143,7 +115,7 @@ DelCronEntry()
 													
 
 	if [[ -n "$CronReload" ]]; then
-		invoke-rc.d cron reload
+		service cron reload
 	fi
 }
 
@@ -153,7 +125,7 @@ CreateTunnel()
 	LocalPort="$2"
 	RemotePort="$3"
 	Host="$4"
-	RAhost="${5:-rassh.linuxmce.org}"
+	RAhost="${5:-ra.linuxmce.org}"
 	RAport="$6"
 	Monitored="${7:-yes}"
 
@@ -162,7 +134,9 @@ CreateTunnel()
 	# if tunnel is not active create it
 	Dead=0
 	if [[ "$Monitored" == yes && "$RA_CheckRemotePort" == "1" ]]; then
-		if [[ -z "$Tunnel" ]] || ! nc -z -w1 "$RAhost" "$RemotePort"; then
+		# Foxi352 - 29 sep 2011 - disabled nc because on ra host we only bind to localhost
+		#if [[ -z "$Tunnel" ]] || ! nc -z -w1 "$RAhost" "$RemotePort"; then
+		if [[ -z "$Tunnel" ]]; then
 			Dead=1
 		fi
 	else
@@ -217,11 +191,13 @@ CreateTunnels()
 		PortName="${PortNameDest%_*}"
 		PortDest="${PortNameDest##*_}"
 		PortTunnel="${!Var}"
-		CreateTunnel "${PortName}_pf" "$PortDest" "$PortTunnel"
-		CreateTunnel "${PortName}_ph" "$PortDest" "$PortTunnel" "" rassh2.linuxmce.org 22
+		#echo "CreateTunnel \"${PortName}_pf\" \"$PortDest\" \"$PortTunnel\""
+		#CreateTunnel "${PortName}_pf" "$PortDest" "$PortTunnel"
+		#echo "CreateTunnel \"${PortName}\" \"$PortDest\" \"$PortTunnel\" \"\" $RAServer 22"
+		CreateTunnel "${PortName}" "$PortDest" "$PortTunnel" "" $RAServer 22
 	done
 
-	CreateTunnels_Special
+	#CreateTunnels_Special
 }
 
 CreateTunnels_Special()
@@ -233,8 +209,8 @@ CreateTunnels_Special()
 		PortName="${PortNameDest%_*}"
 		PortDest="${PortNameDest##*_}"
 		PortTunnel="${!Var}"
-		CreateTunnel "${PortName}_NoMon_pf" "$PortDest" "$PortTunnel" "" "" 22 no
-		CreateTunnel "${PortName}_NoMon_ph" "$PortDest" "$PortTunnel" "" rassh2.linuxmce.org 22 no
+		#CreateTunnel "${PortName}_NoMon_pf" "$PortDest" "$PortTunnel" "" "" 22 no
+		CreateTunnel "${PortName}_NoMon" "$PortDest" "$PortTunnel" "" $RAServer 22 no
 	done
 }
 
@@ -245,11 +221,11 @@ RemoveTunnels()
 	for Var in ${!Port_*}; do
 		PortNameDest="${Var#Port_}"
 		PortName="${PortNameDest%_*}"
-		RemoveTunnel "${PortName}_pf"
-		RemoveTunnel "${PortName}_ph"
+		#RemoveTunnel "${PortName}_pf"
+		RemoveTunnel "${PortName}"
 	done
 
-	RemoveTunnels_Special
+	#RemoveTunnels_Special
 	
 	/usr/pluto/bin/RA_ChangePassword.sh
 }
@@ -261,22 +237,21 @@ RemoveTunnels_Special()
 	for Var in ${!PortNoMon_*}; do
 		PortNameDest="${Var#PortNoMon_}"
 		PortName="${PortNameDest%_*}"
-		RemoveTunnel "${PortName}_NoMon_pf"
-		RemoveTunnel "${PortName}_NoMon_ph"
+		#RemoveTunnel "${PortName}_NoMon_pf"
+		RemoveTunnel "${PortName}_NoMon"
 	done
 }
 
 DeleteHostKey()
 {
-	sed -ri '/rassh2?\.linuxmce\.org/d' /root/.ssh/known_hosts
+	sed -ri '/ra?\.linuxmce\.org/d' /root/.ssh/known_hosts
 }
 
 Me="$(basename "$0")"
-
 if [[ "$Me" == "$(basename "$cronCmd")" ]]; then
 	DeleteHostKey
 	if [[ -n "$remote" ]]; then
-		/usr/pluto/bin/RA_KeepPortsAlive.sh
+		$keepAliveCmd
 		AddCronEntry
 		[[ "$1" == "restart" ]] && RemoveTunnels
 		CreateTunnels

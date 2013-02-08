@@ -7,11 +7,11 @@
 
     Phone: +1 (877) 758-8648
 
-    This program is free software; you can redistribute it and/or modify it under the terms of the GNU General Public License.
+    This program is free software; you can redistribute it and/or modify it under the terms of the GNU Lesser General Public License.
     This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty
     of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
 
-    See the GNU General Public License for more details.
+    See the GNU Lesser General Public License for more details.
 */
 
 #include <time.h>
@@ -31,12 +31,12 @@
 
 // some environment specific stuff
 #ifndef WIN32
-    char *LoggerFileName="/var/log/pluto/PlutoServer.Logger.log";
+    const char *LoggerFileName="/var/log/pluto/PlutoServer.Logger.log";
 #else
     #ifdef UNDER_CE
         char *LoggerFileName="\\Storage Card\\PlutoServer.Logger.txt";
     #else
-        char *LoggerFileName="\\pluto\\PlutoServer.Logger.txt";
+        const char *LoggerFileName="\\pluto\\PlutoServer.Logger.txt";
     #endif
 #endif
 
@@ -56,6 +56,10 @@ string LoggerWrapper::m_sFilename;
 	bool g_bFlushLog = getenv("ImmediatelyFlushLog") && atoi(getenv("ImmediatelyFlushLog"))==1;
 #else
 	bool g_bFlushLog = false;
+#endif
+
+#ifdef __APPLE_CC__
+	#define PTHREAD_MUTEX_RECURSIVE_NP PTHREAD_MUTEX_RECURSIVE
 #endif
 
 string DCE::g_sBinary,DCE::g_sBinaryPath;
@@ -288,15 +292,8 @@ void FileLogger::WriteEntry( Entry& Entry )
     PLUTO_SAFETY_LOCK_LOGGER( sSM, m_Lock );  // Don't log anything but failures
 
     struct tm t;
-
-#ifdef VS2005
-	__int64 tv_sec = Entry.m_TimeStamp.tv_sec;
-	localtime_r((const time_t*)&tv_sec,&t);
-#else
 	localtime_r((time_t *)&Entry.m_TimeStamp.tv_sec,&t);
-#endif    
-	
-	char acBuff[50];
+    char acBuff[50];
     double dwSec = (double)(Entry.m_TimeStamp.tv_usec/1E6) + t.tm_sec;
     snprintf( acBuff, sizeof(acBuff), "%02d/%02d/%02d %d:%02d:%06.3f", (int)t.tm_mon + 1, (int)t.tm_mday, (int)t.tm_year - 100, (int)t.tm_hour, (int)t.tm_min, dwSec );
 

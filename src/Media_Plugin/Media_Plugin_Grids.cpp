@@ -95,7 +95,6 @@ using namespace DCE;
 #include "File_Grids_Plugin/FileListGrid.h"
 #include "SerializeClass/ShapesColors.h"
 #include "../VFD_LCD/VFD_LCD_Base.h"
-#include "../Orbiter/OrbiterGrid.h"
 
 extern int UniqueColors[MAX_MEDIA_COLORS];
 
@@ -108,7 +107,6 @@ class DataGridTable *Media_Plugin::MediaBrowser( string GridID, string Parms, vo
 	string::size_type pos=0;
 
 	int PK_MediaType = atoi(StringUtils::Tokenize( Parms,"|",pos ).c_str());
-	OrbiterMediaGridStyle omgsStyle = (OrbiterMediaGridStyle) atoi(StringUtils::Tokenize( Parms,"|",pos ).c_str());
 	string sPK_MediaSubType = StringUtils::Tokenize( Parms,"|",pos );
 	string sPK_FileFormat = StringUtils::Tokenize( Parms,"|",pos );
 	string sPK_Attribute_Genres = StringUtils::Tokenize( Parms,"|",pos );
@@ -120,17 +118,6 @@ class DataGridTable *Media_Plugin::MediaBrowser( string GridID, string Parms, vo
 	string sPK_Attribute = StringUtils::Tokenize( Parms,"|",pos );
 	if( sPK_Sources.size()==0 )
 		sPK_Sources = TOSTRING(MEDIASOURCE_File_CONST) "," TOSTRING(MEDIASOURCE_Jukebox_CONST) "," TOSTRING(MEDIASOURCE_Local_Disc_CONST);
-	int iWidth = atoi(pMessage->m_mapParameters[COMMANDPARAMETER_Width_CONST].c_str());
-
-
-	// ATTRIBUTETYPE_Tracks_On_Album_SPECIAL is treated the same as ATTRIBUTETYPE_Title_CONST, both show the songs, but the former is a special
-	// case where the user drills down after selecting an album and wants the songs shown in track order rather than alphabetically.
-	bool bSortByTrackNum=false;
-	if( PK_AttributeType_Sort==ATTRIBUTETYPE_Tracks_On_Album_SPECIAL )
-	{
-		PK_AttributeType_Sort=ATTRIBUTETYPE_Title_CONST;
-		bSortByTrackNum=true;
-	}
 
 	LoggerWrapper::GetInstance()->Write(LV_WARNING, "MediaBrowser parms: mediatype %d, submediatype %s, "
 		"fileformat %s, attribute_genres %s, sources %s, users_private %s, attributetype_sort %d, "
@@ -144,7 +131,7 @@ class DataGridTable *Media_Plugin::MediaBrowser( string GridID, string Parms, vo
 	g_bInclFiles=g_bInclDiscs=g_bInclDownload=true;
 #endif
 
-	MediaListGrid *pMediaListGrid = new MediaListGrid(m_pDatagrid_Plugin,this,PK_MediaType,omgsStyle);
+	MediaListGrid *pMediaListGrid = new MediaListGrid(m_pDatagrid_Plugin,this,PK_MediaType);
 	if( sPK_Sources.size()==0 || !PK_MediaType )
 		return pMediaListGrid;
 
@@ -158,12 +145,16 @@ class DataGridTable *Media_Plugin::MediaBrowser( string GridID, string Parms, vo
 	else
 		AttributesBrowser( pMediaListGrid, PK_MediaType, sPK_Attribute, PK_AttributeType_Sort, bIdentifiesFile, sPK_MediaSubType, sPK_FileFormat, sPK_Attribute_Genres, sPK_Sources, sPK_Users_Private, PK_Users, iLastViewed, iPK_Variable, sValue_To_Assign );
 
-	if( bSortByTrackNum )
-		pMediaListGrid->m_listFileBrowserInfo.sort(FileBrowserInfoComparerTrack); 
-	else if( PK_AttributeType_Sort==-1 )
+	if( PK_AttributeType_Sort==-1 )
 		pMediaListGrid->m_listFileBrowserInfo.sort(FileBrowserInfoComparerLastViewed); 
 	else
 		pMediaListGrid->m_listFileBrowserInfo.sort(FileBrowserInfoComparer); 
+
+for(list<FileBrowserInfo *>::iterator ittemp=pMediaListGrid->m_listFileBrowserInfo.begin();ittemp!=pMediaListGrid->m_listFileBrowserInfo.end();++ittemp)
+{
+	FileBrowserInfo *pf = *ittemp;
+LoggerWrapper::GetInstance()->Write(LV_WARNING, "list %s : %s date: %d", pf->m_sDisplayGroup.c_str(), pf->m_sDisplayName.c_str(), (int) pf->m_tLastViewed);
+}
 
 	pMediaListGrid->m_pFileBrowserInfoPtr = new FileBrowserInfoPtr[ pMediaListGrid->m_listFileBrowserInfo.size() ];
 
@@ -174,13 +165,10 @@ class DataGridTable *Media_Plugin::MediaBrowser( string GridID, string Parms, vo
 #ifdef SIM_JUKEBOX
 	string sTerms;
 #endif
-
-	int iCol=0;
 	for(list<FileBrowserInfo *>::iterator it=pMediaListGrid->m_listFileBrowserInfo.begin();it!=pMediaListGrid->m_listFileBrowserInfo.end();++it)
 	{
 		FileBrowserInfo *pFileBrowserInfo = *it;
-		int entry = iRow*iWidth+iCol;
-		pMediaListGrid->m_pFileBrowserInfoPtr[entry] = pFileBrowserInfo;  // Store in an array for fast retrieval by row
+		pMediaListGrid->m_pFileBrowserInfoPtr[iRow] = pFileBrowserInfo;  // Store in an array for fast retrieval by row
 
 		sSource[0] = pFileBrowserInfo->m_cMediaSource ? pFileBrowserInfo->m_cMediaSource : '?';
 #ifdef SIM_JUKEBOX
@@ -207,13 +195,8 @@ class DataGridTable *Media_Plugin::MediaBrowser( string GridID, string Parms, vo
 		else 
 			pCell = new DataGridCell(pFileBrowserInfo->m_sDisplayName);
 		pCell->m_mapAttributes["PK_FileFormat"] = StringUtils::itos(pFileBrowserInfo->m_PK_FileFormat);
+
 		pCell->m_mapAttributes["Source"] = sSource;
-		if( pFileBrowserInfo->m_iTrack )
-			pCell->m_mapAttributes["Track"] = StringUtils::itos(pFileBrowserInfo->m_iTrack);
-		if( pFileBrowserInfo->m_sAlbum.empty()==false )
-			pCell->m_mapAttributes["Album"] = pFileBrowserInfo->m_sAlbum;
-		if( pFileBrowserInfo->m_sPerformer.empty()==false )
-			pCell->m_mapAttributes["Performer"] = pFileBrowserInfo->m_sPerformer;
 
 #ifdef SIM_JUKEBOX
 		if( pFileBrowserInfo->m_cMediaSource == 'L' )
@@ -221,35 +204,14 @@ class DataGridTable *Media_Plugin::MediaBrowser( string GridID, string Parms, vo
 #endif
 
 		pCell->SetValue(pFileBrowserInfo->m_sMRL);
-		pMediaListGrid->SetData(iCol,iRow,pCell);
-
-		if( omgsStyle==omgs_BrowserStyle_Icon_List )
-			iRow++; // Simply increment the row
-		else
-		{
-			if( omgsStyle==omgs_BrowserStyle_Icon && pFileBrowserInfo->m_PK_Picture )
-			{
-				string sFullPath = "/home/mediapics/" + StringUtils::itos(pFileBrowserInfo->m_PK_Picture) + "_tn.jpg";
-				pCell->SetImagePath(sFullPath.c_str());
-			}
-
-			iCol++;
-			if( iCol>=iWidth )
-			{
-				iCol=0;
-				iRow++;
-			}
-		}
+		pMediaListGrid->SetData(0,iRow++,pCell);
 	}
 
-	if( omgsStyle==omgs_BrowserStyle_Icon_List )
-	{
-		MediaListGrid *pMediaListGrid_CoverArt = new MediaListGrid(m_pDatagrid_Plugin,this,pMediaListGrid);
-		DataGridMap::iterator itdg=m_pDatagrid_Plugin->m_DataGrids.find("_" + GridID);
-		if( itdg!=m_pDatagrid_Plugin->m_DataGrids.end() )
-			delete itdg->second;
-		m_pDatagrid_Plugin->m_DataGrids["_" + GridID]=pMediaListGrid_CoverArt;  // The same grid is used for both icons and lists.  If the name starts with an _, it is assumed to be an icon grid
-	}
+	MediaListGrid *pMediaListGrid_CoverArt = new MediaListGrid(m_pDatagrid_Plugin,this,pMediaListGrid);
+	DataGridMap::iterator itdg=m_pDatagrid_Plugin->m_DataGrids.find("_" + GridID);
+	if( itdg!=m_pDatagrid_Plugin->m_DataGrids.end() )
+		delete itdg->second;
+	m_pDatagrid_Plugin->m_DataGrids["_" + GridID]=pMediaListGrid_CoverArt;  // The same grid is used for both icons and lists.  If the name starts with an _, it is assumed to be an icon grid
 
 	return pMediaListGrid;
 }
@@ -397,9 +359,9 @@ void Media_Plugin::AttributesBrowser( MediaListGrid *pMediaListGrid,int PK_Media
 	string sSQL_Where_MediaType;
 
 	if( PK_MediaType==MEDIATYPE_pluto_StoredAudio_CONST )
-		sSQL_Where_MediaType = " EK_MediaType IN (" TOSTRING(MEDIATYPE_pluto_StoredAudio_CONST) "," TOSTRING(MEDIATYPE_pluto_CD_CONST) ")";
+		sSQL_Where_MediaType = " EK_MediaType IN (" TOSTRING(MEDIATYPE_pluto_StoredAudio_CONST) "," TOSTRING(MEDIATYPE_pluto_CD_CONST) "," TOSTRING(MEDIATYPE_lmce_StreamedAudio_CONST)")";
 	else if( PK_MediaType==MEDIATYPE_pluto_StoredVideo_CONST )
-		sSQL_Where_MediaType = " EK_MediaType IN (" TOSTRING(MEDIATYPE_pluto_StoredVideo_CONST) "," TOSTRING(MEDIATYPE_pluto_DVD_CONST) "," TOSTRING(MEDIATYPE_pluto_HDDVD_CONST) "," TOSTRING(MEDIATYPE_pluto_BD_CONST) ")";
+		sSQL_Where_MediaType = " EK_MediaType IN (" TOSTRING(MEDIATYPE_pluto_StoredVideo_CONST) "," TOSTRING(MEDIATYPE_pluto_DVD_CONST) "," TOSTRING(MEDIATYPE_pluto_HDDVD_CONST) "," TOSTRING(MEDIATYPE_pluto_BD_CONST) "," TOSTRING(MEDIATYPE_lmce_StreamedVideo_CONST)")";
 	else 
 		sSQL_Where_MediaType = " EK_MediaType=" + StringUtils::itos(PK_MediaType);
 
@@ -611,29 +573,8 @@ void Media_Plugin::PopulateFileBrowserInfoForDisc(MediaListGrid *pMediaListGrid,
 			pFileBrowserInfo = new FileBrowserInfo(row[1],string("!r") + row[0] + (row[3] && atoi(row[3]) ? string(".") + row[3] : ""),atoi(row[0]),row[2] ? atoi(row[2]) : 0,row[4],'D',false,false);
 			if( (it=mapDisk_To_Pic.find( atoi(row[0]) ))!=mapDisk_To_Pic.end() )
 				pFileBrowserInfo->m_PK_Picture = it->second;
-			if( row[3] )
-				pFileBrowserInfo->m_iTrack = atoi(row[3]);
 			pMediaListGrid->m_listFileBrowserInfo.push_back(pFileBrowserInfo);
 		}
-}
-
-void Media_Plugin::AddSongAttributes(int PK_AttributeType,const char *pName,FileBrowserInfo *pFileBrowserInfo)
-{
-	if( !pName )
-		return;
-
-	switch(PK_AttributeType)
-	{
-	case ATTRIBUTETYPE_Performer_CONST:
-		pFileBrowserInfo->m_sPerformer=pName;
-		return;
-	case ATTRIBUTETYPE_Album_CONST:
-		pFileBrowserInfo->m_sAlbum=pName;
-		return;
-	case ATTRIBUTETYPE_Track_CONST:
-		pFileBrowserInfo->m_iTrack=atoi(pName);
-		return;
-	}
 }
 
 void Media_Plugin::PopulateFileBrowserInfoForFile(MediaListGrid *pMediaListGrid,int PK_AttributeType_Sort, 
@@ -643,39 +584,29 @@ void Media_Plugin::PopulateFileBrowserInfoForFile(MediaListGrid *pMediaListGrid,
 		" subdir %d", PK_AttributeType_Sort, bSubDirectory);
 
 	string sSQL_Sort;
-	bool bShowingSongs=false; // We have special handing here since we want to show not just the name of the song but the performer, album and track too
 	if( PK_AttributeType_Sort==0 || PK_AttributeType_Sort==-1 )
 		sSQL_Sort = "SELECT PK_File,Path,Filename,IsDirectory,FK_FileFormat,Filename,DateLastViewed FROM File WHERE PK_File in (" + sPK_File + ")";
-	else if( PK_AttributeType_Sort==ATTRIBUTETYPE_Title_CONST && pMediaListGrid->m_iPK_MediaType==MEDIATYPE_pluto_StoredAudio_CONST )
-	{
-		bShowingSongs=true;
-		// TODO ___ FIND A BETTER WAY TO DO THIS QUERY.  It's returning a record for the file for each attribute, causing it to skip repeatedly, and it's very inefficient, and requires the double sorting order clauses!
-		// When showing songs for music we want performer, album and track
-		sSQL_Sort = "SELECT PK_File,'',Name,0,FK_FileFormat,Filename,DateLastViewed,FK_AttributeType FROM File LEFT JOIN File_Attribute ON FK_File=PK_File "
-			"LEFT JOIN Attribute ON FK_Attribute=PK_Attribute AND FK_AttributeType IN (" TOSTRING(ATTRIBUTETYPE_Title_CONST) "," TOSTRING(ATTRIBUTETYPE_Performer_CONST) "," TOSTRING(ATTRIBUTETYPE_Album_CONST) "," TOSTRING(ATTRIBUTETYPE_Track_CONST) ") "
-			"WHERE IsDirectory=0 AND PK_File in (" + sPK_File + ") AND FK_AttributeType IN (" TOSTRING(ATTRIBUTETYPE_Title_CONST) "," TOSTRING(ATTRIBUTETYPE_Performer_CONST) "," TOSTRING(ATTRIBUTETYPE_Album_CONST) "," TOSTRING(ATTRIBUTETYPE_Track_CONST) ") ORDER BY PK_File,FK_AttributeType DESC";
-	}
 	else
 		// TODO ___ FIND A BETTER WAY TO DO THIS QUERY.  It's returning a record for the file for each attribute, causing it to skip repeatedly, and it's very inefficient, and requires the double sorting order clauses!
-		sSQL_Sort = "SELECT PK_File,'',Name,0,FK_FileFormat,Filename,DateLastViewed FROM File LEFT JOIN File_Attribute ON FK_File=PK_File LEFT JOIN Attribute ON FK_Attribute=PK_Attribute AND FK_AttributeType=" + StringUtils::itos(PK_AttributeType_Sort) + " WHERE IsDirectory=0 AND PK_File in (" + sPK_File + ") AND (FK_AttributeType IS NULL OR FK_AttributeType=" + StringUtils::itos(PK_AttributeType_Sort) + ") ORDER BY PK_File,PK_Attribute DESC";
+		// TODO EVEN FURTHER, I'm using a subselect to get episode names, This just makes me feel all dirty inside..
+
+		if ( PK_AttributeType_Sort==13 )
+			sSQL_Sort = "SELECT PK_File,'',IFNULL(GROUP_CONCAT(Name ORDER BY FK_AttributeType DESC SEPARATOR '-'),Filename) As Name,0,FK_FileFormat,Filename,DateLastViewed FROM File F1 LEFT JOIN File_Attribute ON FK_File = PK_FILE LEFT JOIN Attribute ON FK_Attribute = PK_Attribute AND FK_AttributeType IN (11," + StringUtils::itos(PK_AttributeType_Sort) + ") Where  IsDirectory = 0 AND PK_File in ( " + sPK_File + " ) GROUP BY PK_File ORDER BY Name ASC";
+		else
+			sSQL_Sort = "SELECT PK_File,'',Name,0,FK_FileFormat,Filename,DateLastViewed FROM File LEFT JOIN File_Attribute ON FK_File=PK_File LEFT JOIN Attribute ON FK_Attribute=PK_Attribute AND FK_AttributeType=" + StringUtils::itos(PK_AttributeType_Sort) + " WHERE IsDirectory=0 AND PK_File in (" + sPK_File + ") AND (FK_AttributeType IS NULL OR FK_AttributeType=" + StringUtils::itos(PK_AttributeType_Sort) + ") ORDER BY PK_File,PK_Attribute DESC";
 
     PlutoSqlResult result;
     DB_ROW row;
 	map<int,int>::iterator it;
-	FileBrowserInfo *pFileBrowserInfo=NULL;
+	FileBrowserInfo *pFileBrowserInfo;
 	int iLastPK_File=0;  // if the there are 2 attributes of the same twice the file may appear more than once
 	// 0 =PK_File, 1=Path, 2=Name, 3=IsDirectory, 4=File Format
     if( (result.r=m_pDatabase_pluto_media->db_wrapper_query_result( sSQL_Sort )) )
         while( ( row=db_wrapper_fetch_row( result.r ) ) )
 		{
 			int PK_File = atoi(row[0]);
-
 			if( PK_File==iLastPK_File )
-			{
-				if( bShowingSongs && row[7] && pFileBrowserInfo )
-					AddSongAttributes(atoi(row[7]),row[2],pFileBrowserInfo);
 				continue;
-			}
 			iLastPK_File=PK_File;
 			if( row[3][0]=='1' )
 			{
@@ -692,17 +623,22 @@ void Media_Plugin::PopulateFileBrowserInfoForFile(MediaListGrid *pMediaListGrid,
 				pFileBrowserInfo = new FileBrowserInfo(row[2] ? row[2] : row[5],string("!F") + row[0],PK_File,row[4] ? atoi(row[4]) : 0,
 					row[5] && strstr(row[5],".dvd")!=NULL ? 'D' : 'F', false,false);
 #else
-				if( pMediaListGrid->m_iPK_MediaType==MEDIATYPE_pluto_Pictures_CONST )
-					pFileBrowserInfo = new FileBrowserInfo(row[2] ? row[2] : row[5],string(row[1]) + "/" + row[2],PK_File,row[4] ? atoi(row[4]) : 0,row[6],'F',false,false);
-				else if( bShowingSongs ) // ATTRIBUTETYPE_Title_CONST is > than performer, album, track so it will always be first anyway
-				{
-					int PK_AttributeType = row[7] ? atoi(row[7]) : 0;
-					pFileBrowserInfo = new FileBrowserInfo(row[2] && PK_AttributeType==ATTRIBUTETYPE_Title_CONST ? row[2] : row[5],string("!F") + row[0],PK_File,row[4] ? atoi(row[4]) : 0,row[6],'F',false,false);
-					if( PK_AttributeType && PK_AttributeType!=ATTRIBUTETYPE_Title_CONST ) // We don't have a song title attribute so we added the filename.  Add whatever other attribute this is for performer/artist/track
-						AddSongAttributes(PK_AttributeType,row[2],pFileBrowserInfo);
-				}
-				else
+			if( pMediaListGrid->m_iPK_MediaType==MEDIATYPE_pluto_Pictures_CONST )
+			{
+				pFileBrowserInfo = new FileBrowserInfo(row[2] ? row[2] : row[5],string("!F")+row[0],PK_File,row[4] ? atoi(row[4]) : 0,row[6],'F',false,false);
+				pFileBrowserInfo->m_sPictureThumb = string(row[1]) + "/" + row[2]+".tnj";
+			}
+			else
+			{
+					// I have to fix the case where lack of title attribute no longer returns null.
+
+					LoggerWrapper::GetInstance()->Write(LV_STATUS,"row[2] = %s",row[2]);
+					if (row[2] != NULL && string(row[2]).empty()) {
+						row[2] = NULL;					
+					}
+
 					pFileBrowserInfo = new FileBrowserInfo(row[2] ? row[2] : row[5],string("!F") + row[0],PK_File,row[4] ? atoi(row[4]) : 0,row[6],'F',false,false);
+					}
 #endif
 			if( (it=mapFile_To_Pic.find( atoi(row[0]) ))!=mapFile_To_Pic.end() )
 				pFileBrowserInfo->m_PK_Picture = it->second;
@@ -712,17 +648,16 @@ void Media_Plugin::PopulateFileBrowserInfoForFile(MediaListGrid *pMediaListGrid,
 
 void Media_Plugin::PopulateFileBrowserInfoForAttribute(MediaListGrid *pMediaListGrid,int PK_AttributeType_Sort, int PK_Attribute, string &sPK_File_Or_Disc,string sTable)
 {
-	DB_ROW row;
-
-	string sSQL_Sort = "SELECT PK_Attribute,Name,min(FK_Picture) AS FK_Picture,FK_File FROM " + sTable + " JOIN " + 
+	string sSQL_Sort = "SELECT PK_Attribute,Name,min(FK_Picture) AS FK_Picture FROM " + sTable + " JOIN " + 
 		sTable + "_Attribute ON FK_" + sTable + "=PK_" + sTable + " JOIN Attribute ON " + 
 		sTable + "_Attribute.FK_Attribute=PK_Attribute AND FK_AttributeType=" + StringUtils::itos(PK_AttributeType_Sort) + 
 		" LEFT JOIN Picture_Attribute ON Picture_Attribute.FK_Attribute=PK_Attribute WHERE " + 
 		(sTable=="File" ? "IsDirectory=0 AND " : "") +
-		"PK_" + sTable + " in (" + sPK_File_Or_Disc + ") GROUP BY PK_Attribute,Name";
+		"PK_" + sTable + " in (" + sPK_File_Or_Disc + ") GROUP BY PK_Attribute,IF(SUBSTRING(Name,1,4)='The ',SUBSTRING(Name,5),Name)";
 
     PlutoSqlResult result;
-	map<int,int> m_mapAttribute_To_File;  // Only used for albums
+    DB_ROW row;
+	map<int,int>::iterator it;
     if( (result.r=m_pDatabase_pluto_media->db_wrapper_query_result( sSQL_Sort )) )
 	{
 		// If we're looking for albums and there are none, just show the songs
@@ -736,43 +671,10 @@ void Media_Plugin::PopulateFileBrowserInfoForAttribute(MediaListGrid *pMediaList
 
         while( ( row=db_wrapper_fetch_row( result.r ) ) )
 		{
-			if( PK_AttributeType_Sort==ATTRIBUTETYPE_Album_CONST && pMediaListGrid->m_omgsStyle==omgs_BrowserStyle_List )
-				m_mapAttribute_To_File[ atoi(row[0]) ] = atoi(row[3]);
 			FileBrowserInfo *pFileBrowserInfo = new FileBrowserInfo(row[1],string("!A") + row[0],atoi(row[0]));
 			if( row[2] )
 				pFileBrowserInfo->m_PK_Picture = atoi(row[2]);
 			pMediaListGrid->m_listFileBrowserInfo.push_back(pFileBrowserInfo);
-		}
-	}
-
-	if( PK_AttributeType_Sort==ATTRIBUTETYPE_Album_CONST && pMediaListGrid->m_omgsStyle==omgs_BrowserStyle_List )
-	{
-		map<int,string> mapFile_Performer; // Used only for albums below
-		// We're going to run the query twice for albums.  First we'll get the performers for the file so that when we show albums we can show performers also
-		string sSQL_Performer = "SELECT FK_File,PK_Attribute,Name FROM " + sTable + " JOIN " + 
-			sTable + "_Attribute ON FK_" + sTable + "=PK_" + sTable + " JOIN Attribute ON " + 
-			sTable + "_Attribute.FK_Attribute=PK_Attribute AND FK_AttributeType=" TOSTRING(ATTRIBUTETYPE_Performer_CONST) 
-			" WHERE " + 
-			(sTable=="File" ? "IsDirectory=0 AND " : "") +
-			"PK_" + sTable + " in (" + sPK_File_Or_Disc + ")";
-
-		PlutoSqlResult result;
-		if( (result.r=m_pDatabase_pluto_media->db_wrapper_query_result( sSQL_Performer )) )
-		{
-			while( ( row=db_wrapper_fetch_row( result.r ) ) )
-			{
-				if( row[0] && row[2] )
-					mapFile_Performer[ atoi(row[0]) ] = row[2];
-			}
-		}
-		map<int,string>::iterator itPerformer;
-		for( list<FileBrowserInfo *>::iterator it=pMediaListGrid->m_listFileBrowserInfo.begin();it!=pMediaListGrid->m_listFileBrowserInfo.end();++it )
-		{
-			FileBrowserInfo *pFileBrowserInfo = *it;
-			int PK_File = m_mapAttribute_To_File[ pFileBrowserInfo->m_PK_Attribute ];
-			if( PK_File && (itPerformer=mapFile_Performer.find(PK_File))!=mapFile_Performer.end() )
-				pFileBrowserInfo->m_sPerformer = itPerformer->second;
-			
 		}
 	}
 
@@ -1077,20 +979,21 @@ class DataGridTable *Media_Plugin::CurrentMediaSections( string GridID, string P
 			pDataGrid->SetData(0, currentPos++,new DataGridCell((*it)->Description_get(),(*it)->Position_get()));
 	}
 
+	// This branch executed for DVDs and other disc media with titles and sections.
 	if( pMediaStream->m_bContainsTitlesOrSections )
 	{
 		for(size_t sTitle=0;sTitle<pMediaStream->m_dequeMediaTitle.size();++sTitle)
 		{
 			MediaTitle *pMediaTitle = pMediaStream->m_dequeMediaTitle[sTitle];
-			list_Attribute *listPK_Attribute = pMediaTitle->m_mapPK_Attribute_Find(ATTRIBUTETYPE_Chapter_CONST);
-			Row_Attribute *pRow_Attribute_Title = listPK_Attribute && listPK_Attribute->size() ? *listPK_Attribute->begin() : NULL;
-			string sTitleName = pRow_Attribute_Title ? pRow_Attribute_Title->Name_get() : "";
+			list_int *listPK_Attribute = pMediaTitle->m_mapPK_Attribute_Find(ATTRIBUTETYPE_Chapter_CONST);
+			int PK_Attribute_Title = listPK_Attribute && listPK_Attribute->size() ? *(listPK_Attribute->begin()) : 0;
+			string sTitleName = m_pMediaAttributes->m_pMediaAttributes_LowLevel->GetAttributeName(PK_Attribute_Title);
 			for(size_t sSection=0;sSection<pMediaTitle->m_dequeMediaSection.size();++sSection)
 			{
 				MediaSection *pMediaSection = pMediaTitle->m_dequeMediaSection[sSection];
-				list_Attribute *listPK_Attribute = pMediaSection->m_mapPK_Attribute_Find(ATTRIBUTETYPE_Chapter_CONST);
-				Row_Attribute *pRow_Attribute_Title = listPK_Attribute && listPK_Attribute->size() ? *listPK_Attribute->begin() : NULL;
-				string sCell = StringUtils::itos(sSection+1) + " " + (pRow_Attribute_Title ? pRow_Attribute_Title->Name_get() : "");
+				list_int *listPK_Attribute = pMediaSection->m_mapPK_Attribute_Find(ATTRIBUTETYPE_Chapter_CONST);
+				int PK_Attribute_Title = listPK_Attribute && listPK_Attribute->size() ? *(listPK_Attribute->begin()) : 0;
+				string sCell = StringUtils::itos(sSection+1) + " " + m_pMediaAttributes->m_pMediaAttributes_LowLevel->GetAttributeName(PK_Attribute_Title);
 				string sValue = " TITLE:" + StringUtils::itos(sTitle+1) + " CHAPTER:" + StringUtils::itos(sSection+1);
 				pDataGrid->SetData(0, currentPos++,new DataGridCell(sCell,sValue));
 				if( (int)sTitle==pMediaStream->m_iDequeMediaTitle_Pos && (int)sSection==pMediaStream->m_iDequeMediaSection_Pos )
@@ -1101,6 +1004,7 @@ class DataGridTable *Media_Plugin::CurrentMediaSections( string GridID, string P
 	}
 	else
 	{
+		// This branch for file based media.
 		int iSection=0;
 		for ( itFiles = pMediaStream->m_dequeMediaFile.begin(); itFiles != pMediaStream->m_dequeMediaFile.end(); itFiles++ )
 		{
@@ -1108,23 +1012,19 @@ class DataGridTable *Media_Plugin::CurrentMediaSections( string GridID, string P
 			// int index = itFiles - pMediaStream->m_dequeMediaFile.begin();
 			sCurrentFile = pMediaFile->m_sDescription.size() ? pMediaFile->m_sDescription : FileUtils::FilenameWithoutPath(pMediaFile->FullyQualifiedFile());
 
-			DataGridCell *pCell = new DataGridCell(sCurrentFile, StringUtils::itos(itFiles - pMediaStream->m_dequeMediaFile.begin()));
-			pDataGrid->SetData(0, currentPos++,pCell);
-
-			if( pMediaFile->m_dwPK_File )
-				pCell->m_mapAttributes["PK_File"] = StringUtils::itos(pMediaFile->m_dwPK_File);
-
-			list_Attribute *listPK_Attribute = pMediaFile->m_mapPK_Attribute_Find(ATTRIBUTETYPE_Performer_CONST);
-			if( listPK_Attribute && listPK_Attribute->size() )
-				pCell->m_mapAttributes["Performer"] = (*listPK_Attribute->begin())->Name_get();
+			string sCurrentTitle; 
 			
-			listPK_Attribute = pMediaFile->m_mapPK_Attribute_Find(ATTRIBUTETYPE_Album_CONST);
-			if( listPK_Attribute && listPK_Attribute->size() )
-				pCell->m_mapAttributes["Album"] = (*listPK_Attribute->begin())->Name_get();
+			if (pMediaFile->m_sEpisode.size()) {
+			  sCurrentTitle = pMediaFile->m_sTitle + "\n    \"" + pMediaFile->m_sEpisode + "\"";
+			} else {
+			  sCurrentTitle = pMediaFile->m_sTitle;
+			}
 
-			listPK_Attribute = pMediaFile->m_mapPK_Attribute_Find(ATTRIBUTETYPE_Title_CONST);
-			if( listPK_Attribute && listPK_Attribute->size() )
-				pCell->m_mapAttributes["Title"] = (*listPK_Attribute->begin())->Name_get();
+			if (sCurrentTitle.size()) {
+			  pDataGrid->SetData(0, currentPos++, new DataGridCell(sCurrentTitle, StringUtils::itos(itFiles - pMediaStream->m_dequeMediaFile.begin())));
+			} else {
+			  pDataGrid->SetData(0, currentPos++,new DataGridCell(sCurrentFile, StringUtils::itos(itFiles - pMediaStream->m_dequeMediaFile.begin())));
+			}
 
 			LoggerWrapper::GetInstance()->Write(LV_STATUS, "Returning data: (%d) -> %s section %d", itFiles - pMediaStream->m_dequeMediaFile.begin(), ((*itFiles)->m_sFilename).c_str(),iSection);
 			mapSections[ make_pair<int,int> (iSection,0) ] = true;
@@ -1255,7 +1155,6 @@ class DataGridTable *Media_Plugin::CDTracks( string GridID, string Parms, void *
 
 class DataGridTable *Media_Plugin::MediaSearchAutoCompl( string GridID, string Parms, void *ExtraData, int *iPK_Variable, string *sValue_To_Assign, class Message *pMessage )
 {
-	int iWidth = atoi(pMessage->m_mapParameters[COMMANDPARAMETER_Width_CONST].c_str());
     FileListGrid *pDataGrid = new FileListGrid( m_pDatagrid_Plugin, this );
     DataGridCell *pCell;
 
@@ -1294,36 +1193,23 @@ class DataGridTable *Media_Plugin::MediaSearchAutoCompl( string GridID, string P
             string label = row[2];
             label += string( "\n" ) + row[1];
             pCell = new DataGridCell( "", string("!F") + row[0] );
-            pDataGrid->SetData( 0, RowCount, pCell );
-            pDataGrid->m_vectFileInfo.push_back( new FileListInfo( false, string(row[1]) + "/" + row[2], false ) );
-			if( iWidth==1 )  // New style with cell attributes
-			{
-				pCell->m_mapAttributes["Description"]="File";
-				pCell->m_mapAttributes["PK_File"]=row[0];
-				pCell->m_mapAttributes["Name"]=row[2];
-				pCell->m_mapAttributes["Path"]=row[1];
-				pCell->m_mapAttributes["Filename"]=row[2];
-				if( row[3] )
-					pCell->m_mapAttributes["PK_Picture"]=row[3];
-				RowCount++;
-				continue;
-			}
-
 			if( row[3] && row[3][0]!='0' )
 			{
 				size_t st=0;
 				pCell->m_pGraphicData = FileUtils::ReadFileIntoBuffer("/home/mediapics/" + string(row[3]) + "_tn.jpg",st);
 				pCell->m_GraphicLength=st;
 			}
+            pDataGrid->SetData( 0, RowCount, pCell );
 
             pCell = new DataGridCell( label, string("!F") + row[0] );
             pCell->m_Colspan = 5;
+            pDataGrid->m_vectFileInfo.push_back( new FileListInfo( false, string(row[1]) + "/" + row[2], false ) );
             pDataGrid->SetData( 1, RowCount++, pCell );
         }
     }
 
     SQL = 
-		"select DISTINCT PK_Attribute, Name, Description, FK_Picture, PK_AttributeType FROM Attribute "
+		"select DISTINCT PK_Attribute, Name, Description, FK_Picture FROM Attribute "
 		"JOIN AttributeType ON Attribute.FK_AttributeType=PK_AttributeType "
 		"JOIN MediaType_AttributeType ON MediaType_AttributeType.FK_AttributeType=PK_AttributeType "
 		"LEFT JOIN Picture_Attribute ON FK_Attribute=PK_Attribute "
@@ -1342,26 +1228,13 @@ class DataGridTable *Media_Plugin::MediaSearchAutoCompl( string GridID, string P
             string label = /* string( "~`S24`" ) + */ row[1];
             label += string( "\n" ) + row[2];
             pCell = new DataGridCell( "", string("!A") + row[0] );
-            pDataGrid->SetData( 0, RowCount, pCell );
-            pDataGrid->m_vectFileInfo.push_back( new FileListInfo( atoi( row[0] ) ) );
-			if( iWidth==1 )  // New style with cell attributes
-			{
-				pCell->m_mapAttributes["PK_Attribute"]=row[0];
-				pCell->m_mapAttributes["PK_AttributeType"]=row[4];
-				pCell->m_mapAttributes["Name"]=row[1];
-				pCell->m_mapAttributes["Description"]=row[2];
-				if( row[3] )
-					pCell->m_mapAttributes["PK_Picture"]=row[3];
-				RowCount++;
-				continue;
-			}
-
 			if( row[3] && row[3][0]!='0' )
 			{
 				size_t st=0;
 				pCell->m_pGraphicData = FileUtils::ReadFileIntoBuffer("/home/mediapics/" + string(row[3]) + "_tn.jpg",st);
 				pCell->m_GraphicLength=st;
 			}
+            pDataGrid->SetData( 0, RowCount, pCell );
 
             if( AttributesFirstSearch.length() )
                 AttributesFirstSearch += ",";
@@ -1369,6 +1242,7 @@ class DataGridTable *Media_Plugin::MediaSearchAutoCompl( string GridID, string P
 
             pCell = new DataGridCell( label,  string("!A") + row[0] );
             pCell->m_Colspan = 5;
+            pDataGrid->m_vectFileInfo.push_back( new FileListInfo( atoi( row[0] ) ) );
             pDataGrid->SetData( 1, RowCount++, pCell );
         }
     }
@@ -1378,7 +1252,7 @@ class DataGridTable *Media_Plugin::MediaSearchAutoCompl( string GridID, string P
 		return pDataGrid;
 
     SQL = 
-		"select DISTINCT PK_Attribute, Name, Description, FK_Picture, PK_AttributeType FROM SearchToken "
+		"select DISTINCT PK_Attribute, Name, Description, FK_Picture FROM SearchToken "
 		"JOIN SearchToken_Attribute ON PK_SearchToken=FK_SearchToken "
 		"JOIN Attribute ON SearchToken_Attribute.FK_Attribute=PK_Attribute "
 		"JOIN AttributeType ON Attribute.FK_AttributeType=PK_AttributeType "
@@ -1401,29 +1275,17 @@ class DataGridTable *Media_Plugin::MediaSearchAutoCompl( string GridID, string P
             string label = /*string( "~`S24`" ) + */ row[1];
             label += string( "\n" ) + row[2];
             pCell = new DataGridCell( "",  string("!A") + row[0] );
-            pDataGrid->SetData( 0, RowCount, pCell );
-            pDataGrid->m_vectFileInfo.push_back( new FileListInfo( atoi( row[0] ) ) );
-			if( iWidth==1 )  // New style with cell attributes
-			{
-				pCell->m_mapAttributes["PK_Attribute"]=row[0];
-				pCell->m_mapAttributes["PK_AttributeType"]=row[4];
-				pCell->m_mapAttributes["Name"]=row[1];
-				pCell->m_mapAttributes["Description"]=row[2];
-				if( row[3] )
-					pCell->m_mapAttributes["PK_Picture"]=row[3];
-				RowCount++;
-				continue;
-			}
-
 			if( row[3] && row[3][0]!='0' )
 			{
 				size_t st=0;
 				pCell->m_pGraphicData = FileUtils::ReadFileIntoBuffer("/home/mediapics/" + string(row[3]) + "_tn.jpg",st);
 				pCell->m_GraphicLength=st;
 			}
+            pDataGrid->SetData( 0, RowCount, pCell );
 
             pCell = new DataGridCell( label,  string("!A") + row[0] );
             pCell->m_Colspan = 5;
+            pDataGrid->m_vectFileInfo.push_back( new FileListInfo( atoi( row[0] ) ) );
             pDataGrid->SetData( 1, RowCount++, pCell );
         }
     }
@@ -1811,17 +1673,17 @@ class DataGridTable *Media_Plugin::MediaAttrCurStream( string GridID, string Par
 		return pDataGrid;
 
 	int iRow=0;
-	for(map<int,list_Attribute>::iterator it=pEntertainArea->m_pMediaStream->m_mapPK_Attribute.begin();it!=pEntertainArea->m_pMediaStream->m_mapPK_Attribute.end();++it)
+	for(map<int,list_int>::iterator it=pEntertainArea->m_pMediaStream->m_mapPK_Attribute.begin();it!=pEntertainArea->m_pMediaStream->m_mapPK_Attribute.end();++it)
 	{
 		Row_AttributeType *pRow_AttributeType = m_pDatabase_pluto_media->AttributeType_get()->GetRow(it->first);
-		for(list_Attribute::iterator itli=it->second.begin();itli!=it->second.end();++itli)
+		for(list_int::iterator itli=it->second.begin();itli!=it->second.end();++itli)
 		{
-			Row_Attribute *pRow_Attribute = *itli;
+			Row_Attribute *pRow_Attribute = m_pDatabase_pluto_media->Attribute_get()->GetRow(*itli);
 			if( pRow_AttributeType && pRow_Attribute )
 			{
 				string sName = pRow_AttributeType->Description_get() + ": ";
 				sName += pRow_Attribute->Name_get();
-				DataGridCell *pCell = new DataGridCell( sName, StringUtils::itos(pRow_Attribute->PK_Attribute_get()) );
+				DataGridCell *pCell = new DataGridCell( sName, StringUtils::itos(*itli) );
 				pDataGrid->SetData(0,iRow++,pCell);
 			}
 		}
@@ -1838,16 +1700,16 @@ class DataGridTable *Media_Plugin::MediaAttrCurStream( string GridID, string Par
 			sNamePrefix = "(#" + StringUtils::itos(pEntertainArea->m_pMediaStream->m_iDequeMediaFile_Pos+1) + ") ";
 		*/
 
-		for( map<int,list_Attribute>::iterator it=pMediaFile->m_mapPK_Attribute.begin();it!=pMediaFile->m_mapPK_Attribute.end();++it)
+		for( map<int,list_int>::iterator it=pMediaFile->m_mapPK_Attribute.begin();it!=pMediaFile->m_mapPK_Attribute.end();++it)
 		{
 			Row_AttributeType *pRow_AttributeType = m_pDatabase_pluto_media->AttributeType_get()->GetRow(it->first);
-			for(list_Attribute::iterator itli=it->second.begin();itli!=it->second.end();++itli)
+			for(list_int::iterator itli=it->second.begin();itli!=it->second.end();++itli)
 			{
-				Row_Attribute *pRow_Attribute = *itli;
+				Row_Attribute *pRow_Attribute = m_pDatabase_pluto_media->Attribute_get()->GetRow(*itli);
 				if( pRow_AttributeType && pRow_Attribute )
 				{
 					string sName = sNamePrefix + pRow_AttributeType->Description_get() + "\n" + pRow_Attribute->Name_get();
-					DataGridCell *pCell = new DataGridCell( sName, StringUtils::itos(pRow_Attribute->PK_Attribute_get()) );
+					DataGridCell *pCell = new DataGridCell( sName, StringUtils::itos(*itli) );
 					pDataGrid->SetData(0,iRow++,pCell);
 				}
 			}
@@ -1868,16 +1730,16 @@ void Media_Plugin::AddMediaTitlesToDataGrid(DataGridTable *pDataGrid,int &iRow,d
 		MediaTitle *pMediaTitle = dequeMediaTitle[s];
 		string sNamePrefix = "(Title " + StringUtils::itos(s+1) + ") ";
 
-		for( map<int,list_Attribute>::iterator it=pMediaTitle->m_mapPK_Attribute.begin();it!=pMediaTitle->m_mapPK_Attribute.end();++it)
+		for( map<int,list_int>::iterator it=pMediaTitle->m_mapPK_Attribute.begin();it!=pMediaTitle->m_mapPK_Attribute.end();++it)
 		{
 			Row_AttributeType *pRow_AttributeType = m_pDatabase_pluto_media->AttributeType_get()->GetRow(it->first);
-			for(list_Attribute::iterator itli=it->second.begin();itli!=it->second.end();++itli)
+			for(list_int::iterator itli=it->second.begin();itli!=it->second.end();++itli)
 			{
-				Row_Attribute *pRow_Attribute = *itli;
+				Row_Attribute *pRow_Attribute = m_pDatabase_pluto_media->Attribute_get()->GetRow(*itli);
 				if( pRow_AttributeType && pRow_Attribute && (bThumbnail==false || CanThumbnail(pRow_AttributeType->PK_AttributeType_get())) )
 				{
 					string sName = sNamePrefix + pRow_AttributeType->Description_get() + "\n" + pRow_Attribute->Name_get();
-					DataGridCell *pCell = new DataGridCell( sName, "!A" + StringUtils::itos(pRow_Attribute->PK_Attribute_get()) );
+					DataGridCell *pCell = new DataGridCell( sName, "!A" + StringUtils::itos(*itli) );
 					pDataGrid->SetData(0,iRow++,pCell);
 				}
 			}
@@ -1892,17 +1754,17 @@ void Media_Plugin::AddMediaSectionToDataGrid(DataGridTable *pDataGrid,int &iRow,
 	{
 		MediaSection *pMediaSection = dequeMediaSection[s];
 
-		for( map<int,list_Attribute>::iterator it=pMediaSection->m_mapPK_Attribute.begin();it!=pMediaSection->m_mapPK_Attribute.end();++it)
+		for( map<int,list_int>::iterator it=pMediaSection->m_mapPK_Attribute.begin();it!=pMediaSection->m_mapPK_Attribute.end();++it)
 		{
 			Row_AttributeType *pRow_AttributeType = m_pDatabase_pluto_media->AttributeType_get()->GetRow(it->first);
-			for(list_Attribute::iterator itli=it->second.begin();itli!=it->second.end();++itli)
+			for(list_int::iterator itli=it->second.begin();itli!=it->second.end();++itli)
 			{
-				Row_Attribute *pRow_Attribute = *itli;
+				Row_Attribute *pRow_Attribute = m_pDatabase_pluto_media->Attribute_get()->GetRow(*itli);
 				if( pRow_AttributeType && pRow_Attribute && (bThumbnail==false || CanThumbnail(pRow_AttributeType->PK_AttributeType_get())) )
 				{
 					string sName = sPreface + " #" + StringUtils::itos(s+1) + " ";
 					sName += pRow_AttributeType->Description_get() + "\n" + pRow_Attribute->Name_get();
-					DataGridCell *pCell = new DataGridCell( sName, "!A" + StringUtils::itos(pRow_Attribute->PK_Attribute_get()) );
+					DataGridCell *pCell = new DataGridCell( sName, "!A" + StringUtils::itos(*itli) );
 					pDataGrid->SetData(0,iRow++,pCell);
 				}
 			}
@@ -1977,17 +1839,14 @@ class DataGridTable *Media_Plugin::AvailablePlaylists( string GridID, string Par
     LoggerWrapper::GetInstance()->Write(LV_STATUS, "Media_Plugin::AvailablePlaylists Called to populate: %s", Parms.c_str());
     PLUTO_SAFETY_LOCK( mm, m_MediaMutex );
 
-	string SQL;
-
     if( Parms.length( )==0 )
-	{
-		SQL = "SELECT PK_Playlist, Name from Playlist ORDER BY NAME";
-	}
-	else
-	{
-	    int userID = atoi(Parms.c_str());
-		SQL = "SELECT PK_Playlist, Name from Playlist where EK_User IS NULL OR EK_User IN ( 0, " + StringUtils::itos(userID) + " ) ORDER BY NAME";
-	}
+        return NULL; // Nothing passed in yet
+
+    // select PK_Playlist, Name from Playlist where EK_USER IN ( 0, 33128 ) LIMIT 30;;
+
+    int userID = atoi(Parms.c_str());
+
+    string SQL = "SELECT PK_Playlist, Name from Playlist where EK_User IS NULL OR EK_User IN ( 0, " + StringUtils::itos(userID) + " ) ORDER BY NAME LIMIT 30";
 
     PlutoSqlResult result;
     DB_ROW row;
@@ -2256,6 +2115,59 @@ class DataGridTable *Media_Plugin::BookmarksByMediaType( string GridID, string P
 	return pDataGrid;
 }
 
+class DataGridTable *Media_Plugin::CaptureCardAudioPorts( string GridID, string Parms, void *ExtraData, int *iPK_Variable, string *sValue_To_Assign, class Message *pMessage )
+{
+	DataGridTable *pDataGrid = new DataGridTable();
+	DataGridCell *pCell;
+
+	LoggerWrapper::GetInstance()->Write(LV_STATUS, "Media_Plugin::CaptureCardAudioPorts");
+
+	PLUTO_SAFETY_LOCK(mm, m_MediaMutex);	// Just to be safe.
+	
+	// See what computer we're scanning for ports on.
+	int PK_Device_Topmost = DatabaseUtils::GetTopMostDevice(m_pDatabase_pluto_main, pMessage->m_dwPK_Device_From);
+	if ( PK_Device_Topmost == 0)
+		return pDataGrid;	// Empty table, because we couldn't figure out which computer.
+
+	vector <Row_Device *> vectRow_Device;
+	m_pDatabase_pluto_main->Device_get()->GetRows("JOIN DeviceTemplate ON FK_DeviceTemplate=PK_DeviceTemplate WHERE FK_DeviceCategory = " TOSTRING(DEVICECATEGORY_Capture_Card_Audio_Ports_CONST),&vectRow_Device);
+	int iRow=0;
+	for (vector<Row_Device *>::iterator it=vectRow_Device.begin();it!=vectRow_Device.end();++it)
+	{
+		Row_Device *pRow_Device = *it;
+		int PK_Device_Topmost_Comp = DatabaseUtils::GetTopMostDevice(m_pDatabase_pluto_main,pRow_Device->PK_Device_get());
+		if ( PK_Device_Topmost_Comp!=PK_Device_Topmost )
+			continue;	// This device is on another computer.
+		
+		vector<Row_Device_DeviceData *> vectRow_Device_DeviceData;
+		m_pDatabase_pluto_main->Device_DeviceData_get()->GetRows("IK_DeviceData=" + StringUtils::itos(pRow_Device->PK_Device_get()) + " AND FK_DeviceData=" TOSTRING(DEVICEDATA_FK_Device_Capture_Card_Audio_P_CONST),&vectRow_Device_DeviceData);
+		
+		string sDescription = pRow_Device->Description_get();
+		Row_Device *pRow_Device_Parent = pRow_Device->FK_Device_ControlledVia_getrow();
+		while( pRow_Device_Parent )
+		  {
+		    sDescription += " / " + pRow_Device_Parent->Description_get();
+		    pRow_Device_Parent = pRow_Device_Parent->FK_Device_ControlledVia_getrow();
+		  }
+
+		pCell = new DataGridCell(sDescription,StringUtils::itos(pRow_Device->PK_Device_get()));
+		if ( vectRow_Device_DeviceData.size() )
+		  {
+		    Row_Device_DeviceData *pRow_Device_DeviceData = (*vectRow_Device_DeviceData.begin());
+		    Row_Device *pRow_Device = pRow_Device_DeviceData->FK_Device_getrow();
+		    if ( pRow_Device )
+		      {
+			pCell->m_mapAttributes["InUse_PK_Device"] = StringUtils::itos(pRow_Device->PK_Device_get());
+			pCell->m_mapAttributes["InUse_Device_Description"] = pRow_Device->Description_get();
+		      }
+		  }
+		pDataGrid->SetData(0,iRow++,pCell);
+	}
+
+	return pDataGrid;
+
+}
+
 class DataGridTable *Media_Plugin::CaptureCardPorts( string GridID, string Parms, void *ExtraData, int *iPK_Variable, string *sValue_To_Assign, class Message *pMessage )
 {
 	DataGridTable *pDataGrid = new DataGridTable();
@@ -2503,17 +2415,17 @@ class DataGridTable *Media_Plugin::ThumbnailableAttributes( string GridID, strin
 
 	list<DataGridCell *> listDataGridCell; // So we can force some attributes to the top
 
-	for(map<int,list_Attribute>::iterator it=pEntertainArea->m_pMediaStream->m_mapPK_Attribute.begin();it!=pEntertainArea->m_pMediaStream->m_mapPK_Attribute.end();++it)
+	for(map<int,list_int>::iterator it=pEntertainArea->m_pMediaStream->m_mapPK_Attribute.begin();it!=pEntertainArea->m_pMediaStream->m_mapPK_Attribute.end();++it)
 	{
 		Row_AttributeType *pRow_AttributeType = m_pDatabase_pluto_media->AttributeType_get()->GetRow(it->first);
-		for(list_Attribute::iterator itli=it->second.begin();itli!=it->second.end();++itli)
+		for(list_int::iterator itli=it->second.begin();itli!=it->second.end();++itli)
 		{
-			Row_Attribute *pRow_Attribute = *itli;
+			Row_Attribute *pRow_Attribute = m_pDatabase_pluto_media->Attribute_get()->GetRow(*itli);
 			if( pRow_AttributeType && pRow_Attribute && CanThumbnail(pRow_AttributeType->PK_AttributeType_get()) )
 			{
 				string sName = pRow_AttributeType->Description_get() + ": ";
 				sName += pRow_Attribute->Name_get();
-				DataGridCell *pCell = new DataGridCell( sName, "!A" + StringUtils::itos(pRow_Attribute->PK_Attribute_get()) );
+				DataGridCell *pCell = new DataGridCell( sName, "!A" + StringUtils::itos(*itli) );
 				if( pRow_AttributeType->PK_AttributeType_get()==ATTRIBUTETYPE_Title_CONST )
 					pDataGrid->SetData(0,iRow++,pCell);
 				else if( pRow_AttributeType->PK_AttributeType_get()==ATTRIBUTETYPE_Performer_CONST || pRow_AttributeType->PK_AttributeType_get()==ATTRIBUTETYPE_Album_CONST )
@@ -2535,16 +2447,16 @@ class DataGridTable *Media_Plugin::ThumbnailableAttributes( string GridID, strin
 			pDataGrid->SetData(0,iRow++,pCell);
 		}
 		
-		for( map<int,list_Attribute>::iterator it=pMediaFile->m_mapPK_Attribute.begin();it!=pMediaFile->m_mapPK_Attribute.end();++it)
+		for( map<int,list_int>::iterator it=pMediaFile->m_mapPK_Attribute.begin();it!=pMediaFile->m_mapPK_Attribute.end();++it)
 		{
 			Row_AttributeType *pRow_AttributeType = m_pDatabase_pluto_media->AttributeType_get()->GetRow(it->first);
-			for(list_Attribute::iterator itli=it->second.begin();itli!=it->second.end();++itli)
+			for(list_int::iterator itli=it->second.begin();itli!=it->second.end();++itli)
 			{
-				Row_Attribute *pRow_Attribute = *itli;
+				Row_Attribute *pRow_Attribute = m_pDatabase_pluto_media->Attribute_get()->GetRow(*itli);
 				if( pRow_AttributeType && pRow_Attribute && CanThumbnail(pRow_AttributeType->PK_AttributeType_get()))
 				{
 					string sName = sNamePrefix + pRow_AttributeType->Description_get() + "\n" + pRow_Attribute->Name_get();
-					DataGridCell *pCell = new DataGridCell( sName, "!A" + StringUtils::itos(pRow_Attribute->PK_Attribute_get()) );
+					DataGridCell *pCell = new DataGridCell( sName, "!A" + StringUtils::itos(*itli) );
 					if( pRow_AttributeType->PK_AttributeType_get()==ATTRIBUTETYPE_Title_CONST )
 						pDataGrid->SetData(0,iRow++,pCell);
 					else if( pRow_AttributeType->PK_AttributeType_get()==ATTRIBUTETYPE_Performer_CONST || pRow_AttributeType->PK_AttributeType_get()==ATTRIBUTETYPE_Album_CONST )
@@ -2562,111 +2474,6 @@ class DataGridTable *Media_Plugin::ThumbnailableAttributes( string GridID, strin
 		pDataGrid->SetData(0,iRow++,*it);
 
 	AddMediaTitlesToDataGrid(pDataGrid,iRow,pEntertainArea->m_pMediaStream->m_dequeMediaTitle,"",true);
-
-	return pDataGrid;
-}
-
-class DataGridTable *Media_Plugin::TracksOnDisc( string GridID, string Parms, void *ExtraData, int *iPK_Variable, string *sValue_To_Assign, class Message *pMessage )
-{
-    PLUTO_SAFETY_LOCK( mm, m_MediaMutex );
-    DataGridTable *pDataGrid = new DataGridTable();
-
-	int PK_Device = atoi(Parms.c_str());
-	DeviceData_Router *pDevice_Disc = NULL;
-	if( PK_Device )
-		pDevice_Disc = m_pRouter->m_mapDeviceData_Router_Find(PK_Device);
-	else // user didn't specify the disc drive.  find the first one that's related
-	{
-		DeviceData_Router *pDevice_Orbiter = m_pRouter->m_mapDeviceData_Router_Find(pMessage->m_dwPK_Device_From);
-		if( pDevice_Orbiter )
-			pDevice_Disc = (DeviceData_Router *) pDevice_Orbiter->FindFirstRelatedDeviceOfCategory(DEVICECATEGORY_Disc_Drives_CONST);
-	}
-
-	if( !pDevice_Disc )
-		return pDataGrid;
-
-	int PK_MediaType,EK_Disc;
-	string sRippingInfo,Disks,sURL,sBlock_Device;
-
-	DCE::CMD_Get_Disk_Info CMD_Get_Disk_Info(m_dwPK_Device,pDevice_Disc->m_dwPK_Device,&sRippingInfo,&PK_MediaType,&EK_Disc,&Disks,&sURL,&sBlock_Device);
-	if( !SendCommand(CMD_Get_Disk_Info) || PK_MediaType==0 )
-		return pDataGrid;
-
-	if( PK_MediaType!=MEDIATYPE_pluto_CD_CONST || sURL.empty() )   // Only handle cd's, and need a URL with the tracks
-		return pDataGrid;
-
-	// Count the number of tracks
-	int iNumTracks=0;
-	string::size_type pos=0;
-	while(pos<sURL.size()-1)
-	{
-		pos = sURL.find('\n',pos+1);
-		iNumTracks++;
-	}
-
-	// Iterate through all the records in the database for this disc, and keep track of which ones we've added
-	int iLastTrackAdded=0;
-	DataGridCell *pCell=NULL;
-	vector<Row_Disc_Attribute *> vectRow_Disc_Attribute;
-	m_pDatabase_pluto_media->Disc_Attribute_get()->GetRows("FK_Disc=" + StringUtils::itos(EK_Disc) + " ORDER BY Track", &vectRow_Disc_Attribute);
-	for( vector<Row_Disc_Attribute *>::iterator it=vectRow_Disc_Attribute.begin();it!=vectRow_Disc_Attribute.end();++it )
-	{
-		Row_Disc_Attribute *pRow_Disc_Attribute = *it;
-		if( pRow_Disc_Attribute->Track_get()==0 )
-			continue;
-
-		// We've got a new track with attributes.  Need to create a new cell
-		int iTrack = pRow_Disc_Attribute->Track_get();
-		if( iTrack!=iLastTrackAdded )
-		{
-			// Some tracks may not have attributes.  If the database has gaps, create a blank cell, and also for this track create a cell with some generic default values
-			for(int i=iLastTrackAdded+1;i<=iTrack;++i)
-			{
-				pCell = new DataGridCell("Track " + StringUtils::itos(i),StringUtils::itos(i));
-				pDataGrid->SetData(0,i-1,pCell);
-			}
-		}
-		iLastTrackAdded=iTrack;
-		Row_Attribute *pRow_Attribute = pRow_Disc_Attribute->FK_Attribute_getrow();
-		if( !pRow_Attribute )
-			continue; // Shouldn't happen
-
-		switch(pRow_Attribute->FK_AttributeType_get())
-		{
-		case ATTRIBUTETYPE_Title_CONST:
-			pCell->m_mapAttributes["Title"]=pRow_Attribute->Name_get();
-			pCell->SetText(pRow_Attribute->Name_get());
-			break;
-		case ATTRIBUTETYPE_Performer_CONST:
-			pCell->m_mapAttributes["Performer"]=pRow_Attribute->Name_get();
-			break;
-		case ATTRIBUTETYPE_Album_CONST:
-			pCell->m_mapAttributes["Album"]=pRow_Attribute->Name_get();
-			break;
-		case ATTRIBUTETYPE_Genre_CONST:
-			pCell->m_mapAttributes["Genre"]=pRow_Attribute->Name_get();
-			break;
-		case ATTRIBUTETYPE_Studio_CONST:
-			pCell->m_mapAttributes["Studio"]=pRow_Attribute->Name_get();
-			break;
-		case ATTRIBUTETYPE_Conductor_CONST:
-			pCell->m_mapAttributes["Conductor"]=pRow_Attribute->Name_get();
-			break;
-		case ATTRIBUTETYPE_ComposerWriter_CONST:
-			pCell->m_mapAttributes["Composer"]=pRow_Attribute->Name_get();
-			break;
-		case ATTRIBUTETYPE_Release_Date_CONST:
-			pCell->m_mapAttributes["Date"]=pRow_Attribute->Name_get();
-			break;
-		};
-	}
-
-	// Add blank cells for any tracks we didn't add already with attributes
-	for(int i=iLastTrackAdded+1;i<=iNumTracks;++i)
-	{
-		pCell = new DataGridCell("Track " + StringUtils::itos(i),StringUtils::itos(i));
-		pDataGrid->SetData(0,i-1,pCell);
-	}
 
 	return pDataGrid;
 }

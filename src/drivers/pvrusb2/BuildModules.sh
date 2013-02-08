@@ -3,6 +3,7 @@
 set -ex
 
 COMP_MODULES_DIR="$(pwd)/compiledModules"
+. /etc/lmce-build/builder.conf
 
 mkdir -p "$COMP_MODULES_DIR"
 
@@ -28,6 +29,7 @@ function BuildModules() {
 	find '(' -type d -name 'compiledModules' -prune -false ')' -or -name '*.ko' -exec cp  '{}' "$COMP_MODULES_DIR/$KVER/misc" ';'
 }
 
+MakeRelease_Kernel=$KVER
 if [[ "$MakeRelease_Kernel" == "" ]] ;then
 	MakeRelease_Kernel=$(uname -r)
 fi

@@ -38,10 +38,11 @@ public:
 	DeviceData_Router *m_pDevice;
 	int m_PK_HouseMode;
 	vector<class EventHandler *> m_vectEventHandlers;
+	bool m_bTimedEvent;
 
 	EventInfo(int PK_Event,Message *pMessage,DeviceData_Router *pDevice,int PK_HouseMode) :
 		m_iPK_Event(PK_Event), m_pMessage(pMessage), m_pEventHandler(NULL), m_pDevice(pDevice),
-		m_PK_HouseMode(PK_HouseMode)
+		m_PK_HouseMode(PK_HouseMode), m_bTimedEvent(false)
 	{};
 	~EventInfo()
 	{

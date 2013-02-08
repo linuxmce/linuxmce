@@ -3,11 +3,40 @@
 . /usr/pluto/bin/SQL_Ops.sh
 . /usr/pluto/bin/Utils.sh
 
+DEVICEDATA_Hostname=188
+DEVICEDATA_Domainname=187
 DEVICEDATA_Network_Interfaces=32
+DEVICEDATA_Network_Interfaces_IPv6=302
+DEVICEDATA_Network_Interfaces_IPv6_tunnel=292
+DEVICEDATA_Network_VPN=295
+DEVICEDATA_Network_PPPoE=303
 
 CommaField()
 {
 	echo "$2" | cut -d, -f "$1"
+}
+
+CalculateNetworkAddress()
+{
+	typeset -i mask=255
+
+	SaveIFS=$IFS
+	IFS=.
+	typeset -a IParr=($IntIP)
+	typeset -a NMarr=($IntNetmask)
+	IFS=$SaveIFS
+
+	typeset -i ipbin1=${IParr[0]}
+	typeset -i ipbin2=${IParr[1]}
+	typeset -i ipbin3=${IParr[2]}
+	typeset -i ipbin4=${IParr[3]}
+
+	typeset -i nmbin1=${NMarr[0]}
+	typeset -i nmbin2=${NMarr[1]}
+	typeset -i nmbin3=${NMarr[2]}
+	typeset -i nmbin4=${NMarr[3]}
+
+	IntNetworkAddress=$"$((ipbin1 & nmbin1)).$((ipbin2 & nmbin2)).$((ipbin3 & nmbin3)).$((ipbin4 & nmbin4))"
 }
 
 ExtractData()
@@ -37,6 +66,89 @@ ExtractData()
 			fi
 		fi
 		NetIfConf=1
+		CalculateNetworkAddress
+	fi
+}
+
+ExtractPPPoEData()
+{
+	local R parts
+	R="$*"
+	if [ -n "$R" ]; then
+		# format:
+		# <Enabled>,<Username>,<Password>
+		PPPoEEnabled=$(CommaField 1 "$R")
+		PPPoEUser=$(CommaField 2 "$R")
+		PPPoEPass=$(CommaField 3 "$R")
+		PPPoEIPv6Enabled=$(CommaField 4 "$R")
+	fi
+}
+
+ExtractIPv6Data()
+{
+	local R IntPart ExtPart
+	R="$*"
+	if [ -n "$R" ]; then
+		# format:
+		# <Ext If>,<Ext IP>,<Ext Netmask>,<Gateway>,<Ext DNS CSV>|<Int If>,<Int IP>,<Int Netmask>
+		# <Ext If>,disabled|<Int If>,<Int IP>,<Int Netmask>
+		# <Ext If>,dhcp|<Int If>,<Int IP>,<Int Netmask>
+		# <Ext If>,ra|<Int If>,<Int IP>,<Int Netmask>
+		ExtPart=$(echo "$R" | cut -d'|' -f1)
+		IntPart=$(echo "$R" | cut -d'|' -sf2)
+		if [ -n "$IntPart" ]; then
+			Intv6If=$(CommaField 1 "$IntPart")
+			Intv6IP=$(CommaField 2 "$IntPart")
+			Intv6Netmask=$(CommaField 3 "$IntPart")
+		fi
+
+		if [ -n "$ExtPart" ]; then
+			Extv6If=$(CommaField 1 "$ExtPart")
+			Extv6IP=$(CommaField 2 "$ExtPart")
+			if [[ "$Extv6IP" != "dhcp" && "$Extv6IP" != "disabled" ]]; then
+				Extv6Netmask=$(CommaField 3 "$ExtPart")
+				v6Gateway=$(CommaField 4 "$ExtPart")
+				v6DNS=$(CommaField 5- "$ExtPart")
+			fi
+		fi
+		Netv6IfConf=1
+		#CalculateNetworkAddress
+	fi
+}
+
+ExtractIPv6TunnelData()
+{
+	local R
+	R="$*"
+	if [ -n "$R" ]; then
+		# format:
+		# 1-<Tunnelbroker>,2-<TunnelID>,3-<Endpoint>,4-<IPv6>,5-<IPv6 netmask>,6-<LAN prefix>,7-<LAN netmask>,8-<UserID>,9-<Password>,10-<Activate>,11-<Dynamic IPv4>,12-<RA enabled>
+		
+		IPv6TunnelBroker=$(CommaField 1 "$R")
+		IPv6TunnelID=$(CommaField 2 "$R")
+		IPv6Endpoint=$(CommaField 3 "$R")
+		IPv6IP=$(CommaField 4 "$R")
+		IPv6Netmask=$(CommaField 5 "$R")
+		IPv6Net=$(CommaField 6 "$R")
+		IPv6NetNetmask=$(CommaField 7 "$R")
+		IPv6UserID=$(CommaField 8 "$R")
+		IPv6Password=$(CommaField 9 "$R")
+		IPv6TunnelActive=$(CommaField 10 "$R")
+		IPv6DynamicIPv4=$(CommaField 11 "$R")
+		IPv6RAenabled=$(CommaField 12 "$R")
+	fi
+}
+
+ExtractVPNData()
+{
+	local R
+	R="$*"
+	if [ -n "$R" ]; then
+		# format:
+		# <enabled>,<IPrange>,<PSK>
+		VPNenabled=$(CommaField 1 "$R")
+		VPNrange=$(CommaField 2 "$R")
+		VPNPSK=$(CommaField 3 "$R")
 	fi
 }
 
@@ -56,6 +168,7 @@ if ! BlacklistConfFiles '/etc/network/interfaces' ;then
 	File="/etc/network/interfaces"
 
 	Script='
+	
 function Display(ParsingInterface, interface, address, netmask, gateway, dns)
 {
 	if (ParsingInterface == 0)
@@ -67,7 +180,6 @@ function Display(ParsingInterface, interface, address, netmask, gateway, dns)
 	else
 		print (interface, address, netmask, gateway, dns);
 }
-
 BEGIN { ParsingInterface = 0; OFS = ","; }
 /#/ {
 	$0 = substr($0, 1, match($0, /#/) - 1);
@@ -113,6 +225,13 @@ fi
 	fi
 }
 
+Hostname=DCERouter
+Domainname=linuxmce.local
+
+PPPoEEnabled=off
+PPPoEUser=
+PPPoEPass=
+
 IntIf=
 IntIP=
 IntNetmask=
@@ -122,14 +241,81 @@ ExtNetmask=
 Gateway=
 DNS=
 NetIfConf=0
-NCards=$(ip addr | grep -cF 'link/ether')
 
+Intv6If=
+Intv6IP=
+Intv6Netmask=
+Extv6If=
+Extv6IP=
+Extv6Netmask=
+v6Gateway=
+v6DNS=
+Netv6IfConf=0
+
+IPv6If=ipv6tunnel
+IPv6TunnelBroker=
+IPv6TunnelID=
+IPv6Endpoint=
+IPv6=
+IPv6Netmask=
+IPv6Net=
+IPv6NetNetmask=
+IPv6UserID=
+IPv6Password=
+IPv6TunnelActive=off
+IPv6DynamicIPv4=0
+IPv6RAenabled=0
+
+VPNenabled=off
+VPNrange=
+VPNPSK=
+
+NCards=$(ip addr | grep "^[0-9]*:" | grep -v "^[0-9]*: lo" | grep -v "^[0-9]*: pan" | grep -c ".")
+
+# Host- and domainname
+Q="SELECT IK_DeviceData
+FROM Device_DeviceData
+WHERE FK_DeviceData=$DEVICEDATA_Hostname"
+Hostname=$(RunSQL "$Q")
+Q="SELECT IK_DeviceData
+FROM Device_DeviceData
+WHERE FK_DeviceData=$DEVICEDATA_Domainname"
+Domainname=$(RunSQL "$Q")
+
+# PPPoe config
+Q="SELECT IK_DeviceData
+FROM Device_DeviceData
+WHERE FK_DeviceData=$DEVICEDATA_Network_PPPoE"
+R=$(RunSQL "$Q")
+ExtractPPPoEData "$R"
+
+# IPv4 interfaces config
 Q="SELECT IK_DeviceData
 FROM Device_DeviceData
 WHERE FK_DeviceData=$DEVICEDATA_Network_Interfaces"
 R=$(RunSQL "$Q")
-
 ExtractData "$R"
+
+# IPv6 interfaces config
+Q="SELECT IK_DeviceData
+FROM Device_DeviceData
+WHERE FK_DeviceData=$DEVICEDATA_Network_Interfaces_IPv6"
+R=$(RunSQL "$Q")
+ExtractIPv6Data "$R"
+
+# IPv6 tunnel data
+Q="SELECT IK_DeviceData
+FROM Device_DeviceData
+WHERE FK_DeviceData=$DEVICEDATA_Network_Interfaces_IPv6_tunnel"
+R=$(RunSQL "$Q")
+ExtractIPv6TunnelData "$R"
+
+# VPN data
+Q="SELECT IK_DeviceData
+FROM Device_DeviceData
+WHERE FK_DeviceData=$DEVICEDATA_Network_VPN"
+R=$(RunSQL "$Q")
+ExtractVPNData "$R"
 
 Q="SELECT IK_DeviceData
 FROM Device_DeviceData
@@ -151,7 +337,13 @@ fi
 if PackageStatus pluto-dcerouter | grep -q '^Status: install '; then
 	# Core always has an internal interface, even if it's an alias
 	if [[ -z "$IntIf" ]]; then
-		IntIf="$ExtIf:0"
+		if [[ "$NCards" -eq 1 ]]; then
+			IntIf="$ExtIf:0"
+		elif [[ "$ExtIf" == eth0 ]]; then
+			IntIf="eth1"
+		else
+			IntIf="eth0"
+		fi
 		Q="SELECT IPaddress FROM Device WHERE FK_DeviceTemplate = 7"
                 IntIP=$(RunSQL "$Q")
 		if [[ "$IntIP" == "" ]] ;then

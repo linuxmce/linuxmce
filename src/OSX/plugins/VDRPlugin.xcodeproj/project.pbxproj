@@ -1,0 +1,269 @@
+// !$*UTF8*$!
+{
+	archiveVersion = 1;
+	classes = {
+	};
+	objectVersion = 46;
+	objects = {
+
+/* Begin PBXBuildFile section */
+		95BBDAF115BF3A4B00F527A1 /* Main.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 95BBDAF015BF3A4B00F527A1 /* Main.cpp */; };
+		95BBDAF315BF3A5300F527A1 /* VDRPlugin.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 95BBDAF215BF3A5300F527A1 /* VDRPlugin.cpp */; };
+		95BBDAFB15BF3AD000F527A1 /* VDRMediaStream.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 95BBDAF815BF3AD000F527A1 /* VDRMediaStream.cpp */; };
+		95BBDAFF15BF3B0600F527A1 /* VDRPluginBase.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 95BBDAFE15BF3B0600F527A1 /* VDRPluginBase.cpp */; };
+		95BBDB0315BF3B3300F527A1 /* mysql.h in Headers */ = {isa = PBXBuildFile; fileRef = 95BBDB0215BF3B3300F527A1 /* mysql.h */; };
+		95BBDB1315BF3CC600F527A1 /* libDCECommon.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 95BBDB1215BF3CC600F527A1 /* libDCECommon.dylib */; };
+		95BBDB1515BF3CED00F527A1 /* libmysqlclient.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 95BBDB1415BF3CED00F527A1 /* libmysqlclient.dylib */; };
+		95BBDB1715BF3D0A00F527A1 /* Datagrid_Plugin.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 95BBDB1615BF3D0A00F527A1 /* Datagrid_Plugin.dylib */; };
+		95BBDB1915BF3D1200F527A1 /* Media_Plugin.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 95BBDB1815BF3D1200F527A1 /* Media_Plugin.dylib */; };
+/* End PBXBuildFile section */
+
+/* Begin PBXFileReference section */
+		95BBDAF015BF3A4B00F527A1 /* Main.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = Main.cpp; path = ../../VDRPlugin/Main.cpp; sourceTree = "<group>"; };
+		95BBDAF215BF3A5300F527A1 /* VDRPlugin.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = VDRPlugin.cpp; path = ../../VDRPlugin/VDRPlugin.cpp; sourceTree = "<group>"; };
+		95BBDAF815BF3AD000F527A1 /* VDRMediaStream.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = VDRMediaStream.cpp; path = ../../VDRPlugin/VDRMediaStream.cpp; sourceTree = "<group>"; };
+		95BBDAFE15BF3B0600F527A1 /* VDRPluginBase.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = VDRPluginBase.cpp; path = ../../Gen_Devices/VDRPluginBase.cpp; sourceTree = "<group>"; };
+		95BBDB0215BF3B3300F527A1 /* mysql.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = mysql.h; path = ../mysql/include/mysql.h; sourceTree = "<group>"; };
+		95BBDB1215BF3CC600F527A1 /* libDCECommon.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libDCECommon.dylib; path = ../lib/libDCECommon.dylib; sourceTree = "<group>"; };
+		95BBDB1415BF3CED00F527A1 /* libmysqlclient.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libmysqlclient.dylib; path = ../mysql/lib/libmysqlclient.dylib; sourceTree = "<group>"; };
+		95BBDB1615BF3D0A00F527A1 /* Datagrid_Plugin.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = Datagrid_Plugin.dylib; path = ../bin/Datagrid_Plugin.dylib; sourceTree = "<group>"; };
+		95BBDB1815BF3D1200F527A1 /* Media_Plugin.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = Media_Plugin.dylib; path = ../bin/Media_Plugin.dylib; sourceTree = "<group>"; };
+		95F78ABD15BF339800FB8F5B /* VDRPlugin.dylib */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.dylib"; includeInIndex = 0; path = VDRPlugin.dylib; sourceTree = BUILT_PRODUCTS_DIR; };
+/* End PBXFileReference section */
+
+/* Begin PBXFrameworksBuildPhase section */
+		95F78ABA15BF339800FB8F5B /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				95BBDB1315BF3CC600F527A1 /* libDCECommon.dylib in Frameworks */,
+				95BBDB1515BF3CED00F527A1 /* libmysqlclient.dylib in Frameworks */,
+				95BBDB1715BF3D0A00F527A1 /* Datagrid_Plugin.dylib in Frameworks */,
+				95BBDB1915BF3D1200F527A1 /* Media_Plugin.dylib in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXFrameworksBuildPhase section */
+
+/* Begin PBXGroup section */
+		95BBDAF415BF3A6000F527A1 /* Libraries */ = {
+			isa = PBXGroup;
+			children = (
+				95BBDB1215BF3CC600F527A1 /* libDCECommon.dylib */,
+				95BBDB1415BF3CED00F527A1 /* libmysqlclient.dylib */,
+				95BBDB1615BF3D0A00F527A1 /* Datagrid_Plugin.dylib */,
+				95BBDB1815BF3D1200F527A1 /* Media_Plugin.dylib */,
+			);
+			name = Libraries;
+			sourceTree = "<group>";
+		};
+		95BBDAF515BF3A6500F527A1 /* Includes */ = {
+			isa = PBXGroup;
+			children = (
+				95BBDB0215BF3B3300F527A1 /* mysql.h */,
+				95BBDAFE15BF3B0600F527A1 /* VDRPluginBase.cpp */,
+				95BBDAF815BF3AD000F527A1 /* VDRMediaStream.cpp */,
+			);
+			name = Includes;
+			sourceTree = "<group>";
+		};
+		95F78AB215BF339800FB8F5B = {
+			isa = PBXGroup;
+			children = (
+				95BBDAF015BF3A4B00F527A1 /* Main.cpp */,
+				95BBDAF215BF3A5300F527A1 /* VDRPlugin.cpp */,
+				95BBDAF515BF3A6500F527A1 /* Includes */,
+				95BBDAF415BF3A6000F527A1 /* Libraries */,
+				95F78ABE15BF339800FB8F5B /* Products */,
+			);
+			sourceTree = "<group>";
+		};
+		95F78ABE15BF339800FB8F5B /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				95F78ABD15BF339800FB8F5B /* VDRPlugin.dylib */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+/* End PBXGroup section */
+
+/* Begin PBXHeadersBuildPhase section */
+		95F78ABB15BF339800FB8F5B /* Headers */ = {
+			isa = PBXHeadersBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				95BBDB0315BF3B3300F527A1 /* mysql.h in Headers */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXHeadersBuildPhase section */
+
+/* Begin PBXNativeTarget section */
+		95F78ABC15BF339800FB8F5B /* VDRPlugin */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 95F78ACA15BF339800FB8F5B /* Build configuration list for PBXNativeTarget "VDRPlugin" */;
+			buildPhases = (
+				95F78AB915BF339800FB8F5B /* Sources */,
+				95F78ABA15BF339800FB8F5B /* Frameworks */,
+				95F78ABB15BF339800FB8F5B /* Headers */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = VDRPlugin;
+			productName = VDRPlugin;
+			productReference = 95F78ABD15BF339800FB8F5B /* VDRPlugin.dylib */;
+			productType = "com.apple.product-type.library.dynamic";
+		};
+/* End PBXNativeTarget section */
+
+/* Begin PBXProject section */
+		95F78AB415BF339800FB8F5B /* Project object */ = {
+			isa = PBXProject;
+			attributes = {
+				LastUpgradeCheck = 0420;
+			};
+			buildConfigurationList = 95F78AB715BF339800FB8F5B /* Build configuration list for PBXProject "VDRPlugin" */;
+			compatibilityVersion = "Xcode 3.2";
+			developmentRegion = English;
+			hasScannedForEncodings = 0;
+			knownRegions = (
+				en,
+			);
+			mainGroup = 95F78AB215BF339800FB8F5B;
+			productRefGroup = 95F78ABE15BF339800FB8F5B /* Products */;
+			projectDirPath = "";
+			projectRoot = "";
+			targets = (
+				95F78ABC15BF339800FB8F5B /* VDRPlugin */,
+			);
+		};
+/* End PBXProject section */
+
+/* Begin PBXSourcesBuildPhase section */
+		95F78AB915BF339800FB8F5B /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				95BBDAF115BF3A4B00F527A1 /* Main.cpp in Sources */,
+				95BBDAF315BF3A5300F527A1 /* VDRPlugin.cpp in Sources */,
+				95BBDAFB15BF3AD000F527A1 /* VDRMediaStream.cpp in Sources */,
+				95BBDAFF15BF3B0600F527A1 /* VDRPluginBase.cpp in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXSourcesBuildPhase section */
+
+/* Begin XCBuildConfiguration section */
+		95F78AC815BF339800FB8F5B /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				ARCHS = "$(ARCHS_STANDARD_64_BIT)";
+				CLANG_ENABLE_OBJC_ARC = YES;
+				COPY_PHASE_STRIP = NO;
+				GCC_C_LANGUAGE_STANDARD = gnu99;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_ENABLE_OBJC_EXCEPTIONS = YES;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"DEBUG=1",
+					"$(inherited)",
+				);
+				GCC_SYMBOLS_PRIVATE_EXTERN = NO;
+				GCC_VERSION = com.apple.compilers.llvm.clang.1_0;
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_MISSING_PROTOTYPES = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				MACOSX_DEPLOYMENT_TARGET = 10.7;
+				ONLY_ACTIVE_ARCH = YES;
+				SDKROOT = macosx;
+			};
+			name = Debug;
+		};
+		95F78AC915BF339800FB8F5B /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				ARCHS = "$(ARCHS_STANDARD_64_BIT)";
+				CLANG_ENABLE_OBJC_ARC = YES;
+				COPY_PHASE_STRIP = YES;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				GCC_C_LANGUAGE_STANDARD = gnu99;
+				GCC_ENABLE_OBJC_EXCEPTIONS = YES;
+				GCC_VERSION = com.apple.compilers.llvm.clang.1_0;
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_MISSING_PROTOTYPES = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				MACOSX_DEPLOYMENT_TARGET = 10.7;
+				SDKROOT = macosx;
+			};
+			name = Release;
+		};
+		95F78ACB15BF339800FB8F5B /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CONFIGURATION_BUILD_DIR = ../bin;
+				HEADER_SEARCH_PATHS = (
+					../../DCE,
+					../..,
+				);
+				INSTALL_PATH = /usr/pluto/bin;
+				LIBRARY_SEARCH_PATHS = (
+					"$(inherited)",
+					"\"$(SRCROOT)/../lib\"",
+					"\"$(SRCROOT)/../mysql/lib\"",
+					"\"$(SRCROOT)/../bin\"",
+				);
+				PRODUCT_NAME = "$(TARGET_NAME)";
+			};
+			name = Debug;
+		};
+		95F78ACC15BF339800FB8F5B /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CONFIGURATION_BUILD_DIR = ../bin;
+				HEADER_SEARCH_PATHS = (
+					../../DCE,
+					../..,
+				);
+				INSTALL_PATH = /usr/pluto/bin;
+				LIBRARY_SEARCH_PATHS = (
+					"$(inherited)",
+					"\"$(SRCROOT)/../lib\"",
+					"\"$(SRCROOT)/../mysql/lib\"",
+					"\"$(SRCROOT)/../bin\"",
+				);
+				PRODUCT_NAME = "$(TARGET_NAME)";
+			};
+			name = Release;
+		};
+/* End XCBuildConfiguration section */
+
+/* Begin XCConfigurationList section */
+		95F78AB715BF339800FB8F5B /* Build configuration list for PBXProject "VDRPlugin" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				95F78AC815BF339800FB8F5B /* Debug */,
+				95F78AC915BF339800FB8F5B /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		95F78ACA15BF339800FB8F5B /* Build configuration list for PBXNativeTarget "VDRPlugin" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				95F78ACB15BF339800FB8F5B /* Debug */,
+				95F78ACC15BF339800FB8F5B /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+/* End XCConfigurationList section */
+	};
+	rootObject = 95F78AB415BF339800FB8F5B /* Project object */;
+}

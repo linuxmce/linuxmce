@@ -126,7 +126,6 @@ void psc_restrict_set(long int val);
 bool psc_batch_isNull();
 bool psc_user_isNull();
 bool psc_frozen_isNull();
-bool psc_mod_isNull();
 bool psc_restrict_isNull();
 
 			
@@ -134,7 +133,6 @@ bool psc_restrict_isNull();
 void psc_batch_setNull(bool val);
 void psc_user_setNull(bool val);
 void psc_frozen_setNull(bool val);
-void psc_mod_setNull(bool val);
 void psc_restrict_setNull(bool val);
 	
 	
@@ -152,8 +150,6 @@ void psc_restrict_setNull(bool val);
 
 		// Return the rows in other tables with foreign keys pointing here
 		void Household_Installation_FK_Household_getrows(vector <class Row_Household_Installation*> *rows);
-void Household_Installation_pschist_FK_Household_getrows(vector <class Row_Household_Installation_pschist*> *rows);
-void Household_Installation_pschmask_FK_Household_getrows(vector <class Row_Household_Installation_pschmask*> *rows);
 
 
 		// Setup binary serialization

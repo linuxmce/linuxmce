@@ -36,26 +36,12 @@ using namespace std;
 #include "Table_UserMode.h"
 
 #include "Table_DeviceTemplate.h"
-#include "Table_DeviceTemplate_pschist.h"
-#include "Table_DeviceTemplate_pschmask.h"
 #include "Table_Device_Users.h"
-#include "Table_Device_Users_pschist.h"
-#include "Table_Device_Users_pschmask.h"
 #include "Table_Document_Comment.h"
-#include "Table_Document_Comment_pschist.h"
-#include "Table_Document_Comment_pschmask.h"
 #include "Table_Installation_Users.h"
-#include "Table_Installation_Users_pschist.h"
-#include "Table_Installation_Users_pschmask.h"
 #include "Table_Orbiter_Users_PasswordReq.h"
-#include "Table_Orbiter_Users_PasswordReq_pschist.h"
-#include "Table_Orbiter_Users_PasswordReq_pschmask.h"
 #include "Table_Package_Users.h"
-#include "Table_Package_Users_pschist.h"
-#include "Table_Package_Users_pschmask.h"
 #include "Table_Room_Users.h"
-#include "Table_Room_Users_pschist.h"
-#include "Table_Room_Users_pschmask.h"
 
 
 void Database_pluto_main::CreateTable_Users()
@@ -103,6 +89,7 @@ void Row_Users::Delete()
 	Row_Users *pRow = this; // Needed so we will have only 1 version of get_primary_fields_assign_from_row
 	
 	if (!is_deleted)
+	{
 		if (is_added)	
 		{	
 			vector<TableRow*>::iterator i;	
@@ -124,6 +111,7 @@ void Row_Users::Delete()
 			table->deleted_cachedRows[key] = this;
 			is_deleted = true;	
 		}	
+	}
 }
 
 void Row_Users::Reload()
@@ -157,12 +145,9 @@ void Row_Users::SetDefaultValues()
 {
 	m_PK_Users = 0;
 is_null[0] = false;
-m_UserName = "";
-is_null[1] = false;
-m_Password = "";
-is_null[2] = false;
-m_PINCode = "0";
-is_null[3] = false;
+is_null[1] = true;
+is_null[2] = true;
+is_null[3] = true;
 m_HasMailbox = 0;
 is_null[4] = false;
 m_AccessGeneralMailbox = 0;
@@ -201,7 +186,8 @@ is_null[24] = true;
 m_psc_user = 0;
 m_psc_frozen = 0;
 is_null[25] = false;
-is_null[26] = true;
+m_psc_mod = "0000-00-00 00:00:00";
+is_null[26] = false;
 is_null[27] = true;
 m_psc_restrict = 0;
 
@@ -383,6 +369,15 @@ void Row_Users::psc_restrict_set(long int val){PLUTO_SAFETY_LOCK_ERRORSONLY(sl,t
 m_psc_restrict = val; is_modified=true; is_null[27]=false;}
 
 		
+bool Row_Users::UserName_isNull() {PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
+
+return is_null[1];}
+bool Row_Users::Password_isNull() {PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
+
+return is_null[2];}
+bool Row_Users::PINCode_isNull() {PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
+
+return is_null[3];}
 bool Row_Users::Extension_isNull() {PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
 
 return is_null[6];}
@@ -431,14 +426,23 @@ return is_null[24];}
 bool Row_Users::psc_frozen_isNull() {PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
 
 return is_null[25];}
-bool Row_Users::psc_mod_isNull() {PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
-
-return is_null[26];}
 bool Row_Users::psc_restrict_isNull() {PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
 
 return is_null[27];}
 
 			
+void Row_Users::UserName_setNull(bool val){PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
+is_null[1]=val;
+is_modified=true;
+}
+void Row_Users::Password_setNull(bool val){PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
+is_null[2]=val;
+is_modified=true;
+}
+void Row_Users::PINCode_setNull(bool val){PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
+is_null[3]=val;
+is_modified=true;
+}
 void Row_Users::Extension_setNull(bool val){PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
 is_null[6]=val;
 is_modified=true;
@@ -503,10 +507,6 @@ void Row_Users::psc_frozen_setNull(bool val){PLUTO_SAFETY_LOCK_ERRORSONLY(sl,tab
 is_null[25]=val;
 is_modified=true;
 }
-void Row_Users::psc_mod_setNull(bool val){PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
-is_null[26]=val;
-is_modified=true;
-}
 void Row_Users::psc_restrict_setNull(bool val){PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
 is_null[27]=val;
 is_modified=true;
@@ -533,8 +533,8 @@ PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
 if (is_null[1])
 return "NULL";
 
-char *buf = new char[51];
-db_wrapper_real_escape_string(table->database->m_pDB, buf, m_UserName.c_str(), (unsigned long) min((size_t)25,m_UserName.size()));
+char *buf = new char[151];
+db_wrapper_real_escape_string(table->database->m_pDB, buf, m_UserName.c_str(), (unsigned long) min((size_t)75,m_UserName.size()));
 string s=string()+"\""+buf+"\"";
 delete[] buf;
 return s;
@@ -547,8 +547,8 @@ PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
 if (is_null[2])
 return "NULL";
 
-char *buf = new char[65];
-db_wrapper_real_escape_string(table->database->m_pDB, buf, m_Password.c_str(), (unsigned long) min((size_t)32,m_Password.size()));
+char *buf = new char[193];
+db_wrapper_real_escape_string(table->database->m_pDB, buf, m_Password.c_str(), (unsigned long) min((size_t)96,m_Password.size()));
 string s=string()+"\""+buf+"\"";
 delete[] buf;
 return s;
@@ -561,8 +561,8 @@ PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
 if (is_null[3])
 return "NULL";
 
-char *buf = new char[65];
-db_wrapper_real_escape_string(table->database->m_pDB, buf, m_PINCode.c_str(), (unsigned long) min((size_t)32,m_PINCode.size()));
+char *buf = new char[193];
+db_wrapper_real_escape_string(table->database->m_pDB, buf, m_PINCode.c_str(), (unsigned long) min((size_t)96,m_PINCode.size()));
 string s=string()+"\""+buf+"\"";
 delete[] buf;
 return s;
@@ -614,8 +614,8 @@ PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
 if (is_null[7])
 return "NULL";
 
-char *buf = new char[41];
-db_wrapper_real_escape_string(table->database->m_pDB, buf, m_FirstName.c_str(), (unsigned long) min((size_t)20,m_FirstName.size()));
+char *buf = new char[121];
+db_wrapper_real_escape_string(table->database->m_pDB, buf, m_FirstName.c_str(), (unsigned long) min((size_t)60,m_FirstName.size()));
 string s=string()+"\""+buf+"\"";
 delete[] buf;
 return s;
@@ -628,8 +628,8 @@ PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
 if (is_null[8])
 return "NULL";
 
-char *buf = new char[61];
-db_wrapper_real_escape_string(table->database->m_pDB, buf, m_LastName.c_str(), (unsigned long) min((size_t)30,m_LastName.size()));
+char *buf = new char[181];
+db_wrapper_real_escape_string(table->database->m_pDB, buf, m_LastName.c_str(), (unsigned long) min((size_t)90,m_LastName.size()));
 string s=string()+"\""+buf+"\"";
 delete[] buf;
 return s;
@@ -642,8 +642,8 @@ PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
 if (is_null[9])
 return "NULL";
 
-char *buf = new char[31];
-db_wrapper_real_escape_string(table->database->m_pDB, buf, m_Nickname.c_str(), (unsigned long) min((size_t)15,m_Nickname.size()));
+char *buf = new char[91];
+db_wrapper_real_escape_string(table->database->m_pDB, buf, m_Nickname.c_str(), (unsigned long) min((size_t)45,m_Nickname.size()));
 string s=string()+"\""+buf+"\"";
 delete[] buf;
 return s;
@@ -669,8 +669,8 @@ PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
 if (is_null[11])
 return "NULL";
 
-char *buf = new char[101];
-db_wrapper_real_escape_string(table->database->m_pDB, buf, m_ForwardEmail.c_str(), (unsigned long) min((size_t)50,m_ForwardEmail.size()));
+char *buf = new char[301];
+db_wrapper_real_escape_string(table->database->m_pDB, buf, m_ForwardEmail.c_str(), (unsigned long) min((size_t)150,m_ForwardEmail.size()));
 string s=string()+"\""+buf+"\"";
 delete[] buf;
 return s;
@@ -735,8 +735,8 @@ PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
 if (is_null[16])
 return "NULL";
 
-char *buf = new char[201];
-db_wrapper_real_escape_string(table->database->m_pDB, buf, m_Password_Unix.c_str(), (unsigned long) min((size_t)100,m_Password_Unix.size()));
+char *buf = new char[601];
+db_wrapper_real_escape_string(table->database->m_pDB, buf, m_Password_Unix.c_str(), (unsigned long) min((size_t)300,m_Password_Unix.size()));
 string s=string()+"\""+buf+"\"";
 delete[] buf;
 return s;
@@ -749,8 +749,8 @@ PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
 if (is_null[17])
 return "NULL";
 
-char *buf = new char[201];
-db_wrapper_real_escape_string(table->database->m_pDB, buf, m_Password_Samba.c_str(), (unsigned long) min((size_t)100,m_Password_Samba.size()));
+char *buf = new char[601];
+db_wrapper_real_escape_string(table->database->m_pDB, buf, m_Password_Samba.c_str(), (unsigned long) min((size_t)300,m_Password_Samba.size()));
 string s=string()+"\""+buf+"\"";
 delete[] buf;
 return s;
@@ -1898,39 +1898,11 @@ PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
 class Table_DeviceTemplate *pTable = table->database->DeviceTemplate_get();
 pTable->GetRows("`FK_Users_Maintainer`=" + StringUtils::itos(m_PK_Users),rows);
 }
-void Row_Users::DeviceTemplate_pschist_FK_Users_Maintainer_getrows(vector <class Row_DeviceTemplate_pschist*> *rows)
-{
-PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
-
-class Table_DeviceTemplate_pschist *pTable = table->database->DeviceTemplate_pschist_get();
-pTable->GetRows("`FK_Users_Maintainer`=" + StringUtils::itos(m_PK_Users),rows);
-}
-void Row_Users::DeviceTemplate_pschmask_FK_Users_Maintainer_getrows(vector <class Row_DeviceTemplate_pschmask*> *rows)
-{
-PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
-
-class Table_DeviceTemplate_pschmask *pTable = table->database->DeviceTemplate_pschmask_get();
-pTable->GetRows("`FK_Users_Maintainer`=" + StringUtils::itos(m_PK_Users),rows);
-}
 void Row_Users::Device_Users_FK_Users_getrows(vector <class Row_Device_Users*> *rows)
 {
 PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
 
 class Table_Device_Users *pTable = table->database->Device_Users_get();
-pTable->GetRows("`FK_Users`=" + StringUtils::itos(m_PK_Users),rows);
-}
-void Row_Users::Device_Users_pschist_FK_Users_getrows(vector <class Row_Device_Users_pschist*> *rows)
-{
-PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
-
-class Table_Device_Users_pschist *pTable = table->database->Device_Users_pschist_get();
-pTable->GetRows("`FK_Users`=" + StringUtils::itos(m_PK_Users),rows);
-}
-void Row_Users::Device_Users_pschmask_FK_Users_getrows(vector <class Row_Device_Users_pschmask*> *rows)
-{
-PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
-
-class Table_Device_Users_pschmask *pTable = table->database->Device_Users_pschmask_get();
 pTable->GetRows("`FK_Users`=" + StringUtils::itos(m_PK_Users),rows);
 }
 void Row_Users::Document_Comment_FK_Users_getrows(vector <class Row_Document_Comment*> *rows)
@@ -1940,39 +1912,11 @@ PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
 class Table_Document_Comment *pTable = table->database->Document_Comment_get();
 pTable->GetRows("`FK_Users`=" + StringUtils::itos(m_PK_Users),rows);
 }
-void Row_Users::Document_Comment_pschist_FK_Users_getrows(vector <class Row_Document_Comment_pschist*> *rows)
-{
-PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
-
-class Table_Document_Comment_pschist *pTable = table->database->Document_Comment_pschist_get();
-pTable->GetRows("`FK_Users`=" + StringUtils::itos(m_PK_Users),rows);
-}
-void Row_Users::Document_Comment_pschmask_FK_Users_getrows(vector <class Row_Document_Comment_pschmask*> *rows)
-{
-PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
-
-class Table_Document_Comment_pschmask *pTable = table->database->Document_Comment_pschmask_get();
-pTable->GetRows("`FK_Users`=" + StringUtils::itos(m_PK_Users),rows);
-}
 void Row_Users::Installation_Users_FK_Users_getrows(vector <class Row_Installation_Users*> *rows)
 {
 PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
 
 class Table_Installation_Users *pTable = table->database->Installation_Users_get();
-pTable->GetRows("`FK_Users`=" + StringUtils::itos(m_PK_Users),rows);
-}
-void Row_Users::Installation_Users_pschist_FK_Users_getrows(vector <class Row_Installation_Users_pschist*> *rows)
-{
-PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
-
-class Table_Installation_Users_pschist *pTable = table->database->Installation_Users_pschist_get();
-pTable->GetRows("`FK_Users`=" + StringUtils::itos(m_PK_Users),rows);
-}
-void Row_Users::Installation_Users_pschmask_FK_Users_getrows(vector <class Row_Installation_Users_pschmask*> *rows)
-{
-PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
-
-class Table_Installation_Users_pschmask *pTable = table->database->Installation_Users_pschmask_get();
 pTable->GetRows("`FK_Users`=" + StringUtils::itos(m_PK_Users),rows);
 }
 void Row_Users::Orbiter_Users_PasswordReq_FK_Users_getrows(vector <class Row_Orbiter_Users_PasswordReq*> *rows)
@@ -1982,20 +1926,6 @@ PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
 class Table_Orbiter_Users_PasswordReq *pTable = table->database->Orbiter_Users_PasswordReq_get();
 pTable->GetRows("`FK_Users`=" + StringUtils::itos(m_PK_Users),rows);
 }
-void Row_Users::Orbiter_Users_PasswordReq_pschist_FK_Users_getrows(vector <class Row_Orbiter_Users_PasswordReq_pschist*> *rows)
-{
-PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
-
-class Table_Orbiter_Users_PasswordReq_pschist *pTable = table->database->Orbiter_Users_PasswordReq_pschist_get();
-pTable->GetRows("`FK_Users`=" + StringUtils::itos(m_PK_Users),rows);
-}
-void Row_Users::Orbiter_Users_PasswordReq_pschmask_FK_Users_getrows(vector <class Row_Orbiter_Users_PasswordReq_pschmask*> *rows)
-{
-PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
-
-class Table_Orbiter_Users_PasswordReq_pschmask *pTable = table->database->Orbiter_Users_PasswordReq_pschmask_get();
-pTable->GetRows("`FK_Users`=" + StringUtils::itos(m_PK_Users),rows);
-}
 void Row_Users::Package_Users_FK_Users_getrows(vector <class Row_Package_Users*> *rows)
 {
 PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
@@ -2003,39 +1933,11 @@ PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
 class Table_Package_Users *pTable = table->database->Package_Users_get();
 pTable->GetRows("`FK_Users`=" + StringUtils::itos(m_PK_Users),rows);
 }
-void Row_Users::Package_Users_pschist_FK_Users_getrows(vector <class Row_Package_Users_pschist*> *rows)
-{
-PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
-
-class Table_Package_Users_pschist *pTable = table->database->Package_Users_pschist_get();
-pTable->GetRows("`FK_Users`=" + StringUtils::itos(m_PK_Users),rows);
-}
-void Row_Users::Package_Users_pschmask_FK_Users_getrows(vector <class Row_Package_Users_pschmask*> *rows)
-{
-PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
-
-class Table_Package_Users_pschmask *pTable = table->database->Package_Users_pschmask_get();
-pTable->GetRows("`FK_Users`=" + StringUtils::itos(m_PK_Users),rows);
-}
 void Row_Users::Room_Users_FK_Users_getrows(vector <class Row_Room_Users*> *rows)
 {
 PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
 
 class Table_Room_Users *pTable = table->database->Room_Users_get();
-pTable->GetRows("`FK_Users`=" + StringUtils::itos(m_PK_Users),rows);
-}
-void Row_Users::Room_Users_pschist_FK_Users_getrows(vector <class Row_Room_Users_pschist*> *rows)
-{
-PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
-
-class Table_Room_Users_pschist *pTable = table->database->Room_Users_pschist_get();
-pTable->GetRows("`FK_Users`=" + StringUtils::itos(m_PK_Users),rows);
-}
-void Row_Users::Room_Users_pschmask_FK_Users_getrows(vector <class Row_Room_Users_pschmask*> *rows)
-{
-PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
-
-class Table_Room_Users_pschmask *pTable = table->database->Room_Users_pschmask_get();
 pTable->GetRows("`FK_Users`=" + StringUtils::itos(m_PK_Users),rows);
 }
 

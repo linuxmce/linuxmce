@@ -19,9 +19,15 @@ for ((i = 1; i <= "$#"; i++)); do
 	esac
 done
 
+## If plymouth isn't stopped, DRM can't be initialized and KMS fails to be set up, preventing X from starting
+stop plymouth
+
+#Ensure KDM doesn't start on boot, ticket http://svn.linuxmce.org/trac.cgi/ticket/1342
+echo '/bin/false'>/etc/X11/default-display-manager
+
 timestampStart=$(date +%s)
 #xinit /usr/pluto/bin/XWM_Wrapper.sh "$XClient" "${XClientParm[@]}" -- "$XDisplay" -ignoreABI -ac -allowMouseOpenFail "$VT" "${XServerParm[@]}"
-xinit /usr/pluto/bin/XWM_Wrapper.sh "${Parms_Client[@]}" -- "${Parms_Server[@]}"
+xinit /usr/pluto/bin/XWM_Wrapper.sh "${Parms_Client[@]}" -- "${Parms_Server[@]}" -dpi 96
 echo "Exit code: $?"
 timestampEnd=$(date +%s)
 

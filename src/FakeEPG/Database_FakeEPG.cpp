@@ -45,7 +45,9 @@ DeleteTable_Listing();
 
 bool Database_FakeEPG::Connect(string host, string user, string pass, string DBName, int port)
 {
+my_bool reconnect = true;
 db_handle = mysql_init(NULL);
+mysql_options(db_handle, MYSQL_OPT_RECONNECT, &reconnect);
 if (mysql_real_connect(db_handle, host.c_str(), user.c_str(), pass.c_str(), DBName.c_str(), port, NULL, 0) == NULL)
 {return false;}
 else

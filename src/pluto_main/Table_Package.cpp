@@ -37,53 +37,20 @@ using namespace std;
 #include "Table_Manufacturer.h"
 
 #include "Table_DeviceTemplate.h"
-#include "Table_DeviceTemplate_pschist.h"
-#include "Table_DeviceTemplate_pschmask.h"
 #include "Table_FAQ.h"
-#include "Table_FAQ_pschist.h"
-#include "Table_FAQ_pschmask.h"
 #include "Table_News.h"
-#include "Table_News_pschist.h"
-#include "Table_News_pschmask.h"
 #include "Table_Package.h"
 #include "Table_Package_Compat.h"
-#include "Table_Package_Compat_pschist.h"
-#include "Table_Package_Compat_pschmask.h"
 #include "Table_Package_Device.h"
-#include "Table_Package_Device_pschist.h"
-#include "Table_Package_Device_pschmask.h"
 #include "Table_Package_Directory.h"
-#include "Table_Package_Directory_pschist.h"
-#include "Table_Package_Directory_pschmask.h"
 #include "Table_Package_Package.h"
 #include "Table_Package_Package.h"
-#include "Table_Package_Package_pschist.h"
-#include "Table_Package_Package_pschist.h"
-#include "Table_Package_Package_pschmask.h"
-#include "Table_Package_Package_pschmask.h"
 #include "Table_Package_Source.h"
-#include "Table_Package_Source_pschist.h"
-#include "Table_Package_Source_pschmask.h"
 #include "Table_Package_Users.h"
-#include "Table_Package_Users_pschist.h"
-#include "Table_Package_Users_pschmask.h"
-#include "Table_Package_Version.h"
-#include "Table_Package_Version_pschist.h"
-#include "Table_Package_Version_pschmask.h"
-#include "Table_Package_pschist.h"
-#include "Table_Package_pschmask.h"
 #include "Table_PageSetup.h"
-#include "Table_PageSetup_pschist.h"
-#include "Table_PageSetup_pschmask.h"
 #include "Table_PaidLicense.h"
-#include "Table_PaidLicense_pschist.h"
-#include "Table_PaidLicense_pschmask.h"
 #include "Table_QuickStartTemplate.h"
-#include "Table_QuickStartTemplate_pschist.h"
-#include "Table_QuickStartTemplate_pschmask.h"
 #include "Table_Skin.h"
-#include "Table_Skin_pschist.h"
-#include "Table_Skin_pschmask.h"
 
 
 void Database_pluto_main::CreateTable_Package()
@@ -131,6 +98,7 @@ void Row_Package::Delete()
 	Row_Package *pRow = this; // Needed so we will have only 1 version of get_primary_fields_assign_from_row
 	
 	if (!is_deleted)
+	{
 		if (is_added)	
 		{	
 			vector<TableRow*>::iterator i;	
@@ -152,6 +120,7 @@ void Row_Package::Delete()
 			table->deleted_cachedRows[key] = this;
 			is_deleted = true;	
 		}	
+	}
 }
 
 void Row_Package::Reload()
@@ -185,8 +154,7 @@ void Row_Package::SetDefaultValues()
 {
 	m_PK_Package = 0;
 is_null[0] = false;
-m_Description = "";
-is_null[1] = false;
+is_null[1] = true;
 is_null[2] = true;
 m_FK_PackageType = 0;
 is_null[3] = true;
@@ -212,7 +180,8 @@ is_null[15] = true;
 m_psc_user = 0;
 m_psc_frozen = 0;
 is_null[16] = false;
-is_null[17] = true;
+m_psc_mod = "0000-00-00 00:00:00";
+is_null[17] = false;
 is_null[18] = true;
 m_psc_restrict = 0;
 
@@ -340,6 +309,9 @@ void Row_Package::psc_restrict_set(long int val){PLUTO_SAFETY_LOCK_ERRORSONLY(sl
 m_psc_restrict = val; is_modified=true; is_null[18]=false;}
 
 		
+bool Row_Package::Description_isNull() {PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
+
+return is_null[1];}
 bool Row_Package::FK_PackageType_isNull() {PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
 
 return is_null[2];}
@@ -382,14 +354,15 @@ return is_null[15];}
 bool Row_Package::psc_frozen_isNull() {PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
 
 return is_null[16];}
-bool Row_Package::psc_mod_isNull() {PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
-
-return is_null[17];}
 bool Row_Package::psc_restrict_isNull() {PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
 
 return is_null[18];}
 
 			
+void Row_Package::Description_setNull(bool val){PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
+is_null[1]=val;
+is_modified=true;
+}
 void Row_Package::FK_PackageType_setNull(bool val){PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
 is_null[2]=val;
 is_modified=true;
@@ -446,10 +419,6 @@ void Row_Package::psc_frozen_setNull(bool val){PLUTO_SAFETY_LOCK_ERRORSONLY(sl,t
 is_null[16]=val;
 is_modified=true;
 }
-void Row_Package::psc_mod_setNull(bool val){PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
-is_null[17]=val;
-is_modified=true;
-}
 void Row_Package::psc_restrict_setNull(bool val){PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
 is_null[18]=val;
 is_modified=true;
@@ -476,8 +445,8 @@ PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
 if (is_null[1])
 return "NULL";
 
-char *buf = new char[511];
-db_wrapper_real_escape_string(table->database->m_pDB, buf, m_Description.c_str(), (unsigned long) min((size_t)255,m_Description.size()));
+char *buf = new char[1531];
+db_wrapper_real_escape_string(table->database->m_pDB, buf, m_Description.c_str(), (unsigned long) min((size_t)765,m_Description.size()));
 string s=string()+"\""+buf+"\"";
 delete[] buf;
 return s;
@@ -542,8 +511,8 @@ PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
 if (is_null[6])
 return "NULL";
 
-char *buf = new char[201];
-db_wrapper_real_escape_string(table->database->m_pDB, buf, m_HomePage.c_str(), (unsigned long) min((size_t)100,m_HomePage.size()));
+char *buf = new char[601];
+db_wrapper_real_escape_string(table->database->m_pDB, buf, m_HomePage.c_str(), (unsigned long) min((size_t)300,m_HomePage.size()));
 string s=string()+"\""+buf+"\"";
 delete[] buf;
 return s;
@@ -582,8 +551,8 @@ PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
 if (is_null[9])
 return "NULL";
 
-char *buf = new char[511];
-db_wrapper_real_escape_string(table->database->m_pDB, buf, m_HelpURL.c_str(), (unsigned long) min((size_t)255,m_HelpURL.size()));
+char *buf = new char[1531];
+db_wrapper_real_escape_string(table->database->m_pDB, buf, m_HelpURL.c_str(), (unsigned long) min((size_t)765,m_HelpURL.size()));
 string s=string()+"\""+buf+"\"";
 delete[] buf;
 return s;
@@ -596,8 +565,8 @@ PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
 if (is_null[10])
 return "NULL";
 
-char *buf = new char[511];
-db_wrapper_real_escape_string(table->database->m_pDB, buf, m_HelpURL_UsersManual.c_str(), (unsigned long) min((size_t)255,m_HelpURL_UsersManual.size()));
+char *buf = new char[1531];
+db_wrapper_real_escape_string(table->database->m_pDB, buf, m_HelpURL_UsersManual.c_str(), (unsigned long) min((size_t)765,m_HelpURL_UsersManual.size()));
 string s=string()+"\""+buf+"\"";
 delete[] buf;
 return s;
@@ -610,8 +579,8 @@ PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
 if (is_null[11])
 return "NULL";
 
-char *buf = new char[511];
-db_wrapper_real_escape_string(table->database->m_pDB, buf, m_HelpURL_ProgrammersGuide.c_str(), (unsigned long) min((size_t)255,m_HelpURL_ProgrammersGuide.size()));
+char *buf = new char[1531];
+db_wrapper_real_escape_string(table->database->m_pDB, buf, m_HelpURL_ProgrammersGuide.c_str(), (unsigned long) min((size_t)765,m_HelpURL_ProgrammersGuide.size()));
 string s=string()+"\""+buf+"\"";
 delete[] buf;
 return s;
@@ -624,8 +593,8 @@ PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
 if (is_null[12])
 return "NULL";
 
-char *buf = new char[131071];
-db_wrapper_real_escape_string(table->database->m_pDB, buf, m_Comments.c_str(), (unsigned long) min((size_t)65535,m_Comments.size()));
+char *buf = new char[393211];
+db_wrapper_real_escape_string(table->database->m_pDB, buf, m_Comments.c_str(), (unsigned long) min((size_t)196605,m_Comments.size()));
 string s=string()+"\""+buf+"\"";
 delete[] buf;
 return s;
@@ -1530,20 +1499,6 @@ PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
 class Table_DeviceTemplate *pTable = table->database->DeviceTemplate_get();
 pTable->GetRows("`FK_Package`=" + StringUtils::itos(m_PK_Package),rows);
 }
-void Row_Package::DeviceTemplate_pschist_FK_Package_getrows(vector <class Row_DeviceTemplate_pschist*> *rows)
-{
-PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
-
-class Table_DeviceTemplate_pschist *pTable = table->database->DeviceTemplate_pschist_get();
-pTable->GetRows("`FK_Package`=" + StringUtils::itos(m_PK_Package),rows);
-}
-void Row_Package::DeviceTemplate_pschmask_FK_Package_getrows(vector <class Row_DeviceTemplate_pschmask*> *rows)
-{
-PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
-
-class Table_DeviceTemplate_pschmask *pTable = table->database->DeviceTemplate_pschmask_get();
-pTable->GetRows("`FK_Package`=" + StringUtils::itos(m_PK_Package),rows);
-}
 void Row_Package::FAQ_FK_Package_getrows(vector <class Row_FAQ*> *rows)
 {
 PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
@@ -1551,39 +1506,11 @@ PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
 class Table_FAQ *pTable = table->database->FAQ_get();
 pTable->GetRows("`FK_Package`=" + StringUtils::itos(m_PK_Package),rows);
 }
-void Row_Package::FAQ_pschist_FK_Package_getrows(vector <class Row_FAQ_pschist*> *rows)
-{
-PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
-
-class Table_FAQ_pschist *pTable = table->database->FAQ_pschist_get();
-pTable->GetRows("`FK_Package`=" + StringUtils::itos(m_PK_Package),rows);
-}
-void Row_Package::FAQ_pschmask_FK_Package_getrows(vector <class Row_FAQ_pschmask*> *rows)
-{
-PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
-
-class Table_FAQ_pschmask *pTable = table->database->FAQ_pschmask_get();
-pTable->GetRows("`FK_Package`=" + StringUtils::itos(m_PK_Package),rows);
-}
 void Row_Package::News_FK_Package_getrows(vector <class Row_News*> *rows)
 {
 PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
 
 class Table_News *pTable = table->database->News_get();
-pTable->GetRows("`FK_Package`=" + StringUtils::itos(m_PK_Package),rows);
-}
-void Row_Package::News_pschist_FK_Package_getrows(vector <class Row_News_pschist*> *rows)
-{
-PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
-
-class Table_News_pschist *pTable = table->database->News_pschist_get();
-pTable->GetRows("`FK_Package`=" + StringUtils::itos(m_PK_Package),rows);
-}
-void Row_Package::News_pschmask_FK_Package_getrows(vector <class Row_News_pschmask*> *rows)
-{
-PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
-
-class Table_News_pschmask *pTable = table->database->News_pschmask_get();
 pTable->GetRows("`FK_Package`=" + StringUtils::itos(m_PK_Package),rows);
 }
 void Row_Package::Package_FK_Package_Sourcecode_getrows(vector <class Row_Package*> *rows)
@@ -1600,20 +1527,6 @@ PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
 class Table_Package_Compat *pTable = table->database->Package_Compat_get();
 pTable->GetRows("`FK_Package`=" + StringUtils::itos(m_PK_Package),rows);
 }
-void Row_Package::Package_Compat_pschist_FK_Package_getrows(vector <class Row_Package_Compat_pschist*> *rows)
-{
-PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
-
-class Table_Package_Compat_pschist *pTable = table->database->Package_Compat_pschist_get();
-pTable->GetRows("`FK_Package`=" + StringUtils::itos(m_PK_Package),rows);
-}
-void Row_Package::Package_Compat_pschmask_FK_Package_getrows(vector <class Row_Package_Compat_pschmask*> *rows)
-{
-PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
-
-class Table_Package_Compat_pschmask *pTable = table->database->Package_Compat_pschmask_get();
-pTable->GetRows("`FK_Package`=" + StringUtils::itos(m_PK_Package),rows);
-}
 void Row_Package::Package_Device_FK_Package_getrows(vector <class Row_Package_Device*> *rows)
 {
 PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
@@ -1621,39 +1534,11 @@ PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
 class Table_Package_Device *pTable = table->database->Package_Device_get();
 pTable->GetRows("`FK_Package`=" + StringUtils::itos(m_PK_Package),rows);
 }
-void Row_Package::Package_Device_pschist_FK_Package_getrows(vector <class Row_Package_Device_pschist*> *rows)
-{
-PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
-
-class Table_Package_Device_pschist *pTable = table->database->Package_Device_pschist_get();
-pTable->GetRows("`FK_Package`=" + StringUtils::itos(m_PK_Package),rows);
-}
-void Row_Package::Package_Device_pschmask_FK_Package_getrows(vector <class Row_Package_Device_pschmask*> *rows)
-{
-PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
-
-class Table_Package_Device_pschmask *pTable = table->database->Package_Device_pschmask_get();
-pTable->GetRows("`FK_Package`=" + StringUtils::itos(m_PK_Package),rows);
-}
 void Row_Package::Package_Directory_FK_Package_getrows(vector <class Row_Package_Directory*> *rows)
 {
 PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
 
 class Table_Package_Directory *pTable = table->database->Package_Directory_get();
-pTable->GetRows("`FK_Package`=" + StringUtils::itos(m_PK_Package),rows);
-}
-void Row_Package::Package_Directory_pschist_FK_Package_getrows(vector <class Row_Package_Directory_pschist*> *rows)
-{
-PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
-
-class Table_Package_Directory_pschist *pTable = table->database->Package_Directory_pschist_get();
-pTable->GetRows("`FK_Package`=" + StringUtils::itos(m_PK_Package),rows);
-}
-void Row_Package::Package_Directory_pschmask_FK_Package_getrows(vector <class Row_Package_Directory_pschmask*> *rows)
-{
-PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
-
-class Table_Package_Directory_pschmask *pTable = table->database->Package_Directory_pschmask_get();
 pTable->GetRows("`FK_Package`=" + StringUtils::itos(m_PK_Package),rows);
 }
 void Row_Package::Package_Package_FK_Package_getrows(vector <class Row_Package_Package*> *rows)
@@ -1670,53 +1555,11 @@ PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
 class Table_Package_Package *pTable = table->database->Package_Package_get();
 pTable->GetRows("`FK_Package_DependsOn`=" + StringUtils::itos(m_PK_Package),rows);
 }
-void Row_Package::Package_Package_pschist_FK_Package_getrows(vector <class Row_Package_Package_pschist*> *rows)
-{
-PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
-
-class Table_Package_Package_pschist *pTable = table->database->Package_Package_pschist_get();
-pTable->GetRows("`FK_Package`=" + StringUtils::itos(m_PK_Package),rows);
-}
-void Row_Package::Package_Package_pschist_FK_Package_DependsOn_getrows(vector <class Row_Package_Package_pschist*> *rows)
-{
-PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
-
-class Table_Package_Package_pschist *pTable = table->database->Package_Package_pschist_get();
-pTable->GetRows("`FK_Package_DependsOn`=" + StringUtils::itos(m_PK_Package),rows);
-}
-void Row_Package::Package_Package_pschmask_FK_Package_getrows(vector <class Row_Package_Package_pschmask*> *rows)
-{
-PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
-
-class Table_Package_Package_pschmask *pTable = table->database->Package_Package_pschmask_get();
-pTable->GetRows("`FK_Package`=" + StringUtils::itos(m_PK_Package),rows);
-}
-void Row_Package::Package_Package_pschmask_FK_Package_DependsOn_getrows(vector <class Row_Package_Package_pschmask*> *rows)
-{
-PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
-
-class Table_Package_Package_pschmask *pTable = table->database->Package_Package_pschmask_get();
-pTable->GetRows("`FK_Package_DependsOn`=" + StringUtils::itos(m_PK_Package),rows);
-}
 void Row_Package::Package_Source_FK_Package_getrows(vector <class Row_Package_Source*> *rows)
 {
 PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
 
 class Table_Package_Source *pTable = table->database->Package_Source_get();
-pTable->GetRows("`FK_Package`=" + StringUtils::itos(m_PK_Package),rows);
-}
-void Row_Package::Package_Source_pschist_FK_Package_getrows(vector <class Row_Package_Source_pschist*> *rows)
-{
-PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
-
-class Table_Package_Source_pschist *pTable = table->database->Package_Source_pschist_get();
-pTable->GetRows("`FK_Package`=" + StringUtils::itos(m_PK_Package),rows);
-}
-void Row_Package::Package_Source_pschmask_FK_Package_getrows(vector <class Row_Package_Source_pschmask*> *rows)
-{
-PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
-
-class Table_Package_Source_pschmask *pTable = table->database->Package_Source_pschmask_get();
 pTable->GetRows("`FK_Package`=" + StringUtils::itos(m_PK_Package),rows);
 }
 void Row_Package::Package_Users_FK_Package_getrows(vector <class Row_Package_Users*> *rows)
@@ -1726,74 +1569,11 @@ PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
 class Table_Package_Users *pTable = table->database->Package_Users_get();
 pTable->GetRows("`FK_Package`=" + StringUtils::itos(m_PK_Package),rows);
 }
-void Row_Package::Package_Users_pschist_FK_Package_getrows(vector <class Row_Package_Users_pschist*> *rows)
-{
-PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
-
-class Table_Package_Users_pschist *pTable = table->database->Package_Users_pschist_get();
-pTable->GetRows("`FK_Package`=" + StringUtils::itos(m_PK_Package),rows);
-}
-void Row_Package::Package_Users_pschmask_FK_Package_getrows(vector <class Row_Package_Users_pschmask*> *rows)
-{
-PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
-
-class Table_Package_Users_pschmask *pTable = table->database->Package_Users_pschmask_get();
-pTable->GetRows("`FK_Package`=" + StringUtils::itos(m_PK_Package),rows);
-}
-void Row_Package::Package_Version_FK_Package_getrows(vector <class Row_Package_Version*> *rows)
-{
-PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
-
-class Table_Package_Version *pTable = table->database->Package_Version_get();
-pTable->GetRows("`FK_Package`=" + StringUtils::itos(m_PK_Package),rows);
-}
-void Row_Package::Package_Version_pschist_FK_Package_getrows(vector <class Row_Package_Version_pschist*> *rows)
-{
-PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
-
-class Table_Package_Version_pschist *pTable = table->database->Package_Version_pschist_get();
-pTable->GetRows("`FK_Package`=" + StringUtils::itos(m_PK_Package),rows);
-}
-void Row_Package::Package_Version_pschmask_FK_Package_getrows(vector <class Row_Package_Version_pschmask*> *rows)
-{
-PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
-
-class Table_Package_Version_pschmask *pTable = table->database->Package_Version_pschmask_get();
-pTable->GetRows("`FK_Package`=" + StringUtils::itos(m_PK_Package),rows);
-}
-void Row_Package::Package_pschist_FK_Package_Sourcecode_getrows(vector <class Row_Package_pschist*> *rows)
-{
-PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
-
-class Table_Package_pschist *pTable = table->database->Package_pschist_get();
-pTable->GetRows("`FK_Package_Sourcecode`=" + StringUtils::itos(m_PK_Package),rows);
-}
-void Row_Package::Package_pschmask_FK_Package_Sourcecode_getrows(vector <class Row_Package_pschmask*> *rows)
-{
-PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
-
-class Table_Package_pschmask *pTable = table->database->Package_pschmask_get();
-pTable->GetRows("`FK_Package_Sourcecode`=" + StringUtils::itos(m_PK_Package),rows);
-}
 void Row_Package::PageSetup_FK_Package_getrows(vector <class Row_PageSetup*> *rows)
 {
 PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
 
 class Table_PageSetup *pTable = table->database->PageSetup_get();
-pTable->GetRows("`FK_Package`=" + StringUtils::itos(m_PK_Package),rows);
-}
-void Row_Package::PageSetup_pschist_FK_Package_getrows(vector <class Row_PageSetup_pschist*> *rows)
-{
-PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
-
-class Table_PageSetup_pschist *pTable = table->database->PageSetup_pschist_get();
-pTable->GetRows("`FK_Package`=" + StringUtils::itos(m_PK_Package),rows);
-}
-void Row_Package::PageSetup_pschmask_FK_Package_getrows(vector <class Row_PageSetup_pschmask*> *rows)
-{
-PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
-
-class Table_PageSetup_pschmask *pTable = table->database->PageSetup_pschmask_get();
 pTable->GetRows("`FK_Package`=" + StringUtils::itos(m_PK_Package),rows);
 }
 void Row_Package::PaidLicense_FK_Package_getrows(vector <class Row_PaidLicense*> *rows)
@@ -1803,20 +1583,6 @@ PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
 class Table_PaidLicense *pTable = table->database->PaidLicense_get();
 pTable->GetRows("`FK_Package`=" + StringUtils::itos(m_PK_Package),rows);
 }
-void Row_Package::PaidLicense_pschist_FK_Package_getrows(vector <class Row_PaidLicense_pschist*> *rows)
-{
-PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
-
-class Table_PaidLicense_pschist *pTable = table->database->PaidLicense_pschist_get();
-pTable->GetRows("`FK_Package`=" + StringUtils::itos(m_PK_Package),rows);
-}
-void Row_Package::PaidLicense_pschmask_FK_Package_getrows(vector <class Row_PaidLicense_pschmask*> *rows)
-{
-PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
-
-class Table_PaidLicense_pschmask *pTable = table->database->PaidLicense_pschmask_get();
-pTable->GetRows("`FK_Package`=" + StringUtils::itos(m_PK_Package),rows);
-}
 void Row_Package::QuickStartTemplate_FK_Package_getrows(vector <class Row_QuickStartTemplate*> *rows)
 {
 PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
@@ -1824,39 +1590,11 @@ PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
 class Table_QuickStartTemplate *pTable = table->database->QuickStartTemplate_get();
 pTable->GetRows("`FK_Package`=" + StringUtils::itos(m_PK_Package),rows);
 }
-void Row_Package::QuickStartTemplate_pschist_FK_Package_getrows(vector <class Row_QuickStartTemplate_pschist*> *rows)
-{
-PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
-
-class Table_QuickStartTemplate_pschist *pTable = table->database->QuickStartTemplate_pschist_get();
-pTable->GetRows("`FK_Package`=" + StringUtils::itos(m_PK_Package),rows);
-}
-void Row_Package::QuickStartTemplate_pschmask_FK_Package_getrows(vector <class Row_QuickStartTemplate_pschmask*> *rows)
-{
-PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
-
-class Table_QuickStartTemplate_pschmask *pTable = table->database->QuickStartTemplate_pschmask_get();
-pTable->GetRows("`FK_Package`=" + StringUtils::itos(m_PK_Package),rows);
-}
 void Row_Package::Skin_FK_Package_getrows(vector <class Row_Skin*> *rows)
 {
 PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
 
 class Table_Skin *pTable = table->database->Skin_get();
-pTable->GetRows("`FK_Package`=" + StringUtils::itos(m_PK_Package),rows);
-}
-void Row_Package::Skin_pschist_FK_Package_getrows(vector <class Row_Skin_pschist*> *rows)
-{
-PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
-
-class Table_Skin_pschist *pTable = table->database->Skin_pschist_get();
-pTable->GetRows("`FK_Package`=" + StringUtils::itos(m_PK_Package),rows);
-}
-void Row_Package::Skin_pschmask_FK_Package_getrows(vector <class Row_Skin_pschmask*> *rows)
-{
-PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
-
-class Table_Skin_pschmask *pTable = table->database->Skin_pschmask_get();
 pTable->GetRows("`FK_Package`=" + StringUtils::itos(m_PK_Package),rows);
 }
 

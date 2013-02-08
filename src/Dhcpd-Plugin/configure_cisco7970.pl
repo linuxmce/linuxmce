@@ -3,15 +3,26 @@
 use strict;
 use diagnostics;
 use DBI;
+require "/usr/pluto/bin/config_ops.pl";
+require "/usr/pluto/bin/lmce.pl";
 
 sub getIP {
-        my $dbh = DBI->connect('dbi:mysql:pluto_main');
+        my $dbh = DBI->connect(&read_pluto_cred()) or die "Can't connect to database: $DBI::errstr\n";
         my $sth = $dbh->prepare("SELECT IPaddress FROM Device WHERE FK_DeviceTemplate = 7");
         $sth->execute || die "Sql Error";
         my $row = $sth->fetchrow_hashref;
         my $IP = $row->{IPaddress};
         return $IP;
 }
+
+sub getTimeZone {
+        my $dbh = DBI->connect(&read_pluto_cred()) or die "Can't connect to database: $DBI::errstr\n";
+        my $sth = $dbh->prepare("SELECT ZoneName FROM TimeZone Where PK_Timezone = (select FK_Timezone from City Where PK_City = (Select FK_City From Installation))");
+        $sth->execute || die "Sql Error";
+        my $row = $sth->fetchrow_hashref;
+        my $TimeZone = $row->{ZoneName};
+        return $TimeZone;
+}  
 
 #declare vars (it's safer this way)
 my $Device_ID;
@@ -38,12 +49,7 @@ if ($IntIP eq "") {
         $IntIP="192.168.80.1";
 }
 
-#sync with AMP (practically do nothing but create a new extension number)
-`/usr/pluto/bin/sync_pluto2amp.pl $Device_ID`;
-
-open(FILE,"/tmp/phone${Device_ID}extension");
-$Device_EXT=<FILE>;
-close(FILE);
+$Device_EXT=$Device_EXT = get_device_devicedata($Device_ID,31);
 
 chomp($Device_EXT);
 $Device_MAC =~ s/[^0-9A-Fa-f]//g;
@@ -54,6 +60,7 @@ my $str_SEPDefault = "";
 my $str_DEV = "";
 my $str_LINE = "";
 my $str_FILE = "";
+my $str_TimeZone = getTimeZone();
 
 $str_XMLDefault .= "<?xml version=\"1.0\"?>\n";
 $str_XMLDefault .= "<Default>\n";
@@ -69,7 +76,7 @@ $str_XMLDefault .= "\t\t\t\t</callManager>\n";
 $str_XMLDefault .= "\t\t\t</member>\n";
 $str_XMLDefault .= "\t\t</members>\n";
 $str_XMLDefault .= "\t</callManagerGroup>\n";
-$str_XMLDefault .= "\t<servicesURL>http://$IntIP/pluto-admin/ServicesMenu.php</servicesURL>\n";
+$str_XMLDefault .= "\t<servicesURL>http://$IntIP/lmce-admin/ServicesMenu.php</servicesURL>\n";
 $str_XMLDefault .= "</Default>\n";
 
 open(FILE,"> /tftpboot/XmlDefault.cnf.xml");
@@ -82,7 +89,7 @@ $str_SEPDefault .= "<name>Default</name>\r\n";
 $str_SEPDefault .= "<dateTimeSetting>\r\n";
 $str_SEPDefault .= "<name>CMLocal</name>\r\n";
 $str_SEPDefault .= "<dateTemplate>D.M.Y</dateTemplate>\r\n";
-$str_SEPDefault .= "<timeZone></timeZone>\r\n";
+$str_SEPDefault .= "<timeZone>$str_TimeZone</timeZone>\r\n";
 $str_SEPDefault .= "</dateTimeSetting>\r\n";
 $str_SEPDefault .= "<callManagerGroup>\r\n";
 $str_SEPDefault .= "<members>\r\n";
@@ -133,7 +140,7 @@ $str_SEPDefault .= "<mlppIndicationStatus>Default</mlppIndicationStatus>\r\n";
 $str_SEPDefault .= "<preemption>Default</preemption>\r\n";
 $str_SEPDefault .= "<connectionMonitorDuration>120</connectionMonitorDuration>\r\n";
 $str_SEPDefault .= "</devicePool>\r\n";
-$str_SEPDefault .= "<loadInformation>term70.default</loadInformation>\r\n";
+$str_SEPDefault .= "<loadInformation></loadInformation>\r\n";
 $str_SEPDefault .= "<vendorConfig>\r\n";
 $str_SEPDefault .= " <disableSpeaker>false</disableSpeaker>\r\n";
 $str_SEPDefault .= " <disableSpeakerAndHeadset>false</disableSpeakerAndHeadset>\r\n";
@@ -147,8 +154,8 @@ $str_SEPDefault .= " <autoSelectLineEnable>0</autoSelectLineEnable>\r\n";
 $str_SEPDefault .= " <webAccess>0</webAccess>\r\n";
 $str_SEPDefault .= " <daysDisplayNotActive></daysDisplayNotActive>\r\n";
 $str_SEPDefault .= " <displayOnTime>09:00</displayOnTime>\r\n";
-$str_SEPDefault .= " <displayOnDuration>19:00</displayOnDuration>\r\n";
-$str_SEPDefault .= " <displayIdleTimeout>01:00</displayIdleTimeout>\r\n";
+$str_SEPDefault .= " <displayOnDuration>10:00</displayOnDuration>\r\n";
+$str_SEPDefault .= " <displayIdleTimeout>00:05</displayIdleTimeout>\r\n";
 $str_SEPDefault .= " <spanToPCPort>1</spanToPCPort>\r\n";
 $str_SEPDefault .= "</vendorConfig>\r\n";
 $str_SEPDefault .= "<versionStamp></versionStamp>\r\n";
@@ -167,13 +174,13 @@ $str_SEPDefault .= "<version>4.1(3)</version>\r\n";
 $str_SEPDefault .= "</networkLocaleInfo>\r\n";
 $str_SEPDefault .= "<deviceSecurityMode>1</deviceSecurityMode>\r\n";
 $str_SEPDefault .= "<idleTimeout>0</idleTimeout>\r\n";
-$str_SEPDefault .= "<authenticationURL>http://$IntIP/pluto-admin/authenticate_cisco.php</authenticationURL>\r\n";
-$str_SEPDefault .= "<directoryURL></directoryURL>\r\n";
+$str_SEPDefault .= "<authenticationURL>http://$IntIP/lmce-admin/authenticate_cisco.php</authenticationURL>\r\n";
+$str_SEPDefault .= "<directoryURL>http://$IntIP/lmce-admin/cisco-xml-phone-directory/directory.php</directoryURL>\r\n";
 $str_SEPDefault .= "<idleURL></idleURL>\r\n";
 $str_SEPDefault .= "<informationURL></informationURL>\r\n";
 $str_SEPDefault .= "<messagesURL></messagesURL>\r\n";
 $str_SEPDefault .= "<proxyServerURL></proxyServerURL>\r\n";
-$str_SEPDefault .= "<servicesURL>http://$IntIP/pluto-admin/ServicesMenu.php</servicesURL>\r\n";
+$str_SEPDefault .= "<servicesURL>http://$IntIP/lmce-admin/ServicesMenu.php</servicesURL>\r\n";
 $str_SEPDefault .= "<dscpForCm2Dvce>96</dscpForCm2Dvce>\r\n";
 $str_SEPDefault .= "<dscpForSCCPPhoneConfig>96</dscpForSCCPPhoneConfig>\r\n";
 $str_SEPDefault .= "<dscpForSCCPPhoneServices>0</dscpForSCCPPhoneServices>\r\n";
@@ -192,13 +199,14 @@ close(FILE);
 
 `ln -sf /tftpboot/SEPDefault7970.cnf.xml /tftpboot/SEP$Device_MAC.cnf.xml`;
 
-`/usr/pluto/bin/GenerateSCCP.sh`;
+# no longer needed
+#`/usr/pluto/bin/GenerateSCCP.sh`;
 
 ### Update Cisco 7970 Orbiter
 my $ORB_ID;
 my $ORB_CNT;
 my $DB_ROW;
-my $DB_PL_HANDLE = DBI->connect("dbi:mysql:database=pluto_main;host=$IntIP;user=root;password=;") or die "Could not connect to MySQL";
+my $DB_PL_HANDLE = DBI->connect(&read_pluto_cred()) or die "Can't connect to database: $DBI::errstr\n";
 my $DB_SQL = "select count(PK_Device) from Device where FK_DeviceTemplate=1727";
 my $DB_STATEMENT = $DB_PL_HANDLE->prepare($DB_SQL) or die "Couldn't prepare query '$DB_SQL': $DBI::errstr\n";
 $DB_STATEMENT->execute() or die "Couldn't execute query '$DB_SQL': $DBI::errstr\n";
@@ -227,6 +235,6 @@ if($DB_ROW = $DB_STATEMENT->fetchrow_hashref())
 }
 $DB_PL_HANDLE->disconnect();
 
-#A HARD RELOAD FOR ASTERISK
-exec("invoke-rc.d asterisk restart");
+#A HARD RELOAD FOR ASTERISK (no longer needed in realtime env.)
+#exec("service asterisk restart");
 

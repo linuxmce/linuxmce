@@ -82,7 +82,6 @@ int RipTask::Run()
 	if (!m_pRipJob->m_pDisk_Drive_Functions->m_pDevice_AppServer)
 	{
 		LoggerWrapper::GetInstance()->Write(LV_CRITICAL, "Cannot rip -- no appserver");
-		m_eTaskStatus_set(TASK_FAILED_ABORT);
 		return 0;
 	}
 	LoggerWrapper::GetInstance()->Write(LV_STATUS, "Going to rip %s; drive number: %d", m_sName.c_str(), m_pRipJob->m_pDisk_Drive_Functions->m_dwPK_Device);
@@ -90,7 +89,6 @@ int RipTask::Run()
 	if (!m_pRipJob->m_pDisk_Drive_Functions->m_mediaInserted)
 	{
 		m_pRipJob->m_pDisk_Drive_Functions->EVENT_Ripping_Progress("",RIP_RESULT_NO_DISC, "", m_sName, m_pRipJob->m_iEK_Disc);
-		m_eTaskStatus_set(TASK_FAILED_ABORT);
 		return 0;
 	}
 
@@ -102,14 +100,12 @@ int RipTask::Run()
 		m_pRipJob->m_pDisk_Drive_Functions->m_mediaDiskStatus != DISCTYPE_CD_VCD)
 	{
 		m_pRipJob->m_pDisk_Drive_Functions->EVENT_Ripping_Progress("", RIP_RESULT_INVALID_DISC_TYPE, "", m_sName, m_pRipJob->m_iEK_Disc);
-		m_eTaskStatus_set(TASK_FAILED_ABORT);
 		return 0;
 	}
 
 	if (m_pRipJob->m_pDisk_Drive_Functions->isRipping())
 	{
 		m_pRipJob->m_pDisk_Drive_Functions->EVENT_Ripping_Progress("", RIP_RESULT_ALREADY_RIPPING, "", m_sName, m_pRipJob->m_iEK_Disc);
-		m_eTaskStatus_set(TASK_FAILED_ABORT);
 		return 0;
 	}
 
@@ -148,7 +144,6 @@ int RipTask::Run()
     if (! m_pRipJob->m_pDisk_Drive_Functions->m_pCommand_Impl->SendCommand(spawnApplication,&sResponse) || sResponse != "OK")
 	{
 		LoggerWrapper::GetInstance()->Write(LV_CRITICAL, "Trying to rip - App server returned %s",sResponse.c_str());
-		m_eTaskStatus_set(TASK_FAILED_ABORT);
 		return 0;
 	}
 
@@ -227,7 +222,7 @@ void RipTask::UpdateProgress(string sStatus,int iPercent,int iTime,string sText,
 		}
 
 		int PK_File = m_pRipJob->m_pDisk_Drive_Functions->m_pMediaAttributes_LowLevel->AddRippedDiscToDatabase(m_pRipJob->m_iEK_Disc,
-			m_pRipJob->m_iPK_MediaType,m_pRipJob->m_sFileName,m_sTrack);
+			m_pRipJob->m_iPK_MediaType,m_pRipJob->m_sFileName,m_pRipJob->m_sTracks);
 
 		if( m_pRow_RipStatus && PK_File )
 			m_pRow_RipStatus->FK_File_set(PK_File);

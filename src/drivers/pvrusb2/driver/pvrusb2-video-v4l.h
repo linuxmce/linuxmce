@@ -1,6 +1,6 @@
 /*
  *
- *  $Id: pvrusb2-video-v4l.h 1571 2007-02-28 04:27:44Z isely $
+ *  $Id: pvrusb2-video-v4l.h 2226 2009-03-07 05:17:32Z isely $
  *
  *  Copyright (C) 2005 Mike Isely <isely@pobox.com>
  *  Copyright (C) 2004 Aurelien Alleaume <slts@free.fr>
@@ -35,11 +35,17 @@
 #include "pvrusb2-options.h"
 
 #ifdef PVR2_ENABLE_SAA711X
+#ifdef PVR2_ENABLE_OLD_I2COPS
 
-#include "pvrusb2-i2c-core.h"
+#include "pvrusb2-i2c-track.h"
 
 int pvr2_i2c_decoder_v4l_setup(struct pvr2_hdw *,struct pvr2_i2c_client *);
 
+#endif /* PVR2_ENABLE_OLD_I2COPS */
+#ifdef PVR2_ENABLE_V4L2SUBDEV
+#include "pvrusb2-hdw-internal.h"
+void pvr2_saa7115_subdev_update(struct pvr2_hdw *, struct v4l2_subdev *);
+#endif /* PVR2_ENABLE_V4L2SUBDEV */
 #endif /* PVR2_ENABLE_SAA711X */
 
 #endif /* __PVRUSB2_VIDEO_V4L_H */

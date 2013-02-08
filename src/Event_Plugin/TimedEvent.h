@@ -41,9 +41,10 @@ public:
 	
 	Row_EventHandler *m_pRow_EventHandler;
 	CommandGroup *m_pCommandGroup;
+	class Criteria *m_pCriteria;
 	string m_sDaysOfWeek,m_sTimes,m_sDaysOfMonth;
 
-	TimedEvent(Row_EventHandler *pRow_EventHandler);
+	TimedEvent(Row_EventHandler *pRow_EventHandler, class Criteria *pCriteria);
 	void CalcNextTime();
 
     /**

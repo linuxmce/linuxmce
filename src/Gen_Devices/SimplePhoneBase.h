@@ -93,7 +93,7 @@ public:
 		if( m_bRunningWithoutDeviceData )
 			return atoi(m_pEvent_Impl->GetDeviceDataFromDatabase(m_dwPK_Device,DEVICEDATA_PK_FloorplanObjectType_CONST).c_str());
 		else
-			return atoi(m_mapParameters_Find(DEVICEDATA_PK_FloorplanObjectType_CONST).c_str());
+			return atoi(m_mapParameters[DEVICEDATA_PK_FloorplanObjectType_CONST].c_str());
 	}
 
 	string Get_PhoneType()
@@ -101,7 +101,7 @@ public:
 		if( m_bRunningWithoutDeviceData )
 			return m_pEvent_Impl->GetDeviceDataFromDatabase(m_dwPK_Device,DEVICEDATA_PhoneType_CONST);
 		else
-			return m_mapParameters_Find(DEVICEDATA_PhoneType_CONST);
+			return m_mapParameters[DEVICEDATA_PhoneType_CONST];
 	}
 
 	string Get_PhoneNumber()
@@ -109,7 +109,7 @@ public:
 		if( m_bRunningWithoutDeviceData )
 			return m_pEvent_Impl->GetDeviceDataFromDatabase(m_dwPK_Device,DEVICEDATA_PhoneNumber_CONST);
 		else
-			return m_mapParameters_Find(DEVICEDATA_PhoneNumber_CONST);
+			return m_mapParameters[DEVICEDATA_PhoneNumber_CONST];
 	}
 
 	bool Get_Speak_in_the_House()
@@ -117,7 +117,7 @@ public:
 		if( m_bRunningWithoutDeviceData )
 			return (m_pEvent_Impl->GetDeviceDataFromDatabase(m_dwPK_Device,DEVICEDATA_Speak_in_the_House_CONST)=="1" ? true : false);
 		else
-			return (m_mapParameters_Find(DEVICEDATA_Speak_in_the_House_CONST)=="1" ? true : false);
+			return (m_mapParameters[DEVICEDATA_Speak_in_the_House_CONST]=="1" ? true : false);
 	}
 
 	string Get_Server_IP()
@@ -125,7 +125,7 @@ public:
 		if( m_bRunningWithoutDeviceData )
 			return m_pEvent_Impl->GetDeviceDataFromDatabase(m_dwPK_Device,DEVICEDATA_Server_IP_CONST);
 		else
-			return m_mapParameters_Find(DEVICEDATA_Server_IP_CONST);
+			return m_mapParameters[DEVICEDATA_Server_IP_CONST];
 	}
 
 };

@@ -60,8 +60,8 @@ for i in 1 2 3 4; do
 	NetDigit=$(($IPDigit & $MaskDigit))
 	INTERNAL_SUBNET="$INTERNAL_SUBNET$Dot$NetDigit" && Dot="."
 done
-if [[ "$(</proc/cmdline)" == *splash=* ]]; then
-	ENABLE_SPLASH="vga=0x311 splash=silent"
+if [[ "$(</proc/cmdline)" == *splash* ]]; then
+	ENABLE_SPLASH="splash"
 fi
 MOON_HOSTS=""
 DlDir="/usr/pluto/diskless"

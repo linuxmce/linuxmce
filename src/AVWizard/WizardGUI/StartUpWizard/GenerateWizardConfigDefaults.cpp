@@ -127,6 +127,7 @@ void GenerateWizardConfigDefaults::GenerateDefaultPages(std::string FolderToSave
 	GeneratePage_UISwitcher(FolderToSave, ImageFolder, FontFolder);
 	GeneratePage_UISwitcherTest(FolderToSave, ImageFolder, FontFolder);
 	GeneratePage_VideoAdjustSize(FolderToSave, ImageFolder, FontFolder);
+	GeneratePage_AudioSoundCard(FolderToSave, ImageFolder, FontFolder);
 	GeneratePage_AudioConnector(FolderToSave, ImageFolder, FontFolder);
 	GeneratePage_AudioVolume(FolderToSave, ImageFolder, FontFolder);
 	GeneratePage_DolbyTest(FolderToSave, ImageFolder, FontFolder);
@@ -150,7 +151,8 @@ void GenerateWizardConfigDefaults::GeneratePage_Welcome(
 
 	Page->AddChild(GenerateTabContainer(-1, ImageFolder, FontFolder));
 
-	std::string StringList[4];
+	const int nStrings = 4;
+	std::string StringList[nStrings];
 	StringList[0] = "From here you can set up the audio & video for your home";
 	StringList[1] = "For selections use \"UP/DOWN/LEFT/RIGHT\" arrows";
 	StringList[2] = "For validation use \"Enter\"";
@@ -165,7 +167,7 @@ void GenerateWizardConfigDefaults::GeneratePage_Welcome(
 	int DefaultFontSize  = Utils::StringToInt32(SkinGenerator::Instance()->DefaultFontSize);
 
 	SetFontStyle(DefaultFontSize, DefaultFontColor, "Regular");
-	for(int i = 0; i<4; i++)
+	for (int i = 0; i < nStrings; i++)
 	{
 		Page->AddChild(CreateControlLabel(
 			"DescribeText"+Utils::Int32ToString(i),
@@ -412,7 +414,7 @@ void GenerateWizardConfigDefaults::GeneratePage_UISwitcher(
 	std::string StringList[4];
 	StringList[0] = "Select your user experience.  The Alpha blended UI is better.";
 	StringList[1] = "But before choosing it read how it works and the requirements";
-	StringList[2] = "at http://plutohome.com/wiki/index.php/UI";
+	StringList[2] = "at http://wiki.linuxmce.org/index.php/UI";
 
 	SettingsDictionaryTree* BackgroundControl = CreateControlBackground("Gray", "(none)", 0, 0);
 	std::string Color = SkinGenerator::Instance()->BackgroundColor;
@@ -603,14 +605,14 @@ void GenerateWizardConfigDefaults::GeneratePage_VideoAdjustSize(
 			"ButtonPlus",
 			"+",
 			520, 260,
-			10,
+			60,
 			false
 		));
 	Page->AddChild(CreateControlButton(
 		"ButtonMinus",
 		"-",
 		520, 295,
-		10,
+		60,
 		false
 		));
 
@@ -655,6 +657,64 @@ void GenerateWizardConfigDefaults::GeneratePage_VideoAdjustSize(
 		));
 
 	Page->SaveToXMLFile("/tmp/VideoAdjustSize.xml");
+}
+
+void GenerateWizardConfigDefaults::GeneratePage_AudioSoundCard(
+	std::string FolderToSave,
+	std::string ImageFolder,
+	std::string FontFolder
+	)
+{
+	std::string ScrollBackColor = SkinGenerator::Instance()->ScrollBackColor;
+	std::string ScrollBackFocusedColor = SkinGenerator::Instance()->ScrollBackFocusedColor;
+	std::string HighScrollBackColor = SkinGenerator::Instance()->HighScrollBackColor;
+	std::string HighScrollBackFocusedColor = SkinGenerator::Instance()->HighScrollBackFocusedColor;
+
+	SettingsDictionaryTree* Page;
+	SettingsDictionaryTree* Container;
+	SettingsDictionary* Dictionary;
+
+	Page = new SettingsDictionaryTree();
+	Dictionary = Page->GetDictionary();
+	SetDefaultBtnImages(Dictionary, ImageFolder);
+
+	Dictionary->SetName("ScreenStep1");
+	Dictionary->SetType("Page");
+	Dictionary->Set("Width", 640);
+	Dictionary->Set("Height", 480);
+	Dictionary->Set("Fullscreen", 1);
+	Dictionary->Set("Caption", "AVWizard Configurator");
+
+	SettingsDictionaryTree* BackgroundControl = CreateControlBackground("Gray", "(none)", 0, 0);
+	BackgroundControl->GetDictionary()->Set("Color", SkinGenerator::Instance()->BackgroundColor);
+	Page->AddChild(BackgroundControl);
+
+	Container = GenerateTabContainer(5, ImageFolder, FontFolder);
+	Page->AddChild(Container);
+
+	//Create text area
+	std::string StringList[1];
+	StringList[0] = "Which sound card did you use?";
+
+	std::string DefaultFontColor = SkinGenerator::Instance()->DefaultFontColor;	
+	int DefaultFontSize  = Utils::StringToInt32(SkinGenerator::Instance()->DefaultFontSize);
+
+	SetFontStyle(DefaultFontSize, DefaultFontColor, "Regular");
+	Page->AddChild(CreateControlScrollList("SoundCardScroll",
+		30, 260,
+		580, 140,
+		ScrollBackColor,
+		ScrollBackFocusedColor,
+		HighScrollBackColor,
+		HighScrollBackFocusedColor,
+		false));
+	Page->AddChild(CreateControlButton("BtnOK",
+		" OK ",
+		320, 450,
+		0,
+		true
+		));
+	Page->SaveToXMLFile("/tmp/AudioSoundCard.xml");
 }
 
 void GenerateWizardConfigDefaults::GeneratePage_AudioConnector(
@@ -708,7 +768,7 @@ void GenerateWizardConfigDefaults::GeneratePage_AudioConnector(
 	Page->AddChild(CreateControlButton(
 		"Btn1",
 		"Analog Stereo",
-		105, 285,
+		320, 250,
 		0,
 		true
 		));
@@ -716,7 +776,7 @@ void GenerateWizardConfigDefaults::GeneratePage_AudioConnector(
 	Page->AddChild(CreateControlButton(
 		"Btn2",
 		"SPDIF Coaxial",
-		265, 285,
+		320, 280,
 		0,
 		true
 		));
@@ -724,15 +784,23 @@ void GenerateWizardConfigDefaults::GeneratePage_AudioConnector(
 	Page->AddChild(CreateControlButton(
 		"Btn3",
 		"SPDIF Optical",
-		420, 285,
+		320, 310,
 		0,
 		true
 		));
 
 	Page->AddChild(CreateControlButton(
 		"Btn4",
+		"HDMI",
+		320, 340,
+		0,
+		true
+		));
+
+	Page->AddChild(CreateControlButton(
+		"Btn5",
 		"No sound",
-		550, 285,
+		320, 370,
 		0,
 		true
 		));
@@ -767,7 +835,7 @@ void GenerateWizardConfigDefaults::GeneratePage_AudioVolume(
 	//Create text area
 	std::string StringList[4];
 	StringList[0] = "I am playing some music, press enter when you confirm that you can hear it";
-	StringList[1] = "and the volume is adjusted at a confortable level.";
+	StringList[1] = "and the volume is adjusted at a comfortable level.";
 
 	StringList[2] = "** NO AUDIO **";
 	StringList[3] = "Bonus CD with sample audio tracks was not installed";

@@ -107,9 +107,11 @@ string Value_get();
 void Value_set(string val);
 
 		
-		
+		bool Value_isNull();
+
 			
-			
+		void Value_setNull(bool val);
+	
 	
 		void Delete();
 		void Reload();		

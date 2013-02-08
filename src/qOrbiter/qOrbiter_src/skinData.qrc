@@ -1,0 +1,34 @@
+<RCC>
+    <qresource prefix="/img">
+        <file alias="harmattan_splash_bkg.png">img/harmattan_splash_bkg.png</file>
+        <file alias="harmattan_splash.png">img/harmattan_splash.png</file>
+        <file alias="Splash.png">qml/desktop/default/img/icons/backgrounds/bedroom.png</file>
+    </qresource>
+    <qresource prefix="/main">
+        <file>config.xml</file>
+        <file>qml/desktop/SetupNewOrbiter.qml</file>
+    </qresource>
+    <qresource prefix="/desktop"/>
+    <qresource prefix="/osx">
+        <file alias="Splash.qml">qml/desktop/Splash.qml</file>
+    </qresource>
+    <qresource prefix="/harmattan">
+        <file alias="Splash.qml">qml/harmattan/default/Splash.qml</file>
+    </qresource>
+    <qresource prefix="/android">
+        <file alias="Splash.qml">qml/android/Splash.qml</file>
+        <file alias="SetupNewOrbiter.qml">qml/android/SetupNewOrbiter.qml</file>
+        <file alias="SplashView.qml">qml/android/SplashView.qml</file>
+    </qresource>
+    <qresource prefix="/icons">
+        <file alias="icon.png">img/harmattan_splash.png</file>
+        <file alias="audio.png">qml/desktop/default/img/icons/kmix.png</file>
+        <file alias="video.png">qml/desktop/default/img/icons/xine.png</file>
+        <file alias="games.png">qml/desktop/default/img/icons/Games.png</file>
+        <file alias="mediacell.png">qml/desktop/default/img/ui3/linuxmcewidebutton.png</file>
+        <file alias="playlist.png">qml/desktop/default/img/icons/package_editors.png</file>
+    </qresource>
+    <qresource prefix="/components">
+        <file alias="FpSprite.qml">qml/desktop/default/components/FpSprite.qml</file>
+    </qresource>
+</RCC>

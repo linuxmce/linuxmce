@@ -40,9 +40,11 @@
 	#include "../SDL/OrbiterRenderer_SDL.h"
 #endif
 
+#ifndef DIRECTFB
 #include <X11/X.h>
 #include <X11/Xlib.h>
 #include <SDL.h>
+#endif
 
 class OrbiterLinux;
 class OrbiterRendererFactory;
@@ -74,9 +76,9 @@ namespace DCE
 		void InitializeAfterSetVideoMode();
 		void InitializeAfterRelatives();
 
-		bool DisplayProgress(string sMessage, int nProgress);
-		bool DisplayProgress(string sMessage, const map<string, bool> &mapChildDevices, int nProgress);
-		int PromptUser(string sPrompt,int iTimeoutSeconds=10,map<int,string> *p_mapPrompts=NULL);
+		virtual bool DisplayProgress(string sMessage, int nProgress);
+		virtual bool DisplayProgress(string sMessage, const map<string, bool> &mapChildDevices, int nProgress);
+		virtual int PromptUser(string sPrompt,int iTimeoutSeconds=10,map<int,string> *p_mapPrompts=NULL);
 
 		void LockDisplay();
 		void UnlockDisplay();
@@ -89,9 +91,11 @@ namespace DCE
 	private:
 
 		//UI2 - non alpha blending with xshape
+#ifndef DIRECTFB
 		Pixmap m_screenMaskObjects; //"layer for object non-popup
 		Pixmap m_screenMaskPopups;  //"layer" for popups
 		Pixmap m_screenMaskCurrent; //the mask to apply
+#endif
 		bool m_bHasPopups;
 		bool m_bScreenRendered;
 	};

@@ -1,0 +1,3 @@
+TODO: Make runvdr more equal to official Debian version
+TODO: Install remote.*.conf examples
+TODO: When plugin could not be loaded, log stderr output somewhere

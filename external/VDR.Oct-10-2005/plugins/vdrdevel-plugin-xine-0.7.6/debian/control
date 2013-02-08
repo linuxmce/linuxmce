@@ -1,0 +1,26 @@
+Source: vdrdevel-plugin-xine
+Section: misc
+Priority: extra
+Maintainer: Thomas Günther <tom@toms-cafe.de>
+Origin: ctvdr                                                                   
+Bugs: mailto:pkg-vdr-dvb-devel@lists.alioth.debian.org
+Build-Depends: debhelper (>= 4.0.0), dpatch, libxine-dev (>= 1.0.2-0vdr1), vdrdevel-dev (>= 1.3.17-12)
+Standards-Version: 3.6.2
+
+Package: vdrdevel-plugin-xine
+Architecture: any
+Depends: ${shlibs:Depends}, ${vdrdevel:Depends}
+Conflicts: libxine1 (<< 1.0.2-0vdr1), ${vdrdevel:Conflicts}
+Recommends: libxine1
+Suggests: y4mscaler, mjpegtools
+Description: allows xine to be a display for vdr, the Video Disk Recorder
+ vdr-plugin-xine is a plugin for vdr which allows you to use xine, gxine or
+ some other front end for libxine as a display, instead of relying on an MPEG
+ decoder / TV output card.
+ .
+ xine >= 0.99.2 and gxine >= 0.4.0 have built-in support for vdr. Other front
+ ends may need to be patched.
+ .
+ If you want to use the SVDRP 'grab' command, you'll need mjpegtools (from
+ Christian Marillat's archive) and y4mscaler.
+XB-VDR-Patchlevel: ${vdrdevel:Patchlevel}

@@ -61,6 +61,10 @@ class GenerateWizardConfigDefaults
 	 */
 	void GeneratePage_VideoAdjustSize(std::string FolderToSave, std::string ImageFolder, std::string FontFolder);
 	/**
+	 * 	Generate page ## of the wizard: AudioSoundCard.xml
+	 */
+	void GeneratePage_AudioSoundCard(std::string FolderToSave, std::string ImageFolder, std::string FontFolder);
+	/**
 	 *	Generate page 5 of the wizard: AudioConnector.xml
 	 */
 	void GeneratePage_AudioConnector(std::string FolderToSave, std::string ImageFolder, std::string FontFolder);

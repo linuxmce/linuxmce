@@ -1,0 +1,302 @@
+Index: asterisk-1.4.21.2~dfsg/include/asterisk/frame.h
+===================================================================
+--- asterisk-1.4.21.2~dfsg.orig/include/asterisk/frame.h	2011-06-11 19:10:40.000000000 +0000
++++ asterisk-1.4.21.2~dfsg/include/asterisk/frame.h	2011-06-11 19:45:17.000000000 +0000
+@@ -86,6 +86,7 @@
+ 	\arg \b UNHOLD	Call is back from hold
+ 	\arg \b VIDUPDATE	Video update requested
+ 	\arg \b SRCUPDATE       The source of media has changed
++	\arg \b SRCCHANGE Media source has changed (RTP marker bit and SSRC must change)
+ 
+ */
+ 
+@@ -296,6 +297,7 @@
+ 	AST_CONTROL_UNHOLD = 17,	/*!< Indicate call is left from hold */
+ 	AST_CONTROL_VIDUPDATE = 18,	/*!< Indicate video frame update */
+ 	AST_CONTROL_SRCUPDATE = 20,     /*!< Indicate source of media has changed */
++	AST_CONTROL_SRCCHANGE = 21,     /*!< Media has changed and requires a new RTP SSRC */
+ };
+ 
+ #define AST_SMOOTHER_FLAG_G729		(1 << 0)
+Index: asterisk-1.4.21.2~dfsg/include/asterisk/rtp.h
+===================================================================
+--- asterisk-1.4.21.2~dfsg.orig/include/asterisk/rtp.h	2011-06-11 19:10:40.000000000 +0000
++++ asterisk-1.4.21.2~dfsg/include/asterisk/rtp.h	2011-06-11 19:45:17.000000000 +0000
+@@ -162,7 +162,23 @@
+ 
+ int ast_rtp_settos(struct ast_rtp *rtp, int tos);
+ 
+-void ast_rtp_new_source(struct ast_rtp *rtp);
++void ast_rtp_update_source(struct ast_rtp *rtp);
++
++/*!
++* \brief Indicate a new source of audio has dropped in and the ssrc should change
++*
++* \param instance Instance that the new media source is feeding into
++*
++* Example usage:
++*
++* \code
++* ast_rtp_instance_change_source(instance);
++* \endcode
++*
++* This indicates that the source of media that is feeding the instance pointed to by
++* instance has changed and that the marker bit should be set and the SSRC updated.
++*/
++void ast_rtp_change_source(struct ast_rtp *instance);
+ 
+ /*! \brief  Setting RTP payload types from lines in a SDP description: */
+ void ast_rtp_pt_clear(struct ast_rtp* rtp);
+Index: asterisk-1.4.21.2~dfsg/main/rtp.c
+===================================================================
+--- asterisk-1.4.21.2~dfsg.orig/main/rtp.c	2011-06-11 19:10:40.000000000 +0000
++++ asterisk-1.4.21.2~dfsg/main/rtp.c	2011-06-11 19:45:17.000000000 +0000
+@@ -1120,6 +1120,7 @@
+ 	unsigned int *rtpheader;
+ 	struct rtpPayloadType rtpPT;
+ 	struct ast_rtp *bridged = NULL;
++	AST_LIST_HEAD_NOLOCK(, ast_frame) frames;
+ 	
+ 	/* If time is up, kill it */
+ 	if (rtp->sending_digit)
+@@ -1197,10 +1198,20 @@
+ 	timestamp = ntohl(rtpheader[1]);
+ 	ssrc = ntohl(rtpheader[2]);
+ 	
+-	if (!mark && rtp->rxssrc && rtp->rxssrc != ssrc) {
+-		if (option_debug || rtpdebug)
+-			ast_log(LOG_DEBUG, "Forcing Marker bit, because SSRC has changed\n");
+-		mark = 1;
++	AST_LIST_HEAD_INIT_NOLOCK(&frames);
++	/* Force a marker bit and change SSRC if the SSRC changes */
++	if (rtp->rxssrc && rtp->rxssrc != ssrc) {
++		struct ast_frame *f, srcupdate;
++		srcupdate.frametype = AST_FRAME_CONTROL;
++		srcupdate.subclass = AST_CONTROL_SRCCHANGE;
++		if (!mark) {
++			if (option_debug || rtpdebug)
++				ast_log(LOG_DEBUG, "Forcing Marker bit, because SSRC has changed\n");
++			mark = 1;
++		}
++
++		f = ast_frisolate(&srcupdate);
++		AST_LIST_INSERT_TAIL(&frames, f, frame_list);
+ 	}
+ 
+ 	rtp->rxssrc = ssrc;
+@@ -1223,7 +1234,7 @@
+ 
+ 	if (res < hdrlen) {
+ 		ast_log(LOG_WARNING, "RTP Read too short (%d, expecting %d)\n", res, hdrlen);
+-		return &ast_null_frame;
++		return AST_LIST_FIRST(&frames) ? AST_LIST_FIRST(&frames) : &ast_null_frame;
+ 	}
+ 
+ 	rtp->rxcount++; /* Only count reasonably valid packets, this'll make the rtcp stats more accurate */
+@@ -1285,7 +1296,11 @@
+ 		} else {
+ 			ast_log(LOG_NOTICE, "Unknown RTP codec %d received from '%s'\n", payloadtype, ast_inet_ntoa(rtp->them.sin_addr));
+ 		}
+-		return f ? f : &ast_null_frame;
++		if (f) {
++			AST_LIST_INSERT_TAIL(&frames, f, frame_list);
++			return AST_LIST_FIRST(&frames);
++		}
++		return &ast_null_frame;
+ 	}
+ 	rtp->lastrxformat = rtp->f.subclass = rtpPT.code;
+ 	rtp->f.frametype = (rtp->f.subclass < AST_FORMAT_MAX_AUDIO) ? AST_FRAME_VOICE : AST_FRAME_VIDEO;
+@@ -1997,12 +2012,22 @@
+ 	return res;
+ }
+ 
+-void ast_rtp_new_source(struct ast_rtp *rtp)
++void ast_rtp_update_source(struct ast_rtp *rtp)
+ {
+ 	rtp->set_marker_bit = 1;
+ 	return;
+ }
+ 
++void ast_rtp_change_source(struct ast_rtp *rtp)
++{
++	unsigned int ssrc = ast_random();
++	/* We simply set this bit so that the next packet sent will have the marker bit turned on */
++	rtp->set_marker_bit = 1;
++	ast_log(LOG_DEBUG, "Changing ssrc from %u to %u due to a source change\n", rtp->ssrc, ssrc);
++
++	rtp->ssrc = ssrc;
++}
++
+ void ast_rtp_set_peer(struct ast_rtp *rtp, struct sockaddr_in *them)
+ {
+ 	rtp->them.sin_port = them->sin_port;
+Index: asterisk-1.4.21.2~dfsg/main/channel.c
+===================================================================
+--- asterisk-1.4.21.2~dfsg.orig/main/channel.c	2011-06-11 19:45:16.000000000 +0000
++++ asterisk-1.4.21.2~dfsg/main/channel.c	2011-06-11 19:45:30.000000000 +0000
+@@ -1876,6 +1876,7 @@
+ 				case AST_CONTROL_RINGING:
+ 				case AST_CONTROL_ANSWER:
+ 				case AST_CONTROL_SRCUPDATE:
++				case AST_CONTROL_SRCCHANGE:
+ 					/* Unimportant */
+ 					break;
+ 				default:
+@@ -2426,6 +2427,8 @@
+ 				/* Do nothing.... */
+ 			} else if (condition == AST_CONTROL_SRCUPDATE) {
+ 				/* Do nothing... */
++			} else if (condition == AST_CONTROL_SRCCHANGE) {
++				/* Do nothing... */
+ 			} else {
+ 				/* not handled */
+ 				ast_log(LOG_WARNING, "Unable to handle indication %d for '%s'\n", condition, chan->name);
+@@ -2966,6 +2969,7 @@
+ 				case AST_CONTROL_UNHOLD:
+ 				case AST_CONTROL_VIDUPDATE:
+ 				case AST_CONTROL_SRCUPDATE:
++				case AST_CONTROL_SRCCHANGE:
+ 				case -1:			/* Ignore -- just stopping indications */
+ 					break;
+ 
+@@ -3415,6 +3419,7 @@
+ 	void *t_pvt;
+ 	struct ast_callerid tmpcid;
+ 	struct ast_channel *clone = original->masq;
++	struct ast_channel *bridged;
+ 	struct ast_cdr *cdr;
+ 	int rformat = original->readformat;
+ 	int wformat = original->writeformat;
+@@ -3665,6 +3670,15 @@
+ 		pthread_kill(original->blocker, SIGURG);
+ 	if (option_debug)
+ 		ast_log(LOG_DEBUG, "Done Masquerading %s (%d)\n", original->name, original->_state);
++
++	if ((bridged = ast_bridged_channel(original))) {
++		ast_channel_lock(bridged);
++		ast_indicate(bridged, AST_CONTROL_SRCCHANGE);
++		ast_channel_unlock(bridged);
++	}
++
++	ast_indicate(original, AST_CONTROL_SRCCHANGE);
++
+ 	return 0;
+ }
+ 
+@@ -3872,6 +3886,7 @@
+ 			case AST_CONTROL_UNHOLD:
+ 			case AST_CONTROL_VIDUPDATE:
+ 			case AST_CONTROL_SRCUPDATE:
++			case AST_CONTROL_SRCCHANGE:
+ 				ast_indicate_data(other, f->subclass, f->data, f->datalen);
+ 				break;
+ 			default:
+@@ -4010,8 +4025,8 @@
+ 		ast_set_flag(c0, AST_FLAG_END_DTMF_ONLY);
+ 
+ 	/* Before we enter in and bridge these two together tell them both the source of audio has changed */
+-	ast_indicate(c0, AST_CONTROL_SRCUPDATE);
+-	ast_indicate(c1, AST_CONTROL_SRCUPDATE);
++	ast_indicate(c0, AST_CONTROL_SRCCHANGE);
++	ast_indicate(c1, AST_CONTROL_SRCCHANGE);
+ 
+ 	for (/* ever */;;) {
+ 		struct timeval now = { 0, };
+Index: asterisk-1.4.21.2~dfsg/channels/chan_h323.c
+===================================================================
+--- asterisk-1.4.21.2~dfsg.orig/channels/chan_h323.c	2011-06-11 19:10:40.000000000 +0000
++++ asterisk-1.4.21.2~dfsg/channels/chan_h323.c	2011-06-11 19:45:17.000000000 +0000
+@@ -916,7 +916,11 @@
+ 		res = 0;
+ 		break;
+ 	case AST_CONTROL_SRCUPDATE:
+-		ast_rtp_new_source(pvt->rtp);
++		ast_rtp_update_source(pvt->rtp);
++		res = 0;
++		break;
++	case AST_CONTROL_SRCCHANGE:
++		ast_rtp_change_source(pvt->rtp);
+ 		res = 0;
+ 		break;
+ 	case AST_CONTROL_PROCEEDING:
+Index: asterisk-1.4.21.2~dfsg/channels/chan_mgcp.c
+===================================================================
+--- asterisk-1.4.21.2~dfsg.orig/channels/chan_mgcp.c	2011-06-11 19:10:40.000000000 +0000
++++ asterisk-1.4.21.2~dfsg/channels/chan_mgcp.c	2011-06-11 19:45:17.000000000 +0000
+@@ -1442,7 +1442,10 @@
+ 		ast_moh_stop(ast);
+ 		break;
+ 	case AST_CONTROL_SRCUPDATE:
+-		ast_rtp_new_source(sub->rtp);
++		ast_rtp_update_source(sub->rtp);
++		break;
++	case AST_CONTROL_SRCCHANGE:
++		ast_rtp_change_source(sub->rtp);
+ 		break;
+ 	case -1:
+ 		transmit_notify_request(sub, "");
+Index: asterisk-1.4.21.2~dfsg/channels/chan_sip.c
+===================================================================
+--- asterisk-1.4.21.2~dfsg.orig/channels/chan_sip.c	2011-06-11 19:45:16.000000000 +0000
++++ asterisk-1.4.21.2~dfsg/channels/chan_sip.c	2011-06-11 19:45:17.000000000 +0000
+@@ -3721,7 +3721,7 @@
+ 				if ((ast->_state != AST_STATE_UP) &&
+ 				    !ast_test_flag(&p->flags[0], SIP_PROGRESS_SENT) &&
+ 				    !ast_test_flag(&p->flags[0], SIP_OUTGOING)) {
+-					ast_rtp_new_source(p->rtp);
++					ast_rtp_update_source(p->rtp);
+ 					transmit_response_with_sdp(p, "183 Session Progress", &p->initreq, XMIT_UNRELIABLE);
+ 					ast_set_flag(&p->flags[0], SIP_PROGRESS_SENT);	
+ 				}
+@@ -3954,11 +3954,11 @@
+ 		res = -1;
+ 		break;
+ 	case AST_CONTROL_HOLD:
+-		ast_rtp_new_source(p->rtp);
++		ast_rtp_update_source(p->rtp);
+ 		ast_moh_start(ast, data, p->mohinterpret);
+ 		break;
+ 	case AST_CONTROL_UNHOLD:
+-		ast_rtp_new_source(p->rtp);
++		ast_rtp_update_source(p->rtp);
+ 		ast_moh_stop(ast);
+ 		break;
+ 	case AST_CONTROL_VIDUPDATE:	/* Request a video frame update */
+@@ -3969,7 +3969,10 @@
+ 			res = -1;
+ 		break;
+ 	case AST_CONTROL_SRCUPDATE:
+-		ast_rtp_new_source(p->rtp);
++		ast_rtp_update_source(p->rtp);
++		break;
++	case AST_CONTROL_SRCCHANGE:
++		ast_rtp_change_source(p->rtp);
+ 		break;
+ 	case -1:
+ 		res = -1;
+@@ -13938,6 +13941,7 @@
+ 						sip_scheddestroy(p, DEFAULT_TRANS_TIMEOUT);
+ 					return -1;
+ 				}
++				ast_queue_control(p->owner, AST_CONTROL_SRCCHANGE);
+ 			} else {
+ 				p->jointcapability = p->capability;
+ 				if (option_debug > 2)
+Index: asterisk-1.4.21.2~dfsg/channels/chan_skinny.c
+===================================================================
+--- asterisk-1.4.21.2~dfsg.orig/channels/chan_skinny.c	2011-06-11 19:10:40.000000000 +0000
++++ asterisk-1.4.21.2~dfsg/channels/chan_skinny.c	2011-06-11 19:45:17.000000000 +0000
+@@ -2864,7 +2864,12 @@
+ 		break;
+ 	case AST_CONTROL_SRCUPDATE:
+ 		if (sub->rtp) {
+-			ast_rtp_new_source(sub->rtp);
++			ast_rtp_update_source(sub->rtp);
++		}
++		break;
++	case AST_CONTROL_SRCCHANGE:
++		if (sub->rtp) {
++			ast_rtp_change_source(sub->rtp);
+ 		}
+ 		break;
+ 	default:

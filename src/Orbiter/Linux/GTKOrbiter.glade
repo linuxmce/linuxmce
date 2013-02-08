@@ -1,0 +1,96 @@
+<?xml version="1.0"?>
+<interface>
+  <requires lib="gtk+" version="2.16"/>
+  <!-- interface-naming-policy project-wide -->
+  <object class="GtkWindow" id="progressWindow">
+    <property name="border_width">8</property>
+    <property name="title" translatable="yes">Progress Window</property>
+    <property name="modal">True</property>
+    <property name="skip_taskbar_hint">True</property>
+    <property name="skip_pager_hint">True</property>
+    <property name="decorated">False</property>
+    <property name="deletable">False</property>
+    <property name="gravity">center</property>
+    <child>
+      <object class="GtkVBox" id="vbox1">
+        <property name="visible">True</property>
+        <child>
+          <object class="GtkLabel" id="progressLabel">
+            <property name="visible">True</property>
+            <property name="label" translatable="yes">&lt;span size="xx-large" weight="heavy"&gt;Progress Label&lt;/span&gt;</property>
+            <property name="use_markup">True</property>
+            <property name="justify">center</property>
+            <property name="wrap">True</property>
+            <property name="track_visited_links">False</property>
+          </object>
+          <packing>
+            <property name="padding">8</property>
+            <property name="position">0</property>
+          </packing>
+        </child>
+        <child>
+          <object class="GtkProgressBar" id="progressBar">
+            <property name="visible">True</property>
+            <property name="extension_events">all</property>
+            <property name="show_text">True</property>
+          </object>
+          <packing>
+            <property name="fill">False</property>
+            <property name="padding">1</property>
+            <property name="position">1</property>
+          </packing>
+        </child>
+      </object>
+    </child>
+  </object>
+  <object class="GtkWindow" id="promptWindow">
+    <property name="border_width">8</property>
+    <property name="title" translatable="yes">Prompt User Window</property>
+    <property name="resizable">False</property>
+    <property name="modal">True</property>
+    <property name="window_position">center-always</property>
+    <property name="skip_taskbar_hint">True</property>
+    <property name="skip_pager_hint">True</property>
+    <property name="decorated">False</property>
+    <child>
+      <object class="GtkVBox" id="promptVbox">
+        <property name="visible">True</property>
+        <property name="homogeneous">True</property>
+        <child>
+          <object class="GtkLabel" id="promptLabel">
+            <property name="visible">True</property>
+            <property name="label" translatable="yes">&lt;span size="xx-large" weight="heavy"&gt;Prompt User Label&lt;/span&gt;</property>
+            <property name="use_markup">True</property>
+            <property name="justify">center</property>
+            <property name="wrap">True</property>
+          </object>
+          <packing>
+            <property name="padding">8</property>
+            <property name="position">0</property>
+          </packing>
+        </child>
+        <child>
+          <object class="GtkScrolledWindow" id="promptScrollArea">
+            <property name="visible">True</property>
+            <property name="can_focus">True</property>
+            <property name="hscrollbar_policy">automatic</property>
+            <property name="vscrollbar_policy">automatic</property>
+            <property name="window_placement_set">True</property>
+            <property name="shadow_type">in</property>
+            <child>
+              <placeholder/>
+            </child>
+          </object>
+          <packing>
+            <property name="position">1</property>
+          </packing>
+        </child>
+      </object>
+    </child>
+  </object>
+  <object class="GtkSizeGroup" id="sizegroup1">
+    <widgets>
+      <widget name="progressLabel"/>
+    </widgets>
+  </object>
+</interface>

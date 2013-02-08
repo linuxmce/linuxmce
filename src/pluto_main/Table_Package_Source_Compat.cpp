@@ -82,6 +82,7 @@ void Row_Package_Source_Compat::Delete()
 	Row_Package_Source_Compat *pRow = this; // Needed so we will have only 1 version of get_primary_fields_assign_from_row
 	
 	if (!is_deleted)
+	{
 		if (is_added)	
 		{	
 			vector<TableRow*>::iterator i;	
@@ -103,6 +104,7 @@ void Row_Package_Source_Compat::Delete()
 			table->deleted_cachedRows[key] = this;
 			is_deleted = true;	
 		}	
+	}
 }
 
 void Row_Package_Source_Compat::Reload()
@@ -153,7 +155,8 @@ is_null[8] = true;
 m_psc_user = 0;
 m_psc_frozen = 0;
 is_null[9] = false;
-is_null[10] = true;
+m_psc_mod = "0000-00-00 00:00:00";
+is_null[10] = false;
 is_null[11] = true;
 m_psc_restrict = 0;
 
@@ -263,9 +266,6 @@ return is_null[8];}
 bool Row_Package_Source_Compat::psc_frozen_isNull() {PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
 
 return is_null[9];}
-bool Row_Package_Source_Compat::psc_mod_isNull() {PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
-
-return is_null[10];}
 bool Row_Package_Source_Compat::psc_restrict_isNull() {PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
 
 return is_null[11];}
@@ -301,10 +301,6 @@ is_modified=true;
 }
 void Row_Package_Source_Compat::psc_frozen_setNull(bool val){PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
 is_null[9]=val;
-is_modified=true;
-}
-void Row_Package_Source_Compat::psc_mod_setNull(bool val){PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
-is_null[10]=val;
 is_modified=true;
 }
 void Row_Package_Source_Compat::psc_restrict_setNull(bool val){PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
@@ -385,8 +381,8 @@ PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
 if (is_null[5])
 return "NULL";
 
-char *buf = new char[511];
-db_wrapper_real_escape_string(table->database->m_pDB, buf, m_Comments.c_str(), (unsigned long) min((size_t)255,m_Comments.size()));
+char *buf = new char[1531];
+db_wrapper_real_escape_string(table->database->m_pDB, buf, m_Comments.c_str(), (unsigned long) min((size_t)765,m_Comments.size()));
 string s=string()+"\""+buf+"\"";
 delete[] buf;
 return s;

@@ -90,12 +90,14 @@ WizardWidgetPage* WizardWidgetScrollList::GetContainerPage()
 	return Page;
 }
 
-/*virtual*/ void WizardWidgetScrollList::AddItem(std::string ItemName, std::string ItemValue)
+/*virtual*/ void WizardWidgetScrollList::AddItem(std::string ItemName, std::string ItemValue,
+						 std::string ItemRatio)
 {
 	if(ItemNames.size() == 0)
 		ItemIndex = 0;
 	ItemNames.push_back(ItemName);
 	ItemValues.push_back(ItemValue);
+	ItemRatios.push_back(ItemRatio);
 }
 
 void WizardWidgetScrollList::RemoveItem(std::string ItemValue)
@@ -107,6 +109,7 @@ void WizardWidgetScrollList::Clear()
 {
 	ItemNames.clear();
 	ItemValues.clear();
+	ItemRatios.clear();
 	ItemIndex = -1;
 }
 
@@ -223,6 +226,15 @@ std::string WizardWidgetScrollList::GetSelectedName()
 	return Result;
 }
 
+std::string WizardWidgetScrollList::GetSelectedRatio()
+{
+  std::string Result;
+  int Index = GetItemIndex();
+  if (-1 == Index)
+    return Result;
+  Result = ItemRatios[Index];
+  return Result;
+}
 
 void WizardWidgetScrollList::SetItemIndex(int ItemIndex)
 {

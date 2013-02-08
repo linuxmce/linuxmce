@@ -32,6 +32,7 @@
 #define ARRAY_Media_Filter_Subtype_CONST 32
 #define ARRAY_Media_Filter_Source_CONST 33
 #define ARRAY_Media_Filter_File_Format_CONST 34
+#define ARRAY_Favourite_TV_Channels_CONST 35
 
 #define ARRAY_TABLE "Array"
 #define ARRAY_PK_ARRAY_FIELD "PK_Array"

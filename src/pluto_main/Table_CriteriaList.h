@@ -128,19 +128,21 @@ void psc_mod_set(string val);
 void psc_restrict_set(long int val);
 
 		
-		bool psc_id_isNull();
+		bool Description_isNull();
+bool Define_isNull();
+bool psc_id_isNull();
 bool psc_batch_isNull();
 bool psc_user_isNull();
 bool psc_frozen_isNull();
-bool psc_mod_isNull();
 bool psc_restrict_isNull();
 
 			
-		void psc_id_setNull(bool val);
+		void Description_setNull(bool val);
+void Define_setNull(bool val);
+void psc_id_setNull(bool val);
 void psc_batch_setNull(bool val);
 void psc_user_setNull(bool val);
 void psc_frozen_setNull(bool val);
-void psc_mod_setNull(bool val);
 void psc_restrict_setNull(bool val);
 	
 	
@@ -159,10 +161,6 @@ void psc_restrict_setNull(bool val);
 		// Return the rows in other tables with foreign keys pointing here
 		void Criteria_FK_CriteriaList_getrows(vector <class Row_Criteria*> *rows);
 void CriteriaList_CriteriaParmList_FK_CriteriaList_getrows(vector <class Row_CriteriaList_CriteriaParmList*> *rows);
-void CriteriaList_CriteriaParmList_pschist_FK_CriteriaList_getrows(vector <class Row_CriteriaList_CriteriaParmList_pschist*> *rows);
-void CriteriaList_CriteriaParmList_pschmask_FK_CriteriaList_getrows(vector <class Row_CriteriaList_CriteriaParmList_pschmask*> *rows);
-void Criteria_pschist_FK_CriteriaList_getrows(vector <class Row_Criteria_pschist*> *rows);
-void Criteria_pschmask_FK_CriteriaList_getrows(vector <class Row_Criteria_pschmask*> *rows);
 
 
 		// Setup binary serialization

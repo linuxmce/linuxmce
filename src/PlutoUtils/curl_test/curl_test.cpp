@@ -65,7 +65,7 @@ int main(int argc, char* argv[])
 	//vectHeaders.push_back("Accept: text/html, */*");
 
 	map<string, string> mapParams;
-	mapParams["XML"] = URLEncode("<CiscoIPPhoneExecute><ExecuteItem URL=\"http://192.168.80.1/pluto-admin/ServicesMenu.php\"/></CiscoIPPhoneExecute>");
+	mapParams["XML"] = URLEncode("<CiscoIPPhoneExecute><ExecuteItem URL=\"http://192.168.80.1/lmce-admin/ServicesMenu.php\"/></CiscoIPPhoneExecute>");
 
 	string Response = HttpPost("http://192.168.80.253/CGI/Execute", vectHeaders, mapParams, "a", "a");
 

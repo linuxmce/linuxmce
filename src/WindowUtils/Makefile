@@ -25,17 +25,24 @@ LDFLAGS += -lmysqlclient_r -lX11 -lXmu
 
 #
 
+header=*.h
+
+
 sources = WindowUtils.cpp
 
 all: libWindowUtils.so all-recursive
 
 libWindowUtils.so: $(sources:.cpp=.o)
 	$(CXX) -shared $(CXXFLAGS) $(CPPFLAGS) -o $@ $(call cpath,$+) $(LDFLAGS) $(LDLIBS)
+	mkdir -p ../lib
 	cp $@ ../lib
 
 libWindowUtils.a: $(sources:.cpp=.o)
 	$(AR) rc $@ $(call cpath,$+)
+	mkdir -p ../lib
 	cp $@ ../lib
+
+distclean: clean
 
 clean:
 	rm -f $(call cpath,$(sources:.cpp=.o) $(sources:.cpp=.d)) libWindowUtils.so libWindowUtils.a >/dev/null
@@ -45,3 +52,8 @@ docs:
 
 include $(ROOT)/PlutoUtils/make.rules
 -include $(sources:.cpp=.d)pe
+
+install: 
+	mkdir -p $(DESTDIR)/usr/pluto/lib $(DESTDIR)/usr/include/lmce
+	cp libWindowUtils.so $(DESTDIR)/usr/pluto/lib
+	cp $(header) $(DESTDIR)/usr/include/lmce

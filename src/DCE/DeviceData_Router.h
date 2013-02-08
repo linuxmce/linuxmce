@@ -6,11 +6,11 @@
      Phone: +1 (877) 758-8648
 
 
-     This program is free software; you can redistribute it and/or modify it under the terms of the GNU General Public License.
+     This program is free software; you can redistribute it and/or modify it under the terms of the GNU Lesser General Public License.
      This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty
      of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
 
-     See the GNU General Public License for more details.
+     See the GNU Lesser General Public License for more details.
 
 */
 
@@ -22,14 +22,11 @@
 #define DCEDEVICE_H
 
 #include "DeviceData_Impl.h"
-
-#ifndef EMBEDDED_LMCE
 #include "pluto_main/Table_Device.h"
 #include "pluto_main/Table_DeviceTemplate.h"
 #include "pluto_main/Table_Device_Device_Pipe.h"
 
 class Row_Device_Device_Pipe;
-#endif
 
 namespace DCE {
 
@@ -254,11 +251,6 @@ private:
         State is the value that the user set and wants the device to stay in.
         */
         string m_sState;
-
-		/** Device deleted?
-		*/
-		bool m_bDeleted;
-
 public:
 
         // **** SERIALIZED VALUES FROM THE DATABASE ****
@@ -271,6 +263,10 @@ public:
               this will contain the IP address of the Router to send the messages to.
              */
         string m_sForeignRouter;
+
+        /** The command line to execute for this device.
+              */
+        string m_sCommandLine;
 
         /** If set to true, the first time this device connects we will send it a reload.
         This is good for controllers which try to continually reconnect and
@@ -324,44 +320,25 @@ public:
         int m_iConfigSize;
 
         string m_sStatus_get() {
-			PLUTO_SAFETY_LOCK(dm, m_DataMutex);
             return m_sStatus;
         }
         string m_sState_get() {
-			PLUTO_SAFETY_LOCK(dm, m_DataMutex);
             return m_sState;
         }
         void m_sStatus_set(string sStatus) {
-			PLUTO_SAFETY_LOCK(dm, m_DataMutex);
-#ifndef EMBEDDED_LMCE
             // Do this manually since we don't want to reset the psc_mod, causing others to think something has changed for this device
             string sSQL = "UPDATE Device SET Status='" + StringUtils::SQLEscape(sStatus) + "',psc_mod=psc_mod WHERE PK_Device=" + StringUtils::itos(m_pRow_Device->PK_Device_get());
             m_pRow_Device->Table_Device_get()->Database_pluto_main_get()->threaded_db_wrapper_query(sSQL);
             m_pRow_Device->Reload();
-#endif
             m_sStatus=sStatus;
         }
         void m_sState_set(string sState) {
-			PLUTO_SAFETY_LOCK(dm, m_DataMutex);
-#ifndef EMBEDDED_LMCE
             // Do this manually since we don't want to reset the psc_mod, causing others to think something has changed for this device
             string sSQL = "UPDATE Device SET State='" + StringUtils::SQLEscape(sState) + "',psc_mod=psc_mod WHERE PK_Device=" + StringUtils::itos(m_pRow_Device->PK_Device_get());
             m_pRow_Device->Table_Device_get()->Database_pluto_main_get()->threaded_db_wrapper_query(sSQL);
             m_pRow_Device->Reload();
-#endif
-			LoggerWrapper::GetInstance()->Write(LV_STATUS, "Set device %d state to %s", m_dwPK_Device, sState.c_str());
             m_sState=sState;
         }
-
-		void MarkAsDeleted()
-		{
-			m_bDeleted = true;
-		}
-
-		bool IsDeleted()
-		{
-			return m_bDeleted;
-		}
 
         // **** POINTERS CREATED BY THE SERIALIZED ID'S ****
 
@@ -371,15 +348,12 @@ public:
         // can tune on any one of them.  They are all marked as RouteTo the television itself.
         class DeviceData_Router *m_pDevice_RouteTo;
         class DeviceData_Router *m_pDevice_Audio,*m_pDevice_Video;
-#ifndef EMBEDDED_LMCE
         Row_Device *m_pRow_Device;
-#endif
 
         map<int,class ServerSocket *> m_mapSocket_Event;
         class ServerSocket *m_pSocket_Command;
 
 
-#ifndef EMBEDDED_LMCE
         DeviceData_Router(Row_Device *pRow_Device, Room *pRoom, string sCommandLine)
 : DeviceData_Impl(pRow_Device->PK_Device_get(),pRow_Device->FK_Installation_get(),pRow_Device->FK_DeviceTemplate_get(),pRow_Device->FK_Device_ControlledVia_get(),pRow_Device->FK_DeviceTemplate_getrow()->FK_DeviceCategory_get(),pRoom ? pRoom->m_dwPK_Room : 0,
                           pRow_Device->FK_DeviceTemplate_getrow()->ImplementsDCE_get()==1,
@@ -397,19 +371,14 @@ public:
             m_pMySerializedData=NULL;
             m_pSocket_Command=NULL;
             m_iConfigSize=0;
-
-			m_bDeleted = false;
         }
-#endif
 
         /** Another constructor for dynamically loaded plug-ins.
         */
         DeviceData_Router(int PK_Device,int PK_DeviceTemplate,int PK_Installation, int PK_Device_ControlledVia)
 : DeviceData_Impl(PK_Device,PK_Installation,PK_DeviceTemplate,PK_Device_ControlledVia,0 /* category */,0 /* room */,true /* implements dce */,false /* is embedded */,
                           "" /* Command line */,true /* Is Plugin */,"" /* Description */,"localhost","" /* Mac Address */, false, false) {
-#ifndef EMBEDDED_LMCE
             m_pRow_Device=NULL;
-#endif
             m_bForceReloadOnFirstConnect=m_bIsRegistered=m_bIsReady=m_bBusy=m_bAlert=false;
             m_tLastused=m_tCanReceiveNextCommand=0;
 
@@ -419,8 +388,6 @@ public:
             m_pMySerializedData=NULL;
             m_pSocket_Command=NULL;
             m_iConfigSize=0;
-			m_bDeleted = false;
-			m_bIgnoreOnOff = false;
         }
 
         ~DeviceData_Router() {

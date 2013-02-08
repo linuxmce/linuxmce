@@ -62,7 +62,6 @@ DesignObj_Orbiter::DesignObj_Orbiter(Orbiter *pOrbiter)
 	m_pParentObject=NULL;
 	m_pWebWindow=NULL;
 	m_bHidden=false;
-	m_bDisabled=false;
 	m_pFloorplanObject=NULL;
 #ifdef PRONTO
 	m_pCCF=NULL;
@@ -269,6 +268,7 @@ void DesignObj_Orbiter::m_GraphicToDisplay_set(string sCalling,int GraphicToDisp
 #ifdef DEBUG
 	LoggerWrapper::GetInstance()->Write(LV_STATUS,"m_GraphicToDisplay_set %s %s=%d",sCalling.c_str(),m_ObjectID.c_str(),GraphicToDisplay);
 #endif
+
 	m_GraphicToDisplay=GraphicToDisplay;
 	if( bSetUnhighlightedState )
 		m_GraphicBeforeHighlight=GraphicToDisplay;

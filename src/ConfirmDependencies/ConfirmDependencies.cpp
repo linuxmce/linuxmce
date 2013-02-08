@@ -59,7 +59,7 @@
 
 #include "CreateDevice/CreateDevice.h"
 
-#include "../include/version.h"
+#define  VERSION "<=version=>"
 
 using namespace std;
 using namespace DCE;
@@ -716,7 +716,7 @@ void CheckDevice(Row_Device *pRow_Device,bool bSourceCode)
 	if( iPK_Distro==-1 )
 	{
 		Row_Device_DeviceData *pRow_Device_DeviceData = pDatabase_pluto_main->Device_DeviceData_get()->GetRow(pRow_Device->PK_Device_get(),DEVICEDATA_PK_Distro_CONST);
-		cout << "No -o specified for distro.  Found deviec data?" << (pRow_Device_DeviceData ? "Y" : "N") << endl;
+                cout << "# No -o specified for distro.  Found device data?" << (pRow_Device_DeviceData ? "Y" : "N") << endl;
 		if( pRow_Device_DeviceData )
 			iPK_Distro = atoi(pRow_Device_DeviceData->IK_DeviceData_get().c_str());
 		else if( dceConfig.m_iPK_Distro )
@@ -727,7 +727,7 @@ void CheckDevice(Row_Device *pRow_Device,bool bSourceCode)
 	if( !pRow_Distro )
 		pRow_Distro = pDatabase_pluto_main->Distro_get()->GetRow(1);
 
-	cout << "Using Distro: " << pRow_Distro->PK_Distro_get() << endl;
+        cout << "# Using Distro: " << pRow_Distro->PK_Distro_get() << endl;
 	
 	CheckDeviceLoop(pRow_Device,bDevelopment);
 }
@@ -787,7 +787,7 @@ void CheckPackage(Row_Package *pRow_Package,Row_Device *pRow_Device,bool bDevelo
 	{
 		Row_Package_Compat *pRow_Package_Compat = vectRow_Package_Compat[s];
 		if( pRow_Package_Compat->FK_Distro_get()==pRow_Distro->PK_Distro_get() ||
-			pRow_Package_Compat->FK_OperatingSystem_get()==pRow_Distro->FK_OperatingSystem_get() ||
+			(pRow_Package_Compat->FK_Distro_isNull() && pRow_Package_Compat->FK_OperatingSystem_get()==pRow_Distro->FK_OperatingSystem_get()) ||
 			(pRow_Package_Compat->FK_Distro_isNull() && pRow_Package_Compat->FK_OperatingSystem_isNull()) )
 		{
 			bFound=true;

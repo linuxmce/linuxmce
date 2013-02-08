@@ -1,0 +1,26 @@
+Source: lmce-base
+Priority: extra
+Maintainer: root <root@racky.theinternet.dyndns.org>
+Build-Depends: debhelper (>= 7), libxml2-dev,libattr1-dev,libmysqlclient-dev
+Standards-Version: 3.9.2
+Section: libs
+Homepage: <insert the upstream URL, if relevant>
+#Vcs-Git: git://git.debian.org/collab-maint/lmce-base.git
+#Vcs-Browser: http://git.debian.org/?p=collab-maint/lmce-base.git;a=summary
+
+Package: lmce-base-dev
+Section: libdevel
+Architecture: any
+Depends: lmce-base-lib (= ${binary:Version})
+Description: LinuxMCE base files
+ Package contains all the header files for setting up a LinuxMCE
+ development environment.
+
+Package: lmce-base
+Section: libs
+Architecture: any
+Depends: ${shlibs:Depends}, ${misc:Depends}
+Description: LinuxMCE base libs
+ Package contains all the libraries need for setting up a LinuxMCE
+ development environment, and to run various apps.
+

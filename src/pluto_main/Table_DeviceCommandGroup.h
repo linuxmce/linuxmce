@@ -129,20 +129,20 @@ void psc_restrict_set(long int val);
 
 		
 		bool FK_DeviceCategory_isNull();
+bool Description_isNull();
 bool psc_id_isNull();
 bool psc_batch_isNull();
 bool psc_user_isNull();
 bool psc_frozen_isNull();
-bool psc_mod_isNull();
 bool psc_restrict_isNull();
 
 			
 		void FK_DeviceCategory_setNull(bool val);
+void Description_setNull(bool val);
 void psc_id_setNull(bool val);
 void psc_batch_setNull(bool val);
 void psc_user_setNull(bool val);
 void psc_frozen_setNull(bool val);
-void psc_mod_setNull(bool val);
 void psc_restrict_setNull(bool val);
 	
 	
@@ -161,17 +161,9 @@ void psc_restrict_setNull(bool val);
 
 		// Return the rows in other tables with foreign keys pointing here
 		void DeviceCommandGroup_Command_FK_DeviceCommandGroup_getrows(vector <class Row_DeviceCommandGroup_Command*> *rows);
-void DeviceCommandGroup_Command_pschist_FK_DeviceCommandGroup_getrows(vector <class Row_DeviceCommandGroup_Command_pschist*> *rows);
-void DeviceCommandGroup_Command_pschmask_FK_DeviceCommandGroup_getrows(vector <class Row_DeviceCommandGroup_Command_pschmask*> *rows);
 void DeviceCommandGroup_DeviceCommandGroup_Parent_FK_DeviceCommandGroup_getrows(vector <class Row_DeviceCommandGroup_DeviceCommandGroup_Parent*> *rows);
 void DeviceCommandGroup_DeviceCommandGroup_Parent_FK_DeviceCommandGroup_Parent_getrows(vector <class Row_DeviceCommandGroup_DeviceCommandGroup_Parent*> *rows);
-void DeviceCommandGroup_DeviceCommandGroup_Parent_pschist_FK_DeviceCommandGroup_getrows(vector <class Row_DeviceCommandGroup_DeviceCommandGroup_Parent_pschist*> *rows);
-void DeviceCommandGroup_DeviceCommandGroup_Parent_pschist_FK_DeviceCommandGroup_Parent_getrows(vector <class Row_DeviceCommandGroup_DeviceCommandGroup_Parent_pschist*> *rows);
-void DeviceCommandGroup_DeviceCommandGroup_Parent_pschmask_FK_DeviceCommandGroup_getrows(vector <class Row_DeviceCommandGroup_DeviceCommandGroup_Parent_pschmask*> *rows);
-void DeviceCommandGroup_DeviceCommandGroup_Parent_pschmask_FK_DeviceCommandGroup_Parent_getrows(vector <class Row_DeviceCommandGroup_DeviceCommandGroup_Parent_pschmask*> *rows);
 void DeviceTemplate_DeviceCommandGroup_FK_DeviceCommandGroup_getrows(vector <class Row_DeviceTemplate_DeviceCommandGroup*> *rows);
-void DeviceTemplate_DeviceCommandGroup_pschist_FK_DeviceCommandGroup_getrows(vector <class Row_DeviceTemplate_DeviceCommandGroup_pschist*> *rows);
-void DeviceTemplate_DeviceCommandGroup_pschmask_FK_DeviceCommandGroup_getrows(vector <class Row_DeviceTemplate_DeviceCommandGroup_pschmask*> *rows);
 
 
 		// Setup binary serialization

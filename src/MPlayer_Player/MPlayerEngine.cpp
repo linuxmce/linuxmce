@@ -10,14 +10,17 @@
 #include "PlutoUtils/FileUtils.h"
 #include "PlutoUtils/StringUtils.h"
 
-#define MPLAYER_BINARY "/opt/pluto-mplayer/bin/mplayer"
+#define MPLAYER_BINARY "/usr/bin/mplayer"
 #define MPLAYER_BINARY_SHORT "mplayer"
 
 using namespace std;
 
-MPlayerEngine::MPlayerEngine(bool bOverrideAudioSettings, string sALSADevice, bool bALSAPassthrough) : m_engineStateMutex("mplayer-engine-state-mutex"),
+//MPlayerEngine::MPlayerEngine(bool bOverrideAudioSettings, string sALSADevice, bool bALSAPassthrough) : m_engineStateMutex("mplayer-engine-state-mutex"),
+//	m_engineReadPipeMutex("mplayer-engine-read-pipe-mutex"),
+//	m_engineWritePipeMutex("mplayer-engine-write-pipe-mutex")
+MPlayerEngine::MPlayerEngine(bool bOverrideAudioSettings, string sALSADevice, bool bALSAPassthrough, string sGpuAccel, string sGpuDeInt) : m_engineStateMutex("mplayer-engine-state-mutex"),
 	m_engineReadPipeMutex("mplayer-engine-read-pipe-mutex"),
-	m_engineWritePipeMutex("mplayer-engine-write-pipe-mutex")
+	m_engineWritePipeMutex("mplayer-engine-write-pipe-mutex")	
 {
 	// initializing mutexes
 	pthread_mutexattr_t mutexAttr1;
@@ -47,7 +50,16 @@ MPlayerEngine::MPlayerEngine(bool bOverrideAudioSettings, string sALSADevice, bo
 	
 	m_eEngineState = PLAYBACK_STARTED;
 	m_vCurrentPlaylist.push_back(BLACK_MPEG_FILE);
-	StartEngine();
+
+	
+	// Assign GPU settings fetched from MD configuration in webadmin
+	sHwAccelSetting = sGpuAccel;
+	sDeInterlaceSetting = sGpuDeInt;
+	Log("Using gpu acceleration setting: " + sHwAccelSetting + "\n");
+	Log("Using deInterlace setting:      " + sDeInterlaceSetting + "\n");	
+
+	StartEngine(); // Start MPlayer
+
 }
 
 MPlayerEngine::~MPlayerEngine() {
@@ -113,17 +125,39 @@ bool MPlayerEngine::StartEngine() {
 			
 			// depending on the passthrough setting
 			string sALSACodec = (m_bALSAPassthrough?"hwac3,hwdts,":"") + string("a52,");
-			
-			execle(MPLAYER_BINARY, MPLAYER_BINARY_SHORT, "-slave", "-idle", "-msglevel", "all=4", "-noborder",
-				"-fixed-vo", "-fs", "-vo", "xv,x11", "-vf", "screenshot",
-				"-ao", sALSADevice.c_str(),
-				"-ac", sALSACodec.c_str(),
-				"-lavdopts", "fast:threads=2", BLACK_MPEG_FILE, (char *) 0, environ);
+
+			if (sHwAccelSetting == "vdpau" || sHwAccelSetting == "auto") { // Try to use VDPAU with MPlayer
+    				// For VDPAU with fallback to autodetect
+				// vo = vdpau,xv
+				// vc = ffh264vdpau,ffmpeg12vdpau,ffvc1vdpau,ffwmv3vdpau
+				execle(MPLAYER_BINARY, MPLAYER_BINARY_SHORT, "-slave", "-idle", "-msglevel", "all=4", "-noborder",
+				  "-fixed-vo", "-fs", "-vo", "vdpau,xv",
+				  "-vc", "ffh264vdpau,ffmpeg12vdpau,ffvc1vdpau,ffwmv3vdpau",
+				  "-ao", sALSADevice.c_str(),
+				  "-ac", sALSACodec.c_str(),
+				  "-lavdopts", "fast:threads=2", BLACK_MPEG_FILE, (char *) 0, environ);
+			}
+			else {
+			    execle(MPLAYER_BINARY, MPLAYER_BINARY_SHORT, "-slave", "-idle", "-msglevel", "all=4", "-noborder",
+			      "-fixed-vo", "-fs", "-vo", "xv,x11", "-vf", "screenshot",
+			      "-ao", sALSADevice.c_str(),
+			      "-ac", sALSACodec.c_str(),
+			      "-lavdopts", "fast:threads=2", BLACK_MPEG_FILE, (char *) 0, environ);
+			}
 		}
 		else {
-			execle(MPLAYER_BINARY, MPLAYER_BINARY_SHORT, "-slave", "-idle", "-msglevel", "all=4", "-noborder",
-			       "-fixed-vo", "-fs", "-vo", "xv,x11", "-vf", "screenshot",
-	  			"-lavdopts", "fast:threads=2", BLACK_MPEG_FILE, (char *) 0, environ);
+			if (sHwAccelSetting == "vdpau" || sHwAccelSetting == "auto") { // Try to use VDPAU with MPlayer			
+			    execle(MPLAYER_BINARY, MPLAYER_BINARY_SHORT, "-slave", "-idle", "-msglevel", "all=4", "-noborder",
+			      "-fixed-vo", "-fs", "-vo", "vdpau,xv",
+			      "-vc", "ffh264vdpau,ffmpeg12vdpau,ffvc1vdpau,ffwmv3vdpau",
+	  		      "-lavdopts", "fast:threads=2", BLACK_MPEG_FILE, (char *) 0, environ);
+	  		}
+	  		else {
+	  	    	    execle(MPLAYER_BINARY, MPLAYER_BINARY_SHORT, "-slave", "-idle", "-msglevel", "all=4", "-noborder",
+			      "-fixed-vo", "-fs", "-vo", "xv,x11", "-vf", "screenshot",
+	  		      "-lavdopts", "fast:threads=2", BLACK_MPEG_FILE, (char *) 0, environ);
+	  		}
+	  		  
 		}
 
 		Log("execle() failed");

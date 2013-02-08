@@ -35,14 +35,8 @@ using namespace std;
 #include "Table_DesignObj.h"
 
 #include "Table_EntertainArea.h"
-#include "Table_EntertainArea_pschist.h"
-#include "Table_EntertainArea_pschmask.h"
 #include "Table_FloorplanObjectType_Color.h"
-#include "Table_FloorplanObjectType_Color_pschist.h"
-#include "Table_FloorplanObjectType_Color_pschmask.h"
 #include "Table_Room.h"
-#include "Table_Room_pschist.h"
-#include "Table_Room_pschmask.h"
 
 
 void Database_pluto_main::CreateTable_FloorplanObjectType()
@@ -90,6 +84,7 @@ void Row_FloorplanObjectType::Delete()
 	Row_FloorplanObjectType *pRow = this; // Needed so we will have only 1 version of get_primary_fields_assign_from_row
 	
 	if (!is_deleted)
+	{
 		if (is_added)	
 		{	
 			vector<TableRow*>::iterator i;	
@@ -111,6 +106,7 @@ void Row_FloorplanObjectType::Delete()
 			table->deleted_cachedRows[key] = this;
 			is_deleted = true;	
 		}	
+	}
 }
 
 void Row_FloorplanObjectType::Reload()
@@ -146,12 +142,9 @@ void Row_FloorplanObjectType::SetDefaultValues()
 is_null[0] = false;
 m_FK_FloorplanType = 0;
 is_null[1] = false;
-m_Description = "";
-is_null[2] = false;
-m_Define = "";
-is_null[3] = false;
-m_Direction = "";
-is_null[4] = false;
+is_null[2] = true;
+is_null[3] = true;
+is_null[4] = true;
 is_null[5] = true;
 m_FK_DesignObj_Control = 0;
 is_null[6] = true;
@@ -167,7 +160,8 @@ is_null[11] = true;
 m_psc_user = 0;
 m_psc_frozen = 0;
 is_null[12] = false;
-is_null[13] = true;
+m_psc_mod = "0000-00-00 00:00:00";
+is_null[13] = false;
 is_null[14] = true;
 m_psc_restrict = 0;
 
@@ -271,6 +265,15 @@ void Row_FloorplanObjectType::psc_restrict_set(long int val){PLUTO_SAFETY_LOCK_E
 m_psc_restrict = val; is_modified=true; is_null[14]=false;}
 
 		
+bool Row_FloorplanObjectType::Description_isNull() {PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
+
+return is_null[2];}
+bool Row_FloorplanObjectType::Define_isNull() {PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
+
+return is_null[3];}
+bool Row_FloorplanObjectType::Direction_isNull() {PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
+
+return is_null[4];}
 bool Row_FloorplanObjectType::FK_DesignObj_Control_isNull() {PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
 
 return is_null[5];}
@@ -289,14 +292,23 @@ return is_null[11];}
 bool Row_FloorplanObjectType::psc_frozen_isNull() {PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
 
 return is_null[12];}
-bool Row_FloorplanObjectType::psc_mod_isNull() {PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
-
-return is_null[13];}
 bool Row_FloorplanObjectType::psc_restrict_isNull() {PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
 
 return is_null[14];}
 
 			
+void Row_FloorplanObjectType::Description_setNull(bool val){PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
+is_null[2]=val;
+is_modified=true;
+}
+void Row_FloorplanObjectType::Define_setNull(bool val){PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
+is_null[3]=val;
+is_modified=true;
+}
+void Row_FloorplanObjectType::Direction_setNull(bool val){PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
+is_null[4]=val;
+is_modified=true;
+}
 void Row_FloorplanObjectType::FK_DesignObj_Control_setNull(bool val){PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
 is_null[5]=val;
 is_modified=true;
@@ -319,10 +331,6 @@ is_modified=true;
 }
 void Row_FloorplanObjectType::psc_frozen_setNull(bool val){PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
 is_null[12]=val;
-is_modified=true;
-}
-void Row_FloorplanObjectType::psc_mod_setNull(bool val){PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
-is_null[13]=val;
 is_modified=true;
 }
 void Row_FloorplanObjectType::psc_restrict_setNull(bool val){PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
@@ -364,8 +372,8 @@ PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
 if (is_null[2])
 return "NULL";
 
-char *buf = new char[101];
-db_wrapper_real_escape_string(table->database->m_pDB, buf, m_Description.c_str(), (unsigned long) min((size_t)50,m_Description.size()));
+char *buf = new char[301];
+db_wrapper_real_escape_string(table->database->m_pDB, buf, m_Description.c_str(), (unsigned long) min((size_t)150,m_Description.size()));
 string s=string()+"\""+buf+"\"";
 delete[] buf;
 return s;
@@ -378,8 +386,8 @@ PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
 if (is_null[3])
 return "NULL";
 
-char *buf = new char[101];
-db_wrapper_real_escape_string(table->database->m_pDB, buf, m_Define.c_str(), (unsigned long) min((size_t)50,m_Define.size()));
+char *buf = new char[301];
+db_wrapper_real_escape_string(table->database->m_pDB, buf, m_Define.c_str(), (unsigned long) min((size_t)150,m_Define.size()));
 string s=string()+"\""+buf+"\"";
 delete[] buf;
 return s;
@@ -392,8 +400,8 @@ PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
 if (is_null[4])
 return "NULL";
 
-char *buf = new char[9];
-db_wrapper_real_escape_string(table->database->m_pDB, buf, m_Direction.c_str(), (unsigned long) min((size_t)4,m_Direction.size()));
+char *buf = new char[25];
+db_wrapper_real_escape_string(table->database->m_pDB, buf, m_Direction.c_str(), (unsigned long) min((size_t)12,m_Direction.size()));
 string s=string()+"\""+buf+"\"";
 delete[] buf;
 return s;
@@ -419,8 +427,8 @@ PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
 if (is_null[6])
 return "NULL";
 
-char *buf = new char[401];
-db_wrapper_real_escape_string(table->database->m_pDB, buf, m_Filename.c_str(), (unsigned long) min((size_t)200,m_Filename.size()));
+char *buf = new char[1201];
+db_wrapper_real_escape_string(table->database->m_pDB, buf, m_Filename.c_str(), (unsigned long) min((size_t)600,m_Filename.size()));
 string s=string()+"\""+buf+"\"";
 delete[] buf;
 return s;
@@ -1249,20 +1257,6 @@ PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
 class Table_EntertainArea *pTable = table->database->EntertainArea_get();
 pTable->GetRows("`FK_FloorplanObjectType`=" + StringUtils::itos(m_PK_FloorplanObjectType),rows);
 }
-void Row_FloorplanObjectType::EntertainArea_pschist_FK_FloorplanObjectType_getrows(vector <class Row_EntertainArea_pschist*> *rows)
-{
-PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
-
-class Table_EntertainArea_pschist *pTable = table->database->EntertainArea_pschist_get();
-pTable->GetRows("`FK_FloorplanObjectType`=" + StringUtils::itos(m_PK_FloorplanObjectType),rows);
-}
-void Row_FloorplanObjectType::EntertainArea_pschmask_FK_FloorplanObjectType_getrows(vector <class Row_EntertainArea_pschmask*> *rows)
-{
-PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
-
-class Table_EntertainArea_pschmask *pTable = table->database->EntertainArea_pschmask_get();
-pTable->GetRows("`FK_FloorplanObjectType`=" + StringUtils::itos(m_PK_FloorplanObjectType),rows);
-}
 void Row_FloorplanObjectType::FloorplanObjectType_Color_FK_FloorplanObjectType_getrows(vector <class Row_FloorplanObjectType_Color*> *rows)
 {
 PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
@@ -1270,39 +1264,11 @@ PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
 class Table_FloorplanObjectType_Color *pTable = table->database->FloorplanObjectType_Color_get();
 pTable->GetRows("`FK_FloorplanObjectType`=" + StringUtils::itos(m_PK_FloorplanObjectType),rows);
 }
-void Row_FloorplanObjectType::FloorplanObjectType_Color_pschist_FK_FloorplanObjectType_getrows(vector <class Row_FloorplanObjectType_Color_pschist*> *rows)
-{
-PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
-
-class Table_FloorplanObjectType_Color_pschist *pTable = table->database->FloorplanObjectType_Color_pschist_get();
-pTable->GetRows("`FK_FloorplanObjectType`=" + StringUtils::itos(m_PK_FloorplanObjectType),rows);
-}
-void Row_FloorplanObjectType::FloorplanObjectType_Color_pschmask_FK_FloorplanObjectType_getrows(vector <class Row_FloorplanObjectType_Color_pschmask*> *rows)
-{
-PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
-
-class Table_FloorplanObjectType_Color_pschmask *pTable = table->database->FloorplanObjectType_Color_pschmask_get();
-pTable->GetRows("`FK_FloorplanObjectType`=" + StringUtils::itos(m_PK_FloorplanObjectType),rows);
-}
 void Row_FloorplanObjectType::Room_FK_FloorplanObjectType_getrows(vector <class Row_Room*> *rows)
 {
 PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
 
 class Table_Room *pTable = table->database->Room_get();
-pTable->GetRows("`FK_FloorplanObjectType`=" + StringUtils::itos(m_PK_FloorplanObjectType),rows);
-}
-void Row_FloorplanObjectType::Room_pschist_FK_FloorplanObjectType_getrows(vector <class Row_Room_pschist*> *rows)
-{
-PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
-
-class Table_Room_pschist *pTable = table->database->Room_pschist_get();
-pTable->GetRows("`FK_FloorplanObjectType`=" + StringUtils::itos(m_PK_FloorplanObjectType),rows);
-}
-void Row_FloorplanObjectType::Room_pschmask_FK_FloorplanObjectType_getrows(vector <class Row_Room_pschmask*> *rows)
-{
-PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
-
-class Table_Room_pschmask *pTable = table->database->Room_pschmask_get();
 pTable->GetRows("`FK_FloorplanObjectType`=" + StringUtils::itos(m_PK_FloorplanObjectType),rows);
 }
 

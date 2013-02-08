@@ -19,6 +19,9 @@
 #define ICON_Document_CONST 16
 #define ICON_Start_Disc_CONST 17
 #define ICON_Movies_CONST 18
+#define ICON_Blinds_Open_CONST 19
+#define ICON_Blinds_Shade_CONST 20
+#define ICON_Blinds_Close_CONST 21
 
 #define ICON_TABLE "Icon"
 #define ICON_PK_ICON_FIELD "PK_Icon"

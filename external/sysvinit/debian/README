@@ -1,0 +1,20 @@
+This is the Debian GNU/Linux prepackaged version of System V Init.  Init
+was written by Miquel van Smoorenburg <miquels@cistron.nl>.
+
+This package was put together by Bruce Perens <Bruce@Pixar.com> from pre-
+distribution sources. Ian Murdock <imurdock@debian.org> integrated it into
+the base system maintained it until the end of 1995. Miquel van Smoorenburg
+<miquels@cistron.nl> has integrated debian support into the base package.
+
+Since version 2.80, debian support was taken out of the upstream package
+and is now only present in the Debian prepackaged version. This was in
+preparance for the split into seperate packages (sysvinit, sysv-rc,
+initscripts) which has been realized in version 2.85.
+
+The upstream source is available at:
+
+Primary-Site:   ftp.cistron.nl /pub/people/miquels/software
+                92K sysvinit-2.86.tar.gz
+Alternate-Site: sunsite.unc.edu /pub/Linux/system/daemons/init
+                92K sysvinit-2.86.tar.gz
+

@@ -96,11 +96,17 @@ case "$URL_TYPE" in
 		SingleEndSlash='s!//*!/!g; s!/*$!/!g; s!^http:/!http://!g; s!^ftp:/!ftp://!g'
 		EndSlashRepos=$(echo "$REPOS_SRC" | sed "$SingleEndSlash")
 		AptSrc_ParseSourcesList
-		if AptSrc_AddSource "deb $EndSlashRepos $REPOS $SECTIONS"; then
-			AptSrc_WriteSourcesList >/etc/apt/sources.list
-			if [[ "$InternetConnection" != NoInternetConnection ]]; then
-				apt-get update
-			fi
+		if [ $REPOS = `lsb_release -c -s`]; then
+                	if AptSrc_AddSource "deb $EndSlashRepos $REPOS $SECTIONS"; then
+                        	if ! BlacklistConfFiles '/etc/apt/sources.list' ;then
+                                	AptSrc_WriteSourcesList >/etc/apt/sources.list
+	                        fi
+        	                if [[ "$InternetConnection" != NoInternetConnection ]]; then
+                	                apt-get update
+                        	fi
+	                fi
+		else
+			echo "Repositories do not match - skipping update of the sources.list file"
 		fi
 
 		if ! PackageIsInstalled "$PKG_NAME"; then
@@ -186,5 +192,7 @@ case "$URL_TYPE" in
 		exit $Ret
 	;;
 esac
+
+/usr/pluto/bin/BootMessage.sh ""
 
 exit 0

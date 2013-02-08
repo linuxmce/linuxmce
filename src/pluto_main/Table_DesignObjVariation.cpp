@@ -48,16 +48,8 @@ using namespace std;
 
 #include "Table_DesignObjVariation_DesignObj.h"
 #include "Table_DesignObjVariation_DesignObjParameter.h"
-#include "Table_DesignObjVariation_DesignObjParameter_pschist.h"
-#include "Table_DesignObjVariation_DesignObjParameter_pschmask.h"
-#include "Table_DesignObjVariation_DesignObj_pschist.h"
-#include "Table_DesignObjVariation_DesignObj_pschmask.h"
 #include "Table_DesignObjVariation_Text.h"
-#include "Table_DesignObjVariation_Text_pschist.h"
-#include "Table_DesignObjVariation_Text_pschmask.h"
 #include "Table_DesignObjVariation_Zone.h"
-#include "Table_DesignObjVariation_Zone_pschist.h"
-#include "Table_DesignObjVariation_Zone_pschmask.h"
 
 
 void Database_pluto_main::CreateTable_DesignObjVariation()
@@ -105,6 +97,7 @@ void Row_DesignObjVariation::Delete()
 	Row_DesignObjVariation *pRow = this; // Needed so we will have only 1 version of get_primary_fields_assign_from_row
 	
 	if (!is_deleted)
+	{
 		if (is_added)	
 		{	
 			vector<TableRow*>::iterator i;	
@@ -126,6 +119,7 @@ void Row_DesignObjVariation::Delete()
 			table->deleted_cachedRows[key] = this;
 			is_deleted = true;	
 		}	
+	}
 }
 
 void Row_DesignObjVariation::Reload()
@@ -207,7 +201,8 @@ is_null[23] = true;
 m_psc_user = 0;
 m_psc_frozen = 0;
 is_null[24] = false;
-is_null[25] = true;
+m_psc_mod = "0000-00-00 00:00:00";
+is_null[25] = false;
 is_null[26] = true;
 m_psc_restrict = 0;
 
@@ -437,9 +432,6 @@ return is_null[23];}
 bool Row_DesignObjVariation::psc_frozen_isNull() {PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
 
 return is_null[24];}
-bool Row_DesignObjVariation::psc_mod_isNull() {PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
-
-return is_null[25];}
 bool Row_DesignObjVariation::psc_restrict_isNull() {PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
 
 return is_null[26];}
@@ -515,10 +507,6 @@ is_modified=true;
 }
 void Row_DesignObjVariation::psc_frozen_setNull(bool val){PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
 is_null[24]=val;
-is_modified=true;
-}
-void Row_DesignObjVariation::psc_mod_setNull(bool val){PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
-is_null[25]=val;
 is_modified=true;
 }
 void Row_DesignObjVariation::psc_restrict_setNull(bool val){PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
@@ -1952,34 +1940,6 @@ PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
 class Table_DesignObjVariation_DesignObjParameter *pTable = table->database->DesignObjVariation_DesignObjParameter_get();
 pTable->GetRows("`FK_DesignObjVariation`=" + StringUtils::itos(m_PK_DesignObjVariation),rows);
 }
-void Row_DesignObjVariation::DesignObjVariation_DesignObjParameter_pschist_FK_DesignObjVariation_getrows(vector <class Row_DesignObjVariation_DesignObjParameter_pschist*> *rows)
-{
-PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
-
-class Table_DesignObjVariation_DesignObjParameter_pschist *pTable = table->database->DesignObjVariation_DesignObjParameter_pschist_get();
-pTable->GetRows("`FK_DesignObjVariation`=" + StringUtils::itos(m_PK_DesignObjVariation),rows);
-}
-void Row_DesignObjVariation::DesignObjVariation_DesignObjParameter_pschmask_FK_DesignObjVariation_getrows(vector <class Row_DesignObjVariation_DesignObjParameter_pschmask*> *rows)
-{
-PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
-
-class Table_DesignObjVariation_DesignObjParameter_pschmask *pTable = table->database->DesignObjVariation_DesignObjParameter_pschmask_get();
-pTable->GetRows("`FK_DesignObjVariation`=" + StringUtils::itos(m_PK_DesignObjVariation),rows);
-}
-void Row_DesignObjVariation::DesignObjVariation_DesignObj_pschist_FK_DesignObjVariation_Parent_getrows(vector <class Row_DesignObjVariation_DesignObj_pschist*> *rows)
-{
-PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
-
-class Table_DesignObjVariation_DesignObj_pschist *pTable = table->database->DesignObjVariation_DesignObj_pschist_get();
-pTable->GetRows("`FK_DesignObjVariation_Parent`=" + StringUtils::itos(m_PK_DesignObjVariation),rows);
-}
-void Row_DesignObjVariation::DesignObjVariation_DesignObj_pschmask_FK_DesignObjVariation_Parent_getrows(vector <class Row_DesignObjVariation_DesignObj_pschmask*> *rows)
-{
-PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
-
-class Table_DesignObjVariation_DesignObj_pschmask *pTable = table->database->DesignObjVariation_DesignObj_pschmask_get();
-pTable->GetRows("`FK_DesignObjVariation_Parent`=" + StringUtils::itos(m_PK_DesignObjVariation),rows);
-}
 void Row_DesignObjVariation::DesignObjVariation_Text_FK_DesignObjVariation_getrows(vector <class Row_DesignObjVariation_Text*> *rows)
 {
 PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
@@ -1987,39 +1947,11 @@ PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
 class Table_DesignObjVariation_Text *pTable = table->database->DesignObjVariation_Text_get();
 pTable->GetRows("`FK_DesignObjVariation`=" + StringUtils::itos(m_PK_DesignObjVariation),rows);
 }
-void Row_DesignObjVariation::DesignObjVariation_Text_pschist_FK_DesignObjVariation_getrows(vector <class Row_DesignObjVariation_Text_pschist*> *rows)
-{
-PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
-
-class Table_DesignObjVariation_Text_pschist *pTable = table->database->DesignObjVariation_Text_pschist_get();
-pTable->GetRows("`FK_DesignObjVariation`=" + StringUtils::itos(m_PK_DesignObjVariation),rows);
-}
-void Row_DesignObjVariation::DesignObjVariation_Text_pschmask_FK_DesignObjVariation_getrows(vector <class Row_DesignObjVariation_Text_pschmask*> *rows)
-{
-PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
-
-class Table_DesignObjVariation_Text_pschmask *pTable = table->database->DesignObjVariation_Text_pschmask_get();
-pTable->GetRows("`FK_DesignObjVariation`=" + StringUtils::itos(m_PK_DesignObjVariation),rows);
-}
 void Row_DesignObjVariation::DesignObjVariation_Zone_FK_DesignObjVariation_getrows(vector <class Row_DesignObjVariation_Zone*> *rows)
 {
 PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
 
 class Table_DesignObjVariation_Zone *pTable = table->database->DesignObjVariation_Zone_get();
-pTable->GetRows("`FK_DesignObjVariation`=" + StringUtils::itos(m_PK_DesignObjVariation),rows);
-}
-void Row_DesignObjVariation::DesignObjVariation_Zone_pschist_FK_DesignObjVariation_getrows(vector <class Row_DesignObjVariation_Zone_pschist*> *rows)
-{
-PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
-
-class Table_DesignObjVariation_Zone_pschist *pTable = table->database->DesignObjVariation_Zone_pschist_get();
-pTable->GetRows("`FK_DesignObjVariation`=" + StringUtils::itos(m_PK_DesignObjVariation),rows);
-}
-void Row_DesignObjVariation::DesignObjVariation_Zone_pschmask_FK_DesignObjVariation_getrows(vector <class Row_DesignObjVariation_Zone_pschmask*> *rows)
-{
-PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
-
-class Table_DesignObjVariation_Zone_pschmask *pTable = table->database->DesignObjVariation_Zone_pschmask_get();
 pTable->GetRows("`FK_DesignObjVariation`=" + StringUtils::itos(m_PK_DesignObjVariation),rows);
 }
 

@@ -1,0 +1,15 @@
+#!/bin/sh
+
+JAVA_HOME="/usr/lib/jvm/java-6-openjdk"
+
+if [ ! -d "$JAVA_HOME" ]; then
+    echo "Can't find java-6-openjdk, please check the build-depends" 1>&2
+    exit 1
+fi
+
+export JAVA_HOME
+
+# workaround for openjdk bug, see http://bugs.debian.org/491074
+export ANT_OPTS="-client"
+
+exec ant "$@"

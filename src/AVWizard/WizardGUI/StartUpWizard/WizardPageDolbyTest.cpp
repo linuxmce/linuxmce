@@ -19,6 +19,7 @@
 #include "WizardPageDolbyTest.h"
 
 #include "GUIWizardUtils.h"
+
 #include <iostream>
 
 #include "WizardWidgetLabel.h"
@@ -53,7 +54,7 @@ WizardPageDolbyTest::~WizardPageDolbyTest(void)
 #ifdef DEBUG
 	std::cout<<"WizardPageDolbyTest::WizardPageDolbyTest"<<std::endl;
 #endif
-	if((Dictionary == NULL)|| (Selected == NULL))
+	if((Dictionary == NULL) || (Selected == NULL))
 		return -1;
 	OutputValue = Selected->GetCaption();
 	Dictionary->Set("DolbyTest", OutputValue!= "No, I cannot hear it");

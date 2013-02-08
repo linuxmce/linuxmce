@@ -36,8 +36,6 @@ using namespace std;
 #include "Table_TimeZone.h"
 
 #include "Table_Installation.h"
-#include "Table_Installation_pschist.h"
-#include "Table_Installation_pschmask.h"
 #include "Table_PostalCode.h"
 
 
@@ -86,6 +84,7 @@ void Row_City::Delete()
 	Row_City *pRow = this; // Needed so we will have only 1 version of get_primary_fields_assign_from_row
 	
 	if (!is_deleted)
+	{
 		if (is_added)	
 		{	
 			vector<TableRow*>::iterator i;	
@@ -107,6 +106,7 @@ void Row_City::Delete()
 			table->deleted_cachedRows[key] = this;
 			is_deleted = true;	
 		}	
+	}
 }
 
 void Row_City::Reload()
@@ -332,8 +332,8 @@ PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
 if (is_null[3])
 return "NULL";
 
-char *buf = new char[91];
-db_wrapper_real_escape_string(table->database->m_pDB, buf, m_City.c_str(), (unsigned long) min((size_t)45,m_City.size()));
+char *buf = new char[271];
+db_wrapper_real_escape_string(table->database->m_pDB, buf, m_City.c_str(), (unsigned long) min((size_t)135,m_City.size()));
 string s=string()+"\""+buf+"\"";
 delete[] buf;
 return s;
@@ -385,8 +385,8 @@ PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
 if (is_null[7])
 return "NULL";
 
-char *buf = new char[51];
-db_wrapper_real_escape_string(table->database->m_pDB, buf, m_County.c_str(), (unsigned long) min((size_t)25,m_County.size()));
+char *buf = new char[151];
+db_wrapper_real_escape_string(table->database->m_pDB, buf, m_County.c_str(), (unsigned long) min((size_t)75,m_County.size()));
 string s=string()+"\""+buf+"\"";
 delete[] buf;
 return s;
@@ -399,8 +399,8 @@ PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
 if (is_null[8])
 return "NULL";
 
-char *buf = new char[9];
-db_wrapper_real_escape_string(table->database->m_pDB, buf, m_Code.c_str(), (unsigned long) min((size_t)4,m_Code.size()));
+char *buf = new char[25];
+db_wrapper_real_escape_string(table->database->m_pDB, buf, m_Code.c_str(), (unsigned long) min((size_t)12,m_Code.size()));
 string s=string()+"\""+buf+"\"";
 delete[] buf;
 return s;
@@ -1032,20 +1032,6 @@ void Row_City::Installation_FK_City_getrows(vector <class Row_Installation*> *ro
 PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
 
 class Table_Installation *pTable = table->database->Installation_get();
-pTable->GetRows("`FK_City`=" + StringUtils::itos(m_PK_City),rows);
-}
-void Row_City::Installation_pschist_FK_City_getrows(vector <class Row_Installation_pschist*> *rows)
-{
-PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
-
-class Table_Installation_pschist *pTable = table->database->Installation_pschist_get();
-pTable->GetRows("`FK_City`=" + StringUtils::itos(m_PK_City),rows);
-}
-void Row_City::Installation_pschmask_FK_City_getrows(vector <class Row_Installation_pschmask*> *rows)
-{
-PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
-
-class Table_Installation_pschmask *pTable = table->database->Installation_pschmask_get();
 pTable->GetRows("`FK_City`=" + StringUtils::itos(m_PK_City),rows);
 }
 void Row_City::PostalCode_FK_City_getrows(vector <class Row_PostalCode*> *rows)

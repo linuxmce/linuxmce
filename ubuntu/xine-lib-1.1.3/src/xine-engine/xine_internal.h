@@ -345,12 +345,6 @@ struct xine_stream_s {
   int                        early_finish_event; /* do not wait fifos get empty before sending event */
   int                        gapless_switch;     /* next stream switch will be gapless */
   int                        delay_finish_event; /* delay event in 1/10 sec units. 0=>no delay, -1=>forever */
-  
-  int                        trick_play_frame_skip_mode; /* what frames to skip: 0 - no frames skipped 
-  					* by trick play, 1 - B-frames are skipped, 2 - B&P-frames are skipped, 
-					 * 3 - B&P&I-frames are skipped (impossible) */
-  int                        trick_play_stream_distincts_frame_type; /* 0 - doesn't distinct between I/P/B-frames (ffmpeg decoder), 
-							    * 1 - distincts between I/P/B-frames (see xvmc.h header ) */
 #endif
 };
 

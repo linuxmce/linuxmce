@@ -75,17 +75,21 @@
 #endif
 #endif
 
-
 using namespace DCE;
 
+#include "ProgressBarConfig.h"
+
 OrbiterRenderer_Linux::OrbiterRenderer_Linux(Orbiter *pOrbiter) : BASE_CLASS(pOrbiter), 
+#ifndef DIRECTFB
 	m_screenMaskObjects(None), m_screenMaskPopups(None), m_screenMaskCurrent(None), 
+#endif
 	m_bHasPopups(false), m_bScreenRendered(false)
 {
 }
 
 OrbiterRenderer_Linux::~OrbiterRenderer_Linux()
 {
+#ifndef DIRECTFB
 	OrbiterLinux *pOrbiterLinux = dynamic_cast<OrbiterLinux *>(OrbiterLogic());
 	
 	if (pOrbiterLinux != NULL)
@@ -94,10 +98,12 @@ OrbiterRenderer_Linux::~OrbiterRenderer_Linux()
 		pOrbiterLinux->m_pX11->Delete_Pixmap(m_screenMaskPopups);
 		pOrbiterLinux->m_pX11->Delete_Pixmap(m_screenMaskCurrent);
 	}
+#endif
 }
 
 bool OrbiterRenderer_Linux::HandleShowPopup(PlutoPopup* Popup, PlutoPoint Position, int EffectID)
 {
+#ifndef DIRECTFB
 	OrbiterLinux *pOrbiterLinux = dynamic_cast<OrbiterLinux *>(OrbiterLogic());
 	
 	if (pOrbiterLinux != NULL && pOrbiterLinux->m_bUseMask)
@@ -126,12 +132,13 @@ bool OrbiterRenderer_Linux::HandleShowPopup(PlutoPopup* Popup, PlutoPoint Positi
 		PlutoRectangle rectTotal(0, 0, Popup->m_pObj->m_rPosition.Width, Popup->m_pObj->m_rPosition.Height);
 		pOrbiterLinux->ApplyMask(rectTotal, Popup->m_Position, mtShowPopupMask);
 	}
-
+#endif
 	return BASE_CLASS::HandleShowPopup(Popup, Position, EffectID);
 }
 
 bool OrbiterRenderer_Linux::HandleHidePopup(PlutoPopup* Popup)
 {
+#ifndef DIRECTFB
 	OrbiterLinux *pOrbiterLinux = dynamic_cast<OrbiterLinux *>(OrbiterLogic());
 	
 	if (pOrbiterLinux != NULL && pOrbiterLinux->m_bUseMask)
@@ -160,7 +167,7 @@ bool OrbiterRenderer_Linux::HandleHidePopup(PlutoPopup* Popup)
 		PlutoRectangle rectTotal(0, 0, Popup->m_pObj->m_rPosition.Width, Popup->m_pObj->m_rPosition.Height);
 		pOrbiterLinux->ApplyMask(rectTotal, Popup->m_Position, mtHidePopupMask);
 	}
-
+#endif
 	return BASE_CLASS::HandleHidePopup(Popup);
 }
 
@@ -182,6 +189,7 @@ void OrbiterRenderer_Linux::ObjectRendered(DesignObj_Orbiter *pObj, PlutoPoint p
 	}
 
 	OrbiterLinux *pOrbiterLinux = dynamic_cast<OrbiterLinux *>(OrbiterLogic());
+#ifndef DIRECTFB
 	if(pOrbiterLinux != NULL && pOrbiterLinux->m_bUseMask)
 	{
 		if(pObj->m_vectGraphic.size() > 0 && NULL != pObj->m_vectGraphic[0])
@@ -205,14 +213,16 @@ void OrbiterRenderer_Linux::ObjectRendered(DesignObj_Orbiter *pObj, PlutoPoint p
 			{
 				LoggerWrapper::GetInstance()->Write(LV_STATUS, "qqq Shape_PixmapMask_Rectangle %d,%d,%d,%d opaque",
 					pObj->m_rPosition.X, pObj->m_rPosition.Y, pObj->m_rPosition.Width, pObj->m_rPosition.Height);
-
+#ifndef DIRECTFB
 				//modify mask
 				pOrbiterLinux->m_pX11->Shape_PixmapMask_Rectangle(
 					m_screenMaskObjects, pObj->m_rPosition.X, pObj->m_rPosition.Y,
 					pObj->m_rPosition.Width, pObj->m_rPosition.Height, true);
+#endif
 			}
 		}
 	}
+#endif
 }
 
 void OrbiterRenderer_Linux::RenderScreen( bool bRenderGraphicsOnly )
@@ -222,6 +232,7 @@ void OrbiterRenderer_Linux::RenderScreen( bool bRenderGraphicsOnly )
 	OrbiterLinux *pOrbiterLinux = dynamic_cast<OrbiterLinux *>(OrbiterLogic());
 	if(NULL != pOrbiterLinux)
 	{
+#ifndef DIRECTFB
 		if(pOrbiterLinux->m_bUseMask)
 		{
 			if(m_screenMaskCurrent == None)
@@ -247,18 +258,19 @@ void OrbiterRenderer_Linux::RenderScreen( bool bRenderGraphicsOnly )
 			pOrbiterLinux->m_pX11->Shape_PixmapMask_Rectangle(
 				m_screenMaskPopups, 0, 0, pOrbiterLinux->m_iImageWidth, pOrbiterLinux->m_iImageHeight, false);
 		}
-
+#endif
 		if( bRenderGraphicsOnly )
 		{
 			BASE_CLASS::RenderScreen( bRenderGraphicsOnly );
-	
+#ifndef DIRECTFB	
                         if(pOrbiterLinux->m_bUseMask)
                                 ApplyMasks();
-
+#endif
 	                m_bScreenRendered = true;
 			return;
 		}		
-		
+
+#ifndef DIRECTFB		
 		pOrbiterLinux->StopActivateExternalWindowTask();
 		pOrbiterLinux->m_pWinListManager->HideAllWindows();
 		pOrbiterLinux->m_bIsExclusiveMode = true; // This is set to false if there's an application desktop
@@ -271,17 +283,17 @@ void OrbiterRenderer_Linux::RenderScreen( bool bRenderGraphicsOnly )
 			}
 
 			X11_Locker lock(pOrbiterLinux->GetDisplay());
+#endif
 			BASE_CLASS::RenderScreen(bRenderGraphicsOnly);
-
+#ifndef DIRECTFB
 	                if(pOrbiterLinux->m_bUseMask)
         	                ApplyMasks();
 		}
-
 		if(pOrbiterLinux->m_bOrbiterReady)
 			pOrbiterLinux->m_pWinListManager->ShowSdlWindow(pOrbiterLinux->m_bIsExclusiveMode, pOrbiterLinux->m_bYieldScreen);
-
 		m_bScreenRendered = true;
 		pOrbiterLinux->m_pWinListManager->ApplyContext();
+#endif
 	}
 }
 
@@ -291,7 +303,7 @@ void OrbiterRenderer_Linux::ApplyMasks()
 	if(NULL != pOrbiterLinux)
 	{
 		LoggerWrapper::GetInstance()->Write(LV_STATUS, "qqq Shape_Window_Apply!");
-
+#ifndef DIRECTFB
 		if(m_bHasPopups)
 		{
 			//mirror mask objects with mask current
@@ -313,7 +325,9 @@ void OrbiterRenderer_Linux::ApplyMasks()
 				LoggerWrapper::GetInstance()->Write(LV_CRITICAL, "qqq Shape_Window_Apply ERROR!");
 			}
 		}
+#endif
 	}
+
 }
 
 void OrbiterRenderer_Linux::InitializeAfterSetVideoMode()
@@ -323,11 +337,13 @@ void OrbiterRenderer_Linux::InitializeAfterSetVideoMode()
 	OrbiterLinux *pOrbiterLinux = dynamic_cast<OrbiterLinux *>(OrbiterLogic());
 	if(NULL != pOrbiterLinux)
 	{
+#ifndef DIRECTFB
 		LoggerWrapper::GetInstance()->Write(LV_STATUS, "OrbiterLinux::InitializeAfterSetVideoMode()");
 		pOrbiterLinux->X11_Init();
 		LoggerWrapper::GetInstance()->Write(LV_STATUS, "OrbiterLinux::InitializeAfterSetVideoMode() : HideOtherWindows");
 		pOrbiterLinux->HideOtherWindows();
 		LoggerWrapper::GetInstance()->Write(LV_STATUS, "OrbiterLinux::InitializeAfterSetVideoMode() : done");
+#endif
 	}
 }
 
@@ -336,18 +352,20 @@ void OrbiterRenderer_Linux::InitializeAfterRelatives()
 	OrbiterLinux *pOrbiterLinux = dynamic_cast<OrbiterLinux *>(OrbiterLogic());
 	if(NULL != pOrbiterLinux)
 	{
+#ifndef DIRECTFB
 		// allow initial "extern" dialogs to receive clicks until this point
 		LoggerWrapper::GetInstance()->Write(LV_STATUS, "OrbiterLinux::InitializeAfterRelatives()");
 		pOrbiterLinux->GrabPointer(true);
 		pOrbiterLinux->GrabKeyboard(true);
 		LoggerWrapper::GetInstance()->Write(LV_STATUS, "OrbiterLinux::InitializeAfterRelatives() : done");
+#endif
 	}
 }
 
 bool OrbiterRenderer_Linux::DisplayProgress(string sMessage, const map<string, bool> &mapChildDevices, int nProgress)
 {
     std::cout << "== DisplayProgress( " << sMessage << ", ChildDevices, " << nProgress << " );" << std::endl;
-
+#ifndef DIRECTFB
 	OrbiterLinux *pOrbiterLinux = dynamic_cast<OrbiterLinux *>(OrbiterLogic());
 	if(NULL ==	pOrbiterLinux)
 		return false;
@@ -357,92 +375,63 @@ bool OrbiterRenderer_Linux::DisplayProgress(string sMessage, const map<string, b
         if(!it->second)
             sMessage += StringUtils::Replace(it->first, "|", "# ") + ", ";
     std::cout << "== DisplayProgress( " << sMessage << ", ChildDevices, " << nProgress << " );" << std::endl;
-    if (pOrbiterLinux->m_pProgressWnd && pOrbiterLinux->m_pProgressWnd->IsCancelled())
-    {
-        delete pOrbiterLinux->m_pProgressWnd;
-        pOrbiterLinux->m_pProgressWnd = NULL;
-        return true;
-    }
-    if (nProgress != -1 && !pOrbiterLinux->m_pProgressWnd)
-    {
-        // Create the progress window ...
-        pOrbiterLinux->m_pProgressWnd = new XProgressWnd();
-        pOrbiterLinux->m_pProgressWnd->UpdateProgress(sMessage, nProgress);
-        pOrbiterLinux->m_pProgressWnd->Run();
-        pOrbiterLinux->m_pWinListManager->PositionWindow(pOrbiterLinux->m_pProgressWnd->m_wndName, 0, 0, pOrbiterLinux->m_iImageWidth, pOrbiterLinux->m_iImageHeight);
-		pOrbiterLinux->m_pWinListManager->SetSdlWindowVisibility(false);
-		pOrbiterLinux->m_pWinListManager->ApplyContext();
-        return false;
-    }
-    /*else*/ if (nProgress != -1)
-    {
-        // Update progress info
-        pOrbiterLinux->m_pProgressWnd->UpdateProgress(sMessage, nProgress);
-        pOrbiterLinux->m_pProgressWnd->DrawWindow();
-        return false;
-    }
-    /*else*/ if(pOrbiterLinux->m_pProgressWnd)
-    {
-        // We are done here ...
-		pOrbiterLinux->m_pWinListManager->SetSdlWindowVisibility(true);
-        pOrbiterLinux->m_pProgressWnd->Terminate();
-        pOrbiterLinux->m_pProgressWnd = NULL;
-        pOrbiterLinux->reinitGraphics();
-		pOrbiterLinux->m_pWinListManager->ApplyContext();
-        return false;
-    }
+
+    DisplayProgress(sMessage, nProgress);
 
     return false;
+#else
+    return true;
+#endif
 }
 
 bool OrbiterRenderer_Linux::DisplayProgress(string sMessage, int nProgress)
 {
+#ifndef DIRECTFB
     std::cout << "== DisplayProgress waitlist( " << sMessage << ", " << nProgress << " );" << std::endl;
 
 	OrbiterLinux *pOrbiterLinux = dynamic_cast<OrbiterLinux *>(OrbiterLogic());
 	if(NULL ==	pOrbiterLinux)
 		return false;
 
-    if (pOrbiterLinux->m_pProgressWnd && pOrbiterLinux->m_pProgressWnd->IsCancelled())
-    {
-        delete pOrbiterLinux->m_pProgressWnd;
-        pOrbiterLinux->m_pProgressWnd = NULL;
-        return true;
-    }
-	if (nProgress != -1 && !pOrbiterLinux->m_pProgressWnd)
-    {
-        // Create the progress window ...
-        pOrbiterLinux->m_pProgressWnd = new XProgressWnd();
-        pOrbiterLinux->m_pProgressWnd->UpdateProgress(sMessage, nProgress);
-        pOrbiterLinux->m_pProgressWnd->Run();
-		pOrbiterLinux->m_pWinListManager->PositionWindow(pOrbiterLinux->m_pProgressWnd->m_wndName, 0, 0, pOrbiterLinux->m_iImageWidth, pOrbiterLinux->m_iImageHeight);
-		pOrbiterLinux->m_pWinListManager->SetSdlWindowVisibility(false);
-		pOrbiterLinux->m_pWinListManager->ApplyContext();
-        return false;
-    }
-    /*else*/ if (nProgress != -1)
-    {
-        // Update progress info
-        pOrbiterLinux->m_pProgressWnd->UpdateProgress(sMessage, nProgress);
-        pOrbiterLinux->m_pProgressWnd->DrawWindow();
-        return false;
-    }
-    /*else*/ if(pOrbiterLinux->m_pProgressWnd)
-    {
-        // We are done here ...
-		pOrbiterLinux->m_pWinListManager->SetSdlWindowVisibility(true);
-        pOrbiterLinux->m_pProgressWnd->Terminate();
-        pOrbiterLinux->m_pProgressWnd = NULL;
-        pOrbiterLinux->reinitGraphics();
-		pOrbiterLinux->m_pWinListManager->ApplyContext();
-        return false;
-    }
+#ifdef ORBITER_OPENGL
+	TextureManager::Instance()->SafeToReleaseTextures(true);
+
+	Popups->Reset();
+	Engine->NewScreen("Progress");
+	TextureManager::Instance()->EmptyCache();
+
+	TextureManager::Instance()->SafeToReleaseTextures(false);
+
+	m_pLastHighlightedObject = NULL;
+	Engine->BeginModifyGeometry();
+#endif /* ORBITER_OPENGL */
+	RenderProgressBar(nProgress);
+
+	BatchedTextRendering(false);
+
+	DesignObjText text;
+	text.m_rPosition = PlutoRectangle(TEXT_TOP_X, TEXT_TOP_Y, OrbiterLogic()->m_iImageWidth - TEXT_TOP_X, OrbiterLogic()->m_iImageHeight - PROGRESS_BOTTOM_DISTANCE);
+
+#ifndef ARMV4I	
+	RenderText(sMessage, &text, m_spTextStyle.get());
+#endif
+
+	BatchedTextRendering(true);
+
+#ifdef ORBITER_OPENGL
+	Engine->EndModifyGeometry();
+#endif /* ORBITER_OPENGL */
+	UpdateScreen();
 
     return false;
+#else
+    return true;
+#endif
 }
 
 int OrbiterRenderer_Linux::PromptUser(string sPrompt, int iTimeoutSeconds, map<int,string> *p_mapPrompts)
 {
+#ifndef DIRECTFB
     map<int,string> mapPrompts;
     mapPrompts[PROMPT_CANCEL]    = "Ok";
     if (p_mapPrompts == NULL) {
@@ -454,9 +443,14 @@ int OrbiterRenderer_Linux::PromptUser(string sPrompt, int iTimeoutSeconds, map<i
 	if(NULL ==	pOrbiterLinux)
 		return false;
 
+	// TODO: replace these with SDL code
 	pOrbiterLinux->m_pWinListManager->SetSdlWindowVisibility(false);
+#ifdef USE_GTK
+    GTKPromptUser promptDlg(sPrompt, iTimeoutSeconds, p_mapPrompts);
+#else
     XPromptUser promptDlg(sPrompt, iTimeoutSeconds, p_mapPrompts);
     promptDlg.SetButtonPlacement(XPromptUser::BTN_VERT);
+#endif
     promptDlg.Init();
 	pOrbiterLinux->m_pWinListManager->PositionWindow(promptDlg.m_wndName, 0, 0, pOrbiterLinux->m_iImageWidth, pOrbiterLinux->m_iImageHeight);
 	pOrbiterLinux->m_pWinListManager->ApplyContext();
@@ -465,20 +459,27 @@ int OrbiterRenderer_Linux::PromptUser(string sPrompt, int iTimeoutSeconds, map<i
 	pOrbiterLinux->m_pWinListManager->SetSdlWindowVisibility(true);
 	pOrbiterLinux->m_pWinListManager->ApplyContext();
     return nUserAnswer;
+#else
+    return 0;
+#endif
 }
 
 void OrbiterRenderer_Linux::LockDisplay()
 {
+#ifndef DIRECTFB
 	OrbiterLinux *pOrbiterLinux = dynamic_cast<OrbiterLinux *>(OrbiterLogic());
     if (pOrbiterLinux)
         pOrbiterLinux->X_LockDisplay();
+#endif
 }
 
 void OrbiterRenderer_Linux::UnlockDisplay()
 {
+#ifndef DIRECTFB
 	OrbiterLinux *pOrbiterLinux = dynamic_cast<OrbiterLinux *>(OrbiterLogic());
     if (pOrbiterLinux)
         pOrbiterLinux->X_UnlockDisplay();
+#endif
 }
 
 void OrbiterRenderer_Linux::EventLoop()
@@ -578,7 +579,7 @@ void OrbiterRenderer_Linux::EventLoop()
 	}  // while
 
 #else
-
+#ifndef DIRECTFB
 	Display *dpy = CompositeHelper::GetInstance().GetDisplay();
     if (!dpy) 
 	{
@@ -663,7 +664,7 @@ void OrbiterRenderer_Linux::EventLoop()
 			break;
 		}            
 	}       
-
+#endif
 #endif //USE_SDL_PATCH
 }
 

@@ -1,0 +1,22 @@
+# Defaults for bootsplash initscript
+# sourced by /etc/init.d/bootsplash
+# installed at /etc/default/bootsplash by the maintainer scripts
+
+#
+# This is a POSIX shell fragment
+#
+
+# Set this to yes to enable bootsplash after kernel loads
+SPLASH="yes"
+
+# The theme bootsplash should use.  Right now this points to
+# /etc/bootsplash/theme/current which is a symlink to the
+# current theme.
+THEME="current"
+
+# Which consoles should be displayed with different bootsplash images
+BOOTSPLASH_TTYS="1 2 3 4 5"
+
+# What messages must be displayed at boot and shutdown time
+MSG_BOOT="Booting the system. Please wait..."
+MSG_SHUTDOWN="Shutting down the system. Please wait..."

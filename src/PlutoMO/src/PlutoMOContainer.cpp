@@ -17,7 +17,7 @@
 
 #include "PlutoMOAppUi.h"
 #include "PlutoMOContainer.h"
-#include "PlutoMOEngine.h"
+#include "PlutoMOengine.h"
 #include "PlutoMO.hrh"
 #include "Logger.h"
 

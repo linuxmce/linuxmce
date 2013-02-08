@@ -1,0 +1,3 @@
+#qmldir testfile
+Main main.qml
+Style style.qml

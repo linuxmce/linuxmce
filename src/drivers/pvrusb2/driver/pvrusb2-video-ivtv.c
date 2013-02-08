@@ -1,6 +1,6 @@
 /*
  *
- *  $Id: pvrusb2-video-ivtv.c 1509 2007-01-19 06:30:10Z isely $
+ *  $Id: pvrusb2-video-ivtv.c 2226 2009-03-07 05:17:32Z isely $
  *
  *  Copyright (C) 2005 Mike Isely <isely@pobox.com>
  *  Copyright (C) 2004 Aurelien Alleaume <slts@free.fr>
@@ -30,6 +30,7 @@
 
 #include "pvrusb2-video-ivtv.h"
 
+#ifdef PVR2_ENABLE_OLD_I2COPS
 #ifdef PVR2_ENABLE_SAA7115
 
 #include "pvrusb2-hdw-internal.h"
@@ -53,29 +54,49 @@ struct pvr2_ivtv_decoder {
 };
 
 
+struct routing_scheme {
+	const int *def;
+	unsigned int cnt;
+};
+
+static const int routing_scheme0[] = {
+	[PVR2_CVAL_INPUT_TV] = 4,
+	/* In radio mode, we mute the video, but point at one
+	   spot just to stay consistent */
+	[PVR2_CVAL_INPUT_RADIO] = 5,
+	[PVR2_CVAL_INPUT_COMPOSITE] = 5,
+	[PVR2_CVAL_INPUT_SVIDEO] =  8,
+};
+
+static const struct routing_scheme routing_schemes[] = {
+	[PVR2_ROUTING_SCHEME_HAUPPAUGE] = {
+		.def = routing_scheme0,
+		.cnt = ARRAY_SIZE(routing_scheme0),
+	},
+};
+
+
 static void set_input(struct pvr2_ivtv_decoder *ctxt)
 {
 	struct pvr2_hdw *hdw = ctxt->hdw;
 	int v = 0;
+	const struct routing_scheme *sp;
+	unsigned int sid = hdw->hdw_desc->signal_routing_scheme;
+
 	pvr2_trace(PVR2_TRACE_CHIPS,"i2c ivtv set_input(%d)",hdw->input_val);
-	switch(hdw->input_val) {
-	case PVR2_CVAL_INPUT_TV:
-		v = 4;
-		break;
-	case PVR2_CVAL_INPUT_COMPOSITE:
-		v = 5;
-		break;
-	case PVR2_CVAL_INPUT_SVIDEO:
-		v = 8;
-		break;
-	case PVR2_CVAL_INPUT_RADIO:
-		// In radio mode, we mute the video, but point at one
-		// spot just to stay consistent
-		v = 5;
-		break;
-	default:
+	if ((sid < ARRAY_SIZE(routing_schemes)) &&
+	    ((sp = routing_schemes + sid) != 0) &&
+	    (hdw->input_val >= 0) &&
+	    (hdw->input_val < sp->cnt)) {
+		v = sp->def[hdw->input_val];
+	} else {
+		pvr2_trace(PVR2_TRACE_ERROR_LEGS,
+			   "*** WARNING *** i2c ivtv set_input:"
+			   " Invalid routing scheme (%u) and/or input (%d)",
+			   sid,hdw->input_val);
 		return;
 	}
+
 	pvr2_i2c_client_cmd(ctxt->client,DECODER_SET_INPUT,&v);
 }
 
@@ -254,7 +275,7 @@ static void decoder_detach(struct pvr2_ivtv_decoder *ctxt)
 {
 	ctxt->client->handler = NULL;
 	ctxt->client->status_poll = NULL;
-	ctxt->hdw->decoder_ctrl = NULL;
+	pvr2_hdw_set_decoder(ctxt->hdw,NULL);
 	kfree(ctxt);
 }
 
@@ -343,7 +364,7 @@ int pvr2_i2c_decoder_ivtv_setup(struct pvr2_hdw *hdw,
 	ctxt->hdw = hdw;
 	ctxt->mode = MODE_UNKNOWN;
 	ctxt->stale_mask = (1 << ARRAY_SIZE(decoder_ops)) - 1;
-	hdw->decoder_ctrl = &ctxt->ctrl;
+	pvr2_hdw_set_decoder(hdw,&ctxt->ctrl);
 	cp->handler = &ctxt->handler;
 	cp->status_poll = execute_query;
 	pvr2_trace(PVR2_TRACE_CHIPS,"i2c 0x%x saa7115 V4L1 handler set up",
@@ -353,6 +374,8 @@ int pvr2_i2c_decoder_ivtv_setup(struct pvr2_hdw *hdw,
 
 
 #endif /* PVR2_ENABLE_SAA7115 */
+#endif /* PVR2_ENABLE_OLD_I2COPS */
+
 
 /*
   Stuff for Emacs to see, in order to encourage consistent editing style:

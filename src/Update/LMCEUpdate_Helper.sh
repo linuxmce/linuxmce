@@ -2,7 +2,7 @@
 . /usr/pluto/bin/TeeMyOutput.sh --outfile /var/log/pluto/LMCEUpdate.log --stdboth --append -- "$@"
 set -e
 
-UPDATES_XML_URI="http://updates.linuxmce.com/updates.xml"
+UPDATES_XML_URI="http://10.0.0.83/updates.xml"
 UPDATES_DIR="/home/updates"
 POUT=101
 PIN=100

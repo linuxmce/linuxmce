@@ -80,6 +80,7 @@ void Row_Size::Delete()
 	Row_Size *pRow = this; // Needed so we will have only 1 version of get_primary_fields_assign_from_row
 	
 	if (!is_deleted)
+	{
 		if (is_added)	
 		{	
 			vector<TableRow*>::iterator i;	
@@ -101,6 +102,7 @@ void Row_Size::Delete()
 			table->deleted_cachedRows[key] = this;
 			is_deleted = true;	
 		}	
+	}
 }
 
 void Row_Size::Reload()
@@ -134,8 +136,7 @@ void Row_Size::SetDefaultValues()
 {
 	m_PK_Size = 0;
 is_null[0] = false;
-m_Description = "";
-is_null[1] = false;
+is_null[1] = true;
 is_null[2] = true;
 m_Width = 0;
 is_null[3] = false;
@@ -159,7 +160,8 @@ is_null[13] = true;
 m_psc_user = 0;
 m_psc_frozen = 0;
 is_null[14] = false;
-is_null[15] = true;
+m_psc_mod = "0000-00-00 00:00:00";
+is_null[15] = false;
 is_null[16] = true;
 m_psc_restrict = 0;
 
@@ -275,6 +277,9 @@ void Row_Size::psc_restrict_set(long int val){PLUTO_SAFETY_LOCK_ERRORSONLY(sl,ta
 m_psc_restrict = val; is_modified=true; is_null[16]=false;}
 
 		
+bool Row_Size::Description_isNull() {PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
+
+return is_null[1];}
 bool Row_Size::Define_isNull() {PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
 
 return is_null[2];}
@@ -299,14 +304,15 @@ return is_null[13];}
 bool Row_Size::psc_frozen_isNull() {PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
 
 return is_null[14];}
-bool Row_Size::psc_mod_isNull() {PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
-
-return is_null[15];}
 bool Row_Size::psc_restrict_isNull() {PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
 
 return is_null[16];}
 
 			
+void Row_Size::Description_setNull(bool val){PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
+is_null[1]=val;
+is_modified=true;
+}
 void Row_Size::Define_setNull(bool val){PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
 is_null[2]=val;
 is_modified=true;
@@ -339,10 +345,6 @@ void Row_Size::psc_frozen_setNull(bool val){PLUTO_SAFETY_LOCK_ERRORSONLY(sl,tabl
 is_null[14]=val;
 is_modified=true;
 }
-void Row_Size::psc_mod_setNull(bool val){PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
-is_null[15]=val;
-is_modified=true;
-}
 void Row_Size::psc_restrict_setNull(bool val){PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
 is_null[16]=val;
 is_modified=true;
@@ -369,8 +371,8 @@ PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
 if (is_null[1])
 return "NULL";
 
-char *buf = new char[101];
-db_wrapper_real_escape_string(table->database->m_pDB, buf, m_Description.c_str(), (unsigned long) min((size_t)50,m_Description.size()));
+char *buf = new char[301];
+db_wrapper_real_escape_string(table->database->m_pDB, buf, m_Description.c_str(), (unsigned long) min((size_t)150,m_Description.size()));
 string s=string()+"\""+buf+"\"";
 delete[] buf;
 return s;
@@ -383,8 +385,8 @@ PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
 if (is_null[2])
 return "NULL";
 
-char *buf = new char[41];
-db_wrapper_real_escape_string(table->database->m_pDB, buf, m_Define.c_str(), (unsigned long) min((size_t)20,m_Define.size()));
+char *buf = new char[121];
+db_wrapper_real_escape_string(table->database->m_pDB, buf, m_Define.c_str(), (unsigned long) min((size_t)60,m_Define.size()));
 string s=string()+"\""+buf+"\"";
 delete[] buf;
 return s;
@@ -475,8 +477,8 @@ PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
 if (is_null[9])
 return "NULL";
 
-char *buf = new char[3];
-db_wrapper_real_escape_string(table->database->m_pDB, buf, m_ScaleMenuBg.c_str(), (unsigned long) min((size_t)1,m_ScaleMenuBg.size()));
+char *buf = new char[7];
+db_wrapper_real_escape_string(table->database->m_pDB, buf, m_ScaleMenuBg.c_str(), (unsigned long) min((size_t)3,m_ScaleMenuBg.size()));
 string s=string()+"\""+buf+"\"";
 delete[] buf;
 return s;
@@ -489,8 +491,8 @@ PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
 if (is_null[10])
 return "NULL";
 
-char *buf = new char[3];
-db_wrapper_real_escape_string(table->database->m_pDB, buf, m_ScaleOtherGraphics.c_str(), (unsigned long) min((size_t)1,m_ScaleOtherGraphics.size()));
+char *buf = new char[7];
+db_wrapper_real_escape_string(table->database->m_pDB, buf, m_ScaleOtherGraphics.c_str(), (unsigned long) min((size_t)3,m_ScaleOtherGraphics.size()));
 string s=string()+"\""+buf+"\"";
 delete[] buf;
 return s;

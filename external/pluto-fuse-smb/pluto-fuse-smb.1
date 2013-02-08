@@ -1,0 +1,55 @@
+.TH PLUTO\-FUSE\-SMB 1 "January 24, 2007"
+
+.SH NAME
+pluto\-fuse\-smb \- Userspace smb/cifs filesystem
+
+.SH SYNOPSIS
+.B pluto-fuse-smb
+.RI [\-U
+.IR username
+.RI ]
+.RI [\-P
+.IR password
+.RI ]
+.RI [\-C
+.IR credetials_file
+.RI ]
+.I service
+.I mountpoint
+.RI [
+.IR FUSE
+.IR options
+.RI ]
+.SH DESCRIPTION
+.B pluto\-fuse\-smb
+is a userspace smb/cifs filesystem. It works like smbfs/cifs, but it's completely in userspace, fuse being the only kernel part
+
+.SH OPTIONS
+.B pluto\-fuse\-smb
+accepts the following options:
+.TP
+.B \-U username
+An optional username to use when mounting a share
+.TP
+.B \-P password
+An optional password to use when mounting a share
+.TP
+.B \-C credentials_file
+An optional file with the following structure
+
+.RI username=<username>
+.br
+.RI password=<password>
+
+.I service
+A UNC path to the share that is to be mounted
+.I mountpoint
+The path where the filesystem will be mounted
+
+.SH EXAMPLE
+pluto-fuse-smb //samba_server/samba_share /mnt/samba_mount
+
+.SH AUTHOR
+Radu Cristescu <radu.c@plutohome.com>
+.br
+original author of fusesmb: Vincent Wagelaar <vincent@ricardis.tudelft.nl>.

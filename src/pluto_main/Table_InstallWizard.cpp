@@ -34,8 +34,6 @@ using namespace std;
 #include "Table_DeviceTemplate.h"
 
 #include "Table_InstallWizard_Distro.h"
-#include "Table_InstallWizard_Distro_pschist.h"
-#include "Table_InstallWizard_Distro_pschmask.h"
 
 
 void Database_pluto_main::CreateTable_InstallWizard()
@@ -83,6 +81,7 @@ void Row_InstallWizard::Delete()
 	Row_InstallWizard *pRow = this; // Needed so we will have only 1 version of get_primary_fields_assign_from_row
 	
 	if (!is_deleted)
+	{
 		if (is_added)	
 		{	
 			vector<TableRow*>::iterator i;	
@@ -104,6 +103,7 @@ void Row_InstallWizard::Delete()
 			table->deleted_cachedRows[key] = this;
 			is_deleted = true;	
 		}	
+	}
 }
 
 void Row_InstallWizard::Reload()
@@ -152,7 +152,8 @@ is_null[7] = true;
 m_psc_user = 0;
 m_psc_frozen = 0;
 is_null[8] = false;
-is_null[9] = true;
+m_psc_mod = "0000-00-00 00:00:00";
+is_null[9] = false;
 is_null[10] = true;
 m_psc_restrict = 0;
 
@@ -250,9 +251,6 @@ return is_null[7];}
 bool Row_InstallWizard::psc_frozen_isNull() {PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
 
 return is_null[8];}
-bool Row_InstallWizard::psc_mod_isNull() {PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
-
-return is_null[9];}
 bool Row_InstallWizard::psc_restrict_isNull() {PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
 
 return is_null[10];}
@@ -280,10 +278,6 @@ is_modified=true;
 }
 void Row_InstallWizard::psc_frozen_setNull(bool val){PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
 is_null[8]=val;
-is_modified=true;
-}
-void Row_InstallWizard::psc_mod_setNull(bool val){PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
-is_null[9]=val;
 is_modified=true;
 }
 void Row_InstallWizard::psc_restrict_setNull(bool val){PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
@@ -351,8 +345,8 @@ PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
 if (is_null[4])
 return "NULL";
 
-char *buf = new char[511];
-db_wrapper_real_escape_string(table->database->m_pDB, buf, m_Comments.c_str(), (unsigned long) min((size_t)255,m_Comments.size()));
+char *buf = new char[1531];
+db_wrapper_real_escape_string(table->database->m_pDB, buf, m_Comments.c_str(), (unsigned long) min((size_t)765,m_Comments.size()));
 string s=string()+"\""+buf+"\"";
 delete[] buf;
 return s;
@@ -1058,20 +1052,6 @@ void Row_InstallWizard::InstallWizard_Distro_FK_InstallWizard_getrows(vector <cl
 PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
 
 class Table_InstallWizard_Distro *pTable = table->database->InstallWizard_Distro_get();
-pTable->GetRows("`FK_InstallWizard`=" + StringUtils::itos(m_PK_InstallWizard),rows);
-}
-void Row_InstallWizard::InstallWizard_Distro_pschist_FK_InstallWizard_getrows(vector <class Row_InstallWizard_Distro_pschist*> *rows)
-{
-PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
-
-class Table_InstallWizard_Distro_pschist *pTable = table->database->InstallWizard_Distro_pschist_get();
-pTable->GetRows("`FK_InstallWizard`=" + StringUtils::itos(m_PK_InstallWizard),rows);
-}
-void Row_InstallWizard::InstallWizard_Distro_pschmask_FK_InstallWizard_getrows(vector <class Row_InstallWizard_Distro_pschmask*> *rows)
-{
-PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
-
-class Table_InstallWizard_Distro_pschmask *pTable = table->database->InstallWizard_Distro_pschmask_get();
 pTable->GetRows("`FK_InstallWizard`=" + StringUtils::itos(m_PK_InstallWizard),rows);
 }
 

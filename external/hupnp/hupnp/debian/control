@@ -1,0 +1,22 @@
+Source: libhupnp-core
+Priority: extra
+Maintainer: Peer Oliver Schmidt <developer@linuxmce.org>
+Build-Depends: debhelper (>= 7)
+Standards-Version: 3.8.3
+Section: libs
+Homepage: <insert the upstream URL, if relevant>
+
+Package: libhupnp-core-dev
+Section: libdevel
+Architecture: any
+Depends: libhupnp-core (= ${binary:Version})
+Description: <insert up to 60 chars description>
+ <insert long description, indented with spaces>
+
+Package: libhupnp-core
+Section: libs
+Architecture: any
+Depends: ${shlibs:Depends}, ${misc:Depends}
+Provides: libqtsolutions-soap-2.7-1
+Description: <insert up to 60 chars description>
+ <insert long description, indented with spaces>

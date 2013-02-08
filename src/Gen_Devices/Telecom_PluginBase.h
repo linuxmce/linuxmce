@@ -85,7 +85,7 @@ public:
 		if( m_bRunningWithoutDeviceData )
 			return atoi(m_pEvent_Impl->GetDeviceDataFromDatabase(m_dwPK_Device,DEVICEDATA_Telecom_Local_Prefix_CONST).c_str());
 		else
-			return atoi(m_mapParameters_Find(DEVICEDATA_Telecom_Local_Prefix_CONST).c_str());
+			return atoi(m_mapParameters[DEVICEDATA_Telecom_Local_Prefix_CONST].c_str());
 	}
 
 	int Get_Telecom_Prepend_Digit()
@@ -93,7 +93,7 @@ public:
 		if( m_bRunningWithoutDeviceData )
 			return atoi(m_pEvent_Impl->GetDeviceDataFromDatabase(m_dwPK_Device,DEVICEDATA_Telecom_Prepend_Digit_CONST).c_str());
 		else
-			return atoi(m_mapParameters_Find(DEVICEDATA_Telecom_Prepend_Digit_CONST).c_str());
+			return atoi(m_mapParameters[DEVICEDATA_Telecom_Prepend_Digit_CONST].c_str());
 	}
 
 	int Get_Telecom_Local_Number_Length()
@@ -101,7 +101,7 @@ public:
 		if( m_bRunningWithoutDeviceData )
 			return atoi(m_pEvent_Impl->GetDeviceDataFromDatabase(m_dwPK_Device,DEVICEDATA_Telecom_Local_Number_Length_CONST).c_str());
 		else
-			return atoi(m_mapParameters_Find(DEVICEDATA_Telecom_Local_Number_Length_CONST).c_str());
+			return atoi(m_mapParameters[DEVICEDATA_Telecom_Local_Number_Length_CONST].c_str());
 	}
 
 	int Get_No_of_sec_to_ring_before_IVR()
@@ -109,7 +109,7 @@ public:
 		if( m_bRunningWithoutDeviceData )
 			return atoi(m_pEvent_Impl->GetDeviceDataFromDatabase(m_dwPK_Device,DEVICEDATA_No_of_sec_to_ring_before_IVR_CONST).c_str());
 		else
-			return atoi(m_mapParameters_Find(DEVICEDATA_No_of_sec_to_ring_before_IVR_CONST).c_str());
+			return atoi(m_mapParameters[DEVICEDATA_No_of_sec_to_ring_before_IVR_CONST].c_str());
 	}
 
 };

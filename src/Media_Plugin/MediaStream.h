@@ -98,8 +98,8 @@ namespace DCE
 		class OH_Orbiter *m_pOH_Orbiter_StartedMedia;    	   /** Which orbiter started this stream in the first place */
 
         map<int, class EntertainArea *> m_mapEntertainArea; /** The entertainment areas where this stream is playing */
-		map< int,list_Attribute > m_mapPK_Attribute;  /** An external media identification script may set attributes here, PK_AttributeType=PK_Attribute */
-		list_Attribute *m_mapPK_Attribute_Find(int PK_AttributeType) { map<int,list_Attribute >::iterator it = m_mapPK_Attribute.find(PK_AttributeType); return it==m_mapPK_Attribute.end() ? NULL : &((*it).second); }
+		map< int,list_int > m_mapPK_Attribute;  /** An external media identification script may set attributes here, PK_AttributeType=PK_Attribute */
+		list_int *m_mapPK_Attribute_Find(int PK_AttributeType) { map<int,list_int >::iterator it = m_mapPK_Attribute.find(PK_AttributeType); return it==m_mapPK_Attribute.end() ? NULL : &((*it).second); }
 		map< pair<int,int>,string > m_mapSections; /** pair<Chapter,Title/0> to section description.  These are provided by the media player independent of what we have in the database */
 
         /**
@@ -125,9 +125,6 @@ namespace DCE
 		command with no delivery confirmation and we have no way of knowing if the stream actually started playing or not.  By
 		setting this flag when the playbackstarted event comes in we'll know this stream is actually 'live' and is playing. */
 		bool m_bPlaybackStarted; 
-
-		bool m_bBypassEvent;  // Passed to MH Play Media, if true we won't fire the started watching/started listening events
-		bool m_bDontSetupAV;  // Passed to MH Play Media, if true we won't call HandleOnOffs when this starts playing
 
 		int m_dwPK_Device_Remote; /** What remote control started this content */
 		
@@ -259,7 +256,7 @@ namespace DCE
 		void LoadDefaultAvSettings(deque<MediaSection *> &dequeMediaSection,map<int,int> &mapAttributes);
 		void LoadDefaultAvSettings(deque<MediaTitle *> &dequeMediaTitle,map<int,int> &mapAttributes);
 		void LoadDefaultAvSettings(MediaFile *pMediaFile,map<int,int> &mapAttributes);
-		void MergeAttributes(map<int,int> &mapAttributes,map< int,list_Attribute > &mapPK_Attribute);
+		void MergeAttributes(map<int,int> &mapAttributes,map< int,list_int > &mapPK_Attribute);
 		string GetTargets(int PK_DeviceTemplate);
 	};
 

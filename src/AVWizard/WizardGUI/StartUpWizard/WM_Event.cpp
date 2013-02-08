@@ -130,6 +130,13 @@ void WM_Event::ConvertFromSDLEvent(SDL_Event& Event)
 					this->Type = WMET_NUMBER_KEY;
 					this->KeyCode = Event.key.keysym.sym;
 					break;
+				case SDLK_q:
+				case SDLK_w:
+				case SDLK_l:
+				case SDLK_a:
+					this->Type = WMET_ALPHA_KEY;
+					this->KeyCode = Event.key.keysym.sym;
+					break;
 				default:
 					Type = 0;
 			}

@@ -1,3 +1,18 @@
+/*
+     Copyright (C) 2004 Pluto, Inc., a Florida Corporation
+
+     www.plutohome.com
+
+     Phone: +1 (877) 758-8648
+ 
+
+     This program is free software; you can redistribute it and/or modify it under the terms of the GNU General Public License.
+     This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty
+     of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+
+     See the GNU General Public License for more details.
+
+*/
 #ifndef LIRC_DCEBase_h
 #define LIRC_DCEBase_h
 #include "DeviceData_Impl.h"
@@ -85,7 +100,7 @@ public:
 		if( m_bRunningWithoutDeviceData )
 			return m_pEvent_Impl->GetDeviceDataFromDatabase(m_dwPK_Device,DEVICEDATA_Device_CONST);
 		else
-			return m_mapParameters_Find(DEVICEDATA_Device_CONST);
+			return m_mapParameters[DEVICEDATA_Device_CONST];
 	}
 
 	string Get_Serial_Port()
@@ -93,7 +108,7 @@ public:
 		if( m_bRunningWithoutDeviceData )
 			return m_pEvent_Impl->GetDeviceDataFromDatabase(m_dwPK_Device,DEVICEDATA_Serial_Port_CONST);
 		else
-			return m_mapParameters_Find(DEVICEDATA_Serial_Port_CONST);
+			return m_mapParameters[DEVICEDATA_Serial_Port_CONST];
 	}
 
 	string Get_System_Device()
@@ -101,7 +116,7 @@ public:
 		if( m_bRunningWithoutDeviceData )
 			return m_pEvent_Impl->GetDeviceDataFromDatabase(m_dwPK_Device,DEVICEDATA_System_Device_CONST);
 		else
-			return m_mapParameters_Find(DEVICEDATA_System_Device_CONST);
+			return m_mapParameters[DEVICEDATA_System_Device_CONST];
 	}
 
 };

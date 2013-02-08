@@ -173,7 +173,8 @@ void psc_mod_set(string val);
 void psc_restrict_set(long int val);
 
 		
-		bool Define_isNull();
+		bool Description_isNull();
+bool Define_isNull();
 bool FK_DesignObj_IncludeIfOtherIncluded_isNull();
 bool TimeoutSeconds_isNull();
 bool ScreenType_isNull();
@@ -183,11 +184,11 @@ bool psc_id_isNull();
 bool psc_batch_isNull();
 bool psc_user_isNull();
 bool psc_frozen_isNull();
-bool psc_mod_isNull();
 bool psc_restrict_isNull();
 
 			
-		void Define_setNull(bool val);
+		void Description_setNull(bool val);
+void Define_setNull(bool val);
 void FK_DesignObj_IncludeIfOtherIncluded_setNull(bool val);
 void TimeoutSeconds_setNull(bool val);
 void ScreenType_setNull(bool val);
@@ -197,7 +198,6 @@ void psc_id_setNull(bool val);
 void psc_batch_setNull(bool val);
 void psc_user_setNull(bool val);
 void psc_frozen_setNull(bool val);
-void psc_mod_setNull(bool val);
 void psc_restrict_setNull(bool val);
 	
 	
@@ -221,11 +221,7 @@ class Row_Skin* FK_Skin_SubstForSkin_getrow();
 
 		// Return the rows in other tables with foreign keys pointing here
 		void CachedScreens_FK_DesignObj_getrows(vector <class Row_CachedScreens*> *rows);
-void CachedScreens_pschist_FK_DesignObj_getrows(vector <class Row_CachedScreens_pschist*> *rows);
-void CachedScreens_pschmask_FK_DesignObj_getrows(vector <class Row_CachedScreens_pschmask*> *rows);
 void CommandGroup_FK_DesignObj_getrows(vector <class Row_CommandGroup*> *rows);
-void CommandGroup_pschist_FK_DesignObj_getrows(vector <class Row_CommandGroup_pschist*> *rows);
-void CommandGroup_pschmask_FK_DesignObj_getrows(vector <class Row_CommandGroup_pschmask*> *rows);
 void DesignObj_FK_DesignObj_IncludeIfOtherIncluded_getrows(vector <class Row_DesignObj*> *rows);
 void DesignObj_FK_DesignObj_SubstForSkin_getrows(vector <class Row_DesignObj*> *rows);
 void DesignObjVariation_FK_DesignObj_getrows(vector <class Row_DesignObjVariation*> *rows);
@@ -236,56 +232,16 @@ void DesignObjVariation_DesignObj_Skin_Language_FK_DesignObj_Up_getrows(vector <
 void DesignObjVariation_DesignObj_Skin_Language_FK_DesignObj_Down_getrows(vector <class Row_DesignObjVariation_DesignObj_Skin_Language*> *rows);
 void DesignObjVariation_DesignObj_Skin_Language_FK_DesignObj_Left_getrows(vector <class Row_DesignObjVariation_DesignObj_Skin_Language*> *rows);
 void DesignObjVariation_DesignObj_Skin_Language_FK_DesignObj_Right_getrows(vector <class Row_DesignObjVariation_DesignObj_Skin_Language*> *rows);
-void DesignObjVariation_DesignObj_Skin_Language_pschist_FK_DesignObj_InsteadOf_getrows(vector <class Row_DesignObjVariation_DesignObj_Skin_Language_pschist*> *rows);
-void DesignObjVariation_DesignObj_Skin_Language_pschist_FK_DesignObj_Up_getrows(vector <class Row_DesignObjVariation_DesignObj_Skin_Language_pschist*> *rows);
-void DesignObjVariation_DesignObj_Skin_Language_pschist_FK_DesignObj_Down_getrows(vector <class Row_DesignObjVariation_DesignObj_Skin_Language_pschist*> *rows);
-void DesignObjVariation_DesignObj_Skin_Language_pschist_FK_DesignObj_Left_getrows(vector <class Row_DesignObjVariation_DesignObj_Skin_Language_pschist*> *rows);
-void DesignObjVariation_DesignObj_Skin_Language_pschist_FK_DesignObj_Right_getrows(vector <class Row_DesignObjVariation_DesignObj_Skin_Language_pschist*> *rows);
-void DesignObjVariation_DesignObj_Skin_Language_pschmask_FK_DesignObj_InsteadOf_getrows(vector <class Row_DesignObjVariation_DesignObj_Skin_Language_pschmask*> *rows);
-void DesignObjVariation_DesignObj_Skin_Language_pschmask_FK_DesignObj_Up_getrows(vector <class Row_DesignObjVariation_DesignObj_Skin_Language_pschmask*> *rows);
-void DesignObjVariation_DesignObj_Skin_Language_pschmask_FK_DesignObj_Down_getrows(vector <class Row_DesignObjVariation_DesignObj_Skin_Language_pschmask*> *rows);
-void DesignObjVariation_DesignObj_Skin_Language_pschmask_FK_DesignObj_Left_getrows(vector <class Row_DesignObjVariation_DesignObj_Skin_Language_pschmask*> *rows);
-void DesignObjVariation_DesignObj_Skin_Language_pschmask_FK_DesignObj_Right_getrows(vector <class Row_DesignObjVariation_DesignObj_Skin_Language_pschmask*> *rows);
-void DesignObjVariation_DesignObj_pschist_FK_DesignObj_Child_getrows(vector <class Row_DesignObjVariation_DesignObj_pschist*> *rows);
-void DesignObjVariation_DesignObj_pschmask_FK_DesignObj_Child_getrows(vector <class Row_DesignObjVariation_DesignObj_pschmask*> *rows);
 void DesignObjVariation_Zone_FK_DesignObj_Goto_getrows(vector <class Row_DesignObjVariation_Zone*> *rows);
-void DesignObjVariation_Zone_pschist_FK_DesignObj_Goto_getrows(vector <class Row_DesignObjVariation_Zone_pschist*> *rows);
-void DesignObjVariation_Zone_pschmask_FK_DesignObj_Goto_getrows(vector <class Row_DesignObjVariation_Zone_pschmask*> *rows);
-void DesignObjVariation_pschist_FK_DesignObj_getrows(vector <class Row_DesignObjVariation_pschist*> *rows);
-void DesignObjVariation_pschist_FK_DesignObj_Goto_getrows(vector <class Row_DesignObjVariation_pschist*> *rows);
-void DesignObjVariation_pschmask_FK_DesignObj_getrows(vector <class Row_DesignObjVariation_pschmask*> *rows);
-void DesignObjVariation_pschmask_FK_DesignObj_Goto_getrows(vector <class Row_DesignObjVariation_pschmask*> *rows);
-void DesignObj_pschist_FK_DesignObj_IncludeIfOtherIncluded_getrows(vector <class Row_DesignObj_pschist*> *rows);
-void DesignObj_pschist_FK_DesignObj_SubstForSkin_getrows(vector <class Row_DesignObj_pschist*> *rows);
-void DesignObj_pschmask_FK_DesignObj_IncludeIfOtherIncluded_getrows(vector <class Row_DesignObj_pschmask*> *rows);
-void DesignObj_pschmask_FK_DesignObj_SubstForSkin_getrows(vector <class Row_DesignObj_pschmask*> *rows);
 void Device_FK_DesignObj_getrows(vector <class Row_Device*> *rows);
 void DeviceTemplate_DesignObj_FK_DesignObj_getrows(vector <class Row_DeviceTemplate_DesignObj*> *rows);
-void DeviceTemplate_DesignObj_pschist_FK_DesignObj_getrows(vector <class Row_DeviceTemplate_DesignObj_pschist*> *rows);
-void DeviceTemplate_DesignObj_pschmask_FK_DesignObj_getrows(vector <class Row_DeviceTemplate_DesignObj_pschmask*> *rows);
 void DeviceTemplate_MediaType_DesignObj_FK_DesignObj_Popup_getrows(vector <class Row_DeviceTemplate_MediaType_DesignObj*> *rows);
-void DeviceTemplate_MediaType_DesignObj_pschist_FK_DesignObj_Popup_getrows(vector <class Row_DeviceTemplate_MediaType_DesignObj_pschist*> *rows);
-void DeviceTemplate_MediaType_DesignObj_pschmask_FK_DesignObj_Popup_getrows(vector <class Row_DeviceTemplate_MediaType_DesignObj_pschmask*> *rows);
-void Device_pschist_FK_DesignObj_getrows(vector <class Row_Device_pschist*> *rows);
-void Device_pschmask_FK_DesignObj_getrows(vector <class Row_Device_pschmask*> *rows);
 void FloorplanObjectType_FK_DesignObj_Control_getrows(vector <class Row_FloorplanObjectType*> *rows);
-void FloorplanObjectType_pschist_FK_DesignObj_Control_getrows(vector <class Row_FloorplanObjectType_pschist*> *rows);
-void FloorplanObjectType_pschmask_FK_DesignObj_Control_getrows(vector <class Row_FloorplanObjectType_pschmask*> *rows);
 void MediaType_FK_DesignObj_getrows(vector <class Row_MediaType*> *rows);
 void MediaType_DesignObj_FK_DesignObj_Popup_getrows(vector <class Row_MediaType_DesignObj*> *rows);
-void MediaType_DesignObj_pschist_FK_DesignObj_Popup_getrows(vector <class Row_MediaType_DesignObj_pschist*> *rows);
-void MediaType_DesignObj_pschmask_FK_DesignObj_Popup_getrows(vector <class Row_MediaType_DesignObj_pschmask*> *rows);
-void MediaType_pschist_FK_DesignObj_getrows(vector <class Row_MediaType_pschist*> *rows);
-void MediaType_pschmask_FK_DesignObj_getrows(vector <class Row_MediaType_pschmask*> *rows);
 void QuickStartTemplate_FK_DesignObj_getrows(vector <class Row_QuickStartTemplate*> *rows);
 void QuickStartTemplate_FK_DesignObj_OSD_getrows(vector <class Row_QuickStartTemplate*> *rows);
-void QuickStartTemplate_pschist_FK_DesignObj_getrows(vector <class Row_QuickStartTemplate_pschist*> *rows);
-void QuickStartTemplate_pschist_FK_DesignObj_OSD_getrows(vector <class Row_QuickStartTemplate_pschist*> *rows);
-void QuickStartTemplate_pschmask_FK_DesignObj_getrows(vector <class Row_QuickStartTemplate_pschmask*> *rows);
-void QuickStartTemplate_pschmask_FK_DesignObj_OSD_getrows(vector <class Row_QuickStartTemplate_pschmask*> *rows);
 void Screen_DesignObj_FK_DesignObj_getrows(vector <class Row_Screen_DesignObj*> *rows);
-void Screen_DesignObj_pschist_FK_DesignObj_getrows(vector <class Row_Screen_DesignObj_pschist*> *rows);
-void Screen_DesignObj_pschmask_FK_DesignObj_getrows(vector <class Row_Screen_DesignObj_pschmask*> *rows);
 
 
 		// Setup binary serialization

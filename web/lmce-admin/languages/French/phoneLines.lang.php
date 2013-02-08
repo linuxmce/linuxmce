@@ -1,0 +1,34 @@
+<?
+$TEXT_PHONE_LINES_CONST='Lignes téléphoniques';
+$TEXT_FAX_CONST='Ligne Fax entrant';
+$TEXT_FAX_EMAIL_CONST='envoyer fax entrants par mail à';
+$TEXT_FAX_HEADER_CONST='entête sur fax sortants';
+$TEXT_PREFIX_CONST='Prefixe';
+$TEXT_CHANNELS_CONST='Canal';
+$TEXT_PROTOCOL_CONST='Protocole';
+$TEXT_PHONE_NUMBER_CONST='Numéro tél.';
+$TEXT_USERNAME_REQUIRED_CONST='Veuillez entrer un nom d\'utilisateur';
+$TEXT_DIAL_EMERGENCY_NUMBERS_CONST='Numéroter des services de secours';
+$TEXT_EMERGENCY_HELP_CONST='List séparé par virgules des numéros d\'urgence, comme \'112,911\' qui seront numérotable sans devoir ajouter un préfixe d\'une ligne';
+$TEXT_EMERGENCY_TRUNK_CONST='via la ligne';
+$TEXT_EMERGENCY_SETTINGS_UPDATED_CONST='Les réglages des numéros de secours ont étés mis à jour';
+$TEXT_PASSWORD_REQUIRED_CONST='Veuillez entrer un mot de passe';
+$TEXT_PHONENUMBER_REQUIRED_CONST='Veuillez entrer un numéro de téléphone';
+$TEXT_HOST_REQUIRED_CONST='Veuillez entrer un hôte';
+$TEXT_ADD_LINE_CONST='Ajouter nouvelle ligne';
+$TEXT_ADD_PHONE_LINE_ERROR_CONST='Une erreur est survenue.';
+$TEXT_ADD_PHONE_LINE_CMD_SENT_CONST='La commande à été envoyée.';
+$TEXT_PHONE_LINE_DELETED_CONST='La ligne à été supprimée.';
+$TEXT_PHONE_ROUTING_CONST='Routage entrant';
+$TEXT_PHONE_LINE_UPDATED_CONST='La ligne téléphonique a été mise à jour.';
+$TEXT_DELETE_PHONE_LINE_CONFIRMATION_CONST='Voulez-vous vraiment supprimer cette ligne?';
+$TEXT_PHONE_LINE_USERNAME_NOTE_CONST='Nom d\'utilisateur pour accèder le service VoIP de votre provider (pas sa page web), parfois c\'est le numéro de téléphone';
+$TEXT_PHONE_LINE_PASSWORD_NOTE_CONST='Mot de passe pour accèder le service VoIP de votre provider (pas sa page web)';
+$TEXT_PHONE_LINE_NUMBER_NOTE_CONST='Le numéro de téléhone qui vous a été attribué';
+$TEXT_PHONE_LINE_HOST_NOTE_CONST='La nom de l\'hôte pour vous enregistrer chez votre provider';
+$TEXT_LOCAL_PHONE_LINES_SETTINGS_CONST='Reglèges des lignes téléhponiques locaux';
+$TEXT_ERROR_TELECOM_PLUGIN_NOT_FOUND_CONST='Plugin Télécom non détecté.';
+$TEXT_PHONE_SETTINGS_UPDATED_CONST='Réglages des lignes téléphoniques mis à jour';
+$TEXT_PHONES_SETUP_CONST='Réglages téléphones';
+$TEXT_ASTERISK_DB_NOT_FOUND_CONST='Base de données Asterisk non trouvée.';
+?>

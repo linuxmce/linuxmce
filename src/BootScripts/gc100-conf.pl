@@ -2,27 +2,9 @@
 
 use DBI;
 use Socket;
+require "/usr/pluto/bin/config_ops.pl";
 
-open(CONF,"/etc/pluto.conf");
-@data=<CONF>;
-close(CONF);
-
-foreach $line (@data) {
-  chomp($line);
-  ($option, $eq, $value) = split(/ /,$line);
-  if($option eq "MySqlHost") {
-    $DBHOST=$value;
-    $FILEHOST=$value;
-  } elsif ($option eq "MySqlUser") {
-    $DBUSER=$value;
-  } elsif ($option eq "MySqlPassword") {
-    $DBPASSWD=$value;
-  } elsif ($option eq "PK_Device") {
-    $PKDEV=$value;
-  }
-}
-
-$db = DBI->connect("dbi:mysql:database=pluto_main;host=$DBHOST;user=$DBUSER;password=$DBPASSWD") or die "Couldn't connect to database: $DBI::errstr\n";
+$db = DBI->connect(&read_pluto_cred()) or die "Couldn't connect to database: $DBI::errstr\n";
 $gw = "";
 
 `rm -f /var/log/pluto/gc100-conf.log >> /dev/null`;
@@ -55,7 +37,7 @@ if($ARGV[0] eq "") {
 	}
 	$state->finish();
 	# Send "Create Device" (718) message to General Info Plugin (template 27)
-	$cmd = "/usr/pluto/bin/MessageSend dcerouter -o -targetType template 0 27 1 718 44 $dev_templ 57 -1 47 $mac 58 auto 198 0 156 $PKDEV";
+	$cmd = "/usr/pluto/bin/MessageSend $DCERouter -o -targetType template 0 27 1 718 44 $dev_templ 57 -1 47 $mac 58 auto 198 0 156 $PK_Device";
 	loggc("$cmd\n");
 	loggc("Creating Device...");
 	$Device_ID = `$cmd`;
@@ -176,7 +158,7 @@ sub get_install {
     @frag = split(/ /,$value);
     $value = $frag[1];
     if($var eq "PK_Installation") {
-      $sql = "select FK_Installation from Device WHERE PK_Device='$PKDEV'";
+      $sql = "select FK_Installation from Device WHERE PK_Device='$PK_Device'";
       $st = $db->prepare($sql);
       $st->execute();
       if($row = $st->fetchrow_hashref()) {
@@ -320,9 +302,9 @@ sub find_gc100 {
 }
 
 sub find_ip {
-	my ($PK_Device) = shift;
-	print "/usr/pluto/bin/PlutoDHCP.sh -d $PK_Device -a";
-	$main_ip = `/usr/pluto/bin/PlutoDHCP.sh -d $PK_Device -a`;
+	my ($PKDEV) = shift;
+	print "/usr/pluto/bin/PlutoDHCP.sh -d $PKDEV -a";
+	$main_ip = `/usr/pluto/bin/PlutoDHCP.sh -d $PKDEV -a`;
 	chomp($main_ip);
 	return $main_ip;
 }

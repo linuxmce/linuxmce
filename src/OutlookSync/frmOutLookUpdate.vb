@@ -214,10 +214,10 @@ Friend Class frmOutLookUpdate
 	Private Function ReadIni(ByRef operationType As String) As Object
 		If operationType = "I" Then
 			'UPGRADE_WARNING: Couldn't resolve default property of object ReadIni. Click for more: 'ms-help://MS.VSCC.2003/commoner/redir/redirect.htm?keyword="vbup1037"'
-            ReadIni = Trim(txtURL.Text) & "/pluto-admin/outlook_sync/insert.php"
+            ReadIni = Trim(txtURL.Text) & "/lmce-admin/outlook_sync/insert.php"
 		Else
 			'UPGRADE_WARNING: Couldn't resolve default property of object ReadIni. Click for more: 'ms-help://MS.VSCC.2003/commoner/redir/redirect.htm?keyword="vbup1037"'
-            ReadIni = Trim(txtURL.Text) & "/pluto-admin/outlook_sync/extract.php"
+            ReadIni = Trim(txtURL.Text) & "/lmce-admin/outlook_sync/extract.php"
 		End If
 	End Function
 	

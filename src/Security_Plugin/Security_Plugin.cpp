@@ -1,3 +1,4 @@
+
 /*
  Security_Plugin
  
@@ -465,6 +466,7 @@ void Security_Plugin::CMD_Set_House_Mode(string sValue_To_Assign,int iPK_Users,s
 		return;
 	}
 
+	string sPreviousHouseMode = StringUtils::ltos(m_mapPK_HouseMode[iPK_DeviceGroup]);
 	m_mapPK_HouseMode[iPK_DeviceGroup]=PK_HouseMode;
 	SaveHouseModes();
 	Row_AlertType *pRow_AlertType = m_pDatabase_pluto_security->AlertType_get()->GetRow(ALERTTYPE_Security_CONST);
@@ -539,7 +541,7 @@ void Security_Plugin::CMD_Set_House_Mode(string sValue_To_Assign,int iPK_Users,s
 	vector<Row_Device *> vectAlarmPanelDevices;
 	m_pDatabase_pluto_main->Device_get()->GetRows(
 		"JOIN DeviceTemplate ON FK_DeviceTemplate = PK_DeviceTemplate "
-		"WHERE FK_DeviceCategory = " + StringUtils::ltos(DEVICECATEGORY_Security_Interface_CONST) + 
+		"WHERE (FK_DeviceCategory = " + StringUtils::ltos(DEVICECATEGORY_Security_Interface_CONST) + " OR FK_DeviceCategory = " + StringUtils::ltos(DEVICECATEGORY_Specialized_CONST) + ")" +
 		" AND FK_Installation = " + StringUtils::ltos(m_pRouter->iPK_Installation_get()), &vectAlarmPanelDevices);
 
 	if(vectAlarmPanelDevices.size())
@@ -564,7 +566,7 @@ void Security_Plugin::CMD_Set_House_Mode(string sValue_To_Assign,int iPK_Users,s
 	DCE::CMD_Remove_Screen_From_History_DL CMD_Remove_Screen_From_History_DL(m_dwPK_Device,m_pOrbiter_Plugin->m_sPK_Device_AllOrbiters,
 		"",SCREEN_SecurityPanel_CONST);
 	SendCommand(CMD_Remove_Screen_From_History_DL);
-	EVENT_House_Mode_Changed(iPK_DeviceGroup,PK_HouseMode);
+	EVENT_House_Mode_Changed(iPK_DeviceGroup,PK_HouseMode,sPreviousHouseMode);
 }
 
 string Security_Plugin::AlertsSinceLastChange(int PK_DeviceGroup,bool &bSecurityOrFire)
@@ -695,12 +697,19 @@ bool Security_Plugin::SensorTrippedEventHandler(DeviceData_Router *pDevice,bool 
 	pDevice->m_sStatus_set(bIsTripped ? "TRIPPED" : "NORMAL");
 
 	string State = pDevice->m_sState_get();
+	LoggerWrapper::GetInstance()->Write(LV_WARNING, "XXX: Device: %d, State: %s", pDevice->m_dwPK_Device, State.c_str());
 	string::size_type pos=0;
 	string Mode = StringUtils::Tokenize(State,",",pos);
 	string Bypass = StringUtils::Tokenize(State,",",pos);
 	string sPK_ModeChange = StringUtils::Tokenize(State,",",pos);
 
 	int PK_HouseMode = GetModeID(Mode);
+
+	string sConfiguration = m_pDatabase_pluto_main->Device_DeviceData_get()->GetRow(m_dwPK_Device,DEVICEDATA_Configuration_CONST)->IK_DeviceData_get();
+	pos = 0;
+	StringUtils::Tokenize(sConfiguration, ",", pos);
+	string HouseMode = StringUtils::Tokenize(sConfiguration, ",", pos);
+	PK_HouseMode = atoi(HouseMode.c_str());
 
 	if( Bypass=="WAIT" || bIsTripped==false )
 	{
@@ -712,7 +721,7 @@ bool Security_Plugin::SensorTrippedEventHandler(DeviceData_Router *pDevice,bool 
 	// if the BabySitter mode is on and is a door log the alert
 	if( m_bBabySitterMode   ) 
 	{
-		int nObjectType = atoi(pDevice->m_mapParameters_Find(DEVICEDATA_PK_FloorplanObjectType_CONST).c_str());
+		int nObjectType = atoi(pDevice->m_mapParameters[DEVICEDATA_PK_FloorplanObjectType_CONST].c_str());
 		if( nObjectType == 1 )  // DOOR
 		{
 			Row_Alert *pRow_Alert = LogAlert( m_pDatabase_pluto_security->AlertType_get()->GetRow(ALERTTYPE_BabySitter_mode_CONST),pDevice,true,true);
@@ -722,7 +731,7 @@ bool Security_Plugin::SensorTrippedEventHandler(DeviceData_Router *pDevice,bool 
 	}
 
 	// The first digit in the alert data is 0/1 for monitor mode
-	if( m_bMonitorMode && atoi(pDevice->m_mapParameters_Find(DEVICEDATA_Alert_CONST).c_str()) )
+	if( m_bMonitorMode && atoi(pDevice->m_mapParameters[DEVICEDATA_Alert_CONST].c_str()) )
 	{
 		// Monitor mode is on, so no matter what notify the appropriate users
 		Row_Alert *pRow_Alert = LogAlert( m_pDatabase_pluto_security->AlertType_get()->GetRow(ALERTTYPE_Monitor_mode_CONST),pDevice,true,true);
@@ -733,6 +742,7 @@ bool Security_Plugin::SensorTrippedEventHandler(DeviceData_Router *pDevice,bool 
 
 	bool bNotify=false,bAnnouncementOnly=false;
 	int PK_AlertType = GetAlertType(PK_HouseMode,pDevice,&bNotify);
+	LoggerWrapper::GetInstance()->Write(LV_WARNING, "XXX: PK_AlertType: %d, PK_HouseMode: %d", PK_AlertType, PK_HouseMode);
 	if( PK_AlertType<=0 )
 	{
 		bAnnouncementOnly=true; // This is something information only, like an announcement, or only has a notification and do nothing
@@ -745,7 +755,7 @@ bool Security_Plugin::SensorTrippedEventHandler(DeviceData_Router *pDevice,bool 
 			return false;
 		else
 			// Get the real alert type.  We already set bAnnouncementOnly=true so we know not to fire the event
-			PK_AlertType = atoi(pDevice->m_mapParameters_Find(DEVICEDATA_EK_AlertType_CONST).c_str());
+			PK_AlertType = atoi(pDevice->m_mapParameters[DEVICEDATA_EK_AlertType_CONST].c_str());
 	}
 
 	// What type of alert is this?  Maybe it's just informational
@@ -800,7 +810,7 @@ int Security_Plugin::GetAlertType(int PK_HouseMode,DeviceData_Router *pDevice,bo
 {
 	// 0=Do nothing, 1=fire alert, 2=make announcement, 3=snap phto
 	int Alert=0;
-	string sAlertData = pDevice->m_mapParameters_Find(DEVICEDATA_Alert_CONST);
+	string sAlertData = pDevice->m_mapParameters[DEVICEDATA_Alert_CONST];
 	//monitor mode, disarmed, armed - away, armed - at home, sleeping, entertaining, extended away
 	if( sAlertData.length()<13 )
 	{
@@ -822,7 +832,7 @@ int Security_Plugin::GetAlertType(int PK_HouseMode,DeviceData_Router *pDevice,bo
 		return ALERTTYPE_ANNOUNCMENT;
 	else if( Alert==3 )
 		return ALERTTYPE_PHOTO;
-	return atoi( pDevice->m_mapParameters_Find(DEVICEDATA_EK_AlertType_CONST).c_str() );
+	return atoi( pDevice->m_mapParameters[DEVICEDATA_EK_AlertType_CONST].c_str() );
 }
 
 void Security_Plugin::AlarmCallback(int id, void* param)
@@ -943,7 +953,12 @@ void Security_Plugin::ProcessCountdown(int id,Row_Alert *pRow_Alert)
 
 void Security_Plugin::SayToDevices(string sText,DeviceData_Router *pDeviceData_Router)
 {
-	DCE::CMD_Send_Audio_To_Device CMD_Send_Audio_To_Device(m_dwPK_Device,m_PK_Device_TextToSpeach,sText,DATA_Get_PK_Device(),true,true);
+	string sPhones = "";
+	bool bBypass_Event = 0; // TODO aaronspecial
+	bool bDont_Setup_AV = 0;
+	string sVoice = ""; //TODO: Once we get some decent voices, set this to one of them!
+
+	DCE::CMD_Send_Audio_To_Device CMD_Send_Audio_To_Device(m_dwPK_Device,m_PK_Device_TextToSpeach,sText,sPhones,DATA_Get_PK_Device(),bBypass_Event, bDont_Setup_AV, sVoice);
 	SendCommand(CMD_Send_Audio_To_Device);
 }
 
@@ -1174,6 +1189,7 @@ void Security_Plugin::SaveHouseModes()
 	for(map<int,int>::iterator it=m_mapPK_HouseMode.begin();it!=m_mapPK_HouseMode.end();++it)
 		sData += StringUtils::itos(it->first) + "," + StringUtils::itos(it->second) + ",";
 
+	LoggerWrapper::GetInstance()->Write(LV_WARNING, "Security_Plugin::SaveHouseModes(): SetHouseMode sData: %s", sData.c_str());
 	pRow_Device_DeviceData->IK_DeviceData_set(sData);
 	pRow_Device_DeviceData->Table_Device_DeviceData_get()->Commit();
 }

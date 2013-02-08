@@ -1,0 +1,17 @@
+Source: bootsplash-theme-pluto
+Section: graphics
+Priority: optional
+Maintainer: Razvan Gavril <razvan.g@plutohome.com>
+Build-Depends: debhelper (>= 4.0.0)
+Standards-Version: 3.6.1
+
+Package: bootsplash-theme-pluto
+Architecture: any
+Recommends: bootsplash
+Provides: bootsplash-theme
+Depends: debconf (>= 0.5) | debconf-2.0
+Description: The bootsplash theme for Pluto Systems
+ This is a bootsplash theme packaged for Pluto Systems customized 
+ version of Debian GNU/Linux.
+ .
+ http://www.plutohome.com/

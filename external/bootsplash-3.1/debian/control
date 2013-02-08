@@ -1,0 +1,16 @@
+Source: bootsplash
+Section: base
+Priority: optional
+Maintainer: Razvan Gavril <razvan.g@plutohome.com>
+Build-Depends: debhelper (>= 4.0.0), libfreetype6-dev (>= 2.1.7-2.4), libjpeg62-dev (>= 6b-10), libmng-dev (>= 1.0.8-1), zlib1g-dev (>= 1)
+Standards-Version: 3.6.1
+
+Package: bootsplash
+Architecture: any
+Depends: ${shlibs:Depends}, ${misc:Depends}, bootsplash-theme-linuxmce | bootsplash-theme-pluto | bootsplash-theme-monster | bootsplash-theme
+Recommends: sysv-rc (>= 2.86.ds1-1pluto)
+Replaces: bootsplash-theme-pluto, bootsplash-theme-monster
+Description: Bootsplash user space utilities and scripts.
+ Bootsplash utilites work with a bootsplash patched kernel to help displaying a nice
+ splash screen on system startup. These package contains utitities and scripts that are
+ used internaly by bootsplash to draw text and play animations.

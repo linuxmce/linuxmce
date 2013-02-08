@@ -52,3 +52,7 @@ clean::
 endif
 
 # ### EOF ###
+
+install: 
+	mkdir -p /lib/modules/
+	cp *.ko $(DESTPATH)/lib/modules/

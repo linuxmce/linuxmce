@@ -35,17 +35,23 @@
 
 #include "Gen_Devices/ZWaveBase.h"
 //<-dceag-d-e->
+#include "../DCE/AlarmManager.h"
 
 //<-dceag-decl-b->
 namespace DCE
 {
-	class ZWave : public ZWave_Command
+	class ZWave : public ZWave_Command, public AlarmEvent
 	{
 //<-dceag-decl-e->
 		// Private member variables
 		ZWApi::ZWApi *myZWApi;
+		int myDeviceID;
+		AlarmManager* m_pAlarmManager;
 
 		// Private methods
+		virtual DeviceData_Impl *InternalIDToDevice(string sInternalID, int instance_id);
+		virtual vector<DeviceData_Impl*> FindDevicesForNode(string sInternalID);
+		void AlarmCallback(int id, void* param);
 		
 public:
 		// Public member variables
@@ -60,8 +66,29 @@ public:
 		virtual void ReceivedCommandForChild(DeviceData_Impl *pDeviceData_Impl,string &sCMD_Result,Message *pMessage);
 		virtual void ReceivedUnknownCommand(string &sCMD_Result,Message *pMessage);
 //<-dceag-const-e->
-		virtual void SendSensorTrippedEvents(unsigned short node_id, bool value);
-		virtual void SendLightChangedEvents(unsigned short node_id, int value);
+		virtual void SendSensorTrippedEvents(unsigned short node_id, int instance_id, bool value);
+		virtual void SendFireAlarmEvent(unsigned short node_id, int instance_id);
+		virtual void SendAirQualityEvent(unsigned short node_id, int instance_id);
+		virtual void SendCO2LevelChangedEvent(unsigned short node_id, int instance_id, int value);
+		virtual void SendLightChangedEvents(unsigned short node_id, int instance_id, int value);
+		virtual void SendPowerUsageChangedEvent(unsigned short node_id, int instance_id, int value);
+		virtual void SendTemperatureChangedEvent(unsigned short node_id, int instance_id, float value);
+		virtual void SendSetpointChangedEvent(unsigned short node_id, int instance_id, float value);
+		virtual void SendBrightnessChangedEvent(unsigned short node_id, int instance_id, int value);
+		virtual void SendHumidityChangedEvent(unsigned short node_id, int instance_id, float value);
+		virtual void SendOnOffEvent(unsigned short node_id, int instance_id, int value);
+		virtual void SendOrbiterPopup(const char *message); 
+        	virtual int AddDevice(int parent, string sInternalID, int iInstanceID, int PK_DeviceTemplate);
+		virtual int GetPKDevice(int node_id, int instance_id);
+        	virtual bool DeleteDevicesForNode(string sInternalID);
+		virtual string GetCapabilities(int iNodeID, int iInstanceID);
+		virtual string GetSchedule(int iNodeID);
+		virtual bool SetCapabilities(int iNodeID, int iInstanceID, string sCapabilities);
+		virtual void AddCapability(int PKDevice, int capability);
+		virtual void SetManufacturerSpecificString(int iPKDevice,string sManufacturerSpecific);
+		virtual std::map<int, int> FindCCInstanceCountForNode(string sInternalID);
+		virtual void ReportBatteryStatus(int iNode, int status);
+
 
 //<-dceag-const2-b->
 		// The following constructor is only used if this a class instance embedded within a DCE Device.  In that case, it won't create it's own connection to the router
@@ -80,7 +107,6 @@ public:
 	string DATA_Get_COM_Port_on_PC();
 	bool DATA_Get_Only_One_Per_PC();
 	bool DATA_Get_Autoassign_to_parents_room();
-	string DATA_Get_Polling_Settings();
 
 			*****EVENT***** accessors inherited from base class
 	void EVENT_Sensor_Tripped(bool bTripped);
@@ -167,13 +193,15 @@ NOEMON or CANBUS */
 	/** Set the configuration parameters for Z-Wave devices (PIR) */
 		/** @param #48 Value */
 			/** The value of parameter. */
+		/** @param #222 Size */
+			/** Size of the parameter (1, 2 or 4; 0/empty==autodetect) */
 		/** @param #239 NodeID */
 			/** Z-Wave node id */
 		/** @param #248 Parameter ID */
 			/** The configuration parameter ID. */
 
-	virtual void CMD_Set_Config_Param(int iValue,int iNodeID,int iParameter_ID) { string sCMD_Result; CMD_Set_Config_Param(iValue,iNodeID,iParameter_ID,sCMD_Result,NULL);};
-	virtual void CMD_Set_Config_Param(int iValue,int iNodeID,int iParameter_ID,string &sCMD_Result,Message *pMessage);
+	virtual void CMD_Set_Config_Param(int iValue,int iSize,int iNodeID,int iParameter_ID) { string sCMD_Result; CMD_Set_Config_Param(iValue,iSize,iNodeID,iParameter_ID,sCMD_Result,NULL);};
+	virtual void CMD_Set_Config_Param(int iValue,int iSize,int iNodeID,int iParameter_ID,string &sCMD_Result,Message *pMessage);
 
 
 	/** @brief COMMAND: #842 - Set Association */
@@ -190,11 +218,10 @@ NOEMON or CANBUS */
 
 
 	/** @brief COMMAND: #966 - Set Polling State */
-	/** Set polling state either for the system, or a  particular node */
+	/** Set the polling State for the Z-Wave interface */
 		/** @param #2 PK_Device */
 			/** The device to set polling info for.  If both this and node id are blank, it sets global polling */
 		/** @param #5 Value To Assign */
-			/** If polling a node, the same as the device data for the node.   If no node is specified, the format is the same as Interface's Polling Settings */
 		/** @param #220 Report */
 			/** If true, the changes will go back to the router to update device data so they persist after a reload */
 		/** @param #225 Always */
@@ -207,7 +234,7 @@ NOEMON or CANBUS */
 
 
 	/** @brief COMMAND: #967 - Add Node */
-	/** Add a node to the ZWave network */
+	/** Adds a new Z-Wave node, must be SIS or Master */
 		/** @param #39 Options */
 			/** A string of letters for each of the following options:
 H = high power */
@@ -223,10 +250,9 @@ H = high power */
 
 
 	/** @brief COMMAND: #968 - Remove Node */
-	/** Remove a node from the ZWave network */
+	/** Removes a Z-Wave node, must be SIS or Master */
 		/** @param #39 Options */
-			/** A string of letters for each of the following options:
-H = high power */
+			/** If true, allow deletion of multiple nodes until timeout occurs or add node is called with node stop. */
 		/** @param #48 Value */
 			/** empty or 1 = Node Any, 2=node controller, 3=node slave, 5=node stop */
 		/** @param #182 Timeout */
@@ -236,6 +262,15 @@ H = high power */
 
 	virtual void CMD_Remove_Node(string sOptions,int iValue,string sTimeout,bool bMultiple) { string sCMD_Result; CMD_Remove_Node(sOptions.c_str(),iValue,sTimeout.c_str(),bMultiple,sCMD_Result,NULL);};
 	virtual void CMD_Remove_Node(string sOptions,int iValue,string sTimeout,bool bMultiple,string &sCMD_Result,Message *pMessage);
+
+
+	/** @brief COMMAND: #1085 - Resync node */
+	/** Resynchronize device data */
+		/** @param #239 NodeID */
+			/** Node id to resync */
+
+	virtual void CMD_Resync_node(int iNodeID) { string sCMD_Result; CMD_Resync_node(iNodeID,sCMD_Result,NULL);};
+	virtual void CMD_Resync_node(int iNodeID,string &sCMD_Result,Message *pMessage);
 
 //<-dceag-h-e->
 	};

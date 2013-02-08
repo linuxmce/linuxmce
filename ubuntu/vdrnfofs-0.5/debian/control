@@ -1,0 +1,16 @@
+Source: vdrnfofs
+Section: misc
+Priority: extra
+Maintainer: Tobias Grimm <etobi@debian.org>
+Build-Depends: debhelper (>= 7.0.50)
+Build-Depends-Indep: python-support
+Standards-Version: 3.8.4
+Homepage: <insert the upstream URL, if relevant>
+#Vcs-Git: git://git.debian.org/collab-maint/vdrnfofs.git
+#Vcs-Browser: http://git.debian.org/?p=collab-maint/vdrnfofs.git;a=summary
+
+Package: vdrnfofs
+Architecture: all
+Depends: ${misc:Depends}, python (>= 2.5), python-fuse
+Description: <insert up to 60 chars description>
+ <insert long description, indented with spaces>

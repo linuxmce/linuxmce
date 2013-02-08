@@ -141,7 +141,6 @@ bool psc_id_isNull();
 bool psc_batch_isNull();
 bool psc_user_isNull();
 bool psc_frozen_isNull();
-bool psc_mod_isNull();
 bool psc_restrict_isNull();
 
 			
@@ -152,7 +151,6 @@ void psc_id_setNull(bool val);
 void psc_batch_setNull(bool val);
 void psc_user_setNull(bool val);
 void psc_frozen_setNull(bool val);
-void psc_mod_setNull(bool val);
 void psc_restrict_setNull(bool val);
 	
 	
@@ -171,35 +169,15 @@ void psc_restrict_setNull(bool val);
 
 		// Return the rows in other tables with foreign keys pointing here
 		void CommandGroup_D_Command_FK_DeviceCategory_getrows(vector <class Row_CommandGroup_D_Command*> *rows);
-void CommandGroup_D_Command_pschist_FK_DeviceCategory_getrows(vector <class Row_CommandGroup_D_Command_pschist*> *rows);
-void CommandGroup_D_Command_pschmask_FK_DeviceCategory_getrows(vector <class Row_CommandGroup_D_Command_pschmask*> *rows);
 void ConfigType_FK_DeviceCategory_getrows(vector <class Row_ConfigType*> *rows);
-void ConfigType_pschist_FK_DeviceCategory_getrows(vector <class Row_ConfigType_pschist*> *rows);
-void ConfigType_pschmask_FK_DeviceCategory_getrows(vector <class Row_ConfigType_pschmask*> *rows);
 void DHCPDevice_FK_DeviceCategory_getrows(vector <class Row_DHCPDevice*> *rows);
-void DHCPDevice_pschist_FK_DeviceCategory_getrows(vector <class Row_DHCPDevice_pschist*> *rows);
-void DHCPDevice_pschmask_FK_DeviceCategory_getrows(vector <class Row_DHCPDevice_pschmask*> *rows);
 void DeviceCategory_FK_DeviceCategory_Parent_getrows(vector <class Row_DeviceCategory*> *rows);
 void DeviceCategory_DeviceData_FK_DeviceCategory_getrows(vector <class Row_DeviceCategory_DeviceData*> *rows);
-void DeviceCategory_DeviceData_pschist_FK_DeviceCategory_getrows(vector <class Row_DeviceCategory_DeviceData_pschist*> *rows);
-void DeviceCategory_DeviceData_pschmask_FK_DeviceCategory_getrows(vector <class Row_DeviceCategory_DeviceData_pschmask*> *rows);
 void DeviceCategory_Event_FK_DeviceCategory_getrows(vector <class Row_DeviceCategory_Event*> *rows);
-void DeviceCategory_Event_pschist_FK_DeviceCategory_getrows(vector <class Row_DeviceCategory_Event_pschist*> *rows);
-void DeviceCategory_Event_pschmask_FK_DeviceCategory_getrows(vector <class Row_DeviceCategory_Event_pschmask*> *rows);
-void DeviceCategory_pschist_FK_DeviceCategory_Parent_getrows(vector <class Row_DeviceCategory_pschist*> *rows);
-void DeviceCategory_pschmask_FK_DeviceCategory_Parent_getrows(vector <class Row_DeviceCategory_pschmask*> *rows);
 void DeviceCommandGroup_FK_DeviceCategory_getrows(vector <class Row_DeviceCommandGroup*> *rows);
-void DeviceCommandGroup_pschist_FK_DeviceCategory_getrows(vector <class Row_DeviceCommandGroup_pschist*> *rows);
-void DeviceCommandGroup_pschmask_FK_DeviceCategory_getrows(vector <class Row_DeviceCommandGroup_pschmask*> *rows);
 void DeviceTemplate_FK_DeviceCategory_getrows(vector <class Row_DeviceTemplate*> *rows);
 void DeviceTemplate_DeviceCategory_ControlledVia_FK_DeviceCategory_getrows(vector <class Row_DeviceTemplate_DeviceCategory_ControlledVia*> *rows);
-void DeviceTemplate_DeviceCategory_ControlledVia_pschist_FK_DeviceCategory_getrows(vector <class Row_DeviceTemplate_DeviceCategory_ControlledVia_pschist*> *rows);
-void DeviceTemplate_DeviceCategory_ControlledVia_pschmask_FK_DeviceCategory_getrows(vector <class Row_DeviceTemplate_DeviceCategory_ControlledVia_pschmask*> *rows);
-void DeviceTemplate_pschist_FK_DeviceCategory_getrows(vector <class Row_DeviceTemplate_pschist*> *rows);
-void DeviceTemplate_pschmask_FK_DeviceCategory_getrows(vector <class Row_DeviceTemplate_pschmask*> *rows);
 void InfraredGroup_FK_DeviceCategory_getrows(vector <class Row_InfraredGroup*> *rows);
-void InfraredGroup_pschist_FK_DeviceCategory_getrows(vector <class Row_InfraredGroup_pschist*> *rows);
-void InfraredGroup_pschmask_FK_DeviceCategory_getrows(vector <class Row_InfraredGroup_pschmask*> *rows);
 
 
 		// Setup binary serialization

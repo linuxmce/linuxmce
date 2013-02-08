@@ -1,0 +1,64 @@
+#! /usr/bin/perl
+#
+# saveconfig	Print out the configuration of the current /etc/rc?.d
+#		symlink setup, in a format compatible to the
+#		"update-rc.d" command line.
+#
+# Author:	Miquel van Smoorenburg <miquels@cistron.nl>
+#
+
+chdir "/etc/init.d";
+
+sub scan {
+	my $dir = shift;
+	local *DD;
+	my $f;
+	opendir DD, $dir;
+	foreach $f (readdir DD) {
+		next if ($f =~ m/^\./);
+		push @{$dir{$dir}}, $f;
+	}
+	closedir DD;
+}
+
+foreach my $d (qw(S 0 1 2 3 4 5 6 7 8 9)) {
+	scan("/etc/rc$d.d");
+}
+scan("/etc/init.d");
+
+foreach my $s (@{$dir{"/etc/init.d"}}) {
+	my %start;
+	my %stop;
+	my $start = 0;
+	my $stop = 0;
+	foreach my $l (qw(S 0 1 2 3 4 5 6)) {
+		#print "L: $l\n";
+		foreach my $f (@{$dir{"/etc/rc$l.d"}}) {
+			#print "F: $f\n";
+			if ($f =~ m#^S(\d+)$s$#) {
+				$start{$1} .= "$l ";
+				$start = 1;
+			}
+			if ($f =~ m#^K(\d+)$s$#) {
+				$stop{$1} .= "$l ";
+				$stop = 1;
+			}
+		}
+	}
+
+	print "$s " if ($start || $stop);
+	if ($start > 0) {
+		print "start ";
+		foreach my $x (sort keys %start) {
+			print "$x ", $start{$x}, ". ";
+		}
+	}
+	if ($stop > 0) {
+		print "stop ";
+		foreach my $x (sort keys %stop) {
+			print "$x ", $stop{$x}, ". ";
+		}
+	}
+	print "\n" if ($start || $stop);
+}
+

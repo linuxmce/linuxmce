@@ -90,6 +90,7 @@ void Row_Disc::Delete()
 	Row_Disc *pRow = this; // Needed so we will have only 1 version of get_primary_fields_assign_from_row
 	
 	if (!is_deleted)
+	{
 		if (is_added)	
 		{	
 			vector<TableRow*>::iterator i;	
@@ -111,6 +112,7 @@ void Row_Disc::Delete()
 			table->deleted_cachedRows[key] = this;
 			is_deleted = true;	
 		}	
+	}
 }
 
 void Row_Disc::Reload()
@@ -166,8 +168,7 @@ is_null[11] = true;
 m_psc_user = 0;
 m_psc_frozen = 0;
 is_null[12] = false;
-m_psc_mod = "0000-00-00 00:00:00";
-is_null[13] = false;
+is_null[13] = true;
 is_null[14] = true;
 m_psc_restrict = 0;
 
@@ -301,6 +302,9 @@ return is_null[11];}
 bool Row_Disc::psc_frozen_isNull() {PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
 
 return is_null[12];}
+bool Row_Disc::psc_mod_isNull() {PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
+
+return is_null[13];}
 bool Row_Disc::psc_restrict_isNull() {PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
 
 return is_null[14];}
@@ -344,6 +348,10 @@ is_modified=true;
 }
 void Row_Disc::psc_frozen_setNull(bool val){PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
 is_null[12]=val;
+is_modified=true;
+}
+void Row_Disc::psc_mod_setNull(bool val){PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
+is_null[13]=val;
 is_modified=true;
 }
 void Row_Disc::psc_restrict_setNull(bool val){PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);

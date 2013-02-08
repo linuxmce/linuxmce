@@ -1,6 +1,6 @@
 #!/bin/sh
 
-# $Id: change-channel.sh 603 2005-09-22 02:47:18Z isely $
+# $Id: change-channel.sh 1690 2007-11-04 21:50:45Z isely $
 
 # This sysfs based channel changing script was contributed on
 # 10-Sep-2005 by Per Christian Henden <perchrh@pvv.org>.  Please see
@@ -52,20 +52,20 @@ CHANNELID=$1
 #check first if we are root
 if [ $UID != "0" ]
    then
-   echo You need to be root to change channels
+   echo "You need to be root to change channels"
    exit
 fi
 
 #check parameters
 if [ $# == "0" ]
 then
-   echo Usage is $0 \<channel id\>
-   echo e.g. $0 S10
-   echo Use $0 -list to get a list of available channels
+   echo "Usage is $0 \<channel id\>"
+   echo "e.g. $0 S10"
+   echo "Use $0 -list to get a list of available channels"
    exit
 else if [ $1 == "-list" ]
 then
-  echo Available channels are:
+  echo "Available channels are:"
   grep "\[" $FREQUENCY_FILE|tr -d "[,]"
   exit
 fi
@@ -78,22 +78,21 @@ freq=`grep  -1 -i "\[$CHANNELID\]" $FREQUENCY_FILE |tail -n 1|cut -d" " -f 3|tr 
 #that means the channel id was not found
 if [ $freq == "000" ]
 then
-echo Could not find channel with id $CHANNELID
+echo "Could not find channel with id $CHANNELID"
 exit
 else
-echo Found frequency $freq for channel $CHANNELID
+echo "Found frequency $freq for channel $CHANNELID"
 fi
 
 #Change the channel for all pvrusb2 cards to that of $freq
 if [ -x /sys/class/pvrusb2/ ]
 then
-ids=`find /sys/class/pvrusb2/ -type d -maxdepth 1 -mindepth 1`
+ids=`find /sys/class/pvrusb2/ -maxdepth 1 -mindepth 1 -type d`
    for id in $ids
    do
    echo $freq > $id/ctl_frequency/cur_val
    done
 else
-echo PVR USB2 sysfs interface not found
+echo "PVR USB2 sysfs interface not found"
 fi
-
 

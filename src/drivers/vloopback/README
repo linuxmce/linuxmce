@@ -33,12 +33,14 @@ Jeroen Vreeken, pe1rxq@amsat.org
 
 -------------------------------------------------------------------------------
 
-Module has experimental support for kernel 2.6.x .
-The current version 0.95 has been tested with kernel 2.6.8 , 2.6.9 and 2.6.10.
+Module now supports kernel 2.6.x .
+The current version 1.0 has been tested with kernel 2.6.x ( up to 2.6.25 ).
 
 To compile and install :
 
 make ; su - ; make install
+/sbin/modprobe videodev 
+/sbin/modprobe vloopback
 
 To uninstall :
 

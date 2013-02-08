@@ -1,0 +1,9 @@
+<-dceag-p-b->
+Package = DCE_Destination_Package
+Dir = 
+desc = DCE Implemenation for #2103 Insteon PLM DCE
+Maintainer = PeterName
+Email = 
+Depend = DCE_Dependencies
+<-dceag-p-e->
+

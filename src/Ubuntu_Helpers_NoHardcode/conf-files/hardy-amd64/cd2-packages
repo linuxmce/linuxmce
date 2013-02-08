@@ -562,9 +562,9 @@ libxslt1.1
 libxss1
 libxt6
 libxt-dev
-libxtrap6
-libxtrap-dev
-libxtst6
+libxtrap6 
+libxtrap-dev 
+libxtst6 
 libxtst-dev
 libxv1
 libxv-dev
@@ -663,7 +663,6 @@ svgalibg1
 syslinux
 sysv-rc
 tcpd
-tee-pluto
 tk8.4
 traceroute
 transcode
@@ -676,7 +675,6 @@ unixodbc
 update-inetd
 usbutils
 vdr
-video-wizard-videos
 vim
 vim-common
 vim-runtime

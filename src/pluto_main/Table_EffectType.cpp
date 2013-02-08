@@ -33,11 +33,7 @@ using namespace std;
 #include "Table_EffectType.h"
 
 #include "Table_DesignObjVariation.h"
-#include "Table_DesignObjVariation_pschist.h"
-#include "Table_DesignObjVariation_pschmask.h"
 #include "Table_EffectType_Effect_Skin.h"
-#include "Table_EffectType_Effect_Skin_pschist.h"
-#include "Table_EffectType_Effect_Skin_pschmask.h"
 
 
 void Database_pluto_main::CreateTable_EffectType()
@@ -85,6 +81,7 @@ void Row_EffectType::Delete()
 	Row_EffectType *pRow = this; // Needed so we will have only 1 version of get_primary_fields_assign_from_row
 	
 	if (!is_deleted)
+	{
 		if (is_added)	
 		{	
 			vector<TableRow*>::iterator i;	
@@ -106,6 +103,7 @@ void Row_EffectType::Delete()
 			table->deleted_cachedRows[key] = this;
 			is_deleted = true;	
 		}	
+	}
 }
 
 void Row_EffectType::Reload()
@@ -139,8 +137,7 @@ void Row_EffectType::SetDefaultValues()
 {
 	m_PK_EffectType = 0;
 is_null[0] = false;
-m_Description = "";
-is_null[1] = false;
+is_null[1] = true;
 is_null[2] = true;
 is_null[3] = true;
 m_psc_id = 0;
@@ -150,7 +147,8 @@ is_null[5] = true;
 m_psc_user = 0;
 m_psc_frozen = 0;
 is_null[6] = false;
-is_null[7] = true;
+m_psc_mod = "0000-00-00 00:00:00";
+is_null[7] = false;
 is_null[8] = true;
 m_psc_restrict = 0;
 
@@ -218,6 +216,9 @@ void Row_EffectType::psc_restrict_set(long int val){PLUTO_SAFETY_LOCK_ERRORSONLY
 m_psc_restrict = val; is_modified=true; is_null[8]=false;}
 
 		
+bool Row_EffectType::Description_isNull() {PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
+
+return is_null[1];}
 bool Row_EffectType::Define_isNull() {PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
 
 return is_null[2];}
@@ -233,14 +234,15 @@ return is_null[5];}
 bool Row_EffectType::psc_frozen_isNull() {PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
 
 return is_null[6];}
-bool Row_EffectType::psc_mod_isNull() {PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
-
-return is_null[7];}
 bool Row_EffectType::psc_restrict_isNull() {PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
 
 return is_null[8];}
 
 			
+void Row_EffectType::Description_setNull(bool val){PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
+is_null[1]=val;
+is_modified=true;
+}
 void Row_EffectType::Define_setNull(bool val){PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
 is_null[2]=val;
 is_modified=true;
@@ -259,10 +261,6 @@ is_modified=true;
 }
 void Row_EffectType::psc_frozen_setNull(bool val){PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
 is_null[6]=val;
-is_modified=true;
-}
-void Row_EffectType::psc_mod_setNull(bool val){PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
-is_null[7]=val;
 is_modified=true;
 }
 void Row_EffectType::psc_restrict_setNull(bool val){PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
@@ -291,8 +289,8 @@ PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
 if (is_null[1])
 return "NULL";
 
-char *buf = new char[61];
-db_wrapper_real_escape_string(table->database->m_pDB, buf, m_Description.c_str(), (unsigned long) min((size_t)30,m_Description.size()));
+char *buf = new char[181];
+db_wrapper_real_escape_string(table->database->m_pDB, buf, m_Description.c_str(), (unsigned long) min((size_t)90,m_Description.size()));
 string s=string()+"\""+buf+"\"";
 delete[] buf;
 return s;
@@ -305,8 +303,8 @@ PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
 if (is_null[2])
 return "NULL";
 
-char *buf = new char[41];
-db_wrapper_real_escape_string(table->database->m_pDB, buf, m_Define.c_str(), (unsigned long) min((size_t)20,m_Define.size()));
+char *buf = new char[121];
+db_wrapper_real_escape_string(table->database->m_pDB, buf, m_Define.c_str(), (unsigned long) min((size_t)60,m_Define.size()));
 string s=string()+"\""+buf+"\"";
 delete[] buf;
 return s;
@@ -963,39 +961,11 @@ PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
 class Table_DesignObjVariation *pTable = table->database->DesignObjVariation_get();
 pTable->GetRows("`FK_EffectType_Highlighted`=" + StringUtils::itos(m_PK_EffectType),rows);
 }
-void Row_EffectType::DesignObjVariation_pschist_FK_EffectType_Highlighted_getrows(vector <class Row_DesignObjVariation_pschist*> *rows)
-{
-PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
-
-class Table_DesignObjVariation_pschist *pTable = table->database->DesignObjVariation_pschist_get();
-pTable->GetRows("`FK_EffectType_Highlighted`=" + StringUtils::itos(m_PK_EffectType),rows);
-}
-void Row_EffectType::DesignObjVariation_pschmask_FK_EffectType_Highlighted_getrows(vector <class Row_DesignObjVariation_pschmask*> *rows)
-{
-PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
-
-class Table_DesignObjVariation_pschmask *pTable = table->database->DesignObjVariation_pschmask_get();
-pTable->GetRows("`FK_EffectType_Highlighted`=" + StringUtils::itos(m_PK_EffectType),rows);
-}
 void Row_EffectType::EffectType_Effect_Skin_FK_EffectType_getrows(vector <class Row_EffectType_Effect_Skin*> *rows)
 {
 PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
 
 class Table_EffectType_Effect_Skin *pTable = table->database->EffectType_Effect_Skin_get();
-pTable->GetRows("`FK_EffectType`=" + StringUtils::itos(m_PK_EffectType),rows);
-}
-void Row_EffectType::EffectType_Effect_Skin_pschist_FK_EffectType_getrows(vector <class Row_EffectType_Effect_Skin_pschist*> *rows)
-{
-PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
-
-class Table_EffectType_Effect_Skin_pschist *pTable = table->database->EffectType_Effect_Skin_pschist_get();
-pTable->GetRows("`FK_EffectType`=" + StringUtils::itos(m_PK_EffectType),rows);
-}
-void Row_EffectType::EffectType_Effect_Skin_pschmask_FK_EffectType_getrows(vector <class Row_EffectType_Effect_Skin_pschmask*> *rows)
-{
-PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
-
-class Table_EffectType_Effect_Skin_pschmask *pTable = table->database->EffectType_Effect_Skin_pschmask_get();
 pTable->GetRows("`FK_EffectType`=" + StringUtils::itos(m_PK_EffectType),rows);
 }
 

@@ -1,0 +1,137 @@
+#!/usr/bin/make -f
+# -*- makefile -*-
+#
+# $ID:$
+# Uncomment this to turn on verbose mode.
+#export DH_VERBOSE=1
+
+# This has to be exported to make some magic below work.
+export DH_OPTIONS
+
+# These are used for cross-compiling and for saving the configure script
+# from having to guess our platform (since we know it already)
+DEB_HOST_GNU_TYPE   ?= $(shell dpkg-architecture -qDEB_HOST_GNU_TYPE)
+DEB_BUILD_GNU_TYPE  ?= $(shell dpkg-architecture -qDEB_BUILD_GNU_TYPE)
+
+
+CFLAGS = -Wall -g
+
+ifneq (,$(findstring noopt,$(DEB_BUILD_OPTIONS)))
+	CFLAGS += -O0
+else
+	CFLAGS += -O2
+endif
+
+configure:
+	@dh_testdir
+	@rm -rf *cache
+	libtoolize
+	aclocal-1.10
+	autoheader
+	autoconf
+	automake
+
+config.status: configure
+	@dh_testdir
+
+	./configure --host=$(DEB_HOST_GNU_TYPE) --build=$(DEB_BUILD_GNU_TYPE) \
+		--prefix=/usr \
+		--mandir=\$${prefix}/share/man \
+		--infodir=\$${prefix}/share/info \
+		--disable-owphp --disable-owperl --disable-owpython \
+		--enable-owcapi \
+		--disable-owtcl \
+		--enable-debian \
+		--enable-owftpd --enable-owfs \
+		CFLAGS="$(CFLAGS)" LDFLAGS="$(LDFLAGS)"
+
+
+#Architecture 
+build: build-arch build-indep
+
+build-arch: build-arch-stamp
+build-arch-stamp:  config.status
+
+	# Add here commands to compile the arch part of the package.
+	$(MAKE) 
+	touch $@
+
+build-indep: build-indep-stamp
+build-indep-stamp:  config.status
+
+	# Add here commands to compile the indep part of the package.
+	#$(MAKE) doc
+	touch $@
+
+clean:
+	dh_testdir
+	dh_testroot
+	rm -f build-arch-stamp build-indep-stamp config.status
+
+	# Add here commands to clean up after the build process.
+	test ! -f Makefile -o ! -f config.status || $(MAKE) distclean
+ifneq "$(wildcard /usr/share/misc/config.sub)" ""
+	cp -f /usr/share/misc/config.sub config.sub
+endif
+ifneq "$(wildcard /usr/share/misc/config.guess)" ""
+	cp -f /usr/share/misc/config.guess config.guess
+endif
+	dh_clean 
+
+install: install-indep install-arch
+install-indep:
+	# nothing to do
+
+install-arch:
+	dh_testdir
+	dh_testroot
+	dh_clean -k 
+	dh_installdirs
+
+	$(MAKE) DESTDIR=$(CURDIR)/debian/tmp install
+	mkdir -p debian/tmp/usr/sbin
+	for f in owserver owftpd  owhttpd ; do \
+		mv debian/tmp/usr/bin/$$f debian/tmp/usr/sbin; \
+	done
+	mv debian/tmp/usr/share/man/mann/owtcl.n debian/tmp/usr/share/man/man3/owtcl.3
+	# changed from rmdir to rm -fR
+	rm -fR debian/tmp/usr/share/man/mann
+
+	dh_movefiles
+#	mkdir -p debian/libownet-php/$(shell php-config5 --extension-dir)/
+#	mv debian/tmp/usr/bin/ownet.php debian/libownet-php/$(shell php-config5 --extension-dir)/
+
+	dh_installchangelogs ChangeLog
+	dh_installdocs
+	dh_installexamples
+#	dh_pycentral -ppython-ow
+#	dh_pysupport -ppython-ownet
+#	dh_perl
+	dh_installinit
+	dh_installman
+	# fix the damn manpage links
+	find debian/*/usr/share/man/man* -type f | xargs perl -i -pe \
+		'if(s/^\.so\s+//) { chomp; open(M,"src/man/$$_"); local $$/=undef; $$_ = <M>; } '
+	find debian/*/usr/share/man/man* -type l | while read a ; do \
+		b=$$(basename $$(readlink "$$a")); \
+		rm -f "$$a"; \
+		ln -s $$b.gz $$(dirname "$$a")/$$(basename "$$a").gz; \
+	done
+	dh_link
+	dh_strip --dbg-package=owfs-dbg
+	dh_compress 
+	dh_fixperms
+	dh_makeshlibs
+	dh_installdeb
+	dh_shlibdeps
+	dh_gencontrol
+	dh_md5sums
+	dh_builddeb
+# Build architecture independant packages using the common target.
+binary-indep: build-indep install-indep
+
+# Build architecture dependant packages using the common target.
+binary-arch: build-arch install-arch
+
+binary: binary-arch binary-indep
+.PHONY: build clean binary-indep binary-arch binary install install-indep install-arch 

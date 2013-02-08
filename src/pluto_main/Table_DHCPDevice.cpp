@@ -37,8 +37,6 @@ using namespace std;
 #include "Table_Manufacturer.h"
 
 #include "Table_DHCPDevice_DeviceData.h"
-#include "Table_DHCPDevice_DeviceData_pschist.h"
-#include "Table_DHCPDevice_DeviceData_pschmask.h"
 
 
 void Database_pluto_main::CreateTable_DHCPDevice()
@@ -86,6 +84,7 @@ void Row_DHCPDevice::Delete()
 	Row_DHCPDevice *pRow = this; // Needed so we will have only 1 version of get_primary_fields_assign_from_row
 	
 	if (!is_deleted)
+	{
 		if (is_added)	
 		{	
 			vector<TableRow*>::iterator i;	
@@ -107,6 +106,7 @@ void Row_DHCPDevice::Delete()
 			table->deleted_cachedRows[key] = this;
 			is_deleted = true;	
 		}	
+	}
 }
 
 void Row_DHCPDevice::Reload()
@@ -166,7 +166,8 @@ is_null[15] = true;
 m_psc_user = 0;
 m_psc_frozen = 0;
 is_null[16] = false;
-is_null[17] = true;
+m_psc_mod = "0000-00-00 00:00:00";
+is_null[17] = false;
 is_null[18] = true;
 m_psc_restrict = 0;
 
@@ -336,9 +337,6 @@ return is_null[15];}
 bool Row_DHCPDevice::psc_frozen_isNull() {PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
 
 return is_null[16];}
-bool Row_DHCPDevice::psc_mod_isNull() {PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
-
-return is_null[17];}
 bool Row_DHCPDevice::psc_restrict_isNull() {PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
 
 return is_null[18];}
@@ -398,10 +396,6 @@ is_modified=true;
 }
 void Row_DHCPDevice::psc_frozen_setNull(bool val){PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
 is_null[16]=val;
-is_modified=true;
-}
-void Row_DHCPDevice::psc_mod_setNull(bool val){PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
-is_null[17]=val;
 is_modified=true;
 }
 void Row_DHCPDevice::psc_restrict_setNull(bool val){PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
@@ -469,8 +463,8 @@ PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
 if (is_null[4])
 return "NULL";
 
-char *buf = new char[101];
-db_wrapper_real_escape_string(table->database->m_pDB, buf, m_VendorModelID.c_str(), (unsigned long) min((size_t)50,m_VendorModelID.size()));
+char *buf = new char[301];
+db_wrapper_real_escape_string(table->database->m_pDB, buf, m_VendorModelID.c_str(), (unsigned long) min((size_t)150,m_VendorModelID.size()));
 string s=string()+"\""+buf+"\"";
 delete[] buf;
 return s;
@@ -483,8 +477,8 @@ PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
 if (is_null[5])
 return "NULL";
 
-char *buf = new char[101];
-db_wrapper_real_escape_string(table->database->m_pDB, buf, m_SerialNumber.c_str(), (unsigned long) min((size_t)50,m_SerialNumber.size()));
+char *buf = new char[301];
+db_wrapper_real_escape_string(table->database->m_pDB, buf, m_SerialNumber.c_str(), (unsigned long) min((size_t)150,m_SerialNumber.size()));
 string s=string()+"\""+buf+"\"";
 delete[] buf;
 return s;
@@ -497,8 +491,8 @@ PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
 if (is_null[6])
 return "NULL";
 
-char *buf = new char[101];
-db_wrapper_real_escape_string(table->database->m_pDB, buf, m_Parms.c_str(), (unsigned long) min((size_t)50,m_Parms.size()));
+char *buf = new char[301];
+db_wrapper_real_escape_string(table->database->m_pDB, buf, m_Parms.c_str(), (unsigned long) min((size_t)150,m_Parms.size()));
 string s=string()+"\""+buf+"\"";
 delete[] buf;
 return s;
@@ -511,8 +505,8 @@ PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
 if (is_null[7])
 return "NULL";
 
-char *buf = new char[41];
-db_wrapper_real_escape_string(table->database->m_pDB, buf, m_Category.c_str(), (unsigned long) min((size_t)20,m_Category.size()));
+char *buf = new char[121];
+db_wrapper_real_escape_string(table->database->m_pDB, buf, m_Category.c_str(), (unsigned long) min((size_t)60,m_Category.size()));
 string s=string()+"\""+buf+"\"";
 delete[] buf;
 return s;
@@ -538,8 +532,8 @@ PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
 if (is_null[9])
 return "NULL";
 
-char *buf = new char[51];
-db_wrapper_real_escape_string(table->database->m_pDB, buf, m_PnpDetectionScript.c_str(), (unsigned long) min((size_t)25,m_PnpDetectionScript.size()));
+char *buf = new char[151];
+db_wrapper_real_escape_string(table->database->m_pDB, buf, m_PnpDetectionScript.c_str(), (unsigned long) min((size_t)75,m_PnpDetectionScript.size()));
 string s=string()+"\""+buf+"\"";
 delete[] buf;
 return s;
@@ -578,8 +572,8 @@ PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
 if (is_null[12])
 return "NULL";
 
-char *buf = new char[61];
-db_wrapper_real_escape_string(table->database->m_pDB, buf, m_Description.c_str(), (unsigned long) min((size_t)30,m_Description.size()));
+char *buf = new char[181];
+db_wrapper_real_escape_string(table->database->m_pDB, buf, m_Description.c_str(), (unsigned long) min((size_t)90,m_Description.size()));
 string s=string()+"\""+buf+"\"";
 delete[] buf;
 return s;
@@ -1482,20 +1476,6 @@ void Row_DHCPDevice::DHCPDevice_DeviceData_FK_DHCPDevice_getrows(vector <class R
 PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
 
 class Table_DHCPDevice_DeviceData *pTable = table->database->DHCPDevice_DeviceData_get();
-pTable->GetRows("`FK_DHCPDevice`=" + StringUtils::itos(m_PK_DHCPDevice),rows);
-}
-void Row_DHCPDevice::DHCPDevice_DeviceData_pschist_FK_DHCPDevice_getrows(vector <class Row_DHCPDevice_DeviceData_pschist*> *rows)
-{
-PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
-
-class Table_DHCPDevice_DeviceData_pschist *pTable = table->database->DHCPDevice_DeviceData_pschist_get();
-pTable->GetRows("`FK_DHCPDevice`=" + StringUtils::itos(m_PK_DHCPDevice),rows);
-}
-void Row_DHCPDevice::DHCPDevice_DeviceData_pschmask_FK_DHCPDevice_getrows(vector <class Row_DHCPDevice_DeviceData_pschmask*> *rows)
-{
-PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
-
-class Table_DHCPDevice_DeviceData_pschmask *pTable = table->database->DHCPDevice_DeviceData_pschmask_get();
 pTable->GetRows("`FK_DHCPDevice`=" + StringUtils::itos(m_PK_DHCPDevice),rows);
 }
 

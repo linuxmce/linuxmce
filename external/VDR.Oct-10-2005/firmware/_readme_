@@ -1,0 +1,28 @@
+for plutohome postinstallation of dvb devices:
+Andre Burkart <burkart@system5.net>
+
+depends on user choosing the right model:
+
+1. OREN demodulators
+--------------------
+
+dvb-fe-or51132-qam.fw
+dvb-fe-or51132-vsb.fw
+dvb-fe-or51211.fw
+
+2. various USB devices
+-----------------------
+
+dvb-usb-vp7045-01.fw		Twinhan USB-T VP-7045/VP-7046 (MagicBoxII)
+dvb-usb-vp702x-01.fw		TwinhanDTV StarBox
+dvb-usb-avertv-a800-02.fw	AVerMedia
+dvb-usb-dibusb-5.0.0.11.fw	various DiBcom USB1.1
+dvb-usb-dibusb-6.0.0.8.fw	DiBcom/Artec USB2.0
+dvb-usb-umt-010-02.fw		HanfTek UMT-010 USB2.0
+dvb-usb-wt220u-01.fw		WideViewer WT-220U PenType DVB-T Receiver
+dvb-usb-dtt200u-01.fw		Yakumo/Typhoon/Hama USB2.0
+
+3. AV7110
+---------
+All fullfeatured dvb-s cards like technotrend or hauppauge
+

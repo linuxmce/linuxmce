@@ -1,6 +1,6 @@
 /*
  *
- *  $Id: pvrusb2-tuner.h 798 2005-12-31 20:30:29Z isely $
+ *  $Id: pvrusb2-tuner.h 2226 2009-03-07 05:17:32Z isely $
  *
  *  Copyright (C) 2005 Mike Isely <isely@pobox.com>
  *
@@ -21,10 +21,12 @@
 #ifndef __PVRUSB2_TUNER_H
 #define __PVRUSB2_TUNER_H
 
-#include "pvrusb2-i2c-core.h"
+#include "pvrusb2-i2c-track.h"
+#ifdef PVR2_ENABLE_OLD_I2COPS
 
 int pvr2_i2c_tuner_setup(struct pvr2_hdw *,struct pvr2_i2c_client *);
 
+#endif /* PVR2_ENABLE_OLD_I2COPS */
 #endif /* __PVRUSB2_TUNER_H */
 
 /*

@@ -1,0 +1,47 @@
+#!/bin/sh
+set -e
+
+switch_autostart()
+{
+    if [ "$1" != "back" ]; then
+        START="vdr"
+        STOP="vdrdevel"
+    else
+        START="vdrdevel"
+        STOP="vdr"
+    fi
+    if [ -x "/etc/init.d/$STOP" ]; then
+        /etc/init.d/$STOP stop
+        update-rc.d -f $STOP remove >/dev/null
+    fi
+    if [ -x "/etc/init.d/$START" ]; then
+        /etc/init.d/$START stop
+        update-rc.d $START defaults >/dev/null
+        /etc/init.d/$START start
+    fi
+}
+
+if [ -x "/etc/init.d/vdr" ]; then
+    if [ -x /usr/sbin/invoke-rc.d ] ; then
+        invoke-rc.d vdr stop
+    else
+        /etc/init.d/vdr stop
+    fi
+fi
+
+case "$1" in
+    remove)
+        switch_autostart back
+        ;;
+    upgrade|deconfigure)
+        ;;
+    failed-upgrade)
+        ;;
+    *)
+        echo "prerm called with unknown argument \`$1'" >&2
+        exit 1
+esac
+
+#DEBHELPER#
+
+exit 0

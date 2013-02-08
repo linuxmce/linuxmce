@@ -1,0 +1,15 @@
+Source: dce-whisperer
+Section: dianemo
+Priority: extra
+Maintainer: root <root@unknown>
+Build-Depends: debhelper (>= 5)
+Standards-Version: 3.7.2
+
+Package: dce-whisperer
+Architecture: any
+Depends: ${shlibs:Depends}, ${misc:Depends}, shell-io, php5-cli
+Description: DCE interface for scripts
+ DCE interface for scripts. Using a format similar to the parameters of
+ MessageSend, scripts can talk to DCE, leading to faster implementation
+ and deployment for simple DCE devices, especially GSD-like devices, but
+ without the ruby-in-a-database paradigm.

@@ -98,7 +98,7 @@ int main(int argc, const char * argv[])
 		return 1;
 	}
 
-	g = open(argv[2], O_WRONLY | O_CREAT | O_TRUNC | O_LARGEFILE, 0664);
+	g = open(argv[2], O_WRONLY | O_CREAT | O_TRUNC | O_LARGEFILE);
 	if (g == -1)
 	{
 		printf("Failed to open '%s': %s\n", argv[2], strerror(errno));

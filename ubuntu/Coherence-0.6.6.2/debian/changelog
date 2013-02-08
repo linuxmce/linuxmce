@@ -1,0 +1,57 @@
+coherence (0.6.6-3) unstable; urgency=low
+
+  * Change dependency for lucid
+  * Limit LinuxMCE Backend to return only existing files (File.Missing != 1)
+  * Add vdr stream patch from http://coherence.beebits.net/ticket/296
+
+ -- Peer Oliver Schmidt <developers@linuxmce.org>  Sat, 22 Oct 2011 17:20:00 +0200
+
+coherence (0.6.6-2) unstable; urgency=low
+
+  * New upstream release
+
+ -- Magne Bratseth <developers@linuxmce.org>  Tue, 09 Aug 2011 21:51:00 +0200
+
+coherence (0.5.6-1) unstable; urgency=low
+
+  * New upstream release (Closes: #474729)
+  * debian/control:
+    - allow Depends on python2.5 or python2.4 (Closes: #485592)
+    - update Standards-Version to 3.8.0
+
+ -- Arnaud Quette <aquette@debian.org>  Thu, 12 Jun 2008 16:49:04 +0200
+
+coherence (0.5.2-1) unstable; urgency=low
+
+  * New upstream release
+  * debian/control: depend on python-pkg-resources instead of
+    python-setuptools for the runtime dependency (Closes: #468724)
+
+ -- Arnaud Quette <aquette@debian.org>  Wed, 05 Mar 2008 13:43:01 +0100
+
+coherence (0.5.0-1) unstable; urgency=low 
+
+  * New upstream release
+  * debian/watch: add an advice to install libcrypt-ssleay-perl
+
+ -- Arnaud Quette <aquette@debian.org>  Sun, 20 Jan 2008 21:59:25 +0100
+
+coherence (0.4.0-1) unstable; urgency=low  
+
+  * New upstream release
+  * debian/control: remove the python-soappy dependency since it's not needed
+    anymore.
+
+ -- Arnaud Quette <aquette@debian.org>  Thu,  2 Aug 2007 10:48:40 +0200
+
+coherence (0.2.1-2) unstable; urgency=low 
+
+  * Depend on python-setuptools; thanks Paul Wise; closes: #432624.
+
+ -- Loic Minier <lool@dooz.org>  Wed, 25 Jul 2007 14:50:00 +0200
+
+coherence (0.2.1-1) experimental; urgency=low
+
+  * Initial release; closes: #427570.
+
+ -- Loic Minier <lool@dooz.org>  Mon, 18 Jun 2007 11:34:15 +0200

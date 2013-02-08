@@ -1,0 +1,37 @@
+<?
+$TEXT_MEDIA_DIRECTORS_CONST='Media Directors';
+$TEXT_WAIT_FOR_PREPARATION_NOTIFICATION_CONST='This device requires some advance preparation, which can take several minutes. Your Core is doing this now and you will see a message on all orbiters and media directors notifying you when it\'s done. Please wait to use the device until then.';
+$TEXT_CONNECTED_TO_CONST='Connected to';
+$TEXT_PVR_CAPTURE_CARD_CONST='PVR Capture Card';
+$TEXT_SOUND_CARD_CONST='Sound Card';
+$TEXT_AUDIO_SETTINGS_CONST='Audio settings';
+$TEXT_AC3_PASSTHROUGH_CONST='Use AC3/DTS pass-through';
+$TEXT_VIDEO_CARD_CONST='Video Card';
+$TEXT_SET_RESOLUTION_REFRESH_CONST='Resolution & refresh';
+$TEXT_SETUP_DISKLESS_MD_CONST='Setup Diskless MD';
+$TEXT_DISKLESS_MD_NOTICE_CONST='When you add a new diskless M/D, you must first click this button, wait for the setup process to complete, then do a "quick reload router", and then you can bootup your new diskless media director.';
+$TEXT_ADD_MD_CONST='Add device';
+$TEXT_MD_UPDATED_CONST='The devices were updated';
+$TEXT_ERROR_DUPLICATE_ROOMS_CONST='Duplicate room for media directors.';
+$TEXT_NO_PVR_CARDS_CONST='No PVR cards.';
+$TEXT_CONFIRM_DELETE_PVR_CARD_CONST='Are you sure you want to delete this card?';
+$TEXT_PVR_CARD_DELETED_CONST='PVR card deleted.';
+$TEXT_REBUILD_DISKLESS_IMAGE_CONST='Rebuild image';
+$TEXT_CONFIRM_DELETE_MEDIA_DIRECTOR_CONST='Are you sure you want to delete this device?';
+$TEXT_FORCE_48K_CONST='Force 48 KHz output sample rate';
+$TEXT_CHANGE_VIDEO_CARD_CONFIRMATION_CONST='Are you sure you want to change the video card?';
+$TEXT_INFRARED_REMOTES_YOU_WILL_USE_CONST='Infrared remote controls you will use';
+$TEXT_INFRARED_RECEIVERS_CONST='Infrared Receivers';
+$TEXT_COMPUTING_APPLICATIONS_CONST='Computing application';
+$TEXT_HARDWARE_ACCELERATION_CONST='Hardware acceleration';
+$TEXT_USE_ALPHA_BLENDED_UI_CONST='Use alpha blended UI';
+$TEXT_DEINTERLACE_QUALITY_CONST='Deinterlace Quality';
+$TEXT_SCREEN_SAVER_CONST='Screen saver';
+$TEXT_SOFTWARE_MODULES_CONST='Software modules';
+$TEXT_UI_CONST='UI';
+$TEXT_OS_ON_HARD_DRIVE_CONST='OS on hard drive';
+$TEXT_VIDEO_SETTINGS_CONST='Video settings';
+$TEXT_EDIT_PIPES_CONST='Edit Audio/Video Pipes';
+$TXT_AUDIO_PIPE_CONST='AUDIO PIPE';
+$TXT_VIDEO_PIPE_CONST='VIDEO PIPE';
+?>

@@ -1,0 +1,41 @@
+Source: sysvinit
+Section: base
+Priority: required
+Maintainer: Razvan Gavril <razvan.g@plutohome.com>
+Standards-Version: 3.5.2.0
+Build-Depends: bash
+
+Package: sysvinit
+Essential: yes
+Architecture: any
+Pre-Depends: ${shlibs:Depends}, initscripts, sysv-rc (>= 2.85-2) | file-rc (>> 0.7.0)
+Depends: coreutils
+Conflicts: last
+Replaces: last, bsdutils (<=2.0-2)
+Description: System-V like init
+ Init is the first program to run after your system is booted, and
+ continues to run as process number 1 until your system halts. Init's
+ job is to start other programs that are essential to the operation of
+ your system. All processes are descended from init. For more information,
+ see the manual page init(8).
+
+Package: sysv-rc
+Architecture: all
+Conflicts: file-rc
+Replaces: dpkg (<< 1.9.17), sysvinit (<< 2.85-1), file-rc (>> 0.7.0)
+Depends: make
+Suggests: sysv-rc-conf
+Description: Standard boot mechanism using symlinks in /etc/rc?.d
+ This package provides support for the System-V like system of booting,
+ shutting down and changing runlevels configured through symbolic
+ links in the /etc/rc?.d directories.
+ Passing 'sysvinig' enable old debian style booting.
+
+Package: initscripts
+Architecture: any
+Depends: ${shlibs:Depends}, ${glibc:Depends}, dpkg (>= 1.9.0), ${mount:Depends}, util-linux (>= 2.9t-2), e2fsprogs (>= 1.19-1), coreutils (>= 5.0.91-2)
+Replaces: sysvinit (<< 2.85-12), libc6, libc6.1, libc0.1, libc0.3
+Conflicts: kbd (<< 0.95-2), mdutils (<< 0.35-9)
+Description: Standard scripts needed for booting and shutting down
+ These scripts are meant for standard Debian/GNU/Linux installations.
+

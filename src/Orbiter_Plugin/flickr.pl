@@ -7,6 +7,8 @@
 
 use Flickr::API;
 use XML::Simple;
+#use XML::SAX;
+#use XML::Libxml;
 use Image::Magick;
 use Data::Dumper;
 use DBI;
@@ -14,6 +16,7 @@ use POSIX qw(ceil floor);
 use POSIX ":sys_wait_h";
 #use strict;
 use vars qw($dest $xs $r @buff $child_count $minW $minH @fileList @AoH);
+require "/usr/pluto/bin/config_ops.pl";
 
 if (-f '/etc/pluto/flickr-enabled')
 {
@@ -111,7 +114,8 @@ if ($search_string){
         });
 	if ($response->{success} == 1) {
 		$xs = new XML::Simple;
-		$r=XMLin($response->{_content});
+		# $r=XMLin($response->{_content});
+		$r=XMLin($response->{_content}=$response->decoded_content); 
 		foreach $id (sort keys %{$r->{'photos'}->{'photo'}}) {
 			last if ($picture_nr >= $max_number);
 			my ($width, $height, $source, $download) = getPictureDimensions($id, $api);
@@ -131,7 +135,8 @@ if ($search_string){
                 $response = $api->execute_method('flickr.photos.getInfo',{'photo_id' => $id , 'secret' => $IMGS->{$id}->{'secret'}});
                 if ($response->{success} == 1) {
 			#print "get info for $id\n";
-			$r=XMLin($response->{_content});
+			# $r=XMLin($response->{_content});
+			$r=XMLin($response->{_content}=$response->decoded_content); 
 			$IMGS->{$id}->{'time'}=$r->{'photo'}->{'dates'}->{'posted'};
 			$IMGS->{$id}->{'format'}=$r->{'photo'}->{'originalformat'};
 			if (!$IMGS->{$id}->{'format'}){
@@ -182,7 +187,8 @@ if ($search_string){
 
 		if ($response->{success} == 1) {
 			$xs = new XML::Simple;
-			$r=XMLin($response->{_content});
+			# $r=XMLin($response->{_content});
+			$r=XMLin($response->{_content}=$response->decoded_content); 
 			foreach $id (sort keys %{$r->{'photos'}->{'photo'}}) {
 				last if ($picture_nr >= $max_number);
 				my ($width, $height, $source, $download) = getPictureDimensions($id, $api);
@@ -203,7 +209,8 @@ if ($search_string){
 	foreach $id (keys %{$IMGS}) {
 		$response = $api->execute_method('flickr.photos.getInfo',{'photo_id' => $id , 'secret' => $IMGS->{$id}->{'secret'}});
 		if ($response->{success} == 1) {
-			$r=XMLin($response->{_content});
+			# $r=XMLin($response->{_content});
+			$r=XMLin($response->{_content}=$response->decoded_content); 
 			$IMGS->{$id}->{'time'}=$r->{'photo'}->{'dates'}->{'posted'};
 			$IMGS->{$id}->{'username'}=$r->{'photo'}->{'owner'}->{'username'};
 			$IMGS->{$id}->{'format'}=$r->{'photo'}->{'originalformat'};
@@ -367,15 +374,15 @@ sub activate_image {
 	## Don't send the messages too fast
 	sleep 1;
 	print `date`;
-	print TEST "1. Sending /usr/pluto/bin/MessageSend dcerouter -targetType template -r -o 0 2 1 819 13 $symdest\n";
-	$fms = qx | /usr/pluto/bin/MessageSend dcerouter -targetType template -r -o 0 2 1 819 13 "$symdest" |; 
+	print TEST "1. Sending /usr/pluto/bin/MessageSend $DCERouter -targetType template -r -o 0 2 1 819 13 $symdest\n";
+	$fms = qx | /usr/pluto/bin/MessageSend $DCERouter -targetType template -r -o 0 2 1 819 13 "$symdest" |; 
 				
 	## If the router is not available for the moment
 	while ( $fms =~ m/Cannot communicate with router/ ) {
 		printf "Waiting for router to come up";
 		sleep 10;
-		print TEST "2. Sending /usr/pluto/bin/MessageSend dcerouter -targetType template -r -o 0 2 1 819 13 \"$symdest\"\n";
-		$fms = qx | /usr/pluto/bin/MessageSend dcerouter -targetType template -r -o 0 2 1 819 13 "$symdest" |;
+		print TEST "2. Sending /usr/pluto/bin/MessageSend $DCERouter -targetType template -r -o 0 2 1 819 13 \"$symdest\"\n";
+		$fms = qx | /usr/pluto/bin/MessageSend $DCERouter -targetType template -r -o 0 2 1 819 13 "$symdest" |;
 	}
 				
 	`rm -f $finaldst.lock`;
@@ -387,8 +394,8 @@ sub activate_image {
 	# second message send
 	#	print "Fire-ing second messagesend event\n";
 	
-	print TEST "3. Sending /usr/pluto/bin/MessageSend dcerouter -targetType template -r -o 0 2 1 391 145 \"$ffield\" 122 30 5 \"*\"\n";
-	qx | /usr/pluto/bin/MessageSend dcerouter -targetType template -r -o 0 2 1 391 145 "$ffield" 122 30 5 "*" |;
+	print TEST "3. Sending /usr/pluto/bin/MessageSend $DCERouter -targetType template -r -o 0 2 1 391 145 \"$ffield\" 122 30 5 \"*\"\n";
+	qx | /usr/pluto/bin/MessageSend $DCERouter -targetType template -r -o 0 2 1 391 145 "$ffield" 122 30 5 "*" |;
 
 	
 	close(TEST);
@@ -412,7 +419,7 @@ sub delete_old {
 		$count = $dim - $max_number;
 	}	
 
-	my $dbh = DBI->connect('dbi:mysql:pluto_media');
+	my $dbh = DBI->connect( &read_pluto_cred('pluto_media')) or die "Can't connect to database: $DBI::errstr\n";
 
 	foreach ( @arrayOfFiles ) {
 		if (!isFileInList($_)){
@@ -435,7 +442,7 @@ sub delete_old {
 	}
 	#print TEST "\n\n-------------DELETING END---------------------\n\n";
 	close(TEST);
-	qx | /usr/pluto/bin/MessageSend dcerouter -targetType template 0 1825 1 606 |;
+	qx | /usr/pluto/bin/MessageSend $DCERouter -targetType template 0 1825 1 606 |;
 }
 
 sub isFileInList {
@@ -462,7 +469,7 @@ sub markFileAsDelete {
 }
 
 sub getMaxNrFiles {
-	my $dbh = DBI->connect('dbi:mysql:pluto_main');
+	my $dbh = DBI->connect( &read_pluto_cred()) or die "Can't connect to database: $DBI::errstr\n";
 	my $sth = $dbh->prepare("
 		SELECT 
 			IK_DeviceData 
@@ -512,7 +519,8 @@ sub getPictureDimensions {
 	my ($buff, $width, $height, $source, $download);
 	my $response= $api->execute_method('flickr.photos.getSizes',{'photo_id' => $id});
 	if ($response->{success} == 1) {
-		my $r=XMLin($response->{_content});
+		# my $r=XMLin($response->{_content});
+		my $r=XMLin($response->{_content}=$response->decoded_content); 
 		foreach $buff (@{$r->{'sizes'}->{'size'}}) {
 			if (($buff->{'width'} >= $minW && $buff->{'height'} >= $minH) && 
 			     ($buff->{'width'} <= 2048 && $buff->{'height'} <= 2048) )  {

@@ -12,6 +12,6 @@ if [[ -z $result ]] ;then
 		fi
 
 		echo "PROGRAM /usr/pluto/bin/monitoring_RAID.sh" >> /etc/mdadm/mdadm.conf
-		invoke-rc.d mdadm reload
+		invoke-rc.d mdadm reload || :
 	fi
 fi

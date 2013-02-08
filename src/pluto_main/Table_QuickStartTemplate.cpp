@@ -37,8 +37,6 @@ using namespace std;
 #include "Table_DesignObj.h"
 
 #include "Table_Device_QuickStart.h"
-#include "Table_Device_QuickStart_pschist.h"
-#include "Table_Device_QuickStart_pschmask.h"
 
 
 void Database_pluto_main::CreateTable_QuickStartTemplate()
@@ -86,6 +84,7 @@ void Row_QuickStartTemplate::Delete()
 	Row_QuickStartTemplate *pRow = this; // Needed so we will have only 1 version of get_primary_fields_assign_from_row
 	
 	if (!is_deleted)
+	{
 		if (is_added)	
 		{	
 			vector<TableRow*>::iterator i;	
@@ -107,6 +106,7 @@ void Row_QuickStartTemplate::Delete()
 			table->deleted_cachedRows[key] = this;
 			is_deleted = true;	
 		}	
+	}
 }
 
 void Row_QuickStartTemplate::Reload()
@@ -162,7 +162,8 @@ is_null[13] = true;
 m_psc_user = 0;
 m_psc_frozen = 0;
 is_null[14] = false;
-is_null[15] = true;
+m_psc_mod = "0000-00-00 00:00:00";
+is_null[15] = false;
 is_null[16] = true;
 m_psc_restrict = 0;
 
@@ -320,9 +321,6 @@ return is_null[13];}
 bool Row_QuickStartTemplate::psc_frozen_isNull() {PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
 
 return is_null[14];}
-bool Row_QuickStartTemplate::psc_mod_isNull() {PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
-
-return is_null[15];}
 bool Row_QuickStartTemplate::psc_restrict_isNull() {PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
 
 return is_null[16];}
@@ -384,10 +382,6 @@ void Row_QuickStartTemplate::psc_frozen_setNull(bool val){PLUTO_SAFETY_LOCK_ERRO
 is_null[14]=val;
 is_modified=true;
 }
-void Row_QuickStartTemplate::psc_mod_setNull(bool val){PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
-is_null[15]=val;
-is_modified=true;
-}
 void Row_QuickStartTemplate::psc_restrict_setNull(bool val){PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
 is_null[16]=val;
 is_modified=true;
@@ -414,8 +408,8 @@ PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
 if (is_null[1])
 return "NULL";
 
-char *buf = new char[101];
-db_wrapper_real_escape_string(table->database->m_pDB, buf, m_Description.c_str(), (unsigned long) min((size_t)50,m_Description.size()));
+char *buf = new char[301];
+db_wrapper_real_escape_string(table->database->m_pDB, buf, m_Description.c_str(), (unsigned long) min((size_t)150,m_Description.size()));
 string s=string()+"\""+buf+"\"";
 delete[] buf;
 return s;
@@ -454,8 +448,8 @@ PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
 if (is_null[4])
 return "NULL";
 
-char *buf = new char[141];
-db_wrapper_real_escape_string(table->database->m_pDB, buf, m_Binary.c_str(), (unsigned long) min((size_t)70,m_Binary.size()));
+char *buf = new char[421];
+db_wrapper_real_escape_string(table->database->m_pDB, buf, m_Binary.c_str(), (unsigned long) min((size_t)210,m_Binary.size()));
 string s=string()+"\""+buf+"\"";
 delete[] buf;
 return s;
@@ -468,8 +462,8 @@ PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
 if (is_null[5])
 return "NULL";
 
-char *buf = new char[511];
-db_wrapper_real_escape_string(table->database->m_pDB, buf, m_Arguments.c_str(), (unsigned long) min((size_t)255,m_Arguments.size()));
+char *buf = new char[1531];
+db_wrapper_real_escape_string(table->database->m_pDB, buf, m_Arguments.c_str(), (unsigned long) min((size_t)765,m_Arguments.size()));
 string s=string()+"\""+buf+"\"";
 delete[] buf;
 return s;
@@ -482,8 +476,8 @@ PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
 if (is_null[6])
 return "NULL";
 
-char *buf = new char[511];
-db_wrapper_real_escape_string(table->database->m_pDB, buf, m_Homepage.c_str(), (unsigned long) min((size_t)255,m_Homepage.size()));
+char *buf = new char[1531];
+db_wrapper_real_escape_string(table->database->m_pDB, buf, m_Homepage.c_str(), (unsigned long) min((size_t)765,m_Homepage.size()));
 string s=string()+"\""+buf+"\"";
 delete[] buf;
 return s;
@@ -496,8 +490,8 @@ PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
 if (is_null[7])
 return "NULL";
 
-char *buf = new char[511];
-db_wrapper_real_escape_string(table->database->m_pDB, buf, m_Icon.c_str(), (unsigned long) min((size_t)255,m_Icon.size()));
+char *buf = new char[1531];
+db_wrapper_real_escape_string(table->database->m_pDB, buf, m_Icon.c_str(), (unsigned long) min((size_t)765,m_Icon.size()));
 string s=string()+"\""+buf+"\"";
 delete[] buf;
 return s;
@@ -510,8 +504,8 @@ PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
 if (is_null[8])
 return "NULL";
 
-char *buf = new char[511];
-db_wrapper_real_escape_string(table->database->m_pDB, buf, m_WindowClass.c_str(), (unsigned long) min((size_t)255,m_WindowClass.size()));
+char *buf = new char[1531];
+db_wrapper_real_escape_string(table->database->m_pDB, buf, m_WindowClass.c_str(), (unsigned long) min((size_t)765,m_WindowClass.size()));
 string s=string()+"\""+buf+"\"";
 delete[] buf;
 return s;
@@ -1396,20 +1390,6 @@ void Row_QuickStartTemplate::Device_QuickStart_FK_QuickStartTemplate_getrows(vec
 PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
 
 class Table_Device_QuickStart *pTable = table->database->Device_QuickStart_get();
-pTable->GetRows("`FK_QuickStartTemplate`=" + StringUtils::itos(m_PK_QuickStartTemplate),rows);
-}
-void Row_QuickStartTemplate::Device_QuickStart_pschist_FK_QuickStartTemplate_getrows(vector <class Row_Device_QuickStart_pschist*> *rows)
-{
-PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
-
-class Table_Device_QuickStart_pschist *pTable = table->database->Device_QuickStart_pschist_get();
-pTable->GetRows("`FK_QuickStartTemplate`=" + StringUtils::itos(m_PK_QuickStartTemplate),rows);
-}
-void Row_QuickStartTemplate::Device_QuickStart_pschmask_FK_QuickStartTemplate_getrows(vector <class Row_Device_QuickStart_pschmask*> *rows)
-{
-PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
-
-class Table_Device_QuickStart_pschmask *pTable = table->database->Device_QuickStart_pschmask_get();
 pTable->GetRows("`FK_QuickStartTemplate`=" + StringUtils::itos(m_PK_QuickStartTemplate),rows);
 }
 

@@ -140,23 +140,23 @@ void psc_mod_set(string val);
 void psc_restrict_set(long int val);
 
 		
-		bool Define_isNull();
+		bool Description_isNull();
+bool Define_isNull();
 bool Comments_isNull();
 bool psc_id_isNull();
 bool psc_batch_isNull();
 bool psc_user_isNull();
 bool psc_frozen_isNull();
-bool psc_mod_isNull();
 bool psc_restrict_isNull();
 
 			
-		void Define_setNull(bool val);
+		void Description_setNull(bool val);
+void Define_setNull(bool val);
 void Comments_setNull(bool val);
 void psc_id_setNull(bool val);
 void psc_batch_setNull(bool val);
 void psc_user_setNull(bool val);
 void psc_frozen_setNull(bool val);
-void psc_mod_setNull(bool val);
 void psc_restrict_setNull(bool val);
 	
 	
@@ -175,53 +175,21 @@ void psc_restrict_setNull(bool val);
 
 		// Return the rows in other tables with foreign keys pointing here
 		void CommandGroup_Command_FK_Command_getrows(vector <class Row_CommandGroup_Command*> *rows);
-void CommandGroup_Command_pschist_FK_Command_getrows(vector <class Row_CommandGroup_Command_pschist*> *rows);
-void CommandGroup_Command_pschmask_FK_Command_getrows(vector <class Row_CommandGroup_Command_pschmask*> *rows);
 void CommandGroup_D_Command_FK_Command_getrows(vector <class Row_CommandGroup_D_Command*> *rows);
-void CommandGroup_D_Command_pschist_FK_Command_getrows(vector <class Row_CommandGroup_D_Command_pschist*> *rows);
-void CommandGroup_D_Command_pschmask_FK_Command_getrows(vector <class Row_CommandGroup_D_Command_pschmask*> *rows);
 void Command_CommandParameter_FK_Command_getrows(vector <class Row_Command_CommandParameter*> *rows);
-void Command_CommandParameter_pschist_FK_Command_getrows(vector <class Row_Command_CommandParameter_pschist*> *rows);
-void Command_CommandParameter_pschmask_FK_Command_getrows(vector <class Row_Command_CommandParameter_pschmask*> *rows);
 void Command_Pipe_FK_Command_getrows(vector <class Row_Command_Pipe*> *rows);
-void Command_Pipe_pschist_FK_Command_getrows(vector <class Row_Command_Pipe_pschist*> *rows);
-void Command_Pipe_pschmask_FK_Command_getrows(vector <class Row_Command_Pipe_pschmask*> *rows);
 void DeviceCommandGroup_Command_FK_Command_getrows(vector <class Row_DeviceCommandGroup_Command*> *rows);
-void DeviceCommandGroup_Command_pschist_FK_Command_getrows(vector <class Row_DeviceCommandGroup_Command_pschist*> *rows);
-void DeviceCommandGroup_Command_pschmask_FK_Command_getrows(vector <class Row_DeviceCommandGroup_Command_pschmask*> *rows);
 void DeviceTemplate_DSPMode_FK_Command_getrows(vector <class Row_DeviceTemplate_DSPMode*> *rows);
-void DeviceTemplate_DSPMode_pschist_FK_Command_getrows(vector <class Row_DeviceTemplate_DSPMode_pschist*> *rows);
-void DeviceTemplate_DSPMode_pschmask_FK_Command_getrows(vector <class Row_DeviceTemplate_DSPMode_pschmask*> *rows);
 void DeviceTemplate_DeviceCategory_ControlledVia_Pipe_FK_Command_Input_getrows(vector <class Row_DeviceTemplate_DeviceCategory_ControlledVia_Pipe*> *rows);
 void DeviceTemplate_DeviceCategory_ControlledVia_Pipe_FK_Command_Output_getrows(vector <class Row_DeviceTemplate_DeviceCategory_ControlledVia_Pipe*> *rows);
-void DeviceTemplate_DeviceCategory_ControlledVia_Pipe_pschist_FK_Command_Input_getrows(vector <class Row_DeviceTemplate_DeviceCategory_ControlledVia_Pipe_pschist*> *rows);
-void DeviceTemplate_DeviceCategory_ControlledVia_Pipe_pschist_FK_Command_Output_getrows(vector <class Row_DeviceTemplate_DeviceCategory_ControlledVia_Pipe_pschist*> *rows);
-void DeviceTemplate_DeviceCategory_ControlledVia_Pipe_pschmask_FK_Command_Input_getrows(vector <class Row_DeviceTemplate_DeviceCategory_ControlledVia_Pipe_pschmask*> *rows);
-void DeviceTemplate_DeviceCategory_ControlledVia_Pipe_pschmask_FK_Command_Output_getrows(vector <class Row_DeviceTemplate_DeviceCategory_ControlledVia_Pipe_pschmask*> *rows);
 void DeviceTemplate_DeviceTemplate_ControlledVia_Pipe_FK_Command_Input_getrows(vector <class Row_DeviceTemplate_DeviceTemplate_ControlledVia_Pipe*> *rows);
 void DeviceTemplate_DeviceTemplate_ControlledVia_Pipe_FK_Command_Output_getrows(vector <class Row_DeviceTemplate_DeviceTemplate_ControlledVia_Pipe*> *rows);
-void DeviceTemplate_DeviceTemplate_ControlledVia_Pipe_pschist_FK_Command_Input_getrows(vector <class Row_DeviceTemplate_DeviceTemplate_ControlledVia_Pipe_pschist*> *rows);
-void DeviceTemplate_DeviceTemplate_ControlledVia_Pipe_pschist_FK_Command_Output_getrows(vector <class Row_DeviceTemplate_DeviceTemplate_ControlledVia_Pipe_pschist*> *rows);
-void DeviceTemplate_DeviceTemplate_ControlledVia_Pipe_pschmask_FK_Command_Input_getrows(vector <class Row_DeviceTemplate_DeviceTemplate_ControlledVia_Pipe_pschmask*> *rows);
-void DeviceTemplate_DeviceTemplate_ControlledVia_Pipe_pschmask_FK_Command_Output_getrows(vector <class Row_DeviceTemplate_DeviceTemplate_ControlledVia_Pipe_pschmask*> *rows);
 void DeviceTemplate_Input_FK_Command_getrows(vector <class Row_DeviceTemplate_Input*> *rows);
-void DeviceTemplate_Input_pschist_FK_Command_getrows(vector <class Row_DeviceTemplate_Input_pschist*> *rows);
-void DeviceTemplate_Input_pschmask_FK_Command_getrows(vector <class Row_DeviceTemplate_Input_pschmask*> *rows);
 void DeviceTemplate_Output_FK_Command_getrows(vector <class Row_DeviceTemplate_Output*> *rows);
-void DeviceTemplate_Output_pschist_FK_Command_getrows(vector <class Row_DeviceTemplate_Output_pschist*> *rows);
-void DeviceTemplate_Output_pschmask_FK_Command_getrows(vector <class Row_DeviceTemplate_Output_pschmask*> *rows);
 void Device_Command_FK_Command_getrows(vector <class Row_Device_Command*> *rows);
-void Device_Command_pschist_FK_Command_getrows(vector <class Row_Device_Command_pschist*> *rows);
-void Device_Command_pschmask_FK_Command_getrows(vector <class Row_Device_Command_pschmask*> *rows);
 void Device_Device_Pipe_FK_Command_Input_getrows(vector <class Row_Device_Device_Pipe*> *rows);
 void Device_Device_Pipe_FK_Command_Output_getrows(vector <class Row_Device_Device_Pipe*> *rows);
-void Device_Device_Pipe_pschist_FK_Command_Input_getrows(vector <class Row_Device_Device_Pipe_pschist*> *rows);
-void Device_Device_Pipe_pschist_FK_Command_Output_getrows(vector <class Row_Device_Device_Pipe_pschist*> *rows);
-void Device_Device_Pipe_pschmask_FK_Command_Input_getrows(vector <class Row_Device_Device_Pipe_pschmask*> *rows);
-void Device_Device_Pipe_pschmask_FK_Command_Output_getrows(vector <class Row_Device_Device_Pipe_pschmask*> *rows);
 void InfraredGroup_Command_FK_Command_getrows(vector <class Row_InfraredGroup_Command*> *rows);
-void InfraredGroup_Command_pschist_FK_Command_getrows(vector <class Row_InfraredGroup_Command_pschist*> *rows);
-void InfraredGroup_Command_pschmask_FK_Command_getrows(vector <class Row_InfraredGroup_Command_pschmask*> *rows);
 
 
 		// Setup binary serialization

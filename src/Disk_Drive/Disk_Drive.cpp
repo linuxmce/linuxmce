@@ -84,15 +84,16 @@ bool Disk_Drive::GetConfig()
 	if( !Disk_Drive_Command::GetConfig() )
 		return false;
 //<-dceag-getconfig-e->
-
+	string sDrive;
+	
 	system("modprobe ide-generic");
 	system("modprobe ide-cd");
-	m_sDrive = DATA_Get_Drive();
-	if (m_sDrive == "")
+	sDrive = DATA_Get_Drive();
+	if (sDrive == "")
 	{
-		m_sDrive = "/dev/cdrom";
-		if (!FileUtils::FileExists(m_sDrive))
-			m_sDrive = "/dev/cdrom1";
+		sDrive = "/dev/cdrom";
+		if (!FileUtils::FileExists(sDrive))
+			sDrive = "/dev/cdrom1";
 	}
 	
 	m_pDatabase_pluto_media = new Database_pluto_media(LoggerWrapper::GetInstance());
@@ -100,7 +101,7 @@ bool Disk_Drive::GetConfig()
 	if( sIP.empty() )
 		sIP = m_sIPAddress;
 
-	VerifyDriveIsNotEmbedded(m_sDrive);
+	VerifyDriveIsNotEmbedded(sDrive);
 
 	if( !m_pDatabase_pluto_media->Connect(sIP,"root","","pluto_media") )
 	{
@@ -110,6 +111,9 @@ bool Disk_Drive::GetConfig()
 	}
 	
 	m_pMediaAttributes_LowLevel = new MediaAttributes_LowLevel(m_pDatabase_pluto_media);
+
+	m_pDisk_Drive_Functions = new Disk_Drive_Functions(m_dwPK_Device,this, sDrive, m_pJobHandler,m_pDatabase_pluto_media,m_pMediaAttributes_LowLevel);
+	m_pDisk_Drive_Functions->UpdateDiscLocation('E',0); // For now say the drive is empty, when the script starts it will get set again
 
 	bool bResult = m_pJobHandler->StartThread();
 	LoggerWrapper::GetInstance()->Write(LV_SOCKET,"Disk_Drive::GetConfig StartThread %d", (int) bResult);
@@ -173,12 +177,6 @@ void Disk_Drive::ReceivedUnknownCommand(string &sCMD_Result,Message *pMessage)
 
 void Disk_Drive::PostConnect()
 {
-	// Do this in the post connect since this means we'll be waiting for external media identifier
-	// and launch manager won't spawn other devices until each connects.  We don't want launch manager
-	// to wait for disk drive, which is waiting for external media identify which launch manager hasn't started yet
-	m_pDisk_Drive_Functions = new Disk_Drive_Functions(m_dwPK_Device,this, m_sDrive, m_pJobHandler,m_pDatabase_pluto_media,m_pMediaAttributes_LowLevel);
-	m_pDisk_Drive_Functions->UpdateDiscLocation('E',0); // For now say the drive is empty, when the script starts it will get set again
-
 	DCE::CMD_Refresh_List_of_Online_Devices_Cat CMD_Refresh_List_of_Online_Devices_Cat(m_dwPK_Device,DEVICECATEGORY_Media_Plugins_CONST,
 		true,BL_SameHouse);
 	SendCommand(CMD_Refresh_List_of_Online_Devices_Cat);
@@ -429,7 +427,7 @@ void Disk_Drive::CMD_Close_Tray(string &sCMD_Result,Message *pMessage)
 
 void Disk_Drive::RunMonitorLoop()
 {
-    m_pDisk_Drive_Functions->internal_monitor_step(DATA_Get_Fire_Startup_Event()); // ignore any drive that is in the drive at the start unless Fire_Startup_Event is true
+    m_pDisk_Drive_Functions->internal_monitor_step(false); // ignore any drive that is in the drive at the start.
 
     bool done = false;
     
@@ -636,12 +634,12 @@ void Disk_Drive::CMD_Abort_Task(int iParameter_ID,string &sCMD_Result,Message *p
 
 	/** @brief COMMAND: #914 - Get Disk Info */
 	/** Retrieve the information on the current disk */
-		/** @param #9 Text */
-			/** If there is ripping going on, this will be non-empty and report the status of the ripping */
+		/** @param #9 sRippingStatus */
+			/** If ripping going on, this will contain the ripping status */
 		/** @param #29 PK_MediaType */
 			/** The type of media */
-		/** @param #131 EK_Disc */
-			/** The PK_Disc from pluto_media */
+		/** @param #131 EK_Dics */
+			/** PK_Disc from pluto_media */
 		/** @param #157 Disks */
 			/** The disk id */
 		/** @param #193 URL */
@@ -649,78 +647,21 @@ void Disk_Drive::CMD_Abort_Task(int iParameter_ID,string &sCMD_Result,Message *p
 		/** @param #223 Block Device */
 			/** The block device for the drive */
 
-void Disk_Drive::CMD_Get_Disk_Info(string *sText,int *iPK_MediaType,int *iEK_Disc,string *sDisks,string *sURL,string *sBlock_Device,string &sCMD_Result,Message *pMessage)
+void Disk_Drive::CMD_Get_Disk_Info(string *sRippingStatus,int *iPK_MediaType,int *iEK_Disc,string *sDisks,string *sURL,string *sBlock_Device,string &sCMD_Result,Message *pMessage)
 //<-dceag-c914-e->
 {
 	m_pDisk_Drive_Functions->internal_reset_drive(false,iPK_MediaType,sDisks,sURL,sBlock_Device,true);
-	*iEK_Disc=m_pDisk_Drive_Functions->m_PK_Disc_get();
-
-	// See if we have any pending ripping tasks
-	PLUTO_SAFETY_LOCK(jm,*m_pJobHandler->m_ThreadMutex_get());
-	const ListJob *plistJob = m_pJobHandler->m_listJob_get();
-	LoggerWrapper::GetInstance()->Write(LV_STATUS,"Disk_Drive::CMD_Get_Disk_Info %d jobs", plistJob->size());
-	for(ListJob::const_iterator it=plistJob->begin();it!=plistJob->end();++it)
-	{
-		Job *pJob = *it;
-		if( pJob->GetType()=="RipJob" )
-		{
-			RipJob *pRipJob = (RipJob *) pJob;
-			*sText = (pRipJob->m_bHasErrors ? "**WITH ERRORS** " : "no errors ") + StringUtils::itos(pJob->PercentComplete()) + "% ";
-
-			int iNotStarted=0,iFailed=0,iCompleted=0,iCancelled=0;
-			const ListTask *pListTask = pRipJob->m_listTask_get();
-			LoggerWrapper::GetInstance()->Write(LV_STATUS,"Disk_Drive::CMD_Get_Disk_Info %d tasks", pListTask->size());
-
-			for(ListTask::const_iterator it=pListTask->begin();it!=pListTask->end();++it)
-			{
-				Task *pTask = *it;
-				if( pTask->GetType() == "RipTask" )
-				{
-					RipTask *pRipTask = (RipTask *) pTask;
-					switch( pRipTask->m_eTaskStatus_get() )
-					{
-					case TASK_NOT_STARTED:
-						iNotStarted++;
-						break;
-					case TASK_IN_PROGRESS:
-						break;
-					case TASK_FAILED_ABORT:
-					case TASK_FAILED_CONTINUE:
-						iFailed++;
-						break;
-					case TASK_COMPLETED:
-						iCompleted++;
-						break;
-					case TASK_CANCELED:
-						iCancelled++;
-						break;
-					}
-				}
-			}
-
-			if( iCompleted )
-				*sText += " Completed: " + StringUtils::itos(iCompleted);
-			if( iFailed )
-				*sText += " Failed: " + StringUtils::itos(iFailed);
-			if( iNotStarted )
-				*sText += " Waiting: " + StringUtils::itos(iNotStarted);
-			if( iCancelled )
-				*sText += " Cancelled: " + StringUtils::itos(iCancelled);
-
-			*sText += "\n" + pRipJob->m_sFileName;
-		}
-	}
 }
 
-void Disk_Drive::VerifyDriveIsNotEmbedded(string &m_sDrive)
+void Disk_Drive::VerifyDriveIsNotEmbedded(string &sDrive)
 {
 	// There's a problem in Linux that it often creates the /dev/cdrom symlinc
 	// to a drive that's really embedded in one of the jukeboxes, and not the main cdrom.
 	// Go through all embedded disk drives, and if this is a symlinc to one, change it to
 	// something else
 
-	int iDrive = FileUtils::GetLinuxDeviceId(m_sDrive);
-	LoggerWrapper::GetInstance()->Write(LV_STATUS,"Disk_Drive::VerifyDriveIsNotEmbedded %d: %s",  iDrive, m_sDrive.c_str());
+	int iDrive = FileUtils::GetLinuxDeviceId(sDrive);
+	LoggerWrapper::GetInstance()->Write(LV_STATUS,"Disk_Drive::VerifyDriveIsNotEmbedded %d: %s",  iDrive, sDrive.c_str());
 
 	bool bNeedToChangeDrive=false; // Will set to true if we're using the same thing as an embedded
 	list<int> listEmbeddedDrives;
@@ -775,7 +716,7 @@ void Disk_Drive::VerifyDriveIsNotEmbedded(string &m_sDrive)
 			{
 	LoggerWrapper::GetInstance()->Write(LV_STATUS,"Disk_Drive::VerifyDriveIsNotEmbedded %d,%s is a go", iDrive2,sValue.c_str());
 				SetDeviceDataInDB(m_dwPK_Device,DEVICEDATA_Drive_CONST,sValue);
-				m_sDrive=sValue;
+				sDrive=sValue;
 				return;
 			}
 		}
@@ -791,15 +732,4 @@ bool Disk_Drive::SafeToReload(string &sReason)
 
 	sReason = "See Pending Tasks.  Disk_Drive is busy.";
 	return false;
-}
-//<-dceag-c942-b->
-
-	/** @brief COMMAND: #942 - Get Ripping Status */
-	/** Get ripping status */
-		/** @param #199 Status */
-			/** Ripping status */
-
-void Disk_Drive::CMD_Get_Ripping_Status(string *sStatus,string &sCMD_Result,Message *pMessage)
-//<-dceag-c942-e->
-{
 }

@@ -59,8 +59,13 @@ namespace DCE
 		double m_fLongitude,m_fLatitude;
 		bool m_bIsDaytime;
 		time_t m_tNextSunriseSunset;
+		map<int,int> m_mapPK_HouseMode;
+		int m_isDst;
 
 		// Private methods
+		void GetHouseModes(Message* pMessage);
+		void DeleteMembers();
+		void Initialize(bool reload);
 public:
 		// Public member variables
 
@@ -77,7 +82,7 @@ public:
 
 		virtual void PrepareToDelete();
 		bool ProcessEvent(class Socket *pSocket,class Message *pMessage,class DeviceData_Base *pDeviceFrom,class DeviceData_Base *pDeviceTo);
-		CriteriaParmNesting *LoadCriteriaParmNesting(CriteriaParmNesting *pCriteriaParmNesting_Parent,Row_CriteriaParmNesting *pRow_CriteriaParmNesting);
+		CriteriaParmNesting *LoadCriteriaParmNesting(CriteriaParmNesting *pCriteriaParmNesting_Parent,Row_CriteriaParmNesting *pRow_CriteriaParmNesting, bool bReload);
 		void ExecuteEvent(EventInstance *pEventInstance);
         void AlarmCallback(int id, void* param);
 		void SetNextTimedEventCallback();
@@ -118,6 +123,14 @@ public:
 	virtual void CMD_Toggle_Event_Handler(int iPK_EventHandler) { string sCMD_Result; CMD_Toggle_Event_Handler(iPK_EventHandler,sCMD_Result,NULL);};
 	virtual void CMD_Toggle_Event_Handler(int iPK_EventHandler,string &sCMD_Result,Message *pMessage);
 
+
+	/** @brief COMMAND: #757 - Download Configuration */
+	/** Request event plugint to reload its configuration */
+		/** @param #9 Text */
+			/** Any information the device may want to do the download */
+
+	virtual void CMD_Download_Configuration(string sText) { string sCMD_Result; CMD_Download_Configuration(sText.c_str(),sCMD_Result,NULL);};
+	virtual void CMD_Download_Configuration(string sText,string &sCMD_Result,Message *pMessage);
 
 //<-dceag-h-e->
 	};

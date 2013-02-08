@@ -1,31 +1,28 @@
 #!/bin/bash -e
 
-# LinuxMCE's mount wrapper script.
-
-# INFO : Because mount.cifs / mount.smb are not updating /etc/mtab correctly when two
-# mount processes run in parallel, we had to implement a locking mechanins by using a
-# wrapper script.
-
-# You can use the original mount / umount binary by running mount.wraper / umount.wrapped
-
-# https://bugzilla.samba.org/show_bug.cgi?id=4665
-# https://bugzilla.samba.org/show_bug.cgi?id=4675
-
-echo "LinuxMCE's custom mount wrapper. Read /bin/mount script for more info."
-
 mount_status=0
 function sigusr1() {
 	mount_status=1
 }
 trap "sigusr1" USR1
 
-echo >> /var/log/pluto/umount-wrapper.log || { /bin/mount.wraped "$@" && exit 0; }
-
-. /usr/pluto/bin/LockUtils.sh
-
+# Make sure a directory exists, before trying to create file in there.
+mkdir -p /var/log/pluto
+if [ ! -w /var/log/pluto ]; then
+	/bin/mount.wraped "$@"
+	exit 0
+fi
+DoLocks=0
+if [ -x /usr/pluto/bin/LockUtils.sh ]; then
+	. /usr/pluto/bin/LockUtils.sh
+	DoLocks=1
+fi
 echo				   >> /var/log/pluto/umount-wrapper.log
 echo "$$ CALLED TO 'mount $@'"     >> /var/log/pluto/umount-wrapper.log
-WaitLock "mtab" "mount-wrapper"    >> /var/log/pluto/umount-wrapper.log
+
+if [[ "$DoLocks" -eq "1" ]] ; then
+	WaitLock "mtab" "mount-wrapper"    >> /var/log/pluto/umount-wrapper.log
+fi
 
 /bin/mount.wraped "$@" || kill -USR1 $$ &
 mount_pid=$!
@@ -37,7 +34,9 @@ done
 
 sleep 0.2
 cat /proc/mounts > /etc/mtab
-Unlock "mtab" "mount-wrapper"  >> /var/log/pluto/umount-wrapper.log
+if [[ "$DoLocks" -eq "1" ]]; then
+	Unlock "mtab" "mount-wrapper"  >> /var/log/pluto/umount-wrapper.log
+fi
 echo "$$ EXIT WITH STATUS $mount_status" >> /var/log/pluto/umount-wrapper.log
 
 exit $mount_status

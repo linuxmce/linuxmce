@@ -6,11 +6,11 @@
      Phone: +1 (877) 758-8648
 
 
-     This program is free software; you can redistribute it and/or modify it under the terms of the GNU General Public License.
+     This program is free software; you can redistribute it and/or modify it under the terms of the GNU Lesser General Public License.
      This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty
      of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
 
-     See the GNU General Public License for more details.
+     See the GNU Lesser General Public License for more details.
 
 */
 
@@ -32,31 +32,15 @@
 #include <queue>
 
 #include "Command_Impl.h"
-
-#ifndef EMBEDDED_LMCE
 #include "pluto_main/Table_Device_DeviceData.h"
-#endif
-
 #include "pluto_main/Define_Event.h"
 #include "pluto_main/Define_EventParameter.h"
 
-#ifndef EMBEDDED_LMCE
 class Database_pluto_main;
 class Row_Device;
-#endif
-
-#include "DCERouter/IDataLayer.h"
-
-using namespace DCE;
 
 typedef class Command_Impl * (* RAP_FType) (class Router *, int, Logger *);
 typedef list<Message *> ListMessage;
-
-#ifdef EMBEDDED_LMCE
-	#define DATA_LAYER_LEGACY_CODE	\
-		PLUTO_SAFETY_LOCK(dm, m_pDataLayer->Mutex()); \
-		std::map<int,class DeviceData_Router *>& m_mapDeviceData_Router = m_pDataLayer->Devices();
-#endif
 
 /*
 
@@ -84,7 +68,6 @@ This class is for ???
         int m_dwPK_Device;
         int m_dwID;
         MessageInterceptorFn m_pMessageInterceptorFn;
-		bool m_bAllowReroute;
 
 		// The list that contains this interceptor in case we want to remove it.  Since external devices
 		// can register as interceptors, and they can go away, and then re-register, there needs to be a
@@ -97,7 +80,6 @@ This class is for ???
             m_pPlugIn=pPlugIn;
             m_pMessageInterceptorFn=pMessageInterceptorFn;
 			m_plistMessageInterceptor=NULL;
-			m_bAllowReroute=true;
         }
         MessageInterceptorCallBack(int PK_Device,int ID)
         {
@@ -106,7 +88,6 @@ This class is for ???
             m_pPlugIn=NULL;
             m_pMessageInterceptorFn=NULL;
 			m_plistMessageInterceptor=NULL;
-			m_bAllowReroute=true;
         }
     };
 
@@ -213,10 +194,7 @@ m_DeviceStructure contains the minimal information, _Base,
  which is sent to all devices when they register
 */
 
-    class Router : public SocketListener, AlarmEvent
-#ifndef EMBEDDED_LMCE
-		   , public DBHelper
-#endif
+    class Router : public SocketListener, AlarmEvent, public DBHelper
     {
     private:
         /*
@@ -230,8 +208,6 @@ m_DeviceStructure contains the minimal information, _Base,
         char *m_pDeviceStructure;
         unsigned long m_dwIDeviceStructure_Size;
         char *m_pBufferForDeviceCategories;
-
-		IDataLayer *m_pDataLayer;
 
         // The Plug-in's and interceptors
         map<int,class Command_Impl *> m_mapPlugIn;
@@ -262,15 +238,11 @@ m_DeviceStructure contains the minimal information, _Base,
         int m_dwPK_Device,m_iFileVersion,m_dwPK_Installation;
         string m_sDBHost,m_sDBUser,m_sDBPassword,m_sDBName;
         int m_dwIDBPort;
-#ifndef EMBEDDED_LMCE
         Row_Device *m_pRow_Device_Me;
-#endif
         set<int> m_RunningDevices;
         list<Message *> m_MessageQueue;
-#ifndef EMBEDDED_LMCE
         Database_pluto_main *m_pDatabase_pluto_main;
 		Row_Installation *m_pRow_Installation;
-#endif
 
         // Lots of maps
         map<int,class Room *> m_mapRoom;
@@ -279,12 +251,8 @@ m_DeviceStructure contains the minimal information, _Base,
         map<int,class CommandGroup *> m_mapCommandGroup;
         map<int,string> m_mapCommandParmNames;
         map<int,string> m_mapEventParmNames;
-        
-#ifndef EMBEDDED_LMCE
-		map<int,class DeviceData_Router *> m_mapDeviceData_Router;
-#endif       
-
-		map<int,ListDeviceData_Router *> m_mapDeviceByTemplate;
+        map<int,class DeviceData_Router *> m_mapDeviceData_Router;
+        map<int,ListDeviceData_Router *> m_mapDeviceByTemplate;
         map<int,ListDeviceData_Router *> m_mapDeviceByCategory;
         map<int,class DeviceGroup *> m_mapDeviceGroup;
         Map_DeviceCategory m_mapDeviceCategory;
@@ -298,41 +266,19 @@ m_DeviceStructure contains the minimal information, _Base,
         DeviceGroup *m_mapDeviceGroup_Find(int PK_DeviceGroup) {map<int,class DeviceGroup *>::iterator it = m_mapDeviceGroup.find(PK_DeviceGroup); return it==m_mapDeviceGroup.end() ? NULL : (*it).second; }
         ListDeviceData_Router *m_mapDeviceByTemplate_Find(int PK_DeviceTemplate) { map<int,ListDeviceData_Router *>::iterator it = m_mapDeviceByTemplate.find(PK_DeviceTemplate); return it==m_mapDeviceByTemplate.end() ? NULL : (*it).second; }
         ListDeviceData_Router *m_mapDeviceByCategory_Find(int PK_DeviceCategory) { map<int,ListDeviceData_Router *>::iterator it = m_mapDeviceByCategory.find(PK_DeviceCategory); return it==m_mapDeviceByCategory.end() ? NULL : (*it).second; }
-        
-		DeviceData_Router *m_mapDeviceData_Router_Find(int PK_Device) 
-		{ 
-#ifdef EMBEDDED_LMCE
-			DATA_LAYER_LEGACY_CODE;
-#endif
-
-			map<int,class DeviceData_Router *>::iterator it = m_mapDeviceData_Router.find(PK_Device); 
-			return it==m_mapDeviceData_Router.end() ? NULL : (*it).second; 
-		}
-        
-		CommandGroup *m_mapCommandGroup_Find(int PK_CommandGroup) { map<int,class CommandGroup *>::iterator it = m_mapCommandGroup.find(PK_CommandGroup); return it==m_mapCommandGroup.end() ? NULL : (*it).second;}
+        DeviceData_Router *m_mapDeviceData_Router_Find(int PK_Device) { map<int,class DeviceData_Router *>::iterator it = m_mapDeviceData_Router.find(PK_Device); return it==m_mapDeviceData_Router.end() ? NULL : (*it).second; }
+        CommandGroup *m_mapCommandGroup_Find(int PK_CommandGroup) { map<int,class CommandGroup *>::iterator it = m_mapCommandGroup.find(PK_CommandGroup); return it==m_mapCommandGroup.end() ? NULL : (*it).second;}
         Command *m_mapCommand_Find(int PK_Command) { map<int,class Command *>::iterator it = m_mapCommand.find(PK_Command); return it==m_mapCommand.end() ? NULL : (*it).second; }
         Event_Router *m_mapEvent_Router_Find(int PK_Event_Router) { map<int,class Event_Router *>::iterator it = m_mapEvent_Router.find(PK_Event_Router); return it==m_mapEvent_Router.end() ? NULL : (*it).second; }
         Room *m_mapRoom_Find(int PK_Room) { map<int,class Room *>::iterator it = m_mapRoom.find(PK_Room); return it==m_mapRoom.end() ? NULL : (*it).second; }
-        
-		const map<int,class DeviceData_Router *> *m_mapDeviceData_Router_get() 
-		{ 
-#ifdef EMBEDDED_LMCE
-			DATA_LAYER_LEGACY_CODE;
-#endif
-			return &m_mapDeviceData_Router; 
-		};
-
+        const map<int,class DeviceData_Router *> *m_mapDeviceData_Router_get() { return &m_mapDeviceData_Router; };
         const map<int,class DeviceGroup *> *m_mapDeviceGroup_get() { return &m_mapDeviceGroup; };
 		const map<int,class Room *> *m_mapRoom_get() { return &m_mapRoom; }
 		const map<int,class Command_Impl *> *m_mapPlugIn_get() { return &m_mapPlugIn; }
         const map<int,class CommandGroup *> *m_mapCommandGroup_get() { return &m_mapCommandGroup; }
 
-		IDataLayer *DataLayer() { return m_pDataLayer; }
-
         int iPK_Installation_get() { return m_dwPK_Installation; }
-#ifndef EMBEDDED_LMCE
 		Row_Installation *m_pRow_Installation_get() { return m_pRow_Installation; }
-#endif
 		int iPK_Device_get() { return m_dwPK_Device; }
         int iPK_Language_get() { return m_dwPK_Language; }
         string sBasePath_get() { return m_sBasePath; }
@@ -575,7 +521,6 @@ m_DeviceStructure contains the minimal information, _Base,
 
 		void SetDeviceDataInDB(int PK_Device,int PK_DeviceData,string sValue,bool bOnlyIfNotAlreadyThere=false)
 		{
-#ifndef EMBEDDED_LMCE
 			Row_Device_DeviceData *pRow_Device_DeviceData = m_pDatabase_pluto_main->Device_DeviceData_get()->GetRow(PK_Device,PK_DeviceData);
 			if( bOnlyIfNotAlreadyThere && pRow_Device_DeviceData && pRow_Device_DeviceData->IK_DeviceData_get().size() )
 				return;
@@ -589,15 +534,12 @@ m_DeviceStructure contains the minimal information, _Base,
 				pRow_Device_DeviceData->Reload();
 			pRow_Device_DeviceData->IK_DeviceData_set( sValue );
 			pRow_Device_DeviceData->Table_Device_DeviceData_get()->Commit();
-#endif
 		}
 
         void ExecuteCommandGroup(int PK_CommandGroup,DeviceData_Router *pDevice_Sender,int sStartingCommand=0);
 		void StopPendingCommandGroup(int PK_CommandGroup,string sDescription,string sHint);
 
-#ifndef EMBEDDED_LMCE
         Database_pluto_main *GetDatabase() { return m_pDatabase_pluto_main; }
-#endif
         void StartListening() { SocketListener::StartListening(m_Port); }
         void Quit() { m_bQuit=true; }
 		virtual void PingFailed( ServerSocket *pServerSocket, int dwPK_Device );

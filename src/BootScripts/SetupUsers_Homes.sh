@@ -22,6 +22,11 @@ while [[ "$#" -gt 0 ]]; do
 	shift
 done
 
+#Create a way to determine if MythTV is installed...
+Q="SELECT PK_Device FROM Device WHERE FK_DeviceTemplate=36"
+MythTV_Installed=$(RunSQL "$Q")
+
+/usr/pluto/bin/BootMessage.sh "Backing up old permissions files..."
 if [ ! -e /etc/samba/smbpasswd.pbackup ] ;then
 	cp /etc/samba/smbpasswd /etc/samba/smbpasswd.pbackup
 fi
@@ -55,7 +60,7 @@ if [[ "$MakeUsers" == yes ]]; then
 fi
 
 # get a list of all users
-Q="SELECT PK_Users,UserName,Password_Unix,Password_Samba FROM Users"
+Q="SELECT PK_Users,UserName,Password_Unix,Password_Samba,FirstName,LastName FROM Users"
 R=$(RunSQL "$Q")
 ListOfUsers="$R"
 LinuxUserID=10000
@@ -63,11 +68,14 @@ DefaultSambaPassword=609FCABC7B0F9AEAAAD3B435B51404EE:DDFF3B733E17BE6500375694FE
 DefaultLinuxPassword=
 
 global_static_dirs="public temp_pvr mydvd cameras tv_listing"
-user_dirs="audio pictures documents videos"
+
+
 user_static_dirs="data"
 
 UserList=
 SambaUserShares=
+
+/usr/pluto/bin/BootMessage.sh "Setting up users..."
 
 for Users in $R; do
 	PlutoUserID=$(Field 1 "$Users")
@@ -75,6 +83,7 @@ for Users in $R; do
 	if [[ -z "$UserName" ]]; then
 		continue
 	fi
+	RealName="$(Field 5 "$Users") $(Field 6 "$Users")"
 	LinuxPassword=$(Field 3 "$Users")
 	SambaPassword=$(Field 4 "$Users")
 
@@ -98,6 +107,7 @@ for Users in $R; do
 		path = /home/user_$PlutoUserID
 		public = no
 		"
+
 		# TODO: replace 00000001 with a real number of seconds (never set to 00000000)
 		SambaEntry="pluto_$UserName:$LinuxUserID:$SambaPassword:[U          ]:LCT-00000001:,,,"
 		ShadowEntry="pluto_$UserName:$LinuxPassword:12221:0:99999:7:::"
@@ -119,7 +129,7 @@ for Users in $R; do
 		mkdir -p -m 0770 "$BaseDir/user_$PlutoUserID/${dir/~/ }"
 	done
 	
-	for dir in $user_dirs; do
+	for dir in $LMCE_DIRS; do
 
 		mkdir -p -m 0770 "$BaseDir/user_$PlutoUserID/data/${dir/~/ }"
 		if [[ -n "$ExtraDir" ]]; then
@@ -142,17 +152,20 @@ if [[ "$MakeUsers" == yes ]] ;then
 	PopulateSection "/etc/samba/smb.conf" "User Shares" "$SambaUserShares"
 fi
 
+/usr/pluto/bin/BootMessage.sh "Setting up Global Static Directories..."
 for dir in $global_static_dirs; do
 	mkdir -p -m 0755 "$BaseDir/${dir/~/ }"
-	chmod 0755 "$BaseDir/${Dir/~/ }"
+	chmod 0755 "$BaseDir/${dir/~/ }"
 done
 
+/usr/pluto/bin/BootMessage.sh "Setting up User Static Directories..."
 for dir in $user_static_dirs; do
 	mkdir -p -m 0755 "$BaseDir/public/${dir/~/ }"
 	chmod 0755 "$BaseDir/public/${dir/~/ }"
 done
 
-for dir in $user_dirs; do
+/usr/pluto/bin/BootMessage.sh "Setting up User Directories..."
+for dir in $LMCE_DIRS; do
 	mkdir -p -m 0755 "$BaseDir/public/data/${dir/~/ }"
 	chmod 0755 "$BaseDir/public/data/${dir/~/ }"
 	if [[ -n "$ExtraDir" ]]; then
@@ -185,19 +198,41 @@ if [[ "$MakeUsers" == yes ]]; then
 		PlutoUserID=$(Field 1 "$Users")
 		UserName=$(Field 2 "$Users" | tr 'A-Z' 'a-z' | tr -dc "a-z0-9-")
 		adduser pluto_$UserName public &>/dev/null
-		chown -R pluto_$UserName.pluto_$UserName /home/user_$PlutoUserID/
+		## If MythTV is installed, lets add the MythTV User and add the mythtv user to the user_* groups
+		userMythTV=$(grep mythtv -i /etc/passwd)
+		if [ ${userMythTV%%:*} ]; then
+			usermod -a -G pluto_$UserName mythtv
+		fi
+
+		if [[ ! -f "/home/user_$PlutoUserID/bookmarks.html" ]]; then
+			# echo "User $PlutoUserID doesn't have bookmarks yet"
+			cp /home/public/bookmarks.html "/home/user_$PlutoUserID/bookmarks.html"
+		fi
+		# Do not run potentially long disk operations on Diskless Media directors!
+		if [[ ! -f "/etc/diskless.conf" ]]; then
+			chown -R pluto_$UserName.pluto_$UserName /home/user_$PlutoUserID/
+		fi
+		
 	done
 
 	if [[ "$(pidof smbd)" != "" ]] ;then
-		invoke-rc.d samba reload
+		service smbd reload || service samba reload
 	fi
 fi
 
-chmod -R 2770 "$BaseDir"/user_* 2>/dev/null
-chmod -R 2775 "$BaseDir"/public 2>/dev/null
-chgrp -R public "$BaseDir"/public
+# Do not run this on diskless media directors!
+if [[ ! -f /etc/diskless.conf ]]; then
+	/usr/pluto/bin/BootMessage.sh "Changing access rights for user directories"
+	chmod -R 2770 "$BaseDir"/user_* 2>/dev/null
+	/usr/pluto/bin/BootMessage.sh "Changing access rights for public directories"
+	chmod -R 2775 "$BaseDir"/public 2>/dev/null
+	/usr/pluto/bin/BootMessage.sh "Changing owner to public for all public directories"
+	chgrp -R public "$BaseDir"/public
+fi
+
 echo "$(date -R) chgrp -R public $BaseDir/public" >> /var/log/pluto/SetupUsers_Homes.log
 
+/usr/pluto/bin/BootMessage.sh "Adding sambahelper to smbpasswd"
 ## ReAdd the sambahelper user to smbpasswd
 if [[ -r /usr/pluto/var/sambaCredentials.secret ]] ;then
 	smbpass=$(cat /usr/pluto/var/sambaCredentials.secret | grep '^password' | cut -d '=' -f2)
@@ -215,12 +250,20 @@ if [[ -r /usr/pluto/var/sambaCredentials.secret ]] ;then
 	fi
 
 	if [[ "$NeedToRestart" == "true" &&  "$(pidof smbd)" != "" ]] ;then
-		invoke-rc.d samba restart
+		service smbd restart || service samba restart
 	fi
 fi
 
 ## Rebuild NIS cache
+/usr/pluto/bin/BootMessage.sh "Rebuilding NIS cache"
 make -C /var/yp
 
 /usr/pluto/bin/UpdateMediaDaemonControl.sh  -disable
-/usr/pluto/bin/UpdateMediaDaemonControl.sh  -enable
+Q="SELECT Enabled FROM Device_StartupScript WHERE FK_Device=$PK_Device AND FK_StartupScript=61"
+StartUpdateMedia=$(RunSQL "$Q")
+if [ "$StartUpdateMedia" -ne "0" ] ; then
+/usr/pluto/bin/UpdateMediaDaemonControl.sh -enable
+fi
+/usr/pluto/bin/BootMessage.sh "Done Rebuilding NIS cache" 
+
+exit 0

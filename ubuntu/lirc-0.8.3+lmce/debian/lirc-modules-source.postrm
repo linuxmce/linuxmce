@@ -1,0 +1,17 @@
+#!/bin/sh
+set -e
+
+#DEBHELPER#
+
+case "$1" in
+    purge)
+	if [ -f /etc/lirc/lirc-modules-source.conf ]; then
+	    rm -f /etc/lirc/lirc-modules-source.conf
+	fi
+	if [ -x /usr/bin/ucf ]; then
+	    /usr/bin/ucf --purge /etc/lirc/lirc-modules-source.conf
+	fi
+	;;
+esac
+
+exit 0

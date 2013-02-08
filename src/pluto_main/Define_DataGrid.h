@@ -101,6 +101,8 @@
 #define DATAGRID_Active_Users_On_Channel_CONST 100
 #define DATAGRID_External_Channels_CONST 101
 #define DATAGRID_Tracks_on_Disc_CONST 102
+#define DATAGRID_EPG_Grid_CONST 103
+#define DATAGRID_Capture_Card_Audio_Ports_CONST 104
 
 #define DATAGRID_TABLE "DataGrid"
 #define DATAGRID_PK_DATAGRID_FIELD "PK_DataGrid"

@@ -19,8 +19,8 @@
 			<Tool
 				Name="VCCLCompilerTool"
 				Optimization="0"
-				AdditionalIncludeDirectories="../DCE;&quot;../../libs/Libraries/pthreads-win32/include&quot;;/mysql/include;..;../../libs/CrossPlatform/LibXML2/include;&quot;../../libs/CrossPlatform/json-c&quot;"
-				PreprocessorDefinitions="WIN32;_DEBUG;_CONSOLE;DEBUG;DCEROUTER;"
+				AdditionalIncludeDirectories="../DCE;&quot;../../libs/Libraries/pthreads-win32/include&quot;;/mysql/include;..;../../libs/CrossPlatform/LibXML2/include"
+				PreprocessorDefinitions="WIN32;_DEBUG;_CONSOLE;DEBUG;DCEROUTER"
 				MinimalRebuild="TRUE"
 				BasicRuntimeChecks="3"
 				RuntimeLibrary="3"
@@ -33,10 +33,10 @@
 				Name="VCCustomBuildTool"/>
 			<Tool
 				Name="VCLinkerTool"
-				AdditionalDependencies="pthreadvc.lib wsock32.lib libmysql.lib pluto_main.lib dce.lib libxml2.lib jsonD.lib"
+				AdditionalDependencies="pthreadvc.lib wsock32.lib libmysql.lib pluto_main.lib dce.lib libxml2.lib"
 				OutputFile="../Debug/DCERouter.exe"
 				LinkIncremental="2"
-				AdditionalLibraryDirectories="/mysql/lib/debug;../lib;&quot;../../libs/Libraries/pthreads-win32/lib&quot;;../../libs/CrossPlatform/LibXML2/lib;&quot;../../libs/CrossPlatform/json-c/Debug&quot;"
+				AdditionalLibraryDirectories="/mysql/lib/debug;../lib;&quot;../../libs/Libraries/pthreads-win32/lib&quot;;../../libs/CrossPlatform/LibXML2/lib"
 				GenerateDebugInformation="TRUE"
 				ProgramDatabaseFile="$(OutDir)/DCERouter.pdb"
 				SubSystem="1"
@@ -73,8 +73,8 @@
 				Optimization="2"
 				InlineFunctionExpansion="1"
 				OmitFramePointers="TRUE"
-				AdditionalIncludeDirectories="../DCE;&quot;../../libs/Libraries/pthreads-win32/include&quot;;/mysql/include;..;../../libs/CrossPlatform/LibXML2/include;&quot;../../libs/CrossPlatform/json-c&quot;"
-				PreprocessorDefinitions="WIN32;NDEBUG;_CONSOLE;MYSQL_VER_40023;DCEROUTER"
+				AdditionalIncludeDirectories="../DCE;&quot;../../libs/Libraries/pthreads-win32/include&quot;;/mysql/include;..;../../libs/CrossPlatform/LibXML2/include"
+				PreprocessorDefinitions="WIN32;NDEBUG;_CONSOLE;MYSQL_VER_40023"
 				StringPooling="TRUE"
 				RuntimeLibrary="2"
 				EnableFunctionLevelLinking="TRUE"
@@ -86,11 +86,11 @@
 				Name="VCCustomBuildTool"/>
 			<Tool
 				Name="VCLinkerTool"
-				AdditionalDependencies="pluto_main-r.lib pthreadvc.lib wsock32.lib libmysql.lib dce-r.lib libxml2.lib json.lib"
+				AdditionalDependencies="pluto_main-r.lib pthreadvc.lib wsock32.lib libmysql.lib dce-r.lib libxml2.lib"
 				ShowProgress="0"
 				OutputFile="../bin/DCERouter.exe"
 				LinkIncremental="1"
-				AdditionalLibraryDirectories="/mysql/lib/opt;../lib;&quot;../../libs/Libraries/pthreads-win32/lib&quot;;../../libs/CrossPlatform/LibXML2/lib;&quot;../../libs/CrossPlatform/json-c/Release&quot;"
+				AdditionalLibraryDirectories="/mysql/lib/debug;../lib;&quot;../../libs/Libraries/pthreads-win32/lib&quot;;../../libs/CrossPlatform/LibXML2/lib"
 				IgnoreDefaultLibraryNames=""
 				GenerateDebugInformation="TRUE"
 				SubSystem="1"
@@ -132,9 +132,6 @@
 				RelativePath=".\CriteriaNesting.cpp">
 			</File>
 			<File
-				RelativePath=".\DataLayer_JSON.cpp">
-			</File>
-			<File
 				RelativePath=".\DCERouter.cpp">
 			</File>
 			<File
@@ -151,34 +148,16 @@
 			Name="Header Files"
 			Filter="h;hpp;hxx;hm;inl;inc">
 			<File
-				RelativePath=".\Command_Data.h">
-			</File>
-			<File
 				RelativePath=".\CriteriaList.h">
 			</File>
 			<File
 				RelativePath=".\CriteriaNesting.h">
 			</File>
 			<File
-				RelativePath=".\DataLayer_JSON.h">
-			</File>
-			<File
 				RelativePath="..\Dce\DCERouter.h">
 			</File>
 			<File
-				RelativePath=".\DeviceCategory_Data.h">
-			</File>
-			<File
-				RelativePath=".\DeviceTemplate_Data.h">
-			</File>
-			<File
 				RelativePath=".\EventHandler_CriteriaList.h">
-			</File>
-			<File
-				RelativePath=".\IDataLayer.h">
-			</File>
-			<File
-				RelativePath=".\Scene_Data.h">
 			</File>
 		</Filter>
 		<Filter

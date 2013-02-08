@@ -1,0 +1,112 @@
+#! /bin/bash
+# Copyright (c) 1995-2000 SuSE GmbH Nuernberg, Germany.
+#
+# Author: Michael Schroeder <feedback@suse.de>
+#
+# /etc/init.d/splash
+# /usr/sbin/rcsplash
+#
+# System startup script for console splash screens
+#
+### BEGIN INIT INFO
+# Provides: splash
+# Required-Start: $remote_fs
+# X-UnitedLinux-Should-Start: fbset
+# Required-Stop:
+# Default-Start:  1 2 3 5 S
+# Default-Stop:
+# Description:    Splash screen setup
+### END INIT INFO
+
+# Source SuSE config
+. /etc/rc.status
+
+# Shell functions sourced from /etc/rc.status:
+#      rc_check         check and set local and overall rc status
+#      rc_status        check and set local and overall rc status
+#      rc_status -v     ditto but be verbose in local rc status
+#      rc_status -v -r  ditto and clear the local rc status
+#      rc_failed        set local and overall rc status to failed
+#      rc_failed <num>  set local and overall rc status to <num><num>
+#      rc_reset         clear local rc status (overall remains)
+#      rc_exit          exit appropriate to overall rc status
+
+# First reset status of this service
+rc_reset
+
+# Return values acc. to LSB for all commands but status:
+# 0 - success
+# 1 - generic or unspecified error
+# 2 - invalid or excess argument(s)
+# 3 - unimplemented feature (e.g. "reload")
+# 4 - insufficient privilege
+# 5 - program is not installed
+# 6 - program is not configured
+# 7 - program is not running
+# 
+# Note that starting an already running service, stopping
+# or restarting a not-running service as well as the restart
+# with force-reload (in case signalling is not supported) are
+# considered a success.
+
+test -f /proc/splash || exit 5
+
+case "$1" in
+    start)
+	test -x /sbin/splash || exit 5
+	splashv=`cat /proc/splash`
+	res="${splashv##*, }"
+	test "$splashv" != "$res" || exit 5
+	res="${res%)*}"
+	startstr="Setting up splash screens ($res):"
+	for splcfg in /etc/bootsplash/vtsplash-[0-9]-$res.cfg /etc/bootsplash/vtsplash-[0-9][0-9]-$res.cfg; do
+		test -f $splcfg || continue
+		spljpg="${splcfg%.cfg}.jpg"
+		test -f $spljpg || continue
+		test -n "$startstr" && echo -n "$startstr"
+		startstr=
+		unit="${splcfg#/etc/bootsplash/vtsplash-}"
+		unit="${unit%%-*}"
+		/sbin/splash -s -u "$unit" "$splcfg"
+		echo -n " $unit"
+	done
+	test -z "$startstr" && rc_status -v
+	;;
+    stop)
+	;;
+    try-restart)
+	## Stop the service and if this succeeds (i.e. the 
+	## service was running before), start it again.
+	## Note: try-restart is not (yet) part of LSB (as of 0.7.5)
+	$0 status >/dev/null &&  $0 restart
+
+	# Remember status and be quiet
+	rc_status
+	;;
+    restart)
+	## Stop the service and regardless of whether it was
+	## running or not, start it again.
+	$0 start
+
+	# Remember status and be quiet
+	rc_status
+	;;
+    force-reload)
+	## Signal the daemon to reload its config. Most daemons
+	## do this on signal 1 (SIGHUP).
+	## If it does not support it, restart.
+	$0 try-restart
+	rc_status
+	;;
+    reload)
+	$0 try-restart
+	rc_status
+	;;
+    status)
+	;;
+    *)
+	echo "Usage: $0 {start|stop|status|try-restart|restart|force-reload|reload}"
+	exit 1
+	;;
+esac
+rc_exit

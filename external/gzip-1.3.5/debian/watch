@@ -1,0 +1,2 @@
+version=2
+ftp://alpha.gnu.org/gnu/gzip/gzip-([\d\.\d]+)\.tar\.gz

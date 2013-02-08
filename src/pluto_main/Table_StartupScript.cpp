@@ -34,8 +34,6 @@ using namespace std;
 #include "Table_DeviceTemplate.h"
 
 #include "Table_Device_StartupScript.h"
-#include "Table_Device_StartupScript_pschist.h"
-#include "Table_Device_StartupScript_pschmask.h"
 
 
 void Database_pluto_main::CreateTable_StartupScript()
@@ -83,6 +81,7 @@ void Row_StartupScript::Delete()
 	Row_StartupScript *pRow = this; // Needed so we will have only 1 version of get_primary_fields_assign_from_row
 	
 	if (!is_deleted)
+	{
 		if (is_added)	
 		{	
 			vector<TableRow*>::iterator i;	
@@ -104,6 +103,7 @@ void Row_StartupScript::Delete()
 			table->deleted_cachedRows[key] = this;
 			is_deleted = true;	
 		}	
+	}
 }
 
 void Row_StartupScript::Reload()
@@ -137,40 +137,33 @@ void Row_StartupScript::SetDefaultValues()
 {
 	m_PK_StartupScript = 0;
 is_null[0] = false;
-m_When = "S";
-is_null[1] = false;
-m_Command = "";
-is_null[2] = false;
-m_Description = "";
-is_null[3] = false;
+is_null[1] = true;
+is_null[2] = true;
+is_null[3] = true;
 m_ConfigureOnly = 0;
 is_null[4] = false;
-m_Parameter_Syntax = "";
-is_null[5] = false;
+is_null[5] = true;
 m_Core_Boot_Order = 99;
 is_null[6] = false;
 m_Core_Background = 0;
 is_null[7] = false;
 m_Core_Enabled = 1;
 is_null[8] = false;
-m_Core_Parameter = "";
-is_null[9] = false;
+is_null[9] = true;
 m_MD_Boot_Order = 99;
 is_null[10] = false;
 m_MD_Background = 0;
 is_null[11] = false;
 m_MD_Enabled = 1;
 is_null[12] = false;
-m_MD_Parameter = "";
-is_null[13] = false;
+is_null[13] = true;
 m_Hybrid_Boot_Order = 99;
 is_null[14] = false;
 m_Hybrid_Background = 0;
 is_null[15] = false;
 m_Hybrid_Enabled = 1;
 is_null[16] = false;
-m_Hybrid_Parameter = "";
-is_null[17] = false;
+is_null[17] = true;
 is_null[18] = true;
 m_FK_DeviceTemplate = 0;
 is_null[19] = true;
@@ -181,7 +174,8 @@ is_null[21] = true;
 m_psc_user = 0;
 m_psc_frozen = 0;
 is_null[22] = false;
-is_null[23] = true;
+m_psc_mod = "0000-00-00 00:00:00";
+is_null[23] = false;
 is_null[24] = true;
 m_psc_restrict = 0;
 
@@ -348,6 +342,24 @@ m_psc_restrict = val; is_modified=true; is_null[24]=false;}
 bool Row_StartupScript::When_isNull() {PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
 
 return is_null[1];}
+bool Row_StartupScript::Command_isNull() {PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
+
+return is_null[2];}
+bool Row_StartupScript::Description_isNull() {PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
+
+return is_null[3];}
+bool Row_StartupScript::Parameter_Syntax_isNull() {PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
+
+return is_null[5];}
+bool Row_StartupScript::Core_Parameter_isNull() {PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
+
+return is_null[9];}
+bool Row_StartupScript::MD_Parameter_isNull() {PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
+
+return is_null[13];}
+bool Row_StartupScript::Hybrid_Parameter_isNull() {PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
+
+return is_null[17];}
 bool Row_StartupScript::FK_DeviceTemplate_isNull() {PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
 
 return is_null[18];}
@@ -363,9 +375,6 @@ return is_null[21];}
 bool Row_StartupScript::psc_frozen_isNull() {PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
 
 return is_null[22];}
-bool Row_StartupScript::psc_mod_isNull() {PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
-
-return is_null[23];}
 bool Row_StartupScript::psc_restrict_isNull() {PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
 
 return is_null[24];}
@@ -373,6 +382,30 @@ return is_null[24];}
 			
 void Row_StartupScript::When_setNull(bool val){PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
 is_null[1]=val;
+is_modified=true;
+}
+void Row_StartupScript::Command_setNull(bool val){PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
+is_null[2]=val;
+is_modified=true;
+}
+void Row_StartupScript::Description_setNull(bool val){PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
+is_null[3]=val;
+is_modified=true;
+}
+void Row_StartupScript::Parameter_Syntax_setNull(bool val){PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
+is_null[5]=val;
+is_modified=true;
+}
+void Row_StartupScript::Core_Parameter_setNull(bool val){PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
+is_null[9]=val;
+is_modified=true;
+}
+void Row_StartupScript::MD_Parameter_setNull(bool val){PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
+is_null[13]=val;
+is_modified=true;
+}
+void Row_StartupScript::Hybrid_Parameter_setNull(bool val){PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
+is_null[17]=val;
 is_modified=true;
 }
 void Row_StartupScript::FK_DeviceTemplate_setNull(bool val){PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
@@ -393,10 +426,6 @@ is_modified=true;
 }
 void Row_StartupScript::psc_frozen_setNull(bool val){PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
 is_null[22]=val;
-is_modified=true;
-}
-void Row_StartupScript::psc_mod_setNull(bool val){PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
-is_null[23]=val;
 is_modified=true;
 }
 void Row_StartupScript::psc_restrict_setNull(bool val){PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
@@ -425,8 +454,8 @@ PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
 if (is_null[1])
 return "NULL";
 
-char *buf = new char[3];
-db_wrapper_real_escape_string(table->database->m_pDB, buf, m_When.c_str(), (unsigned long) min((size_t)1,m_When.size()));
+char *buf = new char[7];
+db_wrapper_real_escape_string(table->database->m_pDB, buf, m_When.c_str(), (unsigned long) min((size_t)3,m_When.size()));
 string s=string()+"\""+buf+"\"";
 delete[] buf;
 return s;
@@ -439,8 +468,8 @@ PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
 if (is_null[2])
 return "NULL";
 
-char *buf = new char[201];
-db_wrapper_real_escape_string(table->database->m_pDB, buf, m_Command.c_str(), (unsigned long) min((size_t)100,m_Command.size()));
+char *buf = new char[601];
+db_wrapper_real_escape_string(table->database->m_pDB, buf, m_Command.c_str(), (unsigned long) min((size_t)300,m_Command.size()));
 string s=string()+"\""+buf+"\"";
 delete[] buf;
 return s;
@@ -453,8 +482,8 @@ PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
 if (is_null[3])
 return "NULL";
 
-char *buf = new char[131071];
-db_wrapper_real_escape_string(table->database->m_pDB, buf, m_Description.c_str(), (unsigned long) min((size_t)65535,m_Description.size()));
+char *buf = new char[393211];
+db_wrapper_real_escape_string(table->database->m_pDB, buf, m_Description.c_str(), (unsigned long) min((size_t)196605,m_Description.size()));
 string s=string()+"\""+buf+"\"";
 delete[] buf;
 return s;
@@ -480,8 +509,8 @@ PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
 if (is_null[5])
 return "NULL";
 
-char *buf = new char[131071];
-db_wrapper_real_escape_string(table->database->m_pDB, buf, m_Parameter_Syntax.c_str(), (unsigned long) min((size_t)65535,m_Parameter_Syntax.size()));
+char *buf = new char[393211];
+db_wrapper_real_escape_string(table->database->m_pDB, buf, m_Parameter_Syntax.c_str(), (unsigned long) min((size_t)196605,m_Parameter_Syntax.size()));
 string s=string()+"\""+buf+"\"";
 delete[] buf;
 return s;
@@ -533,8 +562,8 @@ PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
 if (is_null[9])
 return "NULL";
 
-char *buf = new char[201];
-db_wrapper_real_escape_string(table->database->m_pDB, buf, m_Core_Parameter.c_str(), (unsigned long) min((size_t)100,m_Core_Parameter.size()));
+char *buf = new char[601];
+db_wrapper_real_escape_string(table->database->m_pDB, buf, m_Core_Parameter.c_str(), (unsigned long) min((size_t)300,m_Core_Parameter.size()));
 string s=string()+"\""+buf+"\"";
 delete[] buf;
 return s;
@@ -586,8 +615,8 @@ PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
 if (is_null[13])
 return "NULL";
 
-char *buf = new char[201];
-db_wrapper_real_escape_string(table->database->m_pDB, buf, m_MD_Parameter.c_str(), (unsigned long) min((size_t)100,m_MD_Parameter.size()));
+char *buf = new char[601];
+db_wrapper_real_escape_string(table->database->m_pDB, buf, m_MD_Parameter.c_str(), (unsigned long) min((size_t)300,m_MD_Parameter.size()));
 string s=string()+"\""+buf+"\"";
 delete[] buf;
 return s;
@@ -639,8 +668,8 @@ PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
 if (is_null[17])
 return "NULL";
 
-char *buf = new char[201];
-db_wrapper_real_escape_string(table->database->m_pDB, buf, m_Hybrid_Parameter.c_str(), (unsigned long) min((size_t)100,m_Hybrid_Parameter.size()));
+char *buf = new char[601];
+db_wrapper_real_escape_string(table->database->m_pDB, buf, m_Hybrid_Parameter.c_str(), (unsigned long) min((size_t)300,m_Hybrid_Parameter.size()));
 string s=string()+"\""+buf+"\"";
 delete[] buf;
 return s;
@@ -1667,20 +1696,6 @@ void Row_StartupScript::Device_StartupScript_FK_StartupScript_getrows(vector <cl
 PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
 
 class Table_Device_StartupScript *pTable = table->database->Device_StartupScript_get();
-pTable->GetRows("`FK_StartupScript`=" + StringUtils::itos(m_PK_StartupScript),rows);
-}
-void Row_StartupScript::Device_StartupScript_pschist_FK_StartupScript_getrows(vector <class Row_Device_StartupScript_pschist*> *rows)
-{
-PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
-
-class Table_Device_StartupScript_pschist *pTable = table->database->Device_StartupScript_pschist_get();
-pTable->GetRows("`FK_StartupScript`=" + StringUtils::itos(m_PK_StartupScript),rows);
-}
-void Row_StartupScript::Device_StartupScript_pschmask_FK_StartupScript_getrows(vector <class Row_Device_StartupScript_pschmask*> *rows)
-{
-PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
-
-class Table_Device_StartupScript_pschmask *pTable = table->database->Device_StartupScript_pschmask_get();
 pTable->GetRows("`FK_StartupScript`=" + StringUtils::itos(m_PK_StartupScript),rows);
 }
 

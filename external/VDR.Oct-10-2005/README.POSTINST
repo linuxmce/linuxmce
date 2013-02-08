@@ -1,0 +1,18 @@
+things we need for the first release:
+
+
+addons/ 
+	libxine1_1.0.2-0vdr1+net1_i386.deb
+	vdrdevel-channellogos_0.0.3-2_all.deb
+	vdrdevel-skin-elchi_0.0.0+0.0.1pre6a+1.0rc1-1_all.deb
+	vdrdevel-xpmlogos_0.0.1-2_all.deb
+
+plugins/
+	vdrdevel-plugin-control
+	vdrdevel-plugin-xine-0.7.6
+
+
+##
+things to do with postinstall:
+
+all now automatic :)

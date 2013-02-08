@@ -1,6 +1,6 @@
 /*
  *
- *  $Id: pvrusb2-i2c-cmd-v4l1.h 798 2005-12-31 20:30:29Z isely $
+ *  $Id: pvrusb2-i2c-cmd-v4l1.h 2226 2009-03-07 05:17:32Z isely $
  *
  *  Copyright (C) 2005 Mike Isely <isely@pobox.com>
  *  Copyright (C) 2004 Aurelien Alleaume <slts@free.fr>
@@ -23,7 +23,7 @@
 #ifndef __PVRUSB2_CMD_V4L1_H
 #define __PVRUSB2_CMD_V4L1_H
 
-#include "pvrusb2-i2c-core.h"
+#include "pvrusb2-i2c-track.h"
 
 extern const struct pvr2_i2c_op pvr2_i2c_op_v4l1_standard;
 extern const struct pvr2_i2c_op pvr2_i2c_op_v4l1_volume;

@@ -1,0 +1,305 @@
+// !$*UTF8*$!
+{
+	archiveVersion = 1;
+	classes = {
+	};
+	objectVersion = 46;
+	objects = {
+
+/* Begin PBXBuildFile section */
+		95F788EC15B4B4CC00FB8F5B /* libmysqlclient.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 95F788EB15B4B4CC00FB8F5B /* libmysqlclient.dylib */; };
+		95F788EE15B4B52B00FB8F5B /* libPlutoUtils.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 95F788ED15B4B52B00FB8F5B /* libPlutoUtils.dylib */; };
+		95F788F015B4B55500FB8F5B /* Main.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 95F788EF15B4B55500FB8F5B /* Main.cpp */; };
+		95F788F215B4B6AB00FB8F5B /* CreateDevice.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 95F788F115B4B6AB00FB8F5B /* CreateDevice.cpp */; };
+		95FF887615B49DE800B0EC93 /* UpdateEntArea.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 95FF887515B49DE800B0EC93 /* UpdateEntArea.cpp */; };
+		95FF887F15B49E2300B0EC93 /* UpdateEntArea_Climate.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 95FF887815B49E2300B0EC93 /* UpdateEntArea_Climate.cpp */; };
+		95FF888015B49E2300B0EC93 /* UpdateEntArea_Event.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 95FF887915B49E2300B0EC93 /* UpdateEntArea_Event.cpp */; };
+		95FF888115B49E2300B0EC93 /* UpdateEntArea_Lighting.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 95FF887A15B49E2300B0EC93 /* UpdateEntArea_Lighting.cpp */; };
+		95FF888215B49E2300B0EC93 /* UpdateEntArea_Media.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 95FF887B15B49E2300B0EC93 /* UpdateEntArea_Media.cpp */; };
+		95FF888315B49E2300B0EC93 /* UpdateEntArea_Security.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 95FF887C15B49E2300B0EC93 /* UpdateEntArea_Security.cpp */; };
+		95FF888415B49E2300B0EC93 /* UpdateEntArea_Setup.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 95FF887D15B49E2300B0EC93 /* UpdateEntArea_Setup.cpp */; };
+		95FF888515B49E2300B0EC93 /* UpdateEntArea_Telecom.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 95FF887E15B49E2300B0EC93 /* UpdateEntArea_Telecom.cpp */; };
+		95FF888815B49E4300B0EC93 /* CommandGroupArray.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 95FF888615B49E4300B0EC93 /* CommandGroupArray.cpp */; };
+		95FF888915B49E4300B0EC93 /* Criteria.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 95FF888715B49E4300B0EC93 /* Criteria.cpp */; };
+		95FF888E15B49EF600B0EC93 /* libDCECommon.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 95FF888D15B49EF600B0EC93 /* libDCECommon.dylib */; };
+		95FF889015B49EFD00B0EC93 /* libpluto_main.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 95FF888F15B49EFD00B0EC93 /* libpluto_main.dylib */; };
+/* End PBXBuildFile section */
+
+/* Begin PBXCopyFilesBuildPhase section */
+		95FF885A15B49D0100B0EC93 /* CopyFiles */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 2147483647;
+			dstPath = /usr/share/man/man1/;
+			dstSubfolderSpec = 0;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 1;
+		};
+/* End PBXCopyFilesBuildPhase section */
+
+/* Begin PBXFileReference section */
+		95F788EB15B4B4CC00FB8F5B /* libmysqlclient.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libmysqlclient.dylib; path = ../../mysql/lib/libmysqlclient.dylib; sourceTree = "<group>"; };
+		95F788ED15B4B52B00FB8F5B /* libPlutoUtils.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libPlutoUtils.dylib; path = lib/libPlutoUtils.dylib; sourceTree = "<group>"; };
+		95F788EF15B4B55500FB8F5B /* Main.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = Main.cpp; path = ../UpdateEntArea/Main.cpp; sourceTree = "<group>"; };
+		95F788F115B4B6AB00FB8F5B /* CreateDevice.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = CreateDevice.cpp; path = ../CreateDevice/CreateDevice.cpp; sourceTree = "<group>"; };
+		95FF885C15B49D0100B0EC93 /* UpdateEntArea */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = UpdateEntArea; sourceTree = BUILT_PRODUCTS_DIR; };
+		95FF887515B49DE800B0EC93 /* UpdateEntArea.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = UpdateEntArea.cpp; path = ../UpdateEntArea/UpdateEntArea.cpp; sourceTree = "<group>"; };
+		95FF887815B49E2300B0EC93 /* UpdateEntArea_Climate.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = UpdateEntArea_Climate.cpp; path = ../UpdateEntArea/UpdateEntArea_Climate.cpp; sourceTree = "<group>"; };
+		95FF887915B49E2300B0EC93 /* UpdateEntArea_Event.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = UpdateEntArea_Event.cpp; path = ../UpdateEntArea/UpdateEntArea_Event.cpp; sourceTree = "<group>"; };
+		95FF887A15B49E2300B0EC93 /* UpdateEntArea_Lighting.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = UpdateEntArea_Lighting.cpp; path = ../UpdateEntArea/UpdateEntArea_Lighting.cpp; sourceTree = "<group>"; };
+		95FF887B15B49E2300B0EC93 /* UpdateEntArea_Media.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = UpdateEntArea_Media.cpp; path = ../UpdateEntArea/UpdateEntArea_Media.cpp; sourceTree = "<group>"; };
+		95FF887C15B49E2300B0EC93 /* UpdateEntArea_Security.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = UpdateEntArea_Security.cpp; path = ../UpdateEntArea/UpdateEntArea_Security.cpp; sourceTree = "<group>"; };
+		95FF887D15B49E2300B0EC93 /* UpdateEntArea_Setup.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = UpdateEntArea_Setup.cpp; path = ../UpdateEntArea/UpdateEntArea_Setup.cpp; sourceTree = "<group>"; };
+		95FF887E15B49E2300B0EC93 /* UpdateEntArea_Telecom.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = UpdateEntArea_Telecom.cpp; path = ../UpdateEntArea/UpdateEntArea_Telecom.cpp; sourceTree = "<group>"; };
+		95FF888615B49E4300B0EC93 /* CommandGroupArray.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = CommandGroupArray.cpp; path = ../UpdateEntArea/CommandGroupArray.cpp; sourceTree = "<group>"; };
+		95FF888715B49E4300B0EC93 /* Criteria.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = Criteria.cpp; path = ../UpdateEntArea/Criteria.cpp; sourceTree = "<group>"; };
+		95FF888D15B49EF600B0EC93 /* libDCECommon.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libDCECommon.dylib; path = lib/libDCECommon.dylib; sourceTree = "<group>"; };
+		95FF888F15B49EFD00B0EC93 /* libpluto_main.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libpluto_main.dylib; path = lib/libpluto_main.dylib; sourceTree = "<group>"; };
+		95FF889115B49F2300B0EC93 /* mysql.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = mysql.h; path = plugins/../mysql/include/mysql.h; sourceTree = "<group>"; };
+/* End PBXFileReference section */
+
+/* Begin PBXFrameworksBuildPhase section */
+		95FF885915B49D0100B0EC93 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				95FF888E15B49EF600B0EC93 /* libDCECommon.dylib in Frameworks */,
+				95FF889015B49EFD00B0EC93 /* libpluto_main.dylib in Frameworks */,
+				95F788EC15B4B4CC00FB8F5B /* libmysqlclient.dylib in Frameworks */,
+				95F788EE15B4B52B00FB8F5B /* libPlutoUtils.dylib in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXFrameworksBuildPhase section */
+
+/* Begin PBXGroup section */
+		95FF885115B49D0100B0EC93 = {
+			isa = PBXGroup;
+			children = (
+				95F788EF15B4B55500FB8F5B /* Main.cpp */,
+				95FF887515B49DE800B0EC93 /* UpdateEntArea.cpp */,
+				95FF887715B49DED00B0EC93 /* Includes */,
+				95FF888C15B49E9800B0EC93 /* Libraries */,
+				95FF885D15B49D0100B0EC93 /* Products */,
+			);
+			sourceTree = "<group>";
+		};
+		95FF885D15B49D0100B0EC93 /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				95FF885C15B49D0100B0EC93 /* UpdateEntArea */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+		95FF887715B49DED00B0EC93 /* Includes */ = {
+			isa = PBXGroup;
+			children = (
+				95FF889115B49F2300B0EC93 /* mysql.h */,
+				95FF887815B49E2300B0EC93 /* UpdateEntArea_Climate.cpp */,
+				95FF887915B49E2300B0EC93 /* UpdateEntArea_Event.cpp */,
+				95FF887A15B49E2300B0EC93 /* UpdateEntArea_Lighting.cpp */,
+				95FF887B15B49E2300B0EC93 /* UpdateEntArea_Media.cpp */,
+				95FF887C15B49E2300B0EC93 /* UpdateEntArea_Security.cpp */,
+				95FF887D15B49E2300B0EC93 /* UpdateEntArea_Setup.cpp */,
+				95FF887E15B49E2300B0EC93 /* UpdateEntArea_Telecom.cpp */,
+				95FF888615B49E4300B0EC93 /* CommandGroupArray.cpp */,
+				95FF888715B49E4300B0EC93 /* Criteria.cpp */,
+				95F788F115B4B6AB00FB8F5B /* CreateDevice.cpp */,
+			);
+			name = Includes;
+			sourceTree = "<group>";
+		};
+		95FF888C15B49E9800B0EC93 /* Libraries */ = {
+			isa = PBXGroup;
+			children = (
+				95FF888D15B49EF600B0EC93 /* libDCECommon.dylib */,
+				95FF888F15B49EFD00B0EC93 /* libpluto_main.dylib */,
+				95F788ED15B4B52B00FB8F5B /* libPlutoUtils.dylib */,
+				95F788EB15B4B4CC00FB8F5B /* libmysqlclient.dylib */,
+			);
+			name = Libraries;
+			sourceTree = "<group>";
+		};
+/* End PBXGroup section */
+
+/* Begin PBXNativeTarget section */
+		95FF885B15B49D0100B0EC93 /* UpdateEntArea */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 95FF886615B49D0100B0EC93 /* Build configuration list for PBXNativeTarget "UpdateEntArea" */;
+			buildPhases = (
+				95FF885815B49D0100B0EC93 /* Sources */,
+				95FF885915B49D0100B0EC93 /* Frameworks */,
+				95FF885A15B49D0100B0EC93 /* CopyFiles */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = UpdateEntArea;
+			productName = UpdateEntArea;
+			productReference = 95FF885C15B49D0100B0EC93 /* UpdateEntArea */;
+			productType = "com.apple.product-type.tool";
+		};
+/* End PBXNativeTarget section */
+
+/* Begin PBXProject section */
+		95FF885315B49D0100B0EC93 /* Project object */ = {
+			isa = PBXProject;
+			attributes = {
+				LastUpgradeCheck = 0420;
+			};
+			buildConfigurationList = 95FF885615B49D0100B0EC93 /* Build configuration list for PBXProject "UpdateEntArea" */;
+			compatibilityVersion = "Xcode 3.2";
+			developmentRegion = English;
+			hasScannedForEncodings = 0;
+			knownRegions = (
+				en,
+			);
+			mainGroup = 95FF885115B49D0100B0EC93;
+			productRefGroup = 95FF885D15B49D0100B0EC93 /* Products */;
+			projectDirPath = "";
+			projectRoot = "";
+			targets = (
+				95FF885B15B49D0100B0EC93 /* UpdateEntArea */,
+			);
+		};
+/* End PBXProject section */
+
+/* Begin PBXSourcesBuildPhase section */
+		95FF885815B49D0100B0EC93 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				95FF887615B49DE800B0EC93 /* UpdateEntArea.cpp in Sources */,
+				95FF887F15B49E2300B0EC93 /* UpdateEntArea_Climate.cpp in Sources */,
+				95FF888015B49E2300B0EC93 /* UpdateEntArea_Event.cpp in Sources */,
+				95FF888115B49E2300B0EC93 /* UpdateEntArea_Lighting.cpp in Sources */,
+				95FF888215B49E2300B0EC93 /* UpdateEntArea_Media.cpp in Sources */,
+				95FF888315B49E2300B0EC93 /* UpdateEntArea_Security.cpp in Sources */,
+				95FF888415B49E2300B0EC93 /* UpdateEntArea_Setup.cpp in Sources */,
+				95FF888515B49E2300B0EC93 /* UpdateEntArea_Telecom.cpp in Sources */,
+				95FF888815B49E4300B0EC93 /* CommandGroupArray.cpp in Sources */,
+				95FF888915B49E4300B0EC93 /* Criteria.cpp in Sources */,
+				95F788F015B4B55500FB8F5B /* Main.cpp in Sources */,
+				95F788F215B4B6AB00FB8F5B /* CreateDevice.cpp in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXSourcesBuildPhase section */
+
+/* Begin XCBuildConfiguration section */
+		95FF886415B49D0100B0EC93 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				ARCHS = "$(ARCHS_STANDARD_64_BIT)";
+				CLANG_ENABLE_OBJC_ARC = YES;
+				COPY_PHASE_STRIP = NO;
+				GCC_C_LANGUAGE_STANDARD = gnu99;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_ENABLE_OBJC_EXCEPTIONS = YES;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"DEBUG=1",
+					"$(inherited)",
+				);
+				GCC_SYMBOLS_PRIVATE_EXTERN = NO;
+				GCC_VERSION = com.apple.compilers.llvm.clang.1_0;
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_MISSING_PROTOTYPES = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				INSTALL_PATH = /usr/pluto/bin;
+				MACOSX_DEPLOYMENT_TARGET = 10.7;
+				ONLY_ACTIVE_ARCH = YES;
+				SDKROOT = macosx;
+			};
+			name = Debug;
+		};
+		95FF886515B49D0100B0EC93 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				ARCHS = "$(ARCHS_STANDARD_64_BIT)";
+				CLANG_ENABLE_OBJC_ARC = YES;
+				COPY_PHASE_STRIP = YES;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				GCC_C_LANGUAGE_STANDARD = gnu99;
+				GCC_ENABLE_OBJC_EXCEPTIONS = YES;
+				GCC_VERSION = com.apple.compilers.llvm.clang.1_0;
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_MISSING_PROTOTYPES = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				INSTALL_PATH = /usr/pluto/bin;
+				MACOSX_DEPLOYMENT_TARGET = 10.7;
+				SDKROOT = macosx;
+			};
+			name = Release;
+		};
+		95FF886715B49D0100B0EC93 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CONFIGURATION_BUILD_DIR = bin;
+				HEADER_SEARCH_PATHS = (
+					../DCE,
+					..,
+					/usr/include/mysql,
+				);
+				LIBRARY_SEARCH_PATHS = (
+					"$(inherited)",
+					"\"$(SRCROOT)/lib\"",
+					"\"$(SRCROOT)/../../mysql/lib\"",
+				);
+				OTHER_LDFLAGS = "";
+				PRIVATE_HEADERS_FOLDER_PATH = "";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+			};
+			name = Debug;
+		};
+		95FF886815B49D0100B0EC93 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CONFIGURATION_BUILD_DIR = bin;
+				HEADER_SEARCH_PATHS = (
+					../DCE,
+					..,
+					/usr/include/mysql,
+				);
+				LIBRARY_SEARCH_PATHS = (
+					"$(inherited)",
+					"\"$(SRCROOT)/lib\"",
+					"\"$(SRCROOT)/../../mysql/lib\"",
+				);
+				OTHER_LDFLAGS = "";
+				PRIVATE_HEADERS_FOLDER_PATH = "";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+			};
+			name = Release;
+		};
+/* End XCBuildConfiguration section */
+
+/* Begin XCConfigurationList section */
+		95FF885615B49D0100B0EC93 /* Build configuration list for PBXProject "UpdateEntArea" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				95FF886415B49D0100B0EC93 /* Debug */,
+				95FF886515B49D0100B0EC93 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		95FF886615B49D0100B0EC93 /* Build configuration list for PBXNativeTarget "UpdateEntArea" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				95FF886715B49D0100B0EC93 /* Debug */,
+				95FF886815B49D0100B0EC93 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+/* End XCConfigurationList section */
+	};
+	rootObject = 95FF885315B49D0100B0EC93 /* Project object */;
+}

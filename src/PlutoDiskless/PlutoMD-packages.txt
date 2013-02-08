@@ -1,4 +1,4 @@
-aalib1
+alib1
 abcde
 adduser
 alsa-base
@@ -310,8 +310,6 @@ libxrandr2
 libxrender1
 libxss1
 libxt6
-libxtrap6
-libxtst6
 libxv1
 libxvidcore4
 libxvmc1
@@ -354,7 +352,6 @@ nfs-common
 nfs-kernel-server
 ntpdate
 nvi
-nvidia-glx
 nvidia-kernel-2.6.16.20-pluto-2-686
 nvidia-kernel-2.6.16.20-pluto-2-686-smp
 nvidia-kernel-common
@@ -497,7 +494,6 @@ xserver-xorg-video-mga
 xserver-xorg-video-neomagic
 xserver-xorg-video-newport
 xserver-xorg-video-nsc
-xserver-xorg-video-nv
 xserver-xorg-video-openchrome
 xserver-xorg-video-rendition
 xserver-xorg-video-s3

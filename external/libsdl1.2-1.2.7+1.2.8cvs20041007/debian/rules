@@ -1,0 +1,162 @@
+#!/usr/bin/make -f
+
+# Uncomment this to turn on verbose mode.
+#export DH_VERBOSE=1
+include debian/scripts/vars
+BUILD_DIR:=$(PWD)/$(SOURCE_DIR)/$(TAR_DIR)
+
+MAKE=make
+
+export SHLIBVER=(>> 1.2.7+1.2.8)
+
+DEB_HOST_GNU_TYPE	?= $(shell dpkg-architecture -qDEB_HOST_GNU_TYPE)
+DEB_BUILD_GNU_TYPE	?= $(shell dpkg-architecture -qDEB_BUILD_GNU_TYPE)
+DEB_BUILD_GNU_SYSTEM	?= $(shell dpkg-architecture -qDEB_BUILD_GNU_SYSTEM)
+
+export DEB_HOST_GNU_TYPE
+export DEB_BUILD_GNU_TYPE
+
+LIBSVGA1-DEV :=	$(shell \
+	if [ "`dpkg --print-installation-architecture`" = "i386" ] ;\
+	then echo -n libsvga1-dev ;\
+	fi)
+
+
+
+CALLCFG=../$(TAR_DIR)/configure --enable-dlopen --prefix=/usr --with-pic \
+	--build=$(DEB_BUILD_GNU_TYPE) --host=$(DEB_HOST_GNU_TYPE) \
+	--enable-dependency-tracking --enable-arts-shared=no \
+	--enable-alsa-shared=no --enable-esd-shared=no
+
+MAKEFILE_INS:=$(shell find $(BUILD_DIR) -name Makefile.in)
+
+SOUNDS=arts esd oss nas
+
+ifeq ($(DEB_BUILD_GNU_SYSTEM),linux-gnu)
+SOUNDS += alsa
+libasound = , libasound2-dev
+no_libasound =
+else
+libasound =
+no_libasound = -Nlibsdl1.2debian-alsa
+endif
+
+export DH_COMPAT=3
+
+newversion:
+	dh_testdir
+	#(cd $(BUILD_DIR); ./autogen.sh)
+
+unpack: $(STAMP_DIR)/unpack
+$(STAMP_DIR)/unpack:
+	dh_testdir
+	
+	$(MAKE) -f debian/sys-build.mk source.make
+	
+	(cd $(BUILD_DIR); ./autogen.sh)
+	
+	chmod +x $(BUILD_DIR)/configure $(BUILD_DIR)/depcomp \
+	$(BUILD_DIR)/install-sh $(BUILD_DIR)/missing $(BUILD_DIR)/mkinstalldirs
+
+	touch $(STAMP_DIR)/unpack
+
+configure: $(STAMP_DIR)/configure
+$(STAMP_DIR)/configure: $(STAMP_DIR)/unpack $(BUILD_DIR)/configure $(MAKEFILE_INS)
+	dh_testdir
+
+	for sound in all $(SOUNDS); do \
+		if ( [ "$$sound" = "all" ] ); then \
+			SWITCHES="--disable-video-ggi --enable-video-svga --enable-video-aalib"; \
+		else \
+			SWITCHES=""; \
+			for switch in $(SOUNDS); do \
+				if ( [ "$$sound" = "$$switch" ] ); then \
+					SWITCHES="$$SWITCHES --enable-$$switch"; \
+				else \
+					SWITCHES="$$SWITCHES --disable-$$switch"; \
+				fi; \
+			done; \
+		fi; \
+		mkdir -p $(PWD)/$(SOURCE_DIR)/$$sound; \
+		(cd $(PWD)/$(SOURCE_DIR)/$$sound; $(CALLCFG) $$SWITCHES); \
+	done
+
+	touch $(STAMP_DIR)/configure
+
+build: $(STAMP_DIR)/build
+$(STAMP_DIR)/build: $(STAMP_DIR)/configure
+	dh_testdir
+
+	for sound in all $(SOUNDS); do \
+		$(MAKE) -C $(PWD)/$(SOURCE_DIR)/$$sound; \
+	done
+
+	touch $(STAMP_DIR)/build
+
+clean:
+	dh_testdir
+	dh_testroot
+
+	$(MAKE) -f debian/sys-build.mk source.clean
+	rm -f $(STAMP_DIR)
+
+	dh_clean debian/*substvars*
+
+	cat debian/control.in \
+	| sed "s/@linux-gnu@/`type-handling any linux-gnu`/g" \
+	| sed "s/@libasound@/$(libasound)/g" \
+	> debian/control
+
+install: $(STAMP_DIR)/install
+$(STAMP_DIR)/install: $(STAMP_DIR)/build
+	dh_testdir
+	dh_testroot
+	dh_clean -k
+	dh_installdirs
+
+	$(MAKE) -C $(PWD)/$(SOURCE_DIR)/all install DESTDIR=$(PWD)/debian/tmp
+
+	touch $(STAMP_DIR)/install
+
+# Build architecture-independent files here.
+binary-indep: $(STAMP_DIR)/build
+# We have nothing to do by default.
+
+# Build architecture-dependent files here.
+binary-arch: $(STAMP_DIR)/install
+#	dh_testversion
+	dh_testdir
+	dh_testroot
+	dh_installdocs -A $(BUILD_DIR)/BUGS $(BUILD_DIR)/CREDITS $(BUILD_DIR)/README $(BUILD_DIR)/README-SDL.txt
+	dh_installdocs -plibsdl1.2-dev $(BUILD_DIR)/docs.html $(BUILD_DIR)/docs
+	dh_installexamples -plibsdl1.2-dev $(BUILD_DIR)/test
+	rm debian/libsdl1.2-dev/usr/share/doc/libsdl1.2-dev/examples/test/COPYING
+#	rm debian/libsdl1.2-dev/usr/share/doc/libsdl1.2-dev/examples/test/.cvsignore
+	cd debian/libsdl1.2-dev/usr/share/doc/libsdl1.2-dev/examples; \
+	tar cf examples.tar test; \
+	rm -rf test
+	dh_installmanpages -plibsdl1.2-dev
+	#dh_undocumented
+	dh_installchangelogs
+	dh_install --sourcedir=debian/tmp
+	for sound in $(SOUNDS); do \
+		dh_install --sourcedir=$(PWD)/$(SOURCE_DIR)/$$sound/ -plibsdl1.2debian-$$sound src/.libs/*.so.* usr/lib/; \
+	done
+	rm -rf debian/libsdl1.2debian/usr/include
+	rm -rf debian/libsdl1.2-dev/usr/share/doc/libsdl1.2-dev/docs/man3
+	dh_strip
+	dh_compress
+	dh_fixperms
+	dh_makeshlibs
+	for sound in all $(SOUNDS); do echo "libSDL-1.2 0 libsdl1.2debian $$SHLIBVER" > debian/libsdl1.2debian-$$sound/DEBIAN/shlibs; done
+	dh_installdeb
+	dh_shlibdeps
+	dh_gencontrol $(no_libasound) -- -Vlibsvga1-dev=$(LIBSVGA1-DEV)
+	dh_md5sums
+	dh_builddeb $(no_libasound)
+
+source diff:                                                                  
+	@echo >&2 'source and diff are obsolete - use dpkg-source -b'; false
+
+binary: binary-indep binary-arch
+.PHONY: build clean binary-indep binary-arch binary

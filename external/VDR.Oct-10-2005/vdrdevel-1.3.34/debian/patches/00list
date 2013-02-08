@@ -1,0 +1,68 @@
+01_Makefile-fPIC-fix
+02_Makefile-CFGDIR
+03_cmdsubmenu
+04_newplugin
+06_default_svdrp_port_0
+08_security_CAN-2005-0071
+09_sort_options
+10_dd-record-option
+11_sortrecordings
+12_osdbase-maxitems
+13_epgfix
+15_dvbplayer
+16_avoidTrashing
+17_replay
+22_vdr-playerepg
+
+81_Make_config
+
+# The enAIO patch collection.
+# opt-20_enAIO-2.6
+
+# The Jump patch allows automatic jumping over cutting marks.
+# opt-24_jumpplay-0.6
+
+# Patch needed for the subtitles and the ttxtsubs plugin.
+# opt-27_subtitles-ttxtsubs
+
+# Patch needed for the analogtv plugin.
+# opt-30-x_analogtv
+
+# Patch to share one sat connection for several cards.
+# opt-31_sharelnb
+
+# Patch that shows if there is a valid setup value left or right with < and >.
+# opt-35_setup-show-valid
+
+# Patch to handle recordings that should be cutted in a queue (-/+ autodelete).
+# opt-36_CutterQueue-0.5
+# opt-36_CutterQueue-AutoDelete-0.5
+
+# Patch needed for the submenu plugin.
+# opt-37_submenu
+
+# Patch that suppresses double EPG entries.
+# opt-38_disableDoubleEpgEntrys_0.7.2
+
+# Patch to disable normal epg update for specified channels.
+# opt-39_noepg
+
+# Patch that adds some icons to timer, recording and channel list.
+# opt-40_wareagle-icons
+
+# Patch to show an info, if it is possible to record an event in the timer-info.
+# opt-41_timer-info
+# opt-41_timer-info_wareagle
+
+# Patch needed for the analogtv plugin.
+# opt-42_stuttering
+
+# Patch that implements a livebuffer to allow permanent timeshifting.
+# opt-43_LiveBuffer
+opt-43_LiveBuffer_multi
+
+# Patch needed for the rotor plugin.
+# opt-44_rotor
+
+# Convert package to vdrdevel
+95_vdrdevel

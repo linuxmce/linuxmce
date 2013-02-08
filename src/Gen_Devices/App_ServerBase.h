@@ -1,3 +1,18 @@
+/*
+     Copyright (C) 2004 Pluto, Inc., a Florida Corporation
+
+     www.plutohome.com
+
+     Phone: +1 (877) 758-8648
+ 
+
+     This program is free software; you can redistribute it and/or modify it under the terms of the GNU General Public License.
+     This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty
+     of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+
+     See the GNU General Public License for more details.
+
+*/
 #ifndef App_ServerBase_h
 #define App_ServerBase_h
 #include "DeviceData_Impl.h"
@@ -85,7 +100,7 @@ public:
 		if( m_bRunningWithoutDeviceData )
 			return (m_pEvent_Impl->GetDeviceDataFromDatabase(m_dwPK_Device,DEVICEDATA_Discrete_Volume_CONST)=="1" ? true : false);
 		else
-			return (m_mapParameters_Find(DEVICEDATA_Discrete_Volume_CONST)=="1" ? true : false);
+			return (m_mapParameters[DEVICEDATA_Discrete_Volume_CONST]=="1" ? true : false);
 	}
 
 	int Get_Volume_Level()
@@ -93,7 +108,7 @@ public:
 		if( m_bRunningWithoutDeviceData )
 			return atoi(m_pEvent_Impl->GetDeviceDataFromDatabase(m_dwPK_Device,DEVICEDATA_Volume_Level_CONST).c_str());
 		else
-			return atoi(m_mapParameters_Find(DEVICEDATA_Volume_Level_CONST).c_str());
+			return atoi(m_mapParameters[DEVICEDATA_Volume_Level_CONST].c_str());
 	}
 
 	void Set_Volume_Level(int Value)
@@ -105,7 +120,7 @@ public:
 		if( m_bRunningWithoutDeviceData )
 			return (m_pEvent_Impl->GetDeviceDataFromDatabase(m_dwPK_Device,DEVICEDATA_Only_One_Per_PC_CONST)=="1" ? true : false);
 		else
-			return (m_mapParameters_Find(DEVICEDATA_Only_One_Per_PC_CONST)=="1" ? true : false);
+			return (m_mapParameters[DEVICEDATA_Only_One_Per_PC_CONST]=="1" ? true : false);
 	}
 
 	bool Get_Autoassign_to_parents_room()
@@ -113,7 +128,7 @@ public:
 		if( m_bRunningWithoutDeviceData )
 			return (m_pEvent_Impl->GetDeviceDataFromDatabase(m_dwPK_Device,DEVICEDATA_Autoassign_to_parents_room_CONST)=="1" ? true : false);
 		else
-			return (m_mapParameters_Find(DEVICEDATA_Autoassign_to_parents_room_CONST)=="1" ? true : false);
+			return (m_mapParameters[DEVICEDATA_Autoassign_to_parents_room_CONST]=="1" ? true : false);
 	}
 
 };
@@ -227,7 +242,7 @@ public:
 	bool DATA_Get_Autoassign_to_parents_room() { return GetData()->Get_Autoassign_to_parents_room(); }
 	//Event accessors
 	//Commands - Override these to handle commands from the server
-	virtual void CMD_Simulate_Keypress(string sPK_Button,int iStreamID,string sName,string &sCMD_Result,class Message *pMessage) {};
+	virtual void CMD_Simulate_Keypress(string sPK_Button,string sName,string &sCMD_Result,class Message *pMessage) {};
 	virtual void CMD_Spawn_Application(string sFilename,string sName,string sArguments,string sSendOnFailure,string sSendOnSuccess,bool bShow_logo,bool bRetransmit,bool bExclusive,bool bDetach,string &sCMD_Result,class Message *pMessage) {};
 	virtual void CMD_Kill_Application(string sName,bool bRetransmit,string &sCMD_Result,class Message *pMessage) {};
 	virtual void CMD_Hide_Application(string sName,string &sCMD_Result,class Message *pMessage) {};
@@ -235,7 +250,7 @@ public:
 	virtual void CMD_Vol_Down(int iRepeat_Command,string &sCMD_Result,class Message *pMessage) {};
 	virtual void CMD_Mute(string &sCMD_Result,class Message *pMessage) {};
 	virtual void CMD_Set_Volume(string sLevel,string &sCMD_Result,class Message *pMessage) {};
-	virtual void CMD_Halt_Device(int iPK_Device,string sForce,string sMac_address,string &sCMD_Result,class Message *pMessage) {};
+	virtual void CMD_Halt_Device(int iPK_Device,string sForce,string &sCMD_Result,class Message *pMessage) {};
 	virtual void CMD_Application_is_Running(string sName,bool *bTrueFalse,string &sCMD_Result,class Message *pMessage) {};
 	virtual void CMD_Application_Exited(int iPID,int iExit_Code,string &sCMD_Result,class Message *pMessage) {};
 
@@ -274,9 +289,8 @@ public:
 					{
 						string sCMD_Result="OK";
 						string sPK_Button=pMessage->m_mapParameters[COMMANDPARAMETER_PK_Button_CONST];
-						int iStreamID=atoi(pMessage->m_mapParameters[COMMANDPARAMETER_StreamID_CONST].c_str());
 						string sName=pMessage->m_mapParameters[COMMANDPARAMETER_Name_CONST];
-						CMD_Simulate_Keypress(sPK_Button.c_str(),iStreamID,sName.c_str(),sCMD_Result,pMessage);
+						CMD_Simulate_Keypress(sPK_Button.c_str(),sName.c_str(),sCMD_Result,pMessage);
 						if( pMessage->m_eExpectedResponse==ER_ReplyMessage && !pMessage->m_bRespondedToMessage )
 						{
 							pMessage->m_bRespondedToMessage=true;
@@ -293,7 +307,7 @@ public:
 						{
 							int iRepeat=atoi(itRepeat->second.c_str());
 							for(int i=2;i<=iRepeat;++i)
-								CMD_Simulate_Keypress(sPK_Button.c_str(),iStreamID,sName.c_str(),sCMD_Result,pMessage);
+								CMD_Simulate_Keypress(sPK_Button.c_str(),sName.c_str(),sCMD_Result,pMessage);
 						}
 					};
 					iHandled++;
@@ -493,8 +507,7 @@ public:
 						string sCMD_Result="OK";
 						int iPK_Device=atoi(pMessage->m_mapParameters[COMMANDPARAMETER_PK_Device_CONST].c_str());
 						string sForce=pMessage->m_mapParameters[COMMANDPARAMETER_Force_CONST];
-						string sMac_address=pMessage->m_mapParameters[COMMANDPARAMETER_Mac_address_CONST];
-						CMD_Halt_Device(iPK_Device,sForce.c_str(),sMac_address.c_str(),sCMD_Result,pMessage);
+						CMD_Halt_Device(iPK_Device,sForce.c_str(),sCMD_Result,pMessage);
 						if( pMessage->m_eExpectedResponse==ER_ReplyMessage && !pMessage->m_bRespondedToMessage )
 						{
 							pMessage->m_bRespondedToMessage=true;
@@ -511,7 +524,7 @@ public:
 						{
 							int iRepeat=atoi(itRepeat->second.c_str());
 							for(int i=2;i<=iRepeat;++i)
-								CMD_Halt_Device(iPK_Device,sForce.c_str(),sMac_address.c_str(),sCMD_Result,pMessage);
+								CMD_Halt_Device(iPK_Device,sForce.c_str(),sCMD_Result,pMessage);
 						}
 					};
 					iHandled++;

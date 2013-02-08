@@ -1,0 +1,7 @@
+lmce-dlna (2.46) unstable; urgency=low
+
+  * Initial Release.
+  * Not yet buildable, as the libhupnp-dev does not contain the HUpnpAv but
+    HUpnpCore only.
+
+ -- Peer Oliver Schmidt <developer@linuxmce.org>  Sat, 15 Dec 2012 15:41:49 +0100

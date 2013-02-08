@@ -669,8 +669,11 @@ int main(int argc, char *argv[]){
 	MYSQL *mysqlmyth,*mysqltribune;
 	MYSQL_RES *mresmyth,*mrestribune;
 	MYSQL_ROW rowmyth,rowtribune;
+	my_bool reconnect = true;
 	mysqlmyth=mysql_init(NULL);
+	mysql_options(mysqlmyth, MYSQL_OPT_RECONNECT, &reconnect);
 	mysqltribune=mysql_init(NULL);
+	mysql_options(mysqltribune, MYSQL_OPT_RECONNECT, &reconnect);
 	if(!mysql_real_connect(mysqlmyth,hostmyth.c_str(),usermyth.c_str(),passwdmyth.c_str(),dbmyth.c_str(),0,NULL,0)){
 		cerr<<"Error connecting to db:"<<mysql_error(mysqlmyth)<<endl;
 		return false;

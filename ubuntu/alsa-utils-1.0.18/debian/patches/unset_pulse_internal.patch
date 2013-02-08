@@ -1,0 +1,43 @@
+diff -urN alsa-utils-1.0.18/alsamixer/alsamixer.c alsa-utils-1.0.18.new/alsamixer/alsamixer.c
+--- alsa-utils-1.0.18/alsamixer/alsamixer.c	2008-10-29 23:42:11.000000000 +1100
++++ alsa-utils-1.0.18.new/alsamixer/alsamixer.c	2009-01-19 10:40:13.000000000 +1100
+@@ -2290,6 +2290,10 @@
+ {
+   int opt;
+   
++  /* We don't want to control a pulseaudio mixer, since that can be done from
++   * pulseaudio itself. */
++  setenv("PULSE_INTERNAL", "0", 1);
++
+   /* parse args
+    */
+   do
+diff -urN alsa-utils-1.0.18/amixer/amixer.c alsa-utils-1.0.18.new/amixer/amixer.c
+--- alsa-utils-1.0.18/amixer/amixer.c	2008-10-29 23:42:11.000000000 +1100
++++ alsa-utils-1.0.18.new/amixer/amixer.c	2009-01-19 10:39:14.000000000 +1100
+@@ -1892,6 +1892,11 @@
+ {
+ 	int morehelp, level = 0;
+ 	int read_stdin = 0;
++
++	/* We don't want to control a pulseaudio mixer, since that can be done
++	 * from pulseaudio itself. */
++	setenv("PULSE_INTERNAL", "0", 1);
++
+ 	static struct option long_option[] =
+ 	{
+ 		{"help", 0, NULL, 'h'},
+diff -urN alsa-utils-1.0.18/iecset/iecset.c alsa-utils-1.0.18.new/iecset/iecset.c
+--- alsa-utils-1.0.18/iecset/iecset.c	2008-10-29 23:42:11.000000000 +1100
++++ alsa-utils-1.0.18.new/iecset/iecset.c	2009-01-19 10:39:42.000000000 +1100
+@@ -324,6 +324,10 @@
+ 	char tmpname[32];
+ 	int parms[IDX_LAST];
+ 
++	/* We don't want to control a pulseaudio mixer, since that can be done
++	 * from pulseaudio itself. */
++	setenv("PULSE_INTERNAL", "0", 1);
++
+ 	for (i = 0; i < IDX_LAST; i++)
+ 		parms[i] = -1; /* not set */
+ 

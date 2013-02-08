@@ -65,6 +65,10 @@ private:
 	time_t m_tLastButtonPress; // The time the last button was pressed
 	Orbiter *m_pOrbiter;
 
+private:
+	void modules_remove();
+	void modules_reload();
+
 public:
 	PlutoHIDInterface(Orbiter *pOrbiter);
 	void ProcessHIDEvents();

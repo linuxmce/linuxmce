@@ -369,9 +369,9 @@ void* DevicePoll::_Run() {
 
 	for(unsigned int kn=0; kn< kids.size(); kn ++)
 	{
-		LoggerWrapper::GetInstance()->Write(LV_STATUS, "Child device: #%d(%s)   Category:%d",kids[kn]->m_dwPK_Device,kids[kn]->m_mapParameters_Find(12).c_str(),kids[kn]->m_dwPK_DeviceCategory);
-		inverse_device_map[kids[kn]->m_mapParameters_Find(12)]=kn;
-		device_status[kids[kn]->m_mapParameters_Find(12).c_str()]=0;
+		LoggerWrapper::GetInstance()->Write(LV_STATUS, "Child device: #%d(%s)   Category:%d",kids[kn]->m_dwPK_Device,kids[kn]->m_mapParameters[12].c_str(),kids[kn]->m_dwPK_DeviceCategory);
+		inverse_device_map[kids[kn]->m_mapParameters[12]]=kn;
+		device_status[kids[kn]->m_mapParameters[12].c_str()]=0;
 	}
 	
 

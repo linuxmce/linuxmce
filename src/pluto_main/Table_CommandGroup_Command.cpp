@@ -37,8 +37,6 @@ using namespace std;
 #include "Table_DeviceGroup.h"
 
 #include "Table_CommandGroup_Command_CommandParameter.h"
-#include "Table_CommandGroup_Command_CommandParameter_pschist.h"
-#include "Table_CommandGroup_Command_CommandParameter_pschmask.h"
 
 
 void Database_pluto_main::CreateTable_CommandGroup_Command()
@@ -86,6 +84,7 @@ void Row_CommandGroup_Command::Delete()
 	Row_CommandGroup_Command *pRow = this; // Needed so we will have only 1 version of get_primary_fields_assign_from_row
 	
 	if (!is_deleted)
+	{
 		if (is_added)	
 		{	
 			vector<TableRow*>::iterator i;	
@@ -107,6 +106,7 @@ void Row_CommandGroup_Command::Delete()
 			table->deleted_cachedRows[key] = this;
 			is_deleted = true;	
 		}	
+	}
 }
 
 void Row_CommandGroup_Command::Reload()
@@ -162,7 +162,8 @@ is_null[10] = true;
 m_psc_user = 0;
 m_psc_frozen = 0;
 is_null[11] = false;
-is_null[12] = true;
+m_psc_mod = "0000-00-00 00:00:00";
+is_null[12] = false;
 is_null[13] = true;
 m_psc_restrict = 0;
 
@@ -281,9 +282,6 @@ return is_null[10];}
 bool Row_CommandGroup_Command::psc_frozen_isNull() {PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
 
 return is_null[11];}
-bool Row_CommandGroup_Command::psc_mod_isNull() {PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
-
-return is_null[12];}
 bool Row_CommandGroup_Command::psc_restrict_isNull() {PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
 
 return is_null[13];}
@@ -315,10 +313,6 @@ is_modified=true;
 }
 void Row_CommandGroup_Command::psc_frozen_setNull(bool val){PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
 is_null[11]=val;
-is_modified=true;
-}
-void Row_CommandGroup_Command::psc_mod_setNull(bool val){PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
-is_null[12]=val;
 is_modified=true;
 }
 void Row_CommandGroup_Command::psc_restrict_setNull(bool val){PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
@@ -1218,20 +1212,6 @@ void Row_CommandGroup_Command::CommandGroup_Command_CommandParameter_FK_CommandG
 PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
 
 class Table_CommandGroup_Command_CommandParameter *pTable = table->database->CommandGroup_Command_CommandParameter_get();
-pTable->GetRows("`FK_CommandGroup_Command`=" + StringUtils::itos(m_PK_CommandGroup_Command),rows);
-}
-void Row_CommandGroup_Command::CommandGroup_Command_CommandParameter_pschist_FK_CommandGroup_Command_getrows(vector <class Row_CommandGroup_Command_CommandParameter_pschist*> *rows)
-{
-PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
-
-class Table_CommandGroup_Command_CommandParameter_pschist *pTable = table->database->CommandGroup_Command_CommandParameter_pschist_get();
-pTable->GetRows("`FK_CommandGroup_Command`=" + StringUtils::itos(m_PK_CommandGroup_Command),rows);
-}
-void Row_CommandGroup_Command::CommandGroup_Command_CommandParameter_pschmask_FK_CommandGroup_Command_getrows(vector <class Row_CommandGroup_Command_CommandParameter_pschmask*> *rows)
-{
-PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
-
-class Table_CommandGroup_Command_CommandParameter_pschmask *pTable = table->database->CommandGroup_Command_CommandParameter_pschmask_get();
 pTable->GetRows("`FK_CommandGroup_Command`=" + StringUtils::itos(m_PK_CommandGroup_Command),rows);
 }
 

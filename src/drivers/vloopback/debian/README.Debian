@@ -1,0 +1,61 @@
+I added as little glue as possible to the vloopback source to build with the
+Debian kernel module tools kernel-package [0] or module-assistant [1]
+
+
+kernel-package
+==============
+
+kernel-package is a utility for building Linux kernel related Debian packages
+just by running `make-kpkg kernel_image`
+
+Documentation on building extra kernel modules like vloopback is in the
+kernel-package package in `/usr/share/doc/kernel-package/README.modules`
+
+Essentially, you must download the vloopback source, which comes with the
+necessary Debian glue [2]
+
+Now you can add to the `make-kpkg` command line `--added-modules
+<vloopback_location> modules_image`
+
+No matter where you downloaded vloopback, you can use the absolute path to the
+source for <vloopback_location>
+
+If you downloaded vloopback to `/usr/src/modules/<vloopback_source>s`', you can
+use just <vloopback_source> for <vloopback_location>
+
+When `make-kpkg` is finished, you should find
+'vloopback-modules-<kernel_version>_<vloopback_version>+<kernel_revision>_<architecture>.deb'
+in the directory below that which you ran `make-kpkg`
+
+Use this package however you would ordinarily use a Debian package - for
+instance: `dpkg -i
+vloopback-modules-<kernel_version>_<vloopback_version>+<kernel_revision>_<architecture>.deb`
+
+
+module-assistant
+================
+
+The module-assistant tool helps users & package maintainers with managing
+external kernel modules packaged for Debian
+
+Documentation on building modules with module-assistant is in the
+module-assistant package in `/usr/share/doc/module-assistant/HOWTO`
+
+Essentially, you must download the vloopback source, as with kernel-package
+
+Then you can run `module-assistant build <vloopback_source>`
+
+It's not yet clear to me whether you must download vloopback to
+`/usr/src/module/<vloopback_source>`, whether you can use
+`MODULE_LOC=<other_path> module-assistant build <vloopback_source>` if
+vloopback is downloaded to `<other_path>/<vloopback_source` or whether you can
+run `module-assistant build <other_path>/<vloopback_source>`
+
+Consult the module-assistant documentation or contact the module-assistant
+maintainer for more information
+
+ -- Jack Bates <ms419@freezone.co.uk>
+
+[0] http://packages.debian.org/kernel-package
+[1] http://packages.debian.org/module-assistant
+[2] http://www.lavrsen.dk/twiki/bin/view/Motion/VideoFourLinuxLoopbackDevice

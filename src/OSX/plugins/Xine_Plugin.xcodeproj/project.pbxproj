@@ -1,0 +1,259 @@
+// !$*UTF8*$!
+{
+	archiveVersion = 1;
+	classes = {
+	};
+	objectVersion = 46;
+	objects = {
+
+/* Begin PBXBuildFile section */
+		95F78AA315BF310800FB8F5B /* Xine_Plugin.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 95F78AA215BF310800FB8F5B /* Xine_Plugin.cpp */; };
+		95F78AA515BF311000FB8F5B /* Main.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 95F78AA415BF311000FB8F5B /* Main.cpp */; };
+		95F78AA915BF315500FB8F5B /* Xine_PluginBase.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 95F78AA815BF315500FB8F5B /* Xine_PluginBase.cpp */; };
+		95F78AAB15BF316800FB8F5B /* XineMediaStream.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 95F78AAA15BF316800FB8F5B /* XineMediaStream.cpp */; };
+		95F78AAD15BF31AE00FB8F5B /* mysql.h in Headers */ = {isa = PBXBuildFile; fileRef = 95F78AAC15BF31AE00FB8F5B /* mysql.h */; };
+		95F78AAF15BF320800FB8F5B /* libDCECommon.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 95F78AAE15BF320800FB8F5B /* libDCECommon.dylib */; };
+		95F78AB115BF323F00FB8F5B /* Media_Plugin.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 95F78AB015BF323F00FB8F5B /* Media_Plugin.dylib */; };
+/* End PBXBuildFile section */
+
+/* Begin PBXFileReference section */
+		95F78A8E15BF30A100FB8F5B /* Xine_Plugin.dylib */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.dylib"; includeInIndex = 0; path = Xine_Plugin.dylib; sourceTree = BUILT_PRODUCTS_DIR; };
+		95F78AA215BF310800FB8F5B /* Xine_Plugin.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = Xine_Plugin.cpp; path = ../../Xine_Plugin/Xine_Plugin.cpp; sourceTree = "<group>"; };
+		95F78AA415BF311000FB8F5B /* Main.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = Main.cpp; path = ../../Xine_Plugin/Main.cpp; sourceTree = "<group>"; };
+		95F78AA815BF315500FB8F5B /* Xine_PluginBase.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = Xine_PluginBase.cpp; path = ../../Gen_Devices/Xine_PluginBase.cpp; sourceTree = "<group>"; };
+		95F78AAA15BF316800FB8F5B /* XineMediaStream.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = XineMediaStream.cpp; path = ../../Xine_Plugin/XineMediaStream.cpp; sourceTree = "<group>"; };
+		95F78AAC15BF31AE00FB8F5B /* mysql.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = mysql.h; path = ../mysql/include/mysql.h; sourceTree = "<group>"; };
+		95F78AAE15BF320800FB8F5B /* libDCECommon.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libDCECommon.dylib; path = ../lib/libDCECommon.dylib; sourceTree = "<group>"; };
+		95F78AB015BF323F00FB8F5B /* Media_Plugin.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = Media_Plugin.dylib; path = ../bin/Media_Plugin.dylib; sourceTree = "<group>"; };
+/* End PBXFileReference section */
+
+/* Begin PBXFrameworksBuildPhase section */
+		95F78A8B15BF30A100FB8F5B /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				95F78AAF15BF320800FB8F5B /* libDCECommon.dylib in Frameworks */,
+				95F78AB115BF323F00FB8F5B /* Media_Plugin.dylib in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXFrameworksBuildPhase section */
+
+/* Begin PBXGroup section */
+		95F78A8315BF30A100FB8F5B = {
+			isa = PBXGroup;
+			children = (
+				95F78AA215BF310800FB8F5B /* Xine_Plugin.cpp */,
+				95F78AA415BF311000FB8F5B /* Main.cpp */,
+				95F78AA615BF311500FB8F5B /* Includes */,
+				95F78AA715BF311D00FB8F5B /* Libraries */,
+				95F78A8F15BF30A100FB8F5B /* Products */,
+			);
+			sourceTree = "<group>";
+		};
+		95F78A8F15BF30A100FB8F5B /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				95F78A8E15BF30A100FB8F5B /* Xine_Plugin.dylib */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+		95F78AA615BF311500FB8F5B /* Includes */ = {
+			isa = PBXGroup;
+			children = (
+				95F78AA815BF315500FB8F5B /* Xine_PluginBase.cpp */,
+				95F78AAA15BF316800FB8F5B /* XineMediaStream.cpp */,
+				95F78AAC15BF31AE00FB8F5B /* mysql.h */,
+			);
+			name = Includes;
+			sourceTree = "<group>";
+		};
+		95F78AA715BF311D00FB8F5B /* Libraries */ = {
+			isa = PBXGroup;
+			children = (
+				95F78AAE15BF320800FB8F5B /* libDCECommon.dylib */,
+				95F78AB015BF323F00FB8F5B /* Media_Plugin.dylib */,
+			);
+			name = Libraries;
+			sourceTree = "<group>";
+		};
+/* End PBXGroup section */
+
+/* Begin PBXHeadersBuildPhase section */
+		95F78A8C15BF30A100FB8F5B /* Headers */ = {
+			isa = PBXHeadersBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				95F78AAD15BF31AE00FB8F5B /* mysql.h in Headers */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXHeadersBuildPhase section */
+
+/* Begin PBXNativeTarget section */
+		95F78A8D15BF30A100FB8F5B /* Xine_Plugin */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 95F78A9B15BF30A100FB8F5B /* Build configuration list for PBXNativeTarget "Xine_Plugin" */;
+			buildPhases = (
+				95F78A8A15BF30A100FB8F5B /* Sources */,
+				95F78A8B15BF30A100FB8F5B /* Frameworks */,
+				95F78A8C15BF30A100FB8F5B /* Headers */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = Xine_Plugin;
+			productName = Xine_Plugin;
+			productReference = 95F78A8E15BF30A100FB8F5B /* Xine_Plugin.dylib */;
+			productType = "com.apple.product-type.library.dynamic";
+		};
+/* End PBXNativeTarget section */
+
+/* Begin PBXProject section */
+		95F78A8515BF30A100FB8F5B /* Project object */ = {
+			isa = PBXProject;
+			attributes = {
+				LastUpgradeCheck = 0420;
+			};
+			buildConfigurationList = 95F78A8815BF30A100FB8F5B /* Build configuration list for PBXProject "Xine_Plugin" */;
+			compatibilityVersion = "Xcode 3.2";
+			developmentRegion = English;
+			hasScannedForEncodings = 0;
+			knownRegions = (
+				en,
+			);
+			mainGroup = 95F78A8315BF30A100FB8F5B;
+			productRefGroup = 95F78A8F15BF30A100FB8F5B /* Products */;
+			projectDirPath = "";
+			projectRoot = "";
+			targets = (
+				95F78A8D15BF30A100FB8F5B /* Xine_Plugin */,
+			);
+		};
+/* End PBXProject section */
+
+/* Begin PBXSourcesBuildPhase section */
+		95F78A8A15BF30A100FB8F5B /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				95F78AA315BF310800FB8F5B /* Xine_Plugin.cpp in Sources */,
+				95F78AA515BF311000FB8F5B /* Main.cpp in Sources */,
+				95F78AA915BF315500FB8F5B /* Xine_PluginBase.cpp in Sources */,
+				95F78AAB15BF316800FB8F5B /* XineMediaStream.cpp in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXSourcesBuildPhase section */
+
+/* Begin XCBuildConfiguration section */
+		95F78A9915BF30A100FB8F5B /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				ARCHS = "$(ARCHS_STANDARD_64_BIT)";
+				CLANG_ENABLE_OBJC_ARC = YES;
+				COPY_PHASE_STRIP = NO;
+				GCC_C_LANGUAGE_STANDARD = gnu99;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_ENABLE_OBJC_EXCEPTIONS = YES;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"DEBUG=1",
+					"$(inherited)",
+				);
+				GCC_SYMBOLS_PRIVATE_EXTERN = NO;
+				GCC_VERSION = com.apple.compilers.llvm.clang.1_0;
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_MISSING_PROTOTYPES = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				MACOSX_DEPLOYMENT_TARGET = 10.7;
+				ONLY_ACTIVE_ARCH = YES;
+				SDKROOT = macosx;
+			};
+			name = Debug;
+		};
+		95F78A9A15BF30A100FB8F5B /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				ARCHS = "$(ARCHS_STANDARD_64_BIT)";
+				CLANG_ENABLE_OBJC_ARC = YES;
+				COPY_PHASE_STRIP = YES;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				GCC_C_LANGUAGE_STANDARD = gnu99;
+				GCC_ENABLE_OBJC_EXCEPTIONS = YES;
+				GCC_VERSION = com.apple.compilers.llvm.clang.1_0;
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_MISSING_PROTOTYPES = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				MACOSX_DEPLOYMENT_TARGET = 10.7;
+				SDKROOT = macosx;
+			};
+			name = Release;
+		};
+		95F78A9C15BF30A100FB8F5B /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CONFIGURATION_BUILD_DIR = ../bin;
+				HEADER_SEARCH_PATHS = (
+					../../DCE,
+					../..,
+				);
+				INSTALL_PATH = /usr/pluto/bin;
+				LIBRARY_SEARCH_PATHS = (
+					"$(inherited)",
+					"\"$(SRCROOT)/../lib\"",
+					"\"$(SRCROOT)/../bin\"",
+				);
+				PRODUCT_NAME = "$(TARGET_NAME)";
+			};
+			name = Debug;
+		};
+		95F78A9D15BF30A100FB8F5B /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CONFIGURATION_BUILD_DIR = ../bin;
+				HEADER_SEARCH_PATHS = (
+					../../DCE,
+					../..,
+				);
+				INSTALL_PATH = /usr/pluto/bin;
+				LIBRARY_SEARCH_PATHS = (
+					"$(inherited)",
+					"\"$(SRCROOT)/../lib\"",
+					"\"$(SRCROOT)/../bin\"",
+				);
+				PRODUCT_NAME = "$(TARGET_NAME)";
+			};
+			name = Release;
+		};
+/* End XCBuildConfiguration section */
+
+/* Begin XCConfigurationList section */
+		95F78A8815BF30A100FB8F5B /* Build configuration list for PBXProject "Xine_Plugin" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				95F78A9915BF30A100FB8F5B /* Debug */,
+				95F78A9A15BF30A100FB8F5B /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		95F78A9B15BF30A100FB8F5B /* Build configuration list for PBXNativeTarget "Xine_Plugin" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				95F78A9C15BF30A100FB8F5B /* Debug */,
+				95F78A9D15BF30A100FB8F5B /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+/* End XCConfigurationList section */
+	};
+	rootObject = 95F78A8515BF30A100FB8F5B /* Project object */;
+}

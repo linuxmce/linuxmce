@@ -79,7 +79,7 @@ public:
 	int DATA_Get_ZoomTime();
 	int DATA_Get_FadeTime();
 	bool DATA_Get_Supports_NPOT_Textures();
-	void DATA_Set_Supports_NPOT_Textures(bool Value,bool bUpdateDatabase=false);
+	void DATA_Set_Supports_NPOT_Textures(bool Value);
 	int DATA_Get_Max_Size();
 
 			*****EVENT***** accessors inherited from base class
@@ -131,6 +131,7 @@ public:
 
 	virtual void CMD_Reload() { string sCMD_Result; CMD_Reload(sCMD_Result,NULL);};
 	virtual void CMD_Reload(string &sCMD_Result,Message *pMessage);
+
 
 //<-dceag-h-e->
 	};

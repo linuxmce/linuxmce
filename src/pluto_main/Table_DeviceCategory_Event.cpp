@@ -81,6 +81,7 @@ void Row_DeviceCategory_Event::Delete()
 	Row_DeviceCategory_Event *pRow = this; // Needed so we will have only 1 version of get_primary_fields_assign_from_row
 	
 	if (!is_deleted)
+	{
 		if (is_added)	
 		{	
 			vector<TableRow*>::iterator i;	
@@ -102,6 +103,7 @@ void Row_DeviceCategory_Event::Delete()
 			table->deleted_cachedRows[key] = this;
 			is_deleted = true;	
 		}	
+	}
 }
 
 void Row_DeviceCategory_Event::Reload()
@@ -145,7 +147,8 @@ is_null[4] = true;
 m_psc_user = 0;
 m_psc_frozen = 0;
 is_null[5] = false;
-is_null[6] = true;
+m_psc_mod = "0000-00-00 00:00:00";
+is_null[6] = false;
 is_null[7] = true;
 m_psc_restrict = 0;
 
@@ -219,9 +222,6 @@ return is_null[4];}
 bool Row_DeviceCategory_Event::psc_frozen_isNull() {PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
 
 return is_null[5];}
-bool Row_DeviceCategory_Event::psc_mod_isNull() {PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
-
-return is_null[6];}
 bool Row_DeviceCategory_Event::psc_restrict_isNull() {PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
 
 return is_null[7];}
@@ -241,10 +241,6 @@ is_modified=true;
 }
 void Row_DeviceCategory_Event::psc_frozen_setNull(bool val){PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
 is_null[5]=val;
-is_modified=true;
-}
-void Row_DeviceCategory_Event::psc_mod_setNull(bool val){PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
-is_null[6]=val;
 is_modified=true;
 }
 void Row_DeviceCategory_Event::psc_restrict_setNull(bool val){PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);

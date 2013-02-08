@@ -73,8 +73,8 @@ public:
 		virtual void ReceivedUnknownCommand(string &sCMD_Result,Message *pMessage);
 //<-dceag-const-e->
 
-		virtual void OnQuit() { LoggerWrapper::GetInstance()->Write(LV_STATUS,"IRTrans will quit"); m_bQuit_VL = true; Command_Impl::OnQuit(); };
-		virtual void OnReload() { LoggerWrapper::GetInstance()->Write(LV_STATUS,"IRTrans will reload"); m_bQuit_VL = true; Command_Impl::OnReload(); }
+		virtual void OnQuit() { LoggerWrapper::GetInstance()->Write(LV_STATUS,"IRTrans will quit"); m_bQuit_VL = true; m_bQuit_set(true); Command_Impl::OnQuit(); };
+		virtual void OnReload() { LoggerWrapper::GetInstance()->Write(LV_STATUS,"IRTrans will reload"); m_bQuit_VL = true; m_bQuit_set(true); Command_Impl::OnQuit(); }
 
 //<-dceag-const2-b->!
 
@@ -87,8 +87,7 @@ public:
 	/*
 			*****DATA***** accessors inherited from base class
 	string DATA_Get_COM_Port_on_PC();
-	void DATA_Set_COM_Port_on_PC(string Value,bool bUpdateDatabase=false);
-	bool DATA_Get_Ignore();
+	void DATA_Set_COM_Port_on_PC(string Value);
 	bool DATA_Get_Only_One_Per_PC();
 	bool DATA_Get_Autoassign_to_parents_room();
 	bool DATA_Get_PNP_Create_Without_Prompting();
@@ -158,19 +157,6 @@ public:
 
 	virtual void CMD_Set_Screen_Type(int iValue) { string sCMD_Result; CMD_Set_Screen_Type(iValue,sCMD_Result,NULL);};
 	virtual void CMD_Set_Screen_Type(int iValue,string &sCMD_Result,Message *pMessage);
-
-
-	/** @brief COMMAND: #837 - Show Media Playback State */
-	/** Show the current state of the media playback */
-		/** @param #5 Value To Assign */
-			/** Empty = no media playing, otherwise a speed, 0=pause, 1000=normal forward, -4000 = 4x reverse, etc. */
-		/** @param #29 PK_MediaType */
-			/** The type of media */
-		/** @param #76 Level */
-			/** The level of the volume, from 0-100.  empty means it's not known, or "MUTE" */
-
-	virtual void CMD_Show_Media_Playback_State(string sValue_To_Assign,int iPK_MediaType,string sLevel) { string sCMD_Result; CMD_Show_Media_Playback_State(sValue_To_Assign.c_str(),iPK_MediaType,sLevel.c_str(),sCMD_Result,NULL);};
-	virtual void CMD_Show_Media_Playback_State(string sValue_To_Assign,int iPK_MediaType,string sLevel,string &sCMD_Result,Message *pMessage);
 
 
 //<-dceag-h-e->

@@ -26,7 +26,7 @@ endif
 
 config.status: configure
 	dh_testdir
-#	Add here commands to configure the package.
+	# Add here commands to configure the package.
 	./autogen.sh
 	./configure --host=$(DEB_HOST_GNU_TYPE) --build=$(DEB_BUILD_GNU_TYPE) --prefix=/usr --mandir=\$${prefix}/share/man --infodir=\$${prefix}/share/info CFLAGS="$(CFLAGS)" LDFLAGS="-Wl,-z,defs"
 	./update-iso-version.sh
@@ -36,17 +36,19 @@ build: build-stamp
 
 build-stamp:  config.status
 	dh_testdir
-#	Add here commands to compile the package.
+
+	# Add here commands to compile the package.
 	$(MAKE)
-#	docbook-to-man debian/mce-installer.sgml > mce-installer.1
+	#docbook-to-man debian/mce-installer.sgml > mce-installer.1
+
 	touch $@
 
 clean:
 	dh_testdir
 	dh_testroot
 	rm -f build-stamp 
-#	Add here commands to clean up after the build process.
-	./autogen.sh
+
+	# Add here commands to clean up after the build process.
 	-$(MAKE) clean
 	dh_clean 
 
@@ -56,8 +58,9 @@ install: build
 	dh_clean -k 
 	dh_installdirs
 
-#	Add here commands to install the package into debian/mce-installer.
-	$(MAKE) install DESTDIR=$(CURDIR)/debian/mce-installer
+	# Add here commands to install the package into debian/mce-installer.
+	
+	#$(MAKE) install DESTDIR=$(CURDIR)/debian/mce-installer
 	./build-mce-installer.sh
 	cp mce-installer.sh $(CURDIR)/debian/mce-installer/usr/share/mce-installer
 	cp $(CURDIR)/debian/mce-installer.desktop $(CURDIR)/debian/mce-installer/usr/share/mce-installer/mce-installer.desktop

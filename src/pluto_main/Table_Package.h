@@ -158,7 +158,8 @@ void psc_mod_set(string val);
 void psc_restrict_set(long int val);
 
 		
-		bool FK_PackageType_isNull();
+		bool Description_isNull();
+bool FK_PackageType_isNull();
 bool FK_Package_Sourcecode_isNull();
 bool NonExecutable_isNull();
 bool HomePage_isNull();
@@ -172,11 +173,11 @@ bool psc_id_isNull();
 bool psc_batch_isNull();
 bool psc_user_isNull();
 bool psc_frozen_isNull();
-bool psc_mod_isNull();
 bool psc_restrict_isNull();
 
 			
-		void FK_PackageType_setNull(bool val);
+		void Description_setNull(bool val);
+void FK_PackageType_setNull(bool val);
 void FK_Package_Sourcecode_setNull(bool val);
 void NonExecutable_setNull(bool val);
 void HomePage_setNull(bool val);
@@ -190,7 +191,6 @@ void psc_id_setNull(bool val);
 void psc_batch_setNull(bool val);
 void psc_user_setNull(bool val);
 void psc_frozen_setNull(bool val);
-void psc_mod_setNull(bool val);
 void psc_restrict_setNull(bool val);
 	
 	
@@ -212,53 +212,20 @@ class Row_Manufacturer* FK_Manufacturer_getrow();
 
 		// Return the rows in other tables with foreign keys pointing here
 		void DeviceTemplate_FK_Package_getrows(vector <class Row_DeviceTemplate*> *rows);
-void DeviceTemplate_pschist_FK_Package_getrows(vector <class Row_DeviceTemplate_pschist*> *rows);
-void DeviceTemplate_pschmask_FK_Package_getrows(vector <class Row_DeviceTemplate_pschmask*> *rows);
 void FAQ_FK_Package_getrows(vector <class Row_FAQ*> *rows);
-void FAQ_pschist_FK_Package_getrows(vector <class Row_FAQ_pschist*> *rows);
-void FAQ_pschmask_FK_Package_getrows(vector <class Row_FAQ_pschmask*> *rows);
 void News_FK_Package_getrows(vector <class Row_News*> *rows);
-void News_pschist_FK_Package_getrows(vector <class Row_News_pschist*> *rows);
-void News_pschmask_FK_Package_getrows(vector <class Row_News_pschmask*> *rows);
 void Package_FK_Package_Sourcecode_getrows(vector <class Row_Package*> *rows);
 void Package_Compat_FK_Package_getrows(vector <class Row_Package_Compat*> *rows);
-void Package_Compat_pschist_FK_Package_getrows(vector <class Row_Package_Compat_pschist*> *rows);
-void Package_Compat_pschmask_FK_Package_getrows(vector <class Row_Package_Compat_pschmask*> *rows);
 void Package_Device_FK_Package_getrows(vector <class Row_Package_Device*> *rows);
-void Package_Device_pschist_FK_Package_getrows(vector <class Row_Package_Device_pschist*> *rows);
-void Package_Device_pschmask_FK_Package_getrows(vector <class Row_Package_Device_pschmask*> *rows);
 void Package_Directory_FK_Package_getrows(vector <class Row_Package_Directory*> *rows);
-void Package_Directory_pschist_FK_Package_getrows(vector <class Row_Package_Directory_pschist*> *rows);
-void Package_Directory_pschmask_FK_Package_getrows(vector <class Row_Package_Directory_pschmask*> *rows);
 void Package_Package_FK_Package_getrows(vector <class Row_Package_Package*> *rows);
 void Package_Package_FK_Package_DependsOn_getrows(vector <class Row_Package_Package*> *rows);
-void Package_Package_pschist_FK_Package_getrows(vector <class Row_Package_Package_pschist*> *rows);
-void Package_Package_pschist_FK_Package_DependsOn_getrows(vector <class Row_Package_Package_pschist*> *rows);
-void Package_Package_pschmask_FK_Package_getrows(vector <class Row_Package_Package_pschmask*> *rows);
-void Package_Package_pschmask_FK_Package_DependsOn_getrows(vector <class Row_Package_Package_pschmask*> *rows);
 void Package_Source_FK_Package_getrows(vector <class Row_Package_Source*> *rows);
-void Package_Source_pschist_FK_Package_getrows(vector <class Row_Package_Source_pschist*> *rows);
-void Package_Source_pschmask_FK_Package_getrows(vector <class Row_Package_Source_pschmask*> *rows);
 void Package_Users_FK_Package_getrows(vector <class Row_Package_Users*> *rows);
-void Package_Users_pschist_FK_Package_getrows(vector <class Row_Package_Users_pschist*> *rows);
-void Package_Users_pschmask_FK_Package_getrows(vector <class Row_Package_Users_pschmask*> *rows);
-void Package_Version_FK_Package_getrows(vector <class Row_Package_Version*> *rows);
-void Package_Version_pschist_FK_Package_getrows(vector <class Row_Package_Version_pschist*> *rows);
-void Package_Version_pschmask_FK_Package_getrows(vector <class Row_Package_Version_pschmask*> *rows);
-void Package_pschist_FK_Package_Sourcecode_getrows(vector <class Row_Package_pschist*> *rows);
-void Package_pschmask_FK_Package_Sourcecode_getrows(vector <class Row_Package_pschmask*> *rows);
 void PageSetup_FK_Package_getrows(vector <class Row_PageSetup*> *rows);
-void PageSetup_pschist_FK_Package_getrows(vector <class Row_PageSetup_pschist*> *rows);
-void PageSetup_pschmask_FK_Package_getrows(vector <class Row_PageSetup_pschmask*> *rows);
 void PaidLicense_FK_Package_getrows(vector <class Row_PaidLicense*> *rows);
-void PaidLicense_pschist_FK_Package_getrows(vector <class Row_PaidLicense_pschist*> *rows);
-void PaidLicense_pschmask_FK_Package_getrows(vector <class Row_PaidLicense_pschmask*> *rows);
 void QuickStartTemplate_FK_Package_getrows(vector <class Row_QuickStartTemplate*> *rows);
-void QuickStartTemplate_pschist_FK_Package_getrows(vector <class Row_QuickStartTemplate_pschist*> *rows);
-void QuickStartTemplate_pschmask_FK_Package_getrows(vector <class Row_QuickStartTemplate_pschmask*> *rows);
 void Skin_FK_Package_getrows(vector <class Row_Skin*> *rows);
-void Skin_pschist_FK_Package_getrows(vector <class Row_Skin_pschist*> *rows);
-void Skin_pschmask_FK_Package_getrows(vector <class Row_Skin_pschmask*> *rows);
 
 
 		// Setup binary serialization

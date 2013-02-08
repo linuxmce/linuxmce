@@ -6,6 +6,8 @@ exec 100>&1
 exec >>"$log_file"
 exec 2>&1
 
+#set -x
+
 function DisplayMessage {
 	echo "`date +%H:%M:%S`  $*" >&100
 }

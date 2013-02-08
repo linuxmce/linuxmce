@@ -31,6 +31,7 @@
 #include <cstring>
 
 #include <iostream>
+#include <stdio.h>
 
 #include "GUIWizardUtils.h"
 

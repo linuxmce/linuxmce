@@ -1,0 +1,16 @@
+vdrnfofs (0.5-3lmce) lucid; urgency=low
+
+  * Add creation of id3 files along side the mpg files so LinuxMCE reads
+    metadata
+
+ -- Peer Oliver Schmidt <peer.oliver.schmidt@linuxmce.org>  Tue, 30 Aug 2011 10:14:53 +0200
+vdrnfofs (0.5-2lmce) lucid; urgency=low
+
+  * Add ability to remove recordings
+
+ -- Peer Oliver Schmidt <peer.oliver.schmidt@linuxmce.org>  Mon, 29 Aug 2011 10:35:55 +0200
+vdrnfofs (0.5-1yavdr2) lucid; urgency=low
+
+  * Initial release (Tobias Grimm)
+
+ -- Holger Schvestka <hotzenplotz5@gmx.de>  Thu, 15 Apr 2010 23:32:55 +0200

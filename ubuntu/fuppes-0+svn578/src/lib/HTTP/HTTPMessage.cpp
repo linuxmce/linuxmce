@@ -30,6 +30,7 @@
 #include <iostream>
 #include <sstream>
 #include <time.h>
+#include <stdlib.h>
 
 #include "../Common/RegEx.h"
 #include "../UPnPActions/UPnPActionFactory.h"
@@ -778,7 +779,7 @@ bool CHTTPMessage::ParsePOSTMessage(std::string p_sMessage)
   if(rxContentLength.Search(p_sMessage.c_str()))
   {
     string sContentLength = rxContentLength.Match(1);    
-    m_nContentLength = std::atoll(sContentLength.c_str());
+    m_nContentLength = atoll(sContentLength.c_str());
   }
   
   if((unsigned int)m_nContentLength >= p_sMessage.length())                      

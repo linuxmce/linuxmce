@@ -33,7 +33,8 @@ class Row_Device_DeviceData;
 namespace DefaultScenarios
 {
 
-typedef enum { lomNone=0, lomContainsMD=1, lomContainsOtherVideo=2, lomContainsAudio=3 } LevelOfMedia;
+typedef enum { lomNone=0, lomContainsMD=1, lomContainsOtherVideo=2, lomContainsAudio=3, 
+	       lomContainsWorkstation=4 } LevelOfMedia;
 
 typedef map<char,string> MapShortcuts;  // Map the characters (like 1,2,3) to their default shortcuts
 
@@ -67,6 +68,9 @@ public:
 	void DeleteEntertainArea(Row_EntertainArea *pRow_EntertainArea);
 	void AddMDsDevicesToEntArea(Row_EntertainArea *pRow_EntertainArea);
 	void AddMDsDevicesToEntArea(Row_Device *pRow_Device,Row_EntertainArea *pRow_EntertainArea); // Recursive version of above
+        void AddWSsDevicesToEntArea(Row_EntertainArea *pRow_EntertainArea);
+        void AddWSsDevicesToEntArea(Row_Device *pRow_Device,Row_EntertainArea *pRow_EntertainArea); // Recursive version of above
+
 	void AddAVDevicesToEntArea(Row_EntertainArea *pRow_EntertainArea);
 
 	// Misc utility functions
@@ -129,6 +133,7 @@ public:
 
 	// Misc helper functions for determining types of lights and rooms
 	bool IsLight(int PK_FloorplanType);
+	bool IsBlind(int PK_FloorplanType);
 	bool IsPublicInteriorRoom(int PK_RoomType);
 	bool IsInteriorRoom(int PK_RoomType);
 	bool IsExterior(int PK_RoomType);

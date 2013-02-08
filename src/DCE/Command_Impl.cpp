@@ -7,11 +7,11 @@
 
 	Phone: +1 (877) 758-8648
 
-	This program is free software; you can redistribute it and/or modify it under the terms of the GNU General Public License.
+	This program is free software; you can redistribute it and/or modify it under the terms of the GNU Lesser General Public License.
 	This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty
 	of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
 
-	See the GNU General Public License for more details.
+	See the GNU Lesser General Public License for more details.
 */
 
 #include "PlutoUtils/CommonIncludes.h"
@@ -129,7 +129,11 @@ Command_Impl::Command_Impl( int DeviceID, string ServerAddress, bool bLocalMode,
 	m_bGeneric = false;
 	m_dwMessageInterceptorCounter=1;
 	m_pMessageBuffer=NULL;
-	m_pthread_queue_id=0;
+#ifdef WIN32
+        m_pthread_queue_id.p=0;
+#else
+        m_pthread_queue_id=0;
+#endif
 }
 
 Command_Impl::Command_Impl( Command_Impl *pPrimaryDeviceCommand, DeviceData_Impl *pData, Event_Impl *pEvent, class Router *pRouter )
@@ -152,9 +156,12 @@ Command_Impl::Command_Impl( Command_Impl *pPrimaryDeviceCommand, DeviceData_Impl
 	m_listMessageQueueMutex.Init( NULL, &m_listMessageQueueCond );
 	m_bGeneric = false;
 	m_dwMessageInterceptorCounter=0;
-	m_pMessageBuffer=NULL;
-	m_pthread_queue_id=0;
-
+        m_pMessageBuffer=NULL;
+#ifdef WIN32
+        m_pthread_queue_id.p=0;
+#else
+        m_pthread_queue_id=0;
+#endif
 	// Connect the primary device's event processor
 	// to the Data class so Data class changes can be sent.
 	m_pData->m_pEvent_Impl = m_pPrimaryDeviceCommand->m_pEvent;
@@ -210,11 +217,19 @@ void Command_Impl::PrepareToDelete()
 	}
 
 	LoggerWrapper::GetInstance()->Write( LV_STATUS, "Message queue thread quit" );
-	if( m_pthread_queue_id != 0 )
-	{
-		pthread_join(m_pthread_queue_id, NULL);
-		m_pthread_queue_id = 0;
-	}
+#ifdef WIN32
+        if( m_pthread_queue_id.p != 0 )
+        {
+                pthread_join(m_pthread_queue_id, NULL);
+                m_pthread_queue_id.p = 0;
+        }
+#else
+        if( m_pthread_queue_id != 0 )
+        {
+                pthread_join(m_pthread_queue_id, NULL);
+                m_pthread_queue_id = 0;
+        }
+#endif
 	LoggerWrapper::GetInstance()->Write( LV_STATUS, "Message queue thread joined" );
 
 	if( m_bKillSpawnedDevicesOnExit )
@@ -406,7 +421,8 @@ void Command_Impl::ReplaceParams( ::std::string sReplacement ) {
 
 			if (( sParam1 != "" ) && ( sParam2 != "" ) && ( iParam_value != 0 ))
 			{
-				m_pData->ReplaceParameter(iParam_value, sParam2);
+				m_pData->m_mapParameters.erase( iParam_value ); // erase the old value
+				m_pData->m_mapParameters.insert( pair<int, string>( iParam_value, sParam2 ) ); // insert a new one
 			}
 			else bDone = true;
 
@@ -444,12 +460,21 @@ bool Command_Impl::Connect(int iPK_DeviceTemplate, std::string)
 	if( bResult )
 	{
 		m_bMessageQueueThreadRunning = true;
-		if(m_pthread_queue_id==0 && pthread_create( &m_pthread_queue_id, NULL, MessageQueueThread_DCECI, (void*)this) )
-		{
-			m_pthread_queue_id=0;
-			m_bMessageQueueThreadRunning=false;
-			LoggerWrapper::GetInstance()->Write( LV_CRITICAL, "Cannot create message processing queue" );
-		}
+#ifdef WIN32
+                if(m_pthread_queue_id.p==0 && pthread_create( &m_pthread_queue_id, NULL, MessageQueueThread_DCECI, (void*)this) )
+                {
+                        m_pthread_queue_id.p=0;
+                        m_bMessageQueueThreadRunning=false;
+                        LoggerWrapper::GetInstance()->Write( LV_CRITICAL, "Cannot create message processing queue" );
+                }
+#else
+                if(m_pthread_queue_id==0 && pthread_create( &m_pthread_queue_id, NULL, MessageQueueThread_DCECI, (void*)this) )
+                {
+                        m_pthread_queue_id=0;
+                        m_bMessageQueueThreadRunning=false;
+                        LoggerWrapper::GetInstance()->Write( LV_CRITICAL, "Cannot create message processing queue" );
+                }
+#endif
 #ifdef LL_DEBUG
 		SendString("COMMENT COMMAND " + StringUtils::itos(DeviceID));
 		m_pEvent->SendString("COMMENT EVENT " + StringUtils::itos(DeviceID));
@@ -584,7 +609,9 @@ void Command_Impl::GetDevicesByTemplate(int PK_DeviceTemplate,map<int,string> *p
 				+ " " + sName + " (" + sRoom + ")";
 		}
 	}
-	delete pEvent;
+#ifndef for_windows
+    delete pEvent;
+#endif
 }
 
 void Command_Impl::GetDevicesByCategory(int PK_DeviceCategory,map<int,string> *p_mapDevices)
@@ -617,12 +644,16 @@ void Command_Impl::CannotReloadRouter()
 #ifndef WINCE
 	cout << "The router cannot reload now.  Please try later." << endl
 		<< "Press any key to continue...";
-#ifndef WIN32
-	getch_timeout(30);
-#else
-	getch();
-#endif
-	cout << endl;
+	#ifdef __APPLE_CC__
+		std::cin.get();
+	#else
+		#ifndef WIN32
+			getch_timeout(30);
+		#else
+			getch();
+		#endif
+	#endif
+  	cout << endl;
 #endif
 }
 
@@ -744,17 +775,16 @@ ReceivedMessageResult Command_Impl::ReceivedMessage( Message *pMessage )
 
 	if ( pMessage->m_dwMessage_Type == MESSAGETYPE_DATAPARM_REQUEST && pMessage->m_dwPK_Device_To == m_dwPK_Device )
 	{
+		map<int, string>::iterator p = m_pData->m_mapParameters.find(pMessage->m_dwID);
 		pMessage->m_bRespondedToMessage = true;
-		if (!m_pData->ParameterExists(pMessage->m_dwID))
+		if (p==m_pData->m_mapParameters.end())
 		{
 			SendMessage(new Message(m_dwPK_Device, pMessage->m_dwPK_Device_From, PRIORITY_NORMAL, MESSAGETYPE_REPLY, 0, 1, pMessage->m_dwID, "ERR Parameter not found"));
 		}
 		else
 		{
 			RequestingParameter(pMessage->m_dwID);
-
-			string sValue = m_pData->m_mapParameters_Find(pMessage->m_dwID);
-			SendMessage(new Message(m_dwPK_Device, pMessage->m_dwPK_Device_From, PRIORITY_NORMAL, MESSAGETYPE_REPLY, 0, 1, pMessage->m_dwID, sValue.c_str()));
+			SendMessage(new Message(m_dwPK_Device, pMessage->m_dwPK_Device_From, PRIORITY_NORMAL, MESSAGETYPE_REPLY, 0, 1, pMessage->m_dwID, (*p).second.c_str()));
 		}
 
 		return rmr_Processed;
@@ -771,27 +801,27 @@ ReceivedMessageResult Command_Impl::ReceivedMessage( Message *pMessage )
 		SendMessage(pMessage_Out);
 		return rmr_Processed;
 	}
-	else if ( pMessage->m_dwMessage_Type == MESSAGETYPE_DATAPARM_CHANGE && pMessage->m_dwPK_Device_To == m_dwPK_Device )
-	{
-		//WHAT IS THIS FOR ?
-		p = pMessage->m_mapParameters.begin();
-		if ( p != pMessage->m_mapParameters.end() )
+	else
+		if ( pMessage->m_dwMessage_Type == MESSAGETYPE_DATAPARM_CHANGE && pMessage->m_dwPK_Device_To == m_dwPK_Device )
 		{
-			string ValueOld = m_pData->m_mapParameters_Find((*p).first);
-			m_pData->ReplaceParameter((*p).first,(*p).second);
+			p = pMessage->m_mapParameters.begin();
+			if ( p != pMessage->m_mapParameters.end() )
+			{
+				string ValueOld = m_pData->m_mapParameters[(*p).first];
+				m_pData->m_mapParameters[(*p).first] = (*p).second;
 #ifdef DEBUG
-			LoggerWrapper::GetInstance()->Write( LV_STATUS, "Updating data parm %d with %s (Device %d).", (*p).first, (*p).second.c_str(), m_dwPK_Device );
+				LoggerWrapper::GetInstance()->Write( LV_STATUS, "Updating data parm %d with %s (Device %d).", (*p).first, (*p).second.c_str(), m_dwPK_Device );
 #endif
-			SendString( "OK" );
-			OnDataChange( (*p).first, ValueOld, (*p).second );
+				SendString( "OK" );
+				OnDataChange( (*p).first, ValueOld, (*p).second );
+			}
+			else
+			{
+				LoggerWrapper::GetInstance()->Write( LV_WARNING, "Got a data parm change without the value to change." );
+				SendString( "ERR Input" );
+			}
+			return rmr_Processed;
 		}
-		else
-		{
-			LoggerWrapper::GetInstance()->Write( LV_WARNING, "Got a data parm change without the value to change." );
-			SendString( "ERR Input" );
-		}
-		return rmr_Processed;
-	}
 
 	return rmr_NotProcessed;
 }
@@ -1000,15 +1030,25 @@ void Command_Impl::StartWatchDog( clock_t Timeout )
 
 void Command_Impl::StopWatchDog()
 {
+#ifdef WIN32
+    if ( m_pThread.p != 0 )
+    {
+        m_bStopWatchdog = true;
+        pthread_join( m_pThread, NULL );
+        m_pThread.p = 0;
+    }
+#else
     if ( m_pThread != 0 )
     {
         m_bStopWatchdog = true;
         pthread_join( m_pThread, NULL );
         m_pThread = 0;
     }
+#endif
+
 }
 
-int Command_Impl::RegisterMsgInterceptor(MessageInterceptorFn pMessageInterceptorFn,int PK_Device_From,int PK_Device_To,int PK_DeviceTemplate,int PK_DeviceCategory,int MessageType,int MessageID,bool bAllowRerouting)
+int Command_Impl::RegisterMsgInterceptor(MessageInterceptorFn pMessageInterceptorFn,int PK_Device_From,int PK_Device_To,int PK_DeviceTemplate,int PK_DeviceCategory,int MessageType,int MessageID)
 {
 #ifdef LINK_TO_ROUTER
 	if( m_pRouter )
@@ -1022,10 +1062,9 @@ int Command_Impl::RegisterMsgInterceptor(MessageInterceptorFn pMessageIntercepto
 	{
 		int dwMessageInterceptorCounter=m_dwMessageInterceptorCounter;
 		m_mapMessageInterceptorFn[m_dwMessageInterceptorCounter] = pMessageInterceptorFn;
-		Message *pMessage = new Message(m_dwPK_Device,0,PRIORITY_NORMAL,MESSAGETYPE_REGISTER_INTERCEPTOR,m_dwMessageInterceptorCounter,7,
+		Message *pMessage = new Message(m_dwPK_Device,0,PRIORITY_NORMAL,MESSAGETYPE_REGISTER_INTERCEPTOR,m_dwMessageInterceptorCounter,6,
 			PARM_FROM, StringUtils::itos(PK_Device_From).c_str(), PARM_TO, StringUtils::itos(PK_Device_To).c_str(),PARM_TEMPLATE, StringUtils::itos(PK_DeviceTemplate).c_str(),
-			PARM_CATEGORY, StringUtils::itos(PK_DeviceCategory).c_str(), PARM_MESSAGE_TYPE, StringUtils::itos(MessageType).c_str(), PARM_MESSAGE_ID, StringUtils::itos(MessageID).c_str(),
-			PARM_ALLOW_REROUTE, bAllowRerouting ? "1" : "0");
+			PARM_CATEGORY, StringUtils::itos(PK_DeviceCategory).c_str(), PARM_MESSAGE_TYPE, StringUtils::itos(MessageType).c_str(), PARM_MESSAGE_ID, StringUtils::itos(MessageID).c_str());
 		SendMessageToRouter(pMessage);
 		m_dwMessageInterceptorCounter++;
 		return dwMessageInterceptorCounter;
@@ -1271,7 +1310,7 @@ bool Command_Impl::GetChildDeviceData( int PK_Device, int PK_DeviceData, string 
 
 void Command_Impl::RunLocalMode()
 {
-#ifndef WINCE
+#if !defined(WINCE) && !defined(__APPLE_CC__)
 	while(true)
 	{
 		cout << "Enter incoming message or QUIT: ";

@@ -1,0 +1,13 @@
+#
+# deps-mount	Output a dependency on the package that contains
+#		the "mount" command we need.
+#
+
+DEB_BUILD_GNU_TYPE=`dpkg-architecture -qDEB_BUILD_GNU_TYPE`
+
+case "$DEB_BUILD_GNU_TYPE" in
+	*-linux)
+		echo 'mount:Depends=mount (>= 2.11l-1)'
+		;;
+esac
+

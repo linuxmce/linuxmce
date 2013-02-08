@@ -1,0 +1,23 @@
+Source: libdce
+Priority: extra
+Maintainer: root <root@unknown>
+Build-Depends: debhelper (>= 8.0.0)
+Standards-Version: 3.9.2
+Section: libs
+Homepage: <insert the upstream URL, if relevant>
+#Vcs-Git: git://git.debian.org/collab-maint/libdce.git
+#Vcs-Browser: http://git.debian.org/?p=collab-maint/libdce.git;a=summary
+
+Package: libdce-dev
+Section: libdevel
+Architecture: any
+Depends: libdce (= ${binary:Version})
+Description: DCE header
+ Contains Pluto/LinuxMCE header file for the DCE protocol.
+
+Package: libdce
+Section: libs
+Architecture: any
+Depends: ${shlibs:Depends}, ${misc:Depends}
+Description: DCE library
+ Contains Pluto/LinuxMCE library file for the DCE protocol.

@@ -1,0 +1,12 @@
+shell-io (1.0.1) unstable; urgency=low
+
+  * If an fd is passed multiple times in the parameter list, don't output it
+    more than once if select returned it.
+
+ -- Radu C <radu.cx@gmail.com>  Wed, 10 Jun 2009 01:44:35 +0000
+
+shell-io (1.0) unstable; urgency=low
+
+  * Initial Release.
+
+ -- Radu C <radu.cx@gmail.com>  Fri, 01 May 2009 19:03:23 +0100

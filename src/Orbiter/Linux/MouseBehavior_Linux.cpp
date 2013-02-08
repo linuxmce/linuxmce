@@ -39,12 +39,16 @@
 #include "PlutoUtils/StringUtils.h"
 #include "PlutoUtils/Other.h"
 
+#ifndef DIRECTFB
 #include <X11/Xutil.h>
 #include <X11/Xproto.h>
 #include <X11/keysym.h>
 #include <X11/extensions/XTest.h>
+#endif
 
+#ifndef DIRECTFB
 #include "utilities/linux/transparency/transparency.h"
+#endif
 
 #ifdef HID_REMOTE
 #include "HIDInterface.h"
@@ -61,16 +65,19 @@ MouseBehavior_Linux::MouseBehavior_Linux(Orbiter *pOrbiter)
 
 MouseBehavior_Linux::~MouseBehavior_Linux()
 {
+#ifndef DIRECTFB
     OrbiterLinux *pOrbiterLinux = ptrOrbiterLinux();
     // ptr should not be null
     // if it is, then this class was destroyed in the wrong place
     // now fixed, but leave the check anyway, only here
     if (NULL != pOrbiterLinux && NULL != pOrbiterLinux->m_pX11 && pOrbiterLinux->m_pX11->Mouse_IsConstrainActive())
 		pOrbiterLinux->m_pX11->Mouse_Constrain_Release();
+#endif
 }
 
 OrbiterLinux * MouseBehavior_Linux::ptrOrbiterLinux()
 {
+#ifndef DIRECTFB
     OrbiterLinux * pOrbiterLinux = dynamic_cast<OrbiterLinux *>(m_pOrbiter);
     if (pOrbiterLinux == NULL)
     {
@@ -81,10 +88,12 @@ OrbiterLinux * MouseBehavior_Linux::ptrOrbiterLinux()
         return NULL;
     }
     return pOrbiterLinux;
+#endif
 }
 
 void MouseBehavior_Linux::SetMousePosition(int X,int Y)
 {
+#ifndef DIRECTFB
 	if(0 == ptrOrbiterLinux()->GetMainWindow())
 	{
 		LoggerWrapper::GetInstance()->Write(LV_CRITICAL, "MouseBehavior_Linux::SetMousePosition error: main window not created yet!");
@@ -106,10 +115,12 @@ void MouseBehavior_Linux::SetMousePosition(int X,int Y)
 				pCallBackInfo->m_bStop=true;
 	}
 	mt.Release();
+#endif
 }
 
 void MouseBehavior_Linux::ShowMouse(bool bShow, SetMouseBehaviorRemote setMouseBehaviorRemote)
 {
+#ifndef DIRECTFB
     // TODO: delete these lines
     //       SDL cannot restore a custom cursor set by the X11 code
     //X11_Locker lock(ptrOrbiterLinux()->GetDisplay());
@@ -118,6 +129,8 @@ void MouseBehavior_Linux::ShowMouse(bool bShow, SetMouseBehaviorRemote setMouseB
 	// if there is no mouse plugged in, never show the cursor
 	// (HID remote also registers a mouse device so no special code needed for it)
 	if (!FileUtils::FileExists("/dev/input/mice"))
+		bShow = false;
+	if (FileUtils::FileExists("/etc/pluto/orbiter.disable.mouse"))
 		bShow = false;
     // at show, we want to show the standard mouse cursor
 #ifdef HID_REMOTE
@@ -140,10 +153,12 @@ void MouseBehavior_Linux::ShowMouse(bool bShow, SetMouseBehaviorRemote setMouseB
 	}
     else
         ptrOrbiterLinux()->m_pX11->Mouse_HideCursor(ptrOrbiterLinux()->GetMainWindow());
+#endif
 }
 
 bool MouseBehavior_Linux::ConstrainMouse(const PlutoRectangle &rect)
 {
+#ifndef DIRECTFB
 	if(0 == ptrOrbiterLinux()->GetMainWindow())
 	{
 		LoggerWrapper::GetInstance()->Write(LV_CRITICAL, "MouseBehavior_Linux::ConstrainMouse error: main window not created yet!");
@@ -182,10 +197,12 @@ bool MouseBehavior_Linux::ConstrainMouse(const PlutoRectangle &rect)
 			rect.X, rect.Y, rect.Width, rect.Height);
 	}
 	return bResult;
+#endif
 }
 
 void MouseBehavior_Linux::SetMouseCursorStyle(MouseCursorStyle mouseCursorStyle)
 {
+#ifndef DIRECTFB
 #ifdef DEBUG
     LoggerWrapper::GetInstance()->Write(LV_STATUS, "MouseBehavior_Linux::SetMousePointerStyle(%d)",(int) mouseCursorStyle);
 #endif
@@ -237,10 +254,12 @@ void MouseBehavior_Linux::SetMouseCursorStyle(MouseCursorStyle mouseCursorStyle)
     std::string sPathMask = sPath + ".msk";
     // try to change the cursor
     SetMouseCursorImage(sPath, sPathMask);
+#endif
 }
 
 bool MouseBehavior_Linux::SetMouseCursorImage(const string &sPath, const string &sPathMask)
 {
+#ifndef DIRECTFB
     if (! ptrOrbiterLinux()->m_pX11->Mouse_SetCursor_Image(ptrOrbiterLinux()->GetMainWindow(), sPath, sPathMask))
     {
         LoggerWrapper::GetInstance()->Write(
@@ -250,4 +269,5 @@ bool MouseBehavior_Linux::SetMouseCursorImage(const string &sPath, const string 
         return false;
     }
     return true;
+#endif
 }

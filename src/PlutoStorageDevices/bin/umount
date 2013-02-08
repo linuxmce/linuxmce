@@ -1,18 +1,5 @@
 #!/bin/bash -e
 
-# LinuxMCE's mount wrapper script.
-
-# INFO : Because mount.cifs / mount.smb are not updating /etc/mtab correctly when two
-# mount processes run in parallel, we had to implement a locking mechanins by using a
-# wrapper script.
-
-# You can use the original mount / umount binary by running mount.wraper / umount.wrapped
-
-# https://bugzilla.samba.org/show_bug.cgi?id=4665
-# https://bugzilla.samba.org/show_bug.cgi?id=4675
-
-echo "LinuxMCE's custom mount wrapper. Read /bin/mount script for more info."
-
 mount_status=0
 function sigusr1() {
 	mount_status=1

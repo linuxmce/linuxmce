@@ -257,7 +257,7 @@ void Asterisk::SomeFunction()
 		/** @param #82 PhoneType */
 			/** Phone type from which to place the call */
 		/** @param #83 PhoneExtension */
-			/** Extention to dial */
+			/** Extension to dial */
 		/** @param #84 PhoneCallerID */
 			/** Caller id */
 
@@ -402,7 +402,7 @@ void Asterisk::CreateChildren()
     DBHelper mySqlHelper(dceconf.m_sDBHost, dceconf.m_sDBUser, dceconf.m_sDBPassword, dceconf.m_sDBName,dceconf.m_iDBPort);
     PlutoSqlResult result_set;
     DB_ROW row=NULL;
-    char *sql_buff1="SELECT PK_Users,Extension FROM Users";
+    const char *sql_buff1="SELECT PK_Users,Extension FROM Users";
     if( (result_set.r=mySqlHelper.db_wrapper_query_result(sql_buff1)) == NULL )
     {
         LoggerWrapper::GetInstance()->Write(LV_WARNING, "SQL FAILED : %s",sql_buff1);
@@ -415,7 +415,7 @@ void Asterisk::CreateChildren()
             ext2user[row[1]] = atoi(row[0]);
         }
     }
-    char *sql_buff2="SELECT FK_Device,IK_DeviceData FROM Device_DeviceData WHERE FK_DeviceData=31";
+    const char *sql_buff2="SELECT FK_Device,IK_DeviceData FROM Device_DeviceData WHERE FK_DeviceData=31";
     if( (result_set.r=mySqlHelper.db_wrapper_query_result(sql_buff2)) == NULL )
     {
         LoggerWrapper::GetInstance()->Write(LV_WARNING, "SQL FAILED : %s",sql_buff2);
@@ -488,4 +488,24 @@ void Asterisk::CMD_Send_Asterisk_Status(string &sCMD_Result,Message *pMessage)
 {
 	AsteriskManager::getInstance()->GetExtensionsStatus();
 	AsteriskManager::getInstance()->GetCallsStatus();
+}
+//<-dceag-c1084-b->
+
+	/** @brief COMMAND: #1084 - PBX_Application */
+	/** Link an extension to a dialplan application.  (Ex. call an extension and playback a sound file using the playback application) */
+		/** @param #83 PhoneExtension */
+			/** Extension to dial */
+		/** @param #109 Data String */
+			/** Application data */
+		/** @param #285 Application */
+			/** Application to connect with */
+
+void Asterisk::CMD_PBX_Application(string sPhoneExtension,string sData_String,string sApplication,string &sCMD_Result,Message *pMessage)
+//<-dceag-c1084-e->
+{
+    LoggerWrapper::GetInstance()->Write(LV_CRITICAL, "Command Application called with param: "
+                "PhoneNumber: %s, Application: %s, Application Data: %s",
+                sPhoneExtension.c_str(), sApplication.c_str(), sData_String.c_str());
+
+    AsteriskManager::getInstance()->Application(sPhoneExtension,sApplication,sData_String);
 }

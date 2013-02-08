@@ -81,6 +81,7 @@ void Row_Software::Delete()
 	Row_Software *pRow = this; // Needed so we will have only 1 version of get_primary_fields_assign_from_row
 	
 	if (!is_deleted)
+	{
 		if (is_added)	
 		{	
 			vector<TableRow*>::iterator i;	
@@ -102,6 +103,7 @@ void Row_Software::Delete()
 			table->deleted_cachedRows[key] = this;
 			is_deleted = true;	
 		}	
+	}
 }
 
 void Row_Software::Reload()
@@ -135,8 +137,7 @@ void Row_Software::SetDefaultValues()
 {
 	m_PK_Software = 0;
 is_null[0] = false;
-m_PackageName = "unknown";
-is_null[1] = false;
+is_null[1] = true;
 is_null[2] = true;
 m_psc_id = 0;
 is_null[3] = true;
@@ -145,7 +146,8 @@ is_null[4] = true;
 m_psc_user = 0;
 m_psc_frozen = 0;
 is_null[5] = false;
-is_null[6] = true;
+m_psc_mod = "0000-00-00 00:00:00";
+is_null[6] = false;
 is_null[7] = true;
 m_psc_restrict = 0;
 
@@ -222,9 +224,6 @@ return is_null[4];}
 bool Row_Software::psc_frozen_isNull() {PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
 
 return is_null[5];}
-bool Row_Software::psc_mod_isNull() {PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
-
-return is_null[6];}
 bool Row_Software::psc_restrict_isNull() {PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
 
 return is_null[7];}
@@ -248,10 +247,6 @@ is_modified=true;
 }
 void Row_Software::psc_frozen_setNull(bool val){PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
 is_null[5]=val;
-is_modified=true;
-}
-void Row_Software::psc_mod_setNull(bool val){PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
-is_null[6]=val;
 is_modified=true;
 }
 void Row_Software::psc_restrict_setNull(bool val){PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
@@ -280,8 +275,8 @@ PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
 if (is_null[1])
 return "NULL";
 
-char *buf = new char[129];
-db_wrapper_real_escape_string(table->database->m_pDB, buf, m_PackageName.c_str(), (unsigned long) min((size_t)64,m_PackageName.size()));
+char *buf = new char[385];
+db_wrapper_real_escape_string(table->database->m_pDB, buf, m_PackageName.c_str(), (unsigned long) min((size_t)192,m_PackageName.size()));
 string s=string()+"\""+buf+"\"";
 delete[] buf;
 return s;

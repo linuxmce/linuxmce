@@ -202,16 +202,17 @@ RubyDCEDeviceNode::PopulateDevice(DeviceData_Impl* pdevdata, RubyDeviceWrapper& 
 	devwrap.setDevId(pdevdata->m_dwPK_Device);
 	devwrap.setDevTemplId(pdevdata->m_dwPK_DeviceTemplate);
 
-	PLUTO_SAFETY_LOCK(dm_param, pdevdata->Mutex());
-	int numparams = pdevdata->Parameters().size();	
-	devwrap.setData(pdevdata->Parameters());
-	dm_param.Release();
+	int numparams = pdevdata->m_mapParameters.size();	
+	devwrap.setData(pdevdata->m_mapParameters);
 
 	LoggerWrapper::GetInstance()->Write(LV_STATUS, "Added %d data params to device %d.", numparams, pdevdata->m_dwPK_Device);
 	
-	string sValue = pdevdata->m_mapParameters_Find(DEVICEDATA_Process_Child_Commands_In_Pare_CONST);
-	if(sValue == "1")
-		m_bHandleChildrenInParent_ = true;
+	std::map<int, std::string>::iterator itPar = pdevdata->m_mapParameters.find(DEVICEDATA_Process_Child_Commands_In_Pare_CONST);
+	if( pdevdata->m_mapParameters.end() != itPar && !(*itPar).second.empty() )
+	{
+		if( (*itPar).second == "1" )
+			m_bHandleChildrenInParent_ = true;
+	}
 	
 	std::map<int, RubyDeviceWrapper>& childdevices = devwrap.getChildDevices();
 	std::map<int, std::string>& mapD_PC = devwrap.getMapDevice_PortChannel();
@@ -223,11 +224,12 @@ RubyDCEDeviceNode::PopulateDevice(DeviceData_Impl* pdevdata, RubyDeviceWrapper& 
 		all_children_ids.push_back(vDeviceData[i]->m_dwPK_Device);
 		
 		// Eugen, populate the device<->zone maps
-		string sValue2 = vDeviceData[i]->m_mapParameters_Find(DEVICEDATA_PortChannel_Number_CONST);
-		if(!sValue2.empty())
+		std::map<int, std::string>::iterator itParam = vDeviceData[i]->m_mapParameters.find(DEVICEDATA_PortChannel_Number_CONST);
+		if( vDeviceData[i]->m_mapParameters.end() != itParam &&
+			!(*itParam).second.empty() )
 		{
-			mapD_PC[vDeviceData[i]->m_dwPK_Device] = sValue2;
-			mapPC_D[sValue2] = vDeviceData[i]->m_dwPK_Device;
+			mapD_PC[vDeviceData[i]->m_dwPK_Device] = (*itParam).second;
+			mapPC_D[(*itParam).second] = vDeviceData[i]->m_dwPK_Device;
 		}
 		
 		PopulateDevice(vDeviceData[i], childdevwrap);

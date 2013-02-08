@@ -26,3 +26,5 @@ using namespace std;
 
 string HttpPost(string sURL, const vector<string>& vectHeaders, const map<string, string>& mapParams,
 				string User = "", string Password = "", int nPort = 80);
+string HttpGet(string sURL, string *buffer, string User = "", string Password = "", int nPort = 80);
+void CurlInit();

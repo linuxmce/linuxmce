@@ -270,18 +270,35 @@ void UpdateEntArea::GetMediaAndRooms()
 			// Check up 3 generations of DeviceCategories to see if this is a media director
 			if( pRow_Device->FK_DeviceTemplate_getrow()->FK_DeviceCategory_get()==DEVICECATEGORY_Media_Director_CONST ||
 				pRow_Device->FK_DeviceTemplate_getrow()->FK_DeviceCategory_getrow()->FK_DeviceCategory_Parent_get()==DEVICECATEGORY_Media_Director_CONST ||
-				pRow_Device->FK_DeviceTemplate_getrow()->FK_DeviceCategory_get()==DEVICECATEGORY_Virtual_Media_Director_CONST ||
-				pRow_Device->FK_DeviceTemplate_getrow()->FK_DeviceCategory_getrow()->FK_DeviceCategory_Parent_get()==DEVICECATEGORY_Virtual_Media_Director_CONST ||
 				(pRow_Device->FK_DeviceTemplate_getrow()->FK_DeviceCategory_getrow()->FK_DeviceCategory_Parent_get() &&
-				pRow_Device->FK_DeviceTemplate_getrow()->FK_DeviceCategory_getrow()->FK_DeviceCategory_Parent_getrow()->FK_DeviceCategory_Parent_get()==DEVICECATEGORY_Media_Director_CONST) ||
-				(pRow_Device->FK_DeviceTemplate_getrow()->FK_DeviceCategory_getrow()->FK_DeviceCategory_Parent_get() &&
-				pRow_Device->FK_DeviceTemplate_getrow()->FK_DeviceCategory_getrow()->FK_DeviceCategory_Parent_getrow()->FK_DeviceCategory_Parent_get()==DEVICECATEGORY_Virtual_Media_Director_CONST) 
-				)
+				pRow_Device->FK_DeviceTemplate_getrow()->FK_DeviceCategory_getrow()->FK_DeviceCategory_Parent_getrow()->FK_DeviceCategory_Parent_get()==DEVICECATEGORY_Media_Director_CONST) )
 			{
 				levelOfMedia = lomContainsMD;
 				if( !pRow_Room->ManuallyConfigureEA_get() )
 					PutMDsChildrenInRoom(pRow_Device);
 			}
+
+                        // Check up 3 generations of DeviceCategories to see if this is a mobile internet device
+                        if( pRow_Device->FK_DeviceTemplate_getrow()->FK_DeviceCategory_get()==DEVICECATEGORY_Mobile_Internet_Devices_CONST ||
+                                pRow_Device->FK_DeviceTemplate_getrow()->FK_DeviceCategory_getrow()->FK_DeviceCategory_Parent_get()==DEVICECATEGORY_Mobile_Internet_Devices_CONST ||
+                                (pRow_Device->FK_DeviceTemplate_getrow()->FK_DeviceCategory_getrow()->FK_DeviceCategory_Parent_get() &&
+                                pRow_Device->FK_DeviceTemplate_getrow()->FK_DeviceCategory_getrow()->FK_DeviceCategory_Parent_getrow()->FK_DeviceCategory_Parent_get()==DEVICECATEGORY_Mobile_Internet_Devices_CONST) )
+                        {
+                                levelOfMedia = lomContainsMD;
+                                if( !pRow_Room->ManuallyConfigureEA_get() )
+                                        PutMDsChildrenInRoom(pRow_Device);
+                        }
+
+                        if( pRow_Device->FK_DeviceTemplate_getrow()->FK_DeviceCategory_get()==DEVICECATEGORY_Workstations_CONST ||
+                                pRow_Device->FK_DeviceTemplate_getrow()->FK_DeviceCategory_getrow()->FK_DeviceCategory_Parent_get()==DEVICECATEGORY_Workstations_CONST ||
+                                (pRow_Device->FK_DeviceTemplate_getrow()->FK_DeviceCategory_getrow()->FK_DeviceCategory_Parent_get() &&
+                                pRow_Device->FK_DeviceTemplate_getrow()->FK_DeviceCategory_getrow()->FK_DeviceCategory_Parent_getrow()->FK_DeviceCategory_Parent_get()==DEVICECATEGORY_Workstations_CONST) )
+                        {
+                                levelOfMedia = lomContainsWorkstation;
+                                if( !pRow_Room->ManuallyConfigureEA_get() )
+                                        PutMDsChildrenInRoom(pRow_Device);
+                        }
+
 		}
 
 		if( levelOfMedia==lomNone )
@@ -336,7 +353,7 @@ void UpdateEntArea::SetEAInRooms()
 		vector<Row_EntertainArea *> vectEntertainArea;
 		m_pDatabase_pluto_main->EntertainArea_get()->GetRows("FK_Room=" + StringUtils::itos(it->first),&vectEntertainArea);
 
-		if( it->second.first!=lomContainsMD && vectEntertainArea.size() )
+		if( ( it->second.first!=lomContainsWorkstation || it->second.first!=lomContainsMD ) && vectEntertainArea.size() )
 		{
 			Row_EntertainArea *pRow_EntertainArea = vectEntertainArea[0];
 
@@ -373,13 +390,14 @@ void UpdateEntArea::SetEAInRooms()
 			pRow_EntertainArea->Description_set(pRow_Room->Description_get());
 			if( it->second.first==lomContainsMD )
 				pRow_EntertainArea->FK_FloorplanObjectType_set(FLOORPLANOBJECTTYPE_ENTERTAINMENT_PLUTO_MEDIA_DIR_CONST);
-			else if( it->second.first==lomContainsOtherVideo )
+			else if( it->second.first==lomContainsOtherVideo || it->second.first==lomContainsWorkstation )
 				pRow_EntertainArea->FK_FloorplanObjectType_set(FLOORPLANOBJECTTYPE_ENTERTAINMENT_NONPLUTO_TV_CONST);
 			else if( it->second.first==lomContainsAudio )
 				pRow_EntertainArea->FK_FloorplanObjectType_set(FLOORPLANOBJECTTYPE_ENTERTAINMENT_AUDIO_ZONE_CONST);
 
 			AddAVDevicesToEntArea(pRow_EntertainArea);
 			AddMDsDevicesToEntArea(pRow_EntertainArea);
+			AddWSsDevicesToEntArea(pRow_EntertainArea);
 
 			// Be sure all the devices in this entertainment area are only in the one entertainment area
 			vector<Row_Device_EntertainArea *> vectRow_Device_EntertainArea;
@@ -517,14 +535,13 @@ void UpdateEntArea::AddMDsDevicesToEntArea(Row_EntertainArea *pRow_EntertainArea
 	{
 		Row_Device *pRow_Device = vectRow_Device[s];
 		// Is this a media director?
-		bool bVirtualMD = DatabaseUtils::DeviceIsWithinCategory(m_pDatabase_pluto_main,pRow_Device->PK_Device_get(),DEVICECATEGORY_Virtual_Media_Director_CONST);
-		if( DatabaseUtils::DeviceIsWithinCategory(m_pDatabase_pluto_main,pRow_Device->PK_Device_get(),DEVICECATEGORY_Media_Director_CONST) || bVirtualMD )
+		if( DatabaseUtils::DeviceIsWithinCategory(m_pDatabase_pluto_main,pRow_Device->PK_Device_get(),DEVICECATEGORY_Media_Director_CONST) )
 		{
 			bHasMd=true;
 			// If this is a hybrid, the m/d may be a child of the Core.  Get the parent then, so children of the core, like pvr cards
 			// will also be in the same ent area
 			Row_Device *pRow_Device_Parent = pRow_Device->FK_Device_ControlledVia_getrow();
-			if( !bVirtualMD && pRow_Device_Parent )
+			if( pRow_Device_Parent )
 				pRow_Device = pRow_Device_Parent;
 			AddMDsDevicesToEntArea(pRow_Device,pRow_EntertainArea); // This will recurse
 		}
@@ -533,6 +550,45 @@ void UpdateEntArea::AddMDsDevicesToEntArea(Row_EntertainArea *pRow_EntertainArea
 	vectRow_Device.clear();
 
 	if( bHasMd )
+	{
+		m_pDatabase_pluto_main->Device_get()->GetRows("ManuallyConfigureEA=-1",&vectRow_Device);
+		for(vector<Row_Device *>::iterator it=vectRow_Device.begin();it!=vectRow_Device.end();++it)
+		{
+			Row_Device *pRow_Device = *it;
+			Row_Device_EntertainArea *pRow_Device_EntertainArea = m_pDatabase_pluto_main->Device_EntertainArea_get()->GetRow(pRow_Device->PK_Device_get(),pRow_EntertainArea->PK_EntertainArea_get());
+			if( !pRow_Device_EntertainArea )
+			{
+				LoggerWrapper::GetInstance()->Write( LV_STATUS, "adding device %d %s to all ent area %d %s",pRow_Device->PK_Device_get(),pRow_Device->Description_get().c_str(),pRow_EntertainArea->PK_EntertainArea_get(),pRow_EntertainArea->Description_get().c_str());
+				AddDevicesToEntArea(pRow_Device,pRow_EntertainArea,false);
+			}
+		}
+	}
+}
+
+void UpdateEntArea::AddWSsDevicesToEntArea(Row_EntertainArea *pRow_EntertainArea)
+{
+	bool bHasWS=false;
+	vector<Row_Device *> vectRow_Device; 
+	pRow_EntertainArea->FK_Room_getrow()->Device_FK_Room_getrows(&vectRow_Device);
+	for(size_t s=0;s<vectRow_Device.size();++s)
+	{
+		Row_Device *pRow_Device = vectRow_Device[s];
+		// Is this a workstation?
+		if( DatabaseUtils::DeviceIsWithinCategory(m_pDatabase_pluto_main,pRow_Device->PK_Device_get(),DEVICECATEGORY_Workstations_CONST) )
+		{
+			bHasWS=true;
+			// If this is a hybrid, the m/d may be a child of the Core.  Get the parent then, so children of the core, like pvr cards
+			// will also be in the same ent area
+			Row_Device *pRow_Device_Parent = pRow_Device->FK_Device_ControlledVia_getrow();
+			if( pRow_Device_Parent )
+				pRow_Device = pRow_Device_Parent;
+			AddWSsDevicesToEntArea(pRow_Device,pRow_EntertainArea); // This will recurse
+		}
+	}
+
+	vectRow_Device.clear();
+
+	if( bHasWS )
 	{
 		m_pDatabase_pluto_main->Device_get()->GetRows("ManuallyConfigureEA=-1",&vectRow_Device);
 		for(vector<Row_Device *>::iterator it=vectRow_Device.begin();it!=vectRow_Device.end();++it)
@@ -557,13 +613,9 @@ void UpdateEntArea::AddMDsDevicesToEntArea(Row_Device *pRow_Device,Row_Entertain
 	if( pRow_Device->FK_Device_ControlledVia_get() && pRow_Device->FK_Device_RouteTo_isNull()==true && DatabaseUtils::DeviceIsWithinCategory(m_pDatabase_pluto_main,pRow_Device->FK_Device_ControlledVia_get(),DEVICECATEGORY_Interfaces_CONST) )
 		return;
 
-	// If it's a virtual MD, leave it.
-	if( pRow_Device->FK_DeviceTemplate_getrow()->FK_DeviceCategory_get()==DEVICECATEGORY_Virtual_Media_Director_CONST )
-		return;
-
 	// Output zones may be in different EA's from the parents
 	Row_DeviceTemplate *pRow_DeviceTemplate = pRow_Device->FK_DeviceTemplate_getrow();
-	if( pRow_DeviceTemplate && (pRow_DeviceTemplate->FK_DeviceCategory_get()==DEVICECATEGORY_Output_Zone_CONST || pRow_DeviceTemplate->FK_DeviceCategory_get()==DEVICECATEGORY_Network_Audio_Player_CONST) )
+	if( pRow_DeviceTemplate && (pRow_DeviceTemplate->FK_DeviceCategory_get()==DEVICECATEGORY_Output_Zone_CONST || pRow_DeviceTemplate->FK_DeviceCategory_get()==DEVICECATEGORY_Network_Audio_Player_CONST || pRow_DeviceTemplate->PK_DeviceTemplate_get()==DEVICETEMPLATE_Generic_Proxy_Orbiter_CONST) )
 		return;
 
 	Row_Device_EntertainArea *pRow_Device_EntertainArea = m_pDatabase_pluto_main->Device_EntertainArea_get()->GetRow(pRow_Device->PK_Device_get(),pRow_EntertainArea->PK_EntertainArea_get());
@@ -578,6 +630,34 @@ void UpdateEntArea::AddMDsDevicesToEntArea(Row_Device *pRow_Device,Row_Entertain
 	for(vector<Row_Device *>::iterator it=vectRow_Device_Child.begin();it!=vectRow_Device_Child.end();++it)
 		AddMDsDevicesToEntArea( *it, pRow_EntertainArea );
 }
+
+void UpdateEntArea::AddWSsDevicesToEntArea(Row_Device *pRow_Device,Row_EntertainArea *pRow_EntertainArea)
+{
+	if( pRow_Device->ManuallyConfigureEA_get()!=0 )  // The user is manually specifying this
+		return;
+
+	// If it's not an embedded device (ie route to is null), and the parent is an interface, then this is something like a light switch or sensor which doesn't inherit the parent's room
+	if( pRow_Device->FK_Device_ControlledVia_get() && pRow_Device->FK_Device_RouteTo_isNull()==true && DatabaseUtils::DeviceIsWithinCategory(m_pDatabase_pluto_main,pRow_Device->FK_Device_ControlledVia_get(),DEVICECATEGORY_Interfaces_CONST) )
+		return;
+
+	// Output zones may be in different EA's from the parents
+	Row_DeviceTemplate *pRow_DeviceTemplate = pRow_Device->FK_DeviceTemplate_getrow();
+	if( pRow_DeviceTemplate && (pRow_DeviceTemplate->FK_DeviceCategory_get()==DEVICECATEGORY_Output_Zone_CONST || pRow_DeviceTemplate->FK_DeviceCategory_get()==DEVICECATEGORY_Network_Audio_Player_CONST || pRow_DeviceTemplate->PK_DeviceTemplate_get()==DEVICETEMPLATE_Generic_Proxy_Orbiter_CONST) )
+		return;
+
+	Row_Device_EntertainArea *pRow_Device_EntertainArea = m_pDatabase_pluto_main->Device_EntertainArea_get()->GetRow(pRow_Device->PK_Device_get(),pRow_EntertainArea->PK_EntertainArea_get());
+	if( !pRow_Device_EntertainArea )
+	{
+		LoggerWrapper::GetInstance()->Write( LV_STATUS, "adding device %d %s to ent area %d %s",pRow_Device->PK_Device_get(),pRow_Device->Description_get().c_str(),pRow_EntertainArea->PK_EntertainArea_get(),pRow_EntertainArea->Description_get().c_str());
+		AddDevicesToEntArea(pRow_Device,pRow_EntertainArea);
+	}
+
+	vector<Row_Device *> vectRow_Device_Child;
+	pRow_Device->Device_FK_Device_ControlledVia_getrows(&vectRow_Device_Child);
+	for(vector<Row_Device *>::iterator it=vectRow_Device_Child.begin();it!=vectRow_Device_Child.end();++it)
+		AddMDsDevicesToEntArea( *it, pRow_EntertainArea );
+}
+
 
 void UpdateEntArea::GetDevicesTypes(int PK_DeviceCategory,int PK_Room,map<int,int> *p_map_Device_Type,map<int,list<int> > *p_mapType)
 {

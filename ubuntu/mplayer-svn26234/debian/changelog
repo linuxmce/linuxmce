@@ -1,3 +1,9 @@
+pluto-mplayer (1.0svn26234-pluto4) unstable; urgency=low
+
+  * removed need for ConfHelper.pm
+
+ -- Peer Oliver Schmidt <developer@linuxmce.org>  Fri, 11 Nov 2011 16:49:15 +0200
+
 pluto-mplayer (1.0svn26234-pluto3) unstable; urgency=low
 
   * fixed patches contents

@@ -91,13 +91,14 @@ public:
 			EVENTPARAMETER_PK_Device_CONST, StringUtils::itos(iPK_Device).c_str()));
 	}
 
-	virtual void House_Mode_Changed(int iPK_DeviceGroup,int iPK_HouseMode)
+	virtual void House_Mode_Changed(int iPK_DeviceGroup,int iPK_HouseMode,string sPrevious_Value)
 	{
 		SendMessage(new Message(m_dwPK_Device, DEVICEID_EVENTMANAGER, PRIORITY_NORMAL, MESSAGETYPE_EVENT, 
 			EVENT_House_Mode_Changed_CONST,
-			2 /* number of parameter's pairs (id, value) */,
+			3 /* number of parameter's pairs (id, value) */,
 			EVENTPARAMETER_PK_DeviceGroup_CONST, StringUtils::itos(iPK_DeviceGroup).c_str(),
-			EVENTPARAMETER_PK_HouseMode_CONST, StringUtils::itos(iPK_HouseMode).c_str()));
+			EVENTPARAMETER_PK_HouseMode_CONST, StringUtils::itos(iPK_HouseMode).c_str(),
+			EVENTPARAMETER_Previous_Value_CONST, sPrevious_Value.c_str()));
 	}
 
 };
@@ -141,7 +142,7 @@ public:
 		if( m_bRunningWithoutDeviceData )
 			return m_pEvent_Impl->GetDeviceDataFromDatabase(m_dwPK_Device,DEVICEDATA_Path_CONST);
 		else
-			return m_mapParameters_Find(DEVICEDATA_Path_CONST);
+			return m_mapParameters[DEVICEDATA_Path_CONST];
 	}
 
 	string Get_Mobile_Orbiter_Notification()
@@ -149,7 +150,7 @@ public:
 		if( m_bRunningWithoutDeviceData )
 			return m_pEvent_Impl->GetDeviceDataFromDatabase(m_dwPK_Device,DEVICEDATA_Mobile_Orbiter_Notification_CONST);
 		else
-			return m_mapParameters_Find(DEVICEDATA_Mobile_Orbiter_Notification_CONST);
+			return m_mapParameters[DEVICEDATA_Mobile_Orbiter_Notification_CONST];
 	}
 
 	string Get_Other_Phone_Notifications()
@@ -157,7 +158,7 @@ public:
 		if( m_bRunningWithoutDeviceData )
 			return m_pEvent_Impl->GetDeviceDataFromDatabase(m_dwPK_Device,DEVICEDATA_Other_Phone_Notifications_CONST);
 		else
-			return m_mapParameters_Find(DEVICEDATA_Other_Phone_Notifications_CONST);
+			return m_mapParameters[DEVICEDATA_Other_Phone_Notifications_CONST];
 	}
 
 	string Get_Neighbors_to_Call()
@@ -165,7 +166,7 @@ public:
 		if( m_bRunningWithoutDeviceData )
 			return m_pEvent_Impl->GetDeviceDataFromDatabase(m_dwPK_Device,DEVICEDATA_Neighbors_to_Call_CONST);
 		else
-			return m_mapParameters_Find(DEVICEDATA_Neighbors_to_Call_CONST);
+			return m_mapParameters[DEVICEDATA_Neighbors_to_Call_CONST];
 	}
 
 	string Get_Configuration()
@@ -173,7 +174,7 @@ public:
 		if( m_bRunningWithoutDeviceData )
 			return m_pEvent_Impl->GetDeviceDataFromDatabase(m_dwPK_Device,DEVICEDATA_Configuration_CONST);
 		else
-			return m_mapParameters_Find(DEVICEDATA_Configuration_CONST);
+			return m_mapParameters[DEVICEDATA_Configuration_CONST];
 	}
 
 	void Set_Configuration(string Value)
@@ -185,7 +186,7 @@ public:
 		if( m_bRunningWithoutDeviceData )
 			return m_pEvent_Impl->GetDeviceDataFromDatabase(m_dwPK_Device,DEVICEDATA_PK_Device_CONST);
 		else
-			return m_mapParameters_Find(DEVICEDATA_PK_Device_CONST);
+			return m_mapParameters[DEVICEDATA_PK_Device_CONST];
 	}
 
 	string Get_Emergency_Calls()
@@ -193,7 +194,7 @@ public:
 		if( m_bRunningWithoutDeviceData )
 			return m_pEvent_Impl->GetDeviceDataFromDatabase(m_dwPK_Device,DEVICEDATA_Emergency_Calls_CONST);
 		else
-			return m_mapParameters_Find(DEVICEDATA_Emergency_Calls_CONST);
+			return m_mapParameters[DEVICEDATA_Emergency_Calls_CONST];
 	}
 
 };
@@ -315,7 +316,7 @@ public:
 	void EVENT_Air_Quality(int iPK_Device) { GetEvents()->Air_Quality(iPK_Device); }
 	void EVENT_Doorbell(int iPK_Device) { GetEvents()->Doorbell(iPK_Device); }
 	void EVENT_Monitor_Mode(int iPK_Device) { GetEvents()->Monitor_Mode(iPK_Device); }
-	void EVENT_House_Mode_Changed(int iPK_DeviceGroup,int iPK_HouseMode) { GetEvents()->House_Mode_Changed(iPK_DeviceGroup,iPK_HouseMode); }
+	void EVENT_House_Mode_Changed(int iPK_DeviceGroup,int iPK_HouseMode,string sPrevious_Value) { GetEvents()->House_Mode_Changed(iPK_DeviceGroup,iPK_HouseMode,sPrevious_Value.c_str()); }
 	//Commands - Override these to handle commands from the server
 	virtual void CMD_Set_House_Mode(string sValue_To_Assign,int iPK_Users,string sPassword,int iPK_DeviceGroup,string sHandling_Instructions,string &sCMD_Result,class Message *pMessage) {};
 	virtual void CMD_Verify_PIN(int iPK_Users,string sPassword,bool *bIsSuccessful,string &sCMD_Result,class Message *pMessage) {};

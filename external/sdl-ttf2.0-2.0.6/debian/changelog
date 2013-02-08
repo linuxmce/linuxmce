@@ -1,0 +1,61 @@
+sdl-ttf2.0 (2.0.6-5) unstable; urgency=low
+
+  * debian/control:
+    - Changed Section field of libsdl-ttf2.0-dev from libs to libdevel. 
+
+ -- Jerome Marant <jerome@debian.org>  Sat, 10 Jan 2004 14:59:22 +0100
+
+sdl-ttf2.0 (2.0.6-4) unstable; urgency=low
+
+  * debian/control:
+    - Bumped Standards-Version to 3.6.1.
+    - Added build-dependency on dpatch.
+  * debian/patches/file-opening-fix.dpatch: new patch providing
+    previous fix from Sam Hocevar.
+  * debian/patches/freetype-fix.dpatch: added patch fixing a build
+    failure with last version of Freetype. Closes: Bug#227015.
+    Thanks Daniel Schepler <schepler@math.berkeley.edu>.
+
+ -- Jerome Marant <jerome@debian.org>  Sat, 10 Jan 2004 14:10:04 +0100
+
+sdl-ttf2.0 (2.0.6-3) unstable; urgency=low
+
+  * debian/control:
+    + Set policy to 3.5.10.
+    + Added Sam Hocevar as co-maintainer. 
+  * Backported a fix from HEAD for a crash when opening a font file that
+    does not exist.
+
+ -- Sam Hocevar (Debian packages) <sam+deb@zoy.org>  Sun, 15 Jun 2003 13:15:15 +0200
+
+sdl-ttf2.0 (2.0.6-2) unstable; urgency=low
+
+  * config.{guess,sub}: updated again from versions from
+    autotools-dev. Closes: Bug#183661.
+
+ -- Jerome Marant <jerome@debian.org>  Sun,  6 Apr 2003 00:12:06 +0200
+
+sdl-ttf2.0 (2.0.6-1) unstable; urgency=low
+
+  * New upstream release.
+
+ -- Jerome Marant <jerome@debian.org>  Thu, 20 Mar 2003 19:39:07 +0100
+
+sdl-ttf2.0 (2.0.5-3) unstable; urgency=low
+
+  * debian/control: changed libsdl-ttf2.0-0 section from devel
+    to libs.
+
+ -- Jerome Marant <jerome@debian.org>  Sat,  8 Mar 2003 15:30:56 +0100
+
+sdl-ttf2.0 (2.0.5-2) unstable; urgency=low
+
+  * config.{guess,sub}: updated from versions from autotools-dev.
+
+ -- Jerome Marant <jerome@debian.org>  Thu,  6 Mar 2003 21:40:49 +0100
+
+sdl-ttf2.0 (2.0.5-1) unstable; urgency=low
+
+  * Initial Release. Closes: Bug#174871.
+  
+ -- Jerome Marant <jerome@debian.org>  Sat,  1 Mar 2003 12:19:52 +0100

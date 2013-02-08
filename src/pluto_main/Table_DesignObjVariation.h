@@ -200,7 +200,6 @@ bool psc_id_isNull();
 bool psc_batch_isNull();
 bool psc_user_isNull();
 bool psc_frozen_isNull();
-bool psc_mod_isNull();
 bool psc_restrict_isNull();
 
 			
@@ -222,7 +221,6 @@ void psc_id_setNull(bool val);
 void psc_batch_setNull(bool val);
 void psc_user_setNull(bool val);
 void psc_frozen_setNull(bool val);
-void psc_mod_setNull(bool val);
 void psc_restrict_setNull(bool val);
 	
 	
@@ -255,16 +253,8 @@ class Row_StabilityStatus* FK_StabilityStatus_getrow();
 		// Return the rows in other tables with foreign keys pointing here
 		void DesignObjVariation_DesignObj_FK_DesignObjVariation_Parent_getrows(vector <class Row_DesignObjVariation_DesignObj*> *rows);
 void DesignObjVariation_DesignObjParameter_FK_DesignObjVariation_getrows(vector <class Row_DesignObjVariation_DesignObjParameter*> *rows);
-void DesignObjVariation_DesignObjParameter_pschist_FK_DesignObjVariation_getrows(vector <class Row_DesignObjVariation_DesignObjParameter_pschist*> *rows);
-void DesignObjVariation_DesignObjParameter_pschmask_FK_DesignObjVariation_getrows(vector <class Row_DesignObjVariation_DesignObjParameter_pschmask*> *rows);
-void DesignObjVariation_DesignObj_pschist_FK_DesignObjVariation_Parent_getrows(vector <class Row_DesignObjVariation_DesignObj_pschist*> *rows);
-void DesignObjVariation_DesignObj_pschmask_FK_DesignObjVariation_Parent_getrows(vector <class Row_DesignObjVariation_DesignObj_pschmask*> *rows);
 void DesignObjVariation_Text_FK_DesignObjVariation_getrows(vector <class Row_DesignObjVariation_Text*> *rows);
-void DesignObjVariation_Text_pschist_FK_DesignObjVariation_getrows(vector <class Row_DesignObjVariation_Text_pschist*> *rows);
-void DesignObjVariation_Text_pschmask_FK_DesignObjVariation_getrows(vector <class Row_DesignObjVariation_Text_pschmask*> *rows);
 void DesignObjVariation_Zone_FK_DesignObjVariation_getrows(vector <class Row_DesignObjVariation_Zone*> *rows);
-void DesignObjVariation_Zone_pschist_FK_DesignObjVariation_getrows(vector <class Row_DesignObjVariation_Zone_pschist*> *rows);
-void DesignObjVariation_Zone_pschmask_FK_DesignObjVariation_getrows(vector <class Row_DesignObjVariation_Zone_pschmask*> *rows);
 
 
 		// Setup binary serialization

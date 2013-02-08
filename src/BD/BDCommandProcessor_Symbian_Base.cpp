@@ -31,7 +31,12 @@
 
 #include "BD_PC_ReportMyVersion.h"
 
+#ifdef __SERIES60_30__
+_LIT(KPlutoMODirCurrConnection,"\\private\\A1ef0015\\0000.vmc");
+#else
 _LIT(KPlutoMODirCurrConnection,"c:\\system\\Apps\\PlutoMO\\0000.vmc");
+#endif
+
 //----------------------------------------------------------------------------------------------
 BDCommandProcessor_Symbian_Base::BDCommandProcessor_Symbian_Base
 	(
@@ -194,31 +199,33 @@ void  BDCommandProcessor_Symbian_Base::SetupSecurityManager()
 	RBTMan secManager;
 
 	// a security session
-	RBTSecuritySettings secSettingsSession;
+	TBTServiceSecurity secSettingsSession;
 
 	// define the security on this port
-	User::LeaveIfError(secManager.Connect());
-	CleanupClosePushL(secManager);
-	User::LeaveIfError(secSettingsSession.Open(secManager));
-	CleanupClosePushL(secSettingsSession);
+	//User::LeaveIfError(secManager.Connect());
+	//CleanupClosePushL(secManager);
+	//User::LeaveIfError(secSettingsSession.Open(secManager));
+	//CleanupClosePushL(secSettingsSession);
 
 	// the security settings 
-	TBTServiceSecurity serviceSecurity( KUidPlutoMO, KSolBtRFCOMM, 0 );
+	// TBTServiceSecurity serviceSecurity( KUidPlutoMO, KSolBtRFCOMM, 0 );
+	TBTServiceSecurity serviceSecurity;
 
 	//Define security requirements
+	serviceSecurity.SetUid(KUidPlutoMO);    
 	serviceSecurity.SetAuthentication(false);    
 	serviceSecurity.SetEncryption(false); 
 	serviceSecurity.SetAuthorisation(false);
 
-	serviceSecurity.SetChannelID(KPlutoMOPort );
+	// serviceSecurity.SetChannelID(KPlutoMOPort );
 	TRequestStatus status;
-	secSettingsSession.RegisterService(serviceSecurity, status);
+	// secSettingsSession.RegisterService(serviceSecurity, status);
 
-	User::WaitForRequest( status ); // wait until the security settings are set
-	User::LeaveIfError( status.Int() );
+	//User::WaitForRequest( status ); // wait until the security settings are set
+	//User::LeaveIfError( status.Int() );
 
-	CleanupStack::PopAndDestroy();  //  secManager
-	CleanupStack::PopAndDestroy();  //  secSettingsSession
+	//CleanupStack::PopAndDestroy();  //  secManager
+	//CleanupStack::PopAndDestroy();  //  secSettingsSession
 
 }
 //----------------------------------------------------------------------------------------------

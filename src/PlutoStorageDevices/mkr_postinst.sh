@@ -4,8 +4,8 @@
 
 /usr/pluto/bin/Debug_LogKernelModules.sh "$0" || :
 
-## Add bookmark for fuppes web interface
-AddBookmark "http://dcerouter:3877/" "Fuppes UPnP Server"
+## Add bookmark for mediatomb web interface
+AddBookmark "http://dcerouter:49152/" "Mediatomb UPnP Server"
 
 ## Create the main mount directory
 mkdir -p /mnt/device
@@ -14,7 +14,18 @@ mkdir -p /mnt/device
 cronEntry="*/10 * * * * root bash -c '/usr/pluto/bin/StorageDevices_Radar.sh &>/dev/null'"
 if [[ ! -e /etc/cron.d/StorageDevicesRadar ]] ;then
 	echo "$cronEntry" >>/etc/cron.d/StorageDevicesRadar
-	invoke-rc.d cron reload
+	invoke-rc.d cron reload || :
+fi
+
+## Add a cron entry that scans existing file servers for new shares
+## On the core ONLY - l3mce
+ConfEval
+if [[ "$PK_Device" -eq "1" ]]; then
+	cronEntry="*/10 * * * * root bash -c '/usr/pluto/bin/StorageDevices_FileServerRadar.sh &>/dev/null'"
+	if [[ ! -e /etc/cron.d/StorageDevicesFileServerRadar ]] ;then
+	        echo "$cronEntry" >>/etc/cron.d/StorageDevicesFileServerRadar
+	        invoke-rc.d cron reload || :
+	fi
 fi
 
 ## Samba Share Helper 

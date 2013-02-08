@@ -43,59 +43,7 @@ public class Scenarios
 		
 	}
 	
-	public boolean LoadData(String sRawData)
-	{
-        System.out.println("Got raw data:\n" + sRawData);
-        
-        if(!sRawData.equals(""))
-        	m_mapCommandGroups.clear();
-        
-        /*
-		m_mapCommandGroups.put(nCommandGroupID, new CommandGroup(nCommandGroupID,
-				nArrayID, nRoomID, sCommandGroupName, sRoomName));
-		*/
-        
-        m_mapArrays.put(1, "Scenarios");
-        
-        int nOldIndex = 0;
-        boolean bIsOver = false;
-        while(!bIsOver)
-        {
-            int nIndex = sRawData.indexOf('\n', nOldIndex);
-
-            if(nIndex == -1)
-            {
-                bIsOver = true;
-                nIndex = sRawData.length();
-            }
-            
-            if(nIndex > nOldIndex)
-            {
-                String sLine = sRawData.substring(nOldIndex, nIndex);
-                nOldIndex = nIndex + 1;
-
-                int nPipeIndex = sLine.indexOf("|");
-                String sID = sLine.substring(0, nPipeIndex);
-                String sName = sLine.substring(nPipeIndex + 1, sLine.length());
-                int nID = Integer.parseInt(sID);
-
-                CommandGroup currentCommandGroup = new CommandGroup(nID, 1, 1, sName, "");
-                m_mapCommandGroups.put(nID, currentCommandGroup);                
-                
-                System.out.println("Added scenario: " + nID + " - " + sName);
-            }
-            else
-            {
-                bIsOver = true;
-            }
-        }
-
-        PrintInfo();
-        
-		return false;
-	}
-	
-	public boolean LoadXML(String sXML)
+	public boolean Load(String sXML)
 	{
 		try
 		{

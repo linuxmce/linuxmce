@@ -1,0 +1,11 @@
+--- SDL-1.2.7+1.2.8cvs20041007.orig/configure.in	2004-12-15 12:55:50.000000000 -0330
++++ SDL-1.2.7+1.2.8cvs20041007/configure.in	2004-12-15 13:14:50.000000000 -0330
+@@ -2683,7 +2683,7 @@
+ # Set runtime shared library paths as needed
+ 
+ if test $ARCH = linux -o $ARCH = freebsd -o $ARCH = bsdi; then
+-  SDL_RLD_FLAGS="-Wl,-rpath,\${exec_prefix}/lib"
++  SDL_RLD_FLAGS=""
+ fi
+ if test $ARCH = solaris; then
+   SDL_RLD_FLAGS="-R\${exec_prefix}/lib"

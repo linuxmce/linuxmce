@@ -160,7 +160,6 @@ bool psc_id_isNull();
 bool psc_batch_isNull();
 bool psc_user_isNull();
 bool psc_frozen_isNull();
-bool psc_mod_isNull();
 bool psc_restrict_isNull();
 
 			
@@ -175,7 +174,6 @@ void psc_id_setNull(bool val);
 void psc_batch_setNull(bool val);
 void psc_user_setNull(bool val);
 void psc_frozen_setNull(bool val);
-void psc_mod_setNull(bool val);
 void psc_restrict_setNull(bool val);
 	
 	
@@ -195,8 +193,6 @@ class Row_RepositorySource* FK_RepositorySource_getrow();
 
 		// Return the rows in other tables with foreign keys pointing here
 		void Package_Source_Compat_FK_Package_Source_getrows(vector <class Row_Package_Source_Compat*> *rows);
-void Package_Source_Compat_pschist_FK_Package_Source_getrows(vector <class Row_Package_Source_Compat_pschist*> *rows);
-void Package_Source_Compat_pschmask_FK_Package_Source_getrows(vector <class Row_Package_Source_Compat_pschmask*> *rows);
 
 
 		// Setup binary serialization

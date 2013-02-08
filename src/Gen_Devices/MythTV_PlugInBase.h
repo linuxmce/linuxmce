@@ -100,7 +100,7 @@ public:
 		if( m_bRunningWithoutDeviceData )
 			return m_pEvent_Impl->GetDeviceDataFromDatabase(m_dwPK_Device,DEVICEDATA_PK_Device_CONST);
 		else
-			return m_mapParameters_Find(DEVICEDATA_PK_Device_CONST);
+			return m_mapParameters[DEVICEDATA_PK_Device_CONST];
 	}
 
 	int Get_Priority()
@@ -108,7 +108,7 @@ public:
 		if( m_bRunningWithoutDeviceData )
 			return atoi(m_pEvent_Impl->GetDeviceDataFromDatabase(m_dwPK_Device,DEVICEDATA_Priority_CONST).c_str());
 		else
-			return atoi(m_mapParameters_Find(DEVICEDATA_Priority_CONST).c_str());
+			return atoi(m_mapParameters[DEVICEDATA_Priority_CONST].c_str());
 	}
 
 	bool Get_Only_One_Per_PC()
@@ -116,7 +116,7 @@ public:
 		if( m_bRunningWithoutDeviceData )
 			return (m_pEvent_Impl->GetDeviceDataFromDatabase(m_dwPK_Device,DEVICEDATA_Only_One_Per_PC_CONST)=="1" ? true : false);
 		else
-			return (m_mapParameters_Find(DEVICEDATA_Only_One_Per_PC_CONST)=="1" ? true : false);
+			return (m_mapParameters[DEVICEDATA_Only_One_Per_PC_CONST]=="1" ? true : false);
 	}
 
 	bool Get_Dont_Auto_Configure()
@@ -124,7 +124,15 @@ public:
 		if( m_bRunningWithoutDeviceData )
 			return (m_pEvent_Impl->GetDeviceDataFromDatabase(m_dwPK_Device,DEVICEDATA_Dont_Auto_Configure_CONST)=="1" ? true : false);
 		else
-			return (m_mapParameters_Find(DEVICEDATA_Dont_Auto_Configure_CONST)=="1" ? true : false);
+			return (m_mapParameters[DEVICEDATA_Dont_Auto_Configure_CONST]=="1" ? true : false);
+	}
+
+	string Get_Media_Catalog()
+	{
+		if( m_bRunningWithoutDeviceData )
+			return m_pEvent_Impl->GetDeviceDataFromDatabase(m_dwPK_Device,DEVICEDATA_Media_Catalog_CONST);
+		else
+			return m_mapParameters[DEVICEDATA_Media_Catalog_CONST];
 	}
 
 };
@@ -235,6 +243,7 @@ public:
 	int DATA_Get_Priority() { return GetData()->Get_Priority(); }
 	bool DATA_Get_Only_One_Per_PC() { return GetData()->Get_Only_One_Per_PC(); }
 	bool DATA_Get_Dont_Auto_Configure() { return GetData()->Get_Dont_Auto_Configure(); }
+	string DATA_Get_Media_Catalog() { return GetData()->Get_Media_Catalog(); }
 	//Event accessors
 	void EVENT_Error_Occured(string sError_Message) { GetEvents()->Error_Occured(sError_Message.c_str()); }
 	void EVENT_PVR_Rec_Sched_Conflict() { GetEvents()->PVR_Rec_Sched_Conflict(); }
@@ -248,6 +257,7 @@ public:
 	virtual void CMD_Abort_Task(int iParameter_ID,string &sCMD_Result,class Message *pMessage) {};
 	virtual void CMD_Reporting_EPG_Status(string sText,bool bIsSuccessful,string sTask,string &sCMD_Result,class Message *pMessage) {};
 	virtual void CMD_Remove_Scheduled_Recording(string sID,string sProgramID,string &sCMD_Result,class Message *pMessage) {};
+	virtual void CMD_Sync_Storage_Groups(string &sCMD_Result,class Message *pMessage) {};
 
 	//This distributes a received message to your handler.
 	virtual ReceivedMessageResult ReceivedMessage(class Message *pMessageOriginal)
@@ -520,6 +530,31 @@ public:
 							int iRepeat=atoi(itRepeat->second.c_str());
 							for(int i=2;i<=iRepeat;++i)
 								CMD_Remove_Scheduled_Recording(sID.c_str(),sProgramID.c_str(),sCMD_Result,pMessage);
+						}
+					};
+					iHandled++;
+					continue;
+				case COMMAND_Sync_Storage_Groups_CONST:
+					{
+						string sCMD_Result="OK";
+						CMD_Sync_Storage_Groups(sCMD_Result,pMessage);
+						if( pMessage->m_eExpectedResponse==ER_ReplyMessage && !pMessage->m_bRespondedToMessage )
+						{
+							pMessage->m_bRespondedToMessage=true;
+							Message *pMessageOut=new Message(m_dwPK_Device,pMessage->m_dwPK_Device_From,PRIORITY_NORMAL,MESSAGETYPE_REPLY,0,0);
+							pMessageOut->m_mapParameters[0]=sCMD_Result;
+							SendMessage(pMessageOut);
+						}
+						else if( (pMessage->m_eExpectedResponse==ER_DeliveryConfirmation || pMessage->m_eExpectedResponse==ER_ReplyString) && !pMessage->m_bRespondedToMessage )
+						{
+							pMessage->m_bRespondedToMessage=true;
+							SendString(sCMD_Result);
+						}
+						if( (itRepeat=pMessage->m_mapParameters.find(COMMANDPARAMETER_Repeat_Command_CONST))!=pMessage->m_mapParameters.end() )
+						{
+							int iRepeat=atoi(itRepeat->second.c_str());
+							for(int i=2;i<=iRepeat;++i)
+								CMD_Sync_Storage_Groups(sCMD_Result,pMessage);
 						}
 					};
 					iHandled++;

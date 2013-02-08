@@ -1,0 +1,13 @@
+Source: pluto-add-software
+Section: unknown
+Priority: extra
+Maintainer: root <root@fluffybitch.org>
+Build-Depends: debhelper (>= 7)
+Standards-Version: 3.8.3
+Homepage: <insert the upstream URL, if relevant>
+
+Package: pluto-add-software
+Architecture: any
+Depends: libmysqlclient14, pluto-dcecommon, pluto-plutoutils, dcecommon, plutoutils, pluto-pluto-main-db, pluto_main, libmysqlclient15off, libxml2, libmysqlclient16, ${shlibs:Depends}, ${misc:Depends}
+Description: <insert up to 60 chars description>
+ <insert long description, indented with spaces>

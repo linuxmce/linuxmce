@@ -1,0 +1,7 @@
+LIRC kernel modules source for Ubuntu
+=====================================
+
+This package can be used to build the kernel modules from a newer
+Ubuntu release or to add a patch to a current Ubuntu release.
+
+It uses dkms and standard dkms mechanisms to handle this.

@@ -1,0 +1,99 @@
+Source: owfs
+Section: misc
+Priority: extra
+Maintainer: Matthias Urlichs <smurf@debian.org>
+Build-Depends: debhelper (>= 5.0.38), autotools-dev, automake, autoconf, libtool, swig (>= 1.3.29), libfuse-dev (>= 2.5), libusb-dev
+Build-Conflicts: autoconf2.13
+Standards-Version: 3.7.2
+XS-Python-Version: >= 2.4
+
+Package: owfs
+Architecture: any
+Depends: ${shlibs:Depends}, ${misc:Depends}
+Description: Dallas 1-wire support
+ The 1-Wire bus is a cheap low-speed bus for devices like weather
+ sensors, access control, etc. It can be attached to your system via
+ serial, USB, I2C, and other interfaces.
+ .
+ The owfs packages provide a feature-rich, userspace-only interface
+ to the 1-Wire bus. The Linux "1wire" kernel driver is NOT used.
+ .
+ This is the base package. It includes a server which can multiplex
+ access to the 1-Wire bus between multiple clients.
+
+Package: libowfs27
+Architecture: any
+Section: libs
+Depends: ${shlibs:Depends}, ${misc:Depends}
+Provides: libowfs
+Description: Dallas 1-wire support: libraries
+ The 1-Wire bus is a cheap low-speed bus for devices like weather
+ sensors, access control, etc. It can be attached to your system via
+ serial, USB, I2C, and other interfaces.
+ .
+ This package contains the shared libraries.
+
+Package: libownet27
+Architecture: any
+Section: libs
+Depends: ${shlibs:Depends}, ${misc:Depends}
+Provides: libownet
+Description: Dallas 1-wire support: libraries
+ The 1-Wire bus is a cheap low-speed bus for devices like weather
+ sensors, access control, etc. It can be attached to your system via
+ serial, USB, I2C, and other interfaces.
+ .
+ This package contains the shared library to access a remote owserver.
+
+Package: fuseowfs
+Architecture: any
+Depends: ${shlibs:Depends}, ${misc:Depends}
+Description: Dallas 1-wire support: FUSE daemon
+ The 1-Wire bus is a cheap low-speed bus for devices like weather
+ sensors, access control, etc. It can be attached to your system via
+ serial, USB, I2C, and other interfaces.
+ .
+ This package contains the FUSE daemon.
+
+Package: owfs-dev
+Architecture: any
+Section: libdevel
+Depends: ${shlibs:Depends}, ${misc:Depends}
+Description: Dallas 1-wire support: development files
+ The 1-Wire bus is a cheap low-speed bus for devices like weather
+ sensors, access control, etc. It can be attached to your system via
+ serial, USB, I2C, and other interfaces.
+ .
+ This package contains the development libraries and interfaces.
+
+Package: ownet-dev
+Architecture: any
+Section: libdevel
+Depends: ${shlibs:Depends}, ${misc:Depends}
+Description: Dallas 1-wire support: development files
+ The 1-Wire bus is a cheap low-speed bus for devices like weather
+ sensors, access control, etc. It can be attached to your system via
+ serial, USB, I2C, and other interfaces.
+ .
+ This package contains the development libraries and interfaces
+ to access a remote owserver.
+
+Package: owfs-doc
+Architecture: all
+Description: Documentation for owfs
+ The 1-Wire bus is a cheap low-speed bus for devices like weather
+ sensors, access control, etc. It can be attached to your system via
+ serial, USB, I2C, and other interfaces.
+ .
+ This package contains the documentation for 1-Wire, including the
+ device-specific manpages.
+
+Package: owfs-dbg
+Architecture: any
+Description: Debug symnbols for owfs
+ The 1-Wire bus is a cheap low-speed bus for devices like weather
+ sensors, access control, etc. It can be attached to your system via
+ serial, USB, I2C, and other interfaces.
+ .
+ This package contains the debug symbol files.
+

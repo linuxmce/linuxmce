@@ -96,7 +96,7 @@ public:
 		if( m_bRunningWithoutDeviceData )
 			return m_pEvent_Impl->GetDeviceDataFromDatabase(m_dwPK_Device,DEVICEDATA_Defective_Units_CONST);
 		else
-			return m_mapParameters_Find(DEVICEDATA_Defective_Units_CONST);
+			return m_mapParameters[DEVICEDATA_Defective_Units_CONST];
 	}
 
 	string Get_Hacks()
@@ -104,7 +104,7 @@ public:
 		if( m_bRunningWithoutDeviceData )
 			return m_pEvent_Impl->GetDeviceDataFromDatabase(m_dwPK_Device,DEVICEDATA_Hacks_CONST);
 		else
-			return m_mapParameters_Find(DEVICEDATA_Hacks_CONST);
+			return m_mapParameters[DEVICEDATA_Hacks_CONST];
 	}
 
 };
@@ -245,8 +245,7 @@ public:
 	virtual void CMD_Lock(int iPK_Device,string sID,bool bTurn_On,string *sText,bool *bIsSuccessful,string &sCMD_Result,class Message *pMessage) {};
 	virtual void CMD_Abort_Task(int iParameter_ID,string &sCMD_Result,class Message *pMessage) {};
 	virtual void CMD_Load_Disk(bool bMultiple,string &sCMD_Result,class Message *pMessage) {};
-	virtual void CMD_Get_Disk_Info(string *sText,int *iPK_MediaType,int *iEK_Disc,string *sDisks,string *sURL,string *sBlock_Device,string &sCMD_Result,class Message *pMessage) {};
-	virtual void CMD_Get_Ripping_Status(string *sStatus,string &sCMD_Result,class Message *pMessage) {};
+	virtual void CMD_Get_Disk_Info(string *sAaronSpecial, int *iPK_MediaType, int *iAaronSpecial_EKID, string *sDisks,string *sURL,string *sBlock_Device,string &sCMD_Result,class Message *pMessage) {};
 
 	//This distributes a received message to your handler.
 	virtual ReceivedMessageResult ReceivedMessage(class Message *pMessageOriginal)
@@ -1079,20 +1078,18 @@ public:
 				case COMMAND_Get_Disk_Info_CONST:
 					{
 						string sCMD_Result="OK";
-						string sText=pMessage->m_mapParameters[COMMANDPARAMETER_Text_CONST];
 						int iPK_MediaType=atoi(pMessage->m_mapParameters[COMMANDPARAMETER_PK_MediaType_CONST].c_str());
-						int iEK_Disc=atoi(pMessage->m_mapParameters[COMMANDPARAMETER_EK_Disc_CONST].c_str());
 						string sDisks=pMessage->m_mapParameters[COMMANDPARAMETER_Disks_CONST];
 						string sURL=pMessage->m_mapParameters[COMMANDPARAMETER_URL_CONST];
 						string sBlock_Device=pMessage->m_mapParameters[COMMANDPARAMETER_Block_Device_CONST];
-						CMD_Get_Disk_Info(&sText,&iPK_MediaType,&iEK_Disc,&sDisks,&sURL,&sBlock_Device,sCMD_Result,pMessage);
+						string sAaronSpecial="*grml*"; // TODO hack to get sqlCVS updates back to work.
+						int iAaronSpecial_EKID=0;
+						CMD_Get_Disk_Info(&sAaronSpecial, &iPK_MediaType, &iAaronSpecial_EKID, &sDisks,&sURL,&sBlock_Device,sCMD_Result,pMessage);
 						if( pMessage->m_eExpectedResponse==ER_ReplyMessage && !pMessage->m_bRespondedToMessage )
 						{
 							pMessage->m_bRespondedToMessage=true;
 							Message *pMessageOut=new Message(m_dwPK_Device,pMessage->m_dwPK_Device_From,PRIORITY_NORMAL,MESSAGETYPE_REPLY,0,0);
-						pMessageOut->m_mapParameters[COMMANDPARAMETER_Text_CONST]=sText;
 						pMessageOut->m_mapParameters[COMMANDPARAMETER_PK_MediaType_CONST]=StringUtils::itos(iPK_MediaType);
-						pMessageOut->m_mapParameters[COMMANDPARAMETER_EK_Disc_CONST]=StringUtils::itos(iEK_Disc);
 						pMessageOut->m_mapParameters[COMMANDPARAMETER_Disks_CONST]=sDisks;
 						pMessageOut->m_mapParameters[COMMANDPARAMETER_URL_CONST]=sURL;
 						pMessageOut->m_mapParameters[COMMANDPARAMETER_Block_Device_CONST]=sBlock_Device;
@@ -1108,34 +1105,7 @@ public:
 						{
 							int iRepeat=atoi(itRepeat->second.c_str());
 							for(int i=2;i<=iRepeat;++i)
-								CMD_Get_Disk_Info(&sText,&iPK_MediaType,&iEK_Disc,&sDisks,&sURL,&sBlock_Device,sCMD_Result,pMessage);
-						}
-					};
-					iHandled++;
-					continue;
-				case COMMAND_Get_Ripping_Status_CONST:
-					{
-						string sCMD_Result="OK";
-						string sStatus=pMessage->m_mapParameters[COMMANDPARAMETER_Status_CONST];
-						CMD_Get_Ripping_Status(&sStatus,sCMD_Result,pMessage);
-						if( pMessage->m_eExpectedResponse==ER_ReplyMessage && !pMessage->m_bRespondedToMessage )
-						{
-							pMessage->m_bRespondedToMessage=true;
-							Message *pMessageOut=new Message(m_dwPK_Device,pMessage->m_dwPK_Device_From,PRIORITY_NORMAL,MESSAGETYPE_REPLY,0,0);
-						pMessageOut->m_mapParameters[COMMANDPARAMETER_Status_CONST]=sStatus;
-							pMessageOut->m_mapParameters[0]=sCMD_Result;
-							SendMessage(pMessageOut);
-						}
-						else if( (pMessage->m_eExpectedResponse==ER_DeliveryConfirmation || pMessage->m_eExpectedResponse==ER_ReplyString) && !pMessage->m_bRespondedToMessage )
-						{
-							pMessage->m_bRespondedToMessage=true;
-							SendString(sCMD_Result);
-						}
-						if( (itRepeat=pMessage->m_mapParameters.find(COMMANDPARAMETER_Repeat_Command_CONST))!=pMessage->m_mapParameters.end() )
-						{
-							int iRepeat=atoi(itRepeat->second.c_str());
-							for(int i=2;i<=iRepeat;++i)
-								CMD_Get_Ripping_Status(&sStatus,sCMD_Result,pMessage);
+								CMD_Get_Disk_Info(&sAaronSpecial, &iPK_MediaType, &iAaronSpecial_EKID, &sDisks,&sURL,&sBlock_Device,sCMD_Result,pMessage);
 						}
 					};
 					iHandled++;

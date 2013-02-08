@@ -89,7 +89,11 @@ bool Powerfile_C200::GetConfig()
 		return false;
 //<-dceag-getconfig-e->
 //m_sIPAddress = ;  // todo
-		
+	
+	m_pPowerfileJukebox = new nsJukeBox::PowerfileJukebox(this);
+	if (!m_pPowerfileJukebox->Init())
+		return false;
+	
 #ifdef NOTDEF
 	PurgeInterceptors();
 	// MessageInterceptorFn, int Device_From, int Device_To, int Device_Type, int Device_Category, int Message_Type, int Message_ID
@@ -1226,13 +1230,9 @@ void Powerfile_C200::CMD_Load_Disk(bool bMultiple,string &sCMD_Result,Message *p
 //<-dceag-c914-b->
 
 	/** @brief COMMAND: #914 - Get Disk Info */
-	/** Retrieve the information on the current disk */
-		/** @param #9 Text */
-			/** If there is ripping going on, this will be non-empty and report the status of the ripping */
+	/**  */
 		/** @param #29 PK_MediaType */
 			/** The type of media */
-		/** @param #131 EK_Disc */
-			/** The PK_Disc from pluto_media */
 		/** @param #157 Disks */
 			/** The disk id */
 		/** @param #193 URL */
@@ -1240,7 +1240,7 @@ void Powerfile_C200::CMD_Load_Disk(bool bMultiple,string &sCMD_Result,Message *p
 		/** @param #223 Block Device */
 			/** The block device for the drive */
 
-void Powerfile_C200::CMD_Get_Disk_Info(string *sText,int *iPK_MediaType,int *iEK_Disc,string *sDisks,string *sURL,string *sBlock_Device,string &sCMD_Result,Message *pMessage)
+void Powerfile_C200::CMD_Get_Disk_Info(string *sAaronSpecial, int *iPK_MediaType, int *iAaronSpecial_EKID, string *sDisks,string *sURL,string *sBlock_Device,string &sCMD_Result,Message *pMessage)
 //<-dceag-c914-e->
 {
 	// Should be sent to the children instead
@@ -1283,25 +1283,7 @@ void Powerfile_C200::CMD_Abort_Task(int iParameter_ID,string &sCMD_Result,Messag
 
 void Powerfile_C200::PostConnect()
 {
-	// Do this in the post connect since this means we'll be waiting for external media identifier
-	// and launch manager won't spawn other devices until each connects.  We don't want launch manager
-	// to wait for disk drive, which is waiting for external media identify which launch manager hasn't started yet
-	m_pPowerfileJukebox = new nsJukeBox::PowerfileJukebox(this);
-	if (!m_pPowerfileJukebox->Init())
-		return;
-
 	DCE::CMD_Refresh_List_of_Online_Devices_Cat CMD_Refresh_List_of_Online_Devices_Cat(m_dwPK_Device,DEVICECATEGORY_Media_Plugins_CONST,
 		true,BL_SameHouse);
 	SendCommand(CMD_Refresh_List_of_Online_Devices_Cat);
-}
-//<-dceag-c942-b->
-
-	/** @brief COMMAND: #942 - Get Ripping Status */
-	/** Get ripping status */
-		/** @param #199 Status */
-			/** Ripping status */
-
-void Powerfile_C200::CMD_Get_Ripping_Status(string *sStatus,string &sCMD_Result,Message *pMessage)
-//<-dceag-c942-e->
-{
 }

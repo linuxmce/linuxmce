@@ -1,4 +1,4 @@
-
+CC=gcc
 CFLAGS=-W -Wall -g -ggdb3
 
 all: ansi2html
@@ -6,3 +6,7 @@ all: ansi2html
 
 clean:
 	rm -f ansi2html
+
+install: 
+	mkdir -p /usr/pluto/bin
+	cp ansi2html $(DESTPATH)/usr/pluto/bin

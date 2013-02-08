@@ -1,0 +1,81 @@
+This is a "plugin" for the Video Disk Recorder (VDR).
+
+Written by: _Frank_ vdrportal.de
+	    based on:
+	    - original-skins of vdr
+	    - Elchi for vdr 1.2.6 and enElchi/Elchi for text2skin
+	    - osdimage from brougs78
+
+Project's homepage: vdrportal.de
+
+Latest version available at: vdrportal.de
+
+See the file COPYING for license information.
+
+Description: is a skin-Plugin for vdr >= 1.3.18
+
+skinelchi is a combination of skin and plugin, some options are not availyble at
+"setup"->"osd", some only available at "setup"->"plugins"->"skinelchi".
+
+Building:
+    There are some options in MAKEFILE:
+    
+    1. HAVE_C295 = 1 #if you use c++2.95 and get error "redefinition of 'template <class T> void swap(_Tp &, _Tp &)'"
+     - please tell me, if you know a better solution
+    2. HAVE_IMAGEMAGICK = 1 # uncomment this, if you have ImageMagick and want see pictures from epg4vdr
+     - to support pictures from epg4vdr
+     - you must also select the option in "setup"->"plugins"->"skinelchi"
+     - you can select between 120x90 (original) - i think it is too little -
+       and 180x144 - here can you also select the algorithm for resize
+    3. HAVE_YAEPG_PATCH = 1 # only experimentell - uncomment this, if vdr patched with YAEPG-PATCH and you want see video-window in menu
+    4. VIDEOSTATUS = 1 # only experimentell - uncomment this, if you want some infos of videostatus in DisplayChannel and DisplayReplay
+    5. DEBUG = 1 # only for threads in DisplayMenu.c for screenshot-display of video-window and for epg4vdr
+    
+    - uncomment the needed options.
+
+Commandline-Option:
+  -c DIR  --icache=DIR cache converted images in DIR\n"
+                       (default: '/video/epgimages')\n"
+                       (if use only show setting in setup)\n";
+
+Setup:
+    - several options - i think they are self-descripted
+    - on color-changing be careful - maybe some areas defined more colors as
+      the osd-areas included - can be, must define some equal colors
+
+
+      
+Problems:
+    - on unmodified DVB-Cards maybe the OSD is become unusable, if you use
+      videowindow - note: is only experimentell
+      -> only a reload of drivers helpes
+    - videowindow is freezed sometimes - note: is only experimentell
+      -> change channel to another or the same helpes
+    - Only color-changing is stored in setup if you call setup from main-menu
+      and leave setup with <OK>
+      (but the changes works until next restart)
+      -> the other setup options will be only stored, if you
+      you call "setup"->"plugins"->"skinelchi" and leave it with <OK>
+    - someone (on vdr-wiki) reported restarts with c++ 2.95 and version 0.0.1h
+      with option HAVE_IMAGEMAGICK= 1 and vdr 1.3.23, when he call
+      "setup"->"plugins"->"skinelchi"
+      - i can't fix it, because i have a problem with ImageMagick/vdr and
+        c++ 2.95
+        (with gcc3.0 this works on my system)
+    
+FAQ: Q: Why I have a blank entry in main menu? (vdr-wiki)
+     A: You have select the setup-option "Show in main menu", but you have
+        delete the default entry under "Main menu entry"
+	-> must define a name
+
+     Q: I have select "Show epg4vdr-picture", but no picture is show. Why?
+	(vdrportal.de)
+     A: To show pictures another defined osd must used.
+        If you uses a unmodified DVB-card, maybe thats not possible to create
+	the needed areas, then you must define osd in "setup"->"osd" a little
+	smaller, because a 4-bit-area needs more memory as a 2-bit-area.
+	Maybe I changed this in future, that only epg-info-window will be
+	smaller.
+
+TODO: please report bugs/problems and something to make it better
+      on www.vdr-wiki.de OR vdrportal.de

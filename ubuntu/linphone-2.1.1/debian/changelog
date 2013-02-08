@@ -1,0 +1,345 @@
+linphone (2.1.1-2lmce) intrepid; urgency=low
+
+  * fixes for SIP audio problems
+
+ -- LinuxMCE Developer sambuca <developer@linuxmce.org>  Sun, 12 Jun 2011 18:30:19 +0200
+
+linphone (2.1.1-1build1) intrepid; urgency=low
+
+  * rebuild to pick up ffmpeg's new shlibs.
+
+ -- Reinhard Tartler <siretart@tauware.de>  Mon, 06 Oct 2008 21:57:19 +0200
+
+linphone (2.1.1-1) unstable; urgency=low
+
+  [ Patrick Matthäi ]
+  * Added missing build dependency on libspeexdsp-dev.
+    Closes: #474851
+
+  [ Faidon Liambotis ]
+  * New upstream version. 
+    - Adapt debian/libortp7-dev.install to work with libortp 0.14.2 and future
+      versions.
+  * Do not change config.sub/.guess on clean (eliminates lintian warning).
+
+ -- Faidon Liambotis <paravoid@debian.org>  Sun, 27 Apr 2008 18:21:57 +0300
+
+linphone (2.1.0-1) unstable; urgency=low
+
+  * New upstream release.
+
+ -- Samuel Mimram <smimram@debian.org>  Thu, 14 Feb 2008 21:46:23 +0100
+
+linphone (2.0.1-3) unstable; urgency=low
+
+  * Added a shlibs for libmediastreamer0, closes: #454900.
+
+ -- Samuel Mimram <smimram@debian.org>  Sat, 08 Dec 2007 17:41:58 +0000
+
+linphone (2.0.1-2) unstable; urgency=low
+
+  * Add missing dependency on doxygen.
+
+ -- Samuel Mimram <smimram@debian.org>  Thu, 06 Dec 2007 12:14:39 +0000
+
+linphone (2.0.1-1) unstable; urgency=low
+
+  [ Kilian Krause ]
+  * New upstream release.
+  * Conflict with libortp5-dev to fix conflicting file
+    (/usr/include/ortp/event.h). (Closes: #454281)
+
+  [ Samuel Mimram ]
+  * liblinphone2-dev conflicts with liblinphone1-dev.
+
+ -- Samuel Mimram <smimram@debian.org>  Wed, 05 Dec 2007 11:24:25 +0000
+
+linphone (2.0.0-1) unstable; urgency=low
+
+  * New upstream release, closes: #453185.
+  * New soname for liblinphone.
+  * Removed fix_segfault.dpatch, ingerated upstream.
+  * Updated watch file.
+
+ -- Samuel Mimram <smimram@debian.org>  Thu, 29 Nov 2007 11:47:30 +0000
+
+linphone (1.99.0-3) unstable; urgency=high
+
+  * Backport segfault fix from CVS. (Closes: #445462)
+  * High urgency due to fixing RC bug.
+  * Fix wrong menu section (Closes: #444898)
+  * Add myself to Uploaders to get rid of NMU nag.
+  * Fix "Long descriptions contains short description."
+  * Fix "desktop-entry-invalid-category Application"
+
+ -- Kilian Krause <kilian@debian.org>  Sun, 07 Oct 2007 00:00:52 +0000
+
+linphone (1.99.0-2) unstable; urgency=low
+
+  [ Kilian Krause ]
+  * Fix debian/watch and get-orig-source target
+
+  [ Samuel Mimram ]
+  * Rebuild against latest libosip2, closes: #441896.
+
+ -- Samuel Mimram <smimram@debian.org>  Wed, 12 Sep 2007 15:34:40 +0200
+
+linphone (1.99.0-1) unstable; urgency=low
+
+  * New upstream release.
+  * Added a build-dependency on libexosip2-dev.
+  * New soname for libortp.
+  * Correctly builds with latest libosip2, closes: #439481.
+  * Hide manual menu entry since none is available, closes: #287159.
+
+ -- Samuel Mimram <smimram@debian.org>  Thu, 30 Aug 2007 16:23:08 +0200
+
+linphone (1.7.1-3) unstable; urgency=low
+
+  * Make liblinphone1-dev depend on libmediastreamer0-dev (thanks Alex Samad),
+    closes: #433430.
+  * Install nowebcamCIF.jpg in linphone-common.
+  * Don't ignore errors on make clean.
+
+ -- Samuel Mimram <smimram@debian.org>  Wed, 18 Jul 2007 10:20:53 +0200
+
+linphone (1.7.1-2) unstable; urgency=low
+
+  * Add --disable-strict option to configure, closes: #427194.
+
+ -- Samuel Mimram <smimram@debian.org>  Sun, 10 Jun 2007 22:22:47 +0200
+
+linphone (1.7.1-1) unstable; urgency=low
+
+  * New upstream release.
+  * The gnome applet was removed from upstream sources, not installing it
+    anymore.
+  * Removed desktop_icon.dpatch, gnome_applet_dir.dpatch and
+    sip-max-forwards.dpatch which are either obsolete or integrated upstream.
+
+ -- Samuel Mimram <smimram@debian.org>  Tue, 24 Apr 2007 23:54:23 +0200
+
+linphone (1.6.0-2) unstable; urgency=low
+
+  * Disable arts support, closes: #397815.
+
+ -- Samuel Mimram <smimram@debian.org>  Fri, 23 Mar 2007 00:06:37 +0100
+
+linphone (1.6.0-1) experimental; urgency=low
+
+  [ Samuel Mimram ]
+  * New upstream release.
+  * Added sip-max-forwards.dpatch to correctly set SIP maximum forwards
+    number, closes: #413193.
+  * Updated upstream url in watch and rules.
+
+  [ Kilian Krause ]
+  * Fix building arch=all in binary-arch target.
+
+ -- Samuel Mimram <smimram@debian.org>  Thu,  8 Mar 2007 21:43:06 +0100
+
+linphone (1.5.1-1) unstable; urgency=low
+
+  * New upstream release.
+  * Enable video support.
+  * Fix mismatched #endif in mscommon.h, closes: #398307.
+
+ -- Samuel Mimram <smimram@debian.org>  Wed, 15 Nov 2006 10:34:50 +0000
+
+linphone (1.5.0-1) unstable; urgency=low
+
+  * New upstream release.
+  * Removed ice.dpatch and stun_sparc.dpatch, integrated upstream.
+
+ -- Samuel Mimram <smimram@debian.org>  Wed, 11 Oct 2006 11:33:53 +0000
+
+linphone (1.4.1-2) unstable; urgency=low
+
+  * Added ice.dpatch to fix the FTBFS on amd64 (thanks Jérémy Bobio)
+    and stun_sparc.dpatch to fix the FTBFS on sparc, closes: #390009.
+
+ -- Samuel Mimram <smimram@debian.org>  Sat, 30 Sep 2006 17:16:37 +0000
+
+linphone (1.4.1-1) unstable; urgency=low
+
+  * New upstream release.
+  * Removed no_developer_docs.dpatch, 00mscodec_null_name.dpatch,
+    10mscodec_null_strcmp.dpatch, gcc-4.1.dpatch and
+    world_readable_passwords.dpatch, not needed anymore.
+  * New packages: libmediastreamer0 and libmediastreamer0-dev.
+  * New SONAME for libortp.
+  * Updated watch file.
+  * Acknowledge NMU, closes: #382616.
+
+ -- Samuel Mimram <smimram@debian.org>  Tue, 19 Sep 2006 09:55:19 +0000
+
+linphone (1.3.5-1.1) unstable; urgency=medium
+
+  * Non-maintainer upload.
+  * Always include config.h in sndcard.h (Closes: #382616).
+  * Make binNMUable.
+
+ -- Luk Claes <luk@debian.org>  Sat, 16 Sep 2006 12:16:32 +0200
+
+linphone (1.3.5-1) unstable; urgency=low
+
+  [ Kilian Krause ]
+  * Bump speex build-dep to 1.1.12 as configure requests.
+
+  [ Samuel Mimram ]
+  * New upstream release.
+  * Added no_developer_doc.dpatch in order not to build some parts of the
+    documentation which don't build for now (we didn't ship them anyway),
+    closes: #365523. We need to regenerate configure and Makefiles for this.
+  * Added world_readable_passwords.dpatch to change the permissions of the
+    configuration file to 600 (thanks Alec Berryman). This might be too strict
+    but at least it is safe, closes: #361913.
+  * Updated desktop_icon.dpatch to correct the location of the icon in the
+    linphone.desktop file, closes: #346435.
+  * Updated standards version to 3.7.2, no changes needed.
+
+ -- Samuel Mimram <smimram@debian.org>  Mon, 15 May 2006 09:02:05 +0000
+
+linphone (1.3.3-1) unstable; urgency=low
+
+  * New upstream release.
+  * Added gcc-4.1.dpatch in order to compile with gcc 4.1, closes: #358068.
+
+ -- Samuel Mimram <smimram@debian.org>  Tue, 21 Mar 2006 10:46:37 +0000
+
+linphone (1.3.1-1) unstable; urgency=low
+
+  [ Samuel Mimram ]
+  * New upstream release.
+  * New maintainer Debian VoIP Team, added myself to uploaders.
+  * New soname for libortp.
+  * Removed addressbook_entries.dpatch, integrated upstream.
+
+  [ Kilian Krause ]
+  * debian/rules: Add get-orig-source target.
+
+ -- Samuel Mimram <smimram@debian.org>  Wed, 15 Mar 2006 23:18:57 +0000
+
+linphone (1.2.0-3) unstable; urgency=low
+
+  * Addd desktop_icon.dpatch to correct the icon location in linphone.desktop,
+    closes: #346435.
+  * Added addressbook_entries.dpatch to make addressbook work as expected when
+    clicking on an entry (thanks Emiliano Necciari).
+
+ -- Samuel Mimram <smimram@debian.org>  Fri, 20 Jan 2006 23:42:23 +0100
+
+linphone (1.2.0-2) unstable; urgency=low
+
+  * Updated liblinphone1's shlibs, closes: #345457.
+
+ -- Samuel Mimram <smimram@debian.org>  Sat, 31 Dec 2005 19:24:49 +0100
+
+linphone (1.2.0-1) unstable; urgency=low
+
+  * New upstream release.
+  * Primary selection isn't destroyed anymore, closes: #309374.
+  * Linphonec now handles ctrl+D, closes: #333423.
+  * Swedish translation integrated upstream, closes: #340432.
+  * Removed pl_utf8 patch, integrated upstream.
+  * Soname bump: libortp2 instead of libortp0.
+
+ -- Samuel Mimram <smimram@debian.org>  Sun, 18 Dec 2005 12:39:06 +0100
+
+linphone (1.1.0-2) unstable; urgency=low
+
+  * Added a shlibs to version the dependencies on liblinphone1 and updated
+    libortp0's one, closes: #327795.
+  * Added pl_utf8 patch to correct the charset of the polish translation,
+    closes: #327457.
+  * Installing ortp.pc in libortp0-dev.
+
+ -- Samuel Mimram <smimram@debian.org>  Mon, 12 Sep 2005 12:02:50 +0200
+
+linphone (1.1.0-1) unstable; urgency=low
+
+  * New upstream release.
+  * IPv6 should work now, closes: #301874.
+  * Clearing of passwords should work now, closes: #321064.
+  * Corrected typos in german translation, closes: #313999.
+  * Removed addrbook_sip_addr patch (integrated upstream).
+  * Added yelp to linphone's Suggests, closes: #325863.
+
+ -- Samuel Mimram <smimram@debian.org>  Thu,  8 Sep 2005 19:37:27 +0200
+
+linphone (1.0.1-6) unstable; urgency=low
+
+  * Build-depending on libjack0.100.0-dev instead of libjack0.80.0-dev,
+    closes: #317211.
+  * Updated standards version to 3.6.2.
+
+ -- Samuel Mimram <smimram@debian.org>  Mon, 18 Jul 2005 21:31:20 +0200
+
+linphone (1.0.1-5) unstable; urgency=low
+
+  * Added a patch to check sip addresses format when adding contacts in
+    address book, closes: #305078.
+
+ -- Samuel Mimram <smimram@debian.org>  Sat, 30 Apr 2005 13:58:35 +0200
+
+linphone (1.0.1-4) unstable; urgency=low
+
+  * Added a perl script and a README.Debian to explain how to convert old
+    adress book entries to new format, closes: #303819. 
+
+ -- Samuel Mimram <smimram@debian.org>  Sun, 10 Apr 2005 17:57:39 +0200
+
+linphone (1.0.1-3) unstable; urgency=low
+
+  * Tightened the shlibs of libortp0 to 1.0.1 version.
+
+ -- Samuel Mimram <smimram@debian.org>  Thu, 31 Mar 2005 18:11:23 +0200
+
+linphone (1.0.1-2) unstable; urgency=low
+
+  * Added the 10mscodec_null_strcmp patch to make some more checks for NULL
+    pointers. I hope this will solve the crash on startup, closes: #301494.
+
+ -- Samuel Mimram <smimram@debian.org>  Wed, 30 Mar 2005 11:19:04 +0200
+
+linphone (1.0.1-1) unstable; urgency=low
+
+  * New upstream release.
+
+ -- Samuel Mimram <smimram@debian.org>  Wed, 23 Mar 2005 12:50:48 +0100
+
+linphone (1.0.0-1) unstable; urgency=low
+
+  * New upstream release.
+  * The code was reorganized to be cleaner, some libraries have been merged.
+  * Big-endian architectures are now supported, closes: #275738, #284079.
+  * Sound should not be decreased on startup anymore, closes: #299227.
+  * Samuel Thibault's patches were integrated upstream (many thanks),
+    closes: #297213, #297215, #297622.
+  * Put the rings in a separate package (linphone-common) to save disk space
+    on the Debian mirrors.
+  * Using dh_desktop to register the .desktop file.
+  * Added -g to the CFLAGS.
+
+ -- Samuel Mimram <smimram@debian.org>  Mon, 21 Mar 2005 18:11:06 +0100
+
+linphone (0.12.2-2) unstable; urgency=low
+
+  * Removed all big-endian archs since they are not supported by this version
+    of linphone (please wait until the release of the 1.0 version).
+  * Now using other packages' shlibs with dh_shlibdeps.
+  * Switched to dpatch to handle the patches.
+  * Install /usr/share/doc/linphone-nox/linphonec and corrected the error
+    message accordingly to display the right path, closes: #270935.
+  * Applied a patch to have IPv6 really enabled in the libmediastreamer (thanks
+    Henrik Riomar and Fabio Massimo Di Nitto).
+  * Check for NULL arguments in mscodec.c.
+  * Updated the config.guess and config.sub.
+
+ -- Samuel Mimram <samuel.mimram@ens-lyon.org>  Fri, 10 Sep 2004 11:20:03 +0200
+
+linphone (0.12.2-1) unstable; urgency=low
+
+  * Initial Release, closes: #68243.
+
+ -- Samuel Mimram <samuel.mimram@ens-lyon.org>  Wed, 30 Jun 2004 13:58:16 +0200

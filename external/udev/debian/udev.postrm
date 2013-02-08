@@ -1,0 +1,27 @@
+#!/bin/sh -e
+
+cleanup_rulesd() {
+  [ -d /etc/udev/rules.d/ ] || return 0
+
+  # delete broken symlinks
+  find /etc/udev/rules.d/ -type l -not -exec test -e {} \; -print0 \
+	| xargs --no-run-if-empty --null rm
+  rmdir --ignore-fail-on-non-empty /etc/udev/rules.d/ /etc/udev/ || true
+}
+
+case "$1" in
+    purge)
+    cleanup_rulesd
+    ;;
+
+    remove|upgrade|failed-upgrade|abort-install|abort-upgrade|disappear)
+    ;;
+
+    *)
+    echo "$0 called with unknown argument '$1'" >&2
+    exit 1
+    ;;
+esac
+
+#DEBHELPER#
+

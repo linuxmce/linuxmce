@@ -6,22 +6,15 @@ Section "ServerLayout"
 EndSection
 
 Section "Files"
-	RgbPath		"/usr/X11R6/lib/X11/rgb"
-	ModulePath	"/usr/lib/xorg/modules"
+#	RgbPath		"/usr/X11R6/lib/X11/rgb"
+	ModulePath	"/usr/lib/xorg/extra-modules,/usr/lib/xorg/modules"
 	FontPath	"/usr/share/fonts/X11"
-	FontPath	"/usr/X11R6/lib/X11/fonts/misc/"
-	FontPath	"/usr/X11R6/lib/X11/fonts/Speedo/"
-	FontPath	"/usr/X11R6/lib/X11/fonts/Type1/"
-	FontPath	"/usr/X11R6/lib/X11/fonts/CID/"
-	FontPath	"/usr/X11R6/lib/X11/fonts/75dpi/"
-	FontPath	"/usr/X11R6/lib/X11/fonts/100dpi/"
 EndSection
 
 Section "Module"
 	Load	"dbe"
 	Load	"extmod"
 	Load	"record"
-	Load	"xtrap"
 	Load	"speedo"
 	Load	"type1"
 	Load	"glx"
@@ -102,3 +95,4 @@ Section "ServerFlags"
 	Option	"OffTime"		"0"
 	Option	"AIGLX"			"Off"
 EndSection
+

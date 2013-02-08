@@ -32,6 +32,7 @@
 
 #include "WizardPageVideoResolutionConfirm.h"
 #include "WizardPageVideoAdjustSize.h"
+#include "WizardPageAudioSoundCard.h"
 #include "WizardPageAudioConnector.h"
 #include "WizardPageAudioVolume.h"
 #include "WizardPageDolbyTest.h"
@@ -151,6 +152,8 @@ WizardPage* WizardPagesFactory::CreatePredefinedWizardPage(const std::string Nam
 		Result = new WizardPageUISwitcherTest(FrontEnd, Name);
 	else if (Name == "VideoAdjustSize")
 		Result = new WizardPageVideoAdjustSize(FrontEnd, Name);
+	else if (Name == "AudioSoundCard")
+		Result = new WizardPageAudioSoundCard(FrontEnd, Name);
 	else if (Name == "AudioConnector")
 		Result = new WizardPageAudioConnector(FrontEnd, Name);
 	else if (Name == "AudioVolume")

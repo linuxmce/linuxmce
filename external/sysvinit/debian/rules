@@ -1,0 +1,207 @@
+#! /usr/bin/make -f
+#
+#	debian/rules file for sysvinit
+#
+
+tmp     = $(shell pwd)/debian/tmp
+doc	= /usr/share/doc
+
+SHELL	= /bin/bash
+LC_ALL	= POSIX
+
+DEB_HOST_GNU_TYPE ?= $(shell dpkg-architecture -qDEB_HOST_GNU_TYPE)
+DEB_HOST_GNU_SYSTEM ?= $(shell dpkg-architecture -qDEB_HOST_GNU_SYSTEM)
+DEB_HOST_ARCH ?= $(shell dpkg-architecture -qDEB_HOST_ARCH)
+
+LIBC6	= libc6
+ifeq ($(DEB_HOST_ARCH), alpha)
+LIBC6	= libc6.1
+endif
+ifeq ($(DEB_HOST_ARCH), ia64)
+LIBC6	= libc6.1
+endif
+
+define checkdir
+	test -f src/init.c
+endef
+
+build:
+# Builds the binary package.
+	$(checkdir)
+	(cd src; make DISTRO=Debian)
+	cc -Wall -s -o debian/readlink debian/readlink.c
+	touch build
+
+# Make a binary package (.deb file)
+binary-arch:	build checkroot
+	#
+	#	Sysvinit.
+	#
+	-rm -rf $(tmp)
+	install -d -g root -m 755 -o root $(tmp)
+	install -d -g root -m 755 -o root $(tmp)/{DEBIAN,etc,usr}
+	install -d -g root -m 755 -o root $(tmp)/usr/share
+	install -d -g root -m 755 -o root $(tmp)/usr/share/sysvinit
+	install -d -g root -m 755 -o root $(tmp)/usr/include
+	install -d -g root -m 755 -o root $(tmp)$(doc)/sysvinit
+	install -g root -m 644 doc/Changelog $(tmp)$(doc)/sysvinit/changelog
+	install -g root -m 644 debian/changelog \
+		$(tmp)$(doc)/sysvinit/changelog.Debian
+	install -g root -m 644 debian/README.runlevels \
+		$(tmp)$(doc)/sysvinit
+	gzip -9f $(tmp)$(doc)/sysvinit/{README.runlevels,changelog*}
+	if test -e debian/share/inittab.$(DEB_HOST_GNU_TYPE) ; \
+	then \
+		install -g root -m 644 -o root \
+			debian/share/inittab.$(DEB_HOST_GNU_TYPE) \
+			$(tmp)/usr/share/sysvinit/inittab ; \
+	elif test -e debian/share/inittab.$(DEB_HOST_GNU_SYSTEM) ; \
+	then \
+		install -g root -m 644 -o root \
+			debian/share/inittab.$(DEB_HOST_GNU_SYSTEM) \
+			$(tmp)/usr/share/sysvinit/inittab ; \
+	else \
+		install -g root -m 644 -o root debian/share/inittab \
+			$(tmp)/usr/share/sysvinit/inittab ; \
+	fi
+	install -g root -m 755 -o root debian/share/update-rc.d \
+		$(tmp)/usr/share/sysvinit
+	install -d -g root -m 755 -o root $(tmp)/{bin,sbin,lib,usr}
+	install -d -g root -m 755 -o root $(tmp)/usr/bin
+	install -d -g root -m 755 -o root $(tmp)/usr/sbin
+	install -d -g root -m 755 -o root $(tmp)/usr/share/man
+	install -d -g root -m 755 -o root $(tmp)/usr/share/man/man{1,5,8}
+	(cd src; make ROOT=$(tmp) DISTRO=Debian install )
+ifeq ($(DEB_HOST_ARCH), hurd-i386)
+	# The Hurd has its own halt and reboot commands.
+	rm -f $(tmp)/usr/share/man/man8/halt.8
+	rm -f $(tmp)/usr/share/man/man8/reboot.8
+	rm -f $(tmp)/sbin/halt
+	rm -f $(tmp)/sbin/reboot
+endif
+	rm -f $(tmp)/usr/share/man/man1/mountpoint.1
+	rm -f $(tmp)/bin/mountpoint
+	gzip -9f $(tmp)/usr/share/man/man*/*.[0-9]
+	install -g root -m 644 -o root debian/README \
+	  $(tmp)$(doc)/sysvinit/copyright
+	cat COPYRIGHT >> $(tmp)$(doc)/sysvinit/copyright
+	install -g root -m 755 debian/postinst $(tmp)/DEBIAN/postinst
+	find $(tmp) -type d -name .svn -exec rm -rf '{}' ';' -prune
+	dpkg-shlibdeps src/init
+	dpkg-gencontrol -psysvinit -P$(tmp) -isp
+	dpkg --build $(tmp) ..
+	rm -rf $(tmp)
+	#
+	#	Initscripts.
+	#
+	-rm -rf $(tmp)
+	install -d -g root -m 755 -o root $(tmp)
+	install -d -g root -m 755 -o root $(tmp)/{DEBIAN,etc,usr,sbin,lib}
+	install -d -g root -m 755 -o root $(tmp)/lib/init
+	install -d -g root -m 755 -o root $(tmp)/usr/share
+	install -d -g root -m 755 -o root $(tmp)/usr/share/initscripts
+	install -d -g root -m 755 -o root $(tmp)$(doc)/initscripts
+	sed -ne '/sysvinit (2.84-3)/q' -e p < debian/changelog \
+		> $(tmp)$(doc)/initscripts/changelog
+	chmod 644 $(tmp)$(doc)/initscripts/changelog
+	gzip -9f $(tmp)$(doc)/initscripts/*
+	cp -af debian/initscripts/share/* $(tmp)/usr/share/initscripts
+	cp -af debian/initscripts/etc/* $(tmp)/etc
+	ln -sf bootlogd $(tmp)/etc/init.d/stop-bootlogd
+	chmod 755 $(tmp)/etc/init.d/[a-z]*
+	chmod 644 $(tmp)/etc/init.d/bootclean.sh
+	chmod -R g-w $(tmp)
+	chown -R root.root $(tmp)
+	install -d -g root -m 755 -o root $(tmp)/bin
+	install -d -g root -m 755 -o root $(tmp)/etc/default
+	install -d -g root -m 755 -o root $(tmp)/usr/share/man
+	install -d -g root -m 755 -o root $(tmp)/usr/share/man/man1
+	install -d -g root -m 755 -o root $(tmp)/usr/share/man/man5
+	install -d -g root -m 755 -o root $(tmp)/usr/share/man/man8
+	install -d -g root -m 755 -o root $(tmp)/var/lib/urandom
+	install -g root -m 755 debian/initscripts/sbin/fsck.nfs \
+		$(tmp)/sbin/fsck.nfs
+	install -g root -m 644 debian/initscripts/man/fsck.nfs.8 \
+		$(tmp)/usr/share/man/man8/fsck.nfs.8
+	install -g root -m 644 debian/initscripts/rcS.5 \
+		$(tmp)/usr/share/man/man5
+	install -g root -m 755 src/mountpoint $(tmp)/bin
+	install -g root -m 644 man/mountpoint.1 $(tmp)/usr/share/man/man1
+	install -g root -m 755 debian/readlink $(tmp)/lib/init
+	gzip -9f $(tmp)/usr/share/man/man*/*.[0-9]
+	install -g root -m 644 -o root debian/initscripts/copyright \
+	  $(tmp)$(doc)/initscripts/copyright
+	install -g root -m 755 debian/initscripts/preinst  $(tmp)/DEBIAN
+	install -g root -m 755 debian/initscripts/postinst $(tmp)/DEBIAN
+	install -g root -m 644 -o root debian/initscripts/conffiles \
+	  $(tmp)/DEBIAN/conffiles
+	find $(tmp) -type d -name .svn -exec rm -rf '{}' ';' -prune
+	dpkg-shlibdeps debian/readlink
+	sh debian/deps-mount >> debian/substvars
+	sh debian/deps-glibc >> debian/substvars
+	dpkg-gencontrol -pinitscripts -P$(tmp) -isp
+	dpkg --build $(tmp) ..
+	rm -rf $(tmp)
+
+
+# Architecture independant files.
+binary-indep:   build checkroot
+	#
+	#	sysv-rc
+	#
+	-rm -rf $(tmp)
+	install -d -g root -m 755 -o root $(tmp)
+	install -d -g root -m 755 -o root $(tmp)/{DEBIAN,etc,usr}
+	install -d -g root -m 755 -o root $(tmp)/usr/share
+	install -d -g root -m 755 -o root $(tmp)$(doc)/sysv-rc
+	sed -ne '/sysvinit (2.84-3)/q' -e p < debian/changelog \
+		> $(tmp)$(doc)/sysv-rc/changelog
+	chmod 644 $(tmp)$(doc)/sysv-rc/changelog
+	install -g root -m 644 debian/sysv-rc/doc/* $(tmp)$(doc)/sysv-rc
+	gzip -9f $(tmp)$(doc)/sysv-rc/*
+	install -d -g root -m 755 -o root $(tmp)/etc/rc{0,1,2,3,4,5,6}.d
+	cp -af debian/sysv-rc/etc/* $(tmp)/etc
+	chmod 755 $(tmp)/etc/init.d/[a-z]*
+	chmod -R go=u-w $(tmp)/etc
+	chown -R root.root $(tmp)/etc
+	install -d -g root -m 755 -o root $(tmp)/usr/sbin
+	install -d -g root -m 755 -o root $(tmp)/usr/share/man
+	install -d -g root -m 755 -o root $(tmp)/usr/share/man/man5
+	install -d -g root -m 755 -o root $(tmp)/usr/share/man/man8
+	install -d -g root -m 755 -o root $(tmp)/usr/share/man/ja/man8
+	install -d -g root -m 755 -o root $(tmp)/usr/share/man/fr/man8
+	install -d -g root -m 755 -o root $(tmp)/usr/share/man/es/man8
+	install -g root -m 644 debian/sysv-rc/man8/*.8 \
+		$(tmp)/usr/share/man/man8
+	install -g root -m 644 debian/sysv-rc/man8/ja/*.8 \
+		$(tmp)/usr/share/man/ja/man8
+	install -g root -m 644 debian/sysv-rc/man8/fr/*.8 \
+		$(tmp)/usr/share/man/fr/man8
+	install -g root -m 644 debian/sysv-rc/man8/es/*.8 \
+		$(tmp)/usr/share/man/es/man8
+	install -g root -m 755 debian/sysv-rc/sbin/invoke-rc.d $(tmp)/usr/sbin
+	install -g root -m 755 debian/sysv-rc/sbin/update-rc.d $(tmp)/usr/sbin
+	gzip -9f $(tmp)/usr/share/man/man*/*.[0-9] \
+		 $(tmp)/usr/share/man/??/man*/*.[0-9]
+	install -g root -m 644 -o root debian/sysv-rc/copyright \
+	  $(tmp)$(doc)/sysv-rc/copyright
+	install -g root -m 755 debian/sysv-rc/postinst $(tmp)/DEBIAN/postinst
+	install -g root -m 755 debian/sysv-rc/postrm $(tmp)/DEBIAN/postrm
+	find $(tmp) -type d -name .svn -exec rm -rf '{}' ';' -prune
+	dpkg-gencontrol -psysv-rc -P$(tmp) -isp
+	dpkg --build $(tmp) ..
+	rm -rf $(tmp)
+
+clean:	checkroot
+	(cd src; make clobber )
+	rm -f build debian/files debian/substvars debian/readlink
+	rm -rf $(tmp)
+	find . -name '*.bak' -o -name '*~' | xargs -r rm -f --
+
+binary: binary-arch binary-indep
+
+checkroot:
+	$(checkdir)
+	test root = "`whoami`"
+
+.PHONY: binary binary-arch binary-indep clean checkroot

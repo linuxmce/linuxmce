@@ -34,6 +34,7 @@
 
 #include "logincommand.h"
 #include "originatecommand.h"
+#include "applicationcommand.h"
 #include "hangupcommand.h"
 #include "transfercommand.h"
 //#include "conferencecommand.h"
@@ -88,6 +89,16 @@ void AsteriskManager::Originate(const string sPhoneNumber, const string sOrigina
 	pCommand->setExtenNum(sPhoneNumber);
 	pCommand->setCallerID(sCallerID);
 
+	m_pCommunicationHandler->sendCommand(pCommand);
+}
+
+void AsteriskManager::Application(const string sPhoneNumber, const string sApplication, const string sData_String)
+{
+	/*application*/
+	ApplicationCommand *pCommand = new ApplicationCommand();
+	pCommand->setPhoneNum(sPhoneNumber);
+	pCommand->setApplication(sApplication);
+	pCommand->setApplicationData(sData_String);	
 	m_pCommunicationHandler->sendCommand(pCommand);
 }
 

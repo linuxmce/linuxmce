@@ -123,7 +123,7 @@ public:
 		if( m_bRunningWithoutDeviceData )
 			return (m_pEvent_Impl->GetDeviceDataFromDatabase(m_dwPK_Device,DEVICEDATA_Only_One_Per_PC_CONST)=="1" ? true : false);
 		else
-			return (m_mapParameters_Find(DEVICEDATA_Only_One_Per_PC_CONST)=="1" ? true : false);
+			return (m_mapParameters[DEVICEDATA_Only_One_Per_PC_CONST]=="1" ? true : false);
 	}
 
 	bool Get_Autoassign_to_parents_room()
@@ -131,15 +131,7 @@ public:
 		if( m_bRunningWithoutDeviceData )
 			return (m_pEvent_Impl->GetDeviceDataFromDatabase(m_dwPK_Device,DEVICEDATA_Autoassign_to_parents_room_CONST)=="1" ? true : false);
 		else
-			return (m_mapParameters_Find(DEVICEDATA_Autoassign_to_parents_room_CONST)=="1" ? true : false);
-	}
-
-	string Get_Polling_Settings()
-	{
-		if( m_bRunningWithoutDeviceData )
-			return m_pEvent_Impl->GetDeviceDataFromDatabase(m_dwPK_Device,DEVICEDATA_Polling_Settings_CONST);
-		else
-			return m_mapParameters_Find(DEVICEDATA_Polling_Settings_CONST);
+			return (m_mapParameters[DEVICEDATA_Autoassign_to_parents_room_CONST]=="1" ? true : false);
 	}
 
 };
@@ -249,7 +241,6 @@ public:
 	string DATA_Get_COM_Port_on_PC() { return GetData()->Get_COM_Port_on_PC(); }
 	bool DATA_Get_Only_One_Per_PC() { return GetData()->Get_Only_One_Per_PC(); }
 	bool DATA_Get_Autoassign_to_parents_room() { return GetData()->Get_Autoassign_to_parents_room(); }
-	string DATA_Get_Polling_Settings() { return GetData()->Get_Polling_Settings(); }
 	//Event accessors
 	void EVENT_Sensor_Tripped(bool bTripped) { GetEvents()->Sensor_Tripped(bTripped); }
 	void EVENT_Device_OnOff(bool bOnOff) { GetEvents()->Device_OnOff(bOnOff); }
@@ -263,11 +254,12 @@ public:
 	virtual void CMD_StatusReport(string sArguments,string &sCMD_Result,class Message *pMessage) {};
 	virtual void CMD_Assign_Return_Route(int iNodeID,int iDestNodeID,string &sCMD_Result,class Message *pMessage) {};
 	virtual void CMD_SetWakeUp(int iValue,int iNodeID,string &sCMD_Result,class Message *pMessage) {};
-	virtual void CMD_Set_Config_Param(int iValue,int iNodeID,int iParameter_ID,string &sCMD_Result,class Message *pMessage) {};
+	virtual void CMD_Set_Config_Param(int iValue,int iSize,int iNodeID,int iParameter_ID,string &sCMD_Result,class Message *pMessage) {};
 	virtual void CMD_Set_Association(int iNodeID,int iGroup_ID,string sNodes_List,string &sCMD_Result,class Message *pMessage) {};
 	virtual void CMD_Set_Polling_State(int iPK_Device,string sValue_To_Assign,bool bReport,bool bAlways,int iNodeID,string &sCMD_Result,class Message *pMessage) {};
 	virtual void CMD_Add_Node(string sOptions,int iValue,string sTimeout,bool bMultiple,string &sCMD_Result,class Message *pMessage) {};
 	virtual void CMD_Remove_Node(string sOptions,int iValue,string sTimeout,bool bMultiple,string &sCMD_Result,class Message *pMessage) {};
+	virtual void CMD_Resync_node(int iNodeID,string &sCMD_Result,class Message *pMessage) {};
 
 	//This distributes a received message to your handler.
 	virtual ReceivedMessageResult ReceivedMessage(class Message *pMessageOriginal)
@@ -489,9 +481,10 @@ public:
 					{
 						string sCMD_Result="OK";
 						int iValue=atoi(pMessage->m_mapParameters[COMMANDPARAMETER_Value_CONST].c_str());
+						int iSize=atoi(pMessage->m_mapParameters[COMMANDPARAMETER_Size_CONST].c_str());
 						int iNodeID=atoi(pMessage->m_mapParameters[COMMANDPARAMETER_NodeID_CONST].c_str());
 						int iParameter_ID=atoi(pMessage->m_mapParameters[COMMANDPARAMETER_Parameter_ID_CONST].c_str());
-						CMD_Set_Config_Param(iValue,iNodeID,iParameter_ID,sCMD_Result,pMessage);
+						CMD_Set_Config_Param(iValue,iSize,iNodeID,iParameter_ID,sCMD_Result,pMessage);
 						if( pMessage->m_eExpectedResponse==ER_ReplyMessage && !pMessage->m_bRespondedToMessage )
 						{
 							pMessage->m_bRespondedToMessage=true;
@@ -508,7 +501,7 @@ public:
 						{
 							int iRepeat=atoi(itRepeat->second.c_str());
 							for(int i=2;i<=iRepeat;++i)
-								CMD_Set_Config_Param(iValue,iNodeID,iParameter_ID,sCMD_Result,pMessage);
+								CMD_Set_Config_Param(iValue,iSize,iNodeID,iParameter_ID,sCMD_Result,pMessage);
 						}
 					};
 					iHandled++;
@@ -625,6 +618,32 @@ public:
 							int iRepeat=atoi(itRepeat->second.c_str());
 							for(int i=2;i<=iRepeat;++i)
 								CMD_Remove_Node(sOptions.c_str(),iValue,sTimeout.c_str(),bMultiple,sCMD_Result,pMessage);
+						}
+					};
+					iHandled++;
+					continue;
+				case COMMAND_Resync_node_CONST:
+					{
+						string sCMD_Result="OK";
+						int iNodeID=atoi(pMessage->m_mapParameters[COMMANDPARAMETER_NodeID_CONST].c_str());
+						CMD_Resync_node(iNodeID,sCMD_Result,pMessage);
+						if( pMessage->m_eExpectedResponse==ER_ReplyMessage && !pMessage->m_bRespondedToMessage )
+						{
+							pMessage->m_bRespondedToMessage=true;
+							Message *pMessageOut=new Message(m_dwPK_Device,pMessage->m_dwPK_Device_From,PRIORITY_NORMAL,MESSAGETYPE_REPLY,0,0);
+							pMessageOut->m_mapParameters[0]=sCMD_Result;
+							SendMessage(pMessageOut);
+						}
+						else if( (pMessage->m_eExpectedResponse==ER_DeliveryConfirmation || pMessage->m_eExpectedResponse==ER_ReplyString) && !pMessage->m_bRespondedToMessage )
+						{
+							pMessage->m_bRespondedToMessage=true;
+							SendString(sCMD_Result);
+						}
+						if( (itRepeat=pMessage->m_mapParameters.find(COMMANDPARAMETER_Repeat_Command_CONST))!=pMessage->m_mapParameters.end() )
+						{
+							int iRepeat=atoi(itRepeat->second.c_str());
+							for(int i=2;i<=iRepeat;++i)
+								CMD_Resync_node(iNodeID,sCMD_Result,pMessage);
 						}
 					};
 					iHandled++;

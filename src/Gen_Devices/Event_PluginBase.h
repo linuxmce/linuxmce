@@ -99,7 +99,7 @@ public:
 		if( m_bRunningWithoutDeviceData )
 			return atoi(m_pEvent_Impl->GetDeviceDataFromDatabase(m_dwPK_Device,DEVICEDATA_PK_City_CONST).c_str());
 		else
-			return atoi(m_mapParameters_Find(DEVICEDATA_PK_City_CONST).c_str());
+			return atoi(m_mapParameters[DEVICEDATA_PK_City_CONST].c_str());
 	}
 
 	double Get_Longitude()
@@ -107,7 +107,7 @@ public:
 		if( m_bRunningWithoutDeviceData )
 			return atof(m_pEvent_Impl->GetDeviceDataFromDatabase(m_dwPK_Device,DEVICEDATA_Longitude_CONST).c_str());
 		else
-			return atof(m_mapParameters_Find(DEVICEDATA_Longitude_CONST).c_str());
+			return atof(m_mapParameters[DEVICEDATA_Longitude_CONST].c_str());
 	}
 
 	double Get_Latitude()
@@ -115,7 +115,7 @@ public:
 		if( m_bRunningWithoutDeviceData )
 			return atof(m_pEvent_Impl->GetDeviceDataFromDatabase(m_dwPK_Device,DEVICEDATA_Latitude_CONST).c_str());
 		else
-			return atof(m_mapParameters_Find(DEVICEDATA_Latitude_CONST).c_str());
+			return atof(m_mapParameters[DEVICEDATA_Latitude_CONST].c_str());
 	}
 
 };
@@ -230,6 +230,7 @@ public:
 	void EVENT_Sunset() { GetEvents()->Sunset(); }
 	//Commands - Override these to handle commands from the server
 	virtual void CMD_Toggle_Event_Handler(int iPK_EventHandler,string &sCMD_Result,class Message *pMessage) {};
+	virtual void CMD_Download_Configuration(string sText,string &sCMD_Result,class Message *pMessage) {};
 
 	//This distributes a received message to your handler.
 	virtual ReceivedMessageResult ReceivedMessage(class Message *pMessageOriginal)
@@ -284,6 +285,32 @@ public:
 							int iRepeat=atoi(itRepeat->second.c_str());
 							for(int i=2;i<=iRepeat;++i)
 								CMD_Toggle_Event_Handler(iPK_EventHandler,sCMD_Result,pMessage);
+						}
+					};
+					iHandled++;
+					continue;
+				case COMMAND_Download_Configuration_CONST:
+					{
+						string sCMD_Result="OK";
+						string sText=pMessage->m_mapParameters[COMMANDPARAMETER_Text_CONST];
+						CMD_Download_Configuration(sText.c_str(),sCMD_Result,pMessage);
+						if( pMessage->m_eExpectedResponse==ER_ReplyMessage && !pMessage->m_bRespondedToMessage )
+						{
+							pMessage->m_bRespondedToMessage=true;
+							Message *pMessageOut=new Message(m_dwPK_Device,pMessage->m_dwPK_Device_From,PRIORITY_NORMAL,MESSAGETYPE_REPLY,0,0);
+							pMessageOut->m_mapParameters[0]=sCMD_Result;
+							SendMessage(pMessageOut);
+						}
+						else if( (pMessage->m_eExpectedResponse==ER_DeliveryConfirmation || pMessage->m_eExpectedResponse==ER_ReplyString) && !pMessage->m_bRespondedToMessage )
+						{
+							pMessage->m_bRespondedToMessage=true;
+							SendString(sCMD_Result);
+						}
+						if( (itRepeat=pMessage->m_mapParameters.find(COMMANDPARAMETER_Repeat_Command_CONST))!=pMessage->m_mapParameters.end() )
+						{
+							int iRepeat=atoi(itRepeat->second.c_str());
+							for(int i=2;i<=iRepeat;++i)
+								CMD_Download_Configuration(sText.c_str(),sCMD_Result,pMessage);
 						}
 					};
 					iHandled++;

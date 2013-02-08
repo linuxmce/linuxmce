@@ -1,0 +1,23 @@
+#!/bin/sh
+#
+# Hook for automatic backports at Buildserver.NET
+#
+# Target dist: Debian Etch
+
+# Replace libcurl4-openssl-dev with libcurl3-dev
+sed -i -e 's#^\(Build-Depends:.*\)libcurl4[^\ ]*-dev[^\ ]* \(.*\)$#\1libcurl3-dev \2#' debian/control
+
+# Replace libsnmp-dev with libsnmp9-dev
+sed -i -e 's#^\(Build-Depends:.*\)libsnmp-dev[^\ ]* \(.*\)$#\1libsnmp9-dev, \2#' debian/control
+
+# remove vpb-driver dependency
+sed -i -e 's#^\(Build-Depends:.*\), libvpb-dev#\1#' debian/control
+
+# Until we can have a stable backport of the new speex, let's just use 
+# our existing "broken" speex 1.1.12:
+sed -i -e 's#^\(Build-Depends:.*\), libspeexdsp-dev#\1#' debian/control
+
+# dh_lintian is new
+sed -i -e '/dh_lintian/d' debian/rules
+
+exit 0

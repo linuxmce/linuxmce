@@ -128,19 +128,21 @@ void psc_mod_set(string val);
 void psc_restrict_set(long int val);
 
 		
-		bool psc_id_isNull();
+		bool Description_isNull();
+bool Define_isNull();
+bool psc_id_isNull();
 bool psc_batch_isNull();
 bool psc_user_isNull();
 bool psc_frozen_isNull();
-bool psc_mod_isNull();
 bool psc_restrict_isNull();
 
 			
-		void psc_id_setNull(bool val);
+		void Description_setNull(bool val);
+void Define_setNull(bool val);
+void psc_id_setNull(bool val);
 void psc_batch_setNull(bool val);
 void psc_user_setNull(bool val);
 void psc_frozen_setNull(bool val);
-void psc_mod_setNull(bool val);
 void psc_restrict_setNull(bool val);
 	
 	
@@ -159,16 +161,8 @@ void psc_restrict_setNull(bool val);
 		// Return the rows in other tables with foreign keys pointing here
 		void DesignObj_FK_StabilityStatus_getrows(vector <class Row_DesignObj*> *rows);
 void DesignObjVariation_FK_StabilityStatus_getrows(vector <class Row_DesignObjVariation*> *rows);
-void DesignObjVariation_pschist_FK_StabilityStatus_getrows(vector <class Row_DesignObjVariation_pschist*> *rows);
-void DesignObjVariation_pschmask_FK_StabilityStatus_getrows(vector <class Row_DesignObjVariation_pschmask*> *rows);
-void DesignObj_pschist_FK_StabilityStatus_getrows(vector <class Row_DesignObj_pschist*> *rows);
-void DesignObj_pschmask_FK_StabilityStatus_getrows(vector <class Row_DesignObj_pschmask*> *rows);
 void DeviceTemplate_FK_StabilityStatus_getrows(vector <class Row_DeviceTemplate*> *rows);
-void DeviceTemplate_pschist_FK_StabilityStatus_getrows(vector <class Row_DeviceTemplate_pschist*> *rows);
-void DeviceTemplate_pschmask_FK_StabilityStatus_getrows(vector <class Row_DeviceTemplate_pschmask*> *rows);
 void Skin_FK_StabilityStatus_getrows(vector <class Row_Skin*> *rows);
-void Skin_pschist_FK_StabilityStatus_getrows(vector <class Row_Skin_pschist*> *rows);
-void Skin_pschmask_FK_StabilityStatus_getrows(vector <class Row_Skin_pschmask*> *rows);
 
 
 		// Setup binary serialization

@@ -1,0 +1,199 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) YEAR THE PACKAGE'S COPYRIGHT HOLDER
+# This file is distributed under the same license as the PACKAGE package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
+#
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: PACKAGE VERSION\n"
+"Report-Msgid-Bugs-To: Source: lirc@packages.debian.org\n"
+"POT-Creation-Date: 2008-02-10 15:04-0600\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language-Team: LANGUAGE <LL@li.org>\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=CHARSET\n"
+"Content-Transfer-Encoding: 8bit\n"
+
+#. Type: boolean
+#. Description
+#: ../lirc.templates:1001
+msgid "Create LIRC device nodes if they are not there?"
+msgstr ""
+
+#. Type: boolean
+#. Description
+#: ../lirc.templates:1001
+msgid "LIRC needs some files under /dev/ for it to work:"
+msgstr ""
+
+#. Type: boolean
+#. Description
+#: ../lirc.templates:1001
+msgid "/dev/lirc  /dev/lircd and /dev/lircm"
+msgstr ""
+
+#. Type: boolean
+#. Description
+#: ../lirc.templates:2001
+msgid "Do you want to reconfigure LIRC?"
+msgstr ""
+
+#. Type: boolean
+#. Description
+#: ../lirc.templates:2001
+msgid ""
+"LIRC is already configured, reconfiguring it may spoil some of your "
+"handcrafted configuration in /etc/lirc/hardware.conf."
+msgstr ""
+
+#. Type: boolean
+#. Description
+#: ../lirc.templates:2001
+msgid "However comments, LIRC_ARGS and other unknown code will be preserved."
+msgstr ""
+
+#. Type: note
+#. Description
+#: ../lirc.templates:3001
+msgid "You should take care of old configuration files"
+msgstr ""
+
+#. Type: note
+#. Description
+#: ../lirc.templates:3001
+msgid ""
+"Previous versions of this package didn't include any configuration file and "
+"expected the user to put his own /etc/lircd.conf and /etc/lircmd.conf"
+msgstr ""
+
+#. Type: note
+#. Description
+#: ../lirc.templates:3001
+msgid "The new location for these files is /etc/lirc/."
+msgstr ""
+
+#. Type: note
+#. Description
+#: ../lirc.templates:3001
+msgid ""
+"Things will be arranged properly but, in case they can't be, please make "
+"sure that none of LIRC configuration files are left directly under /etc/."
+msgstr ""
+
+#. Type: note
+#. Description
+#: ../lirc.templates:18001
+msgid "lircmd should use the IntelliMouse protocol instead of IMPS/2"
+msgstr ""
+
+#. Type: note
+#. Description
+#: ../lirc.templates:18001
+msgid ""
+"The method lircmd uses to simulate a mouse is not compatible with IMPS/2 "
+"protocol, so the IntelliMouse support has been added and is now the "
+"preferred protocol."
+msgstr ""
+
+#. Type: note
+#. Description
+#: ../lirc.templates:18001
+msgid ""
+"You ARE currently using lircmd with IMPS/2 protocol and are encouraged to "
+"update /etc/lirc/lircmd.conf and the configuration of any program which uses "
+"lircmd as a mouse to use IntelliMouse protocol."
+msgstr ""
+
+#. Type: note
+#. Description
+#: ../lirc.templates:18001
+msgid "NOTE: gpm will refuse to use lircmd as a mouse with IMPS/2 protocol."
+msgstr ""
+
+#. Type: boolean
+#. Description
+#: ../lirc.templates:19001
+msgid "Delete /var/log/lircd?"
+msgstr ""
+
+#. Type: boolean
+#. Description
+#: ../lirc.templates:19001
+msgid ""
+"LIRC now uses syslog as a logging mechanism. This means that /var/log/lircd "
+"is not anymore pertinent."
+msgstr ""
+
+#. Type: boolean
+#. Description
+#: ../lirc.templates:19001
+msgid ""
+"If you answer 'no' to this question /var/log/lircd will be left there and "
+"you will have to take care of it yourself."
+msgstr ""
+
+#. Type: select
+#. Description
+#: ../lirc.templates:20001
+msgid "Choose a remote if you would like to preload a configuration:"
+msgstr ""
+
+#. Type: select
+#. Description
+#: ../lirc.templates:20001
+msgid ""
+"If you choose a remote, but already have a configuration file in /etc/lirc/"
+"lircd.conf, the existing file will be renamed to /etc/lirc/lircd.conf.dpkg-"
+"old and the community configurations loaded into  /etc/lirc/lircd.conf.  "
+"This process will only happen once, and subsequent instantiations of this "
+"configuration will not overwrite your /etc/lirc/lircd.conf file again."
+msgstr ""
+
+#. Type: select
+#. Description
+#: ../lirc.templates:21001
+msgid "If you need to use an IR transmitter, please select it:"
+msgstr ""
+
+#. Type: select
+#. Description
+#: ../lirc.templates:21001
+msgid ""
+"IR transmitters can be used for controlling external devices.  Some devices "
+"are considered transceivers, with the ability to both send and receive.  "
+"Other devices require separate hardware to accomplish these tasks."
+msgstr ""
+
+#. Type: select
+#. Description
+#: ../lirc.templates:22001
+msgid "Select your custom event interface for your dev/input device:"
+msgstr ""
+
+#. Type: select
+#. Description
+#: ../lirc.templates:22001
+msgid ""
+"Many remotes that were previously supported by the lirc_gpio interface now "
+"need to be set up via the dev/input interface.  You will need to custom "
+"select your remote's event character device.  This can be determined by "
+"'cat /proc/bus/input/devices'."
+msgstr ""
+
+#. Type: select
+#. Description
+#: ../lirc.templates:24001
+msgid "Choose the port that your serial device is attached to:"
+msgstr ""
+
+#. Type: select
+#. Description
+#: ../lirc.templates:24001
+msgid ""
+"The UART (serial) driver is a low level driver that takes advantage of bit "
+"banging a character device.  This means that you can only use it with "
+"hardware serial devices.  It unfortunately does not work with USB serial "
+"devices."
+msgstr ""

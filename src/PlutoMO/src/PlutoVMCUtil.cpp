@@ -15,7 +15,7 @@
  
  */
 //------------------------------------------------------------------------------------------------------------------
-#include "plutomo.hrh"
+#include "PlutoMO.hrh"
 #include <avkon.hrh>
 #include <aknnotewrappers.h> 
 #include <aknutils.h>  // for Fonts. 
@@ -196,7 +196,6 @@ void CPlutoVMCUtil::SetList(
 //------------------------------------------------------------------------------------------------------------------
 void CPlutoVMCUtil::InterceptRepeatedKeys(unsigned long  KeysListSize, const char *pRepeatedKeysList)
 {
-	int i;
 	//for(i = 0; i < m_RepeatedKeys.Count(); i++)
 		//delete m_RepeatedKeys[i];
 
@@ -329,6 +328,7 @@ void CPlutoVMCUtil::SetCaptureKeyboardCommand(
 	LOG("Image saved on the disk : ");
 
 	char* sFilename = new char[256];
+	int i;
 	for(i = 0; i < aName.Length(); i++)
 		sFilename[i] = aName[i];
 	sFilename[i] = '\0';
@@ -445,7 +445,7 @@ void CPlutoVMCUtil::SetCaptureKeyboardCommand(
 
 	//let's see now how many items are visible
 	VisibleItems = Height / RowHeight;
-	for(i = m_uGridTopItem; i < m_uGridTopItem + VisibleItems; i++)
+	for(int i = m_uGridTopItem; i < m_uGridTopItem + VisibleItems; i++)
 	{
 		if(i >= GridList.Count()) 
 			break;
@@ -465,7 +465,7 @@ void CPlutoVMCUtil::SetCaptureKeyboardCommand(
 
 	int iExpandOffset = 0;
 
-	for(i = m_uGridTopItem; i < uGridBottomItem; i++)
+	for(int i = m_uGridTopItem; i < uGridBottomItem; i++)
 	{
 		string *s = GridList[i];
 		const char *pStr = s->c_str();
@@ -480,7 +480,7 @@ void CPlutoVMCUtil::SetCaptureKeyboardCommand(
 		for(int j = 0; j < iBNpos; j++)
 			s1.Append(s->operator [](j));
 
-		for(j = iBNpos + 1; j < strLen; j++)
+		for(int j = iBNpos + 1; j < strLen; j++)
 			s2.Append(s->operator [](j));
 
 		int iItemSizeOffset = (iBNpos != -1) * RowHeight;

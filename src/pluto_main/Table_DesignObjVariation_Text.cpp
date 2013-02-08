@@ -36,8 +36,6 @@ using namespace std;
 #include "Table_Text.h"
 
 #include "Table_DesignObjVariation_Text_Skin_Language.h"
-#include "Table_DesignObjVariation_Text_Skin_Language_pschist.h"
-#include "Table_DesignObjVariation_Text_Skin_Language_pschmask.h"
 
 
 void Database_pluto_main::CreateTable_DesignObjVariation_Text()
@@ -85,6 +83,7 @@ void Row_DesignObjVariation_Text::Delete()
 	Row_DesignObjVariation_Text *pRow = this; // Needed so we will have only 1 version of get_primary_fields_assign_from_row
 	
 	if (!is_deleted)
+	{
 		if (is_added)	
 		{	
 			vector<TableRow*>::iterator i;	
@@ -106,6 +105,7 @@ void Row_DesignObjVariation_Text::Delete()
 			table->deleted_cachedRows[key] = this;
 			is_deleted = true;	
 		}	
+	}
 }
 
 void Row_DesignObjVariation_Text::Reload()
@@ -153,7 +153,8 @@ is_null[6] = true;
 m_psc_user = 0;
 m_psc_frozen = 0;
 is_null[7] = false;
-is_null[8] = true;
+m_psc_mod = "0000-00-00 00:00:00";
+is_null[8] = false;
 is_null[9] = true;
 m_psc_restrict = 0;
 
@@ -242,9 +243,6 @@ return is_null[6];}
 bool Row_DesignObjVariation_Text::psc_frozen_isNull() {PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
 
 return is_null[7];}
-bool Row_DesignObjVariation_Text::psc_mod_isNull() {PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
-
-return is_null[8];}
 bool Row_DesignObjVariation_Text::psc_restrict_isNull() {PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
 
 return is_null[9];}
@@ -268,10 +266,6 @@ is_modified=true;
 }
 void Row_DesignObjVariation_Text::psc_frozen_setNull(bool val){PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
 is_null[7]=val;
-is_modified=true;
-}
-void Row_DesignObjVariation_Text::psc_mod_setNull(bool val){PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
-is_null[8]=val;
 is_modified=true;
 }
 void Row_DesignObjVariation_Text::psc_restrict_setNull(bool val){PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
@@ -1024,20 +1018,6 @@ void Row_DesignObjVariation_Text::DesignObjVariation_Text_Skin_Language_FK_Desig
 PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
 
 class Table_DesignObjVariation_Text_Skin_Language *pTable = table->database->DesignObjVariation_Text_Skin_Language_get();
-pTable->GetRows("`FK_DesignObjVariation_Text`=" + StringUtils::itos(m_PK_DesignObjVariation_Text),rows);
-}
-void Row_DesignObjVariation_Text::DesignObjVariation_Text_Skin_Language_pschist_FK_DesignObjVariation_Text_getrows(vector <class Row_DesignObjVariation_Text_Skin_Language_pschist*> *rows)
-{
-PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
-
-class Table_DesignObjVariation_Text_Skin_Language_pschist *pTable = table->database->DesignObjVariation_Text_Skin_Language_pschist_get();
-pTable->GetRows("`FK_DesignObjVariation_Text`=" + StringUtils::itos(m_PK_DesignObjVariation_Text),rows);
-}
-void Row_DesignObjVariation_Text::DesignObjVariation_Text_Skin_Language_pschmask_FK_DesignObjVariation_Text_getrows(vector <class Row_DesignObjVariation_Text_Skin_Language_pschmask*> *rows)
-{
-PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
-
-class Table_DesignObjVariation_Text_Skin_Language_pschmask *pTable = table->database->DesignObjVariation_Text_Skin_Language_pschmask_get();
 pTable->GetRows("`FK_DesignObjVariation_Text`=" + StringUtils::itos(m_PK_DesignObjVariation_Text),rows);
 }
 

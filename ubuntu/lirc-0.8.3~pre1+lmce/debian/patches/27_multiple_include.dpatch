@@ -1,0 +1,38 @@
+#! /bin/sh /usr/share/dpatch/dpatch-run
+## 27_multiple_include.dpatch by Mario Limonciello <superm1@ubuntu.com>
+##
+## All lines beginning with `## DP:' are a description of the patch.
+## DP: Add support for "including" child lircd.conf's
+
+@DPATCH@
+diff -urNad lirc-0.8.3~pre1~/daemons/config_file.c lirc-0.8.3~pre1/daemons/config_file.c
+--- lirc-0.8.3~pre1~/daemons/config_file.c	2007-07-29 13:20:06.000000000 -0500
++++ lirc-0.8.3~pre1/daemons/config_file.c	2007-12-30 02:12:56.000000000 -0600
+@@ -690,7 +690,26 @@
+ 		if(val!=NULL){
+ 			val2=strtok(NULL, " \t");
+ 			LOGPRINTF(3,"\"%s\" \"%s\"",key,val);
+-                        if (strcasecmp("begin",key)==0){
++			if (strcasecmp("include",key)==0){
++                                FILE* childFile = fopen(val, "r");
++				if (childFile == NULL){
++					logprintf(LOG_ERR,"error opening child file defined at line %d:",line);
++					logprintf(LOG_ERR,"ignoring this child file for now.");
++				}
++				else{
++					if (!top_rem){
++						/* create first remote */
++						LOGPRINTF(2,"creating first remote");
++						top_rem = rem = read_config(childFile);
++					}else{
++						/* create new remote */
++						LOGPRINTF(2,"creating next remote");
++						rem->next=read_config(childFile);
++						rem=rem->next;
++					}
++					fclose(childFile);
++				}
++			}else if (strcasecmp("begin",key)==0){
+ 				if (strcasecmp("codes", val)==0){
+                                         /* init codes mode */
+ 					LOGPRINTF(2,"    begin codes");

@@ -137,7 +137,7 @@ PlutoGraphic *SDLGraphic::GetHighlightedVersion()
 		return NULL;
 
 	SDL_Surface *pSDL_Surface = SDL_CreateRGBSurface(SDL_SWSURFACE,
-		m_nWidth, m_nHeight, 32, rmask, gmask, bmask, amask);
+		m_nWidth, m_nHeight, BIT_PER_PIXEL, rmask, gmask, bmask, amask);
 
 	SDL_Rect SourceRect;
 	SourceRect.x = 0; SourceRect.y = 0;
@@ -194,7 +194,11 @@ Uint32 SDLGraphic::getpixel(SDL_Surface *pSDL_Surface,int x, int y)
 }
 
 //-----------------------------------------------------------------------------------------------------
+#ifdef MAEMO_NOKIA770
+void SDLGraphic::putpixel(SDL_Surface *pSDL_Surface,int x, int y, Uint16 pixel_color)
+#else
 void SDLGraphic::putpixel(SDL_Surface *pSDL_Surface,int x, int y, Uint32 pixel_color)
+#endif
 {
     // don't try to put a pixel outside the pSDL_Surface
     if (x < 0 || x >= pSDL_Surface->w || y < 0 || y >= pSDL_Surface->h)
@@ -210,7 +214,28 @@ void SDLGraphic::putpixel(SDL_Surface *pSDL_Surface,int x, int y, Uint32 pixel_c
         break;
 
     case 2:
-        * (Uint16 *) pixel = pixel_color;
+#ifdef MAEMO_NOKIA770		
+		* (Uint16 *) pixel = pixel_color;
+		
+		/*
+		Uint8 red, green, blue;
+
+		SDL_PixelFormat * fmt = pSDL_Surface->format;	
+		
+		SDL_GetRGB((Uint32)pixel_color, pSDL_Surface->format, &red, &green, &blue);		
+		
+		unsigned char *Dest = (unsigned char *) &pixel_color;
+		
+		* (Uint16 *) pixel = (Dest[0]  << rshift) + (Dest[1] << gshift) + (Dest[2] << bshift);
+		* (Uint16 *) pixel = ((red >> fmt->Rloss) << fmt->Rshift) +
+			         			((green >> fmt->Gloss) << fmt->Gshift) +
+			                 	((blue >> fmt->Bloss) << fmt->Bshift);
+		*/						
+   		
+		//LoggerWrapper::GetInstance()->Write(LV_STATUS, "pixel_color: 0x%x - %u %u %u - 0x%x\n", pixel_color, red, green, blue, pixel);
+#else
+		* (Uint16 *) pixel = pixel_color;
+#endif 
         break;
 
     case 3:
@@ -247,3 +272,4 @@ bool SDLGraphic::GetInMemoryBitmap(char*& pRawBitmapData, size_t& ulSize)
 	ulSize = 0;
 	return false;
 }
+

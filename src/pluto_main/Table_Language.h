@@ -128,21 +128,21 @@ void psc_mod_set(string val);
 void psc_restrict_set(long int val);
 
 		
-		bool FK_Language_TextPlacement_isNull();
+		bool Description_isNull();
+bool FK_Language_TextPlacement_isNull();
 bool psc_id_isNull();
 bool psc_batch_isNull();
 bool psc_user_isNull();
 bool psc_frozen_isNull();
-bool psc_mod_isNull();
 bool psc_restrict_isNull();
 
 			
-		void FK_Language_TextPlacement_setNull(bool val);
+		void Description_setNull(bool val);
+void FK_Language_TextPlacement_setNull(bool val);
 void psc_id_setNull(bool val);
 void psc_batch_setNull(bool val);
 void psc_user_setNull(bool val);
 void psc_frozen_setNull(bool val);
-void psc_mod_setNull(bool val);
 void psc_restrict_setNull(bool val);
 	
 	
@@ -161,26 +161,12 @@ void psc_restrict_setNull(bool val);
 
 		// Return the rows in other tables with foreign keys pointing here
 		void DesignObjVariation_DesignObjParameter_FK_Language_getrows(vector <class Row_DesignObjVariation_DesignObjParameter*> *rows);
-void DesignObjVariation_DesignObjParameter_pschist_FK_Language_getrows(vector <class Row_DesignObjVariation_DesignObjParameter_pschist*> *rows);
-void DesignObjVariation_DesignObjParameter_pschmask_FK_Language_getrows(vector <class Row_DesignObjVariation_DesignObjParameter_pschmask*> *rows);
 void DesignObjVariation_DesignObj_Skin_Language_FK_Language_getrows(vector <class Row_DesignObjVariation_DesignObj_Skin_Language*> *rows);
-void DesignObjVariation_DesignObj_Skin_Language_pschist_FK_Language_getrows(vector <class Row_DesignObjVariation_DesignObj_Skin_Language_pschist*> *rows);
-void DesignObjVariation_DesignObj_Skin_Language_pschmask_FK_Language_getrows(vector <class Row_DesignObjVariation_DesignObj_Skin_Language_pschmask*> *rows);
 void DesignObjVariation_Text_Skin_Language_FK_Language_getrows(vector <class Row_DesignObjVariation_Text_Skin_Language*> *rows);
-void DesignObjVariation_Text_Skin_Language_pschist_FK_Language_getrows(vector <class Row_DesignObjVariation_Text_Skin_Language_pschist*> *rows);
-void DesignObjVariation_Text_Skin_Language_pschmask_FK_Language_getrows(vector <class Row_DesignObjVariation_Text_Skin_Language_pschmask*> *rows);
 void Language_FK_Language_TextPlacement_getrows(vector <class Row_Language*> *rows);
-void Language_pschist_FK_Language_TextPlacement_getrows(vector <class Row_Language_pschist*> *rows);
-void Language_pschmask_FK_Language_TextPlacement_getrows(vector <class Row_Language_pschmask*> *rows);
 void Text_LS_FK_Language_getrows(vector <class Row_Text_LS*> *rows);
 void Text_LS_AltVersions_FK_Language_getrows(vector <class Row_Text_LS_AltVersions*> *rows);
-void Text_LS_AltVersions_pschist_FK_Language_getrows(vector <class Row_Text_LS_AltVersions_pschist*> *rows);
-void Text_LS_AltVersions_pschmask_FK_Language_getrows(vector <class Row_Text_LS_AltVersions_pschmask*> *rows);
-void Text_LS_pschist_FK_Language_getrows(vector <class Row_Text_LS_pschist*> *rows);
-void Text_LS_pschmask_FK_Language_getrows(vector <class Row_Text_LS_pschmask*> *rows);
 void Users_FK_Language_getrows(vector <class Row_Users*> *rows);
-void Users_pschist_FK_Language_getrows(vector <class Row_Users_pschist*> *rows);
-void Users_pschmask_FK_Language_getrows(vector <class Row_Users_pschmask*> *rows);
 
 
 		// Setup binary serialization

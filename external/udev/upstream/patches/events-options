@@ -1,0 +1,20 @@
+Author: Kay Sievers <kay.sievers@suse.de>
+Date: Sun, 3 Jul 2005 12:31:17 +0000 (+0200)
+Source: http://ehlo.org/~kay/gitweb.cgi?p=linux/hotplug/udev-kay.git;a=commitdiff;h=ffd5c6893756af43daf2a9a30bdcff13784a1ec4
+
+  allow OPTIONS to be recognized for /sys/modules /sys/devices events
+  
+  Signed-off-by: Kay Sievers <kay.sievers@suse.de>
+
+--- a/udev_rules.c
++++ b/udev_rules.c
+@@ -1089,9 +1089,6 @@ int udev_rules_get_run(struct udevice *u
+ 			break;
+ 
+ 		dbg("process rule");
+-		if (rule->run_operation == KEY_OP_UNSET)
+-			continue;
+-
+ 		if (rule->name_operation != KEY_OP_UNSET || rule->symlink_operation != KEY_OP_UNSET ||
+ 		    rule->mode != 0000 || rule->owner[0] != '\0' || rule->group[0] != '\0') {
+ 			dbg("skip rule that names a device");

@@ -33,8 +33,6 @@ using namespace std;
 #include "Table_Household.h"
 
 #include "Table_Household_Installation.h"
-#include "Table_Household_Installation_pschist.h"
-#include "Table_Household_Installation_pschmask.h"
 
 
 void Database_pluto_main::CreateTable_Household()
@@ -82,6 +80,7 @@ void Row_Household::Delete()
 	Row_Household *pRow = this; // Needed so we will have only 1 version of get_primary_fields_assign_from_row
 	
 	if (!is_deleted)
+	{
 		if (is_added)	
 		{	
 			vector<TableRow*>::iterator i;	
@@ -103,6 +102,7 @@ void Row_Household::Delete()
 			table->deleted_cachedRows[key] = this;
 			is_deleted = true;	
 		}	
+	}
 }
 
 void Row_Household::Reload()
@@ -144,7 +144,8 @@ is_null[3] = true;
 m_psc_user = 0;
 m_psc_frozen = 0;
 is_null[4] = false;
-is_null[5] = true;
+m_psc_mod = "0000-00-00 00:00:00";
+is_null[5] = false;
 is_null[6] = true;
 m_psc_restrict = 0;
 
@@ -212,9 +213,6 @@ return is_null[3];}
 bool Row_Household::psc_frozen_isNull() {PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
 
 return is_null[4];}
-bool Row_Household::psc_mod_isNull() {PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
-
-return is_null[5];}
 bool Row_Household::psc_restrict_isNull() {PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
 
 return is_null[6];}
@@ -234,10 +232,6 @@ is_modified=true;
 }
 void Row_Household::psc_frozen_setNull(bool val){PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
 is_null[4]=val;
-is_modified=true;
-}
-void Row_Household::psc_mod_setNull(bool val){PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
-is_null[5]=val;
 is_modified=true;
 }
 void Row_Household::psc_restrict_setNull(bool val){PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
@@ -864,20 +858,6 @@ void Row_Household::Household_Installation_FK_Household_getrows(vector <class Ro
 PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
 
 class Table_Household_Installation *pTable = table->database->Household_Installation_get();
-pTable->GetRows("`FK_Household`=" + StringUtils::itos(m_PK_Household),rows);
-}
-void Row_Household::Household_Installation_pschist_FK_Household_getrows(vector <class Row_Household_Installation_pschist*> *rows)
-{
-PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
-
-class Table_Household_Installation_pschist *pTable = table->database->Household_Installation_pschist_get();
-pTable->GetRows("`FK_Household`=" + StringUtils::itos(m_PK_Household),rows);
-}
-void Row_Household::Household_Installation_pschmask_FK_Household_getrows(vector <class Row_Household_Installation_pschmask*> *rows)
-{
-PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
-
-class Table_Household_Installation_pschmask *pTable = table->database->Household_Installation_pschmask_get();
 pTable->GetRows("`FK_Household`=" + StringUtils::itos(m_PK_Household),rows);
 }
 

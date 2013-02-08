@@ -17,8 +17,9 @@
 #include "Shoutcast_Radio_Plugin.h"
 #include "DCE/Logger.h"
 #include "PlutoUtils/FileUtils.h"
+#include "PlutoUtils/HttpUtils.h"
 #include "PlutoUtils/StringUtils.h"
-#include "PlutoUtils/Other.h"
+#include <libxml/xmlreader.h>
 
 #include <iostream>
 using namespace std;
@@ -27,12 +28,19 @@ using namespace DCE;
 #include "Gen_Devices/AllCommandsRequests.h"
 //<-dceag-d-e->
 
+#define UPDATE_SHOUTCAST 1
+
 //<-dceag-const-b->
 // The primary constructor when the class is created as a stand-alone device
 Shoutcast_Radio_Plugin::Shoutcast_Radio_Plugin(int DeviceID, string ServerAddress,bool bConnectEventHandler,bool bLocalMode,class Router *pRouter)
 	: Shoutcast_Radio_Plugin_Command(DeviceID, ServerAddress,bConnectEventHandler,bLocalMode,pRouter)
 //<-dceag-const-e->
 {
+        m_pAlarmManager = new AlarmManager();
+	m_pAlarmManager->Start(1);
+
+	// We re-use this update description object troughout the life of the plugin
+	m_pUpdate = new ShoutcastUpdate();
 }
 
 //<-dceag-const2-b->
@@ -47,7 +55,12 @@ Shoutcast_Radio_Plugin::Shoutcast_Radio_Plugin(Command_Impl *pPrimaryDeviceComma
 Shoutcast_Radio_Plugin::~Shoutcast_Radio_Plugin()
 //<-dceag-dest-e->
 {
-	
+	m_pAlarmManager->Stop();
+        delete m_pAlarmManager;
+	m_pAlarmManager = NULL;
+        if (m_pUpdate != NULL) {
+                delete m_pUpdate;
+	}
 }
 
 //<-dceag-getconfig-b->
@@ -59,6 +72,48 @@ bool Shoutcast_Radio_Plugin::GetConfig()
 
 	// Put your code here to initialize the data in this class
 	// The configuration parameters DATA_ are now populated
+
+	string sConfig = DATA_Get_Configuration();
+
+	vector<string> vectString;
+	StringUtils::Tokenize(sConfig,"\n",vectString);
+	for(uint i=0; i < vectString.size(); ++i) {
+	        string s = StringUtils::Replace(vectString[i],"\r","");
+		if (StringUtils::StartsWith(s, "baseURL=") && 8 < s.length()) {
+		        m_sBaseUrl = s.substr(8, s.length());
+		}
+		if (StringUtils::StartsWith(s, "xmlURL=") && 7 < s.length()) {
+		        m_sXMLUrl = s.substr(7, s.length());
+		}
+		if (StringUtils::StartsWith(s, "genresToLoad=") && 13 < s.length()) {
+		        string genreString = s.substr(13, s.length());
+			vector<string> vectGenres;
+			StringUtils::Tokenize(genreString, ",", vectGenres);
+			for (uint j = 0; j < vectGenres.size(); j++) {
+			        m_vectGenresToLoad.push_back(vectGenres[j]);
+			}
+		}
+		if (StringUtils::StartsWith(s, "limitStations=") && 14 < s.length()) {
+		        m_iLimit = atoi(s.substr(14, s.length()).c_str());
+		}
+		if (StringUtils::StartsWith(s, "getInterval=") && 12 < s.length()) {
+		        m_iGetInterval = atoi(s.substr(12, s.length()).c_str());
+		}
+		if (StringUtils::StartsWith(s, "runInterval=") && 12 < s.length()) {
+		        m_iRunInterval = atoi(s.substr(12, s.length()).c_str());
+		}
+	}
+	// Sanity check for some values, setting these too low will increase the load on the core
+	if (m_iGetInterval < 60) {
+	        m_iGetInterval = 60;
+	}
+	if (m_iRunInterval < 1800) {
+	        m_iRunInterval = 1800;
+	}
+	//start alarm if not already started
+	m_pUpdate->type = 'G';
+	if(-1 == m_pAlarmManager->FindAlarmByType(UPDATE_SHOUTCAST))
+	        m_pAlarmManager->AddRelativeAlarm(m_iGetInterval, this, UPDATE_SHOUTCAST, m_pUpdate);
 	return true;
 }
 
@@ -67,6 +122,17 @@ bool Shoutcast_Radio_Plugin::GetConfig()
 bool Shoutcast_Radio_Plugin::Register()
 //<-dceag-reg-e->
 {
+	m_pMedia_Plugin=( Media_Plugin * ) m_pRouter->FindPluginByTemplate(DEVICETEMPLATE_Media_Plugin_CONST);
+	if( !m_pMedia_Plugin )
+	{
+		LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"Cannot find sister plugins to shoutcast radio plugin");
+		return false;
+	}
+
+	vector<int> vectPK_DeviceTemplate;
+	vectPK_DeviceTemplate.push_back(DEVICETEMPLATE_Shoutcast_Radio_Plugin_CONST);  // No media associated with this. we're just going to populate the grids ourselves and maange our own media
+	m_pMedia_Plugin->RegisterMediaPlugin( this, this, vectPK_DeviceTemplate, true );
+
 	return Connect(PK_DeviceTemplate_get()); 
 }
 
@@ -107,7 +173,9 @@ void Shoutcast_Radio_Plugin::ReceivedUnknownCommand(string &sCMD_Result,Message 
 	sCMD_Result = "UNKNOWN COMMAND";
 }
 
-//<-dceag-sample-b->
+
+
+//<-dceag-sample-b->!
 /*		**** SAMPLE ILLUSTRATING HOW TO USE THE BASE CLASSES ****
 
 **** IF YOU DON'T WANT DCEGENERATOR TO KEEP PUTTING THIS AUTO-GENERATED SECTION ****
@@ -196,5 +264,293 @@ void Shoutcast_Radio_Plugin::SomeFunction()
 
 */
 
+class MediaStream *Shoutcast_Radio_Plugin::CreateMediaStream( class MediaHandlerInfo *pMediaHandlerInfo, int iPK_MediaProvider, vector<class EntertainArea *> &vectEntertainArea, MediaDevice *pMediaDevice, int iPK_Users, deque<MediaFile *> *dequeFilenames, int StreamID )
+{
+        LoggerWrapper::GetInstance()->Write(LV_CRITICAL, "Shoutcast_Radio_Plugin::CreateMediaStream() start");
 
+	return new MediaStream(pMediaHandlerInfo,iPK_MediaProvider,pMediaDevice,iPK_Users,DCE::st_Broadcast,StreamID);
+}
 
+bool Shoutcast_Radio_Plugin::StartMedia( class MediaStream *pMediaStream,string &sError )
+{
+        LoggerWrapper::GetInstance()->Write(LV_CRITICAL, "Shoutcast_Radio_Plugin::StartMedia() start");
+
+	return MediaHandlerBase::StartMedia(pMediaStream, sError);
+}
+
+bool Shoutcast_Radio_Plugin::StopMedia( class MediaStream *pMediaStream )
+{
+        LoggerWrapper::GetInstance()->Write(LV_CRITICAL, "Shoutcast_Radio_Plugin::StopMedia() start");
+    
+	return MediaHandlerBase::StopMedia(pMediaStream);
+}
+
+void Shoutcast_Radio_Plugin::PopulateDataGrid(string sToken,MediaListGrid *pMediaListGrid,int PK_MediaType, string sPK_Attribute, int PK_AttributeType_Sort, bool bShowFiles, string &sPK_MediaSubType, string &sPK_FileFormat, string &sPK_Attribute_Genres, string &sPK_Sources, string &sPK_Users_Private, int PK_Users, int iLastViewed, int *iPK_Variable, string *sValue_To_Assign )
+{
+        LoggerWrapper::GetInstance()->Write(LV_STATUS, "Shoutcast_Radio_Plugin::PopulateDataGrid() start");
+
+	//TODO: send message to user "Downloading data, please try again soon!" ?
+	if (m_vectGenres.empty()) {
+	        updateGenres();
+	}
+	if(sPK_Attribute.empty()==false )
+	{
+	        string genre = sPK_Attribute;
+	        if (m_mapGenreID.find(genre) == m_mapGenreID.end()) {
+		        updateStationsForGenre(genre);
+		}
+	        vector<Station> vectStations;  
+		getStationsByGenre(sPK_Attribute, vectStations);
+	  
+		LoggerWrapper::GetInstance()->Write(LV_STATUS, "Shoutcast_Radio_Plugin::PopulateDataGrid() going to add %d items", vectStations.size());
+		for (uint i = 0; i < vectStations.size(); i++) {
+		        Station station = vectStations[i];
+			string url = getStationURL(station.id);
+			FileBrowserInfo *pFileBrowserInfo = new FileBrowserInfo(station.name,"!E," + sToken + "," + url,0,StringUtils::SQLDateTime("2008-02-8"));
+			//  pFileBrowserInfo->m_PK_Picture = 102;
+			pMediaListGrid->m_listFileBrowserInfo.push_back(pFileBrowserInfo);
+		}
+		return;
+	} else {
+	        // List genres selected for current user (TODO: add proper user-based listing)
+	        for (uint i = 0; i < m_vectGenresToLoad.size(); i++) {
+		        string genre = m_vectGenresToLoad[i];
+			FileBrowserInfo *pFileBrowserInfo = new FileBrowserInfo(genre,"!e," + sToken + ","+genre,0,StringUtils::SQLDateTime("2008-02-10"));
+			//pFileBrowserInfo->m_PK_Picture = 100;
+			pMediaListGrid->m_listFileBrowserInfo.push_back(pFileBrowserInfo);
+		}
+	}
+	LoggerWrapper::GetInstance()->Write(LV_STATUS, "Shoutcast_Radio_Plugin::PopulateDataGrid() end");
+}
+
+void Shoutcast_Radio_Plugin::GetExtendedAttributes(string sType, string sPK_MediaSource, string sURL, string *sValue_To_Assign)
+{
+        LoggerWrapper::GetInstance()->Write(LV_STATUS, "Shoutcast_Radio_Plugin::GetExtendedAttributes() start, sURL = %s", sURL.c_str());
+        uint pos = sURL.find("id=");
+	if (pos != string::npos) {
+ 	        uint endpos = sURL.find("&");
+		int id = 0;
+		string sID = "";
+		LoggerWrapper::GetInstance()->Write(LV_STATUS, "Shoutcast_Radio_Plugin::GetExtendedAttributes() pos = %d, endpos = %d", pos, endpos);
+		if (endpos != string::npos && endpos < sURL.length()) {
+	                sID = sURL.substr(pos+3, endpos-pos-3);
+		} else {
+		        sID = sURL.substr(pos+3);
+		}
+		LoggerWrapper::GetInstance()->Write(LV_STATUS, "Shoutcast_Radio_Plugin::GetExtendedAttributes() id = %s", sID.c_str());
+		id = atoi(sID.c_str());
+		if (id > 0) {
+		        map<int, Station>::iterator it = m_mapIDStation.find(id);
+			if (it != m_mapIDStation.end()) {
+		                Station station = it->second;
+				*sValue_To_Assign = "FILE\t" + getStationURL(station.id) +
+			                "\tTITLE\t" + station.name +
+			                "\tSYNOPSIS\t" +
+			                "\tPICTURE\t";
+			}
+		}
+	}
+}
+
+string Shoutcast_Radio_Plugin::getStationURL(int id) {
+        string sURLSuffix = "&file=filename.pls";
+	string url = m_sBaseUrl + m_sTuneInBase + "?id=";
+	char cid[10];
+	sprintf(cid,"%d", id);
+	url = url + string(cid) + sURLSuffix;
+	return url;
+}
+
+string Shoutcast_Radio_Plugin::getLimitURL() {
+        if (m_iLimit > 0) {
+	  return "&limit=" + StringUtils::itos(m_iLimit);
+	} else {
+	  return "";
+	}
+}
+vector<string> Shoutcast_Radio_Plugin::getGenres() {
+        return m_vectGenres;
+}
+
+bool Shoutcast_Radio_Plugin::getStationsByGenre(string genre, vector<Station> &vectStations) {
+        LoggerWrapper::GetInstance()->Write(LV_STATUS, "Shoutcast_Radio_Plugin::getStationsByGenre() start");
+
+        map<string, vector<int> >::iterator it;
+	it = m_mapGenreID.find(genre);
+	if (it != m_mapGenreID.end()) {
+	        getStationById(it->second, vectStations);
+		return true;
+	}
+	return false;
+}
+
+void Shoutcast_Radio_Plugin::getStationById(vector<int> vectID, vector<Station> &vectStations) {
+        LoggerWrapper::GetInstance()->Write(LV_STATUS, "Shoutcast_Radio_Plugin::getStationById() start");
+        map<int, Station>::iterator it;
+	for(uint s=0;s< vectID.size();++s) {
+	        it = m_mapIDStation.find(vectID[s]);
+		if (it != m_mapIDStation.end()) {
+		        vectStations.push_back(it->second);
+		}
+	}
+}
+
+void Shoutcast_Radio_Plugin::updateGenres() {
+        LoggerWrapper::GetInstance()->Write(LV_STATUS, "Shoutcast_Radio_Plugin::updateGenres() start");
+
+	string data;
+	string res = HttpGet(m_sBaseUrl + m_sXMLUrl, &data);
+	if (res.compare("OK") != 0) {
+		LoggerWrapper::GetInstance()->Write(LV_WARNING, "Shoutcast_Radio_Plugin::updateGenres() Http GET FAILED!");
+		return;
+	}
+	xmlTextReaderPtr reader;
+	int ret;
+	
+	reader = xmlReaderForMemory(data.c_str(), data.size(), "", NULL, 0);
+	if (reader != NULL) {
+	        // go to next node
+	        ret = xmlTextReaderRead(reader);
+
+		m_vectGenres.clear();
+		while (ret == 1) {
+		        if (xmlTextReaderNodeType(reader) != XML_READER_TYPE_END_ELEMENT) {
+			        char *attrValue = (char*) xmlTextReaderGetAttribute(reader, (xmlChar*) "name");
+				if (attrValue) {
+				        m_vectGenres.push_back(string(attrValue));
+				}
+			}
+			ret = xmlTextReaderRead(reader);
+		}
+		xmlFreeTextReader(reader);
+		if (ret != 0) {
+		        LoggerWrapper::GetInstance()->Write(LV_WARNING, "Shoutcast_Radio_Plugin::updateGenres() failed to parse");
+		}
+	} else {
+		        LoggerWrapper::GetInstance()->Write(LV_WARNING, "Shoutcast_Radio_Plugin::updateGenres() unable to open");
+	}
+	LoggerWrapper::GetInstance()->Write(LV_WARNING, "Shoutcast_Radio_Plugin::updateGenres() end, genres = %d", m_vectGenres.size());
+}
+
+bool Shoutcast_Radio_Plugin::parseStation(xmlTextReaderPtr reader,Station& station) {
+
+        char *name = (char*) xmlTextReaderGetAttribute(reader, (xmlChar*)"name");
+	if (name) {
+	        station.name = string(name);
+	}
+	char *id = (char*) xmlTextReaderGetAttribute(reader, (xmlChar*)"id");
+	if (id) {
+	        station.id = atoi(id);
+	}
+	LoggerWrapper::GetInstance()->Write(LV_STATUS, "Shoutcast_Radio_Plugin::parseStation() name %s, id %s", name, id);
+
+	if (!name || !id) {
+	        // require at least id and name
+	        return false;
+	}
+	// bitrate
+	char *br = (char*) xmlTextReaderGetAttribute(reader, (xmlChar*)"br");
+	if (br) {
+	        station.br = atoi(br);
+	}
+	char *genre = (char*) xmlTextReaderGetAttribute(reader, (xmlChar*)"genre");
+	if (genre) {
+	        station.genre = string(genre);
+	}
+	// current track
+	char *ct = (char*) xmlTextReaderGetAttribute(reader, (xmlChar*)"ct");
+	if (ct) {
+	        station.ct = string(ct);
+	}
+	// listener count
+	char *lc = (char*) xmlTextReaderGetAttribute(reader, (xmlChar*)"cl");
+	if (lc) {
+	        station.lc = atoi(lc);
+	}
+
+	return true;
+}
+
+void Shoutcast_Radio_Plugin::updateStationsForGenre(string genre) {
+        LoggerWrapper::GetInstance()->Write(LV_STATUS, "Shoutcast_Radio_Plugin::updateStationsForGenre() start, genre = %s", genre.c_str());
+
+        string url = m_sBaseUrl + m_sXMLUrl + "?genre=" + genre + getLimitURL();
+	string data;
+	string res = HttpGet(url, &data);
+	if (res.compare("OK") != 0) {
+		LoggerWrapper::GetInstance()->Write(LV_WARNING, "Shoutcast_Radio_Plugin::updateStationsForGenres() Http GET FAILED!");
+		return;
+	}
+	xmlTextReaderPtr reader;
+	int ret;
+
+	reader = xmlReaderForMemory(data.c_str(), data.size(), "", NULL, 0);
+	if (reader != NULL) {
+	        // go to next node
+	        ret = xmlTextReaderRead(reader);
+		vector<int> vectGenreIDs;
+		while (ret == 1) {
+		  if (xmlTextReaderNodeType(reader) != XML_READER_TYPE_END_ELEMENT) {
+		    char* nodeName = (char*) xmlTextReaderConstName(reader);
+		    if (nodeName) {
+		      if (strcmp(nodeName, "tunein") == 0) {
+			LoggerWrapper::GetInstance()->Write(LV_STATUS, "Shoutcast_Radio_Plugin::updateStationsForGenre() nodeName is tunein ");
+			char *tunein = (char*) xmlTextReaderGetAttribute(reader, (xmlChar*)"base");
+			if (tunein) {
+			  m_sTuneInBase = string(tunein);
+			  LoggerWrapper::GetInstance()->Write(LV_STATUS, "Shoutcast_Radio_Plugin::updateStationsForGenre() m_sTuneInBase = %s", m_sTuneInBase.c_str());
+			}
+		      } else if (strcmp(nodeName, "station") == 0) {
+			Station station;
+			if (parseStation(reader, station)) {
+			  m_mapIDStation[station.id] = station;
+			  vectGenreIDs.push_back(station.id);
+			}
+		      }
+		    }
+		  }
+		  ret = xmlTextReaderRead(reader);
+		}
+		LoggerWrapper::GetInstance()->Write(LV_WARNING, "Shoutcast_Radio_Plugin::updateStationsForGenre() genre = %s, vectGenreIDs.size = %d", genre.c_str(),  vectGenreIDs.size());
+
+		m_mapGenreID[genre] = vectGenreIDs;
+		xmlFreeTextReader(reader);
+		if (ret != 0) {
+		  fprintf(stderr, "%s : failed to parse\n", url.c_str());
+		}
+	} else {
+	        LoggerWrapper::GetInstance()->Write(LV_CRITICAL, "Shoutcast_Radio_Plugin::updateStationsForGenre() unable to create xml reader");
+	}
+
+}
+
+void Shoutcast_Radio_Plugin::AlarmCallback(int id, void* param) {
+        ShoutcastUpdate* pUpdate = (ShoutcastUpdate*)param;
+	if (pUpdate != NULL) {
+	        if (pUpdate->type == 'G') {
+		        updateGenres();
+
+			// schedule update of stations
+		        pUpdate->genre = 0;
+			pUpdate->type = 'S';
+			m_pAlarmManager->AddRelativeAlarm(m_iGetInterval, this, UPDATE_SHOUTCAST, pUpdate);
+
+		} else if (pUpdate->type == 'S') {
+		        string genre = m_vectGenresToLoad[pUpdate->genre];
+			if (!genre.empty()) {
+			        updateStationsForGenre(genre);
+				// TODO: retry if failed
+			}
+			// schedule update of stations for next genre
+			if (pUpdate->genre < m_vectGenresToLoad.size()-1) {
+			        pUpdate->genre++;
+				m_pAlarmManager->AddRelativeAlarm(m_iGetInterval, this, UPDATE_SHOUTCAST, pUpdate);
+			} else {
+			  // schedule next genre update
+			  pUpdate->genre = 0;
+			  pUpdate->type = 'G';
+			  m_pAlarmManager->AddRelativeAlarm(m_iRunInterval, this, UPDATE_SHOUTCAST, pUpdate);
+			}
+		}
+	}
+}

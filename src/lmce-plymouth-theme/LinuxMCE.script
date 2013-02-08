@@ -1,0 +1,121 @@
+#
+# LinuxMCE plymouth theme
+# originally written 2011 by Serge WAGENER (Foxi352)
+#
+# Feel free to optimize :-)
+#
+# 21/01/2011 - Added info message above status messages (Foxi352)
+# 19/01/2011 - First release (Foxi352)
+#
+# -------------------------------------------
+
+# --- Initialize variables ---
+screen.width = Window.GetWidth();
+screen.height = Window.GetHeight();
+
+# LinuxMCE logo
+logo.image = Image("LinuxMCE-logo.png");
+logo.x = screen.width / 2 - logo.image.GetWidth() / 2;
+logo.y = 50;
+logo.z = -100;
+
+# Progress bar
+progress_box.image = Image("progress_box.png");
+progress_box.x = Window.GetWidth() / 2 - progress_box.image.GetWidth() / 2;
+progress_box.y = 500;
+progress_bar.original_image = Image("progress_bar.png");
+progress_bar.x = progress_box.x + 1;
+progress_bar.y = progress_box.y + 1;
+
+# Boot info message
+message.maxlines=5;
+message.maxlength=85;
+message.x = 60;
+message.y = 530;
+message.z = 0;
+
+# Boot status messages
+status.maxlines=5;
+status.maxlength=85;
+status.x = 60;
+status.y = 580;
+status.z = 0;
+
+# --- Show logo sprite ---
+logo.sprite = Sprite(logo.image);
+logo.sprite.SetPosition(logo.x, logo.y, logo.z);
+
+
+# --- Progress Bar ---
+
+progress_box.sprite = Sprite(progress_box.image);
+progress_box.sprite.SetPosition(progress_box.x, progress_box.y, 0);
+
+progress_bar.sprite = Sprite();
+progress_bar.sprite.SetPosition(progress_bar.x, progress_bar.y, 1);
+
+fun progress_callback (duration, progress)
+  {
+    if (progress_bar.image.GetWidth () != Math.Int (progress_bar.original_image.GetWidth () * progress))
+      {
+        progress_bar.image = progress_bar.original_image.Scale(progress_bar.original_image.GetWidth(progress_bar.original_image) * progress, progress_bar.original_image.GetHeight());
+        progress_bar.sprite.SetImage (progress_bar.image);
+      }
+  }
+
+# --- Status Messages ---
+
+for (i=0; i < status.maxlines; i++) {
+	  status.lines[i]= Image.Text("", 1, 1, 1);
+	  status.sprite[i] = Sprite();
+	  
+	  status.sprite[i].SetPosition(status.x, status.y + (i * 20), status.z);
+	}
+
+fun StringLength(string) {
+  index = 0;
+  str = String(string);
+  while(str.CharAt(index)) index++;
+  return index;
+}
+
+fun status_callback(text)
+{
+  #cut off long messages and append "..."
+  if (StringLength(text) > status.maxlength) {
+    text = ">"+text.SubString(0, status.maxlength - 3);
+    text += "...";
+  }
+  
+  #scroll up
+  for (i = 0; i < status.maxlines - 1; i++) {
+    status.lines[i] = status.lines[i+1];
+  }
+
+  status.lines[i] = Image.Text(text, 1, 1, 1);
+	 
+  # Re-positioning the text images
+  for (i = 0; i < status.maxlines; i++) {
+    status.sprite[i].SetImage(status.lines[i]);
+  }
+	
+}
+
+# --- Info Messages ---
+
+message.sprite = Sprite();
+message.sprite.SetPosition(message.x, message.y, message.z);
+
+fun message_callback(text)
+{
+  message.text = Image.Text(text, 0.95, 0.9, 0.09);
+  message.sprite.SetImage(message.text);
+}
+
+
+# --- Set callback functions ---
+
+Plymouth.SetMessageFunction(message_callback);
+Plymouth.SetUpdateStatusFunction(status_callback);
+Plymouth.SetBootProgressFunction(progress_callback);
+

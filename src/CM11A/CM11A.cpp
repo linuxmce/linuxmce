@@ -99,7 +99,7 @@ bool CM11A::Connect(int iPK_DeviceTemplate) {
 void CM11A::ReceivedCommandForChild(DeviceData_Impl *pDeviceData_Impl,string &sCMD_Result,Message *pMessage)
 //<-dceag-cmdch-e->
 {
-	string sChannel = pDeviceData_Impl->m_mapParameters_Find(DEVICEDATA_PortChannel_Number_CONST);
+	string sChannel = pDeviceData_Impl->mapParameters_Find(DEVICEDATA_PortChannel_Number_CONST);
 	LoggerWrapper::GetInstance()->Write(LV_STATUS, "Child device %d has channel %s.", pMessage->m_dwPK_Device_To, sChannel.c_str());
 	
 	switch(pMessage->m_dwID) {

@@ -1,0 +1,103 @@
+#!/usr/bin/perl
+
+use strict;
+use DBI;
+use Digest::MD5  qw(md5_hex);
+
+# Setup some variables
+#my %AGI;
+#my %HASH_U2E;
+#my %HASH_E2U;
+
+my $line;
+
+my $User = "";
+my $PINCode = "";
+
+my $RealPINCode = "";
+
+my $CONF_HOST="localhost";
+my $CONF_USER="root";
+my $CONF_PASSWD="";
+my $DB_PL_HANDLE;
+my $DB_STATEMENT;
+my $DB_SQL;
+my $DB_ROW;
+
+# Uncomment for AGI Debug Output
+#print STDERR "AGI Environment Dump:\n";
+#foreach my $i (sort keys %AGI) {
+#    print STDERR " -- $i = $AGI{$i}\n";
+#}
+
+#Initialize variables
+$User = $ARGV[0] if(defined($ARGV[0]));
+$PINCode = $ARGV[1] if(defined($ARGV[1]));
+
+# Trim Whitespace
+$User = trim($User);
+$PINCode = trim($PINCode);
+
+print "EXEC NoOp \"linuxmce-validate-user-pin.agi Called with ".$User." and ".$PINCode."\"\n"; 
+$line=<STDIN>;
+&checkresult($line);
+
+# Convert user's entry to MD5 Hash
+$PINCode = md5_hex($PINCode);
+
+print "EXEC NoOp \"PINCode: ".$PINCode."\"\n";
+$line=<STDIN>;
+&checkresult($line);
+
+$DB_PL_HANDLE = DBI->connect("dbi:mysql:database=pluto_main;host=".$CONF_HOST.";user=".$CONF_USER.";password=".$CONF_PASSWD.";") or die "Could not connect to MySQL";
+
+$DB_SQL = "SELECT PINCode FROM Users where Username='".$User."'";
+$DB_STATEMENT = $DB_PL_HANDLE->prepare($DB_SQL) or die "Couldn't prepare query '$DB_SQL': $DBI::errstr\n";
+$DB_STATEMENT->execute() or die "Couldn't execute query '$DB_SQL': $DBI::errstr\n";
+if($DB_ROW = $DB_STATEMENT->fetchrow_hashref())
+{
+    $RealPINCode = $DB_ROW->{'PINCode'};
+    print "EXEC NoOp \"RealPINCode: ".$RealPINCode."\"\n";
+    $line=<STDIN>;
+    &checkresult($line);
+}
+
+if($PINCode == $RealPINCode)
+{
+    print "EXEC Goto pluto-security-custom,s,1\n";
+    $line=<STDIN>;
+    &checkresult($line);
+}
+else
+{
+    print "EXEC Goto linuxmce-userpin,i,1\n";
+    $line=<STDIN>;
+    &checkresult($line);
+}
+
+# Perl checkresult function to retrieve our AGI command results
+sub checkresult {
+    my ($res) = @_;
+    my $retval;
+    chomp $res;
+    if ($res =~ /^200/) {
+        $res =~ /result=(-?\d+)/;
+        if (!length($1)) {
+            print STDERR "FAIL ($res)\n";
+        } else {
+            print STDERR "PASS ($1)\n";
+        }
+    } else {
+        print STDERR "FAIL (unexpected result '$res')\n";
+    }
+}
+
+# Perl trim function to remove whitespace from the start and end of the string
+sub trim($)
+{
+	my $string = shift;
+	$string =~ s/^\s+//;
+	$string =~ s/\s+$//;
+	return $string;
+}
+

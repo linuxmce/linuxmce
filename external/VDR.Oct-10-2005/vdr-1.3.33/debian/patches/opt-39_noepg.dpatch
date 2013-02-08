@@ -1,0 +1,212 @@
+#!/bin/sh /usr/share/dpatch/dpatch-run
+
+## opt-39_noepg.dpatch by Torsten Kunkel <vdr@tkunkel.de>
+##
+## downloaded from http://sjur.de/php/downloadcounter.php?mod=vdr&file=noepg_0.3-1.3.19.diff.gz
+##
+## solved conflict with other patches by Thomas Günther <tom@toms-cafe.de>
+##
+## All lines beginning with `## DP:' are a description of the patch.
+## DP: The patch allows to disable normal epg update for specified channels.
+## DP: This is useful if you get epg data of the channels from external sources.
+
+@DPATCH@
+diff -urNad --exclude=CVS --exclude=.svn ./channels.c /tmp/dpep-work.JT1Z0u/vdr-1.3.29/channels.c
+--- ./channels.c	2005-08-06 14:22:41.000000000 +0200
++++ /tmp/dpep-work.JT1Z0u/vdr-1.3.29/channels.c	2005-08-15 20:07:42.000000000 +0200
+@@ -7,6 +7,7 @@
+  * $Id: channels.c 1.44 2005/08/06 12:22:41 kls Exp $
+  */
+ 
++#include "config.h"
+ #include "channels.h"
+ #include <linux/dvb/frontend.h>
+ #include <ctype.h>
+@@ -994,6 +995,17 @@
+   return NULL;
+ }
+ 
++//TK
++bool cChannels::keinEPGScan(tChannelID kanalID)
++{
++  bool rc=false;
++
++  if (strstr(::Setup.noEPG,kanalID.ToString())!=NULL){
++    rc=true;
++  }
++  return rc;
++}
++
+ cString ChannelString(const cChannel *Channel, int Number)
+ {
+   char buffer[256];
+diff -urNad --exclude=CVS --exclude=.svn ./channels.h /tmp/dpep-work.JT1Z0u/vdr-1.3.29/channels.h
+--- ./channels.h	2005-08-06 13:23:32.000000000 +0200
++++ /tmp/dpep-work.JT1Z0u/vdr-1.3.29/channels.h	2005-08-15 20:07:42.000000000 +0200
+@@ -223,6 +223,7 @@
+       ///< modification has been made, and 2 if the user has made a modification.
+       ///< Calling this function resets the 'modified' flag to 0.
+   cChannel *NewChannel(const cChannel *Transponder, const char *Name, const char *ShortName, const char *Provider, int Nid, int Tid, int Sid, int Rid = 0);
++  bool keinEPGScan(tChannelID kanalID);//TK
+   };
+ 
+ extern cChannels Channels;
+diff -urNad --exclude=CVS --exclude=.svn ./config.c /tmp/dpep-work.JT1Z0u/vdr-1.3.29/config.c
+--- ./config.c	2005-08-13 15:47:08.000000000 +0200
++++ /tmp/dpep-work.JT1Z0u/vdr-1.3.29/config.c	2005-08-15 20:07:42.000000000 +0200
+@@ -268,6 +268,7 @@
+   EPGScanTimeout = 5;
+   EPGBugfixLevel = 2;
+   EPGLinger = 0;
++  strcpy(noEPG, "");
+   SVDRPTimeout = 300;
+   ZapTimeout = 3;
+   SortTimers = 1;
+@@ -426,6 +427,7 @@
+   else if (!strcasecmp(Name, "EPGScanTimeout"))      EPGScanTimeout     = atoi(Value);
+   else if (!strcasecmp(Name, "EPGBugfixLevel"))      EPGBugfixLevel     = atoi(Value);
+   else if (!strcasecmp(Name, "EPGLinger"))           EPGLinger          = atoi(Value);
++  else if (!strcasecmp(Name, "noEPG"))               strn0cpy(noEPG, Value, 999);
+   else if (!strcasecmp(Name, "SVDRPTimeout"))        SVDRPTimeout       = atoi(Value);
+   else if (!strcasecmp(Name, "ZapTimeout"))          ZapTimeout         = atoi(Value);
+   else if (!strcasecmp(Name, "SortTimers"))          SortTimers         = atoi(Value);
+@@ -491,6 +493,7 @@
+   Store("EPGScanTimeout",     EPGScanTimeout);
+   Store("EPGBugfixLevel",     EPGBugfixLevel);
+   Store("EPGLinger",          EPGLinger);
++  Store("noEPG",              noEPG);
+   Store("SVDRPTimeout",       SVDRPTimeout);
+   Store("ZapTimeout",         ZapTimeout);
+   Store("SortTimers",         SortTimers);
+diff -urNad --exclude=CVS --exclude=.svn ./config.h /tmp/dpep-work.JT1Z0u/vdr-1.3.29/config.h
+--- ./config.h	2005-08-13 11:43:27.000000000 +0200
++++ /tmp/dpep-work.JT1Z0u/vdr-1.3.29/config.h	2005-08-15 20:07:42.000000000 +0200
+@@ -228,6 +228,7 @@
+   int EPGScanTimeout;
+   int EPGBugfixLevel;
+   int EPGLinger;
++  char noEPG[999];
+   int SVDRPTimeout;
+   int ZapTimeout;
+   int SortTimers;
+diff -urNad --exclude=CVS --exclude=.svn ./eit.c /tmp/dpep-work.JT1Z0u/vdr-1.3.29/eit.c
+--- ./eit.c	2005-08-13 15:27:34.000000000 +0200
++++ /tmp/dpep-work.JT1Z0u/vdr-1.3.29/eit.c	2005-08-15 20:09:39.000000000 +0200
+@@ -35,6 +35,14 @@
+   if (!channel)
+      return; // only collect data for known channels
+ 
++  //TK
++  tChannelID kanalID;
++  kanalID=channel->GetChannelID();
++  if (Channels.keinEPGScan(kanalID)){
++    return;
++  }
++
++
+   cSchedule *pSchedule = (cSchedule *)Schedules->GetSchedule(channelID);
+   if (!pSchedule) {
+      pSchedule = new cSchedule(channelID);
+diff -urNad --exclude=CVS --exclude=.svn ./menu.c /tmp/dpep-work.JT1Z0u/vdr-1.3.29/menu.c
+--- ./menu.c	2005-08-14 17:14:29.000000000 +0200
++++ /tmp/dpep-work.JT1Z0u/vdr-1.3.29/menu.c	2005-08-15 20:07:42.000000000 +0200
+@@ -391,6 +391,9 @@
+   eOSState Edit(void);
+   eOSState New(void);
+   eOSState Delete(void);
++  eOSState noEPGAdd(void);
++  eOSState noEPGDel(void);
++  eOSState noEPGStatus(void);
+   virtual void Move(int From, int To);
+ public:
+   cMenuChannels(void);
+@@ -497,6 +500,79 @@
+   return osContinue;
+ }
+ 
++eOSState cMenuChannels::noEPGStatus(void)
++{
++  if (!HasSubMenu() && Count() > 0) {
++    cChannel *channel = GetChannel(Current());
++    tChannelID kanalID;
++    kanalID=channel->GetChannelID();
++    
++    if (strstr(::Setup.noEPG,kanalID.ToString())!=NULL){
++      Skins.Message(mtStatus, tr("Kanal in Kein-EPG-Liste!"));
++    }else{
++      Skins.Message(mtStatus, tr("Kanal nicht in Kein-EPG-Liste!"));
++    }
++  }
++  return osContinue;
++}
++
++//TK
++eOSState cMenuChannels::noEPGAdd(void)
++{
++  if (!HasSubMenu() && Count() > 0) {
++    cChannel *channel = GetChannel(Current());
++    tChannelID kanalID;
++    kanalID=channel->GetChannelID();
++    
++    if (strstr(::Setup.noEPG,kanalID.ToString())==NULL){
++      sprintf(::Setup.noEPG,"%s %s",::Setup.noEPG,*kanalID.ToString());
++      ::Setup.Save();
++      Skins.Message(mtStatus, tr("Kanal in Kein-EPG-Liste aufgenommen!"));
++    }else{
++      Skins.Message(mtError, tr("Kanal bereits in Kein-EPG-Liste enthalten!"));
++    }
++  }
++  return osContinue;
++}
++
++//TK
++eOSState cMenuChannels::noEPGDel(void)
++{
++  char neu[999];
++  char tmp[999];
++  char *sep = " ";
++  char *word, *brkt;
++  
++  if (!HasSubMenu() && Count() > 0) {
++    cChannel *channel = GetChannel(Current());
++    tChannelID kanalID;
++    kanalID=channel->GetChannelID();
++    
++    if (strstr(::Setup.noEPG,kanalID.ToString())!=NULL){
++      
++      strcpy(tmp,::Setup.noEPG);
++      
++      for (word = strtok_r(tmp, sep, &brkt);
++           word;
++           word = strtok_r(NULL, sep, &brkt))
++        {
++          if(strcmp(word,kanalID.ToString())!=0){
++            strcat(neu," ");
++            strcat(neu,word);
++          }
++        }
++      
++      strcpy(::Setup.noEPG,neu);
++      ::Setup.Save();
++      Skins.Message(mtStatus, tr("Kanal aus Kein-EPG-Liste gelöscht!"));
++    }else{
++      Skins.Message(mtError, tr("Kanal nicht in Kein-EPG-Liste vorhanden!"));
++    }
++  }
++  return osContinue;
++}
++
++
+ void cMenuChannels::Move(int From, int To)
+ {
+   int CurrentChannelNr = cDevice::CurrentChannel();
+@@ -534,6 +610,9 @@
+               case k0:      cMenuChannelItem::IncSortMode();
+                             Setup();
+                             break;
++              case k2:      return noEPGAdd();//TK
++              case k5:      return noEPGStatus();//TK
++              case k8:      return noEPGDel();//TK
+               case kOk:     return Switch();
+               case kRed:    return Edit();
+               case kGreen:  return New();

@@ -33,11 +33,7 @@ using namespace std;
 #include "Table_License.h"
 
 #include "Table_Package.h"
-#include "Table_Package_pschist.h"
-#include "Table_Package_pschmask.h"
 #include "Table_PaidLicense.h"
-#include "Table_PaidLicense_pschist.h"
-#include "Table_PaidLicense_pschmask.h"
 
 
 void Database_pluto_main::CreateTable_License()
@@ -85,6 +81,7 @@ void Row_License::Delete()
 	Row_License *pRow = this; // Needed so we will have only 1 version of get_primary_fields_assign_from_row
 	
 	if (!is_deleted)
+	{
 		if (is_added)	
 		{	
 			vector<TableRow*>::iterator i;	
@@ -106,6 +103,7 @@ void Row_License::Delete()
 			table->deleted_cachedRows[key] = this;
 			is_deleted = true;	
 		}	
+	}
 }
 
 void Row_License::Reload()
@@ -139,10 +137,8 @@ void Row_License::SetDefaultValues()
 {
 	m_PK_License = 0;
 is_null[0] = false;
-m_Description = "";
-is_null[1] = false;
-m_Define = "";
-is_null[2] = false;
+is_null[1] = true;
+is_null[2] = true;
 is_null[3] = true;
 is_null[4] = true;
 m_RequiresPayment = 0;
@@ -155,7 +151,8 @@ is_null[8] = true;
 m_psc_user = 0;
 m_psc_frozen = 0;
 is_null[9] = false;
-is_null[10] = true;
+m_psc_mod = "0000-00-00 00:00:00";
+is_null[10] = false;
 is_null[11] = true;
 m_psc_restrict = 0;
 
@@ -241,6 +238,12 @@ void Row_License::psc_restrict_set(long int val){PLUTO_SAFETY_LOCK_ERRORSONLY(sl
 m_psc_restrict = val; is_modified=true; is_null[11]=false;}
 
 		
+bool Row_License::Description_isNull() {PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
+
+return is_null[1];}
+bool Row_License::Define_isNull() {PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
+
+return is_null[2];}
 bool Row_License::Summary_isNull() {PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
 
 return is_null[3];}
@@ -262,14 +265,19 @@ return is_null[8];}
 bool Row_License::psc_frozen_isNull() {PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
 
 return is_null[9];}
-bool Row_License::psc_mod_isNull() {PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
-
-return is_null[10];}
 bool Row_License::psc_restrict_isNull() {PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
 
 return is_null[11];}
 
 			
+void Row_License::Description_setNull(bool val){PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
+is_null[1]=val;
+is_modified=true;
+}
+void Row_License::Define_setNull(bool val){PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
+is_null[2]=val;
+is_modified=true;
+}
 void Row_License::Summary_setNull(bool val){PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
 is_null[3]=val;
 is_modified=true;
@@ -298,10 +306,6 @@ void Row_License::psc_frozen_setNull(bool val){PLUTO_SAFETY_LOCK_ERRORSONLY(sl,t
 is_null[9]=val;
 is_modified=true;
 }
-void Row_License::psc_mod_setNull(bool val){PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
-is_null[10]=val;
-is_modified=true;
-}
 void Row_License::psc_restrict_setNull(bool val){PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
 is_null[11]=val;
 is_modified=true;
@@ -328,8 +332,8 @@ PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
 if (is_null[1])
 return "NULL";
 
-char *buf = new char[61];
-db_wrapper_real_escape_string(table->database->m_pDB, buf, m_Description.c_str(), (unsigned long) min((size_t)30,m_Description.size()));
+char *buf = new char[181];
+db_wrapper_real_escape_string(table->database->m_pDB, buf, m_Description.c_str(), (unsigned long) min((size_t)90,m_Description.size()));
 string s=string()+"\""+buf+"\"";
 delete[] buf;
 return s;
@@ -342,8 +346,8 @@ PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
 if (is_null[2])
 return "NULL";
 
-char *buf = new char[61];
-db_wrapper_real_escape_string(table->database->m_pDB, buf, m_Define.c_str(), (unsigned long) min((size_t)30,m_Define.size()));
+char *buf = new char[181];
+db_wrapper_real_escape_string(table->database->m_pDB, buf, m_Define.c_str(), (unsigned long) min((size_t)90,m_Define.size()));
 string s=string()+"\""+buf+"\"";
 delete[] buf;
 return s;
@@ -357,7 +361,7 @@ if (is_null[3])
 return "NULL";
 
 char *buf = new char[5000000];
-db_wrapper_real_escape_string(table->database->m_pDB, buf, m_Summary.c_str(), (unsigned long) min((size_t)16777215,m_Summary.size()));
+db_wrapper_real_escape_string(table->database->m_pDB, buf, m_Summary.c_str(), (unsigned long) min((size_t)50331645,m_Summary.size()));
 string s=string()+"\""+buf+"\"";
 delete[] buf;
 return s;
@@ -370,8 +374,8 @@ PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
 if (is_null[4])
 return "NULL";
 
-char *buf = new char[201];
-db_wrapper_real_escape_string(table->database->m_pDB, buf, m_URL.c_str(), (unsigned long) min((size_t)100,m_URL.size()));
+char *buf = new char[601];
+db_wrapper_real_escape_string(table->database->m_pDB, buf, m_URL.c_str(), (unsigned long) min((size_t)300,m_URL.size()));
 string s=string()+"\""+buf+"\"";
 delete[] buf;
 return s;
@@ -1107,39 +1111,11 @@ PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
 class Table_Package *pTable = table->database->Package_get();
 pTable->GetRows("`FK_License`=" + StringUtils::itos(m_PK_License),rows);
 }
-void Row_License::Package_pschist_FK_License_getrows(vector <class Row_Package_pschist*> *rows)
-{
-PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
-
-class Table_Package_pschist *pTable = table->database->Package_pschist_get();
-pTable->GetRows("`FK_License`=" + StringUtils::itos(m_PK_License),rows);
-}
-void Row_License::Package_pschmask_FK_License_getrows(vector <class Row_Package_pschmask*> *rows)
-{
-PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
-
-class Table_Package_pschmask *pTable = table->database->Package_pschmask_get();
-pTable->GetRows("`FK_License`=" + StringUtils::itos(m_PK_License),rows);
-}
 void Row_License::PaidLicense_FK_License_getrows(vector <class Row_PaidLicense*> *rows)
 {
 PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
 
 class Table_PaidLicense *pTable = table->database->PaidLicense_get();
-pTable->GetRows("`FK_License`=" + StringUtils::itos(m_PK_License),rows);
-}
-void Row_License::PaidLicense_pschist_FK_License_getrows(vector <class Row_PaidLicense_pschist*> *rows)
-{
-PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
-
-class Table_PaidLicense_pschist *pTable = table->database->PaidLicense_pschist_get();
-pTable->GetRows("`FK_License`=" + StringUtils::itos(m_PK_License),rows);
-}
-void Row_License::PaidLicense_pschmask_FK_License_getrows(vector <class Row_PaidLicense_pschmask*> *rows)
-{
-PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
-
-class Table_PaidLicense_pschmask *pTable = table->database->PaidLicense_pschmask_get();
 pTable->GetRows("`FK_License`=" + StringUtils::itos(m_PK_License),rows);
 }
 

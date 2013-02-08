@@ -1,6 +1,6 @@
 /*
  *
- *  $Id: pvrusb2-demod.c 1563 2007-02-28 03:30:33Z isely $
+ *  $Id: pvrusb2-demod.c 2226 2009-03-07 05:17:32Z isely $
  *
  *  Copyright (C) 2005 Mike Isely <isely@pobox.com>
  *  Copyright (C) 2004 Aurelien Alleaume <slts@free.fr>
@@ -33,6 +33,7 @@
 #include <media/v4l2-common.h>
 #endif
 
+#ifdef PVR2_ENABLE_OLD_I2COPS
 #ifdef PVR2_ENABLE_TDA9887
 
 struct pvr2_demod_handler {
@@ -117,6 +118,7 @@ int pvr2_i2c_demod_setup(struct pvr2_hdw *hdw,struct pvr2_i2c_client *cp)
 }
 
 #endif
+#endif /* PVR2_ENABLE_OLD_I2COPS */
 
 
 /*

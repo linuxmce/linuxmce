@@ -4,55 +4,94 @@
 . /usr/local/lmce-build/common/logging.sh
 
 set -e
-set -x
+#set -x
+
+function try_deb() {
+	# we try to download the needed file
+	# from deb.linuxmce.org, and only 
+	# create an empty file, if deb doesn't
+	# carry it.
+	file=$1
+	wget http://deb.linuxmce.org/$1 || touch $1
+}
+	
 
 function fake_win32bins() {
-	touch ${svn_dir}/trunk/src/bin/Pluto_S60.sis
-	touch ${svn_dir}/trunk/src/bin/Orbiter.CAB
-	touch ${svn_dir}/trunk/src/bin/Orbiter_Treo.CAB
+	pushd ${svn_dir}/${svn_branch_name}/src/bin
+	try_deb Pluto_S60.sis
+	try_deb Pluto_S60.sisx
+	try_deb Orbiter.CAB
+	try_deb Orbiter_Treo.CAB
 
-	touch ${svn_dir}/trunk/src/bin/UpdateBinary.exe
-	touch ${svn_dir}/trunk/src/bin/UpdateBinaryCE.exe 
-	touch ${svn_dir}/trunk/src/bin/UpdateBinaryCE_x86.exe
-	touch ${svn_dir}/trunk/src/bin/{Orbiter_Win32.dat,Orbiter_CeNet4_XScale.dat}
-	touch "${svn_dir}/trunk/src/bin/Symbian Series 60 mobile.vmc"
-	touch "${svn_dir}/trunk/src/bin/Windows Mobile Smartphone.vmc"
-	touch ${svn_dir}/trunk/src/bin/Orbiter_CeNet4_x86.dat
+	try_deb UpdateBinary.exe
+	try_deb UpdateBinaryCE.exe 
+	try_deb UpdateBinaryCE_x86.exe
+	try_deb Orbiter_CeNet4_XScale.dat
+	try_deb Orbiter_Win32.dat
+	touch "Symbian Series 60 mobile.vmc"
+	touch "Windows Mobile Smartphone.vmc"
+	try_deb Orbiter_CeNet4_x86.dat
 
-	touch ${svn_dir}/trunk/src/bin/OrbiterInstaller.msi
-	touch ${svn_dir}/trunk/src/bin/OrbiterCE_SDL.CAB
-	touch ${svn_dir}/trunk/src/bin/Orbiter_CeNet4_XScale.CAB
-	touch ${svn_dir}/trunk/src/bin/Orbiter_CeNet4_x86.CAB
-	touch ${svn_dir}/trunk/src/bin/ImportContacts.zip
+	try_deb OrbiterInstaller.msi
+	try_deb OrbiterCE_SDL.CAB
+	try_deb Orbiter_CeNet4_XScale.CAB
+	try_deb Orbiter_CeNet4_x86.CAB
+	try_deb ImportContacts.zip
 
-	touch ${svn_dir}/trunk/src/bin/Orbiter.exe
-	touch ${svn_dir}/trunk/src/bin/Orbiter_CeNet4_XScale.exe
-	touch ${svn_dir}/trunk/src/bin/OrbiterSmartphone.exe
-	touch ${svn_dir}/trunk/src/bin/OrbiterCE_SDL.exe
-	touch ${svn_dir}/trunk/src/bin/Orbiter_CeNet4_x86.exe
+	try_deb Orbiter.exe
+	try_deb Orbiter_CeNet4_XScale.exe
+	try_deb OrbiterSmartphone.exe
+	try_deb OrbiterCE_SDL.exe
+	try_deb Orbiter_CeNet4_x86.exe
 
-	touch ${svn_dir}/trunk/src/bin/AYGSHELL.DLL
-	touch ${svn_dir}/trunk/src/bin/PthreadsCE.dll
-	touch ${svn_dir}/trunk/src/bin/Orbiter.MD5
-	touch ${svn_dir}/trunk/src/bin/logo.gif
+	try_deb AYGSHELL.DLL
+	try_deb PthreadsCE.dll
+	try_deb Orbiter.MD5
+	try_deb logo.gif
 
-	touch ${svn_dir}/trunk/src/bin/PlutoBaSInstaller.msi
-	touch ${svn_dir}/trunk/src/bin/PlutoRebootSetup.msi
+	try_deb PlutoBaSInstaller.msi
+	try_deb PlutoRebootSetup.msi
+
+#	wget -q http://hob.dyndns.org/javamo/JavaMO.jar
+#	wget -q http://hob.dyndns.org/javamo/JavaMO.jad
+        cp ${svn_dir}/${svn_branch_name}/src/Orbiter/Maemo/fremantle.install .
+        
+	try_deb JavaMO.jar
+	try_deb JavaMO.jad
+	popd
+		
+
 }
 
 function import_win32bins() {
-	pushd ${svn_dir}/trunk/src/bin
-	wget --ftp-user=ftp --ftp-password=toomanypeopledownloading ftp://builder32.linuxmce.com/WinBinaries/Windows_Output_LinuxMCE/src/bin/*
-	popd
+	pushd ${svn_dir}/${svn_branch_name}/src/bin
+	wget --ftp-user="$win32_ftp_user" --ftp-password="$win32_ftp_password" \
+		"$win32_ftp_url"/bin/*
 
-	pushd ${svn_dir}/trunk/src/lib
-	wget --ftp-user=ftp --ftp-password=toomanypeopledownloading ftp://builder32.linuxmce.com/WinBinaries/Windows_Output_LinuxMCE/src/lib/* 
-	popd
+	cp ${svn_dir}/${svn_branch_name}/src/Orbiter/Maemo/fremantle.install .
+
+	wget -q http://hob.dyndns.org/javamo/JavaMO.jar
+	wget -q http://hob.dyndns.org/javamo/JavaMO.jad
+	
+	touch JavaMO.jar
+	touch JavaMO.jad
+
+	pushd ${svn_dir}/${svn_branch_name}/src/lib
+	wget --ftp-user="$win32_ftp_user" --ftp-password="$win32_ftp_password" \
+		"$win32_ftp_url"/lib/* 
+	
 }
 
 DisplayMessage "*** STEP: Importing WIN32 binaries"
 trap 'Error "Undefined error in $0"' EXIT
 
-import_win32bins
+if [ x"$win32_create_fake" = x"yes" ] ; then
+	fake_win32bins
+elif [ x"$win32_ftp_url" != x"" -a x"$win32_ftp_user" != x"" ] ; then
+	import_win32bins
+else
+	echo "You must either define win32_create_fake OR "
+	echo "define the win32_ftp variables"
+fi
 
 trap - EXIT

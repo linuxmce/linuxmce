@@ -1,0 +1,51 @@
+prevent autotools from getting run on every build.
+
+(C) 2006 Hector Garcia <hector@debian.org>
+(C) 2008 Stefan Lippers-Hollmann <s.l-h@gmx.de>, rediffed
+
+Index: lirc-0.8.4a/Makefile.in
+===================================================================
+--- lirc-0.8.4a.orig/Makefile.in	2008-11-08 19:42:24.000000000 -0600
++++ lirc-0.8.4a/Makefile.in	2008-11-08 21:32:04.000000000 -0600
+@@ -38,11 +38,6 @@
+ pkgincludedir = $(includedir)/@PACKAGE@
+ top_builddir = .
+ 
+-ACLOCAL = @ACLOCAL@
+-AUTOCONF = @AUTOCONF@
+-AUTOMAKE = @AUTOMAKE@
+-AUTOHEADER = @AUTOHEADER@
+-
+ INSTALL = @INSTALL@
+ INSTALL_PROGRAM = @INSTALL_PROGRAM@
+ INSTALL_DATA = @INSTALL_DATA@
+@@ -167,8 +162,7 @@
+ distclean-libtool:
+ 	-rm -f libtool
+ $(srcdir)/Makefile.in:  Makefile.am  $(top_srcdir)/configure.ac $(ACLOCAL_M4)
+-	cd $(top_srcdir) && \
+-	  $(AUTOMAKE) --gnu  Makefile
++
+ Makefile:  $(srcdir)/Makefile.in  $(top_builddir)/config.status
+ 	cd $(top_builddir) && \
+ 	  CONFIG_HEADERS= CONFIG_LINKS= \
+@@ -177,10 +171,9 @@
+ $(top_builddir)/config.status: $(srcdir)/configure $(CONFIG_STATUS_DEPENDENCIES)
+ 	$(SHELL) ./config.status --recheck
+ $(srcdir)/configure:  $(srcdir)/configure.ac $(ACLOCAL_M4) $(CONFIGURE_DEPENDENCIES)
+-	cd $(srcdir) && $(AUTOCONF)
+ 
+ $(ACLOCAL_M4):  configure.ac acinclude.m4
+-	cd $(srcdir) && $(ACLOCAL) $(ACLOCAL_AMFLAGS)
++
+ config.h: stamp-h
+ 	@if test ! -f $@; then \
+ 		rm -f stamp-h; \
+@@ -201,7 +194,6 @@
+ $(srcdir)/./stamp-h.in: $(top_srcdir)/configure.ac $(ACLOCAL_M4) 
+ 	@rm -f $(srcdir)/./stamp-h.in $(srcdir)/./stamp-h.inT
+ 	@echo timestamp > $(srcdir)/./stamp-h.inT 2> /dev/null
+-	cd $(top_srcdir) && $(AUTOHEADER)
+ 	@mv $(srcdir)/./stamp-h.inT $(srcdir)/./stamp-h.in
+ 
+ distclean-hdr:

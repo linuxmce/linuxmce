@@ -7,6 +7,8 @@
 #include "ServerSocket.h"
 #include "SocketException.h"
 #include "TLV.h"
+#include <stdio.h>
+#include <unistd.h>
 
 #define DEBUG
 
@@ -81,10 +83,11 @@ int main(int argc, char **argv) {
 	}
 
 	bool isConnected = false;
-	
+	my_bool reconnect = true;
 	MYSQL mysql;
 	mysql_init(&mysql);
-	
+	mysql_options(&mysql, MYSQL_OPT_RECONNECT, &reconnect);
+
 	unsigned long result_id=0;
 	map<unsigned long, MYSQL_RES*> my_results;
 
@@ -115,8 +118,13 @@ int main(int argc, char **argv) {
 				unlink(unix_socket.c_str());
 			}
 			else
+			{
 				LOG << "Connected OK" << endl;
-
+				if( mysql_set_character_set( &mysql, "utf8" ) )
+					LOG << "Changing character set for connection to UTF-8\n";
+				else
+					LOG << "FAILED: " <<  "Failed to change character set for connection to UTF-8: " << mysql_error(&mysql) << endl;					
+			}	
 			try
 			{
 				while ( runConnection )

@@ -108,10 +108,8 @@ public:
 		Locked m_eLocked; // Indicates if the drive is in use, if so for what, or available
 		void *m_pLockedPtr; // Whatever did the lock
 		int m_dwPK_Device;
-		int m_PK_Disc; // The id of the disc inserted
 
 		void EVENT_Media_Inserted(int iFK_MediaType,string sMRL,string sID,string sName);
-		void EVENT_Media_Removed();
 		void EVENT_Ripping_Progress(string sText,int iResult,string sValue,string sName,int iEK_Disc);
 		
 	public:
@@ -131,7 +129,6 @@ public:
 		bool isRipping();
 		void UpdateDiscLocation(char cType,int PK_Disc=-1);  // An unknown type
 		void GetTracksForDisc(class Row_Disc *pRow_Disc,map<int,string> &mapTracks);
-		int m_PK_Disc_get() { return m_PK_Disc; } // The id of the disc inserted
 
 		// TODO: write accessors for these
 		DeviceData_Base *m_pDevice_AppServer;

@@ -1,0 +1,54 @@
+import QtQuick 1.0
+import com.nokia.android 1.1
+
+
+Rectangle {
+    id:buttonBase
+    property alias buttontext: buttonLabel.text
+    property alias buttontextcolor: buttonLabel.color
+    property alias buttontextfontsize: buttonLabel.font.pointSize
+    property alias buttontextbold: buttonLabel.font.bold
+    property alias buttontextitalic: buttonLabel.font.italic
+    property alias buttontextzindex: buttonLabel.z
+    property alias buttonsqradius:  buttonBase.radius
+    property alias buttonbordercolor: buttonBase.border
+    property alias buttonopacity: buttonimage.opacity
+
+    height: style.stdbuttonh
+    width: style.stdbuttonw
+
+    radius: 1
+    Image {
+        id: buttonimage
+        source: ""
+        height: style.stdbuttonh
+        width: style.stdbuttonw
+
+    }
+    StyledText {
+        id: buttonLabel
+        anchors.centerIn: parent
+        text:"null ipsum delorium"        
+        verticalAlignment: Text.AlignVCenter
+        horizontalAlignment: Text.AlignHCenter
+        anchors.fill: parent
+        anchors.margins: 5       
+        wrapMode: Text.WordWrap
+       }
+
+    MouseArea{
+        anchors.fill: parent
+        hoverEnabled: true
+        onEntered: {
+
+            buttonimage.opacity = .5
+        }
+        onExited: {
+
+            buttonimage.opacity = 1
+        }
+    }
+
+}
+
+

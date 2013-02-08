@@ -17,7 +17,7 @@ wget --timeout=10 -O "$OutputFile" "$URL"
 # test if offline
 RET=$?
 if [[ "$RET" == "1" ]]; then
-        /usr/pluto/bin/MessageSend dcerouter 0 -305 1 741 159 53 9 'The device was added but is missing some config data which can be downloaded only from internet. The device will not work properly until that info is downloaded.'
+        /usr/pluto/bin/MessageSend "$DCERouter" 0 -305 1 741 159 53 9 'The device was added but is missing some config data which can be downloaded only from internet. The device will not work properly until that info is downloaded.'
         exit 1
 fi
 
@@ -45,11 +45,7 @@ if [[ "$Table" != ""  && "$PSC" != "" ]]; then
 	fi
 fi
 
-QPass=
-if [[ -n "$MySqlPassword" ]]; then
-	QPass="-p$MySqlPassword"
-fi
-mysql -f -u $MySqlUser -h $MySqlHost $QPass "$MySqlDBName" <"$OutputFile"
+mysql -f $MYSQL_DB_CRED "$MySqlDBName" <"$OutputFile"
 
 if [[ "$Table" != ""  && "$PSC" != "" ]]; then
 	## Reset the psc_mod of the records that where syncronized

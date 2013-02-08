@@ -1,0 +1,36 @@
+<?
+$TEXT_NETWORK_SETTINGS_CONST='Network settings';
+$TEXT_NO_DEVICEDATA_NETWORK_INTERFACES_CONST='No record in Device_DeviceData for Network Interfaces.';
+$TEXT_OFFLINEMODE_CONST='OfflineMode';
+$TEXT_CORE_IDENTIFICATION_CONST='Core identification on local network';
+$TEXT_RESET_CONST='Reset';
+$TEXT_COMPUTER_NAME_CONST='Computer name';
+$TEXT_DOMAIN_CONST='Domain name';
+$TEXT_CORE_SEEN_FROM_INTERNET_CONST='Your core as seen from the Internet';
+$TEXT_OUTSIDE_IP_CONST='Outside IP';
+$TEXT_OUTSIDE_HOSTNAME_CONST='Outside hostname';
+$TEXT_DHCP_SERVERS_CONST='DHCP, RA and VPN servers on local network';
+$TEXT_PPPOE_ENABLED_CONST='Use PPPoE for xDSL';
+$TEXT_PPPOE_USER_CONST='Username';
+$TEXT_PPPOE_PASS_CONST='Password';
+$TEXT_PPPOE_IPV6_CONST='Native IPv6';
+$TEXT_IPV4_DHCP_ENABLED_CONST='IPv4 DHCP server enabled using the following IP range:';
+$TEXT_IPV4_DHCP_NONLMCE_ENABLED_CONST='Also serve non LinuxMCE devices using the following range:';
+$TEXT_IPV6_RA_ENABLED_CONST='IPv6 Router Advertisement enabled with prefix';
+$TEXT_VPN_ENABLED_CONST='L2TP/IPSEC VPN server enabled with preshared key (PSK)';
+$TEXT_VPN_CLIENT_RANGE_CONST='Range for VPN clients';
+$TEXT_NUMBER_OF_NIC_CONST='Number of core\'s network adapters';
+$TEXT_EXTERNAL_NIC_CONST='External network card';
+$TEXT_INTERFACE_DISABLED='Disabled';
+$TEXT_INTERFACE_RA='Autoconf';
+$TEXT_INTERFACE_DHCP='DHCP';
+$TEXT_INTERFACE_STATIC='Static';
+$TEXT_NETMASK_CONST='Subnet mask';
+$TEXT_PREFIX_LENGTH_CONST='Prefix length';
+$TEXT_GATEWAY_CONST='Gateway';
+$TEXT_NAMESERVER_CONST='Nameserver';
+$TEXT_INTERNAL_NIC_CONST='Internal network card';
+$TEXT_SWAP_INTERFACES_CONST='Swap Interfaces';
+$TEXT_OPEN_FIREWALL_CONST='You may need to open up ports in the firewall for some programs that run on your internal computers, like video conferencing, file sharing, etc.  <br />To do this, visit the Advanced, <a href="index.php?section=firewall">Firewall</a> page.';
+$TEXT_UPDATING_SETTINGS_CONST='Network will be reconfigured. This may take some time and active connections will probably be dropped !';
+?>

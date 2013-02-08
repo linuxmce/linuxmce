@@ -33,11 +33,7 @@ using namespace std;
 #include "Table_Template.h"
 
 #include "Table_CommandGroup.h"
-#include "Table_CommandGroup_pschist.h"
-#include "Table_CommandGroup_pschmask.h"
 #include "Table_EventHandler.h"
-#include "Table_EventHandler_pschist.h"
-#include "Table_EventHandler_pschmask.h"
 
 
 void Database_pluto_main::CreateTable_Template()
@@ -85,6 +81,7 @@ void Row_Template::Delete()
 	Row_Template *pRow = this; // Needed so we will have only 1 version of get_primary_fields_assign_from_row
 	
 	if (!is_deleted)
+	{
 		if (is_added)	
 		{	
 			vector<TableRow*>::iterator i;	
@@ -106,6 +103,7 @@ void Row_Template::Delete()
 			table->deleted_cachedRows[key] = this;
 			is_deleted = true;	
 		}	
+	}
 }
 
 void Row_Template::Reload()
@@ -139,8 +137,7 @@ void Row_Template::SetDefaultValues()
 {
 	m_PK_Template = 0;
 is_null[0] = false;
-m_Description = "";
-is_null[1] = false;
+is_null[1] = true;
 is_null[2] = true;
 is_null[3] = true;
 m_psc_id = 0;
@@ -150,7 +147,8 @@ is_null[5] = true;
 m_psc_user = 0;
 m_psc_frozen = 0;
 is_null[6] = false;
-is_null[7] = true;
+m_psc_mod = "0000-00-00 00:00:00";
+is_null[7] = false;
 is_null[8] = true;
 m_psc_restrict = 0;
 
@@ -218,6 +216,9 @@ void Row_Template::psc_restrict_set(long int val){PLUTO_SAFETY_LOCK_ERRORSONLY(s
 m_psc_restrict = val; is_modified=true; is_null[8]=false;}
 
 		
+bool Row_Template::Description_isNull() {PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
+
+return is_null[1];}
 bool Row_Template::Define_isNull() {PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
 
 return is_null[2];}
@@ -233,14 +234,15 @@ return is_null[5];}
 bool Row_Template::psc_frozen_isNull() {PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
 
 return is_null[6];}
-bool Row_Template::psc_mod_isNull() {PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
-
-return is_null[7];}
 bool Row_Template::psc_restrict_isNull() {PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
 
 return is_null[8];}
 
 			
+void Row_Template::Description_setNull(bool val){PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
+is_null[1]=val;
+is_modified=true;
+}
 void Row_Template::Define_setNull(bool val){PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
 is_null[2]=val;
 is_modified=true;
@@ -259,10 +261,6 @@ is_modified=true;
 }
 void Row_Template::psc_frozen_setNull(bool val){PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
 is_null[6]=val;
-is_modified=true;
-}
-void Row_Template::psc_mod_setNull(bool val){PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
-is_null[7]=val;
 is_modified=true;
 }
 void Row_Template::psc_restrict_setNull(bool val){PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
@@ -291,8 +289,8 @@ PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
 if (is_null[1])
 return "NULL";
 
-char *buf = new char[511];
-db_wrapper_real_escape_string(table->database->m_pDB, buf, m_Description.c_str(), (unsigned long) min((size_t)255,m_Description.size()));
+char *buf = new char[1531];
+db_wrapper_real_escape_string(table->database->m_pDB, buf, m_Description.c_str(), (unsigned long) min((size_t)765,m_Description.size()));
 string s=string()+"\""+buf+"\"";
 delete[] buf;
 return s;
@@ -305,8 +303,8 @@ PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
 if (is_null[2])
 return "NULL";
 
-char *buf = new char[51];
-db_wrapper_real_escape_string(table->database->m_pDB, buf, m_Define.c_str(), (unsigned long) min((size_t)25,m_Define.size()));
+char *buf = new char[151];
+db_wrapper_real_escape_string(table->database->m_pDB, buf, m_Define.c_str(), (unsigned long) min((size_t)75,m_Define.size()));
 string s=string()+"\""+buf+"\"";
 delete[] buf;
 return s;
@@ -963,39 +961,11 @@ PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
 class Table_CommandGroup *pTable = table->database->CommandGroup_get();
 pTable->GetRows("`FK_Template`=" + StringUtils::itos(m_PK_Template),rows);
 }
-void Row_Template::CommandGroup_pschist_FK_Template_getrows(vector <class Row_CommandGroup_pschist*> *rows)
-{
-PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
-
-class Table_CommandGroup_pschist *pTable = table->database->CommandGroup_pschist_get();
-pTable->GetRows("`FK_Template`=" + StringUtils::itos(m_PK_Template),rows);
-}
-void Row_Template::CommandGroup_pschmask_FK_Template_getrows(vector <class Row_CommandGroup_pschmask*> *rows)
-{
-PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
-
-class Table_CommandGroup_pschmask *pTable = table->database->CommandGroup_pschmask_get();
-pTable->GetRows("`FK_Template`=" + StringUtils::itos(m_PK_Template),rows);
-}
 void Row_Template::EventHandler_FK_Template_getrows(vector <class Row_EventHandler*> *rows)
 {
 PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
 
 class Table_EventHandler *pTable = table->database->EventHandler_get();
-pTable->GetRows("`FK_Template`=" + StringUtils::itos(m_PK_Template),rows);
-}
-void Row_Template::EventHandler_pschist_FK_Template_getrows(vector <class Row_EventHandler_pschist*> *rows)
-{
-PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
-
-class Table_EventHandler_pschist *pTable = table->database->EventHandler_pschist_get();
-pTable->GetRows("`FK_Template`=" + StringUtils::itos(m_PK_Template),rows);
-}
-void Row_Template::EventHandler_pschmask_FK_Template_getrows(vector <class Row_EventHandler_pschmask*> *rows)
-{
-PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
-
-class Table_EventHandler_pschmask *pTable = table->database->EventHandler_pschmask_get();
 pTable->GetRows("`FK_Template`=" + StringUtils::itos(m_PK_Template),rows);
 }
 

@@ -27,6 +27,9 @@ class ZoomSimple : public ZoomBase
 	FloatRect* ZoomEnd;
 	int DeltaX1, DeltaY1, DeltaX2, DeltaY2;
 	float ZoomAmount1, ZoomAmount2;
+
+	FloatRect* getRandomZoomRect();
+
 public:
 	ZoomSimple(Frame* PictureObject, int ScreenWidth, int ScreenHeight, int Width, int Height, int StartTime, int ZoomTime);
 	~ZoomSimple(void);

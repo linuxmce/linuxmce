@@ -1,0 +1,29 @@
+
+Installations instructions for pluto-fuse-smb
+===============================================================================
+
+Installation/compiling
+-------------------------------------------------------------------------------
+To compile type:
+
+ $ automake-1.4
+ $ autoconf
+ $ ./configure
+ $ make
+ $ su
+
+(enter root password)
+ # make install
+
+In case you define a custom install path, make sure that the path to the
+installed executables is in your $PATH .
+
+Running
+-------------------------------------------------------------------------------
+To pluto-fuse-smb type - as normal user:
+
+ $ pluto-fuse-smb <service> <mountpoint>
+
+Configuration
+-------------------------------------------------------------------------------
+No configuration is necessary

@@ -64,10 +64,11 @@ void Plugin_DeadlockHandler(PlutoLock *pPlutoLock)
 }
 void Plugin_SocketCrashHandler(Socket *pSocket)
 {
+	// This isn't graceful, but for the moment in the event of a socket crash we'll just kill everything and force a reload
 	if( g_pCommand_Impl && g_pCommand_Impl->m_pRouter )
 	{
-		LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"Plugin Socket problem.  %d",g_pCommand_Impl->m_dwPK_Device);
-		// g_pCommand_Impl->m_pRouter->CrashWithinPlugin(g_pCommand_Impl->m_dwPK_Device);  // Don't reload plugins since sockets can fail
+		LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"Plugin Deadlock problem.  %d Going to reload",g_pCommand_Impl->m_dwPK_Device);
+		g_pCommand_Impl->m_pRouter->CrashWithinPlugin(g_pCommand_Impl->m_dwPK_Device);
 	}
 }
 //<-dceag-incl-e->
@@ -94,7 +95,7 @@ extern "C" {
 		LoggerWrapper::GetInstance()->Write(LV_STATUS, "Device: %d loaded as plug-in",PK_Device);
 
 		Linphone *pLinphone = new Linphone(PK_Device, "localhost",true,false,pRouter);
-		if( pLinphone->m_bQuit_get()|| !pLinphone->GetConfig() )
+		if( pLinphone->m_bQuit_get())
 		{
 			delete pLinphone;
 			return NULL;
@@ -195,12 +196,12 @@ int main(int argc, char* argv[])
 
 	LoggerWrapper::GetInstance()->Write(LV_STATUS, "Device: %d starting.  Connecting to: %s",PK_Device,sRouter_IP.c_str());
 
-	bool bAppError=false;
+	bool bAppError = false;
 	bool bReload=false;
 	try
 	{
-		Linphone *pLinphone = new Linphone(PK_Device, sRouter_IP,true,bLocalMode);
-		if ( pLinphone->GetConfig() && pLinphone->Connect(pLinphone->PK_DeviceTemplate_get()) ) 
+		Linphone *pLinphone = new Linphone(PK_Device, sRouter_IP,true,bLocalMode);	
+		if ( pLinphone->Connect(pLinphone->PK_DeviceTemplate_get()) ) 
 		{
 			g_pCommand_Impl=pLinphone;
 			g_pDeadlockHandler=DeadlockHandler;
@@ -210,10 +211,7 @@ int main(int argc, char* argv[])
 			if( bLocalMode )
 				pLinphone->RunLocalMode();
 			else
-			{
-				if(pLinphone->m_RequestHandlerThread)
-					pthread_join(pLinphone->m_RequestHandlerThread, NULL);  // This function will return when the device is shutting down
-			}
+				pthread_join(pLinphone->m_RequestHandlerThread, NULL);  // This function will return when the device is shutting down
 			g_pDeadlockHandler=NULL;
 			g_pSocketCrashHandler=NULL;
 		} 
@@ -248,7 +246,7 @@ int main(int argc, char* argv[])
     WSACleanup();
 #endif
 
-	if( bAppError )
+	if(bAppError)
 		return 1;
 
 	if( bReload )

@@ -1,6 +1,6 @@
 #!/bin/bash
 
-PlutoHome="plutohome.com"
+RAServer="www.linuxmce.org"
 #PlutoHome="10.0.0.175/plutohome-com"
 
 . /usr/pluto/bin/Config_Ops.sh
@@ -15,5 +15,5 @@ if [[ -z "$remote" ]]; then
 	exit 0
 fi
 
-PortPage="http://$PlutoHome/get_ra_ports.php?installationID=$PK_Installation"
+PortPage="http://$RAServer/get_ra_ports.php?installationID=$PK_Installation"
 wget -O /dev/null "$PortPage" &>/dev/null

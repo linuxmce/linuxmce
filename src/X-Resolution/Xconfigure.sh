@@ -1,10 +1,8 @@
 #!/bin/bash
-
 function XorgConfLogging() {
 	local message="$1"
 	local xorgLog="/var/log/pluto/xorg.conf.log"
 	local xorgLines=$(cat /etc/X11/xorg.conf | wc -l)
-	
 	local myPid=$$
 
 	echo "$myPid $(date -R) $message [$xorgLines]"	>> $xorgLog
@@ -16,13 +14,15 @@ XorgConfLogging "Starting $0 $*"
 Modeline_640x480_60='"640x480" 25.18 640 656 752 800 480 490 492 525'
 
 . /usr/pluto/bin/pluto.func
-. /usr/pluto/bin/Config_Ops.sh
 . /usr/pluto/bin/Utils.sh
 . /usr/pluto/bin/LockUtils.sh
 . /usr/pluto/bin/X-Common.sh
 
 ConfigFile="/etc/X11/xorg.conf"
 Output="VGA"
+vga_pci=$(lspci | grep ' VGA ')
+gpus=$(echo "$vga_pci" | wc -l)
+bus_id=$(echo "$vga_pci" | awk 'NR==2' | while IFS=':. ' read -r tok1 tok2 tok3 rest; do printf '%2s %2s %s\n' "$((16#$tok1))":"$((16#$tok2))":"$((16#$tok3))" | sed -e 's/ //g'; done)
 
 DEVICECATEGORY_Video_Cards=125
 DEVICEDATA_Setup_Script=189
@@ -127,9 +127,16 @@ SetResolution()
 	esac
 
 	Modeline="$(GenModeline "$DisplayDriver" "$ResX" "$ResY" "$Refresh" "$ScanType")"
+	
 
 	awk -v"ResX=$ResX" -v"ResY=$ResY" -v"Refresh=$Refresh" -v"Modeline=$Modeline" -v"nvHD=$TVStandard" -v"ConnectedMonitor=$ConnectedMonitor" -v"TVOutFormat=$TVOutFormat" -f/usr/pluto/bin/X-ChangeResolution.awk "$ConfigFile" >"$ConfigFile.$$"
 	mv "$ConfigFile"{.$$,}
+
+	# TODO: Use python-Xkit for all xorg.conf manipulations
+	# 
+#	if [ -f /usr/pluto/bin/X-ChangeResolution.py ] ; then
+#		python /usr/pluto/bin/X-ChangeResolution.py $ResX $ResY $ConfigFile
+#	fi
 }
 
 XvMC_Lib()
@@ -179,9 +186,8 @@ UpdateModules()
 UpdateUISections()
 {
 	local OpenGL="$1" AlphaBlending="$2"
-	
-	awk -v"OpenGL=$OpenGL" -v"AlphaBlending=$AlphaBlending" -f/usr/pluto/bin/X-UI_Sections.awk "$ConfigFile" >"$ConfigFile.$$"
-	mv "$ConfigFile"{.$$,}
+		awk -v"OpenGL=$OpenGL" -v"AlphaBlending=$AlphaBlending" -f/usr/pluto/bin/X-UI_Sections.awk "$ConfigFile" >"$ConfigFile.$$"
+		mv "$ConfigFile"{.$$,}
 }
 
 ScriptCustomization()
@@ -263,25 +269,40 @@ EnsureResolutionVariables()
 
 wmtweaks_default()
 {
-	echo '<?xml version="1.0" encoding="UTF-8"?>
-<!DOCTYPE mcs-option SYSTEM "mcs-option.dtd">
+ echo '<?xml version="1.0" encoding="UTF-8"?>
 
-<mcs-option>
-	<option name="Xfwm/UseCompositing" type="int" value="1"/>
-</mcs-option>'
+<channel name="xfwm4" version="1.0">
+
+    <property name="general" type="empty">
+
+        <property name="use_compositing" type="bool" value="true"/>
+
+    </property>
+
+</channel>'
 }
 
 SetWMCompositor()
 {
 	local UseCompositing="$1"
 	local WMTweaksFile
-	local user
 
-	for user in /home/* /root; do
-		if [[ ! -d "$user" ]]; then
-			continue
+	local -a HomeDirs=(/root)
+
+	local Ent
+	local OldIFS="$IFS"
+	IFS=":"
+	local Username Pwd Uid Gid Comment HomeDir Shell
+	while read Username Pwd Uid Gid Comment HomeDir Shell; do
+		if [[ "$Uid" -ge 1000 && -d "$HomeDir" && "$HomeDir" != / ]]; then
+			HomeDirs=("${HomeDirs[@]}" "$HomeDir")
 		fi
-		WMTweaksFile="$user/.config/xfce4/mcs_settings/wmtweaks.xml"
+	done < <(getent passwd | egrep ':/bin/bash$')
+	IFS="$OldIFS"
+
+	local user
+	for user in "${HomeDirs[@]}"; do
+		WMTweaksFile="$user/.config/xfce4/xfconf/xfce-perchannel-xml/xfwm4.xml"
 		mkdir -p "$(dirname "$WMTweaksFile")"
 		wmtweaks_default >"$WMTweaksFile"
 		sed -i '/Xfwm\/UseCompositing/ s/value="."/value="'"$UseCompositing"'"/g' "$WMTweaksFile"
@@ -298,18 +319,19 @@ if [[ -z "$SkipLock" ]]; then
 	WaitLock "Xconfigure" "Xconfigure" nolog # don't run two copies of Xconfigure simultaneously
 fi
 EnsureResolutionVariables
-
 DisplayDriver=$(GetVideoDriver)
 if [[ -n "$ForceVESA" ]]; then
-	DisplayDriver=vesa
+	DisplayDriver="fbdev"
 fi
-if [[ "$DisplayDriver" == viaprop ]]; then
-	DisplayDriver=via
-fi
-if [[ "$DisplayDriver" == intel ]]; then
+#if [[ "$DisplayDriver" == viaprop ]]; then
+#	DisplayDriver=via
+#fi
+if [[ "$DisplayDriver" == "intel" ]]; then
 	. /usr/pluto/bin/X-IntelSpecificFunctions.sh
-elif [[ "$DisplayDriver" == nvidia ]]; then
+elif [[ "$DisplayDriver" == "nvidia" ]]; then
 	. /usr/pluto/bin/X-nVidiaSpecificFunctions.sh
+#elif [[ "$DisplayDriver" == fglrx ]]; then
+#	. /usr/pluto/bin/X-ATISpecificFunction.sh
 fi
 
 Logging "$TYPE" "$SEVERITY_STATUS" "Xconfigure" "Display Driver: $DisplayDriver" >&2
@@ -328,10 +350,16 @@ if [[ "$Defaults" == y ]]; then
 		exit 1
 	fi
 	cat /usr/pluto/templates/xorg.conf.in | awk -v"DisplayDriver=$DisplayDriver" -f/usr/pluto/bin/X-ChangeDisplayDriver.awk >"$ConfigFile"
+	if [[ "$gpus" -gt "1" ]]; then
+		sed -ie "s/#BusID.*/BusID\t\t\"PCI:${bus_id}\"/g" "$ConfigFile"
+	fi
 elif [[ -n "$UpdateVideoDriver" && "$DisplayDriver" != "$CurrentDisplayDriver" ]]; then
 	# change video driver, but only if needed
 	awk -v"DisplayDriver=$DisplayDriver" -f/usr/pluto/bin/X-ChangeDisplayDriver.awk "$ConfigFile" >"$ConfigFile.$$"
 	mv "$ConfigFile"{.$$,}
+	if [[ "$gpus" -gt "1" ]]; then
+		sed -ie "s/#BusID.*/BusID\t\t\"PCI:${bus_id}\"/g" "$ConfigFile.$$"
+	fi
 fi
 
 UpdateModules
@@ -358,9 +386,11 @@ fi
 # Test detected display driver
 # Don't test if driver is vesa (assumption: always works) or current driver (assumption: already tested and works)
 # Doing this test last, to test all the changes, since the video driver (e.g. nvidia) may not work without some extra options that are set together with the resolution
-if [[ "$DisplayDriver" != "$CurrentDisplayDriver" && "$DisplayDriver" != vesa ]] && [[ -n "$Defaults" || -n "$UpdateVideoDriver" ]]; then
+if [[ "$DisplayDriver" != "$CurrentDisplayDriver" && "$DisplayDriver" != "fbdev" ]] && [[ -n "$Defaults" || -n "$UpdateVideoDriver" ]]; then
 	if [[ -z "$NoTest" ]] && ! TestXConfig "$Display" "$ConfigFile" && [[ -z "$ForceVESA" ]]; then
-		"$0" "${OrigParams[@]}" --force-vesa --skiplock
+		"0" "${OrigParams[@]}" --force-vesa --skiplock
 		exit $?
 	fi
 fi
+# ^^ 1004 testing - bad assumption that VESA always works due to dri module load which loads dynamically for VESA modules, dri severly kills the X session for AVWizard 
+# on nvidia cards - these lines break due to install from pluto-nvidia-video-drivers

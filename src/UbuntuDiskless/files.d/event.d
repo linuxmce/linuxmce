@@ -9,16 +9,20 @@ set -e
 . /usr/pluto/bin/Section_Ops.sh
 
 ## Startup sequence
-File="/etc/init.d/kdm"
-Content='#!/bin/bash
-if [[ "$1" == "start" ]] ;then
-	/usr/pluto/bin/Startup_DisklessMD.sh
-fi
-'
+# Startup sequence of core and media director
+# is identical and being taken care of by 
+# /etc/init.d/linuxmce
 
-mkdir -p "${Parm_RootLocation}/$(dirname $File)"
-echo "${Content}" > "${Parm_RootLocation}/${File}"
-chmod +x "${Parm_RootLocation}/${File}"
+#File="/etc/init.d/kdm"
+#Content='#!/bin/bash
+#if [[ "$1" == "start" ]] ;then
+#	/usr/pluto/bin/Startup_DisklessMD.sh
+#fi
+#'
+#
+#mkdir -p "${Parm_RootLocation}/$(dirname $File)"
+#echo "${Content}" > "${Parm_RootLocation}/${File}"
+#chmod +x "${Parm_RootLocation}/${File}"
 
 ## Shutdown sequence
 File="/etc/event.d/pluto-shutdown"

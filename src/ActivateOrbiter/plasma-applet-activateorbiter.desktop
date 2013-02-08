@@ -1,0 +1,16 @@
+[Desktop Entry]
+Name=Activate Orbiter
+Comment=Activates the LinuxMCE Orbiter and brings it to the front.
+Type=Service
+ServiceTypes=Plasma/Applet
+ 
+X-KDE-Library=plasma_applet_activateorbiter
+X-KDE-PluginInfo-Author=Thomas Cherryhomes
+X-KDE-PluginInfo-Email=thom.cherryhomes@gmail.com
+X-KDE-PluginInfo-Name=plasma_applet_activateorbiter
+X-KDE-PluginInfo-Version=1.0
+X-KDE-PluginInfo-Website=http://www.linuxmce.org/
+X-KDE-PluginInfo-Category=Application Launchers
+X-KDE-PluginInfo-Depends=
+X-KDE-PluginInfo-License=GPL
+X-KDE-PluginInfo-EnabledByDefault=true

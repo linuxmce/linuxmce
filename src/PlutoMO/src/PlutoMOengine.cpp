@@ -20,10 +20,11 @@
 #include <aknutils.h>  // for Fonts. 
 
 //#include "bitmapmethods.h"
-#include "palbimageviewerbasic.h"
+// deprecated in s603rd
+// #include "palbimageviewerbasic.h"
 
 #include "PlutoUtils/MyString.h"
-#include "PlutoMOEngine.h"
+#include "PlutoMOengine.h"
 #include "PlutoMO.hrh"     // enumerations
 
 #include "PlutoMOAppUi.h"

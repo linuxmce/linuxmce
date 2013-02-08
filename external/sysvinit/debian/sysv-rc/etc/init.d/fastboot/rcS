@@ -1,0 +1,486 @@
+#!/bin/bash
+
+function box() { true; }
+test -f "/etc/bootsplash/themes/current/config/bootsplash-`/sbin/fbresolution`.cfg" && . /etc/bootsplash/themes/current/config/bootsplash-`/sbin/fbresolution`.cfg
+
+Message() {
+	Logging "$TYPE" "$SEVERITY_NORMAL" "$0" "Boot log: $*" 2>/dev/null || /bin/true
+    echo -e "\033[1m# $*"
+    tput sgr0
+
+    # Update boot splash progress bar
+    progress=$(( $progress + 1 ))
+
+    grep -q "silent" /proc/splash 2>/dev/null
+    if [[ $? -eq 0 ]] ;then
+        echo "show $(( 65534 * ( $progress + 1 ) / 28 ))" > /proc/splash
+	echo "$(( 65534  * ( $progress + 1 ) / 28 ))" > /var/run/bootsplash_progress 2>/dev/null || /bin/true
+        if [ "$text_x" != "" -a "$text_y" != "" -a "$text_color" != "" -a "$text_size" != "" ] ;then
+            text_font="/etc/bootsplash/fonts/VeraBd.ttf"
+            /sbin/fbtruetype -x$(($text_x + 1)) -y$(($text_y + 1)) -t000000 -s$text_size -f$text_font "$*"
+            /sbin/fbtruetype -x$text_x -y$text_y -t$text_color -s$text_size -f$text_font "$*"
+        fi
+    fi
+}
+
+InitBootsplash() {
+   
+	if [[ -x /etc/init.d/bootsplash ]] ;then
+		/etc/init.d/bootsplash stop
+	fi
+    progress=0
+    kscripts=0
+    sscripts=30
+    export progress kscripts sscripts
+}
+
+## Some defaults
+PATH=/sbin:/usr/sbin:/bin:/usr/bin
+runlevel=S
+prevlevel=N
+umask 022
+export PATH runlevel prevlevel
+InitBootsplash
+
+## Mount the proc filesystem
+Message "Mounting /proc filesystem"
+/bin/mount -v proc /proc -n -t proc
+
+## Mount the sysfs, if the kernel supports it
+Message "Mounting /sys filesystem"
+if [ -d /sys ] ;then
+	if cat /proc/filesystems | grep -w sysfs 1> /dev/null 2> /dev/null ;then
+		if ! cat /proc/mounts | grep -w sysfs 1> /dev/null 2> /dev/null ;then
+			/bin/mount -v sysfs /sys -n -t sysfs
+		fi
+	fi
+fi
+
+## Initalize udev
+Message "Initializing udev"
+/etc/init.d/udev start 1>/dev/null
+mount -t devpts none /dev/pts
+
+## Loading modules
+Message "Loading modules"
+modprobe fuse
+(cat /etc/modules; echo) | # make sure there is a LF at the end
+while read module args
+do
+        case "$module" in
+                \#*|"") continue ;;
+        esac
+        modprobe $module $args
+done
+
+## Initializing coldplug system (hotplug-perl or hotplug)
+Message "Loading coldplug modules"
+if [ -x /etc/init.d/hotplug-perl ] ;then
+	/etc/init.d/hotplug-perl start
+elif [ -x /etc/init.d/hotplug ] ;then
+	/etc/init.d/hotplug start
+fi 
+
+
+## Enableing RAID devices
+if [[ -x /etc/init.d/mdadm ]]; then
+	/etc/init.d/mdadm start
+	/etc/init.d/mdadm-raid start
+fi
+
+## Enable Swaping
+Message "Enable swaping"
+/sbin/swapon -a > /dev/null
+
+## Check Filesystem
+grep -qi " fsck " /proc/cmdline || grep -qi " fsck$" /proc/cmdline
+fsckRequested=$?
+
+if [[ $fsckRequested -eq 0 ]] ;then
+	Message "Checking Filesystem"
+
+	## Run fsck in backround and make it display the
+	## progress in a pipe and the err code in a temp file
+	rm -f /dev/fsck_pipe
+	mknod /dev/fsck_pipe p
+	Fsck() {
+		exec 7>/dev/fsck_pipe	
+		fsck -C7 -A -a -f
+		echo $?>/dev/fsck_err
+	}
+	Fsck &
+	exec 8</dev/fsck_pipe
+	
+	## Read the progress from the pipe and display it in bootsplash
+	disk_no=0
+	while read -u 8 p_stage p_current p_total garbage ;do
+		pfsck_stage=$(( 100 * $p_current / $p_total ))
+		pfsck_total=$(( ($p_stage-1) * 20 + $pfsck_stage / 5 ))
+
+		
+		if [[ "$old_stage" != "$p_stage" ]] ;then
+			old_stage=$p_stage;
+			
+			if [[ "$p_stage" == "1" ]] ;then
+				disk_no=$(( disk_no + 1 ))
+			fi
+		fi
+
+		if [[ "$(date +%s)" != "$old" ]] ;then
+
+        		echo "show $(( 65534 * ( $progress + 1) / 28 + 1 ))" > /proc/splash
+
+			progress=$(( $progress - 1 ));
+			Message "Checking Filesystem [ $pfsck_total% of Disk $disk_no ]"
+			old=$(date +%s)
+		fi
+	done
+
+	## See if the check was ok else drop the user in a console
+	fsck_err=$(cat /dev/fsck_err)
+	if [ $fsck_err -gt 1 ] ;then
+		echo
+		echo "fsck failed. Please repair manualy."
+		echo
+		echo "CONTROL-D will exit form this shell and continue system startup."
+		echo
+
+		/sbin/sulogin 
+	fi
+fi
+rm -f /fastboot /forcefsck
+
+/bin/mount -w -o remount /
+if [[ ! -L /etc/mtab ]]; then
+	## Clean up the /etc/mtab
+	Message "Cleaning up /etc/mtab"
+	/bin/rm -f /etc/mtab* 2>/dev/null
+	ln -sf /proc/mounts /etc/mtab
+fi
+
+/etc/init.d/udev-mtab start > /dev/null
+
+## Seting up the system time from the hardware clock
+Message "Setting up the system time from the hardware clock"
+. /etc/default/rcS #FIXME: Should i put it on a separate config file ?
+if [ "$UTC" == "yes" ] ;then
+	/sbin/hwclock --utc --hctosys > /dev/null
+else 
+	/sbin/hwclock --localtime --hctosys > /dev/null
+fi
+
+## Syncronize clock via ntpdate
+if [[ -x /etc/init.d/ntpdate ]] ;then
+	/etc/init.d/ntpdate start &
+fi
+
+## Do some pluto specific cleanup
+rm -f /var/run/*.pid
+rm -rf /var/run/screen/*
+dmesg -n 1
+
+## Force some config options to sysklogd
+SysLogCfg="*.*;auth,authpriv.none       /dev/tty12"
+if ! grep -qF "$SysLogCfg" /etc/syslog.conf; then
+        echo "$SysLogCfg" >>/etc/syslog.conf
+fi
+if ! grep -q '^SYSLOGD="-r"$' /etc/init.d/sysklogd; then
+	sed -i 's/^SYSLOGD=.*$/SYSLOGD="-r"/' /etc/init.d/sysklogd
+fi
+
+## Configure runtime kernel parameters
+Message "Configuring runtime kernel parameters"
+if [ -x /sbin/sysctl -a -r /etc/sysclt.conf ] ;then 
+	/sbin/sysctl -e -p /etc/sysctl.conf > /dev/null
+fi
+
+## Create /tmp/{.ICE-unix, .X11-unix} if they are not present
+find /tmp -maxdepth 1 -mindepth 1 -print0 | xargs -0 rm -rf
+
+if [ ! -e /tmp/.ICE-unix ] ;then
+	mkdir -p /tmp/.ICE-unix 
+	chmod 1777 /tmp/.ICE-unix
+fi
+if [ ! -e /tmp/.X11-unix ] ;then
+	mkdir -p /tmp/.X11-unix
+	chmod 1777 /tmp/.X11-unix
+fi
+
+## Umount and remove prosible /initrd
+if [ -d /initrd ] ;then
+	umount /initrd/proc 2> /dev/null
+	/bin/umount /initrd 2> /dev/null
+	rmdir /initrd 2> /dev/null
+	blockdev --flushbufs /dev/ram0 2> /dev/null
+fi
+
+## Create a fresh utmp file
+touch /var/run/utmp
+chown root.utmp /var/run/utmp
+chmod  664 /var/run/utmp
+
+## Save dmesg
+savelog -q -p -c 5 /var/log/dmesg
+dmesg -s 524288 > /var/log/dmesg
+chgrp adm /var/log/dmesg || :
+
+Message "Setting console fonts"
+if [ -x /etc/init.d/console-screen.sh ]; then
+	/usr/sbin/termwrap /bin/true
+	/etc/init.d/console-screen.sh start 1>/dev/null
+fi
+
+## Set up the hostname
+Message "Setting up the hostname"
+if [ -f /etc/hostname ] ;then
+	hostname --file /etc/hostname
+fi
+
+## Start up the networking
+Message "Start up networking"
+if [[ -x /etc/init.d/ifupdown-clean ]]; then
+	/etc/init.d/ifupdown-clean start 1> /dev/null
+fi
+if [[ -x /sbin/ifrename ]]; then
+	/sbin/ifrename -d -p
+fi
+if [[ -x /etc/init.d/ifupdown ]]; then
+	/etc/init.d/ifupdown start 1> /dev/null # Remove when droping the 
+fi
+if [[ -x /etc/init.d/networking ]]; then
+	/etc/init.d/networking start 1> /dev/null # Uptate_Packages script ?
+fi
+if [[ -x /etc/init.d/inetd ]]; then
+	/etc/init.d/inetd start 1> /dev/null # Starts tftp on Core and Hybrid
+fi
+if [[ -x /etc/init.d/portmap ]]; then
+	/etc/init.d/portmap start 1> /dev/null # Search me ! :/
+fi
+if [[ -x /etc/init.d/nis ]] ;then
+	/etc/init.d/nis start 1>/dev/null # Start nis daemon
+fi
+
+## Mount all local non root filsystems except /proc witch was allready mounted
+Message "Mounting local filesystems"
+
+/bin/mount -v /usr/pluto/var/
+#while [[ ! -f /usr/pluto/var/sambaCredentials.secret ]]; do
+#	Message "Waiting for /usr/pluto/var"
+#	sleep 1
+#done
+/bin/mount -a -v -t nonfs,nosmbfs,noproc
+
+## Now we can safely mount remoute filesystems
+Message "Mounting remote filesystems"
+/etc/init.d/mountnfs.sh start 1> /dev/null
+
+
+## Check to see if a single mode was requested
+grep -qi " s " /proc/cmdline || grep -qi " s$" /proc/cmdline || grep -qi " single " /proc/cmdline || grep -qi ' single$' /proc/cmdline
+if [[ $? -eq 0 ]]; then
+	rm -f /var/run/block_single
+	Message "Going into single user mode"
+	/sbin/sulogin
+	touch /var/run/block_single
+fi
+
+## Start a the ssh daemon very early
+if [[ -x /etc/init.d/ssh ]] ;then
+	Message "Starting Secure Shell Daemon";
+	/etc/init.d/ssh start &
+fi
+
+## Start RemoteAccess at this step
+if [[ -x /usr/pluto/bin/SetupRemoteAccess.sh && -x /usr/pluto/bin/RA-handler.sh ]]; then
+	Message "Checking/Activating Remove Access"
+	(
+		/usr/pluto/bin/RA-handler.sh --confirm
+		/usr/pluto/bin/SetupRemoteAccess.sh
+	) &
+fi
+
+if [[ -x /etc/init.d/sysklogd ]]; then
+	/etc/init.d/sysklogd start
+fi
+
+# A hack ?
+if [ -x /etc/init.d/mysql ] ;then
+    Message "Starting mysql server"
+    /etc/init.d/mysql start 2>/dev/null
+fi
+
+# Start automount daemon
+if [[ -x /etc/init.d/autofs ]] ;then
+	/etc/init.d/autofs start 1>/dev/null 2>/dev/null &
+fi
+
+# restore mysql if restore point found
+
+if [[ -d /home/backup/upload ]]; then
+        Message "Searching system for Restore Points ..."
+        /usr/pluto/bin/PlutoRestorePoint.sh --restore
+	apt-get update 1>/dev/null 2>/dev/null
+	apt-get -f install --reinstall pluto-local-database 1>/dev/null 2>/dev/null
+fi
+
+if [ -x /etc/init.d/dbus ] ;then
+    /etc/init.d/dbus start &
+fi
+
+
+##########################################
+#### Starting Pluto Specific services ####
+##########################################
+
+## Start stuff that makes the dcerouter act as a internet router
+if [[ -x /etc/init.d/dhcp3-server ]] ;then
+	/etc/init.d/dhcp3-server start 1>/dev/null 2>/dev/null &
+fi
+if [[ -x /etc/init.d/bind9 ]] ;then
+	/etc/init.d/bind9 start 1>/dev/null 2>/dev/null &
+fi
+if [[ -x /etc/init.d/Pluto_Network_Firewall.sh ]] ;then
+	/etc/init.d/Pluto_Network_Firewall.sh 1>/dev/null 2>/dev/null &
+fi
+
+## Check to see if pluto finished installing else exit
+## works only on MDs
+if grep -q "^1:23:once:/usr/pluto/install/Initial_Config.sh" /etc/inittab ;then
+	Message "Installing Pluto System"
+	exit 0
+fi
+
+if [[ -f /usr/pluto/bin/Config_Ops.sh ]]; then
+	 . /usr/pluto/bin/Config_Ops.sh
+fi
+if [[ -f /usr/pluto/bin/pluto.func ]] ;then
+	. /usr/pluto/bin/pluto.func
+fi
+if [[ -f /usr/pluto/bin/SQL_Ops.sh ]] ;then
+	. /usr/pluto/bin/SQL_Ops.sh
+fi
+
+## Load the modules listed media director's device data
+insmod /lib/modules/`uname -r`/kernel/drivers/input/misc/pcspkr.ko
+if [[ -x /usr/pluto/bin/LoadMDModules.sh ]] ;then
+	/usr/pluto/bin/LoadMDModules.sh
+fi
+
+# assure some settings
+if [[ -x /usr/pluto/bin/Report_Machine_Status.sh ]]; then
+	/usr/pluto/bin/Report_Machine_Status.sh  &
+fi
+
+if [[ -f /usr/pluto/bin/SQL_Ops.sh  && -f /usr/pluto/bin/Config_Ops.sh ]] ;then
+	Q="SELECT FK_Installation FROM Device WHERE PK_Device='$PK_Device'"
+	R="$(RunSQL "$Q")"
+	ConfSet PK_Installation "$R"
+
+	Q="SELECT PK_Users FROM Users LIMIT 1"
+	R="$(RunSQL "$Q")"
+	ConfSet PK_Users "$R"
+fi
+
+setterm -blank >/dev/console             # disable console blanking
+chmod 777 /etc/pluto.conf 2>/dev/null    # ensure access rights on pluto.conf
+rm /var/log/pluto/running.pids 2>/dev/null
+chmod 777 /var/log/pluto 2>/dev/null
+rm -f /dev/ttyS_*                        # remove all ttyS_* (created by gc100s) entries from /dev
+mkdir -p /usr/pluto/locks                # clean up locks
+rm -f /usr/pluto/locks/*                 # clean up locks
+rm -f /var/run/plutoX*.pid               # clean up X PIDs
+rm -f /mnt/optical/*.checksum
+rm -f /etc/rc{0,6}.d/S*{umountnfs.sh,portmap,networking}
+
+if [[ "$FirstBoot" != "false" && ! -f /usr/pluto/install/.notdone ]] ;then
+	Message "Generating pluto bootscripts for the first time"
+	/usr/pluto/bin/generateRcScripts.sh
+
+	if [[ ! -f /etc/diskless.conf ]] ;then
+		Message "Updating software database (getxmls)"
+		/usr/pluto/bin/getxmls
+	fi
+
+	ConfSet "FirstBoot" "false" 2>/dev/null 1>/dev/null
+fi
+
+lshwd &>/dev/null # initialize USB
+
+/etc/init.d/check_avwizard
+
+if [[ -x /etc/init.d/Pluto_SSH_Keys.sh ]]; then
+	Message "Setting ssh keys"
+	/etc/init.d/Pluto_SSH_Keys.sh &
+fi
+
+if [ -x /etc/init.d/Pluto_ConfirmInstallation.sh ] ;then
+    Message "Confirm Installation"
+    /etc/init.d/Pluto_ConfirmInstallation.sh
+fi
+
+if [ -x /usr/pluto/bin/LMCEUpdate_Apply.sh ]; then
+	Message "Updating system"
+	/usr/pluto/bin/LMCEUpdate_Apply.sh	
+fi
+
+Message "Running depmod"
+/sbin/depmod
+
+if [ -x /etc/init.d/Pluto_Start_DCERouter.sh ] ;then
+    Message "Starting DCE Router"
+    /etc/init.d/Pluto_Start_DCERouter.sh
+fi
+
+if [ -x /etc/init.d/Pluto_Config_Device_Changes.sh ]; then
+    Message "Configure Device Changes"
+    /etc/init.d/Pluto_Config_Device_Changes.sh
+fi
+
+if [[ -x /usr/pluto/bin/shift_state ]]; then
+	ShiftState=$(/usr/pluto/bin/shift_state) # Shift=1; Ctrl=4; LAlt=8; RAlt=2; -- OR flags
+	if [[ "$ShiftState" == 1 ]]; then
+		ShiftMsg=" (shift pressed)"
+	fi
+fi
+
+if [[ -x /usr/pluto/bin/corefile.sh ]]; then
+	Message "Setting core file"
+	/usr/pluto/bin/corefile.sh
+fi
+
+# TODO: add a generic hook mechanism and move all these someplace else where they can be changed without building the package every time
+
+Message "Starting Pluto HAL daemon"
+/usr/pluto/bin/StartHAL.sh
+
+ConfEval
+
+/etc/init.d/0start_avwizard
+
+if [ -x /etc/init.d/Pluto_Start_OrbiterGen.sh ] ;then
+    Message "Starting OrbiterGen"
+    /etc/init.d/Pluto_Start_OrbiterGen.sh
+fi
+
+if [ -x /etc/init.d/Pluto_Start_X.sh ] ;then
+    Message "Starting X Server"
+    /etc/init.d/Pluto_Start_X.sh
+fi
+
+if [ -x /usr/pluto/bin/Firewire2Video4Linux.sh ] ;then
+	Message "Creating Firewire 2 Video4Linux Pipes"
+	/usr/pluto/bin/Firewire2Video4Linux.sh
+fi
+
+if [ -x /etc/init.d/Pluto_Start_LocalDevices.sh ] ;then
+    Message "Starting Local Devices"
+    /etc/init.d/Pluto_Start_LocalDevices.sh
+fi
+
+if [[ -x /usr/pluto/bin/StorageDevices_Setup.sh ]]; then
+	/usr/pluto/bin/StorageDevices_Setup.sh 1>/dev/null 2>/dev/null &
+fi
+
+if [[ -x /usr/pluto/bin/StorageDevices_StatusRadar.sh ]]; then
+	/usr/pluto/bin/StorageDevices_StatusRadar.sh &>/dev/null </dev/null
+fi

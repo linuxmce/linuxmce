@@ -29,9 +29,28 @@ Handle the X10 CM11A interface module.
 #include "devicepoll.h"
 #include <map>
 
+/**
+@namespace DCE
+The Data Commands and Events (DCE) namespace.
+*/
+
+/**
+@class CM11A
+Class to handle the X-10 CM11A controller.
+
+This module is to communicate to the CM11A controller.
+It uses Serial to communicate to the module via rs232.
+Other modules call this with X10 commands such as turn on/turn off/dim/ etc.
+It will formulate the actual messages.
+
+The CM11A_Command class comes from Gen_Devices/CM11ABase.h.
+*/
+
 //<-dceag-decl-b->
+
 namespace DCE
 {
+
 	class CM11A : public CM11A_Command
 	{
 //<-dceag-decl-e->
@@ -41,9 +60,40 @@ namespace DCE
 public:
 		// Public member variables
 
+public:
+		/** Constructor
+@param DeviceID is an int.
+@param ServerAddress is the IP address of the server??
+@param bConnectEventHandler is ???
+@param bLocalMode is ???
+@param pRouter is ???
+        */
+
+        /** Standard destructor */
+
+        /** GetConfig
+        @returns success flag
+        */
+
+        /** Register is used to check if a device is registered
+        @returns registered flag
+        */
+
+        /** ReceivedCommandForChild is
+        @param pDeviceData_Impl is a pointer to ???
+        @param sCMD_Result is a string ???
+        @param pMessage is a pointer to ???
+        */
+
+        /** ReceivedUnknownCommand is called when an error happens.
+        @param sCMD_Result is ???
+        @param pMessage is the message that was incorrect
+        */
+
 //<-dceag-const-b->
 public:
 		// Constructors/Destructor
+
 		CM11A(int DeviceID, string ServerAddress,bool bConnectEventHandler=true,bool bLocalMode=false,class Router *pRouter=NULL);
 		virtual ~CM11A();
 		virtual bool GetConfig();

@@ -32,7 +32,8 @@ Resolutions_VESA=(
 )
 Resolutions_HDTV=(
 	'480p=720x480'
-	'720p=1280x720'
+	'1024-HDready=1024x768'
+    	'720p=1280x720'
 	'1080i=1920x1080i'
 	'1080p=1920x1080'
 	'1280x800'
@@ -70,8 +71,6 @@ Resolution_GetFullName()
 	Idx=$(FindInArray_Prefix "$Prefix" "${Resolution_Array[@]}")
 	if [[ -n "$Idx" ]]; then
 		FullName="${Resolution_Array[$Idx]}"
-	else
-		FullName="$Prefix"
 	fi
 	echo "$FullName"
 }

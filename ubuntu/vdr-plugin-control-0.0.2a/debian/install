@@ -1,0 +1,2 @@
+libvdr-control.so.*        usr/lib/vdr/plugins/
+debian/plugin.control.conf etc/vdr/plugins/

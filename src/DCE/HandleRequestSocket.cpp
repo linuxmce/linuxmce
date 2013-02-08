@@ -7,11 +7,11 @@
 
 	Phone: +1 (877) 758-8648
 
-	This program is free software; you can redistribute it and/or modify it under the terms of the GNU General Public License.
+	This program is free software; you can redistribute it and/or modify it under the terms of the GNU Lesser General Public License.
 	This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty
 	of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
 
-	See the GNU General Public License for more details.
+	See the GNU Lesser General Public License for more details.
 */
 
 #include "PlutoUtils/CommonIncludes.h"
@@ -37,7 +37,11 @@ void *BeginHandleRequestThread( void *HRqSock )
 HandleRequestSocket::HandleRequestSocket( int iDeviceID, string sIPAddress, string sName ) :
 	ClientSocket( iDeviceID, sIPAddress, sName )
 {
-	m_RequestHandlerThread = 0;
+#ifdef WIN32
+    m_RequestHandlerThread.p = 0;
+#else
+    m_RequestHandlerThread = 0;
+#endif
 	m_bUnexpected = false;
 	m_bRunning = false;
 	/** @todo check comment */
@@ -75,18 +79,31 @@ void HandleRequestSocket::DisconnectAndWait()
 		LoggerWrapper::GetInstance()->Write( LV_STATUS, "Requesthandler %p (device: %d) waiting for runThread", this, m_dwPK_Device );
 		Sleep(10);
 	}
-
-	if( m_bRunning && m_RequestHandlerThread )
-	{
-		LoggerWrapper::GetInstance()->Write( LV_CRITICAL, "Requesthandler %p (device: %d) runThread won't die!", this, m_dwPK_Device );
+#ifdef WIN32
+        if( m_bRunning && m_RequestHandlerThread.p )
+        {
+                LoggerWrapper::GetInstance()->Write( LV_CRITICAL, "Requesthandler %p (device: %d) runThread won't die!", this, m_dwPK_Device );
 
 #ifndef WINCE //not defined under ce :(
-		pthread_cancel(m_RequestHandlerThread);
+                pthread_cancel(m_RequestHandlerThread);
 #endif
-	}
+        }
 
-	m_RequestHandlerThread = 0;
+        m_RequestHandlerThread.p = 0;
 }
+#else
+        if( m_bRunning && m_RequestHandlerThread )
+        {
+                LoggerWrapper::GetInstance()->Write( LV_CRITICAL, "Requesthandler %p (device: %d) runThread won't die!", this, m_dwPK_Device );
+
+#ifndef ANDROID
+                pthread_cancel(m_RequestHandlerThread);
+#endif
+        }
+
+        m_RequestHandlerThread = 0;
+}
+#endif
 
 bool HandleRequestSocket::OnConnect( int PK_DeviceTemplate,string sExtraInfo )
 {

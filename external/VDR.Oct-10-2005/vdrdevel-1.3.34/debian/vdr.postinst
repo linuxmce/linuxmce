@@ -1,0 +1,91 @@
+#!/bin/sh
+set -e
+. /usr/share/debconf/confmodule
+
+switch_autostart()
+{
+    if [ "$1" != "back" ]; then
+        START="vdr"
+        STOP="vdrdevel"
+    else
+        START="vdrdevel"
+        STOP="vdr"
+    fi
+    if [ -x "/etc/init.d/$STOP" ]; then
+        /etc/init.d/$STOP stop
+        update-rc.d -f $STOP remove >/dev/null
+    fi
+    if [ -x "/etc/init.d/$START" ]; then
+        /etc/init.d/$START stop
+        update-rc.d $START defaults >/dev/null
+        /etc/init.d/$START start
+    fi
+}
+
+case "$1" in
+    configure)
+        # Copy conf files from standard version
+        if [ -e /var/lib/vdr/channels.conf.COPY ]
+        then
+            mv -f /var/lib/vdr/channels.conf.COPY /var/lib/vdr/channels.conf
+        fi
+        for file in diseqc keymacros sources svdrphosts ; do
+            if [ -e /etc/vdr/$file.conf.COPY ]
+            then
+                mv -f /etc/vdr/$file.conf.COPY /etc/vdr/$file.conf
+            fi
+        done
+
+        db_get vdr/autostart
+        if [ "$RET" = "true" ]; then
+            switch_autostart
+        else
+            switch_autostart back
+        fi
+
+        # make /usr/lib/vdr/ctvdrwrapper setuid/setgid
+        chmod u+s,g+s /usr/lib/vdr/ctvdrwrapper
+        ;;
+    abort-upgrade|abort-remove|abort-deconfigure)
+        ;;
+    *)
+        echo "postinst called with unknown argument \`$1'" >&2
+        exit 1
+esac
+
+# Upgrade <= 1.3.12-1 to a more FHS-conform directory structure
+
+if [ "$1" = "configure" ] ; then
+    if dpkg --compare-versions "$2" le-nl "1.3.12-1" ; then
+        # new location for video dir
+        [ -d /video ]  && [ ! -d /var/lib/video.00 ] && \
+          ln -s /video /var/lib/video.00
+
+        # new location for vdr-managed conf files
+        CONF_FILES="remote.KBD.conf remote.LIRC.conf remote.remote-event.conf"
+        CONF_FILES="$CONF_FILES setup.conf timers.conf channels.conf"
+        for FILE in $CONF_FILES; do
+            if [ -e /etc/vdr/$FILE -a ! -e /var/lib/vdr/$FILE ]; then
+                printf "Note: Moving /etc/vdr/$FILE to /var/lib/vdr/$FILE\n"
+                mv /etc/vdr/$FILE /var/lib/vdr/$FILE
+            fi
+        done
+
+        # clean up generated files
+        rm -f /etc/vdr/commands.conf
+        rm -f /etc/vdr/reccmds.conf
+        rm -f /etc/vdr/remote.conf
+    else
+        [ ! -d /var/lib/video.00 ] && mkdir /var/lib/video.00
+
+        # copy example channels.conf files into config dir
+        if [ ! -e /var/lib/vdr/channels.conf ]; then
+            cp /usr/share/doc/vdr/examples/channels.conf* /var/lib/vdr/
+            gunzip /var/lib/vdr/channels.conf*.gz
+        fi
+    fi
+fi
+
+#DEBHELPER#
+
+exit 0

@@ -22,7 +22,7 @@
 #include <aknapp.h>
 #include <documenthandler.h>
 
-const TUid KUidPlutoMO = { 0x01ef0015 };
+const TUid KUidPlutoMO = { 0xA1ef0015 };
 class CPlutoMOApp : public CAknApplication
     {
     

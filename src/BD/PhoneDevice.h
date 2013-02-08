@@ -19,13 +19,11 @@
 #ifndef PhoneDevice_h
 #define PhoneDevice_h
 
-#ifndef WIN32
-#ifndef NOBLUETOOTH
+#if !defined(WIN32) && !defined(NOBLUETOOTH) && !defined(__APPLE_CC__)
 #include <bluetooth/bluetooth.h>
 #include <bluetooth/rfcomm.h>
 #include <bluetooth/hci.h>
 #include <bluetooth/hci_lib.h>
-#endif
 #endif
 
 #include <math.h>
@@ -48,10 +46,8 @@ public:
 	time_t m_tFirstDetected,m_tLastDetected;
 	int m_iLinkQuality;
 
-#ifndef WIN32	
-#ifndef NOBLUETOOTH
+#if !defined(WIN32) && !defined(NOBLUETOOTH) && !defined(__APPLE_CC__)
 	bdaddr_t m_bdaddrDongle;
-#endif
 #endif
 	
 	// These are just for using the Socket communication & the tester
@@ -115,10 +111,8 @@ public:
 		m_tLastDetected = aDevice.m_tLastDetected;
 		m_iLinkQuality = aDevice.m_iLinkQuality;
 
-#ifndef WIN32	
-#ifndef NOBLUETOOTH
+#if !defined(WIN32) && !defined(NOBLUETOOTH) && !defined(__APPLE_CC__)
 		m_bdaddrDongle = aDevice.m_bdaddrDongle;
-#endif
 #endif
 
 		// These are just for using the Socket communication & the tester

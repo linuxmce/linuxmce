@@ -1,0 +1,131 @@
+#!/bin/sh /usr/share/dpatch/dpatch-run
+
+## opt-42_stuttering.dpatch by wirbel at vdrportal.de, PanamaJack at vdrportal.de
+##
+## downloaded from http://vdrportal.de/board/thread.php?postid=289928#post289928
+## original filename: vdr-1.3.22-stuttering.diff
+##
+## Thomas Günther <tom@toms-cafe.de>:
+##   - Added STUTTERINGVERSION to solve compile error in femon-0.9.0
+##   http://toms-cafe.de/vdr/download/vdr-stuttering-1.3.22+version.diff
+##
+## Tobias Grimm <tg@e-tobi.net>:
+##   - Adapted to vdr-1.3.29
+##
+## All lines beginning with `## DP:' are a description of the patch.
+## DP: This patch is needed for the analogtv plugin.
+
+@DPATCH@
+diff -urNad --exclude=CVS --exclude=.svn ./channels.h /tmp/dpep-work.p8L25f/vdr-1.3.29/channels.h
+--- ./channels.h	2005-08-06 13:23:32.000000000 +0200
++++ /tmp/dpep-work.p8L25f/vdr-1.3.29/channels.h	2005-08-15 20:15:37.000000000 +0200
+@@ -15,6 +15,8 @@
+ #include "thread.h"
+ #include "tools.h"
+ 
++#define STUTTERINGVERSION 1
++
+ #define ISTRANSPONDER(f1, f2)  (abs((f1) - (f2)) < 4) //XXX
+ 
+ #define CHANNELMOD_NONE     0x00
+@@ -152,6 +154,7 @@
+   const int *Apids(void) const { return apids; }
+   const int *Dpids(void) const { return dpids; }
+   const int *Spids(void) const { return spids; }
++  const int *Caids(void) const { return caids; }
+   int Apid(int i) const { return (0 <= i && i < MAXAPIDS) ? apids[i] : 0; }
+   int Dpid(int i) const { return (0 <= i && i < MAXDPIDS) ? dpids[i] : 0; }
+   int Spid(int i) const { return (0 <= i && i < MAXSPIDS) ? spids[i] : 0; }
+diff -urNad --exclude=CVS --exclude=.svn ./device.c /tmp/dpep-work.p8L25f/vdr-1.3.29/device.c
+--- ./device.c	2005-08-14 12:52:08.000000000 +0200
++++ /tmp/dpep-work.p8L25f/vdr-1.3.29/device.c	2005-08-15 20:15:37.000000000 +0200
+@@ -584,7 +584,7 @@
+      if (CaDevice && CanReplay()) {
+         cStatus::MsgChannelSwitch(this, 0); // only report status if we are actually going to switch the channel
+         if (CaDevice->SetChannel(Channel, false) == scrOk) // calling SetChannel() directly, not SwitchChannel()!
+-           cControl::Launch(new cTransferControl(CaDevice, Channel->Vpid(), Channel->Apids(), Channel->Dpids(), Channel->Spids()));
++           cControl::Launch(new cTransferControl(CaDevice, Channel->Vpid(), Channel->Apids(), Channel->Dpids(), Channel->Spids(), Channel->Caids()));
+         else
+            Result = scrNoTransfer;
+         }
+diff -urNad --exclude=CVS --exclude=.svn ./dvbdevice.c /tmp/dpep-work.p8L25f/vdr-1.3.29/dvbdevice.c
+--- ./dvbdevice.c	2005-08-15 16:05:23.000000000 +0200
++++ /tmp/dpep-work.p8L25f/vdr-1.3.29/dvbdevice.c	2005-08-15 20:15:37.000000000 +0200
+@@ -833,7 +833,7 @@
+      CHECK(ioctl(fd_audio, AUDIO_SET_AV_SYNC, true));
+      }
+   else if (StartTransferMode)
+-     cControl::Launch(new cTransferControl(this, Channel->Vpid(), Channel->Apids(), Channel->Dpids(), Channel->Spids()));
++     cControl::Launch(new cTransferControl(this, Channel->Vpid(), Channel->Apids(), Channel->Dpids(), Channel->Spids(), Channel->Caids() ));
+ 
+   return true;
+ }
+diff -urNad --exclude=CVS --exclude=.svn ./transfer.c /tmp/dpep-work.p8L25f/vdr-1.3.29/transfer.c
+--- ./transfer.c	2005-08-14 12:55:03.000000000 +0200
++++ /tmp/dpep-work.p8L25f/vdr-1.3.29/transfer.c	2005-08-15 20:18:17.000000000 +0200
+@@ -14,13 +14,15 @@
+ 
+ // --- cTransfer -------------------------------------------------------------
+ 
+-cTransfer::cTransfer(int VPid, const int *APids, const int *DPids, const int *SPids)
++cTransfer::cTransfer(int VPid, const int *APids, const int *DPids, const int *SPids, const int *Caids)
+ :cReceiver(0, -1, VPid, APids, Setup.UseDolbyDigital ? DPids : NULL, SPids)
+ ,cThread("transfer")
+ {
+   ringBuffer = new cRingBufferLinear(TRANSFERBUFSIZE, TS_SIZE * 2, true, "Transfer");
+   remux = new cRemux(VPid, APids, Setup.UseDolbyDigital ? DPids : NULL, SPids);
+-  needsBufferReserve = Setup.UseDolbyDigital && VPid != 0 && DPids && DPids[0] != 0;
++  // analogue TV with caid = 0xA0 needs bufferReserve of 1024 kilobyte to run
++  analogtv_channel = Caids[0] == 0x00A0;
++  needsBufferReserve = ( Setup.UseDolbyDigital && VPid != 0 && DPids && DPids[0] != 0 ) || analogtv_channel ;
+ }
+ 
+ cTransfer::~cTransfer()
+@@ -64,6 +66,8 @@
+ #ifdef FW_NEEDS_BUFFER_RESERVE_FOR_AC3
+   bool GotBufferReserve = false;
+   int RequiredBufferReserve = KILOBYTE(DvbCardWith4MBofSDRAM ? 288 : 576);
++  if ( analogtv_channel == true )
++    RequiredBufferReserve = KILOBYTE(1024);
+ #endif
+   while (Running()) {
+ #ifdef FW_NEEDS_BUFFER_RESERVE_FOR_AC3
+@@ -145,8 +149,8 @@
+ 
+ cDevice *cTransferControl::receiverDevice = NULL;
+ 
+-cTransferControl::cTransferControl(cDevice *ReceiverDevice, int VPid, const int *APids, const int *DPids, const int *SPids)
+-:cControl(transfer = new cTransfer(VPid, APids, DPids, SPids), true)
++cTransferControl::cTransferControl(cDevice *ReceiverDevice, int VPid, const int *APids, const int *DPids, const int *SPids, const int *Caids)
++:cControl(transfer = new cTransfer(VPid, APids, DPids, SPids, Caids), true)
+ {
+   ReceiverDevice->AttachReceiver(transfer);
+   receiverDevice = ReceiverDevice;
+diff -urNad --exclude=CVS --exclude=.svn ./transfer.h /tmp/dpep-work.p8L25f/vdr-1.3.29/transfer.h
+--- ./transfer.h	2005-08-13 12:16:02.000000000 +0200
++++ /tmp/dpep-work.p8L25f/vdr-1.3.29/transfer.h	2005-08-15 20:15:37.000000000 +0200
+@@ -20,13 +20,14 @@
+ private:
+   cRingBufferLinear *ringBuffer;
+   cRemux *remux;
++  bool analogtv_channel;
+   bool needsBufferReserve;
+ protected:
+   virtual void Activate(bool On);
+   virtual void Receive(uchar *Data, int Length);
+   virtual void Action(void);
+ public:
+-  cTransfer(int VPid, const int *APids, const int *DPids, const int *SPids);
++  cTransfer(int VPid, const int *APids, const int *DPids, const int *SPids, const int *Caids);
+   virtual ~cTransfer();
+   };
+ 
+@@ -35,7 +36,7 @@
+   cTransfer *transfer;
+   static cDevice *receiverDevice;
+ public:
+-  cTransferControl(cDevice *ReceiverDevice, int VPid, const int *APids, const int *DPids, const int *SPids);
++  cTransferControl(cDevice *ReceiverDevice, int VPid, const int *APids, const int *DPids, const int *SPids, const int *Caids);
+   ~cTransferControl();
+   virtual void Hide(void) {}
+   static cDevice *ReceiverDevice(void) { return receiverDevice; }

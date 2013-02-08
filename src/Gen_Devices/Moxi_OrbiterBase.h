@@ -85,7 +85,7 @@ public:
 		if( m_bRunningWithoutDeviceData )
 			return atoi(m_pEvent_Impl->GetDeviceDataFromDatabase(m_dwPK_Device,DEVICEDATA_PK_Distro_CONST).c_str());
 		else
-			return atoi(m_mapParameters_Find(DEVICEDATA_PK_Distro_CONST).c_str());
+			return atoi(m_mapParameters[DEVICEDATA_PK_Distro_CONST].c_str());
 	}
 
 	bool Get_Development()
@@ -93,7 +93,7 @@ public:
 		if( m_bRunningWithoutDeviceData )
 			return (m_pEvent_Impl->GetDeviceDataFromDatabase(m_dwPK_Device,DEVICEDATA_Development_CONST)=="1" ? true : false);
 		else
-			return (m_mapParameters_Find(DEVICEDATA_Development_CONST)=="1" ? true : false);
+			return (m_mapParameters[DEVICEDATA_Development_CONST]=="1" ? true : false);
 	}
 
 	bool Get_No_Effects()
@@ -101,7 +101,7 @@ public:
 		if( m_bRunningWithoutDeviceData )
 			return (m_pEvent_Impl->GetDeviceDataFromDatabase(m_dwPK_Device,DEVICEDATA_No_Effects_CONST)=="1" ? true : false);
 		else
-			return (m_mapParameters_Find(DEVICEDATA_No_Effects_CONST)=="1" ? true : false);
+			return (m_mapParameters[DEVICEDATA_No_Effects_CONST]=="1" ? true : false);
 	}
 
 	int Get_PK_Skin()
@@ -109,7 +109,7 @@ public:
 		if( m_bRunningWithoutDeviceData )
 			return atoi(m_pEvent_Impl->GetDeviceDataFromDatabase(m_dwPK_Device,DEVICEDATA_PK_Skin_CONST).c_str());
 		else
-			return atoi(m_mapParameters_Find(DEVICEDATA_PK_Skin_CONST).c_str());
+			return atoi(m_mapParameters[DEVICEDATA_PK_Skin_CONST].c_str());
 	}
 
 	int Get_PK_Size()
@@ -117,7 +117,7 @@ public:
 		if( m_bRunningWithoutDeviceData )
 			return atoi(m_pEvent_Impl->GetDeviceDataFromDatabase(m_dwPK_Device,DEVICEDATA_PK_Size_CONST).c_str());
 		else
-			return atoi(m_mapParameters_Find(DEVICEDATA_PK_Size_CONST).c_str());
+			return atoi(m_mapParameters[DEVICEDATA_PK_Size_CONST].c_str());
 	}
 
 	int Get_PK_Language()
@@ -125,7 +125,7 @@ public:
 		if( m_bRunningWithoutDeviceData )
 			return atoi(m_pEvent_Impl->GetDeviceDataFromDatabase(m_dwPK_Device,DEVICEDATA_PK_Language_CONST).c_str());
 		else
-			return atoi(m_mapParameters_Find(DEVICEDATA_PK_Language_CONST).c_str());
+			return atoi(m_mapParameters[DEVICEDATA_PK_Language_CONST].c_str());
 	}
 
 	string Get_FK_EntertainArea()
@@ -133,7 +133,7 @@ public:
 		if( m_bRunningWithoutDeviceData )
 			return m_pEvent_Impl->GetDeviceDataFromDatabase(m_dwPK_Device,DEVICEDATA_FK_EntertainArea_CONST);
 		else
-			return m_mapParameters_Find(DEVICEDATA_FK_EntertainArea_CONST);
+			return m_mapParameters[DEVICEDATA_FK_EntertainArea_CONST];
 	}
 
 	string Get_Timeout()
@@ -141,7 +141,7 @@ public:
 		if( m_bRunningWithoutDeviceData )
 			return m_pEvent_Impl->GetDeviceDataFromDatabase(m_dwPK_Device,DEVICEDATA_Timeout_CONST);
 		else
-			return m_mapParameters_Find(DEVICEDATA_Timeout_CONST);
+			return m_mapParameters[DEVICEDATA_Timeout_CONST];
 	}
 
 	string Get_CacheFolder()
@@ -149,7 +149,7 @@ public:
 		if( m_bRunningWithoutDeviceData )
 			return m_pEvent_Impl->GetDeviceDataFromDatabase(m_dwPK_Device,DEVICEDATA_CacheFolder_CONST);
 		else
-			return m_mapParameters_Find(DEVICEDATA_CacheFolder_CONST);
+			return m_mapParameters[DEVICEDATA_CacheFolder_CONST];
 	}
 
 	int Get_CacheSize()
@@ -157,7 +157,7 @@ public:
 		if( m_bRunningWithoutDeviceData )
 			return atoi(m_pEvent_Impl->GetDeviceDataFromDatabase(m_dwPK_Device,DEVICEDATA_CacheSize_CONST).c_str());
 		else
-			return atoi(m_mapParameters_Find(DEVICEDATA_CacheSize_CONST).c_str());
+			return atoi(m_mapParameters[DEVICEDATA_CacheSize_CONST].c_str());
 	}
 
 	bool Get_Use_OCG_Format()
@@ -165,7 +165,7 @@ public:
 		if( m_bRunningWithoutDeviceData )
 			return (m_pEvent_Impl->GetDeviceDataFromDatabase(m_dwPK_Device,DEVICEDATA_Use_OCG_Format_CONST)=="1" ? true : false);
 		else
-			return (m_mapParameters_Find(DEVICEDATA_Use_OCG_Format_CONST)=="1" ? true : false);
+			return (m_mapParameters[DEVICEDATA_Use_OCG_Format_CONST]=="1" ? true : false);
 	}
 
 	int Get_VideoFrameInterval()
@@ -173,7 +173,7 @@ public:
 		if( m_bRunningWithoutDeviceData )
 			return atoi(m_pEvent_Impl->GetDeviceDataFromDatabase(m_dwPK_Device,DEVICEDATA_VideoFrameInterval_CONST).c_str());
 		else
-			return atoi(m_mapParameters_Find(DEVICEDATA_VideoFrameInterval_CONST).c_str());
+			return atoi(m_mapParameters[DEVICEDATA_VideoFrameInterval_CONST].c_str());
 	}
 
 	int Get_ImageQuality()
@@ -181,7 +181,7 @@ public:
 		if( m_bRunningWithoutDeviceData )
 			return atoi(m_pEvent_Impl->GetDeviceDataFromDatabase(m_dwPK_Device,DEVICEDATA_ImageQuality_CONST).c_str());
 		else
-			return atoi(m_mapParameters_Find(DEVICEDATA_ImageQuality_CONST).c_str());
+			return atoi(m_mapParameters[DEVICEDATA_ImageQuality_CONST].c_str());
 	}
 
 	void Set_ImageQuality(int Value)
@@ -193,7 +193,7 @@ public:
 		if( m_bRunningWithoutDeviceData )
 			return m_pEvent_Impl->GetDeviceDataFromDatabase(m_dwPK_Device,DEVICEDATA_PK_Device_CONST);
 		else
-			return m_mapParameters_Find(DEVICEDATA_PK_Device_CONST);
+			return m_mapParameters[DEVICEDATA_PK_Device_CONST];
 	}
 
 	bool Get_Ignore()
@@ -201,7 +201,7 @@ public:
 		if( m_bRunningWithoutDeviceData )
 			return (m_pEvent_Impl->GetDeviceDataFromDatabase(m_dwPK_Device,DEVICEDATA_Ignore_CONST)=="1" ? true : false);
 		else
-			return (m_mapParameters_Find(DEVICEDATA_Ignore_CONST)=="1" ? true : false);
+			return (m_mapParameters[DEVICEDATA_Ignore_CONST]=="1" ? true : false);
 	}
 
 	bool Get_Dont_Auto_Jump_to_Remote()
@@ -209,7 +209,7 @@ public:
 		if( m_bRunningWithoutDeviceData )
 			return (m_pEvent_Impl->GetDeviceDataFromDatabase(m_dwPK_Device,DEVICEDATA_Dont_Auto_Jump_to_Remote_CONST)=="1" ? true : false);
 		else
-			return (m_mapParameters_Find(DEVICEDATA_Dont_Auto_Jump_to_Remote_CONST)=="1" ? true : false);
+			return (m_mapParameters[DEVICEDATA_Dont_Auto_Jump_to_Remote_CONST]=="1" ? true : false);
 	}
 
 	int Get_ScreenWidth()
@@ -217,7 +217,7 @@ public:
 		if( m_bRunningWithoutDeviceData )
 			return atoi(m_pEvent_Impl->GetDeviceDataFromDatabase(m_dwPK_Device,DEVICEDATA_ScreenWidth_CONST).c_str());
 		else
-			return atoi(m_mapParameters_Find(DEVICEDATA_ScreenWidth_CONST).c_str());
+			return atoi(m_mapParameters[DEVICEDATA_ScreenWidth_CONST].c_str());
 	}
 
 	int Get_ScreenHeight()
@@ -225,7 +225,7 @@ public:
 		if( m_bRunningWithoutDeviceData )
 			return atoi(m_pEvent_Impl->GetDeviceDataFromDatabase(m_dwPK_Device,DEVICEDATA_ScreenHeight_CONST).c_str());
 		else
-			return atoi(m_mapParameters_Find(DEVICEDATA_ScreenHeight_CONST).c_str());
+			return atoi(m_mapParameters[DEVICEDATA_ScreenHeight_CONST].c_str());
 	}
 
 	int Get_Rotation()
@@ -233,7 +233,7 @@ public:
 		if( m_bRunningWithoutDeviceData )
 			return atoi(m_pEvent_Impl->GetDeviceDataFromDatabase(m_dwPK_Device,DEVICEDATA_Rotation_CONST).c_str());
 		else
-			return atoi(m_mapParameters_Find(DEVICEDATA_Rotation_CONST).c_str());
+			return atoi(m_mapParameters[DEVICEDATA_Rotation_CONST].c_str());
 	}
 
 	int Get_PK_Screen()
@@ -241,7 +241,7 @@ public:
 		if( m_bRunningWithoutDeviceData )
 			return atoi(m_pEvent_Impl->GetDeviceDataFromDatabase(m_dwPK_Device,DEVICEDATA_PK_Screen_CONST).c_str());
 		else
-			return atoi(m_mapParameters_Find(DEVICEDATA_PK_Screen_CONST).c_str());
+			return atoi(m_mapParameters[DEVICEDATA_PK_Screen_CONST].c_str());
 	}
 
 	bool Get_Get_Time_Code_for_Media()
@@ -249,65 +249,9 @@ public:
 		if( m_bRunningWithoutDeviceData )
 			return (m_pEvent_Impl->GetDeviceDataFromDatabase(m_dwPK_Device,DEVICEDATA_Get_Time_Code_for_Media_CONST)=="1" ? true : false);
 		else
-			return (m_mapParameters_Find(DEVICEDATA_Get_Time_Code_for_Media_CONST)=="1" ? true : false);
+			return (m_mapParameters[DEVICEDATA_Get_Time_Code_for_Media_CONST]=="1" ? true : false);
 	}
 
-	bool Get_Enable_Memory_Management()
-	{
-		if( m_bRunningWithoutDeviceData )
-			return (m_pEvent_Impl->GetDeviceDataFromDatabase(m_dwPK_Device,DEVICEDATA_Enable_Memory_Management_CONST)=="1" ? true : false);
-		else
-			return (m_mapParameters_Find(DEVICEDATA_Enable_Memory_Management_CONST)=="1" ? true : false);
-	}
-
-	int Get_Border_Size()
-	{
-		if( m_bRunningWithoutDeviceData )
-			return atoi(m_pEvent_Impl->GetDeviceDataFromDatabase(m_dwPK_Device,DEVICEDATA_Border_Size_CONST).c_str());
-		else
-			return atoi(m_mapParameters_Find(DEVICEDATA_Border_Size_CONST).c_str());
-	}
-
-	string Get_Alert_Filter_Level()
-	{
-		if( m_bRunningWithoutDeviceData )
-			return m_pEvent_Impl->GetDeviceDataFromDatabase(m_dwPK_Device,DEVICEDATA_Alert_Filter_Level_CONST);
-		else
-			return m_mapParameters_Find(DEVICEDATA_Alert_Filter_Level_CONST);
-	}
-
-	bool Get_Ignore_First_Event()
-	{
-		if( m_bRunningWithoutDeviceData )
-			return (m_pEvent_Impl->GetDeviceDataFromDatabase(m_dwPK_Device,DEVICEDATA_Ignore_First_Event_CONST)=="1" ? true : false);
-		else
-			return (m_mapParameters_Find(DEVICEDATA_Ignore_First_Event_CONST)=="1" ? true : false);
-	}
-
-	void Set_Ignore_First_Event(bool Value)
-	{
-		SetParm(DEVICEDATA_Ignore_First_Event_CONST,(Value ? "1" : "0"));
-	}
-	bool Get_Automatically_Go_to_Remote()
-	{
-		if( m_bRunningWithoutDeviceData )
-			return (m_pEvent_Impl->GetDeviceDataFromDatabase(m_dwPK_Device,DEVICEDATA_Automatically_Go_to_Remote_CONST)=="1" ? true : false);
-		else
-			return (m_mapParameters_Find(DEVICEDATA_Automatically_Go_to_Remote_CONST)=="1" ? true : false);
-	}
-
-	bool Get_Queue_Instead_of_Instant_Play()
-	{
-		if( m_bRunningWithoutDeviceData )
-			return (m_pEvent_Impl->GetDeviceDataFromDatabase(m_dwPK_Device,DEVICEDATA_Queue_Instead_of_Instant_Play_CONST)=="1" ? true : false);
-		else
-			return (m_mapParameters_Find(DEVICEDATA_Queue_Instead_of_Instant_Play_CONST)=="1" ? true : false);
-	}
-
-	void Set_Queue_Instead_of_Instant_Play(bool Value)
-	{
-		SetParm(DEVICEDATA_Queue_Instead_of_Instant_Play_CONST,(Value ? "1" : "0"));
-	}
 };
 
 
@@ -434,14 +378,6 @@ public:
 	int DATA_Get_Rotation() { return GetData()->Get_Rotation(); }
 	int DATA_Get_PK_Screen() { return GetData()->Get_PK_Screen(); }
 	bool DATA_Get_Get_Time_Code_for_Media() { return GetData()->Get_Get_Time_Code_for_Media(); }
-	bool DATA_Get_Enable_Memory_Management() { return GetData()->Get_Enable_Memory_Management(); }
-	int DATA_Get_Border_Size() { return GetData()->Get_Border_Size(); }
-	string DATA_Get_Alert_Filter_Level() { return GetData()->Get_Alert_Filter_Level(); }
-	bool DATA_Get_Ignore_First_Event() { return GetData()->Get_Ignore_First_Event(); }
-	void DATA_Set_Ignore_First_Event(bool Value,bool bUpdateDatabase=false) { GetData()->Set_Ignore_First_Event(Value); if( bUpdateDatabase ) SetDeviceDataInDB(m_dwPK_Device,274,Value); }
-	bool DATA_Get_Automatically_Go_to_Remote() { return GetData()->Get_Automatically_Go_to_Remote(); }
-	bool DATA_Get_Queue_Instead_of_Instant_Play() { return GetData()->Get_Queue_Instead_of_Instant_Play(); }
-	void DATA_Set_Queue_Instead_of_Instant_Play(bool Value,bool bUpdateDatabase=false) { GetData()->Set_Queue_Instead_of_Instant_Play(Value); if( bUpdateDatabase ) SetDeviceDataInDB(m_dwPK_Device,282,Value); }
 	//Event accessors
 	//Commands - Override these to handle commands from the server
 	virtual void CMD_On(int iPK_Pipe,string sPK_Device_Pipes,string &sCMD_Result,class Message *pMessage) {};

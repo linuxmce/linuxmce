@@ -1,0 +1,13 @@
+CFLAGS=-W -Wall -pthread $(shell sdl-config --cflags)
+LDLIBS= $(shell sdl-config --libs) -lSDL_image -lSDL_ttf
+
+%.o: %.c
+	gcc $(CPPFLAGS) $(CFLAGS) -c -o $@ $<
+
+Objects= IniFile.o ProxyOrbiter.o Orbiter.o
+
+Orbiter: $(Objects)
+	gcc $(CFLAGS) -o $@ $+ $(LDFLAGS) $(LDLIBS)
+
+clean:
+	rm -f *.o

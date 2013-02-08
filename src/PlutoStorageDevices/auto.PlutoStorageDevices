@@ -15,7 +15,7 @@ LOG_ERR=3
 UNIQUE_ID=$RANDOM
 
 CIFS_FileSystem="cifs"
-
+CIFS_ExtraOpts=",iocharset=utf8"
 function Log {
 	SEVERITY=$1
 	shift
@@ -59,7 +59,7 @@ DD_FILESYSTEM=159
 DD_UUID=267
 DD_BLOCK_DEV=152
 
-NFS_MOUNT_OPTS="-fstype=nfs,udp,proto=udp,soft,timeo=7,retrans=3,retry=2,rsize=8192,wsize=8192"
+NFS_MOUNT_OPTS="-fstype=nfs,udp,proto=udp,soft,timeo=7,retrans=3,retry=2,rsize=32768,wsize=32768"
 
 case "$Template" in
 	## Software Raid Array
@@ -99,8 +99,8 @@ case "$Template" in
 			fi
 		
 			## Do the mount
-			#echo "$NFS_MOUNT_OPTS $IPaddress:/mnt/device/$StorageDevice"
-			echo "-fstype=$CIFS_FileSystem,credentials=/usr/pluto/var/sambaCredentials.secret,dir_mode=0777,file_mode=0777$CIFS_ExtraOpts ://$IPaddress/Storage$StorageDevice\\\$"
+			echo "$NFS_MOUNT_OPTS $IPaddress:/mnt/device/$StorageDevice"
+			#echo "-fstype=$CIFS_FileSystem,credentials=/usr/pluto/var/sambaCredentials.secret,dir_mode=0777,file_mode=0777$CIFS_ExtraOpts ://$IPaddress/Storage$StorageDevice\\\$"
 		fi
 
 		;;
@@ -117,7 +117,16 @@ case "$Template" in
 			Drive_HalUDI=$(hal-find-by-property --key 'volume.uuid' --string "$Drive_UUID")
 			if [[ "$Drive_HalUDI" == "" ]] ;then
 				Log $LOG_WARN "Cannot find hal object with volume.uuid = $IDrive_UUID"
-				exit 0
+			        # as in the StorageDevices_Radar.sh script, fall back to serial number and storage_device
+				Drive_HalUDI=$(hal-find-by-property --key 'storage.serial' --string "$Drive_UUID")
+				if [[ "$Drive_HalUDI" == "" ]] ;then
+				        Log $LOG_WARN "Cannot find hal object with storage.serial = $Drive_UUID either"
+					Drive_HalUDI=$(hal-find-by-property --key 'volume.label' --string "$Drive_UUID")
+					if [[ "$Drive_HalUDI" == "" ]] ;then
+					        Log $LOG_WARN "Cannot find hal object with volume.label = $Drive_UUID either, aborting!"
+						exit 0
+					fi
+				fi
 			fi
 
 			## Convert udi to block device
@@ -160,8 +169,8 @@ case "$Template" in
 			fi
 		
 			## Do the mount
-			#echo "$NFS_MOUNT_OPTS $IPaddress:/mnt/device/$StorageDevice"
-			echo "-fstype=$CIFS_FileSystem,credentials=/usr/pluto/var/sambaCredentials.secret,dir_mode=0777,file_mode=0777$CIFS_ExtraOpts ://$IPaddress/Storage$StorageDevice\\\$"
+			echo "$NFS_MOUNT_OPTS $IPaddress:/mnt/device/$StorageDevice"
+			#echo "-fstype=$CIFS_FileSystem,credentials=/usr/pluto/var/sambaCredentials.secret,dir_mode=0777,file_mode=0777$CIFS_ExtraOpts ://$IPaddress/Storage$StorageDevice\\\$"
 		fi
 		;;
 	

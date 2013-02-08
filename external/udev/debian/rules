@@ -1,0 +1,163 @@
+#!/usr/bin/make -f
+SHELL+= -e
+
+BUILD_UDEB := 1
+# BUILD_KLIBC := 1
+
+MAKE_VARIABLES := V=true udevdir=/dev
+MAKE_EXTRAS = extras/ata_id/ extras/chassis_id/ extras/scsi_id/ \
+	extras/volume_id/ extras/run_directory/
+
+MAKE_VARIABLES += EXTRAS=\"$(MAKE_EXTRAS)\"
+
+include debian/scripts/vars
+
+BUILD_DIR := $(SOURCE_DIR)/$(TAR_DIR)
+B := $(BUILD_DIR)
+BU := $(BUILD_DIR)/udev-udeb
+D := $(CURDIR)/debian/udev
+U := $(CURDIR)/debian/udev-udeb
+
+DOCS := FAQ README RELEASE-NOTES TODO docs/overview \
+	docs/persistent_naming/ docs/writing_udev_rules/ \
+	docs/udev_vs_devfs
+
+ifndef BUILD_UDEB
+NO_PACKAGE := --no-package=udev-udeb
+endif
+
+all: build
+
+unpack: $(STAMP_DIR)/unpack
+$(STAMP_DIR)/unpack:
+	$(MAKE) -f debian/sys-build.mk source.make
+ifdef BUILD_UDEB
+	cd $B && if [ ! -d udev-udeb/ ]; then \
+		mkdir udev-udeb/ && \
+		cd udev-udeb/ && \
+		sh $(CURDIR)/extra/lndir.sh ..; \
+	fi
+endif
+ifdef BUILD_KLIBC
+	cd $B && if [ ! -d udev-klibc/ ]; then \
+		mkdir udev-klibc/ && \
+		cd udev-klibc/ && \
+		sh $(CURDIR)/extra/lndir.sh ..; \
+	fi
+endif
+	touch $@
+
+# used by the maintainer
+unpack.nopatch: 
+	$(MAKE) -f debian/sys-build.mk source.build
+
+# used by the maintainer
+diff:
+	$(MAKE) -f debian/sys-build.mk make-diff
+
+clean:
+	$(MAKE) -f debian/sys-build.mk source.clean
+	dh_clean
+
+build: $(STAMP_DIR)/build
+$(STAMP_DIR)/build: $(STAMP_DIR)/unpack
+	dh_testdir
+	$(MAKE) -f debian/sys-build.mk source.command SOURCE_CMD=" \
+		$(MAKE) $(MAKE_VARIABLES) OPTIMIZATION=-O2 all \
+			USE_SELINUX=true \
+	"
+ifdef BUILD_UDEB
+	$(MAKE) -f debian/sys-build.mk source.command SOURCE_CMD=" \
+		cd udev-udeb/ && \
+		$(MAKE) $(MAKE_VARIABLES) \
+			OPTIMIZATION='-Os -fomit-frame-pointer' all \
+	"
+endif
+ifdef BUILD_KLIBC
+	$(MAKE) -f debian/sys-build.mk source.command SOURCE_CMD=" \
+		cd udev-udeb/ && \
+		$(MAKE) $(MAKE_VARIABLES) \
+			OPTIMIZATION=-O2 USE_KLIBC=true \
+			KERNEL_DIR=/usr/src/linux-headers-2.6.10-2-386/ all \
+			USE_SELINUX=true \
+	"
+endif
+	touch $@
+
+binary-arch: $(STAMP_DIR)/build checkroot
+	dh_testdir
+	dh_clean -k
+	dh_installdirs
+
+	cp $B/udev $B/udevd $B/udevsend $B/udevstart $B/udevcontrol \
+		$B/extras/ata_id/ata_id $B/extras/chassis_id/chassis_id \
+		$B/extras/scsi_id/scsi_id $B/extras/volume_id/vol_id \
+		$B/extras/run_directory/udev_run_devd \
+		$B/extras/run_directory/udev_run_hotplugd \
+		$D/sbin/
+	cp $B/udevinfo $B/udevtest $D/usr/bin/
+
+	install --mode=755 extra/scsi-devfs.sh $B/extras/cdsymlinks.sh \
+		$B/extras/dvb.sh $B/extras/ide-devfs.sh $B/extras/inputdev.sh \
+		extra/removable.sh \
+		extra/ide-model.sh extra/raid-devfs.sh $D/etc/udev/scripts/
+	cp $B/etc/udev/udev.conf extra/*.rules extra/links.conf \
+		$B/extras/cdsymlinks.conf $D/etc/udev/
+	printf "# maximum size of the /dev tmpfs\ntmpfs_size=\"10M\"\n\n" \
+		>> $D/etc/udev/udev.conf
+	sed -e 's/^#\([^ ]\)/\1/' < extra/compat.rules > \
+		$D/etc/udev/compat-full.rules
+
+	cp extra/reportbug.presubj $D/usr/share/bug/udev/presubj
+	install --mode=755 extra/reportbug.script $D/usr/share/bug/udev/script
+
+ifdef BUILD_UDEB
+	cp $(BU)/udev $(BU)/udevd $(BU)/udevsend $(BU)/udevstart \
+		$B/extras/run_directory/udev_run_devd \
+		$B/extras/run_directory/udev_run_hotplugd \
+		$U/sbin/
+
+	grep '^[a-z]' $(BU)/etc/udev/udev.conf > $U/etc/udev/udev.conf
+	cp extra/devfs.rules $D/etc/udev/compat-full.rules $U/etc/udev/rules.d/
+	cp extra/permissions.rules $U/etc/udev/rules.d/020_permissions.rules
+	cp extra/run.rules $U/etc/udev/rules.d/z50_run.rules
+	cp extra/hotplugd.rules $U/etc/udev/rules.d/z70_hotplugd.rules
+	cp extra/links.conf $U/etc/udev/
+	install --mode=755 extra/scsi-devfs.sh $(BU)/extras/cdsymlinks.sh \
+		$(BU)/extras/ide-devfs.sh $(BU)/extras/inputdev.sh \
+		extra/ide-model.sh extra/raid-devfs.sh $U/etc/udev/scripts/
+
+	#install --mode=755 extra/udev.startup \
+	#	$U/lib/debian-installer-startup.d/S02udev
+endif
+ifdef BUILD_KLIBC
+endif
+
+	dh_installchangelogs $B/ChangeLog
+	dh_installdocs $(addprefix $B/,$(DOCS))
+	cp $B/extras/volume_id/README $D/usr/share/doc/udev/README.vol_id
+	cp $B/extras/chassis_id/README $D/usr/share/doc/udev/README.chassis_id
+	dh_installexamples $B/etc/udev/udev.rules.examples \
+		$B/extras/name_cdrom.pl $B/extras/start_udev \
+		$B/extras/scsi_id/scsi_id.config extra/udevtest-all
+	dh_installman $B/*.8 $B/extras/scsi_id/scsi_id.8
+	dh_link /usr/share/man/man8/udevd.8 /usr/share/man/man8/udevsend.8
+	dh_installinit --no-start --update-rcd-params='start 04 S .'
+	dh_installinit --no-start --update-rcd-params='start 36 S .' \
+		--name=udev-mtab 
+
+	dh_strip
+	dh_compress
+	dh_fixperms
+	dh_shlibdeps
+	dh_installdeb
+	dh_gencontrol $(NO_PACKAGE)
+	dh_builddeb $(NO_PACKAGE)
+
+
+binary:	binary-arch
+
+checkroot:
+	test root = "`whoami`"
+
+.PHONY: binary binary-arch binary-indep unpack configure build clean checkroot

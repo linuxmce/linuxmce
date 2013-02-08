@@ -1,0 +1,144 @@
+#! /bin/bash -p
+#
+# vdrdevel start-stop script
+#
+# modified for c't-distro, Peter Siering <ps@ctmagazin.de>
+# added sort order fix, thanks to Tom (on vdrdevelportal.de)
+# speed improvements by Markus Braun
+#
+#export LD_ASSUME_KERNEL=2.4.1
+
+. /usr/lib/vdrdevel/config-loader.sh
+
+PATH=/usr/local/sbin:/usr/local/bin:/sbin:/bin:/usr/sbin:/usr/bin
+NAME=vdrdevel
+DESC="Linux Video Disk Recorder"
+
+DAEMON=/usr/sbin/runvdrdevel
+PIDFILE=/var/run/runvdrdevel.pid
+VDRPRG=/usr/bin/vdrdevel
+
+# Set shutdown command
+test "$ENABLE_SHUTDOWN" = "1" && VDRSHUTDOWN="/usr/lib/vdrdevel/vdrdevel-shutdown" \
+                              || VDRSHUTDOWN="/usr/lib/vdrdevel/vdrdevel-shutdown-message"
+
+test -x $DAEMON || exit 0
+test -x $VDRPRG || exit 0
+
+. /usr/lib/vdrdevel/plugin-loader.sh
+. /usr/lib/vdrdevel/commands-loader.sh
+. /usr/lib/vdrdevel/remotes-loader.sh
+
+start_ctvdrdevel_specials()
+{
+
+#aumix -L
+    getremotes
+    if [ "$KEYB_TTY" != "" ]; then
+        tput -Tlinux clear > $KEYB_TTY
+        echo -e "This tty is currently mapped to VDR, keypresses aren't echoed.\r" > $KEYB_TTY
+        echo -n "For a login prompt switch to another console." > $KEYB_TTY
+#        chvt `echo "$KEYB_TTY" | sed "s/\/dev\/tty//"`
+#        REDIRECT="< $KEYB_TTY"
+    fi
+}
+
+stop_ctvdrdevel_specials()
+{
+    putremotes
+    if [ "$KEYB_TTY" != "" ]; then
+        tput -Tlinux clear > $KEYB_TTY
+    fi
+}
+
+vdr_specials()
+{
+    # stop other VDR version and copy remote conf files
+    START="vdrdevel"
+    STOP="vdr"
+    if ! start-stop-daemon --start --startas run$STOP --test \
+        --name run$STOP --pidfile /var/run/run$STOP.pid >/dev/null
+    then
+        echo
+        /etc/init.d/$STOP stop
+    fi
+    REMOTES="KBD LIRC remote-event"
+    for i in $REMOTES; do
+        if [ -e /var/lib/$STOP/remote.$i.conf -a \
+           ! -e /var/lib/$START/remote.$i.conf ]
+        then
+            cp /var/lib/$STOP/remote.$i.conf /var/lib/$START/
+        fi
+    done
+}
+
+startvdrdevel()
+{
+    if [ "$ENABLED" != "0" ] ; then
+        # check name and pidfile - exec not function with shell scripts
+        if start-stop-daemon --start --startas $DAEMON --test \
+            --name $(basename $DAEMON) --pidfile $PIDFILE >/dev/null
+        then
+            vdr_specials
+            getplugins
+            mergecommands "commands"
+            mergecommands "reccmds"
+            start_ctvdrdevel_specials
+            start-stop-daemon --start --quiet --startas $DAEMON --background \
+                --name $(basename $DAEMON) --pidfile $PIDFILE --make-pidfile -- \
+                -v $VIDEO_DIR -c $CFG_DIR  -L $PLUGIN_DIR -r $REC_CMD \
+                -s $VDRSHUTDOWN -E $EPG_FILE \
+                --port $SVDRP_PORT --lirc $PLUGINS $OPTIONS $REDIRECT
+        else
+            echo -n " - seems to be running already"
+        fi
+    else
+        echo -n " - aborted (to enable the daemon, edit /etc/default/vdrdevel)"
+    fi
+}
+
+stopvdrdevel()
+{
+    if start-stop-daemon --stop --retry 5 \
+        --name $(basename $DAEMON) --pidfile $PIDFILE >/dev/null
+    then
+        start-stop-daemon --stop --retry 5 --oknodo --exec $VDRPRG >/dev/null
+        rm -f $PIDFILE
+        stop_ctvdrdevel_specials
+    else
+        echo -n " - seems not to be running"
+    fi
+}
+
+case "$1" in
+    start)
+        echo -n "Starting $DESC: $NAME"
+	/etc/init.d/dvb start
+	sleep 2
+	aumix -f /etc/aumixvdr -L
+	startvdrdevel
+        echo "."
+       ;;
+    stop)
+        echo -n "Stopping $DESC: $NAME"
+        stopvdrdevel
+        echo "."
+	/etc/init.d/dvb stop
+        ;;
+    restart|force-reload)
+        echo -n "Restarting $DESC: $NAME"
+        stopvdrdevel
+        sleep 4
+        /etc/init.d/dvb restart
+        sleep 2
+        startvdrdevel
+        echo "."
+        ;;
+    *)
+        N=/etc/init.d/$NAME
+        echo "Usage: $N {start|stop|restart|force-reload}" >&2
+        exit 1
+        ;;
+esac
+
+exit 0

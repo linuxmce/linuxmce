@@ -44,6 +44,17 @@ using namespace std;
 #include "../DesignObj_Orbiter.h"
 #include "PlutoUtils/MultiThreadIncludes.h"
 //-----------------------------------------------------------------------------------------------------
+
+#ifdef MAEMO_NOKIA770
+
+#define BIT_PER_PIXEL 16
+
+#else
+
+#define BIT_PER_PIXEL 32
+
+#endif
+
 namespace DCE
 {
 class Orbiter;

@@ -162,6 +162,7 @@ public:
 	virtual PlutoGraphic *GetBackground( PlutoRectangle &rect ) = 0;
 
 	virtual void ShowProgress(int nPercent);
+	virtual void RenderProgressBar(int nPercent);
 	virtual bool DisplayProgress(string sMessage, int nProgress) { return false; }
 	virtual bool DisplayProgress(string sMessage, const map<string, bool> &mapChildDevices, int nProgress);
 	virtual int PromptUser(string sPrompt,int iTimeoutSeconds=10,map<int,string> *p_mapPrompts = NULL);

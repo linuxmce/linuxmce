@@ -34,13 +34,9 @@ using namespace std;
 
 #include "Table_City.h"
 #include "Table_Installation.h"
-#include "Table_Installation_pschist.h"
-#include "Table_Installation_pschmask.h"
 #include "Table_PostalCode.h"
 #include "Table_Region.h"
 #include "Table_RepositorySource_URL.h"
-#include "Table_RepositorySource_URL_pschist.h"
-#include "Table_RepositorySource_URL_pschmask.h"
 
 
 void Database_pluto_main::CreateTable_Country()
@@ -88,6 +84,7 @@ void Row_Country::Delete()
 	Row_Country *pRow = this; // Needed so we will have only 1 version of get_primary_fields_assign_from_row
 	
 	if (!is_deleted)
+	{
 		if (is_added)	
 		{	
 			vector<TableRow*>::iterator i;	
@@ -109,6 +106,7 @@ void Row_Country::Delete()
 			table->deleted_cachedRows[key] = this;
 			is_deleted = true;	
 		}	
+	}
 }
 
 void Row_Country::Reload()
@@ -221,8 +219,8 @@ PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
 if (is_null[1])
 return "NULL";
 
-char *buf = new char[61];
-db_wrapper_real_escape_string(table->database->m_pDB, buf, m_Description.c_str(), (unsigned long) min((size_t)30,m_Description.size()));
+char *buf = new char[181];
+db_wrapper_real_escape_string(table->database->m_pDB, buf, m_Description.c_str(), (unsigned long) min((size_t)90,m_Description.size()));
 string s=string()+"\""+buf+"\"";
 delete[] buf;
 return s;
@@ -235,8 +233,8 @@ PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
 if (is_null[2])
 return "NULL";
 
-char *buf = new char[61];
-db_wrapper_real_escape_string(table->database->m_pDB, buf, m_Define.c_str(), (unsigned long) min((size_t)30,m_Define.size()));
+char *buf = new char[181];
+db_wrapper_real_escape_string(table->database->m_pDB, buf, m_Define.c_str(), (unsigned long) min((size_t)90,m_Define.size()));
 string s=string()+"\""+buf+"\"";
 delete[] buf;
 return s;
@@ -262,8 +260,8 @@ PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
 if (is_null[4])
 return "NULL";
 
-char *buf = new char[11];
-db_wrapper_real_escape_string(table->database->m_pDB, buf, m_country_code.c_str(), (unsigned long) min((size_t)5,m_country_code.size()));
+char *buf = new char[31];
+db_wrapper_real_escape_string(table->database->m_pDB, buf, m_country_code.c_str(), (unsigned long) min((size_t)15,m_country_code.size()));
 string s=string()+"\""+buf+"\"";
 delete[] buf;
 return s;
@@ -760,20 +758,6 @@ PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
 class Table_Installation *pTable = table->database->Installation_get();
 pTable->GetRows("`FK_Country`=" + StringUtils::itos(m_PK_Country),rows);
 }
-void Row_Country::Installation_pschist_FK_Country_getrows(vector <class Row_Installation_pschist*> *rows)
-{
-PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
-
-class Table_Installation_pschist *pTable = table->database->Installation_pschist_get();
-pTable->GetRows("`FK_Country`=" + StringUtils::itos(m_PK_Country),rows);
-}
-void Row_Country::Installation_pschmask_FK_Country_getrows(vector <class Row_Installation_pschmask*> *rows)
-{
-PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
-
-class Table_Installation_pschmask *pTable = table->database->Installation_pschmask_get();
-pTable->GetRows("`FK_Country`=" + StringUtils::itos(m_PK_Country),rows);
-}
 void Row_Country::PostalCode_FK_Country_getrows(vector <class Row_PostalCode*> *rows)
 {
 PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
@@ -793,20 +777,6 @@ void Row_Country::RepositorySource_URL_FK_Country_getrows(vector <class Row_Repo
 PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
 
 class Table_RepositorySource_URL *pTable = table->database->RepositorySource_URL_get();
-pTable->GetRows("`FK_Country`=" + StringUtils::itos(m_PK_Country),rows);
-}
-void Row_Country::RepositorySource_URL_pschist_FK_Country_getrows(vector <class Row_RepositorySource_URL_pschist*> *rows)
-{
-PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
-
-class Table_RepositorySource_URL_pschist *pTable = table->database->RepositorySource_URL_pschist_get();
-pTable->GetRows("`FK_Country`=" + StringUtils::itos(m_PK_Country),rows);
-}
-void Row_Country::RepositorySource_URL_pschmask_FK_Country_getrows(vector <class Row_RepositorySource_URL_pschmask*> *rows)
-{
-PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
-
-class Table_RepositorySource_URL_pschmask *pTable = table->database->RepositorySource_URL_pschmask_get();
 pTable->GetRows("`FK_Country`=" + StringUtils::itos(m_PK_Country),rows);
 }
 

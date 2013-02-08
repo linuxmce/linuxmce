@@ -6,7 +6,7 @@ use Digest::MD5 qw(md5 md5_hex md5_base64);
 use IO::File;
 use IO::Dir;
 
-my $vers='$Id: fwextract.pl 1386 2006-10-25 02:21:01Z isely $';
+my $vers='$Id: fwextract.pl 2350 2009-11-01 00:43:57Z isely $';
 
 #
 #  Copyright (C) 2005 Mike Isely <isely@pobox.com>
@@ -69,8 +69,19 @@ my @driverDirPath;
 my $fileKeys = {
     'fw1-29xxx-01' => 'v4l-pvrusb2-29xxx-01.fw',
     'fw1-24xxx-01' => 'v4l-pvrusb2-24xxx-01.fw',
+    'fw1-73xxx-01' => 'v4l-pvrusb2-73xxx-01.fw',
     'fw2' => 'v4l-cx2341x-enc.fw',
     'fw3' => 'v4l-cx25840.fw',
+};
+
+# -------------------------------------------------------------------------
+
+# Dependencies - this map hints at which firmware images are expected
+# based on what has already been seen.
+my $fwDependencies = {
+    'fw1-29xxx-01' => ['fw2'],
+    'fw1-24xxx-01' => ['fw2','fw3'],
+    'fw1-73xxx-01' => ['fw2','fw3'],
 };
 
 # -------------------------------------------------------------------------
@@ -79,6 +90,7 @@ my $fileKeys = {
 # firmware images are very specific to a particular make & model of
 # hardware.
 my $hardwareIds = {
+    'fw1-73xxx-01' => "Hauppauge WinTV-HVR-1950",
     'fw1-29xxx-01' => "Hauppauge PVR USB2 Model 29xxx",
     'fw1-24xxx-01' => "Hauppauge PVR USB2 Model 24xxx",
 };
@@ -110,7 +122,7 @@ my $hardwareIds = {
 
 my $contentInfo = {
   bf1cc4da051b1db04091562c86c691ff => {
-    comment => "pvrusb2_23_31351",
+    comment => "Hauppauge pvrusb2_23_21351",
     contents => {
       'fw1-29xxx-01' => {
 	md5_hex => "3b7288416144467369ed2b5b10cf931d",
@@ -125,7 +137,7 @@ my $contentInfo = {
     }
   },
   "02e4934b8525db1fee074f57a0c27304" => {
-    comment => 'CDROM 2.5.22329 (credit: Eliette Mathey <elmat52@yahoo.fr>)',
+    comment => 'Hauppauge CDROM 2.5.22329 (credit: Eliette Mathey <elmat52@yahoo.fr>)',
     contents => {
       'fw1-29xxx-01' => {
 	md5_hex => "3b7288416144467369ed2b5b10cf931d",
@@ -140,7 +152,7 @@ my $contentInfo = {
     }
   },
   b100615d9497d205b065a985bc9d73c3 => {
-    comment => "pvrusb2_inf_26c (related to pvrusb2_26_23097)",
+    comment => "Hauppauge pvrusb2_inf_26c (related to pvrusb2_26_23097)",
     contents => {
       'fw1-29xxx-01' => {
 	md5_hex => "3b7288416144467369ed2b5b10cf931d",
@@ -155,7 +167,7 @@ my $contentInfo = {
     }
   },
   "6576e6cc206a4b5469345e7ebe578abf" => {
-    comment => "pvrusb2_inf (related to pvrusb2_26_23055)",
+    comment => "Hauppauge pvrusb2_inf (related to pvrusb2_26_23055)",
     contents => {
       'fw1-29xxx-01' => {
 	md5_hex => "3b7288416144467369ed2b5b10cf931d",
@@ -170,7 +182,7 @@ my $contentInfo = {
     }
   },
   "9c5fc27cd3a5c2307c911cad92c95689" => {
-    comment => "pvrusb2_27_23178",
+    comment => "Hauppauge pvrusb2_27_23178",
     contents => {
       'fw1-29xxx-01' => {
 	md5_hex => "3b7288416144467369ed2b5b10cf931d",
@@ -185,7 +197,7 @@ my $contentInfo = {
     }
   },
   "9cebcd0f6d47e0ae1676d667d7fb54b0" => {
-    comment => 'DriverVer=03/04/2005,2.2.73.23063 (credit: Fedor Bezrukov <Fedor.Bezrukov@epfl.ch>)',
+    comment => 'Hauppauge DriverVer=03/04/2005,2.2.73.23063 (credit: Fedor Bezrukov <Fedor.Bezrukov@epfl.ch>)',
     contents => {
       'fw1-29xxx-01' => {
 	md5_hex => "3b7288416144467369ed2b5b10cf931d",
@@ -200,7 +212,7 @@ my $contentInfo = {
     }
   },
   "a86445d3763546b04e22110a31d3704f" => {
-    comment => 'Shipped with first 24xxx models (credit: Richard Vieira <rever75@gmail.com>)',
+    comment => 'Hauppauge Shipped with first 24xxx models (credit: Richard Vieira <rever75@gmail.com>)',
     contents => {
       'fw1-24xxx-01' => {
         md5_hex => "34d213394328adf78e2fc9f1411691b0",
@@ -219,19 +231,46 @@ my $contentInfo = {
       }
     }
   },
+  "3dc49fe6a8eefa25c72573557c827624" => {
+    comment => 'Hauppauge pvrusb2_2273_23298',
+    contents => {
+      "fw1-29xxx-01" => {
+        md5_hex => "3b7288416144467369ed2b5b10cf931d",
+        offset => "1076128",
+        size => "8192"
+      },
+      fw2 => {
+        md5_hex => "79c5daf4cde87036c834a314b4929fb1",
+        offset => "289696",
+        size => "262144"
+      }
+    }
+  },
   "1b570b23375b817498007ccf085c27c3" => {
-    comment => 'pvrusb2_2273_24023.zip (also on CDs included with 24xxx models in April 2006)',
+    comment => 'Hauppauge pvrusb2_2273_24023.zip (also on CDs included with 24xxx models in April 2006)',
     contents => {
       "fw1-24xxx-01" => {
         md5_hex => "34d213394328adf78e2fc9f1411691b0",
         offset => "1415264",
         size => "8192"
       },
-      fw2 => {
-        md5_hex => "d85cb08382395390dc95ac6ebc2205f9",
-        offset => "292960",
-        size => "262144"
+      "fw1-29xxx-01" => {
+        md5_hex => "3b7288416144467369ed2b5b10cf931d",
+        offset => "1079392",
+        size => "8192"
       },
+      fw2 => [
+        {
+          md5_hex => "d85cb08382395390dc95ac6ebc2205f9",
+          offset => "292960",
+          size => "262144"
+        },
+        {
+          md5_hex => "79c5daf4cde87036c834a314b4929fb1",
+          offset => "555104",
+          size => "262144"
+        }
+      ],
       fw3 => {
         md5_hex => "c5749da3eb141e87634ff1e2c1e6f390",
         offset => "1423456",
@@ -240,7 +279,7 @@ my $contentInfo = {
     }
   },
   "eedb017a8cc2e8dc9825d1a1b3e4f034" => {
-    comment => 'pvrusb2_inf_24117.zip (for both 24xxx and 29xxx devices)',
+    comment => 'Hauppauge pvrusb2_inf_24117.zip (for both 24xxx and 29xxx devices)',
     contents => {
       "fw1-24xxx-01" => {
         md5_hex => "ffed594f0edea15de8c19cfd13bc4adf",
@@ -252,18 +291,228 @@ my $contentInfo = {
         offset => "1081216",
         size => "8192"
       },
-      fw2 => {
-        md5_hex => "d85cb08382395390dc95ac6ebc2205f9",
-        offset => "294784",
-        size => "262144"
-      },
+      fw2 => [
+        {
+          md5_hex => "d85cb08382395390dc95ac6ebc2205f9",
+          offset => "294784",
+          size => "262144"
+        },
+        {
+          md5_hex => "79c5daf4cde87036c834a314b4929fb1",
+          offset => "556928",
+          size => "262144"
+        }
+      ],
       fw3 => {
         md5_hex => "5c22fd758ea64a1b8df7e2eb59da0842",
         offset => "1425280",
         size => "12559"
       }
     }
+  },
+  "1cfca9ac70343dc596dd8d8c36b157c0" => {
+    comment => "Hauppauge WinTV CD 3.4b",
+    contents => {
+      "fw1-24xxx-01" => {
+        md5_hex => "ce5239749d5ab1c5aba7b1fe57ba081b",
+        offset => "169456",
+        size => "8192"
+      }
+    }
+  },
+  "5892ff339f828695bfd7852f4449b8f9" => {
+    comment => "Hauppauge WinTV CD 3.4b",
+    contents => {
+      "fw1-24xxx-01" => {
+        md5_hex => "ce5239749d5ab1c5aba7b1fe57ba081b",
+        offset => "128104",
+        size => "8192"
+      }
+    }
+  },
+  "99836e41ccb28c7b373e87686f93712a" => {
+    comment => "WinTV CD 3.4b",
+    contents => {
+      fw3 => {
+        md5_hex => "5c22fd758ea64a1b8df7e2eb59da0842",
+        offset => 0,
+        size => "12559"
+      }
+    }
+  },
+  b4cfe83f1aa235141a62cf4d715c354d => {
+    comment => "Hauppauge WinTV CD 3.4b",
+    contents => {
+      "fw1-29xxx-01" => {
+        md5_hex => "3b7288416144467369ed2b5b10cf931d",
+        offset => "1086880",
+        size => "8192"
+      },
+      fw2 => [
+        {
+          md5_hex => "d85cb08382395390dc95ac6ebc2205f9",
+          offset => "300448",
+          size => "262144"
+        },
+        {
+          md5_hex => "79c5daf4cde87036c834a314b4929fb1",
+          offset => "562592",
+          size => "262144"
+        }
+      ],
+      fw3 => {
+        md5_hex => "5c22fd758ea64a1b8df7e2eb59da0842",
+        offset => "1430944",
+        size => "12559"
+      }
+    }
+  },
+  d1b38599f3678f536eb61406f4f0da6d => {
+    comment => "Hauppauge WinTV CD 3.4b",
+    contents => {
+      fw2 => {
+        md5_hex => "d85cb08382395390dc95ac6ebc2205f9",
+        offset => "31928",
+        size => "262144"
+      }
+    }
+  },
+  ee16dd87b5180b45ad13249aa7922e7b => {
+    comment => "Hauppauge WinTV CD 3.4b",
+    contents => {
+      fw2 => {
+        md5_hex => "d85cb08382395390dc95ac6ebc2205f9",
+        offset => "537608",
+        size => "262144"
+      }
+    }
+  },
+  fc7dcdef8f17d3c5decc880673ea5bd5 => {
+    comment => "Hauppauge WinTV CD 3.4b",
+    contents => {
+      fw2 => {
+        md5_hex => "d85cb08382395390dc95ac6ebc2205f9",
+        offset => "537608",
+        size => "262144"
+      }
+    }
+  },
+  "9dc72435a12a6fd365bbb64aabf729fb" => {
+    comment => "GOTVIEW USB2.0 DVD2",
+    contents => {
+      fw2 => {
+        md5_hex => "79c5daf4cde87036c834a314b4929fb1",
+        offset => "592544",
+        size => "262144"
+      },
+      fw3 => {
+        md5_hex => "62569003244398e652144fe792296c78",
+        offset => "1532504",
+        size => "16382"
+      }
+    }
+  },
+  "108ea035f907c80c2c22435c2ec39b8a" => {
+    comment => "Hauppauge cd_4.5a.zip",
+    contents => {
+      "fw1-73xxx-01" => {
+        md5_hex => "c6b01cb318b909cc52d2cf643ca269a1",
+        offset => "374504",
+        size => "8192"
+      }
+    }
+  },
+  "1cb3c48a6684126f5e503a434f2d636b" => {
+    comment => "Bare ROM file",
+    contents => {
+      fw2 => {
+        md5_hex => "1cb3c48a6684126f5e503a434f2d636b",
+        offset => 0,
+        size => "376836"
+      }
+    }
+  },
+  "95bc688d3e7599fd5800161e9971cc55" => {
+    comment => "Bare ROM file",
+    contents => {
+      fw3 => {
+        md5_hex => "95bc688d3e7599fd5800161e9971cc55",
+        offset => 0,
+        size => "16382"
+      }
+    }
+  },
+  "e762ec8dee79f73567c9c9a15b6e384d" => {
+    comment => "Hauppauge cd_4.5a.zip",
+    contents => {
+      "fw1-73xxx-01" => {
+        md5_hex => "c6b01cb318b909cc52d2cf643ca269a1",
+        offset => "603728",
+        size => "8192"
+      }
+    }
+  },
+  "0d635430e2d333c87a7fbd64c513e7fa" => {
+    comment => "OnAir Sasem original CD",
+    contents => {
+      fw2 => {
+        md5_hex => "2c97465a4528807709301899630ba0e1",
+        offset => "162048",
+        size => "262144"
+      }
+    }
+  },
+  "9abbce9a039ff915b531485d314c82d3" => {
+    comment => "OnAir Creator CR_Drv20061",
+    contents => {
+      fw2 => {
+        md5_hex => "2c97465a4528807709301899630ba0e1",
+        offset => "170880",
+        size => "262144"
+      }
+    }
+  },
+  "5d42dc2d75dd59e2ac4ed02f1f1a7be3" => {
+    comment => "OnAir Creator CR_Drv3000",
+    contents => {
+      fw2 => {
+        md5_hex => "2c97465a4528807709301899630ba0e1",
+        offset => "176768",
+        size => "262144"
+      }
+    }
+  },
+  "80f5fa3e47e512a7fc86ada0a9f8c08d" => {
+    comment => "OnAir Creator CR_Drv3203",
+    contents => {
+      fw2 => {
+        md5_hex => "2c97465a4528807709301899630ba0e1",
+        offset => "104576",
+        size => "262144"
+      }
+    }
+  },
+  "2561b64830a76673a6d0b869ed7679b4" => {
+    comment => undef,
+    contents => {
+      "fw1-73xxx-01" => {
+        md5_hex => "ac95c4c24e4edca0f2af5e44867a7204",
+        offset => "437352",
+        size => "16384"
+      }
+    }
+  },
+  "dfd6c9b398e5155ad10569975795dae0" => {
+    comment => undef,
+    contents => {
+      "fw1-73xxx-01" => {
+        md5_hex => "ac95c4c24e4edca0f2af5e44867a7204",
+        offset => "697456",
+        size => "16384"
+      }
+    }
   }
+
 };
 
 
@@ -386,8 +635,8 @@ sub structureWriteToHandle {
 # Suck a file into a data structure so that we can manipulate it.
 sub fetchFileData {
     my $fname = shift;
-    my $fh = new IO::File;
     my $dontDieFl = shift;
+    my $fh = new IO::File;
     my $cnt;
 
     my $info = {
@@ -405,6 +654,36 @@ sub fetchFileData {
     $info->{size} = length $info->{data};
     $info->{md5_hex} = md5_hex($info->{data});
     return $info;
+};
+
+sub fetchMultipleFileData {
+    my $fname = shift;
+    my $item;
+    my $dir;
+    my $name;
+
+    $item = fetchFileData($fname,1);
+    return $item if (defined $item);
+
+    return undef if (!(($dir) = $fname =~ /^(.+)\.fw$/));
+
+    my $entries = getDirEntries($dir);
+    my @items;
+
+    return undef if (!defined $entries);
+
+    $name = $dir . '/';
+
+    foreach $fname (@$entries) {
+	next if ($fname eq '..');
+	next if ($fname eq '.');
+	$item = fetchFileData($dir . '/' . $fname,1);
+	next if (!defined $item);
+	push @items,$item;
+	$name .= ' ' . $fname;
+    }
+
+    return {multiple => \@items, name => $name};
 };
 
 # Print a <value> / <value> string to the terminal.  We do this so
@@ -488,7 +767,7 @@ sub searchForFuzzySequence {
 # needle and try to find where in the haystack it is a residing.
 # Return value is the offset within the haystack where it's been found
 # or undef.  This is a fast, exact search.
-sub searchForSequence {
+sub searchForExactSequence {
     my $needleInfo = shift;
     my $haystackInfo = shift;
     my $idx;
@@ -503,7 +782,7 @@ sub searchForSequence {
     # Pure paranoia
     $ssize = $needleSize if ($ssize > $needleSize);
 
-    for ($idx = 0; $idx < $range; $idx++) {
+    for ($idx = 0; $idx <= $range; $idx++) {
 	# Just check the first 4 bytes initially since this will be fast
 	next if (substr($haystackInfo->{data},$idx,$ssize) ne
 		 substr($needleInfo->{data},0,$ssize));
@@ -516,38 +795,100 @@ sub searchForSequence {
     return undef;
 };
 
-# Helper function for recording info in a data structure about
-# firmware we've found.
-sub noteResult {
-    my $result = shift;
-    my $fileInfo = shift;
-    my $fwInfo = shift;
+# Search for a needle in a haystack.  Pass in the haystack and the
+# needle and try to find where in the haystack it is a residing.
+# Return value is the offset within the haystack where it's been found
+# or undef.  This is a fast, exact search.
+sub searchForSequence {
+    my $needleInfo = shift;
+    my $haystackInfo = shift;
+    my $fuzzyFl = shift;
+    my $fp;
+    my $offset;
 
-    print "Found $fwInfo->{type} in $fileInfo->{name}" .
-	" at offset $fwInfo->{offset}\n";
-    $result->{$fileInfo->{md5_hex}}->{contents}->{$fwInfo->{type}} = {
-	offset => $fwInfo->{offset},
-	size => $fwInfo->{size},
-	md5_hex => md5_hex(substr($fileInfo->{data},
-				  $fwInfo->{offset},
-				  $fwInfo->{size})),
-    };
+    if ($fuzzyFl) {
+	$fp = \&searchForFuzzySequence;
+    } else {
+	$fp = \&searchForExactSequence;
+    }
+
+    return &{$fp}($needleInfo,$haystackInfo);
 }
 
 # Helper function to search a single file for firmware.  This only
 # does an exact search.
 sub searchASingleFile {
-    my $fileData = shift;
+    my $fileInfo = shift;
     my $fwInfo = shift;
-    my $offset;
+    my $fuzzyFl = shift;
+    my $result = shift;
+    my $comment = shift;
+    my ($offset,$size);
     my $key;
+    my $idx;
+    my $item;
+    my $doneFl = 1;
+    my $content = [];
+    my $str = "Searching";
 
+    $str = "Fuzzy searching" if ($fuzzyFl);
+    print "$str $fileInfo->{name} (size=$fileInfo->{size})\n";
     foreach $key (sort keys %$fwInfo) {
-	$offset = searchForSequence($fwInfo->{$key},$fileData);
-	if (defined $offset) {
-	    $fwInfo->{$key}->{offset} = $offset;
+	$content = [];
+	$item = $fwInfo->{$key};
+	next if ($item->{got} && $fuzzyFl);
+	if ($fuzzyFl) {
+	    print "--> Searching for $key ($fileKeys->{$key})\n";
+	}
+	if (exists $item->{multiple}) {
+	    my $mip;
+	    foreach $mip (@{$item->{multiple}}) {
+		$offset = searchForSequence($mip,$fileInfo,$fuzzyFl);
+		next if (! defined $offset);
+		$size = $mip->{size};
+		push @$content,{
+		    offset => $offset,
+		    size => $size,
+		    md5_hex => md5_hex(substr($fileInfo->{data},
+					      $offset,$size)),
+		};
+	    }
+	} else {
+	    $offset = searchForSequence($item,$fileInfo,$fuzzyFl);
+	    if (defined $offset) {
+		$size = $item->{size};
+		push @$content,{
+		    offset => $offset,
+		    size => $size,
+		    md5_hex => md5_hex(substr($fileInfo->{data},
+					      $offset,$size)),
+		};
+	    }
+	}
+	if (scalar(@$content)) {
+	    if (scalar(@$content) == 1) {
+		$content = @{$content}[0];
+		print "Found $item->{type} in $fileInfo->{name}" .
+		    " at offset $content->{offset}\n";
+	    } else {
+		print "Found $item->{type} in $fileInfo->{name}" .
+		    " at offsets";
+		for ($idx = 0; $idx < scalar(@$content); $idx++) {
+		    print "," if ($idx > 0);
+		    print " @{$content}[$idx]->{offset}";
+		}
+		print "\n";
+	    }
+	    $result->{$fileInfo->{md5_hex}}->{comment} = $comment;
+	    $result->{$fileInfo->{md5_hex}}->{contents}->{$item->{type}} =
+		$content;
+	    $item->{got} = 1;
+	} else {
+	    $doneFl = 0;
 	}
     }
+
+    return $doneFl;
 }
 
 # Quick and dirty function to grab the contents of a directory.
@@ -617,6 +958,7 @@ sub getRecursiveDirEntriesOrFail {
 
 sub doSearchDriver {
     my $comment = shift;
+    my $searchExactMode = shift;
     my $fwInfo = { };
     my $fileInfo;
     my ($v1,$v2,$v3);
@@ -626,12 +968,12 @@ sub doSearchDriver {
     my $result = {
     };
 
-    # First read in the already expected two firmware image files.
+    # First read in the already expected firmware image files.
     print "Searching for the following embedded file data:\n";
     foreach $key (sort keys %$fileKeys) {
-	$item = fetchFileData($fileKeys->{$key},1);
+	$item = fetchMultipleFileData($fileKeys->{$key});
 	next if (!defined $item);
-	print "  $key (file $fileKeys->{$key})\n";
+	print "  $key (file $item->{name})\n";
 	$item->{type} = $key;
 	$fwInfo->{$key} = $item;
     }
@@ -645,21 +987,12 @@ sub doSearchDriver {
     # search.  This is fastest.
     foreach $v1 (@$files) {
  	$fileInfo = fetchFileData($v1);
-	print "Searching $fileInfo->{name} (size=$fileInfo->{size})\n";
-	searchASingleFile($fileInfo,$fwInfo);
-	$doneFl = 1;
-	foreach $key (sort keys %$fwInfo) {
-	    if (! exists $fwInfo->{$key}->{offset}) {
-		$doneFl = undef;
-		next;
-	    }
-	    next if ($fwInfo->{$key}->{got});
-	    # Found something
-	    $result->{$fileInfo->{md5_hex}}->{comment} = $comment;
-	    noteResult($result,$fileInfo,$fwInfo->{$key});
-	    $fwInfo->{$key}->{got} = 1;
-	}
+	$doneFl = searchASingleFile($fileInfo,$fwInfo,0,$result,$comment);
 	return $result if ($doneFl);
+    }
+
+    if ($searchExactMode) {
+	return $result;
     }
 
     print "Performing fuzzy search in @driverDirPath\n";
@@ -668,21 +1001,7 @@ sub doSearchDriver {
     foreach $v1 (@$files) {
 	$fileInfo = fetchFileData($v1);
 	next if (!exists $result->{$fileInfo->{md5_hex}});
-	print "Fuzzy searching $fileInfo->{name}" .
-	    " (size=$fileInfo->{size})\n";
-	$doneFl = 1;
-	foreach $key (sort keys %$fwInfo) {
-	    next if ($fwInfo->{$key}->{got});
-	    print "--> Searching for $key ($fileKeys->{$key})\n";
-	    $v3 = searchForFuzzySequence($fwInfo->{$key},$fileInfo);
-	    if (! defined $v3) {
-		$doneFl = undef;
-		next;
-	    }
-	    $fwInfo->{$key}->{offset} = $v3;
-	    noteResult($result,$fileInfo,$fwInfo->{$key});
-	    $fwInfo->{$key}->{got} = 1;
-	}
+	$doneFl = searchASingleFile($fileInfo,$fwInfo,1,$result,$comment);
 	return $result if ($doneFl);
     }
 
@@ -690,22 +1009,7 @@ sub doSearchDriver {
     foreach $v1 (@$files) {
 	$fileInfo = fetchFileData($v1);
 	next if (exists $result->{$fileInfo->{md5_hex}});
-	print "Fuzzy searching $fileInfo->{name}" .
-	    " (size=$fileInfo->{size})\n";
-	$doneFl = 1;
-	foreach $key (sort keys %$fwInfo) {
-	    next if ($fwInfo->{$key}->{got});
-	    print "--> Searching for $key ($fileKeys->{$key})\n";
-	    $v3 = searchForFuzzySequence($fwInfo->{$key},$fileInfo);
-	    if (! defined $v3) {
-		$doneFl = undef;
-		next;
-	    }
-	    $fwInfo->{$key}->{offset} = $v3;
-	    $result->{$fileInfo->{md5_hex}}->{comment} = $comment;
-	    noteResult($result,$fileInfo,$fwInfo->{$key});
-	    $fwInfo->{$key}->{got} = 1;
-	}
+	$doneFl = searchASingleFile($fileInfo,$fwInfo,1,$result,$comment);
 	return $result if ($doneFl);
     }
     return $result;
@@ -719,7 +1023,8 @@ sub doSearchDriver {
 # program how to later extract the firmware files from those same places.
 sub searchDriver {
     my $comment = shift;
-    my $result = doSearchDriver($comment);
+    my $searchExactMode = shift;
+    my $result = doSearchDriver($comment,$searchExactMode);
 
     # Print out results...
     if (scalar(keys %$result)) {
@@ -739,69 +1044,139 @@ EOF
     }
 }
 
-# Extract firmware from parent file
-sub doSubExtract {
-    my $fileInfo = shift;
-    my $fwContentInfo = shift;
-    my $fwKey = shift;
-    my $fwInfo;
-    my $fc;
-
-    return undef if (! defined $fwContentInfo->{contents}->{$fwKey});
-
-    $fc = $fwContentInfo->{contents}->{$fwKey};
-
-    $fwInfo = {
-	key => $fwKey,
-	parent => $fileInfo->{name},
-	comment => $fwContentInfo->{comment},
-	device => $fwContentInfo->{device},
-	md5_hex => $fc->{md5_hex},
-	size => $fc->{size},
-	offset => $fc->{offset},
-	data => substr($fileInfo->{data},
-		       $fc->{offset},
-		       $fc->{size}),
-    };
-    if (exists $hardwareIds->{$fwKey}) {
-	$fwInfo->{hardwareId} = $hardwareIds->{$fwKey};
+# Scan a set of directories and record information about every file we
+# find which matches one of our stored file hashes.
+sub findInterestingFiles {
+    my $dirPath = shift;
+    my $files = getRecursiveDirEntriesOrFail($dirPath);
+    my $foundList = { names => {},
+		      hashes => {},
+		      fw => {}};
+    my ($name,$hash,$fileInfo,$cp,$fwType,$mip,$hp,$mp2);
+    foreach $name (@$files) {
+	$fileInfo = fetchFileData($name);
+	$hash = $fileInfo->{md5_hex};
+	$cp = $contentInfo->{$hash};
+	next if (! defined $cp);
+	print "Found firmware data in \"$name\" ($hash)\n";
+	$fileInfo->{metaInfo} = $cp;
+	$foundList->{names}->{$name} = $fileInfo;
+	$foundList->{hashes}->{$hash} = $fileInfo;
+	foreach $fwType (keys %{$cp->{contents}}) {
+	    $mip = $cp->{contents}->{$fwType};
+	    if (! exists $foundList->{fw}->{$fwType}) {
+		$foundList->{fw}->{$fwType} = { };
+	    }
+	    $hp = $foundList->{fw}->{$fwType};
+	    $mip = [$mip] if (ref $mip ne 'ARRAY');
+	    foreach $mp2 (@$mip) {
+		next if (exists $hp->{$mp2->{md5_hex}});
+		$hp->{$mp2->{md5_hex}} = {
+		    hostFileInfo => $fileInfo,
+		    fwFileInfo => $mp2,
+		};
+	    }
+	}
     }
+    return $foundList;
+}
 
-    return $fwInfo;
+# Walk through all gathered data and extra one of each type of image
+sub selectFirmware {
+    my $fwList = shift;
+    my $fwPriHash = shift;
+    my $fwPriFl;
+    my ($fwType,$hp,$fwp,$iCnt,@hashes,$fwPri,$key,$fwInfo);
+    my $fileInfo;
+    my $result = { };
+
+    foreach $fwType (keys %$fwList) {
+	$hp = $fwList->{$fwType};
+	@hashes = sort keys %$hp;
+	$iCnt = scalar(@hashes);
+	next if ($iCnt == 0);
+	$fwPri = $fwPriHash->{$fwType};
+	$fwPriFl = defined $fwPri;
+	$fwPri = 0 if (!defined $fwPriFl);
+	if ($fwPri >= $iCnt) {
+	    $fwPriFl = undef;
+	    print "Choice $fwPri for $fwType is too high (limit=$iCnt)\n";
+	    $fwPri = 0;
+	}
+	if ($fwPriFl) {
+	    print "Choosing alternative $fwPri for $fwType\n";
+	}
+	$key = $hashes[$fwPri];
+	$fwp = $hp->{$key};
+	$result->{$fwType} = {
+	    key => $fwType,
+	    info => $fwp,
+	    fname => $fileKeys->{$fwType}
+	};
+    }
+    return $result;
+}
+
+# Calculate set of host files we need to pull firmware from
+sub gatherHostFileUsedList {
+    my $fwInfoList = shift;
+    my $fwInfo;
+    my $result = { };
+    my $fwType;
+    my ($hostFileInfo,$hostFileName);
+    foreach $fwType (keys %$fwInfoList) {
+	$fwInfo = $fwInfoList->{$fwType};
+	$hostFileInfo = $fwInfo->{info}->{hostFileInfo};
+	$hostFileName = $hostFileInfo->{name};
+	if (! exists $result->{$hostFileName}) {
+	    $result->{hostFileName} = { };
+	}
+	$result->{$hostFileName}->{fw}->{$fwType} = $fwInfo;
+	$result->{$hostFileName}->{hostFileInfo} = $hostFileInfo;
+    }
+    return $result;
 }
 
 # Write firmware to a file and report about what we've written.
-sub doSubWriteback {
+sub writeFirmwareImage {
     my $fwInfo = shift;
     my $fh = new IO::File;
     my $md5_info;
     my $retCode = undef;
-    my $fname = $fwInfo->{name};
+    my $fwType = $fwInfo->{key};
+    my $fname = $fwInfo->{fname};
+    my $hwId = $fwInfo->{device};
+    my $fwp = $fwInfo->{info};
+    my $fwFileInfo = $fwp->{fwFileInfo};
+    my $hostFileInfo = $fwp->{hostFileInfo};
+    my $comment;
+    my $hostFileName = $hostFileInfo->{name};
+    my $hostFileOffset = $fwFileInfo->{offset};
+    my $data = substr($hostFileInfo->{data},
+		      $hostFileOffset,
+		      $fwFileInfo->{size});
 
-    if (!defined $fwInfo) {
-	print STDERR "Error: Failed to locate data for writing $fname\n";
+    if (!defined $fname) {
+	print STDERR "Error: No file name for firmware $fwType\n";
 	return $retCode;
     }
 
     die "Failed to open $fname for writing" unless $fh->open(">$fname");
 
-    print $fh $fwInfo->{data};
+    print $fh $data;
 
     $fh->close();
 
-    print "Wrote $fwInfo->{key} (file $fname):\n";
-    print "  Size $fwInfo->{size} bytes\n";
-    if (defined $fwInfo->{comment}) {
-	print "  Driver package $fwInfo->{comment}\n";
-    }
-    if (defined $fwInfo->{hardwareId}) {
-	print "  Intended hardware: \"$fwInfo->{hardwareId}\"\n";
-    }
-    print "  Source $fwInfo->{parent} offset $fwInfo->{offset}\n";
-    $md5_info = md5_hex($fwInfo->{data});
-    if ($md5_info ne $fwInfo->{md5_hex}) {
+    print "Wrote $fwType (file $fname):\n";
+    $comment = $fwp->{hostFileInfo}->{comment};
+    print "  Driver package $comment\n" if (defined $comment);
+    print "  Intended hardware: \"$hwId\"\n" if (defined $hwId);
+    print "  Source $hostFileName\n";
+    print "  Offset $hostFileOffset size $fwp->{fwFileInfo}->{size} bytes\n";
+    $md5_info = md5_hex($data);
+    if ($md5_info ne $fwFileInfo->{md5_hex}) {
 	print "  Warning: MD5 mismatch on extracted content for $fname\n";
-	print "  MD5 Expected: $fwInfo->{md5_hex}\n";
+	print "  MD5 Expected: $fwFileInfo->{md5_hex}\n";
 	print "  MD5      Got: $md5_info\n";
     } else {
 	print "  MD5 verified ($md5_info)\n";
@@ -815,82 +1190,72 @@ sub doSubWriteback {
 # recognize files which contain firmware.  For those it finds, it
 # executes the extraction process.
 sub doExtract {
-    my $fileInfo;
-    my $fwInfo = { };
-    my ($v1,$v2,$v3);
-    my ($rc1,$rc2);
-    my $key;
-    my $doneFl = undef;
+    my $driverDirPath = shift;
+    my $fwPriority = shift;
+    my $foundList;
+    my $fwList;
+    my $result = { };
+    my $okFl = 1;
+    my $fwItem;
+    my ($fwType,$fwt);
     my %devNotice;
     my $devCount;
     my @devs;
+    my $fwInfoList;
+    my $retCode = 0;
+    my $eCnt = 0;
+    my $fname;
+    my %missingTypes;
+    my $hostFileList;
+    my %comments;
+    my $cmt;
 
-    # Grab set of files we're going to scan
-    my $files = getRecursiveDirEntriesOrFail(\@driverDirPath);
-
-    # Look in each file for our expected firmware
-    foreach $v1 (@$files) {
-	$fileInfo = fetchFileData($v1);
-
-	$fileInfo->{md5_hex} = md5_hex($fileInfo->{data});
-	next if (! exists $contentInfo->{$fileInfo->{md5_hex}});
-
-	print "Found firmware data in $v1\n";
-
-	$v3 = $contentInfo->{$fileInfo->{md5_hex}};
-
-	foreach $key (sort keys %{$v3->{contents}}) {
-	    next if (defined $fwInfo->{$key});
-	    if (!defined $v3->{contents}->{$key}) {
-		$fwInfo->{$key} = undef;
-		next;
-	    }
-	    $fwInfo->{$key} = doSubExtract($fileInfo,$v3,$key);
-	}
-
-	$doneFl = 1;
-	foreach $key (keys %$fwInfo) {
-	    if (!defined $fwInfo->{$key}) {
-		$doneFl = undef;
-		last;
-	    }
-	}
-	last if ($doneFl);
+    # Figure out which files we are interested in extracting from, and
+    # read & store data from each such interesting file.
+    $foundList = findInterestingFiles($driverDirPath);
+    $fwInfoList = $foundList->{fw};
+    if (scalar(keys %$fwInfoList) < 1) {
+	print "ERROR: Failed to find any files with embedded firmware\n";
+	$retCode = 1;
+	return $retCode;
     }
 
-    if ($doneFl) {
-	foreach $key (keys %$fwInfo) {
-	    if (defined $fwInfo->{$key}) {
-		if (defined $fileKeys->{$key}) {
-		    $fwInfo->{$key}->{name} = $fileKeys->{$key};
-		}
-	    } else {
-		print "Failed to locate firmware key $key";
-		if (defined $fileKeys->{$key}) {
-		    print " (name $fileKeys->{$key})";
-		}
-		print "\n";
-		$doneFl = undef;
-		next;
-	    }
-	    if (!defined $fwInfo->{$key}->{name}) {
-		print "Can't write firmware for key $key; no name defined\n";
-		$doneFl = undef;
-		next;
-	    }
-	    if (!doSubWriteback($fwInfo->{$key})) {
-		$doneFl = undef;
-	    }
-	    if (exists $hardwareIds->{$key}) {
-		$devNotice{$hardwareIds->{$key}} = 1;
-	    }
+    # Calculate list of firmware images to grab and from where they
+    # will be grabbed.
+    $fwList = selectFirmware($fwInfoList,$fwPriority);
+
+    $hostFileList = gatherHostFileUsedList($fwList);
+    foreach $fname (keys %$hostFileList) {
+	$cmt = $hostFileList->{$fname}->{hostFileInfo}->{metaInfo}->{comment};
+	next if (! defined $cmt);
+	$comments{$cmt} = 1;
+    }
+    if (scalar keys %comments) {
+	print "Driver package info:\n";
+	foreach $cmt (sort keys %comments) {
+	    print "  $cmt\n";
 	}
     }
 
-    if (! $doneFl) {
-	print "Failed to successfully 1 or more firmware files\n";
-	return 1;
+    # Extract and write out each selected firmware image.
+    foreach $fwType (sort keys %$fwList) {
+	$fwItem = $fwList->{$fwType};
+	if (!writeFirmwareImage($fwItem)) {
+	    $okFl = 0;
+	}
+	if (exists $hardwareIds->{$fwType}) {
+	    $devNotice{$hardwareIds->{$fwType}} = 1;
+	}
+	$eCnt++;
+	if (exists $fwDependencies->{$fwType}) {
+	    foreach $fwt (@{$fwDependencies->{$fwType}}) {
+		next if (exists $missingTypes{$fwt});
+		next if (exists $fwList->{$fwt});
+		$missingTypes{$fwt} = 1;
+	    }
+	}
     }
+    print "Extracted $eCnt firmware images.\n";
 
     @devs = keys %devNotice;
     $devCount = scalar @devs;
@@ -916,22 +1281,37 @@ EOF
 	}
     }
     print "\n";
-    return 0;
+    if (scalar(keys %missingTypes) > 0) {
+	print "NOTE: Expected but did not see the following firmware images:\n";
+	foreach $fwType (sort keys %missingTypes) {
+	    print "  $fwType ($fileKeys->{$fwType})\n";
+	}
+	$okFl = 0;
+    }
+    if (!$okFl) {
+	print "NOTE: Firmware extraction was not entirely successful.\n";
+	$retCode = 1;
+    }
+    return $retCode;
 }
 
 # Our "main"
 sub mainFunc {
     my $searchMode = 0;
+    my $searchExactMode = 0;
     my $retCode;
     my $comment;
     my $key;
     my %f2Names;
+    my %fPriority;
 
     print "fwextract version: $vers\n";
     exit 1 if (!GetOptions("fwFile=s" => \%f2Names,
+			   "fwPriority=s" => \%fPriority,
 			   "comment=s" => \$comment,
 			   "driverDir=s" => \@driverDirPath,
-			   "search!" => \$searchMode));
+			   "search!" => \$searchMode,
+			   "searchExact!" => \$searchExactMode));
     push @driverDirPath,@ARGV;
     if (scalar(@driverDirPath) == 0) {
 	push @driverDirPath,"win_driver";
@@ -945,12 +1325,13 @@ sub mainFunc {
 	}
     }
 
+    $searchMode = 1 if ($searchExactMode);
     if ($searchMode) {
 	print "Searching for firmware images in driver directory\n";
-	$retCode = searchDriver($comment);
+	$retCode = searchDriver($comment,$searchExactMode);
     } else {
 	print "Extracting firmware files from driver directory\n";
-	$retCode = doExtract();
+	$retCode = doExtract(\@driverDirPath,\%fPriority);
     }
 
     exit $retCode;

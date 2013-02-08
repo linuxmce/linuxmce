@@ -3,24 +3,18 @@
 use strict;
 use diagnostics;
 use DBI;
+require "/usr/pluto/bin/config_ops.pl";
+require "/usr/pluto/bin/lmce.pl";
 
-sub getIP {
-        my $dbh = DBI->connect('dbi:mysql:pluto_main');
-        my $sth = $dbh->prepare("SELECT IPaddress FROM Device WHERE FK_DeviceTemplate = 7");
-        $sth->execute || die "Sql Error";
-        my $row = $sth->fetchrow_hashref;
-        my $IP = $row->{IPaddress};
-        return $IP;
-}
-
-#declare vars (it's safer this way)
+# Declare vars (it's safer this way)
 my $Device_ID;
 my $Device_IP;
 my $Device_MAC;
 my $Device_EXT;
-my $IntIP; 
+my $Device_SECRET;
+my $IntIP;
 
-#check params
+# Check params
 if($#ARGV < 5 || $ARGV[0] ne "-d" || $ARGV[2] ne "-i" || $ARGV[4] ne "-m")
 {
     print "<USAGE-1>\n$0 -d <Device ID> -i <IP> -m <mac address>\n";
@@ -33,19 +27,19 @@ else
     $Device_MAC = $ARGV[5];
 }
 
-$IntIP = getIP();
+# Sync with Asterisk DB (practically do nothing but create a new extension number)
+#`/usr/pluto/bin/db_phone_config.sh`;
+
+# Let's see what the database thinks about the extension of this phone
+$Device_EXT = get_device_devicedata($Device_ID,31);
+$Device_SECRET = get_device_devicedata($Device_ID,128);
+
+chomp($Device_EXT);
+$IntIP = getCoreIP();
 if ($IntIP eq "") {
         $IntIP="192.168.80.1";
 }
 
-#sync with AMP
-`/usr/pluto/bin/sync_pluto2amp.pl $Device_ID`;
-
-open(FILE,"/tmp/phone${Device_ID}extension");
-$Device_EXT=<FILE>;
-close(FILE);
-
-chomp($Device_EXT);
 $Device_MAC =~ s/[^0-9A-Fa-f]//g;
 
 $Device_MAC = uc($Device_MAC);
@@ -111,7 +105,7 @@ $str_SIPDefault .= "phone_label: \"Pluto\"\n";
 
 $str_SIPMAC .= "line1_name: \"$Device_EXT\"\n";
 $str_SIPMAC .= "line1_authname: \"$Device_EXT\"\n";
-$str_SIPMAC .= "line1_password: \"$Device_EXT\"\n";
+$str_SIPMAC .= "line1_password: \"$Device_SECRET\"\n";
 $str_SIPMAC .= "line1_shortname: \"$Device_EXT\"\n";
 
 open(FILE,"> /tftpboot/SIPDefault.cnf");

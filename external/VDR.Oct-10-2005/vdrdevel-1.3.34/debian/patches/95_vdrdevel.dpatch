@@ -1,0 +1,97 @@
+#!/bin/sh -e
+
+## 95_vdrdevel.dpatch by Thomas Günther <tom@toms-cafe.de>
+##
+## Version 0.1.4
+##
+## All lines beginning with `## DP:' are a description of the patch.
+## DP: Substitute vdr -> vdrdevel and vice versa:
+## DP:   1. in includes of all source files (recursively)
+## DP:      except for the files in PLUGIN/src/.
+## DP:   2. in contents of all files in debian directory (recursively)
+## DP:      except for control, changelog, rules, watch, copyright
+## DP:      and files in directories patches, patched and plugin-template.
+## DP:   3. in names of all files in debian directory (recursively)
+## DP:      except files in directories patches and patched.
+## DP: Exceptions:
+## DP:   libvdr-, svdrp, vdrrip, vdrcd, dvdrecord, vdradmin,
+## DP:   vdr-xxv, vdr-patchlevel.
+## DP: Preserve mode, ownership and timestamps.
+
+if [ "$*" != "-patch" -a "$*" != "-unpatch" ]; then
+    echo >&2 "`basename $0`: script expects -patch|-unpatch as argument"
+    exit 1
+fi
+
+# Check if this is a vdrdevel package
+/usr/bin/dh_listpackages | /bin/grep -q "^vdrdevel-" || exit 0
+
+# Create tempfile
+tmp_file=$(/bin/mktemp)
+
+# Define sed commands
+inc_subst="s.\(#[[:space:]]*include[[:space:]]*\)<vdr.\1<vdrdevel.; \
+           s.\(#[[:space:]]*include[[:space:]]*\)<vdrdeveldevel.\1<vdr.;"
+deb_subst="s.vdr.vdrdevel.g; \
+           s.vdrdeveldevel.vdr.g; \
+           s.libvdrdevel-.libvdr-.g; \
+           s.svdrdevelp.svdrp.g; \
+           s.vdrdevelrip.vdrrip.g; \
+           s.vdrdevelcd.vdrcd.g; \
+           s.dvdrdevelecord.dvdrecord.g; \
+           s.vdrdeveladmin.vdradmin.g; \
+           s.vdrdevel-xxv.vdr-xxv.g; \
+           s.vdrdevel-patchlevel.vdr-patchlevel.g;"
+
+# Includes of all source files
+files=$(/usr/bin/find ./ -type f \
+        -iregex ".*\.\(c\|h\|cc\|hh\|cpp\|hpp\)" \
+        -not -regex "\./PLUGINS/src/.*")
+if [ "$files" ]; then
+    for f in $files; do
+        /bin/chmod +w "$f"
+        /bin/cp -a -f "$f" "$tmp_file"
+        /bin/sed -e "$inc_subst" "$f" >"$tmp_file"
+        if ! /usr/bin/cmp -s "$f" "$tmp_file"; then
+            /usr/bin/touch -r "$f" "$tmp_file"
+            /bin/mv -f "$tmp_file" "$f"
+            echo "vdr includes substituted in $f"
+        fi
+    done
+fi
+
+# Files in debian directory (recursively)
+files=$(/usr/bin/find debian/ -type f \
+        -not -regex "debian/patche[sd]/.*" \
+        -not -regex "debian/\(control\|changelog\|rules\|watch\|copyright\)" \
+        -not -regex "debian/plugin-template/.*")
+if [ "$files" ]; then
+    for f in $files; do
+        /bin/chmod +w "$f"
+        /bin/cp -a -f "$f" "$tmp_file"
+        /bin/sed -e "$deb_subst" "$f" >"$tmp_file"
+        if ! /usr/bin/cmp -s "$f" "$tmp_file"; then
+            /usr/bin/touch -r "$f" "$tmp_file"
+            /bin/mv -f "$tmp_file" "$f"
+            echo "vdr pathes substituted in $f"
+        fi
+    done
+fi
+
+# Rename files in debian directory (recursively)
+files=$(/usr/bin/find debian/ -type f \
+        -name "*vdr*" -not -regex "debian/patche[sd]/.*")
+if [ "$files" ]; then
+    for f in $files; do
+        n=$(echo "$f" | /bin/sed -e "$deb_subst")
+        if [ "$f" != "$n" ]; then
+            /bin/mv "$f" "$n"
+            echo "renamed $f to $n"
+        fi
+    done
+fi
+
+# Remove tempfile
+/bin/rm -f "$tmp_file"
+
+exit 0

@@ -1,0 +1,27 @@
+
+This package contains the mechanism for executing the right scripts
+in the right order at bootup/shutdown time, and when changing runlevels.
+It works through managing symlinks in /etc/rc?.d
+
+This package is built from the `sysvinit' source package.
+
+Copyright (C) 2000-2003 Miquel van Smoorenburg <miquels@cistron.nl>
+Copyright (C) 2000,2001 Henrique de Moraes Holschuh <hmh@debian.org>
+
+    This program is free software; you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation; either version 2 of the License, or
+    (at your option) any later version.
+ 
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+                                                                                
+    You should have received a copy of the GNU General Public License
+    along with this program; if not, write to the Free Software
+    Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+                                                                                
+On Debian GNU/Linux systems, the complete text of the GNU General
+Public License can be found in `/usr/share/common-licenses/GPL'.
+

@@ -1,0 +1,113 @@
+   http://www.bootsplash.org/
+
+   Kernel stuff
+
+   ATTENTION!
+   Please read the following information very carefully. This kernel
+   patch is free software; you may redistribute it under the terms of the
+   GNU General Public License. This kernel patch comes with absolutely no
+   warranty.
+
+   Requirements
+
+   * To use the Linux bootsplash screen, you have to recompile your
+   kernel.
+
+   If you are not familiar with this procedure, please ask one of your
+   geek friends or get hold of a distribution that already comes with the
+   bootsplash screen.
+
+   * You need a bootsplash theme. 
+
+   * You need the splash utility, see README.bootsplash
+
+   Otherwise lets get started:
+
+   Patching and Compiling the Kernel
+
+   First off, make sure, your kernel sources are installed in
+   /usr/src/linux. Now download the latest version of the bootsplash
+   patch:
+
+   * bootsplash version 3.0.7 (created 2003/03/10 against vanilla Linux
+     2.4.20)
+   ftp://ftp.suse.com/pub/people/stepan/bootsplash/kernel/bootsplash-3.0.7-2.4.20-vanilla.diff
+
+   yourbox:~ # cd /usr/src/linux
+   yourbox:/usr/src/linux # patch -p1 <
+   /path/to/bootsplash-3.0.7-2.4.20-vanilla.diff
+   patching file drivers/char/console.c
+   patching file drivers/char/keyboard.c
+   patching file drivers/char/n_tty.c
+   patching file drivers/video/Config.in
+   patching file drivers/video/Makefile
+   patching file drivers/video/fbcon-jpegdec.c
+   patching file drivers/video/fbcon-jpegdec.h
+   patching file drivers/video/fbcon-splash.c
+   patching file drivers/video/fbcon-splash.h
+   patching file drivers/video/fbcon-splash16.c
+   patching file drivers/video/fbcon.c
+   patching file include/video/fbcon.h
+   patching file kernel/panic.c
+   yourbox:/usr/src/linux #
+
+   Now you have to change your kernel configuration, using make config,
+   make menuconfig or make xconfig. Go to "Console drivers" ->
+   "Frame-Buffer support" and select "VESA VGA graphics console" (or
+   possibly another framebuffer driver, if one is available for your
+   graphics hardware) and turn on "Use splash screen instead of boot
+   logo". Also be sure to enable "Initial Ramdisk support" in "Block
+   Devices" Save your new config and compile a new kernel. Copy the
+   kernel to your /boot directory and make sure that you have a boot
+   entry for it in your bootloader config.
+
+   Preparing the picture
+
+   As there are no filesystems accessible when the bootsplash is first
+   shown, it can be attached to an initial ramdisk. If you dont have an
+   initial ramdisk normally, just use an empty one.
+
+   Get the sources of the splash utility from:
+   ftp://ftp.suse.com/pub/people/stepan/bootsplash/rpm-sources/bootsplash/splashutils.tar.bz2
+   # cd ~/splash
+   # tar xvjf splashutils.tar.bz2
+   splashutils/
+   splashutils/Makefile
+   splashutils/splash.c
+   [..]
+   splashutils/ChangeLog
+   splashutils/COPYING
+   # cd splashutils
+   # make splash
+   gcc -Os -Wall -c -o splash.o splash.c
+   gcc -Os -Wall -o splash splash.o
+   strip splash
+   # cp splash /sbin/
+   # cd ..
+
+   Next you need to attach the picture plus a header, defining text
+   windows and such to the initrd (in the example, this is done for
+   1024x768. specify other resolutions, if available) :
+
+   /sbin/splash -s -f
+   /etc/bootsplash/themes/yourtheme/config/bootsplash-1024x768.cfg >>
+   /boot/initrd.splash
+
+   If you want to use more than one resolution for the bootsplash, call
+   the above command several times, once for each resolution config file.
+
+   Finishing up
+
+   run lilo, if appropriate, and reboot your system. You should get the
+   bootsplash screen.
+
+   During boot you will likely see the following in your messages:
+   vesafb: framebuffer at 0xf0000000, mapped to 0xdc816000, size 65472k
+   vesafb: mode is 1024x768x16, linelength=2048, pages=41
+   vesafb: protected mode interface info at c000:5137
+   vesafb: scrolling: redraw
+   vesafb: directcolor: size=0:5:6:5, shift=0:11:5:0
+   Looking for splash picture.... silenjpeg size 11165 bytes, found
+   (1024x768, 4912 bytes, v3)
+   Got silent jpeg.
+

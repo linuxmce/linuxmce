@@ -55,13 +55,6 @@ public:
 			EVENTPARAMETER_Name_CONST, sName.c_str()));
 	}
 
-	virtual void Media_Removed()
-	{
-		SendMessage(new Message(m_dwPK_Device, DEVICEID_EVENTMANAGER, PRIORITY_NORMAL, MESSAGETYPE_EVENT, 
-			EVENT_Media_Removed_CONST,
-			0 /* number of parameter's pairs (id, value) */));
-	}
-
 };
 
 
@@ -103,7 +96,7 @@ public:
 		if( m_bRunningWithoutDeviceData )
 			return m_pEvent_Impl->GetDeviceDataFromDatabase(m_dwPK_Device,DEVICEDATA_Drive_CONST);
 		else
-			return m_mapParameters_Find(DEVICEDATA_Drive_CONST);
+			return m_mapParameters[DEVICEDATA_Drive_CONST];
 	}
 
 	void Set_Drive(string Value)
@@ -115,7 +108,7 @@ public:
 		if( m_bRunningWithoutDeviceData )
 			return (m_pEvent_Impl->GetDeviceDataFromDatabase(m_dwPK_Device,DEVICEDATA_Autoassign_to_parents_room_CONST)=="1" ? true : false);
 		else
-			return (m_mapParameters_Find(DEVICEDATA_Autoassign_to_parents_room_CONST)=="1" ? true : false);
+			return (m_mapParameters[DEVICEDATA_Autoassign_to_parents_room_CONST]=="1" ? true : false);
 	}
 
 	bool Get_PNP_Create_Without_Prompting()
@@ -123,7 +116,7 @@ public:
 		if( m_bRunningWithoutDeviceData )
 			return (m_pEvent_Impl->GetDeviceDataFromDatabase(m_dwPK_Device,DEVICEDATA_PNP_Create_Without_Prompting_CONST)=="1" ? true : false);
 		else
-			return (m_mapParameters_Find(DEVICEDATA_PNP_Create_Without_Prompting_CONST)=="1" ? true : false);
+			return (m_mapParameters[DEVICEDATA_PNP_Create_Without_Prompting_CONST]=="1" ? true : false);
 	}
 
 	bool Get_Immediate_Reload_Isnt_Necessar()
@@ -131,7 +124,7 @@ public:
 		if( m_bRunningWithoutDeviceData )
 			return (m_pEvent_Impl->GetDeviceDataFromDatabase(m_dwPK_Device,DEVICEDATA_Immediate_Reload_Isnt_Necessar_CONST)=="1" ? true : false);
 		else
-			return (m_mapParameters_Find(DEVICEDATA_Immediate_Reload_Isnt_Necessar_CONST)=="1" ? true : false);
+			return (m_mapParameters[DEVICEDATA_Immediate_Reload_Isnt_Necessar_CONST]=="1" ? true : false);
 	}
 
 	bool Get_Send_Events()
@@ -139,23 +132,7 @@ public:
 		if( m_bRunningWithoutDeviceData )
 			return (m_pEvent_Impl->GetDeviceDataFromDatabase(m_dwPK_Device,DEVICEDATA_Send_Events_CONST)=="1" ? true : false);
 		else
-			return (m_mapParameters_Find(DEVICEDATA_Send_Events_CONST)=="1" ? true : false);
-	}
-
-	bool Get_Auto_Play()
-	{
-		if( m_bRunningWithoutDeviceData )
-			return (m_pEvent_Impl->GetDeviceDataFromDatabase(m_dwPK_Device,DEVICEDATA_Auto_Play_CONST)=="1" ? true : false);
-		else
-			return (m_mapParameters_Find(DEVICEDATA_Auto_Play_CONST)=="1" ? true : false);
-	}
-
-	bool Get_Fire_Startup_Event()
-	{
-		if( m_bRunningWithoutDeviceData )
-			return (m_pEvent_Impl->GetDeviceDataFromDatabase(m_dwPK_Device,DEVICEDATA_Fire_Startup_Event_CONST)=="1" ? true : false);
-		else
-			return (m_mapParameters_Find(DEVICEDATA_Fire_Startup_Event_CONST)=="1" ? true : false);
+			return (m_mapParameters[DEVICEDATA_Send_Events_CONST]=="1" ? true : false);
 	}
 
 };
@@ -268,11 +245,8 @@ public:
 	bool DATA_Get_PNP_Create_Without_Prompting() { return GetData()->Get_PNP_Create_Without_Prompting(); }
 	bool DATA_Get_Immediate_Reload_Isnt_Necessar() { return GetData()->Get_Immediate_Reload_Isnt_Necessar(); }
 	bool DATA_Get_Send_Events() { return GetData()->Get_Send_Events(); }
-	bool DATA_Get_Auto_Play() { return GetData()->Get_Auto_Play(); }
-	bool DATA_Get_Fire_Startup_Event() { return GetData()->Get_Fire_Startup_Event(); }
 	//Event accessors
 	void EVENT_Media_Inserted(int iFK_MediaType,string sMRL,string sID,string sName) { GetEvents()->Media_Inserted(iFK_MediaType,sMRL.c_str(),sID.c_str(),sName.c_str()); }
-	void EVENT_Media_Removed() { GetEvents()->Media_Removed(); }
 	//Commands - Override these to handle commands from the server
 	virtual void CMD_Disk_Drive_Monitoring_ON(string &sCMD_Result,class Message *pMessage) {};
 	virtual void CMD_Disk_Drive_Monitoring_OFF(string &sCMD_Result,class Message *pMessage) {};
@@ -293,8 +267,7 @@ public:
 	virtual void CMD_Update_Ripping_Status(string sText,string sFilename,string sTime,string sStatus,int iPercent,string sTask,string sJob,string &sCMD_Result,class Message *pMessage) {};
 	virtual void CMD_Lock(int iPK_Device,string sID,bool bTurn_On,string *sText,bool *bIsSuccessful,string &sCMD_Result,class Message *pMessage) {};
 	virtual void CMD_Abort_Task(int iParameter_ID,string &sCMD_Result,class Message *pMessage) {};
-	virtual void CMD_Get_Disk_Info(string *sText,int *iPK_MediaType,int *iEK_Disc,string *sDisks,string *sURL,string *sBlock_Device,string &sCMD_Result,class Message *pMessage) {};
-	virtual void CMD_Get_Ripping_Status(string *sStatus,string &sCMD_Result,class Message *pMessage) {};
+	virtual void CMD_Get_Disk_Info(string *sRippingStatus, int *iPK_MediaType, int *iEK_Disc, string *sDisks,string *sURL,string *sBlock_Device,string &sCMD_Result,class Message *pMessage) {};
 
 	//This distributes a received message to your handler.
 	virtual ReceivedMessageResult ReceivedMessage(class Message *pMessageOriginal)
@@ -857,23 +830,24 @@ public:
 				case COMMAND_Get_Disk_Info_CONST:
 					{
 						string sCMD_Result="OK";
-						string sText=pMessage->m_mapParameters[COMMANDPARAMETER_Text_CONST];
 						int iPK_MediaType=atoi(pMessage->m_mapParameters[COMMANDPARAMETER_PK_MediaType_CONST].c_str());
-						int iEK_Disc=atoi(pMessage->m_mapParameters[COMMANDPARAMETER_EK_Disc_CONST].c_str());
 						string sDisks=pMessage->m_mapParameters[COMMANDPARAMETER_Disks_CONST];
 						string sURL=pMessage->m_mapParameters[COMMANDPARAMETER_URL_CONST];
 						string sBlock_Device=pMessage->m_mapParameters[COMMANDPARAMETER_Block_Device_CONST];
-						CMD_Get_Disk_Info(&sText,&iPK_MediaType,&iEK_Disc,&sDisks,&sURL,&sBlock_Device,sCMD_Result,pMessage);
+						int iEK_Disc=atoi(pMessage->m_mapParameters[COMMANDPARAMETER_EK_Disc_CONST].c_str());
+						string sRippingStatus=pMessage->m_mapParameters[COMMANDPARAMETER_Text_CONST];
+
+						CMD_Get_Disk_Info(&sRippingStatus, &iPK_MediaType, &iEK_Disc, &sDisks,&sURL,&sBlock_Device,sCMD_Result,pMessage);
 						if( pMessage->m_eExpectedResponse==ER_ReplyMessage && !pMessage->m_bRespondedToMessage )
 						{
 							pMessage->m_bRespondedToMessage=true;
 							Message *pMessageOut=new Message(m_dwPK_Device,pMessage->m_dwPK_Device_From,PRIORITY_NORMAL,MESSAGETYPE_REPLY,0,0);
-						pMessageOut->m_mapParameters[COMMANDPARAMETER_Text_CONST]=sText;
 						pMessageOut->m_mapParameters[COMMANDPARAMETER_PK_MediaType_CONST]=StringUtils::itos(iPK_MediaType);
 						pMessageOut->m_mapParameters[COMMANDPARAMETER_EK_Disc_CONST]=StringUtils::itos(iEK_Disc);
 						pMessageOut->m_mapParameters[COMMANDPARAMETER_Disks_CONST]=sDisks;
 						pMessageOut->m_mapParameters[COMMANDPARAMETER_URL_CONST]=sURL;
 						pMessageOut->m_mapParameters[COMMANDPARAMETER_Block_Device_CONST]=sBlock_Device;
+						pMessageOut->m_mapParameters[COMMANDPARAMETER_Text_CONST]=sRippingStatus;
 							pMessageOut->m_mapParameters[0]=sCMD_Result;
 							SendMessage(pMessageOut);
 						}
@@ -886,34 +860,7 @@ public:
 						{
 							int iRepeat=atoi(itRepeat->second.c_str());
 							for(int i=2;i<=iRepeat;++i)
-								CMD_Get_Disk_Info(&sText,&iPK_MediaType,&iEK_Disc,&sDisks,&sURL,&sBlock_Device,sCMD_Result,pMessage);
-						}
-					};
-					iHandled++;
-					continue;
-				case COMMAND_Get_Ripping_Status_CONST:
-					{
-						string sCMD_Result="OK";
-						string sStatus=pMessage->m_mapParameters[COMMANDPARAMETER_Status_CONST];
-						CMD_Get_Ripping_Status(&sStatus,sCMD_Result,pMessage);
-						if( pMessage->m_eExpectedResponse==ER_ReplyMessage && !pMessage->m_bRespondedToMessage )
-						{
-							pMessage->m_bRespondedToMessage=true;
-							Message *pMessageOut=new Message(m_dwPK_Device,pMessage->m_dwPK_Device_From,PRIORITY_NORMAL,MESSAGETYPE_REPLY,0,0);
-						pMessageOut->m_mapParameters[COMMANDPARAMETER_Status_CONST]=sStatus;
-							pMessageOut->m_mapParameters[0]=sCMD_Result;
-							SendMessage(pMessageOut);
-						}
-						else if( (pMessage->m_eExpectedResponse==ER_DeliveryConfirmation || pMessage->m_eExpectedResponse==ER_ReplyString) && !pMessage->m_bRespondedToMessage )
-						{
-							pMessage->m_bRespondedToMessage=true;
-							SendString(sCMD_Result);
-						}
-						if( (itRepeat=pMessage->m_mapParameters.find(COMMANDPARAMETER_Repeat_Command_CONST))!=pMessage->m_mapParameters.end() )
-						{
-							int iRepeat=atoi(itRepeat->second.c_str());
-							for(int i=2;i<=iRepeat;++i)
-								CMD_Get_Ripping_Status(&sStatus,sCMD_Result,pMessage);
+							  CMD_Get_Disk_Info(&sRippingStatus, &iPK_MediaType, &iEK_Disc, &sDisks,&sURL,&sBlock_Device,sCMD_Result,pMessage);
 						}
 					};
 					iHandled++;

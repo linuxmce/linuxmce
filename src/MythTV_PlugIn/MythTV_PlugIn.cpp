@@ -29,6 +29,7 @@ using namespace DCE;
 #include "../pluto_main/Define_Event.h"
 #include "../pluto_main/Define_DeviceData.h"
 #include "../pluto_main/Define_DeviceTemplate.h"
+#include "../pluto_main/Define_Variable.h"
 #include "../pluto_main/Table_EventParameter.h"
 #include "../pluto_main/Table_Users.h"
 #include "../pluto_media/Table_LongAttribute.h"
@@ -51,6 +52,10 @@ using namespace DCE;
 
 #include "../Orbiter_Plugin/OH_Orbiter.h"
 
+#include <sstream>
+#include <math.h>
+#include <time.h>
+
 static const string SCRIPT_DIR =             "/usr/pluto/bin";
 static const string SCRIPT_SYNC_TO_DB =      SCRIPT_DIR + "/MythTvSyncDB.sh";
 static const string SCRIPT_TUNE =            SCRIPT_DIR + "/TuneToChannel.sh";
@@ -58,6 +63,7 @@ static const string SCRIPT_RESTART_BACKEND = SCRIPT_DIR + "/Restart_MythBackend.
 static const string SCRIPT_RESTART_ALL_BACKENDS = SCRIPT_DIR + "/Restart_Backend_With_SchemaLock.sh";
 static const string SCRIPT_INITIAL_FILLDB =  SCRIPT_DIR + "/MythTvInitialFillDB.sh";
 static const string SCRIPT_FORCE_KILL =      SCRIPT_DIR + "/ForciblyKillProcess.sh";
+static const string SCRIPT_MYTHTV_SETUP =    SCRIPT_DIR + "/mythtv_setup.pl";
 
 // For sorting channels
 static bool ChannelComparer(MythChannel *x, MythChannel *y)
@@ -158,6 +164,9 @@ bool MythTV_PlugIn::Register()
     m_pDatagrid_Plugin->RegisterDatagridGenerator( new DataGridGeneratorCallBack(this,(DCEDataGridGeneratorFn)(&MythTV_PlugIn::AllShows))
                                                 ,DATAGRID_EPG_All_Shows_CONST,DEVICETEMPLATE_MythTV_Player_CONST);
 
+    m_pDatagrid_Plugin->RegisterDatagridGenerator( new DataGridGeneratorCallBack(this,(DCEDataGridGeneratorFn)(&MythTV_PlugIn::PVREPGGrid))
+                                                ,DATAGRID_EPG_Grid_CONST,DEVICETEMPLATE_MythTV_Player_CONST);
+
 	m_pDatagrid_Plugin->RegisterDatagridGenerator( new DataGridGeneratorCallBack(this,(DCEDataGridGeneratorFn)(&MythTV_PlugIn::TvProviders))
 												,DATAGRID_TV_Providers_CONST,DEVICETEMPLATE_MythTV_Player_CONST);
 
@@ -188,18 +197,24 @@ bool MythTV_PlugIn::Register()
 		}
 	}
 
+	//Setup Mythtv
+	//This includes purging the settings table of any deleted MD devices
+	//as well as generating and keeping the storagegroups up-to-date
+	system(SCRIPT_MYTHTV_SETUP.c_str());
+
+	/*
 	bool bPathsChanged = SetPaths();
 	if( bPathsChanged )
         { // Paths were changed so we need to restart the backend[s].
-		DeviceData_Base *pDevice_App_Server = (DeviceData_Router *)
-			m_pData->FindFirstRelatedDeviceOfCategory(DEVICECATEGORY_App_Server_CONST);
-		DCE::CMD_Spawn_Application CMD_Spawn_Application(m_dwPK_Device,pDevice_App_Server->m_dwPK_Device,
-			SCRIPT_RESTART_ALL_BACKENDS, "restart_all_backends_in_register", "",
-			"", "", false, false, false, false);
-		SendCommand(CMD_Spawn_Application);
-        }
-
-
+	
+	DeviceData_Base *pDevice_App_Server = (DeviceData_Router *)
+	m_pData->FindFirstRelatedDeviceOfCategory(DEVICECATEGORY_App_Server_CONST);
+	DCE::CMD_Spawn_Application CMD_Spawn_Application(m_dwPK_Device,pDevice_App_Server->m_dwPK_Device,
+	SCRIPT_RESTART_ALL_BACKENDS, "restart_all_backends_in_register", "",
+	"", "", false, false, false, false);
+	SendCommand(CMD_Spawn_Application);
+        }*/
+	
 	// Don't actually build the bookmark/channel list because Sync_Cards_Providers will fill in m_mapDevicesToSources,
 	// but it's not run until about 20 seconds after everything starts so if it needs to send a message to the orbiters
 	// or use AppServer, those devices will be available
@@ -218,7 +233,89 @@ bool MythTV_PlugIn::Register()
 	m_pMythBackEnd_Socket = new MythBackEnd_Socket(this,m_pRouter->sDBHost_get( ));  // The master backend is on the same server as mysql
 	m_pMythBackEnd_Socket->Connect();
 
+	BuildCategoryColors();
+
     return Connect(PK_DeviceTemplate_get());
+}
+
+void MythTV_PlugIn::BuildCategoryColors()
+{
+	// for now, this is hardcoded until I do some databsae changes to pluto_myth -tschak
+	m_mapCategoryColors["Unknown"] = 3165768;
+	m_mapCategoryColors["Special"] = 1463685;
+	m_mapCategoryColors["Children"] = 2299525;
+	m_mapCategoryColors["House/garden"] = 4228374;
+	m_mapCategoryColors["Travel"] = 1475961;
+	m_mapCategoryColors["Educational"] = 1475922;
+	m_mapCategoryColors["Anthology"] = 6980886;
+	m_mapCategoryColors["News"] = 8721942;
+	m_mapCategoryColors["Talk"] = 8722044;
+	m_mapCategoryColors["Collectibles"] = 8722007;
+	m_mapCategoryColors["Documentary"] = 8732694;
+	m_mapCategoryColors["Home improvement"] = 4948062;
+	m_mapCategoryColors["Music"] = 7241803;
+	m_mapCategoryColors["Public affairs"] = 8416331;
+	m_mapCategoryColors["Cooking"] = 8142080;
+	m_mapCategoryColors["How-to"] = 31840;
+	m_mapCategoryColors["Interview"] = 1507452;
+	m_mapCategoryColors["Sitcom"] = 5374076;
+	m_mapCategoryColors["Drama"] = 7864444;
+	m_mapCategoryColors["Music special"] = 21116;
+	m_mapCategoryColors["Science"] = 31867;
+	m_mapCategoryColors["History"] = 8092672;
+	m_mapCategoryColors["Sports non-event"] = 40979;
+	m_mapCategoryColors["Shopping"] = 10519552;
+	m_mapCategoryColors["Religious"] = 10526880;
+	m_mapCategoryColors["Consumer"] = 12015104;
+	m_mapCategoryColors["Fantasy"] = 39066;
+	m_mapCategoryColors["Suspense"] = 5570560;
+	m_mapCategoryColors["Game show"] = 5746785;
+	m_mapCategoryColors["Crime Drama"] = 16648;
+	m_mapCategoryColors["Western"] = 8540160;
+	m_mapCategoryColors["Community"] = 33399;
+	m_mapCategoryColors["Entertainment"] = 3202;
+	m_mapCategoryColors["Bus./financial"] = 567552;
+	m_mapCategoryColors["Sports event"] = 423680;
+	m_mapCategoryColors["Newsmagazine"] = 8055;
+	m_mapCategoryColors["Sports talk"] = 7730;
+	m_mapCategoryColors["Reality"] = 7798784;
+	m_mapCategoryColors["Soap"] = 7798893;
+	m_mapCategoryColors["Health"] = 3897088;
+	m_mapCategoryColors["Action"] = 8131090;
+	m_mapCategoryColors["Science fiction"] = 4274446;
+	m_mapCategoryColors["Comedy"] = 3820938;
+	m_mapCategoryColors["Weather"] = 3836298;
+	m_mapCategoryColors["Romance-comedy"] = 9058953;
+	m_mapCategoryColors["Crime"] = 1109;
+	m_mapCategoryColors["Comedy-drama"] = 9324685;
+	m_mapCategoryColors["Musical comedy"] = 4755062;
+	m_mapCategoryColors["Animals"] = 149369984;
+	m_mapCategoryColors["Baseball"] = 3300920;
+	m_mapCategoryColors["Animated"] = 3294302;
+	m_mapCategoryColors["Holiday"] = 6173234;
+	m_mapCategoryColors["Mystery"] = 3092299;
+	m_mapCategoryColors["Musical"] = 4013960;
+	m_mapCategoryColors["Paranormal"] = 7032398;
+	m_mapCategoryColors["Nature"] = 5270350;
+	m_mapCategoryColors["Holiday Special"] = 7794327;
+	m_mapCategoryColors["Technology"] = 6384462;
+	m_mapCategoryColors["Adventure"] = 3822346;
+	m_mapCategoryColors["Exercise"] = 676666;
+	m_mapCategoryColors["Fundraiser"] = 669011;
+	m_mapCategoryColors["Biography"] = 676630;
+	m_mapCategoryColors["Variety"] = 4204112;
+	m_mapCategoryColors["War"] = 23398; 
+	m_mapCategoryColors["Horror"] = 10158080;
+	m_mapCategoryColors["Fashion"] = 7667867;
+	m_mapCategoryColors["Historical drama"] = 39804;
+	m_mapCategoryColors["Pro wrestling"] = 39702;
+	m_mapCategoryColors["Auction"] = 9870080;
+	m_mapCategoryColors["Auto"] = 23451;
+	m_mapCategoryColors["Motorcycle"] = 36507;
+	m_mapCategoryColors["Action sports"] = 4102912;
+	m_mapCategoryColors["Medical"] = 10158080;
+	m_mapCategoryColors["Politics"] = 4795436;
+	m_mapCategoryColors["Docudrama"] = 1382973;
 }
 
 void MythTV_PlugIn::BuildAttachedInfraredTargetsMap()
@@ -313,7 +410,9 @@ bool MythTV_PlugIn::StartMedia(class MediaStream *pMediaStream,string &sError)
 		}
 	}
 
-	DCE::CMD_Play_Media cmd(m_dwPK_Device, pMythTvMediaStream->m_pMediaDevice_Source->m_pDeviceData_Router->m_dwPK_Device,pMythTvMediaStream->m_iPK_MediaType,pMythTvMediaStream->m_iStreamID_get( ),pMediaStream->m_sStartPosition,"");
+	string sMediaURL = pMythTvMediaStream->GetFilenameToPlay("");
+
+	DCE::CMD_Play_Media cmd(m_dwPK_Device, pMythTvMediaStream->m_pMediaDevice_Source->m_pDeviceData_Router->m_dwPK_Device,pMythTvMediaStream->m_iPK_MediaType,pMythTvMediaStream->m_iStreamID_get( ),pMediaStream->m_sStartPosition, sMediaURL);
 	SendCommand(cmd);
 
 	m_pAlarmManager->CancelAlarmByType(CONFIRM_MASTER_BACKEND_OK);  // Do this immediately 
@@ -424,6 +523,366 @@ MythTvMediaStream* MythTV_PlugIn::ConvertToMythMediaStream(MediaStream *pMediaSt
 	}
 
 	return static_cast<MythTvMediaStream*>(pMediaStream);
+}
+
+/**
+ * GetPicturePath - sister function to grab picture for a given MythTV recording.
+ */
+bool MythTV_PlugIn::GetPicturePath(string sBaseName, string sHostName, string sStorageGroup, string &sPicturePath)
+{
+  LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"MythTV_Plugin::GetPicturePath(%s,%s,%s)",sBaseName.c_str(),sHostName.c_str(),sStorageGroup.c_str());
+  string sSQL = "SELECT dirname FROM storagegroup WHERE hostname = '"+sHostName+"' AND groupname = '"+sStorageGroup+"'";
+  PlutoSqlResult result;
+  DB_ROW row;
+  if ((result.r=m_pDBHelper_Myth->db_wrapper_query_result(sSQL))!=NULL)
+    {
+      LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"MythTV_Plugin::GetPicturePath rows %d",result.r->row_count);
+      while((row=db_wrapper_fetch_row(result.r)))
+	{
+	  string sDirName = row[0];
+	  string sFilePath = sDirName + "/" + sBaseName + ".png";
+	  string sConvertedPath = sDirName + "/" + sBaseName + ".jpg";
+	  LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"MythTV_PlugIn::GetPicturePath - Trying path %s",sFilePath.c_str());
+	  if (FileUtils::FileExists(sFilePath))
+	    {
+	      LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"MythTV_Plugin::GetPicturePath found picture at path %s",sFilePath.c_str());
+	      sPicturePath = sConvertedPath;
+	      // Convert the image using imagemagick to jpeg so Media PlugIn is happy, if needed.
+	      if (!FileUtils::FileExists(sConvertedPath))
+		{
+		  string sCmd = "convert "+sFilePath+" "+sConvertedPath;
+		  system(sCmd.c_str());
+		}
+	      return true;
+	    }
+	}
+    }
+  return false;
+}
+
+/** 
+ * GetRecordingPicture - find out if a recording already has a PK_Picture, and if so
+ * return it.
+ */
+bool MythTV_PlugIn::GetRecordingPicture(string sPath,int &iPK_Picture)
+{
+  vector<Row_Picture *> v_Rows;
+  iPK_Picture=0;
+  if (m_pMedia_Plugin->m_pDatabase_pluto_media->Picture_get()->GetRows("URL='"+sPath+"'",&v_Rows))
+    {
+      if (!v_Rows.empty())
+	{
+	  iPK_Picture=v_Rows[0]->PK_Picture_get();
+	  return true;
+	}
+    }
+
+  return false;
+
+}
+
+string MythTV_PlugIn::GetRecordingURL(string sBaseName, string sHostName, string sStorageGroup)
+{
+  int iPK_Picture;
+  string sRet="";
+  string sFullPath="";
+  string sFilePath="";
+  string sSQL = "SELECT dirname FROM storagegroup WHERE hostname = '"+sHostName+"' AND groupname = '"+sStorageGroup+"'";
+  PlutoSqlResult result;
+  DB_ROW row;
+  if ((result.r=m_pDBHelper_Myth->db_wrapper_query_result(sSQL))!=NULL)
+    {
+      LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"MythTV_Plugin::GetPicturePath rows %d",result.r->row_count);
+      while((row=db_wrapper_fetch_row(result.r)))
+	{
+	  string sDirName = row[0];
+	  string sCurrPath = sDirName + "/" + sBaseName + ".jpg";
+	  sFilePath=sDirName+"/"+sBaseName;
+	  if (FileUtils::FileExists(sCurrPath))
+	    {
+	      sFullPath=sCurrPath;
+	      break;
+	    }
+	}
+      
+      // If path found, Grab the matching PK_Picture 
+
+      if (!sFullPath.empty())
+	{
+	  vector<Row_Picture *> v_Rows;
+	  iPK_Picture=0;
+	  if (m_pMedia_Plugin->m_pDatabase_pluto_media->Picture_get()->GetRows("URL='"+sFullPath+"'",&v_Rows))
+	    {
+	      if (!v_Rows.empty())
+		{
+		  iPK_Picture = v_Rows[0]->PK_Picture_get();
+		}
+	    }
+	}
+    }
+  sRet = sFilePath + "|" + StringUtils::itos(iPK_Picture) + ".pvrtv"; // hackorama for media plugin
+  return sRet;
+}
+
+/**
+ * PopulateDataGrid - populate the datagrid for Recorded TV Display
+ */
+void MythTV_PlugIn::PopulateDataGrid(string sToken,MediaListGrid *pMediaListGrid,int PK_MediaType, string sPK_Attribute, int PK_AttributeType_Sort, bool bShowFiles, string &sPK_MediaSubType, string &sPK_FileFormat, string &sPK_Attribute_Genres, string &sPK_Sources, string &sPK_Users_Private, int PK_Users, int iLastViewed, int *iPK_Variable, string *sValue_To_Assign )
+{
+
+  string sSQL, sDescription, sMediaURL, sDateTime, sPictureFilename;
+
+  LoggerWrapper::GetInstance()->Write(LV_STATUS,"XXX POPULATEDATAGRID XXX PK_AttributeType_Sort %d sPK_Attribute is %s",PK_AttributeType_Sort, sPK_Attribute.c_str());
+
+  if (PK_AttributeType_Sort == ATTRIBUTETYPE_Title_CONST)
+    {
+      if (!sPK_Attribute.empty())
+	{
+	  // If this is not empty, we are drilling down into a show.
+
+	  // parse the attribute which is Series ID|Program ID
+	  string::size_type tokenPos = 0;
+	  string sSeriesId = StringUtils::Tokenize(sPK_Attribute,"|",tokenPos);
+	  string sProgramId = StringUtils::Tokenize(sPK_Attribute,"|",tokenPos);
+
+	  sSQL = "SELECT title, seriesid, programid, basename, subtitle, description, lastmodified, hostname, storagegroup from recorded WHERE seriesid = '"+sSeriesId+"' OR programid = '"+sProgramId+"'";
+ 	  PlutoSqlResult result;
+	  DB_ROW row;
+	  if ((result.r=m_pDBHelper_Myth->db_wrapper_query_result(sSQL))!=NULL)
+	    {
+	      LoggerWrapper::GetInstance()->Write(LV_STATUS,"MythTV_PlugIn::PopulateDataGrid title rows %d",result.r->row_count);
+	      while((row=db_wrapper_fetch_row(result.r)))
+		{
+		  string sTitle = row[0];
+		  string sSeriesId = row[1];
+		  string sProgramId = row[2];
+		  string sBaseName = row[3];
+		  string sSubtitle = row[4];
+		  string sDesc = row[5];
+		  string sDateTime = row[6];
+		  string sHostName = row[7];
+		  string sStorageGroup = row[8];
+		  string sPicturePath;
+
+		  LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"MythTV_Plugin::PopulateDataGrid - drilldown sTitle /%s/ sSubtitle /%s/ sDesc /%s/ ",sTitle.c_str(),sSubtitle.c_str(),sDesc.c_str());
+
+
+		  // Build a visible description from title, subtitle, description.
+		  // Title is always used. If subtitle is available then it is used.
+		  // If subtitle is empty, then description is used IF it is below
+		  // characters.
+
+		  if (sSubtitle.empty())
+		    {
+		      if ((sDesc.size() > 0) && (sDesc.size() < 25))
+			{
+			  sDescription = sTitle + "\n\"" + sDesc + "\"";
+			}
+		      else
+			{
+			  sDescription = sTitle;
+			}
+		    }
+		  else
+		    {
+		      sDescription = sTitle = "\n\"" + sSubtitle + "\"";
+		    }
+
+		  sMediaURL = sBaseName;
+		  FileBrowserInfo *pFileBrowserInfo = new FileBrowserInfo(sDescription,"!E,"+sToken+","+GetRecordingURL(sMediaURL,sHostName,sStorageGroup),0,StringUtils::SQLDateTime(sDateTime));
+		  if (GetPicturePath(sBaseName,sHostName,sStorageGroup,sPicturePath))
+		    {
+		      int iPK_Picture=0;
+		      if (!GetRecordingPicture(sPicturePath,iPK_Picture))
+			{
+			  // No recording picture currently exists for this recording, try to add one.
+			  Row_Picture *pRecordingPicture = m_pMedia_Plugin->m_pMediaAttributes->m_pMediaAttributes_LowLevel->AddPicture(sPicturePath);
+			  if (pRecordingPicture)
+			    {
+			      pFileBrowserInfo->m_PK_Picture = pRecordingPicture->PK_Picture_get();
+			    }
+			  delete pRecordingPicture;
+			}
+		      else
+			{
+			  // A picture already exists, grab the existing record.
+			  pFileBrowserInfo->m_PK_Picture = iPK_Picture;
+			}
+		    }
+		  pMediaListGrid->m_listFileBrowserInfo.push_back(pFileBrowserInfo);
+		}
+	    } // end
+	}
+      else
+	{
+	  // Title, Top level, show one of each.
+	  sSQL = "SELECT title, COUNT(title) as numitems, seriesid, programid, basename, subtitle, description, lastmodified, hostname, storagegroup from recorded GROUP by title;";
+ 	  PlutoSqlResult result;
+	  DB_ROW row;
+	  if ((result.r=m_pDBHelper_Myth->db_wrapper_query_result(sSQL))!=NULL)
+	    {
+	      LoggerWrapper::GetInstance()->Write(LV_STATUS,"MythTV_PlugIn::PopulateDataGrid title rows %d",result.r->row_count);
+	      while((row=db_wrapper_fetch_row(result.r)))
+		{
+		  string sTitle = row[0];
+		  int iNumItems = atoi(row[1]);
+		  string sSeriesId = row[2];
+		  string sProgramId = row[3];
+		  string sBaseName = row[4];
+		  string sSubtitle = row[5];
+		  string sDesc = row[6];
+		  string sDateTime = row[7];
+		  string sHostName = row[8];
+		  string sStorageGroup = row[9];
+		  string sPicturePath;
+
+		  // Build a visible description from title, subtitle, description.
+		  // Title is always used. If subtitle is available then it is used.
+		  // If subtitle is empty, then description is used IF it is below
+		  // characters.
+
+		  if (sSubtitle.empty())
+		    {
+		      if (sDesc.size() < 25)
+			{
+			  sDescription = sTitle + "\n\"" + sDesc + "\"";
+			}
+		      else
+			{
+			  sDescription = sTitle;
+			}
+		    }
+		  else
+		    {
+		      sDescription = sTitle + "\n\"" + sSubtitle + "\"";
+		    }
+
+		  // If there are multiple items, then make a drilldown, otherwise
+		  // make a direct play link to send off to the MythTV_Player
+		  
+		  if (iNumItems>1)
+		    {
+		      sDescription = sTitle + " (" + StringUtils::itos(iNumItems) + " items)";
+		      sMediaURL = sSeriesId+"|"+sProgramId;
+		      FileBrowserInfo *pFileBrowserInfo = new FileBrowserInfo(sDescription,"!e,"+sToken+","+sMediaURL,0,StringUtils::SQLDateTime(sDateTime));
+		      if (GetPicturePath(sBaseName,sHostName,sStorageGroup,sPicturePath))
+			{
+			  int iPK_Picture;
+			  if (!GetRecordingPicture(sPicturePath,iPK_Picture))
+			    {
+			      // No recording picture currently exists for this recording, try to add one.
+			      Row_Picture *pRecordingPicture = m_pMedia_Plugin->m_pMediaAttributes->m_pMediaAttributes_LowLevel->AddPicture(sPicturePath);
+			      if (pRecordingPicture)
+				{
+				  pFileBrowserInfo->m_PK_Picture = pRecordingPicture->PK_Picture_get();
+				}
+			      delete pRecordingPicture;
+			    }
+			  else
+			    {
+			      // A picture already exists, grab the existing record.
+			      pFileBrowserInfo->m_PK_Picture = iPK_Picture;
+			    }
+			}
+		      pMediaListGrid->m_listFileBrowserInfo.push_back(pFileBrowserInfo);
+		    }
+		  else
+		    {
+		      sMediaURL = sBaseName;
+		      FileBrowserInfo *pFileBrowserInfo = new FileBrowserInfo(sDescription,"!E,"+sToken+","+GetRecordingURL(sMediaURL,sHostName,sStorageGroup),0,StringUtils::SQLDateTime(sDateTime));
+		      // COME BACK HERE
+		      if (GetPicturePath(sBaseName,sHostName,sStorageGroup,sPicturePath))
+			{
+			  int iPK_Picture;
+			  if (!GetRecordingPicture(sPicturePath,iPK_Picture))
+			    {
+			      // No recording picture currently exists for this recording, try to add one.
+			      Row_Picture *pRecordingPicture = m_pMedia_Plugin->m_pMediaAttributes->m_pMediaAttributes_LowLevel->AddPicture(sPicturePath);
+			      if (pRecordingPicture)
+				{
+				  pFileBrowserInfo->m_PK_Picture = pRecordingPicture->PK_Picture_get();
+				}
+			      delete pRecordingPicture;
+			    }
+			  else
+			    {
+			      // A picture already exists, grab the existing record.
+			      pFileBrowserInfo->m_PK_Picture = iPK_Picture;
+			    }
+			}
+		      pMediaListGrid->m_listFileBrowserInfo.push_back(pFileBrowserInfo); 
+		    }
+		}
+	    } // end	  
+	}
+    }
+  else if (PK_AttributeType_Sort == ATTRIBUTETYPE_Genre_CONST)
+    {
+    }
+  else
+    {
+      LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"MythTV_PlugIn::PopulateDataGrid() Somehow we fell through.");
+    }
+
+  return;
+}
+
+void MythTV_PlugIn::GetExtendedAttributes(string sType, string sPK_MediaSource, string sURL, string *sValue_To_Assign)
+{
+
+  LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"MythTV_Plugin::GetExtendedAttributes sType is %s",sType.c_str());
+
+  size_t pos=0;
+
+  string sFinalDescription, sSynopsis;
+
+  string sMediaURL = StringUtils::Tokenize(sURL,"|",pos);
+  string sPK_Picture = StringUtils::Tokenize(sURL,"|",pos);
+  string sFileName = FileUtils::FilenameWithoutPath(sMediaURL);
+  string sPicture = "/home/mediapics/"+sPK_Picture+".jpg";
+ 
+  // Get title and synopsis from sMediaURL
+
+  string sSQL = "SELECT title, subtitle, description FROM recorded WHERE basename = '"+FileUtils::FilenameWithoutPath(sMediaURL)+"'";
+  PlutoSqlResult result;
+  DB_ROW row;
+  if ((result.r=m_pDBHelper_Myth->db_wrapper_query_result(sSQL))!=NULL)
+    {
+      while((row=db_wrapper_fetch_row(result.r)))
+	{
+	  string sTitle = row[0];
+	  string sSubtitle = row[1];
+	  string sDesc = row[2];
+	  string sDescription;
+	
+	  sSynopsis=sDesc;
+
+	  if (sSubtitle.empty())
+	    {
+	      if (sDesc.size() < 25)
+		{
+		  sDescription = sTitle + "\n\"" + sDesc + "\"";
+		}
+	      else
+		{
+		  sDescription = sTitle;
+		}
+	    }
+	  else
+	    {
+	      sDescription = sTitle + "\n\"" + sSubtitle + "\"";
+	    }
+	}
+    }
+  
+  *sValue_To_Assign = 
+    "FILE\t" + sFileName + "\t" + 
+    "TITLE\t" + sFinalDescription + "\t" +
+    "SYNOPSIS\t" + sSynopsis + "\t" +
+    "PICTURE\t" + sPicture;
+
+  return;
+
 }
 
 // Parms = Users,PK_EntertainmentArea
@@ -573,6 +1032,318 @@ class DataGridTable *MythTV_PlugIn::AllShows(string GridID, string Parms, void *
 		(int) pDataGridTable->m_MemoryDataTable.size(), PK_Device_Source, p_list_int, (int) m_mapDevicesToSources.size() );
 
 	return pDataGridTable;
+}
+
+// A Traditional EPG Grid
+class DataGridTable *MythTV_PlugIn::PVREPGGrid(string GridID, string Parms, void *ExtraData, int *iPK_Variable, string *sValue_To_Assign, Message *pMessage)
+{
+  DataGridTable *pDataGridTable = new DataGridTable();
+
+  if (m_bBookmarksNeedRefreshing)
+    RefreshBookmarks();
+
+  string::size_type tokenPos=0;
+  int iPK_Users = atoi(StringUtils::Tokenize(Parms,",",tokenPos).c_str());
+  int iPK_EntertainArea = atoi(StringUtils::Tokenize(Parms,",",tokenPos).c_str());
+
+  PLUTO_SAFETY_LOCK(mm, m_pMedia_Plugin->m_MediaMutex);
+
+  LoggerWrapper::GetInstance()->Write(LV_STATUS,"MythTV_PlugIn::EPGGrid() a datagrid for the EPG was requested %s params %s", GridID.c_str(), Parms.c_str());
+
+  EntertainArea *pEntertainArea = m_pMedia_Plugin->m_mapEntertainAreas_Find(iPK_EntertainArea);
+
+  if (!pEntertainArea || !pEntertainArea->m_pMediaStream || !pEntertainArea->m_pMediaStream->m_pMediaDevice_Source)
+    {
+      LoggerWrapper::GetInstance()->Write(LV_STATUS, "MythTV_PlugIn::EPGGrid can't find a stream %p",pEntertainArea);
+      // Come back here and do a data grid if a stream isn't available. For now, just be blank.
+      return pDataGridTable;
+    }
+  
+  // Row 0 column 0 is a blank 'shim' column.
+  DataGridCell *pShimColumn = new DataGridCell("2010\nJun 17","");
+  pDataGridTable->SetData(0,0,pShimColumn);
+
+  // Do the time columns.
+  // -------------------------------------------------------
+  // There are 12 cells, in an hour block (5 min increments)
+  // 6 cells in a 30 minute block
+  // 288 cells in all.
+
+  int iTimeColumn = 1; // Time column counter . The First column is blank (Channel)
+
+  // Do the AM slots.
+  for (int i=0;i<12;i++)
+    {
+      int iVisualTimeIndex = i;
+      string sVisualTimeHour, sActualTimeHour, sVisualTimeHalfHour, sActualTimeHalfHour;
+      ostringstream ssVisualTimeHour, ssActualTimeHour, ssVisualTimeHalfHour, ssActualTimeHalfHour;
+      
+      // Show midnight as 12:00 AM
+      if (i == 0)
+	iVisualTimeIndex = 12;
+
+      // Construct the streams
+      ssVisualTimeHour << iVisualTimeIndex << ":" << "00 AM";
+      ssActualTimeHour << i << ":" << "00";
+      ssVisualTimeHalfHour << iVisualTimeIndex << ":" << "30 AM";
+      ssActualTimeHalfHour << i << ":" << "30";
+
+      // Build the strings.
+      sVisualTimeHour = ssVisualTimeHour.str();
+      sActualTimeHour = ssActualTimeHour.str();
+      sVisualTimeHalfHour = ssVisualTimeHalfHour.str();
+      sActualTimeHalfHour = ssVisualTimeHalfHour.str();
+
+      DataGridCell *pCellHour = new DataGridCell(sVisualTimeHour,sActualTimeHour);
+      pCellHour->m_Colspan = 6;
+      DataGridCell *pCellHalfHour = new DataGridCell(sVisualTimeHalfHour,sActualTimeHalfHour);
+      pCellHalfHour->m_Colspan = 6;
+
+      pDataGridTable->SetData(iTimeColumn, 0, pCellHour);
+      iTimeColumn += 6;
+      pDataGridTable->SetData(iTimeColumn, 0, pCellHalfHour);
+      iTimeColumn += 6;
+
+    }
+
+  // Do the PM slots.
+  for (int i=0;i<12;i++)
+    {
+      int iVisualTimeIndex = i;
+      string sVisualTimeHour, sActualTimeHour, sVisualTimeHalfHour, sActualTimeHalfHour;
+      ostringstream ssVisualTimeHour, ssActualTimeHour, ssVisualTimeHalfHour, ssActualTimeHalfHour;
+      
+      // Show midnight as 12:00 AM
+      if (i == 0)
+	iVisualTimeIndex = 12;
+
+      // Construct the streams
+      ssVisualTimeHour << iVisualTimeIndex << ":" << "00 PM";
+      ssActualTimeHour << i+12 << ":" << "00";
+      ssVisualTimeHalfHour << iVisualTimeIndex << ":" << "30 PM";
+      ssActualTimeHalfHour << i+12 << ":" << "30";
+
+      // Build the strings.
+      sVisualTimeHour = ssVisualTimeHour.str();
+      sActualTimeHour = ssActualTimeHour.str();
+      sVisualTimeHalfHour = ssVisualTimeHalfHour.str();
+      sActualTimeHalfHour = ssVisualTimeHalfHour.str();
+
+      DataGridCell *pCellHour = new DataGridCell(sVisualTimeHour,sActualTimeHour);
+      pCellHour->m_Colspan = 6;
+      pCellHour->m_mapAttributes["timeslot"] = sVisualTimeHour;
+      DataGridCell *pCellHalfHour = new DataGridCell(sVisualTimeHalfHour,sActualTimeHalfHour);
+      pCellHalfHour->m_mapAttributes["timeslot"] = sVisualTimeHour;
+      pCellHalfHour->m_Colspan = 6;
+
+      pDataGridTable->SetData(iTimeColumn, 0, pCellHour);
+      iTimeColumn += 6;
+      pDataGridTable->SetData(iTimeColumn, 0, pCellHalfHour);
+      iTimeColumn += 6;
+
+    }
+
+  // Do the channels.
+  for (ListMythChannel::iterator it=m_ListMythChannel.begin();it!=m_ListMythChannel.end();++it)
+    {
+      MythChannel *pMythChannel = *it;
+      string sChannelName = StringUtils::itos(pMythChannel->m_dwChanNum) + " "+pMythChannel->m_sShortName;
+      pMythChannel->m_pCell = new DataGridCell(sChannelName,"i"+StringUtils::itos(pMythChannel->m_dwID));
+      pMythChannel->m_pCell->m_mapAttributes["Name"] = sChannelName;
+    }
+
+  // Grab the current channels and programs for current time.
+  string sCurrentSQL = "SELECT chanid, title, starttime, endtime, seriesid, programid "
+    "FROM program "
+    "WHERE starttime < '"+StringUtils::SQLDateTime()+
+    "' AND endtime > '"+StringUtils::SQLDateTime()+"'";
+
+  PlutoSqlResult result;
+  DB_ROW row;
+
+  if ( ( result.r=m_pDBHelper_Myth->db_wrapper_query_result(sCurrentSQL) ) != NULL  )
+    {
+      // Rows were returned, process them
+      while ((row = db_wrapper_fetch_row(result.r)))
+	{
+	  MythChannel *pMythChannel = m_mapMythChannel_Find(atoi(row[0])); // row[0] is chanid
+	  if ( !pMythChannel || !pMythChannel->m_pCell )
+	    continue;  // Technically, shouldn't happen.
+
+	  // Append the current show to the end of the channel description. 
+	  pMythChannel->m_pCell->SetText( string(pMythChannel->m_pCell->GetText()) + row[1] );
+
+	  LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"Row: %s %s",row[0],row[1]);
+
+	  // If Channel picture is attached, use it.
+	  if ( pMythChannel->m_pPic )
+	    {
+	      char *pPic = new char[ pMythChannel->m_Pic_size ];
+	      memcpy(pPic, pMythChannel->m_pPic, pMythChannel->m_Pic_size);
+	      pMythChannel->m_pCell->SetImage( pPic, pMythChannel->m_Pic_size, GR_JPG );
+	    }
+
+	  // Set Channel and Show attributes in this data grid cell.
+	  string sChannelID = (NULL != row[0] ? row[0] : "");
+	  string sShowTitle = (NULL != row[1] ? row[1] : "");
+
+	  pMythChannel->m_pCell->m_mapAttributes["ChannelID"] = sChannelID;
+	  pMythChannel->m_pCell->m_mapAttributes["ShowTitle"] = sShowTitle;
+
+	  // FIXME: Come back here and write code for Channel bookmarks!
+	  
+	}
+     
+       m_vectRowToChannels.push_back(0); // First row is empty.
+    
+      int iRow = 1;
+
+      // And finally, slap all the channels into the cells in our pDataGridTable
+      for (ListMythChannel::iterator it=m_ListMythChannel.begin();it!=m_ListMythChannel.end();++it)
+	{
+	  MythChannel *pMythChannel = *it;
+	  if ( pMythChannel->m_pCell )
+	    { 
+	      pDataGridTable->SetData(0, iRow++, pMythChannel->m_pCell);
+	      m_vectRowToChannels.push_back(pMythChannel->m_dwID);
+	    } 
+	}
+
+    }
+
+  // Now, fill in the guide data in the middle. For now, this query is fixed to today
+  // so that I can work on the column span logic.
+  
+  string sGuideSQL = "SELECT * from program WHERE (endtime > '2010-06-20' AND endtime < '2010-06-21')";
+
+  if ( ( result.r=m_pDBHelper_Myth->db_wrapper_query_result(sGuideSQL) ) != NULL  )
+    {
+      // Rows were returned, process them
+      int iRow = 1;
+      while ((row = db_wrapper_fetch_row(result.r)))
+	{
+	  // row[0] = channel ID
+	  // row[1] = starttime
+	  // row[2] = endtime
+	  // row[3] = title
+	  // row[4] = subtitle
+	  // row[5] = description	
+	  // row[6] = category (Comedy)
+	  // row[7] = category_type (series or blank)
+	  // row[8] = airdate
+	  // row[9] = stars
+	  // row[10] = previouslyshown (boolean)
+	  // row[11] = title_pronounce (???)
+	  // row[12] = stereo (boolean)
+	  // row[13] = subtitled (boolean)
+	  // row[14] = hdtv (boolean)
+	  // row[15] = closedcaptioned (boolean)
+	  // row[16] = partnumber (x of y)
+	  // row[17] = parttotal
+	  // row[18] = seriesID
+	  // row[19] = original Airdate
+	  // row[20] = showtype (Series)
+	  // row[21] = colorcode (???)
+	  // row[22] = syndicated episode number
+	  // row[23] = program ID
+	  // row[24] = manual ID
+	  // row[25] = generic (boolean)
+	  // row[26] = listing source (mythtv-setup)
+	  // row[27] = First
+	  // row[28] = Last occurance
+	  // row[29] = subtitletypes
+	  // row[30] = videoprop
+
+	  string sChannelID = row[0];
+	  string sStartTime = row[1];
+	  string sEndTime = row[2];
+	  string sShowTitle = row[3]; // FIXME: come back and handle show subtitles.
+	  string sCategory = row[6];
+	  string sShowID = sChannelID + "," + sStartTime + "," + sEndTime;
+	  int iTargetRow = FindTargetRowForChanID(sChannelID);
+	  int iTargetColumn = FindTargetColForStartTime(sStartTime, sEndTime);
+	  int iColSpan = FindColSpanForEndTime(sStartTime, sEndTime);
+//	  LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"sChannelID %s sStartTime %s sEndTime %s sShowTitle %s iTargetRow %i iTargetColumn %i iColSpan %i",sChannelID.c_str(), sStartTime.c_str(), sEndTime.c_str(), sShowTitle.c_str(), iTargetRow, iTargetColumn, iColSpan);
+	  DataGridCell *pCell = new DataGridCell(sShowTitle, sShowID);
+	  pCell->m_Colspan = iColSpan;
+	  pCell->m_AltColor = mapCategoryColor_Find(sCategory);
+	  pDataGridTable->SetData(iTargetColumn,iTargetRow,pCell);
+	  iRow++;
+	}
+      
+    }
+
+  return pDataGridTable;
+
+}
+
+int MythTV_PlugIn::FindTargetRowForChanID(string sChannelID)
+{
+	MythChannel *pMythChannel = m_mapMythChannel_Find(atoi(sChannelID.c_str()));
+	int iChan = pMythChannel->m_dwID;
+	
+	vector<int>::iterator it;
+
+	int iRow = 0;
+	for (it = m_vectRowToChannels.begin(); it != m_vectRowToChannels.end(); ++it)
+	{
+		if (*it == iChan)
+			return iRow;
+
+		iRow++; 
+	} 
+}
+
+int MythTV_PlugIn::FindTargetColForStartTime(string sStartTime,string sEndTime)
+{
+	// Convert sql time into a time struct we can deal with more easily.
+	time_t tvStartTime = StringUtils::SQLDateTime(sStartTime);
+	time_t tvEndTime = StringUtils::SQLDateTime(sEndTime);
+	struct tm tStartTime;
+	struct tm tEndTime;
+	localtime_r(&tvStartTime,&tStartTime);
+	localtime_r(&tvEndTime,&tEndTime);
+
+	// Figure out where our first column starts.
+	int hourColumn;
+	if (tStartTime.tm_mday != tEndTime.tm_mday)
+	{
+		hourColumn = 0;	// This starts sometime the day before, set to 0
+	} else
+	{
+		hourColumn = tStartTime.tm_hour * 12;
+	}
+	int minuteColumn = ceil(tStartTime.tm_min/5);
+	int columnStartTime = hourColumn+minuteColumn + 1;   // + 1 is the Channel Column
+	return columnStartTime;
+}
+
+int MythTV_PlugIn::FindColSpanForEndTime(string sStartTime, string sEndTime)
+{
+	time_t tvStartTime = StringUtils::SQLDateTime(sStartTime);
+	time_t tvEndTime = StringUtils::SQLDateTime(sEndTime);
+	struct tm tEndTime;
+	struct tm tStartTime;
+	localtime_r(&tvEndTime,&tEndTime);
+	localtime_r(&tvStartTime,&tStartTime);
+
+	// If the show actually winds up spilling into the net day
+	// then we need to make it so that the column span = the very last column...
+
+	int startColumn = FindTargetColForStartTime(sStartTime, sEndTime); 
+	int endHourColumn = tEndTime.tm_hour * 12;
+	int endMinuteColumn = ceil(tEndTime.tm_min/5);
+	int endColumn;
+	if (tStartTime.tm_mday < tEndTime.tm_mday)
+	{
+		endColumn = 288; // (12 * 12) * 2 = last possible cell in 24 hr period.
+	}
+	else
+	{
+		endColumn = endHourColumn + endMinuteColumn;
+	}
+	int colspan = endColumn - startColumn + 1;	// + 1 is the Channel column
+	return colspan;
 }
 
 // The shows on a given channel
@@ -815,10 +1586,27 @@ void MythTV_PlugIn::CMD_Schedule_Recording(string sType,string sOptions,string s
 		return;
 	}
 
-	if( sType=="O" )
+	// This bit of code is a bit odd. It has to do with legacy values for 
+	// setting a scheduling option. Initially, two values, "O" and "C" were 
+	// used for "Record Once" and "Record all on channel." I have to deal
+	// with this, as well as with the new values which map directly to 
+	// the constants in MythTV. -tschak
+	if ( sType=="O" ) 
+	{
 		sType="1";
-	else
+	} 
+	else if (sType=="C")
+	{
 		sType="3";
+	}
+	else if (atoi(sType.c_str()) == 0) // Handle 0 or any random letters.
+	{
+		sType="0";	// Set to Do not record.
+	}
+	else 
+	{
+		// sType is a number, and is already set at this point.
+	}
 
 	string sSQL = "INSERT INTO record(type,chanid,startdate,starttime,enddate,endtime,title,subtitle,description,category,"
 		"station,seriesid,programid,autocommflag,autoexpire,autouserjob1) "
@@ -844,6 +1632,11 @@ void MythTV_PlugIn::CMD_Schedule_Recording(string sType,string sOptions,string s
 	{
 		m_mapScheduledRecordings[mythRecording.key()] =
 			make_pair<char,int> ('C',iID);
+	}
+	else
+	{
+		m_mapScheduledRecordings[mythRecording.key()] = 
+			make_pair<char,int>(sType[0],iID);
 	}
 
 	LoggerWrapper::GetInstance()->Write(LV_STATUS, "MythTV_PlugIn::CMD_Schedule_Recording key " UINT64_PRINTF " %d=%s m_mapScheduledRecordings size %d", 
@@ -888,6 +1681,44 @@ class DataGridTable *MythTV_PlugIn::TvProviders(string GridID,string Parms,void 
 
 	return pDataGrid;
 }
+string MythTV_PlugIn::GetRecordingStatusFor(string sProgramID)
+{
+/*
+	// sProgramID = chanid,startdatetime,enddatetime
+        string::size_type pos=0;
+        string sChanId = StringUtils::Tokenize(sProgramID,",",pos);
+        time_t tStart = atoi(StringUtils::Tokenize(sProgramID,",",pos).c_str());
+        time_t tStop = atoi(StringUtils::Tokenize(sProgramID,",",pos).c_str());
+        string sStart = StringUtils::SQLDateTime(tStart);
+        string sStop = StringUtils::SQLDateTime(tStop);
+        string::size_type pos_start = sStart.find(' ');
+        string::size_type pos_stop = sStop.find(' ');
+        if( pos_start==string::npos || pos_stop==string::npos )
+        {
+                LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"MythTV_PlugIn::GetRecordingStatusFor sProgramID %s is malformed", sProgramID.c_str());
+                return "There was an Error Getting Recording Status";
+        }
+	
+
+
+	DB_ROW row;
+	PlutoSqlResult result_set;
+
+	string sSQL = "SELECT type from record WHERE chanid = '"+sChanID+"' " +
+			"AND startdate = '"+sStartDate+"' AND starttime = '"+sStartTime+"' " +
+			"AND enddate = '"+sEndDate+"' AND endtime = '"+sEndTime+"' ";
+
+	if ( (result_set.r=m_pDBHelper_Myth->db_wrapper_query_result(sSQL)) )
+	{
+		while ((row = db_wrapper_fetch_row(result_set.r)))
+		{
+			
+		}
+	}
+
+*/
+	return "None";
+}
 
 //<-dceag-c698-b->
 
@@ -901,6 +1732,85 @@ class DataGridTable *MythTV_PlugIn::TvProviders(string GridID,string Parms,void 
 void MythTV_PlugIn::CMD_Get_Extended_Media_Data(string sPK_DesignObj,string sProgramID,string &sCMD_Result,Message *pMessage)
 //<-dceag-c698-e->
 {
+	// This is intended to be called from Orbiter devices.
+	PLUTO_SAFETY_LOCK( mm, m_pMedia_Plugin->m_MediaMutex );
+	int dwPK_Orbiter = pMessage->m_dwPK_Device_From;
+
+	// Parse the parameters: 
+	string::size_type tokenPos = 0;
+	string sChanID = StringUtils::Tokenize(sProgramID,",",tokenPos);
+	string sStartTime = StringUtils::Tokenize(sProgramID,",",tokenPos);
+	string sEndTime = StringUtils::Tokenize(sProgramID,",",tokenPos);
+
+	PlutoSqlResult result;
+	DB_ROW row;
+
+	string sSQL = "SELECT * from program WHERE chanid = '"+sChanID+"' AND starttime = '"+sStartTime+"' AND endtime = '"+sEndTime+"'";
+
+	if ( (result.r=m_pDBHelper_Myth->db_wrapper_query_result(sSQL))!=NULL ) 
+	{
+		while((row = db_wrapper_fetch_row(result.r)))
+		{
+			string sTitle = row[3];
+			string sSubTitle = row[4];
+			string sDescription = row[5];
+			string sProgramFullName;
+			string sProgramFullTime = sStartTime + "\n" + sEndTime;
+
+			// Construct the title string with subtitle in Quotes, if present.
+			if (!sSubTitle.empty())
+			{
+				sProgramFullName = sTitle + "\n \"" + sSubTitle  + "\"";
+			}
+			else
+			{
+				sProgramFullName = sTitle;
+			}
+
+			// FIXME: grab test graphic
+			size_t length;
+			char *data = FileUtils::ReadURL("http://www.thetvdb.com/banners/posters/79334-3.jpg",
+							length, true);
+
+			// Create messages to set orbiter variables...
+
+			DCE::CMD_Set_Variable CMD_Set_Variable1(m_dwPK_Device, dwPK_Orbiter, 
+							VARIABLE_Misc_Data_1_CONST,
+							sProgramFullName);
+
+			DCE::CMD_Set_Variable CMD_Set_Variable2(m_dwPK_Device, dwPK_Orbiter,
+							VARIABLE_Misc_Data_2_CONST,
+							sProgramFullTime);
+
+			DCE::CMD_Set_Variable CMD_Set_Variable3(m_dwPK_Device, dwPK_Orbiter,
+							VARIABLE_Misc_Data_3_CONST,
+							sDescription);
+
+			DCE::CMD_Set_Variable CMD_Set_Variable4(m_dwPK_Device, dwPK_Orbiter, 
+							VARIABLE_Misc_Data_4_CONST,
+							GetRecordingStatusFor(sProgramID));
+
+			DCE::CMD_Update_Object_Image CMD_Update_Object_Image(m_dwPK_Device, dwPK_Orbiter, 
+							StringUtils::itos(DESIGNOBJ_objCDCover_CONST),
+							"1",data,(int) length,"0");
+
+			DCE::CMD_Refresh CMD_Refresh(m_dwPK_Device, dwPK_Orbiter, "");
+
+			// Shove the 2 and 3 messages into extramessages for 1, so that
+			// only one message gets sent. More efficient.
+
+			CMD_Set_Variable1.m_pMessage->m_vectExtraMessages.push_back( CMD_Set_Variable2.m_pMessage );
+                	CMD_Set_Variable1.m_pMessage->m_vectExtraMessages.push_back( CMD_Set_Variable3.m_pMessage );
+			CMD_Set_Variable1.m_pMessage->m_vectExtraMessages.push_back( CMD_Set_Variable4.m_pMessage );
+			CMD_Set_Variable1.m_pMessage->m_vectExtraMessages.push_back( CMD_Refresh.m_pMessage );
+
+			// And finally, send the message.
+			SendCommand(CMD_Set_Variable1);
+			SendCommand(CMD_Update_Object_Image);
+
+		}	
+	}
+
 }
 
 //<-dceag-c764-b->
@@ -1039,7 +1949,7 @@ void MythTV_PlugIn::CMD_Sync_Providers_and_Cards(int iPK_Device,int iPK_Orbiter,
 		}
 	}
 
-	bool bPathsChanged = SetPaths();
+	//bool bPathsChanged = SetPaths();
 	bool bAddedProviders=false;
 
 	PLUTO_SAFETY_LOCK(mm,m_pMedia_Plugin->m_MediaMutex);
@@ -1048,7 +1958,7 @@ void MythTV_PlugIn::CMD_Sync_Providers_and_Cards(int iPK_Device,int iPK_Orbiter,
 	LoggerWrapper::GetInstance()->Write(LV_STATUS,"MythTV_PlugIn::SyncCardsAndProviders");
     DB_ROW row,row2;
 
-	string sSQL = "select data from settings where value='DBSchemaVer'";
+	string sSQL = "SELECT data FROM settings WHERE value='DBSchemaVer'";
 	PlutoSqlResult result_set_check;
 	if( (result_set_check.r=m_pDBHelper_Myth->db_wrapper_query_result(sSQL))==NULL || (row=db_wrapper_fetch_row(result_set_check.r))==NULL || atoi(row[0])<MINIMUM_MYTH_SCHEMA )
 	{
@@ -1058,7 +1968,7 @@ void MythTV_PlugIn::CMD_Sync_Providers_and_Cards(int iPK_Device,int iPK_Orbiter,
 	}
 
 	// Find either inputs with a provider specified, or certain types of devices which should be added, but still need a provider
-	sSQL = "select PK_Device,IK_DeviceData FROM Device LEFT JOIN Device_DeviceData ON FK_Device=PK_Device AND FK_DeviceData=" TOSTRING(DEVICEDATA_EK_MediaProvider_CONST) " AND IK_DeviceData IS NOT NULL AND IK_DeviceData<>'' AND IK_DeviceData<>'NONE' "
+	sSQL = "SELECT PK_Device,IK_DeviceData FROM Device LEFT JOIN Device_DeviceData ON FK_Device=PK_Device AND FK_DeviceData=" TOSTRING(DEVICEDATA_EK_MediaProvider_CONST) " AND IK_DeviceData IS NOT NULL AND IK_DeviceData<>'' AND IK_DeviceData<>'NONE' "
 		"WHERE IK_DeviceData IS NOT NULL OR (IK_DeviceData IS NULL AND FK_DeviceTemplate IN (" TOSTRING(DEVICETEMPLATE_Antenna_Port_CONST) "))";
 
 	bool bModifiedRows=false; // Keep track of whether or not we changed anything
@@ -1133,6 +2043,17 @@ void MythTV_PlugIn::CMD_Sync_Providers_and_Cards(int iPK_Device,int iPK_Orbiter,
 				}
 			}
 
+			/* Don't work as expected, I think the data is not set properly in the screenhandler
+			   (see changeset 22677)
+
+			// Skip card if the Use Automatically devdata isn't set
+			sNoConfig = DatabaseUtils::GetDeviceData(m_pMedia_Plugin->m_pDatabase_pluto_main,pRow_Device_CaptureCard->PK_Device_get(),DEVICEDATA_Use_Automatically_CONST);
+			if( !atoi(sNoConfig.c_str()) )
+			{
+				LoggerWrapper::GetInstance()->Write(LV_STATUS,"MythTV_PlugIn::SyncCardsAndProviders -- skipping because Use Automatically DeviceData is not set");
+				continue;
+			}
+		 	*/
 			bool bTunersAsSeparateDevices = DatabaseUtils::GetDeviceData(m_pMedia_Plugin->m_pDatabase_pluto_main,pRow_Device_CaptureCard->PK_Device_get(),DEVICEDATA_Children_as_Separate_Tuners_CONST)=="1";
 
 			// We need to add configure scripts for each model of card, or the sql statement to insert for each card. 
@@ -1144,7 +2065,7 @@ void MythTV_PlugIn::CMD_Sync_Providers_and_Cards(int iPK_Device,int iPK_Orbiter,
 				// Don't delete the card, because then the whole source and everything are deleted when the card is removed.
 				// Just delete the inputs so Myth won't use them, because we can add back inputs easily when the card is enabled again
 				LoggerWrapper::GetInstance()->Write(LV_STATUS,"MythTV_PlugIn::CMD_Sync_Providers_and_Cards deleting disabled cardid %d from device %d",cardid,pRow_Device->PK_Device_get());
-				sSQL = "UPDATE `capturecard` SET hostname=NULL where cardid=" + StringUtils::itos(cardid);
+				sSQL = "UPDATE `capturecard` SET hostname=NULL WHERE cardid=" + StringUtils::itos(cardid);
 				m_pDBHelper_Myth->threaded_db_wrapper_query(sSQL);
 				continue;
 			}
@@ -1155,7 +2076,7 @@ void MythTV_PlugIn::CMD_Sync_Providers_and_Cards(int iPK_Device,int iPK_Orbiter,
 			}
 
 			PlutoSqlResult result_confirm_cardid_is_valid;
-			sSQL = "select cardid from capturecard where cardid=" + StringUtils::itos(cardid);
+			sSQL = "SELECT cardid FROM capturecard WHERE cardid=" + StringUtils::itos(cardid);
 			if( ( result_confirm_cardid_is_valid.r=m_pDBHelper_Myth->db_wrapper_query_result( sSQL ) )==NULL 
 				|| result_confirm_cardid_is_valid.r->row_count<1 )
 			{
@@ -1216,12 +2137,12 @@ void MythTV_PlugIn::CMD_Sync_Providers_and_Cards(int iPK_Device,int iPK_Orbiter,
 				LoggerWrapper::GetInstance()->Write(LV_STATUS,"MythTV_PlugIn::SyncCardsAndProviders added card %d", cardid);
 			}
 
-			sSQL = "UPDATE `capturecard` SET hostname='" + sHostname + "' where cardid=" + StringUtils::itos(cardid);
+			sSQL = "UPDATE `capturecard` SET hostname='" + sHostname + "' WHERE cardid=" + StringUtils::itos(cardid);
 			m_pDBHelper_Myth->threaded_db_wrapper_query(sSQL);
 
 			if( sBlockDevice.empty()==false )
 			{
-				sSQL = "UPDATE `capturecard` set videodevice='" + sBlockDevice + "' WHERE cardid=" + StringUtils::itos(cardid);
+				sSQL = "UPDATE `capturecard` SET videodevice='" + sBlockDevice + "' WHERE cardid=" + StringUtils::itos(cardid);
 				if( m_pDBHelper_Myth->threaded_db_wrapper_query(sSQL)>0 )
 				{
 					LoggerWrapper::GetInstance()->Write(LV_STATUS,"MythTV_PlugIn::CMD_Sync_Providers_and_Cards bModifiedRows=true %s",sSQL.c_str());
@@ -1325,7 +2246,7 @@ void MythTV_PlugIn::CMD_Sync_Providers_and_Cards(int iPK_Device,int iPK_Orbiter,
 						while(true)  
 						{
 							string s = sProviderName + (iAppendValue ? "_" + StringUtils::itos(iAppendValue) : "");
-							sSQL = "SELECT name from `videosource` WHERE name='" + s + "' AND sourceid<>" + StringUtils::itos(sourceid);
+							sSQL = "SELECT name FROM `videosource` WHERE name='" + s + "' AND sourceid<>" + StringUtils::itos(sourceid);
 							PlutoSqlResult result_set2;
 							if( (result_set2.r=m_pDBHelper_Myth->db_wrapper_query_result(sSQL)) && result_set2.r->row_count>0 )
 							{
@@ -1394,6 +2315,71 @@ void MythTV_PlugIn::CMD_Sync_Providers_and_Cards(int iPK_Device,int iPK_Orbiter,
 		}
 	}
 
+	// MythTV crashes sometimes when you have an entry in capturecard with no corresponding entries in cardinput.
+	// We will create a "dummy" videosource to use as a default when no videosource has been assigned in cardinput.
+	sSQL = "SELECT sourceid FROM videosource WHERE name = 'LMCE-Default'";
+	PlutoSqlResult result_videosource;
+	if( (result_videosource.r=m_pDBHelper_Myth->db_wrapper_query_result(sSQL)) )
+	{
+		row=db_wrapper_fetch_row( result_videosource.r );
+		if(result_videosource.r->row_count==0) {
+			//LMCE-Default does not exist, create it!
+			sSQL = "INSERT INTO videosource (name,xmltvgrabber,freqtable) VALUES ('LMCE-Default','/bin/true','us-bcast')";
+			m_pDBHelper_Myth->threaded_db_wrapper_query(sSQL);
+		}
+	}
+
+	// Myth crashes when you have an entry in capture card with no corresponding entires in cardinput for some types of capture cards
+	// So if there are no inputs, we will point to the LMCE-Default videosource. To do this, we need to manage INSERTING, UPDATING and DELETING the appropriate entries.
+	string sDefaultSourceID;
+	
+	sSQL = "SELECT sourceid FROM videosource WHERE name = 'LMCE-Default'";
+	PlutoSqlResult result_defaultVideoSource;
+	if( (result_defaultVideoSource.r=m_pDBHelper_Myth->db_wrapper_query_result(sSQL)) )
+	{
+		row=db_wrapper_fetch_row( result_defaultVideoSource.r );
+		sDefaultSourceID = row[0];
+	}
+	
+	sSQL="SELECT cardid FROM capturecard";
+	PlutoSqlResult result_captureCards;
+	if( (result_captureCards.r=m_pDBHelper_Myth->db_wrapper_query_result(sSQL)) )
+	{
+		string sThisCard;
+		while( ( row=db_wrapper_fetch_row( result_captureCards.r ) ) )
+		{
+			sThisCard=row[0];
+			sSQL="SELECT sourceid FROM cardinput WHERE cardid="+sThisCard;
+			PlutoSqlResult result_sourceid;
+			if( (result_sourceid.r=m_pDBHelper_Myth->db_wrapper_query_result(sSQL)) )
+			{
+				if (result_sourceid.r->row_count==0) {
+					// There is NO ENTRY, create one to LMCE-Default!
+					sSQL="INSERT INTO cardinput (cardid,sourceid,inputname) VALUES ('"+sThisCard+"','"+sDefaultSourceID+"','MPEG2')";
+					m_pDBHelper_Myth->threaded_db_wrapper_query(sSQL);
+				} else if (result_sourceid.r->row_count > 1) {
+					// More than one videosources exist, so we can safely remove the LMCE-Default videosource.
+
+					// There is more than one sourceid associated with this capturecard.
+					// If one of them is LMCE-Default, we can safely remove it now!
+					sSQL="DELETE FROM cardinput WHERE sourceid='"+sDefaultSourceID+"'";
+					m_pDBHelper_Myth->threaded_db_wrapper_query(sSQL);						
+				} else {
+					// There is nothing to do. There is exactly 1 sourceid. This means that either
+					// the sourceid is real, or the sourceid the LMCE-Default one.
+				}				
+			}
+		}
+	}
+
+	// Use LMCE-Default for any videosource that does not exist
+	sSQL = "UPDATE cardinput LEFT JOIN videosource ON cardinput.sourceid=videosource.sourceid SET cardinput.sourceid='"+sDefaultSourceID+"' WHERE videosource.sourceid IS NULL";
+	m_pDBHelper_Myth->threaded_db_wrapper_query(sSQL);	
+	
+	// If for some reason there is a problem and cardinput table is incorrect, delete the hostname to keep some cards from crashing MythTV out (this should never happen, as we make sure its populated above)
+	sSQL = "UPDATE capturecard LEFT JOIN cardinput ON capturecard.cardid=cardinput.cardid SET hostname=NULL WHERE cardinput.cardid IS NULL";
+	m_pDBHelper_Myth->threaded_db_wrapper_query(sSQL);
+		
 	// Delete any stray rows for cards that no longer exist
 	sSQL = "DELETE cardinput FROM cardinput LEFT JOIN capturecard ON capturecard.cardid=cardinput.cardid WHERE capturecard.cardid IS NULL";
 	if( m_pDBHelper_Myth->threaded_db_wrapper_query(sSQL)>0 )
@@ -1402,19 +2388,14 @@ void MythTV_PlugIn::CMD_Sync_Providers_and_Cards(int iPK_Device,int iPK_Orbiter,
 		bModifiedRows=true;
 	}
 
-	// Myth crashes when you have an entry in capture card with no corresponding entires in cardinput for some types of capture cards
-	// So if there are no inputs, just clear the hostname
-	sSQL = "update capturecard LEFT JOIN cardinput on capturecard.cardid=cardinput.cardid set hostname=NULL WHERE cardinput.cardid IS NULL";
-	m_pDBHelper_Myth->threaded_db_wrapper_query(sSQL);
-
 	// We may have videosources with no inputs if the user unplugged a pvr capture device temporarily and is going to reconnect it.
 	// So don't delete the source
 
 	// Since we're sometimes removing and re-adding devices as the user unplugs/plugs them in, be sure we cleanup the database
 	// and don't leave any stray channel or programs around
-	sSQL = "delete channel FROM channel left join videosource on channel.sourceid=videosource.sourceid where videosource.sourceid is null";
+	sSQL = "DELETE channel FROM channel left JOIN videosource ON channel.sourceid=videosource.sourceid WHERE videosource.sourceid IS NULL";
 	m_pDBHelper_Myth->threaded_db_wrapper_query(sSQL);
-	sSQL = "delete program FROM program left join channel on program.chanid=channel.chanid where channel.chanid is null";
+	sSQL = "DELETE program FROM program left JOIN channel ON program.chanid=channel.chanid WHERE channel.chanid IS NULL";
 	m_pDBHelper_Myth->threaded_db_wrapper_query(sSQL);
 
 	if( iPK_Device )
@@ -1424,7 +2405,7 @@ void MythTV_PlugIn::CMD_Sync_Providers_and_Cards(int iPK_Device,int iPK_Orbiter,
 		return;
 
 	// Find cards with invalid starting channels
-	sSQL = "SELECT cardinputid,cardinput.sourceid FROM cardinput LEFT JOIN channel on startchan=channum AND cardinput.sourceid=channel.sourceid WHERE channum IS NULL";
+	sSQL = "SELECT cardinputid,cardinput.sourceid FROM cardinput LEFT JOIN channel ON startchan=channum AND cardinput.sourceid=channel.sourceid WHERE channum IS NULL";
 	PlutoSqlResult result_set2;
 	if( (result_set2.r=m_pDBHelper_Myth->db_wrapper_query_result(sSQL)) )
 	{
@@ -1436,7 +2417,7 @@ void MythTV_PlugIn::CMD_Sync_Providers_and_Cards(int iPK_Device,int iPK_Orbiter,
 				string sourceid=row[1];
 				string sChanNum="1";
 
-				sSQL = "SELECT min(channum) FROM channel where sourceid=" + sourceid;
+				sSQL = "SELECT min(channum) FROM channel WHERE sourceid=" + sourceid;
 				PlutoSqlResult result_set3;
 				if( (result_set3.r=m_pDBHelper_Myth->db_wrapper_query_result(sSQL)) && (row = db_wrapper_fetch_row(result_set3.r)) && row[0] )
 					sChanNum = row[0];
@@ -1453,7 +2434,7 @@ void MythTV_PlugIn::CMD_Sync_Providers_and_Cards(int iPK_Device,int iPK_Orbiter,
 	}
 
 	// Be sure we have some valid capture cards and sources before we do a fill
-	sSQL = "select videosource.sourceid from videosource JOIN cardinput on videosource.sourceid=cardinput.sourceid join capturecard on capturecard.cardid=cardinput.cardid where hostname is not null limit 1";
+	sSQL = "SELECT videosource.sourceid FROM videosource JOIN cardinput ON videosource.sourceid=cardinput.sourceid JOIN capturecard ON capturecard.cardid=cardinput.cardid WHERE hostname IS NOT NULL limit 1";
 	PlutoSqlResult result_set_sources;
 	bool bContainsVideoSources = (result_set_sources.r=m_pDBHelper_Myth->db_wrapper_query_result(sSQL))!=NULL && result_set_sources.r->row_count>0;
 
@@ -1461,22 +2442,23 @@ void MythTV_PlugIn::CMD_Sync_Providers_and_Cards(int iPK_Device,int iPK_Orbiter,
 		(int) bModifiedRows,(int) m_bFillDbRunning,(int) m_bNeedToRunFillDb, (int) bContainsVideoSources);
 	if( (bModifiedRows && bContainsVideoSources) )  // We've changed stuff.  Need to run the fill process
 	{
-		if( m_bFillDbRunning )
+		if( m_bFillDbRunning ) {
 			m_bNeedToRunFillDb = true;  // A fill is already running.  Need to re-run it when we're done
-		else
-		{
+		} else {
 			LoggerWrapper::GetInstance()->Write(LV_STATUS,"MythTV_PlugIn::SyncCardsAndProviders -- setting m_bFillDbRunning=true and starting fill");
 			m_bFillDbRunning=true;
 			StartFillDatabase(bAddedProviders);
 		}
+	} else {
+		system(SCRIPT_MYTHTV_SETUP.c_str());
 	}
-	else if( bPathsChanged )
+	/*else if( bPathsChanged )
         { // Paths were changed, so we don't need to call mythfilldatabase, but we do need to restart the backend[s].
 		DCE::CMD_Spawn_Application CMD_Spawn_Application(m_dwPK_Device,pDevice_App_Server->m_dwPK_Device,
 			SCRIPT_RESTART_ALL_BACKENDS, "restart_all_backends_in_sync", "",
 			"", "", false, false, false, false);
 		SendCommand(CMD_Spawn_Application);
-        }
+        }*/
 }
 
 bool MythTV_PlugIn::UpdateMythSetting(string value,string data,string hostname,bool bOnlyIfNotExisting)
@@ -1519,7 +2501,7 @@ bool MythTV_PlugIn::UpdateMythSetting(string value,string data,string hostname,b
 	if( row[0] && (data==row[0]) )
 		return false;
 
-	sSQL = "UPDATE settings set data='" + StringUtils::SQLEscape(data) + "' WHERE value='" + StringUtils::SQLEscape(value) + "' "
+	sSQL = "UPDATE settings SET data='" + StringUtils::SQLEscape(data) + "' WHERE value='" + StringUtils::SQLEscape(value) + "' "
 		" AND hostname " + (hostname.empty() ? "IS NULL" : "='" + StringUtils::SQLEscape(hostname) + "'");
 
 	m_pDBHelper_Myth->threaded_db_wrapper_query(sSQL);
@@ -1530,19 +2512,20 @@ void MythTV_PlugIn::CheckForNewRecordings()
 {
 	/* I haven't been able to find a clean way to get myth back end to notify us
 	when it has finished making new recordings.  So we'll do it the brute force way
-	and search for new files that have 'tv_shows' in the path but don't yet have any
+	and search for new files that have 'pvr' in the path but don't yet have any
 	attributes */
 
 	string sSQL = "SELECT max(PK_File) FROM File";
 	PlutoSqlResult result;
-    DB_ROW row;
+    	DB_ROW row;
     
 	int PK_File_Max=0;
-	if( ( result.r=m_pMedia_Plugin->m_pDatabase_pluto_media->db_wrapper_query_result( sSQL ) ) && ( row=db_wrapper_fetch_row( result.r ) ) && row[0] )
+	if( ( result.r=m_pMedia_Plugin->m_pDatabase_pluto_media->db_wrapper_query_result( sSQL ) ) && ( row=db_wrapper_fetch_row( result.r ) ) && row[0] ) {
 		PK_File_Max = atoi(row[0]);
+	}
 
 	PLUTO_SAFETY_LOCK(mm,m_pMedia_Plugin->m_MediaMutex); // protect m_sNewRecordings
-	sSQL = "LEFT JOIN File_Attribute ON FK_File=PK_File WHERE (Missing=0 AND Path like '%tv_shows_%' AND FK_File IS NULL AND PK_File>" + StringUtils::itos(m_dwPK_File_LastCheckedForNewRecordings) + ")";
+	sSQL = "LEFT JOIN File_Attribute ON FK_File=PK_File WHERE (Missing=0 AND Path like '%pvr%' AND FK_File IS NULL AND PK_File>" + StringUtils::itos(m_dwPK_File_LastCheckedForNewRecordings) + ")";
 	if( m_sNewRecordings.empty()==false )
 	{
 		sSQL += " OR Filename in (" + m_sNewRecordings + ")";
@@ -1551,7 +2534,7 @@ void MythTV_PlugIn::CheckForNewRecordings()
 	vector<Row_File *> vectRow_File;
 	m_pMedia_Plugin->m_pDatabase_pluto_media->File_get()->GetRows( sSQL, &vectRow_File );
 
-	LoggerWrapper::GetInstance()->Write(LV_STATUS,"MythTV_PlugIn::CheckForNewRecordings PK_File_Max %d m_dwPK_File_LastCheckedForNewRecordings %d files: %d %s",
+	LoggerWrapper::GetInstance()->Write(LV_DEBUG,"MythTV_PlugIn::CheckForNewRecordings PK_File_Max %d m_dwPK_File_LastCheckedForNewRecordings %d files: %d %s",
 		PK_File_Max, m_dwPK_File_LastCheckedForNewRecordings, (int) vectRow_File.size(), sSQL.c_str());
 
 	for(vector<Row_File *>::iterator it=vectRow_File.begin();it!=vectRow_File.end();++it)
@@ -1561,10 +2544,11 @@ void MythTV_PlugIn::CheckForNewRecordings()
 
 		sSQL = 
 			"SELECT recorded.chanid, recorded.starttime, recorded.title, recorded.subtitle, recorded.stars, recorded.category, recorded.description,"
-			"recordedprogram.hdtv, recordedprogram.category_type, channel.name, recordedrating.rating, recgroup, recordedprogram.seriesid, recordedprogram.programid, channel.icon FROM recorded "
+			"recordedprogram.hdtv, recordedprogram.category_type, channel.name, recordedrating.rating, recgroup, recordedprogram.seriesid, recordedprogram.programid, channel.icon, CONCAT(storagegroup.dirname,'/',recorded.basename,'.png') AS screenshot FROM recorded "
 			"LEFT JOIN recordedprogram ON recorded.chanid=recordedprogram.chanid and recorded.starttime=recordedprogram.starttime "
 			"LEFT JOIN channel ON recorded.chanid=channel.chanid "
 			"LEFT JOIN recordedrating ON recorded.chanid=recordedrating.chanid and recorded.starttime=recordedrating.starttime "
+			"LEFT JOIN storagegroup ON recorded.storagegroup = storagegroup.groupname "
 			"WHERE basename='" + pRow_File->Filename_get() + "'";
 
 		PlutoSqlResult result;
@@ -1575,181 +2559,213 @@ void MythTV_PlugIn::CheckForNewRecordings()
 			if( row[11] && strcmp(row[11],"LiveTV")==0 )
 			{
 				pRow_File->Ignore_set(1);
-				LoggerWrapper::GetInstance()->Write(LV_STATUS,"MythTV_PlugIn::CheckForNewRecordings file: %s is live tv title %s",pRow_File->Filename_get().c_str(), title.c_str());
+				LoggerWrapper::GetInstance()->Write(LV_DEBUG,"MythTV_PlugIn::CheckForNewRecordings file: %s is live tv title %s",pRow_File->Filename_get().c_str(), title.c_str());
 	
-				if( title!="" )
+				if( title!="" ) {
 					title = "LiveTV: " + title;
-				else
+				} else {
 					continue;
+				}
 			}
 
 			int PK_Attribute_CreationDate,PK_Attribute_Title=0,PK_Attribute_Episode=0,PK_Attribute_Channel=0,PK_Attribute_Misc;
 
 			LoggerWrapper::GetInstance()->Write(
-				LV_STATUS,
+				LV_DEBUG,
 				"RESULT ROW: file %s chanid %s start_time %s title %s subtitle %s stars %s category %s " // 6
 				"description %s hdtv %s category_type %s chan_name %s rating %s recgroup %s " // 6
-				"seriesid %s programid %s icon %s", // 3
+				"seriesid %s programid %s icon %s screenshot %s", // 3
 				pRow_File->Filename_get().c_str(),
 				row[0], row[1], row[2], row[3], row[4], row[5],
 				row[6], row[7], row[8], row[9], row[10], row[11],
-				row[12], row[13], row[14]);
+				row[12], row[13], row[14], row[15]);
 
 			if( row[1] && row[1][0] != 0 /*starttime*/)
 			{
-				LoggerWrapper::GetInstance()->Write(LV_STATUS, "Fetching starttime attribute -- start (%s)", row[1]);
+				LoggerWrapper::GetInstance()->Write(LV_DEBUG, "Fetching starttime attribute -- 35start (%s)", row[1]);
 				m_pMedia_Plugin->CMD_Add_Media_Attribute(
 					/*val*/row[1],/*streamid*/0,/*tracks*/"",
 					/*attr type*/ATTRIBUTETYPE_Creation_Date_CONST,
 					/*section*/"",
 					/*file*/pRow_File->PK_File_get(),
 					/*int attr key*/&PK_Attribute_CreationDate);
-				LoggerWrapper::GetInstance()->Write(LV_STATUS, "Fetching starttime attribute -- end\n");
+				LoggerWrapper::GetInstance()->Write(LV_DEBUG, "Fetching starttime attribute -- end\n");
 			}
 			if( title != "" )
 			{
-				LoggerWrapper::GetInstance()->Write(LV_STATUS, "Fetching title attribute -- start (%s)", title.c_str());
+				LoggerWrapper::GetInstance()->Write(LV_DEBUG, "Fetching title attribute -- start (%s)", title.c_str());
 				m_pMedia_Plugin->CMD_Add_Media_Attribute(title,0,"",ATTRIBUTETYPE_Title_CONST,"",
 									 pRow_File->PK_File_get(),&PK_Attribute_Title);
-				LoggerWrapper::GetInstance()->Write(LV_STATUS, "Fetching title attribute -- end\n");
+				LoggerWrapper::GetInstance()->Write(LV_DEBUG, "Fetching title attribute -- end\n");
 			}
 			if( row[3] && row[3][0] != 0 /*subtitle*/)
 			{
-				LoggerWrapper::GetInstance()->Write(LV_STATUS, "Fetching subtitle attribute -- start (%s)", row[3]);
+				LoggerWrapper::GetInstance()->Write(LV_DEBUG, "Fetching subtitle attribute -- start (%s)", row[3]);
 				m_pMedia_Plugin->CMD_Add_Media_Attribute(row[3],0,"",ATTRIBUTETYPE_Episode_CONST,"",pRow_File->PK_File_get(),&PK_Attribute_Episode);
-				LoggerWrapper::GetInstance()->Write(LV_STATUS, "Fetching subtitle attribute -- end\n");
+				LoggerWrapper::GetInstance()->Write(LV_DEBUG, "Fetching subtitle attribute -- end\n");
 			}
 			if( row[4] && row[4][0] != 0 /*stars*/)
 			{
-				LoggerWrapper::GetInstance()->Write(LV_STATUS, "Fetching stars attribute -- start (%s)", row[4]);
+				LoggerWrapper::GetInstance()->Write(LV_DEBUG, "Fetching stars attribute -- start (%s)", row[4]);
 				m_pMedia_Plugin->CMD_Add_Media_Attribute(row[4],0,"",ATTRIBUTETYPE_Rating_CONST,"",pRow_File->PK_File_get(),&PK_Attribute_Misc);
-				LoggerWrapper::GetInstance()->Write(LV_STATUS, "Fetching stars attribute -- end\n");
+				LoggerWrapper::GetInstance()->Write(LV_DEBUG, "Fetching stars attribute -- end\n");
 			}
 			if( row[5] && row[5][0] != 0 /*category*/)
 			{
-				LoggerWrapper::GetInstance()->Write(LV_STATUS, "Fetching category attribute -- start (%s)", row[5]);
+				LoggerWrapper::GetInstance()->Write(LV_DEBUG, "Fetching category attribute -- start (%s)", row[5]);
 				m_pMedia_Plugin->CMD_Add_Media_Attribute(row[5],0,"",ATTRIBUTETYPE_Genre_CONST,"",pRow_File->PK_File_get(),&PK_Attribute_Misc);
-				LoggerWrapper::GetInstance()->Write(LV_STATUS, "Fetching category attribute -- end\n");
+				LoggerWrapper::GetInstance()->Write(LV_DEBUG, "Fetching category attribute -- end\n");
 			}
 			if( row[6] && row[6][0] != 0 /*description*/)
 			{
-				LoggerWrapper::GetInstance()->Write(LV_STATUS, "Fetching description attribute -- start (%s)", row[6]);
+				LoggerWrapper::GetInstance()->Write(LV_DEBUG, "Fetching description attribute -- start (%s)", row[6]);
 				Row_LongAttribute *pRow_LongAttribute = m_pMedia_Plugin->m_pDatabase_pluto_media->LongAttribute_get()->AddRow();
 				pRow_LongAttribute->FK_File_set( pRow_File->PK_File_get() );
 				pRow_LongAttribute->FK_AttributeType_set( ATTRIBUTETYPE_Synopsis_CONST );
 				pRow_LongAttribute->Text_set( row[6] );
 				m_pMedia_Plugin->m_pDatabase_pluto_media->LongAttribute_get()->Commit();
-				LoggerWrapper::GetInstance()->Write(LV_STATUS, "Fetching description attribute -- end\n");
+				LoggerWrapper::GetInstance()->Write(LV_DEBUG, "Fetching description attribute -- end\n");
 			}
-			if( row[7] && row[7][0] != 0 && atoi(row[7]) /*hdtv*/)
+			
+			LoggerWrapper::GetInstance()->Write(LV_DEBUG, "Fetching HDTV attribute -- start (%s)", row[7]);
+			if( row[7] && row[7][0] != 0 && atoi(row[7]) /*hdtv*/) {
 				pRow_File->FK_FileFormat_set(FILEFORMAT_HD_1080_CONST);
-			else
+			} else {
 				pRow_File->FK_FileFormat_set(FILEFORMAT_Standard_Def_CONST);
+			}
+			LoggerWrapper::GetInstance()->Write(LV_DEBUG, "Fetching description attribute -- end\n");
+			
+			LoggerWrapper::GetInstance()->Write(LV_DEBUG, "Fetching Category Type attribute -- start (%s)", row[8]);
 			if( row[8] && row[8][0] != 0 /*category_type*/)
 			{
 				string sType = row[8];
-				if( StringUtils::StartsWith(sType,"Sports",true) )
+				if( StringUtils::StartsWith(sType,"Sports",true) ) {
 					pRow_File->FK_MediaSubType_set(MEDIASUBTYPE_Sports_Events_CONST);
-				else
+				} else {
 					pRow_File->FK_MediaSubType_set(MEDIASUBTYPE_TV_Shows_CONST);
-			}
-			else
+				}
+			} else {
 				pRow_File->FK_MediaSubType_set(MEDIASUBTYPE_TV_Shows_CONST);
+			}
+			LoggerWrapper::GetInstance()->Write(LV_DEBUG, "Fetching Category Type attribute -- end\n");
 
-			if( row[9] && row[9][0] != 0 /*channel name*/)
+
+			if( row[9] && row[9][0] != 0 /*channel name*/) {
+				LoggerWrapper::GetInstance()->Write(LV_DEBUG, "Fetching Channel Name attribute -- start (%s)", row[9]);
 				m_pMedia_Plugin->CMD_Add_Media_Attribute(row[9],0,"",ATTRIBUTETYPE_Channel_CONST,"",pRow_File->PK_File_get(),&PK_Attribute_Channel);
-			if( row[10] && row[10][0] != 0 /*rating*/)
-				m_pMedia_Plugin->CMD_Add_Media_Attribute(row[10],0,"",ATTRIBUTETYPE_Rated_CONST,"",pRow_File->PK_File_get(),&PK_Attribute_Misc);
+				LoggerWrapper::GetInstance()->Write(LV_DEBUG, "Fetching Channel Name attribute -- end\n");
+			}
 
-			LoggerWrapper::GetInstance()->Write(LV_STATUS,"MythTV_PlugIn::CheckForNewRecordings file: %s %d %d",pRow_File->Filename_get().c_str(),PK_Attribute_Title,PK_Attribute_Episode);
+			if( row[10] && row[10][0] != 0 /*rating*/) {
+				LoggerWrapper::GetInstance()->Write(LV_DEBUG, "Fetching rating attribute -- start (%s)", row[10]);
+				m_pMedia_Plugin->CMD_Add_Media_Attribute(row[10],0,"",ATTRIBUTETYPE_Rated_CONST,"",pRow_File->PK_File_get(),&PK_Attribute_Misc);
+				LoggerWrapper::GetInstance()->Write(LV_DEBUG, "Fetching rating attribute -- end\n");
+			}
+
+			LoggerWrapper::GetInstance()->Write(LV_DEBUG,"MythTV_PlugIn::CheckForNewRecordings file: %s %d %d",pRow_File->Filename_get().c_str(),PK_Attribute_Title,PK_Attribute_Episode);
 
 			int PK_Picture = 0;
 			if( PK_Attribute_Title || PK_Attribute_Episode )
 			{
-				if( row[12] )
+				if( row[12] ) {
 					sSQL = string("seriesid='") + row[12] + "'";
-				else
+				} else {
 					sSQL = "";
+				}
 
 				if( row[13] )
 				{
-					if( sSQL.empty()==false )
+					if( sSQL.empty()==false ) {
 						sSQL += " OR ";
+					}
 					sSQL += string("programid='") + row[13] + "'";
 				}
-				LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"CheckForNewRecordings %s",sSQL.c_str());
+				LoggerWrapper::GetInstance()->Write(LV_DEBUG,"CheckForNewRecordings: Title/Episode %s",sSQL.c_str());
 
 				PlutoSqlResult result;
-			    DB_ROW row_pic;
+			    	DB_ROW row_pic;
+				LoggerWrapper::GetInstance()->Write(LV_DEBUG,"CheckForNewRecordings: Look For Picture...");				
 				if( (sSQL!="") && (result.r=m_pDBHelper_Myth->db_wrapper_query_result( "SELECT EK_Picture FROM `pluto_myth`.Picture WHERE " + sSQL ) ) && ( row_pic=db_wrapper_fetch_row( result.r ) ) && row_pic[0] && atoi(row_pic[0]) )
 				{
-					LoggerWrapper::GetInstance()->Write(LV_STATUS,"CheckForNewRecordings ok - %s",sSQL.c_str());
+					LoggerWrapper::GetInstance()->Write(LV_DEBUG,"CheckForNewRecordings: Custom MythTV picture found - %s",sSQL.c_str());
 					PK_Picture = atoi(row_pic[0]);
-					if( PK_Attribute_Title )
+					if( PK_Attribute_Title ) {
 						m_pMedia_Plugin->m_pMediaAttributes->m_pMediaAttributes_LowLevel->AddPictureToAttribute(PK_Attribute_Title,atoi(row_pic[0]));
-					if( PK_Attribute_Episode )
+					}
+					if( PK_Attribute_Episode ) {
 						m_pMedia_Plugin->m_pMediaAttributes->m_pMediaAttributes_LowLevel->AddPictureToAttribute(PK_Attribute_Episode,atoi(row_pic[0]));
+					}				
 				}
 				else  // Look for a channel logo
 				{
 					PlutoSqlResult result;
 					if( (result.r=m_pDBHelper_Myth->db_wrapper_query_result( "SELECT EK_Picture FROM `pluto_myth`.Picture WHERE chanid=" + string(row[0]) ) ) && ( row_pic=db_wrapper_fetch_row( result.r ) ) && row_pic[0] && atoi(row_pic[0]) )
 					{
-						LoggerWrapper::GetInstance()->Write(LV_STATUS,"CheckForNewRecordings ok - %s",sSQL.c_str());
+						LoggerWrapper::GetInstance()->Write(LV_DEBUG,"CheckForNewRecordings: Channel Picture Found. - %s",sSQL.c_str());
 						PK_Picture = atoi(row_pic[0]);
-						if( PK_Attribute_Title )
+						if( PK_Attribute_Title ) {
 							m_pMedia_Plugin->m_pMediaAttributes->m_pMediaAttributes_LowLevel->AddPictureToAttribute(PK_Attribute_Title,atoi(row_pic[0]));
-						if( PK_Attribute_Episode )
+						}						
+						if( PK_Attribute_Episode ) {
 							m_pMedia_Plugin->m_pMediaAttributes->m_pMediaAttributes_LowLevel->AddPictureToAttribute(PK_Attribute_Episode,atoi(row_pic[0]));
+						}					
 					}
 					else if( row[14] )  // Use the icon from myth channel
 					{
-						Row_Picture *pRow_Picture = m_pMedia_Plugin->m_pMediaAttributes->m_pMediaAttributes_LowLevel->AddPicture(row[14]);
-						if( !pRow_Picture )
-							LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"Failed to add picture %s",row[15]);
-						else
-						{
-							LoggerWrapper::GetInstance()->Write(LV_STATUS,"Adding Picture %d / %s", pRow_Picture->PK_Picture_get(), row[15]);
+						Row_Picture *pRow_Picture = m_pMedia_Plugin->m_pMediaAttributes->m_pMediaAttributes_LowLevel->AddPicture(row[15]);
+						if( !pRow_Picture ) {
+							LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"CheckForNewRecordings: Failed to add picture %s",row[15]);
+						} else {
+							LoggerWrapper::GetInstance()->Write(LV_DEBUG,"CheckForNewRecordings: Adding Picture %d / %s", pRow_Picture->PK_Picture_get(), row[15]);
 							PK_Picture = pRow_Picture->PK_Picture_get();
-							if( PK_Attribute_Title )
+							if( PK_Attribute_Title ) {
 								m_pMedia_Plugin->m_pMediaAttributes->m_pMediaAttributes_LowLevel->AddPictureToAttribute(PK_Attribute_Title,pRow_Picture->PK_Picture_get());
-							if( PK_Attribute_Episode )
+							}							
+							if( PK_Attribute_Episode ) {
 								m_pMedia_Plugin->m_pMediaAttributes->m_pMediaAttributes_LowLevel->AddPictureToAttribute(PK_Attribute_Episode,pRow_Picture->PK_Picture_get());
+							}						
 						}
 					}
 				}
 			}
 
-			if( PK_Picture )
+			if( PK_Picture ) {
 				m_pMedia_Plugin->m_pMediaAttributes->m_pMediaAttributes_LowLevel->AddPictureToFile(pRow_File->PK_File_get(),PK_Picture);
-			
-			sSQL = 
+			}
+
+
+			LoggerWrapper::GetInstance()->Write(LV_DEBUG,"CheckForNewRecordings: Looking for Personnel attributes...");
+			/*sSQL = 
 				"SELECT role,name FROM recordedcredits JOIN people on recordedcredits.person=people.person "
 				"WHERE chanid='" + string(row[0]) + "' AND starttime='" + row[1] + "'";
 
 			PlutoSqlResult result_person;
 			if( (result_person.r=m_pDBHelper_Myth->db_wrapper_query_result( sSQL ) ) )
 			{
-				while( (row=db_wrapper_fetch_row( result_person.r )) )
+				LoggerWrapper::GetInstance()->Write(LV_DEBUG,"CheckForNewRecordings: Personell results fetched - lets add them in!");
+				while( row=db_wrapper_fetch_row( result_person.r ) )
 				{
 					string sRole = row[0];
-					if( sRole=="director" )
+					LoggerWrapper::GetInstance()->Write(LV_DEBUG, "Adding Petsonell attribute -- (%s)%s", sRole,row[1]);
+					if( sRole=="director" ) {
 						m_pMedia_Plugin->CMD_Add_Media_Attribute(row[1],0,"",ATTRIBUTETYPE_Director_CONST,"",pRow_File->PK_File_get(),&PK_Attribute_Misc);
-					else if( sRole=="actor" )
+					} else if( sRole=="actor" ) {
 						m_pMedia_Plugin->CMD_Add_Media_Attribute(row[1],0,"",ATTRIBUTETYPE_Performer_CONST,"",pRow_File->PK_File_get(),&PK_Attribute_Misc);
-					else if( sRole=="producer" )
+					} else if( sRole=="producer" ) {
 						m_pMedia_Plugin->CMD_Add_Media_Attribute(row[1],0,"",ATTRIBUTETYPE_Producer_CONST,"",pRow_File->PK_File_get(),&PK_Attribute_Misc);
-					else if( sRole=="executive_producer" )
+					} else if( sRole=="executive_producer" ) {
 						m_pMedia_Plugin->CMD_Add_Media_Attribute(row[1],0,"",ATTRIBUTETYPE_Executive_Producer_CONST,"",pRow_File->PK_File_get(),&PK_Attribute_Misc);
-					else if( sRole=="writer" )
+					} else if( sRole=="writer" ) {
 						m_pMedia_Plugin->CMD_Add_Media_Attribute(row[1],0,"",ATTRIBUTETYPE_ComposerWriter_CONST,"",pRow_File->PK_File_get(),&PK_Attribute_Misc);
-
+					}
 				}
+			} else {
+				LoggerWrapper::GetInstance()->Write(LV_DEBUG,"CheckForNewRecordings: No personell results!");
 			}
-
-		}
-		else
+			*/
+		} else {
 			LoggerWrapper::GetInstance()->Write(LV_WARNING,"MythTV_PlugIn::CheckForNewRecordings couldn't locate file %s", pRow_File->Filename_get().c_str());
+		}
 	}
 	
 	m_pMedia_Plugin->m_pDatabase_pluto_media->File_get()->Commit();
@@ -1757,6 +2773,7 @@ void MythTV_PlugIn::CheckForNewRecordings()
 	m_pAlarmManager->AddRelativeAlarm(3600,this,CHECK_FOR_NEW_RECORDINGS,NULL);  /* check again in an hour */
 
 	m_dwPK_File_LastCheckedForNewRecordings = PK_File_Max;
+	LoggerWrapper::GetInstance()->Write(LV_DEBUG, "MythTV_PlugIn::CheckForNewRecordings run complete.");
 }
 
 void MythTV_PlugIn::AlarmCallback(int id, void* param)
@@ -1797,7 +2814,7 @@ bool MythTV_PlugIn::TuneToChannel( class Socket *pSocket, class Message *pMessag
 		if( sProgramID.size()>1 && sProgramID[0]=='i' )
 		{
 			// It's a channel ID, not a channel number.  Convert it
-			string sSQL = "SELECT channum from channel where chanid=" + sProgramID.substr(1);
+			string sSQL = "SELECT channum FROM channel WHERE chanid=" + sProgramID.substr(1);
 			PlutoSqlResult result_set_check;
 			DB_ROW row;
 			if( (result_set_check.r=m_pDBHelper_Myth->db_wrapper_query_result(sSQL))!=NULL && (row=db_wrapper_fetch_row(result_set_check.r))!=NULL && row && row[0] )
@@ -1891,7 +2908,7 @@ void MythTV_PlugIn::BuildChannelList()
 
 	string sSQL = "SELECT channel.chanid, channum, callsign, name, icon, pic.EK_Picture, sourceid "
 		"FROM channel "
-		"LEFT JOIN `pluto_myth`.`Picture` AS pic on channel.chanid=pic.chanid";
+		"LEFT JOIN `pluto_myth`.`Picture` AS pic ON channel.chanid=pic.chanid";
 	PlutoSqlResult result;
 	DB_ROW row;
 	if( (result.r=m_pDBHelper_Myth->db_wrapper_query_result(sSQL))!=NULL )
@@ -1903,7 +2920,7 @@ void MythTV_PlugIn::BuildChannelList()
 			{
 				string sDescription = row[6];
 
-				sSQL = "select name from videosource where sourceid=" + string(row[6]);
+				sSQL = "SELECT name FROM videosource WHERE sourceid=" + string(row[6]);
 				PlutoSqlResult result2;
 				DB_ROW row2;
 				if( (result2.r=m_pDBHelper_Myth->db_wrapper_query_result(sSQL))!=NULL && (row2 = db_wrapper_fetch_row(result2.r))!=NULL )
@@ -2136,7 +3153,7 @@ void MythTV_PlugIn::StartScanJob(ScanJob *pScanJob)
 		sBlockDevice = DatabaseUtils::GetDeviceData(m_pMedia_Plugin->m_pDatabase_pluto_main,pScanJob->m_pRow_Device_CaptureCard->PK_Device_get(),DEVICEDATA_Block_Device_CONST);
 	if( sBlockDevice.empty()==false )
 	{
-		string sSQL = "UPDATE `capturecard` set videodevice='" + sBlockDevice + "' WHERE cardid=" + StringUtils::itos(cardid);
+		string sSQL = "UPDATE `capturecard` SET videodevice='" + sBlockDevice + "' WHERE cardid=" + StringUtils::itos(cardid);
 		m_pDBHelper_Myth->threaded_db_wrapper_query(sSQL);
 	}
 
@@ -2304,6 +3321,7 @@ void MythTV_PlugIn::CMD_Abort_Task(int iParameter_ID,string &sCMD_Result,Message
 
 bool MythTV_PlugIn::SetPaths()
 {
+	
 	bool bChanged = false;
 	LoggerWrapper::GetInstance()->Write(LV_STATUS,"MythTV_PlugIn::SetPaths");
 
@@ -2321,7 +3339,7 @@ bool MythTV_PlugIn::SetPaths()
 	int PK_Device_Storage = atoi(DATA_Get_PK_Device().c_str());
 	string sFilename = PK_Device_Storage ? "/mnt/device/" + StringUtils::itos(PK_Device_Storage) + "/public/data/videos/tv_shows_" : "/home/public/data/videos/tv_shows_";
 
-	string sSQL = "SELECT data,hostname from settings where value='BackendServerIP'";
+	string sSQL = "SELECT data,hostname FROM settings WHERE value='BackendServerIP'";
 	PlutoSqlResult result;
 	DB_ROW row;
 	if( (result.r = m_pDBHelper_Myth->db_wrapper_query_result(sSQL)) )
@@ -2342,6 +3360,11 @@ bool MythTV_PlugIn::SetPaths()
 
 			LoggerWrapper::GetInstance()->Write(LV_STATUS,"MythTV_PlugIn::SetPaths row %s/%s device %d directory %s", row[1], row[0] ? row[0] : "x", PK_Device, sDirectory.c_str());
 
+			//TODO:
+			//This would be a good place to update the "Default" mythtv storage group to the device with the most space...
+
+			/*
+			Note:This section is no longer needed, as this is now handled in PlutoStorageDevices
 			const string CmdList[] =
 			{
 				"mkdir -p \"" + sDirectory + "\"",
@@ -2354,7 +3377,7 @@ bool MythTV_PlugIn::SetPaths()
 			{
 				LoggerWrapper::GetInstance()->Write(LV_STATUS,"MythTV_PlugIn::Register %s", CmdList[i].c_str());
 				system(CmdList[i].c_str());
-			}
+			}*/
 
 			bChanged |= UpdateMythSetting("LiveBufferDir",sDirectory,row[1]);
 			bChanged |= UpdateMythSetting("RecordFilePrefix",sDirectory,row[1]);
@@ -2596,7 +3619,7 @@ void MythTV_PlugIn::CMD_Remove_Scheduled_Recording(string sID,string sProgramID,
 //<-dceag-c911-e->
 {
 	PLUTO_SAFETY_LOCK(mm,m_pMedia_Plugin->m_MediaMutex);
-	string sSQL = "delete from record where recordid=" + sID;
+	string sSQL = "DELETE FROM record WHERE recordid=" + sID;
 	m_pDBHelper_Myth->threaded_db_wrapper_query(sSQL);
 
 	if( m_pMythBackEnd_Socket )
@@ -2686,7 +3709,7 @@ bool MythTV_PlugIn::PlaybackStarted( class Socket *pSocket,class Message *pMessa
 	pMythTvMediaStream->m_sMediaDescription = pMythChannel->m_sLongName;
 	pMythTvMediaStream->m_iCurrentProgramChannelID = pMythTvMediaStream->m_iTrackOrSectionOrChannel = pMythChannel->m_dwID;
 
-	string sSQL = "select title,subtitle,description FROM program where chanid=" + sMRL + " AND "
+	string sSQL = "SELECT title,subtitle,description FROM program WHERE chanid=" + sMRL + " AND "
 		"starttime <= '" + StringUtils::SQLDateTime() + "' AND endtime>='" + StringUtils::SQLDateTime() + "'";
 	PlutoSqlResult result;
 	DB_ROW row;
@@ -2747,4 +3770,15 @@ bool MythTV_PlugIn::ConfirmSourceIsADestination(MythTvMediaStream *pMythTvMediaS
 	}
 	pMythTvMediaStream->m_pMediaDevice_Source = pMediaDevice_Myth;
 	return true;
+}
+//<-dceag-c986-b->
+
+	/** @brief COMMAND: #986 - Sync Storage Groups */
+	/** Synchronize Storage Groups. Sent in response to a storage device being added. */
+
+void MythTV_PlugIn::CMD_Sync_Storage_Groups(string &sCMD_Result,Message *pMessage)
+//<-dceag-c986-e->
+{
+	LoggerWrapper::GetInstance()->Write(LV_STATUS,"MythTV_PlugIn - Synchronizing Storage Groups");
+	system(SCRIPT_MYTHTV_SETUP.c_str());
 }

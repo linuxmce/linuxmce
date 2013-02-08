@@ -1,0 +1,5 @@
+qorbiter (0.1.0-1) unstable; urgency=low
+
+  * Initial release (Closes: #nnnn)  <nnnn is the bug number of your ITP>
+
+ -- Langston <langston@unknown>  Sun, 25 Nov 2012 00:32:21 -0800

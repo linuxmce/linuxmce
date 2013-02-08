@@ -1,0 +1,17 @@
+Source: pluto-fuse-smb
+Section: utils
+Priority: optional
+Maintainer: Radu Cristescu <radu.c@plutohome.com>
+Build-Depends: debhelper (>= 4.0.0), autotools-dev, samba-common, libsmbclient-dev, libfuse-dev, automake1.4
+Standards-Version: 3.7.0
+
+Package: pluto-fuse-smb
+Architecture: any
+Depends: ${shlibs:Depends}, fuse-utils
+Description: filesystem client based on the SMB file transfer protocol
+ pluto-fuse-smb is a filesystem client based on the SMB file transfer protocol.
+ This gives the ability to transparently exchange files with Microsoft Windows
+ servers and Unix servers running Samba.
+ .
+ It is based on FUSE (userspace filesystem framework for Linux), thus you will
+ have to prepare fuse kernel module to be able to use it.

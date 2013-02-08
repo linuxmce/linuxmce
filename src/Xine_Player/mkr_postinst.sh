@@ -61,7 +61,7 @@ gui.post_audio_plugin:goom
 
 # Subtitle autoloading
 # bool, default: 1
-#gui.subtitle_autoload:1
+gui.subtitle_autoload:1
 
 # Visual animation style
 # { None  Post Plugin  Stream Animation }, default: 1
@@ -339,7 +339,6 @@ video.driver:$video_driver
 
 # file browsing start location
 # string, default: /home/work/pluto-svn/trunk/bin
-input.file_origin_path:/home/public/data/music/AC-DC/The Razors Edge
 
 # network bandwidth
 # { 14.4 Kbps (Modem)  19.2 Kbps (Modem)  28.8 Kbps (Modem)  33.6 Kbps (Modem)  34.4 Kbps (Modem)  57.6 Kbps (Modem)  115.2 Kbps (ISDN)  262.2 Kbps (Cable/DSL)  393.2 Kbps (Cable/DSL)  524.3 Kbps (Cable/DSL)  1.5 Mbps (T1)  10.5 Mbps (LAN) }, default: 10
@@ -611,7 +610,7 @@ codec.real_codecs_path:/usr/lib/win32
 
 # subtitle size
 # { tiny  small  normal  large  very large  huge }, default: 1
-#misc.spu_subtitle_size:small
+misc.spu_subtitle_size:large
 
 # subtitle vertical offset
 # numeric, default: 0

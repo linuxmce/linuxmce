@@ -7,11 +7,11 @@ www.plutohome.com
 
 Phone: +1 (877) 758-8648
 
-This program is free software; you can redistribute it and/or modify it under the terms of the GNU General Public License.
+This program is free software; you can redistribute it and/or modify it under the terms of the GNU Lesser General Public License.
 This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty
 of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
 
-See the GNU General Public License for more details.
+See the GNU Lesser General Public License for more details.
 */
 
 #include "PlutoUtils/CommonIncludes.h"
@@ -26,6 +26,11 @@ See the GNU General Public License for more details.
 #include "SocketListener.h"
 
 #include <algorithm>
+
+#ifdef __APPLE_CC__
+	#define PTHREAD_MUTEX_RECURSIVE_NP PTHREAD_MUTEX_RECURSIVE
+#endif
+
 using namespace std;
 
 using namespace DCE;
@@ -88,12 +93,12 @@ void SocketListener::StartListening( int iPortNumber )
 
 void SocketListener::Run()
 {
-	struct sockaddr_in  addrT;
+	struct sockaddr_in6  addrT;
 
-	m_Socket = socket( AF_INET, SOCK_STREAM, 0 );
+	// Open IPv6 socket
+	m_Socket = socket( AF_INET6, SOCK_STREAM, 0 );
 	/** @todo check comment */
 	// setsockopt(m_Socket, IPPROTO_TCP, TCP_NODELAY, (SOCKOPTTYPE)&b, sizeof(b));
-
 	if ( m_Socket == INVALID_SOCKET ) // error
 	{
 		LoggerWrapper::GetInstance()->Write( LV_CRITICAL, "Couldn't create listener socket.\r" );
@@ -101,6 +106,19 @@ void SocketListener::Run()
 		return;
 	}
 
+	// Make socket also listen to IPv4 requests
+	int iOptIPv6only = 0;
+	if (setsockopt(m_Socket, IPPROTO_IPV6, IPV6_V6ONLY, (char *)&iOptIPv6only, sizeof(iOptIPv6only)) == -1)
+	{
+		LoggerWrapper::GetInstance()->Write( LV_CRITICAL, "SOCKET: Cannot set IPV6_V6ONLY socket option.\r" );
+		m_Socket = INVALID_SOCKET;
+		m_bRunning=false;
+		return;
+	} 
+	else 
+	{
+		LoggerWrapper::GetInstance()->Write( LV_SOCKET, "SOCKET: IPV6_V6ONLY option set.\r" );
+	}
 	int iOptReuse = 1;
 	int iOptKeepAlive = 1;
 	if (setsockopt(m_Socket, SOL_SOCKET, SO_REUSEADDR, (SOCKOPTTYPE)&iOptReuse, sizeof(iOptReuse))
@@ -114,11 +132,11 @@ void SocketListener::Run()
 	}
 
 	LoggerWrapper::GetInstance()->Write( LV_SOCKET, "TCPIP: Listening on %d.", m_iListenPort ); // from now trying to start listening
-
+	
 	memset( &addrT, 0, sizeof(addrT) ); // clearing it
-	addrT.sin_family = AF_INET;
-	addrT.sin_port = htons( m_iListenPort );
-	addrT.sin_addr.s_addr = INADDR_ANY;
+	addrT.sin6_family = AF_INET6;
+	addrT.sin6_port = htons( m_iListenPort );
+	addrT.sin6_addr = in6addr_any;
 
 	if ( SOCKFAIL( bind( m_Socket, (struct sockaddr*)&addrT, sizeof(addrT) ) ) ) // test if we can bind the socket with the desired properties @todo ask
 	{
@@ -166,8 +184,8 @@ void SocketListener::Run()
 			if( m_bTerminate )
 				break;
 
-			struct sockaddr_in addr;
-			socklen_t len = sizeof( struct sockaddr );
+			struct sockaddr_in6 addr;
+			socklen_t len = sizeof( addr );
 			SOCKET newsock = accept( m_Socket, (sockaddr *)&addr, &len ); // creating a new socket
 
 			if(!m_bAllowIncommingConnections)
@@ -188,7 +206,9 @@ void SocketListener::Run()
 				}
 				else
 				{
-					LoggerWrapper::GetInstance()->Write( LV_SOCKET, "TCPIP: Accepting incoming connection on socket %d, port %d, from IP %s.", newsock, m_iListenPort, inet_ntoa(addr.sin_addr) );
+					char str[INET6_ADDRSTRLEN];
+					inet_ntop(AF_INET6, &addr.sin6_addr, str, sizeof(str));
+					LoggerWrapper::GetInstance()->Write( LV_SOCKET, "TCPIP: Accepting incoming connection on socket %d, port %d, from IP %s.", newsock, m_iListenPort, str);
 #ifdef WIN32
 					unsigned long on = 1;
 					::ioctlsocket( newsock, FIONBIO, &on );
@@ -204,7 +224,8 @@ void SocketListener::Run()
 #endif
 					/** @todo check comment */
 					// setsockopt(newsock, IPPROTO_TCP, TCP_NODELAY, (SOCKOPTTYPE) &b, sizeof(b));
-					CreateSocket( newsock, "Incoming_Conn Socket " + StringUtils::itos(int(newsock)) + " " + inet_ntoa( addr.sin_addr ), inet_ntoa( addr.sin_addr ) );
+					inet_ntop(AF_INET6, &(addr.sin6_addr), str, INET6_ADDRSTRLEN);
+					CreateSocket( newsock, "Incoming_Conn Socket " + StringUtils::itos(int(newsock)) + " " + str, str);
 				}
 			}
 			else
@@ -334,7 +355,7 @@ string SocketListener::GetIPAddress()
 	char acBuf[256];
 	gethostname( acBuf, sizeof(acBuf) );
 
-	struct hostent *he = gethostbyname ( acBuf );
+	struct hostent *he = gethostbyname2 ( acBuf, AF_INET6 );
 
 	char* addr = he->h_addr_list[0];
 	if (addr) // got an address
@@ -352,10 +373,12 @@ string SocketListener::GetIPAddress( int iDeviceID )
 	GET_SERVER_SOCKET(ss,pServerSocket,iDeviceID);
 	if( pServerSocket == NULL ) return "";
 
-	sockaddr_in inAddr;
+	sockaddr_in6 inAddr;
 	socklen_t sl = sizeof(inAddr);
 	if( getpeername( pServerSocket->m_Socket, (sockaddr*)&inAddr, &sl ) ) return "";
-	return  string( inet_ntoa( inAddr.sin_addr ) );
+	char str[INET6_ADDRSTRLEN];
+	inet_ntop(AF_INET6, &(inAddr.sin6_addr), str, INET6_ADDRSTRLEN);
+	return  string( str );
 
 }
 

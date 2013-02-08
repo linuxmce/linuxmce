@@ -76,9 +76,6 @@
 /* Define this if you have ARTS (libartsc) installed */
 #undef HAVE_ARTS
 
-/* Define to 1 if you have the <asm/types.h> header file. */
-#undef HAVE_ASM_TYPES_H
-
 /* Define to 1 if you have the `asprintf' function. */
 #undef HAVE_ASPRINTF
 
@@ -153,9 +150,6 @@
 
 /* Define this if you have ffmpeg library */
 #undef HAVE_FFMPEG
-
-/* Define this if you have fontconfig library */
-#undef HAVE_FONTCONFIG
 
 /* Define 1 if you have FreeBSD CD-ROM support */
 #undef HAVE_FREEBSD_CDROM
@@ -409,9 +403,6 @@
 /* Define to 1 if you have the `unsetenv' function. */
 #undef HAVE_UNSETENV
 
-/* Define to 1 if you have the `va_copy' function. */
-#undef HAVE_VA_COPY
-
 /* Define this if you have a suitable version of libcdio/libvcd */
 #undef HAVE_VCDNAV
 
@@ -525,12 +516,6 @@
 
 /* Define to 1 if you have the ANSI C header files. */
 #undef STDC_HEADERS
-
-/* Define this if the compiler supports the sentinel attribute */
-#undef SUPPORT_ATTRIBUTE_SENTINEL
-
-/* Define this if the compiler supports the visibility attribute */
-#undef SUPPORT_ATTRIBUTE_VISIBILITY
 
 /* Define this if the compiler supports the -fvisibility flag */
 #undef SUPPORT_FLAG_VISIBILITY

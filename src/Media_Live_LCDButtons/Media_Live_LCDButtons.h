@@ -72,7 +72,6 @@ public:
 	bool DATA_Get_Autoassign_to_parents_room();
 	bool DATA_Get_PNP_Create_Without_Prompting();
 	bool DATA_Get_Immediate_Reload_Isnt_Necessar();
-	string DATA_Get_Capabilities();
 
 			*****EVENT***** accessors inherited from base class
 

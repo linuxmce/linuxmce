@@ -1,0 +1,15 @@
+Source: lmce-xine-plugin
+Section: unknown
+Priority: extra
+Maintainer: LinuxMCE Developers <developers@linuxmce.org>
+Build-Depends: debhelper (>= 8.0.0)
+Standards-Version: 3.9.2
+Homepage: http://www.linuxmce.org
+#Vcs-Git: git://git.debian.org/collab-maint/lmce-xine-plugin.git
+#Vcs-Browser: http://git.debian.org/?p=collab-maint/lmce-xine-plugin.git;a=summary
+
+Package: lmce-xine-plugin
+Architecture: any
+Depends: ${shlibs:Depends}, ${misc:Depends}
+Description: LinuxMCE Xine Plugin
+ The DCERouter plugin to control Xine players in a LinuxMCE universe

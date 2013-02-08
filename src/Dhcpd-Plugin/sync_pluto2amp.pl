@@ -1,33 +1,44 @@
 #!/usr/bin/perl
 
+# by foxi352 - september 2011:
+#
+# THIS HAS BEEN REPLACED BY A NEW SHELL SCRIPT.
+# THIS FILE STILL EXISTS WAITING FOR EVERY CALL TO IT TO BE REPLACED
+#
+# TODO: REPLACE EVERY CALL TO THIS FILE BY db_phone_config.sh AND DELETE THIS PERL SCRIPT
+if (-e '/usr/pluto/bin/db_phone_config.sh') {
+	`/usr/pluto/bin/db_phone_config.sh`;
+	exit 0;
+} 
+
 use strict;
 #use diagnostics;
 use DBI;
+require "/usr/pluto/bin/config_ops.pl";
+# Some helper functions
+require "/usr/pluto/bin/lmce.pl";
 
 #declare vars (it's safer this way)
 my $DEVICE_ID=0;
 my $DEVICE_EXT = 0;
+my $DEVICE_SECRET = "";
 my $DEVICE_TYPE = "";
 my $DEVICE_PORT = 0;
-
-my $CONF_HOST="localhost";
-my $CONF_USER="root";
-my $CONF_PASSWD="";
 
 my $DB_PL_HANDLE;
 my $DB_AS_HANDLE;
 
 my $STATUS = 0;
 
-#check params
-&read_pluto_config();
+# Set the secret to be used for connecting
+$DEVICE_SECRET=$DEVICE_EXT;
 
 #fix permissions on each run
 `chmod g+w /etc/asterisk/*`;
 
 #connect to databases
-$DB_PL_HANDLE = DBI->connect("dbi:mysql:database=pluto_main;host=".$CONF_HOST.";user=".$CONF_USER.";password=".$CONF_PASSWD.";") or die "Could not connect to MySQL";
-$DB_AS_HANDLE = DBI->connect("dbi:mysql:database=asterisk;host=".$CONF_HOST.";user=".$CONF_USER.";password=".$CONF_PASSWD.";") or die "Could not connect to MySQL";
+$DB_PL_HANDLE = DBI->connect(&read_pluto_cred()) or die "Could not connect to MySQL";
+$DB_AS_HANDLE = DBI->connect(&read_pluto_cred('asterisk')) or die "Could not connect to MySQL";
 
 #replace with the ip address of the asterisk server
 my $serv_IP=getIP();
@@ -58,7 +69,9 @@ foreach my $I (sort keys %DEVICES)
 {
     $DEVICE_ID = $I;
     $DEVICE_EXT = 0;
+    $DEVICE_SECRET="";
     &read_pluto_device_data();
+    
     if($STATUS == -1)
     {
         &writelog("Will delete device #$DEVICE_ID from FreePBX\n");
@@ -66,6 +79,8 @@ foreach my $I (sort keys %DEVICES)
     }
     else
     {
+        # If we do not have an extension, we find the next unused extension
+        # add a record to the devicedata table, and generate a secret for it
         if($DEVICE_EXT == 0)
         {
             &find_next_extension();
@@ -96,7 +111,7 @@ $DB_AS_HANDLE->disconnect();
 #run AMP's scripts to generate asterisk's config
 `/var/lib/asterisk/bin/retrieve_conf`;
 
-# Change dtfm mode (thx freepbx for being so buggy)
+# Change dtmf mode (thx freepbx for being so buggy)
 `sed -i 's/^dtmfmode=.*\$/dtmfmode=auto/g' /etc/asterisk/sip_additional.conf`;
 
 #reload asterisk
@@ -118,35 +133,12 @@ sub getIP {
         return $IP;
 }
 
-sub read_pluto_config()
-{
-    open(CONF,"/etc/pluto.conf") or die "Could not open pluto config";
-    while(<CONF>)
-    {
-        chomp;
-        my ($option, $eq, $value) = split(/ /,$_);
-        if($option eq "MySqlHost")
-        {
-            $CONF_HOST=$value;
-        }
-        elsif ($option eq "MySqlUser")
-        {
-            $CONF_USER=$value;
-        }
-        elsif ($option eq "MySqlPassword")
-        {
-            $CONF_PASSWD=$value;
-        }
-    }
-    close(CONF);
-}
-
 sub read_pluto_device_data()
 {
     my $DB_SQL;
     my $DB_STATEMENT;
 
-    $DB_SQL = "select FK_Device, IK_DeviceData, FK_DeviceData from Device_DeviceData where FK_Device=$DEVICE_ID and (FK_DeviceData=31 or FK_DeviceData=29)";
+    $DB_SQL = "select FK_Device, IK_DeviceData, FK_DeviceData from Device_DeviceData where FK_Device=$DEVICE_ID and (FK_DeviceData in (31,29,128))";
     $DB_STATEMENT = $DB_PL_HANDLE->prepare($DB_SQL) or die "Couldn't prepare query '$DB_SQL': $DBI::errstr\n";
     $DB_STATEMENT->execute() or die "Couldn't execute query '$DB_SQL': $DBI::errstr\n";
     $STATUS = -1;
@@ -159,6 +151,10 @@ sub read_pluto_device_data()
         elsif($DB_ROW->{'FK_DeviceData'} == 29)
         {
             $DEVICE_TYPE = $DB_ROW->{'IK_DeviceData'};
+        }
+        elsif($DB_ROW->{'FK_DeviceData'} == 128) 
+        {
+            $DEVICE_SECRET = $DB_ROW->{'IK_DeviceData'};
         }
         $STATUS=0;
     }
@@ -202,7 +198,15 @@ sub update_device_data()
     $DB_SQL = "update Device_DeviceData SET IK_DeviceData='$DEVICE_EXT' WHERE FK_Device='$DEVICE_ID' AND FK_DeviceData='31'";
     $DB_STATEMENT = $DB_PL_HANDLE->prepare($DB_SQL) or die "Couldn't prepare query '$DB_SQL': $DBI::errstr\n";
     $DB_STATEMENT->execute() or die "Couldn't execute query '$DB_SQL': $DBI::errstr\n";
-    $DB_STATEMENT->finish();    
+    $DB_STATEMENT->finish();
+
+    # Generate a random 16 character secret and update the device data with it
+    $DEVICE_SECRET = generateSecret(16);
+
+    $DB_SQL = "update Device_DeviceData SET IK_DeviceData='$DEVICE_SECRET' WHERE FK_Device='$DEVICE_ID' AND FK_DeviceData='128'";
+    $DB_STATEMENT = $DB_PL_HANDLE->prepare($DB_SQL) or die "Couldn't prepare query '$DB_SQL': $DBI::errstr\n";
+    $DB_STATEMENT->execute() or die "Couldn't execute query '$DB_SQL': $DBI::errstr\n";
+    $DB_STATEMENT->finish();
 }
 
 sub update_asterisk_db()
@@ -224,7 +228,8 @@ sub remove_from_asterisk_db()
     if($DB_ROW = $DB_STATEMENT->fetchrow_hashref())
     {
         my $old_ext = $DB_ROW->{'user'};
-        `curl 'http://localhost/admin/config.php?display=extensions&extdisplay=$old_ext&action=del' &> /dev/null`;
+#        `curl 'http://localhost/admin/config.php?display=extensions&extdisplay=$old_ext&action=del' &> /dev/null`;  LmceCape's fix from the forum.
+        `curl 'http://localhost/admin/config.php?type=setup&display=extensions&extdisplay=$old_ext&skip=0&action=del' &> /dev/null`;
     }
     $DB_STATEMENT->finish();    
 }
@@ -257,7 +262,7 @@ sub add_to_asterisk_db()
     $EXT_VARS{'outboundcid'}="\"pl_".$DEVICE_ID."\" <$DEVICE_EXT>";
     $EXT_VARS{'qualify'}="yes" if ($DEVICE_TYPE eq 'sip');
     $EXT_VARS{'vm'}="disabled";
-    $EXT_VARS{'secret'}=$DEVICE_EXT if ($DEVICE_TYPE ne 'custom');
+    $EXT_VARS{'secret'}=$DEVICE_SECRET if ($DEVICE_TYPE ne 'custom');
     $EXT_VARS{'devinfo_dial'}="SCCP/".$DEVICE_EXT if ($DEVICE_TYPE eq 'custom');
     $EXT_VARS{'port'}=$DEVICE_PORT;
     foreach my $var (keys %EXT_VARS)
@@ -284,5 +289,31 @@ sub add_embed_phones()
     $DB_STATEMENT->finish();    
 }
 
+sub generateSecret {
+
+        my $secret;
+        my $_rand;
+
+        my $secret_length = $_[0];
+                if (!$secret_length) {
+                $secret_length = 10;
+        }
+
+        my @chars = split(" ",
+                "a b c d e f g h i j k l m n o
+                p q r s t u v w x y z - _ % # |
+                0 1 2 3 4 5 6 7 8 9");
+
+        srand;
+
+        for (my $i=0; $i <= $secret_length ;$i++) {
+                $_rand = int(rand 41);
+                $secret .= $chars[$_rand];
+        }
+
+        return $secret;
+}
+
+
 # fix some permisions
-`chown asterisk.asterisk /usr/share/asterisk/agi-bin/*`;
+`chown asterisk.asterisk /usr/share/asterisk/agi-bin/* /etc/asterisk/*`;

@@ -1,0 +1,15 @@
+Source: ola-examples
+Priority: extra
+Maintainer: Simon Newton <nomis52@gmail.com>
+Build-Depends: debhelper (>= 7), autotools-dev
+Standards-Version: 3.8.0
+Section: libs
+Homepage: http://code.google.com/p/linux-lighting/
+
+Package: ola-examples
+Section: electronics
+Architecture: any
+Depends: ${shlibs:Depends}, ${misc:Depends}
+Description: Open Lighting Architecture Examples And Tools
+ The Open Lighting Architecture (OLA) provides a plugin framework for
+ distributing DMX512 control signals on Mac and Linux.

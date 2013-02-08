@@ -1,0 +1,12 @@
+<?
+$TEXT_THE_EVENT_WAS_DELETED_CONST='The event was deleted.';
+$TEXT_ADVANCED_EVENTS_CONST='Advanced Events';
+$TEXT_EVENT_CONST='Event';
+$TEXT_FK_EVENT_CONST='FK_Event';
+$TEXT_TIMED_EVENT_CONST='Timed event';
+$TEXT_CRITERIA_CONST='Criteria';
+$TEXT_THE_EVENT_DESCRIPTION_WAS_UPDATED_CONST='The event description was updated.';
+$TEXT_CREATE_ADVANCED_EVENT_CONST='Create advanced event';
+$TEXT_TRUE_CONST='True';
+$TEXT_FALSE_CONST='False';
+?>

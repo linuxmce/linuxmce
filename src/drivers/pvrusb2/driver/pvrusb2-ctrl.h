@@ -1,6 +1,6 @@
 /*
  *
- *  $Id: pvrusb2-ctrl.h 1197 2006-06-22 03:03:17Z isely $
+ *  $Id: pvrusb2-ctrl.h 2093 2008-09-01 00:07:07Z isely $
  *
  *  Copyright (C) 2005 Mike Isely <isely@pobox.com>
  *
@@ -50,7 +50,7 @@ int pvr2_ctrl_get_max(struct pvr2_ctrl *);
 int pvr2_ctrl_get_min(struct pvr2_ctrl *);
 
 /* Retrieve control's default value (any type) */
-int pvr2_ctrl_get_def(struct pvr2_ctrl *);
+int pvr2_ctrl_get_def(struct pvr2_ctrl *, int *valptr);
 
 /* Retrieve control's enumeration count (enum only) */
 int pvr2_ctrl_get_cnt(struct pvr2_ctrl *);

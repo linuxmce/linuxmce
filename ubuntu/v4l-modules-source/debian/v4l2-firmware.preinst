@@ -1,0 +1,28 @@
+#!/bin/bash
+##Create divertion for /lib/firmware/v4l-cx2341x-init.mpg as it is available in linux-firmware as well
+
+if [ install = "$1" -o upgrade = "$1" ]; then
+        dpkg-divert --add --rename --package v4l2-firmware --divert /lib/firmware/v4l-cx2341x-init.mpg.wraped /lib/firmware/v4l-cx2341x-init.mpg
+        dpkg-divert --add --rename --package v4l2-firmware --divert /lib/firmware/v4l-cx2341x-enc.fw.wraped /lib/firmware/v4l-cx2341x-enc.fw
+	dpkg-divert --add --rename --package v4l2-firmware --divert /lib/firmware/v4l-cx2341x-dec.fw.wraped /lib/firmware/v4l-cx2341x-dec.fw
+        dpkg-divert --add --rename --package v4l2-firmware --divert /lib/firmware/v4l-cx25840.fw.wraped /lib/firmware/v4l-cx25840.fw
+        dpkg-divert --add --rename --package v4l2-firmware --divert /lib/firmware/v4l-pvrusb2-29xxx-01.fw.wraped /lib/firmware/v4l-pvrusb2-29xxx-01.fw
+	dpkg-divert --add --rename --package v4l2-firmware --divert /lib/firmware/v4l-pvrusb2-24xxx-01.fw.wraped /lib/firmware/v4l-pvrusb2-24xxx-01.fw
+	dpkg-divert --add --rename --package v4l2-firmware --divert /lib/firmware/dvb-usb-bluebird-01.fw.wraped /lib/firmware/dvb-usb-bluebird-01.fw
+        dpkg-divert --add --rename --package v4l2-firmware --divert /lib/firmware/dvb-usb-dibusb-6.0.0.8.fw.wraped /lib/firmware/dvb-usb-dibusb-6.0.0.8.fw
+	dpkg-divert --add --rename --package v4l2-firmware --divert /lib/firmware/dvb-usb-dtt200u-01.fw.wraped /lib/firmware/dvb-usb-dtt200u-01.fw
+	dpkg-divert --add --rename --package v4l2-firmware --divert /lib/firmware/dvb-fe-or51132-vsb.fw.wraped /lib/firmware/dvb-fe-or51132-vsb.fw
+	dpkg-divert --add --rename --package v4l2-firmware --divert /lib/firmware/dvb-usb-vp7045-01.fw.wraped /lib/firmware/dvb-usb-vp7045-01.fw
+	dpkg-divert --add --rename --package v4l2-firmware --divert /lib/firmware/dvb-usb-vp702x-01.fw.wraped /lib/firmware/dvb-usb-vp702x-01.fw
+	dpkg-divert --add --rename --package v4l2-firmware --divert /lib/firmware/dvb-fe-or51132-qam.fw.wraped /lib/firmware/dvb-fe-or51132-qam.fw
+	dpkg-divert --add --rename --package v4l2-firmware --divert /lib/firmware/dvb-usb-dibusb-5.0.0.11.fw.wraped /lib/firmware/dvb-usb-dibusb-5.0.0.11.fw
+	dpkg-divert --add --rename --package v4l2-firmware --divert /lib/firmware/dvb-fe-or51211.fw.wraped /lib/firmware/dvb-fe-or51211.fw
+	dpkg-divert --add --rename --package v4l2-firmware --divert /lib/firmware/v4l-cx23418-dig.fw.wraped /lib/firmware/v4l-cx23418-dig.fw
+	dpkg-divert --add --rename --package v4l2-firmware --divert /lib/firmware/dvb-ttpci-01.fw.wraped /lib/firmware/dvb-ttpci-01.fw
+	dpkg-divert --add --rename --package v4l2-firmware --divert /lib/firmware/dvb-usb-avertv-a800-02.fw.wraped /lib/firmware/dvb-usb-avertv-a800-02.fw
+	dpkg-divert --add --rename --package v4l2-firmware --divert /lib/firmware/v4l-cx23418-cpu.fw.wraped /lib/firmware/v4l-cx23418-cpu.fw
+	dpkg-divert --add --rename --package v4l2-firmware --divert /lib/firmware/v4l-cx23418-apu.fw.wraped /lib/firmware/v4l-cx23418-apu.fw
+	dpkg-divert --add --rename --package v4l2-firmware --divert /lib/firmware/dvb-usb-umt-010-02.fw.wraped /lib/firmware/dvb-usb-umt-010-02.fw
+	dpkg-divert --add --rename --package v4l2-firmware --divert /lib/firmware/dvb-usb-dib0700-1.10.fw.wraped /lib/firmware/dvb-usb-dib0700-1.10.fw
+fi
+

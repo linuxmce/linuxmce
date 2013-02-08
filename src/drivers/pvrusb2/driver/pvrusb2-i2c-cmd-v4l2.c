@@ -1,6 +1,6 @@
 /*
  *
- *  $Id: pvrusb2-i2c-cmd-v4l2.c 1571 2007-02-28 04:27:44Z isely $
+ *  $Id: pvrusb2-i2c-cmd-v4l2.c 2226 2009-03-07 05:17:32Z isely $
  *
  *  Copyright (C) 2005 Mike Isely <isely@pobox.com>
  *  Copyright (C) 2004 Aurelien Alleaume <slts@free.fr>
@@ -31,6 +31,24 @@
 #endif
 #include "compat.h"
 
+#ifdef PVR2_ENABLE_OLD_I2COPS
+
+static void execute_init(struct pvr2_hdw *hdw)
+{
+#ifndef PVR2_ENABLE_OLD_MODULE_INIT
+	u32 dummy = 0;
+	pvr2_trace(PVR2_TRACE_CHIPS, "i2c v4l2 init");
+	pvr2_i2c_core_cmd(hdw, VIDIOC_INT_INIT, &dummy);
+#endif
+}
+
+
+const struct pvr2_i2c_op pvr2_i2c_op_v4l2_init = {
+	.update = execute_init,
+	.name = "v4l2_init",
+};
+
+
 static void set_standard(struct pvr2_hdw *hdw)
 {
 	pvr2_trace(PVR2_TRACE_CHIPS,"i2c v4l2 set_standard");
@@ -43,6 +61,7 @@ static void set_standard(struct pvr2_hdw *hdw)
 		pvr2_i2c_core_cmd(hdw,VIDIOC_S_STD,&vs);
 	}
 	hdw->tuner_signal_stale = !0;
+	hdw->cropcap_stale = !0;
 }
 
 
@@ -175,7 +194,7 @@ static void set_frequency(struct pvr2_hdw *hdw)
 	fv = pvr2_hdw_get_cur_freq(hdw);
 	pvr2_trace(PVR2_TRACE_CHIPS,"i2c v4l2 set_freq(%lu)",fv);
 	if (hdw->tuner_signal_stale) {
-		pvr2_i2c_core_status_poll(hdw);
+		pvr2_hdw_status_poll(hdw);
 	}
 	memset(&freq,0,sizeof(freq));
 	if (hdw->tuner_signal_info.capability & V4L2_TUNER_CAP_LOW) {
@@ -239,6 +258,37 @@ const struct pvr2_i2c_op pvr2_i2c_op_v4l2_size = {
 };
 
 
+static void set_crop(struct pvr2_hdw *hdw)
+{
+	struct v4l2_crop crop;
+
+	memset(&crop, 0, sizeof crop);
+	crop.type = V4L2_BUF_TYPE_VIDEO_CAPTURE;
+	crop.c.left = hdw->cropl_val;
+	crop.c.top = hdw->cropt_val;
+	crop.c.height = hdw->croph_val;
+	crop.c.width = hdw->cropw_val;
+
+	pvr2_trace(PVR2_TRACE_CHIPS,
+		   "i2c v4l2 set_crop crop=%d:%d:%d:%d",
+		   crop.c.width, crop.c.height, crop.c.left, crop.c.top);
+
+	pvr2_i2c_core_cmd(hdw, VIDIOC_S_CROP, &crop);
+}
+
+static int check_crop(struct pvr2_hdw *hdw)
+{
+	return (hdw->cropl_dirty || hdw->cropt_dirty ||
+		hdw->cropw_dirty || hdw->croph_dirty);
+}
+
+const struct pvr2_i2c_op pvr2_i2c_op_v4l2_crop = {
+	.check = check_crop,
+	.update = set_crop,
+	.name = "v4l2_crop",
+};
+
+
 static void do_log(struct pvr2_hdw *hdw)
 {
 #ifdef PVR2_ENABLE_LOG_STATUS
@@ -273,9 +323,23 @@ void pvr2_v4l2_cmd_stream(struct pvr2_i2c_client *cp,int fl)
 
 void pvr2_v4l2_cmd_status_poll(struct pvr2_i2c_client *cp)
 {
-	pvr2_i2c_client_cmd(cp,VIDIOC_G_TUNER,&cp->hdw->tuner_signal_info);
+	int stat;
+	struct pvr2_hdw *hdw = cp->hdw;
+	if (hdw->cropcap_stale) {
+		hdw->cropcap_info.type = V4L2_BUF_TYPE_VIDEO_CAPTURE;
+		stat = pvr2_i2c_client_cmd(cp, VIDIOC_CROPCAP,
+					   &hdw->cropcap_info);
+		if (stat == 0) {
+			/* Check was successful, so the data is no
+			   longer considered stale. */
+			hdw->cropcap_stale = 0;
+		}
+	}
+	pvr2_i2c_client_cmd(cp, VIDIOC_G_TUNER, &hdw->tuner_signal_info);
 }
 
+
+#endif /* PVR2_ENABLE_OLD_I2COPS */
 
 /*
   Stuff for Emacs to see, in order to encourage consistent editing style:

@@ -1,6 +1,6 @@
-TARGET  PlutoMO.app
-TARGETTYPE  app
-UID  0x100039CE 0x01ef0015 
+TARGET PlutoMO.app
+TARGETTYPE app
+UID  0x100039CE 0x01ef0015  
 TARGETPATH \system\apps\PlutoMO
 
 MACRO   SYMBIAN
@@ -56,7 +56,7 @@ SOURCE  PlutoMOApp.cpp
 SOURCE  PlutoMOAppUi.cpp
 SOURCE  PlutoMODocument.cpp
 SOURCE  PlutoMOContainer.cpp
-SOURCE  PlutoMOEngine.cpp
+SOURCE  PlutoMOengine.cpp
 SOURCE  PlutoVMCContainer.cpp
 SOURCE  PlutoVMCUtil.cpp
 SOURCE  PlutoVMCView.cpp
@@ -68,18 +68,27 @@ SOURCE  NotifyIncomingCall.cpp
 SOURCE  PlutoEventContainer.cpp
 SOURCE 	PlutoEventView.cpp
 
-RESOURCE ..\data\PlutoMO.rss
-RESOURCE ..\data\PlutoMO_caption.rss
+START RESOURCE ..\data\PlutoMO.rss
+HEADER
+TARGETPATH \resource\Apps
+END
+
+START RESOURCE ..\data\PlutoMO_caption.rss
+HEADER
+TARGETPATH \resource\Apps
+END
+
 LANG     SC
 
 USERINCLUDE . ..\inc
 USERINCLUDE ..\..\BD
 USERINCLUDE ..\..\PlutoUtils
 USERINCLUDE ..\..\VIPShared
+USERINCLUDE ..\..\PlutoMO
 USERINCLUDE ..\..
-USERINCLUDE ..\..\..\..\..\Symbian\7.0s\Series60_v21\Series60Ex\helperfunctions
+USERINCLUDE \root\symbian-sdks\s60_20\series60ex\helperfunctions
 
-SYSTEMINCLUDE   . \epoc32\include
+SYSTEMINCLUDE   . \root\symbian-sdks\s60_20\epoc32\include
 
 LIBRARY estor.lib
 LIBRARY euser.lib 
@@ -91,7 +100,7 @@ LIBRARY eikcoctl.lib
 LIBRARY avkon.lib 
 LIBRARY bafl.lib 
 LIBRARY apmime.lib 
-LIBRARY CommonUI.lib 
+LIBRARY commonui.lib 
 LIBRARY esock.lib
 LIBRARY bluetooth.lib
 LIBRARY apgrfx.lib

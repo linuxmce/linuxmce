@@ -27,8 +27,10 @@ get_phone_categories() {
 }
 
 #delete all phones from asterisk
+UseDB asterisk
 Q="delete from sip_buddies where type='friend'";
-echo "$Q;" | mysql -N asterisk -h $MySqlHost -u $MySqlUser $Pass
+RunSQL "$Q"
+UseDB $MySqlDBName
 
 #get current installation
 Q="select FK_Installation from Device where PK_Device=${PK_Device}";
@@ -66,14 +68,18 @@ for Device in $R; do
 											   
 
 
+		UseDB asterisk
 		Q="insert into sip_buddies (name, accountcode, callerid, canreinvite, context, host, disallow, type) values ('${PhoneNumber}', '${PhoneNumber}', 'device${PhoneNumber} <${PhoneNumber}>', 'N', 'trusted', 'dynamic', 'h263', 'friend');"
-		echo "$Q;" | mysql -N asterisk -h $MySqlHost -u $MySqlUser $Pass  
+		RunSQL "$Q"
+		UseDB $MySqlDBName
 	fi
 done
 
 # update internal lines for incoming cals
+UseDB asterisk
 Q="update extensions_table set appdata='INTERNALCHANNELS=${InternalChannels}' where id=27"
-echo "$Q;" | mysql -N asterisk -h $MySqlHost -u $MySqlUser $Pass
+RunSQL "$Q"
+UseDB $MySqlDBName
 
 #echo "$PhoneCategories"
 

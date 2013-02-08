@@ -4,7 +4,7 @@ if [[ "$1" == configure ]]; then
 	. /usr/pluto/bin/SQL_Ops.sh
 	. /usr/pluto/bin/Utils.sh
 
-	AddBookmark "http://10.0.1.2/admin/" "FreePBX"
+	AddBookmark "http://dcerouter/admin/" "FreePBX"
 
 	asterisk -V >/etc/asterisk/version
 	if [[ -n "$MySqlPassword" ]]; then
@@ -54,4 +54,9 @@ if [[ "$1" == configure ]]; then
 	# just to be sure
 	## the installed modules add files to some of these directories and the ownership needs to be set for them too
 	chown -R asterisk.asterisk {/usr/share,/var/{log,lib,spool},/etc}/asterisk
+	# Make sure, files exist
+	touch /etc/asterisk/{{sip,iax,zapata,queues}_additional,{sip,iax}_registrations}.conf
+	chown -R www-data: /etc/asterisk/{{sip,iax,zapata,queues}_additional,{sip,iax}_registrations}.conf
+	chown -R www-data: /var/lib/asterisk/mohmp3
+	chown -R www-data: /var/www/admin
 fi

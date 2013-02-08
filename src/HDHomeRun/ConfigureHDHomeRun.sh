@@ -10,20 +10,33 @@ echo "$(date -R) ConfigureHDHomeRun start"
 Q="SELECT IPaddress FROM Device WHERE PK_Device='$Device'"
 IPAddress=$(RunSQL "$Q")
 
+# Get the HDHomerun internal ID, which is normally used with the hdhomerun_config cli utility
 DeviceID=$(/usr/pluto/bin/hdhomerun_config discover "$IPAddress" | grep "$IPAddress" | cut -d' ' -f3)
 
 echo "$(date -R) HDHomeRun ID $DeviceID IP $IPAddress"
 
+# Get a list of the tuners on the HDHomerun
 Q="SELECT PK_Device FROM Device WHERE FK_Device_ControlledVia='$Device'"
 R=$(RunSQL "$Q")
+
 for i in $R; do
-	/usr/pluto/bin/MessageSend dcerouter -targetType template -r 0 27 1 246 2 $i 52 152 5 "$DeviceID"
-	# hardcode the id until this is fixed
+	# Lets update the DeviceData for the tuners using the GeneralInfo plugin
+
+	# First, we get the actual tuner number
+	Q="SELECT IK_DeviceData FROM Device_DeviceData WHERE FK_Device='$i' AND FK_DeviceData='12'"
+	tuner=$(RunSQL "$Q")
+	# And send our command
+	/usr/pluto/bin/MessageSend dcerouter -targetType template -r 0 27 1 246 2 $i 52 152 5 "$DeviceID"-"$tuner"
+
 done
 
-/usr/pluto/bin/MessageSend $DCERouter -targetType template -r 0 36 1 824  # Force the new device id to be written into mythconverg setup
+# Force the new device id to be written into mythconverg setup
+# with a SyncProvidersAndCards command to MythTV_Plugin
+/usr/pluto/bin/MessageSend $DCERouter -targetType template -r 0 36 1 824  
 
-/usr/pluto/bin/hdhomerun_config $IPAddress upgrade /usr/pluto/bin/hdhomerun_firmware_20080212.bin
+# Update the firmware
+/usr/pluto/bin/hdhomerun_config $IPAddress upgrade /usr/pluto/bin/hdhomerun_atsc_firmware_20091024.bin
+
 sleep 30  # give it time to recover after the firmware upgrade
 
 echo "$(date -R) ConfigureHDHomeRun done"

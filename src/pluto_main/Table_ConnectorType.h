@@ -128,19 +128,21 @@ void psc_mod_set(string val);
 void psc_restrict_set(long int val);
 
 		
-		bool psc_id_isNull();
+		bool Description_isNull();
+bool Define_isNull();
+bool psc_id_isNull();
 bool psc_batch_isNull();
 bool psc_user_isNull();
 bool psc_frozen_isNull();
-bool psc_mod_isNull();
 bool psc_restrict_isNull();
 
 			
-		void psc_id_setNull(bool val);
+		void Description_setNull(bool val);
+void Define_setNull(bool val);
+void psc_id_setNull(bool val);
 void psc_batch_setNull(bool val);
 void psc_user_setNull(bool val);
 void psc_frozen_setNull(bool val);
-void psc_mod_setNull(bool val);
 void psc_restrict_setNull(bool val);
 	
 	
@@ -158,11 +160,7 @@ void psc_restrict_setNull(bool val);
 
 		// Return the rows in other tables with foreign keys pointing here
 		void DeviceTemplate_Input_FK_ConnectorType_getrows(vector <class Row_DeviceTemplate_Input*> *rows);
-void DeviceTemplate_Input_pschist_FK_ConnectorType_getrows(vector <class Row_DeviceTemplate_Input_pschist*> *rows);
-void DeviceTemplate_Input_pschmask_FK_ConnectorType_getrows(vector <class Row_DeviceTemplate_Input_pschmask*> *rows);
 void DeviceTemplate_Output_FK_ConnectorType_getrows(vector <class Row_DeviceTemplate_Output*> *rows);
-void DeviceTemplate_Output_pschist_FK_ConnectorType_getrows(vector <class Row_DeviceTemplate_Output_pschist*> *rows);
-void DeviceTemplate_Output_pschmask_FK_ConnectorType_getrows(vector <class Row_DeviceTemplate_Output_pschmask*> *rows);
 
 
 		// Setup binary serialization

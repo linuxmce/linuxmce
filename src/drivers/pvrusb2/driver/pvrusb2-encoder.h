@@ -1,6 +1,6 @@
 /*
  *
- *  $Id: pvrusb2-encoder.h 679 2005-11-12 07:08:29Z isely $
+ *  $Id: pvrusb2-encoder.h 1736 2007-11-17 05:29:19Z isely $
  *
  *  Copyright (C) 2005 Mike Isely <isely@pobox.com>
  *  Copyright (C) 2004 Aurelien Alleaume <slts@free.fr>
@@ -25,6 +25,9 @@
 
 struct pvr2_hdw;
 
+#ifdef PVR2_ENABLE_CX2341XMOD
+int pvr2_encoder_adjust(struct pvr2_hdw *);
+#endif
 int pvr2_encoder_configure(struct pvr2_hdw *);
 int pvr2_encoder_start(struct pvr2_hdw *);
 int pvr2_encoder_stop(struct pvr2_hdw *);

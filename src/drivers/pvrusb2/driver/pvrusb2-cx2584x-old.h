@@ -1,6 +1,6 @@
 /*
  *
- *  $Id: pvrusb2-cx2584x-old.h 1563 2007-02-28 03:30:33Z isely $
+ *  $Id: pvrusb2-cx2584x-old.h 2226 2009-03-07 05:17:32Z isely $
  *
  *  Copyright (C) 2005 Mike Isely <isely@pobox.com>
  *  Copyright (C) 2004 Aurelien Alleaume <slts@free.fr>
@@ -38,7 +38,7 @@
 
 #ifdef PVR2_ENABLE_CX2584X_OLD
 
-#include "pvrusb2-i2c-core.h"
+#include "pvrusb2-i2c-track.h"
 
 int pvr2_i2c_cx2584x_old_setup(struct pvr2_hdw *,struct pvr2_i2c_client *);
 

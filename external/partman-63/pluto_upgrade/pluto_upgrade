@@ -1,0 +1,165 @@
+#!/bin/sh
+
+## ----- Create the device nodes and find a root and etc partition for pluto -------
+RootDrive=
+EtcDrive=
+while read partInfo ;do
+
+        ## Skip irelevant lines from /proc/partitions
+        if echo $partInfo | grep -q '^$' || echo $partInfo | grep -q '^maj' ;then
+                continue
+        fi
+
+        ## Read partition information
+        part_major=$(echo $partInfo | cut -d' ' -f1)
+        part_minor=$(echo $partInfo | cut -d' ' -f2)
+        part_name=$(echo $partInfo | cut -d' ' -f4)
+
+        logger "($part_name) searching ...."
+
+        ## Create a node for the device
+        rm -f /dev/${part_name}
+        mknod /dev/${part_name} b $part_major $part_minor
+
+        ## Mount the partition
+        mkdir -p /pluto/$part_name
+        mount /dev/${part_name} /pluto/$part_name 2>/dev/null 1>/dev/null
+        if [ $? != 0 ] ;then
+                logger "($part_name) Could not mount partition, skipping"
+                rm -rf /pluto/$part_name
+                continue
+        fi
+
+        ## Check to see if the parition is a `root` for pluto
+        if [ -f /pluto/$part_name/etc/fstab ] && [ -f /pluto/$part_name/etc/pluto.conf ] ;then
+                logger "($part_name) Looks like a pluto root filesystem : $part_name"
+                RootDrive="$part_name"
+                EtcDrive=""
+        fi
+
+        ## Check to see if the partition is a '/etc' for pluto
+        if [ -f /pluto/$part_name/pluto.conf ] && [ -f /pluto/$part_name/fstab ] ;then
+                logger "($part_name) Looks like a pluto etc filesystem : $part_name'"
+                EtcDrive="$part_name"
+
+                ## Now let's find the root paritition
+                RootDrive=`cat /pluto/$part_name/fstab | grep ' / ' | cut -d' ' -f1`
+                RootDrive=${RootDrive##*/}
+        fi
+
+
+        ## Cleanup
+        umount /pluto/$part_name
+        rm -rf /pluto/$part_name
+
+done < /proc/partitions
+
+if [ -z $RootDrive ] ;then
+	logger "Can't find any pluto filesystem, exiting"
+	exit 1
+fi
+
+## ------------------ Mount the whole pluto filesystem in /pluto -------------------
+RootFilesystem=$RootDrive
+EtcFilesystem=$EtcDrive
+
+mkdir -p /target
+
+## First mount the root filsystem
+mkdir -p /pluto
+mount /dev/$RootFilesystem /target
+
+
+## If we have the etc dir on the different drive, mount it too
+if [ ! -z $EtcFilesystem ] ;then
+	mount /dev/$EtcFilesystem /target/etc
+fi
+
+
+UmountList=
+## Now go trough all the entries in fstab and try to mount them too
+while read fstab_entry ;do
+	echo $fstab_entry | grep -q '^ *#' && continue
+
+	drive_name=`echo $fstab_entry | cut -d' ' -f1`
+	drive_where=`echo $fstab_entry | cut -d' ' -f2`
+
+	[ "$drive_where" = "/" ] && continue
+	[ "$drive_where" = "/etc/" ] && continue
+	echo "$drive_where" | grep -q '^/mnt/' && continue
+	echo "$drive_where" | grep -q '^/media' && continue
+	echo "$drive_where" | grep -q '*cdrom*' && continue
+	echo "$drive_where" | grep -q '^ *none' && continue
+	echo "$drive_name"  | grep -q '^ *none' && continue
+	echo "$drive_name"  | grep -q '^ *proc' && continue
+
+	mount $drive_name /target/$drive_where
+	UmountList="$UmountList $drive_where"
+done < /target/etc/fstab
+
+## --------------------- Compare the versions installed / on cd ---------------------
+VersionCD=`ls /cdrom/Debian-Cache/pluto-boot-scripts* | cut -d'_' -f2`
+VersionInstalled=`cat /pluto/etc/pluto.conf | grep '^ *PlutoVersion' | sed 's/^ *PlutoVersion *= *//g'`
+VersionInstalled_IsOlder="yes"
+for i in 1 2 3 4 5 ;do
+	v_cd=`echo $VersionCD | cut -d'.' -f$i`
+	v_in=`echo $VersionInstalled | cut -d'.' -f$i`
+	
+	if [ -z $v_in ] && [ ! -z $v_cd ] ;then
+		VersionInstalled_IsOlder="yes"
+		break;
+	elif [ ! -z $v_in ] && [ -z $v_cd ] ;then
+		VersionInstalled_IsOlder="no"
+		break
+	fi
+
+	if [ $v_in -lt $v_cd ] ;then
+		VersionInstalled_IsOlder="yes"
+		break;
+	elif [ $v_in -gt $v_cd ] ;then
+		VersionInstalled_IsOlder="no"
+		break;
+	fi
+done
+
+
+## -------------- Display the menu containing the posible upgrade options -----------
+. /usr/share/debconf/confmodule
+
+if [ "$VersionInstalled_IsOlder" = "yes" ] ;then
+	title="Pluto Upgrade"
+	description="A version of Pluto is allready installed on this computer. Whan do you want me to do ?"
+	choices=""
+	choices="${choices}1. Perform a default installation without preserving anything."
+	choices="${choices},2. Keep partitioning schema and preserve only the media files."
+	choices="${choices},3. Keep partitioning schema and preserve media and config files."
+
+else
+	title="Pluto Upgrade"
+	description="I detected a newer version ($VersionInstalled) that on the cd ($VersionCD) is allready installed on your computer. Whan do you want me to do ?"
+	choices=""
+	choices="${choices}1. Perform a default installation without preserving anything."
+	choices="${choices},2. Keep partitioning schema and preserve only the media files."
+fi
+
+
+	template='partman/exception_handler'
+	db_subst $template CHOICES "$choices"
+	db_subst $template DESCRIPTION "$description"
+	db_subst $template TYPE "$title"
+	db_input critical $template
+	db_go
+	db_get $template
+	UpgradeType=`echo $RET | cut -d'.' -f1`
+
+	if [ "$UpgradeType" = "1" ] ;then
+		exit 1
+	fi
+
+## ------------------------ Unmount the mounted filesystems ------------------------
+#for drive_where in $UmountList ;do
+#	umount /pluto/$drive_where
+#done
+#umount /pluto/etc 1>/dev/null 2>/dev/null
+#umount /pluto 1>/dev/null 2>/dev/null
+

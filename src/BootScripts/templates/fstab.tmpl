@@ -6,10 +6,13 @@ proc            /proc           proc    defaults                0       0
 /dev/cdrom      /cdrom          iso9660 ro,user,noauto          0       0
 sysfs		/sys		sysfs	defaults		0	0
 
-%CORE_INTERNAL_ADDRESS%:/usr/pluto/diskless/%MOON_ID% 	/			nfs intr,udp,rsize=32768,wsize=32768,retrans=10,timeo=50 1 1
-%CORE_INTERNAL_ADDRESS%:/usr/pluto/var/			/usr/pluto/var/  	nfs intr,udp,rsize=32768,wsize=32768,retrans=10,timeo=50 1 1
-%CORE_INTERNAL_ADDRESS%:/usr/pluto/orbiter		/usr/pluto/orbiter 	nfs intr,udp,rsize=32768,wsize=32768,retrans=10,timeo=50 1 1
-%CORE_INTERNAL_ADDRESS%:/usr/pluto/keys			/usr/pluto/keys 	nfs intr,udp,rsize=32768,wsize=32768,retrans=10,timeo=50 1 1
-%CORE_INTERNAL_ADDRESS%:/usr/pluto/deb-cache		/usr/pluto/deb-cache	nfs intr,udp,rsize=32768,wsize=32768,retrans=10,timeo=50 1 1
+%CORE_INTERNAL_ADDRESS%:/usr/pluto/diskless/%MOON_ID% 	/			nfs4 retrans=10,timeo=50 1 1
+%CORE_INTERNAL_ADDRESS%:/usr/pluto/var/			/usr/pluto/var/  	nfs4 retrans=10,timeo=50 1 1
+%CORE_INTERNAL_ADDRESS%:/usr/pluto/orbiter		/usr/pluto/orbiter 	nfs4 retrans=10,timeo=50 1 1
+%CORE_INTERNAL_ADDRESS%:/usr/pluto/keys			/usr/pluto/keys 	nfs4 retrans=10,timeo=50 1 1
+%CORE_INTERNAL_ADDRESS%:/usr/pluto/deb-cache		/usr/pluto/deb-cache	nfs4 retrans=10,timeo=50 1 1
+%CORE_INTERNAL_ADDRESS%:/var/spool/asterisk		/var/spool/asterisk	nfs4 retrans=10,timeo=50 1 1
 #//%CORE_INTERNAL_ADDRESS%/home				/home			pluto-fuse-smb credentials=/usr/pluto/var/sambaCredentials.secret,nonempty,auto_cache 1 1
-//%CORE_INTERNAL_ADDRESS%/home				/home			cifs credentials=/usr/pluto/var/sambaCredentials.secret 1 1
+#//%CORE_INTERNAL_ADDRESS%/home				/home			cifs iocharset=utf8,credentials=/usr/pluto/var/sambaCredentials.secret 1 1
+%CORE_INTERNAL_ADDRESS%:/home				/home			nfs4 retrans=10,timeo=50 1 1
+%CORE_INTERNAL_ADDRESS%:/home/cameras			/home/cameras		nfs4 retrans=10,timeo=50 1 1

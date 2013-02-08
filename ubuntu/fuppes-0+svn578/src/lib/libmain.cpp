@@ -54,6 +54,8 @@ extern "C"
 }
 #endif
 
+#include <string.h>
+
 using namespace std;
 
 CFuppes* pFuppes = 0;

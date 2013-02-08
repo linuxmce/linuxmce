@@ -46,24 +46,24 @@ namespace DCE
 		void EndProcessingRequest();
 		void *PushRefreshEventWatchdog(void *);
 
-		int	  m_iListenPort;
-		int   m_ImageQuality;
-		int	  m_iImageCounter;  // We will increment this each time we have a new image so we can keep track of whether a connected device has the lateest
-        int   m_iLastImageSent;
+		int m_iListenPort;
+		int m_ImageQuality;
+		int m_iImageCounter;  // We will increment this each time we have a new image so we can keep track of whether a connected device has the lateest
+		int m_iLastImageSent;
 
 		map<int,int> m_mapID_ImageCounter; // Map of connection ID's to the latest image counter
-        deque<string> m_dequeXMLItems;
-        deque<string> m_dequeCellXMLItems;
+		deque<string> m_dequeXMLItems;
+		deque<string> m_dequeCellXMLItems;
 
-        string m_sRequestUrl;
-        string m_sPngImageUrl;
-        string m_sBaseUrl;
+		string m_sRequestUrl;
+		string m_sPngImageUrl;
+		string m_sBaseUrl;
 
-        pluto_pthread_mutex_t m_ActionMutex; 
+		pluto_pthread_mutex_t m_ActionMutex; 
 		pthread_cond_t m_ActionCond;
 
-        string sNoMediaSoftKeysXml;
-        string sAllSoftKeysXml;
+		string sNoMediaSoftKeysXml;
+		string sAllSoftKeysXml;
 
 		bool m_bPhoneRespondedToPush;
 		bool m_bProcessingRequest;
@@ -72,6 +72,9 @@ namespace DCE
 
 		int m_nCurrentScreenId;
 		pluto_pthread_mutex_t m_ResourcesMutex;
+
+		bool m_bNews;
+		string m_sBitsDirectory;
 
 	public:
 		Proxy_Orbiter(int DeviceID, 
@@ -84,18 +87,20 @@ namespace DCE
 		virtual bool GetConfig();
 
 		virtual unsigned long ImageQuality() { return m_ImageQuality; }
-		virtual void ImageQuality(unsigned long nImageQuality) 	{	m_ImageQuality = nImageQuality;	}
+		virtual void ImageQuality(unsigned long nImageQuality) { m_ImageQuality = nImageQuality; }
 		virtual void FireImageQualityChanged(unsigned long nImageQuality);
 
 		virtual bool ReceivedString( Socket *pSocket, string sLine, int nTimeout = - 1 );
 		virtual void ReceivedMessage( Socket *pSocket, Message* pMessage ) {} // We don't do messages
 
-        virtual void Run();
-        virtual void SaveXML(string sFileName);
-        virtual void GenerateXMLItems(DesignObj_Orbiter *pObj); //recursive
-        virtual string GenerateSoftKeys(DesignObj_Orbiter *pObj);
+		virtual void Run();
+		virtual void SaveXML(string sFileName);
+		virtual void SaveBits(DesignObj_Orbiter *Data = NULL);
+		virtual void SaveDataGrid(DesignObj_DataGrid *pDesignObj_DataGrid);
+		virtual void GenerateXMLItems(DesignObj_Orbiter *pObj); //recursive
+		virtual string GenerateSoftKeys(DesignObj_Orbiter *pObj);
 
-        virtual void ParseHardKeys();
+		virtual void ParseHardKeys();
 
 		inline string GetDevicePngFileName();
 		inline string GetDeviceXmlFileName();
@@ -110,10 +115,6 @@ namespace DCE
 		
 		bool PushRefreshEvent(bool bForce, bool bIgnoreMinimumInterval = false);
 		void *PushRefreshEventTask(void *p);
-
-		string PhonePost(string sURL, const vector<string>& vectHeaders, const map<string, string>& mapParams,
-				string User = "", string Password = "", int nPort = 80);
-
 	};
 }
 //-----------------------------------------------------------------------------------------------------

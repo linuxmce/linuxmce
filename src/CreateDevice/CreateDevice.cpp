@@ -51,8 +51,9 @@
 #include "pluto_main/Define_CommandParameter.h"
 #include "DCEConfig.h"
 
-#include "../include/version.h"
+#define  VERSION "<=version=>"
 
+// must be extern as the same is defined in Main.cpp 
 extern DCEConfig dceConfig;
 
 using namespace std;
@@ -228,7 +229,7 @@ LoggerWrapper::GetInstance()->Write(LV_STATUS,"CreateDevice::DoIt Added paramete
 	SQL = "SELECT FK_DeviceData,IK_DeviceData FROM DeviceTemplate_DeviceData JOIN DeviceData ON PK_DeviceData=FK_DeviceData WHERE FK_DeviceTemplate=" + StringUtils::itos(iPK_DeviceTemplate);
 	if( ( result2.r=db_wrapper_query_result( SQL ) ) )
 	{
-LoggerWrapper::GetInstance()->Write(LV_STATUS,"CreateDevice::DoIt DeviceTemplate_DeviceData Found %d rows with %s",(int) result2.r->row_count,SQL.c_str());
+LoggerWrapper::GetInstance()->Write(LV_STATUS,"CreateDevice::DoIt Found %d rows with %s",(int) result2.r->row_count,SQL.c_str());
 		while( (row=db_wrapper_fetch_row( result2.r )) )
 		{
 			if( mapParametersAdded.find(atoi(row[0]))!=mapParametersAdded.end() )
@@ -354,7 +355,7 @@ LoggerWrapper::GetInstance()->Write(LV_STATUS,"CreateDevice::DoIt Found %d rows 
 
 			char cPVR='M'; // Default to MythTV
 			PlutoSqlResult result_pvr;
-			if( ( result_child_dev.r=db_wrapper_query_result( SQL ) ) && (row=db_wrapper_fetch_row( result_child_dev.r )) && row[0] )
+			if( ( result_pvr.r=db_wrapper_query_result( SQL ) ) && (row=db_wrapper_fetch_row( result_pvr.r )) && row[0] )
 				cPVR = row[0][0];
 
 			if( cPVR=='V' )

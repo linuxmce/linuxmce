@@ -1,0 +1,26 @@
+# debian_alsaconf.patch by Thomas Hood
+#
+# Don't precompute paths for lspci and lsmod
+Index: alsa-utils-1.0.18/alsaconf/alsaconf.in
+===================================================================
+--- alsa-utils-1.0.18.orig/alsaconf/alsaconf.in	2008-11-02 20:59:25.000000000 +0100
++++ alsa-utils-1.0.18/alsaconf/alsaconf.in	2008-11-02 20:59:25.000000000 +0100
+@@ -69,12 +69,18 @@
+   distribution="unknown"
+ fi
+ 
++if false; then
+ for prog in lspci lsmod; do
+ 	for path in /sbin /usr/sbin /bin /usr/bin;do
+ 		test -x $path/$prog && eval $prog=$path/$prog
+ 	done
+ done
+ unset prog path
++else
++# debian patch
++lspci=lspci
++lsmod=lsmod
++fi
+ 
+ usage() {
+     xecho "ALSA configurator"

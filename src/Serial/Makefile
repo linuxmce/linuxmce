@@ -28,3 +28,7 @@ include $(ROOT)/PlutoUtils/make.rules
 ifeq (,$(findstring clean, $(MAKECMDGOALS)))
 -include $(sources:.cpp=.d)
 endif
+
+install: 
+	mkdir -p pluto/lib
+	cp libSerial.so $(DESTPATH)pluto/lib

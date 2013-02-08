@@ -1,0 +1,22 @@
+--- /usr/sbin/mkinitramfs.orig	2008-07-16 12:09:55.000000000 +0200
++++ /usr/sbin/mkinitramfs	2008-11-29 23:09:09.000000000 +0100
+@@ -232,7 +232,7 @@
+ 		"${DESTDIR}/scripts/$(dirname "${b}")/"
+ done
+ for b in $(cd "${CONFDIR}/scripts" && find . \
+-	-regextype posix-extended -regex '.*/[[:alnum:]_]+$' -type f); do
++	-regextype posix-extended -regex '.*/[[:alnum:]_.]+$' -type f); do
+ 	[ -d "${DESTDIR}/scripts/$(dirname "${b}")" ] \
+ 		|| mkdir -p "${DESTDIR}/scripts/$(dirname "${b}")"
+ 	cp -p "${CONFDIR}/scripts/${b}" "${DESTDIR}/scripts/$(dirname "${b}")/"
+--- /usr/share/initramfs-tools/scripts/functions.orig	2008-10-01 15:15:48.000000000 +0200
++++ /usr/share/initramfs-tools/scripts/functions	2008-11-29 23:50:52.000000000 +0100
+@@ -110,7 +110,7 @@
+ 
+ 		# only allow variable name chars
+ 		case ${si_x#${initdir}/} in
+-		*[![:alnum:]_]*)
++		*[![:alnum:]_.]*)
+ 			[ "${verbose}" = "y" ] \
+ 			&& echo "$si_x ignored: not alphanumeric or '_' file"
+ 			continue

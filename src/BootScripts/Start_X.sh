@@ -1,6 +1,12 @@
 #!/bin/bash
 . /usr/pluto/bin/pluto.func
 . /usr/pluto/bin/Utils.sh
+. /usr/pluto/bin/Config_Ops.sh
+
+if [ "$AutostartMedia" -ne "1" ] ; then
+	# We don't want to start X, if we don't need the media director
+	exit 0
+fi
 
 function assureXorgSane()
 {
@@ -35,12 +41,14 @@ function assureXorgSane()
 	fi
 }
 
-/usr/pluto/bin/SetupAudioVideo.sh
-
 AlphaBlending=$(AlphaBlendingEnabled)
 
 #XClient=/usr/pluto/bin/Start_IceWM.sh
-XClient=/usr/bin/xfwm4
+if [[ -e /usr/bin/xfwm4 ]] ;then 
+	XClient=/usr/bin/xfwm4
+else 
+	XClient=/usr/bin/kwin
+fi
 XClientParm=()
 XOrgConf="/etc/X11/xorg.conf"
 
@@ -49,7 +57,7 @@ Background=y
 XDisplay=":$Display"
 
 Xcompmgr=/bin/true
-if [[ "$AlphaBlending" != 1 ]]; then
+if [[ "$AlphaBlending" != 1 && "$XClient" != "/usr/bin/kwin" ]]; then
 	XClientParm=(--compositor=off)
 fi
 
@@ -89,3 +97,4 @@ else
 	Logging "$TYPE" "$SEVERITY_NORMAL" "$0" "X server: foreground"
 	"${Xcmd[@]}"
 fi
+/usr/pluto/bin/SetupAudioVideo.sh

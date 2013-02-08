@@ -1,0 +1,44 @@
+#!/bin/sh
+#
+# program: udev-pvrusb2
+#
+# author: Roger J. Allen - rja at rogera.net
+# Wed May 28 12:54:18 CDT 2008
+#
+# help udev assign consistent device name
+# for WinTV-PVR-USB2 by its serial number
+#
+# argument 1 is a device minor number from udev
+# test which sysfs entry matches this minor number
+# output consistent device name for udev to create a symlink
+#
+# in mythtv-setup "Capture Card Setup"
+# set "Video device:" to the symlink instead of /dev/video*
+# for capturecard videodevice
+#
+# sn-1234567 returns "comcasta" for comcast analog tuner input
+# udev will create /dev/comcasta symlink
+# sn-7654321 returns "comcastd" for comcast digital composite input
+# udev will create /dev/comcastd symlink
+#
+# udev rule for Fedora 8 with my custom owner and group settings
+#
+# KERNEL=="video[0-9]*", PROGRAM="/usr/local/bin/udev-pvrusb2 %m", \
+#        SYMLINK+="%c", OWNER="mythtv", GROUP="mythtv"
+#
+
+SerialNo1="sn-1234567"
+Symlink1="comcasta"
+SerialNo2="sn-7654321"
+Symlink2="comcastd"
+
+if [ 1 = $(grep -c $1 /sys/class/pvrusb2/$SerialNo1/v4l_minor_number) ]
+then
+	echo $Symlink1
+	exit 0
+elif [ 1 = $(grep -c $1 /sys/class/pvrusb2/$SerialNo2/v4l_minor_number) ]
+then
+	echo $Symlink2
+	exit 0
+fi
+exit 1

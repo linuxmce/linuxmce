@@ -1,0 +1,48 @@
+vdr                                     usr/bin/
+debian/runvdr                           usr/sbin/
+
+debian/config-loader.sh                 usr/lib/vdr/
+debian/commands-loader.sh               usr/lib/vdr/
+debian/plugin-loader.sh                 usr/lib/vdr/
+debian/remotes-loader.sh                usr/lib/vdr/
+
+ca.conf                                 etc/vdr/
+diseqc.conf                             etc/vdr/
+keymacros.conf                          etc/vdr/
+sources.conf                            etc/vdr/
+svdrphosts.conf                         etc/vdr/
+
+debian/order.conf                       etc/vdr/plugins/
+
+debian/order.commands.conf              etc/vdr/command-hooks/
+debian/order.reccmds.conf               etc/vdr/command-hooks/
+debian/commands.custom.conf             etc/vdr/command-hooks/
+debian/reccmds.custom.conf              etc/vdr/command-hooks/
+
+debian/commands.ctvdr.conf              usr/share/vdr/command-hooks/
+debian/commands.shutdownvdr.conf        usr/share/vdr/command-hooks/
+
+debian/vdr-recordingaction              usr/lib/vdr/
+
+debian/R90.custom                       etc/vdr/recording-hooks/
+debian/S90.custom                       etc/vdr/shutdown-hooks/
+
+debian/ctvdrwrapper                     usr/lib/vdr/
+debian/ctvdrinfo                        usr/bin/
+debian/ctvdrsysinfo                     usr/bin/
+
+epg2html.pl                             usr/lib/vdr/
+svdrpsend.pl                            usr/lib/vdr/
+
+debian/lintian/vdr                      usr/share/lintian/overrides/
+
+debian/themes/*.theme                   var/lib/vdr/themes/
+
+debian/commands.switch.conf             usr/share/vdrdevel/command-hooks/
+debian/commands.switch-back.conf        usr/share/vdr/command-hooks/
+debian/commands.update-recordings.conf  usr/share/vdr/command-hooks/
+debian/remote.KBD.conf			/var/lib/vdr/
+channels.conf				/var/lib/vdr/
+debian/dvb				/etc/init.d/
+debian/postinst/vdr			/etc/default/
+debian/postinst/setup.conf		/var/lib/vdr/

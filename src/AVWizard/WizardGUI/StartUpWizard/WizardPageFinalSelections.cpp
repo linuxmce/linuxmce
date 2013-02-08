@@ -94,19 +94,20 @@ std::string WizardPageFinalSelections::GetVideoRatio(SettingsDictionary* AVWizar
 #ifdef DEBUG
 	std::cout<<"WizardPageFinalSelections::GetVideoRatio()"<<std::endl;
 #endif
-	int RatioMode = 0;
-	if(!AVWizardSettings->Exists("Video_Ratio"))
-	{
-		RatioMode = 0;
-		return "4:3";
-	}
-	std::string RatioValue = AVWizardSettings->GetValue("Video_Ratio");
-	RatioMode = (RatioValue == "4_3");
+	
+	if (!AVWizardSettings->Exists("Resolution"))
+	  {
+	    return "Unknown";
+	  }
+	else if (!AVWizardSettings->Exists("Ratio"))
+	  {
+	    return "Unknown";
+	  }
+	else
+	  {
+	    return AVWizardSettings->GetValue("Ratio");
+	  }
 
-	RatioValue = "16:9";
-	if(RatioMode != 0)
-		RatioValue = "4:3";
-	return RatioValue;
 }
 
 std::string WizardPageFinalSelections::GetVideoOutput(SettingsDictionary* AVWizardSettings)

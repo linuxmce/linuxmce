@@ -1,0 +1,77 @@
+-- MySQL dump 10.11
+--
+-- Host: localhost    Database: pluto_vdr
+-- ------------------------------------------------------
+-- Server version	5.0.38-Ubuntu_0ubuntu1
+
+/*!40101 SET @OLD_CHARACTER_SET_CLIENT=@@CHARACTER_SET_CLIENT */;
+/*!40101 SET @OLD_CHARACTER_SET_RESULTS=@@CHARACTER_SET_RESULTS */;
+/*!40101 SET @OLD_COLLATION_CONNECTION=@@COLLATION_CONNECTION */;
+/*!40101 SET NAMES utf8 */;
+/*!40103 SET @OLD_TIME_ZONE=@@TIME_ZONE */;
+/*!40103 SET TIME_ZONE='+00:00' */;
+/*!40014 SET @OLD_UNIQUE_CHECKS=@@UNIQUE_CHECKS, UNIQUE_CHECKS=0 */;
+/*!40014 SET @OLD_FOREIGN_KEY_CHECKS=@@FOREIGN_KEY_CHECKS, FOREIGN_KEY_CHECKS=0 */;
+/*!40101 SET @OLD_SQL_MODE=@@SQL_MODE, SQL_MODE='NO_AUTO_VALUE_ON_ZERO' */;
+/*!40111 SET @OLD_SQL_NOTES=@@SQL_NOTES, SQL_NOTES=0 */;
+
+--
+-- Table structure for table `Provider`
+--
+
+DROP TABLE IF EXISTS `Provider`;
+CREATE TABLE `Provider` (
+  `PK_Provider` int(11) NOT NULL auto_increment,
+  `FK_ProviderType` int(11) default NULL,
+  `Area` varchar(55) NOT NULL,
+  `Description` varchar(100) default NULL,
+  `FTA` tinyint(1) NOT NULL,
+  `Radio` tinyint(1) NOT NULL,
+  `CA` tinyint(1) NOT NULL,
+  `filename` varchar(50) NOT NULL,
+  `psc_mod` timestamp NOT NULL default CURRENT_TIMESTAMP on update CURRENT_TIMESTAMP,
+  PRIMARY KEY  (`PK_Provider`)
+) ENGINE=InnoDB DEFAULT CHARSET=latin1;
+
+--
+-- Dumping data for table `Provider`
+--
+
+LOCK TABLES `Provider` WRITE;
+/*!40000 ALTER TABLE `Provider` DISABLE KEYS */;
+INSERT INTO `Provider` VALUES (1,1,'Germany','Astra-1 19.2°E (FTA)',1,1,0,'ger.sat.astra1.fta.channels.conf','2007-12-20 09:37:37'),(2,1,'Germany','Astra-1 19.2°E (FTA,CA)',1,1,1,'ger.sat.astra1.all.channels.conf','2007-12-20 09:37:30'),(3,1,'Germany','Astra-1 19.2°E, HotBird 13.0°E (FTA)',1,1,0,'ger.sat.astra1-hotbird.fta.channels.conf','2007-12-20 09:37:23'),(4,1,'Europe','Astra-1 19.2°E, HotBird 13.0°E (FTA,CA)',1,1,1,'eur.sat.astra1-hotbird.all.channels.conf','2007-12-20 09:37:02'),(5,1,'Europe','Astra-1 19.2°E, HotBird 13.0°E, Astra-2/Eurobird 2 (FTA,CA)',1,1,1,'eur.sat.astra1-hotbird-astra2.all.channels.conf','2007-12-20 09:27:24'),(6,1,'Europe','Astra-1 19.2°E (FTA, CA)',1,1,1,'eur.sat.astra1.all.channels.conf','2007-12-20 09:37:12'),(7,1,'Europe','Hotbird 13.0°E (FTA,CA)',1,1,1,'eur.sat.hotbird.all.channels.conf','2007-12-20 09:41:45'),(9,3,'Germany Hessen','Unity Media',1,1,1,'ger.cable.hessen.channels.conf','2007-12-20 09:46:43'),(10,1,'Europe','Eutelsat W3 7.0°E (FTA, CA)',1,1,1,'eur.sat.eutelsatw3.all.channels.conf','2007-12-20 09:52:29'),(11,1,'Europe','Sirius 4.8°E (FTA, CA)',1,1,1,'eur.sat.sirius.all.channels.conf','2007-12-20 09:52:37'),(12,1,'Europe','Thor 1.0°W (FTA, CA)',1,1,1,'eur.sat.thor.all.channels.conf','2007-12-20 09:52:43'),(13,1,'Europe','Eurobird 28.5°E (FTA, CA)',1,1,1,'eur.sat.eurobird.all.channels.conf','2007-12-20 09:52:49'),(14,1,'Europe','Eutelsat W2 16.0°E (FTA, CA)',1,1,1,'eur.eutelsatw2.all.channels.conf','2007-12-20 09:52:55'),(15,3,'Germany Berlin-Brandenburg','Kabel Deutschland',1,1,1,'ger.cable.berlin.channels.conf','2007-12-20 10:51:17'),(16,3,'Germany Munich','Kabel Deutschland',1,1,1,'ger.cable.munich.channels.conf','2007-12-20 10:53:06'),(17,2,'Germany Bayern Munich','DVB-t',1,1,1,'ger.dvb-t.munich.channels.conf','2007-12-20 11:00:00'),(18,2,'Germany Bayern Nuernberg','DVB-t',1,1,1,'ger.dvb-t.nuernberg.channels.conf','2007-12-20 10:59:47'),(19,2,'Germany Hessen Kassel','DVB-t',1,1,1,'ger.dvb-t.kassel.channels.conf','2007-12-20 10:59:20'),(20,2,'Germany Hessen RheinMain','DVB-t',1,1,1,'ger.dvb-t.rheinmain.channels.conf','2007-12-20 11:00:57'),(21,2,'Germany Hessen Rheinland-Pfalz','DVB-t',1,1,1,'ger.dvb-t.rheinland.channels.conf','2007-12-20 11:02:10'),(22,2,'Germany Sachsen Chemnitz','DVB-t',1,1,1,'ger.dvb-t.chemnitz.channels.conf','2007-12-20 11:04:14'),(23,2,'Germany Sachsen Dresden','DVB-t',1,1,1,'ger.dvb-t.dresden.channels.conf','2007-12-20 11:05:35'),(24,2,'Germany Sachsen Leipzig','DVB-t',1,1,1,'ger.dvb-t.leipzig.channels.conf','2007-12-20 11:06:50'),(25,2,'Germany Sachsen Oberlausitz','DVB-t',1,1,1,'ger.dvb-t.oberlausitz.channels.conf','2007-12-20 11:07:15'),(26,2,'Germany Thüringen Erfurt','DVB-t',1,1,1,'ger.dvb-t.erfurt.channels.conf','2007-12-20 11:07:42'),(27,2,'Germany BW Rhn Vorderpfalz','DVB-t',1,1,1,'ger.dvb-t.bw1.channels.conf','2007-12-20 11:08:28'),(28,2,'Germany BW Stuttgart','DVB-t',1,1,1,'ger.dvb-t.bw2.channels.conf','2007-12-20 11:08:57'),(29,2,'Germany NRW Aachen','DVB-t',1,1,1,'ger.dvb-t.aachen.channels.conf','2007-12-20 11:09:22'),(30,2,'Germany NRW Bergischer Kreis','DVB-t',1,1,1,'ger.dvb-t.bergisch.channels.conf','2007-12-20 11:09:45'),(31,2,'Germany NRW Köln Bonn','DVB-t',1,1,1,'ger.dvb-t.koelnbonn.channels.conf','2007-12-20 11:10:14'),(32,2,'Germany NRW Münsterland','DVB-t',1,1,1,'ger.dvb-t.muensterland.channels.conf','2007-12-20 11:10:43'),(33,2,'Germany NRW Ostwestfalen-Lippe','DVB-t',1,1,1,'ger.dvb-t.lippe.channels.conf','2007-12-20 11:11:18'),(34,2,'Germany NRW Dortmund','DVB-t',1,1,1,'ger.dvb-t.dortmund.channels.conf','2007-12-20 11:11:45'),(35,2,'Germany NRW Düsseldorf','DVB-t',1,1,1,'ger.dvb-t.duesseldorf.channels.conf','2007-12-20 11:12:09'),(36,2,'Germany Niedersachsen Braunschweig','DVB-t',1,1,1,'ger.dvb-t.braunschweig.channels.conf','2007-12-20 11:13:27'),(37,2,'Germany Niedersachsen Hannover','DVB-t',1,1,1,'ger.dvb-t.hannover.channels.conf','2007-12-20 11:12:58'),(38,2,'Germany Bremen','DVB-t',1,1,1,'ger.dvb-t.bremen.channels.conf','2007-12-20 11:13:55'),(39,2,'Germany Bremerhaven','DVB-t',1,1,1,'ger.dvb-t.bremerhaven.channels.conf','2007-12-20 11:14:18'),(40,2,'Germany Hamburg','DVB-t',1,1,1,'ger.dvb-t.hamburg.channels.conf','2007-12-20 11:14:39'),(41,2,'Germany Kiel','DVB-t',1,1,1,'ger.dvb-t.kiel.channels.conf','2007-12-20 11:14:59'),(42,2,'Germany Lübeck','DVB-t',1,1,1,'ger.dvb-t.luebeck.channels.conf','2007-12-20 11:15:18'),(43,2,'Germany Westerland','DVB-t',1,1,1,'ger.dvb-t.westerland.channels.conf','2007-12-20 11:15:44'),(44,2,'Luxemburg','DVB-t',1,1,1,'lu.dvb-t.luxemburg.channels.conf','2007-12-20 11:16:42'),(45,2,'France Metz','DVB-t',1,1,1,'fra.dvb-t.metz.channels.conf','2007-12-20 11:17:09'),(46,2,'Switzerland Zürich','DVB-t',1,1,1,'ch.dvb-t.zurich.channels.conf','2007-12-20 11:17:44'),(47,2,'Austria Bregenz-Dornbirn','DVB-t',1,1,1,'at.dvb-t.bregenz.channels.conf','2007-12-20 11:18:37'),(48,2,'Austria Burgenland','DVB-t',1,1,1,'at.dvb-t.burgenland.channels.conf','2007-12-20 11:19:03'),(49,2,'Austria Graz-Schöckel','DVB-t',1,1,1,'at.dvb-t.graz.channels.conf','2007-12-20 11:19:27'),(50,2,'Austria Salzburg','DVB-t',1,1,1,'at.dvb-t.salzburg.channels.conf','2007-12-20 11:20:01'),(51,2,'Austria Wien','DVB-t',1,1,1,'at.dvb-t.wien.channels.conf','2007-12-20 11:20:30');
+/*!40000 ALTER TABLE `Provider` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
+-- Table structure for table `ProviderType`
+--
+
+DROP TABLE IF EXISTS `ProviderType`;
+CREATE TABLE `ProviderType` (
+  `PK_ProviderType` int(11) NOT NULL auto_increment,
+  `Description` varchar(35) default NULL,
+  `psc_mod` timestamp NOT NULL default CURRENT_TIMESTAMP on update CURRENT_TIMESTAMP,
+  PRIMARY KEY  (`PK_ProviderType`)
+) ENGINE=InnoDB DEFAULT CHARSET=latin1;
+
+--
+-- Dumping data for table `ProviderType`
+--
+
+LOCK TABLES `ProviderType` WRITE;
+/*!40000 ALTER TABLE `ProviderType` DISABLE KEYS */;
+INSERT INTO `ProviderType` VALUES (1,'Digital Satelitte (DVB-s)','2007-12-18 09:49:28'),(2,'Digital Video Broadcasting Terrestr','2007-12-18 09:49:00'),(3,'Digital Cable (DVB-c)','2007-12-18 09:49:15');
+/*!40000 ALTER TABLE `ProviderType` ENABLE KEYS */;
+UNLOCK TABLES;
+/*!40103 SET TIME_ZONE=@OLD_TIME_ZONE */;
+
+/*!40101 SET SQL_MODE=@OLD_SQL_MODE */;
+/*!40014 SET FOREIGN_KEY_CHECKS=@OLD_FOREIGN_KEY_CHECKS */;
+/*!40014 SET UNIQUE_CHECKS=@OLD_UNIQUE_CHECKS */;
+/*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;
+/*!40101 SET CHARACTER_SET_RESULTS=@OLD_CHARACTER_SET_RESULTS */;
+/*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
+/*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
+
+-- Dump completed on 2007-12-20 11:22:38

@@ -29,6 +29,7 @@
 #include "inotify-syscalls.h"
 
 #include <errno.h>
+#include <stdio.h>
 
 inotify::inotify()
 {

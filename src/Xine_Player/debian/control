@@ -1,0 +1,13 @@
+Source: pluto-xine-player
+Section: unknown
+Priority: extra
+Maintainer: root <root@fluffybitch.org>
+Build-Depends: debhelper(>=7),libxine-dev|libxine2-dev,libxxf86vm-dev,libxmu-headers,libcdparanoia-dev,libxmu-dev
+Standards-Version: 3.8.3
+Homepage: <insert the upstream URL, if relevant>
+
+Package: pluto-xine-player
+Architecture: any
+Depends: libxine1-pluto-dbg, libice6, libogg0, libsm6, libspeex1, libvorbis0a, libxmu6, libxmuu1, libxp6, libxpm4, libxrandr2, libxrender1, libxt6, libxtst6, pluto-boot-scripts, alsa-base, alsa-utils, libcdparanoia0, imagemagick, libxine1-pluto, libxine1, ${shlibs:Depends}, ${misc:Depends}
+Description: <insert up to 60 chars description>
+ <insert long description, indented with spaces>

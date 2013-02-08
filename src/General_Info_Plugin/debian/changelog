@@ -1,0 +1,5 @@
+lmce-general-info-plugin (2.46-1) unstable; urgency=low
+
+  * Initial release (Closes: #nnnn)  <nnnn is the bug number of your ITP>
+
+ -- LinuxMCE Developers <developers@linuxmce.org>  Thu, 22 Nov 2012 19:57:36 +0000

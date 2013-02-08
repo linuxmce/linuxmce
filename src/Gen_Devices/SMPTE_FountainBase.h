@@ -1,3 +1,18 @@
+/*
+     Copyright (C) 2004 Pluto, Inc., a Florida Corporation
+
+     www.plutohome.com
+
+     Phone: +1 (877) 758-8648
+ 
+
+     This program is free software; you can redistribute it and/or modify it under the terms of the GNU General Public License.
+     This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty
+     of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+
+     See the GNU General Public License for more details.
+
+*/
 #ifndef SMPTE_FountainBase_h
 #define SMPTE_FountainBase_h
 #include "DeviceData_Impl.h"
@@ -44,11 +59,11 @@ public:
 	* @brief Events methods for our device
 	*/
 
-	virtual void Device_Detected(string sMac_Address,string sText,string sIP_Address,int iPK_DeviceTemplate,string sVendorModelID,int iPK_CommMethod,int iPK_PnpProtocol,string sPNP_Serial_Number,string sDeviceData,string sCategory,string sSignature)
+	virtual void Device_Detected(string sMac_Address,string sText,string sIP_Address,int iPK_DeviceTemplate,string sVendorModelID,int iPK_CommMethod,int iPK_PnpProtocol,string sPNP_Serial_Number,string sDeviceData,string sCategory)
 	{
 		SendMessage(new Message(m_dwPK_Device, DEVICEID_EVENTMANAGER, PRIORITY_NORMAL, MESSAGETYPE_EVENT, 
 			EVENT_Device_Detected_CONST,
-			11 /* number of parameter's pairs (id, value) */,
+			10 /* number of parameter's pairs (id, value) */,
 			EVENTPARAMETER_Mac_Address_CONST, sMac_Address.c_str(),
 			EVENTPARAMETER_Text_CONST, sText.c_str(),
 			EVENTPARAMETER_IP_Address_CONST, sIP_Address.c_str(),
@@ -58,8 +73,7 @@ public:
 			EVENTPARAMETER_PK_PnpProtocol_CONST, StringUtils::itos(iPK_PnpProtocol).c_str(),
 			EVENTPARAMETER_PNP_Serial_Number_CONST, sPNP_Serial_Number.c_str(),
 			EVENTPARAMETER_DeviceData_CONST, sDeviceData.c_str(),
-			EVENTPARAMETER_Category_CONST, sCategory.c_str(),
-			EVENTPARAMETER_Signature_CONST, sSignature.c_str()));
+			EVENTPARAMETER_Category_CONST, sCategory.c_str()));
 	}
 
 };
@@ -103,7 +117,7 @@ public:
 		if( m_bRunningWithoutDeviceData )
 			return m_pEvent_Impl->GetDeviceDataFromDatabase(m_dwPK_Device,DEVICEDATA_Configuration_CONST);
 		else
-			return m_mapParameters_Find(DEVICEDATA_Configuration_CONST);
+			return m_mapParameters[DEVICEDATA_Configuration_CONST];
 	}
 
 	string Get_Alsa_Output_Device()
@@ -111,7 +125,7 @@ public:
 		if( m_bRunningWithoutDeviceData )
 			return m_pEvent_Impl->GetDeviceDataFromDatabase(m_dwPK_Device,DEVICEDATA_Alsa_Output_Device_CONST);
 		else
-			return m_mapParameters_Find(DEVICEDATA_Alsa_Output_Device_CONST);
+			return m_mapParameters[DEVICEDATA_Alsa_Output_Device_CONST];
 	}
 
 };
@@ -221,7 +235,7 @@ public:
 	string DATA_Get_Configuration() { return GetData()->Get_Configuration(); }
 	string DATA_Get_Alsa_Output_Device() { return GetData()->Get_Alsa_Output_Device(); }
 	//Event accessors
-	void EVENT_Device_Detected(string sMac_Address,string sText,string sIP_Address,int iPK_DeviceTemplate,string sVendorModelID,int iPK_CommMethod,int iPK_PnpProtocol,string sPNP_Serial_Number,string sDeviceData,string sCategory,string sSignature) { GetEvents()->Device_Detected(sMac_Address.c_str(),sText.c_str(),sIP_Address.c_str(),iPK_DeviceTemplate,sVendorModelID.c_str(),iPK_CommMethod,iPK_PnpProtocol,sPNP_Serial_Number.c_str(),sDeviceData.c_str(),sCategory.c_str(),sSignature.c_str()); }
+	void EVENT_Device_Detected(string sMac_Address,string sText,string sIP_Address,int iPK_DeviceTemplate,string sVendorModelID,int iPK_CommMethod,int iPK_PnpProtocol,string sPNP_Serial_Number,string sDeviceData,string sCategory) { GetEvents()->Device_Detected(sMac_Address.c_str(),sText.c_str(),sIP_Address.c_str(),iPK_DeviceTemplate,sVendorModelID.c_str(),iPK_CommMethod,iPK_PnpProtocol,sPNP_Serial_Number.c_str(),sDeviceData.c_str(),sCategory.c_str()); }
 	//Commands - Override these to handle commands from the server
 	virtual void CMD_On(int iPK_Pipe,string sPK_Device_Pipes,string &sCMD_Result,class Message *pMessage) {};
 	virtual void CMD_Off(int iPK_Pipe,string &sCMD_Result,class Message *pMessage) {};

@@ -34,17 +34,9 @@ using namespace std;
 #include "Table_ParameterType.h"
 
 #include "Table_DHCPDevice_DeviceData.h"
-#include "Table_DHCPDevice_DeviceData_pschist.h"
-#include "Table_DHCPDevice_DeviceData_pschmask.h"
 #include "Table_DeviceCategory_DeviceData.h"
-#include "Table_DeviceCategory_DeviceData_pschist.h"
-#include "Table_DeviceCategory_DeviceData_pschmask.h"
 #include "Table_DeviceTemplate_DeviceData.h"
-#include "Table_DeviceTemplate_DeviceData_pschist.h"
-#include "Table_DeviceTemplate_DeviceData_pschmask.h"
 #include "Table_Device_DeviceData.h"
-#include "Table_Device_DeviceData_pschist.h"
-#include "Table_Device_DeviceData_pschmask.h"
 
 
 void Database_pluto_main::CreateTable_DeviceData()
@@ -92,6 +84,7 @@ void Row_DeviceData::Delete()
 	Row_DeviceData *pRow = this; // Needed so we will have only 1 version of get_primary_fields_assign_from_row
 	
 	if (!is_deleted)
+	{
 		if (is_added)	
 		{	
 			vector<TableRow*>::iterator i;	
@@ -113,6 +106,7 @@ void Row_DeviceData::Delete()
 			table->deleted_cachedRows[key] = this;
 			is_deleted = true;	
 		}	
+	}
 }
 
 void Row_DeviceData::Reload()
@@ -146,10 +140,8 @@ void Row_DeviceData::SetDefaultValues()
 {
 	m_PK_DeviceData = 0;
 is_null[0] = false;
-m_Description = "";
-is_null[1] = false;
-m_Define = "";
-is_null[2] = false;
+is_null[1] = true;
+is_null[2] = true;
 m_FK_ParameterType = 0;
 is_null[3] = false;
 is_null[4] = true;
@@ -160,7 +152,8 @@ is_null[6] = true;
 m_psc_user = 0;
 m_psc_frozen = 0;
 is_null[7] = false;
-is_null[8] = true;
+m_psc_mod = "0000-00-00 00:00:00";
+is_null[8] = false;
 is_null[9] = true;
 m_psc_restrict = 0;
 
@@ -234,6 +227,12 @@ void Row_DeviceData::psc_restrict_set(long int val){PLUTO_SAFETY_LOCK_ERRORSONLY
 m_psc_restrict = val; is_modified=true; is_null[9]=false;}
 
 		
+bool Row_DeviceData::Description_isNull() {PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
+
+return is_null[1];}
+bool Row_DeviceData::Define_isNull() {PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
+
+return is_null[2];}
 bool Row_DeviceData::psc_id_isNull() {PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
 
 return is_null[4];}
@@ -246,14 +245,19 @@ return is_null[6];}
 bool Row_DeviceData::psc_frozen_isNull() {PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
 
 return is_null[7];}
-bool Row_DeviceData::psc_mod_isNull() {PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
-
-return is_null[8];}
 bool Row_DeviceData::psc_restrict_isNull() {PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
 
 return is_null[9];}
 
 			
+void Row_DeviceData::Description_setNull(bool val){PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
+is_null[1]=val;
+is_modified=true;
+}
+void Row_DeviceData::Define_setNull(bool val){PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
+is_null[2]=val;
+is_modified=true;
+}
 void Row_DeviceData::psc_id_setNull(bool val){PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
 is_null[4]=val;
 is_modified=true;
@@ -268,10 +272,6 @@ is_modified=true;
 }
 void Row_DeviceData::psc_frozen_setNull(bool val){PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
 is_null[7]=val;
-is_modified=true;
-}
-void Row_DeviceData::psc_mod_setNull(bool val){PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
-is_null[8]=val;
 is_modified=true;
 }
 void Row_DeviceData::psc_restrict_setNull(bool val){PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
@@ -300,8 +300,8 @@ PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
 if (is_null[1])
 return "NULL";
 
-char *buf = new char[61];
-db_wrapper_real_escape_string(table->database->m_pDB, buf, m_Description.c_str(), (unsigned long) min((size_t)30,m_Description.size()));
+char *buf = new char[181];
+db_wrapper_real_escape_string(table->database->m_pDB, buf, m_Description.c_str(), (unsigned long) min((size_t)90,m_Description.size()));
 string s=string()+"\""+buf+"\"";
 delete[] buf;
 return s;
@@ -314,8 +314,8 @@ PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
 if (is_null[2])
 return "NULL";
 
-char *buf = new char[61];
-db_wrapper_real_escape_string(table->database->m_pDB, buf, m_Define.c_str(), (unsigned long) min((size_t)30,m_Define.size()));
+char *buf = new char[181];
+db_wrapper_real_escape_string(table->database->m_pDB, buf, m_Define.c_str(), (unsigned long) min((size_t)90,m_Define.size()));
 string s=string()+"\""+buf+"\"";
 delete[] buf;
 return s;
@@ -1014,39 +1014,11 @@ PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
 class Table_DHCPDevice_DeviceData *pTable = table->database->DHCPDevice_DeviceData_get();
 pTable->GetRows("`FK_DeviceData`=" + StringUtils::itos(m_PK_DeviceData),rows);
 }
-void Row_DeviceData::DHCPDevice_DeviceData_pschist_FK_DeviceData_getrows(vector <class Row_DHCPDevice_DeviceData_pschist*> *rows)
-{
-PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
-
-class Table_DHCPDevice_DeviceData_pschist *pTable = table->database->DHCPDevice_DeviceData_pschist_get();
-pTable->GetRows("`FK_DeviceData`=" + StringUtils::itos(m_PK_DeviceData),rows);
-}
-void Row_DeviceData::DHCPDevice_DeviceData_pschmask_FK_DeviceData_getrows(vector <class Row_DHCPDevice_DeviceData_pschmask*> *rows)
-{
-PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
-
-class Table_DHCPDevice_DeviceData_pschmask *pTable = table->database->DHCPDevice_DeviceData_pschmask_get();
-pTable->GetRows("`FK_DeviceData`=" + StringUtils::itos(m_PK_DeviceData),rows);
-}
 void Row_DeviceData::DeviceCategory_DeviceData_FK_DeviceData_getrows(vector <class Row_DeviceCategory_DeviceData*> *rows)
 {
 PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
 
 class Table_DeviceCategory_DeviceData *pTable = table->database->DeviceCategory_DeviceData_get();
-pTable->GetRows("`FK_DeviceData`=" + StringUtils::itos(m_PK_DeviceData),rows);
-}
-void Row_DeviceData::DeviceCategory_DeviceData_pschist_FK_DeviceData_getrows(vector <class Row_DeviceCategory_DeviceData_pschist*> *rows)
-{
-PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
-
-class Table_DeviceCategory_DeviceData_pschist *pTable = table->database->DeviceCategory_DeviceData_pschist_get();
-pTable->GetRows("`FK_DeviceData`=" + StringUtils::itos(m_PK_DeviceData),rows);
-}
-void Row_DeviceData::DeviceCategory_DeviceData_pschmask_FK_DeviceData_getrows(vector <class Row_DeviceCategory_DeviceData_pschmask*> *rows)
-{
-PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
-
-class Table_DeviceCategory_DeviceData_pschmask *pTable = table->database->DeviceCategory_DeviceData_pschmask_get();
 pTable->GetRows("`FK_DeviceData`=" + StringUtils::itos(m_PK_DeviceData),rows);
 }
 void Row_DeviceData::DeviceTemplate_DeviceData_FK_DeviceData_getrows(vector <class Row_DeviceTemplate_DeviceData*> *rows)
@@ -1056,39 +1028,11 @@ PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
 class Table_DeviceTemplate_DeviceData *pTable = table->database->DeviceTemplate_DeviceData_get();
 pTable->GetRows("`FK_DeviceData`=" + StringUtils::itos(m_PK_DeviceData),rows);
 }
-void Row_DeviceData::DeviceTemplate_DeviceData_pschist_FK_DeviceData_getrows(vector <class Row_DeviceTemplate_DeviceData_pschist*> *rows)
-{
-PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
-
-class Table_DeviceTemplate_DeviceData_pschist *pTable = table->database->DeviceTemplate_DeviceData_pschist_get();
-pTable->GetRows("`FK_DeviceData`=" + StringUtils::itos(m_PK_DeviceData),rows);
-}
-void Row_DeviceData::DeviceTemplate_DeviceData_pschmask_FK_DeviceData_getrows(vector <class Row_DeviceTemplate_DeviceData_pschmask*> *rows)
-{
-PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
-
-class Table_DeviceTemplate_DeviceData_pschmask *pTable = table->database->DeviceTemplate_DeviceData_pschmask_get();
-pTable->GetRows("`FK_DeviceData`=" + StringUtils::itos(m_PK_DeviceData),rows);
-}
 void Row_DeviceData::Device_DeviceData_FK_DeviceData_getrows(vector <class Row_Device_DeviceData*> *rows)
 {
 PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
 
 class Table_Device_DeviceData *pTable = table->database->Device_DeviceData_get();
-pTable->GetRows("`FK_DeviceData`=" + StringUtils::itos(m_PK_DeviceData),rows);
-}
-void Row_DeviceData::Device_DeviceData_pschist_FK_DeviceData_getrows(vector <class Row_Device_DeviceData_pschist*> *rows)
-{
-PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
-
-class Table_Device_DeviceData_pschist *pTable = table->database->Device_DeviceData_pschist_get();
-pTable->GetRows("`FK_DeviceData`=" + StringUtils::itos(m_PK_DeviceData),rows);
-}
-void Row_DeviceData::Device_DeviceData_pschmask_FK_DeviceData_getrows(vector <class Row_Device_DeviceData_pschmask*> *rows)
-{
-PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
-
-class Table_Device_DeviceData_pschmask *pTable = table->database->Device_DeviceData_pschmask_get();
 pTable->GetRows("`FK_DeviceData`=" + StringUtils::itos(m_PK_DeviceData),rows);
 }
 

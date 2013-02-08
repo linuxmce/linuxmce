@@ -1,0 +1,66 @@
+Index: xine-ui/src/fb/actions.c
+===================================================================
+RCS file: /cvsroot/xine/xine-ui/src/fb/actions.c,v
+retrieving revision 1.9
+diff -u -r1.9 actions.c
+--- xine-ui/src/fb/actions.c	28 Jul 2005 23:36:03 -0000	1.9
++++ xine-ui/src/fb/actions.c	14 Aug 2005 16:08:13 -0000
+@@ -282,6 +282,8 @@
+ 	  "VDRVolumeMinus",         ACTID_EVENT_VDR_VOLMINUS },
+ 	{ "VDR Audio Mute",
+ 	  "VDRMute",                ACTID_EVENT_VDR_MUTE },
++	{ "VDR Audio menu",
++	  "VDRAudio",               ACTID_EVENT_VDR_AUDIO },
+ #endif
+ 	{ 0,
+ 		  0, 0 }
+Index: xine-ui/src/fb/actions.h
+===================================================================
+RCS file: /cvsroot/xine/xine-ui/src/fb/actions.h,v
+retrieving revision 1.5
+diff -u -r1.5 actions.h
+--- xine-ui/src/fb/actions.h	11 Aug 2004 11:45:38 -0000	1.5
++++ xine-ui/src/fb/actions.h	14 Aug 2005 16:08:17 -0000
+@@ -188,7 +188,8 @@
+   ACTID_EVENT_VDR_USER9         = XINE_EVENT_VDR_USER9            | ACTID_IS_INPUT_EVENT,
+   ACTID_EVENT_VDR_VOLPLUS       = XINE_EVENT_VDR_VOLPLUS          | ACTID_IS_INPUT_EVENT,
+   ACTID_EVENT_VDR_VOLMINUS      = XINE_EVENT_VDR_VOLMINUS         | ACTID_IS_INPUT_EVENT,
+-  ACTID_EVENT_VDR_MUTE          = XINE_EVENT_VDR_MUTE             | ACTID_IS_INPUT_EVENT
++  ACTID_EVENT_VDR_MUTE          = XINE_EVENT_VDR_MUTE             | ACTID_IS_INPUT_EVENT,
++  ACTID_EVENT_VDR_AUDIO         = XINE_EVENT_VDR_AUDIO            | ACTID_IS_INPUT_EVENT
+ #endif
+ 
+   /*
+Index: xine-ui/src/xitk/kbindings.c
+===================================================================
+RCS file: /cvsroot/xine/xine-ui/src/xitk/kbindings.c,v
+retrieving revision 1.126
+diff -u -r1.126 kbindings.c
+--- xine-ui/src/xitk/kbindings.c	16 Jul 2005 19:05:31 -0000	1.126
++++ xine-ui/src/xitk/kbindings.c	14 Aug 2005 16:08:23 -0000
+@@ -511,6 +511,8 @@
+     "VDRVolumeMinus",         ACTID_EVENT_VDR_VOLMINUS      , "VOID",     KEYMOD_NOMOD   , 0 , 0},
+   { "VDR Audio Mute",
+     "VDRMute",                ACTID_EVENT_VDR_MUTE          , "VOID",     KEYMOD_NOMOD   , 0 , 0},
++  { "VDR Audio menu",
++    "VDRAudio",               ACTID_EVENT_VDR_AUDIO         , "VOID",     KEYMOD_NOMOD   , 0 , 0},
+ #endif
+   { 0,
+     0,                        0,                              0,          0              , 0 , 0}
+Index: xine-ui/src/xitk/kbindings.h
+===================================================================
+RCS file: /cvsroot/xine/xine-ui/src/xitk/kbindings.h,v
+retrieving revision 1.57
+diff -u -r1.57 kbindings.h
+--- xine-ui/src/xitk/kbindings.h	16 Jul 2005 19:05:31 -0000	1.57
++++ xine-ui/src/xitk/kbindings.h	14 Aug 2005 16:08:23 -0000
+@@ -209,7 +209,8 @@
+   ACTID_EVENT_VDR_USER9         = XINE_EVENT_VDR_USER9            | ACTID_IS_INPUT_EVENT,
+   ACTID_EVENT_VDR_VOLPLUS       = XINE_EVENT_VDR_VOLPLUS          | ACTID_IS_INPUT_EVENT,
+   ACTID_EVENT_VDR_VOLMINUS      = XINE_EVENT_VDR_VOLMINUS         | ACTID_IS_INPUT_EVENT,
+-  ACTID_EVENT_VDR_MUTE          = XINE_EVENT_VDR_MUTE             | ACTID_IS_INPUT_EVENT
++  ACTID_EVENT_VDR_MUTE          = XINE_EVENT_VDR_MUTE             | ACTID_IS_INPUT_EVENT,
++  ACTID_EVENT_VDR_AUDIO         = XINE_EVENT_VDR_AUDIO            | ACTID_IS_INPUT_EVENT
+ #endif
+ 
+   /*

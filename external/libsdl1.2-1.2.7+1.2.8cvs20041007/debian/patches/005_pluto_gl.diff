@@ -1,0 +1,181 @@
+--- x1/src/video/SDL_video.c	(revision 9251)
++++ x2/src/video/SDL_video.c	(working copy)
+@@ -235,6 +235,8 @@
+ 	video->gl_config.stereo = 0;
+ 	video->gl_config.multisamplebuffers = 0;
+ 	video->gl_config.multisamplesamples = 0;
++ 	video->gl_config.render_type = -1; /* not known, don't set */
++ 	video->gl_config.drawable_type = -1; /* not known, don't set */
+ 	
+ 	/* Initialize the video subsystem */
+ 	memset(&vformat, 0, sizeof(vformat));
+@@ -1432,6 +1434,12 @@
+ 		case SDL_GL_MULTISAMPLESAMPLES:
+ 			video->gl_config.multisamplesamples = value;
+ 			break;
++		case SDL_GL_RENDER_TYPE:
++			video->gl_config.render_type = value;
++			break;
++		case SDL_GL_DRAWABLE_TYPE:
++			video->gl_config.drawable_type = value;
++			break;
+ 		default:
+ 			SDL_SetError("Unknown OpenGL attribute");
+ 			retval = -1;
+--- x1/src/video/SDL_sysvideo.h	(revision 9251)
++++ x2/src/video/SDL_sysvideo.h	(working copy)
+@@ -306,6 +306,8 @@
+ 		int stereo;
+ 		int multisamplebuffers;
+ 		int multisamplesamples;
++		int render_type;
++		int drawable_type;
+ 		int driver_loaded;
+ 		char driver_path[256];
+ 		void* dll_handle;
+--- x1/src/video/x11/SDL_x11gl.c	(revision 9251)
++++ x2/src/video/x11/SDL_x11gl.c	(working copy)
+@@ -42,6 +42,11 @@
+ #define GLX_SAMPLES_ARB                    100001
+ #endif
+ 
++#include <GL/glx.h>
++#include <X11/extensions/render.h>
++#include <X11/extensions/Xrender.h>
++#include <stdio.h>
++
+ /* return the preferred visual to use for openGL graphics */
+ XVisualInfo *X11_GL_GetVisual(_THIS)
+ {
+@@ -74,7 +79,27 @@
+ 
+         /* Setup our GLX attributes according to the gl_config. */
+ 	i = 0;
+-	attribs[i++] = GLX_RGBA;
++
++#ifdef GLX_RENDER_TYPE
++	if( this->gl_config.render_type >= 0 ) {
++		attribs[i++] = GLX_RENDER_TYPE;
++		attribs[i++] = this->gl_config.render_type;
++	}
++	else
++#else
++#error You need to make /usr/include/GL/gl*.h point to the nvidia headers
++#endif
++		attribs[i++] = GLX_RGBA;
++
++#ifdef GLX_DRAWABLE_TYPE
++	if( this->gl_config.drawable_type >= 0 ) {
++		attribs[i++] = GLX_DRAWABLE_TYPE;
++		attribs[i++] = this->gl_config.drawable_type;
++	}
++#else
++#error You need to make /usr/include/GL/gl*.h point to the nvidia headers
++#endif
++
+ 	attribs[i++] = GLX_RED_SIZE;
+ 	attribs[i++] = this->gl_config.red_size;
+ 	attribs[i++] = GLX_GREEN_SIZE;
+@@ -94,6 +119,7 @@
+ 
+ 	if( this->gl_config.double_buffer ) {
+ 		attribs[i++] = GLX_DOUBLEBUFFER;
++		attribs[i++] = True;
+ 	}
+ 
+ 	attribs[i++] = GLX_DEPTH_SIZE;
+@@ -139,12 +165,68 @@
+ 		attribs[i++] = this->gl_config.multisamplesamples;
+ 	}
+ 
++#if 0
++ 
+ #ifdef GLX_DIRECT_COLOR /* Try for a DirectColor visual for gamma support */
+ 	attribs[i++] = GLX_X_VISUAL_TYPE;
+ 	attribs[i++] = GLX_DIRECT_COLOR;
+ #endif
++
++#endif // 0
++
+ 	attribs[i++] = None;
+ 
++	if( this->gl_config.render_type >= 0 ) {
++	    GLXFBConfig *cfgs, cfg;
++	    int num_cfgs, event_base, error_base;
++
++	    /* The only reason we would want to set the render type is for
++	       transparent windows, so make sure we have render extension. */
++	    if(!XRenderQueryExtension(GFX_Display, &event_base, &error_base)) {
++		SDL_SetError( "No RENDER extension found" );
++		return NULL;
++	    }
++
++	    cfgs = glXChooseFBConfig(
++		GFX_Display, SDL_Screen, attribs, &num_cfgs);
++
++	    if(!cfgs) {
++		SDL_SetError( "Couldn't find matching GLX visual" );
++		return NULL;
++	    }
++
++	    /* Find a visual that has a RENDER picture format with alpha */
++	    for (i = 0; i < num_cfgs; i++) {
++		XRenderPictFormat *fmt;
++
++		glx_visualinfo = glXGetVisualFromFBConfig(
++		    GFX_Display, cfgs[i]);
++
++		if(glx_visualinfo) {
++
++		    fmt = XRenderFindVisualFormat(
++			GFX_Display, glx_visualinfo->visual);
++
++		    if( fmt && fmt->direct.alphaMask > 0) {
++			cfg = cfgs[i];
++			break; /* success */
++		    }
++
++		    XFree(glx_visualinfo);
++		    glx_visualinfo = NULL;
++		}
++	    }
++
++	    XFree(cfgs);
++
++            if(!glx_visualinfo)
++                SDL_SetError( "Couldn't find RENDER visual w/alpha" );
++            else
++                fprintf(stderr, "Found visual with alpha and render.\n");
++
++	    return glx_visualinfo;
++	}
++
+  	glx_visualinfo = this->gl_data->glXChooseVisual(GFX_Display, 
+ 						  SDL_Screen, attribs);
+ #ifdef GLX_DIRECT_COLOR
+--- x1/include/SDL_video.h	(revision 9251)
++++ x2/include/SDL_video.h	(working copy)
+@@ -219,7 +219,9 @@
+     SDL_GL_ACCUM_ALPHA_SIZE,
+     SDL_GL_STEREO,
+     SDL_GL_MULTISAMPLEBUFFERS,
+-    SDL_GL_MULTISAMPLESAMPLES
++    SDL_GL_MULTISAMPLESAMPLES,
++    SDL_GL_RENDER_TYPE,
++    SDL_GL_DRAWABLE_TYPE,
+ } SDL_GLattr;
+ 
+ /* flags for SDL_SetPalette() */
+Index: sdl-config.in
+===================================================================
+--- x1/sdl-config.in	(revision 9251)
++++ x2/sdl-config.in	(working copy)
+@@ -52,7 +52,7 @@
+       ;;
+ @ENABLE_SHARED_TRUE@    --libs)
+ @ENABLE_SHARED_TRUE@      libdirs="-L@libdir@ @SDL_RLD_FLAGS@"
+-@ENABLE_SHARED_TRUE@      echo $libdirs @SDL_LIBS@ @SHARED_SYSTEM_LIBS@
++@ENABLE_SHARED_TRUE@      echo $libdirs @SDL_LIBS@ @SHARED_SYSTEM_LIBS@ -lGL -lXrender -lXmu -lX11
+ @ENABLE_SHARED_TRUE@      ;;
+ @ENABLE_STATIC_TRUE@@ENABLE_SHARED_TRUE@    --static-libs)
+ @ENABLE_STATIC_TRUE@@ENABLE_SHARED_FALSE@    --libs|--static-libs)

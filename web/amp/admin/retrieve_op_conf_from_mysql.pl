@@ -87,7 +87,7 @@ while( $line = <ZAPATA> ) {
 
 
 # WARNING: this file will be substituted by the output of this program
-$op_conf = "/var/www/pluto-admin/amp/panel/op_buttons_additional.cfg";
+$op_conf = "/var/www/lmce-admin/amp/panel/op_buttons_additional.cfg";
 # the name of the box the MySQL database is running on
 $hostname = "localhost";
 # the name of the database our tables are kept

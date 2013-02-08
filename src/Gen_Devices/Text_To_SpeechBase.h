@@ -85,7 +85,15 @@ public:
 		if( m_bRunningWithoutDeviceData )
 			return m_pEvent_Impl->GetDeviceDataFromDatabase(m_dwPK_Device,DEVICEDATA_BranchNo_CONST);
 		else
-			return m_mapParameters_Find(DEVICEDATA_BranchNo_CONST);
+			return m_mapParameters[DEVICEDATA_BranchNo_CONST];
+	}
+
+	string Get_default_voice()
+	{
+		if( m_bRunningWithoutDeviceData )
+			return m_pEvent_Impl->GetDeviceDataFromDatabase(m_dwPK_Device,DEVICEDATA_default_voice_CONST);
+		else
+			return m_mapParameters[DEVICEDATA_default_voice_CONST];
 	}
 
 };
@@ -193,10 +201,11 @@ public:
 	Command_Impl *CreateCommand(int PK_DeviceTemplate, Command_Impl *pPrimaryDeviceCommand, DeviceData_Impl *pData, Event_Impl *pEvent);
 	//Data accessors
 	string DATA_Get_BranchNo() { return GetData()->Get_BranchNo(); }
+	string DATA_Get_default_voice() { return GetData()->Get_default_voice(); }
 	//Event accessors
 	//Commands - Override these to handle commands from the server
-	virtual void CMD_Send_Audio_To_Device(string sText,string sList_PK_Device,bool bBypass_Event,bool bDont_Setup_AV,string &sCMD_Result,class Message *pMessage) {};
-	virtual void CMD_Text_To_Wave(string sText,char **pData,int *iData_Size,string &sCMD_Result,class Message *pMessage) {};
+	virtual void CMD_Send_Audio_To_Device(string sText,string sPhoneNumber,string sList_PK_Device,bool bBypass_Event,bool bDont_Setup_AV,string sVoice,string &sCMD_Result,class Message *pMessage) {};
+	virtual void CMD_Text_To_Wave(string sText,string sVoice,char **pData,int *iData_Size,string &sCMD_Result,class Message *pMessage) {};
 
 	//This distributes a received message to your handler.
 	virtual ReceivedMessageResult ReceivedMessage(class Message *pMessageOriginal)
@@ -233,10 +242,12 @@ public:
 					{
 						string sCMD_Result="OK";
 						string sText=pMessage->m_mapParameters[COMMANDPARAMETER_Text_CONST];
+						string sPhoneNumber=pMessage->m_mapParameters[COMMANDPARAMETER_PhoneNumber_CONST];
 						string sList_PK_Device=pMessage->m_mapParameters[COMMANDPARAMETER_List_PK_Device_CONST];
 						bool bBypass_Event=(pMessage->m_mapParameters[COMMANDPARAMETER_Bypass_Event_CONST]=="1" ? true : false);
 						bool bDont_Setup_AV=(pMessage->m_mapParameters[COMMANDPARAMETER_Dont_Setup_AV_CONST]=="1" ? true : false);
-						CMD_Send_Audio_To_Device(sText.c_str(),sList_PK_Device.c_str(),bBypass_Event,bDont_Setup_AV,sCMD_Result,pMessage);
+						string sVoice=pMessage->m_mapParameters[COMMANDPARAMETER_Voice_CONST];
+						CMD_Send_Audio_To_Device(sText.c_str(),sPhoneNumber.c_str(),sList_PK_Device.c_str(),bBypass_Event,bDont_Setup_AV,sVoice.c_str(),sCMD_Result,pMessage);
 						if( pMessage->m_eExpectedResponse==ER_ReplyMessage && !pMessage->m_bRespondedToMessage )
 						{
 							pMessage->m_bRespondedToMessage=true;
@@ -253,7 +264,7 @@ public:
 						{
 							int iRepeat=atoi(itRepeat->second.c_str());
 							for(int i=2;i<=iRepeat;++i)
-								CMD_Send_Audio_To_Device(sText.c_str(),sList_PK_Device.c_str(),bBypass_Event,bDont_Setup_AV,sCMD_Result,pMessage);
+								CMD_Send_Audio_To_Device(sText.c_str(),sPhoneNumber.c_str(),sList_PK_Device.c_str(),bBypass_Event,bDont_Setup_AV,sVoice.c_str(),sCMD_Result,pMessage);
 						}
 					};
 					iHandled++;
@@ -262,9 +273,10 @@ public:
 					{
 						string sCMD_Result="OK";
 						string sText=pMessage->m_mapParameters[COMMANDPARAMETER_Text_CONST];
+						string sVoice=pMessage->m_mapParameters[COMMANDPARAMETER_Voice_CONST];
 						char *pData=pMessage->m_mapData_Parameters[COMMANDPARAMETER_Data_CONST];
 						int iData_Size=pMessage->m_mapData_Lengths[COMMANDPARAMETER_Data_CONST];
-						CMD_Text_To_Wave(sText.c_str(),&pData,&iData_Size,sCMD_Result,pMessage);
+						CMD_Text_To_Wave(sText.c_str(),sVoice.c_str(),&pData,&iData_Size,sCMD_Result,pMessage);
 						if( pMessage->m_eExpectedResponse==ER_ReplyMessage && !pMessage->m_bRespondedToMessage )
 						{
 							pMessage->m_bRespondedToMessage=true;
@@ -282,7 +294,7 @@ public:
 						{
 							int iRepeat=atoi(itRepeat->second.c_str());
 							for(int i=2;i<=iRepeat;++i)
-								CMD_Text_To_Wave(sText.c_str(),&pData,&iData_Size,sCMD_Result,pMessage);
+								CMD_Text_To_Wave(sText.c_str(),sVoice.c_str(),&pData,&iData_Size,sCMD_Result,pMessage);
 						}
 					};
 					iHandled++;

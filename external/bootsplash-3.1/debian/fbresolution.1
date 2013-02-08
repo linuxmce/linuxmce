@@ -1,0 +1,91 @@
+.\" $Header: /aolnet/dev/src/CVS/sgml/docbook-to-man/cmd/docbook-to-man.sh,v 1.1.1.1 1998/11/13 21:31:59 db3l Exp $
+.\"
+.\"	transcript compatibility for postscript use.
+.\"
+.\"	synopsis:  .P! <file.ps>
+.\"
+.de P!
+.fl
+\!!1 setgray
+.fl
+\\&.\"
+.fl
+\!!0 setgray
+.fl			\" force out current output buffer
+\!!save /psv exch def currentpoint translate 0 0 moveto
+\!!/showpage{}def
+.fl			\" prolog
+.sy sed -e 's/^/!/' \\$1\" bring in postscript file
+\!!psv restore
+.
+.de pF
+.ie     \\*(f1 .ds f1 \\n(.f
+.el .ie \\*(f2 .ds f2 \\n(.f
+.el .ie \\*(f3 .ds f3 \\n(.f
+.el .ie \\*(f4 .ds f4 \\n(.f
+.el .tm ? font overflow
+.ft \\$1
+..
+.de fP
+.ie     !\\*(f4 \{\
+.	ft \\*(f4
+.	ds f4\"
+'	br \}
+.el .ie !\\*(f3 \{\
+.	ft \\*(f3
+.	ds f3\"
+'	br \}
+.el .ie !\\*(f2 \{\
+.	ft \\*(f2
+.	ds f2\"
+'	br \}
+.el .ie !\\*(f1 \{\
+.	ft \\*(f1
+.	ds f1\"
+'	br \}
+.el .tm ? font underflow
+..
+.ds f1\"
+.ds f2\"
+.ds f3\"
+.ds f4\"
+'\" t 
+.ta 8n 16n 24n 32n 40n 48n 56n 64n 72n  
+.TH "fbresoultion" "1" 
+.SH "NAME" 
+fbresoultion \(em detects what the current frame buffer resolution is. 
+.SH "SYNOPSIS" 
+.PP 
+\fBfbresoultion\fR [\fBoptions\fI\fR\fP]  
+.SH "DESCRIPTION" 
+.PP 
+This manual page was written for the \fBDebian\fP distribution 
+because the original program does not have a manual page. 
+.PP 
+\fBfbresoultion\fR shows the current 
+frame buffer resoultion when run with no options. 
+.SH "OPTIONS" 
+.PP 
+These programs follow the usual GNU command line syntax, 
+with long options starting with two dashes (`-').  A summary of 
+options is included below. 
+.IP "\fB-h, --help\fP         " 10 
+Show summary of options. 
+.IP "\fB-v, --version\fP         " 10 
+Show version of program. 
+.SH "SEE ALSO" 
+.PP 
+fbmngplay (1), fbtruetype (1), bootsplash (1). 
+.SH "AUTHOR" 
+.PP 
+This manual page was written by Matthew A. Nicholson debian@matt-land.com for 
+the \fBDebian\fP system (but may be used by others).  Permission is 
+granted to copy, distribute and/or modify this document under 
+the terms of the GNU General Public License, Version 2 any  
+later version published by the Free Software Foundation. 
+ 
+.PP 
+On Debian systems, the complete text of the GNU General Public 
+License can be found in /usr/share/common-licenses/GPL. 
+ 
+.\" created by instant / docbook-to-man, Sun 28 Mar 2004, 11:05 

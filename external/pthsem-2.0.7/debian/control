@@ -1,0 +1,19 @@
+Source: pthsem
+Priority: optional
+Maintainer: Martin Kögler <mkoegler@auto.tuwien.ac.at>
+Build-Depends: debhelper (>= 4.0.0)
+Standards-Version: 3.6.1
+
+Package: pthsem-dev
+Section: libdev
+Architecture: any
+Depends: pthsem (= ${Source-Version})
+Description: pth replacement with semaphore support
+ This package provides the development files of GPU pth enhanced with semaphore support.
+
+Package: pthsem
+Section: libs
+Architecture: any
+Depends: ${shlibs:Depends}
+Description: pth replacement with semaphore support
+ This package provides GNU pth enhanged with semaphore support.

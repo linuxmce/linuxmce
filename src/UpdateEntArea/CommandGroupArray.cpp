@@ -33,7 +33,7 @@ bool g_bChangedScenarios=false;
 
 using namespace DefaultScenarios;
 
-CommandGroup *CommandGroupArray::FindCommandGroupByTemplate(int PK_Template,string sDescription,int PK_Icon,int TemplateParm1,int TemplateParm2,int *PK_CommandGroup,int Sort)
+CommandGroup *CommandGroupArray::FindCommandGroupByTemplate(int PK_Template,string sDescription,int PK_Icon,int TemplateParm1,int TemplateParm2,int *PK_CommandGroup,int Sort,int PK_Text)
 {
 	CommandGroup *pCommandGroup = m_mapCommandGroup_Find(PK_Template,TemplateParm1,TemplateParm2);
 	if( pCommandGroup )
@@ -43,16 +43,18 @@ CommandGroup *CommandGroupArray::FindCommandGroupByTemplate(int PK_Template,stri
 		return pCommandGroup;
 	}
 
+	LoggerWrapper::GetInstance()->Write(LV_STATUS,"FindCommandGroupByTemplate: PK_Text=%d", PK_Text);
+
 	if( m_pRow_Room )
-		return FindCommandGroupByTemplate(m_pRow_Room,PK_Template,sDescription,PK_Icon,TemplateParm1,TemplateParm2,PK_CommandGroup,Sort);
+		return FindCommandGroupByTemplate(m_pRow_Room,PK_Template,sDescription,PK_Icon,TemplateParm1,TemplateParm2,PK_CommandGroup,Sort,PK_Text);
 	else if( m_pRow_EntertainArea )
-		return FindCommandGroupByTemplate(m_pRow_EntertainArea,PK_Template,sDescription,PK_Icon,TemplateParm1,TemplateParm2,PK_CommandGroup,Sort);
+		return FindCommandGroupByTemplate(m_pRow_EntertainArea,PK_Template,sDescription,PK_Icon,TemplateParm1,TemplateParm2,PK_CommandGroup,Sort,PK_Text);
 	else
-		return FindCommandGroupByTemplate_NoRoom(PK_Template,sDescription,PK_Icon,TemplateParm1,TemplateParm2,PK_CommandGroup);
+		return FindCommandGroupByTemplate_NoRoom(PK_Template,sDescription,PK_Icon,TemplateParm1,TemplateParm2,PK_CommandGroup,PK_Text);
 	return NULL;
 }
 
-CommandGroup *CommandGroupArray::FindCommandGroupByTemplate_NoRoom(int PK_Template,string sDescription,int PK_Icon,int TemplateParm1,int TemplateParm2,int *PK_CommandGroup)
+CommandGroup *CommandGroupArray::FindCommandGroupByTemplate_NoRoom(int PK_Template,string sDescription,int PK_Icon,int TemplateParm1,int TemplateParm2,int *PK_CommandGroup,int PK_Text)
 {
 	string SQL = "FK_Template=" + StringUtils::itos(PK_Template) + " AND FK_Array=" + StringUtils::itos(m_PK_Array) +
 		" AND TemplateParm1=" + StringUtils::itos(TemplateParm1) +
@@ -65,6 +67,8 @@ CommandGroup *CommandGroupArray::FindCommandGroupByTemplate_NoRoom(int PK_Templa
 	bool bExistingCommandGroup=false;
 	if( vectRow_CommandGroup.size() )
 	{
+		LoggerWrapper::GetInstance()->Write(LV_STATUS,"We have %d CommandGroup ...", vectRow_CommandGroup.size());
+		
 		for(size_t s=1;s<vectRow_CommandGroup.size();++s) // There should only be one, delete any extras
 			DeleteCommandGroup(vectRow_CommandGroup[s]);
 		if( PK_CommandGroup )
@@ -76,6 +80,8 @@ CommandGroup *CommandGroupArray::FindCommandGroupByTemplate_NoRoom(int PK_Templa
 	}
 	else if( PK_CommandGroup )
 	{
+		LoggerWrapper::GetInstance()->Write(LV_STATUS,"PK_CommandGroup %d", PK_CommandGroup);
+
 		*PK_CommandGroup = 0;
 		return NULL;
 	}
@@ -85,6 +91,9 @@ CommandGroup *CommandGroupArray::FindCommandGroupByTemplate_NoRoom(int PK_Templa
 	pRow_CommandGroup->Hint_set( "" );
 	pRow_CommandGroup->FK_Template_set(PK_Template);
 	pRow_CommandGroup->Description_set(sDescription);
+	
+	LoggerWrapper::GetInstance()->Write(LV_STATUS,"Added Description %s for template %d and PK_Text %d", sDescription.c_str(), PK_Template, PK_Text);
+	
 	pRow_CommandGroup->FK_Installation_set( m_iPK_Installation );
 	pRow_CommandGroup->FK_Array_set( m_PK_Array );
 	if( PK_Icon )
@@ -100,6 +109,17 @@ CommandGroup *CommandGroupArray::FindCommandGroupByTemplate_NoRoom(int PK_Templa
 	LoggerWrapper::GetInstance()->Write(LV_STATUS,"Added %d %s",
 		pRow_CommandGroup->PK_CommandGroup_get(),pRow_CommandGroup->Description_get().c_str());
 	
+	if( PK_Text ) 
+	{
+		pRow_CommandGroup->FK_Text_set( PK_Text );
+		LoggerWrapper::GetInstance()->Write(LV_STATUS,"Added PK_Text %d!", PK_Text);
+	} 
+	else
+	{
+		pRow_CommandGroup->FK_Text_setNull( true );
+		LoggerWrapper::GetInstance()->Write(LV_STATUS,"No PK_Text passed!");
+	}	
+
 	return new CommandGroup(this,pRow_CommandGroup);
 }
 
@@ -119,7 +139,7 @@ Row_CommandGroup *CommandGroupArray::FindCommandGroupByTemplate(Row_Room *pRow_R
 		return NULL;
 }
 
-CommandGroup *CommandGroupArray::FindCommandGroupByTemplate(Row_Room *pRow_Room,int PK_Template,string sDescription,int PK_Icon,int TemplateParm1,int TemplateParm2,int *PK_CommandGroup,int Sort)
+CommandGroup *CommandGroupArray::FindCommandGroupByTemplate(Row_Room *pRow_Room,int PK_Template,string sDescription,int PK_Icon,int TemplateParm1,int TemplateParm2,int *PK_CommandGroup,int Sort,int PK_Text)
 {
 	string SQL = "JOIN CommandGroup_Room ON FK_CommandGroup=PK_CommandGroup WHERE FK_Room=" + StringUtils::itos(pRow_Room->PK_Room_get()) + 
 		" AND FK_Template=" + StringUtils::itos(PK_Template) + " AND FK_Array=" + StringUtils::itos(m_PK_Array) +
@@ -174,14 +194,25 @@ CommandGroup *CommandGroupArray::FindCommandGroupByTemplate(Row_Room *pRow_Room,
 		Row_CommandGroup_Room *pRow_CommandGroup_Room = m_pDatabase_pluto_main->CommandGroup_Room_get()->AddRow();
 		pRow_CommandGroup_Room->FK_CommandGroup_set(pRow_CommandGroup->PK_CommandGroup_get());
 		pRow_CommandGroup_Room->FK_Room_set(pRow_Room->PK_Room_get());
-		pRow_CommandGroup_Room->Sort_set(Sort ? Sort : pRow_CommandGroup->PK_CommandGroup_get());
+		pRow_CommandGroup_Room->Sort_set(Sort ? GetUnusedSortNo(Sort) : pRow_CommandGroup->PK_CommandGroup_get());
 		m_pDatabase_pluto_main->CommandGroup_Room_get()->Commit();
 	}
-
+	
+	if( PK_Text ) 
+	{
+		pRow_CommandGroup->FK_Text_set( PK_Text );
+		LoggerWrapper::GetInstance()->Write(LV_STATUS,"Added PK_Text %d!", PK_Text);
+	} 
+	else
+	{
+		pRow_CommandGroup->FK_Text_setNull( true );
+		LoggerWrapper::GetInstance()->Write(LV_STATUS,"No PK_Text passed!");
+	}	
+	
 	return new CommandGroup(this,pRow_CommandGroup);
 }
 
-CommandGroup *CommandGroupArray::FindCommandGroupByTemplate(Row_EntertainArea *pRow_EntertainArea,int PK_Template,string sDescription,int PK_Icon,int TemplateParm1,int TemplateParm2,int *PK_CommandGroup,int Sort)
+CommandGroup *CommandGroupArray::FindCommandGroupByTemplate(Row_EntertainArea *pRow_EntertainArea,int PK_Template,string sDescription,int PK_Icon,int TemplateParm1,int TemplateParm2,int *PK_CommandGroup,int Sort,int PK_Text)
 {
 	string SQL = "JOIN CommandGroup_EntertainArea ON FK_CommandGroup=PK_CommandGroup WHERE FK_EntertainArea=" + StringUtils::itos(pRow_EntertainArea->PK_EntertainArea_get()) + 
 		" AND FK_Template=" + StringUtils::itos(PK_Template) +
@@ -227,18 +258,28 @@ CommandGroup *CommandGroupArray::FindCommandGroupByTemplate(Row_EntertainArea *p
 	pRow_CommandGroup->TemplateParm2_set(TemplateParm2);
 	if( !bExistingCommandGroup )
 		pRow_CommandGroup->AutoGeneratedDate_set(StringUtils::SQLDateTime(time(NULL)));
+	if( PK_Text ) 
+	{
+		pRow_CommandGroup->FK_Text_set( PK_Text );
+		LoggerWrapper::GetInstance()->Write(LV_STATUS,"Added PK_Text %d!", PK_Text);
+	} 
+	else
+	{
+		pRow_CommandGroup->FK_Text_setNull( true );
+		LoggerWrapper::GetInstance()->Write(LV_STATUS,"No PK_Text passed!");
+	}	
 	m_pDatabase_pluto_main->CommandGroup_get()->Commit();
-	LoggerWrapper::GetInstance()->Write(LV_STATUS,"Added entertainment area %d %s ea: %d %s hint: %s",
+	LoggerWrapper::GetInstance()->Write(LV_STATUS,"Added entertainment area %d %s ea: %d %s hint: %s and text %d",
 		pRow_CommandGroup->PK_CommandGroup_get(),pRow_CommandGroup->Description_get().c_str(),
 		pRow_EntertainArea->PK_EntertainArea_get(), pRow_EntertainArea->Description_get().c_str(),
-		pRow_CommandGroup->Hint_get().c_str());
+		pRow_CommandGroup->Hint_get().c_str(), pRow_CommandGroup->FK_Text_get());
 
 	if( !bExistingCommandGroup )
 	{
 		Row_CommandGroup_EntertainArea *pRow_CommandGroup_EntertainArea = m_pDatabase_pluto_main->CommandGroup_EntertainArea_get()->AddRow();
 		pRow_CommandGroup_EntertainArea->FK_CommandGroup_set(pRow_CommandGroup->PK_CommandGroup_get());
 		pRow_CommandGroup_EntertainArea->FK_EntertainArea_set(pRow_EntertainArea->PK_EntertainArea_get());
-		pRow_CommandGroup_EntertainArea->Sort_set(Sort ? Sort : pRow_CommandGroup->PK_CommandGroup_get());
+		pRow_CommandGroup_EntertainArea->Sort_set(Sort ? GetUnusedSortNo(Sort) : pRow_CommandGroup->PK_CommandGroup_get());
 		m_pDatabase_pluto_main->CommandGroup_EntertainArea_get()->Commit();
 	}
 
@@ -525,4 +566,34 @@ bool CommandGroupArray::CommandGroupIsModified(Row_CommandGroup *pRow_CommandGro
 		return true;
 
 	return false;
+}
+
+int CommandGroupArray::GetUnusedSortNo(int preferedOrder)
+{
+
+	string SQL = "";
+	if ( m_pRow_Room )
+	{
+		SQL = "JOIN CommandGroup_Room ON FK_CommandGroup=PK_CommandGroup WHERE FK_Room=" + StringUtils::itos(m_pRow_Room->PK_Room_get());
+	}
+	else if ( m_pRow_EntertainArea ) 
+	{
+		SQL = "JOIN CommandGroup_EntertainArea ON FK_CommandGroup=PK_CommandGroup WHERE FK_EntertainArea=" + StringUtils::itos(m_pRow_EntertainArea->PK_EntertainArea_get());		
+	}
+	else 
+	{
+		// no room and no area, just return prefered order number
+		return preferedOrder;
+	}
+	SQL += " AND Sort = " + StringUtils::itos(preferedOrder);
+	vector<Row_CommandGroup *> vectRow_CommandGroup;
+	m_pDatabase_pluto_main->CommandGroup_get()->GetRows(SQL,&vectRow_CommandGroup);
+	if( vectRow_CommandGroup.size() )
+	{
+		return GetUnusedSortNo(preferedOrder+1);
+	}
+	else
+	{
+		return preferedOrder;
+	}
 }

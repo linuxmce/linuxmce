@@ -1,0 +1,13 @@
+diff -ruNp udev-056.orig/udevd.c udev-056/udevd.c
+--- udev-056.orig/udevd.c	2005-03-19 08:39:30.000000000 +0100
++++ udev-056/udevd.c	2005-04-08 15:41:30.000000000 +0200
+@@ -503,6 +503,9 @@ static struct hotplug_msg *get_udevsend_
+ 		if (strncmp(key, "PHYSDEVPATH=", 12) == 0)
+ 			msg->physdevpath = &key[12];
+ 
++		if (strncmp(key, "FIRMWARE=", 9) == 0) /* HACK */
++			msg->timeout = 10;
++
+ 		if (strncmp(key, "TIMEOUT=", 8) == 0)
+ 			msg->timeout = strtoull(&key[8], NULL, 10);
+ 	}

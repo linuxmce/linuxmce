@@ -5,10 +5,21 @@
 #
 
 # option definitions common to all supported networks...
-#option domain-name "fugue.com";
-#option domain-name-servers toccata.fugue.com;
 option domain-name-servers %CORE_INTERNAL_ADDRESS%;
 authoritative;
+
+ddns-update-style interim;
+
+include "/etc/bind/rndc.key";
+
+# Use what key in what zone
+zone %INTERNAL_DOMAIN_NAME%. {
+	primary 127.0.0.1;
+	key "rndc-key";
+}
+
+option domain-name "%INTERNAL_DOMAIN_NAME%";
+
 
 option routers %CORE_INTERNAL_ADDRESS%;
 option subnet-mask %INTERNAL_SUBNET_MASK%;
@@ -20,17 +31,30 @@ max-lease-time 604800;
 allow booting;
 allow bootp;
 
-subnet %INTERNAL_SUBNET% netmask %INTERNAL_SUBNET_MASK% {
-	default-lease-time 86400;
-	max-lease-time 604800;
-	%DYNAMIC_IP_RANGE%
-}
-
 option space pxelinux;
 option pxelinux.magic code 208 = string;
 option pxelinux.configfile code 209 = text;
 option pxelinux.pathprefix code 210 = text;
 option pxelinux.reboottime code 211 = unsigned integer 32;
+
+subnet %INTERNAL_SUBNET% netmask %INTERNAL_SUBNET_MASK% {
+	next-server %CORE_INTERNAL_ADDRESS%;
+	filename "/tftpboot/pxelinux.0";
+	option pxelinux.reboottime = 30;
+
+	default-lease-time 86400;
+	max-lease-time 604800;
+	%DYNAMIC_IP_RANGE%
+	zone   %DYNAMIC_REVERSE_RANGE%.in-addr.arpa. {
+		primary localhost;
+		key	"rndc-key";
+	}
+	zone    %INTERNAL_DOMAIN_NAME%. {
+		primary localhost;
+		key	"rndc-key";
+	}
+
+}
 
 # PXE booting machines
 group {
@@ -45,3 +69,12 @@ group {
 group {
 	%NOBOOT_ENTRIES%
 }
+
+# The following machines did not have a valid MAC address assigned in the database.
+# You may want to correct this manually via the web admin.
+%NOMAC_ENTRIES%
+
+# Custom additions to the dhcpd conf file should be maintained in this 
+# extra file.
+include "/etc/dhcp3/dhcpd-extra.conf";
+

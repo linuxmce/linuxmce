@@ -125,7 +125,9 @@ int main(int argc, char *argv[]) {
 	}
 	string query="";
 	string head="INSERT INTO tmp_Headends( headend_id, community_name, county_name, county_size, st_county_code, state_served, zip_code, dma_code, dma_name, mso_code, dma_rank, headend_name, headend_location, mso_name, time_zone_code ) VALUES ";
+	my_bool reconnect = true;
 	mysql=mysql_init(NULL);
+	mysql_options(mysql, MYSQL_OPT_RECONNECT, &reconnect);
 	if(!mysql_real_connect(mysql,host.c_str(),user.c_str(),passwd.c_str(),db.c_str(),0,NULL,0)){
 		cout<<"Error connecting to db:"<<mysql_error(mysql)<<endl;
 		return true;

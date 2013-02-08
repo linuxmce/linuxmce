@@ -6,11 +6,11 @@
      Phone: +1 (877) 758-8648
 
 
-     This program is free software; you can redistribute it and/or modify it under the terms of the GNU General Public License.
+     This program is free software; you can redistribute it and/or modify it under the terms of the GNU Lesser General Public License.
      This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty
      of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
 
-     See the GNU General Public License for more details.
+     See the GNU Lesser General Public License for more details.
 
 */
 
@@ -458,12 +458,8 @@ Create this on the stack to have all allocated memory clean up on exit
 		 * @brief Register a function that we want to get called back when a message matching a given criteria is received.
 		 * Any of the criteria may be 0, indicating all messages will be a match.
 		 * If this is not a plugin, it will return the counter ID for this interceptor, otherwise it returns 0
-		 * If bAllowRerouting is true, and this is not a plugin, the router will wait for this device to process
-		 * the intercepted message so the routing of the message can be bypassed.  This is more risky
-		 * since it can introduce delays if your device isn't responding right away.  For Plugins this
-		 * parameter is ignored and presumed to always be true
 		 */
-		int RegisterMsgInterceptor(MessageInterceptorFn pMessageInterceptorFn,int PK_Device_From,int PK_Device_To,int PK_DeviceTemplate,int PK_DeviceCategory,int MessageType,int MessageID,bool bAllowRerouting=true);
+		int RegisterMsgInterceptor(MessageInterceptorFn pMessageInterceptorFn,int PK_Device_From,int PK_Device_To,int PK_DeviceTemplate,int PK_DeviceCategory,int MessageType,int MessageID);
 
 		/**
 		 * @brief If a plug-in dies, the router also dies, and all interceptors are cleared.  However if this

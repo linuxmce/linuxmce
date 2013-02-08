@@ -1,0 +1,19 @@
+udev (0.060-1) unstable; urgency=low
+
+  * Kernels older than 2.6.12 are not fully supported anymore, and if
+    used will cause a little delay in the processing of some events.
+    udev users are advised to update to 2.6.12 as soon as possible.
+  * Starting with this release udev will always be used as the hotplug
+    multiplexer even with kernels older than 2.6.10. Using udev with
+    these old kernels will break firmware loading for some drivers.
+  * All rules are applied now, but only the first matching NAME attribute
+    will be considered. It may be needed to add OPTIONS="last_rule" to
+    custom rules to restore the precedent behavior.
+  * The rules keys now support more operations, as documented in the
+    man page. Rules which previously used "=" to add a value to a
+    list-like variable should be changed to use "+=".
+  * Support for /etc/dev.d/ and /etc/hotplug.d/ multiplexing has been
+    removed from udev. Compatibility support is provided by some helper
+    programs started by RUN rules in hotplugd.rules.
+
+ -- Marco d'Itri <md@linux.it>  Wed, 22 Jun 2005 21:42:22 +0200

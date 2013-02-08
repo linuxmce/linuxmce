@@ -10,11 +10,14 @@ fi
 
 Q="SELECT COUNT(*) FROM Installation WHERE PK_Installation=1"
 R=$(RunSQL "$Q")
+
 if [[ "$R" -ne 0 ]]; then
-	NewInstNumber=$(wget --timeout=10 -O - http://plutohome.com/new_installation.php)
+	NewInstNumber=$(wget --timeout=10 -O - http://www.linuxmce.org/new_installation.php)
 	if [[ -n "$NewInstNumber" ]]; then
-		/usr/pluto/bin/sqlCVS -t Installation -O 1 -N "$NewInstNumber" change_key
+	echo "Running command: /usr/pluto/bin/sqlCVS $PLUTO_DB_CRED -D "$MySqlDBName" -t Installation -O 1 -N "$NewInstNumber" change_key"
+		/usr/pluto/bin/sqlCVS $PLUTO_DB_CRED -D "$MySqlDBName" -t Installation -O 1 -N "$NewInstNumber" change_key
 		ConfSet PK_Installation "$NewInstNumber"
 		mv /usr/pluto/orbiter/floorplans/inst{1,$NewInstNumber}
 	fi
 fi
+

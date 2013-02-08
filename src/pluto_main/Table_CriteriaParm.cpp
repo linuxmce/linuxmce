@@ -82,6 +82,7 @@ void Row_CriteriaParm::Delete()
 	Row_CriteriaParm *pRow = this; // Needed so we will have only 1 version of get_primary_fields_assign_from_row
 	
 	if (!is_deleted)
+	{
 		if (is_added)	
 		{	
 			vector<TableRow*>::iterator i;	
@@ -103,6 +104,7 @@ void Row_CriteriaParm::Delete()
 			table->deleted_cachedRows[key] = this;
 			is_deleted = true;	
 		}	
+	}
 }
 
 void Row_CriteriaParm::Reload()
@@ -143,8 +145,7 @@ is_null[2] = false;
 is_null[3] = true;
 m_Operator = 0;
 is_null[4] = false;
-m_Value = "";
-is_null[5] = false;
+is_null[5] = true;
 is_null[6] = true;
 m_FK_CannedEvents_CriteriaParmList = 0;
 is_null[7] = true;
@@ -155,7 +156,8 @@ is_null[9] = true;
 m_psc_user = 0;
 m_psc_frozen = 0;
 is_null[10] = false;
-is_null[11] = true;
+m_psc_mod = "0000-00-00 00:00:00";
+is_null[11] = false;
 is_null[12] = true;
 m_psc_restrict = 0;
 
@@ -250,6 +252,9 @@ m_psc_restrict = val; is_modified=true; is_null[12]=false;}
 bool Row_CriteriaParm::Parm_isNull() {PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
 
 return is_null[3];}
+bool Row_CriteriaParm::Value_isNull() {PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
+
+return is_null[5];}
 bool Row_CriteriaParm::FK_CannedEvents_CriteriaParmList_isNull() {PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
 
 return is_null[6];}
@@ -265,9 +270,6 @@ return is_null[9];}
 bool Row_CriteriaParm::psc_frozen_isNull() {PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
 
 return is_null[10];}
-bool Row_CriteriaParm::psc_mod_isNull() {PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
-
-return is_null[11];}
 bool Row_CriteriaParm::psc_restrict_isNull() {PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
 
 return is_null[12];}
@@ -275,6 +277,10 @@ return is_null[12];}
 			
 void Row_CriteriaParm::Parm_setNull(bool val){PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
 is_null[3]=val;
+is_modified=true;
+}
+void Row_CriteriaParm::Value_setNull(bool val){PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
+is_null[5]=val;
 is_modified=true;
 }
 void Row_CriteriaParm::FK_CannedEvents_CriteriaParmList_setNull(bool val){PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
@@ -295,10 +301,6 @@ is_modified=true;
 }
 void Row_CriteriaParm::psc_frozen_setNull(bool val){PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
 is_null[10]=val;
-is_modified=true;
-}
-void Row_CriteriaParm::psc_mod_setNull(bool val){PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
-is_null[11]=val;
 is_modified=true;
 }
 void Row_CriteriaParm::psc_restrict_setNull(bool val){PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
@@ -353,8 +355,8 @@ PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
 if (is_null[3])
 return "NULL";
 
-char *buf = new char[41];
-db_wrapper_real_escape_string(table->database->m_pDB, buf, m_Parm.c_str(), (unsigned long) min((size_t)20,m_Parm.size()));
+char *buf = new char[121];
+db_wrapper_real_escape_string(table->database->m_pDB, buf, m_Parm.c_str(), (unsigned long) min((size_t)60,m_Parm.size()));
 string s=string()+"\""+buf+"\"";
 delete[] buf;
 return s;
@@ -380,8 +382,8 @@ PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
 if (is_null[5])
 return "NULL";
 
-char *buf = new char[101];
-db_wrapper_real_escape_string(table->database->m_pDB, buf, m_Value.c_str(), (unsigned long) min((size_t)50,m_Value.size()));
+char *buf = new char[301];
+db_wrapper_real_escape_string(table->database->m_pDB, buf, m_Value.c_str(), (unsigned long) min((size_t)150,m_Value.size()));
 string s=string()+"\""+buf+"\"";
 delete[] buf;
 return s;

@@ -65,6 +65,12 @@ namespace DCE
 	DeviceData_Router* m_pDevice_pbx;
 	int m_nPBXDevice;
 
+	string m_sDestChannel;
+	bool m_bReplacedChannel;
+
+	// Los93soL
+	std::map<string,string> m_mapChannel2CallerID;
+
 	// Private methods
 public:
 	// Public member variables
@@ -115,6 +121,9 @@ public:
 	class Orbiter_Plugin *m_pOrbiter_Plugin;
 	Database_pluto_main *m_pDatabase_pluto_main;
 	Database_pluto_telecom *m_pDatabase_pluto_telecom;
+
+	// Parse the metadata for the voicemail grid
+	string ParseVoiceMailMetadata(string s_VoiceMailFile, map<string, string>& mapVMData);
 
 	// Datagrids
 	class DataGridTable *TelecomScenariosGrid(string GridID,string Parms,void *ExtraData,int *iPK_Variable,string *sValue_To_Assign,class Message *pMessage);

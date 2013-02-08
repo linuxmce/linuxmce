@@ -30,11 +30,12 @@
 #include "pluto_main/Table_CriteriaParmList.h"
 #include "pluto_main/Table_EventHandler.h"
 
-TimedEvent::TimedEvent(Row_EventHandler *pRow_EventHandler)
+TimedEvent::TimedEvent(Row_EventHandler *pRow_EventHandler, class Criteria *pCriteria)
 {
 	m_tTime=0;
 	m_pRow_EventHandler=pRow_EventHandler;
 	m_iTimedEventType=m_pRow_EventHandler->TimedEvent_get();
+	m_pCriteria = pCriteria;
 	m_pCommandGroup=NULL;
 	vector<Row_CriteriaParm *> vectRow_CriteriaParm;
 	pRow_EventHandler->FK_Criteria_getrow()->FK_CriteriaParmNesting_getrow()->CriteriaParm_FK_CriteriaParmNesting_getrows(&vectRow_CriteriaParm);
@@ -50,13 +51,12 @@ TimedEvent::TimedEvent(Row_EventHandler *pRow_EventHandler)
 		else if( pRow_CriteriaParm->FK_CriteriaParmList_get()==CRITERIAPARMLIST_Specific_Date_CONST )
 			m_tTime=StringUtils::SQLDateTime(pRow_CriteriaParm->Value_get());
 	}
-	
+
 	CalcNextTime();
 }
 
 void TimedEvent::CalcNextTime()
 {
-	m_tTime=0;
 	switch(m_iTimedEventType)
 	{
 	case INTERVAL_EVENT:
@@ -76,6 +76,7 @@ void TimedEvent::CalcNextTime()
 			{
 				LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"Interval timer %s has no time: %s",
 					m_pRow_EventHandler->Description_get().c_str(),m_sTimes.c_str());
+				m_tTime=0;
 				return;
 			}
 LoggerWrapper::GetInstance()->Write(LV_STATUS,"Added interval timer %s at %d now %d seconds %d",
@@ -84,6 +85,7 @@ LoggerWrapper::GetInstance()->Write(LV_STATUS,"Added interval timer %s at %d now
 		break;
 	case DAY_OF_WEEK:
 		{
+			m_tTime=0;
 			time_t t=time(NULL);
 			struct tm tm_Now;
 			localtime_r(&t,&tm_Now);
@@ -133,6 +135,7 @@ LoggerWrapper::GetInstance()->Write(LV_STATUS,"TimedEvent::CalcNextTime dow done
 		break;
 	case DAY_OF_MONTH:
 		{
+			m_tTime=0;
 			time_t t=time(NULL);
 			struct tm tm_Now;
 			localtime_r(&t,&tm_Now);

@@ -7,11 +7,11 @@
  
  Phone: +1 (877) 758-8648
  
- This program is distributed according to the terms of the Pluto Public License, available at: 
- http://plutohome.com/index.php?section=public_license 
+ This program is distributed according to the terms of the GNU Public License, available at: 
+ http://www.fsf.org/licensing/licenses/gpl.html 
  
  This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY 
- or FITNESS FOR A PARTICULAR PURPOSE. See the Pluto Public License for more details.
+ or FITNESS FOR A PARTICULAR PURPOSE. See the GNU Public License for more details.
  
  */
  
@@ -33,11 +33,9 @@
 #include "EventInfo.h"
 #include "DeviceData_Router.h"
 
-#ifndef EMBEDDED_LMCE
 #include "../pluto_main/Table_CriteriaParmList.h"
 #include "../pluto_main/Table_DesignObjParameter.h"
 #include "../pluto_main/Table_ParameterType.h"
-#endif
 
 #define OPERATOR_EQUALS			1
 #define OPERATOR_NOTEQUALS		2

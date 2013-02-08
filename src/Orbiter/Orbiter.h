@@ -60,6 +60,7 @@ class DataGridRenderer;
 /** For brevity,  DesignObj_Orbiter will be abbreviated Obj */
 #ifdef HID_REMOTE
 	class PlutoHIDInterface;
+        class GenericHIDInterface;
 #endif
 
 #define AUDIO_STATION_SKIN "NuForce"
@@ -151,6 +152,7 @@ namespace DCE
 		friend class ::ObjectRenderer;
 #ifdef HID_REMOTE
 		friend class ::PlutoHIDInterface;
+		friend class ::GenericHIDInterface;
 #endif
 
 #ifdef ENABLE_MOUSE_BEHAVIOR
@@ -238,7 +240,10 @@ namespace DCE
 #endif
 #ifdef HID_REMOTE
 		PlutoHIDInterface *m_pHIDInterface;
+		GenericHIDInterface *m_pGenericHIDInterface;
+		vector <string> m_vectGyroDevices;	// Gyro devices to map to GenericHIDInterface
 		pthread_t m_HidThreadID;
+		pthread_t m_GenericHidThreadID;
 #endif
 		//<-dceag-const-b->!
 
@@ -300,8 +305,6 @@ namespace DCE
 
 
 		virtual void HideWindow(string sWindowName) {}
-
-		virtual void SetMonitorPowerState(bool bOn) {}  // Turn the monitor on or off
 
 		pluto_pthread_mutex_t m_MaintThreadMutex;  // This will also protect the callback map
 		pluto_pthread_mutex_t m_ScreenMutex; /** < Anything that should not be done during a screen render, change, etc. Blocking this will prevent screen changes */
@@ -509,8 +512,6 @@ namespace DCE
 
 		void RedrawObject( void *iData );
 
-		void SendMessageDelayed( void *iData );  // Pass in a message to have it sent at a later time
-
 		// Reselect the given object, used for repeating buttons
 		void ReselectObject( void *data );
 
@@ -643,11 +644,6 @@ namespace DCE
 		* If a ScreenHandler needs to intercept a message it can register using this function
 		*/
 		bool ScreenHandlerMsgInterceptor( class Socket *pSocket, class Message *pMessage, class DeviceData_Base *pDeviceFrom, class DeviceData_Base *pDeviceTo );
-
-		/**
-		* If a ScreenHandler needs to intercept a message it can register using this function
-		*/
-		bool MediaInsertedMsgInterceptor( class Socket *pSocket, class Message *pMessage, class DeviceData_Base *pDeviceFrom, class DeviceData_Base *pDeviceTo );
 
 		/**
 		* @brief A "DoMaint" callback to continually refresh the screen
@@ -966,6 +962,9 @@ namespace DCE
 
 		//Returns true if Orbiter's config file has preseeded install values.
 		bool IsSelfInstallable();
+
+		//Used to redirect game media types to MEDIATYPE_LMCE_Game_CONST
+		int PreprocessMediaType(int iPK_MediaType);
 
 		//<-dceag-h-b->
 	/*
@@ -1995,6 +1994,14 @@ light, climate, media, security, telecom */
 	virtual void CMD_Assisted_Make_Call(int iPK_Users,string sPhoneExtension,string sPK_Device_From,int iPK_Device_To) { string sCMD_Result; CMD_Assisted_Make_Call(iPK_Users,sPhoneExtension.c_str(),sPK_Device_From.c_str(),iPK_Device_To,sCMD_Result,NULL);};
 	virtual void CMD_Assisted_Make_Call(int iPK_Users,string sPhoneExtension,string sPK_Device_From,int iPK_Device_To,string &sCMD_Result,Message *pMessage);
 
+
+	/** @brief COMMAND: #975 - XPromptReload */
+	/** This command displays a message using custom drawn X primitives and asks the user if they want to reload the router. */
+		/** @param #9 Text */
+			/** Text to display on the screen */
+
+	virtual void CMD_XPromptReload(string sText) { string sCMD_Result; CMD_XPromptReload(sText.c_str(),sCMD_Result,NULL);};
+	virtual void CMD_XPromptReload(string sText,string &sCMD_Result,Message *pMessage);
 
 //<-dceag-h-e->
 

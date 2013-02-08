@@ -1,0 +1,61 @@
+#!/bin/sh /usr/share/dpatch/dpatch-run
+
+## woody patch - by Thomas Günther <tom@toms-cafe.de>
+##
+## All lines beginning with `## DP:' are a description of the patch.
+## DP: Make it compile with woody.
+
+@DPATCH@
+--- skinelchi-0.0.1i/DisplayMenu.c
++++ skinelchi-0.0.1i/DisplayMenu.c
+@@ -3,7 +3,6 @@
+ #include <stl.h>
+ #endif
+ #endif
+-#include "DisplayMenu.h"
+ #ifdef HAVE_IMAGEMAGICK
+ #include "bitmap.h"
+ cOSDImageBitmap image;
+@@ -15,6 +14,7 @@
+ bool imagereadwriteready = false;
+ bool imageconvertready = false;
+ #endif
++#include "DisplayMenu.h"
+ 
+ //for epg4vdr
+ cBitmap bmpEpg4Vdr(8,8,1);
+diff -xdebian -xCVS -Naur /source/vdr13/vdrdevel-plugin-skinelchi/bitmap.h ./bitmap.h
+--- skinelchi-0.0.1i/bitmap.h
++++ skinelchi-0.0.1i/bitmap.h
+@@ -5,10 +5,10 @@
+ 
+ #define X_DISPLAY_MISSING
+ 
++#include <Magick++.h>
+ #include "setup.h"
+ #include <vdr/osd.h>
+ #include <vdr/skins.h>
+-#include <Magick++.h>
+ 
+ using namespace Magick;
+ 
+--- skinelchi-0.0.1i/skinelchi.c
++++ skinelchi-0.0.1i/skinelchi.c
+@@ -6,6 +6,7 @@
+ #ifdef HAVE_C295
+ #include <stl.h>
+ #endif
++#include "bitmap.h"
+ #endif
+ #include "setup.h"
+ #include "DisplayChannel.h"
+@@ -16,9 +17,6 @@
+ #include "DisplayMessage.h"
+ #include "skinelchi.h"
+ #include "i18n.h"
+-#ifdef HAVE_IMAGEMAGICK
+-#include "bitmap.h"
+-#endif
+ #include <vdr/font.h>
+ #include <vdr/interface.h>
+ #include <vdr/osd.h>

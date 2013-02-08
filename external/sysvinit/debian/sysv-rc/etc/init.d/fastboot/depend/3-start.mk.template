@@ -1,0 +1,30 @@
+# GNU Makefile listing dependencies between services when services are started.
+
+## Example runing abc_service first.
+$(filter-out $<,$(ALL))         : Pluto_Network_Firewall.sh
+
+## Running a_service after b_service and c_service
+#a_service : b_service c_service
+
+#Pluto_Start_DCERouter.sh        : mysql
+#Pluto_Start_LocalDevices.sh 	: mysql Pluto_Start_DCERouter.sh
+#Pluto_Start_OrbiterGen.sh       : mysql
+Pluto_Update_StartupScrips.sh   : mysql
+Pluto_Network_Firewall.sh	: mysql
+Pluto_Diskless_Setup.sh         : mysql
+Pluto_SSH_Keys.sh		: ssh
+Pluto_WakeMDs.sh		: dhcp3-server nfs-common nfs-kernel-server
+#Pluto_Config_Device_Changes.sh 	: mysql
+Pluto_Dhcpd-Plugin.sh           : dhcp3-server
+Pluto_Share_IRCodes.sh         	: mysql
+Pluto_Backup_Database.sh        : mysql
+Pluto_Purge_Camera_Archive.pl	: mysql
+Pluto_fixMythTvSettings.sh      : mysql
+Pluto_PlutoVersion.sh		: mysql
+Pluto_ConfirmInstallation.sh 	: mysql
+Pluto_UpdateMediaDaemon.sh     	: mysql
+Pluto_Net_Mount_All.sh          : mysql
+
+# Example runing xyz_service last.
+#xyz_sercice : $(filter-out $@,$(ALL))
+

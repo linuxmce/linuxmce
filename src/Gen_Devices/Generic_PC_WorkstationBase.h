@@ -44,6 +44,20 @@ public:
 	* @brief Events methods for our device
 	*/
 
+	virtual void On()
+	{
+		SendMessage(new Message(m_dwPK_Device, DEVICEID_EVENTMANAGER, PRIORITY_NORMAL, MESSAGETYPE_EVENT, 
+			EVENT_On_CONST,
+			0 /* number of parameter's pairs (id, value) */));
+	}
+
+	virtual void Off()
+	{
+		SendMessage(new Message(m_dwPK_Device, DEVICEID_EVENTMANAGER, PRIORITY_NORMAL, MESSAGETYPE_EVENT, 
+			EVENT_Off_CONST,
+			0 /* number of parameter's pairs (id, value) */));
+	}
+
 };
 
 
@@ -230,6 +244,8 @@ public:
 	string DATA_Get_Release() { return GetData()->Get_Release(); }
 	bool DATA_Get_Dont_Detect_Serial_Devices() { return GetData()->Get_Dont_Detect_Serial_Devices(); }
 	//Event accessors
+	void EVENT_On() { GetEvents()->On(); }
+	void EVENT_Off() { GetEvents()->Off(); }
 	//Commands - Override these to handle commands from the server
 	virtual void CMD_On(int iPK_Pipe,string sPK_Device_Pipes,string &sCMD_Result,class Message *pMessage) {};
 	virtual void CMD_Off(int iPK_Pipe,string &sCMD_Result,class Message *pMessage) {};

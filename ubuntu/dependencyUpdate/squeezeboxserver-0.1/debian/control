@@ -1,0 +1,16 @@
+Source: squeezeboxserver
+Section: unknown
+Priority: extra
+Maintainer: Peer Oliver Schmidt <developers@linuxmce.org>
+Build-Depends: debhelper (>= 7)
+Standards-Version: 3.8.3
+Homepage: <insert the upstream URL, if relevant>
+
+Package: squeezeboxserver
+Architecture: any
+Depends: ${shlibs:Depends}, ${misc:Depends}, logitechmediaserver
+Description: Intermediate package to point to renamed logitechmediaserver
+ Logitech renamed the server package for SqueezeBoxes again. This time
+ it is called logitechmediaserver. This intermediary package will help 
+ people with older pluto slim server packages, to fulfill the correct
+ dependency.

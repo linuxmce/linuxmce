@@ -1,0 +1,137 @@
+TARGET PlutoMO.exe
+TARGETTYPE exe
+UID 0x100039CE 0xA1ef0015
+VENDORID 0
+
+// EPOCSTACKSIZE 0x5000
+
+// TARGETPATH \system\apps\PlutoMO
+
+CAPABILITY LocalServices  NetworkServices ReadUserData WriteUserData UserEnvironment
+
+MACRO   SYMBIAN
+MACRO	VIPPHONE
+
+SOURCEPATH ..\..\VIPShared
+SOURCE  BD_CP_Disconnect.cpp
+SOURCE  BD_CP_SendMeKeystrokes.cpp
+SOURCE  BD_CP_ShowImage.cpp
+SOURCE  BD_CP_ShowVMC.cpp
+SOURCE  BD_CP_ShowList.cpp
+SOURCE  BD_CP_UpdateVariables.cpp
+SOURCE  BD_CP_CaptureKeyboard.cpp
+SOURCE  BD_CP_SendFile.cpp
+SOURCE  BD_CP_SimulateEvent.cpp
+SOURCE  BD_CP_CurrentSignalStrength.cpp
+SOURCE  BD_CP_MenuData.cpp
+SOURCE  BD_CP_SetBkgndImage.cpp
+SOURCE  BD_CP_ShowMenu.cpp
+SOURCE  BD_PC_SelectedFromList.cpp
+SOURCE  BD_PC_Disconnect.cpp
+SOURCE  BD_PC_KeyWasPressed.cpp
+SOURCE  BD_PC_OrderPlaced.cpp
+SOURCE  BD_PC_ReportingVariables.cpp
+SOURCE  BD_PC_VMCHidden.cpp
+SOURCE  BD_PC_VMCTerminated.cpp
+SOURCE  BD_PC_SetVariable.cpp
+SOURCE  BD_PC_ReportMyVersion.cpp
+SOURCE  BD_PC_GetSignalStrength.cpp
+SOURCE  BD_PC_SetImageQuality.cpp
+SOURCE  BD_PC_Configure.cpp
+SOURCE  BD_PC_SelectedItem.cpp
+SOURCE  BD_PC_MouseEvent.cpp
+SOURCE  PlutoPhoneCommands.cpp
+SOURCE  RenderMenu.cpp
+SOURCE  VIPMenu.cpp
+SOURCE  VIPIncludes.cpp
+
+SOURCEPATH ..\..\BD
+SOURCE  BDCommandProcessor_Symbian_Base.cpp
+SOURCE  BDCommandProcessor_Symbian_Bluetooth.cpp
+SOURCE  BDCommand.cpp
+
+SOURCEPATH ..\..\PlutoUtils
+SOURCE  MyString.cpp
+SOURCE  StringUtils.cpp
+
+SOURCEPATH ..\..\SerializeClass
+SOURCE  SerializeClass.cpp
+
+SOURCEPATH ..\src
+SOURCE  PlutoMOApp.cpp 
+SOURCE  PlutoMOAppUi.cpp
+SOURCE  PlutoMODocument.cpp
+SOURCE  PlutoMOContainer.cpp
+SOURCE  PlutoMOengine.cpp
+SOURCE  PlutoVMCContainer.cpp
+SOURCE  PlutoVMCUtil.cpp
+SOURCE  PlutoVMCView.cpp
+SOURCE  Logger.cpp
+SOURCE  ImageLoader.cpp
+SOURCE  GetCallerID.cpp
+SOURCE  LineReader.cpp
+SOURCE  NotifyIncomingCall.cpp
+SOURCE  PlutoEventContainer.cpp
+SOURCE 	PlutoEventView.cpp
+
+SOURCEPATH ..\data
+START RESOURCE PlutoMO.rss
+TARGETPATH \resource\apps
+HEADER
+END
+
+// START RESOURCE PlutoMO_caption.rss
+// TARGETPATH \resource\apps
+// END
+
+START RESOURCE PlutoMO_reg.rss
+#ifdef winscw
+targetpath 	  \private\10003a3f\apps
+#else
+targetpath 	  \private\10003a3f\import\apps
+#endif
+END
+
+LANG     SC
+
+USERINCLUDE . ..\inc
+USERINCLUDE ..\..\BD
+USERINCLUDE ..\..\PlutoUtils
+USERINCLUDE ..\..\VIPShared
+USERINCLUDE ..\..\PlutoMO
+USERINCLUDE ..\..
+
+SYSTEMINCLUDE   . \root\symbian-sdks\s60_30\epoc32\include
+
+LIBRARY estor.lib
+LIBRARY euser.lib 
+LIBRARY apparc.lib 
+LIBRARY cone.lib 
+LIBRARY eikcore.lib 
+//LIBRARY commonengine.lib
+LIBRARY eikcoctl.lib 
+LIBRARY avkon.lib 
+LIBRARY bafl.lib 
+LIBRARY apmime.lib 
+LIBRARY commonui.lib 
+LIBRARY esock.lib
+LIBRARY bluetooth.lib
+LIBRARY apgrfx.lib
+LIBRARY sdpdatabase.lib
+LIBRARY btmanclient.lib
+LIBRARY efsrv.lib
+LIBRARY gdi.lib
+LIBRARY mediaclientimage.lib
+LIBRARY fbscli.lib
+LIBRARY ws32.lib
+LIBRARY aknnotify.lib
+//LIBRARY bitgdi.lib
+LIBRARY etel.lib
+LIBRARY logcli.lib
+//LIBRARY aknnotify.lib
+//LIBRARY http.lib
+//LIBRARY InetProtUtil.lib 
+
+// AIF PlutoMO.aif ..\aif PlutoMOaif.rss c8 context_pane_icon.bmp context_pane_icon_mask.bmp list_icon.bmp list_icon_mask.bmp
+
+// SRCDBG

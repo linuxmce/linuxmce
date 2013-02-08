@@ -13,6 +13,11 @@ Lock "DCERouter" "Spawn_DCERouter" || exit 1
 # TODO: remove this when correct locking will be implemented
 rm -f /usr/pluto/locks/pluto_spawned_local_devices.txt
 
+# The following directory needs to exist, for people who want to
+# load plugins without a device template (and the existance of the
+# dir gets rid of a warning on DCERouter startup
+
+mkdir -p /usr/pluto/bin/plugin-inject
 LogFile="/var/log/pluto/DCERouter.log";
 
 echo "== FRESH START =="
@@ -36,12 +41,12 @@ while [[ "$i" -le "$MAX_LOOP_COUNT" ]]; do
 	Logging $TYPE $SEVERITY_NORMAL "$module" "Starting... $i" "$LogFile"
 	Log "$LogFile" "$(date) Starting"
 
-	/usr/pluto/bin/UpdateEntArea -h localhost > >(tee -a /var/log/pluto/updateea.log)
-	mysqldump pluto_main Device > /var/log/pluto/device.$(date +%F-%T)
+	/usr/pluto/bin/UpdateEntArea $PLUTO_DB_CRED -D "$MySqlDBName" > >(tee -a /var/log/pluto/updateea.log)
+	mysqldump $MYSQL_DB_CRED "$MySqlDBName" Device > /var/log/pluto/device.$(date +%F-%T)
 	if [[ "${Valgrind/DCERouter}" != "$Valgrind" ]]; then
-		/usr/pluto/bin/Spawn_Wrapper.sh $VGcmd/usr/pluto/bin/DCERouter -h localhost -l "$LogFile"
+		/usr/pluto/bin/Spawn_Wrapper.sh $VGcmd/usr/pluto/bin/DCERouter $PLUTO_DB_CRED -D "$MySqlDBName" -l "$LogFile"
 	else
-		/usr/pluto/bin/Spawn_Wrapper.sh /usr/pluto/bin/DCERouter -h localhost -l "$LogFile"
+		/usr/pluto/bin/Spawn_Wrapper.sh /usr/pluto/bin/DCERouter $PLUTO_DB_CRED -D "$MySqlDBName" -l "$LogFile"
 	fi
 
 	Ret="$?"
@@ -67,3 +72,4 @@ while [[ "$i" -le "$MAX_LOOP_COUNT" ]]; do
 	fi
 	echo out
 done
+

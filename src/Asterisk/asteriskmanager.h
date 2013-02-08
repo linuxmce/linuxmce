@@ -68,6 +68,11 @@ public:
 		const std::string sOriginatorType, 
 		const std::string sCallerID);
 	
+	/*link an extension to a dialplan application*/
+	void Application(const std::string sPhoneNumber,
+		const std::string sApplication,
+		const std::string sData_String);
+
 	/*hangs up a call*/
 	void Hangup(const std::string sChannel);
 

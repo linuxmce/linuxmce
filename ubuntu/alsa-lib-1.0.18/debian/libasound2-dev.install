@@ -1,0 +1,6 @@
+debian/tmp/usr/share/aclocal
+debian/tmp/usr/include
+debian/tmp/usr/lib/libasound.a
+debian/tmp/usr/lib/libasound.so
+debian/tmp/usr/lib/libasound.la
+debian/tmp/usr/lib/pkgconfig

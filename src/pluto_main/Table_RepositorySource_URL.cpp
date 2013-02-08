@@ -35,8 +35,6 @@ using namespace std;
 #include "Table_Country.h"
 
 #include "Table_Installation_RepositorySource_URL.h"
-#include "Table_Installation_RepositorySource_URL_pschist.h"
-#include "Table_Installation_RepositorySource_URL_pschmask.h"
 
 
 void Database_pluto_main::CreateTable_RepositorySource_URL()
@@ -84,6 +82,7 @@ void Row_RepositorySource_URL::Delete()
 	Row_RepositorySource_URL *pRow = this; // Needed so we will have only 1 version of get_primary_fields_assign_from_row
 	
 	if (!is_deleted)
+	{
 		if (is_added)	
 		{	
 			vector<TableRow*>::iterator i;	
@@ -105,6 +104,7 @@ void Row_RepositorySource_URL::Delete()
 			table->deleted_cachedRows[key] = this;
 			is_deleted = true;	
 		}	
+	}
 }
 
 void Row_RepositorySource_URL::Reload()
@@ -140,13 +140,11 @@ void Row_RepositorySource_URL::SetDefaultValues()
 is_null[0] = false;
 m_FK_RepositorySource = 0;
 is_null[1] = false;
-m_URL = "";
-is_null[2] = false;
+is_null[2] = true;
 is_null[3] = true;
 m_FK_Country = 0;
 is_null[4] = true;
-m_Password = "";
-is_null[5] = false;
+is_null[5] = true;
 is_null[6] = true;
 is_null[7] = true;
 m_psc_id = 0;
@@ -156,7 +154,8 @@ is_null[9] = true;
 m_psc_user = 0;
 m_psc_frozen = 0;
 is_null[10] = false;
-is_null[11] = true;
+m_psc_mod = "0000-00-00 00:00:00";
+is_null[11] = false;
 is_null[12] = true;
 m_psc_restrict = 0;
 
@@ -248,12 +247,18 @@ void Row_RepositorySource_URL::psc_restrict_set(long int val){PLUTO_SAFETY_LOCK_
 m_psc_restrict = val; is_modified=true; is_null[12]=false;}
 
 		
+bool Row_RepositorySource_URL::URL_isNull() {PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
+
+return is_null[2];}
 bool Row_RepositorySource_URL::FK_Country_isNull() {PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
 
 return is_null[3];}
 bool Row_RepositorySource_URL::Username_isNull() {PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
 
 return is_null[4];}
+bool Row_RepositorySource_URL::Password_isNull() {PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
+
+return is_null[5];}
 bool Row_RepositorySource_URL::Comments_isNull() {PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
 
 return is_null[6];}
@@ -269,20 +274,25 @@ return is_null[9];}
 bool Row_RepositorySource_URL::psc_frozen_isNull() {PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
 
 return is_null[10];}
-bool Row_RepositorySource_URL::psc_mod_isNull() {PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
-
-return is_null[11];}
 bool Row_RepositorySource_URL::psc_restrict_isNull() {PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
 
 return is_null[12];}
 
 			
+void Row_RepositorySource_URL::URL_setNull(bool val){PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
+is_null[2]=val;
+is_modified=true;
+}
 void Row_RepositorySource_URL::FK_Country_setNull(bool val){PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
 is_null[3]=val;
 is_modified=true;
 }
 void Row_RepositorySource_URL::Username_setNull(bool val){PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
 is_null[4]=val;
+is_modified=true;
+}
+void Row_RepositorySource_URL::Password_setNull(bool val){PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
+is_null[5]=val;
 is_modified=true;
 }
 void Row_RepositorySource_URL::Comments_setNull(bool val){PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
@@ -303,10 +313,6 @@ is_modified=true;
 }
 void Row_RepositorySource_URL::psc_frozen_setNull(bool val){PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
 is_null[10]=val;
-is_modified=true;
-}
-void Row_RepositorySource_URL::psc_mod_setNull(bool val){PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
-is_null[11]=val;
 is_modified=true;
 }
 void Row_RepositorySource_URL::psc_restrict_setNull(bool val){PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
@@ -348,8 +354,8 @@ PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
 if (is_null[2])
 return "NULL";
 
-char *buf = new char[511];
-db_wrapper_real_escape_string(table->database->m_pDB, buf, m_URL.c_str(), (unsigned long) min((size_t)255,m_URL.size()));
+char *buf = new char[1531];
+db_wrapper_real_escape_string(table->database->m_pDB, buf, m_URL.c_str(), (unsigned long) min((size_t)765,m_URL.size()));
 string s=string()+"\""+buf+"\"";
 delete[] buf;
 return s;
@@ -375,8 +381,8 @@ PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
 if (is_null[4])
 return "NULL";
 
-char *buf = new char[61];
-db_wrapper_real_escape_string(table->database->m_pDB, buf, m_Username.c_str(), (unsigned long) min((size_t)30,m_Username.size()));
+char *buf = new char[181];
+db_wrapper_real_escape_string(table->database->m_pDB, buf, m_Username.c_str(), (unsigned long) min((size_t)90,m_Username.size()));
 string s=string()+"\""+buf+"\"";
 delete[] buf;
 return s;
@@ -389,8 +395,8 @@ PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
 if (is_null[5])
 return "NULL";
 
-char *buf = new char[61];
-db_wrapper_real_escape_string(table->database->m_pDB, buf, m_Password.c_str(), (unsigned long) min((size_t)30,m_Password.size()));
+char *buf = new char[181];
+db_wrapper_real_escape_string(table->database->m_pDB, buf, m_Password.c_str(), (unsigned long) min((size_t)90,m_Password.size()));
 string s=string()+"\""+buf+"\"";
 delete[] buf;
 return s;
@@ -403,8 +409,8 @@ PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
 if (is_null[6])
 return "NULL";
 
-char *buf = new char[61];
-db_wrapper_real_escape_string(table->database->m_pDB, buf, m_Comments.c_str(), (unsigned long) min((size_t)30,m_Comments.size()));
+char *buf = new char[181];
+db_wrapper_real_escape_string(table->database->m_pDB, buf, m_Comments.c_str(), (unsigned long) min((size_t)90,m_Comments.size()));
 string s=string()+"\""+buf+"\"";
 delete[] buf;
 return s;
@@ -1161,20 +1167,6 @@ void Row_RepositorySource_URL::Installation_RepositorySource_URL_FK_RepositorySo
 PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
 
 class Table_Installation_RepositorySource_URL *pTable = table->database->Installation_RepositorySource_URL_get();
-pTable->GetRows("`FK_RepositorySource_URL`=" + StringUtils::itos(m_PK_RepositorySource_URL),rows);
-}
-void Row_RepositorySource_URL::Installation_RepositorySource_URL_pschist_FK_RepositorySource_URL_getrows(vector <class Row_Installation_RepositorySource_URL_pschist*> *rows)
-{
-PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
-
-class Table_Installation_RepositorySource_URL_pschist *pTable = table->database->Installation_RepositorySource_URL_pschist_get();
-pTable->GetRows("`FK_RepositorySource_URL`=" + StringUtils::itos(m_PK_RepositorySource_URL),rows);
-}
-void Row_RepositorySource_URL::Installation_RepositorySource_URL_pschmask_FK_RepositorySource_URL_getrows(vector <class Row_Installation_RepositorySource_URL_pschmask*> *rows)
-{
-PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
-
-class Table_Installation_RepositorySource_URL_pschmask *pTable = table->database->Installation_RepositorySource_URL_pschmask_get();
 pTable->GetRows("`FK_RepositorySource_URL`=" + StringUtils::itos(m_PK_RepositorySource_URL),rows);
 }
 

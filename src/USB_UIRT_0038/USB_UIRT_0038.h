@@ -83,7 +83,6 @@ public:
 	/*
 			*****DATA***** accessors inherited from base class
 	string DATA_Get_COM_Port_on_PC();
-	bool DATA_Get_Ignore();
 	bool DATA_Get_Only_One_Per_PC();
 	bool DATA_Get_Autoassign_to_parents_room();
 	bool DATA_Get_PNP_Create_Without_Prompting();

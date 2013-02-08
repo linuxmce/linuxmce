@@ -33,20 +33,10 @@ using namespace std;
 #include "Table_Pipe.h"
 
 #include "Table_Command_Pipe.h"
-#include "Table_Command_Pipe_pschist.h"
-#include "Table_Command_Pipe_pschmask.h"
 #include "Table_DeviceTemplate_DeviceCategory_ControlledVia_Pipe.h"
-#include "Table_DeviceTemplate_DeviceCategory_ControlledVia_Pipe_pschist.h"
-#include "Table_DeviceTemplate_DeviceCategory_ControlledVia_Pipe_pschmask.h"
 #include "Table_DeviceTemplate_DeviceTemplate_ControlledVia_Pipe.h"
-#include "Table_DeviceTemplate_DeviceTemplate_ControlledVia_Pipe_pschist.h"
-#include "Table_DeviceTemplate_DeviceTemplate_ControlledVia_Pipe_pschmask.h"
 #include "Table_Device_Device_Pipe.h"
-#include "Table_Device_Device_Pipe_pschist.h"
-#include "Table_Device_Device_Pipe_pschmask.h"
 #include "Table_MediaType.h"
-#include "Table_MediaType_pschist.h"
-#include "Table_MediaType_pschmask.h"
 
 
 void Database_pluto_main::CreateTable_Pipe()
@@ -94,6 +84,7 @@ void Row_Pipe::Delete()
 	Row_Pipe *pRow = this; // Needed so we will have only 1 version of get_primary_fields_assign_from_row
 	
 	if (!is_deleted)
+	{
 		if (is_added)	
 		{	
 			vector<TableRow*>::iterator i;	
@@ -115,6 +106,7 @@ void Row_Pipe::Delete()
 			table->deleted_cachedRows[key] = this;
 			is_deleted = true;	
 		}	
+	}
 }
 
 void Row_Pipe::Reload()
@@ -148,8 +140,7 @@ void Row_Pipe::SetDefaultValues()
 {
 	m_PK_Pipe = 0;
 is_null[0] = false;
-m_Description = "";
-is_null[1] = false;
+is_null[1] = true;
 is_null[2] = true;
 is_null[3] = true;
 m_psc_id = 0;
@@ -159,7 +150,8 @@ is_null[5] = true;
 m_psc_user = 0;
 m_psc_frozen = 0;
 is_null[6] = false;
-is_null[7] = true;
+m_psc_mod = "0000-00-00 00:00:00";
+is_null[7] = false;
 is_null[8] = true;
 m_psc_restrict = 0;
 
@@ -227,6 +219,9 @@ void Row_Pipe::psc_restrict_set(long int val){PLUTO_SAFETY_LOCK_ERRORSONLY(sl,ta
 m_psc_restrict = val; is_modified=true; is_null[8]=false;}
 
 		
+bool Row_Pipe::Description_isNull() {PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
+
+return is_null[1];}
 bool Row_Pipe::Define_isNull() {PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
 
 return is_null[2];}
@@ -242,14 +237,15 @@ return is_null[5];}
 bool Row_Pipe::psc_frozen_isNull() {PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
 
 return is_null[6];}
-bool Row_Pipe::psc_mod_isNull() {PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
-
-return is_null[7];}
 bool Row_Pipe::psc_restrict_isNull() {PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
 
 return is_null[8];}
 
 			
+void Row_Pipe::Description_setNull(bool val){PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
+is_null[1]=val;
+is_modified=true;
+}
 void Row_Pipe::Define_setNull(bool val){PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
 is_null[2]=val;
 is_modified=true;
@@ -268,10 +264,6 @@ is_modified=true;
 }
 void Row_Pipe::psc_frozen_setNull(bool val){PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
 is_null[6]=val;
-is_modified=true;
-}
-void Row_Pipe::psc_mod_setNull(bool val){PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
-is_null[7]=val;
 is_modified=true;
 }
 void Row_Pipe::psc_restrict_setNull(bool val){PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
@@ -300,8 +292,8 @@ PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
 if (is_null[1])
 return "NULL";
 
-char *buf = new char[101];
-db_wrapper_real_escape_string(table->database->m_pDB, buf, m_Description.c_str(), (unsigned long) min((size_t)50,m_Description.size()));
+char *buf = new char[301];
+db_wrapper_real_escape_string(table->database->m_pDB, buf, m_Description.c_str(), (unsigned long) min((size_t)150,m_Description.size()));
 string s=string()+"\""+buf+"\"";
 delete[] buf;
 return s;
@@ -314,8 +306,8 @@ PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
 if (is_null[2])
 return "NULL";
 
-char *buf = new char[21];
-db_wrapper_real_escape_string(table->database->m_pDB, buf, m_Define.c_str(), (unsigned long) min((size_t)10,m_Define.size()));
+char *buf = new char[61];
+db_wrapper_real_escape_string(table->database->m_pDB, buf, m_Define.c_str(), (unsigned long) min((size_t)30,m_Define.size()));
 string s=string()+"\""+buf+"\"";
 delete[] buf;
 return s;
@@ -972,39 +964,11 @@ PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
 class Table_Command_Pipe *pTable = table->database->Command_Pipe_get();
 pTable->GetRows("`FK_Pipe`=" + StringUtils::itos(m_PK_Pipe),rows);
 }
-void Row_Pipe::Command_Pipe_pschist_FK_Pipe_getrows(vector <class Row_Command_Pipe_pschist*> *rows)
-{
-PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
-
-class Table_Command_Pipe_pschist *pTable = table->database->Command_Pipe_pschist_get();
-pTable->GetRows("`FK_Pipe`=" + StringUtils::itos(m_PK_Pipe),rows);
-}
-void Row_Pipe::Command_Pipe_pschmask_FK_Pipe_getrows(vector <class Row_Command_Pipe_pschmask*> *rows)
-{
-PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
-
-class Table_Command_Pipe_pschmask *pTable = table->database->Command_Pipe_pschmask_get();
-pTable->GetRows("`FK_Pipe`=" + StringUtils::itos(m_PK_Pipe),rows);
-}
 void Row_Pipe::DeviceTemplate_DeviceCategory_ControlledVia_Pipe_FK_Pipe_getrows(vector <class Row_DeviceTemplate_DeviceCategory_ControlledVia_Pipe*> *rows)
 {
 PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
 
 class Table_DeviceTemplate_DeviceCategory_ControlledVia_Pipe *pTable = table->database->DeviceTemplate_DeviceCategory_ControlledVia_Pipe_get();
-pTable->GetRows("`FK_Pipe`=" + StringUtils::itos(m_PK_Pipe),rows);
-}
-void Row_Pipe::DeviceTemplate_DeviceCategory_ControlledVia_Pipe_pschist_FK_Pipe_getrows(vector <class Row_DeviceTemplate_DeviceCategory_ControlledVia_Pipe_pschist*> *rows)
-{
-PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
-
-class Table_DeviceTemplate_DeviceCategory_ControlledVia_Pipe_pschist *pTable = table->database->DeviceTemplate_DeviceCategory_ControlledVia_Pipe_pschist_get();
-pTable->GetRows("`FK_Pipe`=" + StringUtils::itos(m_PK_Pipe),rows);
-}
-void Row_Pipe::DeviceTemplate_DeviceCategory_ControlledVia_Pipe_pschmask_FK_Pipe_getrows(vector <class Row_DeviceTemplate_DeviceCategory_ControlledVia_Pipe_pschmask*> *rows)
-{
-PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
-
-class Table_DeviceTemplate_DeviceCategory_ControlledVia_Pipe_pschmask *pTable = table->database->DeviceTemplate_DeviceCategory_ControlledVia_Pipe_pschmask_get();
 pTable->GetRows("`FK_Pipe`=" + StringUtils::itos(m_PK_Pipe),rows);
 }
 void Row_Pipe::DeviceTemplate_DeviceTemplate_ControlledVia_Pipe_FK_Pipe_getrows(vector <class Row_DeviceTemplate_DeviceTemplate_ControlledVia_Pipe*> *rows)
@@ -1014,20 +978,6 @@ PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
 class Table_DeviceTemplate_DeviceTemplate_ControlledVia_Pipe *pTable = table->database->DeviceTemplate_DeviceTemplate_ControlledVia_Pipe_get();
 pTable->GetRows("`FK_Pipe`=" + StringUtils::itos(m_PK_Pipe),rows);
 }
-void Row_Pipe::DeviceTemplate_DeviceTemplate_ControlledVia_Pipe_pschist_FK_Pipe_getrows(vector <class Row_DeviceTemplate_DeviceTemplate_ControlledVia_Pipe_pschist*> *rows)
-{
-PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
-
-class Table_DeviceTemplate_DeviceTemplate_ControlledVia_Pipe_pschist *pTable = table->database->DeviceTemplate_DeviceTemplate_ControlledVia_Pipe_pschist_get();
-pTable->GetRows("`FK_Pipe`=" + StringUtils::itos(m_PK_Pipe),rows);
-}
-void Row_Pipe::DeviceTemplate_DeviceTemplate_ControlledVia_Pipe_pschmask_FK_Pipe_getrows(vector <class Row_DeviceTemplate_DeviceTemplate_ControlledVia_Pipe_pschmask*> *rows)
-{
-PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
-
-class Table_DeviceTemplate_DeviceTemplate_ControlledVia_Pipe_pschmask *pTable = table->database->DeviceTemplate_DeviceTemplate_ControlledVia_Pipe_pschmask_get();
-pTable->GetRows("`FK_Pipe`=" + StringUtils::itos(m_PK_Pipe),rows);
-}
 void Row_Pipe::Device_Device_Pipe_FK_Pipe_getrows(vector <class Row_Device_Device_Pipe*> *rows)
 {
 PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
@@ -1035,39 +985,11 @@ PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
 class Table_Device_Device_Pipe *pTable = table->database->Device_Device_Pipe_get();
 pTable->GetRows("`FK_Pipe`=" + StringUtils::itos(m_PK_Pipe),rows);
 }
-void Row_Pipe::Device_Device_Pipe_pschist_FK_Pipe_getrows(vector <class Row_Device_Device_Pipe_pschist*> *rows)
-{
-PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
-
-class Table_Device_Device_Pipe_pschist *pTable = table->database->Device_Device_Pipe_pschist_get();
-pTable->GetRows("`FK_Pipe`=" + StringUtils::itos(m_PK_Pipe),rows);
-}
-void Row_Pipe::Device_Device_Pipe_pschmask_FK_Pipe_getrows(vector <class Row_Device_Device_Pipe_pschmask*> *rows)
-{
-PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
-
-class Table_Device_Device_Pipe_pschmask *pTable = table->database->Device_Device_Pipe_pschmask_get();
-pTable->GetRows("`FK_Pipe`=" + StringUtils::itos(m_PK_Pipe),rows);
-}
 void Row_Pipe::MediaType_FK_Pipe_getrows(vector <class Row_MediaType*> *rows)
 {
 PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
 
 class Table_MediaType *pTable = table->database->MediaType_get();
-pTable->GetRows("`FK_Pipe`=" + StringUtils::itos(m_PK_Pipe),rows);
-}
-void Row_Pipe::MediaType_pschist_FK_Pipe_getrows(vector <class Row_MediaType_pschist*> *rows)
-{
-PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
-
-class Table_MediaType_pschist *pTable = table->database->MediaType_pschist_get();
-pTable->GetRows("`FK_Pipe`=" + StringUtils::itos(m_PK_Pipe),rows);
-}
-void Row_Pipe::MediaType_pschmask_FK_Pipe_getrows(vector <class Row_MediaType_pschmask*> *rows)
-{
-PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
-
-class Table_MediaType_pschmask *pTable = table->database->MediaType_pschmask_get();
 pTable->GetRows("`FK_Pipe`=" + StringUtils::itos(m_PK_Pipe),rows);
 }
 

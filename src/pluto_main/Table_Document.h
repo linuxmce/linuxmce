@@ -138,22 +138,22 @@ void psc_restrict_set(long int val);
 
 		
 		bool FK_Document_Parent_isNull();
+bool Title_isNull();
 bool Contents_isNull();
 bool psc_id_isNull();
 bool psc_batch_isNull();
 bool psc_user_isNull();
 bool psc_frozen_isNull();
-bool psc_mod_isNull();
 bool psc_restrict_isNull();
 
 			
 		void FK_Document_Parent_setNull(bool val);
+void Title_setNull(bool val);
 void Contents_setNull(bool val);
 void psc_id_setNull(bool val);
 void psc_batch_setNull(bool val);
 void psc_user_setNull(bool val);
 void psc_frozen_setNull(bool val);
-void psc_mod_setNull(bool val);
 void psc_restrict_setNull(bool val);
 	
 	
@@ -171,22 +171,8 @@ void psc_restrict_setNull(bool val);
 
 
 		// Return the rows in other tables with foreign keys pointing here
-		void DesignObj_pschist_FK_Document_getrows(vector <class Row_DesignObj_pschist*> *rows);
-void DesignObj_pschmask_FK_Document_getrows(vector <class Row_DesignObj_pschmask*> *rows);
-void DeviceTemplate_pschist_FK_Document_getrows(vector <class Row_DeviceTemplate_pschist*> *rows);
-void DeviceTemplate_pschmask_FK_Document_getrows(vector <class Row_DeviceTemplate_pschmask*> *rows);
-void Document_FK_Document_Parent_getrows(vector <class Row_Document*> *rows);
+		void Document_FK_Document_Parent_getrows(vector <class Row_Document*> *rows);
 void Document_Comment_FK_Document_getrows(vector <class Row_Document_Comment*> *rows);
-void Document_Comment_pschist_FK_Document_getrows(vector <class Row_Document_Comment_pschist*> *rows);
-void Document_Comment_pschmask_FK_Document_getrows(vector <class Row_Document_Comment_pschmask*> *rows);
-void Document_pschist_FK_Document_Parent_getrows(vector <class Row_Document_pschist*> *rows);
-void Document_pschmask_FK_Document_Parent_getrows(vector <class Row_Document_pschmask*> *rows);
-void Package_pschist_FK_Document_getrows(vector <class Row_Package_pschist*> *rows);
-void Package_pschist_FK_Document_ProgrammersGuide_getrows(vector <class Row_Package_pschist*> *rows);
-void Package_pschist_FK_Document_UsersManual_getrows(vector <class Row_Package_pschist*> *rows);
-void Package_pschmask_FK_Document_getrows(vector <class Row_Package_pschmask*> *rows);
-void Package_pschmask_FK_Document_ProgrammersGuide_getrows(vector <class Row_Package_pschmask*> *rows);
-void Package_pschmask_FK_Document_UsersManual_getrows(vector <class Row_Package_pschmask*> *rows);
 
 
 		// Setup binary serialization

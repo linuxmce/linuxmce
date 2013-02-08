@@ -1,0 +1,146 @@
+#!/bin/bash
+#
+# bootanim - boot animation wrapper script for fbmngplay
+# 
+# This program parses /etc/bootsplash/[THEME]/config/bootsplash-XxY.cfg
+# to determine the correct animation position.
+# 
+# This program is free software; you may redistribute it under the terms 
+# of the GNU General Public License. This program has absolutely no warranty.
+#
+# (C) 2002,2003 SuSE Linux AG. Written by Stefan Reinauer <stepan@suse.de>
+#
+# See http://www.bootsplash.org/ for more information.
+#
+
+usage()
+{
+    echo "usage: $0 [start|stop|kill|next] -m [-r XxY] [-d dir] mng1 [mng2..]"
+    cat << EOF
+
+  Available commands:
+	start		starts given animation
+	stop		fades out all running animations
+	kill		immediately stops all animations
+	next		continue to next animation.
+
+  Options for use with start command:
+	-r XxY		screen resolution to use if unable to autodetect.
+	-d dir		directory containing the animation files
+	-m 		play multiple animations
+	mng1|mng2	animation filename(s). Specify -m if multiple.
+
+EOF
+
+}
+
+if [ "$UID" -ne "0" ]; then
+    echo "$0 must be started as user root!!!"
+    echo "Exiting..."
+    exit 1
+fi
+
+# source our config
+source /etc/default/bootsplash 2>/dev/null
+
+# default settings
+test -z "${THEME}" && THEME="default"
+
+if [ ! -d /etc/bootsplash/themes/$THEME ]
+then
+  echo "$0: could not find theme $THEME in /etc/bootsplash/themes."
+  exit 0
+fi
+
+MODE=`/sbin/fbresolution 2>/dev/null`
+DIRECTORY=/etc/bootsplash/themes/$THEME/animations
+OPTIONS="-b -c 1"
+FILES=""
+
+case "$1" in
+start)
+	# echo "$0 start"
+	# We fall through here.
+	;;
+stop)
+	# echo "$0 stop"
+	killall -q -2 fbmngplay
+	exit 0
+	;;
+kill)
+	# echo "$0 kill"
+	killall -q fbmngplay
+	exit 0
+	;;
+next) 
+	# echo "$0 next"
+	killall -q -USR1 fbmngplay
+	exit 0
+	;;
+*)
+	usage;
+	echo "  Error: illegal parameter.";
+	exit 1
+	;;
+esac
+
+shift
+
+# We end up in bootanim start 
+
+TEMP=`getopt -o mr:d:  -- "$@"`
+eval set -- "$TEMP"
+
+while true ; do
+	# echo "loop: $*"
+        case "$1" in
+        -d) # directory
+		shift
+		if [ ! -d "$1" ]; then
+			echo "Not a valid directory."
+			exit 1
+		fi
+		DIRECTORY=$1
+		shift
+		;;
+	-r) # resolution 
+		shift
+		MODE=$1;
+		shift
+		;;
+	-m) # multiple files
+		shift
+		OPTIONS="$OPTIONS -s"
+		;;
+	--) # end
+		shift
+		break;;
+	*) # Weird
+		echo "Internal Error."
+		exit 1
+		;;
+	esac
+done
+
+function box() { true; } # ignore box descriptions in the config file
+
+# Sourcing config file
+if [ -f /etc/bootsplash/themes/$THEME/config/bootsplash-$MODE.cfg ]; then
+    . /etc/bootsplash/themes/$THEME/config/bootsplash-$MODE.cfg
+else
+    echo "$0: No config file found for theme $THEME ($MODE)."
+    exit 1
+fi
+
+# echo "Dir:   $DIRECTORY"
+# echo "Files: $*"
+# echo "Mode:  $MODE"
+# echo "Pos:  $ax,$ay"
+# echo "options: $OPTIONS"
+
+CMDLINE="fbmngplay -x $ax -y $ay $OPTIONS"
+for i in $*; do
+    CMDLINE="$CMDLINE $DIRECTORY/$i"
+done
+
+eval "$CMDLINE &"

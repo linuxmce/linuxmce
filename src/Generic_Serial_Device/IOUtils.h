@@ -20,7 +20,7 @@ Base classe for IOUtils.
 
 #include <string>
 
-#pragma warning( disable : 4996 )
+// #pragma warning( disable : 4996 )
 
 /** @namespace DCE
 The Data Commands and Events (DCE) namespace.

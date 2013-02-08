@@ -1,0 +1,68 @@
+#!/usr/bin/make -f
+# -*- makefile -*-
+# Sample debian/rules that uses debhelper.
+# This file was originally written by Joey Hess and Craig Small.
+# As a special exception, when this file is copied by dh-make into a
+# dh-make output file, you may use that output file without restriction.
+# This special exception was added by Craig Small in version 0.37 of dh-make.
+
+# Uncomment this to turn on verbose mode.
+export DH_VERBOSE=1
+
+export buildenv="/opt/pos/QtSDK.121/Desktop/Qt/4.8.1/gcc/bin"
+export spec=linux-g++
+export srcroot=~/lmce-1004
+export projectdir=$(srcroot)/qOrbiter/qOrbiterMaster
+export buildoutput=$(srcroot)/qOrbiter/build-output
+export binoutput=$(srcroot)/qOrbiter/QOrbiter-build-4.8.1
+export config="CONFIG+=debug CONFIG+=for_desktop CONFIG+=for_debian"
+export project=qOrbiterMaster.pro
+
+%:
+	dh $@ --builddirectory=$(buildoutput)
+
+override_dh_usrlocal:
+#	We do not want any special handling of the usr/local files
+
+override_dh_install:
+	# The qmake project automatically copies all the svn subdirs
+	# we do not want them.
+	rm -fR `find $(binoutput) | grep ".svn"`
+	mkdir -p ./usr/bin ./usr/pluto ./usr/local/lib
+	cp $(binoutput)/qor* ./usr/bin
+	# to get the debs working, we make some VERY
+	# bad things that normally should not be done.
+	# like copying a config file into bin
+	cp $(binoutput)/config.xml ./usr/bin
+	# and blindly copying the qml under usr.
+	cp -r $(binoutput)/qml ./usr
+	cp -r $(binoutput)/imports ./usr
+	# The Qt libs we currently use. 
+	# maybe we should copy the complete lib dir...
+	#cp $(buildenv)/../lib/libQtXml.so.4 ./usr/local/lib/
+	#cp $(buildenv)/../lib/libQtDeclarative.so.4 ./usr/local/lib/
+	#cp $(buildenv)/../lib/libQtScript.so.4 ./usr/local/lib/
+	#cp $(buildenv)/../lib/libQtSvg.so.4 ./usr/local/lib/
+	#cp $(buildenv)/../lib/libQtSql.so.4 ./usr/local/lib/
+	#cp $(buildenv)/../lib/libQtXmlPatterns.so.4 ./usr/local/lib/
+	#cp $(buildenv)/../lib/libQtNetwork.so.4 ./usr/local/lib/
+	#cp $(buildenv)/../lib/libQtGui.so.4 ./usr/local/lib/
+	#cp $(buildenv)/../lib/libQtCore.so.4 ./usr/local/lib/
+	dh_install
+
+override_dh_strip:
+
+override_dh_auto_configure:
+	echo "Starting the QMake process"
+	cd $(buildenv) || :
+	qmake -makefile -nocache $(projectdir)/qOrbiterMaster.pro -o $(buildoutput)/Makefile -r -spec $(spec) $(config)
+
+override_dh_auto_build:
+	echo "Changing into $(buildoutput)"
+	cd $(buildoutput)
+	echo "Starting the actual build process"
+	make -f $(buildoutput)/Makefile clean
+	make -f $(buildoutput)/Makefile -w
+
+override_dh_shlibdeps:
+

@@ -3,6 +3,7 @@
 use DBI;
 #use strict;
 use Socket;
+require "/usr/pluto/bin/config_ops.pl";
 
 
 if($ARGV[0] ne "-d" || $ARGV[2] ne "-i" || $ARGV[4] ne "-m") {
@@ -14,25 +15,7 @@ if($ARGV[0] ne "-d" || $ARGV[2] ne "-i" || $ARGV[4] ne "-m") {
   $mac = $ARGV[5];
 }
 
-open(CONF,"/etc/pluto.conf");
-@data=<CONF>;
-close(CONF);
-
-foreach $line (@data) {
-  ($option, $eq, $value) = split(/ /,$line);
-  if($option eq "MySqlHost") {
-    $DBHOST=$value;
-    $FILEHOST=$value;
-  } elsif ($option eq "MySqlUser") {
-    $DBUSER=$value;
-  } elsif ($option eq "MySqlPassword") {
-    $DBPASSWD=$value;
-  } elsif ($option eq "PK_Device") {
-    $PK_Device=$value;
-  }
-}
-
-$db_handle = DBI->connect("dbi:mysql:database=pluto_main;host=$DBHOST;user=$DBUSER;password=$DBPASSWD") or die "Could not connect to MySQL";
+$db_handle = DBI->connect(&read_pluto_cred()) or die "Can't connect to database: $DBI::errstr\n";
 
 $sql = "select IPaddress from Device where Description='CORE'";
 $st = $db_handle->prepare($sql);
@@ -44,7 +27,7 @@ if($row = $st->fetchrow_hashref()) {
 }
 $st->finish();
   
-$db_handle = DBI->connect("dbi:mysql:database=pluto_main;host=$DBHOST;user=$DBUSER;password=$DBPASSWD") or die "Could not connect to MySQL";
+$db_handle = DBI->connect(&read_pluto_cred()) or die "Can't connect to database: $DBI::errstr\n";
 $sql = "select FK_Device from Device_DeviceData where FK_Device=$Device_ID and FK_DeviceData=31 and IK_DeviceData<>''";
 $statement = $db_handle->prepare($sql) or die "Couldn't prepare query '$sql': $DBI::errstr\n";
 $statement->execute() or die "Couldn't execute query '$sql': $DBI::errstr\n";
@@ -109,5 +92,5 @@ system("curl -d \"update_policy=ask_for_update&setting_server=http%3A%2F%2F$shos
 system("curl -d \"auth_valid1=1&auth_realm1=asterisk&auth_user1=$ext&uth_pass1=$ext&SETTINGS=Save\" http://$ip/set_sip_auth_en.htm > /dev/null");
 system("curl http://$ip/set_base_en.htm?reboot=Reboot > /dev/null");
 
-#sync with AMP
-`/usr/pluto/bin/sync_pluto2amp.pl $Device_ID`
+#sync with Asterisk DB
+`/usr/pluto/bin/db_phone_config.sh`

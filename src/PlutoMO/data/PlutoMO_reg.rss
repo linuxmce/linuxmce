@@ -1,0 +1,16 @@
+#include <appinfo.rh>
+#include <PlutoMO.rsg>
+
+UID2 KUidAppRegistrationResourceFile
+UID3 0xA1ef0015
+
+RESOURCE APP_REGISTRATION_INFO
+{
+app_file= "PlutoMO";
+ localisable_resource_file = "\\resource\\apps\\PlutoMO";
+ localisable_resource_id = R_PLUTOMO_LOCALISABLE_APP_INFO;
+embeddability=KAppNotEmbeddable;
+newfile=KAppDoesNotSupportNewFile;
+
+}
+

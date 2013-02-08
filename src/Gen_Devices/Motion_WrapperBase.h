@@ -1,3 +1,18 @@
+/*
+     Copyright (C) 2004 Pluto, Inc., a Florida Corporation
+
+     www.plutohome.com
+
+     Phone: +1 (877) 758-8648
+ 
+
+     This program is free software; you can redistribute it and/or modify it under the terms of the GNU General Public License.
+     This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty
+     of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+
+     See the GNU General Public License for more details.
+
+*/
 #ifndef Motion_WrapperBase_h
 #define Motion_WrapperBase_h
 #include "DeviceData_Impl.h"
@@ -85,7 +100,7 @@ public:
 		if( m_bRunningWithoutDeviceData )
 			return m_pEvent_Impl->GetDeviceDataFromDatabase(m_dwPK_Device,DEVICEDATA_Type_CONST);
 		else
-			return m_mapParameters_Find(DEVICEDATA_Type_CONST);
+			return m_mapParameters[DEVICEDATA_Type_CONST];
 	}
 
 	int Get_Number_of_ports()
@@ -93,7 +108,7 @@ public:
 		if( m_bRunningWithoutDeviceData )
 			return atoi(m_pEvent_Impl->GetDeviceDataFromDatabase(m_dwPK_Device,DEVICEDATA_Number_of_ports_CONST).c_str());
 		else
-			return atoi(m_mapParameters_Find(DEVICEDATA_Number_of_ports_CONST).c_str());
+			return atoi(m_mapParameters[DEVICEDATA_Number_of_ports_CONST].c_str());
 	}
 
 	int Get_Video_Standard()
@@ -101,7 +116,7 @@ public:
 		if( m_bRunningWithoutDeviceData )
 			return atoi(m_pEvent_Impl->GetDeviceDataFromDatabase(m_dwPK_Device,DEVICEDATA_Video_Standard_CONST).c_str());
 		else
-			return atoi(m_mapParameters_Find(DEVICEDATA_Video_Standard_CONST).c_str());
+			return atoi(m_mapParameters[DEVICEDATA_Video_Standard_CONST].c_str());
 	}
 
 	int Get_Video_Input_Type()
@@ -109,23 +124,7 @@ public:
 		if( m_bRunningWithoutDeviceData )
 			return atoi(m_pEvent_Impl->GetDeviceDataFromDatabase(m_dwPK_Device,DEVICEDATA_Video_Input_Type_CONST).c_str());
 		else
-			return atoi(m_mapParameters_Find(DEVICEDATA_Video_Input_Type_CONST).c_str());
-	}
-
-	string Get_Extra_Parameters()
-	{
-		if( m_bRunningWithoutDeviceData )
-			return m_pEvent_Impl->GetDeviceDataFromDatabase(m_dwPK_Device,DEVICEDATA_Extra_Parameters_CONST);
-		else
-			return m_mapParameters_Find(DEVICEDATA_Extra_Parameters_CONST);
-	}
-
-	string Get_Motion_Parameters()
-	{
-		if( m_bRunningWithoutDeviceData )
-			return m_pEvent_Impl->GetDeviceDataFromDatabase(m_dwPK_Device,DEVICEDATA_Motion_Parameters_CONST);
-		else
-			return m_mapParameters_Find(DEVICEDATA_Motion_Parameters_CONST);
+			return atoi(m_mapParameters[DEVICEDATA_Video_Input_Type_CONST].c_str());
 	}
 
 };
@@ -236,8 +235,6 @@ public:
 	int DATA_Get_Number_of_ports() { return GetData()->Get_Number_of_ports(); }
 	int DATA_Get_Video_Standard() { return GetData()->Get_Video_Standard(); }
 	int DATA_Get_Video_Input_Type() { return GetData()->Get_Video_Input_Type(); }
-	string DATA_Get_Extra_Parameters() { return GetData()->Get_Extra_Parameters(); }
-	string DATA_Get_Motion_Parameters() { return GetData()->Get_Motion_Parameters(); }
 	//Event accessors
 	//Commands - Override these to handle commands from the server
 

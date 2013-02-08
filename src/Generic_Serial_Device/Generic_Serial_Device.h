@@ -39,8 +39,6 @@ Requires 2 other modules to be present:
 #include "GSDMessageProcessing.h"
 
 
-//<-dceag-decl-b->!
-
 /** @namespace DCE
 The Data Commands and Events (DCE) namespace.
 
@@ -63,8 +61,6 @@ GSD devices that control a/v equipment, lighting, etc., can be done
 in as little as an hour or two, almost never more than a day for
 complex protocols.
 */
-namespace DCE
-{
 
 /** @class Generic_Serial_Device
 A class for adding support for new devices.
@@ -88,6 +84,10 @@ GSD devices that control a/v equipment, lighting, etc., can be done
 in as little as an hour or two, almost never more than a day for
 complex protocols.
 */
+
+//<-dceag-decl-b->!
+namespace DCE
+{
 	class Generic_Serial_Device :
 			public Generic_Serial_Device_Command,
 			public GSDMessageProcessor
@@ -100,6 +100,44 @@ public:
 		static pthread_t m_LoggingThread;
 		static bool m_bStopLogging;
 		static int m_FdPipe[2];
+
+		/** Constructors
+        @param DeviceID is the device ident.
+        @param ServerAddress is the IP address of the server.
+        @param bConnectEventHandler is the flag to force connection.
+        @param bLocalMode is the local flag.
+        @param pRouter ia a pointer to the router instance.
+        */
+
+        /** Destructor */
+
+        /** Get the config */
+
+        /** Register the serial device.
+        @returns false as it empty registration a present.
+        */
+
+        /** ReceivedCommandForChild.
+        @param pDeviceData_Impl is a pointer to the DeviceData_Impl.
+        @param sCMD_Result is the address where the result is stored.
+        @param pMessage is a pointer to ehe message.
+
+        When you receive commands that are destined to one of your children,
+          then if that child implements DCE then there will already be a separate class
+          created for the child that will get the message.
+        If the child does not, then you will get all commands for your children
+          in ReceivedCommandForChild, where pDeviceData_Base is the child device.
+        If you handle the message, you should change the sCMD_Result to OK.
+        */
+
+        /** ReceivedUnknownCommand.
+        @param sCMD_Result is the address where the result is stored.
+        @param pMessage is a pointer to ehe message.
+
+        When you received a valid command, but it wasn't for one of your children,
+          then ReceivedUnknownCommand gets called.
+        If you handle the message, you should change the sCMD_Result to OK.
+        */
 
 //<-dceag-const-b->
 public:
@@ -150,6 +188,7 @@ public:
 
 			*****COMMANDS***** we need to implement
 	*/
+
 
 //<-dceag-h-e->
 

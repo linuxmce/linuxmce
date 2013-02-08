@@ -102,13 +102,13 @@ int add_atsc_channel(int atsc_major_channel, int atsc_minor_channel)
 	MYSQL_ROW row;
 	if( (iresult=mysql_query(g_pMySQL,sSQL))!=0 || (pMYSQL_RES = mysql_store_result(g_pMySQL))==NULL )
 	{
-		printf("Error executing query: %s",sSQL);
+		printf("Error executing query: %s\n",sSQL);
 		return 1;
 	}
 
 	if( pMYSQL_RES->row_count>0 )
 	{
-		printf("atsc_major_chan=%d atsc_minor_chan=%d already in the database",
+		printf("atsc_major_chan=%d atsc_minor_chan=%d already in the database\n",
 			atsc_major_channel, atsc_minor_channel);
 		return 1;
 	}
@@ -120,7 +120,7 @@ int add_atsc_channel(int atsc_major_channel, int atsc_minor_channel)
 
 	if( (iresult=mysql_query(g_pMySQL,sSQL))!=0 )
 	{
-		printf("Cannot execute query %s", sSQL);
+		printf("Cannot execute query %s\n", sSQL);
 		return 1;
 	}
 	return 1;
@@ -196,17 +196,17 @@ printf("%s\n",Message);
 
 	/* Valid signal - put it into the database in the dtv_multiplex table */
 	char sSQL[1000];
-	sprintf(sSQL, "SELECT mplexid FROM dtv_multiplex where frequency=%d AND sourceid=%d",g_Frequency,sourceid);
+	sprintf(sSQL, "SELECT mplexid FROM dtv_multiplex WHERE frequency=%d AND sourceid=%d",g_Frequency,sourceid);
 printf("sql123: %s\n",sSQL);
 	MYSQL_RES *pMYSQL_RES;
 	MYSQL_ROW row;
 	int iresult;
 	if( (iresult=mysql_query(g_pMySQL,sSQL))!=0 || (pMYSQL_RES = mysql_store_result(g_pMySQL))==NULL )
 	{
-		printf("Error executing query: %s",sSQL);
+		printf("Error executing query: %s\n",sSQL);
 		return 1;
 	}
-printf("123: %d %d %d",sSQL[0],sSQL[1],sSQL[2]);
+printf("123: %d %d %d\n",sSQL[0],sSQL[1],sSQL[2]);
 printf("%d recs %s\n",(int) pMYSQL_RES->row_count,sSQL);
 	if( pMYSQL_RES->row_count>0 )
 	{
@@ -218,7 +218,7 @@ printf("%d recs %s\n",(int) pMYSQL_RES->row_count,sSQL);
 		sprintf(sSQL, "INSERT INTO dtv_multiplex(frequency,sourceid) VALUES(%d,%d)", g_Frequency,sourceid);
 		if( (iresult=mysql_query(g_pMySQL,sSQL))!=0 )
 		{
-			printf("Cannot execute query %s", sSQL);
+			printf("Cannot execute query %s\n", sSQL);
 			return 1;
 		}
 		g_mplexid = (int) mysql_insert_id(g_pMySQL);
@@ -253,11 +253,11 @@ printf("%d recs %s\n",(int) pMYSQL_RES->row_count,sSQL);
 		"sistandard='%s' WHERE mplexid=%d",pModulation,pSisStandard,g_mplexid);
 	if( (iresult=mysql_query(g_pMySQL,sSQL))!=0 )
 	{
-		printf("Error executing query: %s",sSQL);
+		printf("Error executing query: %s\n",sSQL);
 		return 1;
 	}
 
-	printf("Setting standard: %s",sSQL);
+	printf("Setting standard: %s\n",sSQL);
 
 	sprintf(Message,
 		"/usr/pluto/bin/MessageSend dcerouter -targetType template 0 36 2 72 26 %d 20 0 30 %d 13 \"%s:%lu signal found\n\"",
@@ -306,7 +306,7 @@ static int cmd_scan_callback_program(uint32_t DeviceID, unsigned int Tuner, int 
 	else
 		*pCallSign++=0; // Null terminate it
 
-	printf("current scan: %s\n%s\nservice id: %d chanid: %s callsign %s",g_szCurrentScan,g_szCallback_Lock,serviceid,pChanId,pCallSign);
+	printf("current scan: %s\n%s\nservice id: %d chanid: %s callsign %s\n",g_szCurrentScan,g_szCallback_Lock,serviceid,pChanId,pCallSign);
 	printf("PROGRAM: %s\n", str);
 
 	char sSQL[1000];
@@ -334,14 +334,14 @@ static int cmd_scan_callback_program(uint32_t DeviceID, unsigned int Tuner, int 
 
 		if( (iresult=mysql_query(g_pMySQL,sSQL))!=0 || (pMYSQL_RES = mysql_store_result(g_pMySQL))==NULL )
 		{
-			printf("Error executing query: %s",sSQL);
+			printf("Error executing query: %s\n",sSQL);
 			return 1;
 		}
 
 		char *pFreqId = strstr(g_szCurrentScan,"us-bcast:");
 		if( !pFreqId )
 		{
-			printf("Can't find channel in: %s",g_szCallback_Lock);
+			printf("Can't find channel in: %s\n",g_szCallback_Lock);
 			return 1;
 		}
 
@@ -355,7 +355,7 @@ static int cmd_scan_callback_program(uint32_t DeviceID, unsigned int Tuner, int 
 				szMythChanId);
 			if( (iresult=mysql_query(g_pMySQL,sSQL))!=0 )
 			{
-				printf("Cannot execute query %s", sSQL);
+				printf("Cannot execute query %s\n", sSQL);
 				return 1;
 			}
 		}
@@ -368,21 +368,34 @@ static int cmd_scan_callback_program(uint32_t DeviceID, unsigned int Tuner, int 
 			,pChanId,pDot,szMythChanId);
 		if( (iresult=mysql_query(g_pMySQL,sSQL))!=0 )
 		{
-			printf("Cannot execute query %s", sSQL);
+			printf("Cannot execute query %s\n", sSQL);
 			return 1;
 		}
 printf("Updated: %s\n",sSQL);
 	}
 	else if( strstr(g_szCallback_Lock,"qam256") )
 	{
-		char *pFreqId = strstr(g_szCurrentScan,"us-cable:");
+		char *pFreqId;
+		int szLen;
+
+		pFreqId = strstr(g_szCurrentScan,"us-cable:");
+		szLen = 9;
+
 		if( !pFreqId )
 		{
-			printf("Can't find channel in: %s",g_szCallback_Lock);
-			return 1;
+			// If we can't find the channel by parsing us-cable: lets look for hrc, since its on its own output
+			pFreqId = strstr(g_szCurrentScan,"us-hrc:");
+			szLen = 7;
 		}
 
-		pFreqId += 9;
+		if( !pFreqId )
+		{
+			// No channel id found 
+			printf("Can't find channel in: %s\n",g_szCallback_Lock);
+			return 1;
+		}
+		else
+			pFreqId += szLen;
 
 		char szMythChanId[40];
 		sprintf(szMythChanId,"%d%d%d", sourceid, atoi(pFreqId), serviceid);
@@ -393,7 +406,7 @@ printf("Updated: %s\n",sSQL);
 
 		if( (iresult=mysql_query(g_pMySQL,sSQL))!=0 || (pMYSQL_RES = mysql_store_result(g_pMySQL))==NULL )
 		{
-			printf("Error executing query: %s",sSQL);
+			printf("Error executing query: %s\n",sSQL);
 			return 1;
 		}
 
@@ -408,7 +421,7 @@ printf("Updated: %s\n",sSQL);
 				szMythChanId);
 			if( (iresult=mysql_query(g_pMySQL,sSQL))!=0 )
 			{
-				printf("Cannot execute query %s", sSQL);
+				printf("Cannot execute query %s\n", sSQL);
 				return 1;
 			}
 		}
@@ -424,7 +437,7 @@ printf("Updated: %s\n",sSQL);
 			,szMythChanId);
 		if( (iresult=mysql_query(g_pMySQL,sSQL))!=0 )
 		{
-			printf("Cannot execute query %s", sSQL);
+			printf("Cannot execute query %s\n", sSQL);
 			return 1;
 		}
 printf("Updated: %s\n",sSQL);
@@ -476,10 +489,11 @@ static int myth_scan_tuner(struct hdhomerun_device_t *pHD)
 	// Find the tuner in myth's database
 	char sSQL[1000];
 	sprintf(sSQL,
-		"SELECT capturecard.cardid,cardinput.cardinputid,cardinput.sourceid from capturecard "
+		"SELECT capturecard.cardid,cardinput.cardinputid,cardinput.sourceid FROM capturecard "
 		"LEFT JOIN cardinput ON capturecard.cardid=cardinput.cardid "
-		"WHERE videodevice='%08lX' AND cardtype='HDHOMERUN' and dbox2_port=%u",
+		"WHERE videodevice='%08lX-%u' AND cardtype='HDHOMERUN'",
 		(unsigned long)DeviceID, Tuner);
+
 
 	time_t timeout = time(NULL) + 60;  // Wait up to 60 seconds for the HD Home Run device to get into the database
 	int iresult;
@@ -490,7 +504,7 @@ static int myth_scan_tuner(struct hdhomerun_device_t *pHD)
 	{
 		if( (iresult=mysql_query(g_pMySQL,sSQL))!=0 || (pMYSQL_RES = mysql_store_result(g_pMySQL))==NULL )
 		{
-			printf("Error executing query: %s",sSQL);
+			printf("Error executing query: %s\n",sSQL);
 			return 1;
 		}
 
@@ -522,7 +536,7 @@ static int myth_scan_tuner(struct hdhomerun_device_t *pHD)
 		sourceid = atoi(row[2]);
 	if( sourceid==0 )
 	{
-		sprintf(sSQL, "SELECT sourceid FROM videosource where name='UNKNOWN_%d'",cardid);
+		sprintf(sSQL, "SELECT sourceid FROM videosource WHERE name='UNKNOWN_%d'",cardid);
 		MYSQL_RES *pMYSQL_RES;
 		MYSQL_ROW row;
 		if( (iresult=mysql_query(g_pMySQL,sSQL))!=0 || (pMYSQL_RES = mysql_store_result(g_pMySQL))==NULL
@@ -532,7 +546,7 @@ static int myth_scan_tuner(struct hdhomerun_device_t *pHD)
 			sprintf(sSQL, "INSERT INTO videosource(name,xmltvgrabber) VALUES('UNKNOWN_%d','/bin/true')",cardid);
 			if( (iresult=mysql_query(g_pMySQL,sSQL))!=0 )
 			{
-				printf("Cannot execute query %s", sSQL);
+				printf("Cannot execute query %s\n", sSQL);
 				return 1;
 			}
 			sourceid = (int) mysql_insert_id(g_pMySQL);
@@ -557,6 +571,8 @@ static int myth_scan_tuner(struct hdhomerun_device_t *pHD)
 	int result = myth_scan_tuner_wrapper(pHD, cardid, sourceid, cardinputid );
 	if( result <= 0) {
 		printf("myth_scan_tuner failed\n");
+	} else {
+		printf("myth_scan_tuner SUCCESS!\n");
 	}
 	return result;
 }
@@ -609,9 +625,11 @@ static int myth_scan(const char *pID, const char *pTuner)
 
 static int MySqlConnect(char *ip,char *user,char *password,char *database)
 {
+	my_bool reconnect = true;
 	if( !g_pMySQL )
 		g_pMySQL = mysql_init(NULL);
 
+	mysql_options(g_pMySQL, MYSQL_OPT_RECONNECT, &reconnect);
 	if (mysql_real_connect(g_pMySQL, ip, user, password, database, MYSQL_PORT, NULL, 0) == NULL)
 		return 1; // Failure
 	return 1; // Ok

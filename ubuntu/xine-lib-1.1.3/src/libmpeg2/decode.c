@@ -151,8 +151,6 @@ static inline void get_frame_duration (mpeg2dec_t * mpeg2dec, vo_frame_t *frame)
   frame->duration = (int) ceil (duration);
   _x_stream_info_set(mpeg2dec->stream, XINE_STREAM_INFO_FRAME_DURATION, frame->duration);
   /*printf("mpeg2dec: rff=%u\n",frame->repeat_first_field);*/
-  _x_stream_info_set(mpeg2dec->stream, XINE_STREAM_INFO_TRICK_PLAY_SUPPORTED, 1);
-  _x_stream_info_set(mpeg2dec->stream, XINE_STREAM_INFO_TRICK_PLAY_DISTINCTS_FRAME_TYPE, 1);
 } 
 
 static double get_aspect_ratio(mpeg2dec_t *mpeg2dec)

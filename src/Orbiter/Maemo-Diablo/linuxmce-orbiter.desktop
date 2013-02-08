@@ -1,0 +1,12 @@
+[Desktop Entry]
+Encoding=UTF-8
+Version=1.0
+Type=Application
+Name=LinuxMCEOrbiter
+Exec=/opt/linuxmce-orbiter/bin/orbiter-launcher
+Icon=linuxmceorbiter
+X-Window-Icon=tn-bookmarks-link
+X-HildonDesk-ShowInToolbar=true
+X-Osso-Service=linuxmceorbiter
+X-Osso-Type=application/x-executable
+Terminal=false

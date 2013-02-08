@@ -1,0 +1,3 @@
+src/*.1
+debian/testenc.1
+debian/testenc_wb.1

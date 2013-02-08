@@ -37,22 +37,13 @@ using namespace std;
 #include "Table_DesignObj.h"
 #include "Table_Template.h"
 #include "Table_Icon.h"
+#include "Table_Text.h"
 
 #include "Table_CommandGroup_Command.h"
-#include "Table_CommandGroup_Command_pschist.h"
-#include "Table_CommandGroup_Command_pschmask.h"
 #include "Table_CommandGroup_EntertainArea.h"
-#include "Table_CommandGroup_EntertainArea_pschist.h"
-#include "Table_CommandGroup_EntertainArea_pschmask.h"
 #include "Table_CommandGroup_Room.h"
-#include "Table_CommandGroup_Room_pschist.h"
-#include "Table_CommandGroup_Room_pschmask.h"
 #include "Table_Device_CommandGroup.h"
-#include "Table_Device_CommandGroup_pschist.h"
-#include "Table_Device_CommandGroup_pschmask.h"
 #include "Table_EventHandler.h"
-#include "Table_EventHandler_pschist.h"
-#include "Table_EventHandler_pschmask.h"
 
 
 void Database_pluto_main::CreateTable_CommandGroup()
@@ -100,6 +91,7 @@ void Row_CommandGroup::Delete()
 	Row_CommandGroup *pRow = this; // Needed so we will have only 1 version of get_primary_fields_assign_from_row
 	
 	if (!is_deleted)
+	{
 		if (is_added)	
 		{	
 			vector<TableRow*>::iterator i;	
@@ -121,6 +113,7 @@ void Row_CommandGroup::Delete()
 			table->deleted_cachedRows[key] = this;
 			is_deleted = true;	
 		}	
+	}
 }
 
 void Row_CommandGroup::Reload()
@@ -158,8 +151,7 @@ is_null[1] = true;
 m_FK_Array = 0;
 is_null[2] = true;
 m_FK_Installation = 0;
-m_Description = "";
-is_null[3] = false;
+is_null[3] = true;
 is_null[4] = true;
 m_CanTurnOff = 0;
 is_null[5] = false;
@@ -186,15 +178,18 @@ m_TemplateParm1 = 0;
 is_null[16] = true;
 m_TemplateParm2 = 0;
 is_null[17] = true;
-m_psc_id = 0;
+m_FK_Text = 0;
 is_null[18] = true;
-m_psc_batch = 0;
+m_psc_id = 0;
 is_null[19] = true;
+m_psc_batch = 0;
+is_null[20] = true;
 m_psc_user = 0;
 m_psc_frozen = 0;
-is_null[20] = false;
-is_null[21] = true;
-is_null[22] = true;
+is_null[21] = false;
+m_psc_mod = "0000-00-00 00:00:00";
+is_null[22] = false;
+is_null[23] = true;
 m_psc_restrict = 0;
 
 
@@ -254,6 +249,9 @@ return m_TemplateParm1;}
 long int Row_CommandGroup::TemplateParm2_get(){PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
 
 return m_TemplateParm2;}
+long int Row_CommandGroup::FK_Text_get(){PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
+
+return m_FK_Text;}
 long int Row_CommandGroup::psc_id_get(){PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
 
 return m_psc_id;}
@@ -325,24 +323,27 @@ m_TemplateParm1 = val; is_modified=true; is_null[15]=false;}
 void Row_CommandGroup::TemplateParm2_set(long int val){PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
 
 m_TemplateParm2 = val; is_modified=true; is_null[16]=false;}
+void Row_CommandGroup::FK_Text_set(long int val){PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
+
+m_FK_Text = val; is_modified=true; is_null[17]=false;}
 void Row_CommandGroup::psc_id_set(long int val){PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
 
-m_psc_id = val; is_modified=true; is_null[17]=false;}
+m_psc_id = val; is_modified=true; is_null[18]=false;}
 void Row_CommandGroup::psc_batch_set(long int val){PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
 
-m_psc_batch = val; is_modified=true; is_null[18]=false;}
+m_psc_batch = val; is_modified=true; is_null[19]=false;}
 void Row_CommandGroup::psc_user_set(long int val){PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
 
-m_psc_user = val; is_modified=true; is_null[19]=false;}
+m_psc_user = val; is_modified=true; is_null[20]=false;}
 void Row_CommandGroup::psc_frozen_set(short int val){PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
 
-m_psc_frozen = val; is_modified=true; is_null[20]=false;}
+m_psc_frozen = val; is_modified=true; is_null[21]=false;}
 void Row_CommandGroup::psc_mod_set(string val){PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
 
-m_psc_mod = val; is_modified=true; is_null[21]=false;}
+m_psc_mod = val; is_modified=true; is_null[22]=false;}
 void Row_CommandGroup::psc_restrict_set(long int val){PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
 
-m_psc_restrict = val; is_modified=true; is_null[22]=false;}
+m_psc_restrict = val; is_modified=true; is_null[23]=false;}
 
 		
 bool Row_CommandGroup::FK_Array_isNull() {PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
@@ -351,6 +352,9 @@ return is_null[1];}
 bool Row_CommandGroup::FK_Installation_isNull() {PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
 
 return is_null[2];}
+bool Row_CommandGroup::Description_isNull() {PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
+
+return is_null[3];}
 bool Row_CommandGroup::Hint_isNull() {PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
 
 return is_null[4];}
@@ -378,24 +382,24 @@ return is_null[15];}
 bool Row_CommandGroup::TemplateParm2_isNull() {PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
 
 return is_null[16];}
-bool Row_CommandGroup::psc_id_isNull() {PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
+bool Row_CommandGroup::FK_Text_isNull() {PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
 
 return is_null[17];}
-bool Row_CommandGroup::psc_batch_isNull() {PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
+bool Row_CommandGroup::psc_id_isNull() {PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
 
 return is_null[18];}
-bool Row_CommandGroup::psc_user_isNull() {PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
+bool Row_CommandGroup::psc_batch_isNull() {PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
 
 return is_null[19];}
-bool Row_CommandGroup::psc_frozen_isNull() {PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
+bool Row_CommandGroup::psc_user_isNull() {PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
 
 return is_null[20];}
-bool Row_CommandGroup::psc_mod_isNull() {PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
+bool Row_CommandGroup::psc_frozen_isNull() {PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
 
 return is_null[21];}
 bool Row_CommandGroup::psc_restrict_isNull() {PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
 
-return is_null[22];}
+return is_null[23];}
 
 			
 void Row_CommandGroup::FK_Array_setNull(bool val){PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
@@ -404,6 +408,10 @@ is_modified=true;
 }
 void Row_CommandGroup::FK_Installation_setNull(bool val){PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
 is_null[2]=val;
+is_modified=true;
+}
+void Row_CommandGroup::Description_setNull(bool val){PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
+is_null[3]=val;
 is_modified=true;
 }
 void Row_CommandGroup::Hint_setNull(bool val){PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
@@ -442,28 +450,28 @@ void Row_CommandGroup::TemplateParm2_setNull(bool val){PLUTO_SAFETY_LOCK_ERRORSO
 is_null[16]=val;
 is_modified=true;
 }
-void Row_CommandGroup::psc_id_setNull(bool val){PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
+void Row_CommandGroup::FK_Text_setNull(bool val){PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
 is_null[17]=val;
 is_modified=true;
 }
-void Row_CommandGroup::psc_batch_setNull(bool val){PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
+void Row_CommandGroup::psc_id_setNull(bool val){PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
 is_null[18]=val;
 is_modified=true;
 }
-void Row_CommandGroup::psc_user_setNull(bool val){PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
+void Row_CommandGroup::psc_batch_setNull(bool val){PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
 is_null[19]=val;
 is_modified=true;
 }
-void Row_CommandGroup::psc_frozen_setNull(bool val){PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
+void Row_CommandGroup::psc_user_setNull(bool val){PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
 is_null[20]=val;
 is_modified=true;
 }
-void Row_CommandGroup::psc_mod_setNull(bool val){PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
+void Row_CommandGroup::psc_frozen_setNull(bool val){PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
 is_null[21]=val;
 is_modified=true;
 }
 void Row_CommandGroup::psc_restrict_setNull(bool val){PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
-is_null[22]=val;
+is_null[23]=val;
 is_modified=true;
 }
 	
@@ -514,8 +522,8 @@ PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
 if (is_null[3])
 return "NULL";
 
-char *buf = new char[101];
-db_wrapper_real_escape_string(table->database->m_pDB, buf, m_Description.c_str(), (unsigned long) min((size_t)50,m_Description.size()));
+char *buf = new char[301];
+db_wrapper_real_escape_string(table->database->m_pDB, buf, m_Description.c_str(), (unsigned long) min((size_t)150,m_Description.size()));
 string s=string()+"\""+buf+"\"";
 delete[] buf;
 return s;
@@ -528,8 +536,8 @@ PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
 if (is_null[4])
 return "NULL";
 
-char *buf = new char[61];
-db_wrapper_real_escape_string(table->database->m_pDB, buf, m_Hint.c_str(), (unsigned long) min((size_t)30,m_Hint.size()));
+char *buf = new char[181];
+db_wrapper_real_escape_string(table->database->m_pDB, buf, m_Hint.c_str(), (unsigned long) min((size_t)90,m_Hint.size()));
 string s=string()+"\""+buf+"\"";
 delete[] buf;
 return s;
@@ -692,11 +700,24 @@ sprintf(buf, "%li", m_TemplateParm2);
 return buf;
 }
 
-string Row_CommandGroup::psc_id_asSQL()
+string Row_CommandGroup::FK_Text_asSQL()
 {
 PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
 
 if (is_null[17])
+return "NULL";
+
+char buf[32];
+sprintf(buf, "%li", m_FK_Text);
+
+return buf;
+}
+
+string Row_CommandGroup::psc_id_asSQL()
+{
+PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
+
+if (is_null[18])
 return "NULL";
 
 char buf[32];
@@ -709,7 +730,7 @@ string Row_CommandGroup::psc_batch_asSQL()
 {
 PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
 
-if (is_null[18])
+if (is_null[19])
 return "NULL";
 
 char buf[32];
@@ -722,7 +743,7 @@ string Row_CommandGroup::psc_user_asSQL()
 {
 PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
 
-if (is_null[19])
+if (is_null[20])
 return "NULL";
 
 char buf[32];
@@ -735,7 +756,7 @@ string Row_CommandGroup::psc_frozen_asSQL()
 {
 PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
 
-if (is_null[20])
+if (is_null[21])
 return "NULL";
 
 char buf[32];
@@ -748,7 +769,7 @@ string Row_CommandGroup::psc_mod_asSQL()
 {
 PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
 
-if (is_null[21])
+if (is_null[22])
 return "NULL";
 
 char *buf = new char[39];
@@ -762,7 +783,7 @@ string Row_CommandGroup::psc_restrict_asSQL()
 {
 PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
 
-if (is_null[22])
+if (is_null[23])
 return "NULL";
 
 char buf[32];
@@ -810,10 +831,10 @@ bool Table_CommandGroup::Commit(bool bDeleteFailedModifiedRow,bool bDeleteFailed
 	
 		
 string values_list_comma_separated;
-values_list_comma_separated = values_list_comma_separated + pRow->PK_CommandGroup_asSQL()+", "+pRow->FK_Array_asSQL()+", "+pRow->FK_Installation_asSQL()+", "+pRow->Description_asSQL()+", "+pRow->Hint_asSQL()+", "+pRow->CanTurnOff_asSQL()+", "+pRow->AlwaysShow_asSQL()+", "+pRow->CanBeHidden_asSQL()+", "+pRow->FK_Criteria_Orbiter_asSQL()+", "+pRow->FK_DesignObj_asSQL()+", "+pRow->FK_Template_asSQL()+", "+pRow->AltID_asSQL()+", "+pRow->FK_Icon_asSQL()+", "+pRow->AutoGeneratedDate_asSQL()+", "+pRow->Disabled_asSQL()+", "+pRow->TemplateParm1_asSQL()+", "+pRow->TemplateParm2_asSQL()+", "+pRow->psc_id_asSQL()+", "+pRow->psc_batch_asSQL()+", "+pRow->psc_user_asSQL()+", "+pRow->psc_frozen_asSQL()+", "+pRow->psc_restrict_asSQL();
+values_list_comma_separated = values_list_comma_separated + pRow->PK_CommandGroup_asSQL()+", "+pRow->FK_Array_asSQL()+", "+pRow->FK_Installation_asSQL()+", "+pRow->Description_asSQL()+", "+pRow->Hint_asSQL()+", "+pRow->CanTurnOff_asSQL()+", "+pRow->AlwaysShow_asSQL()+", "+pRow->CanBeHidden_asSQL()+", "+pRow->FK_Criteria_Orbiter_asSQL()+", "+pRow->FK_DesignObj_asSQL()+", "+pRow->FK_Template_asSQL()+", "+pRow->AltID_asSQL()+", "+pRow->FK_Icon_asSQL()+", "+pRow->AutoGeneratedDate_asSQL()+", "+pRow->Disabled_asSQL()+", "+pRow->TemplateParm1_asSQL()+", "+pRow->TemplateParm2_asSQL()+", "+pRow->FK_Text_asSQL()+", "+pRow->psc_id_asSQL()+", "+pRow->psc_batch_asSQL()+", "+pRow->psc_user_asSQL()+", "+pRow->psc_frozen_asSQL()+", "+pRow->psc_restrict_asSQL();
 
 	
-		string query = "insert into CommandGroup (`PK_CommandGroup`, `FK_Array`, `FK_Installation`, `Description`, `Hint`, `CanTurnOff`, `AlwaysShow`, `CanBeHidden`, `FK_Criteria_Orbiter`, `FK_DesignObj`, `FK_Template`, `AltID`, `FK_Icon`, `AutoGeneratedDate`, `Disabled`, `TemplateParm1`, `TemplateParm2`, `psc_id`, `psc_batch`, `psc_user`, `psc_frozen`, `psc_restrict`) values ("+
+		string query = "insert into CommandGroup (`PK_CommandGroup`, `FK_Array`, `FK_Installation`, `Description`, `Hint`, `CanTurnOff`, `AlwaysShow`, `CanBeHidden`, `FK_Criteria_Orbiter`, `FK_DesignObj`, `FK_Template`, `AltID`, `FK_Icon`, `AutoGeneratedDate`, `Disabled`, `TemplateParm1`, `TemplateParm2`, `FK_Text`, `psc_id`, `psc_batch`, `psc_user`, `psc_frozen`, `psc_restrict`) values ("+
 			values_list_comma_separated+")";
 			
 		if (db_wrapper_query(database->m_pDB, query.c_str()))
@@ -879,7 +900,7 @@ condition = condition + "`PK_CommandGroup`=" + tmp_PK_CommandGroup;
 			
 		
 string update_values_list;
-update_values_list = update_values_list + "`PK_CommandGroup`="+pRow->PK_CommandGroup_asSQL()+", `FK_Array`="+pRow->FK_Array_asSQL()+", `FK_Installation`="+pRow->FK_Installation_asSQL()+", `Description`="+pRow->Description_asSQL()+", `Hint`="+pRow->Hint_asSQL()+", `CanTurnOff`="+pRow->CanTurnOff_asSQL()+", `AlwaysShow`="+pRow->AlwaysShow_asSQL()+", `CanBeHidden`="+pRow->CanBeHidden_asSQL()+", `FK_Criteria_Orbiter`="+pRow->FK_Criteria_Orbiter_asSQL()+", `FK_DesignObj`="+pRow->FK_DesignObj_asSQL()+", `FK_Template`="+pRow->FK_Template_asSQL()+", `AltID`="+pRow->AltID_asSQL()+", `FK_Icon`="+pRow->FK_Icon_asSQL()+", `AutoGeneratedDate`="+pRow->AutoGeneratedDate_asSQL()+", `Disabled`="+pRow->Disabled_asSQL()+", `TemplateParm1`="+pRow->TemplateParm1_asSQL()+", `TemplateParm2`="+pRow->TemplateParm2_asSQL()+", `psc_id`="+pRow->psc_id_asSQL()+", `psc_batch`="+pRow->psc_batch_asSQL()+", `psc_user`="+pRow->psc_user_asSQL()+", `psc_frozen`="+pRow->psc_frozen_asSQL()+", `psc_restrict`="+pRow->psc_restrict_asSQL();
+update_values_list = update_values_list + "`PK_CommandGroup`="+pRow->PK_CommandGroup_asSQL()+", `FK_Array`="+pRow->FK_Array_asSQL()+", `FK_Installation`="+pRow->FK_Installation_asSQL()+", `Description`="+pRow->Description_asSQL()+", `Hint`="+pRow->Hint_asSQL()+", `CanTurnOff`="+pRow->CanTurnOff_asSQL()+", `AlwaysShow`="+pRow->AlwaysShow_asSQL()+", `CanBeHidden`="+pRow->CanBeHidden_asSQL()+", `FK_Criteria_Orbiter`="+pRow->FK_Criteria_Orbiter_asSQL()+", `FK_DesignObj`="+pRow->FK_DesignObj_asSQL()+", `FK_Template`="+pRow->FK_Template_asSQL()+", `AltID`="+pRow->AltID_asSQL()+", `FK_Icon`="+pRow->FK_Icon_asSQL()+", `AutoGeneratedDate`="+pRow->AutoGeneratedDate_asSQL()+", `Disabled`="+pRow->Disabled_asSQL()+", `TemplateParm1`="+pRow->TemplateParm1_asSQL()+", `TemplateParm2`="+pRow->TemplateParm2_asSQL()+", `FK_Text`="+pRow->FK_Text_asSQL()+", `psc_id`="+pRow->psc_id_asSQL()+", `psc_batch`="+pRow->psc_batch_asSQL()+", `psc_user`="+pRow->psc_user_asSQL()+", `psc_frozen`="+pRow->psc_frozen_asSQL()+", `psc_restrict`="+pRow->psc_restrict_asSQL();
 
 	
 		string query = "update CommandGroup set " + update_values_list + " where " + condition;
@@ -1202,67 +1223,78 @@ sscanf(row[16], "%li", &(pRow->m_TemplateParm2));
 if (row[17] == NULL)
 {
 pRow->is_null[17]=true;
-pRow->m_psc_id = 0;
+pRow->m_FK_Text = 0;
 }
 else
 {
 pRow->is_null[17]=false;
-sscanf(row[17], "%li", &(pRow->m_psc_id));
+sscanf(row[17], "%li", &(pRow->m_FK_Text));
 }
 
 if (row[18] == NULL)
 {
 pRow->is_null[18]=true;
-pRow->m_psc_batch = 0;
+pRow->m_psc_id = 0;
 }
 else
 {
 pRow->is_null[18]=false;
-sscanf(row[18], "%li", &(pRow->m_psc_batch));
+sscanf(row[18], "%li", &(pRow->m_psc_id));
 }
 
 if (row[19] == NULL)
 {
 pRow->is_null[19]=true;
-pRow->m_psc_user = 0;
+pRow->m_psc_batch = 0;
 }
 else
 {
 pRow->is_null[19]=false;
-sscanf(row[19], "%li", &(pRow->m_psc_user));
+sscanf(row[19], "%li", &(pRow->m_psc_batch));
 }
 
 if (row[20] == NULL)
 {
 pRow->is_null[20]=true;
-pRow->m_psc_frozen = 0;
+pRow->m_psc_user = 0;
 }
 else
 {
 pRow->is_null[20]=false;
-sscanf(row[20], "%hi", &(pRow->m_psc_frozen));
+sscanf(row[20], "%li", &(pRow->m_psc_user));
 }
 
 if (row[21] == NULL)
 {
 pRow->is_null[21]=true;
-pRow->m_psc_mod = "";
+pRow->m_psc_frozen = 0;
 }
 else
 {
 pRow->is_null[21]=false;
-pRow->m_psc_mod = string(row[21],lengths[21]);
+sscanf(row[21], "%hi", &(pRow->m_psc_frozen));
 }
 
 if (row[22] == NULL)
 {
 pRow->is_null[22]=true;
-pRow->m_psc_restrict = 0;
+pRow->m_psc_mod = "";
 }
 else
 {
 pRow->is_null[22]=false;
-sscanf(row[22], "%li", &(pRow->m_psc_restrict));
+pRow->m_psc_mod = string(row[22],lengths[22]);
+}
+
+if (row[23] == NULL)
+{
+pRow->is_null[23]=true;
+pRow->m_psc_restrict = 0;
+}
+else
+{
+pRow->is_null[23]=false;
+sscanf(row[23], "%li", &(pRow->m_psc_restrict));
 }
 
 
@@ -1571,67 +1603,78 @@ sscanf(row[16], "%li", &(pRow->m_TemplateParm2));
 if (row[17] == NULL)
 {
 pRow->is_null[17]=true;
-pRow->m_psc_id = 0;
+pRow->m_FK_Text = 0;
 }
 else
 {
 pRow->is_null[17]=false;
-sscanf(row[17], "%li", &(pRow->m_psc_id));
+sscanf(row[17], "%li", &(pRow->m_FK_Text));
 }
 
 if (row[18] == NULL)
 {
 pRow->is_null[18]=true;
-pRow->m_psc_batch = 0;
+pRow->m_psc_id = 0;
 }
 else
 {
 pRow->is_null[18]=false;
-sscanf(row[18], "%li", &(pRow->m_psc_batch));
+sscanf(row[18], "%li", &(pRow->m_psc_id));
 }
 
 if (row[19] == NULL)
 {
 pRow->is_null[19]=true;
-pRow->m_psc_user = 0;
+pRow->m_psc_batch = 0;
 }
 else
 {
 pRow->is_null[19]=false;
-sscanf(row[19], "%li", &(pRow->m_psc_user));
+sscanf(row[19], "%li", &(pRow->m_psc_batch));
 }
 
 if (row[20] == NULL)
 {
 pRow->is_null[20]=true;
-pRow->m_psc_frozen = 0;
+pRow->m_psc_user = 0;
 }
 else
 {
 pRow->is_null[20]=false;
-sscanf(row[20], "%hi", &(pRow->m_psc_frozen));
+sscanf(row[20], "%li", &(pRow->m_psc_user));
 }
 
 if (row[21] == NULL)
 {
 pRow->is_null[21]=true;
-pRow->m_psc_mod = "";
+pRow->m_psc_frozen = 0;
 }
 else
 {
 pRow->is_null[21]=false;
-pRow->m_psc_mod = string(row[21],lengths[21]);
+sscanf(row[21], "%hi", &(pRow->m_psc_frozen));
 }
 
 if (row[22] == NULL)
 {
 pRow->is_null[22]=true;
-pRow->m_psc_restrict = 0;
+pRow->m_psc_mod = "";
 }
 else
 {
 pRow->is_null[22]=false;
-sscanf(row[22], "%li", &(pRow->m_psc_restrict));
+pRow->m_psc_mod = string(row[22],lengths[22]);
+}
+
+if (row[23] == NULL)
+{
+pRow->is_null[23]=true;
+pRow->m_psc_restrict = 0;
+}
+else
+{
+pRow->is_null[23]=false;
+sscanf(row[23], "%li", &(pRow->m_psc_restrict));
 }
 
 
@@ -1684,6 +1727,13 @@ PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
 class Table_Icon *pTable = table->database->Icon_get();
 return pTable->GetRow(m_FK_Icon);
 }
+class Row_Text* Row_CommandGroup::FK_Text_getrow()
+{
+PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
+
+class Table_Text *pTable = table->database->Text_get();
+return pTable->GetRow(m_FK_Text);
+}
 
 
 void Row_CommandGroup::CommandGroup_Command_FK_CommandGroup_getrows(vector <class Row_CommandGroup_Command*> *rows)
@@ -1693,39 +1743,11 @@ PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
 class Table_CommandGroup_Command *pTable = table->database->CommandGroup_Command_get();
 pTable->GetRows("`FK_CommandGroup`=" + StringUtils::itos(m_PK_CommandGroup),rows);
 }
-void Row_CommandGroup::CommandGroup_Command_pschist_FK_CommandGroup_getrows(vector <class Row_CommandGroup_Command_pschist*> *rows)
-{
-PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
-
-class Table_CommandGroup_Command_pschist *pTable = table->database->CommandGroup_Command_pschist_get();
-pTable->GetRows("`FK_CommandGroup`=" + StringUtils::itos(m_PK_CommandGroup),rows);
-}
-void Row_CommandGroup::CommandGroup_Command_pschmask_FK_CommandGroup_getrows(vector <class Row_CommandGroup_Command_pschmask*> *rows)
-{
-PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
-
-class Table_CommandGroup_Command_pschmask *pTable = table->database->CommandGroup_Command_pschmask_get();
-pTable->GetRows("`FK_CommandGroup`=" + StringUtils::itos(m_PK_CommandGroup),rows);
-}
 void Row_CommandGroup::CommandGroup_EntertainArea_FK_CommandGroup_getrows(vector <class Row_CommandGroup_EntertainArea*> *rows)
 {
 PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
 
 class Table_CommandGroup_EntertainArea *pTable = table->database->CommandGroup_EntertainArea_get();
-pTable->GetRows("`FK_CommandGroup`=" + StringUtils::itos(m_PK_CommandGroup),rows);
-}
-void Row_CommandGroup::CommandGroup_EntertainArea_pschist_FK_CommandGroup_getrows(vector <class Row_CommandGroup_EntertainArea_pschist*> *rows)
-{
-PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
-
-class Table_CommandGroup_EntertainArea_pschist *pTable = table->database->CommandGroup_EntertainArea_pschist_get();
-pTable->GetRows("`FK_CommandGroup`=" + StringUtils::itos(m_PK_CommandGroup),rows);
-}
-void Row_CommandGroup::CommandGroup_EntertainArea_pschmask_FK_CommandGroup_getrows(vector <class Row_CommandGroup_EntertainArea_pschmask*> *rows)
-{
-PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
-
-class Table_CommandGroup_EntertainArea_pschmask *pTable = table->database->CommandGroup_EntertainArea_pschmask_get();
 pTable->GetRows("`FK_CommandGroup`=" + StringUtils::itos(m_PK_CommandGroup),rows);
 }
 void Row_CommandGroup::CommandGroup_Room_FK_CommandGroup_getrows(vector <class Row_CommandGroup_Room*> *rows)
@@ -1735,20 +1757,6 @@ PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
 class Table_CommandGroup_Room *pTable = table->database->CommandGroup_Room_get();
 pTable->GetRows("`FK_CommandGroup`=" + StringUtils::itos(m_PK_CommandGroup),rows);
 }
-void Row_CommandGroup::CommandGroup_Room_pschist_FK_CommandGroup_getrows(vector <class Row_CommandGroup_Room_pschist*> *rows)
-{
-PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
-
-class Table_CommandGroup_Room_pschist *pTable = table->database->CommandGroup_Room_pschist_get();
-pTable->GetRows("`FK_CommandGroup`=" + StringUtils::itos(m_PK_CommandGroup),rows);
-}
-void Row_CommandGroup::CommandGroup_Room_pschmask_FK_CommandGroup_getrows(vector <class Row_CommandGroup_Room_pschmask*> *rows)
-{
-PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
-
-class Table_CommandGroup_Room_pschmask *pTable = table->database->CommandGroup_Room_pschmask_get();
-pTable->GetRows("`FK_CommandGroup`=" + StringUtils::itos(m_PK_CommandGroup),rows);
-}
 void Row_CommandGroup::Device_CommandGroup_FK_CommandGroup_getrows(vector <class Row_Device_CommandGroup*> *rows)
 {
 PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
@@ -1756,39 +1764,11 @@ PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
 class Table_Device_CommandGroup *pTable = table->database->Device_CommandGroup_get();
 pTable->GetRows("`FK_CommandGroup`=" + StringUtils::itos(m_PK_CommandGroup),rows);
 }
-void Row_CommandGroup::Device_CommandGroup_pschist_FK_CommandGroup_getrows(vector <class Row_Device_CommandGroup_pschist*> *rows)
-{
-PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
-
-class Table_Device_CommandGroup_pschist *pTable = table->database->Device_CommandGroup_pschist_get();
-pTable->GetRows("`FK_CommandGroup`=" + StringUtils::itos(m_PK_CommandGroup),rows);
-}
-void Row_CommandGroup::Device_CommandGroup_pschmask_FK_CommandGroup_getrows(vector <class Row_Device_CommandGroup_pschmask*> *rows)
-{
-PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
-
-class Table_Device_CommandGroup_pschmask *pTable = table->database->Device_CommandGroup_pschmask_get();
-pTable->GetRows("`FK_CommandGroup`=" + StringUtils::itos(m_PK_CommandGroup),rows);
-}
 void Row_CommandGroup::EventHandler_FK_CommandGroup_getrows(vector <class Row_EventHandler*> *rows)
 {
 PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
 
 class Table_EventHandler *pTable = table->database->EventHandler_get();
-pTable->GetRows("`FK_CommandGroup`=" + StringUtils::itos(m_PK_CommandGroup),rows);
-}
-void Row_CommandGroup::EventHandler_pschist_FK_CommandGroup_getrows(vector <class Row_EventHandler_pschist*> *rows)
-{
-PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
-
-class Table_EventHandler_pschist *pTable = table->database->EventHandler_pschist_get();
-pTable->GetRows("`FK_CommandGroup`=" + StringUtils::itos(m_PK_CommandGroup),rows);
-}
-void Row_CommandGroup::EventHandler_pschmask_FK_CommandGroup_getrows(vector <class Row_EventHandler_pschmask*> *rows)
-{
-PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
-
-class Table_EventHandler_pschmask *pTable = table->database->EventHandler_pschmask_get();
 pTable->GetRows("`FK_CommandGroup`=" + StringUtils::itos(m_PK_CommandGroup),rows);
 }
 

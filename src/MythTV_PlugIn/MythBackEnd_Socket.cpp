@@ -17,7 +17,7 @@
 using namespace std;
 using namespace DCE;
 
-#define MYTH_PROTOCOL	31
+#define MYTH_PROTOCOL	56	
 #include "Gen_Devices/AllCommandsRequests.h"
 
 MythBackEnd_Socket::MythBackEnd_Socket(MythTV_PlugIn *pMythTV_PlugIn,string sIPAddress)
@@ -165,7 +165,7 @@ bool MythBackEnd_Socket::Connect( )
 	}
 
 	sResponse="";
-	if( !InternalSendMythString("ANN Playback mythtv_plugin 01",&sResponse,"OK") )
+	if( !InternalSendMythString("ANN Playback mythtv_plugin 1",&sResponse,"OK") )
 	{
 		LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"MythBackEnd_Socket::Connect couldn't send ANN m_bConnected=false");
 		DeleteSocket();
@@ -294,7 +294,7 @@ void MythBackEnd_Socket::ProcessIncomingString(string sResponse)
 		else if( sResponse.substr(20,14)=="DONE_RECORDING" )
 			m_pMythTV_PlugIn->m_pAlarmManager->AddRelativeAlarm(0,m_pMythTV_PlugIn,CHECK_FOR_NEW_RECORDINGS,NULL);
 	}
-	LoggerWrapper::GetInstance()->Write(LV_STATUS,"MythBackEnd_Socket::ProcessIncomingString %s", 
+	LoggerWrapper::GetInstance()->Write(LV_DEBUG,"MythBackEnd_Socket::ProcessIncomingString %s", 
 		sResponse.c_str());
 }
 

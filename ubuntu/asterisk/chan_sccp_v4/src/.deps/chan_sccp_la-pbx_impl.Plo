@@ -1,0 +1,539 @@
+chan_sccp_la-pbx_impl.lo: pbx_impl/pbx_impl.c pbx_impl/../config.h \
+ /usr/include/asterisk/autoconfig.h /usr/include/asterisk/buildopts.h \
+ pbx_impl/../common.h /usr/include/sys/signal.h /usr/include/signal.h \
+ /usr/include/features.h /usr/include/bits/predefs.h \
+ /usr/include/sys/cdefs.h /usr/include/bits/wordsize.h \
+ /usr/include/gnu/stubs.h /usr/include/gnu/stubs-32.h \
+ /usr/include/bits/sigset.h /usr/include/bits/types.h \
+ /usr/include/bits/typesizes.h /usr/include/bits/signum.h \
+ /usr/include/time.h /usr/include/bits/siginfo.h \
+ /usr/include/bits/sigaction.h /usr/include/bits/sigcontext.h \
+ /usr/lib/gcc/i486-linux-gnu/4.4.3/include/stddef.h \
+ /usr/include/bits/sigstack.h /usr/include/sys/ucontext.h \
+ /usr/include/bits/pthreadtypes.h /usr/include/bits/sigthread.h \
+ /usr/include/sys/types.h /usr/include/endian.h \
+ /usr/include/bits/endian.h /usr/include/bits/byteswap.h \
+ /usr/include/sys/select.h /usr/include/bits/select.h \
+ /usr/include/bits/time.h /usr/include/sys/sysmacros.h \
+ /usr/include/sys/socket.h /usr/include/sys/uio.h /usr/include/bits/uio.h \
+ /usr/include/bits/socket.h /usr/include/bits/sockaddr.h \
+ /usr/include/asm/socket.h /usr/include/asm-generic/socket.h \
+ /usr/include/asm/sockios.h /usr/include/asm-generic/sockios.h \
+ /usr/include/bits/socket2.h /usr/include/netinet/in.h \
+ /usr/include/stdint.h /usr/include/bits/wchar.h /usr/include/bits/in.h \
+ /usr/include/netinet/in_systm.h /usr/include/netinet/ip.h \
+ /usr/include/netinet/tcp.h /usr/include/string.h /usr/include/xlocale.h \
+ /usr/include/bits/string.h /usr/include/bits/string2.h \
+ /usr/include/stdlib.h /usr/include/bits/string3.h /usr/include/stdio.h \
+ /usr/include/libio.h /usr/include/_G_config.h /usr/include/wchar.h \
+ /usr/lib/gcc/i486-linux-gnu/4.4.3/include/stdarg.h \
+ /usr/include/bits/stdio_lim.h /usr/include/bits/sys_errlist.h \
+ /usr/include/bits/stdio.h /usr/include/bits/stdio2.h \
+ /usr/include/bits/waitflags.h /usr/include/bits/waitstatus.h \
+ /usr/include/alloca.h /usr/include/bits/stdlib.h /usr/include/errno.h \
+ /usr/include/bits/errno.h /usr/include/linux/errno.h \
+ /usr/include/asm/errno.h /usr/include/asm-generic/errno.h \
+ /usr/include/asm-generic/errno-base.h /usr/include/ctype.h \
+ /usr/include/unistd.h /usr/include/bits/posix_opt.h \
+ /usr/include/bits/environments.h /usr/include/bits/confname.h \
+ /usr/include/getopt.h /usr/include/bits/unistd.h /usr/include/assert.h \
+ /usr/include/inttypes.h /usr/include/byteswap.h pbx_impl/../sccp_lock.h \
+ pbx_impl/../sccp_dllists.h pbx_impl/../chan_sccp.h pbx_impl/../config.h \
+ pbx_impl/../common.h pbx_impl/../sccp_protocol.h \
+ pbx_impl/../sccp_labels.h pbx_impl/../sccp_softkeys.h \
+ pbx_impl/../pbx_impl/ast/ast.h pbx_impl/../pbx_impl/ast/../../common.h \
+ /usr/include/asterisk.h /usr/include/asterisk/autoconfig.h \
+ /usr/include/asterisk/compat.h /usr/include/asterisk/compiler.h \
+ /usr/lib/gcc/i486-linux-gnu/4.4.3/include-fixed/limits.h \
+ /usr/lib/gcc/i486-linux-gnu/4.4.3/include-fixed/syslimits.h \
+ /usr/include/limits.h /usr/include/bits/posix1_lim.h \
+ /usr/include/bits/local_lim.h /usr/include/linux/limits.h \
+ /usr/include/bits/posix2_lim.h /usr/include/bits/xopen_lim.h \
+ /usr/include/sys/poll.h /usr/include/bits/poll.h /usr/include/glob.h \
+ /usr/include/asterisk/abstract_jb.h /usr/include/sys/time.h \
+ /usr/include/asterisk/frame_defs.h /usr/include/asterisk/utils.h \
+ /usr/include/asterisk/network.h /usr/include/arpa/inet.h \
+ /usr/include/netdb.h /usr/include/rpc/netdb.h /usr/include/bits/netdb.h \
+ /usr/include/net/if.h /usr/include/sys/ioctl.h \
+ /usr/include/bits/ioctls.h /usr/include/asm/ioctls.h \
+ /usr/include/asm-generic/ioctls.h /usr/include/linux/ioctl.h \
+ /usr/include/asm/ioctl.h /usr/include/asm-generic/ioctl.h \
+ /usr/include/bits/ioctl-types.h /usr/include/sys/ttydefaults.h \
+ /usr/include/asterisk/lock.h /usr/include/pthread.h /usr/include/sched.h \
+ /usr/include/bits/sched.h /usr/include/bits/setjmp.h \
+ /usr/include/sys/param.h /usr/include/linux/param.h \
+ /usr/include/asm/param.h /usr/include/asm-generic/param.h \
+ /usr/include/execinfo.h /usr/include/asterisk/logger.h \
+ /usr/include/asterisk/options.h /usr/include/asterisk/inline_api.h \
+ /usr/include/asterisk/time.h /usr/include/asterisk/localtime.h \
+ /usr/include/locale.h /usr/include/bits/locale.h \
+ /usr/include/asterisk/stringfields.h /usr/include/asterisk/strings.h \
+ /usr/include/asterisk/threadstorage.h /usr/include/asterisk/pbx.h \
+ /usr/include/asterisk/channel.h /usr/include/asterisk/astobj2.h \
+ /usr/include/asterisk/compat.h /usr/include/asterisk/linkedlists.h \
+ /usr/include/asterisk/poll-compat.h /usr/include/asterisk/select.h \
+ /usr/include/asterisk/frame.h /usr/include/asterisk/endian.h \
+ /usr/include/asterisk/sched.h /usr/include/asterisk/chanvars.h \
+ /usr/include/asterisk/config.h /usr/include/asterisk/cdr.h \
+ /usr/include/asterisk/data.h /usr/include/asterisk/datastore.h \
+ /usr/include/asterisk/channelstate.h /usr/include/asterisk/asterisk.h \
+ /usr/include/asterisk/ccss.h /usr/include/asterisk/devicestate.h \
+ /usr/include/asterisk/framehook.h /usr/include/asterisk/hashtab.h \
+ /usr/include/asterisk/xmldoc.h /usr/include/asterisk/xml.h \
+ /usr/include/asterisk/acl.h /usr/include/asterisk/netsock2.h \
+ /usr/include/asterisk/io.h /usr/include/asterisk/module.h \
+ /usr/include/asterisk/causes.h /usr/include/asterisk/app.h \
+ /usr/include/asterisk/callerid.h /usr/include/asterisk/musiconhold.h \
+ /usr/include/asterisk/astdb.h /usr/include/asterisk/features.h \
+ /usr/include/asterisk/manager.h /usr/include/asterisk/translate.h \
+ /usr/include/asterisk/plc.h /usr/include/asterisk/rtp_engine.h \
+ /usr/include/asterisk/res_srtp.h /usr/include/asterisk/event_defs.h \
+ /usr/include/asterisk/indications.h pbx_impl/../pbx_impl/ast/define.h \
+ pbx_impl/../pbx_impl/ast/ast108.h \
+ pbx_impl/../pbx_impl/ast/../../config.h pbx_impl/../sccp_event.h \
+ pbx_impl/../pbx_impl/pbx_impl.h pbx_impl/../pbx_impl/../config.h \
+ pbx_impl/../pbx_impl/../common.h pbx_impl/../pbx_impl/ast/ast.h \
+ pbx_impl/../sccp_pbx.h pbx_impl/../sccp_socket.h \
+ pbx_impl/../sccp_device.h pbx_impl/../sccp_line.h \
+ pbx_impl/../sccp_channel.h pbx_impl/../sccp_features.h \
+ pbx_impl/../sccp_utils.h pbx_impl/../sccp_indicate.h \
+ pbx_impl/../sccp_hint.h pbx_impl/../sccp_actions.h \
+ pbx_impl/../sccp_featureButton.h pbx_impl/../sccp_mwi.h \
+ /usr/include/asterisk/event.h pbx_impl/../sccp_config.h \
+ pbx_impl/../sccp_conference.h pbx_impl/../sccp_adv_features.h \
+ pbx_impl/../sccp_cli.h pbx_impl/../sccp_appfunctions.h \
+ pbx_impl/../sccp_management.h pbx_impl/../sccp_rtp.h
+
+pbx_impl/../config.h:
+
+/usr/include/asterisk/autoconfig.h:
+
+/usr/include/asterisk/buildopts.h:
+
+pbx_impl/../common.h:
+
+/usr/include/sys/signal.h:
+
+/usr/include/signal.h:
+
+/usr/include/features.h:
+
+/usr/include/bits/predefs.h:
+
+/usr/include/sys/cdefs.h:
+
+/usr/include/bits/wordsize.h:
+
+/usr/include/gnu/stubs.h:
+
+/usr/include/gnu/stubs-32.h:
+
+/usr/include/bits/sigset.h:
+
+/usr/include/bits/types.h:
+
+/usr/include/bits/typesizes.h:
+
+/usr/include/bits/signum.h:
+
+/usr/include/time.h:
+
+/usr/include/bits/siginfo.h:
+
+/usr/include/bits/sigaction.h:
+
+/usr/include/bits/sigcontext.h:
+
+/usr/lib/gcc/i486-linux-gnu/4.4.3/include/stddef.h:
+
+/usr/include/bits/sigstack.h:
+
+/usr/include/sys/ucontext.h:
+
+/usr/include/bits/pthreadtypes.h:
+
+/usr/include/bits/sigthread.h:
+
+/usr/include/sys/types.h:
+
+/usr/include/endian.h:
+
+/usr/include/bits/endian.h:
+
+/usr/include/bits/byteswap.h:
+
+/usr/include/sys/select.h:
+
+/usr/include/bits/select.h:
+
+/usr/include/bits/time.h:
+
+/usr/include/sys/sysmacros.h:
+
+/usr/include/sys/socket.h:
+
+/usr/include/sys/uio.h:
+
+/usr/include/bits/uio.h:
+
+/usr/include/bits/socket.h:
+
+/usr/include/bits/sockaddr.h:
+
+/usr/include/asm/socket.h:
+
+/usr/include/asm-generic/socket.h:
+
+/usr/include/asm/sockios.h:
+
+/usr/include/asm-generic/sockios.h:
+
+/usr/include/bits/socket2.h:
+
+/usr/include/netinet/in.h:
+
+/usr/include/stdint.h:
+
+/usr/include/bits/wchar.h:
+
+/usr/include/bits/in.h:
+
+/usr/include/netinet/in_systm.h:
+
+/usr/include/netinet/ip.h:
+
+/usr/include/netinet/tcp.h:
+
+/usr/include/string.h:
+
+/usr/include/xlocale.h:
+
+/usr/include/bits/string.h:
+
+/usr/include/bits/string2.h:
+
+/usr/include/stdlib.h:
+
+/usr/include/bits/string3.h:
+
+/usr/include/stdio.h:
+
+/usr/include/libio.h:
+
+/usr/include/_G_config.h:
+
+/usr/include/wchar.h:
+
+/usr/lib/gcc/i486-linux-gnu/4.4.3/include/stdarg.h:
+
+/usr/include/bits/stdio_lim.h:
+
+/usr/include/bits/sys_errlist.h:
+
+/usr/include/bits/stdio.h:
+
+/usr/include/bits/stdio2.h:
+
+/usr/include/bits/waitflags.h:
+
+/usr/include/bits/waitstatus.h:
+
+/usr/include/alloca.h:
+
+/usr/include/bits/stdlib.h:
+
+/usr/include/errno.h:
+
+/usr/include/bits/errno.h:
+
+/usr/include/linux/errno.h:
+
+/usr/include/asm/errno.h:
+
+/usr/include/asm-generic/errno.h:
+
+/usr/include/asm-generic/errno-base.h:
+
+/usr/include/ctype.h:
+
+/usr/include/unistd.h:
+
+/usr/include/bits/posix_opt.h:
+
+/usr/include/bits/environments.h:
+
+/usr/include/bits/confname.h:
+
+/usr/include/getopt.h:
+
+/usr/include/bits/unistd.h:
+
+/usr/include/assert.h:
+
+/usr/include/inttypes.h:
+
+/usr/include/byteswap.h:
+
+pbx_impl/../sccp_lock.h:
+
+pbx_impl/../sccp_dllists.h:
+
+pbx_impl/../chan_sccp.h:
+
+pbx_impl/../config.h:
+
+pbx_impl/../common.h:
+
+pbx_impl/../sccp_protocol.h:
+
+pbx_impl/../sccp_labels.h:
+
+pbx_impl/../sccp_softkeys.h:
+
+pbx_impl/../pbx_impl/ast/ast.h:
+
+pbx_impl/../pbx_impl/ast/../../common.h:
+
+/usr/include/asterisk.h:
+
+/usr/include/asterisk/autoconfig.h:
+
+/usr/include/asterisk/compat.h:
+
+/usr/include/asterisk/compiler.h:
+
+/usr/lib/gcc/i486-linux-gnu/4.4.3/include-fixed/limits.h:
+
+/usr/lib/gcc/i486-linux-gnu/4.4.3/include-fixed/syslimits.h:
+
+/usr/include/limits.h:
+
+/usr/include/bits/posix1_lim.h:
+
+/usr/include/bits/local_lim.h:
+
+/usr/include/linux/limits.h:
+
+/usr/include/bits/posix2_lim.h:
+
+/usr/include/bits/xopen_lim.h:
+
+/usr/include/sys/poll.h:
+
+/usr/include/bits/poll.h:
+
+/usr/include/glob.h:
+
+/usr/include/asterisk/abstract_jb.h:
+
+/usr/include/sys/time.h:
+
+/usr/include/asterisk/frame_defs.h:
+
+/usr/include/asterisk/utils.h:
+
+/usr/include/asterisk/network.h:
+
+/usr/include/arpa/inet.h:
+
+/usr/include/netdb.h:
+
+/usr/include/rpc/netdb.h:
+
+/usr/include/bits/netdb.h:
+
+/usr/include/net/if.h:
+
+/usr/include/sys/ioctl.h:
+
+/usr/include/bits/ioctls.h:
+
+/usr/include/asm/ioctls.h:
+
+/usr/include/asm-generic/ioctls.h:
+
+/usr/include/linux/ioctl.h:
+
+/usr/include/asm/ioctl.h:
+
+/usr/include/asm-generic/ioctl.h:
+
+/usr/include/bits/ioctl-types.h:
+
+/usr/include/sys/ttydefaults.h:
+
+/usr/include/asterisk/lock.h:
+
+/usr/include/pthread.h:
+
+/usr/include/sched.h:
+
+/usr/include/bits/sched.h:
+
+/usr/include/bits/setjmp.h:
+
+/usr/include/sys/param.h:
+
+/usr/include/linux/param.h:
+
+/usr/include/asm/param.h:
+
+/usr/include/asm-generic/param.h:
+
+/usr/include/execinfo.h:
+
+/usr/include/asterisk/logger.h:
+
+/usr/include/asterisk/options.h:
+
+/usr/include/asterisk/inline_api.h:
+
+/usr/include/asterisk/time.h:
+
+/usr/include/asterisk/localtime.h:
+
+/usr/include/locale.h:
+
+/usr/include/bits/locale.h:
+
+/usr/include/asterisk/stringfields.h:
+
+/usr/include/asterisk/strings.h:
+
+/usr/include/asterisk/threadstorage.h:
+
+/usr/include/asterisk/pbx.h:
+
+/usr/include/asterisk/channel.h:
+
+/usr/include/asterisk/astobj2.h:
+
+/usr/include/asterisk/compat.h:
+
+/usr/include/asterisk/linkedlists.h:
+
+/usr/include/asterisk/poll-compat.h:
+
+/usr/include/asterisk/select.h:
+
+/usr/include/asterisk/frame.h:
+
+/usr/include/asterisk/endian.h:
+
+/usr/include/asterisk/sched.h:
+
+/usr/include/asterisk/chanvars.h:
+
+/usr/include/asterisk/config.h:
+
+/usr/include/asterisk/cdr.h:
+
+/usr/include/asterisk/data.h:
+
+/usr/include/asterisk/datastore.h:
+
+/usr/include/asterisk/channelstate.h:
+
+/usr/include/asterisk/asterisk.h:
+
+/usr/include/asterisk/ccss.h:
+
+/usr/include/asterisk/devicestate.h:
+
+/usr/include/asterisk/framehook.h:
+
+/usr/include/asterisk/hashtab.h:
+
+/usr/include/asterisk/xmldoc.h:
+
+/usr/include/asterisk/xml.h:
+
+/usr/include/asterisk/acl.h:
+
+/usr/include/asterisk/netsock2.h:
+
+/usr/include/asterisk/io.h:
+
+/usr/include/asterisk/module.h:
+
+/usr/include/asterisk/causes.h:
+
+/usr/include/asterisk/app.h:
+
+/usr/include/asterisk/callerid.h:
+
+/usr/include/asterisk/musiconhold.h:
+
+/usr/include/asterisk/astdb.h:
+
+/usr/include/asterisk/features.h:
+
+/usr/include/asterisk/manager.h:
+
+/usr/include/asterisk/translate.h:
+
+/usr/include/asterisk/plc.h:
+
+/usr/include/asterisk/rtp_engine.h:
+
+/usr/include/asterisk/res_srtp.h:
+
+/usr/include/asterisk/event_defs.h:
+
+/usr/include/asterisk/indications.h:
+
+pbx_impl/../pbx_impl/ast/define.h:
+
+pbx_impl/../pbx_impl/ast/ast108.h:
+
+pbx_impl/../pbx_impl/ast/../../config.h:
+
+pbx_impl/../sccp_event.h:
+
+pbx_impl/../pbx_impl/pbx_impl.h:
+
+pbx_impl/../pbx_impl/../config.h:
+
+pbx_impl/../pbx_impl/../common.h:
+
+pbx_impl/../pbx_impl/ast/ast.h:
+
+pbx_impl/../sccp_pbx.h:
+
+pbx_impl/../sccp_socket.h:
+
+pbx_impl/../sccp_device.h:
+
+pbx_impl/../sccp_line.h:
+
+pbx_impl/../sccp_channel.h:
+
+pbx_impl/../sccp_features.h:
+
+pbx_impl/../sccp_utils.h:
+
+pbx_impl/../sccp_indicate.h:
+
+pbx_impl/../sccp_hint.h:
+
+pbx_impl/../sccp_actions.h:
+
+pbx_impl/../sccp_featureButton.h:
+
+pbx_impl/../sccp_mwi.h:
+
+/usr/include/asterisk/event.h:
+
+pbx_impl/../sccp_config.h:
+
+pbx_impl/../sccp_conference.h:
+
+pbx_impl/../sccp_adv_features.h:
+
+pbx_impl/../sccp_cli.h:
+
+pbx_impl/../sccp_appfunctions.h:
+
+pbx_impl/../sccp_management.h:
+
+pbx_impl/../sccp_rtp.h:

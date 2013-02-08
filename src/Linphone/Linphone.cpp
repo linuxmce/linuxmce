@@ -71,7 +71,7 @@ bool Linphone::Connect(int iPK_DeviceTemplate) {
 		return false;
 	}
 	
-	string sPhoneNumber = m_pData->m_mapParameters_Find(DEVICEDATA_PhoneNumber_CONST);
+	string sPhoneNumber = m_pData->mapParameters_Find(DEVICEDATA_PhoneNumber_CONST);
 	if(!sPhoneNumber.length()) {
 		LoggerWrapper::GetInstance()->Write(LV_WARNING, "PhoneNumber parameter is not specified for Linphone");
 		return false;
@@ -243,12 +243,10 @@ void Linphone::SomeFunction()
 
 	/** @brief COMMAND: #334 - Phone_Initiate */
 	/** Initiates a call */
-		/** @param #2 PK_Device */
-			/** The device to iniate the call from.  Used by Telecom plugin to forward to a sip phone.  Not needed when sending to a phone directly.  If this is not specified, telecom plugin assumes the correct option is the from device */
 		/** @param #83 PhoneExtension */
 			/** Extention to dial */
 
-void Linphone::CMD_Phone_Initiate(int iPK_Device,string sPhoneExtension,string &sCMD_Result,Message *pMessage)
+void Linphone::CMD_Phone_Initiate(string sPhoneExtension,string &sCMD_Result,Message *pMessage)
 //<-dceag-c334-e->
 {
 	if(!manager_.Invite(sPhoneExtension.c_str())) {
@@ -279,28 +277,4 @@ void Linphone::CMD_Phone_Drop(string &sCMD_Result,Message *pMessage)
 //<-dceag-c336-e->
 {
 	manager_.Drop();
-}
-//<-dceag-getconfig-b->
-bool Linphone::GetConfig()
-{
-	if( !Linphone_Command::GetConfig() )
-		return false;
-//<-dceag-getconfig-e->
-	return true;
-}
-
-//<-dceag-c28-b->
-
-	/** @brief COMMAND: #28 - Simulate Keypress */
-	/** Send a DTMF code */
-		/** @param #26 PK_Button */
-			/** What key to simulate being pressed.  If 2 numbers are specified, separated by a comma, the second will be used if the Shift key is specified. */
-		/** @param #41 StreamID */
-			/** ID of stream to apply */
-		/** @param #50 Name */
-			/** The application to send the keypress to. If not specified, it goes to the DCE device. */
-
-void Linphone::CMD_Simulate_Keypress(string sPK_Button,int iStreamID,string sName,string &sCMD_Result,Message *pMessage)
-//<-dceag-c28-e->
-{
 }

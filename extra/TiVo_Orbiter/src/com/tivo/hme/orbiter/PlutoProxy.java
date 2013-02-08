@@ -30,7 +30,6 @@ public class PlutoProxy
 	//device templates
 	private final static int DEVICETEMPLATE_XML_Data_Handler_Plugin_CONST = 1868;
 	private final static int DEVICETEMPLATE_Moxi_Orbiter_CONST = 1872;
-	private final static int DEVICETEMPLATE_General_Info_Plugin_CONST = 27;
 	
 	//virtual devices
 	private final static int VIRTUALDEVICE_DCEROUTER_CONST = -1000;
@@ -38,29 +37,22 @@ public class PlutoProxy
 	//commands
 	private final static int COMMAND_Request_XML_Data_CONST = 869;
 	private final static int COMMAND_Simulate_Keypress_CONST = 28;
-	private final static int COMMAND_Goto_Screen_CONST = 741;
-	private final static int COMMAND_Get_Request_File_And_Checksum_CONST = 239;
 	
 	//command parameters
 	private final static int COMMANDPARAMETER_DataGrid_ID_CONST = 15;
 	private final static int COMMANDPARAMETER_Data_String_CONST = 109;
-	private final static int COMMANDPARAMETER_Data_CONST = 19;
 	private final static int COMMANDPARAMETER_Parameters_CONST = 202;
 	private final static int COMMANDPARAMETER_PK_Button_CONST = 26;
-	private final static int COMMANDPARAMETER_PK_Screen_CONST = 159;
-	private final static int COMMANDPARAMETER_Filename_CONST = 13;
 	
-	private int m_nPVRDeviceID = 0;
-	private int m_nOrbiterDeviceID = 0;
+	private int m_nDeviceID = 0;
 	
 	private Communication m_comm = null;
 	
-	public PlutoProxy(MessageProcessor pMessageProcessor, String sIPAddress, int nPort, int nPVRDeviceID, int nOrbiterDeviceID)
+	public PlutoProxy(MessageProcessor pMessageProcessor, String sIPAddress, int nPort, int nDeviceID)
 	{
-		m_comm = new Communication(pMessageProcessor, sIPAddress, nPort, nPVRDeviceID);
+		m_comm = new Communication(pMessageProcessor, sIPAddress, nPort, nDeviceID);
 		
-		m_nPVRDeviceID = nPVRDeviceID;
-		m_nOrbiterDeviceID = nOrbiterDeviceID;
+		m_nDeviceID = nDeviceID;
 		
 		if(!m_comm.Connect())
 			System.out.println("Failed to connect to router:" + sIPAddress);
@@ -71,63 +63,33 @@ public class PlutoProxy
 		m_comm.Disconnect();
 	}
 	
-	public String GetScenarios(boolean bEmbedded, String sEmbeddedScenariosFile)
+	public String GetScenarios()
 	{
 		if(m_comm.IsConnected())
 		{
-			if(bEmbedded)
+			Message message = new Message(
+				  m_nDeviceID,  //from 
+				  DEVICETEMPLATE_XML_Data_Handler_Plugin_CONST, //to template
+				  Message.MessagePriority.PRIORITY_NORMAL, 
+				  Message.MessageType.MESSAGETYPE_COMMAND, 
+				  COMMAND_Request_XML_Data_CONST //message id
+			);
+			message.AddParameter(COMMANDPARAMETER_DataGrid_ID_CONST, "CommandGroups");
+			message.AddParameter(COMMANDPARAMETER_Data_String_CONST, "");
+			message.AddParameter(COMMANDPARAMETER_Parameters_CONST, "");
+			message.ExpectedResponse(Message.MessageExpectedResponse.ER_ReplyMessage);
+			message.TargetType(Message.MessageTargetType.TT_DeviceTemplate, "");
+			message.Write();
+			m_comm.EventHandler().SendMessage(message);
+			  
+			Message response = m_comm.EventHandler().ReceivedMessage();
+			if(null != response)
 			{
-				Message message = new Message(
-						m_nPVRDeviceID, //from
-						DEVICETEMPLATE_General_Info_Plugin_CONST, //to template
-						Message.MessagePriority.PRIORITY_NORMAL,
-						Message.MessageType.MESSAGETYPE_COMMAND,
-						COMMAND_Get_Request_File_And_Checksum_CONST //message id
-				);
-				message.AddParameter(COMMANDPARAMETER_Filename_CONST, sEmbeddedScenariosFile);
-				message.AddParameter(COMMANDPARAMETER_Data_CONST, "");
-				message.ExpectedResponse(Message.MessageExpectedResponse.ER_ReplyMessage);
-				message.TargetType(Message.MessageTargetType.TT_DeviceTemplate, "");
-				message.Write();
-				m_comm.EventHandler().SendMessage(message);
+				String sXML = response.GetParameter(COMMANDPARAMETER_Data_String_CONST);
+				System.out.println("Received xml:\n" + sXML);
 				
-				Message response = m_comm.EventHandler().ReceivedMessage();
-				if(null != response)
-				{
-					byte[] data = response.GetDataParameter(COMMANDPARAMETER_Data_CONST);
-					String sRawData = new String(data);
-					System.out.println("Received scenarios:\n" + sRawData);
-					
-					return sRawData;
-				}					
-			}
-			else
-			{
-				Message message = new Message(
-					  m_nPVRDeviceID,  //from 
-					  DEVICETEMPLATE_XML_Data_Handler_Plugin_CONST, //to template
-					  Message.MessagePriority.PRIORITY_NORMAL, 
-					  Message.MessageType.MESSAGETYPE_COMMAND, 
-					  COMMAND_Request_XML_Data_CONST //message id
-				);
-				
-				message.AddParameter(COMMANDPARAMETER_DataGrid_ID_CONST, "CommandGroups");
-				message.AddParameter(COMMANDPARAMETER_Data_String_CONST, "");
-				message.AddParameter(COMMANDPARAMETER_Parameters_CONST, "");
-				message.ExpectedResponse(Message.MessageExpectedResponse.ER_ReplyMessage);
-				message.TargetType(Message.MessageTargetType.TT_DeviceTemplate, "");
-				message.Write();
-				m_comm.EventHandler().SendMessage(message);
-				  
-				Message response = m_comm.EventHandler().ReceivedMessage();
-				if(null != response)
-				{
-					String sXML = response.GetParameter(COMMANDPARAMETER_Data_String_CONST);
-					System.out.println("Received xml:\n" + sXML);
-					
-					return sXML;
-				}				
-			}
+				return sXML;
+			 }
 		}
 		return null;
 	}
@@ -139,7 +101,7 @@ public class PlutoProxy
 		if(m_comm.IsConnected())
 		{
 			Message message = new Message(
-				  m_nOrbiterDeviceID,  //from 
+				  m_nDeviceID,  //from 
 				  VIRTUALDEVICE_DCEROUTER_CONST, //to
 				  Message.MessagePriority.PRIORITY_NORMAL, 
 				  Message.MessageType.MESSAGETYPE_EXEC_COMMAND_GROUP, 
@@ -157,7 +119,7 @@ public class PlutoProxy
 		if(m_comm.IsConnected())
 		{
 			Message message = new Message(
-				  m_nPVRDeviceID,  //from 
+				  m_nDeviceID,  //from 
 				  DEVICETEMPLATE_Moxi_Orbiter_CONST, 
 				  Message.MessagePriority.PRIORITY_NORMAL, 
 				  Message.MessageType.MESSAGETYPE_COMMAND, 
@@ -169,43 +131,4 @@ public class PlutoProxy
 			m_comm.EventHandler().SendMessage(message);
 		}		
 	}
-	
-	public void GotoScreen(int nScreenID)
-	{
-		System.out.println("GotoScreen: " + (new Integer(nScreenID)).toString());
-		
-		if(m_comm.IsConnected())
-		{
-			Message message = new Message(
-				  m_nPVRDeviceID,  //from 
-				  DEVICETEMPLATE_Moxi_Orbiter_CONST, 
-				  Message.MessagePriority.PRIORITY_NORMAL, 
-				  Message.MessageType.MESSAGETYPE_COMMAND, 
-				  COMMAND_Goto_Screen_CONST //message id
-			);
-			message.AddParameter(COMMANDPARAMETER_PK_Screen_CONST, (new Integer(nScreenID)).toString());
-			message.TargetType(Message.MessageTargetType.TT_DeviceTemplate, "");
-			message.Write();
-			m_comm.EventHandler().SendMessage(message);
-		}		
-	}	
-	
-	public void CameraAction(int nCameraID, int nCameraCommand)
-	{
-		System.out.println("Camera action: " + (new Integer(nCameraCommand)).toString());
-		
-		if(m_comm.IsConnected())
-		{
-			Message message = new Message(
-				  m_nPVRDeviceID,  //from 
-				  nCameraID, 
-				  Message.MessagePriority.PRIORITY_NORMAL, 
-				  Message.MessageType.MESSAGETYPE_COMMAND, 
-				  nCameraCommand //message id
-			);
-			message.TargetType(Message.MessageTargetType.TT_Device, "");
-			message.Write();
-			m_comm.EventHandler().SendMessage(message);
-		}		
-	}		
 }

@@ -24,14 +24,14 @@ for ((i = 1; i <= $#; i++)); do
 	esac
 done
 
-XModulesAdd=(dbe extmod record xtrap speedo type1 glx int10 v4l)
+XModulesAdd=(dbe extmod record speedo type1 glx int10 v4l)
 XModulesRemove=()
 
 XModulesActive=($(awk -f/usr/pluto/bin/X-ModulesSection.awk "$ConfigFile"))
 
 # if driver is 'nvidia', disable the 'dri' module
 # nVidia implements its own DRI, and the X DRI module causes big problems with the nVidia drivers - vox populi
-if [[ "$Driver" == nvidia ]]; then
+if lspci | grep -qi 'VGA .* nVidia)'; then
 	XModulesRemove=("${XModulesRemove[@]}" dri)
 else
 	# all other cards will load the 'dri' module

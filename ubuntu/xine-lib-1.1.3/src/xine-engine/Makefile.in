@@ -187,8 +187,6 @@ FFMPEG_LIBS = @FFMPEG_LIBS@
 FFMPEG_POSTPROC_CFLAGS = @FFMPEG_POSTPROC_CFLAGS@
 FFMPEG_POSTPROC_LIBS = @FFMPEG_POSTPROC_LIBS@
 FIG2DEV = @FIG2DEV@
-FONTCONFIG_CFLAGS = @FONTCONFIG_CFLAGS@
-FONTCONFIG_LIBS = @FONTCONFIG_LIBS@
 FT2_CFLAGS = @FT2_CFLAGS@
 FT2_LIBS = @FT2_LIBS@
 FUSIONSOUND_CFLAGS = @FUSIONSOUND_CFLAGS@
@@ -433,11 +431,7 @@ WAND_LIBS = @WAND_LIBS@
 WIN32_CPPFLAGS = @WIN32_CPPFLAGS@
 WIN32_FALSE = @WIN32_FALSE@
 WIN32_TRUE = @WIN32_TRUE@
-X11_CFLAGS = @X11_CFLAGS@
-X11_LIBS = @X11_LIBS@
 XGETTEXT = @XGETTEXT@
-XINERAMA_CFLAGS = @XINERAMA_CFLAGS@
-XINERAMA_LIBS = @XINERAMA_LIBS@
 XINE_ACFLAGS = @XINE_ACFLAGS@
 XINE_BIN_AGE = @XINE_BIN_AGE@
 XINE_BUILD_CC = @XINE_BUILD_CC@
@@ -460,10 +454,9 @@ XINE_PLUGINPATH = @XINE_PLUGINPATH@
 XINE_SCRIPTPATH = @XINE_SCRIPTPATH@
 XINE_SUB = @XINE_SUB@
 XMKMF = @XMKMF@
-XVMC_LIBS = @XVMC_LIBS@
-XV_CFLAGS = @XV_CFLAGS@
-XV_LIBS = @XV_LIBS@
-XXMC_LIBS = @XXMC_LIBS@
+XVMC_LIB = @XVMC_LIB@
+XV_LIB = @XV_LIB@
+XXMC_LIB = @XXMC_LIB@
 X_CFLAGS = @X_CFLAGS@
 X_EXTRA_LIBS = @X_EXTRA_LIBS@
 X_LIBS = @X_LIBS@
@@ -521,7 +514,7 @@ target_alias = @target_alias@
 w32_path = @w32_path@
 XINE_LIB = $(top_builddir)/src/xine-engine/libxine.la
 LIBXINEPOSIX = $(top_builddir)/lib/libxineposix.la
-AM_CFLAGS = $(X_CFLAGS) $(FT2_CFLAGS) $(FONTCONFIG_CFLAGS) $(VISIBILITY_FLAG)
+AM_CFLAGS = $(X_CFLAGS) $(FT2_CFLAGS)
 AM_CPPFLAGS = $(ZLIB_CPPFLAGS) -DXINE_LIBRARY_COMPILE
 lib_LTLIBRARIES = libxine.la
 XINEUTILS_LIB = $(top_builddir)/src/xine-utils/libxineutils.la
@@ -542,7 +535,7 @@ libxine_la_DEPENDENCIES = $(XINEUTILS_LIB) \
                           $(pthread_dep) $(LIBXINEPOSIX)
 
 libxine_la_LIBADD = $(THREAD_LIBS) $(DYNAMIC_LD_LIBS) $(LTLIBINTL) $(ZLIB_LIBS) \
-		    -lm $(XINEUTILS_LIB) $(LIBICONV) $(FT2_LIBS) $(FONTCONFIG_LIBS) \
+		    -lm $(XINEUTILS_LIB) $(LIBICONV) $(FT2_LIBS) \
                     $(LIBXINEPOSIX) $(RT_LIBS)
 
 libxine_la_LDFLAGS = \
@@ -555,7 +548,7 @@ include_HEADERS = buffer.h metronom.h configfile.h vo_scale.h \
 	plugin_catalog.h audio_decoder.h video_decoder.h post.h \
 	io_helper.h broadcaster.h info_helper.h refcounter.h alphablend.h
 
-noinst_HEADERS = bswap.h ffmpeg_bswap.h
+noinst_HEADERS = bswap.h
 all: all-am
 
 .SUFFIXES:

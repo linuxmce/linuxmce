@@ -47,8 +47,10 @@ using namespace DCE;
 #include "FileListOps.h"
 
 #ifndef WIN32
-#include <dirent.h>
-#include <attr/attributes.h>
+    #include <dirent.h>
+    #ifndef __APPLE_CC__
+        #include <attr/attributes.h>
+    #endif
 #endif
 
 
@@ -447,10 +449,7 @@ LoggerWrapper::GetInstance()->Write(LV_WARNING,"Starting File list");
 				DCE::CMD_MH_Play_Media_Cat cmd(PK_Controller, DEVICECATEGORY_Media_Plugins_CONST, false, BL_SameHouse,
 					0 /* any device */,pFileDetails->m_sBaseName + pFileDetails->m_sFileName,
 					0 /* whatever media type the file is */,0 /* any master device */,"" /* current entertain area */,
-					false /* resume */, 0 /* repeat */,
-					false /* queue */,
-					false /* bypass events */,
-					false /* dont setup av */);
+					false /* resume */, 0 /* repeat */, 0 /* bqueue TODO aaronspecial */, 0 /* bByPass_Event TODO aaronspecial */, 0 /* bDont_Setup_Av TODO aaronspecial */);
 				pCell->m_pMessage = new Message(cmd.m_pMessage);
 				pCellPicture->m_pMessage = new Message(cmd.m_pMessage);
 				delete cmd.m_pMessage;

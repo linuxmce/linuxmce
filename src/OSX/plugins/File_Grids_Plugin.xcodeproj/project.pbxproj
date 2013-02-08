@@ -1,0 +1,273 @@
+// !$*UTF8*$!
+{
+	archiveVersion = 1;
+	classes = {
+	};
+	objectVersion = 46;
+	objects = {
+
+/* Begin PBXBuildFile section */
+		95ABFE3415AF610A0079029F /* File_Grids_Plugin.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 95ABFE3315AF610A0079029F /* File_Grids_Plugin.cpp */; };
+		95ABFE3715AF61160079029F /* Main.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 95ABFE3615AF61160079029F /* Main.cpp */; };
+		95ABFE3D15AF61E60079029F /* mysql.h in Headers */ = {isa = PBXBuildFile; fileRef = 95ABFE3C15AF61E60079029F /* mysql.h */; };
+		95ABFEC815AF76F40079029F /* libDCECommon.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 95ABFEC715AF76F40079029F /* libDCECommon.dylib */; };
+		95ABFECA15AF77840079029F /* libpluto_main.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 95ABFEC915AF77840079029F /* libpluto_main.dylib */; };
+		95ABFECF15AF77C70079029F /* libmysqlclient.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 95ABFECE15AF77C70079029F /* libmysqlclient.dylib */; };
+		95ABFED115AF77EC0079029F /* File_Grids_PluginBase.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 95ABFED015AF77EC0079029F /* File_Grids_PluginBase.cpp */; };
+		95ABFED315AF78100079029F /* Datagrid_Plugin.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 95ABFED215AF78100079029F /* Datagrid_Plugin.dylib */; };
+		95ABFED515AF78C80079029F /* FileListGrid.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 95ABFED415AF78C80079029F /* FileListGrid.cpp */; };
+		95ABFED715AF78D20079029F /* FileListOps.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 95ABFED615AF78D20079029F /* FileListOps.cpp */; };
+/* End PBXBuildFile section */
+
+/* Begin PBXFileReference section */
+		95ABFE2015AF5FFA0079029F /* File_Grids_Plugin.dylib */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.dylib"; includeInIndex = 0; path = File_Grids_Plugin.dylib; sourceTree = BUILT_PRODUCTS_DIR; };
+		95ABFE3315AF610A0079029F /* File_Grids_Plugin.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = File_Grids_Plugin.cpp; path = ../../File_Grids_Plugin/File_Grids_Plugin.cpp; sourceTree = "<group>"; };
+		95ABFE3615AF61160079029F /* Main.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = Main.cpp; path = ../../File_Grids_Plugin/Main.cpp; sourceTree = "<group>"; };
+		95ABFE3C15AF61E60079029F /* mysql.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = mysql.h; path = ../mysql/include/mysql.h; sourceTree = "<group>"; };
+		95ABFEC715AF76F40079029F /* libDCECommon.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libDCECommon.dylib; path = ../lib/libDCECommon.dylib; sourceTree = "<group>"; };
+		95ABFEC915AF77840079029F /* libpluto_main.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libpluto_main.dylib; path = ../lib/libpluto_main.dylib; sourceTree = "<group>"; };
+		95ABFECE15AF77C70079029F /* libmysqlclient.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libmysqlclient.dylib; path = ../mysql/lib/libmysqlclient.dylib; sourceTree = "<group>"; };
+		95ABFED015AF77EC0079029F /* File_Grids_PluginBase.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = File_Grids_PluginBase.cpp; path = ../../Gen_Devices/File_Grids_PluginBase.cpp; sourceTree = "<group>"; };
+		95ABFED215AF78100079029F /* Datagrid_Plugin.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = Datagrid_Plugin.dylib; path = ../bin/Datagrid_Plugin.dylib; sourceTree = "<group>"; };
+		95ABFED415AF78C80079029F /* FileListGrid.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = FileListGrid.cpp; path = ../../File_Grids_Plugin/FileListGrid.cpp; sourceTree = "<group>"; };
+		95ABFED615AF78D20079029F /* FileListOps.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = FileListOps.cpp; path = ../../File_Grids_Plugin/FileListOps.cpp; sourceTree = "<group>"; };
+/* End PBXFileReference section */
+
+/* Begin PBXFrameworksBuildPhase section */
+		95ABFE1D15AF5FFA0079029F /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				95ABFEC815AF76F40079029F /* libDCECommon.dylib in Frameworks */,
+				95ABFECA15AF77840079029F /* libpluto_main.dylib in Frameworks */,
+				95ABFECF15AF77C70079029F /* libmysqlclient.dylib in Frameworks */,
+				95ABFED315AF78100079029F /* Datagrid_Plugin.dylib in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXFrameworksBuildPhase section */
+
+/* Begin PBXGroup section */
+		95ABFE1515AF5FFA0079029F = {
+			isa = PBXGroup;
+			children = (
+				95ABFE3615AF61160079029F /* Main.cpp */,
+				95ABFE3315AF610A0079029F /* File_Grids_Plugin.cpp */,
+				95ABFE3B15AF61D40079029F /* Includes */,
+				95ABFEC515AF76DA0079029F /* Libraries */,
+				95ABFE2115AF5FFA0079029F /* Products */,
+			);
+			sourceTree = "<group>";
+		};
+		95ABFE2115AF5FFA0079029F /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				95ABFE2015AF5FFA0079029F /* File_Grids_Plugin.dylib */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+		95ABFE3B15AF61D40079029F /* Includes */ = {
+			isa = PBXGroup;
+			children = (
+				95ABFE3C15AF61E60079029F /* mysql.h */,
+				95ABFED015AF77EC0079029F /* File_Grids_PluginBase.cpp */,
+				95ABFED415AF78C80079029F /* FileListGrid.cpp */,
+				95ABFED615AF78D20079029F /* FileListOps.cpp */,
+			);
+			name = Includes;
+			sourceTree = "<group>";
+		};
+		95ABFEC515AF76DA0079029F /* Libraries */ = {
+			isa = PBXGroup;
+			children = (
+				95ABFEC715AF76F40079029F /* libDCECommon.dylib */,
+				95ABFEC915AF77840079029F /* libpluto_main.dylib */,
+				95ABFECE15AF77C70079029F /* libmysqlclient.dylib */,
+				95ABFED215AF78100079029F /* Datagrid_Plugin.dylib */,
+			);
+			name = Libraries;
+			sourceTree = "<group>";
+		};
+/* End PBXGroup section */
+
+/* Begin PBXHeadersBuildPhase section */
+		95ABFE1E15AF5FFA0079029F /* Headers */ = {
+			isa = PBXHeadersBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				95ABFE3D15AF61E60079029F /* mysql.h in Headers */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXHeadersBuildPhase section */
+
+/* Begin PBXNativeTarget section */
+		95ABFE1F15AF5FFA0079029F /* File_Grids_Plugin */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 95ABFE2D15AF5FFA0079029F /* Build configuration list for PBXNativeTarget "File_Grids_Plugin" */;
+			buildPhases = (
+				95ABFE1C15AF5FFA0079029F /* Sources */,
+				95ABFE1D15AF5FFA0079029F /* Frameworks */,
+				95ABFE1E15AF5FFA0079029F /* Headers */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = File_Grids_Plugin;
+			productName = File_Grids_Plugin;
+			productReference = 95ABFE2015AF5FFA0079029F /* File_Grids_Plugin.dylib */;
+			productType = "com.apple.product-type.library.dynamic";
+		};
+/* End PBXNativeTarget section */
+
+/* Begin PBXProject section */
+		95ABFE1715AF5FFA0079029F /* Project object */ = {
+			isa = PBXProject;
+			attributes = {
+				LastUpgradeCheck = 0420;
+			};
+			buildConfigurationList = 95ABFE1A15AF5FFA0079029F /* Build configuration list for PBXProject "File_Grids_Plugin" */;
+			compatibilityVersion = "Xcode 3.2";
+			developmentRegion = English;
+			hasScannedForEncodings = 0;
+			knownRegions = (
+				en,
+			);
+			mainGroup = 95ABFE1515AF5FFA0079029F;
+			productRefGroup = 95ABFE2115AF5FFA0079029F /* Products */;
+			projectDirPath = "";
+			projectRoot = "";
+			targets = (
+				95ABFE1F15AF5FFA0079029F /* File_Grids_Plugin */,
+			);
+		};
+/* End PBXProject section */
+
+/* Begin PBXSourcesBuildPhase section */
+		95ABFE1C15AF5FFA0079029F /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				95ABFE3415AF610A0079029F /* File_Grids_Plugin.cpp in Sources */,
+				95ABFE3715AF61160079029F /* Main.cpp in Sources */,
+				95ABFED115AF77EC0079029F /* File_Grids_PluginBase.cpp in Sources */,
+				95ABFED515AF78C80079029F /* FileListGrid.cpp in Sources */,
+				95ABFED715AF78D20079029F /* FileListOps.cpp in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXSourcesBuildPhase section */
+
+/* Begin XCBuildConfiguration section */
+		95ABFE2B15AF5FFA0079029F /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				ARCHS = "$(ARCHS_STANDARD_64_BIT)";
+				CLANG_ENABLE_OBJC_ARC = YES;
+				COPY_PHASE_STRIP = NO;
+				GCC_C_LANGUAGE_STANDARD = gnu99;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_ENABLE_OBJC_EXCEPTIONS = YES;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"DEBUG=1",
+					"$(inherited)",
+				);
+				GCC_SYMBOLS_PRIVATE_EXTERN = NO;
+				GCC_VERSION = com.apple.compilers.llvm.clang.1_0;
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_MISSING_PROTOTYPES = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				MACOSX_DEPLOYMENT_TARGET = 10.7;
+				ONLY_ACTIVE_ARCH = YES;
+				SDKROOT = macosx;
+			};
+			name = Debug;
+		};
+		95ABFE2C15AF5FFA0079029F /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				ARCHS = "$(ARCHS_STANDARD_64_BIT)";
+				CLANG_ENABLE_OBJC_ARC = YES;
+				COPY_PHASE_STRIP = YES;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				GCC_C_LANGUAGE_STANDARD = gnu99;
+				GCC_ENABLE_OBJC_EXCEPTIONS = YES;
+				GCC_VERSION = com.apple.compilers.llvm.clang.1_0;
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_MISSING_PROTOTYPES = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				MACOSX_DEPLOYMENT_TARGET = 10.7;
+				SDKROOT = macosx;
+			};
+			name = Release;
+		};
+		95ABFE2E15AF5FFA0079029F /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CONFIGURATION_BUILD_DIR = ../bin;
+				HEADER_SEARCH_PATHS = (
+					../../DCE,
+					../..,
+				);
+				INSTALL_PATH = /usr/pluto/bin;
+				LIBRARY_SEARCH_PATHS = (
+					"$(inherited)",
+					"\"$(SRCROOT)/../lib\"",
+					"\"$(SRCROOT)/../mysql/lib\"",
+					"\"$(SRCROOT)/../bin\"",
+				);
+				PRODUCT_NAME = "$(TARGET_NAME)";
+			};
+			name = Debug;
+		};
+		95ABFE2F15AF5FFA0079029F /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CONFIGURATION_BUILD_DIR = ../bin;
+				HEADER_SEARCH_PATHS = (
+					../../DCE,
+					../..,
+				);
+				INSTALL_PATH = /usr/pluto/bin;
+				LIBRARY_SEARCH_PATHS = (
+					"$(inherited)",
+					"\"$(SRCROOT)/../lib\"",
+					"\"$(SRCROOT)/../mysql/lib\"",
+					"\"$(SRCROOT)/../bin\"",
+				);
+				PRODUCT_NAME = "$(TARGET_NAME)";
+			};
+			name = Release;
+		};
+/* End XCBuildConfiguration section */
+
+/* Begin XCConfigurationList section */
+		95ABFE1A15AF5FFA0079029F /* Build configuration list for PBXProject "File_Grids_Plugin" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				95ABFE2B15AF5FFA0079029F /* Debug */,
+				95ABFE2C15AF5FFA0079029F /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		95ABFE2D15AF5FFA0079029F /* Build configuration list for PBXNativeTarget "File_Grids_Plugin" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				95ABFE2E15AF5FFA0079029F /* Debug */,
+				95ABFE2F15AF5FFA0079029F /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+/* End XCConfigurationList section */
+	};
+	rootObject = 95ABFE1715AF5FFA0079029F /* Project object */;
+}

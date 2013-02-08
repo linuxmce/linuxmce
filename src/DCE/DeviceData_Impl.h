@@ -6,11 +6,11 @@
      Phone: +1 (877) 758-8648
 
 
-     This program is free software; you can redistribute it and/or modify it under the terms of the GNU General Public License.
+     This program is free software; you can redistribute it and/or modify it under the terms of the GNU Lesser General Public License.
      This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty
      of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
 
-     See the GNU General Public License for more details.
+     See the GNU Lesser General Public License for more details.
 
 */
 /**
@@ -45,14 +45,11 @@ namespace DCE
 	 */
 	class DeviceData_Impl : public DeviceData_Base
 	{
-	protected:
-		pluto_pthread_mutex_t m_DataMutex;
-	private:
-		map<int, string> m_mapParameters; /**< integer-keyed map with the parameters this device has @todo ask - is string=paramvalue? */
 
 	public:
-
 		Event_Impl *m_pEvent_Impl; /**< pointer to an event implementation assicieted with the current device @todo ask */
+		map<int, string> m_mapParameters; /**< integer-keyed map with the parameters this device has @todo ask - is string=paramvalue? */
+        string m_mapParameters_Find(int PK_DeviceData) { map<int, string>::iterator it = m_mapParameters.find(PK_DeviceData); return it==m_mapParameters.end() ? "" : (*it).second; }
 
 		VectDeviceData_Impl m_vectDeviceData_Impl_Children; /**< vector containing the child devices  */
 		bool m_bUsePingToKeepAlive,m_bRunningWithoutDeviceData;
@@ -85,12 +82,11 @@ namespace DCE
 		/**
 		 * @brief default constructor
 		 */
-		 DeviceData_Impl() : m_DataMutex("data")
+		DeviceData_Impl()
 		{
 			m_bRunningWithoutDeviceData=false;
 			m_bUsePingToKeepAlive=false;
 			m_bDeviceData_Impl = true;
-			m_DataMutex.Init(NULL);
 		}
 
 		/**
@@ -100,9 +96,8 @@ namespace DCE
 			unsigned long m_dwPK_DeviceCategory, unsigned long dwPK_Room, bool bImplementsDCE, bool bIsEmbedded, string sCommandLine, bool bIsPlugIn, string sDescription,
 			string sIPAddress, string sMacAddress, bool bInheritsMacFromPC, bool bDisabled )
 			: DeviceData_Base( dwPK_Device, dwPK_Installation, dwPK_Device_Template, dwPK_Device_Controlled_Via, m_dwPK_DeviceCategory, dwPK_Room,
-			bImplementsDCE, bIsEmbedded, sCommandLine, bIsPlugIn, sDescription, sIPAddress, sMacAddress, bInheritsMacFromPC, bDisabled ), m_DataMutex("data")
+			bImplementsDCE, bIsEmbedded, sCommandLine, bIsPlugIn, sDescription, sIPAddress, sMacAddress, bInheritsMacFromPC, bDisabled )
 		{
-			m_DataMutex.Init(NULL);
 			m_bRunningWithoutDeviceData=false;
 			m_bUsePingToKeepAlive=false;
 			m_bDeviceData_Impl = true;
@@ -121,39 +116,10 @@ namespace DCE
 		/**
 		 * @brief returnes the parameter value for the specified parameter
 		 */
-		string m_mapParameters_Find(int iPK_DeviceData)
+		string mapParameters_Find( int iPK_DeviceData )
 		{
-			PLUTO_SAFETY_LOCK(dm, m_DataMutex);
 			map<int,string>::iterator it = m_mapParameters.find( iPK_DeviceData );
 			return it == m_mapParameters.end() ? "" : (*it).second;
-		}
-
-		void ReplaceParameter(int iKey, string sNewValue)
-		{
-			PLUTO_SAFETY_LOCK(dm, m_DataMutex);
-			m_mapParameters[iKey] = sNewValue;
-		}
-
-		bool ParameterExists(int iKey)
-		{
-			PLUTO_SAFETY_LOCK(dm, m_DataMutex);
-			return m_mapParameters.end() != m_mapParameters.find(iKey);
-		}
-
-		void AssignParameters(const map<int, string>& mapParameters)
-		{
-			PLUTO_SAFETY_LOCK(dm, m_DataMutex);
-			m_mapParameters = mapParameters;
-		}
-
-		const map<int, string>& Parameters()
-		{
-			return m_mapParameters;
-		}
-
-		pluto_pthread_mutex_t& Mutex()
-		{
-			return m_DataMutex;
 		}
 
 

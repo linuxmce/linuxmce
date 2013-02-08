@@ -186,9 +186,15 @@ public:
 	 * Process that handles remote control events
 	 */
 	std::string RemoteCmd;
+	
+	/** 
+	 * Process that handles gamepad events
+         */
+	std::string GamepadCmd;
 
 #ifndef WIN32
 	RemoteProcess m_WizardRemote;
+	RemoteProcess m_GamepadRemote; // added for USB Gamepad support.
 #endif
 	
 	/**

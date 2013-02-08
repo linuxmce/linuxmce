@@ -1,0 +1,321 @@
+// !$*UTF8*$!
+{
+	archiveVersion = 1;
+	classes = {
+	};
+	objectVersion = 46;
+	objects = {
+
+/* Begin PBXBuildFile section */
+		95ABFE9715AF68360079029F /* General_Info_Plugin.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 95ABFE9615AF68360079029F /* General_Info_Plugin.cpp */; };
+		95ABFE9915AF68420079029F /* Main.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 95ABFE9815AF68420079029F /* Main.cpp */; };
+		95ABFE9B15AF68B80079029F /* mysql.h in Headers */ = {isa = PBXBuildFile; fileRef = 95ABFE9A15AF68B80079029F /* mysql.h */; };
+		95ABFE9F15AF694B0079029F /* libDCECommon.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 95ABFE9E15AF694B0079029F /* libDCECommon.dylib */; };
+		95ABFEA315AF697E0079029F /* libmysqlclient.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 95ABFEA215AF697E0079029F /* libmysqlclient.dylib */; };
+		95ABFEA515AF69BA0079029F /* General_Info_PluginBase.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 95ABFEA415AF69BA0079029F /* General_Info_PluginBase.cpp */; };
+		95ABFEA715AF69E50079029F /* libpluto_main.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 95ABFEA615AF69E50079029F /* libpluto_main.dylib */; };
+		95ABFEA915AF6A420079029F /* libpluto_media.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 95ABFEA815AF6A420079029F /* libpluto_media.dylib */; };
+		95ABFEAB15AF6AB40079029F /* Datagrid_Plugin.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 95ABFEAA15AF6AB40079029F /* Datagrid_Plugin.dylib */; };
+		95ABFEAD15AF6F410079029F /* DatabaseUtils.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 95ABFEAC15AF6F410079029F /* DatabaseUtils.cpp */; };
+		95ABFEAF15AF72CF0079029F /* Orbiter_Plugin.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 95ABFEAE15AF72CF0079029F /* Orbiter_Plugin.dylib */; };
+		95ABFEB115AF73E70079029F /* UpdateEntArea_Setup.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 95ABFEB015AF73E70079029F /* UpdateEntArea_Setup.cpp */; };
+		95ABFEB315AF74140079029F /* UpdateEntArea.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 95ABFEB215AF74140079029F /* UpdateEntArea.cpp */; };
+		95ABFEB515AF743C0079029F /* UpdateEntArea_Telecom.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 95ABFEB415AF743C0079029F /* UpdateEntArea_Telecom.cpp */; };
+		95ABFEBB15AF745E0079029F /* UpdateEntArea_Climate.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 95ABFEB615AF745E0079029F /* UpdateEntArea_Climate.cpp */; };
+		95ABFEBC15AF745E0079029F /* UpdateEntArea_Event.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 95ABFEB715AF745E0079029F /* UpdateEntArea_Event.cpp */; };
+		95ABFEBD15AF745E0079029F /* UpdateEntArea_Lighting.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 95ABFEB815AF745E0079029F /* UpdateEntArea_Lighting.cpp */; };
+		95ABFEBE15AF745E0079029F /* UpdateEntArea_Media.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 95ABFEB915AF745E0079029F /* UpdateEntArea_Media.cpp */; };
+		95ABFEBF15AF745E0079029F /* UpdateEntArea_Security.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 95ABFEBA15AF745E0079029F /* UpdateEntArea_Security.cpp */; };
+		95FF883415B49B3800B0EC93 /* CommandGroupArray.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 95FF883315B49B3800B0EC93 /* CommandGroupArray.cpp */; };
+		95FF883615B49B6200B0EC93 /* Criteria.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 95FF883515B49B6200B0EC93 /* Criteria.cpp */; };
+		95FF885015B49C4500B0EC93 /* PostCreateOptions.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 95FF884F15B49C4500B0EC93 /* PostCreateOptions.cpp */; };
+/* End PBXBuildFile section */
+
+/* Begin PBXFileReference section */
+		95ABFE7C15AF666A0079029F /* General_Info_Plugin.dylib */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.dylib"; includeInIndex = 0; path = General_Info_Plugin.dylib; sourceTree = BUILT_PRODUCTS_DIR; };
+		95ABFE9615AF68360079029F /* General_Info_Plugin.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = General_Info_Plugin.cpp; path = ../../General_Info_Plugin/General_Info_Plugin.cpp; sourceTree = "<group>"; };
+		95ABFE9815AF68420079029F /* Main.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = Main.cpp; path = ../../General_Info_Plugin/Main.cpp; sourceTree = "<group>"; };
+		95ABFE9A15AF68B80079029F /* mysql.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = mysql.h; path = ../mysql/include/mysql.h; sourceTree = "<group>"; };
+		95ABFE9E15AF694B0079029F /* libDCECommon.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libDCECommon.dylib; path = ../lib/libDCECommon.dylib; sourceTree = "<group>"; };
+		95ABFEA215AF697E0079029F /* libmysqlclient.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libmysqlclient.dylib; path = ../mysql/lib/libmysqlclient.dylib; sourceTree = "<group>"; };
+		95ABFEA415AF69BA0079029F /* General_Info_PluginBase.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = General_Info_PluginBase.cpp; path = ../../Gen_Devices/General_Info_PluginBase.cpp; sourceTree = "<group>"; };
+		95ABFEA615AF69E50079029F /* libpluto_main.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libpluto_main.dylib; path = ../lib/libpluto_main.dylib; sourceTree = "<group>"; };
+		95ABFEA815AF6A420079029F /* libpluto_media.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libpluto_media.dylib; path = ../lib/libpluto_media.dylib; sourceTree = "<group>"; };
+		95ABFEAA15AF6AB40079029F /* Datagrid_Plugin.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = Datagrid_Plugin.dylib; path = ../bin/Datagrid_Plugin.dylib; sourceTree = "<group>"; };
+		95ABFEAC15AF6F410079029F /* DatabaseUtils.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = DatabaseUtils.cpp; path = ../../PlutoUtils/DatabaseUtils.cpp; sourceTree = "<group>"; };
+		95ABFEAE15AF72CF0079029F /* Orbiter_Plugin.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = Orbiter_Plugin.dylib; path = ../bin/Orbiter_Plugin.dylib; sourceTree = "<group>"; };
+		95ABFEB015AF73E70079029F /* UpdateEntArea_Setup.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = UpdateEntArea_Setup.cpp; path = ../../UpdateEntArea/UpdateEntArea_Setup.cpp; sourceTree = "<group>"; };
+		95ABFEB215AF74140079029F /* UpdateEntArea.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = UpdateEntArea.cpp; path = ../../UpdateEntArea/UpdateEntArea.cpp; sourceTree = "<group>"; };
+		95ABFEB415AF743C0079029F /* UpdateEntArea_Telecom.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = UpdateEntArea_Telecom.cpp; path = ../../UpdateEntArea/UpdateEntArea_Telecom.cpp; sourceTree = "<group>"; };
+		95ABFEB615AF745E0079029F /* UpdateEntArea_Climate.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = UpdateEntArea_Climate.cpp; path = ../../UpdateEntArea/UpdateEntArea_Climate.cpp; sourceTree = "<group>"; };
+		95ABFEB715AF745E0079029F /* UpdateEntArea_Event.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = UpdateEntArea_Event.cpp; path = ../../UpdateEntArea/UpdateEntArea_Event.cpp; sourceTree = "<group>"; };
+		95ABFEB815AF745E0079029F /* UpdateEntArea_Lighting.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = UpdateEntArea_Lighting.cpp; path = ../../UpdateEntArea/UpdateEntArea_Lighting.cpp; sourceTree = "<group>"; };
+		95ABFEB915AF745E0079029F /* UpdateEntArea_Media.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = UpdateEntArea_Media.cpp; path = ../../UpdateEntArea/UpdateEntArea_Media.cpp; sourceTree = "<group>"; };
+		95ABFEBA15AF745E0079029F /* UpdateEntArea_Security.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = UpdateEntArea_Security.cpp; path = ../../UpdateEntArea/UpdateEntArea_Security.cpp; sourceTree = "<group>"; };
+		95FF883315B49B3800B0EC93 /* CommandGroupArray.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = CommandGroupArray.cpp; path = ../../UpdateEntArea/CommandGroupArray.cpp; sourceTree = "<group>"; };
+		95FF883515B49B6200B0EC93 /* Criteria.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = Criteria.cpp; path = ../../UpdateEntArea/Criteria.cpp; sourceTree = "<group>"; };
+		95FF884F15B49C4500B0EC93 /* PostCreateOptions.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = PostCreateOptions.cpp; path = ../../General_Info_Plugin/PostCreateOptions.cpp; sourceTree = "<group>"; };
+/* End PBXFileReference section */
+
+/* Begin PBXFrameworksBuildPhase section */
+		95ABFE7915AF666A0079029F /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				95ABFE9F15AF694B0079029F /* libDCECommon.dylib in Frameworks */,
+				95ABFEA315AF697E0079029F /* libmysqlclient.dylib in Frameworks */,
+				95ABFEA715AF69E50079029F /* libpluto_main.dylib in Frameworks */,
+				95ABFEA915AF6A420079029F /* libpluto_media.dylib in Frameworks */,
+				95ABFEAB15AF6AB40079029F /* Datagrid_Plugin.dylib in Frameworks */,
+				95ABFEAF15AF72CF0079029F /* Orbiter_Plugin.dylib in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXFrameworksBuildPhase section */
+
+/* Begin PBXGroup section */
+		95ABFE7115AF666A0079029F = {
+			isa = PBXGroup;
+			children = (
+				95ABFE9615AF68360079029F /* General_Info_Plugin.cpp */,
+				95ABFE9815AF68420079029F /* Main.cpp */,
+				95ABFE9C15AF68BF0079029F /* Includes */,
+				95ABFE9D15AF69350079029F /* Libraries */,
+				95ABFE7D15AF666A0079029F /* Products */,
+			);
+			sourceTree = "<group>";
+		};
+		95ABFE7D15AF666A0079029F /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				95ABFE7C15AF666A0079029F /* General_Info_Plugin.dylib */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+		95ABFE9C15AF68BF0079029F /* Includes */ = {
+			isa = PBXGroup;
+			children = (
+				95ABFE9A15AF68B80079029F /* mysql.h */,
+				95ABFEA415AF69BA0079029F /* General_Info_PluginBase.cpp */,
+				95FF884F15B49C4500B0EC93 /* PostCreateOptions.cpp */,
+				95ABFEAC15AF6F410079029F /* DatabaseUtils.cpp */,
+				95ABFEB215AF74140079029F /* UpdateEntArea.cpp */,
+				95ABFEB015AF73E70079029F /* UpdateEntArea_Setup.cpp */,
+				95ABFEB415AF743C0079029F /* UpdateEntArea_Telecom.cpp */,
+				95ABFEB615AF745E0079029F /* UpdateEntArea_Climate.cpp */,
+				95ABFEB715AF745E0079029F /* UpdateEntArea_Event.cpp */,
+				95ABFEB815AF745E0079029F /* UpdateEntArea_Lighting.cpp */,
+				95ABFEB915AF745E0079029F /* UpdateEntArea_Media.cpp */,
+				95ABFEBA15AF745E0079029F /* UpdateEntArea_Security.cpp */,
+				95FF883315B49B3800B0EC93 /* CommandGroupArray.cpp */,
+				95FF883515B49B6200B0EC93 /* Criteria.cpp */,
+			);
+			name = Includes;
+			sourceTree = "<group>";
+		};
+		95ABFE9D15AF69350079029F /* Libraries */ = {
+			isa = PBXGroup;
+			children = (
+				95ABFE9E15AF694B0079029F /* libDCECommon.dylib */,
+				95ABFEA615AF69E50079029F /* libpluto_main.dylib */,
+				95ABFEA815AF6A420079029F /* libpluto_media.dylib */,
+				95ABFEA215AF697E0079029F /* libmysqlclient.dylib */,
+				95ABFEAA15AF6AB40079029F /* Datagrid_Plugin.dylib */,
+				95ABFEAE15AF72CF0079029F /* Orbiter_Plugin.dylib */,
+			);
+			name = Libraries;
+			sourceTree = "<group>";
+		};
+/* End PBXGroup section */
+
+/* Begin PBXHeadersBuildPhase section */
+		95ABFE7A15AF666A0079029F /* Headers */ = {
+			isa = PBXHeadersBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				95ABFE9B15AF68B80079029F /* mysql.h in Headers */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXHeadersBuildPhase section */
+
+/* Begin PBXNativeTarget section */
+		95ABFE7B15AF666A0079029F /* General_Info_Plugin */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 95ABFE8915AF666A0079029F /* Build configuration list for PBXNativeTarget "General_Info_Plugin" */;
+			buildPhases = (
+				95ABFE7815AF666A0079029F /* Sources */,
+				95ABFE7915AF666A0079029F /* Frameworks */,
+				95ABFE7A15AF666A0079029F /* Headers */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = General_Info_Plugin;
+			productName = General_Info_Plugin;
+			productReference = 95ABFE7C15AF666A0079029F /* General_Info_Plugin.dylib */;
+			productType = "com.apple.product-type.library.dynamic";
+		};
+/* End PBXNativeTarget section */
+
+/* Begin PBXProject section */
+		95ABFE7315AF666A0079029F /* Project object */ = {
+			isa = PBXProject;
+			attributes = {
+				LastUpgradeCheck = 0420;
+			};
+			buildConfigurationList = 95ABFE7615AF666A0079029F /* Build configuration list for PBXProject "General_Info_Plugin" */;
+			compatibilityVersion = "Xcode 3.2";
+			developmentRegion = English;
+			hasScannedForEncodings = 0;
+			knownRegions = (
+				en,
+			);
+			mainGroup = 95ABFE7115AF666A0079029F;
+			productRefGroup = 95ABFE7D15AF666A0079029F /* Products */;
+			projectDirPath = "";
+			projectRoot = "";
+			targets = (
+				95ABFE7B15AF666A0079029F /* General_Info_Plugin */,
+			);
+		};
+/* End PBXProject section */
+
+/* Begin PBXSourcesBuildPhase section */
+		95ABFE7815AF666A0079029F /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				95ABFE9715AF68360079029F /* General_Info_Plugin.cpp in Sources */,
+				95ABFE9915AF68420079029F /* Main.cpp in Sources */,
+				95ABFEA515AF69BA0079029F /* General_Info_PluginBase.cpp in Sources */,
+				95ABFEAD15AF6F410079029F /* DatabaseUtils.cpp in Sources */,
+				95ABFEB115AF73E70079029F /* UpdateEntArea_Setup.cpp in Sources */,
+				95ABFEB315AF74140079029F /* UpdateEntArea.cpp in Sources */,
+				95ABFEB515AF743C0079029F /* UpdateEntArea_Telecom.cpp in Sources */,
+				95ABFEBB15AF745E0079029F /* UpdateEntArea_Climate.cpp in Sources */,
+				95ABFEBC15AF745E0079029F /* UpdateEntArea_Event.cpp in Sources */,
+				95ABFEBD15AF745E0079029F /* UpdateEntArea_Lighting.cpp in Sources */,
+				95ABFEBE15AF745E0079029F /* UpdateEntArea_Media.cpp in Sources */,
+				95ABFEBF15AF745E0079029F /* UpdateEntArea_Security.cpp in Sources */,
+				95FF883415B49B3800B0EC93 /* CommandGroupArray.cpp in Sources */,
+				95FF883615B49B6200B0EC93 /* Criteria.cpp in Sources */,
+				95FF885015B49C4500B0EC93 /* PostCreateOptions.cpp in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXSourcesBuildPhase section */
+
+/* Begin XCBuildConfiguration section */
+		95ABFE8715AF666A0079029F /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				ARCHS = "$(ARCHS_STANDARD_64_BIT)";
+				CLANG_ENABLE_OBJC_ARC = YES;
+				COPY_PHASE_STRIP = NO;
+				GCC_C_LANGUAGE_STANDARD = gnu99;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_ENABLE_OBJC_EXCEPTIONS = YES;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"DEBUG=1",
+					"$(inherited)",
+				);
+				GCC_SYMBOLS_PRIVATE_EXTERN = NO;
+				GCC_VERSION = com.apple.compilers.llvm.clang.1_0;
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_MISSING_PROTOTYPES = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				MACOSX_DEPLOYMENT_TARGET = 10.7;
+				ONLY_ACTIVE_ARCH = YES;
+				SDKROOT = macosx;
+			};
+			name = Debug;
+		};
+		95ABFE8815AF666A0079029F /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				ARCHS = "$(ARCHS_STANDARD_64_BIT)";
+				CLANG_ENABLE_OBJC_ARC = YES;
+				COPY_PHASE_STRIP = YES;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				GCC_C_LANGUAGE_STANDARD = gnu99;
+				GCC_ENABLE_OBJC_EXCEPTIONS = YES;
+				GCC_VERSION = com.apple.compilers.llvm.clang.1_0;
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_MISSING_PROTOTYPES = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				MACOSX_DEPLOYMENT_TARGET = 10.7;
+				SDKROOT = macosx;
+			};
+			name = Release;
+		};
+		95ABFE8A15AF666A0079029F /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CONFIGURATION_BUILD_DIR = ../bin;
+				HEADER_SEARCH_PATHS = (
+					../../DCE,
+					../..,
+				);
+				INSTALL_PATH = /usr/pluto/bin;
+				LIBRARY_SEARCH_PATHS = (
+					"$(inherited)",
+					"\"$(SRCROOT)/../lib\"",
+					"\"$(SRCROOT)/../mysql/lib\"",
+					"\"$(SRCROOT)/../bin\"",
+				);
+				PRODUCT_NAME = "$(TARGET_NAME)";
+			};
+			name = Debug;
+		};
+		95ABFE8B15AF666A0079029F /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CONFIGURATION_BUILD_DIR = ../bin;
+				HEADER_SEARCH_PATHS = (
+					../../DCE,
+					../..,
+				);
+				INSTALL_PATH = /usr/pluto/bin;
+				LIBRARY_SEARCH_PATHS = (
+					"$(inherited)",
+					"\"$(SRCROOT)/../lib\"",
+					"\"$(SRCROOT)/../mysql/lib\"",
+					"\"$(SRCROOT)/../bin\"",
+				);
+				PRODUCT_NAME = "$(TARGET_NAME)";
+			};
+			name = Release;
+		};
+/* End XCBuildConfiguration section */
+
+/* Begin XCConfigurationList section */
+		95ABFE7615AF666A0079029F /* Build configuration list for PBXProject "General_Info_Plugin" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				95ABFE8715AF666A0079029F /* Debug */,
+				95ABFE8815AF666A0079029F /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		95ABFE8915AF666A0079029F /* Build configuration list for PBXNativeTarget "General_Info_Plugin" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				95ABFE8A15AF666A0079029F /* Debug */,
+				95ABFE8B15AF666A0079029F /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+/* End XCConfigurationList section */
+	};
+	rootObject = 95ABFE7315AF666A0079029F /* Project object */;
+}

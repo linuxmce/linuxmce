@@ -57,6 +57,10 @@ namespace FileUtils
     void MakeDir(string sDirectory); /**< makes a directory, including all necessary parent directories, like mkdir -p in Linux */
     bool DirExists(string sDirectory); /**< Returns true if the directory exists */
 	bool DelFile(string sFileName);
+	bool CheckPathSanity(string sPath); /** Simple Sanity Checks for a Path */
+#ifndef WIN32
+	bool MoveFile(string sSourceFileName, string sDestFileName, bool bOverwrite=false); /** Moves a file from src to dest */
+#endif
 	bool DelDir(string sDirectory);
     string BasePath( string sFileName ); /**< returns the path one dir up @todo ask */
     string FileWithoutExtension ( string sFileName ); /**< returns the filename without the extension */

@@ -98,6 +98,7 @@ protected:
 	/** Methods for comunicating with DCE, accessed by wrappers.
     */
 	virtual void SendCommand(RubyCommandWrapper* pcmd);
+	virtual void SendReceiveCommand(RubyCommandWrapper* pcmd);
 
     /** Methods for comunicating with DCE, accessed by wrappers.
     */

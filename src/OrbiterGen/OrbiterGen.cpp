@@ -94,7 +94,8 @@ static HEAP_ALLOC(wrkmem,LZO1X_1_MEM_COMPRESS);
 
 DCEConfig g_DCEConfig;
 
-#include "../include/version.h"
+#define  VERSION "<=version=>"
+
 
 static bool LocationComparer(LocationInfo *x, LocationInfo *y)
 {
@@ -349,6 +350,19 @@ int OrbiterGenerator::DoIt()
 	else
 		m_pRow_Orbiter->Reload();
 
+	if ( m_pRow_Device->FK_DeviceTemplate_get()==DEVICETEMPLATE_qOrbiter_CONST )
+	{
+		LoggerWrapper::GetInstance()->Write(LV_STATUS,"Device %d is a qOrbiter, no regen required.",m_iPK_Orbiter);
+		DatabaseUtils::UnLockTables(m_spDatabase_pluto_main.get());
+		if( !m_bNewOrbiter )
+		{
+			// Don't reset the psc_mod so this doesn't result in a 'new devices' messages
+			string sql = "UPDATE Device SET NeedConfigure=0,psc_mod=psc_mod WHERE PK_Device=" + StringUtils::itos(m_pRow_Device->PK_Device_get());
+			m_spDatabase_pluto_main->threaded_db_wrapper_query(sql);
+		}
+		return 0;
+	}
+
 	if( m_pRow_Orbiter->RegenInProgress_get() )
 	{
 		time_t tModDate = StringUtils::SQLDateTime(m_pRow_Orbiter->psc_mod_get());
@@ -597,7 +611,7 @@ m_bNoEffects = true;
 	Row_DeviceCategory *pDeviceCategory_MD=pRow_Device_MD ? pRow_Device_MD->FK_DeviceTemplate_getrow()->FK_DeviceCategory_getrow() : NULL;
 	while( pDeviceCategory_MD )
 	{
-		if( pDeviceCategory_MD->PK_DeviceCategory_get()==DEVICECATEGORY_Media_Director_CONST )
+		if( pDeviceCategory_MD->PK_DeviceCategory_get()==DEVICECATEGORY_Media_Director_CONST || pDeviceCategory_MD->PK_DeviceCategory_get()== DEVICECATEGORY_Mobile_Internet_Devices_CONST )
 		{
 			m_bIsOSD=true;
 			break;
@@ -708,7 +722,7 @@ m_bNoEffects = true;
 
 	m_pRow_Size = NULL;
 	if( !m_pRow_Device->FK_Device_ControlledVia_isNull() &&
-		m_pRow_Device->FK_Device_ControlledVia_getrow()->FK_DeviceTemplate_getrow()->FK_DeviceCategory_get()==DEVICECATEGORY_Media_Director_CONST )
+		( m_pRow_Device->FK_Device_ControlledVia_getrow()->FK_DeviceTemplate_getrow()->FK_DeviceCategory_get()==DEVICECATEGORY_Media_Director_CONST || m_pRow_Device->FK_Device_ControlledVia_getrow()->FK_DeviceTemplate_getrow()->FK_DeviceCategory_get()==DEVICECATEGORY_Mobile_Internet_Devices_CONST ) )
 	{
 		// This is an on-screen orbiter
 		pRow_Device_DeviceData = m_spDatabase_pluto_main->Device_DeviceData_get()->GetRow(m_pRow_Device->FK_Device_ControlledVia_get(),DEVICEDATA_Video_settings_CONST);
@@ -1084,7 +1098,7 @@ m_bNoEffects = true;
 			{
 				Row_Device_EntertainArea *pRow_Device_EntertainArea = vectRow_Device_EntertainArea[s];
 				Row_Device *pRow_Device = pRow_Device_EntertainArea->FK_Device_getrow();
-				if( pRow_Device && pRow_Device->FK_DeviceTemplate_getrow()->FK_DeviceCategory_get()==DEVICECATEGORY_Media_Director_CONST )
+				if( pRow_Device && ( pRow_Device->FK_DeviceTemplate_getrow()->FK_DeviceCategory_get()==DEVICECATEGORY_Media_Director_CONST || pRow_Device->FK_DeviceTemplate_getrow()->FK_DeviceCategory_get()==DEVICECATEGORY_Mobile_Internet_Devices_CONST  ) )
 					pRow_Device_MediaDirector = pRow_Device_EntertainArea->FK_Device_getrow();
 				if( pRow_Device && pRow_Device->FK_DeviceTemplate_getrow()->FK_DeviceCategory_get()==DEVICECATEGORY_Standard_Orbiter_CONST )
 					pRow_Device_Orbiter = pRow_Device_EntertainArea->FK_Device_getrow();
@@ -1593,8 +1607,8 @@ loop_to_keep_looking_for_objs_to_include:
 		pRow_DesignObj_Array[0] = m_spDatabase_pluto_main->DesignObj_get()->GetRow(DESIGNOBJ_mnuFileList_SortOptions_CONST);
 	}
 
-	int iPK_MediaType_Searchable[] = {MEDIATYPE_pluto_StoredAudio_CONST,MEDIATYPE_pluto_StoredVideo_CONST,MEDIATYPE_pluto_Pictures_CONST,MEDIATYPE_np_Game_CONST,MEDIATYPE_misc_DocViewer_CONST,MEDIATYPE_misc_Playlist_CONST,MEDIATYPE_lmce_Game_CONST};
-	for(int i=0;i<sizeof(iPK_MediaType_Searchable)/sizeof(int);++i)
+	int iPK_MediaType_Searchable[] = {MEDIATYPE_pluto_LiveTV_CONST,MEDIATYPE_pluto_StoredAudio_CONST,MEDIATYPE_pluto_StoredVideo_CONST,MEDIATYPE_pluto_Pictures_CONST,MEDIATYPE_np_Game_CONST,MEDIATYPE_misc_DocViewer_CONST,MEDIATYPE_misc_Playlist_CONST,MEDIATYPE_lmce_Game_CONST, MEDIATYPE_lmce_StreamedAudio_CONST};
+	for(int i=0;i<9;++i)
 	{
 		m_dwMediaType = iPK_MediaType_Searchable[i];
 		for(int iRow_DesignObj=0;iRow_DesignObj<5;++iRow_DesignObj)
@@ -1749,8 +1763,12 @@ loop_to_keep_looking_for_objs_to_include:
 				if( !m_iLastReportedPercentage || Percent - m_iLastReportedPercentage > 3 )
 				{
 					m_iLastReportedPercentage = max(1,Percent);
-					if( g_bBootSplash )
-						system( ("/usr/pluto/bin/BootMessage.sh \"Stage 2 of 2 - Rendering screen " + StringUtils::itos(m_iScreensToRender) + " of " + StringUtils::itos(m_iScreensTotal) + "\"").c_str());
+					if( g_bBootSplash ) 
+					{
+						// string myCmd = "/usr/pluto/bin/BootMessage.sh \"Stage 2 of 2 - Rendering screen " + StringUtils::itos(m_iScreensToRender) + " of " + StringUtils::itos(m_iScreensTotal) + "\"";
+						// LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"Executing %s",myCmd.c_str());
+						// system(myCmd.c_str());
+					}
 					else
 					{
 						m_pRow_Orbiter->Reload();
@@ -2823,14 +2841,14 @@ void OrbiterGenerator::FixupSpecialOrbiters(list<LocationInfo *> &listLocationIn
 			if( !pRow_DeviceTemplate )
 				continue;
 
-			if( pRow_DeviceTemplate->FK_DeviceCategory_get()!=DEVICECATEGORY_Media_Director_CONST )
+			if( pRow_DeviceTemplate->FK_DeviceCategory_get()!=DEVICECATEGORY_Media_Director_CONST || pRow_DeviceTemplate->FK_DeviceCategory_get()!=DEVICECATEGORY_Mobile_Internet_Devices_CONST )
 			{
 				// See if it was the child
 				pRow_Device_MD = pRow_Device_MD->FK_Device_ControlledVia_getrow();
 				pRow_DeviceTemplate = pRow_Device_MD->FK_DeviceTemplate_getrow();
 				if( !pRow_DeviceTemplate )
 					continue;
-				if( pRow_DeviceTemplate->FK_DeviceCategory_get()!=DEVICECATEGORY_Media_Director_CONST )
+				if( pRow_DeviceTemplate->FK_DeviceCategory_get()!=DEVICECATEGORY_Media_Director_CONST || pRow_DeviceTemplate->FK_DeviceCategory_get()!=DEVICECATEGORY_Mobile_Internet_Devices_CONST )
 					continue;
 			}
 

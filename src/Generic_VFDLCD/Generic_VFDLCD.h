@@ -74,7 +74,7 @@ public:
 //<-dceag-decl-b->
 namespace DCE
 {
-	class Generic_VFDLCD : public Generic_VFDLCD_Command
+	class Generic_VFDLCD : public Generic_VFDLCD_Command, public ILCDMessageProvider, public ILCDMessageProcessor
 	{
 //<-dceag-decl-e->
 		// Private member variables

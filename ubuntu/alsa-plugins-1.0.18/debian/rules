@@ -1,0 +1,175 @@
+#!/usr/bin/make -f
+export DH_VERBOSE=1
+
+PACKAGE:= alsa-plugins
+include /usr/share/quilt/quilt.make
+
+export DEB_HOST_GNU_TYPE  ?= $(shell dpkg-architecture -qDEB_HOST_GNU_TYPE)
+export DEB_BUILD_GNU_TYPE ?= $(shell dpkg-architecture -qDEB_BUILD_GNU_TYPE)
+
+DEB_BUILD_ARCH_CPU ?= $(shell dpkg-architecture -qDEB_BUILD_ARCH_CPU)
+DEB_HOST_ARCH  ?= $(shell dpkg-architecture -qDEB_BUILD_ARCH)
+
+biarch_map := i386=amd64 powerpc=ppc64 sparc=sparc64 s390=s390x \
+		amd64=i386 ppc64=powerpc
+biarch_cpu := $(strip $(patsubst $(DEB_BUILD_ARCH_CPU)=%, %, \
+			   $(filter $(DEB_BUILD_ARCH_CPU)=%, $(biarch_map))))
+
+ifneq (,$(biarch_cpu))
+  ifneq (,$(findstring /$(DEB_HOST_ARCH)/, /i386/powerpc/sparc/s390/))
+    bi = 64
+    bilibdir = usr/lib64
+  endif
+  ifneq (,$(findstring /$(DEB_HOST_ARCH)/, /amd64/ppc64/))
+    bi = 32
+    bilibdir = usr/lib32
+  endif
+  bi=
+  bilibdir=
+  ifneq (,$(bi))
+    configure_biarch_stamp = configure-biarch-stamp
+    build_biarch_stamp = build-biarch-stamp
+    BIARCH_CC = gcc -m$(bi)
+    dpkg_ctrl_args = -- '-Vbilib:depends=libc6-$(biarch_cpu)' \
+	'-Vbidev:depends=libc6-dev-$(biarch_cpu)'
+    BIARCH_TEMPLIBDIR = $(CURDIR)/debian/biarch-templibdir
+    BIARCH_PKGCONFIGDIR = $(BIARCH_TEMPLIBDIR)/pkgconfig
+    BIARCH_LIBPULSE = $(wildcard /$(bilibdir)/libpulse.so*)
+    BIARCH_LIBDBUS = $(wildcard /$(bilibdir)/libdbus-1.so*)
+#   BIARCH_LIBJACK = $(wildcard /$(bilibdir)/libjack.so*)
+  endif
+endif
+
+CFLAGS = -g -Wall
+
+INSTALL_UAG := -o root -g audio
+
+ifneq (,$(findstring noopt,$(DEB_BUILD_OPTIONS)))
+	CFLAGS += -O0
+else
+	CFLAGS += -O2
+endif
+
+configure-stamp: debian/stamp-patched $(configure_biarch_stamp)
+	dh_testdir
+	-rm -f config.sub config.guess
+	ln -s /usr/share/misc/config.sub config.sub
+	ln -s /usr/share/misc/config.guess config.guess
+	./configure --prefix=/usr \
+		    --mandir=\$${prefix}/share/man \
+		    --infodir=\$${prefix}/share/info \
+		    --host=$(DEB_HOST_GNU_TYPE) \
+		    --build=$(DEB_BUILD_GNU_TYPE) \
+		    --enable-static
+	touch configure-stamp
+
+biarch-lib-dev-setup:
+	dh_testdir
+	mkdir $(BIARCH_TEMPLIBDIR)
+	mkdir $(BIARCH_PKGCONFIGDIR)
+	# We build-depend on lib$(BI)asound2-dev, so we are guaranteed
+	# to have linkable alsa libraries...
+	cp /usr/lib/pkgconfig/alsa.pc $(BIARCH_PKGCONFIGDIR)/
+
+	# We don't necessarily have pulse, dbus, or jack biarch libraries
+	# and even if we do, we don't have the .so symlink for them
+	# since ia32-libs-dev doesn't exist.
+	# SO: we need to detect these libs when they exist, provide .so
+	# symlinks, and copy the pkg-config files.
+ifneq ($(strip $(BIARCH_LIBPULSE)),)
+	cp /usr/lib/pkgconfig/libpulse.pc $(BIARCH_PKGCONFIGDIR)/
+	ln -s $(word 1, $(BIARCH_LIBPULSE)) $(BIARCH_TEMPLIBDIR)/libpulse.so
+endif
+ifneq ($(strip $(BIARCH_LIBDBUS)),)
+	cp /usr/lib/pkgconfig/dbus-1.pc $(BIARCH_PKGCONFIGDIR)/
+	ln -s $(word 1, $(BIARCH_LIBDBUS)) $(BIARCH_TEMPLIBDIR)/libdbus-1.so
+endif
+#ifneq ($(strip $(BIARCH_LIBJACK)),)
+#	cp /usr/lib/pkgconfig/jack.pc $(BIARCH_PKGCONFIGDIR)/
+#	ln -s $(word 1, $(BIARCH_LIBJACK)) $(BIARCH_TEMPLIBDIR)/libjack.so
+#endif
+	touch biarch-lib-dev-setup
+
+configure-biarch-stamp: debian/stamp-patched biarch-lib-dev-setup
+	dh_testdir
+	-rm -f config.sub config.guess
+	ln -s /usr/share/misc/config.sub config.sub
+	ln -s /usr/share/misc/config.guess config.guess
+	rm -rf bibuild
+	mkdir bibuild
+	cd bibuild && PKG_CONFIG_LIBDIR=$(BIARCH_PKGCONFIGDIR) \
+		CC="$(BIARCH_CC)" ../configure --prefix=/usr \
+		    --mandir=\$${prefix}/share/man \
+		    --infodir=\$${prefix}/share/info \
+		    --host=$(DEB_HOST_GNU_TYPE) \
+		    --enable-static 
+	sed -e '/^SUBDIRS/s/doc//' bibuild/Makefile > bibuild/Makefile.new
+	mv bibuild/Makefile bibuild/Makefile.old
+	mv bibuild/Makefile.new bibuild/Makefile
+	touch -r bibuild/Makefile.old bibuild/Makefile
+	touch configure-biarch-stamp
+
+configure: configure-stamp
+
+build-arch-stamp: configure-stamp
+	dh_testdir
+	$(MAKE) CFLAGS="$(CFLAGS)"
+	touch build-arch-stamp
+
+build-biarch-stamp: configure-biarch-stamp
+	dh_testdir
+	$(MAKE) -C bibuild CFLAGS="$(CFLAGS)" LDFLAGS="-L$(BIARCH_TEMPLIBDIR)"
+	touch build-biarch-stamp
+
+build-arch: $(build_biarch_stamp) build-arch-stamp
+
+build: build-arch
+
+install-arch: build-arch-stamp
+	dh_testdir
+	dh_testroot
+	dh_clean -k
+	$(MAKE) install DESTDIR=$(CURDIR)/debian/libasound2-plugins
+ifneq (,$(build_biarch_stamp))
+	rm -rf debian/bitmp
+	$(MAKE) -C bibuild install DESTDIR=$(CURDIR)/debian/bitmp
+	mkdir -p debian/lib$(bi)asound2-plugins/$(bilibdir)/alsa-lib
+	cp -a debian/bitmp/usr/lib/alsa-lib/libasound_module* \
+	    debian/lib$(bi)asound2-plugins/$(bilibdir)/alsa-lib
+endif
+	dh_installdirs -plibasound2-plugins usr/lib/alsa-lib
+	dh_install
+	#install $(INSTALL_UAG) jack/.libs/libasound_module_pcm_jack.so \
+	#	debian/libasound2-plugins/usr/lib/alsa-lib/libasound_module_pcm_jack.so.2.0.0
+	#ln -s libasound_module_pcm_jack.so.2.0.0 \
+	#	debian/libasound2-plugins/usr/lib/alsa-lib/libasound_module_pcm_jack.so
+	dh_installdocs
+	dh_installexamples
+	dh_installchangelogs debian/changelog.ALSA
+	dh_strip
+	dh_compress
+	dh_fixperms
+
+binary-arch: build-arch-stamp install-arch
+	dh_makeshlibs -n -s
+	dh_installdeb -s
+	dh_shlibdeps -s
+	dh_gencontrol -s
+	dh_md5sums -s
+	dh_builddeb -s
+
+binary: binary-arch
+
+clean: unpatch
+	dh_testdir
+	dh_testroot
+	[ ! -f Makefile ] || $(MAKE) distclean
+	-rm -f configure-stamp build-arch-stamp build-indep-stamp biarch-lib-dev-setup
+	-rm -f config.sub config.guess config.status config.cache
+ifneq (,$(build_biarch_stamp))
+	-rm -rf $(CURDIR)/debian/bitmp
+	-rm -rf $(BIARCH_TEMPLIBDIR)
+endif
+	dh_clean
+
+.PHONY: configure build-arch build install-arch binary-arch binary clean

@@ -79,6 +79,7 @@ void Row_psc_ir_repset::Delete()
 	Row_psc_ir_repset *pRow = this; // Needed so we will have only 1 version of get_primary_fields_assign_from_row
 	
 	if (!is_deleted)
+	{
 		if (is_added)	
 		{	
 			vector<TableRow*>::iterator i;	
@@ -100,6 +101,7 @@ void Row_psc_ir_repset::Delete()
 			table->deleted_cachedRows[key] = this;
 			is_deleted = true;	
 		}	
+	}
 }
 
 void Row_psc_ir_repset::Reload()
@@ -133,8 +135,7 @@ void Row_psc_ir_repset::SetDefaultValues()
 {
 	m_PK_psc_ir_repset = 0;
 is_null[0] = false;
-m_Setting = "";
-is_null[1] = false;
+is_null[1] = true;
 is_null[2] = true;
 
 
@@ -165,11 +166,18 @@ void Row_psc_ir_repset::Value_set(string val){PLUTO_SAFETY_LOCK_ERRORSONLY(sl,ta
 m_Value = val; is_modified=true; is_null[2]=false;}
 
 		
+bool Row_psc_ir_repset::Setting_isNull() {PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
+
+return is_null[1];}
 bool Row_psc_ir_repset::Value_isNull() {PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
 
 return is_null[2];}
 
 			
+void Row_psc_ir_repset::Setting_setNull(bool val){PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
+is_null[1]=val;
+is_modified=true;
+}
 void Row_psc_ir_repset::Value_setNull(bool val){PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
 is_null[2]=val;
 is_modified=true;
@@ -196,8 +204,8 @@ PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
 if (is_null[1])
 return "NULL";
 
-char *buf = new char[61];
-db_wrapper_real_escape_string(table->database->m_pDB, buf, m_Setting.c_str(), (unsigned long) min((size_t)30,m_Setting.size()));
+char *buf = new char[181];
+db_wrapper_real_escape_string(table->database->m_pDB, buf, m_Setting.c_str(), (unsigned long) min((size_t)90,m_Setting.size()));
 string s=string()+"\""+buf+"\"";
 delete[] buf;
 return s;
@@ -210,8 +218,8 @@ PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
 if (is_null[2])
 return "NULL";
 
-char *buf = new char[131071];
-db_wrapper_real_escape_string(table->database->m_pDB, buf, m_Value.c_str(), (unsigned long) min((size_t)65535,m_Value.size()));
+char *buf = new char[393211];
+db_wrapper_real_escape_string(table->database->m_pDB, buf, m_Value.c_str(), (unsigned long) min((size_t)196605,m_Value.size()));
 string s=string()+"\""+buf+"\"";
 delete[] buf;
 return s;

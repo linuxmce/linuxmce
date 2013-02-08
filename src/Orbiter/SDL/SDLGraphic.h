@@ -60,7 +60,11 @@ public:
 
 	//helper methods
 	static Uint32 getpixel(struct SDL_Surface *pSDL_Surface,int x, int y);
+#ifdef MAEMO_NOKIA770	
+	static void putpixel(struct SDL_Surface *pSDL_Surface,int x, int y, Uint16 pixel_color);
+#else
 	static void putpixel(struct SDL_Surface *pSDL_Surface,int x, int y, Uint32 pixel_color);
+#endif
 };
 //-------------------------------------------------------------------------------------------------------
 #endif //__SDL_GRAPHIC_H__

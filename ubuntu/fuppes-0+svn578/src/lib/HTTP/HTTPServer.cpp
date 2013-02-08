@@ -513,7 +513,7 @@ bool ReceiveRequest(CHTTPSessionInfo* p_Session, CHTTPMessage* p_Request)
     RegEx rxContentLength("CONTENT-LENGTH: *(\\d+)", PCRE_CASELESS);
     if(rxContentLength.Search(sHeader.c_str())) {
       string sContentLength = rxContentLength.Match(1);    
-      nContentLength = std::atoi(sContentLength.c_str());
+      nContentLength = atoi(sContentLength.c_str());
     }
 
     // check if we received the full content

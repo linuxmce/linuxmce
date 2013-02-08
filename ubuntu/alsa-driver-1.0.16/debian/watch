@@ -1,2 +1,0 @@
-version=2
-ftp://ftp.alsa-project.org/pub/driver/alsa-driver-(.*).tar.bz2	debian	uupdate

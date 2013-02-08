@@ -10,8 +10,8 @@ DeviceData_Impl *Generic_VFDLCD_Data::CreateData(DeviceData_Impl *Parent,char *p
 	// Peek ahead in the stream.  We're going to pass in the above pointers anyway so it won't affect the position
 	SerializeClass b;
 	b.ResumeReadWrite(pDataBlock,AllocatedSize,CurrentPosition);
-	int iPK_Device = b.Read_unsigned_long();
-	int iPK_Installation = b.Read_unsigned_long();
+	/*int iPK_Device = */b.Read_unsigned_long();
+	/*int iPK_Installation = */b.Read_unsigned_long();
 	int iPK_DeviceTemplate = b.Read_unsigned_long();
 	switch(iPK_DeviceTemplate) {
 		case 1896:

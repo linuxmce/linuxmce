@@ -11,12 +11,12 @@ fi;
 FK_DeviceTemplate=$(RunSQL "SELECT FK_DeviceTemplate from Device WHERE PK_Device=$PK_Device")
 if [[ "$FK_DeviceTemplate" == "28" ]] ; then # If is 'Generic PC as MD' 
 	sed -i "s/^DBHostName.*/DBHostName=$MySqlHost/g" /etc/mythtv/mysql.txt
-	sed -i "s/^DBUserName.*/DBUserName=root/g" /etc/mythtv/mysql.txt
-	sed -i "s/^DBPassword.*/DBPassword=/g" /etc/mythtv/mysql.txt
+	sed -i "s/^DBUserName.*/DBUserName=$MySqlUser/g" /etc/mythtv/mysql.txt
+	sed -i "s/^DBPassword.*/DBPassword=$MySqlPassword/g" /etc/mythtv/mysql.txt
 fi
 
 Q="select IK_DeviceData from Device_DeviceData JOIN Device ON FK_Device=PK_Device where FK_DeviceData=206 AND FK_DeviceTemplate=36"
-AutoConf=$(echo "$Q" | /usr/bin/mysql -h $MySqlHost pluto_main | tail -n +2)
+AutoConf=$(RunSQL "$Q")
 
 if [[ "$AutoConf" == "1" ]]; then 
 	echo "Dont Auto Configure is set"
@@ -35,11 +35,11 @@ amixer set CD playback off
 # amixer set CD capture1
 # don't ask me why 'capture1' turns on cd capture...
 
-#/usr/pluto/bin/sqlCVS -R 4000 -H sqlcvs.plutohome.com -C 3 -n -h localhost -D pluto_myth -a -U anonymous~anonymous -r myth -e checkin
+#/usr/pluto/bin/sqlCVS -R 4000 -H schema.linuxmce.org -C 3 -n $PLUTO_DB_CRED -D pluto_myth -a -U anonymous~anonymous -r myth -e checkin
 if [[  "$DBPassword" != "" ]] ;then
-	mysql_command="mysql -s -B -u $DBUserName -h $DBHostName -p$DBPassword $DBName";
+	mysql_command="mysql -s -B -h $DBHostName -P $MySqlPort -u $DBUserName -p$DBPassword $DBName";
 else
-	mysql_command="mysql -s -B -u $DBUserName -h $DBHostName $DBName";
+	mysql_command="mysql -s -B -h $DBHostName -P $MySqlPort -u $DBUserName $DBName";
 fi
 query="select count(*) from settings where hostname='`hostname`' AND value LIKE 'Backend%'";
 
@@ -73,4 +73,4 @@ chmod 766 	 	/home/mythtv/cache/$hostip
 echo done.
 
 echo "LOCK TABLE schemalock WRITE;" | $mysql_command  # Be sure we're not in the middle of a schema upgrade -- myth doesn't check this
-invoke-rc.d mythtv-backend force-reload
+service mythtv-backend force-reload

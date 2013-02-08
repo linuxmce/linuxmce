@@ -34,6 +34,24 @@
 #include "pluto_media/Table_Attribute.h"
 #include "pluto_media/Define_AttributeType.h"
 #include "pluto_media/Table_Attribute_Settings.h"
+#include "pluto_media/Table_Attribute.h"
+#include "pluto_media/Table_Bookmark.h"
+#include "pluto_media/Table_File_Attribute.h"
+#include "pluto_media/Table_File.h"
+#include "pluto_media/Table_Disc.h"
+#include "pluto_media/Table_DiscLocation.h"
+#include "pluto_media/Table_Picture_Disc.h"
+#include "pluto_media/Table_Disc_Attribute.h"
+#include "pluto_media/Table_Playlist.h"
+#include "pluto_media/Table_Picture.h"
+#include "pluto_media/Table_Picture_File.h"
+#include "pluto_media/Table_Picture_Attribute.h"
+#include "pluto_media/Table_AttributeType.h"
+#include "pluto_media/Table_MediaType_AttributeType.h"
+#include "pluto_media/Table_MediaProvider.h"
+#include "pluto_media/Table_ProviderSource.h"
+#include "pluto_media/Table_LongAttribute.h"
+#include "pluto_media/Table_RipStatus.h"
 #include "pluto_main/Table_MediaType_DesignObj.h"
 #include "pluto_main/Table_DeviceTemplate_MediaType_DesignObj.h"
 
@@ -72,9 +90,7 @@ MediaStream::MediaStream( class MediaHandlerInfo *pMediaHandlerInfo, int iPK_Med
 	m_iPK_MediaProvider=iPK_MediaProvider;
 	m_bPlugInWillSetDescription=false;
 	m_bIdentifiedDisc=false;
-	m_bContainsTitlesOrSections=false;
-	m_bBypassEvent=false;
-	m_bDontSetupAV=false;
+	m_bContainsTitlesOrSections=true;
 
     m_iPK_Users=PK_Users;
     m_eSourceType=sourceType;
@@ -280,6 +296,7 @@ bool MediaStream::ContainsVideo()
 		m_iPK_MediaType==MEDIATYPE_np_VideoTape_CONST ||
 		m_iPK_MediaType==MEDIATYPE_np_LaserDisc_CONST ||
 		m_iPK_MediaType==MEDIATYPE_np_Game_CONST ||
+		m_iPK_MediaType==MEDIATYPE_np_BluRay_CONST ||
 		m_iPK_MediaType==MEDIATYPE_pluto_HDDVD_CONST ||
 		m_iPK_MediaType==MEDIATYPE_pluto_BD_CONST;
 }
@@ -329,6 +346,7 @@ void MediaStream::GetRenderDevices(map<int, MediaDevice *> *pmapMediaDevices)
 
 void MediaStream::UpdateDescriptions(bool bAllFiles,MediaFile *pMediaFile_In)
 {
+
 	if( m_bPlugInWillSetDescription )
 		return;
 
@@ -355,50 +373,64 @@ void MediaStream::UpdateDescriptions(bool bAllFiles,MediaFile *pMediaFile_In)
 		else if( !pMediaFile )
 			pMediaFile = GetCurrentMediaFile();
 
-		Row_Attribute *pRow_Attribute_Album=NULL,*pRow_Attribute_Performer=NULL,*pRow_Attribute_Title=NULL;
+		Row_Attribute *pRow_Attribute_Album=NULL,*pRow_Attribute_Performer=NULL,*pRow_Attribute_Title=NULL,*pRow_Attribute_Episode=NULL;
 
 		// First try to find attributes for the particular song, otherwise look in the collection
 		if( pMediaFile )
 		{
 			if( !pRow_Attribute_Performer )
 			{
-				list_Attribute *listPK_Attribute = pMediaFile->m_mapPK_Attribute_Find(ATTRIBUTETYPE_Performer_CONST);
+				list_int *listPK_Attribute = pMediaFile->m_mapPK_Attribute_Find(ATTRIBUTETYPE_Performer_CONST);
 				if( listPK_Attribute && listPK_Attribute->size() )
-					pRow_Attribute_Performer = *listPK_Attribute->begin();
+					pRow_Attribute_Performer = pMedia_Plugin->m_pDatabase_pluto_media->Attribute_get()->GetRow(*(listPK_Attribute->begin()));
 			}
 			if( !pRow_Attribute_Album )
 			{
-				list_Attribute *listPK_Attribute = pMediaFile->m_mapPK_Attribute_Find(ATTRIBUTETYPE_Album_CONST);
+				list_int *listPK_Attribute = pMediaFile->m_mapPK_Attribute_Find(ATTRIBUTETYPE_Album_CONST);
 				if( listPK_Attribute && listPK_Attribute->size() )
-					pRow_Attribute_Album = *listPK_Attribute->begin();
+					pRow_Attribute_Album = pMedia_Plugin->m_pDatabase_pluto_media->Attribute_get()->GetRow(*(listPK_Attribute->begin()));
 			}
 			if( !pRow_Attribute_Title )
 			{
-				list_Attribute *listPK_Attribute = pMediaFile->m_mapPK_Attribute_Find(ATTRIBUTETYPE_Title_CONST);
+				list_int *listPK_Attribute = pMediaFile->m_mapPK_Attribute_Find(ATTRIBUTETYPE_Title_CONST);
 				if( listPK_Attribute && listPK_Attribute->size() )
-					pRow_Attribute_Title = *listPK_Attribute->begin();
+					pRow_Attribute_Title = pMedia_Plugin->m_pDatabase_pluto_media->Attribute_get()->GetRow(*(listPK_Attribute->begin()));
 			}
+
+			if( !pRow_Attribute_Episode )
+			{
+				list_int *listPK_Attribute = pMediaFile->m_mapPK_Attribute_Find(ATTRIBUTETYPE_Episode_CONST);
+				if( listPK_Attribute && listPK_Attribute->size() )
+					pRow_Attribute_Episode = pMedia_Plugin->m_pDatabase_pluto_media->Attribute_get()->GetRow(*(listPK_Attribute->begin()));
+			}
+
 		}
 
 		if( !pRow_Attribute_Performer )
 		{
-			list_Attribute *listPK_Attribute = m_mapPK_Attribute_Find(ATTRIBUTETYPE_Performer_CONST);
+			list_int *listPK_Attribute = m_mapPK_Attribute_Find(ATTRIBUTETYPE_Performer_CONST);
 			if( listPK_Attribute && listPK_Attribute->size() )
-				pRow_Attribute_Performer = *listPK_Attribute->begin();
+				pRow_Attribute_Performer = pMedia_Plugin->m_pDatabase_pluto_media->Attribute_get()->GetRow(*(listPK_Attribute->begin()));
 		}
 		if( !pRow_Attribute_Album )
 		{
-			list_Attribute *listPK_Attribute = m_mapPK_Attribute_Find(ATTRIBUTETYPE_Album_CONST);
+			list_int *listPK_Attribute = m_mapPK_Attribute_Find(ATTRIBUTETYPE_Album_CONST);
 			if( listPK_Attribute && listPK_Attribute->size() )
-				pRow_Attribute_Album = *listPK_Attribute->begin();
+				pRow_Attribute_Album = pMedia_Plugin->m_pDatabase_pluto_media->Attribute_get()->GetRow(*(listPK_Attribute->begin()));
 		}
 		if( !pRow_Attribute_Title )
 		{
-			list_Attribute *listPK_Attribute = m_mapPK_Attribute_Find(ATTRIBUTETYPE_Title_CONST);
+			list_int *listPK_Attribute = m_mapPK_Attribute_Find(ATTRIBUTETYPE_Title_CONST);
 			if( listPK_Attribute && listPK_Attribute->size() )
-				pRow_Attribute_Title = *listPK_Attribute->begin();
+				pRow_Attribute_Title = pMedia_Plugin->m_pDatabase_pluto_media->Attribute_get()->GetRow(*(listPK_Attribute->begin()));
 		}
-
+		if( !pRow_Attribute_Episode )
+		{
+			list_int *listPK_Attribute = m_mapPK_Attribute_Find(ATTRIBUTETYPE_Episode_CONST);
+			if( listPK_Attribute && listPK_Attribute->size() )
+				pRow_Attribute_Title = pMedia_Plugin->m_pDatabase_pluto_media->Attribute_get()->GetRow(*(listPK_Attribute->begin()));
+		}
+		
 		if( (pRow_Attribute_Performer || pRow_Attribute_Album) && m_iPK_MediaType!=MEDIATYPE_pluto_StoredVideo_CONST )
 		{
 			if( pRow_Attribute_Performer )
@@ -417,13 +449,29 @@ void MediaStream::UpdateDescriptions(bool bAllFiles,MediaFile *pMediaFile_In)
 
 			if( pMediaFile )
 				pMediaFile->m_sDescription = m_sSectionDescription;
+
+                       if( pMediaFile )
+                        {
+                                vector<Row_LongAttribute *> vectRow_LongAttribute;
+                                pMedia_Plugin->m_pDatabase_pluto_media->LongAttribute_get()->GetRows("FK_File=" + StringUtils::itos(pMediaFile->m_dwPK_File) + " AND FK_AttributeType=" TOSTRING(ATTRIBUTETYPE_Synopsis_CONST),&vectRow_LongAttribute);
+                                if( vectRow_LongAttribute.size() )
+                                        {
+                                                string sSynopsis = vectRow_LongAttribute[0]->Text_get();
+                                                StringUtils::Replace(&sSynopsis,"\t","");
+                                                m_sMediaSynopsis = sSynopsis;
+
+                                        }
+                        }
+
 		}
 		else if( pRow_Attribute_Title )
 				m_sMediaDescription = pRow_Attribute_Title->Name_get();
 		else if( pMediaFile && pMediaFile->m_sFilename.size()>6 && pMediaFile->m_sFilename.substr(0,6)=="cdda:/" )
 			m_sMediaDescription = pMediaFile->m_sFilename.substr(6);
 		else if( pMediaFile )
+		{
 			m_sMediaDescription = pMediaFile->m_sFilename;
+		}
 
 		if( pMediaFile && pMediaFile->m_sDescription.size()==0 )
 			pMediaFile->m_sDescription = pMediaFile->m_sFilename;
@@ -435,6 +483,20 @@ void MediaStream::UpdateDescriptions(bool bAllFiles,MediaFile *pMediaFile_In)
 			else
 				m_sMediaDescription = pMediaFile->m_sFilename;
 		}
+
+		// Let's see if putting it down here makes a dent. 
+		if( (pRow_Attribute_Title) && m_iPK_MediaType==MEDIATYPE_pluto_StoredVideo_CONST )
+		{
+			m_sMediaDescription = pRow_Attribute_Title->Name_get();
+
+			if (pRow_Attribute_Episode) {
+				m_sSectionDescription = pRow_Attribute_Episode->Name_get();			
+			} else {
+				m_sSectionDescription = m_sMediaDescription;
+			}
+
+		}
+
 	}
 	else if( m_iPK_MediaType==MEDIATYPE_pluto_DVD_CONST )
 	{
@@ -451,21 +513,21 @@ void MediaStream::UpdateDescriptions(bool bAllFiles,MediaFile *pMediaFile_In)
 
 		if( !pRow_Attribute_Title && pMediaTitle )
 		{
-			list_Attribute *listPK_Attribute = pMediaTitle->m_mapPK_Attribute_Find(ATTRIBUTETYPE_Title_CONST);
+			list_int *listPK_Attribute = pMediaTitle->m_mapPK_Attribute_Find(ATTRIBUTETYPE_Title_CONST);
 			if( listPK_Attribute && listPK_Attribute->size() )
-				pRow_Attribute_Title = *listPK_Attribute->begin();
+				pRow_Attribute_Title = pMedia_Plugin->m_pDatabase_pluto_media->Attribute_get()->GetRow(*(listPK_Attribute->begin()));
 		}
 		if( !pRow_Attribute_Title )
 		{
-			list_Attribute *listPK_Attribute = m_mapPK_Attribute_Find(ATTRIBUTETYPE_Title_CONST);
+			list_int *listPK_Attribute = m_mapPK_Attribute_Find(ATTRIBUTETYPE_Title_CONST);
 			if( listPK_Attribute && listPK_Attribute->size() )
-				pRow_Attribute_Title = *listPK_Attribute->begin();
+				pRow_Attribute_Title = pMedia_Plugin->m_pDatabase_pluto_media->Attribute_get()->GetRow(*(listPK_Attribute->begin()));
 		}
 		if( !pRow_Attribute_Chapter )
 		{
-			list_Attribute *listPK_Attribute = m_mapPK_Attribute_Find(ATTRIBUTETYPE_Chapter_CONST);
+			list_int *listPK_Attribute = m_mapPK_Attribute_Find(ATTRIBUTETYPE_Chapter_CONST);
 			if( listPK_Attribute && listPK_Attribute->size() )
-				pRow_Attribute_Chapter = *listPK_Attribute->begin();
+				pRow_Attribute_Chapter = pMedia_Plugin->m_pDatabase_pluto_media->Attribute_get()->GetRow(*(listPK_Attribute->begin()));
 		}
 
 		if( pRow_Attribute_Title )
@@ -489,6 +551,50 @@ void MediaStream::UpdateDescriptions(bool bAllFiles,MediaFile *pMediaFile_In)
 			else
 				m_sMediaDescription = "<%=T" + StringUtils::itos(TEXT_Unknown_Disc_CONST) + "%>";
 		}
+
+		{
+			MediaFile *pMediaFile=NULL;
+			if ( !pMediaFile )
+				pMediaFile = GetCurrentMediaFile();
+	                if( pMediaFile && (pMediaFile->m_dwPK_File > 0))
+	                {
+	                        vector<Row_LongAttribute *> vectRow_LongAttribute;
+	                        pMedia_Plugin->m_pDatabase_pluto_media->LongAttribute_get()->GetRows("FK_File=" + StringUtils::itos(pMediaFile->m_dwPK_File) + " AND FK_AttributeType=" TOSTRING(ATTRIBUTETYPE_Synopsis_CONST),&vectRow_LongAttribute);
+	                        if( vectRow_LongAttribute.size() )
+      	                          {
+        	                                string sSynopsis = vectRow_LongAttribute[0]->Text_get();
+                	                        StringUtils::Replace(&sSynopsis,"\t","");
+                        	                m_sMediaSynopsis = sSynopsis;
+                                  }
+                	}
+		}
+
+	}
+	else if( m_iPK_MediaType==MEDIATYPE_lmce_StreamedAudio_CONST )
+	{
+		// Use channel name as description
+		MediaFile *pMediaFile=pMediaFile_In;
+		if( bAllFiles )
+		{
+			for(size_t s=0;s<m_dequeMediaFile.size();++s)
+				UpdateDescriptions(false,m_dequeMediaFile[s]);
+			return;
+		}
+		else if( !pMediaFile )
+			pMediaFile = GetCurrentMediaFile();
+
+		Row_Attribute *pRow_Attribute_Channel=NULL;
+		if ( pMediaFile )
+		{
+			list_int *listPK_Attribute = pMediaFile->m_mapPK_Attribute_Find(ATTRIBUTETYPE_Channel_CONST);
+			if( listPK_Attribute && listPK_Attribute->size() )
+				pRow_Attribute_Channel = pMedia_Plugin->m_pDatabase_pluto_media->Attribute_get()->GetRow(*(listPK_Attribute->begin()));
+			if( pRow_Attribute_Channel != NULL)
+			{
+				m_sMediaDescription = pRow_Attribute_Channel->Name_get();
+				pMediaFile->m_sDescription = pRow_Attribute_Channel->Name_get();
+			}
+		}
 	}
 
 	if( m_sMediaDescription.size()==0 )
@@ -507,6 +613,24 @@ void MediaStream::UpdateDescriptions(bool bAllFiles,MediaFile *pMediaFile_In)
 			m_sMediaDescription = pDeviceData_Router->m_sDescription;
 			if( pRow_MediaType )
 				m_sMediaDescription += "(" + pRow_MediaType->Description_get() + ")";
+		}
+	}
+
+	{
+		MediaFile *pMediaFile = NULL;
+		pMediaFile = GetCurrentMediaFile();
+		if( pMediaFile )
+		{
+			vector<Row_LongAttribute *> vectRow_LongAttribute;
+			pMedia_Plugin->m_pDatabase_pluto_media->LongAttribute_get()->GetRows("FK_File=" + StringUtils::itos(pMediaFile->m_dwPK_File) + " AND FK_AttributeType=" TOSTRING(ATTRIBUTETYPE_Synopsis_CONST),&vectRow_LongAttribute);
+			if( vectRow_LongAttribute.size() )
+			{
+				string sSynopsis = vectRow_LongAttribute[0]->Text_get();
+				StringUtils::Replace(&sSynopsis,"\t","");
+				m_sMediaSynopsis = sSynopsis;
+				LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"BLARG Synopsis: %s",m_sMediaSynopsis.c_str());
+                	}
+
 		}
 	}
 }
@@ -674,12 +798,11 @@ void MediaStream::LoadDefaultAvSettings(deque<MediaTitle *> &dequeMediaTitle,map
 	}
 }
 
-void MediaStream::MergeAttributes(map<int,int> &mapAttributes,map< int,list_Attribute > &mapPK_Attribute)
+void MediaStream::MergeAttributes(map<int,int> &mapAttributes,map< int,list_int > &mapPK_Attribute)
 {
-	/*  What did this code block do??  It just had hardcoded values of 10, 30 and 20
-	for(map< int,list_Attribute >::iterator itMA=mapPK_Attribute.begin();itMA!=mapPK_Attribute.end();++itMA)
+	for(map< int,list_int >::iterator itMA=mapPK_Attribute.begin();itMA!=mapPK_Attribute.end();++itMA)
 	{
-		for(list_Attribute::iterator itLI=itMA->second.begin();itLI!=itMA->second.end();++itLI)
+		for(list_int::iterator itLI=itMA->second.begin();itLI!=itMA->second.end();++itLI)
 		{
 			if( itMA->first==ATTRIBUTETYPE_Title_CONST || itMA->first==ATTRIBUTETYPE_Album_CONST )
 				mapAttributes[*itLI]=10;
@@ -689,7 +812,6 @@ void MediaStream::MergeAttributes(map<int,int> &mapAttributes,map< int,list_Attr
 				mapAttributes[*itLI]=20;
 		}
 	}
-	*/
 }
 
 string MediaStream::GetTargets(int PK_DeviceTemplate)
@@ -786,7 +908,6 @@ LoggerWrapper::GetInstance()->Write(LV_STATUS,"MediaStream::SetNowPlaying use al
 
 	sMediaDevices += ContainsVideo() ? ",1" : ",0";
 	sMediaDevices += pEntertainArea_OSD && pEntertainArea_OSD->m_bViewingLiveAVPath ? ",1" : ",0";
-	sMediaDevices += pOH_Orbiter->m_pEntertainArea ? "," + StringUtils::itos((int) pOH_Orbiter->m_pEntertainArea->m_MediaRepeatOptions) : ",0";
 
 	DCE::CMD_Set_Now_Playing CMD_Set_Now_Playing( pMedia_Plugin->m_dwPK_Device, pOH_Orbiter->m_pDeviceData_Router->m_dwPK_Device, 
 		sRemotes, m_sMediaDescription, m_sSectionDescription, 

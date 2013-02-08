@@ -136,23 +136,23 @@ void psc_restrict_set(long int val);
 		
 		bool FK_DeviceGroup_Parent_isNull();
 bool FK_Installation_isNull();
+bool Description_isNull();
 bool Type_isNull();
 bool psc_id_isNull();
 bool psc_batch_isNull();
 bool psc_user_isNull();
 bool psc_frozen_isNull();
-bool psc_mod_isNull();
 bool psc_restrict_isNull();
 
 			
 		void FK_DeviceGroup_Parent_setNull(bool val);
 void FK_Installation_setNull(bool val);
+void Description_setNull(bool val);
 void Type_setNull(bool val);
 void psc_id_setNull(bool val);
 void psc_batch_setNull(bool val);
 void psc_user_setNull(bool val);
 void psc_frozen_setNull(bool val);
-void psc_mod_setNull(bool val);
 void psc_restrict_setNull(bool val);
 	
 	
@@ -172,14 +172,8 @@ class Row_Installation* FK_Installation_getrow();
 
 		// Return the rows in other tables with foreign keys pointing here
 		void CommandGroup_Command_FK_DeviceGroup_getrows(vector <class Row_CommandGroup_Command*> *rows);
-void CommandGroup_Command_pschist_FK_DeviceGroup_getrows(vector <class Row_CommandGroup_Command_pschist*> *rows);
-void CommandGroup_Command_pschmask_FK_DeviceGroup_getrows(vector <class Row_CommandGroup_Command_pschmask*> *rows);
 void DeviceGroup_FK_DeviceGroup_Parent_getrows(vector <class Row_DeviceGroup*> *rows);
-void DeviceGroup_pschist_FK_DeviceGroup_Parent_getrows(vector <class Row_DeviceGroup_pschist*> *rows);
-void DeviceGroup_pschmask_FK_DeviceGroup_Parent_getrows(vector <class Row_DeviceGroup_pschmask*> *rows);
 void Device_DeviceGroup_FK_DeviceGroup_getrows(vector <class Row_Device_DeviceGroup*> *rows);
-void Device_DeviceGroup_pschist_FK_DeviceGroup_getrows(vector <class Row_Device_DeviceGroup_pschist*> *rows);
-void Device_DeviceGroup_pschmask_FK_DeviceGroup_getrows(vector <class Row_Device_DeviceGroup_pschmask*> *rows);
 
 
 		// Setup binary serialization

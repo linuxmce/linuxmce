@@ -1,5 +1,6 @@
 ROOT=..
 
+CXX=g++
 CC=$(CXX)
 CPPFLAGS=-W -Wall -pipe -ggdb3
 CXXFLAGS=-I. -I.. -I$(ROOT) -I$(ROOT)/DCE -I/usr/include/mysql
@@ -12,3 +13,8 @@ all: Main.o PlutoDHCP.o
 
 clean:
 	rm -f PlutoDHCP PlutoDHCP.o
+
+install: 
+	mkdir -p /usr/pluto/bin
+	cp PlutoDHCP $(DESTPATH)/usr/pluto/bin
+	cp PlutoDHCP.sh $(DESTPATH)/usr/pluto/bin

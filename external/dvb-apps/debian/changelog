@@ -1,0 +1,314 @@
+linuxtv-dvb-apps (1.1.0+cvs20051202-1) unstable; urgency=low
+
+  * Using files from CVS because they incluse atscscan and azap and ATSC/QAM
+    tuning frequencies, which are needed for the US
+
+ -- Radu Cristescu <radu.c@plutohome.com>  Fri, 02 Dec 2005 21:23:42 +0200
+
+linuxtv-dvb-apps (1.1.0-7) unstable; urgency=low
+
+  * Thomas Schmidt <tschmidt@debian.org>
+    - Updated scan files from linuxtv.org cvs
+    - Added de-Hamburg scan file from Stephan Poehlsen 
+      (closes: #303183)
+
+ -- Debian VDR Team <pkg-vdr-dvb-devel@lists.alioth.debian.org>  Wed,  9 Mar 2005 21:09:49 +0100
+
+linuxtv-dvb-apps (1.1.0-6) unstable; urgency=low
+
+  * Thomas Schmidt <tschmidt@debian.org>
+    - Added dvbnet and dvbtraffic bins to dvb-utils (closes: #298707)
+    - Changed debian/watch and all other references to the new 
+      download-directory on www.linuxtv.org
+    - Removed Andreas Müller from uploaders - he does not intend 
+      to do uploads anymore
+
+ -- Debian VDR Team <pkg-vdr-dvb-devel@lists.alioth.debian.org>  Wed, 23 Feb 2005 12:09:16 +0100
+
+linuxtv-dvb-apps (1.1.0-5) unstable; urgency=low
+
+  * The "This is my first upload." release
+  * Thomas Schmidt <tschmidt@debian.org>
+    - Added the new frequency-definitions for the scan-utility from 
+      the cvs-repository to dvb-utils (closes: #294325)
+    - Changed my email-address to new debian one
+
+ -- Debian VDR Team <pkg-vdr-dvb-devel@lists.alioth.debian.org>  Wed,  9 Feb 2005 11:38:10 +0100
+
+linuxtv-dvb-apps (1.1.0-4) unstable; urgency=low
+
+  * Thomas Schmidt <thomas.schmidt@in.stud.tu-ilmenau.de>
+    - Build-depend on dpatch (>= 2.0.9) to fix FTBFS on sparc,
+      caused by the new dpatch-file-format
+    - Applied patch from Darren Salt <linux@youmustbejoking.demon.co.uk>
+      to add budget_ci_loadkeys-utility (closes: #276082)
+
+ -- Debian VDR Team <pkg-vdr-dvb-devel@lists.alioth.debian.org>  Sat, 16 Oct 2004 10:01:14 +0200
+
+linuxtv-dvb-apps (1.1.0-3) unstable; urgency=low
+
+  * Thomas Schmidt <thomas.schmidt@in.stud.tu-ilmenau.de>
+    - Applied patch from Darren Salt <linux@youmustbejoking.demon.co.uk>
+      to allow key names that begin with BTN_* in av7110_loadkeys
+      (closes: #273733)
+
+ -- Debian VDR Team <pkg-vdr-dvb-devel@lists.alioth.debian.org>  Tue, 28 Sep 2004 15:50:41 +0200
+
+linuxtv-dvb-apps (1.1.0-2) unstable; urgency=low
+
+  * Thomas Schmidt <thomas.schmidt@in.stud.tu-ilmenau.de>
+    + New upstream version (closes: Bug#242701)
+    + Cleanup of complete debian-directory
+    + Use dh_install
+    + Include README for szap (closes: Bug#254518)
+    + Include hauppauge2.rc5 for Hauppauge Nexus-S 2.2 from 
+      Uwe Maier <uwe.maier@hp.com>
+    + Changed Maintainer to Debian VDR Team
+      <pkg-vdr-dvb-devel@lists.alioth.debian.org>
+    + Cleaned up Build-Deps
+
+ -- Debian VDR Team <pkg-vdr-dvb-devel@lists.alioth.debian.org>  Fri, 30 Jul 2004 14:09:15 +0200
+
+linuxtv-dvb-apps (1.1.0-1) experimental; urgency=low
+
+  * Thomas Schmidt:
+    + Split apps from linuxtv-dvb-package, because upstream did this too
+    + Create DVB-Devices in dvb-utils, as suggested by Mark Purcell
+    + Added correct watch-file
+
+ -- Thomas Schmidt <thomas.schmidt@in.stud.tu-ilmenau.de>  Sun,  7 Mar 2004 15:08:27 +0100
+
+linuxtv-dvb (1.0.1-7) unstable; urgency=low
+
+  * Make dvb-dev a dummy package - move the dvb-api-documentation to 
+    dvb-utils (closes: Bug#226985)
+  * Include the datafiles for scan under /usr/share/doc/examples/scan/
+    and changed README.scan accordingly. (closes: Bug#225596)
+  * Do not package as debian-native-package anymore (closes: Bug#223855)
+
+ -- Thomas Schmidt <thomas.schmidt@in.stud.tu-ilmenau.de>  Sun, 11 Jan 2004 11:37:42 +0100
+
+linuxtv-dvb (1.0.1-6) unstable; urgency=low
+
+  * Change dvb-dev to depend only on linux-kernel-headers
+  * Remove header-files from dvb-dev, because they are included in
+    linux-kernel-headers (closes: Bug#214502)
+
+ -- Thomas Schmidt <thomas.schmidt@in.stud.tu-ilmenau.de>  Fri, 31 Oct 2003 12:09:04 +0100
+
+linuxtv-dvb (1.0.1-5) unstable; urgency=low
+
+  * Add linux-kernel-headers as alternative depend to dvb-dev to the
+    dvb-driver-source package
+
+ -- Thomas Schmidt <thomas.schmidt@in.stud.tu-ilmenau.de>  Fri, 31 Oct 2003 00:28:45 +0100
+
+linuxtv-dvb (1.0.1-4) unstable; urgency=low
+
+  * changed build-system to dpatch
+  * corrected build-depends, as suggested by Santiago Vila
+    (closes: Bug#217531)
+
+ -- Thomas Schmidt <thomas.schmidt@in.stud.tu-ilmenau.de>  Sun, 19 Oct 2003 00:19:30 +0200
+
+linuxtv-dvb (1.0.1-3) unstable; urgency=low
+
+  * cleaned up debian/rules a little bit
+  * changed "Source: dvb" to "Source: linuxtv-dvb" in control.template of the
+    dvb-driver-source
+  * changed symbolic link "linux" in the dvb-driver-source-package to 
+    /usr/include and rename it to "include" (closes: Bug#216192)
+  * changed section of dvb-dev to devel
+
+ -- Thomas Schmidt <thomas.schmidt@in.stud.tu-ilmenau.de>  Fri, 17 Oct 2003 12:32:51 +0200
+
+linuxtv-dvb (1.0.1-2) unstable; urgency=low
+
+  * added Thomas as a co maintainer
+
+ -- Andreas Mueller <amu@tr.debian.net>  Sun, 12 Oct 2003 16:50:12 +0200
+
+linuxtv-dvb (1.0.1-1) unstable; urgency=low
+
+  * New upstream version
+  * renamed source from dvb to upstream's linuxtv-dvb
+  * removed em8300.h since driver isnt supported :)  
+    (closes: Bug#211933)
+    
+ -- Andreas Mueller <amu@tr.debian.net>  Mon, 29 Sep 2003 14:36:56 +0200
+
+dvb (1.0.0-3) unstable; urgency=low
+
+  * dvb-dev: trying to overwrite `/usr/include/linux/em8300.h', which 
+    is also in package em8300-headers see bug: #211883. Added a
+    Conflicts. Notified upstream.
+  * finally close: bug #211933 added kernel-sources as a dependence 
+    (closes: Bug#211933)
+
+ -- Andreas Mueller <amu@tr.debian.net>  Fri, 26 Sep 2003 21:38:44 +0200
+
+dvb (1.0.0-2) unstable; urgency=low
+
+  * Moved to Standarts-Version: 3.6.1
+  * close: bug #211933
+    Added missing build dep kernel-headers for 
+    dvb-driver-source
+  * testing now with precompiled modules    
+  
+ -- Andreas Mueller <amu@tr.debian.net>  Sun, 21 Sep 2003 12:07:02 +0200
+
+dvb (1.0.0-1) unstable; urgency=low
+
+  * Updated to 1.0.0 release 
+  * fixed the dvb-driver-source package
+  * close bug #186207
+    (closes: Bug#186207)
+  * close bug #172173
+    (closes: Bug#172173)
+  * close bug #166818
+    (closes: Bug#166818)
+  * close bug #166829
+    (closes: Bug#166829)
+  * close bug #199845
+    (closes: Bug#199845)
+
+ -- Andreas Mueller <amu@tr.debian.net>  Tue, 9 Sep 2003 12:00:00 +0200
+
+dvb (0.9.4.20020803-6.1) unstable; urgency=low
+
+  * NMU (sponsored by Joey Hess)
+  * debian/patches/02_strstream-gcc3.3-fix_diff:
+    - Change all references to 'strstream.h' to 'strstream', so the package
+      can be successfully built with GCC 3.3, closes: #198286.
+
+ -- Tore Anderson <tore@linpro.no>  Sun, 13 Jul 2003 20:05:32 +0200
+
+dvb (0.9.4.20020803-6) unstable; urgency=low
+  
+  * close bug 157436 
+    (closes: Bug#157436)
+  * set architecture to "any"
+    (closes: Bug#148272)
+  * Added autoconf2.13 as build-dep and modified autogen.sh to run
+    autoconf2.13. Added a patch file 01_auto_sh_diff for this.
+    thanks to Francesco 
+    (closes: #157198)
+ 
+ -- Andreas Mueller <amu@tr.debian.net>  Sat, 15 Mar 2003 21:22:00 +0100
+
+dvb (0.9.4.20020803-5) unstable; urgency=low
+
+  * some cosmetic changes 
+
+ -- Andreas Mueller <amu@tr.debian.net>  Sat,  4 Jan 2003 16:27:00 +0100
+
+
+dvb (0.9.4.20020803-4) unstable; urgency=low
+
+  * took package from Eduard/QA
+    (closes: Bug#117995)
+
+ -- Andreas Mueller <amu@tr.debian.net>  Sat,  4 Jan 2003 16:27:00 +0100
+
+dvb (0.9.4.20020803-3) unstable; urgency=low
+
+  * Too bad, my own scripts reverted the changes in control.  Now fixes
+    Build-Dependencies and Arch, thanks to Lamont, closes: #155364
+  * separated Debian changes from CVS snapshot, now patching like with DBS
+
+ -- Eduard Bloch <blade@debian.org>  Sun,  4 Aug 2002 11:26:12 +0200
+
+dvb (0.9.4.20020803-2) unstable; urgency=low
+
+  * Arch: all, now really :(
+
+ -- Eduard Bloch <blade@debian.org>  Sat,  3 Aug 2002 12:00:46 +0200
+
+dvb (0.9.4.20020803-1) unstable; urgency=low
+
+  * Updated CVS snapshot
+  * Fixed devfsd integration, thanks to Kay Sievers <kay@vrfy.org>
+  * Removed KDREV dependency, -DMODVERSIONS fixed this
+
+ -- Eduard Bloch <blade@debian.org>  Sat,  3 Aug 2002 10:03:36 +0200
+
+dvb (0.9.4.20020709-1) unstable; urgency=low
+
+  * Updated CVS snapshot, works with 2.4.19-rc1
+  * Better dependency on automake, closes: #151685
+  * Defined MODVERSIONS, closes: #145006
+  * Devfs optimisations, closes: #133755. Symlinks may need some improvement,
+    cannot test yet.
+  * Changed misleading debconf message
+  * Arch: all, let's see how far this go.
+
+ -- Eduard Bloch <blade@debian.org>  Tue,  9 Jul 2002 22:45:52 +0200
+
+dvb (0.9.4.20020321-1) unstable; urgency=low
+
+  * Updated CVS snapshot
+  * creating missing symlinks in mpegtools
+
+ -- Eduard Bloch <blade@debian.org>  Wed, 20 Mar 2002 17:31:48 +0100
+
+dvb (0.9.4.20020308-1) unstable; urgency=medium
+
+  * New CVS snapshot, follows new main release
+  * Setting exact kernel version dependency, and Firmware files are installed
+    with the particular modules package. I am fed up with unresolved symbols
+    and ARM crashes.
+  * including Dpram and Root now. If someone tries to argument with GPL
+    violatons, they shold first explain how the various firmware files can be
+    distributed with the Linux kernel while Convergence gives the same
+    permissions for distribution
+  * Set DVB_FIRM_PATH to Debian's storage directory and removed other cludges
+  * Rewrotten a Makefile to make it work with kernel-headers only
+  * added changes from VDR author to make the driver act more smooth with
+    still frames
+
+ -- Eduard Bloch <blade@debian.org>  Mon, 11 Mar 2002 15:57:39 +0100
+
+dvb (0.9.3.20011227-1) unstable; urgency=low
+
+  * New CVS snapshot
+    - 2.4.17 ready
+    - new module, included in the init script. Closes: #126422
+  * removed the patch from fimrware searching routine, making symlinks instead
+  * fixed spelling errors, closes: #124584
+  * fixed paths in dvb-driver-source, using dvb-dev package now
+  * used gtvscreen2.c from the previous version, the new is broken
+  * New example files apps/szap/channels.conf-dvbt*
+
+ -- Eduard Bloch <blade@debian.org>  Tue, 27 Dec 2001 15:12:27 +0100
+
+dvb (0.9.3.20011107-1) unstable; urgency=low
+
+  * New CVS snapshot
+    - driver-source: fixes compilation problems with kernel >> 2.4.10
+    - zapping, mpegtools: various improvements and fixes
+  * improved description and README.Debian, upstream's hints
+
+ -- Eduard Bloch <blade@debian.org>  Tue,  7 Nov 2001 09:36:27 +0100
+
+dvb (0.9.3.20011003-1) unstable; urgency=low
+
+  * New CVS snapshot, minor fix in mpegtools
+  * typos in manpages fixed
+  * included forgotten README in the mpegtools
+  * combined both rules files to build multiple modules packages.
+  * changed location of firmware to /lib/dvb
+
+ -- Eduard Bloch <blade@debian.org>  Wed,  3 Oct 2001 23:11:23 +0200
+
+dvb (0.9.3.20010921-1) unstable; urgency=low
+
+  * Initial Release. Closes: #112463, Closes: #112464
+  * removed firmware from the source, unclear license.
+  * Hacked Makefile and dvb.c to compile w/o firmware files and load external
+    firmware from Debian conform locations.
+
+ -- Eduard Bloch <blade@debian.org>  Fri, 21 Sep 2001 21:21:14 +0200
+
+Local variables:
+mode: debian-changelog
+End:

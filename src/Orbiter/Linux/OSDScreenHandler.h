@@ -163,6 +163,11 @@ public:
 	bool CaptureCardPort_DatagridSelected(CallBackData *pData);
 	bool CaptureCardPort_GridRendering(CallBackData *pData);
 
+	void SCREEN_Get_Capture_Card_Audio_Port(long PK_Screen);
+	bool CaptureCardAudioPort_ObjectSelected(CallBackData *pData);
+	bool CaptureCardAudioPort_DatagridSelected(CallBackData *pData);
+	bool CaptureCardAudioPort_GridRendering(CallBackData *pData);
+
 	// Choose provider
 	virtual void SCREEN_Choose_Provider_for_Device(long PK_Screen);
 	bool ChooseProvider_Intercepted(CallBackData *pData);

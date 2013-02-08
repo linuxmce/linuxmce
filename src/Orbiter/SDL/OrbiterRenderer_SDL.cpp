@@ -69,7 +69,7 @@
 	#include <SDL/SDL_syswm.h>
 #endif
 
-#if !defined(WIN32) && !defined(BLUETOOTH_DONGLE) && !defined(PROXY_ORBITER) && !defined(MOXI_ORBITER)
+#if !defined(DIRECTFB) && !defined(WIN32) && !defined(BLUETOOTH_DONGLE) && !defined(PROXY_ORBITER) && !defined(MOXI_ORBITER)
 	#include "utilities/linux/transparency/transparency.h"
 	#include "utilities/linux/wrapper/wrapper_x11.h"
 #endif
@@ -129,7 +129,7 @@ void OrbiterRenderer_SDL::Configure()
 		uSDLInitFlags |= SDL_FULLSCREEN;
 
     // Switch Nokia into fullscreen mode
-    #ifdef MAEMO_NOKIA770
+    #if defined(MAEMO_NOKIA770) && !defined(DIRECTFB)
 		uSDLInitFlags |= SDL_FULLSCREEN;
 	   	LoggerWrapper::GetInstance()->Write(LV_STATUS, "Added SDL_FULLSCREEN flag to the uSDLInitFlags");
 	#endif
@@ -142,7 +142,7 @@ void OrbiterRenderer_SDL::Configure()
 			printf("Failed to initialize SDL %s\n", SDL_GetError());
 	#endif //WINCE
 
-	#ifndef WIN32 //linux
+	#if !defined(WIN32) && !defined(DIRECTFB) //linux
             string sCmd = "/usr/pluto/bin/Start_X.sh";//; /usr/pluto/bin/Start_WM.sh";
             LoggerWrapper::GetInstance()->Write(LV_CRITICAL, "X is not running! Starting X and the window manager: %s", sCmd.c_str());
             system(sCmd.c_str());
@@ -176,11 +176,11 @@ void OrbiterRenderer_SDL::Configure()
 #endif
 
 
-#ifdef MAEMO_NOKIA770
+#if defined(MAEMO_NOKIA770) && !defined(DIRECTFB)
     uVideoModeFlags |= SDL_FULLSCREEN;
     LoggerWrapper::GetInstance()->Write(LV_STATUS, "Added SDL_FULLSCREEN flag to the uVideoModeFlags");
 #endif
-	
+
 	g_bResettingVideoMode=true;
 	pthread_t hackthread;
 	pthread_create(&hackthread, NULL, SetVideoModeWatchDogThread, (void*)this);
@@ -262,7 +262,7 @@ void OrbiterRenderer_SDL::Configure()
 #ifdef USE_ONLY_SCREEN_SURFACE
 	m_pScreenImage = Screen;
 #else
-    m_pScreenImage = SDL_CreateRGBSurface(SDL_SWSURFACE, OrbiterLogic()->m_iImageWidth, OrbiterLogic()->m_iImageHeight, 32, rmask, gmask, bmask, amask);
+    m_pScreenImage = SDL_CreateRGBSurface(SDL_SWSURFACE, OrbiterLogic()->m_iImageWidth, OrbiterLogic()->m_iImageHeight, BIT_PER_PIXEL, rmask, gmask, bmask, amask);
 	if (m_pScreenImage == NULL)
 	{
 		LoggerWrapper::GetInstance()->Write(LV_WARNING, "SDL_CreateRGBSurface failed! %s",SDL_GetError());
@@ -280,7 +280,7 @@ void OrbiterRenderer_SDL::SetOrbiterWindowTransparency(double TransparencyLevel)
 {
     // FIXME: we shold go until we find the root window
     // FIXME: use GetMainWindow(), to avoid duplicate code
-#if !defined(WIN32) && !defined(BLUETOOTH_DONGLE) && !defined(PROXY_ORBITER) && !defined(MOXI_ORBITER)
+#if !defined(DIRECTFB) && !defined(WIN32) && !defined(BLUETOOTH_DONGLE) && !defined(PROXY_ORBITER) && !defined(MOXI_ORBITER)
 	X11_Locker_NewDisplay locker_NewDisplay;
 	SDL_SysWMinfo info;
 	SDL_VERSION(&info.version); // this is important!
@@ -368,6 +368,14 @@ void OrbiterRenderer_SDL::RenderText(string &TextToDisplay,DesignObjText *Text,T
 void OrbiterRenderer_SDL::HollowRectangle(int X, int Y, int Width, int Height, PlutoColor color, string ParentObjectID/* = ""*/, string ObjectID/* = ""*/)
 {
 	ClipRectangle(X, Y, Width, Height);
+
+#ifdef DEBUG
+	
+	LoggerWrapper::GetInstance()->Write(LV_STATUS, "SDL::HollowRectangle: color:%u %u %u -> 0x%x",
+													color.R(), color.G(), color.B(), color.m_Value);
+	
+#endif
+	
 	sge_Rect(m_pScreenImage,X,Y,Width + X,Height + Y,color.m_Value);
 }
 
@@ -381,11 +389,16 @@ void OrbiterRenderer_SDL::SolidRectangle(int x, int y, int width, int height, Pl
 	SDL_Rect Rectangle;
 	Rectangle.x = x; Rectangle.y = y; Rectangle.w = width; Rectangle.h = height;
 
+#ifdef DEBUG
+	LoggerWrapper::GetInstance()->Write(LV_STATUS, "SDL::SolidRectangle: color=%u %u %u; x=%u, y=%u; w=%u; h=%u\n",
+																color.R(), color.G(), color.B(), x, y, width, height);
+#endif
+
 	if(color.A() < 255)
 	{
 		SDL_Rect rectBar;
 		rectBar.x = 0; rectBar.y = 0; rectBar.w = width; rectBar.h = height;
-		SDL_Surface *pSDL_Bar = SDL_CreateRGBSurface(SDL_SWSURFACE | SDL_SRCALPHA, rectBar.w, rectBar.h, 32, rmask, gmask, bmask, amask);
+		SDL_Surface *pSDL_Bar = SDL_CreateRGBSurface(SDL_SWSURFACE | SDL_SRCALPHA, rectBar.w, rectBar.h, BIT_PER_PIXEL, rmask, gmask, bmask, amask);
 		SDL_FillRect(pSDL_Bar, &rectBar, SDL_MapRGBA(pSDL_Bar->format, color.R(), color.G(), color.B(), color.A()));
 
 		LockDisplay();
@@ -408,6 +421,10 @@ void OrbiterRenderer_SDL::RenderGraphic(class PlutoGraphic *pPlutoGraphic,
 	string ObjectHash/* = ""*/)
 {
 
+#ifdef DEBUG
+	LoggerWrapper::GetInstance()->Write(LV_STATUS, "OrbiterRenderer_SDL::RenderGraphic ...\n");
+#endif
+	
 	if(!pPlutoGraphic || pPlutoGraphic->GraphicType_get() != gtSDLGraphic)
 		return;//nothing to render or not an sdl graphic
 
@@ -448,6 +465,10 @@ void OrbiterRenderer_SDL::RenderGraphic(class PlutoGraphic *pPlutoGraphic,
 			rotozoom_picture = zoomSurface(pSDL_Surface, ZoomX, ZoomY, SMOOTHING_ON);
 
             LockDisplay();
+#ifdef DEBUG
+			LoggerWrapper::GetInstance()->Write(LV_STATUS, "OrbiterRenderer_SDL::RenderGraphic - Different size, stretching surface ...\n");
+#endif
+		
 			SDL_BlitSurface(rotozoom_picture, NULL, m_pScreenImage, &Destination);
 			SDL_FreeSurface(rotozoom_picture);
             UnlockDisplay();
@@ -455,6 +476,10 @@ void OrbiterRenderer_SDL::RenderGraphic(class PlutoGraphic *pPlutoGraphic,
 		else //same size ... just blit the surface
         {
             LockDisplay();
+#ifdef DEBUG
+			LoggerWrapper::GetInstance()->Write(LV_STATUS, "OrbiterRenderer_SDL::RenderGraphic - Blit Surface ...\n");
+#endif
+
             SDL_BlitSurface(pSDL_Surface, NULL, m_pScreenImage, &Destination);
             UnlockDisplay();
         }
@@ -467,11 +492,30 @@ void OrbiterRenderer_SDL::SaveBackgroundForDeselect(DesignObj_Orbiter *pObj, Plu
 	SourceRect.w = pObj->m_rPosition.Width; SourceRect.h = pObj->m_rPosition.Height;
 	
     SDL_Surface *pSDL_Surface = SDL_CreateRGBSurface(SDL_SWSURFACE,
-            pObj->m_rPosition.Width, pObj->m_rPosition.Height, 32, rmask, gmask, bmask, amask);
+            pObj->m_rPosition.Width, pObj->m_rPosition.Height, BIT_PER_PIXEL, rmask, gmask, bmask, amask);
 	
     LockDisplay();
+	/*
+	 * Damned if you do, damned if you don't.
+	 * If it's a proxy orbiter, we want to do what GetBackground (below) does
+	 * But if it's an OSD, we want the original behaviour.
+	 * Why: with the original form of this function, the OSD is fine,
+	 *      but the Proxy Orbiter ends up displaying black regions
+	 *      with the new form of this function, the Proxy Orbiter is fine,
+	 *      but the OSD renders a black frame that starts really faint and
+	 *      fades in as you press a button more and more.
+	 * I can't for the life of me understand where the OSD and Proxy Orbiter
+	 * diverge, so here's to the good old Pluto coding spirit. Hear hear!
+	 */
+#ifdef PROXY_ORBITER
+	/* New */
+	SDL_SetAlpha(m_pScreenImage, 0, 0);
+#endif
 	SDL_BlitSurface(m_pScreenImage, &SourceRect, pSDL_Surface, NULL);
+#ifndef PROXY_ORBITER
+	/* Original */
 	SDL_SetAlpha(pSDL_Surface, SDL_RLEACCEL , SDL_ALPHA_OPAQUE);
+#endif
     UnlockDisplay();
     
 	pObj->m_pGraphicToUndoSelect = new SDLGraphic(pSDL_Surface);
@@ -482,7 +526,7 @@ PlutoGraphic *OrbiterRenderer_SDL::GetBackground( PlutoRectangle &rect )
 	ClipRectangle(rect);
 
     SDL_Surface *pSDL_Surface = SDL_CreateRGBSurface(SDL_SWSURFACE,
-		rect.Width, rect.Height, 32, rmask, gmask, bmask, amask);
+		rect.Width, rect.Height, BIT_PER_PIXEL, rmask, gmask, bmask, amask);
 
 	SDL_Rect SourceRect;
 	SourceRect.x = rect.Left(); SourceRect.y = rect.Top();
@@ -499,17 +543,38 @@ PlutoGraphic *OrbiterRenderer_SDL::GetBackground( PlutoRectangle &rect )
 void OrbiterRenderer_SDL::ReplaceColorInRectangle(int x, int y, int width, int height, PlutoColor ColorToReplace, PlutoColor ReplacementColor, DesignObj_Orbiter *pObj/* = NULL*/)
 {
     SDL_PixelFormat * PF = m_pScreenImage->format;
-    Uint32 PlutoPixelDest, PlutoPixelSrc, Pixel;
+    Uint32 PlutoPixelSrc, Pixel;
+#ifdef MAEMO_NOKIA770
+	Uint16 PlutoPixelDest;
+#else
+	Uint32 PlutoPixelDest;
+#endif
+    Uint8 red, green, blue; 
 
 #ifdef DEBUG
-    LoggerWrapper::GetInstance()->Write(LV_STATUS, "ReplaceColor: %u %u %u : %u %u %u",
+    LoggerWrapper::GetInstance()->Write(LV_STATUS, "ReplaceColor: ColorToReplace --> %u %u %u : ReplacementColor --> %u %u %u",
         ColorToReplace.R(), ColorToReplace.G(), ColorToReplace.B(),
         ReplacementColor.R(), ReplacementColor.G(), ReplacementColor.B());
 #endif
 
-    PlutoPixelSrc = (ColorToReplace.R() << PF->Rshift) | (ColorToReplace.G() << PF->Gshift) | (ColorToReplace.B() << PF->Bshift) | (ColorToReplace.A() << PF->Ashift);
+#ifdef MAEMO_NOKIA770
+    PlutoPixelSrc = (ColorToReplace.R() << rshift) | (ColorToReplace.G() << gshift) | (ColorToReplace.B() << bshift); // | (ColorToReplace.A() << PF->Ashift);
+#else
+    PlutoPixelSrc = (ColorToReplace.R() << PF->Rshift) | (ColorToReplace.G() << PF->Gshift) | (ColorToReplace.B() << PF->Bshift); // | (ColorToReplace.A() << PF->Ashift);
+#endif
+
     unsigned char *Source = (unsigned char *) &PlutoPixelSrc;
-    PlutoPixelDest = ReplacementColor.R() << PF->Rshift | ReplacementColor.G() << PF->Gshift | ReplacementColor.B() << PF->Bshift;//  TODO -- this should work | ReplacementColor.A() << PF->Ashift;
+	
+#ifdef MAEMO_NOKIA770
+
+	PlutoPixelDest = ((ReplacementColor.R() >> PF->Rloss) << PF->Rshift) +
+						((ReplacementColor.G() >> PF->Gloss) << PF->Gshift) +
+						((ReplacementColor.B() >> PF->Bloss) << PF->Bshift);
+#else
+    PlutoPixelDest = (ReplacementColor.R() << PF->Rshift) | (ReplacementColor.G() << PF->Gshift) | (ReplacementColor.B() << PF->Bshift);//  TODO -- this should work | ReplacementColor.A() << PF->Ashift;
+#endif
+
+    const int max_diff = 3;
 
     for (int j = 0; j < height; j++)
     {
@@ -518,24 +583,15 @@ void OrbiterRenderer_SDL::ReplaceColorInRectangle(int x, int y, int width, int h
             // we may need locking on the surface
             Pixel = SDLGraphic::getpixel(m_pScreenImage, i + x, j + y);
             unsigned char *pPixel = (unsigned char *) &Pixel;
-#ifndef MAEMO_NOKIA770           
-            const int max_diff = 3;
-            if ( abs(Source[0]-pPixel[0])<max_diff && abs(Source[1]-pPixel[1])<max_diff && abs(Source[2]-pPixel[2])<max_diff && abs(Source[3]-pPixel[3])<max_diff )
+            SDL_GetRGB((Uint32)Pixel, m_pScreenImage->format, &red, &green, &blue);
+            if (abs(Source[0]-red)<max_diff && abs(Source[1]-green)<max_diff && abs(Source[2]-blue)<max_diff /*&& abs(Source[3]-pPixel[3])<max_diff*/)
             {
                 SDLGraphic::putpixel(m_pScreenImage,i + x, j + y, PlutoPixelDest);
             }
-#else
-	    const int max_diff = 10;
-
-	    if ( abs(Source[0]-pPixel[0])<max_diff && abs(Source[1]-pPixel[1])<max_diff && abs(Source[2]-pPixel[2])<max_diff )
-	    {
-		SDLGraphic::putpixel(m_pScreenImage,i + x, j + y, PlutoPixelDest);
-	    }
-#endif
         }
     }
 
-	
+
     PlutoRectangle rect(x, y, width, height);
 }
 //-----------------------------------------------------------------------------------------------------
@@ -638,7 +694,7 @@ void OrbiterRenderer_SDL::EventLoop()
 				orbiterEvent.data.region.m_iButton = Event.button.button;
 				OrbiterLogic()->ProcessEvent(orbiterEvent);
 
-#if defined(WIN32) && !defined(PROXY_ORBITER) && !defined(BLUETOOTH_DONGLE) && !defined(MOXI_ORBITER)
+#if defined(WIN32) && !defined(DIRECTFB) && !defined(PROXY_ORBITER) && !defined(BLUETOOTH_DONGLE) && !defined(MOXI_ORBITER)
 				RecordMouseAction(Event.button.x, Event.button.y);
 #endif
 			}
@@ -721,6 +777,12 @@ void OrbiterRenderer_SDL::DrawLine(int x1, int y1, int x2, int y2, PlutoColor co
 	int x = x1;
 	int y = y1;
 
+#ifdef MAEMO_NOKIA770
+	LoggerWrapper::GetInstance()->Write(LV_STATUS, "SDL::DrawLine - color: %u, %u, %u",
+																color.R(), color.G(), color.B());
+#endif
+
+	
     if(
 		x1 < 0 || x1 > OrbiterLogic()->m_iImageWidth - 1 || x2 < 0 || x2 > OrbiterLogic()->m_iImageWidth - 1 || 
 		y1 < 0 || y1 > OrbiterLogic()->m_iImageHeight - 1 || y2 < 0 || y2 > OrbiterLogic()->m_iImageHeight - 1
@@ -793,6 +855,12 @@ void OrbiterRenderer_SDL::DrawArrow(PlutoPoint p1, PlutoPoint p2, PlutoSize size
 	string ParentObjectID, string ObjectID) 
 {
 	OrbiterRenderer::DrawArrow(p1, p2, sizeArrow, color);
+
+#ifdef MAEMO_NOKIA770
+	LoggerWrapper::GetInstance()->Write(LV_STATUS, "SDL::DrawArrow - color: %u, %u, %u",
+																color.R(), color.G(), color.B());
+#endif
+	
 	SDL_UpdateRect(Screen, 0, 0, 0, 0);
 }
 //-----------------------------------------------------------------------------------------------------

@@ -82,6 +82,7 @@ void Row_Package_Directory_File::Delete()
 	Row_Package_Directory_File *pRow = this; // Needed so we will have only 1 version of get_primary_fields_assign_from_row
 	
 	if (!is_deleted)
+	{
 		if (is_added)	
 		{	
 			vector<TableRow*>::iterator i;	
@@ -103,6 +104,7 @@ void Row_Package_Directory_File::Delete()
 			table->deleted_cachedRows[key] = this;
 			is_deleted = true;	
 		}	
+	}
 }
 
 void Row_Package_Directory_File::Reload()
@@ -142,8 +144,7 @@ is_null[2] = true;
 m_FK_OperatingSystem = 0;
 is_null[3] = true;
 m_FK_Distro = 0;
-m_File = "";
-is_null[4] = false;
+is_null[4] = true;
 is_null[5] = true;
 is_null[6] = true;
 is_null[7] = true;
@@ -154,7 +155,8 @@ is_null[9] = true;
 m_psc_user = 0;
 m_psc_frozen = 0;
 is_null[10] = false;
-is_null[11] = true;
+m_psc_mod = "0000-00-00 00:00:00";
+is_null[11] = false;
 is_null[12] = true;
 m_psc_restrict = 0;
 
@@ -252,6 +254,9 @@ return is_null[2];}
 bool Row_Package_Directory_File::FK_Distro_isNull() {PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
 
 return is_null[3];}
+bool Row_Package_Directory_File::File_isNull() {PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
+
+return is_null[4];}
 bool Row_Package_Directory_File::Search_isNull() {PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
 
 return is_null[5];}
@@ -270,9 +275,6 @@ return is_null[9];}
 bool Row_Package_Directory_File::psc_frozen_isNull() {PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
 
 return is_null[10];}
-bool Row_Package_Directory_File::psc_mod_isNull() {PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
-
-return is_null[11];}
 bool Row_Package_Directory_File::psc_restrict_isNull() {PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
 
 return is_null[12];}
@@ -284,6 +286,10 @@ is_modified=true;
 }
 void Row_Package_Directory_File::FK_Distro_setNull(bool val){PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
 is_null[3]=val;
+is_modified=true;
+}
+void Row_Package_Directory_File::File_setNull(bool val){PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
+is_null[4]=val;
 is_modified=true;
 }
 void Row_Package_Directory_File::Search_setNull(bool val){PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
@@ -308,10 +314,6 @@ is_modified=true;
 }
 void Row_Package_Directory_File::psc_frozen_setNull(bool val){PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
 is_null[10]=val;
-is_modified=true;
-}
-void Row_Package_Directory_File::psc_mod_setNull(bool val){PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
-is_null[11]=val;
 is_modified=true;
 }
 void Row_Package_Directory_File::psc_restrict_setNull(bool val){PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
@@ -379,8 +381,8 @@ PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
 if (is_null[4])
 return "NULL";
 
-char *buf = new char[511];
-db_wrapper_real_escape_string(table->database->m_pDB, buf, m_File.c_str(), (unsigned long) min((size_t)255,m_File.size()));
+char *buf = new char[1531];
+db_wrapper_real_escape_string(table->database->m_pDB, buf, m_File.c_str(), (unsigned long) min((size_t)765,m_File.size()));
 string s=string()+"\""+buf+"\"";
 delete[] buf;
 return s;
@@ -393,8 +395,8 @@ PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
 if (is_null[5])
 return "NULL";
 
-char *buf = new char[511];
-db_wrapper_real_escape_string(table->database->m_pDB, buf, m_Search.c_str(), (unsigned long) min((size_t)255,m_Search.size()));
+char *buf = new char[1531];
+db_wrapper_real_escape_string(table->database->m_pDB, buf, m_Search.c_str(), (unsigned long) min((size_t)765,m_Search.size()));
 string s=string()+"\""+buf+"\"";
 delete[] buf;
 return s;
@@ -407,8 +409,8 @@ PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
 if (is_null[6])
 return "NULL";
 
-char *buf = new char[511];
-db_wrapper_real_escape_string(table->database->m_pDB, buf, m_MakeCommand.c_str(), (unsigned long) min((size_t)255,m_MakeCommand.size()));
+char *buf = new char[1531];
+db_wrapper_real_escape_string(table->database->m_pDB, buf, m_MakeCommand.c_str(), (unsigned long) min((size_t)765,m_MakeCommand.size()));
 string s=string()+"\""+buf+"\"";
 delete[] buf;
 return s;

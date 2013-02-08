@@ -24,6 +24,8 @@
 #include "PcmEncoder.h"
 
 #include <iostream>
+#include <string.h>
+
 using namespace std;
 
 #ifndef DISABLE_TRANSCODING

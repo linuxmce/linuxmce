@@ -33,22 +33,8 @@ using namespace std;
 #include "Table_Document.h"
 #include "Table_Document.h"
 
-#include "Table_DesignObj_pschist.h"
-#include "Table_DesignObj_pschmask.h"
-#include "Table_DeviceTemplate_pschist.h"
-#include "Table_DeviceTemplate_pschmask.h"
 #include "Table_Document.h"
 #include "Table_Document_Comment.h"
-#include "Table_Document_Comment_pschist.h"
-#include "Table_Document_Comment_pschmask.h"
-#include "Table_Document_pschist.h"
-#include "Table_Document_pschmask.h"
-#include "Table_Package_pschist.h"
-#include "Table_Package_pschist.h"
-#include "Table_Package_pschist.h"
-#include "Table_Package_pschmask.h"
-#include "Table_Package_pschmask.h"
-#include "Table_Package_pschmask.h"
 
 
 void Database_pluto_main::CreateTable_Document()
@@ -96,6 +82,7 @@ void Row_Document::Delete()
 	Row_Document *pRow = this; // Needed so we will have only 1 version of get_primary_fields_assign_from_row
 	
 	if (!is_deleted)
+	{
 		if (is_added)	
 		{	
 			vector<TableRow*>::iterator i;	
@@ -117,6 +104,7 @@ void Row_Document::Delete()
 			table->deleted_cachedRows[key] = this;
 			is_deleted = true;	
 		}	
+	}
 }
 
 void Row_Document::Reload()
@@ -156,8 +144,7 @@ m_Hidden = 0;
 is_null[2] = false;
 m_Order = 0;
 is_null[3] = false;
-m_Title = "";
-is_null[4] = false;
+is_null[4] = true;
 is_null[5] = true;
 is_null[6] = true;
 m_psc_id = 0;
@@ -167,7 +154,8 @@ is_null[8] = true;
 m_psc_user = 0;
 m_psc_frozen = 0;
 is_null[9] = false;
-is_null[10] = true;
+m_psc_mod = "0000-00-00 00:00:00";
+is_null[10] = false;
 is_null[11] = true;
 m_psc_restrict = 0;
 
@@ -256,6 +244,9 @@ m_psc_restrict = val; is_modified=true; is_null[11]=false;}
 bool Row_Document::FK_Document_Parent_isNull() {PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
 
 return is_null[1];}
+bool Row_Document::Title_isNull() {PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
+
+return is_null[4];}
 bool Row_Document::Contents_isNull() {PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
 
 return is_null[5];}
@@ -271,9 +262,6 @@ return is_null[8];}
 bool Row_Document::psc_frozen_isNull() {PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
 
 return is_null[9];}
-bool Row_Document::psc_mod_isNull() {PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
-
-return is_null[10];}
 bool Row_Document::psc_restrict_isNull() {PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
 
 return is_null[11];}
@@ -281,6 +269,10 @@ return is_null[11];}
 			
 void Row_Document::FK_Document_Parent_setNull(bool val){PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
 is_null[1]=val;
+is_modified=true;
+}
+void Row_Document::Title_setNull(bool val){PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
+is_null[4]=val;
 is_modified=true;
 }
 void Row_Document::Contents_setNull(bool val){PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
@@ -301,10 +293,6 @@ is_modified=true;
 }
 void Row_Document::psc_frozen_setNull(bool val){PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
 is_null[9]=val;
-is_modified=true;
-}
-void Row_Document::psc_mod_setNull(bool val){PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
-is_null[10]=val;
 is_modified=true;
 }
 void Row_Document::psc_restrict_setNull(bool val){PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
@@ -372,8 +360,8 @@ PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
 if (is_null[4])
 return "NULL";
 
-char *buf = new char[121];
-db_wrapper_real_escape_string(table->database->m_pDB, buf, m_Title.c_str(), (unsigned long) min((size_t)60,m_Title.size()));
+char *buf = new char[361];
+db_wrapper_real_escape_string(table->database->m_pDB, buf, m_Title.c_str(), (unsigned long) min((size_t)180,m_Title.size()));
 string s=string()+"\""+buf+"\"";
 delete[] buf;
 return s;
@@ -1110,34 +1098,6 @@ return pTable->GetRow(m_FK_Document_Parent);
 }
 
 
-void Row_Document::DesignObj_pschist_FK_Document_getrows(vector <class Row_DesignObj_pschist*> *rows)
-{
-PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
-
-class Table_DesignObj_pschist *pTable = table->database->DesignObj_pschist_get();
-pTable->GetRows("`FK_Document`=" + StringUtils::itos(m_PK_Document),rows);
-}
-void Row_Document::DesignObj_pschmask_FK_Document_getrows(vector <class Row_DesignObj_pschmask*> *rows)
-{
-PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
-
-class Table_DesignObj_pschmask *pTable = table->database->DesignObj_pschmask_get();
-pTable->GetRows("`FK_Document`=" + StringUtils::itos(m_PK_Document),rows);
-}
-void Row_Document::DeviceTemplate_pschist_FK_Document_getrows(vector <class Row_DeviceTemplate_pschist*> *rows)
-{
-PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
-
-class Table_DeviceTemplate_pschist *pTable = table->database->DeviceTemplate_pschist_get();
-pTable->GetRows("`FK_Document`=" + StringUtils::itos(m_PK_Document),rows);
-}
-void Row_Document::DeviceTemplate_pschmask_FK_Document_getrows(vector <class Row_DeviceTemplate_pschmask*> *rows)
-{
-PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
-
-class Table_DeviceTemplate_pschmask *pTable = table->database->DeviceTemplate_pschmask_get();
-pTable->GetRows("`FK_Document`=" + StringUtils::itos(m_PK_Document),rows);
-}
 void Row_Document::Document_FK_Document_Parent_getrows(vector <class Row_Document*> *rows)
 {
 PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
@@ -1151,76 +1111,6 @@ PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
 
 class Table_Document_Comment *pTable = table->database->Document_Comment_get();
 pTable->GetRows("`FK_Document`=" + StringUtils::itos(m_PK_Document),rows);
-}
-void Row_Document::Document_Comment_pschist_FK_Document_getrows(vector <class Row_Document_Comment_pschist*> *rows)
-{
-PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
-
-class Table_Document_Comment_pschist *pTable = table->database->Document_Comment_pschist_get();
-pTable->GetRows("`FK_Document`=" + StringUtils::itos(m_PK_Document),rows);
-}
-void Row_Document::Document_Comment_pschmask_FK_Document_getrows(vector <class Row_Document_Comment_pschmask*> *rows)
-{
-PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
-
-class Table_Document_Comment_pschmask *pTable = table->database->Document_Comment_pschmask_get();
-pTable->GetRows("`FK_Document`=" + StringUtils::itos(m_PK_Document),rows);
-}
-void Row_Document::Document_pschist_FK_Document_Parent_getrows(vector <class Row_Document_pschist*> *rows)
-{
-PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
-
-class Table_Document_pschist *pTable = table->database->Document_pschist_get();
-pTable->GetRows("`FK_Document_Parent`=" + StringUtils::itos(m_PK_Document),rows);
-}
-void Row_Document::Document_pschmask_FK_Document_Parent_getrows(vector <class Row_Document_pschmask*> *rows)
-{
-PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
-
-class Table_Document_pschmask *pTable = table->database->Document_pschmask_get();
-pTable->GetRows("`FK_Document_Parent`=" + StringUtils::itos(m_PK_Document),rows);
-}
-void Row_Document::Package_pschist_FK_Document_getrows(vector <class Row_Package_pschist*> *rows)
-{
-PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
-
-class Table_Package_pschist *pTable = table->database->Package_pschist_get();
-pTable->GetRows("`FK_Document`=" + StringUtils::itos(m_PK_Document),rows);
-}
-void Row_Document::Package_pschist_FK_Document_ProgrammersGuide_getrows(vector <class Row_Package_pschist*> *rows)
-{
-PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
-
-class Table_Package_pschist *pTable = table->database->Package_pschist_get();
-pTable->GetRows("`FK_Document_ProgrammersGuide`=" + StringUtils::itos(m_PK_Document),rows);
-}
-void Row_Document::Package_pschist_FK_Document_UsersManual_getrows(vector <class Row_Package_pschist*> *rows)
-{
-PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
-
-class Table_Package_pschist *pTable = table->database->Package_pschist_get();
-pTable->GetRows("`FK_Document_UsersManual`=" + StringUtils::itos(m_PK_Document),rows);
-}
-void Row_Document::Package_pschmask_FK_Document_getrows(vector <class Row_Package_pschmask*> *rows)
-{
-PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
-
-class Table_Package_pschmask *pTable = table->database->Package_pschmask_get();
-pTable->GetRows("`FK_Document`=" + StringUtils::itos(m_PK_Document),rows);
-}
-void Row_Document::Package_pschmask_FK_Document_ProgrammersGuide_getrows(vector <class Row_Package_pschmask*> *rows)
-{
-PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
-
-class Table_Package_pschmask *pTable = table->database->Package_pschmask_get();
-pTable->GetRows("`FK_Document_ProgrammersGuide`=" + StringUtils::itos(m_PK_Document),rows);
-}
-void Row_Document::Package_pschmask_FK_Document_UsersManual_getrows(vector <class Row_Package_pschmask*> *rows)
-{
-PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
-
-class Table_Package_pschmask *pTable = table->database->Package_pschmask_get();
-pTable->GetRows("`FK_Document_UsersManual`=" + StringUtils::itos(m_PK_Document),rows);
 }
 
 

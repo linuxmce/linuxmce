@@ -6,19 +6,21 @@ LDLIBS=-lconfuse
 
 sources=$(wildcard *.cpp)
 
-all: $(ROOT)/lib/libresolution.so test
+all: libresolution.so test
 
 libresolution.so: libresolution.o
 	g++ -shared $(CPPFLAGS) $(CXXFLAGS) $< -o libresolution.so $(LDFLAGS) $(LDLIBS)
+	cp libresolution.so $(ROOT)/lib
 
-$(ROOT)/lib/libresolution.so: libresolution.so
-	cp libresolution.so $@
-
-test: test.o $(ROOT)/lib/libresolution.so
+test: test.o libresolution.so
 	g++ $(CPPFLAGS) $(CXXFLAGS) $< -o test -L. -lresolution
 
 clean:
-	rm -f test libresolution.so $(ROOT)/lib/libresolution.so *.o
+	rm -f test libresolution.so *.o
 
 include $(ROOT)/PlutoUtils/make.rules
 -include $(sources:.cpp=.d)
+
+install: 
+	mkdir -p pluto/lib
+	cp libresolution.so $(DESTPATH)pluto/lib

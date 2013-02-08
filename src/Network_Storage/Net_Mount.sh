@@ -21,6 +21,10 @@ while [[ "$#" > 0 ]]; do
 	shift
 done
 
+#Create a way to determine if MythTV is installed...
+Q="SELECT PK_Device FROM Device WHERE FK_DeviceTemplate=36"
+MythTV_Installed=$(RunSQL "$Q")
+
 if [[ -z "$NAS_PK_Device" ]]; then
 	Logging "NAS" $SEVERITY_CRITICAL "share mount" "I didn't receive my device number as a parameter. Ending"
 	exit 1
@@ -106,13 +110,13 @@ else
 		done
 	else # not using Pluto directory structure, no mount point specified
 		Logging "NAS" $SEVERITY_NORMAL "share mount" "Not using Pluto directory structure. Links all over the place"
-		user_dirs="pictures audio documents videos"
+		
 		Q="SELECT PK_Users FROM Users"
 		R=$(RunSQL "$Q")
 
 		for user in public $R; do
 			[[ "$user" == public ]] || user="user_$user"
-			for dir in $user_dirs; do
+			for dir in $LMCE_DIRS; do
 				Target="/home/$user/data/$dir/$LinkName"
 				ln -sf "$Dst" "$Target"
 			done

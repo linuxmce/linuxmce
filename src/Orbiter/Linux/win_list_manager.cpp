@@ -459,7 +459,7 @@ WindowContext& WinListManager::PendingContext(string sWindowName)
 void WinListManager::HandleOnCommand()
 {
 #ifdef KDE_LMCE
-        m_pWMController->SetLayer("kicker", LayerBelow);
+        m_pWMController->SetLayer("Plasma", LayerBelow);
 #endif
 
 	m_bEnabled = true;
@@ -478,7 +478,7 @@ void WinListManager::HandleOnCommand()
 void WinListManager::HandleOffCommand()
 {
 #ifdef KDE_LMCE
-        m_pWMController->SetLayer("kicker", LayerNormal);
+        m_pWMController->SetLayer("Plasma", LayerNormal);
 #endif	
 
 	//switch back to whatever desktop was active before. 

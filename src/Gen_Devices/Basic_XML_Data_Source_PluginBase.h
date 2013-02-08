@@ -80,14 +80,6 @@ public:
 	* @brief Device data access methods:
 	*/
 
-	string Get_PortChannel_Number()
-	{
-		if( m_bRunningWithoutDeviceData )
-			return m_pEvent_Impl->GetDeviceDataFromDatabase(m_dwPK_Device,DEVICEDATA_PortChannel_Number_CONST);
-		else
-			return m_mapParameters_Find(DEVICEDATA_PortChannel_Number_CONST);
-	}
-
 };
 
 
@@ -192,11 +184,8 @@ public:
 	virtual void ReceivedUnknownCommand(string &sCMD_Result,Message *pMessage) { };
 	Command_Impl *CreateCommand(int PK_DeviceTemplate, Command_Impl *pPrimaryDeviceCommand, DeviceData_Impl *pData, Event_Impl *pEvent);
 	//Data accessors
-	string DATA_Get_PortChannel_Number() { return GetData()->Get_PortChannel_Number(); }
 	//Event accessors
 	//Commands - Override these to handle commands from the server
-	virtual void CMD_On(int iPK_Pipe,string sPK_Device_Pipes,string &sCMD_Result,class Message *pMessage) {};
-	virtual void CMD_Off(int iPK_Pipe,string &sCMD_Result,class Message *pMessage) {};
 
 	//This distributes a received message to your handler.
 	virtual ReceivedMessageResult ReceivedMessage(class Message *pMessageOriginal)
@@ -222,70 +211,7 @@ public:
 		for(int s=-1;s<(int) pMessageOriginal->m_vectExtraMessages.size(); ++s)
 		{
 			Message *pMessage = s>=0 ? pMessageOriginal->m_vectExtraMessages[s] : pMessageOriginal;
-			if (pMessage->m_dwPK_Device_To==m_dwPK_Device && pMessage->m_dwMessage_Type == MESSAGETYPE_COMMAND)
-			{
-				// Only buffer single messages, otherwise the caller won't know which messages were buffered and which weren't
-				if( m_pMessageBuffer && pMessage->m_bCanBuffer && pMessageOriginal->m_vectExtraMessages.size()==1 && m_pMessageBuffer->BufferMessage(pMessage) )
-					return rmr_Buffered;
-				switch(pMessage->m_dwID)
-				{
-				case COMMAND_Generic_On_CONST:
-					{
-						string sCMD_Result="OK";
-						int iPK_Pipe=atoi(pMessage->m_mapParameters[COMMANDPARAMETER_PK_Pipe_CONST].c_str());
-						string sPK_Device_Pipes=pMessage->m_mapParameters[COMMANDPARAMETER_PK_Device_Pipes_CONST];
-						CMD_On(iPK_Pipe,sPK_Device_Pipes.c_str(),sCMD_Result,pMessage);
-						if( pMessage->m_eExpectedResponse==ER_ReplyMessage && !pMessage->m_bRespondedToMessage )
-						{
-							pMessage->m_bRespondedToMessage=true;
-							Message *pMessageOut=new Message(m_dwPK_Device,pMessage->m_dwPK_Device_From,PRIORITY_NORMAL,MESSAGETYPE_REPLY,0,0);
-							pMessageOut->m_mapParameters[0]=sCMD_Result;
-							SendMessage(pMessageOut);
-						}
-						else if( (pMessage->m_eExpectedResponse==ER_DeliveryConfirmation || pMessage->m_eExpectedResponse==ER_ReplyString) && !pMessage->m_bRespondedToMessage )
-						{
-							pMessage->m_bRespondedToMessage=true;
-							SendString(sCMD_Result);
-						}
-						if( (itRepeat=pMessage->m_mapParameters.find(COMMANDPARAMETER_Repeat_Command_CONST))!=pMessage->m_mapParameters.end() )
-						{
-							int iRepeat=atoi(itRepeat->second.c_str());
-							for(int i=2;i<=iRepeat;++i)
-								CMD_On(iPK_Pipe,sPK_Device_Pipes.c_str(),sCMD_Result,pMessage);
-						}
-					};
-					iHandled++;
-					continue;
-				case COMMAND_Generic_Off_CONST:
-					{
-						string sCMD_Result="OK";
-						int iPK_Pipe=atoi(pMessage->m_mapParameters[COMMANDPARAMETER_PK_Pipe_CONST].c_str());
-						CMD_Off(iPK_Pipe,sCMD_Result,pMessage);
-						if( pMessage->m_eExpectedResponse==ER_ReplyMessage && !pMessage->m_bRespondedToMessage )
-						{
-							pMessage->m_bRespondedToMessage=true;
-							Message *pMessageOut=new Message(m_dwPK_Device,pMessage->m_dwPK_Device_From,PRIORITY_NORMAL,MESSAGETYPE_REPLY,0,0);
-							pMessageOut->m_mapParameters[0]=sCMD_Result;
-							SendMessage(pMessageOut);
-						}
-						else if( (pMessage->m_eExpectedResponse==ER_DeliveryConfirmation || pMessage->m_eExpectedResponse==ER_ReplyString) && !pMessage->m_bRespondedToMessage )
-						{
-							pMessage->m_bRespondedToMessage=true;
-							SendString(sCMD_Result);
-						}
-						if( (itRepeat=pMessage->m_mapParameters.find(COMMANDPARAMETER_Repeat_Command_CONST))!=pMessage->m_mapParameters.end() )
-						{
-							int iRepeat=atoi(itRepeat->second.c_str());
-							for(int i=2;i<=iRepeat;++i)
-								CMD_Off(iPK_Pipe,sCMD_Result,pMessage);
-						}
-					};
-					iHandled++;
-					continue;
-				}
-				iHandled += (Command_Impl::ReceivedMessage(pMessage)==rmr_NotProcessed ? 0 : 1);
-			}
-			else if( pMessage->m_dwMessage_Type == MESSAGETYPE_COMMAND )
+			 if( pMessage->m_dwMessage_Type == MESSAGETYPE_COMMAND )
 			{
 				MapCommand_Impl::iterator it = m_mapCommandImpl_Children.find(pMessage->m_dwPK_Device_To);
 				if( it!=m_mapCommandImpl_Children.end() && !(*it).second->m_bGeneric )

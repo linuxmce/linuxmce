@@ -1,0 +1,10 @@
+/usr/lib/libow*.so
+/usr/lib/libow*.a
+/usr/lib/libow*.la
+/usr/include/owfs*.h
+/usr/lib/libowcapi*.so
+/usr/lib/libowcapi*.a
+/usr/lib/libowcapi*.la
+/usr/include/owcapi.h
+/usr/share/man/man1/libowcapi.1
+/usr/share/man/man1/owcapi.1

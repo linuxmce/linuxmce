@@ -17,6 +17,7 @@ using namespace std;
 
 #define CACHE_READBLOCK_SIZE	128
 #define DEFAULT_DELIMITED_TIMEOUT 3000
+#include <stdio.h>
 #include <sys/time.h>
 #include <time.h>
 

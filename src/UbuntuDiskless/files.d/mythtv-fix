@@ -22,12 +22,12 @@ function IsDeviceInQuickStart {
 Q="SELECT PK_Device FROM Device WHERE FK_DeviceTemplate=28"
 Devices=$(RunSQL "$Q")
 
-Q="SELECT FK_Device FROM Device_QuickStart WHERE FK_QuickStartTemplate=2"
+Q="SELECT FK_Device FROM Device_QuickStart WHERE FK_QuickStartTemplate=8"
 DevsQuickStart=$(RunSQL "$Q")
 
 for device in $Devices ;do
 	if ! IsDeviceInQuickStart "$device" "$DevsQuickStart" ;then 
-		Q="INSERT INTO Device_QuickStart(FK_Device,Description,SortOrder,FK_QuickStartTemplate) VALUES("$device",'MythTV Setup',"1","2")"
+		Q="INSERT INTO Device_QuickStart(FK_Device,Description,SortOrder,FK_QuickStartTemplate) VALUES("$device",'MythTV Setup',"1","8")"
 		RunSQL "$Q"
 	fi
 done

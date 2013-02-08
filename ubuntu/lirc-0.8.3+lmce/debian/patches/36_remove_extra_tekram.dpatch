@@ -1,0 +1,18 @@
+#! /bin/sh /usr/share/dpatch/dpatch-run
+## 35_remove_extra_tekram.dpatch by Mario Limonciello <superm1@ubuntu.com>
+##
+## All lines beginning with `## DP:' are a description of the patch.
+## DP: Remove extra occurrence in lirc.hwdb.  Causes failures (LP: #211566)
+
+@DPATCH@
+diff -urNad lirc~/doc/lirc.hwdb lirc/doc/lirc.hwdb
+--- lirc~/doc/lirc.hwdb	2008-06-03 23:49:46.000000000 -0500
++++ lirc/doc/lirc.hwdb	2008-06-03 23:49:57.000000000 -0500
+@@ -50,7 +50,6 @@
+ REALmagic (bundled with Hollywood Plus DVD card);realmagic;none;hw_pixelview;sigma_designs/lircd.conf.realmagic;
+ Slink-e (receive only);slinke;none;hw_slinke;;
+ Silitek SM-1000;silitek;none;hw_silitek;silitek/lircd.conf.silitek;
+-Tekram Irmate 210 (16x50 UART compatible serial port);tekram;lirc_dev lirc_sir;hw_default;;
+ UIRT2 (receive only, UIR mode);uirt2;none;hw_uirt2;;
+ UIRT2 (receive and transmit);uirt2_raw;none;hw_uirt2_raw;;
+ X10 MouseRemote RF Receiver (Serial);mouseremote;none;hw_mouseremote;x10/lircd.conf.mouseremote;

@@ -1,0 +1,57 @@
+Source: speex
+Section: sound
+Priority: optional
+Maintainer: Debian VoIP Team <pkg-voip-maintainers@lists.alioth.debian.org>
+Uploaders: A. Maitland Bottoms <bottoms@debian.org>, Jose Carlos Garcia Sogo <jsogo@debian.org>, Mark Purcell <msp@debian.org>, Kilian Krause <kilian@debian.org>
+Build-Depends: debhelper (>> 3.0.0), libogg-dev
+Build-Depends-Indep: doxygen, tetex-bin, gs-gpl, graphviz (>=2.2-1)
+Standards-Version: 3.6.2.0
+
+Package: speex
+Architecture: any
+Depends: libspeex1 (= ${Source-Version}), ${shlibs:Depends}
+Description: The Speex Speech Codec
+ Unlike other codecs like MP3 and Ogg Vorbis, Speex is specially
+ designed for compressing voice at low bit-rates for applications
+ such as voice over IP (VoIP). In some sense, it is meant to be
+ complementary to the Ogg Vorbis codec. 
+ .
+ This package contains the encoder and decoder command-line
+ applications.
+
+Package: libspeex1
+Architecture: any
+Section: libs
+Depends: ${shlibs:Depends}
+Conflicts: libspeex
+Replaces: libspeex
+Suggests: speex
+Description: The Speex Speech Codec
+ Unlike other codecs like MP3 and Ogg Vorbis, Speex is specially
+ designed for compressing voice at low bit-rates for applications
+ such as voice over IP (VoIP). In some sense, it is meant to be
+ complementary to the Ogg Vorbis codec. 
+ .
+ This package is only the library.
+
+Package: libspeex-dev
+Architecture: any
+Section: libdevel
+Depends: libspeex1 (= ${Source-Version}), ${shlibs:Depends}
+Description: The Speex Speech Codec
+ Unlike other codecs like MP3 and Ogg Vorbis, Speex is specially
+ designed for compressing voice at low bit-rates for applications
+ such as voice over IP (VoIP). In some sense, it is meant to be
+ complementary to the Ogg Vorbis codec. 
+ .
+ This package is only the library development files.
+
+Package: speex-doc
+Architecture: all
+Section: doc
+Suggests: speex
+Description: Documentation for speex
+ Unlike other codecs like MP3 and Ogg Vorbis, Speex is specially
+ designed for compressing voice at low bit-rates for applications
+ such as voice over IP (VoIP). In some sense, it is meant to be
+ complementary to the Ogg Vorbis codec. 

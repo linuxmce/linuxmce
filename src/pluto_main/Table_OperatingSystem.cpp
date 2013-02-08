@@ -33,29 +33,13 @@ using namespace std;
 #include "Table_OperatingSystem.h"
 
 #include "Table_DeviceTemplate.h"
-#include "Table_DeviceTemplate_pschist.h"
-#include "Table_DeviceTemplate_pschmask.h"
 #include "Table_Distro.h"
-#include "Table_Distro_pschist.h"
-#include "Table_Distro_pschmask.h"
 #include "Table_InstallWizard_Distro.h"
-#include "Table_InstallWizard_Distro_pschist.h"
-#include "Table_InstallWizard_Distro_pschmask.h"
 #include "Table_Package_Compat.h"
-#include "Table_Package_Compat_pschist.h"
-#include "Table_Package_Compat_pschmask.h"
 #include "Table_Package_Directory.h"
 #include "Table_Package_Directory_File.h"
-#include "Table_Package_Directory_File_pschist.h"
-#include "Table_Package_Directory_File_pschmask.h"
-#include "Table_Package_Directory_pschist.h"
-#include "Table_Package_Directory_pschmask.h"
 #include "Table_Package_Source_Compat.h"
-#include "Table_Package_Source_Compat_pschist.h"
-#include "Table_Package_Source_Compat_pschmask.h"
 #include "Table_RepositorySource.h"
-#include "Table_RepositorySource_pschist.h"
-#include "Table_RepositorySource_pschmask.h"
 
 
 void Database_pluto_main::CreateTable_OperatingSystem()
@@ -103,6 +87,7 @@ void Row_OperatingSystem::Delete()
 	Row_OperatingSystem *pRow = this; // Needed so we will have only 1 version of get_primary_fields_assign_from_row
 	
 	if (!is_deleted)
+	{
 		if (is_added)	
 		{	
 			vector<TableRow*>::iterator i;	
@@ -124,6 +109,7 @@ void Row_OperatingSystem::Delete()
 			table->deleted_cachedRows[key] = this;
 			is_deleted = true;	
 		}	
+	}
 }
 
 void Row_OperatingSystem::Reload()
@@ -157,8 +143,7 @@ void Row_OperatingSystem::SetDefaultValues()
 {
 	m_PK_OperatingSystem = 0;
 is_null[0] = false;
-m_Description = "";
-is_null[1] = false;
+is_null[1] = true;
 is_null[2] = true;
 is_null[3] = true;
 m_psc_id = 0;
@@ -168,7 +153,8 @@ is_null[5] = true;
 m_psc_user = 0;
 m_psc_frozen = 0;
 is_null[6] = false;
-is_null[7] = true;
+m_psc_mod = "0000-00-00 00:00:00";
+is_null[7] = false;
 is_null[8] = true;
 m_psc_restrict = 0;
 
@@ -236,6 +222,9 @@ void Row_OperatingSystem::psc_restrict_set(long int val){PLUTO_SAFETY_LOCK_ERROR
 m_psc_restrict = val; is_modified=true; is_null[8]=false;}
 
 		
+bool Row_OperatingSystem::Description_isNull() {PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
+
+return is_null[1];}
 bool Row_OperatingSystem::Define_isNull() {PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
 
 return is_null[2];}
@@ -251,14 +240,15 @@ return is_null[5];}
 bool Row_OperatingSystem::psc_frozen_isNull() {PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
 
 return is_null[6];}
-bool Row_OperatingSystem::psc_mod_isNull() {PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
-
-return is_null[7];}
 bool Row_OperatingSystem::psc_restrict_isNull() {PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
 
 return is_null[8];}
 
 			
+void Row_OperatingSystem::Description_setNull(bool val){PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
+is_null[1]=val;
+is_modified=true;
+}
 void Row_OperatingSystem::Define_setNull(bool val){PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
 is_null[2]=val;
 is_modified=true;
@@ -277,10 +267,6 @@ is_modified=true;
 }
 void Row_OperatingSystem::psc_frozen_setNull(bool val){PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
 is_null[6]=val;
-is_modified=true;
-}
-void Row_OperatingSystem::psc_mod_setNull(bool val){PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
-is_null[7]=val;
 is_modified=true;
 }
 void Row_OperatingSystem::psc_restrict_setNull(bool val){PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
@@ -309,8 +295,8 @@ PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
 if (is_null[1])
 return "NULL";
 
-char *buf = new char[61];
-db_wrapper_real_escape_string(table->database->m_pDB, buf, m_Description.c_str(), (unsigned long) min((size_t)30,m_Description.size()));
+char *buf = new char[181];
+db_wrapper_real_escape_string(table->database->m_pDB, buf, m_Description.c_str(), (unsigned long) min((size_t)90,m_Description.size()));
 string s=string()+"\""+buf+"\"";
 delete[] buf;
 return s;
@@ -323,8 +309,8 @@ PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
 if (is_null[2])
 return "NULL";
 
-char *buf = new char[51];
-db_wrapper_real_escape_string(table->database->m_pDB, buf, m_Define.c_str(), (unsigned long) min((size_t)25,m_Define.size()));
+char *buf = new char[151];
+db_wrapper_real_escape_string(table->database->m_pDB, buf, m_Define.c_str(), (unsigned long) min((size_t)75,m_Define.size()));
 string s=string()+"\""+buf+"\"";
 delete[] buf;
 return s;
@@ -981,39 +967,11 @@ PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
 class Table_DeviceTemplate *pTable = table->database->DeviceTemplate_get();
 pTable->GetRows("`FK_OperatingSystem`=" + StringUtils::itos(m_PK_OperatingSystem),rows);
 }
-void Row_OperatingSystem::DeviceTemplate_pschist_FK_OperatingSystem_getrows(vector <class Row_DeviceTemplate_pschist*> *rows)
-{
-PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
-
-class Table_DeviceTemplate_pschist *pTable = table->database->DeviceTemplate_pschist_get();
-pTable->GetRows("`FK_OperatingSystem`=" + StringUtils::itos(m_PK_OperatingSystem),rows);
-}
-void Row_OperatingSystem::DeviceTemplate_pschmask_FK_OperatingSystem_getrows(vector <class Row_DeviceTemplate_pschmask*> *rows)
-{
-PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
-
-class Table_DeviceTemplate_pschmask *pTable = table->database->DeviceTemplate_pschmask_get();
-pTable->GetRows("`FK_OperatingSystem`=" + StringUtils::itos(m_PK_OperatingSystem),rows);
-}
 void Row_OperatingSystem::Distro_FK_OperatingSystem_getrows(vector <class Row_Distro*> *rows)
 {
 PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
 
 class Table_Distro *pTable = table->database->Distro_get();
-pTable->GetRows("`FK_OperatingSystem`=" + StringUtils::itos(m_PK_OperatingSystem),rows);
-}
-void Row_OperatingSystem::Distro_pschist_FK_OperatingSystem_getrows(vector <class Row_Distro_pschist*> *rows)
-{
-PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
-
-class Table_Distro_pschist *pTable = table->database->Distro_pschist_get();
-pTable->GetRows("`FK_OperatingSystem`=" + StringUtils::itos(m_PK_OperatingSystem),rows);
-}
-void Row_OperatingSystem::Distro_pschmask_FK_OperatingSystem_getrows(vector <class Row_Distro_pschmask*> *rows)
-{
-PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
-
-class Table_Distro_pschmask *pTable = table->database->Distro_pschmask_get();
 pTable->GetRows("`FK_OperatingSystem`=" + StringUtils::itos(m_PK_OperatingSystem),rows);
 }
 void Row_OperatingSystem::InstallWizard_Distro_FK_OperatingSystem_getrows(vector <class Row_InstallWizard_Distro*> *rows)
@@ -1023,39 +981,11 @@ PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
 class Table_InstallWizard_Distro *pTable = table->database->InstallWizard_Distro_get();
 pTable->GetRows("`FK_OperatingSystem`=" + StringUtils::itos(m_PK_OperatingSystem),rows);
 }
-void Row_OperatingSystem::InstallWizard_Distro_pschist_FK_OperatingSystem_getrows(vector <class Row_InstallWizard_Distro_pschist*> *rows)
-{
-PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
-
-class Table_InstallWizard_Distro_pschist *pTable = table->database->InstallWizard_Distro_pschist_get();
-pTable->GetRows("`FK_OperatingSystem`=" + StringUtils::itos(m_PK_OperatingSystem),rows);
-}
-void Row_OperatingSystem::InstallWizard_Distro_pschmask_FK_OperatingSystem_getrows(vector <class Row_InstallWizard_Distro_pschmask*> *rows)
-{
-PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
-
-class Table_InstallWizard_Distro_pschmask *pTable = table->database->InstallWizard_Distro_pschmask_get();
-pTable->GetRows("`FK_OperatingSystem`=" + StringUtils::itos(m_PK_OperatingSystem),rows);
-}
 void Row_OperatingSystem::Package_Compat_FK_OperatingSystem_getrows(vector <class Row_Package_Compat*> *rows)
 {
 PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
 
 class Table_Package_Compat *pTable = table->database->Package_Compat_get();
-pTable->GetRows("`FK_OperatingSystem`=" + StringUtils::itos(m_PK_OperatingSystem),rows);
-}
-void Row_OperatingSystem::Package_Compat_pschist_FK_OperatingSystem_getrows(vector <class Row_Package_Compat_pschist*> *rows)
-{
-PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
-
-class Table_Package_Compat_pschist *pTable = table->database->Package_Compat_pschist_get();
-pTable->GetRows("`FK_OperatingSystem`=" + StringUtils::itos(m_PK_OperatingSystem),rows);
-}
-void Row_OperatingSystem::Package_Compat_pschmask_FK_OperatingSystem_getrows(vector <class Row_Package_Compat_pschmask*> *rows)
-{
-PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
-
-class Table_Package_Compat_pschmask *pTable = table->database->Package_Compat_pschmask_get();
 pTable->GetRows("`FK_OperatingSystem`=" + StringUtils::itos(m_PK_OperatingSystem),rows);
 }
 void Row_OperatingSystem::Package_Directory_FK_OperatingSystem_getrows(vector <class Row_Package_Directory*> *rows)
@@ -1072,34 +1002,6 @@ PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
 class Table_Package_Directory_File *pTable = table->database->Package_Directory_File_get();
 pTable->GetRows("`FK_OperatingSystem`=" + StringUtils::itos(m_PK_OperatingSystem),rows);
 }
-void Row_OperatingSystem::Package_Directory_File_pschist_FK_OperatingSystem_getrows(vector <class Row_Package_Directory_File_pschist*> *rows)
-{
-PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
-
-class Table_Package_Directory_File_pschist *pTable = table->database->Package_Directory_File_pschist_get();
-pTable->GetRows("`FK_OperatingSystem`=" + StringUtils::itos(m_PK_OperatingSystem),rows);
-}
-void Row_OperatingSystem::Package_Directory_File_pschmask_FK_OperatingSystem_getrows(vector <class Row_Package_Directory_File_pschmask*> *rows)
-{
-PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
-
-class Table_Package_Directory_File_pschmask *pTable = table->database->Package_Directory_File_pschmask_get();
-pTable->GetRows("`FK_OperatingSystem`=" + StringUtils::itos(m_PK_OperatingSystem),rows);
-}
-void Row_OperatingSystem::Package_Directory_pschist_FK_OperatingSystem_getrows(vector <class Row_Package_Directory_pschist*> *rows)
-{
-PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
-
-class Table_Package_Directory_pschist *pTable = table->database->Package_Directory_pschist_get();
-pTable->GetRows("`FK_OperatingSystem`=" + StringUtils::itos(m_PK_OperatingSystem),rows);
-}
-void Row_OperatingSystem::Package_Directory_pschmask_FK_OperatingSystem_getrows(vector <class Row_Package_Directory_pschmask*> *rows)
-{
-PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
-
-class Table_Package_Directory_pschmask *pTable = table->database->Package_Directory_pschmask_get();
-pTable->GetRows("`FK_OperatingSystem`=" + StringUtils::itos(m_PK_OperatingSystem),rows);
-}
 void Row_OperatingSystem::Package_Source_Compat_FK_OperatingSystem_getrows(vector <class Row_Package_Source_Compat*> *rows)
 {
 PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
@@ -1107,39 +1009,11 @@ PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
 class Table_Package_Source_Compat *pTable = table->database->Package_Source_Compat_get();
 pTable->GetRows("`FK_OperatingSystem`=" + StringUtils::itos(m_PK_OperatingSystem),rows);
 }
-void Row_OperatingSystem::Package_Source_Compat_pschist_FK_OperatingSystem_getrows(vector <class Row_Package_Source_Compat_pschist*> *rows)
-{
-PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
-
-class Table_Package_Source_Compat_pschist *pTable = table->database->Package_Source_Compat_pschist_get();
-pTable->GetRows("`FK_OperatingSystem`=" + StringUtils::itos(m_PK_OperatingSystem),rows);
-}
-void Row_OperatingSystem::Package_Source_Compat_pschmask_FK_OperatingSystem_getrows(vector <class Row_Package_Source_Compat_pschmask*> *rows)
-{
-PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
-
-class Table_Package_Source_Compat_pschmask *pTable = table->database->Package_Source_Compat_pschmask_get();
-pTable->GetRows("`FK_OperatingSystem`=" + StringUtils::itos(m_PK_OperatingSystem),rows);
-}
 void Row_OperatingSystem::RepositorySource_FK_OperatingSystem_getrows(vector <class Row_RepositorySource*> *rows)
 {
 PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
 
 class Table_RepositorySource *pTable = table->database->RepositorySource_get();
-pTable->GetRows("`FK_OperatingSystem`=" + StringUtils::itos(m_PK_OperatingSystem),rows);
-}
-void Row_OperatingSystem::RepositorySource_pschist_FK_OperatingSystem_getrows(vector <class Row_RepositorySource_pschist*> *rows)
-{
-PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
-
-class Table_RepositorySource_pschist *pTable = table->database->RepositorySource_pschist_get();
-pTable->GetRows("`FK_OperatingSystem`=" + StringUtils::itos(m_PK_OperatingSystem),rows);
-}
-void Row_OperatingSystem::RepositorySource_pschmask_FK_OperatingSystem_getrows(vector <class Row_RepositorySource_pschmask*> *rows)
-{
-PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
-
-class Table_RepositorySource_pschmask *pTable = table->database->RepositorySource_pschmask_get();
 pTable->GetRows("`FK_OperatingSystem`=" + StringUtils::itos(m_PK_OperatingSystem),rows);
 }
 

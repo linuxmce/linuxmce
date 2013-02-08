@@ -1,0 +1,21 @@
+Source: libsdl
+Priority: extra
+Maintainer: LinuxMCE Developer <developers@linuxmce.org>
+Build-Depends: debhelper (>= 8.0.0), libsdl-ttf2.0-dev, libsdl-gfx1.2-dev, libsdl-image1.2-dev
+Standards-Version: 3.9.2
+Section: libs
+Homepage: http://www.linuxmce.org
+
+Package: libsdl-dev
+Section: libdevel
+Architecture: any
+Depends: libsdl (= ${binary:Version})
+Description: <insert up to 60 chars description>
+ <insert long description, indented with spaces>
+
+Package: libsdl
+Section: libs
+Architecture: any
+Depends: ${shlibs:Depends}, ${misc:Depends}
+Description: <insert up to 60 chars description>
+ <insert long description, indented with spaces>

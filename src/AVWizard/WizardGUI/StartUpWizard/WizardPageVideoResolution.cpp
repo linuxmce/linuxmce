@@ -45,6 +45,7 @@ WizardPageVideoResolution::~WizardPageVideoResolution(void)
 	WizardWidgetScrollList* List = dynamic_cast<WizardWidgetScrollList*> (Page->GetChildRecursive("ResolutionScroll"));
 	std::string ResolutionValue = List->GetSelectedValue();
 	std::string ResolutionName  = List->GetSelectedName();
+	std::string ResolutionRatio = List->GetSelectedRatio();
 	std::cout<<"Selected resolution is: "<< ResolutionValue << "(" << ResolutionName << ")" ;
 
 	List = dynamic_cast<WizardWidgetScrollList*> (Page->GetChildRecursive("RefreshScroll"));
@@ -62,6 +63,7 @@ WizardPageVideoResolution::~WizardPageVideoResolution(void)
 	Dictionary->Set("Resolution", ResolutionValue);
 	Dictionary->Set("Refresh", RefreshValue);
 	Dictionary->Set("VideoOutput", VideoConnectorValue);
+	Dictionary->Set("Ratio",ResolutionRatio);
 
 	std::string Cmd = SkinGenerator::Instance()->CommandChangeResolution + " '" + ResolutionValue
 		+ "' '" + RefreshValue + "' '" + VideoConnectorValue +"' '" + ResolutionName +"'";
@@ -79,11 +81,15 @@ WizardPageVideoResolution::~WizardPageVideoResolution(void)
 
 	// Fill connector select list
 	WizardWidgetScrollList *List = dynamic_cast<WizardWidgetScrollList*> (Page->GetChildRecursive("VideoConnectorScroll"));
-	List->AddItem("VGA", "VGA");
-	List->AddItem("DVI/HDMI", "DVI");
-	List->AddItem("Component", "Component");
-	List->AddItem("Composite", "Composite");
-	List->AddItem("S-Video","S-Video");
+	List->AddItem("VGA", "VGA","");
+	List->AddItem("VGA 2", "VGA-2","");
+	List->AddItem("DVI/HDMI", "DVI","");
+	List->AddItem("DVI/HDMI 2", "DVI-2","");
+	List->AddItem("HDMI", "HDMI-0","");
+	List->AddItem("LVDS", "LVDS","");
+	List->AddItem("Component", "Component","");
+	List->AddItem("Composite", "Composite","");
+	List->AddItem("S-Video","S-Video","");
 	if(AVWizardSettings->Exists("VideoOutput")) {
 		std::string VideoConnectorValue = AVWizardSettings->GetValue("VideoOutput");
 		List->SetItemIndex(VideoConnectorValue);
@@ -130,7 +136,11 @@ void WizardPageVideoResolution::FillResolutionStandard(WizardWidgetScrollList* L
 	switch (FillType) {
 		default:
 		case 0: // VGA
-		case 1: // DVI
+		case 1: // VGA 2
+		case 2: // DVI
+		case 3: // DVI 2
+		case 4: // HDMI-0
+		case 5: // LVDS
 		{
 			ResolutionConf ResCnf("/usr/pluto/share/Resolutions.conf");
 			ResResolutionVector ResolutionVector;
@@ -145,31 +155,31 @@ void WizardPageVideoResolution::FillResolutionStandard(WizardWidgetScrollList* L
 				string Label = Resolution.Name;
 				if (Resolution.AspectRatio != "")
 					Label += " (" + Resolution.AspectRatio + ")";
-				List->AddItem(Label, Resolution.Name);
+				List->AddItem(Label, Resolution.Name, Resolution.AspectRatio);
 			}
 		}
 			break;
-		case 2: // Component
-			List->AddItem("HD480p", "480p");
-			List->AddItem("HD720p", "720p");
-			List->AddItem("HD1080i", "1080i");
+		case 6: // Component
+			List->AddItem("HD480p", "480p","4:3");
+			List->AddItem("HD720p", "720p","16:9");
 #if 0
-			List->AddItem("HD1080p", "1080p");
+			List->AddItem("HD1080i", "1080i","16:9");
+			List->AddItem("HD1080p", "1080p","16:9");
 #endif
 			break;
-		case 3: // Composite
-		case 4:	// S-Video
-			List->AddItem("PAL-B", "640x480");
-			List->AddItem("PAL-D", "640x480");
-			List->AddItem("PAL-G", "640x480");
-			List->AddItem("PAL-H", "640x480");
-			List->AddItem("PAL-I", "640x480");
-			List->AddItem("PAL-K1", "640x480");
-			List->AddItem("PAL-M", "640x480");
-			List->AddItem("PAL-N", "640x480");
-			List->AddItem("PAL-NC", "640x480");
-			List->AddItem("NTSC-J", "640x480");
-			List->AddItem("NTSC-M", "640x480");
+		case 7: // Composite
+		case 8:	// S-Video
+			List->AddItem("PAL-B", "640x480","4:3");
+			List->AddItem("PAL-D", "640x480","4:3");
+			List->AddItem("PAL-G", "640x480","4:3");
+			List->AddItem("PAL-H", "640x480","4:3");
+			List->AddItem("PAL-I", "640x480","4:3");
+			List->AddItem("PAL-K1", "640x480","4:3");
+			List->AddItem("PAL-M", "640x480","4:3");
+			List->AddItem("PAL-N", "640x480","4:3");
+			List->AddItem("PAL-NC", "640x480","4:3");
+			List->AddItem("NTSC-J", "640x480","4:3");
+			List->AddItem("NTSC-M", "640x480","4:3");
 			break;
 	}
 
@@ -182,19 +192,24 @@ void WizardPageVideoResolution::FillRefresh(WizardWidgetScrollList* List, const 
 	switch(FillType) {
 		default:
 		case 0: // VGA
-		case 1: // DVI
-			List->AddItem("50 Hz", "50");
-			List->AddItem("60 Hz", "60");
-			List->AddItem("65 Hz", "65");
-			List->AddItem("70 Hz", "70");
-			List->AddItem("75 Hz", "75");
-			List->AddItem("80 Hz", "80");
-			List->AddItem("85 Hz", "85");
+		case 1: // VGA 2
+		case 2: // DVI
+		case 3: // DVI 2
+		case 4: // HDMI-0
+			List->AddItem("24 Hz", "24","");
+			List->AddItem("50 Hz", "50","");
+			List->AddItem("60 Hz", "60","");
+			List->AddItem("65 Hz", "65","");
+			List->AddItem("70 Hz", "70","");
+			List->AddItem("75 Hz", "75","");
+			List->AddItem("80 Hz", "80","");
+			List->AddItem("85 Hz", "85","");
 			List->SetItemIndex(1);
 			break;
-		case 2: // Component
-		case 3: // Composite
-		case 4:	// S-Video
+		case 5: // LVDS
+		case 6: // Component
+		case 7: // Composite
+		case 8:	// S-Video
 			break;
 	}
 }

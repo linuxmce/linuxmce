@@ -80,6 +80,7 @@ void Row_DeviceTemplate_AV::Delete()
 	Row_DeviceTemplate_AV *pRow = this; // Needed so we will have only 1 version of get_primary_fields_assign_from_row
 	
 	if (!is_deleted)
+	{
 		if (is_added)	
 		{	
 			vector<TableRow*>::iterator i;	
@@ -101,6 +102,7 @@ void Row_DeviceTemplate_AV::Delete()
 			table->deleted_cachedRows[key] = this;
 			is_deleted = true;	
 		}	
+	}
 }
 
 void Row_DeviceTemplate_AV::Reload()
@@ -163,7 +165,8 @@ is_null[14] = true;
 m_psc_user = 0;
 m_psc_frozen = 0;
 is_null[15] = false;
-is_null[16] = true;
+m_psc_mod = "0000-00-00 00:00:00";
+is_null[16] = false;
 is_null[17] = true;
 m_psc_restrict = 0;
 
@@ -300,9 +303,6 @@ return is_null[14];}
 bool Row_DeviceTemplate_AV::psc_frozen_isNull() {PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
 
 return is_null[15];}
-bool Row_DeviceTemplate_AV::psc_mod_isNull() {PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
-
-return is_null[16];}
 bool Row_DeviceTemplate_AV::psc_restrict_isNull() {PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
 
 return is_null[17];}
@@ -326,10 +326,6 @@ is_modified=true;
 }
 void Row_DeviceTemplate_AV::psc_frozen_setNull(bool val){PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
 is_null[15]=val;
-is_modified=true;
-}
-void Row_DeviceTemplate_AV::psc_mod_setNull(bool val){PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
-is_null[16]=val;
 is_modified=true;
 }
 void Row_DeviceTemplate_AV::psc_restrict_setNull(bool val){PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
@@ -449,8 +445,8 @@ PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
 if (is_null[8])
 return "NULL";
 
-char *buf = new char[9];
-db_wrapper_real_escape_string(table->database->m_pDB, buf, m_NumericEntry.c_str(), (unsigned long) min((size_t)4,m_NumericEntry.size()));
+char *buf = new char[25];
+db_wrapper_real_escape_string(table->database->m_pDB, buf, m_NumericEntry.c_str(), (unsigned long) min((size_t)12,m_NumericEntry.size()));
 string s=string()+"\""+buf+"\"";
 delete[] buf;
 return s;

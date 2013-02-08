@@ -1,0 +1,89 @@
+dnl Process this file with autoconf to produce a configure script.
+
+AC_INIT(pluto-fuse-smb.c)
+dnl Every other copy of the package version number gets its value from here
+AM_INIT_AUTOMAKE(pluto-fuse-smb, 0.1)
+
+dnl create a config.h file (Automake will add -DHAVE_CONFIG_H)
+AM_CONFIG_HEADER(config.h)
+
+AC_SUBST(VERSION)
+AC_DEFINE(_FILE_OFFSET_BITS,64,[Use 64 bits file offsets])
+AC_DEFINE(FUSE_USE_VERSION,22,[Fuse API Version])
+
+
+# $prefix stores the value of the --prefix command line option, or
+# NONE if the option wasn't set.  In the case that it wasn't set, make
+# it be the default, so that we can use it to expand directories now.
+if test "x$prefix" = "xNONE"; then
+  prefix=$ac_default_prefix
+fi
+
+# and similarly for $exec_prefix
+if test "x$exec_prefix" = "xNONE"; then
+  exec_prefix=$prefix
+fi
+
+
+AC_ARG_ENABLE(debug,AC_HELP_STRING([--enable-debug],
+                                  [Turn debugging options on]),
+            [])
+
+if [[ "x$enable_debug" = "xyes" ]]; then
+  CFLAGS="$CFLAGS -Wall -W -g -O0"
+else
+  CFLAGS="$CFLAGS -Wall -W -g -O2"
+fi
+
+ISODATE=`date +%Y-%m-%d`
+AC_SUBST(ISODATE)
+
+AC_CANONICAL_HOST
+
+dnl Checks for programs.
+AC_PROG_INSTALL
+AC_PROG_CC
+AC_CHECK_PROG(NMBLOOKUP,nmblookup,yes,no)
+test $NMBLOOKUP = no && AC_MSG_ERROR([Please install nmblookup.])
+
+dnl Checks for libraries.
+
+dnl Checks for header files.
+AC_HEADER_STDC
+AC_CHECK_HEADERS(stdio.h  string.h  stdlib.h  stddef.h  errno.h  fcntl.h  dirent.h  sys/param.h  sys/vfs.h pthread.h )
+AC_CHECK_HEADERS(fuse.h,, AC_MSG_ERROR([Please install fuse header files.]))
+AC_CHECK_HEADERS(libsmbclient.h,, AC_MSG_ERROR([Please install libsmbclient header files.]))
+AC_CACHE_CHECK([whether libsmbclient has close or close_fn],
+               [ac_cv_libsmbclient_has_close_fn],
+               [AC_TRY_COMPILE([
+#include <libsmbclient.h>
+               ],[
+SMBCCTX *ctx;
+SMBCFILE *file;
+ctx->close_fn(ctx, file);
+               ],
+               ac_cv_libsmbclient_has_close_fn=yes,
+               ac_cv_libsmbclient_has_close_fn=no)])
+
+if test $ac_cv_libsmbclient_has_close_fn = yes; then
+  AC_DEFINE(HAVE_LIBSMBCLIENT_CLOSE_FN, [], 
+            [New close function for libsmbclient >= 3.0.20])
+fi
+
+#jm_CHECK_TYPE_STRUCT_UTIMBUF
+#AC_HEADER_MAJOR
+#AC_FUNC_ALLOCA
+#AC_STRUCT_TM
+AC_STRUCT_ST_BLOCKS
+#AC_FUNC_CLOSEDIR_VOID
+#AC_CHECK_FUNCS(mkfifo)
+#AC_CHECK_FUNC(mknod)
+
+dnl Checks for typedefs, structures, and compiler characteristics.
+
+dnl Checks for library functions.
+AC_CHECK_LIB(smbclient, smbc_new_context,, AC_MSG_ERROR([Please install libsmbclient >= 3.0.1 first.]))
+AC_CHECK_LIB(pthread, pthread_create,, AC_MSG_ERROR([Please install pthreads library first.]))
+AC_CHECK_LIB(fuse, fuse_main,, AC_MSG_ERROR([Please install libfuse >= 1.1 first.]))
+
+AC_OUTPUT(Makefile)

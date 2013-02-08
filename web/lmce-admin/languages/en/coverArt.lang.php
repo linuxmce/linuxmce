@@ -1,0 +1,34 @@
+<?
+$TEXT_COVERART_CONST='Cover Art';
+$TEXT_SHOW_ALL_FILES_CONST='Show all files';
+$TEXT_SHOW_FILES_NO_COVERART_CONST='Show Files With no cover art';
+$TEXT_SHOW_ALL_DISCS_CONST='Show all discs';
+$TEXT_SHOW_DISCS_WITH_NO_COVER_ART_CONST='Show Discs With no cover art';
+$TEXT_SHOW_FILES_NO_COVERART_CONST='Show Files With no cover art';
+$TEXT_SHOW_ALL_ATTRIBUTES_CONST='Show all attributes';
+$TEXT_SHOW_ALL_ATTRIBUTES_WITH_NO_COVER_ART_CONST='Show attributes with no cover art';
+$TEXT_MATCH_FILES_TO_COVER_ART_CONST='Match files/discs/attributes to cover art';
+$TEXT_KEYWORDS_CONST='Keywords';
+$TEXT_ITEM_CONST='Item';
+$TEXT_FILTERS_CONST='Filters';
+$TEXT_SELECT_ALL_CONST='Select all';
+$TEXT_UNSELECT_ALL_CONST='Unselect all';
+$TEXT_SCAN_FOR_COVER_ARTS_CONST='Scan for cover arts';
+$TEXT_ITEMS_SCANNED_CONST='Items scanned';
+$TEXT_ITEMS_PER_PAGE_CONST='Items per page';
+$TEXT_MEDIA_TYPE_CONST='Media types';
+$TEXT_NO_RECORDS_CONST='No records';
+$TEXT_MATCHCOVERART_CONST='Match Cover Art';
+$TEXT_COVER_ARTS_UPDATED_CONST='Cover arts updated';
+$TEXT_GET_AMAZON_ATTRIBUTES_CONST='Get Amazon attributes & cover art';
+$TEXT_GET_IMDB_ATTRIBUTES_CONST='Get IMDB attributes & cover art';
+$TEXT_AMAZON_KEYWORD_CONST='Amazon keyword';
+$TEXT_IMDB_KEYWORD_CONST='IMDB keyword';
+$TEXT_FILENAME_CONST='Filename';
+$TEXT_WARNING_AUTOMATIC_GRAB_ACTIVE_CONST='Automatic script who retrieve coverarts from Amazon is working. You can stop it at any time or let it finish then match the results.';
+$TEXT_SEARCH_FOR_PATH_CONST='Search for path';
+$TEXT_AND_OR_FILENAME_CONST='and/or filename';
+$TEXT_REMOVE_EXISTING_COVERARTS_CONST='Remove existing cover arts';
+$TEXT_RECORDS_PER_PAGE_EXCEEDED_CONST='The number of records per page should be between 1-100';
+$TEXT_INCLUDE_AMAZON_ATTRIBUTES_CONST='Include Amazon attributes';
+?>

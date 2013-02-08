@@ -1,0 +1,11 @@
+#!/bin/sh
+
+set -e
+
+if [ ! -e /dev/.devfsd ] ; then
+cd /dev && /sbin/MAKEDEV dvb
+fi
+
+#DEBHELPER#
+
+exit 0

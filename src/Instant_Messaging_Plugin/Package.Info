@@ -1,9 +1,0 @@
-<-dceag-p-b->
-Package = DCE_Destination_Package
-Dir = 
-desc = DCE Implemenation for #1958 Instant Messaging Plugin
-Maintainer = thomasName
-Email = 
-Depend = DCE_Dependencies
-<-dceag-p-e->
-

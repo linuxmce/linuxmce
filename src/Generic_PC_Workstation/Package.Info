@@ -1,8 +1,8 @@
 <-dceag-p-b->
 Package = DCE_Destination_Package
 Dir = 
-desc = DCE Implemenation for #1953 Generic PC Workstation
-Maintainer = thomasName
+desc = DCE Implemenation for #1956 Generic PC Workstation
+Maintainer = thomName
 Email = 
 Depend = DCE_Dependencies
 <-dceag-p-e->

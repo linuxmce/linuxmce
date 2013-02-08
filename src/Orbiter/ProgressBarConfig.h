@@ -1,0 +1,13 @@
+#ifndef PROGRESS_BAR_CONFIG
+#define PROGRESS_BAR_CONFIG
+
+//progress bar custom settings
+#define PROGRESS_MAX 100
+#define PROGRESS_OPTIMAL_SIZE 300
+#define PROGRESS_UPDATE_STEP 10
+#define PROGRESS_BOTTOM_DISTANCE 100
+#define PROGRESS_HEIGHT 20
+#define TEXT_TOP_X 50
+#define TEXT_TOP_Y 50
+
+#endif /*PROGRESS_BAR_CONFIG*/

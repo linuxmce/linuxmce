@@ -92,10 +92,10 @@ WizardPageUISwitcher::~WizardPageUISwitcher(void)
 #endif
 	WizardWidgetScrollList* List = dynamic_cast<WizardWidgetScrollList*> (Page->GetChildRecursive("UIScroll"));
 //<-mkr_B_via_b->
-	List->AddItem("Static images, no overlay (lightweight)", "UI1");
-	List->AddItem("OpenGL with overlay (medium)", "UI2_med");
+	List->AddItem("Static images, no overlay (lightweight)", "UI1","4:3");
+	List->AddItem("OpenGL with overlay (medium)", "UI2_med","16:9");
 //<-mkr_B_via_e->
-	List->AddItem("OpenGL with alpha blending (high-end)", "UI2_hi");
+	List->AddItem("OpenGL with alpha blending (high-end)", "UI2_hi","16:9");
 	List->SetFocus(true);
 	
 	if (AVWizardSettings->Exists("UIVersionIndex"))

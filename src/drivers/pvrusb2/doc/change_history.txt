@@ -1,3 +1,746 @@
+
+[pvrusb2-mci-20091031]
+
+  (+) Bind I2C address 0x71 for Zilog IR devices (needed specifically
+      for HVR-1950).
+
+  (+) Shorten hardware descriptive text to fit in too-small V4L API
+      buffer.  (This was not a showstopper problem - the driver never
+      overran the buffer but just correctly truncated the contents.)
+
+  (+) Support use of larger FX2 16KB firmware.
+
+[pvrusb2-mci-20091011]
+
+  (+) Log a description of the hardware when the driver is associated
+      with said hardware.
+
+  (+) Include hardware description in sysfs debuginfo output.
+
+  (+) Implement some additional logic during initialization to
+      differentiate between failures due to jammed hardware vs
+      failures due to missing / messed up sub-device kernel modules.
+      This should result in slightly more useful kernel messages about
+      the problem.
+
+  (+) Include patch from Mike Krufky to "disable the tda18271 slave
+      tuner output / loop thru options when in low power mode" (this
+      is specific to HVR-1950 and is only relevant for kernel 2.6.32
+      or later).
+
+[pvrusb2-mci-20090919]
+
+  (+) Minor internal changes that track ongoing changes within
+      v4l-dvb.
+
+  (+) Associate all pvrusb2-driven V4L device nodes in sysfs with the
+      underlying USB device.  This allows udev to see the hardware
+      device properties, which in turn makes possible customization of
+      the V4L device node setup via rules added to udev.  Note that
+      this implementation only works for kernels back to 2.6.24 -
+      before that point the feature is disabled because I cannot find
+      a way to cleanly break the V4L->USB device association when the
+      USB device goes away before the V4L device (a fact of life in a
+      hotplug environment).
+
+[pvrusb2-mci-20090626]
+
+  (+) Fix compilation issue in pvrusb2-devattr.c for kernels older
+      than 2.6.31.  An earlier tweak there relies on a struct change
+      that only appears in kernel 2.6.31 (or v4l-dvb).  Conditionalize
+      the change appropriate to the environment.
+
+  (+) Enable DVB usage in the standalone driver when compiling under
+      kernels 2.6.26 or later.  Previously this was only enabled when
+      building against v4l-dvb.  Without this change, support for the
+      digital side of the HVR-1950/HVR-1900 would have been missing.
+      Several people have gotten hit by this but I had failed to
+      realize the root cause - that the DVB portions of the pvrusb2
+      driver were simply disabled - until now.  D'Oh!!!
+
+[pvrusb2-mci-20090616]
+
+  (+) Fix problem involving correct determination of undefined audio /
+      video routing.  Routing tables for various chips are sparse
+      arrays but their "sparseness" was incorrectly set up.  With this
+      change we can now handle detection of undefined routing setup.
+
+  (+) Change default television frequency to US broadcast channel 3
+      (previously was 7).  This has zero impact on apps; it only helps
+      with my own testing.  With the phase out of OTA analog
+      television in the US, the previous value became useless to me.
+      I have to set some kind of default here, so I might as well
+      choose something useful (which in this case corresponds to my
+      analog RF modulator).
+
+  (+) Initialize VBI for cx25840 any time the video standard is
+      changed.  This is because the VBI initialization code in the
+      cx25840 appears to use aspects of the video standard as input so
+      we want to make sure that this code runs any time the standard
+      is changed.  No, this does not enable use of VBI; it is a
+      further refinement on the video scaling bug fix.
+
+  (+) Fix horizontal video scaling bug involving analog capture where
+      a cx25840 is used.  This is an old bug - previously fixed back
+      in Nov 2006 (video was being distorted / corrupted for
+      horizontal resolutions other than 720 pixels).  The problem was
+      that the fix had been rendered ineffective by other changes.
+      VBI is now initialized in the cx25840 driver only after the chip
+      has been initialized (fixes 24xxx) and again after any time the
+      chip is reset (fixes HVR-1950).
+
+  (+) Additional tweaks to HVR-1900 device configuration having to do
+      with I/F frequencies in the tuner (from Steve Toth).
+
+  (+) Instantiate ir_video I2C device by default - basically change
+      the default value of the "disable_autoload_ir_video" option to
+      zero.
+
+[pvrusb2-mci-20090509]
+
+  (+) Configuration tweaks from Steve Toth for Hauppauge HVR-1900.
+
+  (+) Implement experimental support for Terratec Grabster AV400.
+      This is very experimental; I am including this so that others
+      can test and help improve things.  I strongly suspect that since
+      this does not include any help for the CS5340 that I'm told is
+      on the board that audio might still not quite be right...
+      Credit goes to Andrea Venturis, Tobias Seiler, and Dave Craig
+      for providing the critical details to make this possible.
+
+  (+) Remove use of usb_settoggle(); this is no longer available with
+      later kernels.
+
+  (+) Attempt to autoload ir-kbd (v4l-dvb's module for some IR
+      receivers) where appropriate.  Note!  This is new behavior and
+      may interfere if lirc was being used.  A new module option is
+      defined to suppress this: disable_autoload_ir_kbd.  It is
+      entirely possible that this option may disappear in the future,
+      if/when lirc is updated to operate with the new i2c binding
+      mechanism.  For now, we default this option to "1", i.e. we
+      won't try to autoload anything to handle IR.
+
+  (+) Include configuration data to select and track actual IR scheme
+      in use.  This change includes reporting of the IR scheme in use
+      via the driver's debug info output.
+
+  (+) Correctly initialize v4l2_routing structures everywhere.  This
+      wasn't causing a problem, but this is the sort of thing that
+      should be cleaned up.
+
+  (+) Account for various API changes related to v4l2-subdev changes
+      since 2.6.29 kernel.
+
+  (+) Fix unitialized struct element during tuner setup.  Stack
+      allocated foreign struct instances should always be memset() to
+      zero in order to guard against fields being added later (and
+      thus being left uninitialized).  This bug was causing bogus agc
+      warnings from the tuner module when using an HVR-1950.  This bug
+      has also been around for a very long time.
+
+  (+) In sysfs, show default values symbolically, same as current
+      values, where appropriate.
+
+  (+) Fix longstanding bug (since Aug 2008) that caused corrupted
+      values to be returned for control default values when the
+      control is not an integer.  Actually that bug propagated from
+      another bug dating back to Apr 2006 where default values for
+      non-integer valued controls was always returning zero.
+
+[pvrusb2-mci-20090315]
+
+  (+) Various miscellaneous tweaks to preserve reasonably correct
+      compilation for older kernels (test compiled back to 2.6.12.3).
+
+  (+) Implement and enable composite and s-video inputs for OnAir
+      devices.
+
+  (+) Remove ancient IVTV_IOC_G_CODEC and IVTV_IOC_S_CODEC ioctl
+      functions.  These are very very old, were non-standard, and were
+      only present to keep MythTV happy (their implementation did
+      nothing except to report success).  That was long ago; no recent
+      versions of MythTV should require this anymore.
+
+  (+) MAJOR: Implement a new client modules layer, based upon the
+      v4l2-subdev framework.  Note that this is only active in the
+      standalone driver when building against v4l-dvb or in a kernel
+      that is 2.6.29 or later.  The v4l-dvb core has a new mechanism
+      known as "v4l2-subdev".  This is a whole new method for finding,
+      attaching to, and communicating with all the various chip-level
+      drivers.  This is the "official" way of controlling all the
+      "sub-drivers" now.  This is also expected to be required
+      starting with kernel 2.6.30 (i.e. support for the old i2c
+      specific mechanism will be removed).  The pvrusb2 standalone
+      driver for now still has the old method implemented alongside
+      the new one - compile time options select which method to build
+      depending on the environment (i.e. kernel version).  So
+      backwards compatibility for now is not affected and the driver
+      should _in theory_ continue to work all the way back to 2.6.12
+      (conditioned of course on the other various things mentioned in
+      the setup documentation).  But at some point in the future, I
+      expect it will become too cumbersome to keep both methods
+      working, at which point I will remove the old method and the
+      standalone driver will then no longer directly support kernels
+      older than approximately 2.6.29 (the point when the v4l2-subdev
+      mechanism first became workable and resident in the mainline
+      kernel).
+
+  (+) Fix build so that V4LDIR trick works again for building against
+      v4l-dvb.
+
+  (+) Use usb_make_path (where possible) to report device bus
+      location.  This produces a more stable result than what had been
+      done before.
+
+[pvrusb2-mci-20090115]
+
+  (+) Stop advertising VBI capability through the V4L interface.  It's
+      never been supported by this driver.
+
+  (+) Fix build breakage for 2.6.28
+
+  (+) Changes to hopefully support 2.6.29
+
+  (+) Issue VIDIOC_INT_INIT when modules first bind to the driver.
+      This is needed because cx25840 in particular now depends on
+      being told to initialize.
+
+[pvrusb2-mci-20081019]
+
+  (+) Fix deadlock problem that started with kernel 2.6.27.x.  New
+      behavior in this kernel causes a USB disconnect if a USB device
+      reset is requested by the driver.  Previously there was no
+      disconnect and the driver retained control of the device.  The
+      pvrusb2 driver, as controlled by the initusbreset option, can
+      trigger such a reset as part of device initialization - and
+      I've had this enabled by default.  Unfortunately now with a
+      disconnect taking place, then the driver ends up cleaning up and
+      then starting over with the next connect - and then triggering
+      another reset.  Worse still, the USB core is issuing the
+      disconnect callback in the same thread context as the thread
+      which requested the reset, which results in a recursive lock
+      entry inside the pvrusb2 driver, thus setting up the deadlock
+      problem.  Once in this state, the only way out is a reboot.
+      Really, the function of "initusbreset" amounted to "chicken
+      soup" anyway; it didn't hurt and might help.  So this fix simply
+      removes the function.  It is no longer possible to automatically
+      reset the device on initialization.  The change is conditioned
+      on the kernel version, so if you build against a kernel older
+      than 2.6.27 then the option (for what it's worth) will still be
+      present.
+
+  (+) Implement a minor tweak to the mpeg encoder programming to
+      hopefully keep PTSes from "drifting away".  This fix was
+      discovered empirically by Boris Dores.
+
+[pvrusb2-mci-20080831]
+
+  (+) Disable "virtual" IR receiver on for 24xxx devices that have an
+      internal IR blaster.  In that case there's another another IR
+      receiver present and to leave the virtual receiver available
+      just causes confusion.  This means that 24xxx users will no
+      longer see a phantom IR chip.
+
+  (+) Plumbing added to support cropping.  Note that this will only
+      work if corresponding support exists and works in cx25840.ko or
+      saa7115.ko (depending on the device you have).  Credit to
+      Servaas Vandenberghe for laying the groundwork for this.  Access
+      is implemented for both the normal V4L ioctl interface published
+      by the driver and sysfs.
+
+  (+) Implement "def_val" in sysfs interface.  Controls already
+      support default values, this makes those values visible in
+      sysfs.
+
+  (+) Detect and trap attempts to use an "alien" USB ID.  The driver
+      expects a descriptor associated with the USB ID; if that
+      descriptor is missing, print a message and fail.  This can
+      happen if the user tries to insert a new USB ID via sysfs -
+      without this change the driver can otherwise cause an oops.
+
+  (+) Various minor tweaks to keep up with the surrounding kernel and
+      v4l-dvb environment.
+
+  (+) Add USB ID 2040:2950 - this is a really old 29xxx device.  It
+      lacks and IR receiver but is otherwise functionally identical to
+      the 2040:2900 device.  Since the IR detection for this device is
+      a separate action anyway, we can safely alias the 2950 id to
+      2900.
+
+[pvrusb2-mci-20080725]
+
+  (+) Include v4l2-ioctl.h when kernel is 2.6.27 or later.  This is a
+      critical change to support kernel 2.6.27.
+
+  (+) Rework lots of odds and ends to maintain the ability to build
+      old kernels in spite of what has changed in the v4l-dvb
+      repository.  At this point v4l-dvb apparently no longer supports
+      kernels older than 2.6.16.  This driver however *should* still
+      compile and function in at least a limited fashion for kernels
+      going back to 2.6.12, provided the documentation's instructions
+      for setup are followed for such kernels.
+
+  (+) For HVR-1950, the IR chip is held in reset at powerup.
+      Implement a small change to ensure that the chip has been
+      released from reset.
+
+[pvrusb2-mci-20080629]
+
+  (+) Select an appropriate GOP size value for the video standard in
+      effect and set it when the video standard is changed.  This is
+      not a big stretch from what the driver had already been doing
+      with the vertical capture resolution.
+
+  (+) Track changes to cx2341x API (fixes compilation issue for kernel
+      versions 2.6.27 or later).
+
+  (+) Port hardware name and description nodes over to legacy sysfs
+      implementation from the more recent sysfs implementation.
+
+  (+) Increase duration of enforced encoder "quiet period" from 50msec
+      to 100msec.  This seems to improve the odds that the encoder
+      will correctly start streaming.
+
+  (+) Implement tv_freq and radio_freq module options.  These set the
+      initial default TV and radio frequencies upon initialization.
+      Under normal use one does not care about this (since the app is
+      always going to set these anyway); this is however useful for
+      debugging.
+
+  (+) Rework pvrusb2-sysfs.c to eliminate a giant pile of hacked up
+      crap that dates from the early days of the driver.  Back then
+      the kernel's class device mechanism did not have a means for
+      passing per-attribute information so an ugly thunking mechanism
+      had been implemented as a workaround.  These days we use the
+      kernel's device mechanism which had been enhanced to handle
+      sysfs classes - and with that we can pass per attribute info.
+      So remove all the gunk and clean this up.
+
+[pvrusb2-mci-20080420]
+
+  (+) Enable FM radio support for "Gotview USB2.0 DVD 2".
+
+  (+) Implement new mechanism to enforce input choices depending on
+      interface being used.  An interface can now declare what inputs
+      it will handle, and the driver core will enforce it - possibly
+      doing a mode switch as a result.  Thus the DVB interface will
+      only handle the dtv input, the v4l radio interface will only
+      handle the radio input, and the v4l video interface will handle
+      all except the dtv input.  Hopefully further in the future it
+      will become possible to stream digital over v4l or mpeg-encoded
+      analog streams over dvb; then these constraints will be relaxed.
+      But for now the outward effect is that digital streaming will be
+      automatic when DVB is used and analog streaming (via mpeg data)
+      will be automatic when V4L is used.  This is a significant
+      change, as this finally enables full use of supported hybrid
+      devices in digital mode.  (Though at the moment, the set of such
+      devices is rather small.)
+
+  (+) Apparently the kernel developers no longer consider it proper
+      etiquette to use __FUNCTION__; everyone must instead use
+      __func__ (even though it breaks with older compilers).  And
+      worse still, actual effort is being expended to sweep this
+      change throughout the kernel source tree.  Don't these people
+      have better things to do?  So... completely clean out all use of
+      __FUNCTION__ from the pvrusb2 driver (it was just in the sysfs
+      interface).  I'm not going to use __func__ either.  So there.
+
+  (+) Fix build so that DVB interface build can succeed when using the
+      V4LDIR trick to perform a standalone driver build against a
+      v4l-dvb repository.
+
+  (+) Fix connect / disconnect race.  The driver wasn't properly
+      sequencing disconnects against connects.  Said another way, if a
+      disconnect happens while the driver is still initializing, then
+      Bad Things can happen.  The fix uses a lock to sequence this
+      properly, and does a check at the top of initialization (after
+      entering the lock) to ensure that the USB core is still
+      connected.
+
+  (+) Fix race on module unload.  Absolutely amazing that this bug
+      apparently went undetected since the early days of the driver.
+      ALL references into the pvrusb2 module must be gone before
+      pvr_exit() can be allowed to return.  That includes any running
+      kernel threads, however previously the driver wasn't tracking
+      kernel thread lifetime at all.  This could lead to an oops if a
+      thread was still cleaning up after the module exit function
+      returns.  Fixing this required rewriting a large fraction of
+      pvrusb2-context.c.  The good news however is that now the driver
+      only needs one control thread instead of one control thread per
+      instance.  (However there is still a worker thread per
+      instance.)
+
+  (+) Implement streaming quirk for OnAir: Ensure that encoder has run
+      for at least 1/4 second before digital streaming is attempted.
+      This was determined through experimentation.  And while this
+      seemingly simple requirement should be easy to do, it wasn't
+      because we also had to account for cases where the encoder's
+      firmware might get reloaded or on the off-chance that any
+      previous streaming in analog mode didn't meet the 1/4 second
+      minimum.  Plus we still have to recover if that quick attempt to
+      run the encoder happens to fail.  So a number of state machine
+      changes were needed.  This is all keyed by setting the OnAir
+      digital streaming scheme in the device attribute table.
+
+  (+) New device attribute defined to indicate that the encoder is
+      required to be healthy in order to do digital streaming.
+      Normally the encoder should only be needed for analog streaming,
+      but at least one case (OnAir) has been identified where the
+      encoder still has to be able to do stuff before digital
+      streaming can start.  If this attribute is set, then the device
+      will require encoder firmware before it will stream anything.
+
+  (+) Fix stuck feed thread in new (still experimental) DVB interface.
+      If the device fails to stream, the feed thread will block
+      forever waiting for buffers.  But while in this state it was not
+      looking for an exit condition from the driver DVB interface.
+      This caused the thread to jam.
+
+  (+) Add digital streaming definitions for Hauppauge 75xxx models
+      (new hardware coming up).  Also define additional USB IDs for
+      this device.
+
+  (+) Add digital streaming definitions for OnAir hardware.
+
+  (+) Rework code which starts / stops USB streaming.  Previous
+      mechanism assumed too much about the device type.  This helps
+      streaming with OnAir.
+
+  (+) Implement some new infrastructure for sending simple FX2
+      commands.  This allows more intelligent handling / logging of
+      such commands and simplifies everyone else that can use it now.
+
+  (+) Implement logic to collect USB buffering statistics.  Output can
+      be seen by cat'ing debugcmd or debuginfo (which also triggers
+      entries into the kernel log) via sysfs.
+
+  (+) Tuner type tweaks in pvrusb2-devattr.c for OnAir, needed for new
+      v4l-dvb snapshots (and kernels in the future).
+
+  (+) Merge in a new DVB interface.  No, this is not ready for
+      prime-time yet.  Compilation of this interface is controlled by
+      the variable CONFIG_PVRUSB2_VIDEO_DVB, which is kept off for the
+      standalone build.  For now.  Coordination between the DVB
+      interface and the rest of the driver is not quite entirely there
+      yet.
+
+  (+) Add USB IDs for new Hauppauge devices (73xxx and 75xxx).
+
+  (+) Set default video standard for OnAir devices to NTSC.
+
+  (+) Fix various compilation warnings caused by a shifting kernel
+      environment.  Clean up a spelling error or two as well.  Fix
+      some C99-questionable constructs too.
+
+[pvrusb2-mci-20080210]
+
+  (+) Completely rework context handling and initialization.  A new
+      kernel thread is created per-instance to manage overall device
+      state.  Hardware initialization is moved into this thread.
+      Initialization of all interfaces now happens in the context of
+      this thread.  Previously these two steps took place in the
+      context of a work queue item, but that could cause a deadlock if
+      the initialization code itself needed another work queue item to
+      run (e.g. core state change).  The deadlock risk for this is
+      actually zero since no interfaces try this, but there's a new
+      interface coming which might need to operate some driver
+      controls during initialization.  Interface tear-down and
+      notification updates also happen through this new thread.  Also
+      with the use of this new thread, the master context mutex is no
+      longer required during interface initialization, which solves a
+      very very longstanding mutex deadlock race (task 1 grabs mutex A
+      then B while task 2 grabs mutex B then A) during driver
+      initialization.  Nobody I know of has ever actually been
+      directly burned by this, but the kernel's own mutex deadlock
+      detector can find it.  Short summary: New kernel thread has been
+      introduced to manage overall driver instance handling and this
+      solves a number of nagging (though currently benign but later to
+      be malignant) issues.
+
+  (+) Close a potential (but improbable) timer race during driver
+      instance tear-down.  This could have caused a kernel oops,
+      though I've never gotten an actual report of this happening.
+
+  (+) Close a potential (but extremely unlikely) thread race during
+      initialization.
+
+  (+) Increase staging buffer size for code which prints video
+      standard strings.  There's enough possible combinations now that
+      the previous buffer wasn't large enough.  (The buffer printing
+      code tracks available size so this wasn't an overrun problem,
+      just truncated text.)
+
+[pvrusb2-mci-20080208]
+
+  (+) Enable support for "GOTVIEW USB2.0 DVD Deluxe" hardware.
+
+  (+) Device attribute structure is entirely read-only and is intended
+      to be compact.  It does not exist in any context involving user
+      application access nor can it be touched in any external manner
+      which might be sensitive to packing order.  Therefore, shrink
+      the space used by switching enumerations to char type and using
+      single bit fields for flag items.
+
+  (+) Abstract LED control out so that it can be handled as a
+      device-specific attribute.
+
+  (+) Allow digital streaming to work even if the encoder firmware
+      could not be loaded (because the encoder is not in the digital
+      streaming path so it does not matter if the encoder is working
+      or not).
+
+  (+) Lots of new generic control logic implemented to handle
+      streaming from a digital source.  This is a major change.  None
+      of this is actually in use yet - these changes just lay the
+      foundation for digital streaming control.
+
+  (+) Fix oops in stream allocation logic (not possible in V4L
+      interface, was found while debugging a new interface).
+
+[pvrusb2-mci-20080120]
+
+  (+) Improve input selection logic so that only selections which make
+      sense are made available.  For example, if the device doesn't
+      have an FM radio, then there's no radio choice.  Similarly, if
+      the device doesn't have a digital tuner, then no dtv choice
+      either.  This determination is made for all input choices where
+      known.  Device attributes are used to control this.
+
+  (+) Foundation laid for new input choice: dtv.  This eventually will
+      play a role in supporting devices that also have a digital
+      tuner.
+
+  (+) Implement analog support for Hauppauge HVR-1950.
+
+  (+) Implement experimental support for the OnAir Creator and older
+      OnAir USB2 tuners.  These are hybrid devices.  Support here
+      however is currently limited to just the analog side.  Only
+      television input has been successfully tested, so far.
+
+  (+) Fix Gotview misconfiguation - mark that a cx25840 is in use
+      there.  This has implications in various parts of the driver
+      that must adjust to the presence of that chip.
+
+[pvrusb2-mci-20071202]
+
+  (+) Recognize and print out video standard mask bit values for ATSC
+      standards.  (This is currently of no real use, but will likely
+      play a part if/when we start handling hybrid devices.)
+
+  (+) Remove use of volatile for various bits of state that might be
+      shared across threads.  I have become convinced that such use of
+      volatile should not be required here.
+
+  (+) Fix critical 1-character typo in logic which attempts to make
+      available PAL-D1 for PAL-D/K devices.  Patch from Roel Kluin
+      <12o3l@tiscali.nl>.
+
+  (+) Implement the ability to set up a default video standard based
+      on detected device type.
+
+[pvrusb2-mci-20071124]
+
+  (+) Enable support for "GOTVIEW USB2.0 DVD2" hardware.
+
+[pvrusb2-mci-20071122]
+
+  (+) Add device_hardware_type and device_hardware_description nodes
+      to the sysfs interface.  Reading these files will return a
+      single token (for device_hardware_type) or a one line
+      description (for device_hardware_description), based on the
+      actual device type being operated.
+
+  (+) Collect all information that describes specific device types and
+      move it all into a single module (pvrusb2-devattr.c).  No more
+      scattered logic that tries to adjust behavior on perceived
+      device type.  Instead, a central descriptor contains information
+      about device attributes which is then used through the driver to
+      tailor the correct behavior.
+
+  (+) Implement concept of device-specific audio / video routing
+      scheme.  It is possible now to specify the signal routing scheme
+      as part of the device description - making possible support of
+      other devices which use different routing schemes.
+
+[pvrusb2-mci-20071116]
+
+Note: This driver version implements a massive pile of changes mostly
+having to do with control of the streaming pipeline.  This is the
+largest amount of churn since the 20051231 snapshot back in Dec 2005
+when the I2C module control mechanism was reworked.  I have however
+beat on the driver quite a bit and it looks very solid.  The most
+obvious outward effect of these changes is that video corruption now
+should be far far more difficult to cause.  Maybe it's completely gone
+now (I can no longer cause it to corrupt at all.)  Thanks go to Hans
+Verkuil, who provided me with the key clues here that resulted in
+these changes.  But with all that said, this is a big block of changes
+and I definitely want to hear if people see any new problems crop up.
+(I'd also like to hear if people actually see any improvements too.)
+
+  (+) Rip out subsystem style pipeline control logic and replace it
+      with separate independent state machines, one per bit of state
+      being managed.  Each bit of state tracks one aspect of the
+      pipeline and each state machine manages that bit of state
+      autonomously, according to surrounding driver state and input
+      from the controls and pipeline streaming state.
+
+  (+) Implement additional state control to correctly prevent
+      streaming from initiating if there's no associated digitizer
+      chip-level driver.  And automatically recover if/when the driver
+      in fact does later on appear.
+
+  (+) Move kernel thread operation from surrounding pvrusb2 context
+      structure and place it directly in the driver core.  Along the
+      way, discover and fix a race condition that could cause a kernel
+      oops on driver removal (this has been there all along).
+
+  (+) Move all pipeline control into the kernel thread.  Operation of
+      streaming start / stop now happens in the kernel thread context
+      and not in any process context from an app.  To start / stop
+      streaming, an app now sets a request bit and waits for the
+      kernel thread to act on the request.
+
+  (+) Split apart control update such that the actual update / commit
+      now takes place in the kernel thread - synchronized with the
+      pipeline control.  This enables far better control of when/how
+      control changes are reflected into the hardware.
+
+  (+) Implement a 50 msec timer to determine when the video digitizer
+      has quiesced after being stopped.  The kernel thread now uses
+      this (via the afore-mentioned state machines) to ensure that the
+      encoder won't be configured until the digitizer is known to be
+      "quiet".  Hans Verkuil has discovered that it is not safe to
+      initialize the encoder until (a) the digitizer is not streaming
+      and (b) the digitizer has been idle for at least 1 frame time.
+      Since we can't easily measure a frame time, the driver just
+      assumes the worst case and measures 50msec.
+
+  (+) Implement another 50 msec timer to enforce a short idle interval
+      just before the encoder is configured.  I was still able to
+      (very rarely) see corrupted video even with the previously
+      mentioned "wait for the digitizer to be quiescent" fix.  This
+      change enforces a much more strict delay - the kernel thread
+      won't even try to touch the encoder until the hardware has been
+      basically not messed with for 50 msec.  With this change I am no
+      longer able to trigger video corruption at all.  I suspect that
+      with this change, the other 50msec timer can be eliminated, but
+      for the moment I am leaving both in place.
+
+  (+) The cx2341x module can notice certain classes of control changes
+      that are not safe while the encoder is running.  The driver now
+      obeys this case - when it happens, the kernel thread will handle
+      it by temporarily shutting down the pipeline, then it will
+      execute the control changes and start the stream up again.
+      Under most cases the entire sequence should happen in a fraction
+      of a second.  NOTE: This change is only of benefit if the driver
+      has been compiled to use the cx2341x module, and that only will
+      happen if the driver is built under kernel 2.6.18 or later (or
+      as part of the v4l-dvb distribution under any 2.6.x kernel
+      supported there).
+
+  (+) Permit the driver to still be partially functional even if the
+      cx23416 firmware could not be located.  Obviously streaming
+      won't work in this case, but now it is possible to reach the
+      driver through sysfs and use it, for example, to capture the fx2
+      firmware.
+
+[pvrusb2-mci-20071104]
+
+  (+) Fix kernel oops involving sysfs support when unloading the
+      driver.  This problem was triggered by change over to the new
+      /sys/class mechanism
+
+  (+) Fix minor bug which affected handling of token lists with
+      certain controls.  This issue has been around for quite a while;
+      nobody noticed it until a kernel janitor audited the code.
+
+[pvrusb2-mci-20071013]
+
+  (+) Additional logic to attempt a better job at tracking the health
+      of the mpeg2 encoder chip.
+
+  (+) Stop handling I2C_M_NOSTART flag; this is deprecated and going
+      away.
+
+  (+) Get rid of use of USB_DEVICE(0,0), seems to break gcc in some
+      cases.  Yes, this appears to be a compiler bug!
+
+  (+) Internal list handling cleanup from Trent Piepho (slight
+      performance improvement, code maintenance improvement).
+
+  (+) The kernel-approved method for handling /sys/class changed a
+      while back (around 2.6.19, usage of struct class_device -->
+      changes to struct device).  While the "old" way still works as
+      of 2.6.22, it is on its way out and we here have to move
+      forward.  Unfortunately the needed changes break compatibility
+      with older kernels.  To deal with that here, I've forked the
+      pvrusb2-sysfs module such that the older version will be built
+      if the kernel target is older than 2.6.22.  For anything newer,
+      the newer pvrusb2-sysfs implementation will be compiled.  Note:
+      An implication of this is that when using the in-V4L driver (not
+      the standalone or in-kernel versions), the sysfs interface will
+      no longer be supported at all for kernels older than roughly
+      2.6.19.
+
+[pvrusb2-mci-20070828]
+
+  (+) Do a better job at guessing the initial video standard to set,
+      based upon which standards the device reports it can be handle.
+      Also log this information with a separate debug mask control
+      bit.
+
+  (+) Fix oops that might happen if a devices fails to correctly
+      initialize (missing a null pointer check).
+
+  (+) Improve code which discriminates device types, so that it will
+      be easier to add other types.  This is just a minor cleanup, not
+      a refactoring.
+
+  (+) Implement programmatic mechanism to allow direct retrieval of
+      device ROM contents.
+
+  (+) Update use of cx2341x module to match changed API for kernel
+      2.6.24 or later or when built against v4l-dvb.
+
+[pvrusb2-mci-20070428a]
+
+  (+) Fix compilation breakage for kernels older than 2.6.16 (bug was
+      introduced in previous snapshot).
+
+[pvrusb2-mci-20070428]
+
+  (+) Implement module option to prevent IR reception on a per
+      instance basis.  This is useful in situations where there are
+      multiple tuners and we only want to designate one tuner as the
+      one with the IR receiver.
+
+  (+) Implement a few encoder tweaks to better support PAL-60.
+      Changes are from Servaas Vandenberghe.
+
+  (+) Stop using sysfs class attribute owner fields for kernels newer
+      than 2.6.21.  This is apparently no longer needed for newer
+      kernsl and kernel developers are trying to get rid of this
+      entanglement.
+
+  (+) Fix build issue in 2.6.21; a feature had been patched in that I
+      had not expected until 2.6.22.  Thanks to Mark Brand for
+      spotting and fixing this.
+
+  (+) Reorganize pvrusb2-options.h a bit for better maintainability.
+
+  (+) Convert usage of a semaphore into a mutex (a mutex is more
+      efficient).  This comes from a kernel janitor.
+
+[pvrusb2-mci-20070407]
+
+  (+) Added bus_info_str sysfs item which will show a string
+      representation of the USB path / address of the connected
+      device.  Modified VIDIOC_QUERYCAP to also report this string in
+      the bus_info structure element returned.
+
+  (+) Some minor benign fixes for issues detected by the sparse tool
+     (change instances of 0 to NULL).
+
 [pvrusb2-mci-20070227]
 
   (+) Pulled up a pile of minor changes from V4L, including a compat.h

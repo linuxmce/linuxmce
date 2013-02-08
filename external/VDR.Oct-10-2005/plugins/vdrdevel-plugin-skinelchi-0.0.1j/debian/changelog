@@ -1,0 +1,100 @@
+vdrdevel-plugin-skinelchi (0.0.1j-10) unstable; urgency=low
+
+  * VDR-1.3.34
+  * Upgraded 95_vdrdevel.dpatch to version 0.1.4
+
+ -- Thomas Günther <tom@toms-cafe.de>  Tue,  4 Oct 2005 00:21:47 +0200
+
+vdrdevel-plugin-skinelchi (0.0.1j-9) unstable; urgency=low
+
+  * VDR-1.3.33
+
+ -- Thomas Günther <tom@toms-cafe.de>  Mon, 26 Sep 2005 01:49:15 +0200
+
+vdrdevel-plugin-skinelchi (0.0.1j-8) unstable; urgency=low
+
+  * VDR-1.3.32
+  * Added 02_skinelchi-1.3.32.dpatch
+  * Upgraded 95_vdrdevel.dpatch to version 0.1.3
+
+ -- Thomas Günther <tom@toms-cafe.de>  Tue, 13 Sep 2005 20:36:19 +0200
+
+vdrdevel-plugin-skinelchi (0.0.1j-7) unstable; urgency=low
+
+  * VDR-1.3.31
+  * Use dependencies.sh from vdr-dev to set vdr dependencies and
+    conflicts
+  * Bumped Standards-Version to 3.6.2
+  * Upgraded 95_vdrdevel.dpatch to version 0.1.2
+
+ -- Thomas Günther <tom@toms-cafe.de>  Thu,  1 Sep 2005 03:51:28 +0200
+
+vdrdevel-plugin-skinelchi (0.0.1j-6) unstable; urgency=low
+
+  * VDR-1.3.30
+
+ -- Thomas Günther <tom@toms-cafe.de>  Mon, 22 Aug 2005 20:07:18 +0200
+
+vdrdevel-plugin-skinelchi (0.0.1j-5) unstable; urgency=low
+
+  * VDR-1.3.29
+
+ -- Thomas Günther <tom@toms-cafe.de>  Sat, 20 Aug 2005 16:52:41 +0200
+
+vdrdevel-plugin-skinelchi (0.0.1j-4) unstable; urgency=low
+
+  * VDR-1.3.28
+
+ -- Thomas Günther <tom@toms-cafe.de>  Mon,  8 Aug 2005 03:24:56 +0200
+
+vdrdevel-plugin-skinelchi (0.0.1j-3) unstable; urgency=low
+
+  * VDR-1.3.27
+
+ -- Thomas Günther <tom@toms-cafe.de>  Tue, 21 Jun 2005 00:21:19 +0200
+
+vdrdevel-plugin-skinelchi (0.0.1j-2) unstable; urgency=low
+
+  * VDR-1.3.26
+  * Upgraded 95_vdrdevel.dpatch to version 0.1.0
+
+ -- Thomas Günther <tom@toms-cafe.de>  Fri, 17 Jun 2005 12:49:52 +0200
+
+vdrdevel-plugin-skinelchi (0.0.1j-1) unstable; urgency=low
+
+  * New upstream release downloaded from
+    http://vdrportal.de/board/thread.php?postid=290971#post290971
+  * Removed fix-for-DisplayTracks patch (integrated in upstream)
+  * Adapted epgimage-path patch to new upstream release
+  * Added fix-transparent patch
+  * Added epgpicture-fix-test patch
+  * Added skinelchi-1.3.25.dpatch
+  * Remove default theme in debian/postinst and debian/postrm
+  * Upgraded 95_vdrdevel.dpatch to version 0.0.9
+
+ -- Thomas Günther <tom@toms-cafe.de>  Wed,  1 Jun 2005 23:29:01 +0200
+
+vdrdevel-plugin-skinelchi (0.0.1i-3) unstable; urgency=low
+
+  * VDR-1.3.24
+
+ -- Thomas Günther <tom@toms-cafe.de>  Tue, 10 May 2005 02:41:37 +0200
+
+vdrdevel-plugin-skinelchi (0.0.1i-2) unstable; urgency=low
+
+  * Tobias Grimm <tg@e-tobi.net>
+    - Enabled imagemagick usage to display epg images
+    - Set link to allow usage of vdrdevel-xpmlogs and add this package to Suggests
+  * Thomas Günther <tom@toms-cafe.de>
+    - Added libmagick++-dev to Build-Depends (for woody)
+    - Added woody patch to make it compile with woody
+
+ -- Tobias Grimm <tg@e-tobi.net>  Sun,  3 Apr 2005 18:28:09 +0200
+
+vdrdevel-plugin-skinelchi (0.0.1i-1) unstable; urgency=low
+
+  * Initial Release.
+  * Added fix-for-DisplayTracks patch
+
+ -- Thomas Günther <tom@toms-cafe.de>  Thu, 31 Mar 2005 00:49:29 +0200
+

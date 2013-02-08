@@ -1,0 +1,9 @@
+#! /bin/sh
+set -e
+
+# Remove default theme
+if [ "$1" = "purge" ]; then
+    /bin/rm -f /var/lib/vdr/themes/Elchi_Plugin-change.theme
+fi
+
+#DEBHELPER#

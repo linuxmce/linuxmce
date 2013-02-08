@@ -1,0 +1,159 @@
+vdrdevel-plugin-control (0.0.2a-20) unstable; urgency=low
+
+  * VDR-1.3.34
+  * Upgraded 95_vdrdevel.dpatch to version 0.1.4
+
+ -- Thomas Günther <tom@toms-cafe.de>  Tue,  4 Oct 2005 00:21:38 +0200
+
+vdrdevel-plugin-control (0.0.2a-19) unstable; urgency=low
+
+  * VDR-1.3.33
+
+ -- Thomas Günther <tom@toms-cafe.de>  Mon, 26 Sep 2005 01:49:04 +0200
+
+vdrdevel-plugin-control (0.0.2a-18) unstable; urgency=low
+
+  * VDR-1.3.32
+  * Upgraded 95_vdrdevel.dpatch to version 0.1.3
+
+ -- Thomas Günther <tom@toms-cafe.de>  Tue, 13 Sep 2005 20:36:08 +0200
+
+vdrdevel-plugin-control (0.0.2a-17) unstable; urgency=low
+
+  * VDR-1.3.31
+  * Use dependencies.sh from vdr-dev to set vdr dependencies and
+    conflicts
+  * Bumped Standards-Version to 3.6.2
+  * Made debian/rules svn-buildpackage-save
+  * Upgraded 95_vdrdevel.dpatch to version 0.1.2
+
+ -- Thomas Günther <tom@toms-cafe.de>  Thu,  1 Sep 2005 03:51:22 +0200
+
+vdrdevel-plugin-control (0.0.2a-16) unstable; urgency=low
+
+  * VDR-1.3.30
+
+ -- Thomas Günther <tom@toms-cafe.de>  Mon, 22 Aug 2005 20:07:07 +0200
+
+vdrdevel-plugin-control (0.0.2a-15) unstable; urgency=low
+
+  * VDR-1.3.29
+
+ -- Thomas Günther <tom@toms-cafe.de>  Sat, 20 Aug 2005 16:52:29 +0200
+
+vdrdevel-plugin-control (0.0.2a-14) unstable; urgency=low
+
+  * VDR-1.3.28
+
+ -- Thomas Günther <tom@toms-cafe.de>  Mon,  8 Aug 2005 03:24:48 +0200
+
+vdrdevel-plugin-control (0.0.2a-13) unstable; urgency=low
+
+  * VDR-1.3.27
+
+ -- Thomas Günther <tom@toms-cafe.de>  Tue, 21 Jun 2005 00:21:08 +0200
+
+vdrdevel-plugin-control (0.0.2a-12) unstable; urgency=low
+
+  * VDR-1.3.26
+  * Upgraded 95_vdrdevel.dpatch to version 0.1.0
+
+ -- Thomas Günther <tom@toms-cafe.de>  Fri, 17 Jun 2005 12:49:33 +0200
+
+vdrdevel-plugin-control (0.0.2a-11) unstable; urgency=low
+
+  * VDR-1.3.25
+  * Upgraded 95_vdrdevel.dpatch to version 0.0.9
+
+ -- Thomas Günther <tom@toms-cafe.de>  Mon, 30 May 2005 23:56:31 +0200
+
+vdrdevel-plugin-control (0.0.2a-10) unstable; urgency=low
+
+  * VDR-1.3.24
+
+ -- Thomas Günther <tom@toms-cafe.de>  Tue, 10 May 2005 02:41:26 +0200
+
+vdrdevel-plugin-control (0.0.2a-9) unstable; urgency=low
+
+  * VDR-1.3.23
+
+ -- Thomas Günther <tom@toms-cafe.de>  Sun, 20 Mar 2005 23:27:19 +0100
+
+vdrdevel-plugin-control (0.0.2a-8) unstable; urgency=low
+
+  * VDR-1.3.22-4
+
+ -- Thomas Günther <tom@toms-cafe.de>  Thu, 10 Mar 2005 01:49:12 +0100
+
+vdrdevel-plugin-control (0.0.2a-7) unstable; urgency=low
+
+  * VDR-1.3.22
+
+ -- Thomas Günther <tom@toms-cafe.de>  Mon, 28 Feb 2005 02:41:51 +0100
+
+vdrdevel-plugin-control (0.0.2a-6) unstable; urgency=low
+
+  * VDR-1.3.21
+
+ -- Thomas Günther <tom@toms-cafe.de>  Tue, 15 Feb 2005 17:37:16 +0100
+
+vdrdevel-plugin-control (0.0.2a-5) unstable; urgency=low
+
+  * VDR-1.3.20
+  * Updated 95_vdrdevel.dpatch to version 0.0.8
+
+ -- Thomas Günther <tom@toms-cafe.de>  Tue,  8 Feb 2005 11:33:50 +0100
+
+vdrdevel-plugin-control (0.0.2a-4) unstable; urgency=low
+
+  * VDR-1.3.19
+  * Added control-1.3.18 patch
+  * Removed makefile patch
+  * Updated 95_vdrdevel.dpatch to version 0.0.7
+
+ -- Thomas Günther <tom@toms-cafe.de>  Tue, 25 Jan 2005 18:28:49 +0100
+
+vdrdevel-plugin-control (0.0.2a-3) unstable; urgency=low
+
+  * vdrdevel-1.3.17-5: changed patchlevel
+
+ -- Thomas Günther <tom@toms-cafe.de>  Mon,  3 Jan 2005 16:28:11 +0100
+
+vdrdevel-plugin-control (0.0.2a-2) unstable; urgency=low
+
+  * vdr -> vdrdevel
+  * Adapted patches for new dpatch >= 2.0.9
+  * Using debian/compat now
+  * Deactivated plugin options - using defaults port 2002 now
+
+ -- Thomas Günther <tom@toms-cafe.de>  Wed,  1 Dec 2004 20:09:22 +0100
+
+vdr-plugin-control (0.0.2a-2) unstable; urgency=low
+
+  * Added Makefile-fPIC-fix patch to fix potential FTBFS
+  * Adapted control file to alioth packages
+  * Using patchlevel.sh and custom control field "vdr-patchlevel"
+  * Removed debian/dirs
+
+ -- Tobias Grimm <tg@e-tobi.net>  Wed, 29 Sep 2004 21:20:00 +0200
+
+vdr-plugin-control (0.0.2a-1) unstable; urgency=low
+
+  * new upstream release
+  * added watch file
+  * recreated debian/rules
+
+ -- Tobias Grimm <tg@e-tobi.net>  Sun, 1 Aug 2004 15:15:00 +0200
+
+vdr-plugin-control (0.0.1-2) unstable; urgency=low
+
+  * changed default port number to 2005
+
+ -- Peter Siering <ps@ctmagazin.de>  Sun, 8 Feb 2004 11:00:00 +0200
+
+vdr-plugin-control (0.0.1-1) unstable; urgency=low
+
+  * integrated patchlevel info
+  * wrong preprocessor tokens in global.h fixed
+
+ -- Rene Bartsch <ml@bartschnet.de>  Tue, 28 Jan 2004 01:10:00 +0200

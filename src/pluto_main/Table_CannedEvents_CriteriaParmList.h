@@ -149,7 +149,8 @@ void psc_mod_set(string val);
 void psc_restrict_set(long int val);
 
 		
-		bool Comments_isNull();
+		bool Description_isNull();
+bool Comments_isNull();
 bool Parm_isNull();
 bool DefaultValue_isNull();
 bool ExtraInfo_isNull();
@@ -157,11 +158,11 @@ bool psc_id_isNull();
 bool psc_batch_isNull();
 bool psc_user_isNull();
 bool psc_frozen_isNull();
-bool psc_mod_isNull();
 bool psc_restrict_isNull();
 
 			
-		void Comments_setNull(bool val);
+		void Description_setNull(bool val);
+void Comments_setNull(bool val);
 void Parm_setNull(bool val);
 void DefaultValue_setNull(bool val);
 void ExtraInfo_setNull(bool val);
@@ -169,7 +170,6 @@ void psc_id_setNull(bool val);
 void psc_batch_setNull(bool val);
 void psc_user_setNull(bool val);
 void psc_frozen_setNull(bool val);
-void psc_mod_setNull(bool val);
 void psc_restrict_setNull(bool val);
 	
 	
@@ -189,8 +189,6 @@ class Row_CriteriaParmList* FK_CriteriaParmList_getrow();
 
 		// Return the rows in other tables with foreign keys pointing here
 		void CriteriaParm_FK_CannedEvents_CriteriaParmList_getrows(vector <class Row_CriteriaParm*> *rows);
-void CriteriaParm_pschist_FK_CannedEvents_CriteriaParmList_getrows(vector <class Row_CriteriaParm_pschist*> *rows);
-void CriteriaParm_pschmask_FK_CannedEvents_CriteriaParmList_getrows(vector <class Row_CriteriaParm_pschmask*> *rows);
 
 
 		// Setup binary serialization

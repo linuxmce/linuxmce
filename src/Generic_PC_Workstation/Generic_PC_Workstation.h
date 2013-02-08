@@ -17,22 +17,16 @@
 #ifndef Generic_PC_Workstation_h
 #define Generic_PC_Workstation_h
 
-//	DCE Implemenation for #1953 Generic PC Workstation
+//	DCE Implemenation for #1956 Generic PC Workstation
 
 #include "Gen_Devices/Generic_PC_WorkstationBase.h"
 //<-dceag-d-e->
 
-#include <X11/Xos.h>
-#include <X11/Xfuncs.h>
 #include <X11/Xlib.h>
-#include <X11/keysym.h>
-#include <X11/Xproto.h>
-#include <X11/Xutil.h>
-#include <X11/Xmu/Error.h>
-
+#include <X11/Xatom.h>
+#include <X11/cursorfont.h>
+#include <X11/Xmu/WinUtil.h>
 #include <X11/extensions/dpms.h>
-
-
 
 //<-dceag-decl-b->
 namespace DCE
@@ -45,6 +39,7 @@ namespace DCE
 		// Private methods
 public:
 		// Public member variables
+		Display *m_pDisplay;
 
 //<-dceag-const-b->
 public:
@@ -56,9 +51,6 @@ public:
 		virtual void ReceivedCommandForChild(DeviceData_Impl *pDeviceData_Impl,string &sCMD_Result,Message *pMessage);
 		virtual void ReceivedUnknownCommand(string &sCMD_Result,Message *pMessage);
 //<-dceag-const-e->
-
-		Display *dpy;
-
 
 //<-dceag-const2-b->
 		// The following constructor is only used if this a class instance embedded within a DCE Device.  In that case, it won't create it's own connection to the router
@@ -81,6 +73,8 @@ public:
 	bool DATA_Get_Dont_Detect_Serial_Devices();
 
 			*****EVENT***** accessors inherited from base class
+	void EVENT_On();
+	void EVENT_Off();
 
 			*****COMMANDS***** we need to implement
 	*/

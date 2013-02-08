@@ -1,0 +1,17 @@
+Source: qorbiter
+Section: unknown
+Priority: extra
+Maintainer: Langston <langstonius@langstonball.com>
+Build-Depends: debhelper (>= 8.0.0)
+Standards-Version: 3.9.2
+Homepage: http://www.linuxmce.org
+#Vcs-Git: git://git.debian.org/collab-maint/qorbiter.git
+#Vcs-Browser: http://git.debian.org/?p=collab-maint/qorbiter.git;a=summary
+
+Package: qorbiter
+Architecture: any
+Depends: ${shlibs:Depends},${misc:Depends},libqt4-declarative,libqt4-declarative-folderlistmodel,libqt4-declarative-gestures,libqt4-declarative-particles,libqt4-declarative-shaders,libqt4-xml,libqt4-network,libqt4-opengl,libqt4-gui,libqt4-core,libqt4-script,libqt4-sql,libqt4-xmlpatterns,libqtwebkit-qmlwebkitplugin
+Description: QML based Home automation frontend application.
+ QOrbiter, the QML based Home Automation frontend application 
+ for LinuxMCE, the open source Home Automation Platform.
+ Support for multiple skins, multimedia and more.

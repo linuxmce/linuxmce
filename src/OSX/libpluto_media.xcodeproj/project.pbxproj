@@ -1,0 +1,431 @@
+// !$*UTF8*$!
+{
+	archiveVersion = 1;
+	classes = {
+	};
+	objectVersion = 46;
+	objects = {
+
+/* Begin PBXBuildFile section */
+		95ABFD7515ACD2F40079029F /* Table_Attribute_Settings.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 95ABFD4A15ACD2F40079029F /* Table_Attribute_Settings.cpp */; };
+		95ABFD7615ACD2F40079029F /* Table_Attribute.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 95ABFD4B15ACD2F40079029F /* Table_Attribute.cpp */; };
+		95ABFD7715ACD2F40079029F /* Table_AttributeType.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 95ABFD4C15ACD2F40079029F /* Table_AttributeType.cpp */; };
+		95ABFD7815ACD2F40079029F /* Table_Bookmark.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 95ABFD4D15ACD2F40079029F /* Table_Bookmark.cpp */; };
+		95ABFD7915ACD2F40079029F /* Table_CoverArtScan.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 95ABFD4E15ACD2F40079029F /* Table_CoverArtScan.cpp */; };
+		95ABFD7A15ACD2F40079029F /* Table_CoverArtScanEntry.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 95ABFD4F15ACD2F40079029F /* Table_CoverArtScanEntry.cpp */; };
+		95ABFD7B15ACD2F40079029F /* Table_Disc_Attribute.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 95ABFD5015ACD2F40079029F /* Table_Disc_Attribute.cpp */; };
+		95ABFD7C15ACD2F40079029F /* Table_Disc_Users.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 95ABFD5115ACD2F40079029F /* Table_Disc_Users.cpp */; };
+		95ABFD7D15ACD2F40079029F /* Table_Disc.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 95ABFD5215ACD2F40079029F /* Table_Disc.cpp */; };
+		95ABFD7E15ACD2F40079029F /* Table_DiscLocation.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 95ABFD5315ACD2F40079029F /* Table_DiscLocation.cpp */; };
+		95ABFD7F15ACD2F40079029F /* Table_Download_Attribute.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 95ABFD5415ACD2F40079029F /* Table_Download_Attribute.cpp */; };
+		95ABFD8015ACD2F40079029F /* Table_Download.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 95ABFD5515ACD2F40079029F /* Table_Download.cpp */; };
+		95ABFD8115ACD2F40079029F /* Table_DownloadSource.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 95ABFD5615ACD2F40079029F /* Table_DownloadSource.cpp */; };
+		95ABFD8215ACD2F40079029F /* Table_File_Attribute.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 95ABFD5715ACD2F40079029F /* Table_File_Attribute.cpp */; };
+		95ABFD8315ACD2F40079029F /* Table_File_Users.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 95ABFD5815ACD2F40079029F /* Table_File_Users.cpp */; };
+		95ABFD8415ACD2F40079029F /* Table_File.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 95ABFD5915ACD2F40079029F /* Table_File.cpp */; };
+		95ABFD8515ACD2F40079029F /* Table_FileFormat.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 95ABFD5A15ACD2F40079029F /* Table_FileFormat.cpp */; };
+		95ABFD8615ACD2F40079029F /* Table_FileGroup.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 95ABFD5B15ACD2F40079029F /* Table_FileGroup.cpp */; };
+		95ABFD8715ACD2F40079029F /* Table_LongAttribute.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 95ABFD5C15ACD2F40079029F /* Table_LongAttribute.cpp */; };
+		95ABFD8815ACD2F40079029F /* Table_MediaProvider.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 95ABFD5D15ACD2F40079029F /* Table_MediaProvider.cpp */; };
+		95ABFD8915ACD2F40079029F /* Table_MediaSource.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 95ABFD5E15ACD2F40079029F /* Table_MediaSource.cpp */; };
+		95ABFD8A15ACD2F40079029F /* Table_MediaSubType.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 95ABFD5F15ACD2F40079029F /* Table_MediaSubType.cpp */; };
+		95ABFD8B15ACD2F40079029F /* Table_MediaType_AttributeType.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 95ABFD6015ACD2F40079029F /* Table_MediaType_AttributeType.cpp */; };
+		95ABFD8C15ACD2F40079029F /* Table_MediaType_FileFormat.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 95ABFD6115ACD2F40079029F /* Table_MediaType_FileFormat.cpp */; };
+		95ABFD8D15ACD2F40079029F /* Table_MediaType_MediaSource.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 95ABFD6215ACD2F40079029F /* Table_MediaType_MediaSource.cpp */; };
+		95ABFD8E15ACD2F40079029F /* Table_MediaType_MediaSubType.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 95ABFD6315ACD2F40079029F /* Table_MediaType_MediaSubType.cpp */; };
+		95ABFD8F15ACD2F40079029F /* Table_Picture_Attribute.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 95ABFD6415ACD2F40079029F /* Table_Picture_Attribute.cpp */; };
+		95ABFD9015ACD2F40079029F /* Table_Picture_Disc.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 95ABFD6515ACD2F40079029F /* Table_Picture_Disc.cpp */; };
+		95ABFD9115ACD2F40079029F /* Table_Picture_Download.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 95ABFD6615ACD2F40079029F /* Table_Picture_Download.cpp */; };
+		95ABFD9215ACD2F40079029F /* Table_Picture_File.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 95ABFD6715ACD2F40079029F /* Table_Picture_File.cpp */; };
+		95ABFD9315ACD2F40079029F /* Table_Picture.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 95ABFD6815ACD2F40079029F /* Table_Picture.cpp */; };
+		95ABFD9415ACD2F40079029F /* Table_Playlist.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 95ABFD6915ACD2F40079029F /* Table_Playlist.cpp */; };
+		95ABFD9515ACD2F40079029F /* Table_PlaylistEntry.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 95ABFD6A15ACD2F40079029F /* Table_PlaylistEntry.cpp */; };
+		95ABFD9615ACD2F40079029F /* Table_ProviderSource.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 95ABFD6B15ACD2F40079029F /* Table_ProviderSource.cpp */; };
+		95ABFD9715ACD2F40079029F /* Table_psc_media_batdet.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 95ABFD6C15ACD2F40079029F /* Table_psc_media_batdet.cpp */; };
+		95ABFD9815ACD2F40079029F /* Table_psc_media_bathdr.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 95ABFD6D15ACD2F40079029F /* Table_psc_media_bathdr.cpp */; };
+		95ABFD9915ACD2F40079029F /* Table_psc_media_batuser.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 95ABFD6E15ACD2F40079029F /* Table_psc_media_batuser.cpp */; };
+		95ABFD9A15ACD2F40079029F /* Table_psc_media_repset.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 95ABFD6F15ACD2F40079029F /* Table_psc_media_repset.cpp */; };
+		95ABFD9B15ACD2F40079029F /* Table_psc_media_schema.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 95ABFD7015ACD2F40079029F /* Table_psc_media_schema.cpp */; };
+		95ABFD9C15ACD2F40079029F /* Table_psc_media_tables.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 95ABFD7115ACD2F40079029F /* Table_psc_media_tables.cpp */; };
+		95ABFD9D15ACD2F40079029F /* Table_RipStatus.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 95ABFD7215ACD2F40079029F /* Table_RipStatus.cpp */; };
+		95ABFD9E15ACD2F40079029F /* Table_SearchToken_Attribute.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 95ABFD7315ACD2F40079029F /* Table_SearchToken_Attribute.cpp */; };
+		95ABFD9F15ACD2F40079029F /* Table_SearchToken.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 95ABFD7415ACD2F40079029F /* Table_SearchToken.cpp */; };
+		95ABFDA115ACD3060079029F /* TableRow.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 95ABFDA015ACD3060079029F /* TableRow.cpp */; };
+		95ABFDA515ACD31C0079029F /* Database_pluto_media.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 95ABFDA415ACD31C0079029F /* Database_pluto_media.cpp */; };
+		95ABFDA715ACD3320079029F /* mysql.h in Headers */ = {isa = PBXBuildFile; fileRef = 95ABFDA615ACD3320079029F /* mysql.h */; };
+		95ABFDA915ACD4280079029F /* libDCECommon.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 95ABFDA815ACD4280079029F /* libDCECommon.dylib */; };
+		95ABFDAB15ACD43F0079029F /* libmysqlclient.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 95ABFDAA15ACD43F0079029F /* libmysqlclient.dylib */; };
+/* End PBXBuildFile section */
+
+/* Begin PBXFileReference section */
+		95ABFD3015ACD1F50079029F /* libpluto_media.dylib */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.dylib"; includeInIndex = 0; path = libpluto_media.dylib; sourceTree = BUILT_PRODUCTS_DIR; };
+		95ABFD4A15ACD2F40079029F /* Table_Attribute_Settings.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = Table_Attribute_Settings.cpp; path = ../pluto_media/Table_Attribute_Settings.cpp; sourceTree = "<group>"; };
+		95ABFD4B15ACD2F40079029F /* Table_Attribute.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = Table_Attribute.cpp; path = ../pluto_media/Table_Attribute.cpp; sourceTree = "<group>"; };
+		95ABFD4C15ACD2F40079029F /* Table_AttributeType.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = Table_AttributeType.cpp; path = ../pluto_media/Table_AttributeType.cpp; sourceTree = "<group>"; };
+		95ABFD4D15ACD2F40079029F /* Table_Bookmark.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = Table_Bookmark.cpp; path = ../pluto_media/Table_Bookmark.cpp; sourceTree = "<group>"; };
+		95ABFD4E15ACD2F40079029F /* Table_CoverArtScan.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = Table_CoverArtScan.cpp; path = ../pluto_media/Table_CoverArtScan.cpp; sourceTree = "<group>"; };
+		95ABFD4F15ACD2F40079029F /* Table_CoverArtScanEntry.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = Table_CoverArtScanEntry.cpp; path = ../pluto_media/Table_CoverArtScanEntry.cpp; sourceTree = "<group>"; };
+		95ABFD5015ACD2F40079029F /* Table_Disc_Attribute.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = Table_Disc_Attribute.cpp; path = ../pluto_media/Table_Disc_Attribute.cpp; sourceTree = "<group>"; };
+		95ABFD5115ACD2F40079029F /* Table_Disc_Users.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = Table_Disc_Users.cpp; path = ../pluto_media/Table_Disc_Users.cpp; sourceTree = "<group>"; };
+		95ABFD5215ACD2F40079029F /* Table_Disc.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = Table_Disc.cpp; path = ../pluto_media/Table_Disc.cpp; sourceTree = "<group>"; };
+		95ABFD5315ACD2F40079029F /* Table_DiscLocation.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = Table_DiscLocation.cpp; path = ../pluto_media/Table_DiscLocation.cpp; sourceTree = "<group>"; };
+		95ABFD5415ACD2F40079029F /* Table_Download_Attribute.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = Table_Download_Attribute.cpp; path = ../pluto_media/Table_Download_Attribute.cpp; sourceTree = "<group>"; };
+		95ABFD5515ACD2F40079029F /* Table_Download.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = Table_Download.cpp; path = ../pluto_media/Table_Download.cpp; sourceTree = "<group>"; };
+		95ABFD5615ACD2F40079029F /* Table_DownloadSource.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = Table_DownloadSource.cpp; path = ../pluto_media/Table_DownloadSource.cpp; sourceTree = "<group>"; };
+		95ABFD5715ACD2F40079029F /* Table_File_Attribute.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = Table_File_Attribute.cpp; path = ../pluto_media/Table_File_Attribute.cpp; sourceTree = "<group>"; };
+		95ABFD5815ACD2F40079029F /* Table_File_Users.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = Table_File_Users.cpp; path = ../pluto_media/Table_File_Users.cpp; sourceTree = "<group>"; };
+		95ABFD5915ACD2F40079029F /* Table_File.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = Table_File.cpp; path = ../pluto_media/Table_File.cpp; sourceTree = "<group>"; };
+		95ABFD5A15ACD2F40079029F /* Table_FileFormat.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = Table_FileFormat.cpp; path = ../pluto_media/Table_FileFormat.cpp; sourceTree = "<group>"; };
+		95ABFD5B15ACD2F40079029F /* Table_FileGroup.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = Table_FileGroup.cpp; path = ../pluto_media/Table_FileGroup.cpp; sourceTree = "<group>"; };
+		95ABFD5C15ACD2F40079029F /* Table_LongAttribute.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = Table_LongAttribute.cpp; path = ../pluto_media/Table_LongAttribute.cpp; sourceTree = "<group>"; };
+		95ABFD5D15ACD2F40079029F /* Table_MediaProvider.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = Table_MediaProvider.cpp; path = ../pluto_media/Table_MediaProvider.cpp; sourceTree = "<group>"; };
+		95ABFD5E15ACD2F40079029F /* Table_MediaSource.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = Table_MediaSource.cpp; path = ../pluto_media/Table_MediaSource.cpp; sourceTree = "<group>"; };
+		95ABFD5F15ACD2F40079029F /* Table_MediaSubType.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = Table_MediaSubType.cpp; path = ../pluto_media/Table_MediaSubType.cpp; sourceTree = "<group>"; };
+		95ABFD6015ACD2F40079029F /* Table_MediaType_AttributeType.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = Table_MediaType_AttributeType.cpp; path = ../pluto_media/Table_MediaType_AttributeType.cpp; sourceTree = "<group>"; };
+		95ABFD6115ACD2F40079029F /* Table_MediaType_FileFormat.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = Table_MediaType_FileFormat.cpp; path = ../pluto_media/Table_MediaType_FileFormat.cpp; sourceTree = "<group>"; };
+		95ABFD6215ACD2F40079029F /* Table_MediaType_MediaSource.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = Table_MediaType_MediaSource.cpp; path = ../pluto_media/Table_MediaType_MediaSource.cpp; sourceTree = "<group>"; };
+		95ABFD6315ACD2F40079029F /* Table_MediaType_MediaSubType.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = Table_MediaType_MediaSubType.cpp; path = ../pluto_media/Table_MediaType_MediaSubType.cpp; sourceTree = "<group>"; };
+		95ABFD6415ACD2F40079029F /* Table_Picture_Attribute.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = Table_Picture_Attribute.cpp; path = ../pluto_media/Table_Picture_Attribute.cpp; sourceTree = "<group>"; };
+		95ABFD6515ACD2F40079029F /* Table_Picture_Disc.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = Table_Picture_Disc.cpp; path = ../pluto_media/Table_Picture_Disc.cpp; sourceTree = "<group>"; };
+		95ABFD6615ACD2F40079029F /* Table_Picture_Download.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = Table_Picture_Download.cpp; path = ../pluto_media/Table_Picture_Download.cpp; sourceTree = "<group>"; };
+		95ABFD6715ACD2F40079029F /* Table_Picture_File.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = Table_Picture_File.cpp; path = ../pluto_media/Table_Picture_File.cpp; sourceTree = "<group>"; };
+		95ABFD6815ACD2F40079029F /* Table_Picture.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = Table_Picture.cpp; path = ../pluto_media/Table_Picture.cpp; sourceTree = "<group>"; };
+		95ABFD6915ACD2F40079029F /* Table_Playlist.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = Table_Playlist.cpp; path = ../pluto_media/Table_Playlist.cpp; sourceTree = "<group>"; };
+		95ABFD6A15ACD2F40079029F /* Table_PlaylistEntry.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = Table_PlaylistEntry.cpp; path = ../pluto_media/Table_PlaylistEntry.cpp; sourceTree = "<group>"; };
+		95ABFD6B15ACD2F40079029F /* Table_ProviderSource.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = Table_ProviderSource.cpp; path = ../pluto_media/Table_ProviderSource.cpp; sourceTree = "<group>"; };
+		95ABFD6C15ACD2F40079029F /* Table_psc_media_batdet.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = Table_psc_media_batdet.cpp; path = ../pluto_media/Table_psc_media_batdet.cpp; sourceTree = "<group>"; };
+		95ABFD6D15ACD2F40079029F /* Table_psc_media_bathdr.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = Table_psc_media_bathdr.cpp; path = ../pluto_media/Table_psc_media_bathdr.cpp; sourceTree = "<group>"; };
+		95ABFD6E15ACD2F40079029F /* Table_psc_media_batuser.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = Table_psc_media_batuser.cpp; path = ../pluto_media/Table_psc_media_batuser.cpp; sourceTree = "<group>"; };
+		95ABFD6F15ACD2F40079029F /* Table_psc_media_repset.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = Table_psc_media_repset.cpp; path = ../pluto_media/Table_psc_media_repset.cpp; sourceTree = "<group>"; };
+		95ABFD7015ACD2F40079029F /* Table_psc_media_schema.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = Table_psc_media_schema.cpp; path = ../pluto_media/Table_psc_media_schema.cpp; sourceTree = "<group>"; };
+		95ABFD7115ACD2F40079029F /* Table_psc_media_tables.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = Table_psc_media_tables.cpp; path = ../pluto_media/Table_psc_media_tables.cpp; sourceTree = "<group>"; };
+		95ABFD7215ACD2F40079029F /* Table_RipStatus.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = Table_RipStatus.cpp; path = ../pluto_media/Table_RipStatus.cpp; sourceTree = "<group>"; };
+		95ABFD7315ACD2F40079029F /* Table_SearchToken_Attribute.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = Table_SearchToken_Attribute.cpp; path = ../pluto_media/Table_SearchToken_Attribute.cpp; sourceTree = "<group>"; };
+		95ABFD7415ACD2F40079029F /* Table_SearchToken.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = Table_SearchToken.cpp; path = ../pluto_media/Table_SearchToken.cpp; sourceTree = "<group>"; };
+		95ABFDA015ACD3060079029F /* TableRow.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = TableRow.cpp; path = ../pluto_media/TableRow.cpp; sourceTree = "<group>"; };
+		95ABFDA415ACD31C0079029F /* Database_pluto_media.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = Database_pluto_media.cpp; path = ../pluto_media/Database_pluto_media.cpp; sourceTree = "<group>"; };
+		95ABFDA615ACD3320079029F /* mysql.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = mysql.h; path = mysql/include/mysql.h; sourceTree = "<group>"; };
+		95ABFDA815ACD4280079029F /* libDCECommon.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libDCECommon.dylib; path = lib/libDCECommon.dylib; sourceTree = "<group>"; };
+		95ABFDAA15ACD43F0079029F /* libmysqlclient.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libmysqlclient.dylib; path = mysql/lib/libmysqlclient.dylib; sourceTree = "<group>"; };
+/* End PBXFileReference section */
+
+/* Begin PBXFrameworksBuildPhase section */
+		95ABFD2D15ACD1F50079029F /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				95ABFDA915ACD4280079029F /* libDCECommon.dylib in Frameworks */,
+				95ABFDAB15ACD43F0079029F /* libmysqlclient.dylib in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXFrameworksBuildPhase section */
+
+/* Begin PBXGroup section */
+		95ABFD2515ACD1F40079029F = {
+			isa = PBXGroup;
+			children = (
+				95ABFDA415ACD31C0079029F /* Database_pluto_media.cpp */,
+				95ABFD4515ACD2600079029F /* Libraries */,
+				95ABFD4315ACD25C0079029F /* Includes */,
+				95ABFD3115ACD1F50079029F /* Products */,
+			);
+			sourceTree = "<group>";
+		};
+		95ABFD3115ACD1F50079029F /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				95ABFD3015ACD1F50079029F /* libpluto_media.dylib */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+		95ABFD4315ACD25C0079029F /* Includes */ = {
+			isa = PBXGroup;
+			children = (
+				95ABFDA015ACD3060079029F /* TableRow.cpp */,
+				95ABFDA615ACD3320079029F /* mysql.h */,
+				95ABFD4615ACD26B0079029F /* Tables */,
+			);
+			name = Includes;
+			sourceTree = "<group>";
+		};
+		95ABFD4515ACD2600079029F /* Libraries */ = {
+			isa = PBXGroup;
+			children = (
+				95ABFDA815ACD4280079029F /* libDCECommon.dylib */,
+				95ABFDAA15ACD43F0079029F /* libmysqlclient.dylib */,
+			);
+			name = Libraries;
+			sourceTree = "<group>";
+		};
+		95ABFD4615ACD26B0079029F /* Tables */ = {
+			isa = PBXGroup;
+			children = (
+				95ABFD4A15ACD2F40079029F /* Table_Attribute_Settings.cpp */,
+				95ABFD4B15ACD2F40079029F /* Table_Attribute.cpp */,
+				95ABFD4C15ACD2F40079029F /* Table_AttributeType.cpp */,
+				95ABFD4D15ACD2F40079029F /* Table_Bookmark.cpp */,
+				95ABFD4E15ACD2F40079029F /* Table_CoverArtScan.cpp */,
+				95ABFD4F15ACD2F40079029F /* Table_CoverArtScanEntry.cpp */,
+				95ABFD5015ACD2F40079029F /* Table_Disc_Attribute.cpp */,
+				95ABFD5115ACD2F40079029F /* Table_Disc_Users.cpp */,
+				95ABFD5215ACD2F40079029F /* Table_Disc.cpp */,
+				95ABFD5315ACD2F40079029F /* Table_DiscLocation.cpp */,
+				95ABFD5415ACD2F40079029F /* Table_Download_Attribute.cpp */,
+				95ABFD5515ACD2F40079029F /* Table_Download.cpp */,
+				95ABFD5615ACD2F40079029F /* Table_DownloadSource.cpp */,
+				95ABFD5715ACD2F40079029F /* Table_File_Attribute.cpp */,
+				95ABFD5815ACD2F40079029F /* Table_File_Users.cpp */,
+				95ABFD5915ACD2F40079029F /* Table_File.cpp */,
+				95ABFD5A15ACD2F40079029F /* Table_FileFormat.cpp */,
+				95ABFD5B15ACD2F40079029F /* Table_FileGroup.cpp */,
+				95ABFD5C15ACD2F40079029F /* Table_LongAttribute.cpp */,
+				95ABFD5D15ACD2F40079029F /* Table_MediaProvider.cpp */,
+				95ABFD5E15ACD2F40079029F /* Table_MediaSource.cpp */,
+				95ABFD5F15ACD2F40079029F /* Table_MediaSubType.cpp */,
+				95ABFD6015ACD2F40079029F /* Table_MediaType_AttributeType.cpp */,
+				95ABFD6115ACD2F40079029F /* Table_MediaType_FileFormat.cpp */,
+				95ABFD6215ACD2F40079029F /* Table_MediaType_MediaSource.cpp */,
+				95ABFD6315ACD2F40079029F /* Table_MediaType_MediaSubType.cpp */,
+				95ABFD6415ACD2F40079029F /* Table_Picture_Attribute.cpp */,
+				95ABFD6515ACD2F40079029F /* Table_Picture_Disc.cpp */,
+				95ABFD6615ACD2F40079029F /* Table_Picture_Download.cpp */,
+				95ABFD6715ACD2F40079029F /* Table_Picture_File.cpp */,
+				95ABFD6815ACD2F40079029F /* Table_Picture.cpp */,
+				95ABFD6915ACD2F40079029F /* Table_Playlist.cpp */,
+				95ABFD6A15ACD2F40079029F /* Table_PlaylistEntry.cpp */,
+				95ABFD6B15ACD2F40079029F /* Table_ProviderSource.cpp */,
+				95ABFD6C15ACD2F40079029F /* Table_psc_media_batdet.cpp */,
+				95ABFD6D15ACD2F40079029F /* Table_psc_media_bathdr.cpp */,
+				95ABFD6E15ACD2F40079029F /* Table_psc_media_batuser.cpp */,
+				95ABFD6F15ACD2F40079029F /* Table_psc_media_repset.cpp */,
+				95ABFD7015ACD2F40079029F /* Table_psc_media_schema.cpp */,
+				95ABFD7115ACD2F40079029F /* Table_psc_media_tables.cpp */,
+				95ABFD7215ACD2F40079029F /* Table_RipStatus.cpp */,
+				95ABFD7315ACD2F40079029F /* Table_SearchToken_Attribute.cpp */,
+				95ABFD7415ACD2F40079029F /* Table_SearchToken.cpp */,
+			);
+			name = Tables;
+			sourceTree = "<group>";
+		};
+/* End PBXGroup section */
+
+/* Begin PBXHeadersBuildPhase section */
+		95ABFD2E15ACD1F50079029F /* Headers */ = {
+			isa = PBXHeadersBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				95ABFDA715ACD3320079029F /* mysql.h in Headers */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXHeadersBuildPhase section */
+
+/* Begin PBXNativeTarget section */
+		95ABFD2F15ACD1F50079029F /* libpluto_media */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 95ABFD3D15ACD1F50079029F /* Build configuration list for PBXNativeTarget "libpluto_media" */;
+			buildPhases = (
+				95ABFD2C15ACD1F50079029F /* Sources */,
+				95ABFD2D15ACD1F50079029F /* Frameworks */,
+				95ABFD2E15ACD1F50079029F /* Headers */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = libpluto_media;
+			productName = libpluto_media;
+			productReference = 95ABFD3015ACD1F50079029F /* libpluto_media.dylib */;
+			productType = "com.apple.product-type.library.dynamic";
+		};
+/* End PBXNativeTarget section */
+
+/* Begin PBXProject section */
+		95ABFD2715ACD1F40079029F /* Project object */ = {
+			isa = PBXProject;
+			attributes = {
+				LastUpgradeCheck = 0420;
+			};
+			buildConfigurationList = 95ABFD2A15ACD1F40079029F /* Build configuration list for PBXProject "libpluto_media" */;
+			compatibilityVersion = "Xcode 3.2";
+			developmentRegion = English;
+			hasScannedForEncodings = 0;
+			knownRegions = (
+				en,
+			);
+			mainGroup = 95ABFD2515ACD1F40079029F;
+			productRefGroup = 95ABFD3115ACD1F50079029F /* Products */;
+			projectDirPath = "";
+			projectRoot = "";
+			targets = (
+				95ABFD2F15ACD1F50079029F /* libpluto_media */,
+			);
+		};
+/* End PBXProject section */
+
+/* Begin PBXSourcesBuildPhase section */
+		95ABFD2C15ACD1F50079029F /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				95ABFD7515ACD2F40079029F /* Table_Attribute_Settings.cpp in Sources */,
+				95ABFD7615ACD2F40079029F /* Table_Attribute.cpp in Sources */,
+				95ABFD7715ACD2F40079029F /* Table_AttributeType.cpp in Sources */,
+				95ABFD7815ACD2F40079029F /* Table_Bookmark.cpp in Sources */,
+				95ABFD7915ACD2F40079029F /* Table_CoverArtScan.cpp in Sources */,
+				95ABFD7A15ACD2F40079029F /* Table_CoverArtScanEntry.cpp in Sources */,
+				95ABFD7B15ACD2F40079029F /* Table_Disc_Attribute.cpp in Sources */,
+				95ABFD7C15ACD2F40079029F /* Table_Disc_Users.cpp in Sources */,
+				95ABFD7D15ACD2F40079029F /* Table_Disc.cpp in Sources */,
+				95ABFD7E15ACD2F40079029F /* Table_DiscLocation.cpp in Sources */,
+				95ABFD7F15ACD2F40079029F /* Table_Download_Attribute.cpp in Sources */,
+				95ABFD8015ACD2F40079029F /* Table_Download.cpp in Sources */,
+				95ABFD8115ACD2F40079029F /* Table_DownloadSource.cpp in Sources */,
+				95ABFD8215ACD2F40079029F /* Table_File_Attribute.cpp in Sources */,
+				95ABFD8315ACD2F40079029F /* Table_File_Users.cpp in Sources */,
+				95ABFD8415ACD2F40079029F /* Table_File.cpp in Sources */,
+				95ABFD8515ACD2F40079029F /* Table_FileFormat.cpp in Sources */,
+				95ABFD8615ACD2F40079029F /* Table_FileGroup.cpp in Sources */,
+				95ABFD8715ACD2F40079029F /* Table_LongAttribute.cpp in Sources */,
+				95ABFD8815ACD2F40079029F /* Table_MediaProvider.cpp in Sources */,
+				95ABFD8915ACD2F40079029F /* Table_MediaSource.cpp in Sources */,
+				95ABFD8A15ACD2F40079029F /* Table_MediaSubType.cpp in Sources */,
+				95ABFD8B15ACD2F40079029F /* Table_MediaType_AttributeType.cpp in Sources */,
+				95ABFD8C15ACD2F40079029F /* Table_MediaType_FileFormat.cpp in Sources */,
+				95ABFD8D15ACD2F40079029F /* Table_MediaType_MediaSource.cpp in Sources */,
+				95ABFD8E15ACD2F40079029F /* Table_MediaType_MediaSubType.cpp in Sources */,
+				95ABFD8F15ACD2F40079029F /* Table_Picture_Attribute.cpp in Sources */,
+				95ABFD9015ACD2F40079029F /* Table_Picture_Disc.cpp in Sources */,
+				95ABFD9115ACD2F40079029F /* Table_Picture_Download.cpp in Sources */,
+				95ABFD9215ACD2F40079029F /* Table_Picture_File.cpp in Sources */,
+				95ABFD9315ACD2F40079029F /* Table_Picture.cpp in Sources */,
+				95ABFD9415ACD2F40079029F /* Table_Playlist.cpp in Sources */,
+				95ABFD9515ACD2F40079029F /* Table_PlaylistEntry.cpp in Sources */,
+				95ABFD9615ACD2F40079029F /* Table_ProviderSource.cpp in Sources */,
+				95ABFD9715ACD2F40079029F /* Table_psc_media_batdet.cpp in Sources */,
+				95ABFD9815ACD2F40079029F /* Table_psc_media_bathdr.cpp in Sources */,
+				95ABFD9915ACD2F40079029F /* Table_psc_media_batuser.cpp in Sources */,
+				95ABFD9A15ACD2F40079029F /* Table_psc_media_repset.cpp in Sources */,
+				95ABFD9B15ACD2F40079029F /* Table_psc_media_schema.cpp in Sources */,
+				95ABFD9C15ACD2F40079029F /* Table_psc_media_tables.cpp in Sources */,
+				95ABFD9D15ACD2F40079029F /* Table_RipStatus.cpp in Sources */,
+				95ABFD9E15ACD2F40079029F /* Table_SearchToken_Attribute.cpp in Sources */,
+				95ABFD9F15ACD2F40079029F /* Table_SearchToken.cpp in Sources */,
+				95ABFDA115ACD3060079029F /* TableRow.cpp in Sources */,
+				95ABFDA515ACD31C0079029F /* Database_pluto_media.cpp in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXSourcesBuildPhase section */
+
+/* Begin XCBuildConfiguration section */
+		95ABFD3B15ACD1F50079029F /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				ARCHS = "$(ARCHS_STANDARD_64_BIT)";
+				CLANG_ENABLE_OBJC_ARC = YES;
+				COPY_PHASE_STRIP = NO;
+				GCC_C_LANGUAGE_STANDARD = gnu99;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_ENABLE_OBJC_EXCEPTIONS = YES;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"DEBUG=1",
+					"$(inherited)",
+				);
+				GCC_SYMBOLS_PRIVATE_EXTERN = NO;
+				GCC_VERSION = com.apple.compilers.llvm.clang.1_0;
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_MISSING_PROTOTYPES = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				MACOSX_DEPLOYMENT_TARGET = 10.7;
+				ONLY_ACTIVE_ARCH = YES;
+				SDKROOT = macosx;
+			};
+			name = Debug;
+		};
+		95ABFD3C15ACD1F50079029F /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				ARCHS = "$(ARCHS_STANDARD_64_BIT)";
+				CLANG_ENABLE_OBJC_ARC = YES;
+				COPY_PHASE_STRIP = YES;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				GCC_C_LANGUAGE_STANDARD = gnu99;
+				GCC_ENABLE_OBJC_EXCEPTIONS = YES;
+				GCC_VERSION = com.apple.compilers.llvm.clang.1_0;
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_MISSING_PROTOTYPES = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				MACOSX_DEPLOYMENT_TARGET = 10.7;
+				SDKROOT = macosx;
+			};
+			name = Release;
+		};
+		95ABFD3E15ACD1F50079029F /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CONFIGURATION_BUILD_DIR = lib;
+				HEADER_SEARCH_PATHS = (
+					../DCE,
+					..,
+				);
+				INSTALL_PATH = /usr/pluto/lib;
+				LIBRARY_SEARCH_PATHS = (
+					"$(inherited)",
+					"\"$(SRCROOT)/lib\"",
+					"\"$(SRCROOT)/mysql/lib\"",
+				);
+				PRODUCT_NAME = "$(TARGET_NAME)";
+			};
+			name = Debug;
+		};
+		95ABFD3F15ACD1F50079029F /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CONFIGURATION_BUILD_DIR = lib;
+				HEADER_SEARCH_PATHS = (
+					../DCE,
+					..,
+				);
+				INSTALL_PATH = /usr/pluto/lib;
+				LIBRARY_SEARCH_PATHS = (
+					"$(inherited)",
+					"\"$(SRCROOT)/lib\"",
+					"\"$(SRCROOT)/mysql/lib\"",
+				);
+				PRODUCT_NAME = "$(TARGET_NAME)";
+			};
+			name = Release;
+		};
+/* End XCBuildConfiguration section */
+
+/* Begin XCConfigurationList section */
+		95ABFD2A15ACD1F40079029F /* Build configuration list for PBXProject "libpluto_media" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				95ABFD3B15ACD1F50079029F /* Debug */,
+				95ABFD3C15ACD1F50079029F /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		95ABFD3D15ACD1F50079029F /* Build configuration list for PBXNativeTarget "libpluto_media" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				95ABFD3E15ACD1F50079029F /* Debug */,
+				95ABFD3F15ACD1F50079029F /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+/* End XCConfigurationList section */
+	};
+	rootObject = 95ABFD2715ACD1F40079029F /* Project object */;
+}

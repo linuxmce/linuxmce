@@ -129,7 +129,7 @@ public:
 		if( m_bRunningWithoutDeviceData )
 			return (m_pEvent_Impl->GetDeviceDataFromDatabase(m_dwPK_Device,DEVICEDATA_Only_One_Per_PC_CONST)=="1" ? true : false);
 		else
-			return (m_mapParameters_Find(DEVICEDATA_Only_One_Per_PC_CONST)=="1" ? true : false);
+			return (m_mapParameters[DEVICEDATA_Only_One_Per_PC_CONST]=="1" ? true : false);
 	}
 
 	bool Get_Autoassign_to_parents_room()
@@ -137,7 +137,7 @@ public:
 		if( m_bRunningWithoutDeviceData )
 			return (m_pEvent_Impl->GetDeviceDataFromDatabase(m_dwPK_Device,DEVICEDATA_Autoassign_to_parents_room_CONST)=="1" ? true : false);
 		else
-			return (m_mapParameters_Find(DEVICEDATA_Autoassign_to_parents_room_CONST)=="1" ? true : false);
+			return (m_mapParameters[DEVICEDATA_Autoassign_to_parents_room_CONST]=="1" ? true : false);
 	}
 
 };

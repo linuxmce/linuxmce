@@ -1,0 +1,18 @@
+[install]
+catalogues = linuxmce; extras; fremantle
+package = lmce-orbiter-installer
+
+[linuxmce]
+name = LinuxMCE Nokia Orbiter Repository
+uri = http://deb.linuxmce.org/maemo
+components = free
+
+[extras]
+name = Maemo 5 Extras catalogue
+uri = http://repository.maemo.org/extras
+components = free non-free
+
+[fremantle]
+name = Maemo 5 Fremantle
+uri = http://repository.maemo.org/
+components = free non-free

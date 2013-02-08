@@ -1,0 +1,9 @@
+---------------
+VDPAUDetect 1.0
+---------------
+
+This is a simple utility which simply tries to open a VDPAU surface under X11, and return an
+exit code of 0, if successful, and 1 if not successful.
+
+This is used to determine if a graphics card can properly support VDPAU. 
+

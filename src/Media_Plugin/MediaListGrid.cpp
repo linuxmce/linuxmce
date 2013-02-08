@@ -39,7 +39,7 @@ using namespace std;
 
 void MediaListGrid::ToData(string GridID,int &Size, char* &Data, int *ColStart, int *RowStart, int ColCount, int RowCount)
 {
-	if( m_omgsStyle==omgs_BrowserStyle_List || (m_omgsStyle==omgs_BrowserStyle_Icon_List && !m_pMediaListGrid_Master) || *ColStart>0 )  // It's just the list -- nothing special to do here.  And there's no horizontal paging
+	if( !m_pMediaListGrid_Master || *ColStart>0 )  // It's just the list -- nothing special to do here.  And there's no horizontal paging
 	{
 		DataGridTable::ToData(GridID,Size,Data,ColStart,RowStart,ColCount,RowCount);
 		return;
@@ -56,39 +56,6 @@ void MediaListGrid::ToData(string GridID,int &Size, char* &Data, int *ColStart, 
 		return;
 	}
 
-	// this is a vanilla icon grid.  Update the picture path
-	if( m_omgsStyle==omgs_BrowserStyle_Icon )
-	{
-		int size = m_listFileBrowserInfo.size();
-		for(int row=*RowStart;row<*RowStart+RowCount;++row)
-		{
-			for(int col=*ColStart;col<*ColStart+ColCount;++col)
-			{
-				int entry = row*ColCount+col;
-				if( entry>=size )
-					continue;
-				FileBrowserInfo *pFileBrowserInfo = m_pFileBrowserInfoPtr[entry];
-				DataGridCell *pCell = GetData(col,row);
-				if( !pCell )
-					continue; // Shouldn't happen
-				char *pIconBuffer = NULL;
-				string PictureFile_Full;
-
-				if( m_iPK_MediaType==MEDIATYPE_pluto_Pictures_CONST && !pFileBrowserInfo->m_bIsDirectory && !pFileBrowserInfo->m_bIsBack )
-					pCell->SetImagePath((pFileBrowserInfo->m_sMRL + ".tnj").c_str());
-				else if(pFileBrowserInfo->m_PK_Picture > 0)
-				{
-					PictureFile_Full = "/home/mediapics/" + StringUtils::itos(pFileBrowserInfo->m_PK_Picture) + "_tn.jpg";
-					pCell->SetImagePath(PictureFile_Full.c_str());
-				}
-			}
-		}
-		DataGridTable::ToData(GridID,Size,Data,ColStart,RowStart,ColCount,RowCount);
-		return;
-	}
-
-	// This is the dual grid hybrid with a separate pic and list grid that are synchronized.  The list grid is the master,
-	// create the pic grid
 	for(int row=*RowStart;row<*RowStart+RowCount;++row)
 	{
 		for(int col=*ColStart;col<*ColStart+ColCount;++col)
@@ -122,7 +89,7 @@ void MediaListGrid::ToData(string GridID,int &Size, char* &Data, int *ColStart, 
 			string PictureFile_Full;
 
 			if( m_iPK_MediaType==MEDIATYPE_pluto_Pictures_CONST && !pFileBrowserInfo->m_bIsDirectory && !pFileBrowserInfo->m_bIsBack )
-				pCell->SetImagePath((pFileBrowserInfo->m_sMRL + ".tnj").c_str());
+				pCell->SetImagePath(pFileBrowserInfo->m_sPictureThumb.c_str());
 			else if(pFileBrowserInfo->m_PK_Picture > 0)
 			{
 				PictureFile_Full = "/home/mediapics/" + StringUtils::itos(pFileBrowserInfo->m_PK_Picture) + "_tn.jpg";

@@ -1,0 +1,76 @@
+Source: lirc
+Section: utils
+Priority: extra
+Maintainer: Ubuntu Core Developers <ubuntu-devel-discuss@lists.ubuntu.com>
+XSBC-Original-Maintainer: lirc Maintainer Team <pkg-lirc-maint@lists.alioth.debian.org>
+Build-Depends: debhelper (>= 5), libusb-dev, libasound2-dev [!hurd-i386 !kfreebsd-i386 !kfreebsd-amd64], libice-dev, libsm-dev, libx11-dev, libirman-dev, autotools-dev, devscripts, dpatch, libxt-dev, po-debconf
+Standards-Version: 3.7.3
+Uploaders: Hector Garcia <hector@debian.org>, Julien Danjou <acid@debian.org>, Aurelien Jarno <aurel32@debian.org>, Amaya Rodrigo Sastre <amaya@debian.org>
+
+Package: lirc
+Architecture: any
+Depends: ${shlibs:Depends}, ${misc:Depends}, setserial
+Pre-Depends: dialog
+Recommends: udev
+Suggests: lirc-modules-source, lirc-x
+Description: Linux Infra-red Remote Control support
+ This package provides the daemons and some utilities to support infra-red
+ remote controls under Linux.
+
+Package: lirc-x
+Architecture: any
+Depends: ${shlibs:Depends}, ${misc:Depends}, lirc (= ${source:Version})
+Replaces: lirc (<< 0.6.4-8)
+Recommends: xfonts-75dpi
+Description: Linux Infra-red Remote Control support (X dependent parts)
+ This package provides those parts of lirc which depend on the XWindow system.
+ .
+ Currently:
+ .
+ irxevent: Allows you to control your X applications with your remote control.
+ .
+ xmode2: shows the IR waveform of the remote controller without an expensive
+ oscilloscope (through an X window). This is not needed for TV cards or the
+ Irman.
+ .
+ You ***MUST*** <--- (really!) have the xfonts-75dpi package available on the
+ X server, whether via files or via a font server like xfs. The lirc-x package
+ only Recommends: these packages because it's possible to have them served
+ remotely, but you really should install them. :)
+
+Package: lirc-modules-source
+Architecture: all
+Depends: ${misc:Depends}, dkms
+Recommends: make, dpkg-dev (>= 1.13), gcc | c-compiler, kernel-package
+Suggests: kernel-source
+Conflicts: lirc (<<0.6.3-1)
+Description: Linux Infra-red Remote Control support (kernel modules)
+ This package provides the source for the kernel modules to support
+ infra-red remote controls under Linux.
+ .
+ Please note that the kernel sources must be installed to compile these
+ modules.
+ .
+ Also, note that this package is not necessary for usage on Ubuntu since
+ the modules are shipped in linux-ubuntu-modules.  It is soley here in
+ the case that a local patch needs to be applied.
+
+Package: liblircclient-dev
+Architecture: any
+Section: libdevel
+Depends: ${misc:Depends}, liblircclient0 (= ${source:Version}), libc6-dev
+Description: development files for LIRC client library
+ This package contains the static library and headers for
+ the LIRC client library.
+ .
+ LIRC is Linux Infra-red Remote Control support.
+
+Package: liblircclient0
+Priority: optional
+Architecture: any
+Section: libs
+Depends: ${shlibs:Depends}, ${misc:Depends}
+Suggests: lirc
+Description: LIRC client library
+ This library provides functions so that other programs (eg xawtv)
+ can support remote controls via LIRC.

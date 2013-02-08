@@ -1,4 +1,3 @@
-// -*-  Mode: c++ -*-
 /*
      Copyright (C) 2004 Pluto, Inc., a Florida Corporation
 
@@ -38,107 +37,134 @@
 
 #include "DCE/PlainClientSocket.h"
 class RatPoisonWrapper;
-typedef enum { MYTHSTATUS_DISCONNECTED=0, MYTHSTATUS_STARTUP, MYTHSTATUS_LIVETV, MYTHSTATUS_MENU, MYTHSTATUS_PLAYBACK, MYTHSTATUS_GUIDEGRID } eMythState;
+class DBHelper;
+typedef enum  { MYTHSTATUS_DISCONNECTED=0, MYTHSTATUS_STARTUP, MYTHSTATUS_LIVETV, MYTHSTATUS_MENU, MYTHSTATUS_PLAYBACK, MYTHSTATUS_GUIDEGRID } eMythState;
 
 //<-dceag-decl-b->
 namespace DCE
 {
 
-class MythTV_Player : public MythTV_Player_Command
-{
-//<-dceag-decl-e->
-private:
-	long unsigned int            m_iMythFrontendWindowId;
-	pluto_pthread_mutex_t m_MythMutex;
+   class VideoFrameGeometry
+  {
 
-	/** Private member variables */
+  public:
+    int m_iWidth;
+    int m_iHeight;
+
+      VideoFrameGeometry (int iWidth, int iHeight);
+      virtual ~ VideoFrameGeometry ();
+  };
+
+	class MythTV_Player : public MythTV_Player_Command
+	{
+//<-dceag-decl-e->
+    private:
+	  map < int, VideoFrameGeometry * >m_mapVideoFrameGeometry;
+        long unsigned int            m_iMythFrontendWindowId;
+	    pluto_pthread_mutex_t m_MythMutex;
+	    int m_iNowPlayingX;
+	    int m_iNowPlayingY;
+	    int m_iNowPlayingW;
+	    int m_iNowPlayingH;
+
+        /** Private member variables */
 	DeviceData_Base *m_pDevice_MythTV_Plugin;
-	PlainClientSocket *m_pMythSocket;
+	PlainClientSocket *m_pMythSocket; 
 	string m_sChannel,m_sInitialChannel; // The current channel and an initial channel to start on
 
 	pthread_t		     m_threadMonitorMyth;
-	int                          m_iControllingDevice;
-	pthread_t                    m_qApplicationThreadId;
-	int m_iStreamID;  // The current stream ID
+        int                          m_iControllingDevice;
+        pthread_t                    m_qApplicationThreadId;
+		int m_iStreamID;  // The current stream ID
 	Display *m_pDisplay;
 	string m_CurrentMode, m_CurrentProgram;
 	int m_CurTime, m_EndTime;
+	bool UpdateMythSetting(DBHelper *pDBHelper_Myth, string value, string data, string host, bool bOnlyIfNotExisting=false);
 	void selectWindow();
-	bool checkWindowName(long unsigned int window, string windowName);
+        bool checkWindowName(long unsigned int window, string windowName);
 
-protected:
-	bool LaunchMythFrontend(bool bSelectWindow=true);
-	bool StopMythFrontend();
+	VideoFrameGeometry* m_mapVideoFrameGeometry_Find(int key) { map<int, VideoFrameGeometry *>::iterator it = m_mapVideoFrameGeometry.find( key ); return it == m_mapVideoFrameGeometry.end() ? NULL : (*it).second; }
+	bool m_mapVideoFrameGeometry_Exists(int key) { map<int, VideoFrameGeometry *>::iterator it = m_mapVideoFrameGeometry.find( key ); return it != m_mapVideoFrameGeometry.end(); }
+
+
+    protected:
+        bool LaunchMythFrontend(bool bSelectWindow=true);
+        bool StopMythFrontend();
 
 	Display *getDisplay() { return m_pDisplay; };
-	void processKeyBoardInputRequest(int iXKeySym);
+        void processKeyBoardInputRequest(int iXKeySym);
 	string sendMythCommand(const char *Cmd);
 
-	// This should be Window but if i put #include <X11/Xlib.h>  in this it will break the compilation.
-	bool locateMythTvFrontendWindow(long unsigned int window);
+        // This should be Window but if i put #include <X11/Xlib.h>  in this it will break the compilation.
+        bool locateMythTvFrontendWindow(long unsigned int window);
 
-	/** Private methods */
-public:
-	/** Public member variables */
+        /** Private methods */
+    public:
+        /** Public member variables */
 	bool m_bExiting;
+	string m_sMediaURL;		// This is used for playing back from the videos menu.
 	eMythState		     m_mythStatus;	
+	string parseMediaURL(string sMediaURL);
+	string getChannelCommandForMediaURL(string sMediaURL);
 
 //<-dceag-const-b->
 public:
-	// Constructors/Destructor
-	MythTV_Player(int DeviceID, string ServerAddress,bool bConnectEventHandler=true,bool bLocalMode=false,class Router *pRouter=NULL);
-	virtual ~MythTV_Player();
-	virtual bool GetConfig();
-	virtual bool Register();
-	virtual void ReceivedCommandForChild(DeviceData_Impl *pDeviceData_Impl,string &sCMD_Result,Message *pMessage);
-	virtual void ReceivedUnknownCommand(string &sCMD_Result,Message *pMessage);
+		// Constructors/Destructor
+		MythTV_Player(int DeviceID, string ServerAddress,bool bConnectEventHandler=true,bool bLocalMode=false,class Router *pRouter=NULL);
+		virtual ~MythTV_Player();
+		virtual bool GetConfig();
+		virtual bool Register();
+		virtual void ReceivedCommandForChild(DeviceData_Impl *pDeviceData_Impl,string &sCMD_Result,Message *pMessage);
+		virtual void ReceivedUnknownCommand(string &sCMD_Result,Message *pMessage);
 //<-dceag-const-e->
-	void updateMode(string toMode);
-	void pollMythStatus();
+		void updateMode(string toMode);
+		void pollMythStatus();
 
-	virtual void CreateChildren();
+		virtual void CreateChildren();
 
-	void LockOrbiterPointer();
-	void ReleaseOrbiterPointer();
+		void LockOrbiterPointer();
+		void ReleaseOrbiterPointer();
 
-	eMythState m_mythStatus_get() { return m_mythStatus; }
-	void m_mythStatus_set(eMythState _eMythState)
-	{
+		eMythState m_mythStatus_get() { return m_mythStatus; }
+		void m_mythStatus_set(eMythState _eMythState)
+		{ 
 #ifdef DEBUG
-		if( m_mythStatus!=_eMythState )
-			LoggerWrapper::GetInstance()->Write(LV_STATUS,"MythTV_Player::m_mythStatus_set was %d now %d",m_mythStatus,_eMythState);
+			if( m_mythStatus!=_eMythState )
+				LoggerWrapper::GetInstance()->Write(LV_STATUS,"MythTV_Player::m_mythStatus_set was %d now %d",m_mythStatus,_eMythState);
 #endif
-		m_mythStatus = _eMythState;
-	}
+			m_mythStatus = _eMythState;
+		}
 
-	//<-dceag-h-b->
+    //<-dceag-h-b->
 	/*
-	  AUTO-GENERATED SECTION
-	  Do not change the declarations
+				AUTO-GENERATED SECTION
+				Do not change the declarations
 	*/
 
 	/*
-	  *****DATA***** accessors inherited from base class
-	  string DATA_Get_Name();
-	  bool DATA_Get_Only_One_Per_PC();
+			*****DATA***** accessors inherited from base class
+	string DATA_Get_Name();
+	bool DATA_Get_Only_One_Per_PC();
 
-	  *****EVENT***** accessors inherited from base class
-	  void EVENT_Playback_Info_Changed(string sMediaDescription,string sSectionDescription,string sSynposisDescription);
-	  void EVENT_Error_Occured(string sError_Message);
-	  void EVENT_Playback_Completed(string sMRL,int iStream_ID,bool bWith_Errors);
-	  void EVENT_Playback_Started(string sMRL,int iStream_ID,string sSectionDescription,string sAudio,string sVideo);
-	  void EVENT_MythTV_Show_Recorded(int iMythTV_ChannelID,string sName,string sDateTime);
+			*****EVENT***** accessors inherited from base class
+	void EVENT_Playback_Info_Changed(string sMediaDescription,string sSectionDescription,string sSynposisDescription);
+	void EVENT_Error_Occured(string sError_Message);
+	void EVENT_Playback_Completed(string sMRL,int iStream_ID,bool bWith_Errors);
+	void EVENT_Playback_Started(string sMRL,int iStream_ID,string sSectionDescription,string sAudio,string sVideo);
+	void EVENT_MythTV_Show_Recorded(int iMythTV_ChannelID,string sName,string sDateTime);
 
-	  *****COMMANDS***** we need to implement
-    */
+			*****COMMANDS***** we need to implement
+	*/
 
 
 	/** @brief COMMAND: #28 - Simulate Keypress */
 	/** Send a key to the device's OSD, or simulate keypresses on the device's panel */
-	/** @param #26 PK_Button */
-	/** What key to simulate being pressed.  If 2 numbers are specified, separated by a comma, the second will be used if the Shift key is specified. */
-	/** @param #50 Name */
-	/** The application to send the keypress to. If not specified, it goes to the DCE device. */
+		/** @param #26 PK_Button */
+			/** What key to simulate being pressed.  If 2 numbers are specified, separated by a comma, the second will be used if the Shift key is specified. */
+		/** @param #41 StreamID */
+			/** ID of stream to apply */
+		/** @param #50 Name */
+			/** The application to send the keypress to. If not specified, it goes to the DCE device. */
 
 	virtual void CMD_Simulate_Keypress(string sPK_Button,int iStreamID,string sName) { string sCMD_Result; CMD_Simulate_Keypress(sPK_Button.c_str(),iStreamID,sName.c_str(),sCMD_Result,NULL);};
 	virtual void CMD_Simulate_Keypress(string sPK_Button,int iStreamID,string sName,string &sCMD_Result,Message *pMessage);
@@ -146,12 +172,12 @@ public:
 
 	/** @brief COMMAND: #29 - Simulate Mouse Click */
 	/** Simlate a mouse click at a certain position on the screen */
-	/** @param #11 Position X */
-	/**  */
-	/** @param #12 Position Y */
-	/**  */
-	/** @param #41 StreamID */
-	/** ID of stream to apply */
+		/** @param #11 Position X */
+			/** position X */
+		/** @param #12 Position Y */
+			/** position Y */
+		/** @param #41 StreamID */
+			/** ID of stream to apply */
 
 	virtual void CMD_Simulate_Mouse_Click(int iPosition_X,int iPosition_Y,int iStreamID) { string sCMD_Result; CMD_Simulate_Mouse_Click(iPosition_X,iPosition_Y,iStreamID,sCMD_Result,NULL);};
 	virtual void CMD_Simulate_Mouse_Click(int iPosition_X,int iPosition_Y,int iStreamID,string &sCMD_Result,Message *pMessage);
@@ -159,14 +185,14 @@ public:
 
 	/** @brief COMMAND: #32 - Update Object Image */
 	/** Display an image on the media player */
-	/** @param #3 PK_DesignObj */
-	/** The object in which to put the bitmap */
-	/** @param #14 Type */
-	/** 1=bmp, 2=jpg, 3=png */
-	/** @param #19 Data */
-	/** The contents of the bitmap, like reading from the file into a memory buffer */
-	/** @param #23 Disable Aspect Lock */
-	/** If 1, the image will be stretched to fit the object */
+		/** @param #3 PK_DesignObj */
+			/** The object in which to put the bitmap */
+		/** @param #14 Type */
+			/** 1=bmp, 2=jpg, 3=png */
+		/** @param #19 Data */
+			/** The contents of the bitmap, like reading from the file into a memory buffer */
+		/** @param #23 Disable Aspect Lock */
+			/** If 1, the image will be stretched to fit the object */
 
 	virtual void CMD_Update_Object_Image(string sPK_DesignObj,string sType,char *pData,int iData_Size,string sDisable_Aspect_Lock) { string sCMD_Result; CMD_Update_Object_Image(sPK_DesignObj.c_str(),sType.c_str(),pData,iData_Size,sDisable_Aspect_Lock.c_str(),sCMD_Result,NULL);};
 	virtual void CMD_Update_Object_Image(string sPK_DesignObj,string sType,char *pData,int iData_Size,string sDisable_Aspect_Lock,string &sCMD_Result,Message *pMessage);
@@ -174,14 +200,14 @@ public:
 
 	/** @brief COMMAND: #37 - Play Media */
 	/** This command will instruct a Media Player to play a media stream identified by a media descriptor created by the "Create Media" command. */
-	/** @param #29 PK_MediaType */
-	/** The type of media */
-	/** @param #41 StreamID */
-	/** The media that we need to play. */
-	/** @param #42 MediaPosition */
-	/** The position at which we need to start playing. */
-	/** @param #59 MediaURL */
-	/** The file to play, or other media id.  The format is specific on the media type and the media player. */
+		/** @param #29 PK_MediaType */
+			/** The type of media */
+		/** @param #41 StreamID */
+			/** The media that we need to play. */
+		/** @param #42 MediaPosition */
+			/** The position at which we need to start playing. */
+		/** @param #59 MediaURL */
+			/** The file to play, or other media id.  The format is specific on the media type and the media player. */
 
 	virtual void CMD_Play_Media(int iPK_MediaType,int iStreamID,string sMediaPosition,string sMediaURL) { string sCMD_Result; CMD_Play_Media(iPK_MediaType,iStreamID,sMediaPosition.c_str(),sMediaURL.c_str(),sCMD_Result,NULL);};
 	virtual void CMD_Play_Media(int iPK_MediaType,int iStreamID,string sMediaPosition,string sMediaURL,string &sCMD_Result,Message *pMessage);
@@ -189,10 +215,10 @@ public:
 
 	/** @brief COMMAND: #38 - Stop Media */
 	/** This will instruct the media player to stop the playback of a media started with the "Play Media" Command */
-	/** @param #41 StreamID */
-	/** The media needing to be stopped. */
-	/** @param #42 MediaPosition */
-	/** The position at which this stream was last played. */
+		/** @param #41 StreamID */
+			/** The media needing to be stopped. */
+		/** @param #42 MediaPosition */
+			/** The position at which this stream was last played. */
 
 	virtual void CMD_Stop_Media(int iStreamID,string *sMediaPosition) { string sCMD_Result; CMD_Stop_Media(iStreamID,sMediaPosition,sCMD_Result,NULL);};
 	virtual void CMD_Stop_Media(int iStreamID,string *sMediaPosition,string &sCMD_Result,Message *pMessage);
@@ -200,8 +226,8 @@ public:
 
 	/** @brief COMMAND: #39 - Pause Media */
 	/** This will stop a media that is currently played. This method should be paired with the "Restart Media" and used when the playback will be stopped and restarted on the same display device. */
-	/** @param #41 StreamID */
-	/** The media stream for which we need to pause playback. */
+		/** @param #41 StreamID */
+			/** The media stream for which we need to pause playback. */
 
 	virtual void CMD_Pause_Media(int iStreamID) { string sCMD_Result; CMD_Pause_Media(iStreamID,sCMD_Result,NULL);};
 	virtual void CMD_Pause_Media(int iStreamID,string &sCMD_Result,Message *pMessage);
@@ -209,8 +235,8 @@ public:
 
 	/** @brief COMMAND: #40 - Restart Media */
 	/** This will restart a media was paused with the above command */
-	/** @param #41 StreamID */
-	/** The media stream that we need to restart playback for. */
+		/** @param #41 StreamID */
+			/** The media stream that we need to restart playback for. */
 
 	virtual void CMD_Restart_Media(int iStreamID) { string sCMD_Result; CMD_Restart_Media(iStreamID,sCMD_Result,NULL);};
 	virtual void CMD_Restart_Media(int iStreamID,string &sCMD_Result,Message *pMessage);
@@ -218,12 +244,12 @@ public:
 
 	/** @brief COMMAND: #41 - Change Playback Speed */
 	/** Will make the playback to FF with a configurable amount of speed. */
-	/** @param #41 StreamID */
-	/** The media needing the playback speed change. */
-	/** @param #43 MediaPlaybackSpeed */
-	/** The requested media playback speed * 1000.  -1000 = rev, 4000 = 4x fwd, -500 = rev 1/2.  Less than 10 = relative.  +2 = double, -1 = reverse.   See Media_Plugin::ReceivedMessage */
-	/** @param #220 Report */
-	/** If true, report this speed to the user on the OSD */
+		/** @param #41 StreamID */
+			/** The media needing the playback speed change. */
+		/** @param #43 MediaPlaybackSpeed */
+			/** The requested media playback speed * 1000.  -1000 = rev, 4000 = 4x fwd, -500 = rev 1/2.  Less than 10 = relative.  +2 = double, -1 = reverse.   See Media_Plugin::ReceivedMessage */
+		/** @param #220 Report */
+			/** If true, report this speed to the user on the OSD */
 
 	virtual void CMD_Change_Playback_Speed(int iStreamID,int iMediaPlaybackSpeed,bool bReport) { string sCMD_Result; CMD_Change_Playback_Speed(iStreamID,iMediaPlaybackSpeed,bReport,sCMD_Result,NULL);};
 	virtual void CMD_Change_Playback_Speed(int iStreamID,int iMediaPlaybackSpeed,bool bReport,string &sCMD_Result,Message *pMessage);
@@ -231,21 +257,39 @@ public:
 
 	/** @brief COMMAND: #42 - Jump to Position in Stream */
 	/** Jump to a position in the stream, specified in seconds. */
-	/** @param #5 Value To Assign */
-	/** The number of seconds.  A number is considered an absolute.  "+2" means forward 2, "-1" means back 1.  A simpler command than Set Media Position */
-	/** @param #41 StreamID */
-	/** The stream */
+		/** @param #5 Value To Assign */
+			/** The number of seconds.  A number is considered an absolute.  "+2" means forward 2, "-1" means back 1.  A simpler command than Set Media Position */
+		/** @param #41 StreamID */
+			/** The stream */
 
 	virtual void CMD_Jump_to_Position_in_Stream(string sValue_To_Assign,int iStreamID) { string sCMD_Result; CMD_Jump_to_Position_in_Stream(sValue_To_Assign.c_str(),iStreamID,sCMD_Result,NULL);};
 	virtual void CMD_Jump_to_Position_in_Stream(string sValue_To_Assign,int iStreamID,string &sCMD_Result,Message *pMessage);
 
 
+	/** @brief COMMAND: #63 - Skip Fwd - Channel/Track Greater */
+	/** VDR chan + */
+		/** @param #41 StreamID */
+			/** ID of stream to apply */
+
+	virtual void CMD_Skip_Fwd_ChannelTrack_Greater(int iStreamID) { string sCMD_Result; CMD_Skip_Fwd_ChannelTrack_Greater(iStreamID,sCMD_Result,NULL);};
+	virtual void CMD_Skip_Fwd_ChannelTrack_Greater(int iStreamID,string &sCMD_Result,Message *pMessage);
+
+
+	/** @brief COMMAND: #64 - Skip Back - Channel/Track Lower */
+	/** VDR chan - */
+		/** @param #41 StreamID */
+			/** ID of stream to apply */
+
+	virtual void CMD_Skip_Back_ChannelTrack_Lower(int iStreamID) { string sCMD_Result; CMD_Skip_Back_ChannelTrack_Lower(iStreamID,sCMD_Result,NULL);};
+	virtual void CMD_Skip_Back_ChannelTrack_Lower(int iStreamID,string &sCMD_Result,Message *pMessage);
+
+
 	/** @brief COMMAND: #65 - Jump Position In Playlist */
 	/** Jump to a specific position in the playlist, or a track, or a chapter.  Smart media players should also understand the skip fwd/skip back (which non-DCE media players use) to be the same thing as a jump +1 or -1 */
-	/** @param #5 Value To Assign */
-	/** The track to go to.  A number is considered an absolute.  "+2" means forward 2, "-1" means back 1. */
-	/** @param #41 StreamID */
-	/** ID of stream to apply */
+		/** @param #5 Value To Assign */
+			/** The track to go to.  A number is considered an absolute.  "+2" means forward 2, "-1" means back 1. */
+		/** @param #41 StreamID */
+			/** ID of stream to apply */
 
 	virtual void CMD_Jump_Position_In_Playlist(string sValue_To_Assign,int iStreamID) { string sCMD_Result; CMD_Jump_Position_In_Playlist(sValue_To_Assign.c_str(),iStreamID,sCMD_Result,NULL);};
 	virtual void CMD_Jump_Position_In_Playlist(string sValue_To_Assign,int iStreamID,string &sCMD_Result,Message *pMessage);
@@ -253,8 +297,8 @@ public:
 
 	/** @brief COMMAND: #81 - Navigate Next */
 	/** Nagivate to the next possible navigable area. (The actual outcome depends on the specifc device) */
-	/** @param #41 StreamID */
-	/** The stream on which to do the navigation. */
+		/** @param #41 StreamID */
+			/** The stream on which to do the navigation. */
 
 	virtual void CMD_Navigate_Next(int iStreamID) { string sCMD_Result; CMD_Navigate_Next(iStreamID,sCMD_Result,NULL);};
 	virtual void CMD_Navigate_Next(int iStreamID,string &sCMD_Result,Message *pMessage);
@@ -262,8 +306,8 @@ public:
 
 	/** @brief COMMAND: #82 - Navigate Prev */
 	/** Nagivate the previous possible navigable area. (The actual outcome depends on the specific device). */
-	/** @param #41 StreamID */
-	/** The stream on which to do the navigation. */
+		/** @param #41 StreamID */
+			/** The stream on which to do the navigation. */
 
 	virtual void CMD_Navigate_Prev(int iStreamID) { string sCMD_Result; CMD_Navigate_Prev(iStreamID,sCMD_Result,NULL);};
 	virtual void CMD_Navigate_Prev(int iStreamID,string &sCMD_Result,Message *pMessage);
@@ -271,18 +315,18 @@ public:
 
 	/** @brief COMMAND: #84 - Get Video Frame */
 	/** Capture a Video frame */
-	/** @param #19 Data */
-	/** The video frame */
-	/** @param #20 Format */
-	/** Format of the frame */
-	/** @param #23 Disable Aspect Lock */
-	/** Disable Aspect Ratio */
-	/** @param #41 StreamID */
-	/** The ID of the stream */
-	/** @param #60 Width */
-	/** Frame width */
-	/** @param #61 Height */
-	/** Frame height */
+		/** @param #19 Data */
+			/** The video frame */
+		/** @param #20 Format */
+			/** Format of the frame */
+		/** @param #23 Disable Aspect Lock */
+			/** Disable Aspect Ratio */
+		/** @param #41 StreamID */
+			/** The ID of the stream */
+		/** @param #60 Width */
+			/** Frame width */
+		/** @param #61 Height */
+			/** Frame height */
 
 	virtual void CMD_Get_Video_Frame(string sDisable_Aspect_Lock,int iStreamID,int iWidth,int iHeight,char **pData,int *iData_Size,string *sFormat) { string sCMD_Result; CMD_Get_Video_Frame(sDisable_Aspect_Lock.c_str(),iStreamID,iWidth,iHeight,pData,iData_Size,sFormat,sCMD_Result,NULL);};
 	virtual void CMD_Get_Video_Frame(string sDisable_Aspect_Lock,int iStreamID,int iWidth,int iHeight,char **pData,int *iData_Size,string *sFormat,string &sCMD_Result,Message *pMessage);
@@ -290,14 +334,14 @@ public:
 
 	/** @brief COMMAND: #87 - Goto Media Menu */
 	/** Goto to the current media Root Menu. */
-	/** @param #41 StreamID */
-	/** The stream ID */
-	/** @param #64 MenuType */
-	/** The type of menu that the user want to jump to.
-		(For DVD handlers usually this applies)
-		0 - Root menu
-		1 - Title menu
-		2 - Media menu */
+		/** @param #41 StreamID */
+			/** The stream ID */
+		/** @param #64 MenuType */
+			/** The type of menu that the user want to jump to.
+(For DVD handlers usually this applies)
+0 - Root menu 
+1 - Title menu
+2 - Media menu */
 
 	virtual void CMD_Goto_Media_Menu(int iStreamID,int iMenuType) { string sCMD_Result; CMD_Goto_Media_Menu(iStreamID,iMenuType,sCMD_Result,NULL);};
 	virtual void CMD_Goto_Media_Menu(int iStreamID,int iMenuType,string &sCMD_Result,Message *pMessage);
@@ -305,11 +349,38 @@ public:
 
 	/** @brief COMMAND: #91 - Input Select */
 	/** toggle inputs */
-	/** @param #71 PK_Command_Input */
-	/** The Input to select, or 0=toggle */
+		/** @param #71 PK_Command_Input */
+			/** The Input to select, or 0=toggle */
 
 	virtual void CMD_Input_Select(int iPK_Command_Input) { string sCMD_Result; CMD_Input_Select(iPK_Command_Input,sCMD_Result,NULL);};
 	virtual void CMD_Input_Select(int iPK_Command_Input,string &sCMD_Result,Message *pMessage);
+
+
+	/** @brief COMMAND: #92 - Pause */
+	/** VDR pause */
+		/** @param #41 StreamID */
+			/** ID of stream to apply */
+
+	virtual void CMD_Pause(int iStreamID) { string sCMD_Result; CMD_Pause(iStreamID,sCMD_Result,NULL);};
+	virtual void CMD_Pause(int iStreamID,string &sCMD_Result,Message *pMessage);
+
+
+	/** @brief COMMAND: #95 - Stop */
+	/** VDR stop */
+		/** @param #41 StreamID */
+			/** ID of stream to apply */
+		/** @param #203 Eject */
+			/** If true, the drive will be ejected if there is no media currently playing, so a remote's stop button acts as stop/eject. */
+
+	virtual void CMD_Stop(int iStreamID,bool bEject) { string sCMD_Result; CMD_Stop(iStreamID,bEject,sCMD_Result,NULL);};
+	virtual void CMD_Stop(int iStreamID,bool bEject,string &sCMD_Result,Message *pMessage);
+
+
+	/** @brief COMMAND: #97 - Mute */
+	/** VDR mute */
+
+	virtual void CMD_Mute() { string sCMD_Result; CMD_Mute(sCMD_Result,NULL);};
+	virtual void CMD_Mute(string &sCMD_Result,Message *pMessage);
 
 
 	/** @brief COMMAND: #102 - Record */
@@ -321,8 +392,8 @@ public:
 
 	/** @brief COMMAND: #123 - Info */
 	/** Info about the currently playing program */
-	/** @param #9 Text */
-	/** nimic */
+		/** @param #9 Text */
+			/** nimic */
 
 	virtual void CMD_Info(string sText) { string sCMD_Result; CMD_Info(sText.c_str(),sCMD_Result,NULL);};
 	virtual void CMD_Info(string sText,string &sCMD_Result,Message *pMessage);
@@ -356,12 +427,21 @@ public:
 	virtual void CMD_PIP_Channel_Down(string &sCMD_Result,Message *pMessage);
 
 
+	/** @brief COMMAND: #139 - Play */
+	/** vdr play */
+		/** @param #41 StreamID */
+			/** ID of stream to apply */
+
+	virtual void CMD_Play(int iStreamID) { string sCMD_Result; CMD_Play(iStreamID,sCMD_Result,NULL);};
+	virtual void CMD_Play(int iStreamID,string &sCMD_Result,Message *pMessage);
+
+
 	/** @brief COMMAND: #187 - Tune to channel */
 	/** This will make the device to tune to a specific channel. */
-	/** @param #39 Options */
-	/** Extra data to allow the receiver to properly identify the channel ( this is the xmltvid value inside the mythtv database). */
-	/** @param #68 ProgramID */
-	/** The Program ID that we need to tune to. */
+		/** @param #39 Options */
+			/** Extra data to allow the receiver to properly identify the channel ( this is the xmltvid value inside the mythtv database). */
+		/** @param #68 ProgramID */
+			/** The Program ID that we need to tune to. */
 
 	virtual void CMD_Tune_to_channel(string sOptions,string sProgramID) { string sCMD_Result; CMD_Tune_to_channel(sOptions.c_str(),sProgramID.c_str(),sCMD_Result,NULL);};
 	virtual void CMD_Tune_to_channel(string sOptions,string sProgramID,string &sCMD_Result,Message *pMessage);
@@ -369,8 +449,8 @@ public:
 
 	/** @brief COMMAND: #190 - Enter/Go */
 	/** Select the currently highlighted menu item */
-	/** @param #41 StreamID */
-	/** ID of stream to apply */
+		/** @param #41 StreamID */
+			/** ID of stream to apply */
 
 	virtual void CMD_EnterGo(int iStreamID) { string sCMD_Result; CMD_EnterGo(iStreamID,sCMD_Result,NULL);};
 	virtual void CMD_EnterGo(int iStreamID,string &sCMD_Result,Message *pMessage);
@@ -378,8 +458,8 @@ public:
 
 	/** @brief COMMAND: #200 - Move Up */
 	/** Move the highlighter */
-	/** @param #41 StreamID */
-	/** ID of stream to apply */
+		/** @param #41 StreamID */
+			/** ID of stream to apply */
 
 	virtual void CMD_Move_Up(int iStreamID) { string sCMD_Result; CMD_Move_Up(iStreamID,sCMD_Result,NULL);};
 	virtual void CMD_Move_Up(int iStreamID,string &sCMD_Result,Message *pMessage);
@@ -387,8 +467,8 @@ public:
 
 	/** @brief COMMAND: #201 - Move Down */
 	/** Move the highlighter */
-	/** @param #41 StreamID */
-	/** ID of stream to apply */
+		/** @param #41 StreamID */
+			/** ID of stream to apply */
 
 	virtual void CMD_Move_Down(int iStreamID) { string sCMD_Result; CMD_Move_Down(iStreamID,sCMD_Result,NULL);};
 	virtual void CMD_Move_Down(int iStreamID,string &sCMD_Result,Message *pMessage);
@@ -396,8 +476,8 @@ public:
 
 	/** @brief COMMAND: #202 - Move Left */
 	/** Move the highlighter */
-	/** @param #41 StreamID */
-	/** ID of stream to apply */
+		/** @param #41 StreamID */
+			/** ID of stream to apply */
 
 	virtual void CMD_Move_Left(int iStreamID) { string sCMD_Result; CMD_Move_Left(iStreamID,sCMD_Result,NULL);};
 	virtual void CMD_Move_Left(int iStreamID,string &sCMD_Result,Message *pMessage);
@@ -405,8 +485,8 @@ public:
 
 	/** @brief COMMAND: #203 - Move Right */
 	/** Move the highlighter */
-	/** @param #41 StreamID */
-	/** ID of stream to apply */
+		/** @param #41 StreamID */
+			/** ID of stream to apply */
 
 	virtual void CMD_Move_Right(int iStreamID) { string sCMD_Result; CMD_Move_Right(iStreamID,sCMD_Result,NULL);};
 	virtual void CMD_Move_Right(int iStreamID,string &sCMD_Result,Message *pMessage);
@@ -484,8 +564,8 @@ public:
 
 	/** @brief COMMAND: #240 - Back / Prior Menu */
 	/** Navigate back .. ( Escape ) */
-	/** @param #41 StreamID */
-	/** ID of stream to apply */
+		/** @param #41 StreamID */
+			/** ID of stream to apply */
 
 	virtual void CMD_Back_Prior_Menu(int iStreamID) { string sCMD_Result; CMD_Back_Prior_Menu(iStreamID,sCMD_Result,NULL);};
 	virtual void CMD_Back_Prior_Menu(int iStreamID,string &sCMD_Result,Message *pMessage);
@@ -493,16 +573,16 @@ public:
 
 	/** @brief COMMAND: #249 - Start Streaming */
 	/** Like play media, but it means the destination device is not the same as the source */
-	/** @param #29 PK_MediaType */
-	/** The type of media */
-	/** @param #41 StreamID */
-	/** Identifier for this streaming session. */
-	/** @param #42 MediaPosition */
-	/** Where to start playing from */
-	/** @param #59 MediaURL */
-	/** The url to use to play this stream. */
-	/** @param #105 StreamingTargets */
-	/** Target destinations for streaming. Semantics dependent on the target device. */
+		/** @param #29 PK_MediaType */
+			/** The type of media */
+		/** @param #41 StreamID */
+			/** Identifier for this streaming session. */
+		/** @param #42 MediaPosition */
+			/** Where to start playing from */
+		/** @param #59 MediaURL */
+			/** The url to use to play this stream. */
+		/** @param #105 StreamingTargets */
+			/** Target destinations for streaming. Semantics dependent on the target device. */
 
 	virtual void CMD_Start_Streaming(int iPK_MediaType,int iStreamID,string sMediaPosition,string sMediaURL,string sStreamingTargets) { string sCMD_Result; CMD_Start_Streaming(iPK_MediaType,iStreamID,sMediaPosition.c_str(),sMediaURL.c_str(),sStreamingTargets.c_str(),sCMD_Result,NULL);};
 	virtual void CMD_Start_Streaming(int iPK_MediaType,int iStreamID,string sMediaPosition,string sMediaURL,string sStreamingTargets,string &sCMD_Result,Message *pMessage);
@@ -510,12 +590,12 @@ public:
 
 	/** @brief COMMAND: #259 - Report Playback Position */
 	/** This will report the playback position of the current stream. */
-	/** @param #9 Text */
-	/** A human readable representation of the current position */
-	/** @param #41 StreamID */
-	/** The stream ID on which to report the position. */
-	/** @param #42 MediaPosition */
-	/** A media player readable representation of the current position including all options */
+		/** @param #9 Text */
+			/** A human readable representation of the current position */
+		/** @param #41 StreamID */
+			/** The stream ID on which to report the position. */
+		/** @param #42 MediaPosition */
+			/** A media player readable representation of the current position including all options */
 
 	virtual void CMD_Report_Playback_Position(int iStreamID,string *sText,string *sMediaPosition) { string sCMD_Result; CMD_Report_Playback_Position(iStreamID,sText,sMediaPosition,sCMD_Result,NULL);};
 	virtual void CMD_Report_Playback_Position(int iStreamID,string *sText,string *sMediaPosition,string &sCMD_Result,Message *pMessage);
@@ -537,13 +617,20 @@ public:
 
 	/** @brief COMMAND: #412 - Set Media Position */
 	/** Jump to a certain media position */
-	/** @param #41 StreamID */
-	/** The stream to set */
-	/** @param #42 MediaPosition */
-	/** The media position.  When MediaPlugin gets this, it will be a bookmark ID, when a media player gets it, the string */
+		/** @param #41 StreamID */
+			/** The stream to set */
+		/** @param #42 MediaPosition */
+			/** The media position.  When MediaPlugin gets this, it will be a bookmark ID, when a media player gets it, the string */
 
 	virtual void CMD_Set_Media_Position(int iStreamID,string sMediaPosition) { string sCMD_Result; CMD_Set_Media_Position(iStreamID,sMediaPosition.c_str(),sCMD_Result,NULL);};
 	virtual void CMD_Set_Media_Position(int iStreamID,string sMediaPosition,string &sCMD_Result,Message *pMessage);
+
+
+	/** @brief COMMAND: #455 - Blue */
+	/** VDR blue */
+
+	virtual void CMD_Blue() { string sCMD_Result; CMD_Blue(sCMD_Result,NULL);};
+	virtual void CMD_Blue(string &sCMD_Result,Message *pMessage);
 
 
 	/** @brief COMMAND: #476 - Day Down */
@@ -558,6 +645,13 @@ public:
 
 	virtual void CMD_Day_Up() { string sCMD_Result; CMD_Day_Up(sCMD_Result,NULL);};
 	virtual void CMD_Day_Up(string &sCMD_Result,Message *pMessage);
+
+
+	/** @brief COMMAND: #518 - Green */
+	/** VDR Green */
+
+	virtual void CMD_Green() { string sCMD_Result; CMD_Green(sCMD_Result,NULL);};
+	virtual void CMD_Green(string &sCMD_Result,Message *pMessage);
 
 
 	/** @brief COMMAND: #528 - Instant Replay */
@@ -576,10 +670,10 @@ public:
 
 	/** @brief COMMAND: #548 - Menu */
 	/** Show a menu associated with this media */
-	/** @param #9 Text */
-	/** A string indicating which menu should appear.  The parameter is only used for smart media devices */
-	/** @param #41 StreamID */
-	/** ID of stream to apply */
+		/** @param #9 Text */
+			/** A string indicating which menu should appear.  The parameter is only used for smart media devices */
+		/** @param #41 StreamID */
+			/** ID of stream to apply */
 
 	virtual void CMD_Menu(string sText,int iStreamID) { string sCMD_Result; CMD_Menu(sText.c_str(),iStreamID,sCMD_Result,NULL);};
 	virtual void CMD_Menu(string sText,int iStreamID,string &sCMD_Result,Message *pMessage);
@@ -606,6 +700,20 @@ public:
 	virtual void CMD_PVR_Menu(string &sCMD_Result,Message *pMessage);
 
 
+	/** @brief COMMAND: #605 - Red */
+	/** VDR red */
+
+	virtual void CMD_Red() { string sCMD_Result; CMD_Red(sCMD_Result,NULL);};
+	virtual void CMD_Red(string &sCMD_Result,Message *pMessage);
+
+
+	/** @brief COMMAND: #682 - Yellow */
+	/** VDR yellow */
+
+	virtual void CMD_Yellow() { string sCMD_Result; CMD_Yellow(sCMD_Result,NULL);};
+	virtual void CMD_Yellow(string &sCMD_Result,Message *pMessage);
+
+
 	/** @brief COMMAND: #762 - Live TV */
 	/** Go to Live TV */
 
@@ -629,14 +737,14 @@ public:
 
 	/** @brief COMMAND: #809 - Display Alert */
 	/** Displays alert on the box */
-	/** @param #9 Text */
-	/** The text in the alert */
-	/** @param #70 Tokens */
-	/** File this alert with this token, and if another alert comes in before timeout with the same token, replace it. */
-	/** @param #182 Timeout */
-	/** Make the alert go away after this many seconds */
-	/** @param #251 Interruption */
-	/** How to interrupt the user if something is happening */
+		/** @param #9 Text */
+			/** The text in the alert */
+		/** @param #70 Tokens */
+			/** File this alert with this token, and if another alert comes in before timeout with the same token, replace it. */
+		/** @param #182 Timeout */
+			/** Make the alert go away after this many seconds */
+		/** @param #251 Interruption */
+			/** How to interrupt the user if something is happening */
 
 	virtual void CMD_Display_Alert(string sText,string sTokens,string sTimeout,int iInterruption) { string sCMD_Result; CMD_Display_Alert(sText.c_str(),sTokens.c_str(),sTimeout.c_str(),iInterruption,sCMD_Result,NULL);};
 	virtual void CMD_Display_Alert(string sText,string sTokens,string sTimeout,int iInterruption,string &sCMD_Result,Message *pMessage);
@@ -644,10 +752,10 @@ public:
 
 	/** @brief COMMAND: #812 - Application Exited */
 	/** Notify us that Myth Player exited */
-	/** @param #227 PID */
-	/** Process ID to be passed to the ApplicationExited function */
-	/** @param #228 Exit Code */
-	/** Exit Code to be passed to the ApplicationExited function */
+		/** @param #227 PID */
+			/** Process ID to be passed to the ApplicationExited function */
+		/** @param #228 Exit Code */
+			/** Exit Code to be passed to the ApplicationExited function */
 
 	virtual void CMD_Application_Exited(int iPID,int iExit_Code) { string sCMD_Result; CMD_Application_Exited(iPID,iExit_Code,sCMD_Result,NULL);};
 	virtual void CMD_Application_Exited(int iPID,int iExit_Code,string &sCMD_Result,Message *pMessage);
@@ -655,10 +763,10 @@ public:
 
 	/** @brief COMMAND: #870 - Get Data */
 	/** Get data from a device */
-	/** @param #9 Text */
-	/** What data to return.  This is free form */
-	/** @param #19 Data */
-	/** The data being returned */
+		/** @param #9 Text */
+			/** What data to return.  This is free form */
+		/** @param #19 Data */
+			/** The data being returned */
 
 	virtual void CMD_Get_Data(string sText,char **pData,int *iData_Size) { string sCMD_Result; CMD_Get_Data(sText.c_str(),pData,iData_Size,sCMD_Result,NULL);};
 	virtual void CMD_Get_Data(string sText,char **pData,int *iData_Size,string &sCMD_Result,Message *pMessage);
@@ -666,10 +774,10 @@ public:
 
 	/** @brief COMMAND: #916 - Set Aspect Ratio */
 	/** Force aspect ratio */
-	/** @param #41 StreamID */
-	/** ID of stream to apply */
-	/** @param #260 Aspect Ratio */
-	/** aspect ratio to set: auto, 1:1, 4:3, 16:9, 2.11:1 */
+		/** @param #41 StreamID */
+			/** ID of stream to apply */
+		/** @param #260 Aspect Ratio */
+			/** aspect ratio to set: auto, 1:1, 4:3, 16:9, 2.11:1 */
 
 	virtual void CMD_Set_Aspect_Ratio(int iStreamID,string sAspect_Ratio) { string sCMD_Result; CMD_Set_Aspect_Ratio(iStreamID,sAspect_Ratio.c_str(),sCMD_Result,NULL);};
 	virtual void CMD_Set_Aspect_Ratio(int iStreamID,string sAspect_Ratio,string &sCMD_Result,Message *pMessage);
@@ -677,13 +785,15 @@ public:
 
 	/** @brief COMMAND: #917 - Set Zoom */
 	/** Sets zoom level, relative, absolute or 'auto' */
-	/** @param #41 StreamID */
-	/** ID of stream to apply */
-	/** @param #261 Zoom Level */
-	/** Zoom level to set */
+		/** @param #41 StreamID */
+			/** ID of stream to apply */
+		/** @param #261 Zoom Level */
+			/** Zoom level to set */
 
 	virtual void CMD_Set_Zoom(int iStreamID,string sZoom_Level) { string sCMD_Result; CMD_Set_Zoom(iStreamID,sZoom_Level.c_str(),sCMD_Result,NULL);};
 	virtual void CMD_Set_Zoom(int iStreamID,string sZoom_Level,string &sCMD_Result,Message *pMessage);
+
+
 	/** @brief COMMAND: #919 - On Demand */
 	/** Go to Video on demand */
 
@@ -693,20 +803,19 @@ public:
 
 	/** @brief COMMAND: #920 - Set Media ID */
 	/** Set Media ID - information about media stream */
-	/** @param #10 ID */
-	/** Media ID (special format) */
-	/** @param #41 StreamID */
-	/** ID of stream to set media information for */
+		/** @param #10 ID */
+			/** Media ID (special format) */
+		/** @param #41 StreamID */
+			/** ID of stream to set media information for */
 
 	virtual void CMD_Set_Media_ID(string sID,int iStreamID) { string sCMD_Result; CMD_Set_Media_ID(sID.c_str(),iStreamID,sCMD_Result,NULL);};
 	virtual void CMD_Set_Media_ID(string sID,int iStreamID,string &sCMD_Result,Message *pMessage);
-
 
 //<-dceag-h-e->
 };
 
 //<-dceag-end-b->
-} // end namespace DCE
+}
 #endif
 //<-dceag-end-e->
 

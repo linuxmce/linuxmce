@@ -1,0 +1,43 @@
+Source: coherence
+Section: python
+Priority: optional
+Maintainer: Arnaud Quette <aquette@debian.org>
+Uploaders: Loic Minier <lool@dooz.org>
+Build-Depends: debhelper (>= 5.0.38),
+               cdbs (>= 0.4.43),
+               python-central (>= 0.5.6),
+               python-dev (>= 2.4),
+               python-setuptools
+Standards-Version: 3.8.0
+XS-Python-Version: >= 2.4
+
+Package: python-coherence
+Architecture: all
+Depends: ${misc:Depends},
+         ${python:Depends},
+         python2.6-celementtree | python-celementtree,
+         python-configobj,
+         python2.5 | python-ctypes,
+         python2.6-elementtree | python-elementtree,
+         python-gst0.10,
+         python-louie,
+         python-mysqldb,
+         python-pkg-resources,
+         python-twisted-core,
+         python-twisted-web,
+         python-zopeinterface
+XB-Python-Version: ${python:Versions}
+Description: Python UPnP framework
+ Coherence is a framework written in Python enabling your application to
+ participate in digital living networks, at the moment primarily the
+ UPnP universe.
+ .
+ Its goal is to relieve your application from all the membership / the
+ UPnP related tasks as much as possible.
+ .
+ The core of Coherence provides a (hopefully complete) implementation
+ of:
+  * a SSDP server,
+  * a MSEARCH client,
+  * server and client for HTTP/SOAP requests, and
+  * server and client for Event Subscription and Notification (GENA).

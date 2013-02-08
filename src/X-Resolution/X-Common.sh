@@ -27,6 +27,7 @@ GenModeline()
 TestXConfig()
 {
 	local Display="${1:-0}" ConfigFile="${2:-/etc/X11/xorg.conf}"
-	X :$((Display+2)) -ignoreABI -probeonly -config "$ConfigFile" -logverbose 9 &>/dev/null
+	stop plymouth
+	xinit /bin/true -- :$((Display+2)) -config "$ConfigFile" -logverbose 9 &>/dev/null
 	return $?
 }

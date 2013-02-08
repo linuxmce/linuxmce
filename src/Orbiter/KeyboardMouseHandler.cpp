@@ -406,10 +406,10 @@ void KeyboardMouseHandler::TempHack_DrawAlphaSquare()
 		return;
 	
 	DesignObj_DataGrid *pObj_Grid = (DesignObj_DataGrid *) pObj;
-	if( pObj_Grid->m_iHighlightedRow_get()==-1 || !pObj_Grid->DataGridTable_Get())
+	if( pObj_Grid->m_iHighlightedRow==-1 || !pObj_Grid->DataGridTable_Get())
 		return;
 
-	DataGridCell *pCell=pObj_Grid->DataGridTable_Get()->GetData( 1,  pObj_Grid->m_GridCurRow + pObj_Grid->m_iHighlightedRow_get() );
+	DataGridCell *pCell=pObj_Grid->DataGridTable_Get()->GetData( 1,  pObj_Grid->m_GridCurRow + pObj_Grid->m_iHighlightedRow );
 	if( !pCell )
 		return;
 

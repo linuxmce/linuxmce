@@ -28,8 +28,7 @@ namespace nsJukeBox
 			virtual bool Init();
 
 			virtual JukeBoxReturnCode MoveFromSlotToDrive(Slot *pSlot,Drive *pDrive);
-			virtual JukeBoxReturnCode MoveFromDriveToSlot(Slot *pSlot,Drive *pDrive) { return MoveFromDriveToSlot(pSlot,pDrive,false); } // need to implement this so we can't make the following function have the 3rd parm with a default
-			virtual JukeBoxReturnCode MoveFromDriveToSlot(Slot *pSlot,Drive *pDrive,bool bFailedLoad);  // if bFailedLoad==true, this is called from MoveFromSlotToDrive after a failure
+			virtual JukeBoxReturnCode MoveFromDriveToSlot(Slot *pSlot,Drive *pDrive);
 			virtual JukeBoxReturnCode Eject(Slot *pSlot);  // Elect the disc in pSlot
 			virtual JukeBoxReturnCode Eject(Drive *pDrive,int PK_Orbiter);  // Elect the disc in pDrive
 			virtual JukeBoxReturnCode Eject(int iSlot_Number,int iPK_Device,int PK_Orbiter);

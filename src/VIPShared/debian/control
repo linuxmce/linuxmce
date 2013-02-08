@@ -1,0 +1,13 @@
+Source: pluto-vipshared
+Section: unknown
+Priority: extra
+Maintainer: root <root@fluffybitch.org>
+Build-Depends: debhelper (>= 7)
+Standards-Version: 3.8.3
+Homepage: <insert the upstream URL, if relevant>
+
+Package: pluto-vipshared
+Architecture: any
+Depends: pluto-plutoutils, plutoutils, ${shlibs:Depends}, ${misc:Depends}
+Description: <insert up to 60 chars description>
+ <insert long description, indented with spaces>

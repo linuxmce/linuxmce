@@ -1,16 +1,107 @@
 
-$Id: notes.txt 1572 2007-02-28 04:57:33Z isely $
+$Id: notes.txt 2357 2009-11-01 03:14:28Z isely $
 
 CHANGES
 
 TODO
 
-  o Suspend the encoder when we're not using it.  Perhaps this will
-    reduce the heat generation when the device is idle.
+  o Possible race conditions on read() for HVR-1950.  See e-mail on
+    pvrusb2 list from Martin Dauskardt on 17-Oct-2009.
+
+  o Is there an activity LED we can light up for OnAir?
+
+  o Fix FM radio on HVR-1950 - this requires updated cx25840 firmware,
+    a fix in the v4l-dvb tuner module and some means to cause the
+    cx25840 to issue a command to the hardware in order to get it to
+    change its IF.  This issue is specific to HVR-1950.
+
+  o See pvrusb2-list e-mail during the week of 10-Jan about
+    implementing raw mode, finally.
+
+  o Do we need to implement isochronous I/O for raw mode?
+
+  o Finally implement the other V4L I/O methods
+
+  o Examine feasibility of an ALSA interface for audio while in raw
+    mode
+
+  o With raw mode implemented, can we start supporting devices with
+    cx25843 chips?  (There no mpeg encoder, see e-mail from
+    13-Jan-2009.)
+
+  o Examine e-mail from storkus on 11-Dec regarding an mpeg firmare
+    upload hang.  Odds are the entire device is jamming.  He triggered
+    this through repeated analog <-> digital mode switching.
 
   o Can we completely turn off video encoding when in radio mode?
     Right now the cx23416 is probably wasting a lot of bandwidth and
     cycles generating blank video frames.
+
+  o Examine cx23885-i2c.c for some additional tidbits to properly
+    screen the I2C bus from poisonous 8/16 bit access conflicts.
+
+  o Need to tell V4L about our parent device so that Hans' controller
+    mechanism can work.  Unfortunately we're a hotplug driver and I
+    don't know if I can safely "untell" V4L when the device gets
+    unplugged.
+
+  o Make cx2341x defaults here match actual defaults.  Better still,
+    stop using our defaults and adopt what cx2341x is doing.
+
+  o Implement use of video_ioctl2.
+
+  o Examine and deal with situation involving v4l chips being touched
+    at inappropriate times.
+
+  o Examine possibility of proxying tuner and demod through pvrusb2
+    core.
+
+  o Fix warnings from cx25840 about having an impossible input
+
+  o V4L low level drivers needs to be synchronized against core analog
+    / digital state.  Either that or we can't switch away from analog
+    while those pieces are still doing things!
+
+  o When streaming is stopped, put the tuner into standby
+    (TUNER_SET_STANDBY).  When not selecting television or radio, put
+    the tuner into standby and KEEP it there until radio or television
+    is selected again.  That will require forcibly preventing the
+    sending of tuning commands.
+
+  o Adaptec AVC-3610 support (Nick Rodgers)
+
+  o Terratec Grabster integration (Andrea Venturi).
+
+  o TEST corner cases of driver reinsertion / rapid hot plugging.  One
+    report of a kernel oops (Andrea Venturi).
+
+  o Select time problem in mythtv observed by phillong69 - NOBODY else
+    is seeing this.  Not sure if it is a real problem, but when it
+    happens to him it is persistent.  He reports that reinserting the
+    driver clears the problem.  Perhaps we should implement a function
+    in the driver to hard-reinitialize the device (e.g. force into
+    reset, reload the firmware, let it reconnect).  However that will
+    also cause us to lose communication with the device and cause the
+    user app to lose contact as well.
+
+  o Need to define default benign behavior for each chip handler when
+    input is set to something, e.g. dtv, where the chip isn't needed.
+
+  o Experiment with trying to get MPEG-TS to work on cx23416.
+
+  o Fix comma-after-space everywhere and audit code against anal and
+    overbroad checkpatch.pl script.  (sigh...)
+
+  o Follow Mike Krufky's info and see if we can finally get
+    uncompressed video working.
+
+  o Implement mpeg-ps vs mpeg-ts stream types as actual configuration
+    types.  We'll need this for DVB support.
+
+  o Consider making the driver buffers deeper
+
+  o Suspend the encoder when we're not using it.  Perhaps this will
+    reduce the heat generation when the device is idle.
 
   o Email from Chris Mosier (was posted to ivtv-users, subject "bug(?)
     in reporting / setting pvrusb2 controls"
@@ -35,12 +126,7 @@ TODO
     > If I set 0, then mplayer reports 44.1
     >
 
-  o Circular lock dependency involving context lock and v4l's internal
-    registration lock.
-
   o Implement new web pages for distro-specific installation info.
-
-  o Investigate firmware loading corruption in 2.6.18
 
   o Update controls.txt
 
@@ -50,33 +136,16 @@ TODO
 
   o Rework FAQ.
 
-  o Implement means to cancel and later resubmit USB streaming request
-    blocks.  I think we need to cancel these requests whenever we
-    suspend the encoder.  This may help prevent video corruption -
-    suspecting buffer corruption in the device.  This has been a
-    longstanding problem but tends not to manifest itself since we
-    don't normally suspend the encoder while an app is streaming from
-    it.
-
   o Implement filter controls for the non-cx2341x mode encoder
     operation (make compatible with cx2341x case).
 
   o FAQ item about what to do if "No decoder present" shows up in the
     system log.
 
-  o Need to thoroughly clean up logic for fetching status from the
-    hardware (signal strength, audio mode, etc).
-
   o Document what it looks like if the wrong FX2 firmware is loaded.
-
-  o Figure out how msp3400 is killing the kernel when I2C times out.
 
   o Probably update the ivtv directory of the source snapshot (and
     rename it to v4l).
-
-  o Probably should stop / start streaming when switching video source.
-
-  o Bring back indirect method into V4L sources, ifdef'ed out.
 
   o Pull in Java based control app
 
@@ -98,21 +167,64 @@ TODO
   o Pull in Mark's frequency table & channel searching stuff into the
     driver sources.
 
-  o Find some way to propagate an I/O failure up to pvr2_main.
-
   o When a device gets rendered useless, how about we unregister the
     v4l interface?
-
-  o Look at removing some redundant semaphores (like the one in
-    pvrusb2-io.c - only single-threaded code should get there anyway).
-
-  o Implement missing v4l ioctl()'s.
-
-  o Investigate a dvb conforming implementation front-end.
 
   o Write a script to program a frequency table into the driver via
     sysfs.  Create several candidate frequency tables that may be used
     with the script.
+
+
+VIDIOC_ENCODER_CMD:
+
+  The use of VIDIOC_ENCODER_CMD is intended to replace not supplement
+  VIDIOC_STREAMON / VIDIOC_STREAMOFF, the idea being that
+  VIDIOC_ENCODER_CMD provides for additional control for
+  hardware-encoding devices that the older API didn't have.  In
+  particular, VIDIOC_ENCODER_CMD allows for pause / resume (as opposed
+  to stop / start), and it's possible with this API to ask for a
+  stream end / drain at a reasonable point (end of GOP) instead of
+  just truncating whatever was in the pipeline at the point when the
+  stop would otherwise take place.  The pvrusb2 driver does not
+  currently support this API.  It might be nice to fix this.  The
+  following issues exist:
+
+  o The driver core needs to issue the right kind of stop command to
+    the encoder to make an end-of-GOP stop work.  (This should be
+    easy, just a piece of 1 bit state to pass into the state machine
+    as an "option" to the shut down action.)
+
+  o Implementing pause / resume should just be a matter of feeding the
+    corresponding commands to the encoder - this should not impact the
+    driver core's state machine (except we should make sure to clear
+    any "pause" state we might have if the stream is stopped instead
+    of being resumed).  But what use-case is there for this?  Nobody
+    has ever asked for pause / resume and PVR apps (the main use for
+    this driver) should never need it.
+
+  o The V4L2 docs specify that if a STOP is issued through
+    VIDIOC_ENCODER_CMD that we must not truncate the stream but rather
+    drain the pipeline first.  This might be difficult, perhaps
+    impossible - part of the pipeline is inside the device hardware
+    behind the FX2 microcontroller and I know of know way for the FX2
+    to tell us when the upstream part of that pipe is empty.  Thus we
+    have no way to know when to finally shut down the downstream part
+    of the pipeline.  The ivtv driver doesn't really have this problem
+    because it controls the entire pipeline itself; there's no FX2
+    microcontroller sitting in the middle.
+
+  o The V4L2 docs also specify that the next read after the pipeline
+    is finally drained should return 0 (EOF), AND that the next read
+    after that should restart the pipeline.  We *want* new data after
+    an end-of-file?  Yuck.  This may be a non-trivial amount of work,
+    and it isn't even feasible unless we figure out how to correctly
+    drain the pipeline in the first place (see previous point).
+
+  For now, I'm not going to implement this.  It's an optional API
+  anyway, and is not required to maintain reasonable control of the
+  device.  I also fail to see a reasonable use-case for pause/resume -
+  and right now I do not have a solution to implementing the required
+  proper draining of the video pipeline.
 
 
 DOCUMENTATION REWORK:
@@ -138,13 +250,6 @@ ISSUES
   o Do we want to implement mmap and user-pointer I/O methods?  These
     make more sense for real frame buffer oriented I/O, but we are not
     dealing with frame buffers here.
-
-Some test frequencies (Chicago broadcast NTSC):
-
-Channel   Frequency  Station
-   7	  175250000  WLS-TV
-   9      187250000  WGN-TV
-  32      579250000  WFLD-TV
 
 Possible new emacs config settings:
  * c-basic-offset: 8

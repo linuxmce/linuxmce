@@ -9,11 +9,11 @@
  Phone: +1 (877) 758-8648
 
 
- This program is distributed according to the terms of the Pluto Public License, available at:
- http://plutohome.com/index.php?section=public_license
+ This program is distributed according to the terms of the GNU Public License, available at:
+ http://www.fsf.org/licensing/licenses/gpl.html
 
  This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY
- or FITNESS FOR A PARTICULAR PURPOSE. See the Pluto Public License for more details.
+ or FITNESS FOR A PARTICULAR PURPOSE. See the GNU Public License for more details.
 
  */
 /*
@@ -25,7 +25,8 @@ using namespace std;
 #include <math.h>
 #ifdef WIN32
 #include <WinSock.h>
-#else
+#endif
+#if !defined(WIN32) && !defined(__APPLE_CC__)
 #include <sys/vfs.h>
 #include <dirent.h>
 #endif
@@ -33,15 +34,13 @@ using namespace std;
 #include "PlutoUtils/FileUtils.h"
 #include "PlutoUtils/StringUtils.h"
 #include "PlutoUtils/Other.h"
-#include "Message.h"
-#include "ServerSocket.h"
+#include "DCE/Message.h"
+#include "DCE/ServerSocket.h"
 #include <sys/stat.h>
-#include "DCERouter.h"
-#include "DeviceData_Router.h"
-#include "AlarmManager.h"
+#include "DCE/DCERouter.h"
+#include "DCE/DeviceData_Router.h"
+#include "DCE/AlarmManager.h"
 #include "DCE/DCEConfig.h"
-
-#ifndef EMBEDDED_LMCE
 #include "pluto_main/Database_pluto_main.h"
 #include "pluto_main/Table_DeviceTemplate.h"
 #include "pluto_main/Table_DeviceData.h"
@@ -70,21 +69,8 @@ using namespace std;
 #include "pluto_main/Table_CommandCategory.h"
 #include "pluto_main/Table_Room.h"
 #include "pluto_main/Table_Installation.h"
-#else
-#include "pluto_main/Define_DeviceTemplate.h"
-#include "pluto_main/Define_Command.h"
-#include "pluto_main/Define_CommandParameter.h"
-#include "pluto_main/Define_DeviceData.h"
-#endif
 
-#ifdef EMBEDDED_LMCE
-	#include "DataLayer_JSON.h"
-	#include "Command_Data.h"
-#endif
-
-#ifndef EMBEDDED_LMCE
 #include "DCE/MessageXML.h"
-#endif
 #include "DCE/Message.h"
 
 #ifndef WIN32
@@ -98,14 +84,12 @@ using namespace std;
 using namespace DCE;
 extern DCEConfig g_DCEConfig;
 
-#include "../include/version.h"
+#define  VERSION "<=version=>"
 
 #define	 SERIALIZE_MESSAGE_FILE		"/var/PersistentDceMessages"
 
-#ifndef EMBEDDED_LMCE
 bool SerializeMessageXML(Message *pMessage, char *&pData, size_t &nSize);
 bool DeserializeMessageXML(Message *pMessage, char *pData, size_t nSize);
-#endif
 
 bool g_WatchDogFlag=false;
 void* WatchDogRoutine(void* param)
@@ -115,7 +99,7 @@ void* WatchDogRoutine(void* param)
 	if (g_WatchDogFlag)
 	{
 		LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"Terminating DCERouter: watchdog detected hard deadlock, seems soft reload failed\n");
-#ifndef WIN32
+#if !defined(WIN32) && !defined(__APPLE_CC__)
 		fflush(stdout);
 		kill(getpid(), SIGKILL);
 #endif
@@ -163,18 +147,9 @@ void DeadlockHandler(PlutoLock *pPlutoLock)
 }
 
 Router::Router(int PK_Device,int PK_Installation,string BasePath,string DBHost,string DBUser,string DBPassword,string DBName,int DBPort,int ListenPort) :
-    SocketListener("Router Dev #" + StringUtils::itos(PK_Device)),
-#ifndef EMBEDDED_LMCE
-	DBHelper(DBHost,DBUser,DBPassword,DBName,DBPort), 
-#endif
+    SocketListener("Router Dev #" + StringUtils::itos(PK_Device)), DBHelper(DBHost,DBUser,DBPassword,DBName,DBPort), 
 		m_CoreMutex("core"), m_InterceptorMutex("interceptor"), m_MessageQueueMutex("messagequeue")
 {
-	m_pDataLayer = NULL;
-
-#ifdef EMBEDDED_LMCE
-	m_pDataLayer = new DataLayer_JSON();
-#endif
-
 	g_pRouter=this;  // For the deadlock handler
 	g_pDeadlockHandler=DeadlockHandler;
     m_sBasePath=BasePath;
@@ -184,9 +159,7 @@ Router::Router(int PK_Device,int PK_Installation,string BasePath,string DBHost,s
     m_dwPK_Installation=PK_Installation;
     m_pDeviceStructure=NULL;
 	m_pBufferForDeviceCategories=NULL;
-#ifndef EMBEDDED_LMCE
 	m_pRow_Device_Me=NULL;
-#endif
     m_sDBHost=DBHost;
     m_sDBUser=DBUser;
     m_sDBPassword=DBPassword;
@@ -195,9 +168,7 @@ Router::Router(int PK_Device,int PK_Installation,string BasePath,string DBHost,s
     m_bIsLoading=false;
 	m_dwPK_Device_Largest=0;
 	m_bStopProcessingMessages=false;
-#ifndef EMBEDDED_LMCE
 	m_pRow_Installation=NULL;
-#endif
 
     m_CoreMutex.Init(NULL);
     m_InterceptorMutex.Init(NULL);
@@ -218,7 +189,6 @@ Router::Router(int PK_Device,int PK_Installation,string BasePath,string DBHost,s
 
     m_Port = ListenPort;
 
-#ifndef EMBEDDED_LMCE
     m_pDatabase_pluto_main = new Database_pluto_main(LoggerWrapper::GetInstance());
 
     if(!m_pDatabase_pluto_main->Connect(m_sDBHost,m_sDBUser,m_sDBPassword,m_sDBName,m_dwIDBPort) )
@@ -226,14 +196,12 @@ Router::Router(int PK_Device,int PK_Installation,string BasePath,string DBHost,s
         LoggerWrapper::GetInstance()->Write(LV_CRITICAL, "Cannot connect to database!");
 		exit(1);
     }
-#endif
 
     if( !m_dwPK_Installation && g_DCEConfig.m_iPK_Installation>0 )
         m_dwPK_Installation = g_DCEConfig.m_iPK_Installation;
 
     if( !m_dwPK_Device && g_DCEConfig.m_iPK_Device_Computer>0 )
     {
-#ifndef EMBEDDED_LMCE
         vector<Row_Device *> vectRow_Device;
         m_pDatabase_pluto_main->Device_get()->GetRows( string(DEVICE_FK_DEVICETEMPLATE_FIELD) + "=" + StringUtils::itos(DEVICETEMPLATE_DCERouter_CONST)
             + " AND " + DEVICE_FK_DEVICE_CONTROLLEDVIA_FIELD + "=" + StringUtils::itos(g_DCEConfig.m_iPK_Device_Computer), &vectRow_Device);
@@ -242,12 +210,10 @@ Router::Router(int PK_Device,int PK_Installation,string BasePath,string DBHost,s
             Row_Device *pRow_Device = vectRow_Device[0];
             m_dwPK_Device = pRow_Device->PK_Device_get();
         }
-#endif
     }
 
     if( !m_dwPK_Installation && !m_dwPK_Device )
     {
-#ifndef EMBEDDED_LMCE
         vector<Row_Device *> vectRow_Device;
         m_pDatabase_pluto_main->Device_get()->GetRows( string(DEVICE_FK_DEVICETEMPLATE_FIELD) + "=" + StringUtils::itos(DEVICETEMPLATE_DCERouter_CONST), &vectRow_Device);
         if( vectRow_Device.size()!=1 )
@@ -259,10 +225,8 @@ Router::Router(int PK_Device,int PK_Installation,string BasePath,string DBHost,s
             exit(1);
         }
         m_pRow_Device_Me=vectRow_Device[0];
-#endif
     }
 
-#ifndef EMBEDDED_LMCE
     if( !m_pRow_Device_Me && m_dwPK_Device )
     {
         m_pRow_Device_Me = m_pDatabase_pluto_main->Device_get()->GetRow(m_dwPK_Device);
@@ -272,9 +236,7 @@ Router::Router(int PK_Device,int PK_Installation,string BasePath,string DBHost,s
 				m_dwPK_Installation,m_dwPK_Device,m_pRow_Device_Me->FK_Installation_get());
         }
     }
-#endif
 
-#ifndef EMBEDDED_LMCE
     if( !m_pRow_Device_Me )
     {
         vector<Row_Device *> vectRow_Device;
@@ -295,23 +257,14 @@ Router::Router(int PK_Device,int PK_Installation,string BasePath,string DBHost,s
         }
         m_pRow_Device_Me=vectRow_Device[0];
     }
-#endif
 
-#ifndef EMBEDDED_LMCE
 	m_dwPK_Device = m_pRow_Device_Me->PK_Device_get();
     m_dwPK_Installation = m_pRow_Device_Me->FK_Installation_get();
-#else
-	m_dwPK_Installation = 1;
-#endif
 
-#ifndef EMBEDDED_LMCE
 	Row_Device_DeviceData *pRow_Device_DeviceData = 
         m_pDatabase_pluto_main->Device_DeviceData_get()->GetRow(m_dwPK_Device,DEVICEDATA_PK_Language_CONST);
 
 	m_dwPK_Language = pRow_Device_DeviceData ? atoi(pRow_Device_DeviceData->IK_DeviceData_get().c_str()) : 1;
-#else
-	m_dwPK_Language = 1;
-#endif
     if( m_sBasePath=="" )
     {
         // Let's find it
@@ -343,7 +296,7 @@ Router::~Router()
 	for(it=m_mapPlugIn.begin();it!=m_mapPlugIn.end();++it)
 	{
 		class Command_Impl *pCommand_Impl = (*it).second;
-		delete pCommand_Impl;
+		if (pCommand_Impl) delete pCommand_Impl;
 	}
 	m_mapPlugIn.clear();
 	m_bTerminate=true;
@@ -389,12 +342,8 @@ Router::~Router()
 		delete (*it).second;
 	m_mapCommandGroup.clear();
 
-#ifdef EMBEDDED_LMCE
-	DATA_LAYER_LEGACY_CODE;
-#endif
-
 	list<class DeviceData_Router *> listTopDevices;
-	for(map<int,class DeviceData_Router *>::iterator it=m_mapDeviceData_Router.begin();it!=m_mapDeviceData_Router.end();++it)
+    for(map<int,class DeviceData_Router *>::iterator it=m_mapDeviceData_Router.begin();it!=m_mapDeviceData_Router.end();++it)
 	{
 		class DeviceData_Router *pDeviceData_Router = (*it).second;
 		if( !pDeviceData_Router->m_pDevice_ControlledVia )
@@ -438,9 +387,7 @@ Router::~Router()
     delete m_pAlarmManager;
     m_pAlarmManager = NULL;
 
-#ifndef EMBEDDED_LMCE
     delete m_pDatabase_pluto_main;
-#endif
 
 	pthread_mutex_destroy(&m_CoreMutex.mutex);
 	pthread_mutex_destroy(&m_InterceptorMutex.mutex);
@@ -461,19 +408,12 @@ void Router::RegisterAllPlugins()
 	list<plugin_activation_data>::iterator i_fRAP;
 	plugin_activation_data pad_tmp;
     string sLogFile;
-	int iPK_Device;
-
-#ifndef EMBEDDED_LMCE
-	int iPK_DeviceTemplate;
-	size_t s;
-#endif
-
+	int iPK_Device, iPK_DeviceTemplate;
 	RAP_FType RAP_RegisterAsPlugin;
-
+	size_t s;
 	
 	// We're going to store a map with all the plug-ins we loaded so we can try to dynamically load plug-ins that weren't in the database
 	map<string,int> mapPluginCommands;
-#ifndef EMBEDDED_LMCE
     vector<Row_Device *> vectRow_Device;
     m_pDatabase_pluto_main->Device_get()->GetRows( string(DEVICE_FK_DEVICE_CONTROLLEDVIA_FIELD) + "=" + StringUtils::itos(m_dwPK_Device), &vectRow_Device);
     for (s = 0; s < vectRow_Device.size(); s++)
@@ -515,62 +455,18 @@ void Router::RegisterAllPlugins()
 		}
 #endif
 	}
-
-#else
-
-	for(
-		map<int, DeviceData_Router *>::iterator it_device = m_pDataLayer->Devices().begin(); 
-		it_device != m_pDataLayer->Devices().end(); ++it_device
-    )
-	{
-		DeviceData_Router *pDeviceData_Router = it_device->second;
-
-		iPK_Device = pDeviceData_Router->m_dwPK_Device;
-		int iPK_DeviceTemplate = pDeviceData_Router->m_dwPK_DeviceTemplate;
-		string CommandLine = pDeviceData_Router->m_sCommandLine;
-
-		if(
-			iPK_DeviceTemplate != DEVICETEMPLATE_General_Info_Plugin_CONST &&
-			iPK_DeviceTemplate != DEVICETEMPLATE_Lighting_Plugin_CONST &&
-			iPK_DeviceTemplate != DEVICETEMPLATE_Climate_Plugin_CONST
-		)
-			continue;
-
-		if(CommandLine.empty())
-		{
-			DeviceTemplate_Data *pDeviceTemplate_Data = m_pDataLayer->DeviceTemplate(iPK_DeviceTemplate);
-			if(NULL != pDeviceTemplate_Data)
-				CommandLine = FileUtils::ValidCPPName(pDeviceTemplate_Data->Description()) + "_Lite";
-		}
-
-		mapPluginCommands[CommandLine] = iPK_Device;
-
-		RAP_RegisterAsPlugin = PlugIn_Load(iPK_Device, iPK_DeviceTemplate, CommandLine);
-		if (RAP_RegisterAsPlugin)
-		{
-			pad_tmp.PK_Device = iPK_Device;
-			pad_tmp.PK_DeviceTemplate = iPK_DeviceTemplate;
-			pad_tmp.func = RAP_RegisterAsPlugin;
-			pad_tmp.log = sLogFile;
-			list_fRAP.push_back(pad_tmp);
-		}
-		else
-		{
-			LoggerWrapper::GetInstance()->Write(LV_CRITICAL, "Cannot load plug-in for device: %d. Be sure the file %s exists",
-				iPK_Device, CommandLine.c_str());
-		}
-	}
-
-#endif // EMBEDDED_LMCE
 	
 	// Repeat and see if we can find any plugins to load dynamically
+	// this is a method to "sneak" in plugins without device templates
+	// as this caused troubles with some non-plugin libs we now only search in a
+	// specific directory ("plugin-inject") for *.so/dll files
 	list<string> listFiles;
 #ifdef WIN32
-	FileUtils::FindFiles(listFiles,".","*.dll",false,true);
-	FileUtils::FindFiles(listFiles,"/pluto/bin","*.dll",false,true);
+	// FileUtils::FindFiles(listFiles,".","*.dll",false,true);
+	FileUtils::FindFiles(listFiles,"/pluto/bin/plugin-inject","*.dll",false,true);
 #else
-	FileUtils::FindFiles(listFiles,".","*.so",false,true);
-	FileUtils::FindFiles(listFiles,"/usr/pluto/bin","*.so",false,true);
+	// FileUtils::FindFiles(listFiles,".","*.so",false,true);
+	FileUtils::FindFiles(listFiles,"/usr/pluto/bin/plugin-inject","*.so",false,true);
 #endif
 
 	int PlugInNumber=0;  // How many plug-ins we're loading dynamically
@@ -589,10 +485,6 @@ void Router::RegisterAllPlugins()
 			iPK_Device = m_dwPK_Device_Largest + PlugInNumber + 1000000;   // Use artificially high numbers > 1 million so there's no confusion with other devices including new ones we will create
 
 			LoggerWrapper::GetInstance()->Write(LV_WARNING, "Router::RegisterAllPlugins Dynamically loading plugin %s as device %d", sFile.c_str(), iPK_Device);
-
-#ifdef EMBEDDED_LMCE
-			DATA_LAYER_LEGACY_CODE;
-#endif
 
 			DeviceData_Router *pDevice = new DeviceData_Router(iPK_Device,PK_DeviceTemplate,m_dwPK_Installation,m_dwPK_Device);
 			m_mapDeviceData_Router[iPK_Device]=pDevice;
@@ -672,20 +564,19 @@ RAP_FType Router::PlugIn_Load(int PK_Device, int PK_DeviceTemplate, string sComm
 
     if (sCommandLine == "")
         return NULL;
-
+    
 #ifndef WIN32
+    #ifdef __APPLE_CC__
+    sCommandLine += ".dylib";
+    #else
     sCommandLine += ".so";
+    #endif
     if (sCommandLine.find("/") == string::npos)
-#ifdef EMBEDDED_LMCE
-        sCommandLine = "/usr/bin/" + sCommandLine;
-#else /*EMBEDDED_LMCE*/
         sCommandLine = "./" + sCommandLine;
-#endif /*EMBEDDED_LMCE*/
-
     so_handle = dlopen(sCommandLine.c_str(), RTLD_LAZY | RTLD_GLOBAL);
-#else /*WIN32*/
+#else
     so_handle = LoadLibrary(sCommandLine.c_str());
-#endif /*WIN32*/
+#endif
 
     if (so_handle == NULL)
     {
@@ -804,15 +695,12 @@ void Router::RegisterMsgInterceptor(Message *pMessage)
     int PK_DeviceCategory = atoi( pMessage->m_mapParameters[PARM_CATEGORY].c_str() );
     int MessageType = atoi( pMessage->m_mapParameters[PARM_MESSAGE_TYPE].c_str() );
     int MessageID = atoi( pMessage->m_mapParameters[PARM_MESSAGE_ID].c_str() );
-    bool bAllowReroute = atoi( pMessage->m_mapParameters[PARM_ALLOW_REROUTE].c_str() )==1;
 
-	LoggerWrapper::GetInstance()->Write(LV_STATUS,"Device %d registered Message interceptor %d/%d/%d/%d/%d/%d/%d",
-		pMessage->m_dwPK_Device_From,PK_Device_From,PK_Device_To,PK_DeviceTemplate,PK_DeviceCategory,MessageType,MessageID,(int) bAllowReroute);
+	LoggerWrapper::GetInstance()->Write(LV_STATUS,"Device %d registered Message interceptor %d/%d/%d/%d/%d/%d",
+		pMessage->m_dwPK_Device_From,PK_Device_From,PK_Device_To,PK_DeviceTemplate,PK_DeviceCategory,MessageType,MessageID);
 
-	MessageInterceptorCallBack *pMessageInterceptorCallBack = new MessageInterceptorCallBack(pMessage->m_dwPK_Device_From, pMessage->m_dwID);
-	pMessageInterceptorCallBack->m_bAllowReroute = bAllowReroute;
     RegisterMsgInterceptor(
-            pMessageInterceptorCallBack,
+            new MessageInterceptorCallBack(pMessage->m_dwPK_Device_From, pMessage->m_dwID),
             PK_Device_From,PK_Device_To,PK_DeviceTemplate,PK_DeviceCategory,MessageType,MessageID );
 }
 
@@ -844,7 +732,6 @@ void Router::StopPendingCommandGroup(int PK_CommandGroup,string sDescription,str
 
 void Router::ExecuteCommandGroup(int PK_CommandGroup,DeviceData_Router *pDevice_Sender,int sStartingCommand)
 {
-#ifndef EMBEDDED_LMCE
 	string sSql = "SELECT PK_CommandGroup_Command,FK_Command,FK_Device,FK_DeviceGroup,DeliveryConfirmation "
 		"FROM CommandGroup_Command WHERE FK_CommandGroup=" + StringUtils::itos(PK_CommandGroup) + " ORDER BY OrderNum";
 
@@ -869,7 +756,7 @@ void Router::ExecuteCommandGroup(int PK_CommandGroup,DeviceData_Router *pDevice_
 				PlutoSqlResult result_set2;
 				if( (result_set.r=db_wrapper_query_result(sSql)) && (row = db_wrapper_fetch_row(result_set.r)) )
 				{
-					int Milliseconds = atoi(row[0]);
+					int iSeconds = atoi(row[0]);
 					DelayedCommandInfo *pDelayedCommandInfo = new DelayedCommandInfo;
 					pDelayedCommandInfo->m_PK_CommandGroup=PK_CommandGroup;
 					pDelayedCommandInfo->m_iStartingCommand=RowCount+1;
@@ -885,7 +772,7 @@ void Router::ExecuteCommandGroup(int PK_CommandGroup,DeviceData_Router *pDevice_
 							pDelayedCommandInfo->m_sHint = row[1];
 					}
 
-					m_pAlarmManager->AddRelativeAlarm(Milliseconds/1000,this,ALARM_DELAYED_COMMAND_EXECUTION,pDelayedCommandInfo);
+					m_pAlarmManager->AddRelativeAlarm(iSeconds,this,ALARM_DELAYED_COMMAND_EXECUTION,pDelayedCommandInfo);
 					return;
 				}
 				else
@@ -929,47 +816,6 @@ void Router::ExecuteCommandGroup(int PK_CommandGroup,DeviceData_Router *pDevice_
 	}
 	else
 		LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"Cannot execute command group db error: %d",PK_CommandGroup);
-
-
-#else
-	if(NULL != m_pDataLayer)
-	{
-		Scene_Data *pScene_Data = m_pDataLayer->Scene(PK_CommandGroup);
-		if(NULL != pScene_Data)
-		{
-			LoggerWrapper::GetInstance()->Write(LV_WARNING, "Executing scene: %d", PK_CommandGroup);
-
-			for(std::map<int, Command_Data>::iterator it = pScene_Data->Commands().begin(); it != pScene_Data->Commands().end(); ++it)
-			{
-				Command_Data &aCommand_Data = it->second;
-
-				Message *pMessage = new Message();
-				pMessage->m_dwPK_Device_From = NULL != pDevice_Sender ? pDevice_Sender->m_dwPK_Device : m_dwPK_Device;
-				pMessage->m_dwMessage_Type = MESSAGETYPE_COMMAND;
-				pMessage->m_dwID = aCommand_Data.PK_Command();
-				pMessage->m_dwPK_Device_To = aCommand_Data.Device_To();
-
-				if(pMessage->m_dwPK_Device_To == DEVICETEMPLATE_This_Orbiter_CONST && NULL != pDevice_Sender)
-					pMessage->m_dwPK_Device_To = pDevice_Sender->m_dwPK_Device;
-
-				for(std::map<int, string>::iterator it_param = aCommand_Data.Params().begin(); 
-					it_param != aCommand_Data.Params().end(); ++it_param)
-				{
-					pMessage->m_mapParameters[it_param->first] = it_param->second;
-				}
-
-				LoggerWrapper::GetInstance()->Write(LV_STATUS, "Processing message from %d to %d id %d", 
-					pMessage->m_dwPK_Device_From, pMessage->m_dwPK_Device_To, pMessage->m_dwID);
-
-				ReceivedMessage(NULL, pMessage);
-			}
-		}
-		else
-		{
-			LoggerWrapper::GetInstance()->Write(LV_CRITICAL, "Unexisting scene: %d", PK_CommandGroup);
-		}
-	}
-#endif
 }
 
 void Router::ReceivedMessage(Socket *pSocket, Message *pMessageWillBeDeleted, bool bAutoDelete)
@@ -1072,17 +918,10 @@ void Router::ReceivedMessage(Socket *pSocket, Message *pMessageWillBeDeleted, bo
 
 		im.Release();
 
-		class MessageInterceptorCallBack *pMessageInterceptorCallBack_Last = NULL;
-
 		for(itInterceptors=listMessageInterceptor.begin();
 			itInterceptors!=listMessageInterceptor.end();++itInterceptors)
 		{
 			class MessageInterceptorCallBack *pMessageInterceptorCallBack = (*itInterceptors);
-
-			// If this is going to a list of devices it's possible we added the same interceptor multiple times.  If so, skip the duplicates
-			if( pMessageInterceptorCallBack_Last==pMessageInterceptorCallBack )
-				continue;
-			pMessageInterceptorCallBack_Last = pMessageInterceptorCallBack;
 
 			class Command_Impl *pPlugIn = pMessageInterceptorCallBack->m_pPlugIn;
 			MessageInterceptorFn pMessageInterceptorFn = pMessageInterceptorCallBack->m_pMessageInterceptorFn;
@@ -1107,11 +946,10 @@ void Router::ReceivedMessage(Socket *pSocket, Message *pMessageWillBeDeleted, bo
 				Message *pMessageInterceptor = new Message(0,pMessageInterceptorCallBack->m_dwPK_Device,PRIORITY_NORMAL,
 					MESSAGETYPE_MESSAGE_INTERCEPTED,pMessageInterceptorCallBack->m_dwID,0);
 				pMessageInterceptor->m_vectExtraMessages.push_back( pMessageOriginator );
-				pMessageInterceptor->m_eExpectedResponse=pMessageInterceptorCallBack->m_bAllowReroute ? ER_ReplyMessage : ER_None;
+				pMessageInterceptor->m_eExpectedResponse=ER_ReplyMessage;
 				ReceivedMessage(NULL,pMessageInterceptor,false);
 				bool bAbort = pMessageInterceptor->m_mapParameters.find(-1) != pMessageInterceptor->m_mapParameters.end() && pMessageInterceptor->m_mapParameters[-1]=="ABORT" ;
-				if( pMessageInterceptorCallBack->m_bAllowReroute )
-					delete pMessageInterceptor;  // If we don't allow a reroute, the ReceivedMessage above used QueueMessageToRouter which will delete the message
+				delete pMessageInterceptor;
 				if( bAbort ) // Special case
 				{
 					LoggerWrapper::GetInstance()->Write(LV_STATUS,"void Router::ReceivedMessage -- Aborting further processing of message type %d id %d as per interceptor",(*SafetyMessage)->m_dwMessage_Type,(*SafetyMessage)->m_dwID);
@@ -1120,117 +958,113 @@ void Router::ReceivedMessage(Socket *pSocket, Message *pMessageWillBeDeleted, bo
 			}
 		}
 	}
-
-	if( (*SafetyMessage)->m_dwMessage_Type!=MESSAGETYPE_MESSAGE_INTERCEPTED )
+	for(int s=-1;s<(int) (*SafetyMessage)->m_vectExtraMessages.size(); ++s)
 	{
-		for(int s=-1;s<(int) (*SafetyMessage)->m_vectExtraMessages.size(); ++s)
+		Message *pMessage = s>=0 ? (*SafetyMessage)->m_vectExtraMessages[s] : (*SafetyMessage);
+		if( !pMessage )
+			continue;
+
+		string Desc="",sCommand="";
+		Command *pCommand=NULL;
+		Event_Router *pEvent_Router=NULL;
+
+		if( pMessage->m_dwMessage_Type==MESSAGETYPE_COMMAND )
 		{
-			Message *pMessage = s>=0 ? (*SafetyMessage)->m_vectExtraMessages[s] : (*SafetyMessage);
-			if( !pMessage )
-				continue;
-
-			string Desc="",sCommand="";
-			Command *pCommand=NULL;
-			Event_Router *pEvent_Router=NULL;
-
-			if( pMessage->m_dwMessage_Type==MESSAGETYPE_COMMAND )
+			pCommand = m_mapCommand_Find(pMessage->m_dwID);
+			if( pCommand )
 			{
-				pCommand = m_mapCommand_Find(pMessage->m_dwID);
-				if( pCommand )
-				{
-					sCommand = pCommand->m_sDescription;
-					Desc = "Command:\x1b[35;1m" + sCommand + "\x1b[0m";
-				}
+				sCommand = pCommand->m_sDescription;
+				Desc = "Command:\x1b[35;1m" + sCommand + "\x1b[0m";
 			}
-			else if( pMessage->m_dwMessage_Type==MESSAGETYPE_EVENT )
-			{
-				pEvent_Router = m_mapEvent_Router_Find(pMessage->m_dwID);
-				if( pEvent_Router )
-					Desc = "Event:\x1b[32;1m" + pEvent_Router->m_sDescription + "\x1b[0m";
-			}
+		}
+		else if( pMessage->m_dwMessage_Type==MESSAGETYPE_EVENT )
+		{
+			pEvent_Router = m_mapEvent_Router_Find(pMessage->m_dwID);
+			if( pEvent_Router )
+				Desc = "Event:\x1b[32;1m" + pEvent_Router->m_sDescription + "\x1b[0m";
+		}
 
-			if( (!pCommand || pCommand->m_bLog) && (!pEvent_Router || pEvent_Router->m_bLog) )
+		if( (!pCommand || pCommand->m_bLog) && (!pEvent_Router || pEvent_Router->m_bLog) )
+		{
+			int LogType = pMessage->m_dwMessage_Type==MESSAGETYPE_EVENT ? LV_EVENT : (pMessage->m_dwMessage_Type==MESSAGETYPE_COMMAND ? LV_ACTION : LV_STATUS);
+			if( pMessage->m_dwMessage_Type==MESSAGETYPE_EVENT || pMessage->m_dwMessage_Type==MESSAGETYPE_COMMAND )
 			{
-				int LogType = pMessage->m_dwMessage_Type==MESSAGETYPE_EVENT ? LV_EVENT : (pMessage->m_dwMessage_Type==MESSAGETYPE_COMMAND ? LV_ACTION : LV_STATUS);
-				if( pMessage->m_dwMessage_Type==MESSAGETYPE_EVENT || pMessage->m_dwMessage_Type==MESSAGETYPE_COMMAND )
+				if (pMessage->m_dwPK_Device_To == DEVICEID_LIST)
 				{
-					if (pMessage->m_dwPK_Device_To == DEVICEID_LIST)
+					string DeviceList;
+					string::size_type pos=0;
+					while(true)
 					{
-						string DeviceList;
-						string::size_type pos=0;
-						while(true)
-						{
-							string Device = StringUtils::Tokenize(pMessage->m_sPK_Device_List_To,",",pos);
-							if( !Device.size() )
-								break;
-							DeviceData_Router *pDeviceData_Router = m_mapDeviceData_Router_Find( atoi(Device.c_str()) );
-							if( pDeviceData_Router )
-								DeviceList += pDeviceData_Router->m_sDescription + "(" + Device + "),";
-							else
-								DeviceList += "**unknown dev: " + Device + ",";
-						}
-
-						LoggerWrapper::GetInstance()->Write(LogType, "Received Message from %d (\x1b[36;1m%s / %s\x1b[0m) to %s type %d id  %d %s, retry %s, parameters:",
-							pMessage->m_dwPK_Device_From,
-							(pDeviceFrom ? pDeviceFrom->m_sDescription.c_str() : "unknown"),
-							(pDeviceFrom  && pDeviceFrom->m_pRoom ? pDeviceFrom->m_pRoom->m_sDescription.c_str() : ""),
-							DeviceList.c_str(),
-							pMessage->m_dwMessage_Type, pMessage->m_dwID,Desc.c_str(),
-							pMessage->m_eRetry == MR_None ? "none" : (pMessage->m_eRetry == MR_Retry ? "retry" : "persist"));
+						string Device = StringUtils::Tokenize(pMessage->m_sPK_Device_List_To,",",pos);
+						if( !Device.size() )
+							break;
+						DeviceData_Router *pDeviceData_Router = m_mapDeviceData_Router_Find( atoi(Device.c_str()) );
+						if( pDeviceData_Router )
+							DeviceList += pDeviceData_Router->m_sDescription + "(" + Device + "),";
+						else
+							DeviceList += "**unknown dev: " + Device + ",";
 					}
-					else if (pMessage->m_dwPK_Device_To != DEVICEID_LOGGER)
-						LoggerWrapper::GetInstance()->Write(LogType, "Received Message from %d (\x1b[36;1m%s / %s\x1b[0m) to %d (\x1b[36;1m%s / %s\x1b[0m), type %d id %d %s, retry %s, parameters:",
-							pMessage->m_dwPK_Device_From,
-							(pDeviceFrom ? pDeviceFrom->m_sDescription.c_str() : "unknown"),
-							(pDeviceFrom  && pDeviceFrom->m_pRoom ? pDeviceFrom->m_pRoom->m_sDescription.c_str() : ""),
-							pMessage->m_dwPK_Device_To,
-							(pDeviceTo ? pDeviceTo->m_sDescription.c_str() : "unknown"),
-							(pDeviceTo && pDeviceTo->m_pRoom ? pDeviceTo->m_pRoom->m_sDescription.c_str() : ""),
-							pMessage->m_dwMessage_Type, pMessage->m_dwID,Desc.c_str(),
-							pMessage->m_eRetry == MR_None ? "none" : (pMessage->m_eRetry == MR_Retry ? "retry" : "persist"));
-				}
-				else if( pMessage->m_dwMessage_Type != MESSAGETYPE_LOG )
-					LoggerWrapper::GetInstance()->Write(LV_STATUS, "Received Message from %d (\x1b[36;1m%s\x1b[0m) to %d (\x1b[36;1m%s\x1b[0m), type %d id %d, retry %s, parameters:",
+
+					LoggerWrapper::GetInstance()->Write(LogType, "Received Message from %d (\x1b[36;1m%s / %s\x1b[0m) to %s type %d id  %d %s, retry %s, parameters:",
 						pMessage->m_dwPK_Device_From,
-						(pDeviceFrom ? pDeviceFrom->m_sDescription.c_str() : "unknown"),pMessage->m_dwPK_Device_To,
-						(pDeviceTo ? pDeviceTo->m_sDescription.c_str() : "unknown"),
-						pMessage->m_dwMessage_Type, pMessage->m_dwID,
+						(pDeviceFrom ? pDeviceFrom->m_sDescription.c_str() : "unknown"),
+						(pDeviceFrom  && pDeviceFrom->m_pRoom ? pDeviceFrom->m_pRoom->m_sDescription.c_str() : ""),
+						DeviceList.c_str(),
+						pMessage->m_dwMessage_Type, pMessage->m_dwID,Desc.c_str(),
 						pMessage->m_eRetry == MR_None ? "none" : (pMessage->m_eRetry == MR_Retry ? "retry" : "persist"));
+				}
+				else if (pMessage->m_dwPK_Device_To != DEVICEID_LOGGER)
+					LoggerWrapper::GetInstance()->Write(LogType, "Received Message from %d (\x1b[36;1m%s / %s\x1b[0m) to %d (\x1b[36;1m%s / %s\x1b[0m), type %d id %d %s, retry %s, parameters:",
+						pMessage->m_dwPK_Device_From,
+						(pDeviceFrom ? pDeviceFrom->m_sDescription.c_str() : "unknown"),
+						(pDeviceFrom  && pDeviceFrom->m_pRoom ? pDeviceFrom->m_pRoom->m_sDescription.c_str() : ""),
+						pMessage->m_dwPK_Device_To,
+						(pDeviceTo ? pDeviceTo->m_sDescription.c_str() : "unknown"),
+						(pDeviceTo && pDeviceTo->m_pRoom ? pDeviceTo->m_pRoom->m_sDescription.c_str() : ""),
+						pMessage->m_dwMessage_Type, pMessage->m_dwID,Desc.c_str(),
+						pMessage->m_eRetry == MR_None ? "none" : (pMessage->m_eRetry == MR_Retry ? "retry" : "persist"));
+			}
+			else if( pMessage->m_dwMessage_Type != MESSAGETYPE_LOG )
+				LoggerWrapper::GetInstance()->Write(LV_STATUS, "Received Message from %d (\x1b[36;1m%s\x1b[0m) to %d (\x1b[36;1m%s\x1b[0m), type %d id %d, retry %s, parameters:",
+					pMessage->m_dwPK_Device_From,
+					(pDeviceFrom ? pDeviceFrom->m_sDescription.c_str() : "unknown"),pMessage->m_dwPK_Device_To,
+					(pDeviceTo ? pDeviceTo->m_sDescription.c_str() : "unknown"),
+					pMessage->m_dwMessage_Type, pMessage->m_dwID,
+					pMessage->m_eRetry == MR_None ? "none" : (pMessage->m_eRetry == MR_Retry ? "retry" : "persist"));
 
-				if (pMessage->m_dwPK_Device_To != DEVICEID_LOGGER)
+			if (pMessage->m_dwPK_Device_To != DEVICEID_LOGGER)
+			{
+				map<long,string>::iterator i;
+				for(i=pMessage->m_mapParameters.begin();i!=pMessage->m_mapParameters.end();++i)
 				{
-					map<long,string>::iterator i;
-					for(i=pMessage->m_mapParameters.begin();i!=pMessage->m_mapParameters.end();++i)
+					Desc="";
+					if( pMessage->m_dwMessage_Type==MESSAGETYPE_COMMAND )
+						Desc = m_mapCommandParmNames[(*i).first];
+					else if( pMessage->m_dwMessage_Type==MESSAGETYPE_EVENT )
+						Desc = m_mapEventParmNames[(*i).first];
+
+					if( pMessage->m_dwMessage_Type==MESSAGETYPE_COMMAND && 
+						((*i).first==COMMANDPARAMETER_PK_Command_Input_CONST ||
+						(*i).first==COMMANDPARAMETER_PK_Command_Output_CONST ) )
 					{
-						Desc="";
-						if( pMessage->m_dwMessage_Type==MESSAGETYPE_COMMAND )
-							Desc = m_mapCommandParmNames[(*i).first];
-						else if( pMessage->m_dwMessage_Type==MESSAGETYPE_EVENT )
-							Desc = m_mapEventParmNames[(*i).first];
-
-						if( pMessage->m_dwMessage_Type==MESSAGETYPE_COMMAND && 
-							((*i).first==COMMANDPARAMETER_PK_Command_Input_CONST ||
-							(*i).first==COMMANDPARAMETER_PK_Command_Output_CONST ) )
-						{
-							Command *pCommand = m_mapCommand_Find(atoi((*i).second.c_str()));
-							if( pCommand )
-								Desc += "(" + pCommand->m_sDescription + ")";
-						}
-
-
-						LoggerWrapper::GetInstance()->Write(LogType, "  Parameter %d(%s): %s", (*i).first, Desc.c_str(), (*i).second.c_str());
+						Command *pCommand = m_mapCommand_Find(atoi((*i).second.c_str()));
+						if( pCommand )
+							Desc += "(" + pCommand->m_sDescription + ")";
 					}
-					map<long,unsigned long>::iterator il;
-					for(il=pMessage->m_mapData_Lengths.begin();il!=pMessage->m_mapData_Lengths.end();++il)
-					{
-						Desc="";
-						if( pMessage->m_dwMessage_Type==MESSAGETYPE_COMMAND )
-							Desc = m_mapCommandParmNames[(*il).first];
-						else if( pMessage->m_dwMessage_Type==MESSAGETYPE_EVENT )
-							Desc = m_mapEventParmNames[(*il).first];
-						if( pMessage->m_dwMessage_Type==MESSAGETYPE_EVENT || pMessage->m_dwMessage_Type==MESSAGETYPE_COMMAND )
-							LoggerWrapper::GetInstance()->Write(LogType, "  Data Parm %d(%s): %d bytes", (*il).first, Desc.c_str(), (*il).second);
-					}
+
+
+					LoggerWrapper::GetInstance()->Write(LogType, "  Parameter %d(%s): %s", (*i).first, Desc.c_str(), (*i).second.c_str());
+				}
+				map<long,unsigned long>::iterator il;
+				for(il=pMessage->m_mapData_Lengths.begin();il!=pMessage->m_mapData_Lengths.end();++il)
+				{
+					Desc="";
+					if( pMessage->m_dwMessage_Type==MESSAGETYPE_COMMAND )
+						Desc = m_mapCommandParmNames[(*il).first];
+					else if( pMessage->m_dwMessage_Type==MESSAGETYPE_EVENT )
+						Desc = m_mapEventParmNames[(*il).first];
+					if( pMessage->m_dwMessage_Type==MESSAGETYPE_EVENT || pMessage->m_dwMessage_Type==MESSAGETYPE_COMMAND )
+						LoggerWrapper::GetInstance()->Write(LogType, "  Data Parm %d(%s): %d bytes", (*il).first, Desc.c_str(), (*il).second);
 				}
 			}
 		}
@@ -1344,7 +1178,6 @@ void Router::ReceivedMessage(Socket *pSocket, Message *pMessageWillBeDeleted, bo
 			if ( p != (*SafetyMessage)->m_mapParameters.end() )
 			{
 				int PK_Device = atoi(p->second.c_str());
-#ifndef EMBEDDED_LMCE
 				Row_Device_DeviceData *pRow_Device_DeviceData = 
 					m_pDatabase_pluto_main->Device_DeviceData_get()->GetRow(PK_Device,(*SafetyMessage)->m_dwID);
 				if( pRow_Device_DeviceData )
@@ -1358,21 +1191,6 @@ void Router::ReceivedMessage(Socket *pSocket, Message *pMessageWillBeDeleted, bo
 					pSocket->SendMessage(new Message(m_dwPK_Device, (*SafetyMessage)->m_dwPK_Device_From, PRIORITY_NORMAL, MESSAGETYPE_REPLY, 0, 1, (*SafetyMessage)->m_dwID, pRow_Device_DeviceData->IK_DeviceData_get().c_str()));
 					(*SafetyMessage)->m_bRespondedToMessage=true;
 				}
-#endif // EMBEDDED_LMCE
-
-#ifdef EMBEDDED_LMCE
-				DeviceData_Router *pDeviceData_Router = m_pDataLayer->Device(PK_Device);
-				if(NULL != pDeviceData_Router)
-				{
-					if(pDeviceData_Router->ParameterExists((*SafetyMessage)->m_dwID))
-					{
-						string sValue = pDeviceData_Router->m_mapParameters_Find((*SafetyMessage)->m_dwID);
-						pSocket->SendMessage(new Message(m_dwPK_Device, (*SafetyMessage)->m_dwPK_Device_From, PRIORITY_NORMAL, MESSAGETYPE_REPLY, 0, 1, (*SafetyMessage)->m_dwID, sValue.c_str()));
-					}
-				}
-
-				(*SafetyMessage)->m_bRespondedToMessage=true;
-#endif
 			}
 			if( !(*SafetyMessage)->m_bRespondedToMessage )
 			{
@@ -1410,7 +1228,7 @@ void Router::ReceivedMessage(Socket *pSocket, Message *pMessageWillBeDeleted, bo
 
 		break;
     default:
-        if( ((*SafetyMessage)->m_dwMessage_Type==MESSAGETYPE_COMMAND || (*SafetyMessage)->m_dwMessage_Type==MESSAGETYPE_MESSAGE_INTERCEPTED) && (*SafetyMessage)->m_eExpectedResponse==ER_None )
+        if( (*SafetyMessage)->m_dwMessage_Type==MESSAGETYPE_COMMAND && (*SafetyMessage)->m_eExpectedResponse==ER_None )
         {
             // Do this on a separate thread.  Sometimes devices will send a message requesting a response, holding a blocked mutex
             // while the device they're waiting for a response from sends them a command.  It's safer to send messages on separate
@@ -1541,7 +1359,6 @@ bool Router::ReceivedString(Socket *pSocket, string Line, int nTimeout/* = -1*/)
 	}
     else if( Line.substr(0,6)=="GET_IP" )
 	{
-#ifndef EMBEDDED_LMCE
 		string::size_type pos = 7;
 		string sSql = "SELECT IPaddress FROM Device WHERE PK_Device=" + StringUtils::Tokenize(Line," ",pos);
 
@@ -1550,7 +1367,6 @@ bool Router::ReceivedString(Socket *pSocket, string Line, int nTimeout/* = -1*/)
 		if( (result_set.r=db_wrapper_query_result(sSql)) && (row = db_wrapper_fetch_row(result_set.r))!=NULL && row[0] )
 			pSocket->SendString( row[0] );
 		else
-#endif
 			pSocket->SendString( "BAD DEVICE" );
         return true;
 	}
@@ -1580,7 +1396,6 @@ bool Router::ReceivedString(Socket *pSocket, string Line, int nTimeout/* = -1*/)
 				"LEFT JOIN DeviceCategory As Parent ON DeviceCategory.FK_DeviceCategory_Parent=Parent.PK_DeviceCategory "
 				"WHERE Device.FK_Installation=" + StringUtils::itos(m_dwPK_Installation) + " AND (FK_DeviceCategory=" + Line.substr(19) + " OR Parent.PK_DeviceCategory=" + Line.substr(19) + 
 				" OR Parent.FK_DeviceCategory_Parent=" + Line.substr(19) + ")"; // Check 3 levels deep
-#ifndef EMBEDDED_LMCE
 		PlutoSqlResult result_set;
 		DB_ROW row;
 		if( (result_set.r=db_wrapper_query_result(sSQL)) )
@@ -1598,7 +1413,6 @@ bool Router::ReceivedString(Socket *pSocket, string Line, int nTimeout/* = -1*/)
 				sResponse += "\t";
 			}
 		}
-#endif
 	    pSocket->SendString(sResponse);
 		return true;
 	}
@@ -1609,7 +1423,6 @@ bool Router::ReceivedString(Socket *pSocket, string Line, int nTimeout/* = -1*/)
 		GET_SERVER_SOCKET(gs, pServerSocket, PK_Device );
 
 		DeviceData_Router *pDevice = m_mapDeviceData_Router_Find(PK_Device);
-#ifndef EMBEDDED_LMCE
 		if (pDevice && pDevice->m_pRow_Device->Disabled_get())
 		{
 			pSocket->SendString("DEVICE_REGISTERED D");
@@ -1617,7 +1430,6 @@ bool Router::ReceivedString(Socket *pSocket, string Line, int nTimeout/* = -1*/)
 		else if(! pServerSocket || pServerSocket->m_Socket == INVALID_SOCKET)
 			pSocket->SendString("DEVICE_REGISTERED N");
 		else
-#endif
 		{
 			string sResponse;
 			{
@@ -1656,14 +1468,10 @@ bool Router::ReceivedString(Socket *pSocket, string Line, int nTimeout/* = -1*/)
 	{
 		string::size_type pos = 7;
 		int PK_Device = atoi(StringUtils::Tokenize(Line," ",pos).c_str());
-#ifndef EMBEDDED_LMCE
 		Row_Device *pRow_Device = m_pDatabase_pluto_main->Device_get()->GetRow(PK_Device);
-#endif
 		string sDevice_ControlledVia;
-#ifndef EMBEDDED_LMCE
 		if( pRow_Device )
 			sDevice_ControlledVia = StringUtils::itos( pRow_Device->FK_Device_ControlledVia_get() );
-#endif
 		pSocket->SendString( "PARENT " + sDevice_ControlledVia );
         return true;
 	}
@@ -1673,7 +1481,6 @@ bool Router::ReceivedString(Socket *pSocket, string Line, int nTimeout/* = -1*/)
 			" WHERE IsEmbedded=0 AND ImplementsDCE=1 AND FK_Device_ControlledVia = " + Line.substr(14);
 
 		string sResponse;
-#ifndef EMBEDDED_LMCE
 		PlutoSqlResult result_set;
 		DB_ROW row;
 		if( (result_set.r=db_wrapper_query_result(sSql)) )
@@ -1688,7 +1495,6 @@ bool Router::ReceivedString(Socket *pSocket, string Line, int nTimeout/* = -1*/)
 				sResponse += row[0] + string("\t") + sCommandLine + "\t";
 			}
 		}
-#endif
 		pSocket->SendString( "CHILD_DEVICES " + sResponse );
 	}
 	LoggerWrapper::GetInstance()->Write(LV_WARNING, "Router: Don't know how to handle %s.", Line.c_str());
@@ -1700,9 +1506,7 @@ bool Router::ReceivedString(Socket *pSocket, string Line, int nTimeout/* = -1*/)
 void Router::OnDisconnected(int DeviceID)
 {
 
-#ifndef EMBEDDED_LMCE
 	db_wrapper_thread_end();
-#endif
 
 
 	m_RunningDevices.erase(DeviceID);
@@ -1725,9 +1529,7 @@ void Router::RegisteredCommandHandler(ServerSocket *pSocket, int DeviceID)
 {
     PLUTO_SAFETY_LOCK(sl,m_CoreMutex);
 
-#ifndef EMBEDDED_LMCE
 	db_wrapper_thread_init();
-#endif
 
     DeviceData_Router *pDevice = m_mapDeviceData_Router_Find(DeviceID);
     if( !pDevice )
@@ -1762,7 +1564,6 @@ void Router::RegisteredCommandHandler(ServerSocket *pSocket, int DeviceID)
 
 	sl.Release();  // Do the database updates without blocking the core mutex; they can take a while
 
-#ifndef EMBEDDED_LMCE
 	if( pDevice )
 	{
 		// Don't use sql2cpp class because we don't want the psc_mod timestamp to change
@@ -1775,7 +1576,7 @@ void Router::RegisteredCommandHandler(ServerSocket *pSocket, int DeviceID)
 		string sSQL = "UPDATE Device SET Registered=-1,psc_mod=psc_mod WHERE PK_Device=" + StringUtils::itos(DeviceID);
 		m_pDatabase_pluto_main->threaded_db_wrapper_query(sSQL);
 	}
-#endif
+
 }
 
 
@@ -1837,10 +1638,8 @@ void Router::DoLogReload()
 
 bool Router::Run()
 {
-#ifndef EMBEDDED_LMCE
 	Message::RegisterSerializer(dfXml, &SerializeMessageXML);
 	Message::RegisterDeserializer(dfXml, &DeserializeMessageXML);
-#endif
 /*
 Message::FromXML(string sXMLData)
 >>	MessageXML msg_xml(sXMLData, this);
@@ -1907,10 +1706,8 @@ string Message::ToXML()
 	Sleep(1000); // Let the sockets close
 
 	//mark all devices as unregistered
-#ifndef EMBEDDED_LMCE
 	string sSQL = "UPDATE Device SET Registered = 0, psc_mod = psc_mod";
 	m_pDatabase_pluto_main->threaded_db_wrapper_query(sSQL);
-#endif
 
 	//start watchdog
 	pthread_t watchdog_thread;
@@ -2465,12 +2262,8 @@ LoggerWrapper::GetInstance()->Write(LV_SOCKET, "Got response: %d to message type
                         return;
                     }
                     string sResponse;
-if( pSafetyMessage->m_pMessage->m_dwMessage_Type==9 )
-int k=2;
                     if (pServerSocket->ReceiveString(sResponse))
                     {
-if( pSafetyMessage->m_pMessage->m_dwMessage_Type==9 )
-int k=2;
 
 #ifdef DEBUG
                         if( clock()-clk2>(CLOCKS_PER_SEC*4) )
@@ -2601,7 +2394,9 @@ void Router::ErrorResponse(Socket *pSocket,Message *pMessage)
 
 void Router::ParseDevice(int MasterDeviceID, int ParentDeviceID, class DeviceData_Impl *pDevice)
 {
-	if ( !pDevice->WithinCategory( DEVICECATEGORY_Computers_CONST ) && !pDevice->WithinCategory( DEVICECATEGORY_Core_CONST ) && MasterDeviceID == DEVICEID_DCEROUTER )
+//  if( pDevice->m_dwPK_DeviceCategory == DEVICETEMPLATE_Pluto_Core_CONST )
+//      m_dwPK_Device = pDevice->m_dwPK_Device;
+    if ( !pDevice->WithinCategory( DEVICECATEGORY_Computers_CONST ) && MasterDeviceID == DEVICEID_DCEROUTER )
     {
         MasterDeviceID = pDevice->m_dwPK_Device;
     }
@@ -2644,16 +2439,13 @@ void Router::Configure()
 {
     AllDevices allDevices; // We're going to want a serialized copy of all the device information
 
-#ifndef EMBEDDED_LMCE
 	string sSQL = "UPDATE Device SET Registered=0,psc_mod=psc_mod";
 	m_pDatabase_pluto_main->threaded_db_wrapper_query(sSQL);
 
 	sSQL = "UPDATE Device JOIN Device AS Parent ON Device.FK_Device_ControlledVia=Parent.PK_Device SET Device.FK_Installation=Parent.FK_Installation";
 	while( m_pDatabase_pluto_main->threaded_db_wrapper_query(sSQL)>0 );
-#endif
 
 	// Get the rooms
-#ifndef EMBEDDED_LMCE
     vector<Row_Room *> vectRow_Room;
     GetDatabase()->Room_get()->GetRows("1=1",&vectRow_Room);  // All rows
     for(size_t s=0;s<vectRow_Room.size();++s)
@@ -2675,7 +2467,6 @@ void Router::Configure()
         m_mapDeviceCategory[pDeviceCategory->m_dwPK_DeviceCategory] = pDeviceCategory;
         allDevices.m_mapDeviceCategory[pDeviceCategory->m_dwPK_DeviceCategory] = pDeviceCategory;  // All devices will want this structure too
     }
-#endif
 
     // Map them up to the parents
     Map_DeviceCategory::iterator itCat;
@@ -2701,18 +2492,15 @@ void Router::Configure()
 				LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"Category %d recurses",pCat->m_dwPK_DeviceCategory);
 				pCat->m_pDeviceCategory_Parent = NULL;
 				pCat->m_dwPK_DeviceCategory_Parent = 0;
-#ifndef EMBEDDED_LMCE
 		        Row_DeviceCategory *pRow_DeviceCategory = 
 					m_pDatabase_pluto_main->DeviceCategory_get()->GetRow(pCat->m_dwPK_DeviceCategory);
 				pRow_DeviceCategory->Table_DeviceCategory_get()->Commit();
-#endif
 			}
 			pCat2 = pCat2->m_pDeviceCategory_Parent;
 		}
     }
 
     // Build some static arrays
-#ifndef EMBEDDED_LMCE
     vector<Row_Command *> vectRow_Command;
     GetDatabase()->Command_get()->GetRows("1=1",&vectRow_Command);  // All rows
     for(size_t s=0;s<vectRow_Command.size();++s)
@@ -2736,28 +2524,8 @@ void Router::Configure()
         }
         m_mapCommand[pRow_Command->PK_Command_get()]=pCommand;
     }
-#endif
 
     // Build some static arrays
-#ifdef EMBEDDED_LMCE
-	if(NULL != m_pDataLayer)
-	{
-		if(m_pDataLayer->Load())
-		{
-			m_dwPK_Device_Largest = m_pDataLayer->LargestDeviceNumber();
-
-			std::list<DeviceData_Router *> listRouterDevices;
-			m_pDataLayer->DevicesByTemplate(DEVICETEMPLATE_DCERouter_CONST, listRouterDevices);
-			if(!listRouterDevices.empty())
-			{
-				DeviceData_Router *pRouter = *(listRouterDevices.begin());
-				m_dwPK_Device = pRouter->m_dwPK_Device;
-			}
-		}
-	}
-#endif
-
-#ifndef EMBEDDED_LMCE
     vector<Row_Event *> vectRow_Event;
     GetDatabase()->Event_get()->GetRows("1=1",&vectRow_Event);  // All rows
     for(size_t s=0;s<vectRow_Event.size();++s)
@@ -2856,7 +2624,7 @@ void Router::Configure()
         for(size_t s2=0;s2<vectDeviceParms.size();++s2)
         {
             Row_Device_DeviceData *pRow_DeviceParm = vectDeviceParms[s2];
-            pDevice->ReplaceParameter( pRow_DeviceParm->FK_DeviceData_get(), pRow_DeviceParm->IK_DeviceData_get() );
+            pDevice->m_mapParameters[ pRow_DeviceParm->FK_DeviceData_get()] = pRow_DeviceParm->IK_DeviceData_get();
         }
 
 		// Fill in any missing data, and fix default values.  First for DeviceTemplate
@@ -2865,7 +2633,7 @@ void Router::Configure()
 		for(size_t s=0;s<vectRow_DeviceTemplate_DeviceData.size();++s)
 		{
 			Row_DeviceTemplate_DeviceData *pRow_DeviceTemplate_DeviceData = vectRow_DeviceTemplate_DeviceData[s];
-			if( pDevice->ParameterExists( pRow_DeviceTemplate_DeviceData->FK_DeviceData_get() )==false )
+			if( pDevice->m_mapParameters.find( pRow_DeviceTemplate_DeviceData->FK_DeviceData_get() )==pDevice->m_mapParameters.end() )
 			{
 				// This isn't in the database.  Add it.  It must be new
 				Row_Device_DeviceData *pRow_Device_DeviceData = m_pDatabase_pluto_main->Device_DeviceData_get()->AddRow();
@@ -2873,17 +2641,17 @@ void Router::Configure()
 				pRow_Device_DeviceData->FK_DeviceData_set( pRow_DeviceTemplate_DeviceData->FK_DeviceData_get() );
 				pRow_Device_DeviceData->IK_DeviceData_set( pRow_DeviceTemplate_DeviceData->IK_DeviceData_get() );
 				pRow_Device_DeviceData->Table_Device_DeviceData_get()->Commit();
-				pDevice->ReplaceParameter(pRow_DeviceTemplate_DeviceData->FK_DeviceData_get(), pRow_DeviceTemplate_DeviceData->IK_DeviceData_get());
+				pDevice->m_mapParameters[pRow_DeviceTemplate_DeviceData->FK_DeviceData_get()] = pRow_DeviceTemplate_DeviceData->IK_DeviceData_get();
 			}
 			else if( pRow_DeviceTemplate_DeviceData->UseDeviceTemplateDefault_get()==1 && 
-				pRow_DeviceTemplate_DeviceData->IK_DeviceData_get()!=pDevice->m_mapParameters_Find(pRow_DeviceTemplate_DeviceData->FK_DeviceData_get()) )
+				pRow_DeviceTemplate_DeviceData->IK_DeviceData_get()!=pDevice->m_mapParameters[pRow_DeviceTemplate_DeviceData->FK_DeviceData_get()] )
 			{
 	            Row_Device_DeviceData *pRow_Device_DeviceData = 
 					m_pDatabase_pluto_main->Device_DeviceData_get()->GetRow(pRow_Device->PK_Device_get(),
 					pRow_DeviceTemplate_DeviceData->FK_DeviceData_get());
 				pRow_Device_DeviceData->IK_DeviceData_set( pRow_DeviceTemplate_DeviceData->IK_DeviceData_get() );
 				pRow_Device_DeviceData->Table_Device_DeviceData_get()->Commit();
-				pDevice->ReplaceParameter(pRow_DeviceTemplate_DeviceData->FK_DeviceData_get(), pRow_DeviceTemplate_DeviceData->IK_DeviceData_get());
+				pDevice->m_mapParameters[pRow_DeviceTemplate_DeviceData->FK_DeviceData_get()] = pRow_DeviceTemplate_DeviceData->IK_DeviceData_get();
 			}
 		}
 
@@ -2896,7 +2664,7 @@ void Router::Configure()
 			for(size_t s=0;s<vectRow_DeviceCategory_DeviceData.size();++s)
 			{
 				Row_DeviceCategory_DeviceData *pRow_DeviceCategory_DeviceData = vectRow_DeviceCategory_DeviceData[s];
-				if( pDevice->ParameterExists( pRow_DeviceCategory_DeviceData->FK_DeviceData_get() )==false )
+				if( pDevice->m_mapParameters.find( pRow_DeviceCategory_DeviceData->FK_DeviceData_get() )==pDevice->m_mapParameters.end() )
 				{
 					// This isn't in the database.  Add it.  It must be new
 					Row_Device_DeviceData *pRow_Device_DeviceData = m_pDatabase_pluto_main->Device_DeviceData_get()->AddRow();
@@ -2904,32 +2672,26 @@ void Router::Configure()
 					pRow_Device_DeviceData->FK_DeviceData_set( pRow_DeviceCategory_DeviceData->FK_DeviceData_get() );
 					pRow_Device_DeviceData->IK_DeviceData_set( pRow_DeviceCategory_DeviceData->IK_DeviceData_get() );
 					pRow_Device_DeviceData->Table_Device_DeviceData_get()->Commit();
-					pDevice->ReplaceParameter(pRow_DeviceCategory_DeviceData->FK_DeviceData_get(), pRow_DeviceCategory_DeviceData->IK_DeviceData_get());
+					pDevice->m_mapParameters[pRow_DeviceCategory_DeviceData->FK_DeviceData_get()] = pRow_DeviceCategory_DeviceData->IK_DeviceData_get();
 				}
 				else if( pRow_DeviceCategory_DeviceData->UseDeviceCategoryDefault_get()==1 && 
-					pRow_DeviceCategory_DeviceData->IK_DeviceData_get()!=pDevice->m_mapParameters_Find(pRow_DeviceCategory_DeviceData->FK_DeviceData_get()) )
+					pRow_DeviceCategory_DeviceData->IK_DeviceData_get()!=pDevice->m_mapParameters[pRow_DeviceCategory_DeviceData->FK_DeviceData_get()] )
 				{
 					Row_Device_DeviceData *pRow_Device_DeviceData = 
 						m_pDatabase_pluto_main->Device_DeviceData_get()->GetRow(pRow_Device->PK_Device_get(),
 						pRow_DeviceCategory_DeviceData->FK_DeviceData_get());
 					pRow_Device_DeviceData->IK_DeviceData_set( pRow_DeviceCategory_DeviceData->IK_DeviceData_get() );
 					pRow_Device_DeviceData->Table_Device_DeviceData_get()->Commit();
-					pDevice->ReplaceParameter(pRow_DeviceCategory_DeviceData->FK_DeviceData_get(), pRow_DeviceCategory_DeviceData->IK_DeviceData_get());
+					pDevice->m_mapParameters[pRow_DeviceCategory_DeviceData->FK_DeviceData_get()] = pRow_DeviceCategory_DeviceData->IK_DeviceData_get();
 				}
 			}
 			pRow_DeviceCategory=pRow_DeviceCategory->FK_DeviceCategory_Parent_getrow();
 		}
 	}
-#endif //EMBEDDED_LMCE
-
-#ifdef EMBEDDED_LMCE
-	DATA_LAYER_LEGACY_CODE;
-#endif
 
 	for(map<int,class DeviceData_Router *>::iterator it=m_mapDeviceData_Router.begin();it!=m_mapDeviceData_Router.end();++it)
     {
 		DeviceData_Router *pDevice = it->second;
-#ifndef EMBEDDED_LMCE
 		vector<Row_Device_Device_Pipe *> vectRow_Device_Device_Pipe;
 		pDevice->m_pRow_Device->Device_Device_Pipe_FK_Device_From_getrows(&vectRow_Device_Device_Pipe);
 		for(vector<Row_Device_Device_Pipe *>::iterator itP=vectRow_Device_Device_Pipe.begin();itP!=vectRow_Device_Device_Pipe.end();++itP)
@@ -2943,7 +2705,6 @@ void Router::Configure()
 				pDevice->m_mapPipe_Available[pRow_Device_Device_Pipe->FK_Pipe_get()] = new Pipe(pDevice,pDevice_To,pRow_Device_Device_Pipe->FK_Pipe_get(),pCommand_Input,pCommand_Output);
 			}
 		}
-#endif
 	}
 
     // Now match up children to parents
@@ -2974,7 +2735,6 @@ void Router::Configure()
     for(itDevice=m_mapDeviceData_Router.begin();itDevice!=m_mapDeviceData_Router.end();++itDevice)
     {
         DeviceData_Router *pDevice = (*itDevice).second;
-#ifndef EMBEDDED_LMCE
 		vector<Row_Device_Device_Related *> vectRow_Device_Device_Related;
 		pDevice->m_pRow_Device->Device_Device_Related_FK_Device_getrows(&vectRow_Device_Device_Related);
 		for(size_t s=0;s<vectRow_Device_Device_Related.size();++s)
@@ -2990,7 +2750,6 @@ void Router::Configure()
         DeviceData_Router *pDevice_RouteTo = m_mapDeviceData_Router_Find(pDevice->m_pRow_Device->FK_Device_RouteTo_get());
         if( pDevice_RouteTo )
             pDevice->m_pDevice_RouteTo = pDevice_RouteTo;
-#endif
     }
 
 	// Be sure nothing is recursive
@@ -3014,22 +2773,13 @@ void Router::Configure()
         DeviceData_Base *pDevice_AL = allDevices.m_mapDeviceData_Base_Find(pDevice->m_dwPK_Device);
 
 		if( pDevice->m_pDevice_Core )
-		{
-			pDevice->m_dwPK_Device_Core = pDevice->m_pDevice_Core->m_dwPK_Device;
-			if( pDevice_AL )
-				pDevice_AL->m_dwPK_Device_Core = pDevice->m_pDevice_Core->m_dwPK_Device;
-		}
+			pDevice->m_dwPK_Device_Core = pDevice_AL->m_dwPK_Device_Core = pDevice->m_pDevice_Core->m_dwPK_Device;
 
 		if( pDevice->m_pDevice_MD )
-		{
-			pDevice->m_dwPK_Device_MD = pDevice->m_pDevice_MD->m_dwPK_Device;
-			if( pDevice_AL )
-				pDevice_AL->m_dwPK_Device_MD = pDevice->m_pDevice_MD->m_dwPK_Device;
-		}
+			pDevice->m_dwPK_Device_MD = pDevice_AL->m_dwPK_Device_MD = pDevice->m_pDevice_MD->m_dwPK_Device;
     }
 
 	// Get the device groups
-#ifndef EMBEDDED_LMCE
     vector<Row_DeviceGroup *> vectDeviceGroup;
     GetDatabase()->DeviceGroup_get()->GetRows(string(DEVICE_FK_INSTALLATION_FIELD) + "=" + StringUtils::itos(m_dwPK_Installation),&vectDeviceGroup);
 
@@ -3049,7 +2799,7 @@ void Router::Configure()
         allDevices.m_mapDeviceGroup[pDeviceGroup->m_dwPK_DeviceGroup] = pDeviceGroup;
         m_mapDeviceGroup[pDeviceGroup->m_dwPK_DeviceGroup] = pDeviceGroup;
     }
-#endif
+
     // Serialize everything
     allDevices.SerializeWrite();
     m_dwIDeviceStructure_Size=(unsigned long) allDevices.CurrentSize();
@@ -3069,7 +2819,6 @@ void Router::Configure()
     }
 
 	// Build all the command groups
-#ifndef EMBEDDED_LMCE
     vector<Row_CommandGroup *> vectRow_CommandGroup;
 	m_pRow_Installation = GetDatabase()->Installation_get()->GetRow(m_dwPK_Installation);
 	if (m_pRow_Installation == NULL)
@@ -3110,9 +2859,7 @@ void Router::Configure()
         }
 
     }
-#endif
 
-#ifndef EMBEDDED_LMCE
     vector<Row_CommandParameter *> vectRow_CommandParameter;
     GetDatabase()->CommandParameter_get()->GetRows("1=1",&vectRow_CommandParameter);  // All rows
     for(size_t s=0;s<vectRow_CommandParameter.size();++s)
@@ -3128,7 +2875,6 @@ void Router::Configure()
         Row_EventParameter *pRow_EventParameter = vectRow_EventParameter[s];
         m_mapEventParmNames[pRow_EventParameter->PK_EventParameter_get()]=pRow_EventParameter->Description_get();
     }
-#endif
 
 	m_pBufferForDeviceCategories = allDevices.m_pcDataBlock;
 	allDevices.DontDeleteData(); // We use the category and group pointers here.  Just delete the device Data
@@ -3147,10 +2893,6 @@ string Router::GetDevicesByDeviceTemplate(DeviceData_Router *pDeviceData_From,in
 {
 	if( BroadcastLevel!=BL_AllHouses && BroadcastLevel!=BL_SameHouse && !pDeviceData_From )
 		return "";  // If we're going to filter, we need an incoming device
-
-#ifdef EMBEDDED_LMCE
-	DATA_LAYER_LEGACY_CODE;
-#endif
 
 	string Result="";
     map<int,class DeviceData_Router *>::iterator itDevice;
@@ -3185,12 +2927,7 @@ string Router::GetDevicesByCategory(DeviceData_Router *pDeviceData_From,int PK_D
 {
 	if( BroadcastLevel!=BL_AllHouses && !pDeviceData_From )
 		return ""; // If we're going to filter, we need an incoming device
-
-#ifdef EMBEDDED_LMCE
-	DATA_LAYER_LEGACY_CODE;
-#endif
-	
-	string Result="";
+    string Result="";
     map<int,class DeviceData_Router *>::iterator itDevice;
     for(itDevice=m_mapDeviceData_Router.begin();itDevice!=m_mapDeviceData_Router.end();++itDevice)
     {
@@ -3263,7 +3000,6 @@ LoggerWrapper::GetInstance()->Write(LV_STATUS,"Looking for device with temp: %d 
 	}
 
 	// We'll have to search based on IP or Mac Address.  This might be a new device that hasn't been loaded into the router yet
-#ifndef EMBEDDED_LMCE
 	vector<Row_Device *> vectRow_Device;
 	string sWhere="FK_Installation=" + StringUtils::itos(m_dwPK_Installation) + " AND IPaddress='" + StringUtils::SQLEscape(sIPAddress) + "' AND MACaddress='" + StringUtils::SQLEscape(sMacAddress) + "'";
 	m_pDatabase_pluto_main->Device_get()->GetRows(sWhere,&vectRow_Device);
@@ -3280,7 +3016,6 @@ LoggerWrapper::GetInstance()->Write(LV_STATUS,"Looking for device with temp: %d 
 
 	if( vectRow_Device.size()==1 )  // Only if we found only 1 device consider it a match
 		return vectRow_Device[0]->PK_Device_get();
-#endif
 	return 0;
 }
 
@@ -3289,11 +3024,9 @@ int Router::ConfirmDeviceTemplate( int iPK_Device, int iPK_DeviceTemplate )
 	DeviceData_Router *pDevice = m_mapDeviceData_Router_Find( iPK_Device );
 	if( !pDevice )
 	{
-#ifndef EMBEDDED_LMCE
 		Row_Device *pRow_Device = m_pDatabase_pluto_main->Device_get()->GetRow( iPK_Device );
 		if( pRow_Device && pRow_Device->FK_Installation_get()==m_dwPK_Installation )
 			return 3;
-#endif
 		return 0;
 	}
 	return pDevice->m_dwPK_DeviceTemplate == iPK_DeviceTemplate ? 2 : 1;
@@ -3333,10 +3066,8 @@ void Router::RemoveAndDeleteSocket( ServerSocket *pServerSocket, bool bDontDelet
 
 	if(!m_bQuit)
 	{
-#ifndef EMBEDDED_LMCE
 		string sSQL = "UPDATE Device SET Registered=0,psc_mod=psc_mod WHERE PK_Device=" + StringUtils::itos(PK_Device);
 		m_pDatabase_pluto_main->threaded_db_wrapper_query(sSQL);
-#endif
 	}
 
 	SocketListener::RemoveAndDeleteSocket( pServerSocket, bDontDelete );
@@ -3376,10 +3107,8 @@ void Router::CheckForRecursiveControlledVia(DeviceData_Router *pDevice,vector<in
 			LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"Device %d is recursive controlled via",pDevice->m_dwPK_Device);
 			pDevice->m_pDevice_ControlledVia=NULL;
 			pDevice->m_dwPK_Device_ControlledVia=0;
-#ifndef EMBEDDED_LMCE
 			pDevice->m_pRow_Device->FK_Device_ControlledVia_setNull(true);
 			pDevice->m_pRow_Device->Table_Device_get()->Commit();
-#endif
 		}
 
 	if( !pDevice->m_pDevice_ControlledVia )
@@ -3395,10 +3124,8 @@ void Router::CheckForRecursiveRouteTo(DeviceData_Router *pDevice,vector<int> *pv
 		{
 			LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"Device %d is recursive route to",pDevice->m_dwPK_Device);
 			pDevice->m_pDevice_RouteTo=NULL;
-#ifndef EMBEDDED_LMCE
 			pDevice->m_pRow_Device->FK_Device_RouteTo_setNull(true);
 			pDevice->m_pRow_Device->Table_Device_get()->Commit();
-#endif
 		}
 
 	if( !pDevice->m_pDevice_RouteTo )
@@ -3418,14 +3145,12 @@ void Router::CheckForRecursivePipes(DeviceData_Router *pDevice,vector<int> *pvec
 			{
 				LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"Device %d is recursive pipe",pDevice->m_dwPK_Device);
 				bPipesRecurse=true;
-#ifndef EMBEDDED_LMCE
 				Row_Device_Device_Pipe *pRow_Device_Device_Pipe = m_pDatabase_pluto_main->Device_Device_Pipe_get()->GetRow(pPipe->m_pDevice_From->m_dwPK_Device,pPipe->m_pDevice_To->m_dwPK_Device,pPipe->m_PK_Pipe);
 				if( pRow_Device_Device_Pipe )
 				{
 					pRow_Device_Device_Pipe->Delete();
 					pRow_Device_Device_Pipe->Table_Device_Device_Pipe_get()->Commit();
 				}
-#endif
 			}
 	}
 
@@ -3492,7 +3217,6 @@ bool Router::IsPlugin(int iPK_Device)
 	return ( m_mapPlugIn.find(iPK_Device) !=  m_mapPlugIn.end() );
 }
 
-#ifndef EMBEDDED_LMCE
 bool SerializeMessageXML(Message *pMessage, char *&pData, size_t &nSize)
 {
 	//message -> xml
@@ -3515,7 +3239,6 @@ bool DeserializeMessageXML(Message *pMessage, char *pData, size_t nSize)
 
 	return !msg_xml.Failed();
 }
-#endif
 
 void Router::HandleMessageFailure(SafetyMessage *pSafetyMessage)
 {

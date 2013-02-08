@@ -1,0 +1,14 @@
+Source: vloopback
+Section: unknown
+Priority: optional
+Maintainer: Jack Bates <ms419@freezone.co.uk>
+Build-Depends: debhelper (>> 4.0.0) # module-assistant?
+Standards-Version: 3.6.2
+
+Package: vloopback-modules-_KVERS_
+Architecture: any
+Provides: vloopback-modules
+Description: vloopback modules for Linux _KVERS_
+ vloopback is a video4linux driver providing video pipes.  With this driver you
+ can use the output of a user program as input to another program which would
+ normally communicate with a video4linux device.

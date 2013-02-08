@@ -94,12 +94,6 @@ int main(int argc, char *argv[])
 		{
 			string str = pBuffer;
 			if( ReplaceTags(str,*it) )
-				// if filename is a template (extension .prep) we have to strip it for the output
-				LoggerWrapper::GetInstance()->Write(LV_STATUS, "Checking for template");
-				if ( sFile.find (".prep") == (sFile.length()-5)) {
-					sFile.erase(sFile.length()-5);
-					LoggerWrapper::GetInstance()->Write(LV_STATUS, "Template found, new filename: '%s'", sFile.c_str());
-				}
 				FileUtils::WriteBufferIntoFile(sFile,str.c_str(),str.size());
 			delete pBuffer;
 		}

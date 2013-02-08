@@ -5,6 +5,8 @@ Priority: optional
 Architecture: {Kernel_Arch}
 Installed-Size: 5796
 Provides: fuse-module, ivtv-modules, kvm-api-4, linux-image, linux-image-2.6, linux-image-{Kernel_Version}, rhcs-modules2-1
-Maintainer: LinuxMCE Team <webpaul1@gmail.com>
+Depends: linux-headers-{Kernel_Version}
+Suggests: linux-restricted-modules-{Kernel_Version}
+Maintainer: LinuxMCE Team <packaging@linuxmce.org>
 Description: Linux kernel image for version {Kernel_Version} on {Kernel_Arch} Diskless
  Kernel image for LinuxMCE diskless Media Directors

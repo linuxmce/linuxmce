@@ -86,7 +86,7 @@ using namespace DCE;
 #include <cctype>
 #include <algorithm>
 
-#include "../include/version.h"
+#define VERSION "<=version=>"
 string g_sLatestMobilePhoneVersion="2006.11.09";
 
 #include "../Media_Plugin/EntertainArea.h"
@@ -898,7 +898,6 @@ bool Orbiter_Plugin::ReloadAborted(class Socket *pSocket,class Message *pMessage
 		return false;
 
 	DeviceData_Router *pDeviceData_Router = m_pRouter->m_mapDeviceData_Router_Find(PK_Device);
-
 	SCREEN_Cannot_Reload_Router SCREEN_Cannot_Reload_Router(m_dwPK_Device, PK_Orbiter, pDeviceData_Router->m_sDescription + "\n" + pMessage->m_mapParameters[EVENTPARAMETER_Text_CONST]);
 	SendCommand(SCREEN_Cannot_Reload_Router);
 
@@ -1128,7 +1127,8 @@ void Orbiter_Plugin::CMD_New_Orbiter(string sType,int iPK_Users,int iPK_DeviceTe
 		}
 		else if( sType=="Symbian60" )
 		{
-			iPK_DeviceTemplate=DEVICETEMPLATE_Symbian_Series_60_mobile_CONST;
+			iPK_DeviceTemplate=DEVICETEMPLATE_Symbian_S60_v1v2_CONST;
+			// iPK_DeviceTemplate=DEVICETEMPLATE_Symbian_Series_60_mobile_CONST;
 			PK_UI=UI_Symbian_Series_60_Phone_CONST;
 			iWidth=176;
 			iHeight=208;
@@ -1584,7 +1584,7 @@ LoggerWrapper::GetInstance()->Write(LV_STATUS,"Preparing floorplan %d devices",N
 
 		int FloorplanObjectType = 0;
 		if( pDeviceData_Router )
-			FloorplanObjectType = atoi(pDeviceData_Router->m_mapParameters_Find(DEVICEDATA_PK_FloorplanObjectType_CONST).c_str());
+			FloorplanObjectType = atoi(pDeviceData_Router->mapParameters_Find(DEVICEDATA_PK_FloorplanObjectType_CONST).c_str());
 		else if( pEntertainArea )
 		{
 			Row_EntertainArea *pRow_EntertainArea = m_pDatabase_pluto_main->EntertainArea_get()->GetRow(pEntertainArea->m_iPK_EntertainArea);
@@ -1883,7 +1883,7 @@ void Orbiter_Plugin::CMD_Regen_Orbiter(int iPK_Device,string sForce,string sRese
 			{
 				int Minutes = (int)(time(NULL) - pOH_Orbiter->m_tRegenTime) /60;
 				string sMessage = "We already started regenerating the orbiter " + pOH_Orbiter->m_pDeviceData_Router->m_sDescription + " " + StringUtils::itos(Minutes) +
-					" minutes ago.  When it is finished, it will return to the main menu automatically.  If you think it is stuck, you may want to reset the Pluto system";
+					" minutes ago.  When it is finished, it will return to the main menu automatically.  If you think it is stuck, you may want to reset the LinuxMCE system";
 				SCREEN_PopupMessage SCREEN_PopupMessage(m_dwPK_Device, pMessage->m_dwPK_Device_From,
 					sMessage, // Main message
 					"", // Command Line
@@ -2034,8 +2034,9 @@ bool Orbiter_Plugin::OSD_OnOff( class Socket *pSocket, class Message *pMessage, 
 		return false; // This message originated with us
 
 	pOH_Orbiter->m_bDisplayOn = pMessage->m_dwID==COMMAND_Generic_On_CONST;
-	if( pOH_Orbiter->m_pDeviceData_Router->m_mapParameters_Find(DEVICEDATA_Leave_Monitor_on_for_OSD_CONST)!="" && 
-		pOH_Orbiter->m_pDeviceData_Router->m_mapParameters_Find(DEVICEDATA_Leave_Monitor_on_for_OSD_CONST)=="1" )
+	if( pOH_Orbiter->m_pDeviceData_Router->m_mapParameters.find(DEVICEDATA_Leave_Monitor_on_for_OSD_CONST)!=
+		pOH_Orbiter->m_pDeviceData_Router->m_mapParameters.end() && 
+		pOH_Orbiter->m_pDeviceData_Router->m_mapParameters[DEVICEDATA_Leave_Monitor_on_for_OSD_CONST]=="1" )
 	{
 		OverrideAVPipe(pOH_Orbiter->m_pDeviceData_Router,pOH_Orbiter->m_bDisplayOn);
 	}

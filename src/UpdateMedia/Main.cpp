@@ -19,7 +19,6 @@
 #include "PlutoUtils/FileUtils.h"
 #include "PlutoUtils/StringUtils.h"
 #include "PlutoUtils/Other.h"
-#include "PlutoUtils/DatabaseUtils.h"
 #include "DCEConfig.h"
 #include "Logger.h"
 #include "UpdateMedia.h"
@@ -50,7 +49,6 @@
 
 #include "inotify/FileNotifier.h"
 #include "PlutoMediaFile.h"
-#include "PlutoMediaFile.h"
 #include "pluto_media/Define_AttributeType.h"
 
 #include "DCE/Message.h"
@@ -58,7 +56,7 @@
 #include "pluto_main/Define_Command.h"
 #include "pluto_main/Define_DeviceTemplate.h"
 
-#include "../include/version.h"
+#define  VERSION "<=version=>"
 
 using namespace std;
 using namespace DCE;
@@ -81,6 +79,31 @@ namespace UpdateMediaVars
 }
 
 using namespace UpdateMediaVars;
+
+
+
+void SyncAttributes()
+{
+	LoggerWrapper::GetInstance()->Write(LV_WARNING, "Synchronizing attributes... "); 
+
+    int nAffectedRecords = g_pDatabase_pluto_media->threaded_db_wrapper_query(
+		"INSERT INTO Picture_Attribute(FK_Attribute,FK_Picture) "
+		"SELECT PK_Attribute,min(Picture_File.FK_Picture) as FK_Picture FROM Attribute "
+		"JOIN File_Attribute ON File_Attribute.FK_Attribute=PK_Attribute "
+		"JOIN Picture_File ON Picture_File.FK_File=File_Attribute.FK_File "
+		"LEFT JOIN Picture_Attribute ON Picture_Attribute.FK_Attribute=PK_Attribute "
+		"WHERE Picture_Attribute.FK_Picture is NULL AND FK_AttributeType IN (" 
+		TOSTRING(ATTRIBUTETYPE_Performer_CONST) ", "
+		TOSTRING(ATTRIBUTETYPE_Album_CONST) ", " 
+		TOSTRING(ATTRIBUTETYPE_Title_CONST) ") "
+		"GROUP BY PK_Attribute"
+	);
+
+	if(nAffectedRecords == -1)
+		LoggerWrapper::GetInstance()->Write(LV_CRITICAL, "Attributes sync failed!"); 
+	else
+		LoggerWrapper::GetInstance()->Write(LV_WARNING, "Attributes sync succeeded! Records affected %d", nAffectedRecords); 
+}
 
 void RemoveDuplicatedAttributes()
 {
@@ -158,7 +181,7 @@ void RemoveDuplicatedAttributes()
 
 void *UpdateMediaThread(void *)
 {
-	DatabaseUtils::SyncMediaAttributes(g_pDatabase_pluto_main);
+	SyncAttributes();
 	RemoveDuplicatedAttributes();
 
 	PlutoMediaIdentifier::Activate(g_pDatabase_pluto_main);
@@ -168,12 +191,15 @@ void *UpdateMediaThread(void *)
 	while(true)
 	{
 		//load info about ModificationData, AttrCount, AttrDate, attributes, timestamp for all files
+#ifdef UPDATEMEDIA_STATUS
 		LoggerWrapper::GetInstance()->Write(LV_STATUS, "Loading fresh data from db...");
+#endif
 		MediaState::Instance().LoadDbInfo(g_pDatabase_pluto_media, UpdateMediaVars::sDirectory);
+#ifdef UPDATEMEDIA_STATUS
 		LoggerWrapper::GetInstance()->Write(LV_STATUS, "Loaded fresh data from db");
 
 		LoggerWrapper::GetInstance()->Write(LV_STATUS, "Worker thread: \"I'm wake!\"");        
-		
+#endif		
 		//UPnP changes: as UPnP mount share doesn't work with inotify (?? 
 		//at least I don't see it firing any expected events, we are manually 
 		//checking contents of 'devices' list for any changes
@@ -208,8 +234,9 @@ void *UpdateMediaThread(void *)
 
 			LoggerWrapper::GetInstance()->Write(LV_WARNING, "Folder to process: %s", sItem.c_str());	
 			PLUTO_SAFETY_LOCK(cm, g_ConnectionMutex );
+#ifdef UPDATEMEDIA_STATUS
 			LoggerWrapper::GetInstance()->Write(LV_STATUS, "Synchronizing '%s'...", sItem.c_str());	
-
+#endif
 			PlutoMediaFile::ResetNewFilesAddedStatus();
 				
 			UpdateMedia engine(g_pDatabase_pluto_media, g_pDatabase_pluto_main, sItem);
@@ -221,16 +248,19 @@ void *UpdateMediaThread(void *)
 
 			if( bUpdateThumbnails )
 				engine.UpdateThumbnails();
-
+#ifdef UPDATEMEDIA_STATUS
 			LoggerWrapper::GetInstance()->Write(LV_STATUS, "Synchronized '%s'.", sItem.c_str());
-
+#endif
 			if(PlutoMediaFile::NewFilesAdded())
 			{
+#ifdef UPDATEMEDIA_STATUS
 				LoggerWrapper::GetInstance()->Write(LV_STATUS, "New files were added to db for '%s'.", sItem.c_str());
+#endif
+				SyncAttributes();
 
-				DatabaseUtils::SyncMediaAttributes(g_pDatabase_pluto_main);
-
+#ifdef UPDATEMEDIA_STATUS
 				LoggerWrapper::GetInstance()->Write(LV_STATUS, "Sending \"Check for new files\" command to Media_Plugin...");
+#endif
 				Event_Impl *pEvent = new Event_Impl(DEVICEID_MESSAGESEND, 0, "dcerouter");
 				Message* pMessage = new Message(0, DEVICETEMPLATE_Media_Plugin_CONST, BL_SameHouse, 
 					MESSAGETYPE_COMMAND, PRIORITY_NORMAL, 
@@ -240,8 +270,9 @@ void *UpdateMediaThread(void *)
 				pEvent = NULL;
 
 				RemoveDuplicatedAttributes();
-
+#ifdef UPDATEMEDIA_STATUS
 				LoggerWrapper::GetInstance()->Write(LV_STATUS, "Command \"Check for new files\" sent!");
+#endif
 			}
 
 			flm.Relock();
@@ -265,15 +296,18 @@ void OnModify(list<string> &listFiles)
 		struct stat st;
 		if(0 != stat(sItem.c_str(), &st))
 		{
+#ifdef UPDATEMEDIA_STATUS
 			LoggerWrapper::GetInstance()->Write(LV_STATUS, "stat failed for %s. We'll try to parent!", sItem.c_str());
-			
+#endif			
 			size_t nPos = sItem.rfind("/");
 			if(nPos != string::npos)
 				sItem = sItem.substr(0, nPos);
 
 			if(0 != stat(sItem.c_str(), &st))
 			{
+#ifdef UPDATEMEDIA_STATUS
 				LoggerWrapper::GetInstance()->Write(LV_STATUS, "stat failed for %s. We'll skip it!", sItem.c_str());
+#endif
 				continue;
 			}
 		}
@@ -285,8 +319,9 @@ void OnModify(list<string> &listFiles)
 			if(nPos != string::npos)
 				sItem = sItem.substr(0, nPos);
 		}
-
+#ifdef UPDATEMEDIA_STATUS
 		LoggerWrapper::GetInstance()->Write(LV_STATUS, "New folder %s to sync...", sItem.c_str());        
+#endif
 		PLUTO_SAFETY_LOCK(flm, g_FoldersListMutex);
 
 		bool bFound = false;
@@ -318,6 +353,10 @@ int main(int argc, char *argv[])
 	bRunAsDaemon=false;
 	bSyncFilesOnly=false;
 	sDirectory="/home/";
+
+        string sPlutoMediaDbName = "pluto_media";
+        string sPlutoMainDbName = "pluto_main";
+
 
 	string sDBHost;
 	string sDBUser;
@@ -361,6 +400,12 @@ int main(int argc, char *argv[])
 		case 'p':
 			sDBPassword = argv[++optnum];
 			break;
+		case 'D':
+			sPlutoMainDbName = argv[++optnum];
+			break;
+		case 'M':
+			sPlutoMediaDbName = argv[++optnum];
+			break;
 		case 'P':
 			iDBPort = atoi(argv[++optnum]);
 			break;
@@ -392,16 +437,18 @@ int main(int argc, char *argv[])
 	if ( bError )
 	{
 		cout << "UpdateMedia, v." << VERSION << endl
-			<< "Usage: UpdateMedia [-h hostname] [-u username] [-p password] [-D database] [-P mysql port]" << endl
+			<< "Usage: UpdateMedia [-h hostname] [-u username] [-p password]" << endl
+			<< "[-D main database] [-M media database] [-P mysql port]" << endl
 			<< "[-d The list with directories, pipe delimited] [-U UPnP mount point to scan] [-s] [-t]" << endl
-			<< "hostname    -- address or DNS of database host, default is `dce_router`" << endl
-			<< "username    -- username for database connection" << endl
-			<< "password    -- password for database connection, default is `` (empty)" << endl
-			<< "database    -- database name.  default is pluto_main" << endl
-			<< "-s          -- Update all search tokens" << endl
-			<< "-t          -- Update all thumbnails" << endl
-			<< "-w			-- Synchronize files only" << endl
-			<< "-B          -- Run as daemon" << endl
+			<< "hostname       -- address or DNS of database host, default is `dce_router`" << endl
+			<< "username       -- username for database connection" << endl
+			<< "password       -- password for database connection, default is `` (empty)" << endl
+			<< "main database  -- main database name.  default is pluto_main" << endl
+			<< "media database -- media database name.  default is pluto_media" << endl
+			<< "-s             -- Update all search tokens" << endl
+			<< "-t             -- Update all thumbnails" << endl
+			<< "-w             -- Synchronize files only" << endl
+			<< "-B             -- Run as daemon" << endl
 			<< "Directory defaults to /home" << endl;
 
 		exit(1);
@@ -457,8 +504,6 @@ int main(int argc, char *argv[])
         g_ConnectionMutex.Init(NULL);
 		g_FoldersListMutex.Init(NULL, &g_ActionCond);
 
-        string sPlutoMediaDbName = "pluto_media";
-        string sPlutoMainDbName = "pluto_main";
 
 #ifdef USE_DEVEL_DATABASES
         sPlutoMediaDbName = "pluto_media_devel";

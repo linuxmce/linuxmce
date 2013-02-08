@@ -1,0 +1,45 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+"http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+	<head>
+		<meta name="viewport" content="width = device-width, user-scalable=no, initial-scale=1.0, minimum-scale=1.0, maximum-scale=1.0" />
+		<meta name="apple-mobile-web-app-capable" content="yes" />
+		<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+
+		<title>WebOrbiter {Description}</title>
+
+		<script type="text/javascript" src="sendKey.js.php"></script>
+		<script type="text/javascript" src="weborbiter/jquery.min.js"></script>
+		<script type="text/javascript" src="weborbiter/jquery.timers.js"></script>
+
+		<script type="text/javascript" src="weborbiter/weborbiter.js"></script>
+
+		<link rel="stylesheet" type="text/css" href="weborbiter/weborbiter.css" />
+		<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+	</head>
+	<body onload="PageLoaded({DeviceNumber})">
+<!-- BEGIN NotFound -->
+		<p>Orbiter proxy not found.</p>
+<!-- END NotFound -->
+<!-- BEGIN Orbiter -->
+		<div>	
+			<img id="waiting" alt="waiting info" src="weborbiter/waiting.gif" />
+		</div>
+		<div>
+			<img id="screen" alt="WebOrbiter Screen" onclick="sendTouch(event)"
+				src="weborbiter_image.php?device_id={DeviceNumber}&amp;rand={ImgRandom}"
+			/>
+		</div>
+		<div>
+			<input type="button" value="Home" onclick="DoCmd('PLUTO_KEY 10');" />
+			<input type="button" value="Back" onclick="DoCmd('PLUTO_KEY 11');" />
+			<input type="button" value="Refresh" onclick="DoCmd('IMAGE');" />
+			<input type="button" value="Exit" onclick="self.close();" />
+			<input type="button" value="Log out" onclick="$('#logout_form').submit()" />
+		</div>
+		<form id="logout_form" method="post" action="weborbiter.php">
+			<p><input type="hidden" name="action" value="logout" /></p>
+		</form>
+	</body>
+<!-- END Orbiter -->
+</html>

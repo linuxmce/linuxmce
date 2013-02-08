@@ -102,8 +102,10 @@ case "$URL_TYPE" in
 
 		if ! PackageIsInstalled "$PKG_NAME"; then
 			#export http_proxy="http://dcerouter:8123"
+			echo "Installing $PKG_NAME from $REPOS" >>/dev/tty1
 			if ! keep_sending_enters | apt-get -t "$REPOS" -y --reinstall install "$PKG_NAME"; then
 				echo "$0: Apt error" >&2
+				echo "$0: Apt error $ERR_APT">>/dev/tty1
 				exit $ERR_APT
 			fi
 
@@ -119,6 +121,7 @@ case "$URL_TYPE" in
 			true
 		else
 			mkdir -p /usr/pluto/download
+			echo "Downloading $@">>/dev/tty1
 			/usr/pluto/install/Download_Direct.sh "$@" || exit $ERR_DOWNLOAD
 		
 			if [ "$REPOS_TYPE" -eq 1 ]; then

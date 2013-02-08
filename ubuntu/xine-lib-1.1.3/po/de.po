@@ -1345,6 +1345,21 @@ msgstr "Falsche Version von Zeichensatz '%s'. Erwartet %d gefunden %d.\n"
 msgid "osd: cannot initialize ft2 library\n"
 msgstr "osd: Kann ft2-Bibliothek nicht initialisieren\n"
 
+#: src/xine-engine/osd.c:851
+#, c-format
+msgid "osd: error matching font %s with FontConfig"
+msgstr "osd: Fehler beim Suchen des Zeichensatzes %s mit FontConfig"
+
+#: src/xine-engine/osd.c:865
+#, c-format
+msgid "osd: error loading font %s with FontConfig"
+msgstr "osd: Fehler beim Laden des Zeichensatzes %s mit FontConfig"
+
+#: src/xine-engine/osd.c:868
+#, c-format
+msgid "osd: error looking up font %s with FontConfig"
+msgstr "osd: Fehler beim Zusammenstellen des Zeichensatzes %s mit FontConfig"
+
 #: src/xine-engine/osd.c:891
 #, c-format
 msgid "osd: error loading font %s with ft2\n"
@@ -5665,16 +5680,6 @@ msgstr "Namensauflösung schlug fehl"
 #: lib/hstrerror.c:22
 msgid "Unknown error"
 msgstr "Unbekannter Fehler"
-
-#~ msgid "osd: error matching font %s with FontConfig"
-#~ msgstr "osd: Fehler beim Suchen des Zeichensatzes %s mit FontConfig"
-
-#~ msgid "osd: error loading font %s with FontConfig"
-#~ msgstr "osd: Fehler beim Laden des Zeichensatzes %s mit FontConfig"
-
-#~ msgid "osd: error looking up font %s with FontConfig"
-#~ msgstr ""
-#~ "osd: Fehler beim Zusammenstellen des Zeichensatzes %s mit FontConfig"
 
 #~ msgid "path to Win32 codecs"
 #~ msgstr "Pfad zu win32-Codecs"

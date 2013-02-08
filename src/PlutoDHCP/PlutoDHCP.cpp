@@ -19,7 +19,6 @@
 #include "PlutoUtils/FileUtils.h"
 #include "PlutoUtils/StringUtils.h"
 #include "PlutoUtils/Other.h"
-#include "PlutoUtils/ProcessUtils.h"
 #include "Logger.h"
 #include "PlutoDHCP.h"
 
@@ -53,7 +52,7 @@
 
 #include "BD/PhoneDevice.h"
 
-#include "../include/version.h"
+#define  VERSION "<=version=>" 
 
 using namespace std;
 using namespace DCE;
@@ -230,10 +229,10 @@ string PlutoDHCP::AssignIP(int PK_Device)
 
 string PlutoDHCP::GetDHCPConfig()
 {
-	string sCoreInternalAddress, sInternalSubnet, sInternalSubnetMask;
+	string sCoreInternalAddress, sInternalSubnet, sInternalSubnetMask, sReverseInternalSubnet, sInternalDomainName;
 	IPAddress ipAddressDhcpStart, ipAddressDhcpStop, ipAddressPlutoStart, ipAddressPlutoStop;
 
-	GetNetParams(sCoreInternalAddress, sInternalSubnet, sInternalSubnetMask);
+	GetNetParams(sCoreInternalAddress, sInternalSubnet, sInternalSubnetMask, sInternalDomainName);
 	DetermineIPRange(ipAddressDhcpStart, ipAddressDhcpStop, ipAddressPlutoStart, ipAddressPlutoStop);
 
 	if (sCoreInternalAddress.size() == 0 || sInternalSubnetMask.size() == 0)
@@ -260,7 +259,7 @@ string PlutoDHCP::GetDHCPConfig()
 		{
 			// Use cerr since cout is going into the dhcp file
 			cerr << "Device " << pRow_Device->PK_Device_get() << " has bad mac address " << pRow_Device->MACaddress_get() << endl;
-			sNoMacEntries += "\n# " + pRow_Device->Description_get() + " (" + StringUtils::itos(pRow_Device->PK_Device_get()) + ") has bad mac address: " + pRow_Device->MACaddress_get();
+			sNoMacEntries += "# \t" + pRow_Device->Description_get() + " (" + StringUtils::itos(pRow_Device->PK_Device_get()) + ") has bad mac address: " + pRow_Device->MACaddress_get() + "\n";
 			continue;
 		}
 
@@ -290,9 +289,8 @@ string PlutoDHCP::GetDHCPConfig()
 	if (ipAddressDhcpStart.AsInt() != 0)
 	{
 		sDynamicPool =
-		"\tpool {"																					"\n"
-		"\t\t allow unknown-clients;"																"\n"
-		"\t\t deny known-clients;"																	"\n";
+		"pool {"																					"\n"
+		"\t\t allow unknown-clients;"																"\n";
 		if (i_NoOfIpAdresses > 0) {
 			if (ipAddressDhcpStart.AsInt() <= p_iIpAddress[0] - 1) {
 				sDynamicPool += "\t\t range " + ipAddressDhcpStart.AsText() + " " +  IPAddress(p_iIpAddress[0] - 1).AsText() +  "; \n";
@@ -313,65 +311,31 @@ string PlutoDHCP::GetDHCPConfig()
 		sDynamicPool += "\t}\n";
 	}
 
-	// Known clients without an ip address
-	string sExternalMac;
-	ProcessUtils::RunApplicationAndGetOutput("/usr/pluto/bin/Network_DisplaySettings.sh  --all | grep EXTERNAL_MAC | cut -d'=' -f2 | tr '\\n' ';'", sExternalMac);
+	// Make a reverse DNS zone compatible string
+	sReverseInternalSubnet = ipAddressDhcpStart.GetOctet(3) + "." + ipAddressDhcpStart.GetOctet(2) + "." + ipAddressDhcpStart.GetOctet(1);
 
-	string sKnownClients =
-	"host dcerouter-external {"																	"\n"
-	"\t hardware ethernet " + sExternalMac + 													"\n"
-	"}"																							"\n";
+	// Load and use the dhcpd.conf template file
+	string sTemplate = "/usr/pluto/templates/dhcpd.conf.tmpl";
+	size_t size;
+	char *pBuffer = FileUtils::ReadFileIntoBuffer(sTemplate,size);
 
-	string sResult = string("") +
-		"# option definitions common to all supported networks..."									"\n"
-		"#option domain-name \"fugue.com\";"														"\n"
-		"#option domain-name-servers toccata.fugue.com;"											"\n"
-		"option domain-name-servers " + sCoreInternalAddress + ";"									"\n"
-		"authoritative;"																			"\n"
-		""																							"\n"
-		"option routers " + sCoreInternalAddress + ";"												"\n"
-		"option subnet-mask " + sInternalSubnetMask + ";"											"\n"
-		""																							"\n"
-		"# lease IPs for 1 day, maximum 1 week"														"\n"
-		"default-lease-time 86400;"																	"\n"
-		"max-lease-time 604800;"																	"\n"
-		""																							"\n"
-		"allow booting;"																			"\n"
-		"allow bootp;"																				"\n"
-		""																							"\n"
-		"option space pxelinux;"																	"\n"
-		"option pxelinux.magic code 208 = string;"													"\n"
-		"option pxelinux.configfile code 209 = text;"												"\n"
-		"option pxelinux.pathprefix code 210 = text;"												"\n"
-		"option pxelinux.reboottime code 211 = unsigned integer 32;"								"\n"
-		""																							"\n"
-		"subnet " + sInternalSubnet + " netmask " + sInternalSubnetMask + " {"						"\n"
-		"\tnext-server " + sCoreInternalAddress + ";"												"\n"
-		"\tfilename \"/tftpboot/pxelinux.0\";"														"\n"
-		"\toption pxelinux.reboottime = 30;"														"\n"
-		""																							"\n"
-		"\tdefault-lease-time 86400;"																"\n"
-		"\tmax-lease-time 604800;"																	"\n"
-		+ sDynamicPool +
-		"}"																							"\n"
-		"# Known clients which won't get an ip address"												"\n"
-		+ sKnownClients +
-		""																							"\n"
-		"# PXE booting machines"																	"\n"
-		"group {"																					"\n"
-		"\tnext-server " + sCoreInternalAddress + ";"												"\n"
-		"\tfilename \"/tftpboot/pxelinux.0\";"														"\n"
-		"\toption pxelinux.reboottime = 30;"														"\n"
-		"" + sMoonEntries + ""																		"\n"
-		"}"																							"\n"
-		""																							"\n"
-		"# regular machines"																		"\n"
-		"group {" + sNoBootEntries + ""																"\n"
-		"}"																							"\n"
-		"" + sNoMacEntries + ""																		"\n"
-	;
+	// Convert char buffer into a string
+	string sConfigData;
+	sConfigData += pBuffer;
+	delete pBuffer;
+ 
+	// Replace the template tags
+	sConfigData=StringUtils::Replace(sConfigData,"%CORE_INTERNAL_ADDRESS%",sCoreInternalAddress);
+	sConfigData=StringUtils::Replace(sConfigData,"%INTERNAL_SUBNET_MASK%",sInternalSubnetMask);
+	sConfigData=StringUtils::Replace(sConfigData,"%INTERNAL_SUBNET%",sInternalSubnet);
+	sConfigData=StringUtils::Replace(sConfigData,"%INTERNAL_DOMAIN_NAME%",sInternalDomainName);
+	sConfigData=StringUtils::Replace(sConfigData,"%DYNAMIC_IP_RANGE%",sDynamicPool);
+	sConfigData=StringUtils::Replace(sConfigData,"%MOON_ENTRIES%",sMoonEntries);
+	sConfigData=StringUtils::Replace(sConfigData,"%NOBOOT_ENTRIES%",sNoBootEntries);
+	sConfigData=StringUtils::Replace(sConfigData,"%NOMAC_ENTRIES%",sNoMacEntries);
+	sConfigData=StringUtils::Replace(sConfigData,"%DYNAMIC_REVERSE_RANGE%",sReverseInternalSubnet);
 
-	return sResult;
+	return sConfigData;
 }
 
 bool PlutoDHCP::bIsMediaDirector(Row_Device *pRow_Device)
@@ -389,12 +353,12 @@ bool PlutoDHCP::bIsMediaDirector(Row_Device *pRow_Device)
 	return pRow_Device_DeviceData && pRow_Device_DeviceData->IK_DeviceData_get()=="1";
 }
 
-void PlutoDHCP::GetNetParams(string &sCoreInternalAddress, string &sInternalSubnet, string &sInternalSubnetMask)
+void PlutoDHCP::GetNetParams(string &sCoreInternalAddress, string &sInternalSubnet, string &sInternalSubnetMask, string &sInternalDomainName)
 {
 	Row_Device * pRow_Device = DetermineCore();
 	if (!pRow_Device)
 		return;
-	Row_Device_DeviceData * pRow_Device_DeviceData = m_pDatabase_pluto_main->Device_DeviceData_get()->GetRow(pRow_Device->PK_Device_get(), DEVICEDATA_Network_Interfaces_CONST);
+	Row_Device_DeviceData * pRow_Device_DeviceData = m_pDatabase_pluto_main->Device_DeviceData_get()->GetRow(pRow_Device->PK_Device_get(), DEVICEDATA_IPv4_Network_Interfaces_CONST);
 	if (!pRow_Device_DeviceData)
 	{
 		cerr << "ERROR: Cannot find network data" << endl;
@@ -437,4 +401,14 @@ void PlutoDHCP::GetNetParams(string &sCoreInternalAddress, string &sInternalSubn
 	IPAddress ipInternalSubnetMask(sInternalSubnetMask);
 	IPAddress ipInternalSubnet(ipCoreInternalAddress.AsInt() & ipInternalSubnetMask.AsInt());
 	sInternalSubnet = ipInternalSubnet.AsText();
+	
+	pRow_Device_DeviceData = m_pDatabase_pluto_main->Device_DeviceData_get()->GetRow(pRow_Device->PK_Device_get(), DEVICEDATA_Domain_CONST);
+	if (!pRow_Device_DeviceData)
+	{
+		cerr << "ERROR: Cannot find domain name" << endl;
+		LoggerWrapper::GetInstance()->Write(LV_CRITICAL, "Cannot find network data");
+		return;
+	}
+
+	sInternalDomainName=pRow_Device_DeviceData->IK_DeviceData_get();
 }

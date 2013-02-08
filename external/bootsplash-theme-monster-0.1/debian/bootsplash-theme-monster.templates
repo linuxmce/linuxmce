@@ -1,0 +1,6 @@
+Template: shared/bootsplash-theme
+Type: select
+Choices: ${choices}
+Description: Please select theme bootsplash should use.
+ Please select the theme bootsplash should use.  If you wish to
+ change it at a later date, just run dpkg-reconfigure bootsplash.

@@ -6,6 +6,12 @@ if [[ -f /root/.mozilla/firefox/pluto.default/prefs.js ]] ;then
 	echo 'user_pref("browser.sessionstore.enabled", false);' >> /root/.mozilla/firefox/pluto.default/prefs.js
 fi
 
+# Be sure to export bookmarks when firefox exits.
+if [[ -f /root/.mozilla/firefox/pluto.default/prefs.js ]] ;then
+	grep -q "browser.bookmarks.autoExportHTML" /root/.mozilla/firefox/pluto.default/prefs.js ||
+	echo 'user_pref("browser.bookmarks.autoExportHTML", true)' >> /root/.mozilla/firefox/pluto.default/prefs.js
+fi
+ 
 . /usr/pluto/bin/Config_Ops.sh
 export DISPLAY=":${Display}"
 
@@ -68,18 +74,9 @@ while [[ "$Loop" == yes ]]; do
 done
 
 FireFoxProfile=~/".mozilla/firefox/$Path/"
+cp /home/user_$User/bookmarks.html "$FireFoxProfile/bookmarks.html"
 
 echo "$(date -R) user $User URL $URL" >>"$LogFile"
-
-if [[ $User != 0 ]]; then
-	if [[ ! -f "/home/user_$User/bookmarks.html" ]]; then
-		echo "User $User doesn't have bookmarks yet"
-		cp /home/public/bookmarks.html "/home/user_$User/bookmarks.html"
-		cp /home/public/bookmarks.html "$FireFoxProfile"
-	else
-		cp "/home/user_$User/bookmarks.html" "$FireFoxProfile"
-	fi
-fi
 
 echo "starting firefox" >>"$LogFile"
 firefox "$URL"

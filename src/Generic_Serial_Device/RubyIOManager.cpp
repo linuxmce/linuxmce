@@ -69,7 +69,7 @@ RubyIOManager::InstantiateNode(Command_Impl* pcmdimpl, DeviceData_Impl* pdevdata
 	if(!sport.empty() && sport != "0" && StringUtils::StartsWith(sport,"ERR")==false ) {
 		porttype = PORTTYPE_SERIAL;
 	} else {
-		sport = pdevdata->m_mapParameters_Find(DEVICEDATA_TCP_Port_CONST);
+		sport = pdevdata->m_mapParameters[DEVICEDATA_TCP_Port_CONST];
 		LoggerWrapper::GetInstance()->Write(LV_STATUS, "Checking TCP Port %s",sport.c_str());
 		if(!sport.empty()) {
 			porttype = PORTTYPE_NETWORK;
@@ -96,7 +96,7 @@ RubyIOManager::InstantiateNode(Command_Impl* pcmdimpl, DeviceData_Impl* pdevdata
 	                serport.erase(0, strlen("/dev/"));
     	        }
 
-        	    string sbaudrate = pdevdata->m_mapParameters_Find(DEVICEDATA_COM_Port_BaudRate_CONST);
+        	    string sbaudrate = pdevdata->m_mapParameters[DEVICEDATA_COM_Port_BaudRate_CONST];
             	if(!sbaudrate.empty() )
 				{
 					int tbps;
@@ -118,7 +118,7 @@ RubyIOManager::InstantiateNode(Command_Impl* pcmdimpl, DeviceData_Impl* pdevdata
             	pio->setBPS(bps);
 	            pio->setSerialPort(serport.c_str());
 
-	            string sparbitstop = pdevdata->m_mapParameters_Find(DEVICEDATA_COM_Port_ParityBitStop_CONST);
+	            string sparbitstop = pdevdata->m_mapParameters[DEVICEDATA_COM_Port_ParityBitStop_CONST];
     	        if(!sparbitstop.empty()) {
         	        LoggerWrapper::GetInstance()->Write(LV_STATUS, "Using paritybit/stopbit: %s.", sparbitstop.c_str());
                 	if(sparbitstop == "N81") {
@@ -172,7 +172,7 @@ RubyIOManager::InstantiateNode(Command_Impl* pcmdimpl, DeviceData_Impl* pdevdata
 		pNode = new RubyIOPool(pnewpool);
 	}
 
-	int delay = atoi(pdevdata->m_mapParameters_Find(DEVICEDATA_Idle_Delay_CONST).c_str());
+	int delay = atoi(pdevdata->m_mapParameters[DEVICEDATA_Idle_Delay_CONST].c_str());
 	if(delay == 0) {
 		delay = DEFAULT_DELAY_TIME;
 	}
@@ -380,6 +380,32 @@ RubyIOManager::SendCommand(RubyCommandWrapper* pcmd) {
 		pmsg = new Message(pcmd->getDevIdFrom(), pcmd->getDevIdTo(), pcmd->getPriority(), pcmd->getType(), pcmd->getId(), 0);
 	pmsg->m_mapParameters = pcmd->getParams();
 	pevdisp_->SendMessage(pmsg);
+	LoggerWrapper::GetInstance()->Write(LV_STATUS, "Command sent.");
+}
+
+void 
+RubyIOManager::SendReceiveCommand(RubyCommandWrapper* pcmd) {
+	LoggerWrapper::GetInstance()->Write(LV_STATUS, "Ruby code requested to send +receive command %d, from %d to %d... Sending...", 
+								pcmd->getId(), pcmd->getDevIdFrom(), pcmd->getDevIdTo());
+
+	Message* pmsg;
+	if( pcmd->getDevIdTo() == DEVICEID_CATEGORY )
+		pmsg = new Message(pcmd->getDevIdFrom(), pcmd->getCategory(), true, BL_SameHouse, pcmd->getPriority(), pcmd->getType(), pcmd->getId(), 0);
+	else if( pcmd->getDevIdTo() == DEVICEID_MASTERDEVICE )
+		pmsg = new Message(pcmd->getDevIdFrom(), pcmd->getTemplate(), BL_SameHouse, pcmd->getPriority(), pcmd->getType(), pcmd->getId(), 0);
+	else
+		pmsg = new Message(pcmd->getDevIdFrom(), pcmd->getDevIdTo(), pcmd->getPriority(), pcmd->getType(), pcmd->getId(), 0);
+	pmsg->m_mapParameters = pcmd->getParams();
+	Message* pResponse = pevdisp_->SendReceiveMessage(pmsg);
+
+	if (pResponse)
+	{
+	        map<long, string>::iterator it;
+		for(it = pResponse->m_mapParameters.begin(); it != pResponse->m_mapParameters.end(); it++) {
+	                pcmd->setParam(it->first, it->second.c_str());
+		}
+	}
+	
 	LoggerWrapper::GetInstance()->Write(LV_STATUS, "Command sent.");
 }
 

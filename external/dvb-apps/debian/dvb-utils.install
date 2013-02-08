@@ -1,0 +1,20 @@
+util/av7110_loadkeys/av7110_loadkeys		usr/bin
+util/av7110_loadkeys/evtest			usr/bin
+	
+util/ca_zap/ca_zap		usr/bin
+util/dvbdate/dvbdate		usr/bin
+util/dvbnet/dvbnet		usr/bin
+util/dvbtraffic/dvbtraffic	usr/bin
+	
+util/scan/dvbscan	usr/bin
+util/scan/atscscan	usr/bin
+util/scan/dvb-*	usr/share/doc/dvb-utils/examples/scan/
+util/scan/atsc	usr/share/doc/dvb-utils/examples/scan/
+	
+util/szap/czap	usr/bin
+util/szap/femon	usr/bin
+util/szap/szap	usr/bin
+util/szap/tzap	usr/bin
+util/szap/azap	usr/bin
+
+util/ttusb_dec_reset/ttusb_dec_reset	usr/bin

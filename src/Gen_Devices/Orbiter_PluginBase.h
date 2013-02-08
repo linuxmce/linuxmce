@@ -163,7 +163,7 @@ public:
 		if( m_bRunningWithoutDeviceData )
 			return m_pEvent_Impl->GetDeviceDataFromDatabase(m_dwPK_Device,DEVICEDATA_File_Name_and_Path_CONST);
 		else
-			return m_mapParameters_Find(DEVICEDATA_File_Name_and_Path_CONST);
+			return m_mapParameters[DEVICEDATA_File_Name_and_Path_CONST];
 	}
 
 	string Get_Mapping()
@@ -171,7 +171,7 @@ public:
 		if( m_bRunningWithoutDeviceData )
 			return m_pEvent_Impl->GetDeviceDataFromDatabase(m_dwPK_Device,DEVICEDATA_Mapping_CONST);
 		else
-			return m_mapParameters_Find(DEVICEDATA_Mapping_CONST);
+			return m_mapParameters[DEVICEDATA_Mapping_CONST];
 	}
 
 	int Get_ThreshHold()
@@ -179,7 +179,7 @@ public:
 		if( m_bRunningWithoutDeviceData )
 			return atoi(m_pEvent_Impl->GetDeviceDataFromDatabase(m_dwPK_Device,DEVICEDATA_ThreshHold_CONST).c_str());
 		else
-			return atoi(m_mapParameters_Find(DEVICEDATA_ThreshHold_CONST).c_str());
+			return atoi(m_mapParameters[DEVICEDATA_ThreshHold_CONST].c_str());
 	}
 
 	bool Get_Ignore()
@@ -187,7 +187,7 @@ public:
 		if( m_bRunningWithoutDeviceData )
 			return (m_pEvent_Impl->GetDeviceDataFromDatabase(m_dwPK_Device,DEVICEDATA_Ignore_CONST)=="1" ? true : false);
 		else
-			return (m_mapParameters_Find(DEVICEDATA_Ignore_CONST)=="1" ? true : false);
+			return (m_mapParameters[DEVICEDATA_Ignore_CONST]=="1" ? true : false);
 	}
 
 	int Get_Width()
@@ -195,7 +195,7 @@ public:
 		if( m_bRunningWithoutDeviceData )
 			return atoi(m_pEvent_Impl->GetDeviceDataFromDatabase(m_dwPK_Device,DEVICEDATA_Width_CONST).c_str());
 		else
-			return atoi(m_mapParameters_Find(DEVICEDATA_Width_CONST).c_str());
+			return atoi(m_mapParameters[DEVICEDATA_Width_CONST].c_str());
 	}
 
 	int Get_Height()
@@ -203,7 +203,7 @@ public:
 		if( m_bRunningWithoutDeviceData )
 			return atoi(m_pEvent_Impl->GetDeviceDataFromDatabase(m_dwPK_Device,DEVICEDATA_Height_CONST).c_str());
 		else
-			return atoi(m_mapParameters_Find(DEVICEDATA_Height_CONST).c_str());
+			return atoi(m_mapParameters[DEVICEDATA_Height_CONST].c_str());
 	}
 
 	int Get_Quantity()
@@ -211,7 +211,7 @@ public:
 		if( m_bRunningWithoutDeviceData )
 			return atoi(m_pEvent_Impl->GetDeviceDataFromDatabase(m_dwPK_Device,DEVICEDATA_Quantity_CONST).c_str());
 		else
-			return atoi(m_mapParameters_Find(DEVICEDATA_Quantity_CONST).c_str());
+			return atoi(m_mapParameters[DEVICEDATA_Quantity_CONST].c_str());
 	}
 
 };

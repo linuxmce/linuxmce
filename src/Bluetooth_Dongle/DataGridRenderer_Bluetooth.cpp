@@ -121,7 +121,7 @@ void DataGridRenderer_Bluetooth::RenderObject(DesignObj_Orbiter *pObj_Screen, Pl
 		bool bTurnOn = true;
 
 		string sCurrentSelected = pOrbiterBluetooth->m_mapVariable[atoi(m_pObj_Owner_DataGrid->sSelVariable.c_str())];
-		int iHighlightedRow = m_pObj_Owner_DataGrid->m_iHighlightedRow_get() >= 0 ? m_pObj_Owner_DataGrid->m_iHighlightedRow_get() : atoi(sCurrentSelected.c_str());
+		int iHighlightedRow = m_pObj_Owner_DataGrid->m_iHighlightedRow >= 0 ? m_pObj_Owner_DataGrid->m_iHighlightedRow : atoi(sCurrentSelected.c_str());
 
 #ifdef DEBUG
 		LoggerWrapper::GetInstance()->Write(LV_WARNING, "About to send BD_CP_ShowList command, column %d, turnon %d, items count %d, selected item %d, send 'selected item' %d",

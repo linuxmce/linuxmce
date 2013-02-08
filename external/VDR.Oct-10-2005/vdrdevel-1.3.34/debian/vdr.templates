@@ -1,0 +1,7 @@
+Template: vdr/autostart
+Type: boolean
+Default: false
+_Description: Start vdr automatically instead of vdrdevel?
+ On system startup either vdr or vdrdevel will be started in daemon mode.
+ By selecting this, you choose vdr instead of vdrdevel.
+ But you can manually switch between vdr and vdrdevel by menu commands.

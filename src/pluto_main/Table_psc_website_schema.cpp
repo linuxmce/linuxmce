@@ -79,6 +79,7 @@ void Row_psc_website_schema::Delete()
 	Row_psc_website_schema *pRow = this; // Needed so we will have only 1 version of get_primary_fields_assign_from_row
 	
 	if (!is_deleted)
+	{
 		if (is_added)	
 		{	
 			vector<TableRow*>::iterator i;	
@@ -100,6 +101,7 @@ void Row_psc_website_schema::Delete()
 			table->deleted_cachedRows[key] = this;
 			is_deleted = true;	
 		}	
+	}
 }
 
 void Row_psc_website_schema::Reload()
@@ -133,8 +135,7 @@ void Row_psc_website_schema::SetDefaultValues()
 {
 	m_PK_psc_website_schema = 0;
 is_null[0] = false;
-m_Value = "";
-is_null[1] = false;
+is_null[1] = true;
 
 
 	is_added=false;
@@ -158,8 +159,15 @@ void Row_psc_website_schema::Value_set(string val){PLUTO_SAFETY_LOCK_ERRORSONLY(
 m_Value = val; is_modified=true; is_null[1]=false;}
 
 		
+bool Row_psc_website_schema::Value_isNull() {PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
+
+return is_null[1];}
 
 			
+void Row_psc_website_schema::Value_setNull(bool val){PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
+is_null[1]=val;
+is_modified=true;
+}
 	
 
 string Row_psc_website_schema::PK_psc_website_schema_asSQL()
@@ -182,8 +190,8 @@ PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
 if (is_null[1])
 return "NULL";
 
-char *buf = new char[131071];
-db_wrapper_real_escape_string(table->database->m_pDB, buf, m_Value.c_str(), (unsigned long) min((size_t)65535,m_Value.size()));
+char *buf = new char[393211];
+db_wrapper_real_escape_string(table->database->m_pDB, buf, m_Value.c_str(), (unsigned long) min((size_t)196605,m_Value.size()));
 string s=string()+"\""+buf+"\"";
 delete[] buf;
 return s;

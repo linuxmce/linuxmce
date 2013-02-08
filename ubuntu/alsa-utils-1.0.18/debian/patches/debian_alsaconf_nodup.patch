@@ -1,0 +1,77 @@
+# debian_alsaconf_nodup.patch by Thomas Hood
+#
+# Do not put any lines into /etc/mod{utils,probe.d}/sound that are
+# already present in /etc/mod{utils,probe.d}/alsa-base
+Index: alsa-utils-1.0.18/alsaconf/alsaconf.in
+===================================================================
+--- alsa-utils-1.0.18.orig/alsaconf/alsaconf.in	2008-11-02 20:59:26.000000000 +0100
++++ alsa-utils-1.0.18/alsaconf/alsaconf.in	2008-11-02 20:59:26.000000000 +0100
+@@ -881,6 +881,7 @@
+ 	    have_alias="yes"
+ 	fi
+     fi
++if false ; then
+     if [ -z "$have_alias" ]; then
+ echo "alias char-major-116 snd
+ alias char-major-14 $SOUND_CORE
+@@ -898,16 +899,60 @@
+     if [ -n "$CARD_OPTS" ]; then
+ 	echo "options $CARD_DRIVER $CARD_OPTS" >> $addcfg
+     fi
++else
++    # For Debian
++    echo "alias snd-card-0 $CARD_DRIVER
++options $CARD_DRIVER index=0${CARD_OPTS:+ $CARD_OPTS}" >> $addcfg
++fi
+ 
+     if [ -n "$cfgout" ]; then
+ 	[ ! -r "$cfgfile" ] || cmp -s "$TMP" "$cfgfile" || cat "$TMP" > "$cfgfile"
++if false ; then
+ 	cmp -s "$addcfg" "$cfgout" || cat "$addcfg" > "$cfgout"
++else
++	# For Debian
++	if [ "$kernel" = old ] ; then
++		if [ -f /etc/modutils/alsa-base ] ; then
++			# Don't duplicate any lines already in /etc/modutils/alsa-base
++			grep -Fv -f /etc/modutils/alsa-base "$addcfg" > "$TMP"
++		else
++			cat "$addcfg" > "$TMP"
++		fi
++	else
++		if [ -f /etc/modprobe.d/alsa-base ] ; then
++			# Don't duplicate any lines already in /etc/modprobe.d/alsa-base
++			grep -Fv -f /etc/modprobe.d/alsa-base "$addcfg" > "$TMP"
++		else
++			cat "$addcfg" > "$TMP"
++		fi
++	fi
++	cmp -s "$TMP" "$cfgout" || cat "$TMP" > "$cfgout"
++fi
+     else
++if false ; then
+ 	echo "$ACB
+ # --- ALSACONF version $version ---" >> $TMP
+         cat "$addcfg" >> "$TMP"
+ 	echo "$ACE
+ " >> $TMP
++else
++	# For Debian
++	if [ "$kernel" = old ] ; then
++		if [ -f /etc/modutils/alsa-base ] ; then
++			# Don't duplicate any lines already in /etc/modutils/alsa-base
++			grep -Fv -f /etc/modutils/alsa-base "$addcfg" >> "$TMP"
++		else
++			cat "$addcfg" >> "$TMP"
++		fi
++	else
++		if [ -f /etc/modprobe.d/alsa-base ] ; then
++			# Don't duplicate any lines already in /etc/modprobe.d/alsa-base
++			grep -Fv -f /etc/modprobe.d/alsa-base "$addcfg" >> "$TMP"
++		else
++			cat "$addcfg" >> "$TMP"
++		fi
++	fi
++fi
+         cmp -s "$TMP" "$cfgfile" || cat "$TMP" > "$cfgfile"
+     fi
+ 

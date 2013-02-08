@@ -1,0 +1,13 @@
+Source: lmce-dhcpd-plugin
+Section: unknown
+Priority: extra
+Maintainer: pos <pos@unknown>
+Build-Depends: debhelper (>= 7)
+Standards-Version: 3.8.3
+Homepage: <insert the upstream URL, if relevant>
+
+Package: lmce-dhcpd-plugin
+Architecture: all
+Depends: ${shlibs:Depends}, ${misc:Depends}
+Description: LinuxMCE DHCPd plugin
+ Contains scripts used to act upon DHCP detected devices.

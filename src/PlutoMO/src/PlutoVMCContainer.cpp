@@ -16,7 +16,7 @@
  */
 
 // INCLUDE FILES
-#include "plutomo.hrh"
+#include "PlutoMO.hrh"
 #include <avkon.hrh>
 #include <aknnotewrappers.h> 
 #include <aknutils.h>  // for Fonts. 
@@ -30,13 +30,12 @@
 #include <aknviewappui.h>
 #include <avkon.hrh>
 
-#include "PlutoMO.hrh"
 #include "PlutoVMCView.h"
 #include "PlutoVMCContainer.h" 
 #include "PlutoVMCUtil.h"
 #include "PlutoMOAppUi.h"
 
-#include "Pluto_Main/Define_Button.h"
+#include "pluto_main/Define_Button.h"
 #include "VIPShared/BD_PC_SetImageQuality.h"
 
 #include "Logger.h"
@@ -439,7 +438,7 @@ char CPlutoVMCContainer::GetKeyChar(int KeyCode)
 	const char *KeysMap[]			 = {".0",".1","abc2","def3","ghi4","jkl5","mno6","pqrs7","tuv8","wxyz9"}; 
 	int KeysMapIndex[]				 = {2,   2,   4,     4,     4,      4,    4,     5,      4,      5     }; 
 	
-	const iDiff = 14 * KEY_TIMER_INTERVAL / 200000;
+	const int iDiff = 14 * KEY_TIMER_INTERVAL / 200000;
 
 	char KeyChar = 0;
 	int iNow = User::TickCount();

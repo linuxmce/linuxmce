@@ -84,7 +84,6 @@ public:
 //#define UsageLog { std::cout  
 #define UsageLog if(g_pPlutoConfig && g_pPlutoConfig->m_ofUsageLog){ PLUTO_SAFETY_LOCK(slUsageLog,g_pPlutoConfig->m_MyUsageLogMutex); PrettyLog plog(g_pPlutoConfig->m_ofUsageLog); (*g_pPlutoConfig->m_ofUsageLog) 
 
-#ifndef EMBEDDED_LMCE
 #ifdef USE_MYSQL
 	#include <mysql.h>
 
@@ -99,7 +98,6 @@ public:
 		}
 	};
 #endif
-#endif // EMBEDDED_LMCE
 
 #endif //SYMBIAN
 

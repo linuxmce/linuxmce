@@ -20,6 +20,7 @@
 #define __SERIAL_PORT_H__
 
 #include <string>
+#include <memory>
 
 #ifdef WIN32
 #include "serio.h"
@@ -81,7 +82,7 @@ public:
 private:
 #ifndef WIN32
 	class Private;
-	Private * d;
+	auto_ptr<Private> d;
 #endif
 
 };

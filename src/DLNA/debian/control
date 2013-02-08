@@ -1,0 +1,16 @@
+Source: lmce-dlna
+Section: unknown
+Priority: extra
+Maintainer: Peer Oliver Schmidt <developer@linuxmce.org>
+Build-Depends: debhelper, libhupnp-av-dev
+#xStandards-Version: 3.9.2
+Homepage: <insert the upstream URL, if relevant>
+#Vcs-Svn: http://svn.linuxmce.org/svn/branches/LinuxMCE-1004/src/DLNA
+#Vcs-Browser: http://git.debian.org/?p=collab-maint/lmce-dlna.git;a=summary
+
+Package: lmce-dlna
+Architecture: any
+Depends: ${shlibs:Depends}, ${misc:Depends}, libhupnp-av
+Description: LinuxMCE DLNA MediaRenderer device
+ This device provides a means to DLNA "Play To" any entertainment area in the 
+ LinuxMCE system.

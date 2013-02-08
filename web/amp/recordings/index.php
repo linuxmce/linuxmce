@@ -1,6 +1,6 @@
 <?php
 // *********** autologin for pluto admin ******************
-session_name('Pluto-admin');
+session_name('LMCE-admin');
 session_start();
 
 if(isset($_SESSION['Extension'])){

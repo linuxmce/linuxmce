@@ -35,6 +35,7 @@
 
 #include <iostream>
 #include <sstream>
+#include <stdlib.h>
 
 using namespace sqlCVS;
 
@@ -48,6 +49,7 @@ R_CommitChanges::R_CommitChanges( string sRepository, string sDefaultUser, strin
 
 bool R_CommitChanges::ProcessRequest( class RA_Processor *pRA_Processor )
 {
+	int psc_user=0;
 	(( sqlCVSprocessor * ) pRA_Processor)->LogActivityTime();
 
 	cout << "Received Commit changes for repository: " << m_sRepository << endl;
@@ -73,13 +75,14 @@ bool R_CommitChanges::ProcessRequest( class RA_Processor *pRA_Processor )
 		for(map<int,ValidatedUser *>::iterator it=g_GlobalConfig.m_mapValidatedUsers.begin();it!=g_GlobalConfig.m_mapValidatedUsers.end();++it)
 		{
 			ValidatedUser *pValidatedUser = (*it).second;
+			psc_user = pValidatedUser->m_psc_user;
 			if( !pValidatedUser->m_bWithoutPassword )
 			{
 				psqlCVSprocessor->m_bAllAnonymous = false;
 				break;
 			}
 		}
-
+		
 		// Figure out who is the default user that will receive ownership of any new records that
 		// don't have an owner specified
 		bool bNoPassword,bIsSupervisor; // We're not going to use them.  Only needed to pass them in
@@ -92,11 +95,63 @@ bool R_CommitChanges::ProcessRequest( class RA_Processor *pRA_Processor )
 
 		if( m_iSchemaVersion!=pRepository->GetSchemaVersion() )
 			pRepository->UpdateClientSchema(this,m_iSchemaVersion);
-		
+
 		if( !psqlCVSprocessor->m_i_psc_batch )
+		{
 			m_cProcessOutcome=INTERNAL_ERROR;
+		}
 		else
+		{
+			// execute post-commit hook if any
+			char buff[1024];
+			std::string path;
+
+			// create postcommit script path variable. 
+			// Name = sqlCVS bin name + -postcommit.sh. 
+			// Example: "sqlCVS-postcommit.sh"
+			ssize_t len = ::readlink("/proc/self/exe", buff, sizeof(buff)-1);
+			if (len != -1) {
+				buff[len] = '\0';
+				path = std::string(buff);
+			}
+			path.append("-postcommit.sh");
+			
+			// test if postcommit script exists
+			fstream fin;
+			fin.open(path.c_str(),ios::in);
+			if( fin.is_open() )
+			{
+				// postcommit script exists, so execute it
+				cout << "post-commit hook: Executing " << path << endl;
+				
+				// $1 = batch ID
+				path.append(" ").append(StringUtils::itos(psqlCVSprocessor->m_i_psc_batch));
+				// $2 = repo
+				path.append(" ").append(psqlCVSprocessor->m_pRepository->Name_get());
+				// $3 = user
+				if(psqlCVSprocessor->m_bAllAnonymous == true)
+					path.append(" ").append("Anonymous");
+				else
+					{
+					MySqlHelper mySqlHelper(g_GlobalConfig.dceConfig.m_sDBHost,g_GlobalConfig.dceConfig.m_sDBUser,g_GlobalConfig.dceConfig.m_sDBPassword,"MasterUsers");
+					MYSQL_ROW row=NULL;
+					row = mysql_fetch_row(mySqlHelper.mysql_query_result("SELECT Username FROM MasterUsers WHERE PK_MasterUsers = "+StringUtils::itos(psc_user)));
+					path.append(" ").append(row[0]);
+					}
+				// $4 = comment
+				path.append(" '").append(StringUtils::URLEncode(psqlCVSprocessor->m_sComments)).append("'");
+				
+				cout << path << endl;
+				system(path.c_str());
+			}
+			else
+			{
+				cout << "post-commit hook: No " << path << " found" << endl;
+			}
+			fin.close();
+
 			m_cProcessOutcome=SUCCESSFULLY_PROCESSED; /** @todo -- process it */
+		}
 	}
 	return true;
 }

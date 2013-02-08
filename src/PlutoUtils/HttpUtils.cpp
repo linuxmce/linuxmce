@@ -14,7 +14,6 @@
 
 */
 #include <curl/curl.h>
-#include <curl/types.h>
 #include <curl/easy.h>
 
 #include "HttpUtils.h"
@@ -28,7 +27,7 @@ string HttpPost(string sURL, const vector<string>& vectHeaders, const map<string
 	struct curl_slist *headerlist = NULL;
 	string sParams;
 
-	curl_global_init(CURL_GLOBAL_ALL);
+	CurlInit();
 	CURL *curl = curl_easy_init();
 
 	for(map<string, string>::const_iterator it = mapParams.begin(); it != mapParams.end();)	
@@ -58,7 +57,7 @@ string HttpPost(string sURL, const vector<string>& vectHeaders, const map<string
 		curl_easy_setopt(curl, CURLOPT_POSTFIELDSIZE, sParams.length());
 		curl_easy_setopt(curl, CURLOPT_POST, 1); // set POST method 
 		curl_easy_setopt(curl, CURLOPT_VERBOSE, 1); 
-		curl_easy_setopt(curl, CURLOPT_PORT, 9999); 
+		curl_easy_setopt(curl, CURLOPT_PORT, nPort);
 
 		if(sUser != "")
 			curl_easy_setopt(curl, CURLOPT_USERPWD, Authenticate.c_str()); 
@@ -75,4 +74,59 @@ string HttpPost(string sURL, const vector<string>& vectHeaders, const map<string
 	}
 
 	return res == CURLE_OK ? "OK" : "ERROR";
+}
+extern "C" {
+int ReceiveData(char *data, size_t size, size_t nmemb, string *buffer)
+{
+	int result = 0;
+	if (buffer != NULL)
+	{
+		buffer->append(data, size * nmemb);
+		result = size * nmemb;
+	}
+	return result;
+}
+}
+
+string HttpGet(string sURL, string *buffer, string sUser, string sPassword, int nPort)
+{
+	string sResponse;
+
+	CURLcode res;
+
+	CurlInit();
+	CURL *curl = curl_easy_init();
+
+	string Authenticate = sUser + ":" + sPassword;
+	char errorBuffer[CURL_ERROR_SIZE];
+
+	if(curl) 
+	{
+		curl_easy_setopt(curl, CURLOPT_ERRORBUFFER, errorBuffer);
+		curl_easy_setopt(curl, CURLOPT_URL, sURL.c_str());
+		curl_easy_setopt(curl, CURLOPT_FOLLOWLOCATION, 1);// allow redirects 
+		curl_easy_setopt(curl, CURLOPT_HEADER, 0); 
+		curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, ReceiveData); 
+		curl_easy_setopt(curl, CURLOPT_WRITEDATA, buffer);
+
+		if(sUser != "")
+			curl_easy_setopt(curl, CURLOPT_USERPWD, Authenticate.c_str()); 
+
+		res = curl_easy_perform(curl);
+	
+		curl_easy_cleanup(curl);
+
+	}
+	
+	return res == CURLE_OK ? "OK" : "ERROR";
+}
+
+bool bCurlInited = false;
+void CurlInit()
+{
+	if (!bCurlInited)
+	{
+		bCurlInited = true;
+		curl_global_init(CURL_GLOBAL_ALL);
+	}
 }

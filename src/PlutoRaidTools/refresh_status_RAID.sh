@@ -17,7 +17,7 @@ if [[ "$DeviceComputer" != "$PK_Device" ]] ;then
 	DeviceAppServer=$(RunSQL "SELECT PK_Device FROM Device WHERE FK_Device_ControlledVia='$DeviceComputer' AND FK_DeviceTemplate='$DT_APP_SERVER'")
 	DeviceAppServer=$(Field 1 "$DeviceAppServer")
 
-	/usr/pluto/bin/MessageSend dcerouter -targetType device 0 "$DeviceAppServer" 1 67 13 "/usr/pluto/bin/monitoring_RAID.sh" 51 "WEB_ADMIN_REFRESH	$DeviceName"
+	/usr/pluto/bin/MessageSend "$DCERouter" -targetType device 0 "$DeviceAppServer" 1 67 13 "/usr/pluto/bin/monitoring_RAID.sh" 51 "WEB_ADMIN_REFRESH	$DeviceName"
 else
 	/usr/pluto/bin/monitoring_RAID.sh "WEB_ADMIN_REFRESH" "$DeviceName"
 fi

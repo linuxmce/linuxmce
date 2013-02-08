@@ -1,0 +1,517 @@
+VDR Plugin 'xine' Revision History
+----------------------------------
+
+2005-09-11: Version 0.7.6
+
+- Fixed vdr-xine to update xine's audio stream bitrate and decoder
+  after xine has connected to vdr-xine. Before that, xine showed
+  the information of the NOSIGNAL stream.
+- Several MPEG1 related fixes. 
+- Several fixes concerning playing of externally generated VDR
+  recordings (thanks to Fabian Wolter for supplying a recording).
+- Fixed compilation for VDR-1.3.32.
+- Playing a still image could make vdr-xine wait for further video
+  packets (this issue showed up from time to time when using the
+  vdr-radio plugin).
+
+2005-08-14: Version 0.7.5
+
+- Added documentation about gxine's VDR support to MANUAL (thanks to 
+  Darren Salt for supplying the patch).
+- Fixed xine-plugin to update audio stream bitrate and decoder.
+- Removed singleton enforcement of xine-plugin as it caused problems
+  with xine's post plugin management (suggested by Darren Salt).
+- Added support to select left / right audio channel by audio post
+  plugin 'vdr_audio'.
+- Added audio post plugin support to xine-ui and fbxine which was needed
+  for the new audio post plugin vdr_audio.
+- Renamed video post plugin 'vdr' to 'vdr_video' to match naming scheme,
+  but it also registered as 'vdr' to maintain compatibility.
+- Created audio post plugin 'upmix_mono' to turn a mono stream into a
+  stereo one with identical data on both sides (requested by Lucian
+  Muresan).
+- Fixed some endianness problems in OSD code (thanks to Carsten
+  Rietzschel for reporting this issue).
+- Fixed some compiler warnings with gcc-4.0.1 and gcc-4.1 (thanks to
+  Eric OUEDRAOGO for reporting this issue).
+- Updated plugin to match interface changes in VDR-1.3.27 (thanks to 
+  C.Y.M for reporting this issue).
+- Fixed implementation of cDevice::Clear() which didn't ensure that
+  really all data (i. e. the data which is just in the FIFO or socket)
+  get's cleared. This might improve switching to trickspeed mode.
+- Updated MANUAL about using vdr_audio post plugin.
+
+2005-05-08: Version 0.7.4
+
+- Fixed compilation issue with gcc-4.1 (thanks to ollo at vdr-portal for
+  reporting this issue).
+- Fixed audio output when used with muggle (thanks to Der_Olli at
+  vdr-portal for testing).
+- Fixed input_vdr for proper "C" coding (thanks to Philip Lawatsch for
+  reporting this issue).
+- Increased xine-lib's demux_mpeg_pes.c's WRAP_THRESHOLD to 270000 to
+  fix detection of false discontinuities (thanks to Jouni Karvo for 
+  reporting this issue).
+- Fixed xine-lib's xxmc decoder to properly decode radio-plugin's 
+  background images.
+- Updated dvbplayer patch for VDR-1.3.24.
+
+2005-04-11: Version 0.7.3
+
+- Started detection of AFD header in xine to automatically crop out the
+  interesting part of the image later.
+- Adopted implementation of cXineDevice::SetDigitialAudioDevice() to
+  different calling order in VDR 1.3.23.
+- Improved cXineDevice::SetDigitalAudioDevice() when replaying recordings.
+- Added setup option to automatically make vdr-xine the primary device
+  while xine is connected to vdr-xine (requested by Der_Olli at vdr-portal).
+- Added setup option to consider all semi transparent colors as opaque to
+  make the menu more readable.
+- Added commandline option '-s' to switch to skin 'curses' while xine is
+  not connected to vdr-xine (requested by Rantanen Teemu).
+- Added commandline option '-q' to suppress debug messages (useful in
+  combination with option '-s').
+- Moved disconnect to cXineDevice::Stop() to get the new options to work.
+- Fixed all (?) deadlock situations in RPC command processing (e. g.
+  stopping replay while switching a channel).
+- Fixed deadlocks in vdr-xine's xread(). A possible drawback is that now
+  a disconnect might happen in such a case.
+- Fixed VDR's I-frame processing which caused disconnects e. g. while
+  moving cut marks in HDTV recordings. vdr-1.2.23-dvbplayer3.patch is 
+  highly recommended for proper operation of vdr-xine.
+- Improved cXineDevice::StillImage() implementation to immediate display
+  the frame (improves moving cut marks).
+- Fixed cXineDevice::StillImage() to work properly in combination with
+  the plugin vdr-radio.
+  BUG: xine's driver xxmc shows just a black screen on my EPIA MII-6000E.
+- Reintroduced usleeps() in input_vdr.c for flush, OSD flush and reset
+  audio. sched_yield() simply caused to much CPU load while waiting 
+  about 40 ms to reach the expected state. Improves number of dropped 
+  frames when switching channels.
+- Optimized OSD display: VDR's channel display repeatedly sends a dirty
+  OSD which doesn't differ from the previous one. Improves number of
+  dropped frames while switching channel.
+  BUG: it's still unclear whether this causes some OSD artefacts.
+- Fixed demux_mpeg_pes' discontinuity detection. Previously, when a PTS
+  wrap happend, xine stopped replay for about 26.5 hours.
+- vdr-xine now nolonger set's xine's metronom directly but tells it's
+  demuxer to do the job. Improves switching channels.
+- Optimized implementation of cXineDevice::Clear() in input_vdr.c.
+  BUG: it may happen that xine's audio driver ALSA might get into a state
+  of "silence" where it doesn't recover from until you stop replaying the
+  recording. I still didn't find a way to reproduce this but it has to do
+  with trickspeed, pause, play, and probably cut marks.
+- Fixed post_vdr.c to detect MRL changes for discovering streams sent from
+  VDR, e. g. when xine is not started with the MRL specified on it's 
+  command line.
+  BUG: It's possible that xine crashes due to this detection. xine doesn't
+  allocate a different stream for a different MRL, but maybe other players
+  do. I'm not sure whether I managed to increase the streams usage counter
+  properly (by allocating an event queue) until I detect the new stream
+  respectively MRL.
+  BUG: post_vdr doesn't operate when xine's driver xxmc is used due to some
+  limitation/incomplete implementation in xine's plugin interface.
+- Fixed xine's deinterlacer interface to take care of cropping. Previously
+  the OSD was resizing like mad e. g. between 1920x1080 and 1920x1088.
+- Added support for VDR's new AUDIO key in xine (thanks to Darren Salt for
+  reporting this issue).
+
+2005-02-27: Version 0.7.2
+
+- Fixed cXineDevice::StillPicture() to support three times larger still
+  image data than before. This was necessary to properly support mp3
+  plugin's cover image feature (thanks to burki at vdr-portal for reporting
+  this issue).
+- Removed cXineStatus as vdr-xine now uses a different method of detecting
+  LiveTV. This one works better in combination with mp3 plugin (thanks to
+  Klaus Schmidinger for suggesting the new solution).
+- Updated xine-lib patch for current CVS (thanks to Grégoire Favre for
+  reporting this issue).
+
+2005-02-13: Version 0.7.1
+
+- Updated finish translation (thanks to Rolf Ahrensberg for supplying the
+  update).
+- Fixed a typo in checking for VDR versions before 1.3.18. This broke
+  successful compilation for versions between 1.3.8 and 1.3.18 (thanks to
+  Andreas Urban for reporting this issue).
+- Fixed processing of cDevice::SetDigitalAudio() as it skipped displaying
+  of NO SIGNAL when switching channels.
+
+2005-01-29: Version 0.7.0
+
+- Implemented centre-cut-out mode: this feature will crop away the black bars
+  around a 4:3 image which is broadcast in a 16:9 stream and is displayed on
+  a 4:3 monitor. See MANUAL how to enable this mode.
+- Fixed OSD scaling for the case where xine cropped the image for displaying.
+- Integrated patch for image grabbing. You can now specify the absolute path
+  of the utilities for grabbing an image. Furthermore, the patch fixes a
+  possible security issue when the filename for the GRAB command contained
+  special shell characters (thanks to Darren Salt for supplying the patch).
+- Image grabbing now also requires pnmcut to support cropped images.
+- Prepended VDR_XINE_ to Makefile variables FIFO_DIR and SET_VIDEO_WINDOW to
+  avoid collisions when vdr-xine's variables are set in VDR's Make.conf.
+- Added syslog messages when VDR_XINE_FIFO_DIR or any fifo cannot be created.
+- Added a further config option to vdr-xine's setup menu: you may now specify
+  how VDR's mute requests will be processed in xine:
+  a) ignore
+  b) simulate (set volume to 0 / restore volume)  
+  c) execute
+- Fixed xine part to update UI when volume / muting is changed.
+- Updated INSTALL, MANUAL and xineI18n.h accordingly.
+
+2005-01-23: Version 0.6.5
+
+- Adapted vdr-xine to the recent changes in VDR-1.3.19.
+- With VDR-1.3.19, the HDTV patch for VDR is obsolete now. See the file
+  vdr-patches-README.txt on my homepage for details.
+
+2005-01-10: Version 0.6.4
+
+- Adapted vdr-xine to the recent changes in VDR-1.3.18. The xine part has also
+  changed and therefore a rebuild of xine is required.
+- With VDR-1.3.18 a lot of my patches for VDR are obsolete now. See the file
+  vdr-patches-README.txt on my homepage for details.
+- Removed the necessity of changing POLLTIMEOUTS_BEFORE_DEVICECLEAR.
+- Updated INSTALL appropriately.
+
+2004-12-31: Version 0.6.3
+
+- Fixed uninitialized variable in xineRemote.c. Release 0.6.2 showed high CPU
+  load of XineRemote control thread when switching between channels with
+  different resolution.
+
+2004-12-30: Version 0.6.2
+
+- Integrated i18n updates (thanks to Rolf Ahrenberg for supplying the patch).
+- Fixed processing of MPEG1 streams. vdr-xine should now be able to work
+  together with vdr-analogtv.
+- Fixed race-condition at shutdown when at client-disconnect vdr-xine accessed
+  the already destructed xineRemote.
+- Fixed invalid pointer access in input_vdr.c (thanks to Darren Salt for
+  supplying the patch).
+- Fixed some OSD update issues that happend when xine asked for an update and
+  VDR was drawing on the OSD at the same time.
+- Prepared xine part for integration into xine-lib-1.0.x.
+- Synced SPU processing. DVD subtitles should now nolonger be several seconds
+  ahead of their expected presentation time.
+- Updated MANUAL to reflect name changes in xine's config file.
+
+2004-12-10: Version 0.6.1
+
+- Added vdr-xine option "-i NUM" which can be used to get two or more vdr-xine
+  instances running on the same machine (in different VDR instances). The same
+  option is available as "--vdr-instance=NUM" to xineplayer but there it must
+  be the first argument to not conflict with any other options from mplayer.
+- Fixed cXineDevice::StillPicture() to automatically add an PES video header
+  if the given data doesn't contain one. As a result vdr-streamdev-* is now
+  able to show an image while pausing Live-TV (thanks to Darren Salt for some
+  hints on optimized coding).
+- Fixed some special cases of dolby audio processing introduced in 0.5.3 
+  (thanks to Markus Maierhofer for reporting this issue).
+- Moved option OSD_SCALING_MODE and DONT_CHANGE_XINE_VOLUME from Makefile to
+  vdr-xine's setup. Therefore the same binary package can now be run on less
+  powerful machines too.
+- Integrated a large piece of xine-lib.patch into xine-lib-cvs. As a result
+  the configure option --disable-exact-blending is gone and is now available
+  as runtime configureable option "video.disable_exact_osd_alpha_blending".
+- Updated xineI18n.h. Feel free to supply updates for other languages too.
+- Updated INSTALL and MANUAL accordingly.
+- Introduced xineCommon.h to handle poisend VDR source.
+- Prepared xineI18n.h for additional languages.
+- Added a setup option for adjusting OSD gamma correction when OSD scaling
+  is necessary.
+- Fixed xine part to no longer freeze when one connects to stale vdr-xine
+  FIFOs.
+- Fixed xine part to immediately react on the "stop" button in case where
+  VDR doesn't send a stream to xine.
+- The error message about missing noSignal.pes is now also logged via syslog
+  as there was otherwise no indicater found in the logfile why VDR terminated
+  that early. 
+
+2004-11-02: Version 0.6.0
+
+- Implemented playback of external sources. This is done using the well known
+  mplayer plugin in combination with my mplayer wrapper called "xineplayer".
+  Just setup mplayer plugin as it's documentation states. Then edit it's
+  "mplayer.sh" and replace "mplayer" by "xineplayer". xineplayer get's built
+  into vdr-xine's source directory. You'll have to copy it to a "bin"
+  directory which is part of your PATH or you might want to specifiy it's full
+  path in mplayer.sh. For this first release you'll have to select mplayer
+  plugin's "TRADITIONAL" mode to get it working with vdr-xine.
+- Exact but CPU intensive OSD blending can now be disabled in xine-lib by
+  giving the configure switch "--disable-exact-blending" to "./autogen.sh".
+- Fixed high CPU load of vdr-xine when xine was disconnected while a currently
+  replayed recording was paused.
+- Removed DATA_DIR. "noSignal.pes" is now expected below VDR's config files
+  directory, i. e. .../plugins/xine/noSignal.pes.
+- Added OSD scaling mode "auto SHQ" which automatically chooses SHQ mode for
+  low resolution streams (width < 360 respectively height < 288). This mode is
+  now the one which is preselected in Makefile.
+- Updated INSTALL and MANUAL accordingly.
+
+2004-10-24: Version 0.5.3
+
+*** NO NEED TO RECOMPILE xine-lib / xine-ui THIS TIME ***
+
+- Fixed dolby audio processing to get recordings (and former live stream) of
+  channel "ProSiebenHD" to play properly.
+- Fixed extraction of PTS values (ignore PTS of value 0) resulting in better
+  prebuffering (thanks to Cristiano Bozzi for reporting this issue).
+- Changed data processing to comply with VDR's new buffer handling since 
+  release 1.3.13 (thanks to Klaus Schmidinger for assistance).
+- Scrambled flag on PES packets is now cleared to not have xine terminate 
+  playback due to bad reception quality respectively early data transmission
+  while device is still tuneing (thanks to mvdbeek at vdr-portal for reporting
+  this issue).
+- Replaced all usleep() calls by cMutex / cCondVar substitutes.
+- Added paragraph to INSTALL (BUILDING XINE) about required versions of
+  autoconf suite for building xine (requested by Frank99 at vdr-portal).
+
+2004-10-09: Version 0.5.2
+
+- Fixed xine-lib/src/vdr/input_vdr.c for compliance with C coding. It should
+  now compile properly with gcc-2.95.3 (thanks to Jouni Karvo for reporting
+  this issue).
+- Implemented cPlugin::CommandLineHelp() (suggested by ronnykornexl at
+  vdr-portal).
+- Updated INSTALL and pointed to xine-cvs archives on my homepage.
+- Updated INSTALL and documented "ERROR: remote control XineRemote not ready!"
+  which appears in VDR's logfile.
+- Updated INSTALL and mentioned delay of about 10 seconds until VDR enters
+  "Phase 2" of remote learning mode after pressing a remote key in "Phase 1".
+- Fixed compile error of xine-lib's video_out_xvmc.c which was caused by my
+  OSD patches (thanks to Kron at vdr-portal for reporting this issue).
+- Fixed a buffer overrun in my patches to xine-lib which caused xine to die
+  occasionally when VDR's OSD was active and/or operated (thanks to Joerg
+  Knitter for intensively testing vdr-xine).
+- Tried to create a patch for xine-lib that complains when applied to RC6 but
+  all rejects should only address the newly added driver xxmc. Therefore they
+  can simply be ignored.
+- Currently, xine-ui.patch is empty but I didn't want to remove this file as
+  doing so might break some people's build scripts.
+
+2004-10-04: Version 0.5.1
+
+- Updated documentation (thanks to Darren Salt for supplying the patch).
+- OSD scaling is now using frame resolution instead of stream resolution. This
+  should make the OSD show up more often already at the right resoltion. For
+  almost immediate response to resolution changes it is required to run xine
+  with --post vdr.
+- Completed implementation of cDevice::GrabImage() method. It now supports
+  xine's different image formats and honors the different aspect ratio of
+  16:9 broadcasts.
+- Added paragraph to INSTALL about additional programs which are needed to
+  successfully grab images.
+- Added paragraph to INSTALL about remote learning mode.
+- Synchronized OSD output. Hideing an OSD and grabing an image immediately
+  afterwards leaded to a snapshot which still showed the OSD.
+- Probably fixed audio replay on channels with still video. Prebuffer time is
+  now extended dynamically by the difference between audio and video time 
+  stamps on the channel in question.
+- Fixed prebuffering after toggleing audio channel.
+- Reorganized directory structure of the xine part once again. xine-ui now
+  needs the configure switch "--enable-vdr-keys" to support vdr-xine's remote.
+- Improved OSD scaling which took over month to optimize. See Makefile for
+  OSD_SCALING_HQ. One might also choose OSD_SCALING_SHQ but be warned about
+  the CPU load it causes.
+- xine-lib-1-RC6 should be sufficient for this release but my patches will
+  complain about the recently added driver xxmc.
+
+2004-08-08: Version 0.5.0
+
+- Added paragraph to INSTALL about using the correct xine-config in Makefile
+  (suggested by Luca Olivetti).
+- Fixed SEGV (in remote control code) which happend when VDR was exiting
+  (thanks to Mattias Grönlund for supplying the patch).
+- Added a Makefile switch DONT_CHANGE_XINE_VOLUME to have vdr-xine never
+  change xine's volume control (e. g. when connecting xine to VDR), as this
+  might lead to (un)muting the wrong audio channels (requested by Jouni
+  Karvo).
+- Fixed quickly switching between play / pause. There is still a lockup left
+  to be fixed that appears on some machines when jumping between cutting marks
+  (thanks to peter_weber69 at vdr-portal for testing the fix).
+- Added video scaling by xine post plugin 'vdr' to support yaepg plugin. One
+  will have to add "--post vdr" to the command line or select the post plugin
+  via the user interface. As yaepg patches VDR, you'll have to tell vdr-xine
+  whether you want to support yaepg by enabling SET_VIDEO_WINDOW in Makefile.
+- Looking forward to having the xine part integrated into CVS, the locations
+  of my plugins in xine-lib's source tree have changed. INSTALL was updated
+  to the new patch procedure. A current CVS source tree is required (can be
+  found on my home page, too).
+
+2004-07-25: Version 0.4.3
+
+- Fixed xineI18n.h for compatibility with VDR-1.3.[01]. The Russian translation
+  entries were introduced with VDR-1.3.2 (reported by Rolf Ahrensberg).
+- Implemented OSD scaling. Currently, the scaled OSD is of "bad" quality, but
+  as a start, it's better than nothing :-)
+- Tried to fix the issues which were recently introduced by soft-start, but
+  it's likely that the fixes still don't work for less powerful machines. In
+  such a case, locate softStartCalcSpeed() in xineDevice.c and try differnt
+  methods (0..3). Please drop me a line on success respectively failure.
+
+2004-07-04: Version 0.4.2
+
+- Integrated swedish translation supplied by Tomas Prybil.
+- Fixed xineI18n.h for compatibility with VDR-1.3.6 (thanks to ronnykornexl at
+  vdr-portal for reporting this issue).
+- Followed http://www.vdr-wiki.de/wiki/index.php/MANUAL-DE#Patches for creating
+  respectively naming xine patches (thanks to ronnykornexl at vdr-portal).
+- New feature for Live-TV mode: "soft-start" replays the stream in slow motion 
+  while buffering. Useful for zapping, where you'll see an image of the current
+  program quite early. The stream speed starts now at 50 %, slows down to 25 % 
+  and then speeds up to 100 %. This happens within the prebuffer time, so you
+  should increase it (e. g. to 50) if you experience problems.
+
+2004-06-27: Version 0.4.1
+
+- Fixed audio handling of the previous release as it broke playing mp3s (thanks
+  to Jouni Karvo for reporting this issue).
+- Fixed xine's linear PCM decoder to support more sample rates. Previously, mp3
+  files did often play to fast.
+- DVDs should play properly now, independent of the dolby setting.
+- Disabled debug code. Please remove all /tmp/frame* files which might have
+  been created by release 0.4.0.
+- Integrated remote control patch for fbxine (provided by Dirk Meyer), but I'm
+  still waiting for an example on how to bind the keys in fbxine.
+- Added a section to MANUAL about xine's command line and useful options 
+  (suggested by Jouni Karvo).
+- VDR: Improved performance. Please apply the vdr-1.3.11 patches which are 
+  available on my homepage.
+- VDR: Fixed recording replay when reaching the end of a recording in
+  trickspeed mode. VDR switched to play mode instead of ending replay.
+  
+2004-06-21: Version 0.4.0
+
+- Integrated patch which implements cDevice::GetSPUDecoder() (thanks to Sven
+  Goethel for supplying the patch).
+- Fixed INSTALL again for correct quoting (thanks to Johannes Schoeller for 
+  reporting this issue).
+- Updated xineI18n.h for now 18 languages in VDR 1.3.x (thanks to Achim
+  Tuffentsammer for the hint).
+- Added a paragraph to INSTALL for users of full featured cards (suggested by
+  Tuomas Jormola).
+- Rewrote INSTALL in various places, to contain much helpful information
+  discussed previously on the mailing list.
+- Integrated patch for supplying xine the default MRL of VDR (thanks to Darren
+  Salt).
+- Added cDevice::Flush() to work around xine's large buffers.
+- xine-lib-1-rc5 should be sufficient to get the plugin working.
+- Improved a lot regarding interoperability with plugin vdr-dvd. To make use 
+  of these changes, you'll have to adjust your '.xine/config'. See MANUAL for 
+  more information.
+- It is recommended to enable dolby when using vdr-dvd.
+
+2004-05-27: Version 0.3.4
+
+- Fixed INSTALL to suggest a correctly quoted 'runvdr' command for running the 
+  plugin for the first time (thanks to peter_weber69 and anonymous (aka Ronny) 
+  on VDR Portal for pointing this out).
+- Fixed xineOsd.c to show OSD in initial remote key learning mode (thanks to 
+  chris281080 on VDR Portal for determining this issue).
+- Added a warning message to xineLib.c, in the case where 'noSignal.pes' can't
+  be opened, e. g. if DATA_DIR is not set correctly in Makefile.
+- Fixed Makefile to use the default DATA_DIR, not my personal one.
+
+2004-05-22: Version 0.3.3
+
+- Fixed input_plugin/input_vdr.c to return proper values for cDevice::GetSTC()
+  (thanks to Pekka Virtanen for supplying a test plugin).
+
+2004-05-22: Version 0.3.2
+
+- Fixed xineRemote.c to be compatible with API of VDR 1.2.6.
+
+2004-05-21: Version 0.3.1
+
+- Updated xine-lib.patch to support all VDR remote keys.
+- Patch file renamed to xine.patch, as xine-ui is modified too.
+- Updated INSTALL to reflect new patch file name and patching of xine-ui.
+- Updated MANUAL to tell command line args and xine's keybindings.
+
+2004-05-21: Version 0.3.0
+
+- Changed code sequence to follow the C language properly (reported by 
+  Jouni Karvo).
+- Updated Finnish translation and added empty Russian translations while 
+  maintaining compatibility with VDR 1.2.x (reported by Rolf Ahrenberg).
+- Dropped (later maybe configurable) sending MUTE to xine, as it's not
+  really necessary for normal operation of VDR (requested by Jouni Karvo).
+- Fixed sending dolby audio to xine (requires up-to-date xine-lib CVS).
+- Added support for VDR-1.3.7's new OSD interface.
+- Integrated patch from Simon Truss to send keystrokes from xine to VDR
+  for controlling VDR from within xine.
+- Enhanced compatibility of xine part to support xine's older API for
+  VIA-enhanced xine (thanks to Vincenzo Memeo).
+
+2004-05-05: Version 0.2.2
+
+- Added define _GNU_SOURCE to Makefile (just like for new plugins).
+- DATA_DIR in Makefile contained path of my system.
+- OSD update in xine is now optimized to VDR's dirty OSD area.
+- Implemented cDevice::GetSTC().
+- Removed some unnecessary PES packet requirements for trickspeed mode.
+- Moved image conversion from xine to VDR for cDevice::GrabImage()
+  implementation.
+- Added support for dolby audio (i. e. cDevice::PlayAudio(): untested due
+  to lack of hardware).
+- Added configuration option to enable dolby audio (default: off).
+- When xine connects to VDR, volume and muting are adjusted to fit VDR's 
+  values.
+
+2004-04-23: Version 0.2.1
+
+- Corrected some FIXMEs for certain recordings.
+- Audio is now unmuted when leaving a recording in trickmode speed.
+
+2004-04-22: Version 0.2.0
+
+- Added trickspeed mode.
+- Added image grabbing (requires y4mscaler, y4mtoppm and pnmtojpeg).
+- Added automatic selection of prebuffer mode.
+- Dropped config option 'xine.modeReplay.prebufferFrames'.
+- Dropped config option 'xine.usageModeDefault'.
+- Dropped main menu entry.
+- Partly integrated Makefile patch from Darren Salt.
+- Fixed some stuff regarding latest CVS xine.
+
+2004-02-03: Version 0.1.2
+
+- Fixed a compile error in xine
+- Fixed a compile error in VDR
+
+2003-12-21: Version 0.1.1
+
+- Changed version numbering for easier update recognition.
+- Updated to latest xine API version number.
+- Fixed VDR's high CPU load when no xine connected.
+- Added Finnish translation supplied by Rolf Ahrenberg.
+- Supplied a completely black 'noSignal.pes' to prevent the monitor from
+  damage while listening to radio stations for a long time.
+
+2003-12-17: Version 0.0.3 (aka 0.1.0)
+
+- Improved channel switching by using xine's prebuffering.
+- Prebuffer settings configurable for Live-TV and Replay.
+- Changed directories for plugin's files as suggested on ML.
+- Supports xine's unscaled OSD (configurable).
+- Shows a currently open OSD on connect with xine.
+- Shows an OSD in remote key learning mode.
+- Addresses some show stoppers due to recent xine changes.
+- Supports i18n.
+
+2003-09-08: Version 0.0.2
+
+- Minor fixes.
+- Improved channel switching.
+- Dropped dependencies to X11.
+
+2003-09-07: Version 0.0.1
+
+- Initial release.
+
+2003-06-23: Version 0.0.0
+
+- Announcement.
+

@@ -33,11 +33,7 @@ using namespace std;
 #include "Table_CommMethod.h"
 
 #include "Table_DeviceTemplate.h"
-#include "Table_DeviceTemplate_pschist.h"
-#include "Table_DeviceTemplate_pschmask.h"
 #include "Table_InfraredGroup.h"
-#include "Table_InfraredGroup_pschist.h"
-#include "Table_InfraredGroup_pschmask.h"
 #include "Table_PnpQueue.h"
 
 
@@ -86,6 +82,7 @@ void Row_CommMethod::Delete()
 	Row_CommMethod *pRow = this; // Needed so we will have only 1 version of get_primary_fields_assign_from_row
 	
 	if (!is_deleted)
+	{
 		if (is_added)	
 		{	
 			vector<TableRow*>::iterator i;	
@@ -107,6 +104,7 @@ void Row_CommMethod::Delete()
 			table->deleted_cachedRows[key] = this;
 			is_deleted = true;	
 		}	
+	}
 }
 
 void Row_CommMethod::Reload()
@@ -150,7 +148,8 @@ is_null[5] = true;
 m_psc_user = 0;
 m_psc_frozen = 0;
 is_null[6] = false;
-is_null[7] = true;
+m_psc_mod = "0000-00-00 00:00:00";
+is_null[7] = false;
 is_null[8] = true;
 m_psc_restrict = 0;
 
@@ -236,9 +235,6 @@ return is_null[5];}
 bool Row_CommMethod::psc_frozen_isNull() {PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
 
 return is_null[6];}
-bool Row_CommMethod::psc_mod_isNull() {PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
-
-return is_null[7];}
 bool Row_CommMethod::psc_restrict_isNull() {PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
 
 return is_null[8];}
@@ -268,10 +264,6 @@ void Row_CommMethod::psc_frozen_setNull(bool val){PLUTO_SAFETY_LOCK_ERRORSONLY(s
 is_null[6]=val;
 is_modified=true;
 }
-void Row_CommMethod::psc_mod_setNull(bool val){PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
-is_null[7]=val;
-is_modified=true;
-}
 void Row_CommMethod::psc_restrict_setNull(bool val){PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
 is_null[8]=val;
 is_modified=true;
@@ -298,8 +290,8 @@ PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
 if (is_null[1])
 return "NULL";
 
-char *buf = new char[41];
-db_wrapper_real_escape_string(table->database->m_pDB, buf, m_Description.c_str(), (unsigned long) min((size_t)20,m_Description.size()));
+char *buf = new char[121];
+db_wrapper_real_escape_string(table->database->m_pDB, buf, m_Description.c_str(), (unsigned long) min((size_t)60,m_Description.size()));
 string s=string()+"\""+buf+"\"";
 delete[] buf;
 return s;
@@ -312,8 +304,8 @@ PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
 if (is_null[2])
 return "NULL";
 
-char *buf = new char[31];
-db_wrapper_real_escape_string(table->database->m_pDB, buf, m_Define.c_str(), (unsigned long) min((size_t)15,m_Define.size()));
+char *buf = new char[91];
+db_wrapper_real_escape_string(table->database->m_pDB, buf, m_Define.c_str(), (unsigned long) min((size_t)45,m_Define.size()));
 string s=string()+"\""+buf+"\"";
 delete[] buf;
 return s;
@@ -970,39 +962,11 @@ PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
 class Table_DeviceTemplate *pTable = table->database->DeviceTemplate_get();
 pTable->GetRows("`FK_CommMethod`=" + StringUtils::itos(m_PK_CommMethod),rows);
 }
-void Row_CommMethod::DeviceTemplate_pschist_FK_CommMethod_getrows(vector <class Row_DeviceTemplate_pschist*> *rows)
-{
-PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
-
-class Table_DeviceTemplate_pschist *pTable = table->database->DeviceTemplate_pschist_get();
-pTable->GetRows("`FK_CommMethod`=" + StringUtils::itos(m_PK_CommMethod),rows);
-}
-void Row_CommMethod::DeviceTemplate_pschmask_FK_CommMethod_getrows(vector <class Row_DeviceTemplate_pschmask*> *rows)
-{
-PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
-
-class Table_DeviceTemplate_pschmask *pTable = table->database->DeviceTemplate_pschmask_get();
-pTable->GetRows("`FK_CommMethod`=" + StringUtils::itos(m_PK_CommMethod),rows);
-}
 void Row_CommMethod::InfraredGroup_FK_CommMethod_getrows(vector <class Row_InfraredGroup*> *rows)
 {
 PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
 
 class Table_InfraredGroup *pTable = table->database->InfraredGroup_get();
-pTable->GetRows("`FK_CommMethod`=" + StringUtils::itos(m_PK_CommMethod),rows);
-}
-void Row_CommMethod::InfraredGroup_pschist_FK_CommMethod_getrows(vector <class Row_InfraredGroup_pschist*> *rows)
-{
-PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
-
-class Table_InfraredGroup_pschist *pTable = table->database->InfraredGroup_pschist_get();
-pTable->GetRows("`FK_CommMethod`=" + StringUtils::itos(m_PK_CommMethod),rows);
-}
-void Row_CommMethod::InfraredGroup_pschmask_FK_CommMethod_getrows(vector <class Row_InfraredGroup_pschmask*> *rows)
-{
-PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
-
-class Table_InfraredGroup_pschmask *pTable = table->database->InfraredGroup_pschmask_get();
 pTable->GetRows("`FK_CommMethod`=" + StringUtils::itos(m_PK_CommMethod),rows);
 }
 void Row_CommMethod::PnpQueue_FK_CommMethod_getrows(vector <class Row_PnpQueue*> *rows)

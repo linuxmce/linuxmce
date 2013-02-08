@@ -4,7 +4,7 @@
 
 # Note:
 #   This script is not currently used, but when we'll have time to update
-#   pluto-admin, we'll use this script for a drop down box similar to the
+#   lmce-admin, we'll use this script for a drop down box similar to the
 #   one used for serial ports.
 #
 #   This would involve changes in the web pages, a Device Data called

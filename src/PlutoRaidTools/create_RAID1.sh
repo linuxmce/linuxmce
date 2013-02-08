@@ -72,6 +72,10 @@ if [[ "$3" != "demonized" ]] ;then
 
 		sleep 3
 
+		# Save RAID configuration
+		mdadm --detail --scan >> /etc/mdadm/mdadm.conf
+		echo "PROGRAM /usr/pluto/bin/monitoring_RAID.sh" >> /etc/mdadm/mdadm.conf
+
 		# Update Raid Information
 		Log "Updating raid information in the database"
                 /usr/pluto/bin/monitor_Raid.sh "REFRESH_FROM_CREATE_RAID1" "/dev/$name"

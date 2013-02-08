@@ -81,7 +81,7 @@ void MediaMouseHandler::Start()
 		if( pObj_Grid->DataGridTable_Get() )
 		{
 			int Rows = pObj_Grid->DataGridTable_Get()->GetRows();
-			int CurrentRow = pObj_Grid->m_iHighlightedRow_get()>0 ? pObj_Grid->m_iHighlightedRow_get() : 0;
+			int CurrentRow = pObj_Grid->m_iHighlightedRow>0 ? pObj_Grid->m_iHighlightedRow : 0;
 			double RowHeight = (double) pObj_Grid->m_rPosition.Height / Rows;
 			int Y = int(CurrentRow * RowHeight + pObj_Grid->m_rPosition.Y + pObj_Grid->m_pPopupPoint.Y);
 			int X = pObj_Grid->m_rPosition.X + pObj_Grid->m_pPopupPoint.X + (pObj_Grid->m_rPosition.Width/2);
@@ -155,7 +155,7 @@ void MediaMouseHandler::Move(int X,int Y,int PK_Direction)
 		if( Row!=m_iLastNotch )
 		{
 			m_iLastNotch=Row;
-			pObj_Grid->m_iHighlightedRow_get() = 1;
+			pObj_Grid->m_iHighlightedRow = 1;
 			pObj_Grid->m_GridCurRow = Row;
 	LoggerWrapper::GetInstance()->Write(LV_FESTIVAL,"MouseBehavior::MediaTracks  *discrete* highlighted row %d",Row);
 			pObj_Grid->Flush();

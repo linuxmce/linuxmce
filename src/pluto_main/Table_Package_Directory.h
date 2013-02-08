@@ -148,25 +148,25 @@ void psc_restrict_set(long int val);
 		
 		bool FK_OperatingSystem_isNull();
 bool FK_Distro_isNull();
+bool Path_isNull();
 bool InputPath_isNull();
 bool GenerateDoxygen_isNull();
 bool psc_id_isNull();
 bool psc_batch_isNull();
 bool psc_user_isNull();
 bool psc_frozen_isNull();
-bool psc_mod_isNull();
 bool psc_restrict_isNull();
 
 			
 		void FK_OperatingSystem_setNull(bool val);
 void FK_Distro_setNull(bool val);
+void Path_setNull(bool val);
 void InputPath_setNull(bool val);
 void GenerateDoxygen_setNull(bool val);
 void psc_id_setNull(bool val);
 void psc_batch_setNull(bool val);
 void psc_user_setNull(bool val);
 void psc_frozen_setNull(bool val);
-void psc_mod_setNull(bool val);
 void psc_restrict_setNull(bool val);
 	
 	
@@ -188,8 +188,6 @@ class Row_Distro* FK_Distro_getrow();
 
 		// Return the rows in other tables with foreign keys pointing here
 		void Package_Directory_File_FK_Package_Directory_getrows(vector <class Row_Package_Directory_File*> *rows);
-void Package_Directory_File_pschist_FK_Package_Directory_getrows(vector <class Row_Package_Directory_File_pschist*> *rows);
-void Package_Directory_File_pschmask_FK_Package_Directory_getrows(vector <class Row_Package_Directory_File_pschmask*> *rows);
 
 
 		// Setup binary serialization

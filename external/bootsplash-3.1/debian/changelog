@@ -1,0 +1,59 @@
+bootsplash (3.1-1pluto8) unstable; urgency=low
+
+  * Added helper script for removing bootsplash on the current console
+  
+ -- Radu Cristescu <radu.c@plutohome.com>  Fri, 28 Jul 2006 14:57:14 +0300
+ 
+bootsplash (3.1-1pluto7) unstable; urgency=low
+
+  * Removed an old debconf option that was not used any more
+  
+ -- Razvan Gavril <razvan.g@plutohome.com>  Mon, 24 Jul 2006 18:25:24 +0300
+ 
+bootsplash (3.1-1pluto6) unstable; urgency=low
+
+  * Remove code that patched the initrd from postinst, it can mess up realy
+    bad  with the current kernel
+
+ -- Razvan Gavril <razvan.g@plutohome.com>  Thu, 15 Jun 2006 12:42:16 +0300
+
+bootsplash (3.1-1pluto5) unstable; urgency=low
+
+  * Support for other themes
+
+ -- Razvan Gavril <razvan.g@plutohome.com>  Thu, 11 May 2006 13:43:11 +0300
+  
+bootsplash (3.1-1pluto4) unstable; urgency=low
+
+  * Bootsplash is the default boot option now
+
+ -- Razvan Gavril <razvan.g@plutohome.com>  Wed, 22 Feb 2006 11:57:04 +0200
+
+bootsplash (3.1-1pluto3) unstable; urgency=low
+
+  * Removed kernel dependency
+  
+ -- Razvan Gavril <razvan.g@plutohome.com>  Fri, 10 Feb 2006 13:53:00 +0200
+
+bootsplash (3.1-1pluto2) unstable; urgency=low
+
+  * Removed bootsplash from kopt and made an altoption until good test results
+  
+ -- Razvan Gavril <razvan.g@plutohome.com>  Thu, 26 Jan 2006 16:43:44 +0200
+  
+bootsplash (3.1-1pluto1) unstable; urgency=low
+
+  * Added default option to patch all the initrd images by default
+
+ -- Razvan Gavril <razvan.g@plutohome.com>  Tue, 24 Jan 2006 15:16:17 +0200
+
+bootsplash (3.1-2) unstable; urgency=low
+
+  * Initial Release.
+  * Ajusted the Makefile to install the binaries in the desired location
+  * Imported the init.d script from www.bootsplash.de debian packages
+  * Imported templated ftom www.bootsplash.de debian packages
+  * Update grub's menu.lst to append 'splash=silent' to kopt
+  * Changed splash.sh and bootanim bash scripts to work with Debian/Pluto
+  
+ -- Razvan Gavril <razvan.g@plutohome.com>  Thu,  5 Jan 2006 12:12:28 +0200

@@ -1,6 +1,14 @@
 #!/bin/bash
 
+#set -e
+
 . /usr/share/debconf/confmodule
+
+echo ""
+echo "********************************************************************************"
+echo "*** Running: $0"
+echo "********************************************************************************"
+
 
 # lirc-modules-source
 db_fset lirc-modules-source/do-build seen true
@@ -33,3 +41,6 @@ db_fset lirc-modules-source/sir_type seen true
 db_set lirc-modules-source/use_lirc_hints ''
 db_fset lirc-modules-source/use_lirc_hints seen true
 db_fset lirc-modules-source/what_next seen true
+
+echo "*** Done: $0"
+

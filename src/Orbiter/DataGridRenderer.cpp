@@ -144,8 +144,8 @@ DataGridRenderer::DataGridRenderer(DesignObj_Orbiter *pOwner): ObjectRenderer(pO
 						GraphicType = GRAPHIC_SELECTED;
 						if( m_pObj_Owner_DataGrid->m_bHighlightSelectedCell )
 						{
-							m_pObj_Owner_DataGrid->m_iHighlightedRow_set( m_pObj_Owner_DataGrid->m_sExtraInfo.find( 'C' )==string::npos ? DGRow : -1 );
-							m_pObj_Owner_DataGrid->m_iHighlightedColumn_set( m_pObj_Owner_DataGrid->m_sExtraInfo.find( 'R' )==string::npos ? DGColumn : -1 );
+							m_pObj_Owner_DataGrid->m_iHighlightedRow = m_pObj_Owner_DataGrid->m_sExtraInfo.find( 'C' )==string::npos ? DGRow : -1;
+							m_pObj_Owner_DataGrid->m_iHighlightedColumn = m_pObj_Owner_DataGrid->m_sExtraInfo.find( 'R' )==string::npos ? DGColumn : -1;
 							m_pObj_Owner_DataGrid->m_bHighlightSelectedCell=false; // Only on the initial draw
 						}
 					}
@@ -360,7 +360,7 @@ DataGridRenderer::DataGridRenderer(DesignObj_Orbiter *pOwner): ObjectRenderer(pO
 		if (pCell->m_pGraphic)
 		{
 			PlutoRectangle rect(x,  y,  w,  h);
-/*
+
 			if(m_pObj_Owner->m_pOrbiter->m_sSkin == AUDIO_STATION_SKIN)
 			{
 				//center graphic
@@ -376,7 +376,7 @@ DataGridRenderer::DataGridRenderer(DesignObj_Orbiter *pOwner): ObjectRenderer(pO
 				rect.Width = new_width;
 				rect.Height = new_height;
 			}
-*/
+
 			if(m_pObj_Owner->m_pOrbiter->m_sSkin == AUDIO_STATION_SKIN && string(pCell->GetValue()).find("!A") != 0)
 			{
 				//don't display coverart for nuforce's non-albums
@@ -414,6 +414,13 @@ DataGridRenderer::DataGridRenderer(DesignObj_Orbiter *pOwner): ObjectRenderer(pO
 
 		Text.m_iPK_HorizAlignment = pTextStyle->m_iPK_HorizAlignment;
 		Text.m_iPK_VertAlignment = pTextStyle->m_iPK_VertAlignment;
+
+		if(m_pObj_Owner->m_pOrbiter->m_sSkin == AUDIO_STATION_SKIN && m_pObj_Owner->m_iBaseObjectID == DESIGNOBJ_dgFileList2_Pics_CONST)
+		{
+			Text.m_iPK_HorizAlignment = HORIZALIGNMENT_Center_CONST;
+			Text.m_iPK_VertAlignment = VERTALIGNMENT_Middle_CONST;
+		}
+
 		string sText = m_pObj_Owner_DataGrid->m_pOrbiter->SubstituteVariables(pCell->GetText(), m_pObj_Owner_DataGrid, 0, 0);
 
 		//don't display any text on a cell if it has already a pictures to display

@@ -1,0 +1,17 @@
+Source: vdrdevel-plugin-control
+Section: misc
+Priority: extra
+Maintainer: Rene Bartsch <ml@bartschnet.de>
+Origin: ctvdr
+Bugs: mailto:pkg-vdr-dvb-devel@lists.alioth.debian.org
+Build-Depends: debhelper (>> 4.1.16), vdrdevel-dev (>= 1.3.17-12), dpatch (>= 2.0.9)
+Standards-Version: 3.6.2
+
+Package: vdrdevel-plugin-control
+Architecture: any
+Depends: ${shlibs:Depends}, ${vdrdevel:Depends}
+Conflicts: ${vdrdevel:Conflicts}
+Description: Plugin to control vdr OSD by console or telnet.
+ This plugin allows to control VDR by console or telnet
+ even if the systems does not have any full featured DVB card.
+XB-VDR-Patchlevel: ${vdrdevel:Patchlevel}

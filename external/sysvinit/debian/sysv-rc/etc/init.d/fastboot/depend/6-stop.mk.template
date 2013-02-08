@@ -1,0 +1,1 @@
+$(filter-out $<,$(ALL))         : bootsplash Pluto_HaltMDs.sh

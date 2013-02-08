@@ -1,7 +1,7 @@
 Source: asterisk-pluto
 Section: unknown
 Priority: optional
-Maintainer: Office Server Operator <root@activate.plutohome.com>
+Maintainer: LinuxMCE Developers <developers@linuxmce.org>
 Build-Depends: debhelper (>= 4.0.0)
 Standards-Version: 3.6.1
 

@@ -1,0 +1,24 @@
+Source: linuxtv-dvb-apps
+Section: misc
+Priority: extra
+Maintainer: Debian VDR Team <pkg-vdr-dvb-devel@lists.alioth.debian.org> 
+Uploaders: Thomas Schmidt <tschmidt@debian.org>
+Build-Depends: debhelper (>> 4.0.0), dpatch (>= 2.0.9)
+Standards-Version: 3.6.1
+
+Package: dvb-utils
+Architecture: any
+Depends: ${shlibs:Depends}, makedev (>=2.3.1-66)
+Provides: dvb-zapping
+Conflicts: dvb-zapping
+Replaces: dvb-zapping
+Description: Viewer programs for DVB cards
+ Some applications for DVB users:
+ .
+ av7110_loadkeys - tool to load keyfiles of ir-remotes
+ evtest - find out events-keys to generate a keyfile for your remote
+ femon  - monitor the singal-strength... of your card
+ scan   - scan all transponders and generate a channels.conf
+ czap   - simple zapping tool for the Linux DVB API (DVB-C-Cards)
+ szap   - simple zapping tool for the Linux DVB API (DVB-S-Cards)
+ tzap   - simple zapping tool for the Linux DVB API (DVB-T-Cards)

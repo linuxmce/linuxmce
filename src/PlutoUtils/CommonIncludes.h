@@ -43,7 +43,11 @@ using namespace std;
 	#include <stdlib.h>
 	#include <errno.h>
 	#include <sys/stat.h>
+#ifdef ANDROID
+        #include <signal.h>
+#else
 	#include <sys/signal.h>
+#endif
 	#include <sys/types.h>
 	#include <sys/socket.h>
 	#include <netinet/in.h>

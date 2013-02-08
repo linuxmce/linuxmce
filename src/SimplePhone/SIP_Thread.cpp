@@ -10,6 +10,7 @@
  or FITNESS FOR A PARTICULAR PURPOSE. See the Pluto Public License for more details.
  */
 #include "SIP_Thread.h"
+#include <linphone/config.h>
 #include <linphonecore.h>
 #include "DCE/Logger.h"
 #include "DCE/DCEConfig.h"
@@ -127,8 +128,13 @@ static void LS_InitProxy()
 	LoggerWrapper::GetInstance()->Write(LV_STATUS,
 	"LS_InitProxy -- Proxy: %s; Extension: %s; Identity: %s",
 	sProxy.c_str(), sExtension.c_str(), sIdentity.c_str());
-	
+
+/* Later releases of linphone contain sipsetup.h - upto intrepid they do not */
+#ifdef sipsetup_h
+	LS_pLinphoneProxyConfig = linphone_proxy_config_new();
+#else
 	LS_pLinphoneProxyConfig = linphone_proxy_config_new(sProxy.c_str());
+#endif
 	if (! LS_pLinphoneProxyConfig)
 	{
 		LoggerWrapper::GetInstance()->Write(LV_CRITICAL, "LS_InitProxy: Failed to initialize proxy");
@@ -136,6 +142,7 @@ static void LS_InitProxy()
 		return;
 	}
 	
+	linphone_proxy_config_set_server_addr(LS_pLinphoneProxyConfig, sProxy.c_str());
 	linphone_proxy_config_set_identity(LS_pLinphoneProxyConfig, sIdentity.c_str());
 	linphone_proxy_config_enableregister(LS_pLinphoneProxyConfig, TRUE);
 	linphone_proxy_config_expires(LS_pLinphoneProxyConfig, 600);
@@ -145,7 +152,7 @@ static void LS_InitProxy()
 static void LS_SetupAuth()
 {
 	PLUTO_SAFETY_LOCK(sl, LS_linphone_mutex);
-	string sPassword = LS_pSimplePhone->GetExtension();
+	string sPassword = LS_pSimplePhone->GetPassword();
 	linphone_auth_info_set_passwd(LS_pLinphoneAuthInfo, sPassword.c_str());
 	linphone_core_add_auth_info(&LS_LinphoneCore, LS_pLinphoneAuthInfo);
 	LS_Auth_Received = 0;
@@ -257,7 +264,7 @@ static void auth_requested(LinphoneCore *linphoneCore, const char *realm, const 
 	LS_Auth_Realm = realm;
 	LS_Auth_Received = 1;
 	
-	LS_pLinphoneAuthInfo = linphone_auth_info_new(username, NULL, NULL, NULL, realm);
+	LS_pLinphoneAuthInfo = linphone_auth_info_new(username, NULL, LS_pSimplePhone->GetPassword().c_str(), NULL, realm);
 	func_exit("callback: auth_requested");
 }
 static void display_something(LinphoneCore * linphoneCore, LINPHONE_CONST char *something)

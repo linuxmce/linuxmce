@@ -161,7 +161,8 @@ void psc_mod_set(string val);
 void psc_restrict_set(long int val);
 
 		
-		bool Define_isNull();
+		bool Description_isNull();
+bool Define_isNull();
 bool FK_UI_isNull();
 bool DataSubdirectory_isNull();
 bool FK_Style_isNull();
@@ -171,11 +172,11 @@ bool psc_id_isNull();
 bool psc_batch_isNull();
 bool psc_user_isNull();
 bool psc_frozen_isNull();
-bool psc_mod_isNull();
 bool psc_restrict_isNull();
 
 			
-		void Define_setNull(bool val);
+		void Description_setNull(bool val);
+void Define_setNull(bool val);
 void FK_UI_setNull(bool val);
 void DataSubdirectory_setNull(bool val);
 void FK_Style_setNull(bool val);
@@ -185,7 +186,6 @@ void psc_id_setNull(bool val);
 void psc_batch_setNull(bool val);
 void psc_user_setNull(bool val);
 void psc_frozen_setNull(bool val);
-void psc_mod_setNull(bool val);
 void psc_restrict_setNull(bool val);
 	
 	
@@ -212,34 +212,14 @@ class Row_Package* FK_Package_getrow();
 		// Return the rows in other tables with foreign keys pointing here
 		void DesignObj_FK_Skin_SubstForSkin_getrows(vector <class Row_DesignObj*> *rows);
 void DesignObjVariation_DesignObjParameter_FK_Skin_getrows(vector <class Row_DesignObjVariation_DesignObjParameter*> *rows);
-void DesignObjVariation_DesignObjParameter_pschist_FK_Skin_getrows(vector <class Row_DesignObjVariation_DesignObjParameter_pschist*> *rows);
-void DesignObjVariation_DesignObjParameter_pschmask_FK_Skin_getrows(vector <class Row_DesignObjVariation_DesignObjParameter_pschmask*> *rows);
 void DesignObjVariation_DesignObj_Skin_Language_FK_Skin_getrows(vector <class Row_DesignObjVariation_DesignObj_Skin_Language*> *rows);
-void DesignObjVariation_DesignObj_Skin_Language_pschist_FK_Skin_getrows(vector <class Row_DesignObjVariation_DesignObj_Skin_Language_pschist*> *rows);
-void DesignObjVariation_DesignObj_Skin_Language_pschmask_FK_Skin_getrows(vector <class Row_DesignObjVariation_DesignObj_Skin_Language_pschmask*> *rows);
 void DesignObjVariation_Text_Skin_Language_FK_Skin_getrows(vector <class Row_DesignObjVariation_Text_Skin_Language*> *rows);
-void DesignObjVariation_Text_Skin_Language_pschist_FK_Skin_getrows(vector <class Row_DesignObjVariation_Text_Skin_Language_pschist*> *rows);
-void DesignObjVariation_Text_Skin_Language_pschmask_FK_Skin_getrows(vector <class Row_DesignObjVariation_Text_Skin_Language_pschmask*> *rows);
-void DesignObj_pschist_FK_Skin_SubstForSkin_getrows(vector <class Row_DesignObj_pschist*> *rows);
-void DesignObj_pschmask_FK_Skin_SubstForSkin_getrows(vector <class Row_DesignObj_pschmask*> *rows);
 void DeviceTemplate_MediaType_DesignObj_FK_Skin_getrows(vector <class Row_DeviceTemplate_MediaType_DesignObj*> *rows);
-void DeviceTemplate_MediaType_DesignObj_pschist_FK_Skin_getrows(vector <class Row_DeviceTemplate_MediaType_DesignObj_pschist*> *rows);
-void DeviceTemplate_MediaType_DesignObj_pschmask_FK_Skin_getrows(vector <class Row_DeviceTemplate_MediaType_DesignObj_pschmask*> *rows);
 void EffectType_Effect_Skin_FK_Skin_getrows(vector <class Row_EffectType_Effect_Skin*> *rows);
-void EffectType_Effect_Skin_pschist_FK_Skin_getrows(vector <class Row_EffectType_Effect_Skin_pschist*> *rows);
-void EffectType_Effect_Skin_pschmask_FK_Skin_getrows(vector <class Row_EffectType_Effect_Skin_pschmask*> *rows);
 void MediaType_DesignObj_FK_Skin_getrows(vector <class Row_MediaType_DesignObj*> *rows);
-void MediaType_DesignObj_pschist_FK_Skin_getrows(vector <class Row_MediaType_DesignObj_pschist*> *rows);
-void MediaType_DesignObj_pschmask_FK_Skin_getrows(vector <class Row_MediaType_DesignObj_pschmask*> *rows);
 void Screen_DesignObj_FK_Skin_getrows(vector <class Row_Screen_DesignObj*> *rows);
-void Screen_DesignObj_pschist_FK_Skin_getrows(vector <class Row_Screen_DesignObj_pschist*> *rows);
-void Screen_DesignObj_pschmask_FK_Skin_getrows(vector <class Row_Screen_DesignObj_pschmask*> *rows);
 void Skin_FK_Skin_TextPlacement_getrows(vector <class Row_Skin*> *rows);
-void Skin_pschist_FK_Skin_TextPlacement_getrows(vector <class Row_Skin_pschist*> *rows);
-void Skin_pschmask_FK_Skin_TextPlacement_getrows(vector <class Row_Skin_pschmask*> *rows);
 void StyleVariation_FK_Skin_getrows(vector <class Row_StyleVariation*> *rows);
-void StyleVariation_pschist_FK_Skin_getrows(vector <class Row_StyleVariation_pschist*> *rows);
-void StyleVariation_pschmask_FK_Skin_getrows(vector <class Row_StyleVariation_pschmask*> *rows);
 
 
 		// Setup binary serialization

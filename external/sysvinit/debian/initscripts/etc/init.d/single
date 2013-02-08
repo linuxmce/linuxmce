@@ -1,0 +1,31 @@
+#! /bin/sh
+#
+# single	executed by init(8) upon entering runlevel 1 (single).
+#
+# Version:	@(#)single  2.85-18  04-Jun-2004  miquels@cistron.nl
+#
+
+PATH="/sbin:/bin:/usr/sbin:/usr/bin"
+
+# Kill all processes.
+echo -n "Sending all processes the TERM signal..."
+killall5 -15
+echo "done."
+sleep 5
+echo -n "Sending all processes the KILL signal..."
+killall5 -9
+echo "done."
+
+# We start update here, since we just killed it.
+if [ -x /sbin/update ] && [ `uname -s` = Linux ]
+then
+	case `uname -r` in
+		0.*|1.*|2.[0123].*)
+			update
+		;;
+	esac
+fi
+
+echo "Entering single-user mode..."
+exec init -t1 S
+

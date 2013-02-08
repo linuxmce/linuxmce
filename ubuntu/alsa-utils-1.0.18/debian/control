@@ -1,0 +1,31 @@
+Source: alsa-utils
+Section: sound
+Priority: optional
+Maintainer: Ubuntu Core Developers <ubuntu-devel-discuss@lists.ubuntu.com>
+XSBC-Original-Maintainer: Debian ALSA Maintainers <pkg-alsa-devel@lists.alioth.debian.org>
+Uploaders: Jordi Mallach <jordi@debian.org>, Elimar Riesebieter <riesebie@lxtec.de>, Martin Pitt <mpitt@debian.org>
+Build-Depends: debhelper, libncurses5-dev, autotools-dev, quilt (>= 0.40),
+ libasound2-dev (>= 1.0.18), xmlto
+Standards-Version: 3.8.0
+Homepage: http://www.alsa-project.org/
+Vcs-Svn: svn://svn.debian.org/pkg-alsa/trunk/alsa-utils
+Vcs-Browser: http://svn.debian.org/wsvn/pkg-alsa/trunk/alsa-utils/
+
+Package: alsa-utils
+Architecture: alpha amd64 arm armeb armel hppa i386 ia64 lpia m32r m68k mips mipsel powerpc ppc64 s390 s390x sh3 sh3eb sh4 sh4eb sparc
+Provides: audio-mixer
+Depends: ${shlibs:Depends}, whiptail | dialog, module-init-tools,
+ python, lsb-base (>= 3.0-9), linux-sound-base (>= 1.0.15-1)
+Recommends: alsa-base (>= 1.0.15-1), pciutils
+Conflicts: udev (<< 0.060), alsa-base (<< 1.0.9b-3)
+#Breaks: udev (<< 136-1)
+Description: ALSA utilities
+ This package contains utilities for configuring and using ALSA, including:
+  o amixer: command line mixer
+  o alsamixer: curses mixer
+  o amidi: read from and write to ALSA RawMIDI ports
+  o aplay, arecord: command line playback and recording
+  o aplaymidi, arecordmidi: command line MIDI playback and recording
+  o aconnect, aseqnet, aseqdump: command line MIDI sequencer control
+ .
+ ALSA is the Advanced Linux Sound Architecture.

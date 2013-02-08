@@ -1,0 +1,55 @@
+ROOT = ..
+CXXFLAGS += -Wall -g -pipe
+LDFLAGS += -L$(ROOT)/lib
+LDLIBS += -lpthread 
+#-lhttp_fetcher
+
+APPNAME = MessageSend
+VERSION = 2.0.0
+
+#sources = MessageSend.cpp ParamGet.cpp
+BaseCPP = -I$(ROOT) -I.. -I$(ROOT)/DCE
+BaseSources = MessageSend.cpp
+
+SerClsCPP = -I./ -I../../ -I../ -I../DCE/ -I../../DCE -D_FILE_OFFSET_BITS=64 -D_LARGEFILE_SOURCE -DUSE_LZO_DATAGRID
+SerClsPfx = $(ROOT)/SerializeClass/
+SerClsSrc = SerializeClass.cpp
+
+DCECPP = -I./ -I../ -I../DCE/ -D_FILE_OFFSET_BITS=64 -D_LARGEFILE_SOURCE -DUSE_LZO_DATAGRID -D_GNU_SOURCE
+DCEPfx = $(ROOT)/DCE/
+DCESrc = ClientSocket.cpp PlainClientSocket.cpp Logger.cpp Message.cpp \
+	Socket.cpp ServerSocket.cpp SocketListener.cpp \
+	AlarmManager.cpp Command_Impl.cpp Event_Impl.cpp \
+	HandleRequestSocket.cpp \
+	DeviceData_Impl.cpp DeviceData_Base.cpp \
+	DCEConfig.cpp \
+	Virtual_Device_Translator.cpp arp-cache.cpp
+
+PUCPP = -I./ -I../../ -I../ -I../DCE/ -I../../DCE -D_FILE_OFFSET_BITS=64 -D_LARGEFILE_SOURCE -DUSE_LZO_DATAGRID
+PUPfx = $(ROOT)/PlutoUtils/
+PUSrc = CommonIncludes.cpp FileUtils.cpp MultiThreadIncludes.cpp Other.cpp ProcessUtils.cpp \
+	StringUtils.cpp getch.cpp md5c.cpp minilzo.cpp uuencode.cpp LinuxSerialUSB.cpp
+
+sources = $(addprefix $(SerClsPfx),$(SerClsSrc)) $(addprefix $(DCEPfx),$(DCESrc)) $(addprefix $(PUPfx),$(PUSrc)) $(BaseSources)
+CPPFLAGS = $(BaseCPP) $(SerClsCPP) $(DCECPP) $(PUCPP)
+
+all: MessageSend 
+	cp $+ $(ROOT)/bin
+
+MessageSend: $(sources:.cpp=.o)
+	$(CXX) $(CPPFLAGS) $(CXXFLAGS) -o $@ $(call cpath,$+)  $(LDFLAGS) $(LDLIBS)
+
+clean: clean-recursive
+	rm -f $(call cpath,$(sources:.cpp=.o) $(sources:.cpp=.d)) MessageSend >/dev/null
+
+package:
+	./make_package.sh $(APPNAME) $(VERSION)
+
+include $(ROOT)/PlutoUtils/make.rules
+ifeq (,$(findstring clean, $(MAKECMDGOALS)))
+-include $(sources:.cpp=.d)
+endif
+
+install: 
+	mkdir -p /usr/pluto/bin
+	cp MessageSend $(DESTPATH)/usr/pluto/bin

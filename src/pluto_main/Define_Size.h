@@ -19,6 +19,11 @@
 #define SIZE_1280x800_CONST 17
 #define SIZE_720x480_CONST 18
 #define SIZE_Nokia770_CONST 19
+#define SIZE_320x480_CONST 20
+#define SIZE_1280x960_CONST 21
+#define SIZE_480x320_iPhone_CONST 22
+#define SIZE_960x640_iPhone_4_CONST 23
+#define SIZE_1024x600_CONST 24
 
 #define SIZE_TABLE "Size"
 #define SIZE_PK_SIZE_FIELD "PK_Size"

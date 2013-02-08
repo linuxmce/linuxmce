@@ -1,0 +1,27 @@
+Author: Kay Sievers <kay.sievers@suse.de>
+Date: Sun, 3 Jul 2005 12:32:22 +0000 (+0200)
+Source: http://ehlo.org/~kay/gitweb.cgi?p=linux/hotplug/udev-kay.git;a=commitdiff;h=c44563817a9eea73a5fac914dd7bd7aa4cbcdbb6
+
+  fake also kernel-name if we renamed a netif
+  
+  Signed-off-by: Kay Sievers <kay.sievers@suse.de>
+
+--- a/udev_add.c
++++ b/udev_add.c
+@@ -290,6 +290,7 @@ int udev_add_device(struct udevice *udev
+ 			if (retval != 0)
+ 				goto exit;
+ 
++			info("renamed netif to '%s'", udev->name);
+ 			/* we've changed the name, now fake the devpath, cause the
+ 			 * original kernel name sleeps with the fishes and we don't
+ 			 * get an event from the kernel with the new name
+@@ -298,6 +299,7 @@ int udev_add_device(struct udevice *udev
+ 			if (pos != NULL) {
+ 				pos[1] = '\0';
+ 				strlcat(udev->devpath, udev->name, sizeof(udev->devpath));
++				strlcpy(udev->kernel_name, udev->name, sizeof(udev->kernel_name));
+ 				setenv("DEVPATH", udev->devpath, 1);
+ 				setenv("INTERFACE", udev->name, 1);
+ 			}
+

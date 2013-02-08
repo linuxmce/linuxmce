@@ -39,7 +39,7 @@ deb-src http://10.0.0.163/debian/ stable main contrib non-free
 # install pluto devel required libs (as root user)
 su
 apt-get update
-apt-get install xlibs-static-dev libpcre3-dev libxp-dev pm-dev libfontconfig1-dev libxrandr-dev libsdl-sound1.2-dev libsdl-sge-dev libxpm-dev libxi-dev libsvga1-dev libcupsys2-dev libgnutls11-dev libgpg-error-dev kdelibs4-dev libaudiofile-dev aalib1-dev libsm-dev kdebase-dev libkonq4-dev render-dev libgcrypt11-dev libxt-dev libsdl-stretch-dev liblcms1-dev libxcursor-dev libaudio-dev libxtrap-dev libglib1.2-dev libdmalloc4-dev libxtst-dev libgtk1.2-dev libexpat1-dev libopencdk8-dev libstlport4.6-dev libstdc++6-dev x-dev libxmu-dev libgtk2.0-dev libxine-dev libvorbis-dev xlibmesa-gl-dev libsdl-ttf2.0-dev libxext-dev libmng-dev libogg-dev libxrender-dev libsdl1.2-dev manpages-dev libncurses5-dev libtasn1-2-dev libtiff4-dev libstdc++5-3.3-dev libsdl-net1.2-dev libasound2-dev libuclibc-dev libxv-dev libarts1-dev libjpeg62-dev libsdl-gfx1.2-dev libpng12-dev libc6-dev slang1-dev libidn11-dev libjack0.80.0-dev libmad0-dev libsmpeg-dev dpkg-dev libsdl-mixer1.2-dev libxmuu-dev libfreetype6-dev libart-2.0-dev libartsc0-dev xlibs-dev libsdl-image1.2-dev manpages-posix-dev libttf-dev libglib2.0-dev qt3-apps-dev libattr1-dev libesd0-dev libmysqlclient12-dev libid3-3.8.3-dev libsdl-console-dev libpango1.0-dev libhttpfetcher-dev zlib1g-dev libx11-dev autotools-dev libice-dev libqt3-mt-dev libssl-dev xlibmesa-glu-dev libatk1.0-devlibxft-dev libfam-dev libwxgtk2.6-0 libwxgtk2.6-dbg libwxgtk2.6-dev icewm libbluetooth1-dev bluez-utils bluez-pin
+apt-get install xlibs-static-dev libpcre3-dev libxp-dev pm-dev libfontconfig1-dev libxrandr-dev libsdl-sound1.2-dev libsdl-sge-dev libxpm-dev libxi-dev libsvga1-dev libcupsys2-dev libgnutls11-dev libgpg-error-dev kdelibs4-dev libaudiofile-dev aalib1-dev libsm-dev kdebase-dev libkonq4-dev render-dev libgcrypt11-dev libxt-dev libsdl-stretch-dev liblcms1-dev libxcursor-dev libaudio-dev libglib1.2-dev libdmalloc4-dev libgtk1.2-dev libexpat1-dev libopencdk8-dev libstlport4.6-dev libstdc++6-dev x-dev libxmu-dev libgtk2.0-dev libxine-dev libvorbis-dev xlibmesa-gl-dev libsdl-ttf2.0-dev libxext-dev libmng-dev libogg-dev libxrender-dev libsdl1.2-dev manpages-dev libncurses5-dev libtasn1-2-dev libtiff4-dev libstdc++5-3.3-dev libsdl-net1.2-dev libasound2-dev libuclibc-dev libxv-dev libarts1-dev libjpeg62-dev libsdl-gfx1.2-dev libpng12-dev libc6-dev slang1-dev libidn11-dev libjack0.80.0-dev libmad0-dev libsmpeg-dev dpkg-dev libsdl-mixer1.2-dev libxmuu-dev libfreetype6-dev libart-2.0-dev libartsc0-dev xlibs-dev libsdl-image1.2-dev manpages-posix-dev libttf-dev libglib2.0-dev qt3-apps-dev libattr1-dev libesd0-dev libmysqlclient12-dev libid3-3.8.3-dev libsdl-console-dev libpango1.0-dev libhttpfetcher-dev zlib1g-dev libx11-dev autotools-dev libice-dev libqt3-mt-dev libssl-dev xlibmesa-glu-dev libatk1.0-devlibxft-dev libfam-dev libwxgtk2.6-0 libwxgtk2.6-dbg libwxgtk2.6-dev icewm libbluetooth1-dev bluez-utils bluez-pin
 exit
 
 # we will define some variables, used only for this installation
@@ -98,7 +98,7 @@ svn co http://10.0.0.170/pluto/trunk/web/
 su
 apt-get install mysql-client mysql-server apache2 libapache2-mod-php4 php4-mysql
 cd /var/www
-ln -sv $PLUTO_SRC_BASE/web/pluto-admin/
+ln -sv $PLUTO_SRC_BASE/web/lmce-admin/
 scp -pr $ACCOUNT_HYBRID_MACHINE:/var/www/globalconfig .
 # ! edit /etc/php4/apache2/php.ini
 # ! uncomment line: ;extension=mysql.so
@@ -131,7 +131,7 @@ tar -jxvf newso.tar.bz2
 
 # getting the correct id
 #
-# open in browser http://localhost/pluto-admin/
+# open in browser http://localhost/lmce-admin/
 # login
 # click on the left frame, at the bottom: 'Show devices tree'
 # click on the left frame: CORE -> The core/hybrid -> OnScreen Orbiter

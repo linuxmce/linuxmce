@@ -1,0 +1,56 @@
+Changelog between 1.0.17 and 1.0.1a releases
+(http://www.alsa-project.org/main/index.php/Changes_v1.0.17_v1.0.17a)
+(Reformated as ASCII text)
+********************************************
+
+* alsa-lib
+  +  Core
+    - IEC958 definition for consumer status channel update
+    - Release v1.0.17a
+  +  PCM API
+    - Add boolean (mute) functionality to softvol plugin
+    - clamp snd_pcm_rewind()/snd_pcm_forward() into the right direction
+    - fix type of internally used sframes variable, to avoid unnecessary casts
+    - fix return value of snd_pcm_rewind()/snd_pcm_forward() to return how much actually has been rewound, instead of what actually could have rewound
+    - Fix interleave check in pcm_direct.c
+    - Fix non-tread mode with PCM direct plugins
+
+Changelog between 1.0.17 and 1.0.18 releases
+(http://www.alsa-project.org/main/index.php/Changes_v1.0.17_v1.0.18)
+(Reformated as ASCII text)
+********************************************
+
+* alsa-lib
+  +  Core
+    -IEC958 definition for consumer status channel update
+    -Release v1.0.17a
+    -Release v1.0.18rc3
+    -Release v1.0.18
+  +  Control API
+    -Replace some assert() with runtime checks
+    -Fix return value of snd_ctl_hw_subscribe_events()
+    -Fix sort-out of non-existing devices in namehint
+  +  Mixer API
+    -alsa-lib: Don't call the simple mixer interface "legacy"
+  +  PCM API
+    -Add boolean (mute) functionality to softvol plugin
+    -clamp snd_pcm_rewind()/snd_pcm_forward() into the right direction
+    -fix type of internally used sframes variable, to avoid unnecessary casts
+    -fix return value of snd_pcm_rewind()/snd_pcm_forward() to return how much actually has been rewound, instead of what actually could have
+    -rewound
+    -Fix interleave check in pcm_direct.c
+    -Fix non-tread mode with PCM direct plugins
+    -alsa-lib: Make sure SND_PCM_NO_xxx flags don't get lost when nonblocking mode is enabled
+    -alsa-lib: Reword doxygen doc for snd_pcm_delay()
+    -Add snd_pcm_avail() and snd_pcm_avail_delay() functions. Make snd_pcm_hwsync() deprecated.
+    -pcm_softvol plugin: remove access type change for refine
+    -Fix comment typos for snd_pcm_read[in]()
+    -Add snd_pcm_avail() and snd_pcm_avail_delay() prototypes
+  +  Configuration
+    -Add iec958 PCM definition for PS3
+  +  Kernel Headers
+    -Increase the components array size
+  +  Test/Example code
+    -test/pcm: Fix error messages in async callback and add snd_pcm_start() condition
+
+vim:syntax=changelog

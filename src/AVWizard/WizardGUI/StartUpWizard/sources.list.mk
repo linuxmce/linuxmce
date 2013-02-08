@@ -38,6 +38,7 @@ WizardPageWelcome.cpp \
 WizardPageVideoResolution.cpp \
 WizardPageVideoResolutionConfirm.cpp \
 WizardPageVideoAdjustSize.cpp \
+WizardPageAudioSoundCard.cpp \
 WizardPageAudioConnector.cpp \
 WizardPageAudioVolume.cpp \
 WizardPageDolbyTest.cpp \

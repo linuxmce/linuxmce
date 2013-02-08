@@ -1,0 +1,18 @@
+#! /bin/sh /usr/share/dpatch/dpatch-run
+## epgimage-path patch
+##
+## All lines beginning with `## DP:' are a description of the patch.
+## DP: Change path for epg images.
+
+@DPATCH@
+--- skinelchi-0.0.1j/setup.c
++++ skinelchi-0.0.1j/setup.c
+@@ -58,7 +58,7 @@
+ 	ResizeItems[0] = "pixel algo";
+ 	ResizeItems[1] = "ratio algo";
+ 	ResizeItems[2] = "zoom image";
+-	strcpy(epgimagedir, "/video/epgimages");
++	strcpy(epgimagedir, "/var/cache/vdr/epgimages");
+ 	commandlinedir = false;
+ 	char *s;
+     	asprintf(&s, "%s/_", tr(FileNameChars));

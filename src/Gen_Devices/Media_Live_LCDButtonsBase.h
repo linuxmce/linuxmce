@@ -1,3 +1,18 @@
+/*
+     Copyright (C) 2004 Pluto, Inc., a Florida Corporation
+
+     www.plutohome.com
+
+     Phone: +1 (877) 758-8648
+ 
+
+     This program is free software; you can redistribute it and/or modify it under the terms of the GNU General Public License.
+     This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty
+     of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+
+     See the GNU General Public License for more details.
+
+*/
 #ifndef Media_Live_LCDButtonsBase_h
 #define Media_Live_LCDButtonsBase_h
 #include "DeviceData_Impl.h"
@@ -85,7 +100,7 @@ public:
 		if( m_bRunningWithoutDeviceData )
 			return m_pEvent_Impl->GetDeviceDataFromDatabase(m_dwPK_Device,DEVICEDATA_Block_Device_CONST);
 		else
-			return m_mapParameters_Find(DEVICEDATA_Block_Device_CONST);
+			return m_mapParameters[DEVICEDATA_Block_Device_CONST];
 	}
 
 	bool Get_Only_One_Per_PC()
@@ -93,7 +108,7 @@ public:
 		if( m_bRunningWithoutDeviceData )
 			return (m_pEvent_Impl->GetDeviceDataFromDatabase(m_dwPK_Device,DEVICEDATA_Only_One_Per_PC_CONST)=="1" ? true : false);
 		else
-			return (m_mapParameters_Find(DEVICEDATA_Only_One_Per_PC_CONST)=="1" ? true : false);
+			return (m_mapParameters[DEVICEDATA_Only_One_Per_PC_CONST]=="1" ? true : false);
 	}
 
 	bool Get_Autoassign_to_parents_room()
@@ -101,7 +116,7 @@ public:
 		if( m_bRunningWithoutDeviceData )
 			return (m_pEvent_Impl->GetDeviceDataFromDatabase(m_dwPK_Device,DEVICEDATA_Autoassign_to_parents_room_CONST)=="1" ? true : false);
 		else
-			return (m_mapParameters_Find(DEVICEDATA_Autoassign_to_parents_room_CONST)=="1" ? true : false);
+			return (m_mapParameters[DEVICEDATA_Autoassign_to_parents_room_CONST]=="1" ? true : false);
 	}
 
 	bool Get_PNP_Create_Without_Prompting()
@@ -109,7 +124,7 @@ public:
 		if( m_bRunningWithoutDeviceData )
 			return (m_pEvent_Impl->GetDeviceDataFromDatabase(m_dwPK_Device,DEVICEDATA_PNP_Create_Without_Prompting_CONST)=="1" ? true : false);
 		else
-			return (m_mapParameters_Find(DEVICEDATA_PNP_Create_Without_Prompting_CONST)=="1" ? true : false);
+			return (m_mapParameters[DEVICEDATA_PNP_Create_Without_Prompting_CONST]=="1" ? true : false);
 	}
 
 	bool Get_Immediate_Reload_Isnt_Necessar()
@@ -117,15 +132,7 @@ public:
 		if( m_bRunningWithoutDeviceData )
 			return (m_pEvent_Impl->GetDeviceDataFromDatabase(m_dwPK_Device,DEVICEDATA_Immediate_Reload_Isnt_Necessar_CONST)=="1" ? true : false);
 		else
-			return (m_mapParameters_Find(DEVICEDATA_Immediate_Reload_Isnt_Necessar_CONST)=="1" ? true : false);
-	}
-
-	string Get_Capabilities()
-	{
-		if( m_bRunningWithoutDeviceData )
-			return m_pEvent_Impl->GetDeviceDataFromDatabase(m_dwPK_Device,DEVICEDATA_Capabilities_CONST);
-		else
-			return m_mapParameters_Find(DEVICEDATA_Capabilities_CONST);
+			return (m_mapParameters[DEVICEDATA_Immediate_Reload_Isnt_Necessar_CONST]=="1" ? true : false);
 	}
 
 };
@@ -237,7 +244,6 @@ public:
 	bool DATA_Get_Autoassign_to_parents_room() { return GetData()->Get_Autoassign_to_parents_room(); }
 	bool DATA_Get_PNP_Create_Without_Prompting() { return GetData()->Get_PNP_Create_Without_Prompting(); }
 	bool DATA_Get_Immediate_Reload_Isnt_Necessar() { return GetData()->Get_Immediate_Reload_Isnt_Necessar(); }
-	string DATA_Get_Capabilities() { return GetData()->Get_Capabilities(); }
 	//Event accessors
 	//Commands - Override these to handle commands from the server
 	virtual void CMD_Display_Message(string sText,string sType,string sName,string sTime,string sList_PK_Device,string &sCMD_Result,class Message *pMessage) {};

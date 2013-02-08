@@ -186,6 +186,9 @@ IRBase::DispatchMessage(Message* pmsg) {
 	} else {
 		cmd = pmsg->m_dwID;
 		m_pCommand_Impl->GetChildDeviceData(pTargetDev->m_dwPK_Device,DEVICEDATA_PortChannel_Number_CONST,irport);
+		// if the device doesn't have a port (which is normal), try to find a port on its parent (which should have this setting)
+		if (irport == "" && pTargetDev->m_dwPK_Device_ControlledVia > 0)
+			m_pCommand_Impl->GetChildDeviceData(pTargetDev->m_dwPK_Device_ControlledVia, DEVICEDATA_PortChannel_Number_CONST, irport);
 	}
 		
 	map <longPair, string>::iterator it = codemap_.find(longPair(devid, cmd));

@@ -85,7 +85,7 @@ public:
 		if( m_bRunningWithoutDeviceData )
 			return atoi(m_pEvent_Impl->GetDeviceDataFromDatabase(m_dwPK_Device,DEVICEDATA_Priority_CONST).c_str());
 		else
-			return atoi(m_mapParameters_Find(DEVICEDATA_Priority_CONST).c_str());
+			return atoi(m_mapParameters[DEVICEDATA_Priority_CONST].c_str());
 	}
 
 };
@@ -195,14 +195,12 @@ public:
 	int DATA_Get_Priority() { return GetData()->Get_Priority(); }
 	//Event accessors
 	//Commands - Override these to handle commands from the server
-	virtual void CMD_Jump_Position_In_Playlist(string sValue_To_Assign,int iStreamID,string &sCMD_Result,class Message *pMessage) {};
-	virtual void CMD_Schedule_Recording(string sType,string sOptions,string sProgramID,string &sCMD_Result,class Message *pMessage) {};
+	virtual void CMD_Jump_Position_In_Playlist(string sValue_To_Assign,string &sCMD_Result,class Message *pMessage) {};
+	virtual void CMD_Schedule_Recording(string sProgramID,string &sCMD_Result,class Message *pMessage) {};
 	virtual void CMD_Get_Extended_Media_Data(string sPK_DesignObj,string sProgramID,string &sCMD_Result,class Message *pMessage) {};
 	virtual void CMD_Set_Active_Menu(string sText,string &sCMD_Result,class Message *pMessage) {};
-	virtual void CMD_Sync_Providers_and_Cards(int iPK_Device,int iPK_Orbiter,string &sCMD_Result,class Message *pMessage) {};
+	virtual void CMD_Sync_Providers_and_Cards(int iPK_Orbiter,string &sCMD_Result,class Message *pMessage) {};
 	virtual void CMD_Make_Thumbnail(string sFilename,char *pData,int iData_Size,string &sCMD_Result,class Message *pMessage) {};
-	virtual void CMD_Reporting_EPG_Status(string sText,bool bIsSuccessful,string sTask,string &sCMD_Result,class Message *pMessage) {};
-	virtual void CMD_Remove_Scheduled_Recording(string sID,string sProgramID,string &sCMD_Result,class Message *pMessage) {};
 
 	//This distributes a received message to your handler.
 	virtual ReceivedMessageResult ReceivedMessage(class Message *pMessageOriginal)
@@ -239,8 +237,7 @@ public:
 					{
 						string sCMD_Result="OK";
 						string sValue_To_Assign=pMessage->m_mapParameters[COMMANDPARAMETER_Value_To_Assign_CONST];
-						int iStreamID=atoi(pMessage->m_mapParameters[COMMANDPARAMETER_StreamID_CONST].c_str());
-						CMD_Jump_Position_In_Playlist(sValue_To_Assign.c_str(),iStreamID,sCMD_Result,pMessage);
+						CMD_Jump_Position_In_Playlist(sValue_To_Assign.c_str(),sCMD_Result,pMessage);
 						if( pMessage->m_eExpectedResponse==ER_ReplyMessage && !pMessage->m_bRespondedToMessage )
 						{
 							pMessage->m_bRespondedToMessage=true;
@@ -257,7 +254,7 @@ public:
 						{
 							int iRepeat=atoi(itRepeat->second.c_str());
 							for(int i=2;i<=iRepeat;++i)
-								CMD_Jump_Position_In_Playlist(sValue_To_Assign.c_str(),iStreamID,sCMD_Result,pMessage);
+								CMD_Jump_Position_In_Playlist(sValue_To_Assign.c_str(),sCMD_Result,pMessage);
 						}
 					};
 					iHandled++;
@@ -265,10 +262,8 @@ public:
 				case COMMAND_Schedule_Recording_CONST:
 					{
 						string sCMD_Result="OK";
-						string sType=pMessage->m_mapParameters[COMMANDPARAMETER_Type_CONST];
-						string sOptions=pMessage->m_mapParameters[COMMANDPARAMETER_Options_CONST];
 						string sProgramID=pMessage->m_mapParameters[COMMANDPARAMETER_ProgramID_CONST];
-						CMD_Schedule_Recording(sType.c_str(),sOptions.c_str(),sProgramID.c_str(),sCMD_Result,pMessage);
+						CMD_Schedule_Recording(sProgramID.c_str(),sCMD_Result,pMessage);
 						if( pMessage->m_eExpectedResponse==ER_ReplyMessage && !pMessage->m_bRespondedToMessage )
 						{
 							pMessage->m_bRespondedToMessage=true;
@@ -285,7 +280,7 @@ public:
 						{
 							int iRepeat=atoi(itRepeat->second.c_str());
 							for(int i=2;i<=iRepeat;++i)
-								CMD_Schedule_Recording(sType.c_str(),sOptions.c_str(),sProgramID.c_str(),sCMD_Result,pMessage);
+								CMD_Schedule_Recording(sProgramID.c_str(),sCMD_Result,pMessage);
 						}
 					};
 					iHandled++;
@@ -346,9 +341,8 @@ public:
 				case COMMAND_Sync_Providers_and_Cards_CONST:
 					{
 						string sCMD_Result="OK";
-						int iPK_Device=atoi(pMessage->m_mapParameters[COMMANDPARAMETER_PK_Device_CONST].c_str());
 						int iPK_Orbiter=atoi(pMessage->m_mapParameters[COMMANDPARAMETER_PK_Orbiter_CONST].c_str());
-						CMD_Sync_Providers_and_Cards(iPK_Device,iPK_Orbiter,sCMD_Result,pMessage);
+						CMD_Sync_Providers_and_Cards(iPK_Orbiter,sCMD_Result,pMessage);
 						if( pMessage->m_eExpectedResponse==ER_ReplyMessage && !pMessage->m_bRespondedToMessage )
 						{
 							pMessage->m_bRespondedToMessage=true;
@@ -365,7 +359,7 @@ public:
 						{
 							int iRepeat=atoi(itRepeat->second.c_str());
 							for(int i=2;i<=iRepeat;++i)
-								CMD_Sync_Providers_and_Cards(iPK_Device,iPK_Orbiter,sCMD_Result,pMessage);
+								CMD_Sync_Providers_and_Cards(iPK_Orbiter,sCMD_Result,pMessage);
 						}
 					};
 					iHandled++;
@@ -394,61 +388,6 @@ public:
 							int iRepeat=atoi(itRepeat->second.c_str());
 							for(int i=2;i<=iRepeat;++i)
 								CMD_Make_Thumbnail(sFilename.c_str(),pData,iData_Size,sCMD_Result,pMessage);
-						}
-					};
-					iHandled++;
-					continue;
-				case COMMAND_Reporting_EPG_Status_CONST:
-					{
-						string sCMD_Result="OK";
-						string sText=pMessage->m_mapParameters[COMMANDPARAMETER_Text_CONST];
-						bool bIsSuccessful=(pMessage->m_mapParameters[COMMANDPARAMETER_IsSuccessful_CONST]=="1" ? true : false);
-						string sTask=pMessage->m_mapParameters[COMMANDPARAMETER_Task_CONST];
-						CMD_Reporting_EPG_Status(sText.c_str(),bIsSuccessful,sTask.c_str(),sCMD_Result,pMessage);
-						if( pMessage->m_eExpectedResponse==ER_ReplyMessage && !pMessage->m_bRespondedToMessage )
-						{
-							pMessage->m_bRespondedToMessage=true;
-							Message *pMessageOut=new Message(m_dwPK_Device,pMessage->m_dwPK_Device_From,PRIORITY_NORMAL,MESSAGETYPE_REPLY,0,0);
-							pMessageOut->m_mapParameters[0]=sCMD_Result;
-							SendMessage(pMessageOut);
-						}
-						else if( (pMessage->m_eExpectedResponse==ER_DeliveryConfirmation || pMessage->m_eExpectedResponse==ER_ReplyString) && !pMessage->m_bRespondedToMessage )
-						{
-							pMessage->m_bRespondedToMessage=true;
-							SendString(sCMD_Result);
-						}
-						if( (itRepeat=pMessage->m_mapParameters.find(COMMANDPARAMETER_Repeat_Command_CONST))!=pMessage->m_mapParameters.end() )
-						{
-							int iRepeat=atoi(itRepeat->second.c_str());
-							for(int i=2;i<=iRepeat;++i)
-								CMD_Reporting_EPG_Status(sText.c_str(),bIsSuccessful,sTask.c_str(),sCMD_Result,pMessage);
-						}
-					};
-					iHandled++;
-					continue;
-				case COMMAND_Remove_Scheduled_Recording_CONST:
-					{
-						string sCMD_Result="OK";
-						string sID=pMessage->m_mapParameters[COMMANDPARAMETER_ID_CONST];
-						string sProgramID=pMessage->m_mapParameters[COMMANDPARAMETER_ProgramID_CONST];
-						CMD_Remove_Scheduled_Recording(sID.c_str(),sProgramID.c_str(),sCMD_Result,pMessage);
-						if( pMessage->m_eExpectedResponse==ER_ReplyMessage && !pMessage->m_bRespondedToMessage )
-						{
-							pMessage->m_bRespondedToMessage=true;
-							Message *pMessageOut=new Message(m_dwPK_Device,pMessage->m_dwPK_Device_From,PRIORITY_NORMAL,MESSAGETYPE_REPLY,0,0);
-							pMessageOut->m_mapParameters[0]=sCMD_Result;
-							SendMessage(pMessageOut);
-						}
-						else if( (pMessage->m_eExpectedResponse==ER_DeliveryConfirmation || pMessage->m_eExpectedResponse==ER_ReplyString) && !pMessage->m_bRespondedToMessage )
-						{
-							pMessage->m_bRespondedToMessage=true;
-							SendString(sCMD_Result);
-						}
-						if( (itRepeat=pMessage->m_mapParameters.find(COMMANDPARAMETER_Repeat_Command_CONST))!=pMessage->m_mapParameters.end() )
-						{
-							int iRepeat=atoi(itRepeat->second.c_str());
-							for(int i=2;i<=iRepeat;++i)
-								CMD_Remove_Scheduled_Recording(sID.c_str(),sProgramID.c_str(),sCMD_Result,pMessage);
 						}
 					};
 					iHandled++;

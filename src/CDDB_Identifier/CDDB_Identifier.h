@@ -76,11 +76,9 @@ public:
 			/** The ID of the disk */
 		/** @param #13 Filename */
 			/** The media that needs to be identified, such as /dev/cdrom under Linux, or E: under Windows */
-		/** @param #201 PK_Device_Related */
-			/** If specified, the device to send the resulting 'media identified' command to.  Otherwise it's the from device */
 
-	virtual void CMD_Identify_Media(int iPK_Device,string sID,string sFilename,int iPK_Device_Related) { string sCMD_Result; CMD_Identify_Media(iPK_Device,sID.c_str(),sFilename.c_str(),iPK_Device_Related,sCMD_Result,NULL);};
-	virtual void CMD_Identify_Media(int iPK_Device,string sID,string sFilename,int iPK_Device_Related,string &sCMD_Result,Message *pMessage);
+	virtual void CMD_Identify_Media(int iPK_Device,string sID,string sFilename) { string sCMD_Result; CMD_Identify_Media(iPK_Device,sID.c_str(),sFilename.c_str(),sCMD_Result,NULL);};
+	virtual void CMD_Identify_Media(int iPK_Device,string sID,string sFilename,string &sCMD_Result,Message *pMessage);
 
 
 //<-dceag-h-e->

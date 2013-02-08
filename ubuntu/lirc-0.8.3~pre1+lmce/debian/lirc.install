@@ -1,0 +1,9 @@
+etc/devfs/*
+etc/lirc/{hardware.conf,lircd.conf,lircmd.conf}
+etc/logcheck/*
+etc/modutils/*
+usr/bin/{ircat,irexec,irman2lirc,irpty,irrecord,irsend,irw,lircrcd,mode2}
+usr/sbin/*
+usr/share/man/man8/*
+usr/share/man/man1/{ircat.1,irexec.1,irpty.1,irrecord.1,irsend.1,irw.1,lircrcd.1,mode2.1}
+etc/udev/rules.d/85-lirc.rules

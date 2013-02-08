@@ -8,6 +8,7 @@ Restricted="${3:-0}"
 
 #PlutohomeHost="http://10.0.0.175/plutohome-com/"
 PlutohomeHost="http://linuxmce.org/"
+sqlCVS_Server="schema.linuxmce.org"
 
 if [[ -z "$DeviceID" && "$DeviceTemplate" -eq 0 ]]; then
 	echo "ERROR. Either the DeviceID or the DeviceTemplate pamaters has to be specified"
@@ -43,14 +44,14 @@ Q="SHOW TABLES LIKE 'InfraredGroup_Command'"
 R="$(RunSQL "$Q")"
 
 if [[ -n "$R" ]]; then
-	/usr/pluto/bin/WebDB_Get.sh "$PlutohomeHost/GetInfraredCodes.php?PK_InfraredGroup=$FK_InfraredGroup&PK_DeviceTemplate=$FK_DeviceTemplate&Restricted=$Restricted" "InfraredGroup_Command"
+	/usr/pluto/bin/WebDB_Get.sh "$PlutohomeHost/GetIRCodes.php?Server=$sqlCVS_Server&PK_InfraredGroup=$FK_InfraredGroup&PK_DeviceTemplate=$FK_DeviceTemplate&Restricted=$Restricted" "InfraredGroup_Command"
 	Ret1=$?
-	/usr/pluto/bin/WebDB_Get.sh "$PlutohomeHost/GetInfraredCodes.php?PK_Manufacturer=$FK_Manufacturer&PK_DeviceCategory=$FK_DeviceCategory&Restricted=$Restricted" "InfraredGroup_Command"
+	/usr/pluto/bin/WebDB_Get.sh "$PlutohomeHost/GetIRCodes.php?Server=$sqlCVS_Server&PK_Manufacturer=$FK_Manufacturer&PK_DeviceCategory=$FK_DeviceCategory&Restricted=$Restricted" "InfraredGroup_Command"
 	Ret2=$?
 	Ret=$((Ret1 || Ret2))
 else
-	if /usr/pluto/bin/WebDB_Get.sh "$PlutohomeHost/GetInfraredCodes.php?Create=1"; then
-		/usr/pluto/bin/WebDB_Get.sh "$PlutohomeHost/GetInfraredCodes.php?PK_InfraredGroup=$FK_InfraredGroup&PK_DeviceTemplate=$FK_DeviceTemplate&Restricted=$Restricted" "InfraredGroup_Command"
+	if /usr/pluto/bin/WebDB_Get.sh "$PlutohomeHost/GetIRCodes.php?Server=$sqlCVS_Server&Create=1"; then
+		/usr/pluto/bin/WebDB_Get.sh "$PlutohomeHost/GetIRCodes.php?Server=$sqlCVS_Server&PK_InfraredGroup=$FK_InfraredGroup&PK_DeviceTemplate=$FK_DeviceTemplate&Restricted=$Restricted" "InfraredGroup_Command"
 		Ret=$?
 	else
 		Ret=1

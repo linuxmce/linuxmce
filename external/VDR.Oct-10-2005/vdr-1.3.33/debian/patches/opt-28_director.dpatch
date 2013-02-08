@@ -1,0 +1,24 @@
+#!/bin/sh /usr/share/dpatch/dpatch-run 
+
+## opt-28_director.dpatch by Emanuel Wontorra <director@wontorra.net>
+##
+## extracted from the director plugin 0.2.3
+## original filename: vdr-director-0.2.diff
+## 
+## All lines beginning with `## DP:' are a description of the patch. 
+## DP: This patch is needed for the director plugin. 
+
+@DPATCH@
+diff -Nur vdr-1.3.25.orig/channels.h vdr-1.3.25/channels.h
+--- vdr-1.3.25.orig/channels.h	2005-05-28 15:57:08.000000000 +0200
++++ vdr-1.3.25/channels.h	2005-08-06 16:44:29.000000000 +0200
+@@ -191,7 +191,9 @@
+   void SetCaIds(const int *CaIds); // list must be zero-terminated
+   void SetCaDescriptors(int Level);
+   void SetLinkChannels(cLinkChannels *LinkChannels);
++  cLinkChannels* GetLinkChannels(void){return linkChannels;};
+   void SetRefChannel(cChannel *RefChannel);
++  cChannel* GetRefChannel(void){return refChannel;};
+   };
+ 
+ class cChannels : public cRwLock, public cConfig<cChannel> {

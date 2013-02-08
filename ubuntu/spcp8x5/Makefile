@@ -1,16 +1,23 @@
-# if define KERNELRELEASE means the release version
+# The build is done against the running kernel unless you set KVER
+# make KVER=2.6.22
 
 ifneq ($(KERNELRELEASE),)
 	obj-m := spcp8x5.o
-	module-objs := spcp8x5.o	
+	module-objs := spcp8x5.o
 else
-	KERNELDIR ?= /lib/modules/$(shell uname -r)/build
-	PWD := $(shell pwd)
-default:
-	$(MAKE) -C $(KERNELDIR) M=$(PWD) modules
+	PWD  := $(shell pwd)
+	KVER ?= $(shell uname -r)
+	KDIR := /lib/modules/$(KVER)/build
 endif
 
+default:
+	$(MAKE) -C $(KDIR) M=$(PWD) modules
+
 install:
-	Dir=$(DESTDIR)/lib/modules/$(shell uname -r)/kernel/drivers/usb/serial; \
+	Dir=$(DESTDIR)/lib/modules/$(KVER)/kernel/drivers/usb/serial; \
 	mkdir -p $$Dir; \
 	cp spcp8x5.ko $$Dir
+
+clean:
+	rm -f *.ko *.o
+

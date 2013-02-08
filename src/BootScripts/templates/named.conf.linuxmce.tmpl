@@ -1,0 +1,18 @@
+include "/etc/bind/rndc.key";
+
+controls {
+	inet 127.0.0.1 port 953
+	allow {127.0.0.1;} keys { "rndc-key"; };
+};
+zone "%DOMAINNAME%" {
+        type master;
+        file "/var/cache/bind/db.linuxmce.local";
+        allow-update { key rndc-key; };
+};
+
+zone "%DYNAMIC_REVERSE_RANGE%.in-addr.arpa" {
+        type master;
+        file "/var/cache/bind/db.linuxmce.rev";
+        allow-update { key rndc-key; };
+};
+

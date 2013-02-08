@@ -146,22 +146,24 @@ void psc_restrict_set(long int val);
 		bool FK_PageSetup_Parent_isNull();
 bool OrderNum_isNull();
 bool FK_Package_isNull();
+bool Description_isNull();
+bool pageURL_isNull();
 bool psc_id_isNull();
 bool psc_batch_isNull();
 bool psc_user_isNull();
 bool psc_frozen_isNull();
-bool psc_mod_isNull();
 bool psc_restrict_isNull();
 
 			
 		void FK_PageSetup_Parent_setNull(bool val);
 void OrderNum_setNull(bool val);
 void FK_Package_setNull(bool val);
+void Description_setNull(bool val);
+void pageURL_setNull(bool val);
 void psc_id_setNull(bool val);
 void psc_batch_setNull(bool val);
 void psc_user_setNull(bool val);
 void psc_frozen_setNull(bool val);
-void psc_mod_setNull(bool val);
 void psc_restrict_setNull(bool val);
 	
 	
@@ -181,14 +183,8 @@ class Row_Package* FK_Package_getrow();
 
 		// Return the rows in other tables with foreign keys pointing here
 		void DeviceTemplate_PageSetup_FK_PageSetup_getrows(vector <class Row_DeviceTemplate_PageSetup*> *rows);
-void DeviceTemplate_PageSetup_pschist_FK_PageSetup_getrows(vector <class Row_DeviceTemplate_PageSetup_pschist*> *rows);
-void DeviceTemplate_PageSetup_pschmask_FK_PageSetup_getrows(vector <class Row_DeviceTemplate_PageSetup_pschmask*> *rows);
 void PageSetup_FK_PageSetup_Parent_getrows(vector <class Row_PageSetup*> *rows);
-void PageSetup_pschist_FK_PageSetup_Parent_getrows(vector <class Row_PageSetup_pschist*> *rows);
-void PageSetup_pschmask_FK_PageSetup_Parent_getrows(vector <class Row_PageSetup_pschmask*> *rows);
 void SetupStep_FK_PageSetup_getrows(vector <class Row_SetupStep*> *rows);
-void SetupStep_pschist_FK_PageSetup_getrows(vector <class Row_SetupStep_pschist*> *rows);
-void SetupStep_pschmask_FK_PageSetup_getrows(vector <class Row_SetupStep_pschmask*> *rows);
 
 
 		// Setup binary serialization

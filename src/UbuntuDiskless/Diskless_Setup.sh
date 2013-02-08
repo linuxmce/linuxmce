@@ -14,6 +14,7 @@ DEVICEDATA_Architecture=112
 DEVICEDATA_DisklessBoot=9
 DEVICEDATA_DisklessImages=258
 DEVICEDATA_Model=233
+DEVICEDATA_PK_Distro=7
 
 function setup_tftp_boot 
 {
@@ -22,13 +23,13 @@ function setup_tftp_boot
 	local Moon_BootConfFile="/tftpboot/pxelinux.cfg/01-$(echo ${Moon_MAC//:/-} | tr 'A-Z' 'a-z')"
 	local BootConf=""
 
-	local BootParams="quiet apicpmtimer noirqdebug"
+	local BootParams="quiet splash video=uvesafb:mode_option=1024x768-24,mtrr=3,scroll=ywrap vmalloc=256m"
 	local BootParams_Extra=$(RunSQL "SELECT IK_DeviceData FROM Device_DeviceData WHERE FK_Device = $Moon_DeviceID AND FK_DeviceData = $DEVICEDATA_Extra_Parameters")
 	local BootParams_Override=$(RunSQL "SELECT IK_DeviceData FROM Device_DeviceData WHERE FK_Device = $Moon_DeviceID AND FK_DeviceData = $DEVICEDATA_Extra_Parameters_Override")
 	if [[ "$BootParams_Override" == "1" ]] ;then
-		BootParams="${BootParams} ${BootParams_Extra}"
-	else
 		BootParams="${BootParams_Extra}"
+	else
+		BootParams="${BootParams} ${BootParams_Extra}"
 	fi
 
 	local DefaultBootName=
@@ -39,15 +40,55 @@ function setup_tftp_boot
 		BootConf="${BootConf}DEFAULT Pluto\n"
 		BootConf="${BootConf}LABEL Pluto\n"
 		BootConf="${BootConf}KERNEL ${Moon_DeviceID}/vmlinuz\n"
-		BootConf="${BootConf}APPEND initrd=${Moon_DeviceID}/initrd.img ramdisk=10240 rw root=/dev/nfs boot=nfs nfsroot=${IntIP}:/usr/pluto/diskless/${Moon_DeviceID} ${BootParams_Extra}\n"
+		BootConf="${BootConf}APPEND initrd=${Moon_DeviceID}/initrd.img ramdisk=10240 rw root=/dev/nfs boot=nfs nfsroot=${IntIP}:/usr/pluto/diskless/${Moon_DeviceID},intr,nolock,udp,rsize=32768,wsize=32768,retrans=10,timeo=50 ${BootParams}\n"
 		
 		echo -e "$BootConf" > "$Moon_BootConfFile"
 
-		mkdir -p /tftpboot/${Moon_DeviceID}
-		rm -f /tftpboot/${Moon_DeviceID}/vmlinuz
-		ln -s ${Moon_RootLocation}/boot/vmlinuz /tftpboot/${Moon_DeviceID}/vmlinuz
-		rm -f /tftpboot/${Moon_DeviceID}/initrd.img
-		ln -s ${Moon_RootLocation}/boot/initrd.img /tftpboot/${Moon_DeviceID}/initrd.img
+		#mkdir -p /tftpboot/${Moon_DeviceID}
+		#rm -f /tftpboot/${Moon_DeviceID}/vmlinuz
+		#ln -s ${Moon_RootLocation}/boot/vmlinuz /tftpboot/${Moon_DeviceID}/vmlinuz
+		#rm -f /tftpboot/${Moon_DeviceID}/initrd.img
+		#ln -s ${Moon_RootLocation}/boot/initrd.img /tftpboot/${Moon_DeviceID}/initrd.img
+      		
+		## Find kernel and initrd
+		Kernel=
+		Initrd=
+		for File in /usr/pluto/diskless/"$Moon_DeviceID"/boot/vmlinuz-*; do
+			Kernel="$File"
+		done
+		if [[ -z "$Kernel" ]]; then
+			echo "WARNING: Missing kernel or initrd file. Cannot set for PXE boot."
+			continue
+		fi
+		Kver=$(basename "$Kernel")
+		Kver="${Kver#vmlinuz-}"
+		Initrd=/usr/pluto/diskless/"$Moon_DeviceID"/boot/initrd.img-"$Kver"
+
+		if [[ -z "$Kernel" || ! -f "$Kernel" || -z "$Initrd" || ! -f "$Initrd" ]]; then
+			echo "WARNING: Missing kernel or initrd file. Cannot set for PXE boot."
+			continue
+		fi
+
+        	mkdir -p /tftpboot/${Moon_DeviceID}
+		# Changed to point to the always updated buntu softlink at device root. 
+		if [[ -f ${Moon_RootLocation}/vmlinuz ]]; then
+        		ln -sf ${Moon_RootLocation}/vmlinuz /tftpboot/${Moon_DeviceID}/vmlinuz
+		else 
+			ln -s "${Moon_RootLocation}/boot/vmlinuz-${Kernel}" "/tftpboot/${Moon_DeviceID}/$Name/vmlinuz"
+		fi
+
+		if [[ -f ${Moon_RootLocation}/initrd.img ]]; then
+			ln -sf ${Moon_RootLocation}/initrd.img /tftpboot/${Moon_DeviceID}/initrd.img
+		else 
+			ln -s "${Moon_RootLocation}/boot/initrd.img-${Kernel}" "/tftpboot/${Moon_DeviceID}/$Name/initrd.img" 
+		fi
+		chmod +r /tftpboot/${Moon_DeviceID}/vmlinuz
+		chmod +r /tftpboot/${Moon_DeviceID}/initrd.img
+
+		## these are needed because by default they see the kernel running on the core,
+		## which may be different from the one installed on the MD, thus not doing what we want by default
+		chroot /usr/pluto/diskless/"$Moon_DeviceID" depmod "$Kver"
+		chroot /usr/pluto/diskless/"$Moon_DeviceID" update-initramfs -k "$Kver" -u
 	else
 		for line in $Moon_DisklessImages; do
 			NameKernel="${line%%=*}"
@@ -63,14 +104,21 @@ function setup_tftp_boot
 			Value="${line#*=}"
 			mkdir -p "/tftpboot/${Moon_DeviceID}/$Name"
 			rm -f "/tftpboot/${Moon_DeviceID}/$Name/"{vmlinuz,initrd.img}
-			ln -s "${Moon_RootLocation}/boot/vmlinuz-${Kernel}" "/tftpboot/${Moon_DeviceID}/$Name/vmlinuz"
-			ln -s "${Moon_RootLocation}/boot/initrd.img-${Kernel}" "/tftpboot/${Moon_DeviceID}/$Name/initrd.img"
+                        if [[ ! -f "${Moon_RootLocation}/boot/vmlinuz-${Kernel}" ]]; then
+                        	# If the moon's kernel image does not correspond to the core's image, we have a problem
+                                # and we try to install the correct version
+                                chroot "${Moon_RootLocation}" apt-get install "linux-image-${Kernel}"
+                        fi
+
+			# Changed to point to the always updated buntu softlink at device root. 
+                        ln -s ${Moon_RootLocation}/vmlinuz /tftpboot/${Moon_DeviceID}/$Name/vmlinuz
+			ln -s ${Moon_RootLocation}/initrd.img /tftpboot/${Moon_DeviceID}/$Name/initrd.img
 		done
 
 		BootConf="${BootConf}DEFAULT Pluto\n"
 		BootConf="${BootConf}LABEL Pluto\n"
 		BootConf="${BootConf}KERNEL ${Moon_DeviceID}/$DefaultBootName/vmlinuz\n"
-		BootConf="${BootConf}APPEND initrd=${Moon_DeviceID}/$DefaultBootName/initrd.img ramdisk=10240 rw root=/dev/nfs boot=nfs nfsroot=${IntIP}:/usr/pluto/diskless/${Moon_DeviceID}/$DefaultBootName ${BootParams_Extra}\n"
+		BootConf="${BootConf}APPEND initrd=${Moon_DeviceID}/$DefaultBootName/initrd.img ramdisk=10240 rw root=/dev/nfs boot=nfs nfsroot=${IntIP}:/usr/pluto/diskless/${Moon_DeviceID}/$DefaultBootName,intr,nolock,udp,rsize=32768,wsize=32768,retrans=10,timeo=50 ${BootParams}\n"
 		
 		echo -e "$BootConf" > "$Moon_BootConfFile"
 	fi
@@ -79,7 +127,7 @@ function setup_tftp_boot
 function setup_mysql_access 
 {
 	echo "* Setting up MySQL access for MD #${Moon_DeviceID}"
-	RunSQL "GRANT ALL PRIVILEGES ON *.* TO 'root'@$Moon_IP; GRANT ALL PRIVILEGES ON *.* TO 'eib'@$Moon_IP"
+	RunSQL "GRANT ALL PRIVILEGES ON *.* TO '$MySqlUser'@$Moon_IP; GRANT ALL PRIVILEGES ON *.* TO 'eib'@$Moon_IP"
 	RunSQL "FLUSH PRIVILEGES"
 }
 
@@ -96,9 +144,11 @@ function generate_diskless_installer
 		cp /usr/pluto/install/$Stuff $Moon_RootLocation/usr/pluto/install
 	done
 
+	Moon_DistroID=$(RunSQL "SELECT IK_DeviceData FROM Device_DeviceData WHERE FK_Device='$Moon_DeviceID' AND FK_DeviceData='$DEVICEDATA_PK_Distro'")
+
 	## Generate another installer script
 	if [[ ! -f $Moon_RootLocation/usr/pluto/install/activation.sh ]]; then
-		/usr/pluto/bin/ConfirmDependencies -o 14 -r -D pluto_main -h dcerouter -u root -p '' -d $Moon_DeviceID install > $Moon_RootLocation/usr/pluto/install/activation.sh
+		/usr/pluto/bin/ConfirmDependencies -o "$Moon_DistroID" -r -D "$MySqlDBName" $PLUTO_DB_CRED -d "$Moon_DeviceID" install > $Moon_RootLocation/usr/pluto/install/activation.sh
 	fi
 	
 	## Modify a install script to run as for diskless
@@ -245,23 +295,24 @@ for Row in $R; do
 	Moon_IP=$(Field 2 "$Row")
 	Moon_IP=$(/usr/pluto/bin/PlutoDHCP.sh -d "$Moon_DeviceID" -a)
 	if [[ -z "$Moon_IP" ]]; then
-		echo "WARNING : No free IP left to assign for moon$Moon_DeviceID"
+		echo "WARNING : No free IP left to assign for moon${Moon_DeviceID}"
 		continue
 	fi
 	
 	Moon_MAC=$(Field 3 "$Row")
 	Moon_MAC=$(echo ${Moon_MAC//-/:} | tr 'a-z' 'A-Z')
 	if ! /usr/pluto/bin/CheckMAC.sh "$Moon_MAC" ;then
-		echo "WARNING : Mac ($Moon_MAC) of moon$Moon_DeviceID is invalid"
+		echo "WARNING : Mac ($Moon_MAC) of moon${Moon_DeviceID} is invalid"
 		continue
 	fi
 
 	Moon_Description=$(Field 4 "$Row")
 	Moon_NeedConfigure=$(Field 5 "$Row")
 	if [[ "$Moon_NeedConfigure" != "1" ]] ;then
-		echo "INFO : Skiping moon$Moon_DeviceID because NeedConfigure flag is not set"
+		echo "INFO : Skiping moon${Moon_DeviceID} because NeedConfigure flag is not set"
 		continue
 	fi
+	echo "INFO : Processing moon${Moon_DeviceID} because NeedConfigure flag is set"
 
 	Moon_DeviceTemplate=$(Field 6 "$Row")
 
@@ -275,7 +326,7 @@ for Row in $R; do
 	RunSQL "UPDATE Device_DeviceData SET IK_DeviceData='$Moon_Model' WHERE FK_Device='$Moon_DeviceID' AND FK_DeviceData='$DEVICEDATA_Model'"
 
 
-	Moon_RootLocation="/usr/pluto/diskless/$Moon_DeviceID"
+	Moon_RootLocation="/usr/pluto/diskless/${Moon_DeviceID}"
 	Moon_BootConfFile="/tftpboot/pxelinux.cfg/01-$(echo ${Moon_MAC//:/-} | tr 'A-Z' 'a-z')"
 	Moon_DisklessImages=$(GetDeviceData "$Moon_DeviceID" "$DEVICEDATA_DisklessImages")
 
@@ -285,7 +336,9 @@ for Row in $R; do
 	hosts_DisklessMD="${hosts_DisklessMD}${Moon_IP}	moon${Moon_DeviceID}\n"
 
 	## Create the a filesystem for this MD
+	echo "INFO : Run Diskless_CreateFS.sh $Moon_DeviceID"
 	/usr/pluto/bin/Diskless_CreateFS.sh "$Moon_DeviceID"
+	echo "INFO : Run Diskless_InstallKernel.sh $Moon_DeviceID"
 	/usr/pluto/bin/Diskless_InstallKernel.sh "$Moon_DeviceID"
 
 	## Setting Up
@@ -304,14 +357,31 @@ for Row in $R; do
 #		ln -s "/home/logs/diskless_$Moon_DeviceID" "$Moon_RootLocation/var/log/pluto"
 #	fi
 
+	## Configure ssh for this device
+	if [[ ! -d ${Moon_RootLocation}/root/.ssh ]]; then 
+		mkdir -p ${Moon_RootLocation}/root/.ssh
+	fi
+	cat /usr/pluto/keys/id_dsa_pluto.pub > ${Moon_RootLocation}/root/.ssh/authorized_keys
+
 	## Dome configuring this MD
 	RunSQL "UPDATE Device SET NeedConfigure = 0 WHERE PK_Device=$Moon_DeviceID"
 done
 
+# Handle deb-cache population
+echo "Moving the apt cache to /usr/pluto/deb-cache/"
+find /var/cache/apt/archives/ -iname '*.deb' -exec mv {} /usr/pluto/deb-cache \;
+pushd /usr/pluto/deb-cache
+dpkg-scanpackages -m . /dev/null | tee Packages | gzip -c > Packages.gz
+popd
+
 setup_hosts_file
 /usr/pluto/bin/Update_StartupScrips.sh
 /usr/pluto/bin/Diskless_ExportsNFS.sh
-/usr/pluto/bin/sync_pluto2amp.pl
+#Only run this script if the Asterisk database is there
+if `mysql --batch --skip-column-names -e "SHOW DATABASES LIKE 'asterisk'" | grep asterisk`; then
+	/usr/pluto/bin/sync_pluto2amp.pl
+fi
+
 
 ## Add host to the list of hosts allowed to access /home samba share
 R=$(RunSQL "SELECT IPaddress FROM Device JOIN DeviceTemplate ON FK_DeviceTemplate = PK_DeviceTemplate WHERE FK_DeviceCategory = 8")
@@ -331,12 +401,15 @@ fi
 
 ## Do the update fix for current debian computers
 for dir in /usr/pluto/diskless/* ;do
-	if [[ -f "$dir/debian/etc/init.d/fastboot/rcS" ]] ;then
-		sed -i 's/ApplyUpdates.sh/LMCEUpdate_Apply.sh/g' "$dir/debian/etc/init.d/fastboot/rcS" || :
-		rm -f "$dir/debian/etc/rc2.d/S98LMCEUpdate" || :
+	if [[ -f "${dir}/debian/etc/init.d/fastboot/rcS" ]] ;then
+		sed -i 's/ApplyUpdates.sh/LMCEUpdate_Apply.sh/g' "${dir}/debian/etc/init.d/fastboot/rcS" || :
+		rm -f "${dir}/debian/etc/rc2.d/S98LMCEUpdate" || :
 	fi
 done
 
+. /usr/pluto/bin/Config_Ops.sh
+if [[ "$PK_Users" -lt "1" ]]; then
+	/usr/pluto/bin/MessageSend "dcerouter" 0 7 7 1 163 "First MD headless reload"
+fi
 echo "Finished setting up network boot for media directors."
 echo "If new media director(s) were added, do a quick reload router."
-

@@ -20,7 +20,7 @@
 #ifndef Windows_Share_Scanner_h
 #define Windows_Share_Scanner_h
 
-//	DCE Implemenation for #1835 Windows Share Scanner
+//	DCE Implemenation for #1815 Windows Share Scanner
 
 #include "Gen_Devices/Windows_Share_ScannerBase.h"
 //<-dceag-d-e->
@@ -65,10 +65,10 @@ public:
 			*****DATA***** accessors inherited from base class
 
 			*****EVENT***** accessors inherited from base class
+	void EVENT_Device_Detected(string sMac_Address,string sText,string sIP_Address,int iPK_DeviceTemplate,string sVendorModelID,int iPK_CommMethod,int iPK_PnpProtocol,string sPNP_Serial_Number,string sDeviceData,string sCategory);
 
 			*****COMMANDS***** we need to implement
 	*/
-
 
 //<-dceag-h-e->
 	};

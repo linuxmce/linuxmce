@@ -1,3 +1,18 @@
+/*
+     Copyright (C) 2004 Pluto, Inc., a Florida Corporation
+
+     www.plutohome.com
+
+     Phone: +1 (877) 758-8648
+ 
+
+     This program is free software; you can redistribute it and/or modify it under the terms of the GNU General Public License.
+     This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty
+     of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+
+     See the GNU General Public License for more details.
+
+*/
 #include "Slim_Server_StreamerBase.h"
 #include "DeviceData_Impl.h"
 #include "Logger.h"
@@ -7,8 +22,6 @@ using namespace DCE;
 extern Slim_Server_Streamer_Command *Create_Slim_Server_Streamer(Command_Impl *pPrimaryDeviceCommand, DeviceData_Impl *pData, Event_Impl *pEvent, Router *pRouter);
 #include "SqueezeBox_PlayerBase.h"
 extern SqueezeBox_Player_Command *Create_SqueezeBox_Player(Command_Impl *pPrimaryDeviceCommand, DeviceData_Impl *pData, Event_Impl *pEvent, Router *pRouter);
-#include "Sound_BridgeBase.h"
-extern Sound_Bridge_Command *Create_Sound_Bridge(Command_Impl *pPrimaryDeviceCommand, DeviceData_Impl *pData, Event_Impl *pEvent, Router *pRouter);
 DeviceData_Impl *Slim_Server_Streamer_Data::CreateData(DeviceData_Impl *Parent,char *pDataBlock,unsigned long AllocatedSize,char *CurrentPosition)
 {
 	// Peek ahead in the stream.  We're going to pass in the above pointers anyway so it won't affect the position
@@ -22,8 +35,6 @@ DeviceData_Impl *Slim_Server_Streamer_Data::CreateData(DeviceData_Impl *Parent,c
 			return new Slim_Server_Streamer_Data();
 		case 58:
 			return new SqueezeBox_Player_Data();
-		case 1858:
-			return new Sound_Bridge_Data();
 	};
 	LoggerWrapper::GetInstance()->Write(LV_STATUS, "Got CreateData for unknown type %d.", iPK_DeviceTemplate);
 	return NULL;
@@ -36,8 +47,6 @@ Event_Impl *Slim_Server_Streamer_Event::CreateEvent( unsigned long dwPK_DeviceTe
 			return (Event_Impl *) new Slim_Server_Streamer_Event(pOCClientSocket, dwDevice);
 		case 58:
 			return (Event_Impl *) new SqueezeBox_Player_Event(pOCClientSocket, dwDevice);
-		case 1858:
-			return (Event_Impl *) new Sound_Bridge_Event(pOCClientSocket, dwDevice);
 	};
 	LoggerWrapper::GetInstance()->Write(LV_STATUS, "Got CreateEvent for unknown type %d.", dwPK_DeviceTemplate);
 	return NULL;
@@ -48,8 +57,6 @@ Command_Impl  *Slim_Server_Streamer_Command::CreateCommand(int PK_DeviceTemplate
 	{
 		case 58:
 			return (Command_Impl *) Create_SqueezeBox_Player(pPrimaryDeviceCommand, pData, pEvent, m_pRouter);
-		case 1858:
-			return (Command_Impl *) Create_Sound_Bridge(pPrimaryDeviceCommand, pData, pEvent, m_pRouter);
 	};
 	LoggerWrapper::GetInstance()->Write(LV_STATUS, "Got CreateCommand for unknown type %d.", PK_DeviceTemplate);
 	return NULL;

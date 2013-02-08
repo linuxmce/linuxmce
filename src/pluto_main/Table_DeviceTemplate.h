@@ -206,8 +206,10 @@ void psc_mod_set(string val);
 void psc_restrict_set(long int val);
 
 		
-		bool Comments_isNull();
+		bool Description_isNull();
+bool Comments_isNull();
 bool FK_Manufacturer_isNull();
+bool Define_isNull();
 bool IsEmbedded_isNull();
 bool CommandLine_isNull();
 bool IRFrequency_isNull();
@@ -230,12 +232,13 @@ bool psc_id_isNull();
 bool psc_batch_isNull();
 bool psc_user_isNull();
 bool psc_frozen_isNull();
-bool psc_mod_isNull();
 bool psc_restrict_isNull();
 
 			
-		void Comments_setNull(bool val);
+		void Description_setNull(bool val);
+void Comments_setNull(bool val);
 void FK_Manufacturer_setNull(bool val);
+void Define_setNull(bool val);
 void IsEmbedded_setNull(bool val);
 void CommandLine_setNull(bool val);
 void IRFrequency_setNull(bool val);
@@ -258,7 +261,6 @@ void psc_id_setNull(bool val);
 void psc_batch_setNull(bool val);
 void psc_user_setNull(bool val);
 void psc_frozen_setNull(bool val);
-void psc_mod_setNull(bool val);
 void psc_restrict_setNull(bool val);
 	
 	
@@ -287,78 +289,30 @@ class Row_PnpLevel* FK_PnpLevel_getrow();
 
 		// Return the rows in other tables with foreign keys pointing here
 		void CommandGroup_D_Command_FK_DeviceTemplate_getrows(vector <class Row_CommandGroup_D_Command*> *rows);
-void CommandGroup_D_Command_pschist_FK_DeviceTemplate_getrows(vector <class Row_CommandGroup_D_Command_pschist*> *rows);
-void CommandGroup_D_Command_pschmask_FK_DeviceTemplate_getrows(vector <class Row_CommandGroup_D_Command_pschmask*> *rows);
 void ConfigType_FK_DeviceTemplate_getrows(vector <class Row_ConfigType*> *rows);
-void ConfigType_pschist_FK_DeviceTemplate_getrows(vector <class Row_ConfigType_pschist*> *rows);
-void ConfigType_pschmask_FK_DeviceTemplate_getrows(vector <class Row_ConfigType_pschmask*> *rows);
 void DHCPDevice_FK_DeviceTemplate_getrows(vector <class Row_DHCPDevice*> *rows);
-void DHCPDevice_pschist_FK_DeviceTemplate_getrows(vector <class Row_DHCPDevice_pschist*> *rows);
-void DHCPDevice_pschmask_FK_DeviceTemplate_getrows(vector <class Row_DHCPDevice_pschmask*> *rows);
 void Device_FK_DeviceTemplate_getrows(vector <class Row_Device*> *rows);
 void DeviceTemplate_AV_FK_DeviceTemplate_getrows(vector <class Row_DeviceTemplate_AV*> *rows);
-void DeviceTemplate_AV_pschist_FK_DeviceTemplate_getrows(vector <class Row_DeviceTemplate_AV_pschist*> *rows);
-void DeviceTemplate_AV_pschmask_FK_DeviceTemplate_getrows(vector <class Row_DeviceTemplate_AV_pschmask*> *rows);
 void DeviceTemplate_DSPMode_FK_DeviceTemplate_getrows(vector <class Row_DeviceTemplate_DSPMode*> *rows);
-void DeviceTemplate_DSPMode_pschist_FK_DeviceTemplate_getrows(vector <class Row_DeviceTemplate_DSPMode_pschist*> *rows);
-void DeviceTemplate_DSPMode_pschmask_FK_DeviceTemplate_getrows(vector <class Row_DeviceTemplate_DSPMode_pschmask*> *rows);
 void DeviceTemplate_DesignObj_FK_DeviceTemplate_getrows(vector <class Row_DeviceTemplate_DesignObj*> *rows);
-void DeviceTemplate_DesignObj_pschist_FK_DeviceTemplate_getrows(vector <class Row_DeviceTemplate_DesignObj_pschist*> *rows);
-void DeviceTemplate_DesignObj_pschmask_FK_DeviceTemplate_getrows(vector <class Row_DeviceTemplate_DesignObj_pschmask*> *rows);
 void DeviceTemplate_DeviceCategory_ControlledVia_FK_DeviceTemplate_getrows(vector <class Row_DeviceTemplate_DeviceCategory_ControlledVia*> *rows);
-void DeviceTemplate_DeviceCategory_ControlledVia_pschist_FK_DeviceTemplate_getrows(vector <class Row_DeviceTemplate_DeviceCategory_ControlledVia_pschist*> *rows);
-void DeviceTemplate_DeviceCategory_ControlledVia_pschmask_FK_DeviceTemplate_getrows(vector <class Row_DeviceTemplate_DeviceCategory_ControlledVia_pschmask*> *rows);
 void DeviceTemplate_DeviceCommandGroup_FK_DeviceTemplate_getrows(vector <class Row_DeviceTemplate_DeviceCommandGroup*> *rows);
-void DeviceTemplate_DeviceCommandGroup_pschist_FK_DeviceTemplate_getrows(vector <class Row_DeviceTemplate_DeviceCommandGroup_pschist*> *rows);
-void DeviceTemplate_DeviceCommandGroup_pschmask_FK_DeviceTemplate_getrows(vector <class Row_DeviceTemplate_DeviceCommandGroup_pschmask*> *rows);
 void DeviceTemplate_DeviceData_FK_DeviceTemplate_getrows(vector <class Row_DeviceTemplate_DeviceData*> *rows);
-void DeviceTemplate_DeviceData_pschist_FK_DeviceTemplate_getrows(vector <class Row_DeviceTemplate_DeviceData_pschist*> *rows);
-void DeviceTemplate_DeviceData_pschmask_FK_DeviceTemplate_getrows(vector <class Row_DeviceTemplate_DeviceData_pschmask*> *rows);
 void DeviceTemplate_DeviceTemplate_ControlledVia_FK_DeviceTemplate_getrows(vector <class Row_DeviceTemplate_DeviceTemplate_ControlledVia*> *rows);
 void DeviceTemplate_DeviceTemplate_ControlledVia_FK_DeviceTemplate_ControlledVia_getrows(vector <class Row_DeviceTemplate_DeviceTemplate_ControlledVia*> *rows);
-void DeviceTemplate_DeviceTemplate_ControlledVia_pschist_FK_DeviceTemplate_getrows(vector <class Row_DeviceTemplate_DeviceTemplate_ControlledVia_pschist*> *rows);
-void DeviceTemplate_DeviceTemplate_ControlledVia_pschist_FK_DeviceTemplate_ControlledVia_getrows(vector <class Row_DeviceTemplate_DeviceTemplate_ControlledVia_pschist*> *rows);
-void DeviceTemplate_DeviceTemplate_ControlledVia_pschmask_FK_DeviceTemplate_getrows(vector <class Row_DeviceTemplate_DeviceTemplate_ControlledVia_pschmask*> *rows);
-void DeviceTemplate_DeviceTemplate_ControlledVia_pschmask_FK_DeviceTemplate_ControlledVia_getrows(vector <class Row_DeviceTemplate_DeviceTemplate_ControlledVia_pschmask*> *rows);
 void DeviceTemplate_DeviceTemplate_Related_FK_DeviceTemplate_getrows(vector <class Row_DeviceTemplate_DeviceTemplate_Related*> *rows);
 void DeviceTemplate_DeviceTemplate_Related_FK_DeviceTemplate_Related_getrows(vector <class Row_DeviceTemplate_DeviceTemplate_Related*> *rows);
-void DeviceTemplate_DeviceTemplate_Related_pschist_FK_DeviceTemplate_getrows(vector <class Row_DeviceTemplate_DeviceTemplate_Related_pschist*> *rows);
-void DeviceTemplate_DeviceTemplate_Related_pschist_FK_DeviceTemplate_Related_getrows(vector <class Row_DeviceTemplate_DeviceTemplate_Related_pschist*> *rows);
-void DeviceTemplate_DeviceTemplate_Related_pschmask_FK_DeviceTemplate_getrows(vector <class Row_DeviceTemplate_DeviceTemplate_Related_pschmask*> *rows);
-void DeviceTemplate_DeviceTemplate_Related_pschmask_FK_DeviceTemplate_Related_getrows(vector <class Row_DeviceTemplate_DeviceTemplate_Related_pschmask*> *rows);
 void DeviceTemplate_Event_FK_DeviceTemplate_getrows(vector <class Row_DeviceTemplate_Event*> *rows);
-void DeviceTemplate_Event_pschist_FK_DeviceTemplate_getrows(vector <class Row_DeviceTemplate_Event_pschist*> *rows);
-void DeviceTemplate_Event_pschmask_FK_DeviceTemplate_getrows(vector <class Row_DeviceTemplate_Event_pschmask*> *rows);
 void DeviceTemplate_InfraredGroup_FK_DeviceTemplate_getrows(vector <class Row_DeviceTemplate_InfraredGroup*> *rows);
-void DeviceTemplate_InfraredGroup_pschist_FK_DeviceTemplate_getrows(vector <class Row_DeviceTemplate_InfraredGroup_pschist*> *rows);
-void DeviceTemplate_InfraredGroup_pschmask_FK_DeviceTemplate_getrows(vector <class Row_DeviceTemplate_InfraredGroup_pschmask*> *rows);
 void DeviceTemplate_Input_FK_DeviceTemplate_getrows(vector <class Row_DeviceTemplate_Input*> *rows);
-void DeviceTemplate_Input_pschist_FK_DeviceTemplate_getrows(vector <class Row_DeviceTemplate_Input_pschist*> *rows);
-void DeviceTemplate_Input_pschmask_FK_DeviceTemplate_getrows(vector <class Row_DeviceTemplate_Input_pschmask*> *rows);
 void DeviceTemplate_MediaType_FK_DeviceTemplate_getrows(vector <class Row_DeviceTemplate_MediaType*> *rows);
-void DeviceTemplate_MediaType_pschist_FK_DeviceTemplate_getrows(vector <class Row_DeviceTemplate_MediaType_pschist*> *rows);
-void DeviceTemplate_MediaType_pschmask_FK_DeviceTemplate_getrows(vector <class Row_DeviceTemplate_MediaType_pschmask*> *rows);
 void DeviceTemplate_Output_FK_DeviceTemplate_getrows(vector <class Row_DeviceTemplate_Output*> *rows);
-void DeviceTemplate_Output_pschist_FK_DeviceTemplate_getrows(vector <class Row_DeviceTemplate_Output_pschist*> *rows);
-void DeviceTemplate_Output_pschmask_FK_DeviceTemplate_getrows(vector <class Row_DeviceTemplate_Output_pschmask*> *rows);
 void DeviceTemplate_PageSetup_FK_DeviceTemplate_getrows(vector <class Row_DeviceTemplate_PageSetup*> *rows);
-void DeviceTemplate_PageSetup_pschist_FK_DeviceTemplate_getrows(vector <class Row_DeviceTemplate_PageSetup_pschist*> *rows);
-void DeviceTemplate_PageSetup_pschmask_FK_DeviceTemplate_getrows(vector <class Row_DeviceTemplate_PageSetup_pschmask*> *rows);
-void Device_pschist_FK_DeviceTemplate_getrows(vector <class Row_Device_pschist*> *rows);
-void Device_pschmask_FK_DeviceTemplate_getrows(vector <class Row_Device_pschmask*> *rows);
 void InfraredGroup_Command_FK_DeviceTemplate_getrows(vector <class Row_InfraredGroup_Command*> *rows);
-void InfraredGroup_Command_pschist_FK_DeviceTemplate_getrows(vector <class Row_InfraredGroup_Command_pschist*> *rows);
-void InfraredGroup_Command_pschmask_FK_DeviceTemplate_getrows(vector <class Row_InfraredGroup_Command_pschmask*> *rows);
 void InstallWizard_FK_DeviceTemplate_getrows(vector <class Row_InstallWizard*> *rows);
-void InstallWizard_pschist_FK_DeviceTemplate_getrows(vector <class Row_InstallWizard_pschist*> *rows);
-void InstallWizard_pschmask_FK_DeviceTemplate_getrows(vector <class Row_InstallWizard_pschmask*> *rows);
 void PnpQueue_FK_DeviceTemplate_getrows(vector <class Row_PnpQueue*> *rows);
 void Screen_DesignObj_FK_DeviceTemplate_getrows(vector <class Row_Screen_DesignObj*> *rows);
-void Screen_DesignObj_pschist_FK_DeviceTemplate_getrows(vector <class Row_Screen_DesignObj_pschist*> *rows);
-void Screen_DesignObj_pschmask_FK_DeviceTemplate_getrows(vector <class Row_Screen_DesignObj_pschmask*> *rows);
 void StartupScript_FK_DeviceTemplate_getrows(vector <class Row_StartupScript*> *rows);
-void StartupScript_pschist_FK_DeviceTemplate_getrows(vector <class Row_StartupScript_pschist*> *rows);
-void StartupScript_pschmask_FK_DeviceTemplate_getrows(vector <class Row_StartupScript_pschmask*> *rows);
 
 
 		// Setup binary serialization

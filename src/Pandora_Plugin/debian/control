@@ -1,0 +1,15 @@
+Source: lmce-pandora-plugin
+Section: unknown
+Priority: extra
+Maintainer: LinuxMCE Developers <developers@linuxmce.org>
+Build-Depends: debhelper (>= 8.0.0)
+Standards-Version: 3.9.2
+Homepage: http://www.linuxmce.org
+#Vcs-Git: git://git.debian.org/collab-maint/lmce-pandora-plugin.git
+#Vcs-Browser: http://git.debian.org/?p=collab-maint/lmce-pandora-plugin.git;a=summary
+
+Package: lmce-pandora-plugin
+Architecture: any
+Depends: ${shlibs:Depends}, ${misc:Depends}
+Description: LinuxMCE Plugin for Pandora
+ <insert long description, indented with spaces>

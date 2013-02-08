@@ -1,0 +1,109 @@
+#!/bin/bash -p
+
+OPTIONS="$*"
+VDRCMD="/usr/bin/vdr $OPTIONS"
+
+. /usr/lib/vdr/config-loader.sh
+
+if [ "$NONPTL" = "1" -a `uname -m` != x86_64 ]; then
+    VDRCMD="LD_ASSUME_KERNEL=2.4.1 $VDRCMD"
+fi
+
+KVERS_2_6=`uname -r | grep -e '2.6'`
+
+function get_modulenames()
+{
+    if [ "$KVERS_2_6" ]; then
+        MODULES=`lsmod | grep ^dvb_core | awk '{print $4;}' | awk '{ gsub(/,/," ", $1); print }'`
+        [ "$MODULES" ] && MODULES="$MODULES dvb_core"
+    else
+        MODULES=`lsmod | grep dvb-core | cut -d'[' -f2 | cut -d']' -f1`
+        [ "$MODULES" ] && MODULES="$MODULES dvb-core"
+    fi
+}
+
+function set_permissions()
+{
+    if [ "$USER" -o "$GROUP" ]; then
+        for FILE in av7110_ir budget_ci_ir; do
+            if [ -e "/proc/$FILE" ]; then
+                chown $USER.$GROUP /proc/$FILE
+            fi
+        done
+    fi
+    chmod o+r /dev/input/event*
+}
+
+function load_dvb_modules()
+{
+    if modprobe dvb >/dev/null 2>&1 ; then
+        get_modulenames
+    else
+        if [ "$MODULES" ]; then
+            for MODULE in $MODULES; do
+                modprobe $MODULE >/dev/null 2>&1
+            done
+        else
+            modprobe dvb-ttpci >/dev/null 2>&1 #2.4
+            modprobe dvb_ttpci >/dev/null 2>&1 #2.6
+            get_modulenames
+        fi
+        if [ "$KVERS_2_6" ]; then
+            wait `pidof udev`
+        fi
+    fi
+    if [ "$KVERS_2_6" ]; then
+        sleep 15
+    fi
+}
+
+function unload_dvb_modules()
+{
+    for MODULE in $MODULES; do
+        rmmod $MODULE >/dev/null 2>&1
+        wait `pidof rmmod`
+    done
+}
+
+
+VDR_ERR=`mktemp -p /tmp vdr-err.XXXXXX`
+
+get_modulenames
+
+[ -z "$MODULES" ] && load_dvb_modules
+
+if [ "$VDSB_WORKAROUND" = "yes" ] && [ -x /usr/bin/szap ] ; then
+    channel=`awk '/^[^:]/ {print NR; exit}' /var/lib/vdr/channels.conf`
+    szap -a 0 -n $channel -c /var/lib/vdr/channels.conf >/dev/null &
+    szap -a 1 -n $channel -c /var/lib/vdr/channels.conf >/dev/null &
+    szap -a 2 -n $channel -c /var/lib/vdr/channels.conf >/dev/null &
+    szap -a 3 -n $channel -c /var/lib/vdr/channels.conf >/dev/null &
+    sleep 5
+    killall szap
+fi
+
+while (true) do
+
+    set_permissions
+
+    eval $VDRCMD >/dev/null 2>"$VDR_ERR"
+
+    case $? in
+        0)
+            exit
+        ;;
+        2)
+            ERROR=`cat "$VDR_ERR"`
+            logger -t runvdr "stopping after fatal fail ($ERROR)"
+            exit
+        ;;
+    esac
+
+    logger -t runvdr "restarting VDR"
+    killall -q -TERM /usr/bin/vdr
+    wait `pidof vdr`
+    unload_dvb_modules
+    sleep 2
+    load_dvb_modules
+
+done

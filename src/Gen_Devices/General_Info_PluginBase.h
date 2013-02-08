@@ -220,6 +220,11 @@ public:
 	virtual void CMD_Get_Home_Symlink(string sPath,string *sSymlink,string &sCMD_Result,class Message *pMessage) {};
 	virtual void CMD_Get_Devices_To_Start(int iPK_Device,string *sValue_To_Assign,string &sCMD_Result,class Message *pMessage) {};
 	virtual void CMD_Update_Device(int iPK_Device,string sMac_address,int iPK_Room,string sIP_Address,string sData_String,string sDescription,string &sCMD_Result,class Message *pMessage) {};
+	virtual void CMD_Send_Email(string sTo,string sSubject,string sMessageBody,string &sCMD_Result,class Message *pMessage) {};
+	virtual void CMD_Get_Users(string *sValue_To_Assign,string &sCMD_Result,class Message *pMessage) {};
+	virtual void CMD_Get_Rooms(string *sValue_To_Assign,string &sCMD_Result,class Message *pMessage) {};
+	virtual void CMD_Get_Scenarios(string sPK_EntertainArea,int iValue,int iPK_Room,string *sValue_To_Assign,string &sCMD_Result,class Message *pMessage) {};
+	virtual void CMD_Get_Entertainment_Areas(string *sValue_To_Assign,string &sCMD_Result,class Message *pMessage) {};
 
 	//This distributes a received message to your handler.
 	virtual ReceivedMessageResult ReceivedMessage(class Message *pMessageOriginal)
@@ -1195,6 +1200,145 @@ public:
 							int iRepeat=atoi(itRepeat->second.c_str());
 							for(int i=2;i<=iRepeat;++i)
 								CMD_Update_Device(iPK_Device,sMac_address.c_str(),iPK_Room,sIP_Address.c_str(),sData_String.c_str(),sDescription.c_str(),sCMD_Result,pMessage);
+						}
+					};
+					iHandled++;
+					continue;
+				case COMMAND_Send_Email_CONST:
+					{
+						string sCMD_Result="OK";
+						string sTo=pMessage->m_mapParameters[COMMANDPARAMETER_To_CONST];
+						string sSubject=pMessage->m_mapParameters[COMMANDPARAMETER_Subject_CONST];
+						string sMessageBody=pMessage->m_mapParameters[COMMANDPARAMETER_MessageBody_CONST];
+						CMD_Send_Email(sTo.c_str(),sSubject.c_str(),sMessageBody.c_str(),sCMD_Result,pMessage);
+						if( pMessage->m_eExpectedResponse==ER_ReplyMessage && !pMessage->m_bRespondedToMessage )
+						{
+							pMessage->m_bRespondedToMessage=true;
+							Message *pMessageOut=new Message(m_dwPK_Device,pMessage->m_dwPK_Device_From,PRIORITY_NORMAL,MESSAGETYPE_REPLY,0,0);
+							pMessageOut->m_mapParameters[0]=sCMD_Result;
+							SendMessage(pMessageOut);
+						}
+						else if( (pMessage->m_eExpectedResponse==ER_DeliveryConfirmation || pMessage->m_eExpectedResponse==ER_ReplyString) && !pMessage->m_bRespondedToMessage )
+						{
+							pMessage->m_bRespondedToMessage=true;
+							SendString(sCMD_Result);
+						}
+						if( (itRepeat=pMessage->m_mapParameters.find(COMMANDPARAMETER_Repeat_Command_CONST))!=pMessage->m_mapParameters.end() )
+						{
+							int iRepeat=atoi(itRepeat->second.c_str());
+							for(int i=2;i<=iRepeat;++i)
+								CMD_Send_Email(sTo.c_str(),sSubject.c_str(),sMessageBody.c_str(),sCMD_Result,pMessage);
+						}
+					};
+					iHandled++;
+					continue;
+				case COMMAND_Get_Users_CONST:
+					{
+						string sCMD_Result="OK";
+						string sValue_To_Assign=pMessage->m_mapParameters[COMMANDPARAMETER_Value_To_Assign_CONST];
+						CMD_Get_Users(&sValue_To_Assign,sCMD_Result,pMessage);
+						if( pMessage->m_eExpectedResponse==ER_ReplyMessage && !pMessage->m_bRespondedToMessage )
+						{
+							pMessage->m_bRespondedToMessage=true;
+							Message *pMessageOut=new Message(m_dwPK_Device,pMessage->m_dwPK_Device_From,PRIORITY_NORMAL,MESSAGETYPE_REPLY,0,0);
+						pMessageOut->m_mapParameters[COMMANDPARAMETER_Value_To_Assign_CONST]=sValue_To_Assign;
+							pMessageOut->m_mapParameters[0]=sCMD_Result;
+							SendMessage(pMessageOut);
+						}
+						else if( (pMessage->m_eExpectedResponse==ER_DeliveryConfirmation || pMessage->m_eExpectedResponse==ER_ReplyString) && !pMessage->m_bRespondedToMessage )
+						{
+							pMessage->m_bRespondedToMessage=true;
+							SendString(sCMD_Result);
+						}
+						if( (itRepeat=pMessage->m_mapParameters.find(COMMANDPARAMETER_Repeat_Command_CONST))!=pMessage->m_mapParameters.end() )
+						{
+							int iRepeat=atoi(itRepeat->second.c_str());
+							for(int i=2;i<=iRepeat;++i)
+								CMD_Get_Users(&sValue_To_Assign,sCMD_Result,pMessage);
+						}
+					};
+					iHandled++;
+					continue;
+				case COMMAND_Get_Rooms_CONST:
+					{
+						string sCMD_Result="OK";
+						string sValue_To_Assign=pMessage->m_mapParameters[COMMANDPARAMETER_Value_To_Assign_CONST];
+						CMD_Get_Rooms(&sValue_To_Assign,sCMD_Result,pMessage);
+						if( pMessage->m_eExpectedResponse==ER_ReplyMessage && !pMessage->m_bRespondedToMessage )
+						{
+							pMessage->m_bRespondedToMessage=true;
+							Message *pMessageOut=new Message(m_dwPK_Device,pMessage->m_dwPK_Device_From,PRIORITY_NORMAL,MESSAGETYPE_REPLY,0,0);
+						pMessageOut->m_mapParameters[COMMANDPARAMETER_Value_To_Assign_CONST]=sValue_To_Assign;
+							pMessageOut->m_mapParameters[0]=sCMD_Result;
+							SendMessage(pMessageOut);
+						}
+						else if( (pMessage->m_eExpectedResponse==ER_DeliveryConfirmation || pMessage->m_eExpectedResponse==ER_ReplyString) && !pMessage->m_bRespondedToMessage )
+						{
+							pMessage->m_bRespondedToMessage=true;
+							SendString(sCMD_Result);
+						}
+						if( (itRepeat=pMessage->m_mapParameters.find(COMMANDPARAMETER_Repeat_Command_CONST))!=pMessage->m_mapParameters.end() )
+						{
+							int iRepeat=atoi(itRepeat->second.c_str());
+							for(int i=2;i<=iRepeat;++i)
+								CMD_Get_Rooms(&sValue_To_Assign,sCMD_Result,pMessage);
+						}
+					};
+					iHandled++;
+					continue;
+				case COMMAND_Get_Scenarios_CONST:
+					{
+						string sCMD_Result="OK";
+						string sPK_EntertainArea=pMessage->m_mapParameters[COMMANDPARAMETER_PK_EntertainArea_CONST];
+						int iValue=atoi(pMessage->m_mapParameters[COMMANDPARAMETER_Value_CONST].c_str());
+						int iPK_Room=atoi(pMessage->m_mapParameters[COMMANDPARAMETER_PK_Room_CONST].c_str());
+						string sValue_To_Assign=pMessage->m_mapParameters[COMMANDPARAMETER_Value_To_Assign_CONST];
+						CMD_Get_Scenarios(sPK_EntertainArea.c_str(),iValue,iPK_Room,&sValue_To_Assign,sCMD_Result,pMessage);
+						if( pMessage->m_eExpectedResponse==ER_ReplyMessage && !pMessage->m_bRespondedToMessage )
+						{
+							pMessage->m_bRespondedToMessage=true;
+							Message *pMessageOut=new Message(m_dwPK_Device,pMessage->m_dwPK_Device_From,PRIORITY_NORMAL,MESSAGETYPE_REPLY,0,0);
+						pMessageOut->m_mapParameters[COMMANDPARAMETER_Value_To_Assign_CONST]=sValue_To_Assign;
+							pMessageOut->m_mapParameters[0]=sCMD_Result;
+							SendMessage(pMessageOut);
+						}
+						else if( (pMessage->m_eExpectedResponse==ER_DeliveryConfirmation || pMessage->m_eExpectedResponse==ER_ReplyString) && !pMessage->m_bRespondedToMessage )
+						{
+							pMessage->m_bRespondedToMessage=true;
+							SendString(sCMD_Result);
+						}
+						if( (itRepeat=pMessage->m_mapParameters.find(COMMANDPARAMETER_Repeat_Command_CONST))!=pMessage->m_mapParameters.end() )
+						{
+							int iRepeat=atoi(itRepeat->second.c_str());
+							for(int i=2;i<=iRepeat;++i)
+								CMD_Get_Scenarios(sPK_EntertainArea.c_str(),iValue,iPK_Room,&sValue_To_Assign,sCMD_Result,pMessage);
+						}
+					};
+					iHandled++;
+					continue;
+				case COMMAND_Get_Entertainment_Areas_CONST:
+					{
+						string sCMD_Result="OK";
+						string sValue_To_Assign=pMessage->m_mapParameters[COMMANDPARAMETER_Value_To_Assign_CONST];
+						CMD_Get_Entertainment_Areas(&sValue_To_Assign,sCMD_Result,pMessage);
+						if( pMessage->m_eExpectedResponse==ER_ReplyMessage && !pMessage->m_bRespondedToMessage )
+						{
+							pMessage->m_bRespondedToMessage=true;
+							Message *pMessageOut=new Message(m_dwPK_Device,pMessage->m_dwPK_Device_From,PRIORITY_NORMAL,MESSAGETYPE_REPLY,0,0);
+						pMessageOut->m_mapParameters[COMMANDPARAMETER_Value_To_Assign_CONST]=sValue_To_Assign;
+							pMessageOut->m_mapParameters[0]=sCMD_Result;
+							SendMessage(pMessageOut);
+						}
+						else if( (pMessage->m_eExpectedResponse==ER_DeliveryConfirmation || pMessage->m_eExpectedResponse==ER_ReplyString) && !pMessage->m_bRespondedToMessage )
+						{
+							pMessage->m_bRespondedToMessage=true;
+							SendString(sCMD_Result);
+						}
+						if( (itRepeat=pMessage->m_mapParameters.find(COMMANDPARAMETER_Repeat_Command_CONST))!=pMessage->m_mapParameters.end() )
+						{
+							int iRepeat=atoi(itRepeat->second.c_str());
+							for(int i=2;i<=iRepeat;++i)
+								CMD_Get_Entertainment_Areas(&sValue_To_Assign,sCMD_Result,pMessage);
 						}
 					};
 					iHandled++;

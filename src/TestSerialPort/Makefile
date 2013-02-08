@@ -1,5 +1,6 @@
 ROOT=..
 
+CXX=g++
 CC=$(CXX)
 CPPFLAGS=-W -Wall -pipe -ggdb3
 CXXFLAGS=-I. -I.. -I$(ROOT) -I$(ROOT)/DCE -I/usr/include/mysql
@@ -14,3 +15,7 @@ all: $(SOURCES:.cpp=.o)
 
 clean:
 	rm -f TestSerialPort *.o
+
+install: 
+	mkdir -p /usr/pluto/bin
+	cp TestSerialPort $(DESTPATH)/usr/pluto/bin

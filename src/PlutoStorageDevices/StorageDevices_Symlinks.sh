@@ -1,7 +1,6 @@
 #!/bin/bash
 . /usr/pluto/bin/Config_Ops.sh
 . /usr/pluto/bin/SQL_Ops.sh
-
 . /usr/pluto/bin/TeeMyOutput.sh --outfile /var/log/pluto/StorageDevices_Symlinks.log --infile /dev/null --stdboth -- "$@"
 
 TPL_GENERIC_PC_AS_CORE=7
@@ -17,6 +16,7 @@ TPL_RAID_5=1849
 DD_DIRECTORIES=153
 DD_USERS=3
 
+
 ## Only run on Core
 FK_DeviceTemplate=$(RunSQL "SELECT FK_DeviceTemplate FROM Device WHERE PK_Device='$PK_Device'")
 if [[ "$FK_DeviceTemplate" != "$TPL_GENERIC_PC_AS_CORE" ]] ;then
@@ -25,10 +25,17 @@ fi
 
 ## Remove old symlinks from home
 echo -e "\n$(date -R) Removing old symlinks"
-for userdir in /home/user_* /home/public ;do
-	find ${userdir}/data -xdev -mindepth 1 -maxdepth 2 -lname "*/mnt/device/*"
-	find ${userdir}/data -xdev -mindepth 1 -maxdepth 2 -lname "*/mnt/device/*" -print0 | xargs -0 rm -f
+for userdir in /home/user_* /home/public;do
+	find ${userdir}/data -xdev -mindepth 1 -maxdepth 3 -lname "*/mnt/device/*"
+	find ${userdir}/data -xdev -mindepth 1 -maxdepth 3 -lname "*/mnt/device/*" -print0 | xargs -0 rm -f
 done
+
+## Maybe its best to let the user clean up the old mythtv tv_shows_* directories and symlinks...
+# This will remove legacy symlinks from the tv_shows_* directories if they exist
+#for userdir in /home/user_* /home/public ;do
+#	find ${userdir}/data/videos -xdev -mindepth 1 -maxdepth 2 -lname "*/mnt/device/*"
+#	find ${userdir}/data/videos -xdev -mindepth 1 -maxdepth 2 -lname "*/mnt/device/*" -print0 | xargs -0 rm -f
+#done
 
 ## Lookup our internal storage devices in the db
 Q="SELECT PK_Device, Description  FROM Device WHERE FK_DeviceTemplate IN ($TPL_GENERIC_INTERNAL_DRIVE, $TPL_GENERIC_SAMBA_SHARE, $TPL_GENERIC_NFS_SHARE, $TPL_RAID_0, $TPL_RAID_1, $TPL_RAID_5)"
@@ -51,16 +58,13 @@ set +o noglob
 	
 	## Sanitize Device_Directories/Users
 	if [[ $Device_Directories == "" ]]; then
-		Device_Directories="pictures,audio,documents,videos"
+		## A list containing the pluto directories
+		Device_Directories=$LMCE_DIRS
 	fi
 
 	if [[ $Device_Users == "" ]]; then
 		Device_Users="0"
 	fi
-
-	Device_Directories=$(echo $Device_Directories | sed 's/ *, */,/g')
-	Device_Directories=$(echo $Device_Directories | sed 's/^ *//g')
-	Device_Directories=$(echo $Device_Directories | sed 's/ *$//g')
 
 	Device_Users=$(echo $Device_Users | sed 's/ *, */,/g')
 	Device_Users=$(echo $Device_Users | sed 's/^ *//g')
@@ -69,14 +73,12 @@ set +o noglob
 	
 	Device_Description=$(echo $Device_Description | tr '/' '-')	# Prevent / char to get in a file name
 
-	## Count dirs and users
-	countDirs=$(echo $Device_Directories | sed 's/,/\n/g' | wc -l)
+	## Count users
 	countUsers=$(echo $Device_Users | sed 's/,/\n/g' | wc -l)
 
 	## If we use a pluto directory structure
 	if [[ "$Device_Users" == "-1" ]] ;then
-		for i in `seq 1 $countDirs`; do
-			mediaDir=$(echo $Device_Directories | cut -d',' -f$i)
+		for mediaDir in $Device_Directories; do
 		
 			for userDir in /home/user_* /home/public ;do
 				userDir=$(basename $userDir)

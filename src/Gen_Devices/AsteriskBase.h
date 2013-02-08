@@ -73,12 +73,12 @@ public:
 			EVENTPARAMETER_PhoneCallerID_CONST, sPhoneCallerID.c_str()));
 	}
 
-	virtual void Voice_Mail_Changed(string sValue,int iPK_Users)
+	virtual void Voice_Mail_Changed(int iValue,int iPK_Users)
 	{
 		SendMessage(new Message(m_dwPK_Device, DEVICEID_EVENTMANAGER, PRIORITY_NORMAL, MESSAGETYPE_EVENT, 
 			EVENT_Voice_Mail_Changed_CONST,
 			2 /* number of parameter's pairs (id, value) */,
-			EVENTPARAMETER_Value_CONST, sValue.c_str(),
+			EVENTPARAMETER_Value_CONST, StringUtils::itos(iValue).c_str(),
 			EVENTPARAMETER_PK_Users_CONST, StringUtils::itos(iPK_Users).c_str()));
 	}
 
@@ -159,7 +159,7 @@ public:
 		if( m_bRunningWithoutDeviceData )
 			return (m_pEvent_Impl->GetDeviceDataFromDatabase(m_dwPK_Device,DEVICEDATA_Manual_configuration_CONST)=="1" ? true : false);
 		else
-			return (m_mapParameters_Find(DEVICEDATA_Manual_configuration_CONST)=="1" ? true : false);
+			return (m_mapParameters[DEVICEDATA_Manual_configuration_CONST]=="1" ? true : false);
 	}
 
 	string Get_Server_IP()
@@ -167,7 +167,7 @@ public:
 		if( m_bRunningWithoutDeviceData )
 			return m_pEvent_Impl->GetDeviceDataFromDatabase(m_dwPK_Device,DEVICEDATA_Server_IP_CONST);
 		else
-			return m_mapParameters_Find(DEVICEDATA_Server_IP_CONST);
+			return m_mapParameters[DEVICEDATA_Server_IP_CONST];
 	}
 
 };
@@ -280,7 +280,7 @@ public:
 	void EVENT_PBX_CommandResult(int iCommandID,int iResult,string sMessage) { GetEvents()->PBX_CommandResult(iCommandID,iResult,sMessage.c_str()); }
 	void EVENT_PBX_Ring(string sSource_Channel,string sDestination_Channel,string sSource_Caller_ID,string sDestination_Caller_ID) { GetEvents()->PBX_Ring(sSource_Channel.c_str(),sDestination_Channel.c_str(),sSource_Caller_ID.c_str(),sDestination_Caller_ID.c_str()); }
 	void EVENT_Incoming_Call(string sPhoneCallerID) { GetEvents()->Incoming_Call(sPhoneCallerID.c_str()); }
-	void EVENT_Voice_Mail_Changed(string sValue,int iPK_Users) { GetEvents()->Voice_Mail_Changed(sValue.c_str(),iPK_Users); }
+	void EVENT_Voice_Mail_Changed(int iValue,int iPK_Users) { GetEvents()->Voice_Mail_Changed(iValue,iPK_Users); }
 	void EVENT_PBX_Hangup(string sChannel_ID,string sReason) { GetEvents()->PBX_Hangup(sChannel_ID.c_str(),sReason.c_str()); }
 	void EVENT_Extensions_Status(string sText) { GetEvents()->Extensions_Status(sText.c_str()); }
 	void EVENT_Calls_Status(string sText) { GetEvents()->Calls_Status(sText.c_str()); }
@@ -290,6 +290,7 @@ public:
 	virtual void CMD_PBX_Transfer(string sPhoneExtension,string sChannel_1,string sChannel_2,string &sCMD_Result,class Message *pMessage) {};
 	virtual void CMD_PBX_Hangup(string sChannel,string &sCMD_Result,class Message *pMessage) {};
 	virtual void CMD_Send_Asterisk_Status(string &sCMD_Result,class Message *pMessage) {};
+	virtual void CMD_PBX_Application(string sPhoneExtension,string sData_String,string sApplication,string &sCMD_Result,class Message *pMessage) {};
 
 	//This distributes a received message to your handler.
 	virtual ReceivedMessageResult ReceivedMessage(class Message *pMessageOriginal)
@@ -426,6 +427,34 @@ public:
 							int iRepeat=atoi(itRepeat->second.c_str());
 							for(int i=2;i<=iRepeat;++i)
 								CMD_Send_Asterisk_Status(sCMD_Result,pMessage);
+						}
+					};
+					iHandled++;
+					continue;
+				case COMMAND_PBX_Application_CONST:
+					{
+						string sCMD_Result="OK";
+						string sPhoneExtension=pMessage->m_mapParameters[COMMANDPARAMETER_PhoneExtension_CONST];
+						string sData_String=pMessage->m_mapParameters[COMMANDPARAMETER_Data_String_CONST];
+						string sApplication=pMessage->m_mapParameters[COMMANDPARAMETER_Application_CONST];
+						CMD_PBX_Application(sPhoneExtension.c_str(),sData_String.c_str(),sApplication.c_str(),sCMD_Result,pMessage);
+						if( pMessage->m_eExpectedResponse==ER_ReplyMessage && !pMessage->m_bRespondedToMessage )
+						{
+							pMessage->m_bRespondedToMessage=true;
+							Message *pMessageOut=new Message(m_dwPK_Device,pMessage->m_dwPK_Device_From,PRIORITY_NORMAL,MESSAGETYPE_REPLY,0,0);
+							pMessageOut->m_mapParameters[0]=sCMD_Result;
+							SendMessage(pMessageOut);
+						}
+						else if( (pMessage->m_eExpectedResponse==ER_DeliveryConfirmation || pMessage->m_eExpectedResponse==ER_ReplyString) && !pMessage->m_bRespondedToMessage )
+						{
+							pMessage->m_bRespondedToMessage=true;
+							SendString(sCMD_Result);
+						}
+						if( (itRepeat=pMessage->m_mapParameters.find(COMMANDPARAMETER_Repeat_Command_CONST))!=pMessage->m_mapParameters.end() )
+						{
+							int iRepeat=atoi(itRepeat->second.c_str());
+							for(int i=2;i<=iRepeat;++i)
+								CMD_PBX_Application(sPhoneExtension.c_str(),sData_String.c_str(),sApplication.c_str(),sCMD_Result,pMessage);
 						}
 					};
 					iHandled++;

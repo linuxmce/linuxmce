@@ -1,0 +1,78 @@
+// UI1 Screen AnswertoLinPhones (59)
+// Created using structure-qml.php from Peer Oliver Schmidt\m// based on the LinuxMCE database
+import QtQuick 1.0
+import "../components"
+Item {
+	Image {
+		source: "skins/Basic/Phone/phonebookB.png"
+		width: 1920
+		height: 1080
+	}
+	function onActivate1785() 
+	{
+	 // Calling Command 741 (Goto Screen) with CommandGroup_Parameters from 17174
+		gotoQScreen("Screen_1.qml")
+	}
+	StyledText {
+		x: 1678
+		y: 0
+		height: 1
+		width: 1
+		textLabel: "Main menu"
+	}
+	ButtonSq {
+		id: button1785_694
+		x: 1678
+		y: 0
+		width: 240
+		height: 180
+		buttonbackground: "skins/Basic/Buttons/TabletControls/home.png"
+		buttontext: "Main menu"
+		clickHandler.onClicked: onActivate1785()
+	}
+	function onActivate1784() 
+	{
+	 // Calling Command 4 (Go back) with CommandGroup_Parameters from 2506
+		manager.sendDceMessage(srouterip + " "+deviceid + " -300 1 4 ")
+	}
+	ButtonSq {
+		id: button1784_695
+		x: 1678
+		y: 180
+		width: 240
+		height: 180
+		buttonbackground: "skins/Basic/Buttons/TabletControls/back.png"
+		buttontext: ""
+		clickHandler.onClicked: onActivate1784()
+	}
+	ButtonSq {
+		id: button2386_696
+		x: 90
+		y: 68
+		width: 1516
+		height: 900
+		buttonbackground: "skins/Basic/25"
+		buttontext: ""
+		clickHandler.onClicked: onActivate2386()
+	}
+	function onActivate2385() 
+	{
+	}
+	StyledText {
+		x: 90
+		y: 68
+		height: 236
+		width: 160
+		textLabel: "<%=6:0%>"
+	}
+	ButtonSq {
+		id: button2385_697
+		x: 90
+		y: 68
+		width: 213
+		height: 177
+		buttonbackground: "skins/Basic/Buttons/square.png"
+		buttontext: "<%=6:0%>"
+		clickHandler.onClicked: onActivate2385()
+	}
+}

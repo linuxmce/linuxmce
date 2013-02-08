@@ -1,0 +1,12 @@
+bootsplash-theme-linuxmce (0.1-2) unstable; urgency=low
+
+  * Changed for LinuxMCE.
+  
+ -- Mircea Hutanu <mircea.h@plutohome.com>  Mon, 24 Jun 2006 16:53:00 +0300
+
+bootsplash-theme-linuxmce (0.1-1) unstable; urgency=low
+
+  * Initial Release.
+
+ -- Razvan Gavril <razvan.g@plutohome.com>  Thu, 24 Jul 2006 13:55:22 +0300
+

@@ -22,3 +22,6 @@ mdadm -S "$array"
 #rm -f $array
 #rm -f "$array:" "/dev/.static$array" "/dev/.tmp.$array"
 
+# Save RAID configuration
+mdadm --detail --scan >> /etc/mdadm/mdadm.conf
+echo "PROGRAM /usr/pluto/bin/monitoring_RAID.sh" >> /etc/mdadm/mdadm.conf

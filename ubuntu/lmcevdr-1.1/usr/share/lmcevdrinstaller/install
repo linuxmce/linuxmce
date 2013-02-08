@@ -1,0 +1,99 @@
+#!/bin/bash
+#
+# LMCEVDR installer package  
+# fasthack for 0710beta
+# Andre Burkart 2008-01-08 (2)
+# extended hack for 0810
+# Peer Oliver Schmidt 2009-03-18
+
+clear
+echo ""
+echo ""
+echo "=== LMCE STUFF =="
+echo ""
+pushd /usr/share/lmcevdrinstaller
+
+# Better not have VDR running during config file update
+invoke-rc.d vdr stop
+
+#channellist templates to lmce
+mkdir -p /usr/pluto/templates/vdr  > /dev/null
+cp ./lmce/channellists/* /usr/pluto/templates/vdr/.  > /dev/null
+
+#vdr lmce Database mappings
+mysql -u root -e "CREATE DATABASE IF NOT EXISTS pluto_vdr;"
+cat ./lmce/pluto_vdr.dump | /usr/bin/mysql pluto_vdr
+
+#scripts for webadmin
+cp -a ./lmce/scripts/setVDR.sh /usr/pluto/bin/.  >/dev/null
+
+echo "======= LMCE SIDE DONE ========"
+
+#SETTINGS
+echo "preconfiguring the settings for VDR..."
+#/etc/init.d/vdr stop
+#sleep 5
+cp ./vdr/vdrsettings/svdrphosts.conf /etc/vdr/.  > /dev/null
+cp ./vdr/vdrsettings/remote.conf /var/lib/vdr/.  > /dev/null
+# cp vdr/vdrsettings/vdr.conf /var/lib/vdr/. > /dev/null
+#
+# Allow access from all devices to streamdev
+#grep -v "0.0.0.0" /etc/vdr/plugins/streamdev.conf>/etc/vdr/plugins/streamdev.conf
+#echo "0.0.0.0/0">>/etc/vdr/plugins/streamdev.conf
+
+# TODO: The video dir needs to be put under the /home/pubic... structure.
+# Make sure a video dir exists.
+mkdir -p /var/lib/video.00
+chown -R vdr:vdr /var/lib/video.00
+
+#
+
+# Make sure VDR is enabled
+sed -i "/^ENABLED/d" /etc/default/vdr
+echo "ENABLED=1">>/etc/default/vdr
+
+# And don't let VDR shutdown the system
+sed -i "/^ENABLE_SHUTDOWN/d" /etc/default/vdr
+echo "ENABLE_SHUTDOWN=0">>/etc/default/vdr
+
+if [ "$PK_Device" = "1" ] 
+then
+	# On the CORE
+	# added configuration from streamdev-server
+	STREAMDEVPLUGIN="streamdev-server"
+	# scrap all old streamdev-server info from setup.conf
+	sed -i "/$STREAMDEVPLUGIN/d" /var/lib/vdr/setup.conf
+	echo "$STREAMDEVPLUGIN.AllowSuspend = 1">>/var/lib/vdr/setup.conf
+	echo "$STREAMDEVPLUGIN.MaxClients = 6">>/var/lib/vdr/setup.conf
+	# Needed for UPnP server mediatomb for live TV
+	echo "$STREAMDEVPLUGIN.StartHTTPServer = 1">>/var/lib/vdr/setup.conf
+	# Needed for live TV on MDs.
+	echo "$STREAMDEVPLUGIN.StartServer = 1">>/var/lib/vdr/setup.conf
+	echo "$STREAMDEVPLUGIN.SuspendMode = 1">>/var/lib/vdr/setup.conf
+else
+	# all other systems utilize the streamdev-server on the core via the streamdev-client
+	# added configuration from streamdev-client
+	STREAMDEVPLUGIN="streamdev-client"
+	# scrap all old streamdev-server info from setup.conf
+	sed -i "/$STREAMDEVPLUGIN/d" /var/lib/vdr/setup.conf
+	#
+	echo "$STREAMDEVPLUGIN.RemoteIp = 192.168.80.1">>/var/lib/vdr/setup.conf
+	echo "$STREAMDEVPLUGIN.RemotePort = 2004">>/var/lib/vdr/setup.conf
+	echo "$STREAMDEVPLUGIN.StartClient = 1">>/var/lib/vdr/setup.conf
+	# StreamFilters sends additional information, like EPG
+	echo "$STREAMDEVPLUGIN.StreamFilters = 1">>/var/lib/vdr/setup.conf
+	# Obsolete due to StreamFilters
+	echo "$STREAMDEVPLUGIN.SyncEPG = 0">>/var/lib/vdr/setup.conf
+fi		
+chown vdr:vdr /var/lib/vdr/*
+
+
+
+echo "++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++"
+echo "++---------------------------- D O N E  --------------------------------------++"
+echo "++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++"
+echo ""
+echo ""
+invoke-rc.d vdr start
+
+

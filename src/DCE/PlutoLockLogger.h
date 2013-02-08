@@ -6,11 +6,11 @@
      Phone: +1 (877) 758-8648
 
 
-     This program is free software; you can redistribute it and/or modify it under the terms of the GNU General Public License.
+     This program is free software; you can redistribute it and/or modify it under the terms of the GNU Lesser General Public License.
      This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty
      of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
 
-     See the GNU General Public License for more details.
+     See the GNU Lesser General Public License for more details.
 
 */
 
@@ -21,7 +21,7 @@
 #ifndef PlutoLockLogger_h
 #define PlutoLockLogger_h
 
-extern char *LoggerFileName;
+extern const char *LoggerFileName;
 using namespace ::std;
 
 #ifndef WIN32
@@ -101,7 +101,7 @@ namespace DCE
 				timeval tv;
 				char Message[2000];
 				// Under Linux pthread_self is an int, under Windows it's a pointer
-	#ifdef WIN32
+	#if defined(WIN32) || defined(__APPLE_CC__)
 				snprintf(Message,sizeof(Message),"Logger failed to get lock(%p): %s:%d thread: %p used by: %s:%d thread:%p got: %d\n",
 					m_pLock, m_sFileName.c_str(),m_Line, pthread_self(),m_pLock->m_sFileName.c_str(),m_pLock->m_Line,
 					m_pLock->m_thread,(m_bGotLock ? 1 : 0));
@@ -140,7 +140,7 @@ namespace DCE
 
 					fprintf(file, "%02d\t%s\t%s\t", LV_CRITICAL,c,"Logger");
 					fwrite(Message, strlen(Message), 1, file);
-	#ifdef WIN32
+	#if defined(WIN32) || defined(__APPLE_CC__)
 					fprintf(file, " <%p>\n",pthread_self());
 	#else
 					fprintf(file, " <%d>\n",(int) pthread_self());

@@ -131,21 +131,23 @@ void psc_mod_set(string val);
 void psc_restrict_set(long int val);
 
 		
-		bool Comments_isNull();
+		bool Description_isNull();
+bool Define_isNull();
+bool Comments_isNull();
 bool psc_id_isNull();
 bool psc_batch_isNull();
 bool psc_user_isNull();
 bool psc_frozen_isNull();
-bool psc_mod_isNull();
 bool psc_restrict_isNull();
 
 			
-		void Comments_setNull(bool val);
+		void Description_setNull(bool val);
+void Define_setNull(bool val);
+void Comments_setNull(bool val);
 void psc_id_setNull(bool val);
 void psc_batch_setNull(bool val);
 void psc_user_setNull(bool val);
 void psc_frozen_setNull(bool val);
-void psc_mod_setNull(bool val);
 void psc_restrict_setNull(bool val);
 	
 	
@@ -163,8 +165,6 @@ void psc_restrict_setNull(bool val);
 
 		// Return the rows in other tables with foreign keys pointing here
 		void Orbiter_Variable_FK_Variable_getrows(vector <class Row_Orbiter_Variable*> *rows);
-void Orbiter_Variable_pschist_FK_Variable_getrows(vector <class Row_Orbiter_Variable_pschist*> *rows);
-void Orbiter_Variable_pschmask_FK_Variable_getrows(vector <class Row_Orbiter_Variable_pschmask*> *rows);
 
 
 		// Setup binary serialization

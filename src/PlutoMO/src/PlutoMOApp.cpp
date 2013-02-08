@@ -15,6 +15,10 @@
  
  */
 
+#ifdef __SERIES60_30__
+#include <eikstart.h>
+#endif
+
 #include    "PlutoMOApp.h"
 #include    "PlutoMODocument.h"
 
@@ -32,10 +36,17 @@ EXPORT_C CApaApplication* NewApplication()
     {
     return new CPlutoMOApp;
     }
+#ifdef __SERIES60_30__
+GLDEF_C TInt E32Main()
+    {
+    return EikStart::RunApplication( NewApplication );
+    }
+# else
 GLDEF_C TInt E32Dll( TDllReason )
     {
     return KErrNone;
     }
+#endif
 
 // End of File  
 

@@ -496,23 +496,19 @@ bool PowerfileJukebox::Get_Jukebox_Status(string * sJukebox_Status, bool bForce)
 			}
 			else
 			{
-				LoggerWrapper::GetInstance()->Write(LV_CRITICAL, "PowerfileJukebox::MoveFromSlotToDrive Can't get disc type. drive %d", pDrive->m_DriveNumber);
-				JukeBox::JukeBoxReturnCode jret = MoveFromDriveToSlot(pSlot,pDrive,true);
-				LoggerWrapper::GetInstance()->Write(LV_CRITICAL, "PowerfileJukebox::MoveFromSlotToDrive return disc to slot returned %d", (int) jret);
+				LoggerWrapper::GetInstance()->Write(LV_CRITICAL, "Can't get disc type. We're sure there's a disc in there (we just loaded it), assuming defective unit.  drive %d", pDrive->m_DriveNumber);
 			}
 		}
 		else
 		{
 			LoggerWrapper::GetInstance()->Write(LV_CRITICAL, "PowerfileJukebox::MoveFromSlotToDrive Loading disc failed: %d %s\n%s", returncode, sOutput.c_str(), sStdErr.c_str());
-			JukeBox::JukeBoxReturnCode jret = MoveFromDriveToSlot(pSlot,pDrive,true);
-			LoggerWrapper::GetInstance()->Write(LV_CRITICAL, "PowerfileJukebox::MoveFromSlotToDrive return disc to slot returned %d", (int) jret);
 		}
 	}
 
 	return jbRetCode;
 }
 
-/*virtual*/ JukeBox::JukeBoxReturnCode PowerfileJukebox::MoveFromDriveToSlot(Slot *pSlot,Drive *pDrive,bool bFailedLoad)
+/*virtual*/ JukeBox::JukeBoxReturnCode PowerfileJukebox::MoveFromDriveToSlot(Slot *pSlot,Drive *pDrive)
 {
 	PLUTO_SAFETY_LOCK(dm, m_DriveMutex);
 
@@ -528,7 +524,7 @@ bool PowerfileJukebox::Get_Jukebox_Status(string * sJukebox_Status, bool bForce)
 
 	JukeBox::JukeBoxReturnCode jbRetCode = JukeBox::jukebox_transport_failure;
 
-	if (pDrive->m_mediaInserted==false && bFailedLoad==false)  // If bFailedLoad the drive will be empty because didn't load it
+	if (pDrive->m_mediaInserted==false)
 	{
 		LoggerWrapper::GetInstance()->Write(LV_WARNING, "Disc unit %d empty", pDrive->m_DriveNumber);
 	}
@@ -563,9 +559,8 @@ bool PowerfileJukebox::Get_Jukebox_Status(string * sJukebox_Status, bool bForce)
 			pDDF->m_mediaDiskStatus = DISCTYPE_NONE;
 			pDDF->m_mediaInserted = false;
 
-			// Update the database if bFailedLoad is not true, otherwise the database wasn't set anyway
-			if( bFailedLoad==false )
-				UpdateDiscLocation(pDrive->m_dwPK_Device_get(),-1,m_pCommand_Impl->m_dwPK_Device,pSlot->m_SlotNumber);
+			// Update the database
+			UpdateDiscLocation(pDrive->m_dwPK_Device_get(),-1,m_pCommand_Impl->m_dwPK_Device,pSlot->m_SlotNumber);
 
 			jbRetCode = JukeBox::jukebox_ok;
 		}

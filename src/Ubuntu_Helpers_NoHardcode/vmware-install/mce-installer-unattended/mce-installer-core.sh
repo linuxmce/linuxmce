@@ -217,7 +217,7 @@ function Create_And_Config_Devices {
 
 	StatsMessage "Configuring the LinuxMCE devices"
         # "DCERouter postinstall"
-        devices=$(echo "SELECT PK_Device FROM Device;" | /usr/bin/mysql pluto_main | tail +2 | tr '\n' ' ')
+        devices=$(echo "SELECT PK_Device FROM Device;" | /usr/bin/mysql pluto_main | tail -n +2 | tr '\n' ' ')
 
 	for i in $devices; do
 		echo "Running device $i"

@@ -1,0 +1,180 @@
+EIBConnection.post: EIBConnection.pre ../../../eibd/client/php/class.def \
+  ../../../eibd/client/php/def.def ../../../eibd/client/php/arg.def \
+  ../../../eibd/client/def/karg.def ../../../eibd/include/eibtypes.h \
+  ../../../eibd/client/php/result.inc ../../../eibd/client/php/errno.inc \
+  ../../../eibd/client/php/complete.inc ../../../eibd/client/php/io.inc \
+  ../../../eibd/client/def/all.lst ../../../eibd/client/def/getapdu.inc \
+  ../../../eibd/client/def/getapdusrc.inc \
+  ../../../eibd/client/def/getbusmonitorpacket.inc \
+  ../../../eibd/client/def/getgroupsrc.inc \
+  ../../../eibd/client/def/gettpdu.inc \
+  ../../../eibd/client/def/groupcacheclear.inc \
+  ../../../eibd/client/def/groupcachedisable.inc \
+  ../../../eibd/client/def/groupcacheenable.inc \
+  ../../../eibd/client/def/groupcacheread.inc \
+  ../../../eibd/client/def/groupcachereadsync.inc \
+  ../../../eibd/client/def/groupcacheremove.inc \
+  ../../../eibd/client/def/loadimage.inc \
+  ../../../eibd/client/def/mcauthorize.inc \
+  ../../../eibd/client/def/mcconnect.inc \
+  ../../../eibd/client/def/mcgetmaskversion.inc \
+  ../../../eibd/client/def/mcgetpeitype.inc \
+  ../../../eibd/client/def/mcprogmodeoff.inc \
+  ../../../eibd/client/def/mcprogmodeon.inc \
+  ../../../eibd/client/def/mcprogmodestatus.inc \
+  ../../../eibd/client/def/mcprogmodetoggle.inc \
+  ../../../eibd/client/def/mcpropertydesc.inc \
+  ../../../eibd/client/def/mcpropertyread.inc \
+  ../../../eibd/client/def/mcpropertyscan.inc \
+  ../../../eibd/client/def/mcpropertywrite.inc \
+  ../../../eibd/client/def/mcreadadc.inc \
+  ../../../eibd/client/def/mcread.inc \
+  ../../../eibd/client/def/mcrestart.inc \
+  ../../../eibd/client/def/mcsetkey.inc \
+  ../../../eibd/client/def/mcwrite.inc \
+  ../../../eibd/client/def/mcwriteplain.inc \
+  ../../../eibd/client/def/mgetmaskversion.inc \
+  ../../../eibd/client/def/mprogmodeoff.inc \
+  ../../../eibd/client/def/mprogmodeon.inc \
+  ../../../eibd/client/def/mprogmodestatus.inc \
+  ../../../eibd/client/def/mprogmodetoggle.inc \
+  ../../../eibd/client/def/mreadindividualaddresses.inc \
+  ../../../eibd/client/def/mwriteindividualaddress.inc \
+  ../../../eibd/client/def/openbusmonitor.inc \
+  ../../../eibd/client/def/openbusmonitortext.inc \
+  ../../../eibd/client/def/opengroupsocket.inc \
+  ../../../eibd/client/def/opentbroadcast.inc \
+  ../../../eibd/client/def/opentconnection.inc \
+  ../../../eibd/client/def/opentgroup.inc \
+  ../../../eibd/client/def/opentindividual.inc \
+  ../../../eibd/client/def/openttpdu.inc \
+  ../../../eibd/client/def/openvbusmonitor.inc \
+  ../../../eibd/client/def/openvbusmonitortext.inc \
+  ../../../eibd/client/def/reset.inc \
+  ../../../eibd/client/def/sendapdu.inc \
+  ../../../eibd/client/def/sendgroup.inc \
+  ../../../eibd/client/def/sendtpdu.inc ../../../eibd/client/php/help.inc
+
+../../../eibd/client/php/class.def:
+
+../../../eibd/client/php/def.def:
+
+../../../eibd/client/php/arg.def:
+
+../../../eibd/client/def/karg.def:
+
+../../../eibd/include/eibtypes.h:
+
+../../../eibd/client/php/result.inc:
+
+../../../eibd/client/php/errno.inc:
+
+../../../eibd/client/php/complete.inc:
+
+../../../eibd/client/php/io.inc:
+
+../../../eibd/client/def/all.lst:
+
+../../../eibd/client/def/getapdu.inc:
+
+../../../eibd/client/def/getapdusrc.inc:
+
+../../../eibd/client/def/getbusmonitorpacket.inc:
+
+../../../eibd/client/def/getgroupsrc.inc:
+
+../../../eibd/client/def/gettpdu.inc:
+
+../../../eibd/client/def/groupcacheclear.inc:
+
+../../../eibd/client/def/groupcachedisable.inc:
+
+../../../eibd/client/def/groupcacheenable.inc:
+
+../../../eibd/client/def/groupcacheread.inc:
+
+../../../eibd/client/def/groupcachereadsync.inc:
+
+../../../eibd/client/def/groupcacheremove.inc:
+
+../../../eibd/client/def/loadimage.inc:
+
+../../../eibd/client/def/mcauthorize.inc:
+
+../../../eibd/client/def/mcconnect.inc:
+
+../../../eibd/client/def/mcgetmaskversion.inc:
+
+../../../eibd/client/def/mcgetpeitype.inc:
+
+../../../eibd/client/def/mcprogmodeoff.inc:
+
+../../../eibd/client/def/mcprogmodeon.inc:
+
+../../../eibd/client/def/mcprogmodestatus.inc:
+
+../../../eibd/client/def/mcprogmodetoggle.inc:
+
+../../../eibd/client/def/mcpropertydesc.inc:
+
+../../../eibd/client/def/mcpropertyread.inc:
+
+../../../eibd/client/def/mcpropertyscan.inc:
+
+../../../eibd/client/def/mcpropertywrite.inc:
+
+../../../eibd/client/def/mcreadadc.inc:
+
+../../../eibd/client/def/mcread.inc:
+
+../../../eibd/client/def/mcrestart.inc:
+
+../../../eibd/client/def/mcsetkey.inc:
+
+../../../eibd/client/def/mcwrite.inc:
+
+../../../eibd/client/def/mcwriteplain.inc:
+
+../../../eibd/client/def/mgetmaskversion.inc:
+
+../../../eibd/client/def/mprogmodeoff.inc:
+
+../../../eibd/client/def/mprogmodeon.inc:
+
+../../../eibd/client/def/mprogmodestatus.inc:
+
+../../../eibd/client/def/mprogmodetoggle.inc:
+
+../../../eibd/client/def/mreadindividualaddresses.inc:
+
+../../../eibd/client/def/mwriteindividualaddress.inc:
+
+../../../eibd/client/def/openbusmonitor.inc:
+
+../../../eibd/client/def/openbusmonitortext.inc:
+
+../../../eibd/client/def/opengroupsocket.inc:
+
+../../../eibd/client/def/opentbroadcast.inc:
+
+../../../eibd/client/def/opentconnection.inc:
+
+../../../eibd/client/def/opentgroup.inc:
+
+../../../eibd/client/def/opentindividual.inc:
+
+../../../eibd/client/def/openttpdu.inc:
+
+../../../eibd/client/def/openvbusmonitor.inc:
+
+../../../eibd/client/def/openvbusmonitortext.inc:
+
+../../../eibd/client/def/reset.inc:
+
+../../../eibd/client/def/sendapdu.inc:
+
+../../../eibd/client/def/sendgroup.inc:
+
+../../../eibd/client/def/sendtpdu.inc:
+
+../../../eibd/client/php/help.inc:

@@ -1,9 +1,24 @@
-(cd /usr/pluto/database; /usr/pluto/bin/sqlCVS -n -D pluto_security -r security import) || exit $?
+echo
+. /usr/pluto/bin/Config_Ops.sh || :
 /usr/pluto/bin/Debug_LogKernelModules.sh "$0" || :
-
-Q="GRANT ALL PRIVILEGES ON pluto_security.* TO 'plutosecurity'@'localhost';"
-echo "$Q" | /usr/bin/mysql
-
-Q="GRANT ALL PRIVILEGES ON pluto_security.* TO 'root'@'127.0.0.1'; FLUSH PRIVILEGES;"
-echo "$Q" | /usr/bin/mysql
+PROCESS="upgrade"
+# Check if we have an existing install, by verifying the DeviceTemplate table exists
+mysql $MYSQL_DB_CRED pluto_security -e "Select 1"||PROCESS="install"
+if [ $PROCESS = "install" ]; then
+	(
+		cd /usr/pluto/database
+		/usr/pluto/bin/sqlCVS $PLUTO_DB_CRED -n -D pluto_security -r security import
+	) || exit $?
+	
+	/usr/pluto/bin/Debug_LogKernelModules.sh "$0" || :
+	
+	Q="GRANT ALL PRIVILEGES ON pluto_security.* TO 'plutosecurity'@'localhost';"
+	mysql $MYSQL_DB_CRED -e "$Q"
+	
+	Q="GRANT ALL PRIVILEGES ON pluto_security.* TO '$MySqlUser'@'127.0.0.1' IDENTIFIED BY '$MySqlPassword';"
+	mysql $MYSQL_DB_CRED -e "$Q"
+	
+	Q="FLUSH PRIVILEGES;"
+	mysql $MYSQL_DB_CRED -e "$Q"
+fi
 

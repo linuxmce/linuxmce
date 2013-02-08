@@ -1,19 +1,19 @@
 #<-dceag-mh-b->
 GENDEV=../Gen_Devices
 
-SNR_CPPFLAGS ?= -DKDE_LMCE -DDEBUG -DTHREAD_LOG -DLOG_ALL_QUERIES -I/opt/libxine1-pluto/include -I/opt/linphone-1.3.5/include
-SNR_LDFLAGS ?= -L/opt/libxine1-pluto/lib -L/opt/linphone-1.3.5/lib
+SNR_CPPFLAGS ?= -DKDE_LMCE -DDEBUG -DTHREAD_LOG -DLOG_ALL_QUERIES
+SNR_LDFLAGS ?= 
 
 ROOT = ..
 CXX = g++
 CXXFLAGS = -Wall -fPIC -ggdb3
 CPPFLAGS = -I$(ROOT) -I$(ROOT)/DCE -I/usr/include/mysql $(SNR_CPPFLAGS)
 LDFLAGS = $(SNR_LDFLAGS) -L$(ROOT)/lib
-BASELDLIBS = -lSerializeClass -lDCECommon -lPlutoUtils -lX11 -lXmu -lXtst -lXext -lpthread 
+BASELDLIBS = -lSerializeClass -lDCECommon -lPlutoUtils -lpthread
 
 MYNAME = Generic_PC_Workstation
 VERSION = 2.0.0
-MYDEVTEMPLATEID = 1953mplateID
+MYDEVTEMPLATEID = 1956mplateID
 
 Gen_Dev_Files = $(GENDEV)/Generic_PC_WorkstationBase.cpp
 sources = Main.cpp Generic_PC_Workstation.cpp $(Gen_Dev_Files)
@@ -22,7 +22,7 @@ sources = Main.cpp Generic_PC_Workstation.cpp $(Gen_Dev_Files)
 CXXFLAGS +=
 CPPFLAGS +=
 LDFLAGS +=
-XTRALDLIBS =
+XTRALDLIBS = -lX11 -lXext -lmysqlclient_r
 
 Gen_Dev_Files +=
 sources +=
@@ -63,3 +63,7 @@ ifeq (,$(findstring clean, $(MAKECMDGOALS)))
 endif
 #<-dceag-mf-e->
 
+
+install: 
+	mkdir -p /usr/pluto/bin
+	cp Generic_PC_Workstation $(DESTPATH)/usr/pluto/bin

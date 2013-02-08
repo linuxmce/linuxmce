@@ -137,19 +137,21 @@ void psc_mod_set(string val);
 void psc_restrict_set(long int val);
 
 		
-		bool psc_id_isNull();
+		bool Description_isNull();
+bool Define_isNull();
+bool psc_id_isNull();
 bool psc_batch_isNull();
 bool psc_user_isNull();
 bool psc_frozen_isNull();
-bool psc_mod_isNull();
 bool psc_restrict_isNull();
 
 			
-		void psc_id_setNull(bool val);
+		void Description_setNull(bool val);
+void Define_setNull(bool val);
+void psc_id_setNull(bool val);
 void psc_batch_setNull(bool val);
 void psc_user_setNull(bool val);
 void psc_frozen_setNull(bool val);
-void psc_mod_setNull(bool val);
 void psc_restrict_setNull(bool val);
 	
 	
@@ -171,16 +173,8 @@ class Row_Installation* FK_Installation_getrow();
 		// Return the rows in other tables with foreign keys pointing here
 		void CommandGroup_FK_Criteria_Orbiter_getrows(vector <class Row_CommandGroup*> *rows);
 void CommandGroup_D_FK_Criteria_Orbiter_getrows(vector <class Row_CommandGroup_D*> *rows);
-void CommandGroup_D_pschist_FK_Criteria_Orbiter_getrows(vector <class Row_CommandGroup_D_pschist*> *rows);
-void CommandGroup_D_pschmask_FK_Criteria_Orbiter_getrows(vector <class Row_CommandGroup_D_pschmask*> *rows);
-void CommandGroup_pschist_FK_Criteria_Orbiter_getrows(vector <class Row_CommandGroup_pschist*> *rows);
-void CommandGroup_pschmask_FK_Criteria_Orbiter_getrows(vector <class Row_CommandGroup_pschmask*> *rows);
 void DesignObjVariation_FK_Criteria_Orbiter_getrows(vector <class Row_DesignObjVariation*> *rows);
-void DesignObjVariation_pschist_FK_Criteria_Orbiter_getrows(vector <class Row_DesignObjVariation_pschist*> *rows);
-void DesignObjVariation_pschmask_FK_Criteria_Orbiter_getrows(vector <class Row_DesignObjVariation_pschmask*> *rows);
 void EventHandler_FK_Criteria_getrows(vector <class Row_EventHandler*> *rows);
-void EventHandler_pschist_FK_Criteria_getrows(vector <class Row_EventHandler_pschist*> *rows);
-void EventHandler_pschmask_FK_Criteria_getrows(vector <class Row_EventHandler_pschmask*> *rows);
 
 
 		// Setup binary serialization

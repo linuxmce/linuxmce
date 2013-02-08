@@ -54,7 +54,7 @@ WizardPageDTSTest::~WizardPageDTSTest(void)
 #ifdef DEBUG
 	std::cout<<"WizardPageDTSTest::DoApplySetting()"<<std::endl;
 #endif
-	if(Selected == NULL || Dictionary == NULL)
+	if ((Selected == NULL) || (Dictionary == NULL))
 		return -1;
 	OutputValue = Selected->GetCaption();
 	Dictionary->Set("DTSTest", OutputValue!= "No, I cannot hear it");
@@ -132,7 +132,7 @@ WizardPageDTSTest::~WizardPageDTSTest(void)
 	std::cout<<"WizardPageDTSTest::DoDecreaseSetting()"<<std::endl;
 #endif
 	std::string IndexText = Utils::CopyStr(Selected->GetName().c_str(), 3, 1);
-	int ButtonIndex = Utils::StringToInt32(IndexText);
+	int ButtonIndex = Utils::StringToInt32(IndexText.c_str());
 	if(ButtonIndex == 1)
 		return;
 	Selected->SetFocus(false);

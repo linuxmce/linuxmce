@@ -44,6 +44,13 @@ namespace DCE {
 		}
 	}
 
+	void RubySerialWrapper::SendReceiveCommand(RubyCommandWrapper* pcmd) 
+	{
+		if(pdce_) {
+			pdce_->SendReceiveCommand(pcmd);
+		}
+	}
+
 	void RubySerialWrapper::DisableDevice( int PK_Device, bool bDisable ) 
 	{
 		if( pdce_ != NULL /*&& device_ != NULL*/ ) {

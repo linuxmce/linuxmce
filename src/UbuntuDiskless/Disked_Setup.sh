@@ -37,7 +37,7 @@ function build_installer_script
 
 	Moon_DistroID=$(RunSQL "SELECT IK_DeviceData FROM Device_DeviceData WHERE FK_Device='$Moon_DeviceID' AND FK_DeviceData='$DEVICEDATA_PK_Distro'")
 
-	/usr/pluto/bin/ConfirmDependencies -o "$Moon_DistroID" -r -D pluto_main -h dcerouter -u root -p '' -d "$Moon_DeviceID" install > "${DestDir}/usr/pluto/install/activation.sh"
+	/usr/pluto/bin/ConfirmDependencies -o "$Moon_DistroID" -r -D "$MySqlDBName" $PLUTO_DB_CRED -d "$Moon_DeviceID" install > "${DestDir}/usr/pluto/install/activation.sh"
 }
 
 function put_sample_movie
@@ -56,7 +56,7 @@ function create_archive
 function setup_mysql_access 
 {
 	echo "* Setting up MySQL access for MD #${Moon_DeviceID}"
-	RunSQL "GRANT ALL PRIVILEGES ON *.* TO 'root'@$Moon_IP; GRANT ALL PRIVILEGES ON *.* TO 'eib'@$Moon_IP"
+	RunSQL "GRANT ALL PRIVILEGES ON *.* TO 'MySqlUser'@$Moon_IP; GRANT ALL PRIVILEGES ON *.* TO 'eib'@$Moon_IP"
 	RunSQL "FLUSH PRIVILEGES"
 }
 

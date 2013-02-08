@@ -1,0 +1,824 @@
+vdr (1.3.33-1ctvdr1) unstable; urgency=low
+
+  * Thomas Günther <tom@toms-cafe.de>
+    - New upstream release
+    - Removed 14_update-resume.dpatch
+    - Removed 18_vdr-plugin-sky-fix.dpatch
+    - Removed 19_summary-fix.dpatch
+    - Removed 20_vdr-1.3.32-keymacros-fix.dpatch
+    - Updated opt-20_enAIO-2.6.dpatch
+    - Updated opt-31_sharelnb.dpatch
+    - Fixed make PLUGINS/lib in debian/rules
+    - Added 18_vdr-1.3.33-recordingsmenu.dpatch
+    - Added 19_vdr-1.3.33-recordingsupdate.dpatch
+
+ -- Tobias Grimm <tg@e-tobi.net>  Sun,  2 Oct 2005 10:18:44 +0200
+
+vdr (1.3.32-1ctvdr4) unstable; urgency=low
+
+  * Thomas Günther <tom@toms-cafe.de>
+    - Fixed 19_summary-fix.dpatch
+    - Added 20_vdr-1.3.32-keymacros-fix.dpatch
+
+ -- Tobias Grimm <tg@e-tobi.net>  Mon, 19 Sep 2005 19:20:35 +0200
+
+vdr (1.3.32-1ctvdr3) unstable; urgency=low
+
+  * Thomas Günther <tom@toms-cafe.de>
+    - Upgraded opt-43_LiveBuffer.dpatch and opt-43_LiveBuffer_multi.dpatch to
+      version 0.1.2
+
+ -- Tobias Grimm <tg@e-tobi.net>  Fri, 16 Sep 2005 09:19:14 +0200
+
+vdr (1.3.32-1ctvdr2) unstable; urgency=low
+
+  * Added 19_summary-fix
+
+ -- Tobias Grimm <tg@e-tobi.net>  Thu, 15 Sep 2005 22:02:12 +0200
+
+vdr (1.3.32-1ctvdr1) unstable; urgency=low
+
+  * New upstream release
+  * Tobias Grimm <tg@e-tobi.net>
+    - If VDR daemon is disabled, show message where it can be enabled
+  * Thomas Schmidt <tschmidt@debian.org>
+    - Added 18_vdr-plugin-sky-fix.dpatch
+    - Updated 10_dd-record-option.dpatch
+    - Removed 18_vdr-1.3.31-remuxbraces.dpatch
+    - Removed 19_vdr-1.3.31-remux.dpatch
+    - Removed 20_vdr-1.3.31-sequence-end-code5.dpatch
+    - Removed 21_vdr-1.3.31-skipframes.dpatch
+    - Do not try to call vdr with LD_ASSUME_KERNEL=2.4.1 in plugins-loader.sh
+      on amd64 (many thanks to Sören Köpping for reporting the problem and
+      sending a patch) (closes: #326866)
+    - Install sky plugin into vdr-plugin-sky package and examples plugins
+      (hello, osddemo, svccli, svcsvr, skincurses, status and svdrpdemo)
+      into vdr-plugin-examples package
+    - Build-Depend on libncurses5-dev, so the skincurses plugin gets compiled
+  * Thomas Günther <tom@toms-cafe.de>
+    - Updated opt-20_enAIO-2.5.dpatch
+    - Updated opt-27_subtitles-ttxtsubs.dpatch
+    - Removed opt-29-x_keymacro-hidden-plugin.dpatch
+    - Updated opt-38_disableDoubleEpgEntrys_0.7.2.dpatch
+    - Upgraded opt-43_LiveBuffer_multi.dpatch to version 0.1.1
+    - Updated opt-37_submenu.dpatch
+    - Fixed vdr call with LD_ASSUME_KERNEL=2.4.1 in plugins-loader.sh
+    - Adapted debian/plugin-loader.sh to example plugins
+    - Added opt-44_rotor.dpatch (needed for rotor plugin)
+    - Improved ctvdrinfo (performance, example plugin, deactivated plugins)
+    - Link doc directory of vdr-dbg to vdr
+
+ -- Tobias Grimm <tg@e-tobi.net>  Thu, 15 Sep 2005 00:42:37 +0200
+
+vdr (1.3.31-1ctvdr1) unstable; urgency=low
+
+  * Thomas Günther <tom@toms-cafe.de>
+    - New upstream release
+    - Updated 15_dvbplayer.dpatch
+    - Upgraded opt-20_enAIO-2.5.dpatch to opt-20_enAIO-2.6.dpatch
+    - Updated opt-27_subtitles-ttxtsubs.dpatch
+    - Updated opt-31_sharelnb.dpatch
+    - Added 11_sortrecordings.dpatch, to allow changing the sort-order
+      of the recordings
+    - Made debian/plugin-template/rules svn-buildpackage-save
+    - Added dependencies.sh to vdr-dev - plugins can use this to automatically
+      fill in the Depends and Conflicts field with ${vdr:Depends} and
+      ${vdr:Conflicts}
+    - Made debian/rules vdrdevel-compatible
+    - Fixed opt-27_subtitles-ttxtsubs.dpatch (Thx to Frank99@vdrportal)
+    - Upgraded opt-43_LiveBuffer_multi.dpatch to version 0.1.0
+    - Changed debian/runvdr to allow manipulation of VDRCMD in /etc/default/vdr
+    - Added 22_vdr-playerepg.dpatch - Fixes mp3 plugin problems
+    - Adapted opt-31_sharelnb.dpatch to 22_vdr-playerepg.dpatch
+    - Made debian/plugin-template/control and debian/plugin-template/rules
+      compatible with dependencies.sh and new patchlevel.sh
+  * Tobias Grimm <tg@e-tobi.net>
+    - Made debian/patchlevel.sh accept opt-entries in 00list with leading
+      spaces and removed leading space from vdr-patchlevel output
+    - Renamed  ${patchlevel} to ${vdr:Patchlevel}
+    - Added 16_avoidTrashing.dpatch, which prevent vdr from trashing the 
+      file system buffers when reading/writing recordings
+    - Added 18_vdr-1.3.31-remuxbraces - Fixes some gcc warning messages 
+    - Added 19_vdr-1.3.31-remux - Fixes a bug in cVideo/AudioRepacker::Repack()
+    - Added 20_vdr-1.3.31-sequence-end-code5 - Fixes a problem with appending 
+      a sequence end code when moving cutting marks in radio recordings
+    - Added 21_vdr-1.3.31-skipframes - Fixes a problem with skipping frames
+      when moving cutting marks in radio recordings
+
+ -- Thomas Günther <tom@toms-cafe.de>  Mon, 29 Aug 2005 00:38:06 +0200
+
+vdr (1.3.30-1ctvdr2) unstable; urgency=low
+
+  * Fixed  opt-37_submenu patch - release char buffers allocated by asprintf
+
+ -- Tobias Grimm <tg@e-tobi.net>  Wed, 24 Aug 2005 00:53:40 +0200
+
+vdr (1.3.30-1ctvdr1) unstable; urgency=low
+
+  * New upstream release
+  * Added 13_epgfix.dpatch to force saving of EPG data on exit
+  * Added opt-43_LiveBuffer_multi.dpatch from vdrdevel
+  * Updated opt-31_sharelnb.dpatch
+  * Updated opt-40_wareagle-icons.dpatch
+  * Updated opt-42_stuttering.dpatch
+  * Removed opt-33-x_epgsearch.dpatch    
+  * Upgraded opt-20_enAIO-2.4.dpatch to opt-20_enAIO-2.5.dpatch
+  * Updated opt-27_subtitles-ttxtsubs.dpatch
+
+ -- Tobias Grimm <tg@e-tobi.net>  Mon, 22 Aug 2005 17:40:13 +0200
+
+vdr (1.3.29-1ctvdr1) unstable; urgency=low
+
+  * Tobias Grimm <tg@e-tobi.net>
+    - New upstream release
+    - Removed installation of hackmenu.c, calendar plugin has been
+      discontinued
+    - Renamed 01_Make_config.dpatch to 81_Make_config.dpatch
+    - Updated the following patches:
+      - opt-24_jumpplay-0.6.dpatch
+      - opt-27_subtitles-ttxtsubs.dpatch
+      - opt-31_sharelnb.dpatch
+      - opt-39_noepg.dpatch
+      - opt-42_stuttering.dpatch  
+    - Removed opt-26-x_replay-1.3.11, is already a standard patch (17_replay)
+    - vdr-dev: depend on ${misc:Depends}
+    - vdr-dbg: depend on ${misc:Depends}
+  * Thomas Günther <tom@toms-cafe.de>
+    - Improved newplugin script
+    - Updated opt-24_jumpplay-0.6.dpatch
+
+ -- Tobias Grimm <tg@e-tobi.net>  Sun, 14 Aug 2005 14:45:33 +0200
+
+vdr (1.3.28-1ctvdr2) unstable; urgency=low
+
+  * Added osdbase-maxitems patch, which fixes a problem with the Enigma skin
+  * Upgraded sharelnb patch (version 1.3.28)
+
+ -- Tobias Grimm <tg@e-tobi.net>  Fri, 12 Aug 2005 19:01:21 +0200
+
+vdr (1.3.28-1ctvdr1) unstable; urgency=low
+
+  * New upstream release
+  * Modified 10_dd-record-option for new upstrem version
+  * Removed 13_remote patch, which is now in the upstream sources
+  * Updated 15_dvbplayer patch
+  * Removed 16_dvbspu patch
+  * Taken from vdrdevel by Thomas Günther <tom@toms-cafe.de>
+    - Updated opt-20_enAIO-2.4
+    - Modified opt-27_subtitles-ttxtsubs
+    - Modified opt-28_director
+    - Modified opt-41_timer-info
+    - Modified opt-41_timer-info_wareagle
+  * Bumped Standards-Version to 3.6.2
+  * Renamed TODO.Debian to TODO
+  * Extract patch infos and install to /usr/share/doc/vdr/patchinfo
+
+ -- Tobias Grimm <tg@e-tobi.net>  Sun,  7 Aug 2005 20:39:38 +0200
+
+vdr (1.3.27-1ctvdr6) unstable; urgency=low
+
+  * Really installing commands.update-recordings.conf now
+  
+ -- Tobias Grimm <tg@e-tobi.net>  Sat, 16 Jul 2005 20:35:42 +0200
+
+vdr (1.3.27-1ctvdr5) unstable; urgency=low
+
+  * Fixed parameter passing in vdr-shutdown
+  * Fixed package description
+  * Converted changelog to UTF-8
+  * Replaced some tabs with spaces
+  * Added ${misc:Depends}
+  * Updated 03_cmdsubmenu.dpatch and opt-24_jumpplay-0.6.dpatch to the
+    versions from vdrdevel
+  * Now using debian/watch from vdrdevel
+  * vdr-dev: depend on debhelper, dvb-dev (>= 1.0.0) | 
+    linux-kernel-headers (>=2.5.999-test7-bk-6) 
+  * vdr-dev: suggests dh-make
+  * Added options --allow-root and --lirc to debugvdr
+  * Fixed bug in channels.conf update
+  * Added commands.update-recordings.conf from vdrdevel to have a 
+    command for updating the recordings list manually
+  
+ -- Tobias Grimm <tg@e-tobi.net>  Sun, 26 Jun 2005 15:27:31 +0200
+
+vdr (1.3.27-1ctvdr4) unstable; urgency=low
+
+  * Thomas Schmidt <tschmidt@debian.org>
+    - Fixed 10_dd-record-option.dpatch
+
+ -- Tobias Grimm <tg@e-tobi.net>  Sun, 26 Jun 2005 12:59:01 +0200
+
+vdr (1.3.27-1ctvdr3) unstable; urgency=low
+
+  * Thomas Schmidt <tschmidt@debian.org>
+    - Added 10_dd-record-option.dpatch - allows to choose if to record
+      or to replay Dolby Digital independently
+
+ -- Tobias Grimm <tg@e-tobi.net>  Sun, 26 Jun 2005 03:32:26 +0200
+
+vdr (1.3.27-1ctvdr2) unstable; urgency=low
+
+  * Thomas Günther <tom@toms-cafe.de>
+    - Added event3 to device list in remotes-loader.sh (Thx to gsgmx@vdrportal)
+    - Fixed runvdr and remotes-loader.sh (Thx to Peter Siering)
+
+ -- Tobias Grimm <tg@e-tobi.net>  Sat, 25 Jun 2005 21:28:51 +0200
+
+vdr (1.3.27-1ctvdr1) unstable; urgency=low
+
+  * New upstream release
+  * Merged changes from vdrdevel 1.3.26 and vdr 1.3.27
+  * Added postinst code to remove Autopids magic RID values from channels.conf
+    (Thx to Thomas Günther for the hint)
+  * Adapted wareagle and jumpplay patch
+  * opt-34_update-resume patch replaced by 14_update-resume patch
+
+ -- Tobias Grimm <tg@e-tobi.net>  Sun, 19 Jun 2005 13:11:22 +0200
+
+vdr (1.2.6-35) unstable; urgency=low
+
+  * UNRELEASED
+  * Added dependencie to pscmisc
+
+ -- Tobias Grimm <tg@e-tobi.net>  Sat,  7 May 2005 14:46:51 +0200
+
+vdr (1.2.6-34) unstable; urgency=low
+
+  * Added ENABLE_SHUTDOWN to /etc/default/vdr
+  * Fixed terminal switching for keyboard control
+
+ -- Tobias Grimm <tg@e-tobi.net>  Tue, 19 Apr 2005 20:31:53 +0200
+
+vdr (1.2.6-33) unstable; urgency=low
+
+  * Fixed bug with not loading plugins in binary compatibility check 
+    when --allow-root is used
+
+ -- Tobias Grimm <tg@e-tobi.net>  Sun, 10 Apr 2005 16:05:42 +0200
+
+vdr (1.2.6-32) unstable; urgency=low
+
+  * Modified not-as-root-patch to allow starting of VDR as root anyway,
+    if the argument --allow-root is given
+  * Removed ctvdrrestart and ctvdrstop scripts
+  * Renamed ctvdradmin to ctvdrwrapper and made it executable by root and
+    vdr only
+
+ -- Tobias Grimm <tg@e-tobi.net>  Sat,  9 Apr 2005 18:20:59 +0200
+
+vdr (1.2.6-31) unstable; urgency=low
+
+  * Thomas Schmidt <tschmidt@debian.org>
+    - Change owner of /proc/{av7110_ir,budget_ci_ir} to the uid and 
+      gid under which vdr will run in /usr/sbin/runvdr 
+      (closes: #297640)
+
+ -- Tobias Grimm <tg@e-tobi.net>  Wed,  6 Apr 2005 22:31:31 +0200
+
+vdr (1.2.6-30) unstable; urgency=low
+
+  * Changes to run vdr as non-root taken from Debian VDR
+    Thomas Schmidt <thomas.schmidt@in.stud.tu-ilmenau.de>
+    - Removed libncurses5-dev from Build-Depends
+    - Remove some files under /var/lib/vdr and /var/cache/vdr in postrm 
+      on purge (closes: #287914)
+    - Added patch from Ludwig Nussel to be able to syncronize the system-
+      time via DVB, even when vdr runs as user
+    - The automatic shutdown is now disabled by default, to enable it 
+      again you have to change ENABLE_SHUTDOWN=0 to 1 in /etc/default/vdr
+    - Set default port for SVDRP to 0, users who run vdr from the 
+      commandline will have to enable it by using the --port option
+      (in the init-script SVDRP will still be enabled and on the default 
+      port 2001)
+    - Added 08_security_CAN-2005-0071.dpatch - do not overwrite 
+      existing files with the GRAB-Command anymore (CAN-2005-0071)
+    - Added 07_not_as_root.dpatch - vdr exists when it should run as
+      user or with group-id root (adapted from Darren Salt's patch 
+      for vdr 1.3.x)
+    - Do not run as user root anymore, the user vdr will be created
+      and the video-directory and config-files will be changed, so the
+      owner/group is vdr:vdr (closes: #287899)
+    - Added patch for the EPG handling under amd64 (closes: #300702)
+  * Tobias Grimm <tg@e-tobi.net>
+    - Small bugfix for VDBS workaround: 3'rd card get's now tuned, 
+      first available channel is used (Thx to HolgerAusB@vdrportal)
+    - Added 13_remote.dpatch from Darren Salt, this allows usage
+      of rcu with the same binary.
+    - Add user vdr to group cdrom in postinst, so that vdr is able to
+      play dvd's with the dvd-plugin again
+    - Introduced a small C program "ctvdradmin" which is made setuid/setgid
+      root and allows to restart and stop vdr by any user
+
+ -- Tobias Grimm <tg@e-tobi.net>  Tue,  8 Feb 2005 19:33:35 +0100
+
+vdr (1.2.6-29) unstable; urgency=low
+
+  * Peter Siering <ps@ctmagazin.de>
+    - hdtv recording from Reinhard Nissl as dpatch (also in elchiaio4d)
+  * Tobias Grimm <tg@e-tobi.net>
+    - Extracted code for handling remote.conf's from vdr.init to
+      remotes-loader.sh.
+    - Fixed plugin-loader.sh to not produce an error message when
+      retrieving the vdr version.
+    - Added new package vdr-dbg, which installs a debuggable vdr as
+      /usr/bin/vdr-dbg as well as some helper scripts.
+    - Adapted patches for new dpatch >= 2.0.9.
+    - vdr-dev now installs /usr/bin/vdrdbg-buildpackage, which allows to
+      build debuggable plugins
+    - now installing newplugin as /usr/bin/vdr-newplugin, which can create
+      a plugin-skeleton
+    - installing dh_make template for plugin packages and
+      usr/bin/debianize-vdrplugin which will create the basic debian files
+      for a plugin (dh-make must be installed!)
+    - set default location for epg.data to /var/cache/vdr (vdr -E)
+    - Extracted loading of VDR daemon config options to separate file for
+      later reuse by other start scripts
+    - Fixed warning message in generated commands.conf and reccmds.conf  
+    - The default command to shutdown the system when the power-off-key of the
+      remote is pressed, can now be configured in /etc/default/vdr.
+    - Build-Depend on: dvb-dev | linux-kernel-headers and libjpeg62-dev
+  * Thomas Günther <tom@toms-cafe.de>
+    - Fixed ploblems with double starts (not detecting a running vdr)
+    - Adapted init procedure to alioth, encapsulated ctvdr specials
+
+ -- Tobias Grimm <tg@e-tobi.net>  Wed, 15 Jan 2005 22:55:00 +0100
+
+vdr (1.2.6-28) unstable; urgency=low
+
+  * Tobias Grimm <tg@e-tobi.net>
+    - fixed switchtimer patch to make it compile with gcc 3.3.4 (sarge)
+
+ -- Tobias Grimm <tg@e-tobi.net>  Wed, 13 Nov 2004 12:20:00 +0200
+
+vdr (1.2.6-27) unstable; urgency=low
+
+  * Tobias Grimm <tg@e-tobi.net>:
+    - using dh_install now
+    - moved usr/bin/recordingaction to /usr/lib/vdr/vdr-recordingaction
+    - moved usr/bin/shutdownvdr to /usr/lib/vdr/vdr-shutdown
+    - added watch file
+    - install man files using debian/vdr.manpages now
+    - default location for reccordings according to FHS is now /var/lib/video
+    - The vdr config dir is /var/lib/vdr now. Real config files are linked to
+      this directory, while generated or vdr-managed config files 
+      (like timers.conf) can exist physically in this directory.
+    - Shutdown-Hook mechanism taken over from Alioth. Hook scripts are no
+      longer  restricted to be shell scripts. (See README.Debian)
+    - moved PLUGIN_DIR, PLUGIN_PREFIX, CFG_DIR, PLUGIN_CFG_DIR,
+      PLUGIN_ORDER_FILE, CMDHOOKSDIR, REC_CMD and SHUTDOWNCMD from the
+      default file to the init script
+    - renamed /usr/bin/ctvdr*.sh to /usr/bin/ctvdr/ctvdr*
+    - using debian/compat now
+    - updated control fields for Sarge
+    - took over order.commands.conf, order.reccmds.conf and order.conf
+      from Alioth
+    - renamed vdraptrefresh.sh to vdraptrefresh
+    - all strings in vdr.menu are now quoted
+    - added manpage for runvdr
+    - moved poweroffvdr to /usr/bin/
+    - took over pluginloader.sh from Alioth
+    - reduced vdr.dirs to /usr/lib/vdr/plugins/ and /var/lib/video/
+    - installing epg2html.pl and svdrpsend.pl to /usr/lib/vdr/ now
+    - replaced update code for 1.2.2 from preinst with an error message
+      (updating such an old version is no longer possible)
+    - removed the commands.[ctvdr|shutdownvdr].conf update
+      (these command files are no longer installed as Debian-conf-files)
+    - Linking var/lib/video to var/lib/video.00. This way, adding
+      more partitions is simply a matter of creating video.01, video.02 and
+      so on.
+    - Added workaround for "Video data stream broken" bug, if you use more
+      than one DVB card. Just set VDSB_WORKAROUND=yes in /etc/default/vdr to
+      enable it. (szap from package dvb-utils is needed!)
+    - renamed patches to opt-<nn>(-x)_name.dpatch pattern like in the 
+      official Debian version at Alioth
+  * Thomas Günther <tom@toms-cafe.de>:
+    - Extracted patchlevel code to patchlevel.sh 
+    - Installing patchlevel.sh into vdrdevel-dev package
+    - Installing conf files as examples
+    - Installing channels.conf and examples into config dir in postinst
+
+ -- Tobias Grimm <tg@e-tobi.net>  Mon, 11 Sep 2004 13:30:00 +0200
+
+vdr (1.2.6-26) unstable; urgency=low
+
+  * Tobias Grimm <tg@e-tobi.net>:
+    - fixed ttxtsubs for AC3 playback (Thanks to Thomas / tbf)
+  * Thomas Günther <tom@toms-cafe.de>:
+    - new (optional) plugin check (with "vdr -V -P plugin")
+    - corrected sharelnb patch description
+    - upgraded jumpplay patch to version 0.5
+    - switchtimer patch - fixed segfault if edit timer from vdradmin
+
+ -- Tobias Grimm <tg@e-tobi.net>  Mon, 09 Aug 2004 19:30:00 +0200
+
+vdr (1.2.6-25) unstable; urgency=low
+
+  * Tobias Grimm <tg@e-tobi.net>:
+    - some small fixes to debian/patches/patchtest
+    - jumpplay patch no longer depends on elchi (Thx to Thomas Günther!)
+    - added switchtimer patch 0.0.4 (There has also been posted a patch for the
+      switchtimer patch, but as this will be included in the next version,
+      I don't include it in the package yet.)
+    - extracted code in dpatch files
+    - took over command loader code from alioth
+    - took over plugin loader code from alioth
+
+ -- Tobias Grimm <tg@e-tobi.net>  Fri, 12 Jul 2004 22:10:00 +0200
+
+vdr (1.2.6-24) unstable; urgency=low
+
+  * Tobias Grimm <tg@e-tobi.net>:
+    - removed osdpip patch for autopid, it no longer depends on the autopid
+      patch
+    - replaced 15_reccmdssubmenu125 patch with 03_cmdsubmenu from the Alioth
+      vdr package
+  * Peter Siering <ps@ctmagazin.de>:
+    - modified dvb-t-channels for hannover, bremen etc.
+
+ -- Tobias Grimm <tg@e-tobi.net>  Fri, 09 Jul 2004 01:50:00 +0200
+
+vdr (1.2.6-23) unstable; urgency=low
+
+  * updated disableDoubleEpgEntries patch to version 0.6
+  * added hoerzu2vdrDisableEpg-0.3 patch
+  * upgraded jumpplay patch to 0.4
+  * added frames fix for elchi patch
+  * added black square fix for elchi patch
+  * added recordings patch by Hardy Flor
+  * added cap patch by Ludwig Nussel - Run vdr as unprivileged user while still
+    beeing able to set the system clock.
+  * fixed patch level generation to not cut patch name after second "_"
+  * added script to list "uncritical" patches, that don't modify header files
+    (or menu.c, which is used by the calendar plugin)
+  * Patches that have no effect on the binary compatibility of the plugins
+    should have a "-" after their number in the file name.
+    i.e.: 10-_patchname.dpatch.
+    These patches will not be include in the patchlevel and therefore plugins
+    must not be recompiled if these patches change.
+  * marked 12_analogtv, 10_skycrypt, 10_graphlcd, 10_threadkill, 
+    32_analogtvautopid, 20_imposd-frames-fix and 10_cap-1.2.6 as "uncritical"
+
+ -- Tobias Grimm <tg@e-tobi.net>  Tue, 06 Jul 2004 01:41:00 +0200
+
+vdr (1.2.6-22) unstable; urgency=low
+
+  * small bugfix in recordingaction script (thx to Thomas Günther!)
+  * added patch for ttxtsubs plugin (subtitles patch removed)
+  * Modified pacthlevel detection, so that it works with a vdr-patchlevel
+    field too. This may become the new way for patchlevel detection with
+    plugins in the official Debian.
+    
+ -- Tobias Grimm <tg@e-tobi.net>  Mon, 21 Jun 2004 23:57:00 +0200
+
+vdr (1.2.6-21) unstable; urgency=low
+
+  * renamed shutdown90.custom to shutdown90.custom.sh
+  
+ -- Tobias Grimm <tg@e-tobi.net>  Thu, 11 May 2004 23:46:00 +0100
+
+vdr (1.2.6-20) unstable; urgency=low
+
+  * improved vdr version extraction in vdr.init
+  
+ -- Tobias Grimm <tg@e-tobi.net>  Thu, 06 May 2004 22:39:00 +0100
+
+vdr (1.2.6-19) unstable; urgency=low
+
+  * added patch for ttxtsubs- and dvbsubs-plugin
+  * small bugfix in recordingaction script
+  * added R90.custom and shutdown90.custom
+  * added order.commands.conf and order.reccmds.conf
+    init-skript now uses these files to order the commands
+  * fixed small bug in ctvdrrestart.sh and ctvdrstop.sh reported by TomG
+  * added at dependency
+  
+ -- Tobias Grimm <tg@e-tobi.net>  Sat, 17 Apr 2004 17:30:00 +0100
+
+vdr (1.2.6-18) unstable; urgency=low
+
+  * updated Elchi patch to version 4d
+  
+ -- Tobias Grimm <tg@e-tobi.net>  Mon, 15 Mar 2004 23:05:00 +0100
+
+vdr (1.2.6-17) unstable; urgency=low
+
+  * improved patchtest use --quick to test applicability of patches only
+  
+ -- Tobias Grimm <tg@e-tobi.net>  Sat, 13 Mar 2004 15:00:00 +0100
+
+vdr (1.2.6-16) unstable; urgency=low
+
+  * corrected bug with wareagel icons patch
+  * updated patchtest to reflect current vdr patch variations
+  * fixed credits in Elchi patch
+  
+ -- Tobias Grimm <tg@e-tobi.net>  Thu, 11 Mar 2004 23:22:00 +0100
+
+vdr (1.2.6-15) unstable; urgency=low
+
+  * added HAVE_AUTOPID to Autopid patch (used by streamdev to detect autopid)
+  
+ -- Tobias Grimm <tg@e-tobi.net>  Tue, 09 Mar 2004 22:20:00 +0100
+
+vdr (1.2.6-14) unstable; urgency=low
+
+  * added ctvdrsysinfo.sh from Felix H. (vdrportal.de)
+  * added disableEpgEntries 0.3 patch
+  * using improved vdr init script from Markus Braun now
+  * added missing dependencies for vdr-dev
+  * did some cleanup to the maintainer scripts to allow autogenerated
+    debhelper stuff
+  * commands.*.conf / reccmds.*.conf files are now installed to 
+    /etc/vdr/command-hooks and symlinked to /usr/share/vdr/command-hooks.
+    vdr.init generates commands.conf and reccmds.conf out of the files
+    it finds in /usr/share/vdr/command-hooks
+  * added reccmds.custom.conf and commands.custom.conf, which should
+    be the place for user-defined commands.
+  * patchtest now prints failed patch
+  * Updated Elchi patch to version 4c
+  * moved shutdownvdr to /usr/bin
+  * added recording hooks mechanism (see debian/recordingaction)
+  * added WarEagle icon patch
+  * added patch from graphlcd plugin
+  
+ -- Tobias Grimm <tg@e-tobi.net>  Tue, 05 Mar 2004 01:30:00 +0100
+
+vdr (1.2.6-13) unstable; urgency=low
+
+  * added maintenance commands
+  * added skycrypt patch
+  
+ -- Tobias Grimm <tg@e-tobi.net>  Sun, 15 Feb 2004 04:15:00 +0100
+
+vdr (1.2.6-12) unstable; urgency=low
+
+  * updated ElchiAIO to version 4b
+  * updated JumpPlay to version 0.3
+  * added Aston CAM patch by Antonino Sergi
+  * vdraptrefresh now uses --reinstall for vdr installation
+  
+ -- Tobias Grimm <tg@e-tobi.net>  Fri, 06 Feb 2004 23:48:00 +0100
+
+vdr (1.2.6-11) unstable; urgency=low
+
+  * vdr.init now generates commands.conf out of commands.*.conf
+  * added some comments to generated commands.conf and reccmds.conf
+  
+ -- Tobias Grimm <tg@e-tobi.net>  Tue, 03 Feb 2004 00:40:00 +0100
+
+vdr (1.2.6-10) unstable; urgency=low
+
+  * elchi3 and improved osd replaced by elchi4
+  * added 8bitcolor patch by Andreas Regel (fixes problems with 256 colors)
+  * added osdpip patch to support osdpip-plugin
+  * added patchlevel test script (debian/patches/patchtest)
+  * added vdraptrefesh script for automatic plugin-reinstall <ps>
+  * replaced JumpPlay 0.0 with JumpPlay patch 0.2
+  
+ -- Tobias Grimm <tg@e-tobi.net>  Wed, 28 Jan 2004 02:26:00 +0100
+
+vdr (1.2.6-9) unstable; urgency=low
+
+  * added libdtv header files to vdr-dev (needed for scanner plugin)
+  * shutdown script now allows hooks to specify an OSD message,
+    when aborting shutdownvdr
+  * MinEventTimeout is set to 10 minutes, when user manually invokes
+    shutdown
+
+ -- Tobias Grimm <tg@e-tobi.net>  Sat, 24 Jan 2004 12:50:00 +0100
+
+vdr (1.2.6-8) unstable; urgency=low
+
+  * added sharelnb patch for autopid
+  * fixed bug in shutdownvdr
+
+ -- Tobias Grimm <tg@e-tobi.net>  Sat, 17 Jan 2004 13:50:00 +0100
+
+vdr (1.2.6-7) unstable; urgency=low
+
+  * added analogtv patches for channel editing with analog plugin 
+    (provided by Andreas Kool)
+  * added plugin version checking in init
+
+ -- Peter Siering <ps@ctmagazin.de>  Thu, 15 Jan 2004 18:20:00 +0100
+
+vdr (1.2.6-6) unstable; urgency=low
+
+  * added patchlevel info to vdr-dev (/usr/include/vdr/patchlevel)
+  * added hack for calendar compiles (/usr/include/vdr/hackmenu.c)
+  * removed multipatch from package name 
+
+ -- Peter Siering <ps@ctmagazin.de>  Tue, 13 Jan 2004 23:00:00 +0100
+
+vdr (1.2.6-5multipatch2) unstable; urgency=low
+
+  * add lnb share patch (dpatch) 
+  * readd sub menu patch (dpatch)
+  * applied vdr.init.order.diff (thanks to Tom at vdrportal.de)
+
+ -- Peter Siering <ps@ctmagazin.de>  Mon, 12 Jan 2004 21:00:00 +0100
+
+vdr (1.2.6-4multipatch2) unstable; urgency=low
+
+  * using dpatch now for patches
+  * added shutdown-hook mechanism
+
+ -- Tobias Grimm <tg@e-tobi.net>  Sun, 11 Jan 2004 17:10:00 +0100
+
+vdr (1.2.6-3multipatch2) unstable; urgency=low
+
+  * included changes from 1.2.2-7:
+  * added vdr-dev package
+
+ -- Tobias Grimm <tg@e-tobi.net>  Sun, 28 Dez 2003 11:29:00 +0200
+
+vdr (1.2.6-2multipatch2) unstable; urgency=low
+
+  * added jumplay patch 0.0
+
+ -- Tobias Grimm <tg@e-tobi.net>  Sun, 07 Dec 2003 02:32:00 +0200
+
+vdr (1.2.6-2multipatch1) unstable; urgency=low
+
+  * fixed small bug in postinst
+
+ -- Tobias Grimm <tg@e-tobi.net>  Sun, 16 Nov 2003 16:11:42 +0200
+
+vdr (1.2.6-1multipatch1) unstable; urgency=low
+
+  * Elchi AIO patch version 3b
+  * AC3overDVB 0.2.1
+  * Autopid
+
+ -- Tobias Grimm <tg@e-tobi.net>  Sun, 16 Nov 2003 19:00:00 +0200
+
+vdr (1.2.6-1) unstable; urgency=low
+
+  * New upstream release
+
+ -- Tobias Grimm <tg@e-tobi.net>  Sun, 16 Nov 2003 16:11:42 +0200
+
+vdr (1.2.2-6woody1) unstable; urgency=low
+
+  * added Alexander Blums submenu patch (towards vdrconvert)
+  * incremented watchdog timeout in defaults from 30 to 60
+  * incorporated Tobias Grimm's <tg@e-tobi.net> fixes:
+  * fixed /debian/rules to create /video instead of trying to copy it
+  * fixed some bashism's in preinst
+  * added lintian override for upstream install documentation
+  * added lintian override for top level video dir
+  * added PLUGINS.html + UPDATE-1.2.0 to docs
+  * added missing registration of /etc/init.d/vdr to postinst
+  * added update-menus to postinst
+  * newplugin will not be installed anymore
+
+ -- Peter Siering <ps@ctmagazin.de>  Sun, 14 Nov 2003 08:00:00 +0200
+
+vdr (1.2.2-5woody1) unstable; urgency=low
+  
+    * integrate reccmds.<addon>.conf logic
+ 
+ -- Peter Siering <ps@ctmagazin.de>  Sun, 02 Nov 2003 21:20:00 +0200
+
+vdr (1.2.2-5woody1) unstable; urgency=low
+
+  * integrate reccmds.<addon>.conf logic
+  * finally fixed update situation, don't bail if new prerm fails
+ 
+ -- Peter Siering <ps@ctmagazin.de>  Tue, 17 Oct 2003 00:20:00 +0200
+
+vdr (1.2.2-4woody1) unstable; urgency=low
+
+  * handle update from -1 gracefully (don't bail if not running)
+ 
+ -- Peter Siering <ps@ctmagazin.de>  Sun, 14 Oct 2003 21:00:00 +0200
+
+vdr (1.2.2-3woody1) unstable; urgency=low
+
+  * Rene Bartsch's fixes in my init logic
+
+ -- Peter Siering <ps@ctmagazin.de>  Sun, 12 Oct 2003 22:00:00 +0200
+
+vdr (1.2.2-2woody1) unstable; urgency=low
+
+  * removing "conffile protection in video" did not what I'd expected
+  * instead move them to /etc/vdr and keep them as conffiles
+  * worked towards the offical vdr releases by amu with .default, .init
+  * new runvdr script, much more friendly for plugin specific conffiles
+
+ -- Peter Siering <ps@ctmagazin.de>  Sun, 02 Oct 2003 11:00:00 +0200
+
+vdr (1.2.2-1woody1) unstable; urgency=low
+
+  * changed runvdr to incorporate auto loading of plugins
+  * integrated init script into package, fixed restart
+  * protecting conffiles in /video
+
+ -- Peter Siering <ps@ctmagazin.de>  Mon, 15 Sep 2003 22:00:00 +0200
+
+vdr (1.2.2-0woody1) unstable; urgency=low
+
+  * new upstream build
+
+ -- Ralf Nolden (KDE) <nolden@kde.org>  Tue, 19 Aug 2003 12:23:09 +0200
+
+vdr (1.0.4-3) unstable; urgency=low
+
+  * some cosmetic things ( ex. autobuilder )
+  * added autobuilder support 
+
+ -- Andreas Mueller <amu@tr.debian.net>  Mon,  10 Mar 2003 11:27:00 +0100
+
+vdr (1.0.4-2) unstable; urgency=low
+
+  * took package from Eduard/QA
+    (closes: Bug#134645)
+    (closes: Bug#158158)
+
+ -- Andreas Mueller <amu@tr.debian.net>  Sat,  4 Jan 2003 16:27:00 +0100
+
+vdr (1.0.4-1) unstable; urgency=low
+
+  * New upstream release
+
+ -- Eduard Bloch <blade@debian.org>  Sat,  3 Aug 2002 12:22:20 +0200
+
+vdr (1.0.0-1) unstable; urgency=medium
+
+  * New upstream (stable) release
+  * removed manpages hocus-pocus and forced to use new version to avoid
+    trashing of vdr.1. Closes: #142809
+  * removed kvdr references, it is broken anyways
+
+ -- Eduard Bloch <blade@debian.org>  Sun,  7 Apr 2002 23:43:41 +0200
+
+vdr (0.98+1.0.0pre5-1) unstable; urgency=high
+
+  * New upstream (pre)release, closes: #141035
+  * Urgency high, since the Woody version is already broken since the new
+    drivers entered it recently
+  * incompatible with kvdr, set Conflicts:
+  * Changed the build-system to DBS like
+  * Added the tools pack from Upstream's web location and the FORMATS file
+  * Not including the DVD patch, too unstable.
+
+ -- Eduard Bloch <blade@debian.org>  Wed,  3 Apr 2002 12:10:31 +0200
+
+vdr (0.98-2) unstable; urgency=medium
+
+  * Disabled SVDRP port as-default and noted in README.Debian. 
+    Better secure than warned and less secure. Closes: #117193
+  * added more Build-Depends, closes: #123701
+  * now conflicting with previous kvdr version and recommending the new since
+    kvdr would break starting vdr-daemon without port specification.
+
+ -- Eduard Bloch <blade@debian.org>  Thu, 13 Dec 2001 00:58:01 +0100
+
+vdr (0.98-1) unstable; urgency=low
+
+  * New upstream release
+  * fixed spelling errors
+
+ -- Eduard Bloch <blade@debian.org>  Wed, 14 Nov 2001 09:56:49 +0100
+
+vdr (0.96-4) unstable; urgency=low
+
+  * improved Description, thanks to Joey and Alfie
+  * included README and other scripts, maybe usefull
+
+ -- Eduard Bloch <blade@debian.org>  Thu, 11 Oct 2001 12:56:42 +0200
+
+vdr (0.96-3) unstable; urgency=high
+
+  * all versions except of -daemon disable the control port by default
+    (possible security hole). Debconf warning for -daemon.
+  * package splited
+  * building additional vdr-daemon binary, needed for kvdr
+  * fixed postinst files, there were too much copy&paste work :(
+
+ -- Eduard Bloch <blade@debian.org>  Mon,  8 Oct 2001 13:21:31 +0200
+
+vdr (0.96-2) unstable; urgency=low
+
+  * enabled DVD support after helping Brian to fix libdvdread packages
+
+ -- Eduard Bloch <blade@debian.org>  Sun,  7 Oct 2001 16:27:53 +0200
+
+vdr (0.96-1) unstable; urgency=low
+
+  * New upstream release
+  * removed upx stuff
+  * no DVD support until the libdvdread2 package is ready
+
+ -- Eduard Bloch <blade@debian.org>  Tue,  2 Oct 2001 02:24:51 +0200
+
+vdr (0.95-1) unstable; urgency=low
+
+  * Initial Release, closes: #113106
+  * Made a little hack to create the channel.conf template from Debian examples
+
+ -- Eduard Bloch <blade@debian.org>  Sat, 22 Sep 2001 03:16:11 +0200
+
+Local variables:
+mode: debian-changelog
+End:

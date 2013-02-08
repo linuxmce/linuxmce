@@ -2,16 +2,21 @@
 #define __Define_Skin_H__
 
 #define SKIN_Basic_CONST 1
-#define SKIN_BO_CONST 2
 #define SKIN_Mobile_Phone_Basic_CONST 3
-#define SKIN_Mobile_Phone_BO_CONST 4
-#define SKIN_Audi_CONST 5
 #define SKIN_SmallUI_CONST 6
-#define SKIN_Monster_CONST 7
-#define SKIN_Marbella_CONST 9
-#define SKIN_Mobile_Phone_Monster_CONST 10
-#define SKIN_Small_UI_Monster_CONST 11
-#define SKIN_NuForce_CONST 12
+#define SKIN_Poison_Arrows_CONST 13
+#define SKIN_Slate_CONST 14
+#define SKIN_Titanium_Blue_CONST 15
+#define SKIN_Titanium_Purple_CONST 16
+#define SKIN_Titanium_Orange_CONST 17
+#define SKIN_Titanium_Silver_CONST 18
+#define SKIN_Titanium_Pink_CONST 19
+#define SKIN_Titanium_Green_CONST 20
+#define SKIN_Titanium_Apple_CONST 21
+#define SKIN_Jarvis_CONST 22
+#define SKIN_Brushed_Aluminum_CONST 23
+#define SKIN_UIta_CONST 24
+#define SKIN_Blue_Crystal_CONST 25
 
 #define SKIN_TABLE "Skin"
 #define SKIN_PK_SKIN_FIELD "PK_Skin"

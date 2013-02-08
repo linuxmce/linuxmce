@@ -33,23 +33,11 @@ using namespace std;
 #include "Table_Orbiter.h"
 
 #include "Table_CachedScreens.h"
-#include "Table_CachedScreens_pschist.h"
-#include "Table_CachedScreens_pschmask.h"
 #include "Table_Device_Orbiter.h"
-#include "Table_Device_Orbiter_pschist.h"
-#include "Table_Device_Orbiter_pschmask.h"
 #include "Table_Orbiter_Users_PasswordReq.h"
-#include "Table_Orbiter_Users_PasswordReq_pschist.h"
-#include "Table_Orbiter_Users_PasswordReq_pschmask.h"
 #include "Table_Orbiter_Variable.h"
-#include "Table_Orbiter_Variable_pschist.h"
-#include "Table_Orbiter_Variable_pschmask.h"
 #include "Table_RemoteControl.h"
-#include "Table_RemoteControl_pschist.h"
-#include "Table_RemoteControl_pschmask.h"
 #include "Table_Room_Users.h"
-#include "Table_Room_Users_pschist.h"
-#include "Table_Room_Users_pschmask.h"
 
 
 void Database_pluto_main::CreateTable_Orbiter()
@@ -97,6 +85,7 @@ void Row_Orbiter::Delete()
 	Row_Orbiter *pRow = this; // Needed so we will have only 1 version of get_primary_fields_assign_from_row
 	
 	if (!is_deleted)
+	{
 		if (is_added)	
 		{	
 			vector<TableRow*>::iterator i;	
@@ -118,6 +107,7 @@ void Row_Orbiter::Delete()
 			table->deleted_cachedRows[key] = this;
 			is_deleted = true;	
 		}	
+	}
 }
 
 void Row_Orbiter::Reload()
@@ -172,7 +162,8 @@ is_null[12] = true;
 m_psc_user = 0;
 m_psc_frozen = 0;
 is_null[13] = false;
-is_null[14] = true;
+m_psc_mod = "0000-00-00 00:00:00";
+is_null[14] = false;
 is_null[15] = true;
 m_psc_restrict = 0;
 
@@ -321,9 +312,6 @@ return is_null[12];}
 bool Row_Orbiter::psc_frozen_isNull() {PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
 
 return is_null[13];}
-bool Row_Orbiter::psc_mod_isNull() {PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
-
-return is_null[14];}
 bool Row_Orbiter::psc_restrict_isNull() {PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
 
 return is_null[15];}
@@ -381,10 +369,6 @@ void Row_Orbiter::psc_frozen_setNull(bool val){PLUTO_SAFETY_LOCK_ERRORSONLY(sl,t
 is_null[13]=val;
 is_modified=true;
 }
-void Row_Orbiter::psc_mod_setNull(bool val){PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
-is_null[14]=val;
-is_modified=true;
-}
 void Row_Orbiter::psc_restrict_setNull(bool val){PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
 is_null[15]=val;
 is_modified=true;
@@ -412,7 +396,7 @@ if (is_null[1])
 return "NULL";
 
 char *buf = new char[5000000];
-db_wrapper_real_escape_string(table->database->m_pDB, buf, m_FloorplanInfo.c_str(), (unsigned long) min((size_t)16777215,m_FloorplanInfo.size()));
+db_wrapper_real_escape_string(table->database->m_pDB, buf, m_FloorplanInfo.c_str(), (unsigned long) min((size_t)50331645,m_FloorplanInfo.size()));
 string s=string()+"\""+buf+"\"";
 delete[] buf;
 return s;
@@ -452,8 +436,8 @@ PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
 if (is_null[4])
 return "NULL";
 
-char *buf = new char[101];
-db_wrapper_real_escape_string(table->database->m_pDB, buf, m_Size.c_str(), (unsigned long) min((size_t)50,m_Size.size()));
+char *buf = new char[301];
+db_wrapper_real_escape_string(table->database->m_pDB, buf, m_Size.c_str(), (unsigned long) min((size_t)150,m_Size.size()));
 string s=string()+"\""+buf+"\"";
 delete[] buf;
 return s;
@@ -479,8 +463,8 @@ PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
 if (is_null[6])
 return "NULL";
 
-char *buf = new char[101];
-db_wrapper_real_escape_string(table->database->m_pDB, buf, m_RegenStatus.c_str(), (unsigned long) min((size_t)50,m_RegenStatus.size()));
+char *buf = new char[301];
+db_wrapper_real_escape_string(table->database->m_pDB, buf, m_RegenStatus.c_str(), (unsigned long) min((size_t)150,m_RegenStatus.size()));
 string s=string()+"\""+buf+"\"";
 delete[] buf;
 return s;
@@ -506,8 +490,8 @@ PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
 if (is_null[8])
 return "NULL";
 
-char *buf = new char[511];
-db_wrapper_real_escape_string(table->database->m_pDB, buf, m_ScenariosFloorplans.c_str(), (unsigned long) min((size_t)255,m_ScenariosFloorplans.size()));
+char *buf = new char[1531];
+db_wrapper_real_escape_string(table->database->m_pDB, buf, m_ScenariosFloorplans.c_str(), (unsigned long) min((size_t)765,m_ScenariosFloorplans.size()));
 string s=string()+"\""+buf+"\"";
 delete[] buf;
 return s;
@@ -1331,39 +1315,11 @@ PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
 class Table_CachedScreens *pTable = table->database->CachedScreens_get();
 pTable->GetRows("`FK_Orbiter`=" + StringUtils::itos(m_PK_Orbiter),rows);
 }
-void Row_Orbiter::CachedScreens_pschist_FK_Orbiter_getrows(vector <class Row_CachedScreens_pschist*> *rows)
-{
-PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
-
-class Table_CachedScreens_pschist *pTable = table->database->CachedScreens_pschist_get();
-pTable->GetRows("`FK_Orbiter`=" + StringUtils::itos(m_PK_Orbiter),rows);
-}
-void Row_Orbiter::CachedScreens_pschmask_FK_Orbiter_getrows(vector <class Row_CachedScreens_pschmask*> *rows)
-{
-PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
-
-class Table_CachedScreens_pschmask *pTable = table->database->CachedScreens_pschmask_get();
-pTable->GetRows("`FK_Orbiter`=" + StringUtils::itos(m_PK_Orbiter),rows);
-}
 void Row_Orbiter::Device_Orbiter_FK_Orbiter_getrows(vector <class Row_Device_Orbiter*> *rows)
 {
 PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
 
 class Table_Device_Orbiter *pTable = table->database->Device_Orbiter_get();
-pTable->GetRows("`FK_Orbiter`=" + StringUtils::itos(m_PK_Orbiter),rows);
-}
-void Row_Orbiter::Device_Orbiter_pschist_FK_Orbiter_getrows(vector <class Row_Device_Orbiter_pschist*> *rows)
-{
-PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
-
-class Table_Device_Orbiter_pschist *pTable = table->database->Device_Orbiter_pschist_get();
-pTable->GetRows("`FK_Orbiter`=" + StringUtils::itos(m_PK_Orbiter),rows);
-}
-void Row_Orbiter::Device_Orbiter_pschmask_FK_Orbiter_getrows(vector <class Row_Device_Orbiter_pschmask*> *rows)
-{
-PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
-
-class Table_Device_Orbiter_pschmask *pTable = table->database->Device_Orbiter_pschmask_get();
 pTable->GetRows("`FK_Orbiter`=" + StringUtils::itos(m_PK_Orbiter),rows);
 }
 void Row_Orbiter::Orbiter_Users_PasswordReq_FK_Orbiter_getrows(vector <class Row_Orbiter_Users_PasswordReq*> *rows)
@@ -1373,39 +1329,11 @@ PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
 class Table_Orbiter_Users_PasswordReq *pTable = table->database->Orbiter_Users_PasswordReq_get();
 pTable->GetRows("`FK_Orbiter`=" + StringUtils::itos(m_PK_Orbiter),rows);
 }
-void Row_Orbiter::Orbiter_Users_PasswordReq_pschist_FK_Orbiter_getrows(vector <class Row_Orbiter_Users_PasswordReq_pschist*> *rows)
-{
-PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
-
-class Table_Orbiter_Users_PasswordReq_pschist *pTable = table->database->Orbiter_Users_PasswordReq_pschist_get();
-pTable->GetRows("`FK_Orbiter`=" + StringUtils::itos(m_PK_Orbiter),rows);
-}
-void Row_Orbiter::Orbiter_Users_PasswordReq_pschmask_FK_Orbiter_getrows(vector <class Row_Orbiter_Users_PasswordReq_pschmask*> *rows)
-{
-PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
-
-class Table_Orbiter_Users_PasswordReq_pschmask *pTable = table->database->Orbiter_Users_PasswordReq_pschmask_get();
-pTable->GetRows("`FK_Orbiter`=" + StringUtils::itos(m_PK_Orbiter),rows);
-}
 void Row_Orbiter::Orbiter_Variable_FK_Orbiter_getrows(vector <class Row_Orbiter_Variable*> *rows)
 {
 PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
 
 class Table_Orbiter_Variable *pTable = table->database->Orbiter_Variable_get();
-pTable->GetRows("`FK_Orbiter`=" + StringUtils::itos(m_PK_Orbiter),rows);
-}
-void Row_Orbiter::Orbiter_Variable_pschist_FK_Orbiter_getrows(vector <class Row_Orbiter_Variable_pschist*> *rows)
-{
-PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
-
-class Table_Orbiter_Variable_pschist *pTable = table->database->Orbiter_Variable_pschist_get();
-pTable->GetRows("`FK_Orbiter`=" + StringUtils::itos(m_PK_Orbiter),rows);
-}
-void Row_Orbiter::Orbiter_Variable_pschmask_FK_Orbiter_getrows(vector <class Row_Orbiter_Variable_pschmask*> *rows)
-{
-PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
-
-class Table_Orbiter_Variable_pschmask *pTable = table->database->Orbiter_Variable_pschmask_get();
 pTable->GetRows("`FK_Orbiter`=" + StringUtils::itos(m_PK_Orbiter),rows);
 }
 void Row_Orbiter::RemoteControl_FK_Orbiter_getrows(vector <class Row_RemoteControl*> *rows)
@@ -1415,39 +1343,11 @@ PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
 class Table_RemoteControl *pTable = table->database->RemoteControl_get();
 pTable->GetRows("`FK_Orbiter`=" + StringUtils::itos(m_PK_Orbiter),rows);
 }
-void Row_Orbiter::RemoteControl_pschist_FK_Orbiter_getrows(vector <class Row_RemoteControl_pschist*> *rows)
-{
-PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
-
-class Table_RemoteControl_pschist *pTable = table->database->RemoteControl_pschist_get();
-pTable->GetRows("`FK_Orbiter`=" + StringUtils::itos(m_PK_Orbiter),rows);
-}
-void Row_Orbiter::RemoteControl_pschmask_FK_Orbiter_getrows(vector <class Row_RemoteControl_pschmask*> *rows)
-{
-PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
-
-class Table_RemoteControl_pschmask *pTable = table->database->RemoteControl_pschmask_get();
-pTable->GetRows("`FK_Orbiter`=" + StringUtils::itos(m_PK_Orbiter),rows);
-}
 void Row_Orbiter::Room_Users_FK_Orbiter_getrows(vector <class Row_Room_Users*> *rows)
 {
 PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
 
 class Table_Room_Users *pTable = table->database->Room_Users_get();
-pTable->GetRows("`FK_Orbiter`=" + StringUtils::itos(m_PK_Orbiter),rows);
-}
-void Row_Orbiter::Room_Users_pschist_FK_Orbiter_getrows(vector <class Row_Room_Users_pschist*> *rows)
-{
-PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
-
-class Table_Room_Users_pschist *pTable = table->database->Room_Users_pschist_get();
-pTable->GetRows("`FK_Orbiter`=" + StringUtils::itos(m_PK_Orbiter),rows);
-}
-void Row_Orbiter::Room_Users_pschmask_FK_Orbiter_getrows(vector <class Row_Room_Users_pschmask*> *rows)
-{
-PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
-
-class Table_Room_Users_pschmask *pTable = table->database->Room_Users_pschmask_get();
 pTable->GetRows("`FK_Orbiter`=" + StringUtils::itos(m_PK_Orbiter),rows);
 }
 

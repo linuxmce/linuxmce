@@ -1,0 +1,52 @@
+#!/usr/bin/make -f
+
+# Uncomment to turn on verbose mode
+#export DH_VERBOSE = 1
+
+ifneq (,$(findstring noopt,$(DEB_BUILD_OPTIONS)))
+	CFLAGS += -O0
+else
+	CFLAGS += -O2
+endif
+
+# Prefix of the target package name
+PACKAGE = vloopback-modules
+
+# Load generic variable handling
+-include /usr/share/modass/include/generic.make
+
+# Load default rules, including kdist, kdist_image, ...
+-include /usr/share/modass/include/common-rules.make
+
+binary-modules:
+	dh_testdir
+	dh_testroot
+	dh_installdirs lib/modules/$(KVERS)/misc
+
+	# Build the module
+	$(MAKE) -C $(KSRC) M=$(PWD) modules
+
+	# Install the module
+	$(MAKE) -C $(KSRC) M=$(PWD) \
+		DEST=debian/$(PKGNAME)/lib/modules/$(KVERS)/misc modules_install
+
+	dh_installdocs README vloopback.html
+	dh_installmodules
+	dh_installchangelogs
+	dh_link
+	dh_strip
+	dh_compress
+	dh_fixperms
+	dh_installdeb
+	dh_gencontrol -- -v$(VERSION)
+	dh_md5sums
+	dh_builddeb --destdir=$(DEB_DESTDIR)
+
+kdist_clean:
+	-$(MAKE) clean
+
+	# kdist_clean may be run before prep-deb-files
+	-dh_clean
+	rm -f debian/control
+
+kdist_config: prep-deb-files

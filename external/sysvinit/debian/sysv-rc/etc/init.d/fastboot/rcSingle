@@ -1,0 +1,12 @@
+#!/bin/bash
+# This file is executed when init tries to enter into single user mode. 
+#
+# Since rcS is running a /sbin/sulogin on sysinit when single mode was
+# requested, we should stop init opening it again right before swithing
+# into the default runlevel.
+if [[ -e /var/run/block_single ]]; then
+	rm -f /var/run/block_single
+	exit 1
+fi
+
+/sbin/sulogin

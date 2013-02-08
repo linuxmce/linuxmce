@@ -1,0 +1,103 @@
+#! /bin/sh /usr/share/dpatch/dpatch-run
+## 22_hauppauge_novat_500.dpatch by Mario Limonciello <superm1@ubuntu.com>
+##
+## All lines beginning with `## DP:' are a description of the patch.
+## DP: Provide support for Hauppauge Nova T 500
+
+@DPATCH@
+diff -urNad lirc~/doc/lirc.hwdb lirc/doc/lirc.hwdb
+--- lirc~/doc/lirc.hwdb	2008-09-24 01:08:02.000000000 -0500
++++ lirc/doc/lirc.hwdb	2008-09-24 01:08:02.000000000 -0500
+@@ -74,6 +74,7 @@
+ FlyVideo 98/FM /2000S (card=56);flyvideo;devinput;hw_default;life-view/lircd.conf.flyvideo;
+ Flyvideo 98FM (LR50Q) / Typhoon TView TV/FM Tuner (card=36);flyvideo;devinput;hw_default;life-view/lircd.conf.flyvideo;
+ Hauppauge TV card;hauppauge;lirc_dev lirc_i2c;hw_default;hauppauge/lircd.conf.hauppauge;
++Hauppauge Nova-T 500;devinput;none;hw_devinput;hauppauge/lircd.conf.hauppauge_novat500;
+ Hauppauge HVR-1300;hauppauge;lirc_dev lirc_i2c;hw_default;hauppauge/lircd.conf.hauppauge;
+ Hauppauge DVB-s card (ver. 2.1);hauppauge_dvb;lirc_dev;hw_default;hauppauge/lircd.conf.hauppauge;
+ Hercules Smart TV Stereo (card=100);hercules_smarttv_stereo;lirc_dev lirc_i2c;hw_default;hercules/lircd.conf.smarttv_stereo;
+diff -urNad lirc~/remotes/hauppauge/lircd.conf.hauppauge_novat500 lirc/remotes/hauppauge/lircd.conf.hauppauge_novat500
+--- lirc~/remotes/hauppauge/lircd.conf.hauppauge_novat500	1969-12-31 18:00:00.000000000 -0600
++++ lirc/remotes/hauppauge/lircd.conf.hauppauge_novat500	2008-09-24 01:11:12.000000000 -0500
+@@ -0,0 +1,81 @@
++#
++# brand:                       Hauppauge NOVA-T-500
++# model no. of remote control: Hauppage Nova-T-500 Snowboard Shape Silver over Black
++#
++
++begin remote
++
++ name  NOVA-T500
++ bits           16
++ eps            30
++ aeps          100
++
++ one             0     0
++ zero            0     0
++ pre_data_bits   16
++ pre_data       0x1
++ gap          199999
++ toggle_bit      0
++
++
++     begin codes
++         Go                       0x0162
++         Power                    0x0074
++         TV                       0x0179
++         Videos                   0x0189
++         Music                    0x0188
++         Pictures                 0x00E2
++         Guide                    0x016D
++         Radio                    0x0181
++         ArrowUp                  0x0067
++         ArrowLeft                0x0069
++         OK                       0x0160
++         ArrowRight               0x006A
++         ArrowDown                0x006C
++         BackExit                 0x009E
++         Menu                     0x008B
++         VolumeUp                 0x0073
++         VolumeDown               0x0072
++         PrevCh                   0x016B
++         Mute                     0x0071
++         ChannelUp                0x0192
++         ChannelDown              0x0193
++         Record                   0x00A7
++         Rewind                   0x00A8
++         SkipBack                 0x0195
++         Play                     0x00CF
++         Pause                    0x0077
++         Stop                     0x0080
++         Fwdwind                  0x00D0
++         SkipFwd                  0x0197
++         1                        0x0002
++         2                        0x0003
++         3                        0x0004
++         4                        0x0005
++         5                        0x0006
++         6                        0x0007
++         7                        0x0008
++         8                        0x0009
++         9                        0x000A
++         *                        0x0037
++         0                        0x000B
++         #                        0x0029
++         one                      0x004F
++         two                      0x0050
++         three                    0x0051
++         four                     0x004B
++         five                     0x004C
++         six                      0x004D
++         seven                    0x0047
++         eight                    0x0048
++         nine                     0x0049
++         ten                      0x0052
++         Red                      0x018E
++         Green                    0x018F
++         Yellow                   0x0190
++         Blue                     0x0191
++     end codes
++
++end remote
++
++

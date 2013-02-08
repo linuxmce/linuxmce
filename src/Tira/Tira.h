@@ -79,8 +79,7 @@ public:
 	/*
 			*****DATA***** accessors inherited from base class
 	string DATA_Get_COM_Port_on_PC();
-	void DATA_Set_COM_Port_on_PC(string Value,bool bUpdateDatabase=false);
-	bool DATA_Get_Ignore();
+	void DATA_Set_COM_Port_on_PC(string Value);
 	int DATA_Get_Repeat();
 	bool DATA_Get_Only_One_Per_PC();
 	bool DATA_Get_Autoassign_to_parents_room();

@@ -7,11 +7,11 @@
 
 	Phone: +1 (877) 758-8648
 
-	This program is free software; you can redistribute it and/or modify it under the terms of the GNU General Public License.
+	This program is free software; you can redistribute it and/or modify it under the terms of the GNU Lesser General Public License.
 	This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty
 	of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
 
-	See the GNU General Public License for more details.
+	See the GNU Lesser General Public License for more details.
 */
 
 #include "PlutoUtils/CommonIncludes.h"
@@ -33,6 +33,10 @@
 #include "PlutoUtils/Other.h"
 
 #include <list>
+
+#ifdef __APPLE_CC__
+	#define PTHREAD_MUTEX_RECURSIVE_NP PTHREAD_MUTEX_RECURSIVE
+#endif
 
 #ifdef PLUTOSERVER
 	const char *Module="PlutoServer";
@@ -200,7 +204,11 @@ Socket::Socket(string Name,string sIPAddress, string sMacAddress) :
 	m_sName = Name;
 	m_bQuit = false;
 	m_bUsePingToKeepAlive = false;
-	m_pthread_pingloop_id = 0;
+#ifdef WIN32
+        m_pthread_pingloop_id.p = 0;
+#else
+        m_pthread_pingloop_id = 0;
+#endif
 	m_pSocket_PingFailure=NULL;
 	m_eSocketType = st_Unknown;
 	m_pcInSockBuffer = new char[INSOCKBUFFER_SIZE];

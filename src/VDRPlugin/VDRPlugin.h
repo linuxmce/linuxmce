@@ -387,7 +387,6 @@ live, nonlive, osd */
 	virtual void CMD_Remove_Scheduled_Recording(string sID,string sProgramID) { string sCMD_Result; CMD_Remove_Scheduled_Recording(sID.c_str(),sProgramID.c_str(),sCMD_Result,NULL);};
 	virtual void CMD_Remove_Scheduled_Recording(string sID,string sProgramID,string &sCMD_Result,Message *pMessage);
 
-
 //<-dceag-h-e->
 	};
 

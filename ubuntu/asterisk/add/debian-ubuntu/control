@@ -1,12 +1,12 @@
 Source: asterisk-pluto
 Section: unknown
 Priority: optional
-Maintainer: Office Server Operator <root@activate.plutohome.com>
+Maintainer: LinuxMCE Developers <developers@linuxmce.org>
 Build-Depends: debhelper (>= 4.0.0)
 Standards-Version: 3.6.1
 
 Package: asterisk-pluto
 Architecture: any
-Depends: asterisk (>= 1:1.4.10~dfsg), asterisk-perl, tcpdump, traceroute, freepbx, zaptel-modules-2.6.24-16-generic | zaptel-modules-2.6.22-14-generic, asterisk-mysql, chan-sccp
+Depends: asterisk (>= 1:1.4.10~dfsg), asterisk-perl, tcpdump, traceroute, freepbx, zaptel-modules | dahdi-dkms, asterisk-mysql, chan-sccp | chan-sccp-b
 Description: Pluto addons for Asterisk
  Pluto addons for Asterisk

@@ -1,10 +1,10 @@
 #ifndef __DB_WRAPPER_MYSQL_H__
 #define __DB_WRAPPER_MYSQL_H__
 
-#ifdef WIN32
-#include <mysql.h>
+#if defined(WIN32) || defined(__APPLE_CC__)
+	#include <mysql.h>
 #else
-#include <mysql/mysql.h>
+	#include <mysql/mysql.h>
 #endif
 
 // data structures
@@ -13,7 +13,8 @@
 #define DB_RES  MYSQL_RES
 
 // functions
-#define db_wrapper_init				mysql_init
+/*#define db_wrapper_init				mysql_init*/
+DB_LINK* db_wrapper_init(DB_LINK *db_link);
 #define db_wrapper_free_result		mysql_free_result
 #define db_wrapper_close			mysql_close
 #define db_wrapper_real_connect		mysql_real_connect

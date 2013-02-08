@@ -136,7 +136,7 @@ LoggerWrapper::GetInstance()->Write(LV_PROCESSUTILS,"dupped arg %d %s",i,ps);
 			{
 				sLogFile = "/dev/null";
 			}
-			int fd = open(sLogFile.c_str(), O_WRONLY | O_CREAT);
+			int fd = open(sLogFile.c_str(), O_WRONLY | O_CREAT,S_IRWXU); // Creating a file needs access rights defined.
 			dup2(fd, 1);
 			dup2(fd, 2);
 			close(fd);
@@ -369,7 +369,13 @@ int ProcessUtils::GetCommandOutput(const char * path, const char *const args[], 
 
 	pipe(output);
 	pipe(errput);
-	
+
+	struct sigaction act, oldact;
+	act.sa_handler = SIG_DFL;
+	act.sa_flags = SA_NOCLDSTOP;
+	sigemptyset(&act.sa_mask);
+	sigaction(SIGCHLD, &act, &oldact);
+
 	switch (pid = fork())
 	{
 		case 0: /* child */
@@ -399,9 +405,6 @@ int ProcessUtils::GetCommandOutput(const char * path, const char *const args[], 
 			close(errput[1]);
 			
 			fd_set fdset;
-			FD_ZERO(&fdset);
-			FD_SET(output[0], &fdset);
-			FD_SET(errput[0], &fdset);
 
 			int maxfd = max(output[0], errput[0]) + 1;
 			
@@ -410,6 +413,10 @@ int ProcessUtils::GetCommandOutput(const char * path, const char *const args[], 
 			
 			while (waitpid(pid, &status, WNOHANG) == 0)
 			{
+				FD_ZERO(&fdset);
+				FD_SET(output[0], &fdset);
+				FD_SET(errput[0], &fdset);
+
 				int bytes = 0;
 				
 				select(maxfd, &fdset, NULL, NULL, NULL);
@@ -447,6 +454,8 @@ int ProcessUtils::GetCommandOutput(const char * path, const char *const args[], 
 			close(output[0]);
 			close(errput[0]);
 	}
+
+	sigaction(SIGCHLD, &oldact, NULL);
 
 	return status;
 #endif
@@ -509,7 +518,7 @@ bool ProcessUtils::SpawnDaemon(const char * path, char * args[], bool bLogOutput
 					// NEVER dup(open(...))!!! You lose the filedescriptor from open and that may cause problems in the child
 					
 					// redirect process output to log file, as selected above
-					int fd = open(sLogFile.c_str(), O_WRONLY | O_CREAT);
+					int fd = open(sLogFile.c_str(), O_WRONLY | O_CREAT,S_IRWXU); // Creating a file needs access rights defined.
 					dup2(fd, 1);
 					dup2(fd, 2);
 					close(fd);

@@ -1,0 +1,11 @@
+Package: pluto-kernel-upgrade
+Version: 2.0.0.44
+Section: unknown
+Priority: optional
+Architecture: i386
+Pre-Depends: libstdc++5, libssl0.9.7, screen, mysql-client, ssh, nfs-kernel-server, syslinux, discover1, ftp-upload, iproute, libcrypt-smbhash-perl, udev
+Depends: %KERN_LIST%, hal, pluto-pwc-camera-drivers, pluto-vloopback, pluto-upgrade-helper, pluto-alsa-sound-drivers
+Installed-Size: 60
+Maintainer: Office Server Operator <root@activate.plutohome.com>
+Description: <insert up to 60 chars description>
+ <insert long description, indented with spaces>

@@ -146,7 +146,6 @@ bool psc_id_isNull();
 bool psc_batch_isNull();
 bool psc_user_isNull();
 bool psc_frozen_isNull();
-bool psc_mod_isNull();
 bool psc_restrict_isNull();
 
 			
@@ -159,7 +158,6 @@ void psc_id_setNull(bool val);
 void psc_batch_setNull(bool val);
 void psc_user_setNull(bool val);
 void psc_frozen_setNull(bool val);
-void psc_mod_setNull(bool val);
 void psc_restrict_setNull(bool val);
 	
 	
@@ -178,23 +176,11 @@ void psc_restrict_setNull(bool val);
 
 		// Return the rows in other tables with foreign keys pointing here
 		void DesignObjVariation_FK_UI_getrows(vector <class Row_DesignObjVariation*> *rows);
-void DesignObjVariation_pschist_FK_UI_getrows(vector <class Row_DesignObjVariation_pschist*> *rows);
-void DesignObjVariation_pschmask_FK_UI_getrows(vector <class Row_DesignObjVariation_pschmask*> *rows);
 void Screen_DesignObj_FK_UI_getrows(vector <class Row_Screen_DesignObj*> *rows);
-void Screen_DesignObj_pschist_FK_UI_getrows(vector <class Row_Screen_DesignObj_pschist*> *rows);
-void Screen_DesignObj_pschmask_FK_UI_getrows(vector <class Row_Screen_DesignObj_pschmask*> *rows);
 void Size_FK_UI_getrows(vector <class Row_Size*> *rows);
-void Size_pschist_FK_UI_getrows(vector <class Row_Size_pschist*> *rows);
-void Size_pschmask_FK_UI_getrows(vector <class Row_Size_pschmask*> *rows);
 void Skin_FK_UI_getrows(vector <class Row_Skin*> *rows);
-void Skin_pschist_FK_UI_getrows(vector <class Row_Skin_pschist*> *rows);
-void Skin_pschmask_FK_UI_getrows(vector <class Row_Skin_pschmask*> *rows);
 void StyleVariation_FK_UI_getrows(vector <class Row_StyleVariation*> *rows);
-void StyleVariation_pschist_FK_UI_getrows(vector <class Row_StyleVariation_pschist*> *rows);
-void StyleVariation_pschmask_FK_UI_getrows(vector <class Row_StyleVariation_pschmask*> *rows);
 void UI_FK_UI_Alt_getrows(vector <class Row_UI*> *rows);
-void UI_pschist_FK_UI_Alt_getrows(vector <class Row_UI_pschist*> *rows);
-void UI_pschmask_FK_UI_Alt_getrows(vector <class Row_UI_pschmask*> *rows);
 
 
 		// Setup binary serialization

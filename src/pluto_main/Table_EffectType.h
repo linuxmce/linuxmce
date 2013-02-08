@@ -128,21 +128,21 @@ void psc_mod_set(string val);
 void psc_restrict_set(long int val);
 
 		
-		bool Define_isNull();
+		bool Description_isNull();
+bool Define_isNull();
 bool psc_id_isNull();
 bool psc_batch_isNull();
 bool psc_user_isNull();
 bool psc_frozen_isNull();
-bool psc_mod_isNull();
 bool psc_restrict_isNull();
 
 			
-		void Define_setNull(bool val);
+		void Description_setNull(bool val);
+void Define_setNull(bool val);
 void psc_id_setNull(bool val);
 void psc_batch_setNull(bool val);
 void psc_user_setNull(bool val);
 void psc_frozen_setNull(bool val);
-void psc_mod_setNull(bool val);
 void psc_restrict_setNull(bool val);
 	
 	
@@ -160,11 +160,7 @@ void psc_restrict_setNull(bool val);
 
 		// Return the rows in other tables with foreign keys pointing here
 		void DesignObjVariation_FK_EffectType_Highlighted_getrows(vector <class Row_DesignObjVariation*> *rows);
-void DesignObjVariation_pschist_FK_EffectType_Highlighted_getrows(vector <class Row_DesignObjVariation_pschist*> *rows);
-void DesignObjVariation_pschmask_FK_EffectType_Highlighted_getrows(vector <class Row_DesignObjVariation_pschmask*> *rows);
 void EffectType_Effect_Skin_FK_EffectType_getrows(vector <class Row_EffectType_Effect_Skin*> *rows);
-void EffectType_Effect_Skin_pschist_FK_EffectType_getrows(vector <class Row_EffectType_Effect_Skin_pschist*> *rows);
-void EffectType_Effect_Skin_pschmask_FK_EffectType_getrows(vector <class Row_EffectType_Effect_Skin_pschmask*> *rows);
 
 
 		// Setup binary serialization

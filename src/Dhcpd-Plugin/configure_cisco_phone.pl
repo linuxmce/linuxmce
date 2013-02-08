@@ -23,4 +23,4 @@ else
 }
 
 #sync with AMP
-`/usr/pluto/bin/sync_pluto2amp.pl $Device_ID`
+`/usr/pluto/bin/db_phone_config.sh`

@@ -7,11 +7,11 @@
 	
 	Phone: +1 (877) 758-8648
 	
-	This program is free software; you can redistribute it and/or modify it under the terms of the GNU General Public License.
+	This program is free software; you can redistribute it and/or modify it under the terms of the GNU Lesser General Public License.
 	This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty 
 	of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. 
 	
-	See the GNU General Public License for more details.
+	See the GNU Lesser General Public License for more details.
 */
 
 #include "DCEConfig.h"
@@ -90,28 +90,6 @@ void DCEConfig::ParseFile(vector<string> &vectString)
 {
     m_mapParameters.clear();
 	m_mapModifiedParameters.clear();
-}
-//------------------------------------------------------------------------------------------------------
-/*inline*/ int DCEConfig::ReadInteger(string sToken, int iDefaultValue/* = 0*/)
-{
-    int iValue = iDefaultValue;
-
-    if( m_mapParameters_Exists(sToken) )
-    {
-		iValue = atoi(m_mapParameters_Find(sToken).c_str());
-    }
-
-    return iValue;
-}
-//------------------------------------------------------------------------------------------------------
-/*inline*/ string DCEConfig::ReadString(string sToken, string sDefaultValue/* = ""*/)
-{
-    string sValue = sDefaultValue;
-
-    if( m_mapParameters_Exists(sToken) )
-        sValue = m_mapParameters_Find(sToken);
-
-    return sValue;
 }
 //------------------------------------------------------------------------------------------------------
 bool DCEConfig::WriteSettings()

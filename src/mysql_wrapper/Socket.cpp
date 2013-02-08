@@ -7,7 +7,7 @@
 #include <errno.h>
 #include <fcntl.h>
 #include <iostream>
-
+#include <stdio.h>
 
 Socket::Socket() : m_sock(-1), m_sockAsFile(NULL)
 {

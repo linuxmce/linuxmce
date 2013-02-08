@@ -42,6 +42,7 @@
 
 bool Init_System()
 {
+#ifndef DIRECTFB
 	//disable repeated keys while orbiter is active
 	system("/usr/bin/X11/xset r off");
 
@@ -52,6 +53,7 @@ bool Init_System()
         return false;
     }
 
+#endif
     return true;
 }
 
@@ -346,9 +348,6 @@ OrbiterLinux *CreateOrbiter(int PK_Device,int PK_DeviceTemplate,string sRouter_I
 		{
 			if (!bLocalMode)
 			{
-				pCLinux->CreateChildren();
-				pCLinux->WaitForRelativesIfOSD();
-
 				if(NULL != pCLinux->m_pScreenHistory_Current && pCLinux->m_pScreenHistory_Current->PK_Screen() != SCREEN_VideoWizard_CONST)
 					pCLinux->CMD_Regen_Screen();
 			}

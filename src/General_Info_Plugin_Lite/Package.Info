@@ -1,9 +1,0 @@
-<-dceag-p-b->
-Package = DCE_Destination_Package
-Dir = 
-desc = DCE Implemenation for #27 General Info Plug-in
-Maintainer = nuforceName
-Email = 
-Depend = DCE_Dependencies
-<-dceag-p-e->
-

@@ -254,31 +254,6 @@ int xine_open (xine_stream_t *stream, const char *mrl) XINE_PROTECTED;
 int  xine_play (xine_stream_t *stream, int start_pos, int start_time) XINE_PROTECTED;
 
 /*
- * seeks a stream to a given position
- * 
- * semantics is similar to xine_play, but previous playback 
- * speed is not changed (e.g. if a stream was paused it will remain paused
- */
-int  xine_seek (xine_stream_t *stream, int start_pos, int start_time);
-
-/* starts seeking playback (audio is muted, video is played with given speed)
- * trick_speed: 
- * 1x = 1.000.000 of trick speed, 
- * positive - forward, negative - backward
- * returns:
- * 1 - no error
- * 0 - error
- */
-int xine_start_trick_play(xine_stream_t *stream, int trick_speed);
-
-/* stops trick playback and restore original playback mode
- * returns:
- * 1 - no error
- * 0 - error
- */
-int xine_stop_trick_play(xine_stream_t *stream);
-
-/*
  * set xine to a trick mode for fast forward, backwards playback,
  * low latency seeking. Please note that this works only with some
  * input plugins. mode constants see below.
@@ -940,15 +915,6 @@ const char *xine_get_meta_info   (xine_stream_t *stream, int info) XINE_PROTECTE
 #define XINE_STREAM_INFO_DVD_CHAPTER_COUNT  33
 #define XINE_STREAM_INFO_DVD_ANGLE_NUMBER   34
 #define XINE_STREAM_INFO_DVD_ANGLE_COUNT    35
-
-
-/* custom values for xine_(start|stop)_trick_play functionality */
-#define XINE_STREAM_INFO_TRICK_PLAY_SUPPORTED    51 /* 0 - not supported, 1 - supported */
-#define XINE_STREAM_INFO_TRICK_PLAY_ENABLED 52 /* trick play is on now */
-#define XINE_STREAM_INFO_TRICK_PLAY_CURRENT_SPEED 53 /* current trick play speed */
-#define XINE_STREAM_INFO_TRICK_PLAY_ORIGINAL_SPEED 54 /* original speed to restore to */
-#define XINE_STREAM_INFO_TRICK_PLAY_DISTINCTS_FRAME_TYPE 55 /* if stream distincts frames types */
-
 
 /* possible values for XINE_STREAM_INFO_VIDEO_AFD */
 #define XINE_VIDEO_AFD_NOT_PRESENT         -1

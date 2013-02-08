@@ -60,12 +60,11 @@ Disk_Drive_Functions::Disk_Drive_Functions(int dwPK_Device,Command_Impl * pComma
 	m_pMediaAttributes_LowLevel=pMediaAttributes_LowLevel;
 	m_eLocked=locked_available;
 	m_bAutoIdentifyMedia=bAutoIdentifyMedia;
-	m_PK_Disc=0;
 
     pthread_mutexattr_init( &m_ThreadAttribute );
     pthread_mutexattr_settype( &m_ThreadAttribute, PTHREAD_MUTEX_RECURSIVE_NP );
 	m_DiskMutex.Init(&m_ThreadAttribute);
-	m_pDevice_MediaIdentifier = m_pCommand_Impl->m_pData->FindFirstRelatedDeviceOfCategory(DEVICECATEGORY_Media_Identifiers_CONST,m_pCommand_Impl,10);
+	m_pDevice_MediaIdentifier = m_pCommand_Impl->m_pData->FindFirstRelatedDeviceOfCategory(DEVICECATEGORY_Media_Identifiers_CONST,m_pCommand_Impl,3);
 	if( !m_pDevice_MediaIdentifier )
 	{
 		m_pDevice_MediaIdentifier = m_pCommand_Impl->m_pData->FindFirstRelatedDeviceOfCategory(DEVICECATEGORY_Media_Identifiers_CONST);  // Try again ignoring registration.  Maybe it will register later
@@ -84,12 +83,7 @@ Disk_Drive_Functions::~Disk_Drive_Functions()
 
 void Disk_Drive_Functions::EVENT_Media_Inserted(int iFK_MediaType, string sMRL, string sID, string sName)
 {
-	m_pCommand_Impl->m_pEvent->SendMessage(new Message(m_dwPK_Device, DEVICEID_EVENTMANAGER, PRIORITY_NORMAL, MESSAGETYPE_EVENT, EVENT_Media_Inserted_CONST, 4, 3, StringUtils::itos(iFK_MediaType).c_str(), 4, sMRL.c_str(), 7, sID.c_str(), 35, sName.c_str()));
-}
-
-void Disk_Drive_Functions::EVENT_Media_Removed()
-{
-	m_pCommand_Impl->m_pEvent->SendMessage(new Message(m_dwPK_Device, DEVICEID_EVENTMANAGER, PRIORITY_NORMAL, MESSAGETYPE_EVENT, EVENT_Media_Removed_CONST, 0));
+	m_pCommand_Impl->m_pEvent->SendMessage(new Message(m_dwPK_Device, DEVICEID_EVENTMANAGER, PRIORITY_NORMAL, MESSAGETYPE_EVENT, 3, 4, 3, StringUtils::itos(iFK_MediaType).c_str(), 4, sMRL.c_str(), 7, sID.c_str(), 35, sName.c_str()));
 }
 
 void Disk_Drive_Functions::EVENT_Ripping_Progress(string sText, int iResult, string sValue, string sName, int iEK_Disc)
@@ -138,41 +132,35 @@ bool Disk_Drive_Functions::internal_reset_drive(bool bFireEvent,int *iPK_MediaTy
 		case DISCTYPE_CD_AUDIO:
 			*sURL = getTracks("cdda://" + m_sDrive + "/").c_str();
 			*iPK_MediaType = MEDIATYPE_pluto_CD_CONST;
-			if( !bRecheck )
-				UpdateDiscLocation('c');  // We know it's media
+			UpdateDiscLocation('c');  // We know it's media
 			break;
 
 		case DISCTYPE_DVD_VIDEO:
 			*sURL = m_sDrive;
 			*iPK_MediaType = MEDIATYPE_pluto_DVD_CONST;
-			if( !bRecheck )
-				UpdateDiscLocation('d');  // We know it's media
+			UpdateDiscLocation('d');  // We know it's media
 			break;
 
 		case DISCTYPE_HDDVD:
 			*sURL = m_sDrive;
 			*iPK_MediaType = MEDIATYPE_pluto_HDDVD_CONST;
-			if( !bRecheck )
-				UpdateDiscLocation('H');  // We know it's media
+			UpdateDiscLocation('H');  // We know it's media
 			break;
 
 		case DISCTYPE_BD:
 			*sURL = m_sDrive;
 			*iPK_MediaType = MEDIATYPE_pluto_BD_CONST;
-			if( !bRecheck )
-				UpdateDiscLocation('R');  // We know it's media
+			UpdateDiscLocation('R');  // We know it's media
 			break;
 
 		case DISCTYPE_BLANK:
 			*iPK_MediaType = MEDIATYPE_misc_BlankMedia_CONST;
-			if( !bRecheck )
-				UpdateDiscLocation('b');  // We know it's media
+			UpdateDiscLocation('b');  // We know it's media
 			break;
 
 		case DISCTYPE_CD_VCD:
 			*iPK_MediaType = MEDIATYPE_pluto_StoredVideo_CONST;
-			if( !bRecheck )
-				UpdateDiscLocation('M');  // We know it's media
+			UpdateDiscLocation('M');  // We know it's media
 			break;
 
 		default:
@@ -183,8 +171,6 @@ bool Disk_Drive_Functions::internal_reset_drive(bool bFireEvent,int *iPK_MediaTy
 		close (fd);
 
 		LoggerWrapper::GetInstance()->Write(LV_WARNING, "Disc of type %d was detected", *iPK_MediaType, sURL->c_str());
-		if( bRecheck )
-			return true; // Nothing else to do, just rechecking the disc
 
 		m_discid=time(NULL);
 		*sDisks = StringUtils::itos(m_discid);
@@ -212,7 +198,6 @@ bool Disk_Drive_Functions::internal_reset_drive(bool bFireEvent,int *iPK_MediaTy
 			m_discid=0;
 			m_mediaInserted = false;
 			UpdateDiscLocation('E',0); // Now the drive is empty
-			EVENT_Media_Removed();
 			LoggerWrapper::GetInstance()->Write(LV_STATUS, "Disk is not in the drive at the moment");
 		}
 	}
@@ -426,8 +411,7 @@ int Disk_Drive_Functions::cdrom_checkdrive(const char * filename, int * flag, bo
 			DisplayMessageOnOrbVFD("Disc detected in drive.");
 		LoggerWrapper::GetInstance()->Write(LV_STATUS, "Got a disc. Sleep a sec, then reopen. One hack to allow the disk to spin I think.");
 		close(fd);
-		if( !Recheck ) // If we're rechecking the disc has already been in there before
-			sleep(1);
+		sleep(1);
 		fd = open(filename, O_RDONLY | O_NONBLOCK);
 		if (fd < 0)
 		{
@@ -742,6 +726,8 @@ bool Disk_Drive_Functions::FixupRippingInfo(Disk_Drive_Functions *pDisk_Drive_Fu
 	}
 	else if( PK_MediaType==MEDIATYPE_pluto_DVD_CONST )
 		StringUtils::Replace(&sDirectory,"___audio___or___video___","videos");
+	else if( PK_MediaType==MEDIATYPE_pluto_HDDVD_CONST || PK_MediaType==MEDIATYPE_pluto_BD_CONST )
+	    StringUtils::Replace(&sDirectory,"___audio___or___video___","videos");
 
 	bool bUsingUnknownDiscName=false;
 	// Validate the name and be sure it's unique
@@ -756,8 +742,16 @@ bool Disk_Drive_Functions::FixupRippingInfo(Disk_Drive_Functions *pDisk_Drive_Fu
 		}
 		if( sFilename.size()==0 )
 		{
-			sFilename = PK_MediaType==MEDIATYPE_pluto_DVD_CONST ? "Unknown DVD" : "Unknown CD";
-			bUsingUnknownDiscName=true;
+		    // default
+		    sFilename = "Unknown CD";
+		    bUsingUnknownDiscName=true;
+
+		    if (PK_MediaType==MEDIATYPE_pluto_DVD_CONST)
+			sFilename = "Unknown DVD";
+		    else if (PK_MediaType==MEDIATYPE_pluto_HDDVD_CONST)
+			sFilename = "Unknown HD-DVD";
+		    else if (PK_MediaType==MEDIATYPE_pluto_BD_CONST)
+			sFilename = "Unknown Blu-ray Disc";
 		}
 		LoggerWrapper::GetInstance()->Write(LV_STATUS,"Disk_Drive_Functions::FixupRippingInfo fixed directory %s / %s / %s", sDirectory.c_str(), sFilename.c_str(), sDirectory2.c_str());
 	}
@@ -890,7 +884,6 @@ void Disk_Drive_Functions::DisplayMessageOnOrbVFD(string sMessage)
 
 void Disk_Drive_Functions::UpdateDiscLocation(char cType,int PK_Disc)
 {
-	m_PK_Disc=PK_Disc;
 	Row_DiscLocation *pRow_DiscLocation = m_pDatabase_pluto_media->DiscLocation_get()->GetRow(m_dwPK_Device,0);
 	LoggerWrapper::GetInstance()->Write(LV_STATUS,"Disk_Drive_Functions::UpdateDiscLocation device %d type %c disc %d / %p", m_dwPK_Device,cType,PK_Disc,pRow_DiscLocation);
 	if( pRow_DiscLocation )

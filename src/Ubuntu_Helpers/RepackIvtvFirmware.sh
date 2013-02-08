@@ -1,13 +1,13 @@
 #!/bin/bash
 
 rm -f ivtv-firmware_*.deb
-aptitude download ivtv-firmware=0.20070217 > /dev/null
+aptitude download ivtv-firmware
 mkdir ivtv-firmware
 cd ivtv-firmware
-dpkg -x ../ivtv-firmware_*.deb . > /dev/null
-dpkg -e ../ivtv-firmware_*.deb > /dev/null
+dpkg -x ../ivtv-firmware_*.deb .
+dpkg -e ../ivtv-firmware_*.deb
 rm -f DEBIAN/preinst
 rm -f ../ivtv-firmware_*.deb
-dpkg-deb -b . .. > /dev/null
+dpkg-deb -b . ..
 cd ..
 rm -rf ivtv-firmware

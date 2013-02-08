@@ -66,7 +66,7 @@ BOOL COrbiterCEInstallerDlg::OnInitDialog()
 
 bool COrbiterCEInstallerDlg::DownloadFile(CString sFile, CString sDestinationFile)
 {
-	const CString sFullPath = "http://10.0.0.175/pluto-admin/fdownload.php?filepath=" + sFile;
+	const CString sFullPath = "http://10.0.0.175/lmce-admin/fdownload.php?filepath=" + sFile;
 
 	//MessageBox(sFullPath);
 

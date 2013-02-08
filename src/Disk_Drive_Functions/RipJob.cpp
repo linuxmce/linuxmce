@@ -29,7 +29,6 @@
 #include "pluto_media/Table_DiscLocation.h"
 #include "IdentifyTask.h"
 #include "Gen_Devices/AllScreens.h"
-#include "Gen_Devices/AllCommandsRequests.h"
 
 using namespace nsJobHandler;
 using namespace DCE;
@@ -114,15 +113,13 @@ RipJob::~RipJob()
 	if( sDevices.size() )
 		m_pDatabase_pluto_media->threaded_db_wrapper_query(sSQL);
 
-	LoggerWrapper::GetInstance()->Write(LV_STATUS, "RipJob::~RipJob %d m_eJobStatus %d drive %d slot %d %s / %s m_pRow_DiscLocation %d/%d query: %s", 
-		m_iID, (int) m_eJobStatus, m_pDisk_Drive_Functions ? m_pDisk_Drive_Functions->m_dwPK_Device_get() : 0,
+	LoggerWrapper::GetInstance()->Write(LV_STATUS, "RipJob::~RipJob %d drive %d slot %d %s / %s m_pRow_DiscLocation %d/%d query: %s", 
+		m_iID, m_pDisk_Drive_Functions ? m_pDisk_Drive_Functions->m_dwPK_Device_get() : 0,
 		m_pSlot ? m_pSlot->m_SlotNumber : 0, m_sDirectory.c_str(), m_sFileName.c_str(),
 		m_pRow_DiscLocation ? m_pRow_DiscLocation->EK_Device_get() : 0, m_pRow_DiscLocation ? m_pRow_DiscLocation->Slot_get() : 0, sSQL.c_str());
 
 	string sMessage;
-	if( m_eJobStatus!=job_Done )
-		sMessage = "Ripping failed, code " + StringUtils::itos( (int) m_eJobStatus );
-	else if(m_nTracksFailedToRip == m_listTask.size())
+	if(m_nTracksFailedToRip == m_listTask.size())
 		sMessage = "Ripping failed";
 	else if (m_bHasErrors)
 		sMessage = "Ripping completed with errors";
@@ -143,12 +140,6 @@ RipJob::~RipJob()
 		"0", // sTimeout
 		"1"); // sCannotGoBack
 	m_pCommand_Impl->SendCommand(SCREEN_PopupMessage);
-
-	if( m_pSlot==NULL )
-	{
-		DCE::CMD_Eject_Disk CMD_Eject_Disk(m_pCommand_Impl->m_dwPK_Device,m_pCommand_Impl->m_dwPK_Device,0);
-		m_pCommand_Impl->SendCommand(CMD_Eject_Disk);
-	}
 }
 
 bool RipJob::ReadyToRun()
@@ -205,7 +196,7 @@ void RipJob::AddRippingTasks(Drive *pDrive, TasklistPosition position)
 	}
 	else
 	{
-	    vector<Task *> vTasks;
+	    	vector<Task *> vTasks;
 		for(vector<string>::iterator it = vectTracks.begin(), end = vectTracks.end(); it != end; ++it)
 		{
 			LoggerWrapper::GetInstance()->Write(LV_STATUS, "Adding ripping task for track %s", it->c_str());

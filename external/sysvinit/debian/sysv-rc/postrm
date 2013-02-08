@@ -1,0 +1,21 @@
+#! /bin/sh
+#
+# debian.postrm
+#
+# Version:	debian.postrm  2.85-3  23-Apr-2003  miquels@cistron.nl
+#
+ 
+case "$1" in
+	remove)
+		;;
+	*)
+		exit 0
+		;;
+esac
+umask 022
+
+set -e
+
+ln -sf /usr/share/sysvinit/update-rc.d /usr/sbin/update-rc.d
+ln -sf /usr/share/sysvinit/update-rc.d /usr/sbin/invoke-rc.d
+

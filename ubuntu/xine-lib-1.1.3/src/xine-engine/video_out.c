@@ -497,45 +497,6 @@ static int vo_frame_draw (vo_frame_t *img, xine_stream_t *stream) {
       return 0;
     }
   }
-  
-  // trick playback code
-  // doing frames skip depending on skip mode and stream smartness
-  if (stream->trick_play_stream_distincts_frame_type)
-  {
-	  switch (stream->trick_play_frame_skip_mode)
-	  {
-		 // no skip
-		case 0:
-			break;
-		
-		// skip B-frames
-		  case 1:
-			  xprintf (stream->xine, XINE_VERBOSITY_DEBUG, "trick_play: skipping B-frame\n");
-			  frames_to_skip = 2;
-			  if ((img->picture_coding_type!=1)&&(img->picture_coding_type!=2))
-				  return 2;
-			break;
-		
-		// skip B&P-frames
-		  case 2:
-			  xprintf (stream->xine, XINE_VERBOSITY_DEBUG, "trick_play: skipping B/P-frame\n");
-			  frames_to_skip = 4;
-			  if ((img->picture_coding_type!=1))
-				  return 4;
-			  break;
-		// no skip
-		  default:
-			  break;
-	  }
-  }
-  else
-  {
-	  if (stream->trick_play_frame_skip_mode)
-	  {
-		  xprintf (stream->xine, XINE_VERBOSITY_DEBUG, "trick_play: skipping ?-frame\n");
-		  frames_to_skip = 1;
-	  }
-  }
 
 
   if (!img->bad_frame) {
@@ -588,11 +549,6 @@ static int vo_frame_draw (vo_frame_t *img, xine_stream_t *stream) {
       stream = xine_list_get_value(this->streams, ite);
       if (stream == XINE_ANON_STREAM) continue;
       pthread_mutex_lock (&stream->first_frame_lock);
-      if (stream->first_frame_flag == 3) {
-      	stream->first_frame_flag = 1;
-	img->is_first = FIRST_FRAME_MAX_POLL;
-      }
-      else
       if (stream->first_frame_flag == 2) {
         if (this->grab_only) {
           stream->first_frame_flag = 0;
@@ -689,7 +645,6 @@ static int vo_frame_draw (vo_frame_t *img, xine_stream_t *stream) {
     this->num_frames_skipped   = 0;
   }
   
-  //return frames_to_skip;
   return frames_to_skip;
 }
 

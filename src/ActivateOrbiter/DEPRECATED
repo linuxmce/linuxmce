@@ -1,0 +1,18 @@
+This code is deprecated. It has been replaced by src/Activate_Orbiter, 
+and is kept here for archival purposes.
+
+Please do not use or maintain this code. It is placed here as an 
+example of how to merge a DCE device with a UI toolkit for making 
+a DCE device with a GUI control. 
+
+The code was abandoned essentially because it was trying to register
+as the same PK_Device as the launch manager. As a result the 
+Launch Manager was extended with the necessary functionality to easily
+activate the attached orbiter, and a new Activate Orbiter plasmoid 
+was written to simply send a message to the launch manager (which
+registers using the same PK_Device as specified in /etc/pluto.conf.),
+this is much easier as it does not require (1) a linkage to the DCE
+libraries, (2) access to the database, as we can simply call 
+MessageSend to do the dirty work.
+
+-Thom

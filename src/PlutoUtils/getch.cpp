@@ -14,9 +14,12 @@
 	See the GNU General Public License for more details.
 */
 
+
 #ifdef WIN32
 #include <conio.h>
-#else
+#endif
+
+#if !defined(WIN32) && !defined(__APPLE_CC__)
 #include <termios.h>
 #include <sys/ioctl.h>
 #include <sys/select.h>
@@ -24,6 +27,7 @@
 
 #define EOF -1
 
+#include <stdio.h> 
 #include <iostream>
 using namespace std;
 
@@ -37,12 +41,15 @@ int THE_getch(bool echo, struct timeval * timeout) // :P
 	
 	fflush(stdout);
 	
-	ioctl(0, TCGETS, &ts);
+	// ioctl(0, TCGETS, &ts); // deprecated and replaced by below code
+	tcgetattr(0, &ts);
+	
 	new_ts = ts;
 	new_ts.c_lflag &= !ICANON;
 	if (! echo)
 		new_ts.c_lflag &= !ECHO;
-	ioctl(0, TCSETS, &new_ts);
+	// ioctl(0, TCSETS, &new_ts); //deprecated and replaced by below code
+	tcsetattr(0, 0, &new_ts);
 
 	c = 0;
 	do
@@ -90,3 +97,4 @@ int getche_timeout(int seconds)
 	return THE_getch(true, &timeout);
 }
 #endif
+

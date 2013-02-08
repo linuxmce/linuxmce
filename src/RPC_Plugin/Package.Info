@@ -1,0 +1,9 @@
+<-dceag-p-b->
+Package = DCE_Destination_Package
+Dir = 
+desc = DCE Implemenation for #2032 RPC Plugin
+Maintainer = adminName
+Email = 
+Depend = DCE_Dependencies
+<-dceag-p-e->
+

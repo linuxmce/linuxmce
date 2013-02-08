@@ -1,0 +1,19 @@
+###############################
+## VDRDEVEL PLUTOHOME VERSION
+##
+## plutopatched sources of main branch
+## fixed xine and networkstreaming stuff
+## by burgiman (Andre)
+## 
+###############################
+
+To get up all the debian-package compiling we need more packages...
+be sure to check, that you got them installed:
+
+
+this will do it for you:
+
+apt-get install dpkg-dev gcc g++ libc6-dev make patch debhelper autoconf automake bzip2 devscripts dh-make wget lintian ssh transfig libcdk-dev gs-common less libssl0.9.6 libssl-dev libcap-dev dpatch
+
+
+

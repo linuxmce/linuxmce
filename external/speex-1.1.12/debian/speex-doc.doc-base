@@ -1,0 +1,11 @@
+Document: speex-doxygen-docs
+Title: Speex API Doxygen documentation
+Author: Jean-Marc Valin, David Rowe
+Abstract: Speex API Doxygen documentation
+  The Speex library API, and associated source file
+  descriptions parsed by Doxygen.
+Section: Apps/Programming
+
+Format: HTML
+Index: /usr/share/doc/speex-doc/html/index.html
+Files: /usr/share/doc/speex-doc/html/*

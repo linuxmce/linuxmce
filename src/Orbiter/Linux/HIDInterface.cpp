@@ -62,6 +62,21 @@ PlutoHIDInterface::PlutoHIDInterface(Orbiter *pOrbiter) : m_HIDMutex("HID")
 	m_iLastButtonPress=0;
 }
 
+/**
+ * A hack to remove the modules so that the detection loop will work.
+ */
+void PlutoHIDInterface::modules_remove()
+{
+//	system("rmmod hid_gyration");
+//	system("rmmod usbhid");
+}
+
+void PlutoHIDInterface::modules_reload()
+{
+//	system("modprobe usbhid");
+//	system("modprobe hid_gyration");
+}
+
 void PlutoHIDInterface::ProcessHIDEvents()
 {
 	struct usb_bus *busses;
@@ -74,6 +89,7 @@ void PlutoHIDInterface::ProcessHIDEvents()
 
 	while(!m_pOrbiter->m_bQuit_get())  // an outer loop so this will retry a connect if the remote is removed and reconnected
 	{
+		modules_remove();
 		usb_find_busses();
 		usb_find_devices();
 
@@ -134,7 +150,8 @@ void PlutoHIDInterface::ProcessHIDEvents()
 								m_MouseStartStop=mssNone;
 							}
 
-							hm.Release();  
+							hm.Release(); 
+							modules_reload(); 
 							usleep(10000);  // Give somebody else a chance to use this
 							hm.Relock();
 							cnt++;

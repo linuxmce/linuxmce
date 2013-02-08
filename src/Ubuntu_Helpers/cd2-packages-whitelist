@@ -486,11 +486,6 @@ libxrender-dev
 libxslt1.1
 libxss1
 libxt6
-libxt-dev
-libxtrap6
-libxtrap-dev
-libxtst6
-libxtst-dev
 libxv1
 libxv-dev
 libxvidcore4
@@ -744,3 +739,7 @@ xwininfo
 xwud
 zlib1g
 zlib1g-dev
+libxcb-shape0 
+libxcb-shm0 
+libxcb-xv0 
+libxcb1

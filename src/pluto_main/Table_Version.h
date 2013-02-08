@@ -149,7 +149,9 @@ void psc_mod_set(string val);
 void psc_restrict_set(long int val);
 
 		
-		bool Date_isNull();
+		bool VersionName_isNull();
+bool BuildName_isNull();
+bool Date_isNull();
 bool Description_isNull();
 bool Repository_isNull();
 bool Comments_isNull();
@@ -160,11 +162,12 @@ bool psc_id_isNull();
 bool psc_batch_isNull();
 bool psc_user_isNull();
 bool psc_frozen_isNull();
-bool psc_mod_isNull();
 bool psc_restrict_isNull();
 
 			
-		void Date_setNull(bool val);
+		void VersionName_setNull(bool val);
+void BuildName_setNull(bool val);
+void Date_setNull(bool val);
 void Description_setNull(bool val);
 void Repository_setNull(bool val);
 void Comments_setNull(bool val);
@@ -175,7 +178,6 @@ void psc_id_setNull(bool val);
 void psc_batch_setNull(bool val);
 void psc_user_setNull(bool val);
 void psc_frozen_setNull(bool val);
-void psc_mod_setNull(bool val);
 void psc_restrict_setNull(bool val);
 	
 	
@@ -193,14 +195,7 @@ void psc_restrict_setNull(bool val);
 
 		// Return the rows in other tables with foreign keys pointing here
 		void Installation_FK_Version_getrows(vector <class Row_Installation*> *rows);
-void Installation_pschist_FK_Version_getrows(vector <class Row_Installation_pschist*> *rows);
-void Installation_pschmask_FK_Version_getrows(vector <class Row_Installation_pschmask*> *rows);
-void Package_Version_FK_Version_getrows(vector <class Row_Package_Version*> *rows);
-void Package_Version_pschist_FK_Version_getrows(vector <class Row_Package_Version_pschist*> *rows);
-void Package_Version_pschmask_FK_Version_getrows(vector <class Row_Package_Version_pschmask*> *rows);
 void Schema_FK_Version_getrows(vector <class Row_Schema*> *rows);
-void Schema_pschist_FK_Version_getrows(vector <class Row_Schema_pschist*> *rows);
-void Schema_pschmask_FK_Version_getrows(vector <class Row_Schema_pschmask*> *rows);
 
 
 		// Setup binary serialization

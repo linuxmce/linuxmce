@@ -1,0 +1,500 @@
+// !$*UTF8*$!
+{
+	archiveVersion = 1;
+	classes = {
+	};
+	objectVersion = 46;
+	objects = {
+
+/* Begin PBXBuildFile section */
+		1D3623260D0F684500981E51 /* RoamingOrbAppDelegate.m in Sources */ = {isa = PBXBuildFile; fileRef = 1D3623250D0F684500981E51 /* RoamingOrbAppDelegate.m */; };
+		1D60589B0D05DD56006BFB54 /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = 29B97316FDCFA39411CA2CEA /* main.m */; };
+		1D60589F0D05DD5A006BFB54 /* Foundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 1D30AB110D05D00D00671497 /* Foundation.framework */; };
+		1DF5F4E00D08C38300B7A737 /* UIKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 1DF5F4DF0D08C38300B7A737 /* UIKit.framework */; };
+		288765590DF743DE002DB57D /* CoreGraphics.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 288765580DF743DE002DB57D /* CoreGraphics.framework */; };
+		9573461B1416413900B30005 /* AboutView.xib in Resources */ = {isa = PBXBuildFile; fileRef = 9573461A1416413900B30005 /* AboutView.xib */; };
+		9573461F1416418800B30005 /* AboutViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 9573461E1416418800B30005 /* AboutViewController.m */; };
+		95734624141646D900B30005 /* PVRView.xib in Resources */ = {isa = PBXBuildFile; fileRef = 95734623141646D900B30005 /* PVRView.xib */; };
+		957346271416471E00B30005 /* PVRViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 957346261416471E00B30005 /* PVRViewController.m */; };
+		9573462914164DC000B30005 /* mythtv.png in Resources */ = {isa = PBXBuildFile; fileRef = 9573462814164DC000B30005 /* mythtv.png */; };
+		9573782B133FDB03005F7613 /* proxy-orbiter-client.m in Sources */ = {isa = PBXBuildFile; fileRef = 95737828133FDB03005F7613 /* proxy-orbiter-client.m */; };
+		B43D27AA140AE42600A8261B /* splash-ipad.png in Resources */ = {isa = PBXBuildFile; fileRef = B43D27A8140AE42600A8261B /* splash-ipad.png */; };
+		B43D27AB140AE42600A8261B /* splash.png in Resources */ = {isa = PBXBuildFile; fileRef = B43D27A9140AE42600A8261B /* splash.png */; };
+		B43D27B3140AE44500A8261B /* Icon-72.png in Resources */ = {isa = PBXBuildFile; fileRef = B43D27AD140AE44500A8261B /* Icon-72.png */; };
+		B43D27B4140AE44500A8261B /* Icon-Small-50.png in Resources */ = {isa = PBXBuildFile; fileRef = B43D27AE140AE44500A8261B /* Icon-Small-50.png */; };
+		B43D27B5140AE44500A8261B /* Icon-Small.png in Resources */ = {isa = PBXBuildFile; fileRef = B43D27AF140AE44500A8261B /* Icon-Small.png */; };
+		B43D27B6140AE44500A8261B /* Icon-Small@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = B43D27B0140AE44500A8261B /* Icon-Small@2x.png */; };
+		B43D27B7140AE44500A8261B /* Icon.png in Resources */ = {isa = PBXBuildFile; fileRef = B43D27B1140AE44500A8261B /* Icon.png */; };
+		B43D27B8140AE44500A8261B /* Icon@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = B43D27B2140AE44500A8261B /* Icon@2x.png */; };
+		B43D27BD140AE45600A8261B /* about.png in Resources */ = {isa = PBXBuildFile; fileRef = B43D27B9140AE45600A8261B /* about.png */; };
+		B43D27BE140AE45600A8261B /* help.png in Resources */ = {isa = PBXBuildFile; fileRef = B43D27BA140AE45600A8261B /* help.png */; };
+		B43D27BF140AE45600A8261B /* orbiter.png in Resources */ = {isa = PBXBuildFile; fileRef = B43D27BB140AE45600A8261B /* orbiter.png */; };
+		B43D27C0140AE45600A8261B /* settings.png in Resources */ = {isa = PBXBuildFile; fileRef = B43D27BC140AE45600A8261B /* settings.png */; };
+		B43D27C4140AE5FF00A8261B /* HelpViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = B43D27C3140AE5FF00A8261B /* HelpViewController.m */; };
+		B43D27C9140AE61400A8261B /* Reachability.m in Sources */ = {isa = PBXBuildFile; fileRef = B43D27C6140AE61400A8261B /* Reachability.m */; };
+		B43D27CA140AE61400A8261B /* UIDeviceAdditions.m in Sources */ = {isa = PBXBuildFile; fileRef = B43D27C8140AE61400A8261B /* UIDeviceAdditions.m */; };
+		B43D27CF140AE69D00A8261B /* HelpView.xib in Resources */ = {isa = PBXBuildFile; fileRef = B43D27CD140AE69D00A8261B /* HelpView.xib */; };
+		B43D27D0140AE69D00A8261B /* MainWindow.xib in Resources */ = {isa = PBXBuildFile; fileRef = B43D27CE140AE69D00A8261B /* MainWindow.xib */; };
+		B43D27D2140AE6EB00A8261B /* ConfigView.xib in Resources */ = {isa = PBXBuildFile; fileRef = B43D27D1140AE6EB00A8261B /* ConfigView.xib */; };
+		B43D27D5140AE6FC00A8261B /* ConfigViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = B43D27D4140AE6FC00A8261B /* ConfigViewController.m */; };
+		B4485E38144AC6B900A0DF9E /* nopvr.html in Resources */ = {isa = PBXBuildFile; fileRef = B4485E37144AC6B900A0DF9E /* nopvr.html */; };
+		B4485E3A144ACB9300A0DF9E /* splash@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = B4485E39144ACB9300A0DF9E /* splash@2x.png */; };
+		B4485E3F144AD81700A0DF9E /* default.png in Resources */ = {isa = PBXBuildFile; fileRef = B4485E3D144AD81700A0DF9E /* default.png */; };
+		B4485E40144AD81700A0DF9E /* default@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = B4485E3E144AD81700A0DF9E /* default@2x.png */; };
+		B4485E46144AD88900A0DF9E /* Default-Landscape~ipad.png in Resources */ = {isa = PBXBuildFile; fileRef = B4485E45144AD88800A0DF9E /* Default-Landscape~ipad.png */; };
+		B4485E48144AD8C800A0DF9E /* Default-Portrait~ipad.png in Resources */ = {isa = PBXBuildFile; fileRef = B4485E47144AD8C800A0DF9E /* Default-Portrait~ipad.png */; };
+		B4558CA512269546007E880C /* AudioToolbox.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = B4558CA412269546007E880C /* AudioToolbox.framework */; };
+		B4558CAB12269568007E880C /* SystemConfiguration.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = B4558CAA12269568007E880C /* SystemConfiguration.framework */; };
+		B4C4A800140CF3AE0006371A /* OrbViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = B4C4A7FF140CF3AE0006371A /* OrbViewController.m */; };
+		B4CCC9571260DE2F007ADE52 /* iTunesArtwork in Resources */ = {isa = PBXBuildFile; fileRef = B4CCC9561260DE2F007ADE52 /* iTunesArtwork */; };
+		B4D3434C14A2090800F0B469 /* MBProgressHUD.m in Sources */ = {isa = PBXBuildFile; fileRef = B4D3434B14A2090800F0B469 /* MBProgressHUD.m */; };
+		B4EC11EA140CE9CE0041C93D /* OrbView.xib in Resources */ = {isa = PBXBuildFile; fileRef = B4EC11E9140CE9CE0041C93D /* OrbView.xib */; };
+/* End PBXBuildFile section */
+
+/* Begin PBXFileReference section */
+		1D30AB110D05D00D00671497 /* Foundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Foundation.framework; path = System/Library/Frameworks/Foundation.framework; sourceTree = SDKROOT; };
+		1D3623240D0F684500981E51 /* RoamingOrbAppDelegate.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = RoamingOrbAppDelegate.h; sourceTree = "<group>"; };
+		1D3623250D0F684500981E51 /* RoamingOrbAppDelegate.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = RoamingOrbAppDelegate.m; sourceTree = "<group>"; };
+		1DF5F4DF0D08C38300B7A737 /* UIKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = UIKit.framework; path = System/Library/Frameworks/UIKit.framework; sourceTree = SDKROOT; };
+		288765580DF743DE002DB57D /* CoreGraphics.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreGraphics.framework; path = System/Library/Frameworks/CoreGraphics.framework; sourceTree = SDKROOT; };
+		29B97316FDCFA39411CA2CEA /* main.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = main.m; sourceTree = "<group>"; };
+		32CA4F630368D1EE00C91783 /* RoamingOrb_Prefix.pch */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = RoamingOrb_Prefix.pch; sourceTree = "<group>"; };
+		8D1107310486CEB800E47090 /* RoamingOrb-Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = "RoamingOrb-Info.plist"; plistStructureDefinitionIdentifier = "com.apple.xcode.plist.structure-definition.iphone.info-plist"; sourceTree = "<group>"; };
+		9573461A1416413900B30005 /* AboutView.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; name = AboutView.xib; path = Views/AboutView.xib; sourceTree = "<group>"; };
+		9573461D1416418800B30005 /* AboutViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = AboutViewController.h; path = Classes/AboutViewController.h; sourceTree = "<group>"; };
+		9573461E1416418800B30005 /* AboutViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = AboutViewController.m; path = Classes/AboutViewController.m; sourceTree = "<group>"; };
+		95734623141646D900B30005 /* PVRView.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; name = PVRView.xib; path = Views/PVRView.xib; sourceTree = "<group>"; };
+		957346251416471E00B30005 /* PVRViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = PVRViewController.h; path = Classes/PVRViewController.h; sourceTree = "<group>"; };
+		957346261416471E00B30005 /* PVRViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = PVRViewController.m; path = Classes/PVRViewController.m; sourceTree = "<group>"; };
+		9573462814164DC000B30005 /* mythtv.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = mythtv.png; path = Assets/TabBar/mythtv.png; sourceTree = "<group>"; };
+		95737827133FDB03005F7613 /* proxy-orbiter-client.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = "proxy-orbiter-client.h"; path = "Classes/proxy-orbiter-client.h"; sourceTree = "<group>"; };
+		95737828133FDB03005F7613 /* proxy-orbiter-client.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = "proxy-orbiter-client.m"; path = "Classes/proxy-orbiter-client.m"; sourceTree = "<group>"; };
+		B43D27A8140AE42600A8261B /* splash-ipad.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = "splash-ipad.png"; path = "Assets/Splash/splash-ipad.png"; sourceTree = "<group>"; };
+		B43D27A9140AE42600A8261B /* splash.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = splash.png; path = Assets/Splash/splash.png; sourceTree = "<group>"; };
+		B43D27AD140AE44500A8261B /* Icon-72.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = "Icon-72.png"; path = "Assets/Icons/Icon-72.png"; sourceTree = "<group>"; };
+		B43D27AE140AE44500A8261B /* Icon-Small-50.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = "Icon-Small-50.png"; path = "Assets/Icons/Icon-Small-50.png"; sourceTree = "<group>"; };
+		B43D27AF140AE44500A8261B /* Icon-Small.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = "Icon-Small.png"; path = "Assets/Icons/Icon-Small.png"; sourceTree = "<group>"; };
+		B43D27B0140AE44500A8261B /* Icon-Small@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = "Icon-Small@2x.png"; path = "Assets/Icons/Icon-Small@2x.png"; sourceTree = "<group>"; };
+		B43D27B1140AE44500A8261B /* Icon.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = Icon.png; path = Assets/Icons/Icon.png; sourceTree = "<group>"; };
+		B43D27B2140AE44500A8261B /* Icon@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = "Icon@2x.png"; path = "Assets/Icons/Icon@2x.png"; sourceTree = "<group>"; };
+		B43D27B9140AE45600A8261B /* about.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = about.png; path = Assets/TabBar/about.png; sourceTree = "<group>"; };
+		B43D27BA140AE45600A8261B /* help.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = help.png; path = Assets/TabBar/help.png; sourceTree = "<group>"; };
+		B43D27BB140AE45600A8261B /* orbiter.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = orbiter.png; path = Assets/TabBar/orbiter.png; sourceTree = "<group>"; };
+		B43D27BC140AE45600A8261B /* settings.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = settings.png; path = Assets/TabBar/settings.png; sourceTree = "<group>"; };
+		B43D27C2140AE5FF00A8261B /* HelpViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = HelpViewController.h; path = Classes/HelpViewController.h; sourceTree = "<group>"; };
+		B43D27C3140AE5FF00A8261B /* HelpViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = HelpViewController.m; path = Classes/HelpViewController.m; sourceTree = "<group>"; };
+		B43D27C5140AE61400A8261B /* Reachability.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = Reachability.h; path = Classes/External/Reachability.h; sourceTree = "<group>"; };
+		B43D27C6140AE61400A8261B /* Reachability.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = Reachability.m; path = Classes/External/Reachability.m; sourceTree = "<group>"; };
+		B43D27C7140AE61400A8261B /* UIDeviceAdditions.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = UIDeviceAdditions.h; path = Classes/External/UIDeviceAdditions.h; sourceTree = "<group>"; };
+		B43D27C8140AE61400A8261B /* UIDeviceAdditions.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = UIDeviceAdditions.m; path = Classes/External/UIDeviceAdditions.m; sourceTree = "<group>"; };
+		B43D27CD140AE69D00A8261B /* HelpView.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; name = HelpView.xib; path = Views/HelpView.xib; sourceTree = "<group>"; };
+		B43D27CE140AE69D00A8261B /* MainWindow.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; name = MainWindow.xib; path = Views/MainWindow.xib; sourceTree = "<group>"; };
+		B43D27D1140AE6EB00A8261B /* ConfigView.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; name = ConfigView.xib; path = Views/ConfigView.xib; sourceTree = "<group>"; };
+		B43D27D3140AE6FC00A8261B /* ConfigViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = ConfigViewController.h; path = Classes/ConfigViewController.h; sourceTree = "<group>"; };
+		B43D27D4140AE6FC00A8261B /* ConfigViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = ConfigViewController.m; path = Classes/ConfigViewController.m; sourceTree = "<group>"; };
+		B4485E37144AC6B900A0DF9E /* nopvr.html */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.html; name = nopvr.html; path = Resources/nopvr.html; sourceTree = "<group>"; };
+		B4485E39144ACB9300A0DF9E /* splash@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = "splash@2x.png"; path = "Assets/Splash/splash@2x.png"; sourceTree = "<group>"; };
+		B4485E3D144AD81700A0DF9E /* default.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = default.png; path = Assets/Splash/default.png; sourceTree = "<group>"; };
+		B4485E3E144AD81700A0DF9E /* default@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = "default@2x.png"; path = "Assets/Splash/default@2x.png"; sourceTree = "<group>"; };
+		B4485E45144AD88800A0DF9E /* Default-Landscape~ipad.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = "Default-Landscape~ipad.png"; path = "Assets/Splash/Default-Landscape~ipad.png"; sourceTree = "<group>"; };
+		B4485E47144AD8C800A0DF9E /* Default-Portrait~ipad.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = "Default-Portrait~ipad.png"; path = "Assets/Splash/Default-Portrait~ipad.png"; sourceTree = "<group>"; };
+		B4558CA412269546007E880C /* AudioToolbox.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AudioToolbox.framework; path = System/Library/Frameworks/AudioToolbox.framework; sourceTree = SDKROOT; };
+		B4558CAA12269568007E880C /* SystemConfiguration.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = SystemConfiguration.framework; path = System/Library/Frameworks/SystemConfiguration.framework; sourceTree = SDKROOT; };
+		B4C4A7FE140CF3AE0006371A /* OrbViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = OrbViewController.h; path = Classes/OrbViewController.h; sourceTree = "<group>"; };
+		B4C4A7FF140CF3AE0006371A /* OrbViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = OrbViewController.m; path = Classes/OrbViewController.m; sourceTree = "<group>"; };
+		B4CCC9561260DE2F007ADE52 /* iTunesArtwork */ = {isa = PBXFileReference; lastKnownFileType = file; name = iTunesArtwork; path = Assets/iTunesArtwork; sourceTree = "<group>"; };
+		B4D3433814A07A1200F0B469 /* RoamingOrb.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = RoamingOrb.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		B4D3434A14A2090800F0B469 /* MBProgressHUD.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = MBProgressHUD.h; path = Classes/External/MBProgressHUD.h; sourceTree = "<group>"; };
+		B4D3434B14A2090800F0B469 /* MBProgressHUD.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = MBProgressHUD.m; path = Classes/External/MBProgressHUD.m; sourceTree = "<group>"; };
+		B4EC11E9140CE9CE0041C93D /* OrbView.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; name = OrbView.xib; path = Views/OrbView.xib; sourceTree = "<group>"; };
+/* End PBXFileReference section */
+
+/* Begin PBXFrameworksBuildPhase section */
+		1D60588F0D05DD3D006BFB54 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				1D60589F0D05DD5A006BFB54 /* Foundation.framework in Frameworks */,
+				1DF5F4E00D08C38300B7A737 /* UIKit.framework in Frameworks */,
+				288765590DF743DE002DB57D /* CoreGraphics.framework in Frameworks */,
+				B4558CA512269546007E880C /* AudioToolbox.framework in Frameworks */,
+				B4558CAB12269568007E880C /* SystemConfiguration.framework in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXFrameworksBuildPhase section */
+
+/* Begin PBXGroup section */
+		080E96DDFE201D6D7F000001 /* Application Delegate */ = {
+			isa = PBXGroup;
+			children = (
+				1D3623240D0F684500981E51 /* RoamingOrbAppDelegate.h */,
+				1D3623250D0F684500981E51 /* RoamingOrbAppDelegate.m */,
+			);
+			name = "Application Delegate";
+			path = Classes;
+			sourceTree = "<group>";
+		};
+		29B97314FDCFA39411CA2CEA /* CustomTemplate */ = {
+			isa = PBXGroup;
+			children = (
+				B43D27CC140AE67C00A8261B /* Views */,
+				B43D27CB140AE65000A8261B /* Classes */,
+				B4558D5312282BE4007E880C /* Assets */,
+				29B97317FDCFA39411CA2CEA /* Resources */,
+				29B97323FDCFA39411CA2CEA /* Frameworks */,
+				B4D3433914A07A1200F0B469 /* Products */,
+			);
+			name = CustomTemplate;
+			sourceTree = "<group>";
+		};
+		29B97315FDCFA39411CA2CEA /* External */ = {
+			isa = PBXGroup;
+			children = (
+				B43D27C5140AE61400A8261B /* Reachability.h */,
+				B43D27C6140AE61400A8261B /* Reachability.m */,
+				B43D27C7140AE61400A8261B /* UIDeviceAdditions.h */,
+				B43D27C8140AE61400A8261B /* UIDeviceAdditions.m */,
+				B4D3434A14A2090800F0B469 /* MBProgressHUD.h */,
+				B4D3434B14A2090800F0B469 /* MBProgressHUD.m */,
+			);
+			name = External;
+			sourceTree = "<group>";
+		};
+		29B97317FDCFA39411CA2CEA /* Resources */ = {
+			isa = PBXGroup;
+			children = (
+				B4485E37144AC6B900A0DF9E /* nopvr.html */,
+				32CA4F630368D1EE00C91783 /* RoamingOrb_Prefix.pch */,
+				29B97316FDCFA39411CA2CEA /* main.m */,
+				8D1107310486CEB800E47090 /* RoamingOrb-Info.plist */,
+			);
+			name = Resources;
+			sourceTree = "<group>";
+		};
+		29B97323FDCFA39411CA2CEA /* Frameworks */ = {
+			isa = PBXGroup;
+			children = (
+				1DF5F4DF0D08C38300B7A737 /* UIKit.framework */,
+				1D30AB110D05D00D00671497 /* Foundation.framework */,
+				288765580DF743DE002DB57D /* CoreGraphics.framework */,
+				B4558CA412269546007E880C /* AudioToolbox.framework */,
+				B4558CAA12269568007E880C /* SystemConfiguration.framework */,
+			);
+			name = Frameworks;
+			sourceTree = "<group>";
+		};
+		B43D27A6140AE38400A8261B /* Splash */ = {
+			isa = PBXGroup;
+			children = (
+				B4485E47144AD8C800A0DF9E /* Default-Portrait~ipad.png */,
+				B4485E45144AD88800A0DF9E /* Default-Landscape~ipad.png */,
+				B4485E3D144AD81700A0DF9E /* default.png */,
+				B4485E3E144AD81700A0DF9E /* default@2x.png */,
+				B4485E39144ACB9300A0DF9E /* splash@2x.png */,
+				B43D27A8140AE42600A8261B /* splash-ipad.png */,
+				B43D27A9140AE42600A8261B /* splash.png */,
+			);
+			name = Splash;
+			sourceTree = "<group>";
+		};
+		B43D27A7140AE3A200A8261B /* TabBar */ = {
+			isa = PBXGroup;
+			children = (
+				B43D27B9140AE45600A8261B /* about.png */,
+				B43D27BA140AE45600A8261B /* help.png */,
+				B43D27BB140AE45600A8261B /* orbiter.png */,
+				B43D27BC140AE45600A8261B /* settings.png */,
+				9573462814164DC000B30005 /* mythtv.png */,
+			);
+			name = TabBar;
+			sourceTree = "<group>";
+		};
+		B43D27AC140AE42E00A8261B /* Icons */ = {
+			isa = PBXGroup;
+			children = (
+				B43D27AD140AE44500A8261B /* Icon-72.png */,
+				B43D27AE140AE44500A8261B /* Icon-Small-50.png */,
+				B43D27AF140AE44500A8261B /* Icon-Small.png */,
+				B43D27B0140AE44500A8261B /* Icon-Small@2x.png */,
+				B43D27B1140AE44500A8261B /* Icon.png */,
+				B43D27B2140AE44500A8261B /* Icon@2x.png */,
+			);
+			name = Icons;
+			sourceTree = "<group>";
+		};
+		B43D27C1140AE5DE00A8261B /* ViewControllers */ = {
+			isa = PBXGroup;
+			children = (
+				B4C4A7FE140CF3AE0006371A /* OrbViewController.h */,
+				B4C4A7FF140CF3AE0006371A /* OrbViewController.m */,
+				B43D27D3140AE6FC00A8261B /* ConfigViewController.h */,
+				B43D27D4140AE6FC00A8261B /* ConfigViewController.m */,
+				B43D27C2140AE5FF00A8261B /* HelpViewController.h */,
+				B43D27C3140AE5FF00A8261B /* HelpViewController.m */,
+				957346251416471E00B30005 /* PVRViewController.h */,
+				957346261416471E00B30005 /* PVRViewController.m */,
+				9573461D1416418800B30005 /* AboutViewController.h */,
+				9573461E1416418800B30005 /* AboutViewController.m */,
+			);
+			name = ViewControllers;
+			sourceTree = "<group>";
+		};
+		B43D27CB140AE65000A8261B /* Classes */ = {
+			isa = PBXGroup;
+			children = (
+				95737827133FDB03005F7613 /* proxy-orbiter-client.h */,
+				95737828133FDB03005F7613 /* proxy-orbiter-client.m */,
+				29B97315FDCFA39411CA2CEA /* External */,
+				B43D27C1140AE5DE00A8261B /* ViewControllers */,
+				080E96DDFE201D6D7F000001 /* Application Delegate */,
+			);
+			name = Classes;
+			sourceTree = "<group>";
+		};
+		B43D27CC140AE67C00A8261B /* Views */ = {
+			isa = PBXGroup;
+			children = (
+				B4EC11E9140CE9CE0041C93D /* OrbView.xib */,
+				B43D27CD140AE69D00A8261B /* HelpView.xib */,
+				B43D27D1140AE6EB00A8261B /* ConfigView.xib */,
+				95734623141646D900B30005 /* PVRView.xib */,
+				B43D27CE140AE69D00A8261B /* MainWindow.xib */,
+				9573461A1416413900B30005 /* AboutView.xib */,
+			);
+			name = Views;
+			sourceTree = "<group>";
+		};
+		B4558D5312282BE4007E880C /* Assets */ = {
+			isa = PBXGroup;
+			children = (
+				B43D27AC140AE42E00A8261B /* Icons */,
+				B43D27A7140AE3A200A8261B /* TabBar */,
+				B43D27A6140AE38400A8261B /* Splash */,
+				B4CCC9561260DE2F007ADE52 /* iTunesArtwork */,
+			);
+			name = Assets;
+			sourceTree = "<group>";
+		};
+		B4D3433914A07A1200F0B469 /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				B4D3433814A07A1200F0B469 /* RoamingOrb.app */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+/* End PBXGroup section */
+
+/* Begin PBXNativeTarget section */
+		1D6058900D05DD3D006BFB54 /* RoamingOrb */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 1D6058960D05DD3E006BFB54 /* Build configuration list for PBXNativeTarget "RoamingOrb" */;
+			buildPhases = (
+				1D60588D0D05DD3D006BFB54 /* Resources */,
+				1D60588E0D05DD3D006BFB54 /* Sources */,
+				1D60588F0D05DD3D006BFB54 /* Frameworks */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = RoamingOrb;
+			productName = orbiter;
+			productReference = B4D3433814A07A1200F0B469 /* RoamingOrb.app */;
+			productType = "com.apple.product-type.application";
+		};
+/* End PBXNativeTarget section */
+
+/* Begin PBXProject section */
+		29B97313FDCFA39411CA2CEA /* Project object */ = {
+			isa = PBXProject;
+			attributes = {
+				LastUpgradeCheck = 0420;
+				ORGANIZATIONNAME = LinuxMCE;
+			};
+			buildConfigurationList = C01FCF4E08A954540054247B /* Build configuration list for PBXProject "RoamingOrb" */;
+			compatibilityVersion = "Xcode 3.2";
+			developmentRegion = English;
+			hasScannedForEncodings = 1;
+			knownRegions = (
+				English,
+				Japanese,
+				French,
+				German,
+				en,
+			);
+			mainGroup = 29B97314FDCFA39411CA2CEA /* CustomTemplate */;
+			productRefGroup = B4D3433914A07A1200F0B469 /* Products */;
+			projectDirPath = "";
+			projectRoot = "";
+			targets = (
+				1D6058900D05DD3D006BFB54 /* RoamingOrb */,
+			);
+		};
+/* End PBXProject section */
+
+/* Begin PBXResourcesBuildPhase section */
+		1D60588D0D05DD3D006BFB54 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				B4CCC9571260DE2F007ADE52 /* iTunesArtwork in Resources */,
+				B43D27AA140AE42600A8261B /* splash-ipad.png in Resources */,
+				B43D27AB140AE42600A8261B /* splash.png in Resources */,
+				B43D27B3140AE44500A8261B /* Icon-72.png in Resources */,
+				B43D27B4140AE44500A8261B /* Icon-Small-50.png in Resources */,
+				B43D27B5140AE44500A8261B /* Icon-Small.png in Resources */,
+				B43D27B6140AE44500A8261B /* Icon-Small@2x.png in Resources */,
+				B43D27B7140AE44500A8261B /* Icon.png in Resources */,
+				B43D27B8140AE44500A8261B /* Icon@2x.png in Resources */,
+				B43D27BD140AE45600A8261B /* about.png in Resources */,
+				B43D27BE140AE45600A8261B /* help.png in Resources */,
+				B43D27BF140AE45600A8261B /* orbiter.png in Resources */,
+				B43D27C0140AE45600A8261B /* settings.png in Resources */,
+				B43D27CF140AE69D00A8261B /* HelpView.xib in Resources */,
+				B43D27D0140AE69D00A8261B /* MainWindow.xib in Resources */,
+				B43D27D2140AE6EB00A8261B /* ConfigView.xib in Resources */,
+				B4EC11EA140CE9CE0041C93D /* OrbView.xib in Resources */,
+				9573461B1416413900B30005 /* AboutView.xib in Resources */,
+				95734624141646D900B30005 /* PVRView.xib in Resources */,
+				9573462914164DC000B30005 /* mythtv.png in Resources */,
+				B4485E38144AC6B900A0DF9E /* nopvr.html in Resources */,
+				B4485E3A144ACB9300A0DF9E /* splash@2x.png in Resources */,
+				B4485E3F144AD81700A0DF9E /* default.png in Resources */,
+				B4485E40144AD81700A0DF9E /* default@2x.png in Resources */,
+				B4485E46144AD88900A0DF9E /* Default-Landscape~ipad.png in Resources */,
+				B4485E48144AD8C800A0DF9E /* Default-Portrait~ipad.png in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXResourcesBuildPhase section */
+
+/* Begin PBXSourcesBuildPhase section */
+		1D60588E0D05DD3D006BFB54 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				1D60589B0D05DD56006BFB54 /* main.m in Sources */,
+				1D3623260D0F684500981E51 /* RoamingOrbAppDelegate.m in Sources */,
+				9573782B133FDB03005F7613 /* proxy-orbiter-client.m in Sources */,
+				B43D27C4140AE5FF00A8261B /* HelpViewController.m in Sources */,
+				B43D27C9140AE61400A8261B /* Reachability.m in Sources */,
+				B43D27CA140AE61400A8261B /* UIDeviceAdditions.m in Sources */,
+				B43D27D5140AE6FC00A8261B /* ConfigViewController.m in Sources */,
+				B4C4A800140CF3AE0006371A /* OrbViewController.m in Sources */,
+				9573461F1416418800B30005 /* AboutViewController.m in Sources */,
+				957346271416471E00B30005 /* PVRViewController.m in Sources */,
+				B4D3434C14A2090800F0B469 /* MBProgressHUD.m in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXSourcesBuildPhase section */
+
+/* Begin XCBuildConfiguration section */
+		1D6058940D05DD3E006BFB54 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CODE_SIGN_IDENTITY = "iPhone Developer";
+				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
+				COPY_PHASE_STRIP = NO;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PRECOMPILE_PREFIX_HEADER = YES;
+				GCC_PREFIX_HEADER = RoamingOrb_Prefix.pch;
+				INFOPLIST_FILE = "RoamingOrb-Info.plist";
+				IPHONEOS_DEPLOYMENT_TARGET = 3.1;
+				PRODUCT_NAME = RoamingOrb;
+				PROVISIONING_PROFILE = "";
+				"PROVISIONING_PROFILE[sdk=iphoneos*]" = "";
+				VALIDATE_PRODUCT = YES;
+			};
+			name = Debug;
+		};
+		1D6058950D05DD3E006BFB54 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CODE_SIGN_IDENTITY = "iPhone Distribution";
+				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Distribution";
+				COPY_PHASE_STRIP = YES;
+				GCC_PRECOMPILE_PREFIX_HEADER = YES;
+				GCC_PREFIX_HEADER = RoamingOrb_Prefix.pch;
+				INFOPLIST_FILE = "RoamingOrb-Info.plist";
+				IPHONEOS_DEPLOYMENT_TARGET = 3.1;
+				PRODUCT_NAME = RoamingOrb;
+				PROVISIONING_PROFILE = "";
+				"PROVISIONING_PROFILE[sdk=iphoneos*]" = "";
+				VALIDATE_PRODUCT = YES;
+			};
+			name = Release;
+		};
+		C01FCF4F08A954540054247B /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ARCHS = (
+					"$(ARCHS_STANDARD_32_BIT)",
+					armv6,
+				);
+				CODE_SIGN_ENTITLEMENTS = "";
+				CODE_SIGN_IDENTITY = "iPhone Distribution";
+				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Distribution";
+				GCC_C_LANGUAGE_STANDARD = c99;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 3.1;
+				PROVISIONING_PROFILE = "";
+				"PROVISIONING_PROFILE[sdk=iphoneos*]" = "";
+				SDKROOT = iphoneos;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Debug;
+		};
+		C01FCF5008A954540054247B /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ARCHS = (
+					"$(ARCHS_STANDARD_32_BIT)",
+					armv6,
+				);
+				CODE_SIGN_IDENTITY = "iPhone Distribution";
+				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Distribution";
+				GCC_C_LANGUAGE_STANDARD = c99;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 3.1;
+				OTHER_CFLAGS = "-DNS_BLOCK_ASSERTIONS=1";
+				PROVISIONING_PROFILE = "";
+				"PROVISIONING_PROFILE[sdk=iphoneos*]" = "";
+				SDKROOT = iphoneos;
+				SEPARATE_STRIP = NO;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Release;
+		};
+/* End XCBuildConfiguration section */
+
+/* Begin XCConfigurationList section */
+		1D6058960D05DD3E006BFB54 /* Build configuration list for PBXNativeTarget "RoamingOrb" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				1D6058940D05DD3E006BFB54 /* Debug */,
+				1D6058950D05DD3E006BFB54 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Debug;
+		};
+		C01FCF4E08A954540054247B /* Build configuration list for PBXProject "RoamingOrb" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				C01FCF4F08A954540054247B /* Debug */,
+				C01FCF5008A954540054247B /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Debug;
+		};
+/* End XCConfigurationList section */
+	};
+	rootObject = 29B97313FDCFA39411CA2CEA /* Project object */;
+}

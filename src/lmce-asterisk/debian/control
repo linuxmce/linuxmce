@@ -1,0 +1,15 @@
+Source: lmce-asterisk
+Section: unknown
+Priority: optional
+Maintainer: LinuxMCE Developers <developers@linuxmce.org>
+Build-Depends: debhelper (>= 4.0.0)
+Standards-Version: 3.6.1
+
+Package: lmce-asterisk
+Architecture: any
+Depends: pluto-boot-scripts, chan-sccp-b, asterisk-sounds-extra, asterisk-mysql, libtiff-tools, mbrola, mbrola-de7, mbrola-fr4, mpg123, asterisk-core-sounds-fr-gsm, asterisk-prompt-de
+Provides: asterisk-config-custom
+Conflicts: freepbx, asterisk-pluto, asterisk-custom-config
+Replaces: asterisk-config
+Description: lmce-asterisk
+ LinuxMCE Asterisk integration

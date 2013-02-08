@@ -83,6 +83,7 @@ void Row_psc_dce_batdet::Delete()
 	Row_psc_dce_batdet *pRow = this; // Needed so we will have only 1 version of get_primary_fields_assign_from_row
 	
 	if (!is_deleted)
+	{
 		if (is_added)	
 		{	
 			vector<TableRow*>::iterator i;	
@@ -104,6 +105,7 @@ void Row_psc_dce_batdet::Delete()
 			table->deleted_cachedRows[key] = this;
 			is_deleted = true;	
 		}	
+	}
 }
 
 void Row_psc_dce_batdet::Reload()
@@ -139,8 +141,7 @@ void Row_psc_dce_batdet::SetDefaultValues()
 is_null[0] = false;
 m_FK_psc_dce_bathdr = 0;
 is_null[1] = false;
-m_Tablename = "";
-is_null[2] = false;
+is_null[2] = true;
 m_New = 0;
 is_null[3] = false;
 m_Deleted = 0;
@@ -218,8 +219,15 @@ void Row_psc_dce_batdet::FK_psc_dce_bathdr_unauth_set(long int val){PLUTO_SAFETY
 m_FK_psc_dce_bathdr_unauth = val; is_modified=true; is_null[8]=false;}
 
 		
+bool Row_psc_dce_batdet::Tablename_isNull() {PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
+
+return is_null[2];}
 
 			
+void Row_psc_dce_batdet::Tablename_setNull(bool val){PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
+is_null[2]=val;
+is_modified=true;
+}
 	
 
 string Row_psc_dce_batdet::PK_psc_dce_batdet_asSQL()
@@ -255,8 +263,8 @@ PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
 if (is_null[2])
 return "NULL";
 
-char *buf = new char[121];
-db_wrapper_real_escape_string(table->database->m_pDB, buf, m_Tablename.c_str(), (unsigned long) min((size_t)60,m_Tablename.size()));
+char *buf = new char[361];
+db_wrapper_real_escape_string(table->database->m_pDB, buf, m_Tablename.c_str(), (unsigned long) min((size_t)180,m_Tablename.size()));
 string s=string()+"\""+buf+"\"";
 delete[] buf;
 return s;

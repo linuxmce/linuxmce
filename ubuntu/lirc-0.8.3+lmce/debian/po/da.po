@@ -1,0 +1,437 @@
+#
+#    Translators, if you are not familiar with the PO format, gettext
+#    documentation is worth reading, especially sections dedicated to
+#    this format, e.g. by running:
+#         info -n '(gettext)PO Files'
+#         info -n '(gettext)Header Entry'
+#
+#    Some information specific to po-debconf are available at
+#            /usr/share/doc/po-debconf/README-trans
+#         or http://www.debian.org/intl/l10n/po-debconf/README-trans
+#
+#    Developers do not need to manually edit POT or PO files.
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: lirc 0.6.6-12\n"
+"Report-Msgid-Bugs-To: Source: lirc@packages.debian.org\n"
+"POT-Creation-Date: 2008-02-10 15:04-0600\n"
+"PO-Revision-Date: 2005-12-12 20:41+0100\n"
+"Last-Translator: Morten Brix Pedersen <morten@wtf.dk>\n"
+"Language-Team: Danish <dansk@klid.dk>\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+
+#. Type: boolean
+#. Description
+#: ../lirc.templates:1001
+#, fuzzy
+msgid "Create LIRC device nodes if they are not there?"
+msgstr "Skal jeg oprette LIRC-enheds noder hvis de ikke eksisterer?"
+
+#. Type: boolean
+#. Description
+#: ../lirc.templates:1001
+msgid "LIRC needs some files under /dev/ for it to work:"
+msgstr "LIRC kræver nogle filer under /dev/ for at det virker:"
+
+#. Type: boolean
+#. Description
+#: ../lirc.templates:1001
+msgid "/dev/lirc  /dev/lircd and /dev/lircm"
+msgstr "/dev/lirc  /dev/lircd og /dev/lircm"
+
+#. Type: boolean
+#. Description
+#: ../lirc.templates:2001
+msgid "Do you want to reconfigure LIRC?"
+msgstr "Vil du rekonfigurere LIRC?"
+
+#. Type: boolean
+#. Description
+#: ../lirc.templates:2001
+msgid ""
+"LIRC is already configured, reconfiguring it may spoil some of your "
+"handcrafted configuration in /etc/lirc/hardware.conf."
+msgstr ""
+"LIRC er allerede sat op, at rekonfigurere vil måske ødelægge noget af din "
+"håndlavede opsætning i /etc/lirc/hardware.conf."
+
+#. Type: boolean
+#. Description
+#: ../lirc.templates:2001
+msgid "However comments, LIRC_ARGS and other unknown code will be preserved."
+msgstr ""
+"Men kommentarer, LIRC_ARGS og andre ukendte koder vil blive holdt intakt."
+
+#. Type: note
+#. Description
+#: ../lirc.templates:3001
+#, fuzzy
+msgid "You should take care of old configuration files"
+msgstr "Du bør tage dig af gamle opsætningsfiler."
+
+#. Type: note
+#. Description
+#: ../lirc.templates:3001
+msgid ""
+"Previous versions of this package didn't include any configuration file and "
+"expected the user to put his own /etc/lircd.conf and /etc/lircmd.conf"
+msgstr ""
+"Tidligere versioner af denne pakke inkluderede ikke nogle opsætningsfiler og "
+"forventede at brugeren lavede sin egen /etc/lircd.conf og /etc/lircmd.conf"
+
+#. Type: note
+#. Description
+#: ../lirc.templates:3001
+msgid "The new location for these files is /etc/lirc/."
+msgstr "Den nye placering for disse filer er /etc/lirc/."
+
+#. Type: note
+#. Description
+#: ../lirc.templates:3001
+msgid ""
+"Things will be arranged properly but, in case they can't be, please make "
+"sure that none of LIRC configuration files are left directly under /etc/."
+msgstr ""
+"Jeg vil prøve at om-arrangere disse ting, men i nogle tilfælde kan jeg ikke. "
+"Gør rede for at ingen af LIRC-opsætningsfilerne er tilbage direkte i /etc/."
+
+#. Type: note
+#. Description
+#: ../lirc.templates:18001
+msgid "lircmd should use the IntelliMouse protocol instead of IMPS/2"
+msgstr "lircmd skal bruge IntelliMouse protokol istedet for IMPS/2"
+
+#. Type: note
+#. Description
+#: ../lirc.templates:18001
+msgid ""
+"The method lircmd uses to simulate a mouse is not compatible with IMPS/2 "
+"protocol, so the IntelliMouse support has been added and is now the "
+"preferred protocol."
+msgstr ""
+"Metoden som lircmd bruger til at simulere en mus er ikke kompatibel med "
+"IMPS/2 protokollen, så IntelliMouse-understøttelse er blevet tilfølet og er "
+"nu den anbefalede protokol."
+
+#. Type: note
+#. Description
+#: ../lirc.templates:18001
+msgid ""
+"You ARE currently using lircmd with IMPS/2 protocol and are encouraged to "
+"update /etc/lirc/lircmd.conf and the configuration of any program which uses "
+"lircmd as a mouse to use IntelliMouse protocol."
+msgstr ""
+"Du bruger LIGE NU lircmd med IMPS/2 protokollen, og det anbefales stærkt at "
+"du opdaterer /etc/lirc/lircmd.conf og opsætningen af de programmer som "
+"bruger lircmd som mus, til at bruge IntelliMouse-protokollen."
+
+#. Type: note
+#. Description
+#: ../lirc.templates:18001
+msgid "NOTE: gpm will refuse to use lircmd as a mouse with IMPS/2 protocol."
+msgstr "BEMÆRK: gpm vil nægte at bruge lircmd som en mus med IMPS/2 protokol."
+
+#. Type: boolean
+#. Description
+#: ../lirc.templates:19001
+#, fuzzy
+msgid "Delete /var/log/lircd?"
+msgstr "Skal jeg slette /var/log/lircd?"
+
+#. Type: boolean
+#. Description
+#: ../lirc.templates:19001
+msgid ""
+"LIRC now uses syslog as a logging mechanism. This means that /var/log/lircd "
+"is not anymore pertinent."
+msgstr ""
+"LIRC bruger nu syslog som logningssystem. Dette betyder at /var/log/lircd "
+"ikke bruges mere."
+
+#. Type: boolean
+#. Description
+#: ../lirc.templates:19001
+msgid ""
+"If you answer 'no' to this question /var/log/lircd will be left there and "
+"you will have to take care of it yourself."
+msgstr ""
+"Hvis du svarer nej til dette spørgsmål, vil /var/log/lircd blive liggende og "
+"du skal tage dig af det selv."
+
+#. Type: select
+#. Description
+#: ../lirc.templates:20001
+msgid "Choose a remote if you would like to preload a configuration:"
+msgstr ""
+
+#. Type: select
+#. Description
+#: ../lirc.templates:20001
+msgid ""
+"If you choose a remote, but already have a configuration file in /etc/lirc/"
+"lircd.conf, the existing file will be renamed to /etc/lirc/lircd.conf.dpkg-"
+"old and the community configurations loaded into  /etc/lirc/lircd.conf.  "
+"This process will only happen once, and subsequent instantiations of this "
+"configuration will not overwrite your /etc/lirc/lircd.conf file again."
+msgstr ""
+
+#. Type: select
+#. Description
+#: ../lirc.templates:21001
+msgid "If you need to use an IR transmitter, please select it:"
+msgstr ""
+
+#. Type: select
+#. Description
+#: ../lirc.templates:21001
+msgid ""
+"IR transmitters can be used for controlling external devices.  Some devices "
+"are considered transceivers, with the ability to both send and receive.  "
+"Other devices require separate hardware to accomplish these tasks."
+msgstr ""
+
+#. Type: select
+#. Description
+#: ../lirc.templates:22001
+msgid "Select your custom event interface for your dev/input device:"
+msgstr ""
+
+#. Type: select
+#. Description
+#: ../lirc.templates:22001
+msgid ""
+"Many remotes that were previously supported by the lirc_gpio interface now "
+"need to be set up via the dev/input interface.  You will need to custom "
+"select your remote's event character device.  This can be determined by "
+"'cat /proc/bus/input/devices'."
+msgstr ""
+
+#. Type: select
+#. Description
+#: ../lirc.templates:24001
+msgid "Choose the port that your serial device is attached to:"
+msgstr ""
+
+#. Type: select
+#. Description
+#: ../lirc.templates:24001
+msgid ""
+"The UART (serial) driver is a low level driver that takes advantage of bit "
+"banging a character device.  This means that you can only use it with "
+"hardware serial devices.  It unfortunately does not work with USB serial "
+"devices."
+msgstr ""
+
+#, fuzzy
+#~ msgid "Drivers to build:"
+#~ msgstr "Vælg drivere der skal bygges."
+
+#, fuzzy
+#~ msgid "Try to automagically select support for your hardware?"
+#~ msgstr "Skal jeg prøve automatisk at vælge understøttelse for din hardware?"
+
+#, fuzzy
+#~ msgid ""
+#~ "You have installed and configured LIRC. It is possible to guess what "
+#~ "kernel modules are needed and their parameters from your previous answers."
+#~ msgstr ""
+#~ "Du har installeret og konfigureret LIRC. Jeg kan prøve at gætte hvilke "
+#~ "kernemoduler der er krævede og deres parametre fra dine tidligere svar."
+
+#~ msgid "You don't need any additional kernel modules"
+#~ msgstr "Du behøver ikke nogle yderligere kernemoduler."
+
+#~ msgid ""
+#~ "Unless you want to build LIRC kernel modules for some other system, you "
+#~ "can probably remove this package."
+#~ msgstr ""
+#~ "Medmindre du vil bygge LIRC kernemoduler til andre systemer, kan du "
+#~ "sikkert fjerne denne pakke."
+
+#, fuzzy
+#~ msgid "How to build the binary modules package"
+#~ msgstr "Hvordan man bygger den binære modulpakke."
+
+#~ msgid ""
+#~ "For instructions on how to build the binary modules debian package read: /"
+#~ "usr/share/doc/lirc-modules-source/README.Debian"
+#~ msgstr ""
+#~ "For instruktioner på hvordan du bygger den binære modul Debianpakke, så "
+#~ "læs: /usr/share/doc/lirc-modules-source/README.Debian"
+
+#~ msgid ""
+#~ "The following list includes short descriptions of the different options "
+#~ "available:"
+#~ msgstr ""
+#~ "Den følgende liste inkluderer korte beskrivelser af de forskellige "
+#~ "muligheder:"
+
+#~ msgid "ANIMAX, IRDEO, Other"
+#~ msgstr "ANIMAX, IRDEO, Andet"
+
+#, fuzzy
+#~ msgid "Type of serial device to support"
+#~ msgstr "Hvilken type af serial-enhed skal understøttes?"
+
+#, fuzzy
+#~ msgid ""
+#~ " ANIMAX: Anir Multimedia Magic\n"
+#~ " IRDEO:  IRdeo\n"
+#~ " Other:  Any other supported device.\n"
+#~ "\n"
+#~ "If you don't know what the other devices are, you should probably choose "
+#~ "\"Other\"."
+#~ msgstr ""
+#~ "Hvis du ikke ved hvad de andre enheder er, bør du nok vælge \"Andet\"."
+
+#~ msgid "Is your serial IR device a transmitter?"
+#~ msgstr "Er din seriale-IR enhed en sender?"
+
+#~ msgid "Should the carrier signal be generated by software?"
+#~ msgstr "Skal signalet genereres af software?"
+
+#, fuzzy
+#~ msgid "IO port of your IR serial device:"
+#~ msgstr "Hvilken IO-port bruger din IR-seriel enhed?"
+
+#, fuzzy
+#~ msgid "IRQ of your IR serial device:"
+#~ msgstr "Hvilken IRQ bruger din IR-seriel enhed?"
+
+#~ msgid "ACTISYS_ACT200L, TEKRAM, Other"
+#~ msgstr "ACTISYS_ACT200L, TEKRAM, Andet"
+
+#~ msgid "What type of SIR device should be supported?"
+#~ msgstr "Hvilken type SIR-enhed skal understøttes?"
+
+#~ msgid ""
+#~ "The following lists are short descriptions of the options to show what "
+#~ "they mean."
+#~ msgstr ""
+#~ "Det følgende er korte beskrivelser af mulighederne, for at vise hvad de "
+#~ "betyder."
+
+#, fuzzy
+#~ msgid "IO port of your SIR device:"
+#~ msgstr "Hvilken IO-port bruger din SIR-enhed?"
+
+#, fuzzy
+#~ msgid "IRQ of your SIR device:"
+#~ msgstr "Hvilken IRQ bruger din SIR-enhed?"
+
+#, fuzzy
+#~ msgid "IO port of your parallel IR device:"
+#~ msgstr "Hvilken IO-port bruger din parellele IR-enhed?"
+
+#, fuzzy
+#~ msgid "IRQ of your parallel IR device:"
+#~ msgstr "Hvilken IRQ bruger din parellele IR-enhed?"
+
+#, fuzzy
+#~ msgid "Timer used for your parallel IR device:"
+#~ msgstr "Hvilken 'timer' skal bruges til din parellele IR-enhed?"
+
+#, fuzzy
+#~ msgid "Try to automatically build the modules?"
+#~ msgstr "Skal jeg prøve automatisk at bygge modulerne?"
+
+#, fuzzy
+#~ msgid ""
+#~ "It is possible to build and install your lirc kernel modules, as long as "
+#~ "your current kernel's source (and gcc) are present on your computer."
+#~ msgstr ""
+#~ "Jeg kan prøve at bygge og installere dine lirc kernemoduler, sålænge din "
+#~ "nuværende kernes kildekode (og gcc) er tilstede på systemet."
+
+#, fuzzy
+#~ msgid ""
+#~ "Even if you choose to dos so, you should build and install a binary "
+#~ "'kernel modules' package so that the package manager can keep track of "
+#~ "the files."
+#~ msgstr ""
+#~ "Selvom du svarer ja her, skal du bygge og installere en binær "
+#~ "'kernemodul' pakke så pakkehåndteringsprogrammet kan holde styr på "
+#~ "filerne."
+
+#~ msgid "Where is your kernel source?"
+#~ msgstr "Hvor er dine kernes kildekode?"
+
+#, fuzzy
+#~ msgid "To build lirc kernel modules, kernel sources are needed."
+#~ msgstr ""
+#~ "For at bygge lirc kernemoduler, skal jeg bruge kildekoden på kernen, som "
+#~ "du planlægger at bygge dem med."
+
+#, fuzzy
+#~ msgid "${ksrc} is not a valid kernel source tree"
+#~ msgstr "${ksrc} er ikke et gyldigt træ med kernekildekode."
+
+#~ msgid ""
+#~ "i2c: TV cards from Hauppauge and PixelView. Needs the new I2C stack "
+#~ "(present on 2.4 kernels). You can get it at:"
+#~ msgstr ""
+#~ "i2c: TV-kort fra Hauppauge og PixelView. Kræver den nye I2C-stak "
+#~ "(tilstede i 2.4-kerner). Du kan få den på:"
+
+#~ msgid "http://www2.lm-sensors.nu/~lm78/."
+#~ msgstr "http://www2.lm-sensors.nu/~lm78/."
+
+#~ msgid ""
+#~ "gpio: TV cards from FlyVideo98, Avermedia, MiRO and many others. Needs "
+#~ "bttv version 0.7.45 or higher (present on 2.4 kernels).  If you are using "
+#~ "the bttv tarball, copy it to the kernel."
+#~ msgstr ""
+#~ "gpio: TV-kort fra FlyVideo98, Avermedia, MiRO og mange andre. Kræver bttv "
+#~ "version 0.7.45 eller højere (tilstede i 2.4-kerner). Hvis du bruger bttv "
+#~ "kildekoden, så kopier den til kernen."
+
+#~ msgid "parallel: Custom parallel-port receiver."
+#~ msgstr "parallel: En parallel-port modtager."
+
+#~ msgid "serial: Serial-port driver."
+#~ msgstr "serial: Serial-port driver."
+
+#~ msgid "sir: Serial InfraRed (IRDA)."
+#~ msgstr "sir: Serial-Infrarød (IRDA)."
+
+#~ msgid "it87: ITE IT8705 and IT8712 CIR ports (e.g. on the ECS K7S5A)."
+#~ msgstr "it87: ITE IT8705 og IT8712 CIR porte (f.eks. ECS K7S5A)."
+
+#~ msgid "bt829: Tekram M230 Mach64"
+#~ msgstr "bt829: Tekram M230 Mach64"
+
+#~ msgid "Quick walktrough:"
+#~ msgstr "Hurtig gennemgang:"
+
+#~ msgid "cd /usr/src/"
+#~ msgstr "cd /usr/src/"
+
+#~ msgid "tar -xzf lirc-modules.tar.gz"
+#~ msgstr "tar -xzf lirc-modules.tar.gz"
+
+#~ msgid "cd modules/lirc"
+#~ msgstr "cd modules/lirc"
+
+#~ msgid "debian/rules binary-modules KSRC=/path/of/my/kernel/source/"
+#~ msgstr "debian/rules binary-modules KSRC=/path/of/my/kernel/source/"
+
+#~ msgid "dpkg -i ../../irc-modules-*.deb"
+#~ msgstr "dpkg -i ../../lirc-modules-*.deb"
+
+#~ msgid "ANIMAX: Anir Multimedia Magic"
+#~ msgstr "ANIMAX: Anir Multimedia Magic"
+
+#~ msgid "IRDEO: IRdeo"
+#~ msgstr "IRDEO: IRdeo"
+
+#~ msgid "ACTISYS_ACT200L: Actisys Act200L dongle."
+#~ msgstr "ACTISYS_ACT200L: Actisys Act200L dongle."
+
+#~ msgid "TEKRAM: Tekram Irmate 210 (16x50 UART compatible serial port)"
+#~ msgstr "TEKRAM: Tekram Irmate 210 (16x50 UART kompatibel seriel port)"
+
+#~ msgid "Other: Any other supported device."
+#~ msgstr "Andet: Any other supported device."

@@ -14,7 +14,7 @@ DeviceData_Impl *Generic_PC_Workstation_Data::CreateData(DeviceData_Impl *Parent
 	int iPK_Installation = b.Read_unsigned_long();
 	int iPK_DeviceTemplate = b.Read_unsigned_long();
 	switch(iPK_DeviceTemplate) {
-		case 1953:
+		case 1956:
 			return new Generic_PC_Workstation_Data();
 	};
 	LoggerWrapper::GetInstance()->Write(LV_STATUS, "Got CreateData for unknown type %d.", iPK_DeviceTemplate);
@@ -24,7 +24,7 @@ DeviceData_Impl *Generic_PC_Workstation_Data::CreateData(DeviceData_Impl *Parent
 Event_Impl *Generic_PC_Workstation_Event::CreateEvent( unsigned long dwPK_DeviceTemplate, ClientSocket *pOCClientSocket, unsigned long dwDevice )
 {
 	switch(dwPK_DeviceTemplate) {
-		case 1953:
+		case 1956:
 			return (Event_Impl *) new Generic_PC_Workstation_Event(pOCClientSocket, dwDevice);
 	};
 	LoggerWrapper::GetInstance()->Write(LV_STATUS, "Got CreateEvent for unknown type %d.", dwPK_DeviceTemplate);

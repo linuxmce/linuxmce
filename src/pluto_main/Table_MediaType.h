@@ -156,13 +156,13 @@ void psc_restrict_set(long int val);
 bool Description_isNull();
 bool FK_DesignObj_isNull();
 bool Extensions_isNull();
+bool Subdirectory_isNull();
 bool FK_Pipe_isNull();
 bool EK_AttributeType_DefaultSort_isNull();
 bool psc_id_isNull();
 bool psc_batch_isNull();
 bool psc_user_isNull();
 bool psc_frozen_isNull();
-bool psc_mod_isNull();
 bool psc_restrict_isNull();
 
 			
@@ -170,13 +170,13 @@ bool psc_restrict_isNull();
 void Description_setNull(bool val);
 void FK_DesignObj_setNull(bool val);
 void Extensions_setNull(bool val);
+void Subdirectory_setNull(bool val);
 void FK_Pipe_setNull(bool val);
 void EK_AttributeType_DefaultSort_setNull(bool val);
 void psc_id_setNull(bool val);
 void psc_batch_setNull(bool val);
 void psc_user_setNull(bool val);
 void psc_frozen_setNull(bool val);
-void psc_mod_setNull(bool val);
 void psc_restrict_setNull(bool val);
 	
 	
@@ -196,14 +196,8 @@ class Row_Pipe* FK_Pipe_getrow();
 
 		// Return the rows in other tables with foreign keys pointing here
 		void DeviceTemplate_MediaType_FK_MediaType_getrows(vector <class Row_DeviceTemplate_MediaType*> *rows);
-void DeviceTemplate_MediaType_pschist_FK_MediaType_getrows(vector <class Row_DeviceTemplate_MediaType_pschist*> *rows);
-void DeviceTemplate_MediaType_pschmask_FK_MediaType_getrows(vector <class Row_DeviceTemplate_MediaType_pschmask*> *rows);
 void MediaType_Broadcast_FK_MediaType_getrows(vector <class Row_MediaType_Broadcast*> *rows);
-void MediaType_Broadcast_pschist_FK_MediaType_getrows(vector <class Row_MediaType_Broadcast_pschist*> *rows);
-void MediaType_Broadcast_pschmask_FK_MediaType_getrows(vector <class Row_MediaType_Broadcast_pschmask*> *rows);
 void MediaType_DesignObj_FK_MediaType_getrows(vector <class Row_MediaType_DesignObj*> *rows);
-void MediaType_DesignObj_pschist_FK_MediaType_getrows(vector <class Row_MediaType_DesignObj_pschist*> *rows);
-void MediaType_DesignObj_pschmask_FK_MediaType_getrows(vector <class Row_MediaType_DesignObj_pschmask*> *rows);
 
 
 		// Setup binary serialization

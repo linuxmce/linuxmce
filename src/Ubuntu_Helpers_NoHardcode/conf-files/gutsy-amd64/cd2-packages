@@ -1,4 +1,3 @@
-
 abcde
 adduser
 alsa-base
@@ -545,10 +544,6 @@ libxslt1.1
 libxss1
 libxt6
 libxt-dev
-libxtrap6
-libxtrap-dev
-libxtst6
-libxtst-dev
 libxv1
 libxv-dev
 libxvidcore4

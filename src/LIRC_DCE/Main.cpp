@@ -22,7 +22,12 @@
 #include "PlutoUtils/Other.h"
 #include "DCERouter.h"
 
-#include "../include/version.cpp"
+// In source files stored in archives and packages, these 2 lines will have the release version (build)
+// and the svn revision as a global variable that can be inspected within a core dump
+#define  VERSION "<=version=>"
+const char *g_szCompile_Date="<=compile_date=>";
+/*SVN_REVISION*/
+
 
 using namespace DCE;
 
@@ -190,8 +195,8 @@ int main(int argc, char* argv[])
 
 	LoggerWrapper::GetInstance()->Write(LV_STATUS, "Device: %d starting.  Connecting to: %s",PK_Device,sRouter_IP.c_str());
 
-	bool bAppError=false;
-	bool bReload=false;
+	bool bAppError = false;
+	bool bReload = false;
 	try
 	{
 		LIRC_DCE *pLIRC_DCE = new LIRC_DCE(PK_Device, sRouter_IP,true,bLocalMode);
@@ -205,10 +210,7 @@ int main(int argc, char* argv[])
 			if( bLocalMode )
 				pLIRC_DCE->RunLocalMode();
 			else
-			{
-				if(pLIRC_DCE->m_RequestHandlerThread)
-					pthread_join(pLIRC_DCE->m_RequestHandlerThread, NULL);  // This function will return when the device is shutting down
-			}
+				pthread_join(pLIRC_DCE->m_RequestHandlerThread, NULL);  // This function will return when the device is shutting down
 			g_pDeadlockHandler=NULL;
 			g_pSocketCrashHandler=NULL;
 		} 

@@ -1,4 +1,3 @@
-
 alsa-utils
 binutils
 coreutils
@@ -41,7 +40,6 @@ mplayer
 mysql-client-5.0
 mythtv-common
 mythtv-frontend
-nvidia-glx
 openssl
 perl
 perl-modules
@@ -65,4 +63,4 @@ xfonts-base
 xfwm4
 xine-ui
 xserver-xorg-core
-zenity
+enity

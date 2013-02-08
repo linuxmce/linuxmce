@@ -1,0 +1,5 @@
+lmce-dpms-monitor (2.0.0.45.25243-1) unstable; urgency=low
+
+  * Initial release (Closes: #nnnn)  <nnnn is the bug number of your ITP>
+
+ -- root <root@fluffybitch.org>  Thu, 31 May 2012 18:12:49 +0000

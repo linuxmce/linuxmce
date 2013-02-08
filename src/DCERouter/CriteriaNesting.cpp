@@ -7,11 +7,11 @@
  
  Phone: +1 (877) 758-8648
  
- This program is distributed according to the terms of the Pluto Public License, available at: 
- http://plutohome.com/index.php?section=public_license 
+ This program is distributed according to the terms of the GNU Public License, available at: 
+ http://www.fsf.org/licensing/licenses/gpl.html 
  
  This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY 
- or FITNESS FOR A PARTICULAR PURPOSE. See the Pluto Public License for more details.
+ or FITNESS FOR A PARTICULAR PURPOSE. See the GNU Public License for more details.
  
  */
  
@@ -20,9 +20,6 @@
 #include "CriteriaParm.h"
 #include "EventInfo.h"
 #include "EventHandler.h"
-#include "Logger.h"
-
-using namespace DCE;
 
 bool CriteriaNesting::Evaluate(class CriteriaList *ptrCriteriaList,class EventInfo *pEventInfo)
 {
@@ -35,10 +32,6 @@ bool CriteriaNesting::Evaluate(class CriteriaList *ptrCriteriaList,class EventIn
 		pEventInfo->pEventHandler->m_vectCriteriaParm.push_back(pCriteriaParm);
 
 		pCriteriaParm->m_bResult = ptrCriteriaList->EvaluateExpression(pCriteriaParm,pEventInfo);
-		LoggerWrapper::GetInstance()->Write(LV_EVENTHANDLER,"CriteriaNesting::Evaluate parm Event Handler: %d m_bAnd %d m_iPK_CriteriaParm %d m_iPK_CriteriaParmList %d m_iPK_ParameterType %d m_sComparedValue %s sValue %s", 
-			pEventInfo->m_iPK_Event, (int) m_bAnd, pCriteriaParm->m_iPK_CriteriaParm, pCriteriaParm->m_iPK_CriteriaParmList, 
-			pCriteriaParm->m_iPK_ParameterType, pCriteriaParm->m_sComparedValue.c_str(), pCriteriaParm->m_sValue.c_str());
-
 		if( m_bAnd==true && pCriteriaParm->m_bResult==false )
 			return !(!m_bNot ^ false) ;
 		if( m_bAnd==false && pCriteriaParm->m_bResult==true )
@@ -55,7 +48,5 @@ bool CriteriaNesting::Evaluate(class CriteriaList *ptrCriteriaList,class EventIn
 	}
 	// If this is an 'and' we're true because we got through everything without a false,
 	// If this is an 'or' we're false because we never got a true value
-	LoggerWrapper::GetInstance()->Write(LV_EVENTHANDLER,"CriteriaNesting::Evaluate nesting Event Handler: %d got to end not %d and %d", 
-		pEventInfo->m_iPK_Event, (int) m_bNot, (int) m_bAnd);
 	return !(!m_bNot ^ m_bAnd);  
 }

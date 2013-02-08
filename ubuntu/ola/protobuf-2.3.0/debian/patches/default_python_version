@@ -1,0 +1,20 @@
+Index: protobuf-2.1.0/python/mox.py
+===================================================================
+--- protobuf-2.1.0.orig/python/mox.py	2009-11-17 03:37:29.000000000 +1100
++++ protobuf-2.1.0/python/mox.py	2009-11-17 03:38:08.000000000 +1100
+@@ -1,4 +1,4 @@
+-#!/usr/bin/python2.4
++#!/usr/bin/python
+ #
+ # Copyright 2008 Google Inc.
+ #
+Index: protobuf-2.1.0/python/stubout.py
+===================================================================
+--- protobuf-2.1.0.orig/python/stubout.py	2009-11-17 03:37:29.000000000 +1100
++++ protobuf-2.1.0/python/stubout.py	2009-11-17 03:38:17.000000000 +1100
+@@ -1,4 +1,4 @@
+-#!/usr/bin/python2.4
++#!/usr/bin/python
+ #
+ # Copyright 2008 Google Inc.
+ #

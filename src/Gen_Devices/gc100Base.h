@@ -99,7 +99,7 @@ public:
 		if( m_bRunningWithoutDeviceData )
 			return (m_pEvent_Impl->GetDeviceDataFromDatabase(m_dwPK_Device,DEVICEDATA_Dont_Auto_Configure_CONST)=="1" ? true : false);
 		else
-			return (m_mapParameters_Find(DEVICEDATA_Dont_Auto_Configure_CONST)=="1" ? true : false);
+			return (m_mapParameters[DEVICEDATA_Dont_Auto_Configure_CONST]=="1" ? true : false);
 	}
 
 };

@@ -1,6 +1,6 @@
 /*
  *
- *  $Id: pvrusb2-demod.h 1563 2007-02-28 03:30:33Z isely $
+ *  $Id: pvrusb2-demod.h 2226 2009-03-07 05:17:32Z isely $
  *
  *  Copyright (C) 2005 Mike Isely <isely@pobox.com>
  *
@@ -23,7 +23,7 @@
 
 #include "pvrusb2-options.h"
 #include "compat.h"
-#include "pvrusb2-i2c-core.h"
+#include "pvrusb2-i2c-track.h"
 
 #ifdef PVR2_ENABLE_TDA9887
 int pvr2_i2c_demod_setup(struct pvr2_hdw *,struct pvr2_i2c_client *);

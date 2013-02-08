@@ -8,11 +8,12 @@ function DisplayUsage() {
 	echo
 	echo " TO SET CONFIGURATION DATA:"
 	echo " --------------------------"
-	echo "  DynamicDNS.sh set <login> <password> <service_params> <domains>"
+	echo "  DynamicDNS.sh set <login> <password> <service_params> <use> <domains>"
 	echo 
 	echo "    login          = login for the dynamic dns service provider"
 	echo "    password       = password for the dynamic dns service provider"
 	echo "    service_params = dynamic dns service params (see list)"
+	echo "    use            = Use web to determine IP address, else get it locally"
 	echo "    domains        = comma separated list of domains to update"
 	echo
 	echo
@@ -49,17 +50,18 @@ fi
 if [[ "$1" == "set" ]] ;then
 	shift
 
-	if [[ "$#" != 4 ]] ;then
+	if [[ "$#" != 5 ]] ;then
 		DisplayUsage
 	fi
 
 	DD_LOGIN="$1"
 	DD_PASS="$2"
 	DD_SERVICE="$3"
-	DD_DOMAINS="$4"
+	DD_USE="$4"
+	DD_DOMAINS="$5"
 	DD_ETH="$ExtIf"
 
-	Vars="DD_LOGIN DD_PASS DD_SERVICE DD_DOMAINS DD_ETH"
+	Vars="DD_LOGIN DD_PASS DD_SERVICE DD_USE DD_DOMAINS DD_ETH"
 	if ! BlacklistConfFiles '/etc/ddclient.conf' ;then
 		cp /usr/pluto/templates/ddclient.conf.template /etc/ddclient.conf.$$
 		ReplaceVars /etc/ddclient.conf.$$
@@ -85,12 +87,14 @@ elif [[ "$1" == "get" ]] ;then
 			DD_LOGIN=$(cat /etc/ddclient.conf | grep -m 1 '^ *login=' | cut -d'=' -f2)
 			DD_PASS=$(cat /etc/ddclient.conf | grep -m 1 '^ *password=' | cut -d'=' -f2)
 			DD_SERVICE=$(cat /etc/ddclient.conf | grep -m 1 '^ *protocol=')
+			DD_USE=$(cat /etc/ddclient.conf | grep -m 1 '^ *use=' | cut -d'=' -f2)
 			DD_DOMAINS=$(cat /etc/ddclient.conf | egrep -m 1 -v '^ *#|^ *$|.*=.*')
 		fi
 	fi
 
 	echo $DD_LOGIN
 	echo $DD_SERVICE
+	echo $DD_USE
 	echo $DD_DOMAINS
 
 ## Unkown call

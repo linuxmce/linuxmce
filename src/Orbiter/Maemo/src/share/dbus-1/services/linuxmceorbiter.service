@@ -1,0 +1,6 @@
+# Service description file for LinuxMCE Orbiter
+# (c) 2007 by Michael Stepanov michael@stepanoff.org
+# Distribution under GPL, all rights reserved.
+[D-BUS Service]
+Name=com.nokia.linuxmceorbiter
+Exec=/usr/bin/linuxmceorbiter

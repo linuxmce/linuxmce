@@ -117,6 +117,8 @@ void GetInformation(const ID3_Tag &myTag, map<int,string>& mapAttributes,
 		PK_Attr = ATTRIBUTETYPE_Album_CONST;
 	else if(id == "TIT2")
 		PK_Attr = ATTRIBUTETYPE_Title_CONST;
+	else if(id == "TIT3")
+		PK_Attr = ATTRIBUTETYPE_Episode_CONST;
 	else if(id == "TPE1")
 		PK_Attr = ATTRIBUTETYPE_Performer_CONST;
 	else if(id == "TCON")

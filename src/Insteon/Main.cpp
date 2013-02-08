@@ -6,21 +6,12 @@
      Phone: +1 (877) 758-8648
  
 
-     Copyright (C) 2007 Peter Kalogiannis, <pkalogiannis@gmail.com>
+     This program is free software; you can redistribute it and/or modify it under the terms of the GNU General Public License.
+     This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty
+     of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
 
-     This program is free software; you can redistribute it and/or modify it
-     under the terms of the GNU General Public License as published by the Free
-     Software Foundation; either version 2 of the License, or (at your option)
-     any later version.
+     See the GNU General Public License for more details.
 
-     This program is distributed in the hope that it will be useful, but
-     WITHOUT ANY WARRANTY; without even the implied warranty of 
-     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the 
-     GNU General Public License for more details.
-
-     You should have received a copy of the GNU General Public License along
-     with this program; if not, write to the Free Software Foundation, Inc.,
-     59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 */
 //<-dceag-incl-b->
 #include "Insteon.h"
@@ -31,7 +22,12 @@
 #include "PlutoUtils/Other.h"
 #include "DCERouter.h"
 
-#include "../include/version.cpp"
+// In source files stored in archives and packages, these 2 lines will have the release version (build)
+// and the svn revision as a global variable that can be inspected within a core dump
+#define  VERSION "<=version=>"
+const char *g_szCompile_Date="<=compile_date=>";
+/*SVN_REVISION*/
+
 
 using namespace DCE;
 

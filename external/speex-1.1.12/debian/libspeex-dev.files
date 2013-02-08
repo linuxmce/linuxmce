@@ -1,0 +1,5 @@
+usr/include
+usr/lib/libspeex.la
+usr/lib/libspeex.a
+usr/lib/libspeex.so
+usr/lib/pkgconfig

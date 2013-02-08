@@ -1,0 +1,16 @@
+diff -ruNp udev-056.orig/Makefile udev-056/Makefile
+--- udev-056.orig/Makefile	2005-03-19 08:39:30.000000000 +0100
++++ udev-056/Makefile	2005-03-20 20:37:51.000000000 +0100
+@@ -165,9 +165,9 @@ ifeq ($(strip $(DEBUG)),true)
+ 	LDFLAGS += -Wl
+ 	STRIPCMD = /bin/true -Since_we_are_debugging
+ else
+-	CFLAGS  += $(OPTIMIZATION) -fomit-frame-pointer
+-	LDFLAGS += -s -Wl
+-	STRIPCMD = $(STRIP) -s --remove-section=.note --remove-section=.comment
++	CFLAGS  += $(OPTIMIZATION) -g
++	LDFLAGS += -Wl
++	STRIPCMD = /bin/true
+ endif
+ 
+ # If we are using our version of klibc, then we need to build, link it, and then

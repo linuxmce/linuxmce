@@ -368,16 +368,16 @@ serio_res_t serio_write(serio_t *serio, void *buf, size_t len)
 		n_copy = serio_BUFSIZE - serio->tx.tail;
 	memcpy(serio->tx.buf + serio->tx.tail, buf, n_copy);
 	old_tail = serio->tx.tail;
-	serio->tx.tail += (int)n_copy;
-	serio->tx.tail = (int)serio_WRAP(serio->tx.tail);
+	serio->tx.tail += n_copy;
+	serio->tx.tail = serio_WRAP(serio->tx.tail);
 	buf = (void *)(((char *)buf)+n_copy);
 	len -= n_copy;
 
 	/* handle the part after the wrap */
 	if (len > 0) {
 		memcpy(serio->tx.buf + serio->tx.tail, buf, len);
-		serio->tx.tail += (int)len;
-		serio->tx.tail = (int)serio_WRAP(serio->tx.tail);
+		serio->tx.tail += len;
+		serio->tx.tail = serio_WRAP(serio->tx.tail);
 	}
 	DPRINT(("%d serio_write: old_tail %d, len1 %d, len2 %d; new tail %d\n", clock(), old_tail, n_copy, len, serio->tx.tail));
 
@@ -441,8 +441,8 @@ serio_res_t serio_read(serio_t *serio, void *buf, size_t len, size_t *n_received
 		n_copy = (size_t)n;
 	memcpy(buf, serio->rx.buf + serio->rx.head, n_copy);
 	old_head = serio->rx.head;
-	serio->rx.head += (int)n_copy;
-	serio->rx.head = (int)serio_WRAP(serio->rx.head);
+	serio->rx.head += n_copy;
+	serio->rx.head = serio_WRAP(serio->rx.head);
 	buf = (void *)(((char *)buf)+n_copy);
 	len -= n_copy;
 	*n_received = n_copy;
@@ -453,7 +453,7 @@ serio_res_t serio_read(serio_t *serio, void *buf, size_t len, size_t *n_received
 		if (len > (size_t)serio->rx.tail) 
 			len = (size_t)serio->rx.tail;
 		memcpy(buf, serio->rx.buf + serio->rx.head, len);
-		serio->rx.head += (int)len;
+		serio->rx.head += len;
 		*n_received += len;
 	}
 	DPRINT(("%d serio_read: old_head %d, len1 %d, *n_received %d; new head %d\n", clock(), old_head, n_copy, *n_received, serio->rx.head));

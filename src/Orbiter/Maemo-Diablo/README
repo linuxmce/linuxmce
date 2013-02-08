@@ -1,0 +1,112 @@
+This is a Nokia N770/N800/N810/N900 application to handle LinuxMCE Orbiter.
+
+Note: these instructions need updating for the Nokia N770.
+Note: these instructions assume you will be using Linux on your development computer.
+
+------------------------------------------------------------------------------
+
+On your development computer, you need:
+
+- Maemo scratchbox - the one for the Fremantle SDK can be used for Diablo too
+- Maemo Diablo SDK (for Nokia N800, N810); or
+- Maemo Fremantle SDK (for Nokia N900)
+
+Note: if you installed the Diablo scratchbox, you can safely and easily upgrade
+to the Fremantle scratchbox:
+http://wiki.maemo.org/Documentation/Maemo5_Final_Installation#Upgrading_from_Maemo_4.x.2FDiablo_SDK
+
+Maemo Diablo SDK last seen here:
+    http://maemo.org/development/sdks/maemo-4-1-diablo-sdk/
+Maemo Fremantle SDK last seen here:
+    http://www.developer.nokia.com/Resources/Tools_and_downloads/Other/Maemo/
+Scratchbox seen together with the SDK.
+
+In scratchbox, you need:
+
+In sources.list:
+
+* For Diablo:
+
+deb http://repository.maemo.org/extras/ diablo free non-free
+deb http://repository.maemo.org/extras-devel/ diablo free non-free
+
+* For Fremantle:
+
+deb http://repository.maemo.org/extras/ fremantle free non-free
+deb http://repository.maemo.org/extras-devel/ fremantle free non-free
+
+* For both Diablo and Fremantle:
+
+- libsdl-sge[-dev] available only for chinook, for some reason,
+thus you need these as well:
+
+deb http://repository.maemo.org/extras/ chinook free non-free
+deb http://repository.maemo.org/extras-devel/ chinook free non-free
+
+Packages to install in both Diablo and Fremantle scratchboxes:
+
+- libmysqlclient15-dev
+- libsdl-ttf2.0-dev
+- libsdl-gfx1.2-dev
+- libsdl-sge-dev
+
+You need to make your "src" directory available to scratchbox, somewhere under
+/scratchbox/users/$your_user
+
+To build, run this within scratchbox:
+dpkg-buildpackage -rfakeroot -b -us -uc
+
+You can also run a parallel build like so:
+MAKEFLAGS=-j6 dpkg-buildpackage -rfakeroot -b -us -uc
+
+Result: ../linuxmce-orbiter_${version}_armel.deb
+
+------------------------------------------------------------------------------
+
+On the tablet, you need:
+
+For Nokia N800, N810:
+- Latest OS2008 Diablo. Last seen here: http://tablets-dev.nokia.com/
+- "Maemo extras" repository enabled.
+deb http://repository.maemo.org/extras/ diablo free non-free
+- "Maemo devel extras" repository enabled.
+deb http://repository.maemo.org/extras-devel/ diablo free non-free
+- "LinuxMCE" repository
+deb http://deb.linuxmce.org/maemo/ diablo free
+
+For Nokia N900:
+- Latest Maemo 5 Fremantle. Last seen here: http://tablets-dev.nokia.com/
+- "Maemo extras" repository enabled.
+deb http://repository.maemo.org/extras/ fremantle free non-free
+- "Maemo devel extras" repository enabled.
+deb http://repository.maemo.org/extras-devel/ fremantle free non-free
+- "LinuxMCE" repository
+deb http://deb.linuxmce.org/maemo/ fremantle free
+
+Preparation:
+
+- Install dropbear-server
+- Install rootsh
+- Use the "root" command in a terminal to become root, and use "passwd"
+to set a password so you can ssh in.
+- Install bash. It will display a message on your tablet, so if you're
+installing it from ssh, that's why it feels stuck.
+- ln -sf bash /bin/sh (mysql-common doesn't play nice with busybox)
+- Install openssh-client (for scp; dropbear-client doesn't have it)
+- mkdir -p /usr/share/fonts/truetype/
+- copy /usr/share/fonts/truetype/msttcorefonts from your system to the
+same location on the tablet
+
+Packages:
+
+- libsdl-gfx1.2-4
+- libsdl-ttf2.0-0
+- libxmu6
+- libmysqlclient15off
+- libhttpfetcher1
+- libsdl-sge
+
+Shortcut:
+
+dpkg -i linuxmce-orbiter_*.deb
+apt-get -f install

@@ -30,7 +30,6 @@ using namespace DCE;
 void *VL_Thread(void *p)
 {
 	VFD_LCD_Base *pVFD_LCD_Base = (VFD_LCD_Base *) p;
-	Sleep(2000); // Give the base classes a chance to startup and initialize the unit
 	pVFD_LCD_Base->RunThread();
 	pVFD_LCD_Base->m_bVL_ThreadRunning=false;
 	return NULL;

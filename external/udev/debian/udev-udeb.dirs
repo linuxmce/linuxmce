@@ -1,0 +1,5 @@
+/etc/hotplug.d/default/
+/etc/udev/
+/etc/udev/rules.d/
+/etc/udev/scripts/
+/sbin/

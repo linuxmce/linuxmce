@@ -77,6 +77,11 @@ int UniqueColors[MAX_TELECOM_COLORS];
 #include <string.h>
 #endif
 
+#include <sstream>
+
+#include <stdlib.h>
+#include <time.h>
+
 #define CONFERENCE_MAX_NO 50
 
 #define SPEAKINTHEHOUSE_INVALID_EXT "555"
@@ -111,6 +116,9 @@ Telecom_Plugin::Telecom_Plugin(int DeviceID, string ServerAddress,bool bConnectE
 	m_nPBXDevice = 0;
 	m_displayThread = (pthread_t)0;
 	TelecomTask::SetTelecom(this);
+
+	m_sDestChannel = "";
+	m_bReplacedChannel = false;
 }
 
 //<-dceag-getconfig-b->
@@ -518,7 +526,7 @@ Telecom_Plugin::CallsStatusChanged(class Socket *pSocket,class Message *pMessage
 	
 	MAP_CHANNELS mapChannels; //call id (conference number or 1st channel) <-> (channel, callerid)
 	MAP_CALLS mapCalls; //call id <-> is conference ?
-	
+
 	PLUTO_SAFETY_LOCK(vm, m_TelecomMutex);  // Protect the call data
 	
 	vector<string> vectLines;
@@ -723,6 +731,15 @@ Telecom_Plugin::Ring( class Socket *pSocket, class Message *pMessage, class Devi
 	string sSource_Caller_ID = pMessage->m_mapParameters[EVENTPARAMETER_Source_Caller_ID_CONST];
 	string sDestination_Caller_ID = pMessage->m_mapParameters[EVENTPARAMETER_Destination_Caller_ID_CONST];
 
+        // Los93soL
+        // Store the channel and callerid in a map to it can be called up easily
+	if(sSource_Caller_ID != "") {
+        	m_mapChannel2CallerID[sSource_Channel] = sSource_Caller_ID;
+	}
+	if(sDestination_Caller_ID != "") {
+	        m_mapChannel2CallerID[sDestination_Channel] = sDestination_Caller_ID;
+	}
+
 	LoggerWrapper::GetInstance()->Write(LV_STATUS, "Ring event received from PBX: src channel %s, dest channel %s",
 		sSource_Channel.c_str(), sDestination_Channel.c_str());
 
@@ -870,13 +887,25 @@ Telecom_Plugin::Ring( class Socket *pSocket, class Message *pMessage, class Devi
 bool
 Telecom_Plugin::Link( class Socket *pSocket, class Message *pMessage, class DeviceData_Base *pDeviceFrom, class DeviceData_Base *pDeviceTo ) 
 {
+	// Los93soL
+	LoggerWrapper::GetInstance()->Write(LV_CRITICAL, "Telecom_Plugin::Link Begin");
+
 	string sSource_Channel = pMessage->m_mapParameters[EVENTPARAMETER_Source_Channel_CONST];
 	string sDestination_Channel = pMessage->m_mapParameters[EVENTPARAMETER_Destination_Channel_CONST];
 	string sSource_Caller_ID = pMessage->m_mapParameters[EVENTPARAMETER_Source_Caller_ID_CONST];
 	string sDestination_Caller_ID = pMessage->m_mapParameters[EVENTPARAMETER_Destination_Caller_ID_CONST];
 
-	LoggerWrapper::GetInstance()->Write(LV_STATUS, "Link event received from PBX: src channel %s, dest channel %s",
-	sSource_Channel.c_str(), sDestination_Channel.c_str());
+        // Los93soL
+        // Store the channel and callerid in a map to it can be called up easily
+        if(sSource_Caller_ID != "") {
+                m_mapChannel2CallerID[sSource_Channel] = sSource_Caller_ID;
+        }
+        if(sDestination_Caller_ID != "") {
+                m_mapChannel2CallerID[sDestination_Channel] = sDestination_Caller_ID;
+        }
+
+	LoggerWrapper::GetInstance()->Write(LV_CRITICAL, "Link event received from PBX: src channel %s, dest channel %s, src caller id %s, dest caller id %s",
+	sSource_Channel.c_str(), sDestination_Channel.c_str(), sSource_Caller_ID.c_str(), sDestination_Caller_ID.c_str());
 
 	PLUTO_SAFETY_LOCK(vm, m_TelecomMutex);
 
@@ -886,6 +915,9 @@ Telecom_Plugin::Link( class Socket *pSocket, class Message *pMessage, class Devi
 	ParseChannel(sSource_Channel, &sSrcExtension);
 	string sDestExtension;
 	ParseChannel(sDestination_Channel, &sDestExtension);
+
+	LoggerWrapper::GetInstance()->Write(LV_CRITICAL, "sSrcExtension: %s sDestExtension: %s",sSrcExtension.c_str(), sDestExtension.c_str());
+
 	if( !sSrcExtension.empty() && sSrcExtension == sDestExtension )
 	{
 		ReplaceChannels(sSource_Channel, sDestination_Channel, sDestination_Caller_ID);
@@ -936,7 +968,7 @@ Telecom_Plugin::Link( class Socket *pSocket, class Message *pMessage, class Devi
 			}
 			
 			string sOrbiters = m_pOrbiter_Plugin->PK_Device_Orbiters_In_Room_get(pOH_Orbiter->m_dwPK_Room, false);
-			
+
 			SCREEN_DevCallInProgress_DL screen_DevCallInProgress_DL(
 				m_dwPK_Device, sOrbiters, 
 				GetCallerName(sSource_Channel, sSource_Caller_ID),
@@ -957,13 +989,31 @@ Telecom_Plugin::Link( class Socket *pSocket, class Message *pMessage, class Devi
 		{
 			string sDestOrbiters = m_pOrbiter_Plugin->PK_Device_Orbiters_In_Room_get(pOH_Orbiter->m_dwPK_Room, false);
 	
-			SCREEN_DevCallInProgress_DL screen_DevCallInProgress_DL(
-				m_dwPK_Device, sDestOrbiters, 
-				GetCallerName(sDestination_Channel, sDestination_Caller_ID),
-				sCallID,
-				sDestination_Channel
-			);
-			SendCommand(screen_DevCallInProgress_DL);
+			// Los93soL - Override the link event with replaced channel if necessary
+			// this is needed because we dial using local channels
+			if (!m_bReplacedChannel) {
+				SCREEN_DevCallInProgress_DL screen_DevCallInProgress_DL(
+					m_dwPK_Device, sDestOrbiters, 
+					GetCallerName(sDestination_Channel, sDestination_Caller_ID),
+					sCallID,
+					sDestination_Channel
+				);
+
+				SendCommand(screen_DevCallInProgress_DL);
+			} else {
+				SCREEN_DevCallInProgress_DL screen_DevCallInProgress_DL(
+                                        m_dwPK_Device, sDestOrbiters,
+					// Los93soL
+					GetCallerName(m_sDestChannel, sDestination_Caller_ID),
+					//GetCallerName(sDestination_Channel, sDestination_Caller_ID),
+                                        sCallID,
+                                        m_sDestChannel
+				);
+
+				SendCommand(screen_DevCallInProgress_DL);
+
+				m_bReplacedChannel = false;
+			}
 		}
 	}
 	
@@ -985,6 +1035,9 @@ Telecom_Plugin::Link( class Socket *pSocket, class Message *pMessage, class Devi
 		}
 	}
 	
+	// Los93soL
+	LoggerWrapper::GetInstance()->Write(LV_CRITICAL, "Telecom_Plugin::Link Complete");
+
 	return false;
 }
 
@@ -999,6 +1052,10 @@ bool Telecom_Plugin::Hangup( class Socket *pSocket, class Message *pMessage, cla
 {
 	string sChannel_ID = pMessage->m_mapParameters[EVENTPARAMETER_Channel_ID_CONST];
 	string sReason = pMessage->m_mapParameters[EVENTPARAMETER_Reason_CONST];
+
+	// Los93soL
+	// Remove the channel from our channel caller ID map
+	m_mapChannel2CallerID.erase(sChannel_ID);
 
 	LoggerWrapper::GetInstance()->Write(LV_STATUS, "WWW Hangup the channel %s", sChannel_ID.c_str());
 	
@@ -1282,6 +1339,7 @@ CallStatus * Telecom_Plugin::LinkChannels(const string & sSrcChannel, const stri
 	}
 	
 	LoggerWrapper::GetInstance()->Write(LV_WARNING, "======== After LinkChannels");
+
 	DumpActiveCalls();
 	
 	return pCallStatus;
@@ -1308,6 +1366,11 @@ void Telecom_Plugin::ReplaceChannels(const string & sSrcChannel, const string & 
 			}
 		}
 	}
+
+	// Los93soL - Flag store the original channel because asterisk will send
+	// an invalid link event to us next because we dial using local channels
+	m_sDestChannel = sDestChannel;
+	m_bReplacedChannel = true;
 }
 
 bool Telecom_Plugin::RemoveChannel(const string & sChannel)
@@ -1797,13 +1860,14 @@ string Telecom_Plugin::GetDialNumber(Row_PhoneNumber *pRow_PhoneNumber)
 void Telecom_Plugin::CMD_Simulate_Keypress(string sPK_Button,int iStreamID,string sName,string &sCMD_Result,Message *pMessage)
 //<-dceag-c28-e->
 {
-	int phoneID=map_orbiter2embedphone[pMessage->m_dwPK_Device_From];
-	if(phoneID>0)
+	sCMD_Result="ERROR";
+	int nEmbeddedPhoneID = 0;
+	if (GetEmbeddedPhoneAssociated(pMessage->m_dwPK_Device_From, nEmbeddedPhoneID))
 	{
-		DCE::CMD_Simulate_Keypress cmd(m_dwPK_Device,phoneID,sPK_Button,0,sName);
+		DCE::CMD_Simulate_Keypress cmd(m_dwPK_Device,nEmbeddedPhoneID,sPK_Button,0,sName);
 		SendCommand(cmd);
+		sCMD_Result="OK";
 	}
-	sCMD_Result="OK";
 }
 
 //<-dceag-c334-b->
@@ -2607,6 +2671,62 @@ bool Telecom_Plugin::VoiceMailChanged(class Socket *pSocket,class Message *pMess
 	return false;	
 }
 
+string Telecom_Plugin::ParseVoiceMailMetadata(string s_VoiceMailFile, map<string, string>& mapVMData)
+{
+	vector<string> vectVoiceMailFile;
+	string s_CallerID, s_CallDuration, s_TimeStamp;
+	int iCallDuration, iTimeStamp;
+
+	s_CallerID = "Unknown Caller ID";
+	s_TimeStamp = "Unk";
+	s_CallDuration = "00:00";
+
+	FileUtils::ReadFileIntoVector(s_VoiceMailFile, vectVoiceMailFile);
+
+	for (size_t i = 0; i < vectVoiceMailFile.size(); i++) 
+	{
+		if (vectVoiceMailFile[i].find("callerid=") != string::npos) 
+		{
+			vector<string> vectParam;
+			StringUtils::Tokenize(vectVoiceMailFile[i],"=",vectParam);
+			s_CallerID = vectParam[1];
+		}
+
+		if (vectVoiceMailFile[i].find("origtime=") != string::npos) 
+		{
+			char temp[16];
+			struct tm *tmp;
+			time_t mytime;
+			vector<string> vectParam;
+			StringUtils::Tokenize(vectVoiceMailFile[i],"=",vectParam);
+			s_TimeStamp = vectParam[1];
+			istringstream is(s_TimeStamp);
+			is >> iTimeStamp;
+			mytime = iTimeStamp;
+			tmp = localtime(&mytime);
+			strftime(temp, sizeof(temp), "%d %b", tmp);
+			s_TimeStamp = temp;
+		}
+
+		if (vectVoiceMailFile[i].find("duration=") != string::npos) 
+		{
+			vector<string> vectParam;
+			StringUtils::Tokenize(vectVoiceMailFile[i],"=",vectParam);
+			s_CallDuration = vectParam[1];
+			istringstream is(s_CallDuration);
+			is >> iCallDuration;
+			s_CallDuration = StringUtils::SecondsAsTime(iCallDuration);
+		}
+	}
+
+	mapVMData["vmCallerID"] = s_CallerID;
+	mapVMData["vmDuration"] = s_CallDuration;
+	mapVMData["vmTimestamp"] = s_TimeStamp;
+
+	return "From: " + s_CallerID + "\nDuration: " + s_CallDuration + " When: " + s_TimeStamp;
+
+}
+
 class DataGridTable *Telecom_Plugin::UserVoiceMailGrid(string GridID,string Parms,void *ExtraData,int *iPK_Variable,string *sValue_To_Assign,class Message *pMessage)
 {
 	LoggerWrapper::GetInstance()->Write(LV_STATUS, "UserVoiceMailGrid request received for GridID: %s with Params: %s",GridID.c_str(),Parms.c_str());
@@ -2625,15 +2745,13 @@ class DataGridTable *Telecom_Plugin::UserVoiceMailGrid(string GridID,string Parm
 	Row_Users *pRow_Users = m_pDatabase_pluto_main->Users_get()->GetRow(atoi(userid.c_str()));
 	if(NULL == pRow_Users)
 	{
-		LoggerWrapper::GetInstance()->Write(LV_WARNING, "Got now record for user %s", userid.c_str());
+		LoggerWrapper::GetInstance()->Write(LV_WARNING, "Got no record for user %s", userid.c_str());
 		return pDataGrid;
 	}
 
 	string sExtension = StringUtils::ltos(pRow_Users->Extension_get());
 	
 	string user_path=string(VOICEMAIL_LOCATION)+sExtension+string("/INBOX/");
-	DIR * dir=opendir(user_path.c_str());
-	struct dirent *dir_ent = NULL;
 	
     Command_Impl * pMediaPlugin = m_pRouter->FindPluginByTemplate(DEVICETEMPLATE_Media_Plugin_CONST);
     if( pMediaPlugin == NULL )
@@ -2643,70 +2761,126 @@ class DataGridTable *Telecom_Plugin::UserVoiceMailGrid(string GridID,string Parm
     }
     
     LoggerWrapper::GetInstance()->Write(LV_WARNING, "Getting new voicemails from %s", user_path.c_str());
-	while(NULL != dir && (dir_ent = readdir(dir)))
+
+    int n = 0; // Number of directory entries
+    struct dirent **namelist;
+    n = scandir(user_path.c_str(),&namelist, 0, alphasort);	// alphasort Defined in _SVID_SOURCE
+    if (n < 0)
+    {
+    	// Don't do a damn thing.
+    }
+    else 
+    {
+    	while(n--)	// Descending. 
 	{
-	    struct stat statbuf;
-		string buffer = user_path+dir_ent->d_name;
-        stat(buffer.c_str(),&statbuf);
+		// stat() the file for some basic info.
+		struct stat statbuf;
+		string buffer = user_path+namelist[n]->d_name;
+		stat(buffer.c_str(),&statbuf);
 
-		LoggerWrapper::GetInstance()->Write(LV_STATUS, "Voicemail ? %s", buffer.c_str());
+		if((S_ISREG(statbuf.st_mode)) && (namelist[n]->d_name[0] != '.') && (strstr(namelist[n]->d_name,".txt") != NULL))
+		{
+                        map<string, string> mapVMData;
+                        string file_path=user_path+(namelist[n]->d_name);
+                        string text = "" + StringUtils::itos(Row+1) + ": " + ParseVoiceMailMetadata(file_path,mapVMData);
+                        file_path.replace(file_path.length()-4,4,".wav");
+                        LoggerWrapper::GetInstance()->Write(LV_STATUS,"WILL SHOW %s / %s",text.c_str(),file_path.c_str());
 
-        if((S_ISREG(statbuf.st_mode)) && (dir_ent->d_name[0] != '.') && (strstr(dir_ent->d_name,".txt") != NULL))
-        {
-			string text = "New message " + StringUtils::itos(Row+1);
-			string file_path=user_path+(dir_ent->d_name);
-			file_path.replace(file_path.length()-4,4,".wav");
-			LoggerWrapper::GetInstance()->Write(LV_STATUS,"WILL SHOW %s / %s",text.c_str(),file_path.c_str());
-
-			string URL_Parm;
-			{
-				string StdErr;
-				const char * const args[] = { VOICEMAIL_URL_PARAM, file_path.c_str(), NULL };
+                        string URL_Parm;
+                        {
+	          		string StdErr;
+		       		const char * const args[] = { VOICEMAIL_URL_PARAM, file_path.c_str(), NULL };
 				ProcessUtils::GetCommandOutput(args[0], args, URL_Parm, StdErr);
 			}
-			string url= VOICEMAIL_URL + StringUtils::Replace(URL_Parm, "\n", "");
-			
-			DCE::CMD_MH_Play_Media CMD_MH_Play_Media_
-				(pMessage->m_dwPK_Device_From, pMediaPlugin->m_dwPK_Device, pMessage->m_dwPK_Device_From, url, MEDIATYPE_pluto_StoredAudio_CONST,0,"",0,0,false,false,false);
-			
-			pCell = new DataGridCell(text,"");
-			pCell->m_pMessage=CMD_MH_Play_Media_.m_pMessage;
-			pDataGrid->SetData(0,Row,pCell);
-			Row++;
+
+                        // string url= VOICEMAIL_URL + StringUtils::Replace(URL_Parm, "\n", "");
+
+			// Date Cell
+			pCell = new DataGridCell(mapVMData["vmTimestamp"],file_path);
+			pDataGrid->SetData(0, Row, pCell);
+
+			// Duration Cell
+			pCell = new DataGridCell(mapVMData["vmDuration"],file_path);
+			pDataGrid->SetData(1, Row, pCell);
+
+			// Caller ID Cell
+			pCell = new DataGridCell(mapVMData["vmCallerID"],file_path);
+			pCell->m_Colspan = 8;
+			pDataGrid->SetData(2, Row, pCell);
+
+/*                        pCell = new DataGridCell(text,file_path);
+
+                        pCell->m_mapAttributes["vmTimestamp"] = mapVMData["vmTimestamp"];
+                        pCell->m_mapAttributes["vmDuration"] = mapVMData["vmDuration"];
+                        pCell->m_mapAttributes["vmCallerID"] = mapVMData["vmCallerID"];
+
+                        pDataGrid->SetData(0,Row,pCell);
+*/
+                        Row++;			
 		}
+
+		free(namelist[n]);	// aren't doubly indirect pointers wonderful? :P
 	}
-	user_path=string(VOICEMAIL_LOCATION)+sExtension+string("/INBOX/Old");
-	dir=opendir(user_path.c_str());
-	dir_ent = NULL;
-	while(NULL != dir && (dir_ent = readdir(dir)))
-	{
-	    struct stat statbuf;
-		string buffer = user_path+dir_ent->d_name;
-        stat(buffer.c_str(),&statbuf);
-        if((S_ISREG(statbuf.st_mode)) && (dir_ent->d_name[0] != '.') && (strstr(dir_ent->d_name,".txt") != NULL))
-        {
-			string text = "Old message " + StringUtils::itos(Row+1);
-			string file_path=user_path+(dir_ent->d_name);
-			file_path.replace(file_path.length()-4,4,".wav");
-			LoggerWrapper::GetInstance()->Write(LV_STATUS,"WILL SHOW %s / %s",text.c_str(),file_path.c_str());
+    }
 
-			string URL_Parm;
-			{
-				string StdErr;
-				const char * const args[] = { VOICEMAIL_URL_PARAM, file_path.c_str(), NULL };
-				ProcessUtils::GetCommandOutput(args[0], args, URL_Parm, StdErr);
-			}
-			string url = VOICEMAIL_URL + StringUtils::Replace(URL_Parm, "\n", "");
-			
-			DCE::CMD_MH_Play_Media CMD_MH_Play_Media_
-				(pMessage->m_dwPK_Device_From, pMediaPlugin->m_dwPK_Device, pMessage->m_dwPK_Device_From, url, MEDIATYPE_pluto_StoredAudio_CONST,0,"",0,0,false,false,false);
-			
-			pCell = new DataGridCell(text,"");
-			pCell->m_pMessage=CMD_MH_Play_Media_.m_pMessage;
-			pDataGrid->SetData(0,Row,pCell);
-			Row++;
-		}
-	}	
+    // now for the Old voicemails
+    user_path=string(VOICEMAIL_LOCATION)+sExtension+string("/INBOX/Old");
+    n = scandir(user_path.c_str(),&namelist, 0, alphasort);     // alphasort Defined in _SVID_SOURCE
+    if (n < 0)
+    {
+        // Don't do a damn thing.
+    }
+    else
+    {
+        while(n--)      // Descending.
+        {
+                // stat() the file for some basic info.
+                struct stat statbuf;
+                string buffer = user_path+namelist[n]->d_name;
+                stat(buffer.c_str(),&statbuf);
+
+                if((S_ISREG(statbuf.st_mode)) && (namelist[n]->d_name[0] != '.') && (strstr(namelist[n]->d_name,".txt") != NULL))
+                {
+                        map<string, string> mapVMData;
+                        string file_path=user_path+(namelist[n]->d_name);
+                        string text = "" + StringUtils::itos(Row+1) + ": " + ParseVoiceMailMetadata(file_path,mapVMData);
+                        file_path.replace(file_path.length()-4,4,".wav");
+                        LoggerWrapper::GetInstance()->Write(LV_STATUS,"WILL SHOW %s / %s",text.c_str(),file_path.c_str());
+
+                        string URL_Parm;
+                        {
+                                string StdErr;
+                                const char * const args[] = { VOICEMAIL_URL_PARAM, file_path.c_str(), NULL };
+                                ProcessUtils::GetCommandOutput(args[0], args, URL_Parm, StdErr);
+                        }
+
+                        string url= VOICEMAIL_URL + StringUtils::Replace(URL_Parm, "\n", "");
+
+                       // Date Cell
+                        pCell = new DataGridCell(mapVMData["vmTimestamp"],file_path);
+			pCell->m_AltColor = 7829367;
+                        pDataGrid->SetData(0, Row, pCell);
+
+                        // Duration Cell
+                        pCell = new DataGridCell(mapVMData["vmDuration"],file_path);
+                        pCell->m_AltColor = 7829367;
+                        pDataGrid->SetData(1, Row, pCell);
+
+                        // Caller ID Cell
+                        pCell = new DataGridCell(mapVMData["vmCallerID"],file_path);
+                        pCell->m_Colspan = 8;
+                        pCell->m_AltColor = 7829367;
+                        pDataGrid->SetData(2, Row, pCell);
+
+                        Row++;
+                }
+
+                free(namelist[n]);      // aren't doubly indirect pointers wonderful? :P
+        }
+    }
+
+    // FIXME Come back here and do the same thing for Old.
+
 #endif
 	return pDataGrid;
 }
@@ -3261,7 +3435,7 @@ ExtensionStatus * Telecom_Plugin::FindExtensionStatusByDevice(int iPK_Device, in
 	}
 
 	//hardphone or embedded?
-	string sSrcPhoneNumber = pDeviceData->m_mapParameters_Find(DEVICEDATA_PhoneNumber_CONST);
+	string sSrcPhoneNumber = pDeviceData->mapParameters_Find(DEVICEDATA_PhoneNumber_CONST);
 
 	//orbiter associated with an embedded?
 	if(sSrcPhoneNumber.empty())
@@ -3272,7 +3446,7 @@ ExtensionStatus * Telecom_Plugin::FindExtensionStatusByDevice(int iPK_Device, in
 			DeviceData_Router *pDeviceData = find_Device(nEmbeddedPhoneID);
 			if(NULL != pDeviceData)
 			{
-				sSrcPhoneNumber = pDeviceData->m_mapParameters_Find(DEVICEDATA_PhoneNumber_CONST);
+				sSrcPhoneNumber = pDeviceData->mapParameters_Find(DEVICEDATA_PhoneNumber_CONST);
 
 				if(NULL != pEmbeddedPhone)
 					*pEmbeddedPhone = nEmbeddedPhoneID;
@@ -3796,15 +3970,23 @@ void Telecom_Plugin::CMD_Add_Extensions_To_Call(string sPhoneCallID,string sExte
 void Telecom_Plugin::CMD_Get_Associated_Picture_For_Channel(string sChannel,char **pData,int *iData_Size,string &sCMD_Result,Message *pMessage)
 //<-dceag-c928-e->
 {
+	// Los93soL
+	LoggerWrapper::GetInstance()->Write(LV_CRITICAL, "Telecom_Plugin::CMD_Get_Associated_Picture_For_Channel Begin");
+
 	if(NULL != pData && NULL != iData_Size)
 	{
 		//default path for unknown user
 		string sPath = "/usr/pluto/orbiter/skins/Basic/Users/UnknownUser.png";
 
+		// Los93sol
+		string sCallerID = m_mapChannel2CallerID[sChannel];
+		LoggerWrapper::GetInstance()->Write(LV_CRITICAL, "CMD_Get_Associated_Picture_For_Channel : sCallerID: %s", sCallerID.c_str());
+
 		string sExten;
 		if(!ParseChannel(sChannel, &sExten) || sExten.empty() )
-			LoggerWrapper::GetInstance()->Write(LV_WARNING, "CMD_Get_Associated_Picture_For_Channel : no extension from channel %s", sChannel.c_str());
-	
+			LoggerWrapper::GetInstance()->Write(LV_CRITICAL, "CMD_Get_Associated_Picture_For_Channel : no extension from channel %s", sChannel.c_str());
+
+		LoggerWrapper::GetInstance()->Write(LV_CRITICAL, "CMD_Get_Associated_Picture_For_Channel : sExten: %s", sExten.c_str());
 		int nEmbeddedDeviceID = FindValueInMap(map_ext2device, sExten, 0); 
 
 		if(0 != nEmbeddedDeviceID)
@@ -3820,14 +4002,43 @@ void Telecom_Plugin::CMD_Get_Associated_Picture_For_Channel(string sChannel,char
 					"/usr/pluto/orbiter/users/" + StringUtils::ltos(pOH_Orbiter->m_pOH_User->m_iPK_Users) + ".png";
 
 				if(FileUtils::FileExists(sUserPicturePath))
-					sPath = sUserPicturePath;
+				  sPath = sUserPicturePath;
 			}
+			
 		}
+		
+		// Attempt to get image for contact in contacts database.
+		vector<Row_PhoneNumber *> vectRow_PhoneNumber;
+		//string sWhere = "DialAs LIKE '%"+sExten+"%'";
+
+		// Los93soL
+		string sWhere = "Extension = '" + sExten + "' OR CONCAT(AreaCode, PhoneNumber) = '" + sCallerID + "' OR PhoneNumber = '" + sCallerID + "'";
+
+		LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"CMD_Get_Associated_Picture_For_Channel: sWhere is %s",sWhere.c_str());
+
+		m_pDatabase_pluto_telecom->PhoneNumber_get()->GetRows(sWhere,&vectRow_PhoneNumber);
+		if (vectRow_PhoneNumber.size())
+		  {
+		    Row_PhoneNumber *pRow_PhoneNumber = vectRow_PhoneNumber[0];  // first match
+		    int iContactID = pRow_PhoneNumber->FK_Contact_get();
+		    string sContactPicturePath = "/usr/pluto/orbiter/contacts/" + StringUtils::itos(iContactID) + 
+		      ".png";
+			
+			LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"BLARG sContactPicturePath IS %s",sContactPicturePath.c_str());
+
+		    if(FileUtils::FileExists(sContactPicturePath))
+		      sPath = sContactPicturePath;
+		  }
+		
 
 		size_t ulSize = 0;
 		*pData = FileUtils::ReadFileIntoBuffer(sPath, ulSize);
 		*iData_Size = static_cast<int>(ulSize);
 	}
+
+	// Los93soL
+	LoggerWrapper::GetInstance()->Write(LV_CRITICAL, "Telecom_Plugin::CMD_Get_Associated_Picture_For_Channel End");
+
 }
 
 string Telecom_Plugin::DebugPendingCalls() const
@@ -3906,6 +4117,15 @@ void Telecom_Plugin::CMD_Add_To_Speed_Dial(int iPK_Device,string sCallerID,strin
 
 string Telecom_Plugin::GetCallerName(string sChannel, string sCallerID)
 {
+	// Los93soL
+	LoggerWrapper::GetInstance()->Write(LV_STATUS, "GetCallerName : sChannel: %s sCallerID: %s", sChannel.c_str(), sCallerID.c_str());
+	if(sCallerID=="") {
+		LoggerWrapper::GetInstance()->Write(LV_STATUS, "GetCallerName: Pulling caller ID from map");
+		sCallerID = m_mapChannel2CallerID[sChannel];
+		LoggerWrapper::GetInstance()->Write(LV_STATUS, "GetCallerName: Map returned caller ID: %s", sCallerID.c_str());
+	}
+
+
 	string sCallerName;
 	string sExten;
 
@@ -3913,7 +4133,7 @@ string Telecom_Plugin::GetCallerName(string sChannel, string sCallerID)
 	if(!ParseChannel(sChannel, &sExten))
 	{
 		//failed to extract extension
-		LoggerWrapper::GetInstance()->Write(LV_STATUS, "GetCallerName : Failed to extension from channel %s", sChannel.c_str());
+		LoggerWrapper::GetInstance()->Write(LV_STATUS, "GetCallerName : Failed to get extension from channel %s", sChannel.c_str());
 	}
 	else
 	{
@@ -3947,26 +4167,36 @@ string Telecom_Plugin::GetCallerName(string sChannel, string sCallerID)
 		//do we have an entry in phone book?
 		//NOTE : if it's a device, the entry from phone book will override the caller name which uses the device name
 		vector<Row_PhoneNumber *> vectRows;
-		m_pDatabase_pluto_telecom->PhoneNumber_get()->GetRows(
-			"Extension = '" + sExten + "' OR PhoneNumber = '" + sExten + "' OR DialAs = '" + sExten + "'", 
-			&vectRows);
+		// Los93soL
+                m_pDatabase_pluto_telecom->PhoneNumber_get()->GetRows(
+                        "Extension = '" + sExten + "' OR CONCAT(AreaCode, PhoneNumber) = '" + sCallerID + "' OR PhoneNumber = '" + sCallerID + "'", &vectRows);
+
+		LoggerWrapper::GetInstance()->Write(LV_CRITICAL, "Extension = %s OR CONCAT(AreaCode, PhoneNumber) = %s OR PhoneNumber = %s",
+                                sCallerID.c_str(), sCallerID.c_str(), sCallerID.c_str());
+
 
 		if(!vectRows.empty())
 		{
-			LoggerWrapper::GetInstance()->Write(LV_STATUS, "GetCallerName: found %d records in PhoneNumber for channel %s, extension %s",
-				vectRows.size(), sChannel.c_str(), sExten.c_str());
+			LoggerWrapper::GetInstance()->Write(LV_STATUS, "GetCallerName: found %d records in PhoneNumber for channel %s, caller ID %s, extensions %s",
+				vectRows.size(), sChannel.c_str(), sCallerID.c_str(), sExten.c_str());
 
 			Row_PhoneNumber *pRow_PhoneNumber = *(vectRows.begin());
 			Row_Contact *pRow_Contact = pRow_PhoneNumber->FK_Contact_getrow();
 			if(NULL != pRow_Contact)
 			{
 				sCallerName = pRow_Contact->Name_get();
+
+				Row_PhoneType *pRow_PhoneType = pRow_PhoneNumber->FK_PhoneType_getrow();
+				if( pRow_PhoneType ) {
+                        		string sPhoneType = pRow_PhoneType->Description_get();
+					sCallerName = pRow_Contact->Name_get() + " (" + sPhoneType + ")";
+				}
 			}
 		}
 		else
 		{
-			LoggerWrapper::GetInstance()->Write(LV_STATUS, "GetCallerName: NO records found in PhoneNumber for channel %s, extension %s",
-				sChannel.c_str(), sExten.c_str());
+			LoggerWrapper::GetInstance()->Write(LV_STATUS, "GetCallerName: NO records found in PhoneNumber for channel %s, caller ID %s, extension %s",
+				sChannel.c_str(), sCallerID.c_str(), sExten.c_str());
 		}
 	}
 
@@ -3985,8 +4215,8 @@ string Telecom_Plugin::GetCallerName(string sChannel, string sCallerID)
 		}
 	}
 
-	LoggerWrapper::GetInstance()->Write(LV_STATUS, "GetCallerName: found caller name '%s' for channel %s, extension %s",
-		sCallerName.c_str(), sChannel.c_str(), sExten.c_str());
+	LoggerWrapper::GetInstance()->Write(LV_STATUS, "GetCallerName: found caller name '%s' for channel %s, caller ID %s, extension %s",
+		sCallerName.c_str(), sChannel.c_str(), sCallerID.c_str(), sExten.c_str());
 
 	return sCallerName;
 }
@@ -3997,33 +4227,45 @@ bool Telecom_Plugin::ConcurrentAccessToSoundCardAllowed(int nOrbiterID)
 
 	if(NULL != pDevice_Orbiter)
 	{
-		DeviceData_Base *pDevice_MD = pDevice_Orbiter->FindSelfOrParentWithinCategory(DEVICECATEGORY_Media_Director_CONST);
 
-		if(NULL != pDevice_MD)
+		// First, look for a USB Conference mic in the device tree.
+		DeviceData_Base *pDevice_USBMic = pDevice_Orbiter->FindSelfOrParentWithinCategory(DEVICECATEGORY_Conference_Microphones_CONST);
+		if (NULL != pDevice_USBMic)
 		{
-			string sAudioSettings;
-			CMD_Get_Device_Data_DT cmd_Get_Device_Data_DT(
-				m_dwPK_Device, DEVICETEMPLATE_General_Info_Plugin_CONST, BL_SameHouse,
-				pDevice_MD->m_dwPK_Device, DEVICEDATA_Audio_settings_CONST, true,
-				&sAudioSettings
-			);
-			SendCommand(cmd_Get_Device_Data_DT);
-
-			// search for C or O, if it is present - then no simultaneous access
-			if(sAudioSettings.find("C") == string::npos && sAudioSettings.find("O") == string::npos)
+			DeviceData_Base *pDevice_MD = pDevice_Orbiter->FindSelfOrParentWithinCategory(DEVICECATEGORY_Media_Director_CONST);
+	
+			if(NULL != pDevice_MD)
 			{
-				LoggerWrapper::GetInstance()->Write(LV_STATUS, "Audio settings '%s', concurrent access allowed!", sAudioSettings.c_str());
-				return true;
+				string sAudioSettings;
+				CMD_Get_Device_Data_DT cmd_Get_Device_Data_DT(
+					m_dwPK_Device, DEVICETEMPLATE_General_Info_Plugin_CONST, BL_SameHouse,
+					pDevice_MD->m_dwPK_Device, DEVICEDATA_Audio_settings_CONST, true,
+					&sAudioSettings
+				);
+				SendCommand(cmd_Get_Device_Data_DT);
+	
+				// search for C or O, if it is present - then no simultaneous access
+				if(sAudioSettings.find("C") == string::npos && sAudioSettings.find("O") == string::npos)
+				{
+					LoggerWrapper::GetInstance()->Write(LV_STATUS, "Audio settings '%s', concurrent access allowed!", sAudioSettings.c_str());
+					return true;
+				}
+				else
+				{
+					LoggerWrapper::GetInstance()->Write(LV_STATUS, "Audio settings '%s', concurrent access is NOT allowed!", sAudioSettings.c_str());
+				}
 			}
 			else
 			{
-				LoggerWrapper::GetInstance()->Write(LV_STATUS, "Audio settings '%s', concurrent access is NOT allowed!", sAudioSettings.c_str());
+				LoggerWrapper::GetInstance()->Write(LV_WARNING, "Can't find parent MD device for %d", nOrbiterID);
 			}
 		}
 		else
 		{
-			LoggerWrapper::GetInstance()->Write(LV_WARNING, "Can't find parent MD device for %d", nOrbiterID);
+			// There is a USB Conference Microphone present.
+			return true;
 		}
+
 	}
 	else
 	{

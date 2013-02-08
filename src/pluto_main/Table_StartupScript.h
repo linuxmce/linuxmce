@@ -177,22 +177,32 @@ void psc_restrict_set(long int val);
 
 		
 		bool When_isNull();
+bool Command_isNull();
+bool Description_isNull();
+bool Parameter_Syntax_isNull();
+bool Core_Parameter_isNull();
+bool MD_Parameter_isNull();
+bool Hybrid_Parameter_isNull();
 bool FK_DeviceTemplate_isNull();
 bool psc_id_isNull();
 bool psc_batch_isNull();
 bool psc_user_isNull();
 bool psc_frozen_isNull();
-bool psc_mod_isNull();
 bool psc_restrict_isNull();
 
 			
 		void When_setNull(bool val);
+void Command_setNull(bool val);
+void Description_setNull(bool val);
+void Parameter_Syntax_setNull(bool val);
+void Core_Parameter_setNull(bool val);
+void MD_Parameter_setNull(bool val);
+void Hybrid_Parameter_setNull(bool val);
 void FK_DeviceTemplate_setNull(bool val);
 void psc_id_setNull(bool val);
 void psc_batch_setNull(bool val);
 void psc_user_setNull(bool val);
 void psc_frozen_setNull(bool val);
-void psc_mod_setNull(bool val);
 void psc_restrict_setNull(bool val);
 	
 	
@@ -211,8 +221,6 @@ void psc_restrict_setNull(bool val);
 
 		// Return the rows in other tables with foreign keys pointing here
 		void Device_StartupScript_FK_StartupScript_getrows(vector <class Row_Device_StartupScript*> *rows);
-void Device_StartupScript_pschist_FK_StartupScript_getrows(vector <class Row_Device_StartupScript_pschist*> *rows);
-void Device_StartupScript_pschmask_FK_StartupScript_getrows(vector <class Row_Device_StartupScript_pschmask*> *rows);
 
 
 		// Setup binary serialization

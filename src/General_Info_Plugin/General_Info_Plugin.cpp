@@ -62,6 +62,7 @@ using namespace DCE;
 #include "pluto_main/Define_Screen.h"
 #include "pluto_main/Define_MediaType.h"
 #include "pluto_main/Table_Room.h"
+#include "pluto_main/Table_EntertainArea.h"
 #include "pluto_main/Define_FloorplanType.h"
 #include "pluto_main/Define_FloorplanObjectType.h"
 #include "pluto_main/Table_DeviceTemplate_AV.h"
@@ -81,6 +82,10 @@ using namespace DCE;
 #include "Orbiter_Plugin/Orbiter_Plugin.h"
 #include "Event_Plugin/Event_Plugin.h"
 #include "Gen_Devices/AllScreens.h"
+#include "pluto_main/Table_Array.h"
+#include "pluto_main/Table_CommandGroup_Room.h"
+#include "pluto_main/Table_CommandGroup.h"
+#include "pluto_main/Table_CommandGroup_EntertainArea.h"
 
 #include "SerializeClass/ShapesColors.h"
 
@@ -152,7 +157,7 @@ bool General_Info_Plugin::GetConfig()
 	}
 
 	m_pAlarmManager = new AlarmManager();
-    m_pAlarmManager->Start(1);      // number of worker threads
+	m_pAlarmManager->Start(1);  // number of worker threads
 
 	return true;
 }
@@ -179,7 +184,7 @@ General_Info_Plugin::~General_Info_Plugin()
 bool General_Info_Plugin::Register()
 //<-dceag-reg-e->
 {
-    // Get the datagrid plugin
+	// Get the datagrid plugin
 	m_pDatagrid_Plugin=( Datagrid_Plugin * ) m_pRouter->FindPluginByTemplate(DEVICETEMPLATE_Datagrid_Plugin_CONST);
 	m_pOrbiter_Plugin=( Orbiter_Plugin * ) m_pRouter->FindPluginByTemplate(DEVICETEMPLATE_Orbiter_Plugin_CONST);
 	m_pEvent_Plugin=( Event_Plugin * ) m_pRouter->FindPluginByTemplate(DEVICETEMPLATE_Event_Plugin_CONST);
@@ -399,10 +404,10 @@ void General_Info_Plugin::CMD_Get_Device_Data(int iPK_Device,int iPK_DeviceData,
 			*sValue_To_Assign="BAD DEVICE";
 		else
 		{
-			if( pDeviceData_Router->m_mapParameters_Find(iPK_DeviceData)=="" )
+			if( pDeviceData_Router->m_mapParameters.find(iPK_DeviceData)==pDeviceData_Router->m_mapParameters.end() )
 				*sValue_To_Assign="BAD PARAMETER";
 			else
-				*sValue_To_Assign=pDeviceData_Router->m_mapParameters_Find(iPK_DeviceData);
+				*sValue_To_Assign=pDeviceData_Router->m_mapParameters[iPK_DeviceData];
 		}
 		return;
 	}
@@ -478,7 +483,7 @@ void General_Info_Plugin::CMD_Request_File_And_Checksum(string sFilename,char **
 
 	*iData_Size = (int) Length;
 	*pData = c;
-    *sChecksum = FileUtils::FileChecksum(*pData, *iData_Size);
+	*sChecksum = FileUtils::FileChecksum(*pData, *iData_Size);
 
 	if(*bChecksum_Only)
 	{
@@ -791,8 +796,8 @@ class DataGridTable *General_Info_Plugin::PendingTasksGrid( string GridID, strin
 	for(list<int>::iterator it=DevicesWithPendingTasks.begin();it!=DevicesWithPendingTasks.end();++it)
 		ReportPendingTasksFromDevice(m_pcRequestSocket->m_pClientSocket,m_dwPK_Device,*it,&pendingTaskList);
 
-    DataGridTable *pDataGrid = new DataGridTable( );
-    DataGridCell *pCell;
+	DataGridTable *pDataGrid = new DataGridTable( );
+	DataGridCell *pCell;
 	int RowCount=0;
 	for(list<PendingTask *>::iterator it=pendingTaskList.m_listPendingTask.begin();it!=pendingTaskList.m_listPendingTask.end();++it)
 	{
@@ -809,7 +814,7 @@ class DataGridTable *General_Info_Plugin::PendingTasksGrid( string GridID, strin
 		if( pPendingTask->m_bCanAbort )
 			pCell->m_mapAttributes["Abort"] = "1";
 		pCell->m_mapAttributes["PK_Device"] = StringUtils::itos(pPendingTask->m_dwPK_Device_Abort);
-        pDataGrid->SetData( 0, RowCount++, pCell );
+	pDataGrid->SetData( 0, RowCount++, pCell );
 	}
 	return pDataGrid;
 }
@@ -926,22 +931,22 @@ class DataGridTable *General_Info_Plugin::QuickStartApps( string GridID, string 
 		}
 		else
 		{
-            if(!vectRow_Device_QuickStart.size())
-                return pDataGrid;
+		if(!vectRow_Device_QuickStart.size())
+		return pDataGrid;
 
 			Row_Device_QuickStart *pRow_Device_QuickStart = vectRow_Device_QuickStart[s];
 			pRow_QuickStartTemplate=pRow_Device_QuickStart->FK_QuickStartTemplate_getrow();
 			sDescription = pRow_Device_QuickStart->Description_get();
 			sBinary = pRow_QuickStartTemplate ? pRow_QuickStartTemplate->Binary_get() : "";
 			sArguments = pRow_QuickStartTemplate ? pRow_QuickStartTemplate->Arguments_get() : "";
-            if( pRow_Device_QuickStart->EK_Picture_get() )
-                pBuffer = FileUtils::ReadFileIntoBuffer("/home/mediapics/" + StringUtils::itos(pRow_Device_QuickStart->EK_Picture_get()) + "_tn.jpg",iSize);
+		if( pRow_Device_QuickStart->EK_Picture_get() )
+		pBuffer = FileUtils::ReadFileIntoBuffer("/home/mediapics/" + StringUtils::itos(pRow_Device_QuickStart->EK_Picture_get()) + "_tn.jpg",iSize);
 		}
 
 		if( pRow_QuickStartTemplate )
 		{
 			if( !pBuffer )
-                pBuffer = FileUtils::ReadFileIntoBuffer("/usr/pluto/orbiter/quickstart/" + StringUtils::itos(pRow_QuickStartTemplate->PK_QuickStartTemplate_get()) + "_tn.jpg",iSize);
+		pBuffer = FileUtils::ReadFileIntoBuffer("/home/quick_start_icons/template_" + StringUtils::itos(pRow_QuickStartTemplate->PK_QuickStartTemplate_get()) + ".png", iSize);
 		}
 
 		if( sBinary.size()==0 )
@@ -970,11 +975,11 @@ class DataGridTable *General_Info_Plugin::QuickStartApps( string GridID, string 
 		pCellText->m_Colspan=3;
 		pDataGrid->SetData( 0, iRow, pCellIcon );
 		pDataGrid->SetData( 1, iRow, pCellText );
-        if( pBuffer )
-        {
-            pCellIcon->m_pGraphicData = pBuffer;
-            pCellIcon->m_GraphicLength = iSize;
-        }
+	if( pBuffer )
+	{
+		pCellIcon->m_pGraphicData = pBuffer;
+		pCellIcon->m_GraphicLength = iSize;
+	}
 /*
 		pCellIcon->m_pMessage = BuildMessageToSpawnApp(m_pRouter->m_mapDeviceData_Router_Find(pMessage->m_dwPK_Device_From),
 			pDevice_MD,pDevice_AppServer,pDevice_Orbiter_OSD,
@@ -992,8 +997,8 @@ class DataGridTable *General_Info_Plugin::QuickStartApps( string GridID, string 
 
 class DataGridTable *General_Info_Plugin::MRUDocuments( string GridID, string Parms, void *ExtraData, int *iPK_Variable, string *sValue_To_Assign, class Message *pMessage )
 {
-    DataGridTable *pDataGrid = new DataGridTable( );
-//    DataGridCell *pCell;
+	DataGridTable *pDataGrid = new DataGridTable( );
+//	DataGridCell *pCell;
 
 
 	return pDataGrid;
@@ -1016,7 +1021,7 @@ class DataGridTable *General_Info_Plugin::TypesOfPhones( string GridID, string P
 
 class DataGridTable *General_Info_Plugin::UsersGrid( string GridID, string Parms, void *ExtraData, int *iPK_Variable, string *sValue_To_Assign, class Message *pMessage )
 {
-    int iWidth = atoi(pMessage->m_mapParameters[COMMANDPARAMETER_Width_CONST].c_str());
+	int iWidth = atoi(pMessage->m_mapParameters[COMMANDPARAMETER_Width_CONST].c_str());
 	if( !iWidth )
 		iWidth = 4;
 
@@ -1044,7 +1049,7 @@ class DataGridTable *General_Info_Plugin::UsersGrid( string GridID, string Parms
 
 class DataGridTable *General_Info_Plugin::DevicesOfCategory( string GridID, string Parms, void *ExtraData, int *iPK_Variable, string *sValue_To_Assign, class Message *pMessage )
 {
-    int iWidth = atoi(pMessage->m_mapParameters[COMMANDPARAMETER_Width_CONST].c_str());
+	int iWidth = atoi(pMessage->m_mapParameters[COMMANDPARAMETER_Width_CONST].c_str());
 	if( !iWidth )
 		iWidth = 1;
 
@@ -1177,7 +1182,7 @@ class DataGridTable *General_Info_Plugin::DeviceTemplatesOfCategory( string Grid
 
 class DataGridTable *General_Info_Plugin::CitiesGrid( string GridID, string Parms, void *ExtraData, int *iPK_Variable, string *sValue_To_Assign, class Message *pMessage )
 {
-    int iWidth = atoi(pMessage->m_mapParameters[COMMANDPARAMETER_Width_CONST].c_str());
+	int iWidth = atoi(pMessage->m_mapParameters[COMMANDPARAMETER_Width_CONST].c_str());
 	if( !iWidth )
 		iWidth = 1;
 
@@ -1236,7 +1241,7 @@ class DataGridTable *General_Info_Plugin::CitiesGrid( string GridID, string Parm
 
 class DataGridTable *General_Info_Plugin::CountriesGrid( string GridID, string Parms, void *ExtraData, int *iPK_Variable, string *sValue_To_Assign, class Message *pMessage )
 {
-    int iWidth = atoi(pMessage->m_mapParameters[COMMANDPARAMETER_Width_CONST].c_str());
+	int iWidth = atoi(pMessage->m_mapParameters[COMMANDPARAMETER_Width_CONST].c_str());
 	if( !iWidth )
 		iWidth = 1;
 
@@ -1274,8 +1279,8 @@ class DataGridTable *General_Info_Plugin::Rooms( string GridID, string Parms, vo
 	if( !iWidth )
 		iWidth = 4;
 
-    DataGridTable *pDataGrid = new DataGridTable( );
-    DataGridCell *pCell;
+	DataGridTable *pDataGrid = new DataGridTable( );
+	DataGridCell *pCell;
 
 	int iRow=0,iCol=0;
 	string sql;
@@ -1304,7 +1309,7 @@ class DataGridTable *General_Info_Plugin::Rooms( string GridID, string Parms, vo
 	}
 
 	PlutoSqlResult result;
-    DB_ROW row;
+	DB_ROW row;
 	if( (result.r = m_pDatabase_pluto_main->db_wrapper_query_result(sql.c_str())) )
 	{
 		while( ( row=db_wrapper_fetch_row( result.r ) ) )
@@ -1572,7 +1577,7 @@ class DataGridTable *General_Info_Plugin::AddSoftware( string GridID, string Par
 
 	vector<class Row_Device_DeviceData*> vpRows;
 	if ( !m_pDatabase_pluto_main->Device_DeviceData_get()->GetRows(" FK_Device="+StringUtils::itos(pDevice->m_dwPK_Device) + " AND FK_DeviceData=" + StringUtils::itos(DEVICEDATA_Model_CONST), 
-	      &vpRows) || vpRows.empty() )
+		  &vpRows) || vpRows.empty() )
 	{
 		LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"General_Info_Plugin::AddSoftware No Model is set for device %d", pDevice->m_dwPK_Device);
 		return NULL;
@@ -1582,17 +1587,17 @@ class DataGridTable *General_Info_Plugin::AddSoftware( string GridID, string Par
 
 	if ( StringUtils::StartsWith(sModel, "LMCE_CORE_") )
 	{
-	    sModel = StringUtils::Replace(sModel, "LMCE_CORE_", "");
+		sModel = StringUtils::Replace(sModel, "LMCE_CORE_", "");
 	}
 	else if ( StringUtils::StartsWith(sModel, "LMCE_MD_") )
 	{
-	    sModel = StringUtils::Replace(sModel, "LMCE_MD_", "");
+		sModel = StringUtils::Replace(sModel, "LMCE_MD_", "");
 	}
 	else
 	{
-	    LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"General_Info_Plugin::AddSoftware unknown Model is set for device %d: %s", 
-		    pDevice->m_dwPK_Device, sModel.c_str());
-	    return NULL;
+		LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"General_Info_Plugin::AddSoftware unknown Model is set for device %d: %s", 
+			pDevice->m_dwPK_Device, sModel.c_str());
+		return NULL;
 	}
 
 
@@ -1713,7 +1718,7 @@ class DataGridTable *General_Info_Plugin::AVDiscret( string GridID, string Parms
 	DataGridTable *pDataGrid = new DataGridTable( );
 	DataGridCell *pCell;
 	//input parameters
-	string sManufacturerId,sTemplateId,sDeviceCategory,sCommands;      
+	string sManufacturerId,sTemplateId,sDeviceCategory,sCommands;	  
 	string sInfraredGrupIds; 
 	string sql,index;
 	string::size_type pos=0;
@@ -1954,8 +1959,8 @@ class DataGridTable *General_Info_Plugin::AVDSPMode( string GridID, string Parms
 	string sql,index;
 
 	sql = "SELECT PK_Command,DeviceTemplate_DSPMode.FK_Command,Command.Description as DSPMode_Desc\
-          FROM Command\
-          LEFT JOIN DeviceTemplate_DSPMode ON PK_Command = FK_Command AND FK_DeviceTemplate='";
+	  FROM Command\
+	  LEFT JOIN DeviceTemplate_DSPMode ON PK_Command = FK_Command AND FK_DeviceTemplate='";
 	sql += Parms + "' " + "WHERE FK_CommandCategory=21 ORDER BY DSPMode_Desc ASC";
 
 	LoggerWrapper::GetInstance()->Write( LV_STATUS , "AV Wizard AVDSPMode sql" );
@@ -2540,70 +2545,73 @@ pair<string, string> strpair(string x, string y)
 
 list<pair<string, string> > General_Info_Plugin::GetUserBookmarks(string sPK_User)
 {
-    list<pair<string, string> > Bookmarks;
-    // the following code reads the Mozilla bookmarks
+	list<pair<string, string> > Bookmarks;
+	// the following code reads the Mozilla bookmarks
 
-    LoggerWrapper::GetInstance()->Write(LV_STATUS,"Reading bookmarks from %s", 
-        ("/home/user_" + sPK_User + "/bookmarks.html").c_str());
+	LoggerWrapper::GetInstance()->Write(LV_STATUS,"Reading bookmarks from %s", 
+	("/home/user_" + sPK_User + "/bookmarks.html").c_str());
 
-    size_t Size;
-    char *Buffer = FileUtils::ReadFileIntoBuffer("/home/user_" + sPK_User + "/bookmarks.html", Size);
-    if( Buffer )
-    {
-        char * BufferTop = Buffer;
-        char *BraceA;
-        char *PosInBuffer=Buffer;
-        while( (BraceA=strstr(Buffer,"<A")) )
-        {
-            char *HRef = strstr(BraceA,"HREF");
-            if( !HRef )
-            {
-                Buffer++;  // Skip past this and continue
-                continue;
-            }
+	size_t Size;
+	char *Buffer = FileUtils::ReadFileIntoBuffer("/home/user_" + sPK_User + "/bookmarks.html", Size);
+	if( Buffer )
+	{
+	char * BufferTop = Buffer;
+	char *BraceA;
+	char *PosInBuffer=Buffer;
+	while( (BraceA=strstr(Buffer,"<A")) )
+	{
+		char *HRef = strstr(BraceA,"HREF");
+		if( !HRef )
+		{
+		Buffer++;  // Skip past this and continue
+		continue;
+		}
 
-            char *FirstQuote = strchr(HRef,'"');
-            if( !FirstQuote )
-            {
-                Buffer++;  // Skip past this and continue
-                continue;
-            }
+		char *FirstQuote = strchr(HRef,'"');
+		if( !FirstQuote )
+		{
+		Buffer++;  // Skip past this and continue
+		continue;
+		}
 
-            char *SecondQuote = strchr(FirstQuote+1,'"');
-            if( !SecondQuote )
-            {
-                Buffer++;  // Skip past this and continue
-                continue;
-            }
-            *SecondQuote=0;
+		char *SecondQuote = strchr(FirstQuote+1,'"');
+		if( !SecondQuote )
+		{
+		Buffer++;  // Skip past this and continue
+		continue;
+		}
+		*SecondQuote=0;
 
-            string Link(FirstQuote+1);
-            char *LastBrace = strchr(SecondQuote+1,'>');
-            if( !LastBrace )
-            {
-                Buffer++;  // Skip past this and continue
-                continue;
-            }
+		string Link(FirstQuote+1);
+		char *LastBrace = strchr(SecondQuote+1,'>');
+		if( !LastBrace )
+		{
+		Buffer++;  // Skip past this and continue
+		continue;
+		}
 
-            char * EndBraceA = strstr(LastBrace+1, "</A>");
-            *EndBraceA = 0;
-            string LinkText(LastBrace+1);
+		char * EndBraceA = strstr(LastBrace+1, "</A>");
+		*EndBraceA = 0;
+		string LinkText(LastBrace+1);
 
-            Buffer = EndBraceA+1;
-            LoggerWrapper::GetInstance()->Write(LV_STATUS,"add bookmarks %s / %s",Link.c_str(), LinkText.c_str());
-            Bookmarks.push_back(pair<string, string>(Link, LinkText));
-        }
+		Buffer = EndBraceA+1;
+		LoggerWrapper::GetInstance()->Write(LV_STATUS,"add bookmarks %s / %s",Link.c_str(), LinkText.c_str());
+		// Do not touch place: URLs.
+		if (Link.find("place:") == string::npos)
+			Bookmarks.push_back(pair<string, string>(Link, LinkText));
 
-        delete[] BufferTop;
-    }
+	}
 
-    if( Bookmarks.size()==0 )
-    {
-        Bookmarks.push_back(make_pair<string,string> ("http://dcerouter/pluto-admin","Pluto Admin"));
-        //Bookmarks.push_back(make_pair<string,string> ("http://dcerouter/support","Pluto Support"));
-    }
+	delete[] BufferTop;
+	}
 
-    return Bookmarks;
+	if( Bookmarks.size()==0 )
+	{
+	Bookmarks.push_back(make_pair<string,string> ("http://dcerouter/lmce-admin","LinuxMCE Admin"));
+	//Bookmarks.push_back(make_pair<string,string> ("http://dcerouter/support","Pluto Support"));
+	}
+
+	return Bookmarks;
 }
 //<-dceag-c697-b->
 
@@ -2862,23 +2870,22 @@ Row_Device *General_Info_Plugin::ProcessChildDevice(Row_Device *pRow_Device,stri
 	{
 		pRow_Device_Child = vectRow_Device_Child[0];
 		pRow_Device_Child->Reload();   // Don't overwrite the room or other data that may already be there
-		if( pRow_Device_Child->FK_DeviceTemplate_get()==PK_DeviceTemplate )
-			return pRow_Device_Child; // For the time being, don't do anything because it's resetting the device's psc_mod causing orbiter to report the router needs a reload
-		else
-			CMD_Delete_Device(pRow_Device_Child->PK_Device_get()); // If the device template has changed, delete the device and recreate it
+		return pRow_Device_Child; // For the time being, don't do anything because it's resetting the device's psc_mod causing orbiter to report the router needs a reload
 	}
-
-	// Create it since it doesn't exist
-	int iPK_Device;
-	bCreatedNew=true;
-	CMD_Create_Device(PK_DeviceTemplate,"",0,"",
-		StringUtils::itos(DEVICEDATA_PortChannel_Number_CONST) + "|" + sInternalID,
-		0,pRow_Device->PK_Device_get(),"",0,0,&iPK_Device);
-	pRow_Device_Child = m_pDatabase_pluto_main->Device_get()->GetRow(iPK_Device);
-	if( !pRow_Device_Child )
+	else
 	{
-		LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"General_Info_Plugin::ProcessChildDevice failed to create child %d",iPK_Device);
-		return NULL;
+		// Create it since it doesn't exist
+		int iPK_Device;
+		bCreatedNew=true;
+		CMD_Create_Device(PK_DeviceTemplate,"",0,"",
+			StringUtils::itos(DEVICEDATA_PortChannel_Number_CONST) + "|" + sInternalID,
+			0,pRow_Device->PK_Device_get(),"",0,0,&iPK_Device);
+		pRow_Device_Child = m_pDatabase_pluto_main->Device_get()->GetRow(iPK_Device);
+		if( !pRow_Device_Child )
+		{
+			LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"General_Info_Plugin::ProcessChildDevice failed to create child %d",iPK_Device);
+			return NULL;
+		}
 	}
 
 	// Don't reset the description if it's already there, the user may have overridden the default name
@@ -2907,20 +2914,15 @@ Row_Device *General_Info_Plugin::ProcessChildDevice(Row_Device *pRow_Device,stri
 
 	pRow_Device_Child->FK_DeviceTemplate_set( PK_DeviceTemplate );
 
-	if( atoi(sPK_FloorplanObjectType.c_str())>0 )
+	Row_Device_DeviceData *pRow_Device_DeviceData = m_pDatabase_pluto_main->Device_DeviceData_get()->GetRow(pRow_Device_Child->PK_Device_get(),DEVICEDATA_PK_FloorplanObjectType_CONST);
+	if( !pRow_Device_DeviceData )
 	{
-		LoggerWrapper::GetInstance()->Write(LV_STATUS, "General_Info_Plugin::ProcessChildDevice setting sPK_FloorplanObjectType to %s for %d",
-			sPK_FloorplanObjectType.c_str(), pRow_Device_Child->PK_Device_get());
-		Row_Device_DeviceData *pRow_Device_DeviceData = m_pDatabase_pluto_main->Device_DeviceData_get()->GetRow(pRow_Device_Child->PK_Device_get(),DEVICEDATA_PK_FloorplanObjectType_CONST);
-		if( !pRow_Device_DeviceData )
-		{
-			pRow_Device_DeviceData = m_pDatabase_pluto_main->Device_DeviceData_get()->AddRow();
-			pRow_Device_DeviceData->FK_Device_set(pRow_Device_Child->PK_Device_get());
-			pRow_Device_DeviceData->FK_DeviceData_set(DEVICEDATA_PK_FloorplanObjectType_CONST);
-		}
-
-		pRow_Device_DeviceData->IK_DeviceData_set( sPK_FloorplanObjectType );
+		pRow_Device_DeviceData = m_pDatabase_pluto_main->Device_DeviceData_get()->AddRow();
+		pRow_Device_DeviceData->FK_Device_set(pRow_Device_Child->PK_Device_get());
+		pRow_Device_DeviceData->FK_DeviceData_set(DEVICEDATA_PK_FloorplanObjectType_CONST);
 	}
+
+	pRow_Device_DeviceData->IK_DeviceData_set( sPK_FloorplanObjectType );
 
 	while(pos<sLine.size())
 	{
@@ -3121,7 +3123,7 @@ void General_Info_Plugin::CMD_Delete_Device(int iPK_Device,string &sCMD_Result,M
 	// First delete any embedded devices
 	string sSQL = "SELECT PK_Device FROM Device where FK_Device_RouteTo=" + StringUtils::itos(iPK_Device);
 	PlutoSqlResult result_set;
-    DB_ROW row;
+	DB_ROW row;
 	if( (result_set.r=m_pRouter->db_wrapper_query_result(sSQL)) )
 		while ((row = db_wrapper_fetch_row(result_set.r)))
 			if( row[0] && atoi(row[0]) )
@@ -3163,7 +3165,7 @@ void General_Info_Plugin::CMD_Delete_Device(int iPK_Device,string &sCMD_Result,M
 void General_Info_Plugin::CMD_Set_Room_For_Device(int iPK_Device,string sName,int iPK_Room,string &sCMD_Result,Message *pMessage)
 //<-dceag-c274-e->
 {
-    PLUTO_SAFETY_LOCK(mm, m_GipMutex);
+	PLUTO_SAFETY_LOCK(mm, m_GipMutex);
 	size_t sBefore=m_mapNewPnpDevicesWaitingForARoom.size();
 
 	Row_Device *pRow_Device = m_pDatabase_pluto_main->Device_get()->GetRow(iPK_Device);
@@ -3393,9 +3395,10 @@ void General_Info_Plugin::CMD_Set_Enable_Status(int iPK_Device,bool bEnable,stri
 		pRow_Device->Disabled_set(bEnable ? 0 : 1);
 		pRow_Device->Table_Device_get()->Commit();
 
-		// If it's a serial device, remove the com port
-		string sSQL = "UPDATE Device_DeviceData SET IK_DeviceData=NULL WHERE FK_Device=" + StringUtils::itos(iPK_Device) + " AND FK_DeviceData=" TOSTRING(DEVICEDATA_COM_Port_on_PC_CONST);
-		m_pDatabase_pluto_main->threaded_db_wrapper_query(sSQL,true);
+		// This has been commented out on the grounds that I think it is RETARDED. -tschak
+//		// If it's a serial device, remove the com port
+//		string sSQL = "UPDATE Device_DeviceData SET IK_DeviceData=NULL WHERE FK_Device=" + StringUtils::itos(iPK_Device) + " AND FK_DeviceData=" TOSTRING(DEVICEDATA_COM_Port_on_PC_CONST);
+//		m_pDatabase_pluto_main->threaded_db_wrapper_query(sSQL,true);
 	}
 	else
 	{
@@ -3475,7 +3478,7 @@ void General_Info_Plugin::CMD_Get_Available_Storage_Device(int iSize,int *iPK_De
 				Device \
 				JOIN Device_DeviceData DDSize ON DDSize.FK_Device = Device.PK_Device AND DDSize.FK_DeviceData = 160 \
 				JOIN Device_DeviceData DDType ON DDType.FK_Device = Device.PK_Device AND DDType.FK_DeviceData = 159 \
-			        LEFT JOIN Device_DeviceData DDMaxFileSize ON DDMaxFileSize.FK_Device = Device.PK_Device AND DDType.FK_DeviceData = 166 \
+				LEFT JOIN Device_DeviceData DDMaxFileSize ON DDMaxFileSize.FK_Device = Device.PK_Device AND DDType.FK_DeviceData = 166 \
 				JOIN DeviceTemplate ON DeviceTemplate.PK_DeviceTemplate = Device.FK_DeviceTemplate \
 			WHERE \
 				DDSize.IK_DeviceData > " + StringUtils::itos(iSize) + " \
@@ -3499,8 +3502,8 @@ void General_Info_Plugin::CMD_Get_Available_Storage_Device(int iSize,int *iPK_De
 		{
 			*iPK_Device = atoi(row[0]);
 			*sDescription = row[1];
-		       	*sPath = "/mnt/device/";
-		        *sPath += row[0];
+			   	*sPath = "/mnt/device/";
+			*sPath += row[0];
 
 		}	
 	}
@@ -3524,7 +3527,7 @@ void General_Info_Plugin::CMD_Get_Available_Storage_Device(int iSize,int *iPK_De
 		
 		if (result_set.r != NULL) {
 			row = NULL;
-	                if ( (row = db_wrapper_fetch_row(result_set.r)) != NULL ) {
+			if ( (row = db_wrapper_fetch_row(result_set.r)) != NULL ) {
 				*iPK_Device = atoi(row[0]);
 				*sDescription = "Core /home directory";
 				*sPath = "/home/";
@@ -3990,14 +3993,7 @@ void General_Info_Plugin::AlarmCallback(int id, void* param)
 
 void General_Info_Plugin::UpdateEntAreas()
 {
-	UpdateEntArea updateEntArea;
-	if( updateEntArea.Connect(m_pData->m_dwPK_Installation,m_pRouter->sDBHost_get(),m_pRouter->sDBUser_get(),m_pRouter->sDBPassword_get(),m_pRouter->sDBName_get(),m_pRouter->iDBPort_get()) )
-	{
-		updateEntArea.GetMediaAndRooms();
-		updateEntArea.SetEAInRooms();
-		updateEntArea.AddDefaultScenarios();
-		LoggerWrapper::GetInstance()->Write(LV_STATUS,"General_Info_Plugin::UpdateEntArea done");
-	}
+	system("/usr/pluto/bin/UpdateEntArea");
 }
 //<-dceag-c934-b->
 
@@ -4121,12 +4117,13 @@ void General_Info_Plugin::CMD_Get_Home_Symlink(string sPath,string *sSymlink,str
 		/** @param #2 PK_Device */
 			/** The parent device */
 		/** @param #5 Value To Assign */
-			/** A pipe delimited list like this: DeviceID1|CommandLine1\nDeviceID2|CommandLine2 etc */
+			/** A pipe delimited list like this: DeviceID1|TemplateName1|CommandLine1\nDeviceID2|DeviceTemplateName2|CommandLine2 etc */
 
 void General_Info_Plugin::CMD_Get_Devices_To_Start(int iPK_Device,string *sValue_To_Assign,string &sCMD_Result,Message *pMessage)
 //<-dceag-c956-e->
 {
-}//<-dceag-c957-b->
+}
+//<-dceag-c957-b->
 
 	/** @brief COMMAND: #957 - Update Device */
 	/** Will update the description, ip, mac, device data */
@@ -4146,4 +4143,208 @@ void General_Info_Plugin::CMD_Get_Devices_To_Start(int iPK_Device,string *sValue
 void General_Info_Plugin::CMD_Update_Device(int iPK_Device,string sMac_address,int iPK_Room,string sIP_Address,string sData_String,string sDescription,string &sCMD_Result,Message *pMessage)
 //<-dceag-c957-e->
 {
+	// Tokenize the device data
+	vector<string> vectDeviceDataBuff;
+	StringUtils::Tokenize(sData_String,"|",vectDeviceDataBuff);
+	
+	// Iterate over the device data tokens in pairs
+	for (int i=0; i<vectDeviceDataBuff.size(); i=i+2) {
+		// Get the device data and convert it to an int
+		string sPK_DeviceData = vectDeviceDataBuff[i];
+		int iPK_DeviceData = atoi(sPK_DeviceData.c_str());
+
+		// Get the value of the device data
+		string sDeviceDataValue = vectDeviceDataBuff[i+1];
+
+		// LoggerWrapper::GetInstance()->Write(LV_CRITICAL, "DeviceData: %s Value: %s", sPK_DeviceData.c_str(), sDeviceDataValue.c_str());
+
+		// Set the device data
+		m_pRouter->SetDeviceDataInDB(iPK_Device,iPK_DeviceData,sDeviceDataValue,false);
+	}
+
+	// Get ready to update the room
+	Row_Device *pRow_Device = m_pDatabase_pluto_main->Device_get()->GetRow(iPK_Device);
+	pRow_Device->Reload();
+
+	// Update the room
+	if(iPK_Room > 0) {
+		pRow_Device->FK_Room_set(iPK_Room);
+	}
+
+	// Update the description
+	if(sDescription.size()) {
+		pRow_Device->Description_set(sDescription);
+		m_pDatabase_pluto_main->Device_get()->Commit();
+	}
+}
+//<-dceag-c1075-b->
+
+	/** @brief COMMAND: #1075 - Send Email */
+	/** Send an email in response to events. */
+		/** @param #282 To */
+			/** Who does the message go to? */
+		/** @param #283 Subject */
+			/** Synopsis of what happened. */
+		/** @param #284 MessageBody */
+			/** Details about the event. */
+
+void General_Info_Plugin::CMD_Send_Email(string sFrom,string sTo,string sSubject,string sMessageBody,string &sCMD_Result,Message *pMessage)
+//<-dceag-c1075-e->
+{
+	cout << "Need to implement command #1075 - Send Email" << endl;
+	cout << "Parm #282 - To=" << sTo << endl; 
+	cout << "Parm #283 - Subject=" << sSubject << endl;
+	cout << "Parm #284 - MessageBody=" << sMessageBody << endl;
+	cout << "Parm #285 - From=" << sFrom;
+
+	// Write our messagebody to a file
+	ofstream myfile ("/tmp/MessageBody.tmp");
+	if (myfile.is_open()){
+	myfile << sMessageBody.c_str();
+	myfile.close(); }
+
+	// Build our command 
+	string sCommand = "mailx -r \""+ sFrom + "\" -s \"" + sSubject + "\" \"" + sTo + "\" < /tmp/MessageBody.tmp";
+
+	// Send our command
+	system(sCommand.c_str());
+
+	// Clean up
+	sCommand = "rm /tmp/MessageBody.tmp";
+
+	system(sCommand.c_str());
+}
+//<-dceag-c1106-b->
+
+	/** @brief COMMAND: #1106 - Get Users */
+	/** Get users */
+		/** @param #5 Value To Assign */
+			/** Returns the users in this system as a Pk\tNickName\nPk\tNickName\n etc. */
+
+void General_Info_Plugin::CMD_Get_Users(string *sValue_To_Assign,string &sCMD_Result,Message *pMessage)
+//<-dceag-c1106-e->
+{
+	string result = "";
+	vector<Row_Users *> vectRow_Users;
+	m_pDatabase_pluto_main->Users_get()->GetRows("1=1 ORDER BY Nickname", &vectRow_Users);
+	for(size_t s=0; s<vectRow_Users.size(); s++)
+	{
+		result += StringUtils::itos(vectRow_Users[s]->PK_Users_get()) + "\t" + vectRow_Users[s]->Nickname_get() + "\n";
+	}
+	(*sValue_To_Assign) = result;
+}
+//<-dceag-c1107-b->
+
+	/** @brief COMMAND: #1107 - Get Rooms */
+	/** Get the rooms */
+		/** @param #5 Value To Assign */
+			/** Returns the rooms in this installation as Pk\tDescription\nPk\tDescription\n etc. */
+
+void General_Info_Plugin::CMD_Get_Rooms(string *sValue_To_Assign,string &sCMD_Result,Message *pMessage)
+//<-dceag-c1107-e->
+{
+	string result = "";
+	vector<Row_Room *> vectRow_Room;
+	m_pDatabase_pluto_main->Room_get()->GetRows("1=1 ORDER BY Description", &vectRow_Room);
+	for(size_t s=0; s<vectRow_Room.size(); s++)
+	{
+		result += StringUtils::itos(vectRow_Room[s]->PK_Room_get()) + "\t" + vectRow_Room[s]->Description_get() + "\n";
+	}
+	(*sValue_To_Assign) = result;
+}
+//<-dceag-c1108-b->
+
+	/** @brief COMMAND: #1108 - Get Scenarios */
+	/** Get scenarios */
+		/** @param #5 Value To Assign */
+			/** Returns the scenarios for the specified parameters. */
+		/** @param #45 PK_EntertainArea */
+			/** Entertainment area to get scenarios for. Only valid for media scenarios. */
+		/** @param #48 Value */
+			/** Scenario to get. 1 = Lightning, 2= Climate, 3 = Security, 4 = Telecom, 5 = Media */
+		/** @param #57 PK_Room */
+			/** The Room to get the scenarios for. Required! */
+
+void General_Info_Plugin::CMD_Get_Scenarios(string sPK_EntertainArea,int iValue,int iPK_Room,string *sValue_To_Assign,string &sCMD_Result,Message *pMessage)
+//<-dceag-c1108-e->
+{
+	string result = "";
+	switch(iValue)
+	{
+	case ARRAY_Lighting_Scenarios_CONST:
+	case ARRAY_Climate_Scenarios_CONST:
+	case ARRAY_Security_Scenarios_CONST:
+	case ARRAY_Communication_Scenarios_CONST:
+	case ARRAY_Misc_Scenarios_CONST:
+	case ARRAY_Sleeping_Scenarios_CONST:
+	{
+		vector<class Row_CommandGroup_Room *> vectAGs;
+		string sql = string(COMMANDGROUP_ROOM_FK_ROOM_FIELD) + "=" +
+			StringUtils::itos(iPK_Room) + " ORDER BY " + COMMANDGROUP_ROOM_SORT_FIELD;
+		m_pDatabase_pluto_main->CommandGroup_Room_get()->GetRows(sql,&vectAGs);
+
+		for(size_t s=0;s<vectAGs.size();++s)
+		{
+			Row_CommandGroup_Room *drAG_R = vectAGs[s];
+			Row_CommandGroup *pRow_CommandGroup=drAG_R->FK_CommandGroup_getrow();
+			if( pRow_CommandGroup && pRow_CommandGroup->FK_Array_get()==iValue && !pRow_CommandGroup->Disabled_get() )
+			{
+				result +=  StringUtils::itos(drAG_R->FK_CommandGroup_get()) + "\t" +
+					// PK_Text
+					(drAG_R->FK_CommandGroup_getrow()->FK_Text_isNull() ? "" : StringUtils::itos(drAG_R->FK_CommandGroup_getrow()->FK_Text_get())) + "\t" +
+					// description
+					drAG_R->FK_CommandGroup_getrow()->Description_get() + "\n";
+			}
+		}
+		break;
+	}
+	case ARRAY_Media_Scenarios_CONST:
+	{
+		int PK_EntArea = atoi(sPK_EntertainArea.c_str());
+		if (PK_EntArea > 0)
+		{
+			vector<class Row_CommandGroup_EntertainArea *> vectEGs;
+			string sql = string(COMMANDGROUP_ENTERTAINAREA_FK_ENTERTAINAREA_FIELD) + "=" + \
+				StringUtils::itos(PK_EntArea) + " ORDER BY " + COMMANDGROUP_ENTERTAINAREA_SORT_FIELD;
+			m_pDatabase_pluto_main->CommandGroup_EntertainArea_get()->GetRows(sql,&vectEGs);
+
+			for(size_t s=0;s<vectEGs.size();++s)
+			{
+				Row_CommandGroup_EntertainArea *drAG_E = vectEGs[s];
+				Row_CommandGroup *pRow_CommandGroup=drAG_E->FK_CommandGroup_getrow();
+				if( pRow_CommandGroup && pRow_CommandGroup->FK_Array_get()==iValue && !pRow_CommandGroup->Disabled_get() )
+				{
+					result +=  StringUtils::itos(drAG_E->FK_CommandGroup_get()) + "\t" +
+						// PK_Text
+						(drAG_E->FK_CommandGroup_getrow()->FK_Text_isNull() ? "" : StringUtils::itos(drAG_E->FK_CommandGroup_getrow()->FK_Text_get())) + "\t" +
+						// description
+						drAG_E->FK_CommandGroup_getrow()->Description_get() + "\n";
+				}
+			}
+		}
+
+		break;
+	}
+	}
+
+	(*sValue_To_Assign) = result;
+}
+//<-dceag-c1109-b->
+
+	/** @brief COMMAND: #1109 - Get Entertainment Areas */
+	/** Get the entertainment areas */
+		/** @param #5 Value To Assign */
+			/** Returns the entertainment areas for this installation as Pk_EntArea\tFK_Room\tDescription\n etc. */
+
+void General_Info_Plugin::CMD_Get_Entertainment_Areas(string *sValue_To_Assign,string &sCMD_Result,Message *pMessage)
+//<-dceag-c1109-e->
+{
+	string result = "";
+	vector<Row_EntertainArea *> vectRow_EntertainArea;
+	m_pDatabase_pluto_main->EntertainArea_get()->GetRows("1=1 ORDER BY Description", &vectRow_EntertainArea);
+	for(size_t s=0; s<vectRow_EntertainArea.size(); s++)
+	{
+		result += StringUtils::itos(vectRow_EntertainArea[s]->PK_EntertainArea_get()) + "\t"+ StringUtils::itos(vectRow_EntertainArea[s]->FK_Room_get()) + "\t" + vectRow_EntertainArea[s]->Description_get() + "\n";
+	}
+	(*sValue_To_Assign) = result;
 }

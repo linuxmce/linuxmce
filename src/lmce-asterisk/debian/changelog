@@ -1,0 +1,159 @@
+lmce-asterisk (0+0.3.3-2ubuntu1) lucid; urgency=low
+
+  * Use incoming CID from PAI or PAF if available.
+  * Try to make gtalk work
+
+ -- Serge Wagener <serge@linuxmce.org>  Wed, 02 Jan 2013 11:25:09 +0100
+
+lmce-asterisk (0+0.3.3-2) lucid; urgency=low
+
+  * Add mbrola for french and german tts
+  * Added googletts support for voice generation
+  * Multilanguage for asterisk core sound
+
+ -- Serge Wagener <serge@linuxmce.org>  Mon, 17 Sep 2012 14:58:49 +0200
+
+lmce-asterisk (0+0.3.2-1ubuntu2) lucid; urgency=low
+
+  * Some bug fixes
+  * Fix for incoming fax
+
+ -- Serge Wagener <serge@linuxmce.org>  Tue, 21 Aug 2012 21:03:45 +0200
+
+lmce-asterisk (0+0.3.2-1ubuntu1) lucid; urgency=low
+
+  * Adding primitive fax send support, this is work in progress
+  * added tables for cdr support
+  * Added video support
+
+ -- Serge Wagener <serge@linuxmce.org>  Sat, 21 Apr 2012 22:10:55 +0200
+
+lmce-asterisk (0+0.3.2-1) unstable; urgency=low
+
+  * Adding tools for future fax support as dependency
+  * Add asterisk user to sudoers for dialplan scripts
+
+ -- Serge Wagener <serge@linuxmce.org>  Thu, 05 Apr 2012 20:17:45 +0200
+
+lmce-asterisk (0+0.3.1-2) unstable; urgency=low
+
+  * Fixed #1345 - bug on incoming and outgoing sip connections
+  * Refs #1332 - experimental gtalk phoneline provider support
+  * Refs #1328 - Don't clear peers from realtime cache, makes incoming
+    calls not work after some minutes
+  * Fixed bug preventing IAX2 provider registration
+  * Fixed some IAX provider trunk bug's
+  * Fixed a bug if SIP provider username <> phonenumber
+  * Fixed a bug for incoming calls when username <> phonenumber
+  * Fixes #1396, adding asterisk group if it does not yet exist
+
+ -- Serge Wagener <serge@linuxmce.org>  Thu, 26 Jan 2012 17:20:23 +0100
+
+lmce-asterisk (0+0.3.1-1) unstable; urgency=low
+
+  * Added support for CISCO mobile iOS app softphone (see http://wiki.linuxmce.org/index.php/Cisco_Mobile)
+  * Corrected sos sound files path
+  * Remove sox warning messags
+  * Some modification on SIP provider registering to reduce incoming
+    call problems
+  * Setting default SIP language to en, targeting multi language once
+    all works
+
+ -- Serge Wagener <serge@linuxmce.org>  Sat, 19 Nov 2011 18:54:38 +0100
+
+lmce-asterisk (0+0.3.0-4) unstable; urgency=low
+
+  * Add dependency to asterisk-voicemail
+  * Some table structure modifications
+
+ -- Serge Wagener <serge@linuxmce.org>  Tue, 14 Nov 2011 20:00:00 +0200
+
+lmce-asterisk (0+0.3.0-3) unstable; urgency=low
+
+  * Fixed a bug in db creation sql file
+
+ -- Serge Wagener <serge@linuxmce.org>  Tue, 8 Nov 2011 07:15:00 +0200
+
+lmce-asterisk (0+0.3.0-2) unstable; urgency=low
+
+  * Fixed a lot of small bugs
+
+ -- Serge Wagener <serge@linuxmce.org>  Tue, 1 Nov 2011 08:00:00 +0200
+
+lmce-asterisk (0+0.3.0-1) unstable; urgency=low
+
+  * Making package asterisk-1.8 compatible.
+
+ -- Serge Wagener <serge@linuxmce.org>  Tue, 25 Oct 2011 14:00:00 +0200
+
+lmce-asterisk (0+0.2.0-8) unstable; urgency=low
+
+  * Making 'hints' work using conf files. Not yet supported in realtime by asterisk.
+
+ -- Serge Wagener <serge@linuxmce.org>  Sun, 23 Oct 2011 19:30:00 +0200
+
+lmce-asterisk (0+0.2.0-7) unstable; urgency=low
+
+  * Modifying trunk SIP entry for incoming calls to work
+
+ -- Serge Wagener <serge@linuxmce.org>  Sat, 22 Oct 2011 14:30:00 +0200
+
+lmce-asterisk (0+0.2.0-6) unstable; urgency=low
+
+  * Adds dependency for asterisk-mysql package
+
+ -- Serge Wagener <serge@linuxmce.org>  Fri, 14 Oct 2011 17:00:00 +0200
+
+lmce-asterisk (0+0.2.0-5) unstable; urgency=low
+
+  * Replaced some GoTo in diaplan with new syntax, speed up parsing
+
+ -- Serge Wagener <serge@linuxmce.org>  Tue, 12 Oct 2011 15:45:00 +0200
+
+lmce-asterisk (0+0.2.0-4) unstable; urgency=low
+
+  * Replaced MeetMe with ConfBridge as that does not need dahdi (zaptel) modules
+
+ -- Serge Wagener <serge@linuxmce.org>  Tue, 11 Oct 2011 15:30:00 +0200
+
+lmce-asterisk (0+0.2.0-3) unstable; urgency=low
+
+  * Adding files from obsolete asterisk-pluto package to this package
+
+ -- Serge Wagener <serge@linuxmce.org>  Tue, 11 Oct 2011 10:30:00 +0200
+
+lmce-asterisk (0+0.2.0-2) unstable; urgency=low
+
+  * Only configure package if asterisk db already existed to not break mce-install
+
+ -- Serge Wagener <serge@linuxmce.org>  Tue, 11 Oct 2011 08:00:00 +0200
+
+lmce-asterisk (0+0.2.0-1) unstable; urgency=low
+
+  * Correctly configure outgoing emergency numbers in dialplan
+
+ -- Serge Wagener <serge@linuxmce.org>  Mon, 10 Oct 2011 21:00:00 +0200
+
+lmce-asterisk (0+0.1.0-4) unstable; urgency=low
+
+  * Configure only in firstboot, after asterisk has been installed
+
+ -- Serge Wagener <serge@linuxmce.org>  Sun, 09 Oct 2011 20:30:00 +0200
+
+lmce-asterisk (0+0.1.0-3) unstable; urgency=low
+
+  * Some dependency changes to let it install before pluto-asterisk
+
+ -- Serge Wagener <serge@linuxmce.org>  Sat, 08 Oct 2011 19:00:00 +0200
+
+lmce-asterisk (0+0.1.0-2) unstable; urgency=low
+
+  * Added extra sounds, let pluto-asterisk live (for now)
+
+ -- Serge Wagener <serge@linuxmce.org>  Thu, 06 Oct 2011 12:30:00 +0200
+
+lmce-asterisk (0+0.1.0-1) unstable; urgency=low
+
+  * Initial packaging
+
+ -- Serge Wagener <serge@linuxmce.org>  Mon, 03 Oct 2011 17:00:00 +0200

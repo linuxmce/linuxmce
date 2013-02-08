@@ -113,7 +113,7 @@ void WizardWidgetButton::PaintNonExpandedButton(
 
 	SDL_Rect Src, Dest;
 
-	int FontWidth = Width;
+	int FontWidth = Width / 2;
 	int FontHeight = Page->GetFontHeight();
 	int FW2 = FontWidth / 2, FH2 = FontHeight / 2;
 

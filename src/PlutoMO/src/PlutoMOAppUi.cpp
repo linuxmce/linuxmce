@@ -21,11 +21,11 @@
 #include <e32base.h>
 #include <http.h>
 #include <chttpformencoder.h>
-#include <http\rhttpsession.h>
-#include <http\mhttptransactioncallback.h>
+#include <http/rhttpsession.h>
+#include <http/mhttptransactioncallback.h>
 #include "eikmenub.h"
 #include <aknnotewrappers.h> 
-#include <AknGlobalConfirmationQuery.h>
+#include <aknglobalconfirmationquery.h>
 //----------------------------------------------------------------------------------------------
 #include "PlutoMO.hrh"
 //----------------------------------------------------------------------------------------------
@@ -37,17 +37,18 @@
 #include "Logger.h"
 #include "PlutoDefs.h"
 #include "PlutoVMCView.h"
-#include "GetCallerId.h"
+#include "GetCallerID.h"
 #include "NotifyIncomingCall.h"
 #include "LineReader.h"
 #include "PlutoEventView.h"
 #include "PlutoEventContainer.h"
 //----------------------------------------------------------------------------------------------
 //test - not used
-#include "httpclient.h"
+#include "HttpClient.h"
 //----------------------------------------------------------------------------------------------
 char CPlutoMOAppUi::GetCurrentDrive()
 {
+	bool bRes = false;
 	char cDrive = 'c';
 
 	TUint attr;
@@ -74,13 +75,21 @@ char CPlutoMOAppUi::GetCurrentDrive()
 void CPlutoMOAppUi::SetupPaths()
 {
 	//initializing default paths
+#ifdef __SERIES60_30__
+	m_sAppFolder		= "\\private\\";
+	m_sLoggerFileName	= "\\private\\\\PlutoMO.log";
+	m_sVMCFolderFilter	= "\\private\\\\*.vmc";
+	m_sPlutoVMC		= "\\private\\\\PlutoMO.vmc";
+	m_sPlutoConfig		= "\\private\\\\PlutoMO.cfg";
+	m_sPlutoEventPng   	= "\\private\\\\PlutoEvent.png";
+
+#else
 	m_sAppFolder		= "x:\\System\\Apps\\PlutoMO";
 	m_sLoggerFileName	= "x:\\System\\apps\\PlutoMO\\PlutoMO.log";
 	m_sVMCFolderFilter	= "x:\\System\\Apps\\PlutoMO\\*.vmc";
-	m_sPlutoVMC			= "x:\\System\\Apps\\PlutoMO\\PlutoMO.vmc";
+	m_sPlutoVMC		= "x:\\System\\Apps\\PlutoMO\\PlutoMO.vmc";
 	m_sPlutoConfig		= "x:\\System\\Apps\\PlutoMO\\PlutoMO.cfg";
-	m_sPlutoEventPng    = "x:\\System\\Apps\\PlutoMO\\PlutoEvent.png";
-
+	m_sPlutoEventPng	= "x:\\System\\Apps\\PlutoMO\\PlutoEvent.png";
 	//current drive
 	char cDrive = GetCurrentDrive();
 	
@@ -91,6 +100,7 @@ void CPlutoMOAppUi::SetupPaths()
 	m_sPlutoVMC.SetAt(cDrive, 0);
 	m_sPlutoConfig.SetAt(cDrive, 0);
 	m_sPlutoEventPng.SetAt(cDrive, 0);
+#endif
 }
 //----------------------------------------------------------------------------------------------
 void CPlutoMOAppUi::ConstructL()
@@ -101,7 +111,11 @@ void CPlutoMOAppUi::ConstructL()
 	//find the real paths to app's misc files
 	SetupPaths();
 
+#ifdef __SERIES60_30__
+	BaseConstructL(EAknEnableSkin);
+#else
 	BaseConstructL();
+#endif
     iAppContainer = new (ELeave) CPlutoMOContainer;
     iAppContainer->SetMopParent(this);
     iAppContainer->ConstructL( ClientRect() );
@@ -505,12 +519,15 @@ void CPlutoMOAppUi::UpdateScreen(
 	{
 		HBufC16 *pPath = HBufC16::NewL(256);
 		TPtr16 aPath = pPath->Des();
-
+#ifdef __SERIES60_30__
+		string FilePath("\\private\\\\");
+#else
 		string FilePath("c:\\Nokia\\Images\\");
+#endif
 		for (unsigned int i = 0; i < FilePath.length(); i++)
 			aPath.Append(FilePath[i]);
 
-		for (i = 0; i < iVMCFileNameSize; i++)
+		for (int i = 0; i < iVMCFileNameSize; i++)
 			aPath.Append(pVMCFileName[i]);
 		
 		SaveFile(FilePath.length(), string(aPath).c_str(), iVMCSize, pVMC);

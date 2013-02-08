@@ -59,6 +59,14 @@ public:
 		return !m_bBadIP;
 	}
 
+  string GetOctet(int pos)
+  {
+    string sResult;
+    unsigned char *pByte = ((unsigned char *) &m_IPAddress) + 4;
+    pByte-=pos;
+    sResult = StringUtils::itos(*pByte);
+    return sResult;
+  }
 	IPAddress() { m_bBadIP=true; }
 	IPAddress(unsigned long IPAddress) { m_IPAddress=IPAddress; }
 	unsigned long AsInt() { return m_IPAddress; }
@@ -98,7 +106,7 @@ public:
 	
 	// Based on the Core's device data, get the range of ip addresses 
 	bool DetermineIPRange(IPAddress &ipAddressDhcpStart,IPAddress &ipAddressDhcpStop,IPAddress &ipAddressPlutoStart,IPAddress &ipAddressPlutoStop);
-	void GetNetParams(string &sCoreInternalAddress, string &sInternalSubnet, string &sInternalSubnetMask);
+	void GetNetParams(string &sCoreInternalAddress, string &sInternalSubnet, string &sInternalSubnetMask, string &sInternalDomainName);
 	string AssignIP(int PK_Device);  // Assign a new IP address to this device
 	string GetDHCPConfig(); // Write out the dhcp configuration data to stdout
 };

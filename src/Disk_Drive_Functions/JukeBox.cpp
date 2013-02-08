@@ -198,6 +198,8 @@ void JukeBox::MassIdentify(string sSlots,int PK_Orbiter)
 
 bool JukeBox::LockJukebox(Disk_Drive_Functions::Locked locked,void *p_void)
 {
+	LoggerWrapper::GetInstance()->Write(LV_STATUS,"JukeBox::LockDrive m_eLocked %d locked %d %p", (int) m_eLocked, (int) locked,m_pLockedPtr);
+
 	if( m_eLocked!=Disk_Drive_Functions::locked_available )
 	{
 		if( m_pLockedPtr==p_void )
@@ -205,10 +207,10 @@ bool JukeBox::LockJukebox(Disk_Drive_Functions::Locked locked,void *p_void)
 			LoggerWrapper::GetInstance()->Write(LV_STATUS,"LockJukebox::LockJukebox already locked");
 			return true;
 		}
+		LoggerWrapper::GetInstance()->Write(LV_STATUS,"JukeBox::LockJukebox cannot lock %p/%p", m_pLockedPtr, p_void);
 		return false;
 	}
 
-	LoggerWrapper::GetInstance()->Write(LV_STATUS,"JukeBox::LockDrive m_eLocked %d locked %d %p", (int) m_eLocked, (int) locked,m_pLockedPtr);
 	m_pLockedPtr=p_void;
 	m_eLocked=locked;
 	return true;

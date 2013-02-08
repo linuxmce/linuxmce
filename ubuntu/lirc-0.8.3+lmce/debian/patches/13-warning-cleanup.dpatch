@@ -1,0 +1,101 @@
+#! /bin/sh /usr/share/dpatch/dpatch-run
+## 13-warning-cleanup.dpatch by Mario Limonciello <superm1@ubuntu.com>
+##
+## All lines beginning with `## DP:' are a description of the patch.
+## DP: Remove build time debug messages for kernel drivers
+
+@DPATCH@
+diff -urNad lirc-0.8.3~/drivers/lirc_gpio/lirc_gpio.c lirc-0.8.3/drivers/lirc_gpio/lirc_gpio.c
+--- lirc-0.8.3~/drivers/lirc_gpio/lirc_gpio.c	2008-05-10 16:22:40.000000000 -0500
++++ lirc-0.8.3/drivers/lirc_gpio/lirc_gpio.c	2008-05-10 16:22:40.000000000 -0500
+@@ -88,12 +88,6 @@
+ static int soft_gap;
+ static int sample_rate = 10;
+ 
+-#define dprintk(fmt, args...)					\
+-	do {							\
+-		if (debug)					\
+-			printk(KERN_DEBUG fmt, ## args);	\
+-	} while (0)
+-
+ struct rcv_info {
+ 	int bttv_id;
+ 	int card_id;
+diff -urNad lirc-0.8.3~/drivers/lirc_it87/lirc_it87.c lirc-0.8.3/drivers/lirc_it87/lirc_it87.c
+--- lirc-0.8.3~/drivers/lirc_it87/lirc_it87.c	2008-01-13 05:13:49.000000000 -0600
++++ lirc-0.8.3/drivers/lirc_it87/lirc_it87.c	2008-05-10 16:22:40.000000000 -0500
+@@ -366,17 +366,12 @@
+ 
+ static int set_use_inc(void *data)
+ {
+-#if WE_DONT_USE_LOCAL_OPEN_CLOSE
+-	MOD_INC_USE_COUNT;
+-#endif
+        return 0;
+ }
+ 
+ static void set_use_dec(void *data)
+ {
+-#if WE_DONT_USE_LOCAL_OPEN_CLOSE
+-	MOD_DEC_USE_COUNT;
+-#endif
++
+ }
+ static struct lirc_plugin plugin = {
+        .name		= LIRC_DRIVER_NAME,
+diff -urNad lirc-0.8.3~/drivers/lirc_serial/lirc_serial.c lirc-0.8.3/drivers/lirc_serial/lirc_serial.c
+--- lirc-0.8.3~/drivers/lirc_serial/lirc_serial.c	2008-04-06 14:03:52.000000000 -0500
++++ lirc-0.8.3/drivers/lirc_serial/lirc_serial.c	2008-05-10 16:22:40.000000000 -0500
+@@ -63,15 +63,6 @@
+ 
+ #include <linux/autoconf.h>
+ 
+-#if defined(CONFIG_SERIAL) || defined(CONFIG_SERIAL_8250)
+-#warning "******************************************"
+-#warning " Your serial port driver is compiled into "
+-#warning " the kernel. You will have to release the "
+-#warning " port you want to use for LIRC with:      "
+-#warning "    setserial /dev/ttySx uart none	"
+-#warning "******************************************"
+-#endif
+-
+ #include <linux/module.h>
+ #include <linux/errno.h>
+ #include <linux/signal.h>
+diff -urNad lirc-0.8.3~/drivers/lirc_sir/lirc_sir.c lirc-0.8.3/drivers/lirc_sir/lirc_sir.c
+--- lirc-0.8.3~/drivers/lirc_sir/lirc_sir.c	2008-01-13 05:13:50.000000000 -0600
++++ lirc-0.8.3/drivers/lirc_sir/lirc_sir.c	2008-05-10 16:22:40.000000000 -0500
+@@ -48,15 +48,6 @@
+ 
+ #include <linux/autoconf.h>
+ 
+-#if !defined(LIRC_ON_SA1100) && !defined(CONFIG_SERIAL_MODULE)
+-#warning "******************************************"
+-#warning " Your serial port driver is compiled into "
+-#warning " the kernel. You will have to release the "
+-#warning " port you want to use for LIRC with:      "
+-#warning "    setserial /dev/ttySx uart none        "
+-#warning "******************************************"
+-#endif
+-
+ #include <linux/module.h>
+ #include <linux/sched.h>
+ #include <linux/errno.h>
+@@ -511,17 +502,11 @@
+ 
+ static int set_use_inc(void *data)
+ {
+-#if WE_DONT_USE_LOCAL_OPEN_CLOSE
+-	MOD_INC_USE_COUNT;
+-#endif
+        return 0;
+ }
+ 
+ static void set_use_dec(void *data)
+ {
+-#if WE_DONT_USE_LOCAL_OPEN_CLOSE
+-	MOD_DEC_USE_COUNT;
+-#endif
+ }
+ static struct lirc_plugin plugin = {
+        .name		= LIRC_DRIVER_NAME,

@@ -118,9 +118,17 @@
 #define DEVICECATEGORY_Flash_Memory_CONST 171
 #define DEVICECATEGORY_LCD_CONST 172
 #define DEVICECATEGORY_Raid_Controllers_CONST 173
-#define DEVICECATEGORY_Data_Provider_Catalog_Plugins_CONST 174
-#define DEVICECATEGORY_Data_Providers_CONST 175
-#define DEVICECATEGORY_NonMedia_Director_PCs_CONST 176
+#define DEVICECATEGORY_Workstations_CONST 174
+#define DEVICECATEGORY_Network_Video_Player_CONST 175
+#define DEVICECATEGORY_Conference_Microphones_CONST 176
+#define DEVICECATEGORY_Ethernet_Serialport_CONST 177
+#define DEVICECATEGORY_BluRay_PlayersRecorders_CONST 178
+#define DEVICECATEGORY_Joysticks_CONST 179
+#define DEVICECATEGORY_Mobile_Internet_Devices_CONST 180
+#define DEVICECATEGORY_HDMICEC_Interface_CONST 181
+#define DEVICECATEGORY_Capture_Card_Audio_Ports_CONST 182
+#define DEVICECATEGORY_USB_Game_Pad_Remote_Controls_CONST 183
+#define DEVICECATEGORY_Wii_Remote_Controls_CONST 184
 
 #define DEVICECATEGORY_TABLE "DeviceCategory"
 #define DEVICECATEGORY_PK_DEVICECATEGORY_FIELD "PK_DeviceCategory"

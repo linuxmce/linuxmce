@@ -158,7 +158,8 @@ void psc_mod_set(string val);
 void psc_restrict_set(long int val);
 
 		
-		bool Define_isNull();
+		bool Description_isNull();
+bool Define_isNull();
 bool Installer_isNull();
 bool KickStartCD_isNull();
 bool Binaries_isNull();
@@ -168,11 +169,11 @@ bool psc_id_isNull();
 bool psc_batch_isNull();
 bool psc_user_isNull();
 bool psc_frozen_isNull();
-bool psc_mod_isNull();
 bool psc_restrict_isNull();
 
 			
-		void Define_setNull(bool val);
+		void Description_setNull(bool val);
+void Define_setNull(bool val);
 void Installer_setNull(bool val);
 void KickStartCD_setNull(bool val);
 void Binaries_setNull(bool val);
@@ -182,7 +183,6 @@ void psc_id_setNull(bool val);
 void psc_batch_setNull(bool val);
 void psc_user_setNull(bool val);
 void psc_frozen_setNull(bool val);
-void psc_mod_setNull(bool val);
 void psc_restrict_setNull(bool val);
 	
 	
@@ -201,26 +201,12 @@ void psc_restrict_setNull(bool val);
 
 		// Return the rows in other tables with foreign keys pointing here
 		void DeviceTemplate_FK_Distro_getrows(vector <class Row_DeviceTemplate*> *rows);
-void DeviceTemplate_pschist_FK_Distro_getrows(vector <class Row_DeviceTemplate_pschist*> *rows);
-void DeviceTemplate_pschmask_FK_Distro_getrows(vector <class Row_DeviceTemplate_pschmask*> *rows);
 void InstallWizard_Distro_FK_Distro_getrows(vector <class Row_InstallWizard_Distro*> *rows);
-void InstallWizard_Distro_pschist_FK_Distro_getrows(vector <class Row_InstallWizard_Distro_pschist*> *rows);
-void InstallWizard_Distro_pschmask_FK_Distro_getrows(vector <class Row_InstallWizard_Distro_pschmask*> *rows);
 void Package_Compat_FK_Distro_getrows(vector <class Row_Package_Compat*> *rows);
-void Package_Compat_pschist_FK_Distro_getrows(vector <class Row_Package_Compat_pschist*> *rows);
-void Package_Compat_pschmask_FK_Distro_getrows(vector <class Row_Package_Compat_pschmask*> *rows);
 void Package_Directory_FK_Distro_getrows(vector <class Row_Package_Directory*> *rows);
 void Package_Directory_File_FK_Distro_getrows(vector <class Row_Package_Directory_File*> *rows);
-void Package_Directory_File_pschist_FK_Distro_getrows(vector <class Row_Package_Directory_File_pschist*> *rows);
-void Package_Directory_File_pschmask_FK_Distro_getrows(vector <class Row_Package_Directory_File_pschmask*> *rows);
-void Package_Directory_pschist_FK_Distro_getrows(vector <class Row_Package_Directory_pschist*> *rows);
-void Package_Directory_pschmask_FK_Distro_getrows(vector <class Row_Package_Directory_pschmask*> *rows);
 void Package_Source_Compat_FK_Distro_getrows(vector <class Row_Package_Source_Compat*> *rows);
-void Package_Source_Compat_pschist_FK_Distro_getrows(vector <class Row_Package_Source_Compat_pschist*> *rows);
-void Package_Source_Compat_pschmask_FK_Distro_getrows(vector <class Row_Package_Source_Compat_pschmask*> *rows);
 void RepositorySource_FK_Distro_getrows(vector <class Row_RepositorySource*> *rows);
-void RepositorySource_pschist_FK_Distro_getrows(vector <class Row_RepositorySource_pschist*> *rows);
-void RepositorySource_pschmask_FK_Distro_getrows(vector <class Row_RepositorySource_pschmask*> *rows);
 
 
 		// Setup binary serialization

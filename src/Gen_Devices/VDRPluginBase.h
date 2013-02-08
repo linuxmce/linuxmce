@@ -85,7 +85,7 @@ public:
 		if( m_bRunningWithoutDeviceData )
 			return atoi(m_pEvent_Impl->GetDeviceDataFromDatabase(m_dwPK_Device,DEVICEDATA_Priority_CONST).c_str());
 		else
-			return atoi(m_mapParameters_Find(DEVICEDATA_Priority_CONST).c_str());
+			return atoi(m_mapParameters[DEVICEDATA_Priority_CONST].c_str());
 	}
 
 	bool Get_Only_One_Per_PC()
@@ -93,7 +93,7 @@ public:
 		if( m_bRunningWithoutDeviceData )
 			return (m_pEvent_Impl->GetDeviceDataFromDatabase(m_dwPK_Device,DEVICEDATA_Only_One_Per_PC_CONST)=="1" ? true : false);
 		else
-			return (m_mapParameters_Find(DEVICEDATA_Only_One_Per_PC_CONST)=="1" ? true : false);
+			return (m_mapParameters[DEVICEDATA_Only_One_Per_PC_CONST]=="1" ? true : false);
 	}
 
 	int Get_EK_Provider()
@@ -101,7 +101,7 @@ public:
 		if( m_bRunningWithoutDeviceData )
 			return atoi(m_pEvent_Impl->GetDeviceDataFromDatabase(m_dwPK_Device,DEVICEDATA_EK_Provider_CONST).c_str());
 		else
-			return atoi(m_mapParameters_Find(DEVICEDATA_EK_Provider_CONST).c_str());
+			return atoi(m_mapParameters[DEVICEDATA_EK_Provider_CONST].c_str());
 	}
 
 };

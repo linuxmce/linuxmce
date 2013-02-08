@@ -126,8 +126,8 @@ bool SMPTE_Fountain::GetConfig()
 		m_mapFilesTimeCode[sFile] = new TimeCodeInfo(Prepend,Append,TimeCode);
 	}
 	PurgeInterceptors();  // Since this is not a plugin, be sure to purge so we're not registered more than once
-	RegisterMsgInterceptor( ( MessageInterceptorFn )( &SMPTE_Fountain::MediaPlaying ), 0, m_pDevice_Xine->m_dwPK_Device, 0, 0, MESSAGETYPE_COMMAND, COMMAND_Play_Media_CONST, false );
-	RegisterMsgInterceptor( ( MessageInterceptorFn )( &SMPTE_Fountain::MediaStopped ), m_pDevice_Xine->m_dwPK_Device, 0, 0, 0, MESSAGETYPE_EVENT, EVENT_Playback_Completed_CONST, false );
+	RegisterMsgInterceptor( ( MessageInterceptorFn )( &SMPTE_Fountain::MediaPlaying ), 0, m_pDevice_Xine->m_dwPK_Device, 0, 0, MESSAGETYPE_COMMAND, COMMAND_Play_Media_CONST );
+	RegisterMsgInterceptor( ( MessageInterceptorFn )( &SMPTE_Fountain::MediaStopped ), m_pDevice_Xine->m_dwPK_Device, 0, 0, 0, MESSAGETYPE_EVENT, EVENT_Playback_Completed_CONST );
 	
 	pthread_t threadid;
 	pthread_create(	&threadid, NULL, OutputThread, NULL); 

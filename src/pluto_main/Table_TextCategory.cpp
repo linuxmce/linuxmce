@@ -35,10 +35,6 @@ using namespace std;
 
 #include "Table_Text.h"
 #include "Table_TextCategory.h"
-#include "Table_TextCategory_pschist.h"
-#include "Table_TextCategory_pschmask.h"
-#include "Table_Text_pschist.h"
-#include "Table_Text_pschmask.h"
 
 
 void Database_pluto_main::CreateTable_TextCategory()
@@ -86,6 +82,7 @@ void Row_TextCategory::Delete()
 	Row_TextCategory *pRow = this; // Needed so we will have only 1 version of get_primary_fields_assign_from_row
 	
 	if (!is_deleted)
+	{
 		if (is_added)	
 		{	
 			vector<TableRow*>::iterator i;	
@@ -107,6 +104,7 @@ void Row_TextCategory::Delete()
 			table->deleted_cachedRows[key] = this;
 			is_deleted = true;	
 		}	
+	}
 }
 
 void Row_TextCategory::Reload()
@@ -151,7 +149,8 @@ is_null[5] = true;
 m_psc_user = 0;
 m_psc_frozen = 0;
 is_null[6] = false;
-is_null[7] = true;
+m_psc_mod = "0000-00-00 00:00:00";
+is_null[7] = false;
 is_null[8] = true;
 m_psc_restrict = 0;
 
@@ -237,9 +236,6 @@ return is_null[5];}
 bool Row_TextCategory::psc_frozen_isNull() {PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
 
 return is_null[6];}
-bool Row_TextCategory::psc_mod_isNull() {PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
-
-return is_null[7];}
 bool Row_TextCategory::psc_restrict_isNull() {PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
 
 return is_null[8];}
@@ -267,10 +263,6 @@ is_modified=true;
 }
 void Row_TextCategory::psc_frozen_setNull(bool val){PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
 is_null[6]=val;
-is_modified=true;
-}
-void Row_TextCategory::psc_mod_setNull(bool val){PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
-is_null[7]=val;
 is_modified=true;
 }
 void Row_TextCategory::psc_restrict_setNull(bool val){PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
@@ -312,8 +304,8 @@ PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
 if (is_null[2])
 return "NULL";
 
-char *buf = new char[201];
-db_wrapper_real_escape_string(table->database->m_pDB, buf, m_Description.c_str(), (unsigned long) min((size_t)100,m_Description.size()));
+char *buf = new char[601];
+db_wrapper_real_escape_string(table->database->m_pDB, buf, m_Description.c_str(), (unsigned long) min((size_t)300,m_Description.size()));
 string s=string()+"\""+buf+"\"";
 delete[] buf;
 return s;
@@ -983,34 +975,6 @@ PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
 
 class Table_TextCategory *pTable = table->database->TextCategory_get();
 pTable->GetRows("`FK_TextCategory_Parent`=" + StringUtils::itos(m_PK_TextCategory),rows);
-}
-void Row_TextCategory::TextCategory_pschist_FK_TextCategory_Parent_getrows(vector <class Row_TextCategory_pschist*> *rows)
-{
-PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
-
-class Table_TextCategory_pschist *pTable = table->database->TextCategory_pschist_get();
-pTable->GetRows("`FK_TextCategory_Parent`=" + StringUtils::itos(m_PK_TextCategory),rows);
-}
-void Row_TextCategory::TextCategory_pschmask_FK_TextCategory_Parent_getrows(vector <class Row_TextCategory_pschmask*> *rows)
-{
-PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
-
-class Table_TextCategory_pschmask *pTable = table->database->TextCategory_pschmask_get();
-pTable->GetRows("`FK_TextCategory_Parent`=" + StringUtils::itos(m_PK_TextCategory),rows);
-}
-void Row_TextCategory::Text_pschist_FK_TextCategory_getrows(vector <class Row_Text_pschist*> *rows)
-{
-PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
-
-class Table_Text_pschist *pTable = table->database->Text_pschist_get();
-pTable->GetRows("`FK_TextCategory`=" + StringUtils::itos(m_PK_TextCategory),rows);
-}
-void Row_TextCategory::Text_pschmask_FK_TextCategory_getrows(vector <class Row_Text_pschmask*> *rows)
-{
-PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
-
-class Table_Text_pschmask *pTable = table->database->Text_pschmask_get();
-pTable->GetRows("`FK_TextCategory`=" + StringUtils::itos(m_PK_TextCategory),rows);
 }
 
 

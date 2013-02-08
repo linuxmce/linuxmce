@@ -161,6 +161,12 @@ void Wizard::MainLoop()
 			m_WizardRemote.Start(RemoteCmd);
 #endif
 		}
+		
+		if (AVWizardOptions->GetDictionary()->Exists("GamepadCmd"))
+		  {
+		    GamepadCmd = AVWizardOptions->GetDictionary()->GetValue("GamepadCmd");
+		    m_GamepadRemote.Start(GamepadCmd);
+		  }
 	}
 
 	AVWizardOptions->GetDictionary()->Set("NoResolutions", 5);
@@ -409,6 +415,7 @@ void Wizard::EvaluateEvents()
 		DoMouseClick(Event.MouseX, Event.MouseY);
 		break;
 	case WMET_NUMBER_KEY:
+	case WMET_ALPHA_KEY:
 #ifdef DEBUG
 		std::cout<<"Numeric key pressed: "<<char(Event.KeyCode)<<std::endl;
 #endif

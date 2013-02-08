@@ -127,10 +127,8 @@ void CDDB_Identifier::ReceivedUnknownCommand(string &sCMD_Result,Message *pMessa
 			/** The ID of the disk */
 		/** @param #13 Filename */
 			/** The media that needs to be identified, such as /dev/cdrom under Linux, or E: under Windows */
-		/** @param #201 PK_Device_Related */
-			/** If specified, the device to send the resulting 'media identified' command to.  Otherwise it's the from device */
 
-void CDDB_Identifier::CMD_Identify_Media(int iPK_Device,string sID,string sFilename,int iPK_Device_Related,string &sCMD_Result,Message *pMessage)
+void CDDB_Identifier::CMD_Identify_Media(int iPK_Device,string sID,string sFilename,string &sCMD_Result,Message *pMessage)
 //<-dceag-c314-e->
 {
 	cout << "Command #314 - Identify Media" << endl;

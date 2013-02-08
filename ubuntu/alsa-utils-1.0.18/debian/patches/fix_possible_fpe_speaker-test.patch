@@ -1,0 +1,33 @@
+Index: alsa-utils-1.0.18/speaker-test/speaker-test.c
+===================================================================
+--- alsa-utils-1.0.18.orig/speaker-test/speaker-test.c	2009-01-12 18:59:51.000000000 -0500
++++ alsa-utils-1.0.18/speaker-test/speaker-test.c	2009-01-12 19:00:02.000000000 -0500
+@@ -424,6 +424,14 @@
+       return err;
+     }
+   }
++
++  /* write the parameters to device */
++  err = snd_pcm_hw_params(handle, params);
++  if (err < 0) {
++    fprintf(stderr, _("Unable to set hw params for playback: %s\n"), snd_strerror(err));
++    return err;
++  }
++
+   snd_pcm_hw_params_get_buffer_size(params, &buffer_size);
+   snd_pcm_hw_params_get_period_size(params, &period_size, NULL);
+   printf(_("was set period_size = %lu\n"),period_size);
+@@ -433,13 +441,6 @@
+     return -EINVAL;
+   }
+ 
+-  /* write the parameters to device */
+-  err = snd_pcm_hw_params(handle, params);
+-  if (err < 0) {
+-    fprintf(stderr, _("Unable to set hw params for playback: %s\n"), snd_strerror(err));
+-    return err;
+-  }
+-
+   return 0;
+ }
+ 

@@ -72,7 +72,6 @@ RubyIOPool::Cleanup() {
 
 bool 
 RubyIOPool::handleStartup() {
-	ppool_->handleStartup();
 	if(!IOPool::handleStartup()) {
 		return false;
 	}	

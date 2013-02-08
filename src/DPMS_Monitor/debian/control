@@ -1,0 +1,13 @@
+Source: lmce-dpms-monitor
+Section: unknown
+Priority: extra
+Maintainer: root <root@fluffybitch.org>
+Build-Depends: debhelper (>= 7)
+Standards-Version: 3.8.3
+Homepage: <insert the upstream URL, if relevant>
+
+Package: lmce-dpms-monitor
+Architecture: any
+Depends: libx11-6, libxext6, pluto-dcecommon, pluto-plutoutils, x-window-system-core, dcecommon, plutoutils, pluto-serializeclass, libserializeclass, libxext6libxext6, ${shlibs:Depends}, ${misc:Depends}
+Description: <insert up to 60 chars description>
+ <insert long description, indented with spaces>

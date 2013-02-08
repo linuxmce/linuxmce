@@ -16,12 +16,15 @@ VDRInfoFileHandler::~VDRInfoFileHandler(void)
 {
 }
 //-----------------------------------------------------------------------------------------------------
-bool VDRInfoFileHandler::LoadAttributes(PlutoMediaAttributes *pPlutoMediaAttributes, 
+bool VDRInfoFileHandler::LoadAttributes(PlutoMediaAttributes *pPlutoMediaAttributes,
 	list<pair<char *, size_t> >& /*listPicturesForTags*/)
 {
+#ifdef UPDATEMEDIA_STATUS
 	LoggerWrapper::GetInstance()->Write(LV_STATUS, "# VDRInfoFileHandler::LoadAttributes: loading %d attributes in the attribute file %s",
 		pPlutoMediaAttributes->m_mapAttributes.size(), GetFileAttribute().c_str());
-
+	LoggerWrapper::GetInstance()->Write(LV_STATUS, "# VDRInfoFileHandler::LoadAttributes: loading %d attributes in the attribute file %s",
+		pPlutoMediaAttributes->m_mapAttributes.size(), GetFileAttribute().c_str());
+#endif
 	string sData;
 	FileUtils::ReadTextFile(GetFileAttribute(), sData);
 
@@ -31,10 +34,13 @@ bool VDRInfoFileHandler::LoadAttributes(PlutoMediaAttributes *pPlutoMediaAttribu
 	for(vector<string>::iterator it = vectLines.begin(), end = vectLines.end(); it != end; ++it)
 	{
 		string sLine = *it;
-		int nAttributeType = 0;
 
+		int nAttributeType = 0;
+		int iStart = 2;
+		
 		if(sLine.size() >= 2)
 		{
+
 			switch(sLine[0])
 			{
 				case 'C':
@@ -50,7 +56,13 @@ bool VDRInfoFileHandler::LoadAttributes(PlutoMediaAttributes *pPlutoMediaAttribu
 					break;
 
 				case 'X':
-					nAttributeType = ATTRIBUTETYPE_Audio_Encoding_CONST;
+					// TODO: Do a proper check of the video format and assign aspect ratio information as well.
+					if (sLine[2] == '1') 
+						nAttributeType = ATTRIBUTETYPE_Format_CONST;
+					else
+						nAttributeType = ATTRIBUTETYPE_Audio_Encoding_CONST;
+						
+					// iStart = 4;
 					break;
 
 				default:
@@ -58,7 +70,7 @@ bool VDRInfoFileHandler::LoadAttributes(PlutoMediaAttributes *pPlutoMediaAttribu
 					break;
 			}
 
-			string sValue = sLine.substr(2, sLine.length() - 3);
+			string sValue = sLine.substr(iStart, sLine.length() - iStart);
 			PlutoMediaAttribute *pma = new PlutoMediaAttribute(0, nAttributeType, sValue);
 
 			if(nAttributeType == ATTRIBUTETYPE_Synopsis_CONST)
@@ -75,10 +87,12 @@ bool VDRInfoFileHandler::SaveAttributes(PlutoMediaAttributes *pPlutoMediaAttribu
 {
 	string sBuffer;
 
+#ifdef UPDATEMEDIA_STATUS
 	LoggerWrapper::GetInstance()->Write(LV_STATUS, "# VDRInfoFileHandler::SaveAttributes: saving %d attributes in the attribute file %s",
 		pPlutoMediaAttributes->m_mapAttributes.size(), GetFileAttribute().c_str());
+#endif
 
-	for(MapPlutoMediaAttributes::iterator it = pPlutoMediaAttributes->m_mapAttributes.begin(); 
+	for(MapPlutoMediaAttributes::iterator it = pPlutoMediaAttributes->m_mapAttributes.begin();
 		it != pPlutoMediaAttributes->m_mapAttributes.end(); ++it)
 	{
 		char cAttributeType = '?';
@@ -131,7 +145,23 @@ bool VDRInfoFileHandler::FileAttributeExists()
 //-----------------------------------------------------------------------------------------------------
 string VDRInfoFileHandler::GetFileAttribute()
 {
-	return m_sDirectory + "/info.vdr";
+	// Newer VDR version let go of the vdr extension, and use plain file names
+	string sInfofile;
+	sInfofile = "/info";
+	
+	if ( FileUtils::FileExists(m_sDirectory + "/info.vdr" ) )
+	{
+#ifdef UPDATEMEDIA_DEBUG
+		LoggerWrapper::GetInstance()->Write(LV_DEBUG, "# VDRInfoFileHandler::GetFileAttribute: %s is an old recording dir", m_sDirectory.c_str());
+#endif
+		sInfofile = "/info.vdr";
+	} else {
+#ifdef UPDATEMEDIA_DEBUG
+		LoggerWrapper::GetInstance()->Write(LV_DEBUG, "# VDRInfoFileHandler::GetFileAttribute: %s is a new recording dir", m_sDirectory.c_str());
+#endif
+	}
+	
+	return m_sDirectory + sInfofile;
 }
 //-----------------------------------------------------------------------------------------------------
 string VDRInfoFileHandler::GetFileSourceForDB()

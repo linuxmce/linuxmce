@@ -1,0 +1,459 @@
+<?php 
+Header( "Content-type: text/vnd.wap.wml"); 
+echo "<?xml version=\"1.0\" encoding=\"UTF-8\"?>"; 
+
+require('include/config/config.inc.php');
+require('include/utils.inc.php');
+
+
+if(isset($_REQUEST['installationID'])){
+	$installationID = (int)$_REQUEST['installationID'];
+}else{
+	$inst=getFieldsAsArray('Installation','PK_Installation',$dbADO,'LIMIT 0,1');
+	$installationID=(int)$inst['PK_Installation'][0];
+}
+
+?>
+<!DOCTYPE wml PUBLIC "-//WAPFORUM//DTD WML 1.1//EN" "http://www.wapforum.org/DTD/wml_1.1.xml">
+<wml>
+<card id="card1" title="LinuxMCE WML # <?=$installationID?>"> 
+  <p> 
+    <?php  
+if(!isset($_REQUEST['user']) && !isset($_REQUEST['pin']) && !isset($_REQUEST['pinuser'])){
+	// authentification
+	$sufix=(isset($_REQUEST['security']))?'&amp;security=0':'';
+	$msg='
+		Username<br/><input type="text" name="myuser" value=""/><br/>
+		PIN*<br/><input type="text" name="mypinuser" value=""/><br/>
+		Callback phone<br/><input type="text" name="myphone" value=""/><br/>
+		* Please set your PIN on pluto admin website<br/>
+<anchor>	
+		<go method="post" href="check.wml?'.$sufix.((isset($_REQUEST['installationID']))?'&amp;installationID='.$_REQUEST['installationID']:'').'">
+		<postfield name="user" value="$(myuser)"/>
+		<postfield name="pinuser" value="$(mypinuser)"/>
+		<postfield name="phone" value="$(myphone)"/>
+		</go>
+
+		Submit form
+</anchor>
+
+	';	
+}else{
+	if(isValidLogin($_REQUEST['user'],@$_REQUEST['pin'],$dbADO) || isValidLogin($_REQUEST['user'],md5(@$_REQUEST['pinuser']),$dbADO)){
+		if(!isset($_REQUEST['pin'])){
+			$_REQUEST['pin']=md5($_REQUEST['pinuser']);
+		}
+		if(isset($_REQUEST['cgid'])){
+			$_REQUEST['opt']=1;
+		}
+		if(isset($_REQUEST['mode'])){
+			$_REQUEST['opt']=2;
+		}
+		if(isset($_REQUEST['speechid'])){
+			$_REQUEST['opt']=3;
+		}		
+		if(isset($_REQUEST['cameraid'])){
+			$_REQUEST['opt']=4;
+		}
+		
+		
+		
+		if(!isset($_REQUEST['opt'])){
+			if(isset($_REQUEST['security'])){
+				if((int)$_REQUEST['security']==0){
+					$msg=displaySecurityAlerts($securityADO,$dbADO);
+				}else{
+					$msg=displaySecuritySelected((int)$_REQUEST['security'],$dbADO,$securityADO);
+				}
+			}else{
+				$msg=indexLogged($dbADO);
+			}
+		}else{
+			$msg=displayScreens($dbADO);
+		}
+	}
+	else{
+		$msg='Error: Invalid login.';
+	}
+}
+    
+
+print $msg;
+    ?> 
+  </p> 
+</card> 
+</wml> 
+
+<?
+function executeScenario($cgid,$dbADO)
+{
+	$ScenariosArray=getAssocArray('Template','PK_Template','Description',$dbADO,'','');
+	$ScenariosArray['']='Undefined type';
+	
+	// Execute scenario command
+		if($cgid>0){
+			$res=$dbADO->Execute('SELECT Description,FK_Template FROM CommandGroup WHERE PK_CommandGroup=?',$cgid);
+			if($res->RecordCount()>0){
+				$row=$res->FetchRow();
+				
+				$commandToSend='/usr/pluto/bin/MessageSend localhost 0 0 10 '.$cgid;
+				exec($commandToSend);
+				$msg=$ScenariosArray[$row['FK_Template']].': Scenario <b>'.$row['Description'].'</b> was executed.';
+			}else {
+				$msg='Invalid scenario.';
+			}
+		}else{
+			$msg='Invalid scenario ID.';
+		}
+
+		$msg.='<br/><a href="check.wml?opt=1'.extraLinks().'">Back</a>';
+	return $msg;
+}
+
+
+function displaySecurityAlerts($securityADO,$dbADO)
+{
+	// Security alerts
+	$roomsArray=getAssocArray('Room','PK_Device','Room.Description',$dbADO,'INNER JOIN Device ON FK_Room=PK_Room');	
+
+	if(isset($_REQUEST['security']) && (int)$_REQUEST['security']==0){
+		$DateFormat='H:i:s d-m';
+		
+		$rs=$securityADO->Execute('
+			SELECT 
+				Alert.*,
+				AlertType.Description,
+				UNIX_TIMESTAMP(DetectionTime) AS UnixTime
+			FROM Alert
+			INNER JOIN AlertType ON FK_AlertType=PK_AlertType
+			ORDER BY DetectionTime DESC LIMIT 0,10');
+		$msg='<b>Security alerts:</b><br/>';
+		$pos=0;
+		while($row=$rs->FetchRow()){
+			$pos++;
+			$msg.=$pos.'. <a href="check.wml?security='.$row['PK_Alert'].extraLinks().'">'.$row['Description'].'</a> ['.(!isset($roomsArray[$row['EK_Device']])?'No room':$roomsArray[$row['EK_Device']]).'] - '.date($DateFormat,$row['UnixTime']).'<br/>
+			';
+		}
+	}
+	
+	return $msg;
+}
+
+function displaySecuritySelected($alertID,$dbADO,$securityADO)
+{
+	global $installationID;
+	$roomsArray=getAssocArray('Room','PK_Device','Room.Description',$dbADO,'INNER JOIN Device ON FK_Room=PK_Room');		
+	// Display selected security alert
+	if($alertID!=0 ){
+		switch(@$_REQUEST['action']){
+			case 1:
+				updateNotification($_REQUEST['user'].': Reset',$alertID,$securityADO);
+				$securityDevicePlugin=getFieldsAsArray('Device','PK_Device',$dbADO,'WHERE FK_DeviceTemplate='.$GLOBALS['SecurityPlugin'].' AND FK_Installation='.$installationID);
+				$cmd='/usr/pluto/bin/MessageSend localhost -targetType device 0 '.@$securityDevicePlugin['PK_Device'][0].' 2 18';
+				exec($cmd);
+				$actionResult='The alarm was reseted.';
+				break;
+			case 2:
+				updateNotification($_REQUEST['user'].': Ignore',$alertID,$securityADO);
+				break;
+			case 3:
+				if(isset($_REQUEST['number'])){
+					$securityDevicePlugin=getFieldsAsArray('Device','PK_Device',$dbADO,'WHERE FK_DeviceTemplate='.$GLOBALS['SecurityPlugin'].' AND FK_Installation='.$installationID);
+					$securityPluginID=(int)@$securityDevicePlugin['PK_Device'][0];
+					$telecomDevicePlugin=getFieldsAsArray('Device','PK_Device',$dbADO,'WHERE FK_DeviceTemplate='.$GLOBALS['TelecomPlugin'].' AND FK_Installation='.$installationID);
+					$telecomPluginID=(int)@$telecomDevicePlugin['PK_Device'][0];
+					$phone=$_REQUEST['phone'];
+					
+					$cmd='/usr/pluto/bin/MessageSend localhost -targetType template '.$securityPluginID.' 45 1 233 75 9"'.$phone.'"@trusted/n 84 "pluto" 83 "'.$_REQUEST['number'].'" 82 "Local"';
+					exec_batch_command($cmd);
+					
+					$actionResult='SOS call to '.$_REQUEST['number'];
+				}else{
+					$sosForm=getSOSForm($installationID,$dbADO);
+				}
+				updateNotification($_REQUEST['user'].': SOS',$alertID,$securityADO);
+				break;
+			case 4:
+				$securityDevicePlugin=getFieldsAsArray('Device','PK_Device',$dbADO,'WHERE FK_DeviceTemplate='.$GLOBALS['SecurityPlugin'].' AND FK_Installation='.$installationID);
+				$securityPluginID=(int)@$securityDevicePlugin['PK_Device'][0];
+				$telecomDevicePlugin=getFieldsAsArray('Device','PK_Device',$dbADO,'WHERE FK_DeviceTemplate='.$GLOBALS['TelecomPlugin'].' AND FK_Installation='.$installationID);
+				$telecomPluginID=(int)@$telecomDevicePlugin['PK_Device'][0];
+				$phone=$_REQUEST['phone'];
+
+				$cmd='/usr/pluto/bin/MessageSend localhost -targetType template '.$securityPluginID.' 45 1 233 75 9"'.$phone.'"@trusted/n 84 "pluto" 83 "997" 82 "Local"';
+				exec_batch_command($cmd);
+		
+				$actionResult='Neighbours notified.';
+				updateNotification($_REQUEST['user'].': Neighbors',$alertID,$securityADO);
+				break;
+			case 5:
+				$actionResult=speakInTheHouse($dbADO);
+				updateNotification($_REQUEST['user'].': Speak',$alertID,$securityADO);
+				break;
+			default:
+				break;
+		}
+		
+		$DateFormat='H:i:s d-m';
+		
+		$rs=$securityADO->Execute('
+			SELECT 
+				Alert.*,
+				AlertType.Description,
+				UNIX_TIMESTAMP(DetectionTime) AS UnixTime
+			FROM Alert
+			INNER JOIN AlertType ON FK_AlertType=PK_AlertType
+			WHERE PK_Alert=?',$alertID);
+		$msg='<b>Security alert:</b> '.@$actionResult.'<br/>';
+		$pos=0;
+		if($rs->RecordCount()==0){
+			return 'Invalid alert ID';
+		}
+		$row=$rs->FetchRow();
+		$alertDevice=getFieldsAsArray('Alert_Device','PK_Alert_Device,EK_Device',$securityADO,'WHERE FK_Alert='.$alertID.' AND EK_Device='.$row['EK_Device']);
+		$resD=$dbADO->Execute('SELECT * FROM Device LEFT JOIN Device_Device_Related ON FK_Device=PK_Device WHERE PK_Device =?',$alertDevice['EK_Device'][0]);
+		$picsArray=array();
+		while($rowD=$resD->FetchRow()){
+			$picPath='alert_'.$alertDevice['PK_Alert_Device'][0].'_cam'.$rowD['FK_Device_Related'];
+			$alertPic=get_alert_pic($picPath,$alertDevice['PK_Alert_Device'][0]);		
+			$picsArray[]='<img src="include/image.php?imagepath='.$alertPic.'" alt="Loading..."/>';
+		}
+		
+		
+		$msg.='
+			<b>'.$row['Description'].'</b> ['.(!isset($roomsArray[$row['EK_Device']])?'No room':$roomsArray[$row['EK_Device']]).'] - '.date($DateFormat,$row['UnixTime']).'<br/>
+		'.join('<br/>',$picsArray).'<br/>
+		<b>What to do?</b><br/>';
+		if(isset($sosForm)){
+			$msg.=$sosForm;
+		}else{
+			$speakInTheHouseLink=(hasAsterisk($dbADO)===true)?'<a href="check.wml?security='.$row['PK_Alert'].'&amp;action=5'.extraLinks().'">speak to the person in the house</a>':'speak to the person in the house (require Asterisk)';
+			$msg.='
+		a) <a href="check.wml?security='.$row['PK_Alert'].'&amp;action=1'.extraLinks().'">reseting the alarm</a><br/> 
+		b) <a href="check.wml?security='.$row['PK_Alert'].'&amp;action=2'.extraLinks().'">ignoring the alert (ie it continues to notify others)</a><br/> 
+		c) <a href="check.wml?security='.$row['PK_Alert'].'&amp;action=3'.extraLinks().'">fire an SOS event (which will call the police, for example)</a><br/>
+		d) <a href="check.wml?security='.$row['PK_Alert'].'&amp;action=4'.extraLinks().'">notifying the neighbors</a><br/> 
+		e) '.$speakInTheHouseLink.'<br/>';
+		}
+	}else{
+		return 'Invalid alert ID';
+	}
+	
+	return $msg;
+}
+
+
+function indexLogged($dbADO)
+{
+	// default option
+	if(isset($_REQUEST['mode'])){
+		$shmSufix='&amp;mode='.$_REQUEST['mode'].'&amp;user='.$_REQUEST['user'].'&amp;pin='.$_REQUEST['pin'];
+	}
+
+	$speakInTheHouseLink=(hasAsterisk($dbADO)===true)?'<a href="check.wml?opt=3'.extraLinks().'">Speak in the house</a>':'Speak in the house (require Asterisk)';
+	
+	$msg='
+		1. <a href="check.wml?opt=1'.extraLinks().'">Standard Scenarios</a><br/>
+		2. <a href="check.wml?opt=2'.extraLinks().@$shmSufix.'">Set house mode</a><br/>
+		3. '.$speakInTheHouseLink.'<br/>
+		4. <a href="check.wml?opt=4'.extraLinks().'">View Cameras</a><br/>
+		5. <a href="check.wml?security=0'.extraLinks().'">Security alerts</a><br/>
+		
+<!--		6. <a href="check.wml?opt=5'.extraLinks().'">All Orbiter Scenarios</a><br/>
+		7. <a href="check.wml?opt=6'.extraLinks().'">Advanced</a><br/>-->
+		';
+		
+	return $msg;
+}
+
+function isValidLogin($username,$pin,$dbADO)
+{
+	$res=$dbADO->Execute('SELECT * FROM Users WHERE UserName=? AND PINCode=?',array($username,$pin));
+	if($res->RecordCount()>0)
+		return true;
+	else
+		return false;
+}
+
+function displayScreens($dbADO)
+{
+	global $installationID;
+	switch (@$_REQUEST['opt']) {
+		case 1:
+			if(isset($_REQUEST['cgid'])){
+				$msg=executeScenario((int)$_REQUEST['cgid'],$dbADO);
+			}else{
+				$ssArray=getScenarios($GLOBALS['ArrayIDForMobileOrbiterScenarios'],$installationID,$dbADO);
+				$count=0;
+				$msg='';
+				foreach ($ssArray AS $scenarioID){
+					$count++;
+					$msg.=$count.'. <a href="check.wml?opt=1&amp;cgid='.$scenarioID['PK_CommandGroup'].extraLinks().'">'.$scenarioID['Description'].'</a><br/>';
+				}
+			}
+			break;
+		case 2:
+			if(isset($_REQUEST['mode'])){
+				$pin=(@$_REQUEST['formSubmit']==1)?$_REQUEST['pin']:$_REQUEST['pinuser'];
+				$securityDevicePlugin=getFieldsAsArray('Device','PK_Device',$dbADO,'WHERE FK_DeviceTemplate='.$GLOBALS['SecurityPlugin'].' AND FK_Installation='.$installationID);
+				$cmd='/usr/pluto/bin/MessageSend localhost -targetType device 0 '.(int)@$securityDevicePlugin['PK_Device'][0].' 1 19 5 '.(int)$_REQUEST['mode'].' 17 '.$_REQUEST['user'].' 99 '.$pin.' 100 0 101 "R"';
+				exec($cmd);
+				$msg='Set house mode command completed.';
+			}else{
+				$msg='
+					House mode<br/>'.generatePullDown('mode','HouseMode','PK_HouseMode','Description',0,$dbADO).'<br/>
+					Username<br/><input type="text" name="user" value=""/><br/>
+					PIN<br/><input type="text" name="pinuser" value=""/><br/>
+	
+				<do type="accept" label="Submit">			
+					<go method="get" href="check.wml?opt=2&amp;mode=$mode&amp;user=$user&amp;pinuser=$pinuser&amp;pin='.@md5($pinuser).((isset($_REQUEST['installationID']))?'&amp;installationID='.$_REQUEST['installationID']:'').'">
+					</go>
+				</do>';
+			}
+			break;
+		case 3:
+			// speak in the house
+			$msg=speakInTheHouse($dbADO);
+			break;
+		case 4:
+			// view cameras
+			if(!isset($_REQUEST['cameraid'])){
+				$cameraDevices=getDevicesFromCategory($GLOBALS['rootCameras'],$installationID,$dbADO);
+				$msg='Cameras: <br/>';
+				$pos=0;
+				foreach($cameraDevices AS $cameraid=>$cameraName){
+					$pos++;
+					$msg.=$pos.'. <a href="check.wml?opt=4&amp;cameraid='.$cameraid.extraLinks().'">'.$cameraName.'</a><br/>';
+				}
+			}else{
+				$cameraid=$_REQUEST['cameraid'];
+				
+				$securityDevicePlugin=getFieldsAsArray('Device','PK_Device',$dbADO,'WHERE FK_DeviceTemplate='.$GLOBALS['SecurityPlugin'].' AND FK_Installation='.$installationID);
+				$securityPluginDD=getFieldsAsArray('Device_DeviceData','IK_DeviceData',$dbADO,'WHERE FK_Device='.(int)@$securityDevicePlugin['PK_Device'][0].' AND FK_DeviceData='.$GLOBALS['Path']);
+				
+				$cmd='/usr/pluto/bin/MessageSend localhost -targetType device -o -p "/var/www/lmce-admin/security_images" 0 '.$_REQUEST['cameraid'].' 1 84 19 0 20 "jpg" 23 0 31 0 60 100 61 100';
+				exec($cmd,$retArray);
+				$msg='Camera screenshot not available.';
+				foreach ($retArray as $line) {
+					if(!ereg(':OK',$line)){
+						exec('mv /var/www/lmce-admin/security_images/19.out /var/www/lmce-admin/security_images/'.$cameraid.'.jpg',$retArray,$retCode);
+						$msg='<img src="security_images/'.$cameraid.'.jpg" alt="Loading ..."/>';
+					}
+				}
+			}
+			break;
+		default:
+			$msg='';
+			break;
+	}
+	
+	return $msg;
+}
+
+function extraLinks($withPin=0)
+{
+	$link='&amp;user='.$_REQUEST['user'].(($withPin==1)?'&amp;pinuser='.$_REQUEST['pinuser']:'').'&amp;phone='.$_REQUEST['phone'].'&amp;pin='.$_REQUEST['pin'].((isset($_REQUEST['installationID']))?'&amp;installationID='.$_REQUEST['installationID']:'');
+	
+	return $link;
+}
+
+function getDevicesFromCategory($categoryID,$installationID,$dbADO)
+{
+	$GLOBALS['childsDeviceCategoryArray']=array();
+	getDeviceCategoryChildsArray($categoryID,$dbADO);
+	$GLOBALS['childsDeviceCategoryArray']=cleanArray($GLOBALS['childsDeviceCategoryArray']);
+	$GLOBALS['childsDeviceCategoryArray'][]=$categoryID;
+
+	$queryDeviceTemplate='
+		SELECT * FROM DeviceTemplate 
+			WHERE FK_DeviceCategory IN ('.join(',',$GLOBALS['childsDeviceCategoryArray']).')
+		ORDER BY Description ASC';
+	$resDeviceTemplate=$dbADO->Execute($queryDeviceTemplate);
+	$DTArray=array();
+	$DTIDArray=array();
+	while($rowDeviceCategory=$resDeviceTemplate->FetchRow()){
+		$DTArray[]=$rowDeviceCategory['Description'];
+		$DTIDArray[]=$rowDeviceCategory['PK_DeviceTemplate'];
+	}
+
+	$devicesList=array();
+	$joinArray=$DTIDArray;	// used only for query when there are no DT in selected category
+	$joinArray[]=0;
+	$queryDevice='
+		SELECT 
+			Device.* FROM Device 
+		WHERE
+			FK_DeviceTemplate IN ('.join(',',$joinArray).') AND FK_Installation=?';	
+	$resDevice=$dbADO->Execute($queryDevice,$installationID);
+	while($rowD=$resDevice->FetchRow()){
+		$devicesList[$rowD['PK_Device']]=$rowD['Description'];
+	}
+	unset($GLOBALS['childsDeviceCategoryArray']);
+	$GLOBALS['childsDeviceCategoryArray']=array();
+	return $devicesList;
+}
+
+function updateNotification($action,$alertID,$securityADO)
+{
+	$securityADO->Execute('UPDATE Notification SET Result=CONCAT(IF(ISNULL(Result),\'\',Result),?) WHERE FK_Alert=?',array($action."\n",$alertID));
+}
+
+function speakInTheHouse($dbADO)
+{
+	global $installationID;
+	$securityDevicePlugin=getFieldsAsArray('Device','PK_Device',$dbADO,'WHERE FK_DeviceTemplate='.$GLOBALS['SecurityPlugin'].' AND FK_Installation='.$installationID);
+	$securityPluginID=(int)@$securityDevicePlugin['PK_Device'][0];
+	$telecomDevicePlugin=getFieldsAsArray('Device','PK_Device',$dbADO,'WHERE FK_DeviceTemplate='.$GLOBALS['TelecomPlugin'].' AND FK_Installation='.$installationID);
+	$telecomPluginID=(int)@$telecomDevicePlugin['PK_Device'][0];
+	$phone=$_REQUEST['phone'];
+
+	$cmd='/usr/pluto/bin/MessageSend localhost -targetType template '.$securityPluginID.' 45 1 233 75 9"'.$phone.'"@trusted/n 84 "pluto" 83 "998" 82 "Local"';
+	//$cmd='/usr/pluto/bin/MessageSend localhost -targetType device '.$securityPluginID.' '.$telecomPluginID.' 1 921 263 '.$phone.' 83 "998"';
+	exec_batch_command($cmd);
+	$msg='Speaking in progress ...';
+	
+	return $msg;
+}
+
+function getSOSForm($installationID,$dbADO){
+
+	$securityDevicePlugin=getFieldsAsArray('Device','PK_Device',$dbADO,'WHERE FK_DeviceTemplate='.$GLOBALS['SecurityPlugin'].' AND FK_Installation='.$installationID);
+	$securityPluginID=(int)@$securityDevicePlugin['PK_Device'][0];
+	
+	$queryDDD='SELECT * FROM Device_DeviceData WHERE FK_Device=? AND FK_DeviceData=?';
+	$resDDD=$dbADO->Execute($queryDDD,array($securityPluginID,$GLOBALS['EmergencyCalls']));
+	$ntcArray=array();
+	if($resDDD->RecordCount()>0){
+		$rowDDD=$resDDD->FetchRow();
+		$ecArray=explode(',',$rowDDD['IK_DeviceData']);
+	}	
+
+	$pulldown='<select name="number">';
+	for($i=0;$i<count($ecArray);$i=$i+2){
+		$pulldown.='<option value="'.@$ecArray[$i+1].'">'.@$ecArray[$i].'</option>';
+	}
+	$pulldown.='</select>';
+	$out='
+		Please choose SOS number to call<br/>
+		'.$pulldown.'<br/>
+		
+	<do type="accept" label="Submit">
+		<go method="get" href="check.wml?user='.$_REQUEST['user'].'&amp;pinuser='.$_REQUEST['pinuser'].'&amp;phone='.$_REQUEST['phone'].'&amp;pin='.$_REQUEST['pin'].'&amp;security='.$_REQUEST['security'].((isset($_REQUEST['installationID']))?'&amp;installationID='.$_REQUEST['installationID']:'').'&amp;number=$number&amp;action=3">
+		</go>
+	</do>	
+	';
+	
+	return $out;
+}
+
+function hasAsterisk($dbADO){
+	global $installationID;
+
+	$deviceArray=getAssocArray('Device','PK_Device','Description',$dbADO,'WHERE FK_DeviceTemplate='.$GLOBALS['Asterisk'].' AND FK_Installation='.$installationID);
+	if(count($deviceArray)>0){
+		return true;
+	}else{
+		return false;
+	}
+}
+?>

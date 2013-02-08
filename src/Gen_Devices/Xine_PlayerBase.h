@@ -93,6 +93,20 @@ public:
 			EVENTPARAMETER_Video_CONST, sVideo.c_str()));
 	}
 
+	virtual void Media_Position_Changed(int iFK_MediaType,string sMRL,string sID,int iStream_ID,string sDateTime,string sCurrent_Time,int iSpeed)
+	{
+		SendMessage(new Message(m_dwPK_Device, DEVICEID_EVENTMANAGER, PRIORITY_NORMAL, MESSAGETYPE_EVENT, 
+			EVENT_Media_Position_Changed_CONST,
+			7 /* number of parameter's pairs (id, value) */,
+			EVENTPARAMETER_FK_MediaType_CONST, StringUtils::itos(iFK_MediaType).c_str(),
+			EVENTPARAMETER_MRL_CONST, sMRL.c_str(),
+			EVENTPARAMETER_ID_CONST, sID.c_str(),
+			EVENTPARAMETER_Stream_ID_CONST, StringUtils::itos(iStream_ID).c_str(),
+			EVENTPARAMETER_DateTime_CONST, sDateTime.c_str(),
+			EVENTPARAMETER_Current_Time_CONST, sCurrent_Time.c_str(),
+			EVENTPARAMETER_Speed_CONST, StringUtils::itos(iSpeed).c_str()));
+	}
+
 };
 
 
@@ -134,7 +148,7 @@ public:
 		if( m_bRunningWithoutDeviceData )
 			return m_pEvent_Impl->GetDeviceDataFromDatabase(m_dwPK_Device,DEVICEDATA_Alsa_Output_Device_CONST);
 		else
-			return m_mapParameters_Find(DEVICEDATA_Alsa_Output_Device_CONST);
+			return m_mapParameters[DEVICEDATA_Alsa_Output_Device_CONST];
 	}
 
 	string Get_Subtitles()
@@ -142,7 +156,7 @@ public:
 		if( m_bRunningWithoutDeviceData )
 			return m_pEvent_Impl->GetDeviceDataFromDatabase(m_dwPK_Device,DEVICEDATA_Subtitles_CONST);
 		else
-			return m_mapParameters_Find(DEVICEDATA_Subtitles_CONST);
+			return m_mapParameters[DEVICEDATA_Subtitles_CONST];
 	}
 
 	void Set_Subtitles(string Value)
@@ -154,7 +168,7 @@ public:
 		if( m_bRunningWithoutDeviceData )
 			return m_pEvent_Impl->GetDeviceDataFromDatabase(m_dwPK_Device,DEVICEDATA_Audio_Tracks_CONST);
 		else
-			return m_mapParameters_Find(DEVICEDATA_Audio_Tracks_CONST);
+			return m_mapParameters[DEVICEDATA_Audio_Tracks_CONST];
 	}
 
 	void Set_Audio_Tracks(string Value)
@@ -166,7 +180,7 @@ public:
 		if( m_bRunningWithoutDeviceData )
 			return m_pEvent_Impl->GetDeviceDataFromDatabase(m_dwPK_Device,DEVICEDATA_Angles_CONST);
 		else
-			return m_mapParameters_Find(DEVICEDATA_Angles_CONST);
+			return m_mapParameters[DEVICEDATA_Angles_CONST];
 	}
 
 	void Set_Angles(string Value)
@@ -178,7 +192,7 @@ public:
 		if( m_bRunningWithoutDeviceData )
 			return atoi(m_pEvent_Impl->GetDeviceDataFromDatabase(m_dwPK_Device,DEVICEDATA_Time_Code_Report_Frequency_CONST).c_str());
 		else
-			return atoi(m_mapParameters_Find(DEVICEDATA_Time_Code_Report_Frequency_CONST).c_str());
+			return atoi(m_mapParameters[DEVICEDATA_Time_Code_Report_Frequency_CONST].c_str());
 	}
 
 	string Get_Name()
@@ -186,7 +200,7 @@ public:
 		if( m_bRunningWithoutDeviceData )
 			return m_pEvent_Impl->GetDeviceDataFromDatabase(m_dwPK_Device,DEVICEDATA_Name_CONST);
 		else
-			return m_mapParameters_Find(DEVICEDATA_Name_CONST);
+			return m_mapParameters[DEVICEDATA_Name_CONST];
 	}
 
 	string Get_Hardware_acceleration()
@@ -194,7 +208,7 @@ public:
 		if( m_bRunningWithoutDeviceData )
 			return m_pEvent_Impl->GetDeviceDataFromDatabase(m_dwPK_Device,DEVICEDATA_Hardware_acceleration_CONST);
 		else
-			return m_mapParameters_Find(DEVICEDATA_Hardware_acceleration_CONST);
+			return m_mapParameters[DEVICEDATA_Hardware_acceleration_CONST];
 	}
 
 	string Get_Deinterlacing_Mode()
@@ -202,7 +216,7 @@ public:
 		if( m_bRunningWithoutDeviceData )
 			return m_pEvent_Impl->GetDeviceDataFromDatabase(m_dwPK_Device,DEVICEDATA_Deinterlacing_Mode_CONST);
 		else
-			return m_mapParameters_Find(DEVICEDATA_Deinterlacing_Mode_CONST);
+			return m_mapParameters[DEVICEDATA_Deinterlacing_Mode_CONST];
 	}
 
 	int Get_Port()
@@ -210,7 +224,7 @@ public:
 		if( m_bRunningWithoutDeviceData )
 			return atoi(m_pEvent_Impl->GetDeviceDataFromDatabase(m_dwPK_Device,DEVICEDATA_Port_CONST).c_str());
 		else
-			return atoi(m_mapParameters_Find(DEVICEDATA_Port_CONST).c_str());
+			return atoi(m_mapParameters[DEVICEDATA_Port_CONST].c_str());
 	}
 
 	int Get_Zoom_Level()
@@ -218,7 +232,7 @@ public:
 		if( m_bRunningWithoutDeviceData )
 			return atoi(m_pEvent_Impl->GetDeviceDataFromDatabase(m_dwPK_Device,DEVICEDATA_Zoom_Level_CONST).c_str());
 		else
-			return atoi(m_mapParameters_Find(DEVICEDATA_Zoom_Level_CONST).c_str());
+			return atoi(m_mapParameters[DEVICEDATA_Zoom_Level_CONST].c_str());
 	}
 
 };
@@ -344,6 +358,7 @@ public:
 	void EVENT_Playback_Completed(string sMRL,int iStream_ID,bool bWith_Errors) { GetEvents()->Playback_Completed(sMRL.c_str(),iStream_ID,bWith_Errors); }
 	void EVENT_Media_Description_Changed(string sText) { GetEvents()->Media_Description_Changed(sText.c_str()); }
 	void EVENT_Playback_Started(string sMRL,int iStream_ID,string sSectionDescription,string sAudio,string sVideo) { GetEvents()->Playback_Started(sMRL.c_str(),iStream_ID,sSectionDescription.c_str(),sAudio.c_str(),sVideo.c_str()); }
+	void EVENT_Media_Position_Changed(int iFK_MediaType,string sMRL,string sID,int iStream_ID,string sDateTime,string sCurrent_Time,int iSpeed) { GetEvents()->Media_Position_Changed(iFK_MediaType,sMRL.c_str(),sID.c_str(),iStream_ID,sDateTime.c_str(),sCurrent_Time.c_str(),iSpeed); }
 	//Commands - Override these to handle commands from the server
 	virtual void CMD_Simulate_Keypress(string sPK_Button,int iStreamID,string sName,string &sCMD_Result,class Message *pMessage) {};
 	virtual void CMD_Simulate_Mouse_Click(int iPosition_X,int iPosition_Y,int iStreamID,string &sCMD_Result,class Message *pMessage) {};

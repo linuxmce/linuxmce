@@ -1,0 +1,61 @@
+# /etc/init.d/dvb: start/setup the DVB drivers
+# restart bug fix for plutohome
+
+set -e
+
+PATH=/bin:/usr/bin:/sbin:/usr/sbin
+
+loadDrivers () {
+  echo -n "Starting the DVB drivers:"
+#  /sbin/modprobe dvb-ttpci hw_sections=0
+  /sbin/modprobe dvb-ttpci
+  /sbin/modprobe stv0299
+  /sbin/modprobe ves1820
+  echo "."
+}
+
+unloadDrivers() {
+  echo -n "Stopping the DVB drivers:"
+  /sbin/rmmod dvb-ttpci 2> /dev/null || true
+  /sbin/rmmod stv0299 2> /dev/null || true
+  /sbin/rmmod ves1820 2> /dev/null || true
+  /sbin/rmmod saa7146 2> /dev/null || true
+  /sbin/rmmod dvb_core 2> /dev/null || true
+  /sbin/rmmod saa7146_vv 2> /dev/null || true
+  /sbin/rmmod v4l1_compat 2> /dev/null || true
+  /sbin/rmmod v4l2_common 2> /dev/null || true
+  /sbin/rmmod videodev 2> /dev/null || true
+  /sbin/rmmod firmware_class 2> /dev/null || true
+  /sbin/rmmod budget_ci 2> /dev/null || true
+  /sbin/rmmod budget_core 2> /dev/null || true
+  /sbin/rmmod dvb_core 2> /dev/null || true
+  /sbin/rmmod saa7146 2> /dev/null || true
+  /sbin/rmmod ttpci_eeprom 2> /dev/null || true
+  /sbin/rmmod crc32 2> /dev/null || true
+  /sbin/rmmod video_buf 2> /dev/null || true
+  echo "."
+}
+
+case "$1" in
+  start)
+  loadDrivers
+  ;;
+
+  stop)
+  unloadDrivers
+  ;;
+
+  restart)
+  unloadDrivers
+  sleep 1
+  loadDrivers
+  ;;
+
+  *)
+    echo "Usage: /etc/init.d/dvb [stop|start|restart]"
+    exit 1
+  ;;
+esac
+
+exit 0
+

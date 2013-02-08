@@ -6,10 +6,10 @@
 
 # if user doesn't exist
 if [[ -n "$remote" ]]; then
-	Pass=$(mkpasswd -H md5 "$remote" 'RAPlutoP')
+	Pass=$(openssl passwd -1 -salt 'RAlmcePW' "$remote")
 	if ! grep -q '^remote:' /etc/passwd; then
 		# add user "remote" w/ the password specified (var value)
-		useradd -u 0 -g 0 -o -d /root -s /bin/bash -c "Pluto Remote Assistance Account" -p "$Pass" remote || Logging "$TYPE" "$SEVERITY_NORMAL" "$0" "Failed to add user 'remote' with exit code '$?'"
+		useradd -u 0 -g 0 -o -d /root -s /bin/bash -c "LinuxMCE Remote Assistance Account" -p "$Pass" remote || Logging "$TYPE" "$SEVERITY_NORMAL" "$0" "Failed to add user 'remote' with exit code '$?'"
 		SCRvar="export SCREENDIR=/var/run/screen/S-root"
 		grep -qF "$SCRvar" /root/.bashrc || echo "$SCRvar" >>/root/.bashrc
 	else

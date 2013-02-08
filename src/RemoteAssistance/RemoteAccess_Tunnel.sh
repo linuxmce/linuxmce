@@ -17,7 +17,7 @@ Host="$4"
 RAhost="$5"
 
 if [[ -z "$RAhost" ]]; then
-	RAhost="rassh.linuxmce.org"
+	RAhost="ra.linuxmce.org"
 fi
 
 if [[ -n "$6" ]]; then
@@ -39,7 +39,6 @@ else
 	Logging "$TYPE" "$SEVERITY_WARNING" "$0" "Key '$RAKey' not found. Exiting"
 	exit 1
 fi
-
 # TODO: check or remove host key every time just in case
 # TODO: check if port 80 isn't proxyed and if it is, also check port 22
 while echo 'x'; do

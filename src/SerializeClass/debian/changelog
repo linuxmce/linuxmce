@@ -1,0 +1,5 @@
+libserialize (2.45-1) unstable; urgency=low
+
+  * Initial release (Closes: #nnnn)  <nnnn is the bug number of your ITP>
+
+ -- root <root@fluffybitch.org>  Sun, 18 Nov 2012 16:28:11 +0000

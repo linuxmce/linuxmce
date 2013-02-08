@@ -1,0 +1,31 @@
+diff -ruNp udev-060.orig/udev.c udev-060/udev.c
+--- udev-060.orig/udev.c	2005-09-23 23:08:25.374883000 +0100
++++ udev-060/udev.c	2005-09-23 23:22:45.034195864 +0100
+@@ -114,11 +114,25 @@ int main(int argc, char *argv[], char *e
+ 	if (!subsystem && argc == 2)
+ 		subsystem = argv[1];
+ 
+-	if (!action || !subsystem || !devpath) {
+-		err("action, subsystem or devpath missing");
++	if (!action || !subsystem) {
++		err("action or subsystem missing");
+ 		goto exit;
+ 	}
+ 
++	if (!devpath) {
++		if (!strcmp(subsystem, "input")) {
++			dbg("input event without devpath");
++			logging_close();
++
++			execv("/sbin/udev_run_hotplugd", argv);
++			err("exec of child failed");
++			_exit(1);
++		} else {
++			err("devpath missing");
++			goto exit;
++		}
++	}
++
+ 	/* export log_priority , as called programs may want to do the same as udev */
+ 	if (udev_log_priority) {
+ 		char priority[32];

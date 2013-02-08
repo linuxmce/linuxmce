@@ -37,16 +37,8 @@ using namespace std;
 
 #include "Table_CommandGroup.h"
 #include "Table_CommandGroup_D.h"
-#include "Table_CommandGroup_D_pschist.h"
-#include "Table_CommandGroup_D_pschmask.h"
-#include "Table_CommandGroup_pschist.h"
-#include "Table_CommandGroup_pschmask.h"
 #include "Table_DesignObjVariation.h"
-#include "Table_DesignObjVariation_pschist.h"
-#include "Table_DesignObjVariation_pschmask.h"
 #include "Table_EventHandler.h"
-#include "Table_EventHandler_pschist.h"
-#include "Table_EventHandler_pschmask.h"
 
 
 void Database_pluto_main::CreateTable_Criteria()
@@ -94,6 +86,7 @@ void Row_Criteria::Delete()
 	Row_Criteria *pRow = this; // Needed so we will have only 1 version of get_primary_fields_assign_from_row
 	
 	if (!is_deleted)
+	{
 		if (is_added)	
 		{	
 			vector<TableRow*>::iterator i;	
@@ -115,6 +108,7 @@ void Row_Criteria::Delete()
 			table->deleted_cachedRows[key] = this;
 			is_deleted = true;	
 		}	
+	}
 }
 
 void Row_Criteria::Reload()
@@ -154,10 +148,8 @@ m_FK_CriteriaList = 0;
 is_null[2] = false;
 m_FK_Installation = 0;
 is_null[3] = false;
-m_Description = "";
-is_null[4] = false;
-m_Define = "";
-is_null[5] = false;
+is_null[4] = true;
+is_null[5] = true;
 is_null[6] = true;
 m_psc_id = 0;
 is_null[7] = true;
@@ -166,7 +158,8 @@ is_null[8] = true;
 m_psc_user = 0;
 m_psc_frozen = 0;
 is_null[9] = false;
-is_null[10] = true;
+m_psc_mod = "0000-00-00 00:00:00";
+is_null[10] = false;
 is_null[11] = true;
 m_psc_restrict = 0;
 
@@ -252,6 +245,12 @@ void Row_Criteria::psc_restrict_set(long int val){PLUTO_SAFETY_LOCK_ERRORSONLY(s
 m_psc_restrict = val; is_modified=true; is_null[11]=false;}
 
 		
+bool Row_Criteria::Description_isNull() {PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
+
+return is_null[4];}
+bool Row_Criteria::Define_isNull() {PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
+
+return is_null[5];}
 bool Row_Criteria::psc_id_isNull() {PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
 
 return is_null[6];}
@@ -264,14 +263,19 @@ return is_null[8];}
 bool Row_Criteria::psc_frozen_isNull() {PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
 
 return is_null[9];}
-bool Row_Criteria::psc_mod_isNull() {PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
-
-return is_null[10];}
 bool Row_Criteria::psc_restrict_isNull() {PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
 
 return is_null[11];}
 
 			
+void Row_Criteria::Description_setNull(bool val){PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
+is_null[4]=val;
+is_modified=true;
+}
+void Row_Criteria::Define_setNull(bool val){PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
+is_null[5]=val;
+is_modified=true;
+}
 void Row_Criteria::psc_id_setNull(bool val){PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
 is_null[6]=val;
 is_modified=true;
@@ -286,10 +290,6 @@ is_modified=true;
 }
 void Row_Criteria::psc_frozen_setNull(bool val){PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
 is_null[9]=val;
-is_modified=true;
-}
-void Row_Criteria::psc_mod_setNull(bool val){PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
-is_null[10]=val;
 is_modified=true;
 }
 void Row_Criteria::psc_restrict_setNull(bool val){PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
@@ -357,8 +357,8 @@ PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
 if (is_null[4])
 return "NULL";
 
-char *buf = new char[51];
-db_wrapper_real_escape_string(table->database->m_pDB, buf, m_Description.c_str(), (unsigned long) min((size_t)25,m_Description.size()));
+char *buf = new char[151];
+db_wrapper_real_escape_string(table->database->m_pDB, buf, m_Description.c_str(), (unsigned long) min((size_t)75,m_Description.size()));
 string s=string()+"\""+buf+"\"";
 delete[] buf;
 return s;
@@ -371,8 +371,8 @@ PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
 if (is_null[5])
 return "NULL";
 
-char *buf = new char[51];
-db_wrapper_real_escape_string(table->database->m_pDB, buf, m_Define.c_str(), (unsigned long) min((size_t)25,m_Define.size()));
+char *buf = new char[151];
+db_wrapper_real_escape_string(table->database->m_pDB, buf, m_Define.c_str(), (unsigned long) min((size_t)75,m_Define.size()));
 string s=string()+"\""+buf+"\"";
 delete[] buf;
 return s;
@@ -1123,34 +1123,6 @@ PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
 class Table_CommandGroup_D *pTable = table->database->CommandGroup_D_get();
 pTable->GetRows("`FK_Criteria_Orbiter`=" + StringUtils::itos(m_PK_Criteria),rows);
 }
-void Row_Criteria::CommandGroup_D_pschist_FK_Criteria_Orbiter_getrows(vector <class Row_CommandGroup_D_pschist*> *rows)
-{
-PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
-
-class Table_CommandGroup_D_pschist *pTable = table->database->CommandGroup_D_pschist_get();
-pTable->GetRows("`FK_Criteria_Orbiter`=" + StringUtils::itos(m_PK_Criteria),rows);
-}
-void Row_Criteria::CommandGroup_D_pschmask_FK_Criteria_Orbiter_getrows(vector <class Row_CommandGroup_D_pschmask*> *rows)
-{
-PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
-
-class Table_CommandGroup_D_pschmask *pTable = table->database->CommandGroup_D_pschmask_get();
-pTable->GetRows("`FK_Criteria_Orbiter`=" + StringUtils::itos(m_PK_Criteria),rows);
-}
-void Row_Criteria::CommandGroup_pschist_FK_Criteria_Orbiter_getrows(vector <class Row_CommandGroup_pschist*> *rows)
-{
-PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
-
-class Table_CommandGroup_pschist *pTable = table->database->CommandGroup_pschist_get();
-pTable->GetRows("`FK_Criteria_Orbiter`=" + StringUtils::itos(m_PK_Criteria),rows);
-}
-void Row_Criteria::CommandGroup_pschmask_FK_Criteria_Orbiter_getrows(vector <class Row_CommandGroup_pschmask*> *rows)
-{
-PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
-
-class Table_CommandGroup_pschmask *pTable = table->database->CommandGroup_pschmask_get();
-pTable->GetRows("`FK_Criteria_Orbiter`=" + StringUtils::itos(m_PK_Criteria),rows);
-}
 void Row_Criteria::DesignObjVariation_FK_Criteria_Orbiter_getrows(vector <class Row_DesignObjVariation*> *rows)
 {
 PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
@@ -1158,39 +1130,11 @@ PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
 class Table_DesignObjVariation *pTable = table->database->DesignObjVariation_get();
 pTable->GetRows("`FK_Criteria_Orbiter`=" + StringUtils::itos(m_PK_Criteria),rows);
 }
-void Row_Criteria::DesignObjVariation_pschist_FK_Criteria_Orbiter_getrows(vector <class Row_DesignObjVariation_pschist*> *rows)
-{
-PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
-
-class Table_DesignObjVariation_pschist *pTable = table->database->DesignObjVariation_pschist_get();
-pTable->GetRows("`FK_Criteria_Orbiter`=" + StringUtils::itos(m_PK_Criteria),rows);
-}
-void Row_Criteria::DesignObjVariation_pschmask_FK_Criteria_Orbiter_getrows(vector <class Row_DesignObjVariation_pschmask*> *rows)
-{
-PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
-
-class Table_DesignObjVariation_pschmask *pTable = table->database->DesignObjVariation_pschmask_get();
-pTable->GetRows("`FK_Criteria_Orbiter`=" + StringUtils::itos(m_PK_Criteria),rows);
-}
 void Row_Criteria::EventHandler_FK_Criteria_getrows(vector <class Row_EventHandler*> *rows)
 {
 PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
 
 class Table_EventHandler *pTable = table->database->EventHandler_get();
-pTable->GetRows("`FK_Criteria`=" + StringUtils::itos(m_PK_Criteria),rows);
-}
-void Row_Criteria::EventHandler_pschist_FK_Criteria_getrows(vector <class Row_EventHandler_pschist*> *rows)
-{
-PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
-
-class Table_EventHandler_pschist *pTable = table->database->EventHandler_pschist_get();
-pTable->GetRows("`FK_Criteria`=" + StringUtils::itos(m_PK_Criteria),rows);
-}
-void Row_Criteria::EventHandler_pschmask_FK_Criteria_getrows(vector <class Row_EventHandler_pschmask*> *rows)
-{
-PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
-
-class Table_EventHandler_pschmask *pTable = table->database->EventHandler_pschmask_get();
 pTable->GetRows("`FK_Criteria`=" + StringUtils::itos(m_PK_Criteria),rows);
 }
 

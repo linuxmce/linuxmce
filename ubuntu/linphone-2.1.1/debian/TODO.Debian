@@ -1,0 +1,27 @@
+Things that upstream should do
+------------------------------
+* Remove things that should be removed during distclean (ie everything which is
+  generated) and should not be in the tar.gz. [pending]
+* Add support for external libraries in configure.
+* Remove speex and gsm from the archive?
+* Is /usr/libexec standard (at least it is not in Debian) for gnome applets?
+  [pending]
+* Size of the gnome icon (linphone2.xpm) should be 32x32.
+* Enhance the manpages.
+* Have the most recent version in http://simon.morlat.free.fr/download/ in order
+  to be able to uscan (or a symlink).
+* Version the librairies.
+* Put the rings in .ogg.
+* Why so many statically-linked libs?
+
+Whishlist
+---------
+* Lower the ring volume?
+* Add a system tray icon (à la gnomemeeting)?
+* Add a bandwidth graph?
+* J'aimerais bien qu'il soit possible de faire exécuter une commande que je choisis quand qqn m'appelle, plutôt que de balancer une sonnerie dans la carte son (le but étant de pouvoir interfacer avec une "vraie" ligne de téléphone)
+* Je pense que ça pourrait être pratique si linphone était en 2 parties : un backend qui fait le boulot, et un ou plusieurs frontend (gnome, ligne de commande, ...) qui communiquent par une socket unix ou TCP/UDP. Comme ça, je pourrais avoir le programme qui tourne en permanence en background (pour recevoir des appels) et lancer le frontend graphique juste quand je veux...
+
+debian
+------
+* Add a watch file.

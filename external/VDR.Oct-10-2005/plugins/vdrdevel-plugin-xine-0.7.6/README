@@ -1,0 +1,15 @@
+This is a "plugin" for the Video Disk Recorder (VDR).
+
+Written by:                  Reinhard Niﬂl <rnissl@gmx.de>
+
+Project's homepage:          http://home.vr-web.de/~rnissl/
+
+Latest version available at: http://home.vr-web.de/~rnissl/
+
+See the file COPYING for license information.
+
+Description:
+Plugin for "software only" playback using xine.
+
+For more information see INSTALL.
+

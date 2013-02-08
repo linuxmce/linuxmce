@@ -1,0 +1,1154 @@
+// !$*UTF8*$!
+{
+	archiveVersion = 1;
+	classes = {
+	};
+	objectVersion = 46;
+	objects = {
+
+/* Begin PBXBuildFile section */
+		B40C363714915319000FD6E6 /* libz.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = B40C363614915319000FD6E6 /* libz.dylib */; };
+		B40C363A14915B73000FD6E6 /* OpenGLES.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = B40C363914915B73000FD6E6 /* OpenGLES.framework */; };
+		B40C363C14915B7D000FD6E6 /* QuartzCore.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = B40C363B14915B7D000FD6E6 /* QuartzCore.framework */; };
+		B40C363E14915B83000FD6E6 /* CoreText.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = B40C363D14915B83000FD6E6 /* CoreText.framework */; };
+		B40C364314915CD1000FD6E6 /* libQtXml.a in Frameworks */ = {isa = PBXBuildFile; fileRef = B40C364114915CD1000FD6E6 /* libQtXml.a */; };
+		B40C364614915CF6000FD6E6 /* libQtXmlPatterns.a in Frameworks */ = {isa = PBXBuildFile; fileRef = B40C364514915CF6000FD6E6 /* libQtXmlPatterns.a */; };
+		B41EB23B149CADD6000B35DE /* moc_abstractimageprovider.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B41EB208149CADD6000B35DE /* moc_abstractimageprovider.cpp */; };
+		B41EB23C149CADD6000B35DE /* moc_attributemodel.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B41EB209149CADD6000B35DE /* moc_attributemodel.cpp */; };
+		B41EB23D149CADD6000B35DE /* moc_attributesortitem.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B41EB20A149CADD6000B35DE /* moc_attributesortitem.cpp */; };
+		B41EB23E149CADD6000B35DE /* moc_attributesortmodel.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B41EB20B149CADD6000B35DE /* moc_attributesortmodel.cpp */; };
+		B41EB23F149CADD6000B35DE /* moc_basicimageprovider.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B41EB20C149CADD6000B35DE /* moc_basicimageprovider.cpp */; };
+		B41EB240149CADD6000B35DE /* moc_climatescenarioitem.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B41EB20D149CADD6000B35DE /* moc_climatescenarioitem.cpp */; };
+		B41EB241149CADD6000B35DE /* moc_climatescenariomodel.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B41EB20E149CADD6000B35DE /* moc_climatescenariomodel.cpp */; };
+		B41EB242149CADD6000B35DE /* moc_datagriditem.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B41EB20F149CADD6000B35DE /* moc_datagriditem.cpp */; };
+		B41EB243149CADD6000B35DE /* moc_datagriditemmodelclass.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B41EB210149CADD6000B35DE /* moc_datagriditemmodelclass.cpp */; };
+		B41EB244149CADD6000B35DE /* moc_epgchannellist.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B41EB211149CADD6000B35DE /* moc_epgchannellist.cpp */; };
+		B41EB245149CADD6000B35DE /* moc_epgitemclass.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B41EB212149CADD6000B35DE /* moc_epgitemclass.cpp */; };
+		B41EB246149CADD6000B35DE /* moc_filedetailsclass.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B41EB213149CADD6000B35DE /* moc_filedetailsclass.cpp */; };
+		B41EB247149CADD6000B35DE /* moc_filedetailsimageprovider.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B41EB214149CADD6000B35DE /* moc_filedetailsimageprovider.cpp */; };
+		B41EB248149CADD6000B35DE /* moc_filedetailsitem.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B41EB215149CADD6000B35DE /* moc_filedetailsitem.cpp */; };
+		B41EB249149CADD6000B35DE /* moc_filedetailsmodel.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B41EB216149CADD6000B35DE /* moc_filedetailsmodel.cpp */; };
+		B41EB24A149CADD6000B35DE /* moc_filtermodel.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B41EB217149CADD6000B35DE /* moc_filtermodel.cpp */; };
+		B41EB24B149CADD6000B35DE /* moc_filtermodelitem.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B41EB218149CADD6000B35DE /* moc_filtermodelitem.cpp */; };
+		B41EB24C149CADD6000B35DE /* moc_floorplandevice.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B41EB219149CADD6000B35DE /* moc_floorplandevice.cpp */; };
+		B41EB24D149CADD6000B35DE /* moc_floorplanimageitem.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B41EB21A149CADD6000B35DE /* moc_floorplanimageitem.cpp */; };
+		B41EB24E149CADD6000B35DE /* moc_floorplanmodel.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B41EB21B149CADD6000B35DE /* moc_floorplanmodel.cpp */; };
+		B41EB24F149CADD6000B35DE /* moc_genreitem.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B41EB21C149CADD6000B35DE /* moc_genreitem.cpp */; };
+		B41EB250149CADD6000B35DE /* moc_genremodel.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B41EB21D149CADD6000B35DE /* moc_genremodel.cpp */; };
+		B41EB251149CADD6000B35DE /* moc_gridimageprovider.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B41EB21E149CADD6000B35DE /* moc_gridimageprovider.cpp */; };
+		B41EB252149CADD6000B35DE /* moc_griditem.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B41EB21F149CADD6000B35DE /* moc_griditem.cpp */; };
+		B41EB253149CADD6000B35DE /* moc_lightingscenarioitem.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B41EB220149CADD6000B35DE /* moc_lightingscenarioitem.cpp */; };
+		B41EB254149CADD6000B35DE /* moc_lightingscenariomodel.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B41EB221149CADD6000B35DE /* moc_lightingscenariomodel.cpp */; };
+		B41EB255149CADD6000B35DE /* moc_listModel.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B41EB222149CADD6000B35DE /* moc_listModel.cpp */; };
+		B41EB256149CADD6000B35DE /* moc_locationitem.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B41EB223149CADD6000B35DE /* moc_locationitem.cpp */; };
+		B41EB257149CADD6000B35DE /* moc_locationmodel.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B41EB224149CADD6000B35DE /* moc_locationmodel.cpp */; };
+		B41EB258149CADD6000B35DE /* moc_mediascenarioitem.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B41EB225149CADD6000B35DE /* moc_mediascenarioitem.cpp */; };
+		B41EB259149CADD6000B35DE /* moc_mediascenariomodel.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B41EB226149CADD6000B35DE /* moc_mediascenariomodel.cpp */; };
+		B41EB25A149CADD6000B35DE /* moc_mediatypeitem.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B41EB227149CADD6000B35DE /* moc_mediatypeitem.cpp */; };
+		B41EB25B149CADD6000B35DE /* moc_mediatypemodel.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B41EB228149CADD6000B35DE /* moc_mediatypemodel.cpp */; };
+		B41EB25C149CADD6000B35DE /* moc_nowplayingclass.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B41EB229149CADD6000B35DE /* moc_nowplayingclass.cpp */; };
+		B41EB25D149CADD6000B35DE /* moc_orbiterbuttonitem.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B41EB22A149CADD6000B35DE /* moc_orbiterbuttonitem.cpp */; };
+		B41EB25E149CADD6000B35DE /* moc_playlistitemclass.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B41EB22B149CADD6000B35DE /* moc_playlistitemclass.cpp */; };
+		B41EB260149CADD6000B35DE /* moc_qOrbiterData.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B41EB22D149CADD6000B35DE /* moc_qOrbiterData.cpp */; };
+		B41EB261149CADD6000B35DE /* moc_qorbitermanager.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B41EB22E149CADD6000B35DE /* moc_qorbitermanager.cpp */; };
+		B41EB262149CADD6000B35DE /* moc_screenparamsclass.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B41EB22F149CADD6000B35DE /* moc_screenparamsclass.cpp */; };
+		B41EB263149CADD6000B35DE /* moc_screenshotattributes.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B41EB230149CADD6000B35DE /* moc_screenshotattributes.cpp */; };
+		B41EB264149CADD6000B35DE /* moc_securityscenarioitem.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B41EB231149CADD6000B35DE /* moc_securityscenarioitem.cpp */; };
+		B41EB265149CADD6000B35DE /* moc_securityscenariomodel.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B41EB232149CADD6000B35DE /* moc_securityscenariomodel.cpp */; };
+		B41EB266149CADD6000B35DE /* moc_securityvideoclass.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B41EB233149CADD6000B35DE /* moc_securityvideoclass.cpp */; };
+		B41EB267149CADD6000B35DE /* moc_skindataitem.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B41EB234149CADD6000B35DE /* moc_skindataitem.cpp */; };
+		B41EB268149CADD6000B35DE /* moc_skindatamodel.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B41EB235149CADD6000B35DE /* moc_skindatamodel.cpp */; };
+		B41EB269149CADD6000B35DE /* moc_sleepingalarm.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B41EB236149CADD6000B35DE /* moc_sleepingalarm.cpp */; };
+		B41EB26A149CADD6000B35DE /* moc_telecomscenarioitem.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B41EB237149CADD6000B35DE /* moc_telecomscenarioitem.cpp */; };
+		B41EB26B149CADD6000B35DE /* moc_telecomscenariomodel.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B41EB238149CADD6000B35DE /* moc_telecomscenariomodel.cpp */; };
+		B41EB26C149CADD6000B35DE /* moc_useritem.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B41EB239149CADD6000B35DE /* moc_useritem.cpp */; };
+		B41EB26D149CADD6000B35DE /* moc_usermodel.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B41EB23A149CADD6000B35DE /* moc_usermodel.cpp */; };
+		B41EB270149CAEEA000B35DE /* moc_avcodegrid.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B41EB26E149CAEEA000B35DE /* moc_avcodegrid.cpp */; };
+		B41EB271149CAEEA000B35DE /* moc_avitem.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B41EB26F149CAEEA000B35DE /* moc_avitem.cpp */; };
+		B41EB273149CB99A000B35DE /* moc_screensavermodule.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B41EB272149CB99A000B35DE /* moc_screensavermodule.cpp */; };
+		B41EB277149CC29C000B35DE /* moc_qOrbiter.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B41EB276149CC29C000B35DE /* moc_qOrbiter.cpp */; };
+		B41EB279149D0A03000B35DE /* moc_qOrbiterBase.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B41EB278149D0A03000B35DE /* moc_qOrbiterBase.cpp */; };
+		B41EB27B149D0BE8000B35DE /* moc_orbiterwindow.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B41EB27A149D0BE8000B35DE /* moc_orbiterwindow.cpp */; };
+		B41EB27D149D25E5000B35DE /* orbiterwindow.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B41EB27C149D25E5000B35DE /* orbiterwindow.cpp */; };
+		B41EB9E3149D28E9000B35DE /* qml in Resources */ = {isa = PBXBuildFile; fileRef = B41EB9E2149D28E9000B35DE /* qml */; };
+		B41EB9ED149DDB0C000B35DE /* main.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B41EB9EC149DDB0C000B35DE /* main.cpp */; };
+		B41EB9FF149DDCC6000B35DE /* Icon-72.png in Resources */ = {isa = PBXBuildFile; fileRef = B41EB9F0149DDCC6000B35DE /* Icon-72.png */; };
+		B41EBA00149DDCC6000B35DE /* Icon-Small-50.png in Resources */ = {isa = PBXBuildFile; fileRef = B41EB9F1149DDCC6000B35DE /* Icon-Small-50.png */; };
+		B41EBA01149DDCC6000B35DE /* Icon-Small.png in Resources */ = {isa = PBXBuildFile; fileRef = B41EB9F2149DDCC6000B35DE /* Icon-Small.png */; };
+		B41EBA02149DDCC6000B35DE /* Icon-Small@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = B41EB9F3149DDCC6000B35DE /* Icon-Small@2x.png */; };
+		B41EBA03149DDCC6000B35DE /* Icon.png in Resources */ = {isa = PBXBuildFile; fileRef = B41EB9F4149DDCC6000B35DE /* Icon.png */; };
+		B41EBA04149DDCC6000B35DE /* Icon@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = B41EB9F5149DDCC6000B35DE /* Icon@2x.png */; };
+		B41EBA05149DDCC6000B35DE /* iTunesArtwork in Resources */ = {isa = PBXBuildFile; fileRef = B41EB9F6149DDCC6000B35DE /* iTunesArtwork */; };
+		B41EBA06149DDCC6000B35DE /* Default-Landscape~ipad.png in Resources */ = {isa = PBXBuildFile; fileRef = B41EB9F8149DDCC6000B35DE /* Default-Landscape~ipad.png */; };
+		B41EBA07149DDCC6000B35DE /* Default-Portrait~ipad.png in Resources */ = {isa = PBXBuildFile; fileRef = B41EB9F9149DDCC6000B35DE /* Default-Portrait~ipad.png */; };
+		B41EBA08149DDCC6000B35DE /* default.png in Resources */ = {isa = PBXBuildFile; fileRef = B41EB9FA149DDCC6000B35DE /* default.png */; };
+		B41EBA09149DDCC6000B35DE /* default@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = B41EB9FB149DDCC6000B35DE /* default@2x.png */; };
+		B41EBA0A149DDCC6000B35DE /* splash-ipad.png in Resources */ = {isa = PBXBuildFile; fileRef = B41EB9FC149DDCC6000B35DE /* splash-ipad.png */; };
+		B41EBA0B149DDCC6000B35DE /* splash.png in Resources */ = {isa = PBXBuildFile; fileRef = B41EB9FD149DDCC6000B35DE /* splash.png */; };
+		B41EBA0C149DDCC6000B35DE /* splash@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = B41EB9FE149DDCC6000B35DE /* splash@2x.png */; };
+		B41EBA10149DE0EE000B35DE /* skinData.qrc in Resources */ = {isa = PBXBuildFile; fileRef = B41EBA0F149DE0EE000B35DE /* skinData.qrc */; };
+		B426519F1491483200F20E5C /* UIKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = B426519E1491483200F20E5C /* UIKit.framework */; };
+		B42651A11491483200F20E5C /* Foundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = B42651A01491483200F20E5C /* Foundation.framework */; };
+		B42651A31491483200F20E5C /* CoreGraphics.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = B42651A21491483200F20E5C /* CoreGraphics.framework */; };
+		B42651A91491483200F20E5C /* InfoPlist.strings in Resources */ = {isa = PBXBuildFile; fileRef = B42651A71491483200F20E5C /* InfoPlist.strings */; };
+		B42651C81491511900F20E5C /* moc_qmlapplicationviewer.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B42651C51491511800F20E5C /* moc_qmlapplicationviewer.cpp */; };
+		B42651C91491511900F20E5C /* qmlapplicationviewer.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B42651C61491511900F20E5C /* qmlapplicationviewer.cpp */; };
+		B42651CD149151FE00F20E5C /* libQtCore.a in Frameworks */ = {isa = PBXBuildFile; fileRef = B42651CA149151FE00F20E5C /* libQtCore.a */; };
+		B42651CE149151FE00F20E5C /* libQtDeclarative.a in Frameworks */ = {isa = PBXBuildFile; fileRef = B42651CB149151FE00F20E5C /* libQtDeclarative.a */; };
+		B42651CF149151FE00F20E5C /* libQtGui.a in Frameworks */ = {isa = PBXBuildFile; fileRef = B42651CC149151FE00F20E5C /* libQtGui.a */; };
+		B42651D31491521F00F20E5C /* libQtNetwork.a in Frameworks */ = {isa = PBXBuildFile; fileRef = B42651D01491521F00F20E5C /* libQtNetwork.a */; };
+		B42651D41491521F00F20E5C /* libQtOpenGL.a in Frameworks */ = {isa = PBXBuildFile; fileRef = B42651D11491521F00F20E5C /* libQtOpenGL.a */; };
+		B42651D51491521F00F20E5C /* libQtScript.a in Frameworks */ = {isa = PBXBuildFile; fileRef = B42651D21491521F00F20E5C /* libQtScript.a */; };
+		B42651D91491525600F20E5C /* libQtSql.a in Frameworks */ = {isa = PBXBuildFile; fileRef = B42651D71491525600F20E5C /* libQtSql.a */; };
+		B42651DC1491528D00F20E5C /* libquikit.a in Frameworks */ = {isa = PBXBuildFile; fileRef = B42651DB1491528D00F20E5C /* libquikit.a */; };
+		B46D9C9814915F730080F792 /* qorbitermanager.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B46D9C9614915F730080F792 /* qorbitermanager.cpp */; };
+		B46D9CA5149166640080F792 /* AlarmManager.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B46D9C9E149166640080F792 /* AlarmManager.cpp */; };
+		B46D9CA6149166640080F792 /* ClientSocket.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B46D9C9F149166640080F792 /* ClientSocket.cpp */; };
+		B46D9CA7149166640080F792 /* Command_Impl.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B46D9CA0149166640080F792 /* Command_Impl.cpp */; };
+		B46D9CA8149166640080F792 /* DataGrid.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B46D9CA1149166640080F792 /* DataGrid.cpp */; };
+		B46D9CA9149166640080F792 /* DCEConfig.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B46D9CA2149166640080F792 /* DCEConfig.cpp */; };
+		B46D9CAA149166640080F792 /* DeviceData_Base.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B46D9CA3149166640080F792 /* DeviceData_Base.cpp */; };
+		B46D9CAB149166640080F792 /* DeviceData_Impl.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B46D9CA4149166640080F792 /* DeviceData_Impl.cpp */; };
+		B46D9CB01491667F0080F792 /* Event_Impl.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B46D9CAC1491667F0080F792 /* Event_Impl.cpp */; };
+		B46D9CB11491667F0080F792 /* HandleRequestSocket.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B46D9CAD1491667F0080F792 /* HandleRequestSocket.cpp */; };
+		B46D9CB21491667F0080F792 /* Logger.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B46D9CAE1491667F0080F792 /* Logger.cpp */; };
+		B46D9CB31491667F0080F792 /* Message.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B46D9CAF1491667F0080F792 /* Message.cpp */; };
+		B46D9CB91491669B0080F792 /* MessageBuffer.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B46D9CB41491669B0080F792 /* MessageBuffer.cpp */; };
+		B46D9CBA1491669B0080F792 /* PlainClientSocket.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B46D9CB51491669B0080F792 /* PlainClientSocket.cpp */; };
+		B46D9CBB1491669B0080F792 /* ServerLogger.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B46D9CB61491669B0080F792 /* ServerLogger.cpp */; };
+		B46D9CBC1491669B0080F792 /* Socket.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B46D9CB71491669B0080F792 /* Socket.cpp */; };
+		B46D9CBD1491669B0080F792 /* Virtual_Device_Translator.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B46D9CB81491669B0080F792 /* Virtual_Device_Translator.cpp */; };
+		B46D9CBF149167000080F792 /* qOrbiterBase.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B46D9CBE149167000080F792 /* qOrbiterBase.cpp */; };
+		B46D9CC514949E9C0080F792 /* CommonIncludes.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B46D9CC214949E9C0080F792 /* CommonIncludes.cpp */; };
+		B46D9CC614949E9C0080F792 /* FileUtils.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B46D9CC314949E9C0080F792 /* FileUtils.cpp */; };
+		B46D9CC714949E9C0080F792 /* getch.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B46D9CC414949E9C0080F792 /* getch.cpp */; };
+		B46D9CCB14949EB70080F792 /* md5c.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B46D9CC814949EB70080F792 /* md5c.cpp */; };
+		B46D9CCC14949EB70080F792 /* minilzo.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B46D9CC914949EB70080F792 /* minilzo.cpp */; };
+		B46D9CD014949ED30080F792 /* MultiThreadIncludes.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B46D9CCE14949ED30080F792 /* MultiThreadIncludes.cpp */; };
+		B46D9CD114949ED30080F792 /* Other.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B46D9CCF14949ED30080F792 /* Other.cpp */; };
+		B46D9CD414949F0A0080F792 /* StringUtils.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B46D9CD214949F0A0080F792 /* StringUtils.cpp */; };
+		B46D9CD514949F0A0080F792 /* ThreadedClass.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B46D9CD314949F0A0080F792 /* ThreadedClass.cpp */; };
+		B46D9CD714949F380080F792 /* uuencode.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B46D9CD614949F380080F792 /* uuencode.cpp */; };
+		B46D9CDB14949FE30080F792 /* SerializeClass.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B46D9CDA14949FE30080F792 /* SerializeClass.cpp */; };
+		B46D9CDD1494A08F0080F792 /* qOrbiter.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B46D9CDC1494A08F0080F792 /* qOrbiter.cpp */; };
+		B46D9CE81494A0F70080F792 /* epgchannellist.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B46D9CDF1494A0F70080F792 /* epgchannellist.cpp */; };
+		B46D9CE91494A0F70080F792 /* filedetailsclass.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B46D9CE01494A0F70080F792 /* filedetailsclass.cpp */; };
+		B46D9CEA1494A0F70080F792 /* floorplandevice.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B46D9CE11494A0F70080F792 /* floorplandevice.cpp */; };
+		B46D9CEB1494A0F70080F792 /* nowplayingclass.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B46D9CE21494A0F70080F792 /* nowplayingclass.cpp */; };
+		B46D9CEC1494A0F70080F792 /* playlistclass.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B46D9CE31494A0F70080F792 /* playlistclass.cpp */; };
+		B46D9CED1494A0F70080F792 /* playlistitemclass.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B46D9CE41494A0F70080F792 /* playlistitemclass.cpp */; };
+		B46D9CEE1494A0F70080F792 /* screenparamsclass.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B46D9CE51494A0F70080F792 /* screenparamsclass.cpp */; };
+		B46D9CEF1494A0F70080F792 /* screenshotattributes.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B46D9CE61494A0F70080F792 /* screenshotattributes.cpp */; };
+		B46D9CF01494A0F70080F792 /* securityvideoclass.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B46D9CE71494A0F70080F792 /* securityvideoclass.cpp */; };
+		B46D9CF61494A18A0080F792 /* datagriditem.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B46D9CF41494A18A0080F792 /* datagriditem.cpp */; };
+		B46D9CF71494A18A0080F792 /* datagriditemmodelclass.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B46D9CF51494A18A0080F792 /* datagriditemmodelclass.cpp */; };
+		B46D9CFE1494A1990080F792 /* attributesortitem.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B46D9CF81494A1990080F792 /* attributesortitem.cpp */; };
+		B46D9CFF1494A1990080F792 /* filedetailsitem.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B46D9CF91494A1990080F792 /* filedetailsitem.cpp */; };
+		B46D9D001494A1990080F792 /* filtermodelitem.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B46D9CFA1494A1990080F792 /* filtermodelitem.cpp */; };
+		B46D9D011494A1990080F792 /* genreitem.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B46D9CFB1494A1990080F792 /* genreitem.cpp */; };
+		B46D9D021494A1990080F792 /* mediatypeitem.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B46D9CFC1494A1990080F792 /* mediatypeitem.cpp */; };
+		B46D9D031494A1990080F792 /* sleepingalarm.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B46D9CFD1494A1990080F792 /* sleepingalarm.cpp */; };
+		B46D9D221494A1DA0080F792 /* attributemodel.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B46D9D041494A1DA0080F792 /* attributemodel.cpp */; };
+		B46D9D231494A1DA0080F792 /* attributesortmodel.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B46D9D051494A1DA0080F792 /* attributesortmodel.cpp */; };
+		B46D9D241494A1DA0080F792 /* climatescenarioitem.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B46D9D061494A1DA0080F792 /* climatescenarioitem.cpp */; };
+		B46D9D251494A1DA0080F792 /* climatescenariomodel.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B46D9D071494A1DA0080F792 /* climatescenariomodel.cpp */; };
+		B46D9D261494A1DA0080F792 /* filedetailsmodel.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B46D9D081494A1DA0080F792 /* filedetailsmodel.cpp */; };
+		B46D9D271494A1DA0080F792 /* filtermodel.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B46D9D091494A1DA0080F792 /* filtermodel.cpp */; };
+		B46D9D281494A1DA0080F792 /* floorplanitem.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B46D9D0A1494A1DA0080F792 /* floorplanitem.cpp */; };
+		B46D9D291494A1DA0080F792 /* floorplanmodel.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B46D9D0B1494A1DA0080F792 /* floorplanmodel.cpp */; };
+		B46D9D2A1494A1DA0080F792 /* genremodel.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B46D9D0C1494A1DA0080F792 /* genremodel.cpp */; };
+		B46D9D2B1494A1DA0080F792 /* gridItem.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B46D9D0D1494A1DA0080F792 /* gridItem.cpp */; };
+		B46D9D2C1494A1DA0080F792 /* lightingscenarioitem.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B46D9D0E1494A1DA0080F792 /* lightingscenarioitem.cpp */; };
+		B46D9D2D1494A1DA0080F792 /* lightingscenariomodel.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B46D9D0F1494A1DA0080F792 /* lightingscenariomodel.cpp */; };
+		B46D9D2E1494A1DA0080F792 /* listModel.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B46D9D101494A1DA0080F792 /* listModel.cpp */; };
+		B46D9D2F1494A1DA0080F792 /* locationitem.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B46D9D111494A1DA0080F792 /* locationitem.cpp */; };
+		B46D9D301494A1DA0080F792 /* locationmodel.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B46D9D121494A1DA0080F792 /* locationmodel.cpp */; };
+		B46D9D311494A1DA0080F792 /* mediascenarioitem.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B46D9D131494A1DA0080F792 /* mediascenarioitem.cpp */; };
+		B46D9D321494A1DA0080F792 /* mediascenariomodel.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B46D9D141494A1DA0080F792 /* mediascenariomodel.cpp */; };
+		B46D9D331494A1DA0080F792 /* mediatypemodel.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B46D9D151494A1DA0080F792 /* mediatypemodel.cpp */; };
+		B46D9D341494A1DA0080F792 /* orbiterbuttonitem.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B46D9D161494A1DA0080F792 /* orbiterbuttonitem.cpp */; };
+		B46D9D381494A1DA0080F792 /* securityscenarioitem.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B46D9D1A1494A1DA0080F792 /* securityscenarioitem.cpp */; };
+		B46D9D391494A1DA0080F792 /* securityscenariomodel.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B46D9D1B1494A1DA0080F792 /* securityscenariomodel.cpp */; };
+		B46D9D3A1494A1DA0080F792 /* skindataitem.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B46D9D1C1494A1DA0080F792 /* skindataitem.cpp */; };
+		B46D9D3B1494A1DA0080F792 /* skindatamodel.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B46D9D1D1494A1DA0080F792 /* skindatamodel.cpp */; };
+		B46D9D3C1494A1DA0080F792 /* telecomscenarioitem.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B46D9D1E1494A1DA0080F792 /* telecomscenarioitem.cpp */; };
+		B46D9D3D1494A1DA0080F792 /* telecomscenariomodel.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B46D9D1F1494A1DA0080F792 /* telecomscenariomodel.cpp */; };
+		B46D9D3E1494A1DA0080F792 /* useritem.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B46D9D201494A1DA0080F792 /* useritem.cpp */; };
+		B46D9D3F1494A1DA0080F792 /* usermodel.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B46D9D211494A1DA0080F792 /* usermodel.cpp */; };
+		B46D9D441494A25E0080F792 /* abstractimageprovider.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B46D9D411494A25E0080F792 /* abstractimageprovider.cpp */; };
+		B46D9D451494A25E0080F792 /* basicImageProvider.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B46D9D421494A25E0080F792 /* basicImageProvider.cpp */; };
+		B46D9D461494A25E0080F792 /* gridimageprovider.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B46D9D431494A25E0080F792 /* gridimageprovider.cpp */; };
+		B46D9D4A1494A2AB0080F792 /* screensavermodule.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B46D9D491494A2AB0080F792 /* screensavermodule.cpp */; };
+		B46D9D4C1494A2B40080F792 /* epgitemclass.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B46D9D4B1494A2B40080F792 /* epgitemclass.cpp */; };
+		B46D9D4F1494A3020080F792 /* avcodegrid.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B46D9D4D1494A3020080F792 /* avcodegrid.cpp */; };
+		B46D9D501494A3020080F792 /* avitem.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B46D9D4E1494A3020080F792 /* avitem.cpp */; };
+/* End PBXBuildFile section */
+
+/* Begin PBXBuildRule section */
+		B41EBA0D149DDE3E000B35DE /* PBXBuildRule */ = {
+			isa = PBXBuildRule;
+			compilerSpec = com.apple.compilers.proxy.script;
+			filePatterns = "*.qrc";
+			fileType = pattern.proxy;
+			isEditable = 1;
+			outputFiles = (
+				"",
+			);
+			script = "";
+		};
+/* End PBXBuildRule section */
+
+/* Begin PBXFileReference section */
+		B40C363614915319000FD6E6 /* libz.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libz.dylib; path = usr/lib/libz.dylib; sourceTree = SDKROOT; };
+		B40C363914915B73000FD6E6 /* OpenGLES.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = OpenGLES.framework; path = System/Library/Frameworks/OpenGLES.framework; sourceTree = SDKROOT; };
+		B40C363B14915B7D000FD6E6 /* QuartzCore.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = QuartzCore.framework; path = System/Library/Frameworks/QuartzCore.framework; sourceTree = SDKROOT; };
+		B40C363D14915B83000FD6E6 /* CoreText.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreText.framework; path = System/Library/Frameworks/CoreText.framework; sourceTree = SDKROOT; };
+		B40C364114915CD1000FD6E6 /* libQtXml.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libQtXml.a; path = "../../../../Qt/qt-lighthouse-ios-simulator/lib/libQtXml.a"; sourceTree = "<group>"; };
+		B40C364514915CF6000FD6E6 /* libQtXmlPatterns.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libQtXmlPatterns.a; path = "../../../../Qt/qt-lighthouse-ios-simulator/lib/libQtXmlPatterns.a"; sourceTree = "<group>"; };
+		B41EB208149CADD6000B35DE /* moc_abstractimageprovider.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = moc_abstractimageprovider.cpp; path = moc_files/moc_abstractimageprovider.cpp; sourceTree = "<group>"; };
+		B41EB209149CADD6000B35DE /* moc_attributemodel.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = moc_attributemodel.cpp; path = moc_files/moc_attributemodel.cpp; sourceTree = "<group>"; };
+		B41EB20A149CADD6000B35DE /* moc_attributesortitem.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = moc_attributesortitem.cpp; path = moc_files/moc_attributesortitem.cpp; sourceTree = "<group>"; };
+		B41EB20B149CADD6000B35DE /* moc_attributesortmodel.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = moc_attributesortmodel.cpp; path = moc_files/moc_attributesortmodel.cpp; sourceTree = "<group>"; };
+		B41EB20C149CADD6000B35DE /* moc_basicimageprovider.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = moc_basicimageprovider.cpp; path = moc_files/moc_basicimageprovider.cpp; sourceTree = "<group>"; };
+		B41EB20D149CADD6000B35DE /* moc_climatescenarioitem.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = moc_climatescenarioitem.cpp; path = moc_files/moc_climatescenarioitem.cpp; sourceTree = "<group>"; };
+		B41EB20E149CADD6000B35DE /* moc_climatescenariomodel.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = moc_climatescenariomodel.cpp; path = moc_files/moc_climatescenariomodel.cpp; sourceTree = "<group>"; };
+		B41EB20F149CADD6000B35DE /* moc_datagriditem.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = moc_datagriditem.cpp; path = moc_files/moc_datagriditem.cpp; sourceTree = "<group>"; };
+		B41EB210149CADD6000B35DE /* moc_datagriditemmodelclass.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = moc_datagriditemmodelclass.cpp; path = moc_files/moc_datagriditemmodelclass.cpp; sourceTree = "<group>"; };
+		B41EB211149CADD6000B35DE /* moc_epgchannellist.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = moc_epgchannellist.cpp; path = moc_files/moc_epgchannellist.cpp; sourceTree = "<group>"; };
+		B41EB212149CADD6000B35DE /* moc_epgitemclass.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = moc_epgitemclass.cpp; path = moc_files/moc_epgitemclass.cpp; sourceTree = "<group>"; };
+		B41EB213149CADD6000B35DE /* moc_filedetailsclass.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = moc_filedetailsclass.cpp; path = moc_files/moc_filedetailsclass.cpp; sourceTree = "<group>"; };
+		B41EB214149CADD6000B35DE /* moc_filedetailsimageprovider.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = moc_filedetailsimageprovider.cpp; path = moc_files/moc_filedetailsimageprovider.cpp; sourceTree = "<group>"; };
+		B41EB215149CADD6000B35DE /* moc_filedetailsitem.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = moc_filedetailsitem.cpp; path = moc_files/moc_filedetailsitem.cpp; sourceTree = "<group>"; };
+		B41EB216149CADD6000B35DE /* moc_filedetailsmodel.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = moc_filedetailsmodel.cpp; path = moc_files/moc_filedetailsmodel.cpp; sourceTree = "<group>"; };
+		B41EB217149CADD6000B35DE /* moc_filtermodel.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = moc_filtermodel.cpp; path = moc_files/moc_filtermodel.cpp; sourceTree = "<group>"; };
+		B41EB218149CADD6000B35DE /* moc_filtermodelitem.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = moc_filtermodelitem.cpp; path = moc_files/moc_filtermodelitem.cpp; sourceTree = "<group>"; };
+		B41EB219149CADD6000B35DE /* moc_floorplandevice.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = moc_floorplandevice.cpp; path = moc_files/moc_floorplandevice.cpp; sourceTree = "<group>"; };
+		B41EB21A149CADD6000B35DE /* moc_floorplanimageitem.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = moc_floorplanimageitem.cpp; path = moc_files/moc_floorplanimageitem.cpp; sourceTree = "<group>"; };
+		B41EB21B149CADD6000B35DE /* moc_floorplanmodel.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = moc_floorplanmodel.cpp; path = moc_files/moc_floorplanmodel.cpp; sourceTree = "<group>"; };
+		B41EB21C149CADD6000B35DE /* moc_genreitem.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = moc_genreitem.cpp; path = moc_files/moc_genreitem.cpp; sourceTree = "<group>"; };
+		B41EB21D149CADD6000B35DE /* moc_genremodel.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = moc_genremodel.cpp; path = moc_files/moc_genremodel.cpp; sourceTree = "<group>"; };
+		B41EB21E149CADD6000B35DE /* moc_gridimageprovider.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = moc_gridimageprovider.cpp; path = moc_files/moc_gridimageprovider.cpp; sourceTree = "<group>"; };
+		B41EB21F149CADD6000B35DE /* moc_griditem.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = moc_griditem.cpp; path = moc_files/moc_griditem.cpp; sourceTree = "<group>"; };
+		B41EB220149CADD6000B35DE /* moc_lightingscenarioitem.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = moc_lightingscenarioitem.cpp; path = moc_files/moc_lightingscenarioitem.cpp; sourceTree = "<group>"; };
+		B41EB221149CADD6000B35DE /* moc_lightingscenariomodel.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = moc_lightingscenariomodel.cpp; path = moc_files/moc_lightingscenariomodel.cpp; sourceTree = "<group>"; };
+		B41EB222149CADD6000B35DE /* moc_listModel.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = moc_listModel.cpp; path = moc_files/moc_listModel.cpp; sourceTree = "<group>"; };
+		B41EB223149CADD6000B35DE /* moc_locationitem.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = moc_locationitem.cpp; path = moc_files/moc_locationitem.cpp; sourceTree = "<group>"; };
+		B41EB224149CADD6000B35DE /* moc_locationmodel.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = moc_locationmodel.cpp; path = moc_files/moc_locationmodel.cpp; sourceTree = "<group>"; };
+		B41EB225149CADD6000B35DE /* moc_mediascenarioitem.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = moc_mediascenarioitem.cpp; path = moc_files/moc_mediascenarioitem.cpp; sourceTree = "<group>"; };
+		B41EB226149CADD6000B35DE /* moc_mediascenariomodel.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = moc_mediascenariomodel.cpp; path = moc_files/moc_mediascenariomodel.cpp; sourceTree = "<group>"; };
+		B41EB227149CADD6000B35DE /* moc_mediatypeitem.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = moc_mediatypeitem.cpp; path = moc_files/moc_mediatypeitem.cpp; sourceTree = "<group>"; };
+		B41EB228149CADD6000B35DE /* moc_mediatypemodel.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = moc_mediatypemodel.cpp; path = moc_files/moc_mediatypemodel.cpp; sourceTree = "<group>"; };
+		B41EB229149CADD6000B35DE /* moc_nowplayingclass.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = moc_nowplayingclass.cpp; path = moc_files/moc_nowplayingclass.cpp; sourceTree = "<group>"; };
+		B41EB22A149CADD6000B35DE /* moc_orbiterbuttonitem.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = moc_orbiterbuttonitem.cpp; path = moc_files/moc_orbiterbuttonitem.cpp; sourceTree = "<group>"; };
+		B41EB22B149CADD6000B35DE /* moc_playlistitemclass.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = moc_playlistitemclass.cpp; path = moc_files/moc_playlistitemclass.cpp; sourceTree = "<group>"; };
+		B41EB22D149CADD6000B35DE /* moc_qOrbiterData.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = moc_qOrbiterData.cpp; path = moc_files/moc_qOrbiterData.cpp; sourceTree = "<group>"; };
+		B41EB22E149CADD6000B35DE /* moc_qorbitermanager.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = moc_qorbitermanager.cpp; path = moc_files/moc_qorbitermanager.cpp; sourceTree = "<group>"; };
+		B41EB22F149CADD6000B35DE /* moc_screenparamsclass.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = moc_screenparamsclass.cpp; path = moc_files/moc_screenparamsclass.cpp; sourceTree = "<group>"; };
+		B41EB230149CADD6000B35DE /* moc_screenshotattributes.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = moc_screenshotattributes.cpp; path = moc_files/moc_screenshotattributes.cpp; sourceTree = "<group>"; };
+		B41EB231149CADD6000B35DE /* moc_securityscenarioitem.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = moc_securityscenarioitem.cpp; path = moc_files/moc_securityscenarioitem.cpp; sourceTree = "<group>"; };
+		B41EB232149CADD6000B35DE /* moc_securityscenariomodel.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = moc_securityscenariomodel.cpp; path = moc_files/moc_securityscenariomodel.cpp; sourceTree = "<group>"; };
+		B41EB233149CADD6000B35DE /* moc_securityvideoclass.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = moc_securityvideoclass.cpp; path = moc_files/moc_securityvideoclass.cpp; sourceTree = "<group>"; };
+		B41EB234149CADD6000B35DE /* moc_skindataitem.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = moc_skindataitem.cpp; path = moc_files/moc_skindataitem.cpp; sourceTree = "<group>"; };
+		B41EB235149CADD6000B35DE /* moc_skindatamodel.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = moc_skindatamodel.cpp; path = moc_files/moc_skindatamodel.cpp; sourceTree = "<group>"; };
+		B41EB236149CADD6000B35DE /* moc_sleepingalarm.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = moc_sleepingalarm.cpp; path = moc_files/moc_sleepingalarm.cpp; sourceTree = "<group>"; };
+		B41EB237149CADD6000B35DE /* moc_telecomscenarioitem.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = moc_telecomscenarioitem.cpp; path = moc_files/moc_telecomscenarioitem.cpp; sourceTree = "<group>"; };
+		B41EB238149CADD6000B35DE /* moc_telecomscenariomodel.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = moc_telecomscenariomodel.cpp; path = moc_files/moc_telecomscenariomodel.cpp; sourceTree = "<group>"; };
+		B41EB239149CADD6000B35DE /* moc_useritem.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = moc_useritem.cpp; path = moc_files/moc_useritem.cpp; sourceTree = "<group>"; };
+		B41EB23A149CADD6000B35DE /* moc_usermodel.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = moc_usermodel.cpp; path = moc_files/moc_usermodel.cpp; sourceTree = "<group>"; };
+		B41EB26E149CAEEA000B35DE /* moc_avcodegrid.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = moc_avcodegrid.cpp; path = moc_files/moc_avcodegrid.cpp; sourceTree = "<group>"; };
+		B41EB26F149CAEEA000B35DE /* moc_avitem.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = moc_avitem.cpp; path = moc_files/moc_avitem.cpp; sourceTree = "<group>"; };
+		B41EB272149CB99A000B35DE /* moc_screensavermodule.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = moc_screensavermodule.cpp; path = moc_files/moc_screensavermodule.cpp; sourceTree = "<group>"; };
+		B41EB276149CC29C000B35DE /* moc_qOrbiter.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = moc_qOrbiter.cpp; path = moc_files/moc_qOrbiter.cpp; sourceTree = "<group>"; };
+		B41EB278149D0A03000B35DE /* moc_qOrbiterBase.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = moc_qOrbiterBase.cpp; path = moc_files/moc_qOrbiterBase.cpp; sourceTree = "<group>"; };
+		B41EB27A149D0BE8000B35DE /* moc_orbiterwindow.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = moc_orbiterwindow.cpp; path = moc_files/moc_orbiterwindow.cpp; sourceTree = "<group>"; };
+		B41EB27C149D25E5000B35DE /* orbiterwindow.cpp */ = {isa = PBXFileReference; explicitFileType = sourcecode.cpp.objcpp; fileEncoding = 4; name = orbiterwindow.cpp; path = ../qOrbiter_src/orbiterwindow.cpp; sourceTree = "<group>"; };
+		B41EB9E2149D28E9000B35DE /* qml */ = {isa = PBXFileReference; lastKnownFileType = folder; name = qml; path = ../qOrbiter_src/qml; sourceTree = "<group>"; };
+		B41EB9EB149DD38B000B35DE /* ioshelpers.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ioshelpers.h; sourceTree = "<group>"; };
+		B41EB9EC149DDB0C000B35DE /* main.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = main.cpp; path = ../qOrbiter_src/main.cpp; sourceTree = "<group>"; };
+		B41EB9F0149DDCC6000B35DE /* Icon-72.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "Icon-72.png"; sourceTree = "<group>"; };
+		B41EB9F1149DDCC6000B35DE /* Icon-Small-50.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "Icon-Small-50.png"; sourceTree = "<group>"; };
+		B41EB9F2149DDCC6000B35DE /* Icon-Small.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "Icon-Small.png"; sourceTree = "<group>"; };
+		B41EB9F3149DDCC6000B35DE /* Icon-Small@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "Icon-Small@2x.png"; sourceTree = "<group>"; };
+		B41EB9F4149DDCC6000B35DE /* Icon.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = Icon.png; sourceTree = "<group>"; };
+		B41EB9F5149DDCC6000B35DE /* Icon@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "Icon@2x.png"; sourceTree = "<group>"; };
+		B41EB9F6149DDCC6000B35DE /* iTunesArtwork */ = {isa = PBXFileReference; lastKnownFileType = file; path = iTunesArtwork; sourceTree = "<group>"; };
+		B41EB9F8149DDCC6000B35DE /* Default-Landscape~ipad.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "Default-Landscape~ipad.png"; sourceTree = "<group>"; };
+		B41EB9F9149DDCC6000B35DE /* Default-Portrait~ipad.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "Default-Portrait~ipad.png"; sourceTree = "<group>"; };
+		B41EB9FA149DDCC6000B35DE /* default.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = default.png; sourceTree = "<group>"; };
+		B41EB9FB149DDCC6000B35DE /* default@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "default@2x.png"; sourceTree = "<group>"; };
+		B41EB9FC149DDCC6000B35DE /* splash-ipad.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "splash-ipad.png"; sourceTree = "<group>"; };
+		B41EB9FD149DDCC6000B35DE /* splash.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = splash.png; sourceTree = "<group>"; };
+		B41EB9FE149DDCC6000B35DE /* splash@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "splash@2x.png"; sourceTree = "<group>"; };
+		B41EBA0F149DE0EE000B35DE /* skinData.qrc */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; name = skinData.qrc; path = ../qOrbiter_src/skinData.qrc; sourceTree = "<group>"; };
+		B426519A1491483200F20E5C /* qOrbiter.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = qOrbiter.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		B426519E1491483200F20E5C /* UIKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = UIKit.framework; path = System/Library/Frameworks/UIKit.framework; sourceTree = SDKROOT; };
+		B42651A01491483200F20E5C /* Foundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Foundation.framework; path = System/Library/Frameworks/Foundation.framework; sourceTree = SDKROOT; };
+		B42651A21491483200F20E5C /* CoreGraphics.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreGraphics.framework; path = System/Library/Frameworks/CoreGraphics.framework; sourceTree = SDKROOT; };
+		B42651A61491483200F20E5C /* qOrbiter-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = "qOrbiter-Info.plist"; sourceTree = "<group>"; };
+		B42651A81491483200F20E5C /* en */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = en; path = en.lproj/InfoPlist.strings; sourceTree = "<group>"; };
+		B42651AC1491483200F20E5C /* qOrbiter-Prefix.pch */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "qOrbiter-Prefix.pch"; sourceTree = "<group>"; };
+		B42651C51491511800F20E5C /* moc_qmlapplicationviewer.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = moc_qmlapplicationviewer.cpp; sourceTree = "<group>"; };
+		B42651C61491511900F20E5C /* qmlapplicationviewer.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = qmlapplicationviewer.cpp; sourceTree = "<group>"; };
+		B42651C71491511900F20E5C /* qmlapplicationviewer.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = qmlapplicationviewer.h; sourceTree = "<group>"; };
+		B42651CA149151FE00F20E5C /* libQtCore.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libQtCore.a; path = "../../../../Qt/qt-lighthouse-ios-simulator/lib/libQtCore.a"; sourceTree = "<group>"; };
+		B42651CB149151FE00F20E5C /* libQtDeclarative.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libQtDeclarative.a; path = "../../../../Qt/qt-lighthouse-ios-simulator/lib/libQtDeclarative.a"; sourceTree = "<group>"; };
+		B42651CC149151FE00F20E5C /* libQtGui.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libQtGui.a; path = "../../../../Qt/qt-lighthouse-ios-simulator/lib/libQtGui.a"; sourceTree = "<group>"; };
+		B42651D01491521F00F20E5C /* libQtNetwork.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libQtNetwork.a; path = "../../../../Qt/qt-lighthouse-ios-simulator/lib/libQtNetwork.a"; sourceTree = "<group>"; };
+		B42651D11491521F00F20E5C /* libQtOpenGL.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libQtOpenGL.a; path = "../../../../Qt/qt-lighthouse-ios-simulator/lib/libQtOpenGL.a"; sourceTree = "<group>"; };
+		B42651D21491521F00F20E5C /* libQtScript.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libQtScript.a; path = "../../../../Qt/qt-lighthouse-ios-simulator/lib/libQtScript.a"; sourceTree = "<group>"; };
+		B42651D71491525600F20E5C /* libQtSql.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libQtSql.a; path = "../../../../Qt/qt-lighthouse-ios-simulator/lib/libQtSql.a"; sourceTree = "<group>"; };
+		B42651DB1491528D00F20E5C /* libquikit.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libquikit.a; path = "../../../../Qt/qt-lighthouse-ios-simulator/plugins/platforms/libquikit.a"; sourceTree = "<group>"; };
+		B46D9C9614915F730080F792 /* qorbitermanager.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = qorbitermanager.cpp; path = ../qOrbiter_src/qorbitermanager.cpp; sourceTree = "<group>"; };
+		B46D9C9714915F730080F792 /* qorbitermanager.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = qorbitermanager.h; path = ../qOrbiter_src/qorbitermanager.h; sourceTree = "<group>"; };
+		B46D9C9B149164640080F792 /* qOrbiter.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = qOrbiter.h; path = ../qOrbiter.h; sourceTree = "<group>"; };
+		B46D9C9E149166640080F792 /* AlarmManager.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = AlarmManager.cpp; path = ../../DCE/AlarmManager.cpp; sourceTree = "<group>"; };
+		B46D9C9F149166640080F792 /* ClientSocket.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = ClientSocket.cpp; path = ../../DCE/ClientSocket.cpp; sourceTree = "<group>"; };
+		B46D9CA0149166640080F792 /* Command_Impl.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = Command_Impl.cpp; path = ../../DCE/Command_Impl.cpp; sourceTree = "<group>"; };
+		B46D9CA1149166640080F792 /* DataGrid.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = DataGrid.cpp; path = ../../DCE/DataGrid.cpp; sourceTree = "<group>"; };
+		B46D9CA2149166640080F792 /* DCEConfig.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = DCEConfig.cpp; path = ../../DCE/DCEConfig.cpp; sourceTree = "<group>"; };
+		B46D9CA3149166640080F792 /* DeviceData_Base.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = DeviceData_Base.cpp; path = ../../DCE/DeviceData_Base.cpp; sourceTree = "<group>"; };
+		B46D9CA4149166640080F792 /* DeviceData_Impl.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = DeviceData_Impl.cpp; path = ../../DCE/DeviceData_Impl.cpp; sourceTree = "<group>"; };
+		B46D9CAC1491667F0080F792 /* Event_Impl.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = Event_Impl.cpp; path = ../../DCE/Event_Impl.cpp; sourceTree = "<group>"; };
+		B46D9CAD1491667F0080F792 /* HandleRequestSocket.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = HandleRequestSocket.cpp; path = ../../DCE/HandleRequestSocket.cpp; sourceTree = "<group>"; };
+		B46D9CAE1491667F0080F792 /* Logger.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = Logger.cpp; path = ../../DCE/Logger.cpp; sourceTree = "<group>"; };
+		B46D9CAF1491667F0080F792 /* Message.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = Message.cpp; path = ../../DCE/Message.cpp; sourceTree = "<group>"; };
+		B46D9CB41491669B0080F792 /* MessageBuffer.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = MessageBuffer.cpp; path = ../../DCE/MessageBuffer.cpp; sourceTree = "<group>"; };
+		B46D9CB51491669B0080F792 /* PlainClientSocket.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = PlainClientSocket.cpp; path = ../../DCE/PlainClientSocket.cpp; sourceTree = "<group>"; };
+		B46D9CB61491669B0080F792 /* ServerLogger.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = ServerLogger.cpp; path = ../../DCE/ServerLogger.cpp; sourceTree = "<group>"; };
+		B46D9CB71491669B0080F792 /* Socket.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = Socket.cpp; path = ../../DCE/Socket.cpp; sourceTree = "<group>"; };
+		B46D9CB81491669B0080F792 /* Virtual_Device_Translator.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = Virtual_Device_Translator.cpp; path = ../../DCE/Virtual_Device_Translator.cpp; sourceTree = "<group>"; };
+		B46D9CBE149167000080F792 /* qOrbiterBase.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = qOrbiterBase.cpp; path = ../../Gen_Devices/qOrbiterBase.cpp; sourceTree = "<group>"; };
+		B46D9CC214949E9C0080F792 /* CommonIncludes.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = CommonIncludes.cpp; path = ../../PlutoUtils/CommonIncludes.cpp; sourceTree = "<group>"; };
+		B46D9CC314949E9C0080F792 /* FileUtils.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = FileUtils.cpp; path = ../../PlutoUtils/FileUtils.cpp; sourceTree = "<group>"; };
+		B46D9CC414949E9C0080F792 /* getch.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = getch.cpp; path = ../../PlutoUtils/getch.cpp; sourceTree = "<group>"; };
+		B46D9CC814949EB70080F792 /* md5c.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = md5c.cpp; path = ../../PlutoUtils/md5c.cpp; sourceTree = "<group>"; };
+		B46D9CC914949EB70080F792 /* minilzo.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = minilzo.cpp; path = ../../PlutoUtils/minilzo.cpp; sourceTree = "<group>"; };
+		B46D9CCE14949ED30080F792 /* MultiThreadIncludes.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = MultiThreadIncludes.cpp; path = ../../PlutoUtils/MultiThreadIncludes.cpp; sourceTree = "<group>"; };
+		B46D9CCF14949ED30080F792 /* Other.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = Other.cpp; path = ../../PlutoUtils/Other.cpp; sourceTree = "<group>"; };
+		B46D9CD214949F0A0080F792 /* StringUtils.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = StringUtils.cpp; path = ../../PlutoUtils/StringUtils.cpp; sourceTree = "<group>"; };
+		B46D9CD314949F0A0080F792 /* ThreadedClass.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = ThreadedClass.cpp; path = ../../PlutoUtils/ThreadedClass.cpp; sourceTree = "<group>"; };
+		B46D9CD614949F380080F792 /* uuencode.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = uuencode.cpp; path = ../../PlutoUtils/uuencode.cpp; sourceTree = "<group>"; };
+		B46D9CDA14949FE30080F792 /* SerializeClass.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = SerializeClass.cpp; path = ../../SerializeClass/SerializeClass.cpp; sourceTree = "<group>"; };
+		B46D9CDC1494A08F0080F792 /* qOrbiter.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = qOrbiter.cpp; path = ../qOrbiter.cpp; sourceTree = "<group>"; };
+		B46D9CDF1494A0F70080F792 /* epgchannellist.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = epgchannellist.cpp; path = ../qOrbiter_src/contextobjects/epgchannellist.cpp; sourceTree = "<group>"; };
+		B46D9CE01494A0F70080F792 /* filedetailsclass.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = filedetailsclass.cpp; path = ../qOrbiter_src/contextobjects/filedetailsclass.cpp; sourceTree = "<group>"; };
+		B46D9CE11494A0F70080F792 /* floorplandevice.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = floorplandevice.cpp; path = ../qOrbiter_src/contextobjects/floorplandevice.cpp; sourceTree = "<group>"; };
+		B46D9CE21494A0F70080F792 /* nowplayingclass.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = nowplayingclass.cpp; path = ../qOrbiter_src/contextobjects/nowplayingclass.cpp; sourceTree = "<group>"; };
+		B46D9CE31494A0F70080F792 /* playlistclass.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = playlistclass.cpp; path = ../qOrbiter_src/contextobjects/playlistclass.cpp; sourceTree = "<group>"; };
+		B46D9CE41494A0F70080F792 /* playlistitemclass.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = playlistitemclass.cpp; path = ../qOrbiter_src/contextobjects/playlistitemclass.cpp; sourceTree = "<group>"; };
+		B46D9CE51494A0F70080F792 /* screenparamsclass.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = screenparamsclass.cpp; path = ../qOrbiter_src/contextobjects/screenparamsclass.cpp; sourceTree = "<group>"; };
+		B46D9CE61494A0F70080F792 /* screenshotattributes.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = screenshotattributes.cpp; path = ../qOrbiter_src/contextobjects/screenshotattributes.cpp; sourceTree = "<group>"; };
+		B46D9CE71494A0F70080F792 /* securityvideoclass.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = securityvideoclass.cpp; path = ../qOrbiter_src/contextobjects/securityvideoclass.cpp; sourceTree = "<group>"; };
+		B46D9CF41494A18A0080F792 /* datagriditem.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = datagriditem.cpp; path = ../qOrbiter_src/datamodels/DatagridClasses/datagriditem.cpp; sourceTree = "<group>"; };
+		B46D9CF51494A18A0080F792 /* datagriditemmodelclass.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = datagriditemmodelclass.cpp; path = ../qOrbiter_src/datamodels/DatagridClasses/datagriditemmodelclass.cpp; sourceTree = "<group>"; };
+		B46D9CF81494A1990080F792 /* attributesortitem.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = attributesortitem.cpp; path = ../qOrbiter_src/datamodels/DataModelItems/attributesortitem.cpp; sourceTree = "<group>"; };
+		B46D9CF91494A1990080F792 /* filedetailsitem.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = filedetailsitem.cpp; path = ../qOrbiter_src/datamodels/DataModelItems/filedetailsitem.cpp; sourceTree = "<group>"; };
+		B46D9CFA1494A1990080F792 /* filtermodelitem.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = filtermodelitem.cpp; path = ../qOrbiter_src/datamodels/DataModelItems/filtermodelitem.cpp; sourceTree = "<group>"; };
+		B46D9CFB1494A1990080F792 /* genreitem.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = genreitem.cpp; path = ../qOrbiter_src/datamodels/DataModelItems/genreitem.cpp; sourceTree = "<group>"; };
+		B46D9CFC1494A1990080F792 /* mediatypeitem.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = mediatypeitem.cpp; path = ../qOrbiter_src/datamodels/DataModelItems/mediatypeitem.cpp; sourceTree = "<group>"; };
+		B46D9CFD1494A1990080F792 /* sleepingalarm.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = sleepingalarm.cpp; path = ../qOrbiter_src/datamodels/DataModelItems/sleepingalarm.cpp; sourceTree = "<group>"; };
+		B46D9D041494A1DA0080F792 /* attributemodel.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = attributemodel.cpp; path = ../qOrbiter_src/datamodels/attributemodel.cpp; sourceTree = "<group>"; };
+		B46D9D051494A1DA0080F792 /* attributesortmodel.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = attributesortmodel.cpp; path = ../qOrbiter_src/datamodels/attributesortmodel.cpp; sourceTree = "<group>"; };
+		B46D9D061494A1DA0080F792 /* climatescenarioitem.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = climatescenarioitem.cpp; path = ../qOrbiter_src/datamodels/climatescenarioitem.cpp; sourceTree = "<group>"; };
+		B46D9D071494A1DA0080F792 /* climatescenariomodel.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = climatescenariomodel.cpp; path = ../qOrbiter_src/datamodels/climatescenariomodel.cpp; sourceTree = "<group>"; };
+		B46D9D081494A1DA0080F792 /* filedetailsmodel.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = filedetailsmodel.cpp; path = ../qOrbiter_src/datamodels/filedetailsmodel.cpp; sourceTree = "<group>"; };
+		B46D9D091494A1DA0080F792 /* filtermodel.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = filtermodel.cpp; path = ../qOrbiter_src/datamodels/filtermodel.cpp; sourceTree = "<group>"; };
+		B46D9D0A1494A1DA0080F792 /* floorplanitem.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = floorplanitem.cpp; path = ../qOrbiter_src/datamodels/floorplanitem.cpp; sourceTree = "<group>"; };
+		B46D9D0B1494A1DA0080F792 /* floorplanmodel.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = floorplanmodel.cpp; path = ../qOrbiter_src/datamodels/floorplanmodel.cpp; sourceTree = "<group>"; };
+		B46D9D0C1494A1DA0080F792 /* genremodel.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = genremodel.cpp; path = ../qOrbiter_src/datamodels/genremodel.cpp; sourceTree = "<group>"; };
+		B46D9D0D1494A1DA0080F792 /* gridItem.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = gridItem.cpp; path = ../qOrbiter_src/datamodels/gridItem.cpp; sourceTree = "<group>"; };
+		B46D9D0E1494A1DA0080F792 /* lightingscenarioitem.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = lightingscenarioitem.cpp; path = ../qOrbiter_src/datamodels/lightingscenarioitem.cpp; sourceTree = "<group>"; };
+		B46D9D0F1494A1DA0080F792 /* lightingscenariomodel.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = lightingscenariomodel.cpp; path = ../qOrbiter_src/datamodels/lightingscenariomodel.cpp; sourceTree = "<group>"; };
+		B46D9D101494A1DA0080F792 /* listModel.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = listModel.cpp; path = ../qOrbiter_src/datamodels/listModel.cpp; sourceTree = "<group>"; };
+		B46D9D111494A1DA0080F792 /* locationitem.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = locationitem.cpp; path = ../qOrbiter_src/datamodels/locationitem.cpp; sourceTree = "<group>"; };
+		B46D9D121494A1DA0080F792 /* locationmodel.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = locationmodel.cpp; path = ../qOrbiter_src/datamodels/locationmodel.cpp; sourceTree = "<group>"; };
+		B46D9D131494A1DA0080F792 /* mediascenarioitem.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = mediascenarioitem.cpp; path = ../qOrbiter_src/datamodels/mediascenarioitem.cpp; sourceTree = "<group>"; };
+		B46D9D141494A1DA0080F792 /* mediascenariomodel.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = mediascenariomodel.cpp; path = ../qOrbiter_src/datamodels/mediascenariomodel.cpp; sourceTree = "<group>"; };
+		B46D9D151494A1DA0080F792 /* mediatypemodel.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = mediatypemodel.cpp; path = ../qOrbiter_src/datamodels/mediatypemodel.cpp; sourceTree = "<group>"; };
+		B46D9D161494A1DA0080F792 /* orbiterbuttonitem.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = orbiterbuttonitem.cpp; path = ../qOrbiter_src/datamodels/orbiterbuttonitem.cpp; sourceTree = "<group>"; };
+		B46D9D1A1494A1DA0080F792 /* securityscenarioitem.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = securityscenarioitem.cpp; path = ../qOrbiter_src/datamodels/securityscenarioitem.cpp; sourceTree = "<group>"; };
+		B46D9D1B1494A1DA0080F792 /* securityscenariomodel.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = securityscenariomodel.cpp; path = ../qOrbiter_src/datamodels/securityscenariomodel.cpp; sourceTree = "<group>"; };
+		B46D9D1C1494A1DA0080F792 /* skindataitem.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = skindataitem.cpp; path = ../qOrbiter_src/datamodels/skindataitem.cpp; sourceTree = "<group>"; };
+		B46D9D1D1494A1DA0080F792 /* skindatamodel.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = skindatamodel.cpp; path = ../qOrbiter_src/datamodels/skindatamodel.cpp; sourceTree = "<group>"; };
+		B46D9D1E1494A1DA0080F792 /* telecomscenarioitem.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = telecomscenarioitem.cpp; path = ../qOrbiter_src/datamodels/telecomscenarioitem.cpp; sourceTree = "<group>"; };
+		B46D9D1F1494A1DA0080F792 /* telecomscenariomodel.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = telecomscenariomodel.cpp; path = ../qOrbiter_src/datamodels/telecomscenariomodel.cpp; sourceTree = "<group>"; };
+		B46D9D201494A1DA0080F792 /* useritem.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = useritem.cpp; path = ../qOrbiter_src/datamodels/useritem.cpp; sourceTree = "<group>"; };
+		B46D9D211494A1DA0080F792 /* usermodel.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = usermodel.cpp; path = ../qOrbiter_src/datamodels/usermodel.cpp; sourceTree = "<group>"; };
+		B46D9D411494A25E0080F792 /* abstractimageprovider.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = abstractimageprovider.cpp; path = ../qOrbiter_src/imageProviders/abstractimageprovider.cpp; sourceTree = "<group>"; };
+		B46D9D421494A25E0080F792 /* basicImageProvider.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = basicImageProvider.cpp; path = ../qOrbiter_src/imageProviders/basicImageProvider.cpp; sourceTree = "<group>"; };
+		B46D9D431494A25E0080F792 /* gridimageprovider.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = gridimageprovider.cpp; path = ../qOrbiter_src/imageProviders/gridimageprovider.cpp; sourceTree = "<group>"; };
+		B46D9D491494A2AB0080F792 /* screensavermodule.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = screensavermodule.cpp; path = ../qOrbiter_src/screensaver/screensavermodule.cpp; sourceTree = "<group>"; };
+		B46D9D4B1494A2B40080F792 /* epgitemclass.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = epgitemclass.cpp; path = ../qOrbiter_src/playlists/epgitemclass.cpp; sourceTree = "<group>"; };
+		B46D9D4D1494A3020080F792 /* avcodegrid.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = avcodegrid.cpp; path = ../qOrbiter_src/avcodegrid.cpp; sourceTree = "<group>"; };
+		B46D9D4E1494A3020080F792 /* avitem.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = avitem.cpp; path = ../qOrbiter_src/avitem.cpp; sourceTree = "<group>"; };
+/* End PBXFileReference section */
+
+/* Begin PBXFrameworksBuildPhase section */
+		B42651971491483200F20E5C /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				B40C364614915CF6000FD6E6 /* libQtXmlPatterns.a in Frameworks */,
+				B40C364314915CD1000FD6E6 /* libQtXml.a in Frameworks */,
+				B40C363714915319000FD6E6 /* libz.dylib in Frameworks */,
+				B42651DC1491528D00F20E5C /* libquikit.a in Frameworks */,
+				B42651D91491525600F20E5C /* libQtSql.a in Frameworks */,
+				B42651D31491521F00F20E5C /* libQtNetwork.a in Frameworks */,
+				B42651D41491521F00F20E5C /* libQtOpenGL.a in Frameworks */,
+				B42651D51491521F00F20E5C /* libQtScript.a in Frameworks */,
+				B42651CD149151FE00F20E5C /* libQtCore.a in Frameworks */,
+				B42651CE149151FE00F20E5C /* libQtDeclarative.a in Frameworks */,
+				B42651CF149151FE00F20E5C /* libQtGui.a in Frameworks */,
+				B426519F1491483200F20E5C /* UIKit.framework in Frameworks */,
+				B40C363E14915B83000FD6E6 /* CoreText.framework in Frameworks */,
+				B40C363C14915B7D000FD6E6 /* QuartzCore.framework in Frameworks */,
+				B40C363A14915B73000FD6E6 /* OpenGLES.framework in Frameworks */,
+				B42651A11491483200F20E5C /* Foundation.framework in Frameworks */,
+				B42651A31491483200F20E5C /* CoreGraphics.framework in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXFrameworksBuildPhase section */
+
+/* Begin PBXGroup section */
+		B41EB1041497E91C000B35DE /* moc_files */ = {
+			isa = PBXGroup;
+			children = (
+				B41EB27A149D0BE8000B35DE /* moc_orbiterwindow.cpp */,
+				B41EB278149D0A03000B35DE /* moc_qOrbiterBase.cpp */,
+				B41EB272149CB99A000B35DE /* moc_screensavermodule.cpp */,
+				B41EB26E149CAEEA000B35DE /* moc_avcodegrid.cpp */,
+				B41EB26F149CAEEA000B35DE /* moc_avitem.cpp */,
+				B41EB208149CADD6000B35DE /* moc_abstractimageprovider.cpp */,
+				B41EB209149CADD6000B35DE /* moc_attributemodel.cpp */,
+				B41EB20A149CADD6000B35DE /* moc_attributesortitem.cpp */,
+				B41EB20B149CADD6000B35DE /* moc_attributesortmodel.cpp */,
+				B41EB20C149CADD6000B35DE /* moc_basicimageprovider.cpp */,
+				B41EB20D149CADD6000B35DE /* moc_climatescenarioitem.cpp */,
+				B41EB20E149CADD6000B35DE /* moc_climatescenariomodel.cpp */,
+				B41EB20F149CADD6000B35DE /* moc_datagriditem.cpp */,
+				B41EB276149CC29C000B35DE /* moc_qOrbiter.cpp */,
+				B41EB210149CADD6000B35DE /* moc_datagriditemmodelclass.cpp */,
+				B41EB211149CADD6000B35DE /* moc_epgchannellist.cpp */,
+				B41EB212149CADD6000B35DE /* moc_epgitemclass.cpp */,
+				B41EB213149CADD6000B35DE /* moc_filedetailsclass.cpp */,
+				B41EB214149CADD6000B35DE /* moc_filedetailsimageprovider.cpp */,
+				B41EB215149CADD6000B35DE /* moc_filedetailsitem.cpp */,
+				B41EB216149CADD6000B35DE /* moc_filedetailsmodel.cpp */,
+				B41EB217149CADD6000B35DE /* moc_filtermodel.cpp */,
+				B41EB218149CADD6000B35DE /* moc_filtermodelitem.cpp */,
+				B41EB219149CADD6000B35DE /* moc_floorplandevice.cpp */,
+				B41EB21A149CADD6000B35DE /* moc_floorplanimageitem.cpp */,
+				B41EB21B149CADD6000B35DE /* moc_floorplanmodel.cpp */,
+				B41EB21C149CADD6000B35DE /* moc_genreitem.cpp */,
+				B41EB21D149CADD6000B35DE /* moc_genremodel.cpp */,
+				B41EB21E149CADD6000B35DE /* moc_gridimageprovider.cpp */,
+				B41EB21F149CADD6000B35DE /* moc_griditem.cpp */,
+				B41EB220149CADD6000B35DE /* moc_lightingscenarioitem.cpp */,
+				B41EB221149CADD6000B35DE /* moc_lightingscenariomodel.cpp */,
+				B41EB222149CADD6000B35DE /* moc_listModel.cpp */,
+				B41EB223149CADD6000B35DE /* moc_locationitem.cpp */,
+				B41EB224149CADD6000B35DE /* moc_locationmodel.cpp */,
+				B41EB225149CADD6000B35DE /* moc_mediascenarioitem.cpp */,
+				B41EB226149CADD6000B35DE /* moc_mediascenariomodel.cpp */,
+				B41EB227149CADD6000B35DE /* moc_mediatypeitem.cpp */,
+				B41EB228149CADD6000B35DE /* moc_mediatypemodel.cpp */,
+				B41EB229149CADD6000B35DE /* moc_nowplayingclass.cpp */,
+				B41EB22A149CADD6000B35DE /* moc_orbiterbuttonitem.cpp */,
+				B41EB22B149CADD6000B35DE /* moc_playlistitemclass.cpp */,
+				B41EB22D149CADD6000B35DE /* moc_qOrbiterData.cpp */,
+				B41EB22E149CADD6000B35DE /* moc_qorbitermanager.cpp */,
+				B41EB22F149CADD6000B35DE /* moc_screenparamsclass.cpp */,
+				B41EB230149CADD6000B35DE /* moc_screenshotattributes.cpp */,
+				B41EB231149CADD6000B35DE /* moc_securityscenarioitem.cpp */,
+				B41EB232149CADD6000B35DE /* moc_securityscenariomodel.cpp */,
+				B41EB233149CADD6000B35DE /* moc_securityvideoclass.cpp */,
+				B41EB234149CADD6000B35DE /* moc_skindataitem.cpp */,
+				B41EB235149CADD6000B35DE /* moc_skindatamodel.cpp */,
+				B41EB236149CADD6000B35DE /* moc_sleepingalarm.cpp */,
+				B41EB237149CADD6000B35DE /* moc_telecomscenarioitem.cpp */,
+				B41EB238149CADD6000B35DE /* moc_telecomscenariomodel.cpp */,
+				B41EB239149CADD6000B35DE /* moc_useritem.cpp */,
+				B41EB23A149CADD6000B35DE /* moc_usermodel.cpp */,
+			);
+			name = moc_files;
+			sourceTree = "<group>";
+		};
+		B41EB9EE149DDCC6000B35DE /* Assets */ = {
+			isa = PBXGroup;
+			children = (
+				B41EB9EF149DDCC6000B35DE /* Icons */,
+				B41EB9F6149DDCC6000B35DE /* iTunesArtwork */,
+				B41EB9F7149DDCC6000B35DE /* Splash */,
+			);
+			path = Assets;
+			sourceTree = "<group>";
+		};
+		B41EB9EF149DDCC6000B35DE /* Icons */ = {
+			isa = PBXGroup;
+			children = (
+				B41EB9F0149DDCC6000B35DE /* Icon-72.png */,
+				B41EB9F1149DDCC6000B35DE /* Icon-Small-50.png */,
+				B41EB9F2149DDCC6000B35DE /* Icon-Small.png */,
+				B41EB9F3149DDCC6000B35DE /* Icon-Small@2x.png */,
+				B41EB9F4149DDCC6000B35DE /* Icon.png */,
+				B41EB9F5149DDCC6000B35DE /* Icon@2x.png */,
+			);
+			path = Icons;
+			sourceTree = "<group>";
+		};
+		B41EB9F7149DDCC6000B35DE /* Splash */ = {
+			isa = PBXGroup;
+			children = (
+				B41EB9F8149DDCC6000B35DE /* Default-Landscape~ipad.png */,
+				B41EB9F9149DDCC6000B35DE /* Default-Portrait~ipad.png */,
+				B41EB9FA149DDCC6000B35DE /* default.png */,
+				B41EB9FB149DDCC6000B35DE /* default@2x.png */,
+				B41EB9FC149DDCC6000B35DE /* splash-ipad.png */,
+				B41EB9FD149DDCC6000B35DE /* splash.png */,
+				B41EB9FE149DDCC6000B35DE /* splash@2x.png */,
+			);
+			path = Splash;
+			sourceTree = "<group>";
+		};
+		B41EBA0E149DDFF8000B35DE /* Ressources */ = {
+			isa = PBXGroup;
+			children = (
+				B41EBA0F149DE0EE000B35DE /* skinData.qrc */,
+			);
+			name = Ressources;
+			sourceTree = "<group>";
+		};
+		B426518F1491483200F20E5C = {
+			isa = PBXGroup;
+			children = (
+				B41EBA0E149DDFF8000B35DE /* Ressources */,
+				B41EB9EE149DDCC6000B35DE /* Assets */,
+				B41EB9E2149D28E9000B35DE /* qml */,
+				B41EB1041497E91C000B35DE /* moc_files */,
+				B46D9C9C149165E30080F792 /* LinuxMCE */,
+				B46D9C9514915DB60080F792 /* qOrbiter */,
+				B42651A41491483200F20E5C /* Lighthouse */,
+				B42651A51491483200F20E5C /* Supporting Files */,
+				B426519D1491483200F20E5C /* Frameworks */,
+				B426519B1491483200F20E5C /* Products */,
+			);
+			sourceTree = "<group>";
+		};
+		B426519B1491483200F20E5C /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				B426519A1491483200F20E5C /* qOrbiter.app */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+		B426519D1491483200F20E5C /* Frameworks */ = {
+			isa = PBXGroup;
+			children = (
+				B40C363614915319000FD6E6 /* libz.dylib */,
+				B42651D61491522500F20E5C /* Simulator */,
+				B426519E1491483200F20E5C /* UIKit.framework */,
+				B42651A01491483200F20E5C /* Foundation.framework */,
+				B42651A21491483200F20E5C /* CoreGraphics.framework */,
+				B40C363D14915B83000FD6E6 /* CoreText.framework */,
+				B40C363B14915B7D000FD6E6 /* QuartzCore.framework */,
+				B40C363914915B73000FD6E6 /* OpenGLES.framework */,
+			);
+			name = Frameworks;
+			sourceTree = "<group>";
+		};
+		B42651A41491483200F20E5C /* Lighthouse */ = {
+			isa = PBXGroup;
+			children = (
+				B42651C51491511800F20E5C /* moc_qmlapplicationviewer.cpp */,
+				B42651C61491511900F20E5C /* qmlapplicationviewer.cpp */,
+				B42651C71491511900F20E5C /* qmlapplicationviewer.h */,
+				B41EB9EB149DD38B000B35DE /* ioshelpers.h */,
+			);
+			name = Lighthouse;
+			path = qOrbiter;
+			sourceTree = "<group>";
+		};
+		B42651A51491483200F20E5C /* Supporting Files */ = {
+			isa = PBXGroup;
+			children = (
+				B42651A61491483200F20E5C /* qOrbiter-Info.plist */,
+				B42651A71491483200F20E5C /* InfoPlist.strings */,
+				B42651AC1491483200F20E5C /* qOrbiter-Prefix.pch */,
+			);
+			name = "Supporting Files";
+			path = qOrbiter;
+			sourceTree = "<group>";
+		};
+		B42651D61491522500F20E5C /* Simulator */ = {
+			isa = PBXGroup;
+			children = (
+				B42651DB1491528D00F20E5C /* libquikit.a */,
+				B42651D71491525600F20E5C /* libQtSql.a */,
+				B42651D01491521F00F20E5C /* libQtNetwork.a */,
+				B42651D11491521F00F20E5C /* libQtOpenGL.a */,
+				B42651D21491521F00F20E5C /* libQtScript.a */,
+				B42651CA149151FE00F20E5C /* libQtCore.a */,
+				B42651CB149151FE00F20E5C /* libQtDeclarative.a */,
+				B42651CC149151FE00F20E5C /* libQtGui.a */,
+				B40C364114915CD1000FD6E6 /* libQtXml.a */,
+				B40C364514915CF6000FD6E6 /* libQtXmlPatterns.a */,
+			);
+			name = Simulator;
+			sourceTree = "<group>";
+		};
+		B46D9C9514915DB60080F792 /* qOrbiter */ = {
+			isa = PBXGroup;
+			children = (
+				B46D9CDE1494A0CB0080F792 /* contextobjects */,
+				B46D9CF11494A12F0080F792 /* datamodels */,
+				B46D9D401494A2450080F792 /* imageProviders */,
+				B46D9D471494A2770080F792 /* playlists */,
+				B46D9D481494A2810080F792 /* screensaver */,
+				B46D9D4D1494A3020080F792 /* avcodegrid.cpp */,
+				B46D9D4E1494A3020080F792 /* avitem.cpp */,
+				B46D9C9614915F730080F792 /* qorbitermanager.cpp */,
+				B46D9C9714915F730080F792 /* qorbitermanager.h */,
+				B41EB27C149D25E5000B35DE /* orbiterwindow.cpp */,
+				B46D9C9B149164640080F792 /* qOrbiter.h */,
+				B46D9CDC1494A08F0080F792 /* qOrbiter.cpp */,
+				B41EB9EC149DDB0C000B35DE /* main.cpp */,
+			);
+			name = qOrbiter;
+			sourceTree = "<group>";
+		};
+		B46D9C9C149165E30080F792 /* LinuxMCE */ = {
+			isa = PBXGroup;
+			children = (
+				B46D9C9D1491661D0080F792 /* DCE */,
+				B46D9CC114949B450080F792 /* Gen_Devices */,
+				B46D9CC014949B430080F792 /* PlutoUtils */,
+				B46D9CD914949FC90080F792 /* SerializeClass */,
+			);
+			name = LinuxMCE;
+			sourceTree = "<group>";
+		};
+		B46D9C9D1491661D0080F792 /* DCE */ = {
+			isa = PBXGroup;
+			children = (
+				B46D9C9E149166640080F792 /* AlarmManager.cpp */,
+				B46D9C9F149166640080F792 /* ClientSocket.cpp */,
+				B46D9CA0149166640080F792 /* Command_Impl.cpp */,
+				B46D9CA1149166640080F792 /* DataGrid.cpp */,
+				B46D9CA2149166640080F792 /* DCEConfig.cpp */,
+				B46D9CA3149166640080F792 /* DeviceData_Base.cpp */,
+				B46D9CA4149166640080F792 /* DeviceData_Impl.cpp */,
+				B46D9CAC1491667F0080F792 /* Event_Impl.cpp */,
+				B46D9CAD1491667F0080F792 /* HandleRequestSocket.cpp */,
+				B46D9CAE1491667F0080F792 /* Logger.cpp */,
+				B46D9CAF1491667F0080F792 /* Message.cpp */,
+				B46D9CB41491669B0080F792 /* MessageBuffer.cpp */,
+				B46D9CB51491669B0080F792 /* PlainClientSocket.cpp */,
+				B46D9CB61491669B0080F792 /* ServerLogger.cpp */,
+				B46D9CB71491669B0080F792 /* Socket.cpp */,
+				B46D9CB81491669B0080F792 /* Virtual_Device_Translator.cpp */,
+			);
+			name = DCE;
+			sourceTree = "<group>";
+		};
+		B46D9CC014949B430080F792 /* PlutoUtils */ = {
+			isa = PBXGroup;
+			children = (
+				B46D9CC214949E9C0080F792 /* CommonIncludes.cpp */,
+				B46D9CC314949E9C0080F792 /* FileUtils.cpp */,
+				B46D9CC414949E9C0080F792 /* getch.cpp */,
+				B46D9CC814949EB70080F792 /* md5c.cpp */,
+				B46D9CC914949EB70080F792 /* minilzo.cpp */,
+				B46D9CCE14949ED30080F792 /* MultiThreadIncludes.cpp */,
+				B46D9CCF14949ED30080F792 /* Other.cpp */,
+				B46D9CD214949F0A0080F792 /* StringUtils.cpp */,
+				B46D9CD314949F0A0080F792 /* ThreadedClass.cpp */,
+				B46D9CD614949F380080F792 /* uuencode.cpp */,
+			);
+			name = PlutoUtils;
+			sourceTree = "<group>";
+		};
+		B46D9CC114949B450080F792 /* Gen_Devices */ = {
+			isa = PBXGroup;
+			children = (
+				B46D9CBE149167000080F792 /* qOrbiterBase.cpp */,
+			);
+			name = Gen_Devices;
+			sourceTree = "<group>";
+		};
+		B46D9CD914949FC90080F792 /* SerializeClass */ = {
+			isa = PBXGroup;
+			children = (
+				B46D9CDA14949FE30080F792 /* SerializeClass.cpp */,
+			);
+			name = SerializeClass;
+			sourceTree = "<group>";
+		};
+		B46D9CDE1494A0CB0080F792 /* contextobjects */ = {
+			isa = PBXGroup;
+			children = (
+				B46D9CDF1494A0F70080F792 /* epgchannellist.cpp */,
+				B46D9CE01494A0F70080F792 /* filedetailsclass.cpp */,
+				B46D9CE11494A0F70080F792 /* floorplandevice.cpp */,
+				B46D9CE21494A0F70080F792 /* nowplayingclass.cpp */,
+				B46D9CE31494A0F70080F792 /* playlistclass.cpp */,
+				B46D9CE41494A0F70080F792 /* playlistitemclass.cpp */,
+				B46D9CE51494A0F70080F792 /* screenparamsclass.cpp */,
+				B46D9CE61494A0F70080F792 /* screenshotattributes.cpp */,
+				B46D9CE71494A0F70080F792 /* securityvideoclass.cpp */,
+			);
+			name = contextobjects;
+			sourceTree = "<group>";
+		};
+		B46D9CF11494A12F0080F792 /* datamodels */ = {
+			isa = PBXGroup;
+			children = (
+				B46D9CF21494A14F0080F792 /* DatagridClasses */,
+				B46D9CF31494A1610080F792 /* DataModelItems */,
+				B46D9D041494A1DA0080F792 /* attributemodel.cpp */,
+				B46D9D051494A1DA0080F792 /* attributesortmodel.cpp */,
+				B46D9D061494A1DA0080F792 /* climatescenarioitem.cpp */,
+				B46D9D071494A1DA0080F792 /* climatescenariomodel.cpp */,
+				B46D9D081494A1DA0080F792 /* filedetailsmodel.cpp */,
+				B46D9D091494A1DA0080F792 /* filtermodel.cpp */,
+				B46D9D0A1494A1DA0080F792 /* floorplanitem.cpp */,
+				B46D9D0B1494A1DA0080F792 /* floorplanmodel.cpp */,
+				B46D9D0C1494A1DA0080F792 /* genremodel.cpp */,
+				B46D9D0D1494A1DA0080F792 /* gridItem.cpp */,
+				B46D9D0E1494A1DA0080F792 /* lightingscenarioitem.cpp */,
+				B46D9D0F1494A1DA0080F792 /* lightingscenariomodel.cpp */,
+				B46D9D101494A1DA0080F792 /* listModel.cpp */,
+				B46D9D111494A1DA0080F792 /* locationitem.cpp */,
+				B46D9D121494A1DA0080F792 /* locationmodel.cpp */,
+				B46D9D131494A1DA0080F792 /* mediascenarioitem.cpp */,
+				B46D9D141494A1DA0080F792 /* mediascenariomodel.cpp */,
+				B46D9D151494A1DA0080F792 /* mediatypemodel.cpp */,
+				B46D9D161494A1DA0080F792 /* orbiterbuttonitem.cpp */,
+				B46D9D1A1494A1DA0080F792 /* securityscenarioitem.cpp */,
+				B46D9D1B1494A1DA0080F792 /* securityscenariomodel.cpp */,
+				B46D9D1C1494A1DA0080F792 /* skindataitem.cpp */,
+				B46D9D1D1494A1DA0080F792 /* skindatamodel.cpp */,
+				B46D9D1E1494A1DA0080F792 /* telecomscenarioitem.cpp */,
+				B46D9D1F1494A1DA0080F792 /* telecomscenariomodel.cpp */,
+				B46D9D201494A1DA0080F792 /* useritem.cpp */,
+				B46D9D211494A1DA0080F792 /* usermodel.cpp */,
+			);
+			name = datamodels;
+			sourceTree = "<group>";
+		};
+		B46D9CF21494A14F0080F792 /* DatagridClasses */ = {
+			isa = PBXGroup;
+			children = (
+				B46D9CF41494A18A0080F792 /* datagriditem.cpp */,
+				B46D9CF51494A18A0080F792 /* datagriditemmodelclass.cpp */,
+			);
+			name = DatagridClasses;
+			sourceTree = "<group>";
+		};
+		B46D9CF31494A1610080F792 /* DataModelItems */ = {
+			isa = PBXGroup;
+			children = (
+				B46D9CF81494A1990080F792 /* attributesortitem.cpp */,
+				B46D9CF91494A1990080F792 /* filedetailsitem.cpp */,
+				B46D9CFA1494A1990080F792 /* filtermodelitem.cpp */,
+				B46D9CFB1494A1990080F792 /* genreitem.cpp */,
+				B46D9CFC1494A1990080F792 /* mediatypeitem.cpp */,
+				B46D9CFD1494A1990080F792 /* sleepingalarm.cpp */,
+			);
+			name = DataModelItems;
+			sourceTree = "<group>";
+		};
+		B46D9D401494A2450080F792 /* imageProviders */ = {
+			isa = PBXGroup;
+			children = (
+				B46D9D411494A25E0080F792 /* abstractimageprovider.cpp */,
+				B46D9D421494A25E0080F792 /* basicImageProvider.cpp */,
+				B46D9D431494A25E0080F792 /* gridimageprovider.cpp */,
+			);
+			name = imageProviders;
+			sourceTree = "<group>";
+		};
+		B46D9D471494A2770080F792 /* playlists */ = {
+			isa = PBXGroup;
+			children = (
+				B46D9D4B1494A2B40080F792 /* epgitemclass.cpp */,
+			);
+			name = playlists;
+			sourceTree = "<group>";
+		};
+		B46D9D481494A2810080F792 /* screensaver */ = {
+			isa = PBXGroup;
+			children = (
+				B46D9D491494A2AB0080F792 /* screensavermodule.cpp */,
+			);
+			name = screensaver;
+			sourceTree = "<group>";
+		};
+/* End PBXGroup section */
+
+/* Begin PBXNativeTarget section */
+		B42651991491483200F20E5C /* qOrbiter */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = B42651BB1491483200F20E5C /* Build configuration list for PBXNativeTarget "qOrbiter" */;
+			buildPhases = (
+				B42651961491483200F20E5C /* Sources */,
+				B42651971491483200F20E5C /* Frameworks */,
+				B42651981491483200F20E5C /* Resources */,
+			);
+			buildRules = (
+				B41EBA0D149DDE3E000B35DE /* PBXBuildRule */,
+			);
+			dependencies = (
+			);
+			name = qOrbiter;
+			productName = qOrbiter;
+			productReference = B426519A1491483200F20E5C /* qOrbiter.app */;
+			productType = "com.apple.product-type.application";
+		};
+/* End PBXNativeTarget section */
+
+/* Begin PBXProject section */
+		B42651911491483200F20E5C /* Project object */ = {
+			isa = PBXProject;
+			attributes = {
+				LastUpgradeCheck = 0420;
+				ORGANIZATIONNAME = CIST;
+			};
+			buildConfigurationList = B42651941491483200F20E5C /* Build configuration list for PBXProject "qOrbiter" */;
+			compatibilityVersion = "Xcode 3.2";
+			developmentRegion = English;
+			hasScannedForEncodings = 0;
+			knownRegions = (
+				en,
+			);
+			mainGroup = B426518F1491483200F20E5C;
+			productRefGroup = B426519B1491483200F20E5C /* Products */;
+			projectDirPath = "";
+			projectRoot = "";
+			targets = (
+				B42651991491483200F20E5C /* qOrbiter */,
+			);
+		};
+/* End PBXProject section */
+
+/* Begin PBXResourcesBuildPhase section */
+		B42651981491483200F20E5C /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				B41EB9E3149D28E9000B35DE /* qml in Resources */,
+				B42651A91491483200F20E5C /* InfoPlist.strings in Resources */,
+				B41EB9FF149DDCC6000B35DE /* Icon-72.png in Resources */,
+				B41EBA00149DDCC6000B35DE /* Icon-Small-50.png in Resources */,
+				B41EBA01149DDCC6000B35DE /* Icon-Small.png in Resources */,
+				B41EBA02149DDCC6000B35DE /* Icon-Small@2x.png in Resources */,
+				B41EBA03149DDCC6000B35DE /* Icon.png in Resources */,
+				B41EBA04149DDCC6000B35DE /* Icon@2x.png in Resources */,
+				B41EBA05149DDCC6000B35DE /* iTunesArtwork in Resources */,
+				B41EBA06149DDCC6000B35DE /* Default-Landscape~ipad.png in Resources */,
+				B41EBA07149DDCC6000B35DE /* Default-Portrait~ipad.png in Resources */,
+				B41EBA08149DDCC6000B35DE /* default.png in Resources */,
+				B41EBA09149DDCC6000B35DE /* default@2x.png in Resources */,
+				B41EBA0A149DDCC6000B35DE /* splash-ipad.png in Resources */,
+				B41EBA0B149DDCC6000B35DE /* splash.png in Resources */,
+				B41EBA0C149DDCC6000B35DE /* splash@2x.png in Resources */,
+				B41EBA10149DE0EE000B35DE /* skinData.qrc in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXResourcesBuildPhase section */
+
+/* Begin PBXSourcesBuildPhase section */
+		B42651961491483200F20E5C /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				B42651C81491511900F20E5C /* moc_qmlapplicationviewer.cpp in Sources */,
+				B42651C91491511900F20E5C /* qmlapplicationviewer.cpp in Sources */,
+				B46D9C9814915F730080F792 /* qorbitermanager.cpp in Sources */,
+				B46D9CA5149166640080F792 /* AlarmManager.cpp in Sources */,
+				B46D9CA6149166640080F792 /* ClientSocket.cpp in Sources */,
+				B46D9CA7149166640080F792 /* Command_Impl.cpp in Sources */,
+				B46D9CA8149166640080F792 /* DataGrid.cpp in Sources */,
+				B46D9CA9149166640080F792 /* DCEConfig.cpp in Sources */,
+				B46D9CAA149166640080F792 /* DeviceData_Base.cpp in Sources */,
+				B46D9CAB149166640080F792 /* DeviceData_Impl.cpp in Sources */,
+				B46D9CB01491667F0080F792 /* Event_Impl.cpp in Sources */,
+				B46D9CB11491667F0080F792 /* HandleRequestSocket.cpp in Sources */,
+				B46D9CB21491667F0080F792 /* Logger.cpp in Sources */,
+				B46D9CB31491667F0080F792 /* Message.cpp in Sources */,
+				B46D9CB91491669B0080F792 /* MessageBuffer.cpp in Sources */,
+				B46D9CBA1491669B0080F792 /* PlainClientSocket.cpp in Sources */,
+				B46D9CBB1491669B0080F792 /* ServerLogger.cpp in Sources */,
+				B46D9CBC1491669B0080F792 /* Socket.cpp in Sources */,
+				B46D9CBD1491669B0080F792 /* Virtual_Device_Translator.cpp in Sources */,
+				B46D9CBF149167000080F792 /* qOrbiterBase.cpp in Sources */,
+				B46D9CC514949E9C0080F792 /* CommonIncludes.cpp in Sources */,
+				B46D9CC614949E9C0080F792 /* FileUtils.cpp in Sources */,
+				B46D9CC714949E9C0080F792 /* getch.cpp in Sources */,
+				B46D9CCB14949EB70080F792 /* md5c.cpp in Sources */,
+				B46D9CCC14949EB70080F792 /* minilzo.cpp in Sources */,
+				B46D9CD014949ED30080F792 /* MultiThreadIncludes.cpp in Sources */,
+				B46D9CD114949ED30080F792 /* Other.cpp in Sources */,
+				B46D9CD414949F0A0080F792 /* StringUtils.cpp in Sources */,
+				B46D9CD514949F0A0080F792 /* ThreadedClass.cpp in Sources */,
+				B46D9CD714949F380080F792 /* uuencode.cpp in Sources */,
+				B46D9CDB14949FE30080F792 /* SerializeClass.cpp in Sources */,
+				B46D9CDD1494A08F0080F792 /* qOrbiter.cpp in Sources */,
+				B46D9CE81494A0F70080F792 /* epgchannellist.cpp in Sources */,
+				B46D9CE91494A0F70080F792 /* filedetailsclass.cpp in Sources */,
+				B46D9CEA1494A0F70080F792 /* floorplandevice.cpp in Sources */,
+				B46D9CEB1494A0F70080F792 /* nowplayingclass.cpp in Sources */,
+				B46D9CEC1494A0F70080F792 /* playlistclass.cpp in Sources */,
+				B46D9CED1494A0F70080F792 /* playlistitemclass.cpp in Sources */,
+				B46D9CEE1494A0F70080F792 /* screenparamsclass.cpp in Sources */,
+				B46D9CEF1494A0F70080F792 /* screenshotattributes.cpp in Sources */,
+				B46D9CF01494A0F70080F792 /* securityvideoclass.cpp in Sources */,
+				B46D9CF61494A18A0080F792 /* datagriditem.cpp in Sources */,
+				B46D9CF71494A18A0080F792 /* datagriditemmodelclass.cpp in Sources */,
+				B46D9CFE1494A1990080F792 /* attributesortitem.cpp in Sources */,
+				B46D9CFF1494A1990080F792 /* filedetailsitem.cpp in Sources */,
+				B46D9D001494A1990080F792 /* filtermodelitem.cpp in Sources */,
+				B46D9D011494A1990080F792 /* genreitem.cpp in Sources */,
+				B46D9D021494A1990080F792 /* mediatypeitem.cpp in Sources */,
+				B46D9D031494A1990080F792 /* sleepingalarm.cpp in Sources */,
+				B46D9D221494A1DA0080F792 /* attributemodel.cpp in Sources */,
+				B46D9D231494A1DA0080F792 /* attributesortmodel.cpp in Sources */,
+				B46D9D241494A1DA0080F792 /* climatescenarioitem.cpp in Sources */,
+				B46D9D251494A1DA0080F792 /* climatescenariomodel.cpp in Sources */,
+				B46D9D261494A1DA0080F792 /* filedetailsmodel.cpp in Sources */,
+				B46D9D271494A1DA0080F792 /* filtermodel.cpp in Sources */,
+				B46D9D281494A1DA0080F792 /* floorplanitem.cpp in Sources */,
+				B46D9D291494A1DA0080F792 /* floorplanmodel.cpp in Sources */,
+				B46D9D2A1494A1DA0080F792 /* genremodel.cpp in Sources */,
+				B46D9D2B1494A1DA0080F792 /* gridItem.cpp in Sources */,
+				B46D9D2C1494A1DA0080F792 /* lightingscenarioitem.cpp in Sources */,
+				B46D9D2D1494A1DA0080F792 /* lightingscenariomodel.cpp in Sources */,
+				B46D9D2E1494A1DA0080F792 /* listModel.cpp in Sources */,
+				B46D9D2F1494A1DA0080F792 /* locationitem.cpp in Sources */,
+				B46D9D301494A1DA0080F792 /* locationmodel.cpp in Sources */,
+				B46D9D311494A1DA0080F792 /* mediascenarioitem.cpp in Sources */,
+				B46D9D321494A1DA0080F792 /* mediascenariomodel.cpp in Sources */,
+				B46D9D331494A1DA0080F792 /* mediatypemodel.cpp in Sources */,
+				B46D9D341494A1DA0080F792 /* orbiterbuttonitem.cpp in Sources */,
+				B46D9D381494A1DA0080F792 /* securityscenarioitem.cpp in Sources */,
+				B46D9D391494A1DA0080F792 /* securityscenariomodel.cpp in Sources */,
+				B46D9D3A1494A1DA0080F792 /* skindataitem.cpp in Sources */,
+				B46D9D3B1494A1DA0080F792 /* skindatamodel.cpp in Sources */,
+				B46D9D3C1494A1DA0080F792 /* telecomscenarioitem.cpp in Sources */,
+				B46D9D3D1494A1DA0080F792 /* telecomscenariomodel.cpp in Sources */,
+				B46D9D3E1494A1DA0080F792 /* useritem.cpp in Sources */,
+				B46D9D3F1494A1DA0080F792 /* usermodel.cpp in Sources */,
+				B46D9D441494A25E0080F792 /* abstractimageprovider.cpp in Sources */,
+				B46D9D451494A25E0080F792 /* basicImageProvider.cpp in Sources */,
+				B46D9D461494A25E0080F792 /* gridimageprovider.cpp in Sources */,
+				B46D9D4A1494A2AB0080F792 /* screensavermodule.cpp in Sources */,
+				B46D9D4C1494A2B40080F792 /* epgitemclass.cpp in Sources */,
+				B46D9D4F1494A3020080F792 /* avcodegrid.cpp in Sources */,
+				B46D9D501494A3020080F792 /* avitem.cpp in Sources */,
+				B41EB23B149CADD6000B35DE /* moc_abstractimageprovider.cpp in Sources */,
+				B41EB23C149CADD6000B35DE /* moc_attributemodel.cpp in Sources */,
+				B41EB23D149CADD6000B35DE /* moc_attributesortitem.cpp in Sources */,
+				B41EB23E149CADD6000B35DE /* moc_attributesortmodel.cpp in Sources */,
+				B41EB23F149CADD6000B35DE /* moc_basicimageprovider.cpp in Sources */,
+				B41EB240149CADD6000B35DE /* moc_climatescenarioitem.cpp in Sources */,
+				B41EB241149CADD6000B35DE /* moc_climatescenariomodel.cpp in Sources */,
+				B41EB242149CADD6000B35DE /* moc_datagriditem.cpp in Sources */,
+				B41EB243149CADD6000B35DE /* moc_datagriditemmodelclass.cpp in Sources */,
+				B41EB244149CADD6000B35DE /* moc_epgchannellist.cpp in Sources */,
+				B41EB245149CADD6000B35DE /* moc_epgitemclass.cpp in Sources */,
+				B41EB246149CADD6000B35DE /* moc_filedetailsclass.cpp in Sources */,
+				B41EB247149CADD6000B35DE /* moc_filedetailsimageprovider.cpp in Sources */,
+				B41EB248149CADD6000B35DE /* moc_filedetailsitem.cpp in Sources */,
+				B41EB249149CADD6000B35DE /* moc_filedetailsmodel.cpp in Sources */,
+				B41EB24A149CADD6000B35DE /* moc_filtermodel.cpp in Sources */,
+				B41EB24B149CADD6000B35DE /* moc_filtermodelitem.cpp in Sources */,
+				B41EB24C149CADD6000B35DE /* moc_floorplandevice.cpp in Sources */,
+				B41EB24D149CADD6000B35DE /* moc_floorplanimageitem.cpp in Sources */,
+				B41EB24E149CADD6000B35DE /* moc_floorplanmodel.cpp in Sources */,
+				B41EB24F149CADD6000B35DE /* moc_genreitem.cpp in Sources */,
+				B41EB250149CADD6000B35DE /* moc_genremodel.cpp in Sources */,
+				B41EB251149CADD6000B35DE /* moc_gridimageprovider.cpp in Sources */,
+				B41EB252149CADD6000B35DE /* moc_griditem.cpp in Sources */,
+				B41EB253149CADD6000B35DE /* moc_lightingscenarioitem.cpp in Sources */,
+				B41EB254149CADD6000B35DE /* moc_lightingscenariomodel.cpp in Sources */,
+				B41EB255149CADD6000B35DE /* moc_listModel.cpp in Sources */,
+				B41EB256149CADD6000B35DE /* moc_locationitem.cpp in Sources */,
+				B41EB257149CADD6000B35DE /* moc_locationmodel.cpp in Sources */,
+				B41EB258149CADD6000B35DE /* moc_mediascenarioitem.cpp in Sources */,
+				B41EB259149CADD6000B35DE /* moc_mediascenariomodel.cpp in Sources */,
+				B41EB25A149CADD6000B35DE /* moc_mediatypeitem.cpp in Sources */,
+				B41EB25B149CADD6000B35DE /* moc_mediatypemodel.cpp in Sources */,
+				B41EB25C149CADD6000B35DE /* moc_nowplayingclass.cpp in Sources */,
+				B41EB25D149CADD6000B35DE /* moc_orbiterbuttonitem.cpp in Sources */,
+				B41EB25E149CADD6000B35DE /* moc_playlistitemclass.cpp in Sources */,
+				B41EB260149CADD6000B35DE /* moc_qOrbiterData.cpp in Sources */,
+				B41EB261149CADD6000B35DE /* moc_qorbitermanager.cpp in Sources */,
+				B41EB262149CADD6000B35DE /* moc_screenparamsclass.cpp in Sources */,
+				B41EB263149CADD6000B35DE /* moc_screenshotattributes.cpp in Sources */,
+				B41EB264149CADD6000B35DE /* moc_securityscenarioitem.cpp in Sources */,
+				B41EB265149CADD6000B35DE /* moc_securityscenariomodel.cpp in Sources */,
+				B41EB266149CADD6000B35DE /* moc_securityvideoclass.cpp in Sources */,
+				B41EB267149CADD6000B35DE /* moc_skindataitem.cpp in Sources */,
+				B41EB268149CADD6000B35DE /* moc_skindatamodel.cpp in Sources */,
+				B41EB269149CADD6000B35DE /* moc_sleepingalarm.cpp in Sources */,
+				B41EB26A149CADD6000B35DE /* moc_telecomscenarioitem.cpp in Sources */,
+				B41EB26B149CADD6000B35DE /* moc_telecomscenariomodel.cpp in Sources */,
+				B41EB26C149CADD6000B35DE /* moc_useritem.cpp in Sources */,
+				B41EB26D149CADD6000B35DE /* moc_usermodel.cpp in Sources */,
+				B41EB270149CAEEA000B35DE /* moc_avcodegrid.cpp in Sources */,
+				B41EB271149CAEEA000B35DE /* moc_avitem.cpp in Sources */,
+				B41EB273149CB99A000B35DE /* moc_screensavermodule.cpp in Sources */,
+				B41EB277149CC29C000B35DE /* moc_qOrbiter.cpp in Sources */,
+				B41EB279149D0A03000B35DE /* moc_qOrbiterBase.cpp in Sources */,
+				B41EB27B149D0BE8000B35DE /* moc_orbiterwindow.cpp in Sources */,
+				B41EB27D149D25E5000B35DE /* orbiterwindow.cpp in Sources */,
+				B41EB9ED149DDB0C000B35DE /* main.cpp in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXSourcesBuildPhase section */
+
+/* Begin PBXVariantGroup section */
+		B42651A71491483200F20E5C /* InfoPlist.strings */ = {
+			isa = PBXVariantGroup;
+			children = (
+				B42651A81491483200F20E5C /* en */,
+			);
+			name = InfoPlist.strings;
+			sourceTree = "<group>";
+		};
+/* End PBXVariantGroup section */
+
+/* Begin XCBuildConfiguration section */
+		B42651B91491483200F20E5C /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				ARCHS = "$(ARCHS_STANDARD_32_BIT)";
+				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
+				COPY_PHASE_STRIP = NO;
+				GCC_C_LANGUAGE_STANDARD = gnu99;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_INPUT_FILETYPE = sourcecode.cpp.objcpp;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"DEBUG=1",
+					"$(inherited)",
+				);
+				GCC_SYMBOLS_PRIVATE_EXTERN = NO;
+				GCC_VERSION = com.apple.compilers.llvm.clang.1_0;
+				GCC_WARN_ABOUT_MISSING_PROTOTYPES = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				HEADER_SEARCH_PATHS = "\"$(SRCROOT)/../../../../Qt/qt-lighthouse-ios-simulator/include\"";
+				IPHONEOS_DEPLOYMENT_TARGET = 5.0;
+				SDKROOT = iphoneos;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				VALID_ARCHS = armv7;
+			};
+			name = Debug;
+		};
+		B42651BA1491483200F20E5C /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				ARCHS = "$(ARCHS_STANDARD_32_BIT)";
+				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
+				COPY_PHASE_STRIP = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu99;
+				GCC_INPUT_FILETYPE = sourcecode.cpp.objcpp;
+				GCC_VERSION = com.apple.compilers.llvm.clang.1_0;
+				GCC_WARN_ABOUT_MISSING_PROTOTYPES = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				HEADER_SEARCH_PATHS = "\"$(SRCROOT)/../../../../Qt/qt-lighthouse-ios-simulator/include\"";
+				IPHONEOS_DEPLOYMENT_TARGET = 5.0;
+				OTHER_CFLAGS = "-DNS_BLOCK_ASSERTIONS=1";
+				SDKROOT = iphoneos;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				VALIDATE_PRODUCT = YES;
+				VALID_ARCHS = armv7;
+			};
+			name = Release;
+		};
+		B42651BC1491483200F20E5C /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				GCC_PRECOMPILE_PREFIX_HEADER = YES;
+				GCC_PREFIX_HEADER = "qOrbiter/qOrbiter-Prefix.pch";
+				HEADER_SEARCH_PATHS = (
+					"\"$(SRCROOT)/../../../../Qt/qt-lighthouse-ios-simulator/include\"/**",
+					"\"$(SRCROOT)/../qOrbiter_src\"",
+					"\"$(SRCROOT)/../..\"",
+					"\"$(SRCROOT)/../../DCE\"",
+				);
+				INFOPLIST_FILE = "qOrbiter/qOrbiter-Info.plist";
+				LIBRARY_SEARCH_PATHS = (
+					"$(inherited)",
+					"\"$(SRCROOT)/../../../../Qt/qt-lighthouse-ios-simulator/plugins/platforms\"",
+					"\"$(SRCROOT)/../../../../Qt/qt-lighthouse-ios-simulator/lib\"",
+				);
+				OTHER_CPLUSPLUSFLAGS = (
+					"-DIOS",
+					"$(OTHER_CFLAGS)",
+				);
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				USER_HEADER_SEARCH_PATHS = "";
+				WRAPPER_EXTENSION = app;
+			};
+			name = Debug;
+		};
+		B42651BD1491483200F20E5C /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				GCC_PRECOMPILE_PREFIX_HEADER = YES;
+				GCC_PREFIX_HEADER = "qOrbiter/qOrbiter-Prefix.pch";
+				HEADER_SEARCH_PATHS = (
+					"\"$(SRCROOT)/../../../../Qt/qt-lighthouse-ios-simulator/include\"/**",
+					"\"$(SRCROOT)/../qOrbiter_src\"",
+					"\"$(SRCROOT)/../..\"",
+					"\"$(SRCROOT)/../../DCE\"",
+				);
+				INFOPLIST_FILE = "qOrbiter/qOrbiter-Info.plist";
+				LIBRARY_SEARCH_PATHS = (
+					"$(inherited)",
+					"\"$(SRCROOT)/../../../../Qt/qt-lighthouse-ios-simulator/plugins/platforms\"",
+					"\"$(SRCROOT)/../../../../Qt/qt-lighthouse-ios-simulator/lib\"",
+				);
+				OTHER_CPLUSPLUSFLAGS = (
+					"-DIOS",
+					"$(OTHER_CFLAGS)",
+				);
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				USER_HEADER_SEARCH_PATHS = "";
+				WRAPPER_EXTENSION = app;
+			};
+			name = Release;
+		};
+/* End XCBuildConfiguration section */
+
+/* Begin XCConfigurationList section */
+		B42651941491483200F20E5C /* Build configuration list for PBXProject "qOrbiter" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				B42651B91491483200F20E5C /* Debug */,
+				B42651BA1491483200F20E5C /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		B42651BB1491483200F20E5C /* Build configuration list for PBXNativeTarget "qOrbiter" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				B42651BC1491483200F20E5C /* Debug */,
+				B42651BD1491483200F20E5C /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+/* End XCConfigurationList section */
+	};
+	rootObject = B42651911491483200F20E5C /* Project object */;
+}

@@ -1,0 +1,102 @@
+Index: alsa-lib-1.0.18/src/conf/cards/Aureon51.conf
+===================================================================
+--- alsa-lib-1.0.18.orig/src/conf/cards/Aureon51.conf	2009-01-14 18:36:49.000000000 -0500
++++ alsa-lib-1.0.18/src/conf/cards/Aureon51.conf	2009-01-14 18:37:05.000000000 -0500
+@@ -121,6 +121,8 @@
+ 	}
+ 	type asym
+ 	playback.pcm {
++	    type linear
++	    slave.pcm {
+ 		type hooks
+ 		slave.pcm {
+ 			type hw
+@@ -147,8 +149,12 @@
+ 				}
+ 			]
+ 		}
++	    }
++	    slave.format S32_LE
+ 	}
+ 	capture.pcm {
++	    type linear
++	    slave.pcm {
+ 		type hooks
+ 		slave.pcm {
+ 			type hw
+@@ -167,5 +173,7 @@
+ 				}
+ 			]
+ 		}
++	    }
++	    slave.format S32_LE
+ 	}
+ }
+Index: alsa-lib-1.0.18/src/conf/cards/Aureon71.conf
+===================================================================
+--- alsa-lib-1.0.18.orig/src/conf/cards/Aureon71.conf	2009-01-14 18:36:49.000000000 -0500
++++ alsa-lib-1.0.18/src/conf/cards/Aureon71.conf	2009-01-14 18:37:05.000000000 -0500
+@@ -132,6 +132,8 @@
+ 	}
+ 	type asym
+ 	playback.pcm {
++	    type linear
++	    slave.pcm {
+ 		type hooks
+ 		slave.pcm {
+ 			type hw
+@@ -158,8 +160,12 @@
+ 				}
+ 			]
+ 		}
++	    }
++	    slave.format S32_LE
+ 	}
+ 	capture.pcm {
++	    type linear
++	    slave.pcm {
+ 		type hooks
+ 		slave.pcm {
+ 			type hw
+@@ -178,5 +184,7 @@
+ 				}
+ 			]
+ 		}
++	    }
++	    slave.format S32_LE
+ 	}
+ }
+Index: alsa-lib-1.0.18/src/conf/cards/ICE1724.conf
+===================================================================
+--- alsa-lib-1.0.18.orig/src/conf/cards/ICE1724.conf	2009-01-14 18:36:49.000000000 -0500
++++ alsa-lib-1.0.18/src/conf/cards/ICE1724.conf	2009-01-14 18:37:05.000000000 -0500
+@@ -166,6 +166,8 @@
+ 	}
+ 	type asym
+ 	playback.pcm {
++	    type linear
++	    slave.pcm {
+ 		type hooks
+ 		slave.pcm {
+ 			type hw
+@@ -192,8 +194,12 @@
+ 				}
+ 			]
+ 		}
++	    }
++	    slave.format S32_LE
+ 	}
+ 	capture.pcm {
++	    type linear
++	    slave.pcm {
+ 		type hooks
+ 		slave.pcm {
+ 			type hw
+@@ -212,5 +218,7 @@
+ 				}
+ 			]
+ 		}
++	    }
++	    slave.format S32_LE
+ 	}
+ }

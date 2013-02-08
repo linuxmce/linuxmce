@@ -35,8 +35,6 @@ using namespace std;
 #include "Table_DeviceCategory.h"
 
 #include "Table_DeviceTemplate_DeviceCategory_ControlledVia_Pipe.h"
-#include "Table_DeviceTemplate_DeviceCategory_ControlledVia_Pipe_pschist.h"
-#include "Table_DeviceTemplate_DeviceCategory_ControlledVia_Pipe_pschmask.h"
 
 
 void Database_pluto_main::CreateTable_DeviceTemplate_DeviceCategory_ControlledVia()
@@ -84,6 +82,7 @@ void Row_DeviceTemplate_DeviceCategory_ControlledVia::Delete()
 	Row_DeviceTemplate_DeviceCategory_ControlledVia *pRow = this; // Needed so we will have only 1 version of get_primary_fields_assign_from_row
 	
 	if (!is_deleted)
+	{
 		if (is_added)	
 		{	
 			vector<TableRow*>::iterator i;	
@@ -105,6 +104,7 @@ void Row_DeviceTemplate_DeviceCategory_ControlledVia::Delete()
 			table->deleted_cachedRows[key] = this;
 			is_deleted = true;	
 		}	
+	}
 }
 
 void Row_DeviceTemplate_DeviceCategory_ControlledVia::Reload()
@@ -155,7 +155,8 @@ is_null[8] = true;
 m_psc_user = 0;
 m_psc_frozen = 0;
 is_null[9] = false;
-is_null[10] = true;
+m_psc_mod = "0000-00-00 00:00:00";
+is_null[10] = false;
 is_null[11] = true;
 m_psc_restrict = 0;
 
@@ -256,9 +257,6 @@ return is_null[8];}
 bool Row_DeviceTemplate_DeviceCategory_ControlledVia::psc_frozen_isNull() {PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
 
 return is_null[9];}
-bool Row_DeviceTemplate_DeviceCategory_ControlledVia::psc_mod_isNull() {PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
-
-return is_null[10];}
 bool Row_DeviceTemplate_DeviceCategory_ControlledVia::psc_restrict_isNull() {PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
 
 return is_null[11];}
@@ -282,10 +280,6 @@ is_modified=true;
 }
 void Row_DeviceTemplate_DeviceCategory_ControlledVia::psc_frozen_setNull(bool val){PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
 is_null[9]=val;
-is_modified=true;
-}
-void Row_DeviceTemplate_DeviceCategory_ControlledVia::psc_mod_setNull(bool val){PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
-is_null[10]=val;
 is_modified=true;
 }
 void Row_DeviceTemplate_DeviceCategory_ControlledVia::psc_restrict_setNull(bool val){PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
@@ -340,8 +334,8 @@ PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
 if (is_null[3])
 return "NULL";
 
-char *buf = new char[51];
-db_wrapper_real_escape_string(table->database->m_pDB, buf, m_Description.c_str(), (unsigned long) min((size_t)25,m_Description.size()));
+char *buf = new char[151];
+db_wrapper_real_escape_string(table->database->m_pDB, buf, m_Description.c_str(), (unsigned long) min((size_t)75,m_Description.size()));
 string s=string()+"\""+buf+"\"";
 delete[] buf;
 return s;
@@ -1102,20 +1096,6 @@ void Row_DeviceTemplate_DeviceCategory_ControlledVia::DeviceTemplate_DeviceCateg
 PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
 
 class Table_DeviceTemplate_DeviceCategory_ControlledVia_Pipe *pTable = table->database->DeviceTemplate_DeviceCategory_ControlledVia_Pipe_get();
-pTable->GetRows("`FK_DeviceTemplate_DeviceCategory_ControlledVia`=" + StringUtils::itos(m_PK_DeviceTemplate_DeviceCategory_ControlledVia),rows);
-}
-void Row_DeviceTemplate_DeviceCategory_ControlledVia::DeviceTemplate_DeviceCategory_ControlledVia_Pipe_pschist_FK_DeviceTemplate_DeviceCategory_ControlledVia_getrows(vector <class Row_DeviceTemplate_DeviceCategory_ControlledVia_Pipe_pschist*> *rows)
-{
-PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
-
-class Table_DeviceTemplate_DeviceCategory_ControlledVia_Pipe_pschist *pTable = table->database->DeviceTemplate_DeviceCategory_ControlledVia_Pipe_pschist_get();
-pTable->GetRows("`FK_DeviceTemplate_DeviceCategory_ControlledVia`=" + StringUtils::itos(m_PK_DeviceTemplate_DeviceCategory_ControlledVia),rows);
-}
-void Row_DeviceTemplate_DeviceCategory_ControlledVia::DeviceTemplate_DeviceCategory_ControlledVia_Pipe_pschmask_FK_DeviceTemplate_DeviceCategory_ControlledVia_getrows(vector <class Row_DeviceTemplate_DeviceCategory_ControlledVia_Pipe_pschmask*> *rows)
-{
-PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
-
-class Table_DeviceTemplate_DeviceCategory_ControlledVia_Pipe_pschmask *pTable = table->database->DeviceTemplate_DeviceCategory_ControlledVia_Pipe_pschmask_get();
 pTable->GetRows("`FK_DeviceTemplate_DeviceCategory_ControlledVia`=" + StringUtils::itos(m_PK_DeviceTemplate_DeviceCategory_ControlledVia),rows);
 }
 

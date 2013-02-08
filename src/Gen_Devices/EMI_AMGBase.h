@@ -98,7 +98,7 @@ public:
 		if( m_bRunningWithoutDeviceData )
 			return atoi(m_pEvent_Impl->GetDeviceDataFromDatabase(m_dwPK_Device,DEVICEDATA_Priority_CONST).c_str());
 		else
-			return atoi(m_mapParameters_Find(DEVICEDATA_Priority_CONST).c_str());
+			return atoi(m_mapParameters[DEVICEDATA_Priority_CONST].c_str());
 	}
 
 };

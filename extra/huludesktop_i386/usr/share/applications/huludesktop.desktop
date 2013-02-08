@@ -1,0 +1,11 @@
+
+[Desktop Entry]
+Type=Application
+Encoding=UTF-8
+Name=Hulu Desktop
+Comment=Browse and stream the entire Hulu library without a browser.
+Icon=huludesktop
+TryExec=huludesktop
+Exec=huludesktop %F
+Terminal=false
+Categories=GTK;AudioVideo;Audio;Video;Player;TV;

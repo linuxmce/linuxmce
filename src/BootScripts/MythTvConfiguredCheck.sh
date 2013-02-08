@@ -7,8 +7,9 @@ chmod 660 /etc/mythtv/mysql.txt
 
 QueryIsConfigured="SELECT count(data) as a FROM settings WHERE value like '%BackendServerIP%' AND hostname='$(hostname)'";
 #MysqlCommand="mysql -D mythconverg -u mythtv -pArkhNKpr";
-MythPass=$(cat /etc/mythtv/mysql.txt |grep ^DBPassword|cut -d= -f2)
-MysqlCommand="mysql -D mythconverg -h $MySqlHost -u mythtv -p$MythPass";
+MythUser=$(grep ^DBUserName /etc/mythtv/mysql.txt | cut -d= -f2)
+MythPass=$(grep ^DBPassword /etc/mythtv/mysql.txt | cut -d= -f2)
+MysqlCommand="mysql -D mythconverg -h $MySqlHost -P $MySqlPort -u $MythUser -p$MythPass";
 
 QueryResult=`echo $QueryIsConfigured | $MysqlCommand | tail -n 1`;
 
@@ -23,7 +24,7 @@ if [ $QueryResult -eq 0 ]; then
 fi;
 
 echo "LOCK TABLE schemalock WRITE;" | $MysqlCommand  # Be sure we're not in the middle of a schema upgrade -- myth doesn't check this
-invoke-rc.d mythtv-backend force-reload;
+service mythtv-backend force-reload;
 
 # looking for XServer pid
 

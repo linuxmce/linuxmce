@@ -1,0 +1,41 @@
+# /etc/default/vdr
+# Default config thanks to: 
+# Thomas Schmidt <thomas.schmidt@in.stud.tu-ilmenau.de>
+# 29.01.2003
+# Modified for c't-distro Peter Siering <ps@ctmagazin.de>
+#
+
+# Change to 1 to enable vdr's init-script
+ENABLED=1
+
+# Change this to 1 if you want vdr to be able to shutdown the
+# computer
+ENABLE_SHUTDOWN=0
+
+# Video-Directory
+VIDEO_DIR="/home/vdr/video.00"
+
+# Set this to load only plugins with the correct patch level
+PLUGIN_CHECK_PATCHLEVEL="yes"
+
+# Set this to load only startable plugins (check with "vdr -V -P plugin")
+PLUGIN_CHECK_STARTABLE="yes"
+
+# console where for controlling
+# VDR by keyboard
+# leave empty to disable
+KEYB_TTY="/dev/tty8"
+
+# Options that will be passed to vdr's commandline
+# for example: OPTIONS="-w 15 --port=0"
+OPTIONS="-w 60"
+
+# VDR executes this command when the power-off-key of the remote is
+# pressed after processing all shutdown hook scripts. Shutdown hooks
+# may override this command - see /usr/share/doc/vdr/README.Debian.
+SHUTDOWNCMD="/etc/init.d/vdr stop ; sleep 1 ; /sbin/shutdown -h now"
+
+# Change this to 0 if you want to allow VDR to use NPTL (if available).
+# This is disabled by default, although it should be safe to enable it.
+# (This has no effect on AMD64 machines.)
+NONPTL=1

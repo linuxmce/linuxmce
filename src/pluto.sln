@@ -183,11 +183,7 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "XML_Data_Handler_Plugin", "
 	ProjectSection(ProjectDependencies) = postProject
 	EndProjectSection
 EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "PlutoSwitcher", "PlutoSwitcher\PlutoSwitcher.vcproj", "{AAF03FA9-EDA4-4EA1-A090-FADE001F054E}"
-	ProjectSection(ProjectDependencies) = postProject
-	EndProjectSection
-EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Asterisk", "Asterisk\Asterisk.vcproj", "{BFB764EC-A94C-414F-AE25-7EECDFEE8BBA}"
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Generic_VFDLCD", "Generic_VFDLCD\Generic_VFDLCD.vcproj", "{BFB764EC-A94C-414F-AE25-7EECDFEE8BBA}"
 	ProjectSection(ProjectDependencies) = postProject
 	EndProjectSection
 EndProject
@@ -195,31 +191,23 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "MakeRelease", "MakeRelease\
 	ProjectSection(ProjectDependencies) = postProject
 	EndProjectSection
 EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "gc100", "gc100\gc100.vcproj", "{BFB764EC-A94C-414F-AE25-7EECDFEE8BBA}"
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "VDR", "VDR\VDR_DLL.vcproj", "{BFB764EC-A94C-414F-AE25-7EECDFEE8BBA}"
 	ProjectSection(ProjectDependencies) = postProject
 	EndProjectSection
 EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "CM11A", "CM11A\CM11A.vcproj", "{BFB764EC-A94C-414F-AE25-7EECDFEE8BBA}"
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "VDR_TestUnit", "VDR\VDR_TestUnit.vcproj", "{B6EFB531-105E-4A1E-BC46-78C6DF6FA325}"
 	ProjectSection(ProjectDependencies) = postProject
 	EndProjectSection
 EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "ConfirmDependencies", "ConfirmDependencies\ConfirmDependencies.vcproj", "{B6EFB531-105E-4A1E-BC46-78C6DF6FA325}"
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "VDRPlugin", "VDRPlugin\VDRPlugin_DLL.vcproj", "{BFB764EC-A94C-414F-AE25-7EECDFEE8BBA}"
 	ProjectSection(ProjectDependencies) = postProject
 	EndProjectSection
 EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Hillcrest_STB", "Hillcrest_STB\Hillcrest_STB.vcproj", "{BFB764EC-A94C-414F-AE25-7EECDFEE8BBA}"
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "MakeRelease_PrepFiles", "MakeRelease_PrepFiles\MakeRelease_PrepFiles.vcproj", "{B6EFB531-105E-4A1E-BC46-78C6DF6FA325}"
 	ProjectSection(ProjectDependencies) = postProject
 	EndProjectSection
 EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Moxi_Orbiter", "Moxi_Orbiter\Moxi_Orbiter.vcproj", "{BFB764EC-A94C-414F-AE25-7EECDFEE8BBA}"
-	ProjectSection(ProjectDependencies) = postProject
-	EndProjectSection
-EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "sql2json", "sql2json\sql2json.vcproj", "{867A9585-2B26-4585-AD57-FEC43B5F69B7}"
-	ProjectSection(ProjectDependencies) = postProject
-	EndProjectSection
-EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "General_Info_Plugin_Lite", "General_Info_Plugin_Lite\General_Info_Plugin_DLL_Lite.vcproj", "{BFB764EC-A94C-415F-BE25-7EECDFEE8BBA}"
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "VIPServer", "VIPServer\VIPServer.vcproj", "{B6EFB531-105E-4A1E-BC46-78C6DF6FA325}"
 	ProjectSection(ProjectDependencies) = postProject
 	EndProjectSection
 EndProject
@@ -413,10 +401,6 @@ Global
 		{BFB764EC-A94C-414F-AE25-7EECDFEE8BBA}.Debug.Build.0 = Debug|Win32
 		{BFB764EC-A94C-414F-AE25-7EECDFEE8BBA}.Release.ActiveCfg = Release|Win32
 		{BFB764EC-A94C-414F-AE25-7EECDFEE8BBA}.Release.Build.0 = Release|Win32
-		{AAF03FA9-EDA4-4EA1-A090-FADE001F054E}.Debug.ActiveCfg = Debug|Win32
-		{AAF03FA9-EDA4-4EA1-A090-FADE001F054E}.Debug.Build.0 = Debug|Win32
-		{AAF03FA9-EDA4-4EA1-A090-FADE001F054E}.Release.ActiveCfg = Release|Win32
-		{AAF03FA9-EDA4-4EA1-A090-FADE001F054E}.Release.Build.0 = Release|Win32
 		{BFB764EC-A94C-414F-AE25-7EECDFEE8BBA}.Debug.ActiveCfg = Debug|Win32
 		{BFB764EC-A94C-414F-AE25-7EECDFEE8BBA}.Debug.Build.0 = Debug|Win32
 		{BFB764EC-A94C-414F-AE25-7EECDFEE8BBA}.Release.ActiveCfg = Release|Win32
@@ -429,10 +413,6 @@ Global
 		{BFB764EC-A94C-414F-AE25-7EECDFEE8BBA}.Debug.Build.0 = Debug|Win32
 		{BFB764EC-A94C-414F-AE25-7EECDFEE8BBA}.Release.ActiveCfg = Release|Win32
 		{BFB764EC-A94C-414F-AE25-7EECDFEE8BBA}.Release.Build.0 = Release|Win32
-		{BFB764EC-A94C-414F-AE25-7EECDFEE8BBA}.Debug.ActiveCfg = Debug|Win32
-		{BFB764EC-A94C-414F-AE25-7EECDFEE8BBA}.Debug.Build.0 = Debug|Win32
-		{BFB764EC-A94C-414F-AE25-7EECDFEE8BBA}.Release.ActiveCfg = Release|Win32
-		{BFB764EC-A94C-414F-AE25-7EECDFEE8BBA}.Release.Build.0 = Release|Win32
 		{B6EFB531-105E-4A1E-BC46-78C6DF6FA325}.Debug.ActiveCfg = Debug|Win32
 		{B6EFB531-105E-4A1E-BC46-78C6DF6FA325}.Debug.Build.0 = Debug|Win32
 		{B6EFB531-105E-4A1E-BC46-78C6DF6FA325}.Release.ActiveCfg = Release|Win32
@@ -441,18 +421,14 @@ Global
 		{BFB764EC-A94C-414F-AE25-7EECDFEE8BBA}.Debug.Build.0 = Debug|Win32
 		{BFB764EC-A94C-414F-AE25-7EECDFEE8BBA}.Release.ActiveCfg = Release|Win32
 		{BFB764EC-A94C-414F-AE25-7EECDFEE8BBA}.Release.Build.0 = Release|Win32
-		{BFB764EC-A94C-414F-AE25-7EECDFEE8BBA}.Debug.ActiveCfg = Debug|Win32
-		{BFB764EC-A94C-414F-AE25-7EECDFEE8BBA}.Debug.Build.0 = Debug|Win32
-		{BFB764EC-A94C-414F-AE25-7EECDFEE8BBA}.Release.ActiveCfg = Release|Win32
-		{BFB764EC-A94C-414F-AE25-7EECDFEE8BBA}.Release.Build.0 = Release|Win32
-		{867A9585-2B26-4585-AD57-FEC43B5F69B7}.Debug.ActiveCfg = Debug|Win32
-		{867A9585-2B26-4585-AD57-FEC43B5F69B7}.Debug.Build.0 = Debug|Win32
-		{867A9585-2B26-4585-AD57-FEC43B5F69B7}.Release.ActiveCfg = Release|Win32
-		{867A9585-2B26-4585-AD57-FEC43B5F69B7}.Release.Build.0 = Release|Win32
-		{BFB764EC-A94C-415F-BE25-7EECDFEE8BBA}.Debug.ActiveCfg = Debug|Win32
-		{BFB764EC-A94C-415F-BE25-7EECDFEE8BBA}.Debug.Build.0 = Debug|Win32
-		{BFB764EC-A94C-415F-BE25-7EECDFEE8BBA}.Release.ActiveCfg = Release|Win32
-		{BFB764EC-A94C-415F-BE25-7EECDFEE8BBA}.Release.Build.0 = Release|Win32
+		{B6EFB531-105E-4A1E-BC46-78C6DF6FA325}.Debug.ActiveCfg = Debug|Win32
+		{B6EFB531-105E-4A1E-BC46-78C6DF6FA325}.Debug.Build.0 = Debug|Win32
+		{B6EFB531-105E-4A1E-BC46-78C6DF6FA325}.Release.ActiveCfg = Release|Win32
+		{B6EFB531-105E-4A1E-BC46-78C6DF6FA325}.Release.Build.0 = Release|Win32
+		{B6EFB531-105E-4A1E-BC46-78C6DF6FA325}.Debug.ActiveCfg = Debug|Win32
+		{B6EFB531-105E-4A1E-BC46-78C6DF6FA325}.Debug.Build.0 = Debug|Win32
+		{B6EFB531-105E-4A1E-BC46-78C6DF6FA325}.Release.ActiveCfg = Release|Win32
+		{B6EFB531-105E-4A1E-BC46-78C6DF6FA325}.Release.Build.0 = Release|Win32
 	EndGlobalSection
 	GlobalSection(SolutionItems) = postSolution
 	EndGlobalSection

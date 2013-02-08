@@ -1,0 +1,20 @@
+#!/bin/sh
+# Copyright (C) 2007-2008 Mario Limonciello
+
+CVERSION=`dpkg-query -W -f='${Version}' lirc-modules-source | awk -F "-" '{print $1}'`
+
+#DEBHELPER#
+
+case "$1" in
+	configure)
+		echo "Adding Module to DKMS build system"
+		dkms add -m lirc -v $CVERSION > /dev/null
+		echo "Doing initial module build"
+		dkms build -m lirc -v $CVERSION > /dev/null
+		echo "Installing initial module"
+		dkms install -m lirc -v $CVERSION --force > /dev/null
+		echo "Done."
+	;;
+esac
+
+

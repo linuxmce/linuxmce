@@ -1,0 +1,6 @@
+01_debian
+02_symlink_security
+03_network
+
+# convert package to vdrdevel
+95_vdrdevel

@@ -1,6 +1,7 @@
 #!/bin/bash -ex
 
 . /etc/lmce-build/builder.conf
+. /usr/local/lmce-build/common/env.sh
 
 while : ;do
 	echo "$(date -R) Started" >> /var/log/loop-build.log	
@@ -10,8 +11,6 @@ while : ;do
 	fi
 
 	# Start Build
-	build_scripts_dir="/usr/local/lmce-build/build-scripts"
-
 	"${build_scripts_dir}/checkout-svn.sh"
 
 	"${build_scripts_dir}/build-replacements.sh"

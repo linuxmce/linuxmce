@@ -1,0 +1,11 @@
+pcsxr (2:1.9.92-1) unstable; urgency=low
+
+  * Initial Release.
+
+ -- Wei Mingzhi <whistler_wmz@users.sf.net>  Fri, 15 Sep 2009 21:15:32 +0800
+
+pcsxr (2:1.9.93-1) unstable; urgency=low
+
+  * Upgraded to upstream SVN which now includes our WM_CLASS and WM_NAME patch.
+
+ -- Thomas Cherryhomes <thom.cherryhomes@gmail.com>  Sun, 31 Jul 2011 21:55:00 -0500

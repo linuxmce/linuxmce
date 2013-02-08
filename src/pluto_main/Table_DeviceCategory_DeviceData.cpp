@@ -81,6 +81,7 @@ void Row_DeviceCategory_DeviceData::Delete()
 	Row_DeviceCategory_DeviceData *pRow = this; // Needed so we will have only 1 version of get_primary_fields_assign_from_row
 	
 	if (!is_deleted)
+	{
 		if (is_added)	
 		{	
 			vector<TableRow*>::iterator i;	
@@ -102,6 +103,7 @@ void Row_DeviceCategory_DeviceData::Delete()
 			table->deleted_cachedRows[key] = this;
 			is_deleted = true;	
 		}	
+	}
 }
 
 void Row_DeviceCategory_DeviceData::Reload()
@@ -159,7 +161,8 @@ is_null[12] = true;
 m_psc_user = 0;
 m_psc_frozen = 0;
 is_null[13] = false;
-is_null[14] = true;
+m_psc_mod = "0000-00-00 00:00:00";
+is_null[14] = false;
 is_null[15] = true;
 m_psc_restrict = 0;
 
@@ -287,9 +290,6 @@ return is_null[12];}
 bool Row_DeviceCategory_DeviceData::psc_frozen_isNull() {PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
 
 return is_null[13];}
-bool Row_DeviceCategory_DeviceData::psc_mod_isNull() {PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
-
-return is_null[14];}
 bool Row_DeviceCategory_DeviceData::psc_restrict_isNull() {PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
 
 return is_null[15];}
@@ -317,10 +317,6 @@ is_modified=true;
 }
 void Row_DeviceCategory_DeviceData::psc_frozen_setNull(bool val){PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
 is_null[13]=val;
-is_modified=true;
-}
-void Row_DeviceCategory_DeviceData::psc_mod_setNull(bool val){PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
-is_null[14]=val;
 is_modified=true;
 }
 void Row_DeviceCategory_DeviceData::psc_restrict_setNull(bool val){PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
@@ -362,8 +358,8 @@ PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
 if (is_null[2])
 return "NULL";
 
-char *buf = new char[131071];
-db_wrapper_real_escape_string(table->database->m_pDB, buf, m_IK_DeviceData.c_str(), (unsigned long) min((size_t)65535,m_IK_DeviceData.size()));
+char *buf = new char[393211];
+db_wrapper_real_escape_string(table->database->m_pDB, buf, m_IK_DeviceData.c_str(), (unsigned long) min((size_t)196605,m_IK_DeviceData.size()));
 string s=string()+"\""+buf+"\"";
 delete[] buf;
 return s;
@@ -415,8 +411,8 @@ PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
 if (is_null[6])
 return "NULL";
 
-char *buf = new char[131071];
-db_wrapper_real_escape_string(table->database->m_pDB, buf, m_Description.c_str(), (unsigned long) min((size_t)65535,m_Description.size()));
+char *buf = new char[393211];
+db_wrapper_real_escape_string(table->database->m_pDB, buf, m_Description.c_str(), (unsigned long) min((size_t)196605,m_Description.size()));
 string s=string()+"\""+buf+"\"";
 delete[] buf;
 return s;

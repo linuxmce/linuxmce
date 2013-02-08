@@ -167,10 +167,26 @@ class DataGridTable *Climate_Plugin::ClimateScenariosGrid(string GridID,string P
 //<-dceag-createinst-b->!
 void Climate_Plugin::GetFloorplanDeviceInfo(DeviceData_Router *pDeviceData_Router,EntertainArea *pEntertainArea,int iFloorplanObjectType,int &iPK_FloorplanObjectType_Color,int &Color,string &sDescription,string &OSD,int &PK_DesignObj_Toolbar)
 {
+	string sOn;	string sMode; string sFan; string sSetPoint; string sTemp;
+	GetStateVar(pDeviceData_Router, sOn, sMode, sFan, sSetPoint, sTemp);
+
+	if( sOn.c_str()=="OFF" ) {
+		iPK_FloorplanObjectType_Color = FLOORPLANOBJECTTYPE_COLOR_CLIMATE_THERMOSTAT_OFF_CONST;
+	} else {
+		iPK_FloorplanObjectType_Color = FLOORPLANOBJECTTYPE_COLOR_CLIMATE_THERMOSTAT_COOLING_CONST;
+	};	
+	
 	switch(iFloorplanObjectType)
 	{
 	case FLOORPLANOBJECTTYPE_CLIMATE_THERMOSTAT_CONST:
 		PK_DesignObj_Toolbar=DESIGNOBJ_grpThermostatControls_CONST;
+		if ( sMode=="HEAT" ) {
+			iPK_FloorplanObjectType_Color = FLOORPLANOBJECTTYPE_COLOR_CLIMATE_THERMOSTAT_HEATING_CONST;
+		} else if ( sMode=="COOL" )	{
+			iPK_FloorplanObjectType_Color = FLOORPLANOBJECTTYPE_COLOR_CLIMATE_THERMOSTAT_COOLING_CONST;
+		} else if ( sMode=="AUTO" || sMode=="AUTO (COOL)" || sMode=="AUTO (HEAT)") {	
+			iPK_FloorplanObjectType_Color = FLOORPLANOBJECTTYPE_COLOR_CLIMATE_THERMOSTAT_FAN_CONST;
+		};
 		break;
 	case FLOORPLANOBJECTTYPE_CLIMATE_THERMOMETER_CONST:
 		PK_DesignObj_Toolbar=0;
@@ -183,24 +199,65 @@ void Climate_Plugin::GetFloorplanDeviceInfo(DeviceData_Router *pDeviceData_Route
 		break;
 	case FLOORPLANOBJECTTYPE_CLIMATE_POOL_CONST:
 		PK_DesignObj_Toolbar=DESIGNOBJ_grpPoolControls_CONST;
+		if( sMode=="HEAT" ) {
+			iPK_FloorplanObjectType_Color = FLOORPLANOBJECTTYPE_COLOR_CLIMATE_THERMOSTAT_HEATING_CONST;
+		} else if ( sMode=="COOL" ) {
+			iPK_FloorplanObjectType_Color = FLOORPLANOBJECTTYPE_COLOR_CLIMATE_THERMOSTAT_COOLING_CONST;
+		} else if ( sMode=="AUTO" || sMode=="AUTO (COOL)" || sMode=="AUTO (HEAT)") {
+			iPK_FloorplanObjectType_Color = FLOORPLANOBJECTTYPE_COLOR_CLIMATE_THERMOSTAT_FAN_CONST;
+		};
 		break;
 	case FLOORPLANOBJECTTYPE_CLIMATE_SPRINKLER_CONST:
 		PK_DesignObj_Toolbar=DESIGNOBJ_grpSprinklerControls_CONST;
+		if( sOn=="ON" )
+			iPK_FloorplanObjectType_Color = FLOORPLANOBJECTTYPE_COLOR_CLIMATE_THERMOSTAT_HEATING_CONST;
+		else if ( sOn=="OFF" )
+			iPK_FloorplanObjectType_Color = FLOORPLANOBJECTTYPE_COLOR_CLIMATE_THERMOSTAT_FAN_CONST;
 		break;
+	default:
+		PK_DesignObj_Toolbar=0;
+		break;
+	};       
+	
+	string sExtra_Parameters = pDeviceData_Router->m_mapParameters_Find(DEVICEDATA_Extra_Parameters_CONST);
+
+	if (sExtra_Parameters.length() > 0) {
+		string Test = "Extra parameters present!";
+//		LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"Climate_Plugin::GetFloorplanDeviceInfo |Got current state info %s %s %s %s %s",sOn.c_str(),sMode.c_str(), sFan.c_str(),sSetPoint.c_str(),sTemp.c_str());
+
+		string sTemp_OSD_String = sExtra_Parameters.c_str();
+		unsigned int pos;
+		if ((pos=sTemp_OSD_String.find("$1",0)) != string::npos) 	sTemp_OSD_String.replace( pos, 2, sOn);
+		if ((pos=sTemp_OSD_String.find("$2",0)) != string::npos) 	sTemp_OSD_String.replace( pos, 2, sMode);
+		if ((pos=sTemp_OSD_String.find("$3",0)) != string::npos) 	sTemp_OSD_String.replace( pos, 2, sFan);
+		if ((pos=sTemp_OSD_String.find("$4",0)) != string::npos) 	sTemp_OSD_String.replace( pos, 2, sSetPoint);
+		if ((pos=sTemp_OSD_String.find("$5",0)) != string::npos) 	sTemp_OSD_String.replace( pos, 2, sTemp);
+		OSD=sTemp_OSD_String.c_str();
+//		LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"Climate_Plugin::GetFloorplanDeviceInfo |Extra parameters found: %s | NEW OSD is %s",sExtra_Parameters.c_str(),sTemp_OSD_String.c_str());
+		
+	} else {
+		OSD=pDeviceData_Router->m_sState_get();
+//		LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"Climate_Plugin::GetFloorplanDeviceInfo |Extra parameters not found!");
 	};
-	if( (OSD=pDeviceData_Router->m_sState_get())=="OFF" )
-		iPK_FloorplanObjectType_Color = FLOORPLANOBJECTTYPE_COLOR_CLIMATE_THERMOSTAT_OFF_CONST;
-	else
-		iPK_FloorplanObjectType_Color = FLOORPLANOBJECTTYPE_COLOR_CLIMATE_THERMOSTAT_COOLING_CONST;
+	
+
+//	LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"Climate_Plugin::GetFloorplanDeviceInfo |  Device ID:%d Install_ID:%d Template:%d Category:%d Room:%d",pDeviceData_Router->m_dwPK_Device,pDeviceData_Router->m_dwPK_Installation,pDeviceData_Router->m_dwPK_DeviceTemplate,pDeviceData_Router->m_dwPK_DeviceCategory,pDeviceData_Router->m_dwPK_Room);
+
 }
 
 bool Climate_Plugin::ClimateCommand( class Socket *pSocket, class Message *pMessage, class DeviceData_Base *pDeviceFrom, class DeviceData_Base *pDeviceTo )
 {
 	// This only runs as a plug-in so we can safely cast it
 	class DeviceData_Router *pDevice_RouterTo = (class DeviceData_Router *) pDeviceTo;
+	LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"XXXX calling PreprocessClimateMessage for pDevice_RouterTo");
+	if (pDevice_RouterTo)
+	  LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"XXXX pDeviceTo %d",pDeviceTo->m_dwPK_Device);
 	PreprocessClimateMessage(pDevice_RouterTo,pMessage);
 
 	class DeviceData_Router *pDevice_RouterFrom = (class DeviceData_Router *) pDeviceFrom;
+	LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"XXXX calling PreprocessClimateMessage for pDevice_RouterFrom");
+	if (pDevice_RouterFrom)
+	  LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"XXXX pDeviceFrom %d",pDeviceFrom->m_dwPK_Device);
 	PreprocessClimateMessage(pDevice_RouterFrom,pMessage);
 
 	if( pMessage->m_sPK_Device_List_To.length() ) 
@@ -221,6 +278,24 @@ bool Climate_Plugin::ClimateCommand( class Socket *pSocket, class Message *pMess
 
 void Climate_Plugin::PreprocessClimateMessage(DeviceData_Router *pDevice,Message *pMessage)
 {
+  if (!pDevice)
+    {
+      //LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"XXXX pDevice is NULL");
+    }
+  else
+    {
+      //LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"XXXX pDevice->m_dwPK_Device is %d",pDevice->m_dwPK_Device);
+    }
+
+  if (!pMessage)
+    {
+      //LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"XXXX pMessage is NULL");
+    }
+  else
+    {
+      //LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"XXXX pMessage dwID is %d",pMessage->m_dwID);
+    }
+
 	if( !pDevice || !pMessage || !pDevice->WithinCategory(DEVICECATEGORY_Climate_Device_CONST) )
 		return;
 
@@ -230,29 +305,41 @@ void Climate_Plugin::PreprocessClimateMessage(DeviceData_Router *pDevice,Message
 	string sSetPoint;
 	string sTemp;
 	GetStateVar(pDevice, sOn, sMode, sFan, sSetPoint, sTemp);
-	
-	// The State is in the format ON|OFF/SET TEMP (CURRENT TEMP)
+
+	// The State is in the format ON|OFF/HEAT|COOL|FAN_ONLY|AUTO/HIGH|AUTO/SET TEMP (CURRENT TEMP)
 	if( pMessage->m_dwMessage_Type==MESSAGETYPE_COMMAND )
 	{
-		if( pMessage->m_dwID==COMMAND_Set_Level_CONST )
+	  // LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"XXXX Command!!!!");
+		if( pMessage->m_dwID==COMMAND_Set_Temperature_CONST )
 		{
-			string sLevel = pMessage->m_mapParameters[COMMANDPARAMETER_Level_CONST];
+		  LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"XXXX COMMAND_Set_Temperature! ");
+			string sLevel = pMessage->m_mapParameters[COMMANDPARAMETER_Value_To_Assign_CONST];
 			if( sLevel.size()==0 )
 				pMessage->m_dwID=COMMAND_Generic_Off_CONST;
 			else
 			{
 				int iLevel = atoi(sLevel.c_str());
+
+				if (sLevel[0]=='+' || sLevel[0]=='-')
+				  {
+				    iLevel = atoi(sLevel.substr(1).c_str());
+				    LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"sLevel is %s, iLevel is %d",sLevel.substr(1).c_str(),iLevel);
+				  }
+
 				if( sLevel[0]=='+' )
 					iLevel = min(100, GetClimateLevel(pDevice,0)+iLevel);
 				else if( sLevel[0]=='-' )
-					iLevel = max(0, GetClimateLevel(pDevice,0)+iLevel);
+					iLevel = max(0, GetClimateLevel(pDevice,0)-iLevel);
 
 				if( iLevel==0 )
 					pMessage->m_dwID=COMMAND_Generic_Off_CONST;
 				else
 				{
-					pDevice->m_sState_set("ON/" + StringUtils::itos(iLevel) + GetTemperature(pDevice));
-					pMessage->m_mapParameters[COMMANDPARAMETER_Level_CONST] = StringUtils::itos(iLevel);
+//					pDevice->m_sState_set("ON/" + StringUtils::itos(iLevel) + GetTemperature(pDevice)); /Replaced with clause below
+				  LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"XXXX setting new Level to %d",iLevel);
+					SetStateValue(pDevice, "ON", sMode, sFan, StringUtils::itos(iLevel), sTemp);
+
+					pMessage->m_mapParameters[COMMANDPARAMETER_Value_To_Assign_CONST] = StringUtils::itos(iLevel);
 				}
 			}
 		}
@@ -266,13 +353,13 @@ void Climate_Plugin::PreprocessClimateMessage(DeviceData_Router *pDevice,Message
 			LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"Climate_Plugin: COMMAND_Set_HeatCool_CONST !");
 			string sState = pMessage->m_mapParameters[COMMANDPARAMETER_OnOff_CONST];
 			if( sState=="H" )
-				SetStateValue(pDevice, sOn, "HEAT", sFan, sSetPoint, sTemp);
+				SetStateValue(pDevice, "ON", "HEAT", sFan, sSetPoint, sTemp);
 			else if( sState=="C" )
-				SetStateValue(pDevice, sOn, "COOL", sFan, sSetPoint, sTemp);
+				SetStateValue(pDevice, "ON", "COOL", sFan, sSetPoint, sTemp);
 			else if( sState=="F" )
-				SetStateValue(pDevice, sOn, "FAN_ONLY", sFan, sSetPoint, sTemp);
+				SetStateValue(pDevice, "ON", "FAN_ONLY", sFan, sSetPoint, sTemp);
 			else
-				SetStateValue(pDevice, sOn, "AUTO", sFan, sSetPoint, sTemp);
+				SetStateValue(pDevice, "ON", "AUTO", sFan, sSetPoint, sTemp);
 		}
 		else if( pMessage->m_dwID == COMMAND_Set_Fan_CONST )
 		{
@@ -280,11 +367,11 @@ void Climate_Plugin::PreprocessClimateMessage(DeviceData_Router *pDevice,Message
 			string sState = pMessage->m_mapParameters[COMMANDPARAMETER_OnOff_CONST];
 			if( 1 == atoi(sState.c_str()) )
 			{
-				SetStateValue(pDevice, sOn, "FAN_ONLY", "HIGH", sSetPoint, sTemp);
+				SetStateValue(pDevice, "ON", sMode, "HIGH", sSetPoint, sTemp);
 			}
 			else
 			{
-				SetStateValue(pDevice, sOn, "AUTO", "AUTO", sSetPoint, sTemp);
+				SetStateValue(pDevice, "ON", sMode, "AUTO", sSetPoint, sTemp);
 			}
 		}
 	}
@@ -295,6 +382,12 @@ void Climate_Plugin::PreprocessClimateMessage(DeviceData_Router *pDevice,Message
 			LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"Climate_Plugin: EVENT_Temperature_Changed_CONST !");
 			// Replace the current temp
 			string sLevel = pMessage->m_mapParameters[EVENTPARAMETER_Value_CONST];
+			
+			// Ugly hack to store only two decimals of temperature value. If a c++ pro could please replace it :-)
+			char cTemp[10];
+			sprintf(cTemp,"%.2f",atof(sLevel.c_str()));
+			sLevel = cTemp;
+			
 			SetStateValue(pDevice, sOn, sMode, sFan, sSetPoint, sLevel);
 		}
 		else if( pMessage->m_dwID == EVENT_Thermostat_Set_Point_Chan_CONST )
@@ -302,7 +395,8 @@ void Climate_Plugin::PreprocessClimateMessage(DeviceData_Router *pDevice,Message
 			LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"Climate_Plugin: EVENT_Thermostat_Set_Point_Chan_CONST !");
 			// Replace the current temp
 			string sLevel = pMessage->m_mapParameters[EVENTPARAMETER_Value_CONST];
-			SetStateValue(pDevice, sOn, sMode, sFan, sLevel, sTemp);
+			LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"Climate_Plugin: Set Point Changed to %s",sLevel.c_str());
+			SetStateValue(pDevice, "ON", sMode, sFan, sLevel, sTemp);
 		}
 		else if( pMessage->m_dwID == EVENT_Fan_Mode_Changed_CONST )
 		{
@@ -315,12 +409,12 @@ void Climate_Plugin::PreprocessClimateMessage(DeviceData_Router *pDevice,Message
 				default:
 				case 0:
 				case 1:
-					SetStateValue(pDevice, sOn, sMode, "AUTO", sSetPoint, sTemp);
+					SetStateValue(pDevice, "ON", sMode, "AUTO", sSetPoint, sTemp);
 					break;
 					
 				case 2:
 				case 3:
-					SetStateValue(pDevice, sOn, sMode, "HIGH", sSetPoint, sTemp);
+					SetStateValue(pDevice, "ON", sMode, "HIGH", sSetPoint, sTemp);
 					break;
 			}
 		}
@@ -335,19 +429,31 @@ void Climate_Plugin::PreprocessClimateMessage(DeviceData_Router *pDevice,Message
 			{
 				default:
 				case 10:
-					SetStateValue(pDevice, sOn, "AUTO", sFan, sSetPoint, sTemp);
+					SetStateValue(pDevice, "ON", "AUTO", sFan, sSetPoint, sTemp);
 					break;
 			
 				case 1:
-					SetStateValue(pDevice, sOn, "HEAT", sFan, sSetPoint, sTemp);
+					SetStateValue(pDevice, "ON", "HEAT", sFan, sSetPoint, sTemp);
 					break;
 			
 				case 2:
-					SetStateValue(pDevice, sOn, "COOL", sFan, sSetPoint, sTemp);
+					SetStateValue(pDevice, "ON", "COOL", sFan, sSetPoint, sTemp);
 					break;
 			
+				case 3:
+					SetStateValue(pDevice, "OFF", sMode, sFan, sSetPoint, sTemp);
+					break;
+
+				case 4:
+					SetStateValue(pDevice, "ON", "AUTO (COOL)", sFan, sSetPoint, sTemp);
+					break;
+
+				case 5:
+					SetStateValue(pDevice, "ON", "AUTO (HEAT)", sFan, sSetPoint, sTemp);
+					break;
+					
 				case 6:
-					SetStateValue(pDevice, sOn, "FAN_ONLY", sFan, sSetPoint, sTemp);
+					SetStateValue(pDevice, "ON", "FAN_ONLY", sFan, sSetPoint, sTemp);
 					break;
 			}
 		}
@@ -380,65 +486,83 @@ void Climate_Plugin::GetStateVar(DeviceData_Router *pDevice,
 {
 	string sCurrentState = pDevice->m_sState_get();
 	
-	// temperature
-	string::size_type pos1 = sCurrentState.rfind('(');
-	string::size_type pos2 = sCurrentState.rfind(')');
-	if( pos1!=string::npos && pos2!=string::npos && pos1 < pos2 )
+	switch(pDevice->m_dwPK_DeviceTemplate)
 	{
-		sTemp = sCurrentState.substr(pos1+1,pos2-pos1-1);
-		sCurrentState = sCurrentState.substr(0, pos1);
-	}
-	else
-	{
-		sTemp = "25";
-	}
-	
-	// on/off
-	if( sCurrentState.substr(0,3) == "OFF" )
-	{
-		sOn = "OFF";
-	}
-	else
-	{
-		sOn = "ON";
-	}
-	
-	// mode and fan
-	sMode = "AUTO";
-	sFan = "AUTO";
-	pos1 = sCurrentState.find('/');
-	pos2 = sCurrentState.rfind('/');
-	if( pos1!=string::npos && pos2!=string::npos && pos1 < pos2 )
-	{
-		string::size_type pos3 = sCurrentState.find('/', pos1 + 1);
-		if( pos3!=string::npos && pos1 < pos3 && pos3 < pos2 )
+		case DEVICETEMPLATE_Temperature_sensor_CONST:
+			sTemp = sCurrentState;
+			break; 
+		default:
 		{
-			sMode = sCurrentState.substr(pos1+1, pos3-pos1-1);
-			sFan = sCurrentState.substr(pos3+1, pos2-pos3-1);
+			// temperature
+			string::size_type pos1 = sCurrentState.rfind('(');
+			string::size_type pos2 = sCurrentState.rfind(')');
+			if( pos1!=string::npos && pos2!=string::npos && pos1 < pos2 )
+			{
+				sTemp = sCurrentState.substr(pos1+1,pos2-pos1-1);
+				sCurrentState = sCurrentState.substr(0, pos1);
+			}
+			else
+			{
+				sTemp = "25";
+			}
+			
+			// on/off
+			if( sCurrentState.substr(0,3) == "OFF" )
+			{
+				sOn = "OFF";
+			}
+			else
+			{
+				sOn = "ON";
+			}
+			
+			// mode and fan
+			sMode = "AUTO";
+			sFan = "AUTO";
+			pos1 = sCurrentState.find('/');
+			pos2 = sCurrentState.rfind('/');
+			if( pos1!=string::npos && pos2!=string::npos && pos1 < pos2 )
+			{
+				string::size_type pos3 = sCurrentState.find('/', pos1 + 1);
+				if( pos3!=string::npos && pos1 < pos3 && pos3 < pos2 )
+				{
+					sMode = sCurrentState.substr(pos1+1, pos3-pos1-1);
+					sFan = sCurrentState.substr(pos3+1, pos2-pos3-1);
+				}
+			}
+			else if( pos1!=string::npos )
+			{
+				if( sCurrentState.c_str()[0] != 'O' )
+				{
+					sMode = sCurrentState.substr(0, pos1);
+				}
+			}
+			
+			// set point
+			sSetPoint = "25";
+			if( pos2!=string::npos && pos2+1<sCurrentState.size() )
+			{
+				int iSetPoint = atoi( sCurrentState.substr(pos2+1).c_str() );
+				if( 0 != iSetPoint )
+				{
+					sSetPoint = StringUtils::itos(iSetPoint);
+				}
+			}
 		}
-	}
-	else if( pos1!=string::npos )
-	{
-		if( sCurrentState.c_str()[0] != 'O' )
-		{
-			sMode = sCurrentState.substr(0, pos1);
-		}
-	}
-	
-	// set point
-	sSetPoint = "25";
-	if( pos2!=string::npos && pos2+1<sCurrentState.size() )
-	{
-		int iSetPoint = atoi( sCurrentState.substr(pos2+1).c_str() );
-		if( 0 != iSetPoint )
-		{
-			sSetPoint = StringUtils::itos(iSetPoint);
-		}
+		break;
 	}
 }
 
 void Climate_Plugin::SetStateValue(DeviceData_Router *pDevice,
 	   string sOn, string sMode, string sFan, string sSetPoint, string sTemp)
 {
-	pDevice->m_sState_set(sOn + "/" + sMode + "/" + sFan + "/" + sSetPoint + " (" + sTemp + ")");
+	switch(pDevice->m_dwPK_DeviceTemplate)
+	{
+		case DEVICETEMPLATE_Temperature_sensor_CONST:
+		case DEVICETEMPLATE_Multilevel_Sensor_CONST:
+			pDevice->m_sState_set(sTemp);
+			break; 
+		default:
+			pDevice->m_sState_set(sOn + "/" + sMode + "/" + sFan + "/" + sSetPoint + " (" + sTemp + ")");
+	}
 }

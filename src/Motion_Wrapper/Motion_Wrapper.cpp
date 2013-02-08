@@ -27,6 +27,7 @@ using namespace DCE;
 #include "Gen_Devices/AllCommandsRequests.h"
 //<-dceag-d-e->
 
+#include "PlutoUtils/ProcessUtils.h"
 #include "DCERouter.h"
 #include "pluto_main/Define_DeviceData.h"
 #include "pluto_main/Define_Command.h"
@@ -34,7 +35,7 @@ using namespace DCE;
 
 #define MOTION_CONF_PATH	"/etc/motion/"
 #define MOTION_CONF_FILE	"motion.conf"
-
+#define ALARM_PURGE_ARCHIVE	1
 #define SNAPSHOT_SLEEP_TIME	100
 
 static pid_t * my_motion_pid = NULL;
@@ -112,6 +113,7 @@ Motion_Wrapper::Motion_Wrapper(Command_Impl *pPrimaryDeviceCommand, DeviceData_I
 	: Motion_Wrapper_Command(pPrimaryDeviceCommand, pData, pEvent, pRouter)
 //<-dceag-const2-e->
 {
+	m_pAlarmManager = NULL;
 }
 
 //<-dceag-dest-b->
@@ -119,6 +121,7 @@ Motion_Wrapper::~Motion_Wrapper()
 //<-dceag-dest-e->
 {
 	if(motionpid_) {
+		signal(SIGCHLD, SIG_DFL);
 		LoggerWrapper::GetInstance()->Write(LV_STATUS, "Killing motion process: %d...", motionpid_);
 		my_motion_pid = NULL;
 		kill(motionpid_, SIGKILL);
@@ -132,7 +135,8 @@ Motion_Wrapper::~Motion_Wrapper()
 		kill(*i, SIGKILL);
 		waitpid(*i,NULL,0);
 	}
-
+	delete m_pAlarmManager;
+	m_pAlarmManager = NULL;
 }
 
 bool Motion_Wrapper::Connect(int iPK_DeviceTemplate) {
@@ -150,9 +154,9 @@ bool Motion_Wrapper::Connect(int iPK_DeviceTemplate) {
 	mconffile.exceptions ( ifstream::eofbit | ifstream::failbit | ifstream::badbit );	
 	try {	
 		mconffile.open(sPath.c_str(), fstream::out | fstream::trunc);
-		string sVideoStandard = m_pData->m_mapParameters_Find(DEVICEDATA_Video_Standard_CONST);
-		string sMotionParameters = m_pData->m_mapParameters_Find(DEVICEDATA_Motion_Parameters_CONST);
-		string sMotionExtraParameters = m_pData->m_mapParameters_Find(DEVICEDATA_Extra_Parameters_CONST);
+		string sVideoStandard = m_pData->mapParameters_Find(DEVICEDATA_Video_Standard_CONST);
+		string sMotionParameters = m_pData->mapParameters_Find(DEVICEDATA_Motion_Parameters_CONST);
+		string sMotionExtraParameters = m_pData->mapParameters_Find(DEVICEDATA_Extra_Parameters_CONST);
 		
 		mconffile 	<< "norm " << sVideoStandard << endl 
 					/* Using DEVICEDATA_Motion_Option_CONST 51 for default values */
@@ -202,7 +206,7 @@ bool Motion_Wrapper::Connect(int iPK_DeviceTemplate) {
 					<< "snapshot_interval 60" << endl
 					<< "snapshot_filename %Y/%m/%d/%H/%M_%S" << endl
 					<< "jpeg_filename %Y/%m/%d/%H/%M_%S" << endl
-					<< "ffmpeg_filename movies/%d_%m_%Y_%H_%M_%S" << endl
+					<< "movie_filename movies/%d_%m_%Y_%H_%M_%S" << endl
 					<< "timelapse_filename %Y/%m/%d-timelapse" << endl
 					*/
            /*DEVICEDATA_Extra_Parameters_CONST 139 for Extra Parameters*/
@@ -247,6 +251,10 @@ bool Motion_Wrapper::Connect(int iPK_DeviceTemplate) {
 			}
 		}
 	}
+	
+	m_pAlarmManager = new DCE::AlarmManager();
+	m_pAlarmManager->Start(2);      
+	m_pAlarmManager->AddRelativeAlarm(1,this,ALARM_PURGE_ARCHIVE,NULL);
 
 	signal(SIGCHLD, sighandler);
 	StartMotion(&motionpid_);
@@ -292,7 +300,7 @@ void Motion_Wrapper::ReceivedCommandForChild(DeviceData_Impl *pDeviceData_Impl,s
 	
 	switch(pMessage->m_dwID) {
 		case COMMAND_Get_Video_Frame_CONST: {
-				string sPortNumber = pDeviceData_Impl->m_mapParameters_Find(DEVICEDATA_PortChannel_Number_CONST);
+				string sPortNumber = pDeviceData_Impl->mapParameters_Find(DEVICEDATA_PortChannel_Number_CONST);
 				
 				LoggerWrapper::GetInstance()->Write(LV_STATUS, "Taking Snapshot...");
 				if(kill(motionpid_, SIGALRM)) {
@@ -335,7 +343,7 @@ bool Motion_Wrapper::CreateVideoDeviceFor1394(DeviceData_Impl* pDeviceData) {
 
 	LoggerWrapper::GetInstance()->Write(LV_STATUS, "Generating v4l device for %d ieee1394 video device", PK_Device);
 
-	string sDevice = pDeviceData->m_mapParameters_Find(DEVICEDATA_Device_CONST);
+	string sDevice = pDeviceData->mapParameters_Find(DEVICEDATA_Device_CONST);
 
 	dc1394_pid = fork();
 	if( dc1394_pid == 0 )
@@ -361,17 +369,17 @@ bool Motion_Wrapper::AddChildDeviceToConfigFile(std::ofstream& conffile, DeviceD
 	int PK_Device = pDeviceData->m_dwPK_Device;
 	LoggerWrapper::GetInstance()->Write(LV_STATUS, "Using child device %d from Generic Analog Capture Card ", PK_Device);
 
-	string sMotion = pDeviceData->m_mapParameters_Find(DEVICEDATA_Motion_Option_CONST);
+	string sMotion = pDeviceData->mapParameters_Find(DEVICEDATA_Motion_Option_CONST);
 	//TO DO = write camera record options & sync with house mode		
 		  
 
 	//video device
-	string sDevice = pDeviceData->m_mapParameters_Find(DEVICEDATA_Device_CONST);
+	string sDevice = pDeviceData->mapParameters_Find(DEVICEDATA_Device_CONST);
 
 	if (pDeviceData->m_dwPK_DeviceTemplate == DEVICETEMPLATE_Generic_Motion_IP_Camera_CONST) { 
 		string sUrl = "";
     string sProtocol = "";
-    sProtocol = pDeviceData->m_mapParameters_Find(DEVICEDATA_Protocol_CONST);
+    sProtocol = pDeviceData->mapParameters_Find(DEVICEDATA_Protocol_CONST);
     
 		if ( sProtocol.empty() ) {
       LoggerWrapper::GetInstance()->Write(LV_STATUS, "Protocol Parameter Empty, set http as default ");
@@ -384,22 +392,22 @@ bool Motion_Wrapper::AddChildDeviceToConfigFile(std::ofstream& conffile, DeviceD
 		
 		sUrl  = sProtocol + "://";
 		sUrl += pDeviceData->m_sIPAddress;
-		if ( ! pDeviceData->m_mapParameters_Find(DEVICEDATA_TCP_Port_CONST).empty() ) {
+		if ( ! pDeviceData->mapParameters_Find(DEVICEDATA_TCP_Port_CONST).empty() ) {
       LoggerWrapper::GetInstance()->Write(LV_STATUS, "IP Parameter Empty, skipping");
-			sUrl += ":" + pDeviceData->m_mapParameters_Find(DEVICEDATA_TCP_Port_CONST); /* DEVICEDATA_TCP_Port_CONST 69 */
+			sUrl += ":" + pDeviceData->mapParameters_Find(DEVICEDATA_TCP_Port_CONST); /* DEVICEDATA_TCP_Port_CONST 69 */
 		}
-		if ( pDeviceData->m_mapParameters_Find(DEVICEDATA_Path_CONST).empty() ) {
+		if ( pDeviceData->mapParameters_Find(DEVICEDATA_Path_CONST).empty() ) {
 			sUrl += "/";
 		} else {
-			sUrl += pDeviceData->m_mapParameters_Find(DEVICEDATA_Path_CONST);
+			sUrl += pDeviceData->mapParameters_Find(DEVICEDATA_Path_CONST);
 		}
 
 		conffile << "netcam_url " << sUrl << endl;
 
-		if ( ! pDeviceData->m_mapParameters_Find(DEVICEDATA_Username_CONST).empty() ) {
-			conffile << "netcam_userpass " <<  pDeviceData->m_mapParameters_Find(DEVICEDATA_Username_CONST); 
-			if ( ! pDeviceData->m_mapParameters_Find(DEVICEDATA_Password_CONST).empty() ) {
-				conffile  << ":" <<  pDeviceData->m_mapParameters_Find(DEVICEDATA_Password_CONST);
+		if ( ! pDeviceData->mapParameters_Find(DEVICEDATA_Username_CONST).empty() ) {
+			conffile << "netcam_userpass " <<  pDeviceData->mapParameters_Find(DEVICEDATA_Username_CONST); 
+			if ( ! pDeviceData->mapParameters_Find(DEVICEDATA_Password_CONST).empty() ) {
+				conffile  << ":" <<  pDeviceData->mapParameters_Find(DEVICEDATA_Password_CONST);
 			}
 			conffile << endl;
 		}
@@ -416,7 +424,7 @@ bool Motion_Wrapper::AddChildDeviceToConfigFile(std::ofstream& conffile, DeviceD
 		}
 
 		//input port
-		string sPort = pDeviceData->m_mapParameters_Find(DEVICEDATA_PortChannel_Number_CONST);
+		string sPort = pDeviceData->mapParameters_Find(DEVICEDATA_PortChannel_Number_CONST);
 		if(!sPort.empty()) {
 			conffile 	<< "input " << sPort << endl;
 		} else {
@@ -426,7 +434,7 @@ bool Motion_Wrapper::AddChildDeviceToConfigFile(std::ofstream& conffile, DeviceD
 	}
 	
 	//noise level
-	string sNoiseLevel = pDeviceData->m_mapParameters_Find(DEVICEDATA_Noise_CONST);
+	string sNoiseLevel = pDeviceData->mapParameters_Find(DEVICEDATA_Noise_CONST);
 	if(!sNoiseLevel.empty()) {
 		conffile	<< endl << "noise_level " << sNoiseLevel << endl;
 	}
@@ -478,7 +486,7 @@ bool Motion_Wrapper::AddChildDeviceToConfigFile(std::ofstream& conffile, DeviceD
 	Adding text from #59 Configuration parameter string as 
 	custom entries in threadX.conf.
 */
-	string sConfiguration = pDeviceData->m_mapParameters_Find(DEVICEDATA_Configuration_CONST);
+	string sConfiguration = pDeviceData->mapParameters_Find(DEVICEDATA_Configuration_CONST);
 	LoggerWrapper::GetInstance()->Write(LV_STATUS, "Got custom #59 configuration string %s", sConfiguration.c_str());
 	if(!sConfiguration.empty()) {
 		conffile	<< "\n# custom settings from Pluto's device parameter #59 Configuration" << endl;
@@ -595,7 +603,17 @@ DeviceData_Router* Motion_Wrapper::find_Device(int iPK_Device) {
 	return m_pRouter->m_mapDeviceData_Router_Find(iPK_Device);
 }
 
-
+void Motion_Wrapper::AlarmCallback(int id, void* param)
+{
+	
+	if (id==ALARM_PURGE_ARCHIVE) {
+		m_pAlarmManager->CancelAlarmByType(ALARM_PURGE_ARCHIVE);
+		// Purge Camera Archive once every 6 hours
+		m_pAlarmManager->AddRelativeAlarm(60*60*6,this,ALARM_PURGE_ARCHIVE,NULL);
+		string sCmd = "/usr/pluto/bin/Purge_Camera_Archive.pl";
+		system(sCmd.c_str());
+	}
+}
 /*
 
 this came from generic_analog_camera

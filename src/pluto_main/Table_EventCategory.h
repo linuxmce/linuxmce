@@ -134,7 +134,6 @@ bool psc_id_isNull();
 bool psc_batch_isNull();
 bool psc_user_isNull();
 bool psc_frozen_isNull();
-bool psc_mod_isNull();
 bool psc_restrict_isNull();
 
 			
@@ -144,7 +143,6 @@ void psc_id_setNull(bool val);
 void psc_batch_setNull(bool val);
 void psc_user_setNull(bool val);
 void psc_frozen_setNull(bool val);
-void psc_mod_setNull(bool val);
 void psc_restrict_setNull(bool val);
 	
 	
@@ -164,10 +162,6 @@ void psc_restrict_setNull(bool val);
 		// Return the rows in other tables with foreign keys pointing here
 		void Event_FK_EventCategory_getrows(vector <class Row_Event*> *rows);
 void EventCategory_FK_EventCategory_Parent_getrows(vector <class Row_EventCategory*> *rows);
-void EventCategory_pschist_FK_EventCategory_Parent_getrows(vector <class Row_EventCategory_pschist*> *rows);
-void EventCategory_pschmask_FK_EventCategory_Parent_getrows(vector <class Row_EventCategory_pschmask*> *rows);
-void Event_pschist_FK_EventCategory_getrows(vector <class Row_Event_pschist*> *rows);
-void Event_pschmask_FK_EventCategory_getrows(vector <class Row_Event_pschmask*> *rows);
 
 
 		// Setup binary serialization

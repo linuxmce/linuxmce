@@ -1,0 +1,14 @@
+Source: vdrdevel-plugin-#PACKAGE#
+Section: misc
+Priority: extra
+Maintainer: #USERNAME# <#EMAIL#>
+Build-Depends: debhelper (>> 4.1.16), vdrdevel-dev (>= #VDRVERSION#), dpatch
+Standards-Version: #POLICY#
+
+Package: vdrdevel-plugin-#PACKAGE#
+Architecture: any
+Depends: ${shlibs:Depends}, ${vdrdevel:Depends}
+Conflicts: ${vdrdevel:Conflicts}
+Description: <insert up to 60 chars description>
+ <insert long description, indented with spaces>
+XB-VDR-Patchlevel: ${vdrdevel:Patchlevel}

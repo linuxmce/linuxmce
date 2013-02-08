@@ -25,9 +25,6 @@
 #include "CriteriaParm.h"
 #include "EventInfo.h"
 #include "EventHandler.h"
-#include "Logger.h"
-
-using namespace DCE;
 
 CriteriaParmNesting::~CriteriaParmNesting()
 {
@@ -53,9 +50,6 @@ bool CriteriaParmNesting::Evaluate(class Criteria *pCriteria,class EventInfo *pE
 //		pEventInfo->pEventHandler->m_vectCriteriaParm.push_back(pCriteriaParm);
 
 		pCriteriaParm->m_bResult = pCriteria->EvaluateExpression(pCriteriaParm,pEventInfo,pExtraInfo);
-		LoggerWrapper::GetInstance()->Write(LV_EVENTHANDLER,"CriteriaParmNesting::Evaluate parm Event Handler: %d m_bAnd %d m_iPK_CriteriaParm %d m_iPK_CriteriaParmList %d m_iPK_ParameterType %d m_sComparedValue %s sValue %s", 
-			pEventInfo->m_iPK_Event, (int) m_bAnd, pCriteriaParm->m_iPK_CriteriaParm, pCriteriaParm->m_iPK_CriteriaParmList, 
-			pCriteriaParm->m_iPK_ParameterType, pCriteriaParm->m_sComparedValue.c_str(), pCriteriaParm->m_sValue.c_str());
 		if( m_bAnd==true && pCriteriaParm->m_bResult==false )
 			return !(!m_bNot ^ false) ;
 		if( m_bAnd==false && pCriteriaParm->m_bResult==true )
@@ -72,8 +66,6 @@ bool CriteriaParmNesting::Evaluate(class Criteria *pCriteria,class EventInfo *pE
 	}
 	// If this is an 'and' we're true because we got through everything without a false,
 	// If this is an 'or' we're false because we never got a true value
-	LoggerWrapper::GetInstance()->Write(LV_EVENTHANDLER,"CriteriaParmNesting::Evaluate nesting Event Handler: %d got to end not %d and %d", 
-		pEventInfo->m_iPK_Event, (int) m_bNot, (int) m_bAnd);
 	return !(!m_bNot ^ m_bAnd);  
 }
 

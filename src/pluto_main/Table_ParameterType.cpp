@@ -33,20 +33,10 @@ using namespace std;
 #include "Table_ParameterType.h"
 
 #include "Table_CommandParameter.h"
-#include "Table_CommandParameter_pschist.h"
-#include "Table_CommandParameter_pschmask.h"
 #include "Table_CriteriaParmList.h"
-#include "Table_CriteriaParmList_pschist.h"
-#include "Table_CriteriaParmList_pschmask.h"
 #include "Table_DesignObjParameter.h"
-#include "Table_DesignObjParameter_pschist.h"
-#include "Table_DesignObjParameter_pschmask.h"
 #include "Table_DeviceData.h"
-#include "Table_DeviceData_pschist.h"
-#include "Table_DeviceData_pschmask.h"
 #include "Table_EventParameter.h"
-#include "Table_EventParameter_pschist.h"
-#include "Table_EventParameter_pschmask.h"
 
 
 void Database_pluto_main::CreateTable_ParameterType()
@@ -94,6 +84,7 @@ void Row_ParameterType::Delete()
 	Row_ParameterType *pRow = this; // Needed so we will have only 1 version of get_primary_fields_assign_from_row
 	
 	if (!is_deleted)
+	{
 		if (is_added)	
 		{	
 			vector<TableRow*>::iterator i;	
@@ -115,6 +106,7 @@ void Row_ParameterType::Delete()
 			table->deleted_cachedRows[key] = this;
 			is_deleted = true;	
 		}	
+	}
 }
 
 void Row_ParameterType::Reload()
@@ -148,10 +140,8 @@ void Row_ParameterType::SetDefaultValues()
 {
 	m_PK_ParameterType = 0;
 is_null[0] = false;
-m_Description = "";
-is_null[1] = false;
-m_Define = "";
-is_null[2] = false;
+is_null[1] = true;
+is_null[2] = true;
 is_null[3] = true;
 is_null[4] = true;
 m_psc_id = 0;
@@ -161,7 +151,8 @@ is_null[6] = true;
 m_psc_user = 0;
 m_psc_frozen = 0;
 is_null[7] = false;
-is_null[8] = true;
+m_psc_mod = "0000-00-00 00:00:00";
+is_null[8] = false;
 is_null[9] = true;
 m_psc_restrict = 0;
 
@@ -235,6 +226,12 @@ void Row_ParameterType::psc_restrict_set(long int val){PLUTO_SAFETY_LOCK_ERRORSO
 m_psc_restrict = val; is_modified=true; is_null[9]=false;}
 
 		
+bool Row_ParameterType::Description_isNull() {PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
+
+return is_null[1];}
+bool Row_ParameterType::Define_isNull() {PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
+
+return is_null[2];}
 bool Row_ParameterType::CPPType_isNull() {PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
 
 return is_null[3];}
@@ -250,14 +247,19 @@ return is_null[6];}
 bool Row_ParameterType::psc_frozen_isNull() {PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
 
 return is_null[7];}
-bool Row_ParameterType::psc_mod_isNull() {PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
-
-return is_null[8];}
 bool Row_ParameterType::psc_restrict_isNull() {PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
 
 return is_null[9];}
 
 			
+void Row_ParameterType::Description_setNull(bool val){PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
+is_null[1]=val;
+is_modified=true;
+}
+void Row_ParameterType::Define_setNull(bool val){PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
+is_null[2]=val;
+is_modified=true;
+}
 void Row_ParameterType::CPPType_setNull(bool val){PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
 is_null[3]=val;
 is_modified=true;
@@ -276,10 +278,6 @@ is_modified=true;
 }
 void Row_ParameterType::psc_frozen_setNull(bool val){PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
 is_null[7]=val;
-is_modified=true;
-}
-void Row_ParameterType::psc_mod_setNull(bool val){PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
-is_null[8]=val;
 is_modified=true;
 }
 void Row_ParameterType::psc_restrict_setNull(bool val){PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
@@ -308,8 +306,8 @@ PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
 if (is_null[1])
 return "NULL";
 
-char *buf = new char[41];
-db_wrapper_real_escape_string(table->database->m_pDB, buf, m_Description.c_str(), (unsigned long) min((size_t)20,m_Description.size()));
+char *buf = new char[121];
+db_wrapper_real_escape_string(table->database->m_pDB, buf, m_Description.c_str(), (unsigned long) min((size_t)60,m_Description.size()));
 string s=string()+"\""+buf+"\"";
 delete[] buf;
 return s;
@@ -322,8 +320,8 @@ PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
 if (is_null[2])
 return "NULL";
 
-char *buf = new char[31];
-db_wrapper_real_escape_string(table->database->m_pDB, buf, m_Define.c_str(), (unsigned long) min((size_t)15,m_Define.size()));
+char *buf = new char[91];
+db_wrapper_real_escape_string(table->database->m_pDB, buf, m_Define.c_str(), (unsigned long) min((size_t)45,m_Define.size()));
 string s=string()+"\""+buf+"\"";
 delete[] buf;
 return s;
@@ -336,8 +334,8 @@ PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
 if (is_null[3])
 return "NULL";
 
-char *buf = new char[21];
-db_wrapper_real_escape_string(table->database->m_pDB, buf, m_CPPType.c_str(), (unsigned long) min((size_t)10,m_CPPType.size()));
+char *buf = new char[61];
+db_wrapper_real_escape_string(table->database->m_pDB, buf, m_CPPType.c_str(), (unsigned long) min((size_t)30,m_CPPType.size()));
 string s=string()+"\""+buf+"\"";
 delete[] buf;
 return s;
@@ -1016,39 +1014,11 @@ PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
 class Table_CommandParameter *pTable = table->database->CommandParameter_get();
 pTable->GetRows("`FK_ParameterType`=" + StringUtils::itos(m_PK_ParameterType),rows);
 }
-void Row_ParameterType::CommandParameter_pschist_FK_ParameterType_getrows(vector <class Row_CommandParameter_pschist*> *rows)
-{
-PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
-
-class Table_CommandParameter_pschist *pTable = table->database->CommandParameter_pschist_get();
-pTable->GetRows("`FK_ParameterType`=" + StringUtils::itos(m_PK_ParameterType),rows);
-}
-void Row_ParameterType::CommandParameter_pschmask_FK_ParameterType_getrows(vector <class Row_CommandParameter_pschmask*> *rows)
-{
-PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
-
-class Table_CommandParameter_pschmask *pTable = table->database->CommandParameter_pschmask_get();
-pTable->GetRows("`FK_ParameterType`=" + StringUtils::itos(m_PK_ParameterType),rows);
-}
 void Row_ParameterType::CriteriaParmList_FK_ParameterType_getrows(vector <class Row_CriteriaParmList*> *rows)
 {
 PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
 
 class Table_CriteriaParmList *pTable = table->database->CriteriaParmList_get();
-pTable->GetRows("`FK_ParameterType`=" + StringUtils::itos(m_PK_ParameterType),rows);
-}
-void Row_ParameterType::CriteriaParmList_pschist_FK_ParameterType_getrows(vector <class Row_CriteriaParmList_pschist*> *rows)
-{
-PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
-
-class Table_CriteriaParmList_pschist *pTable = table->database->CriteriaParmList_pschist_get();
-pTable->GetRows("`FK_ParameterType`=" + StringUtils::itos(m_PK_ParameterType),rows);
-}
-void Row_ParameterType::CriteriaParmList_pschmask_FK_ParameterType_getrows(vector <class Row_CriteriaParmList_pschmask*> *rows)
-{
-PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
-
-class Table_CriteriaParmList_pschmask *pTable = table->database->CriteriaParmList_pschmask_get();
 pTable->GetRows("`FK_ParameterType`=" + StringUtils::itos(m_PK_ParameterType),rows);
 }
 void Row_ParameterType::DesignObjParameter_FK_ParameterType_getrows(vector <class Row_DesignObjParameter*> *rows)
@@ -1058,20 +1028,6 @@ PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
 class Table_DesignObjParameter *pTable = table->database->DesignObjParameter_get();
 pTable->GetRows("`FK_ParameterType`=" + StringUtils::itos(m_PK_ParameterType),rows);
 }
-void Row_ParameterType::DesignObjParameter_pschist_FK_ParameterType_getrows(vector <class Row_DesignObjParameter_pschist*> *rows)
-{
-PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
-
-class Table_DesignObjParameter_pschist *pTable = table->database->DesignObjParameter_pschist_get();
-pTable->GetRows("`FK_ParameterType`=" + StringUtils::itos(m_PK_ParameterType),rows);
-}
-void Row_ParameterType::DesignObjParameter_pschmask_FK_ParameterType_getrows(vector <class Row_DesignObjParameter_pschmask*> *rows)
-{
-PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
-
-class Table_DesignObjParameter_pschmask *pTable = table->database->DesignObjParameter_pschmask_get();
-pTable->GetRows("`FK_ParameterType`=" + StringUtils::itos(m_PK_ParameterType),rows);
-}
 void Row_ParameterType::DeviceData_FK_ParameterType_getrows(vector <class Row_DeviceData*> *rows)
 {
 PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
@@ -1079,39 +1035,11 @@ PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
 class Table_DeviceData *pTable = table->database->DeviceData_get();
 pTable->GetRows("`FK_ParameterType`=" + StringUtils::itos(m_PK_ParameterType),rows);
 }
-void Row_ParameterType::DeviceData_pschist_FK_ParameterType_getrows(vector <class Row_DeviceData_pschist*> *rows)
-{
-PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
-
-class Table_DeviceData_pschist *pTable = table->database->DeviceData_pschist_get();
-pTable->GetRows("`FK_ParameterType`=" + StringUtils::itos(m_PK_ParameterType),rows);
-}
-void Row_ParameterType::DeviceData_pschmask_FK_ParameterType_getrows(vector <class Row_DeviceData_pschmask*> *rows)
-{
-PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
-
-class Table_DeviceData_pschmask *pTable = table->database->DeviceData_pschmask_get();
-pTable->GetRows("`FK_ParameterType`=" + StringUtils::itos(m_PK_ParameterType),rows);
-}
 void Row_ParameterType::EventParameter_FK_ParameterType_getrows(vector <class Row_EventParameter*> *rows)
 {
 PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
 
 class Table_EventParameter *pTable = table->database->EventParameter_get();
-pTable->GetRows("`FK_ParameterType`=" + StringUtils::itos(m_PK_ParameterType),rows);
-}
-void Row_ParameterType::EventParameter_pschist_FK_ParameterType_getrows(vector <class Row_EventParameter_pschist*> *rows)
-{
-PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
-
-class Table_EventParameter_pschist *pTable = table->database->EventParameter_pschist_get();
-pTable->GetRows("`FK_ParameterType`=" + StringUtils::itos(m_PK_ParameterType),rows);
-}
-void Row_ParameterType::EventParameter_pschmask_FK_ParameterType_getrows(vector <class Row_EventParameter_pschmask*> *rows)
-{
-PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
-
-class Table_EventParameter_pschmask *pTable = table->database->EventParameter_pschmask_get();
 pTable->GetRows("`FK_ParameterType`=" + StringUtils::itos(m_PK_ParameterType),rows);
 }
 

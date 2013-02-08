@@ -1,0 +1,282 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003" ToolsVersion="3.5">
+  <PropertyGroup>
+    <ProjectType>Local</ProjectType>
+    <ProductVersion>8.0.30729</ProductVersion>
+    <SchemaVersion>2.0</SchemaVersion>
+    <ProjectGuid>{C5679AE5-F8FF-451F-A97B-EA58F93B04AF}</ProjectGuid>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <AssemblyKeyContainerName>
+    </AssemblyKeyContainerName>
+    <AssemblyName>HAData</AssemblyName>
+    <DefaultClientScript>JScript</DefaultClientScript>
+    <DefaultHTMLPageLayout>Grid</DefaultHTMLPageLayout>
+    <DefaultTargetSchema>IE50</DefaultTargetSchema>
+    <DelaySign>false</DelaySign>
+    <OutputType>Library</OutputType>
+    <RootNamespace>HAData</RootNamespace>
+    <RunPostBuildEvent>OnBuildSuccess</RunPostBuildEvent>
+    <FileUpgradeFlags>
+    </FileUpgradeFlags>
+    <UpgradeBackupLocation>
+    </UpgradeBackupLocation>
+    <OldToolsVersion>0.0</OldToolsVersion>
+    <TargetFrameworkVersion>v3.5</TargetFrameworkVersion>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <OutputPath>bin\Debug\</OutputPath>
+    <BaseAddress>285212672</BaseAddress>
+    <ConfigurationOverrideFile>
+    </ConfigurationOverrideFile>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <DocumentationFile>
+    </DocumentationFile>
+    <DebugSymbols>true</DebugSymbols>
+    <FileAlignment>4096</FileAlignment>
+    <Optimize>false</Optimize>
+    <RegisterForComInterop>false</RegisterForComInterop>
+    <RemoveIntegerChecks>false</RemoveIntegerChecks>
+    <WarningLevel>4</WarningLevel>
+    <DebugType>full</DebugType>
+    <ErrorReport>prompt</ErrorReport>
+    <PlatformTarget>x86</PlatformTarget>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <OutputPath>bin\Release\</OutputPath>
+    <BaseAddress>285212672</BaseAddress>
+    <ConfigurationOverrideFile>
+    </ConfigurationOverrideFile>
+    <DocumentationFile>
+    </DocumentationFile>
+    <FileAlignment>4096</FileAlignment>
+    <Optimize>true</Optimize>
+    <RegisterForComInterop>false</RegisterForComInterop>
+    <RemoveIntegerChecks>false</RemoveIntegerChecks>
+    <WarningLevel>4</WarningLevel>
+    <DebugType>none</DebugType>
+    <ErrorReport>prompt</ErrorReport>
+    <PlatformTarget>x86</PlatformTarget>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="System">
+      <Name>System</Name>
+    </Reference>
+    <Reference Include="System.Data">
+      <Name>System.Data</Name>
+    </Reference>
+    <Reference Include="System.Drawing">
+      <Name>System.Drawing</Name>
+    </Reference>
+    <Reference Include="System.Web">
+      <Name>System.Web</Name>
+    </Reference>
+    <Reference Include="System.Windows.Forms">
+      <Name>System.Windows.Forms</Name>
+    </Reference>
+    <Reference Include="System.Xml">
+      <Name>System.XML</Name>
+    </Reference>
+    <Reference Include="MySql.Data, Version=6.1.3.0, Culture=neutral, PublicKeyToken=20449f9ba87f7ae2">
+      <Package>mysql-connector-net</Package>
+    </Reference>
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="AssemblyInfo.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Class1.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Common\HADataConfiguration.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Common\HAServerConnection.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Common\IDValue.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Common\SerializableDataSet.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Include="Common\TreeBuilder\ActionTree.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Common\TreeBuilder\ObjectTree.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Common\TreeBuilder\TextTree.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="DataAccess\ArrayData.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Include="DataAccess\ButtonData.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Include="DataAccess\CommandCategoryData.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Include="DataAccess\CommandData.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Include="DataAccess\CommandGroup_DData.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Include="DataAccess\CommandGroup_D_CommandData.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Include="DataAccess\CommandGroup_D_Command_CommandParameterData.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Include="DataAccess\CommandParameterData.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Include="DataAccess\Command_CommandParameterData.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Include="DataAccess\CriteriaListData.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Include="DataAccess\CriteriaList_CriteriaParmListData.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Include="DataAccess\CriteriaParmListData.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Include="DataAccess\DesignObjCategoryData.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Include="DataAccess\DesignObjData.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Include="DataAccess\DesignObjParameterData.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Include="DataAccess\DesignObjTypeData.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Include="DataAccess\DesignObjType_DesignObjParameterData.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Include="DataAccess\DesignObjVariationData.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Include="DataAccess\DesignObjVariation_DesignObjData.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Include="DataAccess\DesignObjVariation_DesignObjParameterData.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Include="DataAccess\DesignObjVariation_DesignObj_Skin_Language.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Include="DataAccess\DesignObjVariation_TextData.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Include="DataAccess\DesignObjVariation_Text_Skin_LanguageData.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Include="DataAccess\DesignObjVariation_ZoneData.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Include="DataAccess\DeviceTemplateData.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Include="DataAccess\EffectTypeData.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Include="DataAccess\HorizAlignmentData.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Include="DataAccess\IconData.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Include="DataAccess\InstallationData.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Include="DataAccess\LanguageData.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Include="DataAccess\MyDataSet.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Include="DataAccess\ParameterTypeData.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Include="DataAccess\Screen_CommandParameterData.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Include="DataAccess\SizeData.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Include="DataAccess\SkinData.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Include="DataAccess\StyleData.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Include="DataAccess\StyleVariationData.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Include="DataAccess\SystemData.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Include="DataAccess\TextCategoryData.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Include="DataAccess\TextData.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Include="DataAccess\Text_LSData.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Include="DataAccess\Text_LS_AltVersionsData.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Include="DataAccess\UIData.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Include="DataAccess\UserModeData.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Include="DataAccess\UsersData.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Include="DataAccess\VariableData.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Include="DataAccess\VersionData.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Include="DataAccess\VertAlignmentData.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <EmbeddedResource Include="DataAccess\ArrayData.resx">
+      <DependentUpon>ArrayData.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="DataAccess\DesignObjVariationData.resx">
+      <DependentUpon>DesignObjVariationData.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="DataAccess\DesignObjVariation_DesignObjData.resx">
+      <DependentUpon>DesignObjVariation_DesignObjData.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="DataAccess\DesignObjVariation_ZoneData.resx">
+      <DependentUpon>DesignObjVariation_ZoneData.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="DataAccess\EffectTypeData.resx">
+      <DependentUpon>EffectTypeData.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="DataAccess\Screen_CommandParameterData.resx">
+      <DependentUpon>Screen_CommandParameterData.cs</DependentUpon>
+    </EmbeddedResource>
+  </ItemGroup>
+  <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
+  <PropertyGroup>
+    <PreBuildEvent>
+    </PreBuildEvent>
+    <PostBuildEvent>
+    </PostBuildEvent>
+  </PropertyGroup>
+</Project>

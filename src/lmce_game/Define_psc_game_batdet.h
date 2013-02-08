@@ -1,0 +1,27 @@
+#ifndef __Define_psc_game_batdet_H__
+#define __Define_psc_game_batdet_H__
+
+
+#define PSC_GAME_BATDET_TABLE "psc_game_batdet"
+#define PSC_GAME_BATDET_PK_PSC_GAME_BATDET_FIELD "PK_psc_game_batdet"
+#define PSC_GAME_BATDET_PK_PSC_GAME_BATDET_TABLE_FIELD "psc_game_batdet.PK_psc_game_batdet"
+#define PSC_GAME_BATDET_FK_PSC_GAME_BATHDR_FIELD "FK_psc_game_bathdr"
+#define PSC_GAME_BATDET_FK_PSC_GAME_BATHDR_TABLE_FIELD "psc_game_batdet.FK_psc_game_bathdr"
+#define PSC_GAME_BATDET_TABLENAME_FIELD "Tablename"
+#define PSC_GAME_BATDET_TABLENAME_TABLE_FIELD "psc_game_batdet.Tablename"
+#define PSC_GAME_BATDET_NEW_FIELD "New"
+#define PSC_GAME_BATDET_NEW_TABLE_FIELD "psc_game_batdet.New"
+#define PSC_GAME_BATDET_DELETED_FIELD "Deleted"
+#define PSC_GAME_BATDET_DELETED_TABLE_FIELD "psc_game_batdet.Deleted"
+#define PSC_GAME_BATDET_MODIFIED_FIELD "Modified"
+#define PSC_GAME_BATDET_MODIFIED_TABLE_FIELD "psc_game_batdet.Modified"
+#define PSC_GAME_BATDET_FK_PSC_GAME_BATHDR_ORIG_FIELD "FK_psc_game_bathdr_orig"
+#define PSC_GAME_BATDET_FK_PSC_GAME_BATHDR_ORIG_TABLE_FIELD "psc_game_batdet.FK_psc_game_bathdr_orig"
+#define PSC_GAME_BATDET_FK_PSC_GAME_BATHDR_AUTH_FIELD "FK_psc_game_bathdr_auth"
+#define PSC_GAME_BATDET_FK_PSC_GAME_BATHDR_AUTH_TABLE_FIELD "psc_game_batdet.FK_psc_game_bathdr_auth"
+#define PSC_GAME_BATDET_FK_PSC_GAME_BATHDR_UNAUTH_FIELD "FK_psc_game_bathdr_unauth"
+#define PSC_GAME_BATDET_FK_PSC_GAME_BATHDR_UNAUTH_TABLE_FIELD "psc_game_batdet.FK_psc_game_bathdr_unauth"
+
+
+#endif
+

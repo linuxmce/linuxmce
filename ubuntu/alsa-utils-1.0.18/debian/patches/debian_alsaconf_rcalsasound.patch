@@ -1,0 +1,25 @@
+Tweaked alsaconf to the new location of rcalasound script.
+Elimar Riesebieter 2007/10/21
+
+Index: alsa-utils-1.0.18/alsaconf/alsaconf.in
+===================================================================
+--- alsa-utils-1.0.18.orig/alsaconf/alsaconf.in	2008-11-02 20:59:26.000000000 +0100
++++ alsa-utils-1.0.18/alsaconf/alsaconf.in	2008-11-02 20:59:26.000000000 +0100
+@@ -510,7 +510,7 @@
+ #
+ 
+ if [ "$distribution" = "debian" ]; then
+-    rcalsasound=/etc/init.d/alsa
++    rcalsasound=/usr/sbin/alsa
+ elif [ -x /etc/init.d/alsasound ]; then
+     rcalsasound=/etc/init.d/alsasound
+ elif [ -x /usr/sbin/rcalsasound ]; then
+@@ -1422,7 +1422,7 @@
+ 
+ intro
+ 
+-[ -x /etc/init.d/alsa ] && /etc/init.d/alsa force-unload
++[ -x $rcalsasound ] && $rcalsasound force-unload
+ 
+ if [ -d /proc/asound ]; then
+   /sbin/rmmod dmasound dmasound_awacs 2>/dev/null

@@ -1,0 +1,16 @@
+Source: shairport
+Section: net
+Priority: extra
+Maintainer: Serge Wagener <serge@swa.lu>
+Build-Depends: debhelper (>= 7), libssl-dev, libao2, libao-dev, libwww-perl, pkg-config
+Standards-Version: 3.8.4
+Homepage: https://github.com/albertz/shairport
+
+Package: shairport
+Architecture: any
+Depends: ${shlibs:Depends}, ${misc:Depends}, avahi-utils, libwww-perl, libcrypt-openssl-rsa-perl, libio-socket-inet6-perl
+Description: Turns LMCE MD into Airplay remote speakers
+ This packages the shairport package for debian / (k)ubuntu use.
+ It can be installed on LinuxMCE Media Director to turn it into.
+ an Airplay v1 remote speaker. It emulates Airport Express.
+ beheavior.

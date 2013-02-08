@@ -1,0 +1,6 @@
+The Debian Package v4l2-ngene-modules
+----------------------------
+
+Video for Linux drivers - newer than the distro's own. Usually taken straight from Mercurial.
+
+ -- Mandingo <Mandingo@Mydingo.com>  Sat, 09 Jan 2010 23:39:19 -0500

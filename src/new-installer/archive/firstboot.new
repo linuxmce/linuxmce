@@ -1,0 +1,160 @@
+#!/bin/bash
+###########################################################
+### Setup global variables
+###########################################################
+LogFile="/var/log/pluto/firstboot.log"
+trap 'rm -f /etc/rc5.d/S90firstboot' EXIT
+
+
+###########################################################
+### Setup Functions - Error checking and logging
+###########################################################
+
+Setup_Logfile () {
+if [ -f ${log_file} ]; then
+	touch ${log_file}
+	if [ $? = 1 ]; then
+		echo "`date` - Unable to write to ${log_file} - re-run script as root"
+		exit 1
+	else
+		echo "`date` - Logging initiatilized to ${log_file}"
+	fi
+else
+	#0 out an existing file
+	echo > ${log_file}
+	echo "`date` - Setup has run before, clearing old log file at ${log_file}"
+fi
+}
+
+VerifyExitCode () {
+        local EXITCODE=$?
+        if [ "$EXITCODE" != "0" ] ; then
+        	echo "An error (Exit code $EXITCODE) occured during the last action"
+        	echo "$1"
+                exit 1
+        fi
+}
+
+StatsMessage () {
+	printf "`date` - $* \n"
+}
+
+###########################################################
+### Setup Functions - General functions
+###########################################################
+
+CreatePackagesFiles () {
+StatsMessage "Creating necessary package files"
+pushd /usr/pluto/deb-cache
+dpkg-scanpackages -m . /dev/null | tee Packages | gzip -c > Packages.gz
+popd 
+}
+
+SetupNetworking () {
+rm -f /etc/X11/xorg.conf
+rm -f /etc/network/interfaces
+
+## Reconfigure networking
+/usr/pluto/bin/Network_Setup.sh
+/etc/init.d/networking restart
+/usr/pluto/bin/DHCP_config.sh
+/etc/init.d/networking restart
+/usr/pluto/bin/Network_Firewall.sh
+/usr/pluto/bin/ConfirmInstallation.sh
+/usr/pluto/bin/Timezone_Detect.sh
+
+}
+
+CleanInstallSteps () {
+
+if [[ -f /etc/pluto/install_cleandb ]]; then
+	
+	# on upgrade, the old keys are already in place, so keep them
+	rm -f /etc/ssh/ssh_host_* 
+	dpkg-reconfigure -pcritical openssh-server
+	
+	PostInstPkg=(
+	pluto-local-database pluto-media-database pluto-security-database pluto-system-database
+	pluto-telecom-database freepbx
+	)
+	
+	for Pkg in "${PostInstPkg[@]}"; do
+		/var/lib/dpkg/info/"$Pkg".postinst configure
+	done
+
+	. /usr/pluto/bin/SQL_Ops.sh
+	. /usr/pluto/bin/Config_Ops.sh
+
+	# Mark remote assistance as diabled
+	ConfDel remote
+
+	arch=$(apt-config dump | grep 'APT::Architecture' | sed 's/APT::Architecture.*"\(.*\)".*/\1/g')
+
+	Queries=(
+		"UPDATE Device_DeviceData
+			SET IK_DeviceData=15
+			WHERE PK_Device IN (
+					SELECT PK_Device FROM Device WHERE FK_DeviceTemplate IN (7, 28)
+				)
+				AND FK_DeviceData=7
+		"
+		"UPDATE Device_DeviceData SET IK_DeviceData='LMCE_CORE_u0804_$arch' WHERE IK_DeviceData='LMCE_CORE_1_1'"
+		"UPDATE Device_DeviceData SET IK_DeviceData='LMCE_MD_u0804_i386'   WHERE IK_DeviceData='LMCE_MD_1_1'"
+		"UPDATE Device_DeviceData SET IK_DeviceData='0' WHERE FK_DeviceData='234'"
+		"UPDATE Device_DeviceData SET IK_DeviceData='i386' WHERE FK_DeviceData='112' AND IK_DeviceData='686'"
+		"USE asterisk; UPDATE incoming SET destination=CONCAT('custom-linuxmce', SUBSTR(destination, 18)) WHERE destination LIKE 'from-pluto-custom%'"
+		"DELETE FROM Software_Device WHERE 1"
+	)
+
+	for Q in "${Queries[@]}"; do
+		RunSQL "$Q"
+	done
+
+	DT_DiskDrive=11
+	DiskDrives=$(RunSQL "SELECT PK_Device FROM Device WHERE FK_DeviceTemplate='$DT_DiskDrive'")
+	for DiskDrive in $DiskDrives ;do
+		DiskDrive_DeviceID=$(Field 1 "$DiskDrive")
+		for table in 'CommandGroup_Command' 'Device_Command' 'Device_CommandGroup' 'Device_DeviceData' 'Device_DeviceGroup' 'Device_Device_Related' 'Device_EntertainArea' 'Device_HouseMode' 'Device_Orbiter' 'Device_StartupScript' 'Device_Users' ;do
+			RunSQL "DELETE FROM \`$table\` WHERE FK_DeviceID = '$DiskDrive_DeviceID' LIMIT 1"
+		done
+
+		RunSQL "DELETE FROM Device WHERE PK_Device = '$DiskDrive_DeviceID' LIMIT 1"
+	done
+fi
+}
+
+CreateDisklessImage () {
+StatsMessage "Building a disk image for your Diskless Media Directors"
+local diskless_log=/var/log/pluto/Diskless_Create-`date +"%F"`.log
+nohup /usr/pluto/bin/Diskless_CreateTBZ.sh >> ${diskless_log} 2>&1 &
+}
+
+VideoDriver () {
+## Install driver based on the type of video card used
+if lshwd | grep -qi 'VGA .* (nv)'; then
+        apt-get -y -f install pluto-nvidia-video-drivers
+		VerifyExitCode "Install Pluto nVidia Driver"
+elif lshwd | grep -qi 'VGA .* (radeon)'; then
+        # Check to see if old Radeon card, if so, do not install new driver
+        if ! lshwd | grep -Pqi 'VGA .*Radeon ((9|X|ES)(1|2?)([0-9])(5|0)0|Xpress) (.*) \(radeon\)'; then
+               apt-get -y -f install xorg-driver-fglrx
+			   VerifyExitCode "Install Radeon Driver"
+        fi
+fi
+}
+
+###########################################################
+### Main execution area
+###########################################################
+
+#Setup logging
+. /usr/pluto/bin/TeeMyOutput.sh --outfile "$LogFile" --stdboth --append -- "$@"
+
+StatsMessage "Starting firstboot script"
+CreatePackagesFiles
+SetupNetworking 
+CleanInstallSteps
+#CreateDisklessImage
+VideoDriver
+StatsMessage "Firstboot Script Complete"
+exit 0

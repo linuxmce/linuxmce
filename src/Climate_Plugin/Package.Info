@@ -2,8 +2,8 @@
 Package = DCE_Destination_Package
 Dir = 
 desc = DCE Implemenation for #31 Climate Plug-in
-Maintainer = DCE_MaintainerName
-Email = DCE_MaintainerEmail
+Maintainer = tschakName
+Email = 
 Depend = DCE_Dependencies
 <-dceag-p-e->
 

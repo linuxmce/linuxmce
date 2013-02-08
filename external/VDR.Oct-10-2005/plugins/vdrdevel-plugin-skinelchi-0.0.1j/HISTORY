@@ -1,0 +1,140 @@
+VDR Plugin 'skinelchi' Revision History
+----------------------------------------
+
+2005-02-15: Version 0.0.1
+
+- Initial revision.
+  based on source-code of vdr
+
+2005-02-??
+- two patches 1. for epg-progress-bar on MTV - reported from Brougs78
+	      2. for hiding menu-entry in menu, when not the default screen
+
+2005-02-26: Version 0.0.1b
+
+- fixed something when use font "FontSml" - reported from Brougs78
+- clear palette and fill with colors of theme before drawing channellogo
+  (because of this max. possible colors in logos will less then possible on
+   hardware)
+- fix a crash on my system in combination with sleeptimer-0.0.6, when
+  slepptimer will show message "Going to sleep in about one minute"
+  in ChannelDisplay -> no message like this will display in ChannelDisplay.
+- Added "One area (if possible)" in setup for my testings
+- Added one area (scrollarea) to MenuDisplay (to make colors of theme working)
+- Added changing of colors (not really useful and very experimental) -> will
+  be changed in future. theme where saved under "Elchi-Plugin-change.theme
+  on pressed "ok" for leave setup, but plugin uses the changed colors until
+  restart of vdr, if you want use the new theme after restart, you must
+  select it under setup->osd->theme  (but you must select blind, the
+  description is not changed, maybe a way to change it without patch
+  of vdr is use of "themes", but not at the moment for me
+  (on changing the colors will be there entrys "too many colors" in log)
+
+2005-02-26: Version 0.0.1c
+
+- only a test with videowindow, inspired by plugin "yaepg" and
+  http://www.vdrportal.de
+- removed one unneeded line (260 in DisplayMenu.c), that overwrite a corner
+- show Audio-Track also in DisplayChannel::SetChannel to view it also, when no
+  epg is available
+- mainmenu-mode selectable ("as setup" or "as plugin")
+
+2005-03-01: Version 0.0.1d
+
+- add a small video-window to menu (selectable - only experimental),
+  but does not correkt work in all modes, best is one area, other modes
+  doesn't show colors on the scrollbar-area, but the area is defined
+  (changing of colordepth has no effekt). video freezes sometimes on switching
+  video-mode, but only on screen, switching on same or other channel bring
+  video on screen back (like yaepg)
+  (on multiarea-mode, maybe the osd lose colors, on my system only a
+  driver-reload helps at this moment)
+- change mainmenu-mode "plugin" to change menu-mode (videoarea or not)
+- change the color-setup, but now is a big area show the new color, will be change
+  in future
+
+2005-03-02: Version 0.0.1e (no release)
+
+- define HAVE_YAEPG_PATCH for video-window in MAKEFILE
+- bring back color changing, was break in 0.0.1d
+
+2005-03-06: Version 0.0.1f
+
+- add setup-option for display screenshots on left side, when using videowindow
+  on singlearea menu (maybe to use this later to show videowindow like osdpip)
+  (osd-problems with multiarea menu only when uses screenshots before using
+   multiarea-menu or if video freezes after leave the menu) - please report,
+   if someone found or know something to make this work)
+- some minor changes in setup and DisplayMenu
+- add symbols for dvd-replay in DisplayReplay (...4 - ...8) - hope, they are not ugly
+
+2005-03-09: Version 0.0.1g
+
+- add setup-option for show epg4vdr-pictures in egp-window
+- define HAVE_IMAGEMAGICK for epg4vdr-picture and video-window in MAKEFILE
+  (must uncomment the options you want in makefile)
+
+2005-03-10: only a diff for 0.0.1g
+
+- some fixes for 0.0.1g
+
+2005-03-22: Version 0.0.1h
+
+- included changes published on www.vdrportal.de
+- added option HAVE_C295 in MAKEFILE, uncomment this, if you have problem with
+  c++2.95 and error "redefinition of 'template <class T> void swap(_Tp &, _Tp &)'"
+- VolumeBar now reaches the right side of osd, when volume=100%
+- unused text-area in DiplayReplay is redrawned transparent, when SetText is
+  called (because i.e. plugin mp3 changes text)
+- changed calculation of DisplayTracks, DisplayTracks now also uses
+  Setup.ChannelInfoPos
+- add colors of MenuItems to 2bit-area of menuitems before draw first pixel to
+  avoid flushing-effects -> but color of clrMenuItemNonSelectable now is only
+  shown, if this color is the same as clrMenuItemCurrentBg or clrMenuItemCurrentFg
+  (doesn't work with videowindow)
+- changed handling for show VPS-symbol in DisplayChannel, something was wrong
+- changed handling of audiostring in DisplayChannel (thanks to HelAu from
+  www.vdrportal.de for reporting problem with vdr on "Dummy Modus")
+  (i hope, my changes works - please report, if not)
+- i think, is not needed, to show time/audiostring/vps-symbol only with
+  "WithInfo", i have uncomment this in ...DisplayChannel::Flush()
+
+2005-03-27: Version 0.0.1i
+
+- vps-symbol in small DisplayChannel now really show
+- include bitmap.c in skinelchi.c only when needed
+- fixed a bug in setup.c if use format "png"
+- changed something in DisplayReplay::SetTitle and add scrolling of title
+- add option in setup to show epg4vdr-picture in original size
+- add option in setup to select resize algorithm when show epg4vdr-picture
+  not in original size (120x90 -> 180x144 pixels)
+- changes in MAKEFILE (i.e. remove a forgotten line)
+
+2005-03-28: only a diff for 0.0.1i
+
+- a small fix for DisplayTracks, when DisplayTracks is called with first track
+  that must displayed on next "page"
+
+something maybe only changed if i get feedback
+
+2005-04-02: another diff for 0.0.1i
+
+- add option to set up directory of epg-pictures, because there another program
+  provides picture of epg
+
+2005-04-03:
+
+- add command-line-option to setup directory of epg-pictures, when use, in
+  setup the directory is not to be set up, only show (inspired by a user of
+  www.vdr-wiki.de)
+- add option VIDEOSTATUS in MAKEFILE and "Video status" in setup to show video
+  status in DisplayReplay and DisplayChannel, and switch VideoDisplayFormat in 
+  DisplayReplay when the setting VideoDisplayFormat not same as set up in setup
+  (i.e. on my system dvd-plugin does not set this korrekt)
+- add option to set up the use of FixedFont in DisplayMenu (inspired by a user
+  of vdrportal.de)
+- add option "120x120" for pictures of epg
+- rename some variables epg4vdr... in epgimages...
+- add slideshow for images of epg if there more then one image pro eventID
+  and add option to set up showtime for images (thanks for cooperation to
+  sn123py from vdrportal.de, who is renamed the images in tvmovie2vdr)

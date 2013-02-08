@@ -1,8 +1,10 @@
 #!/bin/bash
 
 ## TrigerCascade="true" result in script being run on the other computers too
+. /usr/pluto/bin/Config_Ops.sh
 . /usr/pluto/bin/Section_Ops.sh
 . /usr/pluto/bin/Utils.sh
+. /usr/pluto/bin/SQL_Ops.sh
 AutoMaster_StorageDevices="/mnt/device /etc/auto.PlutoStorageDevices --timeout=30"
 PopulateSection "/etc/auto.master" "PlutoStorageDevices" "$AutoMaster_StorageDevices"
 mkdir -p /mnt/device
@@ -45,10 +47,35 @@ fi
 ## Start UPNP media files client
 mkdir -p /mnt/upnp
 if ! mountpoint /mnt/upnp ;then
-	djmount -o allow_other,default_permissions /mnt/upnp
+	if [ -x /usr/bin/djmount ] ;then
+		djmount -o allow_other,default_permissions /mnt/upnp
+	fi
+fi
+
+#Create a way to determine if MythTV is installed...
+Q="SELECT PK_Device FROM Device WHERE FK_DeviceTemplate=36"
+MythTV_Installed=$(RunSQL "$Q")
+
+if [[ $MythTV_Installed ]] ;then
+	# Call MythTV Setup to alter storage groups. 
+	if [ -x /usr/pluto/bin/mythtv_setup.pl ] ; then
+		/usr/pluto/bin/mythtv_setup.pl
+	fi
+
+	#Alter mythconverg.settings to force Media Directors to stream recordings from the backend on the core to avoid errors with non-system drive storage groups
+	Q="UPDATE settings SET data=1 where value='AlwaysStreamFiles'"
+	UseDB "mythconverg"
+	RunSQL "$Q"
+
+        #Sync some settings to MDs
+        Q="UPDATE settings SET data=1 where value='TruncateDeletesSlowly'"
+        UseDB "mythconverg"
+        RunSQL "$Q"
 fi
 
 ## Call this script on the other machines too
 if [[ $TrigerCascade == "true" ]] ;then
-	/usr/pluto/bin/MessageSend dcerouter -targetType template 0 26 1 67 13 "/usr/pluto/bin/StorageDevices_Setup.sh" 51 "--nocascade"
+	/usr/pluto/bin/MessageSend "$DCERouter" -targetType template 0 26 1 67 13 "/usr/pluto/bin/StorageDevices_Setup.sh" 51 "--nocascade"
 fi
+
+invoke-rc.d samba restart || invoke-rc.d smbd restart

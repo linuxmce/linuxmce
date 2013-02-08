@@ -37,8 +37,6 @@ using namespace std;
 #include "Table_Distro.h"
 
 #include "Table_Package_Directory_File.h"
-#include "Table_Package_Directory_File_pschist.h"
-#include "Table_Package_Directory_File_pschmask.h"
 
 
 void Database_pluto_main::CreateTable_Package_Directory()
@@ -86,6 +84,7 @@ void Row_Package_Directory::Delete()
 	Row_Package_Directory *pRow = this; // Needed so we will have only 1 version of get_primary_fields_assign_from_row
 	
 	if (!is_deleted)
+	{
 		if (is_added)	
 		{	
 			vector<TableRow*>::iterator i;	
@@ -107,6 +106,7 @@ void Row_Package_Directory::Delete()
 			table->deleted_cachedRows[key] = this;
 			is_deleted = true;	
 		}	
+	}
 }
 
 void Row_Package_Directory::Reload()
@@ -148,8 +148,7 @@ is_null[3] = true;
 m_FK_OperatingSystem = 0;
 is_null[4] = true;
 m_FK_Distro = 0;
-m_Path = "";
-is_null[5] = false;
+is_null[5] = true;
 is_null[6] = true;
 m_FlipSource = 0;
 is_null[7] = false;
@@ -163,7 +162,8 @@ is_null[11] = true;
 m_psc_user = 0;
 m_psc_frozen = 0;
 is_null[12] = false;
-is_null[13] = true;
+m_psc_mod = "0000-00-00 00:00:00";
+is_null[13] = false;
 is_null[14] = true;
 m_psc_restrict = 0;
 
@@ -273,6 +273,9 @@ return is_null[3];}
 bool Row_Package_Directory::FK_Distro_isNull() {PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
 
 return is_null[4];}
+bool Row_Package_Directory::Path_isNull() {PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
+
+return is_null[5];}
 bool Row_Package_Directory::InputPath_isNull() {PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
 
 return is_null[6];}
@@ -291,9 +294,6 @@ return is_null[11];}
 bool Row_Package_Directory::psc_frozen_isNull() {PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
 
 return is_null[12];}
-bool Row_Package_Directory::psc_mod_isNull() {PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
-
-return is_null[13];}
 bool Row_Package_Directory::psc_restrict_isNull() {PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
 
 return is_null[14];}
@@ -305,6 +305,10 @@ is_modified=true;
 }
 void Row_Package_Directory::FK_Distro_setNull(bool val){PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
 is_null[4]=val;
+is_modified=true;
+}
+void Row_Package_Directory::Path_setNull(bool val){PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
+is_null[5]=val;
 is_modified=true;
 }
 void Row_Package_Directory::InputPath_setNull(bool val){PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
@@ -329,10 +333,6 @@ is_modified=true;
 }
 void Row_Package_Directory::psc_frozen_setNull(bool val){PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
 is_null[12]=val;
-is_modified=true;
-}
-void Row_Package_Directory::psc_mod_setNull(bool val){PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
-is_null[13]=val;
 is_modified=true;
 }
 void Row_Package_Directory::psc_restrict_setNull(bool val){PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
@@ -413,8 +413,8 @@ PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
 if (is_null[5])
 return "NULL";
 
-char *buf = new char[511];
-db_wrapper_real_escape_string(table->database->m_pDB, buf, m_Path.c_str(), (unsigned long) min((size_t)255,m_Path.size()));
+char *buf = new char[1531];
+db_wrapper_real_escape_string(table->database->m_pDB, buf, m_Path.c_str(), (unsigned long) min((size_t)765,m_Path.size()));
 string s=string()+"\""+buf+"\"";
 delete[] buf;
 return s;
@@ -427,8 +427,8 @@ PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
 if (is_null[6])
 return "NULL";
 
-char *buf = new char[511];
-db_wrapper_real_escape_string(table->database->m_pDB, buf, m_InputPath.c_str(), (unsigned long) min((size_t)255,m_InputPath.size()));
+char *buf = new char[1531];
+db_wrapper_real_escape_string(table->database->m_pDB, buf, m_InputPath.c_str(), (unsigned long) min((size_t)765,m_InputPath.size()));
 string s=string()+"\""+buf+"\"";
 delete[] buf;
 return s;
@@ -1269,20 +1269,6 @@ void Row_Package_Directory::Package_Directory_File_FK_Package_Directory_getrows(
 PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
 
 class Table_Package_Directory_File *pTable = table->database->Package_Directory_File_get();
-pTable->GetRows("`FK_Package_Directory`=" + StringUtils::itos(m_PK_Package_Directory),rows);
-}
-void Row_Package_Directory::Package_Directory_File_pschist_FK_Package_Directory_getrows(vector <class Row_Package_Directory_File_pschist*> *rows)
-{
-PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
-
-class Table_Package_Directory_File_pschist *pTable = table->database->Package_Directory_File_pschist_get();
-pTable->GetRows("`FK_Package_Directory`=" + StringUtils::itos(m_PK_Package_Directory),rows);
-}
-void Row_Package_Directory::Package_Directory_File_pschmask_FK_Package_Directory_getrows(vector <class Row_Package_Directory_File_pschmask*> *rows)
-{
-PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
-
-class Table_Package_Directory_File_pschmask *pTable = table->database->Package_Directory_File_pschmask_get();
 pTable->GetRows("`FK_Package_Directory`=" + StringUtils::itos(m_PK_Package_Directory),rows);
 }
 

@@ -136,7 +136,6 @@ bool psc_id_isNull();
 bool psc_batch_isNull();
 bool psc_user_isNull();
 bool psc_frozen_isNull();
-bool psc_mod_isNull();
 bool psc_restrict_isNull();
 
 			
@@ -145,7 +144,6 @@ void psc_id_setNull(bool val);
 void psc_batch_setNull(bool val);
 void psc_user_setNull(bool val);
 void psc_frozen_setNull(bool val);
-void psc_mod_setNull(bool val);
 void psc_restrict_setNull(bool val);
 	
 	
@@ -166,12 +164,6 @@ void psc_restrict_setNull(bool val);
 		void Criteria_FK_CriteriaParmNesting_getrows(vector <class Row_Criteria*> *rows);
 void CriteriaParm_FK_CriteriaParmNesting_getrows(vector <class Row_CriteriaParm*> *rows);
 void CriteriaParmNesting_FK_CriteriaParmNesting_Parent_getrows(vector <class Row_CriteriaParmNesting*> *rows);
-void CriteriaParmNesting_pschist_FK_CriteriaParmNesting_Parent_getrows(vector <class Row_CriteriaParmNesting_pschist*> *rows);
-void CriteriaParmNesting_pschmask_FK_CriteriaParmNesting_Parent_getrows(vector <class Row_CriteriaParmNesting_pschmask*> *rows);
-void CriteriaParm_pschist_FK_CriteriaParmNesting_getrows(vector <class Row_CriteriaParm_pschist*> *rows);
-void CriteriaParm_pschmask_FK_CriteriaParmNesting_getrows(vector <class Row_CriteriaParm_pschmask*> *rows);
-void Criteria_pschist_FK_CriteriaParmNesting_getrows(vector <class Row_Criteria_pschist*> *rows);
-void Criteria_pschmask_FK_CriteriaParmNesting_getrows(vector <class Row_Criteria_pschmask*> *rows);
 
 
 		// Setup binary serialization

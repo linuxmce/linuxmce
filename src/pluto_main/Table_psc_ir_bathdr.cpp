@@ -84,6 +84,7 @@ void Row_psc_ir_bathdr::Delete()
 	Row_psc_ir_bathdr *pRow = this; // Needed so we will have only 1 version of get_primary_fields_assign_from_row
 	
 	if (!is_deleted)
+	{
 		if (is_added)	
 		{	
 			vector<TableRow*>::iterator i;	
@@ -105,6 +106,7 @@ void Row_psc_ir_bathdr::Delete()
 			table->deleted_cachedRows[key] = this;
 			is_deleted = true;	
 		}	
+	}
 }
 
 void Row_psc_ir_bathdr::Reload()
@@ -221,8 +223,8 @@ PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
 if (is_null[1])
 return "NULL";
 
-char *buf = new char[33];
-db_wrapper_real_escape_string(table->database->m_pDB, buf, m_IPAddress.c_str(), (unsigned long) min((size_t)16,m_IPAddress.size()));
+char *buf = new char[97];
+db_wrapper_real_escape_string(table->database->m_pDB, buf, m_IPAddress.c_str(), (unsigned long) min((size_t)48,m_IPAddress.size()));
 string s=string()+"\""+buf+"\"";
 delete[] buf;
 return s;
@@ -249,8 +251,8 @@ PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
 if (is_null[3])
 return "NULL";
 
-char *buf = new char[131071];
-db_wrapper_real_escape_string(table->database->m_pDB, buf, m_comments.c_str(), (unsigned long) min((size_t)65535,m_comments.size()));
+char *buf = new char[393211];
+db_wrapper_real_escape_string(table->database->m_pDB, buf, m_comments.c_str(), (unsigned long) min((size_t)196605,m_comments.size()));
 string s=string()+"\""+buf+"\"";
 delete[] buf;
 return s;

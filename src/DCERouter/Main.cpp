@@ -7,11 +7,11 @@
 
  Phone: +1 (877) 758-8648
 
- This program is distributed according to the terms of the Pluto Public License, available at:
- http://plutohome.com/index.php?section=public_license
+ This program is distributed according to the terms of the GNU Public License, available at:
+ http://www.fsf.org/licensing/licenses/gpl.html
 
  This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY
- or FITNESS FOR A PARTICULAR PURPOSE. See the Pluto Public License for more details.
+ or FITNESS FOR A PARTICULAR PURPOSE. See the GNU Public License for more details.
 
  */
 
@@ -46,13 +46,12 @@ Usage: Router [-i installation] [-d device] [-h hostname]
 #include "DCERouter.h"
 #include "DCE/DCEConfig.h"
 #include "DeviceData_Router.h"
-
-#ifndef EMBEDDED_LMCE
 #include "../pluto_main/Table_DeviceData.h"
 #include "../pluto_main/Table_DesignObj.h"
-#endif
 
-#include "../include/version.cpp"
+#define  VERSION "<=version=>"
+const char *g_szCompile_Date="<=compile_date=>";
+/*SVN_REVISION*/
 
 using namespace DCE;
 
@@ -100,11 +99,11 @@ int main(int argc, char *argv[])
 		cout<<"Copyright (C) 2004 Pluto, Inc., a Florida Corporation"<<endl
 		    <<"www.plutohome.com"<<endl
 		    <<"Phone: +1 (877) 758-8648"<<endl
-		    <<"This program is distributed according to the terms of the Pluto Public License, available at: "<<endl
-		    <<"http://plutohome.com/index.php?section=public_license "<<endl
+		    <<"This program is distributed according to the terms of the GNU Public License, available at: "<<endl
+		    <<"http://www.fsf.org/licensing/licenses/gpl.html "<<endl
 		    <<"This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; "<<endl
 		    <<"without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. "<<endl
-		    <<"See the Pluto Public License for more details."<<endl << "---------------" << endl << endl;
+		    <<"See the GNU Public License for more details."<<endl << "---------------" << endl << endl;
 
 	srand((int) time(NULL));
 

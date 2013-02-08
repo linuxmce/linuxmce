@@ -1,30 +1,28 @@
 #!/bin/bash
 
+. /usr/pluto/bin/SQL_Ops.sh
+
 PIXDIR="/home/quick_start_icons"
 
-if [[ ! -d $PIXDIR ]]; then
-        mkdir -p $PIXDIR
+if [[ ! -d "$PIXDIR" ]]; then
+	mkdir -p "$PIXDIR"
 fi
 
-icon=$(mysql -u root -D pluto_main -N -e "SELECT Icon FROM QuickStartTemplate")
-template=$(mysql -u root -D pluto_main -N -e "SELECT PK_QuickStartTemplate FROM QuickStartTemplate")
+Q="SELECT PK_QuickStartTemplate,Icon FROM QuickStartTemplate Where Icon != ''"
+R=$(RunSQL "$Q")
 
-ICON=( $icon )
-TEMPLATE=( $template )
-counter=${#ICON[@]}
-
-
-index=0
-
-while [[ $index -le $(($counter-1)) ]]; do
-
-        wget --tries=1 --timeout=2 -O $PIXDIR/${TEMPLATE[$index]} ${ICON[$index]}
-        convert $PIXDIR/${TEMPLATE[$index]} $PIXDIR/template_${TEMPLATE[$index]}.jpg
-        rm $PIXDIR/${TEMPLATE[$index]}
-        RET=$?
-        if [[ "$RET" == "1" ]]; then
-        echo "Internet connection problem or bad URL !"
-        fi
-        index=$[$index + 1]
+for Row in $R; do
+	Template=$(Field 1 "$Row")
+	Icon=$(Field 2 "$Row")
+	LocalIcon="$PIXDIR/template_$Template.png"
+	if [[ "$Icon" = "http://"* ]]; then
+		# URL
+		wget --tries=1 --timeout=2 -O "$PIXDIR/$Template" "$Icon"
+		convert "$PIXDIR/$Template" "$LocalIcon"
+		rm -f "$PIXDIR/$Template"
+	elif [[ -n "$Icon" && -f "$Icon" ]]; then
+		# File
+		convert "$Icon" "$LocalIcon"
+	fi
 done
 

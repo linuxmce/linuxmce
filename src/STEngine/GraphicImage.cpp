@@ -17,8 +17,6 @@
 
  */
 
-#include <algorithm> // for std::min()
-
 #include <GL/glu.h>
 #include "GraphicImage.h"
 #include "SDL_rotozoom.h"
@@ -28,6 +26,11 @@
 #include "TextureManager.h"
 
 #include "DCE/Logger.h"
+
+#include <exiv2/image.hpp>
+#include <exiv2/exif.hpp>
+#include <exiv2/iptc.hpp>
+
 using namespace DCE;
 
 GraphicImage::GraphicImage(int nMaxSize)
@@ -42,32 +45,69 @@ GraphicImage::~GraphicImage()
 	ReleaseTexture();
 }
 
+void GraphicImage::adjustImageZoomAndOrientation(string FileName) {
+	// Check orientation if jpeg
+	Exiv2::Image::AutoPtr image = Exiv2::ImageFactory::open(FileName);
+	if(image.get() != 0) {
+	        image->readMetadata();
+		Exiv2::ExifData &exifData = image->exifData();
+
+		if(!exifData.empty()) {
+		        Exiv2::ExifData::const_iterator end = exifData.end();
+		        for (Exiv2::ExifData::const_iterator i = exifData.begin(); i != end; ++i) {
+			        if (i->tag() == 274) {
+				        int orientation = i->value().toLong();
+					if (orientation > 1) {
+					        LoggerWrapper::GetInstance()->Write(LV_STATUS, "Image needs to be rotated: orientation = %d", orientation);
+						double rotAngle = 0;
+						// TODO: support other rotation/flip combinations
+						if (orientation == 6) {
+						  rotAngle = -90;
+						} else if (orientation = 8) {
+						  rotAngle = 90;
+						}
+						LoggerWrapper::GetInstance()->Write(LV_STATUS, "Image rotation = %f",rotAngle);
+						SDL_Surface *pSDL_Surface = LocalSurface;
+						
+						LocalSurface = rotozoomSurface(pSDL_Surface, rotAngle, 1, 1);
+						SDL_FreeSurface(pSDL_Surface);
+
+					}
+					break;
+			        }
+			}
+		}
+        }
+	LoggerWrapper::GetInstance()->Write(LV_STATUS, "After rotation w: %d h: %d",LocalSurface->w,LocalSurface->h);
+
+	if(m_nMaxSize && (LocalSurface->w > m_nMaxSize || LocalSurface->h > m_nMaxSize)) 
+	{
+		LoggerWrapper::GetInstance()->Write(LV_WARNING, "Pictures too big %s, downscaling it", FileName.c_str());
+
+		SDL_Surface *pSDL_Surface = LocalSurface;
+
+		//zoom
+		double ZoomX = 1;
+		double ZoomY = 1;
+
+		SDL_Surface *rotozoom_picture;
+
+		ZoomX = ZoomY = min(m_nMaxSize / double(pSDL_Surface->w),
+			m_nMaxSize / double(pSDL_Surface->h));
+
+		LocalSurface = zoomSurface(pSDL_Surface, ZoomX, ZoomY, SMOOTHING_ON);
+		SDL_FreeSurface(pSDL_Surface);
+	}
+
+}
+
 bool GraphicImage::Load(string FileName)
 {
 	LocalSurface = IMG_Load(FileName.c_str()); 
 	if( LocalSurface )
 	{
-		LoggerWrapper::GetInstance()->Write(LV_STATUS, "Loaded %s w: %d h: %d",FileName.c_str(),LocalSurface->w,LocalSurface->h);
-
-		if(m_nMaxSize && (LocalSurface->w > m_nMaxSize || LocalSurface->h > m_nMaxSize)) 
-		{
-			LoggerWrapper::GetInstance()->Write(LV_WARNING, "Picture too big %s, downscaling it", FileName.c_str());
-
-			SDL_Surface *pSDL_Surface = LocalSurface;
-
-			//zoom
-			double ZoomX = 1;
-			double ZoomY = 1;
-
-			SDL_Surface *rotozoom_picture;
-
-			ZoomX = ZoomY = std::min(m_nMaxSize / double(pSDL_Surface->w),
-				m_nMaxSize / double(pSDL_Surface->h));
-
-			LocalSurface = zoomSurface(pSDL_Surface, ZoomX, ZoomY, SMOOTHING_ON);
-			SDL_FreeSurface(pSDL_Surface);
-		}
-
+	        LoggerWrapper::GetInstance()->Write(LV_STATUS, "Loaded %s",FileName.c_str());
+	        adjustImageZoomAndOrientation(FileName);
 	}
 	else
 		LoggerWrapper::GetInstance()->Write(LV_WARNING, "Failed to load '%s'", FileName.c_str());
@@ -168,44 +208,7 @@ void GraphicImage::ScaleImage(int nScreenWidth, int nScreenHeight)
 	if(LocalSurface == NULL)
 		return;
 
-	/* If Surface is bigger than the maximum supported texture size,
-	 * then resize the Surface to fit on the maximum texture size.
-	 */
-	SDL_Surface *Surface = LocalSurface;
-	GLint texSize = 512;
-	glGetIntegerv(GL_MAX_TEXTURE_SIZE, &texSize);
-	if (Surface->w > texSize || Surface->h > texSize) {
-		double adj[] = { 1.0, 0.95, 0.90 };
-		SDL_Surface *ns = NULL;
-		for (int i = 0; i < (int)(sizeof(adj) / sizeof(double)); i++) {
-			double zoomW = ((double)texSize) / Surface->w;
-			double zoomH = ((double)texSize) / Surface->h;
-			double zoom = std::min(zoomW, zoomH) * adj[i];
-			ns = rotozoomSurface(Surface, 0.0, zoom, 1);
-
-			if (ns == NULL)
-				continue;
-
-			if (ns->w > texSize || ns->h > texSize) {
-				SDL_FreeSurface(ns);
-				ns = NULL;
-				continue;
-			}
-
-			break;
-		}
-
-		if (ns) {
-			LocalSurface = ns;
-			SDL_FreeSurface(Surface);
-			Surface = ns;
-		} else {
-			LoggerWrapper::GetInstance()->Write(
-				LV_STATUS, "Rotozoom failed");
-			return;
-		}
-	}
-
+	SDL_Surface* Surface = LocalSurface;
 	Width = MinPowerOf2(Surface->w);
 	Height = MinPowerOf2(Surface->h);
 
@@ -214,6 +217,7 @@ void GraphicImage::ScaleImage(int nScreenWidth, int nScreenHeight)
 	if (Width == Surface->w && Height == Surface->h)
 		return;
 
+	// Max values tell us how much of the new surface holds an image
 	MaxU = ((float)Surface->w)/Width;
 	MaxV = ((float)Surface->h)/Height;
 

@@ -79,6 +79,7 @@ void Row_Image::Delete()
 	Row_Image *pRow = this; // Needed so we will have only 1 version of get_primary_fields_assign_from_row
 	
 	if (!is_deleted)
+	{
 		if (is_added)	
 		{	
 			vector<TableRow*>::iterator i;	
@@ -100,6 +101,7 @@ void Row_Image::Delete()
 			table->deleted_cachedRows[key] = this;
 			is_deleted = true;	
 		}	
+	}
 }
 
 void Row_Image::Reload()
@@ -146,7 +148,8 @@ is_null[6] = true;
 m_psc_user = 0;
 m_psc_frozen = 0;
 is_null[7] = false;
-is_null[8] = true;
+m_psc_mod = "0000-00-00 00:00:00";
+is_null[8] = false;
 is_null[9] = true;
 m_psc_restrict = 0;
 
@@ -235,9 +238,6 @@ return is_null[6];}
 bool Row_Image::psc_frozen_isNull() {PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
 
 return is_null[7];}
-bool Row_Image::psc_mod_isNull() {PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
-
-return is_null[8];}
 bool Row_Image::psc_restrict_isNull() {PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
 
 return is_null[9];}
@@ -263,10 +263,6 @@ void Row_Image::psc_frozen_setNull(bool val){PLUTO_SAFETY_LOCK_ERRORSONLY(sl,tab
 is_null[7]=val;
 is_modified=true;
 }
-void Row_Image::psc_mod_setNull(bool val){PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
-is_null[8]=val;
-is_modified=true;
-}
 void Row_Image::psc_restrict_setNull(bool val){PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
 is_null[9]=val;
 is_modified=true;
@@ -280,8 +276,8 @@ PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
 if (is_null[0])
 return "NULL";
 
-char *buf = new char[201];
-db_wrapper_real_escape_string(table->database->m_pDB, buf, m_PK_Image.c_str(), (unsigned long) min((size_t)100,m_PK_Image.size()));
+char *buf = new char[601];
+db_wrapper_real_escape_string(table->database->m_pDB, buf, m_PK_Image.c_str(), (unsigned long) min((size_t)300,m_PK_Image.size()));
 string s=string()+"\""+buf+"\"";
 delete[] buf;
 return s;
@@ -501,7 +497,7 @@ values_list_comma_separated = values_list_comma_separated + pRow->PK_Image_asSQL
 		Row_Image* pRow = (Row_Image*) (*i).second;	
 		SingleStringKey key(pRow->m_PK_Image);
 
-		char tmp_PK_Image[201];
+		char tmp_PK_Image[601];
 db_wrapper_real_escape_string(database->m_pDB,tmp_PK_Image, key.pk.c_str(), (unsigned long) key.pk.size());
 
 
@@ -560,7 +556,7 @@ update_values_list = update_values_list + "`PK_Image`="+pRow->PK_Image_asSQL()+"
 		SingleStringKey key = (*i).first;
 		Row_Image* pRow = (Row_Image*) (*i).second;	
 
-		char tmp_PK_Image[201];
+		char tmp_PK_Image[601];
 db_wrapper_real_escape_string(database->m_pDB,tmp_PK_Image, key.pk.c_str(), (unsigned long) key.pk.size());
 
 
@@ -823,7 +819,7 @@ Row_Image* Table_Image::FetchRow(SingleStringKey &key)
 	PLUTO_SAFETY_LOCK_ERRORSONLY(sl,database->m_DBMutex);
 
 	//defines the string query for the value of key
-	char tmp_PK_Image[201];
+	char tmp_PK_Image[601];
 db_wrapper_real_escape_string(database->m_pDB,tmp_PK_Image, key.pk.c_str(), (unsigned long) key.pk.size());
 
 

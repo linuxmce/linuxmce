@@ -26,7 +26,7 @@ if [ x"$1" = x"master" ] ; then
 	# to show up in LMCE's recording list with metadata.
 	UpdateMythSettingAllHosts "JobAllowUserJob1" "1"
 	UpdateMythSetting "AutoRunUserJob1"  "1" "NULL"
-	UpdateMythSetting "UserJob1"         "/usr/pluto/bin/SaveMythRecording.sh %CHANID% %STARTTIME% %DIR% %FILE%" "NULL"
+	UpdateMythSetting "UserJob1"         "/usr/pluto/bin/SaveMythRecording.sh %CHANID% %STARTTIME% \"%DIR%\" \"%FILE%\"" "NULL"
 	UpdateMythSetting "UserJobDesc1"     "Save the recorded show into Pluto\'s database" "NULL"
 
 	# This is only to default to English, if you set a different
@@ -81,6 +81,10 @@ if [ x"$1" = x"master" ] ; then
 	# Don't change this unless you KNOW what you are doing
 	UpdateMythSetting "MasterServerIP"      $IPADDR "NULL"
 	UpdateMythSetting "MasterServerPort"    "6543"  "NULL"
+
+	# Now that we're on MythTV 0.22, we have to set a PIN.
+	UpdateMythSettingAllHosts "SecurityPin"	"0000"
+
 elif [ x"$1" = x"slave" ] ; then
 	IPADDR="$2"
 	NAME="$3"
@@ -98,4 +102,5 @@ elif [ x"$1" = x"slave" ] ; then
 	UpdateMythSetting "MasterServerPort"    "6543"  $NAME
 	UpdateMythSetting "BackendServerPort"   "6543"  $NAME
 	UpdateMythSetting "BackendServerStatus" "6544"  $NAME
+	UpdateMythSetting "AlwaysStreamFiles" 	"1" 	$NAME
 fi

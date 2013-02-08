@@ -1,0 +1,1917 @@
+#! /bin/sh /usr/share/dpatch/dpatch-run
+## 26_transmitter_lircd.conf.dpatch by Mario Limonciello <superm1@ubuntu.com>
+##
+## All lines beginning with `## DP:' are a description of the patch.
+## DP: Add support to preconfigure transmitters off the bat
+
+@DPATCH@
+diff -urNad lirc-0.8.3~pre1~/Makefile.am lirc-0.8.3~pre1/Makefile.am
+--- lirc-0.8.3~pre1~/Makefile.am	2008-03-24 00:12:26.000000000 -0500
++++ lirc-0.8.3~pre1/Makefile.am	2008-03-24 00:35:50.000000000 -0500
+@@ -20,11 +20,11 @@
+ 	./data2setup.sh > setup-driver.sh
+ 
+ dist-hook:
+-	for f in contrib remotes; do \
++	for f in contrib remotes transmitters; do \
+ 		cp -pr $(srcdir)/$$f $(distdir)/$$f; done
+ 	rm -r `find $(distdir) -name "CVS"`
+ 	-rcs2log >$(distdir)/ChangeLog
+ 
+ DISTCLEANFILES = configure.sh .setup.config
+ 
+-CLEANFILES = *~ remotes/*~ contrib/*~
++CLEANFILES = *~ remotes/*~ contrib/*~ transmitters/*~
+diff -urNad lirc-0.8.3~pre1~/Makefile.in lirc-0.8.3~pre1/Makefile.in
+--- lirc-0.8.3~pre1~/Makefile.in	2008-03-24 00:12:26.000000000 -0500
++++ lirc-0.8.3~pre1/Makefile.in	2008-03-24 00:35:50.000000000 -0500
+@@ -215,7 +215,7 @@
+ EXTRA_DIST = setup.sh setup-driver.sh setup.data data2setup.sh ANNOUNCE TODO
+ SUBDIRS = drivers daemons tools doc
+ DISTCLEANFILES = configure.sh .setup.config
+-CLEANFILES = *~ remotes/*~ contrib/*~
++CLEANFILES = *~ remotes/*~ contrib/*~ transmitters/*~
+ all: config.h
+ 	$(MAKE) $(AM_MAKEFLAGS) all-recursive
+ 
+@@ -666,7 +666,7 @@
+ 	./data2setup.sh > setup-driver.sh
+ 
+ dist-hook:
+-	for f in contrib remotes; do \
++	for f in contrib remotes transmitters; do \
+ 		cp -pr $(srcdir)/$$f $(distdir)/$$f; done
+ 	rm -r `find $(distdir) -name "CVS"`
+ 	-rcs2log >$(distdir)/ChangeLog
+diff -urNad lirc-0.8.3~pre1~/doc/transmitter.hwdb lirc-0.8.3~pre1/doc/transmitter.hwdb
+--- lirc-0.8.3~pre1~/doc/transmitter.hwdb	1969-12-31 18:00:00.000000000 -0600
++++ lirc-0.8.3~pre1/doc/transmitter.hwdb	2008-03-24 00:35:50.000000000 -0500
+@@ -0,0 +1,52 @@
++# LIRC - Transmitter Hardware DataBase
++#
++# This file lists all the cable and satellite boxes
++# supported by LIRC in a parseable form.
++#
++# The format is:
++#
++# [remote controls type]
++# description;driver;lirc driver;HW_DEFAULT;lircd_conf;
++#
++#
++[Motorola Cable box]
++Serial Port (UART) : Motorola Cable box;serial;lirc_dev lirc_serial;hw_default;motorola/dctxxxx.conf
++Hauppauge PVR-150 (pci) : Motorola Cable box;none;lirc_dev lirc_pvr150;hw_default;motorola/dctxxxx.conf
++Microsoft Windows Media Center V2 (usb) : Motorola Cable box;none;lirc_dev lirc_mceusb2;hw_default;motorola/dctxxxx.conf
++Command IR : Motorola Cable box;none;lirc_dev lirc_cmdir;hw_default;motorola/dctxxxx.conf
++USB-UIRT2 : Motorola Cable box;uirt2_raw;none;hw_uirt2_raw;motorola/dctxxxx.conf
++
++[Sky Satellite]
++Serial Port (UART) : Sky Satellite Receiver;serial;lirc_dev lirc_serial;hw_default;sky/general.conf
++Hauppauge PVR-150 (pci) : Sky Satellite Receiver;none;lirc_dev lirc_pvr150;hw_default;sky/general.conf
++Microsoft Windows Media Center V2 (usb) : Sky Satellite Receiver;none;lirc_dev lirc_mceusb2;hw_default;sky/general.conf
++Command IR : Sky Satellite Receiver;none;lirc_dev lirc_cmdir;hw_default;sky/general.conf
++USB-UIRT2 : Sky Satellite Receiver;uirt2_raw;none;hw_uirt2_raw;sky/general.conf
++
++[Dish Networks]
++Serial Port (UART) : Dish Receiver;serial;lirc_dev lirc_serial;hw_default;dish/general.conf
++Hauppauge PVR-150 (pci) : Dish Receiver;none;lirc_dev lirc_pvr150;hw_default;dish/general.conf
++Microsoft Windows Media Center V2 (usb) : Dish Receiver;none;lirc_dev lirc_mceusb2;hw_default;dish/general.conf
++Command IR : Dish Receiver;none;lirc_dev lirc_cmdir;hw_default;dish/general.conf
++USB-UIRT2 : Dish Receiver;uirt2_raw;none;hw_uirt2_raw;dish/general.conf
++
++[Direct TV]
++Serial Port (UART) : Direct TV Receiver;serial;lirc_dev lirc_serial;hw_default;directtv/general.conf
++Hauppauge PVR-150 (pci) : Direct TV Receiver;none;lirc_dev lirc_pvr150;hw_default;directtv/general.conf
++Microsoft Windows Media Center V2 (usb) : Direct TV Receiver;none;lirc_dev lirc_mceusb2;hw_default;directtv/general.conf
++Command IR : Direct TV Receiver;none;lirc_dev lirc_cmdir;hw_default;directtv/general.conf
++USB-UIRT2 : Direct TV Receiver;uirt2_raw;none;hw_uirt2_raw;directtv/general.conf
++
++[Pioneer Cable box]
++Serial Port (UART) : Pioneer Cable box;serial;lirc_dev lirc_serial;hw_default;pioneer/general.conf
++Hauppauge PVR-150 (pci) : Pioneer Cable box;none;lirc_dev lirc_pvr150;hw_default;pioneer/general.conf
++Microsoft Windows Media Center V2 (usb) : Pioneer Cable box;none;lirc_dev lirc_mceusb2;hw_default;pioneer/general.conf
++Command IR : Pioneer Cable box;none;lirc_dev lirc_cmdir;hw_default;pioneer/general.conf
++USB-UIRT2 : Pioneer Cable box;uirt2_raw;none;hw_uirt2_raw;pioneer/general.conf
++
++[Scientific Atlanta Cable box]
++Serial Port (UART) : Scientific Atlanta Cable box;serial;lirc_dev lirc_serial;hw_default;scientificatlanta/general.conf
++Hauppauge PVR-150 (pci) : Scientific Atlanta Cable box;none;lirc_dev lirc_pvr150;hw_default;scientificatlanta/general.conf
++Microsoft Windows Media Center V2 (usb) : Scientific Atlanta Cable box;none;lirc_dev lirc_mceusb2;hw_default;scientificatlanta/general.conf
++Command IR : Scientific Atlanta Cable box;none;lirc_dev lirc_cmdir;hw_default;scientificatlanta/general.conf
++USB-UIRT2 : Scientific Atlanta Cable box;uirt2_raw;none;hw_uirt2_raw;scientificatlanta/general.conf
+diff -urNad lirc-0.8.3~pre1~/transmitters/directtv/general.conf lirc-0.8.3~pre1/transmitters/directtv/general.conf
+--- lirc-0.8.3~pre1~/transmitters/directtv/general.conf	1969-12-31 18:00:00.000000000 -0600
++++ lirc-0.8.3~pre1/transmitters/directtv/general.conf	2008-03-24 00:35:50.000000000 -0500
+@@ -0,0 +1,183 @@
++#
++# this config file was automatically generated
++# using lirc-0.8.1-CVS-pvr150(default) on Thu Nov 23 11:12:04 2006
++#
++# contributed by Chris Jacobs
++#
++# brand: DirecTV HD20-100
++# model no. of remote control: HD20-100
++# devices being controlled by this remote: DirecTV HD20-100
++#
++
++begin remote
++
++  name   directtv
++  flags RAW_CODES
++  eps            30
++  aeps          100
++
++  ptrail        613
++  repeat     0     0
++  gap    29767
++
++      begin raw_codes
++
++          name 1
++             6000    1150    1250    1100     650     550
++              650     550     650     550     650     500
++              650    1150     650     550     650    1150
++              600
++
++          name 2
++             6000    1100    1250    1150     650     550
++              650     550     600     550     650     550
++             1250     550     650     550    1200     550
++              650
++
++          name 3
++             6000    1150    1250    1100     650     550
++              650     550     650     550     650     550
++             1200    1150     650     550    1250    1150
++              600
++
++          name 4
++             6000    1150    1250    1150     650     500
++              650     550     650     550     650    1150
++              650     500     650     550    1250    1150
++              650
++
++          name 5
++             6000    1150    1250    1100     650     550
++              650     550     650     500     650    1150
++              650    1150     650    1150     600     550
++              650
++
++          name 6
++             6000    1150    1250    1150     650     500
++              650     550     650     550     650    1150
++             1200     550     650    1150     650    1150
++              600
++
++          name 7
++             6000    1100    1250    1150     650     550
++              650     500     650     550     650    1150
++             1250    1100     650    1150    1250     550
++              650
++
++          name 8
++             6000    1150    1250    1100     650     550
++              650     550     650     550    1200     550
++              650     550     650    1150    1200     550
++              650
++
++          name 9
++             6000    1100    1300    1100     650     550
++              650     550     650     500    1250     550
++              650    1150     650    1150    1200    1150
++              650
++
++          name 0
++             6000    1150    1250    1150     650     500
++              650     550     650    1150     650     550
++              650    1100     650    1150    1250     550
++              650
++
++          name dash
++             6000    1100    1300    1100     650     550
++              650     550     650    1100     650     550
++             1250     550     650    1100    1250    1150
++              650
++
++          name last
++             6000    1100    1300    1100     650     550
++              650     550     650     500    1250    1150
++             1250    1150    1200    1150     650     550
++              650
++
++          name guide
++             6000    1100    1300    1100     650     550
++              650     550    1250     500    1250     550
++              650     550     650     550     600     550
++              650
++
++          name up
++             6000    1100    1300    1100     650     550
++              650     550    1250     500     650     550
++              650    1150    1250     500    1250    1150
++              650
++
++          name down
++             6000    1150    1250    1100     650     550
++              650     550    1250     500     650     550
++             1250     550    1250    1150     600     550
++              650
++
++          name left
++             6000    1150    1250    1150     650     500
++              700     500    1250     550     650     550
++             1250    1100    1250    1150     650    1150
++              600
++
++          name right
++             6000    1150    1250    1100     650     550
++              650     550    1250     500     650    1150
++              650     550    1250    1100     650    1150
++              650
++
++          name select
++             6000    1150    1250    1100     700     500
++              650     550    1250     550     650    1100
++              650    1150    1250    1150    1200     550
++              650
++
++          name action
++             6000    1150    1250    1150     650     500
++              650     550    1250     550    1250     550
++              600    1150     650     550     650    1150
++              650
++
++          name list
++             6050    1100    1250    1150     650     500
++              650     550    1250     550    1250     550
++             1200     550     650     550    1250     550
++              650
++
++          name info
++             6000    1100    1250    1150     650     550
++              650     500    1250     550    1250    1150
++             1250     500     650    1150     650    1150
++              650
++
++          name back
++             6000    1150    1250    1150     650     500
++              700     500    1250     550     650    1150
++             1200    1150     650     550     650     550
++              650
++
++          name power
++             6000    1150    1250    1100     650     550
++             1250     550     650     550     650     500
++              650     550    1250    1150    1250     500
++              650
++
++          name exit
++             6000    1150    1250    1150     650     500
++              650     550    1250     550     650    1150
++             1200     550    1250    1150    1250    1100
++              650
++
++          name ch-
++             6000    1100    1250    1150     650     550
++              650     500     650     550    1250    1150
++             1250     550    1200     550    1250    1150
++              650
++
++          name ch+
++             6000    1100    1300    1100     650     550
++              650     500     700     500    1250    1150
++              650    1150    1200     550    1250     550
++              650
++
++      end raw_codes
++
++end remote
+diff -urNad lirc-0.8.3~pre1~/transmitters/dish/general.conf lirc-0.8.3~pre1/transmitters/dish/general.conf
+--- lirc-0.8.3~pre1~/transmitters/dish/general.conf	1969-12-31 18:00:00.000000000 -0600
++++ lirc-0.8.3~pre1/transmitters/dish/general.conf	2008-03-24 00:35:50.000000000 -0500
+@@ -0,0 +1,1272 @@
++# This config file is based on the information posted by Endaf Jones at
++# http://www.gossamer-threads.com/lists/mythtv/users/196566#196566
++#
++# brand:                       JVC/RCA
++# model no. of remote control:
++# supported devices:           Dish Network (Echostar)
++#                                - JVC 2700 receiver
++#                                - JVC 4700 receiver
++#                                - JVC 49xx receiver
++#                                - JVC 50xx receiver
++#                                - RCA 31x receiver
++#                              and several other Dish receivers using the
++#                              "blue button" remotes
++#
++# Unit code selection (1-16) is performed by specifying the appropriate
++# value for post_data
++#  1=0x000             2=0x200             3=0x100             4=0x300
++#  5=0x080             6=0x280             7=0x180             8=0x380
++#  9=0x040            10=0x240            11=0x140            12=0x340
++# 13=0x0C0            14=0x2C0            15=0x1C0            16=0x3C0
++#
++# Each has been implemented in this config file with the remote names "dish#"
++# where the hash/pound/number sign ("#") is a code number from 1 through 16.
++# There is also a remote called "dish" (without a number), for users with only
++# one receiver, that uses remote code 1 (DISH's default).
++#
++# The duty_cycle (the percentage of time during a pulse that infrared light is
++# being sent) is commented because some hardware transmitters don't support its
++# use.
++#
++# The discrete power functions (power_on and power_off) can be used to ensure
++# the power state of the receiver.  However, they probably shouldn't be used in
++# a channel change script as the receiver will require a significant delay
++# after a power_on before it is capable of receiving/responding to additional
++# commands (such as channel numbers).  Instead, assuming most of your recording
++# is during prime-time, you may want to set a cron job to run a "power_on"
++# command for each of your receivers about 5 or 10 minutes before primtetime.
++
++
++### Remote definition for remotes using remote code 1 (0x000)
++begin remote
++  name dish
++
++  flags SPACE_ENC|NO_HEAD_REP
++  eps 30
++  aeps 100
++
++  frequency 56000
++#  duty_cycle 32
++
++  one 440 1645
++  zero 440 2780
++
++  header 525 6045
++  ptrail 450
++  gap 6115
++
++  min_repeat 6
++
++  bits 6
++  post_data_bits 10
++
++  post_data 0x000
++
++  begin codes
++    info                               0
++    power_on                           1
++    power                              2
++    1                                  4
++    2                                  5
++    3                                  6
++    4                                  8
++    5                                  9
++    6                                  10
++    7                                  12
++    8                                  13
++    9                                  14
++    0                                  17
++    menu                               11
++    select                             16
++    cancel                             18
++    guide                              20
++    view                               22
++    tv_vcr                             23
++    right                              24
++    up                                 26
++    recall                             27
++    left                               28
++    down                               30
++    record                             31
++    pause                              32
++    stop                               33
++    sys_info                           36
++    asterisk                           37
++    pound                              38
++    power_off                          39
++    sat                                41
++    dish_home                          52
++    sys_info2                          54
++    dish_home2                         56
++  end codes
++end remote
++
++### Remote definition for remotes using remote code 1 (0x000)
++### (Duplicated to allow a "dish" and a "dish1" remote name)
++begin remote
++  name dish1
++
++  flags SPACE_ENC|NO_HEAD_REP
++  eps 30
++  aeps 100
++
++  frequency 56000
++#  duty_cycle 32
++
++  one 440 1645
++  zero 440 2780
++
++  header 525 6045
++  ptrail 450
++  gap 6115
++
++  min_repeat 6
++
++  bits 6
++  post_data_bits 10
++
++  post_data 0x000
++
++  begin codes
++    info                               0
++    power_on                           1
++    power                              2
++    1                                  4
++    2                                  5
++    3                                  6
++    4                                  8
++    5                                  9
++    6                                  10
++    7                                  12
++    8                                  13
++    9                                  14
++    0                                  17
++    menu                               11
++    select                             16
++    cancel                             18
++    guide                              20
++    view                               22
++    tv_vcr                             23
++    right                              24
++    up                                 26
++    recall                             27
++    left                               28
++    down                               30
++    record                             31
++    pause                              32
++    stop                               33
++    sys_info                           36
++    asterisk                           37
++    pound                              38
++    power_off                          39
++    sat                                41
++    dish_home                          52
++    sys_info2                          54
++    dish_home2                         56
++    dvr				       57
++    skip_fwd			       55
++    skip_back			       54
++    fwd				       50
++    play			       3
++    back			       49
++    dish			       52
++    page_up			       15
++    page_down			       7
++  end codes
++end remote
++
++### Remote definition for remotes using remote code 2 (0x200)
++begin remote
++  name dish2
++
++  flags SPACE_ENC|NO_HEAD_REP
++  eps 30
++  aeps 100
++
++  frequency 56000
++#  duty_cycle 32
++
++  one 440 1645
++  zero 440 2780
++
++  header 525 6045
++  ptrail 450
++  gap 6115
++
++  min_repeat 6
++
++  bits 6
++  post_data_bits 10
++
++  post_data 0x200
++
++  begin codes
++    info                               0
++    power_on                           1
++    power                              2
++    1                                  4
++    2                                  5
++    3                                  6
++    4                                  8
++    5                                  9
++    6                                  10
++    7                                  12
++    8                                  13
++    9                                  14
++    0                                  17
++    menu                               11
++    select                             16
++    cancel                             18
++    guide                              20
++    view                               22
++    tv_vcr                             23
++    right                              24
++    up                                 26
++    recall                             27
++    left                               28
++    down                               30
++    record                             31
++    pause                              32
++    stop                               33
++    sys_info                           36
++    asterisk                           37
++    pound                              38
++    power_off                          39
++    sat                                41
++    dish_home                          52
++    sys_info2                          54
++    dish_home2                         56
++    dvr				       57
++    skip_fwd			       55
++    skip_back			       54
++    fwd				       50
++    play			       3
++    back			       49
++    dish			       52
++    page_up			       15
++    page_down			       7
++  end codes
++end remote
++
++### Remote definition for remotes using remote code 3 (0x100)
++begin remote
++  name dish3
++
++  flags SPACE_ENC|NO_HEAD_REP
++  eps 30
++  aeps 100
++
++  frequency 56000
++#  duty_cycle 32
++
++  one 440 1645
++  zero 440 2780
++
++  header 525 6045
++  ptrail 450
++  gap 6115
++
++  min_repeat 6
++
++  bits 6
++  post_data_bits 10
++
++  post_data 0x100
++
++  begin codes
++    info                               0
++    power_on                           1
++    power                              2
++    1                                  4
++    2                                  5
++    3                                  6
++    4                                  8
++    5                                  9
++    6                                  10
++    7                                  12
++    8                                  13
++    9                                  14
++    0                                  17
++    menu                               11
++    select                             16
++    cancel                             18
++    guide                              20
++    view                               22
++    tv_vcr                             23
++    right                              24
++    up                                 26
++    recall                             27
++    left                               28
++    down                               30
++    record                             31
++    pause                              32
++    stop                               33
++    sys_info                           36
++    asterisk                           37
++    pound                              38
++    power_off                          39
++    sat                                41
++    dish_home                          52
++    sys_info2                          54
++    dish_home2                         56
++    dvr				       57
++    skip_fwd			       55
++    skip_back			       54
++    fwd				       50
++    play			       3
++    back			       49
++    dish			       52
++    page_up			       15
++    page_down			       7
++  end codes
++end remote
++
++### Remote definition for remotes using remote code 4 (0x300)
++begin remote
++  name dish4
++
++  flags SPACE_ENC|NO_HEAD_REP
++  eps 30
++  aeps 100
++
++  frequency 56000
++#  duty_cycle 32
++
++  one 440 1645
++  zero 440 2780
++
++  header 525 6045
++  ptrail 450
++  gap 6115
++
++  min_repeat 6
++
++  bits 6
++  post_data_bits 10
++
++  post_data 0x300
++
++  begin codes
++    info                               0
++    power_on                           1
++    power                              2
++    1                                  4
++    2                                  5
++    3                                  6
++    4                                  8
++    5                                  9
++    6                                  10
++    7                                  12
++    8                                  13
++    9                                  14
++    0                                  17
++    menu                               11
++    select                             16
++    cancel                             18
++    guide                              20
++    view                               22
++    tv_vcr                             23
++    right                              24
++    up                                 26
++    recall                             27
++    left                               28
++    down                               30
++    record                             31
++    pause                              32
++    stop                               33
++    sys_info                           36
++    asterisk                           37
++    pound                              38
++    power_off                          39
++    sat                                41
++    dish_home                          52
++    sys_info2                          54
++    dish_home2                         56
++    dvr				       57
++    skip_fwd			       55
++    skip_back			       54
++    fwd				       50
++    play			       3
++    back			       49
++    dish			       52
++    page_up			       15
++    page_down			       7
++  end codes
++end remote
++
++### Remote definition for remotes using remote code 5 (0x080)
++begin remote
++  name dish5
++
++  flags SPACE_ENC|NO_HEAD_REP
++  eps 30
++  aeps 100
++
++  frequency 56000
++#  duty_cycle 32
++
++  one 440 1645
++  zero 440 2780
++
++  header 525 6045
++  ptrail 450
++  gap 6115
++
++  min_repeat 6
++
++  bits 6
++  post_data_bits 10
++
++  post_data 0x080
++
++  begin codes
++    info                               0
++    power_on                           1
++    power                              2
++    1                                  4
++    2                                  5
++    3                                  6
++    4                                  8
++    5                                  9
++    6                                  10
++    7                                  12
++    8                                  13
++    9                                  14
++    0                                  17
++    menu                               11
++    select                             16
++    cancel                             18
++    guide                              20
++    view                               22
++    tv_vcr                             23
++    right                              24
++    up                                 26
++    recall                             27
++    left                               28
++    down                               30
++    record                             31
++    pause                              32
++    stop                               33
++    sys_info                           36
++    asterisk                           37
++    pound                              38
++    power_off                          39
++    sat                                41
++    dish_home                          52
++    sys_info2                          54
++    dish_home2                         56
++    dvr				       57
++    skip_fwd			       55
++    skip_back			       54
++    fwd				       50
++    play			       3
++    back			       49
++    dish			       52
++    page_up			       15
++    page_down			       7
++  end codes
++end remote
++
++### Remote definition for remotes using remote code 6 (0x280)
++begin remote
++  name dish6
++
++  flags SPACE_ENC|NO_HEAD_REP
++  eps 30
++  aeps 100
++
++  frequency 56000
++#  duty_cycle 32
++
++  one 440 1645
++  zero 440 2780
++
++  header 525 6045
++  ptrail 450
++  gap 6115
++
++  min_repeat 6
++
++  bits 6
++  post_data_bits 10
++
++  post_data 0x280
++
++  begin codes
++    info                               0
++    power_on                           1
++    power                              2
++    1                                  4
++    2                                  5
++    3                                  6
++    4                                  8
++    5                                  9
++    6                                  10
++    7                                  12
++    8                                  13
++    9                                  14
++    0                                  17
++    menu                               11
++    select                             16
++    cancel                             18
++    guide                              20
++    view                               22
++    tv_vcr                             23
++    right                              24
++    up                                 26
++    recall                             27
++    left                               28
++    down                               30
++    record                             31
++    pause                              32
++    stop                               33
++    sys_info                           36
++    asterisk                           37
++    pound                              38
++    power_off                          39
++    sat                                41
++    dish_home                          52
++    sys_info2                          54
++    dish_home2                         56
++    dvr				       57
++    skip_fwd			       55
++    skip_back			       54
++    fwd				       50
++    play			       3
++    back			       49
++    dish			       52
++    page_up			       15
++    page_down			       7
++  end codes
++end remote
++
++### Remote definition for remotes using remote code 7 (0x180)
++begin remote
++  name dish7
++
++  flags SPACE_ENC|NO_HEAD_REP
++  eps 30
++  aeps 100
++
++  frequency 56000
++#  duty_cycle 32
++
++  one 440 1645
++  zero 440 2780
++
++  header 525 6045
++  ptrail 450
++  gap 6115
++
++  min_repeat 6
++
++  bits 6
++  post_data_bits 10
++
++  post_data 0x180
++
++  begin codes
++    info                               0
++    power_on                           1
++    power                              2
++    1                                  4
++    2                                  5
++    3                                  6
++    4                                  8
++    5                                  9
++    6                                  10
++    7                                  12
++    8                                  13
++    9                                  14
++    0                                  17
++    menu                               11
++    select                             16
++    cancel                             18
++    guide                              20
++    view                               22
++    tv_vcr                             23
++    right                              24
++    up                                 26
++    recall                             27
++    left                               28
++    down                               30
++    record                             31
++    pause                              32
++    stop                               33
++    sys_info                           36
++    asterisk                           37
++    pound                              38
++    power_off                          39
++    sat                                41
++    dish_home                          52
++    sys_info2                          54
++    dish_home2                         56
++    dvr				       57
++    skip_fwd			       55
++    skip_back			       54
++    fwd				       50
++    play			       3
++    back			       49
++    dish			       52
++    page_up			       15
++    page_down			       7    
++  end codes
++end remote
++
++### Remote definition for remotes using remote code 8 (0x380)
++begin remote
++  name dish8
++
++  flags SPACE_ENC|NO_HEAD_REP
++  eps 30
++  aeps 100
++
++  frequency 56000
++#  duty_cycle 32
++
++  one 440 1645
++  zero 440 2780
++
++  header 525 6045
++  ptrail 450
++  gap 6115
++
++  min_repeat 6
++
++  bits 6
++  post_data_bits 10
++
++  post_data 0x380
++
++  begin codes
++    info                               0
++    power_on                           1
++    power                              2
++    1                                  4
++    2                                  5
++    3                                  6
++    4                                  8
++    5                                  9
++    6                                  10
++    7                                  12
++    8                                  13
++    9                                  14
++    0                                  17
++    menu                               11
++    select                             16
++    cancel                             18
++    guide                              20
++    view                               22
++    tv_vcr                             23
++    right                              24
++    up                                 26
++    recall                             27
++    left                               28
++    down                               30
++    record                             31
++    pause                              32
++    stop                               33
++    sys_info                           36
++    asterisk                           37
++    pound                              38
++    power_off                          39
++    sat                                41
++    dish_home                          52
++    sys_info2                          54
++    dish_home2                         56
++    dvr				       57
++    skip_fwd			       55
++    skip_back			       54
++    fwd				       50
++    play			       3
++    back			       49
++    dish			       52
++    page_up			       15
++    page_down			       7    
++  end codes
++end remote
++
++### Remote definition for remotes using remote code 9 (0x040)
++begin remote
++  name dish9
++
++  flags SPACE_ENC|NO_HEAD_REP
++  eps 30
++  aeps 100
++
++  frequency 56000
++#  duty_cycle 32
++
++  one 440 1645
++  zero 440 2780
++
++  header 525 6045
++  ptrail 450
++  gap 6115
++
++  min_repeat 6
++
++  bits 6
++  post_data_bits 10
++
++  post_data 0x040
++
++  begin codes
++    info                               0
++    power_on                           1
++    power                              2
++    1                                  4
++    2                                  5
++    3                                  6
++    4                                  8
++    5                                  9
++    6                                  10
++    7                                  12
++    8                                  13
++    9                                  14
++    0                                  17
++    menu                               11
++    select                             16
++    cancel                             18
++    guide                              20
++    view                               22
++    tv_vcr                             23
++    right                              24
++    up                                 26
++    recall                             27
++    left                               28
++    down                               30
++    record                             31
++    pause                              32
++    stop                               33
++    sys_info                           36
++    asterisk                           37
++    pound                              38
++    power_off                          39
++    sat                                41
++    dish_home                          52
++    sys_info2                          54
++    dish_home2                         56
++    dvr				       57
++    skip_fwd			       55
++    skip_back			       54
++    fwd				       50
++    play			       3
++    back			       49
++    dish			       52
++    page_up			       15
++    page_down			       7    
++  end codes
++end remote
++
++### Remote definition for remotes using remote code 10 (0x240)
++begin remote
++  name dish10
++
++  flags SPACE_ENC|NO_HEAD_REP
++  eps 30
++  aeps 100
++
++  frequency 56000
++#  duty_cycle 32
++
++  one 440 1645
++  zero 440 2780
++
++  header 525 6045
++  ptrail 450
++  gap 6115
++
++  min_repeat 6
++
++  bits 6
++  post_data_bits 10
++
++  post_data 0x240
++
++  begin codes
++    info                               0
++    power_on                           1
++    power                              2
++    1                                  4
++    2                                  5
++    3                                  6
++    4                                  8
++    5                                  9
++    6                                  10
++    7                                  12
++    8                                  13
++    9                                  14
++    0                                  17
++    menu                               11
++    select                             16
++    cancel                             18
++    guide                              20
++    view                               22
++    tv_vcr                             23
++    right                              24
++    up                                 26
++    recall                             27
++    left                               28
++    down                               30
++    record                             31
++    pause                              32
++    stop                               33
++    sys_info                           36
++    asterisk                           37
++    pound                              38
++    power_off                          39
++    sat                                41
++    dish_home                          52
++    sys_info2                          54
++    dish_home2                         56
++    dvr				       57
++    skip_fwd			       55
++    skip_back			       54
++    fwd				       50
++    play			       3
++    back			       49
++    dish			       52
++    page_up			       15
++    page_down			       7    
++  end codes
++end remote
++
++### Remote definition for remotes using remote code 11 (0x140)
++begin remote
++  name dish11
++
++  flags SPACE_ENC|NO_HEAD_REP
++  eps 30
++  aeps 100
++
++  frequency 56000
++#  duty_cycle 32
++
++  one 440 1645
++  zero 440 2780
++
++  header 525 6045
++  ptrail 450
++  gap 6115
++
++  min_repeat 6
++
++  bits 6
++  post_data_bits 10
++
++  post_data 0x140
++
++  begin codes
++    info                               0
++    power_on                           1
++    power                              2
++    1                                  4
++    2                                  5
++    3                                  6
++    4                                  8
++    5                                  9
++    6                                  10
++    7                                  12
++    8                                  13
++    9                                  14
++    0                                  17
++    menu                               11
++    select                             16
++    cancel                             18
++    guide                              20
++    view                               22
++    tv_vcr                             23
++    right                              24
++    up                                 26
++    recall                             27
++    left                               28
++    down                               30
++    record                             31
++    pause                              32
++    stop                               33
++    sys_info                           36
++    asterisk                           37
++    pound                              38
++    power_off                          39
++    sat                                41
++    dish_home                          52
++    sys_info2                          54
++    dish_home2                         56
++    dvr				       57
++    skip_fwd			       55
++    skip_back			       54
++    fwd				       50
++    play			       3
++    back			       49
++    dish			       52
++    page_up			       15
++    page_down			       7    
++  end codes
++end remote
++
++### Remote definition for remotes using remote code 12 (0x340)
++begin remote
++  name dish12
++
++  flags SPACE_ENC|NO_HEAD_REP
++  eps 30
++  aeps 100
++
++  frequency 56000
++#  duty_cycle 32
++
++  one 440 1645
++  zero 440 2780
++
++  header 525 6045
++  ptrail 450
++  gap 6115
++
++  min_repeat 6
++
++  bits 6
++  post_data_bits 10
++
++  post_data 0x340
++
++  begin codes
++    info                               0
++    power_on                           1
++    power                              2
++    1                                  4
++    2                                  5
++    3                                  6
++    4                                  8
++    5                                  9
++    6                                  10
++    7                                  12
++    8                                  13
++    9                                  14
++    0                                  17
++    menu                               11
++    select                             16
++    cancel                             18
++    guide                              20
++    view                               22
++    tv_vcr                             23
++    right                              24
++    up                                 26
++    recall                             27
++    left                               28
++    down                               30
++    record                             31
++    pause                              32
++    stop                               33
++    sys_info                           36
++    asterisk                           37
++    pound                              38
++    power_off                          39
++    sat                                41
++    dish_home                          52
++    sys_info2                          54
++    dish_home2                         56
++    dvr				       57
++    skip_fwd			       55
++    skip_back			       54
++    fwd				       50
++    play			       3
++    back			       49
++    dish			       52
++    page_up			       15
++    page_down			       7    
++  end codes
++end remote
++
++### Remote definition for remotes using remote code 13 (0x0C0)
++begin remote
++  name dish13
++
++  flags SPACE_ENC|NO_HEAD_REP
++  eps 30
++  aeps 100
++
++  frequency 56000
++#  duty_cycle 32
++
++  one 440 1645
++  zero 440 2780
++
++  header 525 6045
++  ptrail 450
++  gap 6115
++
++  min_repeat 6
++
++  bits 6
++  post_data_bits 10
++
++  post_data 0x0C0
++
++  begin codes
++    info                               0
++    power_on                           1
++    power                              2
++    1                                  4
++    2                                  5
++    3                                  6
++    4                                  8
++    5                                  9
++    6                                  10
++    7                                  12
++    8                                  13
++    9                                  14
++    0                                  17
++    menu                               11
++    select                             16
++    cancel                             18
++    guide                              20
++    view                               22
++    tv_vcr                             23
++    right                              24
++    up                                 26
++    recall                             27
++    left                               28
++    down                               30
++    record                             31
++    pause                              32
++    stop                               33
++    sys_info                           36
++    asterisk                           37
++    pound                              38
++    power_off                          39
++    sat                                41
++    dish_home                          52
++    sys_info2                          54
++    dish_home2                         56
++    dvr				       57
++    skip_fwd			       55
++    skip_back			       54
++    fwd				       50
++    play			       3
++    back			       49
++    dish			       52
++    page_up			       15
++    page_down			       7    
++  end codes
++end remote
++
++### Remote definition for remotes using remote code 14 (0x2C0)
++begin remote
++  name dish14
++
++  flags SPACE_ENC|NO_HEAD_REP
++  eps 30
++  aeps 100
++
++  frequency 56000
++#  duty_cycle 32
++
++  one 440 1645
++  zero 440 2780
++
++  header 525 6045
++  ptrail 450
++  gap 6115
++
++  min_repeat 6
++
++  bits 6
++  post_data_bits 10
++
++  post_data 0x2C0
++
++  begin codes
++    info                               0
++    power_on                           1
++    power                              2
++    1                                  4
++    2                                  5
++    3                                  6
++    4                                  8
++    5                                  9
++    6                                  10
++    7                                  12
++    8                                  13
++    9                                  14
++    0                                  17
++    menu                               11
++    select                             16
++    cancel                             18
++    guide                              20
++    view                               22
++    tv_vcr                             23
++    right                              24
++    up                                 26
++    recall                             27
++    left                               28
++    down                               30
++    record                             31
++    pause                              32
++    stop                               33
++    sys_info                           36
++    asterisk                           37
++    pound                              38
++    power_off                          39
++    sat                                41
++    dish_home                          52
++    sys_info2                          54
++    dish_home2                         56
++    dvr				       57
++    skip_fwd			       55
++    skip_back			       54
++    fwd				       50
++    play			       3
++    back			       49
++    dish			       52
++    page_up			       15
++    page_down			       7    
++  end codes
++end remote
++
++### Remote definition for remotes using remote code 15 (0x1C0)
++begin remote
++  name dish15
++
++  flags SPACE_ENC|NO_HEAD_REP
++  eps 30
++  aeps 100
++
++  frequency 56000
++#  duty_cycle 32
++
++  one 440 1645
++  zero 440 2780
++
++  header 525 6045
++  ptrail 450
++  gap 6115
++
++  min_repeat 6
++
++  bits 6
++  post_data_bits 10
++
++  post_data 0x1C0
++
++  begin codes
++    info                               0
++    power_on                           1
++    power                              2
++    1                                  4
++    2                                  5
++    3                                  6
++    4                                  8
++    5                                  9
++    6                                  10
++    7                                  12
++    8                                  13
++    9                                  14
++    0                                  17
++    menu                               11
++    select                             16
++    cancel                             18
++    guide                              20
++    view                               22
++    tv_vcr                             23
++    right                              24
++    up                                 26
++    recall                             27
++    left                               28
++    down                               30
++    record                             31
++    pause                              32
++    stop                               33
++    sys_info                           36
++    asterisk                           37
++    pound                              38
++    power_off                          39
++    sat                                41
++    dish_home                          52
++    sys_info2                          54
++    dish_home2                         56
++    dvr				       57
++    skip_fwd			       55
++    skip_back			       54
++    fwd				       50
++    play			       3
++    back			       49
++    dish			       52
++    page_up			       15
++    page_down			       7    
++  end codes
++end remote
++
++### Remote definition for remotes using remote code 16 (0x3C0)
++begin remote
++  name dish16
++
++  flags SPACE_ENC|NO_HEAD_REP
++  eps 30
++  aeps 100
++
++  frequency 56000
++#  duty_cycle 32
++
++  one 440 1645
++  zero 440 2780
++
++  header 525 6045
++  ptrail 450
++  gap 6115
++
++  min_repeat 6
++
++  bits 6
++  post_data_bits 10
++
++  post_data 0x3C0
++
++  begin codes
++    info                               0
++    power_on                           1
++    power                              2
++    1                                  4
++    2                                  5
++    3                                  6
++    4                                  8
++    5                                  9
++    6                                  10
++    7                                  12
++    8                                  13
++    9                                  14
++    0                                  17
++    menu                               11
++    select                             16
++    cancel                             18
++    guide                              20
++    view                               22
++    tv_vcr                             23
++    right                              24
++    up                                 26
++    recall                             27
++    left                               28
++    down                               30
++    record                             31
++    pause                              32
++    stop                               33
++    sys_info                           36
++    asterisk                           37
++    pound                              38
++    power_off                          39
++    sat                                41
++    dish_home                          52
++    sys_info2                          54
++    dish_home2                         56
++    dvr				       57
++    skip_fwd			       55
++    skip_back			       54
++    fwd				       50
++    play			       3
++    back			       49
++    dish			       52
++    page_up			       15
++    page_down			       7    
++  end codes
++end remote
++
+diff -urNad lirc-0.8.3~pre1~/transmitters/motorola/dctxxxx.conf lirc-0.8.3~pre1/transmitters/motorola/dctxxxx.conf
+--- lirc-0.8.3~pre1~/transmitters/motorola/dctxxxx.conf	1969-12-31 18:00:00.000000000 -0600
++++ lirc-0.8.3~pre1/transmitters/motorola/dctxxxx.conf	2008-03-24 00:35:50.000000000 -0500
+@@ -0,0 +1,73 @@
++#
++# this config file was automatically generated
++# using lirc-0.6.6(serial) on Fri Mar 28 22:46:44 2003
++#
++# contributed by shane bradley
++#
++#
++#
++# brand:                       Motorola
++# model no. of remote control: DCT2000
++# devices being controlled by this remote:
++#
++                                                                                    
++begin remote
++ name  DCT2000
++  bits           16
++  flags SPACE_ENC|CONST_LENGTH
++  eps            30
++  aeps          100
++ 
++  header       9036  4424
++  one           556  2185
++  zero          556  4424
++  ptrail        556
++  gap          100025
++  toggle_bit      0
++ 
++ 
++      begin codes
++          HELP                     0x000000000000B3F2
++          POWER                    0x000000000000AFF9
++          MUTE                     0x0000000000000FF7
++          PAGE+                    0x000000000000A3F3
++          PAGE-                    0x00000000000023FB
++          LOCK                     0x00000000000097F6
++          EXIT                     0x000000000000B7F4
++          AUP                      0x000000000000D3F6
++          ADOWN                    0x00000000000053FE
++          ALEFT                    0x00000000000093F1
++          ARIGHT                   0x00000000000013F9
++          OK                       0x00000000000077F8
++          GUIDE                    0x000000000000F3F4
++          MENU                     0x00000000000067F9
++          VOL+                     0x0000000000004FF3
++          VOL-                     0x0000000000008FFB
++          LAST                     0x00000000000037FC
++          FAV                      0x00000000000057FA
++          CH+                      0x0000000000002FF5
++          CH-                      0x000000000000CFFD
++          A                        0x00000000000017FE
++          B                        0x0000000000001BF1
++          C                        0x000000000000EBF9
++          1                        0x0000000000007FF0
++          2                        0x000000000000BFF8
++          3                        0x0000000000003FF4
++          4                        0x000000000000DFFC
++          5                        0x0000000000005FF2
++          6                        0x0000000000009FFA
++          7                        0x0000000000001FF6
++          8                        0x000000000000EFFE
++          9                        0x0000000000006FF1
++          0                        0x000000000000FFFF
++          BYPASS                   0x000000000000D7F2
++          MUSIC                    0x000000000000F7F0
++          STOP                     0x00000000000063FD
++          PAUSE                    0x00000000000007FF
++          PLAY                     0x000000000000E3F5
++          REW                      0x00000000000087F7
++          REC                      0x00000000000073FC
++          FFWD                     0x00000000000047FB
++      end codes
++ 
++end remote
+diff -urNad lirc-0.8.3~pre1~/transmitters/pioneer/general.conf lirc-0.8.3~pre1/transmitters/pioneer/general.conf
+--- lirc-0.8.3~pre1~/transmitters/pioneer/general.conf	1969-12-31 18:00:00.000000000 -0600
++++ lirc-0.8.3~pre1/transmitters/pioneer/general.conf	2008-03-24 00:35:50.000000000 -0500
+@@ -0,0 +1,107 @@
++#
++# this config file was automatically generated
++# using lirc-0.6.6(act200l) on Wed Apr  7 18:14:45 2004
++#
++# contributed by william nolan (will|willnolan.com)
++#
++# number codes denoised and rationalized by joe pierce (joe|joepierce.org)
++#
++# brand:                       Time Warner Digital Cable
++# model no. of remote control:  UR4-P360 (http://www.twalbany.com/digitalentertainment/ur4-p360.php)
++# devices being controlled by this remote: Pioneer Voyager digital cable
++#                                          set top box
++# notes: I'm not sure if this remote is used by all TW digital cable boxes,
++# but this one works with the ones used by TW in the New York area.
++# I was able to capture the commands with an Actisys IR-200L but not able
++# to transmit with it.  I built the simple circuit in the LIRC documentation
++# and have been successfully using it to control the set top box ever since.
++
++begin remote
++
++  name  TWC_UR4-P360
++  bits           22
++  flags SPACE_ENC|CONST_LENGTH
++  eps            30
++  aeps          100
++
++  header       3337  3378
++  one           820  2540
++  zero          820   817
++  ptrail        820
++  gap          100786
++  toggle_bit      0
++
++  frequency    56000
++
++      begin codes
++          POWER                    0x37C107
++          GUIDE                    0x36C127
++          MENU                     0x36F920
++          INFO                     0x36213B
++          UP                       0x36812F
++          DOWN                     0x37A10B
++          LEFT                     0x37810F
++          RIGHT                    0x364137
++          SELECT                   0x366133
++          PAGEUP                   0x36D924
++          PAGEDOWN                 0x37D904
++          HELP                     0x376912
++          SETTINGS                 0x373918
++          EXIT                     0x366932
++          A                        0x37E902
++          B                        0x36193C
++          C                        0x37191C
++          LAST                     0x36E123
++          FAV                      0x37F101
++          DAYMINUS                 0x0E163D
++          DAYPLUS                  0x0FE603
++          CHUP                     0x377111
++          CHDOWN                   0x36F121
++          1                        0x36113D
++          2                        0x37111D
++          3                        0x36912D
++          4                        0x37910D
++          5                        0x365135
++          6                        0x375115
++          7                        0x36D125
++          8                        0x37D105
++          9                        0x363139
++          0                        0x373119
++          ENTER                    0x363139
++          REW                      0x37291A
++          PLAY                     0x37990C
++          FF                       0x36293A
++          REC                      0x375914
++          STOP                     0x365934
++          PAUSE                    0x374117
++      end codes
++
++end remote
++
++
++begin remote
++
++  name  TWC_UR4-P360-SONY
++  bits           11
++  flags SPACE_ENC|CONST_LENGTH
++  eps            30
++  aeps          100
++
++  header       2370   598
++  one          1179   598
++  zero          582   598
++  ptrail        582
++  gap          45000
++  min_repeat      2
++  toggle_bit      0
++
++
++      begin codes
++          VOLUP                    0x248
++          VOLDOWN                  0x648
++          MUTE                     0x148
++      end codes
++
++end remote
++
++
+diff -urNad lirc-0.8.3~pre1~/transmitters/scientificatlanta/general.conf lirc-0.8.3~pre1/transmitters/scientificatlanta/general.conf
+--- lirc-0.8.3~pre1~/transmitters/scientificatlanta/general.conf	1969-12-31 18:00:00.000000000 -0600
++++ lirc-0.8.3~pre1/transmitters/scientificatlanta/general.conf	2008-03-24 00:36:10.000000000 -0500
+@@ -0,0 +1,85 @@
++#
++# this config file was automatically generated
++# using lirc-0.6.6(sir) on Wed Mar 24 22:28:59 2004
++#
++# Modified by Stephane Lavergne <stephane|iMars.com>:
++#    Base frequency is 56kHz, irrecord was otherwise right on.
++#
++# contributed by 
++#
++# brand:                       Scientific Atlanta
++# model no. of remote control: AT8400
++# devices being controlled by this remote: Explorer 8000
++#
++
++begin remote
++
++  name  SAE8000
++  bits           22
++  flags SPACE_ENC|CONST_LENGTH
++  eps            30
++  aeps          100
++
++  header       3397  3372
++  one           827  2557
++  zero          827   855
++  ptrail        827
++  gap          101386
++  toggle_bit      0
++
++  frequency 56000
++
++      begin codes
++          power                    0x000000000037C107
++          guide                    0x000000000036C127
++          menu                     0x000000000036F920
++          info                     0x000000000036213B
++          select_up                0x000000000036812F
++          select_down              0x000000000037A10B
++          select                   0x0000000000366133
++          select_left              0x000000000037810F
++          select_right             0x0000000000364137
++          select_page+             0x000000000036D924
++          select_page-             0x000000000037D904
++          exit                     0x0000000000366932
++          settings                 0x0000000000373918
++          A                        0x000000000037E902
++          B                        0x000000000036193C
++          C                        0x000000000037191C
++          vol+                     0x000000000036093E
++          vol-                     0x000000000037091E
++          ch+                      0x0000000000377111
++          ch-                      0x000000000036F121
++          mute                     0x000000000036892E
++          fav                      0x000000000037F101
++          last                     0x000000000036E123
++          rew8secs                 0x000000000037C906
++          list                     0x000000000036C926
++          live                     0x000000000036B129
++          rew                      0x000000000037291A
++          ff                       0x000000000036293A
++          play                     0x000000000037990C
++          stop                     0x0000000000365934
++          pause                    0x0000000000374117
++          rec                      0x0000000000375914
++          1                        0x000000000036113D
++          2                        0x000000000037111D
++          3                        0x000000000036912D
++          4                        0x000000000037910D
++          5                        0x0000000000365135
++          6                        0x0000000000375115
++          7                        0x000000000036D125
++          8                        0x000000000037D105
++          9                        0x0000000000363139
++          asterisk                 0x000000000037E103
++          0                        0x0000000000373119
++          pound                    0x000000000036B928
++          pip_power                0x000000000037B908
++          pip_swap                 0x0000000000367930
++          pip_move                 0x0000000000377910
++          pip_ch+                  0x000000000036E922
++          pip_ch-                  0x000000000037F900
++          video_source             0x0000000000376113
++      end codes
++
++end remote
+diff -urNad lirc-0.8.3~pre1~/transmitters/sky/general.conf lirc-0.8.3~pre1/transmitters/sky/general.conf
+--- lirc-0.8.3~pre1~/transmitters/sky/general.conf	1969-12-31 18:00:00.000000000 -0600
++++ lirc-0.8.3~pre1/transmitters/sky/general.conf	2008-03-24 00:35:50.000000000 -0500
+@@ -0,0 +1,72 @@
++#
++# this config file was automatically generated
++# using lirc-0.8.0(userspace) on Fri Jul 28 02:45:39 2006
++#
++# contributed by Lloyd Williams <binary_frog|chatcircuit.com>
++#
++# brand:                       SKY
++# model no. of remote control: URC 1650-00 B00 - 9RC16P-1014 Sky+ Rev 6
++# devices being controlled by this remote: SKY+ DVB-S receiver & PVR
++#
++
++begin remote
++
++  name  sky
++  bits            8
++  flags RC6|CONST_LENGTH
++  eps            30
++  aeps          100
++
++  header       2691   890
++  one           427   460
++  zero          427   460
++  pre_data_bits   17
++  pre_data       0x3FF3
++  gap          149845
++  min_repeat      2
++  toggle_bit      0
++
++  rc6_mask    0x100000
++
++      begin codes
++          POWER                    0xF3
++          TV_GUIDE                 0x33
++          BOX_OFFICE               0x82
++          SERVICES                 0x81
++          INTERACTIVE              0x0A
++          INFO                     0x34
++          UP                       0xA7
++          LEFT                     0xA5
++          RIGHT                    0xA4
++          DOWN                     0xA6
++          SELECT                   0xA3
++          CH+                      0xDF
++          CH-                      0xDE
++          TEXT                     0xC3
++          BACK_UP                  0x7C
++          HELP                     0x7E
++          FREV                     0xC2
++          FFWD                     0xD7
++          PLAY                     0xC1
++          PAUSE                    0xDB
++          RECORD                   0xBF
++          STOP                     0xC0
++          RED                      0x92
++          GREEN                    0x91
++          YELLOW                   0x90
++          BLUE                     0x8F
++          1                        0xFE
++          2                        0xFD
++          3                        0xFC
++          4                        0xFB
++          5                        0xFA
++          6                        0xF9
++          7                        0xF8
++          8                        0xF7
++          9                        0xF6
++          0                        0xFF
++          SKY                      0x7F
++          TV                       0x7B
++      end codes
++
++end remote

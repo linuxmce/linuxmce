@@ -57,7 +57,11 @@ namespace DCE
 		float m_fCurrentFileLength;
 				
 		int m_iCurrentStreamID;
-		
+	
+		// GPU related settings
+		string sGraphicsDriver;
+		string sGraphicsDeinterlace;
+			
 		// Private methods
 		void InitializePlayerEngine();
 		void SmartLoadPlaylist(string sFolder, string sExtensions, list<string>& vFiles, string &sLargestFile, int& iLargestFilePosition);
@@ -101,11 +105,11 @@ public:
 	/*
 			*****DATA***** accessors inherited from base class
 	string DATA_Get_Subtitles();
-	void DATA_Set_Subtitles(string Value,bool bUpdateDatabase=false);
+	void DATA_Set_Subtitles(string Value);
 	string DATA_Get_Audio_Tracks();
-	void DATA_Set_Audio_Tracks(string Value,bool bUpdateDatabase=false);
+	void DATA_Set_Audio_Tracks(string Value);
 	string DATA_Get_Angles();
-	void DATA_Set_Angles(string Value,bool bUpdateDatabase=false);
+	void DATA_Set_Angles(string Value);
 	string DATA_Get_Name();
 	int DATA_Get_Port();
 
@@ -505,7 +509,6 @@ public:
 
 	virtual void CMD_Set_Media_ID(string sID,int iStreamID) { string sCMD_Result; CMD_Set_Media_ID(sID.c_str(),iStreamID,sCMD_Result,NULL);};
 	virtual void CMD_Set_Media_ID(string sID,int iStreamID,string &sCMD_Result,Message *pMessage);
-
 
 //<-dceag-h-e->
 	

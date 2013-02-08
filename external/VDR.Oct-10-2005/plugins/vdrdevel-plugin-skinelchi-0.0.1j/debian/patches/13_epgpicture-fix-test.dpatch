@@ -1,0 +1,88 @@
+#!/bin/sh /usr/share/dpatch/dpatch-run
+
+## epgpicture-fix-test patch - _Frank_ @ vdrportal.de
+##
+## downloaded from http://vdrportal.de/board/thread.php?postid=292961#post292961
+## original filename skinelchi-0.0.1j_epgpicture-fix-test.diff
+##
+## All lines beginning with `## DP:' are a description of the patch.
+## DP: Fixes loading of more than one epgpictures.
+
+@DPATCH@
+diff -Nru skinelchi-0.0.1j/DisplayMenu.c skinelchi-0.0.1j_epgpicture-fix-test/DisplayMenu.c
+--- skinelchi-0.0.1j/DisplayMenu.c	Sun Apr  3 15:10:51 2005
++++ skinelchi-0.0.1j_epgpicture-fix-test/DisplayMenu.c	Fri Apr  8 10:40:48 2005
+@@ -694,6 +694,9 @@
+ 	    }
+ 	else {
+ 	    if (loading) {
++#ifdef DEBUG
++		isyslog("skinelchi: epgwindow - loading message is show");
++#endif
+ 	        loading = false;
+ 	        char *s;
+ 	        asprintf(&s, tr("Picture"));
+@@ -821,7 +824,6 @@
+ }
+ 
+ void cEpgImage::Action(void) {
+-    ShowTime.Set();
+     uint64 epgshowtime = SkinElchiSetup.epgshowtime * 1000;
+     char *direventid;
+     char *filename;
+@@ -857,10 +859,30 @@
+ 	;
+ #endif
+     	image.Render(bmpEpgImage, x, y, epgimagecolors, 0);
++	ShowTime.Set();
+ 	epgimageconvertready = true;
++//test
++	bool wait = true;
++	while(wait) {
++	    if (ShowTime.Elapsed() >= epgshowtime)
++		wait = false;
++	    else {
++		if (!loading) {
++#ifdef DEBUG
++		    isyslog("skinelchi: epgthread - 'loading message' or 'picture' is show");
++#endif
++		    break;
++		    }
++		sleep(1);
++		}
++	    }
++#ifdef DEBUG
++	if (loading)
++	    isyslog("skinelchi: epgthread end because 'Menu closed', 'no DisplayMenu::Flush()' (or 'wrong compiler optimization'?)");
++#endif
++//test
+ 	while(!loading) {
+ 	    if (ShowTime.Elapsed() >= epgshowtime) {
+-	        ShowTime.Set();
+ 		imagenumber++;
+ 		if (imagenumber)
+ 		    asprintf(&filename, "%s_%d.%s", direventid, imagenumber, filetype);
+@@ -884,16 +906,21 @@
+ #endif
+     		    image.Render(bmpEpgImage, x, y, epgimagecolors, 0);
+ 		    epgimageconvertready = true;
++	    	    ShowTime.Set();
+ 		    }
+ 		else {
+-		    if (imagenumber == 1)
++		    if (imagenumber == 1) {
++#ifdef DEBUG
++			isyslog("skinelchi: no more Pictures found");
++#endif
+ 			break;
++			}
+ 		    else
+ 			imagenumber = -1;
+ 		    }
+ 		}
+ 	    else
+-		sleep(2);
++		sleep(1);
+ 	    }
+ 	}
+ #ifdef DEBUG

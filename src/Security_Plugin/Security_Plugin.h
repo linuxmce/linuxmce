@@ -187,7 +187,7 @@ public:
 	void EVENT_Air_Quality(int iPK_Device);
 	void EVENT_Doorbell(int iPK_Device);
 	void EVENT_Monitor_Mode(int iPK_Device);
-	void EVENT_House_Mode_Changed(int iPK_DeviceGroup,int iPK_HouseMode);
+	void EVENT_House_Mode_Changed(int iPK_DeviceGroup,int iPK_HouseMode,string sPrevious_Value);
 
 			*****COMMANDS***** we need to implement
 	*/
@@ -221,7 +221,6 @@ public:
 
 	virtual void CMD_Verify_PIN(int iPK_Users,string sPassword,bool *bIsSuccessful) { string sCMD_Result; CMD_Verify_PIN(iPK_Users,sPassword.c_str(),bIsSuccessful,sCMD_Result,NULL);};
 	virtual void CMD_Verify_PIN(int iPK_Users,string sPassword,bool *bIsSuccessful,string &sCMD_Result,Message *pMessage);
-
 
 //<-dceag-h-e->
 	// make these inline so Orbiter Plugin can call them without adding the security plugin.cpp file

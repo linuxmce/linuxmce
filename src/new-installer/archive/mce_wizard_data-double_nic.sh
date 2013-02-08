@@ -1,0 +1,24 @@
+c_deviceType=2 # 1-Core, 2-Hybrid, 3-DiskedMD
+c_netIfaceNo=1
+c_netExtName='{extif}'
+c_netExtIP=''
+c_netExtMask=''
+c_netExtGateway=''
+c_netExtDNS1=''
+c_netExtDNS2=''
+c_netExtUseDhcp=1 # 1 - Yes / 0 - No
+c_runDhcpServer=1 # 1 - Yes / 0 - No
+c_netIntName='{intif}'
+c_netIntIPN='192.168.80'
+c_startupType=1 #0 - Start Kde / 1 - Start LMCE
+c_installType=1
+c_installMirror='http://archive.ubuntu.com/ubuntu/'
+c_netExtKeep='true'
+c_installUI=0 # 0 - UI1, 1 - UI2M, 2 - UI2A
+c_linuxmceCdFrom=1 # 1 - CD, 2 -ISO
+c_linuxmceCdIsoPath='' 
+c_ubuntuExtraCdFrom=1
+c_ubuntuExtraCdPath=''
+c_ubuntuLiveCdFrom=1
+c_ubuntuLiveCdPath=''
+

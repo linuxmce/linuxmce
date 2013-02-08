@@ -1,5 +1,11 @@
 #!/bin/bash
 
+#
+# This file is no longer needed. Everything is done in db_phone_config.sh
+#
+exit 0
+
+
 . /usr/pluto/bin/SQL_Ops.sh
 
 UseDB asterisk
@@ -18,10 +24,11 @@ if [[ ! -f "$SCCPconfFile".template ]]; then
 	cp "$SCCPconfFile"{,.template}
 fi
 
-UseDB pluto_main
+UseDB $MySqlDBName
 
 DEVICEDATA_PhoneNumber=31
 DEVICETEMPLATE_Cisco_7970=1726
+DEVICETEMPLATE_Cisco_7910=1968
 
 Q="
 	SELECT PK_Device,MACAddress,IK_DeviceData
@@ -41,49 +48,65 @@ for Row in $R; do
 	Device_MAC="${Device_MAC//:}"
 	Device_MAC=$(echo "$Device_MAC" | tr '[a-z]' '[A-Z]')
 
-str_DEV=";<pl_dev_$Device_ID>
-type = 7970
-description = SEP$Device_MAC
-autologin = $Device_EXT
-transfer = off
-park = off
-speeddial = 
-cfwdall = off
-cfwdbusy = off
-dtmfmode = inband
-device => SEP$Device_MAC
-;</pl_dev_$Device_ID>
+str_DEV="[SEP$Device_MAC](7970)
+description = LinuxMCE ext $Device_EXT
+button = line, $Device_EXT
 "
 
-str_LINE=";<pl_line_$Device_ID>
+str_LINE="[$Device_EXT](defaultline)
 id = $Device_EXT
 pin = 
 label = $Device_EXT
 description = $Device_EXT
-context = from-internal
-incominglimit = 2
-transfer = off
-vmnum=*97
-secondary_dialtone_digits = 9
-secondary_dialtone_tone = 0x22
 cid_name = pl_$Device_ID
 cid_num = $Device_EXT
-line => $Device_EXT
-;</pl_line_$Device_ID>
 "
 
 	devices="$devices$str_DEV"
 	lines="$lines$str_LINE"
 done
 
-while read line; do
-	line="${line#+}"
-	line="${line%+}"
 
-	echo "$line"
-	if [[ "$line" == "[devices]" ]]; then
-		echo "$devices"
-	elif [[ "$line" == "[lines]" ]]; then
-		echo "$lines"
-	fi
-done < <(sed 's/^/+/; s/$/+/' "$SCCPconfFile".template) >"$SCCPconfFile"
+Q="
+	SELECT PK_Device,MACAddress,IK_DeviceData
+	FROM Device
+	JOIN Device_DeviceData ON PK_Device=FK_Device
+	WHERE
+		FK_DeviceData=$DEVICEDATA_PhoneNumber
+		AND FK_DeviceTemplate=$DEVICETEMPLATE_Cisco_7910
+"
+R=$(RunSQL "$Q")
+
+for Row in $R; do
+	Device_ID=$(Field 1 "$Row")
+	Device_MAC=$(Field 2 "$Row")
+	Device_EXT=$(Field 3 "$Row")
+
+	Device_MAC="${Device_MAC//:}"
+	Device_MAC=$(echo "$Device_MAC" | tr '[a-z]' '[A-Z]')
+
+str_DEV="[SEP$Device_MAC](7910)
+description = LinuxMCE ext $Device_EXT
+button = line, $Device_EXT
+"
+
+str_LINE="[$Device_EXT](defaultline)
+id = $Device_EXT
+pin = 
+label = $Device_EXT
+description = $Device_EXT
+cid_name = pl_$Device_ID
+cid_num = $Device_EXT
+"
+
+	devices="$devices$str_DEV"
+	lines="$lines$str_LINE"
+done
+
+cp $SCCPconfFile.template $SCCPconfFile
+
+echo "$devices" >> $SCCPconfFile
+echo "$lines" >> $SCCPconfFile
+
+chown asterisk:asterisk /etc/asterisk/*
+

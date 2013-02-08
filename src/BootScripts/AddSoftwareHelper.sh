@@ -38,7 +38,7 @@ NotifyOrbiter()
 {
 	# notifying Orbiter if asked
 	if [[ "$OrbiterID" != "" ]]; then
-		/usr/pluto/bin/MessageSend dcerouter 0 $OrbiterID 1 14 15 "*"
+		/usr/pluto/bin/MessageSend "$DCERouter" 0 $OrbiterID 1 14 15 "*"
 	fi
 }
 
@@ -46,7 +46,7 @@ SendMessageToOrbiter()
 {
 	# if Orbiter ID is present
 	if [[ "$OrbiterID" != "" ]]; then
-		/usr/pluto/bin/MessageSend dcerouter 0 $OrbiterID 1 809 9 "$1" 70 "add_software" 182 "5" 251 0
+		/usr/pluto/bin/MessageSend "$DCERouter" 0 $OrbiterID 1 809 9 "$1" 70 "add_software" 182 "5" 251 0
 	fi
 }
 

@@ -1,0 +1,40 @@
+#! /bin/sh -e
+##
+## DP: patch fixing a crash when opening a font file that does not exist.
+## DP: by Sam Hocevar <sam+deb@zoy.org>
+
+[ -f debian/patches/00patch-opts ] && . debian/patches/00patch-opts
+patch_opts="${patch_opts:--f --no-backup-if-mismatch}"
+
+if [ $# -ne 1 ]; then
+    echo >&2 "`basename $0`: script expects -patch|-unpatch as argument"
+    exit 1
+fi
+case "$1" in
+       -patch) patch $patch_opts -p1 < $0;;
+       -unpatch) patch $patch_opts -p1 -R < $0;;
+	*)
+		echo >&2 "`basename $0`: script expects -patch|-unpatch as argument"
+		exit 1;;
+esac
+
+exit 0
+@DPATCH@
+--- sdl-ttf2.0-2.0.6.orig/SDL_ttf.c
++++ sdl-ttf2.0-2.0.6/SDL_ttf.c
+@@ -359,7 +359,14 @@
+ 
+ TTF_Font* TTF_OpenFontIndex( const char *file, int ptsize, long index )
+ {
+-	return TTF_OpenFontIndexRW(SDL_RWFromFile(file, "rb"), 1, ptsize, index);
++	SDL_RWops *rw = SDL_RWFromFile( file, "rb" );
++
++	if( !rw ) {
++		TTF_SetError( SDL_GetError() );
++		return NULL;
++	}
++
++	return TTF_OpenFontIndexRW( rw, 1, ptsize, index );
+ }
+ 
+ TTF_Font* TTF_OpenFont( const char *file, int ptsize )

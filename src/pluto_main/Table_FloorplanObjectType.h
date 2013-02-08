@@ -146,23 +146,27 @@ void psc_mod_set(string val);
 void psc_restrict_set(long int val);
 
 		
-		bool FK_DesignObj_Control_isNull();
+		bool Description_isNull();
+bool Define_isNull();
+bool Direction_isNull();
+bool FK_DesignObj_Control_isNull();
 bool Filename_isNull();
 bool psc_id_isNull();
 bool psc_batch_isNull();
 bool psc_user_isNull();
 bool psc_frozen_isNull();
-bool psc_mod_isNull();
 bool psc_restrict_isNull();
 
 			
-		void FK_DesignObj_Control_setNull(bool val);
+		void Description_setNull(bool val);
+void Define_setNull(bool val);
+void Direction_setNull(bool val);
+void FK_DesignObj_Control_setNull(bool val);
 void Filename_setNull(bool val);
 void psc_id_setNull(bool val);
 void psc_batch_setNull(bool val);
 void psc_user_setNull(bool val);
 void psc_frozen_setNull(bool val);
-void psc_mod_setNull(bool val);
 void psc_restrict_setNull(bool val);
 	
 	
@@ -182,14 +186,8 @@ class Row_DesignObj* FK_DesignObj_Control_getrow();
 
 		// Return the rows in other tables with foreign keys pointing here
 		void EntertainArea_FK_FloorplanObjectType_getrows(vector <class Row_EntertainArea*> *rows);
-void EntertainArea_pschist_FK_FloorplanObjectType_getrows(vector <class Row_EntertainArea_pschist*> *rows);
-void EntertainArea_pschmask_FK_FloorplanObjectType_getrows(vector <class Row_EntertainArea_pschmask*> *rows);
 void FloorplanObjectType_Color_FK_FloorplanObjectType_getrows(vector <class Row_FloorplanObjectType_Color*> *rows);
-void FloorplanObjectType_Color_pschist_FK_FloorplanObjectType_getrows(vector <class Row_FloorplanObjectType_Color_pschist*> *rows);
-void FloorplanObjectType_Color_pschmask_FK_FloorplanObjectType_getrows(vector <class Row_FloorplanObjectType_Color_pschmask*> *rows);
 void Room_FK_FloorplanObjectType_getrows(vector <class Row_Room*> *rows);
-void Room_pschist_FK_FloorplanObjectType_getrows(vector <class Row_Room_pschist*> *rows);
-void Room_pschmask_FK_FloorplanObjectType_getrows(vector <class Row_Room_pschmask*> *rows);
 
 
 		// Setup binary serialization

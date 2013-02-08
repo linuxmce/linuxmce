@@ -43,7 +43,6 @@ Datagrid_Plugin::Datagrid_Plugin( int DeviceID, string ServerAddress, bool bConn
 //<-dceag-const-e->
 {
  m_DataGridMutex.Init( NULL );
- m_iGridRequestCounter=0;
 }
 
 //<-dceag-getconfig-b->
@@ -282,7 +281,7 @@ void Datagrid_Plugin::CMD_Request_Datagrid_Contents(string sID,string sDataGrid_
 			// If we didn't find anything, and we're seeking for a particular value, don't set iRow, just stay at the top
 			if( bFound || bValue==false )
 			{
-				*iRow=min(dgrow,pDataGridTable->GetRows()-1);
+				*iRow=dgrow;
 
 				// Since we now cache pages of the grid in advance, we don't want to jump directly to the given row
 				// since that means the page breaks won't line up and any existing cached pages won't be valid.  So
@@ -300,8 +299,6 @@ LoggerWrapper::GetInstance()->Write( LV_DATAGRID, "Seek row %d",*iRow);
 LoggerWrapper::GetInstance()->Write( LV_DATAGRID, "ready to call todata: %s ", sDataGrid_ID.c_str() );
 #endif
 
-		if( pDataGridTable->m_iRequestID==0 )
-			pDataGridTable->m_iRequestID = m_iGridRequestCounter++;  // So we can keep track of the order which grids where requested.  Presently added for 
 		pDataGridTable->ToData( sDataGrid_ID, *iData_Size, *pData, iColumn, iRow, iColumn_count, iRow_count );
 #ifdef DEBUG
 		clock_t cStop = clock();

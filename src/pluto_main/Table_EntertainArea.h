@@ -140,23 +140,23 @@ void psc_mod_set(string val);
 void psc_restrict_set(long int val);
 
 		
-		bool FK_FloorplanObjectType_isNull();
+		bool Description_isNull();
+bool FK_FloorplanObjectType_isNull();
 bool FloorplanInfo_isNull();
 bool psc_id_isNull();
 bool psc_batch_isNull();
 bool psc_user_isNull();
 bool psc_frozen_isNull();
-bool psc_mod_isNull();
 bool psc_restrict_isNull();
 
 			
-		void FK_FloorplanObjectType_setNull(bool val);
+		void Description_setNull(bool val);
+void FK_FloorplanObjectType_setNull(bool val);
 void FloorplanInfo_setNull(bool val);
 void psc_id_setNull(bool val);
 void psc_batch_setNull(bool val);
 void psc_user_setNull(bool val);
 void psc_frozen_setNull(bool val);
-void psc_mod_setNull(bool val);
 void psc_restrict_setNull(bool val);
 	
 	
@@ -176,11 +176,7 @@ class Row_FloorplanObjectType* FK_FloorplanObjectType_getrow();
 
 		// Return the rows in other tables with foreign keys pointing here
 		void CommandGroup_EntertainArea_FK_EntertainArea_getrows(vector <class Row_CommandGroup_EntertainArea*> *rows);
-void CommandGroup_EntertainArea_pschist_FK_EntertainArea_getrows(vector <class Row_CommandGroup_EntertainArea_pschist*> *rows);
-void CommandGroup_EntertainArea_pschmask_FK_EntertainArea_getrows(vector <class Row_CommandGroup_EntertainArea_pschmask*> *rows);
 void Device_EntertainArea_FK_EntertainArea_getrows(vector <class Row_Device_EntertainArea*> *rows);
-void Device_EntertainArea_pschist_FK_EntertainArea_getrows(vector <class Row_Device_EntertainArea_pschist*> *rows);
-void Device_EntertainArea_pschmask_FK_EntertainArea_getrows(vector <class Row_Device_EntertainArea_pschmask*> *rows);
 
 
 		// Setup binary serialization

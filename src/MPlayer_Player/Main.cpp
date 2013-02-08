@@ -22,7 +22,12 @@
 #include "PlutoUtils/Other.h"
 #include "DCERouter.h"
 
-#include "../include/version.cpp"
+// In source files stored in archives and packages, these 2 lines will have the release version (build)
+// and the svn revision as a global variable that can be inspected within a core dump
+#define  VERSION "<=version=>"
+const char *g_szCompile_Date="<=compike_date=>";
+/*SVN_REVISION*/
+
 
 using namespace DCE;
 

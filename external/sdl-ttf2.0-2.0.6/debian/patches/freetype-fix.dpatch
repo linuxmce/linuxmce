@@ -1,0 +1,50 @@
+#! /bin/sh -e
+##
+## DP: patch fixing a build failure with last version of Freetype.
+## DP: by Daniel Schepler <schepler@math.berkeley.edu>
+
+[ -f debian/patches/00patch-opts ] && . debian/patches/00patch-opts
+patch_opts="${patch_opts:--f --no-backup-if-mismatch}"
+
+if [ $# -ne 1 ]; then
+    echo >&2 "`basename $0`: script expects -patch|-unpatch as argument"
+    exit 1
+fi
+case "$1" in
+       -patch) patch $patch_opts -p1 < $0;;
+       -unpatch) patch $patch_opts -p1 -R < $0;;
+	*)
+		echo >&2 "`basename $0`: script expects -patch|-unpatch as argument"
+		exit 1;;
+esac
+
+exit 0
+@DPATCH@
+--- sdl-ttf2.0-2.0.6.old/SDL_ttf.c	2004-01-09 21:13:02.573965462 -0800
++++ sdl-ttf2.0-2.0.6/SDL_ttf.c	2004-01-09 21:11:43.509597069 -0800
+@@ -39,10 +39,12 @@
+ #define FREEA(p) free(p)
+ #endif
+ 
+-#include <freetype/freetype.h>
+-#include <freetype/ftoutln.h>
+-#include <freetype/ttnameid.h>
+-#include <freetype/internal/ftobjs.h>
++#include <ft2build.h>
++#include FT_FREETYPE_H
++#include FT_OUTLINE_H
++#include FT_TRUETYPE_IDS_H
++#include FT_INTERNAL_INTERNAL_H
++#include FT_INTERNAL_OBJECTS_H
+ 
+ #include "SDL.h"
+ #include "SDL_endian.h"
+@@ -172,7 +174,7 @@
+ 	  int          err_code;
+ 	  const char*  err_msg;
+ 	} ft_errors[] = {
+-#include <freetype/fterrors.h>
++#include FT_ERRORS_H
+ 	};
+ 	int i;
+ 	const char *err_msg;

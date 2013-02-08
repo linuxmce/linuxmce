@@ -504,4 +504,16 @@ void db_wrapper_thread_end()
 //	cout << "db_wrapper_thread_end()" << endl;
 }
 
+#else // USE_MYSQL_WRAPPER
+#include "db_wrapper.h"
+DB_LINK* db_wrapper_init(DB_LINK *db_link)
+{
+	my_bool reconnect = true;
+	DB_LINK *result = mysql_init(db_link);
+	if( result )
+	{
+		mysql_options(result, MYSQL_OPT_RECONNECT, &reconnect);
+	}
+	return result;
+}	
 #endif // USE_MYSQL_WRAPPER

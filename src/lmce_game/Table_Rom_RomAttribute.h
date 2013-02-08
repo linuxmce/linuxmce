@@ -96,21 +96,49 @@ class DECLSPECIFIER Row_Rom_RomAttribute : public TableRow, public SerializeClas
 		
 		long int m_FK_Rom;
 long int m_FK_RomAttribute;
+long int m_psc_id;
+long int m_psc_batch;
+long int m_psc_user;
+short int m_psc_frozen;
+string m_psc_mod;
+long int m_psc_restrict;
 
-		bool is_null[2];
+		bool is_null[8];
 	
 	public:
 		long int FK_Rom_get();
 long int FK_RomAttribute_get();
+long int psc_id_get();
+long int psc_batch_get();
+long int psc_user_get();
+short int psc_frozen_get();
+string psc_mod_get();
+long int psc_restrict_get();
 
 		
 		void FK_Rom_set(long int val);
 void FK_RomAttribute_set(long int val);
+void psc_id_set(long int val);
+void psc_batch_set(long int val);
+void psc_user_set(long int val);
+void psc_frozen_set(short int val);
+void psc_mod_set(string val);
+void psc_restrict_set(long int val);
 
 		
-		
+		bool psc_id_isNull();
+bool psc_batch_isNull();
+bool psc_user_isNull();
+bool psc_frozen_isNull();
+bool psc_restrict_isNull();
+
 			
-			
+		void psc_id_setNull(bool val);
+void psc_batch_setNull(bool val);
+void psc_user_setNull(bool val);
+void psc_frozen_setNull(bool val);
+void psc_restrict_setNull(bool val);
+	
 	
 		void Delete();
 		void Reload();		
@@ -131,13 +159,19 @@ class Row_RomAttribute* FK_RomAttribute_getrow();
 
 		// Setup binary serialization
 		void SetupSerialization(int iSC_Version) {
-			StartSerializeList() + m_FK_Rom+ m_FK_RomAttribute;
+			StartSerializeList() + m_FK_Rom+ m_FK_RomAttribute+ m_psc_id+ m_psc_batch+ m_psc_user+ m_psc_frozen+ m_psc_mod+ m_psc_restrict;
 		}
 	private:
 		void SetDefaultValues();
 		
 		string FK_Rom_asSQL();
 string FK_RomAttribute_asSQL();
+string psc_id_asSQL();
+string psc_batch_asSQL();
+string psc_user_asSQL();
+string psc_frozen_asSQL();
+string psc_mod_asSQL();
+string psc_restrict_asSQL();
 
 	};
 

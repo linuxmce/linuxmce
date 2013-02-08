@@ -1,9 +1,0 @@
-add_onda_a69g_ac97_support.patch
-alpha_build_fixes.patch
-disable_gcc_version_check1.patch
-disable_gcc_version_check2.patch
-core_oss_framepointer.patch
-debian_makefile_depmod.patch
-post_16_20080307.patch
-add_suspend_quirk_hp_nc6220_nw8240.patch
-refix_lp_68659_by_disabling_dxs_for_0x1458a002.patch

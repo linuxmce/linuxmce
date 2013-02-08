@@ -6,11 +6,11 @@
      Phone: +1 (877) 758-8648
 
 
-     This program is free software; you can redistribute it and/or modify it under the terms of the GNU General Public License.
+     This program is free software; you can redistribute it and/or modify it under the terms of the GNU Lesser General Public License.
      This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty
      of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
 
-     See the GNU General Public License for more details.
+     See the GNU Lesser General Public License for more details.
 
 */
 
@@ -39,7 +39,6 @@ class DCEConfig : public RA_Config
 private:
 
 	map<string,bool> m_mapModifiedParameters;
-public: // HACK needed by lmce_launch_managerwidget.cpp -- dtk 2007-11-06 HACK
 	map<string,string> m_mapParameters;
 
 public:
@@ -55,8 +54,27 @@ public:
 	string m_mapParameters_Find(string Token) {	map<string,string>::iterator it = m_mapParameters.find( Token ); return it == m_mapParameters.end() ? string() : (*it).second; }
 	bool m_mapParameters_Exists(string Token) {	map<string,string>::iterator it = m_mapParameters.find( Token ); return it != m_mapParameters.end(); }
 
-	inline int ReadInteger(string sToken, int iDefaultValue = 0);
-	inline string ReadString(string sToken, string sDefaultValue = "");
+	inline int ReadInteger(string sToken, int iDefaultValue = 0)
+	{
+		int iValue = iDefaultValue;
+		
+		if( m_mapParameters_Exists(sToken) )
+		{
+			iValue = atoi(m_mapParameters_Find(sToken).c_str());
+		}
+		
+		return iValue;
+	}
+
+	inline string ReadString(string sToken, string sDefaultValue = "")
+	{
+		string sValue = sDefaultValue;
+		
+		if( m_mapParameters_Exists(sToken) )
+			sValue = m_mapParameters_Find(sToken);
+		
+		return sValue;
+	}
 
 	const map<string, string>& Parameters() const;
 

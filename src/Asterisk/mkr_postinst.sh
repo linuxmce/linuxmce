@@ -5,6 +5,19 @@
 sed -r -i "s/RUNASTERISK=no/RUNASTERISK=yes/" /etc/default/asterisk
 sed -r -i "s/[#]RUNASTSAFE=yes/RUNASTSAFE=yes/" /etc/default/asterisk
 
+# Create some files that being included from other config files, but don't exist.
+# 
+#touch /etc/asterisk/manager_custom.conf
+#touch /etc/asterisk/queues_custom.conf
+#touch /etc/asterisk/sip_custom.conf
+#touch /etc/asterisk/sip_registrations.conf
+#touch /etc/asterisk/sip_registrations_custom.conf
+#touch /etc/asterisk/sip_nat.conf
+#touch /etc/asterisk/sip_general_custom.conf
+#touch /etc/asterisk/sip_general_additional.conf
+#touch /etc/asterisk/sip_additional.conf
+
+
 ########### DO NOTHING ###########
 
 #echo 'CREATE DATABASE IF NOT EXISTS `asterisk`;' | mysql

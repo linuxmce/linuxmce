@@ -20,8 +20,6 @@
 #define MediaListGrid_H
 
 #include "DataGrid.h"
-#include "../Orbiter/OrbiterGrid.h"
-
 namespace DCE
 {
 	class Media_Plugin;
@@ -43,15 +41,11 @@ public:
 
 	bool m_bIsDirectory,m_bIsBack;  // Keep track of whether this is a 'go back' or not
 	string m_sDisplayGroup,m_sDisplayName;
-	string m_sMRL;
+	string m_sMRL,m_sPictureThumb;
 	int m_PK_File,m_PK_Disc,m_PK_Picture,m_PK_Attribute,m_PK_Bookmark,m_PK_FileFormat;
 	char m_cMediaSource; // F=File, D=Disc, L=Download, A=Attribute
 	enumTypeOfMedia m_enumTypeOfMedia;
 	time_t m_tLastViewed;
-
-	// These are used only for browsing songs
-	int m_iTrack;
-	string m_sPerformer,m_sAlbum;
 
 	// Constructor for file info
 	FileBrowserInfo(string sDisplayName, string sPath,int PK_File_Or_Disc,int PK_FileFormat, char *pLastViewed, char cMediaSource, bool bIsDirectory,bool bIsBack) 
@@ -77,7 +71,6 @@ public:
 		m_bIsDirectory=bIsDirectory;
 		m_bIsBack=bIsBack;
 		m_PK_Bookmark=0;
-		m_iTrack=0;
 		m_sMRL=sPath;
 		m_PK_FileFormat=PK_FileFormat;
 		m_cMediaSource=cMediaSource;
@@ -99,7 +92,6 @@ public:
 		m_PK_FileFormat=0;
 		m_cMediaSource='A';
 		m_tLastViewed=tLastViewed;
-		m_iTrack=0;
 	}
 	// Constructor for bookmark
 	FileBrowserInfo(string sDisplayName, int PK_Bookmark, int PK_Picture, int PK_File, int PK_Disc,int PK_FileFormat, char cMediaSource)
@@ -117,7 +109,6 @@ public:
 		m_PK_FileFormat=PK_FileFormat;
 		m_cMediaSource=cMediaSource;
 		m_tLastViewed=0;
-		m_iTrack=0;
 	}
 };
 
@@ -145,20 +136,6 @@ static bool FileBrowserInfoComparerLastViewed(FileBrowserInfo *x, FileBrowserInf
 	return x->m_tLastViewed > y->m_tLastViewed;
 }
 
-static bool FileBrowserInfoComparerTrack(FileBrowserInfo *x, FileBrowserInfo *y)
-{
-	if( (x->m_iTrack==0 && y->m_iTrack==0) || x->m_bIsBack || y->m_bIsBack || x->m_bIsDirectory || y->m_bIsDirectory )
-		return FileBrowserInfoComparer(x,y);
-
-	if( x->m_iTrack==0 && y->m_iTrack!=0 )
-		return false;
-
-	if( x->m_iTrack!=0 && y->m_iTrack==0 )
-		return true;
-
-	return x->m_iTrack < y->m_iTrack;
-}
-
 class DatabaseInfoOnPath
 {
 public:
@@ -176,10 +153,9 @@ public:
 class MediaListGrid : public DataGridTable
 {
 public:
-	OrbiterMediaGridStyle m_omgsStyle;
 	FileBrowserInfoPtr *m_pFileBrowserInfoPtr;  // This will be the same as m_listFileBrowserInfo, but in an array for faster retrieval by row number
 
-	MediaListGrid(class Datagrid_Plugin *pDatagrid_Plugin,class Media_Plugin *pMedia_Plugin,int PK_MediaType,OrbiterMediaGridStyle omgsStyle) : m_pDatagrid_Plugin(pDatagrid_Plugin), m_pMedia_Plugin(pMedia_Plugin) { m_pFileBrowserInfoPtr=NULL; m_pMediaListGrid_Master=NULL; m_iPK_MediaType=PK_MediaType; m_omgsStyle=omgsStyle; }
+	MediaListGrid(class Datagrid_Plugin *pDatagrid_Plugin,class Media_Plugin *pMedia_Plugin,int PK_MediaType) : m_pDatagrid_Plugin(pDatagrid_Plugin), m_pMedia_Plugin(pMedia_Plugin) { m_pFileBrowserInfoPtr=NULL; m_pMediaListGrid_Master=NULL; m_iPK_MediaType=PK_MediaType; }
 	MediaListGrid(class Datagrid_Plugin *pDatagrid_Plugin,class Media_Plugin *pMedia_Plugin,MediaListGrid *pMediaListGrid) : m_pDatagrid_Plugin(pDatagrid_Plugin), m_pMedia_Plugin(pMedia_Plugin), m_pMediaListGrid_Master(pMediaListGrid) { m_pFileBrowserInfoPtr=NULL; m_iPK_MediaType=m_pMediaListGrid_Master->m_iPK_MediaType; }
 	~MediaListGrid()
 	{

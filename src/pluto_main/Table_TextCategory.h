@@ -134,7 +134,6 @@ bool psc_id_isNull();
 bool psc_batch_isNull();
 bool psc_user_isNull();
 bool psc_frozen_isNull();
-bool psc_mod_isNull();
 bool psc_restrict_isNull();
 
 			
@@ -144,7 +143,6 @@ void psc_id_setNull(bool val);
 void psc_batch_setNull(bool val);
 void psc_user_setNull(bool val);
 void psc_frozen_setNull(bool val);
-void psc_mod_setNull(bool val);
 void psc_restrict_setNull(bool val);
 	
 	
@@ -164,10 +162,6 @@ void psc_restrict_setNull(bool val);
 		// Return the rows in other tables with foreign keys pointing here
 		void Text_FK_TextCategory_getrows(vector <class Row_Text*> *rows);
 void TextCategory_FK_TextCategory_Parent_getrows(vector <class Row_TextCategory*> *rows);
-void TextCategory_pschist_FK_TextCategory_Parent_getrows(vector <class Row_TextCategory_pschist*> *rows);
-void TextCategory_pschmask_FK_TextCategory_Parent_getrows(vector <class Row_TextCategory_pschmask*> *rows);
-void Text_pschist_FK_TextCategory_getrows(vector <class Row_Text_pschist*> *rows);
-void Text_pschmask_FK_TextCategory_getrows(vector <class Row_Text_pschmask*> *rows);
 
 
 		// Setup binary serialization

@@ -137,7 +137,8 @@ void psc_mod_set(string val);
 void psc_restrict_set(long int val);
 
 		
-		bool Define_isNull();
+		bool Description_isNull();
+bool Define_isNull();
 bool SourceOnly_isNull();
 bool PathToFile_isNull();
 bool Instructions_isNull();
@@ -145,11 +146,11 @@ bool psc_id_isNull();
 bool psc_batch_isNull();
 bool psc_user_isNull();
 bool psc_frozen_isNull();
-bool psc_mod_isNull();
 bool psc_restrict_isNull();
 
 			
-		void Define_setNull(bool val);
+		void Description_setNull(bool val);
+void Define_setNull(bool val);
 void SourceOnly_setNull(bool val);
 void PathToFile_setNull(bool val);
 void Instructions_setNull(bool val);
@@ -157,7 +158,6 @@ void psc_id_setNull(bool val);
 void psc_batch_setNull(bool val);
 void psc_user_setNull(bool val);
 void psc_frozen_setNull(bool val);
-void psc_mod_setNull(bool val);
 void psc_restrict_setNull(bool val);
 	
 	
@@ -176,13 +176,7 @@ void psc_restrict_setNull(bool val);
 		// Return the rows in other tables with foreign keys pointing here
 		void Installation_FK_RepositoryType_Source_getrows(vector <class Row_Installation*> *rows);
 void Installation_FK_RepositoryType_Binaries_getrows(vector <class Row_Installation*> *rows);
-void Installation_pschist_FK_RepositoryType_Source_getrows(vector <class Row_Installation_pschist*> *rows);
-void Installation_pschist_FK_RepositoryType_Binaries_getrows(vector <class Row_Installation_pschist*> *rows);
-void Installation_pschmask_FK_RepositoryType_Source_getrows(vector <class Row_Installation_pschmask*> *rows);
-void Installation_pschmask_FK_RepositoryType_Binaries_getrows(vector <class Row_Installation_pschmask*> *rows);
 void RepositorySource_FK_RepositoryType_getrows(vector <class Row_RepositorySource*> *rows);
-void RepositorySource_pschist_FK_RepositoryType_getrows(vector <class Row_RepositorySource_pschist*> *rows);
-void RepositorySource_pschmask_FK_RepositoryType_getrows(vector <class Row_RepositorySource_pschmask*> *rows);
 
 
 		// Setup binary serialization

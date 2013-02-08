@@ -156,7 +156,6 @@ bool psc_id_isNull();
 bool psc_batch_isNull();
 bool psc_user_isNull();
 bool psc_frozen_isNull();
-bool psc_mod_isNull();
 bool psc_restrict_isNull();
 
 			
@@ -170,7 +169,6 @@ void psc_id_setNull(bool val);
 void psc_batch_setNull(bool val);
 void psc_user_setNull(bool val);
 void psc_frozen_setNull(bool val);
-void psc_mod_setNull(bool val);
 void psc_restrict_setNull(bool val);
 	
 	
@@ -191,41 +189,15 @@ void psc_restrict_setNull(bool val);
 void DeviceTemplate_MediaType_DesignObj_FK_Screen_FileList_getrows(vector <class Row_DeviceTemplate_MediaType_DesignObj*> *rows);
 void DeviceTemplate_MediaType_DesignObj_FK_Screen_OSD_getrows(vector <class Row_DeviceTemplate_MediaType_DesignObj*> *rows);
 void DeviceTemplate_MediaType_DesignObj_FK_Screen_Alt_getrows(vector <class Row_DeviceTemplate_MediaType_DesignObj*> *rows);
-void DeviceTemplate_MediaType_DesignObj_pschist_FK_Screen_getrows(vector <class Row_DeviceTemplate_MediaType_DesignObj_pschist*> *rows);
-void DeviceTemplate_MediaType_DesignObj_pschist_FK_Screen_FileList_getrows(vector <class Row_DeviceTemplate_MediaType_DesignObj_pschist*> *rows);
-void DeviceTemplate_MediaType_DesignObj_pschist_FK_Screen_OSD_getrows(vector <class Row_DeviceTemplate_MediaType_DesignObj_pschist*> *rows);
-void DeviceTemplate_MediaType_DesignObj_pschist_FK_Screen_Alt_getrows(vector <class Row_DeviceTemplate_MediaType_DesignObj_pschist*> *rows);
-void DeviceTemplate_MediaType_DesignObj_pschmask_FK_Screen_getrows(vector <class Row_DeviceTemplate_MediaType_DesignObj_pschmask*> *rows);
-void DeviceTemplate_MediaType_DesignObj_pschmask_FK_Screen_FileList_getrows(vector <class Row_DeviceTemplate_MediaType_DesignObj_pschmask*> *rows);
-void DeviceTemplate_MediaType_DesignObj_pschmask_FK_Screen_OSD_getrows(vector <class Row_DeviceTemplate_MediaType_DesignObj_pschmask*> *rows);
-void DeviceTemplate_MediaType_DesignObj_pschmask_FK_Screen_Alt_getrows(vector <class Row_DeviceTemplate_MediaType_DesignObj_pschmask*> *rows);
 void MediaType_DesignObj_FK_Screen_getrows(vector <class Row_MediaType_DesignObj*> *rows);
 void MediaType_DesignObj_FK_Screen_FileList_getrows(vector <class Row_MediaType_DesignObj*> *rows);
 void MediaType_DesignObj_FK_Screen_OSD_getrows(vector <class Row_MediaType_DesignObj*> *rows);
 void MediaType_DesignObj_FK_Screen_Alt_getrows(vector <class Row_MediaType_DesignObj*> *rows);
-void MediaType_DesignObj_pschist_FK_Screen_getrows(vector <class Row_MediaType_DesignObj_pschist*> *rows);
-void MediaType_DesignObj_pschist_FK_Screen_FileList_getrows(vector <class Row_MediaType_DesignObj_pschist*> *rows);
-void MediaType_DesignObj_pschist_FK_Screen_OSD_getrows(vector <class Row_MediaType_DesignObj_pschist*> *rows);
-void MediaType_DesignObj_pschist_FK_Screen_Alt_getrows(vector <class Row_MediaType_DesignObj_pschist*> *rows);
-void MediaType_DesignObj_pschmask_FK_Screen_getrows(vector <class Row_MediaType_DesignObj_pschmask*> *rows);
-void MediaType_DesignObj_pschmask_FK_Screen_FileList_getrows(vector <class Row_MediaType_DesignObj_pschmask*> *rows);
-void MediaType_DesignObj_pschmask_FK_Screen_OSD_getrows(vector <class Row_MediaType_DesignObj_pschmask*> *rows);
-void MediaType_DesignObj_pschmask_FK_Screen_Alt_getrows(vector <class Row_MediaType_DesignObj_pschmask*> *rows);
 void Screen_CommandParameter_FK_Screen_getrows(vector <class Row_Screen_CommandParameter*> *rows);
-void Screen_CommandParameter_pschist_FK_Screen_getrows(vector <class Row_Screen_CommandParameter_pschist*> *rows);
-void Screen_CommandParameter_pschmask_FK_Screen_getrows(vector <class Row_Screen_CommandParameter_pschmask*> *rows);
 void Screen_DesignObj_FK_Screen_getrows(vector <class Row_Screen_DesignObj*> *rows);
-void Screen_DesignObj_pschist_FK_Screen_getrows(vector <class Row_Screen_DesignObj_pschist*> *rows);
-void Screen_DesignObj_pschmask_FK_Screen_getrows(vector <class Row_Screen_DesignObj_pschmask*> *rows);
 void Skin_FK_Screen_MainMenu_getrows(vector <class Row_Skin*> *rows);
 void Skin_FK_Screen_Sleeping_getrows(vector <class Row_Skin*> *rows);
 void Skin_FK_Screen_ScreenSaver_getrows(vector <class Row_Skin*> *rows);
-void Skin_pschist_FK_Screen_MainMenu_getrows(vector <class Row_Skin_pschist*> *rows);
-void Skin_pschist_FK_Screen_Sleeping_getrows(vector <class Row_Skin_pschist*> *rows);
-void Skin_pschist_FK_Screen_ScreenSaver_getrows(vector <class Row_Skin_pschist*> *rows);
-void Skin_pschmask_FK_Screen_MainMenu_getrows(vector <class Row_Skin_pschmask*> *rows);
-void Skin_pschmask_FK_Screen_Sleeping_getrows(vector <class Row_Skin_pschmask*> *rows);
-void Skin_pschmask_FK_Screen_ScreenSaver_getrows(vector <class Row_Skin_pschmask*> *rows);
 
 
 		// Setup binary serialization

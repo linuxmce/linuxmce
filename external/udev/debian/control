@@ -1,0 +1,25 @@
+Source: udev
+Section: admin
+Priority: optional
+Maintainer: Mrcea Hutanu <mircea.h@plutohome.com>
+Build-Depends: debhelper (>> 4.2), bzip2, libselinux1-dev, realpath
+Standards-Version: 3.6.1.1
+
+Package: udev
+Architecture: any
+Depends: ${shlibs:Depends}, ${misc:Depends}, hotplug (>= 0.0.20040329-16), initscripts (>= 2.85-16), makedev (>= 2.3.1-75), lsb-base (>= 1.3-9ubuntu3), sed (>= 3.95)
+Conflicts: lvm-common (<< 1.5.13)
+Description: /dev/ management daemon
+ udev is a program which dynamically creates and removes device nodes from
+ /dev/. It responds to /sbin/hotplug device events and requires a 2.6 kernel.
+
+Package: udev-udeb
+XC-Package-Type: udeb
+Section: debian-installer
+Architecture: any
+Depends: ${shlibs:Depends}, hotplug-udeb
+Description: /dev/ management daemon
+ udev is a program which dynamically creates and removes device nodes from
+ /dev/. It responds to /sbin/hotplug device events and requires a 2.6 kernel.
+ .
+ This is a minimal version for use in debian-installer.

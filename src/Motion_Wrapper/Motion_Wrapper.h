@@ -25,16 +25,15 @@
 #include <sys/types.h>
 #include <sys/wait.h>
 #include <unistd.h>
-
+#include "AlarmManager.h"
 #include <iostream>
-
 #include "DCE/DeviceData_Router.h"
 class Database_pluto_main;
 
 //<-dceag-decl-b->
 namespace DCE
 {
-	class Motion_Wrapper : public Motion_Wrapper_Command
+	class Motion_Wrapper : public Motion_Wrapper_Command, public AlarmEvent
 	{
 //<-dceag-decl-e->
 		// Private member variables
@@ -45,6 +44,7 @@ public:
 
 //<-dceag-const-b->
 public:
+		class DCE::AlarmManager *m_pAlarmManager;
 		// Constructors/Destructor
 		Motion_Wrapper(int DeviceID, string ServerAddress,bool bConnectEventHandler=true,bool bLocalMode=false,class Router *pRouter=NULL);
 		virtual ~Motion_Wrapper();
@@ -53,7 +53,7 @@ public:
 		virtual void ReceivedCommandForChild(DeviceData_Impl *pDeviceData_Impl,string &sCMD_Result,Message *pMessage);
 		virtual void ReceivedUnknownCommand(string &sCMD_Result,Message *pMessage);
 //<-dceag-const-e->
-
+		void AlarmCallback(int id, void* param);
 		virtual bool Connect(int iPK_DeviceTemplate);
 
 //<-dceag-const2-b->
@@ -74,8 +74,6 @@ public:
 	int DATA_Get_Number_of_ports();
 	int DATA_Get_Video_Standard();
 	int DATA_Get_Video_Input_Type();
-	string DATA_Get_Extra_Parameters();
-	string DATA_Get_Motion_Parameters();
 
 			*****EVENT***** accessors inherited from base class
 

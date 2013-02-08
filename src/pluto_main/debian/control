@@ -1,0 +1,21 @@
+Source: libpluto-main
+Priority: extra
+Maintainer: LinuxMCE Developers <developers@linuxmce.org>
+Build-Depends: debhelper (>= 7), libmysqlclient-dev
+Standards-Version: 3.8.3
+Section: libs
+Homepage: http://www.linuxmce.org
+
+Package: libpluto-main-dev
+Section: libdevel
+Architecture: any
+Depends: ${shlibs:Depends}, ${misc:Depends}
+Description: LinuxMCE main library development files
+ The header files and stuff needed to to compile stuff for LinuxMCE
+
+Package: libpluto-main
+Section: libs
+Architecture: any
+Depends: ${shlibs:Depends}, ${misc:Depends}
+Description: LinuxMCE main library lib files
+ The library needed for most LinuxMCE devices and apps

@@ -1,7 +1,7 @@
 /*
-     Copyright (C) 2008 LOCALE|concept
+     Copyright (C) 2004 Pluto, Inc., a Florida Corporation
 
-     www.localeconcept.com
+     www.plutohome.com
 
      Phone: +1 (877) 758-8648
  
@@ -20,7 +20,6 @@
 #include "PlutoUtils/StringUtils.h"
 #include "PlutoUtils/Other.h"
 
-
 #include <iostream>
 using namespace std;
 using namespace DCE;
@@ -34,6 +33,7 @@ Generic_PC_Workstation::Generic_PC_Workstation(int DeviceID, string ServerAddres
 	: Generic_PC_Workstation_Command(DeviceID, ServerAddress,bConnectEventHandler,bLocalMode,pRouter)
 //<-dceag-const-e->
 {
+	m_pDisplay = NULL;
 }
 
 //<-dceag-const2-b->
@@ -48,7 +48,8 @@ Generic_PC_Workstation::Generic_PC_Workstation(Command_Impl *pPrimaryDeviceComma
 Generic_PC_Workstation::~Generic_PC_Workstation()
 //<-dceag-dest-e->
 {
-	
+	XCloseDisplay(m_pDisplay);
+	m_pDisplay = NULL;	
 }
 
 //<-dceag-getconfig-b->
@@ -58,12 +59,22 @@ bool Generic_PC_Workstation::GetConfig()
 		return false;
 //<-dceag-getconfig-e->
 
+	m_pDisplay = XOpenDisplay(getenv("DISPLAY"));
+
+	if (!m_pDisplay) 
+	{
+		LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"Could Not Open X Display.");
+		return false;
+	}
+
+	if (DPMSCapable(m_pDisplay) == False)
+	{
+		LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"X Server is not DPMS Capable");
+		return false;
+	}
+
 	// Put your code here to initialize the data in this class
 	// The configuration parameters DATA_ are now populated
-
-
-	dpy = XOpenDisplay(getenv("DISPLAY"));
-
 	return true;
 }
 
@@ -213,12 +224,7 @@ void Generic_PC_Workstation::SomeFunction()
 void Generic_PC_Workstation::CMD_On(int iPK_Pipe,string sPK_Device_Pipes,string &sCMD_Result,Message *pMessage)
 //<-dceag-c192-e->
 {
-	cout << "Need to implement command #192 - On" << endl;
-	cout << "Parm #97 - PK_Pipe=" << iPK_Pipe << endl;
-	cout << "Parm #98 - PK_Device_Pipes=" << sPK_Device_Pipes << endl;
-
-	system("xset dpms force on");
-
+	DPMSForceLevel(m_pDisplay,DPMSModeOn);
 }
 
 //<-dceag-c193-b->
@@ -231,11 +237,7 @@ void Generic_PC_Workstation::CMD_On(int iPK_Pipe,string sPK_Device_Pipes,string 
 void Generic_PC_Workstation::CMD_Off(int iPK_Pipe,string &sCMD_Result,Message *pMessage)
 //<-dceag-c193-e->
 {
-	cout << "Need to implement command #193 - Off" << endl;
-	cout << "Parm #97 - PK_Pipe=" << iPK_Pipe << endl;
-
-	system("xset dpms force off");
-
+	DPMSForceLevel(m_pDisplay,DPMSModeOff);
 }
 
 

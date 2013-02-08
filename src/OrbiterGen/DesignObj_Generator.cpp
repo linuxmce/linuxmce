@@ -92,10 +92,11 @@
 #include "pluto_media/Table_FileFormat.h"
 #include "pluto_media/Table_MediaSubType.h"
 #include "pluto_media/Table_MediaSource.h"
+#include "pluto_media/Table_Bookmark.h"
 
 extern bool g_bBootSplash;
 
-#define TOTAL_ESTIMATED_SCREENS 200
+#define TOTAL_ESTIMATED_SCREENS 330
 
 DesignObj_Generator::DesignObj_Generator(OrbiterGenerator *pGenerator,class Row_DesignObj * drDesignObj,class PlutoRectangle rPosition,class DesignObj_Generator *ocoParent,bool bAddToGenerated,bool bDontShare,bool bProcess)
 {
@@ -158,13 +159,13 @@ LoggerWrapper::GetInstance()->Write(LV_STATUS,"const %p %d",this,drDesignObj->PK
 	if( m_pRow_DesignObj->FK_DesignObjType_get()==DESIGNOBJTYPE_Floorplan_CONST )
 		m_iFloorplanPage = m_pOrbiterGenerator->m_iFloorplanPage;
 
-
-if( m_pRow_DesignObj->PK_DesignObj_get()==2255 || m_pRow_DesignObj->PK_DesignObj_get()==2212 )
+/*
+if( m_pRow_DesignObj->PK_DesignObj_get()==4871 ||  m_pRow_DesignObj->PK_DesignObj_get()==5088 )// ||  m_pRow_DesignObj->PK_DesignObj_get()==5112 ) 
 {
     int k=2; 
 }
-
-	// Pick the standard variation, the specialized variation we will use for parameters, and all matching variations for including child objects
+*/
+    // Pick the standard variation, the specialized variation we will use for parameters, and all matching variations for including child objects
     PickVariation(m_pOrbiterGenerator,m_pRow_DesignObj,&m_pRow_DesignObjVariation,&m_pRow_DesignObjVariation_Standard,&m_alDesignObjVariations);
 
     if( !m_pRow_DesignObjVariation_Standard )
@@ -256,8 +257,8 @@ int k=2;
 						{
 							m_bUsingCache=true;
 							ReadFloorplanInfo(Filename+".fp");
-							LoggerWrapper::GetInstance()->Write(LV_STATUS,"Not building screen %s found valid cache in %s",
-								(StringUtils::itos(m_pRow_DesignObj->PK_DesignObj_get()) + "." + StringUtils::itos(m_iVersion)).c_str(),Filename.c_str());
+							LoggerWrapper::GetInstance()->Write(LV_STATUS,"Not building screen %s found valid cache",
+								(StringUtils::itos(m_pRow_DesignObj->PK_DesignObj_get()) + "." + StringUtils::itos(m_iVersion)).c_str());
 							m_pOrbiterGenerator->m_iPK_CommandGroup=0;
 							return;
 						}
@@ -961,13 +962,17 @@ int k=2;
 								m_alChildDesignObjs.push_back(pDesignObj_Generator);
 								pDesignObj_Generator->m_rBackgroundPosition.X=X;
 								pDesignObj_Generator->m_rBackgroundPosition.Y=Y;
+								// Keep original X,Y values, we need them to calculate the childrens offset below
+								int orgX = pDesignObj_Generator->m_rPosition.X;
+								int orgY = pDesignObj_Generator->m_rPosition.Y;
 								pDesignObj_Generator->m_rPosition.X=X;
 								pDesignObj_Generator->m_rPosition.Y=Y;
 								for(size_t s=0;s<pDesignObj_Generator->m_vectDesignObjText.size();++s)
 								{
 									CGText *ot = (CGText *) pDesignObj_Generator->m_vectDesignObjText[s];
-									ot->m_rPosition.X=X;
-									ot->m_rPosition.Y=Y;
+									// Set to parents position(x,y) + the childs original offset (calculated from its current value - the parents current value)
+									ot->m_rPosition.X=X+(ot->m_rPosition.X-orgX);
+									ot->m_rPosition.Y=Y+(ot->m_rPosition.Y-orgY);
 								}
 
 								pDesignObj_Generator->m_pFloorplanFillPoint = new PlutoPoint(pRow_FloorplanObjectType->FillX_get() * ScaleFactor / 1000,pRow_FloorplanObjectType->FillY_get() * ScaleFactor / 1000);
@@ -1655,7 +1660,8 @@ vector<class ArrayValue *> *DesignObj_Generator::GetArrayValues(Row_DesignObjVar
                     if( pRow_CommandGroup && pRow_CommandGroup->FK_Array_get()==PK_Array && !pRow_CommandGroup->Disabled_get() )
                     {
                         alArray->push_back(new ArrayValue(drAG_R->FK_CommandGroup_getrow()->AltID_isNull() ? StringUtils::itos(drAG_R->FK_CommandGroup_get()) : StringUtils::itos(drAG_R->FK_CommandGroup_getrow()->AltID_get()),
-                            (!drAG_R->FK_CommandGroup_getrow()->FK_Icon_isNull() && m_pOrbiterGenerator->m_iUiVersion==1 ? "~cb~" : "") +  drAG_R->FK_CommandGroup_getrow()->Description_get(),
+                            (!drAG_R->FK_CommandGroup_getrow()->FK_Icon_isNull() && m_pOrbiterGenerator->m_iUiVersion==1 ? "~cb~" : "") +  
+(!drAG_R->FK_CommandGroup_getrow()->FK_Text_isNull() ? GetText(drAG_R->FK_CommandGroup_getrow()->FK_Text_get()) : drAG_R->FK_CommandGroup_getrow()->Description_get()),
                             drAG_R->FK_CommandGroup_getrow()->FK_Icon_isNull() ? NULL : drAG_R->FK_CommandGroup_getrow()->FK_Icon_getrow(),
                             drAG_R->FK_CommandGroup_getrow()->FK_Criteria_Orbiter_isNull() ? 0 : drAG_R->FK_CommandGroup_getrow()->FK_Criteria_Orbiter_get(),
                             bNoSubstitutions || drAG_R->FK_CommandGroup_getrow()->FK_DesignObj_isNull() ? 0 : drAG_R->FK_CommandGroup_getrow()->FK_DesignObj_get(),
@@ -1720,7 +1726,9 @@ vector<class ArrayValue *> *DesignObj_Generator::GetArrayValues(Row_DesignObjVar
                     if( pRow_CommandGroup && pRow_CommandGroup->FK_Array_get()==PK_Array && !pRow_CommandGroup->Disabled_get() )
                     {
                         alArray->push_back(new ArrayValue(drAG_E->FK_CommandGroup_getrow()->AltID_isNull() ? StringUtils::itos(drAG_E->FK_CommandGroup_get()) : StringUtils::itos(drAG_E->FK_CommandGroup_getrow()->AltID_get()),
-                            (!drAG_E->FK_CommandGroup_getrow()->FK_Icon_isNull() && m_pOrbiterGenerator->m_iUiVersion==1 ? "~cb~" : "") +  drAG_E->FK_CommandGroup_getrow()->Description_get(),
+                            (!drAG_E->FK_CommandGroup_getrow()->FK_Icon_isNull() && m_pOrbiterGenerator->m_iUiVersion==1 ? "~cb~" : "") +  
+								// Try to get descriprion from Text table if we have PK_Text
+								(!drAG_E->FK_CommandGroup_getrow()->FK_Text_isNull() ? GetText(drAG_E->FK_CommandGroup_getrow()->FK_Text_get()) : drAG_E->FK_CommandGroup_getrow()->Description_get()),
                             drAG_E->FK_CommandGroup_getrow()->FK_Icon_isNull() ? NULL : drAG_E->FK_CommandGroup_getrow()->FK_Icon_getrow(),
                             drAG_E->FK_CommandGroup_getrow()->FK_Criteria_Orbiter_isNull() ? 0 : drAG_E->FK_CommandGroup_getrow()->FK_Criteria_Orbiter_get(),
                             !bNoSubstitutions && drAG_E->FK_CommandGroup_getrow()->FK_DesignObj_isNull() ? 0 : drAG_E->FK_CommandGroup_getrow()->FK_DesignObj_get(),
@@ -1758,6 +1766,10 @@ vector<class ArrayValue *> *DesignObj_Generator::GetArrayValues(Row_DesignObjVar
 
 				alArray->push_back(new ArrayValue("0",	GetText(TEXT_Filename_CONST),
                     NULL, 0, 0, 0, 0,false,false,false));
+				
+				// TODO: Add another filter to show recently added media files
+				//alArray->push_back(new ArrayValue("-2",	GetText(TEXT_Recently_Added_CONST),
+                //    NULL, 0, 0, 0, 0,false,false,false));
 
 				vector<Row_MediaType_AttributeType *> vectRow_MediaType_AttributeType;
 				m_pOrbiterGenerator->m_spDatabase_pluto_media->MediaType_AttributeType_get()->GetRows(sSQL,&vectRow_MediaType_AttributeType);
@@ -1975,9 +1987,16 @@ vector<class ArrayValue *> *DesignObj_Generator::GetArrayValues(Row_DesignObjVar
 							continue;
 						if( PK_Array==ARRAY_Phone_Users_CONST && drIU->FK_Users_getrow()->Extension_isNull() )
 							continue;
-						string sName = pRow_Users->UserName_get();
-						if( drIU->FK_Users_getrow()->Nickname_get().size() )
+						//User selection names.
+						//Use Nickname when available. 
+						string sName = "";						
+						if( drIU->FK_Users_getrow()->Nickname_get().size() && !(drIU->FK_Users_getrow()->Nickname_isNull())) {
+							//There is a Nickname, use it!
 							sName = pRow_Users->Nickname_get();
+						} else {
+							//There is no Nickname, so use the UserName		
+							sName = pRow_Users->UserName_get();
+						}
 
 						alArray->push_back(new ArrayValue(StringUtils::itos(pRow_Users->PK_Users_get()),sName,NULL,0,0,
 							0,0,pRow_DesignObjVariation_DesignObj_Skin_Language->CanBeHidden_get()==1,pRow_DesignObjVariation_DesignObj_Skin_Language->HideByDefault_get()==1,false));
@@ -2023,6 +2042,33 @@ vector<class ArrayValue *> *DesignObj_Generator::GetArrayValues(Row_DesignObjVar
                 }
             }
             break;
+    case ARRAY_Favourite_TV_Channels_CONST:
+      {
+	DBHelper *pDBHelper_Myth = new DBHelper("localhost", "root", "","mythconverg");
+	vector <class Row_Bookmark *> vectBookMarks;
+	string sWhereQuery = "WHERE EK_MediaType = 1";  // Grab all TV Related bookmarks.
+	m_pOrbiterGenerator->m_spDatabase_pluto_media->Bookmark_get()->GetRows(sWhereQuery,&vectBookMarks);
+	for ( vector<Row_Bookmark *>::iterator it=vectBookMarks.begin();it!=vectBookMarks.end();++it )
+	  {
+	    // Get channel from bookmark position, grab related data in mythconverg.
+	    Row_Bookmark *pRow_Bookmark = *it;
+	    vector<string> vectTmp;
+	    string sPosition = pRow_Bookmark->Position_get();
+	    string sChannel = sPosition.substr(sPosition.find(":")+1);
+	    LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"FAVE: %s",sChannel.c_str());;
+	    string sSQLForChannel = "select chanid, callsign, icon FROM channel WHERE chanid = '"+sChannel+"'";
+	    PlutoSqlResult result_set_channel;
+	    if ((result_set_channel.r=pDBHelper_Myth->db_wrapper_query_result(sSQLForChannel))!=NULL &&
+		result_set_channel.r->row_count>0 )
+	      {
+		DB_ROW row=db_wrapper_fetch_row(result_set_channel.r);
+		string sCallsign=row[1];
+		string sIcon=row[2];
+		alArray->push_back(new ArrayValue(sPosition,sCallsign,NULL,0,0,0,0,false,false,false));
+	      }
+	  }
+      }
+      break;
 
     }
 
@@ -2079,14 +2125,15 @@ void DesignObj_Generator::ScaleAllValues(int FactorX_Input,int FactorY_Input,cla
 		// Floorplans were scaled already, but they need to be offset by the parent floorplan object
 		// and they are to be centered on the point, rather than upper/left like the others
 		m_rBackgroundPosition.X += m_ocoParent->m_rBackgroundPosition.X - m_rBackgroundPosition.Width/2;
-		m_rBackgroundPosition.Y += m_ocoParent->m_rBackgroundPosition.Y - m_rBackgroundPosition.Width/2;
+		m_rBackgroundPosition.Y += m_ocoParent->m_rBackgroundPosition.Y - m_rBackgroundPosition.Height/2;
 		m_rPosition.X += m_ocoParent->m_rPosition.X - m_rPosition.Width/2;
-		m_rPosition.Y += m_ocoParent->m_rPosition.Y - m_rPosition.Width/2;
-        for(size_t s=0;s<m_vectDesignObjText.size();++s)
-        {
-            CGText *ot = (CGText *) m_vectDesignObjText[s];
+		m_rPosition.Y += m_ocoParent->m_rPosition.Y - m_rPosition.Height/2;
+
+		for(size_t s=0;s<m_vectDesignObjText.size();++s)
+		{
+			CGText *ot = (CGText *) m_vectDesignObjText[s];
 			ot->m_rPosition.X += m_ocoParent->m_rPosition.X - m_rPosition.Width/2;
-			ot->m_rPosition.Y += m_ocoParent->m_rPosition.Y - m_rPosition.Width/2;
+			ot->m_rPosition.Y += m_ocoParent->m_rPosition.Y - m_rPosition.Height/2;
 		}
 	}
 
@@ -2259,9 +2306,16 @@ int k=2;
             {
 				LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"User %d in text %s is invalid",PK_User,Text.c_str());
 				sValue = "";
-            }
-			else
-	            sValue = drUser->Nickname_isNull() ? drUser->UserName_get() : drUser->Nickname_get();
+            } else {
+		   //not sure where this is used exactly?
+	           if(drUser->Nickname_get().size() && !(drUser->Nickname_isNull())) {
+			//There is a Nickname, use it!
+			sValue = drUser->Nickname_get();
+		   } else {
+			//There is no Nickname, so use the UserName
+			sValue = drUser->UserName_get();
+		   }
+	    }
         }
         else if( sVariable[0]=='T' && sVariable.length()>1 )  // <%=T592%> means text object 592
         {

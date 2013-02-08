@@ -129,12 +129,6 @@
 				RelativePath="..\Gen_Devices\Slim_Server_StreamerBase.cpp">
 			</File>
 			<File
-				RelativePath=".\Sound_Bridge.cpp">
-			</File>
-			<File
-				RelativePath="..\Gen_Devices\Sound_BridgeBase.cpp">
-			</File>
-			<File
 				RelativePath=".\SqueezeBox_Player.cpp">
 			</File>
 			<File

@@ -1,0 +1,367 @@
+
+Please read the file "INSTALL" for getting the stuff working a first time :-)
+
+
+PREBUFFER
+=========
+
+My plugin uses xine's prebuffer. The prebuffer causes xine to buffer a certain
+amount of data when a stream begins before xine starts to play back the
+stream. With no prebuffer or too small a prebuffer, play back of Live-TV may
+be degraded to a slide show without sound as xine discards a lot of frames but
+cannot fetch new frames quickly enough as those are broadcast at a fixed rate.
+The drawback of a large prebuffer is a delay in switching channels: it must be
+filled before video and audio can be played back smoothly.
+
+
+SETUP-MENU
+==========
+
+Live-TV prebuffer [frames]: 31
+
+For a typical decoder to be able to decode frames, it needs at least a
+complete Group of Pictures (GOP), which starts with an I-frame (describes a
+full frame) and contains further B- and P-frames (describe differences between
+last and next I-frame), plus the next I-frame of the next GOP. Typically a
+GOP contains 15 images, but when switching channels you might just miss the
+I-frame of the current GOP and therefore it will take up to 30 frames to
+gather the above mentioned data. The default value of 31 was working perfectly
+for me. Currently, 25 frames per second are assumed, so the value 31 will
+cause a delay of 1.24 seconds, until video and audio will be playing fluently.
+As the current release features extra dynamic prebuffering it might still be
+ok to reduce this value to about 16 frames.
+
+
+OSD display mode: Blend scaled AUTO
+
+Lets you choose among several processing options for VDR's OSD.
+
+* X11 overlay
+  Tells xine to use a method for displaying the OSD that is independent of the
+  stream's video resolution. In this so called "unscaled" mode, xine uses a
+  X11 window to overlay the OSD on the video window. The advantage of mapping
+  a single OSD pixel to a single pixel on screen has the disadvantage of not
+  being able to support semi-transparent areas which appear totally opaque in
+  this mode.
+
+  NOTE: You won't see any OSD in this mode if X11 is not available!
+
+* Blend clipped
+* Blend scaled LQ
+* Blend scaled HQ
+* Blend scaled SHQ
+* Blend scaled AUTO
+  For these modes xine uses the CPU to blend the OSD into each video frame. As
+  the result depends on the stream's video resolution you may choose among 
+  several modes which require a different amount of CPU time.
+  The first mode simply cuts off all parts of the OSD that do not fit into the
+  video frame. If for example an OSD of size 720x576 is to be blended into a
+  frame of size 480x576 (e. g. VIVA broadcasts at this resolution) then almost
+  one halve of the OSD will be dropped at the right and the OSD will be quite 
+  stretched in horizontal direction.
+  All other modes scale the OSD to fit into the video frame. The difference
+  among them is the scaling quality (Low, High and Super High) which also 
+  leads to increasing CPU load and slows down e. g. navigation in the channels
+  list, etc.
+  The last mode automatically chooses between HQ and SHQ depending on the
+  stream's video resolution. SHQ will be choosen if either width or height
+  are below 360x288.
+
+  NOTE: Blend scaled is only implemented for VDR 1.3.x (1.3.7 and higher).
+
+
+OSD gamma correction [ 123 => 1.23 ]: 123
+
+When OSD scaling is performed then multiple pixels (or parts of them for SHQ)
+have to be combined into a single one. During this process a so called gamma
+correction is applied in order to give the resulting pixels the correct visual
+representation of the original ones.
+You may adjust this correction within the range 1.00 to 2.50 (by entering 100
+to 250 respectively) to get the best visual representation on your monitor. 
+Changing this value is most noticeable in SHQ scaling mode so you need to
+watch a channel that doesn't broadcast at 720x576 in order to activate OSD
+scaling and to be able to see any change concerning gamma correction.
+
+
+Audio mode: Dolby on
+
+With this option you can control feeding dolby audio data to xine. You may
+want to use this option if you don't have the necessary replay equipment 
+connected to your computer. In that way you can force xine to use a 
+differently coded audio source among the supplied e. g. mp2 or pcm.
+
+
+Control xine's volume: Yes
+
+Allows you to control whether xine shall honor VDR's set volume requests. You
+might need this if you have a special setup (e. g. external audio decoder or 
+amplifier) where changing the volume in xine might mute external audio.
+
+
+Muting: Simulate
+
+Lets you choose among several options how xine shall process VDR's muting
+requests:
+
+* Ignore
+  Muting respectively unmuting requests will be ignored.
+* Execute
+  Muting respectively unmuting requests will be executed.
+* Simulate
+  Muting is simulated by setting volume to 0. Unmuting is simulated by
+  restoring the previous volume.
+
+  NOTE: This happens even if "Control xine's volume" is set to "No"!
+
+
+Get primary device when xine connects: Yes
+
+This option is especially useful for owners of full featured DVB cards which
+usually run the OSD on a full featured card (i. e. the full featured card is
+the primary device). 
+With this option set to Yes, vdr-xine automatically makes itself the primary
+device while xine is connected to it. In that way the OSD and live TV are 
+automatically available via vdr-xine without the need to manually switch the
+primary device via remote control nor SVDRP interface.
+
+
+Support semi transparent colors: Yes
+
+Depending on the currently broadcast image the displayed OSD might be hardly
+readable when the OSD is blended semi transparently into the TV image.
+If this option is set to No, vdr-xine simply ignores the semi-transparent
+component of the color and therefore makes such colors opaque which typically
+makes the OSD easier to read.
+
+
+COMMAND LINE ARGS
+=================
+
+There are currently two optional arguments.
+
+	-r      Enable remote control.
+
+This argument enables Simon Truss' patch which allows controlling VDR by
+pressing buttons in xine. It will also allow control from any other suitably
+patched front end.
+
+	-i N	Instance number for FIFO directory
+
+If you want to run two instances of vdr-xine (in different VDR processes) on
+the same computer then you have to use a unique FIFO dir for each instance.
+For example "-i 3" will append "3" to the FIFO_DIR given in Makefile. The MRL
+will then have to be like that: "vdr:/tmp/vdr-xine3/stream#demux:mpeg_pes".
+
+	-q	Suppress debug messages on console
+
+This option is useful if VDR's console is to be used for other output e. g.
+for the OSD implementation of VDR's skin 'curses'.
+
+	-s	Switch to curses skin while xine is not connected
+
+Use this switch if it is useful to control VDR via it's controlling terminal
+while xine is not connected to vdr-xine.
+
+
+XINE KEYBINDINGS
+================
+
+To make use of the remote control feature, you'll have to assign keys in xine
+to VDR's commands. Therefore, you'll find 33 keybindings in xine's key binding
+editor, named 'VDR ...', which control the specified action in VDR. Besides
+those, the following entries are also used for VDR:
+
+	'enter the numer 0' .. 'enter the numer 9'
+	'jump to media menu'
+	'menu navigate up'
+	'menu navigate down'
+	'menu navigate left'
+	'menu navigate right'
+	'menu select'
+
+
+GXINE KEYBINDINGS
+=================
+
+And similarly for gxine...
+
+You'll find several VDR-specific keybindings in gxine's key binding editor:
+
+		Used for VDR				VDR-specific
+
+	"Play"		Menu bindings			"Red"
+	"Pause"		Number key bindings		"Green"
+	"Stop"		"Volume +"			"Yellow"
+	"Up"		"Volume -"			"Blue"
+	"Down"		"Mute"				"Record"
+	"Left"						"Power"
+	"Right"		"Select/OK"			"Back"
+	"Rewind / Back 1 min"				"Audio"
+	"Fast forward / Forward 1 min"
+
+You'll notice that the menu bindings have their VDR functions in [brackets].
+	
+If not all of these bindings are present, try "Add new default bindings"
+from the Reload menu; if they still aren't, you're running an older version
+of gxine.
+
+The volume control bindings assume that VDR is passing volume control events
+back to gxine - in the xine plugin's configuration, you need
+	Control xine's volume	Yes
+	Muting			Execute
+for these bindings to work.
+
+
+XINE-LIB CONFIG
+===============
+
+This applies whether you're using xine, gxine or some other xine-lib front
+end.
+
+xine uses large buffers to gain smooth playback. The drawback is that VDR puts
+a lot of data into xine's buffers and therefore VDR's progress indicator is 
+way ahead of the position at which xine is currently playing. For a recording
+of a radio channel, xine's default buffers will cause an offset of about 16
+seconds. But this can easily be improved (with almost no noticeable effects)
+to less than 2 seconds by adjusting xine's number of audio buffers. Just edit
+your xine config "~/.xine/config" and add or change the following entry:
+
+	engine.buffers.audio_num_buffers:4
+
+The value '4' is the smallest possible value. You may increase it, in case that
+you experience noticeable distortions in audio playback. Another interesting
+option might be the following:
+
+	audio.synchronization.av_sync_method:resample
+
+It should totally avoid distortions by adjusting audio data to fill any gaps.
+But it's only useable if your amplifier is not connected via SPDIF.
+
+Another useful option on less powerful machines is the following:
+
+	video.output.disable_exact_alphablend:1
+
+The result will be that a less exact algorithm is used for blending the OSD
+into each video frame and thus CPU time is saved.
+
+
+
+XINE COMMAND LINE OPTIONS
+=========================
+
+This section is not intended as a replacement for xine's documentation, but it
+may be useful to have a starting point for further reading. So, some useful
+command line options are listed below.
+
+Options for xine (X11 required):
+
+	-V vidix	 (for normal TV on my Matrox G550)
+	-V xshm		 (for watching HDTV)
+
+	-A alsa		 (use alsa sound system)
+
+	--post vdr_video (highly recommended for correct and immediate OSD scaling
+			  especially when using "xineplayer". It further enables
+                          video scaling and positioning as used within yaepg)
+
+	--post vdr_audio (highly recommended for selecting left / right stereo channel)
+
+	-D		 (enable selected deinterlacer)
+	-Dtvtime:method=Greedy2Frame,cheap_mode=0,pulldown=0,use_progressive_frame_flag=1
+			 (use specfied deinterlacer)
+	-L		 (disable LIRC support)
+
+Options for gxine (X11 required):
+
+	-V vidix	 (for normal TV on my Matrox G550)
+	-V xshm		 (for watching HDTV)
+
+	-A alsa		 (use alsa sound system)
+
+	Other options must (as of 0.4.4) be configured from within gxine.
+
+Options for fbxine (no X11 required):
+
+	-V vidixfb	 (for normal TV on my Matrox G550)
+	-V fb		 (for watching HDTV)
+
+	-A alsa		 (use alsa sound system)
+
+	--post vdr	 (highly recommended for correct and immediate OSD scaling
+			  especially when using "xineplayer". It further enables
+                          video scaling and positioning as used within yaepg)
+
+	--post vdr_audio (highly recommended for selecting left / right stereo channel)
+
+	-D		 (enable selected deinterlacer)
+	-Dtvtime:method=Greedy2Frame,cheap_mode=0,pulldown=0,use_progressive_frame_flag=1
+			 (use specfied deinterlacer)
+	-L		 (disable LIRC support)
+
+The default deinterlacer doesn't take too much CPU time, but on the other hand
+it doesn't deinterlace in all situations (e. g. when there is only a small area
+with significant movement on the screen).
+
+The specified deinterlacer does a good job, but requires much CPU time.
+
+If you don't like VDR's OSD to be stretched when playing 16:9 material you
+might also use xine's "expand" post processing plugin. It simply puts the
+16:9 images into an 4:3 image (adding a black bar on top and bottom) and
+therefore the OSD will keep it's aspect ratio. To make use of the plugin
+add the following options in this order on (fb)xine's command line:
+
+	xine ... --post expand --post vdr_video ...
+
+The expand plugin now also supports a feature called "centre cut out" which
+crops away the black bars around the image when 4:3 material is broadcast in
+a 16:9 stream and displayed on a 4:3 monitor. The command line looks then like
+the following:
+
+	xine ... --post expand:centre_crop_out_mode=1 --post vdr_video ...
+
+If you want to listen to mono audio streams in stereo, I'd suggest to use
+the xine's upmix_mono audio post plugin like that:
+
+	xine ... --post vdr_audio --post upmix_mono ...
+
+
+
+XINEPLAYER
+==========
+xineplayer is a companion of vdr-xine and is used to get the beloved mplayer
+plugin working with vdr-xine. I. e. you'll be able to replay DivX movies 
+directly through xine without the need for CPU expensive recoding. And you'll
+still be able to continue using VDR's OSD while the external file is playing.
+
+To get it working just install the mplayer plugin. Then edit it's "mplayer.sh"
+and replace
+
+	# where to find mplayer
+	MPLAYER="mplayer"
+
+with
+
+	# where to find mplayer
+	MPLAYER="xineplayer"
+
+and now you'll only have to make sure that xineplayer is found by your shell.
+xineplayer was built in vdr-xine's source directory so you'll either have to
+copy it to a directory which is contained in your environment variable PATH or
+just enter the absolute path to xineplayer into mplayer.sh as mentioned above.
+That's it.
+
+NOTE: xineplayer is still under development and currently only supports
+      mplayer plugin's TRADITIONAL mode. Furthermore it ignores any parameter
+      given on the command line besides the last one and expects this to be a
+      MRL recognizeable by xine (e. g. a filename). If xine doesn't know how
+      to play the given MRL you'll only see an error message on xine's console.
+
+As vdr-xine supports an instance number to create an unique FIFO directory it
+will also necessary to tell this number to xineplayer to have it control the
+right instance of vdr-xine. xineplayer's command line looks like that:
+
+	xineplayer [ --vdr-xine-instance=N ] [ options ] mrl
+
+NOTE: "--vdr-xine-instance" must be given as the first argument as it might
+      otherwise collide with further options originally intended for mplayer.
+

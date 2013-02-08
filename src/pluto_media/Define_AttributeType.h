@@ -47,6 +47,11 @@
 #define ATTRIBUTETYPE_Screen_saver_disabled_CONST 46
 #define ATTRIBUTETYPE_Manufacturer_CONST 47
 #define ATTRIBUTETYPE_Year_CONST 48
+#define ATTRIBUTETYPE_System_CONST 49
+#define ATTRIBUTETYPE_Season_Number_CONST 50
+#define ATTRIBUTETYPE_Episode_Number_CONST 51
+#define ATTRIBUTETYPE_TV_Season_ID_CONST 52
+#define ATTRIBUTETYPE_System_Configuration_CONST 56
 
 #define ATTRIBUTETYPE_TABLE "AttributeType"
 #define ATTRIBUTETYPE_PK_ATTRIBUTETYPE_FIELD "PK_AttributeType"

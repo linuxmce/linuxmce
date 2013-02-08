@@ -52,6 +52,9 @@ void
 CallsStatusCommand::handleStartup() {
 	m_token.setKey(TOKEN_ACTION, ACTION_COMMAND);
 	m_token.setKey(TOKEN_COMMAND, "core show channels concise");
+	//Response is like: 
+	//SIP/20408720-00000008!from-trunk!!1!Up!AppDial!(Outgoing Line)!039872039!!3!15!IAX2/306-3010!1317825362.75
+	//IAX2/306-3010!macro-dialout-trunk!s!23!Up!Dial!SIP/20408720/39872039,300,!306!!3!15!SIP/20408720-00000008!1317825362.74
 };
 
 bool 

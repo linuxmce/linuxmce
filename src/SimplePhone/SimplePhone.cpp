@@ -40,6 +40,8 @@ using namespace DCE;
 
 #include "SIP_Thread.h"
 
+#include "pluto_main/Define_Button.h"
+
 //<-dceag-const-b->
 // The primary constructor when the class is created as a stand-alone device
 SimplePhone::SimplePhone(int DeviceID, string ServerAddress,bool bConnectEventHandler,bool bLocalMode,class Router *pRouter)
@@ -83,21 +85,32 @@ bool SimplePhone::GetConfig()
 	LoggerWrapper::GetInstance()->Write(LV_WARNING, "Server IP: %s", SimplePhoneConf::Instance().Get_Server_IP().c_str());
 
 	/* Get MD Audio Settings */
+
 	string sAudioSettings = Get_MD_AudioSettings();
 	LoggerWrapper::GetInstance()->Write(LV_STATUS, "MD Audio Settings: %s", sAudioSettings.c_str());
 	string sAlsaDevice = "asym_analog";
-
+	// TODO: FIX ME with the changes to asound.conf by l3top
 	for (size_t i = 0; i < sAudioSettings.length(); i++)
 	{
 		switch (sAudioSettings[i])
 		{
 			case 'C':
 			case 'O':
-				sAlsaDevice = "asym_spdif";
+				sAlsaDevice = "default"; // used to be "asym_spdif";
 				break;
 			case 'S':
 			case 'L':
-				sAlsaDevice = "asym_analog";
+				sAlsaDevice = "default"; // used to be "asym_analog";
+				break;
+			case 'M':
+			        if (FileUtils::FileExists("/etc/pluto/simplephone.conf")) {
+                                    sAlsaDevice = "donttouch"; // used to be "plughw:1";
+                                } else {
+                                    sAlsaDevice = "default";   // If we do not have a simplephone.conf we create a default one.
+                                }
+				break;
+			case 'H':
+				sAlsaDevice = "default"; // used to be "asym_hdmi";
 				break;
 			default:
 				LoggerWrapper::GetInstance()->Write(LV_STATUS, "Flag unprocessed: '%c'", sAudioSettings[i]);
@@ -114,15 +127,34 @@ bool SimplePhone::GetConfig()
 		{
 			vectLinphoneConfig[i] = "alsadev=" + sAlsaDevice;
 		}
+
+                if (strstr(pcConfigLine, "playback_dev_id=") == pcConfigLine)
+		{
+			vectLinphoneConfig[i] = "playback_dev_id=ALSA: " + sAlsaDevice;
+		}
+
+		if (strstr(pcConfigLine, "ringer_dev_id=") == pcConfigLine)
+		{
+			vectLinphoneConfig[i] = "ringer_dev_id=ALSA: " + sAlsaDevice;
+		}
+
+		if (strstr(pcConfigLine, "capture_dev_id=") == pcConfigLine)
+		{
+			vectLinphoneConfig[i] = "capture_dev_id=ALSA: " + sAlsaDevice;		
+		}
+
 	}
-	FileUtils::WriteVectorToFile("/etc/pluto/simplephone.conf", vectLinphoneConfig);
+
+        if ( sAlsaDevice != "donttouch" ) {	
+            FileUtils::WriteVectorToFile("/etc/pluto/simplephone.conf", vectLinphoneConfig);
+        }
 
 	m_sExtension = m_pEvent->GetDeviceDataFromDatabase(m_dwPK_Device, DEVICEDATA_PhoneNumber_CONST);
 	if (m_sExtension.length() == 0)
 	{
 		LoggerWrapper::GetInstance()->Write(LV_WARNING, "SimplePhone::GetConfig: Extension is empty. Attempting to sync with AMP");
 
-		const char * const cmd[] = { "/usr/pluto/bin/LaunchRemoteCmd.sh", "dcerouter", "/usr/pluto/bin/sync_pluto2amp.pl", NULL };
+		const char * const cmd[] = { "/usr/pluto/bin/LaunchRemoteCmd.sh", "dcerouter", "/usr/pluto/bin/db_phone_config.sh", NULL };
 		string sOutput, sStdErr;
 		ProcessUtils::GetCommandOutput(cmd[0], cmd, sOutput, sStdErr);
 
@@ -136,6 +168,26 @@ bool SimplePhone::GetConfig()
 		}
 	}
 	LoggerWrapper::GetInstance()->Write(LV_STATUS, "SimplePhone::GetConfig: Starting with extension '%s'", m_sExtension.c_str());
+
+	m_sPassword = m_pEvent->GetDeviceDataFromDatabase(m_dwPK_Device, DEVICEDATA_Password_CONST);
+	if (m_sPassword.length() == 0)
+	{
+		LoggerWrapper::GetInstance()->Write(LV_WARNING, "SimplePhone::GetConfig: Password is empty. Attempting to sync with AMP");
+
+		const char * const cmd[] = { "/usr/pluto/bin/LaunchRemoteCmd.sh", "dcerouter", "/usr/pluto/bin/db_phone_config.sh", NULL };
+		string sOutput, sStdErr;
+		ProcessUtils::GetCommandOutput(cmd[0], cmd, sOutput, sStdErr);
+
+		LoggerWrapper::GetInstance()->Write(LV_STATUS, "SimplePhone::GetConfig: Output of sync command:\n%s\nSimplePhone::GetConfig: End of output", sOutput.c_str());
+
+		m_sPassword = m_pEvent->GetDeviceDataFromDatabase(m_dwPK_Device, DEVICEDATA_Password_CONST);
+		if (m_sPassword.length() == 0)
+		{
+			LoggerWrapper::GetInstance()->Write(LV_WARNING, "SimplePhone::GetConfig: Password is empty after sync. Will use extension as password. This is a security risk.");
+			m_sPassword = m_sExtension;
+		}
+	}
+	LoggerWrapper::GetInstance()->Write(LV_STATUS, "SimplePhone::GetConfig: Received password for extension '%s'", m_sExtension.c_str());
 	
 	// set mic as default capture device, mute, increase capture volume level
 	const char * cmd = "/usr/pluto/bin/SoundCards_SetupAudioCapture.sh";
@@ -361,12 +413,59 @@ void SimplePhone::CMD_Simulate_Keypress(string sPK_Button,int iStreamID,string s
     sCMD_Result="ERROR";
     if(LS_ActiveCall())
     {
-		if( !sPK_Button.empty() )
+
+	    if (!sPK_Button.empty()) {
+	    	switch(atoi(sPK_Button.c_str()))
+		    {
+		    	case BUTTON_0_CONST:
+				ch = '0';
+				break;
+			case BUTTON_1_CONST:
+				ch = '1';
+				break;
+			case BUTTON_2_CONST:
+				ch = '2';
+				break;
+			case BUTTON_3_CONST:
+				ch = '3';
+				break;
+			case BUTTON_4_CONST:
+				ch = '4';
+				break;
+			case BUTTON_5_CONST:
+				ch = '5';
+				break;
+			case BUTTON_6_CONST:
+				ch = '6';
+				break;
+			case BUTTON_7_CONST:
+				ch = '7';
+				break;
+			case BUTTON_8_CONST:
+				ch = '8';
+				break;
+			case BUTTON_9_CONST:
+				ch = '9';
+				break;
+			case BUTTON_Asterisk_CONST:
+				ch = '*';
+				break;
+			case BUTTON_Pound_CONST:
+				ch = '#';
+				break;
+		    }
+	    }
+
+	    /*		if( !sPK_Button.empty() )
 		{
 			// only read the first character
 			ch = sPK_Button[0];
 		}
-		
+	    */
+	
+
+	// why the hell was it done this way?
+
         if( isdigit(ch) || (ch == '*') || (ch == '#'))
         {
             LoggerWrapper::GetInstance()->Write(LV_STATUS, "Will send '%d'(%c) as DTMF",ch,ch);
@@ -382,17 +481,33 @@ void SimplePhone::CMD_Simulate_Keypress(string sPK_Button,int iStreamID,string s
     {
         LoggerWrapper::GetInstance()->Write(LV_STATUS, "Looks like there is no call");
     }
+    
 }
 
 string SimplePhone::Get_MD_AudioSettings()
 {
-	// M/D where we are attached to
-	int PK_MD = m_pData->m_dwPK_Device_MD;
 
-	return m_pData->m_pEvent_Impl->GetDeviceDataFromDatabase(PK_MD,DEVICEDATA_Audio_settings_CONST);
+	m_pUSBMicrophoneDevice = m_pData->FindFirstRelatedDeviceOfCategory(DEVICECATEGORY_Conference_Microphones_CONST);
+
+	if (!m_pUSBMicrophoneDevice)
+	{
+		// M/D where we are attached to
+		int PK_MD = m_pData->m_dwPK_Device_MD;
+
+		return m_pData->m_pEvent_Impl->GetDeviceDataFromDatabase(PK_MD,DEVICEDATA_Audio_settings_CONST);
+	} else
+	{
+		return "M"; // Mic found
+	}
+
 }
 
 string SimplePhone::GetExtension()
 {
 	return m_sExtension;
+}
+
+string SimplePhone::GetPassword()
+{
+	return m_sPassword;
 }

@@ -5,7 +5,7 @@
 . /usr/local/lmce-build/common/utils.sh
 
 set -e
-set -x
+#set -x
 
 DisplayMessage "*** STEP: Creating LINUXMCE CD 1"
 trap 'Error "Undefined error in $0"' EXIT

@@ -1,0 +1,96 @@
+some knx devices, the actions their are supposed to perform, the place on the address channel i used for it, the command/events DCE templates they NEED to work correctly
+
+
+the templates that are not already implemented in the db are commented so that the program still compiles.
+parse EIB.cpp, functions "processTelegram" and "ReceivedCommandForChild" to uncomment according to the device templates you made.
+don't forget to run "sql2cpp" and "DCEGen -d 49" (merge)
+
+each knxdevice is suppose to handle a generic DCE COMMAND Read, and then send correct values to the DCE(throughe the events)
+
+
+the channel is their template's parameter 'channel group':
+<channel>			=<groupaddress>[ | <groupaddress>]*
+<groupaddress>		=<3rangeaddress>|<2rangeaddress>|<1rangeaddress>
+<3rangeaddress>		=<line>/<group>/<adress>
+<2rangeaddress>		=<fulline>/<address>
+<1rangeaddress>		=<fulladdress>
+<line>				=[0..31]
+<group>				=[0..7]
+<address>			=[0..255]
+<fulline>			=<address>
+<fulladdress>		=<0..65535>
+
+DCE commands and events are represented as below:
+name[; parameter name:value type/range:explanation]*
+
+
+
+Light_Switch_onoff:
+channel meaning:
+	write state on /off | return state (on/off)
+DCE commands
+	Generic_On 
+	Generic_Off
+DCE events
+	State_Changed; State:int: 1 if on, 0 if off
+special:
+	light switch is not supposed to handle a "set level%", but it considers that like a set on/off according to required lvl %
+	this one already work perfectly
+
+
+Light_Switch_dimmable:
+channel meaning:
+	write state on/off | write level % | return state on/off | return level 0-100
+DCE commands
+	Generic_On 
+	Generic_Off
+	Set_Level; Level:int:% light required
+DCE events
+	State_Changed; State:int:1 if on, 0 if off
+	Level_Changed; Level:int:% light level reached
+special:
+	Level_Changed is commented since not in db
+
+
+Drapes:
+channel meaning:
+	write open% | return open% | write open/close | write stop
+DCE commands
+	Set_Level; Level:int:% light required
+	Open
+	Close
+	Stop
+DCE events
+	Level_Changed; Level:int:% light level reached
+special:
+	Level_Changed is commented since not in db. LevelChanged is supposed to be sent only when stopping the current order(reached 100% after an Open, ..)
+
+
+Blinds:
+channel meaning:
+	write open% | write angle | return open% | return angle | write open/close | write stop |
+DCE commands
+	Set_Level; Level:int:% light required
+//	Set_Angle; Angle:int:
+	Open
+	Close
+	Stop
+DCE events
+	Level_Changed; Level:int:% light level reached
+//	Angle_Changed; Angle:int:
+special
+	Level_Changed, SetAngle, Angle_Changed are not yet implemented
+
+
+Standard_Thermostat:
+channel meaning:
+	write asked temperature | write mode | return asked temperature | return mode | return real temperature
+DCE commands
+	Set_Temperature; Value_To_Assign:float:temperature to reach
+	Set_Mode; Mode:int:working mode
+DCE events
+	Thermostat_Set_Point_Chan; value:float:temperature to reach
+	State_Changed; value:float:actual temperature reached
+special
+	modes are: normal|eco|night|nofreeze|stop
+	State_Changed is sent by the thermostat, according to its programmation

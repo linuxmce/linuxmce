@@ -1,0 +1,7 @@
+LIRC kernel modules source
+=====================================
+
+This package can be used to build the kernel modules from a newer
+release or to add a patch to a current release.
+
+It uses dkms and standard dkms mechanisms to handle this.

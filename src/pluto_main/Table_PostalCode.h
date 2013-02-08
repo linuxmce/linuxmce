@@ -158,8 +158,6 @@ class Row_Country* FK_Country_getrow();
 
 		// Return the rows in other tables with foreign keys pointing here
 		void Installation_FK_PostalCode_getrows(vector <class Row_Installation*> *rows);
-void Installation_pschist_FK_PostalCode_getrows(vector <class Row_Installation_pschist*> *rows);
-void Installation_pschmask_FK_PostalCode_getrows(vector <class Row_Installation_pschmask*> *rows);
 
 
 		// Setup binary serialization

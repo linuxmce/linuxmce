@@ -85,7 +85,7 @@ public:
 		if( m_bRunningWithoutDeviceData )
 			return m_pEvent_Impl->GetDeviceDataFromDatabase(m_dwPK_Device,DEVICEDATA_Type_CONST);
 		else
-			return m_mapParameters_Find(DEVICEDATA_Type_CONST);
+			return m_mapParameters[DEVICEDATA_Type_CONST];
 	}
 
 	string Get_Directories()
@@ -93,7 +93,7 @@ public:
 		if( m_bRunningWithoutDeviceData )
 			return m_pEvent_Impl->GetDeviceDataFromDatabase(m_dwPK_Device,DEVICEDATA_Directories_CONST);
 		else
-			return m_mapParameters_Find(DEVICEDATA_Directories_CONST);
+			return m_mapParameters[DEVICEDATA_Directories_CONST];
 	}
 
 	string Get_Name()
@@ -101,7 +101,7 @@ public:
 		if( m_bRunningWithoutDeviceData )
 			return m_pEvent_Impl->GetDeviceDataFromDatabase(m_dwPK_Device,DEVICEDATA_Name_CONST);
 		else
-			return m_mapParameters_Find(DEVICEDATA_Name_CONST);
+			return m_mapParameters[DEVICEDATA_Name_CONST];
 	}
 
 	int Get_ZoomTime()
@@ -109,7 +109,7 @@ public:
 		if( m_bRunningWithoutDeviceData )
 			return atoi(m_pEvent_Impl->GetDeviceDataFromDatabase(m_dwPK_Device,DEVICEDATA_ZoomTime_CONST).c_str());
 		else
-			return atoi(m_mapParameters_Find(DEVICEDATA_ZoomTime_CONST).c_str());
+			return atoi(m_mapParameters[DEVICEDATA_ZoomTime_CONST].c_str());
 	}
 
 	int Get_FadeTime()
@@ -117,7 +117,7 @@ public:
 		if( m_bRunningWithoutDeviceData )
 			return atoi(m_pEvent_Impl->GetDeviceDataFromDatabase(m_dwPK_Device,DEVICEDATA_FadeTime_CONST).c_str());
 		else
-			return atoi(m_mapParameters_Find(DEVICEDATA_FadeTime_CONST).c_str());
+			return atoi(m_mapParameters[DEVICEDATA_FadeTime_CONST].c_str());
 	}
 
 	bool Get_Supports_NPOT_Textures()
@@ -125,7 +125,7 @@ public:
 		if( m_bRunningWithoutDeviceData )
 			return (m_pEvent_Impl->GetDeviceDataFromDatabase(m_dwPK_Device,DEVICEDATA_Supports_NPOT_Textures_CONST)=="1" ? true : false);
 		else
-			return (m_mapParameters_Find(DEVICEDATA_Supports_NPOT_Textures_CONST)=="1" ? true : false);
+			return (m_mapParameters[DEVICEDATA_Supports_NPOT_Textures_CONST]=="1" ? true : false);
 	}
 
 	void Set_Supports_NPOT_Textures(bool Value)
@@ -137,7 +137,7 @@ public:
 		if( m_bRunningWithoutDeviceData )
 			return atoi(m_pEvent_Impl->GetDeviceDataFromDatabase(m_dwPK_Device,DEVICEDATA_Max_Size_CONST).c_str());
 		else
-			return atoi(m_mapParameters_Find(DEVICEDATA_Max_Size_CONST).c_str());
+			return atoi(m_mapParameters[DEVICEDATA_Max_Size_CONST].c_str());
 	}
 
 };

@@ -24,17 +24,12 @@ CSQL_ID=""
 #Returns resulting rows in $Var; you can iterate through them using 'for'
 RunSQL()
 {
-	local Q Pass
+	local Q
 	Q="$*"
-	Pass=
-	if [[ -n "$MySqlPassword" ]]; then
-		Pass="-p$MySqlPassword"
-	fi
-	if [[ -n "$MySqlPort" ]]; then
-		Port="-P $MySqlPort"
-	fi
 	if [[ -n "$Q" ]]; then
-		echo "$Q;" | mysql -A -N "$SQL_DB" -h "$MySqlHost" -u "$MySqlUser" $Pass $Port | SQL_Translate
+		mysql -A -N "$SQL_DB" $MYSQL_DB_CRED -e "$Q;" | SQL_Translate
+	else
+		mysql -A -N "$SQL_DB" $MYSQL_DB_CRED | SQL_Translate
 	fi
 }
 
@@ -84,7 +79,7 @@ UseDB()
 {
 	SQL_DB="$1"
 	if [[ -z "$SQL_DB" ]]; then
-		SQL_DB="pluto_main"
+		SQL_DB="$MySqlDBName"
 	fi
 }
 

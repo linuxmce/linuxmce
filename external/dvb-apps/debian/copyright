@@ -1,0 +1,20 @@
+This package was debianized by Eduard Bloch <blade@debian.org> on
+Fri, 21 Sep 2001 17:31:06 +0200.
+
+It was downloaded from http://www.linuxtv.org/download/
+
+Upstream Authors: 
+
+Ralph Metzler <mocm@metzlerbros.de> and Marcus Metzler <rjkm@metzlerbros.de>
+for convergence integrated media GmbH.
+
+Based on parts from:
+Michael Hunold <m.hunold@gmx.de>
+Christian Theiss <mistert@rz.fh-augsburg.de>
+Nathan Laredo <laredo@gnu.org>
+and others
+
+Copyright:
+
+It may be redistributed under the terms of the GNU GPL, Version 2
+found on Debian systems in the file /usr/share/common-licenses/GPL .

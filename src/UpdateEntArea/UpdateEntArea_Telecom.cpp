@@ -65,6 +65,7 @@
 #include "pluto_main/Table_Users.h"
 #include "pluto_main/Define_Screen.h"
 #include "pluto_main/Define_RoomType.h"
+#include "pluto_main/Define_Text.h"
 
 #include "CommandGroupArray.h"
 
@@ -75,10 +76,17 @@ using namespace DefaultScenarios;
 
 void UpdateEntArea::AddDefaultTelecomScenarios()
 {
+        LoggerWrapper::GetInstance()->Write(LV_STATUS,"Staring to update telecom areas ...");
+	
 	for(map<int, pair<LevelOfMedia, bool> >::iterator it=m_mapRoom_Media.begin();it!=m_mapRoom_Media.end();++it)
 	{
 		Row_Room *pRow_Room = m_pDatabase_pluto_main->Room_get()->GetRow(it->first);
-		if( pRow_Room )
+               	if( !pRow_Room )
+                {
+                        LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"Cannot find Room %d!", it->first);
+                        continue;
+                }
+		if( pRow_Room && pRow_Room->FK_RoomType_get()!=ROOMTYPE_Unmanaged_CONST)
 			AddDefaultTelecomScenarios(pRow_Room);
 	}
 }
@@ -88,27 +96,29 @@ void UpdateEntArea::AddDefaultTelecomScenarios(Row_Room *pRow_Room)
 	CommandGroup *pCommandGroup;
 	CommandGroupArray commandGroupArray(pRow_Room,ARRAY_Communication_Scenarios_CONST,true);
 
-	pCommandGroup = commandGroupArray.FindCommandGroupByTemplate(TEMPLATE_Telecom_Scenarios_CONST,"Active Calls",ICON_Phone_CONST,1,0);
+        LoggerWrapper::GetInstance()->Write(LV_STATUS, "Starting to add telecom scenarios ...");
+
+	pCommandGroup = commandGroupArray.FindCommandGroupByTemplate(TEMPLATE_Telecom_Scenarios_CONST,"Active Calls",ICON_Phone_CONST,1,0,0,0,TEXT_Active_Calls_CONST);
 	if( pCommandGroup )
 		pCommandGroup->AddCommand(DEVICETEMPLATE_This_Orbiter_CONST,COMMAND_Goto_Screen_CONST,1,1,
 		COMMANDPARAMETER_PK_Screen_CONST,StringUtils::itos(SCREEN_Active_Calls_CONST).c_str());
 
-	pCommandGroup = commandGroupArray.FindCommandGroupByTemplate(TEMPLATE_Telecom_Scenarios_CONST,"Speed Dial",ICON_Phone_CONST,2,0);
+	pCommandGroup = commandGroupArray.FindCommandGroupByTemplate(TEMPLATE_Telecom_Scenarios_CONST,"Speed Dial",ICON_Phone_CONST,2,0,0,0,TEXT_SPEED_DIAL_CONST);
 	if( pCommandGroup )
 		pCommandGroup->AddCommand(DEVICETEMPLATE_This_Orbiter_CONST,COMMAND_Goto_Screen_CONST,1,1,
 			COMMANDPARAMETER_PK_Screen_CONST,StringUtils::itos(SCREEN_MakeCallFavorites_CONST).c_str());
 
-	pCommandGroup = commandGroupArray.FindCommandGroupByTemplate(TEMPLATE_Telecom_Scenarios_CONST,"Dial Direct",ICON_Phone_CONST,3,0);
+	pCommandGroup = commandGroupArray.FindCommandGroupByTemplate(TEMPLATE_Telecom_Scenarios_CONST,"Dial Direct",ICON_Phone_CONST,3,0,0,0,TEXT_CALL_DNUM_CONST);
 	if( pCommandGroup )
 		pCommandGroup->AddCommand(DEVICETEMPLATE_This_Orbiter_CONST,COMMAND_Goto_Screen_CONST,1,1,
 			COMMANDPARAMETER_PK_Screen_CONST,StringUtils::itos(SCREEN_MakeCallDialNumber_CONST).c_str());
 
-	pCommandGroup = commandGroupArray.FindCommandGroupByTemplate(TEMPLATE_Telecom_Scenarios_CONST,"Phone Book",ICON_Phone_CONST,4,0);
+	pCommandGroup = commandGroupArray.FindCommandGroupByTemplate(TEMPLATE_Telecom_Scenarios_CONST,"Phone Book",ICON_Phone_CONST,4,0,0,0,TEXT_CALL_PB_CONST);
 	if( pCommandGroup )
 		pCommandGroup->AddCommand(DEVICETEMPLATE_This_Orbiter_CONST,COMMAND_Goto_Screen_CONST,1,1,
 			COMMANDPARAMETER_PK_Screen_CONST,StringUtils::itos(SCREEN_MakeCallPhonebook_CONST).c_str());
 
-	pCommandGroup = commandGroupArray.FindCommandGroupByTemplate(TEMPLATE_Telecom_Scenarios_CONST,"Intercom",ICON_Phone_CONST,5,0);
+	pCommandGroup = commandGroupArray.FindCommandGroupByTemplate(TEMPLATE_Telecom_Scenarios_CONST,"Intercom",ICON_Phone_CONST,5,0,0,0,TEXT_CALL_INTERCOM_CONST);
 	if( pCommandGroup )
 		pCommandGroup->AddCommand(DEVICETEMPLATE_This_Orbiter_CONST,COMMAND_Goto_Screen_CONST,1,1,
 			COMMANDPARAMETER_PK_Screen_CONST,StringUtils::itos(SCREEN_MakeCallIntercom_CONST).c_str());
@@ -118,7 +128,19 @@ void UpdateEntArea::AddDefaultTelecomScenarios(Row_Room *pRow_Room)
 	for(size_t s=0;s<vectRow_Users.size();++s)
 	{
 		Row_Users *pRow_Users = vectRow_Users[s];
-		pCommandGroup = commandGroupArray.FindCommandGroupByTemplate(TEMPLATE_Telecom_Scenarios_CONST,pRow_Users->UserName_get(),0,1,pRow_Users->PK_Users_get());
+
+		//Voicemail Button.
+		//Use Nickname when available. 
+		string sName = "";						
+		if( pRow_Users->Nickname_get().size() && !(pRow_Users->Nickname_isNull())) {
+			//There is a Nickname, use it!
+			sName = pRow_Users->Nickname_get();
+		} else {
+			//There is no Nickname, so use the UserName		
+			sName = pRow_Users->UserName_get();
+		}
+
+		pCommandGroup = commandGroupArray.FindCommandGroupByTemplate(TEMPLATE_Telecom_Scenarios_CONST,sName,0,1,pRow_Users->PK_Users_get());
 		if( pCommandGroup )
 		{
 			pCommandGroup->m_pRow_CommandGroup->FK_DesignObj_set(DESIGNOBJ_butUserStatus_CONST);

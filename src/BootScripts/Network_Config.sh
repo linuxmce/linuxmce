@@ -87,4 +87,3 @@ Q="
 RunSQL "$Q"
 
 /usr/pluto/bin/Network_Setup.sh
-

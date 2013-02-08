@@ -1,0 +1,48 @@
+   http://www.bootsplash.org
+
+   Themeing
+
+   It's possible to create different [10]themes for the bootsplash
+   screen. This makes it easier to exchange the pictures and animations
+   shown during bootup. The current theme is selected by the THEME
+   variable in /etc/sysconfig/bootsplash. 
+   If you change the theme you have to call "mkinitrd" and, if using 
+   lilo as bootloader, "lilo" afterwards. Bootsplash themes are by default
+   stored in /etc/bootsplash/themes.
+
+   Each theme has its own directory with several subdirectories:
+
+   images/
+   contains jpeg pictures for the current splash theme. It's suggested
+   that each picture should have a text area of at least 80x25 so all
+   boot messages can be seen properly. If you create a theme with the
+   text window residing at a different position than the default one, you
+   need to change this in the configuration files. See configuration
+   files in config/. If you change a picture here, you need to call
+   mkinitrd to notify the kernel about the new picture.
+
+   config/
+   contains config files for the different jpeg pictures (defining text
+   area and such) as well as the bootup animation config file
+   (animations.cfg) If you change the bootsplash picture configuration,
+   you need to call mkinitrd to notify the kernel about your changes.
+   This is not needed if you change the animation configuration in
+   animation.cfg
+
+   animations/
+   contains the status animations that are shown during bootup. see
+   config/ for configuration file. The animations are stored in the
+   portable and free MNG format, the animated companion of the PNG file
+   format. You can easily create animations from a PNG or JPG picture
+   series using "convert" from the ImageMagick package.
+
+   Example: convert -delay 20 anim*.png anim.mng
+
+   bootloader/
+   "message" file for bootloader (i.e. lilo/grub).
+
+   In version 3 almost everything is themeable, and yes, almost
+   everything is defined in the configuration files. Because the format
+   of the configuration files is somewhat obtuse you'll need to read the
+   information in the file README.config.
+

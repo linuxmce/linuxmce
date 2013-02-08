@@ -1,0 +1,91 @@
+#!/bin/bash
+
+if [[ "$1" == configure ]]; then
+	. /usr/pluto/bin/SQL_Ops.sh
+	. /usr/pluto/bin/Utils.sh
+
+	if [[ -n "$MySqlPassword" ]]; then
+		PassParm="-p$MySqlPassword"
+	fi
+
+	# check if asterisk db exists
+	res=$(mysql --batch --skip-column-names -e "SHOW DATABASES LIKE 'asterisk'" | grep asterisk)
+	
+	# if asterisk db already exists delete some tables and recreate them to make sure they correspond to latest schema
+	if [[ "$res" == "asterisk" ]]; then
+		mysql -f -h "$MySqlHost" -u "$MySqlUser" $PassParm -e "use asterisk; ALTER TABLE phonelines ADD isfax ENUM('yes','no') NOT NULL DEFAULT 'no' AFTER enabled;" 2>>/dev/null
+		mysql -f -h "$MySqlHost" -u "$MySqlUser" $PassParm -e "use asterisk; ALTER TABLE phonelines ADD faxheader VARCHAR(30) NULL DEFAULT 'LinuxMCE fax'" 2>>/dev/null
+		mysql -f -h "$MySqlHost" -u "$MySqlUser" $PassParm -e "use asterisk; ALTER TABLE phonelines ADD faxmail VARCHAR(5) AFTER password;" 2>>/dev/null
+		mysql -f -h "$MySqlHost" -u "$MySqlUser" $PassParm -e "use asterisk; ALTER TABLE extensions MODIFY appdata VARCHAR(150);" 2>>/dev/null
+	fi
+	
+	# recreate asterisk database (except tables which contains user data)
+	mysql -f -h "$MySqlHost" -u "$MySqlUser" $PassParm < /usr/share/asterisk/sql/createdb.sql
+	
+	# populate new db with our default values
+	mysql -f -h "$MySqlHost" -u "$MySqlUser" $PassParm < /usr/share/asterisk/sql/initialdb.sql
+
+	# if asterisk is already installed, and db creation succeded make sure file rights are correct
+	if [[ -e /usr/sbin/asterisk ]] && [[ "$res" == "asterisk" ]]; then
+		. /usr/pluto/bin/Section_Ops.sh
+
+		#create asterisk group if it does not yet exist 
+		egrep -i "^asterisk" /etc/group >/dev/null 
+		if [[ $? -ne 0 ]]; then 
+			addgroup asterisk 
+		fi 
+			 
+		#create asterisk account if it does not yet exist
+		id -u asterisk >/dev/null 2>/dev/null
+		if [[ $? -ne 0 ]]; then
+			adduser asterisk
+			usermod -a -G www-data asterisk
+			usermod -a -G asterisk www-data
+		fi
+		
+		mkdir -p /var/lib/asterisk/mohmp3
+		mkdir -p /var/{log,spool}/asterisk
+		
+		chmod -R ug+rw /etc/asterisk
+		chown -R www-data: /var/lib/asterisk/mohmp3
+		chown -R asterisk:asterisk {/usr/share,/var/{log,lib,spool},/etc}/asterisk
+
+		/usr/pluto/bin/db_create_dialplan.sh || :
+		/usr/pluto/bin/db_phone_config.sh || :
+		
+
+		service apache2 restart
+		which asterisk > /dev/null && service asterisk restart
+
+		Fax="[fax]
+        comment = Archive of incoming and outgoing faxes
+        mangled names = no
+        browsable = yes
+        writable = yes
+        path = /home/fax
+        public = no
+        guest ok = no
+        force user = asterisk
+        force group = asterisk
+        create mask = 0660"
+
+		PopulateSection "/etc/samba/smb.conf" "FAX" "$Fax"
+	fi
+	
+	# add asterisk user to sudoers to execute dialplan bash scripts
+	sudo="asterisk	ALL=(root) NOPASSWD:PLUTO_WEBCMD"
+	awk '!/asterisk.*ALL=\(root\)/' /etc/sudoers >>/etc/sudoers.$$	
+	if ! BlacklistConfFiles '/etc/sudoers' ;then
+	        if [ ! -e '/etc/sudoers.pbackup' ] ;then
+	                cp /etc/sudoers /etc/sudoers.pbackup || :
+	        fi
+	
+	        echo "$sudo" >>/etc/sudoers.$$
+	        mv -f /etc/sudoers.$$ /etc/sudoers
+	        chmod 440 /etc/sudoers
+	fi
+	mkdir -p /home/fax/incoming
+	mkdir -p /home/fax/outgoing
+	chown -R asterisk:asterisk /home/fax
+	chmod -R 770 /home/fax
+fi

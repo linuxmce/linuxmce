@@ -1,0 +1,120 @@
+#! /bin/sh
+#
+# rcS		Call all S??* scripts in /etc/rcS.d in
+#		numerical/alphabetical order.
+#
+# Version:	@(#)/etc/init.d/rcS  2.76  12-Jan-2006  razvan.g@plutohome.com
+#
+
+PATH=/sbin:/bin:/usr/sbin:/usr/bin
+
+# Tweak so we can check /proc/cmdline here
+/bin/mount -v proc /proc -n -t proc
+cmdline="$(</proc/cmdline)"
+if [[ "$cmdline" != *sysvinit* ]]; then
+ /etc/init.d/fastboot/rcS
+ exit
+fi
+/bin/umount /proc
+
+runlevel=S
+prevlevel=N
+umask 022
+export PATH runlevel prevlevel
+
+#
+#	See if system needs to be setup. This is ONLY meant to
+#	be used for the initial setup after a fresh installation!
+#
+if [ -x /sbin/unconfigured.sh ]
+then
+  /sbin/unconfigured.sh
+fi
+
+#
+#	Source defaults.
+#
+. /etc/default/rcS
+export VERBOSE
+
+################################
+## START: bootsplash addition ##
+function rc_splash()
+{
+    if [ -x /sbin/splash.sh ]; then
+        /sbin/splash.sh "$1"
+        progress=$(( $progress + 1 ))
+    fi
+}
+
+    SSC=(/etc/rcS.d/S*)
+    case "$SSC" in
+        *\*) sscriptsS=0 ;;
+        *) sscriptsS=${#SSC[*]}
+    esac
+
+    SSC=(/etc/rc2.d/*)
+    case "$SSC" in
+        *\*) sscripts2=0 ;;
+        *) sscripts2=${#SSC[*]}
+    esac
+    
+    sscripts=$(( $sscriptsS + $sscripts2 ))
+    export sscripts
+
+    kscripts=0
+    export kscripts
+
+    export progress=0
+## END: bootsplash addition   ##
+################################
+
+
+#
+#	Trap CTRL-C &c only in this shell so we can interrupt subprocesses.
+#
+trap ":" INT QUIT TSTP
+
+#
+#	Call all parts in order.
+#
+for i in /etc/rcS.d/S??*
+do
+	# Ignore dangling symlinks for now.
+	[ ! -f "$i" ] && continue
+	
+	rc_splash "$i start"
+	
+	case "$i" in
+		*.sh)
+			# Source shell script for speed.
+			(
+				trap - INT QUIT TSTP
+				set start
+				. $i
+			)
+			;;
+		*)
+			# No sh extension, so fork subprocess.
+			$i start
+			;;
+	esac
+done
+
+#
+#	For compatibility, run the files in /etc/rc.boot too.
+#
+[ -d /etc/rc.boot ] && run-parts /etc/rc.boot
+
+#
+#	Finish setup if needed. The comment above about
+#	/sbin/unconfigured.sh applies here as well!
+#
+if [ -x /sbin/setup.sh ]
+then
+  /sbin/setup.sh
+fi
+
+echo $progress > /tmp/bootsplash_progress
+echo $sscripts > /tmp/bootsplash_sscripts
+

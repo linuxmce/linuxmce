@@ -162,7 +162,6 @@ bool psc_id_isNull();
 bool psc_batch_isNull();
 bool psc_user_isNull();
 bool psc_frozen_isNull();
-bool psc_mod_isNull();
 bool psc_restrict_isNull();
 
 			
@@ -179,7 +178,6 @@ void psc_id_setNull(bool val);
 void psc_batch_setNull(bool val);
 void psc_user_setNull(bool val);
 void psc_frozen_setNull(bool val);
-void psc_mod_setNull(bool val);
 void psc_restrict_setNull(bool val);
 	
 	
@@ -197,23 +195,11 @@ void psc_restrict_setNull(bool val);
 
 		// Return the rows in other tables with foreign keys pointing here
 		void CachedScreens_FK_Orbiter_getrows(vector <class Row_CachedScreens*> *rows);
-void CachedScreens_pschist_FK_Orbiter_getrows(vector <class Row_CachedScreens_pschist*> *rows);
-void CachedScreens_pschmask_FK_Orbiter_getrows(vector <class Row_CachedScreens_pschmask*> *rows);
 void Device_Orbiter_FK_Orbiter_getrows(vector <class Row_Device_Orbiter*> *rows);
-void Device_Orbiter_pschist_FK_Orbiter_getrows(vector <class Row_Device_Orbiter_pschist*> *rows);
-void Device_Orbiter_pschmask_FK_Orbiter_getrows(vector <class Row_Device_Orbiter_pschmask*> *rows);
 void Orbiter_Users_PasswordReq_FK_Orbiter_getrows(vector <class Row_Orbiter_Users_PasswordReq*> *rows);
-void Orbiter_Users_PasswordReq_pschist_FK_Orbiter_getrows(vector <class Row_Orbiter_Users_PasswordReq_pschist*> *rows);
-void Orbiter_Users_PasswordReq_pschmask_FK_Orbiter_getrows(vector <class Row_Orbiter_Users_PasswordReq_pschmask*> *rows);
 void Orbiter_Variable_FK_Orbiter_getrows(vector <class Row_Orbiter_Variable*> *rows);
-void Orbiter_Variable_pschist_FK_Orbiter_getrows(vector <class Row_Orbiter_Variable_pschist*> *rows);
-void Orbiter_Variable_pschmask_FK_Orbiter_getrows(vector <class Row_Orbiter_Variable_pschmask*> *rows);
 void RemoteControl_FK_Orbiter_getrows(vector <class Row_RemoteControl*> *rows);
-void RemoteControl_pschist_FK_Orbiter_getrows(vector <class Row_RemoteControl_pschist*> *rows);
-void RemoteControl_pschmask_FK_Orbiter_getrows(vector <class Row_RemoteControl_pschmask*> *rows);
 void Room_Users_FK_Orbiter_getrows(vector <class Row_Room_Users*> *rows);
-void Room_Users_pschist_FK_Orbiter_getrows(vector <class Row_Room_Users_pschist*> *rows);
-void Room_Users_pschmask_FK_Orbiter_getrows(vector <class Row_Room_Users_pschmask*> *rows);
 
 
 		// Setup binary serialization

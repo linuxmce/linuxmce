@@ -1,0 +1,28 @@
+diff -ruNp udev-060.orig/extras/cdsymlinks.sh udev-060/extras/cdsymlinks.sh
+--- udev-060.orig/extras/cdsymlinks.sh	2005-07-03 07:55:38.000000000 +0100
++++ udev-060/extras/cdsymlinks.sh	2005-08-10 21:40:45.000000000 +0100
+@@ -57,15 +57,15 @@ notin () {
+ 
+ 
+ # Scan /proc/sys/dev/cdrom/info for details on the present devices
+-setArray DEVICES `sed -re '/^drive name:/I!        d; s/.*://' /proc/sys/dev/cdrom/info`
+-setArray DVDRAMs `sed -re '/^Can write DVD-RAM:/I! d; s/.*://' /proc/sys/dev/cdrom/info`
+-setArray DVDRWs  `sed -re '/^Can write DVD-R:/I!   d; s/.*://' /proc/sys/dev/cdrom/info`
+-setArray DVDs    `sed -re '/^Can read DVD:/I!      d; s/.*://' /proc/sys/dev/cdrom/info`
+-setArray CDRWs   `sed -re '/^Can write CD-RW:/I!   d; s/.*://' /proc/sys/dev/cdrom/info`
+-setArray CDRs    `sed -re '/^Can write CD-R:/I!    d; s/.*://' /proc/sys/dev/cdrom/info`
+-setArray CDMRWs  `sed -re '/^Can write MRW:/I!     d; s/.*://' /proc/sys/dev/cdrom/info`
+-setArray CDMs    `sed -re '/^Can read MRW:/I!      d; s/.*://' /proc/sys/dev/cdrom/info`
+-setArray CDRAMs  `sed -re '/^Can write RAM:/I!     d; s/.*://' /proc/sys/dev/cdrom/info`
++setArray DEVICES `grep -i '^drive name:'        /proc/sys/dev/cdrom/info | sed 's/.*://'`
++setArray DVDRAMs `grep -i '^Can write DVD-RAM:' /proc/sys/dev/cdrom/info | sed 's/.*://'`
++setArray DVDRWs  `grep -i '^Can write DVD-R:'   /proc/sys/dev/cdrom/info | sed 's/.*://'`
++setArray DVDs    `grep -i '^Can read DVD:'      /proc/sys/dev/cdrom/info | sed 's/.*://'`
++setArray CDRWs   `grep -i '^Can write CD-RW:'   /proc/sys/dev/cdrom/info | sed 's/.*://'`
++setArray CDRs    `grep -i '^Can write CD-R:'    /proc/sys/dev/cdrom/info | sed 's/.*://'`
++setArray CDMRWs  `grep -i '^Can write MRW:'     /proc/sys/dev/cdrom/info | sed 's/.*://'`
++setArray CDMs    `grep -i '^Can read MRW:'      /proc/sys/dev/cdrom/info | sed 's/.*://'`
++setArray CDRAMs  `grep -i '^Can write RAM:'     /proc/sys/dev/cdrom/info | sed 's/.*://'`
+ 
+ # How many devices do we have?
+ NumDevs=$(($DEVICES-1))

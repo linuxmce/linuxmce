@@ -97,7 +97,7 @@ void EPGMouseHandler::Start()
 		if( pDataGridTable )
 		{
 			int Rows = pDataGridTable->GetRows();
-			int CurrentRow = m_pDesignObj_DataGrid_Active->m_iHighlightedRow_get()>0 ? m_pDesignObj_DataGrid_Active->m_iHighlightedRow_get() : 0;
+			int CurrentRow = m_pDesignObj_DataGrid_Active->m_iHighlightedRow>0 ? m_pDesignObj_DataGrid_Active->m_iHighlightedRow : 0;
 			double RowHeight = (double) m_pDesignObj_DataGrid_Active->m_rPosition.Height / Rows;
 			int Y = int(CurrentRow * RowHeight + m_pDesignObj_DataGrid_Active->m_rPosition.Y + m_pDesignObj_DataGrid_Active->m_pPopupPoint.Y);
 			int X = m_pDesignObj_DataGrid_Active->m_rPosition.X + m_pDesignObj_DataGrid_Active->m_pPopupPoint.X + (m_pDesignObj_DataGrid_Active->m_rPosition.Width/2);
@@ -209,7 +209,7 @@ void EPGMouseHandler::Move(int X,int Y,int PK_Direction)
 			if( Row!=m_iRow_Last )
 			{
 				NeedToRender render( m_pMouseBehavior->m_pOrbiter, "Move on grid" );
-				m_pDesignObj_DataGrid_Active->m_iHighlightedRow_set(Row);
+				m_pDesignObj_DataGrid_Active->m_iHighlightedRow=Row;
 				m_iRow_Last = Row;
 //				m_pMouseBehavior->m_pOrbiter->m_pObj_Highlighted_set(m_pDesignObj_DataGrid_Active);
 				m_pMouseBehavior->m_pOrbiter->Renderer()->DoHighlightObject();
@@ -225,7 +225,7 @@ void EPGMouseHandler::Move(int X,int Y,int PK_Direction)
 					DataGridTable *pDataGridTable_Channel = m_pObj ? ((DesignObj_DataGrid *) m_pObj)->m_pDataGridTable_Current_get() : NULL;
 					if( pDataGridTable_Channel )
 					{
-						DataGridCell *pCell = pDataGridTable_Channel->GetData(0,((DesignObj_DataGrid *) m_pObj)->m_iHighlightedRow_get() + ((DesignObj_DataGrid *) m_pObj)->m_GridCurRow );
+						DataGridCell *pCell = pDataGridTable_Channel->GetData(0,((DesignObj_DataGrid *) m_pObj)->m_iHighlightedRow + ((DesignObj_DataGrid *) m_pObj)->m_GridCurRow );
 						if( pCell )
 							m_pObj_Bookmark_Channel->m_GraphicToDisplay_set( "EPMH2", pCell->m_mapAttributes_Find("Favorite").empty()==false ? GRAPHIC_SELECTED : GRAPHIC_NORMAL );
 					}
@@ -247,7 +247,7 @@ void EPGMouseHandler::Move(int X,int Y,int PK_Direction)
 			if( Row!=m_iRow_Last )
 			{
 				NeedToRender render( m_pMouseBehavior->m_pOrbiter, "Move on grid" );
-				m_pDesignObj_DataGrid_Active->m_iHighlightedRow_set(Row);
+				m_pDesignObj_DataGrid_Active->m_iHighlightedRow=Row;
 				m_iRow_Last = Row;
 //				m_pMouseBehavior->m_pOrbiter->m_pObj_Highlighted_set(m_pDesignObj_DataGrid_Active);
 

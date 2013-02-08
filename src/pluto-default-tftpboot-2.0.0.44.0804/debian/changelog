@@ -1,0 +1,12 @@
+pluto-default-tftpboot (2.0.0.44.0804-2) hardy; urgency=low
+
+  * Updated for 8.04.1+
+
+ -- root <root@dcerouter>  Wed, 03 Sep 2008 17:15:52 +0200
+
+pluto-default-tftpboot (2.0.0.44.0804-1) unstable; urgency=low
+
+  * Initial release (Closes: #nnnn)  <nnnn is the bug number of your ITP>
+
+ -- root <developers@linuxmce.org>  Thu, 24 Jul 2008 21:08:50 +0200
+

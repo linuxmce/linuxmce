@@ -17,6 +17,8 @@
 #define DISTRO_Ubuntu_Edgy_CONST 14
 #define DISTRO_Ubuntu_Gutsy_CONST 15
 #define DISTRO_Ubuntu_Hurdy_CONST 16
+#define DISTRO_Ubuntu_Intrepid_CONST 17
+#define DISTRO_Ubuntu_Lucid_CONST 18
 
 #define DISTRO_TABLE "Distro"
 #define DISTRO_PK_DISTRO_FIELD "PK_Distro"

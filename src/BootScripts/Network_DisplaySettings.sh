@@ -11,7 +11,7 @@ function displayNetworkSettings {
 
 	local netExtName="$(echo $ExtPart | cut -d',' -f1)"
 	local netExtIP=$(ifconfig $netExtName | grep "inet addr" | sed 's/.*inet addr:\([0-9.]*\).*Bcast.*/\1/g')
-	local netExtMac=$(ifconfig $netExtName | grep "HWaddr" | sed 's/.*HWaddr \([0-9.:A-F]*\).*$/\1/g')
+	local netExtMac=$(ifconfig $netExtName | grep "HWaddr" | sed 's/.*HWaddr \([:[:xdigit:]]*\).*$/\1/g')
 	local netExtMask=$(ifconfig $netExtName | grep "inet addr" | sed 's/.*Mask:\([0-9.]*\).*$/\1/g')
 	local netExtGate=$(route -n | grep "^0.0.0.0" | head -1 | awk '{print $2}')
 	local netExtDNS1=$(cat /etc/resolv.conf | grep "^nameserver" | head -1 | awk '{print $2}')
@@ -23,7 +23,7 @@ function displayNetworkSettings {
 	fi
 
 	local netIntName="$(echo $IntPart | cut -d',' -f1)"
-	local netIntMac=$(ifconfig $netIntName | grep "HWaddr" | sed 's/.*HWaddr \([0-9.:A-F]*\).*$/\1/g')
+	local netIntMac=$(ifconfig $netIntName | grep "HWaddr" | sed 's/.*HWaddr \([:[:xdigit:]]*\).*$/\1/g')
 	local netIntMask="$(echo $IntPart | cut -d',' -f3)"
 	local netIntIP="$(echo $IntPart | cut -d',' -f2)"
 
@@ -43,18 +43,23 @@ function displayNetworkSettings {
 
 }
 
-
+## TODO: Clean up parameter parsing: no processing, just set internal flags here
 for ((i = 1; i <= "$#"; i++)); do
 	case "${!i}" in
+		--out-file)
+			((i++))
+			exec >"${!i}"
+		;;
 		--orbiter) Orbiter=y ;;
 		--all)
 			displayNetworkSettings
 			exit 0
-			;;
+		;;
 		*) echo "Unknown option '${!i}'" ;;
 	esac
 done
 
+## TODO: make this into a function, additional to displayNetworkSettings, to use depending on script parameters
 . /usr/pluto/bin/Network_Parameters.sh
 
 case "$DCERouter" in

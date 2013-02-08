@@ -1,6 +1,6 @@
 /*
  *
- *  $Id: pvrusb2-audio-old.c 1563 2007-02-28 03:30:33Z isely $
+ *  $Id: pvrusb2-audio-old.c 2226 2009-03-07 05:17:32Z isely $
  *
  *  Copyright (C) 2005 Mike Isely <isely@pobox.com>
  *  Copyright (C) 2004 Aurelien Alleaume <slts@free.fr>
@@ -23,6 +23,7 @@
 #include "pvrusb2-options.h"
 #include "compat.h"
 
+#ifdef PVR2_ENABLE_OLD_I2COPS
 #ifdef ENABLE_PVRUSB2_AUDIO_OLD
 
 #include "pvrusb2-audio-old.h"
@@ -58,14 +59,67 @@ struct pvr2_msp3400_handler {
 
 */
 
+struct routing_scheme_item {
+	int index;
+	int input;
+};
+
+struct routing_scheme {
+	const struct routing_scheme_item *def;
+	unsigned int cnt;
+};
+
+static const struct routing_scheme_item routing_scheme0[] = {
+	[PVR2_CVAL_INPUT_TV]        = {
+		.index = AUDIO_TUNER,
+		.input = SCART_IN1_DA,
+	},
+	[PVR2_CVAL_INPUT_RADIO]     = {
+		.index = AUDIO_RADIO,
+		.input = SCART_IN2,
+	},
+	[PVR2_CVAL_INPUT_COMPOSITE] = {
+		.index = AUDIO_EXTERN,
+		.input = SCART_IN1,
+	},
+	[PVR2_CVAL_INPUT_SVIDEO]    = {
+		.index = AUDIO_EXTERN,
+		.input = SCART_IN1,
+	},
+};
+
+static const struct routing_scheme routing_schemes[] = {
+	[PVR2_ROUTING_SCHEME_HAUPPAUGE] = {
+		.def = routing_scheme0,
+		.cnt = ARRAY_SIZE(routing_scheme0),
+	},
+};
+
+
 /* This function selects the correct audio input source */
 static void set_stereo(struct pvr2_msp3400_handler *ctxt)
 {
 	struct pvr2_hdw *hdw = ctxt->hdw;
 	unsigned short sarg = 0;
 	struct msp_matrix mspm;
+	const struct routing_scheme *sp;
+	unsigned int sid = hdw->hdw_desc->signal_routing_scheme;
 
 	pvr2_trace(PVR2_TRACE_CHIPS,"i2c msp3400 set_stereo");
+
+	if ((sid < ARRAY_SIZE(routing_schemes)) &&
+	    ((sp = routing_schemes + sid) != 0) &&
+	    (hdw->input_val >= 0) &&
+	    (hdw->input_val < sp->cnt)) {
+		sarg = sp->def[hdw->input_val].index;
+		mspm.input = sp->def[hdw->input_val].input;
+	} else {
+		pvr2_trace(PVR2_TRACE_ERROR_LEGS,
+			   "*** WARNING *** i2c msp3400 set_stereo (old):"
+			   " Invalid routing scheme (%u) and/or input (%d)",
+			   sid,hdw->input_val);
+		return;
+	}
 
 	if (hdw->input_val == PVR2_CVAL_INPUT_TV) {
 		struct v4l2_tuner vt;
@@ -74,21 +128,6 @@ static void set_stereo(struct pvr2_msp3400_handler *ctxt)
 		pvr2_i2c_client_cmd(ctxt->client,VIDIOC_S_TUNER,&vt);
 	}
 
-	sarg = AUDIO_TUNER;
-	switch (hdw->input_val) {
-	case PVR2_CVAL_INPUT_TV:
-		sarg = AUDIO_TUNER;
-		break;
-	case PVR2_CVAL_INPUT_RADIO:
-		/* Assume that msp34xx also handle FM decoding, in which case
-		   we're still using the tuner. */
-		sarg = AUDIO_TUNER;
-		break;
-	case PVR2_CVAL_INPUT_SVIDEO:
-	case PVR2_CVAL_INPUT_COMPOSITE:
-		sarg = AUDIO_EXTERN;
-		break;
-	}
 	pvr2_i2c_client_cmd(ctxt->client,AUDC_SET_INPUT,&sarg);
 
 	/* The above should have been enough to do the job, however
@@ -99,16 +138,6 @@ static void set_stereo(struct pvr2_msp3400_handler *ctxt)
 	   msp3400.c's header file and it currently isn't in a public
 	   place.  Damnit! */
 
-	mspm.input = SCART_IN1_DA;
-	switch (hdw->input_val) {
-	case PVR2_CVAL_INPUT_SVIDEO:
-	case PVR2_CVAL_INPUT_COMPOSITE:
-		mspm.input = SCART_IN1;
-		break;
-	case PVR2_CVAL_INPUT_RADIO:
-		mspm.input = SCART_IN2;
-		break;
-	}
 	mspm.output = 1;
 	pvr2_i2c_client_cmd(ctxt->client,MSP_SET_MATRIX,&mspm);
 }
@@ -248,6 +277,8 @@ int pvr2_i2c_msp3400_old_setup(struct pvr2_hdw *hdw,struct pvr2_i2c_client *cp)
 }
 
 #endif
+#endif /* PVR2_ENABLE_OLD_I2COPS */
+
 
 /*
   Stuff for Emacs to see, in order to encourage consistent editing style:

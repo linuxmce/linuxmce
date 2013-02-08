@@ -34,26 +34,12 @@ using namespace std;
 #include "Table_Language.h"
 
 #include "Table_DesignObjVariation_DesignObjParameter.h"
-#include "Table_DesignObjVariation_DesignObjParameter_pschist.h"
-#include "Table_DesignObjVariation_DesignObjParameter_pschmask.h"
 #include "Table_DesignObjVariation_DesignObj_Skin_Language.h"
-#include "Table_DesignObjVariation_DesignObj_Skin_Language_pschist.h"
-#include "Table_DesignObjVariation_DesignObj_Skin_Language_pschmask.h"
 #include "Table_DesignObjVariation_Text_Skin_Language.h"
-#include "Table_DesignObjVariation_Text_Skin_Language_pschist.h"
-#include "Table_DesignObjVariation_Text_Skin_Language_pschmask.h"
 #include "Table_Language.h"
-#include "Table_Language_pschist.h"
-#include "Table_Language_pschmask.h"
 #include "Table_Text_LS.h"
 #include "Table_Text_LS_AltVersions.h"
-#include "Table_Text_LS_AltVersions_pschist.h"
-#include "Table_Text_LS_AltVersions_pschmask.h"
-#include "Table_Text_LS_pschist.h"
-#include "Table_Text_LS_pschmask.h"
 #include "Table_Users.h"
-#include "Table_Users_pschist.h"
-#include "Table_Users_pschmask.h"
 
 
 void Database_pluto_main::CreateTable_Language()
@@ -101,6 +87,7 @@ void Row_Language::Delete()
 	Row_Language *pRow = this; // Needed so we will have only 1 version of get_primary_fields_assign_from_row
 	
 	if (!is_deleted)
+	{
 		if (is_added)	
 		{	
 			vector<TableRow*>::iterator i;	
@@ -122,6 +109,7 @@ void Row_Language::Delete()
 			table->deleted_cachedRows[key] = this;
 			is_deleted = true;	
 		}	
+	}
 }
 
 void Row_Language::Reload()
@@ -155,8 +143,7 @@ void Row_Language::SetDefaultValues()
 {
 	m_PK_Language = 0;
 is_null[0] = false;
-m_Description = "";
-is_null[1] = false;
+is_null[1] = true;
 is_null[2] = true;
 m_FK_Language_TextPlacement = 0;
 is_null[3] = true;
@@ -167,7 +154,8 @@ is_null[5] = true;
 m_psc_user = 0;
 m_psc_frozen = 0;
 is_null[6] = false;
-is_null[7] = true;
+m_psc_mod = "0000-00-00 00:00:00";
+is_null[7] = false;
 is_null[8] = true;
 m_psc_restrict = 0;
 
@@ -235,6 +223,9 @@ void Row_Language::psc_restrict_set(long int val){PLUTO_SAFETY_LOCK_ERRORSONLY(s
 m_psc_restrict = val; is_modified=true; is_null[8]=false;}
 
 		
+bool Row_Language::Description_isNull() {PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
+
+return is_null[1];}
 bool Row_Language::FK_Language_TextPlacement_isNull() {PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
 
 return is_null[2];}
@@ -250,14 +241,15 @@ return is_null[5];}
 bool Row_Language::psc_frozen_isNull() {PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
 
 return is_null[6];}
-bool Row_Language::psc_mod_isNull() {PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
-
-return is_null[7];}
 bool Row_Language::psc_restrict_isNull() {PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
 
 return is_null[8];}
 
 			
+void Row_Language::Description_setNull(bool val){PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
+is_null[1]=val;
+is_modified=true;
+}
 void Row_Language::FK_Language_TextPlacement_setNull(bool val){PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
 is_null[2]=val;
 is_modified=true;
@@ -276,10 +268,6 @@ is_modified=true;
 }
 void Row_Language::psc_frozen_setNull(bool val){PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
 is_null[6]=val;
-is_modified=true;
-}
-void Row_Language::psc_mod_setNull(bool val){PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
-is_null[7]=val;
 is_modified=true;
 }
 void Row_Language::psc_restrict_setNull(bool val){PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
@@ -308,8 +296,8 @@ PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
 if (is_null[1])
 return "NULL";
 
-char *buf = new char[61];
-db_wrapper_real_escape_string(table->database->m_pDB, buf, m_Description.c_str(), (unsigned long) min((size_t)30,m_Description.size()));
+char *buf = new char[181];
+db_wrapper_real_escape_string(table->database->m_pDB, buf, m_Description.c_str(), (unsigned long) min((size_t)90,m_Description.size()));
 string s=string()+"\""+buf+"\"";
 delete[] buf;
 return s;
@@ -986,39 +974,11 @@ PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
 class Table_DesignObjVariation_DesignObjParameter *pTable = table->database->DesignObjVariation_DesignObjParameter_get();
 pTable->GetRows("`FK_Language`=" + StringUtils::itos(m_PK_Language),rows);
 }
-void Row_Language::DesignObjVariation_DesignObjParameter_pschist_FK_Language_getrows(vector <class Row_DesignObjVariation_DesignObjParameter_pschist*> *rows)
-{
-PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
-
-class Table_DesignObjVariation_DesignObjParameter_pschist *pTable = table->database->DesignObjVariation_DesignObjParameter_pschist_get();
-pTable->GetRows("`FK_Language`=" + StringUtils::itos(m_PK_Language),rows);
-}
-void Row_Language::DesignObjVariation_DesignObjParameter_pschmask_FK_Language_getrows(vector <class Row_DesignObjVariation_DesignObjParameter_pschmask*> *rows)
-{
-PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
-
-class Table_DesignObjVariation_DesignObjParameter_pschmask *pTable = table->database->DesignObjVariation_DesignObjParameter_pschmask_get();
-pTable->GetRows("`FK_Language`=" + StringUtils::itos(m_PK_Language),rows);
-}
 void Row_Language::DesignObjVariation_DesignObj_Skin_Language_FK_Language_getrows(vector <class Row_DesignObjVariation_DesignObj_Skin_Language*> *rows)
 {
 PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
 
 class Table_DesignObjVariation_DesignObj_Skin_Language *pTable = table->database->DesignObjVariation_DesignObj_Skin_Language_get();
-pTable->GetRows("`FK_Language`=" + StringUtils::itos(m_PK_Language),rows);
-}
-void Row_Language::DesignObjVariation_DesignObj_Skin_Language_pschist_FK_Language_getrows(vector <class Row_DesignObjVariation_DesignObj_Skin_Language_pschist*> *rows)
-{
-PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
-
-class Table_DesignObjVariation_DesignObj_Skin_Language_pschist *pTable = table->database->DesignObjVariation_DesignObj_Skin_Language_pschist_get();
-pTable->GetRows("`FK_Language`=" + StringUtils::itos(m_PK_Language),rows);
-}
-void Row_Language::DesignObjVariation_DesignObj_Skin_Language_pschmask_FK_Language_getrows(vector <class Row_DesignObjVariation_DesignObj_Skin_Language_pschmask*> *rows)
-{
-PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
-
-class Table_DesignObjVariation_DesignObj_Skin_Language_pschmask *pTable = table->database->DesignObjVariation_DesignObj_Skin_Language_pschmask_get();
 pTable->GetRows("`FK_Language`=" + StringUtils::itos(m_PK_Language),rows);
 }
 void Row_Language::DesignObjVariation_Text_Skin_Language_FK_Language_getrows(vector <class Row_DesignObjVariation_Text_Skin_Language*> *rows)
@@ -1028,39 +988,11 @@ PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
 class Table_DesignObjVariation_Text_Skin_Language *pTable = table->database->DesignObjVariation_Text_Skin_Language_get();
 pTable->GetRows("`FK_Language`=" + StringUtils::itos(m_PK_Language),rows);
 }
-void Row_Language::DesignObjVariation_Text_Skin_Language_pschist_FK_Language_getrows(vector <class Row_DesignObjVariation_Text_Skin_Language_pschist*> *rows)
-{
-PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
-
-class Table_DesignObjVariation_Text_Skin_Language_pschist *pTable = table->database->DesignObjVariation_Text_Skin_Language_pschist_get();
-pTable->GetRows("`FK_Language`=" + StringUtils::itos(m_PK_Language),rows);
-}
-void Row_Language::DesignObjVariation_Text_Skin_Language_pschmask_FK_Language_getrows(vector <class Row_DesignObjVariation_Text_Skin_Language_pschmask*> *rows)
-{
-PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
-
-class Table_DesignObjVariation_Text_Skin_Language_pschmask *pTable = table->database->DesignObjVariation_Text_Skin_Language_pschmask_get();
-pTable->GetRows("`FK_Language`=" + StringUtils::itos(m_PK_Language),rows);
-}
 void Row_Language::Language_FK_Language_TextPlacement_getrows(vector <class Row_Language*> *rows)
 {
 PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
 
 class Table_Language *pTable = table->database->Language_get();
-pTable->GetRows("`FK_Language_TextPlacement`=" + StringUtils::itos(m_PK_Language),rows);
-}
-void Row_Language::Language_pschist_FK_Language_TextPlacement_getrows(vector <class Row_Language_pschist*> *rows)
-{
-PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
-
-class Table_Language_pschist *pTable = table->database->Language_pschist_get();
-pTable->GetRows("`FK_Language_TextPlacement`=" + StringUtils::itos(m_PK_Language),rows);
-}
-void Row_Language::Language_pschmask_FK_Language_TextPlacement_getrows(vector <class Row_Language_pschmask*> *rows)
-{
-PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
-
-class Table_Language_pschmask *pTable = table->database->Language_pschmask_get();
 pTable->GetRows("`FK_Language_TextPlacement`=" + StringUtils::itos(m_PK_Language),rows);
 }
 void Row_Language::Text_LS_FK_Language_getrows(vector <class Row_Text_LS*> *rows)
@@ -1077,53 +1009,11 @@ PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
 class Table_Text_LS_AltVersions *pTable = table->database->Text_LS_AltVersions_get();
 pTable->GetRows("`FK_Language`=" + StringUtils::itos(m_PK_Language),rows);
 }
-void Row_Language::Text_LS_AltVersions_pschist_FK_Language_getrows(vector <class Row_Text_LS_AltVersions_pschist*> *rows)
-{
-PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
-
-class Table_Text_LS_AltVersions_pschist *pTable = table->database->Text_LS_AltVersions_pschist_get();
-pTable->GetRows("`FK_Language`=" + StringUtils::itos(m_PK_Language),rows);
-}
-void Row_Language::Text_LS_AltVersions_pschmask_FK_Language_getrows(vector <class Row_Text_LS_AltVersions_pschmask*> *rows)
-{
-PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
-
-class Table_Text_LS_AltVersions_pschmask *pTable = table->database->Text_LS_AltVersions_pschmask_get();
-pTable->GetRows("`FK_Language`=" + StringUtils::itos(m_PK_Language),rows);
-}
-void Row_Language::Text_LS_pschist_FK_Language_getrows(vector <class Row_Text_LS_pschist*> *rows)
-{
-PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
-
-class Table_Text_LS_pschist *pTable = table->database->Text_LS_pschist_get();
-pTable->GetRows("`FK_Language`=" + StringUtils::itos(m_PK_Language),rows);
-}
-void Row_Language::Text_LS_pschmask_FK_Language_getrows(vector <class Row_Text_LS_pschmask*> *rows)
-{
-PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
-
-class Table_Text_LS_pschmask *pTable = table->database->Text_LS_pschmask_get();
-pTable->GetRows("`FK_Language`=" + StringUtils::itos(m_PK_Language),rows);
-}
 void Row_Language::Users_FK_Language_getrows(vector <class Row_Users*> *rows)
 {
 PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
 
 class Table_Users *pTable = table->database->Users_get();
-pTable->GetRows("`FK_Language`=" + StringUtils::itos(m_PK_Language),rows);
-}
-void Row_Language::Users_pschist_FK_Language_getrows(vector <class Row_Users_pschist*> *rows)
-{
-PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
-
-class Table_Users_pschist *pTable = table->database->Users_pschist_get();
-pTable->GetRows("`FK_Language`=" + StringUtils::itos(m_PK_Language),rows);
-}
-void Row_Language::Users_pschmask_FK_Language_getrows(vector <class Row_Users_pschmask*> *rows)
-{
-PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
-
-class Table_Users_pschmask *pTable = table->database->Users_pschmask_get();
 pTable->GetRows("`FK_Language`=" + StringUtils::itos(m_PK_Language),rows);
 }
 

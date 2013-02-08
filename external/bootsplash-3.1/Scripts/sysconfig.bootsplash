@@ -1,0 +1,13 @@
+## Path:	System/Boot
+## Description:	enables/disables bootup graphics
+## Type:	yesno
+## Default:	yes
+#
+# SPLASH can be set to "no" to turn off the splash-screen on console 1
+# at boot time (after kernel load).
+#
+# SPLASH=no to disable the splash screen
+#
+# SPLASH=yes to show the splash screen
+#
+SPLASH="yes"

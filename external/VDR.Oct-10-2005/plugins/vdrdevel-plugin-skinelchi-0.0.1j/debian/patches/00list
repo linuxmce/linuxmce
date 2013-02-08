@@ -1,0 +1,10 @@
+01_Makefile-fPIC-fix
+02_skinelchi-1.3.32
+11_woody
+12_fix-transparent
+13_epgpicture-fix-test
+14_skinelchi-1.3.25
+20_epgimage-path
+
+# convert package to vdrdevel
+95_vdrdevel

@@ -52,7 +52,7 @@ using namespace DCE;
 
 #define ALARM_TIMED_EVENT	1
 #define ALARM_SUNRISE_SUNSET	2
-
+#define ALARM_CHECK_DST         3
 
 //<-dceag-const-b->
 // The primary constructor when the class is created as a stand-alone device
@@ -69,6 +69,7 @@ Event_Plugin::Event_Plugin(int DeviceID, string ServerAddress,bool bConnectEvent
 	m_pTimedEvent_Next=NULL;
 	m_pDatabase_pluto_main=NULL;
 	m_pAlarmManager=NULL;
+	m_isDst = -1;
 }
 
 //<-dceag-getconfig-b->
@@ -85,8 +86,25 @@ bool Event_Plugin::GetConfig()
         m_bQuit_set(true);
         return false;
     }
+    m_pAlarmManager = new AlarmManager();
+    m_pAlarmManager->Start(2);      //4 = number of worker threads
 
+    time_t t=time(NULL);
+    struct tm tm_DstNow;
+    localtime_r(&t,&tm_DstNow);
+    m_isDst = tm_DstNow.tm_isdst;
+    
+    m_pAlarmManager->AddRelativeAlarm(60,this,ALARM_CHECK_DST,NULL);
+
+    Initialize(false);
+	return true;
+}
+
+void Event_Plugin::Initialize(bool bReload)
+{
 	Row_Installation *pRow_Installation = m_pDatabase_pluto_main->Installation_get()->GetRow( m_pRouter->iPK_Installation_get() );
+	if (bReload)
+		pRow_Installation->Reload();
 
 	vector<Row_Criteria *> vectRow_Criteria;
 	if(pRow_Installation)
@@ -94,7 +112,11 @@ bool Event_Plugin::GetConfig()
 	for(size_t s=0;s<vectRow_Criteria.size();++s)
 	{
 		Row_Criteria *pRow_Criteria = vectRow_Criteria[s];
-		CriteriaParmNesting *pCriteriaParmNesting = LoadCriteriaParmNesting(NULL,pRow_Criteria->FK_CriteriaParmNesting_getrow());
+		if (bReload) {
+			pRow_Criteria->Reload();
+		}
+		
+		CriteriaParmNesting *pCriteriaParmNesting = LoadCriteriaParmNesting(NULL,pRow_Criteria->FK_CriteriaParmNesting_getrow(), bReload);
 		Criteria *pCriteria = new Criteria(pRow_Criteria->PK_Criteria_get(),pCriteriaParmNesting);
 		m_mapCriteria[pRow_Criteria->PK_Criteria_get()] = pCriteria;
 	}
@@ -105,15 +127,17 @@ bool Event_Plugin::GetConfig()
 	for(size_t s=0;s<vectRow_EventHandler.size();++s)
 	{
 		Row_EventHandler *pRow_EventHandler = vectRow_EventHandler[s];
-		if( pRow_EventHandler->Disabled_get() )
-			continue;
+		if (bReload)
+			pRow_EventHandler->Reload();
 
 		if( pRow_EventHandler->TimedEvent_get() )
 		{
-			TimedEvent *pTimedEvent = new TimedEvent(pRow_EventHandler);
+			// Load all timed events, even disabled ones - this is needed to be able to enable/disable them from the orbiter
+			TimedEvent *pTimedEvent = new TimedEvent(pRow_EventHandler, m_mapCriteria_Find(pRow_EventHandler->FK_Criteria_get()));
 #ifdef DEBUG
 			LoggerWrapper::GetInstance()->Write(LV_STATUS,"Adding timed event %d",pRow_EventHandler->PK_EventHandler_get());
 #endif
+			// TODO: as the commands are kept in the router itself, we wont get the most up to date values using this approach
 			pTimedEvent->m_pCommandGroup = m_pRouter->m_mapCommandGroup_Find(pRow_EventHandler->FK_CommandGroup_get());
 			if( !pTimedEvent->m_pCommandGroup )
 			{
@@ -125,6 +149,9 @@ bool Event_Plugin::GetConfig()
 		}
 		else
 		{
+			if( pRow_EventHandler->Disabled_get() )
+				continue;
+
 			EventHandler *pEventHandler = new EventHandler(pRow_EventHandler->PK_EventHandler_get(),
 				pRow_EventHandler->FK_Event_get(),m_pRouter->m_mapCommandGroup_Find(pRow_EventHandler->FK_CommandGroup_get()),
 				m_mapCriteria_Find(pRow_EventHandler->FK_Criteria_get()),pRow_EventHandler->OncePerSeconds_get());
@@ -138,9 +165,7 @@ bool Event_Plugin::GetConfig()
 			pListEventHandler->push_back(pEventHandler);
 		}
 	}
-
-	m_pAlarmManager = new AlarmManager();
-    m_pAlarmManager->Start(2);      //4 = number of worker threads
+	m_pAlarmManager->Clear();
 
 	PLUTO_SAFETY_LOCK(em,m_EventMutex);
 	m_fLongitude = DATA_Get_Longitude();
@@ -160,13 +185,15 @@ bool Event_Plugin::GetConfig()
 		SetFirstSunriseSunset();
 	
 	SetNextTimedEventCallback();
-	return true;
 }
 
 //<-dceag-const2-b->!
 
-CriteriaParmNesting *Event_Plugin::LoadCriteriaParmNesting(CriteriaParmNesting *pCriteriaParmNesting_Parent,Row_CriteriaParmNesting *pRow_CriteriaParmNesting)
+CriteriaParmNesting *Event_Plugin::LoadCriteriaParmNesting(CriteriaParmNesting *pCriteriaParmNesting_Parent,Row_CriteriaParmNesting *pRow_CriteriaParmNesting, bool bReload)
 {
+	if (bReload)
+		pRow_CriteriaParmNesting->Reload();
+
 	CriteriaParmNesting *pCriteriaParmNesting = new CriteriaParmNesting(pRow_CriteriaParmNesting->IsNot_get()==1,pRow_CriteriaParmNesting->IsAnd_get()==1);
 	if( pCriteriaParmNesting_Parent )
 		pCriteriaParmNesting_Parent->m_vectCriteriaParmNesting.push_back(pCriteriaParmNesting);
@@ -175,16 +202,23 @@ CriteriaParmNesting *Event_Plugin::LoadCriteriaParmNesting(CriteriaParmNesting *
 	for(size_t s=0;s<vectRow_CriteriaParmNesting.size();++s)
 	{
 		Row_CriteriaParmNesting *pRow_CriteriaParmNesting = vectRow_CriteriaParmNesting[s];
-		LoadCriteriaParmNesting(pCriteriaParmNesting,pRow_CriteriaParmNesting);
+		if (bReload)
+			pRow_CriteriaParmNesting->Reload();
+		LoadCriteriaParmNesting(pCriteriaParmNesting,pRow_CriteriaParmNesting, bReload);
 	}
 	vector<Row_CriteriaParm *> vectRow_CriteriaParm;
 	pRow_CriteriaParmNesting->CriteriaParm_FK_CriteriaParmNesting_getrows(&vectRow_CriteriaParm);
 	for(size_t s=0;s<vectRow_CriteriaParm.size();++s)
 	{
 		Row_CriteriaParm *pRow_CriteriaParm = vectRow_CriteriaParm[s];
+		if (bReload)
+			pRow_CriteriaParm->Reload();
 
 		if(NULL != pRow_CriteriaParm->FK_CriteriaParmList_getrow())
 		{
+			if (bReload)
+				pRow_CriteriaParm->FK_CriteriaParmList_getrow()->Reload();
+
 			pCriteriaParmNesting->m_vectCriteriaParm.push_back( new CriteriaParm(
 				pRow_CriteriaParm->PK_CriteriaParm_get(),pRow_CriteriaParm->FK_CriteriaParmList_get(),
 				pRow_CriteriaParm->FK_CriteriaParmList_getrow()->FK_ParameterType_get(),pRow_CriteriaParm->Operator_get(),
@@ -207,6 +241,11 @@ Event_Plugin::~Event_Plugin()
 	delete m_pDatabase_pluto_main;
 	m_pDatabase_pluto_main = NULL;
 
+	DeleteMembers();
+}
+
+void Event_Plugin::DeleteMembers()
+{
 	for(map<int,ListEventHandler *>::iterator it = m_mapListEventHandler.begin(), end =
 		m_mapListEventHandler.end(); it != end; ++it)
 	{
@@ -220,9 +259,17 @@ Event_Plugin::~Event_Plugin()
 	}
 	m_mapListEventHandler.clear();	
 
+	for(map<int,TimedEvent *>::iterator it = m_mapTimedEvent.begin(), end =
+		m_mapTimedEvent.end(); it != end; ++it)
+	{
+	        delete it->second;
+	}
+	m_mapTimedEvent.clear();
+	
 	for(map<int,Criteria *>::iterator itc = m_mapCriteria.begin(), endc = m_mapCriteria.end(); itc != endc; ++itc)
 		delete itc->second;
 	m_mapCriteria.clear();
+
 }
 
 void Event_Plugin::PrepareToDelete()
@@ -280,8 +327,49 @@ void Event_Plugin::ReceivedUnknownCommand(string &sCMD_Result,Message *pMessage)
 	sCMD_Result = "UNKNOWN DEVICE";
 }
 
+void Event_Plugin::GetHouseModes(Message* pMessage) {
+
+	PLUTO_SAFETY_LOCK(em,m_EventMutex);
+        // find PK_Device of security plugin
+	map<int,string> mapDevices;
+	GetDevicesByTemplate(DEVICETEMPLATE_Security_Plugin_CONST, &mapDevices);
+	int PK_SecurityPlugin;
+	if( mapDevices.begin() == mapDevices.end() )
+	{
+		LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"Cannot find sister plugins to event plugin (Security Plugin)");
+		return;
+	} else {
+	        PK_SecurityPlugin = mapDevices.begin()->first;
+	}
+
+	Row_Device_DeviceData *pRow_Device_DeviceData =
+	        m_pDatabase_pluto_main->Device_DeviceData_get()->GetRow(PK_SecurityPlugin,DEVICEDATA_Configuration_CONST);
+	if( !pRow_Device_DeviceData )
+	        return;
+
+	pRow_Device_DeviceData->Reload();
+	string sData=pRow_Device_DeviceData->IK_DeviceData_get();
+
+	// decode int list to int,int map
+        m_mapPK_HouseMode.clear();
+	string::size_type pos=0;
+	while( pos<sData.size() && pos!=string::npos )
+	{
+	        int PK_DeviceGroup = atoi( StringUtils::Tokenize(sData,",",pos).c_str() );
+		m_mapPK_HouseMode[PK_DeviceGroup]=atoi( StringUtils::Tokenize(sData,",",pos).c_str() );
+	}
+	if (pMessage->m_dwID == EVENT_House_Mode_Changed_CONST)
+	{
+		int iPK_DeviceGroup = atoi(pMessage->m_mapParameters[EVENTPARAMETER_PK_DeviceGroup_CONST].c_str());
+		int iPrevValue = atoi(pMessage->m_mapParameters[EVENTPARAMETER_Previous_Value_CONST].c_str());
+		LoggerWrapper::GetInstance()->Write(LV_WARNING,"House mode changed event, previous house mode = %d", iPrevValue);
+		m_mapPK_HouseMode[iPK_DeviceGroup] = iPrevValue;
+	}
+}
+
 bool Event_Plugin::ProcessEvent(class Socket *pSocket,class Message *pMessage,class DeviceData_Base *pDeviceFrom,class DeviceData_Base *pDeviceTo)
 {
+	PLUTO_SAFETY_LOCK(em,m_EventMutex);
 	ListEventHandler *pListEventHandler = m_mapListEventHandler_Find(pMessage->m_dwID);
 	if( pListEventHandler==NULL ) // No handlers for this type of event
 	{
@@ -289,18 +377,21 @@ bool Event_Plugin::ProcessEvent(class Socket *pSocket,class Message *pMessage,cl
 		return false;
 	}
 
-	EventInfo *pEventInfo = new EventInfo(pMessage->m_dwID,pMessage,(DeviceData_Router *)pDeviceFrom,1 /*m_iPKID_C_HouseMode*/);
+	GetHouseModes(pMessage); // Update house modes
+	EventInfo *pEventInfo = new EventInfo(pMessage->m_dwID,pMessage,(DeviceData_Router *)pDeviceFrom, m_mapPK_HouseMode[0]);
 //	m_listEventInfo.push_back(pEventInfo);
 
-//	LoggerWrapper::GetInstance()->Write(LV_EVENT,"Event #%d has %d handlers",pEventInfo->m_iPKID_Event,(int)pEvent->m_vectEventHandlers.size());
+//	LoggerWrapper::GetInstance()->Write(LV_EVENT,"Event #%d has %d handlers",pEventInfo->m_iPK_Event,(int)pEventInfo->m_vectEventHandlers.size());
 	for(ListEventHandler::iterator it=pListEventHandler->begin();it!=pListEventHandler->end();++it)
 	{
 		EventHandler *pEventHandler = *it;
 //		pEventInfo->m_vectEventHandlers.push_back(pEventHandler);
 //		pEventInfo->pEventHandler = pEventHandler;
 
-		if(pEventHandler->m_pCommandGroup==NULL)
+		if(pEventHandler->m_pCommandGroup==NULL) {
+			LoggerWrapper::GetInstance()->Write(LV_EVENT,"no command group for this eventhandler");
 			continue;  // This event handler doesn't have anything to do anyway
+		}
 
 		bool bResult = true;  // it's true unless there's a criteria that evaluates to false
 
@@ -385,15 +476,60 @@ void Event_Plugin::AlarmCallback(int id, void* param)
 	{
 		TimedEvent *pTimedEvent = (TimedEvent *) param;
 
-		LoggerWrapper::GetInstance()->Write(LV_STATUS,"Timer: %s firing command group %d",
-			pTimedEvent->m_pRow_EventHandler->Description_get().c_str(),pTimedEvent->m_pCommandGroup->m_PK_CommandGroup);
-
-		ExecCommandGroup(pTimedEvent->m_pCommandGroup->m_PK_CommandGroup);
+		LoggerWrapper::GetInstance()->Write(LV_STATUS,"Timer: %s timed out",
+						    pTimedEvent->m_pRow_EventHandler->Description_get().c_str());
+ 
+		if ( !pTimedEvent->m_pRow_EventHandler->Disabled_get() )
+		{
+			bool bResult = true;
+			if( pTimedEvent->m_pCriteria!=NULL )
+			{
+				LoggerWrapper::GetInstance()->Write(LV_STATUS,"Timer: %s - checking criteria.");
+				// Create some fake message and and use the event plugin as from device to avoid passing NULLs
+				Message* pMessage = new Message();
+				GetHouseModes(pMessage); // Update house modes
+				EventInfo *pEventInfo = new EventInfo(m_dwPK_Device, pMessage , (DeviceData_Router *)this, m_mapPK_HouseMode[0]);
+				pEventInfo->m_bTimedEvent = true;
+				try
+				{
+					if( !pTimedEvent->m_pCriteria->Evaluate(pEventInfo,(void *) m_pRouter) )
+						bResult=false;
+				}
+				catch(exception e)
+				{
+					LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"Problem with criteria for timed event : %s - result: %s",pTimedEvent->m_pRow_EventHandler->Description_get().c_str(),"??");
+					bResult=false;
+				}
+			}
+			LoggerWrapper::GetInstance()->Write(LV_STATUS,"Timer: criteria evaluated as : %d", bResult);
+		
+			if (bResult)
+			{
+				LoggerWrapper::GetInstance()->Write(LV_STATUS,"Timer: %s firing command group %d",
+								    pTimedEvent->m_pRow_EventHandler->Description_get().c_str(),pTimedEvent->m_pCommandGroup->m_PK_CommandGroup);
+				ExecCommandGroup(pTimedEvent->m_pCommandGroup->m_PK_CommandGroup);
+			}
+		}
 		pTimedEvent->CalcNextTime();
 		SetNextTimedEventCallback();
 	}
 	else if( id==ALARM_SUNRISE_SUNSET )
 		FireSunriseSunsetEvent();
+	else if ( id==ALARM_CHECK_DST )
+	  {
+	    time_t t=time(NULL);
+	    struct tm tm_DstNow;
+	    localtime_r(&t,&tm_DstNow);
+	    int isDst = tm_DstNow.tm_isdst;
+	    if (isDst != m_isDst)
+	      {
+		// DST has changed, reload everything.
+		LoggerWrapper::GetInstance()->Write(LV_WARNING,"Daylight Savings time has changed. Reloading events.");
+		Initialize(true);
+	      }
+	    m_isDst = isDst;
+	    m_pAlarmManager->AddRelativeAlarm(1,this,ALARM_CHECK_DST,NULL);
+	  }
 }
 
 class DataGridTable *Event_Plugin::AlarmsInRoom( string GridID, string Parms, void *ExtraData, int *iPK_Variable, string *sValue_To_Assign, class Message *pMessage )
@@ -587,4 +723,19 @@ void Event_Plugin::FireSunriseSunsetEvent()
 
 	m_pAlarmManager->AddAbsoluteAlarm( m_tNextSunriseSunset, this, ALARM_SUNRISE_SUNSET, NULL );
 
+}
+//<-dceag-c757-b->
+
+	/** @brief COMMAND: #757 - Download Configuration */
+	/** Request event plugint to reload its configuration */
+		/** @param #9 Text */
+			/** Any information the device may want to do the download */
+
+void Event_Plugin::CMD_Download_Configuration(string sText,string &sCMD_Result,Message *pMessage)
+//<-dceag-c757-e->
+{
+	PLUTO_SAFETY_LOCK(em,m_EventMutex);
+	DeleteMembers();
+	Initialize(true);
+	LoggerWrapper::GetInstance()->Write(LV_WARNING,"Event_Plugin::CMD_Download_Configuration() : Done");
 }

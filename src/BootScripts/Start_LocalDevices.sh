@@ -11,7 +11,9 @@ function printHelp()
 
 lshwd # needed for some systems which won't report usb devices until you run lshwd first (bug in usb architecture)
 /usr/pluto/bin/UpdateAvailableSerialPorts.sh
+/usr/pluto/bin/UpdateAvailableSoundCards.sh
 bash -x /usr/pluto/bin/SoundCards_Setup.sh | tee-pluto /var/log/pluto/SoundCards_Setup.log
+bash -x /usr/pluto/bin/SoundCards_Setup_ConferenceMicrophones.sh | tee-pluto /var/log/pluto/Soundcards_Setup.log
 
 [[ $# -ne 4 && $# -ne 2 && $# -ne 0 ]] && printHelp && exit
 CurrentDevice=$PK_Device
@@ -38,7 +40,7 @@ GhostHuntQ="SELECT *
 
 {
 	date -R
-	echo "$GhostHuntQ" | mysql pluto_main
+	RunSQL "$GhostHuntQ"
 } >>/var/log/pluto/start_devices.log
 
 Q="SELECT Device.PK_Device, DeviceTemplate.Description, DeviceTemplate.CommandLine, Device.Disabled

@@ -1,0 +1,20 @@
+#!/bin/bash
+
+. /usr/pluto/bin/Utils.sh
+
+set -e
+
+if [[ "$1" == "configure" ]] ;then
+	if [ ! -e /etc/ld.so.conf.d ] ;then
+		if ! BlacklistConfFiles '/etc/ld.so.conf' ;then
+			if [ ! -e /etc/ld.so.conf.pbackup ] ;then
+				cp /etc/ld.so.conf /etc/ld.so.conf.pbackup || :
+			fi
+			cat /etc/ld.so.conf | grep -v '/usr/pluto/lib' > /etc/ld.so.conf.tmp
+			mv -f /etc/ld.so.conf.tmp /etc/ld.so.conf || :
+		fi	
+	else
+		rm /etc/ld.so.conf.d/pluto-main.conf || :
+	fi
+	ldconfig
+fi

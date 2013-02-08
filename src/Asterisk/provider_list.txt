@@ -1,14 +1,23 @@
-freeworddialup (free only)	http://www.freeworlddialup.com	freeworddialup	IAX
-sipgate (try for free, pay as you go)	http://www.sipgate.co.uk/	sipgate	SIP
-inphonex (try for free, pay as you go)	http://www.inphonex.com	inphonex	SIP
-e-fon (Switzerland)	http://www.e-fon.ch/	efon	IAX
-broadvoice (US number, free incoming)	http://www.broadvoice.com	broadvoice	SIP
-teliax (US number, pay incoming)	http://www.teliax.com/	teliax-out	IAX
-NuFone	http://www.nufone.net	nufone-out	IAX
-VoiceEclipse	http://www.voiceeclipse.com/	voiceeclipse	SIP
-Gradwell	http://www.gradwell.com/	sipgradwell	SIP
-Xs4all	http://www.xs4all.nl/	xs4all	SIP
-Viatalk (US Central)	http://www.viatalk.com/	viatalk_us-central	SIP
 1und1	http://www.1und1.de/	1und1	SIP
+Gradwell	http://www.gradwell.com/	sipgradwell	SIP
+MagicJack (US Only, $20/yr.)	http://www.magicjack.com	MagicJack	SIP
+Messagenet (IT)	http://www.messagenet.it	Messagenet	SIP
+NuFone	http://www.nufone.net	nufone-out	IAX
+Viatalk (US Central)	http://www.viatalk.com/	viatalk_us-central	SIP
+VoiceEclipse	http://www.voiceeclipse.com/	voiceeclipse	SIP
+Vonage		http://www.vonage.com		Vonage		SIP
+Xs4all	http://www.xs4all.nl/	xs4all	SIP
+blueface	http://www.blueface.ie/	blueface	SIP
+broadvoice (US number, free incoming)	http://www.broadvoice.com	broadvoice	SIP
+e-fon (Switzerland)	http://www.e-fon.ch/	efon	IAX
+freeworddialup (free only)	http://www.freeworlddialup.com	freeworddialup	IAX
+inphonex (try for free, pay as you go)	http://www.inphonex.com	inphonex	SIP
 sipgate (DE)	http://www.sipgate.de	sipgate_de	SIP
-
+sipgate (try for free, pay as you go)	http://www.sipgate.co.uk/	sipgate	SIP
+teliax (US number, pay incoming)	http://www.teliax.com/	teliax-out	IAX
+voipwa (AU)	http://www.voipwa.net.au	voipwa	IAX
+WhistlePhone (US, free ad-supported)	http://whistlephone.com	WhistlePhone	SIP
+Visual Online (Luxembourg)      http://www.vo.lu        visualonline    SIP
+Linksys SPA3102/SPA3000	http://www.cisco.com/en/US/products/ps10027	spa3102	SIP
+voipgo (CA, US) 	http://www.voipgo.com	voipgo	SIP
+Affinity Telecom (Swedish)	http://www.affinity.se/	affinity	SIP

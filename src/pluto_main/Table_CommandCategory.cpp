@@ -35,10 +35,6 @@ using namespace std;
 
 #include "Table_Command.h"
 #include "Table_CommandCategory.h"
-#include "Table_CommandCategory_pschist.h"
-#include "Table_CommandCategory_pschmask.h"
-#include "Table_Command_pschist.h"
-#include "Table_Command_pschmask.h"
 
 
 void Database_pluto_main::CreateTable_CommandCategory()
@@ -86,6 +82,7 @@ void Row_CommandCategory::Delete()
 	Row_CommandCategory *pRow = this; // Needed so we will have only 1 version of get_primary_fields_assign_from_row
 	
 	if (!is_deleted)
+	{
 		if (is_added)	
 		{	
 			vector<TableRow*>::iterator i;	
@@ -107,6 +104,7 @@ void Row_CommandCategory::Delete()
 			table->deleted_cachedRows[key] = this;
 			is_deleted = true;	
 		}	
+	}
 }
 
 void Row_CommandCategory::Reload()
@@ -151,7 +149,8 @@ is_null[5] = true;
 m_psc_user = 0;
 m_psc_frozen = 0;
 is_null[6] = false;
-is_null[7] = true;
+m_psc_mod = "0000-00-00 00:00:00";
+is_null[7] = false;
 is_null[8] = true;
 m_psc_restrict = 0;
 
@@ -237,9 +236,6 @@ return is_null[5];}
 bool Row_CommandCategory::psc_frozen_isNull() {PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
 
 return is_null[6];}
-bool Row_CommandCategory::psc_mod_isNull() {PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
-
-return is_null[7];}
 bool Row_CommandCategory::psc_restrict_isNull() {PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
 
 return is_null[8];}
@@ -267,10 +263,6 @@ is_modified=true;
 }
 void Row_CommandCategory::psc_frozen_setNull(bool val){PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
 is_null[6]=val;
-is_modified=true;
-}
-void Row_CommandCategory::psc_mod_setNull(bool val){PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
-is_null[7]=val;
 is_modified=true;
 }
 void Row_CommandCategory::psc_restrict_setNull(bool val){PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
@@ -312,8 +304,8 @@ PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
 if (is_null[2])
 return "NULL";
 
-char *buf = new char[41];
-db_wrapper_real_escape_string(table->database->m_pDB, buf, m_Description.c_str(), (unsigned long) min((size_t)20,m_Description.size()));
+char *buf = new char[121];
+db_wrapper_real_escape_string(table->database->m_pDB, buf, m_Description.c_str(), (unsigned long) min((size_t)60,m_Description.size()));
 string s=string()+"\""+buf+"\"";
 delete[] buf;
 return s;
@@ -983,34 +975,6 @@ PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
 
 class Table_CommandCategory *pTable = table->database->CommandCategory_get();
 pTable->GetRows("`FK_CommandCategory_Parent`=" + StringUtils::itos(m_PK_CommandCategory),rows);
-}
-void Row_CommandCategory::CommandCategory_pschist_FK_CommandCategory_Parent_getrows(vector <class Row_CommandCategory_pschist*> *rows)
-{
-PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
-
-class Table_CommandCategory_pschist *pTable = table->database->CommandCategory_pschist_get();
-pTable->GetRows("`FK_CommandCategory_Parent`=" + StringUtils::itos(m_PK_CommandCategory),rows);
-}
-void Row_CommandCategory::CommandCategory_pschmask_FK_CommandCategory_Parent_getrows(vector <class Row_CommandCategory_pschmask*> *rows)
-{
-PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
-
-class Table_CommandCategory_pschmask *pTable = table->database->CommandCategory_pschmask_get();
-pTable->GetRows("`FK_CommandCategory_Parent`=" + StringUtils::itos(m_PK_CommandCategory),rows);
-}
-void Row_CommandCategory::Command_pschist_FK_CommandCategory_getrows(vector <class Row_Command_pschist*> *rows)
-{
-PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
-
-class Table_Command_pschist *pTable = table->database->Command_pschist_get();
-pTable->GetRows("`FK_CommandCategory`=" + StringUtils::itos(m_PK_CommandCategory),rows);
-}
-void Row_CommandCategory::Command_pschmask_FK_CommandCategory_getrows(vector <class Row_Command_pschmask*> *rows)
-{
-PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
-
-class Table_Command_pschmask *pTable = table->database->Command_pschmask_get();
-pTable->GetRows("`FK_CommandCategory`=" + StringUtils::itos(m_PK_CommandCategory),rows);
 }
 
 

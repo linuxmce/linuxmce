@@ -1,0 +1,23 @@
+Source: pluto-messagetrans
+Priority: extra
+Maintainer: Peer Oliver Schmidt <developer@linuxmce.org>
+Build-Depends: debhelper (>= 8.0.0)
+Standards-Version: 3.9.2
+Section: libs
+Homepage: <insert the upstream URL, if relevant>
+#Vcs-Git: git://git.debian.org/collab-maint/pluto-messagetrans.git
+#Vcs-Browser: http://git.debian.org/?p=collab-maint/pluto-messagetrans.git;a=summary
+
+Package: pluto-messagetrans-dev
+Section: libdevel
+Architecture: any
+Depends: pluto-messagetrans (= ${binary:Version})
+Description: <insert up to 60 chars description>
+ <insert long description, indented with spaces>
+
+Package: pluto-messagetrans
+Section: libs
+Architecture: any
+Depends: ${shlibs:Depends}, ${misc:Depends}
+Description: <insert up to 60 chars description>
+ <insert long description, indented with spaces>

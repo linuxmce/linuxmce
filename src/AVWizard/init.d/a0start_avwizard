@@ -1,0 +1,35 @@
+#!/bin/bash
+### BEGIN INIT INFO 
+# Provides:          avwizard
+# Required-Start:    check_avwizard
+# Required-Stop:     
+# Should-Start:      
+# Default-Start:     2 
+# Default-Stop:      1 
+# Short-Description: AVWizard
+# Description:       This script starts the AV Wizard
+### END INIT INFO #
+. /usr/pluto/bin/Utils.sh
+
+if [ "$1" == "status" ] ; then
+	if [ `pidof AVWizard_Run.sh` ] ; then
+		echo "* AVWizard is running"
+	else
+		echo "* AVWizard is not running"
+	fi
+	exit 0
+fi
+
+CheckAVWizard () {
+## Install driver based on the type of video card used
+if [[ "$AVWizardOverride" == "1" || "$AVWizardDone" != "1" ]] && [[ "$AutostartMedia" == "1" ]] ;then
+	/usr/pluto/bin/AVWizard_Run.sh 1>/dev/null 2>/dev/null </dev/null
+	ConfSet "AVWizardOverride" "0"
+else
+	beep -l 50 -f 1000 -n -l 50 -f 1200 -n -l 50 -f 1400 -n -l 50 -f 1600 -n -l 50 -f 1800 -n -l 50 -f 2000 -n -l 50 -f 2200 &
+fi
+}
+
+CheckVideoDriver
+CheckAVWizard
+killall WatchGyroRemote 2>/dev/null

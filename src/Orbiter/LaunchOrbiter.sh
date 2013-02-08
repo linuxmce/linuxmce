@@ -107,7 +107,7 @@ done
 
 
 ## Run Orbiter
-xset m 1 1
+xset m 2 2 
 
 if [[ "$Valgrind" == *"$Executable"* ]]; then
 	$VGcmd "$Executable" "$@"

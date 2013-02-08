@@ -130,7 +130,6 @@ bool psc_id_isNull();
 bool psc_batch_isNull();
 bool psc_user_isNull();
 bool psc_frozen_isNull();
-bool psc_mod_isNull();
 bool psc_restrict_isNull();
 
 			
@@ -139,7 +138,6 @@ void psc_id_setNull(bool val);
 void psc_batch_setNull(bool val);
 void psc_user_setNull(bool val);
 void psc_frozen_setNull(bool val);
-void psc_mod_setNull(bool val);
 void psc_restrict_setNull(bool val);
 	
 	
@@ -158,8 +156,6 @@ void psc_restrict_setNull(bool val);
 
 		// Return the rows in other tables with foreign keys pointing here
 		void CommandGroup_D_Command_FK_CommandGroup_D_getrows(vector <class Row_CommandGroup_D_Command*> *rows);
-void CommandGroup_D_Command_pschist_FK_CommandGroup_D_getrows(vector <class Row_CommandGroup_D_Command_pschist*> *rows);
-void CommandGroup_D_Command_pschmask_FK_CommandGroup_D_getrows(vector <class Row_CommandGroup_D_Command_pschmask*> *rows);
 void DesignObjVariation_FK_CommandGroup_D_OnActivate_getrows(vector <class Row_DesignObjVariation*> *rows);
 void DesignObjVariation_FK_CommandGroup_D_OnLoad_getrows(vector <class Row_DesignObjVariation*> *rows);
 void DesignObjVariation_FK_CommandGroup_D_OnUnload_getrows(vector <class Row_DesignObjVariation*> *rows);
@@ -168,22 +164,6 @@ void DesignObjVariation_FK_CommandGroup_D_OnStartup_getrows(vector <class Row_De
 void DesignObjVariation_FK_CommandGroup_D_OnHighlight_getrows(vector <class Row_DesignObjVariation*> *rows);
 void DesignObjVariation_FK_CommandGroup_D_OnUnhighlight_getrows(vector <class Row_DesignObjVariation*> *rows);
 void DesignObjVariation_Zone_FK_CommandGroup_D_getrows(vector <class Row_DesignObjVariation_Zone*> *rows);
-void DesignObjVariation_Zone_pschist_FK_CommandGroup_D_getrows(vector <class Row_DesignObjVariation_Zone_pschist*> *rows);
-void DesignObjVariation_Zone_pschmask_FK_CommandGroup_D_getrows(vector <class Row_DesignObjVariation_Zone_pschmask*> *rows);
-void DesignObjVariation_pschist_FK_CommandGroup_D_OnActivate_getrows(vector <class Row_DesignObjVariation_pschist*> *rows);
-void DesignObjVariation_pschist_FK_CommandGroup_D_OnLoad_getrows(vector <class Row_DesignObjVariation_pschist*> *rows);
-void DesignObjVariation_pschist_FK_CommandGroup_D_OnUnload_getrows(vector <class Row_DesignObjVariation_pschist*> *rows);
-void DesignObjVariation_pschist_FK_CommandGroup_D_OnTimeout_getrows(vector <class Row_DesignObjVariation_pschist*> *rows);
-void DesignObjVariation_pschist_FK_CommandGroup_D_OnStartup_getrows(vector <class Row_DesignObjVariation_pschist*> *rows);
-void DesignObjVariation_pschist_FK_CommandGroup_D_OnHighlight_getrows(vector <class Row_DesignObjVariation_pschist*> *rows);
-void DesignObjVariation_pschist_FK_CommandGroup_D_OnUnhighlight_getrows(vector <class Row_DesignObjVariation_pschist*> *rows);
-void DesignObjVariation_pschmask_FK_CommandGroup_D_OnActivate_getrows(vector <class Row_DesignObjVariation_pschmask*> *rows);
-void DesignObjVariation_pschmask_FK_CommandGroup_D_OnLoad_getrows(vector <class Row_DesignObjVariation_pschmask*> *rows);
-void DesignObjVariation_pschmask_FK_CommandGroup_D_OnUnload_getrows(vector <class Row_DesignObjVariation_pschmask*> *rows);
-void DesignObjVariation_pschmask_FK_CommandGroup_D_OnTimeout_getrows(vector <class Row_DesignObjVariation_pschmask*> *rows);
-void DesignObjVariation_pschmask_FK_CommandGroup_D_OnStartup_getrows(vector <class Row_DesignObjVariation_pschmask*> *rows);
-void DesignObjVariation_pschmask_FK_CommandGroup_D_OnHighlight_getrows(vector <class Row_DesignObjVariation_pschmask*> *rows);
-void DesignObjVariation_pschmask_FK_CommandGroup_D_OnUnhighlight_getrows(vector <class Row_DesignObjVariation_pschmask*> *rows);
 
 
 		// Setup binary serialization

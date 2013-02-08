@@ -100,7 +100,6 @@ public:
 
 	/** Private member variables */
 	
-	int m_iGridRequestCounter;
 	pluto_pthread_mutex_t m_DataGridMutex;
 	DataGridMap m_DataGrids;
 	map<int, DatagridGeneratorCallBackMap *> m_mapDataGridGeneratorCallBack;

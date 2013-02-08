@@ -22,7 +22,7 @@ eval `cat /etc/mythtv/mysql.txt | grep -v "^#" | grep -v "^$"`;
 mysql_command="mysql -s -B -u $DBUserName -h $DBHostName -p$DBPassword $DBName";
 
 Q="select IK_DeviceData from Device_DeviceData where FK_DeviceData=206"
-AutoConf=$(echo "$Q" | /usr/bin/mysql -h $MySqlHost pluto_main | tail -n +2)
+AutoConf=$(echo "$Q" | /usr/bin/mysql -h $MySqlHost $MySqlDBName | tail -n +2)
 
 if [[ "$AutoConf" == "1" ]]; then
     echo "Auto Configure is set"
@@ -106,7 +106,7 @@ PK_Device_QuickStart="$(RunSQL "$Q")"
 
 if [ "$PK_Device_QuickStart" = "" ]; then
 
-	Q="INSERT INTO Device_QuickStart(FK_Device,Description,SortOrder,FK_QuickStartTemplate) SELECT $PK_Device_MD,Description,1,PK_QuickStartTemplate FROM QuickStartTemplate WHERE PK_QuickStartTemplate=2"
+	Q="INSERT INTO Device_QuickStart(FK_Device,Description,SortOrder,FK_QuickStartTemplate) SELECT $PK_Device_MD,Description,1,PK_QuickStartTemplate FROM QuickStartTemplate WHERE PK_QuickStartTemplate=8"
 	RunSQL "$Q"
 fi
 

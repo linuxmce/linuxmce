@@ -29,8 +29,6 @@ using namespace DCE;
 
 JobHandler::JobHandler()
 {
-	m_bMultiThreadedJobs=true;  // Derived versions can override this if there should be only 1 job at a time
-	m_bProcessingSuspended=m_bSuspendProcessing=false;
 }
 
 JobHandler::~JobHandler()
@@ -53,7 +51,6 @@ bool JobHandler::AbortAllJobs()
 		}
 	}
 
-	PurgeCompletedJobs();
 	BroadcastCond();
 	return bAbortedOk;
 }
@@ -111,8 +108,7 @@ void JobHandler::PurgeCompletedJobs()
 #endif
 			pJob->StopThread(5);  // Job should immediately, but give it 5 seconds to be sure
 			m_listJob.erase(it++);
-			if( pJob->m_bAutoDelete_get() )
-				delete pJob;
+			delete pJob;
 		}
 		else
 		{
@@ -131,36 +127,14 @@ bool JobHandler::HasJobs()
 	return m_listJob.empty()==false; 
 }
 
-void JobHandler::AddJob(Job *pJob,bool bFirst)
+void JobHandler::AddJob(Job *pJob)
 {
 	PLUTO_SAFETY_LOCK(jm,m_ThreadMutex);
 #ifdef DEBUG
 	LoggerWrapper::GetInstance()->Write(LV_STATUS,"JobHandler::AddJob job %d %s",pJob->m_iID_get(),pJob->m_sName_get().c_str());
 #endif
 	BroadcastCond();
-	if( bFirst )
-		m_listJob.push_front(pJob);
-	else
-		m_listJob.push_back(pJob);
-}
-
-bool JobHandler::MoveJobToEndOfQueue(Job *pJob)
-{
-	PLUTO_SAFETY_LOCK(jm,m_ThreadMutex);
-#ifdef DEBUG
-	LoggerWrapper::GetInstance()->Write(LV_STATUS,"JobHandler::MoveJobToEndOfQueue job %d %s",pJob->m_iID_get(),pJob->m_sName_get().c_str());
-#endif
-	for(list<class Job *>::iterator it=m_listJob.begin();it!=m_listJob.end();++it)
-	{
-		if( pJob==*it )
-		{
-			m_listJob.erase(it);
-			m_listJob.push_back(pJob);
-			BroadcastCond();
-			return true;
-		}
-	}
-	return false;
+	m_listJob.push_back(pJob);
 }
 
 string JobHandler::ToString()
@@ -186,20 +160,8 @@ void JobHandler::Run()
 {
 	while(!m_bQuit)
 	{
-		Job *pJob_Next_Timed=NULL,*pJob_SingleThreaded=NULL;
+		Job *pJob_Next_Timed=NULL;
 		PLUTO_SAFETY_LOCK(jm,m_ThreadMutex);
-
-		if( m_bSuspendProcessing )  // We need to suspend until ResumeProcessing is called
-		{
-			if( m_bProcessingSuspended==false )
-			{
-				LoggerWrapper::GetInstance()->Write(LV_STATUS,"JobHandler::Run Suspending processing");
-				m_bProcessingSuspended = true;
-			}
-			jm.Release();
-			Sleep(500);
-			continue;
-		}
 		PurgeCompletedJobs();
 
 		LoggerWrapper::GetInstance()->Write(LV_STATUS,"JobHandler::Run jobs %d", m_listJob.size());
@@ -213,18 +175,10 @@ void JobHandler::Run()
 			if( pJob->ReadyToRun() )
 			{
 #ifdef DEBUG
-				LoggerWrapper::GetInstance()->Write(LV_STATUS,"JobHandler::Run ready to run job %d %s status %d <%p>",
-					pJob->m_iID_get(),pJob->m_sName_get().c_str(),(int) pJob->m_eJobStatus_get(), pJob);
+				LoggerWrapper::GetInstance()->Write(LV_STATUS,"JobHandler::Run ready to run job %d %s status %d",
+					pJob->m_iID_get(),pJob->m_sName_get().c_str(),(int) pJob->m_eJobStatus_get());
 #endif
-				if( m_bMultiThreadedJobs==false )
-				{
-					pJob_SingleThreaded = pJob;  // Only run this one job
-					break;
-				}
-				else
-				{
-					pJob->StartThread();
-				}
+				pJob->StartThread();
 			}
 
 			// This Job wants to be called no later than a certain time.  See what is the next job (ie nearest next runattempt)
@@ -233,16 +187,6 @@ void JobHandler::Run()
 				if( !pJob_Next_Timed || pJob_Next_Timed->m_tNextRunAttempt_get()>pJob->m_tNextRunAttempt_get() )
 					pJob_Next_Timed=pJob;
 			}
-		}
-
-		// We've got a job to run as single threaded
-		if( pJob_SingleThreaded )
-		{
-			jm.Release();
-			pJob_SingleThreaded->Run();
-			pJob_SingleThreaded = NULL;
-			jm.Relock();
-			continue;  // Start the loop again at the beginning since it may have changed while the mutex was unlocked
 		}
 
 		if( m_bQuit )
@@ -256,10 +200,10 @@ void JobHandler::Run()
 		// See if there's a time limit by which we should check the jobs again
 		if( pJob_Next_Timed )
 		{
-			time_t Seconds = pJob_Next_Timed->m_tNextRunAttempt_get() - time(NULL);
+			int Seconds = pJob_Next_Timed->m_tNextRunAttempt_get() - time(NULL);
 			if( Seconds<0 )
 				Seconds=0;
-			jm.TimedCondWait( (int) Seconds, 0 );  // Yes, wait only up until this job wants to be called again
+			jm.TimedCondWait( Seconds, 0 );  // Yes, wait only up until this job wants to be called again
 		}
 		else
 			jm.CondWait();  // Nope, wait until something happens
@@ -268,7 +212,6 @@ void JobHandler::Run()
 
 Job *JobHandler::FindJob(int jobID)
 {
-	PLUTO_SAFETY_LOCK(jm,m_ThreadMutex);
 	for(list<class Job *>::iterator it=m_listJob.begin();it!=m_listJob.end();++it)
 	{
 		Job *pJob = *it;
@@ -287,58 +230,16 @@ Task *JobHandler::FindTask(int jobID,int taskID)
 	return pJob->FindTask(taskID);
 }
 
-bool JobHandler::ReportPendingTasks(PendingTaskList *pPendingTaskList,string sType)
+bool JobHandler::ReportPendingTasks(PendingTaskList *pPendingTaskList)
 {
 	PLUTO_SAFETY_LOCK(jm,m_ThreadMutex);
 	bool bPendingTasks=false;
 	for(list<class Job *>::iterator it=m_listJob.begin();it!=m_listJob.end();++it)
 	{
 		Job *pJob = *it;
-		if( sType.empty()==false && pJob->GetType()!=sType )
-			continue; // Skip this.  The user only cares about a specific type of job
 		bPendingTasks |= pJob->ReportPendingTasks(pPendingTaskList);
 	}
 
 	return bPendingTasks;
 }
-
-bool JobHandler::SuspendProcessing(int iTimeoutInSeconds)
-{
-	LoggerWrapper::GetInstance()->Write(LV_STATUS,"JobHandler::SuspendProcessing");
-	time_t tTimeout = time(NULL) + iTimeoutInSeconds;
-
-	PLUTO_SAFETY_LOCK(jm,m_ThreadMutex);
-	m_bProcessingSuspended=false;  // So we know when the Run loop gets into the 'idle' mode
-	m_bSuspendProcessing=true;  // Only set here and in ResumeProcessing
-
-	jm.Release();
-	while( !m_bProcessingSuspended || NumberJobsWithStatus(Job::job_InProgress)>0 )
-	{
-		BroadcastCond();
-		if( (iTimeoutInSeconds && tTimeout < time(NULL)) || m_bQuit )
-			return false;  // We never were able to suspend.  Some job must be 'stuck'
-		Sleep(500);  // Sleep half a second
-	}
-	return true;
-}
-
-void JobHandler::ResumeProcessing()
-{
-	LoggerWrapper::GetInstance()->Write(LV_STATUS,"JobHandler::ResumeProcessing");
-	PLUTO_SAFETY_LOCK(jm,m_ThreadMutex);
-	m_bSuspendProcessing=false;  // Only set here and in SuspendProcessing
-}
-
-int JobHandler::NumberJobsWithStatus(Job::JobStatus eJobStatus)
-{
-	int iCount=0;
-	for(list<Job *>::iterator it=m_listJob.begin();it!=m_listJob.end();++it)
-	{
-		Job *pJob = *it;
-		if( pJob->m_eJobStatus_get()==eJobStatus )
-			iCount++;
-	}
-	return iCount;
-}
-
 

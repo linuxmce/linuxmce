@@ -1,0 +1,223 @@
+#!/bin/sh /usr/share/dpatch/dpatch-run
+
+## 03_cmdsubmenu.dpatch by Albu at vdrportal.de
+##
+## 2003-10-08: Version 0.1 - Albu at vdrportal.de
+##   http://vdrportal.de/board/thread.php?threadid=6319
+##
+## 2003-10-09: Version 0.2 - Tobias Grimm <tg@e-tobi.net>
+##   - Added Define CMD_SUBMENUS in Makefile
+##
+## 2004-05-28: Version 0.3 - Thomas Günther <tom@toms-cafe.de>
+##   - Fixed compilation with gcc-3.3.3
+##   - Added new virtual method AddConfig in cConfig
+##   - Redefining of method Add in cListBase to virtual no longer necessary
+##   - Improved code in menu.c
+##   http://toms-cafe.de/vdr/download/vdr-cmdsubmenu-0.3.diff
+##
+## 2004-12-20: Version 0.4 - Thomas Günther <tom@toms-cafe.de>
+##   - Solved conflict with jumpplay patch 0.6
+##   http://toms-cafe.de/vdr/download/vdr-cmdsubmenu-0.4.diff
+##
+## All lines beginning with `## DP:' are a description of the patch.
+## DP: Adds submenus within the commands and recording commands menu.
+## DP: To create a submenu entry, prefix the name by one ore more "-".
+
+@DPATCH@
+--- vdr-1.2.6/Makefile
++++ vdr-1.2.6/Makefile
+@@ -48,6 +48,7 @@
+ 
+ DEFINES += -DREMOTE_$(REMOTE)
+ 
++DEFINES += -DCMD_SUBMENUS
+ DEFINES += -D_GNU_SOURCE
+ 
+ DEFINES += -DVIDEODIR=\"$(VIDEODIR)\"
+--- vdr-1.2.6/config.c
++++ vdr-1.2.6/config.c
+@@ -27,18 +27,29 @@
+ {
+   title = command = NULL;
+   confirm = false;
++  nIndent = 0;
++  childs = NULL;
+ }
+ 
+ cCommand::~cCommand()
+ {
+   free(title);
+   free(command);
++  delete childs;
+ }
+ 
+ bool cCommand::Parse(const char *s)
+ {
+   const char *p = strchr(s, ':');
+   if (p) {
++    nIndent = 0;
++#ifdef CMD_SUBMENUS
++    while (*s == '-')
++    {
++      nIndent++;
++      s++;
++    }
++#endif // CMD_SUBMENUS
+      int l = p - s;
+      if (l > 0) {
+         title = MALLOC(char, l + 1);
+@@ -85,6 +96,76 @@
+   return result;
+ }
+ 
++int cCommand::getIndent ()
++{
++  return nIndent;
++}
++
++void cCommand::setIndent (int nNewIndent)
++{
++  nIndent = nNewIndent;
++}
++
++bool cCommand::hasChilds ()
++{
++  if (!childs)
++  {
++    return false;
++  }
++  return (childs->Count () > 0);
++}
++
++int cCommand::getChildCount ()
++{
++  if (!childs)
++  {
++    return false;
++  }
++  return childs->Count ();
++}
++
++void cCommand::addChild (cCommand *newChild)
++{
++  if (!childs)
++  {
++    childs = new cCommands ();
++  }
++  childs->Add (newChild);
++}
++
++
++cCommands *cCommand::getChilds ()
++{
++  return childs;
++}
++
++// --- cCommands -------------------------------------------------------
++
++void cCommands::AddConfig(cCommand *Object)
++{
++  cCommand *c = (cCommand *) Object;
++  cCommand *cParent;
++  int nIndent;
++  int nIndex;
++
++  if (!c)
++  {
++    return;
++  }
++  nIndent = c->getIndent ();
++  //  isyslog ("nIndent %d %s\n", nIndent, c->Title ());
++  for (nIndex = Count () - 1; nIndex >= 0; nIndex--)
++  {
++    cParent = (cCommand *) Get (nIndex);
++    if (cParent->getIndent () < nIndent)
++    {
++      cParent->addChild (c);
++      return;
++    }
++  }
++  cConfig<cCommand>::Add(Object);
++}
++
+ // -- cSVDRPhost -------------------------------------------------------------
+ 
+ cSVDRPhost::cSVDRPhost(void)
+--- vdr-1.2.6/config.h
++++ vdr-1.2.6/config.h
+@@ -32,11 +32,15 @@
+ 
+ #define MaxFileName 256
+ 
++class cCommands;
++
+ class cCommand : public cListObject {
+ private:
+   char *title;
+   char *command;
+   bool confirm;
++  int nIndent;
++  cCommands *childs;
+   static char *result;
+ public:
+   cCommand(void);
+@@ -45,6 +49,12 @@
+   const char *Title(void) { return title; }
+   bool Confirm(void) { return confirm; }
+   const char *Execute(const char *Parameters = NULL);
++  int getIndent ();
++  void setIndent (int nNewIndent);
++  bool hasChilds ();
++  int getChildCount ();
++  cCommands *getChilds ();
++  void addChild (cCommand *newChild);
+   };
+ 
+ typedef uint32_t in_addr_t; //XXX from /usr/include/netinet/in.h (apparently this is not defined on systems with glibc < 2.2)
+@@ -86,6 +96,10 @@
+ public:
+   cConfig(void) { fileName = NULL; }
+   virtual ~cConfig() { free(fileName); }
++  virtual void AddConfig(T *Object)
++  {
++    cList<T>::Add(Object);
++  }
+   const char *FileName(void) { return fileName; }
+   bool Load(const char *FileName = NULL, bool AllowComments = false, bool MustExist = false)
+   {
+@@ -114,7 +128,7 @@
+                 if (!isempty(buffer)) {
+                    T *l = new T;
+                    if (l->Parse(buffer))
+-                      Add(l);
++                      AddConfig(l);
+                    else {
+                       esyslog("ERROR: error in %s, line %d\n", fileName, line);
+                       delete l;
+@@ -156,7 +170,10 @@
+   }
+   };
+ 
+-class cCommands : public cConfig<cCommand> {};
++class cCommands : public cConfig<cCommand> {
++public:
++  virtual void AddConfig(cCommand *Object);
++  };
+ 
+ class cSVDRPhosts : public cConfig<cSVDRPhost> {
+ public:
+--- vdr-1.2.6/menu.c
++++ vdr-1.2.6/menu.c
+@@ -1518,6 +1518,12 @@
+   if (command) {
+      char *buffer = NULL;
+      bool confirmed = true;
++#ifdef CMD_SUBMENUS
++     if (command->hasChilds()) {
++        AddSubMenu(new cMenuCommands(command->Title(), command->getChilds(), parameters));
++        return osContinue;
++        }
++#endif // CMD_SUBMENUS
+      if (command->Confirm()) {
+         asprintf(&buffer, "%s?", command->Title());
+         confirmed = Interface->Confirm(buffer);

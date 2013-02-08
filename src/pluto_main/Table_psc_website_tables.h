@@ -122,10 +122,12 @@ void last_psc_id_set(long int val);
 void last_psc_batch_set(long int val);
 
 		
-		bool filter_isNull();
+		bool Tablename_isNull();
+bool filter_isNull();
 
 			
-		void filter_setNull(bool val);
+		void Tablename_setNull(bool val);
+void filter_setNull(bool val);
 	
 	
 		void Delete();

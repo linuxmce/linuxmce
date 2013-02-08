@@ -1,0 +1,94 @@
+#include "screensaverclass.h"
+#include <QTimer>
+
+
+ScreenSaverClass::ScreenSaverClass(QObject *parent) :
+    QObject(parent)
+{
+    qi_currentImage = QImage();
+    qi_newImage = QImage();
+    primary = true;
+    transitionDuration = 60000;
+}
+
+void ScreenSaverClass::setImageList(QStringList imgList)
+{
+    images = imgList;
+    if(!images.empty())
+    {
+        pickImage();
+        setImage(images.at(0));
+        emit screenSaverReady();
+    }
+    else
+    {
+        //("Screensaver image list error!");
+    }
+}
+
+void ScreenSaverClass::clearImageList()
+{
+    images.clear();
+}
+
+void ScreenSaverClass::setImageData(const uchar *data, int iData_size)
+{
+
+    qi_currentImage.loadFromData(data, iData_size);
+    qi_currentImage = qi_currentImage.scaledToHeight(1080);
+    emit imageChanged();
+    delete data;
+}
+
+void ScreenSaverClass::setActive(bool state)
+{
+   active = state;
+   emit stateChanged();
+}
+
+bool ScreenSaverClass::getStatus()
+{
+    return isReady;
+}
+
+void ScreenSaverClass::setStatus(bool status)
+{
+    isReady = status;
+    emit statusChanged();
+
+}
+
+void ScreenSaverClass::pickImage()
+{
+
+
+    QTimer *timer = new QTimer(this);
+        connect(timer, SIGNAL(timeout()), this, SLOT(selectNew()));
+        timer->start(transitionDuration);
+}
+
+void ScreenSaverClass::selectNew()
+{
+    int index = images.lastIndexOf(currentImage);
+
+
+    if (index+1 < images.count())
+    {
+        setImage(images.at(index+1));
+    }
+    else
+    {
+        setImage(images.at(0));
+    }
+}
+
+QString ScreenSaverClass::getImage()
+{
+    return currentImage;
+}
+
+void ScreenSaverClass::setImage(QString url)
+{
+    currentImage =  url;
+    emit requestNewImage(currentImage);
+}

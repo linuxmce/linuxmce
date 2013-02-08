@@ -1,9 +1,0 @@
-This is a slightly patched version of SDLMAME for LinuxMCE. 
-
-Right now, it contains fixes so that it will build properly on the 
-current GCC, but it will also contain LinuxMCE specific bits later
-for adding a command message socket, which hopefully will be merged
-upstream.
-
--tschak
-

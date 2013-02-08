@@ -1,0 +1,114 @@
+// UI1 Screen Myth_all commands (93)
+// Created using structure-qml.php from Peer Oliver Schmidt\m// based on the LinuxMCE database
+import QtQuick 1.0
+import "../components"
+Item {
+	Image {
+		source: "skins/Basic/Phone/phonebookB.png"
+		width: 1920
+		height: 1080
+	}
+	function onActivate1785() 
+	{
+	 // Calling Command 741 (Goto Screen) with CommandGroup_Parameters from 17174
+		gotoQScreen("Screen_1.qml")
+	}
+	StyledText {
+		x: 1680
+		y: 0
+		height: 1
+		width: 1
+		textLabel: "Main menu"
+	}
+	ButtonSq {
+		id: button1785_1148
+		x: 1680
+		y: 0
+		width: 240
+		height: 180
+		buttonbackground: "skins/Basic/Buttons/TabletControls/home.png"
+		buttontext: "Main menu"
+		clickHandler.onClicked: onActivate1785()
+	}
+	function onActivate1784() 
+	{
+	 // Calling Command 4 (Go back) with CommandGroup_Parameters from 2506
+		manager.sendDceMessage(srouterip + " "+deviceid + " -300 1 4 ")
+	}
+	ButtonSq {
+		id: button1784_1149
+		x: 1680
+		y: 180
+		width: 240
+		height: 180
+		buttonbackground: "skins/Basic/Buttons/TabletControls/back.png"
+		buttontext: ""
+		clickHandler.onClicked: onActivate1784()
+	}
+	function onActivate4273() 
+	{
+	 // Calling Command 741 (Goto Screen) with CommandGroup_Parameters from 15927
+		gotoQScreen("Screen_94.qml")
+	}
+	StyledText {
+		x: 379
+		y: 135
+		height: 213
+		width: 698
+		textLabel: "Watching TV"
+	}
+	ButtonSq {
+		id: button4273_1150
+		x: 379
+		y: 135
+		width: 930
+		height: 160
+		buttonbackground: "skins/Basic/Buttons/fullbutton.png"
+		buttontext: "Watching TV"
+		clickHandler.onClicked: onActivate4273()
+	}
+	function onActivate4274() 
+	{
+	 // Calling Command 741 (Goto Screen) with CommandGroup_Parameters from 15928
+		gotoQScreen("Screen_95.qml")
+	}
+	StyledText {
+		x: 379
+		y: 406
+		height: 213
+		width: 698
+		textLabel: "Live TV Browse Mode"
+	}
+	ButtonSq {
+		id: button4274_1151
+		x: 379
+		y: 406
+		width: 930
+		height: 160
+		buttonbackground: "skins/Basic/Buttons/fullbutton.png"
+		buttontext: "Live TV Browse Mode"
+		clickHandler.onClicked: onActivate4274()
+	}
+	function onActivate4275() 
+	{
+	 // Calling Command 741 (Goto Screen) with CommandGroup_Parameters from 15929
+		gotoQScreen("Screen_96.qml")
+	}
+	StyledText {
+		x: 379
+		y: 677
+		height: 213
+		width: 698
+		textLabel: "Playback Recording"
+	}
+	ButtonSq {
+		id: button4275_1152
+		x: 379
+		y: 677
+		width: 930
+		height: 160
+		buttonbackground: "skins/Basic/Buttons/fullbutton.png"
+		buttontext: "Playback Recording"
+		clickHandler.onClicked: onActivate4275()
+	}
+}

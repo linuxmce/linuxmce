@@ -175,9 +175,9 @@ void EIB::ReceivedCommandForChild(DeviceData_Impl *pDeviceData_Impl,string &sCMD
 		case COMMAND_Toggle_Power_CONST: {
 			switch(pDeviceData_Impl->m_dwPK_DeviceTemplate) {
 				case DEVICETEMPLATE_Generic_Input_Ouput_CONST: {
-					string sInputOrOutput = pDeviceData_Impl->m_mapParameters_Find(DEVICEDATA_InputOrOutput_CONST);
+					string sInputOrOutput = pDeviceData_Impl->mapParameters_Find(DEVICEDATA_InputOrOutput_CONST);
 					if(sInputOrOutput == "0" || sInputOrOutput == "2") { /* check if input */
-						string sChannel = pDeviceData_Impl->m_mapParameters_Find(DEVICEDATA_PortChannel_Number_CONST);
+						string sChannel = pDeviceData_Impl->mapParameters_Find(DEVICEDATA_PortChannel_Number_CONST);
 						tlmsg.setGroupAddress(sChannel.c_str());
 						tlmsg.setShortUserData((unsigned int)atoi(pMessage->m_mapParameters[COMMANDPARAMETER_OnOff_CONST].c_str()));
 						LoggerWrapper::GetInstance()->Write(LV_STATUS, "Turning ON");
@@ -199,7 +199,7 @@ void EIB::ReceivedCommandForChild(DeviceData_Impl *pDeviceData_Impl,string &sCMD
 				case DEVICETEMPLATE_Light_Switch_dimmable_CONST: {
 					/***default***/
 					vector<string> addrs;
-					string sChannel = pDeviceData_Impl->m_mapParameters_Find(DEVICEDATA_PortChannel_Number_CONST);
+					string sChannel = pDeviceData_Impl->mapParameters_Find(DEVICEDATA_PortChannel_Number_CONST);
 					if(getParamsFromChannel(sChannel, addrs) >= 1) {
 						tlmsg.setGroupAddress(addrs[0].c_str());
 						tlmsg.setShortUserData(1);
@@ -224,7 +224,7 @@ void EIB::ReceivedCommandForChild(DeviceData_Impl *pDeviceData_Impl,string &sCMD
 				case DEVICETEMPLATE_Light_Switch_dimmable_CONST: {
 					/***default***/
 					vector<string> addrs;
-					string sChannel = pDeviceData_Impl->m_mapParameters_Find(DEVICEDATA_PortChannel_Number_CONST);
+					string sChannel = pDeviceData_Impl->mapParameters_Find(DEVICEDATA_PortChannel_Number_CONST);
 					if(getParamsFromChannel(sChannel, addrs) >= 1) {
 						tlmsg.setGroupAddress(addrs[0].c_str());
 						tlmsg.setShortUserData(0);
@@ -244,7 +244,7 @@ void EIB::ReceivedCommandForChild(DeviceData_Impl *pDeviceData_Impl,string &sCMD
 			switch(pDeviceData_Impl->m_dwPK_DeviceTemplate) {
 				case DEVICETEMPLATE_Light_Switch_dimmable_CONST: {
 					vector<string> addrs;
-					string sChannel = pDeviceData_Impl->m_mapParameters_Find(DEVICEDATA_PortChannel_Number_CONST);
+					string sChannel = pDeviceData_Impl->mapParameters_Find(DEVICEDATA_PortChannel_Number_CONST);
 					if(getParamsFromChannel(sChannel, addrs) >= 2) {
 						tlmsg.setGroupAddress(addrs[1].c_str());
 						
@@ -263,7 +263,7 @@ void EIB::ReceivedCommandForChild(DeviceData_Impl *pDeviceData_Impl,string &sCMD
 				case DEVICETEMPLATE_Drapes_Switch_CONST: {
 					/***drapes switch***/
 					vector<string> addrs;
-					string sChannel = pDeviceData_Impl->m_mapParameters_Find(DEVICEDATA_PortChannel_Number_CONST);
+					string sChannel = pDeviceData_Impl->mapParameters_Find(DEVICEDATA_PortChannel_Number_CONST);
 					if(getParamsFromChannel(sChannel, addrs) >= 2) {
 						tlmsg.setGroupAddress(addrs[1].c_str());
 						int dimmval = 
@@ -297,7 +297,7 @@ void EIB::ReceivedCommandForChild(DeviceData_Impl *pDeviceData_Impl,string &sCMD
 			switch(pDeviceData_Impl->m_dwPK_DeviceTemplate) {
 				case DEVICETEMPLATE_Standard_Thermostat_CONST: {
 					vector<string> addrs;
-					string sChannel = pDeviceData_Impl->m_mapParameters_Find(DEVICEDATA_PortChannel_Number_CONST);
+					string sChannel = pDeviceData_Impl->mapParameters_Find(DEVICEDATA_PortChannel_Number_CONST);
 					if(getParamsFromChannel(sChannel, addrs) >= 1) {
 						tlmsg.setGroupAddress(addrs[0].c_str());
 						float tempval = 
@@ -356,9 +356,9 @@ bool EIB::processTelegram(const EIBBUS::TelegramMessage *pt, DeviceData_Impl *pD
 		case DEVICETEMPLATE_Motion_Detector_CONST: 
 		case DEVICETEMPLATE_Siren_CONST: 
 		case DEVICETEMPLATE_Smoke_Detector_CONST: {
-			string sInputOrOutput = pDevData->m_mapParameters_Find(DEVICEDATA_InputOrOutput_CONST);
+			string sInputOrOutput = pDevData->mapParameters_Find(DEVICEDATA_InputOrOutput_CONST);
 			if(sInputOrOutput == "0" || sInputOrOutput == "2") { /* check if output */
-				string sChannel = pDevData->m_mapParameters_Find(DEVICEDATA_PortChannel_Number_CONST);
+				string sChannel = pDevData->mapParameters_Find(DEVICEDATA_PortChannel_Number_CONST);
 				if(sChannel == pt->getGroupAddress()) {
 					LoggerWrapper::GetInstance()->Write(LV_STATUS, "Sensor triggered. Sending Event."); 
 					pMessage = new Message(pDevData->m_dwPK_Device, DEVICEID_EVENTMANAGER, PRIORITY_NORMAL, MESSAGETYPE_EVENT, 
@@ -367,7 +367,7 @@ bool EIB::processTelegram(const EIBBUS::TelegramMessage *pt, DeviceData_Impl *pD
 			}
 		} break;
 		case DEVICETEMPLATE_Standard_Thermostat_CONST: {
-			string sChannel = pDevData->m_mapParameters_Find(DEVICEDATA_PortChannel_Number_CONST);
+			string sChannel = pDevData->mapParameters_Find(DEVICEDATA_PortChannel_Number_CONST);
 			
 			vector<string> addrs;
 			if(getParamsFromChannel(sChannel, addrs) >= 2) {

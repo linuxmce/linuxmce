@@ -1,0 +1,12 @@
+Source: pluto-default-tftpboot
+Section: unknown
+Priority: extra
+Maintainer: root <developers@linuxmce.org>
+Build-Depends: debhelper (>= 5)
+Standards-Version: 3.7.2
+
+Package: pluto-default-tftpboot
+Architecture: all
+Depends: ${shlibs:Depends}, ${misc:Depends}
+Description: <insert up to 60 chars description>
+ <insert long description, indented with spaces>

@@ -1,0 +1,11 @@
+Package: huludesktop
+Version: 0.9.8-1
+Architecture: i386
+Maintainer: Hulu, LLC <support@hulu.com>
+Installed-Size: 1396
+Depends: libc6 (>= 2.4), libglib2.0-0 (>= 2.16.0), libgtk2.0-0 (>= 2.12.0), zlib1g (>= 1:1.2.3.3.dfsg-1)
+Section: x11
+Priority: optional
+Homepage: http://www.hulu.com/labs/hulu-desktop
+Description: Hulu Desktop for Linux
+ Hulu Desktop is a lean-back viewing experience for your personal computer. It features a sleek new look that's optimized for use with the LIRC open source remote control package, allowing you to navigate Hulu's entire library with just six buttons.

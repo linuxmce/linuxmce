@@ -143,7 +143,10 @@ void psc_mod_set(string val);
 void psc_restrict_set(long int val);
 
 		
-		bool TransparentColor_isNull();
+		bool Define_isNull();
+bool Description_isNull();
+bool TransparentColor_isNull();
+bool MainFileName_isNull();
 bool SelectedFileName_isNull();
 bool AltFileNames_isNull();
 bool BackgroundFileName_isNull();
@@ -151,11 +154,13 @@ bool psc_id_isNull();
 bool psc_batch_isNull();
 bool psc_user_isNull();
 bool psc_frozen_isNull();
-bool psc_mod_isNull();
 bool psc_restrict_isNull();
 
 			
-		void TransparentColor_setNull(bool val);
+		void Define_setNull(bool val);
+void Description_setNull(bool val);
+void TransparentColor_setNull(bool val);
+void MainFileName_setNull(bool val);
 void SelectedFileName_setNull(bool val);
 void AltFileNames_setNull(bool val);
 void BackgroundFileName_setNull(bool val);
@@ -163,7 +168,6 @@ void psc_id_setNull(bool val);
 void psc_batch_setNull(bool val);
 void psc_user_setNull(bool val);
 void psc_frozen_setNull(bool val);
-void psc_mod_setNull(bool val);
 void psc_restrict_setNull(bool val);
 	
 	
@@ -181,14 +185,8 @@ void psc_restrict_setNull(bool val);
 
 		// Return the rows in other tables with foreign keys pointing here
 		void CommandGroup_FK_Icon_getrows(vector <class Row_CommandGroup*> *rows);
-void CommandGroup_pschist_FK_Icon_getrows(vector <class Row_CommandGroup_pschist*> *rows);
-void CommandGroup_pschmask_FK_Icon_getrows(vector <class Row_CommandGroup_pschmask*> *rows);
 void Floorplan_FK_Icon_getrows(vector <class Row_Floorplan*> *rows);
-void Floorplan_pschist_FK_Icon_getrows(vector <class Row_Floorplan_pschist*> *rows);
-void Floorplan_pschmask_FK_Icon_getrows(vector <class Row_Floorplan_pschmask*> *rows);
 void Room_FK_Icon_getrows(vector <class Row_Room*> *rows);
-void Room_pschist_FK_Icon_getrows(vector <class Row_Room_pschist*> *rows);
-void Room_pschmask_FK_Icon_getrows(vector <class Row_Room_pschmask*> *rows);
 
 
 		// Setup binary serialization

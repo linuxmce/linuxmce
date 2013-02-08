@@ -1,0 +1,12 @@
+Install path path
+--- a/Makefile
++++ b/Makefile
+@@ -17,7 +17,7 @@
+ 	$(CC) $(CFLAGS) -c $< -o $@
+ 
+ 
+-prefix=/usr/local
++prefix=/usr
+ install: hairtunes shairport
+ 	install -D -m 0755 hairtunes $(DESTDIR)$(prefix)/bin/hairtunes
+ 	install -D -m 0755 shairport.pl $(DESTDIR)$(prefix)/bin/shairport.pl

@@ -1,0 +1,35 @@
+;
+; Installation file for PlutoMO application - lite version
+;
+;Languages
+&EN
+;
+; UID is the app's UID
+;
+#{"PlutoMO"},(0xA1ef0015),2,01,0
+
+; Series 60 identifier
+;(0x101F6F88), 0, 0, 0, {"Series60ProductID"}
+[0x101F7961], 0, 0, 0, {"S60ProductID"}
+
+; vendor
+%{"Pluto-EN"}
+:"Pluto"
+
+"\root\symbian-sdks\s60_30\epoc32\release\gcce\urel\PlutoMO.exe"         -"!:\sys\bin\PlutoMO.exe"
+"\root\symbian-sdks\s60_30\epoc32\data\z\resource\apps\PlutoMO.rsc" -"!:\resource\apps\PlutoMO.rsc"
+"\root\symbian-sdks\s60_30\epoc32\data\z\resource\apps\PlutoMO.mif"         -"!:\resource\apps\PlutoMO.mif"
+
+"\root\symbian-sdks\s60_30\epoc32\data\z\private\10003a3f\import\apps\PlutoMO_reg.rsc" -"!:\private\10003a3f\import\apps\PlutoMO_reg.RSC"
+
+
+; "\root\symbian-sdks\s60_30\epoc32\data\z\resource\apps\PlutoMO_3rd.rsc" -"!:\resource\apps\PlutoMO_3rd.rsc"
+;"\root\symbian-sdks\s60_30\epoc32\data\z\resource\Apps\PlutoMO_caption.rsc" -"!:\resource\apps\PlutoMO_caption.rsc"
+
+
+;"PlutoMO.cfg"         -"!:\resource\apps\PlutoMO.cfg"
+;"PlutoEvent.png"         -"!:\private\A1ef0015\PlutoEvent.png"
+"PlutoMO.cfg"         -"!:\private\A1ef0015\PlutoMO.cfg"
+"PlutoEvent.png"         -"!:\private\A1ef0015\PlutoEvent.png"
+
+

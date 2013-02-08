@@ -1,0 +1,1 @@
+shlibs:Depends=libc6 (>= 2.3.2.ds1-4), libx11-6 | xlibs (>> 4.1.0), libxrender1

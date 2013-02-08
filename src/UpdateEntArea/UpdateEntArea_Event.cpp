@@ -145,7 +145,7 @@ void UpdateEntArea::AddDefaultEventHandlers()
 	for(map<int, pair<LevelOfMedia, bool> >::iterator it=m_mapRoom_Media.begin();it!=m_mapRoom_Media.end();++it)
 	{
 		Row_Room *pRow_Room = m_pDatabase_pluto_main->Room_get()->GetRow(it->first);
-		if( pRow_Room )
+		if( pRow_Room && pRow_Room->FK_RoomType_get()!=ROOMTYPE_Unmanaged_CONST)
 			AddDefaultEventHandlers(pRow_Room);
 	}
 }
@@ -316,6 +316,7 @@ Row_Criteria *UpdateEntArea::SetLeaveHomeCriteria(Row_EventHandler *pRow_EventHa
 		pRow_Criteria->FK_CriteriaList_set(CRITERIALIST_Events_CONST);
 		pRow_Criteria->FK_Installation_set(m_iPK_Installation);
 		pRow_Criteria->Description_set("Leave Home");
+		pRow_Criteria->Define_set("");
 		m_pDatabase_pluto_main->Criteria_get()->Commit();
 
 		m_pDatabase_pluto_main->threaded_db_wrapper_query(
@@ -576,6 +577,7 @@ Row_Criteria *UpdateEntArea::SetWatchingMediaCriteria(Row_EventHandler *pRow_Eve
 		pRow_Criteria->FK_CriteriaParmNesting_set(p_criteriaParmNesting_Top->m_pRow_CriteriaParmNesting->PK_CriteriaParmNesting_get());
 		pRow_Criteria->FK_CriteriaList_set(CRITERIALIST_Events_CONST);
 		pRow_Criteria->FK_Installation_set(m_iPK_Installation);
+		pRow_Criteria->Define_set("");
 		if( pRow_EventHandler->FK_Event_get()==EVENT_Watching_Media_CONST )
 			pRow_Criteria->Description_set("Watching Media");
 		else

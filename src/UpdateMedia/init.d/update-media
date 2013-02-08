@@ -1,4 +1,16 @@
 #!/bin/sh
+
+### BEGIN INIT INFO
+# Provides:          UpdateMedia
+# Required-Start:    $remote_fs $syslog
+# Required-Stop:     $remote_fs $syslog
+# Should-Start:      $named
+# Default-Start:     
+# Default-Stop:      1
+# Short-Description: UpdateMedia media tagging
+# Description:       UpdateMedia syncs media tags and the pluto_media database
+#                    This script is only needed for shutdown purposes. 
+### END INIT INFO
 # Start/stop pluto update media.
 
 . /lib/lsb/init-functions

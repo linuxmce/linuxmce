@@ -50,7 +50,6 @@ return and set the status to ABORTED.
 using namespace std;
 #include "PlutoUtils/ThreadedClass.h"
 
-#include "Job.h"
 
 /** @namespace DCE
 For DCE
@@ -75,16 +74,7 @@ namespace nsJobHandler
     */
 	class JobHandler : public nsThreadedClass::ThreadedClass
 	{
-	private:
 		ListJob m_listJob;
-		bool m_bProcessingSuspended, m_bSuspendProcessing;
-
-	protected:
-		/* If this m_bMultiThreadedJobs is true, the default, then StartThread() will 
-		be called so all jobs can run in parallel.  Set it to false to run only 1 job
-		at a time in the same thread as the JobHandler's main Run() thread
-		*/
-		bool m_bMultiThreadedJobs;
 
 	public:
 		JobHandler();
@@ -94,23 +84,19 @@ namespace nsJobHandler
 		void PurgeCompletedJobs();
 		bool WaitForJobsToFinish(bool bAbort=true,int iSeconds=5);  //!< By default abort and wait 5 seconds for jobs to finish
 
-		void AddJob(Job *pJob,bool bFirst=false);
-		bool MoveJobToEndOfQueue(Job *pJob);
+		void AddJob(Job *pJob);
 		string ToString();
 		bool ContainsJob(string sName);
 		void StateChanged();
 
 		bool HasJobs();
 
-		virtual void Run();
+		void Run();
 
 		/** Be sure to grab a mutex before using this.
         like this: PLUTO_SAFETY_LOCK(jm,*m_pJobHandler->m_ThreadMutex_get());
         */
 		Job *FindJob(int jobID);
-
-		// Returns the number of jobs with the indicated status
-		int NumberJobsWithStatus(Job::JobStatus eJobStatus);
 
         /** Be sure to grab a mutex before using this.
         like this: PLUTO_SAFETY_LOCK(jm,*m_pJobHandler->m_ThreadMutex_get());
@@ -122,14 +108,7 @@ namespace nsJobHandler
         */
 		const ListJob *m_listJob_get() { return &m_listJob; }
 
-		bool ReportPendingTasks(PendingTaskList *pPendingTaskList,string sType="");
-
-		// This function will block until all jobs in progress are not running anymore and the Run() loop is in a suspended state, and return true
-		// If it doesn't happen within iTimeoutInSeconds seconds, it will return false.  iTimeoutInSeconds==0 means wait forever
-		bool SuspendProcessing(int iTimeoutInSeconds);
-
-		// Resume processing after calling suspend processing
-		void ResumeProcessing();
+		bool ReportPendingTasks(PendingTaskList *pPendingTaskList);
 	};
 };
 

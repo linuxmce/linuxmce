@@ -8,8 +8,9 @@
 . /usr/pluto/bin/Config_Ops.sh
 
 if Lock "Restart_MythBackend" "Restart_MythBackend"; then
-	MythPass=$(cat /etc/mythtv/mysql.txt |grep ^DBPassword|cut -d= -f2)
-	MysqlCommand="mysql -D mythconverg -h $MySqlHost -u mythtv -p$MythPass";
+	MythUser=$(grep ^DBUserName /etc/mythtv/mysql.txt | cut -d= -f2)
+	MythPass=$(grep ^DBPassword /etc/mythtv/mysql.txt | cut -d= -f2)
+	MysqlCommand="mysql -D mythconverg -h $MySqlHost -P $MySqlPort -u $MythUser -p$MythPass";
 
 	# We don't unlock this one, ever, so that way we can run this multiple times in
 	# both the myth plugin and myth player and know that it will always be running
@@ -23,7 +24,7 @@ if Lock "Restart_MythBackend" "Restart_MythBackend"; then
 		if [[ -z "$MythSetup" && -z "$Backend" && -x /etc/init.d/mythtv-backend ]]; then
 			Logging "$TYPE" "$SEVERITY_CRITICAL" "MythBackend_Restart" "MythBackend not found running; restarting it"
 			echo "LOCK TABLE schemalock WRITE;" | $MysqlCommand  # Be sure we're not in the middle of a schema upgrade -- myth doesn't check this
-			invoke-rc.d mythtv-backend restart
+			service mythtv-backend restart
 			Logging "$TYPE" "$SEVERITY_CRITICAL" "MythBackend_Restart" "MythBackend restarted"
 		fi
 		Unlock "MythBackend" "MythBackend_Restart" nolog

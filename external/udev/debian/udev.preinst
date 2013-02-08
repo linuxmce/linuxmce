@@ -1,0 +1,119 @@
+#!/bin/sh -e
+
+move_conffile() {
+    OLDCONFFILE="$1"
+    NEWCONFFILE="$2"
+
+    if [ ! -f "$OLDCONFFILE" -o -f "$NEWCONFFILE" ]; then
+        return 0
+    fi
+
+    old_md5=`grep "^ $OLDCONFFILE " /var/lib/dpkg/status | sed -e "s/.* //"`
+    new_md5=`md5sum "$OLDCONFFILE" | sed -e "s/ .*//"`
+    if [ "$old_md5" = "$new_md5" ]; then
+        # Old configuration file hasn't changed, remove it so we don't
+        # try and keep it in postinst.
+        rm "$OLDCONFFILE"
+    else
+        mv "$OLDCONFFILE" "$NEWCONFFILE"
+    fi
+}
+
+supported_kernel() {
+  case "$(uname -r)" in
+    2.[012345].*|2.6.[0-7]|2.6.[0-7][!0-9]*) return 1 ;;
+  esac
+  return 0
+}
+
+check_kernel_version() {
+  # skip the check if udev is not already active
+  [ -d /dev/.udevdb/ ] || return 0
+
+  supported_kernel && return 0
+
+  echo "udev requires a kernel >= 2.6.8, upgrade aborted."
+  exit 1
+}
+
+create_first_install_flag() {
+  [ -d /etc/udev/ ] || mkdir -p /etc/udev/
+  : > /etc/udev/first-install
+}
+
+check_version() {
+  [ "$2" ] || return 0
+
+  if dpkg --compare-versions $2 lt 0.024-9; then
+    echo 'Upgrading from packages older than 0.024-9 is not supported.'
+    echo 'Please purge udev before installing this package.'
+    exit 1
+  fi
+  # switch from .udev.tdb to .udevdb
+  if dpkg --compare-versions $2 lt 0.046-1; then
+    if [ -e /dev/.udev.tdb ]; then
+      : > /dev/run-udevstart
+    fi
+  fi
+  if dpkg --compare-versions $2 lt 0.046-4; then
+    mkdir -p /etc/udev/scripts/
+    for file in cdsymlinks.sh dvb.sh ide-devfs.sh inputdev.sh scsi-devfs.sh removable.sh; do
+      if [ -f /etc/udev/$file -a ! -f /etc/udev/scripts/$file ]; then
+        move_conffile /etc/udev/$file /etc/udev/scripts/$file
+      fi
+    done
+  fi
+  if dpkg --compare-versions $2 lt 0.046-5; then
+    CD_RE='^KERNEL="(hd[a-z]|sr[0-9]*|pcd[0-9]*)",[[:space:]]*PROGRAM="/etc/udev/scripts/cdsymlinks.sh %k"'
+    if grep --no-messages -q -E $CD_RE /etc/udev/rules.d/* \
+	&& [ ! -e /etc/udev/rules.d/cd-aliases.rules ]; then
+      ln -s ../cd-aliases.rules /etc/udev/rules.d/cd-aliases.rules
+    fi
+  fi
+  if dpkg --compare-versions $2 lt 0.048-2; then
+    # refuse to upgrade if udev would stop working after the first reboot
+    check_kernel_version
+    # be sure to create the default symlinks on upgrades too
+    create_first_install_flag
+  fi
+  if dpkg --compare-versions $2 lt 0.054-3; then
+    if [ -d /.dev/ -a -d /dev/.udevdb/ ]; then
+      mkdir -p /dev/.static/dev/
+      chmod 700 /dev/.static/
+      mount -n --move /.dev/ /dev/.static/dev/ || true
+      rmdir /.dev/ || true
+    fi
+  fi
+  if dpkg --compare-versions $2 lt 0.056-2; then
+    [ -e /etc/udev/rules.d/020_permissions.rules ] || \
+      ln -s ../permissions.rules /etc/udev/rules.d/020_permissions.rules
+  fi
+  if dpkg --compare-versions $2 lt 0.060-1; then
+    [ -e /etc/udev/rules.d/z50_run.rules ] || \
+      ln -s ../run.rules /etc/udev/rules.d/z50_run.rules
+    [ -e /etc/udev/rules.d/z70_hotplugd.rules ] || \
+      ln -s ../hotplugd.rules /etc/udev/rules.d/z70_hotplugd.rules
+    : > /etc/udev/remove-conffiles-1
+  fi
+  return 0
+}
+
+case "$1" in
+    install)
+    if [ -z "$2" ]; then # the package has not been installed yet
+	create_first_install_flag
+    fi
+    ;;
+
+    upgrade|abort-upgrade)
+    check_version "$@"
+    ;;
+
+    *)
+    echo "$0 called with unknown argument '$1'" >&2
+    exit 1
+    ;;
+esac
+
+#DEBHELPER#
+

@@ -22,7 +22,7 @@
 #include <coecntrl.h>
 #include <aknlists.h>
 #include "eiklbx.h"         // For Listbox
-#include "PlutoMOEngine.h"
+#include "PlutoMOengine.h"
 
 
 

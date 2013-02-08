@@ -13,6 +13,7 @@
 */
 
 #include "IOUtils.h"
+#include <stdio.h>
 
 namespace DCE {
 
@@ -40,7 +41,7 @@ std::string IOUtils::FormatHexAsciiBuffer(const char* buff, unsigned int size, c
 	{
 		Result += " (\x1b[" + std::string(color) + ";1m";
 
-		for(size_t i=0;i<size;++i)
+		for(int i=0;i<size;++i)
 		{
 			char c = buff[i];
 			if( c>=' ' && c<='~' )

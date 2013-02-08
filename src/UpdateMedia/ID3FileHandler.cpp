@@ -26,9 +26,10 @@ bool ID3FileHandler::LoadAttributes(PlutoMediaAttributes *pPlutoMediaAttributes,
 {
 	string sFileWithAttributes = m_sDirectory + "/" + FileWithAttributes(pPlutoMediaAttributes, false);
 
+#ifdef UPDATEMEDIA_STATUS
 	LoggerWrapper::GetInstance()->Write(LV_STATUS, "# ID3FileHandler::LoadAttributes: loading %d attributes in the attribute file %s",
 		pPlutoMediaAttributes->m_mapAttributes.size(), sFileWithAttributes.c_str());
-
+#endif
 	//deserialize data from user defined tag
 	char *pData = NULL;
 	size_t Size = 0;
@@ -41,16 +42,17 @@ bool ID3FileHandler::LoadAttributes(PlutoMediaAttributes *pPlutoMediaAttributes,
 		pData = NULL;
 	}
 
+#ifdef UPDATEMEDIA_STATUS
 	LoggerWrapper::GetInstance()->Write(LV_STATUS, "# LoadPlutoAttributes: pluto attributes loaded (from id3 file - general object tag) %d", 
 		pPlutoMediaAttributes->m_mapAttributes.size());
-
+#endif
 	//get common id3 attributes
 	map<int, string> mapAttributes;
 	GetId3Info(sFileWithAttributes, mapAttributes, listPicturesForTags);	
-
+#ifdef UPDATEMEDIA_STATUS
 	LoggerWrapper::GetInstance()->Write(LV_STATUS, "# LoadPlutoAttributes: id3 attributes loaded (from id3 file - common tags) %d", 
 		mapAttributes.size());
-
+#endif
 	//merge attributes
 	for(map<int, string>::iterator it = mapAttributes.begin(), end = mapAttributes.end(); it != end; ++it)
 	{
@@ -76,9 +78,10 @@ bool ID3FileHandler::SaveAttributes(PlutoMediaAttributes *pPlutoMediaAttributes)
 {
 	string sFileWithAttributes = m_sDirectory + "/" + FileWithAttributes(pPlutoMediaAttributes, true);
 
+#ifdef UPDATEMEDIA_STATUS
 	LoggerWrapper::GetInstance()->Write(LV_STATUS, "# ID3FileHandler::SaveAttributes: saving %d attributes in the attribute file %s",
 		pPlutoMediaAttributes->m_mapAttributes.size(), sFileWithAttributes.c_str());
-
+#endif
 	//Temporary map with attributes for common tags
 	map<int, string> mapAttributes;
 	for(MapPlutoMediaAttributes::iterator it = pPlutoMediaAttributes->m_mapAttributes.begin(), 
@@ -87,10 +90,10 @@ bool ID3FileHandler::SaveAttributes(PlutoMediaAttributes *pPlutoMediaAttributes)
 		mapAttributes[it->first] = it->second->m_sName;
 	}
 
-
+#ifdef UPDATEMEDIA_STATUS
 	LoggerWrapper::GetInstance()->Write(LV_WARNING, "# ID3FileHandler::SaveAttributes: saving %d pictures into APIC tags to %s",
 		pPlutoMediaAttributes->m_mapCoverarts.size(), sFileWithAttributes.c_str());
-
+#endif
 	list<pair<char *, size_t> > listPictures;
 	for(MapPictures::iterator itc = pPlutoMediaAttributes->m_mapCoverarts.begin();
 		itc != pPlutoMediaAttributes->m_mapCoverarts.end(); ++itc)
@@ -122,10 +125,10 @@ bool ID3FileHandler::SaveAttributes(PlutoMediaAttributes *pPlutoMediaAttributes)
 bool ID3FileHandler::RemoveAttribute(int nTagType, string sValue, PlutoMediaAttributes *pPlutoMediaAttributes)
 {
 	string sFileWithAttributes = m_sDirectory + "/" + FileWithAttributes(pPlutoMediaAttributes, true);
-
+#ifdef UPDATEMEDIA_STATUS
 	LoggerWrapper::GetInstance()->Write(LV_STATUS, "# ID3FileHandler::RemoveAttribute: removing %s type %d attribute from the attribute file %s",
 		sValue.c_str(), nTagType, sFileWithAttributes.c_str());
-
+#endif
 	RemoveId3Tag(sFileWithAttributes, nTagType, sValue);
 	return true;
 }
@@ -136,7 +139,9 @@ string ID3FileHandler::FileWithAttributes(PlutoMediaAttributes *pPlutoMediaAttri
 	//no id3 file if the media file doesn't exist anymore.
 	if(!FileUtils::FileExists(m_sFullFilename))
 	{
+#ifdef UPDATEMEDIA_STATUS
 		LoggerWrapper::GetInstance()->Write(LV_STATUS, "# No id3 file. The media file doesn't exist anymore.");
+#endif
 		return "";
 	}
 
@@ -163,7 +168,9 @@ string ID3FileHandler::FileWithAttributes(PlutoMediaAttributes *pPlutoMediaAttri
 			pPlutoMediaAttributes->m_sStartPosition == ""
 		)
 		{
+#ifdef UPDATEMEDIA_STATUS
 			LoggerWrapper::GetInstance()->Write(LV_STATUS, "# Won't create id3 file (the media file doesn't have attributes)");
+#endif
 			return "";
 		}
 

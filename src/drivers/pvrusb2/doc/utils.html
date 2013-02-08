@@ -7,7 +7,7 @@
 </HEAD>
 <BODY LANG="en-US" DIR="LTR">
 <H1>pvrusb2 driver utilities</H1>
-<P>$Id: utils.html 1274 2006-07-03 05:07:20Z isely $</P>
+<P>$Id: utils.html 2032 2008-06-30 02:17:38Z isely $</P>
 <P>Mike Isely &lt;isely at pobox dot com&gt;</P>
 <HR>
 
@@ -25,6 +25,11 @@ include the following:</P>
 
 <UL>
 
+<LI><em><tt>94-local.rules</tt></em> - This is a udev configuration
+fragment which can be used in conjunction with <tt>udev-pvrusb2</tt>
+to automatically create predictable device access nodes in the file
+system (see further).</LI>
+
 <LI><em><tt>change-channel.sh</tt></em> - This is a bash program which
 provides an interface for managing channel IDs and changing channels
 through the driver's sysfs interface.  This script works with a
@@ -34,6 +39,12 @@ This was created and contributed by Per Christian Henden; for his
 e-mail address and a description on how to use the script along with a
 brief method to generate the frequency data from xawtv, please see the
 comments at the top of the script.</LI>
+
+<LI><em><tt>decode_eeprom.cpp</tt></em> - This is the source for a
+utility that can parse out an FX2 load image from an eeprom image.
+The FX2 loads code from a resident eeprom using packets in the eeprom.
+This program can parse each packet and emit a set of s-records of the
+contained data (which can then be fed to a disassembler).</LI>
 
 <LI><em><tt>decode_log.cpp</tt></em> - This is a decompiler, which is
 used to interpret the USB traffic flowing between the pvrusb2 device
@@ -64,6 +75,11 @@ information.  Note: This script is somewhat broken right now; it needs
 to be updated to account for new types possible in sysfs and the fact
 that enumeration values can have embedded spaces.</LI>
 
+<LI><em><tt>udev-pvrusb2</tt></em> - This is a script fragment which
+can be used in conjunction with <tt>94-local.rules</tt> to
+automatically create predictable device access nodes in the file
+system (see further).</LI>
+
 <LI><em><tt>usbreplayprep.pl</tt></em> - This is a Perl script which
 can postprocess USB sniffer output into a compact form that the
 decompiler can parse.  This also originally came from Bj&ouml;rn
@@ -71,6 +87,120 @@ however it has been modified to also preserve data coming from the
 device (older version only preserved data going *to* the device).</LI>
 
 </UL>
+
+<HR>
+<H2><A NAME="sniff">Fun with udev and the pvrusb2 driver</A></H2>
+
+<P>Thanks to an intrepid user, Roger Allen, who got sick of the
+non-deterministic assignment of device nodes, we have a tool here that
+can be used to configure udev to assign a predictable name to each
+device instance.  The solution is contained in the two files here,
+<tt>udev-pvrusb2</tt> and <tt>94-local.rules</tt>.  This is by no
+means the <em>only</em> way to do it, but it is a good example.  One
+could also probably use a variation to change the group and mode of
+the sysfs interface files too...</P>
+
+<P>Rather than explaining this in my words, here's the description in
+Roger's words (note: I replaced the serial numbers with obvious fake
+values):</P>
+
+<blockquote> <p>After spending months checking dmesg to see which of
+my two WinTV-PVR-USB2 devices would win the race for /dev/video0, I
+finally got around to learning enough about udev rules to straighten
+out my mess.  I have Comcast Chicago cable with a single settopbox
+which is feeding the composite of one of the boxes, while the other
+one is connected directly to the coax and tuning the few (31 and
+decreasing) available unecrypted analog cable channels.  This is
+working under Fedora 8 with mythtv rpms from atrpms.  I tried to keep
+it simple so it only uses the shell and grep.  Fedora doesn't have a
+"video" group, so this is using "mythtv" instead.  I modified the
+mythbackend to run as "mythtv" instead of "root".  Other dists will
+probably want to change the GROUP and/or OWNER or not use OWNER at all
+in the udev rule.  The rule creates symlinks for /dev/comcasta and
+/dev/comcastd for Analog and Digital.  There are comments in
+udev-pvrusb2 describing how to use it with mythtv-setup.  I'm sure the
+shell script could be better written, but it works for me.</p>
+
+<p>This mythtv backend also has a Kworld ATSC-110 using /dev/video2,
+which the script successfully leaves alone, so it should play nice
+with other video devices.</p>
+
+<p>The single line udev rule goes into
+/etc/udev/rules.d/94-local.rules or whatever file your Linux
+distribution likes: [copy of <tt>94-local.rules</tt>]</p>
+
+<code><pre>
+# local rules by rja for moria
+
+# pvrusb2
+# Create a symlink /dev/comcasta pointing to WinTV-PVR-USB2 with serial sn-7653922 tuning comcast analog
+# Create a symlink /dev/comcastd pointing to WinTV-PVR-USB2 with serial sn-8257134 using composite comcast digital
+KERNEL=="video[0-9]*", PROGRAM="/usr/local/bin/udev-pvrusb2 %m", SYMLINK+="%c", OWNER="mythtv", GROUP="mythtv"
+</pre></code>
+
+<p>The /usr/local/bin/udev-pvrusb2 script (don't forget to make it
+executable) is: [copy of <tt>udev-pvrusb2</tt>]</p>
+
+<code><pre>
+#!/bin/sh
+#
+# program: udev-pvrusb2
+#
+# author: Roger J. Allen - rja at rogera.net
+# Wed May 28 12:54:18 CDT 2008
+#
+# help udev assign consistent device name
+# for WinTV-PVR-USB2 by its serial number
+#
+# argument 1 is a device minor number from udev
+# test which sysfs entry matches this minor number
+# output consistent device name for udev to create a symlink
+#
+# in mythtv-setup "Capture Card Setup"
+# set "Video device:" to the symlink instead of /dev/video*
+# for capturecard videodevice
+#
+# sn-1234567 returns "comcasta" for comcast analog tuner input
+# udev will create /dev/comcasta symlink
+# sn-7654321 returns "comcastd" for comcast digital composite input
+# udev will create /dev/comcastd symlink
+#
+# udev rule for Fedora 8 with my custom owner and group settings
+#
+# KERNEL=="video[0-9]*", PROGRAM="/usr/local/bin/udev-pvrusb2 %m", \
+#        SYMLINK+="%c", OWNER="mythtv", GROUP="mythtv"
+#
+
+SerialNo1="sn-1234567"
+Symlink1="comcasta"
+SerialNo2="sn-7654321"
+Symlink2="comcastd"
+
+if [ 1 = $(grep -c $1 /sys/class/pvrusb2/$SerialNo1/v4l_minor_number) ]
+then
+	echo $Symlink1
+	exit 0
+elif [ 1 = $(grep -c $1 /sys/class/pvrusb2/$SerialNo2/v4l_minor_number) ]
+then
+	echo $Symlink2
+	exit 0
+fi
+exit 1
+</pre></code>
+
+<p>Unless you break into my home and steal my WinTV-PVR-USB2s, change
+the serial numbers and symlink names to taste.  If you have more than
+two devices, just modify the udev-pvrusb2 script.</p>
+
+<p>You can mangle the bits any way you want.  If you find that it
+needs tweaking for other Linux distributions, then please post your
+fixes.</p>
+
+<p>Roger J. Allen<br>
+rja {at] rogera.net</p>
+
+</blockquote>
+
 
 <HR>
 <H2><A NAME="sniff">Sniffing and decompiling USB traffic</A></H2>

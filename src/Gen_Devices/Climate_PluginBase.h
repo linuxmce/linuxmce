@@ -80,6 +80,14 @@ public:
 	* @brief Device data access methods:
 	*/
 
+	string Get_Temperature_Measurement_Units()
+	{
+		if( m_bRunningWithoutDeviceData )
+			return m_pEvent_Impl->GetDeviceDataFromDatabase(m_dwPK_Device,DEVICEDATA_Temperature_Measurement_Units_CONST);
+		else
+			return m_mapParameters[DEVICEDATA_Temperature_Measurement_Units_CONST];
+	}
+
 };
 
 
@@ -184,6 +192,7 @@ public:
 	virtual void ReceivedUnknownCommand(string &sCMD_Result,Message *pMessage) { };
 	Command_Impl *CreateCommand(int PK_DeviceTemplate, Command_Impl *pPrimaryDeviceCommand, DeviceData_Impl *pData, Event_Impl *pEvent);
 	//Data accessors
+	string DATA_Get_Temperature_Measurement_Units() { return GetData()->Get_Temperature_Measurement_Units(); }
 	//Event accessors
 	//Commands - Override these to handle commands from the server
 

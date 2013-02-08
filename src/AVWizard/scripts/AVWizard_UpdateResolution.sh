@@ -37,8 +37,8 @@ case "$Param" in
 		killall -USR2 AVWizard
 		bash -x "$BaseDir"/Xconfigure.sh --conffile "$XF86Config" --resolution "$DefaultResolution_Size" --output "$DefaultConnector" --tv-standard "$DefaultTVStandard" | tee-pluto /var/log/pluto/Xconfigure.log
 
-		sed -ir '/Option.*"Composite"/d' "$XF86Config"
-		WMTweaksFile="/root/.config/xfce4/mcs_settings/wmtweaks.xml"
+		sed -ri '/Option.*"Composite"/d' "$XF86Config"
+		WMTweaksFile="/root/.config/xfce4/xfconf/xfce-perchannel-xml/xfwm4.xml"
 		cp "$WMTweaksFile"{,.orig}
 		sed -i '/Xfwm\/UseCompositing/ s/value="."/value="1"/g' "$WMTweaksFile"
 		
@@ -65,7 +65,7 @@ case "$Param" in
 
 		bash -x "$BaseDir"/Xconfigure.sh --conffile "$XF86Config" --resolution "$VideoResolution_Size@$RequestedRefresh" --output "$RequestedConnector" --tv-standard "$RequestedTVStandard" | tee-pluto /var/log/pluto/Xconfigure.log
 
-		sed -ir '/Option.*"Composite"/d' "$XF86Config"
+		sed -ri '/Option.*"Composite"/d' "$XF86Config"
 		WMTweaksFile="/root/.config/xfce4/mcs_settings/wmtweaks.xml"
 		cp "$WMTweaksFile"{,.orig}
 		sed -i '/Xfwm\/UseCompositing/ s/value="."/value="1"/g' "$WMTweaksFile"

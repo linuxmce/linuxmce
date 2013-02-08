@@ -132,6 +132,24 @@
 			<File
 				RelativePath=".\Table_Rom_RomAttribute.cpp">
 			</File>
+			<File
+				RelativePath=".\Table_psc_game_batdet.cpp">
+			</File>
+			<File
+				RelativePath=".\Table_psc_game_bathdr.cpp">
+			</File>
+			<File
+				RelativePath=".\Table_psc_game_batuser.cpp">
+			</File>
+			<File
+				RelativePath=".\Table_psc_game_repset.cpp">
+			</File>
+			<File
+				RelativePath=".\Table_psc_game_schema.cpp">
+			</File>
+			<File
+				RelativePath=".\Table_psc_game_tables.cpp">
+			</File>
 
 		</Filter>
 		<Filter

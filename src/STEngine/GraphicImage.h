@@ -36,6 +36,7 @@ class GraphicImage
 	bool CheckExtension(const char* checkFor);
 	bool SupportTextureNonPowerOfTwo();
 	void Convert(void);
+	void adjustImageZoomAndOrientation(string FileName);
 
 public:
 	GraphicImage(int nMaxSize);

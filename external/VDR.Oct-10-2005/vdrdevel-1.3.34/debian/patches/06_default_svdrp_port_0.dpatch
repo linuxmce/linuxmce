@@ -1,0 +1,22 @@
+#! /bin/sh /usr/share/dpatch/dpatch-run
+
+## 06_default_svdrp_port_0.dpatch by Thomas Schmidt <tschmidt@debian.org>
+##
+## All lines beginning with `## DP:' are a description of the patch.
+## DP: This sets the default svdrp-port to 0, which means that
+## DP: SVDRP is disabled by default unless someone specifies
+## DP: another port with the --port option when starting vdr
+
+@DPATCH@
+diff -urNad vdr-1.3.23/vdr.c /tmp/dpep.VfmeKc/vdr-1.3.23/vdr.c
+--- vdr-1.3.23/vdr.c	2005-04-09 21:28:57.170560288 +0200
++++ /tmp/dpep.VfmeKc/vdr-1.3.23/vdr.c	2005-04-09 21:28:57.354532320 +0200
+@@ -211,7 +211,7 @@
+ 
+   // Command line options:
+ 
+-#define DEFAULTSVDRPPORT 2001
++#define DEFAULTSVDRPPORT 0
+ #define DEFAULTWATCHDOG     0 // seconds
+ #define DEFAULTPLUGINDIR PLUGINDIR
+ #define DEFAULTEPGDATAFILENAME "epg.data"

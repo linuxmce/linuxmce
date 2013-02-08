@@ -121,37 +121,13 @@
 				RelativePath=".\Table_Array.cpp">
 			</File>
 			<File
-				RelativePath=".\Table_Array_pschist.cpp">
-			</File>
-			<File
-				RelativePath=".\Table_Array_pschmask.cpp">
-			</File>
-			<File
 				RelativePath=".\Table_Broadcast.cpp">
-			</File>
-			<File
-				RelativePath=".\Table_Broadcast_pschist.cpp">
-			</File>
-			<File
-				RelativePath=".\Table_Broadcast_pschmask.cpp">
 			</File>
 			<File
 				RelativePath=".\Table_Button.cpp">
 			</File>
 			<File
-				RelativePath=".\Table_Button_pschist.cpp">
-			</File>
-			<File
-				RelativePath=".\Table_Button_pschmask.cpp">
-			</File>
-			<File
 				RelativePath=".\Table_CachedScreens.cpp">
-			</File>
-			<File
-				RelativePath=".\Table_CachedScreens_pschist.cpp">
-			</File>
-			<File
-				RelativePath=".\Table_CachedScreens_pschmask.cpp">
 			</File>
 			<File
 				RelativePath=".\Table_CannedEvents.cpp">
@@ -160,40 +136,16 @@
 				RelativePath=".\Table_CannedEvents_CriteriaParmList.cpp">
 			</File>
 			<File
-				RelativePath=".\Table_CannedEvents_CriteriaParmList_pschist.cpp">
-			</File>
-			<File
-				RelativePath=".\Table_CannedEvents_CriteriaParmList_pschmask.cpp">
-			</File>
-			<File
-				RelativePath=".\Table_CannedEvents_pschist.cpp">
-			</File>
-			<File
-				RelativePath=".\Table_CannedEvents_pschmask.cpp">
-			</File>
-			<File
 				RelativePath=".\Table_City.cpp">
 			</File>
 			<File
 				RelativePath=".\Table_CommMethod.cpp">
 			</File>
 			<File
-				RelativePath=".\Table_CommMethod_pschist.cpp">
-			</File>
-			<File
-				RelativePath=".\Table_CommMethod_pschmask.cpp">
-			</File>
-			<File
 				RelativePath=".\Table_Command.cpp">
 			</File>
 			<File
 				RelativePath=".\Table_CommandCategory.cpp">
-			</File>
-			<File
-				RelativePath=".\Table_CommandCategory_pschist.cpp">
-			</File>
-			<File
-				RelativePath=".\Table_CommandCategory_pschmask.cpp">
 			</File>
 			<File
 				RelativePath=".\Table_CommandGroup.cpp">
@@ -205,18 +157,6 @@
 				RelativePath=".\Table_CommandGroup_Command_CommandParameter.cpp">
 			</File>
 			<File
-				RelativePath=".\Table_CommandGroup_Command_CommandParameter_pschist.cpp">
-			</File>
-			<File
-				RelativePath=".\Table_CommandGroup_Command_CommandParameter_pschmask.cpp">
-			</File>
-			<File
-				RelativePath=".\Table_CommandGroup_Command_pschist.cpp">
-			</File>
-			<File
-				RelativePath=".\Table_CommandGroup_Command_pschmask.cpp">
-			</File>
-			<File
 				RelativePath=".\Table_CommandGroup_D.cpp">
 			</File>
 			<File
@@ -226,79 +166,19 @@
 				RelativePath=".\Table_CommandGroup_D_Command_CommandParameter.cpp">
 			</File>
 			<File
-				RelativePath=".\Table_CommandGroup_D_Command_CommandParameter_pschist.cpp">
-			</File>
-			<File
-				RelativePath=".\Table_CommandGroup_D_Command_CommandParameter_pschmask.cpp">
-			</File>
-			<File
-				RelativePath=".\Table_CommandGroup_D_Command_pschist.cpp">
-			</File>
-			<File
-				RelativePath=".\Table_CommandGroup_D_Command_pschmask.cpp">
-			</File>
-			<File
-				RelativePath=".\Table_CommandGroup_D_pschist.cpp">
-			</File>
-			<File
-				RelativePath=".\Table_CommandGroup_D_pschmask.cpp">
-			</File>
-			<File
 				RelativePath=".\Table_CommandGroup_EntertainArea.cpp">
-			</File>
-			<File
-				RelativePath=".\Table_CommandGroup_EntertainArea_pschist.cpp">
-			</File>
-			<File
-				RelativePath=".\Table_CommandGroup_EntertainArea_pschmask.cpp">
 			</File>
 			<File
 				RelativePath=".\Table_CommandGroup_Room.cpp">
 			</File>
 			<File
-				RelativePath=".\Table_CommandGroup_Room_pschist.cpp">
-			</File>
-			<File
-				RelativePath=".\Table_CommandGroup_Room_pschmask.cpp">
-			</File>
-			<File
-				RelativePath=".\Table_CommandGroup_pschist.cpp">
-			</File>
-			<File
-				RelativePath=".\Table_CommandGroup_pschmask.cpp">
-			</File>
-			<File
 				RelativePath=".\Table_CommandParameter.cpp">
-			</File>
-			<File
-				RelativePath=".\Table_CommandParameter_pschist.cpp">
-			</File>
-			<File
-				RelativePath=".\Table_CommandParameter_pschmask.cpp">
 			</File>
 			<File
 				RelativePath=".\Table_Command_CommandParameter.cpp">
 			</File>
 			<File
-				RelativePath=".\Table_Command_CommandParameter_pschist.cpp">
-			</File>
-			<File
-				RelativePath=".\Table_Command_CommandParameter_pschmask.cpp">
-			</File>
-			<File
 				RelativePath=".\Table_Command_Pipe.cpp">
-			</File>
-			<File
-				RelativePath=".\Table_Command_Pipe_pschist.cpp">
-			</File>
-			<File
-				RelativePath=".\Table_Command_Pipe_pschmask.cpp">
-			</File>
-			<File
-				RelativePath=".\Table_Command_pschist.cpp">
-			</File>
-			<File
-				RelativePath=".\Table_Command_pschmask.cpp">
 			</File>
 			<File
 				RelativePath=".\Table_ConfigType.cpp">
@@ -307,43 +187,13 @@
 				RelativePath=".\Table_ConfigType_File.cpp">
 			</File>
 			<File
-				RelativePath=".\Table_ConfigType_File_pschist.cpp">
-			</File>
-			<File
-				RelativePath=".\Table_ConfigType_File_pschmask.cpp">
-			</File>
-			<File
 				RelativePath=".\Table_ConfigType_Setting.cpp">
-			</File>
-			<File
-				RelativePath=".\Table_ConfigType_Setting_pschist.cpp">
-			</File>
-			<File
-				RelativePath=".\Table_ConfigType_Setting_pschmask.cpp">
 			</File>
 			<File
 				RelativePath=".\Table_ConfigType_Token.cpp">
 			</File>
 			<File
-				RelativePath=".\Table_ConfigType_Token_pschist.cpp">
-			</File>
-			<File
-				RelativePath=".\Table_ConfigType_Token_pschmask.cpp">
-			</File>
-			<File
-				RelativePath=".\Table_ConfigType_pschist.cpp">
-			</File>
-			<File
-				RelativePath=".\Table_ConfigType_pschmask.cpp">
-			</File>
-			<File
 				RelativePath=".\Table_ConnectorType.cpp">
-			</File>
-			<File
-				RelativePath=".\Table_ConnectorType_pschist.cpp">
-			</File>
-			<File
-				RelativePath=".\Table_ConnectorType_pschmask.cpp">
 			</File>
 			<File
 				RelativePath=".\Table_Country.cpp">
@@ -358,49 +208,13 @@
 				RelativePath=".\Table_CriteriaList_CriteriaParmList.cpp">
 			</File>
 			<File
-				RelativePath=".\Table_CriteriaList_CriteriaParmList_pschist.cpp">
-			</File>
-			<File
-				RelativePath=".\Table_CriteriaList_CriteriaParmList_pschmask.cpp">
-			</File>
-			<File
-				RelativePath=".\Table_CriteriaList_pschist.cpp">
-			</File>
-			<File
-				RelativePath=".\Table_CriteriaList_pschmask.cpp">
-			</File>
-			<File
 				RelativePath=".\Table_CriteriaParm.cpp">
 			</File>
 			<File
 				RelativePath=".\Table_CriteriaParmList.cpp">
 			</File>
 			<File
-				RelativePath=".\Table_CriteriaParmList_pschist.cpp">
-			</File>
-			<File
-				RelativePath=".\Table_CriteriaParmList_pschmask.cpp">
-			</File>
-			<File
 				RelativePath=".\Table_CriteriaParmNesting.cpp">
-			</File>
-			<File
-				RelativePath=".\Table_CriteriaParmNesting_pschist.cpp">
-			</File>
-			<File
-				RelativePath=".\Table_CriteriaParmNesting_pschmask.cpp">
-			</File>
-			<File
-				RelativePath=".\Table_CriteriaParm_pschist.cpp">
-			</File>
-			<File
-				RelativePath=".\Table_CriteriaParm_pschmask.cpp">
-			</File>
-			<File
-				RelativePath=".\Table_Criteria_pschist.cpp">
-			</File>
-			<File
-				RelativePath=".\Table_Criteria_pschmask.cpp">
 			</File>
 			<File
 				RelativePath=".\Table_DHCPDevice.cpp">
@@ -409,25 +223,7 @@
 				RelativePath=".\Table_DHCPDevice_DeviceData.cpp">
 			</File>
 			<File
-				RelativePath=".\Table_DHCPDevice_DeviceData_pschist.cpp">
-			</File>
-			<File
-				RelativePath=".\Table_DHCPDevice_DeviceData_pschmask.cpp">
-			</File>
-			<File
-				RelativePath=".\Table_DHCPDevice_pschist.cpp">
-			</File>
-			<File
-				RelativePath=".\Table_DHCPDevice_pschmask.cpp">
-			</File>
-			<File
 				RelativePath=".\Table_DataGrid.cpp">
-			</File>
-			<File
-				RelativePath=".\Table_DataGrid_pschist.cpp">
-			</File>
-			<File
-				RelativePath=".\Table_DataGrid_pschmask.cpp">
 			</File>
 			<File
 				RelativePath=".\Table_DesignObj.cpp">
@@ -436,37 +232,13 @@
 				RelativePath=".\Table_DesignObjCategory.cpp">
 			</File>
 			<File
-				RelativePath=".\Table_DesignObjCategory_pschist.cpp">
-			</File>
-			<File
-				RelativePath=".\Table_DesignObjCategory_pschmask.cpp">
-			</File>
-			<File
 				RelativePath=".\Table_DesignObjParameter.cpp">
-			</File>
-			<File
-				RelativePath=".\Table_DesignObjParameter_pschist.cpp">
-			</File>
-			<File
-				RelativePath=".\Table_DesignObjParameter_pschmask.cpp">
 			</File>
 			<File
 				RelativePath=".\Table_DesignObjType.cpp">
 			</File>
 			<File
 				RelativePath=".\Table_DesignObjType_DesignObjParameter.cpp">
-			</File>
-			<File
-				RelativePath=".\Table_DesignObjType_DesignObjParameter_pschist.cpp">
-			</File>
-			<File
-				RelativePath=".\Table_DesignObjType_DesignObjParameter_pschmask.cpp">
-			</File>
-			<File
-				RelativePath=".\Table_DesignObjType_pschist.cpp">
-			</File>
-			<File
-				RelativePath=".\Table_DesignObjType_pschmask.cpp">
 			</File>
 			<File
 				RelativePath=".\Table_DesignObjVariation.cpp">
@@ -478,25 +250,7 @@
 				RelativePath=".\Table_DesignObjVariation_DesignObjParameter.cpp">
 			</File>
 			<File
-				RelativePath=".\Table_DesignObjVariation_DesignObjParameter_pschist.cpp">
-			</File>
-			<File
-				RelativePath=".\Table_DesignObjVariation_DesignObjParameter_pschmask.cpp">
-			</File>
-			<File
 				RelativePath=".\Table_DesignObjVariation_DesignObj_Skin_Language.cpp">
-			</File>
-			<File
-				RelativePath=".\Table_DesignObjVariation_DesignObj_Skin_Language_pschist.cpp">
-			</File>
-			<File
-				RelativePath=".\Table_DesignObjVariation_DesignObj_Skin_Language_pschmask.cpp">
-			</File>
-			<File
-				RelativePath=".\Table_DesignObjVariation_DesignObj_pschist.cpp">
-			</File>
-			<File
-				RelativePath=".\Table_DesignObjVariation_DesignObj_pschmask.cpp">
 			</File>
 			<File
 				RelativePath=".\Table_DesignObjVariation_Text.cpp">
@@ -505,37 +259,7 @@
 				RelativePath=".\Table_DesignObjVariation_Text_Skin_Language.cpp">
 			</File>
 			<File
-				RelativePath=".\Table_DesignObjVariation_Text_Skin_Language_pschist.cpp">
-			</File>
-			<File
-				RelativePath=".\Table_DesignObjVariation_Text_Skin_Language_pschmask.cpp">
-			</File>
-			<File
-				RelativePath=".\Table_DesignObjVariation_Text_pschist.cpp">
-			</File>
-			<File
-				RelativePath=".\Table_DesignObjVariation_Text_pschmask.cpp">
-			</File>
-			<File
 				RelativePath=".\Table_DesignObjVariation_Zone.cpp">
-			</File>
-			<File
-				RelativePath=".\Table_DesignObjVariation_Zone_pschist.cpp">
-			</File>
-			<File
-				RelativePath=".\Table_DesignObjVariation_Zone_pschmask.cpp">
-			</File>
-			<File
-				RelativePath=".\Table_DesignObjVariation_pschist.cpp">
-			</File>
-			<File
-				RelativePath=".\Table_DesignObjVariation_pschmask.cpp">
-			</File>
-			<File
-				RelativePath=".\Table_DesignObj_pschist.cpp">
-			</File>
-			<File
-				RelativePath=".\Table_DesignObj_pschmask.cpp">
 			</File>
 			<File
 				RelativePath=".\Table_Device.cpp">
@@ -547,25 +271,7 @@
 				RelativePath=".\Table_DeviceCategory_DeviceData.cpp">
 			</File>
 			<File
-				RelativePath=".\Table_DeviceCategory_DeviceData_pschist.cpp">
-			</File>
-			<File
-				RelativePath=".\Table_DeviceCategory_DeviceData_pschmask.cpp">
-			</File>
-			<File
 				RelativePath=".\Table_DeviceCategory_Event.cpp">
-			</File>
-			<File
-				RelativePath=".\Table_DeviceCategory_Event_pschist.cpp">
-			</File>
-			<File
-				RelativePath=".\Table_DeviceCategory_Event_pschmask.cpp">
-			</File>
-			<File
-				RelativePath=".\Table_DeviceCategory_pschist.cpp">
-			</File>
-			<File
-				RelativePath=".\Table_DeviceCategory_pschmask.cpp">
 			</File>
 			<File
 				RelativePath=".\Table_DeviceCommandGroup.cpp">
@@ -574,43 +280,13 @@
 				RelativePath=".\Table_DeviceCommandGroup_Command.cpp">
 			</File>
 			<File
-				RelativePath=".\Table_DeviceCommandGroup_Command_pschist.cpp">
-			</File>
-			<File
-				RelativePath=".\Table_DeviceCommandGroup_Command_pschmask.cpp">
-			</File>
-			<File
 				RelativePath=".\Table_DeviceCommandGroup_DeviceCommandGroup_Parent.cpp">
-			</File>
-			<File
-				RelativePath=".\Table_DeviceCommandGroup_DeviceCommandGroup_Parent_pschist.cpp">
-			</File>
-			<File
-				RelativePath=".\Table_DeviceCommandGroup_DeviceCommandGroup_Parent_pschmask.cpp">
-			</File>
-			<File
-				RelativePath=".\Table_DeviceCommandGroup_pschist.cpp">
-			</File>
-			<File
-				RelativePath=".\Table_DeviceCommandGroup_pschmask.cpp">
 			</File>
 			<File
 				RelativePath=".\Table_DeviceData.cpp">
 			</File>
 			<File
-				RelativePath=".\Table_DeviceData_pschist.cpp">
-			</File>
-			<File
-				RelativePath=".\Table_DeviceData_pschmask.cpp">
-			</File>
-			<File
 				RelativePath=".\Table_DeviceGroup.cpp">
-			</File>
-			<File
-				RelativePath=".\Table_DeviceGroup_pschist.cpp">
-			</File>
-			<File
-				RelativePath=".\Table_DeviceGroup_pschmask.cpp">
 			</File>
 			<File
 				RelativePath=".\Table_DeviceTemplate.cpp">
@@ -619,28 +295,10 @@
 				RelativePath=".\Table_DeviceTemplate_AV.cpp">
 			</File>
 			<File
-				RelativePath=".\Table_DeviceTemplate_AV_pschist.cpp">
-			</File>
-			<File
-				RelativePath=".\Table_DeviceTemplate_AV_pschmask.cpp">
-			</File>
-			<File
 				RelativePath=".\Table_DeviceTemplate_DSPMode.cpp">
 			</File>
 			<File
-				RelativePath=".\Table_DeviceTemplate_DSPMode_pschist.cpp">
-			</File>
-			<File
-				RelativePath=".\Table_DeviceTemplate_DSPMode_pschmask.cpp">
-			</File>
-			<File
 				RelativePath=".\Table_DeviceTemplate_DesignObj.cpp">
-			</File>
-			<File
-				RelativePath=".\Table_DeviceTemplate_DesignObj_pschist.cpp">
-			</File>
-			<File
-				RelativePath=".\Table_DeviceTemplate_DesignObj_pschmask.cpp">
 			</File>
 			<File
 				RelativePath=".\Table_DeviceTemplate_DeviceCategory_ControlledVia.cpp">
@@ -649,34 +307,10 @@
 				RelativePath=".\Table_DeviceTemplate_DeviceCategory_ControlledVia_Pipe.cpp">
 			</File>
 			<File
-				RelativePath=".\Table_DeviceTemplate_DeviceCategory_ControlledVia_Pipe_pschist.cpp">
-			</File>
-			<File
-				RelativePath=".\Table_DeviceTemplate_DeviceCategory_ControlledVia_Pipe_pschmask.cpp">
-			</File>
-			<File
-				RelativePath=".\Table_DeviceTemplate_DeviceCategory_ControlledVia_pschist.cpp">
-			</File>
-			<File
-				RelativePath=".\Table_DeviceTemplate_DeviceCategory_ControlledVia_pschmask.cpp">
-			</File>
-			<File
 				RelativePath=".\Table_DeviceTemplate_DeviceCommandGroup.cpp">
 			</File>
 			<File
-				RelativePath=".\Table_DeviceTemplate_DeviceCommandGroup_pschist.cpp">
-			</File>
-			<File
-				RelativePath=".\Table_DeviceTemplate_DeviceCommandGroup_pschmask.cpp">
-			</File>
-			<File
 				RelativePath=".\Table_DeviceTemplate_DeviceData.cpp">
-			</File>
-			<File
-				RelativePath=".\Table_DeviceTemplate_DeviceData_pschist.cpp">
-			</File>
-			<File
-				RelativePath=".\Table_DeviceTemplate_DeviceData_pschmask.cpp">
 			</File>
 			<File
 				RelativePath=".\Table_DeviceTemplate_DeviceTemplate_ControlledVia.cpp">
@@ -685,52 +319,16 @@
 				RelativePath=".\Table_DeviceTemplate_DeviceTemplate_ControlledVia_Pipe.cpp">
 			</File>
 			<File
-				RelativePath=".\Table_DeviceTemplate_DeviceTemplate_ControlledVia_Pipe_pschist.cpp">
-			</File>
-			<File
-				RelativePath=".\Table_DeviceTemplate_DeviceTemplate_ControlledVia_Pipe_pschmask.cpp">
-			</File>
-			<File
-				RelativePath=".\Table_DeviceTemplate_DeviceTemplate_ControlledVia_pschist.cpp">
-			</File>
-			<File
-				RelativePath=".\Table_DeviceTemplate_DeviceTemplate_ControlledVia_pschmask.cpp">
-			</File>
-			<File
 				RelativePath=".\Table_DeviceTemplate_DeviceTemplate_Related.cpp">
-			</File>
-			<File
-				RelativePath=".\Table_DeviceTemplate_DeviceTemplate_Related_pschist.cpp">
-			</File>
-			<File
-				RelativePath=".\Table_DeviceTemplate_DeviceTemplate_Related_pschmask.cpp">
 			</File>
 			<File
 				RelativePath=".\Table_DeviceTemplate_Event.cpp">
 			</File>
 			<File
-				RelativePath=".\Table_DeviceTemplate_Event_pschist.cpp">
-			</File>
-			<File
-				RelativePath=".\Table_DeviceTemplate_Event_pschmask.cpp">
-			</File>
-			<File
 				RelativePath=".\Table_DeviceTemplate_InfraredGroup.cpp">
 			</File>
 			<File
-				RelativePath=".\Table_DeviceTemplate_InfraredGroup_pschist.cpp">
-			</File>
-			<File
-				RelativePath=".\Table_DeviceTemplate_InfraredGroup_pschmask.cpp">
-			</File>
-			<File
 				RelativePath=".\Table_DeviceTemplate_Input.cpp">
-			</File>
-			<File
-				RelativePath=".\Table_DeviceTemplate_Input_pschist.cpp">
-			</File>
-			<File
-				RelativePath=".\Table_DeviceTemplate_Input_pschmask.cpp">
 			</File>
 			<File
 				RelativePath=".\Table_DeviceTemplate_MediaType.cpp">
@@ -739,40 +337,10 @@
 				RelativePath=".\Table_DeviceTemplate_MediaType_DesignObj.cpp">
 			</File>
 			<File
-				RelativePath=".\Table_DeviceTemplate_MediaType_DesignObj_pschist.cpp">
-			</File>
-			<File
-				RelativePath=".\Table_DeviceTemplate_MediaType_DesignObj_pschmask.cpp">
-			</File>
-			<File
-				RelativePath=".\Table_DeviceTemplate_MediaType_pschist.cpp">
-			</File>
-			<File
-				RelativePath=".\Table_DeviceTemplate_MediaType_pschmask.cpp">
-			</File>
-			<File
 				RelativePath=".\Table_DeviceTemplate_Output.cpp">
 			</File>
 			<File
-				RelativePath=".\Table_DeviceTemplate_Output_pschist.cpp">
-			</File>
-			<File
-				RelativePath=".\Table_DeviceTemplate_Output_pschmask.cpp">
-			</File>
-			<File
 				RelativePath=".\Table_DeviceTemplate_PageSetup.cpp">
-			</File>
-			<File
-				RelativePath=".\Table_DeviceTemplate_PageSetup_pschist.cpp">
-			</File>
-			<File
-				RelativePath=".\Table_DeviceTemplate_PageSetup_pschmask.cpp">
-			</File>
-			<File
-				RelativePath=".\Table_DeviceTemplate_pschist.cpp">
-			</File>
-			<File
-				RelativePath=".\Table_DeviceTemplate_pschmask.cpp">
 			</File>
 			<File
 				RelativePath=".\Table_Device_Command.cpp">
@@ -781,166 +349,52 @@
 				RelativePath=".\Table_Device_CommandGroup.cpp">
 			</File>
 			<File
-				RelativePath=".\Table_Device_CommandGroup_pschist.cpp">
-			</File>
-			<File
-				RelativePath=".\Table_Device_CommandGroup_pschmask.cpp">
-			</File>
-			<File
-				RelativePath=".\Table_Device_Command_pschist.cpp">
-			</File>
-			<File
-				RelativePath=".\Table_Device_Command_pschmask.cpp">
-			</File>
-			<File
 				RelativePath=".\Table_Device_DeviceData.cpp">
-			</File>
-			<File
-				RelativePath=".\Table_Device_DeviceData_pschist.cpp">
-			</File>
-			<File
-				RelativePath=".\Table_Device_DeviceData_pschmask.cpp">
 			</File>
 			<File
 				RelativePath=".\Table_Device_DeviceGroup.cpp">
 			</File>
 			<File
-				RelativePath=".\Table_Device_DeviceGroup_pschist.cpp">
-			</File>
-			<File
-				RelativePath=".\Table_Device_DeviceGroup_pschmask.cpp">
-			</File>
-			<File
 				RelativePath=".\Table_Device_Device_Pipe.cpp">
-			</File>
-			<File
-				RelativePath=".\Table_Device_Device_Pipe_pschist.cpp">
-			</File>
-			<File
-				RelativePath=".\Table_Device_Device_Pipe_pschmask.cpp">
 			</File>
 			<File
 				RelativePath=".\Table_Device_Device_Related.cpp">
 			</File>
 			<File
-				RelativePath=".\Table_Device_Device_Related_pschist.cpp">
-			</File>
-			<File
-				RelativePath=".\Table_Device_Device_Related_pschmask.cpp">
-			</File>
-			<File
 				RelativePath=".\Table_Device_EntertainArea.cpp">
-			</File>
-			<File
-				RelativePath=".\Table_Device_EntertainArea_pschist.cpp">
-			</File>
-			<File
-				RelativePath=".\Table_Device_EntertainArea_pschmask.cpp">
 			</File>
 			<File
 				RelativePath=".\Table_Device_HouseMode.cpp">
 			</File>
 			<File
-				RelativePath=".\Table_Device_HouseMode_pschist.cpp">
-			</File>
-			<File
-				RelativePath=".\Table_Device_HouseMode_pschmask.cpp">
-			</File>
-			<File
 				RelativePath=".\Table_Device_MRU.cpp">
-			</File>
-			<File
-				RelativePath=".\Table_Device_MRU_pschist.cpp">
-			</File>
-			<File
-				RelativePath=".\Table_Device_MRU_pschmask.cpp">
 			</File>
 			<File
 				RelativePath=".\Table_Device_Orbiter.cpp">
 			</File>
 			<File
-				RelativePath=".\Table_Device_Orbiter_pschist.cpp">
-			</File>
-			<File
-				RelativePath=".\Table_Device_Orbiter_pschmask.cpp">
-			</File>
-			<File
 				RelativePath=".\Table_Device_QuickStart.cpp">
-			</File>
-			<File
-				RelativePath=".\Table_Device_QuickStart_pschist.cpp">
-			</File>
-			<File
-				RelativePath=".\Table_Device_QuickStart_pschmask.cpp">
 			</File>
 			<File
 				RelativePath=".\Table_Device_StartupScript.cpp">
 			</File>
 			<File
-				RelativePath=".\Table_Device_StartupScript_pschist.cpp">
-			</File>
-			<File
-				RelativePath=".\Table_Device_StartupScript_pschmask.cpp">
-			</File>
-			<File
 				RelativePath=".\Table_Device_Users.cpp">
-			</File>
-			<File
-				RelativePath=".\Table_Device_Users_pschist.cpp">
-			</File>
-			<File
-				RelativePath=".\Table_Device_Users_pschmask.cpp">
-			</File>
-			<File
-				RelativePath=".\Table_Device_pschist.cpp">
-			</File>
-			<File
-				RelativePath=".\Table_Device_pschmask.cpp">
 			</File>
 			<File
 				RelativePath=".\Table_Direction.cpp">
 			</File>
 			<File
-				RelativePath=".\Table_Direction_pschist.cpp">
-			</File>
-			<File
-				RelativePath=".\Table_Direction_pschmask.cpp">
-			</File>
-			<File
 				RelativePath=".\Table_Directory.cpp">
 			</File>
 			<File
-				RelativePath=".\Table_Directory_pschist.cpp">
-			</File>
-			<File
-				RelativePath=".\Table_Directory_pschmask.cpp">
-			</File>
-			<File
 				RelativePath=".\Table_Distro.cpp">
-			</File>
-			<File
-				RelativePath=".\Table_Distro_pschist.cpp">
-			</File>
-			<File
-				RelativePath=".\Table_Distro_pschmask.cpp">
 			</File>
 			<File
 				RelativePath=".\Table_Document.cpp">
 			</File>
 			<File
 				RelativePath=".\Table_Document_Comment.cpp">
-			</File>
-			<File
-				RelativePath=".\Table_Document_Comment_pschist.cpp">
-			</File>
-			<File
-				RelativePath=".\Table_Document_Comment_pschmask.cpp">
-			</File>
-			<File
-				RelativePath=".\Table_Document_pschist.cpp">
-			</File>
-			<File
-				RelativePath=".\Table_Document_pschmask.cpp">
 			</File>
 			<File
 				RelativePath=".\Table_Effect.cpp">
@@ -952,31 +406,7 @@
 				RelativePath=".\Table_EffectType_Effect_Skin.cpp">
 			</File>
 			<File
-				RelativePath=".\Table_EffectType_Effect_Skin_pschist.cpp">
-			</File>
-			<File
-				RelativePath=".\Table_EffectType_Effect_Skin_pschmask.cpp">
-			</File>
-			<File
-				RelativePath=".\Table_EffectType_pschist.cpp">
-			</File>
-			<File
-				RelativePath=".\Table_EffectType_pschmask.cpp">
-			</File>
-			<File
-				RelativePath=".\Table_Effect_pschist.cpp">
-			</File>
-			<File
-				RelativePath=".\Table_Effect_pschmask.cpp">
-			</File>
-			<File
 				RelativePath=".\Table_EntertainArea.cpp">
-			</File>
-			<File
-				RelativePath=".\Table_EntertainArea_pschist.cpp">
-			</File>
-			<File
-				RelativePath=".\Table_EntertainArea_pschmask.cpp">
 			</File>
 			<File
 				RelativePath=".\Table_Event.cpp">
@@ -985,61 +415,19 @@
 				RelativePath=".\Table_EventCategory.cpp">
 			</File>
 			<File
-				RelativePath=".\Table_EventCategory_pschist.cpp">
-			</File>
-			<File
-				RelativePath=".\Table_EventCategory_pschmask.cpp">
-			</File>
-			<File
 				RelativePath=".\Table_EventHandler.cpp">
-			</File>
-			<File
-				RelativePath=".\Table_EventHandler_pschist.cpp">
-			</File>
-			<File
-				RelativePath=".\Table_EventHandler_pschmask.cpp">
 			</File>
 			<File
 				RelativePath=".\Table_EventParameter.cpp">
 			</File>
 			<File
-				RelativePath=".\Table_EventParameter_pschist.cpp">
-			</File>
-			<File
-				RelativePath=".\Table_EventParameter_pschmask.cpp">
-			</File>
-			<File
 				RelativePath=".\Table_Event_EventParameter.cpp">
-			</File>
-			<File
-				RelativePath=".\Table_Event_EventParameter_pschist.cpp">
-			</File>
-			<File
-				RelativePath=".\Table_Event_EventParameter_pschmask.cpp">
-			</File>
-			<File
-				RelativePath=".\Table_Event_pschist.cpp">
-			</File>
-			<File
-				RelativePath=".\Table_Event_pschmask.cpp">
 			</File>
 			<File
 				RelativePath=".\Table_FAQ.cpp">
 			</File>
 			<File
-				RelativePath=".\Table_FAQ_pschist.cpp">
-			</File>
-			<File
-				RelativePath=".\Table_FAQ_pschmask.cpp">
-			</File>
-			<File
 				RelativePath=".\Table_Firewall.cpp">
-			</File>
-			<File
-				RelativePath=".\Table_Firewall_pschist.cpp">
-			</File>
-			<File
-				RelativePath=".\Table_Firewall_pschmask.cpp">
 			</File>
 			<File
 				RelativePath=".\Table_Floorplan.cpp">
@@ -1051,49 +439,13 @@
 				RelativePath=".\Table_FloorplanObjectType_Color.cpp">
 			</File>
 			<File
-				RelativePath=".\Table_FloorplanObjectType_Color_pschist.cpp">
-			</File>
-			<File
-				RelativePath=".\Table_FloorplanObjectType_Color_pschmask.cpp">
-			</File>
-			<File
-				RelativePath=".\Table_FloorplanObjectType_pschist.cpp">
-			</File>
-			<File
-				RelativePath=".\Table_FloorplanObjectType_pschmask.cpp">
-			</File>
-			<File
 				RelativePath=".\Table_FloorplanType.cpp">
-			</File>
-			<File
-				RelativePath=".\Table_FloorplanType_pschist.cpp">
-			</File>
-			<File
-				RelativePath=".\Table_FloorplanType_pschmask.cpp">
-			</File>
-			<File
-				RelativePath=".\Table_Floorplan_pschist.cpp">
-			</File>
-			<File
-				RelativePath=".\Table_Floorplan_pschmask.cpp">
 			</File>
 			<File
 				RelativePath=".\Table_HorizAlignment.cpp">
 			</File>
 			<File
-				RelativePath=".\Table_HorizAlignment_pschist.cpp">
-			</File>
-			<File
-				RelativePath=".\Table_HorizAlignment_pschmask.cpp">
-			</File>
-			<File
 				RelativePath=".\Table_HouseMode.cpp">
-			</File>
-			<File
-				RelativePath=".\Table_HouseMode_pschist.cpp">
-			</File>
-			<File
-				RelativePath=".\Table_HouseMode_pschmask.cpp">
 			</File>
 			<File
 				RelativePath=".\Table_Household.cpp">
@@ -1102,34 +454,10 @@
 				RelativePath=".\Table_Household_Installation.cpp">
 			</File>
 			<File
-				RelativePath=".\Table_Household_Installation_pschist.cpp">
-			</File>
-			<File
-				RelativePath=".\Table_Household_Installation_pschmask.cpp">
-			</File>
-			<File
-				RelativePath=".\Table_Household_pschist.cpp">
-			</File>
-			<File
-				RelativePath=".\Table_Household_pschmask.cpp">
-			</File>
-			<File
 				RelativePath=".\Table_Icon.cpp">
 			</File>
 			<File
-				RelativePath=".\Table_Icon_pschist.cpp">
-			</File>
-			<File
-				RelativePath=".\Table_Icon_pschmask.cpp">
-			</File>
-			<File
 				RelativePath=".\Table_Image.cpp">
-			</File>
-			<File
-				RelativePath=".\Table_Image_pschist.cpp">
-			</File>
-			<File
-				RelativePath=".\Table_Image_pschmask.cpp">
 			</File>
 			<File
 				RelativePath=".\Table_InfraredGroup.cpp">
@@ -1141,40 +469,10 @@
 				RelativePath=".\Table_InfraredGroup_Command_Preferred.cpp">
 			</File>
 			<File
-				RelativePath=".\Table_InfraredGroup_Command_Preferred_pschist.cpp">
-			</File>
-			<File
-				RelativePath=".\Table_InfraredGroup_Command_Preferred_pschmask.cpp">
-			</File>
-			<File
-				RelativePath=".\Table_InfraredGroup_Command_pschist.cpp">
-			</File>
-			<File
-				RelativePath=".\Table_InfraredGroup_Command_pschmask.cpp">
-			</File>
-			<File
-				RelativePath=".\Table_InfraredGroup_pschist.cpp">
-			</File>
-			<File
-				RelativePath=".\Table_InfraredGroup_pschmask.cpp">
-			</File>
-			<File
 				RelativePath=".\Table_InstallWizard.cpp">
 			</File>
 			<File
 				RelativePath=".\Table_InstallWizard_Distro.cpp">
-			</File>
-			<File
-				RelativePath=".\Table_InstallWizard_Distro_pschist.cpp">
-			</File>
-			<File
-				RelativePath=".\Table_InstallWizard_Distro_pschmask.cpp">
-			</File>
-			<File
-				RelativePath=".\Table_InstallWizard_pschist.cpp">
-			</File>
-			<File
-				RelativePath=".\Table_InstallWizard_pschmask.cpp">
 			</File>
 			<File
 				RelativePath=".\Table_Installation.cpp">
@@ -1183,61 +481,19 @@
 				RelativePath=".\Table_Installation_RepositorySource_URL.cpp">
 			</File>
 			<File
-				RelativePath=".\Table_Installation_RepositorySource_URL_pschist.cpp">
-			</File>
-			<File
-				RelativePath=".\Table_Installation_RepositorySource_URL_pschmask.cpp">
-			</File>
-			<File
 				RelativePath=".\Table_Installation_Users.cpp">
-			</File>
-			<File
-				RelativePath=".\Table_Installation_Users_pschist.cpp">
-			</File>
-			<File
-				RelativePath=".\Table_Installation_Users_pschmask.cpp">
-			</File>
-			<File
-				RelativePath=".\Table_Installation_pschist.cpp">
-			</File>
-			<File
-				RelativePath=".\Table_Installation_pschmask.cpp">
 			</File>
 			<File
 				RelativePath=".\Table_Language.cpp">
 			</File>
 			<File
-				RelativePath=".\Table_Language_pschist.cpp">
-			</File>
-			<File
-				RelativePath=".\Table_Language_pschmask.cpp">
-			</File>
-			<File
 				RelativePath=".\Table_License.cpp">
-			</File>
-			<File
-				RelativePath=".\Table_License_pschist.cpp">
-			</File>
-			<File
-				RelativePath=".\Table_License_pschmask.cpp">
 			</File>
 			<File
 				RelativePath=".\Table_Licensing.cpp">
 			</File>
 			<File
-				RelativePath=".\Table_Licensing_pschist.cpp">
-			</File>
-			<File
-				RelativePath=".\Table_Licensing_pschmask.cpp">
-			</File>
-			<File
 				RelativePath=".\Table_Manufacturer.cpp">
-			</File>
-			<File
-				RelativePath=".\Table_Manufacturer_pschist.cpp">
-			</File>
-			<File
-				RelativePath=".\Table_Manufacturer_pschmask.cpp">
 			</File>
 			<File
 				RelativePath=".\Table_MediaType.cpp">
@@ -1246,43 +502,13 @@
 				RelativePath=".\Table_MediaType_Broadcast.cpp">
 			</File>
 			<File
-				RelativePath=".\Table_MediaType_Broadcast_pschist.cpp">
-			</File>
-			<File
-				RelativePath=".\Table_MediaType_Broadcast_pschmask.cpp">
-			</File>
-			<File
 				RelativePath=".\Table_MediaType_DesignObj.cpp">
-			</File>
-			<File
-				RelativePath=".\Table_MediaType_DesignObj_pschist.cpp">
-			</File>
-			<File
-				RelativePath=".\Table_MediaType_DesignObj_pschmask.cpp">
-			</File>
-			<File
-				RelativePath=".\Table_MediaType_pschist.cpp">
-			</File>
-			<File
-				RelativePath=".\Table_MediaType_pschmask.cpp">
 			</File>
 			<File
 				RelativePath=".\Table_News.cpp">
 			</File>
 			<File
-				RelativePath=".\Table_News_pschist.cpp">
-			</File>
-			<File
-				RelativePath=".\Table_News_pschmask.cpp">
-			</File>
-			<File
 				RelativePath=".\Table_OperatingSystem.cpp">
-			</File>
-			<File
-				RelativePath=".\Table_OperatingSystem_pschist.cpp">
-			</File>
-			<File
-				RelativePath=".\Table_OperatingSystem_pschmask.cpp">
 			</File>
 			<File
 				RelativePath=".\Table_Orbiter.cpp">
@@ -1291,25 +517,7 @@
 				RelativePath=".\Table_Orbiter_Users_PasswordReq.cpp">
 			</File>
 			<File
-				RelativePath=".\Table_Orbiter_Users_PasswordReq_pschist.cpp">
-			</File>
-			<File
-				RelativePath=".\Table_Orbiter_Users_PasswordReq_pschmask.cpp">
-			</File>
-			<File
 				RelativePath=".\Table_Orbiter_Variable.cpp">
-			</File>
-			<File
-				RelativePath=".\Table_Orbiter_Variable_pschist.cpp">
-			</File>
-			<File
-				RelativePath=".\Table_Orbiter_Variable_pschmask.cpp">
-			</File>
-			<File
-				RelativePath=".\Table_Orbiter_pschist.cpp">
-			</File>
-			<File
-				RelativePath=".\Table_Orbiter_pschmask.cpp">
 			</File>
 			<File
 				RelativePath=".\Table_Package.cpp">
@@ -1318,28 +526,10 @@
 				RelativePath=".\Table_PackageType.cpp">
 			</File>
 			<File
-				RelativePath=".\Table_PackageType_pschist.cpp">
-			</File>
-			<File
-				RelativePath=".\Table_PackageType_pschmask.cpp">
-			</File>
-			<File
 				RelativePath=".\Table_Package_Compat.cpp">
 			</File>
 			<File
-				RelativePath=".\Table_Package_Compat_pschist.cpp">
-			</File>
-			<File
-				RelativePath=".\Table_Package_Compat_pschmask.cpp">
-			</File>
-			<File
 				RelativePath=".\Table_Package_Device.cpp">
-			</File>
-			<File
-				RelativePath=".\Table_Package_Device_pschist.cpp">
-			</File>
-			<File
-				RelativePath=".\Table_Package_Device_pschmask.cpp">
 			</File>
 			<File
 				RelativePath=".\Table_Package_Directory.cpp">
@@ -1348,25 +538,7 @@
 				RelativePath=".\Table_Package_Directory_File.cpp">
 			</File>
 			<File
-				RelativePath=".\Table_Package_Directory_File_pschist.cpp">
-			</File>
-			<File
-				RelativePath=".\Table_Package_Directory_File_pschmask.cpp">
-			</File>
-			<File
-				RelativePath=".\Table_Package_Directory_pschist.cpp">
-			</File>
-			<File
-				RelativePath=".\Table_Package_Directory_pschmask.cpp">
-			</File>
-			<File
 				RelativePath=".\Table_Package_Package.cpp">
-			</File>
-			<File
-				RelativePath=".\Table_Package_Package_pschist.cpp">
-			</File>
-			<File
-				RelativePath=".\Table_Package_Package_pschmask.cpp">
 			</File>
 			<File
 				RelativePath=".\Table_Package_Source.cpp">
@@ -1375,103 +547,28 @@
 				RelativePath=".\Table_Package_Source_Compat.cpp">
 			</File>
 			<File
-				RelativePath=".\Table_Package_Source_Compat_pschist.cpp">
-			</File>
-			<File
-				RelativePath=".\Table_Package_Source_Compat_pschmask.cpp">
-			</File>
-			<File
-				RelativePath=".\Table_Package_Source_pschist.cpp">
-			</File>
-			<File
-				RelativePath=".\Table_Package_Source_pschmask.cpp">
-			</File>
-			<File
 				RelativePath=".\Table_Package_Users.cpp">
-			</File>
-			<File
-				RelativePath=".\Table_Package_Users_pschist.cpp">
-			</File>
-			<File
-				RelativePath=".\Table_Package_Users_pschmask.cpp">
-			</File>
-			<File
-				RelativePath=".\Table_Package_Version.cpp">
-			</File>
-			<File
-				RelativePath=".\Table_Package_Version_pschist.cpp">
-			</File>
-			<File
-				RelativePath=".\Table_Package_Version_pschmask.cpp">
-			</File>
-			<File
-				RelativePath=".\Table_Package_pschist.cpp">
-			</File>
-			<File
-				RelativePath=".\Table_Package_pschmask.cpp">
 			</File>
 			<File
 				RelativePath=".\Table_PageSetup.cpp">
 			</File>
 			<File
-				RelativePath=".\Table_PageSetup_pschist.cpp">
-			</File>
-			<File
-				RelativePath=".\Table_PageSetup_pschmask.cpp">
-			</File>
-			<File
 				RelativePath=".\Table_PaidLicense.cpp">
-			</File>
-			<File
-				RelativePath=".\Table_PaidLicense_pschist.cpp">
-			</File>
-			<File
-				RelativePath=".\Table_PaidLicense_pschmask.cpp">
 			</File>
 			<File
 				RelativePath=".\Table_ParameterType.cpp">
 			</File>
 			<File
-				RelativePath=".\Table_ParameterType_pschist.cpp">
-			</File>
-			<File
-				RelativePath=".\Table_ParameterType_pschmask.cpp">
-			</File>
-			<File
 				RelativePath=".\Table_PhoneLineType.cpp">
-			</File>
-			<File
-				RelativePath=".\Table_PhoneLineType_pschist.cpp">
-			</File>
-			<File
-				RelativePath=".\Table_PhoneLineType_pschmask.cpp">
 			</File>
 			<File
 				RelativePath=".\Table_Pipe.cpp">
 			</File>
 			<File
-				RelativePath=".\Table_Pipe_pschist.cpp">
-			</File>
-			<File
-				RelativePath=".\Table_Pipe_pschmask.cpp">
-			</File>
-			<File
 				RelativePath=".\Table_PnpLevel.cpp">
 			</File>
 			<File
-				RelativePath=".\Table_PnpLevel_pschist.cpp">
-			</File>
-			<File
-				RelativePath=".\Table_PnpLevel_pschmask.cpp">
-			</File>
-			<File
 				RelativePath=".\Table_PnpProtocol.cpp">
-			</File>
-			<File
-				RelativePath=".\Table_PnpProtocol_pschist.cpp">
-			</File>
-			<File
-				RelativePath=".\Table_PnpProtocol_pschmask.cpp">
 			</File>
 			<File
 				RelativePath=".\Table_PnpQueue.cpp">
@@ -1483,19 +580,7 @@
 				RelativePath=".\Table_QuickStartCategory.cpp">
 			</File>
 			<File
-				RelativePath=".\Table_QuickStartCategory_pschist.cpp">
-			</File>
-			<File
-				RelativePath=".\Table_QuickStartCategory_pschmask.cpp">
-			</File>
-			<File
 				RelativePath=".\Table_QuickStartTemplate.cpp">
-			</File>
-			<File
-				RelativePath=".\Table_QuickStartTemplate_pschist.cpp">
-			</File>
-			<File
-				RelativePath=".\Table_QuickStartTemplate_pschmask.cpp">
 			</File>
 			<File
 				RelativePath=".\Table_Region.cpp">
@@ -1504,19 +589,7 @@
 				RelativePath=".\Table_RemoteControl.cpp">
 			</File>
 			<File
-				RelativePath=".\Table_RemoteControl_pschist.cpp">
-			</File>
-			<File
-				RelativePath=".\Table_RemoteControl_pschmask.cpp">
-			</File>
-			<File
 				RelativePath=".\Table_RemoteMapping.cpp">
-			</File>
-			<File
-				RelativePath=".\Table_RemoteMapping_pschist.cpp">
-			</File>
-			<File
-				RelativePath=".\Table_RemoteMapping_pschmask.cpp">
 			</File>
 			<File
 				RelativePath=".\Table_RepositorySource.cpp">
@@ -1525,25 +598,7 @@
 				RelativePath=".\Table_RepositorySource_URL.cpp">
 			</File>
 			<File
-				RelativePath=".\Table_RepositorySource_URL_pschist.cpp">
-			</File>
-			<File
-				RelativePath=".\Table_RepositorySource_URL_pschmask.cpp">
-			</File>
-			<File
-				RelativePath=".\Table_RepositorySource_pschist.cpp">
-			</File>
-			<File
-				RelativePath=".\Table_RepositorySource_pschmask.cpp">
-			</File>
-			<File
 				RelativePath=".\Table_RepositoryType.cpp">
-			</File>
-			<File
-				RelativePath=".\Table_RepositoryType_pschist.cpp">
-			</File>
-			<File
-				RelativePath=".\Table_RepositoryType_pschmask.cpp">
 			</File>
 			<File
 				RelativePath=".\Table_Room.cpp">
@@ -1552,34 +607,10 @@
 				RelativePath=".\Table_RoomType.cpp">
 			</File>
 			<File
-				RelativePath=".\Table_RoomType_pschist.cpp">
-			</File>
-			<File
-				RelativePath=".\Table_RoomType_pschmask.cpp">
-			</File>
-			<File
 				RelativePath=".\Table_Room_Users.cpp">
 			</File>
 			<File
-				RelativePath=".\Table_Room_Users_pschist.cpp">
-			</File>
-			<File
-				RelativePath=".\Table_Room_Users_pschmask.cpp">
-			</File>
-			<File
-				RelativePath=".\Table_Room_pschist.cpp">
-			</File>
-			<File
-				RelativePath=".\Table_Room_pschmask.cpp">
-			</File>
-			<File
 				RelativePath=".\Table_Schema.cpp">
-			</File>
-			<File
-				RelativePath=".\Table_Schema_pschist.cpp">
-			</File>
-			<File
-				RelativePath=".\Table_Schema_pschmask.cpp">
 			</File>
 			<File
 				RelativePath=".\Table_Screen.cpp">
@@ -1588,52 +619,16 @@
 				RelativePath=".\Table_Screen_CommandParameter.cpp">
 			</File>
 			<File
-				RelativePath=".\Table_Screen_CommandParameter_pschist.cpp">
-			</File>
-			<File
-				RelativePath=".\Table_Screen_CommandParameter_pschmask.cpp">
-			</File>
-			<File
 				RelativePath=".\Table_Screen_DesignObj.cpp">
-			</File>
-			<File
-				RelativePath=".\Table_Screen_DesignObj_pschist.cpp">
-			</File>
-			<File
-				RelativePath=".\Table_Screen_DesignObj_pschmask.cpp">
-			</File>
-			<File
-				RelativePath=".\Table_Screen_pschist.cpp">
-			</File>
-			<File
-				RelativePath=".\Table_Screen_pschmask.cpp">
 			</File>
 			<File
 				RelativePath=".\Table_SetupStep.cpp">
 			</File>
 			<File
-				RelativePath=".\Table_SetupStep_pschist.cpp">
-			</File>
-			<File
-				RelativePath=".\Table_SetupStep_pschmask.cpp">
-			</File>
-			<File
 				RelativePath=".\Table_Size.cpp">
 			</File>
 			<File
-				RelativePath=".\Table_Size_pschist.cpp">
-			</File>
-			<File
-				RelativePath=".\Table_Size_pschmask.cpp">
-			</File>
-			<File
 				RelativePath=".\Table_Skin.cpp">
-			</File>
-			<File
-				RelativePath=".\Table_Skin_pschist.cpp">
-			</File>
-			<File
-				RelativePath=".\Table_Skin_pschmask.cpp">
 			</File>
 			<File
 				RelativePath=".\Table_Software.cpp">
@@ -1648,19 +643,7 @@
 				RelativePath=".\Table_StabilityStatus.cpp">
 			</File>
 			<File
-				RelativePath=".\Table_StabilityStatus_pschist.cpp">
-			</File>
-			<File
-				RelativePath=".\Table_StabilityStatus_pschmask.cpp">
-			</File>
-			<File
 				RelativePath=".\Table_StartupScript.cpp">
-			</File>
-			<File
-				RelativePath=".\Table_StartupScript_pschist.cpp">
-			</File>
-			<File
-				RelativePath=".\Table_StartupScript_pschmask.cpp">
 			</File>
 			<File
 				RelativePath=".\Table_Style.cpp">
@@ -1669,34 +652,10 @@
 				RelativePath=".\Table_StyleVariation.cpp">
 			</File>
 			<File
-				RelativePath=".\Table_StyleVariation_pschist.cpp">
-			</File>
-			<File
-				RelativePath=".\Table_StyleVariation_pschmask.cpp">
-			</File>
-			<File
-				RelativePath=".\Table_Style_pschist.cpp">
-			</File>
-			<File
-				RelativePath=".\Table_Style_pschmask.cpp">
-			</File>
-			<File
 				RelativePath=".\Table_System.cpp">
 			</File>
 			<File
-				RelativePath=".\Table_System_pschist.cpp">
-			</File>
-			<File
-				RelativePath=".\Table_System_pschmask.cpp">
-			</File>
-			<File
 				RelativePath=".\Table_Template.cpp">
-			</File>
-			<File
-				RelativePath=".\Table_Template_pschist.cpp">
-			</File>
-			<File
-				RelativePath=".\Table_Template_pschmask.cpp">
 			</File>
 			<File
 				RelativePath=".\Table_Text.cpp">
@@ -1705,34 +664,10 @@
 				RelativePath=".\Table_TextCategory.cpp">
 			</File>
 			<File
-				RelativePath=".\Table_TextCategory_pschist.cpp">
-			</File>
-			<File
-				RelativePath=".\Table_TextCategory_pschmask.cpp">
-			</File>
-			<File
 				RelativePath=".\Table_Text_LS.cpp">
 			</File>
 			<File
 				RelativePath=".\Table_Text_LS_AltVersions.cpp">
-			</File>
-			<File
-				RelativePath=".\Table_Text_LS_AltVersions_pschist.cpp">
-			</File>
-			<File
-				RelativePath=".\Table_Text_LS_AltVersions_pschmask.cpp">
-			</File>
-			<File
-				RelativePath=".\Table_Text_LS_pschist.cpp">
-			</File>
-			<File
-				RelativePath=".\Table_Text_LS_pschmask.cpp">
-			</File>
-			<File
-				RelativePath=".\Table_Text_pschist.cpp">
-			</File>
-			<File
-				RelativePath=".\Table_Text_pschmask.cpp">
 			</File>
 			<File
 				RelativePath=".\Table_TimeZone.cpp">
@@ -1741,64 +676,22 @@
 				RelativePath=".\Table_UI.cpp">
 			</File>
 			<File
-				RelativePath=".\Table_UI_pschist.cpp">
-			</File>
-			<File
-				RelativePath=".\Table_UI_pschmask.cpp">
-			</File>
-			<File
 				RelativePath=".\Table_UnknownDevices.cpp">
-			</File>
-			<File
-				RelativePath=".\Table_UnknownDevices_pschist.cpp">
-			</File>
-			<File
-				RelativePath=".\Table_UnknownDevices_pschmask.cpp">
 			</File>
 			<File
 				RelativePath=".\Table_UserMode.cpp">
 			</File>
 			<File
-				RelativePath=".\Table_UserMode_pschist.cpp">
-			</File>
-			<File
-				RelativePath=".\Table_UserMode_pschmask.cpp">
-			</File>
-			<File
 				RelativePath=".\Table_Users.cpp">
-			</File>
-			<File
-				RelativePath=".\Table_Users_pschist.cpp">
-			</File>
-			<File
-				RelativePath=".\Table_Users_pschmask.cpp">
 			</File>
 			<File
 				RelativePath=".\Table_Variable.cpp">
 			</File>
 			<File
-				RelativePath=".\Table_Variable_pschist.cpp">
-			</File>
-			<File
-				RelativePath=".\Table_Variable_pschmask.cpp">
-			</File>
-			<File
 				RelativePath=".\Table_Version.cpp">
 			</File>
 			<File
-				RelativePath=".\Table_Version_pschist.cpp">
-			</File>
-			<File
-				RelativePath=".\Table_Version_pschmask.cpp">
-			</File>
-			<File
 				RelativePath=".\Table_VertAlignment.cpp">
-			</File>
-			<File
-				RelativePath=".\Table_VertAlignment_pschist.cpp">
-			</File>
-			<File
-				RelativePath=".\Table_VertAlignment_pschmask.cpp">
 			</File>
 			<File
 				RelativePath=".\Table_psc_constants_batdet.cpp">

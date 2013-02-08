@@ -1,0 +1,19 @@
+#! /bin/sh /usr/share/dpatch/dpatch-run
+## 02_symlink_security.dpatch by  <ds@flibble.youmustbejoking.demon.co.uk>
+##
+## All lines beginning with `## DP:' are a description of the patch.
+## DP: Fully plug security hole.
+
+@DPATCH@
+diff -urNad vdr-plugin-xine-0.7.0/xineLib.c /tmp/dpep.Cd3lwX/vdr-plugin-xine-0.7.0/xineLib.c
+--- vdr-plugin-xine-0.7.0/xineLib.c	2005-01-29 22:28:31.000000000 +0000
++++ /tmp/dpep.Cd3lwX/vdr-plugin-xine-0.7.0/xineLib.c	2005-01-30 00:25:56.000000000 +0000
+@@ -3254,7 +3254,7 @@
+       
+       bool success = false;
+         
+-      int outfd = ::open(FileName, O_CREAT /* | O_EXCL */ | O_TRUNC | O_RDWR, 0644);
++      int outfd = ::open(FileName, O_CREAT | O_NOFOLLOW | O_TRUNC | O_RDWR, 0644);
+       if (-1 != outfd)
+       {
+         int sizeX = SizeX;
