@@ -53,9 +53,9 @@ clean:
 
 install: 
 	for i in $(APPS) $(DCEDEVS) $(PLUGINS) $(CONFLICTING); do $(MAKE) -C $$i install; done
-#	mkdir -p $(DESTDIR)/home/public $(DESTDIR)/usr/pluto/bin $(DESTDIR)/usr/pluto/lib $(DESTDIR)/usr/include
+	mkdir -p $(DESTDIR)/home/public $(DESTDIR)/usr/pluto/bin $(DESTDIR)/usr/pluto/lib $(DESTDIR)/usr/include
 #	cp BootScripts/bookmarks.html $(DESTDIR)/home/public || :
-#	for i in $(PLUGINS); do cp $$i/$$i.so $(DESTDIR)/usr/pluto/bin; done
-#	for i in $(APPS); do cp $$i/$$i $(DESTDIR)/usr/pluto/bin; done
-#	for i in $(LIBRARIES); do cp lib/lib$$i* $(DESTDIR)/usr/pluto/lib; done
-#	for i in $(LIBRARIES); do mkdir -p $(DESTDIR)/usr/include/$$i ; cp $$i/*.h $(DESTDIR)/usr/include/$$i ; done
+	for i in $(PLUGINS); do cp $$i/$$i.so $(DESTDIR)/usr/pluto/bin; done
+	for i in $(APPS); do cp $$i/$$i $(DESTDIR)/usr/pluto/bin; done
+	for i in $(LIBRARIES); do cp lib/lib$$i* $(DESTDIR)/usr/pluto/lib; done
+	for i in $(LIBRARIES); do mkdir -p $(DESTDIR)/usr/include/$$i ; cp $$i/*.h $(DESTDIR)/usr/include/$$i ; done
