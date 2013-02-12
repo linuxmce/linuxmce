@@ -11,6 +11,7 @@
 #include <QBoxLayout>
 #include <Phonon>
 #include <QDeclarativeItem>
+#include <QKeyEvent>
 
 #endif
 
@@ -117,7 +118,7 @@ signals:
 
 public slots:
 
-    void mediaStarted(){setMediaPlaying(true);}
+    void mediaStarted(){setMediaPlaying(true);  }
 
     void setServerAddress(QString a) {serverAddress = a;emit serverAddressChanged();}
     QString getServerAddress(){return serverAddress;}
@@ -228,6 +229,7 @@ private:
 
 
 private slots:
+
 
 };
 

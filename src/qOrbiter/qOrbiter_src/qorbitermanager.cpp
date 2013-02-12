@@ -1053,6 +1053,17 @@ void qorbiterManager::nowPlayingChanged(bool b)
     nowPlayingButton->setStatus(b);
 }
 
+void qorbiterManager::mountMediaDevice(int d)
+{
+
+    QString mountProg = "mount";
+    QStringList args;
+    args << qs_routerip+":/mnt/device/"+QString::number(d) << "/mnt/remote/"+QString::number(d);
+    QProcess *mountProcess = new QProcess(this);
+    mountProcess->start(mountProg, args);
+
+}
+
 bool qorbiterManager::loadSkins(QUrl base)
 {
     emit skinMessage("Local Skins path" +base.toString());

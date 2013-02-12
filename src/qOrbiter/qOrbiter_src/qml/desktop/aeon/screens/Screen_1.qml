@@ -2,7 +2,7 @@ import QtQuick 1.0
 
 import "../components"
 import "../js/ComponentLoader.js" as JsLib
-import "../../default/lib/handlers"
+import "../../lib/handlers"
 
 Item
 {
@@ -33,7 +33,6 @@ Item
         interval: 2000
         triggeredOnStart: false
         running: true
-
         onTriggered: nowPlayingArt.source = "image://listprovider/updateobject/"+securityvideo.timestamp
     }
 

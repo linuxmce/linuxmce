@@ -25,15 +25,20 @@ Item {
     height:manager.appHeight
     property alias skinStyle: style
 
-    WaitSpinner {
-        id: waitSpinner
-        anchors.centerIn: parent
-    }
+    property string locationinfo: "standby"
+    property string screenfile
+    property string dynamic_height
+    property string dynamic_width
+
+    signal close()
+    signal changeScreen(string s)
+    signal setupStart(int x, string y)
+
+    Component.onCompleted: {logger.userLogMsg = "Main.qml loaded in default skin"; manager.setBoundStatus(true)}
 
     Style{
         id:style
     }
-    Component.onCompleted: {logger.userLogMsg = "Main.qml loaded in default skin"; manager.setBoundStatus(true)}
 
     FontLoader{
         id:myFont
@@ -41,42 +46,125 @@ Item {
         source: "fonts/Sawasdee.ttf"
     }
 
-    MediaManager{
-        id:dceplayer
-        anchors.top: parent.top
-        anchors.left:parent.left
-        z:dceplayer.mediaPlaying ==false ? -5 : 0
-        Component.onCompleted: {setWindowSize(manager.appHeight, manager.appWidth); dceplayer.setConnectionDetails(manager.mediaPlayerID, manager.m_ipAddress)}
-        MouseArea{
-            anchors.fill: dceplayer
-            acceptedButtons: Qt.LeftButton | Qt.RightButton
-            onClicked:  Qt.RightButton ? pageLoader.visible = !pageLoader.visible: ""
-        }
-        Connections{
-            target:manager
-            onOrientationChanged:dceplayer.setWindowSize(manager.appHeight, manager.appWidth)
-            onMediaPlayerIdChanged:{
-                console.log("initializing media player")
-                dceplayer.setConnectionDetails(manager.mediaPlayerID, manager.m_ipAddress)
-            }
-        }
-        onCurrentStatusChanged:logger.logMediaMessage(dceplayer.currentStatus)
-        onMediaBufferChanged: console.log("media buffer change:"+mediaBuffer)
-        onMediaPlayingChanged: console.log("Media Playback status changed locally "+dceplayer.mediaBuffer)
+    WaitSpinner {
+        id: waitSpinner
+        anchors.centerIn: parent
     }
 
-    signal close()
-    signal changeScreen(string s)
-    signal setupStart(int x, string y)
-    property string locationinfo: "standby"
-    property string screenfile
-    property string dynamic_height
-    property string dynamic_width
-
+    /*! Depreciated function.
+      Was previously used to deal with orientation changes.
+      */
     function checkLayout()
     {
         console.log("c++ slot orientation changed")
     }
+
+    //! Returns the value of the param value passed in scaled to a percentage of the current width value of the application window.
+    function scaleX(x){
+        return x/100*manager.appWidth
+    }
+    //! Returns the value of the param value passed in scaled to a percentage of the current height value of the application window.
+    function scaleY(y){
+        return y/100*manager.appHeight
+    }
+
+    //! \warn This function is required by the qml engine.
+    //! this function load pages as called from other threads or in response to user events.
+    function screenchange(screenname )
+    {
+        pageLoader.source = "screens/"+screenname
+        if (pageLoader.status == Component.Ready)
+        {
+            var s = String(screenname)
+            manager.setDceResponse("Command to change to:" + screenname+ " was successfull")
+        }
+        else if (pageLoader.status == Component.Loading)
+        {
+            logger.userLogMsg = "loading page from network"
+            finishLoading(screenname)
+        }
+        else
+        {
+            logger.userLogMsg ="Command to change to:" + screenname + " failed!"
+            screenfile = screenname
+            pageLoader.source = "screens/Screen_x.qml"
+        }
+    }
+
+    function finishLoading (screenname)
+    {
+        if(pageLoader.status != Component.Ready)
+        {
+            logger.userLogMsg="finishing load";
+            pageLoader.source = "screens/"+screenname
+            logger.userLogMsg = "screen" + screenname + " loaded."
+        }
+        else
+        {
+            finishLoading(screenname)
+        }
+    }
+
+    function checkStatus(component)
+    {
+        logger.userLogMsg = "Checking progress:"+(component.progress)
+    }
+
+    function hideUI(){
+        console.log("Ui visibility check")
+        if(dceplayer.mediaPlaying)
+        {
+            if(dceplayer.focus){
+                dceplayer.focus = false
+               pageLoader.forceActiveFocus()
+                console.log("PageLoader item focus::"+pageLoader.focus)
+            } else{
+               dceplayer.forceActiveFocus()
+                pageLoader.focus = false
+                console.log("Dceplayer focus::"+dceplayer.focus)
+            }
+        }
+        else{
+            console.log("No local media playing.")
+        }
+    }
+
+
+    function loadComponent(componentName )
+    {
+        componentLoader.source = "components/"+componentName
+        if (componentLoader.status == Component.Ready)
+        {
+            logger.userLogMsg ="Command to change to:" + componentName+ " was successfull"
+        }
+        else if (componentLoader.status == Component.Loading)
+        {
+            logger.userLogMsg = "loading page from network"
+            finishLoadingComponent(componentName)
+        }
+        else
+        {
+            logger.userLogMsg = "Command to add: " + componentName + " failed!"
+
+        }
+    }
+
+    function finishLoadingComponent (componentName)
+    {
+        if(componentLoader.status != Component.Ready)
+        {
+            logger.userLogMsg = "finishing network load"
+            componentLoader.source = "components/"+componentName
+            logger.userLogMsg="screen" + componentName + " loaded."
+        }
+        else
+        {
+            finishLoadingComponent(componentName)
+        }
+
+    }
+
+
 
     DebugPanel{
         id:dcemessages
@@ -126,134 +214,75 @@ Item {
 
     //    }
 
-    Rectangle{
-        id:alternate_background
-        anchors.fill: parent
-        gradient: Gradient{
-            GradientStop { position: 0.0; color: "darkslategrey" }
-            GradientStop { position: 0.33; color: "slategrey" }
-            GradientStop { position: 1.0; color: "black" }
-        }
-    }
-
-
-
-
-
-    //! Returns the value of the param value passed in scaled to a percentage of the current width value of the application window.
-    function scaleX(x){
-        return x/100*manager.appWidth
-    }
-    //! Returns the value of the param value passed in scaled to a percentage of the current height value of the application window.
-    function scaleY(y){
-        return y/100*manager.appHeight
-    }
-
-    //! \warn This function is required by the qml engine.
-    //! this function load pages as called from other threads or in response to user events.
-    function screenchange(screenname )
-    {
-        pageLoader.source = "screens/"+screenname
-        if (pageLoader.status == Component.Ready)
-        {
-            var s = String(screenname)
-            manager.setDceResponse("Command to change to:" + screenname+ " was successfull")
-        }
-        else if (pageLoader.status == Component.Loading)
-        {
-            logger.userLogMsg = "loading page from network"
-            finishLoading(screenname)
-        }
-        else
-        {
-            logger.userLogMsg ="Command to change to:" + screenname + " failed!"
-            screenfile = screenname
-            pageLoader.source = "screens/Screen_x.qml"
-        }
-    }
-
-    function finishLoading (screenname)
-    {
-        if(pageLoader.status != Component.Ready)
-        {
-            logger.userLogMsg="finishing load";
-            pageLoader.source = "screens/"+screenname
-            logger.userLogMsg = "screen" + screenname + " loaded."
-
-        }
-        else
-        {
-            finishLoading(screenname)
-        }
-
-    }
-
-    function checkStatus(component)
-    {
-        logger.userLogMsg = "Checking progress:"+(component.progress)
-    }
-
-
-    Loader {
-        id:pageLoader
-        objectName: "loadbot"
-
-        onSourceChanged:  loadin
-        onLoaded: {
-            console.log("Screen Changed:" + pageLoader.source)
-        }
+    FocusScope{
+        id:mainScope
+        height: manager.appHeight
+        width: manager.appWidth
         focus:true
-        z:5
+        Keys.onTabPressed: hideUI()
 
+        Rectangle{
+            id:alternate_background
+            anchors.fill: parent
+            gradient: Gradient{
+                GradientStop { position: 0.0; color: "darkslategrey" }
+                GradientStop { position: 0.33; color: "slategrey" }
+                GradientStop { position: 1.0; color: "black" }
+            }
+
+            focus:false
+        }
+
+        MediaManager{
+            id:dceplayer
+            anchors.top: parent.top
+            anchors.left:parent.left
+
+            onFocusChanged: console.log("DCEPlayer Internal focus::"+focus)
+            z:dceplayer.mediaPlaying ==false ? -5 : 0
+            Component.onCompleted: {setWindowSize(manager.appHeight, manager.appWidth); dceplayer.setConnectionDetails(manager.mediaPlayerID, manager.m_ipAddress)}
+
+            Connections{
+                target:manager
+                onOrientationChanged:dceplayer.setWindowSize(manager.appHeight, manager.appWidth)
+                onMediaPlayerIdChanged:{
+                    console.log("initializing media player"+manager.mediaPlayerID)
+                    dceplayer.setConnectionDetails(manager.mediaPlayerID, manager.m_ipAddress)
+                }
+            }
+
+            onCurrentStatusChanged:logger.logMediaMessage("Media Player Status::"+dceplayer.currentStatus)
+            onMediaBufferChanged: console.log("media buffer change:"+mediaBuffer)
+            onMediaPlayingChanged: console.log("Media Playback status changed locally "+dceplayer.mediaBuffer)
+        }
+
+        Loader {
+            id:pageLoader
+            objectName: "loadbot"
+            focus:true
+            onSourceChanged:  loadin
+            onLoaded: {
+                console.log("Screen Changed:" + pageLoader.source)
+            }
+            visible: !dceplayer.focus
+            z:5
+
+        }
+
+
+        Loader{
+            id:componentLoader
+            height: parent.height
+            width: parent.width
+            objectName: "componentbot"
+            onLoaded: {
+                console.log("Component is loaded")
+                componentLoader.z = 5
+            }
+            z:5
+            focus:false
+        }
     }
-    //=================Components==================================================//
-    function loadComponent(componentName )
-    {
-        componentLoader.source = "components/"+componentName
-        if (componentLoader.status == Component.Ready)
-        {
-            logger.userLogMsg ="Command to change to:" + componentName+ " was successfull"
-        }
-        else if (componentLoader.status == Component.Loading)
-        {
-            logger.userLogMsg = "loading page from network"
-            finishLoadingComponent(componentName)
-        }
-        else
-        {
-            logger.userLogMsg = "Command to add: " + componentName + " failed!"
-
-        }
-    }
-
-    function finishLoadingComponent (componentName)
-    {
-        if(componentLoader.status != Component.Ready)
-        {
-            logger.userLogMsg = "finishing network load"
-            componentLoader.source = "components/"+componentName
-            logger.userLogMsg="screen" + componentName + " loaded."
-        }
-        else
-        {
-            finishLoadingComponent(componentName)
-        }
-
-    }
-
-
-    Loader{
-        id:componentLoader
-        height: parent.height
-        width: parent.width
-        objectName: "componentbot"
-        onLoaded: {console.log("Component is loaded")
-            componentLoader.z = 5
-        }
-        z:5
-    }
-
-
 
     SequentialAnimation{
         id:loadin
@@ -269,7 +298,6 @@ Item {
             target:pageLoader
             properties: "opacity"; to: "1"; duration: 5000
         }
-
     }
 
     //-----------------------------shader related---------------------------//

@@ -12,7 +12,8 @@ import "../components"
 
 Rectangle {
     id:asktoresume
-    anchors.fill: parent
+    height: manager.appHeight
+    width: manager.appWidth
     color: style.highlight2
     property int device_from:screenparams.getParam(184) /*!< \brief Device from */
     property int device_mediasource:screenparams.getParam(186)/*!< \brief Device's mediasource id */

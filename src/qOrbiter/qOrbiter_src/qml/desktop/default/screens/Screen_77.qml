@@ -4,20 +4,17 @@ import "../components"
 Rectangle {
 
     // property alias synText:
-    id: genericdvdremote
+    id: game_system_generic
     anchors.centerIn: parent
 
-    Connections{
-        target:dcenowplaying
-        onPlayListPositionChanged: image1.source = "image://updateobject/"+securityvideo.timestamp
-    }
+
 
     height: manager.appHeight
     width: manager.appWidth
     radius: 0
     opacity: 1
     color: "transparent"
-    Component.onCompleted:setNowPlayingData()
+ //   Component.onCompleted:setNowPlayingData()
     //main 'now playing rect containing all the other items
     Remote_lighting_controls{ id: remote_lighting_controls1; x: 1187; y: 501; width: 93; height: 219 }
     Remote_Audio_controls{ id: remote1; x: 1127; y: 511; anchors.rightMargin: 0; z: 45; anchors.right: remote_lighting_controls1.left}
@@ -31,7 +28,7 @@ Rectangle {
 
     }
 
-   NonEPGPlaylist{ x: 64;y: 70}
+ //  NonEPGPlaylist{ x: 64;y: 70}
 
 
 
@@ -75,16 +72,6 @@ Rectangle {
            }
        }
 
-       NowPlayingImage {
-           id: image1
-           x: 0
-           y: 38
-           width: 350
-           height: 224
-           anchors.topMargin: 38
-           anchors.bottomMargin: 88
-           anchors.fill: parent
-       }
 
        Rectangle {
            id: rectangle2

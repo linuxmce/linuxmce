@@ -4,10 +4,12 @@ import "../js/ComponentLoader.js" as MyJs
 import "../effects"
 import Qt.labs.shaders 1.0
 /*!
-  \brief Mythtv playing back a recording screen.
-  \todo implement timecode
+ *\brief MythTv recording playback screen.
+ *
+ *\ingroup qml_desktop_default
+ *
 
-  */
+ */
 Rectangle {
 
     // property alias synText:

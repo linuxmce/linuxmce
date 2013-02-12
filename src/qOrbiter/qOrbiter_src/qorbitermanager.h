@@ -821,6 +821,8 @@ public slots:
     void setMediaResponse (QString r) {mediaResponse = r; emit mediaResponseChanged();}
     QString getMediaResponse(){return mediaResponse;}
 
+    void mountMediaDevice(int d);
+
 
     /*Media Control Slots*/
     void playMedia(QString FK_Media) { emit startPlayback(FK_Media);}
@@ -851,7 +853,7 @@ public slots:
 
     /*Screenshot & Images slots*/
     void updateImageChanged(QImage img);
-    void grabStreamImage(){emit requestStreamImage(); }
+    void grabStreamImage(){ if(m_bContainsVideo) emit requestStreamImage(); }
     void grabFileImage() {emit requestStoredMediaImage(nowPlayingButton->path+"/"+nowPlayingButton->filepath);  }
     void setScreenShotVariables(screenshotAttributes*t);
     void showScreenShotVariables() { qorbiterUIwin->rootContext()->setContextProperty("screenshotAttributes", QVariant::fromValue(screenshotVars)); }

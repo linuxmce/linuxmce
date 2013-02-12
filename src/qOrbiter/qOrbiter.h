@@ -1308,6 +1308,7 @@ signals:
     void setEa(int room, int ea);
 
 
+
     //connections
     void checkReload();
     void routerDisconnect();
@@ -1486,6 +1487,8 @@ signals:
     void DCEHostChanged();
 
 public slots:
+
+
 
     void cancelAllRequests(){
         b_cancelRequest = true;

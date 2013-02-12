@@ -18,10 +18,13 @@ MediaManager::MediaManager(QDeclarativeItem *parent) :
     setFlag(ItemHasNoContents, false);
     serverAddress = "";
     deviceNumber = -1;
-timeCodeServer = new QTcpServer();
+    timeCodeServer = new QTcpServer();
     setCurrentStatus("Media Manager defaults set, initializing media engines");
 #ifdef QT4
     audioSink = new Phonon::AudioOutput();
+    QList <Phonon::AudioOutputDevice> outputs = Phonon::BackendCapabilities::availableAudioOutputDevices();
+    qDebug() << outputs;
+    audioSink->setOutputDevice(outputs.last());
     videoSurface = new Phonon::VideoWidget();
     mediaObject = new Phonon::MediaObject();
     Phonon::createPath(mediaObject, audioSink);
@@ -37,7 +40,7 @@ timeCodeServer = new QTcpServer();
     filterProxy->setWidget(videoSurface);
     filterProxy->setAutoFillBackground(false);
 
-   #endif
+#endif
     setCurrentStatus("Window Initialized");
     totalTime=0;
     setMediaBuffer(0);
@@ -72,8 +75,9 @@ void MediaManager::initializeConnections()
     QObject::connect(mediaPlayer, SIGNAL(mediaIdChanged(QString)), this, SLOT(setFileReference(QString)));
     QObject::connect(mediaPlayer, SIGNAL(startPlayback()), this, SLOT(startTimeCodeServer()),Qt::QueuedConnection);
     QObject::connect(mediaPlayer, SIGNAL(startPlayback()), videoSurface, SLOT(raise()),Qt::QueuedConnection);
+
     QObject::connect(mediaPlayer, SIGNAL(connectionStatusChanged(bool)), this, SLOT(setConnectionStatus(bool)));
-   QObject::connect(mediaPlayer,SIGNAL(jumpToStreamPosition(int)), this, SLOT(setMediaPosition(int)));
+    QObject::connect(mediaPlayer,SIGNAL(jumpToStreamPosition(int)), this, SLOT(setMediaPosition(int)));
 
     /*From internal plugin*/
     QObject::connect(mediaObject, SIGNAL(finished()), mediaPlayer, SLOT(mediaEnded()),Qt::QueuedConnection);
@@ -89,7 +93,7 @@ void MediaManager::initializeConnections()
 
     /*internals*/
     QObject::connect(dcethread, SIGNAL(started()), mediaPlayer, SLOT(run()));
-   #ifdef QT4
+#ifdef QT4
     mediaObject->setTickInterval(quint32(1000));
 #elif QT5
 
@@ -239,14 +243,14 @@ void MediaManager::transmit(QString d)
     QDataStream out(&chunk, QIODevice::WriteOnly);
     //out << (quint16)0;
     out << d.toAscii(); //.toStdString().c_str();
-   out.device()->reset();
+    out.device()->reset();
     out << (quint16)(chunk.size() -sizeof(quint16));
 
     if(!clientList.isEmpty()){
         for(int s = 0; s< clientList.length(); s++)
         {
             QTcpSocket *tr = clientList.at(s);
-        tr->write(chunk);
+            tr->write(chunk);
         }
     }
 
@@ -255,8 +259,8 @@ void MediaManager::transmit(QString d)
 
 void MediaManager::mountDrive(int device)
 {
-       mountProcess = new QProcess();
-       QObject::connect(mountProcess, SIGNAL(readyRead()), this, SLOT(setCurrentStatus(QString)));
-        mountProcess->execute("gksudo mount 192.168.80.1:/mnt/device/121 /mnt/device/121");
-       qDebug() << mountProcess->state();
+    mountProcess = new QProcess();
+    QObject::connect(mountProcess, SIGNAL(readyRead()), this, SLOT(setCurrentStatus(QString)));
+    mountProcess->execute("gksudo mount 192.168.80.1:/mnt/device/121 /mnt/device/121");
+    qDebug() << mountProcess->state();
 }

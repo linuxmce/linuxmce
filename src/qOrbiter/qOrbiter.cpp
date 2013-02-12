@@ -1861,6 +1861,7 @@ void qOrbiter::processConfigData(QNetworkReply *r)
     if (SendCommand(configFileRequest))
     {
         emit commandResponseChanged("Requesting remote configuration..");
+
     }
     else
     {
@@ -2709,6 +2710,7 @@ void DCE::qOrbiter::GetMediaAttributeGrid(QString  qs_fk_fileno)
                 index = pDataGridTable->CovertColRowType(it->first).first;
                 QString attributeType = pCell->m_mapAttributes_Find("Title").c_str();
                 QString attribute  = pCell->m_mapAttributes_Find("Name").c_str();
+
                 cellfk = pCell->GetValue();
                 //QApplication::processEvents(QEventLoop::AllEvents);
 #ifdef debug
@@ -2717,7 +2719,7 @@ void DCE::qOrbiter::GetMediaAttributeGrid(QString  qs_fk_fileno)
                 if(attributeType == "Program")
                 {
                     emit fd_programChanged(attribute);
-                    ;
+                    qDebug("PROGRAM");
                 }
                 else if(attributeType == "Title")
                 {
@@ -2927,6 +2929,8 @@ void qOrbiter::checkTimeCode()
 void qOrbiter::getStreamingVideo()
 {
 
+    qDebug() << "STREAM IMAGE!!!";
+
     char *grabData;
     int grabData_size=0;
     string sFormat ="png";
@@ -2948,6 +2952,7 @@ void qOrbiter::getStreamingVideo()
     else
     {
         emit commandResponseChanged("Couldnt get the stream image!");
+        emit videoGrabReady(QImage());
     }
 
 }
@@ -3155,7 +3160,7 @@ void DCE::qOrbiter::GetNowPlayingAttributes()
         string valassign ="";
         bool isSuccessfull;// = "false";
 
-        string m_sGridID ="mac_"+StringUtils::itos(m_dwPK_Device); // the string identifier on the type of grid
+        string m_sGridID ="mac"+StringUtils::itos(m_dwPK_Device); // the string identifier on the type of grid
         string m_sSeek;
         int iData_Size=0;
         int GridCurRow = 0;
@@ -3503,13 +3508,13 @@ void DCE::qOrbiter::populateAdditionalMedia() //additional media grid that popul
 
                       for(MemoryDataTable::iterator it=pMediaGridTable->m_MemoryDataTable.begin();it!=pMediaGridTable->m_MemoryDataTable.end();++it)
                       {
-
-
                           pCell= it->second;
                           const char *pPath = pCell->GetImagePath();
                           filePath = QString::fromUtf8(pPath);
                           fk_file = pCell->GetValue();
+
                           cellTitle = QString::fromUtf8(pCell->m_Text);
+
                           //            if(fk_file.contains("!A"))
                           //            {
                           //                string sText = "";
@@ -3708,8 +3713,8 @@ void DCE::qOrbiter::GetAlarms()
         {
             DataGridTable *pSleepingDataGridTable = new DataGridTable(iData_Size,pData,false);
             cellsToRender= pSleepingDataGridTable->getTotalRowCount();
-          //  qDebug() << pSleepingDataGridTable->GetCols();
-          //  qDebug() << pSleepingDataGridTable->GetRows();
+            //  qDebug() << pSleepingDataGridTable->GetCols();
+            //  qDebug() << pSleepingDataGridTable->GetRows();
 #ifndef ANDROID
             LoggerWrapper::GetInstance()->Write(LV_CRITICAL, "sleeping menu alarms Grid Dimensions: Height %i, Width %i", gHeight, gWidth);
 #endif
@@ -4549,7 +4554,7 @@ void qOrbiter::CreateChildren()
         }
         emit commandResponseChanged("Current device template::"+QString::number(pDeviceData_Impl_Child->m_dwPK_DeviceTemplate));
 
-        if (pDeviceData_Impl_Child->m_dwPK_DeviceCategory == 180){
+        if (pDeviceData_Impl_Child->m_dwPK_DeviceTemplate == 2205){
             int t = pDeviceData_Impl_Child->m_dwPK_Device;
             setqMediaPlayerID(t);
             emit commandResponseChanged("QMediaPlayer ID::"+t);
@@ -5130,6 +5135,7 @@ void qOrbiter::CMD_Guide(string &sCMD_Result,Message *pMessage)
 void qOrbiter::getAttributeImage(QString param)
 {
     CMD_Get_Attribute_Image attributeImage(m_dwPK_Device , iMediaPluginID );
+
 }
 
 
@@ -5185,3 +5191,6 @@ void qOrbiter::executeMessageSend(QString outGoing)
     }
 
 }
+
+
+

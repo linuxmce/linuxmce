@@ -14,7 +14,8 @@ import "../components"
 Item{
     id:singlecameraview
     property int camera:screenparams.getParam(2) /*!< \brief the camera device number in this screen. */
-anchors.fill: parent
+    height: manager.appHeight
+    width: manager.appWidth
     Connections{
         target: securityvideo
         onImageUpdated:{
@@ -26,9 +27,10 @@ anchors.fill: parent
 
 
     Rectangle{
-      anchors.fill: parent
+        anchors.fill: parent
         color: "transparent"
         Component.onCompleted: requestSecurityPic(screenparams.getParam(2), 640, 480)
+        anchors.centerIn: parent
         StyledText {
             id: singlecamlabel
             x: 74
@@ -59,13 +61,13 @@ anchors.fill: parent
             Rectangle{
                 height: scaleY(10)
                 width: scaleX(15)
-               anchors.top: securityimage.bottom
-               anchors.horizontalCenter: securitycamrect.horizontalCenter
+                anchors.top: securityimage.bottom
+                anchors.horizontalCenter: securitycamrect.horizontalCenter
 
-               Text {
-                   id: buttonplaceholder
-                   text: qsTr("Camera label and controls go here")
-               }
+                Text {
+                    id: buttonplaceholder
+                    text: qsTr("Camera label and controls go here")
+                }
             }
         }
 
