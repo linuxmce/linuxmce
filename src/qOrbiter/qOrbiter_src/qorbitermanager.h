@@ -493,6 +493,7 @@ signals:
     void moveArrowDirection(int d);
     void signalGoBack(); 
 
+
  void redButton();
  void blueButton();
  void greenButton();
@@ -562,6 +563,7 @@ signals:
     void internalHostChanged();
     void externalHostChanged();
     void deviceNumberChanged(int d);
+    void applicationPathChanged();
 
     /*Media Device Control Signals*/
     void resendAvCodes();
@@ -652,19 +654,57 @@ public slots:
      * \brief This requests the availible attribute types.
      */
     void requestAttributeTypes(){}
+
+    /*!
+     * \brief requestGenres
+     */
     void requestGenres(){}
 
-    //mobile device specfic
+    /*!
+     * \brief setupMobileStorage Sets up the mobile storage location for Android devices.
+     * Returns true if sucessfull, false if not.
+     * \return
+     */
     bool setupMobileStorage();
+
+    /*!
+     * \brief setMobileStorage
+     * \param s
+     */
     void setMobileStorage(QString s){mobileStorageLocation = s; emit mobileStorageChanged(mobileStorageLocation);}
+
+    /*!
+     * \brief getMobileStorage
+     * \return
+     */
     QString getMobileStorage(){return mobileStorageLocation;}
 
-    /*Child devices*/
+    /*! @name child devices */
+    //@{
+    /*!
+     * \brief setCommunicatorID
+     * \param i
+     */
     void setCommunicatorID(int i){communicatorID = i;emit communicatorIdChanged(); }
+
+    /*!
+     * \brief getCommunicatorID
+     * \return
+     */
     int getCommunicatorID() {return communicatorID;}
 
+    /*!
+     * \brief setMediaPlayerID
+     * \param i
+     */
     void setMediaPlayerID(int i) { mediaPlayerID = i; emit mediaPlayerIdChanged(); qDebug() << "New Media Player ID" << mediaPlayerID;}
+
+    /*!
+     * \brief getMediaPlayerID
+     * \return
+     */
     int getMediaPlayerID(){return mediaPlayerID;}
+ //@}
 
     /*Splash screen related slots*/
     void showExistingOrbiter(const QList<QObject *> l )  ;
@@ -762,7 +802,11 @@ public slots:
     void setHouseMode(int mode, int pass);
 
 
-    /*Media Metadata Slots*/
+    /*! @name Media Metadata Slots*/
+    //{@
+    /*!
+     * \brief getLiveTVPlaylist
+     */
     void getLiveTVPlaylist() { }
     /*!
      * \brief This requests the current playlist of stored media.
@@ -776,55 +820,186 @@ public slots:
      * \ingroup qorbiter_properties
      */
     void changedPlaylistPosition(int position) {emit newPlaylistPosition(position);}
+    //@}
 
-    /*Media Mode control slots*/
+    /*! @name Media Mode control slots*/
+    //@{
     void setNowPlayingData() {}
     /*!
      * \brief This sets the playlist for tv channels.
      * \ingroup qorbiter_properties
      */
     void setNowPlayingTv() {emit bindMediaRemote(true); emit liveTVrequest(); }
+
+    /*!
+     * \brief setBoundStatus
+     * \param b
+     */
     void setBoundStatus(bool b) {emit bindMediaRemote(b);}
+
+    /*!
+     * \brief setNowPlayingIcon
+     * \param b
+     */
     void setNowPlayingIcon(bool b);
+
+    /*!
+     * \brief nowPlayingChanged
+     * \param b
+     */
     void nowPlayingChanged(bool b);
+
+    /*!
+     * \brief addDeviceToList
+     * \param d
+     */
     void addDeviceToList(AvDevice* d) {devices->appendRow(d);}
+
+    /*!
+     * \brief addCommandToList
+     * \param c
+     */
     void addCommandToList(AvCommand* c) {deviceCommands->appendRow(c);}
+
+    /*!
+     * \brief moveDirection
+     * \param d
+     */
     void moveDirection(int d) {emit moveArrowDirection(d);}
+
+    /*!
+     * \brief osdBack
+     */
     void osdBack() {emit signalGoBack();}
+
+    /*!
+     * \brief setDeviceVolume
+     * \param d
+     */
     void setDeviceVolume(int d){ deviceVolume = d; emit deviceVolumeChanged();}
+
+    /*!
+     * \brief getDeviceVolume
+     * \return
+     */
     int getDeviceVolume() {return deviceVolume;}
 
+    /*!
+     * \brief setLiveAvPath
+     * \param path
+     */
     void setLiveAvPath(bool path) { usingLiveAvPath = path; qDebug() ; emit liveAvPath();}
+
+    /*!
+     * \brief getLiveAvPath
+     * \return
+     */
     bool getLiveAvPath() { return usingLiveAvPath;}
 
+    /*!
+     * \brief setContainsVideo
+     * \param video
+     */
     void setContainsVideo(bool video) {m_bContainsVideo = video; emit containsVideo();}
+
+    /*!
+     * \brief getContainsVideo
+     * \return
+     */
     bool getContainsVideo() {return m_bContainsVideo;}
 
+    /*!
+     * \brief setOsd
+     * \param osd
+     */
     void setOsd(bool osd) { m_bIsOSD = osd; emit isOsd();}
+
+    /*!
+     * \brief getOsd
+     * \return
+     */
     bool getOsd() { return m_bIsOSD;}
 
+    /*!
+     * \brief setMonitorStatus
+     * \param state
+     */
     void setMonitorStatus(bool state) { monitorAvailible = state; emit monitorStatusChanged();}
+
+    /*!
+     * \brief getMonitorStatus
+     * \return
+     */
     bool getMonitorStatus() {return monitorAvailible;}
 
+    /*!
+     * \brief setDiscreteAudio
+     * \param d
+     */
     void setDiscreteAudio(bool d) {discreteAudio = d; emit discreteAudioChanged();}
+
+    /*!
+     * \brief getDiscreteAudio
+     * \return
+     */
     bool getDiscreteAudio() {return discreteAudio;}
 
+    /*!
+     * \brief setCommandResponse
+     * \param response
+     */
     void setCommandResponse(QString response) {commandResponse =QTime::currentTime().toString()+"::"+response; qDebug() << commandResponse; emit commandResponseChanged();}
+
+    /*!
+     * \brief getCommandResponse
+     * \return
+     */
     QString getCommandResponse() {return commandResponse;}
 
+    /*!
+     * \brief setEventResponse
+     * \param eResponse
+     */
     void setEventResponse(QString eResponse){eventResponse = eResponse; emit eventResponseChanged();}
+
+    /*!
+     * \brief getEventResponse
+     * \return
+     */
     QString getEventResponse() {return eventResponse;}
 
+    /*!
+     * \brief setDeviceResponse
+     * \param dResponse
+     */
     void setDeviceResponse(QString dResponse) {deviceResponse = deviceResponse; emit deviceResponseChanged();}
+
+    /*!
+     * \brief getDeviceResponse
+     * \return
+     */
     QString getDeviceResponse() {return deviceResponse;}
 
+    /*!
+     * \brief setMediaResponse
+     * \param r
+     */
     void setMediaResponse (QString r) {mediaResponse = r; emit mediaResponseChanged();}
+    /*!
+     * \brief getMediaResponse
+     * \return
+     */
     QString getMediaResponse(){return mediaResponse;}
 
+    /*!
+     * \brief mountMediaDevice
+     * \param d
+     */
     void mountMediaDevice(int d);
+//@}
 
-
-    /*Media Control Slots*/
+    /*! @name Media Control Slots*/
+    //{@
     void playMedia(QString FK_Media) { emit startPlayback(FK_Media);}
     void stopMedia() {emit stopPlayback();}
     void setPlaybackSpeed(int s) {emit setStreamSpeed(s);}
@@ -849,9 +1024,10 @@ public slots:
     void movePlaylistEntry(QString d, int index) {emit movePlistEntry(d, index); }
     void removePlaylistEntry(int index) {emit removePlistEntry(index);}
     void saveCurrentPlaylist(QString name, bool mode) {emit savePlist(name, mode);} /*true is public, false is private*/
+//@}
 
-
-    /*Screenshot & Images slots*/
+    /*! @nameScreenshot & Images slots*/
+    //@{
     void updateImageChanged(QImage img);
     void grabStreamImage(){ if(m_bContainsVideo) emit requestStreamImage(); }
     void grabFileImage() {emit requestStoredMediaImage(nowPlayingButton->path+"/"+nowPlayingButton->filepath);  }
@@ -860,8 +1036,10 @@ public slots:
     void setMediaScreenShot(QImage screen_shot);
     void saveScreenShot(QString attribute);
     void cleanupScreenie();
+    //@}
 
-    /*Media Devices slots*/
+    /*! @name Media Devices slots*/
+    //@{
     void showDeviceCodes(int code) {emit populateDeviceCommands(code);}
     void setCommandList(QList<QObject*> &l);
     void resendCode(int from, int to) { deviceCommands->clear(); emit resendDeviceCode( from,  to);}
@@ -869,8 +1047,11 @@ public slots:
     bool getDisplayStatus() { return osdStatus; }
     void adjustLights(QString l) {emit newLightLevel(l); }
     void showAvControl() {emit resendAvCodes();}
+    //@}
 
-    /*QML Skin Function slots*/
+
+    /*! @name QML Skin Function slots*/
+    //@{
     void setActiveSkin(QString name);
     bool loadSkins(QUrl url);
 #if (QT5)
@@ -878,8 +1059,10 @@ public slots:
 #else
     void skinLoaded(QDeclarativeView::Status status);
 #endif
+ //@}
 
-    /*Datagrid Slots*/
+    /*! @name Datagrid Slots*/
+    //@{
     void setGridStatus(bool s) {emit gridStatus(s);}
     void setSorting(int i);
     void setMediaType(int m) {i_current_mediaType = m; emit mediaTypeChanged();}
@@ -907,6 +1090,7 @@ public slots:
 
     void setCurrentPage(int page) {media_currentPage = page;   emit mediaPageChanged();  }
     int getCurrentPage() {return media_currentPage;}
+    //@}
 
     //initialization related
     void regenOrbiter(int deviceNo);
