@@ -1,0 +1,80 @@
+# This makefile is used to build squeezeslave for an old 133MHz Pentium MMX laptop.
+# As it is very slow to compile squeezeslave on it, the system installed support libraries
+# are used instead of compiling them as part of the build.
+
+OS=lnx24
+CC=gcc
+TAR=tar
+CP=cp
+PATCH=patch
+CFLAGS=-DRENICE -DDAEMONIZE -Wall -s -march=i586 -mtune=pentium-mmx -O3 -fomit-frame-pointer
+
+# Comment out these two lines to remove display support
+CFLAGS+=-DINTERACTIVE
+LIBS+=-lncurses -llirc_client
+
+INCLUDE=-Ilib/portaudio/pa_common -Ilib/portaudio/pablio -Ilib/portmixer/px_common -Isrc
+
+LIBVORBIS=tremor-r18153
+
+# Tremor fixed point ogg decoder
+# INCLUDE+=-Ilib/vorbis/$(OS)/include
+# CFLAGS+=-DTREMOR_DECODER
+# SUPPORTLIBS:=lib/vorbis/$(OS)/lib/libvorbisidec.a
+
+# Vorbis floating point ogg decoder
+LIBS+=/usr/lib/libvorbisfile.a /usr/lib/libvorbis.a
+
+LIBPORTAUDIO=lib/libportaudio.a
+
+PORTAUDIOFILES:=lib/portaudio/pa_unix_oss/pa_unix.c lib/portaudio/pa_unix_oss/pa_unix_oss.c  lib/portaudio/pa_common/pa_lib.c lib/portaudio/pa_common/pa_convert.c lib/portaudio/pablio/ringbuffer.c
+
+PORTMIXERFILES:=lib/portmixer/px_unix_oss/px_unix_oss.c
+
+SLIMPROTOFILES:=src/slimaudio/slimaudio_http.c src/slimaudio/slimaudio_decoder.c src/slimaudio/slimaudio_decoder_flac.c src/slimaudio/slimaudio_decoder_mad.c src/slimaudio/slimaudio_decoder_vorbis.c src/slimaudio/slimaudio_decoder_pcm.c src/slimaudio/slimaudio_output.c src/slimaudio/slimaudio_buffer.c src/slimaudio/slimaudio.c src/slimproto/slimproto.c
+
+SQUEEZESLAVEFILES:=src/squeezeslave/squeezeslave.c src/squeezeslave/help.c src/squeezeslave/daemonize.c src/squeezeslave/interactive.c
+
+LIBSLIMPROTO=lib/libslimproto.a
+
+SQUEEZESLAVE=bin/squeezeslave
+
+.c.o:
+	$(CC) $(CFLAGS) -c $(INCLUDE) $< -o $*.o
+
+all: $(SUPPORTLIBS) $(SQUEEZESLAVE) 
+
+lib/vorbis/$(OS)/lib/libvorbisidec.a:
+	cd lib/vorbis/$(OS)/build && $(TAR) --bzip -xf ../../../../sources/$(LIBVORBIS).tar.bz2
+	cd lib/vorbis/$(OS)/build && $(PATCH) -p0 -i ../../../../patches/$(LIBVORBIS)-version-script.patch
+	cd lib/vorbis/$(OS)/build/$(LIBVORBIS) && CC="$(CC)" CFLAGS="$(CFLAGS)" CPPFLAGS="$(CFLAGS)" LDFLAGS="$(LDFLAGS)" ./configure --enable-shared=no
+	cd lib/vorbis/$(OS)/build/$(LIBVORBIS) && make clean && make
+	$(CP) -p lib/vorbis/$(OS)/build/$(LIBVORBIS)/.libs/libvorbisidec.a lib/vorbis/$(OS)/lib
+	$(CP) -p lib/vorbis/$(OS)/build/$(LIBVORBIS)/{ivorbiscodec.h,ivorbisfile.h,config_types.h} lib/vorbis/$(OS)/include/vorbis
+
+$(LIBPORTAUDIO): $(PORTAUDIOFILES:.c=.o)
+	ar cru $(LIBPORTAUDIO) $^
+	ranlib $(LIBPORTAUDIO)
+
+$(LIBSLIMPROTO): $(SLIMPROTOFILES:.c=.o)
+	ar cru $(LIBSLIMPROTO) $^
+	ranlib $(LIBSLIMPROTO)
+			
+$(SQUEEZESLAVE): $(SQUEEZESLAVEFILES:.c=.o) $(PORTMIXERFILES:.c=.o) $(LIBSLIMPROTO) $(LIBPORTAUDIO) $(SUPPORTLIBS)
+	$(CC) -o $(SQUEEZESLAVE) $^ /usr/lib/libmad.a /usr/lib/libFLAC.a $(SUPPORTLIBS) $(LIBS) /usr/lib/libogg.a -lpthread -lm
+
+clean:
+	-@rm -f $(SLIMPROTOFILES:.c=.o)
+	-@rm -f $(SQUEEZESLAVEFILES:.c=.o)
+	-@rm -f $(PORTMIXERFILES:.c=.o)
+	-@rm -f $(PORTAUDIOFILES:.c=.o)
+	-@rm -f $(LIBSLIMPROTO)
+	-@rm -f $(LIBPORTAUDIO)
+	-@rm -f $(LIBGETOPT)
+	-@rm -f $(SQUEEZESLAVE)
+
+realclean: clean
+	-@rm -rf lib/vorbis/$(OS)/build/$(LIBVORBIS)
+	-@rm -f lib/vorbis/$(OS)/lib/libvorbisidec.a
+	-@rm -f lib/vorbis/$(OS)/include/vorbis/{ivorbiscodec.h,ivorbisfile.h,config_types.h}
+

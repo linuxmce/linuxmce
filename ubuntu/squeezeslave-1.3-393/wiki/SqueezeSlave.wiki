@@ -1,0 +1,605 @@
+=Squeezeslave=
+
+[[Category: Software players]]
+
+[[SqueezeSlave]] is a software music player that allows you to play music streamed from [[SqueezeCenter | Squeezebox Server]] (formerly known as [[SqueezeCenter]], [[SlimServer]]) and [[SqueezeNetwork]].
+
+[[SqueezeSlave]] is an alternative to [[SqueezePlay]] and [[SoftSqueeze]].  The main difference is that SqueezeSlave has no graphical interface (GUI), but rather is run from a command line. A text based display is supported as of version 0.9-133 on all platforms similar to the [[SLIMP3]].  This mode is disabled by default. This makes SqueezeSlave useful as a player for "headless" applications (e.g., server computer without display).  It's also useful as a background player where a display is not required, or as a player which uses the least computing resources.
+
+[[SqueezeSlave]] was written by Richard Titmuss with contributions from Adrian Smith, Alan Young, Dominique Leroux, Duane Paddock, Graham Chapman, Ivor Bosloper, Jason Melvin, Luke Redpath, Sam Gupta and Uri Savoray.
+
+[[SqueezeSlave]] is currently maintained by Ralph Irving http://forums.slimdevices.com/member.php?u=3484.
+
+If you have problems with [[SqueezeSlave]] read the support thread at http://forums.slimdevices.com/showthread.php?t=83362 for additional help.
+
+Version 1.1 fixes a long standing issue with squeezeslave ALSA hanging after the playlist was stopped the first time.
+
+Version 1.0 fixed a long standing bug in the buffering code that caused playback to not advance after the end of the first track when the duration of the track was less than 30 seconds.  The bug also caused several online music services like LastFM and Napster to exhibit the problem. Version 1.0 has been tested with Squeezebox Server versions 7.3.4, 7.4.2, 7.5.1 and 7.6 r31503.  Server versions older than 7.3.4 have not been tested so YMMV.
+
+Version 0.9 brought replay gain support with [[SqueezeCenter | Squeezebox Server]] v7.4 r26720 or later.
+Positive dB replay gain values are ignored to prevent clipping.
+
+The linux version supports ALSA, pulseaudio and OSS audio, IR remotes, USB displays, on screen text mode display and keyboard navigation.
+
+The windows version as of 0.9-133 supports Direct Sound and ASIO audio, on screen text mode display and player navigation via keyboard.  IR remotes and USB displays support is not available at this time.
+
+All versions of squeezeslave prior to 0.9-133 hang after playing the first remote audio stream between [[Squeezebox Server]] v7.4 r28009 and v7.6 r30499.  A server side fix was applied at SBS v7.6 r30500. [[SqueezeCenter]] versions 7.3.4 and older are not affected.  Gentoo ebuilds for Squeezebox Server v7.4.2 and v7.5 include the server side patch - Thanks Stuart.  The patch is also available in the squeezeslave source patches directory as httpsocketclose.patch.
+
+The additional display features no longer require patching for [[SqueezeCenter | Squeezebox Server]] v7.4 r26720 or later.
+For older versions of [[SqueezeCenter]] the replay gain patches below include the necessary changes for the display feature.
+
+Patch files squeezecenter_squeezeslave_player3-7.3.patch and squeezecenter_squeezeslave_player3-7.2.patch are included in the binary packages if that build has the features enabled for squeezecenter 7.3.3 and 7.2.2 running on linux/solaris.  They are also available in the source tree under the patches subdirectory.
+
+Executable versions for Windows, Linux Intel/ARMel, OSX PPC/Intel and Solaris SPARC/Intel can be downloaded from SourceForge.net at: http://sourceforge.net/projects/softsqueeze/files/squeezeslave/squeezeslave-1.1.253/
+
+Makefiles are available for NetBSD and FreeBSD, see build instructions below.
+
+[https://www.paypal.com/cgi-bin/webscr?cmd=_donations&business=LL5P6365KQEXN&lc=CA&item_name=Squeezeslave&currency_code=USD&bn=PP%2dDonationsBF%3abtn_donate_SM%2egif%3aNonHosted Donations] to the squeezeslave project always appreciated.
+
+== Installation ==
+
+=== Mac OS X installation ===
+
+The Mac OS X version can be downloaded from http://sourceforge.net/projects/softsqueeze/files/squeezeslave/squeezeslave-1.1.253/squeezeslave-1.1-253-osx.tar.gz/download . Unpacking the file gives a folder with
+* A GNU <code>LICENSE.txt</code>
+* An <code>squeezeslave-ppc</code> and
+* a <code>squeezeslave-intel</code> executable.
+* A launchd <code>squeezeslave.plist</code> description file
+* There are several other squeezeslave binaries included but are not needed unless you run into problems.
+
+A look at the <code>plist</code> file indicates that the executable is to be renamed and moved to <code>/opt/local/bin/</code>.
+You might have to create the corresponding directory.
+
+Time to open the '''Terminal''' as an administrator, navigate to the place the downloaded files are located and
+
+ mkdir -p /opt/local/bin/
+ mv squeezeslave-intel /opt/local/bin/squeezeslave
+
+You can now check the command line options with 
+ /opt/local/bin/squeezeslave -h
+
+The next step is to find out which number is associated to the output device you plan to use 
+ /opt/local/bin/squeezeslave -L
+
+which gave me
+ Output devices:
+   0: iSight
+   1: Built-in Line Input
+   2: Built-in Digital Input
+   3: Built-in Output
+   4: Built-in Line Output
+   5: Built-in Digital Output
+
+Now try to run it.
+If your Squeezecenter runs on the same machine and you want to send the audio to the line output
+ /opt/local/bin/squeezeslave -o4
+If the Squeezecenter runs on another machine, add its host name to the command line
+ /opt/local/bin/squeezeslave -o4 macmini.mynet
+
+Now open the SqueezeCenter control webpage and look at the players list. The new Squeezeslave should have appeared.
+
+If this works, you are ready to have Squeezeslave automatically launched at boot time.
+
+Lingon http://sourceforge.net/projects/lingon/ provides a gui to edit and create launchd configuration files or you can edit <code>squeezeslave.plist</code> with a text editor and customize it to your installation.
+ <?xml version="1.0" encoding="UTF-8"?>
+ <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+ <plist version="1.0">
+        <dict>
+                <key>KeepAlive</key>
+                <true/>
+                <key>OnDemand</key>
+                <false/>
+                <key>RunAtLoad</key>
+                <true/>
+                <key>Label</key>
+                <string>squeezeslave</string>
+                <key>ProgramArguments</key>
+                <array>
+                        <string>/opt/local/bin/squeezeslave</string>
+                        <string>-o4</string>
+                        <string>-r10</string>
+                        <string>macmini.mynet</string>
+                </array>
+        </dict>
+ </plist>
+
+If you intend to use more than one Squeezeslave, you will need to provide a different mac address to each
+                <array>
+                        <string>/opt/local/bin/squeezeslave</string>
+                        <string>-o4</string>
+                        <string>-r10</string>
+                        <string>-m00:00:00:00:00:16</string>
+                        <string>macmini.mynet</string>
+                </array>
+
+For me, the lengthier command parameter <code>--mac 00:00:00:00:00:16</code> didn't work properly.
+
+Move the file to the proper place
+ mv squeezeslave.plist /Library/LaunchDaemons/
+ chown root:wheel /Library/LaunchDaemons/squeezeslave.plist
+
+Start Squeezeslave
+ launchctl load /Library/LaunchDaemons/squeezeslave.plist
+
+Check it is running
+ ps ax | grep squeeze
+
+Stop it
+ launchctl remove squeezelave
+
+The Squeezeslave should now automatically launch at login time.
+
+There are two known issues running squeezeslave under launchctl.
+# The system can take up to 20 seconds to enter sleep mode.
+# If squeezeslave is playing when sleep mode is activated, no audio will be heard after system resume.  Stop and restart the player to restore audio.
+
+===Linux build instructions===
+Prebuilt versions of squeezeslave for most platforms are available on SourceForge.net.  However, if you have problems with the precompiled binaries for linux, please checkout the source and build yourself. There have been many issues lately with system libraries and the linux binaries that have been solved by building your own.
+
+The current source tree for squeezeslave is available on Google Code.
+
+To checkout version 1.1-253 use the branch url
+
+ svn checkout http://squeezeslave.googlecode.com/svn/squeezeslave/branches/squeezeslave-1.1-253
+
+If a subversion client is not available you can download the source code in tar format.
+
+ http://squeezeslave.googlecode.com/files/squeezeslave-1.1-253-src.tar.bz2
+
+You can checkout the latest development code from trunk with this url.
+
+ svn checkout http://squeezeslave.googlecode.com/svn/squeezeslave/trunk/squeezeslave
+
+To track changes in trunk you can view them at http://code.google.com/p/squeezeslave/source/list
+
+The makefiles build all required support libraries; portaudio, flac, ogg, vorbis and mad.
+
+System libraries are still required for alsa (asound), curses (ncurses) and lirc_client and may require installing the "development" packages to compile successfully.
+
+On ubuntu linux the following commands run as root will install the additional requirements.
+
+ sudo apt-get install subversion
+
+ sudo apt-get install libasound2-dev
+
+and these additional packages are only required to build the INTERACTIVE version, makefiles with "display" in the filename.  The INTERACTIVE (display) adds support for a text console display, much like the [[SliMP3]] player and the ability to control the display using the keyboard.  USB LCD displays and IR remotes can also be used with the display version.
+
+ sudo apt-get install libncurses5-dev
+
+ sudo apt-get install liblircclient-dev
+
+===Which makefile does what?===
+
+Most current linux distributions are based on the Linux 2.6 kernel so these makefiles should work for most current linux installs.
+
+*Linux 2.6 32-bit intel kernel, OSS, ALSA and pulseaudio audio drivers.
+
+makefile.linux26-alsa-display
+
+*Linux 2.6 64-bit intel kernel, OSS, ALSA and pulseaudio audio drivers.
+
+makefile.linux26-i64-alsa-display
+
+*Linux 2.6 32-bit PowerPC kernel (PS3, PPC Mac Linux), OSS, ALSA and pulseaudio audio drivers
+
+makefile.linux26-ppc-alsa-display
+
+*Linux 2.4 32-bit intel kernel, OSS.
+
+makefile.linux24-display
+
+All deprecated linux makefiles without the -display postfix have been removed and the abilitiy to build squeezeslave without interactive (aka DISPLAY) support is now provided by commenting out two lines from the linux*-display makefiles.
+
+<code>
+ # Comment out these two lines to remove display support
+ # CFLAGS+=-DINTERACTIVE
+ # LIBS+=-lcurses -llirc_client
+</code>
+
+For more details see deprecated/README.txt in the source repository.
+
+===A typical Linux build===
+
+ svn checkout http://squeezeslave.googlecode.com/svn/squeezeslave/trunk/squeezeslave
+ cd squeezeslave
+ make -f makefile.linux26-alsa-display realclean
+ make -f makefile.linux26-alsa-display
+
+Upon successfull completion, you'll find a file in the bin/ directory starting with squeezeslave.  Several makefiles append additional words to help identify the "flavour" of the build for packaging purposes.  You can safely rename the file to be called just squeezeslave.  This step is NOT necessary with the above build example.
+
+=== FreeBSD build instructions ===
+
+You need the following ports packages: audio/libogg, audio/libvorbis, audio/libmad, audio/flac, audio/portaudio2 and optionaly comms/lirc.
+
+If you don't want lirc, you need to remove '-DINTERACTIVE' from makefile (line 7).
+
+Then, type:
+
+ make -f makefile.freebsd
+
+=== NetBSD build instructions ===
+
+You need the following pkgsrc packages: multimedia/libogg, audio/libvorbis, audio/libmad, audio/flac and audio/portaudio-devel.
+
+Then use the following makefile [[http://www.baaz.fr/makefile.netbsd]].
+
+The NetBSD makefile is now available in the source repository.
+
+and:
+
+ make -f makefile.netbsd
+
+This makefile doesn't build squeezeslave with INTERACTIVE (lirc and screen). This should work (you need to install wip/lirc) but I didn't test.
+
+=== Windows build instructions ===
+
+Download Cygwin setup from http://www.cygwin.com/setup.exe
+
+Setup.exe version 2.674 was used for this install.
+
+Root Directory: C:\cygwin<br />
+All Users (Recommended)<br />
+Local Package Directory C:\cygwin\pkgs<br />
+Choose a mirror close to your location.<br />
+
+Install the following packages.  Note that most are "core" required packages and will already be selected for installation.
+
+ alternatives
+ apache2
+ apache2-devel
+ base-cygwin
+ base-files
+ base-passwd
+ bash
+ binutils
+ bzip2
+ coreutils
+ crypt
+ csih
+ cygrunsrv
+ cygutils
+ cygwin
+ cygwin-doc
+ dash
+ diffutils
+ editrights
+ findutils
+ gawk
+ gcc-core
+ gcc-g++
+ gcc-mingw-core
+ gcc-mingw-g++
+ gdb
+ gettext
+ grep
+ groff
+ gzip
+ ipc-utils
+ less
+ libX11_6
+ libXau6
+ libXdmcp6
+ libXext6
+ libXmuu1
+ libXtst6
+ libapr1
+ libaprutil1
+ libbz2_1
+ libdb4.2
+ libexpat1
+ libgcc1
+ libgdbm4
+ libgmp3
+ libiconv2
+ libintl2
+ libintl3
+ libintl8
+ libncurses8
+ libncurses9
+ libneon27
+ libopenldap2_3_0
+ libpcre0
+ libpopt0
+ libpq5
+ libreadline6
+ libreadline7
+ libsasl2
+ libserf0_0
+ libsqlite3_0
+ libssp0
+ libstdc++6
+ libwrap0
+ libxcb1
+ login
+ make
+ man
+ mingw-runtime
+ minires
+ openssh
+ openssl
+ patch
+ popt
+ rebase
+ run
+ sed
+ subversion
+ tar
+ tcltk
+ termcap
+ terminfo
+ terminfo0
+ texinfo
+ tzcode
+ vim
+ w32api
+ wget
+ which
+ zlib
+ zlib-devel
+ zlib0
+
+If you'd like to be able to ssh to your windows machine, instructions on setting up cygwin sshd can be found at http://pigtail.net/LRP/printsrv/cygwin-sshd.html  This step is not required to build squeezeslave.
+
+To build an ASIO binary you need to obtain Steinberg's ASIO SDK asiosdk2.2.zip file from http://www.steinberg.net/en/company/3rd_party_developer/sdk_download_portal.html as it cannot be included in the repository.  Registration is required.  The ASIO SDK is not needed for the DirectX build.
+
+You'll need to download the DirectX SDK file DXSDK_Mar09.exe or older from http://www.microsoft.com/downloads/details.aspx?FamilyID=24A541D6-0486-4453-8641-1EEE9E21B282&displaylang=en as it's not included in the repository.  The DXSDK_Aug09.exe and DXSDK_Feb10.exe releases do NOT compile with squeezeslave as the dsound.h file includes header files only available from Visual Studio.  If the version of the SDK you're using is not DXSDK_Mar09.exe you'll need to update the filename in the makefile as well.  The DirectX SDK is not needed for the ASIO build.
+
+The WASAPI version does not require any additional files be downloaded for a successful build.
+
+Launch a 'Cygwin Bash Shell" command prompt window.  The icon should be on your Desktop.
+
+ svn checkout http://squeezeslave.googlecode.com/svn/squeezeslave/trunk/squeezeslave
+ cd squeezeslave
+
+ <i>Direct sound build</i>
+ <i>Copy DXSDK_Mar09.exe file into the sources subdirectory using Windows explorer.</i>
+ make -f makefile.mingw32-display realclean
+ make -f makefile.mingw32-display
+
+ <i>ASIO build</i>
+ <i>Copy asiosdk2.2.zip file into the sources subdirectory using Windows explorer.</i>
+ make -f makefile.mingw32-asio-display realclean
+ make -f makefile.mingw32-asio-display
+
+ <i>WASAPI build</i>
+ make -f makefile.mingw32-wasapi-display realclean
+ make -f makefile.mingw32-wasapi-display
+
+Upon successfull completion, you'll find a file in the bin/ directory called squeezeslave.exe.  Several makefiles append a hyphen and an additional word to help identify the "flavour" of the build for packaging purposes.
+
+== Command Line Switches ==
+
+Command Line Switches (options) available (this list available by using the -h switch)
+
+If you experience problems using the --longer command line options, try the one letter equivalent.
+For those options that require and additional argument, leave no space between the letter and the argument.
+
+For example;
+
+squeezeslave -r10 -o4 -m00:00:00:00:00:02 schostname
+
+=== Squeezeslave 1.1-253 (Windows) ===
+<code>
+ squeezeslave 1.1-253 Apr 30 2011 17:40:47
+ compile flags: windows portaudio:1608:wasapi debug interactive 
+ buffer sizes: decoder 2097152 output 2822400 bytes
+ 
+ Copyright 2004-2007 Richard Titmuss, 2008-2011 Duane Paddock.
+ This is free software; see the source for copying conditions. There is NO
+ warranty; not even for MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+ 
+ squeezeslave [options] [<server address>]
+ The Squeezebox Server address defaults to 127.0.0.1.
+ Options:
+ -h, --help                  Prints this message.
+ -a,                         Sets the amplitude of a high-frequency tone
+ --predelay_amplitude <val>  produced during the predelay (see --predelay).
+                             The frequency is set at the source's sampling
+                             rate/2 and the amplitude is in absolute value.
+                             For 16-bit sources, the max is 32767, but values
+                             below 10 are likely to work.  The goal is to
+                             produce an inaudible signal that will cause DACs
+                             to wake-up and lock before actual samples are
+                             played out.  If the DAC locks using only silence,
+                             do not use this option (it will default to 0).
+ -k, --keepalive <sec>       Controls how frequently squeezeslave sends a
+                             alive signal to Squeezebox Server.  6.5.x servers
+                             need this to avoid dropping the player's
+                             connection.  By default, the implementation
+                             chooses the right value: 10s for a >=6.5.x server
+                             and 0s for a <6.5.x server, which means no
+                             keepalive.
+ -H, --highpriority          Change process priority class to high.
+ -S, --shared                Use shared mode for a WasApi device.
+                             Settings in Control Panel for a shared device
+                             must be set to 16-bit, 44100 Hz (CD Quality).
+                               ** Available on WASAPI version only. **
+ -D, --display               Enable slimp3 style text display and
+                             keyboard input.
+                             Keys: 0-9:             0-9
+                                   Insert or I      Add
+                                   Cursor Keys      Arrows
+                                   >,<              Fwd,Rew
+                                   Home or H        Home
+                                   End or N         Now Playing
+                                   Space or P       Pause
+                                   Enter            Play
+                                   Q                Quit
+                                   R                Repeat
+                                   S                Shuffle
+                                   ?                Search
+                                   b                Browse
+                                   F                Favourites
+                                   %                Size
+                                   Z                Sleep
+                                   +,-              Vol up,down
+ -w, --width <chars>         Set the display width to <chars> characters
+ -L, --list                  List available audio devices and exit.
+ -m, --mac <mac_address>     Sets the mac address for this instance.
+                             Use the colon-separated notation.
+                             The default is 00:00:00:00:00:01.
+                             Squeezebox Server uses this value to distinguish
+                             multiple instances, allowing per-player settings.
+ -o, --output <device_id>    Sets the output device id.
+                             The default id is 0.
+                             The output device ids can be found with -L.
+ -P, --port <portnumber>     Sets the Squeezebox Server port number.
+                             The default port is 3483.
+ -p, --predelay <msec>       Sets a delay before any playback is started.  This
+                             is useful if the DAC used for output is slow to
+                             wake-up/lock, causing the first few samples to be
+                             dropped.
+ -R, --retry                 Causes the program to retry connecting to
+                             Squeezebox Server until it succeeds or is stopped
+                             using SIGTERM or keyboard entry.
+                             If the connection to Squeezebox Server is lost, the
+                             program will poll it until it restarts.  --retry
+                             enables retry with a 5 second delay between
+                             attempts.
+ -r <sec>, --intretry <sec>  For a different retry interval use -r and the
+                             desired interval in seconds. (ie. -r10)
+                             Retry interval range is 1-120 seconds.
+ -V, --version               Prints the squeezeslave version.
+ -v, --volume <sw|off>       Enables/disables volume changes done by
+                             Squeezebox Server during its operation, such as
+                             when changing the volume through the web interface
+                             or when applying replay gain.  Defaults to sw.
+                                   sw:  volume changes performed in software.
+                                   off: volume changes ignored.
+ -y, --latency <msec>        Modify the default latency for the audio device.
+                             Useful if you experience drop outs during playback.
+                             Values between 80-200 ms are recommended.
+ -Y, --debuglog <logfile>    Redirect debug output from stderr to <logfile>.
+ -d, --debug <trace_name>    Turns on debug tracing for the specified level.
+                             The option can be used multiple times to enable
+                             multiple levels.
+                             Available levels:
+                                   all
+                                   slimproto
+                                   slimaudio
+                                   slimaudio_buffer
+                                   slimaudio_buffer_v
+                                   slimaudio_decoder
+                                   slimaudio_decoder_r
+                                   slimaudio_decoder_v
+                                   slimaudio_http
+                                   slimaudio_http_v
+                                   slimaudio_output
+                                   slimaudio_output_v
+</code>
+
+=== Squeezeslave 1.1-253 (Unix) ===
+<code>
+ squeezeslave 1.1-253 May  1 2011 05:49:57
+ compile flags: linux portaudio:1608 debug signals interactive daemon 
+ buffer sizes: decoder 2097152 output 2822400 bytes
+ 
+ Copyright 2004-2007 Richard Titmuss, 2008-2011 Duane Paddock.
+ This is free software; see the source for copying conditions. There is NO
+ warranty; not even for MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+ 
+ squeezeslave [options] [<server address>]
+ The Squeezebox Server address defaults to 127.0.0.1.
+ Options:
+ -h, --help                  Prints this message.
+ -a,                         Sets the amplitude of a high-frequency tone
+ --predelay_amplitude <val>  produced during the predelay (see --predelay).
+                             The frequency is set at the source's sampling
+                             rate/2 and the amplitude is in absolute value.
+                             For 16-bit sources, the max is 32767, but values
+                             below 10 are likely to work.  The goal is to
+                             produce an inaudible signal that will cause DACs
+                             to wake-up and lock before actual samples are
+                             played out.  If the DAC locks using only silence,
+                             do not use this option (it will default to 0).
+ -k, --keepalive <sec>       Controls how frequently squeezeslave sends a
+                             alive signal to Squeezebox Server.  6.5.x servers
+                             need this to avoid dropping the player's
+                             connection.  By default, the implementation
+                             chooses the right value: 10s for a >=6.5.x server
+                             and 0s for a <6.5.x server, which means no
+                             keepalive.
+ -l, --lcd                   Enable LCDd (lcdproc) text display.
+                             Requires LCDd running on local host.
+ -i, --lirc                  Enable lirc remote control support.
+                             Requires lirc running on local host.
+ -c, --lircrc <filename>     Location of lirc client configuration file.
+                             Default: ~/.lircrc
+ -D, --display               Enable slimp3 style text display and
+                             keyboard input.
+                             Keys: 0-9:             0-9
+                                   Insert or I      Add
+                                   Cursor Keys      Arrows
+                                   >,<              Fwd,Rew
+                                   Home or H        Home
+                                   End or N         Now Playing
+                                   Space or P       Pause
+                                   Enter            Play
+                                   Q                Quit
+                                   R                Repeat
+                                   S                Shuffle
+                                   ?                Search
+                                   b                Browse
+                                   F                Favourites
+                                   %                Size
+                                   Z                Sleep
+                                   +,-              Vol up,down
+ -w, --width <chars>         Set the display width to <chars> characters
+                             If using LCDd, width is detected.
+ -M, --daemonize <logfile>   Run squeezeslave as a daemon.
+                             Messages written to specified file.
+                             Not supported with lirc and display modes.
+ -L, --list                  List available audio devices and exit.
+ -m, --mac <mac_address>     Sets the mac address for this instance.
+                             Use the colon-separated notation.
+                             The default is 00:00:00:00:00:01.
+                             Squeezebox Server uses this value to distinguish
+                             multiple instances, allowing per-player settings.
+ -o, --output <device_id>    Sets the output device id.
+                             The default id is 0.
+                             The output device ids can be found with -L.
+ -P, --port <portnumber>     Sets the Squeezebox Server port number.
+                             The default port is 3483.
+ -p, --predelay <msec>       Sets a delay before any playback is started.  This
+                             is useful if the DAC used for output is slow to
+                             wake-up/lock, causing the first few samples to be
+                             dropped.
+ -R, --retry                 Causes the program to retry connecting to
+                             Squeezebox Server until it succeeds or is stopped
+                             using SIGTERM or keyboard entry.
+                             If the connection to Squeezebox Server is lost, the
+                             program will poll it until it restarts.  --retry
+                             enables retry with a 5 second delay between
+                             attempts.
+ -r <sec>, --intretry <sec>  For a different retry interval use -r and the
+                             desired interval in seconds. (ie. -r10)
+                             Retry interval range is 1-120 seconds.
+ -V, --version               Prints the squeezeslave version.
+ -v, --volume <sw|off>       Enables/disables volume changes done by
+                             Squeezebox Server during its operation, such as
+                             when changing the volume through the web interface
+                             or when applying replay gain.  Defaults to sw.
+                                   sw:  volume changes performed in software.
+                                   off: volume changes ignored.
+ -y, --latency <msec>        Modify the default latency for the audio device.
+                             Useful if you experience drop outs during playback.
+                             Values between 80-200 ms are recommended.
+ -Y, --debuglog <logfile>    Redirect debug output from stderr to <logfile>.
+ -d, --debug <trace_name>    Turns on debug tracing for the specified level.
+                             The option can be used multiple times to enable
+                             multiple levels.
+                             Available levels:
+                                   all
+                                   slimproto
+                                   slimaudio
+                                   slimaudio_buffer
+                                   slimaudio_buffer_v
+                                   slimaudio_decoder
+                                   slimaudio_decoder_r
+                                   slimaudio_decoder_v
+                                   slimaudio_http
+                                   slimaudio_http_v
+                                   slimaudio_output
+                                   slimaudio_output_v
+</code>
+
