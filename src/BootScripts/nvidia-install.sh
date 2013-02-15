@@ -16,6 +16,7 @@
 #######################################################################################################################
 . /usr/pluto/bin/Utils.sh
 LogFile="/var/log/pluto/nvidia-install.log";
+Distro=$(lsb_release -c -s)
 
 # DRIVER LISTS
 # Make lists of all PCI_Id's supported under each driver version
@@ -76,7 +77,6 @@ getInstalledNvidiaDriver() {
 # returns the preferred driver to install for the currently installed nVidia card.
 getPreferredNvidiaDriver() {
 	PCI_Id=$(getPCI_Id)
-	Distro="$(lsb_release -c -s)"
  
 	case " $Driver_Current_Supported " in *" $PCI_Id "*)
 		echo "nvidia-current"
