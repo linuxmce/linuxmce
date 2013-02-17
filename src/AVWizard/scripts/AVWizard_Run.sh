@@ -103,14 +103,15 @@ SetupX () {
 }
 
 DualBus () {
-	local vga_pci=$(lspci | grep -w 'VGA')
-	if [[ $(wc -l <<< "$vga_pci") -gt "1" ]]; then
-		BestGPU "$vga_pci"
+	if [[ $(lspci | grep -w 'VGA' | sort -u | wc -l) -gt "1" ]]; then
+		BestGPU
+		vga_pci="$1"
 		if [[ -e "$XF86Config" ]]; then
 			XorgConfig="$XF86Config"
 		else
 			XorgConfig="$ConfFile"
 		fi
+
 		bus_id=$(echo "$vga_pci" | while IFS=':. ' read -r tok1 tok2 tok3 rest; do printf '%2s %2s %s\n' "$((16#${tok1}))":"$((16#${tok2}))":"$((16#${tok3}))" | sed -e 's/ //g'; done)
 		if grep "\#BusID" $XorgConfig; then
 			sed -ie "s/\#BusID.*/BusID\t\t\"PCI:${bus_id}\"/g" $XorgConfig
@@ -427,10 +428,10 @@ Enable_Audio_Channels () {
 	# inject necessary unmuting commands for later bootup.
 	yalpa=$(aplay -l)
 	grep -iwo "card ." <<< "$yalpa" | awk '{print $2}' | uniq | while read CardNumber; do
-		amixer -c "$CardNumber" | grep '\[off\]' -B5 | grep "Simple" | sed 's/Simple mixer control //g' | grep -vi "capture" | while read MuteStatus; do 
+		amixer -c "$CardNumber" | grep '\[off\]' -B5 | grep "Simple" | sed 's/Simple mixer control //g' | grep -viE '(capture|mic)' | while read MuteStatus; do 
 			amixer -c "$CardNumber" sset "$MuteStatus" unmute 
 		done
-		amixer -c "$CardNumber" | grep '\[.*\%\]' -B5 | grep "Simple" | sed 's/Simple mixer control //g' | grep -vi "capture" | while read VolLevel; do 
+		amixer -c "$CardNumber" | grep '\[.*\%\]' -B5 | grep "Simple" | sed 's/Simple mixer control //g' | grep -viE '(capture|mic)' | while read VolLevel; do 
 			amixer -c "$CardNumber" sset "$VolLevel" 80%
 		done
 	done
