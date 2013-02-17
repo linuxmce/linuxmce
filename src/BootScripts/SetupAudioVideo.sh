@@ -160,11 +160,11 @@ Enable_Audio_Channels()
 	# inject necessary unmuting commands for later bootup.
 	yalpa=$(aplay -l)
 	grep -iwo "card ." <<< "$yalpa" | awk '{print $2}' | uniq | while read CardNumber; do
-		amixer -c "$CardNumber" | grep '\[off\]' -B5 | grep "Simple" | sed 's/Simple mixer control //g' | grep -vi "capture" | while read MuteStatus; do 
+		amixer -c "$CardNumber" | grep '\[off\]' -B5 | grep "Simple" | sed 's/Simple mixer control //g' | grep -viE '(capture|mic)' | while read MuteStatus; do 
 			amixer -c "$CardNumber" sset "$MuteStatus" unmute 
 		done
 		alsactl store
-		amixer -c "$CardNumber" | grep '\[.*\%\]' -B5 | grep "Simple" | sed 's/Simple mixer control //g' | grep -vi "capture" | while read VolLevel; do 
+		amixer -c "$CardNumber" | grep '\[.*\%\]' -B5 | grep "Simple" | sed 's/Simple mixer control //g' | grep -viE '(capture|mic)' | while read VolLevel; do 
 			amixer -c "$CardNumber" sset "$VolLevel" 80%
 		done 2>&1>/dev/null
 		alsactl store
