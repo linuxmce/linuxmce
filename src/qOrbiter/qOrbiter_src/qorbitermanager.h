@@ -192,6 +192,7 @@ class qorbiterManager : public QObject
     Q_PROPERTY (QString commandResponse READ getCommandResponse WRITE setCommandResponse NOTIFY commandResponseChanged)//for use in displaying command related dce replies.
     Q_PROPERTY (QString eventResponse READ getEventResponse WRITE setEventResponse NOTIFY eventResponseChanged) // for use in displaying message associated with incoming events
     Q_PROPERTY (QString deviceResponse READ getDeviceResponse WRITE setDeviceResponse NOTIFY deviceResponseChanged) // for use in display of messages associated with specific devices
+    Q_PROPERTY (QString imagePath READ getImagePath WRITE setImagePath NOTIFY imagePathChanged)
 
     /*!
      * \warning enablescreensavermode - currently unused, should be built anyways
@@ -453,6 +454,7 @@ Param 10 - pk_attribute
     int i_currentFloorplanType;
     int deviceVolume;
     QString applicationPath;
+    QString imagePath;
 
     /*Child Device IDs*/
     int mediaPlayerID;
@@ -564,6 +566,7 @@ signals:
     void externalHostChanged();
     void deviceNumberChanged(int d);
     void applicationPathChanged();
+    void imagePathChanged();
 
     /*Media Device Control Signals*/
     void resendAvCodes();
@@ -621,6 +624,13 @@ signals:
 
 
 public slots:
+
+    void setApplicationPath(QString p){applicationPath = p; emit applicationPathChanged();}
+    QString getApplicationPath(){return applicationPath;}
+
+    void setImagePath(QString i) {imagePath = i; emit imagePathChanged();}
+    QString getImagePath(){return imagePath;}
+
     /*!
     * \brief setFormFactor
     * \param f

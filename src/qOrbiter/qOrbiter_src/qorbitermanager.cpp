@@ -203,6 +203,7 @@ qorbiterManager::qorbiterManager(QDeclarativeView *view, QObject *parent) :
 #endif
 
     qmlPath = adjustPath(QApplication::applicationDirPath().remove("/bin"));
+    setApplicationPath(QApplication::applicationDirPath());
     localDir = qmlPath.append(buildType);
 
     initializeGridModel();  //begins setup of media grid listmodel and its properties
@@ -264,6 +265,7 @@ qorbiterManager::~qorbiterManager()
 
 void qorbiterManager::gotoQScreen(QString s)
 {
+
     if(s == "Screen_1.qml")
     {
         bool t = false;
@@ -847,6 +849,7 @@ void qorbiterManager::swapSkins(QString incSkin)
         emit skinMessage("Setting Skin to:" + incSkin);
         skin = tskinModel->find(incSkin);
         emit skinMessage("Got it from the model : " + skin->baseUrl().toString());
+        setImagePath(skin->baseUrl().toString()+"/img/");
         //load the actual skin entry point
         currentSkin = incSkin;
         qorbiterUIwin->engine()->rootContext()->setContextProperty("style", skin->styleView());
