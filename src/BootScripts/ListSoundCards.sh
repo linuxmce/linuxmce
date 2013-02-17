@@ -1,6 +1,6 @@
 #!/bin/bash
 
-DEVICETEMPLATE_Stereo_virtual_sound_card=2223
+DEVICETEMPLATE_Stereo_virtual_sound_card=2242
 DEVICEDATA_Channel_Left=311
 DEVICEDATA_Channel_Right=312
 

@@ -144,7 +144,7 @@ pcm.Virtual_$Dev {
 		bindings.0 $Channel_Left
 		bindings.1 $Channel_Right
 		slave {
-			pcm "hw:$SoundCard,0"
+			pcm "hw:$SoundCard,0,0"
 			channels $Channels
 			rate $SampleRate
 		}
@@ -239,13 +239,11 @@ Setup_AsoundConf()
 			;;
 	esac	
 
-	if [[ "$AlternateSC" == "2" ]]; then
-		SoundOut="hw:"
-	else
+	if [[ "$AlternateSC" -ne "2" ]]; then
 		SoundCard="${HWOnlyCard},${CardDevice}"
 	fi
 
-	if [[ "$AlternateSC" == "1" ]]; then
+	if [[ "$AlternateSC" -gt "0" ]]; then
 		AsoundConf="/usr/pluto/templates/asound.conf.backup"
 	fi
 
