@@ -1,30 +1,51 @@
 // import QtQuick 1.0 // to target S60 5th Edition or Maemo 5
 import QtQuick 1.1
+import "../../lib/effects"
 
 Rectangle {
     id:mediaPlaybackBase
-    width: manager.appWidth
-    height: manager.appHeight
+    anchors.fill: parent
     color: "transparent"
+
     Component.onCompleted: manager.setBoundStatus(true)
     property alias metadataComponent:mediaTypeMetaData.sourceComponent
     property alias scrollBarComponent:mediaScrollerTarget.sourceComponent
     property alias controlComponent: controlsLoader.sourceComponent
     property alias playlistSource:playlist.model
     property alias playlistDelegate:playlist.delegate
+
+
+
     Rectangle{
         id:metadataSection
         width: manager.appWidth
-        height: scaleY(35)
+        height: scaleY(45)
         color: "transparent"
+
         anchors.verticalCenter: parent.verticalCenter
         clip:false
-
+        DropShadow{
+            id:headerDrop
+            sourceItem:fill
+            height: fill.height
+            width: fill.width
+           // anchors.verticalCenter: opacityMask.verticalCenter
+            distance:4
+            color:"black"
+            blur:1
+            opacity: .25
+        }
         Rectangle{
-            id:opacityMask
             anchors.fill: parent
-            color: "darkgrey"
-            opacity: .50
+            color:"transparent"
+            border.color: "black"
+            border.width: 2
+            Image {
+                id: fill
+                source: manager.imagePath+"ui3/appBackground.png"
+                anchors.fill:parent
+            }
+
         }
 
         PlaylistTemplateCoverFlow{
@@ -36,6 +57,7 @@ Rectangle {
         NonEPGPlaylist{
             anchors.left: parent.left
             anchors.verticalCenter: parent.verticalCenter
+
         }
 
         StyledText {
@@ -56,6 +78,17 @@ Rectangle {
             id:mediaTypeMetaData
             anchors.left: npImage.right
             anchors.leftMargin: scaleX(-1)
+            height: parent.height*.95
+        }
+
+        DropShadow{
+            id:metadata_drop
+            sourceItem:mediaTypeMetaData
+            height: mediaTypeMetaData.height
+            width: mediaTypeMetaData.width
+            distance:2
+            color:"black"
+            anchors.left: mediaTypeMetaData.left
         }
 
         StyledText {
@@ -68,6 +101,8 @@ Rectangle {
         }
 
     }
+
+
 
     Loader{
         id:mediaScrollerTarget

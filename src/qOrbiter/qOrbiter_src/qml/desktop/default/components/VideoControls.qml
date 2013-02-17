@@ -5,6 +5,7 @@ Rectangle {
     height: childrenRect.height
     color: "transparent"
 
+
     Row{
         spacing: 5
 
@@ -14,7 +15,7 @@ Rectangle {
             media_but_txt: "back"
             Image {
                 id: backicon
-                source: "../img/icons/player_end.png"
+                source: manager.imagePath+"ui3/round_bluish_button.png"
                 rotation: 180
                 height: parent.height
                 width: parent.width

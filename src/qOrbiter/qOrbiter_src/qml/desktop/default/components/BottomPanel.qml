@@ -1,21 +1,32 @@
 import QtQuick 1.0
+import Qt.labs.shaders 1.0
+import "../../lib/effects"
 import "../js/ComponentLoader.js" as MyJs
 
 
 Rectangle {
     id:advanced_panel
-    width: manager.appWidth
+    width: manager.appWidth - scaleX(1)
     height: style.widebuttonh + scaleY(4)
+    anchors.horizontalCenter: parent.horizontalCenter
     color:"transparent"
+    border.color: "black"
+    border.width: 3
 
+    DropShadow{
+        id:headerDrop
+        sourceItem:panelbg
+        height: panelbg.height
+        width: panelbg.width
+        distance:2
+        color:"black"
+    }
     Image {
         id: panelbg
-        source: "../img/ui3/footer.png"
+        source: manager.imagePath+"ui3/bluish_fill.png"
         height: parent.height
         width: parent.width
-        opacity: .85
     }
-
     Row{
         id:advancedrow
         height:childrenRect.height +5
@@ -82,7 +93,7 @@ Rectangle {
             }
         }
 
-        UserListComponent {id:user}
+       // UserListComponent {id:user}
 
         AdvancedButton{
             id:exit

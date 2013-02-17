@@ -12,12 +12,15 @@ Rectangle {
     width: scaleX(44)
     height: scaleY(3)
     color: "transparent"
+    clip:true
 
-    DropShadow{
-sourceItem: scroller_transit
-anchors.fill: scroller_transit
-color:"black"
-    }
+        DropShadow{
+            sourceItem: scroller_transit
+            height: scroller_transit.height
+            width: scroller_transit.width
+            color:"black"
+            distance:2
+        }
 
     property int slidertimer: (scroll_tab.x / scroller_transit.width) * dceTimecode.tcTotalTime
 
@@ -35,14 +38,34 @@ color:"black"
         anchors.topMargin: scaleY(1)
     }
 
-    Image {
-        id: scroller_transit
-        source: "../img/icons/blue.png"
+    Rectangle{
+        id:scroller_transit
         height: parent.height
         width: parent.width
+        color: "darkslategrey"
+        radius: 5
         anchors.centerIn: parent
 
+        Rectangle{
+            id:progress_fill
+            height: parent.height-2
+            width: ( dceTimecode.runningTimer / dceTimecode.tcTotalTime) * scroller.width+(scroll_tab.width/2)
+            color: "white"
+            anchors.left: parent.left
+            anchors.verticalCenter: parent.verticalCenter
+            radius: 5
+            opacity: .5
+        }
     }
+
+    //    Image {
+    //        id: scroller_transit
+    //        source: "../img/icons/blue.png"
+    //        height: parent.height
+    //        width: parent.width
+    //        anchors.centerIn: parent
+
+    //    }
     Image {
         id: scroll_tab
         source: "../img/icons/scroller.png"
@@ -64,7 +87,7 @@ color:"black"
                                    dceTimecode.showDragTime(slidertimer)  }
                                else
                                {drag_indicator.opacity = 0
-                                   }
+                               }
             onReleased: {
                 drag_indicator.opacity =0
                 dceTimecode.finishDragging()

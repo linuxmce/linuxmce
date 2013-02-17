@@ -3,8 +3,9 @@ import "../../lib/handlers"
 
 Rectangle {
     id:nonepgplaylist
-    width: scaleX(25)
-    height: scaleY(55)
+    width:mediaplaylist.count() <= 1 ? 0: scaleX(25)
+    height:mediaplaylist.count() <= 1 ? 0: scaleY(55)
+    visible: mediaplaylist.count() <= 1
     color: "transparent"
     clip:false
     property bool optionVisible: false

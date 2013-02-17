@@ -46,10 +46,7 @@ Item {
         source: "fonts/Sawasdee.ttf"
     }
 
-    WaitSpinner {
-        id: waitSpinner
-        anchors.centerIn: parent
-    }
+
 
     /*! Depreciated function.
       Was previously used to deal with orientation changes.
@@ -73,41 +70,23 @@ Item {
     function screenchange(screenname )
     {
         pageLoader.source = "screens/"+screenname
+        while(pageLoader.status == Component.Loading)
+        {
+            console.log(pageLoader.progress)
+        }
+
         if (pageLoader.status == Component.Ready)
         {
             var s = String(screenname)
             manager.setDceResponse("Command to change to:" + screenname+ " was successfull")
         }
-        else if (pageLoader.status == Component.Loading)
-        {
-            logger.userLogMsg = "loading page from network"
-            finishLoading(screenname)
-        }
-        else
+        else if (pageLoader.status==Component.Error)
         {
             logger.userLogMsg ="Command to change to:" + screenname + " failed!"
+            logger.userLogMsg = pageLoader.Error.toString()
             screenfile = screenname
             pageLoader.source = "screens/Screen_x.qml"
         }
-    }
-
-    function finishLoading (screenname)
-    {
-        if(pageLoader.status != Component.Ready)
-        {
-            logger.userLogMsg="finishing load";
-            pageLoader.source = "screens/"+screenname
-            logger.userLogMsg = "screen" + screenname + " loaded."
-        }
-        else
-        {
-            finishLoading(screenname)
-        }
-    }
-
-    function checkStatus(component)
-    {
-        logger.userLogMsg = "Checking progress:"+(component.progress)
     }
 
     function hideUI(){
@@ -116,10 +95,10 @@ Item {
         {
             if(dceplayer.focus){
                 dceplayer.focus = false
-               pageLoader.forceActiveFocus()
+                pageLoader.forceActiveFocus()
                 console.log("PageLoader item focus::"+pageLoader.focus)
             } else{
-               dceplayer.forceActiveFocus()
+                dceplayer.forceActiveFocus()
                 pageLoader.focus = false
                 console.log("Dceplayer focus::"+dceplayer.focus)
             }
@@ -133,59 +112,41 @@ Item {
     function loadComponent(componentName )
     {
         componentLoader.source = "components/"+componentName
+        while(componentLoader.status === Component.Loading){
+            console.log(componentLoader.progress)
+        }
+
         if (componentLoader.status == Component.Ready)
         {
             logger.userLogMsg ="Command to change to:" + componentName+ " was successfull"
         }
-        else if (componentLoader.status == Component.Loading)
-        {
-            logger.userLogMsg = "loading page from network"
-            finishLoadingComponent(componentName)
-        }
         else
         {
             logger.userLogMsg = "Command to add: " + componentName + " failed!"
-
+            logger.userLogMsg = componentLoader.Error.toString()
         }
     }
 
-    function finishLoadingComponent (componentName)
-    {
-        if(componentLoader.status != Component.Ready)
-        {
-            logger.userLogMsg = "finishing network load"
-            componentLoader.source = "components/"+componentName
-            logger.userLogMsg="screen" + componentName + " loaded."
-        }
-        else
-        {
-            finishLoadingComponent(componentName)
-        }
+//    DebugPanel{
+//        id:dcemessages
+//        debugMessage: dcemessage
+//        z:2
+//        anchors.top: parent.top
+//    }
 
-    }
+//    DebugPanel{
+//        id:mediaMessages
+//        debugMessage: manager.mediaResponse
+//        z:2
+//        anchors.top: dcemessages.bottom
+//    }
 
-
-
-    DebugPanel{
-        id:dcemessages
-        debugMessage: dcemessage
-        z:2
-        anchors.top: parent.top
-    }
-
-    DebugPanel{
-        id:mediaMessages
-        debugMessage: manager.mediaResponse
-        z:2
-        anchors.top: dcemessages.bottom
-    }
-
-    DebugPanel{
-        id:commandmessages
-        debugMessage: manager.commandResponse
-        z:2
-        anchors.top: mediaMessages.bottom
-    }
+//    DebugPanel{
+//        id:commandmessages
+//        debugMessage: manager.commandResponse
+//        z:2
+//        anchors.top: mediaMessages.bottom
+//    }
 
     //    DebugPanel{
     //        id:mediaplayerMessages
@@ -221,17 +182,28 @@ Item {
         focus:true
         Keys.onTabPressed: hideUI()
 
-        Rectangle{
-            id:alternate_background
+        Image {
+            id: appbackground
+            source: manager.imagePath+"ui3/appBackground.png"
             anchors.fill: parent
-            gradient: Gradient{
-                GradientStop { position: 0.0; color: "darkslategrey" }
-                GradientStop { position: 0.33; color: "slategrey" }
-                GradientStop { position: 1.0; color: "black" }
-            }
-
-            focus:false
         }
+
+        DataHeader {
+            id: data_header
+            z:6
+        }
+
+//        Rectangle{
+//            id:alternate_background
+//            anchors.fill: parent
+//            gradient: Gradient{
+//                GradientStop { position: 0.0; color: "darkslategrey" }
+//                GradientStop { position: 0.33; color: "slategrey" }
+//                GradientStop { position: 1.0; color: "black" }
+//            }
+
+//            focus:false
+//        }
 
         MediaManager{
             id:dceplayer
@@ -260,6 +232,9 @@ Item {
             id:pageLoader
             objectName: "loadbot"
             focus:true
+            height: manager.appHeight - data_header.height
+            width: manager.appWidth
+            anchors.top: data_header.bottom
             onSourceChanged:  loadin
             onLoaded: {
                 console.log("Screen Changed:" + pageLoader.source)

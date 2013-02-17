@@ -31,7 +31,7 @@ Rectangle{
 
     DropShadow{
         sourceItem: nowplayingimage
-        blur:1
+        distance: 4
         color:"black"
         anchors.fill: sourceItem
     }
@@ -45,9 +45,6 @@ Rectangle{
         smooth: true
         visible: source == undefined ? false : true
     }
-
-
-
     Timer{
         id:refreshtimer
         interval: 1000

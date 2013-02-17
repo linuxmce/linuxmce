@@ -7,34 +7,33 @@ import "../effects"
 Rectangle{
     id:textrect
     visible: true
-    height: textCol.height
+    height: parent.height
     width: scaleX(40)
     color:"transparent"
-
+//    border.color: "black"
+//    border.width: 1
     clip:true
-
     Column{
         id:textCol
         spacing: scaleY(.5)
         width: childrenRect.width
-        height: dcenowplaying.aspect == "wide"?scaleY(25): scaleY(35)
+        height: parent.height
         StyledText {
             id: video_title
             width: scaleX(35)
             wrapMode: "WrapAtWordBoundaryOrAnywhere"
-            text: dcenowplaying.mediatitle
+            text:dcenowplaying.episode =="" ? qsTr("Title: ")+ dcenowplaying.qs_mainTitle :qsTr("Program: ")+ dcenowplaying.tvProgram
             font.bold: true
-            font.italic: true
+            font.italic: false
             smooth: true
-            fontSize: scaleY(5)
-            visible:  dcenowplaying.mediatitle =="" ? false: true
-            opacity: .65
-            style: Text.Sunken
+            fontSize: scaleY(4)
+            visible:  dcenowplaying.qs_mainTitle =="" ? false: true
+
         }
         StyledText {
             id: episode_title
             width: scaleX(35)
-            text:  dcenowplaying.episode
+            text: qsTr("Episode: ")+ dcenowplaying.episode
             font.bold: true
             //  wrapMode: "WrapAtWordBoundaryOrAnywhere"
             elide: "ElideRight"

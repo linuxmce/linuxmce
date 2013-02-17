@@ -1,5 +1,7 @@
 import QtQuick 1.0
 Item {
+    height: childrenRect.height
+    width: childrenRect.width
 property bool verticalMirror: false
     function getDate(){
         var d = new Date();
