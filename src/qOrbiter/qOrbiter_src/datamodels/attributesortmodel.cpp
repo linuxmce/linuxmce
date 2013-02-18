@@ -1,7 +1,7 @@
 #include "attributesortmodel.h"
-#ifdef debug
+
 #include <QDebug>
-#endif
+
 
 AttributeSortModel::AttributeSortModel(AttributeSortItem* prototype, int filterNumber, QObject *parent) :
     QAbstractListModel(parent), m_prototype(prototype), filterLevel(filterNumber)
@@ -39,8 +39,7 @@ void AttributeSortModel::appendRows(const QList<AttributeSortItem *> &items)
 {
   beginInsertRows(QModelIndex(), rowCount(), rowCount()+items.size()-1);
   foreach(AttributeSortItem *item, items) {
-
-      QObject::connect(item, SIGNAL(filterChanged()), this, SLOT(handleItemChange()));
+      QObject::connect(item, SIGNAL(dataChanged()), this, SLOT(handleItemChange()));
     m_list.append(item);
   }
 
@@ -65,13 +64,11 @@ void AttributeSortModel::handleItemChange()
 {
   AttributeSortItem* item = static_cast<AttributeSortItem*>(sender());
   QModelIndex index = indexFromItem(item);
- // qDebug() << "Handling item change for:" << index;
+ //qDebug() << "Handling item change for:" << index;
   if(index.isValid())
   {
-     QModelIndex lastrow;
-     ident = item->fileformat();
-     lastrow = index;
-    emit dataChanged(index, index ,item->selectedStatus());
+
+    emit dataChanged(index, index ,index.row());
   }
 }
 
@@ -173,8 +170,8 @@ void AttributeSortModel::sortModel(int column, Qt::SortOrder order)
 void AttributeSortModel::setSelectionStatus(QString format)
 {
     AttributeSortItem* item = find(format);
-    item->updateSelection(true);
-    //qDebug() << "Setting State for:" << format;
+    item->updateSelection(!item->selectedStatus());
+    qDebug() << "Set State for:" << format << "to " << item->selectedStatus();
     //return state;
     ReturnSelectedItems();
 
@@ -195,7 +192,7 @@ void AttributeSortModel::ReturnSelectedItems()
         if(item->selectedStatus() == true) t_selected_items.append(item->fileformat());
     }
     QString qs_sorting_string= t_selected_items.join(",");
-    //qDebug() << "Attribute Sort updated sorting filter" << qs_sorting_string;
+    qDebug() << "Attribute Sort updated sorting filter" << qs_sorting_string;
     emit SetTypeSort(filterLevel, qs_sorting_string);
 }
 

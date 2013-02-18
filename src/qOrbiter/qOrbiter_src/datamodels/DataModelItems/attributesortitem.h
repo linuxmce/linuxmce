@@ -10,7 +10,6 @@
 class AttributeSortItem: public QObject
 {
     Q_OBJECT
-    Q_PROPERTY (bool m_isSelected READ selectedStatus WRITE updateSelection NOTIFY filterChanged)
 
 public:
     enum Roles {
@@ -40,10 +39,10 @@ public:
 signals:
     void imageChanged();
     void dataChanged();
-    void filterChanged();
+
 
 public slots:
-    bool setStatus(bool b) { m_isSelected = b; return m_isSelected;}
+    bool setStatus(bool b) { m_isSelected = b; emit dataChanged();}
     bool updateSelection (bool newBool) ;
 };
 #endif // ATTRIBUTESORTITEM_H

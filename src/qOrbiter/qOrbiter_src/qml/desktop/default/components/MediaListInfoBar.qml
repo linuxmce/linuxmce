@@ -21,6 +21,11 @@ Row{
         color: "aliceblue"
     }
     StyledText {
+        id: grid_subtype
+        text: qsTr("Sorted by subtype:  ") + manager.q_subType
+        color: "aliceblue"
+    }
+    StyledText {
         id: grid_attritbute_label
         text: qsTr("Sorted by Attribute:  ") + manager.q_attributetype_sort
         color: "aliceblue"

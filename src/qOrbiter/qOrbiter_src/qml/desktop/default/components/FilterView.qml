@@ -4,19 +4,13 @@ import "../../lib/handlers"
 
 Rectangle {
     id:filterView
-    width: manager.appWidth
-    height: scaleY(12)
+    width: scaleX(35)
+    height: scaleY(15)
     color: "transparent"
     state: "inactive"
+
     property alias currentFilterModel:filterList.model
-
     onCurrentFilterModelChanged: filterList.count===0 ? state = "inactive" : state = "active"
-
-    Rectangle{
-        anchors.fill: parent
-        color: "black"
-        opacity: .25
-    }
 
     ListView{
         id:filterList
@@ -30,9 +24,10 @@ Rectangle {
             height: scaleY(10)
             width: scaleX(10)
             color: "transparent"
-
+            property bool currentState:status
+            onCurrentStateChanged: console.log("Qml sort item status change"+status)
             Image {
-                source: "../img/icons/Video.png"
+                source: currentState ? manager.imagePath+"ui3/green_button.png" :  manager.imagePath+"ui3/red_button.png"
                 anchors.fill: parent
             }
 

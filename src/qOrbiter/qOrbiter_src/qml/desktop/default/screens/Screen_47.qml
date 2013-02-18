@@ -1,7 +1,7 @@
 import QtQuick 1.0
 import Qt.labs.shaders 1.0
 import AudioVisual 1.0
-import "../effects"
+import "../../lib/effects"
 import "../components"
 import "../animation"
 import "../../lib/handlers"
@@ -40,13 +40,10 @@ Rectangle {
         id: pos_label
         anchors.top: fileviewscreen.top
         anchors.horizontalCenter: fileviewscreen.horizontalCenter
-
         color:style.darkhighlight
         width: grid_view1.width
         height: scaleY(5)
         opacity: .25
-
-
     }
 
     MediaListInfoBar {
@@ -64,6 +61,7 @@ Rectangle {
 
     MediaListGridDelagate {
         id: contactDelegate
+       visible: false
     }
 
 
@@ -73,7 +71,7 @@ Rectangle {
         height: scaleY(85)
         clip: true
         focus:true
-        anchors.horizontalCenter: parent.horizontalCenter
+        anchors.left: options_rect.right
         color: "transparent"
 
         GridView {
@@ -83,12 +81,12 @@ Rectangle {
             height: scaleY(85)
             anchors.centerIn: grid_view1
             model:dataModel
-            delegate: contactDelegate
+            delegate: MediaListGridDelagate{}
             focus: true
             //clip: true
             //contentItem.clip: true
-            cellWidth: scaleX(21)
-            cellHeight: scaleY(21)
+            cellWidth: contactDelegate.width
+            cellHeight: contactDelegate.height
             flow:GridView.TopToBottom
             opacity:1
             scale:1
@@ -97,7 +95,7 @@ Rectangle {
             Keys.onPressed: {
                 if(event.key !==Qt.Key_Enter && event.key !== 16777237 && event.key !==16777236 && event.key !==16777234 && event.key !==16777235)
                 {
-                   gridView.currentIndex = dataModel.setSection(event.key)
+                    gridView.currentIndex = dataModel.setSection(event.key)
                     gridView.positionViewAtIndex(currentIndex,ListView.Beginning)
                 }
                 console.log(event.key)
@@ -109,7 +107,19 @@ Rectangle {
             Component.onCompleted:forceActiveFocus()
 
             highlight:Rectangle{
-                color:"white"
+                color:"transparent"
+                border.color: "white"
+                border.width: 1
+                opacity: .25
+                BorderImage {
+                    id: borderimg
+                    horizontalTileMode: BorderImage.Repeat
+                    source: "../img/icons/drpshadow.png"
+                    anchors.fill: parent
+                    anchors { leftMargin: -6; topMargin: -6; rightMargin: -8; bottomMargin: -8 }
+                    border { left: 10; top: 10; right: 10; bottom: 10 }
+                    smooth: true
+                }
             }
 
         }
@@ -118,12 +128,12 @@ Rectangle {
     Rectangle{
         id:options_rect
         height: scaleY(50)
-        width: scaleX(15)
+        width:childrenRect.width
         anchors.left: parent.left
         color:"transparent"
         Column{
             height: parent.height
-            width: parent.width
+            width: childrenRect.width
             MoonButton {
                 id: pall
                 text: "Play All"
@@ -137,6 +147,10 @@ Rectangle {
             MoonButton {
                 id: asort
                 text: "Attribute \n Sort"
+                MouseArea{
+                    anchors.fill:parent
+                    onClicked: {myFilters.y = asort.y; myFilters.currentFilterModel=attribfilter}
+                }
             }
             MoonButton {
                 id: sources
@@ -149,15 +163,25 @@ Rectangle {
             MoonButton {
                 id: mTypes
                 text: "Media \n Types"
+
+                MouseArea{
+                    anchors.fill:parent
+                    onClicked: {
+                        myFilters.y = mTypes.y
+                        myFilters.currentFilterModel = mediatypefilter
+                    }
+                }
             }
             MoonButton {
                 id: goback
                 text: "Back"
+                MouseArea
+                {
+                    anchors.fill:parent
+                    onClicked: manager.goBackGrid()
+                }
             }
-
         }
-
-
     }
     //    ListView{
     //        id:model_pages
@@ -321,6 +345,7 @@ Rectangle {
     }
     FilterView{
         id:myFilters
+        anchors.left: options_rect.right
     }
 
 }

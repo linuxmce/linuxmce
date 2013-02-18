@@ -8,28 +8,27 @@ import "../../lib/handlers"
 import "../js/ComponentLoader.js" as MyJs
 
 
-Component
+Item
 {
     id: contactDelegate
-    
+    height: childrenRect.height
+    width: childrenRect.width
     Rectangle
     {
         id:mainItem
-        width: scaleX(21);
-        height: scaleY(21)
-        color: "transparent"
         opacity: 0
         scale:0
         rotation: 360
-        
+        state:'unsorted'
+        color:"transparent"
+        onStateChanged: console.log("State changed in DG delegate to "+ state)
         MouseArea{
             anchors.fill: mainItem
             hoverEnabled: true
             onEntered: {
                 mainItem.color = style.darkhighlight
                 mainItem.scale = 1.25
-                mainItem.z = 10
-                
+                mainItem.z = 10                
             }
             onExited: {
                 mainItem.color = "transparent"
@@ -50,16 +49,14 @@ Component
         property bool pop:ping
         onPopChanged:{
             console.log(pop)
-            if(pop===true)
-
-           gridView.positionViewAtIndex(index,ListView.Beginning)
+        //    if(pop===true)
+          // gridView.positionViewAtIndex(index,ListView.Beginning)
         }
         Rectangle
         {
             id:frame
-            
-            width: scaleX(21);
-            height: scaleY(21)
+            height: parent.height-5
+            width: parent.width -5
             anchors.centerIn: mainItem
             clip:true
             color: "transparent"
@@ -80,13 +77,12 @@ Component
             Image
             {
                 id: imagerect;
-                source:path !=="" ? "http://"+srouterip+"/lmce-admin/MediaImage.php?img="+path : ""
-                height: scaleY(16);
-                width: scaleX(16);
+                source:path !=="" ? "http://"+srouterip+"/lmce-admin/MediaImage.php?img="+path : ""             
                 anchors.centerIn: parent;
-                fillMode: Image.PreserveAspectCrop
+                fillMode: Image.PreserveAspectFit
                 smooth: true
                 asynchronous: true
+                anchors.fill: parent
 
             }
             Rectangle{
@@ -105,12 +101,57 @@ Component
                 wrapMode: "WrapAtWordBoundaryOrAnywhere"
                 width: imagerect.width
                 font.bold: true
-                anchors.top: imagerect.bottom
+                anchors.bottom: imagerect.bottom
                 anchors.horizontalCenter: imagerect.horizontalCenter
             }
-
-            
-
         }
+
+        states: [
+            State {
+                name: "unsorted"
+                when:manager.q_attributetype_sort === "13"
+                PropertyChanges {
+                    target: mainItem
+                    width: scaleX(21);
+                    height: scaleY(21)
+                    color: "transparent"
+                }
+            },
+            State {
+                name: "tv"
+                when:manager.q_attributetype_sort === "12"
+                PropertyChanges {
+                    target: mainItem
+                    width: scaleX(21);
+                    height: scaleY(21)
+                    color: "transparent"
+                }
+
+            },
+            State {
+                name: "movies"
+                when:manager.q_subType === "2"
+                PropertyChanges {
+                    target: mainItem
+                    width: scaleX(14);
+                    height: scaleY(38)
+                    color: "transparent"
+                }
+
+            },
+            State {
+                name: "seasons"
+                when:manager.q_attributetype_sort === "52"
+                PropertyChanges {
+                    target: mainItem
+                    width: scaleX(14);
+                    height: scaleY(38)
+                    color: "transparent"
+                }
+            }
+        ]
     }
+
+
+
 }

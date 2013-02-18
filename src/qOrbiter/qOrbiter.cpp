@@ -2423,6 +2423,7 @@ void qOrbiter::goBackGrid()
             q_pk_users = reverseParams.at(7);
             q_last_viewed = reverseParams.at(8);
             q_pk_attribute = reverseParams.at(9);
+            updateSelectedAttributes(goBack.at(back));
         }
         emit clearAndContinue(q_mediaType.toInt());
     }
@@ -4724,6 +4725,8 @@ void DCE::qOrbiter::prepareFileList(int iPK_MediaType)
     if(backwards == false)
     {
         q_mediaType = QString::number(iPK_MediaType);
+        if(goBack.last() != s)
+            emit updateSelectedAttributes(s);
         goBack<< s;
     }
 #ifdef QT5

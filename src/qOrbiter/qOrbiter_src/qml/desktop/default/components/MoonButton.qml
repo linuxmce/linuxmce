@@ -11,12 +11,11 @@ import "../js/ComponentLoader.js" as MyJs
 Rectangle{
     id:rectButton
     height: textElement.height > 34 ? textElement.height : 34
-    width: 94
+    width: scaleX(9)
     color: "transparent"
     property string text
     Image {
         id: bgimage
-        fillMode: Image.TileHorizontally
         source: manager.imagePath+"ui3/green_button.png"
         anchors.fill: parent
     }

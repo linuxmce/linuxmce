@@ -818,7 +818,7 @@ void qorbiterManager::processConfig(QByteArray config)
     binaryConfig.clear();
 
     //---update object image
-    setDceResponse(" Remote Config Complete"); 
+    setDceResponse(" Remote Config Complete");
 
     activateScreenSaver();
 
@@ -896,6 +896,14 @@ void qorbiterManager::skinLoaded(QDeclarativeView::Status status)
         QApplication::processEvents(QEventLoop::AllEvents);
         startOrbiter();
     }
+}
+
+void qorbiterManager::updateSelectedAttributes(QString attributes)
+{
+    qDebug() << "Updated Attributes::" << attributes.split("|");
+    QStringList ta = attributes.split("|");
+    setTypeSort(ta.at(6));
+    setSubType(ta.at(1));
 }
 
 
@@ -994,7 +1002,7 @@ int qorbiterManager::getlocation() const
 
 void qorbiterManager::regenOrbiter(int deviceNo)
 {
-        emit screenChange("WebRegen.qml");
+    emit screenChange("WebRegen.qml");
 }
 
 void qorbiterManager::regenComplete(int i)
@@ -1083,9 +1091,9 @@ bool qorbiterManager::loadSkins(QUrl base)
       should suffice and improper skins are dealt with later.
       */
 
-QStringList localSkins;
-QStringList excludes;
-excludes << "!lib" << "!startup";
+    QStringList localSkins;
+    QStringList excludes;
+    excludes << "!lib" << "!startup";
 
 #ifdef for_harmattan
     tskinModel->addSkin("default");
@@ -1101,16 +1109,16 @@ excludes << "!lib" << "!startup";
     tskinModel->addSkin("default");
 #elif RPI
     QDir desktopQmlPath(QString(base.toString()),"",QDir::Name, QDir::NoDotAndDotDot);
-     desktopQmlPath.setNameFilters(excludes);
+    desktopQmlPath.setNameFilters(excludes);
     setDceResponse("Skin Search Path:"+ desktopQmlPath.dirName());
-     localSkins = desktopQmlPath.entryList(QDir::Dirs |QDir::NoDotAndDotDot);
+    localSkins = desktopQmlPath.entryList(QDir::Dirs |QDir::NoDotAndDotDot);
 
     qDebug()<<"inside of skins we find" << localSkins.join(",");
     tskinModel->addSkin(localSkins.join(","));
 #else
     QDir desktopQmlPath(QString(base.toString()),"",QDir::Name, QDir::NoDotAndDotDot);
     setDceResponse("Skin Search Path:"+ desktopQmlPath.dirName());
-     localSkins = desktopQmlPath.entryList(QDir::Dirs |QDir::NoDotAndDotDot);
+    localSkins = desktopQmlPath.entryList(QDir::Dirs |QDir::NoDotAndDotDot);
 
 #ifdef QT_DEBUG
     qDebug()<<"inside of skins we find" << localSkins.join(",");

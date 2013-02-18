@@ -525,6 +525,7 @@ int main(int argc, char* argv[])
 
         //mediagrid
         // QObject::connect(&w, SIGNAL(gridStatus(bool)), &pqOrbiter, SLOT(setGridStatus(bool)),Qt::QueuedConnection);
+        QObject::connect(&pqOrbiter, SIGNAL(updateSelectedAttributes(QString)), &w, SLOT(updateSelectedAttributes(QString)), Qt::QueuedConnection);
         QObject::connect(&w, SIGNAL(cancelRequests()), &pqOrbiter, SLOT(cancelAllRequests()), Qt::QueuedConnection);
         QObject::connect(&w, SIGNAL(gridGoBack()), &pqOrbiter, SLOT(goBackGrid()), Qt::QueuedConnection);
         QObject::connect(mediaModel, SIGNAL(pagingCleared()), &pqOrbiter,SLOT(populateAdditionalMedia()), Qt::QueuedConnection);

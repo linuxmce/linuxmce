@@ -166,6 +166,8 @@ class qorbiterManager : public QObject
 
     Q_PROPERTY(int i_current_mediaType READ getMediaType WRITE setMediaType NOTIFY mediaTypeChanged)/*!< \brief Contains the current media type of the playing media. \ingroup qorbiter_properties */
     Q_PROPERTY (QString q_mediaType READ getSorting NOTIFY gridTypeChanged) /*!< \brief Contains the current media type of the media grid being browsed \ingroup qorbiter_properties */
+    Q_PROPERTY (QString q_attributetype_sort READ getTypeSort WRITE setTypeSort NOTIFY typeSortChanged) /*!< \brief attribute type sorting */
+    Q_PROPERTY (QString q_subType READ getSubType WRITE setSubType NOTIFY subTypeChanged)
     Q_PROPERTY (QString sPK_User READ getCurrentUser WRITE setCurrentUser NOTIFY userChanged)/*!< \brief Contains string of the current user \ingroup qorbiter_properties */
     Q_PROPERTY (QString currentRoom READ getCurrentRoom WRITE setCurrentRoom NOTIFY roomChanged)/*!< \brief Contains the current EA or room with the EA  \ingroup qorbiter_properties */
     Q_PROPERTY (QString dceResponse READ getDceResponse WRITE setDceResponse NOTIFY dceResponseChanged)
@@ -348,6 +350,7 @@ Param 10 - pk_attribute
     QString audioDefaultSort;
     QString photoDefaultSort;
     QString gamesDefaultSort;
+    QMap<int, QString> attributeTypes;
 
     QStringList goBack;
     QString qs_seek;
@@ -493,13 +496,13 @@ signals:
     void aspectRatioChanged(QString ratio);
     void mobileStorageChanged(QString location);
     void moveArrowDirection(int d);
-    void signalGoBack(); 
+    void signalGoBack();
 
 
- void redButton();
- void blueButton();
- void greenButton();
- void yellowButton();
+    void redButton();
+    void blueButton();
+    void greenButton();
+    void yellowButton();
 
     /*Dvd Specific*/
     void show_dvdMenu();
@@ -520,6 +523,9 @@ signals:
 
 
     /*Datagrid Signals*/
+    void typeSortChanged();
+    void subTypeChanged();
+
     void gridStatus(bool s);
     void gridGoBack();
     void mediaTypeChanged();
@@ -625,6 +631,12 @@ signals:
 
 public slots:
 
+    void setSubType(QString t) {q_subType = t; emit subTypeChanged();}
+    QString getSubType(){return q_subType;}
+
+    void setTypeSort(QString t) {q_attributetype_sort = t; emit typeSortChanged();}
+    QString getTypeSort(){return q_attributetype_sort;}
+
     void setApplicationPath(QString p){applicationPath = p; emit applicationPathChanged();}
     QString getApplicationPath(){return applicationPath;}
 
@@ -636,7 +648,7 @@ public slots:
     * \param f
     * \ingroup qorbiter_properties
     */
-   void setFormFactor(int f) {isPhone = f;}
+    void setFormFactor(int f) {isPhone = f;}
 
     void sendDceMessage(QString m) {emit newMessageSend(m);}
 
@@ -664,6 +676,11 @@ public slots:
      * \brief This requests the availible attribute types.
      */
     void requestAttributeTypes(){}
+
+
+    QString translateAttribute(QString a){
+       return a;
+    }
 
     /*!
      * \brief requestGenres
@@ -714,7 +731,7 @@ public slots:
      * \return
      */
     int getMediaPlayerID(){return mediaPlayerID;}
- //@}
+    //@}
 
     /*Splash screen related slots*/
     void showExistingOrbiter(const QList<QObject *> l )  ;
@@ -1006,7 +1023,7 @@ public slots:
      * \param d
      */
     void mountMediaDevice(int d);
-//@}
+    //@}
 
     /*! @name Media Control Slots*/
     //{@
@@ -1034,7 +1051,7 @@ public slots:
     void movePlaylistEntry(QString d, int index) {emit movePlistEntry(d, index); }
     void removePlaylistEntry(int index) {emit removePlistEntry(index);}
     void saveCurrentPlaylist(QString name, bool mode) {emit savePlist(name, mode);} /*true is public, false is private*/
-//@}
+    //@}
 
     /*! @nameScreenshot & Images slots*/
     //@{
@@ -1069,10 +1086,11 @@ public slots:
 #else
     void skinLoaded(QDeclarativeView::Status status);
 #endif
- //@}
+    //@}
 
     /*! @name Datagrid Slots*/
     //@{
+    void updateSelectedAttributes(QString attributes);
     void setGridStatus(bool s) {emit gridStatus(s);}
     void setSorting(int i);
     void setMediaType(int m) {i_current_mediaType = m; emit mediaTypeChanged();}

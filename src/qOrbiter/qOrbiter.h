@@ -1355,6 +1355,7 @@ signals:
     void newGenreSort(AttributeSortItem*);
     void newFileFormatSort(AttributeSortItem*);
     void attributeSortFinished();
+    void updateSelectedAttributes(QString attributeString);
 
 
     //now playing signals
