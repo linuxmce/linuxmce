@@ -2036,12 +2036,14 @@ void qOrbiter::requestMediaSubtypes(int type)
     if(SendCommand(getTypesCmd, &pResponse) && pResponse=="OK"){
         emit commandResponseChanged("Got subtypes for attribute");
         QStringList data;
-        data = QString::fromStdString(sText.c_str()).split("\n");
-
+        data = QString::fromStdString(sText.c_str()).split("\n");      
         for(int i=0; i < data.count(); i++)
         {
             QStringList subSplit = data.at(i).split(":");
-            emit newMediaSubtype(new AttributeSortItem( subSplit.last(),subSplit.first(), QImage(),false,  0));
+            if(subSplit.count()>1){
+               emit newMediaSubtype(new AttributeSortItem( subSplit.last(),subSplit.first(), QImage(),false,  0));
+            }
+
         }
     }
     else
@@ -2064,10 +2066,16 @@ void qOrbiter::requestTypes(int type)
         emit newAttributeSort( new AttributeSortItem( "Recent","-1", QImage(),false,  0));
         QStringList data;
         data = QString::fromStdString(sText.c_str()).split("\n");
+        if(data.count() < 1)
+            data.removeLast();
+
         for(int i=0; i < data.count(); i++)
         {
             QStringList subSplit = data.at(i).split(":");
+            if(subSplit.count() > 1){
             emit newAttributeSort( new AttributeSortItem( subSplit.last(),subSplit.first(), QImage(),false,  0));
+            }
+
         }
     }
     else
@@ -2112,7 +2120,7 @@ void qOrbiter::requestFileFormats(int type)
 
     CMD_Get_File_Formats getTypesCmd(m_dwPK_Device, iMediaPluginID,type , &sText);
     if(SendCommand(getTypesCmd, &pResponse) && pResponse=="OK"){
-        emit commandResponseChanged("Got types for attribute");
+        emit commandResponseChanged("Got File Formats for attribute");
         QStringList data;
         data = QString::fromStdString(sText.c_str()).split("\n");
         for(int i=0; i < data.count(); i++)
@@ -2121,7 +2129,10 @@ void qOrbiter::requestFileFormats(int type)
 #ifdef debug
             emit commandResponse(data.at(i).split(":"));
 #endif
-            emit newFileFormatSort( new AttributeSortItem( subSplit.last(),subSplit.first(), QImage(),false,  0));
+            if(subSplit.count() > 1){
+                  emit newFileFormatSort( new AttributeSortItem( subSplit.last(),subSplit.first(), QImage(),false,  0));
+            }
+
         }
     }
     else
@@ -2280,7 +2291,6 @@ void qOrbiter::setStringParam(int paramType, QString param)
 
     case 2:
         q_fileFormat = param;
-
         longassstring << q_mediaType+ "|" + q_subType + "|" + q_fileFormat + "|" + q_attribute_genres + "|" + q_mediaSources << "|" + q_usersPrivate +"|" + q_attributetype_sort +"|" + q_pk_users + "|" + q_last_viewed +"|" + q_pk_attribute;
         datagridVariableString = longassstring.join("|");
         emit clearAndContinue(q_mediaType.toInt());;
@@ -2288,7 +2298,6 @@ void qOrbiter::setStringParam(int paramType, QString param)
 
     case 3:
         q_attribute_genres = param;
-
         longassstring << q_mediaType+ "|" + q_subType + "|" + q_fileFormat + "|" + q_attribute_genres + "|" + q_mediaSources << "|" + q_usersPrivate +"|" + q_attributetype_sort +"|" + q_pk_users + "|" + q_last_viewed +"|" + q_pk_attribute;
         datagridVariableString = longassstring.join("|");
         emit clearAndContinue(q_mediaType.toInt());;
@@ -4696,7 +4705,7 @@ void DCE::qOrbiter::prepareFileList(int iPK_MediaType)
             {
                 q_attributetype_sort = audioDefaultSort;
             }
-            else if(q_attributetype_sort == "2" ) //catches performer
+            else if(q_attributetype_sort == "2" && q_pk_attribute !="" ) //catches performer
             {
                 q_attributetype_sort= "3";
             }
@@ -4704,7 +4713,7 @@ void DCE::qOrbiter::prepareFileList(int iPK_MediaType)
             {
                 q_attributetype_sort = "2";
             }
-            else if(q_attributetype_sort =="3") //album
+            else if(q_attributetype_sort =="3" && q_pk_attribute !="") //album
             {
                 q_attributetype_sort = "13";
             }

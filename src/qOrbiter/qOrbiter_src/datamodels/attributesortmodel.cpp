@@ -171,6 +171,12 @@ void AttributeSortModel::setSelectionStatus(QString format)
 {
     AttributeSortItem* item = find(format);
     item->updateSelection(!item->selectedStatus());
+    if(filterLevel==6){
+        qDebug() << "exclusive sort, unchecking other items!";
+        foreach(AttributeSortItem* uitem, m_list) {
+          if(uitem->id()!= item->id()) uitem->m_isSelected = false;
+        }
+    }
     qDebug() << "Set State for:" << format << "to " << item->selectedStatus();
     //return state;
     ReturnSelectedItems();

@@ -44,5 +44,6 @@ signals:
 public slots:
     bool setStatus(bool b) { m_isSelected = b; emit dataChanged();}
     bool updateSelection (bool newBool) ;
+
 };
 #endif // ATTRIBUTESORTITEM_H

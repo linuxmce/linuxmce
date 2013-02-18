@@ -43,5 +43,6 @@ QVariant AttributeSortItem::data(int role) const
 
 bool AttributeSortItem::updateSelection(bool newbool)
 {
-   setStatus(newbool);
+    setStatus(newbool);
 }
+
