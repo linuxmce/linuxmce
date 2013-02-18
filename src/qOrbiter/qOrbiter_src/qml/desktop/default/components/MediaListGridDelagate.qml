@@ -46,12 +46,8 @@ Item
         }
         
         Component.onCompleted: {fade_and_scale.running = true}
-        property bool pop:ping
-        onPopChanged:{
-            console.log(pop)
-        //    if(pop===true)
-          // gridView.positionViewAtIndex(index,ListView.Beginning)
-        }
+
+
         Rectangle
         {
             id:frame
@@ -95,7 +91,7 @@ Item
             Text
             {
                 id:celllabel
-                text: name;
+                text: name
                 font.pointSize: 12;
                 color: "white" ;
                 wrapMode: "WrapAtWordBoundaryOrAnywhere"
@@ -109,7 +105,7 @@ Item
         states: [
             State {
                 name: "unsorted"
-                when:manager.q_attributetype_sort === "13"
+                when:manager.q_attributetype_sort !== ("52") && manager.q_subType !==("2"||"3") && manager.i_current_mediaType !== 4
                 PropertyChanges {
                     target: mainItem
                     width: scaleX(21);
@@ -148,8 +144,20 @@ Item
                     height: scaleY(38)
                     color: "transparent"
                 }
+            },
+            State {
+                name: "audio"
+                when: manager.i_current_mediaType === 4
+                PropertyChanges {
+                    target: mainItem
+                    width: scaleX(17);
+                    height: scaleY(28)
+                    color: "transparent"
+                }
             }
+
         ]
+
     }
 
 

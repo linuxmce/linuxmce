@@ -18,7 +18,7 @@ Rectangle {
 
     Rectangle{
         id:metadataSection
-        width: manager.appWidth
+        width: parent.width
         height: scaleY(45)
         color: "transparent"
 
@@ -57,17 +57,10 @@ Rectangle {
 
         NonEPGPlaylist{
             anchors.left: parent.left
-            anchors.verticalCenter: parent.verticalCenter
-
+            anchors.top: parent.top
         }
 
-        StyledText {
-            id: updating_time
-            text: dceTimecode.qsCurrentTime
-            fontSize:32
-            anchors.left: parent.left
-            anchors.bottom: metadataSection.bottom
-        }
+
 
         NowPlayingImage{
             id:npImage
@@ -92,25 +85,31 @@ Rectangle {
             anchors.left: mediaTypeMetaData.left
         }
 
-        StyledText {
-            id: totalTime
-            text: dceTimecode.qsTotalTime
-            fontSize:32
-            anchors.right: parent.right
-
-            anchors.bottom: metadataSection.bottom
-        }
 
     }
 
+    StyledText {
+        id: updating_time
+        text: dceTimecode.qsCurrentTime
+        fontSize:32
+        anchors.left: parent.left
+        anchors.top: metadataSection.bottom
+    }
 
+    StyledText {
+        id: totalTime
+        text: dceTimecode.qsTotalTime
+        fontSize:32
+        anchors.right: parent.right
+        anchors.top: metadataSection.bottom
+    }
 
     Loader{
         id:mediaScrollerTarget
         anchors.top: metadataSection.bottom
+        anchors.topMargin: scaleY(1)
         anchors.horizontalCenter: parent.horizontalCenter
     }
-
 
     Rectangle{
         id:bottomControls

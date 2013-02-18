@@ -3,11 +3,17 @@ import "../../lib/handlers"
 
 Rectangle {
     id:nonepgplaylist
-    width:mediaplaylist.count() <= 1 ? 0: scaleX(25)
-    height:mediaplaylist.count() <= 1 ? 0: scaleY(55)
-    visible: mediaplaylist.count() <= 1
+    width: scaleX(25)
+    height: scaleY(45)
+    visible: nonepgplaylistview.count > 1 ? true : false
     color: "transparent"
-    clip:false
+    clip:true
+    Rectangle{
+        anchors.fill: parent
+        color: "black"
+        opacity: .35
+    }
+
     property bool optionVisible: false
 
     Connections{
@@ -20,26 +26,24 @@ Rectangle {
     ListView{
         id:nonepgplaylistview
         width: scaleX(25)
-        height: scaleY(55)
-        anchors.centerIn: parent
+        height:parent.height
+        anchors.top: parent.top
         clip: true
         interactive: true
         flickableDirection: "VerticalFlick"
         model: mediaplaylist
 
         delegate:
-            Rectangle {
-            border.color: "black"
-            border.width: 1
+            Rectangle {            
             width:scaleX(25)
-            height: scaleY(12)
+            height:index === dcenowplaying.m_iplaylistPosition ? scaleY(12) : scaleY(8)
             anchors.horizontalCenter: parent.horizontalCenter
             color: "transparent"
             clip: true
             Image {
                 id: playlistimage
                 fillMode: Image.PreserveAspectCrop
-                source:  index === dcenowplaying.m_iplaylistPosition ? playlistimage.source = "image://listprovider/updateobject/"+securityvideo.timestamp: ""
+                source: index === dcenowplaying.m_iplaylistPosition ? playlistimage.source = "image://listprovider/updateobject/"+securityvideo.timestamp: manager.imagePath+"ui3/grey_cell.png"
                 anchors.fill: parent
                 opacity: .5
             }

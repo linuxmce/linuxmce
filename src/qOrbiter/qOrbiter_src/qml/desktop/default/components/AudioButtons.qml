@@ -24,7 +24,7 @@ Row{
         MouseArea{
             anchors.fill: parent
             onClicked:  {
-                MyJs.createStageComponent("../components/Avcodes.qml", storedAudioRemote)
+                MyJs.createStageComponent("../components/Avcodes.qml", storedVideoRemote)
             }
         }
     }
@@ -38,5 +38,5 @@ Row{
     AvOptionButton{
         buttontext: qsTr("Power")
     }
-    HomeButton{}
+
 }

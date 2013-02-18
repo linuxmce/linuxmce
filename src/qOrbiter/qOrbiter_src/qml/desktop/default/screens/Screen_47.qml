@@ -107,10 +107,10 @@ Rectangle {
             Component.onCompleted:forceActiveFocus()
 
             highlight:Rectangle{
-                color:"transparent"
+                color:"white"
                 border.color: "white"
                 border.width: 1
-                opacity: .25
+                opacity: .35
                 BorderImage {
                     id: borderimg
                     horizontalTileMode: BorderImage.Repeat
@@ -139,11 +139,10 @@ Rectangle {
                 text: "Play All"
                 PlayAll{}
             }
-            MoonButton {
-                id: genre
-                text: "Genre"
-
-            }
+//            MoonButton {
+//                id: genre
+//                text: "Genre"
+//            }
             MoonButton {
                 id: asort
                 text: "Attribute \n Sort"
@@ -152,13 +151,17 @@ Rectangle {
                     onClicked: {myFilters.y = asort.y; myFilters.currentFilterModel=attribfilter}
                 }
             }
-            MoonButton {
-                id: sources
-                text: "Sources"
-            }
+//            MoonButton {
+//                id: sources
+//                text: "Sources"
+//            }
             MoonButton {
                 id: rez
                 text: "Resolution"
+                MouseArea{
+                    anchors.fill:parent
+                    onClicked: {myFilters.y = rez.y; myFilters.currentFilterModel=fileformatmodel}
+                    }
             }
             MoonButton {
                 id: mTypes

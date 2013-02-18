@@ -3511,7 +3511,7 @@ void DCE::qOrbiter::populateAdditionalMedia() //additional media grid that popul
                       {
                           pCell= it->second;
                           const char *pPath = pCell->GetImagePath();
-                          filePath = QString::fromUtf8(pPath);
+                          filePath = QString::fromUtf8(pPath).remove(".tnj");
                           fk_file = pCell->GetValue();
 
                           cellTitle = QString::fromUtf8(pCell->m_Text);

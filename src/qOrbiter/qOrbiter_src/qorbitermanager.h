@@ -350,7 +350,7 @@ Param 10 - pk_attribute
     QString audioDefaultSort;
     QString photoDefaultSort;
     QString gamesDefaultSort;
-    QMap<int, QString> attributeTypes;
+
 
     QStringList goBack;
     QString qs_seek;

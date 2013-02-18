@@ -37,8 +37,8 @@ Rectangle{
     }
     Image {
         id: nowplayingimage
-        width: dcenowplaying.aspect=="wide"? scaleX(30) : scaleX(32)
-        height:dcenowplaying.aspect=="wide"? scaleY(43) : scaleY(65)
+        width: dcenowplaying.aspect=="wide"? scaleX(30) : scaleX(25)
+        height:dcenowplaying.aspect=="wide"? scaleY(43) : scaleY(45)
         fillMode: Image.PreserveAspectFit
         source: "image://listprovider/updateobject/"+securityvideo.timestamp
         anchors.horizontalCenter: parent.horizontalCenter

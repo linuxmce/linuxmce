@@ -97,7 +97,7 @@ Rectangle{
             smooth: true
             font.bold: true
             fontSize: scaleY(2)
-            color:style.maincolor
+            color:"White"
             visible:  dcenowplaying.synop =="" ? false: true
         }
 
