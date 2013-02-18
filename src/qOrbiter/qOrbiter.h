@@ -1635,6 +1635,8 @@ public slots:
     void GetMediaAttributeGrid(QString qs_fk_fileno);
     void GetSecurityCam(int i_inc_pkdevice);
     void playMedia(QString inc_FKFile);
+    void mythtvPlayMedia();
+
     void StopMedia();
     void RwMedia();
     void FfMedia();

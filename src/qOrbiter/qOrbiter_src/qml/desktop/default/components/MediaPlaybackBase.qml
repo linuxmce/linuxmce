@@ -4,7 +4,8 @@ import "../../lib/effects"
 
 Rectangle {
     id:mediaPlaybackBase
-    anchors.fill: parent
+    height: parent.height
+    width: manager.appWidth
     color: "transparent"
 
     Component.onCompleted: manager.setBoundStatus(true)
@@ -14,6 +15,7 @@ Rectangle {
     property alias playlistSource:playlist.model
     property alias playlistDelegate:playlist.delegate
 
+    property bool enableScrollbar:true
 
 
     Rectangle{
@@ -119,8 +121,7 @@ Rectangle {
         anchors.bottom: parent.bottom
         anchors.horizontalCenter: parent.horizontalCenter
         Loader{
-            id:controlsLoader
-            sourceComponent:VideoControls{}
+            id:controlsLoader           
             anchors.centerIn: parent
         }
     }

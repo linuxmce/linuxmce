@@ -1,150 +1,151 @@
 import QtQuick 1.0
 import "../components"
 
-Rectangle {
+MediaPlaybackBase {
 
     // property alias synText:
     id: mythtvremote
-    anchors.centerIn: parent
+    metadataComponent: MythTvMetaData{ }
+    controlComponent: MythTvControls{}
+    playlistSource:simpleepg
+//    Timer{
+//        id:singleshot
+//        repeat: false
+//        interval: 2000
+//        triggeredOnStart: false
+//        running: true
 
-    Timer{
-        id:singleshot
-        repeat: false
-        interval: 2000
-        triggeredOnStart: false
-        running: true
+//        onTriggered: nowplayingimage.source = "image://listprovider/updateobject/"+securityvideo.timestamp
+//    }
 
-        onTriggered: nowplayingimage.source = "image://listprovider/updateobject/"+securityvideo.timestamp
-    }
+//    Connections{
+//        target:dcenowplaying
+//        onPlayListPositionChanged: nowplayingimage.source = "image://listprovider/updateobject/"+securityvideo.timestamp
+//    }
+//    height: manager.appHeight
+//    width: manager.appWidth
+//    radius: 0
+//    opacity: 1
+//    color: style.darkhighlight
+//    Component.onCompleted:setNowPlayingTv()
 
-    Connections{
-        target:dcenowplaying
-        onPlayListPositionChanged: nowplayingimage.source = "image://listprovider/updateobject/"+securityvideo.timestamp
-    }
-    height: manager.appHeight
-    width: manager.appWidth
-    radius: 0
-    opacity: 1
-    color: style.darkhighlight
-    Component.onCompleted:setNowPlayingTv()
+//    //main 'now playing rect containing all the other items
+//    HomeButton{anchors.right: parent.right; anchors.top:parent.top}
+//    VideoControls {id: videocontrols1; anchors.bottom: parent.bottom; anchors.horizontalCenter: parent.horizontalCenter}
 
-    //main 'now playing rect containing all the other items
-    HomeButton{anchors.right: parent.right; anchors.top:parent.top}
-    VideoControls {id: videocontrols1; anchors.bottom: parent.bottom; anchors.horizontalCenter: parent.horizontalCenter}
+//    Row{
+//        id:mainrow
+//        height: childrenRect.height
+//        width: childrenRect.width
+//        spacing: 5
+//        anchors.top:parent.top
+//        anchors.topMargin: scaleY(10)
+//        anchors.horizontalCenter: parent.horizontalCenter
+//        EPGPlaylist{ }
+//        RemoteNumberPad {id: remotenumberpad1;}
+//        Rectangle {
+//            width: scaleX(30)
+//            height: childrenRect.height
+//            color: style.accentcolor
 
-    Row{
-        id:mainrow
-        height: childrenRect.height
-        width: childrenRect.width
-        spacing: 5
-        anchors.top:parent.top
-        anchors.topMargin: scaleY(10)
-        anchors.horizontalCenter: parent.horizontalCenter
-        EPGPlaylist{ }
-        RemoteNumberPad {id: remotenumberpad1;}
-        Rectangle {
-            width: scaleX(30)
-            height: childrenRect.height
-            color: style.accentcolor
+//            Rectangle {
+//                id: gradientheader
 
-            Rectangle {
-                id: gradientheader
+//                width: parent.width
+//                height: childrenRect.height
+//                gradient: Gradient {
+//                    GradientStop {
+//                        position: 0
+//                        color: "#ffffff"
+//                    }
 
-                width: parent.width
-                height: childrenRect.height
-                gradient: Gradient {
-                    GradientStop {
-                        position: 0
-                        color: "#ffffff"
-                    }
+//                    GradientStop {
+//                        position: 1
+//                        color: "#3878a0"
+//                    }
+//                }
+//                Text {
+//                    id: headertext
+//                    text:"Speed: " + dcenowplaying.qs_playbackSpeed
+//                    font.family: "Droid Sans"
+//                    font.pixelSize: 12
+//                }
+//            }
 
-                    GradientStop {
-                        position: 1
-                        color: "#3878a0"
-                    }
-                }
-                Text {
-                    id: headertext
-                    text:"Speed: " + dcenowplaying.qs_playbackSpeed
-                    font.family: "Droid Sans"
-                    font.pixelSize: 12
-                }
-            }
+//            Image {
+//                id: nowplayingimage
+//                width: scaleX(30)
+//                height: scaleY(30)
+//                anchors.top: gradientheader.bottom
+//                fillMode: Image.PreserveAspectFit
+//                source: "image://listprovider/updateobject/"+dcenowplaying.m_iplaylistPosition
+//            }
 
-            Image {
-                id: nowplayingimage
-                width: scaleX(30)
-                height: scaleY(30)
-                anchors.top: gradientheader.bottom
-                fillMode: Image.PreserveAspectFit
-                source: "image://listprovider/updateobject/"+dcenowplaying.m_iplaylistPosition
-            }
+//            Rectangle {
+//                id: metadatavideo
+//                width: scaleX(30)
+//                height: childrenRect.height
 
-            Rectangle {
-                id: metadatavideo
-                width: scaleX(30)
-                height: childrenRect.height
+//                gradient: Gradient {
+//                    GradientStop {
+//                        position: 0
+//                        color: style.accentcolor
+//                    }
 
-                gradient: Gradient {
-                    GradientStop {
-                        position: 0
-                        color: style.accentcolor
-                    }
+//                    GradientStop {
+//                        position: 1
+//                        color: style.darkhighlight
+//                    }
+//                }
+//                color: style.darkhiglight
+//                anchors.top:nowplayingimage.bottom
+//                Column
+//                {
+//                    width: scaleX(30)
+//                    spacing: 5
+//                    height: childrenRect.height
 
-                    GradientStop {
-                        position: 1
-                        color: style.darkhighlight
-                    }
-                }
-                color: style.darkhiglight
-                anchors.top:nowplayingimage.bottom
-                Column
-                {
-                    width: scaleX(30)
-                    spacing: 5
-                    height: childrenRect.height
-
-                    Text {
-                        id: artist
-                        width: parent.width
-                        text: qsTr("Device: ")  + dcenowplaying.qs_mainTitle
-                        font.family: "Droid Sans"
-                        wrapMode: "NoWrap"
-                        font.bold: true
-                        smooth: true
-                        font.pixelSize: 12
-                    }
-
-
-                    Text {
-                        id: album
-                        wrapMode: "NoWrap"
-                        text: qsTr("Channel: ") + dcenowplaying.qs_mainTitle2
-                        font.family: "Droid Sans"
-                        font.bold: true
-                        smooth: true
-                        horizontalAlignment: Text.AlignHCenter
-                        font.pixelSize: 12
-                    }
-
-                    Text {
-                        id: title
-                        wrapMode: "NoWrap"
-                        text: qsTr("Program:") + dcenowplaying.program
-                        font.family: "Droid Sans"
-                        font.bold: true
-                        smooth: true
-                        horizontalAlignment: Text.AlignHCenter
-                        font.pixelSize: 12
-                    }
-                }
-            }
-        }
+//                    Text {
+//                        id: artist
+//                        width: parent.width
+//                        text: qsTr("Device: ")  + dcenowplaying.qs_mainTitle
+//                        font.family: "Droid Sans"
+//                        wrapMode: "NoWrap"
+//                        font.bold: true
+//                        smooth: true
+//                        font.pixelSize: 12
+//                    }
 
 
-        Remote_lighting_controls{ id: remote_lighting_controls1; }
-        Remote_Audio_controls{ id: remote1; }
+//                    Text {
+//                        id: album
+//                        wrapMode: "NoWrap"
+//                        text: qsTr("Channel: ") + dcenowplaying.qs_mainTitle2
+//                        font.family: "Droid Sans"
+//                        font.bold: true
+//                        smooth: true
+//                        horizontalAlignment: Text.AlignHCenter
+//                        font.pixelSize: 12
+//                    }
 
-    }
+//                    Text {
+//                        id: title
+//                        wrapMode: "NoWrap"
+//                        text: qsTr("Program:") + dcenowplaying.program
+//                        font.family: "Droid Sans"
+//                        font.bold: true
+//                        smooth: true
+//                        horizontalAlignment: Text.AlignHCenter
+//                        font.pixelSize: 12
+//                    }
+//                }
+//            }
+//        }
+
+
+//        Remote_lighting_controls{ id: remote_lighting_controls1; }
+//        Remote_Audio_controls{ id: remote1; }
+
+//    }
 
 }

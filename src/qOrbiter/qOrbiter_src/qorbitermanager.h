@@ -492,6 +492,7 @@ signals:
     void newPlaylistPosition(int pos);
     void bindMediaRemote(bool b);
     void startPlayback(QString file);
+    void play();
     void zoomLevelChanged(QString zoom);
     void aspectRatioChanged(QString ratio);
     void mobileStorageChanged(QString location);
@@ -1028,6 +1029,7 @@ public slots:
     /*! @name Media Control Slots*/
     //{@
     void playMedia(QString FK_Media) { emit startPlayback(FK_Media);}
+    void mythTvPlay(){emit play();}
     void stopMedia() {emit stopPlayback();}
     void setPlaybackSpeed(int s) {emit setStreamSpeed(s);}
     void pauseMedia() {emit pause();}

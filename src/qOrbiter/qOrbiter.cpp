@@ -45,7 +45,6 @@ qOrbiter::qOrbiter(int DeviceID, string ServerAddress,bool bConnectEventHandler,
 {
 
 }
-
 //<-dceag-const2-b->
 //! The constructor when the class is created as an embedded instance within another stand-alone device
 qOrbiter::qOrbiter(Command_Impl *pPrimaryDeviceCommand, DeviceData_Impl *pData, Event_Impl *pEvent, Router *pRouter)
@@ -2813,6 +2812,13 @@ void DCE::qOrbiter::playMedia(QString inc_FKFile)
     SendCommand(playMedia);
 }
 
+void qOrbiter::mythtvPlayMedia()
+{
+    qDebug() << "Sending play to mythtv";
+    CMD_Change_Playback_Speed forward_media(m_dwPK_Device, iMediaPluginID, internal_streamID, 1000, true);
+    SendCommand(forward_media);
+}
+
 void DCE::qOrbiter::StopMedia()
 {
     CMD_MH_Stop_Media endMedia(m_dwPK_Device, iMediaPluginID,0,i_current_mediaType ,0,StringUtils::itos(i_ea),false);
@@ -3326,6 +3332,7 @@ void DCE::qOrbiter::requestLiveTvPlaylist()
 #else
     CMD_Populate_Datagrid cmd_populate_livetv_grid(m_dwPK_Device, iPK_Device_DatagridPlugIn, StringUtils::itos( m_dwIDataGridRequestCounter ), string(m_sGridID), 11, m_UserID + "," + m_EA, 0, &pkVar, &valassign,  &isSuccessfull, &gHeight, &gWidth );
 #endif
+    qDebug() << "Userid::" <<m_UserID.c_str();
     if (SendCommand(cmd_populate_livetv_grid))
     {
         /*
