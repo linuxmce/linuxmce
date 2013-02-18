@@ -7,6 +7,7 @@
 #include <datamodels/gridItem.h>
 #include <qorbitermanager.h>
 #include <QDeclarativeListProperty>
+#include <QKeyEvent>
 
 /*!
  * \brief The ListModel class is based on QAbstractListmodel for the purposes of provinding a flat list of data.
@@ -76,14 +77,27 @@ signals:
     void totalPagesChanged();
     void letterLoaded();
     void alphabetChanged();
+    void updateIndex(int newIndex);
 
 
 public slots:
     QDeclarativeListProperty<QString> getAlphabet() { return QDeclarativeListProperty<QString>(this,m_sortList); }
+
     int setSection(QString s){
 
         foreach(gridItem* item, m_list) {
-            if(item->name().startsWith(s)) {
+            if(item->name().startsWith(s)) {              
+               return indexFromItem(item).row();
+            }
+        }
+    }
+    int setSection(int key){
+
+        QKeySequence seq = QKeySequence(key);
+
+        QString t = seq.toString();
+        foreach(gridItem* item, m_list) {
+            if(item->name().startsWith(t)) {
                return indexFromItem(item).row();
             }
         }

@@ -9,8 +9,8 @@ Item
     }
 
 
-    property int barHeight:scaleY(65)
-    property int barWidth:scaleX(2)
+    property int barHeight:scaleY(3)
+    property int barWidth:grid_view1.width
 
     property string borderColor:"white"
     property string internalColor:"transparent"
@@ -34,9 +34,54 @@ Item
             id:progress_bar_fill
             height: 0
             width: parent.width-1
-            color: dataModel.loadingStatus === false ? inactiveColor : activeColor
+            color: dataModel.loadingStatus  ? inactiveColor : activeColor
             anchors.bottom: parent.bottom
             opacity: .25
+        }
+        ListView{
+            id:alphalist
+            height: scaleY(4)
+            width: grid_view1.width
+            clip:true
+           anchors.centerIn: parent
+            model:alphabetlist
+            orientation:ListView.Horizontal
+
+            delegate:
+                Rectangle {
+                id:alphabetrect
+                height: scaleY(5)
+                width: scaleX(4)
+                color: "transparent"
+                clip:false
+                StyledText {
+                    id: test
+                    text: name
+                    font.pixelSize: 18
+                    anchors.centerIn: parent
+                    color:"aliceblue"
+
+                }
+                MouseArea{
+                    anchors.fill: parent
+                    hoverEnabled: true
+                    onEntered: {
+                        alphabetrect.scale = 1.5
+                    }
+                    onExited: {
+
+                        alphabetrect.scale = 1
+                    }
+                    onClicked: { if(dataModel.totalPages===1){
+                            gridView.currentIndex = dataModel.setSection(name)
+                            gridView.positionViewAtIndex(gridView.currentIndex, ListView.Beginning)
+
+                        }else{
+                            manager.setSeekLetter(name)
+                        }
+                    }
+                }
+            }
         }
 
         StyledText {
@@ -45,8 +90,8 @@ Item
             color: "white"
             font.bold: true
             font.pixelSize: scaleY(4)
-           anchors.top: progress_bar.bottom
-           anchors.left: progress_bar.left
+           anchors.verticalCenter: progress_bar.verticalCenter
+           anchors.right: progress_bar.left
 
         }
 
@@ -57,6 +102,7 @@ Item
             font.bold: true
             font.pixelSize: scaleY(4)
             anchors.bottom: progress_bar.top
+            anchors.left: progress_bar.right
         }
 
     }

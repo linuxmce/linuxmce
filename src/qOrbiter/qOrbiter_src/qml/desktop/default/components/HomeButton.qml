@@ -7,10 +7,9 @@ Item {
 
     ButtonSq{
         buttonsqradius: 2.5
-        buttontext: "Home"
+        buttontext: ""
         buttontextfontsize: 14
-        height: scaleY(13)
-        width:  scaleX(8)
+        anchors.fill: parent
         Image {
             id: homeimage
             source: "../img/ui3/homebig.png"

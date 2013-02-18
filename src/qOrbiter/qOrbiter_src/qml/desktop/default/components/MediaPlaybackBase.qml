@@ -37,13 +37,14 @@ Rectangle {
         }
         Rectangle{
             anchors.fill: parent
-            color:"transparent"
+            color:"black"
             border.color: "black"
             border.width: 2
             Image {
                 id: fill
                 source: manager.imagePath+"ui3/appBackground.png"
                 anchors.fill:parent
+                opacity: .85
             }
 
         }

@@ -55,6 +55,16 @@ Item{
         anchors.right: parent.right
         anchors.rightMargin: 25
         spacing:scaleX(2)
+
+       Loader{
+           id:home
+           source: manager.currentScreen !== "Screen_1.qml" ? "HomeButton.qml" : ""
+           onSourceChanged: if(home.source !==""){
+                                home.item.height =parent.height
+                                home.item.width = 25
+                            }
+       }
+
         UserListComponent{
             id:user
 
@@ -74,8 +84,10 @@ Item{
             StyledText{
                 text:!dceplayer.connected ? "!" : dceplayer.mediaBuffer
                 font.letterSpacing: 2
-                anchors.centerIn: parent
+                anchors.bottom: parent.bottom
+                anchors.horizontalCenter: parent.horizontalCenter
                 isBold: true
+                color: "black"
             }
 
         }
