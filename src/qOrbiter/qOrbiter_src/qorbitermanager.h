@@ -165,7 +165,7 @@ class qorbiterManager : public QObject
     Q_PROPERTY (int appWidth READ getAppW WRITE setAppW NOTIFY orientationChanged)/*!< \brief Contains the application width \ingroup qorbiter_properties */
 
     Q_PROPERTY(int i_current_mediaType READ getMediaType WRITE setMediaType NOTIFY mediaTypeChanged)/*!< \brief Contains the current media type of the playing media. \ingroup qorbiter_properties */
-    Q_PROPERTY (QString q_mediaType READ getSorting NOTIFY gridTypeChanged) /*!< \brief Contains the current media type of the media grid being browsed \ingroup qorbiter_properties */
+    Q_PROPERTY (QString q_mediaType READ getSorting WRITE setGridMediaType NOTIFY mediaGridTypeChanged) /*!< \brief Contains the current media type of the media grid being browsed \ingroup qorbiter_properties */
     Q_PROPERTY (QString q_attributetype_sort READ getTypeSort WRITE setTypeSort NOTIFY typeSortChanged) /*!< \brief attribute type sorting */
     Q_PROPERTY (QString q_subType READ getSubType WRITE setSubType NOTIFY subTypeChanged)
     Q_PROPERTY (QString sPK_User READ getCurrentUser WRITE setCurrentUser NOTIFY userChanged)/*!< \brief Contains string of the current user \ingroup qorbiter_properties */
@@ -335,7 +335,7 @@ Param 8 - ?? users
 Param 9 - ??last_viewed
 Param 10 - pk_attribute
       */
-    QString q_mediaType;           //1
+    QString q_mediaType;/*! \brief The media type of the grid being navigated */           //1
     QString q_subType;             //2
     QString q_fileFormat;          //3
     QString q_attribute_genres;    //4
@@ -534,6 +534,7 @@ signals:
     void filterChanged();
     void resetFilter();
     void modelChanged();
+    void mediaGridTypeChanged();
     void gridTypeChanged(int i);
     void mediaRequest(int);
     void mediaSeperatorChanged(int sep);
@@ -574,6 +575,7 @@ signals:
     void deviceNumberChanged(int d);
     void applicationPathChanged();
     void imagePathChanged();
+    void pingTheRouter();
 
     /*Media Device Control Signals*/
     void resendAvCodes();
@@ -744,7 +746,7 @@ public slots:
     void processConfig(QByteArray config);
     bool writeConfig();
     bool readLocalConfig();
-    void setConnectedState(bool state) { connectedState = state;  if(state == false) {checkConnection("Connection Changed");} emit connectedStateChanged(); }
+    void setConnectedState(bool state) { connectedState = state; checkConnection(); emit connectedStateChanged(); }
     bool getConnectedState () {return connectedState;}
     void setDceResponse(QString response);
     QString getDceResponse () ;
@@ -1095,9 +1097,13 @@ public slots:
     void updateSelectedAttributes(QString attributes);
     void setGridStatus(bool s) {emit gridStatus(s);}
     void setSorting(int i);
+
     void setMediaType(int m) {i_current_mediaType = m; emit mediaTypeChanged();}
     int getMediaType(){return i_current_mediaType;}
+
+    void setGridMediaType(QString t){q_mediaType = t; qDebug() << q_mediaType; emit mediaGridTypeChanged();}
     QString getSorting() {return q_mediaType;}
+
     void initializeSortString();
     void clearMediaModel();
     void getGrid(int i);
@@ -1127,7 +1133,7 @@ public slots:
     void regenComplete(int i);
     void regenError(QProcess::ProcessError);
     QString adjustPath(const QString&);
-    void checkConnection(QString s);
+    void checkConnection();
     void processError(QString msg);
 
     void setDeviceNumber(int d) {iPK_Device = d; emit deviceNumberChanged(iPK_Device);}

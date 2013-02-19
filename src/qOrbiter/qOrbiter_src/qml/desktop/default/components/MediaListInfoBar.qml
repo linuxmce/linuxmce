@@ -10,13 +10,13 @@ import "../js/ComponentLoader.js" as MyJs
 
 Row{
     id:label_row
-    width: childrenRect.width
-    height: scaleY(5)
+    width: visible ? childrenRect.width : 0
+    height: visible ? scaleY(5) :0
     anchors.centerIn: pos_label
     spacing: scaleX(1)
     StyledText {
         id: grid_position_label
-        text: qsTr("You are browsing by:") + manager.i_current_mediaType
+        text: qsTr("You are browsing by:") + manager.q_mediaType
         font.pixelSize: 14
         color: "aliceblue"
     }
@@ -34,12 +34,15 @@ Row{
         id: page_label
         text: qsTr("Current Page") + manager.media_currentPage
         color: "aliceblue"
+        visible: manager.media_currentPage !==0
     }
     
     TextInput{
         id:seperationSetter
         width: page_label.width
+        height: parent.height
         text: manager.media_pageSeperator
+        font.pixelSize: scaleY(2)
         onFocusChanged: activeFocus ? text="" : text=manager.media_pageSeperator
         color: "aliceblue"
         Keys.onEnterPressed: {
@@ -50,5 +53,7 @@ Row{
             }
         }
     }
+
+
     
 }

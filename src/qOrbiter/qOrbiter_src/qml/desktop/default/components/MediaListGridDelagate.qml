@@ -105,7 +105,7 @@ Item
         states: [
             State {
                 name: "unsorted"
-                when:manager.q_attributetype_sort !== ("52") && manager.q_subType !==("2"||"3") && manager.i_current_mediaType !== 4
+                when:manager.q_attributetype_sort !== ("52") && manager.q_subType !==("2"||"3") && manager.q_mediaType !== "4"
                 PropertyChanges {
                     target: mainItem
                     width: scaleX(21);
@@ -147,7 +147,7 @@ Item
             },
             State {
                 name: "audio"
-                when: manager.i_current_mediaType === 4
+                when: manager.q_mediaType === "4"
                 PropertyChanges {
                     target: mainItem
                     width: scaleX(17);

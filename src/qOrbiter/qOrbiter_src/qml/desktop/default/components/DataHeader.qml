@@ -20,8 +20,6 @@ Item{
     anchors.top: parent.top
     anchors.horizontalCenter: parent.horizontalCenter
 
-
-
     DropShadow{
         id:headerDrop
         sourceItem:headerbg
@@ -54,16 +52,18 @@ Item{
         width: childrenRect.width
         anchors.right: parent.right
         anchors.rightMargin: 25
-        spacing:scaleX(2)
 
-       Loader{
-           id:home
-           source: manager.currentScreen !== "Screen_1.qml" ? "HomeButton.qml" : ""
-           onSourceChanged: if(home.source !==""){
-                                home.item.height =parent.height
-                                home.item.width = 25
-                            }
-       }
+        MediaListInfoBar{
+            id:mediaInfo
+            visible:false
+        }
+
+        Loader{
+            id:home
+            source: manager.currentScreen !== "Screen_1.qml" ? "HomeButton.qml" : ""
+            height: parent.height
+            width: scaleX(6)
+        }
 
         UserListComponent{
             id:user
@@ -72,13 +72,14 @@ Item{
 
         Image{
             id:connection_status
-            height: parent.height
+            height: visible ? parent.height :0
             fillMode: Image.PreserveAspectFit
             source: manager.connectedState ? manager.imagePath+"ui3/connect_established.png" : manager.imagePath+"ui3/connect_no.png"
+            visible:mediaplayer_status.visible
         }
         Image{
             id:mediaplayer_status
-            height: parent.height
+            height: visible ? parent.height :0
             fillMode: Image.PreserveAspectFit
             source: manager.imagePath+"ui3/mediaplayer.png"
             StyledText{
@@ -115,10 +116,55 @@ Item{
 
 
     }
-
-
-
-
-
+    states: [
+        State {
+            name: "default"
+            when: manager.currentScreen==="Screen_1.qml"
+            PropertyChanges {
+                target: data_row
+                spacing:scaleX(2)
+            }
+            PropertyChanges {
+                target: mediaplayer_status
+                visible:true
+            }
+            PropertyChanges {
+                target: mediaInfo
+                visible:false
+            }
+        },
+        State {
+            name: "videos"
+            when: manager.currentScreen==="Screen_47.qml" && manager.q_mediaType==="5"
+            PropertyChanges {
+                target: data_row
+                spacing:scaleX(2)
+            }
+            PropertyChanges {
+                target: mediaplayer_status
+                visible:false
+            }
+            PropertyChanges {
+                target: mediaInfo
+                visible:true
+            }
+        },
+        State {
+            name: "audio"
+            when: manager.currentScreen==="Screen_47.qml" && manager.q_mediaType==="4"
+            PropertyChanges {
+                target: data_row
+                spacing:scaleX(2)
+            }
+            PropertyChanges {
+                target: mediaplayer_status
+                visible:false
+            }
+            PropertyChanges {
+                target: mediaInfo
+                visible:true
+            }
+        }
+    ]
     
 }

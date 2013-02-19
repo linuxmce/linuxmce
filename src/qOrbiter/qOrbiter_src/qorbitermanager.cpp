@@ -904,6 +904,7 @@ void qorbiterManager::updateSelectedAttributes(QString attributes)
     QStringList ta = attributes.split("|");
     setTypeSort(ta.at(6));
     setSubType(ta.at(1));
+    setGridMediaType(ta.at(0));
 }
 
 
@@ -1052,8 +1053,7 @@ QString qorbiterManager::adjustPath(const QString &path)
 
 void qorbiterManager::setSorting(int i)
 {
-    q_mediaType = QString::number(i);
-    qorbiterUIwin->rootContext()->setContextProperty("gmediaType", q_mediaType);
+    setGridMediaType(QString::number(i));
     emit gridTypeChanged(i);
 }
 
@@ -1573,17 +1573,10 @@ void qorbiterManager::showSleepingAlarms(SleepingAlarm *s)
 }
 
 
-void qorbiterManager::checkConnection(QString s)
+void qorbiterManager::checkConnection()
 {
-    /*
-    setDceResponse(s);
-    if(pqOrbiter->m_bQuit_get() == true)
-    {
-        setConnectedState(false);
-        setDceResponse("Disconnected!");
-    }
-    emit raiseSplash();
-*/
+    setDceResponse("Disconnect detected, checking");
+    emit pingTheRouter();
 
 }
 

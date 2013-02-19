@@ -24,7 +24,7 @@ Rectangle {
 
     function runEffects()
     {
-        MyJs.createStageComponent("FileDetails"+manager.i_current_mediaType+".qml" , fileviewscreen)
+        MyJs.createStageComponent("FileDetails"+manager.q_mediaType+".qml" , fileviewscreen)
     }
 
     Connections
@@ -46,11 +46,7 @@ Rectangle {
         opacity: .25
     }
 
-    MediaListInfoBar {
-        id: label_row
-        anchors.centerIn: pos_label
-        z:2
-    }
+
     MediaListProgressBar {
         id: progress_bar
         anchors.top: grid_view1.bottom
@@ -67,7 +63,7 @@ Rectangle {
 
     Rectangle {
         id:grid_view1
-        width: scaleX(85)
+        width: scaleX(91)
         height: scaleY(85)
         clip: true
         focus:true

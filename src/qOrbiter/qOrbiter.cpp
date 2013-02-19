@@ -1892,6 +1892,7 @@ void DCE::qOrbiter::deinitialize()
     BindMediaRemote(false);
     //DCE::CMD_Orbiter_Registered CMD_OrbiterUnRegistered(m_dwPK_Device, iOrbiterPluginID, StringUtils::itos(m_dwPK_Device) ,i_user, StringUtils::itos(i_ea), i_room, &pData, &iSize);
     // SendCommand(CMD_OrbiterUnRegistered);
+      emit routerConnectionChanged(false);
     emit closeOrbiter();
 }
 
@@ -4268,6 +4269,7 @@ void DCE::qOrbiter::adjustVolume(int vol)
 void qOrbiter::OnDisconnect()
 {
     emit routerDisconnect();
+    emit routerConnectionChanged(false);
     qDebug("Router disconnected!");
     m_bOrbiterConnected = false;
     setNowPlaying(false);
@@ -4286,9 +4288,7 @@ void qOrbiter::OnReload()
     pData = "NULL";
     iSize = 0;
     DCE::CMD_Orbiter_Registered unregister(m_dwPK_Device, iOrbiterPluginID, StringUtils::itos(m_dwPK_Device) ,i_user, StringUtils::itos(i_ea), i_room, &pData, &iSize);
-    SendCommand(unregister);
-
-    qDebug("Router Reloaded!");
+    SendCommand(unregister); 
     pthread_cond_broadcast( &m_listMessageQueueCond );
 
 #ifdef LINK_TO_ROUTER
@@ -4301,6 +4301,7 @@ void qOrbiter::OnReload()
 
 bool qOrbiter::OnReplaceHandler(string msg)
 {
+
     deinitialize();
 
 }
@@ -5125,6 +5126,7 @@ void qOrbiter::verifyInstall(QNetworkReply *r)
         emit commandResponseChanged("Found installation, connecting.");
         if ( initialize() == true )
         {
+            emit routerConnectionChanged(true);
             setdceIP(QString::fromStdString(m_sIPAddress));
 
             LoggerWrapper::GetInstance()->Write(LV_STATUS, "Connect OK");
@@ -5211,5 +5213,19 @@ void qOrbiter::executeMessageSend(QString outGoing)
 
 }
 
+
+void qOrbiter::checkRouterConnection()
+{
+    if(m_bQuit_get() == false){
+        DisconnectAndWait();
+    }
+    if(RouterNeedsReload()){
+
+    }
+
+    if(this->m_bRunning){
+
+    }
+}
 
 

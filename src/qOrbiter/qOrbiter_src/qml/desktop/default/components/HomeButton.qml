@@ -2,8 +2,7 @@ import QtQuick 1.0
 
 Item {
     id: homebutton
-    height: scaleY(13)
-    width:  scaleX(8)
+ anchors.fill: parent
 
     ButtonSq{
         buttonsqradius: 2.5

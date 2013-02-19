@@ -393,6 +393,7 @@ int main(int argc, char* argv[])
         QObject::connect(&orbiterWin.mainView, SIGNAL(destroyed()), &a, SLOT(quit()));
         QObject::connect(&w, SIGNAL(destroyed()), &a, SLOT(quit()));
 
+        QObject::connect(&pqOrbiter, SIGNAL(routerConnectionChanged(bool)), &w, SLOT(setConnectedState(bool)), Qt::QueuedConnection);
 
 
         // QObject::connect (&w, SIGNAL(orbiterClosing()), &dceThread, SLOT(quit()),Qt::QueuedConnection);

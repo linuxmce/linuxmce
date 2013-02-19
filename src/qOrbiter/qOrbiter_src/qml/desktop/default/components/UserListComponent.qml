@@ -4,8 +4,8 @@ import QtQuick 1.0
 Rectangle {
 
     id: userComponent
-    height: parent.height
-    width:  childrenRect.width
+    height: visible ?parent.height :0
+    width:  visible ? childrenRect.width : 0
     clip: false
     color:"transparent"
     state: 'minimized'

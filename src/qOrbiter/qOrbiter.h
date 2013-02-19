@@ -1312,6 +1312,7 @@ signals:
     //connections
     void checkReload();
     void routerDisconnect();
+    void routerConnectionChanged(bool s);
 
     //floorplans
     void floorPlanImageData(const uchar* ,int);
@@ -1489,6 +1490,9 @@ signals:
 
 public slots:
 
+    void checkRouterConnection();
+
+
 
 
     void cancelAllRequests(){
@@ -1600,6 +1604,7 @@ public slots:
     int getCurrentPage() {return media_currentPage;}
 
     bool checkLoadingStatus();
+
     void requestLiveTvPlaylist();
     void prepareFileList( int iPK_MediaType);
     void cleanupGrid();
