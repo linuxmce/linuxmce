@@ -51,6 +51,10 @@ bool VDRInfoFileHandler::LoadAttributes(PlutoMediaAttributes *pPlutoMediaAttribu
 					nAttributeType = ATTRIBUTETYPE_Title_CONST;
 					break;
 
+				case 'S':
+					nAttributeType = ATTRIBUTETYPE_Episode_CONST;
+					break;
+
 				case 'D':
 					nAttributeType = ATTRIBUTETYPE_Synopsis_CONST;
 					break;
