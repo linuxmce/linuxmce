@@ -495,9 +495,33 @@ VerifyExitCode () {
 	fi
 }
 
+NattyProp () {
+	if [[ "$(lsb_release -sc)" == "lucid" ]]; then
+		CurKernel="-generic"
+		if uname -r | grep "pae"; then 
+			CurKernel="-generic-pae"
+		fi
+		NewKernel="linux-image${CurKernel}-lts-backport-natty"
+		NewHeaders="linux-headers${CurKernel}-lts-backport-natty"
+
+		if [[ $(apt-cache policy "$NewKernel" | grep Installed | awk '{print $2}') == "(none)" ]]; then 
+				StatusMessage "Installing natty-backports kernel and support"
+				ErrorMessage "This could take more than 3 hours to complete. DO NOT INERRUPT!!!"
+				apt-get -yf install "$NewKernel"
+				#apt-get -yf install "$NewHeaders"
+				#apt-get -yf remove linux-headers${CurKernel}
+				apt-get -yf remove linux-image${CurKernel}
+				apt-get update
+				apt-get -yf dist-upgrade
+				chmod +r /initrd.img
+				chmod +r /vmlinuz
+				update-grub
+		fi
+	fi
+}
+
 IntelBridgeDetect () {
 	Ibridge="none"
-	CurKernel="-generic"
 	CPUid=$(cpuid | grep Version | awk '{print $2}')
 	grep -Eiq '(0206A7|0206D6|0206D7|0206D6)' <<< "$CPUid" && Ibridge="Sandy"
 	grep -iq "0306A9" <<< "$CPUid" && Ibridge="Ivy"
@@ -506,41 +530,26 @@ IntelBridgeDetect () {
 		continue
 	fi
 
-	if uname -r | grep "pae"; then 
-		CurKernel="-generic-pae"
-	fi
-
-	if [[ "$Ibridge" == "Sandy" ]]; then
-		NewKernel="linux-image${CurKernel}-lts-backport-natty"
-		NewHeaders="linux-headers${CurKernel}-lts-backport-natty"
-		NewKernelId="natty"
-	fi
-
-	if [[ "$Ibridge" == "Ivy" ]]; then
-		NewKernel="linux-image-3.0.0-26${CurKernel}"
-		NewHeaders="linux-headers-3.0.0-26${CurKernel}"
-		NewKernelId="latest oneiric"
-	fi
-
 	# Let's just go for sandy bridge right now
-	#if [[ "$Ibridge" != "none" ]]; then
+	if [[ "$Ibridge" == "Ivy" ]]; then
+		continue
+	#	NewKernel="linux-image-3.0.0-26${CurKernel}"
+	#	StatusMessage "Installing latest oneiric kernel and support"
+	#	apt-get -yf install "$NewKernel"
+	#	apt-get -yf remove linux-image${CurKernel}
+	#	apt-get update
+	#	apt-get -yf dist-upgrade
+	#	update-grub
+	fi
+
 	if [[ "$Ibridge" == "Sandy" ]]; then
-		if [[ $(apt-cache policy "$NewKernel" | grep Installed | awk '{print $2}') == "(none)" ]]; then 
-			StatusMessage "$Ibridge bridge detected. Addjusting repositories and updating."
-			apt-add-repository ppa:kernel-ppa/ppa
-			apt-add-repository ppa:glasen/intel-driver
-			# apt-add-repository ppa:f-hackenberger/x220-intel-mesa
-			apt-get update
-			StatusMessage "Installing "$NewKernelId" backported kernel and supporting intel drivers"
-			apt-get -yf install "$NewKernel"
-			apt-get -yf install "$NewHeaders"
-			apt-get -yf remove linux-headers${CurKernel}
-			apt-get -yf remove linux-image${CurKernel}
-			apt-get -yf dist-upgrade
-			update-grub
-			sleep 10
-			reboot
-		fi
+		StatusMessage "$Ibridge bridge detected. Addjusting repositories and updating."
+		apt-add-repository ppa:kernel-ppa/ppa
+		apt-add-repository ppa:glasen/intel-driver
+		# apt-add-repository ppa:f-hackenberger/x220-intel-mesa
+		apt-get update
+		StatusMessage "Installing backported kernel and supporting intel drivers"
+		NattyProp
 	fi
 }
 
@@ -627,6 +636,9 @@ FindVideoDriver () {
 			prop_driver="fglrx"
 			if grep -Ei '((R.)([2-5])|(9|X|ES)(1|2?)([0-9])(5|0)0|Xpress)' <<< "$vga_info"; then
 				prop_driver="radeon" 
+			fi 
+			if grep -Ei '(mach)' <<< "$vga_info"; then
+				prop_driver="mach64"
 			fi ;;
 
 		*8086)
@@ -636,9 +648,6 @@ FindVideoDriver () {
 			fi
 			if grep "i128" <<< "$vga_info"; then
 				prop_driver="i128"
-			fi 
-			if grep "mach" <<< "$vga_info"; then
-				prop_driver="mach64"
 			fi ;;
 
 		*1106)
@@ -687,8 +696,19 @@ InstallVideoDriver () {
 			fi ;;
 		fglrx)
 			if ! PackageIsInstalled fglrx; then 
+				NattyProp
 				apt-get -yf install fglrx
 				VerifyExitCode "Install fglrx Driver"
+				if -f /etc/X11/xorg.conf; then 
+					a=1
+						for i in xorg.conf; do
+						new=$(printf "fglrx.xorg.backup%03d" ${a})
+						cp /etc/X11/xorg.conf ${new}
+						let a=a+1
+					done
+
+				fi
+				reboot
 			fi ;;
 		intel)
 			if ! PackageIsInstalled xserver-xorg-video-intel; then 
@@ -738,12 +758,7 @@ InstallVideoDriver () {
 	esac
 
 	if [[ "$chip_man" == "[8086" ]] && [[ -n $online ]]; then
-		if [[ "$distro" = "precise" ]]; then
-			if ! PackageIsInstalled "i965-va-driver"; then
-				apt-get -yf install i965-va-driver
-				VerifyExitCode "Install Intel Graphics Accelerator"
-			fi
-		else
+		if [[ "$distro" = "lucid" ]]; then
 			if ! PackageIsInstalled "cpuid"; then
 				apt-get -yf install cpuid
 			fi
@@ -753,6 +768,11 @@ InstallVideoDriver () {
 				VerifyExitCode "Install Intel Graphics Accelerator"
 			fi
 			IntelBridgeDetect
+		else
+			if ! PackageIsInstalled "i965-va-driver"; then
+				apt-get -yf install i965-va-driver
+				VerifyExitCode "Install Intel Graphics Accelerator"
+			fi
 		fi
 	fi
 }
@@ -1046,4 +1066,3 @@ function VDRInstalled() {
 	fi					
 	return $RETURNVALUE
 }
-
