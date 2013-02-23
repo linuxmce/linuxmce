@@ -699,7 +699,7 @@ InstallVideoDriver () {
 				NattyProp
 				apt-get -yf install fglrx
 				VerifyExitCode "Install fglrx Driver"
-				if [[ -f /etc/X11/xorg.conf; then
+				if [[ -f /etc/X11/xorg.conf ]]; then
 					if [[ -f /etc/X11/fglrx.xorg.backup ]]; then
 						a=$(find /etc/X11 -type f -name 'fglrx.xorg.backup.*' | sed 's/.*backup.//g' | sort -n | tail -1)
 						let a=a+1
