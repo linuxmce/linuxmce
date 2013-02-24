@@ -290,6 +290,7 @@ macx{
 
 !macx{
         LIBS += -lQtXml
+	LIBS += -lQtNetwork
 }
 
 #windows builds require a special pthreads.
