@@ -11,7 +11,8 @@ export DH_VERBOSE=1
 
 export buildenv="/opt/pos/QtSDK.121/Desktop/Qt/4.8.1/gcc/bin"
 export spec=linux-g++
-export srcroot=~/lmce-1004
+export imgsrc=~/lmce-trunk/extra/QOrbiter-Images/default/img/
+export srcroot=~/lmce-trunk/src/
 export projectdir=$(srcroot)/qOrbiter/qOrbiterMaster
 export buildoutput=$(srcroot)/qOrbiter/build-output
 export binoutput=$(srcroot)/qOrbiter/QOrbiter-build-4.8.1
@@ -28,14 +29,15 @@ override_dh_install:
 	# The qmake project automatically copies all the svn subdirs
 	# we do not want them.
 	rm -fR `find $(binoutput) | grep ".svn"`
-	mkdir -p ./usr/bin ./usr/pluto ./usr/local/lib
+	mkdir -p ./usr/bin ./usr/local/lib ./usr/pluto/qml/img
 	cp $(binoutput)/qor* ./usr/bin
+#	cp -r $(imgsrc) ./usr/pluto/qml/img
 	# to get the debs working, we make some VERY
 	# bad things that normally should not be done.
 	# like copying a config file into bin
 	cp $(binoutput)/config.xml ./usr/bin
 	# and blindly copying the qml under usr.
-	cp -r $(binoutput)/qml ./usr
+	cp -r $(binoutput)/qml ./usr/pluto/qml
 	cp -r $(binoutput)/imports ./usr
 	# The Qt libs we currently use. 
 	# maybe we should copy the complete lib dir...
@@ -62,6 +64,9 @@ override_dh_auto_build:
 	cd $(buildoutput)
 	echo "Starting the actual build process"
 	make -f $(buildoutput)/Makefile clean
+	echo "Copying the images from the extra directory where golgoj4 has put them"
+	mkdir -p $(projectdir)/../qOrbiter_src/qml/desktop/default/img/
+	cp -r $(imgsrc)/* $(projectdir)/../qOrbiter_src/qml/desktop/default/img/
 	make -f $(buildoutput)/Makefile -w
 
 override_dh_shlibdeps:
