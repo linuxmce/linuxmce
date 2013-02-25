@@ -1270,7 +1270,14 @@ bool qorbiterManager::readLocalConfig()
             QDomElement configVariables = localConfig.documentElement().toElement();
 
             if(configVariables.namedItem("firstrun").attributes().namedItem("id").nodeValue()=="true")
-            {return true;}
+            {
+#ifdef QT5
+                currentSkin = "noir";
+#else
+                currentSkin = "default";
+#endif
+                return true;
+            }
             else
             {
                 if(!configVariables.namedItem("routerip").attributes().namedItem("id").nodeValue().isEmpty())
