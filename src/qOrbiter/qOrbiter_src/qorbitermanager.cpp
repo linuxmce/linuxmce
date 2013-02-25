@@ -98,8 +98,8 @@ qorbiterManager::qorbiterManager(QDeclarativeView *view, QObject *parent) :
     myOrbiters = new ExistingOrbiterModel(new ExistingOrbiter(), this);
     devices = new DeviceModel(new AvDevice(), this );
     deviceCommands = new AvCodeGrid(new AvCommand(), this);
-    qorbiterUIwin->rootContext()->setContextProperty("srouterip", QString(qs_routerip) );
-    qorbiterUIwin->rootContext()->setContextProperty("deviceid", QString::number((iPK_Device)) );
+  //  qorbiterUIwin->rootContext()->setContextProperty("srouterip", QString(qs_routerip) );
+  //  qorbiterUIwin->rootContext()->setContextProperty("deviceid", QString::number((iPK_Device)) );
     qorbiterUIwin->rootContext()->setContextProperty("extip", qs_ext_routerip );
     qorbiterUIwin->rootContext()->setContextProperty("manager", this); //providing a direct object for qml to call c++ functions of this class
     qorbiterUIwin->rootContext()->setContextProperty("dcemessage", dceResponse);
@@ -1205,6 +1205,9 @@ void qorbiterManager::qmlSetupLmce(QString incdeviceid, QString incrouterip)
  *\note Android requires some additional handling in that the mobile storage location must be determined first, and then file options can
  * be set. This has to occur everytime the application starts, and we hope to improve this in the future.
  *
+ * \note The property 'firstrun' is checked initially. If it is true, then all most of the settings are ignored, as they
+ * are defaults set other wise. In addition, this prevents over writing of command line variables.
+ *
  * \return
  */
 bool qorbiterManager::readLocalConfig()
@@ -1266,59 +1269,43 @@ bool qorbiterManager::readLocalConfig()
         {
             QDomElement configVariables = localConfig.documentElement().toElement();
 
-            if(!configVariables.namedItem("routerip").attributes().namedItem("id").nodeValue().isEmpty())
-            {
-
-                qs_routerip = configVariables.namedItem("routerip").attributes().namedItem("id").nodeValue();
-            }
+            if(configVariables.namedItem("firstrun").attributes().namedItem("id").nodeValue()=="true")
+            {return true;}
             else
             {
-                qs_routerip = "192.168.80.1";
-            }
+                if(!configVariables.namedItem("routerip").attributes().namedItem("id").nodeValue().isEmpty())
+                {qs_routerip = configVariables.namedItem("routerip").attributes().namedItem("id").nodeValue();}
+                else
+                {qs_routerip = "192.168.80.1";}
 
-            currentSkin = configVariables.namedItem("skin").attributes().namedItem("id").nodeValue();
-            if (currentSkin.isEmpty())
-#ifdef QT5
-                currentSkin = "noir";
-#else
-                currentSkin = "default";
-#endif
-            if(configVariables.namedItem("device").attributes().namedItem("id").nodeValue().toLong() !=0)
-            {
+                currentSkin = configVariables.namedItem("skin").attributes().namedItem("id").nodeValue();
+                if (currentSkin.isEmpty()){
+    #ifdef QT5
+                    currentSkin = "noir";
+    #else
+                    currentSkin = "default";
+    #endif
+                }
 
-                iPK_Device = configVariables.namedItem("device").attributes().namedItem("id").nodeValue().toLong();
-            }
-            else
-            {
-                iPK_Device = -1;
-            }
+                if(configVariables.namedItem("device").attributes().namedItem("id").nodeValue().toLong() !=0)
+                {iPK_Device = configVariables.namedItem("device").attributes().namedItem("id").nodeValue().toLong();}
+                else
+                {iPK_Device = -1;}
 
-            if(!configVariables.namedItem("externalip").attributes().namedItem("id").nodeValue().isEmpty() )
-            {
-                setExternalIp(configVariables.namedItem("externalip").attributes().namedItem("id").nodeValue());
+                if(!configVariables.namedItem("externalip").attributes().namedItem("id").nodeValue().isEmpty() )
+                {setExternalIp(configVariables.namedItem("externalip").attributes().namedItem("id").nodeValue());}
+                else
+                {setExternalIp("fill.me.in.com");}
 
-            }
-            else
-            {
-                setExternalIp("fill.me.in.com");
+                if(!configVariables.namedItem("debug").attributes().namedItem("id").nodeValue().toInt() == 0 )
+                {setDebugMode(false);}
+                else
+                {setDebugMode(true);}
 
-            }
-
-            if(!configVariables.namedItem("debug").attributes().namedItem("id").nodeValue().toInt() == 0 )
-            {
-                setDebugMode(false);
-            }
-            else
-            {
-                setDebugMode(true);
-            }
-
-            if(!configVariables.namedItem("phone").attributes().namedItem("id").nodeValue().toInt() == 1 )
-            {
-                setFormFactor(1);
-            }
-            else{
-                setFormFactor(2);
+                if(!configVariables.namedItem("phone").attributes().namedItem("id").nodeValue().toInt() == 1 )
+                {setFormFactor(1);}
+                else
+                {setFormFactor(2);}
             }
         }
         return true;

@@ -1131,7 +1131,7 @@ void qOrbiter::CMD_Set_Now_Playing(string sPK_DesignObj,string sValue_To_Assign,
         }
 
     }
-    else
+    else if(iPK_MediaType != 18)
     {
         GetNowPlayingAttributes();
         emit playlistPositionChanged(iValue);
@@ -1139,6 +1139,10 @@ void qOrbiter::CMD_Set_Now_Playing(string sPK_DesignObj,string sValue_To_Assign,
         {
             emit clearPlaylist();
         }
+    }
+    else
+    {
+
     }
 
 }

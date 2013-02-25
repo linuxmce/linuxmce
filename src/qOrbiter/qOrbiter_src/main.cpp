@@ -240,10 +240,11 @@ int main(int argc, char* argv[])
         {
         case 'r':
             sRouter_IP = argv[++optnum];
+            qDebug()<< "Command line hostname: " << sRouter_IP.c_str();
             break;
         case 'd':
             PK_Device = atoi(argv[++optnum]);
-            qDebug() << "Command Line Device" << PK_Device <<". Command line hostname: " << sRouter_IP.c_str();
+            qDebug() << "Command Line Device" << PK_Device;
             break;
         case 'L':
             bLocalMode = true;

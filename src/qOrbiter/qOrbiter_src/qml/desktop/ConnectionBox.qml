@@ -8,6 +8,7 @@ Rectangle{
     height: scaleY(20)
     color: "transparent"
 
+
     Rectangle {
         anchors.fill: connectionBox
         radius: 7

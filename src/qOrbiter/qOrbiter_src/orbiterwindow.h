@@ -53,7 +53,7 @@ public:
  * \param frameless - set to true of no frame is desired.
  * \param parent
      */
-    explicit orbiterWindow(long deviceid, std::string routerip, bool fullScreen, bool frameless,  QObject *parent = 0);
+    explicit orbiterWindow(int deviceid, std::string routerip, bool fullScreen, bool frameless,  QObject *parent = 0);
     //public members
 
     QString message;

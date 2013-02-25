@@ -52,14 +52,17 @@
 
 
 
-orbiterWindow::orbiterWindow(long deviceid, std::string routerip, bool fullScreen, bool frameless, QObject *parent) :
-    QObject(parent)
+orbiterWindow::orbiterWindow(int deviceid, std::string routerip, bool fullScreen, bool frameless, QObject *parent) :
+    QObject(parent), deviceno(deviceid), router(routerip)
 {
 #ifndef ANDROID
     if(frameless==true){
     mainView.window()->setWindowFlags(Qt::FramelessWindowHint);
     }
 #endif
+    mainView.rootContext()->setContextProperty("deviceid", int(deviceno));
+    mainView.rootContext()->setContextProperty("srouterip", QString::fromStdString(router));
+    qDebug() << deviceno;
     phoneSize = false;
     localPath = "";
     newOrbiter = false;
@@ -78,8 +81,7 @@ orbiterWindow::orbiterWindow(long deviceid, std::string routerip, bool fullScree
     //    this->b_devicePresent = false;
 
     //qDebug() << mainView.size();
-    router = routerip;
-    deviceno = deviceid;
+
 
     userList.append(new PromptData("No Users",0));
     roomList.append(new PromptData("No Rooms",0));
@@ -150,8 +152,7 @@ orbiterWindow::orbiterWindow(long deviceid, std::string routerip, bool fullScree
     mainView.rootContext()->setContextProperty("appH", 600);
 #endif
 
-    mainView.rootContext()->setContextProperty("deviceid", int(deviceno));
-    mainView.rootContext()->setContextProperty("srouterip", QString::fromStdString(router));
+
 
 #ifdef for_desktop
 #ifndef QT5
