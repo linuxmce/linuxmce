@@ -1,14 +1,10 @@
 <?
-
 /*
  Copyright 2010 - Langston Ball
  golgoj4@gmail.com
  GPLv2 Licensed
  TMDB Data Grabber
  TMDB.com data grabber for television shows from the web admin, both for single files.
-
-
-
  */
 
 include ('TMDb.php');
@@ -153,9 +149,13 @@ $config = $tmdb -> getConfig();
 	
 	foreach ($raw['results'] as $k => $val) {
 		$image_url = $tmdb->getImageUrl($val['poster_path'], TMDb::IMAGE_POSTER, 'original');
+		$backdrop_url = $tmdb->getImageUrl($val['backdrop_path'], TMDb::IMAGE_BACKDROP, 'original');
+		
+        
 		$out.='<form action="index.php" method="post" id="TMDBform" name="tmdbSaved"><table border="0" bordercolor="" style="background-color:#C0C0C0" width="45%" cellpadding="3" cellspacing="3" align="center">';
+		$out.='';
 		$out.='	<tr>
-		<td width="15%"><h2>'.$val['title'].'</h2></td><td rowspan="2" style="background-color:#FFF8DC" width=180><img src='.$image_url.' height="320" width="180" align="center"> </td>
+		<td width="15%"><h2>'.$val['title'].'</h2></td><td rowspan="2" style="background-color:#FFF8DC" width=180><img src='.$image_url.' height="320" width="180" align="center"> </td><td width="320"><img src='.$backdrop_url.' height="180" width="320" align="center"></td>
 		<input type="hidden" name="section" value="tmdbSaved">
         <input type="hidden" id="fileID" name="fileID" value="'.$_POST['fileID'].' ">
          <input type="hidden" id="movie_name" name="movie_name" value="'.$val['title'].' ">
@@ -247,10 +247,12 @@ $result = mysql_query($query);
 	$imgTypes = array ();
 		$imgTypes['poster_sizes']=$tmdb->getAvailableImageSizes(TMDb::IMAGE_POSTER);
 		$imgTypes['backdrop_sizes']=$tmdb->getAvailableImageSizes(TMDb::IMAGE_BACKDROP);
-	$actors = $cast['cast'];
+		
 	$crew = $cast['crew'];
 	$synopsis = mysql_real_escape_string($movie['overview']);
 	$backdrop_path = $movie['backdrop_path'];
+	$backdropUrl=$tmdb->getImageUrl($val['backdrop_path'], TMDb::IMAGE_BACKDROP, 'original').$backdrop_path;
+	
 	$poster_path = $movie['poster_path'];
 	$genres = $movie['genres'];
 	$title = $movie['title'];
@@ -274,6 +276,7 @@ $typeArray=array_flip($attribute_type_array);
 		<td>File Image</td>
 		<td>'.saveFileImage ($movie['original_title'],$tmdb->getImageUrl($poster_path, TMDb::IMAGE_POSTER, 'original')).'</td>
 	</tr>';
+
 	
 $out.= '<tr>
 		<td>Title</td>
@@ -326,10 +329,7 @@ $out.='<tr>
 	<td>'.insertAttribute($crew['name'], $typeArray['Composer/Writer'], $hasImage, $imagePath, $mediadbADO, $dbADO).'</td>
 	</tr>';
 	}
-}
-		
-		
-	
+}			
 		foreach ($cast['cast'] as $name => $crew) {
 		
 		/*		$tImgPath="";
@@ -348,11 +348,21 @@ $out.='<tr>
 }
 
 		
-
+	$backdrop = false;
+	
+	if($movie['backdrop_path']!=""){
+		$backdrop = true;
+		
+	}
+else {
+	$backdrop_path="";
+}
+	
 	$out.='<tr>
 		<td>IMDB</td>
-		<td>'.insertAttribute($movie['imdb_id'], $typeArray['IMDB'],false, $imagePath,  $mediadbADO, $dbADO).'</td>
+		<td>'.insertAttribute($movie['imdb_id'], $typeArray['IMDB'], $backdrop, $backdropUrl,  $mediadbADO, $dbADO).'</td>
 	</tr>'; 
+	
 	
 	$out.='<tr>
 		<td>Running Time</td>
@@ -396,8 +406,7 @@ function insertAttribute($attribute, $attributeType, $hasImage, $imagePath, $med
 			$insertRes= (int)mysql_insert_id()  or die (mysql_error());
 			//echo $insertRes;
 			$idQuery="INSERT INTO File_Attribute  VALUES (\"$fileID\", \"$insertRes\", 0, 0, NULL, NULL, NULL, 0, CURTIME(), NULL  )";
-			mysql_query($idQuery)  or die (mysql_error());
-		
+			mysql_query($idQuery)  or die (mysql_error());		
 			return "New Attribute:".$attribute." added to database under".$attributeType."<br>".$imgResponse;
 	}
 	else
@@ -424,18 +433,28 @@ function insertAttribute($attribute, $attributeType, $hasImage, $imagePath, $med
 				break;
 		}
   
-	mysql_query($idQuery2)  or die (mysql_error());
-	if($hasImage=="true"){
-				$imgResponse=saveAttributeImage($test, $attributeType,  $imagePath);
-		
+	mysql_query($idQuery2)  or die (mysql_error());	
+	if($imagePath!=""){
+			
+				$imgResponse=saveAttributeImage($test, $attributeType,  $imagePath);		
 			}
 	return "New Attribute:".$attribute." added to database for file.".$fileID." for attribute type ".$attributeType;
 	}
-	else {return "Already Associated <br>";}
+	else {
+			if($imagePath!=""){
+				
+				$imgResponse=saveAttributeImage($test, $attributeType,  $imagePath);		
+			}
+		return "Already Associated <br>";
 	}
+	}
+
 }
 
 function saveAttributeImage($attribute, $attributeType,  $imagePath){
+	print("saving attribute image ".$attribute."\n");
+	echo $imagePath;
+	
 $fileIdent=$_POST['fileID'];
 //print_r($fileIdent);
 $test=mysql_query("SELECT * FROM Picture_Attribute WHERE FK_Attribute=\"$attribute\" ") or die (mysql_error("MYsql Error"));
@@ -457,8 +476,8 @@ $extension=strtolower(str_replace('.','',strrchr($import_cover_art,".")));
 	if($import_cover_art!=''){
 		mysql_query("INSERT INTO Picture (Extension,URL) VALUES (\"$extension\", \"$import_cover_art\")");
 		$picID=(int)mysql_insert_id()  or die (mysql_error());
-		mysql_query("INSERT INTO Picture_File (FK_Picture,FK_File) VALUES (\"$picID\",\"$fileIdent\")");
-
+		mysql_query("INSERT INTO Picture_Attribute (FK_Picture, FK_Attribute) VALUES (\"$picID\",\"$attribute\")");
+			
 		// create the file and the thumbnail
 		$extension=($extension=='jpeg')?'jpg':$extension;
 		$newPicName=$picID.'.'.$extension;
@@ -466,6 +485,7 @@ $extension=strtolower(str_replace('.','',strrchr($import_cover_art,".")));
 			$error='';
 			if($extension!='jpg'){
 				$error=$TEXT_ERROR_NOT_JPEG_CONST;
+				printf($TEXT_ERROR_NOT_JPEG_CONST);
 				return "Attribute::".$error;
 			}
 			else{
