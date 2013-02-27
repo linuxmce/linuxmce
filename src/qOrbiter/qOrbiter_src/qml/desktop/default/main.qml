@@ -83,7 +83,7 @@ Item {
         else if (pageLoader.status==Component.Error)
         {
             logger.userLogMsg ="Command to change to:" + screenname + " failed!"
-            logger.userLogMsg = pageLoader.Error.toString()
+            logger.userLogMsg = pageLoader.sourceComponent.errorString()
             screenfile = screenname
             pageLoader.source = "screens/Screen_x.qml"
         }

@@ -2,8 +2,8 @@ import QtQuick 1.0
 
 Item {
     id: homebutton
- anchors.fill: parent
-
+height:25
+width: 25
     ButtonSq{
         buttonsqradius: 2.5
         buttontext: ""

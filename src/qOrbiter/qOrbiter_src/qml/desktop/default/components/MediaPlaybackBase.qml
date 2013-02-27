@@ -132,6 +132,7 @@ Rectangle {
         width: scaleX(40)
         anchors.bottom: parent.bottom
         anchors.left: parent.left
+
         AudioControl{
             id:audio_controls
         }

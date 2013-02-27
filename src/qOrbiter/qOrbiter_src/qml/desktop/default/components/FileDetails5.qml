@@ -26,6 +26,12 @@ Rectangle {
         }
     }
 
+    Image{
+        id:imdb
+        anchors.fill: parent
+        source:"http://"+srouterip+"/lmce-admin/imdbImage.php?imdb="+filedetailsclass.file
+    }
+
     Connections{
         target:filedetailsclass
         onImageChanged:filedetailsimage.source = "image://listprovider/filedetailsprovider/"+securityvideo.timestamp

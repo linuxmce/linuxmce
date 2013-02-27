@@ -14,6 +14,7 @@ Rectangle {
     height: manager.appHeight
     color: "transparent"
     clip: true
+    focus:true
     property int mouselocY: 0
     property int mouselocX: 0
     property int mpCount: model_pages.count
@@ -33,7 +34,6 @@ Rectangle {
         onShowDetailsChanged:
         {
             runEffects()
-
         }
     }
     Rectangle{
@@ -70,6 +70,8 @@ Rectangle {
         anchors.left: options_rect.right
         color: "transparent"
 
+
+
         GridView {
             id: gridView
             //z: 2
@@ -86,18 +88,20 @@ Rectangle {
             flow:GridView.TopToBottom
             opacity:1
             scale:1
-            cacheBuffer: 0
+            cacheBuffer: 15
             interactive:true
+
             Keys.onPressed: {
                 if(event.key !==Qt.Key_Enter && event.key !== 16777237 && event.key !==16777236 && event.key !==16777234 && event.key !==16777235)
                 {
                     gridView.currentIndex = dataModel.setSection(event.key)
                     gridView.positionViewAtIndex(currentIndex,ListView.Beginning)
                 }
-                console.log(event.key)
+
             }
             Keys.onEnterPressed: {
                 manager.setStringParam(4, dataModel.get(currentIndex, "id"))
+                gridView.positionViewAtIndex(0, ListView.Beginning)
             }
             highlightFollowsCurrentItem:true
             Component.onCompleted:forceActiveFocus()

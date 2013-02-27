@@ -13,6 +13,7 @@ Item
     id: contactDelegate
     height: childrenRect.height
     width: childrenRect.width
+
     Rectangle
     {
         id:mainItem
@@ -21,7 +22,7 @@ Item
         rotation: 360
         state:'unsorted'
         color:"transparent"
-        onStateChanged: console.log("State changed in DG delegate to "+ state)
+      //  onStateChanged: console.log("State changed in DG delegate to "+ state)
         MouseArea{
             anchors.fill: mainItem
             hoverEnabled: true
@@ -36,6 +37,7 @@ Item
                 mainItem.z = 1
             }
         }
+
         ParallelAnimation {
             id:fade_and_scale
             running: false
@@ -88,7 +90,7 @@ Item
                 opacity: .5
             }
 
-            Text
+            StyledText
             {
                 id:celllabel
                 text: name
@@ -155,11 +157,6 @@ Item
                     color: "transparent"
                 }
             }
-
         ]
-
     }
-
-
-
 }
