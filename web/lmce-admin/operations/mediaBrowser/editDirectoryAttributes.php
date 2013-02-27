@@ -22,7 +22,8 @@ function confirmation()
 {
 	var answer = confirm("Confirm Cleaning Files?");	
 	if (answer){
-		alert("Cleaning");								
+		alert("Cleaning");			
+		document.getElementById("clean_value").value="true";					
 			document.forms[1].submit();
 	}
 	else{
@@ -127,7 +128,8 @@ function confirmation()
 					</tr>	
 					<tr>	
 			<td>
-			<input type="button" name="cleanFiles" value="'.$TEXT_CLEAN_FILES_CONST.'" onClick="confirmation()" ><br>							
+			<input type="button" name="cleanFiles" value="'.$TEXT_CLEAN_FILES_CONST.'" onClick="confirmation()" ><br>	
+			<input type="hidden" name="clean_value" value="false" id="clean_value"/>						
 			</td>
 			</tr>				
 					<tr>
@@ -307,9 +309,11 @@ function confirmation()
 		updateMediaType($subType, $fileFormat, $filesArray, $mediadbADO);
 		}
 		
-		if (isset($_POST['cleanFiles']))
+		if ($_POST['clean_value']=="true")
 		{
-		cleanFiles($filesArray, $mediadbADO);
+		if(cleanFiles($filesArray, $mediadbADO) ) {
+			
+		}
 			
 			header('Location: index.php?section=editDirectoryAttributes&fileID='.$fileID.'&msg='.$TEXT_CLEANED_FILES_CONST);			
 		exit();
@@ -402,12 +406,30 @@ function cleanFiles($filesArray, $mediadbADO)
 
 	foreach ($filesArray AS $id=>$filename)
 		{
+				$picsArray=getFields('Picture_File','FK_Picture',$mediadbADO,'WHERE FK_File='.$id);
+				$attributePicArray=getFields("File_Attribute", "FK_Attribute", $mediadbADO, 'WHERE FK_File='.$id);
+				
+				
 			//$mediadbADO->Execute('UPDATE File SET (FK_MediaSubType, FK_FileFormat) VALUES (?,?) where PK_File = `'.$id.'`',array($subType,$fileFormat));
-		//$mediadbADO->Execute('Update File Set Field = FK_MediaSubType Where Search = ?',array($subType,$id));
-		$mediadbADO->Execute("DELETE FROM File_Attribute WHERE FK_File = ".$id."");
-        $mediadbADO->Execute("DELETE FROM LongAttribute WHERE FK_File = ".$id." and FK_AttributeType = 37");
-        $mediadbADO->Execute("DELETE FROM Picture_File WHERE FK_File = ".$id."");
-		}
+		    //$mediadbADO->Execute('Update File Set Field = FK_MediaSubType Where Search = ?',array($subType,$id));
+				$mediadbADO->Execute("DELETE FROM File_Attribute WHERE FK_File = ".$id."");
+		        $mediadbADO->Execute("DELETE FROM LongAttribute WHERE FK_File = ".$id." and FK_AttributeType = 37");
+     //   $mediadbADO->Execute("DELETE FROM Picture_File WHERE FK_File = ".$id."");		
+		
+		//Deleting file attribute pictures		
+				for($i=0;$i<count($picsArray);$i++){
+					// Remove link to file
+					$mediadbADO->Execute('DELETE FROM Picture_File WHERE FK_File = ? AND FK_Picture = ?',array($id,$picsArray[$i]['FK_Picture']));
+					delete_media_pic_if_unused($picsArray[$i]['FK_Picture'], $mediadbADO);
+				}
+				
+				for($i=0;$i<count($attributePicArray);$i++){
+					// Remove link to file
+					$mediadbADO->Execute('DELETE FROM Picture_Attribute WHERE FK_Attribute = ? AND FK_Picture = ?',array($attributePicArray[$i]['FK_Attribute'],$attributePicArray[$i]['FK_Picture']));
+					delete_media_pic_if_unused($attributePicArray[$i]['FK_Picture'], $mediadbADO);
+				}
+			}			
+
 		return true;
 }
 ?>
