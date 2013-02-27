@@ -133,7 +133,28 @@ QString databaseFunctions::checkAttribute(QString attribute, QString fileNo, int
 	    //cout << "Mysql Error" << qPrintable(chkAttribExist.lastError().text()) << endl;
 	    return chkVal.toString();
 	    }
-	}
+    }
+}
+
+QString databaseFunctions::searchAttribute(QString file ,int attributeType)
+{
+
+    QSqlQuery chkFile;
+    chkFile.prepare("SELECT File_Attribute.FK_File, File_Attribute.FK_Attribute, Attribute.PK_Attribute, Attribute.Name, Attribute.FK_AttributeType FROM File_Attribute, Attribute WHERE File_Attribute.FK_Attribute = Attribute.PK_Attribute AND Attribute.FK_AttributeType = (:attribType) AND File_Attribute.FK_File = (:fileID) LIMIT 1 " );
+    chkFile.bindValue(":attribType", attributeType);
+    chkFile.bindValue(":fileID", file);
+    chkFile.exec();
+
+    QString result="";
+int at=0;
+    QSqlRecord chkFileRec = chkFile.record();
+
+    if(chkFile.next()){
+    at = chkFileRec.indexOf("Name");
+    result= chkFile.value(at).toString();
+    }
+
+    return result;
 }
 
 //inserts a new attribute into the database and returns the inserted id for later use in associations
