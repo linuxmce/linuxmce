@@ -11,26 +11,27 @@ QT       += sql
 
 INCLUDEPATH = /usr/include/mysql/
 TARGET = ../bin/linuxmceTag
+#target.path = /usr/pluto/bin
 CONFIG   +=sharedlib
 CONFIG   += console
 CONFIG   -= app_bundle
 
 
 TEMPLATE = app
-
-
-
 SOURCES += main.cpp \
     autotagger.cpp \
     tvshows.cpp \
     films.cpp \
-    databaseFunctions.cpp
+    databaseFunctions.cpp \
+   # taglogger.cpp
 
 HEADERS += \
     autotagger.h \
     pilot.h \
     film.h \
-    databaseFunctions.h
+    databaseFunctions.h \
+    taglogger.h
 
 OTHER_FILES += \
     Readme.txt
+#INSTALLS = target
