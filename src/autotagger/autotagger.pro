@@ -11,7 +11,7 @@ QT       += sql
 
 INCLUDEPATH = /usr/include/mysql/
 TARGET = ../bin/linuxmceTag
-target.path = /usr/pluto/bin
+#target.path = /usr/pluto/bin
 CONFIG   +=sharedlib
 CONFIG   += console
 CONFIG   -= app_bundle
@@ -34,4 +34,4 @@ HEADERS += \
 
 OTHER_FILES += \
     Readme.txt
-INSTALLS = target
+#INSTALLS = target
