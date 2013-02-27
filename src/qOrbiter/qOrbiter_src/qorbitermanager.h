@@ -568,7 +568,7 @@ signals:
     void skinDataLoaded(bool b);
     void roomChanged();
     void floorplanTypeChanged(int t);
-    void internalIpChanged();
+    void internalIpChanged(QString ip);
     void externalIpChanged();
     void internalHostChanged();
     void externalHostChanged();
@@ -770,7 +770,7 @@ public slots:
     int getAppW(){return appWidth;  checkOrientation(qorbiterUIwin->size());}
 
     /*Network State property functions*/
-    void setInternalIp(QString s) { m_ipAddress = s; emit internalIpChanged(); }
+    void setInternalIp(QString s) { m_ipAddress = s; emit internalIpChanged(m_ipAddress); }
     QString getInternalIp() {return m_ipAddress; }
     void setInternalHost(QString h) { internalHost = h; emit internalHostChanged();}
     QString getInternalHost() {return internalHost;}

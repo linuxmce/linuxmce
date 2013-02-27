@@ -57,7 +57,7 @@ orbiterWindow::orbiterWindow(int deviceid, std::string routerip, bool fullScreen
 {
 #ifndef ANDROID
     if(frameless==true){
-    mainView.window()->setWindowFlags(Qt::FramelessWindowHint);
+        mainView.window()->setWindowFlags(Qt::FramelessWindowHint);
     }
 #endif
     mainView.rootContext()->setContextProperty("deviceid", int(deviceno));
@@ -94,7 +94,7 @@ orbiterWindow::orbiterWindow(int deviceid, std::string routerip, bool fullScreen
 
 #if defined (GLENABLED) || (QT5)
     fileReader = new FileReader();
-     mainView.rootContext()->setContextProperty("fileReader", fileReader);
+    mainView.rootContext()->setContextProperty("fileReader", fileReader);
 #endif
 
 #if (QT5)
@@ -104,15 +104,15 @@ orbiterWindow::orbiterWindow(int deviceid, std::string routerip, bool fullScreen
 #endif
     mainView.rootContext()->setContextProperty("window", this);
     mainView.setWindowTitle("LinuxMCE Orbiter ");
-  //  mainView.rootContext()->setContextProperty("orbiterList" , "");
+    //  mainView.rootContext()->setContextProperty("orbiterList" , "");
 
 #ifdef GLENABLED
 
 #ifdef for_desktop
 #ifndef QT5
-     QGLFormat format= QGLFormat::defaultFormat();
+    QGLFormat format= QGLFormat::defaultFormat();
     glWidget = new QGLWidget(format);
-         glWidget->setAutoFillBackground(false);
+    glWidget->setAutoFillBackground(false);
     mainView.setViewport(glWidget);
     mainView.setViewportUpdateMode(QGraphicsView::FullViewportUpdate);
 #endif
@@ -125,10 +125,10 @@ orbiterWindow::orbiterWindow(int deviceid, std::string routerip, bool fullScreen
     //mainView.setViewportUpdateMode(QGraphicsView::FullViewportUpdate);
 #elif ANDROID
     QGLFormat format= QGLFormat::defaultFormat();
-   glWidget = new QGLWidget(format);
-        glWidget->setAutoFillBackground(false);
-   mainView.setViewport(glWidget);
-   mainView.setViewportUpdateMode(QGraphicsView::FullViewportUpdate);
+    glWidget = new QGLWidget(format);
+    glWidget->setAutoFillBackground(false);
+    mainView.setViewport(glWidget);
+    mainView.setViewportUpdateMode(QGraphicsView::FullViewportUpdate);
 #endif
 #endif
     // QObject::connect(&mainView, SIGNAL(sceneResized(QSize)), this, SIGNAL(orientationChanged(QSize)));
@@ -144,8 +144,8 @@ orbiterWindow::orbiterWindow(int deviceid, std::string routerip, bool fullScreen
         mainView.rootContext()->setContextProperty("appW", 800);
         mainView.rootContext()->setContextProperty("appH", 600);
     }else{
-    mainView.rootContext()->setContextProperty("appW", 1280);
-    mainView.rootContext()->setContextProperty("appH", 720);
+        mainView.rootContext()->setContextProperty("appW", 1280);
+        mainView.rootContext()->setContextProperty("appH", 720);
     }
 #else
     mainView.rootContext()->setContextProperty("appW", 800);
@@ -157,7 +157,7 @@ orbiterWindow::orbiterWindow(int deviceid, std::string routerip, bool fullScreen
 #ifdef for_desktop
 #ifndef QT5
     buildType = "/qml/desktop";
- #else
+#else
     buildType = "/qml/rpi";
 #endif
     qrcPath = buildType+"/Splash.qml";
@@ -185,7 +185,7 @@ orbiterWindow::orbiterWindow(int deviceid, std::string routerip, bool fullScreen
     localPath = "desktop/";
 #elif defined __ANDROID__
     qrcPath = "qrc:android/Splash.qml";
-localPath = "android/";
+    localPath = "android/";
 #elif defined for_android
     buildType = "/qml/android";
     qrcPath = "qrc:android/Splash.qml";
@@ -199,15 +199,15 @@ localPath = "android/";
     qrcPath = "qrc:desktop/Splash.qml";
 
 #endif
-       #ifdef ANDROID
+#ifdef ANDROID
     mainView.addImportPath("assets:/imports/androidComponents");
     mainView.engine()->addPluginPath(QDir::homePath()+"/../lib");
     mainView.rootContext()->setBaseUrl(QUrl::fromLocalFile("/"));
     mainView.setMainQmlFile(QString("qml/Base.qml"));
 #elif !for_harmattan
     mainView.setSource(QApplication::applicationDirPath().remove("/bin")+buildType+"/Splash.qml");
- #elif for_harmattan
-     mainView.setSource(QApplication::applicationDirPath()+"qml/Splash.qml");
+#elif for_harmattan
+    mainView.setSource(QApplication::applicationDirPath()+"qml/Splash.qml");
 #endif
 
 #ifdef Q_OS_SYMBIAN
@@ -217,18 +217,18 @@ localPath = "android/";
 #elif defined(for_harmattan)
     mainView.showFullScreen();
 #elif defined(for_desktop)
-     if(fullScreen==true){
-    mainView.showFullScreen();
-     }
-     else{
-         mainView.show();
-     }
+    if(fullScreen==true){
+        mainView.showFullScreen();
+    }
+    else{
+        mainView.show();
+    }
 #elif defined(__ANDROID__)
     mainView.showFullScreen();
 #elif defined(for_android)
     mainView.show();
 #elif RPI
-     mainView.showFullScreen();
+    mainView.showFullScreen();
 #else
     mainView.showNormal();
     // mainView.setResizeMode(QDeclarativeView::SizeRootObjectToView);
@@ -261,11 +261,11 @@ QString orbiterWindow::getMessage()
 
 void orbiterWindow::qmlSetupLmce(QString device, QString ip)
 {
-    router = ip.toStdString();
+    router = ip.toStdString().c_str();
     deviceno = device.toLong();
-//    mainView.rootContext()->setContextProperty("deviceid", int(deviceno));
-//    mainView.rootContext()->setContextProperty("srouterip", QString::fromStdString(router));
-    emit setupLmce(device, ip);
+    mainView.rootContext()->setContextProperty("deviceid", int(deviceno));
+    mainView.rootContext()->setContextProperty("srouterip", QString::fromStdString(router));
+    emit setupLmce(device, QString::fromStdString(router));
 }
 
 bool orbiterWindow::getOrbiterState()
@@ -322,7 +322,7 @@ void orbiterWindow::setDeviceState(bool b)
 void orbiterWindow::prepareExistingOrbiters()
 {
     qDebug()<< "showing List";
-  emit showList();
+    emit showList();
 }
 
 void orbiterWindow::displayPromptResponse(int type, QList<QObject*> pList)
@@ -333,7 +333,7 @@ void orbiterWindow::displayPromptResponse(int type, QList<QObject*> pList)
     if(type==1){
         userList.clear();
         userList = pList;
-       mainView.rootContext()->setContextProperty("users", QVariant::fromValue(userList));
+        mainView.rootContext()->setContextProperty("users", QVariant::fromValue(userList));
     }
     else
     {

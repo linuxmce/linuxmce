@@ -40,7 +40,7 @@ ListView{
             height: childrenRect.height
             width: parent.width *.65
             anchors.centerIn: parent
-            
+
             Text {
                 id: orbiter_label
                 text: qsTr("Orbiter:")+ label

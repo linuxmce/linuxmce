@@ -1772,7 +1772,7 @@ bool DCE::qOrbiter::initialize()
 
     emit commandResponseChanged("Connecting to router");
     emit commandResponseChanged("Starting dce initialization");
-
+    qDebug() << m_sIPAddress.c_str();
 
     if ((GetConfig() == true) && (Connect(PK_DeviceTemplate_get()) == true))
     {
@@ -1939,6 +1939,7 @@ void qOrbiter::qmlSetup(QString device, QString address)
     m_dwPK_Device = device.toLong();
     m_sHostName = address.toStdString();
     m_sIPAddress = address.toStdString();
+    dceIP = address;
     if(!m_bOrbiterConnected )
         pingCore();
 
@@ -2040,7 +2041,7 @@ void qOrbiter::requestMediaSubtypes(int type)
     if(SendCommand(getTypesCmd, &pResponse) && pResponse=="OK"){
         emit commandResponseChanged("Got subtypes for attribute");
         QStringList data;
-        data = QString::fromStdString(sText.c_str()).split("\n");      
+        data = QString::fromStdString(sText.c_str()).split("\n");
         for(int i=0; i < data.count(); i++)
         {
             QStringList subSplit = data.at(i).split(":");
@@ -4292,7 +4293,7 @@ void qOrbiter::OnReload()
     pData = "NULL";
     iSize = 0;
     DCE::CMD_Orbiter_Registered unregister(m_dwPK_Device, iOrbiterPluginID, StringUtils::itos(m_dwPK_Device) ,i_user, StringUtils::itos(i_ea), i_room, &pData, &iSize);
-    SendCommand(unregister); 
+    SendCommand(unregister);
     pthread_cond_broadcast( &m_listMessageQueueCond );
 
 #ifdef LINK_TO_ROUTER
@@ -4633,7 +4634,7 @@ void qOrbiter::adjustRoomLights(QString level)
 
 
 void DCE::qOrbiter::prepareFileList(int iPK_MediaType)
-{    
+{
     q_mediaType = QString::number(iPK_MediaType);
     requestMore = false;
     media_currentRow = 0;
@@ -5064,13 +5065,11 @@ void qOrbiter::CMD_Menu(string sText,int iStreamID,string &sCMD_Result,Message *
 void qOrbiter::pingCore()
 {
 
-    emit commandResponseChanged("initiating ping to core");
-
-    QString url = QString::fromStdString(m_sHostName);
+    emit commandResponseChanged("initiating ping to core with address::"+dceIP);
+    QString url = (dceIP);
     if(!url.contains(QRegExp("(\\D)"))){
 
         emit commandResponseChanged("Host name provided, doing lookup");
-
         QHostInfo::lookupHost(url, this, SLOT(checkPing(QHostInfo)));
     }
     else{
@@ -5114,13 +5113,13 @@ void qOrbiter::checkPing(QHostInfo info)
 
 void qOrbiter::checkInstall()
 {
-    emit commandResponseChanged("Checking for LinuxMCE installtion in checkInstall()");
-    if(m_bOrbiterConnected == false){
-        QString url = "http://"+QString::fromStdString(m_sIPAddress)+"/lmce-admin/index.php";
+    emit commandResponseChanged("Checking for LinuxMCE installtion in checkInstall() at "+ dceIP);
+
+        QString url = "http://"+dceIP+"/lmce-admin/index.php";
         QNetworkAccessManager *pingManager = new QNetworkAccessManager();
         connect(pingManager, SIGNAL(finished(QNetworkReply*)), this, SLOT(verifyInstall(QNetworkReply*)));
         QNetworkReply *badReply = pingManager->get(QNetworkRequest(url));
-    }
+
 }
 
 void qOrbiter::verifyInstall(QNetworkReply *r)
@@ -5131,14 +5130,13 @@ void qOrbiter::verifyInstall(QNetworkReply *r)
         if ( initialize() == true )
         {
             emit routerConnectionChanged(true);
-            setdceIP(QString::fromStdString(m_sIPAddress));
+          //  setdceIP(dceIP);
 
             LoggerWrapper::GetInstance()->Write(LV_STATUS, "Connect OK");
 
             if( m_bLocalMode )
                 RunLocalMode();
         }
-
     }
 
 }

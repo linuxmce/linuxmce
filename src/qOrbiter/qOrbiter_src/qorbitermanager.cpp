@@ -1193,7 +1193,7 @@ void qorbiterManager::qmlSetupLmce(QString incdeviceid, QString incrouterip)
     setDeviceNumber(incdeviceid.toInt());
 
     setDceResponse("Initializing Local Manager");
-    initializeManager( qs_routerip.toStdString(), iPK_Device);
+    initializeManager(incrouterip.toStdString(), incdeviceid.toLong());
 }
 
 /*!

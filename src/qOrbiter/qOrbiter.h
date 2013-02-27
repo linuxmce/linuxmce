@@ -1546,7 +1546,7 @@ public slots:
     void deinitialize();
     bool getConfiguration();
     void registerDevice(int user, QString ea, int room);
-    void qmlSetup(QString device, QString address);
+    void qmlSetup(QString device, QString ip);
     void setCurrentScreen(QString s);
     void setOrbiterSetupVars(int users, int room, int skin, int lang, int height, int width);
     void finishSetup();

@@ -47,7 +47,7 @@ for(deploymentfolder, DEPLOYMENTFOLDERS) {
     DEPLOYMENT += $$item
 }
 
-
+MAINPROFILEPWD = $$PWD
 
 android {
     for(deploymentfolder, DEPLOYMENTFOLDERS) {

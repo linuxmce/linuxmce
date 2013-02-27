@@ -160,7 +160,7 @@ public slots:
 
 signals:
     void MessageChanged();
-    void setupLmce(QString device, QString routerIp);
+    void setupLmce(QString device, QString router);
     void StatusChanged();
     void connectionChanged();
     void configStatus();

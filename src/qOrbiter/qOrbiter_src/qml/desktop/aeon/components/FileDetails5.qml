@@ -26,7 +26,7 @@ Rectangle{
     }
     color: "transparent"
     MouseArea{
-        anchors.fill: parent
+        anchors.fill: details
     }
     // Cover art
     Rectangle{
@@ -36,7 +36,7 @@ Rectangle{
         color: "black"
         Image{
             id: coverArt
-            anchors.fill: parent
+           height:parent.height
             fillMode: Image.PreserveAspectFit;
             source: ""
             smooth: true

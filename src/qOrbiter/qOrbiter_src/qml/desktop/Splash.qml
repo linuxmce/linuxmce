@@ -32,13 +32,7 @@ Item {
         return y/100*appW
     }
 
-    Connections{
-        target: window      
-        onShowExternal: {
-            console.log("showing external ip box")
-            ext_routerip.visible = true
-        }
-    }
+
 
     function screenchange(screenname )
     {

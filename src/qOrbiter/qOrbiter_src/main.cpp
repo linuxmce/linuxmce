@@ -465,7 +465,7 @@ int main(int argc, char* argv[])
         QObject::connect(&pqOrbiter, SIGNAL(deviceInvalid()), &orbiterWin, SLOT(prepareExistingOrbiters()), Qt::QueuedConnection);
         QObject::connect(&pqOrbiter,SIGNAL(routerInvalid()), &orbiterWin, SIGNAL(showExternal()),Qt::QueuedConnection);
         QObject::connect(&pqOrbiter, SIGNAL(connectionValid(bool)), &orbiterWin, SLOT(setConnectionState(bool)), Qt::QueuedConnection);
-        QObject::connect(&orbiterWin,SIGNAL(setupLmce(QString,QString)), &pqOrbiter, SLOT(qmlSetup(QString,QString)),Qt::QueuedConnection);
+        QObject::connect(&orbiterWin,SIGNAL(setupLmce(QString, QString)), &pqOrbiter, SLOT(qmlSetup(QString, QString)),Qt::QueuedConnection);
         QObject::connect(&w,SIGNAL(connectionValid(bool)), &orbiterWin, SLOT(setConnectionState(bool)));
         QObject::connect(&pqOrbiter,SIGNAL(deviceValid(bool)), &orbiterWin, SLOT(setDeviceState(bool)));
         QObject::connect(&w,SIGNAL(localConfigReady(bool)), &orbiterWin, SLOT(setLocalConfigState(bool)),Qt::QueuedConnection);
@@ -659,7 +659,8 @@ int main(int argc, char* argv[])
         QObject::connect(&pqOrbiter, SIGNAL(routerDisconnect()), &w, SLOT(reloadHandler()),Qt::QueuedConnection);
         QObject::connect(&pqOrbiter, SIGNAL(checkReload()), &w, SLOT(connectionWatchdog()), Qt::QueuedConnection);
         QObject::connect(&w, SIGNAL(reInitialize()), &pqOrbiter, SLOT(initialize()), Qt::QueuedConnection);
-
+       // QObject::connect(&w, SIGNAL(deviceNumberChanged(int)), &pqOrbiter, SLOT(setDeviceId(int)));
+       // QObject::connect(&w, SIGNAL(internalIpChanged(QString)), &pqOrbiter, SLOT(setdceIP(QString)));
 
 
         dceThread.start();
@@ -670,6 +671,7 @@ int main(int argc, char* argv[])
 #endif
         if(PK_Device != w.iPK_Device){
             pqOrbiter.setDeviceId(w.iPK_Device);
+            pqOrbiter.setdceIP(QString::fromStdString(sRouter_IP));
             pqOrbiter.m_sHostName = w.qs_routerip.toStdString();
             pqOrbiter.m_sIPAddress = w.qs_routerip.toStdString();
             pqOrbiter.m_sExternalIP = w.qs_ext_routerip.toStdString();
