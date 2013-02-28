@@ -394,7 +394,7 @@ function insertAttribute($attribute, $attributeType, $hasImage, $imagePath, $med
 		$chkCount = mysql_num_rows($chkResult);
 		$chk = mysql_fetch_assoc($chkResult);
 		$test = $chk['FK_Attribute'];
-		echo "test::" . $test ."::".$chkCount."<br>";
+	//	echo "test::" . $test ."::".$chkCount."<br>";
 		// echo $attrib;
 		$imgResponse = "";
 		$inserKey="";
@@ -412,13 +412,13 @@ function insertAttribute($attribute, $attributeType, $hasImage, $imagePath, $med
 			
 			
 			if ($imagePath != "") {
-				printf("Saving new attribute image \n with new attribute::" . $attrib);
+				
 				$imgResponse = saveAttributeImage($attrib, $attributeType, $imagePath);
 			}
 			return "New Attribute:" . $attribute . " added to database for file." . $fileID . " for attribute type " . $attributeType . "\n" . $imgResponse;
 		} else {
 			if ($imagePath != "") {
-				printf("Saving attribute image  for existing attribute \n");
+			
 				$imgResponse = saveAttributeImage($attrib, $attributeType, $imagePath);
 			}
 			return "Already Associated to" . $test . "\n" . $imgResponse;
@@ -429,14 +429,14 @@ function insertAttribute($attribute, $attributeType, $hasImage, $imagePath, $med
 
 function saveAttributeImage($attribute, $attributeType, $imagePath) {
 
-	echo "now saving attribute picture for attribute type::" . $attributeType . " and attribute::" . $attribute;
+	//echo "now saving attribute picture for attribute type::" . $attributeType . " and attribute::" . $attribute;
 	$fileIdent = $_POST['fileID'];
 	//print_r($fileIdent);
 	$test = mysql_query("SELECT * FROM Picture_Attribute WHERE FK_Attribute=\"$attribute\" ") or die(mysql_error("MYsql Error"));
 	$fileCount = mysql_num_rows($test);
 	$tarray = mysql_fetch_assoc($test);
 
-	echo "FILECOUNT::" . $fileCount;
+	
 	if ($fileCount < 1) {
 		//	printf("No image found, saving.");
 		$fullUrl = $imagePath;
