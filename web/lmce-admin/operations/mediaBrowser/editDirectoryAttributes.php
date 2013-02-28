@@ -425,7 +425,7 @@ function cleanFiles($filesArray, $mediadbADO)
 				
 				for($i=0;$i<count($attributePicArray);$i++){
 					// Remove link to file
-					$mediadbADO->Execute('DELETE FROM Picture_Attribute WHERE FK_Attribute = ? AND FK_Picture = ?',array($attributePicArray[$i]['FK_Attribute'],$attributePicArray[$i]['FK_Picture']));
+					$mediadbADO->Execute('DELETE FROM Picture_Attribute WHERE FK_Attribute = ? ',$attributePicArray[$i]['FK_Attribute']);
 					delete_media_pic_if_unused($attributePicArray[$i]['FK_Picture'], $mediadbADO);
 				}
 			}			
