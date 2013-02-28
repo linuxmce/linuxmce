@@ -423,24 +423,83 @@ GamePad_Setup () {
 
 }
 
-Enable_Audio_Channels () {
-	# Added this to correctly unmute channels for setup wizard, and to 
-	# inject necessary unmuting commands for later bootup.
-	yalpa=$(aplay -l)
-	grep -iwo "card ." <<< "$yalpa" | awk '{print $2}' | uniq | while read CardNumber; do
-		amixer -c "$CardNumber" | grep '\[off\]' -B5 | grep "Simple" | sed 's/Simple mixer control //g' | grep -viE '(capture|mic)' | while read MuteStatus; do 
-			amixer -c "$CardNumber" sset "$MuteStatus" unmute 
-		done
-		amixer -c "$CardNumber" | grep '\[.*\%\]' -B5 | grep "Simple" | sed 's/Simple mixer control //g' | grep -viE '(capture|mic)' | while read VolLevel; do 
-			amixer -c "$CardNumber" sset "$VolLevel" 80%
-		done
-	done
-	alsactl store
-
-	if grep -qi "device 7" <<< "$yalpa"; then 
-		CardNumber=$(grep -i "device 7" <<< "$yalpa" | grep -iwo "card ." | awk '{print $2}')
-		aplay -Dplughw:${CardNumber},7 /usr/share/sounds/linphone/rings/orig.wav
+OrderAudioModuleLoad () {
+# Get module/audio card load order, and convert to hyphen format.
+CardOrder=$(cat /proc/asound/modules | awk '{print $2}' | sed 's/_/-/g' | sort -u)
+# If no modules loaded, leave. We have no working SoundCards.
+if [[ -z "$CardOrder" ]]; then
+	return
+fi
+# Target file alsa-base.conf 
+Abase="/etc/modprobe.d/alsa-base.conf"
+# Get our current configuration.
+CurrentAconfig=$(grep "LinuxMCE" -A20 "$Abase" | grep -v "LinuxMCE" | awk '{print $2}')
+if [[ -n "$CurrentAconfig" ]]; then
+	# If our module load order does not match our loaded modules, start section fresh.
+	if ! [[ "$CardOrder" == "$CurrentAconfig" ]]; then
+		sed -i '{/.*Added.*LinuxMCE.*/{/.*End.*LinuxMCE.*/d}};s/.*LinuxMCE.*//g' "$Abase"
+		echo "### Added module load order by LinuxMCE ###" >> "$Abase"
+	else
+		# If they match, leave... our work is done.
+		return
 	fi
+else
+	# If there is no current LMCE edit section, create one.
+	echo "" >> "$Abase"
+	echo "### Added module load order by LinuxMCE ###" >> "$Abase"
+fi
+
+# If there is already a positive load order of modules, use that as a base to add a new card in order.
+# this allows adding cards. Removing cards could result in an unnecessary module load with unkown results.
+ModOrder=$(grep -E "(.*index=[0-9]|.*index=[0-9][0-9])" "$Abase" | sed 's/.*index=//g' | sort -n | tail -1)
+if [[ -z "$ModOrder" ]]; then
+	ModOrder=0
+else
+	# Incriment existing highest module order number
+	ModOrder=$((ModOrder++))
+fi
+
+### Loop through loaded audio modules 
+echo "$CardOrder" | while read EachModule; do
+	Acurrent="options ${EachModule} index"
+	# If the current module is given a default do not first value
+	# or if the current order number is already assigned (should not happen)
+	# then delete the line.
+	sed -i "/${Acurrent}=-2*/d;/.*index=${ModOrder}/d" "$Abase"
+	# If module does not already have an order number (to prevent multiple loads of the same module
+	# or overwriting an existing) write to config file.
+	if ! grep -q "${Acurrent}" "$Abase"; then
+		echo "${Acurrent}=${ModOrder}" >> "$Abase"
+		ModOrder=$((ModOrder++))
+	fi
+done
+
+echo "### End addition by LinuxMCE ###" >> "$Abase"
+NewAbase=$(cat -s "$Abase")
+echo "$NewAbase" > "$Abase"
+echo "" >> "$Abase"
+}
+
+
+Enable_Audio_Channels () {
+OrderAudioModuleLoad
+# Added this to correctly unmute channels for setup wizard, and to 
+# inject necessary unmuting commands for later bootup.
+yalpa=$(aplay -l)
+grep -iwo "card ." <<< "$yalpa" | awk '{print $2}' | uniq | while read CardNumber; do
+	amixer -c "$CardNumber" | grep '\[off\]' -B5 | grep "Simple" | sed 's/Simple mixer control //g' | grep -viE '(capture|mic)' | while read MuteStatus; do 
+		amixer -c "$CardNumber" sset "$MuteStatus" unmute 
+	done
+	amixer -c "$CardNumber" | grep '\[.*\%\]' -B5 | grep "Simple" | sed 's/Simple mixer control //g' | grep -viE '(capture|mic)' | while read VolLevel; do 
+		amixer -c "$CardNumber" sset "$VolLevel" 80%
+	done
+done
+alsactl store
+
+if grep -qi "device 7" <<< "$yalpa"; then 
+	CardNumber=$(grep -i "device 7" <<< "$yalpa" | grep -iwo "card ." | awk '{print $2}')
+	aplay -Dplughw:${CardNumber},7 /usr/share/sounds/linphone/rings/orig.wav
+fi
 }
 
 Start_AVWizard () {
