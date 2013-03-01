@@ -206,12 +206,24 @@ int main(int argc, char *argv[])        //main loop
 
 
         videoMedia currentFile;                 //creating new class
-        currentFile.mediaType="movie";
+
         //currentFile.fileNumber=1;               //bs variable initialization, will be taken from parameters passed to it
         currentFile.incfileName = currScan;       //by updateMedia later.
 
-        int mType = currentFile.videoMediaType(currScan);
-        if (mType == 1)
+        int mType;
+        int mediaSubType = metaDataDB.findMediaType(db_File_ID);
+        if(mediaSubType != -1)
+        {
+            mType = mediaSubType;
+            cout << "Found Overriding Media Sub Type::"<< mType << endl;
+        }
+        else{
+            cout << "No Override found, using hueristics." << endl;
+            mType= currentFile.videoMediaType(currScan);
+        }
+
+
+        if (mType == 2)
         {
             cout << "-----------Open MovieDB.com Filter--------------" << endl;
             currentFile.mediaType="film";
@@ -321,11 +333,9 @@ int main(int argc, char *argv[])        //main loop
                 cout << "Media Type Movie Set, Resolution set to:" <<  qPrintable(workingPrint.m_rez) << endl;
             }
         }
-        else if (mType == 2)
+        else if (mType == 1)
         {
             cout << "------------------TVDB.com Filter--------------" << endl;
-
-
             currentFile.mediaType="tv";
 
             tvshow pilot;
@@ -334,7 +344,7 @@ int main(int argc, char *argv[])        //main loop
 
             QString seriesChecker = metaDataDB.searchAttribute(db_File_ID, PROGRAM );
             if(seriesChecker.isEmpty()){
-              pilot.showTitle = pilot.setShow(tVar);
+                pilot.showTitle = pilot.setShow(tVar);
             }
             else{
                 pilot.showTitle = seriesChecker;
@@ -342,7 +352,7 @@ int main(int argc, char *argv[])        //main loop
 
             QString cSeason = metaDataDB.searchAttribute(db_File_ID, SEASON_NUMBER);
             if(cSeason.isEmpty()){
-               pilot.season = pilot.setSeason(tVar);
+                pilot.season = pilot.setSeason(tVar);
             }
             else
             {
@@ -575,7 +585,9 @@ int main(int argc, char *argv[])        //main loop
                 cout << "***************Database Updated, file complete*****************" << endl;
                 cout << "***************************************************************" << endl;
             }
-        };
+        } else{
+            cout << "***************No scanner for this file type, file complete*****************" << endl;
+        }
         cout << "**************************End File*****************************" << endl;
     };
 

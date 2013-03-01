@@ -33,6 +33,7 @@ public:
     QString findFileNo(QString fullFilePath, QString fullFileName);
     QString checkAttribute(QString attribute, QString fileNo, int AttributeType);
     QString searchAttribute(QString file, int attributeType);
+    int findMediaType(QString file);
 
     QString insertAttribute(QString ins_attribute, QString inc_attribType);
     int associateFile(QString fkFile, QString fkAttributeNo );
