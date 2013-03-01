@@ -3,13 +3,15 @@ import QtQuick 1.0
 
 Rectangle {
     id: filedetailrect
-    width: scaleX(75)
-    height: scaleY(75)
+    width: scaleX(100)
+    height: scaleY(100)
     anchors.centerIn: parent
     color:"transparent"
     clip: true    
     border.color: "white"
     border.width: 3
+    property int bgImageProp:manager.q_subType ==="1" ? 43 : manager.q_attributetype_sort===53 ? 43 :36
+
     MouseArea{
         anchors.fill: parent
         hoverEnabled: true
@@ -29,7 +31,7 @@ Rectangle {
     Image{
         id:imdb
         anchors.fill: parent
-        source:"http://"+srouterip+"/lmce-admin/imdbImage.php?imdb="+filedetailsclass.file
+        source:"http://"+srouterip+"/lmce-admin/imdbImage.php?file="+filedetailsclass.file+"&prop="+bgImageProp
     }
 
     Connections{

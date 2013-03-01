@@ -75,7 +75,7 @@ UserItem * UserModel::find(const QString &id) const
         return item;
     }
   }
-  return 0;
+  return new UserItem();
 }
 
 QModelIndex UserModel::indexFromItem(const UserItem *item) const

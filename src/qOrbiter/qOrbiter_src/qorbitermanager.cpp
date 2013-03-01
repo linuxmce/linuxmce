@@ -784,7 +784,9 @@ void qorbiterManager::processConfig(QByteArray config)
     setDceResponse("Setting location");
     QApplication::processEvents(QEventLoop::AllEvents);
     //------------not sure if neccesary since it knows where we are.
+      qDebug() << iPK_User;
     setActiveRoom(iFK_Room, iea_area);
+
     setCurrentUser(QString::number(iPK_User));
 
     //-----setting up the FILEFORMAT model------------------------------------------------------------------------
