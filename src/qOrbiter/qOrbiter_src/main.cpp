@@ -387,12 +387,12 @@ int main(int argc, char* argv[])
 
         //shutdown signals
         QObject::connect(&w, SIGNAL(orbiterClosing()), &pqOrbiter, SLOT(deinitialize()), Qt::QueuedConnection);
-        //  QObject::connect(&pqOrbiter, SIGNAL(closeOrbiter()), &pqOrbiter, SLOT(deleteLater()));
-        QObject::connect(&pqOrbiter, SIGNAL(closeOrbiter()), &dceThread, SLOT(quit()), Qt::QueuedConnection);
-        QObject::connect(&dceThread, SIGNAL(finished()),&orbiterWin.mainView, SLOT(close()));
-        //  QObject::connect(&dceThread, SIGNAL(finished()), &dceThread, SLOT(deleteLater()));
+        QObject::connect(&pqOrbiter, SIGNAL(closeOrbiter()), &pqOrbiter, SLOT(deleteLater()));
+        QObject::connect(&pqOrbiter, SIGNAL(destroyed()), &dceThread, SLOT(quit()), Qt::QueuedConnection);
+        // QObject::connect(&dceThread, SIGNAL(finished()),&orbiterWin.mainView, SLOT(close()));
+        QObject::connect(&dceThread, SIGNAL(finished()),&orbiterWin.mainView , SLOT(close()));
         QObject::connect(&orbiterWin.mainView, SIGNAL(destroyed()), &a, SLOT(quit()));
-        QObject::connect(&w, SIGNAL(destroyed()), &a, SLOT(quit()));
+        //   QObject::connect(&w, SIGNAL(destroyed()), &a, SLOT(quit()));
 
         QObject::connect(&pqOrbiter, SIGNAL(routerConnectionChanged(bool)), &w, SLOT(setConnectedState(bool)), Qt::QueuedConnection);
 
@@ -544,7 +544,7 @@ int main(int argc, char* argv[])
         QObject::connect(&w, SIGNAL(gridTypeChanged(int)), mediaModel, SLOT(setGridType(int)), Qt::QueuedConnection);
         QObject::connect(&w, SIGNAL(setDceGridParam(int,QString)), &pqOrbiter, SLOT(setStringParam(int,QString)),Qt::QueuedConnection);
 
-           QObject::connect(&w, SIGNAL(keepLoading(bool)), &pqOrbiter,SLOT(setGridStatus(bool)),Qt::QueuedConnection);
+        QObject::connect(&w, SIGNAL(keepLoading(bool)), &pqOrbiter,SLOT(setGridStatus(bool)),Qt::QueuedConnection);
         QObject::connect(&pqOrbiter, SIGNAL(showFileInfo(bool)), w.filedetailsclass, SLOT(setVisible(bool)),Qt::QueuedConnection);
         QObject::connect(&pqOrbiter, SIGNAL(setFocusFile(QString)), w.filedetailsclass, SLOT(setFile(QString)),Qt::QueuedConnection);
         QObject::connect(&pqOrbiter, SIGNAL(modelPagesChanged(int)), mediaModel, SLOT(setTotalPages(int)),Qt::QueuedConnection);
@@ -659,8 +659,8 @@ int main(int argc, char* argv[])
         QObject::connect(&pqOrbiter, SIGNAL(routerDisconnect()), &w, SLOT(reloadHandler()),Qt::QueuedConnection);
         QObject::connect(&pqOrbiter, SIGNAL(checkReload()), &w, SLOT(connectionWatchdog()), Qt::QueuedConnection);
         QObject::connect(&w, SIGNAL(reInitialize()), &pqOrbiter, SLOT(initialize()), Qt::QueuedConnection);
-       // QObject::connect(&w, SIGNAL(deviceNumberChanged(int)), &pqOrbiter, SLOT(setDeviceId(int)));
-       // QObject::connect(&w, SIGNAL(internalIpChanged(QString)), &pqOrbiter, SLOT(setdceIP(QString)));
+        // QObject::connect(&w, SIGNAL(deviceNumberChanged(int)), &pqOrbiter, SLOT(setDeviceId(int)));
+        // QObject::connect(&w, SIGNAL(internalIpChanged(QString)), &pqOrbiter, SLOT(setdceIP(QString)));
 
 
         dceThread.start();
