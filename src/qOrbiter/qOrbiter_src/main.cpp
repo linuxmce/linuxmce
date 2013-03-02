@@ -386,13 +386,13 @@ int main(int argc, char* argv[])
 #endif
 
         //shutdown signals
-        QObject::connect(&w, SIGNAL(orbiterClosing()), &pqOrbiter, SLOT(deinitialize()), Qt::QueuedConnection);
-        QObject::connect(&pqOrbiter, SIGNAL(closeOrbiter()), &pqOrbiter, SLOT(deleteLater()));
+        QObject::connect(&w, SIGNAL(destroyed()), &pqOrbiter, SLOT(deinitialize()), Qt::QueuedConnection);
+        QObject::connect(&pqOrbiter, SIGNAL(closeOrbiter()), &pqOrbiter, SLOT(shutdown()));
         QObject::connect(&pqOrbiter, SIGNAL(destroyed()), &dceThread, SLOT(quit()), Qt::QueuedConnection);
-        // QObject::connect(&dceThread, SIGNAL(finished()),&orbiterWin.mainView, SLOT(close()));
-        QObject::connect(&dceThread, SIGNAL(finished()),&orbiterWin.mainView , SLOT(close()));
-        QObject::connect(&orbiterWin.mainView, SIGNAL(destroyed()), &a, SLOT(quit()));
-        //   QObject::connect(&w, SIGNAL(destroyed()), &a, SLOT(quit()));
+        QObject::connect(&dceThread, SIGNAL(finished()), &dceThread, SLOT(deleteLater()));
+        QObject::connect(&a, SIGNAL(lastWindowClosed()), &a, SLOT(quit()));
+        //QObject::connect(&dceThread, SIGNAL(finished()),&a, SLOT(quit()));
+
 
         QObject::connect(&pqOrbiter, SIGNAL(routerConnectionChanged(bool)), &w, SLOT(setConnectedState(bool)), Qt::QueuedConnection);
 

@@ -921,6 +921,7 @@ void qorbiterManager::closeOrbiter()
 #endif
     //  emit unregisterOrbiter((userList->find(sPK_User)->data(4).toInt()), QString(iFK_Room), iea_area );
     emit orbiterClosing();
+    this->deleteLater();
 }
 
 /*
