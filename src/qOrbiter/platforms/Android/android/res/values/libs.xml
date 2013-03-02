@@ -4,12 +4,5 @@
     <array name="qt_libs">
         <item>QtCore</item>
         <item>QtGui</item>
-        <item>QtNetwork</item>
-        <item>QtXml</item>
-        <item>QtOpenGL</item>
-        <item>QtWebKit</item>
-        <item>QtDeclarative</item>
-        <item>QtSvg</item>
-        <item>QtSystemInfo</item>
     </array>
 </resources>
