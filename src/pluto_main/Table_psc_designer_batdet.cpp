@@ -141,7 +141,8 @@ void Row_psc_designer_batdet::SetDefaultValues()
 is_null[0] = false;
 m_FK_psc_designer_bathdr = 0;
 is_null[1] = false;
-is_null[2] = true;
+m_Tablename = "";
+is_null[2] = false;
 m_New = 0;
 is_null[3] = false;
 m_Deleted = 0;
@@ -219,15 +220,8 @@ void Row_psc_designer_batdet::FK_psc_designer_bathdr_unauth_set(long int val){PL
 m_FK_psc_designer_bathdr_unauth = val; is_modified=true; is_null[8]=false;}
 
 		
-bool Row_psc_designer_batdet::Tablename_isNull() {PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
-
-return is_null[2];}
 
 			
-void Row_psc_designer_batdet::Tablename_setNull(bool val){PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
-is_null[2]=val;
-is_modified=true;
-}
 	
 
 string Row_psc_designer_batdet::PK_psc_designer_batdet_asSQL()

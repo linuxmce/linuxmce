@@ -998,10 +998,6 @@
 #define COMMAND_Get_Attributes_For_Type_CONST 1096
 #define COMMAND_Get_File_Formats_CONST 1097
 #define COMMAND_Get_Media_Sub_Type_CONST 1098
-#define COMMAND_Load_Url_CONST 1099
-#define COMMAND_Get_Links_CONST 1100
-#define COMMAND_Reload_Page_CONST 1101
-#define COMMAND_Show_History_CONST 1102
 #define COMMAND_Goto_Url_CONST 1103
 #define COMMAND_Back_CONST 1104
 #define COMMAND_Forward_CONST 1105
@@ -1009,6 +1005,10 @@
 #define COMMAND_Get_Rooms_CONST 1107
 #define COMMAND_Get_Scenarios_CONST 1108
 #define COMMAND_Get_Entertainment_Areas_CONST 1109
+#define COMMAND_Netflix_CONST 1110
+#define COMMAND_YouTube_CONST 1111
+#define COMMAND_VUDU_CONST 1112
+#define COMMAND_CinemaNow_CONST 1113
 
 #define COMMAND_TABLE "Command"
 #define COMMAND_PK_COMMAND_FIELD "PK_Command"

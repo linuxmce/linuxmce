@@ -135,16 +135,20 @@ void Row_Firewall::SetDefaultValues()
 {
 	m_PK_Firewall = 0;
 is_null[0] = false;
-is_null[1] = true;
+m_Protocol = "tcp";
+is_null[1] = false;
 m_SourcePort = 0;
 is_null[2] = false;
 m_SourcePortEnd = 0;
 is_null[3] = false;
 m_DestinationPort = 0;
 is_null[4] = false;
-is_null[5] = true;
-is_null[6] = true;
-is_null[7] = true;
+m_SourceIP = "";
+is_null[5] = false;
+m_DestinationIP = "";
+is_null[6] = false;
+m_RuleType = "";
+is_null[7] = false;
 is_null[8] = true;
 m_psc_id = 0;
 is_null[9] = true;
@@ -252,18 +256,6 @@ void Row_Firewall::psc_restrict_set(long int val){PLUTO_SAFETY_LOCK_ERRORSONLY(s
 m_psc_restrict = val; is_modified=true; is_null[13]=false;}
 
 		
-bool Row_Firewall::Protocol_isNull() {PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
-
-return is_null[1];}
-bool Row_Firewall::SourceIP_isNull() {PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
-
-return is_null[5];}
-bool Row_Firewall::DestinationIP_isNull() {PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
-
-return is_null[6];}
-bool Row_Firewall::RuleType_isNull() {PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
-
-return is_null[7];}
 bool Row_Firewall::psc_id_isNull() {PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
 
 return is_null[8];}
@@ -281,22 +273,6 @@ bool Row_Firewall::psc_restrict_isNull() {PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table-
 return is_null[13];}
 
 			
-void Row_Firewall::Protocol_setNull(bool val){PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
-is_null[1]=val;
-is_modified=true;
-}
-void Row_Firewall::SourceIP_setNull(bool val){PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
-is_null[5]=val;
-is_modified=true;
-}
-void Row_Firewall::DestinationIP_setNull(bool val){PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
-is_null[6]=val;
-is_modified=true;
-}
-void Row_Firewall::RuleType_setNull(bool val){PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
-is_null[7]=val;
-is_modified=true;
-}
 void Row_Firewall::psc_id_setNull(bool val){PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
 is_null[8]=val;
 is_modified=true;

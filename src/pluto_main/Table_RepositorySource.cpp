@@ -146,7 +146,8 @@ is_null[2] = true;
 m_FK_Distro = 0;
 m_FK_RepositoryType = 1;
 is_null[3] = false;
-is_null[4] = true;
+m_Description = "";
+is_null[4] = false;
 is_null[5] = true;
 is_null[6] = true;
 is_null[7] = true;
@@ -256,9 +257,6 @@ return is_null[1];}
 bool Row_RepositorySource::FK_Distro_isNull() {PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
 
 return is_null[2];}
-bool Row_RepositorySource::Description_isNull() {PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
-
-return is_null[4];}
 bool Row_RepositorySource::Define_isNull() {PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
 
 return is_null[5];}
@@ -288,10 +286,6 @@ is_modified=true;
 }
 void Row_RepositorySource::FK_Distro_setNull(bool val){PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
 is_null[2]=val;
-is_modified=true;
-}
-void Row_RepositorySource::Description_setNull(bool val){PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
-is_null[4]=val;
 is_modified=true;
 }
 void Row_RepositorySource::Define_setNull(bool val){PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);

@@ -154,7 +154,8 @@ void Row_Package::SetDefaultValues()
 {
 	m_PK_Package = 0;
 is_null[0] = false;
-is_null[1] = true;
+m_Description = "";
+is_null[1] = false;
 is_null[2] = true;
 m_FK_PackageType = 0;
 is_null[3] = true;
@@ -309,9 +310,6 @@ void Row_Package::psc_restrict_set(long int val){PLUTO_SAFETY_LOCK_ERRORSONLY(sl
 m_psc_restrict = val; is_modified=true; is_null[18]=false;}
 
 		
-bool Row_Package::Description_isNull() {PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
-
-return is_null[1];}
 bool Row_Package::FK_PackageType_isNull() {PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
 
 return is_null[2];}
@@ -359,10 +357,6 @@ bool Row_Package::psc_restrict_isNull() {PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->
 return is_null[18];}
 
 			
-void Row_Package::Description_setNull(bool val){PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
-is_null[1]=val;
-is_modified=true;
-}
 void Row_Package::FK_PackageType_setNull(bool val){PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
 is_null[2]=val;
 is_modified=true;

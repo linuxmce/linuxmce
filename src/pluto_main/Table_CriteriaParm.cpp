@@ -145,7 +145,8 @@ is_null[2] = false;
 is_null[3] = true;
 m_Operator = 0;
 is_null[4] = false;
-is_null[5] = true;
+m_Value = "";
+is_null[5] = false;
 is_null[6] = true;
 m_FK_CannedEvents_CriteriaParmList = 0;
 is_null[7] = true;
@@ -252,9 +253,6 @@ m_psc_restrict = val; is_modified=true; is_null[12]=false;}
 bool Row_CriteriaParm::Parm_isNull() {PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
 
 return is_null[3];}
-bool Row_CriteriaParm::Value_isNull() {PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
-
-return is_null[5];}
 bool Row_CriteriaParm::FK_CannedEvents_CriteriaParmList_isNull() {PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
 
 return is_null[6];}
@@ -277,10 +275,6 @@ return is_null[12];}
 			
 void Row_CriteriaParm::Parm_setNull(bool val){PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
 is_null[3]=val;
-is_modified=true;
-}
-void Row_CriteriaParm::Value_setNull(bool val){PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
-is_null[5]=val;
 is_modified=true;
 }
 void Row_CriteriaParm::FK_CannedEvents_CriteriaParmList_setNull(bool val){PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);

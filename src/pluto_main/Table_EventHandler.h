@@ -163,7 +163,6 @@ void psc_restrict_set(long int val);
 		
 		bool FK_Event_isNull();
 bool TimedEvent_isNull();
-bool Description_isNull();
 bool FK_Criteria_isNull();
 bool FK_Installation_isNull();
 bool FK_CommandGroup_isNull();
@@ -182,7 +181,6 @@ bool psc_restrict_isNull();
 			
 		void FK_Event_setNull(bool val);
 void TimedEvent_setNull(bool val);
-void Description_setNull(bool val);
 void FK_Criteria_setNull(bool val);
 void FK_Installation_setNull(bool val);
 void FK_CommandGroup_setNull(bool val);

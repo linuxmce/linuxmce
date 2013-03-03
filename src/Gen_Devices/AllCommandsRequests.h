@@ -30184,5 +30184,101 @@ namespace DCE
 			COMMAND_Get_Entertainment_Areas_CONST,
 			0 /* number of parameters */); }
 	};
+	class CMD_Netflix : public PreformedCommand {
+	public:
+		CMD_Netflix(long DeviceIDFrom, long DeviceIDTo) { m_pMessage = new Message(DeviceIDFrom, DeviceIDTo, MESSAGETYPE_COMMAND, PRIORITY_NORMAL, 
+			COMMAND_Netflix_CONST,
+			0 /* number of parameters */); }
+	};
+	class CMD_Netflix_DL : public PreformedCommand {
+	public:
+		CMD_Netflix_DL(long DeviceIDFrom, string DeviceIDTo) { m_pMessage = new Message(DeviceIDFrom, DeviceIDTo, MESSAGETYPE_COMMAND, PRIORITY_NORMAL,
+			COMMAND_Netflix_CONST,
+			0 /* number of parameters */); }
+	};
+	class CMD_Netflix_DT : public PreformedCommand {
+	public:
+		CMD_Netflix_DT(long DeviceIDFrom, long MasterDevice, eBroadcastLevel eB) { m_pMessage = new Message(DeviceIDFrom, MasterDevice, eB, MESSAGETYPE_COMMAND, PRIORITY_NORMAL,
+			COMMAND_Netflix_CONST,
+			0 /* number of parameters */); }
+	};
+	class CMD_Netflix_Cat : public PreformedCommand {
+	public:
+		CMD_Netflix_Cat(long DeviceIDFrom, long DeviceCategory, bool bIncludeChildren, eBroadcastLevel eB) { m_pMessage = new Message(DeviceIDFrom, DeviceCategory, bIncludeChildren, eB, MESSAGETYPE_COMMAND, PRIORITY_NORMAL,
+			COMMAND_Netflix_CONST,
+			0 /* number of parameters */); }
+	};
+	class CMD_YouTube : public PreformedCommand {
+	public:
+		CMD_YouTube(long DeviceIDFrom, long DeviceIDTo) { m_pMessage = new Message(DeviceIDFrom, DeviceIDTo, MESSAGETYPE_COMMAND, PRIORITY_NORMAL, 
+			COMMAND_YouTube_CONST,
+			0 /* number of parameters */); }
+	};
+	class CMD_YouTube_DL : public PreformedCommand {
+	public:
+		CMD_YouTube_DL(long DeviceIDFrom, string DeviceIDTo) { m_pMessage = new Message(DeviceIDFrom, DeviceIDTo, MESSAGETYPE_COMMAND, PRIORITY_NORMAL,
+			COMMAND_YouTube_CONST,
+			0 /* number of parameters */); }
+	};
+	class CMD_YouTube_DT : public PreformedCommand {
+	public:
+		CMD_YouTube_DT(long DeviceIDFrom, long MasterDevice, eBroadcastLevel eB) { m_pMessage = new Message(DeviceIDFrom, MasterDevice, eB, MESSAGETYPE_COMMAND, PRIORITY_NORMAL,
+			COMMAND_YouTube_CONST,
+			0 /* number of parameters */); }
+	};
+	class CMD_YouTube_Cat : public PreformedCommand {
+	public:
+		CMD_YouTube_Cat(long DeviceIDFrom, long DeviceCategory, bool bIncludeChildren, eBroadcastLevel eB) { m_pMessage = new Message(DeviceIDFrom, DeviceCategory, bIncludeChildren, eB, MESSAGETYPE_COMMAND, PRIORITY_NORMAL,
+			COMMAND_YouTube_CONST,
+			0 /* number of parameters */); }
+	};
+	class CMD_VUDU : public PreformedCommand {
+	public:
+		CMD_VUDU(long DeviceIDFrom, long DeviceIDTo) { m_pMessage = new Message(DeviceIDFrom, DeviceIDTo, MESSAGETYPE_COMMAND, PRIORITY_NORMAL, 
+			COMMAND_VUDU_CONST,
+			0 /* number of parameters */); }
+	};
+	class CMD_VUDU_DL : public PreformedCommand {
+	public:
+		CMD_VUDU_DL(long DeviceIDFrom, string DeviceIDTo) { m_pMessage = new Message(DeviceIDFrom, DeviceIDTo, MESSAGETYPE_COMMAND, PRIORITY_NORMAL,
+			COMMAND_VUDU_CONST,
+			0 /* number of parameters */); }
+	};
+	class CMD_VUDU_DT : public PreformedCommand {
+	public:
+		CMD_VUDU_DT(long DeviceIDFrom, long MasterDevice, eBroadcastLevel eB) { m_pMessage = new Message(DeviceIDFrom, MasterDevice, eB, MESSAGETYPE_COMMAND, PRIORITY_NORMAL,
+			COMMAND_VUDU_CONST,
+			0 /* number of parameters */); }
+	};
+	class CMD_VUDU_Cat : public PreformedCommand {
+	public:
+		CMD_VUDU_Cat(long DeviceIDFrom, long DeviceCategory, bool bIncludeChildren, eBroadcastLevel eB) { m_pMessage = new Message(DeviceIDFrom, DeviceCategory, bIncludeChildren, eB, MESSAGETYPE_COMMAND, PRIORITY_NORMAL,
+			COMMAND_VUDU_CONST,
+			0 /* number of parameters */); }
+	};
+	class CMD_CinemaNow : public PreformedCommand {
+	public:
+		CMD_CinemaNow(long DeviceIDFrom, long DeviceIDTo) { m_pMessage = new Message(DeviceIDFrom, DeviceIDTo, MESSAGETYPE_COMMAND, PRIORITY_NORMAL, 
+			COMMAND_CinemaNow_CONST,
+			0 /* number of parameters */); }
+	};
+	class CMD_CinemaNow_DL : public PreformedCommand {
+	public:
+		CMD_CinemaNow_DL(long DeviceIDFrom, string DeviceIDTo) { m_pMessage = new Message(DeviceIDFrom, DeviceIDTo, MESSAGETYPE_COMMAND, PRIORITY_NORMAL,
+			COMMAND_CinemaNow_CONST,
+			0 /* number of parameters */); }
+	};
+	class CMD_CinemaNow_DT : public PreformedCommand {
+	public:
+		CMD_CinemaNow_DT(long DeviceIDFrom, long MasterDevice, eBroadcastLevel eB) { m_pMessage = new Message(DeviceIDFrom, MasterDevice, eB, MESSAGETYPE_COMMAND, PRIORITY_NORMAL,
+			COMMAND_CinemaNow_CONST,
+			0 /* number of parameters */); }
+	};
+	class CMD_CinemaNow_Cat : public PreformedCommand {
+	public:
+		CMD_CinemaNow_Cat(long DeviceIDFrom, long DeviceCategory, bool bIncludeChildren, eBroadcastLevel eB) { m_pMessage = new Message(DeviceIDFrom, DeviceCategory, bIncludeChildren, eB, MESSAGETYPE_COMMAND, PRIORITY_NORMAL,
+			COMMAND_CinemaNow_CONST,
+			0 /* number of parameters */); }
+	};
 }
 #endif

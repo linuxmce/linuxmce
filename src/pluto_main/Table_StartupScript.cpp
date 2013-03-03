@@ -137,33 +137,40 @@ void Row_StartupScript::SetDefaultValues()
 {
 	m_PK_StartupScript = 0;
 is_null[0] = false;
-is_null[1] = true;
-is_null[2] = true;
-is_null[3] = true;
+m_When = "S";
+is_null[1] = false;
+m_Command = "";
+is_null[2] = false;
+m_Description = "";
+is_null[3] = false;
 m_ConfigureOnly = 0;
 is_null[4] = false;
-is_null[5] = true;
+m_Parameter_Syntax = "";
+is_null[5] = false;
 m_Core_Boot_Order = 99;
 is_null[6] = false;
 m_Core_Background = 0;
 is_null[7] = false;
 m_Core_Enabled = 1;
 is_null[8] = false;
-is_null[9] = true;
+m_Core_Parameter = "";
+is_null[9] = false;
 m_MD_Boot_Order = 99;
 is_null[10] = false;
 m_MD_Background = 0;
 is_null[11] = false;
 m_MD_Enabled = 1;
 is_null[12] = false;
-is_null[13] = true;
+m_MD_Parameter = "";
+is_null[13] = false;
 m_Hybrid_Boot_Order = 99;
 is_null[14] = false;
 m_Hybrid_Background = 0;
 is_null[15] = false;
 m_Hybrid_Enabled = 1;
 is_null[16] = false;
-is_null[17] = true;
+m_Hybrid_Parameter = "";
+is_null[17] = false;
 is_null[18] = true;
 m_FK_DeviceTemplate = 0;
 is_null[19] = true;
@@ -342,24 +349,6 @@ m_psc_restrict = val; is_modified=true; is_null[24]=false;}
 bool Row_StartupScript::When_isNull() {PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
 
 return is_null[1];}
-bool Row_StartupScript::Command_isNull() {PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
-
-return is_null[2];}
-bool Row_StartupScript::Description_isNull() {PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
-
-return is_null[3];}
-bool Row_StartupScript::Parameter_Syntax_isNull() {PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
-
-return is_null[5];}
-bool Row_StartupScript::Core_Parameter_isNull() {PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
-
-return is_null[9];}
-bool Row_StartupScript::MD_Parameter_isNull() {PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
-
-return is_null[13];}
-bool Row_StartupScript::Hybrid_Parameter_isNull() {PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
-
-return is_null[17];}
 bool Row_StartupScript::FK_DeviceTemplate_isNull() {PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
 
 return is_null[18];}
@@ -382,30 +371,6 @@ return is_null[24];}
 			
 void Row_StartupScript::When_setNull(bool val){PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
 is_null[1]=val;
-is_modified=true;
-}
-void Row_StartupScript::Command_setNull(bool val){PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
-is_null[2]=val;
-is_modified=true;
-}
-void Row_StartupScript::Description_setNull(bool val){PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
-is_null[3]=val;
-is_modified=true;
-}
-void Row_StartupScript::Parameter_Syntax_setNull(bool val){PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
-is_null[5]=val;
-is_modified=true;
-}
-void Row_StartupScript::Core_Parameter_setNull(bool val){PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
-is_null[9]=val;
-is_modified=true;
-}
-void Row_StartupScript::MD_Parameter_setNull(bool val){PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
-is_null[13]=val;
-is_modified=true;
-}
-void Row_StartupScript::Hybrid_Parameter_setNull(bool val){PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
-is_null[17]=val;
 is_modified=true;
 }
 void Row_StartupScript::FK_DeviceTemplate_setNull(bool val){PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);

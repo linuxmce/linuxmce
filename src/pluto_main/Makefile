@@ -247,25 +247,18 @@ Table_psc_website_repset.cpp \
 Table_psc_website_schema.cpp \
 Table_psc_website_tables.cpp
 
-header=*.h
-
 all: libpluto_main.so all-recursive
 
 libpluto_main.so: $(sources:.cpp=.o)
 	$(CXX) -shared $(CXXFLAGS) $(CPPFLAGS) -o $@ $(call cpath,$+)
 	cp $@ ../lib
 
-distclean: clean
 clean: clean-recursive
 	rm -f *.o *.d libpluto_main.so >/dev/null
 
-install: 
-	mkdir -p $(DESTDIR)/usr/lib $(DESTDIR)/pluto/lib $(DESTDIR)/usr/include/lmce
-	cp libpluto_main.so $(DESTDIR)/pluto/lib
-	cp libpluto_main.so $(DESTDIR)/usr/lib
-	cp $(header) $(DESTDIR)/usr/include/lmce	
-	mkdir -p pluto/lib 
-	cp libpluto_main.so $(DESTPATH)pluto/lib 
+install:
+	mkdir -p $(DESTDIR)/usr/pluto/bin
+	cp $@ /usr/pluto/bin
 
 include $(ROOT)/PlutoUtils/make.rules
 -include $(sources:.cpp=.d)

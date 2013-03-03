@@ -143,7 +143,8 @@ m_FK_Room = 0;
 is_null[1] = false;
 m_Only1Stream = 0;
 is_null[2] = false;
-is_null[3] = true;
+m_Description = "";
+is_null[3] = false;
 m_Private = 0;
 is_null[4] = false;
 is_null[5] = true;
@@ -250,9 +251,6 @@ void Row_EntertainArea::psc_restrict_set(long int val){PLUTO_SAFETY_LOCK_ERRORSO
 m_psc_restrict = val; is_modified=true; is_null[12]=false;}
 
 		
-bool Row_EntertainArea::Description_isNull() {PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
-
-return is_null[3];}
 bool Row_EntertainArea::FK_FloorplanObjectType_isNull() {PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
 
 return is_null[5];}
@@ -276,10 +274,6 @@ bool Row_EntertainArea::psc_restrict_isNull() {PLUTO_SAFETY_LOCK_ERRORSONLY(sl,t
 return is_null[12];}
 
 			
-void Row_EntertainArea::Description_setNull(bool val){PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
-is_null[3]=val;
-is_modified=true;
-}
 void Row_EntertainArea::FK_FloorplanObjectType_setNull(bool val){PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
 is_null[5]=val;
 is_modified=true;

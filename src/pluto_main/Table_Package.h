@@ -158,8 +158,7 @@ void psc_mod_set(string val);
 void psc_restrict_set(long int val);
 
 		
-		bool Description_isNull();
-bool FK_PackageType_isNull();
+		bool FK_PackageType_isNull();
 bool FK_Package_Sourcecode_isNull();
 bool NonExecutable_isNull();
 bool HomePage_isNull();
@@ -176,8 +175,7 @@ bool psc_frozen_isNull();
 bool psc_restrict_isNull();
 
 			
-		void Description_setNull(bool val);
-void FK_PackageType_setNull(bool val);
+		void FK_PackageType_setNull(bool val);
 void FK_Package_Sourcecode_setNull(bool val);
 void NonExecutable_setNull(bool val);
 void HomePage_setNull(bool val);

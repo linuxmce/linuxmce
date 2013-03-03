@@ -147,7 +147,8 @@ m_FK_CommandGroup_D = 0;
 is_null[3] = false;
 is_null[4] = true;
 m_FK_DesignObj_Goto = 0;
-is_null[5] = true;
+m_Description = "";
+is_null[5] = false;
 m_X = 0;
 is_null[6] = false;
 m_Y = 0;
@@ -284,9 +285,6 @@ return is_null[2];}
 bool Row_DesignObjVariation_Zone::FK_DesignObj_Goto_isNull() {PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
 
 return is_null[4];}
-bool Row_DesignObjVariation_Zone::Description_isNull() {PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
-
-return is_null[5];}
 bool Row_DesignObjVariation_Zone::psc_id_isNull() {PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
 
 return is_null[10];}
@@ -314,10 +312,6 @@ is_modified=true;
 }
 void Row_DesignObjVariation_Zone::FK_DesignObj_Goto_setNull(bool val){PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
 is_null[4]=val;
-is_modified=true;
-}
-void Row_DesignObjVariation_Zone::Description_setNull(bool val){PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
-is_null[5]=val;
 is_modified=true;
 }
 void Row_DesignObjVariation_Zone::psc_id_setNull(bool val){PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);

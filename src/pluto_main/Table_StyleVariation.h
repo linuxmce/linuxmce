@@ -172,7 +172,6 @@ void psc_restrict_set(long int val);
 		
 		bool FK_Skin_isNull();
 bool FK_UI_isNull();
-bool Font_isNull();
 bool ForeColor_isNull();
 bool ShadowX_isNull();
 bool ShadowY_isNull();
@@ -187,7 +186,6 @@ bool psc_restrict_isNull();
 			
 		void FK_Skin_setNull(bool val);
 void FK_UI_setNull(bool val);
-void Font_setNull(bool val);
 void ForeColor_setNull(bool val);
 void ShadowX_setNull(bool val);
 void ShadowY_setNull(bool val);

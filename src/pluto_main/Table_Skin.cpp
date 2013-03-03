@@ -153,7 +153,8 @@ void Row_Skin::SetDefaultValues()
 {
 	m_PK_Skin = 0;
 is_null[0] = false;
-is_null[1] = true;
+m_Description = "";
+is_null[1] = false;
 is_null[2] = true;
 is_null[3] = true;
 m_FK_UI = 0;
@@ -319,9 +320,6 @@ void Row_Skin::psc_restrict_set(long int val){PLUTO_SAFETY_LOCK_ERRORSONLY(sl,ta
 m_psc_restrict = val; is_modified=true; is_null[19]=false;}
 
 		
-bool Row_Skin::Description_isNull() {PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
-
-return is_null[1];}
 bool Row_Skin::Define_isNull() {PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
 
 return is_null[2];}
@@ -357,10 +355,6 @@ bool Row_Skin::psc_restrict_isNull() {PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->dat
 return is_null[19];}
 
 			
-void Row_Skin::Description_setNull(bool val){PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
-is_null[1]=val;
-is_modified=true;
-}
 void Row_Skin::Define_setNull(bool val){PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
 is_null[2]=val;
 is_modified=true;

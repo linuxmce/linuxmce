@@ -148,8 +148,10 @@ m_OrderNum = 0;
 is_null[3] = false;
 is_null[4] = true;
 m_FK_Package = 0;
-is_null[5] = true;
-is_null[6] = true;
+m_Description = "";
+is_null[5] = false;
+m_pageURL = "";
+is_null[6] = false;
 m_showInTopMenu = 0;
 is_null[7] = false;
 is_null[8] = true;
@@ -268,12 +270,6 @@ return is_null[3];}
 bool Row_PageSetup::FK_Package_isNull() {PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
 
 return is_null[4];}
-bool Row_PageSetup::Description_isNull() {PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
-
-return is_null[5];}
-bool Row_PageSetup::pageURL_isNull() {PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
-
-return is_null[6];}
 bool Row_PageSetup::psc_id_isNull() {PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
 
 return is_null[8];}
@@ -301,14 +297,6 @@ is_modified=true;
 }
 void Row_PageSetup::FK_Package_setNull(bool val){PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
 is_null[4]=val;
-is_modified=true;
-}
-void Row_PageSetup::Description_setNull(bool val){PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
-is_null[5]=val;
-is_modified=true;
-}
-void Row_PageSetup::pageURL_setNull(bool val){PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
-is_null[6]=val;
 is_modified=true;
 }
 void Row_PageSetup::psc_id_setNull(bool val){PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);

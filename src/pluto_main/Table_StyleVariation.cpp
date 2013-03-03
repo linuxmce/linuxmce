@@ -146,7 +146,8 @@ is_null[2] = true;
 m_FK_Skin = 0;
 is_null[3] = true;
 m_FK_UI = 0;
-is_null[4] = true;
+m_Font = "";
+is_null[4] = false;
 is_null[5] = true;
 m_ForeColor = 0;
 m_PixelHeight = 0;
@@ -338,9 +339,6 @@ return is_null[2];}
 bool Row_StyleVariation::FK_UI_isNull() {PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
 
 return is_null[3];}
-bool Row_StyleVariation::Font_isNull() {PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
-
-return is_null[4];}
 bool Row_StyleVariation::ForeColor_isNull() {PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
 
 return is_null[5];}
@@ -379,10 +377,6 @@ is_modified=true;
 }
 void Row_StyleVariation::FK_UI_setNull(bool val){PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
 is_null[3]=val;
-is_modified=true;
-}
-void Row_StyleVariation::Font_setNull(bool val){PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
-is_null[4]=val;
 is_modified=true;
 }
 void Row_StyleVariation::ForeColor_setNull(bool val){PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);

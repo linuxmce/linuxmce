@@ -143,7 +143,8 @@ void Row_OperatingSystem::SetDefaultValues()
 {
 	m_PK_OperatingSystem = 0;
 is_null[0] = false;
-is_null[1] = true;
+m_Description = "";
+is_null[1] = false;
 is_null[2] = true;
 is_null[3] = true;
 m_psc_id = 0;
@@ -222,9 +223,6 @@ void Row_OperatingSystem::psc_restrict_set(long int val){PLUTO_SAFETY_LOCK_ERROR
 m_psc_restrict = val; is_modified=true; is_null[8]=false;}
 
 		
-bool Row_OperatingSystem::Description_isNull() {PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
-
-return is_null[1];}
 bool Row_OperatingSystem::Define_isNull() {PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
 
 return is_null[2];}
@@ -245,10 +243,6 @@ bool Row_OperatingSystem::psc_restrict_isNull() {PLUTO_SAFETY_LOCK_ERRORSONLY(sl
 return is_null[8];}
 
 			
-void Row_OperatingSystem::Description_setNull(bool val){PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
-is_null[1]=val;
-is_modified=true;
-}
 void Row_OperatingSystem::Define_setNull(bool val){PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
 is_null[2]=val;
 is_modified=true;

@@ -139,7 +139,8 @@ void Row_Manufacturer::SetDefaultValues()
 {
 	m_PK_Manufacturer = 0;
 is_null[0] = false;
-is_null[1] = true;
+m_Description = "";
+is_null[1] = false;
 is_null[2] = true;
 m_IRFrequency = 0;
 is_null[3] = true;
@@ -219,9 +220,6 @@ void Row_Manufacturer::psc_restrict_set(long int val){PLUTO_SAFETY_LOCK_ERRORSON
 m_psc_restrict = val; is_modified=true; is_null[8]=false;}
 
 		
-bool Row_Manufacturer::Description_isNull() {PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
-
-return is_null[1];}
 bool Row_Manufacturer::IRFrequency_isNull() {PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
 
 return is_null[2];}
@@ -242,10 +240,6 @@ bool Row_Manufacturer::psc_restrict_isNull() {PLUTO_SAFETY_LOCK_ERRORSONLY(sl,ta
 return is_null[8];}
 
 			
-void Row_Manufacturer::Description_setNull(bool val){PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
-is_null[1]=val;
-is_modified=true;
-}
 void Row_Manufacturer::IRFrequency_setNull(bool val){PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
 is_null[2]=val;
 is_modified=true;

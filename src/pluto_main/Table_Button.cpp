@@ -137,8 +137,10 @@ void Row_Button::SetDefaultValues()
 {
 	m_PK_Button = 0;
 is_null[0] = false;
-is_null[1] = true;
-is_null[2] = true;
+m_Description = "";
+is_null[1] = false;
+m_Define = "";
+is_null[2] = false;
 is_null[3] = true;
 m_psc_id = 0;
 is_null[4] = true;
@@ -216,12 +218,6 @@ void Row_Button::psc_restrict_set(long int val){PLUTO_SAFETY_LOCK_ERRORSONLY(sl,
 m_psc_restrict = val; is_modified=true; is_null[8]=false;}
 
 		
-bool Row_Button::Description_isNull() {PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
-
-return is_null[1];}
-bool Row_Button::Define_isNull() {PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
-
-return is_null[2];}
 bool Row_Button::psc_id_isNull() {PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
 
 return is_null[3];}
@@ -239,14 +235,6 @@ bool Row_Button::psc_restrict_isNull() {PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->d
 return is_null[8];}
 
 			
-void Row_Button::Description_setNull(bool val){PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
-is_null[1]=val;
-is_modified=true;
-}
-void Row_Button::Define_setNull(bool val){PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
-is_null[2]=val;
-is_modified=true;
-}
 void Row_Button::psc_id_setNull(bool val){PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
 is_null[3]=val;
 is_modified=true;

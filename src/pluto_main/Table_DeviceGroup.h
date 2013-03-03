@@ -136,7 +136,6 @@ void psc_restrict_set(long int val);
 		
 		bool FK_DeviceGroup_Parent_isNull();
 bool FK_Installation_isNull();
-bool Description_isNull();
 bool Type_isNull();
 bool psc_id_isNull();
 bool psc_batch_isNull();
@@ -147,7 +146,6 @@ bool psc_restrict_isNull();
 			
 		void FK_DeviceGroup_Parent_setNull(bool val);
 void FK_Installation_setNull(bool val);
-void Description_setNull(bool val);
 void Type_setNull(bool val);
 void psc_id_setNull(bool val);
 void psc_batch_setNull(bool val);

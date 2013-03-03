@@ -138,7 +138,6 @@ void psc_restrict_set(long int val);
 
 		
 		bool FK_Document_Parent_isNull();
-bool Title_isNull();
 bool Contents_isNull();
 bool psc_id_isNull();
 bool psc_batch_isNull();
@@ -148,7 +147,6 @@ bool psc_restrict_isNull();
 
 			
 		void FK_Document_Parent_setNull(bool val);
-void Title_setNull(bool val);
 void Contents_setNull(bool val);
 void psc_id_setNull(bool val);
 void psc_batch_setNull(bool val);

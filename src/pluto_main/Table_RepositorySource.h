@@ -142,7 +142,6 @@ void psc_restrict_set(long int val);
 		
 		bool FK_OperatingSystem_isNull();
 bool FK_Distro_isNull();
-bool Description_isNull();
 bool Define_isNull();
 bool Instructions_isNull();
 bool psc_id_isNull();
@@ -154,7 +153,6 @@ bool psc_restrict_isNull();
 			
 		void FK_OperatingSystem_setNull(bool val);
 void FK_Distro_setNull(bool val);
-void Description_setNull(bool val);
 void Define_setNull(bool val);
 void Instructions_setNull(bool val);
 void psc_id_setNull(bool val);

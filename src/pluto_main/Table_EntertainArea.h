@@ -140,8 +140,7 @@ void psc_mod_set(string val);
 void psc_restrict_set(long int val);
 
 		
-		bool Description_isNull();
-bool FK_FloorplanObjectType_isNull();
+		bool FK_FloorplanObjectType_isNull();
 bool FloorplanInfo_isNull();
 bool psc_id_isNull();
 bool psc_batch_isNull();
@@ -150,8 +149,7 @@ bool psc_frozen_isNull();
 bool psc_restrict_isNull();
 
 			
-		void Description_setNull(bool val);
-void FK_FloorplanObjectType_setNull(bool val);
+		void FK_FloorplanObjectType_setNull(bool val);
 void FloorplanInfo_setNull(bool val);
 void psc_id_setNull(bool val);
 void psc_batch_setNull(bool val);
