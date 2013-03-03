@@ -18,7 +18,6 @@
 //<-dceag-d-e->
 
 #include <curl/curl.h>
-#include <curl/types.h>
 #include <curl/easy.h>
 
 #include <pthread.h>
