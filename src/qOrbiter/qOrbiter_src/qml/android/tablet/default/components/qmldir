@@ -80,3 +80,5 @@ NowPlayingImage NowPlayingImage.qml
 DvdButtons DvdButtons.qml
 ScenarioTemplate ScenarioTemplate.qml
 NowPlayingButton NowPlayingButton.qml
+AudioControl AudioControl.qml
+BinaryDragHandle BinaryDragHandle.qml
