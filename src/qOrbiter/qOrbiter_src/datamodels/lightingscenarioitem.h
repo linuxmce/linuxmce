@@ -4,6 +4,10 @@
 #include <datamodels/listModel.h>
 #include <QImage>
 
+/*!
+ * \brief The LightingScenarioItem class
+ * \ingroup data_model
+ */
 class LightingScenarioItem: public QObject
 {
          Q_OBJECT

@@ -6,6 +6,12 @@ ClimateScenarioItem:: ClimateScenarioItem( const QString &name, const QString &t
 
 }
 
+/*!
+ * \brief ClimateScenarioItem::roleNames
+ * \return
+ *
+ *
+ */
 QHash<int, QByteArray> ClimateScenarioItem::roleNames() const
 {
   QHash<int, QByteArray> names;

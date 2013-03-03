@@ -230,13 +230,13 @@ public:
     bool m_bNewOrbiter;
     bool m_bUseAlphaBlending ;
     bool m_bUseMask;
-//@}
+    //@}
 
     //<-dceag-const-b->
 public:
     // Constructors/Destructor
     qOrbiter(int DeviceID, string ServerAddress,bool bConnectEventHandler=true,bool bLocalMode=false,class Router *pRouter=NULL, QObject *parent = 0);
-
+    virtual ~qOrbiter();
     //<-dceag-const-e->
     //  virtual bool GetConfig();
     virtual bool Register();
@@ -1501,7 +1501,7 @@ public slots:
     }
 
     void setModelPages(int p) {modelPages = p; emit modelPagesChanged(modelPages);}
-            int getModelPages() {return modelPages;}
+    int getModelPages() {return modelPages;}
 
     void osdBack();
 
@@ -1690,6 +1690,8 @@ public slots:
     void sendAvCommand(int deviceto, int command);
     //floorplans
     void getFloorplanDeviceCommand(int device);
+
+    void shutdown();
 
     //child devices
 protected:

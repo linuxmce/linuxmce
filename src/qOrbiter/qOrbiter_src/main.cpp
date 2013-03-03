@@ -220,7 +220,7 @@ int main(int argc, char* argv[])
     g_sBinaryPath = FileUtils::BasePath(argv[0]);
     cout << "qOrbiter, v." << VERSION << endl
          << "Visit www.linuxmce.org for source code and license information" << endl << endl;
-    string sRouter_IP="DCEROUTER";
+    string sRouter_IP="192.168.80.1";
     string graphicsmode="raster";
     string screen = "";
     int PK_Device=-1;

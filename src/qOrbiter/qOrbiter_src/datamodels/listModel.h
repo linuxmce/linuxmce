@@ -14,7 +14,7 @@
  * This class is essentially duplicated for certain data structures in QOrbiter. The best definition of when it used
  * is in the case of items a QList<QObject*> would me more difficult to implement.
  *
- *  \ingroup data_models
+ *  \ingroup data_model
  */
 class ListModel : public QAbstractListModel
 {

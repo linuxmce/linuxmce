@@ -33,6 +33,10 @@
 
 class qorbiterManager;
 
+/*!
+ * \brief The FloorPlanModel class
+ * \ingroup data_model
+ */
 class FloorPlanModel : public QAbstractListModel
 {
     Q_PROPERTY (QString currentPage READ getCurrentPage WRITE setCurrentPage NOTIFY pageChanged)

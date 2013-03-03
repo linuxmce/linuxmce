@@ -1,4 +1,5 @@
 import QtQuick 1.0
+import QtWebKit 1.0
 import "../components"
 import "../js/ComponentLoader.js" as MyJs
 
@@ -175,10 +176,32 @@ Rectangle {
                     onClicked: MyJs.createStageComponent("ComponentViewer.qml", advancedscreen)
                 }
             }
+
+            AdvancedButton{
+                id:html5
+                height: scaleY(style.buttonH)
+                width: scaleX(style.buttonW)
+                buttontext: qsTr("HTML 5 video test")
+                radius: 5
+                MouseArea{
+                    id:html5test
+                    anchors.fill: parent
+                    onClicked: htmltestsurface.visible = !htmltestsurface.visible
+                }
+            }
         }
     }
     ConfigPanel{
         id:localConfigPanel
+    }
+    WebView{
+        id:htmltestsurface
+        anchors.top: parent.top
+        height: 300
+        width: parent.width
+        url: "http://www.w3schools.com/html/tryit.asp?filename=tryhtml5_video_all"
+        visible: false
+
     }
 }
 

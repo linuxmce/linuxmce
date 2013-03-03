@@ -7,11 +7,16 @@
 #include <QVariant>
 
 
-
+/*!
+ * \brief The LocationModel class.
+ * QAbstractListmodel based class for storing the various items relating to locations in the home and the current users location.
+ * \ingroup room_list
+ */
 class LocationModel : public QAbstractListModel
 {
-    Q_PROPERTY(QString currentRoom READ getStringRoom NOTIFY roomChanged)
-    Q_PROPERTY(QString currentEA READ getStringEa NOTIFY eaChanged)
+
+    Q_PROPERTY(QString currentRoom READ getStringRoom NOTIFY roomChanged)/*!< The current location, string format */
+    Q_PROPERTY(QString currentEA READ getStringEa NOTIFY eaChanged)/*!< The current entertain area, string format */
     Q_PROPERTY(int currentItem READ getCurrentItem WRITE setCurrentItem NOTIFY locationChanged)
     Q_OBJECT
 

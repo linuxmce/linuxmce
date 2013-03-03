@@ -26,19 +26,26 @@
 #include <QVariant>
 #include <QImage>
 
-
+/*!
+ * \brief The ClimateScenarioItem class
+ * \ingroup data_model
+ */
 class ClimateScenarioItem: public QObject{
          Q_OBJECT
         // Q_PROPERTY(QImage buttonImage READ buttonImage NOTIFY imageChanged)
 
         public:
+    /*!
+           * \brief The Climate Roles enum defines the qml properties for listmodels.
+           * \ingroup data_model
+           */
           enum Roles {
-            NameRole = Qt::UserRole+1,
-            LabelRole,
-            ParamRole,
-            CommandRole,
-            GotoRole,
-            ImageRole
+            NameRole = Qt::UserRole+1, /*!< 'username' - String username */
+            LabelRole,/*!< 'title' - String name of climate scenario item.  */
+            ParamRole, /*!< 'params' - String of parameters associated with this climate item.  */
+            CommandRole,/*!< 'command' - The command or command group associated with this item. */
+            GotoRole, /*!< 'gotoscree' - The screen to goto - depreciated.  */
+            ImageRole /*!< image - String of the image name.  */
           };
 
         public:

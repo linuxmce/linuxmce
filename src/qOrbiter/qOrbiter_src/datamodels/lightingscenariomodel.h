@@ -10,7 +10,10 @@
 
 class LightingScenarioItem;
 
-
+/*!
+ * \brief The LightingScenarioModel class
+ * \ingroup data_model
+ */
 class LightingScenarioModel : public QAbstractListModel
 {
     Q_OBJECT

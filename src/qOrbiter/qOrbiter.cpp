@@ -1897,7 +1897,8 @@ void DCE::qOrbiter::deinitialize()
     //DCE::CMD_Orbiter_Registered CMD_OrbiterUnRegistered(m_dwPK_Device, iOrbiterPluginID, StringUtils::itos(m_dwPK_Device) ,i_user, StringUtils::itos(i_ea), i_room, &pData, &iSize);
     // SendCommand(CMD_OrbiterUnRegistered);
       emit routerConnectionChanged(false);
-    emit closeOrbiter();
+  emit closeOrbiter();
+
 }
 
 
@@ -2150,6 +2151,14 @@ void qOrbiter::requestFileFormats(int type)
 
 void qOrbiter::getFloorplanDeviceCommand(int device)
 {
+}
+
+void qOrbiter::shutdown()
+{
+    m_pData = NULL;
+    m_pEvent->m_pClientSocket->Disconnect();
+    m_pEvent = NULL;
+   this->deleteLater();
 }
 
 void qOrbiter::beginSetup()
@@ -4586,6 +4595,11 @@ void qOrbiter::CreateChildren()
         }
     }
     emit commandResponseChanged("Finished spawning children!");
+}
+
+qOrbiter::~qOrbiter()
+{
+    this->deleteLater();
 }
 
 

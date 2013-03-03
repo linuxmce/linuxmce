@@ -243,6 +243,7 @@ macx{
         DEFINES+=ANDROID
         DEPLOYMENTFOLDERS = qmlcomponents base #folder_01
         QML_IMPORT_PATH = "androidComponents"
+QT+=network
 }
 
 linux-rasp-pi-g++{
@@ -722,7 +723,11 @@ OTHER_FILES += Readme.txt \
     android/res/values-pt-rBR/strings.xml \
     android/res/layout/splash.xml \
     android/res/values-id/strings.xml \
-    android/res/drawable-ldpi/icon.png
+    android/res/drawable-ldpi/icon.png \
+    android/src/org/kde/necessitas/origo/QtActivity.java \
+    android/src/org/kde/necessitas/origo/QtApplication.java \
+    android/src/org/kde/necessitas/ministro/IMinistro.aidl \
+    android/src/org/kde/necessitas/ministro/IMinistroCallback.aidl
 
 
 for_harmattan{

@@ -96,6 +96,23 @@ This section references the c++ code that is a part of QOrbiter. It is split int
  */
 
 /*!
+ * \defgroup data_model Models and Lists
+ * This part of the LinuxMCE Skin API contains the references for roles in various listmodels used in the QML application. A list of the c++ classes
+ * is also availible for reference here as well.
+ * - \ref user_list
+ *
+ * \ingroup qml_api
+ */
+
+/*!
+ *\defgroup room_list "RoomList" Properties and methods
+ * The list of rooms in the home is provided by the 'roomList' property. It is a c++ backed model that provides various properties and methods
+ * to allow the user to select rooms.
+ *
+ * \ingroup data_model
+ */
+
+/*!
  *\defgroup startup_properties Startup Properties and Methods
  *\ingroup qml_properties
  */

@@ -30,7 +30,10 @@
 
 class ClimateScenarioItem;
 
-
+/*!
+ * \brief The ClimateScenarioModel class
+ * \ingroup data_model
+ */
 class ClimateScenarioModel : public QAbstractListModel
 {
   Q_OBJECT

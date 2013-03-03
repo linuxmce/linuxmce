@@ -4,10 +4,10 @@ import QtQuick 1.1
 Rectangle {
     height: manager.appHeight
     width: manager.appWidth
-   color: "black"
+    color: "black"
     Timer{
         id:wait
-        interval: 2500
+        interval: 3500
         onTriggered: {mainContent.source = "http://"+srouterip+"/lmce-admin/skins/android/Splash.qml"; }
         running:true
     }
@@ -39,16 +39,6 @@ Rectangle {
         opacity: .85
     }
 
-
-
-        Text {
-            id: dceMessages
-            text: manager.dceResponse
-            anchors.bottom: parent.bottom
-            anchors.horizontalCenter: parent.horizontalCenter
-        }
-
-
     Loader{
         id:mainContent
         height: manager.appHeight
@@ -56,16 +46,21 @@ Rectangle {
         source:""
         opacity: 0
         onOpacityChanged: PropertyAnimation {target:mainContent; property: "opacity"; to:1 ; duration: 1500}
-        onStatusChanged: if(mainContent.status != Loader.Ready){
-
-                             loading.text = qsTr("Im Sorry I couldnt connect to a LinuxMCE Server at "+srouterip+" Please ensure you can reach your core \n I will continue trying. \n"+ mainContent.Error)
+        onStatusChanged: if(mainContent.status === Loader.Error){
+                             loading.text = qsTr("Im Sorry I couldnt connect to a LinuxMCE Server at "+srouterip+" Please ensure you can reach your core. \n I will continue trying. \n"+ mainContent.sourceComponent.errorString())
+                             console.log(mainContent.sourceComponent.errorString())
                              wait.restart()
                          }
-                         else {
+                         else if (mainContent.status != Loader.Loading){
+                             loading.text = "Loading, please wait"
+
+                         }
+                         else  if (mainContent.status === Loader.Ready){
                              mainContent.opacity = .01
                              loading.visible= false
                              loading.text = "Content Loaded, one moment"
                          }
+
     }
 
 
