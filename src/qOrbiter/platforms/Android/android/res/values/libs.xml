@@ -9,5 +9,9 @@
         <item>QtSystemInfo</item>
         <item>QtWebKit</item>
         <item>QtDeclarative</item>
+        <item>QtServiceFramework</item>
+        <item>QtConnectivity</item>
+        <item>QtNetwork</item>
+        <item>QtLocation</item>
     </array>
 </resources>
