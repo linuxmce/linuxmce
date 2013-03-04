@@ -1897,8 +1897,8 @@ void DCE::qOrbiter::deinitialize()
     BindMediaRemote(false);
     //DCE::CMD_Orbiter_Registered CMD_OrbiterUnRegistered(m_dwPK_Device, iOrbiterPluginID, StringUtils::itos(m_dwPK_Device) ,i_user, StringUtils::itos(i_ea), i_room, &pData, &iSize);
     // SendCommand(CMD_OrbiterUnRegistered);
-      emit routerConnectionChanged(false);
-  emit closeOrbiter();
+    emit routerConnectionChanged(false);
+    emit closeOrbiter();
 
 }
 
@@ -2048,7 +2048,7 @@ void qOrbiter::requestMediaSubtypes(int type)
         {
             QStringList subSplit = data.at(i).split(":");
             if(subSplit.count()>1){
-               emit newMediaSubtype(new AttributeSortItem( subSplit.last(),subSplit.first(), QImage(),false,  0));
+                emit newMediaSubtype(new AttributeSortItem( subSplit.last(),subSplit.first(), QImage(),false,  0));
             }
 
         }
@@ -2080,7 +2080,7 @@ void qOrbiter::requestTypes(int type)
         {
             QStringList subSplit = data.at(i).split(":");
             if(subSplit.count() > 1){
-            emit newAttributeSort( new AttributeSortItem( subSplit.last(),subSplit.first(), QImage(),false,  0));
+                emit newAttributeSort( new AttributeSortItem( subSplit.last(),subSplit.first(), QImage(),false,  0));
             }
 
         }
@@ -2137,7 +2137,7 @@ void qOrbiter::requestFileFormats(int type)
             emit commandResponse(data.at(i).split(":"));
 #endif
             if(subSplit.count() > 1){
-                  emit newFileFormatSort( new AttributeSortItem( subSplit.last(),subSplit.first(), QImage(),false,  0));
+                emit newFileFormatSort( new AttributeSortItem( subSplit.last(),subSplit.first(), QImage(),false,  0));
             }
 
         }
@@ -2159,7 +2159,7 @@ void qOrbiter::shutdown()
     m_pData = NULL;
     m_pEvent->m_pClientSocket->Disconnect();
     m_pEvent = NULL;
-   this->deleteLater();
+    this->deleteLater();
 }
 
 void qOrbiter::beginSetup()
@@ -4722,7 +4722,18 @@ void DCE::qOrbiter::prepareFileList(int iPK_MediaType)
             }
             else if (q_pk_attribute !=""){
                 q_attributetype_sort = "13";
+            } else if(q_subType == "1" ){
+                if(q_attributetype_sort ==""||"13"){
+                    q_attributetype_sort = "12";
+                }
+
+            }else if(q_subType == "2"){
+                if(q_attributetype_sort ==""){
+                    q_attributetype_sort ="13";
+                }
+
             }
+
 
         }
 
@@ -5130,14 +5141,14 @@ void qOrbiter::checkInstall()
 {
     emit commandResponseChanged("Checking for LinuxMCE installtion in checkInstall() at "+ dceIP);
 
-        QString url = "http://"+dceIP+"/lmce-admin/index.php";
-        QNetworkAccessManager *pingManager = new QNetworkAccessManager();
+    QString url = "http://"+dceIP+"/lmce-admin/index.php";
+    QNetworkAccessManager *pingManager = new QNetworkAccessManager();
 
-        connect(pingManager, SIGNAL(finished(QNetworkReply*)), this, SLOT(verifyInstall(QNetworkReply*)));
-        QNetworkRequest s;
+    connect(pingManager, SIGNAL(finished(QNetworkReply*)), this, SLOT(verifyInstall(QNetworkReply*)));
+    QNetworkRequest s;
 
 
-        QNetworkReply *badReply = pingManager->get(QNetworkRequest(url));
+    QNetworkReply *badReply = pingManager->get(QNetworkRequest(url));
 
 
 }
@@ -5150,7 +5161,7 @@ void qOrbiter::verifyInstall(QNetworkReply *r)
         if ( initialize() == true )
         {
             emit routerConnectionChanged(true);
-          //  setdceIP(dceIP);
+            //  setdceIP(dceIP);
 
             LoggerWrapper::GetInstance()->Write(LV_STATUS, "Connect OK");
 

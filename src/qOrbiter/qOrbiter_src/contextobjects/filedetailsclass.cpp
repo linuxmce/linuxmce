@@ -13,6 +13,8 @@ void FileDetailsClass::setFileMediaType()
 
 
 void FileDetailsClass::clear(){
+     setScreenshot("");
+     emit screenShotChanged();
     directors.clear();
     composers.clear();
     composerlist.clear();
@@ -35,6 +37,7 @@ void FileDetailsClass::clear(){
     synop.clear();
 
 
+
     emit synopChanged();
     emit objectChanged();
     emit synopChanged();
@@ -55,5 +58,6 @@ void FileDetailsClass::clear(){
     emit episodeChanged();
     emit studioChanged();
     emit ratingChanged();
+    emit screenShotChanged();
 
 }
