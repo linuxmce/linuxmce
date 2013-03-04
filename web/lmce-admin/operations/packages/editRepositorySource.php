@@ -196,6 +196,14 @@ function editRepositorySource($output,$dbADO) {
 		$FK_OperatingSystem=cleanInteger($_REQUEST['FK_OperatingSystem']);
 		$FK_Distro=cleanInteger($_REQUEST['FK_Distro']);
 
+		if ($FK_OperatingSystem==0) {
+			$FK_OperatingSystem=NULL;
+		}
+
+		if ($FK_Distro==0) {
+			$FK_Distro=NULL;
+		}
+
 		if ($description!='') {
 			if ($PK_RepositorySource==0) {
 				// insert
@@ -241,7 +249,7 @@ function editRepositorySource($output,$dbADO) {
 			</script>
 			";
 		} else {
-			header("Location: index.php?section=editRepositorySource&from=$from&deviceID=$deviceID&RepositorySource={$PK_RepositorySource}");
+			header("Location: index.php?section=editRepositorySource&from={$from}&deviceID={$deviceID}&RepositorySource={$PK_RepositorySource}");
 		}
 	}
 
