@@ -50,7 +50,7 @@ class FileDetailsClass : public QObject
     Q_PROPERTY(QString file READ getFile WRITE setFile NOTIFY FileChanged)/*!< \brief The current file with full filepath \ingroup file_details */
     Q_PROPERTY(QString objecttitle READ getTitle WRITE setTitle NOTIFY objectChanged)/*!< \brief The current media objects title, unparsed.  \ingroup file_details*/
     Q_PROPERTY(QString synop READ getSynop WRITE setSynop NOTIFY synopChanged)/*!< \brief The Current media synopsis \ingroup file_details*/
-    Q_PROPERTY(QUrl screenshot READ getScreenShot WRITE setScreenshot NOTIFY imageChanged)/*!< \brief Contains url to the current screenshot \ingroup file_details*/
+    Q_PROPERTY(QString screenshot READ getScreenShot WRITE setScreenshot NOTIFY screenShotChanged)/*!< \brief Contains url to the current screenshot \ingroup file_details*/
     Q_PROPERTY(QString filename READ getFilename WRITE setFilename NOTIFY fileNameChanged)/*!< \brief Filename of the current file, with no path. \ingroup file_details*/
     Q_PROPERTY(QString path READ getPath WRITE setPath NOTIFY pathChanged)/*!< \brief Path of file, minus the filename. \ingroup file_details*/
     Q_PROPERTY(QString qs_storageDevice READ getStorageDevice READ getStorageDevice NOTIFY storageDeviceChanged)/*!< \brief The string value of the storage device. \ingroup file_details*/
@@ -123,7 +123,7 @@ public:
     QImage qi_bgimage;
     bool showDetails;
     QString synop;
-    QUrl screenshot;
+    QString screenshot;
     QUrl bgImage;
     QString filename;
     QString path;
@@ -142,6 +142,7 @@ signals:
     void FileChanged(QString f);
     void VisibleChanged(bool vis);
     //void ImageChanged(QUrl);
+    void screenShotChanged();
     void titleImageChanged();
     //general signals
     void mediaTitleChanged();
@@ -290,8 +291,10 @@ public slots:
     inline QString getSynop() {return synop;}
     inline void setSynop(QString s) { synop = s; emit synopChanged(); }
 
-    inline void setScreenshot(QUrl u) {screenshot = u;}
-    inline QUrl getScreenShot() {return screenshot;}
+    inline void setScreenshot(QString u) {
+        screenshot = u.remove("home/mediapics/") ; emit screenShotChanged();
+    }
+    inline QString getScreenShot() {return screenshot;}
 
     inline QString getFilename() {return filename;}
     inline void setFilename (QString f) {filename = f; emit fileNameChanged();}

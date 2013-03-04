@@ -279,13 +279,15 @@ void qorbiterManager::gotoQScreen(QString s)
     //This allows it to execute some transition or other if it wants to
 
     setDceResponse("Starting screen switch");
-    QVariant screenname= s;
+    QString lameFix = s.replace("http://", "https://");
+    qDebug() << lameFix;
+    QVariant screenname= lameFix;
 
     QObject *item = qorbiterUIwin->rootObject();
     setDceResponse("About to call screenchange()");
     if (QMetaObject::invokeMethod(item, "screenchange", Qt::QueuedConnection, Q_ARG(QVariant, screenname))) {
         setDceResponse("Done call to screenchange()");
-        setCurrentScreen(s);
+        setCurrentScreen(lameFix);
         if(!currentScreen.contains("187"))
             gotoScreenList->append(currentScreen);
 
@@ -449,8 +451,17 @@ void qorbiterManager::refreshUI(QUrl url)
 #else
     qorbiterUIwin->setResizeMode(QDeclarativeView::SizeRootObjectToView);
 #endif
-    qorbiterUIwin->rootContext()->setBaseUrl(skin->entryUrl());
-    qorbiterUIwin->setSource(skin->entryUrl());
+
+
+    QUrl fixed  = skin->entryUrl();
+    if(fixed.scheme()=="http"){
+       // fixed.setScheme("https");
+    }
+
+
+    qorbiterUIwin->rootContext()->setBaseUrl(fixed);
+
+    qorbiterUIwin->setSource(fixed);
 
 }
 

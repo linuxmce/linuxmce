@@ -26,6 +26,7 @@
 #include "PlutoUtils/Other.h"
 #include <QDebug>
 #include <iostream>
+#include <QtNetwork/QSslConfiguration>
 
 
 using namespace std;
@@ -2656,8 +2657,8 @@ void DCE::qOrbiter::GetMediaAttributeGrid(QString  qs_fk_fileno)
         // filedetailsclass->setScreenshot(details.at(placeholder+1));
         // filedetailsclass->setScreenshotimage(getfileForDG(details.at(placeholder+1).toStdString()));
         emit mediaResponseChanged(details.at(placeholder+1));
-        QImage temp =  getfileForDG(details.at(placeholder+1).toStdString());
-        emit fd_titleImageChanged(temp);
+        emit fd_imageUrlChanged(QString(details.at(placeholder+1)));
+
     }
 
     placeholder = details.indexOf("PATH");
@@ -5131,8 +5132,13 @@ void qOrbiter::checkInstall()
 
         QString url = "http://"+dceIP+"/lmce-admin/index.php";
         QNetworkAccessManager *pingManager = new QNetworkAccessManager();
+
         connect(pingManager, SIGNAL(finished(QNetworkReply*)), this, SLOT(verifyInstall(QNetworkReply*)));
+        QNetworkRequest s;
+
+
         QNetworkReply *badReply = pingManager->get(QNetworkRequest(url));
+
 
 }
 

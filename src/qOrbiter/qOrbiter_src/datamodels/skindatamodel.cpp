@@ -15,6 +15,11 @@
 SkinDataModel::SkinDataModel(QUrl &baseUrl, SkinDataItem* prototype, qorbiterManager *uiRef, QObject* parent): QAbstractListModel(parent), m_prototype(prototype)
 {
     m_baseUrl = baseUrl ;
+
+//    if(m_baseUrl.scheme() == "http"){
+//        m_baseUrl.setScheme("https");
+//    }
+
     uiRef->setDceResponse("Setting skin source: " + m_baseUrl.toString());
    #ifndef QT5
     setRoleNames(m_prototype->roleNames());

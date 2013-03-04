@@ -4,13 +4,23 @@ import QtQuick 1.0
 Rectangle {
     id: filedetailrect
     width: scaleX(100)
-    height: scaleY(100)
+    height:0
     anchors.centerIn: parent
     color:"transparent"
     clip: true    
     border.color: "white"
     border.width: 3
     property int bgImageProp:manager.q_subType ==="1" ? 43 : manager.q_attributetype_sort===53 ? 43 :36
+
+    Behavior on height{
+        PropertyAnimation{
+            target: filedetailrect
+            property: "height"
+            duration: 1000
+            easing.type: Easing.OutElastic
+            easing.amplitude: .6
+        }
+    }
 
     MouseArea{
         anchors.fill: parent
@@ -32,12 +42,8 @@ Rectangle {
         id:imdb
         anchors.fill: parent
         source:"http://"+srouterip+"/lmce-admin/imdbImage.php?file="+filedetailsclass.file+"&prop="+bgImageProp
-    }
-
-    Connections{
-        target:filedetailsclass
-        onImageChanged:filedetailsimage.source = "image://listprovider/filedetailsprovider/"+securityvideo.timestamp
-    }
+        onStatusChanged: imdb.status == Image.Ready ? filedetailrect.height = scaleY(100) : ""
+    }   
 
     FileDetailsHeader {
         id: titlerect
@@ -65,7 +71,7 @@ Rectangle {
             id: filedetailsimage
             width: filedetailsclass.aspect=="wide"? scaleX(35) : scaleX(25)
             height:filedetailsclass.aspect=="wide"?scaleY(35) : scaleY(58)
-            source: ""
+           source:filedetailsclass.screenshot !=="" ? "http://"+srouterip+"/lmce-admin/MediaImage.php?img="+filedetailsclass.screenshot : ""
             smooth: true
         }
 

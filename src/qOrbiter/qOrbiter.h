@@ -1421,7 +1421,7 @@ signals:
     void fd_show(bool s);
     void fd_objectTitleChanged(QString t);
     void fd_synopChanged(QString s);
-    void fd_imageUrlChanged(QUrl loc);
+    void fd_imageUrlChanged(QString loc);
     void fd_pathChanged(QString path);
     void fd_storageDeviceChanged(QString device);
     void fd_titleChanged(QString t);
