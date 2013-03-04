@@ -28,7 +28,6 @@ $TEXT_DRIVE_DELETED_CONST='Drive deleted';
 $TEXT_RAID_ARRAY_CREATED_CONST='RAID array created';
 $TEXT_DRIVE_ADDED_CONST='Drive added';
 $TEXT_NO_DRIVES_FOR_ARRAY_CONST='ERROR: at least 2 drives are required to create an array';
-$TEXT_DESCRIPTION_REQUIRED_CONST='Description required.';
 $TEXT_PARENT_REQUIRED_CONST='Parent required.';
 $TEXT_TYPE_REQUIRED_CONST='RAID type required.';
 $TEXT_USE_AUTOMATICALLY_CONST='Use automatically';

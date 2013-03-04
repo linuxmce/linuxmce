@@ -36,10 +36,10 @@ if(!isset($_SESSION['userLoggedIn']) && $section!='' && $section!='login' && $se
 // if installation ID is 1 (offline installation), check if it doesn't changed
 validate_installation((int)@$_SESSION['installationID'],$dbADO);
 
-switch ($section) {	
+switch ($section) {
 	case 'login':
 		$output = new Template($dbADO);
-		$output->setTemplateFileType('small');		
+		$output->setTemplateFileType('small');
 	    include_once('operations/login.php');
 	    login($output,$dbADO);
 	break;
@@ -92,13 +92,13 @@ switch ($section) {
 		$output->setTemplateFileType('small');
 	    include_once('operations/controlledVia/addControlledViaToMasterDevice.php');
 	    addControlledViaToMasterDevice($output,$dbADO);
-	break;	
+	break;
 	case 'editControlledViaToMasterDevice':
 		$output = new Template($dbADO);
 		$output->setTemplateFileType('small');
 	    include_once('operations/controlledVia/editControlledViaToMasterDevice.php');
 	    editControlledViaToMasterDevice($output,$dbADO);
-	break;	
+	break;
 	case 'deleteControlledViaFromMasterDevice':
 		$output = new Template($dbADO);
 		$output->setTemplateFileType('small');
@@ -116,19 +116,19 @@ switch ($section) {
 		$output->setTemplateFileType('small');
 	    include_once('operations/controlledVia/deletePipeFromDeviceTemplateControlledViaCategory.php');
 	    deletePipeFromDeviceTemplateControlledViaCategory($output,$dbADO);
-	break;	
+	break;
 	case 'addControlledViaCategoryToMasterDevice':
 		$output = new Template($dbADO);
 		$output->setTemplateFileType('small');
 	    include_once('operations/controlledVia/addControlledViaCategoryToMasterDevice.php');
 	    addControlledViaCategoryToMasterDevice($output,$dbADO);
-	break;	
+	break;
 	case 'editControlledViaCategoryToMasterDevice':
 		$output = new Template($dbADO);
 		$output->setTemplateFileType('small');
 	    include_once('operations/controlledVia/editControlledViaCategoryToMasterDevice.php');
 	    editControlledViaCategoryToMasterDevice($output,$dbADO);
-	break;	
+	break;
 	case 'deleteControlledViaCategoryFromMasterDevice':
 		$output = new Template($dbADO);
 		$output->setTemplateFileType('small');
@@ -140,33 +140,56 @@ switch ($section) {
 		$output->setTemplateFileType('small');
 	    include_once('operations/packages/addPackageToMasterDevice.php');
 	    addPackageToMasterDevice($output,$dbADO);
-	break;	
+	break;
 	case 'addPackage':
 		$output = new Template($dbADO);
 		$output->setTemplateFileType('small');
 	    include_once('operations/packages/addPackage.php');
 	    addPackage($output,$dbADO);
-	break;	
+	break;
 	case 'packagesList':
 		$output = new Template($dbADO);
 		$output->setTemplateFileType('large');
 		$output->setHelpSrc('/wiki/index.php/Packages');
 	    include_once('operations/packages/packagesList.php');
 	    packagesList($output,$dbADO);
-	break;	
-
-	case 'addRepositorySource':
+	break;
+	case 'addDistro':
 		$output = new Template($dbADO);
 		$output->setTemplateFileType('small');
-	    include_once('operations/packages/addRepositorySource.php');
-	    addRepositorySource($output,$dbADO);
-	break;	
+	    include_once('operations/packages/addDistro.php');
+	    addDistro($output,$dbADO);
+	break;
+	case 'distroList':
+		$output = new Template($dbADO);
+		$output->setTemplateFileType('large');
+	    include_once('operations/packages/distroList.php');
+	    distroList($output,$dbADO);
+	break;
+	case 'addOS':
+		$output = new Template($dbADO);
+		$output->setTemplateFileType('small');
+	    include_once('operations/packages/addOS.php');
+	    addOS($output,$dbADO);
+	break;
+	case 'osList':
+		$output = new Template($dbADO);
+		$output->setTemplateFileType('large');
+	    include_once('operations/packages/osList.php');
+	    osList($output,$dbADO);
+	break;
 	case 'editRepositorySource':
 		$output = new Template($dbADO);
 		$output->setTemplateFileType('small');
 	    include_once('operations/packages/editRepositorySource.php');
 	    editRepositorySource($output,$dbADO);
-	break;	
+	break;
+	case 'repositorySourceList':
+		$output = new Template($dbADO);
+		$output->setTemplateFileType('large');
+	    include_once('operations/packages/repositorySourceList.php');
+	    repositorySourceList($output,$dbADO);
+	break;
 	case 'addDirectory':
 		$output = new Template($dbADO);
 		$output->setTemplateFileType('small');
@@ -1822,7 +1845,7 @@ switch ($section) {
 		$output = new Template($dbADO);
 		$output->setTemplateFileType('large');
 	    include_once('operations/mediaBrowser/searchMedia.php');
-	    searchMedia($output,$mediadbADO);	    
+	    searchMedia($output,$mediadbADO);
 	break;
 	case 'filePicker';
 		$output = new Template($dbADO);
@@ -1834,35 +1857,35 @@ switch ($section) {
 	case 'index';
 		@$_SESSION['lastLeftFrameSrc']='';
 		@$_SESSION['lastRightFrameSrc']='';
-		
+
 		die('<script>self.location=\'index.php\'</script>');
 		exit();
 	break;
 	case '';
 		$output = new Template($dbADO);	
-		
+
 		$output->setTemplateFileType('homeWithFrames');
-		
+
 		$output->setLeftFrameSrc('index.php?section=wizard&rightSection=login');
 		$output->setRightFrameSrc('index.php?section=userHome');
-		
-		$output->setBody('');		
-		
+
+		$output->setBody('');
+
 		$output->setScriptCalendar('null');
-		$output->setTitle(APPLICATION_NAME);			
-  		$output->output();  	
-  	break;	
-	default:			
-		$output = new Template($dbADO);	
-		
+		$output->setTitle(APPLICATION_NAME);
+  		$output->output();
+  	break;
+	default:
+		$output = new Template($dbADO);
+
 		$output->setTemplateFileType('home');
-		
-		$output->setBody('Not a valid section');		
-		
-		
-		$output->setTitle(APPLICATION_NAME);			
-  		$output->output();  		
-  		
+
+		$output->setBody('Not a valid section');
+
+
+		$output->setTitle(APPLICATION_NAME);
+  		$output->output();
+
 	break;
 }
 ?>

@@ -24,7 +24,6 @@ $TEXT_REQUIRED_CONST='Required';
 $TEXT_ALLOWED_TO_MODIFY_CONST='Allowed to modify';
 $TEXT_USER_MASTER_DEVICE_LIST_DEFAULTS_CONST='User Master Device List Defaults';
 $TEXT_SET_BY_DEVICE_CONST='Set by device';
-$TEXT_DESCRIPTION_REQUIRED_CONST='Please enter a description!';
 $TEXT_DEFAULT_VALUE_REQUIRED_CONST='Please enter a default value!';
 $TEXT_NO_DEVICE_DATA_FOR_THIS_DEVICE_CONST='No device data for this device!';
 $TEXT_ADD_A_NEW_PARAMETER_CONST='Add a new parameter';
