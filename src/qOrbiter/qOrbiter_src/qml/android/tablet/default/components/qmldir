@@ -83,3 +83,6 @@ NowPlayingButton NowPlayingButton.qml
 AudioControl AudioControl.qml
 BinaryDragHandle BinaryDragHandle.qml
 MediaListGridDelagate MediaListGridDelagate.qml
+FileDetailsButtons FileDetailsButtons.qml
+FileDetailsButton FileDetailsButton.qml
+GenericAttributeSelector GenericAttributeSelector.qml
