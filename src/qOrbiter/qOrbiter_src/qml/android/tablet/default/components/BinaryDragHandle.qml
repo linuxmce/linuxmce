@@ -3,8 +3,8 @@ import QtQuick 1.1
 
 Rectangle{
     id:dragHandle
-    height: 30
-    width: 15
+    height: 60
+    width: 30
     radius: 30
     color:"grey"
     smooth:true

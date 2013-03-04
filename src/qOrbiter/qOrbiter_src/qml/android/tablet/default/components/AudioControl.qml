@@ -2,8 +2,8 @@ import QtQuick 1.1
 
 Rectangle {
     id:audioControl
-    width: 50
-    height: 50
+    width: 75
+    height: 75
     color:"transparent"
     state:"inactive"
 
@@ -65,7 +65,7 @@ Rectangle {
             name: "active"
             PropertyChanges {
                 target: audioControl
-                width:200
+                width:400
             }
             PropertyChanges {
                 target: inactivity_timer

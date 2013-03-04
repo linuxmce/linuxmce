@@ -82,3 +82,4 @@ ScenarioTemplate ScenarioTemplate.qml
 NowPlayingButton NowPlayingButton.qml
 AudioControl AudioControl.qml
 BinaryDragHandle BinaryDragHandle.qml
+MediaListGridDelagate MediaListGridDelagate.qml

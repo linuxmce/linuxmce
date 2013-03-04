@@ -18,13 +18,13 @@ Rectangle {
         height: scaleY(80)
         anchors.centerIn: gridholder
         model:dataModel
-        delegate: contactDelegate
+        delegate: MediaListGridDelagate{}
         cacheBuffer: 0
         focus: true
         //clip: true
         contentItem.clip: true
-        cellWidth: scaleX(25)
-        cellHeight: scaleY(25)
+        cellWidth: contactDelegate.width
+        cellHeight: contactDelegate.height
 
         opacity:1
         scale:1

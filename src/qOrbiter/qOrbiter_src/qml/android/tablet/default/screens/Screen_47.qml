@@ -15,7 +15,7 @@ Rectangle {
 
     function runEffects()
     {
-        MyJs.createStageComponent("FileDetails"+manager.i_current_mediaType+".qml" , fileviewscreen)
+        MyJs.createStageComponent("FileDetails"+manager.i_current_mediaType+".qml" , parent)
     }
 
     Connections
@@ -26,6 +26,12 @@ Rectangle {
             runEffects()
         }
     }
+
+    MediaListGridDelagate {
+        id: contactDelegate
+       visible: false
+    }
+
     Rectangle{
         id: pos_label
         anchors.top: fileviewscreen.top
@@ -133,61 +139,61 @@ Rectangle {
 
 
 
-    Component
-    {
-        id: contactDelegate
-//        DropShadow{
-//            sourceItem: imagerect
-//            anchors.fill: imagerect
-//            color:"black"
-//            blur:.75
+//    Component
+//    {
+//        id: contactDelegate
+////        DropShadow{
+////            sourceItem: imagerect
+////            anchors.fill: imagerect
+////            color:"black"
+////            blur:.75
+////        }
+//        Rectangle
+//        {
+//            id:mainItem
+//            width: scaleX(25);
+//            height: scaleY(25)
+//            color: "transparent"
+//            clip:true
+
+//            Image
+//            {
+//                id: imagerect;
+//                source: path !=="" ? "http://192.168.80.1/lmce-admin/MediaImage.php?img="+path : ""
+//                height: scaleY(12);
+//                width: scaleX(18);
+//                anchors.centerIn: parent;
+//                fillMode: Image.PreserveAspectCrop
+//                 smooth: true
+//                asynchronous: true
+//            }
+
+//            Rectangle{
+//                id:textmask
+//                color: "grey"
+//                anchors.fill:celllabel
+//                opacity: .80
+//            }
+
+//            Text
+//            {
+//                id:celllabel
+//                text: name;
+//                font.pointSize: 14;
+//                color: "Black" ;
+//                wrapMode: "WrapAtWordBoundaryOrAnywhere"
+//                width: imagerect.width
+//                font.bold: true
+//                anchors.top: imagerect.top
+//                anchors.horizontalCenter: imagerect.horizontalCenter
+//            }
+//            MouseArea
+//            {
+//                anchors.fill: parent
+//                onClicked: {setStringParam(4, id); mouselocX = mouseX; mouselocY = mouseY}
+//            }
 //        }
-        Rectangle
-        {
-            id:mainItem
-            width: scaleX(25);
-            height: scaleY(25)
-            color: "transparent"
-            clip:true
-
-            Image
-            {
-                id: imagerect;
-                source: path !=="" ? "http://192.168.80.1/lmce-admin/MediaImage.php?img="+path : ""
-                height: scaleY(12);
-                width: scaleX(18);
-                anchors.centerIn: parent;
-                fillMode: Image.PreserveAspectCrop
-                 smooth: true
-                asynchronous: true
-            }
-
-            Rectangle{
-                id:textmask
-                color: "grey"
-                anchors.fill:celllabel
-                opacity: .80
-            }
-
-            Text
-            {
-                id:celllabel
-                text: name;
-                font.pointSize: 14;
-                color: "Black" ;
-                wrapMode: "WrapAtWordBoundaryOrAnywhere"
-                width: imagerect.width
-                font.bold: true
-                anchors.top: imagerect.top
-                anchors.horizontalCenter: imagerect.horizontalCenter
-            }
-            MouseArea
-            {
-                anchors.fill: parent
-                onClicked: {setStringParam(4, id); mouselocX = mouseX; mouselocY = mouseY}
-            }
-        }
-    }
+//    }
 
     Component
     {

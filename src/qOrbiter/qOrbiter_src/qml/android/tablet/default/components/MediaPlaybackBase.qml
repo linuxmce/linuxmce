@@ -45,6 +45,12 @@ Rectangle {
             anchors.horizontalCenterOffset: scaleX(-3)
         }
 
+        Image{
+            id:contextImage
+            anchors.fill: parent
+            source: "http"
+        }
+
         Loader{
             id:mediaTypeMetaData
             anchors.left: npImage.right

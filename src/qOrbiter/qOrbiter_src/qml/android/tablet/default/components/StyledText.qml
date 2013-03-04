@@ -14,7 +14,6 @@ import "../../lib/effects"
         font.pixelSize: fontSize
         font.family: myFont.name
 
-
     }
 
 

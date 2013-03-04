@@ -3,27 +3,43 @@ import QtQuick 1.0
 
 Rectangle {
     id: filedetailrect
-    width: scaleX(65)
-    height: scaleY(75)
-    anchors.top: parent.top
-    anchors.topMargin: scaleY(5)
-    anchors.horizontalCenter: parent.horizontalCenter
+    width: scaleX(100)
+    height: 0
+    anchors.centerIn: parent
     color: style.highlight2
     clip: true
     radius: 5
     border.color: style.highlight1
     border.width: 3
+    property int bgImageProp:manager.q_subType ==="1" ? 43 : manager.q_attributetype_sort===53 ? 43 :36
+
+    Behavior on height{
+        PropertyAnimation{
+            target: filedetailrect
+            property: "height"
+            duration: 1000
+            easing.type: Easing.OutElastic
+            easing.amplitude: .6
+        }
+    }
+
     Image {
         id: fdbg
         source: "../img/icons/nowplaying.png"
         anchors.fill: filedetailrect
 
     }
-
-    Connections{
-        target:filedetailsclass
-        onImageChanged:filedetailsimage.source = "image://listprovider/filedetailsprovider/"+securityvideo.timestamp
+    Image{
+        id:imdb
+        anchors.fill: parent
+        source:"http://"+srouterip+"/lmce-admin/imdbImage.php?file="+filedetailsclass.file+"&prop="+bgImageProp
+        onStatusChanged: imdb.status == Image.Ready ? filedetailrect.height = scaleY(100) : ""
     }
+
+    //    Connections{
+    //        target:filedetailsclass
+    //        onImageChanged:filedetailsimage.source = "image://listprovider/filedetailsprovider/"+securityvideo.timestamp
+    //    }
 
     Rectangle{
         id:titlerect
@@ -49,7 +65,7 @@ Rectangle {
         width:childrenRect.width
         color: "transparent"
 
-       anchors.verticalCenter: parent.verticalCenter
+        anchors.verticalCenter: parent.verticalCenter
         anchors.left: parent.left
         anchors.leftMargin: scaleX(2)
         BorderImage {
@@ -65,7 +81,7 @@ Rectangle {
             id: filedetailsimage
             width: filedetailsclass.aspect=="wide"? scaleX(30) : scaleX(23)
             height:filedetailsclass.aspect=="wide"?scaleY(40) : scaleY(55)
-            source: ""
+            source:filedetailsclass.screenshot !=="" ? "http://"+srouterip+"/lmce-admin/MediaImage.php?img="+filedetailsclass.screenshot : ""
             smooth: true
         }
 
@@ -92,108 +108,108 @@ Rectangle {
         anchors.left: imageholder.right
         anchors.leftMargin: scaleX(1)
 
-            Column
-            {
-                spacing:5
-                anchors.margins: scaleY(1)
-                width: parent.width
-                height: childrenRect.height
-                Text {
-                    id: fnametext
-                    text: "Title: " + filedetailsclass.objecttitle
-                    font.pixelSize: scaleY(2)
-                    color:"aliceblue"
-                    wrapMode: "WrapAtWordBoundaryOrAnywhere"
-                     width: rectangle1.width *.95
-                }
+        Column
+        {
+            spacing:5
+            anchors.margins: scaleY(1)
+            width: parent.width
+            height: childrenRect.height
+            Text {
+                id: fnametext
+                text: "Title: " + filedetailsclass.objecttitle
+                font.pixelSize: scaleY(2)
+                color:"aliceblue"
+                wrapMode: "WrapAtWordBoundaryOrAnywhere"
+                width: rectangle1.width *.95
+            }
 
-                Text {
-                    id: storageDeviceText
-                    width: scaleX(35)
-                    text: qsTr("Located on: ") + filedetailsclass.qs_storageDevice
-                    font.family: "Droid Sans"
-                    wrapMode: "WrapAtWordBoundaryOrAnywhere"
+            Text {
+                id: storageDeviceText
+                width: scaleX(35)
+                text: qsTr("Located on: ") + filedetailsclass.qs_storageDevice
+                font.family: "Droid Sans"
+                wrapMode: "WrapAtWordBoundaryOrAnywhere"
 
-                    smooth: true
-                    font.pixelSize: scaleY(2)
+                smooth: true
+                font.pixelSize: scaleY(2)
 
-                }
+            }
 
-                Text {
-                    id: programtext
-                    width: scaleX(35)
-                    text: qsTr("Album: ") + filedetailsclass.album
-                    font.family: "Droid Sans"
-                    wrapMode: "WrapAtWordBoundaryOrAnywhere"
+            Text {
+                id: programtext
+                width: scaleX(35)
+                text: qsTr("Album: ") + filedetailsclass.album
+                font.family: "Droid Sans"
+                wrapMode: "WrapAtWordBoundaryOrAnywhere"
 
-                    smooth: true
-                    font.pixelSize: scaleY(2)
-                    visible:  filedetailsclass.album =="" ? false: true
-                }
+                smooth: true
+                font.pixelSize: scaleY(2)
+                visible:  filedetailsclass.album =="" ? false: true
+            }
 
-                Text {
-                    id: episode
-                    width: scaleX(35)
-                    wrapMode: "WrapAtWordBoundaryOrAnywhere"
-                    text: qsTr("Track: ") + filedetailsclass.track
-                    font.family: "Droid Sans"
+            Text {
+                id: episode
+                width: scaleX(35)
+                wrapMode: "WrapAtWordBoundaryOrAnywhere"
+                text: qsTr("Track: ") + filedetailsclass.track
+                font.family: "Droid Sans"
 
-                    smooth: true
-                    font.pixelSize: scaleY(2)
-                    visible:  filedetailsclass.track =="" ? false: true
-                }
+                smooth: true
+                font.pixelSize: scaleY(2)
+                visible:  filedetailsclass.track =="" ? false: true
+            }
 
-                Text {
-                    id: genre
-                    width: scaleX(35)
-                    wrapMode: "WrapAtWordBoundaryOrAnywhere"
-                    text: qsTr("Genre(s): ") + filedetailsclass.genre
-                    font.family: "Droid Sans"
-                    //font.bold: true
-                    smooth: true
-                    font.pixelSize: scaleY(2)
-                    visible:  filedetailsclass.genre =="" ? false: true
-                    MouseArea{
-                        anchors.fill: genre
-                        hoverEnabled: true
-                        onEntered: { genre.elide = "ElideNone" ; }
-                        onExited: {genre.elide = "ElideRight"; }
-                    }
-                }
-                Text {
-                    id: released
-                    width: scaleX(35)
-                    wrapMode: "WrapAtWordBoundaryOrAnywhere"
-                    text: qsTr("Released: ") + dcenowplaying.releasedate
-                    font.family: "Droid Sans"
-                    // font.bold: true
-                    smooth: true
-                    font.pixelSize: scaleY(2)
-                    visible:  filedetailsclass.releasedate ==="" ? false: true
-
-                }
-
-
-                Text {
-                    id: starring
-                    width: scaleX(35)
-                    wrapMode: "WrapAtWordBoundaryOrAnywhere"
-                    text: qsTr("Perfomers: ") + filedetailsclass.performerlist
-                    font.family: "Droid Sans"
-                    //  font.bold: true
-                    smooth: true
-                    font.pixelSize: scaleY(2)
-                    elide: "ElideRight"
-                    visible:  filedetailsclass.performerlist =="" ? false: true
-
-                    MouseArea{
-                        anchors.fill: starring
-                        hoverEnabled: true
-                        onEntered: { starring.elide = "ElideNone" ; }
-                        onExited: {starring.elide = "ElideRight"; }
-                    }
+            Text {
+                id: genre
+                width: scaleX(35)
+                wrapMode: "WrapAtWordBoundaryOrAnywhere"
+                text: qsTr("Genre(s): ") + filedetailsclass.genre
+                font.family: "Droid Sans"
+                //font.bold: true
+                smooth: true
+                font.pixelSize: scaleY(2)
+                visible:  filedetailsclass.genre =="" ? false: true
+                MouseArea{
+                    anchors.fill: genre
+                    hoverEnabled: true
+                    onEntered: { genre.elide = "ElideNone" ; }
+                    onExited: {genre.elide = "ElideRight"; }
                 }
             }
+            Text {
+                id: released
+                width: scaleX(35)
+                wrapMode: "WrapAtWordBoundaryOrAnywhere"
+                text: qsTr("Released: ") + dcenowplaying.releasedate
+                font.family: "Droid Sans"
+                // font.bold: true
+                smooth: true
+                font.pixelSize: scaleY(2)
+                visible:  filedetailsclass.releasedate ==="" ? false: true
+
+            }
+
+
+            Text {
+                id: starring
+                width: scaleX(35)
+                wrapMode: "WrapAtWordBoundaryOrAnywhere"
+                text: qsTr("Perfomers: ") + filedetailsclass.performerlist
+                font.family: "Droid Sans"
+                //  font.bold: true
+                smooth: true
+                font.pixelSize: scaleY(2)
+                elide: "ElideRight"
+                visible:  filedetailsclass.performerlist =="" ? false: true
+
+                MouseArea{
+                    anchors.fill: starring
+                    hoverEnabled: true
+                    onEntered: { starring.elide = "ElideNone" ; }
+                    onExited: {starring.elide = "ElideRight"; }
+                }
+            }
+        }
     }
 
 
@@ -235,7 +251,10 @@ Rectangle {
             x: ((parent.width/3)*2)
             MouseArea{
                 anchors.fill:  parent
-                onClicked: { filedetailrect.destroy()}
+                onClicked: {
+                    filedetailsclass.clear()
+                    filedetailrect.destroy()
+                }
             }
         }
     }

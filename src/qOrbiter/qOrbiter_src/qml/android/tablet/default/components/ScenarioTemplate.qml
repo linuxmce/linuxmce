@@ -10,7 +10,7 @@ Rectangle{
     clip:true
     color:"transparent"
     radius: 20
-
+    visible: scenarioview.count !== 0
     property string bgimgSource
     property int floorplantype
     property variant scenariomodel
@@ -102,6 +102,8 @@ Rectangle{
                     id:sT
                     text:title
                     fontSize: scaleY(4.5)
+                    height:parent.height
+                    width: parent.width
                     anchors.centerIn: parent
                     isBold: true
                 }
