@@ -45,6 +45,7 @@ ListModel::ListModel(gridItem* prototype, QObject* parent) :
     clear();
     setTotalPages(0);
 
+
 }
 
 int ListModel::rowCount(const QModelIndex &parent) const
@@ -78,8 +79,9 @@ ListModel::~ListModel() {
 void ListModel::appendRow(gridItem *item)
 {
     setLoadingStatus(true);
+    qDebug() << "adding" << m_list.count()+1;
+    QObject::connect(item, SIGNAL(destroyed(QObject*)), this, SLOT(objectDestroyed(QObject*)));
     appendRows(QList<gridItem*>() << item);
-    //  qDebug() << m_list.count();
 }
 
 void ListModel::appendRows(const QList<gridItem *> &items)
@@ -146,17 +148,24 @@ bool ListModel::resetInternalData()
 {
     qDebug("Resetting listmodel data");
     m_list.clear();
-    //    int total = m_list.count();
-    //    for(int i = 0; i < m_list.count(); ++i){
+    qDebug() << this->thread();
+    int total = m_list.size();
+    int counter=0;
+//    QList<gridItem*>::iterator i;
 
-    //        qDebug() <<"removing::" << m_list.count() << " of " << total;
-    //        gridItem* pItem = m_list.takeAt(i);
-    //        if (pItem)
-    //                delete pItem;
-    //    }
-    //    m_list.clear();
+//    for( i = m_list.begin(); i !=m_list.end(); ++i){
 
-    //   qDebug() << "Items cleared. Count:: "<< m_list.count();
+//        gridItem* pItem = m_list.at(counter);
+//       qDebug() <<"removing item ::" <<counter << " of " << total;
+//        if (pItem){
+//            pItem->destruct();
+
+//            counter++;
+//        }
+//    }
+
+//    qDebug() << this->thread();
+    qDebug() /*<< counter*/ << "::Items cleared. Remaining Count:: "<< total;
     return true;
 
 }

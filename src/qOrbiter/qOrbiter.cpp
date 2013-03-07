@@ -741,7 +741,8 @@ void qOrbiter::CMD_Update_Object_Image(string sPK_DesignObj,string sType,char *p
         emit objectUpdate(t);
     else
         emit mediaResponseChanged("Screenshot returned is invalid!");
-    qDebug() << t.size();
+    imgData=NULL;
+
 }
 
 //<-dceag-c58-b->
@@ -2048,7 +2049,7 @@ void qOrbiter::requestMediaSubtypes(int type)
         {
             QStringList subSplit = data.at(i).split(":");
             if(subSplit.count()>1){
-                emit newMediaSubtype(new AttributeSortItem( subSplit.last(),subSplit.first(), QImage(),false,  0));
+                emit newMediaSubtype(new AttributeSortItem( subSplit.last(),subSplit.first(), "",false,  0));
             }
 
         }
@@ -2070,7 +2071,7 @@ void qOrbiter::requestTypes(int type)
 
     if(SendCommand(getTypesCmd, &pResponse) && pResponse=="OK"){
         emit commandResponseChanged("Got types for attribute");
-        emit newAttributeSort( new AttributeSortItem( "Recent","-1", QImage(),false,  0));
+        emit newAttributeSort( new AttributeSortItem( "Recent","-1", "",false,  0));
         QStringList data;
         data = QString::fromStdString(sText.c_str()).split("\n");
         if(data.count() < 1)
@@ -2080,7 +2081,7 @@ void qOrbiter::requestTypes(int type)
         {
             QStringList subSplit = data.at(i).split(":");
             if(subSplit.count() > 1){
-                emit newAttributeSort( new AttributeSortItem( subSplit.last(),subSplit.first(), QImage(),false,  0));
+                emit newAttributeSort( new AttributeSortItem( subSplit.last(),subSplit.first(), "",false,  0));
             }
 
         }
@@ -2137,7 +2138,7 @@ void qOrbiter::requestFileFormats(int type)
             emit commandResponse(data.at(i).split(":"));
 #endif
             if(subSplit.count() > 1){
-                emit newFileFormatSort( new AttributeSortItem( subSplit.last(),subSplit.first(), QImage(),false,  0));
+                emit newFileFormatSort( new AttributeSortItem( subSplit.last(),subSplit.first(), "",false,  0));
             }
 
         }
@@ -3387,9 +3388,8 @@ void DCE::qOrbiter::requestLiveTvPlaylist()
                 EPGItemClass *t = new EPGItemClass(channelName, channelNumber, channelIndex, program, index, QString("na"), QString("na"));
                 emit addChannel(t);
                 index++;
-#ifdef RPI
-                //         QThread::msleep(20);
-#endif
+                QApplication::processEvents(QEventLoop::AllEvents);
+                QThread::msleep(20);
             }
         }
     }
@@ -3516,9 +3516,7 @@ void DCE::qOrbiter::populateAdditionalMedia() //additional media grid that popul
                       pMediaGridTable = new DataGridTable(iData_Size,pData,false);
 
                       emit mediaResponseChanged("grid request ok");
-                      delete[] pData;
-                      pData = NULL;
-                      free(pData);
+
 
                       // LoggerWrapper::GetInstance()->Write(LV_CRITICAL, "Pic Datagrid Dimensions: Height %i, Width %i", gHeight, gWidth);
                       DataGridCell *pCell;
@@ -3526,7 +3524,6 @@ void DCE::qOrbiter::populateAdditionalMedia() //additional media grid that popul
                       QString fk_file;
                       QString filePath;
                       int index;
-                      QImage cellImg;
                       media_pos = GridCurRow;
 
                       if (m_sSeek != "")
@@ -3561,7 +3558,7 @@ void DCE::qOrbiter::populateAdditionalMedia() //additional media grid that popul
                           //                }
                           //            }
                           index = pMediaGridTable->CovertColRowType(it->first).first;
-                          gridItem * item = new gridItem(fk_file, cellTitle, filePath.remove("/home/mediapics/"), index);
+                         gridItem * item = new gridItem(fk_file, cellTitle, filePath.remove("/home/mediapics/"), index);
                           if(!b_cancelRequest){
                               emit addItem(item);
                               QApplication::processEvents(QEventLoop::AllEvents);
@@ -3585,7 +3582,10 @@ void DCE::qOrbiter::populateAdditionalMedia() //additional media grid that popul
                       }
 
                       media_seek="";
-                      pMediaGridTable = NULL;
+                      pData = NULL;
+                      delete[] pData;
+
+                      free(pData);
 
                   }
 }
@@ -4148,6 +4148,7 @@ void DCE::qOrbiter::grabScreenshot(QString fileWithPath)
     {
         emit mediaResponseChanged("Couldnt Create Screenshot!");
     }
+
 }
 
 /*
@@ -4223,8 +4224,7 @@ void DCE::qOrbiter::ShowBookMarks()
             QString cellTitle;
             QString fk_file;
             QString filePath;
-            QImage titleImg;
-            QImage bookmarkImg;
+
             int outer_index;
             outer_index = 0;
             for(MemoryDataTable::iterator it=pDataGridTable->m_MemoryDataTable.begin();it!=pDataGridTable->m_MemoryDataTable.end();++it)
@@ -4234,8 +4234,7 @@ void DCE::qOrbiter::ShowBookMarks()
                 const char *pPath = pCell->GetImagePath();
                 filePath = QString::fromUtf8(pPath);
                 fk_file = pCell->GetValue();
-                titleImg.load(":/icons/icon.png");
-                bookmarkImg.load(":/icons/icon.png");
+
 
                 if(outer_index==2)
                 {

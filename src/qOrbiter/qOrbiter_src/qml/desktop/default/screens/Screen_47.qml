@@ -10,8 +10,7 @@ import "../js/ComponentLoader.js" as MyJs
 
 Rectangle {
     id:fileviewscreen
-    width: manager.appWidth
-    height: manager.appHeight
+    anchors.fill: parent
     color: "transparent"
     clip: true
     focus:true
@@ -41,7 +40,7 @@ Rectangle {
         anchors.top: fileviewscreen.top
         anchors.horizontalCenter: fileviewscreen.horizontalCenter
         color:style.darkhighlight
-        width: grid_view1.width
+        width: gridView.width
         height: scaleY(5)
         opacity: .25
     }
@@ -49,8 +48,8 @@ Rectangle {
 
     MediaListProgressBar {
         id: progress_bar
-        anchors.top: grid_view1.bottom
-        anchors.left: grid_view1.left
+        anchors.top: gridView.bottom
+        anchors.horizontalCenter: parent.horizontalCenter
     }
 
 
@@ -60,24 +59,14 @@ Rectangle {
        visible: false
     }
 
-
-    Rectangle {
-        id:grid_view1
-        width: scaleX(91)
-        height: scaleY(85)
-        clip: true
-        focus:true
-        anchors.left: options_rect.right
-        color: "transparent"
-
-
-
         GridView {
             id: gridView
             //z: 2
-            width: scaleX(85)
+            width: scaleX(95)
             height: scaleY(85)
-            anchors.centerIn: grid_view1
+            anchors.horizontalCenter: parent.horizontalCenter
+            anchors.top: parent.top
+            anchors.topMargin: scaleY(3)
             model:dataModel
             delegate: MediaListGridDelagate{}
             focus: true
@@ -124,7 +113,7 @@ Rectangle {
 
         }
 
-    }
+
     Rectangle{
         id:options_rect
         height: scaleY(50)
@@ -183,6 +172,11 @@ Rectangle {
                     anchors.fill:parent
                     onClicked: manager.goBackGrid()
                 }
+            }
+
+            HomeButton{
+                height: 50
+                width: 50
             }
         }
     }

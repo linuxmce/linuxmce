@@ -3,14 +3,14 @@ Item
 { Connections
     {
         target: dataModel
-        onProgressChanged:{progress_bar_fill.height = progress_bar.height* ((dataModel.currentCells / dataModel.totalcells))}
-        onReady:progress_bar_fill.height = 0
-        onLoadingStatusChanged:progress_bar_fill.color = dataModel.loadingStatus ? "green" : "red"
+        onProgressChanged:{progress_bar_fill.width = progress_bar.width* ((dataModel.currentCells / dataModel.totalcells))}
+        onReady:progress_bar_fill.color = "green"
+        //onLoadingStatusChanged:progress_bar_fill.color = dataModel.loadingStatus ? "green" : "red"
     }
 
 
     property int barHeight:scaleY(3)
-    property int barWidth:grid_view1.width
+    property int barWidth:gridView.width
 
     property string borderColor:"white"
     property string internalColor:"transparent"
@@ -32,16 +32,16 @@ Item
 
         Rectangle{
             id:progress_bar_fill
-            height: 0
+            height: parent.height
             width: parent.width-1
-            color: dataModel.loadingStatus  ? inactiveColor : activeColor
+            color: !dataModel.loadingStatus  ? inactiveColor : activeColor
             anchors.bottom: parent.bottom
             opacity: .25
         }
         ListView{
             id:alphalist
             height: scaleY(4)
-            width: grid_view1.width
+            width: gridView.width
             clip:true
            anchors.centerIn: parent
             model:alphabetlist

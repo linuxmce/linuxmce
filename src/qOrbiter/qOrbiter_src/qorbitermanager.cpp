@@ -818,7 +818,7 @@ void qorbiterManager::processConfig(QByteArray config)
     {
         QString name = genrelist.at(index).attributes().namedItem("Name").nodeValue();
         QString pk= genrelist.at(index).attributes().namedItem("PK_Attribute").nodeValue();
-        genreFilter->appendRow(new AttributeSortItem(name,pk, QImage(),false,genreFilter));
+        genreFilter->appendRow(new AttributeSortItem(name,pk, "",false,genreFilter));
     }
     this->qorbiterUIwin->rootContext()->setContextProperty("genrefilter", genreFilter); //custom mediatype selection model
     connect(genreFilter, SIGNAL(SetTypeSort(int,QString)), this, SLOT(setStringParam(int,QString)));

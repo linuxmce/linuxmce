@@ -19,10 +19,7 @@ Component{
             MouseArea{
                 anchors.fill: parent
                 onClicked:{
-
                     setActiveSkin(name)
-
-
                 }
             }
 

@@ -13,7 +13,7 @@ import QtQuick 1.0
 
 
     QtObject{
-        id:aeonstyle
+        id:crystalShades
         objectName: "orbiter_style"
         //skin description
         property string skincreator: "Raymond Bemelmans (aka RayBe)"

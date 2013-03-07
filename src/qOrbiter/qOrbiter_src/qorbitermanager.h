@@ -257,6 +257,7 @@ public:
 
     //skins
     SkinDataModel* tskinModel;
+    QList<QObject*> skins_list;
     ExistingOrbiterModel *myOrbiters;
     QString qrcPath;
     //TODO, remove the below in favour of the data structure

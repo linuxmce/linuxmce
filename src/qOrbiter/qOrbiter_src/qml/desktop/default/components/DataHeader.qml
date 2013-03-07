@@ -15,10 +15,20 @@ The data header is a persistent qml header that displays state full information 
  */
 Item{
     id:dataheader
-    height: scaleY(5)
+    height: manager.currentScreen === "Screen_1.qml" ? scaleY(5) : 0
     width: manager.appWidth
     anchors.top: parent.top
     anchors.horizontalCenter: parent.horizontalCenter
+    visible: height=== 0 ? false: true //manager.currentScreen === "Screen_1.qml" ? true : false
+
+    Behavior on height{
+        PropertyAnimation{
+            duration: 750
+            property: "height"
+            easing.type: Easing.InElastic
+            target:dataheader
+        }
+    }
 
     DropShadow{
         id:headerDrop
@@ -44,6 +54,7 @@ Item{
         id:screen1time
         anchors.left: parent.left
         anchors.verticalCenter: parent.verticalCenter
+        height: parent.height
     }
 
     Row{

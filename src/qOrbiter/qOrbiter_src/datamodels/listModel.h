@@ -81,6 +81,12 @@ signals:
 
 
 public slots:
+
+    void objectDestroyed(QObject*){
+        qDebug()<< "Model item deleted";
+
+}
+
     QDeclarativeListProperty<QString> getAlphabet() { return QDeclarativeListProperty<QString>(this,m_sortList); }
 
     int setSection(QString s){

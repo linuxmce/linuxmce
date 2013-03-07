@@ -5,7 +5,7 @@
 #include <QVariant>
 #include <QImage>
 #include <QMap>
-
+#include <QDebug>
 /*!
  * \brief The gridItem class is the item class associated with ListModel class.
  * Its purpose is to serve as a representation of the data contaied in a single object.
@@ -41,6 +41,12 @@ public:
     void setAspect (QString qs_aspect) {m_aspect = qs_aspect;}
     void setPing (bool ping) {sorted = ping; emit dataChanged();}
     void emitPing(){emit ping();}
+
+
+public slots:
+    void destruct() {
+        qDebug() <<"item destroyed";
+    }
 
 private:
     QString m_name;

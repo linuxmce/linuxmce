@@ -12,7 +12,7 @@ import QtQuick 1.0
 
 
 QtObject{
-    id:aeonstyle
+    id:plutoHomeStyle
     objectName: "orbiter_style"
     //skin description
     property string skincreator: "PlutoHome transformed by Peer Oliver Schmidt"

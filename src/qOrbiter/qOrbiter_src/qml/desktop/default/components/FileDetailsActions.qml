@@ -3,8 +3,9 @@ import QtQuick 1.0
 
 Rectangle{
     id:controlrow
-   width: rectangle1.width
+   width: parent.width
    color: "transparent"
+   anchors.bottomMargin: scaleY(2)
 
    Rectangle{
        id:transparency
@@ -20,7 +21,7 @@ Rectangle{
 
     AvOptionButton {
         id: buttonsq1
-        width: style.stdbuttonw
+        width: parent.width/3
         height: style.stdbuttonh
         radius: 10
         //anchors.leftMargin: 18
@@ -34,7 +35,7 @@ Rectangle{
 
         AvOptionButton {
             id: buttonsq2
-            width: style.stdbuttonw
+            width:  parent.width/3
             height: style.stdbuttonh
             radius: 10
             buttontext: "Move"
@@ -42,14 +43,13 @@ Rectangle{
 
         AvOptionButton {
             id: buttonsq3
-            width: style.stdbuttonw
+            width:  parent.width/3
             height: style.stdbuttonh
             radius: 10
-            buttontext: "Close"
-            x: ((parent.width/3)*2)
+            buttontext: "Close"          
             MouseArea{
                 anchors.fill:  parent
-                onClicked: { filedetailrect.destroy()}
+                onClicked: { filedetailsclass.clear();filedetailrect.destroy()}
             }
         }
     }

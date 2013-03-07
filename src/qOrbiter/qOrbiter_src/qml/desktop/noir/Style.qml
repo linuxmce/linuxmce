@@ -12,17 +12,15 @@
 import QtQuick 1.0
 
 Item{
-    id:classicstyle
+    id:noirStyle
     objectName: "noir"
-    property alias style: classicstyle
+    property alias style: noirStyle
     function scaleX(x){
     return x/100*appW
     }
     function scaleY(y){
     return y/100*appH
     }
-
-
 
     //skin description
     property string skincreator: "Langston Ball (aka golgoj4)"

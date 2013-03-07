@@ -138,4 +138,12 @@ Rectangle {
         }
     }
 
+    HomeButton{
+        id:home
+        anchors.right: parent.right
+        anchors.bottom: parent.bottom
+        height: 50
+        width: 50
+    }
+
 }

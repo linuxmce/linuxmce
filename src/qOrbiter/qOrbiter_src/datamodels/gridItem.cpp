@@ -4,6 +4,7 @@ gridItem::gridItem(QString &ident, QString &name,  QString &path,  int &index, Q
     m_fk_file(ident), m_name(name), m_path(path), m_index(index)
 {
 setPing(false);
+
 }
 
 QHash<int, QByteArray> gridItem::roleNames() const

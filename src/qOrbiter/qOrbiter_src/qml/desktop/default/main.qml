@@ -20,7 +20,7 @@ import "../lib/handlers"
  *
  */
 Item {
-    id: item
+    id: qmlroot
     width:manager.appWidth
     height:manager.appHeight
     property alias skinStyle: style
@@ -169,19 +169,19 @@ Item {
         focus:true
         Keys.onTabPressed: hideUI()
 
-            ScreenSaver
-            {   id:ss
-                height: manager.appHeight
-                width: manager.appWidth
-                anchors.centerIn: parent
+//            ScreenSaver
+//            {   id:ss
+//                height: manager.appHeight
+//                width: manager.appWidth
+//                anchors.centerIn: parent
 
-                MouseArea{
-                    anchors.fill: ss
-                    acceptedButtons: Qt.LeftButton | Qt.RightButton
-                    onClicked:  Qt.RightButton ? pageLoader.visible = !pageLoader.visible: ""
-                }
+//                MouseArea{
+//                    anchors.fill: ss
+//                    acceptedButtons: Qt.LeftButton | Qt.RightButton
+//                    onClicked:  Qt.RightButton ? pageLoader.visible = !pageLoader.visible: ""
+//                }
 
-            }
+//            }
 
         Image {
             id: appbackground
@@ -193,6 +193,7 @@ Item {
         DataHeader {
             id: data_header
             z:6
+
         }
 
 //        Rectangle{

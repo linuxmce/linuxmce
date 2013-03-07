@@ -131,9 +131,17 @@ Item
                 when:manager.q_subType === "2"
                 PropertyChanges {
                     target: mainItem
-                    width: scaleX(14);
-                    height: scaleY(38)
+                    width: scaleX(16);
+                    height: scaleY(42)
                     color: "transparent"
+                }
+                PropertyChanges {
+                    target: celllabel
+                    visible:false
+                }
+                PropertyChanges {
+                    target: textmask
+                    visible:false
                 }
 
             },
