@@ -273,28 +273,20 @@ Setup_XineConf()
 	fi
 
 	if [[ "$AlternateSC" -ne "1" ]]; then
+		XineConfSet audio.device.alsa_front_device "$PlaybackCard" "$XineConf"
+		XineConfSet audio.device.alsa_default_device "$PlaybackCard" "$XineConf"
 		case "$AudioSetting" in
 			*[COH]*)
-				XineConfSet audio.device.alsa_front_device "$PlaybackCard" "$XineConf"
-				XineConfSet audio.device.alsa_default_device "$PlaybackCard" "$XineConf"
 				XineConfSet audio.output.speaker_arrangement 'Pass Through' "$XineConf"
 				XineConfSet audio.device.alsa_passthrough_device "$PlaybackCard" "$XineConf"
-				;;
-			*)
-				XineConfSet audio.device.alsa_front_device "$PlaybackCard" "$XineConf"
-				XineConfSet audio.device.alsa_default_device "$PlaybackCard" "$XineConf"
 				;;
 		esac
 	else
 		case "$AudioSetting" in
 			*[COH]*)
-				XineConfSet audio.device.alsa_front_device "$PlaybackCard" "$XineConf"
-				XineConfSet audio.device.alsa_default_device "$PlaybackCard" "$XineConf"
 				XineConfSet audio.device.alsa_passthrough_device "$PlaybackCard" "$XineConf"
 				;;
 			*)
-				XineConfSet audio.device.alsa_front_device "$PlaybackCard" "$XineConf"
-				XineConfSet audio.device.alsa_default_device "$PlaybackCard" "$XineConf"
 				sed -i '/audio\.device\.alsa_passthrough_device.*/d' "$XineConf"
 				;;
 		esac
