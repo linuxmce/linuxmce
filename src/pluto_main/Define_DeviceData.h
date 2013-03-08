@@ -260,6 +260,9 @@
 #define DEVICEDATA_Send_Date_Time_to_KNX_bus_CONST 307
 #define DEVICEDATA_GA_for_date_object_CONST 308
 #define DEVICEDATA_GA_for_time_object_CONST 309
+#define DEVICEDATA_Sampling_Rate_CONST 310
+#define DEVICEDATA_Channel_Left_CONST 311
+#define DEVICEDATA_Channel_Right_CONST 312
 
 #define DEVICEDATA_TABLE "DeviceData"
 #define DEVICEDATA_PK_DEVICEDATA_FIELD "PK_DeviceData"
