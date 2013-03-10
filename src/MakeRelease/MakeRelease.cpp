@@ -1143,9 +1143,12 @@ AsksSourceQuests:
 
 		vector<Row_Package_Source_Compat *> vectRow_Package_Source_Compat;
 		g_pDatabase_pluto_main->Package_Source_Compat_get()->GetRows(
-				"FK_Package_Source=" + StringUtils::itos(pRow_Package_Source_SVN->PK_Package_Source_get()) + 
-				" AND (FK_Distro IS NULL OR FK_Distro=" + StringUtils::itos(g_pRow_Distro->PK_Distro_get()) + ")" +
-				"AND (FK_OperatingSystem IS NULL OR FK_OperatingSystem=" + StringUtils::itos(g_pRow_Distro->FK_OperatingSystem_get()) + ")",&vectRow_Package_Source_Compat);
+				" FK_Package_Source=" + StringUtils::itos(pRow_Package_Source_SVN->PK_Package_Source_get()) + 
+				" AND (FK_Distro IS NULL OR FK_Distro=" + StringUtils::itos(g_pRow_Distro->PK_Distro_get()) + ")" + 
+				" AND (FK_OperatingSystem IS NULL OR FK_OperatingSystem=" + StringUtils::itos(g_pRow_Distro->FK_OperatingSystem_get()) + ")", &vectRow_Package_Source_Compat);
+
+		cout << "NUMBER OF COMPATS: " << StringUtils::itos(vectRow_Package_Source_Compat.size()) << endl;
+
 		if( vectRow_Package_Source_Compat.size()==0 )
 		{
 			if( !g_bInteractive )
@@ -1159,6 +1162,7 @@ AsksSourceQuests:
 				
 			if( g_bSupressPrompts || !AskYNQuestion("Add a record Package_Source_Compat and try to build it?",false) )
 				return true;
+
 			pRow_Package_Source_Compat = g_pDatabase_pluto_main->Package_Source_Compat_get()->AddRow();
 			pRow_Package_Source_Compat->FK_Package_Source_set(pRow_Package_Source_SVN->PK_Package_Source_get());
 			pRow_Package_Source_Compat->FK_Distro_set( g_pRow_Distro->PK_Distro_get() );
