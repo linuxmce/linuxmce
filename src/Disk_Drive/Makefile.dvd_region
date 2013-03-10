@@ -1,0 +1,8 @@
+CC=gcc
+CFLAGS=-W -Wall -ggdb3 #-DDEBUG
+
+all: dvd_region
+	cp dvd_region ../bin
+
+clean:
+	rm -f dvd_region
