@@ -882,7 +882,7 @@ void CheckPackage(Row_Package *pRow_Package,Row_Device *pRow_Device,bool bDevelo
 			Row_Package_Source_Compat *pRPSC = vectRPSC[t];
 			if( pRPSC->FK_Distro_get()==pRow_Distro->PK_Distro_get() && !pRPSC->MustBuildFromSource_get() )
 				pRPSC_Match=pRPSC; // This is considered the perfect match
-			else if( pRPSC->FK_OperatingSystem_get()==pRow_Distro->FK_OperatingSystem_get() && !pRPSC->MustBuildFromSource_get() )
+			else if( pRPSC->FK_Distro_isNull() && pRPSC->FK_OperatingSystem_get()==pRow_Distro->FK_OperatingSystem_get() && !pRPSC->MustBuildFromSource_get() )
 				pRPSC_OS=pRPSC; // It matched the OS, so we'll use it if we don't find an exact match for the distro
 
 			if( (pRPSC->FK_Distro_isNull() || pRow_Distro->PK_Distro_get()==pRPSC->FK_Distro_get()) && 
