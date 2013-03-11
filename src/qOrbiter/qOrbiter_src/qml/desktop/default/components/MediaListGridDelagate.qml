@@ -19,7 +19,7 @@ Item
         id:mainItem
         opacity: 0
         scale:0
-        rotation: 360
+        rotation: 0
         state:'unsorted'
         color:"transparent"
       //  onStateChanged: console.log("State changed in DG delegate to "+ state)
@@ -43,7 +43,7 @@ Item
             running: false
             PropertyAnimation { target: mainItem; property: "opacity"; to: 1; duration: 1000}
             PropertyAnimation { target: mainItem; property: "scale"; to: 1; duration: 500}
-            PropertyAnimation { target: mainItem; property: "rotation"; to: 0; duration: 500}
+         //   PropertyAnimation { target: mainItem; property: "rotation"; to: 0; duration: 500}
             
         }
         
