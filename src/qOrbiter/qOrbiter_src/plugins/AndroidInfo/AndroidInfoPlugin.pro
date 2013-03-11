@@ -18,6 +18,9 @@ QML_IMPORT_PATH =
 SOURCES += main.cpp \
     androidsystem.cpp
 
+HEADERS += \
+    androidsystem.h
+
 # Please do not modify the following two lines. Required for deployment.
 include(qmlapplicationviewer/qmlapplicationviewer.pri)
 qtcAddDeployment()
@@ -57,5 +60,4 @@ OTHER_FILES += \
     android/res/drawable-ldpi/icon.png \
     android/AndroidManifest.xml
 
-HEADERS += \
-    androidsystem.h
+

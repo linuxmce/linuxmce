@@ -4,6 +4,7 @@
 #include <QObject>
 #include <jni.h>
 #include <QPlatformNativeInterface>
+#include <QColor>
 
 
 class AndroidSystem : public QObject
@@ -15,6 +16,18 @@ class AndroidSystem : public QObject
     Q_PROPERTY(QString deviceName READ getDeviceName NOTIFY deviceNameChanged)
     Q_PROPERTY(QString deviceManufacturer READ getDeviceManufacturer NOTIFY deviceManufacturerChanged)
     Q_PROPERTY(QString deviceBrand READ getDeviceBrand NOTIFY deviceBrandChanged )
+
+    Q_PROPERTY(QColor blueStandard READ getBlueStandard NOTIFY blueStandardChanged)
+    Q_PROPERTY(QColor blueHighlight READ getBlueHighLight NOTIFY blueHightlightChanged)
+    Q_PROPERTY(QColor purpleStandard READ getPurpleStandard NOTIFY purpleStandardChanged)
+    Q_PROPERTY(QColor purpleHighlight READ getPurpleHighlight NOTIFY purpleHighlightChanged)
+    Q_PROPERTY (QColor greenStandard READ getGreenStandard NOTIFY greenStandardChanged)
+    Q_PROPERTY(QColor greenHighlight READ getGreenHighlight NOTIFY greenHighlightChanged)
+    Q_PROPERTY(QColor orangeHighlight READ getOrangeHighlight NOTIFY orangeHighlightChanged)
+    Q_PROPERTY(QColor orangeStandard READ getOrangeStandard NOTIFY orangeStandardChanged)
+    Q_PROPERTY (QColor redStandard READ getRedStandard NOTIFY redStandardChanged)
+    Q_PROPERTY(QColor redHighlight READ getRedHighlight NOTIFY redHighlightChanged)
+
 public:
     explicit AndroidSystem(QObject *parent = 0);
     int apiLevel;
@@ -24,6 +37,18 @@ public:
     QString deviceManufacturer;
     QString deviceBrand;
 
+    QColor blueStandard;
+    QColor blueHighlight;
+    QColor purpleStandard;
+    QColor purpleHighlight;
+    QColor greenStandard;
+    QColor greenHighlight;
+    QColor orangeStandard;
+    QColor orangeHighlight;
+    QColor redStandard;
+    QColor redHighlight;
+
+
 signals:
     void apiLevelChanged();
     void statusMessageChanged();
@@ -32,7 +57,30 @@ signals:
     void deviceManufacturerChanged();
     void deviceBrandChanged();
 
+    void blueStandardChanged();
+    void blueHightlightChanged();
+    void purpleStandardChanged();
+    void purpleHighlightChanged();
+    void greenStandardChanged();
+    void greenHighlightChanged();
+    void orangeStandardChanged();
+    void orangeHighlightChanged();
+    void redStandardChanged();
+    void redHighlightChanged();
+
+
 public slots:
+    QColor  getBlueStandard() {return blueStandard;}
+    QColor getBlueHighLight() {return blueHighlight;}
+    QColor getPurpleStandard() {return purpleStandard;}
+    QColor getPurpleHighlight() {return purpleHighlight;}
+    QColor getGreenStandard() {return greenStandard;}
+    QColor getGreenHighlight(){ return greenHighlight;}
+    QColor getOrangeStandard(){return orangeStandard;}
+    QColor getOrangeHighlight(){return orangeHighlight;}
+    QColor getRedStandard() {return redStandard;}
+    QColor getRedHighlight() {return redHighlight;}
+
 
     void setDeviceBrand(QString b) {deviceBrand = b; emit deviceBrandChanged();}
     QString getDeviceBrand() {return deviceBrand;}
@@ -51,7 +99,7 @@ public slots:
 
     void setApiLevel(int lvl){ apiLevel = lvl; emit apiLevelChanged();}
     int getApiLevel(){ return apiLevel;}
-    
+
 private:
 
     void findClassIdents();

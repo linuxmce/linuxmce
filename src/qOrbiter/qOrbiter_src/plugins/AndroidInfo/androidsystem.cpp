@@ -10,6 +10,17 @@ static jclass buildVersionClass=0;
 AndroidSystem::AndroidSystem(QObject *parent) :
     QObject(parent)
 {
+     blueStandard = "#33B5E5";
+     blueHighlight= "#0099CC";
+     purpleStandard ="#AA66CC";
+     purpleHighlight="#9933CC";
+     greenStandard="#99CC00";
+     greenHighlight="#669900";
+     orangeStandard="#FFBB33";
+     orangeHighlight="#FF8800";
+     redStandard="#FF4444";
+     redHighlight="#CC0000";
+
     if(m_pvm)
     {
         setStatusMessage("Android Plugin Connected");
@@ -68,5 +79,5 @@ void AndroidSystem::findClassIdents()
 
     }
     m_pvm->DetachCurrentThread();
-
+    setStatusMessage("Device info Gather complete.");
 }
