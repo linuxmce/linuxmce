@@ -43,7 +43,7 @@ using namespace DCE;
 
 extern "C" 
 {
-		#include <hid.h>
+		#include <linux/hid.h>
 		#include <usb.h>
 }
 
