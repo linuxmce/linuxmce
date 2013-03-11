@@ -36,7 +36,7 @@ XTRALDLIBS += -lDCECommon -lSDL -lSDL_ttf -lSDL_image -lSGE -lSDL_gfx -lXtst -lX
 
 # Remove unnessesary libraries for Maemo Orbiter
 ifneq (MAEMO_NOKIA770,$(findstring MAEMO_NOKIA770, $(SNR_CPPFLAGS)))
-XTRALDLIBS += -lhid -lGL -lGLU
+XTRALDLIBS += -lusb -lGL -lGLU
 CPPFLAGS += -DHID_REMOTE
 endif
 
@@ -49,8 +49,8 @@ sources += Linux/GTKPromptUser.cpp \
 endif
 
 # wmctrl wrapper
-CPPFLAGS += -I/usr/X11R6/include -I/usr/include/glib-2.0 -I/usr/lib/glib-2.0/include
-XTRALDLIBS += -lX11 -lXmu -lglib-2.0
+CPPFLAGS += -I/usr/X11R6/include `pkg-config --cflags glib-2.0`
+XTRALDLIBS += -lX11 -lXmu `pkg-config --libs glib-2.0`
 
 Gen_Dev_Files +=
 sources += \
