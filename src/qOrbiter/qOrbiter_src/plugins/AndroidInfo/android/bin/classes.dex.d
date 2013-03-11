@@ -1,0 +1,25 @@
+/home/golgoj4/code/AndroidInfo/AndroidInfoPlugin/android/bin/classes.dex : \
+/home/golgoj4/code/AndroidInfo/AndroidInfoPlugin/android/bin/classes/org/kde/necessitas/example/AndroidInfoPlugin/R$layout.class \
+/home/golgoj4/code/AndroidInfo/AndroidInfoPlugin/android/bin/classes/org/kde/necessitas/example/AndroidInfoPlugin/R$drawable.class \
+/home/golgoj4/code/AndroidInfo/AndroidInfoPlugin/android/bin/classes/org/kde/necessitas/example/AndroidInfoPlugin/R$array.class \
+/home/golgoj4/code/AndroidInfo/AndroidInfoPlugin/android/bin/classes/org/kde/necessitas/example/AndroidInfoPlugin/R$attr.class \
+/home/golgoj4/code/AndroidInfo/AndroidInfoPlugin/android/bin/classes/org/kde/necessitas/example/AndroidInfoPlugin/R$string.class \
+/home/golgoj4/code/AndroidInfo/AndroidInfoPlugin/android/bin/classes/org/kde/necessitas/example/AndroidInfoPlugin/BuildConfig.class \
+/home/golgoj4/code/AndroidInfo/AndroidInfoPlugin/android/bin/classes/org/kde/necessitas/example/AndroidInfoPlugin/R.class \
+/home/golgoj4/code/AndroidInfo/AndroidInfoPlugin/android/bin/classes/org/kde/necessitas/origo/QtActivity$5.class \
+/home/golgoj4/code/AndroidInfo/AndroidInfoPlugin/android/bin/classes/org/kde/necessitas/origo/QtActivity$3$1.class \
+/home/golgoj4/code/AndroidInfo/AndroidInfoPlugin/android/bin/classes/org/kde/necessitas/origo/QtActivity$6.class \
+/home/golgoj4/code/AndroidInfo/AndroidInfoPlugin/android/bin/classes/org/kde/necessitas/origo/QtApplication.class \
+/home/golgoj4/code/AndroidInfo/AndroidInfoPlugin/android/bin/classes/org/kde/necessitas/origo/QtActivity$2.class \
+/home/golgoj4/code/AndroidInfo/AndroidInfoPlugin/android/bin/classes/org/kde/necessitas/origo/QtActivity.class \
+/home/golgoj4/code/AndroidInfo/AndroidInfoPlugin/android/bin/classes/org/kde/necessitas/origo/QtActivity$4.class \
+/home/golgoj4/code/AndroidInfo/AndroidInfoPlugin/android/bin/classes/org/kde/necessitas/origo/QtApplication$InvokeResult.class \
+/home/golgoj4/code/AndroidInfo/AndroidInfoPlugin/android/bin/classes/org/kde/necessitas/origo/QtActivity$3$1$1.class \
+/home/golgoj4/code/AndroidInfo/AndroidInfoPlugin/android/bin/classes/org/kde/necessitas/origo/QtActivity$3.class \
+/home/golgoj4/code/AndroidInfo/AndroidInfoPlugin/android/bin/classes/org/kde/necessitas/origo/QtActivity$1.class \
+/home/golgoj4/code/AndroidInfo/AndroidInfoPlugin/android/bin/classes/org/kde/necessitas/ministro/IMinistro$Stub.class \
+/home/golgoj4/code/AndroidInfo/AndroidInfoPlugin/android/bin/classes/org/kde/necessitas/ministro/IMinistroCallback.class \
+/home/golgoj4/code/AndroidInfo/AndroidInfoPlugin/android/bin/classes/org/kde/necessitas/ministro/IMinistro$Stub$Proxy.class \
+/home/golgoj4/code/AndroidInfo/AndroidInfoPlugin/android/bin/classes/org/kde/necessitas/ministro/IMinistroCallback$Stub$Proxy.class \
+/home/golgoj4/code/AndroidInfo/AndroidInfoPlugin/android/bin/classes/org/kde/necessitas/ministro/IMinistroCallback$Stub.class \
+/home/golgoj4/code/AndroidInfo/AndroidInfoPlugin/android/bin/classes/org/kde/necessitas/ministro/IMinistro.class \
