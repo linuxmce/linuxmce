@@ -51,7 +51,7 @@
 //dceag-d-e->
 
 //<-dceag-decl-b->!
-class basicImageProvider;
+//class basicImageProvider;
 //<-dceag-decl-e->
 
 //<-dceag-decl-b->
@@ -142,7 +142,7 @@ public:
     string media_seek; /*!< \brief Where the grid is seeking to. */
     int modelPages; /*!< \brief The total number of pages in the model. */
     bool b_cancelRequest;
-    DataGridTable *pMediaGridTable;
+   // DataGridTable *pMediaGridTable;
     //@}
 
     /*! @name Address and ip Member variables */

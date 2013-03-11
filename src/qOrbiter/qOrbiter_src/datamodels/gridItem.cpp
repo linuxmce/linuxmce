@@ -1,6 +1,6 @@
 #include <datamodels/gridItem.h>
 
-gridItem::gridItem(QString &ident, QString &name,  QString &path,  int &index, QObject *parent) :
+gridItem::gridItem(QString ident, QString name,  QString path,  int index, QObject *parent) :
     m_fk_file(ident), m_name(name), m_path(path), m_index(index)
 {
 setPing(false);

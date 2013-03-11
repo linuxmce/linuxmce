@@ -325,7 +325,6 @@ int main(int argc, char* argv[])
 
         // orbiterWin.mainView.rootContext()->setContextProperty("dcerouter", &pqOrbiter); //dcecontext object bad!
         typedef QMap <int, QString> myMap;
-
         int throwaway = qRegisterMetaType<myMap>("myMap");
 
         orbiterWindow orbiterWin(PK_Device, sRouter_IP, fs, fm);

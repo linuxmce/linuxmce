@@ -22,12 +22,16 @@ class gridItem: public QObject
         FKRole = Qt::DisplayRole+6,
         AspectRole= Qt::DisplayRole+7,
         TrackerRole=Qt::DisplayRole+8
-
     };
 
 public:
     gridItem() {}
-    explicit gridItem( QString &ident, QString &name,  QString &path,  int &index, QObject *parent=0 );
+    explicit gridItem( QString ident, QString name,  QString path,  int index, QObject *parent=0 );
+    ~gridItem() {
+
+
+    }
+
     QVariant data(int role) const;
     QHash<int, QByteArray> roleNames() const;
 
@@ -45,7 +49,8 @@ public:
 
 public slots:
     void destruct() {
-        qDebug() <<"item destroyed";
+        qDebug() <<"GridItem::Internals:: item destroyed";
+       this->~gridItem();
     }
 
 private:

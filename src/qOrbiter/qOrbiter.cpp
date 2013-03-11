@@ -1052,7 +1052,13 @@ void qOrbiter::CMD_Set_Now_Playing(string sPK_DesignObj,string sValue_To_Assign,
     }
     else
     {
-        checkTimeCode();
+        if(iPK_MediaType !=18)
+        {
+          checkTimeCode();
+           QString port = QString::fromStdString(GetCurrentDeviceData(m_dwPK_Device_NowPlaying, 171));
+          emit newTCport(port.toInt());
+        }
+
         emit setNowPlaying(true);
         emit currentScreenChanged("Screen_"+scrn+".qml");
         currentScreen = "Screen_"+scrn+".qml";
@@ -1065,8 +1071,8 @@ void qOrbiter::CMD_Set_Now_Playing(string sPK_DesignObj,string sValue_To_Assign,
         QString md1 = QString::fromStdString(sValue_To_Assign);
         QStringList mdlist;
         mdlist= md1.split(QRegExp("\\n"), QString::SkipEmptyParts);
-        QString port = QString::fromStdString(GetCurrentDeviceData(m_dwPK_Device_NowPlaying, 171));
-        emit newTCport(port.toInt());
+
+
 
         if (mdlist.count() == 2)
         {
@@ -2800,8 +2806,9 @@ void DCE::qOrbiter::GetMediaAttributeGrid(QString  qs_fk_fileno)
 #ifdef RPI
             QThread::msleep(100);
 #endif
-
         }
+        pData = NULL;
+        delete []pData;
 
     }
 
@@ -2921,8 +2928,13 @@ void DCE::qOrbiter::requestMediaPlaylist()
                 index++;
             }
 
+            emit playlistDone();
+            pDataGridTable->ClearData();
+            free(pData);
+            free(pDataGridTable);
         }
-        emit playlistDone();
+
+
     }
     else
     {
@@ -3042,6 +3054,8 @@ void DCE::qOrbiter::GetScreenSaverImages() // unused at this time
     SendCommand(screen_saver_files);
     QStringList tempList = QString::fromStdString(sFilename).split("\n");
     emit screenSaverImages(tempList);
+    tempList.detachShared();
+    tempList.clear();
 }
 
 void DCE::qOrbiter::BindMediaRemote(bool onoff)
@@ -3071,9 +3085,7 @@ void DCE::qOrbiter::setNowPlayingDetails()
 {
     if(i_current_mediaType != 11)
     {
-
         //qDebug("Requesting playlist");
-
     }
     else{
 
@@ -3098,7 +3110,7 @@ void DCE::qOrbiter::GetSingleSecurityCam(int cam_device, int iHeight, int iWidth
 
     QImage returnedFrame;
     returnedFrame.loadFromData(QByteArray(sData, sData_size));
-    qDebug()<< "Returned security frame " << returnedFrame.size();
+    //  qDebug()<< "Returned security frame " << returnedFrame.size();
     emit securityImageReady(cam_device, returnedFrame);
 }
 
@@ -3307,6 +3319,9 @@ void DCE::qOrbiter::GetNowPlayingAttributes()
 
                     }
                 }
+                delete pDataGridTable;
+                pData = NULL;
+                delete []pData;
             }
         }
     }
@@ -3388,10 +3403,13 @@ void DCE::qOrbiter::requestLiveTvPlaylist()
                 EPGItemClass *t = new EPGItemClass(channelName, channelNumber, channelIndex, program, index, QString("na"), QString("na"));
                 emit addChannel(t);
                 index++;
-                QApplication::processEvents(QEventLoop::AllEvents);
-                QThread::msleep(20);
             }
+
+            pDataGridTable->ClearData();
+            free(pData);
+            free(pDataGridTable);
         }
+
     }
     else
     {
@@ -3513,7 +3531,7 @@ void DCE::qOrbiter::populateAdditionalMedia() //additional media grid that popul
                  std::string pResponse ="";
                   if(SendCommand(req_data_grid_pics, &pResponse) && pResponse == "OK")
                   {
-                      pMediaGridTable = new DataGridTable(iData_Size,pData,false);
+                      DataGridTable* pMediaGridTable = new DataGridTable(iData_Size,pData,false);
 
                       emit mediaResponseChanged("grid request ok");
 
@@ -3531,6 +3549,7 @@ void DCE::qOrbiter::populateAdditionalMedia() //additional media grid that popul
                           media_seek = "";
                           populateAdditionalMedia();
                           delete[] pData;
+                          delete pMediaGridTable;
                           return;
                       }
                       setCurrentPage((std::abs(GridCurRow /  media_pageSeperator))) ;
@@ -3558,7 +3577,7 @@ void DCE::qOrbiter::populateAdditionalMedia() //additional media grid that popul
                           //                }
                           //            }
                           index = pMediaGridTable->CovertColRowType(it->first).first;
-                         gridItem * item = new gridItem(fk_file, cellTitle, filePath.remove("/home/mediapics/"), index);
+                          gridItem * item = new gridItem(fk_file, cellTitle, filePath.remove("/home/mediapics/"), index, this);
                           if(!b_cancelRequest){
                               emit addItem(item);
                               QApplication::processEvents(QEventLoop::AllEvents);
@@ -3575,7 +3594,7 @@ void DCE::qOrbiter::populateAdditionalMedia() //additional media grid that popul
                           else
                           {
                               qDebug() << "Stopping";
-                              // pMediaGridTable = NULL;
+                              pMediaGridTable = NULL;
                               item->deleteLater();
                               return;
                           }
@@ -3583,11 +3602,11 @@ void DCE::qOrbiter::populateAdditionalMedia() //additional media grid that popul
 
                       media_seek="";
                       pData = NULL;
-                      delete[] pData;
-
                       free(pData);
-
+                      free(pMediaGridTable);
                   }
+
+
 }
 
 void DCE::qOrbiter::SetSecurityMode(int pin, int mode)
@@ -3696,6 +3715,9 @@ void DCE::qOrbiter::GetAdvancedMediaOptions(int device) // prepping for advanced
                 }
                 emit newDeviceCommand(new AvCommand(fk_file.toInt(), cellTitle, false, device));
             }
+            pDataGridTable->ClearData();
+            free(pData);
+            free(pDataGridTable);
 
         }
     }
@@ -3803,10 +3825,10 @@ void DCE::qOrbiter::GetAlarms()
                 col++;
 
             }
-            delete pSleepingDataGridTable;
-            pSleepingDataGridTable = NULL;
+            pSleepingDataGridTable->ClearData();
+            delete[] pSleepingDataGridTable;
             delete[] pData;
-            pData = NULL;
+
         }
 
     }
@@ -4111,6 +4133,9 @@ void DCE::qOrbiter::grabScreenshot(QString fileWithPath)
                 qDebug() << cellAttribute;
                 emit addScreenShotVar(new screenshotAttributes( cellfk, cellTitle, cellAttribute.prepend("!A") ));
             }
+            pDataGridTable->ClearData();
+            free(pData);
+            free(pDataGridTable);
 
         }
 
@@ -4247,8 +4272,11 @@ void DCE::qOrbiter::ShowBookMarks()
                 }
             }
             //emit bookmarkList(bookmarks);
+            pDataGridTable->ClearData();
+            free(pData);
+            free(pDataGridTable);
         }
-        //bookmarks.clear();
+        //   bookmarks.clear();
 
     }
 }
@@ -4315,8 +4343,8 @@ void qOrbiter::OnReload()
 
 bool qOrbiter::OnReplaceHandler(string msg)
 {
-
-    deinitialize();
+    emit commandResponseChanged("Disconnecting due to device with same ID connecting.");
+        deinitialize();
 
 }
 
@@ -4653,7 +4681,7 @@ void DCE::qOrbiter::prepareFileList(int iPK_MediaType)
     requestMore = false;
     media_currentRow = 0;
     cellsToRender = 0;
-    pMediaGridTable = NULL;
+    //pMediaGridTable = NULL;
     emit mediaResponseChanged("Initial media request for media type " + QString::number(iPK_MediaType));
 #ifdef QT5
     //QApplication::processEvents(QEventLoop::AllEvents);
@@ -4799,7 +4827,7 @@ void DCE::qOrbiter::prepareFileList(int iPK_MediaType)
         {
             //not sure what its for
             //creating a dg table to check for cells. If 0, then we error out and provide a single "error cell"
-            pMediaGridTable = new DataGridTable(iData_Size,pData,false);
+            DataGridTable * pMediaGridTable = new DataGridTable(iData_Size,pData,false);
             cellsToRender= pMediaGridTable->GetRows();
 
 #ifndef ANDROID
@@ -4835,7 +4863,7 @@ void DCE::qOrbiter::prepareFileList(int iPK_MediaType)
                 emit mediaResponseChanged(QString::number(media_totalPages)+ " pages from request, populating first page.");
 
                 delete[] pData;
-                pMediaGridTable = NULL;
+                delete pMediaGridTable;
                 pData = NULL;
                 if(b_cancelRequest)
                     b_cancelRequest=false;

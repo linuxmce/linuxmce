@@ -12,7 +12,7 @@
 /*!
  * \brief The ListModel class is based on QAbstractListmodel for the purposes of provinding a flat list of data.
  * This class is essentially duplicated for certain data structures in QOrbiter. The best definition of when it used
- * is in the case of items a QList<QObject*> would me more difficult to implement.
+ * is in the case of items a QList<QObject*> wouldnt be acceptable to implement.
  *
  *  \ingroup data_model
  */

@@ -14,6 +14,8 @@ void FileDetailsClass::setFileMediaType()
 
 void FileDetailsClass::clear(){
      setScreenshot("");
+     titleImage = QImage();
+
      emit screenShotChanged();
     directors.clear();
     composers.clear();

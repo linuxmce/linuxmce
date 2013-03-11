@@ -35,5 +35,7 @@ void NowPlayingClass::resetData()
     setProgram("");
     setRelease("");
 
+
+
 }
 
