@@ -36,12 +36,7 @@ whattodo:
 
 all: bin so
 
-enoceanlib:
-	$(GCC) -c -fPIC -D_GNU_SOURCE -o cssl.o libEnOcean/cssl.c
-	$(GCC) -c -fPIC -o EnOceanPort.o libEnOcean/EnOceanPort.c
-	$(GCC) -c -fPIC -o TCM120.o libEnOcean/TCM120.c
-
-bin: enoceanlib EnOcean_TCM120
+bin: EnOcean_TCM120
 
 so: EnOcean_TCM120.so
 
@@ -51,10 +46,19 @@ EnOcean_TCM120.so: $(sources:.cpp=.o)
 	chmod +x post_make.sh
 	./post_make.sh $@
 		
-EnOcean_TCM120: $(sources:.cpp=.o)
-	$(CXX) -o $(MYNAME) $(call cpath,$+) cssl.o EnOceanPort.o TCM120.o $(LDFLAGS) $(LDLIBS)
+EnOcean_TCM120: $(sources:.cpp=.o) cssl.o EnOceanPort.o TCM120.o
+	$(CXX) -o $(MYNAME) $(call cpath,$+) $(LDFLAGS) $(LDLIBS)
 	cp $@ ../bin
 	./post_make.sh $@
+
+cssl.o:
+	$(GCC) -c -fPIC -D_GNU_SOURCE -o cssl.o libEnOcean/cssl.c
+
+EnOceanPort.o:
+	$(GCC) -c -fPIC -o EnOceanPort.o libEnOcean/EnOceanPort.c
+
+TCM120.o:
+	$(GCC) -c -fPIC -o TCM120.o libEnOcean/TCM120.c
 
 clean: clean-recursive
 	rm -f $(call cpath,$(sources:.cpp=.o) $(sources:.cpp=.d)) EnOcean_TCM120.bin EnOcean_TCM120.so cssl.o EnOceanPort.o TCM120.o  >/dev/null
@@ -70,6 +74,6 @@ endif
 #<-dceag-mf-e->
 
 
-install: 
-	mkdir -p /usr/pluto/bin
-	cp EnOcean_TCM120 $(DESTPATH)/usr/pluto/bin
+install:
+       mkdir -p /usr/pluto/bin
+       cp EnOcean_TCM120 $(DESTPATH)/usr/pluto/bin
