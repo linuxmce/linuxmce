@@ -8,7 +8,7 @@ CXXFLAGS = -fPIC -Wall -g -ggdb3 -D_GNU_SOURCE
 CPPFLAGS = -I./ -I$(ROOT) -I/usr/include/SDL -D_FILE_OFFSET_BITS=64 -D_LARGEFILE_SOURCE $(SNR_CPPFLAGS)
 CXX = g++
 LDFLAGS =
-LDLIBS = $(SNR_LDFLAGS) -lSDL -lpng -lSDL_gfx
+LDLIBS = $(SNR_LDFLAGS) -lSDL -lpng -lSDL_gfx -lSDL_image
 
 sources = \
 	SDL_CompositeAlphaChannel.cpp \
