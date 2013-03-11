@@ -44,6 +44,7 @@ Item{
         source: manager.imagePath+"ui3/bluish_fill.png"
         height: parent.height
         width: parent.width
+        opacity: .25
     }
     WaitSpinner {
         id: waitSpinner
@@ -177,5 +178,5 @@ Item{
             }
         }
     ]
-    
+
 }

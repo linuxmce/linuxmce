@@ -2930,8 +2930,8 @@ void DCE::qOrbiter::requestMediaPlaylist()
 
             emit playlistDone();
             pDataGridTable->ClearData();
-            free(pData);
-            free(pDataGridTable);
+            delete []pData; pData=NULL;
+             pDataGridTable=NULL;
         }
 
 
@@ -3405,9 +3405,10 @@ void DCE::qOrbiter::requestLiveTvPlaylist()
                 index++;
             }
 
+
             pDataGridTable->ClearData();
-            free(pData);
-            free(pDataGridTable);
+            delete []pData; pData=NULL;
+             pDataGridTable=NULL;
         }
 
     }
@@ -3594,16 +3595,18 @@ void DCE::qOrbiter::populateAdditionalMedia() //additional media grid that popul
                           else
                           {
                               qDebug() << "Stopping";
-                              pMediaGridTable = NULL;
+                              pMediaGridTable->ClearData();
+                              delete []pData; pData=NULL;
+                               pMediaGridTable=NULL;
                               item->deleteLater();
                               return;
                           }
                       }
 
                       media_seek="";
-                      pData = NULL;
-                      free(pData);
-                      free(pMediaGridTable);
+                      pMediaGridTable->ClearData();
+                      delete []pData; pData=NULL;
+                       pMediaGridTable=NULL;
                   }
 
 
@@ -3716,8 +3719,8 @@ void DCE::qOrbiter::GetAdvancedMediaOptions(int device) // prepping for advanced
                 emit newDeviceCommand(new AvCommand(fk_file.toInt(), cellTitle, false, device));
             }
             pDataGridTable->ClearData();
-            free(pData);
-            free(pDataGridTable);
+            delete []pData; pData=NULL;
+             pDataGridTable=NULL;
 
         }
     }
@@ -4134,8 +4137,8 @@ void DCE::qOrbiter::grabScreenshot(QString fileWithPath)
                 emit addScreenShotVar(new screenshotAttributes( cellfk, cellTitle, cellAttribute.prepend("!A") ));
             }
             pDataGridTable->ClearData();
-            free(pData);
-            free(pDataGridTable);
+            delete []pData; pData=NULL;
+            pDataGridTable=NULL;
 
         }
 
@@ -4273,8 +4276,8 @@ void DCE::qOrbiter::ShowBookMarks()
             }
             //emit bookmarkList(bookmarks);
             pDataGridTable->ClearData();
-            free(pData);
-            free(pDataGridTable);
+            delete []pData; pData=NULL;
+             pDataGridTable=NULL;
         }
         //   bookmarks.clear();
 

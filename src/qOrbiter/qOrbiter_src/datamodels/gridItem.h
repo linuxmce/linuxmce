@@ -27,10 +27,7 @@ class gridItem: public QObject
 public:
     gridItem() {}
     explicit gridItem( QString ident, QString name,  QString path,  int index, QObject *parent=0 );
-    ~gridItem() {
 
-
-    }
 
     QVariant data(int role) const;
     QHash<int, QByteArray> roleNames() const;
@@ -49,8 +46,8 @@ public:
 
 public slots:
     void destruct() {
-        qDebug() <<"GridItem::Internals:: item destroyed";
-       this->~gridItem();
+        qDebug() << "calling destructor for item.";
+       this->deleteLater();
     }
 
 private:

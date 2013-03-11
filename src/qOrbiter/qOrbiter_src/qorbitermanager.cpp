@@ -1702,7 +1702,7 @@ void qorbiterManager::activateScreenSaver()
 
 void qorbiterManager::killScreenSaver()
 {
-
+ScreenSaver->setActive(false);
 }
 /*!
  * \brief qorbiterManager::createAndroidConfig

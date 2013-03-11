@@ -162,12 +162,18 @@ Item {
     }
 
 
+
     FocusScope{
         id:mainScope
         height: manager.appHeight
         width: manager.appWidth
         focus:true
         Keys.onTabPressed: hideUI()
+        ScreenSaver
+        {   id:ss
+            height: manager.appHeight
+            width: manager.appWidth
+            anchors.centerIn: parent
 
 //            ScreenSaver
 //            {   id:ss
@@ -182,6 +188,9 @@ Item {
 //                }
 
 //            }
+
+        }
+
 
         Image {
             id: appbackground

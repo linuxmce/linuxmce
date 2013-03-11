@@ -10,15 +10,14 @@ Rectangle {
     height: style.widebuttonh + scaleY(4)
     anchors.horizontalCenter: parent.horizontalCenter
     color:"transparent"
-    border.color: "black"
-    border.width: 3
+
 
     DropShadow{
         id:headerDrop
         sourceItem:panelbg
         height: panelbg.height
         width: panelbg.width
-        distance:2
+        distance:1
         color:"black"
     }
     Image {
@@ -26,6 +25,7 @@ Rectangle {
         source: manager.imagePath+"ui3/bluish_fill.png"
         height: parent.height
         width: parent.width
+        opacity: .25
     }
     Row{
         id:advancedrow
