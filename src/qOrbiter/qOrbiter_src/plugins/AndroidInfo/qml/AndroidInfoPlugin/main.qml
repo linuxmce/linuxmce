@@ -40,6 +40,16 @@ Rectangle {
            font.pixelSize: 20
            color: system.orangeStandard
        }
+       Text {
+           text:"Mount Status::"+system.mountStatus
+           font.pixelSize: 20
+           color: system.orangeStandard
+       }
+       Text {
+           text:"Mount Location::"+system.externalStorageLocation
+           font.pixelSize: 20
+           color: system.orangeStandard
+       }
    }
 
     Text {

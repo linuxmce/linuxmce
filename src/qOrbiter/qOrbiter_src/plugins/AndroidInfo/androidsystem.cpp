@@ -10,16 +10,16 @@ static jclass buildVersionClass=0;
 AndroidSystem::AndroidSystem(QObject *parent) :
     QObject(parent)
 {
-     blueStandard = "#33B5E5";
-     blueHighlight= "#0099CC";
-     purpleStandard ="#AA66CC";
-     purpleHighlight="#9933CC";
-     greenStandard="#99CC00";
-     greenHighlight="#669900";
-     orangeStandard="#FFBB33";
-     orangeHighlight="#FF8800";
-     redStandard="#FF4444";
-     redHighlight="#CC0000";
+    blueStandard = "#33B5E5";
+    blueHighlight= "#0099CC";
+    purpleStandard ="#AA66CC";
+    purpleHighlight="#9933CC";
+    greenStandard="#99CC00";
+    greenHighlight="#669900";
+    orangeStandard="#FFBB33";
+    orangeHighlight="#FF8800";
+    redStandard="#FF4444";
+    redHighlight="#CC0000";
 
     if(m_pvm)
     {
@@ -75,6 +75,33 @@ void AndroidSystem::findClassIdents()
             setDeviceBrand(QString::fromAscii(myConvertedBrandString));
             setDeviceManufacturer(QString::fromAscii(myConvertedManufacturerString));
             setDeviceName(QString::fromAscii(myConvertedModelString));
+        }
+
+        jclass externalStorageClass = env->FindClass("android.os.Environment");
+        if(externalStorageClass){
+
+            jmethodID storageMethodID = env->GetStaticMethodID(externalStorageClass, "getExternalStorageState", "()Ljava/lang/String;");
+            jstring jStorageState = (jstring)env->CallObjectMethod(externalStorageClass, storageMethodID);
+            const char* myConvertedStorageState = env->GetStringUTFChars(jStorageState, 0);
+            if(strcmp(myConvertedStorageState, "mounted")==0){
+                setMountStatus(true);
+
+                 jmethodID storageLocationID = env->GetStaticMethodID(externalStorageClass, "getExternalStorageDirectory", "()Ljava/io/File;");
+                 jobject myFileRef = env->CallStaticObjectMethod(externalStorageClass, storageLocationID);
+
+                 jclass fileClass=env->FindClass("java/io/File");
+                 jmethodID findPathID=env->GetMethodID(fileClass, "getPath", "()Ljava/lang/String;");
+
+               jstring extPath = (jstring)env->CallObjectMethod(myFileRef, findPathID);
+
+               const char*myPath = env->GetStringUTFChars(extPath, 0);
+                setExternalStorageLocation(QString::fromAscii(myPath));
+            }else
+            {
+                qDebug() << myConvertedStorageState;
+                setMountStatus(false);
+            }
+
         }
 
     }

@@ -17,6 +17,9 @@ class AndroidSystem : public QObject
     Q_PROPERTY(QString deviceManufacturer READ getDeviceManufacturer NOTIFY deviceManufacturerChanged)
     Q_PROPERTY(QString deviceBrand READ getDeviceBrand NOTIFY deviceBrandChanged )
 
+    Q_PROPERTY(bool mountStatus READ getMountStatus NOTIFY mountStatusChanged)
+    Q_PROPERTY(QString externalStorageLocation READ getExternalStorageLocation NOTIFY externalStorageLocationChanged)
+
     Q_PROPERTY(QColor blueStandard READ getBlueStandard NOTIFY blueStandardChanged)
     Q_PROPERTY(QColor blueHighlight READ getBlueHighLight NOTIFY blueHightlightChanged)
     Q_PROPERTY(QColor purpleStandard READ getPurpleStandard NOTIFY purpleStandardChanged)
@@ -36,6 +39,9 @@ public:
     QString deviceName;
     QString deviceManufacturer;
     QString deviceBrand;
+    QString externalStorageLocation;
+
+    bool mountStatus;
 
     QColor blueStandard;
     QColor blueHighlight;
@@ -50,6 +56,8 @@ public:
 
 
 signals:
+    void mountStatusChanged();
+    void externalStorageLocationChanged();
     void apiLevelChanged();
     void statusMessageChanged();
     void codenameChanged();
@@ -70,6 +78,12 @@ signals:
 
 
 public slots:
+    void setMountStatus(bool b) {mountStatus = b; emit mountStatusChanged();}
+    bool getMountStatus(){return mountStatus;}
+
+    void setExternalStorageLocation(QString e) {externalStorageLocation = e; emit externalStorageLocationChanged();}
+    QString getExternalStorageLocation(){return externalStorageLocation;}
+
     QColor  getBlueStandard() {return blueStandard;}
     QColor getBlueHighLight() {return blueHighlight;}
     QColor getPurpleStandard() {return purpleStandard;}
