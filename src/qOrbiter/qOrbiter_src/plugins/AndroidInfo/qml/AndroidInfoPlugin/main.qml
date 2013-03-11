@@ -13,33 +13,41 @@ Rectangle {
        Text {
            text:"Status::"+system.statusMessage
            font.pixelSize: 20
-           color: "yellow"
+           color: system.blueHighlight
+           Rectangle{
+               height: 1
+               width: parent.width
+               color: system.blueStandard
+           }
        }
        Text {
            text:"Api Level::"+system.apiLevel
            font.pixelSize: 20
-           color: "yellow"
+           color: system.redStandard
        }
        Text {
            text:"Device Name::"+system.deviceName
            font.pixelSize: 20
-           color: "yellow"
+           color: system.purpleStandard
        }
        Text {
            text:"Device Brand::"+system.deviceBrand
            font.pixelSize: 20
-           color: "yellow"
+           color: system.greenStandard
        }
        Text {
            text:"Device Manufacturer::"+system.deviceManufacturer
            font.pixelSize: 20
-           color: "yellow"
+           color: system.orangeStandard
        }
    }
 
     Text {
         text: qsTr("Hello Android \n Tap to exit.")
         anchors.top: parent.top
+        anchors.horizontalCenter: parent.horizontalCenter
+        font.bold: true
+        color: "white"
 
     }
     MouseArea {
