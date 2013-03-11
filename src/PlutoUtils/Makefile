@@ -11,9 +11,11 @@ ifneq ($(strip $(have_httpfetcher)),)
 	CXXFLAGS += -DUSE_HTTP_FETCHER
 endif
 
-CPPFLAGS = -I./ -I../../ -I../ -I../DCE/ -I../../DCE -I../VIPShared/ -I../../VIPShared -D_FILE_OFFSET_BITS=64 -D_LARGEFILE_SOURCE -DUSE_LZO_DATAGRID $(SNR_CPPFLAGS)
 CXX = g++
-LDFLAGS =
+CXXFLAGS += -fPIC
+CPPFLAGS = -I./ -I../../ -I../ -I../DCE/ -I../../DCE -I../VIPShared/ -I../../VIPShared -D_FILE_OFFSET_BITS=64 -D_LARGEFILE_SOURCE -DUSE_LZO_DATAGRID $(SNR_CPPFLAGS)
+LDFLAGS += $(SNR_LDFLAGS) -L$(ROOT)/lib
+BASELDLIBS += -lDCECommon
 
 ifneq ($(strip $(have_httpfetcher)),)
 	LDLIBS += -lhttp_fetcher
@@ -24,7 +26,7 @@ CPPFLAGS += -I/usr/include/mysql
 LDFLAGS += -lmysqlclient_r
 #<-mkr_B_use_mysql_wrapper_e->
 
-#
+LDLIBS = $(XTRALDLIBS) $(BASELDLIBS)
 
 sources = CommonIncludes.cpp FileUtils.cpp MultiThreadIncludes.cpp Other.cpp ProcessUtils.cpp StringUtils.cpp DatabaseUtils.cpp getch.cpp md5c.cpp minilzo.cpp uuencode.cpp LinuxSerialUSB.cpp ThreadedClass.cpp \
 	  ../db_wrapper/db_wrapper.cpp ../db_wrapper/ClientSocket.cpp ../db_wrapper/Socket.cpp
