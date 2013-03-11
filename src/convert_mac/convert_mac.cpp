@@ -17,7 +17,7 @@
 #include <math.h>
 
 #include <iostream>
-#include <strstream>
+//#include <strstream>
 #include <fstream>
 #include <cstdlib>
 #include <string>
