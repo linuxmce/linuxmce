@@ -75,5 +75,5 @@ endif
 
 
 install:
-       mkdir -p /usr/pluto/bin
-       cp EnOcean_TCM120 $(DESTPATH)/usr/pluto/bin
+	mkdir -p /usr/pluto/bin
+	cp EnOcean_TCM120 $(DESTPATH)/usr/pluto/bin
