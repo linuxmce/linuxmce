@@ -34,5 +34,5 @@ if ! BlacklistConfFiles "$MyCnf" ;then
 	Q="FLUSH PRIVILEGES;"
 	mysql $MYSQL_DB_CRED -e "$Q"
 
-	invoke-rc.d mysql restart
+	restart mysql || :
 fi
