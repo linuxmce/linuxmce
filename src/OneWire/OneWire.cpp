@@ -27,7 +27,7 @@ extern "C" {
 	void *start( void* );
 }
 void *start( void *p ) {
-	OneWire::OneWire *base = static_cast<OneWire::OneWire*>(p);
+	OneWire *base = static_cast<OneWire*>(p);
 	base->receiveFunction();
 	return NULL;
 }
@@ -295,7 +295,7 @@ void OneWire::readDevices() {
 						DeviceData_Impl *pChildDevice = InternalIDToDevice(id);
 						if (pChildDevice != NULL) {		
 
-						(static_cast<OneWire::OneWire*>(myself))->m_pEvent->SendMessage( new Message(pChildDevice->m_dwPK_Device,
+						(static_cast<OneWire*>(myself))->m_pEvent->SendMessage( new Message(pChildDevice->m_dwPK_Device,
 							DEVICEID_EVENTMANAGER,
 							PRIORITY_NORMAL,
 							MESSAGETYPE_EVENT,
