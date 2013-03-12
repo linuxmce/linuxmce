@@ -12,6 +12,8 @@ VERSION = 2.0.0
 
 CPPFLAGS += -I/usr/include/dbus-1.0/ -I/usr/include/hal \
 	-I/usr/lib/dbus-1.0/include -I/usr/include/glib-2.0 -I/usr/lib/glib-2.0/include \
+	-I/usr/lib/i386-linux-gnu/dbus-1.0/include \
+	-I/usr/lib/i386-linux-gnu/glib-2.0/include \
 	-DDBUS_API_SUBJECT_TO_CHANGE -D_FILE_OFFSET_BITS=64 -D_LARGEFILE_SOURCE \
 	$(SNR_CPPFLAGS) -D_GNU_SOURCE
 CXXFLAGS += -Wno-deprecated
