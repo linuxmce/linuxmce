@@ -116,8 +116,8 @@ public slots:
 
 private:
 
-    void findClassIdents();
-
+    bool findClassIdents();
+    bool getDisplayInfo();
 
 
 };

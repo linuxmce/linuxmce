@@ -4,7 +4,7 @@ static JavaVM *m_pvm = 0;
 
 /*Api Level*/
 static jclass buildVersionClass=0;
-
+static jclass displayInfoClass=0;
 
 
 AndroidSystem::AndroidSystem(QObject *parent) :
@@ -24,7 +24,14 @@ AndroidSystem::AndroidSystem(QObject *parent) :
     if(m_pvm)
     {
         setStatusMessage("Android Plugin Connected");
-        findClassIdents();
+        if(findClassIdents()){
+            setStatusMessage("Phase I complete.");
+        }
+
+        if(getDisplayInfo()){
+          //  setStatusMessage("Phase 2 Complete");
+        }
+
     }
     else
     {
@@ -44,11 +51,12 @@ JNIEXPORT jint JNI_OnLoad(JavaVM* vm, void* /*reserved*/)
 }
 
 
-void AndroidSystem::findClassIdents()
+bool AndroidSystem::findClassIdents()
 {
     JNIEnv *env;
     if(m_pvm->AttachCurrentThread(&env, NULL)<0){
         qCritical()<<"AttachCurrentThread failed";
+        return false;
     } else{
         buildVersionClass = env->FindClass("android/os/Build$VERSION");
         if(buildVersionClass){
@@ -86,15 +94,15 @@ void AndroidSystem::findClassIdents()
             if(strcmp(myConvertedStorageState, "mounted")==0){
                 setMountStatus(true);
 
-                 jmethodID storageLocationID = env->GetStaticMethodID(externalStorageClass, "getExternalStorageDirectory", "()Ljava/io/File;");
-                 jobject myFileRef = env->CallStaticObjectMethod(externalStorageClass, storageLocationID);
+                jmethodID storageLocationID = env->GetStaticMethodID(externalStorageClass, "getExternalStorageDirectory", "()Ljava/io/File;");
+                jobject myFileRef = env->CallStaticObjectMethod(externalStorageClass, storageLocationID);
 
-                 jclass fileClass=env->FindClass("java/io/File");
-                 jmethodID findPathID=env->GetMethodID(fileClass, "getPath", "()Ljava/lang/String;");
+                jclass fileClass=env->FindClass("java/io/File");
+                jmethodID findPathID=env->GetMethodID(fileClass, "getPath", "()Ljava/lang/String;");
 
-               jstring extPath = (jstring)env->CallObjectMethod(myFileRef, findPathID);
+                jstring extPath = (jstring)env->CallObjectMethod(myFileRef, findPathID);
 
-               const char*myPath = env->GetStringUTFChars(extPath, 0);
+                const char*myPath = env->GetStringUTFChars(extPath, 0);
                 setExternalStorageLocation(QString::fromAscii(myPath));
             }else
             {
@@ -107,4 +115,35 @@ void AndroidSystem::findClassIdents()
     }
     m_pvm->DetachCurrentThread();
     setStatusMessage("Device info Gather complete.");
+    return true;
+}
+
+bool AndroidSystem::getDisplayInfo()
+{
+    JNIEnv *env;
+    if(m_pvm->AttachCurrentThread(&env, NULL)<0){
+        qCritical()<<"AttachCurrentThread failed";
+        return false;
+    } else{
+          jclass displayContextClass = env->FindClass("android/content/Context");
+        if(displayContextClass){
+            setStatusMessage("Located Contexts");
+            jfieldID field_WINDOW_SERVICE = env->GetStaticFieldID(displayContextClass, "DISPLAY_SERVICE", "Ljava/lang/String;");
+            jobject WINDOW_SERVICE = env->GetStaticObjectField(displayContextClass, field_WINDOW_SERVICE);
+
+
+            // jobject contextGetterID = env->GetObjectClass(displayContextClass);
+            jmethodID contextMethodID = env->GetMethodID(displayContextClass, "getSystemService", "(Ljava/lang/String;)Ljava/lang/Object;");
+            jobject window_service_actual = env->CallObjectMethod(displayContextClass, contextMethodID);
+
+
+
+
+
+            //setApiLevel(env->GetStaticIntField(buildVersionClass, env->GetStaticFieldID(buildVersionClass,"SDK_INT", "I")));
+            // qDebug() << env->get(buildVersionClass, env->GetStaticFieldID(buildVersionClass,"CODENAME", "()java/lang/String;"));
+        }
+    }
+
+    return true;
 }
