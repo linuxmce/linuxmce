@@ -220,7 +220,7 @@ void serialCallBack(enocean_data_structure in) {
 	DeviceData_Impl *pTargetChildDevice = NULL;
 
 	long id = (in.ID_BYTE3 << 24) + (in.ID_BYTE2 << 16) + (in.ID_BYTE1 << 8) + in.ID_BYTE0;
-	pTargetChildDevice = (static_cast<EnOcean_TCM120::EnOcean_TCM120*>(myself))->InternalIDToDevice(id);
+	pTargetChildDevice = (static_cast<EnOcean_TCM120*>(myself))->InternalIDToDevice(id);
 //	LoggerWrapper::GetInstance()->Write(LV_WARNING,"Node %i Internal: %p",id,pTargetChildDevice);
 
 	switch(in.ORG) {
@@ -247,7 +247,7 @@ void serialCallBack(enocean_data_structure in) {
 
 				if (pTargetChildDevice != NULL) {
 					LoggerWrapper::GetInstance()->Write(LV_WARNING,"Sending On/Off event from Node 0x%08x",id);
-					(static_cast<EnOcean_TCM120::EnOcean_TCM120*>(myself))->m_pEvent->SendMessage( new Message(pTargetChildDevice->m_dwPK_Device,
+					(static_cast<EnOcean_TCM120*>(myself))->m_pEvent->SendMessage( new Message(pTargetChildDevice->m_dwPK_Device,
 						DEVICEID_EVENTMANAGER, PRIORITY_NORMAL, MESSAGETYPE_EVENT,
 						EVENT_Device_OnOff_CONST,
 						1,
@@ -268,7 +268,7 @@ void serialCallBack(enocean_data_structure in) {
 			if (pTargetChildDevice != NULL) {
 				if (((in.STATUS >> 4) & 7) == 0) { // magnet contact profile, send sensor tripped events
 					LoggerWrapper::GetInstance()->Write(LV_WARNING,"Sending sensor tripped event from Node 0x%08x",id);
-					(static_cast<EnOcean_TCM120::EnOcean_TCM120*>(myself))->m_pEvent->SendMessage( new Message(pTargetChildDevice->m_dwPK_Device,
+					(static_cast<EnOcean_TCM120*>(myself))->m_pEvent->SendMessage( new Message(pTargetChildDevice->m_dwPK_Device,
 						DEVICEID_EVENTMANAGER,
 						PRIORITY_NORMAL,
 						MESSAGETYPE_EVENT,
