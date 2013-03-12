@@ -4,8 +4,8 @@ ORB = ../Orbiter
 SNR_LDFLAGS ?= 
 
 ROOT = ..
-CXXFLAGS = -Wall -ggdb3
-CPPFLAGS = -I/usr/local/include -I$(ROOT)/DCE -I.. -I. -I/usr/include/SDL -I$(TS) -I$(ROOT)/SDL_Helpers -DOrbiterGen
+CXXFLAGS = -Wall -ggdb3 -fpermissive
+CPPFLAGS = -I/usr/local/include -I$(ROOT)/DCE -I.. -I. -I/usr/include/SDL -I$(TS) -I$(ROOT)/SDL_Helpers -DOrbiterGen 
 LDFLAGS = $(SNR_LDFLAGS) -L$(ROOT)/lib
 LDLIBS = -ldl -lpluto_main -lpluto_media -lDCECommon -lPlutoUtils -lSerializeClass -lSDL -lSGE -lSDL_gfx -lSDL_image -lSDL_ttf -lGL -lXrender -lSDL_Helpers
 
