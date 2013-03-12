@@ -36,7 +36,7 @@ int reprq = 0;
 
 extern "C" void *start( void* );
 void *start( void *p ) {
-	PLCBUS::PLCBUS *base = static_cast<PLCBUS::PLCBUS*>(p);
+	PLCBUS *base = static_cast<PLCBUS*>(p);
 	base->receiveFunction();
 	return NULL;
 }
