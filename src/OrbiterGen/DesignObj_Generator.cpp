@@ -2098,7 +2098,8 @@ void DesignObj_Generator::ScaleAllValues(int FactorX_Input,int FactorY_Input,cla
         PlutoPoint p(plutoSize.Width,plutoSize.Height);
         PlutoSize plutoSize2(ScaleValue(&p,FactorX,FactorY));
         m_rBackgroundPosition.Size(plutoSize2);
-		p=ScaleValue(&m_rPosition.Location(),FactorX_Origin,FactorY_Origin);
+	PlutoPoint p6(m_rPosition.Location());
+		p=ScaleValue(&p6,FactorX_Origin,FactorY_Origin);
         m_rPosition.Location(p);
 		PlutoSize plutoSize3=m_rPosition.Size();
         p=PlutoPoint(plutoSize3.Width,plutoSize3.Height);
