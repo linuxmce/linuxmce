@@ -53,7 +53,7 @@ Rectangle{
             TextInput {
                 id: routerip
                 width: 80
-                text: srouterip
+                text: window.router
                 font.pointSize: 12
                 font.family: myFont.name
                 //  onTextChanged: setRouterIp(routerip.text)
@@ -83,7 +83,7 @@ Rectangle{
             TextInput {
                 id: devicenumber
                 width: scaleX(10)
-                text: deviceid
+                text: window.deviceno
                 font.family: myFont.name
                 font.pointSize: 12
                 //onTextChanged: setDeviceNo(devicenumber.text)

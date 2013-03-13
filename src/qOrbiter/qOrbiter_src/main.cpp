@@ -233,7 +233,7 @@ int main(int argc, char* argv[])
     g_sBinaryPath = FileUtils::BasePath(argv[0]);
     cout << "qOrbiter, v." << VERSION << endl
          << "Visit www.linuxmce.org for source code and license information" << endl << endl;
-    string sRouter_IP="192.168.80.1";
+    string sRouter_IP="";
     string graphicsmode="raster";
     string screen = "";
     int PK_Device=-1;
@@ -339,17 +339,21 @@ int main(int argc, char* argv[])
         // orbiterWin.mainView.rootContext()->setContextProperty("dcerouter", &pqOrbiter); //dcecontext object bad!
         typedef QMap <int, QString> myMap;
         int throwaway = qRegisterMetaType<myMap>("myMap");
+        QThread dceThread;
+        qOrbiter pqOrbiter(PK_Device, sRouter_IP,true,bLocalMode );
 
         orbiterWindow orbiterWin(PK_Device, sRouter_IP, fs, fm);
         orbiterWin.setMessage("Setting up Lmce");
 
+#ifndef ANDROID
         qorbiterManager  w(&orbiterWin.mainView);
-
+#else
+        qorbiterManager w(&orbiterWin.mainView, &androidHelper);
+#endif
         AbstractImageProvider modelimageprovider(&w);
         orbiterWin.mainView.engine()->addImageProvider("listprovider", &modelimageprovider);
 
-        QThread dceThread;
-        qOrbiter pqOrbiter(PK_Device, sRouter_IP,true,bLocalMode );
+
 
         pqOrbiter.moveToThread(&dceThread);
         QObject::connect(&dceThread, SIGNAL(started()), &pqOrbiter, SLOT(beginSetup()));
@@ -479,7 +483,7 @@ int main(int argc, char* argv[])
         QObject::connect(&pqOrbiter, SIGNAL(deviceInvalid()), &orbiterWin, SLOT(prepareExistingOrbiters()), Qt::QueuedConnection);
         QObject::connect(&pqOrbiter,SIGNAL(routerInvalid()), &orbiterWin, SIGNAL(showExternal()),Qt::QueuedConnection);
         QObject::connect(&pqOrbiter, SIGNAL(connectionValid(bool)), &orbiterWin, SLOT(setConnectionState(bool)), Qt::QueuedConnection);
-        QObject::connect(&orbiterWin,SIGNAL(setupLmce(QString, QString)), &pqOrbiter, SLOT(qmlSetup(QString, QString)),Qt::QueuedConnection);
+        QObject::connect(&orbiterWin,SIGNAL(setupLmce(int, QString)), &pqOrbiter, SLOT(qmlSetup(int, QString)),Qt::QueuedConnection);
         QObject::connect(&w,SIGNAL(connectionValid(bool)), &orbiterWin, SLOT(setConnectionState(bool)));
         QObject::connect(&pqOrbiter,SIGNAL(deviceValid(bool)), &orbiterWin, SLOT(setDeviceState(bool)));
         QObject::connect(&w,SIGNAL(localConfigReady(bool)), &orbiterWin, SLOT(setLocalConfigState(bool)),Qt::QueuedConnection);
@@ -673,42 +677,64 @@ int main(int argc, char* argv[])
         QObject::connect(&pqOrbiter, SIGNAL(routerDisconnect()), &w, SLOT(reloadHandler()),Qt::QueuedConnection);
         QObject::connect(&pqOrbiter, SIGNAL(checkReload()), &w, SLOT(connectionWatchdog()), Qt::QueuedConnection);
         QObject::connect(&w, SIGNAL(reInitialize()), &pqOrbiter, SLOT(initialize()), Qt::QueuedConnection);
-        // QObject::connect(&w, SIGNAL(deviceNumberChanged(int)), &pqOrbiter, SLOT(setDeviceId(int)));
-        // QObject::connect(&w, SIGNAL(internalIpChanged(QString)), &pqOrbiter, SLOT(setdceIP(QString)));
-
-
+     //   QObject::connect(&w, SIGNAL(deviceNumberChanged(int)), &pqOrbiter, SLOT(setDeviceId(int)));
+     //   QObject::connect(&w, SIGNAL(internalIpChanged(QString)), &pqOrbiter, SLOT(setdceIP(QString)));
         dceThread.start();
+
+
         // tcThread->start();
 #ifndef QT5
         //mediaThread->start();
         //epgThread->start();
 #endif
-        if(PK_Device != w.iPK_Device){
-            pqOrbiter.setDeviceId(w.iPK_Device);
-            pqOrbiter.setdceIP(QString::fromStdString(sRouter_IP));
-            pqOrbiter.m_sHostName = w.qs_routerip.toStdString();
-            pqOrbiter.m_sIPAddress = w.qs_routerip.toStdString();
-            pqOrbiter.m_sExternalIP = w.qs_ext_routerip.toStdString();
 
-            pqOrbiter.pingCore();
-            PK_Device = pqOrbiter.m_dwPK_Device;
-
-#ifdef QT_DEBUG
-            qDebug() << "Initializing connection from config file";
-#endif
-
-        }
-        else
+        if(sRouter_IP!="")
         {
-            pqOrbiter.m_sHostName = sRouter_IP;
-            pqOrbiter.m_sExternalIP = w.qs_ext_routerip.toStdString();
-            pqOrbiter.pingCore();
-            PK_Device = pqOrbiter.m_dwPK_Device;
+            qDebug()<< "Command Line override. Using command line settings";
 
-#ifdef QT_DEBUG
-            qDebug() << "Initializing connection from command line host and device";
-#endif
+
+        }else if(sRouter_IP =="" && w.getInternalIp() != ""){
+            qDebug() << "No Command line opt set but config file located";
+            sRouter_IP = w.getInternalIp().toStdString();
+            if(PK_Device == -1){
+                PK_Device = w.getDeviceNumber();            }
+
+            orbiterWin.setDeviceNumber(PK_Device); orbiterWin.setRouterAddress(w.getInternalIp());
         }
+        else{
+            qDebug() << "Nothing set, waiting for gui input.";
+        }
+
+        pqOrbiter.qmlSetup(PK_Device, QString::fromStdString(sRouter_IP));
+
+
+
+
+
+//        if(PK_Device != w.iPK_Device){
+//            qDebug() << w.iPK_Device;
+//            pqOrbiter.setDeviceId(w.iPK_Device);
+//            pqOrbiter.setdceIP(QString::fromStdString(sRouter_IP));
+//            pqOrbiter.m_sHostName = w.qs_routerip.toStdString();
+//            pqOrbiter.m_sIPAddress = w.qs_routerip.toStdString();
+//            pqOrbiter.m_sExternalIP = w.qs_ext_routerip.toStdString();
+//            pqOrbiter.pingCore();
+//            PK_Device = pqOrbiter.m_dwPK_Device;
+
+//#ifdef QT_DEBUG
+//            qDebug() << "Initializing connection from config file";
+//#endif
+//        }
+//        else
+//        {
+//            pqOrbiter.setDeviceId(PK_Device);
+//            pqOrbiter.m_sHostName = sRouter_IP;
+//            pqOrbiter.m_sExternalIP = w.qs_ext_routerip.toStdString();
+//            pqOrbiter.pingCore();
+//#ifdef QT_DEBUG
+//            qDebug() << "Initializing connection from command line host and device";
+//#endif
+//        }
 
         //        pqOrbiter.pingCore();
         //        PK_Device = pqOrbiter.m_dwPK_Device;

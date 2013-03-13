@@ -53,16 +53,14 @@
 
 
 orbiterWindow::orbiterWindow(int deviceid, std::string routerip, bool fullScreen, bool frameless, QObject *parent) :
-    QObject(parent), deviceno(deviceid), router(routerip)
+    QObject(parent), deviceno(deviceid)
 {
 #ifndef ANDROID
     if(frameless==true){
         mainView.window()->setWindowFlags(Qt::FramelessWindowHint);
     }
 #endif
-    mainView.rootContext()->setContextProperty("deviceid", int(deviceno));
-    mainView.rootContext()->setContextProperty("srouterip", QString::fromStdString(router));
-    qDebug() << deviceno;
+    router = QString::fromStdString(routerip);
     phoneSize = false;
     localPath = "";
     newOrbiter = false;
@@ -259,13 +257,11 @@ QString orbiterWindow::getMessage()
     return message;
 }
 
-void orbiterWindow::qmlSetupLmce(QString device, QString ip)
+void orbiterWindow::qmlSetupLmce(int device, QString ip)
 {
-    router = ip.toStdString().c_str();
-    deviceno = device.toLong();
-    mainView.rootContext()->setContextProperty("deviceid", int(deviceno));
-    mainView.rootContext()->setContextProperty("srouterip", QString::fromStdString(router));
-    emit setupLmce(device, QString::fromStdString(router));
+
+    qDebug() <<"Orbiter Window Settings.\n Device::"<<device<<"\n Router::"<<ip;
+    emit setupLmce(device, ip);
 }
 
 bool orbiterWindow::getOrbiterState()
@@ -321,8 +317,10 @@ void orbiterWindow::setDeviceState(bool b)
 
 void orbiterWindow::prepareExistingOrbiters()
 {
+    userList.clear();
     qDebug()<< "showing List";
     emit showList();
+
 }
 
 void orbiterWindow::displayPromptResponse(int type, QList<QObject*> pList)

@@ -64,7 +64,10 @@
 
 #include <QProcess>
 #include <QtXml/QDomDocument>
-#ifndef __ANDROID__
+
+#ifdef ANDROID
+#include "plugins/AndroidInfo/androidsystem.h"
+#endif
 
 #if GLENABLED
 #include <shaders/filereader.h>
@@ -73,7 +76,7 @@
 //for pi - for_pi now sets glenabled
 //#include <shaders/filereader.h>
 //#include <shaders/trace.h>
-#endif
+
 
 /*-------Custom Classes -----------------*/
 
@@ -205,17 +208,17 @@ class qorbiterManager : public QObject
 public:
 #if (QT5)
     qorbiterManager(QQuickView * view, QObject *parent=0);  //constructor
-#else
+#elif ANDROID
+    qorbiterManager(QDeclarativeView *view, AndroidSystem *jniHelper,  QObject *parent =0);
+#elif   QT4_8
     qorbiterManager(QDeclarativeView * view, QObject *parent=0);  //constructor
+
 #endif
     ~qorbiterManager();
-#ifndef __ANDROID__
-#if GLENABLED
-    FileReader * fileReader;
-#endif
+
     //for Pi - for_pi now sets GLENABLED
     //FileReader * fileReader;
-#endif
+
     bool b_glEnabled;
     int isPhone;
     //settings
@@ -279,6 +282,10 @@ public:
     QQuickView *qorbiterUIwin;
 #else
     QDeclarativeView *qorbiterUIwin;    //Qml declarativeview
+#endif
+
+#ifdef ANDROID
+    AndroidSystem *androidHelper;
 #endif
 
     ScreenSaverClass *ScreenSaver;
@@ -694,9 +701,10 @@ public slots:
     /*!
      * \brief setupMobileStorage Sets up the mobile storage location for Android devices.
      * Returns true if sucessfull, false if not.
+     * @param externalStorage : This is set by the AndroidSytem code that gets this from the JNI interface.
      * \return
      */
-    bool setupMobileStorage();
+    bool setupMobileStorage(QString externalStorage);
 
     /*!
      * \brief setMobileStorage
@@ -771,7 +779,7 @@ public slots:
     int getAppW(){return appWidth;  checkOrientation(qorbiterUIwin->size());}
 
     /*Network State property functions*/
-    void setInternalIp(QString s) { m_ipAddress = s; emit internalIpChanged(m_ipAddress); }
+    void setInternalIp(QString s) { m_ipAddress = s; setDceResponse("got ip address, sending to dce"); emit internalIpChanged(m_ipAddress); }
     QString getInternalIp() {return m_ipAddress; }
     void setInternalHost(QString h) { internalHost = h; emit internalHostChanged();}
     QString getInternalHost() {return internalHost;}

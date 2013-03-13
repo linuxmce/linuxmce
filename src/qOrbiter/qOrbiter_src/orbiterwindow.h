@@ -32,6 +32,8 @@
 class orbiterWindow : public QObject
 {
     Q_OBJECT
+    Q_PROPERTY (QString router READ getRouterAddress WRITE setRouterAddress NOTIFY routerChanged)
+    Q_PROPERTY (int deviceno READ getDeviceNumber WRITE setDeviceNumber NOTIFY deviceChanged)
     Q_PROPERTY (QString message READ getMessage WRITE setMessage NOTIFY MessageChanged)
     Q_PROPERTY (bool newOrbiter READ getOrbiterState WRITE setOrbiterState NOTIFY StatusChanged)
     Q_PROPERTY (bool b_connectionPresent READ getConnectionState WRITE setConnectionState NOTIFY connectionChanged) /*! window.b_connectionPresent:True if router is located \ingroup startup_properties  */
@@ -61,7 +63,7 @@ public:
 
     QString buildType;
     QString qrcPath;
-    std::string router;
+   QString router;
     QList<ExistingOrbiter*> orbiterList;
     QList<QObject*> userList;
     QList<QObject*> roomList;
@@ -85,7 +87,11 @@ public:
     bool phoneSize;
 
 public slots:
+    void setDeviceNumber(int d){deviceno = d; emit deviceChanged();}
+    int getDeviceNumber(){return deviceno;}
 
+    QString getRouterAddress(){return router;}
+    void setRouterAddress(QString r) {router = r; emit routerChanged();}
 
     void setQmlPage(QString p) {qmlPage = p; emit pageChanged(); }
     QString getQmlPage() {return qmlPage;}
@@ -100,7 +106,7 @@ public slots:
      *This function starts a connection to the router given the params. Depending on if the ip and or device are valid, the application
      *will start or it will present other options.
      */
-    void qmlSetupLmce(QString device, QString ip);
+    void qmlSetupLmce(int device, QString ip);
 
     void setMessage(QString imsg);
     QString getMessage();
@@ -160,7 +166,7 @@ public slots:
 
 signals:
     void MessageChanged();
-    void setupLmce(QString device, QString router);
+    void setupLmce(int device, QString router);
     void StatusChanged();
     void connectionChanged();
     void configStatus();
@@ -176,6 +182,7 @@ signals:
     void reloadStatusChanged();
     void newOrbiterData(int u, int r, int s, int l, int h, int w);
     void pageChanged();
+    void routerChanged();
 };
 #endif
 

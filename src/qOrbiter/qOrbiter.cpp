@@ -44,6 +44,8 @@ qOrbiter::qOrbiter(int DeviceID, string ServerAddress,bool bConnectEventHandler,
     : qOrbiter_Command(DeviceID, ServerAddress,bConnectEventHandler,bLocalMode,pRouter)
     //<-dceag-const-e->
 {
+    qDebug() << "Constructing";
+    QObject::connect(this, SIGNAL(dceIPChanged()), this, SLOT(pingCore()));
 
 }
 //<-dceag-const2-b->
@@ -60,6 +62,7 @@ qOrbiter::qOrbiter(Command_Impl *pPrimaryDeviceCommand, DeviceData_Impl *pData, 
 bool qOrbiter::Register()
 //<-dceag-reg-e->
 {
+
     return Connect(PK_DeviceTemplate_get());
 }
 
@@ -69,6 +72,7 @@ bool qOrbiter::Register()
 //<-dceag-createinst-b->
 qOrbiter_Command *Create_qOrbiter(Command_Impl *pPrimaryDeviceCommand, DeviceData_Impl *pData, Event_Impl *pEvent, Router *pRouter)
 {
+
     return new qOrbiter(pPrimaryDeviceCommand, pData, pEvent, pRouter);
 }
 //<-dceag-createinst-e->
@@ -1780,7 +1784,11 @@ bool DCE::qOrbiter::initialize()
 
     emit commandResponseChanged("Connecting to router");
     emit commandResponseChanged("Starting dce initialization");
-    qDebug() << m_sIPAddress.c_str();
+//    if(m_sIPAddress==""){
+//        m_sIPAddress="192.168.80.1";
+//    }
+    emit commandResponseChanged("Initialization IP::"+ QString::fromStdString(m_sIPAddress));
+
 
     if ((GetConfig() == true) && (Connect(PK_DeviceTemplate_get()) == true))
     {
@@ -1943,12 +1951,11 @@ void qOrbiter::registerDevice(int user, QString ea, int room)
     }
 }
 
-void qOrbiter::qmlSetup(QString device, QString address)
+void qOrbiter::qmlSetup(int device, QString address)
 {
-    m_dwPK_Device = device.toLong();
+    m_dwPK_Device = device;
     m_sHostName = address.toStdString();
-    m_sIPAddress = address.toStdString();
-    dceIP = address;
+    m_sIPAddress = address.toStdString();   
     if(!m_bOrbiterConnected )
         pingCore();
 
@@ -5120,9 +5127,11 @@ void qOrbiter::CMD_Menu(string sText,int iStreamID,string &sCMD_Result,Message *
 
 void qOrbiter::pingCore()
 {
+    qDebug() << "Executing ping to" << m_sIPAddress.c_str();
+    if(m_sIPAddress!=""){
 
-    emit commandResponseChanged("initiating ping to core with address::"+dceIP);
-    QString url = (dceIP);
+    emit commandResponseChanged("initiating ping to core with address::"+QString::fromStdString(m_sIPAddress));
+    QString url = QString::fromStdString(m_sIPAddress);
     if(!url.contains(QRegExp("(\\D)"))){
 
         emit commandResponseChanged("Host name provided, doing lookup");
@@ -5135,7 +5144,11 @@ void qOrbiter::pingCore()
             checkInstall();
         }
     }
-
+}
+    else
+    {
+        return;
+    }
 
 
     // TODO: add a network timeout for this so it returns faster for located non-lmce machines. Currently it only returns fast if the ip or hostname is totally invalid, i.e. no route. For online machines,
@@ -5169,9 +5182,9 @@ void qOrbiter::checkPing(QHostInfo info)
 
 void qOrbiter::checkInstall()
 {
-    emit commandResponseChanged("Checking for LinuxMCE installtion in checkInstall() at "+ dceIP);
+    emit commandResponseChanged("Checking for LinuxMCE installtion in checkInstall() at "+ QString::fromStdString(m_sIPAddress));
 
-    QString url = "http://"+dceIP+"/lmce-admin/index.php";
+    QString url = "http://"+QString::fromStdString(m_sIPAddress)+"/lmce-admin/index.php";
     QNetworkAccessManager *pingManager = new QNetworkAccessManager();
 
     connect(pingManager, SIGNAL(finished(QNetworkReply*)), this, SLOT(verifyInstall(QNetworkReply*)));
@@ -5191,7 +5204,7 @@ void qOrbiter::verifyInstall(QNetworkReply *r)
         if ( initialize() == true )
         {
             emit routerConnectionChanged(true);
-            //  setdceIP(dceIP);
+            //  setm_sIPAddress(m_sIPAddress);
 
             LoggerWrapper::GetInstance()->Write(LV_STATUS, "Connect OK");
 
