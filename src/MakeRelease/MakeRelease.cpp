@@ -765,7 +765,12 @@ string MakeCommandMods(string in)
 		out = StringUtils::Replace(out, "make clean lib", "make clean ; make lib"); 
 		stringstream sstr; 
 		sstr << g_iCoresToUse; 
-		out = StringUtils::Replace(out, "make", "make -j" + sstr.str()); 
+		if (out.find("qmake") == string::npos) {
+			out = StringUtils::Replace(out, "make", "make -j" + sstr.str()); 
+		} else {
+			out = StringUtils::Replace(out, " make", " make -j" + sstr.str()); 
+			out = StringUtils::Replace(out, ";make", "; make -j" + sstr.str()); 
+		}
 	}
 	return out; 
 }
