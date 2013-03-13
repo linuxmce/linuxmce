@@ -14,6 +14,8 @@
 #include <sys/wait.h>
 #include <errno.h>
 #include <glib.h>
+#include <sys/types.h>
+#include <sys/stat.h>
 
 #include <stdio.h>
 #include <stdlib.h>
