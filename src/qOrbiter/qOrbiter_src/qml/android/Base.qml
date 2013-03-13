@@ -2,8 +2,7 @@ import QtQuick 1.1
 
 
 Rectangle {
-    height: manager.appHeight
-    width: manager.appWidth
+anchors.fill: parent
     color: "black"
     Timer{
         id:wait
@@ -30,7 +29,7 @@ Rectangle {
 
     Text {
         id: loading
-        text: qsTr("Connecting to "+window.router+", please be patient")
+        text: qsTr("Connecting to "+window.router+", please be patient \n" )
         anchors.centerIn: parent
         font.pixelSize: 16
         font.family: "Droid"
@@ -51,10 +50,10 @@ Rectangle {
                              console.log(mainContent.sourceComponent.errorString())
                              wait.restart()
                          }
-                         else if (mainContent.status != Loader.Loading){
-                             loading.text = "Loading, please wait"
+//                         else if (mainContent.status != Loader.Loading){
+//                             loading.text = "Loading, please wait \n" + progress +"% \n"+sourceComponent.errorString()
 
-                         }
+//                         }
                          else  if (mainContent.status === Loader.Ready){
                              mainContent.opacity = .01
                              loading.visible= false
