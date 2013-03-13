@@ -70,6 +70,8 @@ using namespace DCE;
 #define DEFAULT_SCREEN_WIDTH 176
 #define DEFAULT_SCREEN_HEIGHT 209
 
+extern Command_Impl *g_pCommand_Impl;
+
 using namespace DCE;
 
 /** @test
@@ -515,7 +517,7 @@ bool Bluetooth_Dongle::ScanningLoop()
     if(!bResult) //something wrong happened
     {
         LoggerWrapper::GetInstance()->Write(LV_CRITICAL, "The detection loop is broken.");
-        extern Command_Impl *g_pCommand_Impl;
+//        extern Command_Impl *g_pCommand_Impl;
 
 	BugReport();
 	
