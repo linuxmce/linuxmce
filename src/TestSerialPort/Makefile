@@ -14,7 +14,7 @@ all: $(SOURCES:.cpp=.o)
 	cp TestSerialPort $(ROOT)/bin/
 
 clean:
-	rm -f TestSerialPort *.o
+	rm -f TestSerialPort $(SOURCES:.cpp=.o)
 
 install: 
 	mkdir -p /usr/pluto/bin
