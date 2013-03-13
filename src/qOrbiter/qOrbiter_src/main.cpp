@@ -82,6 +82,10 @@ Q_IMPORT_PLUGIN(UIKit)
 #include <QDebug>
 #endif
 
+#ifdef ANDROID
+#include "plugins/AndroidInfo/androidsystem.h"
+#endif
+
 //--end includes to be made plugins
 
 // In source files stored in archives and packages, these 2 lines will have the release version (build)
@@ -207,6 +211,15 @@ int main(int argc, char* argv[])
 #endif
 
     QCoreApplication::setApplicationName("LinuxMCE QOrbiter");
+#ifdef ANDROID
+    AndroidSystem androidHelper;
+#endif
+
+    QOrbiterLogger localLogger;
+
+#ifdef ANDROID
+    localLogger.setLogLocation(QString(androidHelper.externalStorageLocation+"/LinuxMCE/"));
+#endif
 
 #ifdef __ANDROID__ // workaround for 'text as boxes' issue.
     QFont f = a.font();
@@ -214,7 +227,7 @@ int main(int argc, char* argv[])
     f.setBold("true");
     a.setFont(f);
 #endif
-    QOrbiterLogger localLogger;
+
 
     g_sBinary = FileUtils::FilenameWithoutPath(argv[0]);
     g_sBinaryPath = FileUtils::BasePath(argv[0]);

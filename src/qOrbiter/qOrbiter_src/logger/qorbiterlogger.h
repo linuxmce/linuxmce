@@ -55,6 +55,7 @@ signals:
     void guiLogStateChanged(bool);
     void qtLogStateChanged(bool);
 
+
     
 public slots:
     /*!
