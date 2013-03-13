@@ -26,7 +26,11 @@ XTRALDLIBS = -lruby1.8 -lSerial -lrt -lMessageTranslation
 ifneq (,$(findstring amd64, $(arch))) 
         CPPFLAGS += -I/usr/lib/ruby/1.8/x86_64-linux
 else
-        CPPFLAGS += -I/usr/lib/ruby/1.8/i386-linux -I/usr/lib/ruby/1.8/i486-linux
+	ifneq (,$(findstring armhf, $(arch)))
+	        CPPFLAGS += -I/usr/lib/ruby/1.8/arm-linux-eabihf
+	else
+	        CPPFLAGS += -I/usr/lib/ruby/1.8/i386-linux -I/usr/lib/ruby/1.8/i486-linux -I/usr/lib/ruby/1.8/i686-linux
+	endif
 endif
 
 #<-mkr_B_use_mysql_wrapper_b->
