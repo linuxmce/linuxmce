@@ -63,7 +63,7 @@ ListView{
         }
         MouseArea {
             anchors.fill: parent
-            onClicked: window.qmlSetupLmce(device, srouterip)
+            onClicked: window.qmlSetupLmce(device, window.router)
         }
     }
 

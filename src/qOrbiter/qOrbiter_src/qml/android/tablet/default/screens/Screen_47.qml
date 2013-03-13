@@ -15,7 +15,7 @@ Rectangle {
 
     function runEffects()
     {
-        MyJs.createStageComponent("FileDetails"+manager.i_current_mediaType+".qml" , parent)
+        MyJs.createStageComponent("FileDetails"+manager.q_mediaType+".qml" , parent)
     }
 
     Connections
@@ -453,6 +453,11 @@ Rectangle {
         ListElement{
             name:"Z"
         }
+    }
+    GenericAttributeSelector{
+        id:selector
+        activeModel: "NULL"
+
     }
 }
 
