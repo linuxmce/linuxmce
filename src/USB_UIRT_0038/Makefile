@@ -10,10 +10,14 @@ CPPFLAGS = -I$(ROOT) -I$(ROOT)/DCE -I/usr/include/mysql $(SNR_CPPFLAGS)
 LDFLAGS = -L$(ROOT)/lib
 BASELDLIBS = -lSerializeClass -lDCECommon -lPlutoUtils -lmysqlclient_r -lpthread
 
+ifneq (,$(findstring -DARMHF, $(CPPFLAGS)))
+        UUIRTDRV_SO = uuirtdrv-armhf.so
+else
 ifneq (,$(findstring -DARCH64, $(CPPFLAGS)))
         UUIRTDRV_SO = uuirtdrv-amd64.so
 else
         UUIRTDRV_SO = uuirtdrv-i386.so
+endif
 endif
 
 MYNAME = USB_UIRT_0038
