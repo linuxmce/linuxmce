@@ -262,6 +262,7 @@ void orbiterWindow::qmlSetupLmce(int device, QString ip)
 
     qDebug() <<"Orbiter Window Settings.\n Device::"<<device<<"\n Router::"<<ip;
     emit setupLmce(device, ip);
+    router=ip;
 }
 
 bool orbiterWindow::getOrbiterState()
