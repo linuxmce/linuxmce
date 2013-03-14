@@ -204,19 +204,15 @@ ip6tables -A INPUT -p ipv6-icmp -m icmp6 --icmpv6-type 137 -m hl --hl-eq 255 -j 
 ip6tables -A INPUT -m state --state ESTABLISHED,RELATED -j ACCEPT
 ip6tables -A INPUT -m mark --mark "$AllowMark" -j ACCEPT
 
-# Log denied packets
-iptables -I INPUT -m limit --limit 5/min -j LOG --log-prefix "IPv4 packet denied: " --log-level 7
-ip6tables -I INPUT -m limit --limit 5/min -j LOG --log-prefix "IPv6 packet denied: " --log-level 7
-
 # If on multiple NIC's, accept incoming on LAN and NAT or masquerade on external
 if [[ -n "$IntIP" ]]; then
 	#TODO: use 4 byte netmask in these calculations
 	IntNet="$(echo "$IntIP" | cut -d. -f-3).0"
 	IntBitmask=24
-	iptables -A INPUT -p udp --dport 67 -j ACCEPT # BOOTP/DHCP
-	ip6tables -A INPUT -p udp --dport 546 -j ACCEPT # DHCP
+	iptables -A INPUT -i $IntIf -p udp --dport 67 -j ACCEPT # BOOTP/DHCP
+	ip6tables -A INPUT -i $IntIf -p udp --dport 546 -j ACCEPT # DHCP
 	
-	iptables -A INPUT -s "$IntNet/$IntBitmask" -j ACCEPT
+	iptables -A INPUT -i $IntIf -s "$IntNet/$IntBitmask" -j ACCEPT
 	ip6tables -A INPUT -i $IntIf -j ACCEPT
 
 	## Workaround for some ISPs that don't allow routers and drop packets based on TTL.
@@ -300,6 +296,14 @@ done
 if [[ "$PPPoEEnabled" == "on" ]]; then
 	iptables --append FORWARD -o ppp+ --protocol tcp --tcp-flags SYN,RST SYN --jump TCPMSS --clamp-mss-to-pmtu
 	ip6tables --append FORWARD -o ppp+ --protocol tcp --tcp-flags SYN,RST SYN --jump TCPMSS --clamp-mss-to-pmtu
+fi
+
+# Log denied packets, i.e. packets that make it through the ruleset without being accepted
+if [[ "$DefaultPolicy" == "DROP" ]]; then
+	iptables -A INPUT -m limit --limit 5/min -j LOG --log-prefix "IPv4 packet denied: " --log-level 7
+fi
+if [[ "$DefaultIPv6Policy" == "DROP" ]]; then
+	ip6tables -A INPUT -m limit --limit 5/min -j LOG --log-prefix "IPv6 packet denied: " --log-level 7
 fi
 
 ExtIf=$OldExtIf
