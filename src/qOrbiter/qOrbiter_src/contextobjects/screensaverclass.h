@@ -45,7 +45,7 @@ signals:
 public slots:
     void setImageList(QStringList imgList);
     void clearImageList();
-    void setImageData(const QImage &i);
+    void setImageData(QImage i);
     void setActive(bool state);
     bool getActive() {return active;}
 
@@ -63,7 +63,7 @@ public slots:
     int getInterval() {return timerInterval;}
     void setInterval (int ms) {timerInterval = ms; emit intervalChanged();}
 
-    void setDuration(int d) {transitionDuration = d; emit durationChanged();}
+    void setDuration(int d) {transitionDuration = d; picChanger.stop(); picChanger.start(transitionDuration); emit durationChanged();}
     int getDuration() {return transitionDuration;}
 
 };

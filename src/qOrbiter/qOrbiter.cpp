@@ -4985,10 +4985,14 @@ void qOrbiter::getScreenSaverImage(QString inc_requested_img_path)
         emit mediaResponseChanged("DCE::Recieved Screensaver image");
         data = (uchar*)picData;
         QImage t;
+
         t.loadFromData(data, picData_Size);
         emit currentScreenSaverImage(t);
         data=NULL;
         delete data;
+
+        picData = NULL;
+        delete[] picData;
         picData_Size = 0;
     }
 

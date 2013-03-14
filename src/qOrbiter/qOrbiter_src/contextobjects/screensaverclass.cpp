@@ -33,11 +33,13 @@ void ScreenSaverClass::clearImageList()
     images.clear();
 }
 
-void ScreenSaverClass::setImageData(const QImage &i)
+void ScreenSaverClass::setImageData( QImage i)
 {
     qDebug() << i.size();
+    qi_currentImage =QImage();
     qi_currentImage = i;
     emit imageChanged();
+    i=QImage();
 }
 
 void ScreenSaverClass::setActive(bool state)
@@ -47,9 +49,9 @@ void ScreenSaverClass::setActive(bool state)
     }else
     {
         if(state==true){
-            picChanger.start(transitionDuration);
+          //  picChanger.start(transitionDuration);
         } else {
-            picChanger.stop();
+          //  picChanger.stop();
 
         }
         active = state;
