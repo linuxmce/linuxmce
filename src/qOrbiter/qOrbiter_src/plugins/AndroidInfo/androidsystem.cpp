@@ -1,5 +1,7 @@
 #include "androidsystem.h"
 #include <QDebug>
+#include <QApplication>
+
 static JavaVM *m_pvm = 0;
 
 /*Api Level*/
@@ -29,7 +31,7 @@ AndroidSystem::AndroidSystem(QObject *parent) :
         }
 
         if(getDisplayInfo()){
-          //  setStatusMessage("Phase 2 Complete");
+            //  setStatusMessage("Phase 2 Complete");
         }
 
     }
@@ -120,30 +122,41 @@ bool AndroidSystem::findClassIdents()
 
 bool AndroidSystem::getDisplayInfo()
 {
-    JNIEnv *env;
-    if(m_pvm->AttachCurrentThread(&env, NULL)<0){
-        qCritical()<<"AttachCurrentThread failed";
-        return false;
-    } else{
-          jclass displayContextClass = env->FindClass("android/content/Context");
-        if(displayContextClass){
-            setStatusMessage("Located Contexts");
-            jfieldID field_WINDOW_SERVICE = env->GetStaticFieldID(displayContextClass, "DISPLAY_SERVICE", "Ljava/lang/String;");
-            jobject WINDOW_SERVICE = env->GetStaticObjectField(displayContextClass, field_WINDOW_SERVICE);
+//    JNIEnv *env;
+//    if(m_pvm->AttachCurrentThread(&env, NULL)<0){
+//        qCritical()<<"AttachCurrentThread failed";
+//        return false;
+//    } else{
+//        jclass displayContextClass = env->FindClass("android/content/Context");
+//        if(displayContextClass){
+//            setStatusMessage("Located Contexts");
+
+//            jclass activityClass = env->FindClass("android/app/NativeActivity");
+
+//            jmethodID getWindowManagerID = env->GetMethodID(activityClass, "getWindowManager", "()Landroid/view/WindowManager");
 
 
-            // jobject contextGetterID = env->GetObjectClass(displayContextClass);
-            jmethodID contextMethodID = env->GetMethodID(displayContextClass, "getSystemService", "(Ljava/lang/String;)Ljava/lang/Object;");
-            jobject window_service_actual = env->CallObjectMethod(displayContextClass, contextMethodID);
+//            jmethodID contextMethodID = env->GetMethodID(displayContextClass, "getSystemService", "(Ljava/lang/String;)Ljava/lang/Object;");
+//            jfieldID field_WINDOW_SERVICE = env->GetStaticFieldID(displayContextClass, "DISPLAY_SERVICE", "Ljava/lang/String;");
+//            jobject window_service_actual = env->CallObjectMethod( displayContextClass, contextMethodID, "display");
+
+//            jclass window_service_class = env->FindClass("android/hardware/display/DisplayManager");
+//            jmethodID getDisplaysID = env->GetMethodID(window_service_class, "getDisplays" , "()[Landroid/view/Display;" );
+//            jmethodID getNameID = env->GetMethodID(window_service_class, "toString", "()Ljava/lang/String;");
+//            jmethodID getDisplayID = env->GetMethodID(window_service_class, "getDisplay", "(I)Landroid/view/Display;");
+
+//            jobjectArray displayArrayObj = (jobjectArray)env->CallStaticObjectMethod(window_service_class, getDisplaysID);
+//             qDebug() << env->GetArrayLength(displayArrayObj);
 
 
 
+//             // jobject display = env->GetObjectArrayElement(displayArrayObj, 0);
+//             // jclass displayObjClass = env->FindClass("Landroid/view/Display;");
+//           //  jmethodID displayId = env->GetMethodID(displayObjClass, "getDisplay", "()I");
+//            //  qDebug() <<env->CallIntMethod(display, displayId);
+//        }
 
-
-            //setApiLevel(env->GetStaticIntField(buildVersionClass, env->GetStaticFieldID(buildVersionClass,"SDK_INT", "I")));
-            // qDebug() << env->get(buildVersionClass, env->GetStaticFieldID(buildVersionClass,"CODENAME", "()java/lang/String;"));
-        }
-    }
-
+//        return true;
+//    }
     return true;
 }

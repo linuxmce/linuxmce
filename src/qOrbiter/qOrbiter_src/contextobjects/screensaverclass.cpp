@@ -19,7 +19,7 @@ void ScreenSaverClass::setImageList(QStringList imgList)
     {
         setImage(images.at(0));
         emit screenSaverReady();
-     //   picChanger.start(transitionDuration);
+
     }
     else
     {
@@ -33,12 +33,11 @@ void ScreenSaverClass::clearImageList()
     images.clear();
 }
 
-void ScreenSaverClass::setImageData(QImage i)
+void ScreenSaverClass::setImageData(const QImage &i)
 {
-
+    qDebug() << i.size();
     qi_currentImage = i;
     emit imageChanged();
-
 }
 
 void ScreenSaverClass::setActive(bool state)

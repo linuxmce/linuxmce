@@ -26,7 +26,7 @@ public:
     int transitionDuration;
     bool isReady;
     bool primary;
-    
+
     int timerInterval;
 
      QTimer picChanger;
@@ -45,7 +45,7 @@ signals:
 public slots:
     void setImageList(QStringList imgList);
     void clearImageList();
-    void setImageData(QImage i);
+    void setImageData(const QImage &i);
     void setActive(bool state);
     bool getActive() {return active;}
 

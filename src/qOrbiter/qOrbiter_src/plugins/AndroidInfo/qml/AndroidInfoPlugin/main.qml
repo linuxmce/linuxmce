@@ -58,12 +58,12 @@ Rectangle {
         anchors.horizontalCenter: parent.horizontalCenter
         font.bold: true
         color: "white"
-
-    }
-    MouseArea {
-        anchors.fill: parent
-        onClicked: {
-            Qt.quit();
+        MouseArea {
+            anchors.fill: parent
+            onClicked: {
+                Qt.quit();
+            }
         }
     }
+
 }
