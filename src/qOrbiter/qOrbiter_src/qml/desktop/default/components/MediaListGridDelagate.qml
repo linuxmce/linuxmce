@@ -75,12 +75,14 @@ Item
             Image
             {
                 id: imagerect;
-                source:path !=="" ? "http://"+srouterip+"/lmce-admin/MediaImage.php?img="+path : ""             
+                source:path !=="" ? "http://"+m_ipAddress+"/lmce-admin/MediaImage.php?img="+path : ""
                 anchors.centerIn: parent;
                 fillMode: Image.PreserveAspectFit
                 smooth: true
                 asynchronous: true
                 anchors.fill: parent
+                sourceSize.width:parent.width
+                sourceSize.height:parent.height
 
             }
             Rectangle{

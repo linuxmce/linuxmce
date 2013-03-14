@@ -1058,9 +1058,9 @@ void qOrbiter::CMD_Set_Now_Playing(string sPK_DesignObj,string sValue_To_Assign,
     {
         if(iPK_MediaType !=18)
         {
-          checkTimeCode();
-           QString port = QString::fromStdString(GetCurrentDeviceData(m_dwPK_Device_NowPlaying, 171));
-          emit newTCport(port.toInt());
+            checkTimeCode();
+            QString port = QString::fromStdString(GetCurrentDeviceData(m_dwPK_Device_NowPlaying, 171));
+            emit newTCport(port.toInt());
         }
 
         emit setNowPlaying(true);
@@ -1784,9 +1784,9 @@ bool DCE::qOrbiter::initialize()
 
     emit commandResponseChanged("Connecting to router");
     emit commandResponseChanged("Starting dce initialization");
-//    if(m_sIPAddress==""){
-//        m_sIPAddress="192.168.80.1";
-//    }
+    //    if(m_sIPAddress==""){
+    //        m_sIPAddress="192.168.80.1";
+    //    }
     emit commandResponseChanged("Initialization IP::"+ QString::fromStdString(m_sIPAddress));
 
 
@@ -1955,7 +1955,7 @@ void qOrbiter::qmlSetup(int device, QString address)
 {
     m_dwPK_Device = device;
     m_sHostName = address.toStdString();
-    m_sIPAddress = address.toStdString();   
+    m_sIPAddress = address.toStdString();
     if(!m_bOrbiterConnected )
         pingCore();
 
@@ -2938,7 +2938,7 @@ void DCE::qOrbiter::requestMediaPlaylist()
             emit playlistDone();
             pDataGridTable->ClearData();
             delete []pData; pData=NULL;
-             pDataGridTable=NULL;
+            pDataGridTable=NULL;
         }
 
 
@@ -3415,7 +3415,7 @@ void DCE::qOrbiter::requestLiveTvPlaylist()
 
             pDataGridTable->ClearData();
             delete []pData; pData=NULL;
-             pDataGridTable=NULL;
+            pDataGridTable=NULL;
         }
 
     }
@@ -3604,7 +3604,7 @@ void DCE::qOrbiter::populateAdditionalMedia() //additional media grid that popul
                               qDebug() << "Stopping";
                               pMediaGridTable->ClearData();
                               delete []pData; pData=NULL;
-                               pMediaGridTable=NULL;
+                              pMediaGridTable=NULL;
                               item->deleteLater();
                               return;
                           }
@@ -3613,7 +3613,7 @@ void DCE::qOrbiter::populateAdditionalMedia() //additional media grid that popul
                       media_seek="";
                       pMediaGridTable->ClearData();
                       delete []pData; pData=NULL;
-                       pMediaGridTable=NULL;
+                      pMediaGridTable=NULL;
                   }
 
 
@@ -3727,7 +3727,7 @@ void DCE::qOrbiter::GetAdvancedMediaOptions(int device) // prepping for advanced
             }
             pDataGridTable->ClearData();
             delete []pData; pData=NULL;
-             pDataGridTable=NULL;
+            pDataGridTable=NULL;
 
         }
     }
@@ -4284,7 +4284,7 @@ void DCE::qOrbiter::ShowBookMarks()
             //emit bookmarkList(bookmarks);
             pDataGridTable->ClearData();
             delete []pData; pData=NULL;
-             pDataGridTable=NULL;
+            pDataGridTable=NULL;
         }
         //   bookmarks.clear();
 
@@ -4354,7 +4354,7 @@ void qOrbiter::OnReload()
 bool qOrbiter::OnReplaceHandler(string msg)
 {
     emit commandResponseChanged("Disconnecting due to device with same ID connecting.");
-        deinitialize();
+    deinitialize();
 
 }
 
@@ -4974,7 +4974,6 @@ void qOrbiter::getScreenSaverImage(QString inc_requested_img_path)
     picData_Size = 0;
     const uchar *data;
 
-
     CMD_Request_File reqFile((long)m_dwPK_Device, (long)4 , inc_requested_img_path.toStdString(), &picData, &picData_Size);
     string p_sResponse="";
     if(SendCommand(reqFile, &p_sResponse) && p_sResponse=="OK")
@@ -4982,9 +4981,14 @@ void qOrbiter::getScreenSaverImage(QString inc_requested_img_path)
 #ifdef QT5
         //QApplication::processEvents(QEventLoop::AllEvents);
 #endif
-        emit mediaResponseChanged("Recieved Screensaver image");
+
+        emit mediaResponseChanged("DCE::Recieved Screensaver image");
         data = (uchar*)picData;
-        emit currentScreenSaverImage(data, picData_Size);
+        QImage t;
+        t.loadFromData(data, picData_Size);
+        emit currentScreenSaverImage(t);
+        data=NULL;
+        delete data;
     }
 
 
@@ -5130,21 +5134,21 @@ void qOrbiter::pingCore()
     qDebug() << "Executing ping to" << m_sIPAddress.c_str();
     if(m_sIPAddress!=""){
 
-    emit commandResponseChanged("initiating ping to core with address::"+QString::fromStdString(m_sIPAddress));
-    QString url = QString::fromStdString(m_sIPAddress);
-    if(!url.contains(QRegExp("(\\D)"))){
+        emit commandResponseChanged("initiating ping to core with address::"+QString::fromStdString(m_sIPAddress));
+        QString url = QString::fromStdString(m_sIPAddress);
+        if(!url.contains(QRegExp("(\\D)"))){
 
-        emit commandResponseChanged("Host name provided, doing lookup");
-        QHostInfo::lookupHost(url, this, SLOT(checkPing(QHostInfo)));
-    }
-    else{
+            emit commandResponseChanged("Host name provided, doing lookup");
+            QHostInfo::lookupHost(url, this, SLOT(checkPing(QHostInfo)));
+        }
+        else{
 
-        if(!m_bOrbiterConnected){
-            emit commandResponseChanged("No hostname, checking installation");
-            checkInstall();
+            if(!m_bOrbiterConnected){
+                emit commandResponseChanged("No hostname, checking installation");
+                checkInstall();
+            }
         }
     }
-}
     else
     {
         return;

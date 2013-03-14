@@ -840,7 +840,7 @@ void qorbiterManager::processConfig(QByteArray config)
     //---update object image
     setDceResponse(" Remote Config Complete");
 
-    activateScreenSaver();
+
 
     emit registerOrbiter((userList->find(sPK_User)->data(4).toInt()), QString::number(iea_area), iFK_Room );
     setOrbiterStatus(true);
@@ -1710,17 +1710,9 @@ int qorbiterManager::loadSplash()
     return 0;
 }
 
-void qorbiterManager::activateScreenSaver()
-{
 
-    ScreenSaver->setActive(true);
 
-}
 
-void qorbiterManager::killScreenSaver()
-{
-    ScreenSaver->setActive(false);
-}
 /*!
  * \brief qorbiterManager::createAndroidConfig
  *This function tries to determine the external storage location for a given android device so that it can read / write the user settings.

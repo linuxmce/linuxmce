@@ -4,6 +4,7 @@
 #include <QObject>
 #include <QStringList>
 #include <QImage>
+#include <QTimer>
 
 class ScreenSaverClass : public QObject
 {
@@ -11,6 +12,8 @@ class ScreenSaverClass : public QObject
     Q_PROPERTY (QString currentImage READ getImage WRITE setImage NOTIFY imageChanged)
     Q_PROPERTY (bool isReady READ getStatus WRITE setStatus NOTIFY statusChanged)
     Q_PROPERTY (int transitionDuration READ getDuration WRITE setDuration NOTIFY durationChanged )
+   Q_PROPERTY (int timerInterval READ getInterval WRITE setInterval NOTIFY intervalChanged)
+    Q_PROPERTY (bool active READ getActive WRITE setActive NOTIFY activatedChanged)
 
 public:
     explicit ScreenSaverClass(QObject *parent = 0);
@@ -24,6 +27,11 @@ public:
     bool isReady;
     bool primary;
     
+    int timerInterval;
+
+     QTimer picChanger;
+
+
 signals:
     void imageChanged();
     void screenSaverReady();
@@ -31,16 +39,17 @@ signals:
     void requestNewImage(QString url);
     void stateChanged();
     void durationChanged();
+    void activatedChanged();
+    void intervalChanged();
 
 public slots:
     void setImageList(QStringList imgList);
     void clearImageList();
-    void setImageData(const uchar* data,int iData_size);
+    void setImageData(QImage i);
     void setActive(bool state);
+    bool getActive() {return active;}
 
     QImage getImageData() {return qi_currentImage;}
-    QImage getSecondImageData() {return qi_newImage;}
-
     QString getImage();
 
     void setImage(QString imgUrl);
@@ -51,10 +60,12 @@ public slots:
     void pickImage();
 
     void selectNew();
+    int getInterval() {return timerInterval;}
+    void setInterval (int ms) {timerInterval = ms; emit intervalChanged();}
 
     void setDuration(int d) {transitionDuration = d; emit durationChanged();}
     int getDuration() {return transitionDuration;}
-    
+
 };
 
 #endif // SCREENSAVERCLASS_H

@@ -524,7 +524,7 @@ int main(int argc, char* argv[])
         QObject::connect(&w, SIGNAL(stopPlayback()), &pqOrbiter,SLOT(StopMedia()),Qt::QueuedConnection);
 
         QObject::connect(w.ScreenSaver, SIGNAL(requestNewImage(QString)), &pqOrbiter, SLOT(getScreenSaverImage(QString)), Qt::QueuedConnection);
-        QObject::connect(&pqOrbiter, SIGNAL(currentScreenSaverImage(const uchar*,int)), w.ScreenSaver, SLOT(setImageData(const uchar*,int)),Qt::QueuedConnection);
+        QObject::connect(&pqOrbiter, SIGNAL(currentScreenSaverImage(QImage)), w.ScreenSaver, SLOT(setImageData(QImage)),Qt::QueuedConnection);
 
         // QObject::connect (&w, SIGNAL(liveTVrequest()), simpleEPGmodel, SLOT(populate()));
 

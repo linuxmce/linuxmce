@@ -127,26 +127,26 @@ Item {
         }
     }
 
-//    DebugPanel{
-//        id:dcemessages
-//        debugMessage: dcemessage
-//        z:2
-//        anchors.top: parent.top
-//    }
+    //    DebugPanel{
+    //        id:dcemessages
+    //        debugMessage: dcemessage
+    //        z:2
+    //        anchors.top: parent.top
+    //    }
 
-//    DebugPanel{
-//        id:mediaMessages
-//        debugMessage: manager.mediaResponse
-//        z:2
-//        anchors.top: dcemessages.bottom
-//    }
+    //    DebugPanel{
+    //        id:mediaMessages
+    //        debugMessage: manager.mediaResponse
+    //        z:2
+    //        anchors.top: dcemessages.bottom
+    //    }
 
-//    DebugPanel{
-//        id:commandmessages
-//        debugMessage: manager.commandResponse
-//        z:2
-//        anchors.top: mediaMessages.bottom
-//    }
+    //    DebugPanel{
+    //        id:commandmessages
+    //        debugMessage: manager.commandResponse
+    //        z:2
+    //        anchors.top: mediaMessages.bottom
+    //    }
 
     //    DebugPanel{
     //        id:mediaplayerMessages
@@ -169,28 +169,20 @@ Item {
         width: manager.appWidth
         focus:true
         Keys.onTabPressed: hideUI()
+
+
         ScreenSaver
         {   id:ss
             height: manager.appHeight
             width: manager.appWidth
             anchors.centerIn: parent
-
-//            ScreenSaver
-//            {   id:ss
-//                height: manager.appHeight
-//                width: manager.appWidth
-//                anchors.centerIn: parent
-
-//                MouseArea{
-//                    anchors.fill: ss
-//                    acceptedButtons: Qt.LeftButton | Qt.RightButton
-//                    onClicked:  Qt.RightButton ? pageLoader.visible = !pageLoader.visible: ""
-//                }
-
-//            }
-
+            Component.onCompleted: screensaver.setActive(true)
+            MouseArea{
+                anchors.fill: ss
+                acceptedButtons: Qt.LeftButton | Qt.RightButton
+                onClicked:  Qt.RightButton ? pageLoader.visible = !pageLoader.visible: ""
+            }
         }
-
 
         Image {
             id: appbackground
@@ -205,17 +197,17 @@ Item {
 
         }
 
-//        Rectangle{
-//            id:alternate_background
-//            anchors.fill: parent
-//            gradient: Gradient{
-//                GradientStop { position: 0.0; color: "darkslategrey" }
-//                GradientStop { position: 0.33; color: "slategrey" }
-//                GradientStop { position: 1.0; color: "black" }
-//            }
+        //        Rectangle{
+        //            id:alternate_background
+        //            anchors.fill: parent
+        //            gradient: Gradient{
+        //                GradientStop { position: 0.0; color: "darkslategrey" }
+        //                GradientStop { position: 0.33; color: "slategrey" }
+        //                GradientStop { position: 1.0; color: "black" }
+        //            }
 
-//            focus:false
-//        }
+        //            focus:false
+        //        }
 
         MediaManager{
             id:dceplayer

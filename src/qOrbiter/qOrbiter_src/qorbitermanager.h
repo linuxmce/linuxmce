@@ -1161,9 +1161,8 @@ public slots:
     void showSleepingAlarms(SleepingAlarm *s);
     void getSleepingAlarms() {sleeping_alarms->clear(); emit getAlarms();}
 
-    /*ScreenSaver*/
-    void killScreenSaver();
-    void activateScreenSaver();
+
+
 
 
 

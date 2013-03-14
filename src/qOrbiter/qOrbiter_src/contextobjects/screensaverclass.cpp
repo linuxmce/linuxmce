@@ -1,14 +1,15 @@
 #include "screensaverclass.h"
 #include <QTimer>
+#include <QDebug>
 
 
 ScreenSaverClass::ScreenSaverClass(QObject *parent) :
     QObject(parent)
 {
     qi_currentImage = QImage();
-    qi_newImage = QImage();
     primary = true;
     transitionDuration = 60000;
+    connect(&picChanger, SIGNAL(timeout()), this, SLOT(selectNew()));
 }
 
 void ScreenSaverClass::setImageList(QStringList imgList)
@@ -16,12 +17,13 @@ void ScreenSaverClass::setImageList(QStringList imgList)
     images = imgList;
     if(!images.empty())
     {
-        pickImage();
         setImage(images.at(0));
         emit screenSaverReady();
+     //   picChanger.start(transitionDuration);
     }
     else
     {
+        setActive(false);
         //("Screensaver image list error!");
     }
 }
@@ -31,19 +33,34 @@ void ScreenSaverClass::clearImageList()
     images.clear();
 }
 
-void ScreenSaverClass::setImageData(const uchar *data, int iData_size)
+void ScreenSaverClass::setImageData(QImage i)
 {
 
-    qi_currentImage.loadFromData(data, iData_size);
-    qi_currentImage = qi_currentImage.scaledToHeight(1080);
+    qi_currentImage = i;
     emit imageChanged();
-    delete data;
+
 }
 
 void ScreenSaverClass::setActive(bool state)
 {
-   active = state;
-   emit stateChanged();
+    if(active == state){
+
+    }else
+    {
+        if(state==true){
+            picChanger.start(transitionDuration);
+        } else {
+            picChanger.stop();
+
+        }
+        active = state;
+        emit activatedChanged();
+    }
+
+    if(active = true){
+
+    }
+    setStatus(state);
 }
 
 bool ScreenSaverClass::getStatus()
@@ -60,17 +77,13 @@ void ScreenSaverClass::setStatus(bool status)
 
 void ScreenSaverClass::pickImage()
 {
-
-
-    QTimer *timer = new QTimer(this);
-        connect(timer, SIGNAL(timeout()), this, SLOT(selectNew()));
-        timer->start(transitionDuration);
+    connect(&picChanger, SIGNAL(timeout()), this, SLOT(selectNew()));
+    picChanger.start(transitionDuration);
 }
 
 void ScreenSaverClass::selectNew()
 {
     int index = images.lastIndexOf(currentImage);
-
 
     if (index+1 < images.count())
     {
@@ -90,5 +103,6 @@ QString ScreenSaverClass::getImage()
 void ScreenSaverClass::setImage(QString url)
 {
     currentImage =  url;
+    qDebug() << url;
     emit requestNewImage(currentImage);
 }

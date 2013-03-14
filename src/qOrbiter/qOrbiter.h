@@ -1454,7 +1454,7 @@ signals:
 
 
     //screensaver
-    void currentScreenSaverImage(const uchar* ,int);
+    void currentScreenSaverImage(QImage I);
 
     //sleeping alarms
     void sleepingAlarmsReady(SleepingAlarm *t);

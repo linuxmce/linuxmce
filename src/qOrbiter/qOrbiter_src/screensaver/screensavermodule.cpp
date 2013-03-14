@@ -57,7 +57,6 @@ void ScreenSaverModule::startAlternate()
     picChanger2.setInterval(timerInterval);
     connect(&picChanger2, SIGNAL(timeout()), this, SLOT(nextTransition()));
     picChanger2.start();
-
 }
 
 
