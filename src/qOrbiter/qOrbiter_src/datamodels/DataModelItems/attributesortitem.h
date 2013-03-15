@@ -43,6 +43,11 @@ signals:
 public slots:
     bool setStatus(bool b) { m_isSelected = b; emit dataChanged();}
     bool updateSelection (bool newBool) ;
+    void destruct() {
+        //qDebug() << "calling destructor for item.";
+       this->deleteLater();
+    }
+
 
 };
 #endif // ATTRIBUTESORTITEM_H

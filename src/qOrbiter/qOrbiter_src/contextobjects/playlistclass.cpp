@@ -67,6 +67,7 @@ void PlaylistClass::appendRows(const QList<PlaylistItemClass *> &items)
         {
             m_list.append(item);
             QObject::connect(item, SIGNAL(dataChanged()), this, SLOT(handleItemChange()));
+            QObject::connect(item, SIGNAL(destroyed()), this, SLOT(itemDeletion()));
 
         }
 
@@ -230,10 +231,18 @@ bool PlaylistClass::checkDupe(QString name, int position)
 
 bool PlaylistClass::resetInternalData()
 {  
-    int total = m_list.count();
-    for(int i = 0; i < m_list.count(); i++){
-        m_list.removeAt(i);
+    qDebug("Resetting Playlist data");
+    int total = m_list.size();
+    int counter=0;
+    QList<PlaylistItemClass*>::iterator i;
+    for( i = m_list.begin(); i !=m_list.end(); ++i){
+        PlaylistItemClass* pItem = m_list.takeFirst();
+        qDebug() <<"removing item ::" <<counter << " of " << total;
+        qDebug() << "item thread ::" << pItem->thread() << " Parent thread::" << this->thread();
+        pItem->destruct();
+        counter++;
     }
-    m_list.clear();
+    qDebug() << counter << "::Items cleared. Remaining Count:: "<< m_list.size();
+
     return true;
 }

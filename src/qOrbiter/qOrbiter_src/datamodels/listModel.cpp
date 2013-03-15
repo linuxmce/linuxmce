@@ -76,16 +76,16 @@ ListModel::~ListModel() {
     clear();
 }
 
-void ListModel::appendRow(gridItem *item)
+void ListModel::appendRow( gridItem *item)
 {
     setLoadingStatus(true);
     // qDebug() << "adding" << m_list.count()+1;
 
-    gridItem * copiedItem = new gridItem(item->id(),item->name(), item->path(),item->index());
+//    gridItem * copiedItem = new gridItem(item->id(),item->name(), item->path(),item->index());
     //  QObject::connect(copiedItem, SIGNAL(destroyed(QObject*)), this, SLOT(objectDestroyed(QObject*)));
-    appendRows(QList<gridItem*>() << copiedItem);
+    appendRows(QList<gridItem*>() << item);
 
-   item->destruct();
+
 }
 
 void ListModel::appendRows(const QList<gridItem *> &items)
@@ -149,37 +149,20 @@ void ListModel::reset()
 
 bool ListModel::resetInternalData()
 {
-    qDebug("Resetting listmodel data");
-    //   m_list.clear();
-    qDebug() << this->thread();
+    qDebug("Resetting Media Listmodel data");
     int total = m_list.size();
-
-
     int counter=0;
-    //    QList<gridItem*>::iterator i;
-    //    for( i = m_list.begin(); i !=m_list.end(); ++i){
-    //        gridItem* pItem = m_list.at(counter);
-    //       qDebug() <<"removing item ::" <<counter << " of " << total;
-    //       qDebug() << "item thread ::" << pItem->thread() << " Parent thread::" << this->thread();
-    //        if (pItem){
-    //            pItem->deleteLater();
-    //            counter++;
-    //        }
-    //    }
 
     QList<gridItem*>::iterator i;
     for( i = m_list.begin(); i !=m_list.end(); ++i){
         gridItem* pItem = m_list.takeFirst();
-        qDebug() <<"removing item ::" <<counter << " of " << total;
-        qDebug() << "item thread ::" << pItem->thread() << " Parent thread::" << this->thread();
+      //  qDebug() <<"removing item ::" <<counter << " of " << total;
+       // qDebug() << "item thread ::" << pItem->thread() << " Parent thread::" << this->thread();
         pItem->destruct();
         counter++;
     }
-
-    qDebug() << this->thread();
-    qDebug() << counter << "::Items cleared. Remaining Count:: "<< m_list.size();
+ //   qDebug() << counter << "::Items cleared. Remaining Count:: "<< m_list.size();
     return true;
-
 }
 
 gridItem * ListModel::find(const QString &id) const

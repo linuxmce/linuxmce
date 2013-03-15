@@ -27,6 +27,7 @@
 #include <QVariant>
 #include <datamodels/DataModelItems/attributesortitem.h>
 #include <QStringList>
+#include <QDebug>
 
 class AttributeSortItem;
 
@@ -70,6 +71,11 @@ public slots:
    bool removeRow(int row, const QModelIndex &parent = QModelIndex());
    bool removeRows(int row, int count, const QModelIndex &parent = QModelIndex());
    void clear();
+   void itemDeletion() { qDebug() << "Attribute Sort Item Destroyed::" << m_list.size(); }
+   void objectDestroyed(QObject*){
+       qDebug()<< "Attribute QObject* item destroyed";
+
+}
 
 private slots:
   void handleItemChange();

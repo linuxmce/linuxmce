@@ -51,6 +51,12 @@ class LightingScenarioItem: public QObject
         signals:
           void imageChanged();
 
+public slots:
+          void destruct() {
+              qDebug() << "calling destructor for item.";
+             this->deleteLater();
+          }
+
 };
 
 #endif // LIGHTINGSCENARIOITEM_H

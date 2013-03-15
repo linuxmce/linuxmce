@@ -1894,7 +1894,7 @@ void qOrbiter::processConfigData(QNetworkReply *r)
     {
         emit commandResponseChanged("Invalid config for device: " + QString::number(m_dwPK_Device));
         emit commandResponseChanged("Please run http://dcerouter/lmce-admin/qOrbiterGenerator.php?d=" + QString::number(m_dwPK_Device)) ;
-
+        return;
     }
 
     emit configReady(configData);
@@ -2809,14 +2809,17 @@ void DCE::qOrbiter::GetMediaAttributeGrid(QString  qs_fk_fileno)
                 {
                     qDebug() << "unhandled attribute" << attributeType << " :: " << attribute;
                 }
-            }
 #ifdef RPI
             QThread::msleep(100);
 #endif
-        }
-        pData = NULL;
-        delete []pData;
+            }
+            pData = NULL;
+            delete []pData;
 
+            pDataGridTable->ClearData();
+            pDataGridTable =NULL;
+            delete pDataGridTable;
+        }
     }
 
 }
@@ -4991,15 +4994,8 @@ void qOrbiter::getScreenSaverImage(QString inc_requested_img_path)
 
         delete[] data;
         data=NULL;
-
-       // delete[] picData;
-      //  picData = NULL;
-
         picData_Size = 0;
-
     }
-
-
 }
 
 void DCE::qOrbiter::sendAvCommand(int deviceto, int command)

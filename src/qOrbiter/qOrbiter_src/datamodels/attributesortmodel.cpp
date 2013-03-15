@@ -40,7 +40,8 @@ void AttributeSortModel::appendRows(const QList<AttributeSortItem *> &items)
   beginInsertRows(QModelIndex(), rowCount(), rowCount()+items.size()-1);
   foreach(AttributeSortItem *item, items) {
       QObject::connect(item, SIGNAL(dataChanged()), this, SLOT(handleItemChange()));
-    m_list.append(item);
+      QObject::connect(item, SIGNAL(destroyed()), this, SLOT(itemDeletion()));
+      m_list.append(item);
   }
 
   endInsertRows();
@@ -88,15 +89,9 @@ void AttributeSortModel::reset()
 bool AttributeSortModel::resetInternalData()
 {
 
-    qDebug("Resetting attribute filter data");
-    int total = m_list.count();
-    for(int i = 0; i <= m_list.count(); ++i){
-
-      //  qDebug() <<"removing::" << m_list.count() << " of " << total;
-        m_list.removeAt(i);
-    }
+    qDeleteAll(m_list);
     m_list.clear();
-  //  qDebug() << "Items cleared. Count:: "<< m_list.count();
+    qDebug("Attribute Sort Model Cleared.");
     return true;
 }
 

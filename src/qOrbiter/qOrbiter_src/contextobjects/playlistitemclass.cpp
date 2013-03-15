@@ -7,6 +7,7 @@ PlaylistItemClass::PlaylistItemClass( QString &ident, QString &path,  int &index
     m_fk_file(path), m_path(path), m_index(index), m_name(ident)
 {
 isActive = false;
+
 }
 
 QHash<int, QByteArray> PlaylistItemClass::roleNames() const

@@ -42,6 +42,7 @@ The purpose of this class is to keep a reference to all items in the current pla
 #include <QVariant>
 #include <QImage>
 #include <QMap>
+#include <QDebug>
 #ifdef debug
 #include <QDebug>
 #endif
@@ -79,6 +80,10 @@ public:
 
 public slots:
     void addedToModel();
+    void destruct() {
+        qDebug() << "calling destructor for item.";
+       this->deleteLater();
+    }
 
 private:
     QString m_name;
