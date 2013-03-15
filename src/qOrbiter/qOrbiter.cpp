@@ -4988,12 +4988,15 @@ void qOrbiter::getScreenSaverImage(QString inc_requested_img_path)
 
         t.loadFromData(data, picData_Size);
         emit currentScreenSaverImage(t);
-        data=NULL;
-        delete data;
 
-        picData = NULL;
-        delete[] picData;
+        delete[] data;
+        data=NULL;
+
+       // delete[] picData;
+      //  picData = NULL;
+
         picData_Size = 0;
+
     }
 
 

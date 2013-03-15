@@ -48,12 +48,14 @@ class AbstractImageProvider: public QObject , public QDeclarativeImageProvider
 public:
     AbstractImageProvider(qorbiterManager * manager );
 
-QImage result;
-QImage key;
+
+
 
     QImage requestImage(const QString &id, QSize *size, const QSize &requestedSize)
     {
         QImage temp;
+        QImage result;
+
         if (id.contains("floorplan"))
         {
              temp = floorplanProvider();
@@ -100,9 +102,11 @@ QImage key;
         if (requestedSize.isValid()) {
             result = temp.scaled(requestedSize);
         } else {
-            result = temp;
+            result= temp;
         }
         return result;
+
+
     }
 
 

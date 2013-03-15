@@ -15,7 +15,7 @@ AbstractImageProvider::AbstractImageProvider(qorbiterManager *manager):QDeclarat
 QImage AbstractImageProvider::floorplanProvider()
 {
 
-    key= managerreference->floorplans->getFloorPlanImage();
+  QImage  key= managerreference->floorplans->getFloorPlanImage();
 
     if (key.isNull())
     {
@@ -36,7 +36,7 @@ QImage AbstractImageProvider::floorplanProvider()
 
 QImage AbstractImageProvider::securityProvider(int cam)
 {
-   key = managerreference->SecurityVideo->getCameraImage(cam);
+   QImage key = managerreference->SecurityVideo->getCameraImage(cam);
 
    if (key.isNull())
    {
@@ -50,7 +50,7 @@ QImage AbstractImageProvider::securityProvider(int cam)
 
 QImage AbstractImageProvider::updateObjectProvider()
 {
-   key = managerreference->nowPlayingButton->getImage();
+   QImage key = managerreference->nowPlayingButton->getImage();
    //qDebug()<< "!!!!!!!!!!" <<key.size();
     if (key.isNull())
     {
@@ -72,7 +72,7 @@ QImage AbstractImageProvider::updateObjectProvider()
 
 QImage AbstractImageProvider::fileDetails()
 {
-    key= managerreference->filedetailsclass->titleImage;
+    QImage key= managerreference->filedetailsclass->titleImage;
 
     if (key.isNull())
     {
@@ -88,7 +88,7 @@ QImage AbstractImageProvider::fileDetails()
 
 QImage AbstractImageProvider::screenShot()
 {
-    key = managerreference->mediaScreenShot;
+    QImage key = managerreference->mediaScreenShot;
 
      if (key.isNull())
      {
@@ -100,7 +100,7 @@ QImage AbstractImageProvider::screenShot()
 
 QImage AbstractImageProvider::ScreenSaver()
 {
-    key = managerreference->ScreenSaver->getImageData();
+    QImage key = managerreference->ScreenSaver->getImageData();
 
      if (key.isNull())
      {
@@ -112,7 +112,7 @@ QImage AbstractImageProvider::ScreenSaver()
 
 QImage AbstractImageProvider::Stream()
 {
-    key = managerreference->nowPlayingButton->streamImage;
+    QImage key = managerreference->nowPlayingButton->streamImage;
 
      if (key.isNull())
      {
