@@ -33,13 +33,16 @@ void ScreenSaverClass::clearImageList()
     images.clear();
 }
 
-void ScreenSaverClass::setImageData( QImage i)
+void ScreenSaverClass::setImageData( QByteArray buffer)
 {
-    qDebug() << i.size();
-    qi_currentImage =QImage();
-    qi_currentImage = i;
+
+    qi_currentImage.loadFromData(buffer);
+//    qDebug() << i.size();
+//    qi_currentImage =QImage();
+//    qi_currentImage = i;
     emit imageChanged();
-    i=QImage();
+//    i=QImage();
+
 }
 
 void ScreenSaverClass::setActive(bool state)
@@ -105,5 +108,7 @@ void ScreenSaverClass::setImage(QString url)
 {
     currentImage =  url;
     qDebug() << url;
+
+    qi_currentImage.detach();
     emit requestNewImage(currentImage);
 }

@@ -41,6 +41,12 @@ public:
   inline bool getStatus () {return m_isSelected;}
   bool updateSelection (bool newBool) ;
 
+public slots:
+  void destruct() {
+      //qDebug() << "calling destructor for filter model item..";
+     this->deleteLater();
+  }
+
 private:
   QString m_fk_fileformat;
   QString m_description;

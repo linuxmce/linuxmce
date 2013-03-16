@@ -36,10 +36,13 @@ public:
   void setStatus(bool b) { m_isSelected = b; }
   bool updateSelection (bool newBool) ;
 
+public slots:
+  void destruct() {
+      //qDebug() << "calling destructor for genre sort item.";
+     this->deleteLater();
+  }
 
 private:
-
-
   bool m_isSelected;
   QString m_fk_fileformat;
   QString m_description;

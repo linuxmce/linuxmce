@@ -2810,15 +2810,16 @@ void DCE::qOrbiter::GetMediaAttributeGrid(QString  qs_fk_fileno)
                     qDebug() << "unhandled attribute" << attributeType << " :: " << attribute;
                 }
 #ifdef RPI
-            QThread::msleep(100);
+                QThread::msleep(100);
 #endif
             }
-            pData = NULL;
-            delete []pData;
 
+            delete []pData;
+            pData = NULL;
             pDataGridTable->ClearData();
-            pDataGridTable =NULL;
             delete pDataGridTable;
+            pDataGridTable =NULL;
+
         }
     }
 
@@ -2940,6 +2941,7 @@ void DCE::qOrbiter::requestMediaPlaylist()
 
             emit playlistDone();
             pDataGridTable->ClearData();
+            delete pDataGridTable;
             delete []pData; pData=NULL;
             pDataGridTable=NULL;
         }
@@ -3329,9 +3331,11 @@ void DCE::qOrbiter::GetNowPlayingAttributes()
 
                     }
                 }
+                pDataGridTable->ClearData();
                 delete pDataGridTable;
-                pData = NULL;
+                pDataGridTable = NULL;
                 delete []pData;
+                pData = NULL;
             }
         }
     }
@@ -3560,7 +3564,10 @@ void DCE::qOrbiter::populateAdditionalMedia() //additional media grid that popul
                           media_seek = "";
                           populateAdditionalMedia();
                           delete[] pData;
+                          pData=NULL;
+                          pMediaGridTable->ClearData();
                           delete pMediaGridTable;
+                          pMediaGridTable = NULL;
                           return;
                       }
                       setCurrentPage((std::abs(GridCurRow /  media_pageSeperator))) ;
@@ -3606,8 +3613,10 @@ void DCE::qOrbiter::populateAdditionalMedia() //additional media grid that popul
                           {
                               qDebug() << "Stopping";
                               pMediaGridTable->ClearData();
-                              delete []pData; pData=NULL;
+                              delete pMediaGridTable;
                               pMediaGridTable=NULL;
+
+                              delete []pData; pData=NULL;
                               item->deleteLater();
                               return;
                           }
@@ -3616,6 +3625,7 @@ void DCE::qOrbiter::populateAdditionalMedia() //additional media grid that popul
                       media_seek="";
                       pMediaGridTable->ClearData();
                       delete []pData; pData=NULL;
+                      delete pMediaGridTable;
                       pMediaGridTable=NULL;
                   }
 
@@ -3729,6 +3739,7 @@ void DCE::qOrbiter::GetAdvancedMediaOptions(int device) // prepping for advanced
                 emit newDeviceCommand(new AvCommand(fk_file.toInt(), cellTitle, false, device));
             }
             pDataGridTable->ClearData();
+            delete pDataGridTable; pDataGridTable=NULL;
             delete []pData; pData=NULL;
             pDataGridTable=NULL;
 
@@ -4147,6 +4158,7 @@ void DCE::qOrbiter::grabScreenshot(QString fileWithPath)
                 emit addScreenShotVar(new screenshotAttributes( cellfk, cellTitle, cellAttribute.prepend("!A") ));
             }
             pDataGridTable->ClearData();
+            delete pDataGridTable;
             delete []pData; pData=NULL;
             pDataGridTable=NULL;
 
@@ -4286,6 +4298,7 @@ void DCE::qOrbiter::ShowBookMarks()
             }
             //emit bookmarkList(bookmarks);
             pDataGridTable->ClearData();
+            delete pDataGridTable;
             delete []pData; pData=NULL;
             pDataGridTable=NULL;
         }
@@ -4876,8 +4889,10 @@ void DCE::qOrbiter::prepareFileList(int iPK_MediaType)
                 emit mediaResponseChanged(QString::number(media_totalPages)+ " pages from request, populating first page.");
 
                 delete[] pData;
+                pMediaGridTable->ClearData();
                 delete pMediaGridTable;
                 pData = NULL;
+                pMediaGridTable = NULL;
                 if(b_cancelRequest)
                     b_cancelRequest=false;
                 requestPage(0);
@@ -4975,7 +4990,6 @@ void qOrbiter::getScreenSaverImage(QString inc_requested_img_path)
     char *picData;
     int picData_Size;
     picData_Size = 0;
-    const uchar *data;
 
     CMD_Request_File reqFile((long)m_dwPK_Device, (long)4 , inc_requested_img_path.toStdString(), &picData, &picData_Size);
     string p_sResponse="";
@@ -4985,15 +4999,12 @@ void qOrbiter::getScreenSaverImage(QString inc_requested_img_path)
         //QApplication::processEvents(QEventLoop::AllEvents);
 #endif
 
+        QByteArray t(picData, picData_Size);
         emit mediaResponseChanged("DCE::Recieved Screensaver image");
-        data = (uchar*)picData;
-        QImage t;
-
-        t.loadFromData(data, picData_Size);
         emit currentScreenSaverImage(t);
 
-        delete[] data;
-        data=NULL;
+       delete picData;
+        picData=NULL;
         picData_Size = 0;
     }
 }

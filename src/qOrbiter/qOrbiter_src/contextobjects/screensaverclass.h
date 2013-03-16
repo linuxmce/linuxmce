@@ -45,7 +45,7 @@ signals:
 public slots:
     void setImageList(QStringList imgList);
     void clearImageList();
-    void setImageData(QImage i);
+    void setImageData(QByteArray buffer);
     void setActive(bool state);
     bool getActive() {return active;}
 

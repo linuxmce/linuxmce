@@ -836,12 +836,10 @@ void qorbiterManager::processConfig(QByteArray config)
     connect(attribFilter, SIGNAL(SetTypeSort(int,QString)), this, SLOT(setStringParam(int,QString)));
     QObject::connect(this, SIGNAL(resetFilter()), attribFilter, SLOT(clear()) );
     binaryConfig.clear();
-
+    tConf.clear();
+    configData.clear();
     //---update object image
     setDceResponse(" Remote Config Complete");
-
-
-
     emit registerOrbiter((userList->find(sPK_User)->data(4).toInt()), QString::number(iea_area), iFK_Room );
     setOrbiterStatus(true);
 }
