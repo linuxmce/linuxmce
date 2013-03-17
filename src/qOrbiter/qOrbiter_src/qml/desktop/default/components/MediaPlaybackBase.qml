@@ -82,7 +82,7 @@ Rectangle {
 
         Loader{
             id:mediaTypeMetaData
-            anchors.left: npImage.right
+
             anchors.leftMargin: scaleX(-1)
             height: parent.height*.95
         }
@@ -186,6 +186,10 @@ Rectangle {
                 target: current_playlist
                 state:"exposed"
             }
+            PropertyChanges {
+                target: mediaTypeMetaData
+                opacity:1
+            }
             PropertyChanges{
                 target:playlistEditor
                 state:"hidden"
@@ -195,12 +199,21 @@ Rectangle {
                 anchors.left: undefined
                 anchors.horizontalCenter: metadataSection.horizontalCenter
             }
+            AnchorChanges{
+                target: mediaTypeMetaData
+
+                anchors.left: npImage.right
+                }
         },
         State {
             name: "playlist"
             PropertyChanges {
                 target: npImage
 
+            }
+            PropertyChanges {
+                target: mediaTypeMetaData
+                opacity:0
             }
 
             PropertyChanges {
@@ -217,13 +230,18 @@ Rectangle {
                 anchors.horizontalCenter: undefined
                 anchors.right: metadataSection.left
             }
+            AnchorChanges{
+                target: mediaTypeMetaData
+               anchors.left: metadataSection.right
+
+                }
         }
     ]
 
     transitions: [
         Transition {
             AnchorAnimation{
-                targets: npImage
+
                 duration: 1000
             }
 

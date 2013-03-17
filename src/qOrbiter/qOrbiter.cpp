@@ -1128,7 +1128,7 @@ void qOrbiter::CMD_Set_Now_Playing(string sPK_DesignObj,string sValue_To_Assign,
         //  emit np_title2Changed(QString::fromStdString(sText));
         emit playlistPositionChanged(iValue);
         GetNowPlayingAttributes();
-        if(bRetransmit==0){
+        if(bRetransmit==1){
             emit clearPlaylist();
         }
 
@@ -1138,7 +1138,7 @@ void qOrbiter::CMD_Set_Now_Playing(string sPK_DesignObj,string sValue_To_Assign,
         b_mediaPlaying = true;
         emit playlistPositionChanged(iValue);
         GetNowPlayingAttributes();
-        if(bRetransmit==0){
+        if(bRetransmit==1){
             emit clearPlaylist();
         }
 

@@ -14,7 +14,7 @@ Rectangle {
     id:asktoresume
     height: manager.appHeight
     width: manager.appWidth
-    color: style.highlight2
+    color: skinStyle.highlight2
     property int device_from:screenparams.getParam(184) /*!< \brief Device from */
     property int device_mediasource:screenparams.getParam(186)/*!< \brief Device's mediasource id */
     property int stream_id:screenparams.getParam(187)/*!< \brief The stream id of the media being resumed. */
@@ -27,9 +27,9 @@ Rectangle {
         id:containerrect
         height:scaleY(50)
         width: scaleX(60)
-        color: style.bgcolor
+        color: skinStyle.bgcolor
         clip: true
-        border.color: style.highlight1
+        border.color: skinStyle.highlight1
         border.width: 2
         anchors.centerIn: parent
         radius: 10

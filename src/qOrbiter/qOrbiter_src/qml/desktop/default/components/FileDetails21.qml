@@ -7,10 +7,10 @@ Rectangle {
     width: scaleX(80)
     height: scaleY(85)
   anchors.centerIn: parent
-    color: style.highlight2
+    color: skinStyle.highlight2
     clip: false
     radius: 5
-    border.color: style.highlight1
+    border.color: skinStyle.highlight1
     border.width: 3
     //opacity: 0
     scale:0
@@ -41,16 +41,16 @@ Rectangle {
     }
 
 
-    Connections{
-        target:filedetailsclass
-        onImageChanged:filedetailsimage.source = "image://listprovider/filedetailsprovider/"+securityvideo.timestamp
-    }
+//    Connections{
+//        target:filedetailsclass
+//        onImageChanged:filedetailsimage.source = "image://listprovider/filedetailsprovider/"+securityvideo.timestamp
+//    }
 
     Rectangle{
         id:titlerect
         height: childrenRect.height + 5
         width: parent.width
-        color:style.highlight1
+        color:skinStyle.highlight1
         radius:2.5
         Text {
             id: text2
@@ -95,7 +95,7 @@ Rectangle {
             id: filedetailsimage
             width: filedetailsclass.aspect=="wide"? scaleX(42.5) : scaleX(23)
             height:filedetailsclass.aspect=="wide"?scaleY(42.5) : scaleY(55)
-            source: "../img/icons/mediatime.png"
+            source: "http://"+m_ipAddress+"/lmce-admin/MediaImage.php?img="+filedetailsclass.screenshot
             smooth: true
         }
 
@@ -115,8 +115,8 @@ Rectangle {
         height: scaleY(45)
         radius: 2.5
         clip:  true
-        color: style.darkhighlight
-        border.color: style.highlight1
+        color: skinStyle.darkhighlight
+        border.color: skinStyle.highlight1
         anchors.left: imageholder.right
         anchors.leftMargin: scaleX(.5)
 
@@ -301,7 +301,7 @@ Rectangle {
         Rectangle {
             width: container.width
             height: childrenRect.height
-            color: style.button_system_color
+            color: skinStyle.button_system_color
 
             Text {
                 text: section
@@ -338,8 +338,8 @@ Rectangle {
         spacing: scaleY(.5)
         AvOptionButton {
             id: buttonsq1
-            width: style.stdbuttonw
-            height: style.stdbuttonh
+            width: skinStyle.stdbuttonw
+            height: skinStyle.stdbuttonh
             radius: 10
 
             //anchors.leftMargin: 18
@@ -353,8 +353,8 @@ Rectangle {
 
         AvOptionButton {
             id: buttonsq2
-            width: style.stdbuttonw
-            height: style.stdbuttonh
+            width: skinStyle.stdbuttonw
+            height: skinStyle.stdbuttonh
             radius: 10
             buttontext: "Move"
             MouseArea{
@@ -365,8 +365,8 @@ Rectangle {
 
         AvOptionButton {
             id: buttonsq3
-            width: style.stdbuttonw
-            height: style.stdbuttonh
+            width: skinStyle.stdbuttonw
+            height: skinStyle.stdbuttonh
             radius: 10
             buttontext: "Close"
             x: ((parent.width/3)*2)

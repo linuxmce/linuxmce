@@ -1,10 +1,11 @@
 import QtQuick 1.1
-
+import "../../lib/handlers"
 Rectangle {
     id:editPlaylistBase
     color: "transparent"
     state: "hidden"
     anchors.centerIn: metadataSection
+    onStateChanged:editView.positionViewAtIndex(dcenowplaying.m_iplaylistPosition, ListView.Beginning)
     Behavior on height {
         PropertyAnimation{
             duration: 750
@@ -29,6 +30,12 @@ Rectangle {
         color: "black"
         opacity: .25
     }
+    Connections{
+        target: mediaplaylist
+        onActiveItemChanged:{
+            editView.positionViewAtIndex(mediaplaylist.currentIndex, ListView.Beginning)
+        }
+    }
 
     ListView{
         id:editView
@@ -37,26 +44,70 @@ Rectangle {
         clip: true
         flickableDirection: Flickable.VerticalFlick
         model:mediaplaylist
-        currentIndex: dcenowplaying.m_iplaylistPosition
+        Component.onCompleted: currentIndex= dcenowplaying.m_iplaylistPosition
+        highlightFollowsCurrentItem: true
+        spacing:scaleY(1)
+        highlight: Rectangle{
+            radius: 5
+            color: "darkslategrey"
+            opacity: .75
 
-        delegate: Row{
+        }
+
+        delegate:Rectangle{
+
+            height: childrenRect.height
+            width: parent.width
+            color: index ==dcenowplaying.m_iplaylistPosition ? "grey": "darkslategrey"
+            Row{
             height: children.height
             width: parent.width
             spacing:5
+
             StyledText {
                 text: name + "::"+index
-                width: parent.width*.50
+                width: parent.width*.70
             }
-            StyledText{
-                text: "up"
+            Rectangle{
+                 width: parent.width *.10
+                height: childrenRect.height
+                color: "darkslategrey"
+                StyledText{
+                    text: "up"
+                }
+                PlaylistMoveHandler{
+                    direction: "-"
+                }
             }
-            StyledText{
-                text: "down"
+            Rectangle{
+          width: parent.width *.10
+                height: childrenRect.height
+                color: "darkslategrey"
+
+                StyledText{
+                    text: "Down"
+
+                }
+                PlaylistMoveHandler{
+                    direction: "+"
+                }
             }
-            StyledText{
-                text: "Delete"
+
+            Rectangle{
+                width: parent.width *.10
+                height: childrenRect.height
+                color: "darkslategrey"
+                StyledText{
+                    text: "Delete"
+                }
+                PlaylistRemoveItemHandler{
+
+                }
             }
         }
+        }
+
+
     }
     Row{
         id:playlistMeta
@@ -93,6 +144,10 @@ Rectangle {
                 height: metadataSection.height
                 width:metadataSection.width /2
                 opacity:1
+            }
+            PropertyChanges {
+                target: editView
+                currentIndex: dcenowplaying.m_iplaylistPosition
             }
         }
     ]
