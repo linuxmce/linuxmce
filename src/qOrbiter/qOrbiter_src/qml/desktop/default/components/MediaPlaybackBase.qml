@@ -17,6 +17,9 @@ Rectangle {
 
     property bool enableScrollbar:true
 
+    OptionsDisplay {
+        id: optionsDisplay
+    }
 
     Rectangle{
         id:metadataSection
@@ -61,8 +64,6 @@ Rectangle {
             anchors.left: parent.left
             anchors.top: parent.top
         }
-
-
 
         NowPlayingImage{
             id:npImage
@@ -135,6 +136,22 @@ Rectangle {
 
         AudioControl{
             id:audio_controls
+        }
+    }
+
+    Rectangle{
+        height: 50
+        width: 50
+        color: "black"
+        StyledText{
+            anchors.centerIn: parent
+            text: optionsDisplay.state == "exposed" ? "Close": "Options"
+        }
+        anchors.right: home.left
+        anchors.bottom: parent.bottom
+        MouseArea{
+            anchors.fill: parent
+            onClicked: optionsDisplay.state=="exposed" ? optionsDisplay.state="hidden": optionsDisplay.state = "exposed"
         }
     }
 

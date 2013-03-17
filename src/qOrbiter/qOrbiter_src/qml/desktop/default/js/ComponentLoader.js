@@ -35,8 +35,6 @@ function finishStageCreation()
     {
         console.log(component.Status)
     }
-
-
 }
 
 

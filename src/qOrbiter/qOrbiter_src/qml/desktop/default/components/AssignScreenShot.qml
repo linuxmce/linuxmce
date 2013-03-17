@@ -27,7 +27,7 @@ Rectangle {
             id:attributedelegate
             height: 50
             width: parent.width-1
-            color: style.accentcolor
+            color: skinStyle.accentcolor
             Text {
                 id: propertystring
                 text: attributeType
@@ -37,7 +37,7 @@ Rectangle {
                 anchors.fill: parent
                 hoverEnabled: true
                 onEntered: attributedelegate.color = "aliceblue"
-                onExited: attributedelegate.color = style.accentcolor
+                onExited: attributedelegate.color = skinStyle.accentcolor
                 onClicked: {
                      manager.saveScreenShot(attributeNo)
                     manager.cleanupScreenie()
@@ -58,7 +58,7 @@ Rectangle {
         y:50
         height: parent.height *.85
         width: parent.width *.25
-        color: style.lighthighlight
+        color: skinStyle.lighthighlight
         radius:10
         clip:true
         StyledText {

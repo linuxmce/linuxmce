@@ -27,7 +27,7 @@ Item
             anchors.fill: mainItem
             hoverEnabled: true
             onEntered: {
-                mainItem.color = style.darkhighlight
+                mainItem.color = skinStyle.darkhighlight
                 mainItem.scale = 1.25
                 mainItem.z = 10                
             }

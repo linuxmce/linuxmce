@@ -1069,8 +1069,8 @@ public slots:
     /*! @nameScreenshot & Images slots*/
     //@{
     void updateImageChanged(QImage img);
-    void grabStreamImage(){ if(m_bContainsVideo) emit requestStreamImage(); }
-    void grabFileImage() {emit requestStoredMediaImage(nowPlayingButton->path+"/"+nowPlayingButton->filepath);  }
+    void grabStreamImage(){ if(m_bContainsVideo) emit requestStreamImage(); }/*!< \brief This slot is used for non-media devices*/
+    void grabFileImage() {emit requestStoredMediaImage(nowPlayingButton->path+"/"+nowPlayingButton->filepath);  } /*!< \brief This slot is used for now playing screenshots. */
     void setScreenShotVariables(screenshotAttributes*t);
     void showScreenShotVariables() { qorbiterUIwin->rootContext()->setContextProperty("screenshotAttributes", QVariant::fromValue(screenshotVars)); }
     void setMediaScreenShot(QImage screen_shot);

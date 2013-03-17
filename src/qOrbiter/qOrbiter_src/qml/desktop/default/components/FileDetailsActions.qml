@@ -22,7 +22,7 @@ Rectangle{
     AvOptionButton {
         id: buttonsq1
         width: parent.width/3
-        height: style.stdbuttonh
+        height: skinStyle.stdbuttonh
         radius: 10
         //anchors.leftMargin: 18
         buttontext: "Play"
@@ -36,7 +36,7 @@ Rectangle{
         AvOptionButton {
             id: buttonsq2
             width:  parent.width/3
-            height: style.stdbuttonh
+            height: skinStyle.stdbuttonh
             radius: 10
             buttontext: "Move"
         }
@@ -44,7 +44,7 @@ Rectangle{
         AvOptionButton {
             id: buttonsq3
             width:  parent.width/3
-            height: style.stdbuttonh
+            height: skinStyle.stdbuttonh
             radius: 10
             buttontext: "Close"          
             MouseArea{
