@@ -36,7 +36,7 @@ static void display_url(LinphoneCore * linphoneCore, LINPHONE_CONST char *someth
 static void display_warning (LinphoneCore * linphoneCore, LINPHONE_CONST char *something);
 	
 /* C Object, private members */
-static LinphoneCore LS_LinphoneCore;
+static LinphoneCore *LS_LinphoneCore;
 static LinphoneCoreVTable LS_LinphoneCoreVTable;
 static LinphoneProxyConfig * LS_pLinphoneProxyConfig = NULL;
 static LinphoneAuthInfo * LS_pLinphoneAuthInfo = NULL;
@@ -67,11 +67,12 @@ static void LS_RegisterWithAsterisk()
 	
 	linphone_core_enable_logs(stdout);
 	//linphone_core_disable_logs();
-	linphone_core_init(&LS_LinphoneCore, &LS_LinphoneCoreVTable, "/etc/pluto/simplephone.conf", NULL);
+
+	LS_LinphoneCore = linphone_core_new(&LS_LinphoneCoreVTable, "/etc/pluto/simplephone.conf", NULL, NULL);
 	if (LS_pLinphoneProxyConfig != NULL)
 	{
-		linphone_core_add_proxy_config(&LS_LinphoneCore, LS_pLinphoneProxyConfig);
-		linphone_core_set_default_proxy(&LS_LinphoneCore, LS_pLinphoneProxyConfig);
+		linphone_core_add_proxy_config(LS_LinphoneCore, LS_pLinphoneProxyConfig);
+		linphone_core_set_default_proxy(LS_LinphoneCore, LS_pLinphoneProxyConfig);
 	}
 	else
 	{
@@ -97,8 +98,8 @@ static void LS_UnregisterWithAsterisk()
 {
 	PLUTO_SAFETY_LOCK(sl, LS_linphone_mutex);
 	func_enter("LS_UnregisterWithAsterisk");
-	linphone_core_terminate_call(&LS_LinphoneCore, NULL);
-	linphone_core_uninit(&LS_LinphoneCore);
+	linphone_core_terminate_call(LS_LinphoneCore, NULL);
+	linphone_core_destroy(LS_LinphoneCore);
 	func_exit("LS_UnregisterWithAsterisk");
 }
 /** Initialize LinphoneCoreVTable variable */
@@ -154,7 +155,7 @@ static void LS_SetupAuth()
 	PLUTO_SAFETY_LOCK(sl, LS_linphone_mutex);
 	string sPassword = LS_pSimplePhone->GetPassword();
 	linphone_auth_info_set_passwd(LS_pLinphoneAuthInfo, sPassword.c_str());
-	linphone_core_add_auth_info(&LS_LinphoneCore, LS_pLinphoneAuthInfo);
+	linphone_core_add_auth_info(LS_LinphoneCore, LS_pLinphoneAuthInfo);
 	LS_Auth_Received = 0;
 }
 static void LS_SignalHandler(int ExitStatus)
@@ -187,19 +188,19 @@ void * LS_Thread(void * arg)
 /** Returns true of a call is in progress, false otherwise */
 bool LS_ActiveCall()
 {
-	return LS_LinphoneCore.call;
+	return linphone_core_in_call(LS_LinphoneCore);
 }
 /** Send a DTMF tone though and active call */
 void LS_SentDTMF(char cDTMF)
 {
 	PLUTO_SAFETY_LOCK(sl, LS_linphone_mutex);
-	linphone_core_send_dtmf(&LS_LinphoneCore, cDTMF);
+	linphone_core_send_dtmf(LS_LinphoneCore, cDTMF);
 }
 /** Initiate a call */
 void LS_InitiateCall(string sNumber)
 {
 	PLUTO_SAFETY_LOCK(sl, LS_linphone_mutex);
-	linphone_core_invite(&LS_LinphoneCore, sNumber.c_str());
+	linphone_core_invite(LS_LinphoneCore, sNumber.c_str());
 }
 /** Drop the active call */
 bool LS_DropCall()
@@ -211,7 +212,7 @@ bool LS_DropCall()
 bool LS_DropCall_nolock()
 {
 	func_enter("LS_DropCall");
-	bool retval = linphone_core_terminate_call(&LS_LinphoneCore, NULL) != -1;
+	bool retval = linphone_core_terminate_call(LS_LinphoneCore, NULL) != -1;
 	func_exit("LS_DropCall");
 	return retval;
 }
@@ -219,7 +220,7 @@ bool LS_DropCall_nolock()
 void LS_ProcessEvents()
 {
 	PLUTO_SAFETY_LOCK_ERRORSONLY(sl, LS_linphone_mutex);
-	linphone_core_iterate(&LS_LinphoneCore);
+	linphone_core_iterate(LS_LinphoneCore);
 }
 /** Accept the incoming call */
 bool LS_AcceptCall()
@@ -230,7 +231,7 @@ bool LS_AcceptCall()
 /** Accept the incoming call - version without mutex */
 bool LS_AcceptCall_nolock()
 {
-	bool retval = linphone_core_accept_call(&LS_LinphoneCore, NULL) != -1;
+	bool retval = linphone_core_accept_call(LS_LinphoneCore, NULL) != -1;
 	return retval;
 }
 /* Linphone callbacks - implementation */
