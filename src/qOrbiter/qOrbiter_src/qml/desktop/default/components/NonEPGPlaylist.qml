@@ -3,8 +3,7 @@ import "../../lib/handlers"
 
 Rectangle {
     id:nonepgplaylist
-    width: scaleX(25)
-    height: scaleY(45)
+
     visible: nonepgplaylistview.count > 1 ? true : false
     color: "transparent"
     clip:true
@@ -20,6 +19,12 @@ Rectangle {
         target: mediaplaylist
         onActiveItemChanged:{
             nonepgplaylistview.positionViewAtIndex(mediaplaylist.currentIndex, ListView.Beginning)
+        }
+    }
+
+    Behavior on opacity{
+        PropertyAnimation{
+            duration: 1000
         }
     }
 
@@ -179,4 +184,25 @@ Rectangle {
             }
         }
     }
+
+    states: [
+        State {
+            name: "hidden"
+            PropertyChanges {
+                target: nonepgplaylist
+                height:0
+                width:0
+                opacity:0
+            }
+        },
+        State {
+            name: "exposed"
+            PropertyChanges {
+                target: nonepgplaylist
+                width: scaleX(25)
+                height: scaleY(45)
+                opacity:1
+            }
+        }
+    ]
 }

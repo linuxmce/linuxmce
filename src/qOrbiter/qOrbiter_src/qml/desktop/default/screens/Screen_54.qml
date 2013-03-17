@@ -58,8 +58,5 @@ MediaPlaybackBase{
             onClicked: manager.changedPlaylistPosition(index)
         }
     }
-    AudioButtons{
-        anchors.top: parent.top
-        anchors.horizontalCenter: parent.horizontalCenter
-    }
+
 }

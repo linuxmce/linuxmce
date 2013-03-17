@@ -7,19 +7,28 @@ Rectangle {
     height: parent.height
     width: manager.appWidth
     color: "transparent"
-
+    state:"default"
     Component.onCompleted: manager.setBoundStatus(true)
     property alias metadataComponent:mediaTypeMetaData.sourceComponent
     property alias scrollBarComponent:mediaScrollerTarget.sourceComponent
     property alias controlComponent: controlsLoader.sourceComponent
     property alias playlistSource:playlist.model
     property alias playlistDelegate:playlist.delegate
-
     property bool enableScrollbar:true
+
+    function togglePlaylistEditor(){
+        if(state=="default"){
+            state="playlist"
+        }else{
+            state="default"
+        }
+    }
 
     OptionsDisplay {
         id: optionsDisplay
     }
+
+
 
     Rectangle{
         id:metadataSection
@@ -61,13 +70,13 @@ Rectangle {
         }
 
         NonEPGPlaylist{
+            id:current_playlist
             anchors.left: parent.left
             anchors.top: parent.top
         }
 
         NowPlayingImage{
             id:npImage
-            anchors.centerIn: metadataSection
             anchors.horizontalCenterOffset: scaleX(-10)
         }
 
@@ -90,7 +99,10 @@ Rectangle {
 
 
     }
+    EditPlaylistBase{
+            id:playlistEditor
 
+    }
     StyledText {
         id: updating_time
         text: dceTimecode.qsCurrentTime
@@ -162,5 +174,60 @@ Rectangle {
         height: 50
         width: 50
     }
+
+    states: [
+        State {
+            name: "default"
+            PropertyChanges {
+                target: npImage
+                opacity:1
+            }
+            PropertyChanges {
+                target: current_playlist
+                state:"exposed"
+            }
+            PropertyChanges{
+                target:playlistEditor
+                state:"hidden"
+            }
+            AnchorChanges{
+                target: npImage
+                anchors.left: undefined
+                anchors.horizontalCenter: metadataSection.horizontalCenter
+            }
+        },
+        State {
+            name: "playlist"
+            PropertyChanges {
+                target: npImage
+
+            }
+
+            PropertyChanges {
+                target: current_playlist
+                state:"hidden"
+            }
+            PropertyChanges{
+                target:playlistEditor
+                state:"exposed"
+            }
+
+            AnchorChanges{
+                target: npImage
+                anchors.horizontalCenter: undefined
+                anchors.right: metadataSection.left
+            }
+        }
+    ]
+
+    transitions: [
+        Transition {
+            AnchorAnimation{
+                targets: npImage
+                duration: 1000
+            }
+
+        }
+    ]
 
 }

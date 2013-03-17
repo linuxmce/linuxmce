@@ -8,10 +8,10 @@ Rectangle {
     anchors.top: parent.top
     anchors.topMargin: scaleY(5)
     anchors.horizontalCenter: parent.horizontalCenter
-    color: style.highlight2
+    color: skinStyle.highlight2
     clip: true
     radius: 5
-    border.color: style.highlight1
+    border.color: skinStyle.highlight1
     border.width: 3
     MouseArea{
         anchors.fill: filedetailrect
@@ -34,7 +34,7 @@ Rectangle {
         id:titlerect
         height: childrenRect.height + 5
         width: parent.width
-        color:style.highlight1
+        color:skinStyle.highlight1
         radius:2.5
         StyledText {
             id: text2
@@ -69,7 +69,7 @@ Rectangle {
             id: filedetailsimage
             width: filedetailsclass.aspect=="wide"? scaleX(30) : scaleX(23)
             height:filedetailsclass.aspect=="wide"?scaleY(40) : scaleY(55)
-            source: ""
+            source: "http://"+m_ipAddress+"/lmce-admin/MediaImage.php?img="+filedetailsclass.screenshot
             smooth: true
         }
 
@@ -199,8 +199,8 @@ Rectangle {
         spacing: scaleY(.5)
         AvOptionButton {
             id: buttonsq1
-            width: style.stdbuttonw
-            height: style.stdbuttonh
+            width: skinStyle.stdbuttonw
+            height: skinStyle.stdbuttonh
             radius: 10
 
             //anchors.leftMargin: 18
@@ -214,16 +214,16 @@ Rectangle {
 
         AvOptionButton {
             id: buttonsq2
-            width: style.stdbuttonw
-            height: style.stdbuttonh
+            width: skinStyle.stdbuttonw
+            height: skinStyle.stdbuttonh
             radius: 10
             buttontext: "Move"
         }
 
         AvOptionButton {
             id: buttonsq3
-            width: style.stdbuttonw
-            height: style.stdbuttonh
+            width: skinStyle.stdbuttonw
+            height: skinStyle.stdbuttonh
             radius: 10
             buttontext: "Close"
             x: ((parent.width/3)*2)

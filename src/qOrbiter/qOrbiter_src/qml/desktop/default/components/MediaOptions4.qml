@@ -16,15 +16,7 @@ Rectangle {
             width: childrenRect.width
             spacing: scaleX(1)
 
-            AvOptionButton{
-                buttontext: qsTr("Zoom & Aspect")
-                MouseArea{
-                    anchors.fill: parent
-                    onClicked:  {
-                        MyJs.createStageComponent("../components/ZoomAspect.qml", mediaPlaybackBase)
-                    }
-                }
-            }
+
             AvOptionButton{
                 buttontext: qsTr("Bookmarks")
                 MouseArea{
@@ -53,17 +45,7 @@ Rectangle {
                     onClicked: mediaPlaybackBase.togglePlaylistEditor()
                 }
             }
-            AvOptionButton{
-                buttontext: qsTr("Thumbnail")
-                MouseArea{
-                    anchors.fill: parent
-                    onClicked:  {
-                        manager.grabFileImage()
-                        MyJs.createStageComponent("../components/AssignScreenShot.qml", mediaPlaybackBase)
 
-                    }
-                }
-            }
             AvOptionButton{
                 buttontext: qsTr("Jog")
                 MouseArea{
