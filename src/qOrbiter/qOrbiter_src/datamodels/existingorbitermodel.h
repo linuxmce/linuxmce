@@ -26,6 +26,7 @@ signals:
 public slots:
   void appendRow(ExistingOrbiter * item);
  void handleItemChange();
+ void clear() { resetInternalData();}
 private:
 ExistingOrbiter *m_prototype;
 QList<ExistingOrbiter*>m_list;

@@ -15,6 +15,8 @@
 SkinDataModel::SkinDataModel(QUrl &baseUrl, SkinDataItem* prototype, qorbiterManager *uiRef, QObject* parent): QAbstractListModel(parent), m_prototype(prototype)
 {
     m_baseUrl = baseUrl ;
+    clear();
+
 
 //    if(m_baseUrl.scheme() == "http"){
 //        m_baseUrl.setScheme("https");
@@ -28,6 +30,7 @@ SkinDataModel::SkinDataModel(QUrl &baseUrl, SkinDataItem* prototype, qorbiterMan
     ui_reference = uiRef;
     SkinLoader* load = new SkinLoader(m_baseUrl, ui_reference, this);
     m_skin_loader = load;
+    current_style = new QDeclarativeComponent(ui_reference->qorbiterUIwin->rootContext()->engine(), this);
 
     QObject::connect(m_skin_loader, SIGNAL(finishedList()), this, SLOT(checkStatus()));
 }
@@ -53,7 +56,10 @@ SkinDataModel::~SkinDataModel() {
 
 void SkinDataModel::appendRow(SkinDataItem *item)
 {
-    appendRows(QList<SkinDataItem*>() << item);
+
+            appendRows(QList<SkinDataItem*>() << item);
+
+
 }
 
 void SkinDataModel::appendRows(const QList<SkinDataItem *> &items)
@@ -151,41 +157,33 @@ SkinDataItem * SkinDataModel::takeRow(int row)
 
 void SkinDataModel::addSkin(QString name) {
 
-
-    /*QImage skinPic(":/icons/Skin-Data.png");
-
-    // Init the skin loader at this URL and then load the SkinDataItems from that SkinLoader
-
-
-    qDebug() << "Loading Skin at " + m_baseUrl.toString() + "/" + name;
-    QUrl skinBase(m_baseUrl.toString()  + "/" + name);
-    //skinBase.setPath(m_baseUrl.toString());
-   QUrl style;
-   style.setUrl(m_baseUrl.toString() + "/" + name + "/Style.qml");
-
-   if (!style.isValid()) {
-       qDebug() << "Invalid URL!";
-   }*/
-    //qDebug() << "Loading skin : " << name;
     m_skin_loader->prepSkinsToLoad(name);
 
 }
 
 void SkinDataModel::setActiveSkin(QString name)
 {
-    ui_reference->setDceResponse("Loading Skin at " + m_baseUrl.toString() + "/" + name);
+    delete current_style;
 
-    QString skinURL = find(name)->path();
+    ui_reference->setDceResponse("Loading Skin at " + m_baseUrl.toString() + "/" + name);
+    QString skinURL = m_baseUrl.toString() + "/" + name+"/Style.qml";
+    m_entryUrl = m_baseUrl.toString()+"/"+name+"/main.qml";
+
+     qDebug() << "Skin url" << skinURL;
+
    //dir -l qDebug() << skinURL;
+
 #if (QT5)
     QQmlComponent skinData(ui_reference->qorbiterUIwin->engine(), skinURL);
 #else
-    QDeclarativeComponent skinData(ui_reference->qorbiterUIwin->engine(), skinURL);
+
+     current_style = new QDeclarativeComponent(ui_reference->qorbiterUIwin->engine(), skinURL);
 #endif
-    QObject *styleObject = skinData.create(ui_reference->qorbiterUIwin->rootContext());
-    if (skinData.isError()) {
+
+    if (current_style->isError()) {
         // this dir does not contain a Style.qml; ignore it
-        ui_reference->setDceResponse(skinData.errors().last().toString());
+        ui_reference->setDceResponse(current_style->errors().last().toString());
+
         return;
     }
     else
@@ -193,19 +191,18 @@ void SkinDataModel::setActiveSkin(QString name)
         //turning it into a qObject - this part actually loads it - the error should connect to a slot and not an exit
 
         //wait for it to load up
-        while (!skinData.isReady())
+        while (!current_style->isReady())
         {
-            if(skinData.isError())
+            if(current_style->isError())
             {
-                ui_reference->setDceResponse(skinData.errors().last().toString());
-
+                ui_reference->setDceResponse(current_style->errors().last().toString());
                 break;
             }
-
-
         }
-
+        currentItem = current_style->create();
+        emit currentSkinReady();
     }
+
 }
 
 void SkinDataModel::checkStatus()

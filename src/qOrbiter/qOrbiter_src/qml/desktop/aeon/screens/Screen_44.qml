@@ -3,27 +3,27 @@ import "../components"
 import "../js/ComponentLoader.js" as MyJs
 Item {
     id:screen_44
-    height: style.orbiterH
-    width: style.orbiterW
+    height: skinStyle.orbiterH
+    width: skinStyle.orbiterW
     Rectangle {
-        height: style.orbiterH
-        width: style.orbiterW
+        height: skinStyle.orbiterH
+        width: skinStyle.orbiterW
         color:  "black"
         opacity: .8
     }
 
 Rectangle {
-    height: style.orbiterH
-    width: style.orbiterW
+    height: skinStyle.orbiterH
+    width: skinStyle.orbiterW
     color: "transparent"
     id: advancedscreen
 
     Rectangle {
          border.width: 1
-         border.color: style.button_action_color_hover
+         border.color: skinStyle.button_action_color_hover
         id:home
-        height: style.buttonH
-        width: style.buttonW
+        height: skinStyle.buttonH
+        width: skinStyle.buttonW
         radius: 5
         Text {
             text:"Home"
@@ -55,10 +55,10 @@ Rectangle {
 
         Rectangle {
              border.width: 1
-             border.color: style.button_action_color_hover
+             border.color: skinStyle.button_action_color_hover
             id:regenorbiter
-            height: style.buttonH
-            width: style.buttonW
+            height: skinStyle.buttonH
+            width: skinStyle.buttonW
             radius: 5
             Text {
                 text:"Regen Orbiter"
@@ -83,10 +83,10 @@ Rectangle {
 
         Rectangle {
             border.width: 1
-            border.color: style.button_action_color_hover
+            border.color: skinStyle.button_action_color_hover
             id:pending
-            height: style.buttonH
-            width: style.buttonW
+            height: skinStyle.buttonH
+            width: skinStyle.buttonW
             radius: 5
             Text {
                 text:"Pending Tasks"
@@ -105,10 +105,10 @@ Rectangle {
 
         Rectangle {
             border.width: 1
-            border.color: style.button_action_color_hover
+            border.color: skinStyle.button_action_color_hover
             id:networksettings
-            height: style.buttonH
-            width: style.buttonW
+            height: skinStyle.buttonH
+            width: skinStyle.buttonW
             radius: 5
             Text {
                 text:"Network Settings"
@@ -127,10 +127,10 @@ Rectangle {
 
         Rectangle {
             border.width: 1
-            border.color: style.button_action_color_hover
+            border.color: skinStyle.button_action_color_hover
             id:avwizard
-            height: style.buttonH
-            width: style.buttonW
+            height: skinStyle.buttonH
+            width: skinStyle.buttonW
             radius: 5
             Text {
                 text:"Av wizard"
@@ -149,8 +149,8 @@ Rectangle {
 
         Rectangle {
             id:regenorbiters
-            height: style.buttonH
-            width: style.buttonW
+            height: skinStyle.buttonH
+            width: skinStyle.buttonW
             radius: 5
             Text {
                 text:"Regen All Orbiters"
@@ -169,8 +169,8 @@ Rectangle {
 
         Rectangle {
             id:quickreload
-            height: style.buttonH
-            width: style.buttonW
+            height: skinStyle.buttonH
+            width: skinStyle.buttonW
             radius: 5
             Text {
                 text:"Quick Reload"
@@ -193,12 +193,12 @@ Rectangle {
         }
 
         Rectangle {
-            id:changeStyle
-            height: style.buttonH
-            width: style.buttonW
+            id:changeskinStyle
+            height: skinStyle.buttonH
+            width: skinStyle.buttonW
             radius: 5
             Text {
-                text:"Change Styles"
+                text:"Change skinStyles"
                 font.pointSize: 10
                 verticalAlignment: Text.AlignVCenter
                 horizontalAlignment: Text.AlignHCenter

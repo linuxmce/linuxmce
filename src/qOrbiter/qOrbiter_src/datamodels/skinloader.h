@@ -9,6 +9,7 @@
 #include <QQmlComponent>
 #else
 #include <QtDeclarative/QDeclarativeComponent>
+#include <QDeclarativeItem>
 #endif
 #include "skindataitem.h"
 
@@ -40,8 +41,6 @@ signals:
 #else
     QDeclarativeComponent *current_component;
 #endif
-
-
     SkinDataModel *m_parent;
     QUrl m_base_url;
     qorbiterManager  *ui_reference;

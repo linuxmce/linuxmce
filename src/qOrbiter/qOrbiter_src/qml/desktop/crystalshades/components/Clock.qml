@@ -1,4 +1,4 @@
-import QtQuick 1.0
+import QtQuick 1.1
 Image {
 property bool verticalMirror: false
     function getDate(){

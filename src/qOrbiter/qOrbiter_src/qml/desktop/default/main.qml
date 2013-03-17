@@ -23,7 +23,7 @@ Item {
     id: qmlroot
     width:manager.appWidth
     height:manager.appHeight
-    property alias skinStyle: style
+
 
     property string locationinfo: "standby"
     property string screenfile
@@ -36,9 +36,7 @@ Item {
 
     Component.onCompleted: {logger.userLogMsg = "Main.qml loaded in default skin"; manager.setBoundStatus(true)}
 
-    Style{
-        id:style
-    }
+
 
     FontLoader{
         id:myFont

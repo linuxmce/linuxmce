@@ -47,7 +47,5 @@ public slots:
         //qDebug() << "calling destructor for item.";
        this->deleteLater();
     }
-
-
 };
 #endif // ATTRIBUTESORTITEM_H

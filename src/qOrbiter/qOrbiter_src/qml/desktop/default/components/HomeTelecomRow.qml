@@ -20,7 +20,7 @@ Rectangle{
             anchors.topMargin: scaleY(2)
             height: scaleY(13)
             width: scaleX(8)
-            radius: style.but_smooth
+            radius: skinStyle.but_smooth
             color:"transparent"
 
             Image {
@@ -44,14 +44,14 @@ Rectangle{
             id:securityflick
             height: scaleY(16)
             width: scaleX(87)
-            contentHeight: style.buttonH
-            contentWidth: ((style.buttonW) * (telecomScenarios.count + 1)) - 5
+            contentHeight: skinStyle.buttonH
+            contentWidth: ((skinStyle.buttonW) * (telecomScenarios.count + 1)) - 5
             clip: true
             flickableDirection: "HorizontalFlick"
 
             ListView{
                 id: telecomScenarios
-                height: scaleY(style.buttonH)
+                height: scaleY(skinStyle.buttonH)
                 width: stage.width
                 model: currentRoomTelecom
                 spacing: 5

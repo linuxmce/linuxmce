@@ -1310,8 +1310,9 @@ signals:
 
 
     //connections
-    void checkReload();
+    void routerReload();
     void routerDisconnect();
+    void routerReplace();
     void routerConnectionChanged(bool s);
 
     //floorplans

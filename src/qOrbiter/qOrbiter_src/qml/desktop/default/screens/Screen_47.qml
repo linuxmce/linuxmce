@@ -39,7 +39,7 @@ Rectangle {
         id: pos_label
         anchors.top: fileviewscreen.top
         anchors.horizontalCenter: fileviewscreen.horizontalCenter
-        color:style.darkhighlight
+        color:skinStyle.darkhighlight
         width: gridView.width
         height: scaleY(5)
         opacity: .25
@@ -222,8 +222,8 @@ Rectangle {
 
     //        ButtonSq
     //        {
-    //            height: scaleY(style.iconHeight)
-    //            width: scaleX(style.iconWidth)
+    //            height: scaleY(skinStyle.iconHeight)
+    //            width: scaleX(skinStyle.iconWidth)
     //            buttontext: "Go Back"
     //            buttontextbold: true
     //            MouseArea

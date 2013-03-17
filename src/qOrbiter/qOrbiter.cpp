@@ -2611,7 +2611,7 @@ void DCE::qOrbiter::GetFileInfoForQml(QString qs_file_reference)
     else
     {
         emit commandResponseChanged("Unable to request file information");
-        checkReload();
+        routerReload();
     }
 
 }
@@ -4336,12 +4336,12 @@ void DCE::qOrbiter::adjustVolume(int vol)
 
 void qOrbiter::OnDisconnect()
 {
-    emit routerDisconnect();
     emit routerConnectionChanged(false);
     qDebug("Router disconnected!");
     m_bOrbiterConnected = false;
     setNowPlaying(false);
     emit eventResponseChanged("Connection Lost");
+    emit routerDisconnect();
 }
 
 void qOrbiter::OnReload()
@@ -4363,13 +4363,13 @@ void qOrbiter::OnReload()
     if(NULL != m_pRouter && m_pRouter->IsPlugin(m_pcRequestSocket->m_dwPK_Device))
         m_pRouter->Reload();
 #endif
-    emit routerDisconnect();
-    emit checkReload();
+    emit routerReload();
 }
 
 bool qOrbiter::OnReplaceHandler(string msg)
 {
     emit commandResponseChanged("Disconnecting due to device with same ID connecting.");
+    emit routerReplace();
     deinitialize();
 
 }

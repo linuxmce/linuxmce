@@ -667,15 +667,17 @@ int main(int argc, char* argv[])
         QObject::connect(&w, SIGNAL(setVolume(int)), &pqOrbiter,SLOT(adjustVolume(int)), Qt::QueuedConnection);
         QObject::connect(&w, SIGNAL(resendDeviceCode(int,int)), &pqOrbiter, SLOT(sendAvCommand(int,int)), Qt::QueuedConnection);
         QObject::connect(&w, SIGNAL(osdChanged(bool)), &pqOrbiter, SLOT(displayToggle(bool)),Qt::QueuedConnection);
-        QObject::connect(&pqOrbiter,SIGNAL(routerReloading(QString)), &w, SLOT(reloadHandler()) );
+       // QObject::connect(&pqOrbiter,SIGNAL(routerReloading(QString)), &w, SLOT(reloadHandler()) );
         QObject::connect(&w, SIGNAL(newLightLevel(QString)), &pqOrbiter, SLOT(adjustRoomLights(QString)), Qt::QueuedConnection);
         QObject::connect(&w, SIGNAL(zoomLevelChanged(QString)), &pqOrbiter, SLOT(setZoom(QString)), Qt::QueuedConnection);
         QObject::connect(&w, SIGNAL(aspectRatioChanged(QString)), &pqOrbiter, SLOT(setAspect(QString)), Qt::QueuedConnection);
         //FIXME: below emits error: QObject::connect: Attempt to bind non-signal orbiterWindow::close()
         //QObject::connect (&w,SIGNAL, &w, SLOT(closeOrbiter()), Qt::DirectConnection);
         QObject::connect(&w, SIGNAL(reloadRouter()), &pqOrbiter, SLOT(quickReload()), Qt::QueuedConnection);
-        QObject::connect(&pqOrbiter, SIGNAL(routerDisconnect()), &w, SLOT(reloadHandler()),Qt::QueuedConnection);
-        QObject::connect(&pqOrbiter, SIGNAL(checkReload()), &w, SLOT(connectionWatchdog()), Qt::QueuedConnection);
+        QObject::connect(&pqOrbiter,SIGNAL(routerReload()), &w, SLOT(reloadHandler()));
+        QObject::connect(&pqOrbiter, SIGNAL(replaceDevice()), &w, SLOT(replaceHandler()));
+        QObject::connect(&pqOrbiter, SIGNAL(routerDisconnect()), &w, SLOT(disconnectHandler()),Qt::QueuedConnection);
+        QObject::connect(&pqOrbiter, SIGNAL(routerReload()), &w, SLOT(connectionWatchdog()), Qt::QueuedConnection);
         QObject::connect(&w, SIGNAL(reInitialize()), &pqOrbiter, SLOT(initialize()), Qt::QueuedConnection);
      //   QObject::connect(&w, SIGNAL(deviceNumberChanged(int)), &pqOrbiter, SLOT(setDeviceId(int)));
      //   QObject::connect(&w, SIGNAL(internalIpChanged(QString)), &pqOrbiter, SLOT(setdceIP(QString)));

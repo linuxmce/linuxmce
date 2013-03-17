@@ -105,6 +105,7 @@ qorbiterManager::qorbiterManager(QDeclarativeView *view, QObject *parent) :
     myOrbiters = new ExistingOrbiterModel(new ExistingOrbiter(), this);
     devices = new DeviceModel(new AvDevice(), this );
     deviceCommands = new AvCodeGrid(new AvCommand(), this);
+
     //  qorbiterUIwin->rootContext()->setContextProperty("srouterip", QString(qs_routerip) );
     //  qorbiterUIwin->rootContext()->setContextProperty("deviceid", QString::number((iPK_Device)) );
     qorbiterUIwin->rootContext()->setContextProperty("extip", qs_ext_routerip );
@@ -137,6 +138,7 @@ qorbiterManager::qorbiterManager(QDeclarativeView *view, QObject *parent) :
     QObject::connect(this, SIGNAL(orbiterReady(bool)), this, SLOT(showUI(bool)));
     QObject::connect(this, SIGNAL(skinDataLoaded(bool)), SLOT(showUI(bool)));
     QObject::connect(view->engine(), SIGNAL(quit()), this, SLOT(closeOrbiter()));
+
 
 
     /*!
@@ -460,15 +462,8 @@ void qorbiterManager::refreshUI(QUrl url)
 #endif
 
 
-    QUrl fixed  = skin->entryUrl();
-    if(fixed.scheme()=="http"){
-        // fixed.setScheme("https");
-    }
-
-
-    qorbiterUIwin->rootContext()->setBaseUrl(fixed);
-
-    qorbiterUIwin->setSource(fixed);
+    qorbiterUIwin->rootContext()->setBaseUrl(url);
+    qorbiterUIwin->setSource(url);
 
 }
 
@@ -866,13 +861,14 @@ void qorbiterManager::swapSkins(QString incSkin)
     checkOrientation(qorbiterUIwin->size());
     if (tskinModel->rowCount() > 0)
     {
-        emit skinMessage("Setting Skin to:" + incSkin);
-        skin = tskinModel->find(incSkin);
-        emit skinMessage("Got it from the model : " + skin->baseUrl().toString());
-        setImagePath(skin->baseUrl().toString()+"/img/");
+
+        emit skinMessage("Setting Skin to:" +incSkin);
+        qDebug()<<"Break";
+        emit skinMessage("Got it from the model : " + tskinModel->m_baseUrl.toString());
+        setImagePath(tskinModel->m_baseUrl.toString()+"/"+incSkin+"/img/");
         //load the actual skin entry point
         currentSkin = incSkin;
-        qorbiterUIwin->engine()->rootContext()->setContextProperty("style", skin->styleView());
+        qorbiterUIwin->engine()->rootContext()->setContextProperty("skinStyle", tskinModel->currentItem);
 #if (QT5)
         QObject::connect(qorbiterUIwin, SIGNAL(statusChanged(QQuickView::Status)),
                          this, SLOT(skinLoaded(QQuickView::Status)));
@@ -880,7 +876,7 @@ void qorbiterManager::swapSkins(QString incSkin)
         QObject::connect(qorbiterUIwin, SIGNAL(statusChanged(QDeclarativeView::Status)),
                          this, SLOT(skinLoaded(QDeclarativeView::Status)));
 #endif
-        QMetaObject::invokeMethod(this, "refreshUI", Qt::QueuedConnection, Q_ARG(QUrl, skin->entryUrl()));
+        QMetaObject::invokeMethod(this, "refreshUI", Qt::QueuedConnection, Q_ARG(QUrl, tskinModel->m_entryUrl));
     }
     else
     {
@@ -1100,6 +1096,7 @@ bool qorbiterManager::loadSkins(QUrl base)
 {
     emit skinMessage("Local Skins path" +base.toString());
     tskinModel = new SkinDataModel(base, new SkinDataItem, this);
+     QObject::connect(tskinModel, SIGNAL(currentSkinReady()), this, SLOT(showSkin()));
     qorbiterUIwin->rootContext()->setContextProperty("skinsList", tskinModel);
     QObject::connect(tskinModel, SIGNAL(skinsFinished(bool)), this, SLOT(setSkinStatus(bool)));
 
@@ -1139,6 +1136,7 @@ bool qorbiterManager::loadSkins(QUrl base)
     setDceResponse("Skin Search Path:"+ desktopQmlPath.dirName());
     localSkins = desktopQmlPath.entryList(QDir::Dirs |QDir::NoDotAndDotDot);
 
+
 #ifdef QT_DEBUG
     qDebug()<<"inside of skins we find" << localSkins.join(",");
 #endif
@@ -1159,7 +1157,8 @@ void qorbiterManager::showUI(bool b)
 
     if( b_orbiterReady && b_skinReady )
     {
-        swapSkins(currentSkin);
+        setActiveSkin(currentSkin);
+
     }
     else
     {
@@ -1613,8 +1612,22 @@ void qorbiterManager::regenError(QProcess::ProcessError)
 
 bool qorbiterManager::cleanupData()
 {
-    roomLights= NULL;                 //current room scenarios model
-    roomMedia=NULL;                   //current room media model
+
+    roomLights->clear();                 //current room scenarios model
+    roomMedia->clear();
+    roomClimate->clear();
+    roomClimateScenarios.clear();
+    roomLightingScenarios.clear();
+    roomMediaScenarios.clear();
+    roomSecurity->clear();
+    roomSecurityScenarios.clear();
+    roomTelecom->clear();
+    roomTelecomScenarios.clear();
+    nowPlayingButton->resetData();
+    filedetailsclass->clear();
+    devices->clear();
+    myOrbiters->clear();
+
     return true;
 }
 
@@ -1660,7 +1673,8 @@ void qorbiterManager::setActiveSkin(QString name)
 #ifdef QT_DEBUG
     qDebug("Setting Skin");
 #endif
-    swapSkins(name);
+    tskinModel->setActiveSkin(name);
+
 }
 
 void qorbiterManager::cleanupScreenie()
@@ -1681,8 +1695,23 @@ void qorbiterManager::initializeConnections()
 
 void qorbiterManager::reloadHandler()
 {
-    gotoQScreen("ReloadHandler.qml");
+    if(cleanupData()){
+      gotoQScreen("ReloadHandler.qml");
+    }
 
+
+}
+
+void qorbiterManager::disconnectHandler()
+{
+    cleanupData();
+    gotoQScreen("Splash.qml");
+}
+
+void qorbiterManager::replaceHandler()
+{
+    cleanupData();
+    gotoQScreen("Splash.qml");
 }
 
 void qorbiterManager::setDceResponse(QString response)
@@ -1887,3 +1916,6 @@ bool qorbiterManager::setupMobileStorage(QString externalStorage)
 #endif
 
 }
+
+
+

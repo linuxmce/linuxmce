@@ -7,7 +7,7 @@ import "../js/ComponentLoader.js" as MyJs
 Rectangle {
     id:advanced_panel
     width: manager.appWidth - scaleX(1)
-    height: style.widebuttonh + scaleY(4)
+    height: skinStyle.widebuttonh + scaleY(4)
     anchors.horizontalCenter: parent.horizontalCenter
     color:"transparent"
 
@@ -36,8 +36,8 @@ Rectangle {
         clip: false
 
         AdvancedButton {
-            width: style.widebuttonw
-            height: style.widebuttonh
+            width: skinStyle.widebuttonw
+            height: skinStyle.widebuttonh
             id: buttonsq1
             buttontext: "Advanced"
             radius: 5
@@ -52,8 +52,8 @@ Rectangle {
             id: buttonsq2
             x: 63
             y: 1
-            width: style.widebuttonw
-            height: style.widebuttonh
+            width: skinStyle.widebuttonw
+            height: skinStyle.widebuttonh
             buttontext: "Power"
             radius: 5
             MouseArea{
@@ -67,8 +67,8 @@ Rectangle {
             id: buttonsq3
             x: 125
             y: 1
-            width: style.widebuttonw
-            height: style.widebuttonh
+            width: skinStyle.widebuttonw
+            height: skinStyle.widebuttonh
             buttontext: "Sleeping Menu"
             radius: 5
 
@@ -84,8 +84,8 @@ Rectangle {
 
         AdvancedButton{
             id:roombutton
-            width: style.widebuttonw
-            height: style.widebuttonh
+            width: skinStyle.widebuttonw
+            height: skinStyle.widebuttonh
             buttontext: currentroom
             MouseArea{
                 anchors.fill: parent
@@ -97,8 +97,8 @@ Rectangle {
 
         AdvancedButton{
             id:exit
-            width: style.widebuttonw
-            height: style.widebuttonh
+            width: skinStyle.widebuttonw
+            height: skinStyle.widebuttonh
             buttontext: "Exit Orbiter"
             MouseArea{
                 anchors.fill: exit

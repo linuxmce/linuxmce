@@ -5,8 +5,8 @@ Rectangle {
     property alias media_but_txt: media_button_text.text
     property alias button:handler
     id: rectangle1
-    height: style.mediabuttonH
-    width: style.mediabuttonW
+    height: skinStyle.mediabuttonH
+    width: skinStyle.mediabuttonW
     border.color: "white"
     border.width: 1
     color: handler.pressed ? "yellow" : "green"

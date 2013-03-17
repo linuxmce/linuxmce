@@ -54,7 +54,7 @@ Rectangle{
             hoverEnabled: true
             onEntered: {
                 buttonbg.opacity = 1
-                buttonLabel.color = style.lighttext
+                buttonLabel.color = skinStyle.lighttext
                 buttonLabel.font.capitalization = Font.AllUppercase
             }
 

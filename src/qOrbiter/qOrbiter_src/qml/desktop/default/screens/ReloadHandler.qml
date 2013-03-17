@@ -71,7 +71,7 @@ Rectangle {
         id:continueTimer
         interval: 5000
         running: true
-        onTriggered: manager.qmlSetupLmce(iPK_Device,srouterip)
+        onTriggered: manager.qmlSetupLmce(iPK_Device,manager.m_ipAddress)
     }
 
 }

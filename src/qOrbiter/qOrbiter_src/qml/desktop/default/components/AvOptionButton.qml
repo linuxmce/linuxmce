@@ -3,8 +3,8 @@ import QtQuick 1.0
 Rectangle{
 
     color: "transparent"
-    height: style.avoptionbuttonh
-    width: style.avoptionbuttonw
+    height: skinStyle.avoptionbuttonh
+    width: skinStyle.avoptionbuttonw
     property alias buttontext: buttonLabel.text
     property alias buttontextcolor: buttonLabel.color
     property alias buttontextfontsize: buttonLabel.font.pointSize
@@ -27,11 +27,11 @@ horizontalTileMode: BorderImage.Repeat
 
     Rectangle {
         id:buttonBase
-        color:style.darkhighlight
+        color:skinStyle.darkhighlight
         height: parent.height
         width: parent.width
         border.width: 2
-        border.color: style.highlight1
+        border.color: skinStyle.highlight1
         radius: 1
 
 
@@ -58,13 +58,13 @@ horizontalTileMode: BorderImage.Repeat
         anchors.fill: buttonLabel
         hoverEnabled: true
         onEntered: {
-            buttonBase.color = style.lighthighlight
-            buttonLabel.color = style.lighttext
+            buttonBase.color = skinStyle.lighthighlight
+            buttonLabel.color = skinStyle.lighttext
             buttonLabel.font.capitalization = Font.AllUppercase
         }
 
         onExited: {
-            buttonBase.color = style.darkhighlight
+            buttonBase.color = skinStyle.darkhighlight
             buttonLabel.font.capitalization = Font.Normal
             buttonLabel.color = "black"
         }

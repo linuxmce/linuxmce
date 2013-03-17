@@ -39,7 +39,7 @@ Rectangle {
                 id:metarect
                 width: scaleX(35)
                 height: childrenRect.height
-                color: style.bgcolor
+                color: skinStyle.bgcolor
 
                 Rectangle {
                     id: gradientheader
@@ -83,7 +83,7 @@ Rectangle {
                         opacity: .35
                     }
 
-                    color: style.bgcolor
+                    color: skinStyle.bgcolor
                     anchors.top:nowplayingimage.bottom
 //                    LiveTvData {
 //                    }

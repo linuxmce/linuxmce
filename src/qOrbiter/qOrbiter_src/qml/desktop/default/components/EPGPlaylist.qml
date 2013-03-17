@@ -3,7 +3,7 @@ import QtQuick 1.0
 Rectangle {
     width: scaleX(26)
     height: scaleY(61)
-    color: style.lighthighlight
+    color: skinStyle.lighthighlight
     Component.onCompleted: getLiveTVPlaylist()
     clip:true
 
@@ -37,15 +37,15 @@ Rectangle {
                 border.width: 2
                 width:scaleX(25)
                 height: scaleY(10)
-                color: style.lighthighlight
+                color: skinStyle.lighthighlight
 
                 Rectangle{
                     id:channelidrect
                     height: parent.height - 1
                     width: parent.width*.25
-                    color: style.maincolor
+                    color: skinStyle.maincolor
                     anchors.right: parent.right
-                    border.color: style.darkhighlight
+                    border.color: skinStyle.darkhighlight
                     border.width: 2
 
                     StyledText {
@@ -94,9 +94,9 @@ Rectangle {
 
                     }
                     hoverEnabled: true
-                    onEntered:{ delrect.color = style.accentcolor ; proglabel.color = "black"}
+                    onEntered:{ delrect.color = skinStyle.accentcolor ; proglabel.color = "black"}
 
-                    onExited: {delrect.color = style.lighthighlight; proglabel.color = "aliceblue"}
+                    onExited: {delrect.color = skinStyle.lighthighlight; proglabel.color = "aliceblue"}
                 }
             }
         }

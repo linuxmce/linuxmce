@@ -39,6 +39,11 @@ public:
     void addSkin(QString url);
     int *default_ea;
 
+    QDeclarativeComponent *current_style;
+    QObject *currentItem;
+    QUrl m_baseUrl;
+    QUrl m_entryUrl;
+    QUrl m_styleUrl;
 public slots:
     void setActiveSkin(QString name);
     void checkStatus();
@@ -48,10 +53,11 @@ private slots:
 
 signals:
     void skinsFinished(bool b);
+    void currentSkinReady();
+
 
 private:
     SkinLoader *m_skin_loader;
-    QUrl m_baseUrl;
     qorbiterManager  *ui_reference;
     SkinDataItem* m_prototype;
     QList<SkinDataItem*> m_list;

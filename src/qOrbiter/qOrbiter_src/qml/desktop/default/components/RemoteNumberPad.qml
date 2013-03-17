@@ -3,9 +3,9 @@ import QtQuick 1.0
 Rectangle {
     width: scaleX(20)
     height: childrenRect.height
-    color:style.lighthighlight
+    color:skinStyle.lighthighlight
     id:remotenumberpad
-    border.color: style.highlight1
+    border.color: skinStyle.highlight1
     border.width: 2
     radius:5
 
@@ -21,10 +21,10 @@ Rectangle {
             id: numberdisplay
             width: scaleX(15)
             height: scaleY(8)
-            color: style.highlight2
+            color: skinStyle.highlight2
             radius: 19
             anchors.horizontalCenter: parent.horizontalCenter
-            border.color: style.accentcolor
+            border.color: skinStyle.accentcolor
             border.width: 2
 
             TextInput {
@@ -48,8 +48,8 @@ Rectangle {
             // anchors.top: numberdisplay.bottom
             anchors.topMargin: 5
             anchors.horizontalCenter: parent.horizontalCenter
-            border.color: style.highlight1
-            color: style.darkhighlight
+            border.color: skinStyle.highlight1
+            color: skinStyle.darkhighlight
             radius: 5
             Column{
                 id: numberrowcolum
@@ -63,7 +63,7 @@ Rectangle {
                         id:number1
                         height: scaleY(9)
                         width: scaleX(5)
-                        color:style.lighthighlight
+                        color:skinStyle.lighthighlight
                         radius: 100
                         Image {
                             id: name
@@ -84,11 +84,11 @@ Rectangle {
                             hoverEnabled: true
                             onEntered:
                             {
-                                parent.color = style.darkhighlight
+                                parent.color = skinStyle.darkhighlight
                             }
                             onExited:
                             {
-                              parent.color = style.lighthighlight
+                              parent.color = skinStyle.lighthighlight
                             }
 
 
@@ -104,7 +104,7 @@ Rectangle {
                         id:number2
                         height: scaleY(9)
                         width: scaleX(5)
-                        color:style.lighthighlight
+                        color:skinStyle.lighthighlight
                         radius: 100
                         Image {
 
@@ -125,11 +125,11 @@ Rectangle {
                             hoverEnabled: true
                             onEntered:
                             {
-                                parent.color = style.darkhighlight
+                                parent.color = skinStyle.darkhighlight
                             }
                             onExited:
                             {
-                              parent.color = style.lighthighlight
+                              parent.color = skinStyle.lighthighlight
                             }
 
 
@@ -145,7 +145,7 @@ Rectangle {
                         id:number3
                         height: scaleY(9)
                         width: scaleX(5)
-                        color:style.lighthighlight
+                        color:skinStyle.lighthighlight
                         radius: 100
                         Image {
 
@@ -166,11 +166,11 @@ Rectangle {
                             hoverEnabled: true
                             onEntered:
                             {
-                                parent.color = style.darkhighlight
+                                parent.color = skinStyle.darkhighlight
                             }
                             onExited:
                             {
-                              parent.color = style.lighthighlight
+                              parent.color = skinStyle.lighthighlight
                             }
 
 
@@ -195,7 +195,7 @@ Rectangle {
                         id:number4
                         height: scaleY(9)
                         width: scaleX(5)
-                        color:style.lighthighlight
+                        color:skinStyle.lighthighlight
                         radius: 100
                         Image {
 
@@ -216,11 +216,11 @@ Rectangle {
                             hoverEnabled: true
                             onEntered:
                             {
-                                parent.color = style.darkhighlight
+                                parent.color = skinStyle.darkhighlight
                             }
                             onExited:
                             {
-                              parent.color = style.lighthighlight
+                              parent.color = skinStyle.lighthighlight
                             }
 
 
@@ -236,7 +236,7 @@ Rectangle {
                         id:number5
                         height: scaleY(9)
                         width: scaleX(5)
-                        color:style.lighthighlight
+                        color:skinStyle.lighthighlight
                         radius: 100
                         Image {
 
@@ -257,11 +257,11 @@ Rectangle {
                             hoverEnabled: true
                             onEntered:
                             {
-                                parent.color = style.darkhighlight
+                                parent.color = skinStyle.darkhighlight
                             }
                             onExited:
                             {
-                              parent.color = style.lighthighlight
+                              parent.color = skinStyle.lighthighlight
                             }
 
 
@@ -277,7 +277,7 @@ Rectangle {
                         id:number6
                         height: scaleY(9)
                         width: scaleX(5)
-                        color:style.lighthighlight
+                        color:skinStyle.lighthighlight
                         radius: 100
                         Image {
 
@@ -298,11 +298,11 @@ Rectangle {
                             hoverEnabled: true
                             onEntered:
                             {
-                                parent.color = style.darkhighlight
+                                parent.color = skinStyle.darkhighlight
                             }
                             onExited:
                             {
-                              parent.color = style.lighthighlight
+                              parent.color = skinStyle.lighthighlight
                             }
 
 
@@ -327,7 +327,7 @@ Rectangle {
                         id:number7
                         height: scaleY(9)
                         width: scaleX(5)
-                        color:style.lighthighlight
+                        color:skinStyle.lighthighlight
                         radius: 100
                         Image {
 
@@ -348,11 +348,11 @@ Rectangle {
                             hoverEnabled: true
                             onEntered:
                             {
-                                parent.color = style.darkhighlight
+                                parent.color = skinStyle.darkhighlight
                             }
                             onExited:
                             {
-                              parent.color = style.lighthighlight
+                              parent.color = skinStyle.lighthighlight
                             }
 
 
@@ -368,7 +368,7 @@ Rectangle {
                         id:number8
                         height: scaleY(9)
                         width: scaleX(5)
-                        color:style.lighthighlight
+                        color:skinStyle.lighthighlight
                         radius: 100
                         Image {
 
@@ -389,11 +389,11 @@ Rectangle {
                             hoverEnabled: true
                             onEntered:
                             {
-                                parent.color = style.darkhighlight
+                                parent.color = skinStyle.darkhighlight
                             }
                             onExited:
                             {
-                              parent.color = style.lighthighlight
+                              parent.color = skinStyle.lighthighlight
                             }
 
 
@@ -409,7 +409,7 @@ Rectangle {
                         id:number9
                         height: scaleY(9)
                         width: scaleX(5)
-                        color:style.lighthighlight
+                        color:skinStyle.lighthighlight
                         radius: 100
                         Image {
 
@@ -430,11 +430,11 @@ Rectangle {
                             hoverEnabled: true
                             onEntered:
                             {
-                                parent.color = style.darkhighlight
+                                parent.color = skinStyle.darkhighlight
                             }
                             onExited:
                             {
-                              parent.color = style.lighthighlight
+                              parent.color = skinStyle.lighthighlight
                             }
 
                             onClicked:
@@ -473,7 +473,7 @@ Rectangle {
                         id:number0
                         height: scaleY(9)
                         width: scaleX(5)
-                        color:style.lighthighlight
+                        color:skinStyle.lighthighlight
                         radius: 100
                         Image {
 
@@ -496,11 +496,11 @@ Rectangle {
                             hoverEnabled: true
                             onEntered:
                             {
-                                parent.color = style.darkhighlight
+                                parent.color = skinStyle.darkhighlight
                             }
                             onExited:
                             {
-                              parent.color = style.lighthighlight
+                              parent.color = skinStyle.lighthighlight
                             }
                              onClicked: text_input1.text = text_input1.text+"0"
 

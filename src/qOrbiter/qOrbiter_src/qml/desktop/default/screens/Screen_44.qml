@@ -17,7 +17,7 @@ Rectangle {
         width: scaleX(75)
         color: "slategrey"
         radius: 5
-        border.color: style.highlight1
+        border.color: skinStyle.highlight1
         border.width: 2
         anchors.centerIn: parent
         opacity: .85
@@ -31,8 +31,8 @@ Rectangle {
 
             AdvancedButton{
                 id:regenorbiter
-                height: scaleY(style.buttonH)
-                width: scaleX(style.buttonW)
+                height: scaleY(skinStyle.buttonH)
+                width: scaleX(skinStyle.buttonW)
                 buttontext: qsTr("Regen This Orbiter")
                 radius: 5
                 MouseArea{
@@ -44,24 +44,24 @@ Rectangle {
 
             AdvancedButton{
                 id:regenorbiters
-                height: scaleY(style.buttonH)
-                width: scaleX(style.buttonW)
+                height: scaleY(skinStyle.buttonH)
+                width: scaleX(skinStyle.buttonW)
                 buttontext: qsTr("Regen All Orbiters")
                 radius: 5
             }
 
             AdvancedButton{
                 id:reloadandregen
-                height: scaleY(style.buttonH)
-                width: scaleX(style.buttonW)
+                height: scaleY(skinStyle.buttonH)
+                width: scaleX(skinStyle.buttonW)
                 buttontext: qsTr("Reload and Regen")
                 radius: 5
             }
 
             AdvancedButton{
                 id:quickreload
-                height: scaleY(style.buttonH)
-                width: scaleX(style.buttonW)
+                height: scaleY(skinStyle.buttonH)
+                width: scaleX(skinStyle.buttonW)
                 buttontext: qsTr("Quick Reload")
                 radius: 5
                 MouseArea{
@@ -73,32 +73,32 @@ Rectangle {
 
             AdvancedButton{
                 id:networksettings
-                height: scaleY(style.buttonH)
-                width: scaleX(style.buttonW)
+                height: scaleY(skinStyle.buttonH)
+                width: scaleX(skinStyle.buttonW)
                 buttontext: qsTr("Network Settings")
                 radius: 5
             }
 
             AdvancedButton{
                 id:avwizard
-                height: scaleY(style.buttonH)
-                width: scaleX(style.buttonW)
+                height: scaleY(skinStyle.buttonH)
+                width: scaleX(skinStyle.buttonW)
                 buttontext: qsTr("Av wizard")
                 radius: 5
             }
 
             AdvancedButton{
                 id:pendingtasks
-                height: scaleY(style.buttonH)
-                width: scaleX(style.buttonW)
+                height: scaleY(skinStyle.buttonH)
+                width: scaleX(skinStyle.buttonW)
                 buttontext: qsTr("Pending Tasks")
                 radius: 5
             }
 
             AdvancedButton{
                 id:remoteassistance
-                height: scaleY(style.buttonH)
-                width: scaleX(style.buttonW)
+                height: scaleY(skinStyle.buttonH)
+                width: scaleX(skinStyle.buttonW)
                 buttontext: qsTr("Remote Assistance")
                 radius: 5
                 MouseArea{
@@ -109,17 +109,17 @@ Rectangle {
 
             AdvancedButton{
                 id:addsoftware
-                height: scaleY(style.buttonH)
-                width: scaleX(style.buttonW)
+                height: scaleY(skinStyle.buttonH)
+                width: scaleX(skinStyle.buttonW)
                 buttontext: qsTr("Add Software")
                 radius: 5
             }
 
             AdvancedButton{
-                id:changeStyle
-                height: scaleY(style.buttonH)
-                width: scaleX(style.buttonW)
-                buttontext: qsTr("Change Styles")
+                id:changeskinStyle
+                height: scaleY(skinStyle.buttonH)
+                width: scaleX(skinStyle.buttonW)
+                buttontext: qsTr("Change skinStyles")
                 radius: 5
                 MouseArea{
                     anchors.fill: parent
@@ -129,32 +129,32 @@ Rectangle {
 
             AdvancedButton{
                 id:gc100
-                height: scaleY(style.buttonH)
-                width: scaleX(style.buttonW)
+                height: scaleY(skinStyle.buttonH)
+                width: scaleX(skinStyle.buttonW)
                 buttontext: qsTr("Add GC100")
                 radius: 5
             }
 
             AdvancedButton{
                 id:pingtest
-                height: scaleY(style.buttonH)
-                width: scaleX(style.buttonW)
+                height: scaleY(skinStyle.buttonH)
+                width: scaleX(skinStyle.buttonW)
                 buttontext: qsTr("Ping Test")
                 radius: 5
             }
 
             AdvancedButton{
                 id:ircodes
-                height: scaleY(style.buttonH)
-                width: scaleX(style.buttonW)
+                height: scaleY(skinStyle.buttonH)
+                width: scaleX(skinStyle.buttonW)
                 buttontext: qsTr("IR Codes")
                 radius: 5
             }
 
             AdvancedButton{
                 id:qorbiterConfig
-                height: scaleY(style.buttonH)
-                width: scaleX(style.buttonW)
+                height: scaleY(skinStyle.buttonH)
+                width: scaleX(skinStyle.buttonW)
                 buttontext: qsTr("Local Config")
                 radius: 5
                 MouseArea{
@@ -166,8 +166,8 @@ Rectangle {
 
             AdvancedButton{
                 id:componentDisplay
-                height: scaleY(style.buttonH)
-                width: scaleX(style.buttonW)
+                height: scaleY(skinStyle.buttonH)
+                width: scaleX(skinStyle.buttonW)
                 buttontext: qsTr("Display Components")
                 radius: 5
                 MouseArea{
@@ -179,8 +179,8 @@ Rectangle {
 
             AdvancedButton{
                 id:html5
-                height: scaleY(style.buttonH)
-                width: scaleX(style.buttonW)
+                height: scaleY(skinStyle.buttonH)
+                width: scaleX(skinStyle.buttonW)
                 buttontext: qsTr("HTML 5 video test")
                 radius: 5
                 MouseArea{

@@ -1094,6 +1094,7 @@ public slots:
     //@{
     void setActiveSkin(QString name);
     bool loadSkins(QUrl url);
+    void showSkin() { swapSkins(currentSkin); }
 #if (QT5)
     void skinLoaded(QQuickView::Status status);
 #else
@@ -1153,6 +1154,8 @@ public slots:
     void closeOrbiter();
     void exitApp() { qorbiterUIwin->close();}
     void reloadHandler();
+    void disconnectHandler();
+    void replaceHandler();
     bool OrbiterGen();              //prelim orbter generation
     void quickReload();
 
@@ -1160,11 +1163,6 @@ public slots:
     void updateAlarm(bool toggle, int grp);
     void showSleepingAlarms(SleepingAlarm *s);
     void getSleepingAlarms() {sleeping_alarms->clear(); emit getAlarms();}
-
-
-
-
-
 
 private:
     void initializeConnections();
