@@ -37,8 +37,6 @@ public:
     inline QString channelImage() const { return channel_image; }
     inline QString programImage() const {return program_image;}
     inline QString mythid () const {return m_channel;}
-
-
     inline QMap <QString*, int> attributes() const {return m_mapAttrib;}
 private:
     QString m_channame;

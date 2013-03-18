@@ -1138,9 +1138,9 @@ void qOrbiter::CMD_Set_Now_Playing(string sPK_DesignObj,string sValue_To_Assign,
         b_mediaPlaying = true;
         emit playlistPositionChanged(iValue);
         GetNowPlayingAttributes();
-        if(bRetransmit==1){
+
             emit clearPlaylist();
-        }
+
 
     }
     else if(iPK_MediaType != 18)
@@ -5250,7 +5250,7 @@ void qOrbiter::CMD_Guide(string &sCMD_Result,Message *pMessage)
 
 void qOrbiter::getAttributeImage(QString param)
 {
-    CMD_Get_Attribute_Image attributeImage(m_dwPK_Device , iMediaPluginID );
+    CMD_Get_Attribute_Image attributeImage(m_dwPK_Device , iMediaPluginID );   
 
 }
 

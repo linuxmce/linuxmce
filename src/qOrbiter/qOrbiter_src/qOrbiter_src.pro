@@ -333,14 +333,13 @@ message (Build Type: $$DEFINES)
 message( Opengl Status: $$glmsg )
 
 SOURCES += main.cpp \
-        ../../Gen_Devices/qOrbiterBase.cpp \
         ../qOrbiter.cpp \
+        ../../Gen_Devices/qOrbiterBase.cpp \
         qorbitermanager.cpp \
         datamodels/listModel.cpp \
         datamodels/gridItem.cpp \
         imageProviders/gridimageprovider.cpp \
         imageProviders/basicImageProvider.cpp \
-        datamodels/orbiterbuttonitem.cpp \
         datamodels/locationmodel.cpp \
         datamodels/locationitem.cpp \
         datamodels/usermodel.cpp \
@@ -384,7 +383,6 @@ SOURCES += main.cpp \
         ../../DCE/DeviceData_Impl.cpp \
         datamodels/skindatamodel.cpp \
         datamodels/skindataitem.cpp \     
-        datamodels/attributemodel.cpp \
         datamodels/DataModelItems/filtermodelitem.cpp \
         datamodels/DataModelItems/genreitem.cpp \
         ../../PlutoUtils/getch.cpp \
@@ -392,11 +390,9 @@ SOURCES += main.cpp \
         datamodels/attributesortmodel.cpp \       
         datamodels/DataModelItems/mediatypeitem.cpp \
         contextobjects/nowplayingclass.cpp \
-        datamodels/DatagridClasses/datagriditemmodelclass.cpp \
         contextobjects/screenparamsclass.cpp \
         contextobjects/playlistclass.cpp \
         contextobjects/playlistitemclass.cpp \
-        datamodels/DatagridClasses/datagriditem.cpp \
         contextobjects/securityvideoclass.cpp \
         contextobjects/epgchannellist.cpp \
         playlists/epgitemclass.cpp \
@@ -406,7 +402,6 @@ SOURCES += main.cpp \
         datamodels/DataModelItems/sleepingalarm.cpp \
         contextobjects/filedetailsclass.cpp \
         datamodels/avcodegrid.cpp \
-        datamodels/avitem.cpp \
         contextobjects/floorplandevice.cpp \
         contextobjects/screenshotattributes.cpp \
         orbiterwindow.cpp \
@@ -414,7 +409,6 @@ SOURCES += main.cpp \
         datamodels/skinloader.cpp \
         datamodels/genericsetupmodel.cpp \
         datamodels/genericsetupitem.cpp \
-        dgmanager.cpp \
         datamodels/avdevice.cpp \
         contextobjects/existingorbiter.cpp \
         contextobjects/modelpage.cpp \
@@ -486,7 +480,6 @@ HEADERS += \
         datamodels/gridItem.h \
         imageProviders/gridimageprovider.h \
         imageProviders/basicImageProvider.h \
-        datamodels/orbiterbuttonitem.h \
         datamodels/locationmodel.h \
         datamodels/locationitem.h \
         datamodels/usermodel.h \
@@ -504,7 +497,6 @@ HEADERS += \
         screensaver/screensavermodule.h \
         datamodels/skindatamodel.h \
         datamodels/skindataitem.h \
-        datamodels/attributemodel.h \
         datamodels/DataModelItems/filtermodelitem.h \
         datamodels/DataModelItems/genreitem.h \
         datamodels/DataModelItems/attributesortitem.h \
@@ -512,11 +504,9 @@ HEADERS += \
         datamodels/DataModelItems/mediatypeitem.h \
         contextobjects/filedetailsclass.h \
         contextobjects/nowplayingclass.h \
-        datamodels/DatagridClasses/datagriditemmodelclass.h \
         contextobjects/screenparamsclass.h \
         contextobjects/playlistclass.h \
         contextobjects/playlistitemclass.h \
-        datamodels/DatagridClasses/datagriditem.h \
         contextobjects/securityvideoclass.h \
         contextobjects/epgchannellist.h \
         playlists/epgitemclass.h \
@@ -524,7 +514,6 @@ HEADERS += \
         imageProviders/abstractimageprovider.h \
         datamodels/DataModelItems/sleepingalarm.h \
         datamodels/avcodegrid.h \
-        datamodels/avitem.h \
         datamodels/floorplanimageitem.h \
         contextobjects/floorplandevice.h \
         contextobjects/screenshotattributes.h \
@@ -533,7 +522,6 @@ HEADERS += \
         datamodels/skinloader.h  \
         datamodels/genericsetupmodel.h \
         datamodels/genericsetupitem.h \
-        dgmanager.h \
         datamodels/avdevice.h \
         contextobjects/existingorbiter.h \
         contextobjects/modelpage.h \

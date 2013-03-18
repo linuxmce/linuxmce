@@ -94,7 +94,7 @@
 
 #include <datamodels/attributesortmodel.h>
 
-#include <datamodels/filedetailsmodel.h>
+
 #include <contextobjects/filedetailsclass.h>
 #include <contextobjects/nowplayingclass.h>
 #include <contextobjects/screenparamsclass.h>
@@ -214,7 +214,7 @@ public:
     qorbiterManager(QDeclarativeView * view, QObject *parent=0);  //constructor
 
 #endif
-    ~qorbiterManager();
+
 
     //for Pi - for_pi now sets GLENABLED
     //FileReader * fileReader;

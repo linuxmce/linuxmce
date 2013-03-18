@@ -27,16 +27,19 @@
 #include <QObject>
 #include <QHash>
 #include <QVariant>
-
+/*!
+ * \brief The AvDevice class is the item class that makes up the objects inside a DeviceModel.
+ * \rel DeviceModel
+ */
 class AvDevice : public QObject
 {
     Q_OBJECT
     enum Roles {
         NameRole = Qt::UserRole+1,
         ControllerRole =Qt::UserRole+2,
-       DeviceNumberRole= Qt::DisplayRole+3,
-       ActiveRole = Qt::DisplayRole+4,
-       LocationRole = Qt::UserRole+5,
+        DeviceNumberRole= Qt::DisplayRole+3,
+        ActiveRole = Qt::DisplayRole+4,
+        LocationRole = Qt::UserRole+5,
         TypeRole = Qt::UserRole+6
     };
 public:
@@ -56,12 +59,12 @@ signals:
     void dataChanged();
     
 private:
-        int i_deviceNo;
-        QString qs_controlledBy;
-        QString qs_device;
-        QString location;
-        bool active;
-        int deviceType;
+    int i_deviceNo;
+    QString qs_controlledBy;
+    QString qs_device;
+    QString location;
+    bool active;
+    int deviceType;
     
 };
 

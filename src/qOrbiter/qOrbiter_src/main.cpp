@@ -667,7 +667,7 @@ int main(int argc, char* argv[])
         QObject::connect(&w, SIGNAL(setVolume(int)), &pqOrbiter,SLOT(adjustVolume(int)), Qt::QueuedConnection);
         QObject::connect(&w, SIGNAL(resendDeviceCode(int,int)), &pqOrbiter, SLOT(sendAvCommand(int,int)), Qt::QueuedConnection);
         QObject::connect(&w, SIGNAL(osdChanged(bool)), &pqOrbiter, SLOT(displayToggle(bool)),Qt::QueuedConnection);
-       // QObject::connect(&pqOrbiter,SIGNAL(routerReloading(QString)), &w, SLOT(reloadHandler()) );
+        // QObject::connect(&pqOrbiter,SIGNAL(routerReloading(QString)), &w, SLOT(reloadHandler()) );
         QObject::connect(&w, SIGNAL(newLightLevel(QString)), &pqOrbiter, SLOT(adjustRoomLights(QString)), Qt::QueuedConnection);
         QObject::connect(&w, SIGNAL(zoomLevelChanged(QString)), &pqOrbiter, SLOT(setZoom(QString)), Qt::QueuedConnection);
         QObject::connect(&w, SIGNAL(aspectRatioChanged(QString)), &pqOrbiter, SLOT(setAspect(QString)), Qt::QueuedConnection);
@@ -679,8 +679,8 @@ int main(int argc, char* argv[])
         QObject::connect(&pqOrbiter, SIGNAL(routerDisconnect()), &w, SLOT(disconnectHandler()),Qt::QueuedConnection);
         QObject::connect(&pqOrbiter, SIGNAL(routerReload()), &w, SLOT(connectionWatchdog()), Qt::QueuedConnection);
         QObject::connect(&w, SIGNAL(reInitialize()), &pqOrbiter, SLOT(initialize()), Qt::QueuedConnection);
-     //   QObject::connect(&w, SIGNAL(deviceNumberChanged(int)), &pqOrbiter, SLOT(setDeviceId(int)));
-     //   QObject::connect(&w, SIGNAL(internalIpChanged(QString)), &pqOrbiter, SLOT(setdceIP(QString)));
+        //   QObject::connect(&w, SIGNAL(deviceNumberChanged(int)), &pqOrbiter, SLOT(setDeviceId(int)));
+        //   QObject::connect(&w, SIGNAL(internalIpChanged(QString)), &pqOrbiter, SLOT(setdceIP(QString)));
         dceThread.start();
 
 
@@ -708,44 +708,13 @@ int main(int argc, char* argv[])
         }
 
         pqOrbiter.qmlSetup(PK_Device, QString::fromStdString(sRouter_IP));
-
-
-
-
-
-//        if(PK_Device != w.iPK_Device){
-//            qDebug() << w.iPK_Device;
-//            pqOrbiter.setDeviceId(w.iPK_Device);
-//            pqOrbiter.setdceIP(QString::fromStdString(sRouter_IP));
-//            pqOrbiter.m_sHostName = w.qs_routerip.toStdString();
-//            pqOrbiter.m_sIPAddress = w.qs_routerip.toStdString();
-//            pqOrbiter.m_sExternalIP = w.qs_ext_routerip.toStdString();
-//            pqOrbiter.pingCore();
-//            PK_Device = pqOrbiter.m_dwPK_Device;
-
-//#ifdef QT_DEBUG
-//            qDebug() << "Initializing connection from config file";
-//#endif
-//        }
-//        else
-//        {
-//            pqOrbiter.setDeviceId(PK_Device);
-//            pqOrbiter.m_sHostName = sRouter_IP;
-//            pqOrbiter.m_sExternalIP = w.qs_ext_routerip.toStdString();
-//            pqOrbiter.pingCore();
-//#ifdef QT_DEBUG
-//            qDebug() << "Initializing connection from command line host and device";
-//#endif
-//        }
-
-        //        pqOrbiter.pingCore();
-        //        PK_Device = pqOrbiter.m_dwPK_Device;
         a.exec();
 
-        if( pqOrbiter.m_bReload )
-
-        { bReload=true; }
-        a.quit();
+         localLogger.deleteLater();
+         timecode->deleteLater();
+         mediaModel->deleteLater();
+         storedVideoPlaylist->deleteLater();
+         simpleEPGmodel->deleteLater();
     }
 
 

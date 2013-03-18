@@ -229,7 +229,7 @@ qorbiterManager::qorbiterManager(QDeclarativeView *view, QObject *parent) :
     backwards = false;
 
     //file details object and imageprovider setup
-    filedetailsclass = new FileDetailsClass();
+    filedetailsclass = new FileDetailsClass(this);
     qorbiterUIwin->rootContext()->setContextProperty("filedetailsclass" ,filedetailsclass);
     filedetailsclass->clear();
 
@@ -237,7 +237,7 @@ qorbiterManager::qorbiterManager(QDeclarativeView *view, QObject *parent) :
     qorbiterUIwin->rootContext()->setContextProperty("dcenowplaying" , nowPlayingButton);
 
     //screen parameters class that could be extended as needed to fetch other data
-    ScreenParameters = new ScreenParamsClass;
+    ScreenParameters = new ScreenParamsClass(this);
     qorbiterUIwin->rootContext()->setContextProperty("screenparams", ScreenParameters);
 
     //floorplan model initialization for slots in main.cpp
@@ -245,7 +245,7 @@ qorbiterManager::qorbiterManager(QDeclarativeView *view, QObject *parent) :
 
 
     //----------------Security Video setup
-    SecurityVideo = new SecurityVideoClass();
+    SecurityVideo = new SecurityVideoClass(this);
     qorbiterUIwin->rootContext()->setContextProperty("securityvideo", SecurityVideo);
 
     //-alarms
@@ -266,10 +266,6 @@ qorbiterManager::qorbiterManager(QDeclarativeView *view, QObject *parent) :
      */
 }
 
-qorbiterManager::~qorbiterManager()
-{
-    this->deleteLater();
-}
 
 
 void qorbiterManager::gotoQScreen(QString s)

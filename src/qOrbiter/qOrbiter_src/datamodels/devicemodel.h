@@ -5,7 +5,11 @@
 #include <QList>
 #include <QVariant>
 #include <datamodels/avdevice.h>
-
+/*!
+ * \brief The DeviceModel class. This class is the model container class for AvDevice class objects representing
+ * hardware or software devices in the a linuxmce system.
+ * \rel AvDevice
+ */
 class DeviceModel : public QAbstractListModel
 {
     Q_OBJECT
