@@ -55,7 +55,7 @@ class FileDetailsClass : public QObject
     Q_PROPERTY(QString path READ getPath WRITE setPath NOTIFY pathChanged)/*!< \brief Path of file, minus the filename. \ingroup file_details*/
     Q_PROPERTY(QString qs_storageDevice READ getStorageDevice READ getStorageDevice NOTIFY storageDeviceChanged)/*!< \brief The string value of the storage device. \ingroup file_details*/
 
-    Q_PROPERTY(QImage titleImage READ getTitleImage WRITE setTitleImage NOTIFY titleImageChanged)/*!< \brief Possibly used later for additional images. \warning not implemented \ingroup file_details*/
+
    // Q_PROPERTY(QImage program READ getProgramImage WRITE setProgramImage NOTIFY objectChanged)
     Q_PROPERTY(QString rating READ getRating WRITE setRating NOTIFY ratingChanged)/*!< \brief The rating if availible of the media.  \ingroup file_details*/
     //media title variable that can be independant of what is passed initially by now playing
@@ -87,9 +87,9 @@ public:
     int i_aspectH; //height then width
     int i_aspectW; //height then width
     QString aspect;
-    QImage titleImage;
+
     QString file;
-    QImage programImage;
+  ;
     QString season;
     QString imdb;
     QString qs_mainTitle;
@@ -119,8 +119,6 @@ public:
     QString releasedate;
     QString rating;
 
-    QImage qi_screenshot;
-    QImage qi_bgimage;
     bool showDetails;
     QString synop;
     QString screenshot;
@@ -276,13 +274,6 @@ public slots:
     inline void setFile(QString incFile) { file = incFile; emit FileChanged(file); }
 
 
-    inline void setTitleImage (QImage inc_t) {titleImage = inc_t; emit imageChanged();}
-    inline QImage getTitleImage () {return titleImage;}
-
-
-    inline void setProgramImage (QImage inc_p) {programImage = inc_p; emit objectChanged();}
-    inline QImage getProgramImage () {return programImage;}
-
 
     // Q_INVOKABLE void setSelectionStatus(QString format);
     // Q_INVOKABLE bool getSelectionStatus();
@@ -301,15 +292,6 @@ public slots:
 
     inline QString getPath() {return path;}
     inline void setPath (QString f) {path = f; emit pathChanged();}
-
-
-    inline void setScreenshotimage(QImage img) {qi_screenshot= img; emit imageChanged();}
-    inline QImage getScreenshotimage() {return qi_screenshot;}
-
-
-    void setBGimage(QImage img) {qi_bgimage= img;}
-    QImage getBGimage() {return qi_bgimage;}
-
 
     inline bool isVisible () { return showDetails; }
     inline void setVisible (bool state) { clear(); showDetails = state; emit VisibleChanged( showDetails);}
