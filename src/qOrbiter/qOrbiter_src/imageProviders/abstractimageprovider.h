@@ -74,19 +74,7 @@ public:
         {
             temp = screenShot();
         }
-        else if (id.contains("filedetailsprovider"))
-        {
-            temp = fileDetails();
-            if(temp.height() > temp.width())
-            {
 
-                managerreference->filedetailsclass->setImageAspect("poster");
-            }
-            else
-            {
-                managerreference->filedetailsclass->setImageAspect("wide");
-            }
-        }
         else if(id.contains("screensaver"))
         {
             temp = ScreenSaver();
@@ -121,7 +109,6 @@ private:
     QImage floorplanProvider();
     QImage securityProvider(int cam);
     QImage updateObjectProvider();
-    QImage fileDetails();
     QImage screenShot();
     QImage ScreenSaver();
     QImage Stream();

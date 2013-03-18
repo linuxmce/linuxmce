@@ -27,7 +27,7 @@
 #include <QAbstractListModel>
 #include <QList>
 #include <QVariant>
-#include <datamodels/DataModelItems/filedetailsitem.h>
+
 #include <QStringList>
 
 class FileDetailsItem;

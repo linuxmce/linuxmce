@@ -70,21 +70,6 @@ QImage AbstractImageProvider::updateObjectProvider()
     return key;
 }
 
-QImage AbstractImageProvider::fileDetails()
-{
-    QImage key= managerreference->filedetailsclass->titleImage;
-
-    if (key.isNull())
-    {
-         key.load(":/icons/icon.png");
-
-    }
-    managerreference->filedetailsclass->setAspectH(key.height()/ 100);
-    managerreference->filedetailsclass->setAspectW(key.width() / 100);
-    //qDebug()<< key.width()/key.height();
-
-    return key;
-}
 
 QImage AbstractImageProvider::screenShot()
 {

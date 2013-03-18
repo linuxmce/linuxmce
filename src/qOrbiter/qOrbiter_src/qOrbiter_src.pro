@@ -391,8 +391,6 @@ SOURCES += main.cpp \
         datamodels/DataModelItems/attributesortitem.cpp \
         datamodels/attributesortmodel.cpp \       
         datamodels/DataModelItems/mediatypeitem.cpp \
-        datamodels/filedetailsmodel.cpp \
-        datamodels/DataModelItems/filedetailsitem.cpp \
         contextobjects/nowplayingclass.cpp \
         datamodels/DatagridClasses/datagriditemmodelclass.cpp \
         contextobjects/screenparamsclass.cpp \
@@ -512,8 +510,6 @@ HEADERS += \
         datamodels/DataModelItems/attributesortitem.h \
         datamodels/attributesortmodel.h \      
         datamodels/DataModelItems/mediatypeitem.h \
-        datamodels/filedetailsmodel.h \
-        datamodels/DataModelItems/filedetailsitem.h \
         contextobjects/filedetailsclass.h \
         contextobjects/nowplayingclass.h \
         datamodels/DatagridClasses/datagriditemmodelclass.h \

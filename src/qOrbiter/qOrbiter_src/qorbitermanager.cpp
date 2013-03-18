@@ -34,7 +34,7 @@
 #include <QTimer>
 #include <QtDeclarative/QtDeclarative>
 #endif
-#include <imageProviders/filedetailsimageprovider.h>
+
 #include <contextobjects/epgchannellist.h>
 #include <datamodels/skindatamodel.h>
 
