@@ -1,7 +1,7 @@
 #<-dceag-mh-b->
 GENDEV=../Gen_Devices
 
-SNR_CPPFLAGS ?= -DKDE_LMCE -DDEBUG -DTHREAD_LOG -DLOG_ALL_QUERIES
+SNR_CPPFLAGS ?=
 SNR_LDFLAGS ?= 
 
 ROOT = ..
@@ -19,13 +19,17 @@ Gen_Dev_Files = $(GENDEV)/AirPlay_StreamerBase.cpp
 sources = Main.cpp AirPlay_Streamer.cpp $(Gen_Dev_Files)
 #<-dceag-mh-e->
 
-CXXFLAGS +=
+CXXFLAGS += `pkg-config --cflags avahi-client` 
 CPPFLAGS +=
-LDFLAGS +=
+LDFLAGS += `pkg-config --libs avahi-client`
 XTRALDLIBS = -lmysqlclient_r
 
 Gen_Dev_Files +=
-sources +=
+sources += AirPlay_Protocol_Factory.cpp \
+		AirPlay_Service.cpp \
+		AirPlay_Protocol.cpp \
+		AirPlay_Protocol_AirPlay.cpp \
+		AirPlay_Protocol_AirTunes.cpp
 
 #<-dceag-mf-b->
 LDLIBS = $(XTRALDLIBS) $(BASELDLIBS)
@@ -44,14 +48,14 @@ AirPlay_Streamer.so: $(sources:.cpp=.o)
 	cp $@ ../bin
 	chmod +x post_make.sh
 	./post_make.sh $@
-		
+
 AirPlay_Streamer: $(sources:.cpp=.o)
 	$(CXX) -o $(MYNAME) $(call cpath,$+) $(LDFLAGS) $(LDLIBS)
 	cp $@ ../bin
 	./post_make.sh $@
 
 clean: clean-recursive
-	rm -f $(call cpath,$(sources:.cpp=.o) $(sources:.cpp=.d)) AirPlay_Streamer.bin AirPlay_Streamer.so >/dev/null
+	rm -f $(call cpath,$(sources:.cpp=.o) $(sources:.cpp=.d)) AirPlay_Streamer AirPlay_Streamer.so >/dev/null
 
 package:
 	chmod +x make_package.sh

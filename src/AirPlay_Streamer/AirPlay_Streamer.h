@@ -22,18 +22,23 @@
 #include "Gen_Devices/AirPlay_StreamerBase.h"
 //<-dceag-d-e->
 
+#include "AirPlay_Service.h"
+
 //<-dceag-decl-b->
 namespace DCE
 {
+  class AirPlay_Service;
 	class AirPlay_Streamer : public AirPlay_Streamer_Command
 	{
 //<-dceag-decl-e->
+	  friend class AirPlay_Service;
 		// Private member variables
 
 		// Private methods
 public:
 		// Public member variables
-
+	  AirPlay_Service *m_pAirPlay_Service;
+	  DeviceData_Base *m_pDeviceMD;
 //<-dceag-const-b->
 public:
 		// Constructors/Destructor
@@ -44,7 +49,10 @@ public:
 		virtual void ReceivedCommandForChild(DeviceData_Impl *pDeviceData_Impl,string &sCMD_Result,Message *pMessage);
 		virtual void ReceivedUnknownCommand(string &sCMD_Result,Message *pMessage);
 //<-dceag-const-e->
-
+		virtual void PostConnect();
+		virtual void OnQuit();
+		virtual void CreateChildren();
+\
 //<-dceag-const2-b->
 		// The following constructor is only used if this a class instance embedded within a DCE Device.  In that case, it won't create it's own connection to the router
 		// You can delete this whole section and put an ! after dceag-const2-b tag if you don't want this constructor.  Do the same in the implementation file
