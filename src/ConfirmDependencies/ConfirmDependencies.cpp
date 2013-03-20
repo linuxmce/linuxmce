@@ -69,7 +69,7 @@ using namespace DCE;
 int iPK_Device=0;
 class CreateDevice *g_pCreateDevice;
 
-bool bSummary=false,bInteractive=true,g_bSkipConfirmRelations=false;
+bool bSummary=false,bInteractive=true,g_bSkipConfirmRelations=false,g_bSkipInstallCheck=false;
 map<int,bool> g_mapPackages_AlreadyChecked; // Don't check each package more than once
 
 class PackageInfo
@@ -107,7 +107,7 @@ public:
 		m_pRow_RepositorySource_URL=pRow_RepositorySource_URL;
 		m_bMustBuild=bMustBuild;
 		m_pRow_Package_Directory_Compiled_Output=NULL;
-		if( !g_bSkipConfirmRelations )
+		if( !g_bSkipInstallCheck )
 		{
 			Row_Package_Device *pRow_Package_Device = pRow_Package_Source_Compat->Table_Package_Source_Compat_get()->Database_pluto_main_get()->Package_Device_get()->GetRow(pRow_Package_Source->FK_Package_get(),iPK_Device);
 			m_bAlreadyInstalled = (pRow_Package_Device!=NULL);
@@ -282,6 +282,10 @@ int main(int argc, char *argv[])
 			break;
 		case 'r':
 			g_bSkipConfirmRelations = true;
+			g_bSkipInstallCheck = true; // maintains existing functionality
+			break;
+		case 'f':
+			g_bSkipInstallCheck = true;
 			break;
 		case 'n':
 			bInteractive = false;
@@ -303,16 +307,34 @@ int main(int argc, char *argv[])
 	{
 		PrintCmd(argc, argv);
 		cout << "ConfirmDependencies, v." << VERSION << endl
-			<< "Usage: ConfirmDependencies [-h hostname] [-u username] [-p password] [-D database] [-P mysql port] [-r Repository(-ies)] [-t Table(s)] [-U Users(s)] [-d DeviceID] [-n]" << endl
+			<< "Usage: ConfirmDependencies [-h hostname] [-u username] [-p password] [-D database] [-P mysql port] [-O orbiter id] [-d DeviceID] [-o distro id] [-f] [-r] [-n] [-c] [-s] command" << endl
+			<< "Commands" <<endl
+			<< "view        -- View required packages for a device, grouped by child devices. (view)" << endl
+			<< "status      -- Same as view, but also physically scans the disk for the files" << endl
+			<< "               to see whether the packages are installed. (status)" << endl
+			<< "list        -- List all the packages in a single list (list)" << endl
+			<< "listall     -- List all the packages in a single list with full information (listall)" << endl
+			<< "install     -- Output an install script for the packages (install)" << endl
+			<< "build       -- Output a script that will build any packages that were not available as binaries. (build)" << endl
+			<< "buildall    -- Output a script that will build all packages, even if they were available as source. (buildall)" << endl
+			<< endl
+			<< "Options" << endl
 			<< "hostname    -- address or DNS of database host, default is `dcerouter`" << endl
 			<< "username    -- username for database connection" << endl
 			<< "password    -- password for database connection, default is `` (empty)" << endl
 			<< "database    -- database name.  default is pluto_main" << endl
 			<< "port        -- port for database connection, default is 3306" << endl
-			<< "output path -- Where to put the output files.  Default is ../[database name]" << endl
-			<< "input path  -- Where to find the template files.  Default is . then ../ConfirmDependencies" << endl
-			<< "device id   -- the device id" << endl
-			<< "-n no prompts -- errors will be sent to a log file without asking the user to continue" << endl;
+			<< "orbiter id  -- orbiter id to send onscreen messages" << endl
+			<< "device id   -- top device id of the tree to verify" << endl
+			<< "distro id   -- distribution id to verify against" << endl
+			<< "-f          -- force install, skips checking if package is install and configured" << endl
+			<< "               (useful for repairing installations)" << endl
+//			<< "-i          -- do not parse DisklessMDs on core [currently unused, DisklessMDs are not parsed]" << endl
+			<< "-r          -- skips relationship checking (avoids checking for required plugins due to MD devices)" << endl
+			<< "               (implies -f for backwards compatibility)" << endl
+			<< "-n          -- no prompts, errors will be sent to a log file without asking the user to continue" << endl
+			<< "-c          -- include all source code packages" << endl
+			<< "-s          -- summary" << endl;
 
 		exit(1);
 	}
