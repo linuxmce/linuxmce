@@ -39,14 +39,20 @@ Rectangle {
 
     ListView{
         id:editView
-        height: parent.height-50
-        width: parent.width
+        height: parent.height - 50
+        width: metadataSection.width/1.5
         clip: true
         flickableDirection: Flickable.VerticalFlick
         model:mediaplaylist
         Component.onCompleted: currentIndex= dcenowplaying.m_iplaylistPosition
         highlightFollowsCurrentItem: true
         spacing:scaleY(1)
+        Behavior on opacity {
+            PropertyAnimation{
+                duration: 750
+            }
+        }
+
         highlight: Rectangle{
             radius: 5
             color: "darkslategrey"
@@ -60,51 +66,61 @@ Rectangle {
             width: parent.width
             color: index ==dcenowplaying.m_iplaylistPosition ? "grey": "darkslategrey"
             Row{
-            height: children.height
-            width: parent.width
-            spacing:5
+                height: children.height
+                width: parent.width
+                spacing:5
 
-            StyledText {
-                text: name + "::"+index
-                width: parent.width*.70
+                Rectangle{
+                    height: parent.height
+                    width: parent.width*.08
+                    color: "black"
+                    StyledText {
+                        text: index
+                        anchors.centerIn: parent
+                    }
+                }
+
+                StyledText {
+                    text: name
+                    width: parent.width*.70
+                }
+                Rectangle{
+                    width: parent.width *.10
+                    height: childrenRect.height
+                    color: "darkslategrey"
+                    StyledText{
+                        text: "up"
+                    }
+                    PlaylistMoveHandler{
+                        direction: "-"
+                    }
+                }
+                Rectangle{
+                    width: parent.width *.10
+                    height: childrenRect.height
+                    color: "darkslategrey"
+
+                    StyledText{
+                        text: "Down"
+
+                    }
+                    PlaylistMoveHandler{
+                        direction: "+"
+                    }
+                }
+
+                Rectangle{
+                    width: parent.width *.10
+                    height: childrenRect.height
+                    color: "darkslategrey"
+                    StyledText{
+                        text: "Delete"
+                    }
+                    PlaylistRemoveItemHandler{
+
+                    }
+                }
             }
-            Rectangle{
-                 width: parent.width *.10
-                height: childrenRect.height
-                color: "darkslategrey"
-                StyledText{
-                    text: "up"
-                }
-                PlaylistMoveHandler{
-                    direction: "-"
-                }
-            }
-            Rectangle{
-          width: parent.width *.10
-                height: childrenRect.height
-                color: "darkslategrey"
-
-                StyledText{
-                    text: "Down"
-
-                }
-                PlaylistMoveHandler{
-                    direction: "+"
-                }
-            }
-
-            Rectangle{
-                width: parent.width *.10
-                height: childrenRect.height
-                color: "darkslategrey"
-                StyledText{
-                    text: "Delete"
-                }
-                PlaylistRemoveItemHandler{
-
-                }
-            }
-        }
         }
 
 
@@ -134,8 +150,12 @@ Rectangle {
                 height:0
                 width:0
                 opacity:0
-
             }
+            PropertyChanges {
+                target: editView
+             opacity:0
+            }
+
         },
         State {
             name: "exposed"
@@ -148,6 +168,8 @@ Rectangle {
             PropertyChanges {
                 target: editView
                 currentIndex: dcenowplaying.m_iplaylistPosition
+                opacity:1
+
             }
         }
     ]

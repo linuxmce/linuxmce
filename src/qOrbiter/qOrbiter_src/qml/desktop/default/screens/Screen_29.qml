@@ -14,7 +14,7 @@ Item{
             id:mainsleepingrect
             height:scaleY(65)
             width: scaleX(80)
-            color:style.lighthighlight
+            color:skinStyle.lighthighlight
             anchors.centerIn: parent
             radius: 10
             clip:true
@@ -72,7 +72,7 @@ Item{
                                 {
                                 height: scaleY(15)
                                 width: scaleX(25)
-                                color:style.darkhighlight
+                                color:skinStyle.darkhighlight
                                 border.color: "black"
                                 border.width: 2
                                 anchors.margins: 10

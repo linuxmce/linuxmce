@@ -3850,8 +3850,10 @@ void DCE::qOrbiter::GetAlarms()
 
             }
             pSleepingDataGridTable->ClearData();
-            delete[] pSleepingDataGridTable;
+            delete pSleepingDataGridTable;
+            pSleepingDataGridTable = NULL;
             delete[] pData;
+            pData=NULL;
 
         }
 

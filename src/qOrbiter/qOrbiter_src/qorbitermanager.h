@@ -214,8 +214,6 @@ public:
     qorbiterManager(QDeclarativeView * view, QObject *parent=0);  //constructor
 
 #endif
-
-
     //for Pi - for_pi now sets GLENABLED
     //FileReader * fileReader;
 
