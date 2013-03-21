@@ -396,7 +396,7 @@ if [[ "$TARGET_DISTRO" = "ubuntu" ]]; then
 	#Install headers and run depmod for the seamless integraiton function, ensure no errors exist
 	LC_ALL=C chroot "$TEMP_DIR" apt-get -y install linux-headers-generic
 	VerifyExitCode "Install linux headers package failed"
-	TARGET_KVER=$(ls -vd /lib/modules/[0-9]* | sed 's/.*\///g' | tail -1) 
+	TARGET_KVER=$(ls -vd "$TEMP_DIR"/lib/modules/[0-9]* | sed 's/.*\///g' | tail -1) 
 	LC_ALL=C chroot "$TEMP_DIR" depmod -v "$TARGET_KVER" 
 	VerifyExitCode "depmod failed for $TARGET_KVER" 
 
@@ -503,7 +503,7 @@ case "$TARGET_DISTRO" in
 		## If libdvdcss2 is installed on the hybrid/core
 		if [[ -d /usr/share/doc/libdvdcss2 ]] ;then
 			pushd $TEMP_DIR >/dev/null
-			chroot $TEMP_DIR apt-get install libdvdcss2
+			LC_ALL=C chroot $TEMP_DIR apt-get -y install libdvdcss2
 			VerifyExitCode "Installation of libdvdcss2 failed"
 			popd >/dev/null
 		fi
@@ -533,7 +533,7 @@ esac
 LC_ALL=C chroot $TEMP_DIR ln -s /usr/lib/libdvdread.so.4 /usr/lib/libdvdread.so.3
 
 # Install plymouth theme on MD in Lucid
-if [[ "$TARGET_RELEASE" = "lucid" ]] ; then
+if [[ "$TARGET_RELEASE" = "lucid" ]] || [[ "$TARGET_RELEASE" = "precise" ]]; then
 	LC_ALL=C chroot $TEMP_DIR apt-get -y install lmce-plymouth-theme
 	VerifyExitCode "MCE plymouth theme install failed"
 fi
@@ -647,10 +647,15 @@ for TARGET in $TARGET_TYPES; do
 			case "$TARGET_RELEASE" in
 				lucid)
 					TARGET_DISTRO_ID=18
+					TARGET_REPO_DISTRO_SRC=20
+					TARGET_REPO_LMCE_SRC=21
+					;;
+				precise)
+					TARGET_DISTRO_ID=20
+					TARGET_REPO_DISTRO_SRC=24
+					TARGET_REPO_LMCE_SRC=25
 					;;
 			esac
-			TARGET_REPO_DISTRO_SRC=20
-			TARGET_REPO_LMCE_SRC=21
 			;;
 		"raspbian-armhf")
 			TARGET_DISTRO="raspbian"
