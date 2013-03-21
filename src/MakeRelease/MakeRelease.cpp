@@ -1626,14 +1626,16 @@ string Makefile = "none:\n"
 	vector<Row_Package_Source *> vect_pRow_Package_Source_Dependencies;
 	pRow_Package_Source->Table_Package_Source_get()->GetRows("JOIN Package_Package ON Package_Package.FK_Package_DependsOn=Package_Source.FK_Package AND Package_Package.FK_Package=" + 
 		StringUtils::itos(pRow_Package_Source->FK_Package_get()) + " WHERE FK_RepositorySource IN ("
-//		+ StringUtils::itos(REPOSITORYSOURCE_Ubuntu_Pluto_Addons_CONST)
-//		+ "," + StringUtils::itos(REPOSITORYSOURCE_Debian_CONST)
-//		+ "," + StringUtils::itos(REPOSITORYSOURCE_Ubuntu_CONST)
-//		+ "," + StringUtils::itos(REPOSITORYSOURCE_MythTV_CONST) + ")",
-		+ StringUtils::itos(REPOSITORYSOURCE_Ubuntu_Mirrors_CONST)
+		+ StringUtils::itos(REPOSITORYSOURCE_Ubuntu_CONST)
+		+ "," + StringUtils::itos(REPOSITORYSOURCE_Ubuntu_Pluto_Addons_CONST)
+		+ "," + StringUtils::itos(REPOSITORYSOURCE_Debian_CONST)
+		+ "," + StringUtils::itos(REPOSITORYSOURCE_MythTV_CONST)
+		+ "," + StringUtils::itos(REPOSITORYSOURCE_Ubuntu_Mirrors_CONST)
+		+ "," + StringUtils::itos(REPOSITORYSOURCE_Ubuntu_Security_CONST)
 		+ "," + StringUtils::itos(REPOSITORYSOURCE_Ubuntu_LinuxMCE_Addons_CONST)
 		+ "," + StringUtils::itos(REPOSITORYSOURCE_Medibuntu_CONST)
-		+ "," + StringUtils::itos(REPOSITORYSOURCE_Slimdevices_CONST) + ")",
+		+ "," + StringUtils::itos(REPOSITORYSOURCE_Slimdevices_CONST)
+		+ ")",
 		&vect_pRow_Package_Source_Dependencies);
 
 	string sDepends,sPreDepends;
@@ -1984,10 +1986,12 @@ string Makefile = "none:\n"
 	if ( pRow_Package_Source->FK_RepositorySource_get() != REPOSITORYSOURCE_Ubuntu_Pluto_Addons_CONST && pRow_Package_Source->FK_RepositorySource_get() != REPOSITORYSOURCE_Ubuntu_LinuxMCE_Addons_CONST ) {
 		pRow_Package_Source->Table_Package_Source_get()->GetRows("JOIN Package_Package ON Package_Package.FK_Package_DependsOn=Package_Source.FK_Package AND Package_Package.FK_Package=" + 
 		StringUtils::itos(pRow_Package_Source->FK_Package_get()) + " WHERE FK_RepositorySource IN ("
-//		+ StringUtils::itos(REPOSITORYSOURCE_Ubuntu_Pluto_Addons_CONST)
-//		+ "," + StringUtils::itos(REPOSITORYSOURCE_Debian_CONST)
-//		+ "," + StringUtils::itos(REPOSITORYSOURCE_MythTV_CONST) + ")",
-		+ StringUtils::itos(REPOSITORYSOURCE_Ubuntu_Mirrors_CONST)
+		+ StringUtils::itos(REPOSITORYSOURCE_Ubuntu_CONST)
+		+ "," + StringUtils::itos(REPOSITORYSOURCE_Ubuntu_Pluto_Addons_CONST)
+		+ "," + StringUtils::itos(REPOSITORYSOURCE_Debian_CONST)
+		+ "," + StringUtils::itos(REPOSITORYSOURCE_MythTV_CONST)
+		+ "," + StringUtils::itos(REPOSITORYSOURCE_Ubuntu_Mirrors_CONST)
+		+ "," + StringUtils::itos(REPOSITORYSOURCE_Ubuntu_Security_CONST)
 		+ "," + StringUtils::itos(REPOSITORYSOURCE_Ubuntu_LinuxMCE_Addons_CONST)
 		+ "," + StringUtils::itos(REPOSITORYSOURCE_Medibuntu_CONST)
 		+ "," + StringUtils::itos(REPOSITORYSOURCE_Slimdevices_CONST)
