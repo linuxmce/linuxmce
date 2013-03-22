@@ -1,0 +1,17 @@
+Source: lmce-airplay-streamer
+Section: unknown
+Priority: extra
+Maintainer: Thomas Cherryhomes <tschak@linuxmce.org>
+Build-Depends: debhelper (>= 8.0.0),libshairport-dev
+Standards-Version: 3.9.2
+Homepage: <insert the upstream URL, if relevant>
+#Vcs-Git: git://git.debian.org/collab-maint/lmce-airplay-streamer.git
+#Vcs-Browser: http://git.debian.org/?p=collab-maint/lmce-airplay-streamer.git;a=summary
+
+Package: lmce-airplay-streamer
+Architecture: any
+Depends: ${shlibs:Depends}, ${misc:Depends}, libshairport1
+Description: LinuxMCE AirPlay Streamer
+ Implements Apple AirPlay for audio, video and photo streaming. LinuxMCE
+ acts as a destination.
+
