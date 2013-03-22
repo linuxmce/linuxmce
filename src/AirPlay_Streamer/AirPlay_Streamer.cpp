@@ -59,13 +59,10 @@ bool AirPlay_Streamer::GetConfig()
 		return false;
 //<-dceag-getconfig-e->
 
+	LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"GETCONFIG! ");
+
 	// Put your code here to initialize the data in this class
 	// The configuration parameters DATA_ are now populated
-	if (!m_pAirPlay_Service->init())
-	  return false;
-	m_pDeviceMD = m_pData->m_AllDevices.m_mapDeviceData_Base_Find(m_pData->m_dwPK_Device_MD);
-	m_pAirPlay_Service->Name_set(m_pDeviceMD->m_sDescription.c_str());
-	LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"Service is %s",m_pDeviceMD->m_sDescription.c_str());
 	return true;
 }
 
@@ -126,10 +123,43 @@ void AirPlay_Streamer::OnQuit()
   Command_Impl::OnQuit();
 }
 
+string AirPlay_Streamer::DeviceNameFromMacAddress(string sMacAddress)
+{
+  string::size_type pos=0;
+  if (sMacAddress.size() == 17)
+    {
+      string sMac1 = StringUtils::Tokenize(sMacAddress,":",pos);
+      string sMac2 = StringUtils::Tokenize(sMacAddress,":",pos);
+      string sMac3 = StringUtils::Tokenize(sMacAddress,":",pos);
+      string sMac4 = StringUtils::Tokenize(sMacAddress,":",pos);
+      string sMac5 = StringUtils::Tokenize(sMacAddress,":",pos);
+      string sMac6 = StringUtils::Tokenize(sMacAddress,":",pos);
+      return sMac1+sMac2+sMac3+sMac4+sMac5+sMac6;
+    }
+  else
+    {
+      // Generic Mac Address foobage.
+      return "001122334455";
+    }
+}
+
 void AirPlay_Streamer::CreateChildren()
 {
   Command_Impl::CreateChildren();
+
+  m_pDeviceMD = m_pData->m_AllDevices.m_mapDeviceData_Base_Find(m_pData->m_dwPK_Device_MD);
+  char cName[100];
+  sprintf(cName,"%s@%s",DeviceNameFromMacAddress(m_pDeviceMD->GetMacAddress()).c_str(),m_pDeviceMD->m_sDescription.c_str());
+  m_pAirPlay_Service->Name_set(cName);
+  LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"Service name is %s",cName);
+  m_sCurrentMacAddress = m_pDeviceMD->GetMacAddress();
+  LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"Address is %s",m_sCurrentMacAddress.c_str());
+  LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"Service is %s",m_pDeviceMD->m_sDescription.c_str());
+  if (!m_pAirPlay_Service->init())
+    return;
+  
   m_pAirPlay_Service->start();
+
 }
 
 /*

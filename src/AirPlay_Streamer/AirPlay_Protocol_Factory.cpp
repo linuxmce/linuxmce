@@ -42,7 +42,6 @@ namespace DCE
       {
 	m_mapAirPlayProtocolForMediaType[iPK_MediaType] = pAirPlay_Protocol;
 	pAirPlay_Protocol->init();
-	// m_pAirPlay_Streamer->m_pAirPlay_Service->registerService(pAirPlay_Protocol);
       }
   }
 

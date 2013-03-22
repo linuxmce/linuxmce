@@ -29,7 +29,11 @@ namespace DCE
     m_iPort=0;
     m_cServiceType=NULL;
     m_aslTXTRecords = avahi_string_list_new(NULL);
-    TXTRecord_Add("deviceid=00:01:2e:2b:59:82");
+        char tmp[100];
+    sprintf(tmp, "device=%s",pAirPlay_Streamer->m_sCurrentMacAddress.c_str());
+    string tmpStr = tmp;
+    LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"ADDR IS %s",tmpStr.c_str());
+    TXTRecord_Add(tmpStr);
   }
 
   AirPlay_Protocol::~AirPlay_Protocol()

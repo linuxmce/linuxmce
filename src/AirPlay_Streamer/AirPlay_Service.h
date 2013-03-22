@@ -41,10 +41,12 @@ namespace DCE
     AirPlay_Protocol_Factory *m_pAirPlay_Protocol_Factory;
 
     char *m_cName;
+    string m_sMacAddress;
 
     bool init();
     bool start();
     void Name_set(string sName);
+    void MacAddress_set(string sMacAddress);
     void sanityCheck();
   };
 

@@ -31,7 +31,7 @@ DCE::AirPlay_Service::AirPlay_Service(AirPlay_Streamer *pAirPlay_Streamer)
 DCE::AirPlay_Service::~AirPlay_Service()
 {
   stopAvahi(this);
-  delete m_pAirPlay_Protocol_Factory;
+  // delete m_pAirPlay_Protocol_Factory;
 }
 
 bool DCE::AirPlay_Service::init()
@@ -52,6 +52,11 @@ bool DCE::AirPlay_Service::start()
 void DCE::AirPlay_Service::Name_set(string sName)
 {
   m_cName = avahi_strdup(sName.c_str());
+}
+
+void DCE::AirPlay_Service::MacAddress_set(string sMacAddress)
+{
+  m_sMacAddress = sMacAddress;
 }
 
 void DCE::AirPlay_Service::sanityCheck()
@@ -176,11 +181,8 @@ static void create_services(AvahiClient *c, void * userdata) {
   return;
 
  fail:
-  if (pAirPlay_Service->m_pAvahi_Threaded_Poll)
     avahi_threaded_poll_stop(pAirPlay_Service->m_pAvahi_Threaded_Poll);
-  if (pAirPlay_Service->m_pAvahi_Client)
     avahi_client_free(pAirPlay_Service->m_pAvahi_Client);
-  if (pAirPlay_Service->m_pAvahi_Threaded_Poll)
     avahi_threaded_poll_free(pAirPlay_Service->m_pAvahi_Threaded_Poll);
 }
 
@@ -258,11 +260,8 @@ static bool startAvahi(DCE::AirPlay_Service* pAirPlay_Service)
 
 static bool stopAvahi(DCE::AirPlay_Service* pAirPlay_Service)
 {
-  if (pAirPlay_Service->m_pAvahi_Threaded_Poll)
     avahi_threaded_poll_stop(pAirPlay_Service->m_pAvahi_Threaded_Poll);
-  if (pAirPlay_Service->m_pAvahi_Client)
     avahi_client_free(pAirPlay_Service->m_pAvahi_Client);
-  if (pAirPlay_Service->m_pAvahi_Threaded_Poll)
     avahi_threaded_poll_free(pAirPlay_Service->m_pAvahi_Threaded_Poll);
   return true;
 }
