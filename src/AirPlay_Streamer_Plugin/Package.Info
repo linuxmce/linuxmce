@@ -1,0 +1,9 @@
+<-dceag-p-b->
+Package = DCE_Destination_Package
+Dir = 
+desc = DCE Implemenation for #2252 AirPlay Streamer Plugin
+Maintainer = ThomasName
+Email = 
+Depend = DCE_Dependencies
+<-dceag-p-e->
+

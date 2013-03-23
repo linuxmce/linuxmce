@@ -17,7 +17,7 @@ DeviceData_Impl *AirPlay_Streamer_Data::CreateData(DeviceData_Impl *Parent,char 
 		case 2246:
 			return new AirPlay_Streamer_Data();
 	};
-	LoggerWrapper::GetInstance()->Write(LV_STATUS, "Got CreateData for unknown type %d.", iPK_DeviceTemplate);
+	LoggerWrapper::GetInstance()->Write(LV_STATUS, "Got CreateData for unknown type %d, PK_Device %d, PK_Installation %d.", iPK_DeviceTemplate, iPK_Device, iPK_Installation);
 	return NULL;
 }
 
