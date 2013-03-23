@@ -5,7 +5,7 @@
  */
 
 #include "AirPlay_Protocol_AirTunes.h"
-#include <sstream>
+#include "PlutoUtils/FileUtils.h"
 
 void * StartAirTunesThread(void * Arg)
 {
@@ -65,6 +65,9 @@ namespace DCE
     m_ao.ao_append_option = AudioOutputFunctions::ao_append_option;
     m_ao.ao_free_options = AudioOutputFunctions::ao_free_options;
     m_ao.ao_get_option = AudioOutputFunctions::ao_get_option;
+    m_ao.ao_set_metadata = AudioOutputFunctions::ao_set_metadata;    
+    m_ao.ao_set_metadata_coverart = AudioOutputFunctions::ao_set_metadata_coverart;        
+
 
     if (!start())
       {
@@ -132,14 +135,31 @@ namespace DCE
 
   int AirPlay_Protocol_AirTunes::AudioOutputFunctions::ao_play(ao_device *device, char *output_samples, uint32_t num_bytes)
   {
-    // TODO
-    LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"ao_play!");
-    return 0;
+    if (!device)
+      return 0;
+    
+    ao_device_linuxmce* device_linuxmce = (ao_device_linuxmce*) device;
+    
+#define NUM_OF_BYTES 64
+    
+    unsigned int sentBytes = 0;
+    unsigned char buf[NUM_OF_BYTES];
+    while (sentBytes < num_bytes)
+      {
+	int n = (num_bytes - sentBytes < NUM_OF_BYTES ? num_bytes - sentBytes : NUM_OF_BYTES);
+	memcpy(buf, (char*) output_samples + sentBytes, n);
+
+	if (device_linuxmce->pipe->Write(buf, n) == 0)
+	  return 0;
+	
+	sentBytes += n;
+      }
+    
+    return 1;
   }
   
   int AirPlay_Protocol_AirTunes::AudioOutputFunctions::ao_default_driver_id(void)
   {
-    // TODO
     LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"ao_default_driver_id!");
     return 0;
   }
@@ -148,36 +168,93 @@ namespace DCE
 								 ao_sample_format *format,
 								 ao_option *option)
   {
-    // TODO
+    // TODO - more
+
+    ao_device_linuxmce* device = new ao_device_linuxmce();
+    
+    device->pipe = new AirTunesPipe("/tmp/airplay.fifo");
+    device->pipe->Open();
+
     LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"ao_open_live!");
-    return NULL;
+    if (ao_get_option(option, "artist"))
+      LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"XXXXXXXXX Artist is %s",ao_get_option(option, "artist"));
+    
+    if (ao_get_option(option, "album"))
+      LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"XXXXXXXXX Album is %s",ao_get_option(option, "album"));
+    
+    if (ao_get_option(option, "name"))
+      LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"XXXXXXXXX Title is %s",ao_get_option(option, "name"));
+    
+    return (ao_device*) device;
   }
   
   int AirPlay_Protocol_AirTunes::AudioOutputFunctions::ao_close(ao_device *device)
   {
     // TODO
+    ao_device_linuxmce* device_linuxmce = (ao_device_linuxmce*) device;
     LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"ao_close!");
+    device_linuxmce->pipe->Close();
+    delete device_linuxmce->pipe;
     return 0;
   }
 
   int AirPlay_Protocol_AirTunes::AudioOutputFunctions::ao_append_option(ao_option **options, const char *key, const char *value)
   {
-    // TODO
     LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"ao_append_option!");
-    return 0;
+    ao_option *op, *list;
+    
+    op = (ao_option*) calloc(1,sizeof(ao_option));
+    if (op == NULL) return 0;
+    
+    op->key = strdup(key);
+    op->value = strdup(value?value:"");
+    op->next = NULL;
+    
+    if ((list = *options) != NULL)
+      {
+	list = *options;
+	while (list->next != NULL)
+	  list = list->next;
+	list->next = op;
+      }
+    else
+      {
+	*options = op;
+      }
+    
+    return 1;
+  
   }
 
   void AirPlay_Protocol_AirTunes::AudioOutputFunctions::ao_free_options(ao_option *options) 
   {
     LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"ao_free_options!");
+    ao_option *rest;
+    
+    while (options != NULL)
+      {
+	rest = options->next;
+	free(options->key);
+	free(options->value);
+	free(options);
+	options = rest;
+      }
+    
     // TODO
   }
   
   char* AirPlay_Protocol_AirTunes::AudioOutputFunctions::ao_get_option(ao_option *options, const char* key)
   {
-    // TODO
     LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"ao_get_option!");
+    while (options != NULL)
+      {
+	if (strcmp(options->key, key) == 0)
+	  return options->value;
+	options = options->next;
+      }
+    
     return NULL;
+    
   }
 
   void AirPlay_Protocol_AirTunes::AudioOutputFunctions::ao_set_metadata(const char *buffer, unsigned int size)
@@ -194,5 +271,41 @@ namespace DCE
   }
 
   // end ao functions
+
+  // airtunes pipe functions
+
+  AirPlay_Protocol_AirTunes::AirTunesPipe::AirTunesPipe(string sPath)
+  {
+    m_bIsOpen=false;
+    m_fifoFd=0;
+    m_sPath=sPath;
+  }
+
+  AirPlay_Protocol_AirTunes::AirTunesPipe::~AirTunesPipe()
+  {
+    m_bIsOpen=false;
+    m_fifoFd=0;
+  }
+
+  bool AirPlay_Protocol_AirTunes::AirTunesPipe::Open()
+  {
+    unlink(m_sPath.c_str());
+    mknod(m_sPath.c_str(), S_IFIFO | 0666, 0);
+    m_fifoFd = open(m_sPath.c_str(), O_WRONLY);
+    return true;
+  }
+
+  bool AirPlay_Protocol_AirTunes::AirTunesPipe::Close()
+  {
+    close(m_fifoFd);
+    return true;
+  }
+
+  int AirPlay_Protocol_AirTunes::AirTunesPipe::Write(unsigned char* cBuffer, size_t iLen)
+  {
+    return write(m_fifoFd, cBuffer, iLen);
+  }
+
+  // end airtunes pipe funcs
 
 }
