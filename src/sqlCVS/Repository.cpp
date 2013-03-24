@@ -976,7 +976,8 @@ void Repository::ImportTable(string sTableName,SerializeableStrings &str,size_t 
 	if( sPrimaryKey.length( ) )
 		sSQL << ", PRIMARY KEY( " << sPrimaryKey << " )";
 
-	sSQL << " ) TYPE=InnoDB";
+//	sSQL << " ) TYPE=InnoDB";
+	sSQL << " ) ";
 
 	map<int,int> map_id_mod,map_id_new;
 	if( !pTable )
