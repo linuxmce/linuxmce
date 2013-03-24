@@ -1,8 +1,10 @@
 /*
-     Copyright (C) 2013 LinuxMCE 
+     Copyright (C) 2004 Pluto, Inc., a Florida Corporation
 
-     www.linuxmce.org
+     www.plutohome.com
 
+     Phone: +1 (877) 758-8648
+ 
 
      This program is free software; you can redistribute it and/or modify it under the terms of the GNU General Public License.
      This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty
@@ -20,15 +22,25 @@
 #include "Gen_Devices/AirPlay_Streamer_PluginBase.h"
 //<-dceag-d-e->
 
+#include "../Media_Plugin/Media_Plugin.h"
+#include "../Media_Plugin/MediaStream.h"
+#include "../Media_Plugin/MediaHandlerBase.h"
+
+#include "AirPlayMediaStream.h"
+
 //<-dceag-decl-b->
 namespace DCE
 {
-	class AirPlay_Streamer_Plugin : public AirPlay_Streamer_Plugin_Command
+	class AirPlay_Streamer_Plugin : public AirPlay_Streamer_Plugin_Command, public MediaHandlerBase
 	{
 //<-dceag-decl-e->
 		// Private member variables
 
-		// Private methods
+		pluto_pthread_mutex_t m_AirPlayMediaMutex; // protect us from ourselves.
+	  	map<int, int> m_mapDevicesToStreams;
+	  	// Private methods
+		class Media_Plugin *m_pMedia_Plugin;
+		class Orbiter_Plugin *m_pOrbiter_Plugin;
 public:
 		// Public member variables
 
@@ -42,6 +54,33 @@ public:
 		virtual void ReceivedCommandForChild(DeviceData_Impl *pDeviceData_Impl,string &sCMD_Result,Message *pMessage);
 		virtual void ReceivedUnknownCommand(string &sCMD_Result,Message *pMessage);
 //<-dceag-const-e->
+public:
+
+		/**
+		 * @brief
+		 */
+		virtual class MediaStream *CreateMediaStream( class MediaHandlerInfo *pMediaHandlerInfo, int iPK_MediaProvider, vector<class EntertainArea *> &vectEntertainArea, MediaDevice *pMediaDevice, int iPK_Users, deque<MediaFile *> *dequeFilenames, int StreamID );
+		virtual MediaDevice *FindMediaDeviceForEntertainArea(EntertainArea *pEntertainArea);
+		/**
+		 * @brief Start media playback
+		 */
+		virtual bool StartMedia( class MediaStream *pMediaStream,string &sError );
+		
+		/**
+		 * @brief Stop media playback
+		 */
+		//virtual bool StopMedia( class MediaStream *pMediaStream );
+		
+		//virtual MediaDevice *FindMediaDeviceForEntertainArea(EntertainArea *pEntertainArea);
+		/**
+		 * @brief We need to see all media inserted events so we can start the appropriate media devices
+		 */
+		
+		AirPlayMediaStream *ConvertToAirPlayMediaStream(MediaStream *pMediaStream, string callerIdMessage = "");
+		
+		//bool MenuOnScreen( class Socket *pSocket, class Message *pMessage, class DeviceData_Base *pDeviceFrom, class DeviceData_Base *pDeviceTo );
+		
+		//virtual void PrepareToDelete();
 
 //<-dceag-const2-b->
 		// The following constructor is only used if this a class instance embedded within a DCE Device.  In that case, it won't create it's own connection to the router

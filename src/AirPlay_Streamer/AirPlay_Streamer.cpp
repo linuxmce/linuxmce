@@ -27,6 +27,8 @@ using namespace DCE;
 #include "Gen_Devices/AllCommandsRequests.h"
 //<-dceag-d-e->
 
+#include "pluto_main/Define_MediaType.h"
+
 //<-dceag-const-b->
 // The primary constructor when the class is created as a stand-alone device
 AirPlay_Streamer::AirPlay_Streamer(int DeviceID, string ServerAddress,bool bConnectEventHandler,bool bLocalMode,class Router *pRouter)
@@ -63,6 +65,8 @@ bool AirPlay_Streamer::GetConfig()
 
 	// Put your code here to initialize the data in this class
 	// The configuration parameters DATA_ are now populated
+	m_pDevice_Media_PlugIn = m_pData->m_AllDevices.m_mapDeviceData_Base_FindFirstOfTemplate(DEVICETEMPLATE_Media_Plugin_CONST);
+
 	return true;
 }
 
@@ -150,6 +154,7 @@ void AirPlay_Streamer::CreateChildren()
   m_pDeviceMD = m_pData->m_AllDevices.m_mapDeviceData_Base_Find(m_pData->m_dwPK_Device_MD);
   char cName[100];
   sprintf(cName,"%s@%s",DeviceNameFromMacAddress(m_pDeviceMD->GetMacAddress()).c_str(),m_pDeviceMD->m_sDescription.c_str());
+  // sprintf(cName,"%s",m_pDeviceMD->m_sDescription.c_str());
   m_pAirPlay_Service->Name_set(cName);
   LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"Service name is %s",cName);
   m_sCurrentMacAddress = m_pDeviceMD->GetMacAddress();
@@ -160,6 +165,34 @@ void AirPlay_Streamer::CreateChildren()
   
   m_pAirPlay_Service->start();
 
+}
+
+void AirPlay_Streamer::StartAirTunesPlayback()
+{
+  CMD_MH_Play_Media CMD_MH_Play_Media(m_pData->m_dwPK_Device_ControlledVia,
+				      m_pDevice_Media_PlugIn->m_dwPK_Device,
+				      0,
+				      "",
+				      MEDIATYPE_lmce_Airplay_audio_CONST,
+				      DEVICETEMPLATE_AirPlay_Streamer_CONST,
+				      "",
+				      false,
+				      0,
+				      0,
+				      0,
+				      0);
+  SendCommand(CMD_MH_Play_Media);
+  
+}
+
+void AirPlay_Streamer::StopAirTunesPlayback()
+{
+  CMD_MH_Stop_Media_Cat CMD_MH_Stop_Media_Cat (m_dwPK_Device,
+					       DEVICECATEGORY_Media_Plugins_CONST,
+					       false, BL_SameHouse,
+					       m_dwPK_Device, 0, 0, "",
+					       false);
+  SendCommand(CMD_MH_Stop_Media_Cat);
 }
 
 /*

@@ -1,8 +1,10 @@
 /*
-     Copyright (C) 2013 LinuxMCE
+     Copyright (C) 2004 Pluto, Inc., a Florida Corporation
 
-     www.linuxmce.org
+     www.plutohome.com
 
+     Phone: +1 (877) 758-8648
+ 
 
      This program is free software; you can redistribute it and/or modify it under the terms of the GNU General Public License.
      This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty
@@ -25,21 +27,38 @@ using namespace DCE;
 #include "Gen_Devices/AllCommandsRequests.h"
 //<-dceag-d-e->
 
+#include "Orbiter_Plugin/Orbiter_Plugin.h"
+#include "pluto_main/Define_MediaType.h"
+#include "pluto_main/Define_DeviceTemplate.h"
+
+/*#include "Orbiter_Plugin/Orbiter_Plugin.h"
+#include "pluto_main/Define_MediaType.h"
+#include "pluto_main/Define_DeviceCategory.h"
+#include "pluto_main/Define_Event.h"
+#include "pluto_main/Define_EventParameter.h"
+#include "pluto_main/Define_DesignObj.h"
+#include "pluto_main/Define_Variable.h"
+#include "../pluto_main/Define_DataGrid.h"
+#include "../pluto_main/Define_DeviceData.h"
+#include "../pluto_main/Define_Event.h"
+#include "../pluto_main/Define_DeviceData.h"
+#include "../pluto_main/Define_DeviceTemplate.h"
+#include "../pluto_main/Table_Users.h"*/
+
+
+
 //<-dceag-const-b->
 // The primary constructor when the class is created as a stand-alone device
 AirPlay_Streamer_Plugin::AirPlay_Streamer_Plugin(int DeviceID, string ServerAddress,bool bConnectEventHandler,bool bLocalMode,class Router *pRouter)
 	: AirPlay_Streamer_Plugin_Command(DeviceID, ServerAddress,bConnectEventHandler,bLocalMode,pRouter)
 //<-dceag-const-e->
+	,m_AirPlayMediaMutex("airplay media mutex")
 {
+  	LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"AirPlay_Streamer_Plugin::Starting up...");
+  	m_AirPlayMediaMutex.Init(NULL);
 }
 
-//<-dceag-const2-b->
-// The constructor when the class is created as an embedded instance within another stand-alone device
-AirPlay_Streamer_Plugin::AirPlay_Streamer_Plugin(Command_Impl *pPrimaryDeviceCommand, DeviceData_Impl *pData, Event_Impl *pEvent, Router *pRouter)
-	: AirPlay_Streamer_Plugin_Command(pPrimaryDeviceCommand, pData, pEvent, pRouter)
-//<-dceag-const2-e->
-{
-}
+//<-dceag-const2-b->!
 
 //<-dceag-dest-b->
 AirPlay_Streamer_Plugin::~AirPlay_Streamer_Plugin()
@@ -65,6 +84,25 @@ bool AirPlay_Streamer_Plugin::GetConfig()
 bool AirPlay_Streamer_Plugin::Register()
 //<-dceag-reg-e->
 {
+  	LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"AirPlay_Streamer_Plugin::Register()");
+	m_pMedia_Plugin = ( Media_Plugin * ) m_pRouter->FindPluginByTemplate(DEVICETEMPLATE_Media_Plugin_CONST);
+  	//m_pOrbiter_Plugin=( Orbiter_Plugin * ) m_pRouter->FindPluginByTemplate(DEVICETEMPLATE_Orbiter_Plugin_CONST);
+  	//if( !m_pMedia_Plugin || !m_pOrbiter_Plugin )
+    if( !m_pMedia_Plugin)
+    	{
+      		LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"AirPlay_Streamer_Plugin::Cannot find sister plugins");
+      		return false;
+    	}
+
+  	vector<int> vectPK_DeviceTemplate;
+  	vectPK_DeviceTemplate.push_back(DEVICETEMPLATE_AirPlay_Streamer_CONST);
+	vectPK_DeviceTemplate.push_back(DEVICETEMPLATE_AirPlay_Streamer_CONST);
+  	m_pMedia_Plugin->RegisterMediaPlugin( this, this, vectPK_DeviceTemplate, true );
+
+  	LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"AirPlay_Streamer_Plugin::Registered device media player");
+
+  	//RegisterMsgInterceptor(( MessageInterceptorFn )( &AirPlay_Streamer_Plugin::MenuOnScreen ), 0, 0, 0, 0, MESSAGETYPE_EVENT, EVENT_Menu_Onscreen_CONST );
+
 	return Connect(PK_DeviceTemplate_get()); 
 }
 
@@ -102,90 +140,11 @@ void AirPlay_Streamer_Plugin::ReceivedCommandForChild(DeviceData_Impl *pDeviceDa
 void AirPlay_Streamer_Plugin::ReceivedUnknownCommand(string &sCMD_Result,Message *pMessage)
 //<-dceag-cmduk-e->
 {
-	sCMD_Result = "UNKNOWN COMMAND";
+	sCMD_Result = "UNKNOWN DEVICE";
 }
 
-//<-dceag-sample-b->
-/*		**** SAMPLE ILLUSTRATING HOW TO USE THE BASE CLASSES ****
+//<-dceag-sample-b->!
 
-**** IF YOU DON'T WANT DCEGENERATOR TO KEEP PUTTING THIS AUTO-GENERATED SECTION ****
-**** ADD AN ! AFTER THE BEGINNING OF THE AUTO-GENERATE TAG, LIKE //<=dceag-sample-b->! ****
-Without the !, everything between <=dceag-sometag-b-> and <=dceag-sometag-e->
-will be replaced by DCEGenerator each time it is run with the normal merge selection.
-The above blocks are actually <- not <=.  We don't want a substitution here
-
-void AirPlay_Streamer_Plugin::SomeFunction()
-{
-	// If this is going to be loaded into the router as a plug-in, you can implement: 	virtual bool Register();
-	// to do all your registration, such as creating message interceptors
-
-	// If you use an IDE with auto-complete, after you type DCE:: it should give you a list of all
-	// commands and requests, including the parameters.  See "AllCommandsRequests.h"
-
-	// Examples:
-	
-	// Send a specific the "CMD_Simulate_Mouse_Click" command, which takes an X and Y parameter.  We'll use 55,77 for X and Y.
-	DCE::CMD_Simulate_Mouse_Click CMD_Simulate_Mouse_Click(m_dwPK_Device,OrbiterID,55,77);
-	SendCommand(CMD_Simulate_Mouse_Click);
-
-	// Send the message to orbiters 32898 and 27283 (ie a device list, hence the _DL)
-	// And we want a response, which will be "OK" if the command was successfull
-	string sResponse;
-	DCE::CMD_Simulate_Mouse_Click_DL CMD_Simulate_Mouse_Click_DL(m_dwPK_Device,"32898,27283",55,77)
-	SendCommand(CMD_Simulate_Mouse_Click_DL,&sResponse);
-
-	// Send the message to all orbiters within the house, which is all devices with the category DEVICECATEGORY_Orbiter_CONST (see pluto_main/Define_DeviceCategory.h)
-	// Note the _Cat for category
-	DCE::CMD_Simulate_Mouse_Click_Cat CMD_Simulate_Mouse_Click_Cat(m_dwPK_Device,DEVICECATEGORY_Orbiter_CONST,true,BL_SameHouse,55,77)
-    SendCommand(CMD_Simulate_Mouse_Click_Cat);
-
-	// Send the message to all "DeviceTemplate_Orbiter_CONST" devices within the room (see pluto_main/Define_DeviceTemplate.h)
-	// Note the _DT.
-	DCE::CMD_Simulate_Mouse_Click_DT CMD_Simulate_Mouse_Click_DT(m_dwPK_Device,DeviceTemplate_Orbiter_CONST,true,BL_SameRoom,55,77);
-	SendCommand(CMD_Simulate_Mouse_Click_DT);
-
-	// This command has a normal string parameter, but also an int as an out parameter
-	int iValue;
-	DCE::CMD_Get_Signal_Strength CMD_Get_Signal_Strength(m_dwDeviceID, DestDevice, sMac_address,&iValue);
-	// This send command will wait for the destination device to respond since there is
-	// an out parameter
-	SendCommand(CMD_Get_Signal_Strength);  
-
-	// This time we don't care about the out parameter.  We just want the command to 
-	// get through, and don't want to wait for the round trip.  The out parameter, iValue,
-	// will not get set
-	SendCommandNoResponse(CMD_Get_Signal_Strength);  
-
-	// This command has an out parameter of a data block.  Any parameter that is a binary
-	// data block is a pair of int and char *
-	// We'll also want to see the response, so we'll pass a string for that too
-
-	int iFileSize;
-	char *pFileContents
-	string sResponse;
-	DCE::CMD_Request_File CMD_Request_File(m_dwDeviceID, DestDevice, "filename",&pFileContents,&iFileSize,&sResponse);
-	SendCommand(CMD_Request_File);
-
-	// If the device processed the command (in this case retrieved the file),
-	// sResponse will be "OK", and iFileSize will be the size of the file
-	// and pFileContents will be the file contents.  **NOTE**  We are responsible
-	// free deleting pFileContents.
-
-
-	// To access our data and events below, you can type this-> if your IDE supports auto complete to see all the data and events you can access
-
-	// Get our IP address from our data
-	string sIP = DATA_Get_IP_Address();
-
-	// Set our data "Filename" to "myfile"
-	DATA_Set_Filename("myfile");
-
-	// Fire the "Finished with file" event, which takes no parameters
-	EVENT_Finished_with_file();
-	// Fire the "Touch or click" which takes an X and Y parameter
-	EVENT_Touch_or_click(10,150);
-}
-*/
 //<-dceag-sample-e->
 
 /*
@@ -194,4 +153,150 @@ void AirPlay_Streamer_Plugin::SomeFunction()
 
 */
 
+class MediaStream *AirPlay_Streamer_Plugin::CreateMediaStream( class MediaHandlerInfo *pMediaHandlerInfo, int iPK_MediaProvider, vector<class EntertainArea *> &vectEntertainArea, MediaDevice *pMediaDevice, int iPK_Users, deque<MediaFile *> *dequeFilenames, int StreamID )
+{
+  	LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"AirPlay_Streamer_Plugin::CreateMediaStream Called");
+  
+  	AirPlayMediaStream *pAirPlayMediaStream;
+  	MediaDevice *pMediaDevice_PassedIn;
+  	PLUTO_SAFETY_LOCK( xm, m_AirPlayMediaMutex );
+  
+ 
+  	if(m_bQuit_get())
+    {
+      	LoggerWrapper::GetInstance()->Write(LV_CRITICAL, "AirPlay_Streamer_Plugin::CreateMediaStream with m_bQuit");
+      	return NULL;
+    }
+  
+  	PLUTO_SAFETY_LOCK( mm, m_pMedia_Plugin->m_MediaMutex );
+  
+  	pMediaDevice_PassedIn = NULL;
+  	if ( vectEntertainArea.size()==0 && pMediaDevice == NULL )
+    {
+      	LoggerWrapper::GetInstance()->Write(LV_CRITICAL, "AirPlay_Streamer_Plugin::I can't create a media stream without an entertainment area or a media device");
+      	return NULL;
+    }
+  
+  	if ( pMediaDevice != NULL  && // test the media device only if it set
+       pMediaDevice->m_pDeviceData_Router->m_dwPK_DeviceTemplate != DEVICETEMPLATE_AirPlay_Streamer_CONST )
+    {	
+      	pMediaDevice_PassedIn = pMediaDevice;
+      	pMediaDevice = m_pMedia_Plugin->m_mapMediaDevice_Find(m_pRouter->FindClosestRelative(DEVICETEMPLATE_AirPlay_Streamer_CONST, pMediaDevice->m_pDeviceData_Router->m_dwPK_Device));
+    }
+  
+  	if ( !pMediaDevice )
+    {
+      	for(size_t s=0;s<vectEntertainArea.size();++s)
+		{
+	  		EntertainArea *pEntertainArea = vectEntertainArea[0];
+	  		pMediaDevice = FindMediaDeviceForEntertainArea(pEntertainArea);
+	  		if( pMediaDevice )
+	    	break;
+		}
+      	if( !pMediaDevice )
+		{
+	  		LoggerWrapper::GetInstance()->Write(LV_CRITICAL, "AirPlay_Streamer_Plugin::I didn't find a device in the target entertainment area !");
+	  		return NULL;
+		}
+    }
+  
+  LoggerWrapper::GetInstance()->Write(LV_CRITICAL, "AirPlay_Streamer_Plugin::Selected device (%d: %s) as playback device!",
+				      pMediaDevice->m_pDeviceData_Router->m_dwPK_Device,
+				      pMediaDevice->m_pDeviceData_Router->m_sDescription.c_str());
+  
+  pAirPlayMediaStream = new AirPlayMediaStream( this, pMediaHandlerInfo,iPK_MediaProvider,
+					  pMediaDevice,
+					  iPK_Users, st_RemovableMedia, StreamID );
+  
+  m_mapDevicesToStreams[pMediaDevice->m_pDeviceData_Router->m_dwPK_Device] = StreamID;
+  
+  return pAirPlayMediaStream;
+  
+}
 
+MediaDevice *AirPlay_Streamer_Plugin::FindMediaDeviceForEntertainArea(EntertainArea *pEntertainArea)
+{
+		PLUTO_SAFETY_LOCK( mm, m_pMedia_Plugin->m_MediaMutex );
+ 
+		MediaDevice *pMediaDevice;
+		pMediaDevice = GetMediaDeviceForEntertainArea(pEntertainArea, DEVICETEMPLATE_AirPlay_Streamer_CONST);
+ 
+		LoggerWrapper::GetInstance()->Write(LV_CRITICAL, "AirPlay_Streamer_Plugin::Looking for a proper device in the ent area %d - %s"
+			, pEntertainArea->m_iPK_EntertainArea, pEntertainArea->m_sDescription.c_str());
+		if ( pMediaDevice == NULL ) return NULL;
+
+		LoggerWrapper::GetInstance()->Write(LV_CRITICAL, "AirPlay_Streamer_Plugin::Returning device %d - %s"
+			, pMediaDevice->m_pDeviceData_Router->m_dwPK_Device, pMediaDevice->m_pDeviceData_Router->m_sDescription.c_str());
+ 
+		return pMediaDevice;
+}
+
+AirPlayMediaStream *AirPlay_Streamer_Plugin::ConvertToAirPlayMediaStream(MediaStream *pMediaStream, string callerIdMessage)
+{
+	PLUTO_SAFETY_LOCK( mm, m_pMedia_Plugin->m_MediaMutex );
+ 
+	if ( pMediaStream == NULL )
+	{
+		LoggerWrapper::GetInstance()->Write(LV_CRITICAL, (callerIdMessage + "AirPlay_Streamer_Plugin::Stream is a NULL stream!").c_str());
+		return NULL;
+	}
+ 
+	if ( pMediaStream->GetType() != MEDIASTREAM_TYPE_AIRPLAY_AUDIO )
+	{
+		LoggerWrapper::GetInstance()->Write(LV_CRITICAL, (callerIdMessage + "AirPlay_Streamer_Plugin::Stream is not an AirPlayMediaStream!").c_str());
+		return NULL;
+	}
+ 
+	return static_cast<AirPlayMediaStream*>(pMediaStream);
+}
+
+bool AirPlay_Streamer_Plugin::StartMedia( MediaStream *pMediaStream,string &sError )
+{
+	LoggerWrapper::GetInstance()->Write( LV_CRITICAL, "AirPlay_Streamer_Plugin::StartMedia() Starting media stream playback.");
+
+	PLUTO_SAFETY_LOCK( mm, m_pMedia_Plugin->m_MediaMutex ); 
+ 
+	AirPlayMediaStream *pAirPlayMediaStream = NULL;
+	if ( (pAirPlayMediaStream = ConvertToAirPlayMediaStream(pMediaStream, "AirPlay_Streamer_Plugin::StartMedia(): ")) == NULL )
+		return false;
+ 
+	MediaFile *pMediaFile = NULL;
+ 
+	LoggerWrapper::GetInstance()->Write( LV_CRITICAL, "AirPlay_Streamer_Plugin::StartMedia() Media type %d", pMediaStream->m_iPK_MediaType);
+ 
+	string Response;
+  
+	// send the CMD straight through.
+ 
+	pAirPlayMediaStream->m_sMediaDescription = "AirPlay audio";
+
+	DCE::CMD_Play_Media CMD_Play_Media(m_dwPK_Device,
+						pMediaStream->m_pMediaDevice_Source->m_pDeviceData_Router->m_dwPK_Device,
+						pAirPlayMediaStream->m_iPK_MediaType,
+						pAirPlayMediaStream->m_iStreamID_get(),
+						"","");
+	SendCommand(CMD_Play_Media);
+ 
+	/* We're going to send a message to all the orbiters in this area so they know what the remote is,
+	and we will send all bound remotes to the new screen */
+	
+	/*
+	
+	for( MapEntertainArea::iterator itEA = pAirPlayMediaStream->m_mapEntertainArea.begin( );itEA != pAirPlayMediaStream->m_mapEntertainArea.end( );++itEA )
+	{
+		EntertainArea *pEntertainArea = ( *itEA ).second;
+		LoggerWrapper::GetInstance()->Write( LV_CRITICAL, "AirPlay_Streamer_Plugin::Looking into the ent area (%p) with id %d and %d remotes", pEntertainArea, pEntertainArea->m_iPK_EntertainArea, (int) pEntertainArea->m_mapBoundRemote.size() );
+        for(map<int,OH_Orbiter *>::iterator it=m_pOrbiter_Plugin->m_mapOH_Orbiter.begin();it!=m_pOrbiter_Plugin->m_mapOH_Orbiter.end();++it)
+        {
+            OH_Orbiter *pOH_Orbiter = (*it).second;
+			if( pOH_Orbiter->m_pEntertainArea!=pEntertainArea )
+				continue;
+			LoggerWrapper::GetInstance()->Write(LV_CRITICAL, "AirPlay_Streamer_Plugin::Processing remote: for orbiter: %d", pOH_Orbiter->m_pDeviceData_Router->m_dwPK_Device);
+			bool bBound = pEntertainArea->m_mapBoundRemote.find(pOH_Orbiter->m_pDeviceData_Router->m_dwPK_Device)!=pEntertainArea->m_mapBoundRemote.end();
+			pAirPlayMediaStream->SetNowPlaying(pOH_Orbiter,false,bBound);
+		}
+	}*/
+
+	return MediaHandlerBase::StartMedia(pMediaStream,sError);
+ 
+}

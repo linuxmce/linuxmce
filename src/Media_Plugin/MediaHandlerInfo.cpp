@@ -46,6 +46,7 @@ MediaHandlerInfo::MediaHandlerInfo( class MediaHandlerBase *pMediaHandlerBase, c
 
     if( m_PK_DeviceTemplate )
     {
+	LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"XXXXXXXXXXXXXX MediaHandlerInfo template is %d",m_PK_DeviceTemplate);
         ListDeviceData_Router *pListDeviceData_Router=m_pMediaHandlerBase->m_pMedia_Plugin->m_pRouter->m_mapDeviceByTemplate_Find( m_PK_DeviceTemplate );
 		if( !pListDeviceData_Router )
 		{

@@ -23,9 +23,9 @@ namespace DCE
   {
     Port_set(7000);
     ServiceType_set("_airplay._tcp");
-    TXTRecord_Add("features=0x77");
-    TXTRecord_Add("model=AppleTV2,1");
-    TXTRecord_Add("srcvers=101.28");
+    TXTRecord_Add("features=0x39f7");
+    TXTRecord_Add("model=LinuxMCE,1");
+    TXTRecord_Add("srcvers=130.14");
     
     m_pAirPlaySocketListener = new AirPlaySocketListener(string("m_pAirPlaySocketListener"));
 

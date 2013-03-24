@@ -95,7 +95,8 @@ bool AirPlay_PlugIn::Register()
     	}
 
   	vector<int> vectPK_DeviceTemplate;
-  	vectPK_DeviceTemplate.push_back(DEVICETEMPLATE_AirPlay_Audio_Player_CONST);
+  	vectPK_DeviceTemplate.push_back(DEVICETEMPLATE_AirPlay_Streamer_CONST);
+	vectPK_DeviceTemplate.push_back(DEVICETEMPLATE_AirPlay_Streamer_CONST);
   	m_pMedia_Plugin->RegisterMediaPlugin( this, this, vectPK_DeviceTemplate, true );
 
   	LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"AirPlay_PlugIn::Registered device media player");
@@ -139,7 +140,7 @@ void AirPlay_PlugIn::ReceivedCommandForChild(DeviceData_Impl *pDeviceData_Impl,s
 void AirPlay_PlugIn::ReceivedUnknownCommand(string &sCMD_Result,Message *pMessage)
 //<-dceag-cmduk-e->
 {
-	sCMD_Result = "UNKNOWN COMMAND";
+	sCMD_Result = "UNKNOWN DEVICE";
 }
 
 //<-dceag-sample-b->!
@@ -177,10 +178,10 @@ class MediaStream *AirPlay_PlugIn::CreateMediaStream( class MediaHandlerInfo *pM
     }
   
   	if ( pMediaDevice != NULL  && // test the media device only if it set
-       pMediaDevice->m_pDeviceData_Router->m_dwPK_DeviceTemplate != DEVICETEMPLATE_AirPlay_Audio_Player_CONST )
+       pMediaDevice->m_pDeviceData_Router->m_dwPK_DeviceTemplate != DEVICETEMPLATE_AirPlay_Streamer_CONST )
     {	
       	pMediaDevice_PassedIn = pMediaDevice;
-      	pMediaDevice = m_pMedia_Plugin->m_mapMediaDevice_Find(m_pRouter->FindClosestRelative(DEVICETEMPLATE_AirPlay_Audio_Player_CONST, pMediaDevice->m_pDeviceData_Router->m_dwPK_Device));
+      	pMediaDevice = m_pMedia_Plugin->m_mapMediaDevice_Find(m_pRouter->FindClosestRelative(DEVICETEMPLATE_AirPlay_Streamer_CONST, pMediaDevice->m_pDeviceData_Router->m_dwPK_Device));
     }
   
   	if ( !pMediaDevice )
@@ -218,7 +219,7 @@ MediaDevice *AirPlay_PlugIn::FindMediaDeviceForEntertainArea(EntertainArea *pEnt
 		PLUTO_SAFETY_LOCK( mm, m_pMedia_Plugin->m_MediaMutex );
  
 		MediaDevice *pMediaDevice;
-		pMediaDevice = GetMediaDeviceForEntertainArea(pEntertainArea, DEVICETEMPLATE_AirPlay_Audio_Player_CONST);
+		pMediaDevice = GetMediaDeviceForEntertainArea(pEntertainArea, DEVICETEMPLATE_AirPlay_Streamer_CONST);
  
 		LoggerWrapper::GetInstance()->Write(LV_CRITICAL, "AirPlay_PlugIn::Looking for a proper device in the ent area %d - %s"
 			, pEntertainArea->m_iPK_EntertainArea, pEntertainArea->m_sDescription.c_str());
