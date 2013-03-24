@@ -68,9 +68,10 @@ namespace DCE
     m_ao.ao_append_option = AudioOutputFunctions::ao_append_option;
     m_ao.ao_free_options = AudioOutputFunctions::ao_free_options;
     m_ao.ao_get_option = AudioOutputFunctions::ao_get_option;
+#ifdef LMCE_SHAIRPORT
     m_ao.ao_set_metadata = AudioOutputFunctions::ao_set_metadata;    
     m_ao.ao_set_metadata_coverart = AudioOutputFunctions::ao_set_metadata_coverart;        
-
+#endif
     if (!start())
       {
 	return false;
