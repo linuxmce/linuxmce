@@ -6,7 +6,7 @@
 ###########################################################
 log_file=/var/log/LinuxMCE_Setup.log
 DISTRO="$(lsb_release -c -s)"
-COMPOS="beta2"
+COMPOS="unstable"
 DT_MEDIA_DIRECTOR=3
 LOCAL_REPO_BASE=/usr/pluto/deb-cache
 LOCAL_REPO_DIR=./
@@ -537,6 +537,9 @@ case "$DISTRO" in
 	# select UI2 without alpha blending
 	PK_DISTRO=18
 	;;
+"precise")
+	PK_DISTRO=20
+	;;
 esac
 
 
@@ -760,7 +763,7 @@ fi
 }
 
 addAdditionalTTYStart () {
-if [[ "$DISTRO" = "lucid" ]] ; then
+if [[ "$DISTRO" = "lucid" ]] || [[ "$DISTRO" = "precise" ]]; then
 	sed -i 's/23/235/' /etc/init/tty2.conf
 	sed -i 's/23/235/' /etc/init/tty3.conf
 	sed -i 's/23/235/' /etc/init/tty4.conf
@@ -911,8 +914,8 @@ fi
 
 CreateDisklessImage () {
 StatsMessage "Building a disk image for your Diskless Media Directors"
-local diskless_log=/var/log/pluto/Diskless_Create-\`date +"%F"\`.log
-nohup /usr/pluto/bin/Diskless_CreateTBZ.sh >> \${diskless_log} 2>&1 &
+#local diskless_log=/var/log/pluto/Diskless_Create-\`date +"%F"\`.log
+#nohup /usr/pluto/bin/Diskless_CreateTBZ.sh >> \${diskless_log} 2>&1 &
 }
 
 
