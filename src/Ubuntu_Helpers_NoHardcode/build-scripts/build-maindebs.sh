@@ -111,7 +111,7 @@ function build_main_debs() {
 			# tribune xml
 			exclude_list=$exclude_list,598,599
 			# convertmac  -Wno-deprecated
-			exclude_list=$exclude_list,315,316
+#			exclude_list=$exclude_list,315,316
 			# sql2cpp missing lib entries
 			exclude_list=$exclude_list,202,203
 			# BuildSource failed for: 493 Pluto Powerfile C200

@@ -19,6 +19,9 @@ case "${build_name}" in
 	"lucid")
 		Distro_ID="18"
 		;;
+	"precise")
+		Distro_ID="20"
+		;;
 esac
 
 
