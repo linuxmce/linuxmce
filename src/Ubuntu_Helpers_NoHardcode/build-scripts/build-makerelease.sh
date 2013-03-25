@@ -58,6 +58,7 @@ function Build_MakeRelease {
 	Precompile PlutoUtils "${svn_dir}/${svn_branch_name}/src/PlutoUtils"
 	Precompile SerializeClass "${svn_dir}/${svn_branch_name}/src/SerializeClass"
 	Precompile LibDCE "${svn_dir}/${svn_branch_name}/src/DCE"
+	Precompile WindowUtils "${svn_dir}/${svn_branch_name}/src/WindowUtils"
 	Precompile MakeRelease "${svn_dir}/${svn_branch_name}/src/MakeRelease"
 	Precompile MakeRelease_PrepFiles "${svn_dir}/${svn_branch_name}/src/MakeRelease_PrepFiles"
 

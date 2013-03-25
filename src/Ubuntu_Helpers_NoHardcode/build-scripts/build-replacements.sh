@@ -94,9 +94,9 @@ function Build_Replacements_Common
 	Build_Replacement_Package mtx-pluto ubuntu/mtx-1.3.11
 
 	#Package: libowfs
-	Build_Replacement_Package libowfs27 external/owfs-2.8p5
-        dir_="${svn_dir}/${svn_branch_name}/external"
-        cp $dir_/*ow*.deb "${replacements_dir}"
+#	Build_Replacement_Package libowfs27 external/owfs-2.8p5
+#        dir_="${svn_dir}/${svn_branch_name}/external"
+#        cp $dir_/*ow*.deb "${replacements_dir}"
 
 	#Package: parted
 #	Build_Replacement_Package parted ubuntu/parted-1.8.8
@@ -119,19 +119,19 @@ function Build_Replacements_Common
 #	Build_Replacement_Package pluto-avwizard-sounds src/pluto-avwizard-sounds
 
 	#Package: asterisk-perl
-	Build_Replacement_Package asterisk-perl external/asterisk-perl-0.10
+#	Build_Replacement_Package asterisk-perl external/asterisk-perl-0.10
 
 	#Package: lmcevdr
-	dir_="${svn_dir}/${svn_branch_name}"/ubuntu/lmcevdr-1.1
-	if Changed_Since_Last_Build "$dir_" 
-	then
-		DisplayMessage "Building lmcevdr"
-		pushd "$dir_"
-		dpkg-deb -b . ..
-		popd
-	fi
-	cp ${svn_dir}/${svn_branch_name}/ubuntu/lmcevdr_*.deb ${replacements_dir}
-
+#	dir_="${svn_dir}/${svn_branch_name}"/ubuntu/lmcevdr-1.1
+#	if Changed_Since_Last_Build "$dir_" 
+#	then
+#		DisplayMessage "Building lmcevdr"
+#		pushd "$dir_"
+#		dpkg-deb -b . ..
+#		popd
+#	fi
+#	cp ${svn_dir}/${svn_branch_name}/ubuntu/lmcevdr_*.deb ${replacements_dir}
+#
 	#Package: vdr-plugin-control
 #	Build_Replacement_Package vdr-plugin-control ubuntu/vdr-plugin-control-0.0.2a+lmce
 
@@ -287,6 +287,35 @@ function Build_Replacements_Lucid
 	else
 		DisplayMessage "Not building alsa-modules, as the drivers archive does not exist"
 	fi
+	Build_Replacement_Package python-coherence ubuntu/Coherence-0.6.6.2	        
+}
+
+function Build_Replacements_Precise
+{
+	mkdir -pv "$replacements_dir"
+
+#	#Package: lirc
+	Build_Replacement_Package lirc ubuntu/lirc-0.8.6+lmce1
+	cp ${svn_dir}/${svn_branch_name}/ubuntu/lirc-x*.deb ${replacements_dir}
+	cp ${svn_dir}/${svn_branch_name}/ubuntu/lirc-modules*.deb ${replacements_dir}
+	
+        apt-get install -y liblinphone2-dev 
+
+	Build_Replacement_Package vdrnfofs ubuntu/vdrnfofs-0.5
+
+	# SqueezeSlave
+	Build_Replacement_Package squeezeslave ubuntu/squeezeslave
+
+	# shairport (AirPlay Audio)
+# not building as libao2 is no longer with us. Maybe libao4 works?!
+#	Build_Replacement_Package shairport ubuntu/shairport-0.05
+
+	# lmce-asterisk
+	Build_Replacement_Package lmce-asterisk src/lmce-asterisk
+        cp ${svn_dir}/${svn_branch_name}/src/lmce-asterisk*.deb ${replacements_dir}
+        Build_Replacement_Package chan-sccp-b ubuntu/asterisk/chan_sccp_v4                
+	#Package: zaptel-modules
+
 	Build_Replacement_Package python-coherence ubuntu/Coherence-0.6.6.2	        
 }
 
@@ -593,6 +622,9 @@ case "${build_name}" in
 		;;
 	"lucid")
 		Build_Replacements_Lucid
+		;;
+	"precise")
+		Build_Replacements_Precise
 		;;
 esac
 Build_Replacements_Common

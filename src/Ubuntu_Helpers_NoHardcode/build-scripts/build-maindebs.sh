@@ -95,86 +95,29 @@ function build_main_debs() {
 #			exclude_list=$exclude_list,$mkr_irtrans_package
 			;;
 		"precise")
-			Distro_ID="18"
-			Main_Version='2.0.0.45.'
+			Distro_ID="20"
+			Main_Version='2.0.0.46.'
 			# mess
 			exclude_list=$exclude_list,716,717
 			# mame
 			exclude_list=$exclude_list,682,683
 			# videolan client
-			exlucde_list=$exclude_list,431,432
+#			exlucde_list=$exclude_list,431,432
 			exclude_list=$exclude_list,$mkr_tira
 #			exclude_list=$exclude_list,$mkr_usb_uirt_0038_package
 			exclude_list=$exclude_list,$mkr_vloopback_driver_package
 #			exclude_list=$exclude_list,672,674 #
 
-			# g++ -c -I.. -I../DCE -I/usr/include/mysql -DKDE_LMCE -DDEBUG -DTHREAD_LOG -DLOG_ALL_QUERIES  -Wall -fPIC -ggdb3  PLCBUS.cpp -o PLCBUS.o
-			# PLCBUS.cpp: In function ‘void* start(void*)’:
-			# PLCBUS.cpp:39:18: error: ‘base’ was not declared in this scope
-			# PLCBUS.cpp:39:37: error: expected type-specifier
-			# PLCBUS.cpp:39:37: error: expected ‘>’
-			# PLCBUS.cpp:39:37: error: expected ‘(’
-			# PLCBUS.cpp:39:52: error: expected primary-expression before ‘>’ token
-			# PLCBUS.cpp:39:56: error: expected ‘)’ before ‘;’ token
-			exclude_list=$exclude_list,767,768
-			# g++ -c -I.. -I../DCE -I/usr/include/mysql -DKDE_LMCE -DDEBUG -DTHREAD_LOG -DLOG_ALL_QUERIES -I/opt/owfs/include  -Wall -fPIC -ggdb3  OneWire.cpp -o OneWire.o
-			# OneWire.cpp: In function ‘void* start(void*)’:
-			# OneWire.cpp:30:20: error: ‘base’ was not declared in this scope
-			# OneWire.cpp:30:39: error: expected type-specifier
-			# OneWire.cpp:30:39: error: expected ‘>’
-			# OneWire.cpp:30:39: error: expected ‘(’
-			# OneWire.cpp:30:56: error: expected primary-expression before ‘>’ token
-			# OneWire.cpp:30:60: error: expected ‘)’ before ‘;’ token
-			# OneWire.cpp: In member function ‘virtual void DCE::OneWire::readDevices()’:
-			# OneWire.cpp:297:20: error: expected type-specifier
-			# OneWire.cpp:297:20: error: expected ‘>’
-			# OneWire.cpp:297:20: error: expected ‘(’
-			# OneWire.cpp:297:37: error: expected primary-expression before ‘>’ token
-			exclude_list=$exclude_list,776,777
-			exclude_list=$exclude_list,685,684
 			# tribune xml
 			exclude_list=$exclude_list,598,599
-			# simplephone
-			exclude_list=$exclude_list,498,499
-			# hal device finder
-			exclude_list=$exclude_list,535,536
-			# pluto mcr remote
-			exclude_list=$exclude_list,653,654
-			# orbiter
-			exclude_list=$exclude_list,119,138
-			# pluto disk drive
-			exclude_list=$exclude_list,122
-			# pluto bluetooth dongle
-			exclude_list=$exclude_list,124
-			# orbitergen
-			# DesignObj_Generator.cpp:2101:38: error: taking address of temporary [-fpermissive]			
-			exclude_list=$exclude_list,226
 			# convertmac  -Wno-deprecated
 			exclude_list=$exclude_list,315,316
 			# sql2cpp missing lib entries
 			exclude_list=$exclude_list,202,203
-			#/usr/bin/ld: cannot find -lSDL_Helpers
-			#collect2: ld returned 1 exit status
-			#make: *** [Proxy_Orbiter] Error 1
-			#make clean; make bin ***FAILED***
-			#Error: make clean; make bin failed!
-			#BuildSource failed for: 488 Pluto Proxy Orbiter
-			exclude_list=$exclude_list,488
-			# /usr/bin/ld: cannot find -lDisk_Drive_Functions
 			# BuildSource failed for: 493 Pluto Powerfile C200
 			exclude_list=$exclude_list,493
-			# usb game pad
-#			exclude_list=$exclude_list,795,796
-			# 674  # game
-#			# does not compile atm
-#			exclude_list=$exclude_list,683
-			# SDLMESS 
-			# does not compile atm
-#			exclude_list=$exclude_list,717
                         # MAME SNAPS and metadata
                         exclude_list=$exclude_list,680,681
-			# 721 LinuxMCE DPMS Monitor Source
-#			exclude_list=$exclude_list,721,722
 			;;
 	esac
 

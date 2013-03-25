@@ -45,4 +45,4 @@ pushd /usr/local/lmce-build/build-dvd
 popd
 
 fi
-wget http://vt100.at/announce.php?text=in\ vitro\ fluffy\ is\ done -O /dev/null
+wget http://vt100.at/announce.php?text=precise\ fluffy\ is\ done -O /dev/null

@@ -39,7 +39,7 @@ function MoveDebs2Repo {
 }
 
 function CopyDebsToDisklessSync {
-	local sync_pkgs="pluto-bluetooth-dongle pluto-cm11a pluto-eib pluto-gc100 pluto-generic-serial-device pluto-hdhomerun pluto-irbase pluto-irtrans-wrapper pluto-libbd pluto-lirc-wrapper pluto-messagetrans pluto-motion-wrapper pluto-msiml-disp-butt pluto-nvidia-video-drivers pluto-powerfile-c200 pluto-proxy-orbiter pluto-text-to-speech pluto-tira-wrapper pluto-usb-uirt-0038 pluto-vdr pluto-vipshared pluto-wavetrend-reader pluto-zwave-lighting mtx-pluto lirc-pluto id-my-disc lmcevdr pluto-vdr-plugin pluto-vdr vdr-dev vdr-plugin-control vdr-plugin-xineliboutput vdr libxine1-xvdr libxine-xvdr libxineliboutput-sxfe xineliboutput-sxfe mythtv-backend mythtv-common mythtv-frontend mythtv-transcode-utils pluto-ivtv-video-drivers"
+	local sync_pkgs="pluto-bluetooth-dongle pluto-cm11a pluto-eib pluto-gc100 pluto-generic-serial-device pluto-hdhomerun pluto-irbase pluto-irtrans-wrapper pluto-libbd pluto-lirc-wrapper pluto-messagetrans pluto-motion-wrapper pluto-msiml-disp-butt pluto-nvidia-video-drivers pluto-powerfile-c200 pluto-proxy-orbiter pluto-text-to-speech pluto-tira-wrapper pluto-usb-uirt-0038 pluto-vdr pluto-vipshared pluto-wavetrend-reader pluto-zwave-lighting mtx-pluto nvidia-glx-new lirc-pluto id-my-disc lmcevdr pluto-vdr-plugin pluto-vdr vdr-dev vdr-plugin-control vdr-plugin-xineliboutput vdr libxine1-xvdr libxine-xvdr libxineliboutput-sxfe xineliboutput-sxfe mythtv-backend mythtv-common mythtv-frontend mythtv-transcode-utils pluto-ivtv-video-drivers"
 #	sync_pkgs="$sync_pkgs lirc-modules-2.6.22-14-generic linux-restricted-modules-2.6.22-14-generic"
 	sync_pkgs="$sync_pkgs lirc-modules-$KVER linux-restricted-modules-$KVER"
 	sync_pkgs="$sync_pkgs 3m-touchware elo-touchscreen 3ware-3dm2"
