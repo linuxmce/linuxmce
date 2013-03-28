@@ -165,10 +165,10 @@ chown bind:dhcpd /etc/bind/rndc.key
 chmod 664 /etc/bind/rndc.key
 
 # Apparmor prevents dhcpd from reading bind conf files
-if [[ -e /etc/apparmor.d/usr.sbin.dhcpd3 && $( grep '/etc/bind' /etc/apparmor.d/usr.sbin.dhcpd3 ) == "" ]] ;then
-	sed -i "s,\},\n  # Let dhcpd read bind's config files\n  /etc/bind/\*\* r\,\n\},g" /etc/apparmor.d/usr.sbin.dhcpd3
+if [[ -e /etc/apparmor.d/usr.sbin.dhcpd && $( grep '/etc/bind' /etc/apparmor.d/usr.sbin.dhcpd ) == "" ]] ;then
+	sed -i "s,\},\n  # Let dhcpd read bind's config files\n  /etc/bind/\*\* r\,\n\},g" /etc/apparmor.d/usr.sbin.dhcpd
 	service apparmor restart
-	service dhcp3-server restart
+	service isc-dhcp-server restart
 fi
 rm -f /var/cache/bind/*.jnl
 service bind9 start 

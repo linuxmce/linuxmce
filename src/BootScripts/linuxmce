@@ -165,7 +165,7 @@ if [[ "$AutostartCore" -eq "1" ]] ; then
 
 	RunSQL "UPDATE Orbiter set Regen=2,RegenInProgress=0 where RegenInProgress=1"
 
-	StartService "Starting DHCP Server" "service dhcp3-server start"
+	StartService "Starting DHCP Server" "service isc-dhcp-server start"
 	StartService "Starting DNS Server" "service bind9 start"
 	StartService "Configuring Network Firewall" "/usr/pluto/bin/Network_Firewall.sh"
 	StartService "Confirm Installation" "/usr/pluto/bin/ConfirmInstallation.sh"

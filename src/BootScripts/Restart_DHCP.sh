@@ -9,18 +9,18 @@
 . /usr/pluto/bin/Network_Parameters.sh
 . /usr/pluto/bin/Utils.sh
 
-if [ ! -e /etc/dhcp3/dhcpd.conf.pbackup ] ;then
-	cp /etc/dhcp3/dhcpd.conf /etc/dhcp3/dhcpd.conf.pbackup
+if [ ! -e /etc/dhcp/dhcpd.conf.pbackup ] ;then
+	cp /etc/dhcp/dhcpd.conf /etc/dhcp/dhcpd.conf.pbackup
 fi
 while :; do
 	WaitLock "PlutoDHCP" "DHCP_Restart" nolog
-	IsRunning=$(pgrep dhcpd3)
+	IsRunning=$(pgrep dhcpd)
 	if [[ -z "$IsRunning" && -n "$DHCPsetting" ]]; then
-		if ! BlacklistConfFiles '/etc/dhcp3/dhcpd.conf' ;then
+		if ! BlacklistConfFiles '/etc/dhcp/dhcpd.conf' ;then
 			Logging "$TYPE" "$SEVERITY_CRITICAL" "DHCP_Restart" "DHCP not found running; restarting it"
-			touch /etc/dhcp3/dhcpd-extra.conf			        
-			/usr/pluto/bin/PlutoDHCP >/etc/dhcp3/dhcpd.conf
-			service dhcp3-server restart
+			touch /etc/dhcp/dhcpd-extra.conf
+			/usr/pluto/bin/PlutoDHCP >/etc/dhcp/dhcpd.conf
+			service isc-dhcp-server restart
 		fi
 	fi
 	Unlock "PlutoDHCP" "DHCP_Restart" nolog

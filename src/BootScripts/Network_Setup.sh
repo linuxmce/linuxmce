@@ -68,8 +68,8 @@ echo "Writing network configuration files with settings from database"
 /usr/bin/poff -a > /dev/null
 
 # Shut down DHCP (v4 & v6) and RA related services
-if pidof dhcpd3 > /dev/null; then
-	service dhcp3-server stop
+if pidof dhcpd > /dev/null; then
+	service isc-dhcp-server stop
 fi
 if pidof radvd > /dev/null; then
 	service radvd stop
@@ -470,24 +470,24 @@ if [[ "$VPNenabled" == "on" ]]; then
 		done
 fi
 
-if ! BlacklistConfFiles '/etc/default/dhcp3-server' ;then
-	if [ ! -e /etc/default/dhcp3-server.pbackup ] && [ -e /etc/default/dhcp3-server ] ;then
-		cp /etc/default/dhcp3-server /etc/default/dhcp3-server.pbackup
+if ! BlacklistConfFiles '/etc/default/isc-dhcp-server' ;then
+	if [ ! -e /etc/default/isc-dhcp-server.pbackup ] && [ -e /etc/default/isc-dhcp-server ] ;then
+		cp /etc/default/isc-dhcp-server /etc/default/isc-dhcp-server.pbackup
 	fi
 
 	if [[ -n "$DHCPcard" ]]; then
-		echo "INTERFACES=\"$DHCPcard\"" >/etc/default/dhcp3-server
+		echo "INTERFACES=\"$DHCPcard\"" >/etc/default/isc-dhcp-server
 	elif [[ "$IntIf" != *:* ]]; then
-		echo "INTERFACES=\"$IntIf\"" >/etc/default/dhcp3-server
+		echo "INTERFACES=\"$IntIf\"" >/etc/default/isc-dhcp-server
 	else
-		echo "INTERFACES=\"$ExtIf\"" >/etc/default/dhcp3-server
+		echo "INTERFACES=\"$ExtIf\"" >/etc/default/isc-dhcp-server
 	fi
 fi
 
 /usr/pluto/bin/DHCP_config.sh
 /etc/init.d/networking restart
 
-service dhcp3-server start
+service isc-dhcp-server start
 
 # Start DHCPv6 client if activated on any interface other then ppp0 (will be started from ppp scripts)
 if [[ ${#dhcpv6[@]} > 0 ]]; then

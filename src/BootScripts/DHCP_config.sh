@@ -20,8 +20,8 @@ function refresh_all {
 
 WaitLock "PlutoDHCP" "PlutoDHCP_config"
 if [[ -z "$DHCPsetting" ]]; then
-	rm -f /etc/dhcp3/dhcpd.conf
-	service dhcp3-server stop
+	rm -f /etc/dhcp/dhcpd.conf
+	service isc-dhcp-server stop
 	exit
 fi
 
@@ -29,12 +29,12 @@ if [[ "$1" == "refresh_all" ]] ;then
 	refresh_all
 fi
 
-if ! BlacklistConfFiles '/etc/dhcp3/dhcpd.conf' ;then
-	if [ ! -e /etc/dhcp3/dhcpd.conf.pbackup ] ;then
-		cp /etc/dhcp3/dhcpd.conf /etc/dhcp3/dhcpd.conf.pbackup
+if ! BlacklistConfFiles '/etc/dhcp/dhcpd.conf' ;then
+	if [ ! -e /etc/dhcp/dhcpd.conf.pbackup ] ;then
+		cp /etc/dhcp/dhcpd.conf /etc/dhcp/dhcpd.conf.pbackup
 	fi
-	/usr/pluto/bin/PlutoDHCP >/etc/dhcp3/dhcpd.conf
-	touch /etc/dhcp3/dhcpd-extra.conf
-	service dhcp3-server restart
+	/usr/pluto/bin/PlutoDHCP >/etc/dhcp/dhcpd.conf
+	touch /etc/dhcp/dhcpd-extra.conf
+	service isc-dhcp-server restart
 fi
 Unlock "PlutoDHCP" "PlutoDHCP_config"
