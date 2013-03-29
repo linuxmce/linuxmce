@@ -44,7 +44,7 @@ function setup_tftp_boot
 
 		echo -e "$BootConf" > "$Moon_BootConfFile"
 
-		#mkdir -p /tftpboot/${Moon_DeviceID}
+		mkdir -p /tftpboot/${Moon_DeviceID}
 		#rm -f /tftpboot/${Moon_DeviceID}/vmlinuz
 		#ln -s ${Moon_RootLocation}/boot/vmlinuz /tftpboot/${Moon_DeviceID}/vmlinuz
 		#rm -f /tftpboot/${Moon_DeviceID}/initrd.img
@@ -80,7 +80,7 @@ function setup_tftp_boot
 			# /vmlinuz was not found, setup the symlinks
 			#ln -s "${Moon_RootLocation}/boot/vmlinuz-${Kernel}" "/tftpboot/${Moon_DeviceID}/$Name/vmlinuz"
 			pushd ${Moon_RootLocation}
-				ln -sf /vmlinuz boot/vmlinuz-${Kver}
+			ln -sf boot/vmlinuz-${Kver} ${Moon_RootLocation}/vmlinuz
 			popd
 	       		ln -sf ${Moon_RootLocation}/vmlinuz /tftpboot/${Moon_DeviceID}/vmlinuz
 		fi
@@ -91,7 +91,7 @@ function setup_tftp_boot
 			# /initrd.img was not found, setup the symlink
 			#ln -s "${Moon_RootLocation}/boot/initrd.img-${Kernel}" "/tftpboot/${Moon_DeviceID}/$Name/initrd.img" 
 			pushd ${Moon_RootLocation}
-				ln -sf /initrd.img boot/initrd.img-${Kver}
+			ln -sf boot/initrd.img-${Kver} ${Moon_RootLocation}/initrd.img
 			popd
 	       		ln -sf ${Moon_RootLocation}/initrd.img /tftpboot/${Moon_DeviceID}/initrd.img
 		fi
