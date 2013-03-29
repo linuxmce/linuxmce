@@ -77,7 +77,7 @@ which avahi-daemon > /dev/null && service avahi-daemon restart || :
 ## Prevent updatedb from running from cron
 if ! BlacklistConfFiles '/etc/updatedb.conf' ;then
 	# only do stuff if updatedb exists
-	if [ -e /etc/updatedb.conf ]; ten
+	if [ -e /etc/updatedb.conf ]; then
 		if ! grep -qF 'exit 0 # Pluto' /etc/updatedb.conf; then
 			echo "exit 0 # Pluto" >>/etc/updatedb.conf
 		fi
