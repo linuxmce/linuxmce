@@ -1,4 +1,8 @@
 #!/bin/bash
+
+# Startup scripts are not currently used, prevent mysql errors by exiting
+exit 0
+
 . /usr/pluto/bin/pluto.func
 
 . /usr/pluto/bin/Config_Ops.sh

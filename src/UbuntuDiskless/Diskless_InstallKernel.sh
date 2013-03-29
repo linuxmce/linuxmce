@@ -21,8 +21,9 @@ if [[ -n "$DisklessImages" ]]; then
 fi
 
 ## Determine what kernel are we going to use
-#Moon_KernelVersion=$(basename $(ls /boot/vmlinuz-* | head -1) | cut -d"-" -f2-99)
-Moon_KernelVersion=$(uname -r)
+# use the installed kernel on the MD, not the core's running kernel
+#Moon_KernelVersion=$(uname -r)
+Moon_KernelVersion=$(basename $(ls /boot/vmlinuz-* | head -1) | cut -d"-" -f2-99)
 
 ## Create symlinks to existing kernels
 rm -f ${Moon_RootLocation}/boot/initrd.img
