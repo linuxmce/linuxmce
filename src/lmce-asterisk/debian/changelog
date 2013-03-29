@@ -1,3 +1,9 @@
+lmce-asterisk (0+0.3.3-3ubuntu1) precise; urgency=low
+
+  * remove asterisk-sounds-extra from depends
+
+ -- phenigma <phenigma@hotmail.com>  Thu, 28 Mar 2013 20:04:32 -0500
+
 lmce-asterisk (0+0.3.3-2ubuntu1) lucid; urgency=low
 
   * Use incoming CID from PAI or PAF if available.
