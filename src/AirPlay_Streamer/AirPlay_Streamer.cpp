@@ -156,6 +156,7 @@ void AirPlay_Streamer::CreateChildren()
   sprintf(cName,"%s@%s",DeviceNameFromMacAddress(m_pDeviceMD->GetMacAddress()).c_str(),m_pDeviceMD->m_sDescription.c_str());
   // sprintf(cName,"%s",m_pDeviceMD->m_sDescription.c_str());
   m_pAirPlay_Service->Name_set(cName);
+  m_pAirPlay_Service->Name_AirPlay_set(m_pDeviceMD->m_sDescription.c_str());
   LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"Service name is %s",cName);
   m_sCurrentMacAddress = m_pDeviceMD->GetMacAddress();
   LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"Address is %s",m_sCurrentMacAddress.c_str());

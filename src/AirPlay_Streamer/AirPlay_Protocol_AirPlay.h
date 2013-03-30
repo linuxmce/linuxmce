@@ -9,8 +9,7 @@
 
 #include "AirPlay_Protocol.h"
 
-#include "DCE/SocketListener.h"
-#include "DCE/ServerSocket.h"
+#define SOCKET_STATE_INITIAL 0;
 
 namespace DCE
 {
@@ -29,15 +28,7 @@ namespace DCE
       virtual bool stop();
 
       void ServerThread();
-      
-      class AirPlaySocketListener : public SocketListener
-      {
-      public:
-      AirPlaySocketListener(string sName):SocketListener(sName){};
-	virtual void ReceivedMessage(Socket *pSocket, Message* pMessage){};
-	virtual bool ReceivedString(Socket *pSocket, string sLine, int nTimeout = - 1);
-      };
-      AirPlaySocketListener *m_pAirPlaySocketListener;
+
     };
 
 }

@@ -35,6 +35,11 @@ namespace DCE
     gAirPlay_Streamer = pAirPlay_Streamer;
     Port_set(7322);
     ServiceType_set("_raop._tcp");
+    char tmp[100];
+    sprintf(tmp, "device=%s",pAirPlay_Streamer->m_sCurrentMacAddress.c_str());
+    string tmpStr = tmp;
+    LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"ADDR IS %s",tmpStr.c_str());
+    TXTRecord_Add(tmpStr);
     TXTRecord_Add("am=LinuxMCE,1");
     TXTRecord_Add("tp=UDP");
     TXTRecord_Add("sm=false");

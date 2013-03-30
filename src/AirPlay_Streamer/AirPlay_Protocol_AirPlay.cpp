@@ -23,12 +23,15 @@ namespace DCE
   {
     Port_set(7000);
     ServiceType_set("_airplay._tcp");
-    TXTRecord_Add("features=0x39f7");
+    char tmp[100];
+    sprintf(tmp, "deviceid=%s",pAirPlay_Streamer->m_sCurrentMacAddress.c_str());
+    string tmpStr = tmp;
+    LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"ADDR IS %s",tmpStr.c_str());
+    TXTRecord_Add(tmpStr);
+    TXTRecord_Add("features=0x77");
     TXTRecord_Add("model=LinuxMCE,1");
-    TXTRecord_Add("srcvers=130.14");
+    TXTRecord_Add("srcvers=101.10");
     
-    m_pAirPlaySocketListener = new AirPlaySocketListener(string("m_pAirPlaySocketListener"));
-
   }
 
   AirPlay_Protocol_AirPlay::~AirPlay_Protocol_AirPlay()
@@ -45,7 +48,6 @@ namespace DCE
   {
     LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"AirPlay_Protocol_AirPlay::init() - Spawning server thread.");
     
-    m_pAirPlaySocketListener->StartListening(Port_get());
     return true;
   }
 
@@ -66,12 +68,6 @@ namespace DCE
 	// Implement me.
 	Sleep(1000);
       }
-  }
-
-  bool AirPlay_Protocol_AirPlay::AirPlaySocketListener::ReceivedString(Socket *pSocket, string sLine, int nTimeout)
-  {
-    LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"Received String %s",sLine.c_str());
-    return true;
   }
   
 }

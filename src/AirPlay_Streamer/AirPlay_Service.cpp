@@ -54,6 +54,11 @@ void DCE::AirPlay_Service::Name_set(string sName)
   m_cName = avahi_strdup(sName.c_str());
 }
 
+void DCE::AirPlay_Service::Name_AirPlay_set(string sName)
+{
+  m_cAirPlayName = avahi_strdup(sName.c_str());
+}
+
 void DCE::AirPlay_Service::MacAddress_set(string sMacAddress)
 {
   m_sMacAddress = sMacAddress;
@@ -140,19 +145,41 @@ static void create_services(AvahiClient *c, void * userdata) {
 	DCE::AirPlay_Protocol *pAirPlay_Protocol = *it;
 	DCE::LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"strlst is %s",
 						 avahi_string_list_to_string(pAirPlay_Protocol->TXTRecords_get()));
-	if ((ret = avahi_entry_group_add_service_strlst(pAirPlay_Service->m_pAvahi_Entry_Group,
-							AVAHI_IF_UNSPEC, AVAHI_PROTO_UNSPEC, 
-							(AvahiPublishFlags)0,
-							pAirPlay_Service->m_cName,
-							pAirPlay_Protocol->ServiceType_get(),
-							NULL, NULL, 
-							pAirPlay_Protocol->Port_get(),
-							pAirPlay_Protocol->TXTRecords_get())) > 0)
+	string servicetmp = pAirPlay_Protocol->ServiceType_get();
+	if (servicetmp == "_airplay._tcp")
 	  {
-	    if (ret == AVAHI_ERR_COLLISION)
-	      goto collision;
-
-	    DCE::LoggerWrapper::GetInstance()->Write(LV_CRITICAL, "Could not add service %s",pAirPlay_Service->m_cName);
+ 	    if ((ret = avahi_entry_group_add_service_strlst(pAirPlay_Service->m_pAvahi_Entry_Group,
+							    AVAHI_IF_UNSPEC, AVAHI_PROTO_UNSPEC, 
+							    (AvahiPublishFlags)0,
+							    pAirPlay_Service->m_cAirPlayName,
+							    pAirPlay_Protocol->ServiceType_get(),
+							    NULL, NULL, 
+							    pAirPlay_Protocol->Port_get(),
+							    pAirPlay_Protocol->TXTRecords_get())) > 0)
+	      {
+		if (ret == AVAHI_ERR_COLLISION)
+		  goto collision;
+		
+		DCE::LoggerWrapper::GetInstance()->Write(LV_CRITICAL, "Could not add service %s",pAirPlay_Service->m_cName);
+	      }
+	  }
+	else
+	  {
+	    // Alternate Naming done here.
+ 	    if ((ret = avahi_entry_group_add_service_strlst(pAirPlay_Service->m_pAvahi_Entry_Group,
+							    AVAHI_IF_UNSPEC, AVAHI_PROTO_UNSPEC, 
+							    (AvahiPublishFlags)0,
+							    pAirPlay_Service->m_cName,
+							    pAirPlay_Protocol->ServiceType_get(),
+							    NULL, NULL, 
+							    pAirPlay_Protocol->Port_get(),
+							    pAirPlay_Protocol->TXTRecords_get())) > 0)
+	      {
+		if (ret == AVAHI_ERR_COLLISION)
+		  goto collision;
+		
+		DCE::LoggerWrapper::GetInstance()->Write(LV_CRITICAL, "Could not add service %s",pAirPlay_Service->m_cName);
+	      }	    
 	  }
       }
     
@@ -166,14 +193,15 @@ static void create_services(AvahiClient *c, void * userdata) {
 
   return;
 
- collision:
+ collision: // this is why I hate gotos, seriously... 
 
   /* A service name collision with a local service happened. Let's
    * pick a new name */
+
   n = avahi_alternative_service_name(pAirPlay_Service->m_cName);
   avahi_free(pAirPlay_Service->m_cName);
   pAirPlay_Service->m_cName = n;
-
+  
   DCE::LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"Service Name Collision. renaming to %s",pAirPlay_Service->m_cName);
   avahi_entry_group_reset(pAirPlay_Service->m_pAvahi_Entry_Group);
 

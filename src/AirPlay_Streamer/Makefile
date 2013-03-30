@@ -29,7 +29,8 @@ sources += AirPlay_Protocol_Factory.cpp \
 		AirPlay_Service.cpp \
 		AirPlay_Protocol.cpp \
 		AirPlay_Protocol_AirPlay.cpp \
-		AirPlay_Protocol_AirTunes.cpp
+		AirPlay_Protocol_AirTunes.cpp \
+                AirPlay_Socket.cpp
 
 #<-dceag-mf-b->
 LDLIBS = $(XTRALDLIBS) $(BASELDLIBS)
