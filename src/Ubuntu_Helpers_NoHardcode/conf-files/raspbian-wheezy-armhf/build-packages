@@ -132,7 +132,6 @@ linux-source-3.2
 lirc
 module-assistant
 mysql-client
-mysql-server
 nasm
 patch
 po4a

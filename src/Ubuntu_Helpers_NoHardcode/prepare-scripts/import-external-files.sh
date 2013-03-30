@@ -19,6 +19,9 @@ extra_dir=/var/lmce-build/extras
 
 . /etc/lmce-build/builder.conf
 
+# wget fails if http_proxy is set for some reason
+unset http_proxy
+
 function ImportPublicSkinFromRSyncHost {
 	local skins_dir=${base_dir}/graphics
 # we don't want this on a lmce machine

@@ -5,23 +5,42 @@
 set -e
 set -x
 
+# set NUMCORES=X in /etc/lmce-build/builder.custom.conf to enable multi-job builds
+[[ 1 -lt "$NUM_CORES" ]]  && make_jobs="-j $NUM_CORES"
 
-case "${build_name}" in
-	"gutsy")
-		Distro_ID="15"
-		;;
-	"hardy")
-		Distro_ID="16"
-		;;
-	"intrepid")
-		Distro_ID="17"
-		;;
-	"lucid")
-		Distro_ID="18"
-		;;
-	"precise")
-		Distro_ID="20"
-		;;
+case "${flavor}" in
+        "ubuntu")
+                case "${build_name}" in
+                        "gutsy")
+                                Distro_ID="15"
+                                RepositorySource=21
+                                ;;
+                        "hardy")
+                                Distro_ID="16"
+                                RepositorySource=21
+                                ;;
+                        "intrepid")
+                                Distro_ID="17"
+                                RepositorySource=21
+                                ;;
+                        "lucid")
+                                Distro_ID="18"
+                                RepositorySource=21
+                                ;;
+                        "precise")
+                                Distro_ID="20"
+                                RepositorySource=25
+                                ;;
+                esac
+                ;;
+        "raspbian")
+                case "${build_name}" in
+                        "wheezy")
+                        Distro_ID="19"
+                        RepositorySource=23
+                        ;;
+                esac
+                ;;
 esac
 
 
@@ -50,6 +69,5 @@ export MYSQL_BUILD_CRED
 SVNrevision=$(svn info "$svn_dir/$svn_branch_name/src" |grep ^Revision | cut -d" " -f2)
 
 # Compile the packages
-arch=$arch "${mkr_dir}/MakeRelease" -R "$SVNrevision" $PLUTO_BUILD_CRED -O "$out_dir" -D 'pluto_main_build' -o "$Distro_ID" -r 21 -m 1 -k "$1" -s "${svn_dir}/${svn_branch_name}" -n / -d
-arch=$arch "${mkr_dir}/MakeRelease" -R "$SVNrevision" $PLUTO_BUILD_CRED -O "$out_dir" -D 'pluto_main_build' -o "$Distro_ID" -r 21 -m 1108 -k "$1" -s "${svn_dir}/${svn_branch_name}" -n / -d
-
+arch=$arch "${mkr_dir}/MakeRelease" $make_jobs -R "$SVNrevision" $PLUTO_BUILD_CRED -O "$out_dir" -D 'pluto_main_build' -o "$Distro_ID" -r "$RepositorySource" -m 1 -k "$1" -s "${svn_dir}/${svn_branch_name}" -n / -d
+arch=$arch "${mkr_dir}/MakeRelease" $make_jobs -R "$SVNrevision" $PLUTO_BUILD_CRED -O "$out_dir" -D 'pluto_main_build' -o "$Distro_ID" -r "$RepositorySource" -m 1108 -k "$1" -s "${svn_dir}/${svn_branch_name}" -n / -d

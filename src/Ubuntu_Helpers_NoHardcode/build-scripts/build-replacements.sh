@@ -7,13 +7,15 @@
 
 set -e
 
+cache_name=".cache"
+
 function Changed_Since_Last_Build
 {
 	return $(/bin/true) #Zaerc HACK
 
 	local fs_path="$1"
 	DisplayMessage "Checking for changes '$fs_path'"
-	local cache_file="${replacements_dir}/.cache"
+	local cache_file="${replacements_dir}/${cache_name}"
 	local url_id=$(svn info "$fs_path" | grep '^URL: ' | cut -d' ' -f2 | md5sum | cut -d' ' -f1)
 	local revision_new=$(svn info $fs_path | grep '^Revision: ' | cut -d' ' -f2)
 	local revision_old=$(cat "$cache_file" | grep "^${url_id}" | cut -d'|' -f2)
@@ -22,13 +24,24 @@ function Changed_Since_Last_Build
 		return $(/bin/false)
 	fi
 
-	grep -v "$url_id" "$cache_file" > "${cache_file}.tmp"
-	echo "$url_id|$revision_new" >> "${cache_file}.tmp"
-	mv "${cache_file}.tmp" "$cache_file"
-
 	return $(/bin/true)
 }
 
+function Update_Changed_Since_Last_Build
+{
+	return $(/bin/true)
+
+        local fs_path="$1"
+        DisplayMessage "Updating change for '$fs_path'"
+        local cache_file="${replacements_dir}/${cache_name}"
+        local url_id=$(svn info "$fs_path" | grep '^URL: ' | cut -d' ' -f2 | md5sum | cut -d' ' -f1)
+        local revision_new=$(svn info $fs_path | grep '^Revision: ' | cut -d' ' -f2)
+
+	[[ ! -e "$cache_file" ]] && touch "$cache_file"
+        grep -v "$url_id" "$cache_file" > "${cache_file}.tmp"
+        echo "$url_id|$revision_new" >> "${cache_file}.tmp"
+        mv "${cache_file}.tmp" "$cache_file"
+}
 
 function Build_Replacement_Package
 {
@@ -44,11 +57,12 @@ function Build_Replacement_Package
 		dpkg-buildpackage -rfakeroot -us -uc -b 
 		cp -r ../${pkg_name}*.deb "${replacements_dir}"
 		popd
+		Update_Changed_Since_Last_Build "$dir_"
 	fi
 
 }
 
-function Build_Replacements_Common
+function Build_Replacements_Common_ubuntu
 { 
 	mkdir -pv "$replacements_dir"
 
@@ -75,6 +89,7 @@ function Build_Replacements_Common
 		./make_package_ubuntu.sh $KVER
 		cp -r asterisk-pluto_*.deb ${replacements_dir}
 		popd
+		Update_Changed_Since_Last_Build "$dir_"
 	fi
 ###	Build_Replacement_Package asterisk-pluto ubuntu/asterisk
 
@@ -111,6 +126,7 @@ function Build_Replacements_Common
 		./makepackage.sh	
 		cp linux-image-diskless_*.deb "${replacements_dir}"		
 		popd
+		Update_Changed_Since_Last_Build "$dir_"
 	fi
 
 ### Now done in prepare-scripts/import-external-files.sh, 
@@ -299,7 +315,7 @@ function Build_Replacements_Precise
 	cp ${svn_dir}/${svn_branch_name}/ubuntu/lirc-x*.deb ${replacements_dir}
 	cp ${svn_dir}/${svn_branch_name}/ubuntu/lirc-modules*.deb ${replacements_dir}
 	
-        apt-get install -y liblinphone2-dev 
+        apt-get install -y liblinphone-dev 
 
 	Build_Replacement_Package vdrnfofs ubuntu/vdrnfofs-0.5
 
@@ -344,6 +360,7 @@ function Build_Replacements_Intrepid
 		dpkg-buildpackage -rfakeroot -us -uc -b
 		cp -r ../*lirc*.deb "${replacements_dir}"
 		popd
+		Update_Changed_Since_Last_Build "$dir_"
 	fi
 
         #Package: libxine 	
@@ -610,24 +627,37 @@ trap 'Error "Undefined error in $0" ; apt-get install libtool -y' EXIT
 DisplayMessage "*** STEP: Building replacement debs"
 # make sure the headers are there
 apt-get --force-yes -y install linux-headers-$KVER 
-case "${build_name}" in
-	"gutsy")
-		Build_Replacements_Gutsy
-		;;
-	"hardy")
-		Build_Replacements_Hardy
-		;;
-	"intrepid")
-		Build_Replacements_Intrepid
-		;;
-	"lucid")
-		Build_Replacements_Lucid
-		;;
-	"precise")
-		Build_Replacements_Precise
-		;;
+
+# dir is required even if no replacements are built
+mkdir -pv "${replacements_dir}"
+
+case "${flavor}" in
+        "ubuntu")
+		DisplayMessage "Building Replacements for $build_name"
+                case "${build_name}" in
+                        "gutsy")
+                                Build_Replacements_Gutsy
+                                ;;
+                        "hardy")
+                                Build_Replacements_Hardy
+                                ;;
+                        "intrepid")
+                                Build_Replacements_Intrepid
+                                ;;
+                        "lucid")
+                                Build_Replacements_Lucid
+                                ;;
+                        "precise")
+                                Build_Replacements_Precise
+                                ;;
+                esac
+		DisplayMessage "Building Replacements for $flavor"
+                Build_Replacements_Common_ubuntu
+                ;;
+        "raspbian")
+                DisplayMessage "No replacements for raspbian at this time."
+                ;;
 esac
-Build_Replacements_Common
 
 DisplayMessage "Removing duplicate debs from replacements"
 remove_duplicate_debs "${replacements_dir}"

@@ -7,6 +7,9 @@
 #set -x 
 set -e
 
+# set NUMCORES=X in /etc/lmce-build/builder.custom.conf to enable multi-job builds
+if [ "$NUM_CORES" -gt 1 ] ; then make_jobs="-j $NUM_CORES"; fi
+
 function Precompile
 {
 	local pkg_name="$1"
@@ -45,7 +48,7 @@ function Precompile
 		echo "SNR_CPPFLAGS=\"\" make $makefile_opt clean"
 		SNR_CPPFLAGS="" make $makefile_opt clean || Error "Failed to clean ${pkg_name} to use for MakeRelease"
 		echo "SNR_CPPFLAGS=\"\" make $makefile_opt"
-		SNR_CPPFLAGS="" make $makefile_opt || Error "Failed to precompile ${pkg_name} to use for MakeRelease"
+		SNR_CPPFLAGS="" make $make_jobs $makefile_opt || Error "Failed to precompile ${pkg_name} to use for MakeRelease"
 
 	 popd
 
