@@ -254,11 +254,11 @@ mount none -t proc $TEMP_DIR/proc
 
 ## Setup apt in pluto style
 case "$TARGET_DISTRO" in
-	"$HOST_DISTRO")
-		StatsMessage "Setting up /etc/sources.list for HOST_DISTRO: $TARGET_DISTRO"
-		cp {,"$TEMP_DIR"}/etc/apt/sources.list
-		#cp -R {,"$TEMP_DIR"}/etc/apt/sources.list.d/
-		;;
+#	"$HOST_DISTRO")
+#		StatsMessage "Setting up /etc/sources.list for HOST_DISTRO: $TARGET_DISTRO"
+#		cp {,"$TEMP_DIR"}/etc/apt/sources.list
+#		#cp -R {,"$TEMP_DIR"}/etc/apt/sources.list.d/
+#		;;
 	"ubuntu")
 		StatsMessage "Setting up /etc/sources.list for ubuntu"
 		TARGET_REPO_NAME=main
