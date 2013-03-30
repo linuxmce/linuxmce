@@ -261,6 +261,15 @@ case "$TARGET_DISTRO" in
 		;;
 	"ubuntu")
 		StatsMessage "Setting up /etc/sources.list for ubuntu"
+		TARGET_REPO_NAME=main
+		case "$TARGET_RELEASE" in
+			lucid)
+				TARGET_REPO_NAME="beta2"
+				;;
+			precise)
+				TARGET_REPO_NAME="unstable"
+				;;
+		esac
 		echo "deb file:/usr/pluto/deb-cache ./
 deb $TARGET_REPO $TARGET_RELEASE main restricted universe multiverse
 deb-src $TARGET_REPO $TARGET_RELEASE main restricted universe multiverse
@@ -268,10 +277,10 @@ deb $TARGET_REPO $TARGET_RELEASE-updates main restricted universe multiverse
 deb-src $TARGET_REPO $TARGET_RELEASE-updates main restricted universe multiverse
 deb http://security.ubuntu.com/ubuntu/ $TARGET_RELEASE-security main restricted universe multiverse
 deb-src http://security.ubuntu.com/ubuntu/ $TARGET_RELEASE-security main restricted universe multiverse
-deb http://deb.linuxmce.org/ubuntu/ $TARGET_RELEASE  beta2
+deb http://deb.linuxmce.org/ubuntu/ $TARGET_RELEASE $TARGET_REPO_NAME
 deb http://debian.slimdevices.com/ stable  main
 deb http://archive.canonical.com/ubuntu $TARGET_RELEASE partner
-deb http://packages.medibuntu.org/ $TARGET_RELEASE  free non-free
+deb http://packages.medibuntu.org/ $TARGET_RELEASE free non-free
 " > $TEMP_DIR/etc/apt/sources.list
 		;;
 	"raspbian")
