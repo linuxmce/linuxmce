@@ -86,7 +86,7 @@ bool AirPlay_PlugIn::Register()
 {
   	LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"AirPlay_PlugIn::Register()");
 	m_pMedia_Plugin = ( Media_Plugin * ) m_pRouter->FindPluginByTemplate(DEVICETEMPLATE_Media_Plugin_CONST);
-  	//m_pOrbiter_Plugin=( Orbiter_Plugin * ) m_pRouter->FindPluginByTemplate(DEVICETEMPLATE_Orbiter_Plugin_CONST);
+  	m_pOrbiter_Plugin=( Orbiter_Plugin * ) m_pRouter->FindPluginByTemplate(DEVICETEMPLATE_Orbiter_Plugin_CONST);
   	//if( !m_pMedia_Plugin || !m_pOrbiter_Plugin )
     if( !m_pMedia_Plugin)
     	{
@@ -96,10 +96,9 @@ bool AirPlay_PlugIn::Register()
 
   	vector<int> vectPK_DeviceTemplate;
   	vectPK_DeviceTemplate.push_back(DEVICETEMPLATE_AirPlay_Streamer_CONST);
-	vectPK_DeviceTemplate.push_back(DEVICETEMPLATE_AirPlay_Streamer_CONST);
   	m_pMedia_Plugin->RegisterMediaPlugin( this, this, vectPK_DeviceTemplate, true );
 
-  	LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"AirPlay_PlugIn::Registered device media player");
+  	LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"AirPlay_PlugIn::Registered device media player 2246");
 
   	//RegisterMsgInterceptor(( MessageInterceptorFn )( &AirPlay_PlugIn::MenuOnScreen ), 0, 0, 0, 0, MESSAGETYPE_EVENT, EVENT_Menu_Onscreen_CONST );
 
@@ -280,7 +279,7 @@ bool AirPlay_PlugIn::StartMedia( MediaStream *pMediaStream,string &sError )
 	/* We're going to send a message to all the orbiters in this area so they know what the remote is,
 	and we will send all bound remotes to the new screen */
 	
-	/*
+	
 	
 	for( MapEntertainArea::iterator itEA = pAirPlayMediaStream->m_mapEntertainArea.begin( );itEA != pAirPlayMediaStream->m_mapEntertainArea.end( );++itEA )
 	{
@@ -295,7 +294,7 @@ bool AirPlay_PlugIn::StartMedia( MediaStream *pMediaStream,string &sError )
 			bool bBound = pEntertainArea->m_mapBoundRemote.find(pOH_Orbiter->m_pDeviceData_Router->m_dwPK_Device)!=pEntertainArea->m_mapBoundRemote.end();
 			pAirPlayMediaStream->SetNowPlaying(pOH_Orbiter,false,bBound);
 		}
-	}*/
+	}
 
 	return MediaHandlerBase::StartMedia(pMediaStream,sError);
  
